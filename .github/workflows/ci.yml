@@ -31,5 +31,5 @@ jobs:
 
       - name: Build and test C++ 17
         run: |
-          conda activate yardl
+          conda info
           make validate-with-no-changes -e CPP_VERSION=17
