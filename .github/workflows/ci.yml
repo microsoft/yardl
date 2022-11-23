@@ -30,7 +30,7 @@ jobs:
       - uses: conda-incubator/setup-miniconda@v2
         with:
           activate-environment: yardl
-          environment-file: build/ci-environment.yml
+          environment-file: ci-environment.yml
 
       - name: Build and test C++17
         run: make validate-with-no-changes -e CPP_VERSION=17
