@@ -21,6 +21,8 @@ jobs:
       - name: Set environment variables
         run: echo "GOBIN=${RUNNER_TEMP}/bin" >> $GITHUB_ENV
 
+      - run: env
+
       - name: Create filtered conda environment file
         run: |
           cat environment.yml | grep -v "#.*\<\local\>" > ci-environment.yml
@@ -36,5 +38,4 @@ jobs:
 
       - name: Build and test C++ 17
         run: |
-          conda info
           make validate-with-no-changes -e CPP_VERSION=17
