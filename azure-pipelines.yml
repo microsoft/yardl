@@ -4,6 +4,15 @@ trigger:
 pr:
   - main
 
-# steps are injected automatically
-steps:
-  - script: echo "hello"
+jobs:
+  - job: BuildAndTest
+    displayName: Build and test
+
+    variables:
+      GOBIN: $(Agent.TempDirectory)/bin
+
+    steps:
+      - script: |
+          echo "##vso[task.prependpath]$CONDA/bin"
+          echo "##vso[task.prependpath]$GOBIN"
+        displayName: Update PATH
