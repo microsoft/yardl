@@ -4,7 +4,4 @@ trigger:
 pr:
   - main
 
-jobs:
-
-  - displayName: Internal checks
-    # steps are injected automatically
+# steps are injected automatically
