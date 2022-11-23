@@ -1,0 +1,102 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the README at:
+// https://github.com/microsoft/vscode-dev-containerdevcotns/tree/v0.238.0/containers/go
+{
+  "name": "yardl",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".."
+  },
+  "runArgs": ["--cap-add=SYS_PTRACE", "--security-opt", "seccomp=unconfined"],
+
+  // Configure tool-specific properties.
+  "customizations": {
+    // Configure properties specific to VS Code.
+    "vscode": {
+      // Set *default* container specific settings.json values on container create.
+      "settings": {
+        "files.trimFinalNewlines": true,
+        "files.trimTrailingWhitespace": true,
+        "files.insertFinalNewline": true,
+        "go.toolsManagement.checkForUpdates": "local",
+        "go.useLanguageServer": true,
+        "gopls": { "ui.semanticTokens": true },
+
+        "[cpp]": {
+          "editor.formatOnSave": true
+        },
+
+        "[json]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode",
+          "editor.formatOnSave": true
+        },
+
+        "[jsonc]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode",
+          "editor.formatOnSave": true
+        },
+
+        "cmake.sourceDirectory": "${workspaceFolder}/cpp",
+        "cmake.buildDirectory": "${workspaceFolder}/cpp/build",
+
+        // Python linting.
+        "python.analysis.typeCheckingMode": "basic",
+        "python.linting.ignorePatterns": ["**/conftest.py", "**/test_*.py"],
+        "python.defaultInterpreterPath": "/opt/conda/envs/yardl/bin/python",
+        "python.formatting.autopep8Path": "/opt/conda/envs/yardl/bin/autopep8",
+        "python.terminal.activateEnvironment": false, // Disable the extension calling activate when the integrated terminal launches. We take care of this in ~/.bashrc.
+
+        "testMate.cpp.test.executables": "cpp/{build,Build,BUILD,out,Out,OUT}/**/*{test,Test,TEST}*",
+
+        // enable pretty printing when debugging C++ tests
+        "testMate.cpp.debug.configTemplate": {
+          "type": "cppvsdbg",
+          "linux": { "type": "cppdbg", "MIMode": "gdb" },
+          "darwin": { "type": "cppdbg", "MIMode": "lldb" },
+          "win32": { "type": "cppvsdbg" },
+          "program": "${exec}",
+          "args": "${argsArray}",
+          "cwd": "${cwd}",
+          "env": "${envObj}",
+          "environment": "${envObjArray}",
+          "sourceFileMap": "${sourceFileMapObj}",
+          "setupCommands": [
+            {
+              "description": "Enable pretty-printing for gdb",
+              "text": "-enable-pretty-printing",
+              "ignoreFailures": true
+            }
+          ]
+        },
+
+        "gcovViewer.gcovBinary": "/opt/conda/envs/yardl/bin/x86_64-conda-linux-gnu-gcov",
+        "gcovViewer.buildDirectories": ["${workspaceFolder}/cpp/build"]
+      },
+
+      // Add the IDs of extensions you want installed when the container is created.
+      "extensions": [
+        "cschlosser.doxdocgen",
+        "eamodio.gitlens",
+        "esbenp.prettier-vscode",
+        "golang.Go",
+        "JacquesLucke.gcov-viewer",
+        "jinliming2.vscode-go-template",
+        "matepek.vscode-catch2-test-adapter",
+        "mhutchie.git-graph",
+        "ms-python.python",
+        "ms-vscode.cmake-tools",
+        "ms-vscode.cpptools",
+        "timonwong.shellcheck",
+        "twxs.cmake"
+      ]
+    }
+  },
+
+  // Use 'forwardPorts' to make a list of ports inside the container available locally.
+  // "forwardPorts": [],
+
+  // Use 'postCreateCommand' to run commands after the container is created.
+  // "postCreateCommand": "go version",
+
+  // Comment out to connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
+  "remoteUser": "vscode"
+}

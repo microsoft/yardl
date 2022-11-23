@@ -1,0 +1,4 @@
+namespace: Sandbox
+
+cpp:
+  sourcesOutputDir: ../../cpp/sandbox/generated

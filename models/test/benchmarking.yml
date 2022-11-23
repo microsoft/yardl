@@ -1,0 +1,55 @@
+BenchmarkFloat256x256: !protocol
+  sequence:
+    float256x256: !stream
+      items: !array
+        items: float
+        dimensions: [256, 256]
+
+BenchmarkFloatVlen: !protocol
+  sequence:
+    floatArray: !stream
+      items: !array
+        items: float
+        dimensions: 2
+
+
+SmallBenchmarkRecord: !record
+  fields:
+    a: double
+    b: float
+    c: float
+
+BenchmarkSmallRecord: !protocol
+  sequence:
+    smallRecord: !stream
+      items: SmallBenchmarkRecord
+
+BenchmarkSmallRecordWithOptionals: !protocol
+  sequence:
+    smallRecord: !stream
+      items: SimpleEncodingCounters
+
+BenchmarkSimpleMrd: !protocol
+  sequence:
+    data: !stream
+      items:
+        - SimpleAcquisition
+        - Image<float>
+
+SimpleEncodingCounters: !record
+  fields:
+    e1: uint32?
+    e2: uint32?
+    slice: uint32?
+    repetition: uint32?
+
+SimpleAcquisition: !record
+  fields:
+    flags: uint64
+    idx: SimpleEncodingCounters
+    data: !array
+      items: complexfloat
+      dimensions: 2
+    trajectory: !array
+      items: float
+      dimensions: 2

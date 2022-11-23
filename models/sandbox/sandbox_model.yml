@@ -1,0 +1,7 @@
+HelloWorld: !protocol
+  sequence:
+    data: !stream
+      items: !array
+        items: complexdouble
+        dimensions:
+          - 2

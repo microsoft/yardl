@@ -1,0 +1,9 @@
+namespace: TestModel
+
+cpp:
+  sourcesOutputDir: ../../cpp/test/generated
+  internalGenerateMocks: true
+  internalSymlinkStaticHeaders: true
+
+json:
+  outputDir: ../../cpp/test/generated
