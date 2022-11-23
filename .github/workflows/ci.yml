@@ -1,4 +1,4 @@
-      name: ci
+name: ci
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
   pull_request:
     branches: [ main ]
 
-env:
+env: {}
 
 jobs:
 
