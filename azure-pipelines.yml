@@ -5,4 +5,5 @@ pr:
   - main
 
 # steps are injected automatically
-steps: []
+steps:
+  - script: echo "hello"
