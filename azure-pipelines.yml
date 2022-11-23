@@ -5,3 +5,4 @@ pr:
   - main
 
 # steps are injected automatically
+steps: []
