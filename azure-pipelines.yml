@@ -1,18 +1,9 @@
+# This is an internal pipeline where steps are injected automatically
+
 trigger:
   - main
 
 pr:
   - main
 
-jobs:
-  - job: BuildAndTest
-    displayName: Build and test
-
-    variables:
-      GOBIN: $(Agent.TempDirectory)/bin
-
-    steps:
-      - script: |
-          echo "##vso[task.prependpath]$CONDA/bin"
-          echo "##vso[task.prependpath]$GOBIN"
-        displayName: Update PATH
+steps: []
