@@ -5,31 +5,6 @@ pr:
   - main
 
 jobs:
-  - job: BuildAndTest
-    displayName: Build and test
 
-    variables:
-      GOBIN: $(Agent.TempDirectory)/bin
-
-    steps:
-      - script: |
-          echo "##vso[task.prependpath]$CONDA/bin"
-          echo "##vso[task.prependpath]$GOBIN"
-        displayName: Update PATH
-
-      - script: |
-          cat environment.yml | grep -v "#.*\<\local\>" > /tmp/ci-environment.yml
-          conda env create -f /tmp/ci-environment.yml
-        displayName: Create conda environment
-
-      - script: |
-          source activate yardl
-          set -e
-          make validate-with-no-changes -e CPP_VERSION=17
-        displayName: Build and test C++ 17
-
-      - script: |
-          source activate yardl
-          set -e
-          make validate-with-no-changes -e CPP_VERSION=20
-        displayName: Build and test C++ 20
+  - displayName: Internal checks
+    # steps are injected automatically
