@@ -24,3 +24,8 @@ jobs:
         run: |
           cat environment.yml | grep -v "#.*\<\local\>" > /tmp/ci-environment.yml
           conda env create -f /tmp/ci-environment.yml
+
+      - name: Build and test C++ 17
+        run: |
+          conda activate yardl
+          make validate-with-no-changes -e CPP_VERSION=17
