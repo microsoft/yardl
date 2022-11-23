@@ -2,10 +2,10 @@ name: ci
 
 on:
   push:
-    branches: [main]
-    tags: ["v*.*.*"]
-  pull_request:
-    branches: [main]
+  #   branches: [main]
+  #   tags: ["v*.*.*"]
+  # pull_request:
+  #   branches: [main]
 
 jobs:
   validate:
@@ -32,8 +32,16 @@ jobs:
           activate-environment: yardl
           environment-file: ci-environment.yml
 
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v2
+        with:
+          languages: go, cpp
+
       - name: Build and test C++17
         run: make validate-with-no-changes -e CPP_VERSION=17
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
 
       - name: Build and test C++20
         run: make validate-with-no-changes -e CPP_VERSION=20
