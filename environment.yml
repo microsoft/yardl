@@ -1,0 +1,27 @@
+name: yardl
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - bash-completion=2.11 # local
+  - ccache=4.5.1 # local
+  - clang-format=14.0.4 # local
+  - cmake=3.21.3
+  - fmt=8.1.1
+  - gcc_linux-64=11.2.0
+  - gdb=11.2 # local
+  - go=1.18.3
+  - gtest=1.11.0
+  - gmock=1.11.0
+  - gxx_linux-64=11.2.0
+  - h5py=3.7.0 # local
+  - hdf5=1.12.1
+  - howardhinnant_date=3.0.1
+  - jupyter=1.0.0 # local
+  - make=4.3
+  - ninja=1.11.0
+  - nlohmann_json=3.10.5
+  - python=3.10.5 # local
+  - shellcheck=0.8.0 # local
+  - valgrind=3.18.1 # local
+  - xtensor=0.24.2

@@ -1,0 +1,558 @@
+SimpleRecord: !record
+  fields:
+    x: int
+    y: int
+    z: int
+
+RecordWithPrimitives: !record
+  fields:
+    boolField: bool
+    int8Field: int8
+    uint8Field: uint8
+    int16Field: int16
+    uint16Field: uint16
+    int32Field: int32
+    uint32Field: uint32
+    int64Field: int64
+    uint64Field: uint64
+    sizeField: size
+    float32Field: float32
+    float64Field: float64
+    complexfloat32Field: complexfloat32
+    complexfloat64Field: complexfloat64
+    dateField: date
+    timeField: time
+    datetimeField: datetime
+
+RecordWithPrimitiveAliases: !record
+  fields:
+    byteField: byte
+    intField: int
+    uintField: uint
+    longField: long
+    ulongField: ulong
+    floatField: float
+    doubleField: double
+    complexfloatField: complexfloat
+    complexdoubleField: complexfloat64
+
+TupleWithRecords: !record
+  fields:
+    a: SimpleRecord
+    b: SimpleRecord
+
+RecordWithVectors: !record
+  fields:
+    defaultVector: !vector
+      items: int
+    defaultVectorFixedLength: !vector
+      items: int
+      length: 3
+    vectorOfVectors: !vector
+      items: !vector
+        items: int
+        length: 2
+
+RecordWithArrays: !record
+  fields:
+    defaultArray: !array
+      items: int
+    defaultArrayWithEmptyDimension: !array
+      items: int
+      dimensions:
+    rank1Array: !array
+      items: int
+      dimensions: 1
+    rank2Array: !array
+      items: int
+      dimensions: 2
+    rank2ArrayWithNamedDimensions: !array
+      items: int
+      dimensions:
+        a:
+        b:
+    rank2FixedArray: !array
+      items: int
+      dimensions: [3, 4]
+    rank2FixedArrayWithNamedDimensions: !array
+      items: int
+      dimensions:
+        a: 3
+        b: 4
+    dynamicArray: !array
+      items: int
+    arrayOfVectors: !array
+      items: !vector
+        items: int
+        length: 4
+      dimensions: [5]
+
+Scalars: !protocol
+  sequence:
+    int32: int32
+    record: RecordWithPrimitives
+
+RecordWithOptionalFields: !record
+  fields:
+    optionalInt: [null, int]
+    optionalIntAlternateSyntax: int?
+
+ScalarOptionals: !protocol
+  sequence:
+    optionalInt: int?
+    optionalRecord: SimpleRecord?
+    recordWithOptionalFields: RecordWithOptionalFields
+    optionalRecordWithOptionalFields: RecordWithOptionalFields?
+
+NestedRecords: !protocol
+  sequence:
+    tupleWithRecords: TupleWithRecords
+
+RecordWithVlens: !record
+  fields:
+    a: !vector
+      items: SimpleRecord
+    b: int
+    c: int
+
+Vlens: !protocol
+  sequence:
+    intVector: !vector
+      items: int
+    complexVector: !vector
+      items: complexfloat32
+    recordWithVlens: RecordWithVlens
+    vlenOfRecordWithVlens: !vector
+      items: RecordWithVlens
+
+RecordWithStrings: !record
+  fields:
+    a: string
+    b: string
+
+Strings: !protocol
+  sequence:
+    singleString: string
+    recWithString: RecordWithStrings
+
+RecordWithOptionalVector: !record
+  fields:
+    optionalVector:
+      - null
+      - !vector
+        items: int
+
+OptionalVectors: !protocol
+  sequence:
+    recordWithOptionalVector: RecordWithOptionalVector
+
+RecordWithFixedVectors: !record
+  fields:
+    fixedIntVector: !vector
+      length: 5
+      items: int
+    fixedSimpleRecordVector: !vector
+      length: 3
+      items: SimpleRecord
+    fixedRecordWithVlensVector: !vector
+      length: 2
+      items: RecordWithVlens
+
+FixedVectors: !protocol
+  sequence:
+    fixedIntVector: !vector
+      length: 5
+      items: int
+    fixedSimpleRecordVector: !vector
+      length: 3
+      items: SimpleRecord
+    fixedRecordWithVlensVector: !vector
+      length: 2
+      items: RecordWithVlens
+    recordWithFixedVectors: RecordWithFixedVectors
+
+Streams: !protocol
+  sequence:
+    intData: !stream
+      items: int
+    optionalIntData: !stream
+      items: int?
+    recordWithOptionalVectorData: !stream
+      items: RecordWithOptionalVector
+    fixedVector: !stream
+      items: !vector
+        items: int
+        length: 3
+
+RecordWithFixedArrays: !record
+  fields:
+    ints: !array
+      items: int
+      dimensions: [2, 3]
+    fixedSimpleRecordArray: !array
+      items: SimpleRecord
+      dimensions: [3, 2]
+    fixedRecordWithVlensArray: !array
+      items: RecordWithVlens
+      dimensions: [2, 2]
+
+RecordWithNDArrays: !record
+  fields:
+    ints: !array
+      items: int
+      dimensions: 2
+    fixedSimpleRecordArray: !array
+      items: SimpleRecord
+      dimensions: 2
+    fixedRecordWithVlensArray: !array
+      items: RecordWithVlens
+      dimensions: 2
+
+RecordWithNDArraysSingleDimension: !record
+  fields:
+    ints: !array
+      items: int
+      dimensions: 1
+    fixedSimpleRecordArray: !array
+      items: SimpleRecord
+      dimensions: 1
+    fixedRecordWithVlensArray: !array
+      items: RecordWithVlens
+      dimensions: 1
+
+RecordWithDynamicNDArrays: !record
+  fields:
+    ints: !array
+      items: int
+    fixedSimpleRecordArray: !array
+      items: SimpleRecord
+    fixedRecordWithVlensArray: !array
+      items: RecordWithVlens
+
+NamedFixedNDArray: !array
+  items: int
+  dimensions:
+    dimA: 2
+    dimB: 4
+
+FixedArrays: !protocol
+  sequence:
+    ints: !array
+      items: int
+      dimensions: [2, 3]
+    fixedSimpleRecordArray: !array
+      items: SimpleRecord
+      dimensions: [3, 2]
+    fixedRecordWithVlensArray: !array
+      items: RecordWithVlens
+      dimensions: [2, 2]
+    recordWithFixedArrays: RecordWithFixedArrays
+    namedArray: NamedFixedNDArray
+
+NamedNDArray: !array
+  items: int
+  dimensions:
+    dimA:
+    dimB:
+
+NDArrays: !protocol
+  sequence:
+    ints: !array
+      items: int
+      dimensions: 2
+    simpleRecordArray: !array
+      items: SimpleRecord
+      dimensions: 2
+    recordWithVlensArray: !array
+      items: RecordWithVlens
+      dimensions: 2
+    recordWithNDArrays: RecordWithNDArrays
+    namedArray: NamedNDArray
+
+NDArraysSingleDimension: !protocol
+  sequence:
+    ints: !array
+      items: int
+      dimensions: 1
+    simpleRecordArray: !array
+      items: SimpleRecord
+      dimensions: 1
+    recordWithVlensArray: !array
+      items: RecordWithVlens
+      dimensions: 1
+    recordWithNDArrays: RecordWithNDArraysSingleDimension
+
+DynamicNDArrays: !protocol
+  sequence:
+    ints: !array
+      items: int
+    simpleRecordArray: !array
+      items: SimpleRecord
+    recordWithVlensArray: !array
+      items: RecordWithVlens
+    recordWithDynamicNDArrays: RecordWithDynamicNDArrays
+
+Unions: !protocol
+  sequence:
+    intOrSimpleRecord: [int, SimpleRecord]
+    intOrRecordWithVlens: [int, RecordWithVlens]
+    monosotateOrIntOrSimpleRecord: [null, int, SimpleRecord]
+
+StreamsOfUnions: !protocol
+  sequence:
+    intOrSimpleRecord: !stream
+      items: [int, SimpleRecord]
+    nullableIntOrSimpleRecord: !stream
+      items: [null, int, SimpleRecord]
+
+Fruits: !enum
+  values:
+    - apple
+    - banana
+    - pear
+
+UInt64Enum: !enum
+  base: uint64
+  values:
+    a: 0x8000000000000000
+
+Int64Enum: !enum
+  base: int64
+  values:
+    b: -0x4000000000000000
+
+Enums: !protocol
+  sequence:
+    single: Fruits
+    vec: !vector { items: Fruits }
+
+StateTest: !protocol
+  sequence:
+    anInt: int
+    aStream: !stream
+      items: int
+    anotherInt: int
+
+Image<T>: !array
+  items: T
+  dimensions:
+    x:
+    y:
+
+GenericRecord<T1, T2>: !record
+  fields:
+    scalar1: T1
+    scalar2: T2
+    vector1: !vector
+      items: T1
+    image2: Image<T2>
+
+MyTuple<T1, T2>: !record
+  fields:
+    v1: T1
+    v2: T2
+
+SimpleGenerics: !protocol
+  sequence:
+    floatImage: Image<float>
+    intImage: Image<int>
+    intImageAlternateSyntax: !generic
+      name: Image
+      args: int
+    stringImage: Image<string>
+    intFloatTuple: MyTuple<int,float>
+    floatFloatTuple: MyTuple<float, float>
+    intFloatTupleAlternateSyntax: !generic
+      name: MyTuple
+      args: [int, float]
+    intStringTuple: MyTuple<int,string>
+    streamOfTypeVariants: !stream
+      items: [Image<float>, Image<double>]
+
+AdvancedGenerics: !protocol
+  sequence:
+    intImageImage: Image<Image<float>>
+    genericRecord1: GenericRecord<int, string>
+    tupleOfOptionals: MyTuple<int?, string?>
+    tupleOfOptionalsAlternateSyntax: !generic
+      name: MyTuple
+      args:
+        - [null, int]
+        - [null, string]
+    tupleOfVectors: !generic
+      name: MyTuple
+      args:
+        - !vector { items: int }
+        - !vector { items: float }
+
+AliasedString: string
+AliasedEnum: Fruits
+AliasedOpenGeneric<T1,T2>: MyTuple<T1,T2>
+AliasedClosedGeneric: MyTuple<AliasedString, AliasedEnum>
+AliasedOptional: int?
+AliasedGenericOptional<T>: T?
+AliasedGenericUnion2<T1,T2>: [T1, T2]
+AliasedGenericVector<T>: !vector { items: T }
+AliasedGenericFixedVector<T>: !vector { items: T, length: 3 }
+
+Aliases: !protocol
+  sequence:
+    aliasedString: AliasedString
+    aliasedEnum: AliasedEnum
+    aliasedOpenGeneric: AliasedOpenGeneric<AliasedString, AliasedEnum>
+    aliasedClosedGeneric: AliasedClosedGeneric
+    aliasedOptional: AliasedOptional
+    aliasedGenericOptional: AliasedGenericOptional<float>
+    aliasedGenericUnion2: AliasedGenericUnion2<AliasedString, AliasedEnum>
+    aliasedGenericVector: AliasedGenericVector<float>
+    aliasedGenericFixedVector: AliasedGenericFixedVector<float>
+    streamOfAliasedGenericUnion2: !stream
+      items: AliasedGenericUnion2<AliasedString, AliasedEnum>
+
+AliasedIntOrSimpleRecord: [int, SimpleRecord]
+AliasedNullableIntSimpleRecord: [null, int, SimpleRecord]
+
+StreamsOfAliasedUnions: !protocol
+  sequence:
+    intOrSimpleRecord: !stream
+      items: AliasedIntOrSimpleRecord
+    nullableIntOrSimpleRecord: !stream
+      items: AliasedNullableIntSimpleRecord
+
+RecordWithComputedFields: !record
+  fields:
+    arrayField: !array
+      items: int
+      dimensions:
+        x:
+        y:
+    dynamicArrayField: !array
+      items: int
+    fixedArrayField: !array
+      items: int
+      dimensions:
+        x: 3
+        y: 4
+    intField: int
+    stringField: string
+    tupleField: MyTuple<int, int>
+    vectorField: !vector { items: int }
+    vectorOfVectorsField: !vector { items: !vector { items: int } }
+    fixedVectorField: !vector { items: int, length: 3 }
+    optionalNamedArray: NamedNDArray?
+    intFloatUnion: [int, float]
+    nullableIntFloatUnion: [null, int, float]
+    unionWithNestedGenericUnion:
+      - int
+      - GenericRecordWithComputedFields<string, float>
+  computedFields:
+    intLiteral: 42 # this comment is ignored
+    largeNegativeInt64Literal: -0x4000000000000000
+    largeUInt64Literal: 0x8000000000000000
+    stringLiteral: "'hello'"
+    stringLiteral2: '"hello"'
+    stringLiteral3: |-
+      'hello'
+    stringLiteral4: |-
+      "hello"
+    accessOtherComputedField: intField
+    accessIntField: intField
+    accessStringField: stringField
+    accessTupleField: tupleField
+    accessNestedTupleField: tupleField.v2
+    accessArrayField: arrayField
+    accessArrayFieldElement: arrayField[0, 1]
+    accessArrayFieldElementByName: arrayField[y:1, x:0]
+    accessVectorField: vectorField
+    accessVectorFieldElement: vectorField[1]
+    accessVectorOfVectorsField: vectorOfVectorsField[1][2]
+    arraySize: size(arrayField)
+    arrayXSize: size(arrayField, "x")
+    arrayYSize: size(arrayField, "y")
+    array0Size: size(arrayField, 0)
+    array1Size: size(arrayField, 1)
+    arraySizeFromIntField: size(arrayField, intField)
+    arraySizeFromStringField: size(arrayField, stringField)
+    arraySizeFromNestedIntField: size(arrayField, tupleField.v1)
+    fixedArraySize: size(fixedArrayField)
+    fixedArrayXSize: size(fixedArrayField, "x")
+    fixedArray0Size: size(fixedArrayField, 0)
+    vectorSize: size(vectorField)
+    fixedVectorSize: size(fixedVectorField)
+    arrayDimensionXIndex: dimensionIndex(arrayField, "x")
+    arrayDimensionYIndex: dimensionIndex(arrayField, "y")
+    arrayDimensionIndexFromStringField: dimensionIndex(arrayField, stringField)
+    arrayDimensionCount: dimensionCount(arrayField)
+    dynamicArrayDimensionCount: dimensionCount(dynamicArrayField)
+    optionalNamedArrayLength:
+      !switch optionalNamedArray:
+        NamedNDArray arr: size(arr)
+        null: 0
+    optionalNamedArrayLengthWithDiscard:
+      !switch optionalNamedArray:
+        NamedNDArray arr: size(arr)
+        _: 0
+    intFloatUnionAsFloat:
+      !switch intFloatUnion:
+        int i: i
+        float f: f
+    nullableIntFloatUnionString:
+      !switch nullableIntFloatUnion:
+        null: "'null'"
+        int: "'int'"
+        _: "'float'"
+    nestedSwitch:
+      !switch unionWithNestedGenericUnion:
+        int: -1
+        GenericRecordWithComputedFields<string, float> rec:
+          !switch rec.f1:
+            float: 20
+            string: 10
+    useNestedComputedField:
+      !switch unionWithNestedGenericUnion:
+        int: -1
+        GenericRecordWithComputedFields<string, float> rec: rec.typeIndex
+
+GenericRecordWithComputedFields<T0, T1>: !record
+  fields:
+    f1: [T0, T1]
+  computedFields:
+    typeIndex:
+      !switch f1:
+        T0: 0
+        T1: 1
+
+ProtocolWithComputedFields: !protocol
+  sequence:
+    recordWithComputedFields: RecordWithComputedFields
+
+# BEGIN delibrately using C++ keywords and macros as identitiers
+
+RecordWithKeywordFields: !record
+  fields:
+    int: string
+    sizeof: ArrayWithKeywordDimensionNames<int>
+    if: EnumWithKeywordSymbols
+  computedFields:
+    float: int
+    double: float
+    return: sizeof[while:1, do:2]
+
+EnumWithKeywordSymbols: !enum
+  values:
+    try: 2
+    catch: 1
+
+ArrayWithKeywordDimensionNames<INT16_MAX>: !array
+  items: INT16_MAX
+  dimensions:
+    while:
+    do:
+
+ProtocolWithKeywordSteps: !protocol
+  sequence:
+    int: !stream
+      items: RecordWithKeywordFields
+    float: EnumWithKeywordSymbols
+
+# END delibrately using C++ keywords and macros as identitiers

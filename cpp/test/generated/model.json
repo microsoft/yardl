@@ -1,0 +1,2996 @@
+{
+  "namespaces": [
+    {
+      "name": "TestModel",
+      "types": [
+        {
+          "record": {
+            "name": "SmallBenchmarkRecord",
+            "fields": [
+              {
+                "name": "a",
+                "type": "float64"
+              },
+              {
+                "name": "b",
+                "type": "float32"
+              },
+              {
+                "name": "c",
+                "type": "float32"
+              }
+            ]
+          }
+        },
+        {
+          "record": {
+            "name": "SimpleEncodingCounters",
+            "fields": [
+              {
+                "name": "e1",
+                "type": [
+                  null,
+                  "uint32"
+                ]
+              },
+              {
+                "name": "e2",
+                "type": [
+                  null,
+                  "uint32"
+                ]
+              },
+              {
+                "name": "slice",
+                "type": [
+                  null,
+                  "uint32"
+                ]
+              },
+              {
+                "name": "repetition",
+                "type": [
+                  null,
+                  "uint32"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "record": {
+            "name": "SimpleAcquisition",
+            "fields": [
+              {
+                "name": "flags",
+                "type": "uint64"
+              },
+              {
+                "name": "idx",
+                "type": "TestModel.SimpleEncodingCounters"
+              },
+              {
+                "name": "data",
+                "type": {
+                  "array": {
+                    "items": [
+                      "complexfloat32"
+                    ],
+                    "dimensions": 2
+                  }
+                }
+              },
+              {
+                "name": "trajectory",
+                "type": {
+                  "array": {
+                    "items": [
+                      "float32"
+                    ],
+                    "dimensions": 2
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "record": {
+            "name": "SimpleRecord",
+            "fields": [
+              {
+                "name": "x",
+                "type": "int32"
+              },
+              {
+                "name": "y",
+                "type": "int32"
+              },
+              {
+                "name": "z",
+                "type": "int32"
+              }
+            ]
+          }
+        },
+        {
+          "record": {
+            "name": "RecordWithPrimitives",
+            "fields": [
+              {
+                "name": "boolField",
+                "type": "bool"
+              },
+              {
+                "name": "int8Field",
+                "type": "int8"
+              },
+              {
+                "name": "uint8Field",
+                "type": "uint8"
+              },
+              {
+                "name": "int16Field",
+                "type": "int16"
+              },
+              {
+                "name": "uint16Field",
+                "type": "uint16"
+              },
+              {
+                "name": "int32Field",
+                "type": "int32"
+              },
+              {
+                "name": "uint32Field",
+                "type": "uint32"
+              },
+              {
+                "name": "int64Field",
+                "type": "int64"
+              },
+              {
+                "name": "uint64Field",
+                "type": "uint64"
+              },
+              {
+                "name": "sizeField",
+                "type": "size"
+              },
+              {
+                "name": "float32Field",
+                "type": "float32"
+              },
+              {
+                "name": "float64Field",
+                "type": "float64"
+              },
+              {
+                "name": "complexfloat32Field",
+                "type": "complexfloat32"
+              },
+              {
+                "name": "complexfloat64Field",
+                "type": "complexfloat64"
+              },
+              {
+                "name": "dateField",
+                "type": "date"
+              },
+              {
+                "name": "timeField",
+                "type": "time"
+              },
+              {
+                "name": "datetimeField",
+                "type": "datetime"
+              }
+            ]
+          }
+        },
+        {
+          "record": {
+            "name": "RecordWithPrimitiveAliases",
+            "fields": [
+              {
+                "name": "byteField",
+                "type": "uint8"
+              },
+              {
+                "name": "intField",
+                "type": "int32"
+              },
+              {
+                "name": "uintField",
+                "type": "uint32"
+              },
+              {
+                "name": "longField",
+                "type": "int64"
+              },
+              {
+                "name": "ulongField",
+                "type": "uint64"
+              },
+              {
+                "name": "floatField",
+                "type": "float32"
+              },
+              {
+                "name": "doubleField",
+                "type": "float64"
+              },
+              {
+                "name": "complexfloatField",
+                "type": "complexfloat32"
+              },
+              {
+                "name": "complexdoubleField",
+                "type": "complexfloat64"
+              }
+            ]
+          }
+        },
+        {
+          "record": {
+            "name": "TupleWithRecords",
+            "fields": [
+              {
+                "name": "a",
+                "type": "TestModel.SimpleRecord"
+              },
+              {
+                "name": "b",
+                "type": "TestModel.SimpleRecord"
+              }
+            ]
+          }
+        },
+        {
+          "record": {
+            "name": "RecordWithVectors",
+            "fields": [
+              {
+                "name": "defaultVector",
+                "type": {
+                  "vector": {
+                    "items": [
+                      "int32"
+                    ]
+                  }
+                }
+              },
+              {
+                "name": "defaultVectorFixedLength",
+                "type": {
+                  "vector": {
+                    "items": [
+                      "int32"
+                    ],
+                    "length": 3
+                  }
+                }
+              },
+              {
+                "name": "vectorOfVectors",
+                "type": {
+                  "vector": {
+                    "items": [
+                      {
+                        "vector": {
+                          "items": [
+                            "int32"
+                          ],
+                          "length": 2
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "record": {
+            "name": "RecordWithArrays",
+            "fields": [
+              {
+                "name": "defaultArray",
+                "type": {
+                  "array": {
+                    "items": [
+                      "int32"
+                    ]
+                  }
+                }
+              },
+              {
+                "name": "defaultArrayWithEmptyDimension",
+                "type": {
+                  "array": {
+                    "items": [
+                      "int32"
+                    ]
+                  }
+                }
+              },
+              {
+                "name": "rank1Array",
+                "type": {
+                  "array": {
+                    "items": [
+                      "int32"
+                    ],
+                    "dimensions": 1
+                  }
+                }
+              },
+              {
+                "name": "rank2Array",
+                "type": {
+                  "array": {
+                    "items": [
+                      "int32"
+                    ],
+                    "dimensions": 2
+                  }
+                }
+              },
+              {
+                "name": "rank2ArrayWithNamedDimensions",
+                "type": {
+                  "array": {
+                    "items": [
+                      "int32"
+                    ],
+                    "dimensions": [
+                      {
+                        "name": "a"
+                      },
+                      {
+                        "name": "b"
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "name": "rank2FixedArray",
+                "type": {
+                  "array": {
+                    "items": [
+                      "int32"
+                    ],
+                    "dimensions": [
+                      {
+                        "length": 3
+                      },
+                      {
+                        "length": 4
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "name": "rank2FixedArrayWithNamedDimensions",
+                "type": {
+                  "array": {
+                    "items": [
+                      "int32"
+                    ],
+                    "dimensions": [
+                      {
+                        "name": "a",
+                        "length": 3
+                      },
+                      {
+                        "name": "b",
+                        "length": 4
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "name": "dynamicArray",
+                "type": {
+                  "array": {
+                    "items": [
+                      "int32"
+                    ]
+                  }
+                }
+              },
+              {
+                "name": "arrayOfVectors",
+                "type": {
+                  "array": {
+                    "items": [
+                      {
+                        "vector": {
+                          "items": [
+                            "int32"
+                          ],
+                          "length": 4
+                        }
+                      }
+                    ],
+                    "dimensions": [
+                      {
+                        "length": 5
+                      }
+                    ]
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "record": {
+            "name": "RecordWithOptionalFields",
+            "fields": [
+              {
+                "name": "optionalInt",
+                "type": [
+                  null,
+                  "int32"
+                ]
+              },
+              {
+                "name": "optionalIntAlternateSyntax",
+                "type": [
+                  null,
+                  "int32"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "record": {
+            "name": "RecordWithVlens",
+            "fields": [
+              {
+                "name": "a",
+                "type": {
+                  "vector": {
+                    "items": [
+                      "TestModel.SimpleRecord"
+                    ]
+                  }
+                }
+              },
+              {
+                "name": "b",
+                "type": "int32"
+              },
+              {
+                "name": "c",
+                "type": "int32"
+              }
+            ]
+          }
+        },
+        {
+          "record": {
+            "name": "RecordWithStrings",
+            "fields": [
+              {
+                "name": "a",
+                "type": "string"
+              },
+              {
+                "name": "b",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        {
+          "record": {
+            "name": "RecordWithOptionalVector",
+            "fields": [
+              {
+                "name": "optionalVector",
+                "type": [
+                  null,
+                  {
+                    "vector": {
+                      "items": [
+                        "int32"
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "record": {
+            "name": "RecordWithFixedVectors",
+            "fields": [
+              {
+                "name": "fixedIntVector",
+                "type": {
+                  "vector": {
+                    "items": [
+                      "int32"
+                    ],
+                    "length": 5
+                  }
+                }
+              },
+              {
+                "name": "fixedSimpleRecordVector",
+                "type": {
+                  "vector": {
+                    "items": [
+                      "TestModel.SimpleRecord"
+                    ],
+                    "length": 3
+                  }
+                }
+              },
+              {
+                "name": "fixedRecordWithVlensVector",
+                "type": {
+                  "vector": {
+                    "items": [
+                      "TestModel.RecordWithVlens"
+                    ],
+                    "length": 2
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "record": {
+            "name": "RecordWithFixedArrays",
+            "fields": [
+              {
+                "name": "ints",
+                "type": {
+                  "array": {
+                    "items": [
+                      "int32"
+                    ],
+                    "dimensions": [
+                      {
+                        "length": 2
+                      },
+                      {
+                        "length": 3
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "name": "fixedSimpleRecordArray",
+                "type": {
+                  "array": {
+                    "items": [
+                      "TestModel.SimpleRecord"
+                    ],
+                    "dimensions": [
+                      {
+                        "length": 3
+                      },
+                      {
+                        "length": 2
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "name": "fixedRecordWithVlensArray",
+                "type": {
+                  "array": {
+                    "items": [
+                      "TestModel.RecordWithVlens"
+                    ],
+                    "dimensions": [
+                      {
+                        "length": 2
+                      },
+                      {
+                        "length": 2
+                      }
+                    ]
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "record": {
+            "name": "RecordWithNDArrays",
+            "fields": [
+              {
+                "name": "ints",
+                "type": {
+                  "array": {
+                    "items": [
+                      "int32"
+                    ],
+                    "dimensions": 2
+                  }
+                }
+              },
+              {
+                "name": "fixedSimpleRecordArray",
+                "type": {
+                  "array": {
+                    "items": [
+                      "TestModel.SimpleRecord"
+                    ],
+                    "dimensions": 2
+                  }
+                }
+              },
+              {
+                "name": "fixedRecordWithVlensArray",
+                "type": {
+                  "array": {
+                    "items": [
+                      "TestModel.RecordWithVlens"
+                    ],
+                    "dimensions": 2
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "record": {
+            "name": "RecordWithNDArraysSingleDimension",
+            "fields": [
+              {
+                "name": "ints",
+                "type": {
+                  "array": {
+                    "items": [
+                      "int32"
+                    ],
+                    "dimensions": 1
+                  }
+                }
+              },
+              {
+                "name": "fixedSimpleRecordArray",
+                "type": {
+                  "array": {
+                    "items": [
+                      "TestModel.SimpleRecord"
+                    ],
+                    "dimensions": 1
+                  }
+                }
+              },
+              {
+                "name": "fixedRecordWithVlensArray",
+                "type": {
+                  "array": {
+                    "items": [
+                      "TestModel.RecordWithVlens"
+                    ],
+                    "dimensions": 1
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "record": {
+            "name": "RecordWithDynamicNDArrays",
+            "fields": [
+              {
+                "name": "ints",
+                "type": {
+                  "array": {
+                    "items": [
+                      "int32"
+                    ]
+                  }
+                }
+              },
+              {
+                "name": "fixedSimpleRecordArray",
+                "type": {
+                  "array": {
+                    "items": [
+                      "TestModel.SimpleRecord"
+                    ]
+                  }
+                }
+              },
+              {
+                "name": "fixedRecordWithVlensArray",
+                "type": {
+                  "array": {
+                    "items": [
+                      "TestModel.RecordWithVlens"
+                    ]
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "alias": {
+            "name": "NamedFixedNDArray",
+            "type": {
+              "array": {
+                "items": [
+                  "int32"
+                ],
+                "dimensions": [
+                  {
+                    "name": "dimA",
+                    "length": 2
+                  },
+                  {
+                    "name": "dimB",
+                    "length": 4
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "alias": {
+            "name": "NamedNDArray",
+            "type": {
+              "array": {
+                "items": [
+                  "int32"
+                ],
+                "dimensions": [
+                  {
+                    "name": "dimA"
+                  },
+                  {
+                    "name": "dimB"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "enum": {
+            "name": "Fruits",
+            "values": [
+              {
+                "symbol": "apple",
+                "value": 0
+              },
+              {
+                "symbol": "banana",
+                "value": 1
+              },
+              {
+                "symbol": "pear",
+                "value": 2
+              }
+            ]
+          }
+        },
+        {
+          "enum": {
+            "name": "UInt64Enum",
+            "base": "uint64",
+            "values": [
+              {
+                "symbol": "a",
+                "value": 9223372036854775808
+              }
+            ]
+          }
+        },
+        {
+          "enum": {
+            "name": "Int64Enum",
+            "base": "int64",
+            "values": [
+              {
+                "symbol": "b",
+                "value": -4611686018427387904
+              }
+            ]
+          }
+        },
+        {
+          "alias": {
+            "name": "Image",
+            "typeParameters": [
+              "T"
+            ],
+            "type": {
+              "array": {
+                "items": [
+                  "T"
+                ],
+                "dimensions": [
+                  {
+                    "name": "x"
+                  },
+                  {
+                    "name": "y"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "record": {
+            "name": "GenericRecord",
+            "typeParameters": [
+              "T1",
+              "T2"
+            ],
+            "fields": [
+              {
+                "name": "scalar1",
+                "type": "T1"
+              },
+              {
+                "name": "scalar2",
+                "type": "T2"
+              },
+              {
+                "name": "vector1",
+                "type": {
+                  "vector": {
+                    "items": [
+                      "T1"
+                    ]
+                  }
+                }
+              },
+              {
+                "name": "image2",
+                "type": {
+                  "name": "TestModel.Image",
+                  "typeArguments": [
+                    "T2"
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "record": {
+            "name": "MyTuple",
+            "typeParameters": [
+              "T1",
+              "T2"
+            ],
+            "fields": [
+              {
+                "name": "v1",
+                "type": "T1"
+              },
+              {
+                "name": "v2",
+                "type": "T2"
+              }
+            ]
+          }
+        },
+        {
+          "alias": {
+            "name": "AliasedString",
+            "type": "string"
+          }
+        },
+        {
+          "alias": {
+            "name": "AliasedEnum",
+            "type": "TestModel.Fruits"
+          }
+        },
+        {
+          "alias": {
+            "name": "AliasedOpenGeneric",
+            "typeParameters": [
+              "T1",
+              "T2"
+            ],
+            "type": {
+              "name": "TestModel.MyTuple",
+              "typeArguments": [
+                "T1",
+                "T2"
+              ]
+            }
+          }
+        },
+        {
+          "alias": {
+            "name": "AliasedClosedGeneric",
+            "type": {
+              "name": "TestModel.MyTuple",
+              "typeArguments": [
+                "TestModel.AliasedString",
+                "TestModel.AliasedEnum"
+              ]
+            }
+          }
+        },
+        {
+          "alias": {
+            "name": "AliasedOptional",
+            "type": [
+              null,
+              "int32"
+            ]
+          }
+        },
+        {
+          "alias": {
+            "name": "AliasedGenericOptional",
+            "typeParameters": [
+              "T"
+            ],
+            "type": [
+              null,
+              "T"
+            ]
+          }
+        },
+        {
+          "alias": {
+            "name": "AliasedGenericUnion2",
+            "typeParameters": [
+              "T1",
+              "T2"
+            ],
+            "type": [
+              {
+                "label": "T1",
+                "type": "T1"
+              },
+              {
+                "label": "T2",
+                "type": "T2"
+              }
+            ]
+          }
+        },
+        {
+          "alias": {
+            "name": "AliasedGenericVector",
+            "typeParameters": [
+              "T"
+            ],
+            "type": {
+              "vector": {
+                "items": [
+                  "T"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "alias": {
+            "name": "AliasedGenericFixedVector",
+            "typeParameters": [
+              "T"
+            ],
+            "type": {
+              "vector": {
+                "items": [
+                  "T"
+                ],
+                "length": 3
+              }
+            }
+          }
+        },
+        {
+          "alias": {
+            "name": "AliasedIntOrSimpleRecord",
+            "type": [
+              {
+                "label": "int32",
+                "type": "int32"
+              },
+              {
+                "label": "SimpleRecord",
+                "type": "TestModel.SimpleRecord"
+              }
+            ]
+          }
+        },
+        {
+          "alias": {
+            "name": "AliasedNullableIntSimpleRecord",
+            "type": [
+              null,
+              {
+                "label": "int32",
+                "type": "int32"
+              },
+              {
+                "label": "SimpleRecord",
+                "type": "TestModel.SimpleRecord"
+              }
+            ]
+          }
+        },
+        {
+          "record": {
+            "name": "GenericRecordWithComputedFields",
+            "typeParameters": [
+              "T0",
+              "T1"
+            ],
+            "fields": [
+              {
+                "name": "f1",
+                "type": [
+                  {
+                    "label": "T0",
+                    "type": "T0"
+                  },
+                  {
+                    "label": "T1",
+                    "type": "T1"
+                  }
+                ]
+              }
+            ],
+            "computedFields": [
+              {
+                "name": "typeIndex",
+                "expression": {
+                  "switch": {
+                    "target": {
+                      "memberAccess": {
+                        "member": "f1"
+                      }
+                    },
+                    "cases": [
+                      {
+                        "pattern": {
+                          "type": "T0"
+                        },
+                        "expression": 0
+                      },
+                      {
+                        "pattern": {
+                          "type": "T1"
+                        },
+                        "expression": 1
+                      }
+                    ]
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "record": {
+            "name": "RecordWithComputedFields",
+            "fields": [
+              {
+                "name": "arrayField",
+                "type": {
+                  "array": {
+                    "items": [
+                      "int32"
+                    ],
+                    "dimensions": [
+                      {
+                        "name": "x"
+                      },
+                      {
+                        "name": "y"
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "name": "dynamicArrayField",
+                "type": {
+                  "array": {
+                    "items": [
+                      "int32"
+                    ]
+                  }
+                }
+              },
+              {
+                "name": "fixedArrayField",
+                "type": {
+                  "array": {
+                    "items": [
+                      "int32"
+                    ],
+                    "dimensions": [
+                      {
+                        "name": "x",
+                        "length": 3
+                      },
+                      {
+                        "name": "y",
+                        "length": 4
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "name": "intField",
+                "type": "int32"
+              },
+              {
+                "name": "stringField",
+                "type": "string"
+              },
+              {
+                "name": "tupleField",
+                "type": {
+                  "name": "TestModel.MyTuple",
+                  "typeArguments": [
+                    "int32",
+                    "int32"
+                  ]
+                }
+              },
+              {
+                "name": "vectorField",
+                "type": {
+                  "vector": {
+                    "items": [
+                      "int32"
+                    ]
+                  }
+                }
+              },
+              {
+                "name": "vectorOfVectorsField",
+                "type": {
+                  "vector": {
+                    "items": [
+                      {
+                        "vector": {
+                          "items": [
+                            "int32"
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "name": "fixedVectorField",
+                "type": {
+                  "vector": {
+                    "items": [
+                      "int32"
+                    ],
+                    "length": 3
+                  }
+                }
+              },
+              {
+                "name": "optionalNamedArray",
+                "type": [
+                  null,
+                  "TestModel.NamedNDArray"
+                ]
+              },
+              {
+                "name": "intFloatUnion",
+                "type": [
+                  {
+                    "label": "int32",
+                    "type": "int32"
+                  },
+                  {
+                    "label": "float32",
+                    "type": "float32"
+                  }
+                ]
+              },
+              {
+                "name": "nullableIntFloatUnion",
+                "type": [
+                  null,
+                  {
+                    "label": "int32",
+                    "type": "int32"
+                  },
+                  {
+                    "label": "float32",
+                    "type": "float32"
+                  }
+                ]
+              },
+              {
+                "name": "unionWithNestedGenericUnion",
+                "type": [
+                  {
+                    "label": "int32",
+                    "type": "int32"
+                  },
+                  {
+                    "label": "GenericRecordWithComputedFields\u003cstring,float32\u003e",
+                    "type": {
+                      "name": "TestModel.GenericRecordWithComputedFields",
+                      "typeArguments": [
+                        "string",
+                        "float32"
+                      ]
+                    }
+                  }
+                ]
+              }
+            ],
+            "computedFields": [
+              {
+                "name": "intLiteral",
+                "expression": 42
+              },
+              {
+                "name": "largeNegativeInt64Literal",
+                "expression": -4611686018427387904
+              },
+              {
+                "name": "largeUInt64Literal",
+                "expression": 9223372036854775808
+              },
+              {
+                "name": "stringLiteral",
+                "expression": "\"hello\""
+              },
+              {
+                "name": "stringLiteral2",
+                "expression": "\"hello\""
+              },
+              {
+                "name": "stringLiteral3",
+                "expression": "\"hello\""
+              },
+              {
+                "name": "stringLiteral4",
+                "expression": "\"hello\""
+              },
+              {
+                "name": "accessOtherComputedField",
+                "expression": {
+                  "memberAccess": {
+                    "member": "intField"
+                  }
+                }
+              },
+              {
+                "name": "accessIntField",
+                "expression": {
+                  "memberAccess": {
+                    "member": "intField"
+                  }
+                }
+              },
+              {
+                "name": "accessStringField",
+                "expression": {
+                  "memberAccess": {
+                    "member": "stringField"
+                  }
+                }
+              },
+              {
+                "name": "accessTupleField",
+                "expression": {
+                  "memberAccess": {
+                    "member": "tupleField"
+                  }
+                }
+              },
+              {
+                "name": "accessNestedTupleField",
+                "expression": {
+                  "memberAccess": {
+                    "target": {
+                      "memberAccess": {
+                        "member": "tupleField"
+                      }
+                    },
+                    "member": "v2"
+                  }
+                }
+              },
+              {
+                "name": "accessArrayField",
+                "expression": {
+                  "memberAccess": {
+                    "member": "arrayField"
+                  }
+                }
+              },
+              {
+                "name": "accessArrayFieldElement",
+                "expression": {
+                  "index": {
+                    "target": {
+                      "memberAccess": {
+                        "member": "arrayField"
+                      }
+                    },
+                    "arguments": [
+                      {
+                        "expression": 0
+                      },
+                      {
+                        "expression": 1
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "name": "accessArrayFieldElementByName",
+                "expression": {
+                  "index": {
+                    "target": {
+                      "memberAccess": {
+                        "member": "arrayField"
+                      }
+                    },
+                    "arguments": [
+                      {
+                        "label": "x",
+                        "expression": 0
+                      },
+                      {
+                        "label": "y",
+                        "expression": 1
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "name": "accessVectorField",
+                "expression": {
+                  "memberAccess": {
+                    "member": "vectorField"
+                  }
+                }
+              },
+              {
+                "name": "accessVectorFieldElement",
+                "expression": {
+                  "index": {
+                    "target": {
+                      "memberAccess": {
+                        "member": "vectorField"
+                      }
+                    },
+                    "arguments": [
+                      {
+                        "expression": 1
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "name": "accessVectorOfVectorsField",
+                "expression": {
+                  "index": {
+                    "target": {
+                      "index": {
+                        "target": {
+                          "memberAccess": {
+                            "member": "vectorOfVectorsField"
+                          }
+                        },
+                        "arguments": [
+                          {
+                            "expression": 1
+                          }
+                        ]
+                      }
+                    },
+                    "arguments": [
+                      {
+                        "expression": 2
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "name": "arraySize",
+                "expression": {
+                  "call": {
+                    "function": "size",
+                    "arguments": [
+                      {
+                        "memberAccess": {
+                          "member": "arrayField"
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "name": "arrayXSize",
+                "expression": {
+                  "call": {
+                    "function": "size",
+                    "arguments": [
+                      {
+                        "memberAccess": {
+                          "member": "arrayField"
+                        }
+                      },
+                      0
+                    ]
+                  }
+                }
+              },
+              {
+                "name": "arrayYSize",
+                "expression": {
+                  "call": {
+                    "function": "size",
+                    "arguments": [
+                      {
+                        "memberAccess": {
+                          "member": "arrayField"
+                        }
+                      },
+                      1
+                    ]
+                  }
+                }
+              },
+              {
+                "name": "array0Size",
+                "expression": {
+                  "call": {
+                    "function": "size",
+                    "arguments": [
+                      {
+                        "memberAccess": {
+                          "member": "arrayField"
+                        }
+                      },
+                      0
+                    ]
+                  }
+                }
+              },
+              {
+                "name": "array1Size",
+                "expression": {
+                  "call": {
+                    "function": "size",
+                    "arguments": [
+                      {
+                        "memberAccess": {
+                          "member": "arrayField"
+                        }
+                      },
+                      1
+                    ]
+                  }
+                }
+              },
+              {
+                "name": "arraySizeFromIntField",
+                "expression": {
+                  "call": {
+                    "function": "size",
+                    "arguments": [
+                      {
+                        "memberAccess": {
+                          "member": "arrayField"
+                        }
+                      },
+                      {
+                        "memberAccess": {
+                          "member": "intField"
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "name": "arraySizeFromStringField",
+                "expression": {
+                  "call": {
+                    "function": "size",
+                    "arguments": [
+                      {
+                        "memberAccess": {
+                          "member": "arrayField"
+                        }
+                      },
+                      {
+                        "call": {
+                          "function": "dimensionIndex",
+                          "arguments": [
+                            {
+                              "memberAccess": {
+                                "member": "arrayField"
+                              }
+                            },
+                            {
+                              "memberAccess": {
+                                "member": "stringField"
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "name": "arraySizeFromNestedIntField",
+                "expression": {
+                  "call": {
+                    "function": "size",
+                    "arguments": [
+                      {
+                        "memberAccess": {
+                          "member": "arrayField"
+                        }
+                      },
+                      {
+                        "memberAccess": {
+                          "target": {
+                            "memberAccess": {
+                              "member": "tupleField"
+                            }
+                          },
+                          "member": "v1"
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "name": "fixedArraySize",
+                "expression": 12
+              },
+              {
+                "name": "fixedArrayXSize",
+                "expression": 3
+              },
+              {
+                "name": "fixedArray0Size",
+                "expression": 3
+              },
+              {
+                "name": "vectorSize",
+                "expression": {
+                  "call": {
+                    "function": "size",
+                    "arguments": [
+                      {
+                        "memberAccess": {
+                          "member": "vectorField"
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "name": "fixedVectorSize",
+                "expression": 3
+              },
+              {
+                "name": "arrayDimensionXIndex",
+                "expression": 0
+              },
+              {
+                "name": "arrayDimensionYIndex",
+                "expression": 1
+              },
+              {
+                "name": "arrayDimensionIndexFromStringField",
+                "expression": {
+                  "call": {
+                    "function": "dimensionIndex",
+                    "arguments": [
+                      {
+                        "memberAccess": {
+                          "member": "arrayField"
+                        }
+                      },
+                      {
+                        "memberAccess": {
+                          "member": "stringField"
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "name": "arrayDimensionCount",
+                "expression": 2
+              },
+              {
+                "name": "dynamicArrayDimensionCount",
+                "expression": {
+                  "call": {
+                    "function": "dimensionCount",
+                    "arguments": [
+                      {
+                        "memberAccess": {
+                          "member": "dynamicArrayField"
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "name": "optionalNamedArrayLength",
+                "expression": {
+                  "switch": {
+                    "target": {
+                      "memberAccess": {
+                        "member": "optionalNamedArray"
+                      }
+                    },
+                    "cases": [
+                      {
+                        "pattern": {
+                          "type": "TestModel.NamedNDArray",
+                          "identifier": "arr"
+                        },
+                        "expression": {
+                          "call": {
+                            "function": "size",
+                            "arguments": [
+                              {
+                                "memberAccess": {
+                                  "member": "arr"
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      {
+                        "pattern": {
+                          "type": null
+                        },
+                        "expression": 0
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "name": "optionalNamedArrayLengthWithDiscard",
+                "expression": {
+                  "switch": {
+                    "target": {
+                      "memberAccess": {
+                        "member": "optionalNamedArray"
+                      }
+                    },
+                    "cases": [
+                      {
+                        "pattern": {
+                          "type": "TestModel.NamedNDArray",
+                          "identifier": "arr"
+                        },
+                        "expression": {
+                          "call": {
+                            "function": "size",
+                            "arguments": [
+                              {
+                                "memberAccess": {
+                                  "member": "arr"
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      {
+                        "pattern": {},
+                        "expression": 0
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "name": "intFloatUnionAsFloat",
+                "expression": {
+                  "switch": {
+                    "target": {
+                      "memberAccess": {
+                        "member": "intFloatUnion"
+                      }
+                    },
+                    "cases": [
+                      {
+                        "pattern": {
+                          "type": "int32",
+                          "identifier": "i"
+                        },
+                        "expression": {
+                          "convert": {
+                            "expression": {
+                              "memberAccess": {
+                                "member": "i"
+                              }
+                            },
+                            "type": "float32"
+                          }
+                        }
+                      },
+                      {
+                        "pattern": {
+                          "type": "float32",
+                          "identifier": "f"
+                        },
+                        "expression": {
+                          "memberAccess": {
+                            "member": "f"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "name": "nullableIntFloatUnionString",
+                "expression": {
+                  "switch": {
+                    "target": {
+                      "memberAccess": {
+                        "member": "nullableIntFloatUnion"
+                      }
+                    },
+                    "cases": [
+                      {
+                        "pattern": {
+                          "type": null
+                        },
+                        "expression": "\"null\""
+                      },
+                      {
+                        "pattern": {
+                          "type": "int32"
+                        },
+                        "expression": "\"int\""
+                      },
+                      {
+                        "pattern": {},
+                        "expression": "\"float\""
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "name": "nestedSwitch",
+                "expression": {
+                  "switch": {
+                    "target": {
+                      "memberAccess": {
+                        "member": "unionWithNestedGenericUnion"
+                      }
+                    },
+                    "cases": [
+                      {
+                        "pattern": {
+                          "type": "int32"
+                        },
+                        "expression": -1
+                      },
+                      {
+                        "pattern": {
+                          "type": {
+                            "name": "TestModel.GenericRecordWithComputedFields",
+                            "typeArguments": [
+                              "string",
+                              "float32"
+                            ]
+                          },
+                          "identifier": "rec"
+                        },
+                        "expression": {
+                          "convert": {
+                            "expression": {
+                              "switch": {
+                                "target": {
+                                  "memberAccess": {
+                                    "target": {
+                                      "memberAccess": {
+                                        "member": "rec"
+                                      }
+                                    },
+                                    "member": "f1"
+                                  }
+                                },
+                                "cases": [
+                                  {
+                                    "pattern": {
+                                      "type": "float32"
+                                    },
+                                    "expression": 20
+                                  },
+                                  {
+                                    "pattern": {
+                                      "type": "string"
+                                    },
+                                    "expression": 10
+                                  }
+                                ]
+                              }
+                            },
+                            "type": "int16"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "name": "useNestedComputedField",
+                "expression": {
+                  "switch": {
+                    "target": {
+                      "memberAccess": {
+                        "member": "unionWithNestedGenericUnion"
+                      }
+                    },
+                    "cases": [
+                      {
+                        "pattern": {
+                          "type": "int32"
+                        },
+                        "expression": -1
+                      },
+                      {
+                        "pattern": {
+                          "type": {
+                            "name": "TestModel.GenericRecordWithComputedFields",
+                            "typeArguments": [
+                              "string",
+                              "float32"
+                            ]
+                          },
+                          "identifier": "rec"
+                        },
+                        "expression": {
+                          "convert": {
+                            "expression": {
+                              "memberAccess": {
+                                "target": {
+                                  "memberAccess": {
+                                    "member": "rec"
+                                  }
+                                },
+                                "member": "typeIndex",
+                                "isComputed": true
+                              }
+                            },
+                            "type": "int16"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "alias": {
+            "name": "ArrayWithKeywordDimensionNames",
+            "typeParameters": [
+              "INT16_MAX"
+            ],
+            "type": {
+              "array": {
+                "items": [
+                  "INT16_MAX"
+                ],
+                "dimensions": [
+                  {
+                    "name": "while"
+                  },
+                  {
+                    "name": "do"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "enum": {
+            "name": "EnumWithKeywordSymbols",
+            "values": [
+              {
+                "symbol": "try",
+                "value": 2
+              },
+              {
+                "symbol": "catch",
+                "value": 1
+              }
+            ]
+          }
+        },
+        {
+          "record": {
+            "name": "RecordWithKeywordFields",
+            "comment": "BEGIN delibrately using C++ keywords and macros as identitiers\n",
+            "fields": [
+              {
+                "name": "int",
+                "type": "string"
+              },
+              {
+                "name": "sizeof",
+                "type": {
+                  "name": "TestModel.ArrayWithKeywordDimensionNames",
+                  "typeArguments": [
+                    "int32"
+                  ]
+                }
+              },
+              {
+                "name": "if",
+                "type": "TestModel.EnumWithKeywordSymbols"
+              }
+            ],
+            "computedFields": [
+              {
+                "name": "float",
+                "expression": {
+                  "memberAccess": {
+                    "member": "int"
+                  }
+                }
+              },
+              {
+                "name": "double",
+                "expression": {
+                  "memberAccess": {
+                    "member": "float",
+                    "isComputed": true
+                  }
+                }
+              },
+              {
+                "name": "return",
+                "expression": {
+                  "index": {
+                    "target": {
+                      "memberAccess": {
+                        "member": "sizeof"
+                      }
+                    },
+                    "arguments": [
+                      {
+                        "label": "while",
+                        "expression": 1
+                      },
+                      {
+                        "label": "do",
+                        "expression": 2
+                      }
+                    ]
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "protocols": [
+        {
+          "name": "BenchmarkFloat256x256",
+          "sequence": [
+            {
+              "name": "float256x256",
+              "type": {
+                "stream": {
+                  "items": [
+                    {
+                      "array": {
+                        "items": [
+                          "float32"
+                        ],
+                        "dimensions": [
+                          {
+                            "length": 256
+                          },
+                          {
+                            "length": 256
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "BenchmarkFloatVlen",
+          "sequence": [
+            {
+              "name": "floatArray",
+              "type": {
+                "stream": {
+                  "items": [
+                    {
+                      "array": {
+                        "items": [
+                          "float32"
+                        ],
+                        "dimensions": 2
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "BenchmarkSmallRecord",
+          "sequence": [
+            {
+              "name": "smallRecord",
+              "type": {
+                "stream": {
+                  "items": [
+                    "TestModel.SmallBenchmarkRecord"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "BenchmarkSmallRecordWithOptionals",
+          "sequence": [
+            {
+              "name": "smallRecord",
+              "type": {
+                "stream": {
+                  "items": [
+                    "TestModel.SimpleEncodingCounters"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "BenchmarkSimpleMrd",
+          "sequence": [
+            {
+              "name": "data",
+              "type": {
+                "stream": {
+                  "items": [
+                    {
+                      "label": "SimpleAcquisition",
+                      "type": "TestModel.SimpleAcquisition"
+                    },
+                    {
+                      "label": "Image\u003cfloat32\u003e",
+                      "type": {
+                        "name": "TestModel.Image",
+                        "typeArguments": [
+                          "float32"
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Scalars",
+          "sequence": [
+            {
+              "name": "int32",
+              "type": "int32"
+            },
+            {
+              "name": "record",
+              "type": "TestModel.RecordWithPrimitives"
+            }
+          ]
+        },
+        {
+          "name": "ScalarOptionals",
+          "sequence": [
+            {
+              "name": "optionalInt",
+              "type": [
+                null,
+                "int32"
+              ]
+            },
+            {
+              "name": "optionalRecord",
+              "type": [
+                null,
+                "TestModel.SimpleRecord"
+              ]
+            },
+            {
+              "name": "recordWithOptionalFields",
+              "type": "TestModel.RecordWithOptionalFields"
+            },
+            {
+              "name": "optionalRecordWithOptionalFields",
+              "type": [
+                null,
+                "TestModel.RecordWithOptionalFields"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "NestedRecords",
+          "sequence": [
+            {
+              "name": "tupleWithRecords",
+              "type": "TestModel.TupleWithRecords"
+            }
+          ]
+        },
+        {
+          "name": "Vlens",
+          "sequence": [
+            {
+              "name": "intVector",
+              "type": {
+                "vector": {
+                  "items": [
+                    "int32"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "complexVector",
+              "type": {
+                "vector": {
+                  "items": [
+                    "complexfloat32"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "recordWithVlens",
+              "type": "TestModel.RecordWithVlens"
+            },
+            {
+              "name": "vlenOfRecordWithVlens",
+              "type": {
+                "vector": {
+                  "items": [
+                    "TestModel.RecordWithVlens"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Strings",
+          "sequence": [
+            {
+              "name": "singleString",
+              "type": "string"
+            },
+            {
+              "name": "recWithString",
+              "type": "TestModel.RecordWithStrings"
+            }
+          ]
+        },
+        {
+          "name": "OptionalVectors",
+          "sequence": [
+            {
+              "name": "recordWithOptionalVector",
+              "type": "TestModel.RecordWithOptionalVector"
+            }
+          ]
+        },
+        {
+          "name": "FixedVectors",
+          "sequence": [
+            {
+              "name": "fixedIntVector",
+              "type": {
+                "vector": {
+                  "items": [
+                    "int32"
+                  ],
+                  "length": 5
+                }
+              }
+            },
+            {
+              "name": "fixedSimpleRecordVector",
+              "type": {
+                "vector": {
+                  "items": [
+                    "TestModel.SimpleRecord"
+                  ],
+                  "length": 3
+                }
+              }
+            },
+            {
+              "name": "fixedRecordWithVlensVector",
+              "type": {
+                "vector": {
+                  "items": [
+                    "TestModel.RecordWithVlens"
+                  ],
+                  "length": 2
+                }
+              }
+            },
+            {
+              "name": "recordWithFixedVectors",
+              "type": "TestModel.RecordWithFixedVectors"
+            }
+          ]
+        },
+        {
+          "name": "Streams",
+          "sequence": [
+            {
+              "name": "intData",
+              "type": {
+                "stream": {
+                  "items": [
+                    "int32"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "optionalIntData",
+              "type": {
+                "stream": {
+                  "items": [
+                    [
+                      null,
+                      "int32"
+                    ]
+                  ]
+                }
+              }
+            },
+            {
+              "name": "recordWithOptionalVectorData",
+              "type": {
+                "stream": {
+                  "items": [
+                    "TestModel.RecordWithOptionalVector"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "fixedVector",
+              "type": {
+                "stream": {
+                  "items": [
+                    {
+                      "vector": {
+                        "items": [
+                          "int32"
+                        ],
+                        "length": 3
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "FixedArrays",
+          "sequence": [
+            {
+              "name": "ints",
+              "type": {
+                "array": {
+                  "items": [
+                    "int32"
+                  ],
+                  "dimensions": [
+                    {
+                      "length": 2
+                    },
+                    {
+                      "length": 3
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "fixedSimpleRecordArray",
+              "type": {
+                "array": {
+                  "items": [
+                    "TestModel.SimpleRecord"
+                  ],
+                  "dimensions": [
+                    {
+                      "length": 3
+                    },
+                    {
+                      "length": 2
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "fixedRecordWithVlensArray",
+              "type": {
+                "array": {
+                  "items": [
+                    "TestModel.RecordWithVlens"
+                  ],
+                  "dimensions": [
+                    {
+                      "length": 2
+                    },
+                    {
+                      "length": 2
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "recordWithFixedArrays",
+              "type": "TestModel.RecordWithFixedArrays"
+            },
+            {
+              "name": "namedArray",
+              "type": "TestModel.NamedFixedNDArray"
+            }
+          ]
+        },
+        {
+          "name": "NDArrays",
+          "sequence": [
+            {
+              "name": "ints",
+              "type": {
+                "array": {
+                  "items": [
+                    "int32"
+                  ],
+                  "dimensions": 2
+                }
+              }
+            },
+            {
+              "name": "simpleRecordArray",
+              "type": {
+                "array": {
+                  "items": [
+                    "TestModel.SimpleRecord"
+                  ],
+                  "dimensions": 2
+                }
+              }
+            },
+            {
+              "name": "recordWithVlensArray",
+              "type": {
+                "array": {
+                  "items": [
+                    "TestModel.RecordWithVlens"
+                  ],
+                  "dimensions": 2
+                }
+              }
+            },
+            {
+              "name": "recordWithNDArrays",
+              "type": "TestModel.RecordWithNDArrays"
+            },
+            {
+              "name": "namedArray",
+              "type": "TestModel.NamedNDArray"
+            }
+          ]
+        },
+        {
+          "name": "NDArraysSingleDimension",
+          "sequence": [
+            {
+              "name": "ints",
+              "type": {
+                "array": {
+                  "items": [
+                    "int32"
+                  ],
+                  "dimensions": 1
+                }
+              }
+            },
+            {
+              "name": "simpleRecordArray",
+              "type": {
+                "array": {
+                  "items": [
+                    "TestModel.SimpleRecord"
+                  ],
+                  "dimensions": 1
+                }
+              }
+            },
+            {
+              "name": "recordWithVlensArray",
+              "type": {
+                "array": {
+                  "items": [
+                    "TestModel.RecordWithVlens"
+                  ],
+                  "dimensions": 1
+                }
+              }
+            },
+            {
+              "name": "recordWithNDArrays",
+              "type": "TestModel.RecordWithNDArraysSingleDimension"
+            }
+          ]
+        },
+        {
+          "name": "DynamicNDArrays",
+          "sequence": [
+            {
+              "name": "ints",
+              "type": {
+                "array": {
+                  "items": [
+                    "int32"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "simpleRecordArray",
+              "type": {
+                "array": {
+                  "items": [
+                    "TestModel.SimpleRecord"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "recordWithVlensArray",
+              "type": {
+                "array": {
+                  "items": [
+                    "TestModel.RecordWithVlens"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "recordWithDynamicNDArrays",
+              "type": "TestModel.RecordWithDynamicNDArrays"
+            }
+          ]
+        },
+        {
+          "name": "Unions",
+          "sequence": [
+            {
+              "name": "intOrSimpleRecord",
+              "type": [
+                {
+                  "label": "int32",
+                  "type": "int32"
+                },
+                {
+                  "label": "SimpleRecord",
+                  "type": "TestModel.SimpleRecord"
+                }
+              ]
+            },
+            {
+              "name": "intOrRecordWithVlens",
+              "type": [
+                {
+                  "label": "int32",
+                  "type": "int32"
+                },
+                {
+                  "label": "RecordWithVlens",
+                  "type": "TestModel.RecordWithVlens"
+                }
+              ]
+            },
+            {
+              "name": "monosotateOrIntOrSimpleRecord",
+              "type": [
+                null,
+                {
+                  "label": "int32",
+                  "type": "int32"
+                },
+                {
+                  "label": "SimpleRecord",
+                  "type": "TestModel.SimpleRecord"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "StreamsOfUnions",
+          "sequence": [
+            {
+              "name": "intOrSimpleRecord",
+              "type": {
+                "stream": {
+                  "items": [
+                    {
+                      "label": "int32",
+                      "type": "int32"
+                    },
+                    {
+                      "label": "SimpleRecord",
+                      "type": "TestModel.SimpleRecord"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "nullableIntOrSimpleRecord",
+              "type": {
+                "stream": {
+                  "items": [
+                    null,
+                    {
+                      "label": "int32",
+                      "type": "int32"
+                    },
+                    {
+                      "label": "SimpleRecord",
+                      "type": "TestModel.SimpleRecord"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Enums",
+          "sequence": [
+            {
+              "name": "single",
+              "type": "TestModel.Fruits"
+            },
+            {
+              "name": "vec",
+              "type": {
+                "vector": {
+                  "items": [
+                    "TestModel.Fruits"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "StateTest",
+          "sequence": [
+            {
+              "name": "anInt",
+              "type": "int32"
+            },
+            {
+              "name": "aStream",
+              "type": {
+                "stream": {
+                  "items": [
+                    "int32"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "anotherInt",
+              "type": "int32"
+            }
+          ]
+        },
+        {
+          "name": "SimpleGenerics",
+          "sequence": [
+            {
+              "name": "floatImage",
+              "type": {
+                "name": "TestModel.Image",
+                "typeArguments": [
+                  "float32"
+                ]
+              }
+            },
+            {
+              "name": "intImage",
+              "type": {
+                "name": "TestModel.Image",
+                "typeArguments": [
+                  "int32"
+                ]
+              }
+            },
+            {
+              "name": "intImageAlternateSyntax",
+              "type": {
+                "name": "TestModel.Image",
+                "typeArguments": [
+                  "int32"
+                ]
+              }
+            },
+            {
+              "name": "stringImage",
+              "type": {
+                "name": "TestModel.Image",
+                "typeArguments": [
+                  "string"
+                ]
+              }
+            },
+            {
+              "name": "intFloatTuple",
+              "type": {
+                "name": "TestModel.MyTuple",
+                "typeArguments": [
+                  "int32",
+                  "float32"
+                ]
+              }
+            },
+            {
+              "name": "floatFloatTuple",
+              "type": {
+                "name": "TestModel.MyTuple",
+                "typeArguments": [
+                  "float32",
+                  "float32"
+                ]
+              }
+            },
+            {
+              "name": "intFloatTupleAlternateSyntax",
+              "type": {
+                "name": "TestModel.MyTuple",
+                "typeArguments": [
+                  "int32",
+                  "float32"
+                ]
+              }
+            },
+            {
+              "name": "intStringTuple",
+              "type": {
+                "name": "TestModel.MyTuple",
+                "typeArguments": [
+                  "int32",
+                  "string"
+                ]
+              }
+            },
+            {
+              "name": "streamOfTypeVariants",
+              "type": {
+                "stream": {
+                  "items": [
+                    {
+                      "label": "Image\u003cfloat32\u003e",
+                      "type": {
+                        "name": "TestModel.Image",
+                        "typeArguments": [
+                          "float32"
+                        ]
+                      }
+                    },
+                    {
+                      "label": "Image\u003cfloat64\u003e",
+                      "type": {
+                        "name": "TestModel.Image",
+                        "typeArguments": [
+                          "float64"
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "AdvancedGenerics",
+          "sequence": [
+            {
+              "name": "intImageImage",
+              "type": {
+                "name": "TestModel.Image",
+                "typeArguments": [
+                  {
+                    "name": "TestModel.Image",
+                    "typeArguments": [
+                      "float32"
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "name": "genericRecord1",
+              "type": {
+                "name": "TestModel.GenericRecord",
+                "typeArguments": [
+                  "int32",
+                  "string"
+                ]
+              }
+            },
+            {
+              "name": "tupleOfOptionals",
+              "type": {
+                "name": "TestModel.MyTuple",
+                "typeArguments": [
+                  [
+                    null,
+                    "int32"
+                  ],
+                  [
+                    null,
+                    "string"
+                  ]
+                ]
+              }
+            },
+            {
+              "name": "tupleOfOptionalsAlternateSyntax",
+              "type": {
+                "name": "TestModel.MyTuple",
+                "typeArguments": [
+                  [
+                    null,
+                    "int32"
+                  ],
+                  [
+                    null,
+                    "string"
+                  ]
+                ]
+              }
+            },
+            {
+              "name": "tupleOfVectors",
+              "type": {
+                "name": "TestModel.MyTuple",
+                "typeArguments": [
+                  {
+                    "vector": {
+                      "items": [
+                        "int32"
+                      ]
+                    }
+                  },
+                  {
+                    "vector": {
+                      "items": [
+                        "float32"
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Aliases",
+          "sequence": [
+            {
+              "name": "aliasedString",
+              "type": "TestModel.AliasedString"
+            },
+            {
+              "name": "aliasedEnum",
+              "type": "TestModel.AliasedEnum"
+            },
+            {
+              "name": "aliasedOpenGeneric",
+              "type": {
+                "name": "TestModel.AliasedOpenGeneric",
+                "typeArguments": [
+                  "TestModel.AliasedString",
+                  "TestModel.AliasedEnum"
+                ]
+              }
+            },
+            {
+              "name": "aliasedClosedGeneric",
+              "type": "TestModel.AliasedClosedGeneric"
+            },
+            {
+              "name": "aliasedOptional",
+              "type": "TestModel.AliasedOptional"
+            },
+            {
+              "name": "aliasedGenericOptional",
+              "type": {
+                "name": "TestModel.AliasedGenericOptional",
+                "typeArguments": [
+                  "float32"
+                ]
+              }
+            },
+            {
+              "name": "aliasedGenericUnion2",
+              "type": {
+                "name": "TestModel.AliasedGenericUnion2",
+                "typeArguments": [
+                  "TestModel.AliasedString",
+                  "TestModel.AliasedEnum"
+                ]
+              }
+            },
+            {
+              "name": "aliasedGenericVector",
+              "type": {
+                "name": "TestModel.AliasedGenericVector",
+                "typeArguments": [
+                  "float32"
+                ]
+              }
+            },
+            {
+              "name": "aliasedGenericFixedVector",
+              "type": {
+                "name": "TestModel.AliasedGenericFixedVector",
+                "typeArguments": [
+                  "float32"
+                ]
+              }
+            },
+            {
+              "name": "streamOfAliasedGenericUnion2",
+              "type": {
+                "stream": {
+                  "items": [
+                    {
+                      "name": "TestModel.AliasedGenericUnion2",
+                      "typeArguments": [
+                        "TestModel.AliasedString",
+                        "TestModel.AliasedEnum"
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "StreamsOfAliasedUnions",
+          "sequence": [
+            {
+              "name": "intOrSimpleRecord",
+              "type": {
+                "stream": {
+                  "items": [
+                    "TestModel.AliasedIntOrSimpleRecord"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "nullableIntOrSimpleRecord",
+              "type": {
+                "stream": {
+                  "items": [
+                    "TestModel.AliasedNullableIntSimpleRecord"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "ProtocolWithComputedFields",
+          "sequence": [
+            {
+              "name": "recordWithComputedFields",
+              "type": "TestModel.RecordWithComputedFields"
+            }
+          ]
+        },
+        {
+          "name": "ProtocolWithKeywordSteps",
+          "sequence": [
+            {
+              "name": "int",
+              "type": {
+                "stream": {
+                  "items": [
+                    "TestModel.RecordWithKeywordFields"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "float",
+              "type": "TestModel.EnumWithKeywordSymbols"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

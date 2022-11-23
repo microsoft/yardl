@@ -1,0 +1,21 @@
+BasedOnStyle: Google
+
+# Preserve existing line breaks
+ColumnLimit: 0
+
+IncludeCategories:
+  - Regex: "^<[A-Za-z0-9_]+>"
+    Priority: 1
+    SortPriority: 1
+    CaseSensitive: true
+  - Regex: "^<[A-Za-z0-9_/.]+>"
+    Priority: 2
+    SortPriority: 2
+    CaseSensitive: true
+
+# int* value instead of int *value
+DerivePointerAlignment: false
+PointerAlignment: Left
+
+# "east const" style: int const instead of const int
+QualifierAlignment: Right
