@@ -2,10 +2,10 @@ name: ci
 
 on:
   push:
-  #   branches: [main]
-  #   tags: ["v*.*.*"]
-  # pull_request:
-  #   branches: [main]
+    branches: [main]
+    tags: ["v*.*.*"]
+  pull_request:
+    branches: [main]
 
 defaults:
   run:
@@ -27,7 +27,7 @@ jobs:
       - name: Configure environment
         uses: ./.github/actions/configure-environment
 
-      - name: Build and test C++20
+      - name: Build and test
         run: make validate-with-no-changes -e CPP_VERSION=${{ matrix.cppVersion }}
 
   codeQL:
