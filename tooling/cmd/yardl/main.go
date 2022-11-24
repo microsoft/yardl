@@ -8,6 +8,7 @@ import (
 )
 
 var (
+	// set during build
 	version = ""
 	commit  = ""
 )
