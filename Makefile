@@ -36,7 +36,7 @@ run-sandbox-quiet: build-sandbox
 	cd cpp/build
 	./sandbox_exec > /dev/null
 
-build-all: generate generate-sandbox
+build-all: generate generate-sandbox configure
 	cd cpp/build
 	ninja
 
@@ -67,7 +67,7 @@ watch-generate-sandbox:
 watch-exec-sandbox: configure
 	watchexec -c -w models/sandbox/ -w cpp/ -i **/cpp/build/** -i **/cpp/test/** -i **/cpp/sandbox/generated/** -w tooling/ -- "make generate-sandbox && cd cpp/build && printf 'Building... ' && ninja --quiet sandbox_exec && printf 'done.\n\n' && ./sandbox_exec"
 
-validate: generate generate-sandbox configure build-all test run-sandbox-quiet benchmark
+validate: build-all test run-sandbox-quiet benchmark
 
 validate-with-no-changes: validate
 	if [[ `git status --porcelain` ]]; then

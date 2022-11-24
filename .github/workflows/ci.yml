@@ -46,7 +46,6 @@ jobs:
 
       - name: Build
         run: |
-          make configure
           make build-all
 
       - name: Perform CodeQL Analysis
