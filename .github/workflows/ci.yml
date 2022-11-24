@@ -18,6 +18,7 @@ jobs:
       matrix:
         cppVersion: [17, 20]
 
+    name: Validate C++${{ matrix.cppVersion }}
     runs-on: ubuntu-latest
 
     steps:
@@ -30,6 +31,7 @@ jobs:
         run: make validate-with-no-changes -e CPP_VERSION=${{ matrix.cppVersion }}
 
   codeQL:
+    name: CodeQL
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -43,7 +45,9 @@ jobs:
           languages: go, cpp
 
       - name: Build
-        run: make build-all
+        run: |
+          make configure
+          make build-all
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v2
