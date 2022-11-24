@@ -50,3 +50,16 @@ jobs:
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v2
+
+  noticeCheck:
+    name: Check NOTICE.txt
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - run: |
+         scripts/generate-notice.sh
+         	if [[ `git status --porcelain` ]]; then
+            echo "the NOTICE.txt needs to be regenerated using scripts/generate-notice.sh"
+            exit 1
+          fi
