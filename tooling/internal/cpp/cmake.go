@@ -9,9 +9,9 @@ import (
 	"path"
 
 	"github.com/microsoft/yardl/tooling/internal/formatting"
+	"github.com/microsoft/yardl/tooling/internal/iocommon"
 	"github.com/microsoft/yardl/tooling/pkg/dsl"
 	"github.com/microsoft/yardl/tooling/pkg/packaging"
-	"gitlab.com/akabio/iotool"
 )
 
 func writeCMakeLists(env *dsl.Environment, options packaging.CppCodegenOptions) error {
@@ -58,5 +58,5 @@ func writeCMakeLists(env *dsl.Environment, options packaging.CppCodegenOptions) 
 	w.WriteString(")\n")
 
 	definitionsPath := path.Join(options.SourcesOutputDir, "CMakeLists.txt")
-	return iotool.WriteFileIfChanged(definitionsPath, b.Bytes(), 0644)
+	return iocommon.WriteFileIfNeeded(definitionsPath, b.Bytes(), 0644)
 }

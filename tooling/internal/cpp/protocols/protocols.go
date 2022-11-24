@@ -10,9 +10,9 @@ import (
 
 	"github.com/microsoft/yardl/tooling/internal/cpp/common"
 	"github.com/microsoft/yardl/tooling/internal/formatting"
+	"github.com/microsoft/yardl/tooling/internal/iocommon"
 	"github.com/microsoft/yardl/tooling/pkg/dsl"
 	"github.com/microsoft/yardl/tooling/pkg/packaging"
-	"gitlab.com/akabio/iotool"
 )
 
 func WriteProtocols(env *dsl.Environment, options packaging.CppCodegenOptions) error {
@@ -35,7 +35,7 @@ func WriteProtocols(env *dsl.Environment, options packaging.CppCodegenOptions) e
 	}
 
 	definitionsPath := path.Join(options.SourcesOutputDir, "protocols.cc")
-	return iotool.WriteFileIfChanged(definitionsPath, b.Bytes(), 0644)
+	return iocommon.WriteFileIfNeeded(definitionsPath, b.Bytes(), 0644)
 }
 
 func writeHeader(env *dsl.Environment, options packaging.CppCodegenOptions) error {
@@ -54,7 +54,7 @@ func writeHeader(env *dsl.Environment, options packaging.CppCodegenOptions) erro
 	}
 
 	definitionsPath := path.Join(options.SourcesOutputDir, "protocols.h")
-	return iotool.WriteFileIfChanged(definitionsPath, b.Bytes(), 0644)
+	return iocommon.WriteFileIfNeeded(definitionsPath, b.Bytes(), 0644)
 }
 
 func writeDeclarations(w *formatting.IndentedWriter, ns *dsl.Namespace) {
