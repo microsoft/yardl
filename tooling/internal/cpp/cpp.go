@@ -17,9 +17,9 @@ import (
 	"github.com/microsoft/yardl/tooling/internal/cpp/mocks"
 	"github.com/microsoft/yardl/tooling/internal/cpp/protocols"
 	"github.com/microsoft/yardl/tooling/internal/cpp/types"
+	"github.com/microsoft/yardl/tooling/internal/iocommon"
 	"github.com/microsoft/yardl/tooling/pkg/dsl"
 	"github.com/microsoft/yardl/tooling/pkg/packaging"
-	"gitlab.com/akabio/iotool"
 )
 
 //go:embed include/*
@@ -137,7 +137,7 @@ func copyEmbeddedIncludeDir(sourceDir, destDir string) error {
 			if err != nil {
 				return err
 			}
-			err = iotool.WriteFileIfChanged(path.Join(destDir, entry.Name()), content, 0664)
+			err = iocommon.WriteFileIfNeeded(path.Join(destDir, entry.Name()), content, 0664)
 			if err != nil {
 				return err
 			}

@@ -9,8 +9,12 @@ require (
 	github.com/inancgumus/screen v0.0.0-20190314163918-06e984b86ed3
 	github.com/spf13/cobra v1.5.0
 	github.com/stretchr/testify v1.8.0
-	gitlab.com/akabio/iotool v0.5.0
 	gopkg.in/yaml.v3 v3.0.1
+)
+
+require (
+	github.com/kr/pretty v0.1.0 // indirect
+	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 )
 
 require (

@@ -14,9 +14,9 @@ import (
 
 	"github.com/microsoft/yardl/tooling/internal/cpp/common"
 	"github.com/microsoft/yardl/tooling/internal/formatting"
+	"github.com/microsoft/yardl/tooling/internal/iocommon"
 	"github.com/microsoft/yardl/tooling/pkg/dsl"
 	"github.com/microsoft/yardl/tooling/pkg/packaging"
-	"gitlab.com/akabio/iotool"
 )
 
 func WriteBinary(env *dsl.Environment, options packaging.CppCodegenOptions) error {
@@ -50,7 +50,7 @@ func WriteBinary(env *dsl.Environment, options packaging.CppCodegenOptions) erro
 	}
 
 	filePath := path.Join(options.SourcesOutputDir, "protocols.cc")
-	return iotool.WriteFileIfChanged(filePath, b.Bytes(), 0644)
+	return iocommon.WriteFileIfNeeded(filePath, b.Bytes(), 0644)
 
 }
 
@@ -157,7 +157,7 @@ func writeHeaderFile(env *dsl.Environment, options packaging.CppCodegenOptions) 
 	}
 
 	filePath := path.Join(options.SourcesOutputDir, "protocols.h")
-	return iotool.WriteFileIfChanged(filePath, b.Bytes(), 0644)
+	return iocommon.WriteFileIfNeeded(filePath, b.Bytes(), 0644)
 }
 
 func writeIsTriviallySerializableSpecializations(w *formatting.IndentedWriter, env *dsl.Environment) {
