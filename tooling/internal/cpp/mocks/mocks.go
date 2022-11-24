@@ -71,7 +71,7 @@ func WriteMocks(env *dsl.Environment, options packaging.CppCodegenOptions) error
 	w.WriteStringln("}")
 
 	definitionsPath := path.Join(options.SourcesOutputDir, "mocks.cc")
-	return iocommon.EnsureFileContents(definitionsPath, b.Bytes(), 0644)
+	return iocommon.WriteFileIfNeeded(definitionsPath, b.Bytes(), 0644)
 }
 
 func writeProtocolTestWriter(w *formatting.IndentedWriter, p *dsl.ProtocolDefinition) {

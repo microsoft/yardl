@@ -50,7 +50,7 @@ func WriteBinary(env *dsl.Environment, options packaging.CppCodegenOptions) erro
 	}
 
 	filePath := path.Join(options.SourcesOutputDir, "protocols.cc")
-	return iocommon.EnsureFileContents(filePath, b.Bytes(), 0644)
+	return iocommon.WriteFileIfNeeded(filePath, b.Bytes(), 0644)
 
 }
 
@@ -157,7 +157,7 @@ func writeHeaderFile(env *dsl.Environment, options packaging.CppCodegenOptions) 
 	}
 
 	filePath := path.Join(options.SourcesOutputDir, "protocols.h")
-	return iocommon.EnsureFileContents(filePath, b.Bytes(), 0644)
+	return iocommon.WriteFileIfNeeded(filePath, b.Bytes(), 0644)
 }
 
 func writeIsTriviallySerializableSpecializations(w *formatting.IndentedWriter, env *dsl.Environment) {

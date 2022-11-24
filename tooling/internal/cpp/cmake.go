@@ -58,5 +58,5 @@ func writeCMakeLists(env *dsl.Environment, options packaging.CppCodegenOptions) 
 	w.WriteString(")\n")
 
 	definitionsPath := path.Join(options.SourcesOutputDir, "CMakeLists.txt")
-	return iocommon.EnsureFileContents(definitionsPath, b.Bytes(), 0644)
+	return iocommon.WriteFileIfNeeded(definitionsPath, b.Bytes(), 0644)
 }

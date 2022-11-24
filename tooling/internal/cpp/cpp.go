@@ -137,7 +137,7 @@ func copyEmbeddedIncludeDir(sourceDir, destDir string) error {
 			if err != nil {
 				return err
 			}
-			err = iocommon.EnsureFileContents(path.Join(destDir, entry.Name()), content, 0664)
+			err = iocommon.WriteFileIfNeeded(path.Join(destDir, entry.Name()), content, 0664)
 			if err != nil {
 				return err
 			}

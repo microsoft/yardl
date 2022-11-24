@@ -48,7 +48,7 @@ func WriteHdf5(env *dsl.Environment, options packaging.CppCodegenOptions) error 
 	}
 
 	filePath := path.Join(options.SourcesOutputDir, "protocols.cc")
-	return iocommon.EnsureFileContents(filePath, b.Bytes(), 0644)
+	return iocommon.WriteFileIfNeeded(filePath, b.Bytes(), 0644)
 }
 
 func writeNamespaceDefinitions(w *formatting.IndentedWriter, ns *dsl.Namespace) {

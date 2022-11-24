@@ -169,5 +169,5 @@ func outputJson(env *dsl.Environment, options *packaging.JsonCodegenOptions) err
 	}
 
 	jsonPath := path.Join(options.OutputDir, "model.json")
-	return iocommon.EnsureFileContents(jsonPath, b, 0644)
+	return iocommon.WriteFileIfNeeded(jsonPath, b, 0644)
 }

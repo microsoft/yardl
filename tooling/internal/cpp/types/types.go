@@ -37,7 +37,7 @@ func WriteTypes(env *dsl.Environment, options packaging.CppCodegenOptions) error
 	}
 
 	definitionsPath := path.Join(options.SourcesOutputDir, "types.h")
-	return iocommon.EnsureFileContents(definitionsPath, b.Bytes(), 0644)
+	return iocommon.WriteFileIfNeeded(definitionsPath, b.Bytes(), 0644)
 }
 
 func writeNamespaceMembers(w *formatting.IndentedWriter, ns *dsl.Namespace) {
