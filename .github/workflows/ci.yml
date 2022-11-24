@@ -57,9 +57,16 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - run: |
-         scripts/generate-notice.sh
-         	if [[ `git status --porcelain` ]]; then
+      - name: Set variables
+        run: |
+          gobin="${RUNNER_TEMP}/bin"
+          echo "GOBIN=${gobin}" >> $GITHUB_ENV
+          echo "${gobin}" >> $GITHUB_PATH
+
+      - name: Generate notice
+        run: |
+          scripts/generate-notice.sh
+          if [[ `git status --porcelain` ]]; then
             echo "the NOTICE.txt needs to be regenerated using scripts/generate-notice.sh"
             exit 1
           fi
