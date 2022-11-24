@@ -10,9 +10,9 @@ import (
 
 	"github.com/microsoft/yardl/tooling/internal/cpp/common"
 	"github.com/microsoft/yardl/tooling/internal/formatting"
+	"github.com/microsoft/yardl/tooling/internal/iocommon"
 	"github.com/microsoft/yardl/tooling/pkg/dsl"
 	"github.com/microsoft/yardl/tooling/pkg/packaging"
-	"gitlab.com/akabio/iotool"
 )
 
 func WriteTypes(env *dsl.Environment, options packaging.CppCodegenOptions) error {
@@ -37,7 +37,7 @@ func WriteTypes(env *dsl.Environment, options packaging.CppCodegenOptions) error
 	}
 
 	definitionsPath := path.Join(options.SourcesOutputDir, "types.h")
-	return iotool.WriteFileIfChanged(definitionsPath, b.Bytes(), 0644)
+	return iocommon.EnsureFileContents(definitionsPath, b.Bytes(), 0644)
 }
 
 func writeNamespaceMembers(w *formatting.IndentedWriter, ns *dsl.Namespace) {

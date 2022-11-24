@@ -12,9 +12,9 @@ import (
 
 	"github.com/microsoft/yardl/tooling/internal/cpp/common"
 	"github.com/microsoft/yardl/tooling/internal/formatting"
+	"github.com/microsoft/yardl/tooling/internal/iocommon"
 	"github.com/microsoft/yardl/tooling/pkg/dsl"
 	"github.com/microsoft/yardl/tooling/pkg/packaging"
-	"gitlab.com/akabio/iotool"
 )
 
 func WriteHdf5(env *dsl.Environment, options packaging.CppCodegenOptions) error {
@@ -48,7 +48,7 @@ func WriteHdf5(env *dsl.Environment, options packaging.CppCodegenOptions) error 
 	}
 
 	filePath := path.Join(options.SourcesOutputDir, "protocols.cc")
-	return iotool.WriteFileIfChanged(filePath, b.Bytes(), 0644)
+	return iocommon.EnsureFileContents(filePath, b.Bytes(), 0644)
 }
 
 func writeNamespaceDefinitions(w *formatting.IndentedWriter, ns *dsl.Namespace) {

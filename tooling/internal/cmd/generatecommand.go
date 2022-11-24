@@ -16,10 +16,10 @@ import (
 	"github.com/fsnotify/fsnotify"
 	"github.com/inancgumus/screen"
 	"github.com/microsoft/yardl/tooling/internal/cpp"
+	"github.com/microsoft/yardl/tooling/internal/iocommon"
 	"github.com/microsoft/yardl/tooling/pkg/dsl"
 	"github.com/microsoft/yardl/tooling/pkg/packaging"
 	"github.com/spf13/cobra"
-	"gitlab.com/akabio/iotool"
 )
 
 func newGenerateCommand() *cobra.Command {
@@ -169,5 +169,5 @@ func outputJson(env *dsl.Environment, options *packaging.JsonCodegenOptions) err
 	}
 
 	jsonPath := path.Join(options.OutputDir, "model.json")
-	return iotool.WriteFileIfChanged(jsonPath, b, 0644)
+	return iocommon.EnsureFileContents(jsonPath, b, 0644)
 }

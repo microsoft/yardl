@@ -12,9 +12,9 @@ import (
 	"github.com/microsoft/yardl/tooling/internal/cpp/common"
 	"github.com/microsoft/yardl/tooling/internal/cpp/hdf5"
 	"github.com/microsoft/yardl/tooling/internal/formatting"
+	"github.com/microsoft/yardl/tooling/internal/iocommon"
 	"github.com/microsoft/yardl/tooling/pkg/dsl"
 	"github.com/microsoft/yardl/tooling/pkg/packaging"
-	"gitlab.com/akabio/iotool"
 )
 
 func WriteMocks(env *dsl.Environment, options packaging.CppCodegenOptions) error {
@@ -71,7 +71,7 @@ func WriteMocks(env *dsl.Environment, options packaging.CppCodegenOptions) error
 	w.WriteStringln("}")
 
 	definitionsPath := path.Join(options.SourcesOutputDir, "mocks.cc")
-	return iotool.WriteFileIfChanged(definitionsPath, b.Bytes(), 0644)
+	return iocommon.EnsureFileContents(definitionsPath, b.Bytes(), 0644)
 }
 
 func writeProtocolTestWriter(w *formatting.IndentedWriter, p *dsl.ProtocolDefinition) {
