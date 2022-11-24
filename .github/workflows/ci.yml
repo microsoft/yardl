@@ -14,8 +14,23 @@ defaults:
 
 jobs:
   validate:
+    strategy:
+      matrix:
+        cppVersion: [17, 20]
+
     runs-on: ubuntu-latest
 
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Configure environment
+        uses: ./.github/actions/configure-environment
+
+      - name: Build and test C++20
+        run: make validate-with-no-changes -e CPP_VERSION=${{ matrix.cppVersion }}
+
+  codeQL:
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
 
@@ -27,11 +42,8 @@ jobs:
         with:
           languages: go, cpp
 
-      - name: Build and test C++17
-        run: make validate-with-no-changes -e CPP_VERSION=17
-
-      - name: Build and test C++20
-        run: make validate-with-no-changes -e CPP_VERSION=20
+      - name: Build
+        run: make build-all
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v2
