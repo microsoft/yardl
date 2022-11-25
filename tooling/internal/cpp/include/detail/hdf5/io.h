@@ -15,6 +15,12 @@
 #include "ddl.h"
 
 namespace yardl::hdf5 {
+// To be incremented when we make a structural change to the
+// way we store data in an HDF5 file
+static const inline uint32_t kHdf5FormatVersionNumber = 1;
+static const inline std::string kHdf5FormatVersionNumberAttributeName = "$yardl_format_version";
+
+static const inline std::string kSchemaDatasetName = "$yardl_schema";
 
 template <typename TInner, typename TOuter>
 static inline void WriteScalarDataset(H5::Group const& group, std::string name,
@@ -340,7 +346,7 @@ class Hdf5Writer {
   Hdf5Writer(std::string const& path, std::string const& group_name, std::string const& schema)
       : file_(path, H5F_ACC_CREAT | H5F_ACC_RDWR),
         group_(CreateGroup(file_, group_name)) {
-    WriteScalarDataset<InnerVlenString, std::string>(group_, "$schema", InnerVlenStringDdl(), schema);
+    WriteScalarDataset<InnerVlenString, std::string>(group_, kSchemaDatasetName, InnerVlenStringDdl(), schema);
   }
 
  private:
@@ -349,7 +355,13 @@ class Hdf5Writer {
       throw std::runtime_error("Unable to create group '" + group_name +
                                "' for protocol because it already exists.");
     }
-    return file.createGroup(group_name);
+    H5::Group group = file.createGroup(group_name);
+
+    uint32_t version = kHdf5FormatVersionNumber;
+    group.createAttribute(kHdf5FormatVersionNumberAttributeName, H5::PredType::NATIVE_INT, H5::DataSpace())
+        .write(H5::PredType::NATIVE_UINT32, &version);
+
+    return group;
   }
 
  protected:
@@ -362,9 +374,10 @@ class Hdf5Reader {
   Hdf5Reader(std::string path, std::string group_name, std::string const& expected_schema)
       : file_(path, H5F_ACC_RDONLY), group_(OpenGroup(file_, group_name)) {
     std::string actual_schema;
-    ReadScalarDataset<InnerVlenString, std::string>(group_, "$schema", InnerVlenStringDdl(), actual_schema);
+    ReadScalarDataset<InnerVlenString, std::string>(group_, kSchemaDatasetName, InnerVlenStringDdl(), actual_schema);
     if (actual_schema != expected_schema) {
-      throw std::runtime_error("Data to be read is not compatible with the protocol");
+      throw std::runtime_error(
+          "The schema of the data to be read is not compatible with the current protocol.");
     }
   }
 
@@ -375,7 +388,17 @@ class Hdf5Reader {
                                "' for protocol because it does not exist.");
     }
 
-    return file.openGroup(group_name);
+    H5::Group group = file.openGroup(group_name);
+    if (group.attrExists(kHdf5FormatVersionNumberAttributeName)) {
+      uint32_t version;
+      group.openAttribute(kHdf5FormatVersionNumberAttributeName)
+          .read(H5::PredType::NATIVE_UINT32, &version);
+      if (version == kHdf5FormatVersionNumber) {
+        return group;
+      }
+    }
+
+    throw std::runtime_error("The data in the HDF5 file is not in the expected format.");
   }
 
  protected:

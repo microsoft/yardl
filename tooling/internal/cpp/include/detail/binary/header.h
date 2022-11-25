@@ -7,11 +7,11 @@
 
 namespace yardl::binary {
 static inline std::array<char, 4> MAGIC_BYTES = {'t', 'a', 'k', 'u'};
-static inline uint32_t VERSION_NUMBER = 1;
+static inline uint32_t kBinaryFormatVersionNumber = 1;
 
 inline void WriteHeader(CodedOutputStream& w, std::string& schema) {
   w.WriteBytes(MAGIC_BYTES.data(), MAGIC_BYTES.size());
-  w.WriteFixedInteger(VERSION_NUMBER);
+  w.WriteFixedInteger(kBinaryFormatVersionNumber);
   yardl::binary::WriteString(w, schema);
 }
 
@@ -24,7 +24,7 @@ inline void ReadHeader(CodedInputStream& r, std::string& schema) {
 
   uint32_t version_number;
   r.ReadFixedInteger(version_number);
-  if (version_number != VERSION_NUMBER) {
+  if (version_number != kBinaryFormatVersionNumber) {
     throw std::runtime_error(
         "Data in the stream is not in the expected format. Unsupported version.");
   }
