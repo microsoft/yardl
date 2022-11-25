@@ -22,6 +22,10 @@ jobs:
       - name: Configure environment
         uses: ./.github/actions/configure-environment
 
+      - name: Set PATH
+        run: |
+          dirname $(which go) >> $GITHUB_PATH
+
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v2
         with:
