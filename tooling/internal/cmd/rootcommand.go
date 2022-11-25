@@ -4,15 +4,24 @@
 package cmd
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
 )
 
-func newRootCommand() *cobra.Command {
+func newRootCommand(version, commit string) *cobra.Command {
+	if version == "" {
+		version = "unknown"
+	}
+	if commit != "" {
+		version = fmt.Sprintf("%s commit %s", version, commit)
+	}
+
 	cmd := &cobra.Command{
 		Use:          "yardl",
 		SilenceUsage: true,
+		Version:      version,
 	}
 
 	// hide --help as a flag in the usage output
@@ -25,8 +34,8 @@ func newRootCommand() *cobra.Command {
 	return cmd
 }
 
-func Execute() {
-	err := newRootCommand().Execute()
+func Execute(version, commit string) {
+	err := newRootCommand(version, commit).Execute()
 	if err != nil {
 		os.Exit(1)
 	}

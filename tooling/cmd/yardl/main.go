@@ -7,6 +7,12 @@ import (
 	"github.com/microsoft/yardl/tooling/internal/cmd"
 )
 
+var (
+	// set during build
+	version = ""
+	commit  = ""
+)
+
 func main() {
-	cmd.Execute()
+	cmd.Execute(version, commit)
 }
