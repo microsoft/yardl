@@ -7,33 +7,46 @@ on:
   pull_request:
     branches: [main]
 
+defaults:
+  run:
+    # See https://github.com/marketplace/actions/setup-miniconda#important
+    shell: bash -el {0}
+
 jobs:
   validate:
+    strategy:
+      matrix:
+        cppVersion: [17, 20]
+
+    name: Validate C++${{ matrix.cppVersion }}
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        # See https://github.com/marketplace/actions/setup-miniconda#important
-        shell: bash -el {0}
 
     steps:
       - uses: actions/checkout@v3
 
-      - name: Initial setup
-        run: |
-          gobin="${RUNNER_TEMP}/bin"
-          echo "GOBIN=${gobin}" >> $GITHUB_ENV
-          echo "${gobin}" >> $GITHUB_PATH
+      - name: Configure environment
+        uses: ./.github/actions/configure-environment
 
-          # filter conda environment file
-          cat environment.yml | grep -v "#.*\<\local\>" > ci-environment.yml
+      - name: Build and test
+        run: make validate-with-no-changes -e CPP_VERSION=${{ matrix.cppVersion }}
 
-      - uses: conda-incubator/setup-miniconda@v2
+  codeQL:
+    name: CodeQL
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Configure environment
+        uses: ./.github/actions/configure-environment
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v2
         with:
-          activate-environment: yardl
-          environment-file: ci-environment.yml
+          languages: go, cpp
 
-      - name: Build and test C++17
-        run: make validate-with-no-changes -e CPP_VERSION=17
+      - name: Build
+        run: |
+          make build-all
 
-      - name: Build and test C++20
-        run: make validate-with-no-changes -e CPP_VERSION=20
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
