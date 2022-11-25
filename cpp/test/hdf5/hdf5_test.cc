@@ -5,6 +5,7 @@
 
 #include "../generated/hdf5/protocols.h"
 #include "../generated/types.h"
+#include "../generated/yardl/detail/hdf5/io.h"
 #include "../yardl_testing.h"
 
 using namespace test_model;
@@ -13,6 +14,43 @@ using namespace yardl;
 using namespace yardl::testing;
 
 namespace {
+
+TEST(Hdf5Test, TestMissingHdf5FormatVersionAttribute) {
+  std::string filename = TestFilename(Format::kHdf5);
+
+  {
+    ScalarsWriter w(filename);
+    w.WriteInt32(1);
+    w.WriteRecord({true});
+  }
+
+  {
+    H5::H5File file(filename, H5F_ACC_RDWR);
+    file.openGroup("Scalars").removeAttr(yardl::hdf5::kHdf5FormatVersionNumberAttributeName);
+  }
+
+  ASSERT_ANY_THROW(static_cast<void>(ScalarsReader(filename)));
+}
+
+TEST(Hdf5Test, TestUnsupportedHdf5FormatVersionAttribute) {
+  std::string filename = TestFilename(Format::kHdf5);
+
+  {
+    ScalarsWriter w(filename);
+    w.WriteInt32(1);
+    w.WriteRecord({true});
+  }
+
+  {
+    auto new_version = yardl::hdf5::kHdf5FormatVersionNumber + 10;
+    H5::H5File file(filename, H5F_ACC_RDWR);
+    file.openGroup("Scalars")
+        .openAttribute(yardl::hdf5::kHdf5FormatVersionNumberAttributeName)
+        .write(H5::PredType::NATIVE_UINT32, &new_version);
+  }
+
+  ASSERT_ANY_THROW(static_cast<void>(ScalarsReader(filename)));
+}
 
 TEST(Hdf5Tests, MultipleProtocolsInFile) {
   std::string filename = TestFilename(Format::kHdf5);
