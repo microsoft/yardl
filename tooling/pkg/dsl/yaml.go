@@ -37,7 +37,9 @@ func ParseYamlInDir(path string, namespaceName string) (*Namespace, error) {
 				if err != nil {
 					return err
 				}
-				if !info.IsDir() && info.Name() != packaging.PackageFileName {
+				if !info.IsDir() &&
+					(strings.HasSuffix(info.Name(), ".yml") || strings.HasSuffix(info.Name(), ".yaml")) &&
+					info.Name() != packaging.PackageFileName {
 					paths = append(paths, path)
 				}
 				return nil
