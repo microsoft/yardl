@@ -1,0 +1,55 @@
+name: smoketest
+
+on:
+  push:
+    # branches: [main]
+    # tags: ["v*.*.*"]
+  pull_request:
+
+defaults:
+  run:
+    # See https://github.com/marketplace/actions/setup-miniconda#important
+    shell: bash -el {0}
+
+jobs:
+  buildBinaries:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      # - name: Configure environment
+      #   uses: ./.github/actions/configure-environment
+
+      # - name: Set PATH
+      #   run: |
+      #     dirname $(which go) >> $GITHUB_PATH
+
+      - uses: actions/setup-go@v3
+        with:
+          go-version: '1.18.3' # The Go version to download (if necessary) and use.
+
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v2
+        with:
+          version: v1.13.0
+          args: release --rm-dist --snapshot
+
+      - name: Cache goreleaser output
+        uses: actions/cache@v3
+        with:
+          key: dist
+          path: dist
+
+  buildMacos:
+    runs-on: macos-latest
+    needs: buildBinaries
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Get goreleaser output
+        uses: actions/cache@v3
+        with:
+          key: dist
+          path: dist
+
+      - run: ls -al dist
