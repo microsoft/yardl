@@ -17,13 +17,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      # - name: Configure environment
-      #   uses: ./.github/actions/configure-environment
-
-      # - name: Set PATH
-      #   run: |
-      #     dirname $(which go) >> $GITHUB_PATH
-
       - uses: actions/setup-go@v3
         with:
           go-version: '1.18.3' # The Go version to download (if necessary) and use.
@@ -40,8 +33,8 @@ jobs:
           key: dist
           path: dist
 
-  buildMacos:
-    runs-on: macos-latest
+  buildWindows:
+    runs-on: windows-latest
     needs: buildBinaries
     steps:
       - uses: actions/checkout@v3
@@ -52,4 +45,10 @@ jobs:
           key: dist
           path: dist
 
-      - run: ls -al dist
+      - name: Set path
+        shell: pwsh
+        run: Add-Content $env:GITHUB_PATH "${{github.workspace}}\yardl_windows_amd64_v1"
+
+      - name: Yardl
+        shell: pwsh
+        run: yardl --version
