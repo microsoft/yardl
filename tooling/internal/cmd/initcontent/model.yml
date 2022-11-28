@@ -14,7 +14,7 @@ Header: !record
     subject: string
 
 # Sample is a record made up of a datetime and
-# a vectir of integers
+# a vector of integers
 Sample: !record
   fields:
     timestamp: datetime
