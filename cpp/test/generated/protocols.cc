@@ -2,7 +2,12 @@
 
 #include "protocols.h"
 
+#ifdef _MSC_VER
+#define unlikely(x)
+#else
 #define unlikely(x) __builtin_expect((x), 0)
+#endif
+
 namespace test_model {
 namespace {
 void BenchmarkFloat256x256WriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end, uint8_t current) {
