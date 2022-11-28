@@ -1,0 +1,13 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg/master/scripts/vcpkg.schema.json",
+  "name": "smoketest",
+  "dependencies": [
+    {
+      "name": "hdf5",
+      "features": ["cpp"],
+      "default-features": false
+    },
+    "date",
+    "xtensor"
+  ]
+}
