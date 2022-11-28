@@ -55,7 +55,6 @@ find_package(xtensor REQUIRED)
 
 	fmt.Fprintf(w, "target_link_libraries(%s\n", objectLibraryName)
 	w.Indented(func() {
-		w.WriteStringln("PUBLIC hdf5")
 		w.WriteStringln("PUBLIC ${HDF5_C_LIBRARIES}")
 		w.WriteStringln("PUBLIC ${HDF5_CXX_LIBRARIES}")
 		w.WriteStringln("PUBLIC date::date")

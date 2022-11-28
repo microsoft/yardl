@@ -13,6 +13,7 @@ defaults:
 
 jobs:
   buildBinaries:
+    name: Build yardl binaries
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -22,7 +23,7 @@ jobs:
           go-version: '1.18.3' # The Go version to download (if necessary) and use.
 
       - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v2
+        uses: goreleaser/goreleaser-action@v3
         with:
           version: v1.13.0
           args: release --rm-dist --snapshot
@@ -33,7 +34,8 @@ jobs:
           name: dist
           path: dist
 
-  buildWindows:
+  smoketestWindows:
+    name: Run smoketest on Windows
     runs-on: windows-latest
     needs: buildBinaries
     steps:

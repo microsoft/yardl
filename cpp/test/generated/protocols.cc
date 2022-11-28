@@ -3,7 +3,7 @@
 #include "protocols.h"
 
 #ifdef _MSC_VER
-#define unlikely(x)
+#define unlikely(x) x
 #else
 #define unlikely(x) __builtin_expect((x), 0)
 #endif

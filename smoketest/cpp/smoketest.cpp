@@ -1,9 +1,7 @@
-#include <chrono>
-
-#include "generated/binary/protocols.h"
+#include "generated/hdf5/protocols.h"
 
 int main() {
-  smoketest::binary::MyProtocolWriter w("smoketest.bin");
+  smoketest::hdf5::MyProtocolWriter w("smoketest.bin");
 
   w.WriteHeader({"123"});
 

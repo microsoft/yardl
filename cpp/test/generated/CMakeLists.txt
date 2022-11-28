@@ -26,7 +26,6 @@ add_library(test_model_generated OBJECT
 )
 
 target_link_libraries(test_model_generated
-  PUBLIC hdf5
   PUBLIC ${HDF5_C_LIBRARIES}
   PUBLIC ${HDF5_CXX_LIBRARIES}
   PUBLIC date::date

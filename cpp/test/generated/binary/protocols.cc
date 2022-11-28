@@ -9,8 +9,10 @@
 
 namespace yardl::binary {
 // Values of offsetof() are only used if types are standard-layout.
+#ifndef _MSC_VER
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Winvalid-offsetof"
+#endif
 
 template <>
 struct IsTriviallySerializable<test_model::SmallBenchmarkRecord> {
@@ -317,7 +319,9 @@ struct IsTriviallySerializable<test_model::RecordWithKeywordFields> {
     offsetof(__T__, int_field) < offsetof(__T__, sizeof_field) && offsetof(__T__, sizeof_field) < offsetof(__T__, if_field);
 };
 
+#ifndef _MSC_VER
 #pragma GCC diagnostic pop // #pragma GCC diagnostic ignored "-Winvalid-offsetof" 
+#endif
 } //namespace yardl::binary 
 
 namespace {
