@@ -27,7 +27,7 @@ func WriteProtocols(env *dsl.Environment, options packaging.CppCodegenOptions) e
 
 	w.WriteString("#include \"protocols.h\"\n\n")
 	w.WriteStringln("#ifdef _MSC_VER")
-	w.WriteStringln("#define unlikely(x)")
+	w.WriteStringln("#define unlikely(x) x")
 	w.WriteStringln("#else")
 	w.WriteString("#define unlikely(x) __builtin_expect((x), 0)\n")
 	w.WriteString("#endif\n\n")
