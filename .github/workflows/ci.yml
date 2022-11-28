@@ -52,7 +52,7 @@ jobs:
           path: dist
 
   smoketestWindows:
-    name: Run smoketest on Windows
+    name: Run smoke test on Windows
     runs-on: windows-latest
     needs: buildBinaries
     steps:
@@ -67,7 +67,7 @@ jobs:
         shell: pwsh
         run: Add-Content $env:GITHUB_PATH "${{github.workspace}}\yardl_windows_amd64_v1"
 
-      - name: Run smoketest
+      - name: Run smoke test
         shell: pwsh
         run: smoketest\run-smoketest.ps1
 
