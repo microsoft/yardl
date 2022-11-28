@@ -51,6 +51,7 @@ jobs:
       - name: yardl init
         shell: pwsh
         run: |
+          mkdir smoketest\model
           cd smoketest\model
           yardl init
 
