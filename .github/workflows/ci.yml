@@ -3,6 +3,7 @@ name: ci
 on:
   push:
     branches: [main]
+    tags: ["v*.*.*"]
   pull_request:
   schedule:
     - cron: '0 0 * * 3' # 00:00 every Wednesday
@@ -115,12 +116,13 @@ jobs:
           fi
 
   release:
-    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref_type == 'tag'
     needs:
       - validate
       - codeQL
       - smoketestWindows
       - noticeCheck
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
 
