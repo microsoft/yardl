@@ -9,7 +9,7 @@ else()
   add_compile_options(-Wall -Wextra -pedantic -Werror)
 endif()
 
-add_executable(smoketest smoketest.cpp)
+add_executable(smoketest smoketest.cc)
 target_link_libraries(smoketest smoketest_generated)
 
 add_subdirectory(generated)
