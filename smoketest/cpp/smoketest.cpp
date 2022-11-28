@@ -1,7 +1,7 @@
 #include "generated/hdf5/protocols.h"
 
 int main() {
-  smoketest::hdf5::MyProtocolWriter w("smoketest.bin");
+  smoketest::hdf5::MyProtocolWriter w("smoketest.h5");
 
   w.WriteHeader({"123"});
 
