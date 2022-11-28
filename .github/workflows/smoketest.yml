@@ -54,6 +54,7 @@ jobs:
           mkdir smoketest\model
           cd smoketest\model
           yardl init smoketest
+          yardl generate
 
       - name: build smoketest
         shell: pwsh
