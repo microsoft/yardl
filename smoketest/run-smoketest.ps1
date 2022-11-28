@@ -22,7 +22,7 @@ try
     yardl generate
 
     cd $scriptDir\cpp
-    rm -Recurse -Force $scriptDir\cpp\build
+    rm -Recurse -Force $scriptDir\cpp\build -ErrorAction SilentlyContinue
     mkdir -Force $scriptDir\cpp\build | Out-Null
     cd $scriptDir\cpp\build
 

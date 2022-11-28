@@ -7,6 +7,7 @@
 # add_subdirectory(<path to this directory>)
 
 if(NOT DEFINED CMAKE_CXX_STANDARD OR CMAKE_CXX_STANDARD LESS 20)
+  set(USE_DATE true)
   find_package(date REQUIRED)
 endif()
 
@@ -28,6 +29,8 @@ add_library(test_model_generated OBJECT
 target_link_libraries(test_model_generated
   PUBLIC ${HDF5_C_LIBRARIES}
   PUBLIC ${HDF5_CXX_LIBRARIES}
-  PUBLIC date::date
   PUBLIC xtensor
 )
+if (USE_DATE)
+  target_link_libraries(test_model_generated PUBLIC date::date)
+endif()

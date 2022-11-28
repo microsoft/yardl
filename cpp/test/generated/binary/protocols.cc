@@ -8,8 +8,8 @@
 #include "../yardl/detail/binary/serializers.h"
 
 namespace yardl::binary {
-// Values of offsetof() are only used if types are standard-layout.
 #ifndef _MSC_VER
+// Values of offsetof() are only used if types are standard-layout.
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Winvalid-offsetof"
 #endif
