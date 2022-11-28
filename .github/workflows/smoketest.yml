@@ -48,6 +48,20 @@ jobs:
         shell: pwsh
         run: Add-Content $env:GITHUB_PATH "${{github.workspace}}\yardl_windows_amd64_v1"
 
-      - name: Yardl
+      - name: yardl init
         shell: pwsh
-        run: yardl --version
+        run: |
+          cd smoketest\model
+          yardl init
+
+      - name: build smoketest
+        shell: pwsh
+        run: |
+          mkdir smoketest\cpp\build
+          cd smoketest\cpp\build
+          cmake .. -DCMAKE_TOOLCHAIN_FILE=C:\vcpkg\scripts\buildsystems\vcpkg.cmake
+          cmake --build .
+
+      - name: Run smoketest
+        shell: pwsh
+        run: smoketest\cpp\build\Debug\smoketest.exe
