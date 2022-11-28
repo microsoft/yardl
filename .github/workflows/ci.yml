@@ -3,10 +3,10 @@ name: ci
 on:
   push:
     branches: [main]
-    tags: ["v*.*.*"]
   pull_request:
   schedule:
     - cron: '0 0 * * 3' # 00:00 every Wednesday
+  workflow_call:
 
 defaults:
   run:
