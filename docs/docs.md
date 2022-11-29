@@ -59,11 +59,9 @@ Windows with MSVC with vcpkg. MacOS and homebrew support is coming.
 
 ## Quick Start
 
-> **Note**
->
+> **Note**<br>
 > Yardl is currently based on YAML. If you are not familiar with its syntax, you
 > can get an overview [here](https://learnxinyminutes.com/docs/yaml/).
-
 
 To get started, create a new empty directory and `cd` into it. This directory
 will contain ouy yardl package. To quickly create a package you can run:
