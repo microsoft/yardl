@@ -6,15 +6,16 @@
 - [Packages](#packages)
 - [Yardl Syntax](#yardl-syntax)
   - [Protocols](#protocols)
+  - [Records](#records)
   - [Primitive Types](#primitive-types)
   - [Optional Types](#optional-types)
   - [Unions](#unions)
-  - [Records](#records)
   - [Enums](#enums)
   - [Vectors](#vectors)
   - [Arrays](#arrays)
-  - [Named Types](#named-types)
+  - [Type Aliases](#type-aliases)
   - [Computed Fields](#computed-fields)
+  - [Generics](#generics)
 - [C++ Generated Code](#c-generated-code)
 - [Command-Line Reference](#command-line-reference)
 - [Performance Tips](#performance-tips)
@@ -60,8 +61,8 @@ Windows with MSVC with vcpkg. MacOS and homebrew support is coming.
 ## Quick Start
 
 > **Note**<br>
-> Yardl is currently based on YAML. If you are not familiar with its syntax, you
-> can get an overview [here](https://learnxinyminutes.com/docs/yaml/).
+> Yardl is currently based on YAML. If you are new to YAML, you can get an
+> overview [here](https://learnxinyminutes.com/docs/yaml/).
 
 To get started, create a new empty directory and `cd` into it. This directory
 will contain ouy yardl package. To quickly create a package you can run:
@@ -312,37 +313,198 @@ options for other languages.
 Yardl model files use YAML syntax and are requires to have either a `.yml` or
 `.yaml` file extension.
 
-As you go through the sections below, you can run the following from the package directory:
+To efficiently work with yardl, we recommend that you run the following from the
+package directory:
 
 ```bash
 yardl generate --watch
 ```
 
-This watches the directory for changes and validates and generates code whenever
-a file is saved. This allows you to get rapid feedback and to experiment as you
-experiment with the language.
+This watches the directory for changes and generates code whenever a file is
+saved. This allows you to get rapid feedback as you experiment.
+
+Comments placed above top-level types and their fields are captured and added to
+the generated code.
+
+`yardl generate` only generates code once the model files in the package have
+been validated. It will write out any validation errors to standard error.
 
 ### Protocols
 
-### Primitive Types
+As explained in the [quick start](#quick-start), protocols define a sequence of
+values, called "steps", that are required to be transmitted, in order. They are
+defined like this:
 
-### Optional Types
+```yaml
+MyProtocol: !protocol
 
-### Unions
+sequence:
+  a: int
+  b: !stream
+    items: float
+  c: !stream:
+    items string
+```
+
+In the example, the first step is a single integer named `i`. Following that
+will be a stream (named `b`) of zero or more floating-point numbers, and a
+stream (named `c`) of strings.
 
 ### Records
 
+Records have fields and, optionally, [computed fields](#computed-fields). They map to C++ structs.
+
+Fields have a name and can be of any primitive or compound type. For example:
+
+```yaml
+MyRecord: !record
+  fields:
+    myIntField: int
+    myStringField: string
+```
+
+Records must be declared at the top level and cannot be inlined. For example,
+this is not supported:
+
+```yaml
+RecordA: !record
+  fields:
+    recA: !record # NOT SUPPORTED!
+      fields:
+        a: int
+    recB: RecordB # But this is fine.
+
+RecordB: !record
+  fields:
+    c: int
+```
+
+Note that Yardl does not support type inheritance.
+
+### Primitive Types
+
+Yardl has the following primitive types:
+
+| Type             | Comment                                                                 |
+| ---------------- | ----------------------------------------------------------------------- |
+| `bool`           |                                                                         |
+| `int8`           |                                                                         |
+| `uint8`          |                                                                         |
+| `byte`           | Alias of `uint8`                                                        |
+| `int16`          |                                                                         |
+| `uint16`         |                                                                         |
+| `int32`          |                                                                         |
+| `int`            | Alias of `int32`                                                        |
+| `uint32`         |                                                                         |
+| `uint`           | Alias of `unit32`                                                       |
+| `int64`          |                                                                         |
+| `long`           | Alias of `int64`                                                        |
+| `uint64`         |                                                                         |
+| `ulong`          | Alias of `uint64`                                                       |
+| `size`           |                                                                         |
+| `float32`        |                                                                         |
+| `float`          | Alias of `float32`                                                      |
+| `float64`        |                                                                         |
+| `double`         | Alias of `float64`                                                      |
+| `complexfloat32` | A complex number where each component is a 32-bit floating-point number |
+| `complexfloat`   | Alias of `complexfloat32`                                               |
+| `complexfloat64` | A complex number where each component is a 63-bit floating-point number |
+| `complexdouble`  | Alias of `complexfloat64`                                               |
+| `string`         |                                                                         |
+| `date`           | A number of days since the epoch                                        |
+| `time`           | A number of nanoseconds after midnight                                  |
+| `datetime`       | A number of nanoseconds since the epoch                                 |
+
+### Optional Types
+
+A value can be made optional by adding a `?` to its type name. For example:
+
+```yaml
+Rec: !record
+  fields:
+    optionalInt: int?
+```
+
+When a type cannot be represented with a single name, you can use the expanded
+form to represent an optional value:
+
+```yaml
+Rec: !record
+  fields:
+    optionalArray:
+      - null
+      - !vector
+        items: int
+```
+
+Note that `null` must be the first item in the sequence.
+
+### Unions
+
+When a value can be one of several types, you can define a union:
+
+```yaml
+Rec: !record
+  fields:
+    intOrFloat: [int, float]
+    intOrFloatExpandedForm:
+      - int
+      - float
+    nullableIntOrFloat:
+      - null
+      - int
+      - float
+    arrayOfFloatsOrDoubles:
+      - !array
+        items: float
+      - !array
+        items: double
+```
+
 ### Enums
+
+Enums can be defined as a list of values:
+
+```yaml
+Fruits: !enum
+  values:
+    - apple
+    - banana
+    - pear
+```
+
+You can optionally specify the underlying type of the enum and give each symbol
+an integer value:
+
+```yaml
+UInt64Enum: !enum
+  base: uint64
+  values:
+    a: 0x1
+    b: 0x2
+    c: 20
+```
 
 ### Vectors
 
 ### Arrays
 
-### Named Types
+### Type Aliases
 
 ### Computed Fields
 
+### Generics
+
 ## C++ Generated Code
+
+// TODO: Find the right place for this
+
+It is an error to attempt to read or write to a protocol out of order. In order
+to verify that a protocol has been completely written to or read from, you can
+call `Close()` on the generated reader or writer instance. Protocol readers have
+a `CopyTo()` method that allows you to copy the contents of the protocol to
+another protocol writer. This makes is easy to, say, read from an HDF5 file and
+send it
 
 ## Command-Line Reference
 

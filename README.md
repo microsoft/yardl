@@ -6,7 +6,7 @@ types and serialization code.
 ![A DSL on the left is translated to C++ code on the
 right](docs/images/overview.png)
 
-It is conceptually similar to, and inspired by [Avro](https://avro.apache.org/),
+It is conceptually similar to, and inspired by, [Avro](https://avro.apache.org/),
 [Protocol Buffers](https://developers.google.com/protocol-buffers),
 [Bond](https://microsoft.github.io/bond/), and others, but it was designed
 primarily with raw medical instrument signal data in mind. Some of its features
