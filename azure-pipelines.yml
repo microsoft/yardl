@@ -3,6 +3,14 @@
 trigger:
   - main
 
+schedules:
+  - cron: "0 0 * * 3"
+    displayName: At 00:00 on Wednesdays
+    branches:
+      include:
+        - main
+    always: "true"
+
 pr:
   - main
 

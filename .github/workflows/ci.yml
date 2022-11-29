@@ -5,6 +5,8 @@ on:
     branches: [main]
     tags: ["v*.*.*"]
   pull_request:
+  schedule:
+    - cron: '0 0 * * 3' # 00:00 every Wednesday
 
 defaults:
   run:
@@ -111,3 +113,29 @@ jobs:
             echo "NOTICE.txt needs to be regenerated using scripts/generate-notice.sh"
             exit 1
           fi
+
+  release:
+    if: github.event_name == 'push' && github.ref_type == 'tag'
+    needs:
+      - validate
+      - codeQL
+      - smoketestWindows
+      - noticeCheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Configure environment
+        uses: ./.github/actions/configure-environment
+
+      - name: Set PATH
+        run: |
+          dirname $(which go) >> $GITHUB_PATH
+
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v3
+        with:
+          version: v1.13.0
+          args: release --rm-dist
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
