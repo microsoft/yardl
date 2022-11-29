@@ -15,6 +15,7 @@
   - [Arrays](#arrays)
   - [Named Types](#named-types)
   - [Computed Fields](#computed-fields)
+- [C++ Generated Code](#c-generated-code)
 - [Command-Line Reference](#command-line-reference)
 - [Performance Tips](#performance-tips)
 
@@ -91,8 +92,8 @@ cpp:
 It specifies the package's namespace along with code generation settings. The
 `cpp.sourcesOutputDir` property specifies where the generated C++ code should go.
 
-All other `.yml` files in the directory are assumed to be yardl model files. The
-contents of `model.yml` look like this:
+All other `.yml` and `.yaml` files in the directory are assumed to be yardl
+model files. The contents of `model.yml` look like this:
 
 ```yaml
 # This is an example protocol, which is defined as a Header value
@@ -120,7 +121,7 @@ Sample: !record
 `!protocol`, `!stream` and `!record` are custom YAML tags, which describe the
 type of the YAML node that follows.
 
-`MyProtocol` is a protocol, which is a defined sequence of values that are to be
+`MyProtocol` is a protocol, which is a defined sequence of values that are
 transmitted or received. This protocol says that there will be one `Header`
 value followed by an unknown number of `Sample`s. `Header` and `Sample` are
 records, which are converted to C++ structs.
@@ -158,7 +159,7 @@ which are the base classes for implementations in `binary/protocols.h` and
 dates, and the header files in `yardl/detail` are included in generated files
 but are not intended to be included by consuming code.
 
-Ok, let's write some code! In the parent directory of `cpp/generated/`, `cpp/`
+Ok, let's write some code! In the parent directory of the generate code, `cpp`,
 create `playground.cc` that looks like this:
 
 ```cpp
@@ -198,7 +199,7 @@ int main() {
 }
 ```
 
-Adjacent to that file, create a `CMakeLists.txt` that looks something like this (on Linux):
+Adjacent to that file, create a `CMakeLists.txt` that looks something like this:
 
 ```cmake
 cmake_minimum_required(VERSION 3.19)
@@ -212,7 +213,7 @@ target_link_libraries(playground playground_generated)
 add_subdirectory(generated)
 ```
 
-Now let's compile and run this code.
+Now let's compile and run this code. Here are the steps on Linux:
 
 ```bash
 mkdir build
@@ -222,7 +223,7 @@ ninja
 ./playground
 ```
 
-You can inspect the binary file with:
+You can inspect the binary file our code produced with:
 
 ```bash
 hexdump -C playground.bin
@@ -230,7 +231,7 @@ hexdump -C playground.bin
 
 Note that the binary file contains a JSON representation of the protocol's
 schema. This allows code that was not previously aware of this protocol to
-deserialize this file.
+deserialize the contents.
 
 In addition to the compact binary format, we can write the protocol out to an HDF5 file.
 This requires only a few modifications to our code:
@@ -275,9 +276,52 @@ This requires only a few modifications to our code:
 
 ```
 
+You can inspect HDF5 file with HDFView or by running
+
+```bash
+h5dump playground.h5
+```
+
 ## Packages
 
+A package is a directory with a `_package.yml` manifest.
+
+Here is a commented `_package.yml` file:
+
+```yaml
+# _package.yml
+
+# The namespace of the package. Required.
+namespace: MyNamespace
+
+# settings for C++ code generation
+cpp:
+  # The directory where generated code will be written.
+  # The directory will be created if it does not exist.
+  sourcesOutputDir: ../path/relative/to/this/file
+
+  # Whether to generate a CMakeLists.txt file in sourcesOutputDir
+  # Default true
+  generateCMakeLists: true
+```
+
+In the future, this file will be able to reference other packages and specify
+options for other languages.
+
 ## Yardl Syntax
+
+Yardl model files use YAML syntax and are requires to have either a `.yml` or
+`.yaml` file extension.
+
+As you go through the sections below, you can run the following from the package directory:
+
+```bash
+yardl generate --watch
+```
+
+This watches the directory for changes and validates and generates code whenever
+a file is saved. This allows you to get rapid feedback and to experiment as you
+experiment with the language.
 
 ### Protocols
 
@@ -298,6 +342,8 @@ This requires only a few modifications to our code:
 ### Named Types
 
 ### Computed Fields
+
+## C++ Generated Code
 
 ## Command-Line Reference
 
