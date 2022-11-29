@@ -9,12 +9,12 @@ import (
 )
 
 type ProtocolSchema struct {
-	Protocol ProtocolDefinition `json:"protocol"`
-	Types    []TypeDefinition   `json:"types"`
+	Protocol *ProtocolDefinition `json:"protocol"`
+	Types    []TypeDefinition    `json:"types"`
 }
 
 func GetProtocolSchema(protocol *ProtocolDefinition, symbolTable SymbolTable) *ProtocolSchema {
-	schema := &ProtocolSchema{Protocol: *protocol}
+	schema := &ProtocolSchema{Protocol: removeComments(protocol)}
 	visitedTypeDefinitions := make(map[TypeDefinition]any)
 	Visit(protocol, func(self Visitor, node Node) {
 		switch t := node.(type) {
@@ -39,7 +39,7 @@ func GetProtocolSchema(protocol *ProtocolDefinition, symbolTable SymbolTable) *P
 				t = &clone
 			}
 
-			schema.Types = append(schema.Types, t)
+			schema.Types = append(schema.Types, removeComments(t))
 
 		case *SimpleType:
 			self.Visit(symbolTable.GetGenericTypeDefinition(t.ResolvedDefinition))
@@ -56,6 +56,56 @@ func GetProtocolSchema(protocol *ProtocolDefinition, symbolTable SymbolTable) *P
 	})
 
 	return schema
+}
+
+func removeComments[T Node](typeDefinition T) T {
+	return Rewrite(typeDefinition, func(self Rewriter, node Node) Node {
+		switch t := node.(type) {
+		case *DefinitionMeta:
+			if t.Comment == "" {
+				return t
+			}
+
+			clone := *t
+			clone.Comment = ""
+			return &clone
+
+		case *Field:
+			if t.Comment == "" {
+				return self.DefaultRewrite(t)
+			}
+
+			clone := *t
+			clone.Comment = ""
+			return self.DefaultRewrite(&clone)
+		case *ProtocolStep:
+			if t.Comment == "" {
+				return self.DefaultRewrite(t)
+			}
+
+			clone := *t
+			clone.Comment = ""
+			return self.DefaultRewrite(&clone)
+		case *ArrayDimension:
+			if t.Comment == "" {
+				return t
+			}
+			clone := *t
+			clone.Comment = ""
+			return &clone
+
+		case *EnumValue:
+			if t.Comment == "" {
+				return t
+			}
+			clone := *t
+			clone.Comment = ""
+			return &clone
+
+		default:
+			return self.DefaultRewrite(t)
+		}
+	}).(T)
 }
 
 func GetProtocolSchemaString(protocol *ProtocolDefinition, symbolTable SymbolTable) string {

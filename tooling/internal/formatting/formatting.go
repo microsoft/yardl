@@ -95,11 +95,21 @@ func ToPascalCase(s string) string {
 		return s
 	}
 
-	if start := s[0]; start >= 'A' && start <= 'Z' {
-		return s
+	if !strings.ContainsAny(s, "_ -") {
+		if start := s[0]; start >= 'A' && start <= 'Z' {
+			return s
+		}
+
+		return strings.ToUpper(s[:1]) + s[1:]
 	}
 
-	return strings.ToUpper(s[:1]) + s[1:]
+	var b strings.Builder
+	tokens := strings.FieldsFunc(s, func(r rune) bool { return r == '_' || r == '-' || r == ' ' })
+	for _, part := range tokens {
+		b.WriteString(ToPascalCase(part))
+	}
+
+	return b.String()
 }
 
 // Copied from the from the VSCode "transform to snake case" command implementation.

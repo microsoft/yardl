@@ -29,6 +29,48 @@ jobs:
       - name: Build and test
         run: make validate-with-no-changes -e CPP_VERSION=${{ matrix.cppVersion }}
 
+  buildBinaries:
+    name: Build yardl binaries
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-go@v3
+        with:
+          go-version: '1.18.3'
+
+      - name: Build yardl binaries for multiple platforms
+        uses: goreleaser/goreleaser-action@v3
+        with:
+          version: v1.13.0
+          args: release --rm-dist --snapshot
+
+      - name: Upload yardl binaries
+        uses: actions/upload-artifact@v3
+        with:
+          name: dist
+          path: dist
+
+  smoketestWindows:
+    name: Run smoke test on Windows
+    runs-on: windows-latest
+    needs: buildBinaries
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Download yardl binaries
+        uses: actions/download-artifact@v3
+        with:
+          name: dist
+
+      - name: Set path
+        shell: pwsh
+        run: Add-Content $env:GITHUB_PATH "${{github.workspace}}\yardl_windows_amd64_v1"
+
+      - name: Run smoke test
+        shell: pwsh
+        run: smoketest\run-smoketest.ps1
+
   codeQL:
     name: CodeQL
     runs-on: ubuntu-latest

@@ -129,7 +129,7 @@ static inline H5::ArrayType FixedVectorDdl(H5::DataType const& element_type, hsi
  */
 static inline H5::ArrayType FixedNDArrayDdl(H5::DataType const& element_type,
                                             std::initializer_list<hsize_t> dimensions) {
-  return H5::ArrayType(element_type, dimensions.size(), std::data(dimensions));
+  return H5::ArrayType(element_type, static_cast<int>(dimensions.size()), std::data(dimensions));
 }
 
 /**
@@ -176,7 +176,7 @@ H5::EnumType UnionTypeEnumDdl(bool nullable, Labels const&... labels) {
 
 struct IndexEntry {
   int8_t type_;
-  u_int64_t offset_;
+  uint64_t offset_;
 };
 
 static inline H5::CompType UnionIndexDatasetElementTypeDdl(H5::EnumType type_enum) {

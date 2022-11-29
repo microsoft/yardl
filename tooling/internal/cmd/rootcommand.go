@@ -30,6 +30,7 @@ func newRootCommand(version, commit string) *cobra.Command {
 
 	cmd.AddCommand(newValidateCommand())
 	cmd.AddCommand(newGenerateCommand())
+	cmd.AddCommand(newInitCommand())
 
 	return cmd
 }

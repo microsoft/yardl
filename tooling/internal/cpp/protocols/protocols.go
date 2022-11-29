@@ -26,7 +26,11 @@ func WriteProtocols(env *dsl.Environment, options packaging.CppCodegenOptions) e
 	common.WriteGeneratedFileHeader(w)
 
 	w.WriteString("#include \"protocols.h\"\n\n")
+	w.WriteStringln("#ifdef _MSC_VER")
+	w.WriteStringln("#define unlikely(x) x")
+	w.WriteStringln("#else")
 	w.WriteString("#define unlikely(x) __builtin_expect((x), 0)\n")
+	w.WriteString("#endif\n\n")
 
 	for _, ns := range env.Namespaces {
 		fmt.Fprintf(w, "namespace %s {\n", common.NamespaceIdentifierName(ns.Name))

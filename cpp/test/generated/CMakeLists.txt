@@ -7,7 +7,14 @@
 # add_subdirectory(<path to this directory>)
 
 if(NOT DEFINED CMAKE_CXX_STANDARD OR CMAKE_CXX_STANDARD LESS 20)
+  set(USE_DATE true)
   find_package(date REQUIRED)
+endif()
+
+if(VCPKG_TARGET_TRIPLET)
+  set(HDF5_CXX_LIBRARIES hdf5::hdf5_cpp-shared)
+else()
+  set(HDF5_CXX_LIBRARIES hdf5_cpp)
 endif()
 
 find_package(HDF5 REQUIRED)
@@ -20,6 +27,10 @@ add_library(test_model_generated OBJECT
 )
 
 target_link_libraries(test_model_generated
-  PUBLIC hdf5
-  PUBLIC hdf5_cpp
+  PUBLIC ${HDF5_C_LIBRARIES}
+  PUBLIC ${HDF5_CXX_LIBRARIES}
+  PUBLIC xtensor
 )
+if (USE_DATE)
+  target_link_libraries(test_model_generated PUBLIC date::date)
+endif()

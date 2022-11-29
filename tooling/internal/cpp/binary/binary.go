@@ -162,16 +162,20 @@ func writeHeaderFile(env *dsl.Environment, options packaging.CppCodegenOptions) 
 
 func writeIsTriviallySerializableSpecializations(w *formatting.IndentedWriter, env *dsl.Environment) {
 	fmt.Fprintf(w, "namespace yardl::binary {\n")
+	w.WriteStringln("#ifndef _MSC_VER")
 	common.WriteComment(w, "Values of offsetof() are only used if types are standard-layout.")
 	w.WriteStringln("#pragma GCC diagnostic push")
-	w.WriteStringln("#pragma GCC diagnostic ignored \"-Winvalid-offsetof\"\n")
+	w.WriteStringln("#pragma GCC diagnostic ignored \"-Winvalid-offsetof\"")
+	w.WriteStringln("#endif\n")
 
 	for _, ns := range env.Namespaces {
 		for _, td := range ns.TypeDefinitions {
 			writeIsTriviallySerializableSpecialization(w, td)
 		}
 	}
+	w.WriteStringln("#ifndef _MSC_VER")
 	w.WriteStringln("#pragma GCC diagnostic pop // #pragma GCC diagnostic ignored \"-Winvalid-offsetof\" ")
+	w.WriteStringln("#endif")
 	fmt.Fprintf(w, "} //namespace yardl::binary \n\n")
 }
 

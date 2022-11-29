@@ -19,6 +19,15 @@ func TestToPascalCase(t *testing.T) {
 		{"a", "A"},
 		{"aB", "AB"},
 		{"99", "99"},
+		{"ioReader", "IoReader"},
+		{"IoReader", "IoReader"},
+		{"IOReader", "IOReader"},
+		{"snake_case", "SnakeCase"},
+		{"snake__case", "SnakeCase"},
+		{"_snake_case_", "SnakeCase"},
+		{"kebab-case", "KebabCase"},
+		{"kebab--case", "KebabCase"},
+		{"apple banana", "AppleBanana"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.intput, func(t *testing.T) {

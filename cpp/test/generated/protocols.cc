@@ -2,7 +2,12 @@
 
 #include "protocols.h"
 
+#ifdef _MSC_VER
+#define unlikely(x) x
+#else
 #define unlikely(x) __builtin_expect((x), 0)
+#endif
+
 namespace test_model {
 namespace {
 void BenchmarkFloat256x256WriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end, uint8_t current) {
@@ -4606,7 +4611,7 @@ void ProtocolWithKeywordStepsReaderBaseInvalidState(uint8_t attempted, uint8_t c
 
 } // namespace 
 
-std::string ProtocolWithKeywordStepsWriterBase::schema_ = R"({"protocol":{"name":"ProtocolWithKeywordSteps","sequence":[{"name":"int","type":{"stream":{"items":["TestModel.RecordWithKeywordFields"]}}},{"name":"float","type":"TestModel.EnumWithKeywordSymbols"}]},"types":[{"name":"ArrayWithKeywordDimensionNames","typeParameters":["INT16_MAX"],"type":{"array":{"items":["INT16_MAX"],"dimensions":[{"name":"while"},{"name":"do"}]}}},{"name":"EnumWithKeywordSymbols","values":[{"symbol":"try","value":2},{"symbol":"catch","value":1}]},{"name":"RecordWithKeywordFields","comment":"BEGIN delibrately using C++ keywords and macros as identitiers\n","fields":[{"name":"int","type":"string"},{"name":"sizeof","type":{"name":"TestModel.ArrayWithKeywordDimensionNames","typeArguments":["int32"]}},{"name":"if","type":"TestModel.EnumWithKeywordSymbols"}]}]})";
+std::string ProtocolWithKeywordStepsWriterBase::schema_ = R"({"protocol":{"name":"ProtocolWithKeywordSteps","sequence":[{"name":"int","type":{"stream":{"items":["TestModel.RecordWithKeywordFields"]}}},{"name":"float","type":"TestModel.EnumWithKeywordSymbols"}]},"types":[{"name":"ArrayWithKeywordDimensionNames","typeParameters":["INT16_MAX"],"type":{"array":{"items":["INT16_MAX"],"dimensions":[{"name":"while"},{"name":"do"}]}}},{"name":"EnumWithKeywordSymbols","values":[{"symbol":"try","value":2},{"symbol":"catch","value":1}]},{"name":"RecordWithKeywordFields","fields":[{"name":"int","type":"string"},{"name":"sizeof","type":{"name":"TestModel.ArrayWithKeywordDimensionNames","typeArguments":["int32"]}},{"name":"if","type":"TestModel.EnumWithKeywordSymbols"}]}]})";
 
 void ProtocolWithKeywordStepsWriterBase::WriteInt(test_model::RecordWithKeywordFields const& value) {
   if (unlikely(state_ != 0)) {

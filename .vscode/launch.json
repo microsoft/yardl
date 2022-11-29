@@ -9,7 +9,7 @@
       "type": "go",
       "request": "launch",
       "mode": "auto",
-      "program": "${workspaceFolder}/cli",
+      "program": "${workspaceFolder}/tooling/cmd/yardl",
       "cwd": "${workspaceFolder}/models/sandbox",
       "args": ["generate"]
     },
@@ -18,7 +18,7 @@
       "type": "go",
       "request": "launch",
       "mode": "auto",
-      "program": "${workspaceFolder}/cli",
+      "program": "${workspaceFolder}/tooling/cmd/yardl",
       "cwd": "${workspaceFolder}/models/test",
       "args": ["generate"]
     }
