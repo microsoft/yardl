@@ -60,6 +60,7 @@ Windows with MSVC with vcpkg. MacOS and homebrew support is coming.
 ## Quick Start
 
 > **Note**
+>
 > Yardl is currently based on YAML. If you are not familiar with its syntax, you
 > can get an overview [here](https://learnxinyminutes.com/docs/yaml/).
 
