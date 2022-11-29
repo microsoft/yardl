@@ -106,6 +106,9 @@ TEST(ComputedFieldsTests, ArraySize) {
   ASSERT_EQ(r.FixedArraySize(), r.fixed_array_field.size());
   ASSERT_EQ(r.FixedArrayXSize(), r.fixed_array_field.shape(0));
   ASSERT_EQ(r.FixedArray0Size(), r.fixed_array_field.shape(0));
+
+  r.array_field_map_dimensions = {{1, 2, 3}, {4, 5, 6}};
+  ASSERT_EQ(r.ArrayFieldMapDimensionsXSize(), 2);
 }
 
 TEST(ComputedFieldsTest, SwitchExpression) {

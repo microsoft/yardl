@@ -1109,6 +1109,24 @@
                 }
               },
               {
+                "name": "arrayFieldMapDimensions",
+                "type": {
+                  "array": {
+                    "items": [
+                      "int32"
+                    ],
+                    "dimensions": [
+                      {
+                        "name": "x"
+                      },
+                      {
+                        "name": "y"
+                      }
+                    ]
+                  }
+                }
+              },
+              {
                 "name": "dynamicArrayField",
                 "type": {
                   "array": {
@@ -1574,6 +1592,22 @@
                           "member": "v1"
                         }
                       }
+                    ]
+                  }
+                }
+              },
+              {
+                "name": "arrayFieldMapDimensionsXSize",
+                "expression": {
+                  "call": {
+                    "function": "size",
+                    "arguments": [
+                      {
+                        "memberAccess": {
+                          "member": "arrayFieldMapDimensions"
+                        }
+                      },
+                      0
                     ]
                   }
                 }

@@ -422,6 +422,7 @@ struct _Inner_RecordWithComputedFields {
   _Inner_RecordWithComputedFields() {} 
   _Inner_RecordWithComputedFields(test_model::RecordWithComputedFields const& o) 
       : array_field(o.array_field),
+      array_field_map_dimensions(o.array_field_map_dimensions),
       dynamic_array_field(o.dynamic_array_field),
       fixed_array_field(o.fixed_array_field),
       int_field(o.int_field),
@@ -437,10 +438,11 @@ struct _Inner_RecordWithComputedFields {
   }
 
   explicit operator test_model::RecordWithComputedFields() const {
-    return test_model::RecordWithComputedFields{static_cast<yardl::NDArray<int32_t, 2>>(array_field), static_cast<yardl::DynamicNDArray<int32_t>>(dynamic_array_field), fixed_array_field, int_field, static_cast<std::string>(string_field), tuple_field, static_cast<std::vector<int32_t>>(vector_field), static_cast<std::vector<std::vector<int32_t>>>(vector_of_vectors_field), fixed_vector_field, static_cast<std::optional<test_model::NamedNDArray>>(optional_named_array), static_cast<std::variant<int32_t, float>>(int_float_union), static_cast<std::variant<std::monostate, int32_t, float>>(nullable_int_float_union), static_cast<std::variant<int32_t, test_model::GenericRecordWithComputedFields<std::string, float>>>(union_with_nested_generic_union)};
+    return test_model::RecordWithComputedFields{static_cast<yardl::NDArray<int32_t, 2>>(array_field), static_cast<yardl::NDArray<int32_t, 2>>(array_field_map_dimensions), static_cast<yardl::DynamicNDArray<int32_t>>(dynamic_array_field), fixed_array_field, int_field, static_cast<std::string>(string_field), tuple_field, static_cast<std::vector<int32_t>>(vector_field), static_cast<std::vector<std::vector<int32_t>>>(vector_of_vectors_field), fixed_vector_field, static_cast<std::optional<test_model::NamedNDArray>>(optional_named_array), static_cast<std::variant<int32_t, float>>(int_float_union), static_cast<std::variant<std::monostate, int32_t, float>>(nullable_int_float_union), static_cast<std::variant<int32_t, test_model::GenericRecordWithComputedFields<std::string, float>>>(union_with_nested_generic_union)};
   }
 
   yardl::hdf5::InnerNdArray<int32_t, int32_t, 2> array_field;
+  yardl::hdf5::InnerNdArray<int32_t, int32_t, 2> array_field_map_dimensions;
   yardl::hdf5::InnerDynamicNdArray<int32_t, int32_t> dynamic_array_field;
   yardl::FixedNDArray<int32_t, 3, 4> fixed_array_field;
   int32_t int_field;
@@ -689,6 +691,7 @@ template <typename _T0_Inner, typename T0, typename _T1_Inner, typename T1>
   using RecordType = test_model::hdf5::_Inner_RecordWithComputedFields;
   H5::CompType t(sizeof(RecordType));
   t.insertMember("arrayField", HOFFSET(RecordType, array_field), yardl::hdf5::NDArrayDdl<int32_t, int32_t, 2>(H5::PredType::NATIVE_INT32));
+  t.insertMember("arrayFieldMapDimensions", HOFFSET(RecordType, array_field_map_dimensions), yardl::hdf5::NDArrayDdl<int32_t, int32_t, 2>(H5::PredType::NATIVE_INT32));
   t.insertMember("dynamicArrayField", HOFFSET(RecordType, dynamic_array_field), yardl::hdf5::DynamicNDArrayDdl<int32_t, int32_t>(H5::PredType::NATIVE_INT32));
   t.insertMember("fixedArrayField", HOFFSET(RecordType, fixed_array_field), yardl::hdf5::FixedNDArrayDdl(H5::PredType::NATIVE_INT32, {3, 4}));
   t.insertMember("intField", HOFFSET(RecordType, int_field), H5::PredType::NATIVE_INT32);

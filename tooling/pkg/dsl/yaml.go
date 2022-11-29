@@ -791,6 +791,10 @@ func (dimension *ArrayDimension) UnmarshalYAML(value *yaml.Node) error {
 		dimension.Length = &asUnit64
 		return nil
 	}
+	if value.Tag == "!!str" {
+		dimension.Name = &value.Value
+		return nil
+	}
 
 	return parseError(value, "invalid dimension specification")
 }
