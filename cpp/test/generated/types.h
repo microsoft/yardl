@@ -454,6 +454,7 @@ struct GenericRecordWithComputedFields {
 
 struct RecordWithComputedFields {
   yardl::NDArray<int32_t, 2> array_field{};
+  yardl::NDArray<int32_t, 2> array_field_map_dimensions{};
   yardl::DynamicNDArray<int32_t> dynamic_array_field{};
   yardl::FixedNDArray<int32_t, 3, 4> fixed_array_field{};
   int32_t int_field{};
@@ -619,6 +620,10 @@ struct RecordWithComputedFields {
     return array_field.shape(tuple_field.v1);
   }
 
+  size_t ArrayFieldMapDimensionsXSize() const {
+    return array_field_map_dimensions.shape(0);
+  }
+
   size_t FixedArraySize() const {
     return 12ULL;
   }
@@ -751,6 +756,7 @@ struct RecordWithComputedFields {
 
   bool operator==(const RecordWithComputedFields& other) const {
     return array_field == other.array_field &&
+      array_field_map_dimensions == other.array_field_map_dimensions &&
       dynamic_array_field == other.dynamic_array_field &&
       fixed_array_field == other.fixed_array_field &&
       int_field == other.int_field &&

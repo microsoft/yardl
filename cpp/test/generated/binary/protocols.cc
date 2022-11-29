@@ -291,6 +291,7 @@ struct IsTriviallySerializable<test_model::RecordWithComputedFields> {
   static constexpr bool value = 
     std::is_standard_layout_v<__T__> &&
     IsTriviallySerializable<decltype(__T__::array_field)>::value &&
+    IsTriviallySerializable<decltype(__T__::array_field_map_dimensions)>::value &&
     IsTriviallySerializable<decltype(__T__::dynamic_array_field)>::value &&
     IsTriviallySerializable<decltype(__T__::fixed_array_field)>::value &&
     IsTriviallySerializable<decltype(__T__::int_field)>::value &&
@@ -303,8 +304,8 @@ struct IsTriviallySerializable<test_model::RecordWithComputedFields> {
     IsTriviallySerializable<decltype(__T__::int_float_union)>::value &&
     IsTriviallySerializable<decltype(__T__::nullable_int_float_union)>::value &&
     IsTriviallySerializable<decltype(__T__::union_with_nested_generic_union)>::value &&
-    (sizeof(__T__) == (sizeof(__T__::array_field) + sizeof(__T__::dynamic_array_field) + sizeof(__T__::fixed_array_field) + sizeof(__T__::int_field) + sizeof(__T__::string_field) + sizeof(__T__::tuple_field) + sizeof(__T__::vector_field) + sizeof(__T__::vector_of_vectors_field) + sizeof(__T__::fixed_vector_field) + sizeof(__T__::optional_named_array) + sizeof(__T__::int_float_union) + sizeof(__T__::nullable_int_float_union) + sizeof(__T__::union_with_nested_generic_union))) &&
-    offsetof(__T__, array_field) < offsetof(__T__, dynamic_array_field) && offsetof(__T__, dynamic_array_field) < offsetof(__T__, fixed_array_field) && offsetof(__T__, fixed_array_field) < offsetof(__T__, int_field) && offsetof(__T__, int_field) < offsetof(__T__, string_field) && offsetof(__T__, string_field) < offsetof(__T__, tuple_field) && offsetof(__T__, tuple_field) < offsetof(__T__, vector_field) && offsetof(__T__, vector_field) < offsetof(__T__, vector_of_vectors_field) && offsetof(__T__, vector_of_vectors_field) < offsetof(__T__, fixed_vector_field) && offsetof(__T__, fixed_vector_field) < offsetof(__T__, optional_named_array) && offsetof(__T__, optional_named_array) < offsetof(__T__, int_float_union) && offsetof(__T__, int_float_union) < offsetof(__T__, nullable_int_float_union) && offsetof(__T__, nullable_int_float_union) < offsetof(__T__, union_with_nested_generic_union);
+    (sizeof(__T__) == (sizeof(__T__::array_field) + sizeof(__T__::array_field_map_dimensions) + sizeof(__T__::dynamic_array_field) + sizeof(__T__::fixed_array_field) + sizeof(__T__::int_field) + sizeof(__T__::string_field) + sizeof(__T__::tuple_field) + sizeof(__T__::vector_field) + sizeof(__T__::vector_of_vectors_field) + sizeof(__T__::fixed_vector_field) + sizeof(__T__::optional_named_array) + sizeof(__T__::int_float_union) + sizeof(__T__::nullable_int_float_union) + sizeof(__T__::union_with_nested_generic_union))) &&
+    offsetof(__T__, array_field) < offsetof(__T__, array_field_map_dimensions) && offsetof(__T__, array_field_map_dimensions) < offsetof(__T__, dynamic_array_field) && offsetof(__T__, dynamic_array_field) < offsetof(__T__, fixed_array_field) && offsetof(__T__, fixed_array_field) < offsetof(__T__, int_field) && offsetof(__T__, int_field) < offsetof(__T__, string_field) && offsetof(__T__, string_field) < offsetof(__T__, tuple_field) && offsetof(__T__, tuple_field) < offsetof(__T__, vector_field) && offsetof(__T__, vector_field) < offsetof(__T__, vector_of_vectors_field) && offsetof(__T__, vector_of_vectors_field) < offsetof(__T__, fixed_vector_field) && offsetof(__T__, fixed_vector_field) < offsetof(__T__, optional_named_array) && offsetof(__T__, optional_named_array) < offsetof(__T__, int_float_union) && offsetof(__T__, int_float_union) < offsetof(__T__, nullable_int_float_union) && offsetof(__T__, nullable_int_float_union) < offsetof(__T__, union_with_nested_generic_union);
 };
 
 template <>
@@ -1198,6 +1199,7 @@ template<typename T0, yardl::binary::Reader<T0> ReadT0, typename T1, yardl::bina
   }
 
   yardl::binary::WriteNDArray<int32_t, yardl::binary::WriteInteger, 2>(stream, value.array_field);
+  yardl::binary::WriteNDArray<int32_t, yardl::binary::WriteInteger, 2>(stream, value.array_field_map_dimensions);
   yardl::binary::WriteDynamicNDArray<int32_t, yardl::binary::WriteInteger>(stream, value.dynamic_array_field);
   yardl::binary::WriteFixedNDArray<int32_t, yardl::binary::WriteInteger, 3, 4>(stream, value.fixed_array_field);
   yardl::binary::WriteInteger(stream, value.int_field);
@@ -1219,6 +1221,7 @@ template<typename T0, yardl::binary::Reader<T0> ReadT0, typename T1, yardl::bina
   }
 
   yardl::binary::ReadNDArray<int32_t, yardl::binary::ReadInteger, 2>(stream, value.array_field);
+  yardl::binary::ReadNDArray<int32_t, yardl::binary::ReadInteger, 2>(stream, value.array_field_map_dimensions);
   yardl::binary::ReadDynamicNDArray<int32_t, yardl::binary::ReadInteger>(stream, value.dynamic_array_field);
   yardl::binary::ReadFixedNDArray<int32_t, yardl::binary::ReadInteger, 3, 4>(stream, value.fixed_array_field);
   yardl::binary::ReadInteger(stream, value.int_field);
