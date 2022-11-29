@@ -65,7 +65,7 @@ Windows with MSVC with vcpkg. MacOS and homebrew support is coming.
 > overview [here](https://learnxinyminutes.com/docs/yaml/).
 
 To get started, create a new empty directory and `cd` into it. This directory
-will contain ouy yardl package. To quickly create a package you can run:
+will contain the yardl package. To quickly create a package you can run:
 
 ``` bash
 yardl init playground
@@ -121,12 +121,11 @@ Sample: !record
 `!protocol`, `!stream` and `!record` are custom YAML tags, which describe the
 type of the YAML node that follows.
 
-`MyProtocol` is a protocol, which is a defined sequence of values that are
-transmitted or received. This protocol says that there will be one `Header`
+`MyProtocol` is a protocol, which is a defined sequence of values that can be written to or read from a file or binary stream (e.g. over a network connection). This example protocol says that there will be one `Header`
 value followed by an unknown number of `Sample`s. `Header` and `Sample` are
-records, which are converted to C++ structs.
+records.
 
-To generate code for this model, run this from the same directory:
+To generate C++ code for this model, run this from the same directory:
 
 ```bash
 yardl generate
@@ -153,10 +152,10 @@ $ tree -L 2 --dirsfirst
 ```
 
 In the root directory, `types.h` contains generated code for named types like
-records and enums. `protocols.h` declares abstract protocol readers and writer,
+records and enums. `protocols.h` declares abstract protocol readers and writers,
 which are the base classes for implementations in `binary/protocols.h` and
-`hdf5/protocols.h`. `yardl.yardl.h` defines core datatypes like arrays and
-dates, and the header files in `yardl/detail` are included in generated files
+`hdf5/protocols.h`. The `yardl/yardl.h` file defines core datatypes like arrays and
+dates, and the header files in `yardl/detail/` are included in generated files
 but are not intended to be included by consuming code.
 
 Ok, let's write some code! In the parent directory of the generate code, `cpp`,
@@ -195,7 +194,7 @@ int main() {
     std::cout << "Read Sample.data.size(): " << sample.data.size() << std::endl;
   }
 
-  return EXIT_SUCCESS;
+  return 0;
 }
 ```
 
@@ -271,7 +270,7 @@ This requires only a few modifications to our code:
       std::cout << "Sample.data.size(): " << sample.data.size() << std::endl;
     }
 
-    return EXIT_SUCCESS;
+    return 0;
   }
 
 ```
@@ -346,13 +345,13 @@ sequence:
     items string
 ```
 
-In the example, the first step is a single integer named `i`. Following that
+In the example, the first step is a single integer named `a`. Following that
 will be a stream (named `b`) of zero or more floating-point numbers, and a
 stream (named `c`) of strings.
 
 ### Records
 
-Records have fields and, optionally, [computed fields](#computed-fields). They map to C++ structs.
+Records have fields and, optionally, [computed fields](#computed-fields). In generated C++ code, they map to structs.
 
 Fields have a name and can be of any primitive or compound type. For example:
 
@@ -415,6 +414,28 @@ Yardl has the following primitive types:
 | `time`           | A number of nanoseconds after midnight                                  |
 | `datetime`       | A number of nanoseconds since the epoch                                 |
 
+### Unions
+
+When a value can be one of several types, you can define a union:
+
+```yaml
+Rec: !record
+  fields:
+    intOrFloat: [int, float]
+    intOrFloatExpandedForm:
+      - int
+      - float
+    nullableIntOrFloat:
+      - null
+      - int
+      - float
+    arrayOfFloatsOrDoubles:
+      - !array
+        items: float
+      - !array
+        items: double
+```
+
 ### Optional Types
 
 A value can be made optional by adding a `?` to its type name. For example:
@@ -438,28 +459,6 @@ Rec: !record
 ```
 
 Note that `null` must be the first item in the sequence.
-
-### Unions
-
-When a value can be one of several types, you can define a union:
-
-```yaml
-Rec: !record
-  fields:
-    intOrFloat: [int, float]
-    intOrFloatExpandedForm:
-      - int
-      - float
-    nullableIntOrFloat:
-      - null
-      - int
-      - float
-    arrayOfFloatsOrDoubles:
-      - !array
-        items: float
-      - !array
-        items: double
-```
 
 ### Enums
 
