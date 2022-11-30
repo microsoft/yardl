@@ -16,7 +16,6 @@
   - [Computed Fields](#computed-fields)
   - [Generics](#generics)
 - [C++ Generated Code](#c-generated-code)
-- [Command-Line Reference](#command-line-reference)
 - [Performance Tips](#performance-tips)
 
 ## Installation
@@ -402,7 +401,7 @@ Yardl has the following primitive types:
 | `long`           | Alias of `int64`                                                        |
 | `uint64`         |                                                                         |
 | `ulong`          | Alias of `uint64`                                                       |
-| `size`           |                                                                         |
+| `size`           | Equivalent to `uint64`                                                  |
 | `float32`        |                                                                         |
 | `float`          | Alias of `float32`                                                      |
 | `float64`        |                                                                         |
@@ -418,7 +417,7 @@ Yardl has the following primitive types:
 
 ### Unions
 
-When a value can be one of several types, you can define a union:
+When a value could be one of several types, you can define a union:
 
 ```yaml
 Rec: !record
@@ -440,10 +439,9 @@ Rec: !record
 
 The `null` type in the example above means that no value is also a possibility.
 
-A special case of unions is when the cases are `null` or a single type. This is
-an optional type, for example `[null, int]`.  This can also be represented by
-the shorthand `int?` syntax. The `?` suffix can only be applied to a simple type
-name, and the expanded form has to be used for more complex types:
+The `?` suffix can appended to a type name as a shorthand to define an *optional
+type*, a special case of union. For example, `int?` is the same as `[null,
+int]`. Note that the expanded form has to be used for complex optional types:
 
 ```yaml
 Rec: !record
@@ -550,9 +548,97 @@ Dimension names can be used in [computed field](#computed-fields) expressions.
 
 ### Type Aliases
 
+We've seen records, enums, and protocols defined as top-level, named types. In fact,
+any type can be given an alias:
+
+```yaml
+FloatArray: !array
+  items: float
+
+SignedInteger: [int8, int16, int32, int64]
+
+Id: string
+Name: string
+```
+
+This simply gives another name to a type, so the `Name` type above is no
+different from the `string` type.
+
 ### Computed Fields
 
+In addition to fields, records can contain computed fields. These are simple expressions
+over the record's other (computed) fields.
+
+```yaml
+MyRec: !record
+  fields:
+    arrayField: !array
+        items: int
+        dimensions: [x, y]
+  computedFields:
+    accessArray: arrayField
+    accessArrayElement: arrayField[0, 1]
+    accessArrayElementByName: arrayField[y:1, x:0]
+    sizeOfArrayField: size(arrayField)
+    sizeOfFirstDimension: size(arrayField, 0)
+    sizeOfXDimension: size(arrayField, 'x')
+```
+
+To work with union types, you need to use a switch expressions with type pattern
+matching:
+
+```yaml
+NamedArray: !array
+  items: int
+  dimensions: [x, y]
+
+MyRec: !record
+  fields:
+    myUnion: [null, int, NamedArray]
+  computedFields:
+    myUnionSize:
+      !switch myUnion:
+        int: 1 # if the union holds an int
+        NamedArray arr: size(arr) # if it's a NamedArray. Note the variable declaration.
+        _: 0 # all other cases (here it's just null)
+```
+
+The following function calls are supported from computed field expressions:
+
+- `size(vector)`: returns the size (length) of the vector
+- `size(array)`: returns the total size of the array
+- `size(array, integer)`: returns the size of the array's dimension at the given
+  index
+- `size(array, string)`: returns the size of the array's dimension with the
+  given name
+
+- `dimensionIndex(array, string)` returns the index of the dimension with the
+  given name
+
+- `dimensionCount(array)` returns the dimension count of the array
+
 ### Generics
+
+Yardl supports generic types.
+
+```yaml
+Image<T>: !array
+  items: T
+
+ImageVariant:
+  - Image<float>
+  - Image<double>
+  - Image<complexfloat>
+  - Image<complexdouble>
+
+RecordWithImages<T, U>: !record
+  fields:
+    image1: Image<T>
+    image2: Image<U>
+```
+
+Note that protocols cannot be generic types, but its steps may be made up of
+closed generic types (e.g. `Image<float>`).
 
 ## C++ Generated Code
 
@@ -564,7 +650,5 @@ call `Close()` on the generated reader or writer instance. Protocol readers have
 a `CopyTo()` method that allows you to copy the contents of the protocol to
 another protocol writer. This makes is easy to, say, read from an HDF5 file and
 send it
-
-## Command-Line Reference
 
 ## Performance Tips
