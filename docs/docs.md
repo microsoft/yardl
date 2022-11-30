@@ -276,7 +276,7 @@ HDF5 file. This requires only a few modifications to our code:
 
 ```
 
-You can inspect HDF5 file with HDFView or by running
+You can inspect the HDF5 file with HDFView or by running
 
 ```bash
 h5dump playground.h5
@@ -337,7 +337,6 @@ defined like this:
 
 ```yaml
 MyProtocol: !protocol
-
 sequence:
   a: int
   b: !stream
@@ -356,7 +355,8 @@ can call `Close()` on the generated reader or writer instance.
 
 Generated protocol readers have a `CopyTo()` method that allows you to copy the
 contents of the protocol to another protocol writer. This makes is easy to, say,
-read from an HDF5 file and send it to a network stream
+read from an HDF5 file and send the data in the binary format over a network
+connection.
 
 ### Records
 
@@ -448,9 +448,10 @@ Rec: !record
 
 The `null` type in the example above means that no value is also a possibility.
 
-The `?` suffix can appended to a type name as a shorthand to define an *optional
-type*, a special case of union. For example, `int?` is the same as `[null,
-int]`. Note that the expanded form has to be used for complex optional types:
+The `?` suffix can be appended to a type name as a shorthand to define an
+*optional type*, a special case of union. For example, `int?` is the same as
+`[null, int]`. Note that the expanded form has to be used for complex optional
+types:
 
 ```yaml
 Rec: !record
@@ -504,7 +505,7 @@ In generated C++ code, `vec1` maps to an `std::vector<int>` and `vec2` to an
 
 ### Arrays
 
-The `!array` tag denotes multidimensional arrays. They can have a fixed size:
+The `!array` tag denotes a multidimensional array. They can be of a fixed size:
 
 ```yaml
 MyRec: !record
@@ -514,7 +515,7 @@ MyRec: !record
       dimensions: [3, 4]
 ```
 
-In other cases, the size is not fixed but the number of dimensions is known:
+Or the size might not be fixed but the number of dimensions is known:
 
 ```yaml
 MyRec: !record
@@ -524,7 +525,7 @@ MyRec: !record
       dimensions: 2
 ```
 
-And finally, the number of dimensions may be unknown as well:
+Or finally, the number of dimensions may be unknown as well:
 
 ```yaml
 MyRec: !record
@@ -533,7 +534,8 @@ MyRec: !record
       items: float
 ```
 
-Dimensions can be given labels:
+Dimensions can be given names, which can be used in [computed
+field](#computed-fields) expressions.
 
 ```yaml
 MyRec: !record
@@ -552,13 +554,10 @@ MyRec: !record
         x:
         y:
 ```
-
-Dimension names can be used in [computed field](#computed-fields) expressions.
-
 ### Type Aliases
 
-We've seen records, enums, and protocols defined as top-level, named types. In fact,
-any type can be given an alias:
+We've seen records, enums, and protocols defined as top-level, named types, but
+any type can be given one or more aliases:
 
 ```yaml
 FloatArray: !array
@@ -593,7 +592,7 @@ MyRec: !record
     sizeOfXDimension: size(arrayField, 'x')
 ```
 
-To work with union types, you need to use a switch expressions with type pattern
+To work with union types, you need to use a switch expression with type pattern
 matching:
 
 ```yaml
