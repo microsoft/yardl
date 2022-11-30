@@ -6,7 +6,7 @@
 #include "serializers.h"
 
 namespace yardl::binary {
-static inline std::array<char, 4> MAGIC_BYTES = {'t', 'a', 'k', 'u'};
+static inline std::array<char, 5> MAGIC_BYTES = {'y', 'a', 'r', 'd', 'l'};
 static inline uint32_t kBinaryFormatVersionNumber = 1;
 
 inline void WriteHeader(CodedOutputStream& w, std::string& schema) {
@@ -16,7 +16,7 @@ inline void WriteHeader(CodedOutputStream& w, std::string& schema) {
 }
 
 inline void ReadHeader(CodedInputStream& r, std::string& schema) {
-  std::array<char, 4> magic_bytes{};
+  std::array<char, 5> magic_bytes{};
   r.ReadBytes(magic_bytes.data(), magic_bytes.size());
   if (magic_bytes != MAGIC_BYTES) {
     throw std::runtime_error("Data in the stream is not in the expected format.");
