@@ -23,8 +23,8 @@ var modelFileContents string
 func newInitCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:                   "init PACKAGE_NAME",
-		Short:                 "Create a package in the current directory.",
-		Long:                  `Create a package in the current directory.`,
+		Short:                 "Create a package in the current directory",
+		Long:                  `Create a package in the current directory`,
 		DisableFlagsInUseLine: true,
 		Args:                  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {

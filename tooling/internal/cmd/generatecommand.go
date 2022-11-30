@@ -69,7 +69,7 @@ func newGenerateCommand() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().BoolVarP(&flags.watch, "watch", "w", false, "Watch for changes and regenerate code.")
+	cmd.Flags().BoolVarP(&flags.watch, "watch", "w", false, "Regenerate code whenever a file in the current directory changes.")
 
 	return cmd
 }

@@ -19,18 +19,22 @@ func newRootCommand(version, commit string) *cobra.Command {
 	}
 
 	cmd := &cobra.Command{
-		Use:          "yardl",
-		SilenceUsage: true,
-		Version:      version,
+		Use: "yardl",
+		Long: `yardl generates domain types and serialization code from a simple schema language.
+
+Read more at https://github.com/microsoft/yardl`,
+		Version: version,
 	}
 
 	// hide --help as a flag in the usage output
 	cmd.PersistentFlags().BoolP("help", "h", false, "Print usage")
 	cmd.PersistentFlags().Lookup("help").Hidden = true
 
-	cmd.AddCommand(newValidateCommand())
-	cmd.AddCommand(newGenerateCommand())
+	cobra.EnableCommandSorting = false
+
 	cmd.AddCommand(newInitCommand())
+	cmd.AddCommand(newGenerateCommand())
+	cmd.AddCommand(newValidateCommand())
 
 	return cmd
 }

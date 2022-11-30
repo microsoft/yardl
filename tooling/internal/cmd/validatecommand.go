@@ -15,8 +15,8 @@ import (
 func newValidateCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:                   "validate",
-		Short:                 "Validate the package in the current directory.",
-		Long:                  `Validate the package in the current directory.`,
+		Short:                 "Validate the package in the current directory",
+		Long:                  `Validate the package in the current directory`,
 		DisableFlagsInUseLine: true,
 		Args:                  cobra.NoArgs,
 		Run: func(cmd *cobra.Command, args []string) {
