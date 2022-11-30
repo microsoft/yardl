@@ -1,10 +1,15 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+#include <iostream>
+
 #include "generated/hdf5/protocols.h"
 
 int main() {
-  smoketest::hdf5::MyProtocolWriter w("smoketest.h5");
+  std::string filename = "smoketest.h5";
+  std::remove(filename.c_str());
+
+  smoketest::hdf5::MyProtocolWriter w(filename);
 
   w.WriteHeader({"123"});
 
