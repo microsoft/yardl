@@ -15,8 +15,9 @@
   - [Type Aliases](#type-aliases)
   - [Computed Fields](#computed-fields)
   - [Generics](#generics)
-- [C++ Generated Code](#c-generated-code)
 - [Performance Tips](#performance-tips)
+  - [Batched Reads and Writes](#batched-reads-and-writes)
+  - [Use Fixed Data Types When Possible](#use-fixed-data-types-when-possible)
 
 ## Installation
 
@@ -349,6 +350,14 @@ In the example, the first step is a single integer named `a`. Following that
 will be a stream (named `b`) of zero or more floating-point numbers, and a
 stream (named `c`) of strings.
 
+It is an error to attempt to read or write a protocol's steps out of order. In
+order to verify that a protocol has been completely written to or read from, you
+can call `Close()` on the generated reader or writer instance.
+
+Generated protocol readers have a `CopyTo()` method that allows you to copy the
+contents of the protocol to another protocol writer. This makes is easy to, say,
+read from an HDF5 file and send it to a network stream
+
 ### Records
 
 Records have fields and, optionally, [computed fields](#computed-fields). In
@@ -640,15 +649,18 @@ RecordWithImages<T, U>: !record
 Note that protocols cannot be generic types, but its steps may be made up of
 closed generic types (e.g. `Image<float>`).
 
-## C++ Generated Code
-
-// TODO: Find the right place for this
-
-It is an error to attempt to read or write to a protocol out of order. In order
-to verify that a protocol has been completely written to or read from, you can
-call `Close()` on the generated reader or writer instance. Protocol readers have
-a `CopyTo()` method that allows you to copy the contents of the protocol to
-another protocol writer. This makes is easy to, say, read from an HDF5 file and
-send it
-
 ## Performance Tips
+
+### Batched Reads and Writes
+
+Generated protocol reader and writer classes have read and write methods for
+each step. When a step is a stream, there will also be overloads that read or
+write a batch of values as an `std::vector` in one go. For small data types,
+using batched reads and writes can make a dramatic difference in throughput,
+especially for HDF5 files.
+
+### Use Fixed Data Types When Possible
+
+For HDF5, using variable-length collections (like `!vector` without a length or
+`!array` without fixed dimension sizes) has lower throughput than their fixed-sized
+counterparts.
