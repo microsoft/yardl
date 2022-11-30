@@ -8,7 +8,6 @@
   - [Protocols](#protocols)
   - [Records](#records)
   - [Primitive Types](#primitive-types)
-  - [Optional Types](#optional-types)
   - [Unions](#unions)
   - [Enums](#enums)
   - [Vectors](#vectors)
@@ -71,7 +70,8 @@ will contain the yardl package. To quickly create a package you can run:
 yardl init playground
 ```
 
-This creates a package with the the namespace `Playground`, containing the following files:
+This creates a package with the the namespace `Playground`, containing the
+following files:
 
 ```text
 $ tree .
@@ -121,9 +121,10 @@ Sample: !record
 `!protocol`, `!stream` and `!record` are custom YAML tags, which describe the
 type of the YAML node that follows.
 
-`MyProtocol` is a protocol, which is a defined sequence of values that can be written to or read from a file or binary stream (e.g. over a network connection). This example protocol says that there will be one `Header`
-value followed by an unknown number of `Sample`s. `Header` and `Sample` are
-records.
+`MyProtocol` is a protocol, which is a defined sequence of values that can be
+written to or read from a file or binary stream (e.g. over a network
+connection). This example protocol says that there will be one `Header` value
+followed by an unknown number of `Sample`s. `Header` and `Sample` are records.
 
 To generate C++ code for this model, run this from the same directory:
 
@@ -232,8 +233,8 @@ Note that the binary file contains a JSON representation of the protocol's
 schema. This allows code that was not previously aware of this protocol to
 deserialize the contents.
 
-In addition to the compact binary format, we can write the protocol out to an HDF5 file.
-This requires only a few modifications to our code:
+In addition to the compact binary format, we can write the protocol out to an
+HDF5 file. This requires only a few modifications to our code:
 
 ```diff
   #include <iostream>
@@ -351,7 +352,8 @@ stream (named `c`) of strings.
 
 ### Records
 
-Records have fields and, optionally, [computed fields](#computed-fields). In generated C++ code, they map to structs.
+Records have fields and, optionally, [computed fields](#computed-fields). In
+generated C++ code, they map to structs.
 
 Fields have a name and can be of any primitive or compound type. For example:
 
@@ -436,18 +438,12 @@ Rec: !record
         items: double
 ```
 
-### Optional Types
+The `null` type in the example above means that no value is also a possibility.
 
-A value can be made optional by adding a `?` to its type name. For example:
-
-```yaml
-Rec: !record
-  fields:
-    optionalInt: int?
-```
-
-When a type cannot be represented with a single name, you can use the expanded
-form to represent an optional value:
+A special case of unions is when the cases are `null` or a single type. This is
+an optional type, for example `[null, int]`.  This can also be represented by
+the shorthand `int?` syntax. The `?` suffix can only be applied to a simple type
+name, and the expanded form has to be used for more complex types:
 
 ```yaml
 Rec: !record
@@ -457,8 +453,6 @@ Rec: !record
       - !vector
         items: int
 ```
-
-Note that `null` must be the first item in the sequence.
 
 ### Enums
 
@@ -486,7 +480,73 @@ UInt64Enum: !enum
 
 ### Vectors
 
+Vectors are one-dimensional arrays. They can optionally have a fixed length.
+
+```yaml
+MyRec: !record
+  fields:
+    vec1: !vector
+      items: int
+    vec2: !vector
+      items: int
+      length: 10
+```
+
+In generated C++ code, `vec1` maps to an `std::vector<int>` and `vec2` to an
+`std::array<int, 10>`
+
 ### Arrays
+
+The `!array` tag denotes multidimensional arrays. They can have a fixed size:
+
+```yaml
+MyRec: !record
+  fields:
+    fixedNdArray: !array
+      items: float
+      dimensions: [3, 4]
+```
+
+In other cases, the size is not fixed but the number of dimensions is known:
+
+```yaml
+MyRec: !record
+  fields:
+    ndArray: !array
+      items: float
+      dimensions: 2
+```
+
+And finally, the number of dimensions may be unknown as well:
+
+```yaml
+MyRec: !record
+  fields:
+    dynamicNdArray: !array
+      items: float
+```
+
+Dimensions can be given labels:
+
+```yaml
+MyRec: !record
+  fields:
+    fixedNdArray: !array
+      items: float
+      dimensions:
+        x: 3
+        y: 4
+    ndArray: !array
+      items: float
+      dimensions: [x, y]
+    ndArrayAlternate: !array
+      items: float
+      dimensions:
+        x:
+        y:
+```
+
+Dimension names can be used in [computed field](#computed-fields) expressions.
 
 ### Type Aliases
 
