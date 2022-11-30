@@ -170,6 +170,7 @@ create `playground.cc` that looks like this:
 
 int main() {
   std::string filename = "playground.bin";
+  std::remove(filename.c_str());
 
   {
     playground::binary::MyProtocolWriter writer(filename);
@@ -246,6 +247,7 @@ HDF5 file. This requires only a few modifications to our code:
   int main() {
 -   std::string filename = "playground.bin";
 +   std::string filename = "playground.h5";
+    std::remove(filename.c_str());
 
     {
 -      playground::binary::MyProtocolWriter writer(filename);
