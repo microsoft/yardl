@@ -65,6 +65,10 @@ func (t *GeneralizedType) MarshalJSON() ([]byte, error) {
 }
 
 func (tcs TypeCases) MarshalJSON() ([]byte, error) {
+	if len(tcs) == 1 {
+		return json.Marshal(tcs[0])
+	}
+
 	type Alias TypeCases
 	return json.Marshal(Alias(tcs))
 }

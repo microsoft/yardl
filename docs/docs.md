@@ -18,6 +18,18 @@
 - [Performance Tips](#performance-tips)
   - [Batched Reads and Writes](#batched-reads-and-writes)
   - [Use Fixed Data Types When Possible](#use-fixed-data-types-when-possible)
+- [Protocol Schema Reference](#protocol-schema-reference)
+  - [References to Primitive Types](#references-to-primitive-types)
+  - [References to Top-Level Types](#references-to-top-level-types)
+  - [Unions](#unions-1)
+  - [Vectors](#vectors-1)
+  - [Arrays](#arrays-1)
+  - [Streams](#streams)
+  - [Enums](#enums-1)
+  - [Records](#records-1)
+  - [Aliases](#aliases)
+  - [Protocols](#protocols-1)
+  - [Protocol Schema JSON](#protocol-schema-json)
 
 ## Installation
 
@@ -554,6 +566,7 @@ MyRec: !record
         x:
         y:
 ```
+
 ### Type Aliases
 
 We've seen records, enums, and protocols defined as top-level, named types, but
@@ -663,3 +676,296 @@ especially for HDF5 files.
 For HDF5, using variable-length collections (like `!vector` without a length or
 `!array` without fixed dimension sizes) has lower throughput than their fixed-sized
 counterparts.
+
+## Protocol Schema Reference
+
+A protocol's schema is embedded in a JSON format in both the HDF5 and binary
+formats. This format is informally described here.
+
+> **Warning**<br>
+> We might make breaking changes to this format before V1.
+
+The JSON schema is meant to be compact and therefore it does not contain of the
+comments that may be in the Yardl, nor does it contain computed fields, since
+those are not needed for deserialization.
+
+### References to Primitive Types
+
+Primitive type references are represented by name as a JSON string, e.g.
+`"int32"` or `"string"`
+
+### References to Top-Level Types
+
+References to top-level types (records, enums, and aliases) are represented by
+their namespaced name as a JSON string, e.g. `"MyNamespace.MyRecord"` or
+`"MyNamespace.MyEnum"`.
+
+### Unions
+
+Unions are represented as a JSON array:
+
+```JSON
+[
+  {
+    "label": "int32",
+    "type": "int32"
+  },
+  {
+    "label": "float32",
+    "type": "float32"
+  }
+]
+```
+
+The `label` field a unique name given to each union case, derived from its type name.
+
+If `null` is one of the cases, then it is represented by `null` in the json too:
+
+```JSON
+[
+  null,
+  {
+    "label": "int32",
+    "type": "int32"
+  },
+  {
+    "label": "float32",
+    "type": "float32"
+  }
+]
+```
+
+For the special case of an optional type, a label for the non-null case is
+omitted and the object is simplified to its `type` value:
+
+```JSON
+[
+  null,
+  "int32"
+]
+```
+
+### Vectors
+
+```JSON
+{
+  "vector": {
+    "items": "int32",
+    "length": 10
+  }
+}
+```
+
+The `length` field is only present if it is specified in the Yardl definition.
+
+### Arrays
+
+A fixed array with dimensions `x` and `y`:
+
+```JSON
+{
+  "array": {
+    "items": "int32",
+    "dimensions": [
+      {
+        "name": "x",
+        "length": 3
+      },
+      {
+        "name": "y",
+        "length": 4
+      }
+    ]
+  }
+}
+```
+
+An non-fixed array with dimensions `x` and `y`:
+
+```JSON
+{
+  "array": {
+    "items": "int32",
+    "dimensions": [
+      {
+        "name": "x"
+      },
+      {
+        "name": "y"
+      }
+    ]
+  }
+}
+```
+
+A non-fixed array with two unnamed dimensions:
+
+```JSON
+{
+  "array": {
+    "items": "int32",
+    "dimensions": 2
+  }
+}
+```
+
+And finally, an array with an unknown number of dimensions:
+
+```JSON
+{
+  "array": {
+    "items": "int32"
+  }
+}
+```
+
+### Streams
+
+Streams in protocols are represented as:
+
+```JSON
+{
+  "stream": {
+    "items": "int32",
+  }
+}
+```
+
+### Enums
+
+Enums are top-level types and cannot be declared inline (like in an record field)
+
+An example enum that looks like this:
+
+```yaml
+Animals: !enum
+  base: uint8
+  values: [cat, dog]
+```
+
+Is represented in JSON as:
+
+```JSON
+{
+  "enum": {
+    "name": "Animals",
+    "base": "uint8",
+    "values": [
+      {
+        "symbol": "cat",
+        "value": 0
+      },
+      {
+        "symbol": "dog",
+        "value": 1
+      }
+    ]
+  }
+}
+```
+
+The `base` field is only present in the JSON id it is specified in the Yardl.
+
+### Records
+
+Records are top-level types that cannot be declared inline.
+
+An example generic record:
+
+```yaml
+MyTuple<T1, T2>: !record
+  fields:
+    f1: T1
+    f2: T2
+```
+
+Would look like this:
+
+```JSON
+{
+  "record": {
+    "name": "MyTuple",
+    "typeParameters": [
+      "T1",
+      "T2"
+    ],
+    "fields": [
+      {
+        "name": "f1",
+        "type": "T1"
+      },
+      {
+        "name": "f2",
+        "type": "T2"
+      }
+    ]
+  }
+}
+```
+
+Computed fields are omitted from the protocol since they are not used during
+deserialization.
+
+### Aliases
+
+A simple type alias:
+
+```yaml
+MyString: string
+```
+
+Is converted to:
+
+```JSON
+{
+  "alias": {
+    "name": "MyString",
+    "type": "string"
+  }
+}
+```
+
+### Protocols
+
+A protocol that looks like this:
+
+```yaml
+MyProtocol : !protocol
+  sequence:
+    a: string
+    b: !stream
+      items: double
+```
+
+Is represented like this:
+
+```JSON
+{
+  "name": "MyProtocol",
+  "sequence": [
+    {
+      "name": "a",
+      "type": "string"
+    },
+    {
+      "name": "b",
+      "type": {
+        "stream": {
+          "items": "float64"
+        }
+      }
+    }
+  ]
+}
+```
+### Protocol Schema JSON
+
+The json that is embedded in the binary or HDF5 format contains the protocol
+definition (defined above) and the transitive closure of named types used by the protocol.
+
+```JSON
+{
+  "protocol": <protocol>,
+  "types": [ <type>, ... ]
+}
+```
