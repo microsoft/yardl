@@ -29,7 +29,7 @@
   - [Records](#records-1)
   - [Aliases](#aliases)
   - [Protocols](#protocols-1)
-  - [Protocol Schema JSON](#protocol-schema-json)
+  - [Top-Level Schema](#top-level-schema)
 
 ## Installation
 
@@ -62,7 +62,7 @@ conda install -c conda-forge hdf5 xtensor howardhinnant_date
 
 If using [vcpkg](https://vcpkg.io/en/index.html), you can use a manifest file
 that looks like the one
-[here](../smoketest/cpp/vcpkg.json).
+[here](../smoketest/cpp/vcpkg.JSON).
 
 The `yardl generate` command emits a `CMakeLists.txt` that defines an
 object library and the necessary `find_package()` and `target_link_libraries()`
@@ -680,14 +680,15 @@ counterparts.
 ## Protocol Schema Reference
 
 A protocol's schema is embedded in a JSON format in both the HDF5 and binary
-formats. This format is informally described here.
+formats. This JSON format is informally described here.
 
 > **Warning**<br>
 > We might make breaking changes to this format before V1.
 
 The JSON schema is meant to be compact and therefore it does not contain of the
 comments that may be in the Yardl, nor does it contain computed fields, since
-those are not needed for deserialization.
+those are not needed for deserialization. We chose JSON because it can be easily
+parsed at runtime during deserialization but also easily read.
 
 ### References to Primitive Types
 
@@ -717,9 +718,10 @@ Unions are represented as a JSON array:
 ]
 ```
 
-The `label` field a unique name given to each union case, derived from its type name.
+The `label` field a unique name given to each union case, derived from its type
+name. The labels are used in HDF5 the HDF5 format.
 
-If `null` is one of the cases, then it is represented by `null` in the json too:
+If `null` is one of the cases, then it is represented by `null` in the JSON as well:
 
 ```JSON
 [
@@ -747,6 +749,8 @@ omitted and the object is simplified to its `type` value:
 
 ### Vectors
 
+Vectors have the following representation:
+
 ```JSON
 {
   "vector": {
@@ -760,7 +764,7 @@ The `length` field is only present if it is specified in the Yardl definition.
 
 ### Arrays
 
-A fixed array with dimensions `x` and `y`:
+A fixed array with dimensions `x` and `y` would look like this:
 
 ```JSON
 {
@@ -780,7 +784,8 @@ A fixed array with dimensions `x` and `y`:
 }
 ```
 
-An non-fixed array with dimensions `x` and `y`:
+A non-fixed array with dimensions `x` and `y` would look like the above but
+without the `length` field:
 
 ```JSON
 {
@@ -798,7 +803,7 @@ An non-fixed array with dimensions `x` and `y`:
 }
 ```
 
-A non-fixed array with two unnamed dimensions:
+A non-fixed array with two unnamed dimensions would look like this:
 
 ```JSON
 {
@@ -833,9 +838,9 @@ Streams in protocols are represented as:
 
 ### Enums
 
-Enums are top-level types and cannot be declared inline (like in an record field)
+Enums are top-level types and cannot be declared inline.
 
-An example enum that looks like this:
+An example enum that looks like this in Yardl:
 
 ```yaml
 Animals: !enum
@@ -864,7 +869,7 @@ Is represented in JSON as:
 }
 ```
 
-The `base` field is only present in the JSON id it is specified in the Yardl.
+The `base` field is only present in the JSON if it is specified in the Yardl.
 
 ### Records
 
@@ -925,9 +930,34 @@ Is converted to:
 }
 ```
 
+If an alias is generic:
+
+```yaml
+MyVector<T> : !vector
+  items: T
+```
+
+Its JSON looks like this:
+
+```JSON
+{
+  "alias": {
+    "name": "MyVector",
+    "typeParameters": [
+      "T"
+    ],
+    "type": {
+      "vector": {
+        "items": "T"
+      }
+    }
+  }
+}
+```
+
 ### Protocols
 
-A protocol that looks like this:
+A protocol that looks like this in Yardl:
 
 ```yaml
 MyProtocol : !protocol
@@ -937,7 +967,7 @@ MyProtocol : !protocol
       items: double
 ```
 
-Is represented like this:
+Is represented in JSON like this:
 
 ```JSON
 {
@@ -958,10 +988,12 @@ Is represented like this:
   ]
 }
 ```
-### Protocol Schema JSON
 
-The json that is embedded in the binary or HDF5 format contains the protocol
-definition (defined above) and the transitive closure of named types used by the protocol.
+### Top-Level Schema
+
+The JSON that is embedded in the binary or HDF5 format contains the protocol
+definition (defined above) and the transitive closure of named types (records,
+enums, and aliases) used by the protocol.
 
 ```JSON
 {
