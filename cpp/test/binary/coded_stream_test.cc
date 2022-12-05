@@ -277,19 +277,19 @@ TEST(CodedStreamTests, FloatingPoint) {
   {
     CodedOutputStream w(ss, 10);
     for (int i = 0; i < 15; i++) {
-      WriteFloat(w, static_cast<float>(i) - std::numeric_limits<float>::epsilon());
-      WriteDouble(w, static_cast<double>(i) - std::numeric_limits<double>::epsilon());
+      WriteFloatingPoint(w, static_cast<float>(i) - std::numeric_limits<float>::epsilon());
+      WriteFloatingPoint(w, static_cast<double>(i) - std::numeric_limits<double>::epsilon());
     }
   }
 
   CodedInputStream r(ss, 10);
   for (int i = 0; i < 15; i++) {
     float val1;
-    ReadFloat(r, val1);
+    ReadFloatingPoint(r, val1);
     ASSERT_EQ(static_cast<float>(i) - std::numeric_limits<float>::epsilon(), val1);
 
     double val2;
-    ReadDouble(r, val2);
+    ReadFloatingPoint(r, val2);
     ASSERT_EQ(static_cast<double>(i) - std::numeric_limits<double>::epsilon(), val2);
   }
 
@@ -329,7 +329,7 @@ TEST(CodedStreamTests, Vector) {
     CodedOutputStream w(ss, 10);
     WriteVector<int, &WriteInteger>(w, v1);
     WriteVector<std::string, &WriteString>(w, v2);
-    WriteVector<float, &WriteFloat>(w, v3);
+    WriteVector<float, &WriteFloatingPoint>(w, v3);
   }
 
   CodedInputStream r(ss, 10);
@@ -342,7 +342,7 @@ TEST(CodedStreamTests, Vector) {
   ASSERT_EQ(v2, v2_read);
 
   std::vector<float> v3_read;
-  ReadVector<float, &ReadFloat>(r, v3_read);
+  ReadVector<float, &ReadFloatingPoint>(r, v3_read);
   ASSERT_EQ(v3, v3_read);
 
   r.VerifyFinished();
@@ -357,7 +357,7 @@ TEST(CodedStreamTests, Array) {
     CodedOutputStream w(ss, 10);
     WriteArray<int, &WriteInteger, 10>(w, a1);
     WriteArray<std::string, &WriteString, 6>(w, a2);
-    WriteArray<float, &WriteFloat, 10>(w, a3);
+    WriteArray<float, &WriteFloatingPoint, 10>(w, a3);
   }
 
   CodedInputStream r(ss, 10);
@@ -370,7 +370,7 @@ TEST(CodedStreamTests, Array) {
   ASSERT_EQ(a2, v2_read);
 
   std::array<float, 10> v3_read;
-  ReadArray<float, &ReadFloat, 10>(r, v3_read);
+  ReadArray<float, &ReadFloatingPoint, 10>(r, v3_read);
   ASSERT_EQ(a3, v3_read);
 
   r.VerifyFinished();
@@ -383,7 +383,7 @@ TEST(CodedStreamTests, DynamicNDArray) {
   {
     CodedOutputStream w(ss, 10);
     WriteDynamicNDArray<int, &WriteInteger>(w, a1);
-    WriteDynamicNDArray<float, &WriteFloat>(w, a2);
+    WriteDynamicNDArray<float, &WriteFloatingPoint>(w, a2);
   }
 
   CodedInputStream r(ss, 10);
@@ -392,7 +392,7 @@ TEST(CodedStreamTests, DynamicNDArray) {
   ASSERT_EQ(a1, a1_read);
 
   yardl::DynamicNDArray<float> a2_read;
-  ReadDynamicNDArray<float, &ReadFloat>(r, a2_read);
+  ReadDynamicNDArray<float, &ReadFloatingPoint>(r, a2_read);
   ASSERT_EQ(a2, a2_read);
 
   r.VerifyFinished();
@@ -405,7 +405,7 @@ TEST(CodedStreamTests, NDArray) {
   {
     CodedOutputStream w(ss, 10);
     WriteNDArray<int, &WriteInteger, 2>(w, a1);
-    WriteNDArray<float, &WriteFloat, 2>(w, a2);
+    WriteNDArray<float, &WriteFloatingPoint, 2>(w, a2);
   }
 
   CodedInputStream r(ss, 10);
@@ -414,7 +414,7 @@ TEST(CodedStreamTests, NDArray) {
   ASSERT_EQ(a1, a1_read);
 
   yardl::NDArray<float, 2> a2_read;
-  ReadNDArray<float, &ReadFloat, 2>(r, a2_read);
+  ReadNDArray<float, &ReadFloatingPoint, 2>(r, a2_read);
   ASSERT_EQ(a2, a2_read);
 
   r.VerifyFinished();
@@ -427,7 +427,7 @@ TEST(CodedStreamTests, FixedNDArray) {
   {
     CodedOutputStream w(ss, 10);
     WriteFixedNDArray<int, &WriteInteger, 2, 3>(w, a1);
-    WriteFixedNDArray<float, &WriteFloat, 2, 3>(w, a2);
+    WriteFixedNDArray<float, &WriteFloatingPoint, 2, 3>(w, a2);
   }
 
   CodedInputStream r(ss, 10);
@@ -436,7 +436,7 @@ TEST(CodedStreamTests, FixedNDArray) {
   ASSERT_EQ(a1, a1_read);
 
   yardl::FixedNDArray<float, 2, 3> a2_read;
-  ReadFixedNDArray<float, &ReadFloat, 2, 3>(r, a2_read);
+  ReadFixedNDArray<float, &ReadFloatingPoint, 2, 3>(r, a2_read);
   ASSERT_EQ(a2, a2_read);
 
   r.VerifyFinished();
@@ -449,7 +449,7 @@ TEST(CodedStreamTests, BatchedReads_TriviallySerializable_SmallBatches) {
   std::stringstream ss;
   {
     CodedOutputStream w(ss);
-    WriteVector<float, &WriteFloat>(w, expected);
+    WriteVector<float, &WriteFloatingPoint>(w, expected);
     WriteInteger(w, 0);
   }
 
@@ -458,7 +458,7 @@ TEST(CodedStreamTests, BatchedReads_TriviallySerializable_SmallBatches) {
   std::vector<float> inputBuf(7);
   std::vector<float> actual;
   do {
-    ReadBlocksIntoVector<float, &ReadFloat>(r, current_block_remaining, inputBuf);
+    ReadBlocksIntoVector<float, &ReadFloatingPoint>(r, current_block_remaining, inputBuf);
     actual.insert(actual.end(), inputBuf.begin(), inputBuf.end());
 
   } while (current_block_remaining > 0);
@@ -499,14 +499,14 @@ TEST(CodedStreamTests, BatchedReads_TriviallySerializable_SingleBatchExactSize) 
   std::stringstream ss;
   {
     CodedOutputStream w(ss);
-    WriteVector<float, &WriteFloat>(w, expected);
+    WriteVector<float, &WriteFloatingPoint>(w, expected);
     WriteInteger(w, 0);
   }
 
   CodedInputStream r(ss);
   size_t current_block_remaining = 0;
   std::vector<float> actual(128);
-  ReadBlocksIntoVector<float, &ReadFloat>(r, current_block_remaining, actual);
+  ReadBlocksIntoVector<float, &ReadFloatingPoint>(r, current_block_remaining, actual);
   ASSERT_EQ(0, current_block_remaining);
   ASSERT_EQ(expected, actual);
   r.VerifyFinished();
@@ -519,14 +519,14 @@ TEST(CodedStreamTests, BatchedReads_TriviallySerializable_SingleBatchLargerThanN
   std::stringstream ss;
   {
     CodedOutputStream w(ss);
-    WriteVector<float, &WriteFloat>(w, expected);
+    WriteVector<float, &WriteFloatingPoint>(w, expected);
     WriteInteger(w, 0);
   }
 
   CodedInputStream r(ss);
   size_t current_block_remaining = 0;
   std::vector<float> actual(129);
-  ReadBlocksIntoVector<float, &ReadFloat>(r, current_block_remaining, actual);
+  ReadBlocksIntoVector<float, &ReadFloatingPoint>(r, current_block_remaining, actual);
   ASSERT_EQ(0, current_block_remaining);
   ASSERT_EQ(expected, actual);
   r.VerifyFinished();

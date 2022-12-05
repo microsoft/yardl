@@ -19,31 +19,6 @@
 namespace yardl::binary {
 
 /**
- * bit_cast() is used below to perform bitwise casts between floating point and
- * integer types. This should be used instead of expressions like
- * reinterpret_cast<int&>(float_value) because accessing the result of
- * the latter is technically undefined behavior.
- */
-#if __cplusplus >= 202002L
-using std::bit_cast;
-#else
-template <typename Dest,
-          typename Source,
-          typename std::enable_if_t<
-              sizeof(Dest) == sizeof(Source) &&
-                  std::is_trivially_copyable_v<Source> &&
-                  std::is_trivially_copyable_v<Dest> &&
-                  std::is_default_constructible_v<Dest>,
-              bool> = true>
-inline Dest bit_cast(Source const& source) {
-  Dest dest;
-  memcpy(static_cast<void*>(std::addressof(dest)),
-         static_cast<void const*>(std::addressof(source)), sizeof(dest));
-  return dest;
-}
-#endif
-
-/**
  * @brief Function pointer type for writing a single value to a stream.
  *
  * @tparam T the type of the value to write
@@ -164,46 +139,20 @@ inline void ReadInteger(CodedInputStream& stream, T& value) {
   stream.ReadVarInt64(value);
 }
 
-inline void WriteFloat(CodedOutputStream& stream, float const& value) {
-  stream.WriteFixedInteger(bit_cast<uint32_t>(value));
+template <typename T, std::enable_if_t<std::is_floating_point_v<T> ||
+                                           std::is_same_v<T, std::complex<float>> ||
+                                           std::is_same_v<T, std::complex<double>>,
+                                       bool> = true>
+inline void WriteFloatingPoint(CodedOutputStream& stream, T const& value) {
+  stream.WriteBytes(reinterpret_cast<char const*>(std::addressof(value)), sizeof(value));
 }
 
-inline void ReadFloat(CodedInputStream& stream, float& value) {
-  uint32_t tmp;
-  stream.ReadFixedInteger(tmp);
-  value = bit_cast<float>(tmp);
-}
-
-inline void WriteDouble(CodedOutputStream& stream, double const& value) {
-  stream.WriteFixedInteger(bit_cast<uint64_t>(value));
-}
-
-inline void ReadDouble(CodedInputStream& stream, double& value) {
-  uint64_t tmp;
-  stream.ReadFixedInteger(tmp);
-  value = bit_cast<double>(tmp);
-}
-
-inline void WriteComplexFloat(CodedOutputStream& stream, std::complex<float> const& value) {
-  auto arr = bit_cast<std::array<uint32_t, 2>>(value);
-  stream.WriteBytes(arr.data(), sizeof(arr));
-}
-
-inline void ReadComplexFloat(CodedInputStream& stream, std::complex<float>& value) {
-  std::array<uint32_t, 2> arr;
-  stream.ReadBytes(arr.data(), sizeof(arr));
-  value = bit_cast<std::complex<float>>(arr);
-}
-
-inline void WriteComplexDouble(CodedOutputStream& stream, std::complex<double> const& value) {
-  auto arr = bit_cast<std::array<uint64_t, 2>>(value);
-  stream.WriteBytes(arr.data(), sizeof(arr));
-}
-
-inline void ReadComplexDouble(CodedInputStream& stream, std::complex<double>& value) {
-  std::array<uint64_t, 2> arr;
-  stream.ReadBytes(arr.data(), sizeof(arr));
-  value = bit_cast<std::complex<double>>(arr);
+template <typename T, std::enable_if_t<std::is_floating_point_v<T> ||
+                                           std::is_same_v<T, std::complex<float>> ||
+                                           std::is_same_v<T, std::complex<double>>,
+                                       bool> = true>
+inline void ReadFloatingPoint(CodedInputStream& stream, T& value) {
+  stream.ReadBytes(reinterpret_cast<char*>(std::addressof(value)), sizeof(value));
 }
 
 inline void WriteString(CodedOutputStream& stream, std::string const& value) {
