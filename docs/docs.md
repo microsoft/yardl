@@ -18,7 +18,7 @@
 - [Performance Tips](#performance-tips)
   - [Batched Reads and Writes](#batched-reads-and-writes)
   - [Use Fixed Data Types When Possible](#use-fixed-data-types-when-possible)
-- [Protocol Schema Reference](#protocol-schema-reference)
+- [Protocol Schema JSON Reference](#protocol-schema-json-reference)
   - [References to Primitive Types](#references-to-primitive-types)
   - [References to Top-Level Types](#references-to-top-level-types)
   - [Unions](#unions-1)
@@ -690,7 +690,7 @@ For HDF5, using variable-length collections (like `!vector` without a length or
 `!array` without fixed dimension sizes) has lower throughput than their fixed-sized
 counterparts.
 
-## Protocol Schema Reference
+## Protocol Schema JSON Reference
 
 A protocol's schema is embedded in a JSON format in both the HDF5 and binary
 encodings. This JSON format is informally described here.
@@ -698,10 +698,10 @@ encodings. This JSON format is informally described here.
 > **Warning**<br>
 > We might make breaking changes to this format before V1.
 
-The JSON schema is meant to be compact and therefore it does not contain of the
-comments that may be in the Yardl, nor does it contain computed fields, since
-those are not needed for deserialization. We chose JSON because it can be easily
-parsed at runtime during deserialization but also easily read.
+The JSON schema is meant to be provide enough information for deserializers to
+understand the schema at runtime, and therefore does not contain the comments
+that may be in the Yardl, nor does it contain computed fields, since those are
+not needed for deserialization.
 
 ### References to Primitive Types
 
@@ -731,10 +731,10 @@ Unions are represented as a JSON array:
 ]
 ```
 
-The `label` field a unique name given to each union case, derived from its type
-name. The labels are used in HDF5 the HDF5 format.
+The `label` field is unique name automatically assigned to each union case,
+derived from its type name. The labels are used in the HDF5 format.
 
-If `null` is one of the cases, then it is represented by `null` in the JSON as well:
+If `null` is one of the cases, it is represented by `null` in the JSON as well:
 
 ```JSON
 [
@@ -751,7 +751,8 @@ If `null` is one of the cases, then it is represented by `null` in the JSON as w
 ```
 
 For the special case of an optional type, a label for the non-null case is
-omitted and the object is simplified to its `type` value:
+omitted and the object is simplified to its `type` value, since the label is not
+used.
 
 ```JSON
 [
@@ -773,7 +774,7 @@ Vectors have the following representation:
 }
 ```
 
-The `length` field is only present if it is specified in the Yardl definition.
+The `length` field is only present if it is given in the Yardl definition.
 
 ### Arrays
 
@@ -921,7 +922,7 @@ Would look like this:
 }
 ```
 
-Computed fields are omitted from the protocol since they are not used during
+Computed fields are omitted from the JSON since they are not used during
 deserialization.
 
 ### Aliases
@@ -950,7 +951,7 @@ MyVector<T> : !vector
   items: T
 ```
 
-Its JSON looks like this:
+its JSON looks like this:
 
 ```JSON
 {
@@ -980,7 +981,7 @@ MyProtocol : !protocol
       items: double
 ```
 
-Is represented in JSON like this:
+is represented in JSON like this:
 
 ```JSON
 {
@@ -1015,28 +1016,31 @@ enums, and aliases) used by the protocol.
 }
 ```
 
-
 ## Compact Binary Encoding Reference
 
-The binary file starts with five magic bytes: `0x79 0x61 0x72 0x64 0x6c` (ASCII
-'y' 'a' 'r' 'd' 'l') followed by four bytes containing a little-endian 32-bit
-integer representing the encoding version number (currently 1). The the protocol
-schema in JSON format is encoded using the string format described below.
+> **Warning**<br>
+> We might make breaking changes to this format before V1.
 
-After the schema, the protocol step values are written. The sections below
-describe how each data type is encoded.
+The binary format starts with five magic bytes: `0x79 0x61 0x72 0x64 0x6c`
+(ASCII 'y' 'a' 'r' 'd' 'l') followed by four bytes containing a little-endian
+32-bit integer representing the encoding version number (currently 1). Then the
+[protocol schema](#protocol-schema-reference) in JSON format written as a string
+in the format described below.
+
+After the schema, the protocol step values are written in order. The sections
+below describe how each data type is encoded.
 
 ### Booleans
 
 Booleans are encoded as a byte with the value 0 or 1. However, vectors or arrays
-of booleans could use a single bit per value in order to save space. This is
-being tracked [here](https://github.com/microsoft/yardl/issues/19).
+of booleans could use a single bit per value in order to save space. This issue
+is being tracked [here](https://github.com/microsoft/yardl/issues/19).
 
 ### Unsigned Integers
 
 Unsigned integers (`uint8`, `uint16`, `uint32`, `uint64`, and `size`) are
-written as variable-width integers, or *varints*, in same way as Protocol
-Buffers. The high-order bit of each byte serves as a continuation and indicates
+written as variable-width integers, or *varints* (in same way as Protocol
+Buffers). The high-order bit of each byte serves as a continuation and indicates
 whether more bytes remain. The lower seven bits of each byte are appended as
 increasingly significant bits in the resulting value.
 
@@ -1065,7 +1069,7 @@ numbers as `2 * n` and negative numbers as `2 * abs(n) + 1`. This way, small
 negative values can still be represented with a smaller number of bytes when
 encoded as a varint.
 
-Some examples
+Some examples:
 
 | Original value | Encoded value |
 | -------------- | ------------- |
@@ -1077,20 +1081,20 @@ Some examples
 
 ### Floating-Point Numbers
 
-`float32` and `float64` are written as a little-endian IEEE 754 bytes of length
+`float32` and `float64` are written as a little-endian IEEE 754 of byte length
 4 and 8, respectively. `complexfloat32` and `complexfloat64` write out first the
 real part followed by the imaginary part.
 
 ### Strings
 
-For strings, the length of the UTF8-encoded bytes is written out as an unsigned
-varint, followed by the UTF8-encoded bytes.
+For strings, the length of the UTF8-encoded bytes is first written out as an
+unsigned varint, followed by the UTF8-encoded bytes.
 
-For example, the string "hello" would be encoded as `Ox05 Ox68 Ox65 Ox6c Ox6c Ox6f`.
+For example, the string "hello" is encoded as `Ox05 Ox68 Ox65 Ox6c Ox6c Ox6f`.
 
 ### Dates, Times, and DateTimes
 
-Dates are written as an signed varint number of days since the epoch.
+Dates are written as a signed varint number of days since the epoch.
 
 Times are written an a signed varint number of nanoseconds since midnight.
 
@@ -1101,7 +1105,8 @@ DateTimes are written as a signed varint number of nanoseconds since the epoch.
 Unions are written as the 0-based index of the type followed by the
 value.
 
-The index is and written as an unsigned varint and the value if skipped if the type is `null`.
+The index is written as an unsigned varint and the value if skipped if the type
+is `null`.
 
 Example values for the union `[null, uint, float]`:
 
@@ -1137,18 +1142,26 @@ format is:
 2. Each dimension length as an unsigned varint
 3. The values of the array in row-major order
 
-If the number of dimensions is given in the, (1) is omitted. If the length of each dimension is specified, (1) and (2) are omitted.
+If the number of dimensions is given in the schema, (1) is omitted. If the
+length of each dimension is specified, (1) and (2) are omitted.
 
-A future version of the binary format may support column-major layout. See discussion [here](https://github.com/microsoft/yardl/issues/23).
+A future version of the binary format may support column-major layout. See
+discussion [here](https://github.com/microsoft/yardl/issues/23).
 
 ### Enums
 
-Enums are written as varint encoding of the integer value of the enum. Note that the value is signed if the base type is signed, which is the case if the `base` properly is not specified.
+Enums are written as a varint encoding of the integer value of the enum. Note
+that the value is signed if the base type is signed, which is the default case
+if the `base` properly is not specified.
 
 ### Records
 
-Records are encoded as the concatenation of the value of its fields, in the order they appear in the schema.
+Records are encoded as the concatenation of the value of its fields, in the
+order they appear in the schema.
 
 ### Streams
 
-Streams are written as one or more blocks. Each block starts with a length as an unsigned varint followed by that number of values. The last block will have length 0 and will simply be `0x0`, which signals that the stream is complete. Only the last block can have length 0.
+Streams are written as one or more blocks. Each block starts with a length as an
+unsigned varint followed by that number of values. The last block will have
+length 0 and will simply be `0x0`, which signals that the stream is complete.
+Only the last block can have length 0.
