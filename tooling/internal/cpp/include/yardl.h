@@ -35,7 +35,7 @@ using FixedNDArray = xt::xtensor_fixed<T, xt::xshape<Dims...>,
  * @tparam N the number of dimensions
  */
 template <typename T, size_t N>
-using NDArray = xt::xtensor<T, N>;
+using NDArray = xt::xtensor<T, N, xt::layout_type::row_major>;
 
 /**
  * @brief  A multidimensional array where the number of dimensions
@@ -44,7 +44,7 @@ using NDArray = xt::xtensor<T, N>;
  * @tparam T the element type
  */
 template <typename T>
-using DynamicNDArray = xt::xarray<T>;
+using DynamicNDArray = xt::xarray<T, xt::layout_type::row_major>;
 
 #if __cplusplus < 202002L
 /**
