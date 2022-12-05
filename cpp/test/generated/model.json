@@ -73,9 +73,7 @@
                 "name": "data",
                 "type": {
                   "array": {
-                    "items": [
-                      "complexfloat32"
-                    ],
+                    "items": "complexfloat32",
                     "dimensions": 2
                   }
                 }
@@ -84,9 +82,7 @@
                 "name": "trajectory",
                 "type": {
                   "array": {
-                    "items": [
-                      "float32"
-                    ],
+                    "items": "float32",
                     "dimensions": 2
                   }
                 }
@@ -254,9 +250,7 @@
                 "name": "defaultVector",
                 "type": {
                   "vector": {
-                    "items": [
-                      "int32"
-                    ]
+                    "items": "int32"
                   }
                 }
               },
@@ -264,9 +258,7 @@
                 "name": "defaultVectorFixedLength",
                 "type": {
                   "vector": {
-                    "items": [
-                      "int32"
-                    ],
+                    "items": "int32",
                     "length": 3
                   }
                 }
@@ -275,16 +267,12 @@
                 "name": "vectorOfVectors",
                 "type": {
                   "vector": {
-                    "items": [
-                      {
-                        "vector": {
-                          "items": [
-                            "int32"
-                          ],
-                          "length": 2
-                        }
+                    "items": {
+                      "vector": {
+                        "items": "int32",
+                        "length": 2
                       }
-                    ]
+                    }
                   }
                 }
               }
@@ -299,9 +287,7 @@
                 "name": "defaultArray",
                 "type": {
                   "array": {
-                    "items": [
-                      "int32"
-                    ]
+                    "items": "int32"
                   }
                 }
               },
@@ -309,9 +295,7 @@
                 "name": "defaultArrayWithEmptyDimension",
                 "type": {
                   "array": {
-                    "items": [
-                      "int32"
-                    ]
+                    "items": "int32"
                   }
                 }
               },
@@ -319,9 +303,7 @@
                 "name": "rank1Array",
                 "type": {
                   "array": {
-                    "items": [
-                      "int32"
-                    ],
+                    "items": "int32",
                     "dimensions": 1
                   }
                 }
@@ -330,9 +312,7 @@
                 "name": "rank2Array",
                 "type": {
                   "array": {
-                    "items": [
-                      "int32"
-                    ],
+                    "items": "int32",
                     "dimensions": 2
                   }
                 }
@@ -341,9 +321,7 @@
                 "name": "rank2ArrayWithNamedDimensions",
                 "type": {
                   "array": {
-                    "items": [
-                      "int32"
-                    ],
+                    "items": "int32",
                     "dimensions": [
                       {
                         "name": "a"
@@ -359,9 +337,7 @@
                 "name": "rank2FixedArray",
                 "type": {
                   "array": {
-                    "items": [
-                      "int32"
-                    ],
+                    "items": "int32",
                     "dimensions": [
                       {
                         "length": 3
@@ -377,9 +353,7 @@
                 "name": "rank2FixedArrayWithNamedDimensions",
                 "type": {
                   "array": {
-                    "items": [
-                      "int32"
-                    ],
+                    "items": "int32",
                     "dimensions": [
                       {
                         "name": "a",
@@ -397,9 +371,7 @@
                 "name": "dynamicArray",
                 "type": {
                   "array": {
-                    "items": [
-                      "int32"
-                    ]
+                    "items": "int32"
                   }
                 }
               },
@@ -407,16 +379,12 @@
                 "name": "arrayOfVectors",
                 "type": {
                   "array": {
-                    "items": [
-                      {
-                        "vector": {
-                          "items": [
-                            "int32"
-                          ],
-                          "length": 4
-                        }
+                    "items": {
+                      "vector": {
+                        "items": "int32",
+                        "length": 4
                       }
-                    ],
+                    },
                     "dimensions": [
                       {
                         "length": 5
@@ -457,9 +425,7 @@
                 "name": "a",
                 "type": {
                   "vector": {
-                    "items": [
-                      "TestModel.SimpleRecord"
-                    ]
+                    "items": "TestModel.SimpleRecord"
                   }
                 }
               },
@@ -499,9 +465,7 @@
                   null,
                   {
                     "vector": {
-                      "items": [
-                        "int32"
-                      ]
+                      "items": "int32"
                     }
                   }
                 ]
@@ -517,9 +481,7 @@
                 "name": "fixedIntVector",
                 "type": {
                   "vector": {
-                    "items": [
-                      "int32"
-                    ],
+                    "items": "int32",
                     "length": 5
                   }
                 }
@@ -528,9 +490,7 @@
                 "name": "fixedSimpleRecordVector",
                 "type": {
                   "vector": {
-                    "items": [
-                      "TestModel.SimpleRecord"
-                    ],
+                    "items": "TestModel.SimpleRecord",
                     "length": 3
                   }
                 }
@@ -539,9 +499,7 @@
                 "name": "fixedRecordWithVlensVector",
                 "type": {
                   "vector": {
-                    "items": [
-                      "TestModel.RecordWithVlens"
-                    ],
+                    "items": "TestModel.RecordWithVlens",
                     "length": 2
                   }
                 }
@@ -557,9 +515,7 @@
                 "name": "ints",
                 "type": {
                   "array": {
-                    "items": [
-                      "int32"
-                    ],
+                    "items": "int32",
                     "dimensions": [
                       {
                         "length": 2
@@ -575,9 +531,7 @@
                 "name": "fixedSimpleRecordArray",
                 "type": {
                   "array": {
-                    "items": [
-                      "TestModel.SimpleRecord"
-                    ],
+                    "items": "TestModel.SimpleRecord",
                     "dimensions": [
                       {
                         "length": 3
@@ -593,9 +547,7 @@
                 "name": "fixedRecordWithVlensArray",
                 "type": {
                   "array": {
-                    "items": [
-                      "TestModel.RecordWithVlens"
-                    ],
+                    "items": "TestModel.RecordWithVlens",
                     "dimensions": [
                       {
                         "length": 2
@@ -618,9 +570,7 @@
                 "name": "ints",
                 "type": {
                   "array": {
-                    "items": [
-                      "int32"
-                    ],
+                    "items": "int32",
                     "dimensions": 2
                   }
                 }
@@ -629,9 +579,7 @@
                 "name": "fixedSimpleRecordArray",
                 "type": {
                   "array": {
-                    "items": [
-                      "TestModel.SimpleRecord"
-                    ],
+                    "items": "TestModel.SimpleRecord",
                     "dimensions": 2
                   }
                 }
@@ -640,9 +588,7 @@
                 "name": "fixedRecordWithVlensArray",
                 "type": {
                   "array": {
-                    "items": [
-                      "TestModel.RecordWithVlens"
-                    ],
+                    "items": "TestModel.RecordWithVlens",
                     "dimensions": 2
                   }
                 }
@@ -658,9 +604,7 @@
                 "name": "ints",
                 "type": {
                   "array": {
-                    "items": [
-                      "int32"
-                    ],
+                    "items": "int32",
                     "dimensions": 1
                   }
                 }
@@ -669,9 +613,7 @@
                 "name": "fixedSimpleRecordArray",
                 "type": {
                   "array": {
-                    "items": [
-                      "TestModel.SimpleRecord"
-                    ],
+                    "items": "TestModel.SimpleRecord",
                     "dimensions": 1
                   }
                 }
@@ -680,9 +622,7 @@
                 "name": "fixedRecordWithVlensArray",
                 "type": {
                   "array": {
-                    "items": [
-                      "TestModel.RecordWithVlens"
-                    ],
+                    "items": "TestModel.RecordWithVlens",
                     "dimensions": 1
                   }
                 }
@@ -698,9 +638,7 @@
                 "name": "ints",
                 "type": {
                   "array": {
-                    "items": [
-                      "int32"
-                    ]
+                    "items": "int32"
                   }
                 }
               },
@@ -708,9 +646,7 @@
                 "name": "fixedSimpleRecordArray",
                 "type": {
                   "array": {
-                    "items": [
-                      "TestModel.SimpleRecord"
-                    ]
+                    "items": "TestModel.SimpleRecord"
                   }
                 }
               },
@@ -718,9 +654,7 @@
                 "name": "fixedRecordWithVlensArray",
                 "type": {
                   "array": {
-                    "items": [
-                      "TestModel.RecordWithVlens"
-                    ]
+                    "items": "TestModel.RecordWithVlens"
                   }
                 }
               }
@@ -732,9 +666,7 @@
             "name": "NamedFixedNDArray",
             "type": {
               "array": {
-                "items": [
-                  "int32"
-                ],
+                "items": "int32",
                 "dimensions": [
                   {
                     "name": "dimA",
@@ -754,9 +686,7 @@
             "name": "NamedNDArray",
             "type": {
               "array": {
-                "items": [
-                  "int32"
-                ],
+                "items": "int32",
                 "dimensions": [
                   {
                     "name": "dimA"
@@ -820,9 +750,7 @@
             ],
             "type": {
               "array": {
-                "items": [
-                  "T"
-                ],
+                "items": "T",
                 "dimensions": [
                   {
                     "name": "x"
@@ -855,9 +783,7 @@
                 "name": "vector1",
                 "type": {
                   "vector": {
-                    "items": [
-                      "T1"
-                    ]
+                    "items": "T1"
                   }
                 }
               },
@@ -980,9 +906,7 @@
             ],
             "type": {
               "vector": {
-                "items": [
-                  "T"
-                ]
+                "items": "T"
               }
             }
           }
@@ -995,9 +919,7 @@
             ],
             "type": {
               "vector": {
-                "items": [
-                  "T"
-                ],
+                "items": "T",
                 "length": 3
               }
             }
@@ -1094,9 +1016,7 @@
                 "name": "arrayField",
                 "type": {
                   "array": {
-                    "items": [
-                      "int32"
-                    ],
+                    "items": "int32",
                     "dimensions": [
                       {
                         "name": "x"
@@ -1112,9 +1032,7 @@
                 "name": "arrayFieldMapDimensions",
                 "type": {
                   "array": {
-                    "items": [
-                      "int32"
-                    ],
+                    "items": "int32",
                     "dimensions": [
                       {
                         "name": "x"
@@ -1130,9 +1048,7 @@
                 "name": "dynamicArrayField",
                 "type": {
                   "array": {
-                    "items": [
-                      "int32"
-                    ]
+                    "items": "int32"
                   }
                 }
               },
@@ -1140,9 +1056,7 @@
                 "name": "fixedArrayField",
                 "type": {
                   "array": {
-                    "items": [
-                      "int32"
-                    ],
+                    "items": "int32",
                     "dimensions": [
                       {
                         "name": "x",
@@ -1178,9 +1092,7 @@
                 "name": "vectorField",
                 "type": {
                   "vector": {
-                    "items": [
-                      "int32"
-                    ]
+                    "items": "int32"
                   }
                 }
               },
@@ -1188,15 +1100,11 @@
                 "name": "vectorOfVectorsField",
                 "type": {
                   "vector": {
-                    "items": [
-                      {
-                        "vector": {
-                          "items": [
-                            "int32"
-                          ]
-                        }
+                    "items": {
+                      "vector": {
+                        "items": "int32"
                       }
-                    ]
+                    }
                   }
                 }
               },
@@ -1204,9 +1112,7 @@
                 "name": "fixedVectorField",
                 "type": {
                   "vector": {
-                    "items": [
-                      "int32"
-                    ],
+                    "items": "int32",
                     "length": 3
                   }
                 }
@@ -1959,9 +1865,7 @@
             ],
             "type": {
               "array": {
-                "items": [
-                  "INT16_MAX"
-                ],
+                "items": "INT16_MAX",
                 "dimensions": [
                   {
                     "name": "while"
@@ -2064,23 +1968,19 @@
               "name": "float256x256",
               "type": {
                 "stream": {
-                  "items": [
-                    {
-                      "array": {
-                        "items": [
-                          "float32"
-                        ],
-                        "dimensions": [
-                          {
-                            "length": 256
-                          },
-                          {
-                            "length": 256
-                          }
-                        ]
-                      }
+                  "items": {
+                    "array": {
+                      "items": "float32",
+                      "dimensions": [
+                        {
+                          "length": 256
+                        },
+                        {
+                          "length": 256
+                        }
+                      ]
                     }
-                  ]
+                  }
                 }
               }
             }
@@ -2093,16 +1993,12 @@
               "name": "floatArray",
               "type": {
                 "stream": {
-                  "items": [
-                    {
-                      "array": {
-                        "items": [
-                          "float32"
-                        ],
-                        "dimensions": 2
-                      }
+                  "items": {
+                    "array": {
+                      "items": "float32",
+                      "dimensions": 2
                     }
-                  ]
+                  }
                 }
               }
             }
@@ -2115,9 +2011,7 @@
               "name": "smallRecord",
               "type": {
                 "stream": {
-                  "items": [
-                    "TestModel.SmallBenchmarkRecord"
-                  ]
+                  "items": "TestModel.SmallBenchmarkRecord"
                 }
               }
             }
@@ -2130,9 +2024,7 @@
               "name": "smallRecord",
               "type": {
                 "stream": {
-                  "items": [
-                    "TestModel.SimpleEncodingCounters"
-                  ]
+                  "items": "TestModel.SimpleEncodingCounters"
                 }
               }
             }
@@ -2224,9 +2116,7 @@
               "name": "intVector",
               "type": {
                 "vector": {
-                  "items": [
-                    "int32"
-                  ]
+                  "items": "int32"
                 }
               }
             },
@@ -2234,9 +2124,7 @@
               "name": "complexVector",
               "type": {
                 "vector": {
-                  "items": [
-                    "complexfloat32"
-                  ]
+                  "items": "complexfloat32"
                 }
               }
             },
@@ -2248,9 +2136,7 @@
               "name": "vlenOfRecordWithVlens",
               "type": {
                 "vector": {
-                  "items": [
-                    "TestModel.RecordWithVlens"
-                  ]
+                  "items": "TestModel.RecordWithVlens"
                 }
               }
             }
@@ -2285,9 +2171,7 @@
               "name": "fixedIntVector",
               "type": {
                 "vector": {
-                  "items": [
-                    "int32"
-                  ],
+                  "items": "int32",
                   "length": 5
                 }
               }
@@ -2296,9 +2180,7 @@
               "name": "fixedSimpleRecordVector",
               "type": {
                 "vector": {
-                  "items": [
-                    "TestModel.SimpleRecord"
-                  ],
+                  "items": "TestModel.SimpleRecord",
                   "length": 3
                 }
               }
@@ -2307,9 +2189,7 @@
               "name": "fixedRecordWithVlensVector",
               "type": {
                 "vector": {
-                  "items": [
-                    "TestModel.RecordWithVlens"
-                  ],
+                  "items": "TestModel.RecordWithVlens",
                   "length": 2
                 }
               }
@@ -2327,9 +2207,7 @@
               "name": "intData",
               "type": {
                 "stream": {
-                  "items": [
-                    "int32"
-                  ]
+                  "items": "int32"
                 }
               }
             },
@@ -2338,10 +2216,8 @@
               "type": {
                 "stream": {
                   "items": [
-                    [
-                      null,
-                      "int32"
-                    ]
+                    null,
+                    "int32"
                   ]
                 }
               }
@@ -2350,9 +2226,7 @@
               "name": "recordWithOptionalVectorData",
               "type": {
                 "stream": {
-                  "items": [
-                    "TestModel.RecordWithOptionalVector"
-                  ]
+                  "items": "TestModel.RecordWithOptionalVector"
                 }
               }
             },
@@ -2360,16 +2234,12 @@
               "name": "fixedVector",
               "type": {
                 "stream": {
-                  "items": [
-                    {
-                      "vector": {
-                        "items": [
-                          "int32"
-                        ],
-                        "length": 3
-                      }
+                  "items": {
+                    "vector": {
+                      "items": "int32",
+                      "length": 3
                     }
-                  ]
+                  }
                 }
               }
             }
@@ -2382,9 +2252,7 @@
               "name": "ints",
               "type": {
                 "array": {
-                  "items": [
-                    "int32"
-                  ],
+                  "items": "int32",
                   "dimensions": [
                     {
                       "length": 2
@@ -2400,9 +2268,7 @@
               "name": "fixedSimpleRecordArray",
               "type": {
                 "array": {
-                  "items": [
-                    "TestModel.SimpleRecord"
-                  ],
+                  "items": "TestModel.SimpleRecord",
                   "dimensions": [
                     {
                       "length": 3
@@ -2418,9 +2284,7 @@
               "name": "fixedRecordWithVlensArray",
               "type": {
                 "array": {
-                  "items": [
-                    "TestModel.RecordWithVlens"
-                  ],
+                  "items": "TestModel.RecordWithVlens",
                   "dimensions": [
                     {
                       "length": 2
@@ -2449,9 +2313,7 @@
               "name": "ints",
               "type": {
                 "array": {
-                  "items": [
-                    "int32"
-                  ],
+                  "items": "int32",
                   "dimensions": 2
                 }
               }
@@ -2460,9 +2322,7 @@
               "name": "simpleRecordArray",
               "type": {
                 "array": {
-                  "items": [
-                    "TestModel.SimpleRecord"
-                  ],
+                  "items": "TestModel.SimpleRecord",
                   "dimensions": 2
                 }
               }
@@ -2471,9 +2331,7 @@
               "name": "recordWithVlensArray",
               "type": {
                 "array": {
-                  "items": [
-                    "TestModel.RecordWithVlens"
-                  ],
+                  "items": "TestModel.RecordWithVlens",
                   "dimensions": 2
                 }
               }
@@ -2495,9 +2353,7 @@
               "name": "ints",
               "type": {
                 "array": {
-                  "items": [
-                    "int32"
-                  ],
+                  "items": "int32",
                   "dimensions": 1
                 }
               }
@@ -2506,9 +2362,7 @@
               "name": "simpleRecordArray",
               "type": {
                 "array": {
-                  "items": [
-                    "TestModel.SimpleRecord"
-                  ],
+                  "items": "TestModel.SimpleRecord",
                   "dimensions": 1
                 }
               }
@@ -2517,9 +2371,7 @@
               "name": "recordWithVlensArray",
               "type": {
                 "array": {
-                  "items": [
-                    "TestModel.RecordWithVlens"
-                  ],
+                  "items": "TestModel.RecordWithVlens",
                   "dimensions": 1
                 }
               }
@@ -2537,9 +2389,7 @@
               "name": "ints",
               "type": {
                 "array": {
-                  "items": [
-                    "int32"
-                  ]
+                  "items": "int32"
                 }
               }
             },
@@ -2547,9 +2397,7 @@
               "name": "simpleRecordArray",
               "type": {
                 "array": {
-                  "items": [
-                    "TestModel.SimpleRecord"
-                  ]
+                  "items": "TestModel.SimpleRecord"
                 }
               }
             },
@@ -2557,9 +2405,7 @@
               "name": "recordWithVlensArray",
               "type": {
                 "array": {
-                  "items": [
-                    "TestModel.RecordWithVlens"
-                  ]
+                  "items": "TestModel.RecordWithVlens"
                 }
               }
             },
@@ -2665,9 +2511,7 @@
               "name": "vec",
               "type": {
                 "vector": {
-                  "items": [
-                    "TestModel.Fruits"
-                  ]
+                  "items": "TestModel.Fruits"
                 }
               }
             }
@@ -2684,9 +2528,7 @@
               "name": "aStream",
               "type": {
                 "stream": {
-                  "items": [
-                    "int32"
-                  ]
+                  "items": "int32"
                 }
               }
             },
@@ -2870,16 +2712,12 @@
                 "typeArguments": [
                   {
                     "vector": {
-                      "items": [
-                        "int32"
-                      ]
+                      "items": "int32"
                     }
                   },
                   {
                     "vector": {
-                      "items": [
-                        "float32"
-                      ]
+                      "items": "float32"
                     }
                   }
                 ]
@@ -2957,15 +2795,13 @@
               "name": "streamOfAliasedGenericUnion2",
               "type": {
                 "stream": {
-                  "items": [
-                    {
-                      "name": "TestModel.AliasedGenericUnion2",
-                      "typeArguments": [
-                        "TestModel.AliasedString",
-                        "TestModel.AliasedEnum"
-                      ]
-                    }
-                  ]
+                  "items": {
+                    "name": "TestModel.AliasedGenericUnion2",
+                    "typeArguments": [
+                      "TestModel.AliasedString",
+                      "TestModel.AliasedEnum"
+                    ]
+                  }
                 }
               }
             }
@@ -2978,9 +2814,7 @@
               "name": "intOrSimpleRecord",
               "type": {
                 "stream": {
-                  "items": [
-                    "TestModel.AliasedIntOrSimpleRecord"
-                  ]
+                  "items": "TestModel.AliasedIntOrSimpleRecord"
                 }
               }
             },
@@ -2988,9 +2822,7 @@
               "name": "nullableIntOrSimpleRecord",
               "type": {
                 "stream": {
-                  "items": [
-                    "TestModel.AliasedNullableIntSimpleRecord"
-                  ]
+                  "items": "TestModel.AliasedNullableIntSimpleRecord"
                 }
               }
             }
@@ -3012,9 +2844,7 @@
               "name": "int",
               "type": {
                 "stream": {
-                  "items": [
-                    "TestModel.RecordWithKeywordFields"
-                  ]
+                  "items": "TestModel.RecordWithKeywordFields"
                 }
               }
             },
