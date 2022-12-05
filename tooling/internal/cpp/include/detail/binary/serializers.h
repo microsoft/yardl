@@ -144,7 +144,7 @@ template <typename T, std::enable_if_t<std::is_floating_point_v<T> ||
                                            std::is_same_v<T, std::complex<double>>,
                                        bool> = true>
 inline void WriteFloatingPoint(CodedOutputStream& stream, T const& value) {
-  stream.WriteBytes(reinterpret_cast<char const*>(std::addressof(value)), sizeof(value));
+  WriteTriviallySerializable(stream, value);
 }
 
 template <typename T, std::enable_if_t<std::is_floating_point_v<T> ||
@@ -152,7 +152,7 @@ template <typename T, std::enable_if_t<std::is_floating_point_v<T> ||
                                            std::is_same_v<T, std::complex<double>>,
                                        bool> = true>
 inline void ReadFloatingPoint(CodedInputStream& stream, T& value) {
-  stream.ReadBytes(reinterpret_cast<char*>(std::addressof(value)), sizeof(value));
+  ReadTriviallySerializable(stream, value);
 }
 
 inline void WriteString(CodedOutputStream& stream, std::string const& value) {

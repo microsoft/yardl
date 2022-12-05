@@ -30,6 +30,19 @@
   - [Aliases](#aliases)
   - [Protocols](#protocols-1)
   - [Top-Level Schema](#top-level-schema)
+- [Compact Binary Encoding Reference](#compact-binary-encoding-reference)
+  - [Booleans](#booleans)
+  - [Unsigned Integers](#unsigned-integers)
+  - [Signed integers](#signed-integers)
+  - [Floating-Point Numbers](#floating-point-numbers)
+  - [Strings](#strings)
+  - [Dates, Times, and DateTimes](#dates-times-and-datetimes)
+  - [Unions](#unions-2)
+  - [Vectors](#vectors-2)
+  - [Arrays](#arrays-2)
+  - [Enums](#enums-2)
+  - [Records](#records-2)
+  - [Streams](#streams-1)
 
 ## Installation
 
@@ -680,7 +693,7 @@ counterparts.
 ## Protocol Schema Reference
 
 A protocol's schema is embedded in a JSON format in both the HDF5 and binary
-formats. This JSON format is informally described here.
+encodings. This JSON format is informally described here.
 
 > **Warning**<br>
 > We might make breaking changes to this format before V1.
@@ -1001,3 +1014,141 @@ enums, and aliases) used by the protocol.
   "types": [ <type>, ... ]
 }
 ```
+
+
+## Compact Binary Encoding Reference
+
+The binary file starts with five magic bytes: `0x79 0x61 0x72 0x64 0x6c` (ASCII
+'y' 'a' 'r' 'd' 'l') followed by four bytes containing a little-endian 32-bit
+integer representing the encoding version number (currently 1). The the protocol
+schema in JSON format is encoded using the string format described below.
+
+After the schema, the protocol step values are written. The sections below
+describe how each data type is encoded.
+
+### Booleans
+
+Booleans are encoded as a byte with the value 0 or 1. However, vectors or arrays
+of booleans could use a single bit per value in order to save space. This is
+being tracked [here](https://github.com/microsoft/yardl/issues/19).
+
+### Unsigned Integers
+
+Unsigned integers (`uint8`, `uint16`, `uint32`, `uint64`, and `size`) are
+written as variable-width integers, or *varints*, in same way as Protocol
+Buffers. The high-order bit of each byte serves as a continuation and indicates
+whether more bytes remain. The lower seven bits of each byte are appended as
+increasingly significant bits in the resulting value.
+
+This allows smaller values to be encoded in fewer bytes.
+
+Some examples:
+
+| Integer value | First encoded byte | Second encoded byte |
+| ------------- | ------------------ | ------------------- |
+| 0             | 00000000           |                     |
+| 1             | 00000001           |                     |
+| 127           | 01111111           |                     |
+| 128           | 10000000           | 00000001            |
+| 129           | 10000001           | 00000001            |
+
+### Signed integers
+
+Signed integers (`int8`, `int16`, `int32`, and `int64`) are first converted to
+unsigned integers using *zig-zag* encoding, and then encoded as unsigned
+integers as above.
+
+Because two's complement sets the highest bit of negative numbers, a negative
+64-bit integer would always require 10 bytes to be encoded as a varint, making
+it a poor choice. Instead of two's complement, zig-zag encoding stores positive
+numbers as `2 * n` and negative numbers as `2 * abs(n) + 1`. This way, small
+negative values can still be represented with a smaller number of bytes when
+encoded as a varint.
+
+Some examples
+
+| Original value | Encoded value |
+| -------------- | ------------- |
+| 0              | 0             |
+| -1             | 1             |
+| 1              | 2             |
+| -2             | 3             |
+| 2              | 4             |
+
+### Floating-Point Numbers
+
+`float32` and `float64` are written as a little-endian IEEE 754 bytes of length
+4 and 8, respectively. `complexfloat32` and `complexfloat64` write out first the
+real part followed by the imaginary part.
+
+### Strings
+
+For strings, the length of the UTF8-encoded bytes is written out as an unsigned
+varint, followed by the UTF8-encoded bytes.
+
+For example, the string "hello" would be encoded as `Ox05 Ox68 Ox65 Ox6c Ox6c Ox6f`.
+
+### Dates, Times, and DateTimes
+
+Dates are written as an signed varint number of days since the epoch.
+
+Times are written an a signed varint number of nanoseconds since midnight.
+
+DateTimes are written as a signed varint number of nanoseconds since the epoch.
+
+### Unions
+
+Unions are written as the 0-based index of the type followed by the
+value.
+
+The index is and written as an unsigned varint and the value if skipped if the type is `null`.
+
+Example values for the union `[null, uint, float]`:
+
+| Value           | Encoded Bytes              |
+| --------------- | -------------------------- |
+| `<null>`        | `0x00`                     |
+| 6 (`uint`)      | `0x01 0x06`                |
+| 95.72 (`float`) | `0x02 0xa4 0x70 0xbf 0x42` |
+
+
+### Vectors
+
+If the vector length is not specified in Yardl:
+
+```yaml
+!vector
+items: int
+```
+
+then the format is:
+
+1. The length of the array as an unsigned varint
+2. The array values written one after another.
+
+If the length is given, then (1) is omitted.
+
+### Arrays
+
+If the number of array dimensions is not given in the Yardl schema, then the
+format is:
+
+1. The number of dimensions as a unsigned varint
+2. Each dimension length as an unsigned varint
+3. The values of the array in row-major order
+
+If the number of dimensions is given in the, (1) is omitted. If the length of each dimension is specified, (1) and (2) are omitted.
+
+A future version of the binary format may support column-major layout. See discussion [here](https://github.com/microsoft/yardl/issues/23).
+
+### Enums
+
+Enums are written as varint encoding of the integer value of the enum. Note that the value is signed if the base type is signed, which is the case if the `base` properly is not specified.
+
+### Records
+
+Records are encoded as the concatenation of the value of its fields, in the order they appear in the schema.
+
+### Streams
+
+Streams are written as one or more blocks. Each block starts with a length as an unsigned varint followed by that number of values. The last block will have length 0 and will simply be `0x0`, which signals that the stream is complete. Only the last block can have length 0.
