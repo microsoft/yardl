@@ -465,7 +465,7 @@ RecordWithComputedFields: !record
     accessNestedTupleField: tupleField.v2
     accessArrayField: arrayField
     accessArrayFieldElement: arrayField[0, 1]
-    accessArrayFieldElementByName: arrayField[y:1, x:0]
+    accessArrayFieldElementByName: arrayField[x:0, y:1]
     accessVectorField: vectorField
     accessVectorFieldElement: vectorField[1]
     accessVectorOfVectorsField: vectorOfVectorsField[1][2]
