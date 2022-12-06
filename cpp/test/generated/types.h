@@ -362,6 +362,12 @@ enum class Int64Enum : int64_t {
   kB = -4611686018427387904LL,
 };
 
+enum class SizeBasedEnum : size_t {
+  kA = 0ULL,
+  kB = 1ULL,
+  kC = 2ULL,
+};
+
 template <typename T>
 using Image = yardl::NDArray<T, 2>;
 
