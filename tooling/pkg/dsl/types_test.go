@@ -41,14 +41,14 @@ Z<T>: T`, true,
 		t.Run(tC.spec, func(t *testing.T) {
 			env, err := parseAndValidate(t, tC.spec)
 			require.Nil(t, err)
-			x := typeDefnitionByName(env, "X").(*NamedType)
-			y := typeDefnitionByName(env, "Y").(*NamedType)
+			x := typeDefinitionByName(env, "X").(*NamedType)
+			y := typeDefinitionByName(env, "Y").(*NamedType)
 			require.Equal(t, tC.expectedResult, TypesEqual(GetUnderlyingType(y.Type), x.Type))
 		})
 	}
 }
 
-func typeDefnitionByName(env *Environment, name string) TypeDefinition {
+func typeDefinitionByName(env *Environment, name string) TypeDefinition {
 	for _, ns := range env.Namespaces {
 		for _, td := range ns.TypeDefinitions {
 			if td.GetDefinitionMeta().Name == name {

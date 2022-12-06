@@ -17,17 +17,17 @@ func TestTypeParsing_Valid(t *testing.T) {
 	}{
 		{input: "Foo", expected: `{"name":"Foo"}`},
 		{input: "Foo ", expected: `{"name":"Foo"}`},
-		{input: " Foo ", expected: `{"name":"Foo"}`},
+		{input: " Foo ", expected: `{"name":"Foo","positionOffset":1}`},
 		{input: "Foo?", expected: `{"name":"Foo","optional":true}`},
 		{input: "Foo ? ", expected: `{"name":"Foo","optional":true}`},
-		{input: "Foo<int>", expected: `{"name":"Foo","args":[{"name":"int"}]}`},
-		{input: "Foo< int >", expected: `{"name":"Foo","args":[{"name":"int"}]}`},
-		{input: "Foo<int?>", expected: `{"name":"Foo","args":[{"name":"int","optional":true}]}`},
-		{input: "Foo<int>?", expected: `{"name":"Foo","args":[{"name":"int"}],"optional":true}`},
-		{input: "Foo<int,float>", expected: `{"name":"Foo","args":[{"name":"int"},{"name":"float"}]}`},
-		{input: " Foo < int , float > ", expected: `{"name":"Foo","args":[{"name":"int"},{"name":"float"}]}`},
-		{input: "Foo<Bar<int>>", expected: `{"name":"Foo","args":[{"name":"Bar","args":[{"name":"int"}]}]}`},
-		{input: "Foo<Bar<int>,Baz<long>>", expected: `{"name":"Foo","args":[{"name":"Bar","args":[{"name":"int"}]},{"name":"Baz","args":[{"name":"long"}]}]}`},
+		{input: "Foo<int>", expected: `{"name":"Foo","args":[{"name":"int","positionOffset":4}]}`},
+		{input: "Foo< int >", expected: `{"name":"Foo","args":[{"name":"int","positionOffset":5}]}`},
+		{input: "Foo<int?>", expected: `{"name":"Foo","args":[{"name":"int","optional":true,"positionOffset":4}]}`},
+		{input: "Foo<int>?", expected: `{"name":"Foo","args":[{"name":"int","positionOffset":4}],"optional":true}`},
+		{input: "Foo<int,float>", expected: `{"name":"Foo","args":[{"name":"int","positionOffset":4},{"name":"float","positionOffset":8}]}`},
+		{input: " Foo < int , float > ", expected: `{"name":"Foo","args":[{"name":"int","positionOffset":7},{"name":"float","positionOffset":13}],"positionOffset":1}`},
+		{input: "Foo<Bar<int>>", expected: `{"name":"Foo","args":[{"name":"Bar","args":[{"name":"int","positionOffset":8}],"positionOffset":4}]}`},
+		{input: "Foo<Bar<int>,Baz<long>>", expected: `{"name":"Foo","args":[{"name":"Bar","args":[{"name":"int","positionOffset":8}],"positionOffset":4},{"name":"Baz","args":[{"name":"long","positionOffset":17}],"positionOffset":13}]}`},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.input, func(t *testing.T) {

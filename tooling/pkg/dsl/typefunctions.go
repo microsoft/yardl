@@ -185,6 +185,10 @@ func TypesEqual(a, b Type) bool {
 	if b == nil {
 		return a == nil
 	}
+
+	a = GetUnderlyingType(a)
+	b = GetUnderlyingType(b)
+
 	switch ta := a.(type) {
 	case *SimpleType:
 		tb, ok := b.(*SimpleType)

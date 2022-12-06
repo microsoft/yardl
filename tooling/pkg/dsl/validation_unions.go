@@ -11,9 +11,58 @@ import (
 	"github.com/microsoft/yardl/tooling/internal/validation"
 )
 
-func validateUnionCases(env *Environment, errorSink *validation.ErrorSink) *Environment {
+func assignUnionCaseLabels(env *Environment, errorSink *validation.ErrorSink) *Environment {
 	Visit(env, func(self Visitor, node Node) {
-		if t, ok := node.(*GeneralizedType); ok {
+		if t, ok := node.(*GeneralizedType); ok && t.Cases.IsUnion() {
+			// assign labels to union cases
+			for _, typeCase := range t.Cases {
+				if !typeCase.IsNullType() {
+					typeCase.Label = typeLabel(typeCase.Type, true)
+				}
+			}
+
+			duplicates := make(map[string][]int)
+			for i, typeCase := range t.Cases {
+				if !typeCase.IsNullType() {
+					duplicates[typeCase.Label] = append(duplicates[typeCase.Label], i)
+				}
+			}
+
+			for _, v := range duplicates {
+				if len(v) > 1 {
+					for _, i := range v {
+						t.Cases[i].Label = typeLabel(t.Cases[i].Type, false)
+					}
+				}
+			}
+
+			labels := make(map[string]any)
+			for _, item := range t.Cases {
+				if item != nil {
+					if _, found := labels[item.Label]; found {
+						errorSink.Add(validationError(node, "internal error: union cases must have distinct labels within the union"))
+					}
+				}
+			}
+		}
+
+		self.VisitChildren(node)
+	})
+
+	return env
+}
+
+func validateUnionCases(env *Environment, errorSink *validation.ErrorSink) *Environment {
+	if len(errorSink.Errors) > 0 {
+		// We could end up in an infinite loop if there are cycles
+		return env
+	}
+
+	visitedTypes := make(map[TypeDefinition]any)
+
+	VisitWithContext(env, false, func(self VisitorWithContext[bool], node Node, visitingReference bool) {
+		switch t := node.(type) {
+		case *GeneralizedType:
 			cases := t.Cases
 			if len(cases) == 0 {
 				errorSink.Add(validationError(node, "a field cannot be a union type with no options"))
@@ -35,51 +84,70 @@ func validateUnionCases(env *Environment, errorSink *validation.ErrorSink) *Envi
 						errorSink.Add(validationError(typeCase, "unions may not immediately contain other unions"))
 					}
 				}
+
+				for i, item := range t.Cases {
+					for j := i + 1; j < len(t.Cases); j++ {
+						otherItem := t.Cases[j]
+
+						if TypesEqual(item.Type, otherItem.Type) {
+							if !item.IsNullType() {
+								// Determine if the types are defined at a different location than the cases
+								// This indicates that the cause of the duplicate is a type type argument.
+
+								itemNodeMeta := item.GetNodeMeta()
+								itemTypeNodeMeta := item.Type.GetNodeMeta()
+
+								otherItemNodeMeta := otherItem.GetNodeMeta()
+								otherItemTypeNodeMeta := otherItem.Type.GetNodeMeta()
+
+								itemDefinedElsewhere := !itemNodeMeta.Equals(itemTypeNodeMeta)
+								otherItemDefinedElsewhere := !otherItemNodeMeta.Equals(otherItemTypeNodeMeta)
+
+								if itemDefinedElsewhere || otherItemDefinedElsewhere {
+									if itemDefinedElsewhere && otherItemDefinedElsewhere {
+										// both are type arguments
+										errorSink.Add(validationError(item, "redundant union type cases resulting from the type arguments given at %s and %s", itemTypeNodeMeta, otherItemTypeNodeMeta))
+										continue
+									}
+
+									// only one is a type argument
+									var typeParameterNode Node
+									var redundantNode Node
+									if itemDefinedElsewhere {
+										typeParameterNode = itemTypeNodeMeta
+										redundantNode = otherItemNodeMeta
+									} else {
+										typeParameterNode = otherItemTypeNodeMeta
+										redundantNode = itemNodeMeta
+									}
+
+									errorSink.Add(validationError(redundantNode, "redundant union type cases resulting from the type argument given at %s", typeParameterNode))
+									continue
+								}
+							}
+							// No contributions from type arguments.
+							// To avoid reporting the same error multiple times, we only report the error
+							// if we we visiting the type directly, i.e. not through a reference.
+							if !visitingReference {
+								errorSink.Add(validationError(item, "redundant union type cases"))
+							}
+						}
+					}
+				}
 			}
 
-			if cases.IsUnion() {
-				// assign labels to union cases
-				for _, typeCase := range cases {
-					if !typeCase.IsNullType() {
-						typeCase.Label = typeLabel(typeCase.Type, true)
-					}
-				}
+			self.VisitChildren(node, visitingReference)
 
-				duplicates := make(map[string][]int)
-				for i, typeCase := range cases {
-					if !typeCase.IsNullType() {
-						duplicates[typeCase.Label] = append(duplicates[typeCase.Label], i)
-					}
-				}
-
-				for _, v := range duplicates {
-					if len(v) > 1 {
-						for _, i := range v {
-							cases[i].Label = typeLabel(cases[i].Type, false)
-						}
-					}
-				}
-
-				for i, item := range cases {
-					for j := i + 1; j < len(cases); j++ {
-						if TypesEqual(item.Type, cases[j].Type) {
-							errorSink.Add(validationError(item, "all type cases in a union must be distinct"))
-						}
-					}
-				}
-
-				labels := make(map[string]any)
-				for _, item := range cases {
-					if item != nil {
-						if _, found := labels[item.Label]; found {
-							errorSink.Add(validationError(node, "union cases must have distict labels within the union"))
-						}
-					}
+		case *SimpleType:
+			if len(t.ResolvedDefinition.GetDefinitionMeta().TypeArguments) > 0 {
+				if _, alreadyVisited := visitedTypes[t.ResolvedDefinition]; !alreadyVisited {
+					visitedTypes[t.ResolvedDefinition] = nil
+					self.Visit(t.ResolvedDefinition, true)
 				}
 			}
+		default:
+			self.VisitChildren(node, visitingReference)
 		}
-
-		self.VisitChildren(node)
 	})
 
 	return env
