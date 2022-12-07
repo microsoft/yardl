@@ -54,11 +54,9 @@ func assignUnionCaseLabels(env *Environment, errorSink *validation.ErrorSink) *E
 
 func validateUnionCases(env *Environment, errorSink *validation.ErrorSink) *Environment {
 	if len(errorSink.Errors) > 0 {
-		// We could end up in an infinite loop if there are cycles
+		// Only perform this if all types are resolved
 		return env
 	}
-
-	visitedTypes := make(map[TypeDefinition]any)
 
 	VisitWithContext(env, false, func(self VisitorWithContext[bool], node Node, visitingReference bool) {
 		switch t := node.(type) {
@@ -152,10 +150,7 @@ func validateUnionCases(env *Environment, errorSink *validation.ErrorSink) *Envi
 
 		case *SimpleType:
 			if len(t.ResolvedDefinition.GetDefinitionMeta().TypeArguments) > 0 {
-				if _, alreadyVisited := visitedTypes[t.ResolvedDefinition]; !alreadyVisited {
-					visitedTypes[t.ResolvedDefinition] = nil
-					self.Visit(t.ResolvedDefinition, true)
-				}
+				self.Visit(t.ResolvedDefinition, true)
 			}
 		default:
 			self.VisitChildren(node, visitingReference)

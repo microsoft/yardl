@@ -188,6 +188,7 @@ MyRecord: !record
   fields:
     f: MyUnionType<int, int>`
 	_, err := parseAndValidate(t, src)
+	require.NotNil(t, err)
 	assert.Regexp(t, ".yaml:2:21: redundant union type cases resulting from the type arguments given at .*.yaml:5:20 and .*.yaml:5:25", err.Error())
 }
 
@@ -198,6 +199,7 @@ MyRecord: !record
   fields:
     f: MyUnionType<int, float>`
 	_, err := parseAndValidate(t, src)
+	require.NotNil(t, err)
 	assert.Regexp(t, ".yaml:2:24: redundant union type cases resulting from the type argument given at .*.yaml:5:20$", err.Error())
 }
 
@@ -209,6 +211,7 @@ Rec<T>: !record
 Alias1<T>: Rec<T>
 Alias2: Alias1<int>`
 	_, err := parseAndValidate(t, src)
+	require.NotNil(t, err)
 	assert.Regexp(t, ".yaml:4:12: redundant union type cases resulting from the type argument given at .*.yaml:6:16$", err.Error())
 }
 
@@ -220,6 +223,7 @@ Rec<T>: !record
 Alias1<T>: Rec<T>
 Alias2: Alias1<int>`
 	_, err := parseAndValidate(t, src)
+	require.NotNil(t, err)
 	assert.Regexp(t, ".yaml:4:9: redundant union type cases$", err.Error())
 	assert.Equal(t, 1, len(strings.Split(err.Error(), "\n")))
 }
@@ -228,6 +232,7 @@ func TestUnionElementsMustBeDistinct_SizeAndUnit64Direct(t *testing.T) {
 	src := `
 T: [size, uint64]`
 	_, err := parseAndValidate(t, src)
+	require.NotNil(t, err)
 	assert.ErrorContains(t, err, "redundant union type cases (uint64 and size are equivalent)")
 }
 
@@ -237,6 +242,7 @@ MySize: size
 MyUint64: uint64
 T: [MySize, MyUint64]`
 	_, err := parseAndValidate(t, src)
+	require.NotNil(t, err)
 	assert.ErrorContains(t, err, "redundant union type cases (uint64 and size are equivalent)")
 }
 
