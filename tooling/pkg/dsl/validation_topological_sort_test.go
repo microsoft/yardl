@@ -64,5 +64,5 @@ Image<T>: !array
 ---
 `
 	_, err := parseAndValidate(t, src)
-	require.ErrorContains(t, err, "there is a reference cycle, which is not supported, within namespace 'test': Named Type 'Image' -> Named Type 'Image'")
+	require.ErrorContains(t, err, "there is a reference cycle, which is not supported, within namespace 'test': Alias 'Image' -> Alias 'Image'")
 }

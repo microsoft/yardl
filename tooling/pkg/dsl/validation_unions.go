@@ -102,7 +102,7 @@ func validateUnionCases(env *Environment, errorSink *validation.ErrorSink) *Envi
 								}
 
 								// Determine if the types are defined at a different location than the cases
-								// This indicates that the cause of the duplicate is a type type argument.
+								// This indicates that the cause of the duplicate is a type argument.
 
 								itemNodeMeta := item.GetNodeMeta()
 								itemTypeNodeMeta := item.Type.GetNodeMeta()
@@ -150,6 +150,7 @@ func validateUnionCases(env *Environment, errorSink *validation.ErrorSink) *Envi
 
 		case *SimpleType:
 			if len(t.ResolvedDefinition.GetDefinitionMeta().TypeArguments) > 0 {
+				// Check the referenced type with the type arguments provided
 				self.Visit(t.ResolvedDefinition, true)
 			}
 		default:

@@ -74,7 +74,7 @@ func TypeDefinitionsEqual(a, b TypeDefinition) bool {
 	bMeta := b.GetDefinitionMeta()
 	if aMeta.Namespace != bMeta.Namespace || aMeta.Name != bMeta.Name {
 		if a == PrimitiveSize && b == PrimitiveUint64 || a == PrimitiveUint64 && b == PrimitiveSize {
-			// size and uint64 are equivalent though not aliases
+			// Special case: `size` and `uint64` are equivalent though not aliases
 			return true
 		}
 
