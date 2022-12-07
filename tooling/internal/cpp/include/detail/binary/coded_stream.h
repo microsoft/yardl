@@ -74,6 +74,10 @@ class CodedOutputStream {
     WriteVarInt(value);
   }
 
+  void WriteVarInt64(size_t const& value) {
+    WriteVarInt64(static_cast<uint64_t>(value));
+  }
+
   void WriteVarInt64(int64_t const& value) {
     WriteVarInt64(ZigZagEncode64(value));
   }
@@ -213,6 +217,12 @@ class CodedInputStream {
     } else {
       ReadVarIntegerFastFromArray(value, buffer_ptr_);
     }
+  }
+
+  void ReadVarInt64(size_t& value) {
+    uint64_t uint64_value;
+    ReadVarInt64(uint64_value);
+    value = uint64_value;
   }
 
   void ReadVarInt64(int64_t& value) {
