@@ -16,12 +16,12 @@ try
 {
     $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
 
-    rm -Recurse -Force $scriptDir\model -ErrorAction SilentlyContinue
-    mkdir -Force $scriptDir\model | Out-Null
+    cd $scriptDir
+    rm -Recurse -Force model -ErrorAction SilentlyContinue
 
-    # Create model and generate code
-    cd $scriptDir\model
     yardl init smoketest
+
+    cd model
     yardl generate
 
     cd $scriptDir\cpp
