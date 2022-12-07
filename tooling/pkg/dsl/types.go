@@ -616,7 +616,7 @@ var (
 
 	_ TypeDefinition = (*RecordDefinition)(nil)
 	_ TypeDefinition = (*EnumDefinition)(nil)
-	_ TypeDefinition = (*PrimitiveDefinition)(nil)
+	_ TypeDefinition = (PrimitiveDefinition)("")
 	_ TypeDefinition = (*NamedType)(nil)
 	_ TypeDefinition = (*ProtocolDefinition)(nil)
 	_ TypeDefinition = (*GenericTypeParameter)(nil)

@@ -48,7 +48,7 @@ TEST_P(RoundTripTests, Scalars) {
   rec.uint32_field = 55;
   rec.int64_field = -66;
   rec.uint64_field = 66;
-  rec.size_field = sizeof(size_t);
+  rec.size_field = UINT64_MAX;
   rec.float32_field = 4290.39;
   rec.float64_field = 2234290.39;
   rec.complexfloat32_field = {1.3, 2.2};
@@ -559,7 +559,7 @@ INSTANTIATE_TEST_SUITE_P(,
                          ::testing::Values(
                              Format::kBinary,
                              Format::kHdf5),
-                         [](const ::testing::TestParamInfo<Format>& info) {
+                         [](::testing::TestParamInfo<Format> const& info) {
   switch (info.param) {
   case Format::kBinary:
     return "Binary";

@@ -220,8 +220,24 @@ Rec<T>: !record
 Alias1<T>: Rec<T>
 Alias2: Alias1<int>`
 	_, err := parseAndValidate(t, src)
-	assert.ErrorContains(t, err, "redundant union type cases")
+	assert.Regexp(t, ".yaml:4:9: redundant union type cases$", err.Error())
 	assert.Equal(t, 1, len(strings.Split(err.Error(), "\n")))
+}
+
+func TestUnionElementsMustBeDistinct_SizeAndUnit64Direct(t *testing.T) {
+	src := `
+T: [size, uint64]`
+	_, err := parseAndValidate(t, src)
+	assert.ErrorContains(t, err, "redundant union type cases (uint64 and size are equivalent)")
+}
+
+func TestUnionElementsMustBeDistinct_SizeAndUnit64Aliased(t *testing.T) {
+	src := `
+MySize: size
+MyUint64: uint64
+T: [MySize, MyUint64]`
+	_, err := parseAndValidate(t, src)
+	assert.ErrorContains(t, err, "redundant union type cases (uint64 and size are equivalent)")
 }
 
 func TestVectorLengthCannotBeNegative(t *testing.T) {

@@ -24,7 +24,7 @@
 namespace yardl::hdf5 {
 
 /**
- * @brief Returns the HDF5 type for size_t.
+ * @brief Returns the HDF5 type for yardl::Size.
  */
 static inline H5::DataType SizeTypeDdl() {
   static_assert(sizeof(hsize_t) == sizeof(size_t));

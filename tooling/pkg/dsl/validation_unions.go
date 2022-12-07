@@ -90,7 +90,19 @@ func validateUnionCases(env *Environment, errorSink *validation.ErrorSink) *Envi
 						otherItem := t.Cases[j]
 
 						if TypesEqual(item.Type, otherItem.Type) {
+							additionalExplanation := ""
 							if !item.IsNullType() {
+								// determine if this is because size and uint64 were used, which are equivalent but not aliases
+								if itemPrimitive, ok := GetPrimitiveType(item.Type); ok {
+									if otherItemPrimitive, ok := GetPrimitiveType(otherItem.Type); ok {
+										if itemPrimitive != otherItemPrimitive &&
+											(itemPrimitive == PrimitiveUint64 && otherItemPrimitive == PrimitiveSize ||
+												itemPrimitive == PrimitiveSize && otherItemPrimitive == PrimitiveUint64) {
+											additionalExplanation = " (uint64 and size are equivalent)"
+										}
+									}
+								}
+
 								// Determine if the types are defined at a different location than the cases
 								// This indicates that the cause of the duplicate is a type type argument.
 
@@ -106,7 +118,7 @@ func validateUnionCases(env *Environment, errorSink *validation.ErrorSink) *Envi
 								if itemDefinedElsewhere || otherItemDefinedElsewhere {
 									if itemDefinedElsewhere && otherItemDefinedElsewhere {
 										// both are type arguments
-										errorSink.Add(validationError(item, "redundant union type cases resulting from the type arguments given at %s and %s", itemTypeNodeMeta, otherItemTypeNodeMeta))
+										errorSink.Add(validationError(item, "redundant union type cases resulting from the type arguments given at %s and %s%s", itemTypeNodeMeta, otherItemTypeNodeMeta, additionalExplanation))
 										continue
 									}
 
@@ -121,7 +133,7 @@ func validateUnionCases(env *Environment, errorSink *validation.ErrorSink) *Envi
 										redundantNode = itemNodeMeta
 									}
 
-									errorSink.Add(validationError(redundantNode, "redundant union type cases resulting from the type argument given at %s", typeParameterNode))
+									errorSink.Add(validationError(redundantNode, "redundant union type cases resulting from the type argument given at %s%s", typeParameterNode, additionalExplanation))
 									continue
 								}
 							}
@@ -129,7 +141,7 @@ func validateUnionCases(env *Environment, errorSink *validation.ErrorSink) *Envi
 							// To avoid reporting the same error multiple times, we only report the error
 							// if we we visiting the type directly, i.e. not through a reference.
 							if !visitingReference {
-								errorSink.Add(validationError(item, "redundant union type cases"))
+								errorSink.Add(validationError(item, "redundant union type cases%s", additionalExplanation))
 							}
 						}
 					}
