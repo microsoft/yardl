@@ -74,6 +74,7 @@ class CodedOutputStream {
     WriteVarInt(value);
   }
 
+  template <typename T, std::enable_if_t<!std::is_same_v<size_t, uint64_t>, bool> = true>
   void WriteVarInt64(size_t const& value) {
     WriteVarInt64(static_cast<uint64_t>(value));
   }
@@ -219,6 +220,7 @@ class CodedInputStream {
     }
   }
 
+  template <typename T, std::enable_if_t<!std::is_same_v<size_t, uint64_t>, bool> = true>
   void ReadVarInt64(size_t& value) {
     uint64_t uint64_value;
     ReadVarInt64(uint64_value);
