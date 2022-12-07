@@ -7,6 +7,7 @@ import (
 	_ "embed"
 	"fmt"
 	"os"
+	"path"
 	"text/template"
 
 	"github.com/microsoft/yardl/tooling/internal/formatting"
@@ -23,8 +24,8 @@ var modelFileContents string
 func newInitCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:                   "init PACKAGE_NAME",
-		Short:                 "Create a package in the current directory",
-		Long:                  `Create a package in the current directory`,
+		Short:                 "Generate scaffolding for a new package",
+		Long:                  `Creates a new package directory named 'model' under the current directory with an example model.`,
 		DisableFlagsInUseLine: true,
 		Args:                  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
@@ -40,11 +41,18 @@ func newInitCommand() *cobra.Command {
 }
 
 func initImpl(namespace string) error {
+	modelDir := "model"
+	if err := os.MkdirAll(modelDir, 0775); err != nil {
+		return err
+	}
+
+	packageFilePath := path.Join(modelDir, packaging.PackageFileName)
+
 	template := template.Must(template.New("package").Parse(packageFileTemplate))
-	packageFile, err := os.OpenFile(packaging.PackageFileName, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0664)
+	packageFile, err := os.OpenFile(packageFilePath, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0664)
 	if err != nil {
 		if os.IsExist(err) {
-			return fmt.Errorf("%s already exists", packaging.PackageFileName)
+			return fmt.Errorf("%s already exists", packageFilePath)
 		}
 		return err
 	}
@@ -59,17 +67,26 @@ func initImpl(namespace string) error {
 		return err
 	}
 
-	modelFileName := "model.yml"
+	modelFilePath := path.Join(modelDir, "model.yml")
 
-	modelFile, err := os.OpenFile(modelFileName, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0664)
+	modelFile, err := os.OpenFile(modelFilePath, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0664)
 	if err != nil {
 		if os.IsExist(err) {
-			return fmt.Errorf("%s already exists", modelFileName)
+			return fmt.Errorf("%s already exists", modelFilePath)
 		}
 		return err
 	}
 	defer packageFile.Close()
 
 	_, err = modelFile.WriteString(modelFileContents)
-	return err
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("Initialized new package in the 'model' directory.")
+	fmt.Println("To generate code for it, run the following commands:")
+	fmt.Println("  cd model")
+	fmt.Println("  yardl generate")
+
+	return nil
 }
