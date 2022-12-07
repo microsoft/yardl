@@ -66,17 +66,13 @@ class CodedOutputStream {
     WriteVarInt32(ZigZagEncode32(value));
   }
 
-  void WriteVarInt64(uint64_t const& value) {
+  template <typename T, std::enable_if_t<std::is_integral_v<T> && sizeof(T) == 8 && std::is_unsigned_v<T>, bool> = true>
+  void WriteVarInt64(T const& value) {
     if (RemainingBufferSpace() < MAX_VARINT64_BYTES) {
       FlushBuffer();
     }
 
     WriteVarInt(value);
-  }
-
-  template <typename T, std::enable_if_t<!std::is_same_v<size_t, uint64_t>, bool> = true>
-  void WriteVarInt64(size_t const& value) {
-    WriteVarInt64(static_cast<uint64_t>(value));
   }
 
   void WriteVarInt64(int64_t const& value) {
@@ -212,19 +208,13 @@ class CodedInputStream {
     value = ZigZagDecode32(v);
   }
 
-  void ReadVarInt64(uint64_t& value) {
+  template <typename T, std::enable_if_t<std::is_integral_v<T> && sizeof(T) == 8 && std::is_unsigned_v<T>, bool> = true>
+  void ReadVarInt64(T& value) {
     if (RemainingBufferSpace() < MAX_VARINT64_BYTES) {
       ReadVarIntegerSlow(value);
     } else {
       ReadVarIntegerFastFromArray(value, buffer_ptr_);
     }
-  }
-
-  template <typename T, std::enable_if_t<!std::is_same_v<size_t, uint64_t>, bool> = true>
-  void ReadVarInt64(size_t& value) {
-    uint64_t uint64_value;
-    ReadVarInt64(uint64_value);
-    value = uint64_value;
   }
 
   void ReadVarInt64(int64_t& value) {
