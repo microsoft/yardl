@@ -362,7 +362,7 @@ enum class Int64Enum : int64_t {
   kB = -4611686018427387904LL,
 };
 
-enum class SizeBasedEnum : size_t {
+enum class SizeBasedEnum : yardl::Size {
   kA = 0ULL,
   kB = 1ULL,
   kC = 2ULL,

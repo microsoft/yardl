@@ -132,7 +132,7 @@ namespace {
 
 [[maybe_unused]] H5::EnumType GetSizeBasedEnumHdf5Ddl() {
   H5::EnumType t(yardl::hdf5::SizeTypeDdl());
-  size_t i = 0ULL;
+  yardl::Size i = 0ULL;
   t.insert("a", &i);
   i = 1ULL;
   t.insert("b", &i);
