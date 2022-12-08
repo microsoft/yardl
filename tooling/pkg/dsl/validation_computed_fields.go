@@ -220,17 +220,26 @@ func resolveComputedFields(env *Environment, errorSink *validation.ErrorSink) *E
 
 					if labeledCount > 0 {
 						orderedArguments := make([]*IndexArgument, len(*d.Dimensions))
-						for _, arg := range t.Arguments {
+						for argIndex, arg := range t.Arguments {
 							found := false
-							for i, dim := range *d.Dimensions {
+							for dimIndex, dim := range *d.Dimensions {
 								if *dim.Name == arg.Label {
 									found = true
-									if orderedArguments[i] != nil {
+									if orderedArguments[dimIndex] != nil {
 										errorSink.Add(validationError(arg.Value, "array index has multiple arguments for dimension '%s'", *dim.Name))
 										return t
 									}
 
-									orderedArguments[i] = arg
+									if dimIndex != argIndex {
+										expectedOrder := make([]string, len(*d.Dimensions))
+										for i, dim := range *d.Dimensions {
+											expectedOrder[i] = *dim.Name
+										}
+										errorSink.Add(validationError(arg.Value, "array index has arguments must be specified in order: %s", strings.Join(expectedOrder, ", ")))
+										return t
+									}
+
+									orderedArguments[dimIndex] = arg
 									break
 								}
 							}

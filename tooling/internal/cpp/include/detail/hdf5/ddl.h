@@ -26,7 +26,7 @@ namespace yardl::hdf5 {
 /**
  * @brief Returns the HDF5 type for yardl::Size.
  */
-static inline H5::DataType SizeTypeDdl() {
+static inline H5::PredType const& SizeTypeDdl() {
   static_assert(sizeof(hsize_t) == sizeof(size_t));
   static_assert(std::is_signed_v<hsize_t> == std::is_signed_v<size_t>);
   return H5::PredType::NATIVE_HSIZE;

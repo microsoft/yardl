@@ -218,7 +218,7 @@ X: !record
         y:
   computedFields:
     y1: y[1, 2]
-    y2: y[y:2, x:1]`
+    y2: y[x:1, y:2]`
 	_, err := parseAndValidate(t, src)
 	assert.Nil(t, err)
 }
@@ -251,6 +251,21 @@ X: !record
     y2: y[x:1, x:1]`
 	_, err := parseAndValidate(t, src)
 	assert.ErrorContains(t, err, `array index has multiple arguments for dimension 'x'`)
+}
+
+func TestIndexArrayDimensionsOutOfOrder(t *testing.T) {
+	src := `
+X: !record
+  fields:
+    y: !array
+      items: int
+      dimensions:
+        x:
+        y:
+  computedFields:
+    y2: y[y:1, x:1]`
+	_, err := parseAndValidate(t, src)
+	assert.ErrorContains(t, err, `array index has arguments must be specified in order`)
 }
 
 func TestIndexArrayInvalidDimensionName(t *testing.T) {
@@ -319,7 +334,7 @@ X: !record
         x: 10
         y: 20
   computedFields:
-    y1: y[y:1,x:10]`
+    y1: y[x:10, y:1]`
 	_, err := parseAndValidate(t, src)
 	assert.ErrorContains(t, err, `index argument (10) is too large for array dimension 'x' of length 10`)
 }

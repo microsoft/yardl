@@ -813,6 +813,26 @@
           }
         },
         {
+          "enum": {
+            "name": "SizeBasedEnum",
+            "base": "size",
+            "values": [
+              {
+                "symbol": "a",
+                "value": 0
+              },
+              {
+                "symbol": "b",
+                "value": 1
+              },
+              {
+                "symbol": "c",
+                "value": 2
+              }
+            ]
+          }
+        },
+        {
           "alias": {
             "name": "Image",
             "typeParameters": [
@@ -2670,6 +2690,10 @@
                   ]
                 }
               }
+            },
+            {
+              "name": "size",
+              "type": "TestModel.SizeBasedEnum"
             }
           ]
         },
