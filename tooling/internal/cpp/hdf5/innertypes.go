@@ -109,15 +109,15 @@ func writeInnerUnionTypes(w *formatting.IndentedWriter, env *dsl.Environment) {
 
 			w.WriteString("}\n\n")
 
-			fmt.Fprintf(w, "explicit operator std::variant<%s>() const {\n", outerTypeArguments)
+			fmt.Fprintf(w, "void ToOuter(std::variant<%s>& o) const {\n", outerTypeArguments)
 			w.Indented(func() {
-				fmt.Fprintf(w, "return ConvertToOuterVariant<std::variant<%s>>();\n", outerTypeArguments)
+				w.WriteStringln("ToOuterImpl(o);")
 			})
 			w.WriteString("}\n\n")
 
-			fmt.Fprintf(w, "explicit operator std::variant<std::monostate, %s>() const {\n", outerTypeArguments)
+			fmt.Fprintf(w, "void ToOuter(std::variant<std::monostate, %s>& o) const {\n", outerTypeArguments)
 			w.Indented(func() {
-				fmt.Fprintf(w, "return ConvertToOuterVariant<std::variant<std::monostate, %s>>();\n", outerTypeArguments)
+				w.WriteStringln("ToOuterImpl(o);")
 			})
 			w.WriteString("}\n\n")
 
@@ -136,7 +136,7 @@ func writeInnerUnionTypes(w *formatting.IndentedWriter, env *dsl.Environment) {
 			w.WriteStringln("template <typename T>")
 			w.WriteStringln("void Init(T const& v) {")
 			w.Indented(func() {
-				w.WriteStringln("constexpr size_t offset = GetOuterVariantOffet<std::remove_const_t<std::remove_reference_t<decltype(v)>>>();")
+				w.WriteStringln("constexpr size_t offset = GetOuterVariantOffset<std::remove_const_t<std::remove_reference_t<decltype(v)>>>();")
 				w.WriteString("switch (type_index_) {\n")
 				for i := 0; i < arity; i++ {
 					fmt.Fprintf(w, "case %d:\n", i)
@@ -150,18 +150,21 @@ func writeInnerUnionTypes(w *formatting.IndentedWriter, env *dsl.Environment) {
 			w.WriteString("}\n\n")
 
 			w.WriteStringln("template <typename TVariant>")
-			w.WriteStringln("TVariant ConvertToOuterVariant() const {")
+			w.WriteStringln("void ToOuterImpl(TVariant& o) const {")
 			w.Indented(func() {
-				w.WriteStringln("constexpr size_t offset = GetOuterVariantOffet<TVariant>();")
+				w.WriteStringln("constexpr size_t offset = GetOuterVariantOffset<TVariant>();")
 				w.WriteString("switch (type_index_) {\n")
 				w.WriteStringln(`case -1:
   if constexpr (offset == 1) {
-    return TVariant(std::in_place_index<0>, std::monostate{});
+    o.template emplace<0>(std::monostate{});
+    return;
   }`)
 				for i := 0; i < arity; i++ {
 					fmt.Fprintf(w, "case %d:\n", i)
 					w.Indented(func() {
-						fmt.Fprintf(w, "return TVariant(std::in_place_index<%d + offset>, static_cast<TOuter%d>(value%d_));\n", i, i, i)
+						fmt.Fprintf(w, "o.template emplace<%d + offset>();\n", i)
+						fmt.Fprintf(w, "yardl::hdf5::ToOuter(value%d_, std::get<%d + offset>(o));\n", i, i)
+						w.WriteStringln("return;")
 					})
 				}
 				w.WriteStringln("}")
@@ -171,7 +174,7 @@ func writeInnerUnionTypes(w *formatting.IndentedWriter, env *dsl.Environment) {
 			w.WriteString("}\n\n")
 
 			w.WriteStringln(`template <typename TVariant>
-static constexpr size_t GetOuterVariantOffet() {
+static constexpr size_t GetOuterVariantOffset() {
   constexpr bool has_monostate = std::is_same_v<std::monostate, std::variant_alternative_t<0, TVariant>>;
   if constexpr (has_monostate) {
     return 1;
@@ -229,13 +232,13 @@ func writeInnerType(w *formatting.IndentedWriter, recordDef *dsl.RecordDefinitio
 	}
 
 	writeInnerDefinitionTemplateSpec(w, recordDef)
-	innerTypeName := innerTypeName(recordDef)
-	fmt.Fprintf(w, "struct %s {\n", innerTypeName)
+	innerName := innerTypeName(recordDef)
+	fmt.Fprintf(w, "struct %s {\n", innerName)
 
 	outerTypeSyntax := common.TypeDefinitionSyntax(recordDef)
 	w.Indented(func() {
-		fmt.Fprintf(w, "%s() {} \n", innerTypeName)
-		fmt.Fprintf(w, "%s(%s const& o) \n", innerTypeName, outerTypeSyntax)
+		fmt.Fprintf(w, "%s() {} \n", innerName)
+		fmt.Fprintf(w, "%s(%s const& o) \n", innerName, outerTypeSyntax)
 		w.Indented(func() {
 			w.Indented(func() {
 				w.WriteString(": ")
@@ -247,17 +250,12 @@ func writeInnerType(w *formatting.IndentedWriter, recordDef *dsl.RecordDefinitio
 		})
 		w.WriteString("}\n\n")
 
-		fmt.Fprintf(w, "explicit operator %s() const {\n", outerTypeSyntax)
+		fmt.Fprintf(w, "void ToOuter (%s& o) const {\n", outerTypeSyntax)
 		w.Indented(func() {
-			fmt.Fprintf(w, "return %s{", outerTypeSyntax)
-			formatting.Delimited(w, ", ", recordDef.Fields, func(w *formatting.IndentedWriter, i int, f *dsl.Field) {
-				if needsInnerType(f.Type) {
-					fmt.Fprintf(w, "static_cast<%s>(%s)", common.TypeSyntax(f.Type), common.FieldIdentifierName(f.Name))
-				} else {
-					w.WriteString(common.FieldIdentifierName(f.Name))
-				}
-			})
-			w.WriteStringln("};")
+			for _, f := range recordDef.Fields {
+				fieldName := common.FieldIdentifierName(f.Name)
+				fmt.Fprintf(w, "yardl::hdf5::ToOuter(%s, o.%s);\n", fieldName, fieldName)
+			}
 		})
 
 		w.WriteString("}\n\n")
