@@ -37,3 +37,12 @@ if [ ! -f smoketest.h5 ]; then
 fi
 
 h5dump smoketest.h5
+
+
+## add the unit test types to the model and make sure it compiles
+cd ../..
+cp ../models/test/unittests.yml model/
+cd model
+yardl generate
+cd ../cpp/build
+ninja
