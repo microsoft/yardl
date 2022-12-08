@@ -311,8 +311,10 @@ func TypeDefinitionSyntax(t dsl.TypeDefinition) string {
 
 func PrimitiveSyntax(p dsl.PrimitiveDefinition) string {
 	switch p {
-	case dsl.Int8, dsl.Uint8, dsl.Int16, dsl.Uint16, dsl.Int32, dsl.Uint32, dsl.Int64, dsl.Uint64, dsl.Size:
+	case dsl.Int8, dsl.Uint8, dsl.Int16, dsl.Uint16, dsl.Int32, dsl.Uint32, dsl.Int64, dsl.Uint64:
 		return string(p) + "_t"
+	case dsl.Size:
+		return "yardl::Size"
 	case dsl.Float32:
 		return "float"
 	case dsl.Float64:

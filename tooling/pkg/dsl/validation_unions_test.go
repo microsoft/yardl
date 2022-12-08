@@ -6,6 +6,7 @@ package dsl
 import (
 	"os"
 	"path"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -48,16 +49,16 @@ X: !record
 	assert.ErrorContains(t, err, "if null is specified in a union type, it must be the first option")
 }
 
-func TestUnionElementsMustBeDistict(t *testing.T) {
+func TestUnionElementsMustBeDistinct(t *testing.T) {
 	src := `
 X: !record
   fields:
     f: [int, int]`
 	_, err := parseAndValidate(t, src)
-	assert.ErrorContains(t, err, "all type cases in a union must be distinct")
+	assert.ErrorContains(t, err, "redundant union type cases")
 }
 
-func TestUnionElementsMustBeDistictWithGenerics(t *testing.T) {
+func TestUnionElementsMustBeDistinctWithGenerics(t *testing.T) {
 	src := `
 X: !record
   fields:
@@ -65,10 +66,10 @@ X: !record
 GenericRecord<T>: !record`
 
 	_, err := parseAndValidate(t, src)
-	assert.ErrorContains(t, err, "all type cases in a union must be distinct")
+	assert.ErrorContains(t, err, "redundant union type cases")
 }
 
-func TestUnionElementsAreDistictWithGenerics(t *testing.T) {
+func TestUnionElementsAreDistinctWithGenerics(t *testing.T) {
 	src := `
 X: !record
   fields:
@@ -79,35 +80,36 @@ GenericRecord<T>: !record`
 	assert.Nil(t, err)
 }
 
-func TestUnionElementsMustBeDistict_SameUnrecognizedType(t *testing.T) {
+func TestUnionElementsMustBeDistinct_SameUnrecognizedType(t *testing.T) {
 	src := `
+Bar: int
 X: !record
   fields:
     f: [Bar, Bar]`
 	_, err := parseAndValidate(t, src)
-	assert.ErrorContains(t, err, "all type cases in a union must be distinct")
+	assert.ErrorContains(t, err, "redundant union type cases")
 }
 
-func TestUnionElementsMustBeDistict_DifferentUnrecognizedType(t *testing.T) {
+func TestUnionElementsMustBeDistinct_DifferentUnrecognizedType(t *testing.T) {
 	src := `
 X: !record
   fields:
     f: [Foo, Bar]`
 	_, err := parseAndValidate(t, src)
 	assert.NotNil(t, err)
-	assert.NotContains(t, err.Error(), "all type cases in a union must be distinct")
+	assert.NotContains(t, err.Error(), "redundant union type cases")
 }
 
-func TestUnionElementsMustBeDistict_MultipleNulls(t *testing.T) {
+func TestUnionElementsMustBeDistinct_MultipleNulls(t *testing.T) {
 	src := `
 X: !record
   fields:
     f: [null, null, null]`
 	_, err := parseAndValidate(t, src)
-	assert.ErrorContains(t, err, "all type cases in a union must be distinct")
+	assert.ErrorContains(t, err, "redundant union type cases")
 }
 
-func TestUnionElementsMustBeDistict_Complex(t *testing.T) {
+func TestUnionElementsMustBeDistinct_Complex(t *testing.T) {
 	src := `
 X: !record
   fields:
@@ -119,10 +121,10 @@ X: !record
         items: [int, float]
         length: 10`
 	_, err := parseAndValidate(t, src)
-	assert.ErrorContains(t, err, "all type cases in a union must be distinct")
+	assert.ErrorContains(t, err, "redundant union type cases")
 }
 
-func TestUnionElementsMustBeDistict_Nested(t *testing.T) {
+func TestUnionElementsMustBeDistinct_Nested(t *testing.T) {
 	src := `
 X: !record
   fields:
@@ -130,7 +132,118 @@ X: !record
       - int
       - [ float, float ]`
 	_, err := parseAndValidate(t, src)
-	assert.ErrorContains(t, err, "all type cases in a union must be distinct")
+	assert.ErrorContains(t, err, "redundant union type cases")
+}
+
+func TestUnionElementsMustBeDistinct_AliasedType(t *testing.T) {
+	src := `
+MyIntType: uint64
+MyRecord: !record
+  fields:
+    one: [uint64, MyIntType]`
+	_, err := parseAndValidate(t, src)
+	assert.ErrorContains(t, err, "redundant union type cases")
+}
+
+func TestUnionElementsMustBeDistinct_AliasedWithinVector(t *testing.T) {
+	src := `
+MyIntType: uint64
+MyRecord: !record
+  fields:
+    f:
+      - !vector
+        items: MyIntType
+      - !vector
+        items: uint64`
+	_, err := parseAndValidate(t, src)
+	assert.ErrorContains(t, err, "redundant union type cases")
+}
+
+func TestUnionElementsMustBeDistinct_DifferentGenericArgs(t *testing.T) {
+	src := `
+MyIntType: uint64
+Image<T>: !array
+  items: T
+MyRecord: !record
+  fields:
+    f: [Image<double>, Image<float>]`
+	_, err := parseAndValidate(t, src)
+	assert.Nil(t, err)
+}
+
+func TestUnionElementsMustBeDistinct_GenericUnionAlias_AllUnique(t *testing.T) {
+	src := `
+MyUnionType<T, U>: [T, U]
+MyRecord: !record
+  fields:
+    f: MyUnionType<int, float>`
+	_, err := parseAndValidate(t, src)
+	assert.Nil(t, err)
+}
+
+func TestUnionElementsMustBeDistinct_GenericUnionAlias_NotUnique_MultipleTypeArgs(t *testing.T) {
+	src := `
+MyUnionType<T, U>: [T, U]
+MyRecord: !record
+  fields:
+    f: MyUnionType<int, int>`
+	_, err := parseAndValidate(t, src)
+	require.NotNil(t, err)
+	assert.Regexp(t, ".yaml:2:21: redundant union type cases resulting from the type arguments given at .*.yaml:5:20 and .*.yaml:5:25", err.Error())
+}
+
+func TestUnionElementsMustBeDistinct_GenericUnionAlias_NotUnique_SingleTypeArg(t *testing.T) {
+	src := `
+MyUnionType<T, U>: [T, int]
+MyRecord: !record
+  fields:
+    f: MyUnionType<int, float>`
+	_, err := parseAndValidate(t, src)
+	require.NotNil(t, err)
+	assert.Regexp(t, ".yaml:2:24: redundant union type cases resulting from the type argument given at .*.yaml:5:20$", err.Error())
+}
+
+func TestUnionElementsMustBeDistinct_GenericUnionAliasChain_SingleTypeArg(t *testing.T) {
+	src := `
+Rec<T>: !record
+  fields:
+    f: [T, int]
+Alias1<T>: Rec<T>
+Alias2: Alias1<int>`
+	_, err := parseAndValidate(t, src)
+	require.NotNil(t, err)
+	assert.Regexp(t, ".yaml:4:12: redundant union type cases resulting from the type argument given at .*.yaml:6:16$", err.Error())
+}
+
+func TestUnionElementsMustBeDistinct_GenericUnionAliasChain_ErrorsNotDuplicated(t *testing.T) {
+	src := `
+Rec<T>: !record
+  fields:
+    f: [int, int]
+Alias1<T>: Rec<T>
+Alias2: Alias1<int>`
+	_, err := parseAndValidate(t, src)
+	require.NotNil(t, err)
+	assert.Regexp(t, ".yaml:4:9: redundant union type cases$", err.Error())
+	assert.Equal(t, 1, len(strings.Split(err.Error(), "\n")))
+}
+
+func TestUnionElementsMustBeDistinct_SizeAndUnit64Direct(t *testing.T) {
+	src := `
+T: [size, uint64]`
+	_, err := parseAndValidate(t, src)
+	require.NotNil(t, err)
+	assert.ErrorContains(t, err, "redundant union type cases (uint64 and size are equivalent)")
+}
+
+func TestUnionElementsMustBeDistinct_SizeAndUnit64Aliased(t *testing.T) {
+	src := `
+MySize: size
+MyUint64: uint64
+T: [MySize, MyUint64]`
+	_, err := parseAndValidate(t, src)
+	require.NotNil(t, err)
+	assert.ErrorContains(t, err, "redundant union type cases (uint64 and size are equivalent)")
 }
 
 func TestVectorLengthCannotBeNegative(t *testing.T) {

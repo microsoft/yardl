@@ -119,8 +119,8 @@ TEST(ComputedFieldsTest, SwitchExpression) {
   r.optional_named_array = {};
   ASSERT_EQ(r.OptionalNamedArrayLength(), 0);
   ASSERT_EQ(r.OptionalNamedArrayLengthWithDiscard(), 0);
-  static_assert(std::is_same_v<decltype(r.OptionalNamedArrayLength()), size_t>);
-  static_assert(std::is_same_v<decltype(r.OptionalNamedArrayLengthWithDiscard()), size_t>);
+  static_assert(std::is_same_v<decltype(r.OptionalNamedArrayLength()), yardl::Size>);
+  static_assert(std::is_same_v<decltype(r.OptionalNamedArrayLengthWithDiscard()), yardl::Size>);
 
   r.int_float_union = 42;
   ASSERT_EQ(r.IntFloatUnionAsFloat(), 42.0f);

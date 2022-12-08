@@ -88,7 +88,7 @@ struct RecordWithPrimitives {
   uint32_t uint32_field{};
   int64_t int64_field{};
   uint64_t uint64_field{};
-  size_t size_field{};
+  yardl::Size size_field{};
   float float32_field{};
   double float64_field{};
   std::complex<float> complexfloat32_field{};
@@ -362,7 +362,7 @@ enum class Int64Enum : int64_t {
   kB = -4611686018427387904LL,
 };
 
-enum class SizeBasedEnum : size_t {
+enum class SizeBasedEnum : yardl::Size {
   kA = 0ULL,
   kB = 1ULL,
   kC = 2ULL,
@@ -590,31 +590,31 @@ struct RecordWithComputedFields {
     return const_cast<int32_t&>(std::as_const(*this).AccessVectorOfVectorsField());
   }
 
-  size_t ArraySize() const {
+  yardl::Size ArraySize() const {
     return array_field.size();
   }
 
-  size_t ArrayXSize() const {
+  yardl::Size ArrayXSize() const {
     return array_field.shape(0);
   }
 
-  size_t ArrayYSize() const {
+  yardl::Size ArrayYSize() const {
     return array_field.shape(1);
   }
 
-  size_t Array0Size() const {
+  yardl::Size Array0Size() const {
     return array_field.shape(0);
   }
 
-  size_t Array1Size() const {
+  yardl::Size Array1Size() const {
     return array_field.shape(1);
   }
 
-  size_t ArraySizeFromIntField() const {
+  yardl::Size ArraySizeFromIntField() const {
     return array_field.shape(int_field);
   }
 
-  size_t ArraySizeFromStringField() const {
+  yardl::Size ArraySizeFromStringField() const {
     return array_field.shape(([](std::string dim_name) {
       if (dim_name == "x") return 0;
       if (dim_name == "y") return 1;
@@ -622,43 +622,43 @@ struct RecordWithComputedFields {
     })(string_field));
   }
 
-  size_t ArraySizeFromNestedIntField() const {
+  yardl::Size ArraySizeFromNestedIntField() const {
     return array_field.shape(tuple_field.v1);
   }
 
-  size_t ArrayFieldMapDimensionsXSize() const {
+  yardl::Size ArrayFieldMapDimensionsXSize() const {
     return array_field_map_dimensions.shape(0);
   }
 
-  size_t FixedArraySize() const {
+  yardl::Size FixedArraySize() const {
     return 12ULL;
   }
 
-  size_t FixedArrayXSize() const {
+  yardl::Size FixedArrayXSize() const {
     return 3ULL;
   }
 
-  size_t FixedArray0Size() const {
+  yardl::Size FixedArray0Size() const {
     return 3ULL;
   }
 
-  size_t VectorSize() const {
+  yardl::Size VectorSize() const {
     return vector_field.size();
   }
 
-  size_t FixedVectorSize() const {
+  yardl::Size FixedVectorSize() const {
     return 3ULL;
   }
 
-  size_t ArrayDimensionXIndex() const {
+  yardl::Size ArrayDimensionXIndex() const {
     return 0ULL;
   }
 
-  size_t ArrayDimensionYIndex() const {
+  yardl::Size ArrayDimensionYIndex() const {
     return 1ULL;
   }
 
-  size_t ArrayDimensionIndexFromStringField() const {
+  yardl::Size ArrayDimensionIndexFromStringField() const {
     return ([](std::string dim_name) {
       if (dim_name == "x") return 0;
       if (dim_name == "y") return 1;
@@ -666,16 +666,16 @@ struct RecordWithComputedFields {
     })(string_field);
   }
 
-  size_t ArrayDimensionCount() const {
+  yardl::Size ArrayDimensionCount() const {
     return 2ULL;
   }
 
-  size_t DynamicArrayDimensionCount() const {
+  yardl::Size DynamicArrayDimensionCount() const {
     return dynamic_array_field.dimension();
   }
 
-  size_t OptionalNamedArrayLength() const {
-    return [](auto&& __case_arg__) -> size_t {
+  yardl::Size OptionalNamedArrayLength() const {
+    return [](auto&& __case_arg__) -> yardl::Size {
       if (__case_arg__.has_value()) {
         test_model::NamedNDArray const& arr = __case_arg__.value();
         return arr.size();
@@ -684,8 +684,8 @@ struct RecordWithComputedFields {
     }(optional_named_array);
   }
 
-  size_t OptionalNamedArrayLengthWithDiscard() const {
-    return [](auto&& __case_arg__) -> size_t {
+  yardl::Size OptionalNamedArrayLengthWithDiscard() const {
+    return [](auto&& __case_arg__) -> yardl::Size {
       if (__case_arg__.has_value()) {
         test_model::NamedNDArray const& arr = __case_arg__.value();
         return arr.size();

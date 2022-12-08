@@ -73,6 +73,11 @@ func TypeDefinitionsEqual(a, b TypeDefinition) bool {
 	aMeta := a.GetDefinitionMeta()
 	bMeta := b.GetDefinitionMeta()
 	if aMeta.Namespace != bMeta.Namespace || aMeta.Name != bMeta.Name {
+		if a == PrimitiveSize && b == PrimitiveUint64 || a == PrimitiveUint64 && b == PrimitiveSize {
+			// Special case: `size` and `uint64` are equivalent though not aliases
+			return true
+		}
+
 		return false
 	}
 
@@ -185,6 +190,10 @@ func TypesEqual(a, b Type) bool {
 	if b == nil {
 		return a == nil
 	}
+
+	a = GetUnderlyingType(a)
+	b = GetUnderlyingType(b)
+
 	switch ta := a.(type) {
 	case *SimpleType:
 		tb, ok := b.(*SimpleType)

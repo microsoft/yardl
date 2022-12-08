@@ -31,7 +31,7 @@ func topologicalSortTypes(env *Environment, errorSink *validation.ErrorSink) *En
 							case *EnumDefinition:
 								return fmt.Sprintf("Enum '%s'", nt.Name)
 							case *NamedType:
-								return fmt.Sprintf("Array '%s'", nt.Name)
+								return fmt.Sprintf("Alias '%s'", nt.Name)
 							case *Field:
 								return fmt.Sprintf("Field '%s'", nt.Name)
 							default:
