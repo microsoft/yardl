@@ -225,9 +225,9 @@ class InnerFixedNdArray : public yardl::FixedNDArray<TInner, Dims...> {
   InnerFixedNdArray() {}
   InnerFixedNdArray(yardl::FixedNDArray<TOuter, Dims...> const& o) {
     auto o_iter = o.begin();
-    auto i_iter = this->begin();
+    TInner* i_data_ptr = this->data();
     for (size_t i = 0; i < length; i++) {
-      new (i_iter++) TInner(*o_iter++);
+      new (i_data_ptr++) TInner(*o_iter++);
     }
   }
 
