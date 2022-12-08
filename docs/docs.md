@@ -43,6 +43,7 @@
   - [Enums](#enums-2)
   - [Records](#records-2)
   - [Streams](#streams-1)
+  - [Example](#example)
 
 ## Installation
 
@@ -1184,3 +1185,74 @@ Streams are written as one or more blocks. Each block starts with a length as an
 unsigned varint followed by that number of values. The last block will have
 length 0 and will simply be `0x0`, which signals that the stream is complete.
 Only the last block can have length 0.
+
+### Example
+
+Let's work through an example. Here is a sample model:
+
+```yaml
+MyProtocol: !protocol
+  sequence:
+    floatArray: !array
+      items: float
+      dimensions: [2,2]
+    points: !stream
+      items: Point
+
+Point: !record
+  fields:
+    x: uint64
+    y: int32
+```
+
+We will write the values `{1.2, 3.4}, {5.6, 7.8}` as the `floatArray` step, and
+5 points with coordinates `{1, 2}`, `{3, 4}`, `{5, 6}`, `{700, 800}`, and
+`{800000, -900000}`. The points will be written in two blocks, the first of
+length 3, the second of length 2. The C++ to write these values looks like this:
+
+```cpp
+writer.WriteFloatArray({{1.2, 3.4}, {5.6, 7.8}});
+
+writer.WritePoints({{1, 2}, {3, 4}, {5, 6}});
+writer.WritePoints({{700, 800}, {800000, -900000}});
+writer.EndPoints();
+```
+
+Now let's look at the binary file. The first section of the file is the header
+and schema. It begins with the magic bytes, the binary version, then the schema
+as a JSON string. The string is written as its length (304) encoded as an an
+unsigned varint followed by 304 chars.
+
+```text
+ASCII:  y  a  r  d  l  .  .  .  .  .  .  {  "  p  r  o  t  o  c  o  l  "  :  {  "  n  a  m  e  "  :  "  M  y  P  r  o  t  o  c  o  l  "  ,  "  s  e  q  u  e  n  c  e  "  :  [  {  "  n  a  m  e  "  :  "  f  l  o  a  t  A  r  r  a  y  "  ,  "  t  y  p  e  "  :  {  "  a  r  r  a  y  "  :  {  "  i  t  e  m  s  "  :  "  f  l  o  a  t  3  2  "  ,  "  d  i  m  e  n  s  i  o  n  s  "  :  [  {  "  l  e  n  g  t  h  "  :  2  }  ,  {  "  l  e  n  g  t  h  "  :  2  }  ]  }  }  }  ,  {  "  n  a  m  e  "  :  "  p  o  i  n  t  s  "  ,  "  t  y  p  e  "  :  {  "  s  t  r  e  a  m  "  :  {  "  i  t  e  m  s  "  :  "  S  a  n  d  b  o  x  .  P  o  i  n  t  "  }  }  }  ]  }  ,  "  t  y  p  e  s  "  :  [  {  "  n  a  m  e  "  :  "  P  o  i  n  t  "  ,  "  f  i  e  l  d  s  "  :  [  {  "  n  a  m  e  "  :  "  x  "  ,  "  t  y  p  e  "  :  "  u  i  n  t  6  4  "  }  ,  {  "  n  a  m  e  "  :  "  y  "  ,  "  t  y  p  e  "  :  "  i  n  t  3  2  "  }  ]  }  ]  }
+HEX:    79 61 72 64 6c 01 00 00 00 b0 02 7b 22 70 72 6f 74 6f 63 6f 6c 22 3a 7b 22 6e 61 6d 65 22 3a 22 4d 79 50 72 6f 74 6f 63 6f 6c 22 2c 22 73 65 71 75 65 6e 63 65 22 3a 5b 7b 22 6e 61 6d 65 22 3a 22 66 6c 6f 61 74 41 72 72 61 79 22 2c 22 74 79 70 65 22 3a 7b 22 61 72 72 61 79 22 3a 7b 22 69 74 65 6d 73 22 3a 22 66 6c 6f 61 74 33 32 22 2c 22 64 69 6d 65 6e 73 69 6f 6e 73 22 3a 5b 7b 22 6c 65 6e 67 74 68 22 3a 32 7d 2c 7b 22 6c 65 6e 67 74 68 22 3a 32 7d 5d 7d 7d 7d 2c 7b 22 6e 61 6d 65 22 3a 22 70 6f 69 6e 74 73 22 2c 22 74 79 70 65 22 3a 7b 22 73 74 72 65 61 6d 22 3a 7b 22 69 74 65 6d 73 22 3a 22 53 61 6e 64 62 6f 78 2e 50 6f 69 6e 74 22 7d 7d 7d 5d 7d 2c 22 74 79 70 65 73 22 3a 5b 7b 22 6e 61 6d 65 22 3a 22 50 6f 69 6e 74 22 2c 22 66 69 65 6c 64 73 22 3a 5b 7b 22 6e 61 6d 65 22 3a 22 78 22 2c 22 74 79 70 65 22 3a 22 75 69 6e 74 36 34 22 7d 2c 7b 22 6e 61 6d 65 22 3a 22 79 22 2c 22 74 79 70 65 22 3a 22 69 6e 74 33 32 22 7d 5d 7d 5d 7d
+        mmmmmmmmmmmmmm vvvvvvvvvvv sssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss
+                                   uuuuu ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+        m = magic bytes
+        v = version (unsigned int)
+        s = string
+        u = unsigned varint
+        c = char
+```
+
+Following the schema string is the `floatArray` value, followed by the `points`
+stream, shown below. `floatArray` is made up of four consecutive 32-bit
+floating-point values. The `points` stream is made up of blocks with lengths 3, 2,
+and 0. The 0-length block indicates the end of the stream, and in this case the
+end of the file as well, since there are no more steps in the protocol. Each nonempty
+block has `Point`s, each of which is an unsigned varint followed by a signed varint.
+
+```text
+ASCII:  .  .  .  ?  .  .  Y  @  3  3  .  @  .  .  .  @  .  .  .  .  .  .  .  .  .  .  .  .  .  .  0  .  .  m  .
+HEX:    9a 99 99 3f 9a 99 59 40 33 33 b3 40 9a 99 f9 40 03 01 04 03 08 05 0c 02 bc 05 c0 0c 80 ea 30 bf ee 6d 00
+        aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa ssssssssssssssssssssssssssssssssssssssssssssssssssssssss
+        fffffffffff fffffffffff fffffffffff fffffffffff bbbbbbbbbbbbbbbbbbbb bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb bb
+                                                        uu ppppp ppppp ppppp uu ppppppppppp ppppppppppppppppp uu
+                                                        uu ii uu ii uu ii uu    uuuuu iiiii uuuuuuuu iiiiiiii
+
+        a = array                                       s = stream
+        f = float                                       b = block
+                                                        u = unsigned varint
+                                                        i = signed varint
+                                                        p = point
+```
