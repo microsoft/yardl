@@ -79,13 +79,13 @@ func writeInnerUnionTypes(w *formatting.IndentedWriter, env *dsl.Environment) {
 		w.Indented(func() {
 			w.WriteStringln("public:")
 			fmt.Fprintf(w, "InnerUnion%d() : type_index_(-1) {} \n", arity)
-			fmt.Fprintf(w, "InnerUnion%d(std::variant<%s> const& v) : type_index_(v.index()) {\n", arity, outerTypeArguments)
+			fmt.Fprintf(w, "InnerUnion%d(std::variant<%s> const& v) : type_index_(static_cast<int8_t>(v.index())) {\n", arity, outerTypeArguments)
 			w.Indented(func() {
 				w.WriteStringln("Init(v);")
 			})
 			w.WriteString("}\n\n")
 
-			fmt.Fprintf(w, "InnerUnion%d(std::variant<std::monostate, %s> const& v) : type_index_(v.index() - 1) {\n", arity, outerTypeArguments)
+			fmt.Fprintf(w, "InnerUnion%d(std::variant<std::monostate, %s> const& v) : type_index_(static_cast<int8_t>(v.index()) - 1) {\n", arity, outerTypeArguments)
 			w.Indented(func() {
 				w.WriteStringln("Init(v);")
 			})

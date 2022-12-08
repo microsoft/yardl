@@ -196,19 +196,19 @@ struct InnerVlenString {
 /**
  * @brief An HDF5-compatible representation of a fixed-size vector (std::array).
  */
-template <typename TInner, typename TOuter, size_t size>
-class InnerFixedVector : public std::array<TInner, size> {
+template <typename TInner, typename TOuter, size_t N>
+class InnerFixedVector : public std::array<TInner, N> {
  public:
   InnerFixedVector() {}
-  InnerFixedVector(std::array<TOuter, size> const& o) {
-    for (size_t i = 0; i < size; i++) {
+  InnerFixedVector(std::array<TOuter, N> const& o) {
+    for (size_t i = 0; i < N; i++) {
       new (&(*this)[i]) TInner(o[i]);
     }
   }
 
-  explicit operator std::array<TOuter, size>() const {
+  explicit operator std::array<TOuter, N>() const {
     std::array<TOuter, size> rtn;
-    for (size_t i = 0; i < size; i++) {
+    for (size_t i = 0; i < N; i++) {
       rtn[i] = static_cast<TOuter>((*this)[i]);
     }
 
