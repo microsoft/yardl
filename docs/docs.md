@@ -62,10 +62,16 @@ If using [vcpkg](https://vcpkg.io/en/index.html), you can use a manifest file
 that looks like the one
 [here](../smoketest/cpp/vcpkg.json).
 
-The `yardl generate` command emits a `CMakeLists.txt` that defines an
-object library and the necessary `find_package()` and `target_link_libraries()`
-calls. It has been tested to work with Conda on Linux with Clang and GCC and on
-Windows with MSVC with vcpkg. MacOS and homebrew support is coming.
+On macOS, you can use [Homebrew](https://brew.sh/) to install the dependencies:
+
+```bash
+brew install hdf5 xtensor howard-hinnant-date
+```
+
+The `yardl generate` command emits a `CMakeLists.txt` that defines an object
+library and the necessary `find_package()` and `target_link_libraries()` calls.
+It has been tested to work on Linux with Clang and GCC, on macOS with
+Clang, and on Windows with MSVC with vcpkg.
 
 ## Quick Start
 
