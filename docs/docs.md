@@ -588,7 +588,7 @@ MyRec: !record
   computedFields:
     accessArray: arrayField
     accessArrayElement: arrayField[0, 1]
-    accessArrayElementByName: arrayField[y:1, x:0]
+    accessArrayElementByName: arrayField[x:0, y:1]
     sizeOfArrayField: size(arrayField)
     sizeOfFirstDimension: size(arrayField, 0)
     sizeOfXDimension: size(arrayField, 'x')
