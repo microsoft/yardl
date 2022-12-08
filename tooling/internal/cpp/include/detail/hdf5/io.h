@@ -46,7 +46,7 @@ static inline void ReadScalarDataset(H5::Group const& group, std::string name,
   } else {
     TInner inner_value;
     dataset.read(&inner_value, hdf5_type, dataspace, dataspace);
-    value = static_cast<TOuter>(inner_value);
+    inner_value.ToOuter(value);
   }
 }
 
@@ -183,7 +183,7 @@ class DatasetReader {
     } else {
       TInner inner_value;
       dataset_.read(&inner_value, element_type_, memspace, filespace_, transfer_properties());
-      value = static_cast<TOuter>(inner_value);
+      inner_value.ToOuter(value);
     }
 
     offset_++;
@@ -209,8 +209,15 @@ class DatasetReader {
     } else {
       InnerTypeBuffer<TInner, TOuter> inner_value(values.size());
       dataset_.read(inner_value.data(), element_type_, memspace, filespace_, transfer_properties());
-      std::transform(inner_value.begin(), inner_value.end(), values.begin(),
-                     [](TInner const& v) { return static_cast<TOuter>(v); });
+
+      auto i_iter = inner_value.begin();
+      auto o_iter = values.begin();
+
+      while (i_iter != inner_value.end()) {
+        i_iter->ToOuter(*o_iter);
+        ++i_iter;
+        ++o_iter;
+      }
     }
 
     offset_ += rows_to_read;

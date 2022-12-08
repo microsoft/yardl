@@ -45,6 +45,14 @@ try
     {
         throw "The expected output file was not found"
     }
+
+    echo "Adding unit test types to the model"
+    cd ../..
+    cp ../models/test/unittests.yml model/
+    cd model
+    yardl generate
+    cd ../cpp/build
+    cmake --build .
 }
 finally
 {

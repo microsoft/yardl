@@ -11,11 +11,11 @@ template <typename TInner0, typename TOuter0, typename TInner1, typename TOuter1
 class InnerUnion2 {
   public:
   InnerUnion2() : type_index_(-1) {} 
-  InnerUnion2(std::variant<TOuter0, TOuter1> const& v) : type_index_(v.index()) {
+  InnerUnion2(std::variant<TOuter0, TOuter1> const& v) : type_index_(static_cast<int8_t>(v.index())) {
     Init(v);
   }
 
-  InnerUnion2(std::variant<std::monostate, TOuter0, TOuter1> const& v) : type_index_(v.index() - 1) {
+  InnerUnion2(std::variant<std::monostate, TOuter0, TOuter1> const& v) : type_index_(static_cast<int8_t>(v.index()) - 1) {
     Init(v);
   }
 
@@ -34,12 +34,12 @@ class InnerUnion2 {
     }
   }
 
-  explicit operator std::variant<TOuter0, TOuter1>() const {
-    return ConvertToOuterVariant<std::variant<TOuter0, TOuter1>>();
+  void ToOuter(std::variant<TOuter0, TOuter1>& o) const {
+    ToOuterImpl(o);
   }
 
-  explicit operator std::variant<std::monostate, TOuter0, TOuter1>() const {
-    return ConvertToOuterVariant<std::variant<std::monostate, TOuter0, TOuter1>>();
+  void ToOuter(std::variant<std::monostate, TOuter0, TOuter1>& o) const {
+    ToOuterImpl(o);
   }
 
   int8_t type_index_;
@@ -55,7 +55,7 @@ class InnerUnion2 {
   private:
   template <typename T>
   void Init(T const& v) {
-    constexpr size_t offset = GetOuterVariantOffet<std::remove_const_t<std::remove_reference_t<decltype(v)>>>();
+    constexpr size_t offset = GetOuterVariantOffset<std::remove_const_t<std::remove_reference_t<decltype(v)>>>();
     switch (type_index_) {
     case 0:
       new (&value0_) TInner0(std::get<0 + offset>(v));
@@ -67,23 +67,28 @@ class InnerUnion2 {
   }
 
   template <typename TVariant>
-  TVariant ConvertToOuterVariant() const {
-    constexpr size_t offset = GetOuterVariantOffet<TVariant>();
+  void ToOuterImpl(TVariant& o) const {
+    constexpr size_t offset = GetOuterVariantOffset<TVariant>();
     switch (type_index_) {
     case -1:
       if constexpr (offset == 1) {
-        return TVariant(std::in_place_index<0>, std::monostate{});
+        o.template emplace<0>(std::monostate{});
+        return;
       }
     case 0:
-      return TVariant(std::in_place_index<0 + offset>, static_cast<TOuter0>(value0_));
+      o.template emplace<0 + offset>();
+      yardl::hdf5::ToOuter(value0_, std::get<0 + offset>(o));
+      return;
     case 1:
-      return TVariant(std::in_place_index<1 + offset>, static_cast<TOuter1>(value1_));
+      o.template emplace<1 + offset>();
+      yardl::hdf5::ToOuter(value1_, std::get<1 + offset>(o));
+      return;
     }
     throw std::runtime_error("unrecognized type variant type index " + std::to_string(type_index_));
   }
 
   template <typename TVariant>
-  static constexpr size_t GetOuterVariantOffet() {
+  static constexpr size_t GetOuterVariantOffset() {
     constexpr bool has_monostate = std::is_same_v<std::monostate, std::variant_alternative_t<0, TVariant>>;
     if constexpr (has_monostate) {
       return 1;
@@ -159,8 +164,11 @@ struct _Inner_SimpleEncodingCounters {
       repetition(o.repetition) {
   }
 
-  explicit operator test_model::SimpleEncodingCounters() const {
-    return test_model::SimpleEncodingCounters{static_cast<std::optional<uint32_t>>(e1), static_cast<std::optional<uint32_t>>(e2), static_cast<std::optional<uint32_t>>(slice), static_cast<std::optional<uint32_t>>(repetition)};
+  void ToOuter (test_model::SimpleEncodingCounters& o) const {
+    yardl::hdf5::ToOuter(e1, o.e1);
+    yardl::hdf5::ToOuter(e2, o.e2);
+    yardl::hdf5::ToOuter(slice, o.slice);
+    yardl::hdf5::ToOuter(repetition, o.repetition);
   }
 
   yardl::hdf5::InnerOptional<uint32_t, uint32_t> e1;
@@ -178,8 +186,11 @@ struct _Inner_SimpleAcquisition {
       trajectory(o.trajectory) {
   }
 
-  explicit operator test_model::SimpleAcquisition() const {
-    return test_model::SimpleAcquisition{flags, static_cast<test_model::SimpleEncodingCounters>(idx), static_cast<yardl::NDArray<std::complex<float>, 2>>(data), static_cast<yardl::NDArray<float, 2>>(trajectory)};
+  void ToOuter (test_model::SimpleAcquisition& o) const {
+    yardl::hdf5::ToOuter(flags, o.flags);
+    yardl::hdf5::ToOuter(idx, o.idx);
+    yardl::hdf5::ToOuter(data, o.data);
+    yardl::hdf5::ToOuter(trajectory, o.trajectory);
   }
 
   uint64_t flags;
@@ -196,8 +207,10 @@ struct _Inner_RecordWithVectors {
       vector_of_vectors(o.vector_of_vectors) {
   }
 
-  explicit operator test_model::RecordWithVectors() const {
-    return test_model::RecordWithVectors{static_cast<std::vector<int32_t>>(default_vector), default_vector_fixed_length, static_cast<std::vector<std::array<int32_t, 2>>>(vector_of_vectors)};
+  void ToOuter (test_model::RecordWithVectors& o) const {
+    yardl::hdf5::ToOuter(default_vector, o.default_vector);
+    yardl::hdf5::ToOuter(default_vector_fixed_length, o.default_vector_fixed_length);
+    yardl::hdf5::ToOuter(vector_of_vectors, o.vector_of_vectors);
   }
 
   yardl::hdf5::InnerVlen<int32_t, int32_t> default_vector;
@@ -219,8 +232,16 @@ struct _Inner_RecordWithArrays {
       array_of_vectors(o.array_of_vectors) {
   }
 
-  explicit operator test_model::RecordWithArrays() const {
-    return test_model::RecordWithArrays{static_cast<yardl::DynamicNDArray<int32_t>>(default_array), static_cast<yardl::DynamicNDArray<int32_t>>(default_array_with_empty_dimension), static_cast<yardl::NDArray<int32_t, 1>>(rank1_array), static_cast<yardl::NDArray<int32_t, 2>>(rank2_array), static_cast<yardl::NDArray<int32_t, 2>>(rank2_array_with_named_dimensions), rank2_fixed_array, rank2_fixed_array_with_named_dimensions, static_cast<yardl::DynamicNDArray<int32_t>>(dynamic_array), array_of_vectors};
+  void ToOuter (test_model::RecordWithArrays& o) const {
+    yardl::hdf5::ToOuter(default_array, o.default_array);
+    yardl::hdf5::ToOuter(default_array_with_empty_dimension, o.default_array_with_empty_dimension);
+    yardl::hdf5::ToOuter(rank1_array, o.rank1_array);
+    yardl::hdf5::ToOuter(rank2_array, o.rank2_array);
+    yardl::hdf5::ToOuter(rank2_array_with_named_dimensions, o.rank2_array_with_named_dimensions);
+    yardl::hdf5::ToOuter(rank2_fixed_array, o.rank2_fixed_array);
+    yardl::hdf5::ToOuter(rank2_fixed_array_with_named_dimensions, o.rank2_fixed_array_with_named_dimensions);
+    yardl::hdf5::ToOuter(dynamic_array, o.dynamic_array);
+    yardl::hdf5::ToOuter(array_of_vectors, o.array_of_vectors);
   }
 
   yardl::hdf5::InnerDynamicNdArray<int32_t, int32_t> default_array;
@@ -241,8 +262,9 @@ struct _Inner_RecordWithOptionalFields {
       optional_int_alternate_syntax(o.optional_int_alternate_syntax) {
   }
 
-  explicit operator test_model::RecordWithOptionalFields() const {
-    return test_model::RecordWithOptionalFields{static_cast<std::optional<int32_t>>(optional_int), static_cast<std::optional<int32_t>>(optional_int_alternate_syntax)};
+  void ToOuter (test_model::RecordWithOptionalFields& o) const {
+    yardl::hdf5::ToOuter(optional_int, o.optional_int);
+    yardl::hdf5::ToOuter(optional_int_alternate_syntax, o.optional_int_alternate_syntax);
   }
 
   yardl::hdf5::InnerOptional<int32_t, int32_t> optional_int;
@@ -257,8 +279,10 @@ struct _Inner_RecordWithVlens {
       c(o.c) {
   }
 
-  explicit operator test_model::RecordWithVlens() const {
-    return test_model::RecordWithVlens{static_cast<std::vector<test_model::SimpleRecord>>(a), b, c};
+  void ToOuter (test_model::RecordWithVlens& o) const {
+    yardl::hdf5::ToOuter(a, o.a);
+    yardl::hdf5::ToOuter(b, o.b);
+    yardl::hdf5::ToOuter(c, o.c);
   }
 
   yardl::hdf5::InnerVlen<test_model::SimpleRecord, test_model::SimpleRecord> a;
@@ -273,8 +297,9 @@ struct _Inner_RecordWithStrings {
       b(o.b) {
   }
 
-  explicit operator test_model::RecordWithStrings() const {
-    return test_model::RecordWithStrings{static_cast<std::string>(a), static_cast<std::string>(b)};
+  void ToOuter (test_model::RecordWithStrings& o) const {
+    yardl::hdf5::ToOuter(a, o.a);
+    yardl::hdf5::ToOuter(b, o.b);
   }
 
   yardl::hdf5::InnerVlenString a;
@@ -287,8 +312,8 @@ struct _Inner_RecordWithOptionalVector {
       : optional_vector(o.optional_vector) {
   }
 
-  explicit operator test_model::RecordWithOptionalVector() const {
-    return test_model::RecordWithOptionalVector{static_cast<std::optional<std::vector<int32_t>>>(optional_vector)};
+  void ToOuter (test_model::RecordWithOptionalVector& o) const {
+    yardl::hdf5::ToOuter(optional_vector, o.optional_vector);
   }
 
   yardl::hdf5::InnerOptional<yardl::hdf5::InnerVlen<int32_t, int32_t>, std::vector<int32_t>> optional_vector;
@@ -302,8 +327,10 @@ struct _Inner_RecordWithFixedVectors {
       fixed_record_with_vlens_vector(o.fixed_record_with_vlens_vector) {
   }
 
-  explicit operator test_model::RecordWithFixedVectors() const {
-    return test_model::RecordWithFixedVectors{fixed_int_vector, fixed_simple_record_vector, static_cast<std::array<test_model::RecordWithVlens, 2>>(fixed_record_with_vlens_vector)};
+  void ToOuter (test_model::RecordWithFixedVectors& o) const {
+    yardl::hdf5::ToOuter(fixed_int_vector, o.fixed_int_vector);
+    yardl::hdf5::ToOuter(fixed_simple_record_vector, o.fixed_simple_record_vector);
+    yardl::hdf5::ToOuter(fixed_record_with_vlens_vector, o.fixed_record_with_vlens_vector);
   }
 
   std::array<int32_t, 5> fixed_int_vector;
@@ -319,8 +346,10 @@ struct _Inner_RecordWithFixedArrays {
       fixed_record_with_vlens_array(o.fixed_record_with_vlens_array) {
   }
 
-  explicit operator test_model::RecordWithFixedArrays() const {
-    return test_model::RecordWithFixedArrays{ints, fixed_simple_record_array, static_cast<yardl::FixedNDArray<test_model::RecordWithVlens, 2, 2>>(fixed_record_with_vlens_array)};
+  void ToOuter (test_model::RecordWithFixedArrays& o) const {
+    yardl::hdf5::ToOuter(ints, o.ints);
+    yardl::hdf5::ToOuter(fixed_simple_record_array, o.fixed_simple_record_array);
+    yardl::hdf5::ToOuter(fixed_record_with_vlens_array, o.fixed_record_with_vlens_array);
   }
 
   yardl::FixedNDArray<int32_t, 2, 3> ints;
@@ -336,8 +365,10 @@ struct _Inner_RecordWithNDArrays {
       fixed_record_with_vlens_array(o.fixed_record_with_vlens_array) {
   }
 
-  explicit operator test_model::RecordWithNDArrays() const {
-    return test_model::RecordWithNDArrays{static_cast<yardl::NDArray<int32_t, 2>>(ints), static_cast<yardl::NDArray<test_model::SimpleRecord, 2>>(fixed_simple_record_array), static_cast<yardl::NDArray<test_model::RecordWithVlens, 2>>(fixed_record_with_vlens_array)};
+  void ToOuter (test_model::RecordWithNDArrays& o) const {
+    yardl::hdf5::ToOuter(ints, o.ints);
+    yardl::hdf5::ToOuter(fixed_simple_record_array, o.fixed_simple_record_array);
+    yardl::hdf5::ToOuter(fixed_record_with_vlens_array, o.fixed_record_with_vlens_array);
   }
 
   yardl::hdf5::InnerNdArray<int32_t, int32_t, 2> ints;
@@ -353,8 +384,10 @@ struct _Inner_RecordWithNDArraysSingleDimension {
       fixed_record_with_vlens_array(o.fixed_record_with_vlens_array) {
   }
 
-  explicit operator test_model::RecordWithNDArraysSingleDimension() const {
-    return test_model::RecordWithNDArraysSingleDimension{static_cast<yardl::NDArray<int32_t, 1>>(ints), static_cast<yardl::NDArray<test_model::SimpleRecord, 1>>(fixed_simple_record_array), static_cast<yardl::NDArray<test_model::RecordWithVlens, 1>>(fixed_record_with_vlens_array)};
+  void ToOuter (test_model::RecordWithNDArraysSingleDimension& o) const {
+    yardl::hdf5::ToOuter(ints, o.ints);
+    yardl::hdf5::ToOuter(fixed_simple_record_array, o.fixed_simple_record_array);
+    yardl::hdf5::ToOuter(fixed_record_with_vlens_array, o.fixed_record_with_vlens_array);
   }
 
   yardl::hdf5::InnerVlen<int32_t, int32_t> ints;
@@ -370,8 +403,10 @@ struct _Inner_RecordWithDynamicNDArrays {
       fixed_record_with_vlens_array(o.fixed_record_with_vlens_array) {
   }
 
-  explicit operator test_model::RecordWithDynamicNDArrays() const {
-    return test_model::RecordWithDynamicNDArrays{static_cast<yardl::DynamicNDArray<int32_t>>(ints), static_cast<yardl::DynamicNDArray<test_model::SimpleRecord>>(fixed_simple_record_array), static_cast<yardl::DynamicNDArray<test_model::RecordWithVlens>>(fixed_record_with_vlens_array)};
+  void ToOuter (test_model::RecordWithDynamicNDArrays& o) const {
+    yardl::hdf5::ToOuter(ints, o.ints);
+    yardl::hdf5::ToOuter(fixed_simple_record_array, o.fixed_simple_record_array);
+    yardl::hdf5::ToOuter(fixed_record_with_vlens_array, o.fixed_record_with_vlens_array);
   }
 
   yardl::hdf5::InnerDynamicNdArray<int32_t, int32_t> ints;
@@ -389,8 +424,11 @@ struct _Inner_GenericRecord {
       image2(o.image2) {
   }
 
-  explicit operator test_model::GenericRecord<T1, T2>() const {
-    return test_model::GenericRecord<T1, T2>{static_cast<T1>(scalar1), static_cast<T2>(scalar2), static_cast<std::vector<T1>>(vector1), static_cast<test_model::Image<T2>>(image2)};
+  void ToOuter (test_model::GenericRecord<T1, T2>& o) const {
+    yardl::hdf5::ToOuter(scalar1, o.scalar1);
+    yardl::hdf5::ToOuter(scalar2, o.scalar2);
+    yardl::hdf5::ToOuter(vector1, o.vector1);
+    yardl::hdf5::ToOuter(image2, o.image2);
   }
 
   _T1_Inner scalar1;
@@ -407,8 +445,9 @@ struct _Inner_MyTuple {
       v2(o.v2) {
   }
 
-  explicit operator test_model::MyTuple<T1, T2>() const {
-    return test_model::MyTuple<T1, T2>{static_cast<T1>(v1), static_cast<T2>(v2)};
+  void ToOuter (test_model::MyTuple<T1, T2>& o) const {
+    yardl::hdf5::ToOuter(v1, o.v1);
+    yardl::hdf5::ToOuter(v2, o.v2);
   }
 
   _T1_Inner v1;
@@ -422,8 +461,8 @@ struct _Inner_GenericRecordWithComputedFields {
       : f1(o.f1) {
   }
 
-  explicit operator test_model::GenericRecordWithComputedFields<T0, T1>() const {
-    return test_model::GenericRecordWithComputedFields<T0, T1>{static_cast<std::variant<T0, T1>>(f1)};
+  void ToOuter (test_model::GenericRecordWithComputedFields<T0, T1>& o) const {
+    yardl::hdf5::ToOuter(f1, o.f1);
   }
 
   ::InnerUnion2<_T0_Inner, T0, _T1_Inner, T1> f1;
@@ -448,8 +487,21 @@ struct _Inner_RecordWithComputedFields {
       union_with_nested_generic_union(o.union_with_nested_generic_union) {
   }
 
-  explicit operator test_model::RecordWithComputedFields() const {
-    return test_model::RecordWithComputedFields{static_cast<yardl::NDArray<int32_t, 2>>(array_field), static_cast<yardl::NDArray<int32_t, 2>>(array_field_map_dimensions), static_cast<yardl::DynamicNDArray<int32_t>>(dynamic_array_field), fixed_array_field, int_field, static_cast<std::string>(string_field), tuple_field, static_cast<std::vector<int32_t>>(vector_field), static_cast<std::vector<std::vector<int32_t>>>(vector_of_vectors_field), fixed_vector_field, static_cast<std::optional<test_model::NamedNDArray>>(optional_named_array), static_cast<std::variant<int32_t, float>>(int_float_union), static_cast<std::variant<std::monostate, int32_t, float>>(nullable_int_float_union), static_cast<std::variant<int32_t, test_model::GenericRecordWithComputedFields<std::string, float>>>(union_with_nested_generic_union)};
+  void ToOuter (test_model::RecordWithComputedFields& o) const {
+    yardl::hdf5::ToOuter(array_field, o.array_field);
+    yardl::hdf5::ToOuter(array_field_map_dimensions, o.array_field_map_dimensions);
+    yardl::hdf5::ToOuter(dynamic_array_field, o.dynamic_array_field);
+    yardl::hdf5::ToOuter(fixed_array_field, o.fixed_array_field);
+    yardl::hdf5::ToOuter(int_field, o.int_field);
+    yardl::hdf5::ToOuter(string_field, o.string_field);
+    yardl::hdf5::ToOuter(tuple_field, o.tuple_field);
+    yardl::hdf5::ToOuter(vector_field, o.vector_field);
+    yardl::hdf5::ToOuter(vector_of_vectors_field, o.vector_of_vectors_field);
+    yardl::hdf5::ToOuter(fixed_vector_field, o.fixed_vector_field);
+    yardl::hdf5::ToOuter(optional_named_array, o.optional_named_array);
+    yardl::hdf5::ToOuter(int_float_union, o.int_float_union);
+    yardl::hdf5::ToOuter(nullable_int_float_union, o.nullable_int_float_union);
+    yardl::hdf5::ToOuter(union_with_nested_generic_union, o.union_with_nested_generic_union);
   }
 
   yardl::hdf5::InnerNdArray<int32_t, int32_t, 2> array_field;
@@ -476,8 +528,10 @@ struct _Inner_RecordWithKeywordFields {
       if_field(o.if_field) {
   }
 
-  explicit operator test_model::RecordWithKeywordFields() const {
-    return test_model::RecordWithKeywordFields{static_cast<std::string>(int_field), static_cast<test_model::ArrayWithKeywordDimensionNames<int32_t>>(sizeof_field), if_field};
+  void ToOuter (test_model::RecordWithKeywordFields& o) const {
+    yardl::hdf5::ToOuter(int_field, o.int_field);
+    yardl::hdf5::ToOuter(sizeof_field, o.sizeof_field);
+    yardl::hdf5::ToOuter(if_field, o.if_field);
   }
 
   yardl::hdf5::InnerVlenString int_field;
@@ -974,9 +1028,9 @@ void BenchmarkSimpleMrdWriter::WriteDataImpl(std::variant<test_model::SimpleAcqu
     [&](auto const& arg) {
       using T = std::decay_t<decltype(arg)>;
       if constexpr (std::is_same_v<T, test_model::SimpleAcquisition>) {
-        data_dataset_state_->Append<test_model::hdf5::_Inner_SimpleAcquisition, test_model::SimpleAcquisition>(value.index(), arg);
+        data_dataset_state_->Append<test_model::hdf5::_Inner_SimpleAcquisition, test_model::SimpleAcquisition>(static_cast<int8_t>(value.index()), arg);
       } else if constexpr (std::is_same_v<T, test_model::Image<float>>) {
-        data_dataset_state_->Append<yardl::hdf5::InnerNdArray<float, float, 2>, test_model::Image<float>>(value.index(), arg);
+        data_dataset_state_->Append<yardl::hdf5::InnerNdArray<float, float, 2>, test_model::Image<float>>(static_cast<int8_t>(value.index()), arg);
       } else {
         static_assert(yardl::hdf5::always_false_v<T>, "non-exhaustive visitor!");
       }
@@ -1658,9 +1712,9 @@ void StreamsOfUnionsWriter::WriteIntOrSimpleRecordImpl(std::variant<int32_t, tes
     [&](auto const& arg) {
       using T = std::decay_t<decltype(arg)>;
       if constexpr (std::is_same_v<T, int32_t>) {
-        intOrSimpleRecord_dataset_state_->Append<int32_t, int32_t>(value.index(), arg);
+        intOrSimpleRecord_dataset_state_->Append<int32_t, int32_t>(static_cast<int8_t>(value.index()), arg);
       } else if constexpr (std::is_same_v<T, test_model::SimpleRecord>) {
-        intOrSimpleRecord_dataset_state_->Append<test_model::SimpleRecord, test_model::SimpleRecord>(value.index(), arg);
+        intOrSimpleRecord_dataset_state_->Append<test_model::SimpleRecord, test_model::SimpleRecord>(static_cast<int8_t>(value.index()), arg);
       } else {
         static_assert(yardl::hdf5::always_false_v<T>, "non-exhaustive visitor!");
       }
@@ -1685,11 +1739,11 @@ void StreamsOfUnionsWriter::WriteNullableIntOrSimpleRecordImpl(std::variant<std:
     [&](auto const& arg) {
       using T = std::decay_t<decltype(arg)>;
       if constexpr (std::is_same_v<T, std::monostate>) {
-        nullableIntOrSimpleRecord_dataset_state_->Append<std::monostate, std::monostate>(value.index() -1, arg);
+        nullableIntOrSimpleRecord_dataset_state_->Append<std::monostate, std::monostate>(static_cast<int8_t>(value.index()) -1, arg);
       } else if constexpr (std::is_same_v<T, int32_t>) {
-        nullableIntOrSimpleRecord_dataset_state_->Append<int32_t, int32_t>(value.index() -1, arg);
+        nullableIntOrSimpleRecord_dataset_state_->Append<int32_t, int32_t>(static_cast<int8_t>(value.index()) -1, arg);
       } else if constexpr (std::is_same_v<T, test_model::SimpleRecord>) {
-        nullableIntOrSimpleRecord_dataset_state_->Append<test_model::SimpleRecord, test_model::SimpleRecord>(value.index() -1, arg);
+        nullableIntOrSimpleRecord_dataset_state_->Append<test_model::SimpleRecord, test_model::SimpleRecord>(static_cast<int8_t>(value.index()) -1, arg);
       } else {
         static_assert(yardl::hdf5::always_false_v<T>, "non-exhaustive visitor!");
       }
@@ -1926,9 +1980,9 @@ void SimpleGenericsWriter::WriteStreamOfTypeVariantsImpl(std::variant<test_model
     [&](auto const& arg) {
       using T = std::decay_t<decltype(arg)>;
       if constexpr (std::is_same_v<T, test_model::Image<float>>) {
-        streamOfTypeVariants_dataset_state_->Append<yardl::hdf5::InnerNdArray<float, float, 2>, test_model::Image<float>>(value.index(), arg);
+        streamOfTypeVariants_dataset_state_->Append<yardl::hdf5::InnerNdArray<float, float, 2>, test_model::Image<float>>(static_cast<int8_t>(value.index()), arg);
       } else if constexpr (std::is_same_v<T, test_model::Image<double>>) {
-        streamOfTypeVariants_dataset_state_->Append<yardl::hdf5::InnerNdArray<double, double, 2>, test_model::Image<double>>(value.index(), arg);
+        streamOfTypeVariants_dataset_state_->Append<yardl::hdf5::InnerNdArray<double, double, 2>, test_model::Image<double>>(static_cast<int8_t>(value.index()), arg);
       } else {
         static_assert(yardl::hdf5::always_false_v<T>, "non-exhaustive visitor!");
       }
@@ -2110,9 +2164,9 @@ void AliasesWriter::WriteStreamOfAliasedGenericUnion2Impl(test_model::AliasedGen
     [&](auto const& arg) {
       using T = std::decay_t<decltype(arg)>;
       if constexpr (std::is_same_v<T, test_model::AliasedString>) {
-        streamOfAliasedGenericUnion2_dataset_state_->Append<yardl::hdf5::InnerVlenString, test_model::AliasedString>(value.index(), arg);
+        streamOfAliasedGenericUnion2_dataset_state_->Append<yardl::hdf5::InnerVlenString, test_model::AliasedString>(static_cast<int8_t>(value.index()), arg);
       } else if constexpr (std::is_same_v<T, test_model::AliasedEnum>) {
-        streamOfAliasedGenericUnion2_dataset_state_->Append<test_model::Fruits, test_model::AliasedEnum>(value.index(), arg);
+        streamOfAliasedGenericUnion2_dataset_state_->Append<test_model::Fruits, test_model::AliasedEnum>(static_cast<int8_t>(value.index()), arg);
       } else {
         static_assert(yardl::hdf5::always_false_v<T>, "non-exhaustive visitor!");
       }
@@ -2214,9 +2268,9 @@ void StreamsOfAliasedUnionsWriter::WriteIntOrSimpleRecordImpl(test_model::Aliase
     [&](auto const& arg) {
       using T = std::decay_t<decltype(arg)>;
       if constexpr (std::is_same_v<T, int32_t>) {
-        intOrSimpleRecord_dataset_state_->Append<int32_t, int32_t>(value.index(), arg);
+        intOrSimpleRecord_dataset_state_->Append<int32_t, int32_t>(static_cast<int8_t>(value.index()), arg);
       } else if constexpr (std::is_same_v<T, test_model::SimpleRecord>) {
-        intOrSimpleRecord_dataset_state_->Append<test_model::SimpleRecord, test_model::SimpleRecord>(value.index(), arg);
+        intOrSimpleRecord_dataset_state_->Append<test_model::SimpleRecord, test_model::SimpleRecord>(static_cast<int8_t>(value.index()), arg);
       } else {
         static_assert(yardl::hdf5::always_false_v<T>, "non-exhaustive visitor!");
       }
@@ -2241,11 +2295,11 @@ void StreamsOfAliasedUnionsWriter::WriteNullableIntOrSimpleRecordImpl(test_model
     [&](auto const& arg) {
       using T = std::decay_t<decltype(arg)>;
       if constexpr (std::is_same_v<T, std::monostate>) {
-        nullableIntOrSimpleRecord_dataset_state_->Append<std::monostate, std::monostate>(value.index() -1, arg);
+        nullableIntOrSimpleRecord_dataset_state_->Append<std::monostate, std::monostate>(static_cast<int8_t>(value.index()) -1, arg);
       } else if constexpr (std::is_same_v<T, int32_t>) {
-        nullableIntOrSimpleRecord_dataset_state_->Append<int32_t, int32_t>(value.index() -1, arg);
+        nullableIntOrSimpleRecord_dataset_state_->Append<int32_t, int32_t>(static_cast<int8_t>(value.index()) -1, arg);
       } else if constexpr (std::is_same_v<T, test_model::SimpleRecord>) {
-        nullableIntOrSimpleRecord_dataset_state_->Append<test_model::SimpleRecord, test_model::SimpleRecord>(value.index() -1, arg);
+        nullableIntOrSimpleRecord_dataset_state_->Append<test_model::SimpleRecord, test_model::SimpleRecord>(static_cast<int8_t>(value.index()) -1, arg);
       } else {
         static_assert(yardl::hdf5::always_false_v<T>, "non-exhaustive visitor!");
       }
