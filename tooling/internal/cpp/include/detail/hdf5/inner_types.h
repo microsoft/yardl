@@ -207,7 +207,7 @@ class InnerFixedVector : public std::array<TInner, N> {
   }
 
   explicit operator std::array<TOuter, N>() const {
-    std::array<TOuter, size> rtn;
+    std::array<TOuter, N> rtn;
     for (size_t i = 0; i < N; i++) {
       rtn[i] = static_cast<TOuter>((*this)[i]);
     }
@@ -424,7 +424,6 @@ class InnerTypeBuffer {
   TInner const* end() const {
     return begin() + data_.size() / sizeof(TInner);
   }
-
 
  private:
   std::vector<uint8_t> data_;

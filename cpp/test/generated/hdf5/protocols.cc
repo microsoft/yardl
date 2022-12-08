@@ -11,11 +11,11 @@ template <typename TInner0, typename TOuter0, typename TInner1, typename TOuter1
 class InnerUnion2 {
   public:
   InnerUnion2() : type_index_(-1) {} 
-  InnerUnion2(std::variant<TOuter0, TOuter1> const& v) : type_index_(v.index()) {
+  InnerUnion2(std::variant<TOuter0, TOuter1> const& v) : type_index_(static_cast<int8_t>(v.index())) {
     Init(v);
   }
 
-  InnerUnion2(std::variant<std::monostate, TOuter0, TOuter1> const& v) : type_index_(v.index() - 1) {
+  InnerUnion2(std::variant<std::monostate, TOuter0, TOuter1> const& v) : type_index_(static_cast<int8_t>(v.index()) - 1) {
     Init(v);
   }
 
@@ -974,9 +974,9 @@ void BenchmarkSimpleMrdWriter::WriteDataImpl(std::variant<test_model::SimpleAcqu
     [&](auto const& arg) {
       using T = std::decay_t<decltype(arg)>;
       if constexpr (std::is_same_v<T, test_model::SimpleAcquisition>) {
-        data_dataset_state_->Append<test_model::hdf5::_Inner_SimpleAcquisition, test_model::SimpleAcquisition>(value.index(), arg);
+        data_dataset_state_->Append<test_model::hdf5::_Inner_SimpleAcquisition, test_model::SimpleAcquisition>(static_cast<int8_t>(value.index()), arg);
       } else if constexpr (std::is_same_v<T, test_model::Image<float>>) {
-        data_dataset_state_->Append<yardl::hdf5::InnerNdArray<float, float, 2>, test_model::Image<float>>(value.index(), arg);
+        data_dataset_state_->Append<yardl::hdf5::InnerNdArray<float, float, 2>, test_model::Image<float>>(static_cast<int8_t>(value.index()), arg);
       } else {
         static_assert(yardl::hdf5::always_false_v<T>, "non-exhaustive visitor!");
       }
@@ -1658,9 +1658,9 @@ void StreamsOfUnionsWriter::WriteIntOrSimpleRecordImpl(std::variant<int32_t, tes
     [&](auto const& arg) {
       using T = std::decay_t<decltype(arg)>;
       if constexpr (std::is_same_v<T, int32_t>) {
-        intOrSimpleRecord_dataset_state_->Append<int32_t, int32_t>(value.index(), arg);
+        intOrSimpleRecord_dataset_state_->Append<int32_t, int32_t>(static_cast<int8_t>(value.index()), arg);
       } else if constexpr (std::is_same_v<T, test_model::SimpleRecord>) {
-        intOrSimpleRecord_dataset_state_->Append<test_model::SimpleRecord, test_model::SimpleRecord>(value.index(), arg);
+        intOrSimpleRecord_dataset_state_->Append<test_model::SimpleRecord, test_model::SimpleRecord>(static_cast<int8_t>(value.index()), arg);
       } else {
         static_assert(yardl::hdf5::always_false_v<T>, "non-exhaustive visitor!");
       }
@@ -1685,11 +1685,11 @@ void StreamsOfUnionsWriter::WriteNullableIntOrSimpleRecordImpl(std::variant<std:
     [&](auto const& arg) {
       using T = std::decay_t<decltype(arg)>;
       if constexpr (std::is_same_v<T, std::monostate>) {
-        nullableIntOrSimpleRecord_dataset_state_->Append<std::monostate, std::monostate>(value.index() -1, arg);
+        nullableIntOrSimpleRecord_dataset_state_->Append<std::monostate, std::monostate>(static_cast<int8_t>(value.index()) -1, arg);
       } else if constexpr (std::is_same_v<T, int32_t>) {
-        nullableIntOrSimpleRecord_dataset_state_->Append<int32_t, int32_t>(value.index() -1, arg);
+        nullableIntOrSimpleRecord_dataset_state_->Append<int32_t, int32_t>(static_cast<int8_t>(value.index()) -1, arg);
       } else if constexpr (std::is_same_v<T, test_model::SimpleRecord>) {
-        nullableIntOrSimpleRecord_dataset_state_->Append<test_model::SimpleRecord, test_model::SimpleRecord>(value.index() -1, arg);
+        nullableIntOrSimpleRecord_dataset_state_->Append<test_model::SimpleRecord, test_model::SimpleRecord>(static_cast<int8_t>(value.index()) -1, arg);
       } else {
         static_assert(yardl::hdf5::always_false_v<T>, "non-exhaustive visitor!");
       }
@@ -1926,9 +1926,9 @@ void SimpleGenericsWriter::WriteStreamOfTypeVariantsImpl(std::variant<test_model
     [&](auto const& arg) {
       using T = std::decay_t<decltype(arg)>;
       if constexpr (std::is_same_v<T, test_model::Image<float>>) {
-        streamOfTypeVariants_dataset_state_->Append<yardl::hdf5::InnerNdArray<float, float, 2>, test_model::Image<float>>(value.index(), arg);
+        streamOfTypeVariants_dataset_state_->Append<yardl::hdf5::InnerNdArray<float, float, 2>, test_model::Image<float>>(static_cast<int8_t>(value.index()), arg);
       } else if constexpr (std::is_same_v<T, test_model::Image<double>>) {
-        streamOfTypeVariants_dataset_state_->Append<yardl::hdf5::InnerNdArray<double, double, 2>, test_model::Image<double>>(value.index(), arg);
+        streamOfTypeVariants_dataset_state_->Append<yardl::hdf5::InnerNdArray<double, double, 2>, test_model::Image<double>>(static_cast<int8_t>(value.index()), arg);
       } else {
         static_assert(yardl::hdf5::always_false_v<T>, "non-exhaustive visitor!");
       }
@@ -2110,9 +2110,9 @@ void AliasesWriter::WriteStreamOfAliasedGenericUnion2Impl(test_model::AliasedGen
     [&](auto const& arg) {
       using T = std::decay_t<decltype(arg)>;
       if constexpr (std::is_same_v<T, test_model::AliasedString>) {
-        streamOfAliasedGenericUnion2_dataset_state_->Append<yardl::hdf5::InnerVlenString, test_model::AliasedString>(value.index(), arg);
+        streamOfAliasedGenericUnion2_dataset_state_->Append<yardl::hdf5::InnerVlenString, test_model::AliasedString>(static_cast<int8_t>(value.index()), arg);
       } else if constexpr (std::is_same_v<T, test_model::AliasedEnum>) {
-        streamOfAliasedGenericUnion2_dataset_state_->Append<test_model::Fruits, test_model::AliasedEnum>(value.index(), arg);
+        streamOfAliasedGenericUnion2_dataset_state_->Append<test_model::Fruits, test_model::AliasedEnum>(static_cast<int8_t>(value.index()), arg);
       } else {
         static_assert(yardl::hdf5::always_false_v<T>, "non-exhaustive visitor!");
       }
@@ -2214,9 +2214,9 @@ void StreamsOfAliasedUnionsWriter::WriteIntOrSimpleRecordImpl(test_model::Aliase
     [&](auto const& arg) {
       using T = std::decay_t<decltype(arg)>;
       if constexpr (std::is_same_v<T, int32_t>) {
-        intOrSimpleRecord_dataset_state_->Append<int32_t, int32_t>(value.index(), arg);
+        intOrSimpleRecord_dataset_state_->Append<int32_t, int32_t>(static_cast<int8_t>(value.index()), arg);
       } else if constexpr (std::is_same_v<T, test_model::SimpleRecord>) {
-        intOrSimpleRecord_dataset_state_->Append<test_model::SimpleRecord, test_model::SimpleRecord>(value.index(), arg);
+        intOrSimpleRecord_dataset_state_->Append<test_model::SimpleRecord, test_model::SimpleRecord>(static_cast<int8_t>(value.index()), arg);
       } else {
         static_assert(yardl::hdf5::always_false_v<T>, "non-exhaustive visitor!");
       }
@@ -2241,11 +2241,11 @@ void StreamsOfAliasedUnionsWriter::WriteNullableIntOrSimpleRecordImpl(test_model
     [&](auto const& arg) {
       using T = std::decay_t<decltype(arg)>;
       if constexpr (std::is_same_v<T, std::monostate>) {
-        nullableIntOrSimpleRecord_dataset_state_->Append<std::monostate, std::monostate>(value.index() -1, arg);
+        nullableIntOrSimpleRecord_dataset_state_->Append<std::monostate, std::monostate>(static_cast<int8_t>(value.index()) -1, arg);
       } else if constexpr (std::is_same_v<T, int32_t>) {
-        nullableIntOrSimpleRecord_dataset_state_->Append<int32_t, int32_t>(value.index() -1, arg);
+        nullableIntOrSimpleRecord_dataset_state_->Append<int32_t, int32_t>(static_cast<int8_t>(value.index()) -1, arg);
       } else if constexpr (std::is_same_v<T, test_model::SimpleRecord>) {
-        nullableIntOrSimpleRecord_dataset_state_->Append<test_model::SimpleRecord, test_model::SimpleRecord>(value.index() -1, arg);
+        nullableIntOrSimpleRecord_dataset_state_->Append<test_model::SimpleRecord, test_model::SimpleRecord>(static_cast<int8_t>(value.index()) -1, arg);
       } else {
         static_assert(yardl::hdf5::always_false_v<T>, "non-exhaustive visitor!");
       }

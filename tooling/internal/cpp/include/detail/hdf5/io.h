@@ -263,7 +263,7 @@ class UnionDatasetWriter {
   }
 
   template <typename TElementInner, typename TElementOuter>
-  void Append(size_t type, TElementOuter const& value) {
+  void Append(int8_t type, TElementOuter const& value) {
     uint64_t offset;
     if (type == -1) {
       offset = 0;
