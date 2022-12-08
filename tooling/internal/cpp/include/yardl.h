@@ -69,4 +69,9 @@ using Time = std::chrono::duration<int64_t, std::nano>;
 using DateTime = std::chrono::time_point<std::chrono::system_clock,
                                          std::chrono::duration<int64_t, std::nano>>;
 
+/**
+ * @brief The same as size_t when it is 64 bits, otherwise uint64_t.
+ */
+using Size = std::conditional_t<sizeof(size_t) == sizeof(uint64_t), size_t, uint64_t>;
+
 }  // namespace yardl

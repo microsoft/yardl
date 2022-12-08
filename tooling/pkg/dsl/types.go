@@ -21,6 +21,17 @@ type NodeMeta struct {
 	Column int    `json:"-"`
 }
 
+func (n *NodeMeta) String() string {
+	return fmt.Sprintf("%s:%d:%d", n.File, n.Line, n.Column)
+}
+
+func (n *NodeMeta) Equals(other *NodeMeta) bool {
+	return n == other || (n != nil && other != nil &&
+		n.File == other.File &&
+		n.Line == other.Line &&
+		n.Column == other.Column)
+}
+
 func (n *NodeMeta) GetNodeMeta() *NodeMeta {
 	return n
 }
@@ -605,7 +616,7 @@ var (
 
 	_ TypeDefinition = (*RecordDefinition)(nil)
 	_ TypeDefinition = (*EnumDefinition)(nil)
-	_ TypeDefinition = (*PrimitiveDefinition)(nil)
+	_ TypeDefinition = (PrimitiveDefinition)("")
 	_ TypeDefinition = (*NamedType)(nil)
 	_ TypeDefinition = (*ProtocolDefinition)(nil)
 	_ TypeDefinition = (*GenericTypeParameter)(nil)

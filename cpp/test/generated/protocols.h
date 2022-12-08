@@ -1327,6 +1327,9 @@ class EnumsWriterBase {
   // Ordinal 1.
   void WriteVec(std::vector<test_model::Fruits> const& value);
 
+  // Ordinal 2.
+  void WriteSize(test_model::SizeBasedEnum const& value);
+
   // Optionaly close this writer before destructing. Validates that all steps were completed.
   void Close();
 
@@ -1338,6 +1341,7 @@ class EnumsWriterBase {
   protected:
   virtual void WriteSingleImpl(test_model::Fruits const& value) = 0;
   virtual void WriteVecImpl(std::vector<test_model::Fruits> const& value) = 0;
+  virtual void WriteSizeImpl(test_model::SizeBasedEnum const& value) = 0;
   virtual void CloseImpl() {}
 
   static std::string schema_;
@@ -1357,6 +1361,9 @@ class EnumsReaderBase {
   // Ordinal 1.
   void ReadVec(std::vector<test_model::Fruits>& value);
 
+  // Ordinal 2.
+  void ReadSize(test_model::SizeBasedEnum& value);
+
   // Optionaly close this writer before destructing. Validates that all steps were completely read.
   void Close();
 
@@ -1367,6 +1374,7 @@ class EnumsReaderBase {
   protected:
   virtual void ReadSingleImpl(test_model::Fruits& value) = 0;
   virtual void ReadVecImpl(std::vector<test_model::Fruits>& value) = 0;
+  virtual void ReadSizeImpl(test_model::SizeBasedEnum& value) = 0;
   virtual void CloseImpl() {}
   static std::string schema_;
 

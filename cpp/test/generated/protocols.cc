@@ -3046,12 +3046,14 @@ void EnumsWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end, u
   switch (current) {
   case 0: expected_method = "WriteSingle()"; break;
   case 1: expected_method = "WriteVec()"; break;
+  case 2: expected_method = "WriteSize()"; break;
   }
   std::string attempted_method;
   switch (attempted) {
   case 0: attempted_method = "WriteSingle()"; break;
   case 1: attempted_method = "WriteVec()"; break;
-  case 2: attempted_method = "Close()"; break;
+  case 2: attempted_method = "WriteSize()"; break;
+  case 3: attempted_method = "Close()"; break;
   }
   throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
 }
@@ -3061,7 +3063,8 @@ void EnumsReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
     switch (i/2) {
     case 0: return "ReadSingle()";
     case 1: return "ReadVec()";
-    case 2: return "Close()";
+    case 2: return "ReadSize()";
+    case 3: return "Close()";
     default: return "<unknown>";
     }
   };
@@ -3070,7 +3073,7 @@ void EnumsReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
 
 } // namespace 
 
-std::string EnumsWriterBase::schema_ = R"({"protocol":{"name":"Enums","sequence":[{"name":"single","type":"TestModel.Fruits"},{"name":"vec","type":{"vector":{"items":"TestModel.Fruits"}}}]},"types":[{"name":"Fruits","values":[{"symbol":"apple","value":0},{"symbol":"banana","value":1},{"symbol":"pear","value":2}]}]})";
+std::string EnumsWriterBase::schema_ = R"({"protocol":{"name":"Enums","sequence":[{"name":"single","type":"TestModel.Fruits"},{"name":"vec","type":{"vector":{"items":"TestModel.Fruits"}}},{"name":"size","type":"TestModel.SizeBasedEnum"}]},"types":[{"name":"Fruits","values":[{"symbol":"apple","value":0},{"symbol":"banana","value":1},{"symbol":"pear","value":2}]},{"name":"SizeBasedEnum","base":"size","values":[{"symbol":"a","value":0},{"symbol":"b","value":1},{"symbol":"c","value":2}]}]})";
 
 void EnumsWriterBase::WriteSingle(test_model::Fruits const& value) {
   if (unlikely(state_ != 0)) {
@@ -3090,9 +3093,18 @@ void EnumsWriterBase::WriteVec(std::vector<test_model::Fruits> const& value) {
   state_ = 2;
 }
 
-void EnumsWriterBase::Close() {
+void EnumsWriterBase::WriteSize(test_model::SizeBasedEnum const& value) {
   if (unlikely(state_ != 2)) {
     EnumsWriterBaseInvalidState(2, false, state_);
+  }
+
+  WriteSizeImpl(value);
+  state_ = 3;
+}
+
+void EnumsWriterBase::Close() {
+  if (unlikely(state_ != 3)) {
+    EnumsWriterBaseInvalidState(3, false, state_);
   }
 
   CloseImpl();
@@ -3118,9 +3130,18 @@ void EnumsReaderBase::ReadVec(std::vector<test_model::Fruits>& value) {
   state_ = 4;
 }
 
-void EnumsReaderBase::Close() {
+void EnumsReaderBase::ReadSize(test_model::SizeBasedEnum& value) {
   if (unlikely(state_ != 4)) {
     EnumsReaderBaseInvalidState(4, state_);
+  }
+
+  ReadSizeImpl(value);
+  state_ = 6;
+}
+
+void EnumsReaderBase::Close() {
+  if (unlikely(state_ != 6)) {
+    EnumsReaderBaseInvalidState(6, state_);
   }
 
   CloseImpl();
@@ -3135,6 +3156,11 @@ void EnumsReaderBase::CopyTo(EnumsWriterBase& writer) {
     std::vector<test_model::Fruits> value;
     ReadVec(value);
     writer.WriteVec(value);
+  }
+  {
+    test_model::SizeBasedEnum value;
+    ReadSize(value);
+    writer.WriteSize(value);
   }
 }
 

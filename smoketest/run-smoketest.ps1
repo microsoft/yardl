@@ -16,12 +16,12 @@ try
 {
     $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
 
-    rm -Recurse -Force $scriptDir\model -ErrorAction SilentlyContinue
-    mkdir -Force $scriptDir\model | Out-Null
+    cd $scriptDir
+    rm -Recurse -Force model -ErrorAction SilentlyContinue
 
-    # Create model and generate code
-    cd $scriptDir\model
     yardl init smoketest
+
+    cd model
     yardl generate
 
     cd $scriptDir\cpp
@@ -45,6 +45,14 @@ try
     {
         throw "The expected output file was not found"
     }
+
+    echo "Adding unit test types to the model"
+    cd ../..
+    cp ../models/test/unittests.yml model/
+    cd model
+    yardl generate
+    cd ../cpp/build
+    cmake --build .
 }
 finally
 {

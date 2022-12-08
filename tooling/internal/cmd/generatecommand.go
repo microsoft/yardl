@@ -36,13 +36,15 @@ func newGenerateCommand() *cobra.Command {
 		Args:                  cobra.NoArgs,
 		Run: func(*cobra.Command, []string) {
 			if !flags.watch {
-				_, err := generateCore()
+				packageInfo, err := generateCore()
 				if err != nil {
 					// avoiding returning the error here because
 					// cobra prefixes the error with "Error: "
 					fmt.Fprintln(os.Stderr, err)
 					os.Exit(1)
 				}
+
+				WriteSuccessfulSummary(packageInfo)
 
 				return
 			}
@@ -117,10 +119,21 @@ func generateInWatchMode() {
 	screen.Clear()
 	screen.MoveTopLeft()
 
+	fmt.Printf("Validated model package '%s' at %v.\n\n", packageInfo.Namespace, time.Now().Format("15:04:05"))
+
 	if err != nil {
 		fmt.Println(err)
 	} else {
-		fmt.Printf("✅ Validated and generated code for model package '%s' at %v.", packageInfo.Namespace, time.Now().Format("15:04:05"))
+		WriteSuccessfulSummary(packageInfo)
+	}
+}
+
+func WriteSuccessfulSummary(packageInfo packaging.PackageInfo) {
+	if packageInfo.Cpp != nil {
+		fmt.Printf("✅ Wrote C++ to %s.\n", packageInfo.Cpp.SourcesOutputDir)
+	}
+	if packageInfo.Json != nil {
+		fmt.Printf("✅ Wrote JSON to %s.\n", packageInfo.Json.OutputDir)
 	}
 }
 

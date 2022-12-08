@@ -153,7 +153,7 @@ func writeProtocolMethods(w *formatting.IndentedWriter, p *dsl.ProtocolDefinitio
 								outerType := common.TypeSyntax(typeCase.Type)
 								fmt.Fprintf(w, "if constexpr (std::is_same_v<T, %s>) {\n", outerType)
 								w.Indented(func() {
-									fmt.Fprintf(w, "%s->Append<%s, %s>(value.index()%s, arg);\n", dsWriterName, innerType, outerType, indexAdjustment)
+									fmt.Fprintf(w, "%s->Append<%s, %s>(static_cast<int8_t>(value.index())%s, arg);\n", dsWriterName, innerType, outerType, indexAdjustment)
 								})
 								w.WriteString("} else ")
 							}

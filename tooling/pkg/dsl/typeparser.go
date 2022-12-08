@@ -10,9 +10,10 @@ import (
 )
 
 type simpleTypeTree struct {
-	Name          string           `json:"name"`
-	TypeArguments []simpleTypeTree `json:"args,omitempty"`
-	Optional      bool             `json:"optional,omitempty"`
+	Name           string           `json:"name"`
+	TypeArguments  []simpleTypeTree `json:"args,omitempty"`
+	Optional       bool             `json:"optional,omitempty"`
+	PositionOffset int              `json:"positionOffset,omitempty"`
 }
 
 func (pt *simpleTypeTree) String() string {
@@ -67,6 +68,7 @@ func (tp *typeParser) consumeIdentifier() string {
 func (tp *typeParser) parseTypeString() (simpleTypeTree, error) {
 	parsed := simpleTypeTree{}
 	tp.skipWhitespace()
+	parsed.PositionOffset = tp.position
 	parsed.Name = tp.consumeIdentifier()
 	tp.skipWhitespace()
 
@@ -154,7 +156,10 @@ func parseSimpleTypeStringAllowingRemaining(typeString string) (typeTree simpleT
 }
 
 func (tree simpleTypeTree) ToType(node NodeMeta) Type {
-	simpleType := SimpleType{NodeMeta: node, Name: tree.Name}
+	nodeWithPositionUpdated := node
+	nodeWithPositionUpdated.Column += tree.PositionOffset
+
+	simpleType := SimpleType{NodeMeta: nodeWithPositionUpdated, Name: tree.Name}
 	for _, typeArg := range tree.TypeArguments {
 		simpleType.TypeArguments = append(simpleType.TypeArguments, typeArg.ToType(node))
 	}

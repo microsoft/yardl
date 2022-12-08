@@ -752,6 +752,7 @@ class EnumsWriter : public test_model::EnumsWriterBase, yardl::binary::BinaryWri
   protected:
   void WriteSingleImpl(test_model::Fruits const& value) override;
   void WriteVecImpl(std::vector<test_model::Fruits> const& value) override;
+  void WriteSizeImpl(test_model::SizeBasedEnum const& value) override;
   void CloseImpl() override;
 };
 
@@ -768,6 +769,7 @@ class EnumsReader : public test_model::EnumsReaderBase, yardl::binary::BinaryRea
   protected:
   void ReadSingleImpl(test_model::Fruits& value) override;
   void ReadVecImpl(std::vector<test_model::Fruits>& value) override;
+  void ReadSizeImpl(test_model::SizeBasedEnum& value) override;
   void CloseImpl() override;
 };
 

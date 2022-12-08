@@ -66,7 +66,11 @@ class CodedOutputStream {
     WriteVarInt32(ZigZagEncode32(value));
   }
 
-  void WriteVarInt64(uint64_t const& value) {
+  template <typename T, std::enable_if_t<std::is_integral_v<T> &&
+                                             sizeof(T) == 8 &&
+                                             std::is_unsigned_v<T>,
+                                         bool> = true>
+  void WriteVarInt64(T const& value) {
     if (RemainingBufferSpace() < MAX_VARINT64_BYTES) {
       FlushBuffer();
     }
@@ -207,7 +211,11 @@ class CodedInputStream {
     value = ZigZagDecode32(v);
   }
 
-  void ReadVarInt64(uint64_t& value) {
+  template <typename T, std::enable_if_t<std::is_integral_v<T> &&
+                                             sizeof(T) == 8 &&
+                                             std::is_unsigned_v<T>,
+                                         bool> = true>
+  void ReadVarInt64(T& value) {
     if (RemainingBufferSpace() < MAX_VARINT64_BYTES) {
       ReadVarIntegerSlow(value);
     } else {

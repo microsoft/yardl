@@ -2180,6 +2180,10 @@ void EnumsWriter::WriteVecImpl(std::vector<test_model::Fruits> const& value) {
   yardl::binary::WriteVector<test_model::Fruits, yardl::binary::WriteEnum<test_model::Fruits>>(stream_, value);
 }
 
+void EnumsWriter::WriteSizeImpl(test_model::SizeBasedEnum const& value) {
+  yardl::binary::WriteEnum<test_model::SizeBasedEnum>(stream_, value);
+}
+
 void EnumsWriter::Flush() {
   stream_.Flush();
 }
@@ -2194,6 +2198,10 @@ void EnumsReader::ReadSingleImpl(test_model::Fruits& value) {
 
 void EnumsReader::ReadVecImpl(std::vector<test_model::Fruits>& value) {
   yardl::binary::ReadVector<test_model::Fruits, yardl::binary::ReadEnum<test_model::Fruits>>(stream_, value);
+}
+
+void EnumsReader::ReadSizeImpl(test_model::SizeBasedEnum& value) {
+  yardl::binary::ReadEnum<test_model::SizeBasedEnum>(stream_, value);
 }
 
 void EnumsReader::CloseImpl() {

@@ -23,8 +23,8 @@ type VisitorFunc func(self Visitor, node Node)
 
 // Visits a Node tree from the given root, threading a context parameter throughout.
 func VisitWithContext[T any](root Node, context T, visitor VisitorWithContextFunc[T]) {
-	vistorWithContext := VisitorWithContext[T]{visitorWithContext: visitor}
-	visitor(vistorWithContext, root, context)
+	visitorWithContext := VisitorWithContext[T]{visitorWithContext: visitor}
+	visitor(visitorWithContext, root, context)
 }
 
 type VisitorWithContextFunc[T any] func(self VisitorWithContext[T], node Node, context T)

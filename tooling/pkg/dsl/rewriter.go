@@ -90,7 +90,7 @@ func (rewriter RewriterWithContext[T]) DefaultRewrite(node Node, context T) Node
 		rewrittenEnv.Namespaces = rewrittenNamespaces
 		return &rewrittenEnv
 	case *Namespace:
-		rewrittenTypes := rewriteIntefaceSlice(t.TypeDefinitions, context, rewriter)
+		rewrittenTypes := rewriteInterfaceSlice(t.TypeDefinitions, context, rewriter)
 		rewrittenProtocols := rewriteSlice(t.Protocols, context, rewriter)
 
 		if rewrittenTypes == nil && rewrittenProtocols == nil {
@@ -209,7 +209,7 @@ func (rewriter RewriterWithContext[T]) DefaultRewrite(node Node, context T) Node
 	case *GenericTypeParameter:
 		return t
 	case *SimpleType:
-		rewrittenTypeArguments := rewriteIntefaceSlice(t.TypeArguments, context, rewriter)
+		rewrittenTypeArguments := rewriteInterfaceSlice(t.TypeArguments, context, rewriter)
 		if rewrittenTypeArguments == nil {
 			return t
 		}
@@ -218,7 +218,7 @@ func (rewriter RewriterWithContext[T]) DefaultRewrite(node Node, context T) Node
 		rewrittenSimpleType.TypeArguments = rewrittenTypeArguments
 		return &rewrittenSimpleType
 	case *GeneralizedType:
-		rewrittenTypeCases := rewriteIntefaceSlice(t.Cases, context, rewriter)
+		rewrittenTypeCases := rewriteInterfaceSlice(t.Cases, context, rewriter)
 
 		var rewrittenDimensionality Dimensionality
 		if t.Dimensionality != nil {
@@ -283,7 +283,7 @@ func (rewriter RewriterWithContext[T]) DefaultRewrite(node Node, context T) Node
 			rewrittenTarget = rewriter.Rewrite(t.Target, context).(Expression)
 		}
 
-		rewrittenArguments := rewriteIntefaceSlice(t.Arguments, context, rewriter)
+		rewrittenArguments := rewriteInterfaceSlice(t.Arguments, context, rewriter)
 
 		if rewrittenTarget == t.Target && rewrittenArguments == nil {
 			return t
@@ -306,7 +306,7 @@ func (rewriter RewriterWithContext[T]) DefaultRewrite(node Node, context T) Node
 		return &rewrittenArgument
 
 	case *FunctionCallExpression:
-		rewrittenArguments := rewriteIntefaceSlice(t.Arguments, context, rewriter)
+		rewrittenArguments := rewriteInterfaceSlice(t.Arguments, context, rewriter)
 
 		if rewrittenArguments == nil {
 			return t
@@ -379,7 +379,7 @@ func (rewriter RewriterWithContext[T]) DefaultRewrite(node Node, context T) Node
 	}
 }
 
-// Rewites a slice of pointers to types that implement the Node interface, e.g, []*Field
+// Rewrites a slice of pointers to types that implement the Node interface, e.g, []*Field
 // Returns nil if no changes were made and the original slice should be used.
 func rewriteSlice[TContext any, TElement any, T interface {
 	*TElement
@@ -402,9 +402,9 @@ func rewriteSlice[TContext any, TElement any, T interface {
 	return rewrittenSlice
 }
 
-// Rewites a slice of an interface that implements the Node interface, e.g, []Expression
+// Rewrites a slice of an interface that implements the Node interface, e.g, []Expression
 // Returns nil if no changes were made and the original slice should be used.
-func rewriteIntefaceSlice[TContext any, T Node](slice []T, context TContext, rewriter RewriterWithContext[TContext]) []T {
+func rewriteInterfaceSlice[TContext any, T Node](slice []T, context TContext, rewriter RewriterWithContext[TContext]) []T {
 	var rewrittenSlice []T
 	for i, element := range slice {
 		visited := rewriter.Rewrite(T(element), context)

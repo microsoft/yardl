@@ -36,10 +36,10 @@ endif()
 if(VCPKG_TARGET_TRIPLET)
   set(HDF5_CXX_LIBRARIES hdf5::hdf5_cpp-shared)
 else()
-  set(HDF5_CXX_LIBRARIES hdf5_cpp)
+  set(HDF5_CXX_LIBRARIES hdf5::hdf5_cpp)
 endif()
 
-find_package(HDF5 REQUIRED)
+find_package(HDF5 REQUIRED COMPONENTS C CXX)
 find_package(xtensor REQUIRED)
 `, objectLibraryName)
 
