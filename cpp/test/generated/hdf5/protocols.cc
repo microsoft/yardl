@@ -130,6 +130,17 @@ namespace {
   return t;
 };
 
+[[maybe_unused]] H5::EnumType GetSizeBasedEnumHdf5Ddl() {
+  H5::EnumType t(yardl::hdf5::SizeTypeDdl());
+  size_t i = 0ULL;
+  t.insert("a", &i);
+  i = 1ULL;
+  t.insert("b", &i);
+  i = 2ULL;
+  t.insert("c", &i);
+  return t;
+};
+
 [[maybe_unused]] H5::EnumType GetEnumWithKeywordSymbolsHdf5Ddl() {
   H5::EnumType t(H5::PredType::NATIVE_INT32);
   int32_t i = 2;
@@ -1776,6 +1787,10 @@ void EnumsWriter::WriteVecImpl(std::vector<test_model::Fruits> const& value) {
   yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerVlen<test_model::Fruits, test_model::Fruits>, std::vector<test_model::Fruits>>(group_, "vec", yardl::hdf5::InnerVlenDdl(test_model::hdf5::GetFruitsHdf5Ddl()), value);
 }
 
+void EnumsWriter::WriteSizeImpl(test_model::SizeBasedEnum const& value) {
+  yardl::hdf5::WriteScalarDataset<test_model::SizeBasedEnum, test_model::SizeBasedEnum>(group_, "size", test_model::hdf5::GetSizeBasedEnumHdf5Ddl(), value);
+}
+
 EnumsReader::EnumsReader(std::string path)
     : yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "Enums", schema_) {
 }
@@ -1786,6 +1801,10 @@ void EnumsReader::ReadSingleImpl(test_model::Fruits& value) {
 
 void EnumsReader::ReadVecImpl(std::vector<test_model::Fruits>& value) {
   yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerVlen<test_model::Fruits, test_model::Fruits>, std::vector<test_model::Fruits>>(group_, "vec", yardl::hdf5::InnerVlenDdl(test_model::hdf5::GetFruitsHdf5Ddl()), value);
+}
+
+void EnumsReader::ReadSizeImpl(test_model::SizeBasedEnum& value) {
+  yardl::hdf5::ReadScalarDataset<test_model::SizeBasedEnum, test_model::SizeBasedEnum>(group_, "size", test_model::hdf5::GetSizeBasedEnumHdf5Ddl(), value);
 }
 
 StateTestWriter::StateTestWriter(std::string path)

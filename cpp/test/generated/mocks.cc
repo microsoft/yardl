@@ -2170,12 +2170,31 @@ class MockEnumsWriter : public EnumsWriterBase {
     WriteVecImpl_expected_values_.push(value);
   }
 
+  void WriteSizeImpl (test_model::SizeBasedEnum const& value) override {
+    if (WriteSizeImpl_expected_values_.empty()) {
+      throw std::runtime_error("Unexpected call to WriteSizeImpl");
+    }
+    if (WriteSizeImpl_expected_values_.front() != value) {
+      throw std::runtime_error("Unexpected argument value for call to WriteSizeImpl");
+    }
+    WriteSizeImpl_expected_values_.pop();
+  }
+
+  std::queue<test_model::SizeBasedEnum> WriteSizeImpl_expected_values_;
+
+  void ExpectWriteSizeImpl (test_model::SizeBasedEnum const& value) {
+    WriteSizeImpl_expected_values_.push(value);
+  }
+
   void Verify() {
     if (!WriteSingleImpl_expected_values_.empty()) {
       throw std::runtime_error("Expected call to WriteSingleImpl was not received");
     }
     if (!WriteVecImpl_expected_values_.empty()) {
       throw std::runtime_error("Expected call to WriteVecImpl was not received");
+    }
+    if (!WriteSizeImpl_expected_values_.empty()) {
+      throw std::runtime_error("Expected call to WriteSizeImpl was not received");
     }
   }
 };
@@ -2200,6 +2219,11 @@ class TestEnumsWriterBase : public EnumsWriterBase {
   void WriteVecImpl(std::vector<test_model::Fruits> const& value) override {
     writer_->WriteVec(value);
     mock_writer_.ExpectWriteVecImpl(value);
+  }
+
+  void WriteSizeImpl(test_model::SizeBasedEnum const& value) override {
+    writer_->WriteSize(value);
+    mock_writer_.ExpectWriteSizeImpl(value);
   }
 
   void CloseImpl() override {

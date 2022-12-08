@@ -321,10 +321,15 @@ Int64Enum: !enum
   values:
     b: -0x4000000000000000
 
+SizeBasedEnum: !enum
+  base: size
+  values: [a,b,c]
+
 Enums: !protocol
   sequence:
     single: Fruits
     vec: !vector { items: Fruits }
+    size: SizeBasedEnum
 
 StateTest: !protocol
   sequence:

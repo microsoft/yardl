@@ -389,6 +389,7 @@ TEST_P(RoundTripTests, Enums) {
   auto tw = CreateValidatingWriter<EnumsWriterBase>();
   tw->WriteSingle(Fruits::kApple);
   tw->WriteVec({Fruits::kApple, Fruits::kBanana});
+  tw->WriteSize(SizeBasedEnum::kC);
 
   tw->Close();
 }
