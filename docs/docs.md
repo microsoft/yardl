@@ -48,6 +48,16 @@ can be installed with:
 conda install -c conda-forge hdf5 xtensor howardhinnant_date
 ```
 
+Alternatively, you can create a new conda environment with all dependencies and
+compilers using an environment.yml like [the one in this
+repo](../environment.yml).
+
+```bash
+wget https://raw.githubusercontent.com/microsoft/yardl/main/environment.yml
+conda env create -n yardl -f environment.yml
+conda activate yardl
+```
+
 If using [vcpkg](https://vcpkg.io/en/index.html), you can use a manifest file
 that looks like the one
 [here](../smoketest/cpp/vcpkg.json).
@@ -63,24 +73,25 @@ Windows with MSVC with vcpkg. MacOS and homebrew support is coming.
 > Yardl is currently based on YAML. If you are new to YAML, you can get an
 > overview [here](https://learnxinyminutes.com/docs/yaml/).
 
-To get started, create a new empty directory and `cd` into it. This directory
-will contain the yardl package. To quickly create a package you can run:
+To get started, create a new empty directory and `cd` into it. Then run:
 
 ``` bash
 yardl init playground
 ```
 
-This creates a package with the the namespace `Playground`, containing the
-following files:
+This creates the initial structure and files for our project:
 
-```text
+```
 $ tree .
 .
-├── model.yml
-└── _package.yml
+└── model
+    ├── model.yml
+    └── _package.yml
 ```
 
-_package.yml is the package's manifest.
+The Yardl model package is in the `model` directory.
+
+`_package.yml` is the package's manifest.
 
 ``` yaml
 namespace: Playground
@@ -126,7 +137,7 @@ written to or read from a file or binary stream (e.g. over a network
 connection). This example protocol says that there will be one `Header` value
 followed by an unknown number of `Sample`s. `Header` and `Sample` are records.
 
-To generate C++ code for this model, run this from the same directory:
+To generate C++ code for this model, `cd` into the `model` directory and run:
 
 ```bash
 yardl generate
@@ -159,7 +170,7 @@ which are the base classes for implementations in `binary/protocols.h` and
 dates, and the header files in `yardl/detail/` are included in generated files
 but are not intended to be included by consuming code.
 
-Ok, let's write some code! In the parent directory of the generate code, `cpp`,
+Ok, let's write some code! In the parent directory of the generated code, `cpp`,
 create `playground.cc` that looks like this:
 
 ```cpp
