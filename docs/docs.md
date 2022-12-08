@@ -236,8 +236,8 @@ Now let's compile and run this code. Here are the steps on Linux:
 ```bash
 mkdir build
 cd build
-cmake .. -GNinja
-ninja
+cmake ..
+cmake --build .
 ./playground
 ```
 
