@@ -45,4 +45,4 @@ cp ../models/test/unittests.yml model/
 cd model
 yardl generate
 cd ../cpp/build
-ninja
+cmake --build .
