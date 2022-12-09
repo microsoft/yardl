@@ -143,6 +143,7 @@ jobs:
       - validate
       - codeQL
       - smoketestWindows
+      - smoketestMac
       - noticeCheck
     runs-on: ubuntu-latest
     steps:
