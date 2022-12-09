@@ -538,14 +538,8 @@ func typeDefinitionRwFunction(t dsl.TypeDefinition, write bool) string {
 			switch t {
 			case dsl.Bool, dsl.Int8, dsl.Int16, dsl.Int32, dsl.Int64, dsl.Uint8, dsl.Uint16, dsl.Uint32, dsl.Uint64, dsl.Size:
 				return "Integer"
-			case dsl.Float32:
-				return "Float"
-			case dsl.Float64:
-				return "Double"
-			case dsl.ComplexFloat32:
-				return "ComplexFloat"
-			case dsl.ComplexFloat64:
-				return "ComplexDouble"
+			case dsl.Float32, dsl.Float64, dsl.ComplexFloat32, dsl.PrimitiveComplexFloat64:
+				return "FloatingPoint"
 			case dsl.String:
 				return "String"
 			case dsl.Date:

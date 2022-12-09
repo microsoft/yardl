@@ -18,6 +18,32 @@
 - [Performance Tips](#performance-tips)
   - [Batched Reads and Writes](#batched-reads-and-writes)
   - [Use Fixed Data Types When Possible](#use-fixed-data-types-when-possible)
+- [Protocol Schema JSON Reference](#protocol-schema-json-reference)
+  - [References to Primitive Types](#references-to-primitive-types)
+  - [References to Top-Level Types](#references-to-top-level-types)
+  - [Unions](#unions-1)
+  - [Vectors](#vectors-1)
+  - [Arrays](#arrays-1)
+  - [Streams](#streams)
+  - [Enums](#enums-1)
+  - [Records](#records-1)
+  - [Aliases](#aliases)
+  - [Protocols](#protocols-1)
+  - [Top-Level Schema](#top-level-schema)
+- [Compact Binary Encoding Reference](#compact-binary-encoding-reference)
+  - [Booleans](#booleans)
+  - [Unsigned Integers](#unsigned-integers)
+  - [Signed integers](#signed-integers)
+  - [Floating-Point Numbers](#floating-point-numbers)
+  - [Strings](#strings)
+  - [Dates, Times, and DateTimes](#dates-times-and-datetimes)
+  - [Unions](#unions-2)
+  - [Vectors](#vectors-2)
+  - [Arrays](#arrays-2)
+  - [Enums](#enums-2)
+  - [Records](#records-2)
+  - [Streams](#streams-1)
+  - [Example](#example)
 
 ## Installation
 
@@ -60,7 +86,7 @@ conda activate yardl
 
 If using [vcpkg](https://vcpkg.io/en/index.html), you can use a manifest file
 that looks like the one
-[here](../smoketest/cpp/vcpkg.json).
+[here](../smoketest/cpp/vcpkg.JSON).
 
 On macOS, you can use [Homebrew](https://brew.sh/) to install the dependencies:
 
@@ -573,6 +599,7 @@ MyRec: !record
         x:
         y:
 ```
+
 ### Type Aliases
 
 We've seen records, enums, and protocols defined as top-level, named types, but
@@ -682,3 +709,550 @@ especially for HDF5 files.
 For HDF5, using variable-length collections (like `!vector` without a length or
 `!array` without fixed dimension sizes) has lower throughput than their fixed-sized
 counterparts.
+
+## Protocol Schema JSON Reference
+
+A protocol's schema is embedded in a JSON format in both the HDF5 and binary
+encodings. This JSON format is informally described here.
+
+> **Warning**<br>
+> We might make breaking changes to this format before V1.
+
+The JSON schema is meant to be provide enough information for deserializers to
+understand the schema at runtime, and therefore does not contain the comments
+that may be in the Yardl, nor does it contain computed fields, since those are
+not needed for deserialization.
+
+### References to Primitive Types
+
+Primitive type references are represented by name as a JSON string, e.g.
+`"int32"` or `"string"`
+
+### References to Top-Level Types
+
+References to top-level types (records, enums, and aliases) are represented by
+their namespaced name as a JSON string, e.g. `"MyNamespace.MyRecord"` or
+`"MyNamespace.MyEnum"`.
+
+### Unions
+
+Unions are represented as a JSON array:
+
+```JSON
+[
+  {
+    "label": "int32",
+    "type": "int32"
+  },
+  {
+    "label": "float32",
+    "type": "float32"
+  }
+]
+```
+
+The `label` field is unique name automatically assigned to each union case,
+derived from its type name. The labels are used in the HDF5 format.
+
+If `null` is one of the cases, it is represented by `null` in the JSON as well:
+
+```JSON
+[
+  null,
+  {
+    "label": "int32",
+    "type": "int32"
+  },
+  {
+    "label": "float32",
+    "type": "float32"
+  }
+]
+```
+
+For the special case of an optional type, a label for the non-null case is
+omitted and the object is simplified to its `type` value, since the label is not
+used.
+
+```JSON
+[
+  null,
+  "int32"
+]
+```
+
+### Vectors
+
+Vectors have the following representation:
+
+```JSON
+{
+  "vector": {
+    "items": "int32",
+    "length": 10
+  }
+}
+```
+
+The `length` field is only present if it is given in the Yardl definition.
+
+### Arrays
+
+A fixed array with dimensions `x` and `y` would look like this:
+
+```JSON
+{
+  "array": {
+    "items": "int32",
+    "dimensions": [
+      {
+        "name": "x",
+        "length": 3
+      },
+      {
+        "name": "y",
+        "length": 4
+      }
+    ]
+  }
+}
+```
+
+A non-fixed array with dimensions `x` and `y` would look like the above but
+without the `length` field:
+
+```JSON
+{
+  "array": {
+    "items": "int32",
+    "dimensions": [
+      {
+        "name": "x"
+      },
+      {
+        "name": "y"
+      }
+    ]
+  }
+}
+```
+
+A non-fixed array with two unnamed dimensions would look like this:
+
+```JSON
+{
+  "array": {
+    "items": "int32",
+    "dimensions": 2
+  }
+}
+```
+
+And finally, an array with an unknown number of dimensions:
+
+```JSON
+{
+  "array": {
+    "items": "int32"
+  }
+}
+```
+
+### Streams
+
+Streams in protocols are represented as:
+
+```JSON
+{
+  "stream": {
+    "items": "int32",
+  }
+}
+```
+
+### Enums
+
+Enums are top-level types and cannot be declared inline.
+
+An example enum that looks like this in Yardl:
+
+```yaml
+Animals: !enum
+  base: uint8
+  values: [cat, dog]
+```
+
+Is represented in JSON as:
+
+```JSON
+{
+  "enum": {
+    "name": "Animals",
+    "base": "uint8",
+    "values": [
+      {
+        "symbol": "cat",
+        "value": 0
+      },
+      {
+        "symbol": "dog",
+        "value": 1
+      }
+    ]
+  }
+}
+```
+
+The `base` field is only present in the JSON if it is specified in the Yardl.
+
+### Records
+
+Records are top-level types that cannot be declared inline.
+
+An example generic record:
+
+```yaml
+MyTuple<T1, T2>: !record
+  fields:
+    f1: T1
+    f2: T2
+```
+
+Would look like this:
+
+```JSON
+{
+  "record": {
+    "name": "MyTuple",
+    "typeParameters": [
+      "T1",
+      "T2"
+    ],
+    "fields": [
+      {
+        "name": "f1",
+        "type": "T1"
+      },
+      {
+        "name": "f2",
+        "type": "T2"
+      }
+    ]
+  }
+}
+```
+
+Computed fields are omitted from the JSON since they are not used during
+deserialization.
+
+### Aliases
+
+A simple type alias:
+
+```yaml
+MyString: string
+```
+
+Is converted to:
+
+```JSON
+{
+  "alias": {
+    "name": "MyString",
+    "type": "string"
+  }
+}
+```
+
+If an alias is generic:
+
+```yaml
+MyVector<T> : !vector
+  items: T
+```
+
+its JSON looks like this:
+
+```JSON
+{
+  "alias": {
+    "name": "MyVector",
+    "typeParameters": [
+      "T"
+    ],
+    "type": {
+      "vector": {
+        "items": "T"
+      }
+    }
+  }
+}
+```
+
+### Protocols
+
+A protocol that looks like this in Yardl:
+
+```yaml
+MyProtocol : !protocol
+  sequence:
+    a: string
+    b: !stream
+      items: double
+```
+
+is represented in JSON like this:
+
+```JSON
+{
+  "name": "MyProtocol",
+  "sequence": [
+    {
+      "name": "a",
+      "type": "string"
+    },
+    {
+      "name": "b",
+      "type": {
+        "stream": {
+          "items": "float64"
+        }
+      }
+    }
+  ]
+}
+```
+
+### Top-Level Schema
+
+The JSON that is embedded in the binary or HDF5 format contains the protocol
+definition (defined above) and the transitive closure of named types (records,
+enums, and aliases) used by the protocol.
+
+```JSON
+{
+  "protocol": <protocol>,
+  "types": [ <type>, ... ]
+}
+```
+
+## Compact Binary Encoding Reference
+
+> **Warning**<br>
+> We might make breaking changes to this format before V1.
+
+The binary format starts with five magic bytes: `0x79 0x61 0x72 0x64 0x6c`
+(ASCII 'y' 'a' 'r' 'd' 'l') followed by four bytes containing a little-endian
+32-bit integer representing the encoding version number (currently 1). Then the
+[protocol schema](#protocol-schema-reference) in JSON format written as a string
+in the format described below.
+
+After the schema, the protocol step values are written in order. The sections
+below describe how each data type is encoded.
+
+### Booleans
+
+Booleans are encoded as a byte with the value 0 or 1. However, vectors or arrays
+of booleans could use a single bit per value in order to save space. This issue
+is being tracked [here](https://github.com/microsoft/yardl/issues/19).
+
+### Unsigned Integers
+
+Unsigned integers (`uint8`, `uint16`, `uint32`, `uint64`, and `size`) are
+written as variable-width integers, or *varints* (in same way as Protocol
+Buffers). The high-order bit of each byte serves as a continuation and indicates
+whether more bytes remain. The lower seven bits of each byte are appended as
+increasingly significant bits in the resulting value.
+
+This allows smaller values to be encoded in fewer bytes.
+
+Some examples:
+
+| Integer value | First encoded byte | Second encoded byte |
+| ------------- | ------------------ | ------------------- |
+| 0             | 00000000           |                     |
+| 1             | 00000001           |                     |
+| 127           | 01111111           |                     |
+| 128           | 10000000           | 00000001            |
+| 129           | 10000001           | 00000001            |
+
+### Signed integers
+
+Signed integers (`int8`, `int16`, `int32`, and `int64`) are first converted to
+unsigned integers using *zig-zag* encoding, and then encoded as unsigned
+integers as above.
+
+Because two's complement sets the highest bit of negative numbers, a negative
+64-bit integer would always require 10 bytes to be encoded as a varint, making
+it a poor choice. Instead of two's complement, zig-zag encoding stores positive
+numbers as `2 * n` and negative numbers as `2 * abs(n) + 1`. This way, small
+negative values can still be represented with a smaller number of bytes when
+encoded as a varint.
+
+Some examples:
+
+| Original value | Encoded value |
+| -------------- | ------------- |
+| 0              | 0             |
+| -1             | 1             |
+| 1              | 2             |
+| -2             | 3             |
+| 2              | 4             |
+
+### Floating-Point Numbers
+
+`float32` and `float64` are written as a little-endian IEEE 754 of byte length
+4 and 8, respectively. `complexfloat32` and `complexfloat64` write out first the
+real part followed by the imaginary part.
+
+### Strings
+
+For strings, the length of the UTF8-encoded bytes is first written out as an
+unsigned varint, followed by the UTF8-encoded bytes.
+
+For example, the string "hello" is encoded as `Ox05 Ox68 Ox65 Ox6c Ox6c Ox6f`.
+
+### Dates, Times, and DateTimes
+
+Dates are written as a signed varint number of days since the epoch.
+
+Times are written an a signed varint number of nanoseconds since midnight.
+
+DateTimes are written as a signed varint number of nanoseconds since the epoch.
+
+### Unions
+
+Unions are written as the 0-based index of the type followed by the
+value.
+
+The index is written as an unsigned varint and the value if skipped if the type
+is `null`.
+
+Example values for the union `[null, uint, float]`:
+
+| Value           | Encoded Bytes              |
+| --------------- | -------------------------- |
+| `<null>`        | `0x00`                     |
+| 6 (`uint`)      | `0x01 0x06`                |
+| 95.72 (`float`) | `0x02 0xa4 0x70 0xbf 0x42` |
+
+
+### Vectors
+
+If the vector length is not specified in Yardl:
+
+```yaml
+!vector
+items: int
+```
+
+then the format is:
+
+1. The length of the array as an unsigned varint
+2. The array values written one after another.
+
+If the length is given, then (1) is omitted.
+
+### Arrays
+
+If the number of array dimensions is not given in the Yardl schema, then the
+format is:
+
+1. The number of dimensions as a unsigned varint
+2. Each dimension length as an unsigned varint
+3. The values of the array in row-major order
+
+If the number of dimensions is given in the schema, (1) is omitted. If the
+length of each dimension is specified, (1) and (2) are omitted.
+
+A future version of the binary format may support column-major layout. See
+discussion [here](https://github.com/microsoft/yardl/issues/23).
+
+### Enums
+
+Enums are written as a varint encoding of the integer value of the enum. Note
+that the value is signed if the base type is signed, which is the default case
+if the `base` properly is not specified.
+
+### Records
+
+Records are encoded as the concatenation of the value of its fields, in the
+order they appear in the schema.
+
+### Streams
+
+Streams are written as one or more blocks. Each block starts with a length as an
+unsigned varint followed by that number of values. The last block will have
+length 0 and will simply be `0x0`, which signals that the stream is complete.
+Only the last block can have length 0.
+
+### Example
+
+Let's work through an example. Here is a sample model:
+
+```yaml
+MyProtocol: !protocol
+  sequence:
+    floatArray: !array
+      items: float
+      dimensions: [2,2]
+    points: !stream
+      items: Point
+
+Point: !record
+  fields:
+    x: uint64
+    y: int32
+```
+
+We will write the values `{1.2, 3.4}, {5.6, 7.8}` as the `floatArray` step, and
+5 points with coordinates `{1, 2}`, `{3, 4}`, `{5, 6}`, `{700, 800}`, and
+`{800000, -900000}`. The points will be written in two blocks, the first of
+length 3, the second of length 2. The C++ to write these values looks like this:
+
+```cpp
+writer.WriteFloatArray({{1.2, 3.4}, {5.6, 7.8}});
+
+writer.WritePoints({{1, 2}, {3, 4}, {5, 6}});
+writer.WritePoints({{700, 800}, {800000, -900000}});
+writer.EndPoints();
+```
+
+Now let's look at the binary file. The first section of the file is the header
+and schema. It begins with the magic bytes, the binary version, then the schema
+as a JSON string. The string is written as its length (304) encoded as an an
+unsigned varint followed by 304 chars.
+
+```text
+ASCII:  y  a  r  d  l  .  .  .  .  .  .  {  "  p  r  o  t  o  c  o  l  "  :  {  "  n  a  m  e  "  :  "  M  y  P  r  o  t  o  c  o  l  "  ,  "  s  e  q  u  e  n  c  e  "  :  [  {  "  n  a  m  e  "  :  "  f  l  o  a  t  A  r  r  a  y  "  ,  "  t  y  p  e  "  :  {  "  a  r  r  a  y  "  :  {  "  i  t  e  m  s  "  :  "  f  l  o  a  t  3  2  "  ,  "  d  i  m  e  n  s  i  o  n  s  "  :  [  {  "  l  e  n  g  t  h  "  :  2  }  ,  {  "  l  e  n  g  t  h  "  :  2  }  ]  }  }  }  ,  {  "  n  a  m  e  "  :  "  p  o  i  n  t  s  "  ,  "  t  y  p  e  "  :  {  "  s  t  r  e  a  m  "  :  {  "  i  t  e  m  s  "  :  "  S  a  n  d  b  o  x  .  P  o  i  n  t  "  }  }  }  ]  }  ,  "  t  y  p  e  s  "  :  [  {  "  n  a  m  e  "  :  "  P  o  i  n  t  "  ,  "  f  i  e  l  d  s  "  :  [  {  "  n  a  m  e  "  :  "  x  "  ,  "  t  y  p  e  "  :  "  u  i  n  t  6  4  "  }  ,  {  "  n  a  m  e  "  :  "  y  "  ,  "  t  y  p  e  "  :  "  i  n  t  3  2  "  }  ]  }  ]  }
+HEX:    79 61 72 64 6c 01 00 00 00 b0 02 7b 22 70 72 6f 74 6f 63 6f 6c 22 3a 7b 22 6e 61 6d 65 22 3a 22 4d 79 50 72 6f 74 6f 63 6f 6c 22 2c 22 73 65 71 75 65 6e 63 65 22 3a 5b 7b 22 6e 61 6d 65 22 3a 22 66 6c 6f 61 74 41 72 72 61 79 22 2c 22 74 79 70 65 22 3a 7b 22 61 72 72 61 79 22 3a 7b 22 69 74 65 6d 73 22 3a 22 66 6c 6f 61 74 33 32 22 2c 22 64 69 6d 65 6e 73 69 6f 6e 73 22 3a 5b 7b 22 6c 65 6e 67 74 68 22 3a 32 7d 2c 7b 22 6c 65 6e 67 74 68 22 3a 32 7d 5d 7d 7d 7d 2c 7b 22 6e 61 6d 65 22 3a 22 70 6f 69 6e 74 73 22 2c 22 74 79 70 65 22 3a 7b 22 73 74 72 65 61 6d 22 3a 7b 22 69 74 65 6d 73 22 3a 22 53 61 6e 64 62 6f 78 2e 50 6f 69 6e 74 22 7d 7d 7d 5d 7d 2c 22 74 79 70 65 73 22 3a 5b 7b 22 6e 61 6d 65 22 3a 22 50 6f 69 6e 74 22 2c 22 66 69 65 6c 64 73 22 3a 5b 7b 22 6e 61 6d 65 22 3a 22 78 22 2c 22 74 79 70 65 22 3a 22 75 69 6e 74 36 34 22 7d 2c 7b 22 6e 61 6d 65 22 3a 22 79 22 2c 22 74 79 70 65 22 3a 22 69 6e 74 33 32 22 7d 5d 7d 5d 7d
+        mmmmmmmmmmmmmm vvvvvvvvvvv sssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss
+                                   uuuuu ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+        m = magic bytes
+        v = version (unsigned int)
+        s = string
+        u = unsigned varint
+        c = char
+```
+
+Following the schema string is the `floatArray` value, followed by the `points`
+stream, shown below. `floatArray` is made up of four consecutive 32-bit
+floating-point values. The `points` stream is made up of blocks with lengths 3, 2,
+and 0. The 0-length block indicates the end of the stream, and in this case the
+end of the file as well, since there are no more steps in the protocol. Each nonempty
+block has `Point`s, each of which is an unsigned varint followed by a signed varint.
+
+```text
+ASCII:  .  .  .  ?  .  .  Y  @  3  3  .  @  .  .  .  @  .  .  .  .  .  .  .  .  .  .  .  .  .  .  0  .  .  m  .
+HEX:    9a 99 99 3f 9a 99 59 40 33 33 b3 40 9a 99 f9 40 03 01 04 03 08 05 0c 02 bc 05 c0 0c 80 ea 30 bf ee 6d 00
+        aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa ssssssssssssssssssssssssssssssssssssssssssssssssssssssss
+        fffffffffff fffffffffff fffffffffff fffffffffff bbbbbbbbbbbbbbbbbbbb bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb bb
+                                                        uu ppppp ppppp ppppp uu ppppppppppp ppppppppppppppppp uu
+                                                           uu ii uu ii uu ii    uuuuu iiiii uuuuuuuu iiiiiiii
+
+        a = array                                       s = stream
+        f = float                                       b = block
+                                                        u = unsigned varint
+                                                        i = signed varint
+                                                        p = point
+```

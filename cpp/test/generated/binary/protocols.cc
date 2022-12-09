@@ -424,9 +424,9 @@ namespace {
     return;
   }
 
-  yardl::binary::WriteDouble(stream, value.a);
-  yardl::binary::WriteFloat(stream, value.b);
-  yardl::binary::WriteFloat(stream, value.c);
+  yardl::binary::WriteFloatingPoint(stream, value.a);
+  yardl::binary::WriteFloatingPoint(stream, value.b);
+  yardl::binary::WriteFloatingPoint(stream, value.c);
 }
 
 [[maybe_unused]] void ReadSmallBenchmarkRecord(yardl::binary::CodedInputStream& stream, test_model::SmallBenchmarkRecord& value) {
@@ -435,9 +435,9 @@ namespace {
     return;
   }
 
-  yardl::binary::ReadDouble(stream, value.a);
-  yardl::binary::ReadFloat(stream, value.b);
-  yardl::binary::ReadFloat(stream, value.c);
+  yardl::binary::ReadFloatingPoint(stream, value.a);
+  yardl::binary::ReadFloatingPoint(stream, value.b);
+  yardl::binary::ReadFloatingPoint(stream, value.c);
 }
 
 [[maybe_unused]] void WriteSimpleEncodingCounters(yardl::binary::CodedOutputStream& stream, test_model::SimpleEncodingCounters const& value) {
@@ -472,8 +472,8 @@ namespace {
 
   yardl::binary::WriteInteger(stream, value.flags);
   test_model::binary::WriteSimpleEncodingCounters(stream, value.idx);
-  yardl::binary::WriteNDArray<std::complex<float>, yardl::binary::WriteComplexFloat, 2>(stream, value.data);
-  yardl::binary::WriteNDArray<float, yardl::binary::WriteFloat, 2>(stream, value.trajectory);
+  yardl::binary::WriteNDArray<std::complex<float>, yardl::binary::WriteFloatingPoint, 2>(stream, value.data);
+  yardl::binary::WriteNDArray<float, yardl::binary::WriteFloatingPoint, 2>(stream, value.trajectory);
 }
 
 [[maybe_unused]] void ReadSimpleAcquisition(yardl::binary::CodedInputStream& stream, test_model::SimpleAcquisition& value) {
@@ -484,8 +484,8 @@ namespace {
 
   yardl::binary::ReadInteger(stream, value.flags);
   test_model::binary::ReadSimpleEncodingCounters(stream, value.idx);
-  yardl::binary::ReadNDArray<std::complex<float>, yardl::binary::ReadComplexFloat, 2>(stream, value.data);
-  yardl::binary::ReadNDArray<float, yardl::binary::ReadFloat, 2>(stream, value.trajectory);
+  yardl::binary::ReadNDArray<std::complex<float>, yardl::binary::ReadFloatingPoint, 2>(stream, value.data);
+  yardl::binary::ReadNDArray<float, yardl::binary::ReadFloatingPoint, 2>(stream, value.trajectory);
 }
 
 [[maybe_unused]] void WriteSimpleRecord(yardl::binary::CodedOutputStream& stream, test_model::SimpleRecord const& value) {
@@ -526,10 +526,10 @@ namespace {
   yardl::binary::WriteInteger(stream, value.int64_field);
   yardl::binary::WriteInteger(stream, value.uint64_field);
   yardl::binary::WriteInteger(stream, value.size_field);
-  yardl::binary::WriteFloat(stream, value.float32_field);
-  yardl::binary::WriteDouble(stream, value.float64_field);
-  yardl::binary::WriteComplexFloat(stream, value.complexfloat32_field);
-  yardl::binary::WriteComplexDouble(stream, value.complexfloat64_field);
+  yardl::binary::WriteFloatingPoint(stream, value.float32_field);
+  yardl::binary::WriteFloatingPoint(stream, value.float64_field);
+  yardl::binary::WriteFloatingPoint(stream, value.complexfloat32_field);
+  yardl::binary::WriteFloatingPoint(stream, value.complexfloat64_field);
   yardl::binary::WriteDate(stream, value.date_field);
   yardl::binary::WriteTime(stream, value.time_field);
   yardl::binary::WriteDateTime(stream, value.datetime_field);
@@ -551,10 +551,10 @@ namespace {
   yardl::binary::ReadInteger(stream, value.int64_field);
   yardl::binary::ReadInteger(stream, value.uint64_field);
   yardl::binary::ReadInteger(stream, value.size_field);
-  yardl::binary::ReadFloat(stream, value.float32_field);
-  yardl::binary::ReadDouble(stream, value.float64_field);
-  yardl::binary::ReadComplexFloat(stream, value.complexfloat32_field);
-  yardl::binary::ReadComplexDouble(stream, value.complexfloat64_field);
+  yardl::binary::ReadFloatingPoint(stream, value.float32_field);
+  yardl::binary::ReadFloatingPoint(stream, value.float64_field);
+  yardl::binary::ReadFloatingPoint(stream, value.complexfloat32_field);
+  yardl::binary::ReadFloatingPoint(stream, value.complexfloat64_field);
   yardl::binary::ReadDate(stream, value.date_field);
   yardl::binary::ReadTime(stream, value.time_field);
   yardl::binary::ReadDateTime(stream, value.datetime_field);
@@ -571,10 +571,10 @@ namespace {
   yardl::binary::WriteInteger(stream, value.uint_field);
   yardl::binary::WriteInteger(stream, value.long_field);
   yardl::binary::WriteInteger(stream, value.ulong_field);
-  yardl::binary::WriteFloat(stream, value.float_field);
-  yardl::binary::WriteDouble(stream, value.double_field);
-  yardl::binary::WriteComplexFloat(stream, value.complexfloat_field);
-  yardl::binary::WriteComplexDouble(stream, value.complexdouble_field);
+  yardl::binary::WriteFloatingPoint(stream, value.float_field);
+  yardl::binary::WriteFloatingPoint(stream, value.double_field);
+  yardl::binary::WriteFloatingPoint(stream, value.complexfloat_field);
+  yardl::binary::WriteFloatingPoint(stream, value.complexdouble_field);
 }
 
 [[maybe_unused]] void ReadRecordWithPrimitiveAliases(yardl::binary::CodedInputStream& stream, test_model::RecordWithPrimitiveAliases& value) {
@@ -588,10 +588,10 @@ namespace {
   yardl::binary::ReadInteger(stream, value.uint_field);
   yardl::binary::ReadInteger(stream, value.long_field);
   yardl::binary::ReadInteger(stream, value.ulong_field);
-  yardl::binary::ReadFloat(stream, value.float_field);
-  yardl::binary::ReadDouble(stream, value.double_field);
-  yardl::binary::ReadComplexFloat(stream, value.complexfloat_field);
-  yardl::binary::ReadComplexDouble(stream, value.complexdouble_field);
+  yardl::binary::ReadFloatingPoint(stream, value.float_field);
+  yardl::binary::ReadFloatingPoint(stream, value.double_field);
+  yardl::binary::ReadFloatingPoint(stream, value.complexfloat_field);
+  yardl::binary::ReadFloatingPoint(stream, value.complexdouble_field);
 }
 
 [[maybe_unused]] void WriteTupleWithRecords(yardl::binary::CodedOutputStream& stream, test_model::TupleWithRecords const& value) {
@@ -1209,9 +1209,9 @@ template<typename T0, yardl::binary::Reader<T0> ReadT0, typename T1, yardl::bina
   yardl::binary::WriteVector<std::vector<int32_t>, yardl::binary::WriteVector<int32_t, yardl::binary::WriteInteger>>(stream, value.vector_of_vectors_field);
   yardl::binary::WriteArray<int32_t, yardl::binary::WriteInteger, 3>(stream, value.fixed_vector_field);
   yardl::binary::WriteOptional<test_model::NamedNDArray, test_model::binary::WriteNamedNDArray>(stream, value.optional_named_array);
-  WriteUnion<int32_t, yardl::binary::WriteInteger, float, yardl::binary::WriteFloat>(stream, value.int_float_union);
-  WriteUnion<std::monostate, yardl::binary::WriteMonostate, int32_t, yardl::binary::WriteInteger, float, yardl::binary::WriteFloat>(stream, value.nullable_int_float_union);
-  WriteUnion<int32_t, yardl::binary::WriteInteger, test_model::GenericRecordWithComputedFields<std::string, float>, test_model::binary::WriteGenericRecordWithComputedFields<std::string, yardl::binary::WriteString, float, yardl::binary::WriteFloat>>(stream, value.union_with_nested_generic_union);
+  WriteUnion<int32_t, yardl::binary::WriteInteger, float, yardl::binary::WriteFloatingPoint>(stream, value.int_float_union);
+  WriteUnion<std::monostate, yardl::binary::WriteMonostate, int32_t, yardl::binary::WriteInteger, float, yardl::binary::WriteFloatingPoint>(stream, value.nullable_int_float_union);
+  WriteUnion<int32_t, yardl::binary::WriteInteger, test_model::GenericRecordWithComputedFields<std::string, float>, test_model::binary::WriteGenericRecordWithComputedFields<std::string, yardl::binary::WriteString, float, yardl::binary::WriteFloatingPoint>>(stream, value.union_with_nested_generic_union);
 }
 
 [[maybe_unused]] void ReadRecordWithComputedFields(yardl::binary::CodedInputStream& stream, test_model::RecordWithComputedFields& value) {
@@ -1231,9 +1231,9 @@ template<typename T0, yardl::binary::Reader<T0> ReadT0, typename T1, yardl::bina
   yardl::binary::ReadVector<std::vector<int32_t>, yardl::binary::ReadVector<int32_t, yardl::binary::ReadInteger>>(stream, value.vector_of_vectors_field);
   yardl::binary::ReadArray<int32_t, yardl::binary::ReadInteger, 3>(stream, value.fixed_vector_field);
   yardl::binary::ReadOptional<test_model::NamedNDArray, test_model::binary::ReadNamedNDArray>(stream, value.optional_named_array);
-  ReadUnion<int32_t, yardl::binary::ReadInteger, float, yardl::binary::ReadFloat>(stream, value.int_float_union);
-  ReadUnion<std::monostate, yardl::binary::ReadMonostate, int32_t, yardl::binary::ReadInteger, float, yardl::binary::ReadFloat>(stream, value.nullable_int_float_union);
-  ReadUnion<int32_t, yardl::binary::ReadInteger, test_model::GenericRecordWithComputedFields<std::string, float>, test_model::binary::ReadGenericRecordWithComputedFields<std::string, yardl::binary::ReadString, float, yardl::binary::ReadFloat>>(stream, value.union_with_nested_generic_union);
+  ReadUnion<int32_t, yardl::binary::ReadInteger, float, yardl::binary::ReadFloatingPoint>(stream, value.int_float_union);
+  ReadUnion<std::monostate, yardl::binary::ReadMonostate, int32_t, yardl::binary::ReadInteger, float, yardl::binary::ReadFloatingPoint>(stream, value.nullable_int_float_union);
+  ReadUnion<int32_t, yardl::binary::ReadInteger, test_model::GenericRecordWithComputedFields<std::string, float>, test_model::binary::ReadGenericRecordWithComputedFields<std::string, yardl::binary::ReadString, float, yardl::binary::ReadFloatingPoint>>(stream, value.union_with_nested_generic_union);
 }
 
 template<typename INT16_MAX_Type, yardl::binary::Writer<INT16_MAX_Type> WriteINT16_MAX_Type>
@@ -1282,12 +1282,12 @@ template<typename INT16_MAX_Type, yardl::binary::Reader<INT16_MAX_Type> ReadINT1
 
 void BenchmarkFloat256x256Writer::WriteFloat256x256Impl(yardl::FixedNDArray<float, 256, 256> const& value) {
   yardl::binary::WriteInteger(stream_, 1U);
-  yardl::binary::WriteFixedNDArray<float, yardl::binary::WriteFloat, 256, 256>(stream_, value);
+  yardl::binary::WriteFixedNDArray<float, yardl::binary::WriteFloatingPoint, 256, 256>(stream_, value);
 }
 
 void BenchmarkFloat256x256Writer::WriteFloat256x256Impl(std::vector<yardl::FixedNDArray<float, 256, 256>> const& values) {
   if (!values.empty()) {
-    yardl::binary::WriteVector<yardl::FixedNDArray<float, 256, 256>, yardl::binary::WriteFixedNDArray<float, yardl::binary::WriteFloat, 256, 256>>(stream_, values);
+    yardl::binary::WriteVector<yardl::FixedNDArray<float, 256, 256>, yardl::binary::WriteFixedNDArray<float, yardl::binary::WriteFloatingPoint, 256, 256>>(stream_, values);
   }
 }
 
@@ -1310,13 +1310,13 @@ bool BenchmarkFloat256x256Reader::ReadFloat256x256Impl(yardl::FixedNDArray<float
       return false;
     }
   }
-  yardl::binary::ReadFixedNDArray<float, yardl::binary::ReadFloat, 256, 256>(stream_, value);
+  yardl::binary::ReadFixedNDArray<float, yardl::binary::ReadFloatingPoint, 256, 256>(stream_, value);
   current_block_remaining_--;
   return true;
 }
 
 bool BenchmarkFloat256x256Reader::ReadFloat256x256Impl(std::vector<yardl::FixedNDArray<float, 256, 256>>& values) {
-  yardl::binary::ReadBlocksIntoVector<yardl::FixedNDArray<float, 256, 256>, yardl::binary::ReadFixedNDArray<float, yardl::binary::ReadFloat, 256, 256>>(stream_, current_block_remaining_, values);
+  yardl::binary::ReadBlocksIntoVector<yardl::FixedNDArray<float, 256, 256>, yardl::binary::ReadFixedNDArray<float, yardl::binary::ReadFloatingPoint, 256, 256>>(stream_, current_block_remaining_, values);
   return current_block_remaining_ != 0;
 }
 
@@ -1326,12 +1326,12 @@ void BenchmarkFloat256x256Reader::CloseImpl() {
 
 void BenchmarkFloatVlenWriter::WriteFloatArrayImpl(yardl::NDArray<float, 2> const& value) {
   yardl::binary::WriteInteger(stream_, 1U);
-  yardl::binary::WriteNDArray<float, yardl::binary::WriteFloat, 2>(stream_, value);
+  yardl::binary::WriteNDArray<float, yardl::binary::WriteFloatingPoint, 2>(stream_, value);
 }
 
 void BenchmarkFloatVlenWriter::WriteFloatArrayImpl(std::vector<yardl::NDArray<float, 2>> const& values) {
   if (!values.empty()) {
-    yardl::binary::WriteVector<yardl::NDArray<float, 2>, yardl::binary::WriteNDArray<float, yardl::binary::WriteFloat, 2>>(stream_, values);
+    yardl::binary::WriteVector<yardl::NDArray<float, 2>, yardl::binary::WriteNDArray<float, yardl::binary::WriteFloatingPoint, 2>>(stream_, values);
   }
 }
 
@@ -1354,13 +1354,13 @@ bool BenchmarkFloatVlenReader::ReadFloatArrayImpl(yardl::NDArray<float, 2>& valu
       return false;
     }
   }
-  yardl::binary::ReadNDArray<float, yardl::binary::ReadFloat, 2>(stream_, value);
+  yardl::binary::ReadNDArray<float, yardl::binary::ReadFloatingPoint, 2>(stream_, value);
   current_block_remaining_--;
   return true;
 }
 
 bool BenchmarkFloatVlenReader::ReadFloatArrayImpl(std::vector<yardl::NDArray<float, 2>>& values) {
-  yardl::binary::ReadBlocksIntoVector<yardl::NDArray<float, 2>, yardl::binary::ReadNDArray<float, yardl::binary::ReadFloat, 2>>(stream_, current_block_remaining_, values);
+  yardl::binary::ReadBlocksIntoVector<yardl::NDArray<float, 2>, yardl::binary::ReadNDArray<float, yardl::binary::ReadFloatingPoint, 2>>(stream_, current_block_remaining_, values);
   return current_block_remaining_ != 0;
 }
 
@@ -1458,12 +1458,12 @@ void BenchmarkSmallRecordWithOptionalsReader::CloseImpl() {
 
 void BenchmarkSimpleMrdWriter::WriteDataImpl(std::variant<test_model::SimpleAcquisition, test_model::Image<float>> const& value) {
   yardl::binary::WriteInteger(stream_, 1U);
-  WriteUnion<test_model::SimpleAcquisition, test_model::binary::WriteSimpleAcquisition, test_model::Image<float>, test_model::binary::WriteImage<float, yardl::binary::WriteFloat>>(stream_, value);
+  WriteUnion<test_model::SimpleAcquisition, test_model::binary::WriteSimpleAcquisition, test_model::Image<float>, test_model::binary::WriteImage<float, yardl::binary::WriteFloatingPoint>>(stream_, value);
 }
 
 void BenchmarkSimpleMrdWriter::WriteDataImpl(std::vector<std::variant<test_model::SimpleAcquisition, test_model::Image<float>>> const& values) {
   if (!values.empty()) {
-    yardl::binary::WriteVector<std::variant<test_model::SimpleAcquisition, test_model::Image<float>>, WriteUnion<test_model::SimpleAcquisition, test_model::binary::WriteSimpleAcquisition, test_model::Image<float>, test_model::binary::WriteImage<float, yardl::binary::WriteFloat>>>(stream_, values);
+    yardl::binary::WriteVector<std::variant<test_model::SimpleAcquisition, test_model::Image<float>>, WriteUnion<test_model::SimpleAcquisition, test_model::binary::WriteSimpleAcquisition, test_model::Image<float>, test_model::binary::WriteImage<float, yardl::binary::WriteFloatingPoint>>>(stream_, values);
   }
 }
 
@@ -1486,13 +1486,13 @@ bool BenchmarkSimpleMrdReader::ReadDataImpl(std::variant<test_model::SimpleAcqui
       return false;
     }
   }
-  ReadUnion<test_model::SimpleAcquisition, test_model::binary::ReadSimpleAcquisition, test_model::Image<float>, test_model::binary::ReadImage<float, yardl::binary::ReadFloat>>(stream_, value);
+  ReadUnion<test_model::SimpleAcquisition, test_model::binary::ReadSimpleAcquisition, test_model::Image<float>, test_model::binary::ReadImage<float, yardl::binary::ReadFloatingPoint>>(stream_, value);
   current_block_remaining_--;
   return true;
 }
 
 bool BenchmarkSimpleMrdReader::ReadDataImpl(std::vector<std::variant<test_model::SimpleAcquisition, test_model::Image<float>>>& values) {
-  yardl::binary::ReadBlocksIntoVector<std::variant<test_model::SimpleAcquisition, test_model::Image<float>>, ReadUnion<test_model::SimpleAcquisition, test_model::binary::ReadSimpleAcquisition, test_model::Image<float>, test_model::binary::ReadImage<float, yardl::binary::ReadFloat>>>(stream_, current_block_remaining_, values);
+  yardl::binary::ReadBlocksIntoVector<std::variant<test_model::SimpleAcquisition, test_model::Image<float>>, ReadUnion<test_model::SimpleAcquisition, test_model::binary::ReadSimpleAcquisition, test_model::Image<float>, test_model::binary::ReadImage<float, yardl::binary::ReadFloatingPoint>>>(stream_, current_block_remaining_, values);
   return current_block_remaining_ != 0;
 }
 
@@ -1597,7 +1597,7 @@ void VlensWriter::WriteIntVectorImpl(std::vector<int32_t> const& value) {
 }
 
 void VlensWriter::WriteComplexVectorImpl(std::vector<std::complex<float>> const& value) {
-  yardl::binary::WriteVector<std::complex<float>, yardl::binary::WriteComplexFloat>(stream_, value);
+  yardl::binary::WriteVector<std::complex<float>, yardl::binary::WriteFloatingPoint>(stream_, value);
 }
 
 void VlensWriter::WriteRecordWithVlensImpl(test_model::RecordWithVlens const& value) {
@@ -1621,7 +1621,7 @@ void VlensReader::ReadIntVectorImpl(std::vector<int32_t>& value) {
 }
 
 void VlensReader::ReadComplexVectorImpl(std::vector<std::complex<float>>& value) {
-  yardl::binary::ReadVector<std::complex<float>, yardl::binary::ReadComplexFloat>(stream_, value);
+  yardl::binary::ReadVector<std::complex<float>, yardl::binary::ReadFloatingPoint>(stream_, value);
 }
 
 void VlensReader::ReadRecordWithVlensImpl(test_model::RecordWithVlens& value) {
@@ -2269,7 +2269,7 @@ void StateTestReader::CloseImpl() {
 }
 
 void SimpleGenericsWriter::WriteFloatImageImpl(test_model::Image<float> const& value) {
-  test_model::binary::WriteImage<float, yardl::binary::WriteFloat>(stream_, value);
+  test_model::binary::WriteImage<float, yardl::binary::WriteFloatingPoint>(stream_, value);
 }
 
 void SimpleGenericsWriter::WriteIntImageImpl(test_model::Image<int32_t> const& value) {
@@ -2285,15 +2285,15 @@ void SimpleGenericsWriter::WriteStringImageImpl(test_model::Image<std::string> c
 }
 
 void SimpleGenericsWriter::WriteIntFloatTupleImpl(test_model::MyTuple<int32_t, float> const& value) {
-  test_model::binary::WriteMyTuple<int32_t, yardl::binary::WriteInteger, float, yardl::binary::WriteFloat>(stream_, value);
+  test_model::binary::WriteMyTuple<int32_t, yardl::binary::WriteInteger, float, yardl::binary::WriteFloatingPoint>(stream_, value);
 }
 
 void SimpleGenericsWriter::WriteFloatFloatTupleImpl(test_model::MyTuple<float, float> const& value) {
-  test_model::binary::WriteMyTuple<float, yardl::binary::WriteFloat, float, yardl::binary::WriteFloat>(stream_, value);
+  test_model::binary::WriteMyTuple<float, yardl::binary::WriteFloatingPoint, float, yardl::binary::WriteFloatingPoint>(stream_, value);
 }
 
 void SimpleGenericsWriter::WriteIntFloatTupleAlternateSyntaxImpl(test_model::MyTuple<int32_t, float> const& value) {
-  test_model::binary::WriteMyTuple<int32_t, yardl::binary::WriteInteger, float, yardl::binary::WriteFloat>(stream_, value);
+  test_model::binary::WriteMyTuple<int32_t, yardl::binary::WriteInteger, float, yardl::binary::WriteFloatingPoint>(stream_, value);
 }
 
 void SimpleGenericsWriter::WriteIntStringTupleImpl(test_model::MyTuple<int32_t, std::string> const& value) {
@@ -2302,12 +2302,12 @@ void SimpleGenericsWriter::WriteIntStringTupleImpl(test_model::MyTuple<int32_t, 
 
 void SimpleGenericsWriter::WriteStreamOfTypeVariantsImpl(std::variant<test_model::Image<float>, test_model::Image<double>> const& value) {
   yardl::binary::WriteInteger(stream_, 1U);
-  WriteUnion<test_model::Image<float>, test_model::binary::WriteImage<float, yardl::binary::WriteFloat>, test_model::Image<double>, test_model::binary::WriteImage<double, yardl::binary::WriteDouble>>(stream_, value);
+  WriteUnion<test_model::Image<float>, test_model::binary::WriteImage<float, yardl::binary::WriteFloatingPoint>, test_model::Image<double>, test_model::binary::WriteImage<double, yardl::binary::WriteFloatingPoint>>(stream_, value);
 }
 
 void SimpleGenericsWriter::WriteStreamOfTypeVariantsImpl(std::vector<std::variant<test_model::Image<float>, test_model::Image<double>>> const& values) {
   if (!values.empty()) {
-    yardl::binary::WriteVector<std::variant<test_model::Image<float>, test_model::Image<double>>, WriteUnion<test_model::Image<float>, test_model::binary::WriteImage<float, yardl::binary::WriteFloat>, test_model::Image<double>, test_model::binary::WriteImage<double, yardl::binary::WriteDouble>>>(stream_, values);
+    yardl::binary::WriteVector<std::variant<test_model::Image<float>, test_model::Image<double>>, WriteUnion<test_model::Image<float>, test_model::binary::WriteImage<float, yardl::binary::WriteFloatingPoint>, test_model::Image<double>, test_model::binary::WriteImage<double, yardl::binary::WriteFloatingPoint>>>(stream_, values);
   }
 }
 
@@ -2324,7 +2324,7 @@ void SimpleGenericsWriter::CloseImpl() {
 }
 
 void SimpleGenericsReader::ReadFloatImageImpl(test_model::Image<float>& value) {
-  test_model::binary::ReadImage<float, yardl::binary::ReadFloat>(stream_, value);
+  test_model::binary::ReadImage<float, yardl::binary::ReadFloatingPoint>(stream_, value);
 }
 
 void SimpleGenericsReader::ReadIntImageImpl(test_model::Image<int32_t>& value) {
@@ -2340,15 +2340,15 @@ void SimpleGenericsReader::ReadStringImageImpl(test_model::Image<std::string>& v
 }
 
 void SimpleGenericsReader::ReadIntFloatTupleImpl(test_model::MyTuple<int32_t, float>& value) {
-  test_model::binary::ReadMyTuple<int32_t, yardl::binary::ReadInteger, float, yardl::binary::ReadFloat>(stream_, value);
+  test_model::binary::ReadMyTuple<int32_t, yardl::binary::ReadInteger, float, yardl::binary::ReadFloatingPoint>(stream_, value);
 }
 
 void SimpleGenericsReader::ReadFloatFloatTupleImpl(test_model::MyTuple<float, float>& value) {
-  test_model::binary::ReadMyTuple<float, yardl::binary::ReadFloat, float, yardl::binary::ReadFloat>(stream_, value);
+  test_model::binary::ReadMyTuple<float, yardl::binary::ReadFloatingPoint, float, yardl::binary::ReadFloatingPoint>(stream_, value);
 }
 
 void SimpleGenericsReader::ReadIntFloatTupleAlternateSyntaxImpl(test_model::MyTuple<int32_t, float>& value) {
-  test_model::binary::ReadMyTuple<int32_t, yardl::binary::ReadInteger, float, yardl::binary::ReadFloat>(stream_, value);
+  test_model::binary::ReadMyTuple<int32_t, yardl::binary::ReadInteger, float, yardl::binary::ReadFloatingPoint>(stream_, value);
 }
 
 void SimpleGenericsReader::ReadIntStringTupleImpl(test_model::MyTuple<int32_t, std::string>& value) {
@@ -2362,13 +2362,13 @@ bool SimpleGenericsReader::ReadStreamOfTypeVariantsImpl(std::variant<test_model:
       return false;
     }
   }
-  ReadUnion<test_model::Image<float>, test_model::binary::ReadImage<float, yardl::binary::ReadFloat>, test_model::Image<double>, test_model::binary::ReadImage<double, yardl::binary::ReadDouble>>(stream_, value);
+  ReadUnion<test_model::Image<float>, test_model::binary::ReadImage<float, yardl::binary::ReadFloatingPoint>, test_model::Image<double>, test_model::binary::ReadImage<double, yardl::binary::ReadFloatingPoint>>(stream_, value);
   current_block_remaining_--;
   return true;
 }
 
 bool SimpleGenericsReader::ReadStreamOfTypeVariantsImpl(std::vector<std::variant<test_model::Image<float>, test_model::Image<double>>>& values) {
-  yardl::binary::ReadBlocksIntoVector<std::variant<test_model::Image<float>, test_model::Image<double>>, ReadUnion<test_model::Image<float>, test_model::binary::ReadImage<float, yardl::binary::ReadFloat>, test_model::Image<double>, test_model::binary::ReadImage<double, yardl::binary::ReadDouble>>>(stream_, current_block_remaining_, values);
+  yardl::binary::ReadBlocksIntoVector<std::variant<test_model::Image<float>, test_model::Image<double>>, ReadUnion<test_model::Image<float>, test_model::binary::ReadImage<float, yardl::binary::ReadFloatingPoint>, test_model::Image<double>, test_model::binary::ReadImage<double, yardl::binary::ReadFloatingPoint>>>(stream_, current_block_remaining_, values);
   return current_block_remaining_ != 0;
 }
 
@@ -2377,7 +2377,7 @@ void SimpleGenericsReader::CloseImpl() {
 }
 
 void AdvancedGenericsWriter::WriteIntImageImageImpl(test_model::Image<test_model::Image<float>> const& value) {
-  test_model::binary::WriteImage<test_model::Image<float>, test_model::binary::WriteImage<float, yardl::binary::WriteFloat>>(stream_, value);
+  test_model::binary::WriteImage<test_model::Image<float>, test_model::binary::WriteImage<float, yardl::binary::WriteFloatingPoint>>(stream_, value);
 }
 
 void AdvancedGenericsWriter::WriteGenericRecord1Impl(test_model::GenericRecord<int32_t, std::string> const& value) {
@@ -2393,7 +2393,7 @@ void AdvancedGenericsWriter::WriteTupleOfOptionalsAlternateSyntaxImpl(test_model
 }
 
 void AdvancedGenericsWriter::WriteTupleOfVectorsImpl(test_model::MyTuple<std::vector<int32_t>, std::vector<float>> const& value) {
-  test_model::binary::WriteMyTuple<std::vector<int32_t>, yardl::binary::WriteVector<int32_t, yardl::binary::WriteInteger>, std::vector<float>, yardl::binary::WriteVector<float, yardl::binary::WriteFloat>>(stream_, value);
+  test_model::binary::WriteMyTuple<std::vector<int32_t>, yardl::binary::WriteVector<int32_t, yardl::binary::WriteInteger>, std::vector<float>, yardl::binary::WriteVector<float, yardl::binary::WriteFloatingPoint>>(stream_, value);
 }
 
 void AdvancedGenericsWriter::Flush() {
@@ -2405,7 +2405,7 @@ void AdvancedGenericsWriter::CloseImpl() {
 }
 
 void AdvancedGenericsReader::ReadIntImageImageImpl(test_model::Image<test_model::Image<float>>& value) {
-  test_model::binary::ReadImage<test_model::Image<float>, test_model::binary::ReadImage<float, yardl::binary::ReadFloat>>(stream_, value);
+  test_model::binary::ReadImage<test_model::Image<float>, test_model::binary::ReadImage<float, yardl::binary::ReadFloatingPoint>>(stream_, value);
 }
 
 void AdvancedGenericsReader::ReadGenericRecord1Impl(test_model::GenericRecord<int32_t, std::string>& value) {
@@ -2421,7 +2421,7 @@ void AdvancedGenericsReader::ReadTupleOfOptionalsAlternateSyntaxImpl(test_model:
 }
 
 void AdvancedGenericsReader::ReadTupleOfVectorsImpl(test_model::MyTuple<std::vector<int32_t>, std::vector<float>>& value) {
-  test_model::binary::ReadMyTuple<std::vector<int32_t>, yardl::binary::ReadVector<int32_t, yardl::binary::ReadInteger>, std::vector<float>, yardl::binary::ReadVector<float, yardl::binary::ReadFloat>>(stream_, value);
+  test_model::binary::ReadMyTuple<std::vector<int32_t>, yardl::binary::ReadVector<int32_t, yardl::binary::ReadInteger>, std::vector<float>, yardl::binary::ReadVector<float, yardl::binary::ReadFloatingPoint>>(stream_, value);
 }
 
 void AdvancedGenericsReader::CloseImpl() {
@@ -2449,7 +2449,7 @@ void AliasesWriter::WriteAliasedOptionalImpl(test_model::AliasedOptional const& 
 }
 
 void AliasesWriter::WriteAliasedGenericOptionalImpl(test_model::AliasedGenericOptional<float> const& value) {
-  test_model::binary::WriteAliasedGenericOptional<float, yardl::binary::WriteFloat>(stream_, value);
+  test_model::binary::WriteAliasedGenericOptional<float, yardl::binary::WriteFloatingPoint>(stream_, value);
 }
 
 void AliasesWriter::WriteAliasedGenericUnion2Impl(test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum> const& value) {
@@ -2457,11 +2457,11 @@ void AliasesWriter::WriteAliasedGenericUnion2Impl(test_model::AliasedGenericUnio
 }
 
 void AliasesWriter::WriteAliasedGenericVectorImpl(test_model::AliasedGenericVector<float> const& value) {
-  test_model::binary::WriteAliasedGenericVector<float, yardl::binary::WriteFloat>(stream_, value);
+  test_model::binary::WriteAliasedGenericVector<float, yardl::binary::WriteFloatingPoint>(stream_, value);
 }
 
 void AliasesWriter::WriteAliasedGenericFixedVectorImpl(test_model::AliasedGenericFixedVector<float> const& value) {
-  test_model::binary::WriteAliasedGenericFixedVector<float, yardl::binary::WriteFloat>(stream_, value);
+  test_model::binary::WriteAliasedGenericFixedVector<float, yardl::binary::WriteFloatingPoint>(stream_, value);
 }
 
 void AliasesWriter::WriteStreamOfAliasedGenericUnion2Impl(test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum> const& value) {
@@ -2508,7 +2508,7 @@ void AliasesReader::ReadAliasedOptionalImpl(test_model::AliasedOptional& value) 
 }
 
 void AliasesReader::ReadAliasedGenericOptionalImpl(test_model::AliasedGenericOptional<float>& value) {
-  test_model::binary::ReadAliasedGenericOptional<float, yardl::binary::ReadFloat>(stream_, value);
+  test_model::binary::ReadAliasedGenericOptional<float, yardl::binary::ReadFloatingPoint>(stream_, value);
 }
 
 void AliasesReader::ReadAliasedGenericUnion2Impl(test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum>& value) {
@@ -2516,11 +2516,11 @@ void AliasesReader::ReadAliasedGenericUnion2Impl(test_model::AliasedGenericUnion
 }
 
 void AliasesReader::ReadAliasedGenericVectorImpl(test_model::AliasedGenericVector<float>& value) {
-  test_model::binary::ReadAliasedGenericVector<float, yardl::binary::ReadFloat>(stream_, value);
+  test_model::binary::ReadAliasedGenericVector<float, yardl::binary::ReadFloatingPoint>(stream_, value);
 }
 
 void AliasesReader::ReadAliasedGenericFixedVectorImpl(test_model::AliasedGenericFixedVector<float>& value) {
-  test_model::binary::ReadAliasedGenericFixedVector<float, yardl::binary::ReadFloat>(stream_, value);
+  test_model::binary::ReadAliasedGenericFixedVector<float, yardl::binary::ReadFloatingPoint>(stream_, value);
 }
 
 bool AliasesReader::ReadStreamOfAliasedGenericUnion2Impl(test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum>& value) {
