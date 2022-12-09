@@ -1248,7 +1248,7 @@ HEX:    9a 99 99 3f 9a 99 59 40 33 33 b3 40 9a 99 f9 40 03 01 04 03 08 05 0c 02 
         aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa ssssssssssssssssssssssssssssssssssssssssssssssssssssssss
         fffffffffff fffffffffff fffffffffff fffffffffff bbbbbbbbbbbbbbbbbbbb bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb bb
                                                         uu ppppp ppppp ppppp uu ppppppppppp ppppppppppppppppp uu
-                                                        uu ii uu ii uu ii uu    uuuuu iiiii uuuuuuuu iiiiiiii
+                                                           uu ii uu ii uu ii    uuuuu iiiii uuuuuuuu iiiiiiii
 
         a = array                                       s = stream
         f = float                                       b = block
