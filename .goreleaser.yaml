@@ -28,4 +28,6 @@ changelog:
       - '^docs:'
       - '^test:'
 
+release:
+  draft: true
 # yaml-language-server: $schema=https://goreleaser.com/static/schema.json
