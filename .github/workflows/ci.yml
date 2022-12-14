@@ -111,7 +111,7 @@ jobs:
 
       - name: Build
         run: |
-          make build-all
+          just build-all
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v2

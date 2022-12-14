@@ -62,7 +62,7 @@ watch-generate-sandbox:
     watchexec -r -c -w tooling/ -- "just install && cd models/sandbox && yardl generate --watch"
 
 watch-exec-sandbox: configure
-    watchexec -c -w models/sandbox/ -w cpp/ -i **/cpp/build/** -i **/cpp/test/** -i **/cpp/sandbox/generated/** -w tooling/ -- "make generate-sandbox && cd cpp/build && printf 'Building... ' && ninja --quiet sandbox_exec && printf 'done.\n\n' && ./sandbox_exec"
+    watchexec -c -w models/sandbox/ -w cpp/ -i **/cpp/build/** -i **/cpp/test/** -i **/cpp/sandbox/generated/** -w tooling/ -- "just generate-sandbox && cd cpp/build && printf 'Building... ' && ninja --quiet sandbox_exec && printf 'done.\n\n' && ./sandbox_exec"
 
 validate: build-all test run-sandbox-quiet benchmark
 
