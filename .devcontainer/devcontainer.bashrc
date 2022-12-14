@@ -3,10 +3,9 @@
 
 source /opt/conda/etc/profile.d/conda.sh
 conda activate yardl
+source <(just --completions bash)
 
 PATH=${PATH}:${HOME}/go/bin
-
-alias make="make -s"
 
 if [[ "${BASH_ENV:-}" == "$(readlink -f "${BASH_SOURCE[0]:-}")" ]]; then
     # We don't want subshells to unnecessarily source this again.

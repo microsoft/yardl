@@ -85,6 +85,7 @@
         "ms-python.python",
         "ms-vscode.cmake-tools",
         "ms-vscode.cpptools",
+        "sclu1034.justfile",
         "timonwong.shellcheck",
         "twxs.cmake"
       ]

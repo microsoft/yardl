@@ -18,7 +18,7 @@ dependencies:
   - hdf5=1.12.1
   - howardhinnant_date=3.0.1
   - jupyter=1.0.0 # local
-  - make=4.3
+  - just=1.5.0
   - ninja=1.11.0
   - nlohmann_json=3.10.5
   - python=3.10.5 # local
