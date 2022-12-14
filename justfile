@@ -2,13 +2,10 @@ set shell := ['bash', '-ceuo', 'pipefail']
 
 cpp_version := "17"
 
-default: configure test && default-warning
-
-@default-warning:
-  echo "run 'just test' for a more efficient version of the default recipe that skips CMake configuration"
+@default: validate
+  echo $'\n\e[1;34mNote: you can run \'just test\' to a run an inner-loop subset of the complete validation'
 
 ensure-build-dir:
-    pwd
     mkdir -p cpp/build
 
 configure: ensure-build-dir

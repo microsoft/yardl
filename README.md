@@ -48,6 +48,24 @@ planned features include:
 - Constraints
 - Improvements to the language and editing experience
 
+## Building the Code in this Repo
+
+We recommend opening repo in a [dev
+container](https://code.visualstudio.com/docs/devcontainers/containers) or a
+[codespace](https://docs.github.com/en/codespaces/overview). Otherwise, all the
+required dependencies are specified in the
+[Conda](https://docs.conda.io/en/latest/) [environment.yml](environment.yml)
+file in the repo root.
+
+We use the [`just`](https://github.com/casey/just) command runner to build and run tests. To get
+started, you should be able to run
+
+```bash
+$ just
+```
+
+from the repo root.
+
 ## Contributing
 
 This project welcomes contributions and suggestions.  Most contributions require
