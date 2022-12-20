@@ -8,4 +8,6 @@ target_link_libraries(
   sandbox_generated
 )
 
-add_subdirectory(generated)
+if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/generated)
+  add_subdirectory(generated)
+endif()

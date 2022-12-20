@@ -31,7 +31,7 @@ jobs:
         uses: ./.github/actions/configure-environment
 
       - name: Build and test
-        run: make validate-with-no-changes -e CPP_VERSION=${{ matrix.cppVersion }}
+        run: just cpp_version=${{ matrix.cppVersion }} validate-with-no-changes
 
   buildBinaries:
     name: Build yardl binaries
@@ -112,7 +112,7 @@ jobs:
 
       - name: Build
         run: |
-          make build-all
+          just build-all
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v2
