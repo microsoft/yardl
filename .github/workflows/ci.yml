@@ -90,7 +90,7 @@ jobs:
       - name: Set path
         run: |
           chmod +x "${{github.workspace}}/yardl_darwin_amd64_v1/yardl"
-          echo "${{github.workspace}}/yardl_darwin_amd64_v1" >> $GITHUB_PATH 
+          echo "${{github.workspace}}/yardl_darwin_amd64_v1" >> $GITHUB_PATH
 
       - name: Run smoke test
         run: ./smoketest/run-smoketest-macos.sh
@@ -98,6 +98,7 @@ jobs:
   codeQL:
     name: CodeQL
     runs-on: ubuntu-latest
+    if: github.repository == 'microsoft/yardl'
     steps:
       - uses: actions/checkout@v3
 
@@ -140,12 +141,16 @@ jobs:
     if: github.event_name == 'push' && github.ref_type == 'tag'
     needs:
       - validate
-      - codeQL
       - smoketestWindows
+      - smoketestMac
       - noticeCheck
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - run: git fetch --force --tags
 
       - name: Configure environment
         uses: ./.github/actions/configure-environment
