@@ -74,7 +74,9 @@ func TestUnionElementsAreDistinctWithGenerics(t *testing.T) {
 X: !record
   fields:
     f: [GenericRecord<float>, GenericRecord<double>]
-GenericRecord<T>: !record`
+GenericRecord<T>: !record
+  fields:
+    t: T`
 
 	_, err := parseAndValidate(t, src)
 	assert.Nil(t, err)

@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func Test(t *testing.T) {
+func TestTypeEquality(t *testing.T) {
 	testCases := []struct {
 		spec           string
 		expectedResult bool
