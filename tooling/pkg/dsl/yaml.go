@@ -83,6 +83,10 @@ func ParseYamlInDir(path string, namespaceName string) (*Namespace, error) {
 			Visit(&ns, func(self Visitor, node Node) {
 				switch node := node.(type) {
 				case *Namespace:
+				case *DefinitionMeta:
+					for _, p := range node.TypeParameters {
+						self.Visit(p)
+					}
 				default:
 					nodeMeta := node.GetNodeMeta()
 					nodeMeta.File = path

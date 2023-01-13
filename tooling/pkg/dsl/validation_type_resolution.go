@@ -186,3 +186,39 @@ func validateGenericTypeDefinitions(env *Environment, errorSink *validation.Erro
 
 	return env
 }
+
+func validateGenericParametersUsed(env *Environment, errorSink *validation.ErrorSink) *Environment {
+	if len(errorSink.Errors) > 0 {
+		return env
+	}
+
+	VisitWithContext(env, nil, func(self VisitorWithContext[map[*GenericTypeParameter]any], node Node, context map[*GenericTypeParameter]any) {
+		switch t := node.(type) {
+		case TypeDefinition:
+			meta := t.GetDefinitionMeta()
+			if len(meta.TypeParameters) == 0 {
+				break
+			}
+
+			usedTypeParameters := make(map[*GenericTypeParameter]any)
+			for _, p := range meta.TypeParameters {
+				usedTypeParameters[p] = nil
+			}
+			self.VisitChildren(node, usedTypeParameters)
+			for p := range usedTypeParameters {
+				errorSink.Add(validationError(p, "generic type parameter '%s' is not used", p.Name))
+			}
+
+			return
+
+		case *SimpleType:
+			if gen, ok := t.ResolvedDefinition.(*GenericTypeParameter); ok {
+				delete(context, gen)
+			}
+		}
+
+		self.VisitChildren(node, context)
+	})
+
+	return env
+}

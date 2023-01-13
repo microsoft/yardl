@@ -83,3 +83,12 @@ Rec2: !record
 	_, err := parseAndValidate(t, src)
 	assert.ErrorContains(t, err, "the type 'Foo' is not recognized")
 }
+
+func TestTypeParameterUnused(t *testing.T) {
+	src := `
+MyUnion<T, U>: [T, int]
+`
+
+	_, err := parseAndValidate(t, src)
+	assert.ErrorContains(t, err, "generic type parameter 'U' is not used")
+}

@@ -40,6 +40,7 @@ func Validate(namespaces []*Namespace) (*Environment, error) {
 		validateUnionCases,
 		validateEnums,
 		resolveComputedFields,
+		validateGenericParametersUsed,
 	}
 
 	for _, pass := range passes {
