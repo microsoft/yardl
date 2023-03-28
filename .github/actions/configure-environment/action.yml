@@ -7,14 +7,14 @@ runs:
     - name: Initial setup
       shell: bash
       run: |
-        gobin="${RUNNER_TEMP}/bin"
-        echo "GOBIN=${gobin}" >> $GITHUB_ENV
-        echo "${gobin}" >> $GITHUB_PATH
-
-        # filter conda environment file
+.de         # filter conda environment file
         cat environment.yml | grep -v "#.*\<\local\>" > ci-environment.yml
 
     - uses: conda-incubator/setup-miniconda@v2
       with:
         activate-environment: yardl
         environment-file: ci-environment.yml
+
+    - uses: actions/setup-go@v4
+      with:
+        go-version: '1.20.2'
