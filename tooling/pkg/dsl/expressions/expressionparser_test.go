@@ -40,7 +40,7 @@ func TestParseExpression(t *testing.T) {
 		{"foo[1, 2]", "", "(part foo (index 1, 2))"},
 		{"foo[x:1, y:2]", "", "(part foo (index x:1, y:2))"},
 		{"foo[1,]", `unexpected token "," (expected "]")`, ""},
-		{"foo[,1]", `unexpected token "," (expected "]")`, ""},
+		{"foo[,1]", `unexpected token "," (expected Expression)`, ""},
 		{"foo[1][2]", "", "(part foo (index 1)(index 2))"},
 		{"foo[1].bar[2]", "", "(part foo (index 1)).(part bar (index 2))"},
 		{"foo[bar()]", "", "(part foo (index (call bar)))"},
