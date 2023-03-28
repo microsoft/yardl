@@ -7,7 +7,7 @@ runs:
     - name: Initial setup
       shell: bash
       run: |
-.de         # filter conda environment file
+        # filter conda environment file
         cat environment.yml | grep -v "#.*\<\local\>" > ci-environment.yml
 
     - uses: conda-incubator/setup-miniconda@v2
