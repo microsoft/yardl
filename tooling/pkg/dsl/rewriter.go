@@ -145,6 +145,15 @@ func (rewriter RewriterWithContext[T]) DefaultRewrite(node Node, context T) Node
 		return t
 	case *Stream:
 		return t
+	case *Map:
+		rewrittenKeyType := rewriter.Rewrite(t.KeyType, context)
+		if rewrittenKeyType == t.KeyType {
+			return t
+		}
+
+		rewrittenMap := *t
+		rewrittenMap.KeyType = rewrittenKeyType.(Type)
+		return &rewrittenMap
 	case *EnumDefinition:
 		rewrittenDimensionMeta := rewriter.Rewrite(t.DefinitionMeta, context)
 		rewrittenBaseType := t.BaseType

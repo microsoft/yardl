@@ -24,6 +24,7 @@ func WriteTypes(env *dsl.Environment, options packaging.CppCodegenOptions) error
 #include <array>
 #include <complex>
 #include <optional>
+#include <unordered_map>
 #include <variant>
 #include <vector>
 

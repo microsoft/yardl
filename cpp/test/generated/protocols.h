@@ -1170,6 +1170,70 @@ class DynamicNDArraysReaderBase {
   uint8_t state_ = 0;
 };
 
+// Abstract writer for the Maps protocol.
+class MapsWriterBase {
+  public:
+  // Ordinal 0.
+  void WriteStringToInt(std::unordered_map<std::string, int32_t> const& value);
+
+  // Ordinal 1.
+  void WriteStringToUnion(std::unordered_map<std::string, std::variant<std::string, int32_t>> const& value);
+
+  // Ordinal 2.
+  void WriteAliasedGeneric(test_model::AliasedMap<std::string, int32_t> const& value);
+
+  // Optionaly close this writer before destructing. Validates that all steps were completed.
+  void Close();
+
+  virtual ~MapsWriterBase() = default;
+
+  // Flushes all buffered data.
+  virtual void Flush() {}
+
+  protected:
+  virtual void WriteStringToIntImpl(std::unordered_map<std::string, int32_t> const& value) = 0;
+  virtual void WriteStringToUnionImpl(std::unordered_map<std::string, std::variant<std::string, int32_t>> const& value) = 0;
+  virtual void WriteAliasedGenericImpl(test_model::AliasedMap<std::string, int32_t> const& value) = 0;
+  virtual void CloseImpl() {}
+
+  static std::string schema_;
+
+  private:
+  uint8_t state_ = 0;
+
+  friend class MapsReaderBase;
+};
+
+// Abstract reader for the Maps protocol.
+class MapsReaderBase {
+  public:
+  // Ordinal 0.
+  void ReadStringToInt(std::unordered_map<std::string, int32_t>& value);
+
+  // Ordinal 1.
+  void ReadStringToUnion(std::unordered_map<std::string, std::variant<std::string, int32_t>>& value);
+
+  // Ordinal 2.
+  void ReadAliasedGeneric(test_model::AliasedMap<std::string, int32_t>& value);
+
+  // Optionaly close this writer before destructing. Validates that all steps were completely read.
+  void Close();
+
+  void CopyTo(MapsWriterBase& writer);
+
+  virtual ~MapsReaderBase() = default;
+
+  protected:
+  virtual void ReadStringToIntImpl(std::unordered_map<std::string, int32_t>& value) = 0;
+  virtual void ReadStringToUnionImpl(std::unordered_map<std::string, std::variant<std::string, int32_t>>& value) = 0;
+  virtual void ReadAliasedGenericImpl(test_model::AliasedMap<std::string, int32_t>& value) = 0;
+  virtual void CloseImpl() {}
+  static std::string schema_;
+
+  private:
+  uint8_t state_ = 0;
+};
+
 // Abstract writer for the Unions protocol.
 class UnionsWriterBase {
   public:

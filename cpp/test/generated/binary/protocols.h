@@ -658,6 +658,42 @@ class DynamicNDArraysReader : public test_model::DynamicNDArraysReaderBase, yard
   void CloseImpl() override;
 };
 
+// Binary writer for the Maps protocol.
+class MapsWriter : public test_model::MapsWriterBase, yardl::binary::BinaryWriter {
+  public:
+  // The stream_arg parameter can either be a std::string filename
+  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::ostream.
+  template <typename TStreamArg>
+  MapsWriter(TStreamArg&& stream_arg)
+      : yardl::binary::BinaryWriter(std::forward<TStreamArg>(stream_arg), schema_) {
+  }
+
+  void Flush() override;
+
+  protected:
+  void WriteStringToIntImpl(std::unordered_map<std::string, int32_t> const& value) override;
+  void WriteStringToUnionImpl(std::unordered_map<std::string, std::variant<std::string, int32_t>> const& value) override;
+  void WriteAliasedGenericImpl(test_model::AliasedMap<std::string, int32_t> const& value) override;
+  void CloseImpl() override;
+};
+
+// Binary reader for the Maps protocol.
+class MapsReader : public test_model::MapsReaderBase, yardl::binary::BinaryReader {
+  public:
+  // The stream_arg parameter can either be a std::string filename
+  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::istream.
+  template <typename TStreamArg>
+  MapsReader(TStreamArg&& stream_arg)
+      : yardl::binary::BinaryReader(std::forward<TStreamArg>(stream_arg), schema_) {
+  }
+
+  protected:
+  void ReadStringToIntImpl(std::unordered_map<std::string, int32_t>& value) override;
+  void ReadStringToUnionImpl(std::unordered_map<std::string, std::variant<std::string, int32_t>>& value) override;
+  void ReadAliasedGenericImpl(test_model::AliasedMap<std::string, int32_t>& value) override;
+  void CloseImpl() override;
+};
+
 // Binary writer for the Unions protocol.
 class UnionsWriter : public test_model::UnionsWriterBase, yardl::binary::BinaryWriter {
   public:

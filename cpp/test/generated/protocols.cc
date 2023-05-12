@@ -2661,6 +2661,130 @@ void DynamicNDArraysReaderBase::CopyTo(DynamicNDArraysWriterBase& writer) {
 }
 
 namespace {
+void MapsWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end, uint8_t current) {
+  std::string expected_method;
+  switch (current) {
+  case 0: expected_method = "WriteStringToInt()"; break;
+  case 1: expected_method = "WriteStringToUnion()"; break;
+  case 2: expected_method = "WriteAliasedGeneric()"; break;
+  }
+  std::string attempted_method;
+  switch (attempted) {
+  case 0: attempted_method = "WriteStringToInt()"; break;
+  case 1: attempted_method = "WriteStringToUnion()"; break;
+  case 2: attempted_method = "WriteAliasedGeneric()"; break;
+  case 3: attempted_method = "Close()"; break;
+  }
+  throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
+}
+
+void MapsReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
+  auto f = [](uint8_t i) -> std::string {
+    switch (i/2) {
+    case 0: return "ReadStringToInt()";
+    case 1: return "ReadStringToUnion()";
+    case 2: return "ReadAliasedGeneric()";
+    case 3: return "Close()";
+    default: return "<unknown>";
+    }
+  };
+  throw std::runtime_error("Expected call to " + f(current) + " but received call to " + f(attempted) + " instead.");
+}
+
+} // namespace 
+
+std::string MapsWriterBase::schema_ = R"({"protocol":{"name":"Maps","sequence":[{"name":"stringToInt","type":{"map":{"keys":"string","values":"int32"}}},{"name":"stringToUnion","type":{"map":{"keys":"string","values":[{"label":"string","type":"string"},{"label":"int32","type":"int32"}]}}},{"name":"aliasedGeneric","type":{"name":"TestModel.AliasedMap","typeArguments":["string","int32"]}}]},"types":[{"name":"AliasedMap","typeParameters":["K","V"],"type":{"map":{"keys":"K","values":"V"}}}]})";
+
+void MapsWriterBase::WriteStringToInt(std::unordered_map<std::string, int32_t> const& value) {
+  if (unlikely(state_ != 0)) {
+    MapsWriterBaseInvalidState(0, false, state_);
+  }
+
+  WriteStringToIntImpl(value);
+  state_ = 1;
+}
+
+void MapsWriterBase::WriteStringToUnion(std::unordered_map<std::string, std::variant<std::string, int32_t>> const& value) {
+  if (unlikely(state_ != 1)) {
+    MapsWriterBaseInvalidState(1, false, state_);
+  }
+
+  WriteStringToUnionImpl(value);
+  state_ = 2;
+}
+
+void MapsWriterBase::WriteAliasedGeneric(test_model::AliasedMap<std::string, int32_t> const& value) {
+  if (unlikely(state_ != 2)) {
+    MapsWriterBaseInvalidState(2, false, state_);
+  }
+
+  WriteAliasedGenericImpl(value);
+  state_ = 3;
+}
+
+void MapsWriterBase::Close() {
+  if (unlikely(state_ != 3)) {
+    MapsWriterBaseInvalidState(3, false, state_);
+  }
+
+  CloseImpl();
+}
+
+std::string MapsReaderBase::schema_ = MapsWriterBase::schema_;
+
+void MapsReaderBase::ReadStringToInt(std::unordered_map<std::string, int32_t>& value) {
+  if (unlikely(state_ != 0)) {
+    MapsReaderBaseInvalidState(0, state_);
+  }
+
+  ReadStringToIntImpl(value);
+  state_ = 2;
+}
+
+void MapsReaderBase::ReadStringToUnion(std::unordered_map<std::string, std::variant<std::string, int32_t>>& value) {
+  if (unlikely(state_ != 2)) {
+    MapsReaderBaseInvalidState(2, state_);
+  }
+
+  ReadStringToUnionImpl(value);
+  state_ = 4;
+}
+
+void MapsReaderBase::ReadAliasedGeneric(test_model::AliasedMap<std::string, int32_t>& value) {
+  if (unlikely(state_ != 4)) {
+    MapsReaderBaseInvalidState(4, state_);
+  }
+
+  ReadAliasedGenericImpl(value);
+  state_ = 6;
+}
+
+void MapsReaderBase::Close() {
+  if (unlikely(state_ != 6)) {
+    MapsReaderBaseInvalidState(6, state_);
+  }
+
+  CloseImpl();
+}
+void MapsReaderBase::CopyTo(MapsWriterBase& writer) {
+  {
+    std::unordered_map<std::string, int32_t> value;
+    ReadStringToInt(value);
+    writer.WriteStringToInt(value);
+  }
+  {
+    std::unordered_map<std::string, std::variant<std::string, int32_t>> value;
+    ReadStringToUnion(value);
+    writer.WriteStringToUnion(value);
+  }
+  {
+    test_model::AliasedMap<std::string, int32_t> value;
+    ReadAliasedGeneric(value);
+    writer.WriteAliasedGeneric(value);
+  }
+}
+
+namespace {
 void UnionsWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end, uint8_t current) {
   std::string expected_method;
   switch (current) {

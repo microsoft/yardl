@@ -59,6 +59,17 @@ func (t *GeneralizedType) MarshalJSON() ([]byte, error) {
 		}
 
 		return json.Marshal(streamWrapper{Stream: streamView{Items: t.Cases}})
+	case *Map:
+		type mapView struct {
+			Keys   Type      `json:"keys"`
+			Values TypeCases `json:"values"`
+		}
+		type mapWrapper struct {
+			Map mapView `json:"map"`
+		}
+
+		return json.Marshal(mapWrapper{Map: mapView{Keys: d.KeyType, Values: t.Cases}})
+
 	default:
 		panic(fmt.Sprintf("unexpected type %T", d))
 	}

@@ -396,6 +396,8 @@ func innerTypeSyntax(t dsl.Type) string {
 				return fmt.Sprintf("yardl::hdf5::InnerVlen<%s, %s>", scalarTInnerSyntax, scalarTOuterSyntax)
 			}
 			return fmt.Sprintf("yardl::hdf5::InnerNdArray<%s, %s, %d>", scalarTInnerSyntax, scalarTOuterSyntax, len(*d.Dimensions))
+		case *dsl.Map:
+			return fmt.Sprintf("yardl::hdf5::InnerMap<%s, %s, %s, %s>", innerTypeSyntax(d.KeyType), common.TypeSyntax(d.KeyType), scalarTInnerSyntax, scalarTOuterSyntax)
 		default:
 			panic(fmt.Sprintf("unexpected type %T", d))
 		}
@@ -569,6 +571,8 @@ func typeDdlExpression(t dsl.Type) string {
 			}
 
 			return fmt.Sprintf("yardl::hdf5::NDArrayDdl<%s, %s, %d>(%s)", innerTypeSyntax(scalarT), common.TypeSyntax(scalarT), len(*d.Dimensions), scalarDdl)
+		case *dsl.Map:
+			return fmt.Sprintf("yardl::hdf5::InnerMapDdl<%s, %s>(%s, %s)", innerTypeSyntax(d.KeyType), innerTypeSyntax(t.ToScalar()), typeDdlExpression(d.KeyType), scalarDdl)
 		default:
 			panic(fmt.Sprintf("unexpected type %T", d))
 		}

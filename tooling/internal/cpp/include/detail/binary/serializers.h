@@ -6,6 +6,7 @@
 #include <complex>
 #include <memory>
 #include <optional>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -372,6 +373,29 @@ inline void ReadFixedNDArray(CodedInputStream& stream, yardl::FixedNDArray<T, Di
 
   for (auto& element : value) {
     ReadElement(stream, element);
+  }
+}
+
+template <typename TKey, typename TValue, Writer<TKey> WriteKey, Writer<TValue> WriteValue>
+inline void WriteMap(CodedOutputStream& stream, std::unordered_map<TKey, TValue> const& value) {
+  WriteInteger(stream, value.size());
+  for (auto const& [key, value] : value) {
+    WriteKey(stream, key);
+    WriteValue(stream, value);
+  }
+}
+
+template <typename TKey, typename TValue, Reader<TKey> ReadKey, Reader<TValue> ReadValue>
+inline void ReadMap(CodedInputStream& stream, std::unordered_map<TKey, TValue>& value) {
+  uint64_t size;
+  ReadInteger(stream, size);
+
+  for (size_t i = 0; i < size; i++) {
+    TKey k;
+    ReadKey(stream, k);
+    TValue v;
+    ReadValue(stream, v);
+    value.emplace(std::move(k), std::move(v));
   }
 }
 

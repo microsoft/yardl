@@ -4,6 +4,7 @@
 #include <array>
 #include <complex>
 #include <optional>
+#include <unordered_map>
 #include <variant>
 #include <vector>
 
@@ -347,6 +348,9 @@ struct RecordWithDynamicNDArrays {
 using NamedFixedNDArray = yardl::FixedNDArray<int32_t, 2, 4>;
 
 using NamedNDArray = yardl::NDArray<int32_t, 2>;
+
+template <typename K, typename V>
+using AliasedMap = std::unordered_map<K, V>;
 
 enum class Fruits {
   kApple = 0,

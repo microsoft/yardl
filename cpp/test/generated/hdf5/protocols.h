@@ -535,6 +535,34 @@ class DynamicNDArraysReader : public test_model::DynamicNDArraysReaderBase, publ
 
   private:
 };
+// HDF5 writer for the Maps protocol.
+class MapsWriter : public test_model::MapsWriterBase, public yardl::hdf5::Hdf5Writer {
+  public:
+  MapsWriter(std::string path);
+
+  protected:
+  void WriteStringToIntImpl(std::unordered_map<std::string, int32_t> const& value) override;
+
+  void WriteStringToUnionImpl(std::unordered_map<std::string, std::variant<std::string, int32_t>> const& value) override;
+
+  void WriteAliasedGenericImpl(test_model::AliasedMap<std::string, int32_t> const& value) override;
+
+  private:
+};
+
+// HDF5 reader for the Maps protocol.
+class MapsReader : public test_model::MapsReaderBase, public yardl::hdf5::Hdf5Reader {
+  public:
+  MapsReader(std::string path);
+
+  void ReadStringToIntImpl(std::unordered_map<std::string, int32_t>& value) override;
+
+  void ReadStringToUnionImpl(std::unordered_map<std::string, std::variant<std::string, int32_t>>& value) override;
+
+  void ReadAliasedGenericImpl(test_model::AliasedMap<std::string, int32_t>& value) override;
+
+  private:
+};
 // HDF5 writer for the Unions protocol.
 class UnionsWriter : public test_model::UnionsWriterBase, public yardl::hdf5::Hdf5Writer {
   public:

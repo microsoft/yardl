@@ -896,6 +896,26 @@ namespace {
   yardl::binary::ReadNDArray<int32_t, yardl::binary::ReadInteger, 2>(stream, value);
 }
 
+template<typename K, yardl::binary::Writer<K> WriteK, typename V, yardl::binary::Writer<V> WriteV>
+[[maybe_unused]] void WriteAliasedMap(yardl::binary::CodedOutputStream& stream, test_model::AliasedMap<K, V> const& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<test_model::AliasedMap<K, V>>::value) {
+    yardl::binary::WriteTriviallySerializable(stream, value);
+    return;
+  }
+
+  yardl::binary::WriteMap<K, V, WriteK, WriteV>(stream, value);
+}
+
+template<typename K, yardl::binary::Reader<K> ReadK, typename V, yardl::binary::Reader<V> ReadV>
+[[maybe_unused]] void ReadAliasedMap(yardl::binary::CodedInputStream& stream, test_model::AliasedMap<K, V>& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<test_model::AliasedMap<K, V>>::value) {
+    yardl::binary::ReadTriviallySerializable(stream, value);
+    return;
+  }
+
+  yardl::binary::ReadMap<K, V, ReadK, ReadV>(stream, value);
+}
+
 template<typename T, yardl::binary::Writer<T> WriteT>
 [[maybe_unused]] void WriteImage(yardl::binary::CodedOutputStream& stream, test_model::Image<T> const& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<test_model::Image<T>>::value) {
@@ -2057,6 +2077,42 @@ void DynamicNDArraysReader::ReadRecordWithDynamicNDArraysImpl(test_model::Record
 }
 
 void DynamicNDArraysReader::CloseImpl() {
+  stream_.VerifyFinished();
+}
+
+void MapsWriter::WriteStringToIntImpl(std::unordered_map<std::string, int32_t> const& value) {
+  yardl::binary::WriteMap<std::string, int32_t, yardl::binary::WriteString, yardl::binary::WriteInteger>(stream_, value);
+}
+
+void MapsWriter::WriteStringToUnionImpl(std::unordered_map<std::string, std::variant<std::string, int32_t>> const& value) {
+  yardl::binary::WriteMap<std::string, std::variant<std::string, int32_t>, yardl::binary::WriteString, WriteUnion<std::string, yardl::binary::WriteString, int32_t, yardl::binary::WriteInteger>>(stream_, value);
+}
+
+void MapsWriter::WriteAliasedGenericImpl(test_model::AliasedMap<std::string, int32_t> const& value) {
+  test_model::binary::WriteAliasedMap<std::string, yardl::binary::WriteString, int32_t, yardl::binary::WriteInteger>(stream_, value);
+}
+
+void MapsWriter::Flush() {
+  stream_.Flush();
+}
+
+void MapsWriter::CloseImpl() {
+  stream_.Flush();
+}
+
+void MapsReader::ReadStringToIntImpl(std::unordered_map<std::string, int32_t>& value) {
+  yardl::binary::ReadMap<std::string, int32_t, yardl::binary::ReadString, yardl::binary::ReadInteger>(stream_, value);
+}
+
+void MapsReader::ReadStringToUnionImpl(std::unordered_map<std::string, std::variant<std::string, int32_t>>& value) {
+  yardl::binary::ReadMap<std::string, std::variant<std::string, int32_t>, yardl::binary::ReadString, ReadUnion<std::string, yardl::binary::ReadString, int32_t, yardl::binary::ReadInteger>>(stream_, value);
+}
+
+void MapsReader::ReadAliasedGenericImpl(test_model::AliasedMap<std::string, int32_t>& value) {
+  test_model::binary::ReadAliasedMap<std::string, yardl::binary::ReadString, int32_t, yardl::binary::ReadInteger>(stream_, value);
+}
+
+void MapsReader::CloseImpl() {
   stream_.VerifyFinished();
 }
 

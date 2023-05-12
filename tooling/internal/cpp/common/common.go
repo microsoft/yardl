@@ -274,6 +274,8 @@ func TypeSyntax(t dsl.Type) string {
 			}
 
 			return fmt.Sprintf("yardl::FixedNDArray<%s, %s>", scalarString, strings.Join(dims, ", "))
+		case *dsl.Map:
+			return fmt.Sprintf("std::unordered_map<%s, %s>", TypeSyntax(d.KeyType), scalarString)
 		default:
 			panic(fmt.Sprintf("unexpected type %T", d))
 		}

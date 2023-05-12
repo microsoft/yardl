@@ -267,13 +267,6 @@ type ArrayDimension struct {
 	Length  *uint64 `json:"length,omitempty"`
 }
 
-// ----------------------------------------------------------------------------
-// type Dimensionality =
-//     | Nil // Scalar
-//     | Vector of length : int option
-//     | Array of dimensions: ArrayDimension list option
-//     | Stream
-
 type Dimensionality interface {
 	Node
 	dimensionality()
@@ -314,6 +307,15 @@ func (a *Array) IsFixed() bool {
 
 	return true
 }
+
+// Map implements Dimensionality on a GeneralizedType.
+// The Value type of the map is the Cases of the GeneralizedType.
+type Map struct {
+	NodeMeta
+	KeyType Type `json:"keyType"`
+}
+
+func (m *Map) dimensionality() {}
 
 type Stream struct {
 	NodeMeta
@@ -623,6 +625,7 @@ var (
 
 	_ Dimensionality = (*Vector)(nil)
 	_ Dimensionality = (*Array)(nil)
+	_ Dimensionality = (*Map)(nil)
 	_ Dimensionality = (*Stream)(nil)
 
 	_ Type = (*SimpleType)(nil)
