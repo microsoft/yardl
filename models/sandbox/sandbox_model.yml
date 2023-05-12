@@ -1,5 +1,7 @@
-X: !record
-  fields:
-    m: string->int
-  computedFields:
-    mHello: m["hello"]
+HelloWorld: !protocol
+  sequence:
+    data: !stream
+      items: !array
+        items: complexdouble
+        dimensions:
+          - 2
