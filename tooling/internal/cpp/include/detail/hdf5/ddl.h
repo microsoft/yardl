@@ -88,6 +88,18 @@ static inline H5::VarLenType InnerVlenDdl(H5::DataType const& element_type) {
 }
 
 /**
+ * @brief Creates an HDF5 data type for an std::unordered_map
+ */
+template <typename TKey, typename TValue>
+static inline H5::VarLenType InnerMapDdl(H5::DataType const& key_type, H5::DataType const& value_type) {
+  using InnerMapPairType = std::pair<TKey, TValue>;
+  auto pair_type = H5::CompType(sizeof(InnerMapPairType));
+  pair_type.insertMember("key", HOFFSET(InnerMapPairType, first), key_type);
+  pair_type.insertMember("value", HOFFSET(InnerMapPairType, second), value_type);
+  return H5::VarLenType(pair_type);
+}
+
+/**
  * @brief Creates a compund datatype for std::complex
  */
 template <typename T>

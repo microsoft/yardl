@@ -31,6 +31,7 @@ func Validate(namespaces []*Namespace) (*Environment, error) {
 		validateRecordFieldNames,
 		validateProtocolSequenceNames,
 		validateArrayAndVectorDimensions,
+		validateMaps,
 		validateStreams,
 		buildSymbolTable,
 		resolveTypes,

@@ -659,6 +659,46 @@ func UnmarshalStreamYAML(value *yaml.Node) (*GeneralizedType, error) {
 	return t, nil
 }
 
+func UnmarshalMapYAML(value *yaml.Node) (*GeneralizedType, error) {
+	if value.Kind != yaml.MappingNode {
+		return nil, parseError(value, "a !map must be specified with fields `keys` and `values`")
+	}
+
+	m := &Map{NodeMeta: createNodeMeta(value)}
+	t := &GeneralizedType{Dimensionality: m, NodeMeta: m.NodeMeta}
+
+	for i := 0; i < len(value.Content); i += 2 {
+		k := value.Content[i]
+		v := value.Content[i+1]
+		switch k.Value {
+		case "keys":
+			keyType, err := UnmarshalTypeYAML(v)
+			if err != nil {
+				return nil, err
+			}
+			m.KeyType = keyType
+		case "values":
+			cases, err := UnmarshalTypeCases(v)
+			if err != nil {
+				return nil, err
+			}
+			t.Cases = cases
+		default:
+			return nil, parseError(k, "field '%s' is not valid on a !map specification", k.Value)
+		}
+	}
+
+	if m.KeyType == nil {
+		return nil, parseError(value, "`keys` must be specified on a !map")
+	}
+
+	if t.Cases == nil {
+		return nil, parseError(value, "`values` must be specified on a !map")
+	}
+
+	return t, nil
+}
+
 func UnmarshalTypeDefinition(value *yaml.Node, definitionMeta *DefinitionMeta) (TypeDefinition, error) {
 	switch value.Tag {
 	case "!record":
@@ -704,6 +744,8 @@ func UnmarshalTypeYAML(value *yaml.Node) (Type, error) {
 		return UnmarshalVectorYAML(value)
 	case "!array":
 		return UnmarshalArrayYAML(value)
+	case "!map":
+		return UnmarshalMapYAML(value)
 	case "!stream":
 		return UnmarshalStreamYAML(value)
 	default:

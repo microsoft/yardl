@@ -12,6 +12,7 @@
   - [Enums](#enums)
   - [Vectors](#vectors)
   - [Arrays](#arrays)
+  - [Maps](#maps)
   - [Type Aliases](#type-aliases)
   - [Computed Fields](#computed-fields)
   - [Generics](#generics)
@@ -24,6 +25,7 @@
   - [Unions](#unions-1)
   - [Vectors](#vectors-1)
   - [Arrays](#arrays-1)
+  - [Maps](#maps-1)
   - [Streams](#streams)
   - [Enums](#enums-1)
   - [Records](#records-1)
@@ -40,6 +42,7 @@
   - [Unions](#unions-2)
   - [Vectors](#vectors-2)
   - [Arrays](#arrays-2)
+  - [Maps](#maps-2)
   - [Enums](#enums-2)
   - [Records](#records-2)
   - [Streams](#streams-1)
@@ -600,6 +603,27 @@ MyRec: !record
         y:
 ```
 
+### Maps
+
+Maps, also known as dictionaries or associative arrays, are an unordered collection of key-value pairs. They are declared like this:
+
+```yaml
+MyMap: !map
+  keys: string
+  values: int
+```
+
+Often they can be declared with the shorthand syntax:
+
+```yaml
+MyMap: string->int
+```
+
+Keys are required to be scalar primitive types.
+
+In generated C++ code, these are generated as `std::unordered_map`.
+
+
 ### Type Aliases
 
 We've seen records, enums, and protocols defined as top-level, named types, but
@@ -854,6 +878,19 @@ And finally, an array with an unknown number of dimensions:
 {
   "array": {
     "items": "int32"
+  }
+}
+```
+
+### Maps
+
+Maps have the following representation:
+
+```JSON
+{
+  "map": {
+    "keys": "string",
+    "values": "int32"
   }
 }
 ```
@@ -1167,6 +1204,13 @@ length of each dimension is specified, (1) and (2) are omitted.
 
 A future version of the binary format may support column-major layout. See
 discussion [here](https://github.com/microsoft/yardl/issues/23).
+
+### Maps
+
+The format is:
+
+1. The length of map as an unsigned varint
+2. For each entry, the key followed by the value.
 
 ### Enums
 

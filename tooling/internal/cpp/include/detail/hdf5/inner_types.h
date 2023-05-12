@@ -10,6 +10,7 @@
 #include <optional>
 #include <string>
 #include <type_traits>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -404,6 +405,69 @@ struct InnerDynamicNdArray {
 
   hvl_t dimensions_;
   hvl_t data_;
+};
+
+/**
+ * @brief An HDF5-compatible representation of std::unordered_map.
+ */
+template <typename TInnerKey, typename TOuterKey, typename TInnerValue, typename TOuterValue>
+struct InnerMap : public hvl_t {
+  using pair_type = std::pair<TInnerKey, TInnerValue>;
+
+  InnerMap() : hvl_t{0, nullptr} {
+  }
+
+  InnerMap(std::unordered_map<TOuterKey, TOuterValue> const& map)
+      : hvl_t{map.size(), MallocOrThrow(map.size() * sizeof(pair_type))} {
+    int i = 0;
+    for (auto const& [k, v] : map) {
+      auto dest = (pair_type*)p + i++;
+      new (&(dest->first)) TInnerKey(k);
+      new (&(dest->second)) TInnerValue(v);
+    }
+  }
+
+  InnerMap(InnerMap const&) = delete;
+
+  ~InnerMap() {
+    if (p != nullptr) {
+      if constexpr (!std::is_trivially_destructible_v<pair_type>) {
+        for (size_t i = 0; i < len; i++) {
+          auto inner_object = (pair_type*)p + i;
+          inner_object->~pair_type();
+        }
+      }
+
+      free(p);
+      p = nullptr;
+      len = 0;
+    }
+  }
+
+  InnerMap& operator=(InnerMap const&) = delete;
+
+  void ToOuter(std::unordered_map<TOuterKey, TOuterValue>& map) const {
+    if (len > 0) {
+      pair_type* inner_objects = static_cast<pair_type*>(p);
+      for (size_t i = 0; i < len; i++) {
+        pair_type& inner_object = inner_objects[i];
+        TOuterKey k;
+        if constexpr (std::is_same_v<TInnerKey, TOuterKey>) {
+          k = inner_object.first;
+        } else {
+          inner_object.first.ToOuter(k);
+        }
+
+        TOuterValue v;
+        if constexpr (std::is_same_v<TInnerValue, TOuterValue>) {
+          v = inner_object.second;
+        } else {
+          inner_object.second.ToOuter(v);
+        }
+        map.emplace(std::move(k), std::move(v));
+      }
+    }
+  }
 };
 
 template <typename TInner, typename TOuter>

@@ -360,6 +360,16 @@ TEST_P(RoundTripTests, DynamicNDArrays) {
   tw->Close();
 }
 
+TEST_P(RoundTripTests, Maps) {
+  auto tw = CreateValidatingWriter<MapsWriterBase>();
+
+  tw->WriteStringToInt({{"a", 1}, {"b", 2}, {"c", 3}});
+  tw->WriteStringToUnion({{"a", 1}, {"b", "2"}});
+  tw->WriteAliasedGeneric({{"a", 1}, {"b", 2}, {"c", 3}});
+
+  tw->Close();
+}
+
 TEST_P(RoundTripTests, Unions_FirstOption) {
   auto tw = CreateValidatingWriter<UnionsWriterBase>();
 

@@ -175,10 +175,11 @@ func resolveComputedFields(env *Environment, errorSink *validation.ErrorSink) *E
 			}
 			targetType := ToGeneralizedType(GetUnderlyingType(t.Target.GetResolvedType()))
 			t.ResolvedType = targetType.ToScalar()
+			argumentsValidated := false
 
 			switch d := targetType.Dimensionality.(type) {
 			case nil:
-				errorSink.Add(validationError(t, "index target must be a vector or array"))
+				errorSink.Add(validationError(t, "index target must be a vector, array, or map"))
 				return t
 			case *Vector:
 				if len(t.Arguments) != 1 {
@@ -192,6 +193,21 @@ func resolveComputedFields(env *Environment, errorSink *validation.ErrorSink) *E
 						}
 					}
 				}
+			case *Map:
+				if len(t.Arguments) != 1 {
+					errorSink.Add(validationError(t, "map lookup must have exactly one argument"))
+				}
+
+				argType := t.Arguments[0].Value.GetResolvedType()
+				if argType == nil {
+					return t
+				}
+
+				if !TypesEqual(argType, d.KeyType) {
+					errorSink.Add(validationError(t.Arguments[0], "incorrect map lookup argument type"))
+					return t
+				}
+				argumentsValidated = true
 			case *Array:
 				labeledCount := 0
 				unlabeledCount := 0
@@ -271,14 +287,16 @@ func resolveComputedFields(env *Environment, errorSink *validation.ErrorSink) *E
 				}
 			}
 
-			for _, arg := range t.Arguments {
-				argType := arg.Value.GetResolvedType()
-				if argType == nil {
-					return t
-				}
-				if !IsIntegralType(argType) {
-					errorSink.Add(validationError(arg.Value, "index argument must be an integral type"))
-					return t
+			if !argumentsValidated {
+				for _, arg := range t.Arguments {
+					argType := arg.Value.GetResolvedType()
+					if argType == nil {
+						return t
+					}
+					if !IsIntegralType(argType) {
+						errorSink.Add(validationError(arg.Value, "index argument must be an integral type"))
+						return t
+					}
 				}
 			}
 
@@ -593,6 +611,11 @@ func resolveSizeFunctionCall(functionCall *FunctionCallExpression, visitor Rewri
 				ResolvedType: SizeType,
 			}
 		}
+	case *Map:
+		if len(functionCall.Arguments) == 2 {
+			errorSink.Add(validationError(functionCall, "%s() does not accept a second argument when called with a !map", FunctionSize))
+			return functionCall
+		}
 
 	case *Array:
 		if len(functionCall.Arguments) == 1 {
@@ -683,7 +706,7 @@ func resolveSizeFunctionCall(functionCall *FunctionCallExpression, visitor Rewri
 
 		errorSink.Add(validationError(functionCall.Arguments[1], "%s() expects a string or integer as its second argument", FunctionSize))
 	default:
-		errorSink.Add(validationError(functionCall, "%s() must be called with a !vector or an !array as the first argument", FunctionSize))
+		errorSink.Add(validationError(functionCall, "%s() must be called with a !vector, !array, or !map as the first argument", FunctionSize))
 	}
 
 	return functionCall

@@ -700,6 +700,21 @@
           }
         },
         {
+          "alias": {
+            "name": "AliasedMap",
+            "typeParameters": [
+              "K",
+              "V"
+            ],
+            "type": {
+              "map": {
+                "keys": "K",
+                "values": "V"
+              }
+            }
+          }
+        },
+        {
           "enum": {
             "name": "Fruits",
             "values": [
@@ -1189,6 +1204,15 @@
                     }
                   }
                 ]
+              },
+              {
+                "name": "mapField",
+                "type": {
+                  "map": {
+                    "keys": "string",
+                    "values": "string"
+                  }
+                }
               }
             ],
             "computedFields": [
@@ -1611,6 +1635,124 @@
                         "memberAccess": {
                           "member": "dynamicArrayField"
                         }
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "name": "accessMap",
+                "expression": {
+                  "memberAccess": {
+                    "member": "mapField"
+                  }
+                }
+              },
+              {
+                "name": "mapSize",
+                "expression": {
+                  "call": {
+                    "function": "size",
+                    "arguments": [
+                      {
+                        "memberAccess": {
+                          "member": "mapField"
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "name": "accessMapEntry",
+                "expression": {
+                  "index": {
+                    "target": {
+                      "memberAccess": {
+                        "member": "mapField"
+                      }
+                    },
+                    "arguments": [
+                      {
+                        "expression": "\"hello\""
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "name": "stringComputedField",
+                "expression": "\"hello\""
+              },
+              {
+                "name": "accessMapEntryWithComputedField",
+                "expression": {
+                  "index": {
+                    "target": {
+                      "memberAccess": {
+                        "member": "mapField"
+                      }
+                    },
+                    "arguments": [
+                      {
+                        "expression": {
+                          "memberAccess": {
+                            "member": "stringComputedField",
+                            "isComputed": true
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "name": "accessMapEntryWithComputedFieldNested",
+                "expression": {
+                  "index": {
+                    "target": {
+                      "memberAccess": {
+                        "member": "mapField"
+                      }
+                    },
+                    "arguments": [
+                      {
+                        "expression": {
+                          "index": {
+                            "target": {
+                              "memberAccess": {
+                                "member": "mapField"
+                              }
+                            },
+                            "arguments": [
+                              {
+                                "expression": {
+                                  "memberAccess": {
+                                    "member": "stringComputedField",
+                                    "isComputed": true
+                                  }
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "name": "accessMissingMapEntry",
+                "expression": {
+                  "index": {
+                    "target": {
+                      "memberAccess": {
+                        "member": "mapField"
+                      }
+                    },
+                    "arguments": [
+                      {
+                        "expression": "\"missing\""
                       }
                     ]
                   }
@@ -2432,6 +2574,48 @@
             {
               "name": "recordWithDynamicNDArrays",
               "type": "TestModel.RecordWithDynamicNDArrays"
+            }
+          ]
+        },
+        {
+          "name": "Maps",
+          "sequence": [
+            {
+              "name": "stringToInt",
+              "type": {
+                "map": {
+                  "keys": "string",
+                  "values": "int32"
+                }
+              }
+            },
+            {
+              "name": "stringToUnion",
+              "type": {
+                "map": {
+                  "keys": "string",
+                  "values": [
+                    {
+                      "label": "string",
+                      "type": "string"
+                    },
+                    {
+                      "label": "int32",
+                      "type": "int32"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "aliasedGeneric",
+              "type": {
+                "name": "TestModel.AliasedMap",
+                "typeArguments": [
+                  "string",
+                  "int32"
+                ]
+              }
             }
           ]
         },

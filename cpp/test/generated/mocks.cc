@@ -1896,6 +1896,111 @@ class TestDynamicNDArraysWriterBase : public DynamicNDArraysWriterBase {
   bool close_called_ = false;
 };
 
+class MockMapsWriter : public MapsWriterBase {
+  public:
+  void WriteStringToIntImpl (std::unordered_map<std::string, int32_t> const& value) override {
+    if (WriteStringToIntImpl_expected_values_.empty()) {
+      throw std::runtime_error("Unexpected call to WriteStringToIntImpl");
+    }
+    if (WriteStringToIntImpl_expected_values_.front() != value) {
+      throw std::runtime_error("Unexpected argument value for call to WriteStringToIntImpl");
+    }
+    WriteStringToIntImpl_expected_values_.pop();
+  }
+
+  std::queue<std::unordered_map<std::string, int32_t>> WriteStringToIntImpl_expected_values_;
+
+  void ExpectWriteStringToIntImpl (std::unordered_map<std::string, int32_t> const& value) {
+    WriteStringToIntImpl_expected_values_.push(value);
+  }
+
+  void WriteStringToUnionImpl (std::unordered_map<std::string, std::variant<std::string, int32_t>> const& value) override {
+    if (WriteStringToUnionImpl_expected_values_.empty()) {
+      throw std::runtime_error("Unexpected call to WriteStringToUnionImpl");
+    }
+    if (WriteStringToUnionImpl_expected_values_.front() != value) {
+      throw std::runtime_error("Unexpected argument value for call to WriteStringToUnionImpl");
+    }
+    WriteStringToUnionImpl_expected_values_.pop();
+  }
+
+  std::queue<std::unordered_map<std::string, std::variant<std::string, int32_t>>> WriteStringToUnionImpl_expected_values_;
+
+  void ExpectWriteStringToUnionImpl (std::unordered_map<std::string, std::variant<std::string, int32_t>> const& value) {
+    WriteStringToUnionImpl_expected_values_.push(value);
+  }
+
+  void WriteAliasedGenericImpl (test_model::AliasedMap<std::string, int32_t> const& value) override {
+    if (WriteAliasedGenericImpl_expected_values_.empty()) {
+      throw std::runtime_error("Unexpected call to WriteAliasedGenericImpl");
+    }
+    if (WriteAliasedGenericImpl_expected_values_.front() != value) {
+      throw std::runtime_error("Unexpected argument value for call to WriteAliasedGenericImpl");
+    }
+    WriteAliasedGenericImpl_expected_values_.pop();
+  }
+
+  std::queue<test_model::AliasedMap<std::string, int32_t>> WriteAliasedGenericImpl_expected_values_;
+
+  void ExpectWriteAliasedGenericImpl (test_model::AliasedMap<std::string, int32_t> const& value) {
+    WriteAliasedGenericImpl_expected_values_.push(value);
+  }
+
+  void Verify() {
+    if (!WriteStringToIntImpl_expected_values_.empty()) {
+      throw std::runtime_error("Expected call to WriteStringToIntImpl was not received");
+    }
+    if (!WriteStringToUnionImpl_expected_values_.empty()) {
+      throw std::runtime_error("Expected call to WriteStringToUnionImpl was not received");
+    }
+    if (!WriteAliasedGenericImpl_expected_values_.empty()) {
+      throw std::runtime_error("Expected call to WriteAliasedGenericImpl was not received");
+    }
+  }
+};
+
+class TestMapsWriterBase : public MapsWriterBase {
+  public:
+  TestMapsWriterBase(std::unique_ptr<test_model::MapsWriterBase> writer, std::function<std::unique_ptr<MapsReaderBase>()> create_reader) : writer_(std::move(writer)), create_reader_(create_reader) {
+  }
+
+  ~TestMapsWriterBase() {
+    if (!close_called_ && !std::uncaught_exceptions()) {
+      ADD_FAILURE() << "Close() needs to be called on 'TestMapsWriterBase' to verify mocks";
+    }
+  }
+
+  protected:
+  void WriteStringToIntImpl(std::unordered_map<std::string, int32_t> const& value) override {
+    writer_->WriteStringToInt(value);
+    mock_writer_.ExpectWriteStringToIntImpl(value);
+  }
+
+  void WriteStringToUnionImpl(std::unordered_map<std::string, std::variant<std::string, int32_t>> const& value) override {
+    writer_->WriteStringToUnion(value);
+    mock_writer_.ExpectWriteStringToUnionImpl(value);
+  }
+
+  void WriteAliasedGenericImpl(test_model::AliasedMap<std::string, int32_t> const& value) override {
+    writer_->WriteAliasedGeneric(value);
+    mock_writer_.ExpectWriteAliasedGenericImpl(value);
+  }
+
+  void CloseImpl() override {
+    close_called_ = true;
+    writer_->Close();
+    std::unique_ptr<MapsReaderBase> reader = create_reader_();
+    reader->CopyTo(mock_writer_);
+    mock_writer_.Verify();
+  }
+
+  private:
+  std::unique_ptr<test_model::MapsWriterBase> writer_;
+  std::function<std::unique_ptr<test_model::MapsReaderBase>()> create_reader_;
+  MockMapsWriter mock_writer_;
+  bool close_called_ = false;
+};
+
 class MockUnionsWriter : public UnionsWriterBase {
   public:
   void WriteIntOrSimpleRecordImpl (std::variant<int32_t, test_model::SimpleRecord> const& value) override {
@@ -3604,6 +3709,18 @@ std::unique_ptr<test_model::DynamicNDArraysWriterBase> CreateValidatingWriter<te
     return std::make_unique<test_model::TestDynamicNDArraysWriterBase>(std::make_unique<test_model::hdf5::DynamicNDArraysWriter>(filename), [filename](){ return std::make_unique<test_model::hdf5::DynamicNDArraysReader>(filename);});
   case Format::kBinary:
     return std::make_unique<test_model::TestDynamicNDArraysWriterBase>(std::make_unique<test_model::binary::DynamicNDArraysWriter>(filename), [filename](){return std::make_unique<test_model::binary::DynamicNDArraysReader>(filename);});
+  default:
+    throw std::runtime_error("Unknown format");
+  }
+}
+
+template<>
+std::unique_ptr<test_model::MapsWriterBase> CreateValidatingWriter<test_model::MapsWriterBase>(Format format, std::string const& filename) {
+  switch (format) {
+  case Format::kHdf5:
+    return std::make_unique<test_model::TestMapsWriterBase>(std::make_unique<test_model::hdf5::MapsWriter>(filename), [filename](){ return std::make_unique<test_model::hdf5::MapsReader>(filename);});
+  case Format::kBinary:
+    return std::make_unique<test_model::TestMapsWriterBase>(std::make_unique<test_model::binary::MapsWriter>(filename), [filename](){return std::make_unique<test_model::binary::MapsReader>(filename);});
   default:
     throw std::runtime_error("Unknown format");
   }

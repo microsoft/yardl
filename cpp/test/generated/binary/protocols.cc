@@ -304,8 +304,9 @@ struct IsTriviallySerializable<test_model::RecordWithComputedFields> {
     IsTriviallySerializable<decltype(__T__::int_float_union)>::value &&
     IsTriviallySerializable<decltype(__T__::nullable_int_float_union)>::value &&
     IsTriviallySerializable<decltype(__T__::union_with_nested_generic_union)>::value &&
-    (sizeof(__T__) == (sizeof(__T__::array_field) + sizeof(__T__::array_field_map_dimensions) + sizeof(__T__::dynamic_array_field) + sizeof(__T__::fixed_array_field) + sizeof(__T__::int_field) + sizeof(__T__::string_field) + sizeof(__T__::tuple_field) + sizeof(__T__::vector_field) + sizeof(__T__::vector_of_vectors_field) + sizeof(__T__::fixed_vector_field) + sizeof(__T__::optional_named_array) + sizeof(__T__::int_float_union) + sizeof(__T__::nullable_int_float_union) + sizeof(__T__::union_with_nested_generic_union))) &&
-    offsetof(__T__, array_field) < offsetof(__T__, array_field_map_dimensions) && offsetof(__T__, array_field_map_dimensions) < offsetof(__T__, dynamic_array_field) && offsetof(__T__, dynamic_array_field) < offsetof(__T__, fixed_array_field) && offsetof(__T__, fixed_array_field) < offsetof(__T__, int_field) && offsetof(__T__, int_field) < offsetof(__T__, string_field) && offsetof(__T__, string_field) < offsetof(__T__, tuple_field) && offsetof(__T__, tuple_field) < offsetof(__T__, vector_field) && offsetof(__T__, vector_field) < offsetof(__T__, vector_of_vectors_field) && offsetof(__T__, vector_of_vectors_field) < offsetof(__T__, fixed_vector_field) && offsetof(__T__, fixed_vector_field) < offsetof(__T__, optional_named_array) && offsetof(__T__, optional_named_array) < offsetof(__T__, int_float_union) && offsetof(__T__, int_float_union) < offsetof(__T__, nullable_int_float_union) && offsetof(__T__, nullable_int_float_union) < offsetof(__T__, union_with_nested_generic_union);
+    IsTriviallySerializable<decltype(__T__::map_field)>::value &&
+    (sizeof(__T__) == (sizeof(__T__::array_field) + sizeof(__T__::array_field_map_dimensions) + sizeof(__T__::dynamic_array_field) + sizeof(__T__::fixed_array_field) + sizeof(__T__::int_field) + sizeof(__T__::string_field) + sizeof(__T__::tuple_field) + sizeof(__T__::vector_field) + sizeof(__T__::vector_of_vectors_field) + sizeof(__T__::fixed_vector_field) + sizeof(__T__::optional_named_array) + sizeof(__T__::int_float_union) + sizeof(__T__::nullable_int_float_union) + sizeof(__T__::union_with_nested_generic_union) + sizeof(__T__::map_field))) &&
+    offsetof(__T__, array_field) < offsetof(__T__, array_field_map_dimensions) && offsetof(__T__, array_field_map_dimensions) < offsetof(__T__, dynamic_array_field) && offsetof(__T__, dynamic_array_field) < offsetof(__T__, fixed_array_field) && offsetof(__T__, fixed_array_field) < offsetof(__T__, int_field) && offsetof(__T__, int_field) < offsetof(__T__, string_field) && offsetof(__T__, string_field) < offsetof(__T__, tuple_field) && offsetof(__T__, tuple_field) < offsetof(__T__, vector_field) && offsetof(__T__, vector_field) < offsetof(__T__, vector_of_vectors_field) && offsetof(__T__, vector_of_vectors_field) < offsetof(__T__, fixed_vector_field) && offsetof(__T__, fixed_vector_field) < offsetof(__T__, optional_named_array) && offsetof(__T__, optional_named_array) < offsetof(__T__, int_float_union) && offsetof(__T__, int_float_union) < offsetof(__T__, nullable_int_float_union) && offsetof(__T__, nullable_int_float_union) < offsetof(__T__, union_with_nested_generic_union) && offsetof(__T__, union_with_nested_generic_union) < offsetof(__T__, map_field);
 };
 
 template <>
@@ -896,6 +897,26 @@ namespace {
   yardl::binary::ReadNDArray<int32_t, yardl::binary::ReadInteger, 2>(stream, value);
 }
 
+template<typename K, yardl::binary::Writer<K> WriteK, typename V, yardl::binary::Writer<V> WriteV>
+[[maybe_unused]] void WriteAliasedMap(yardl::binary::CodedOutputStream& stream, test_model::AliasedMap<K, V> const& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<test_model::AliasedMap<K, V>>::value) {
+    yardl::binary::WriteTriviallySerializable(stream, value);
+    return;
+  }
+
+  yardl::binary::WriteMap<K, V, WriteK, WriteV>(stream, value);
+}
+
+template<typename K, yardl::binary::Reader<K> ReadK, typename V, yardl::binary::Reader<V> ReadV>
+[[maybe_unused]] void ReadAliasedMap(yardl::binary::CodedInputStream& stream, test_model::AliasedMap<K, V>& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<test_model::AliasedMap<K, V>>::value) {
+    yardl::binary::ReadTriviallySerializable(stream, value);
+    return;
+  }
+
+  yardl::binary::ReadMap<K, V, ReadK, ReadV>(stream, value);
+}
+
 template<typename T, yardl::binary::Writer<T> WriteT>
 [[maybe_unused]] void WriteImage(yardl::binary::CodedOutputStream& stream, test_model::Image<T> const& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<test_model::Image<T>>::value) {
@@ -1212,6 +1233,7 @@ template<typename T0, yardl::binary::Reader<T0> ReadT0, typename T1, yardl::bina
   WriteUnion<int32_t, yardl::binary::WriteInteger, float, yardl::binary::WriteFloatingPoint>(stream, value.int_float_union);
   WriteUnion<std::monostate, yardl::binary::WriteMonostate, int32_t, yardl::binary::WriteInteger, float, yardl::binary::WriteFloatingPoint>(stream, value.nullable_int_float_union);
   WriteUnion<int32_t, yardl::binary::WriteInteger, test_model::GenericRecordWithComputedFields<std::string, float>, test_model::binary::WriteGenericRecordWithComputedFields<std::string, yardl::binary::WriteString, float, yardl::binary::WriteFloatingPoint>>(stream, value.union_with_nested_generic_union);
+  yardl::binary::WriteMap<std::string, std::string, yardl::binary::WriteString, yardl::binary::WriteString>(stream, value.map_field);
 }
 
 [[maybe_unused]] void ReadRecordWithComputedFields(yardl::binary::CodedInputStream& stream, test_model::RecordWithComputedFields& value) {
@@ -1234,6 +1256,7 @@ template<typename T0, yardl::binary::Reader<T0> ReadT0, typename T1, yardl::bina
   ReadUnion<int32_t, yardl::binary::ReadInteger, float, yardl::binary::ReadFloatingPoint>(stream, value.int_float_union);
   ReadUnion<std::monostate, yardl::binary::ReadMonostate, int32_t, yardl::binary::ReadInteger, float, yardl::binary::ReadFloatingPoint>(stream, value.nullable_int_float_union);
   ReadUnion<int32_t, yardl::binary::ReadInteger, test_model::GenericRecordWithComputedFields<std::string, float>, test_model::binary::ReadGenericRecordWithComputedFields<std::string, yardl::binary::ReadString, float, yardl::binary::ReadFloatingPoint>>(stream, value.union_with_nested_generic_union);
+  yardl::binary::ReadMap<std::string, std::string, yardl::binary::ReadString, yardl::binary::ReadString>(stream, value.map_field);
 }
 
 template<typename INT16_MAX_Type, yardl::binary::Writer<INT16_MAX_Type> WriteINT16_MAX_Type>
@@ -2057,6 +2080,42 @@ void DynamicNDArraysReader::ReadRecordWithDynamicNDArraysImpl(test_model::Record
 }
 
 void DynamicNDArraysReader::CloseImpl() {
+  stream_.VerifyFinished();
+}
+
+void MapsWriter::WriteStringToIntImpl(std::unordered_map<std::string, int32_t> const& value) {
+  yardl::binary::WriteMap<std::string, int32_t, yardl::binary::WriteString, yardl::binary::WriteInteger>(stream_, value);
+}
+
+void MapsWriter::WriteStringToUnionImpl(std::unordered_map<std::string, std::variant<std::string, int32_t>> const& value) {
+  yardl::binary::WriteMap<std::string, std::variant<std::string, int32_t>, yardl::binary::WriteString, WriteUnion<std::string, yardl::binary::WriteString, int32_t, yardl::binary::WriteInteger>>(stream_, value);
+}
+
+void MapsWriter::WriteAliasedGenericImpl(test_model::AliasedMap<std::string, int32_t> const& value) {
+  test_model::binary::WriteAliasedMap<std::string, yardl::binary::WriteString, int32_t, yardl::binary::WriteInteger>(stream_, value);
+}
+
+void MapsWriter::Flush() {
+  stream_.Flush();
+}
+
+void MapsWriter::CloseImpl() {
+  stream_.Flush();
+}
+
+void MapsReader::ReadStringToIntImpl(std::unordered_map<std::string, int32_t>& value) {
+  yardl::binary::ReadMap<std::string, int32_t, yardl::binary::ReadString, yardl::binary::ReadInteger>(stream_, value);
+}
+
+void MapsReader::ReadStringToUnionImpl(std::unordered_map<std::string, std::variant<std::string, int32_t>>& value) {
+  yardl::binary::ReadMap<std::string, std::variant<std::string, int32_t>, yardl::binary::ReadString, ReadUnion<std::string, yardl::binary::ReadString, int32_t, yardl::binary::ReadInteger>>(stream_, value);
+}
+
+void MapsReader::ReadAliasedGenericImpl(test_model::AliasedMap<std::string, int32_t>& value) {
+  test_model::binary::ReadAliasedMap<std::string, yardl::binary::ReadString, int32_t, yardl::binary::ReadInteger>(stream_, value);
+}
+
+void MapsReader::CloseImpl() {
   stream_.VerifyFinished();
 }
 

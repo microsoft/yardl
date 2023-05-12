@@ -629,6 +629,8 @@ func typeRwFunction(t dsl.Type, write bool) string {
 			}
 
 			return fmt.Sprintf("yardl::binary::%sDynamicNDArray<%s, %s>", verb(write), common.TypeSyntax(scalarType), scalarFunction)
+		case *dsl.Map:
+			return fmt.Sprintf("yardl::binary::%sMap<%s, %s, %s, %s>", verb(write), common.TypeSyntax(td.KeyType), common.TypeSyntax(scalarType), typeRwFunction(td.KeyType, write), scalarFunction)
 		default:
 			panic(fmt.Sprintf("Unknown dimensionality type %T", td))
 		}

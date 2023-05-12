@@ -87,6 +87,8 @@ func (visitor VisitorWithContext[T]) VisitChildren(node Node, context T) {
 		break
 	case *Stream:
 		break
+	case *Map:
+		visitor.Visit(t.KeyType, context)
 	case *EnumDefinition:
 		visitor.Visit(t.DefinitionMeta, context)
 		if t.BaseType != nil {
