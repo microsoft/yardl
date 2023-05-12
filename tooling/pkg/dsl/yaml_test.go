@@ -45,8 +45,6 @@ a4: float->int`
 	require.True(t, TypesEqual(a1, a2))
 	require.False(t, TypesEqual(a1, a3))
 	require.False(t, TypesEqual(a1, a4))
-
-	// require.Equal(t, "int", RequireType[*SimpleType](t, RequireType[*GeneralizedType](t, RequireType[*GeneralizedType](t, f.Type).Cases[0].Type).Cases[0].Type).Name)
 }
 
 func TestBasicErrors(t *testing.T) {

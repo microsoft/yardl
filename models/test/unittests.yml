@@ -463,6 +463,7 @@ RecordWithComputedFields: !record
     unionWithNestedGenericUnion:
       - int
       - GenericRecordWithComputedFields<string, float>
+    mapField: string->string
   computedFields:
     intLiteral: 42 # this comment is ignored
     largeNegativeInt64Literal: -0x4000000000000000
@@ -503,6 +504,12 @@ RecordWithComputedFields: !record
     arrayDimensionIndexFromStringField: dimensionIndex(arrayField, stringField)
     arrayDimensionCount: dimensionCount(arrayField)
     dynamicArrayDimensionCount: dimensionCount(dynamicArrayField)
+    accessMap: mapField
+    mapSize: size(mapField)
+    accessMapEntry: mapField["hello"]
+    stringComputedField: "'hello'"
+    accessMapEntryWithComputedField: mapField[stringComputedField]
+    accessMapEntryWithComputedFieldNested: mapField[mapField[stringComputedField]]
     optionalNamedArrayLength:
       !switch optionalNamedArray:
         NamedNDArray arr: size(arr)

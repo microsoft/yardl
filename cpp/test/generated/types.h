@@ -477,6 +477,7 @@ struct RecordWithComputedFields {
   std::variant<int32_t, float> int_float_union{};
   std::variant<std::monostate, int32_t, float> nullable_int_float_union{};
   std::variant<int32_t, test_model::GenericRecordWithComputedFields<std::string, float>> union_with_nested_generic_union{};
+  std::unordered_map<std::string, std::string> map_field{};
 
   uint8_t IntLiteral() const {
     return 42;
@@ -678,6 +679,46 @@ struct RecordWithComputedFields {
     return dynamic_array_field.dimension();
   }
 
+  std::unordered_map<std::string, std::string> const& AccessMap() const {
+    return map_field;
+  }
+
+  std::unordered_map<std::string, std::string>& AccessMap() {
+    return const_cast<std::unordered_map<std::string, std::string>&>(std::as_const(*this).AccessMap());
+  }
+
+  yardl::Size MapSize() const {
+    return map_field.size();
+  }
+
+  std::string const& AccessMapEntry() const {
+    return map_field.at("hello");
+  }
+
+  std::string& AccessMapEntry() {
+    return const_cast<std::string&>(std::as_const(*this).AccessMapEntry());
+  }
+
+  std::string StringComputedField() const {
+    return "hello";
+  }
+
+  std::string const& AccessMapEntryWithComputedField() const {
+    return map_field.at(StringComputedField());
+  }
+
+  std::string& AccessMapEntryWithComputedField() {
+    return const_cast<std::string&>(std::as_const(*this).AccessMapEntryWithComputedField());
+  }
+
+  std::string const& AccessMapEntryWithComputedFieldNested() const {
+    return map_field.at(map_field.at(StringComputedField()));
+  }
+
+  std::string& AccessMapEntryWithComputedFieldNested() {
+    return const_cast<std::string&>(std::as_const(*this).AccessMapEntryWithComputedFieldNested());
+  }
+
   yardl::Size OptionalNamedArrayLength() const {
     return [](auto&& __case_arg__) -> yardl::Size {
       if (__case_arg__.has_value()) {
@@ -778,7 +819,8 @@ struct RecordWithComputedFields {
       optional_named_array == other.optional_named_array &&
       int_float_union == other.int_float_union &&
       nullable_int_float_union == other.nullable_int_float_union &&
-      union_with_nested_generic_union == other.union_with_nested_generic_union;
+      union_with_nested_generic_union == other.union_with_nested_generic_union &&
+      map_field == other.map_field;
   }
 
   bool operator!=(const RecordWithComputedFields& other) const {

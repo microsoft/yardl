@@ -172,7 +172,7 @@ func writeComputedFieldExpression(w *formatting.IndentedWriter, expression dsl.E
 			case dsl.FunctionSize:
 				self.Visit(t.Arguments[0])
 				switch dsl.ToGeneralizedType(dsl.GetUnderlyingType(t.Arguments[0].GetResolvedType())).Dimensionality.(type) {
-				case *dsl.Vector:
+				case *dsl.Vector, *dsl.Map:
 					fmt.Fprintf(w, ".size(")
 				case *dsl.Array:
 					if len(t.Arguments) == 1 {

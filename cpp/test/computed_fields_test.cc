@@ -35,6 +35,12 @@ TEST(ComputedFieldsTests, AccessFields) {
 
   r.vector_of_vectors_field = {{1, 2, 3}, {4, 5, 6}};
   EXPECT_EQ(r.AccessVectorOfVectorsField(), r.vector_of_vectors_field[1][2]);
+
+  r.map_field = {{"hello", "world"}, {"world", "bye"}};
+  EXPECT_EQ(r.AccessMap(), r.map_field);
+  EXPECT_EQ(r.AccessMapEntry(), "world");
+  EXPECT_EQ(r.AccessMapEntryWithComputedField(), "world");
+  EXPECT_EQ(r.AccessMapEntryWithComputedFieldNested(), "bye");
 }
 
 TEST(ComputedFieldsTest, Literals) {
@@ -78,6 +84,12 @@ TEST(ComputedFieldsTests, VectorSize) {
   EXPECT_EQ(r.VectorSize(), 3);
 
   EXPECT_EQ(r.FixedVectorSize(), 3);
+}
+
+TEST(ComputedFieldsTests, MapSize) {
+  RecordWithComputedFields r;
+  r.map_field = {{"hello", "bonjour"}, {"world", "monde"}};
+  EXPECT_EQ(r.MapSize(), 2);
 }
 
 TEST(ComputedFieldsTests, ArraySize) {

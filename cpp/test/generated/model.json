@@ -1204,6 +1204,15 @@
                     }
                   }
                 ]
+              },
+              {
+                "name": "mapField",
+                "type": {
+                  "map": {
+                    "keys": "string",
+                    "values": "string"
+                  }
+                }
               }
             ],
             "computedFields": [
@@ -1625,6 +1634,107 @@
                       {
                         "memberAccess": {
                           "member": "dynamicArrayField"
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "name": "accessMap",
+                "expression": {
+                  "memberAccess": {
+                    "member": "mapField"
+                  }
+                }
+              },
+              {
+                "name": "mapSize",
+                "expression": {
+                  "call": {
+                    "function": "size",
+                    "arguments": [
+                      {
+                        "memberAccess": {
+                          "member": "mapField"
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "name": "accessMapEntry",
+                "expression": {
+                  "index": {
+                    "target": {
+                      "memberAccess": {
+                        "member": "mapField"
+                      }
+                    },
+                    "arguments": [
+                      {
+                        "expression": "\"hello\""
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "name": "stringComputedField",
+                "expression": "\"hello\""
+              },
+              {
+                "name": "accessMapEntryWithComputedField",
+                "expression": {
+                  "index": {
+                    "target": {
+                      "memberAccess": {
+                        "member": "mapField"
+                      }
+                    },
+                    "arguments": [
+                      {
+                        "expression": {
+                          "memberAccess": {
+                            "member": "stringComputedField",
+                            "isComputed": true
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "name": "accessMapEntryWithComputedFieldNested",
+                "expression": {
+                  "index": {
+                    "target": {
+                      "memberAccess": {
+                        "member": "mapField"
+                      }
+                    },
+                    "arguments": [
+                      {
+                        "expression": {
+                          "index": {
+                            "target": {
+                              "memberAccess": {
+                                "member": "mapField"
+                              }
+                            },
+                            "arguments": [
+                              {
+                                "expression": {
+                                  "memberAccess": {
+                                    "member": "stringComputedField",
+                                    "isComputed": true
+                                  }
+                                }
+                              }
+                            ]
+                          }
                         }
                       }
                     ]

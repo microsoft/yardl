@@ -193,7 +193,7 @@ X: !record
   computedFields:
     r0: r[0]`
 	_, err := parseAndValidate(t, src)
-	assert.ErrorContains(t, err, `index target must be a vector or array`)
+	assert.ErrorContains(t, err, `index target must be a vector, array, or map`)
 }
 
 func TestIndexVectorOfVectors(t *testing.T) {
@@ -205,6 +205,61 @@ X: !record
     v01: v[0][1]`
 	_, err := parseAndValidate(t, src)
 	assert.Nil(t, err)
+}
+
+func TestIndexMap(t *testing.T) {
+	src := `
+X: !record
+  fields:
+    y: string->int
+  computedFields:
+    y1: y["hello"]`
+	_, err := parseAndValidate(t, src)
+	assert.Nil(t, err)
+}
+
+func TestIndexMapWrongType(t *testing.T) {
+	src := `
+X: !record
+  fields:
+    y: string->int
+  computedFields:
+    y1: y[1]`
+	_, err := parseAndValidate(t, src)
+	assert.ErrorContains(t, err, `incorrect map lookup argument type`)
+}
+
+func TestIndexMapTooManyArguments(t *testing.T) {
+	src := `
+X: !record
+  fields:
+    y: string->int
+  computedFields:
+    y1: y["hello", 1]`
+	_, err := parseAndValidate(t, src)
+	assert.ErrorContains(t, err, `map lookup must have exactly one argument`)
+}
+
+func TestMapSize(t *testing.T) {
+	src := `
+X: !record
+  fields:
+    y: string->int
+  computedFields:
+    y1: size(y)`
+	_, err := parseAndValidate(t, src)
+	assert.NoError(t, err)
+}
+
+func TestMapSizeTooManyArgs(t *testing.T) {
+	src := `
+X: !record
+  fields:
+    y: string->int
+  computedFields:
+    y1: size(y, 1)`
+	_, err := parseAndValidate(t, src)
+	assert.ErrorContains(t, err, `size() does not accept a second argument when called with a !map`)
 }
 
 func TestIndexArray(t *testing.T) {
@@ -356,7 +411,7 @@ X: !record
   computedFields:
     vSize: size(1)`
 	_, err := parseAndValidate(t, src)
-	assert.ErrorContains(t, err, `size() must be called with a !vector or an !array as the first argument`)
+	assert.ErrorContains(t, err, `size() must be called with a !vector, !array, or !map as the first argument`)
 }
 
 func TestVectorSize(t *testing.T) {

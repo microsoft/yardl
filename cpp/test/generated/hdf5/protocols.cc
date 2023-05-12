@@ -484,7 +484,8 @@ struct _Inner_RecordWithComputedFields {
       optional_named_array(o.optional_named_array),
       int_float_union(o.int_float_union),
       nullable_int_float_union(o.nullable_int_float_union),
-      union_with_nested_generic_union(o.union_with_nested_generic_union) {
+      union_with_nested_generic_union(o.union_with_nested_generic_union),
+      map_field(o.map_field) {
   }
 
   void ToOuter (test_model::RecordWithComputedFields& o) const {
@@ -502,6 +503,7 @@ struct _Inner_RecordWithComputedFields {
     yardl::hdf5::ToOuter(int_float_union, o.int_float_union);
     yardl::hdf5::ToOuter(nullable_int_float_union, o.nullable_int_float_union);
     yardl::hdf5::ToOuter(union_with_nested_generic_union, o.union_with_nested_generic_union);
+    yardl::hdf5::ToOuter(map_field, o.map_field);
   }
 
   yardl::hdf5::InnerNdArray<int32_t, int32_t, 2> array_field;
@@ -518,6 +520,7 @@ struct _Inner_RecordWithComputedFields {
   ::InnerUnion2<int32_t, int32_t, float, float> int_float_union;
   ::InnerUnion2<int32_t, int32_t, float, float> nullable_int_float_union;
   ::InnerUnion2<int32_t, int32_t, test_model::hdf5::_Inner_GenericRecordWithComputedFields<yardl::hdf5::InnerVlenString, std::string, float, float>, test_model::GenericRecordWithComputedFields<std::string, float>> union_with_nested_generic_union;
+  yardl::hdf5::InnerMap<yardl::hdf5::InnerVlenString, std::string, yardl::hdf5::InnerVlenString, std::string> map_field;
 };
 
 struct _Inner_RecordWithKeywordFields {
@@ -769,6 +772,7 @@ template <typename _T0_Inner, typename T0, typename _T1_Inner, typename T1>
   t.insertMember("intFloatUnion", HOFFSET(RecordType, int_float_union), ::InnerUnion2Ddl<int32_t, int32_t, float, float>(false, H5::PredType::NATIVE_INT32, "int32", H5::PredType::NATIVE_FLOAT, "float32"));
   t.insertMember("nullableIntFloatUnion", HOFFSET(RecordType, nullable_int_float_union), ::InnerUnion2Ddl<int32_t, int32_t, float, float>(true, H5::PredType::NATIVE_INT32, "int32", H5::PredType::NATIVE_FLOAT, "float32"));
   t.insertMember("unionWithNestedGenericUnion", HOFFSET(RecordType, union_with_nested_generic_union), ::InnerUnion2Ddl<int32_t, int32_t, test_model::hdf5::_Inner_GenericRecordWithComputedFields<yardl::hdf5::InnerVlenString, std::string, float, float>, test_model::GenericRecordWithComputedFields<std::string, float>>(false, H5::PredType::NATIVE_INT32, "int32", test_model::hdf5::GetGenericRecordWithComputedFieldsHdf5Ddl<yardl::hdf5::InnerVlenString, std::string, float, float>(yardl::hdf5::InnerVlenStringDdl(), H5::PredType::NATIVE_FLOAT), "GenericRecordWithComputedFields<string,float32>"));
+  t.insertMember("mapField", HOFFSET(RecordType, map_field), yardl::hdf5::InnerMapDdl<yardl::hdf5::InnerVlenString, yardl::hdf5::InnerVlenString>(yardl::hdf5::InnerVlenStringDdl(), yardl::hdf5::InnerVlenStringDdl()));
   return t;
 };
 
