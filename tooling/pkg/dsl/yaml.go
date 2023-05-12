@@ -661,7 +661,7 @@ func UnmarshalStreamYAML(value *yaml.Node) (*GeneralizedType, error) {
 
 func UnmarshalMapYAML(value *yaml.Node) (*GeneralizedType, error) {
 	if value.Kind != yaml.MappingNode {
-		return nil, parseError(value, "a !map must be specified with fields `keys` and optionally `values`")
+		return nil, parseError(value, "a !map must be specified with fields `keys` and `values`")
 	}
 
 	m := &Map{NodeMeta: createNodeMeta(value)}
