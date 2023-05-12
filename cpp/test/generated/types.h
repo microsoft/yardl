@@ -719,6 +719,14 @@ struct RecordWithComputedFields {
     return const_cast<std::string&>(std::as_const(*this).AccessMapEntryWithComputedFieldNested());
   }
 
+  std::string const& AccessMissingMapEntry() const {
+    return map_field.at("missing");
+  }
+
+  std::string& AccessMissingMapEntry() {
+    return const_cast<std::string&>(std::as_const(*this).AccessMissingMapEntry());
+  }
+
   yardl::Size OptionalNamedArrayLength() const {
     return [](auto&& __case_arg__) -> yardl::Size {
       if (__case_arg__.has_value()) {

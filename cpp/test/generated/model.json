@@ -1742,6 +1742,23 @@
                 }
               },
               {
+                "name": "accessMissingMapEntry",
+                "expression": {
+                  "index": {
+                    "target": {
+                      "memberAccess": {
+                        "member": "mapField"
+                      }
+                    },
+                    "arguments": [
+                      {
+                        "expression": "\"missing\""
+                      }
+                    ]
+                  }
+                }
+              },
+              {
                 "name": "optionalNamedArrayLength",
                 "expression": {
                   "switch": {

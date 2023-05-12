@@ -41,6 +41,7 @@ TEST(ComputedFieldsTests, AccessFields) {
   EXPECT_EQ(r.AccessMapEntry(), "world");
   EXPECT_EQ(r.AccessMapEntryWithComputedField(), "world");
   EXPECT_EQ(r.AccessMapEntryWithComputedFieldNested(), "bye");
+  EXPECT_THROW(r.AccessMissingMapEntry(), std::out_of_range);
 }
 
 TEST(ComputedFieldsTest, Literals) {

@@ -510,6 +510,8 @@ RecordWithComputedFields: !record
     stringComputedField: "'hello'"
     accessMapEntryWithComputedField: mapField[stringComputedField]
     accessMapEntryWithComputedFieldNested: mapField[mapField[stringComputedField]]
+    accessMissingMapEntry: mapField["missing"]
+
     optionalNamedArrayLength:
       !switch optionalNamedArray:
         NamedNDArray arr: size(arr)
