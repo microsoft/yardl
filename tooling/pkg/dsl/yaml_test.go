@@ -25,7 +25,28 @@ x: !record
 	f := ns.TypeDefinitions[0].(*RecordDefinition).Fields[0]
 
 	require.Equal(t, "int", RequireType[*SimpleType](t, RequireType[*GeneralizedType](t, RequireType[*GeneralizedType](t, f.Type).Cases[0].Type).Cases[0].Type).Name)
+}
 
+func TestMapShorthand(t *testing.T) {
+	src := `
+a1: !map
+  keys: string
+  values: int
+a2: string->int
+a3: string->float
+a4: float->int`
+	ns, err := parse(t, src)
+	require.Nil(t, err)
+
+	a1 := ns.TypeDefinitions[0].(*NamedType).Type
+	a2 := ns.TypeDefinitions[1].(*NamedType).Type
+	a3 := ns.TypeDefinitions[2].(*NamedType).Type
+	a4 := ns.TypeDefinitions[3].(*NamedType).Type
+	require.True(t, TypesEqual(a1, a2))
+	require.False(t, TypesEqual(a1, a3))
+	require.False(t, TypesEqual(a1, a4))
+
+	// require.Equal(t, "int", RequireType[*SimpleType](t, RequireType[*GeneralizedType](t, RequireType[*GeneralizedType](t, f.Type).Cases[0].Type).Cases[0].Type).Name)
 }
 
 func TestBasicErrors(t *testing.T) {

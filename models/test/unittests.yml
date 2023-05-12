@@ -292,15 +292,11 @@ DynamicNDArrays: !protocol
       items: RecordWithVlens
     recordWithDynamicNDArrays: RecordWithDynamicNDArrays
 
-AliasedMap<K,V>: !map
-  keys: K
-  values: V
+AliasedMap<K,V>: K->V
 
 Maps: !protocol
   sequence:
-    stringToInt: !map
-      keys: string
-      values: int
+    stringToInt: string->int
     stringToUnion: !map
       keys: string
       values: [string, int]

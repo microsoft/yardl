@@ -284,6 +284,13 @@ func TypesEqual(a, b Type) bool {
 			}
 
 			return true
+		case *Map:
+			db, ok := tb.Dimensionality.(*Map)
+			if !ok {
+				return false
+			}
+			return TypesEqual(da.KeyType, db.KeyType)
+
 		case *Stream:
 			_, ok := tb.Dimensionality.(*Stream)
 			return ok

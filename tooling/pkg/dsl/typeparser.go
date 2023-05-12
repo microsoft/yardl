@@ -11,6 +11,7 @@ import (
 
 type simpleTypeTree struct {
 	Name           string           `json:"name"`
+	MapKey         *simpleTypeTree  `json:"mapKey,omitempty"`
 	TypeArguments  []simpleTypeTree `json:"args,omitempty"`
 	Optional       bool             `json:"optional,omitempty"`
 	PositionOffset int              `json:"positionOffset,omitempty"`
@@ -54,7 +55,7 @@ func (tp *typeParser) advance(count int) string {
 }
 
 func (tp *typeParser) consumeIdentifier() string {
-	idx := strings.IndexAny(tp.remainingInput, ",<>? ")
+	idx := strings.IndexAny(tp.remainingInput, ",<>?- ")
 	if idx == -1 {
 		rtn := tp.remainingInput
 		tp.position += len(tp.remainingInput)
@@ -85,47 +86,63 @@ func (tp *typeParser) parseTypeString() (simpleTypeTree, error) {
 		}
 
 		parsed.Optional = true
-		return parsed, nil
+		goto doneGenericArgs
 	}
 
-	if tp.remainingInput[0] != '<' {
-		return parsed, nil
+	if tp.remainingInput[0] == '<' {
+		tp.advance(1)
+
+		parsed.TypeArguments = make([]simpleTypeTree, 0)
+
+		for {
+			arg, err := tp.parseTypeString()
+			if err != nil {
+				return parsed, err
+			}
+			parsed.TypeArguments = append(parsed.TypeArguments, arg)
+			tp.skipWhitespace()
+			if tp.remainingInput == "" {
+				return parsed, errors.New("missing '>' in type string")
+			}
+			if arg.Name == "" {
+				return parsed, fmt.Errorf("the type parameter name cannot be empty at position %d", tp.position+1)
+			}
+
+			switch tp.remainingInput[0] {
+			case '>':
+				tp.advance(1)
+				tp.skipWhitespace()
+				if tp.remainingInput != "" && tp.remainingInput[0] == '?' {
+					tp.advance(1)
+					parsed.Optional = true
+				}
+				goto doneGenericArgs
+			case ',':
+				tp.advance(1)
+				continue
+			default:
+				return parsed, fmt.Errorf("unexpected '%s' in type string at position %d", tp.remainingInput, tp.position+1)
+			}
+		}
 	}
+doneGenericArgs:
 
-	tp.advance(1)
-
-	parsed.TypeArguments = make([]simpleTypeTree, 0)
-
-	for {
-		arg, err := tp.parseTypeString()
+	if len(tp.remainingInput) > 1 && tp.remainingInput[0] == '-' && tp.remainingInput[1] == '>' {
+		tp.advance(2)
+		tp.skipWhitespace()
+		if tp.remainingInput == "" {
+			return parsed, errors.New("missing type name after '->'")
+		}
+		value, err := tp.parseTypeString()
 		if err != nil {
 			return parsed, err
 		}
-		parsed.TypeArguments = append(parsed.TypeArguments, arg)
-		tp.skipWhitespace()
-		if tp.remainingInput == "" {
-			return parsed, errors.New("missing '>' in type string")
-		}
-		if arg.Name == "" {
-			return parsed, fmt.Errorf("the type parameter name cannot be empty at position %d", tp.position+1)
-		}
 
-		switch tp.remainingInput[0] {
-		case '>':
-			tp.advance(1)
-			tp.skipWhitespace()
-			if tp.remainingInput != "" && tp.remainingInput[0] == '?' {
-				tp.advance(1)
-				parsed.Optional = true
-			}
-			return parsed, nil
-		case ',':
-			tp.advance(1)
-			continue
-		default:
-			return parsed, fmt.Errorf("unexpected '%s' in type string at position %d", tp.remainingInput, tp.position+1)
-		}
+		value.MapKey = &parsed
+		return value, nil
 	}
+
+	return parsed, nil
 }
 
 func parseSimpleTypeString(typeString string) (simpleTypeTree, error) {
@@ -164,13 +181,25 @@ func (tree simpleTypeTree) ToType(node NodeMeta) Type {
 		simpleType.TypeArguments = append(simpleType.TypeArguments, typeArg.ToType(node))
 	}
 
-	if tree.Optional {
-		return &GeneralizedType{
-			NodeMeta: node,
-			Cases: TypeCases{
+	if tree.Optional || tree.MapKey != nil {
+		gt := &GeneralizedType{NodeMeta: nodeWithPositionUpdated}
+		if tree.Optional {
+			gt.Cases = TypeCases{
 				&TypeCase{NodeMeta: node},
 				&TypeCase{NodeMeta: node, Type: &simpleType},
-			}}
+			}
+		} else {
+			gt.Cases = TypeCases{
+				&TypeCase{NodeMeta: node, Type: &simpleType},
+			}
+		}
+
+		if tree.MapKey != nil {
+			keyType := tree.MapKey.ToType(node)
+			gt.Dimensionality = &Map{NodeMeta: node, KeyType: keyType}
+		}
+
+		return gt
 	}
 
 	return &simpleType
