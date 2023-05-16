@@ -160,8 +160,7 @@ Header: !record
 Sample: !record
   fields:
     timestamp: datetime
-    data: !vector
-      items: int
+    data: int*
 ```
 
 `!protocol`, `!stream` and `!record` are custom YAML tags, which describe the
@@ -488,27 +487,15 @@ Rec: !record
       - int
       - float
     arrayOfFloatsOrDoubles:
-      - !array
-        items: float
-      - !array
-        items: double
+      - float[]
+      - double[]
 ```
 
 The `null` type in the example above means that no value is also a possibility.
 
 The `?` suffix can be appended to a type name as a shorthand to define an
 *optional type*, a special case of union. For example, `int?` is the same as
-`[null, int]`. Note that the expanded form has to be used for complex optional
-types:
-
-```yaml
-Rec: !record
-  fields:
-    optionalArray:
-      - null
-      - !vector
-        items: int
-```
+`[null, int]`.
 
 ### Enums
 
@@ -536,7 +523,18 @@ UInt64Enum: !enum
 
 ### Vectors
 
-Vectors are one-dimensional arrays. They can optionally have a fixed length.
+Vectors are one-dimensional arrays. They can optionally have a fixed length. The simple syntax for vectors is `<type>*[length]`.
+
+For example:
+
+```yaml
+MyRec: !record
+  fields:
+    vec1: int*
+    vec2: int*10
+```
+
+In the example above, `vec1` is a vector of integers of unknown length and `vec2` has length 10. The expanded syntax for vectors is:
 
 ```yaml
 MyRec: !record
@@ -553,12 +551,15 @@ In generated C++ code, `vec1` maps to an `std::vector<int>` and `vec2` to an
 
 ### Arrays
 
-The `!array` tag denotes a multidimensional array. They can be of a fixed size:
+Arrays tag denotes a multidimensional array. Like vectors, there is a simple syntax and an expanded syntax for declaring them. Both syntaxes are shown in the examples below.
+
+There are three kinds of arrays. They can be of a fixed size:
 
 ```yaml
 MyRec: !record
   fields:
-    fixedNdArray: !array
+    fixedNdArray: float[3, 4]
+    fixedNdArrayExpandedSyntax: !array
       items: float
       dimensions: [3, 4]
 ```
@@ -568,7 +569,8 @@ Or the size might not be fixed but the number of dimensions is known:
 ```yaml
 MyRec: !record
   fields:
-    ndArray: !array
+    ndArray: float[,]
+    ndArrayExpandedSyntax: !array
       items: float
       dimensions: 2
 ```
@@ -578,7 +580,8 @@ Or finally, the number of dimensions may be unknown as well:
 ```yaml
 MyRec: !record
   fields:
-    dynamicNdArray: !array
+    dynamicNdArray: float[]
+    dynamicNdArrayExpandedSyntax: !array
       items: float
 ```
 
@@ -588,7 +591,8 @@ field](#computed-fields) expressions.
 ```yaml
 MyRec: !record
   fields:
-    fixedNdArray: !array
+    fixedNdArray: float[x:3, y:4]
+    fixedNdArrayExpandedSyntax: !array
       items: float
       dimensions:
         x: 3
@@ -596,12 +600,17 @@ MyRec: !record
     ndArray: !array
       items: float
       dimensions: [x, y]
-    ndArrayAlternate: !array
+    ndArrayExpandedSyntax: !array
+      items: float
+      dimensions: [x, y]
+    ndArrayExpandedSyntaxAlternate: !array
       items: float
       dimensions:
         x:
         y:
 ```
+
+In the simple syntax, `int[]` means an int array with an unknown number of dimensions, and `int[,]` means an int array with two dimensions. To declare an array with 1 dimension of unknown length, you can either give the dimension a name (`int[x]`) or use parentheses to disambiguate from an empty set of dimensions: `int[()]`.
 
 ### Maps
 
@@ -613,7 +622,7 @@ MyMap: !map
   values: int
 ```
 
-Often they can be declared with the shorthand syntax:
+They can be declared with the shorthand syntax:
 
 ```yaml
 MyMap: string->int
@@ -630,8 +639,7 @@ We've seen records, enums, and protocols defined as top-level, named types, but
 any type can be given one or more aliases:
 
 ```yaml
-FloatArray: !array
-  items: float
+FloatArray: float[]
 
 SignedInteger: [int8, int16, int32, int64]
 
@@ -650,9 +658,7 @@ over the record's other (computed) fields.
 ```yaml
 MyRec: !record
   fields:
-    arrayField: !array
-        items: int
-        dimensions: [x, y]
+    arrayField: int[x,y]
   computedFields:
     accessArray: arrayField
     accessArrayElement: arrayField[0, 1]
@@ -666,9 +672,7 @@ To work with union types, you need to use a switch expression with type pattern
 matching:
 
 ```yaml
-NamedArray: !array
-  items: int
-  dimensions: [x, y]
+NamedArray: int[x, y]
 
 MyRec: !record
   fields:
@@ -700,8 +704,7 @@ The following function calls are supported from computed field expressions:
 Yardl supports generic types.
 
 ```yaml
-Image<T>: !array
-  items: T
+Image<T>: T[]
 
 ImageVariant:
   - Image<float>
@@ -1237,9 +1240,7 @@ Let's work through an example. Here is a sample model:
 ```yaml
 MyProtocol: !protocol
   sequence:
-    floatArray: !array
-      items: float
-      dimensions: [2,2]
+    floatArray: float[2,2]
     points: !stream
       items: Point
 
