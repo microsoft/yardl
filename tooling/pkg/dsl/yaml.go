@@ -114,12 +114,12 @@ func (meta *DefinitionMeta) UnmarshalYAML(value *yaml.Node) error {
 	meta.NodeMeta = createNodeMeta(value)
 	meta.Name = value.Value
 
-	parsedTypeString, err := parseSimpleType2(meta.Name)
+	parsedTypeString, err := parseType(meta.Name)
 	if err != nil {
 		return parseError(value, err.Error())
 	}
 
-	parsedType := parsedTypeString.ToType(meta.NodeMeta)
+	parsedType := convertType(parsedTypeString, meta.NodeMeta)
 	simpleParsedType, ok := parsedType.(*SimpleType)
 	if !ok {
 		return parseError(value, "not a valid type declaration name")
@@ -332,11 +332,12 @@ func UnmarshalPattern(patternNode *yaml.Node) (Pattern, error) {
 		}, nil
 
 	case "!!str":
-
-		pat, err := parsePattern(patternNode.Value, createNodeMeta(patternNode))
+		patAst, err := parsePattern(patternNode.Value)
 		if err != nil {
 			return nil, parseError(patternNode, err.Error())
 		}
+
+		pat := convertPattern(patAst, createNodeMeta(patternNode))
 
 		// check for (invalid) declaration pattern:
 		// null <var>:
@@ -354,6 +355,86 @@ func UnmarshalPattern(patternNode *yaml.Node) (Pattern, error) {
 	default:
 		return nil, parseError(patternNode, "expected pattern to be a string")
 	}
+}
+
+func convertType(ast *TypeAst, node NodeMeta) Type {
+	nodeWithPositionUpdated := node
+	nodeWithPositionUpdated.Column += ast.Pos.Offset
+
+	var t Type
+	if ast.Named != nil {
+		simpleType := SimpleType{NodeMeta: nodeWithPositionUpdated, Name: ast.Named.Name}
+		for _, typeArg := range ast.Named.TypeArgs {
+			simpleType.TypeArguments = append(simpleType.TypeArguments, convertType(typeArg, node))
+		}
+		t = &simpleType
+	} else if ast.Named != nil {
+		t = convertType(ast.Sub, node)
+	} else {
+		panic("unreachable")
+	}
+
+	for _, tt := range ast.Tails {
+		t = applyTypeTail(t, tt)
+	}
+
+	return t
+}
+
+func applyTypeTail(inner Type, tail TypeTail) Type {
+	nodeMeta := *inner.GetNodeMeta()
+	gt := GeneralizedType{
+		NodeMeta: nodeMeta,
+		Cases:    TypeCases{&TypeCase{NodeMeta: nodeMeta, Type: inner}},
+	}
+
+	if tail.Optional {
+		gt.Cases = append(TypeCases{&TypeCase{NodeMeta: nodeMeta}}, gt.Cases...)
+	} else if tail.MapValue != nil {
+		gt.Cases = TypeCases{&TypeCase{NodeMeta: nodeMeta, Type: convertType(tail.MapValue, nodeMeta)}}
+		gt.Dimensionality = &Map{
+			NodeMeta: nodeMeta,
+			KeyType:  inner,
+		}
+	} else if tail.Vector != nil {
+		gt.Dimensionality = &Vector{
+			NodeMeta: nodeMeta,
+			Length:   tail.Vector.Length,
+		}
+	} else if tail.Array != nil {
+		a := Array{NodeMeta: nodeMeta}
+
+		if len(tail.Array.Dimensions) > 0 {
+			dims := ArrayDimensions{}
+			for _, dim := range tail.Array.Dimensions {
+				dims = append(dims, &ArrayDimension{NodeMeta: nodeMeta, Name: dim.Name, Length: dim.Length})
+			}
+
+			a.Dimensions = &dims
+		}
+
+		gt.Dimensionality = &a
+	} else {
+		panic("unreachable")
+	}
+
+	return &gt
+}
+
+func convertPattern(pat *PatternAst, node NodeMeta) Pattern {
+	if pat.Discard {
+		return &DiscardPattern{NodeMeta: node}
+	}
+	if pat.Type != nil {
+		tp := TypePattern{NodeMeta: node, Type: convertType(pat.Type, node)}
+		if pat.Variable != nil {
+			return &DeclarationPattern{TypePattern: tp, Identifier: *pat.Variable}
+		}
+
+		return &tp
+	}
+
+	panic("unreachable")
 }
 
 func ConvertExpression(expression expressions.Expression, hostNode *yaml.Node) Expression {
@@ -713,12 +794,12 @@ func UnmarshalTypeYAML(value *yaml.Node) (Type, error) {
 	case "!!null":
 		return nil, nil
 	case "!!str":
-		parsedTypeTree, err := parseSimpleType2(value.Value)
+		parsedTypeTree, err := parseType(value.Value)
 		if err != nil {
 			return nil, parseError(value, err.Error())
 		}
 
-		return parsedTypeTree.ToType(createNodeMeta(value)), nil
+		return convertType(parsedTypeTree, createNodeMeta(value)), nil
 	case "!generic":
 		return UnmarshalGenericNode(value)
 	case "!!seq":

@@ -209,6 +209,34 @@ struct RecordWithArrays {
   }
 };
 
+struct RecordWithArraysSimpleSyntax {
+  yardl::DynamicNDArray<int32_t> default_array{};
+  yardl::DynamicNDArray<int32_t> default_array_with_empty_dimension{};
+  yardl::NDArray<int32_t, 1> rank1_array{};
+  yardl::NDArray<int32_t, 2> rank2_array{};
+  yardl::NDArray<int32_t, 2> rank2_array_with_named_dimensions{};
+  yardl::FixedNDArray<int32_t, 3, 4> rank2_fixed_array{};
+  yardl::FixedNDArray<int32_t, 3, 4> rank2_fixed_array_with_named_dimensions{};
+  yardl::DynamicNDArray<int32_t> dynamic_array{};
+  yardl::FixedNDArray<std::array<int32_t, 4>, 5> array_of_vectors{};
+
+  bool operator==(const RecordWithArraysSimpleSyntax& other) const {
+    return default_array == other.default_array &&
+      default_array_with_empty_dimension == other.default_array_with_empty_dimension &&
+      rank1_array == other.rank1_array &&
+      rank2_array == other.rank2_array &&
+      rank2_array_with_named_dimensions == other.rank2_array_with_named_dimensions &&
+      rank2_fixed_array == other.rank2_fixed_array &&
+      rank2_fixed_array_with_named_dimensions == other.rank2_fixed_array_with_named_dimensions &&
+      dynamic_array == other.dynamic_array &&
+      array_of_vectors == other.array_of_vectors;
+  }
+
+  bool operator!=(const RecordWithArraysSimpleSyntax& other) const {
+    return !(*this == other);
+  }
+};
+
 struct RecordWithOptionalFields {
   std::optional<int32_t> optional_int{};
   std::optional<int32_t> optional_int_alternate_syntax{};

@@ -45,20 +45,18 @@ func TestTypeParsing_Valid(t *testing.T) {
 		{input: "Foo*?", expected: `(Optional (Vector 'Foo'))`},
 		{input: "Foo?*3?", expected: `(Optional (Vector[3] (Optional 'Foo')))`},
 
-		// {input: "Foo[]", expected: ``},
-		// {input: "Foo[]?", expected: ``},
-		// {input: "Foo?[]", expected: ``},
-		// {input: "Foo?[]?", expected: ``},
-		// {input: "Foo[*]", expected: ``},
-		// {input: "Foo[]", expected: ``},
-		// {input: "Foo[,]", expected: ``},
-		// {input: "Foo[x,y]", expected: ``},
-		// {input: "Foo[2,3]", expected: ``},
-		// {input: "Foo[x:2,y:3]", expected: ``},
+		{input: "Foo[]", expected: `(Array 'Foo')`},
+		{input: "Foo[()]", expected: `(Array[[]] 'Foo')`},
+		{input: "Foo[()]", expected: `(Array[[]] 'Foo')`},
+		{input: "Foo[,]", expected: `(Array[[][]] 'Foo')`},
+		{input: "Foo[, ,]", expected: `(Array[[][][]] 'Foo')`},
+		{input: "Foo[x,y]", expected: `(Array[[x][y]] 'Foo')`},
+		{input: "Foo[2,3]", expected: `(Array[[2][3]] 'Foo')`},
+		{input: "Foo[x:2,y:3]", expected: `(Array[[x 2][y 3]] 'Foo')`},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.input, func(t *testing.T) {
-			ts, err := parseSimpleType2(tc.input)
+			ts, err := parseType(tc.input)
 			assert.Nil(t, err)
 			assert.Nil(t, err)
 			assert.Equal(t, tc.expected, ts.String())
@@ -66,29 +64,36 @@ func TestTypeParsing_Valid(t *testing.T) {
 	}
 }
 
-// func TestTypeParsing_Invalid(t *testing.T) {
-// 	testCases := []struct {
-// 		input    string
-// 		expected string
-// 	}{
-// 		{input: "Foo<", expected: `missing '>'`},
-// 		{input: "Foo?<int>", expected: `'?' at position 4 must appear after generic type arguments`},
-// 		{input: "Foo??", expected: `unexpected trailing '?' in type string`},
-// 		{input: "Foo<int>>", expected: `unexpected trailing '>' in type string`},
-// 		{input: "Foo<int>,bar>", expected: `unexpected trailing ',bar>' in type string`},
-// 		{input: "<int>", expected: `the type name cannot be empty`},
-// 		{input: "Foo<>", expected: `the type parameter name cannot be empty at position 5`},
-// 		{input: "Foo<int,>", expected: `the type parameter name cannot be empty at position 9`},
-// 		{input: "string->", expected: `missing type name after '->'`},
-// 	}
-// 	for _, tc := range testCases {
-// 		t.Run(tc.input, func(t *testing.T) {
-// 			_, err := parseSimpleTypeString(tc.input)
-// 			assert.ErrorContains(t, err, tc.expected)
-// 		})
-// 	}
-// }
+func TestTypeParsing_Invalid(t *testing.T) {
+	testCases := []struct {
+		input    string
+		expected string
+	}{
+		{input: "Foo<", expected: `unexpected token "<EOF>" (expected TypeAst ("," TypeAst)* ">")`},
+		{input: "Foo?<int>", expected: `unexpected token "<"`},
+		{input: "Foo<int>>", expected: `unexpected token ">"`},
+		{input: "Foo<int>,bar>", expected: `unexpected token ","`},
+		{input: "<int>", expected: `unexpected token "<"`},
+		{input: "Foo<>", expected: `unexpected token ">"`},
+		{input: "Foo<int,>", expected: `unexpected token "," (expected ">")`},
+		{input: "string->", expected: `unexpected token "<EOF>" (expected TypeAst)`},
+		{input: "int[", expected: `unexpected token "<EOF>" (expected "]")`},
+		{input: "int[/]", expected: `unexpected token "/" (expected "]")`},
+		{input: "int[x:]", expected: `unexpected token "]" (expected integer)`},
+		{input: "int[(x:2]", expected: `unexpected token "]" (expected ")")`},
+		{input: "int[((x:2)]", expected: `unexpected token "]" (expected ")")`},
+		{input: "int[x:4987439128739182743918274]", expected: `integer out of range`},
+		{input: "int[4987439128739182743918274]", expected: `integer out of range`},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.input, func(t *testing.T) {
+			_, err := parseType(tc.input)
+			t.Log(err)
+			assert.ErrorContains(t, err, tc.expected)
+		})
+	}
+}
 
 func TestTypeParsing2(t *testing.T) {
-	parseSimpleType2("Foo<A>")
+	parseType("Foo<A>")
 }
