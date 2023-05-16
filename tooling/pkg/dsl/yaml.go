@@ -368,7 +368,7 @@ func convertType(ast *TypeAst, node NodeMeta) Type {
 			simpleType.TypeArguments = append(simpleType.TypeArguments, convertType(typeArg, node))
 		}
 		t = &simpleType
-	} else if ast.Named != nil {
+	} else if ast.Sub != nil {
 		t = convertType(ast.Sub, node)
 	} else {
 		panic("unreachable")
