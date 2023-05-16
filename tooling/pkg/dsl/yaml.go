@@ -114,25 +114,30 @@ func (meta *DefinitionMeta) UnmarshalYAML(value *yaml.Node) error {
 	meta.NodeMeta = createNodeMeta(value)
 	meta.Name = value.Value
 
-	parsedTypeString, err := parseSimpleTypeString(meta.Name)
+	parsedTypeString, err := parseSimpleType2(meta.Name)
 	if err != nil {
 		return parseError(value, err.Error())
 	}
 
-	meta.Name = parsedTypeString.Name
-	if len(parsedTypeString.TypeArguments) > 0 {
-		meta.TypeParameters = make([]*GenericTypeParameter, len(parsedTypeString.TypeArguments))
-		for i, arg := range parsedTypeString.TypeArguments {
-			if len(arg.TypeArguments) > 0 {
-				return parseError(value, "generic type parameters cannot themselves have generic type parameters")
-			}
+	parsedType := parsedTypeString.ToType(meta.NodeMeta)
+	simpleParsedType, ok := parsedType.(*SimpleType)
+	if !ok {
+		return parseError(value, "not a valid type declaration name")
+	}
 
-			meta.TypeParameters[i] =
-				&GenericTypeParameter{
-					NodeMeta: createNodeMeta(value),
-					Name:     arg.Name,
-				}
+	meta.Name = simpleParsedType.Name
+
+	for _, t := range simpleParsedType.TypeArguments {
+		sa, ok := t.(*SimpleType)
+		if !ok {
+			return parseError(value, "invalid type parameter name")
 		}
+
+		if len(sa.TypeArguments) > 0 {
+			return parseError(value, "generic type parameters cannot themselves have generic type parameters")
+		}
+
+		meta.TypeParameters = append(meta.TypeParameters, &GenericTypeParameter{NodeMeta: meta.NodeMeta, Name: sa.Name})
 	}
 
 	meta.Comment = normalizeComment(value.HeadComment)
@@ -327,18 +332,11 @@ func UnmarshalPattern(patternNode *yaml.Node) (Pattern, error) {
 		}, nil
 
 	case "!!str":
-		if patternNode.Value == "_" {
-			return &DiscardPattern{
-				NodeMeta: createNodeMeta(patternNode),
-			}, nil
-		}
 
-		parsedTypeTree, remaining, err := parseSimpleTypeStringAllowingRemaining(patternNode.Value)
+		pat, err := parsePattern(patternNode.Value, createNodeMeta(patternNode))
 		if err != nil {
 			return nil, parseError(patternNode, err.Error())
 		}
-
-		var typePatternType Type
 
 		// check for (invalid) declaration pattern:
 		// null <var>:
@@ -346,27 +344,13 @@ func UnmarshalPattern(patternNode *yaml.Node) (Pattern, error) {
 		// null:
 		// but we don't want an error saying that the type is invalid, rather the error should
 		// say that a variable of type null is not allowed.
-		if parsedTypeTree.Name != "null" || parsedTypeTree.Optional || len(parsedTypeTree.TypeArguments) != 0 {
-			typePatternType = parsedTypeTree.ToType(createNodeMeta(patternNode))
+		if dp, ok := pat.(*DeclarationPattern); ok {
+			if st, ok := dp.TypePattern.Type.(*SimpleType); ok && st.Name == "null" {
+				dp.Type = nil
+			}
 		}
 
-		typePattern := TypePattern{
-			NodeMeta: createNodeMeta(patternNode),
-			Type:     typePatternType,
-		}
-
-		if remaining == "" {
-			return &typePattern, nil
-		}
-
-		if len(strings.Fields(remaining)) == 1 {
-			return &DeclarationPattern{
-				TypePattern: typePattern,
-				Identifier:  remaining,
-			}, nil
-		}
-
-		return nil, parseError(patternNode, "unable to parse pattern. Expected a type name, or a type name and an identifier, or a discard `_`")
+		return pat, nil
 	default:
 		return nil, parseError(patternNode, "expected pattern to be a string")
 	}
@@ -729,7 +713,7 @@ func UnmarshalTypeYAML(value *yaml.Node) (Type, error) {
 	case "!!null":
 		return nil, nil
 	case "!!str":
-		parsedTypeTree, err := parseSimpleTypeString(value.Value)
+		parsedTypeTree, err := parseSimpleType2(value.Value)
 		if err != nil {
 			return nil, parseError(value, err.Error())
 		}
