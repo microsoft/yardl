@@ -16,7 +16,7 @@ import (
 
 	"github.com/alecthomas/participle/v2/lexer"
 	"github.com/microsoft/yardl/tooling/internal/validation"
-	"github.com/microsoft/yardl/tooling/pkg/dsl/expressions"
+	"github.com/microsoft/yardl/tooling/pkg/dsl/parser"
 	"github.com/microsoft/yardl/tooling/pkg/packaging"
 	"gopkg.in/yaml.v3"
 )
@@ -114,7 +114,7 @@ func (meta *DefinitionMeta) UnmarshalYAML(value *yaml.Node) error {
 	meta.NodeMeta = createNodeMeta(value)
 	meta.Name = value.Value
 
-	parsedTypeString, err := parseType(meta.Name)
+	parsedTypeString, err := parser.ParseType(meta.Name)
 	if err != nil {
 		return parseError(value, err.Error())
 	}
@@ -253,9 +253,9 @@ func UnmarshalExpression(value *yaml.Node) (Expression, error) {
 	case "!!null":
 		return nil, parseError(value, "An expression cannot be null")
 	case "!!str", "!!int", "!!float", "!!bool", "!switch":
-		exp, err := expressions.ParseExpression(value.Value)
+		exp, err := parser.ParseExpression(value.Value)
 		if err != nil {
-			if err, ok := err.(expressions.ParseError); ok {
+			if err, ok := err.(parser.ParseError); ok {
 				line := value.Line + err.Position().Line - 1
 				column := value.Column + err.Position().Column - 1
 				return nil, validation.ValidationError{
@@ -332,7 +332,7 @@ func UnmarshalPattern(patternNode *yaml.Node) (Pattern, error) {
 		}, nil
 
 	case "!!str":
-		patAst, err := parsePattern(patternNode.Value)
+		patAst, err := parser.ParsePattern(patternNode.Value)
 		if err != nil {
 			return nil, parseError(patternNode, err.Error())
 		}
@@ -357,7 +357,7 @@ func UnmarshalPattern(patternNode *yaml.Node) (Pattern, error) {
 	}
 }
 
-func convertType(ast *TypeAst, node NodeMeta) Type {
+func convertType(ast *parser.Type, node NodeMeta) Type {
 	nodeWithPositionUpdated := node
 	nodeWithPositionUpdated.Column += ast.Pos.Offset
 
@@ -381,7 +381,7 @@ func convertType(ast *TypeAst, node NodeMeta) Type {
 	return t
 }
 
-func applyTypeTail(inner Type, tail TypeTail) Type {
+func applyTypeTail(inner Type, tail parser.TypeTail) Type {
 	nodeMeta := *inner.GetNodeMeta()
 	gt := GeneralizedType{
 		NodeMeta: nodeMeta,
@@ -421,7 +421,7 @@ func applyTypeTail(inner Type, tail TypeTail) Type {
 	return &gt
 }
 
-func convertPattern(pat *PatternAst, node NodeMeta) Pattern {
+func convertPattern(pat *parser.Pattern, node NodeMeta) Pattern {
 	if pat.Discard {
 		return &DiscardPattern{NodeMeta: node}
 	}
@@ -437,7 +437,7 @@ func convertPattern(pat *PatternAst, node NodeMeta) Pattern {
 	panic("unreachable")
 }
 
-func ConvertExpression(expression expressions.Expression, hostNode *yaml.Node) Expression {
+func ConvertExpression(expression parser.Expression, hostNode *yaml.Node) Expression {
 	createNodeMeta := func(pos lexer.Position) NodeMeta {
 		return NodeMeta{
 			Line:   hostNode.Line + pos.Line - 1,
@@ -446,7 +446,7 @@ func ConvertExpression(expression expressions.Expression, hostNode *yaml.Node) E
 	}
 
 	switch expression := expression.(type) {
-	case expressions.IntegerLiteral:
+	case parser.IntegerLiteral:
 		exp := &IntegerLiteralExpression{
 			NodeMeta: createNodeMeta(expression.Pos),
 		}
@@ -454,12 +454,12 @@ func ConvertExpression(expression expressions.Expression, hostNode *yaml.Node) E
 		exp.Value.UnmarshalText([]byte(expression.Value))
 		return exp
 
-	case expressions.StringLiteral:
+	case parser.StringLiteral:
 		return &StringLiteralExpression{
 			NodeMeta: createNodeMeta(expression.Pos),
 			Value:    expression.Value,
 		}
-	case expressions.PathExpr:
+	case parser.PathExpr:
 		var target Expression
 		for i, part := range expression.Parts {
 			curr := &MemberAccessExpression{
@@ -500,7 +500,7 @@ func ConvertExpression(expression expressions.Expression, hostNode *yaml.Node) E
 
 		return target
 
-	case expressions.FunctionCall:
+	case parser.FunctionCall:
 		args := make([]Expression, len(expression.Arguments))
 		for i, arg := range expression.Arguments {
 			args[i] = ConvertExpression(arg, hostNode)
@@ -794,7 +794,7 @@ func UnmarshalTypeYAML(value *yaml.Node) (Type, error) {
 	case "!!null":
 		return nil, nil
 	case "!!str":
-		parsedTypeTree, err := parseType(value.Value)
+		parsedTypeTree, err := parser.ParseType(value.Value)
 		if err != nil {
 			return nil, parseError(value, err.Error())
 		}

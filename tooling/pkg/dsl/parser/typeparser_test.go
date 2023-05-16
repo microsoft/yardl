@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-package dsl
+package parser
 
 import (
 	"testing"
@@ -56,7 +56,7 @@ func TestTypeParsing_Valid(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.input, func(t *testing.T) {
-			ts, err := parseType(tc.input)
+			ts, err := ParseType(tc.input)
 			assert.Nil(t, err)
 			assert.Nil(t, err)
 			assert.Equal(t, tc.expected, ts.String())
@@ -69,14 +69,14 @@ func TestTypeParsing_Invalid(t *testing.T) {
 		input    string
 		expected string
 	}{
-		{input: "Foo<", expected: `unexpected token "<EOF>" (expected TypeAst ("," TypeAst)* ">")`},
+		{input: "Foo<", expected: `unexpected token "<EOF>" (expected Type ("," Type)* ">")`},
 		{input: "Foo?<int>", expected: `unexpected token "<"`},
 		{input: "Foo<int>>", expected: `unexpected token ">"`},
 		{input: "Foo<int>,bar>", expected: `unexpected token ","`},
 		{input: "<int>", expected: `unexpected token "<"`},
 		{input: "Foo<>", expected: `unexpected token ">"`},
 		{input: "Foo<int,>", expected: `unexpected token "," (expected ">")`},
-		{input: "string->", expected: `unexpected token "<EOF>" (expected TypeAst)`},
+		{input: "string->", expected: `unexpected token "<EOF>" (expected Type)`},
 		{input: "int[", expected: `unexpected token "<EOF>" (expected "]")`},
 		{input: "int[/]", expected: `unexpected token "/" (expected "]")`},
 		{input: "int[x:]", expected: `unexpected token "]" (expected integer)`},
@@ -87,7 +87,7 @@ func TestTypeParsing_Invalid(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.input, func(t *testing.T) {
-			_, err := parseType(tc.input)
+			_, err := ParseType(tc.input)
 			t.Log(err)
 			assert.ErrorContains(t, err, tc.expected)
 		})
@@ -95,5 +95,5 @@ func TestTypeParsing_Invalid(t *testing.T) {
 }
 
 func TestTypeParsing2(t *testing.T) {
-	parseType("Foo<A>")
+	ParseType("Foo<A>")
 }

@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-package dsl
+package parser
 
 import (
 	"fmt"
@@ -13,14 +13,14 @@ import (
 	"github.com/alecthomas/participle/v2/lexer"
 )
 
-type TypeAst struct {
+type Type struct {
 	Pos   lexer.Position
-	Named *NameAst   `(@@`
-	Sub   *TypeAst   ` | '(' @@ ')')`
-	Tails []TypeTail `@@*`
+	Named *TypeName  `parser:"(@@"`
+	Sub   *Type      `parser:" | '(' @@ ')')"`
+	Tails []TypeTail `parser:"@@*"`
 }
 
-func (t TypeAst) String() string {
+func (t Type) String() string {
 	var val string
 	if t.Named != nil {
 		val = t.Named.String()
@@ -34,13 +34,13 @@ func (t TypeAst) String() string {
 	return val
 }
 
-type NameAst struct {
+type TypeName struct {
 	Pos      lexer.Position
-	Name     string     `@Ident`
-	TypeArgs []*TypeAst `('<' @@ (',' @@)* '>')?`
+	Name     string  `parser:"@Ident"`
+	TypeArgs []*Type `parser:"('<' @@ (',' @@)* '>')?"`
 }
 
-func (n NameAst) String() string {
+func (n TypeName) String() string {
 	if len(n.TypeArgs) == 0 {
 		return fmt.Sprintf("'%s'", n.Name)
 	}
@@ -54,10 +54,10 @@ func (n NameAst) String() string {
 }
 
 type TypeTail struct {
-	Optional bool       `  @'?'`
-	MapValue *TypeAst   `| '-' '>' @@`
-	Vector   *VectorAst `| '*' @@`
-	Array    *ArrayAst  `| '[' @@`
+	Optional bool    `parser:"  @'?'"`
+	MapValue *Type   `parser:"| '-' '>' @@"`
+	Vector   *Vector `parser:"| '*' @@"`
+	Array    *Array  `parser:"| '[' @@"`
 }
 
 func (t TypeTail) String(target string) string {
@@ -95,20 +95,20 @@ func (t TypeTail) String(target string) string {
 	panic("unreachable")
 }
 
-type VectorAst struct {
-	Length *uint64 `@Int?`
+type Vector struct {
+	Length *uint64 `parser:"@Int?"`
 }
 
-type ArrayAst struct {
-	Dimensions []ArrayDimensionAst `']' | ((@@ (',' @@)*) ']')`
+type Array struct {
+	Dimensions []ArrayDimension `parser:"']' | ((@@ (',' @@)*) ']')"`
 }
 
-type ArrayDimensionAst struct {
+type ArrayDimension struct {
 	Name   *string
 	Length *uint64
 }
 
-func (a *ArrayDimensionAst) Parse(lex *lexer.PeekingLexer) error {
+func (a *ArrayDimension) Parse(lex *lexer.PeekingLexer) error {
 	parenCount := 0
 	for lex.Peek().Type == '(' {
 		lex.Next()
@@ -149,6 +149,25 @@ func (a *ArrayDimensionAst) Parse(lex *lexer.PeekingLexer) error {
 	return nil
 }
 
+type Pattern struct {
+	Discard  bool    `parser:"  @'_'"`
+	Type     *Type   `parser:"| (@@"`
+	Variable *string `parser:"   @Ident?)"`
+}
+
+var (
+	typeParser    = participle.MustBuild[Type]()
+	patternParser = participle.MustBuild[Pattern]()
+)
+
+func ParseType(input string) (*Type, error) {
+	return typeParser.ParseString("", input)
+}
+
+func ParsePattern(input string) (*Pattern, error) {
+	return patternParser.ParseString("", input)
+}
+
 func parseUnit64(lex *lexer.PeekingLexer) (uint64, error) {
 	if lex.Peek().Type != scanner.Int {
 		return 0, &participle.UnexpectedTokenError{
@@ -165,23 +184,4 @@ func parseUnit64(lex *lexer.PeekingLexer) (uint64, error) {
 		Pos: tok.Pos,
 	}
 
-}
-
-type PatternAst struct {
-	Discard  bool     `  @'_'`
-	Type     *TypeAst `| (@@`
-	Variable *string  `   @Ident?)`
-}
-
-var (
-	typeParser    = participle.MustBuild[TypeAst]()
-	patternParser = participle.MustBuild[PatternAst]()
-)
-
-func parseType(input string) (*TypeAst, error) {
-	return typeParser.ParseString("", input)
-}
-
-func parsePattern(input string) (*PatternAst, error) {
-	return patternParser.ParseString("", input)
 }
