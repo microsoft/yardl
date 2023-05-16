@@ -96,7 +96,7 @@ COPY --from=file-normalizer /data/devcontainer.bashrc /opt/devcontainer/
 # We can't just write to .bashrc from here because it will be overwritten if the devcontainer user has
 # opted to use their own dotfiles repo. The dotfiles repo is cloned after the postCreateCommand
 # in the devcontainer.json file is executed.
-RUN echo -e "\n\
+RUN echo "\n\
 if ! grep -q \"^source /opt/devcontainer/devcontainer.bashrc\" \${HOME}/.bashrc; then\n\
 	echo \"source /opt/devcontainer/devcontainer.bashrc\" >> \${HOME}/.bashrc\n\
 fi\n" >> /etc/bash.bashrc
