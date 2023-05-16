@@ -398,6 +398,123 @@
         },
         {
           "record": {
+            "name": "RecordWithArraysSimpleSyntax",
+            "fields": [
+              {
+                "name": "defaultArray",
+                "type": {
+                  "array": {
+                    "items": "int32"
+                  }
+                }
+              },
+              {
+                "name": "defaultArrayWithEmptyDimension",
+                "type": {
+                  "array": {
+                    "items": "int32"
+                  }
+                }
+              },
+              {
+                "name": "rank1Array",
+                "type": {
+                  "array": {
+                    "items": "int32",
+                    "dimensions": 1
+                  }
+                }
+              },
+              {
+                "name": "rank2Array",
+                "type": {
+                  "array": {
+                    "items": "int32",
+                    "dimensions": 2
+                  }
+                }
+              },
+              {
+                "name": "rank2ArrayWithNamedDimensions",
+                "type": {
+                  "array": {
+                    "items": "int32",
+                    "dimensions": [
+                      {
+                        "name": "a"
+                      },
+                      {
+                        "name": "b"
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "name": "rank2FixedArray",
+                "type": {
+                  "array": {
+                    "items": "int32",
+                    "dimensions": [
+                      {
+                        "length": 3
+                      },
+                      {
+                        "length": 4
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "name": "rank2FixedArrayWithNamedDimensions",
+                "type": {
+                  "array": {
+                    "items": "int32",
+                    "dimensions": [
+                      {
+                        "name": "a",
+                        "length": 3
+                      },
+                      {
+                        "name": "b",
+                        "length": 4
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "name": "dynamicArray",
+                "type": {
+                  "array": {
+                    "items": "int32"
+                  }
+                }
+              },
+              {
+                "name": "arrayOfVectors",
+                "type": {
+                  "array": {
+                    "items": {
+                      "vector": {
+                        "items": "int32",
+                        "length": 4
+                      }
+                    },
+                    "dimensions": [
+                      {
+                        "length": 5
+                      }
+                    ]
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "record": {
             "name": "RecordWithOptionalFields",
             "fields": [
               {

@@ -150,6 +150,24 @@ struct IsTriviallySerializable<test_model::RecordWithArrays> {
 };
 
 template <>
+struct IsTriviallySerializable<test_model::RecordWithArraysSimpleSyntax> {
+  using __T__ = test_model::RecordWithArraysSimpleSyntax;
+  static constexpr bool value = 
+    std::is_standard_layout_v<__T__> &&
+    IsTriviallySerializable<decltype(__T__::default_array)>::value &&
+    IsTriviallySerializable<decltype(__T__::default_array_with_empty_dimension)>::value &&
+    IsTriviallySerializable<decltype(__T__::rank1_array)>::value &&
+    IsTriviallySerializable<decltype(__T__::rank2_array)>::value &&
+    IsTriviallySerializable<decltype(__T__::rank2_array_with_named_dimensions)>::value &&
+    IsTriviallySerializable<decltype(__T__::rank2_fixed_array)>::value &&
+    IsTriviallySerializable<decltype(__T__::rank2_fixed_array_with_named_dimensions)>::value &&
+    IsTriviallySerializable<decltype(__T__::dynamic_array)>::value &&
+    IsTriviallySerializable<decltype(__T__::array_of_vectors)>::value &&
+    (sizeof(__T__) == (sizeof(__T__::default_array) + sizeof(__T__::default_array_with_empty_dimension) + sizeof(__T__::rank1_array) + sizeof(__T__::rank2_array) + sizeof(__T__::rank2_array_with_named_dimensions) + sizeof(__T__::rank2_fixed_array) + sizeof(__T__::rank2_fixed_array_with_named_dimensions) + sizeof(__T__::dynamic_array) + sizeof(__T__::array_of_vectors))) &&
+    offsetof(__T__, default_array) < offsetof(__T__, default_array_with_empty_dimension) && offsetof(__T__, default_array_with_empty_dimension) < offsetof(__T__, rank1_array) && offsetof(__T__, rank1_array) < offsetof(__T__, rank2_array) && offsetof(__T__, rank2_array) < offsetof(__T__, rank2_array_with_named_dimensions) && offsetof(__T__, rank2_array_with_named_dimensions) < offsetof(__T__, rank2_fixed_array) && offsetof(__T__, rank2_fixed_array) < offsetof(__T__, rank2_fixed_array_with_named_dimensions) && offsetof(__T__, rank2_fixed_array_with_named_dimensions) < offsetof(__T__, dynamic_array) && offsetof(__T__, dynamic_array) < offsetof(__T__, array_of_vectors);
+};
+
+template <>
 struct IsTriviallySerializable<test_model::RecordWithOptionalFields> {
   using __T__ = test_model::RecordWithOptionalFields;
   static constexpr bool value = 
@@ -656,6 +674,40 @@ namespace {
 
 [[maybe_unused]] void ReadRecordWithArrays(yardl::binary::CodedInputStream& stream, test_model::RecordWithArrays& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<test_model::RecordWithArrays>::value) {
+    yardl::binary::ReadTriviallySerializable(stream, value);
+    return;
+  }
+
+  yardl::binary::ReadDynamicNDArray<int32_t, yardl::binary::ReadInteger>(stream, value.default_array);
+  yardl::binary::ReadDynamicNDArray<int32_t, yardl::binary::ReadInteger>(stream, value.default_array_with_empty_dimension);
+  yardl::binary::ReadNDArray<int32_t, yardl::binary::ReadInteger, 1>(stream, value.rank1_array);
+  yardl::binary::ReadNDArray<int32_t, yardl::binary::ReadInteger, 2>(stream, value.rank2_array);
+  yardl::binary::ReadNDArray<int32_t, yardl::binary::ReadInteger, 2>(stream, value.rank2_array_with_named_dimensions);
+  yardl::binary::ReadFixedNDArray<int32_t, yardl::binary::ReadInteger, 3, 4>(stream, value.rank2_fixed_array);
+  yardl::binary::ReadFixedNDArray<int32_t, yardl::binary::ReadInteger, 3, 4>(stream, value.rank2_fixed_array_with_named_dimensions);
+  yardl::binary::ReadDynamicNDArray<int32_t, yardl::binary::ReadInteger>(stream, value.dynamic_array);
+  yardl::binary::ReadFixedNDArray<std::array<int32_t, 4>, yardl::binary::ReadArray<int32_t, yardl::binary::ReadInteger, 4>, 5>(stream, value.array_of_vectors);
+}
+
+[[maybe_unused]] void WriteRecordWithArraysSimpleSyntax(yardl::binary::CodedOutputStream& stream, test_model::RecordWithArraysSimpleSyntax const& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<test_model::RecordWithArraysSimpleSyntax>::value) {
+    yardl::binary::WriteTriviallySerializable(stream, value);
+    return;
+  }
+
+  yardl::binary::WriteDynamicNDArray<int32_t, yardl::binary::WriteInteger>(stream, value.default_array);
+  yardl::binary::WriteDynamicNDArray<int32_t, yardl::binary::WriteInteger>(stream, value.default_array_with_empty_dimension);
+  yardl::binary::WriteNDArray<int32_t, yardl::binary::WriteInteger, 1>(stream, value.rank1_array);
+  yardl::binary::WriteNDArray<int32_t, yardl::binary::WriteInteger, 2>(stream, value.rank2_array);
+  yardl::binary::WriteNDArray<int32_t, yardl::binary::WriteInteger, 2>(stream, value.rank2_array_with_named_dimensions);
+  yardl::binary::WriteFixedNDArray<int32_t, yardl::binary::WriteInteger, 3, 4>(stream, value.rank2_fixed_array);
+  yardl::binary::WriteFixedNDArray<int32_t, yardl::binary::WriteInteger, 3, 4>(stream, value.rank2_fixed_array_with_named_dimensions);
+  yardl::binary::WriteDynamicNDArray<int32_t, yardl::binary::WriteInteger>(stream, value.dynamic_array);
+  yardl::binary::WriteFixedNDArray<std::array<int32_t, 4>, yardl::binary::WriteArray<int32_t, yardl::binary::WriteInteger, 4>, 5>(stream, value.array_of_vectors);
+}
+
+[[maybe_unused]] void ReadRecordWithArraysSimpleSyntax(yardl::binary::CodedInputStream& stream, test_model::RecordWithArraysSimpleSyntax& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<test_model::RecordWithArraysSimpleSyntax>::value) {
     yardl::binary::ReadTriviallySerializable(stream, value);
     return;
   }

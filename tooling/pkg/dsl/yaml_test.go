@@ -119,6 +119,27 @@ x: !protocol
 	require.Equal(t, "comment on step", ns.Protocols[0].Sequence[0].Comment)
 }
 
+func TestGenericTypeWithInvalidNestedGenerics(t *testing.T) {
+	src := `
+Foo<X<Y>>: string`
+	_, err := parse(t, src)
+	require.ErrorContains(t, err, "generic type parameters cannot themselves have generic type parameters")
+}
+
+func TestGenericTypeWithInvalidGenerics(t *testing.T) {
+	src := `
+Foo<A->B>: string`
+	_, err := parse(t, src)
+	require.ErrorContains(t, err, "invalid type parameter name")
+}
+
+func TestTypeDeclarationWithInvalid(t *testing.T) {
+	src := `
+int->string: string`
+	_, err := parse(t, src)
+	require.ErrorContains(t, err, "not a valid type declaration name")
+}
+
 func RequireType[T any](t *testing.T, value any) T {
 	if typed, ok := value.(T); ok {
 		return typed

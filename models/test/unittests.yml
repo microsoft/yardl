@@ -43,15 +43,9 @@ TupleWithRecords: !record
 
 RecordWithVectors: !record
   fields:
-    defaultVector: !vector
-      items: int
-    defaultVectorFixedLength: !vector
-      items: int
-      length: 3
-    vectorOfVectors: !vector
-      items: !vector
-        items: int
-        length: 2
+    defaultVector: int*
+    defaultVectorFixedLength: int*3
+    vectorOfVectors: int*2*
 
 RecordWithArrays: !record
   fields:
@@ -87,6 +81,18 @@ RecordWithArrays: !record
         length: 4
       dimensions: [5]
 
+RecordWithArraysSimpleSyntax: !record
+  fields:
+    defaultArray: int[]
+    defaultArrayWithEmptyDimension: int[]
+    rank1Array: int[()]
+    rank2Array: int[,]
+    rank2ArrayWithNamedDimensions: int[a,b]
+    rank2FixedArray: int[3,4]
+    rank2FixedArrayWithNamedDimensions: int[a:3,b:4]
+    dynamicArray: int[]
+    arrayOfVectors: int*4[5]
+
 Scalars: !protocol
   sequence:
     int32: int32
@@ -117,13 +123,10 @@ RecordWithVlens: !record
 
 Vlens: !protocol
   sequence:
-    intVector: !vector
-      items: int
-    complexVector: !vector
-      items: complexfloat32
+    intVector: int*
+    complexVector: complexfloat32*
     recordWithVlens: RecordWithVlens
-    vlenOfRecordWithVlens: !vector
-      items: RecordWithVlens
+    vlenOfRecordWithVlens: RecordWithVlens*
 
 RecordWithStrings: !record
   fields:
@@ -148,9 +151,7 @@ OptionalVectors: !protocol
 
 RecordWithFixedVectors: !record
   fields:
-    fixedIntVector: !vector
-      length: 5
-      items: int
+    fixedIntVector: int*5
     fixedSimpleRecordVector: !vector
       length: 3
       items: SimpleRecord
@@ -160,15 +161,9 @@ RecordWithFixedVectors: !record
 
 FixedVectors: !protocol
   sequence:
-    fixedIntVector: !vector
-      length: 5
-      items: int
-    fixedSimpleRecordVector: !vector
-      length: 3
-      items: SimpleRecord
-    fixedRecordWithVlensVector: !vector
-      length: 2
-      items: RecordWithVlens
+    fixedIntVector: int*5
+    fixedSimpleRecordVector: SimpleRecord*3
+    fixedRecordWithVlensVector: RecordWithVlens*2
     recordWithFixedVectors: RecordWithFixedVectors
 
 Streams: !protocol
@@ -180,116 +175,64 @@ Streams: !protocol
     recordWithOptionalVectorData: !stream
       items: RecordWithOptionalVector
     fixedVector: !stream
-      items: !vector
-        items: int
-        length: 3
+      items: int*3
 
 RecordWithFixedArrays: !record
   fields:
-    ints: !array
-      items: int
-      dimensions: [2, 3]
-    fixedSimpleRecordArray: !array
-      items: SimpleRecord
-      dimensions: [3, 2]
-    fixedRecordWithVlensArray: !array
-      items: RecordWithVlens
-      dimensions: [2, 2]
+    ints: int[2, 3]
+    fixedSimpleRecordArray: SimpleRecord[3, 2]
+    fixedRecordWithVlensArray: RecordWithVlens[2, 2]
 
 RecordWithNDArrays: !record
   fields:
-    ints: !array
-      items: int
-      dimensions: 2
-    fixedSimpleRecordArray: !array
-      items: SimpleRecord
-      dimensions: 2
-    fixedRecordWithVlensArray: !array
-      items: RecordWithVlens
-      dimensions: 2
+    ints: int[,]
+    fixedSimpleRecordArray: SimpleRecord[,]
+    fixedRecordWithVlensArray: RecordWithVlens[,]
 
 RecordWithNDArraysSingleDimension: !record
   fields:
-    ints: !array
-      items: int
-      dimensions: 1
-    fixedSimpleRecordArray: !array
-      items: SimpleRecord
-      dimensions: 1
-    fixedRecordWithVlensArray: !array
-      items: RecordWithVlens
-      dimensions: 1
+    ints: int[()]
+    fixedSimpleRecordArray: SimpleRecord[()]
+    fixedRecordWithVlensArray: RecordWithVlens[()]
 
 RecordWithDynamicNDArrays: !record
   fields:
-    ints: !array
-      items: int
-    fixedSimpleRecordArray: !array
-      items: SimpleRecord
-    fixedRecordWithVlensArray: !array
-      items: RecordWithVlens
+    ints: int[]
+    fixedSimpleRecordArray: SimpleRecord[]
+    fixedRecordWithVlensArray: RecordWithVlens[]
 
-NamedFixedNDArray: !array
-  items: int
-  dimensions:
-    dimA: 2
-    dimB: 4
+NamedFixedNDArray: int[dimA:2, dimB:4]
 
 FixedArrays: !protocol
   sequence:
-    ints: !array
-      items: int
-      dimensions: [2, 3]
-    fixedSimpleRecordArray: !array
-      items: SimpleRecord
-      dimensions: [3, 2]
-    fixedRecordWithVlensArray: !array
-      items: RecordWithVlens
-      dimensions: [2, 2]
+    ints: int[2, 3]
+    fixedSimpleRecordArray: SimpleRecord[3, 2]
+    fixedRecordWithVlensArray: RecordWithVlens[2, 2]
     recordWithFixedArrays: RecordWithFixedArrays
     namedArray: NamedFixedNDArray
 
-NamedNDArray: !array
-  items: int
-  dimensions:
-    dimA:
-    dimB:
+NamedNDArray: int[dimA, dimB]
 
 NDArrays: !protocol
   sequence:
-    ints: !array
-      items: int
-      dimensions: 2
-    simpleRecordArray: !array
-      items: SimpleRecord
-      dimensions: 2
-    recordWithVlensArray: !array
-      items: RecordWithVlens
-      dimensions: 2
+    ints: int[,]
+    simpleRecordArray: SimpleRecord[,]
+    recordWithVlensArray: RecordWithVlens[,]
     recordWithNDArrays: RecordWithNDArrays
     namedArray: NamedNDArray
 
 NDArraysSingleDimension: !protocol
   sequence:
-    ints: !array
-      items: int
-      dimensions: 1
-    simpleRecordArray: !array
-      items: SimpleRecord
-      dimensions: 1
-    recordWithVlensArray: !array
-      items: RecordWithVlens
-      dimensions: 1
+    ints: int[()]
+    simpleRecordArray: SimpleRecord[()]
+    recordWithVlensArray: RecordWithVlens[()]
     recordWithNDArrays: RecordWithNDArraysSingleDimension
 
 DynamicNDArrays: !protocol
   sequence:
-    ints: !array
-      items: int
-    simpleRecordArray: !array
-      items: SimpleRecord
-    recordWithVlensArray: !array
-      items: RecordWithVlens
+    ints: int[]
+    simpleRecordArray: SimpleRecord[]
+    recordWithVlensArray: RecordWithVlens[]
     recordWithDynamicNDArrays: RecordWithDynamicNDArrays
 
 AliasedMap<K,V>: K->V
@@ -338,7 +281,7 @@ SizeBasedEnum: !enum
 Enums: !protocol
   sequence:
     single: Fruits
-    vec: !vector { items: Fruits }
+    vec: Fruits*
     size: SizeBasedEnum
 
 StateTest: !protocol
@@ -348,18 +291,13 @@ StateTest: !protocol
       items: int
     anotherInt: int
 
-Image<T>: !array
-  items: T
-  dimensions:
-    x:
-    y:
+Image<T>: T[x, y]
 
 GenericRecord<T1, T2>: !record
   fields:
     scalar1: T1
     scalar2: T2
-    vector1: !vector
-      items: T1
+    vector1: T1*
     image2: Image<T2>
 
 MyTuple<T1, T2>: !record
@@ -397,8 +335,8 @@ AdvancedGenerics: !protocol
     tupleOfVectors: !generic
       name: MyTuple
       args:
-        - !vector { items: int }
-        - !vector { items: float }
+        - int*
+        - float*
 
 AliasedString: string
 AliasedEnum: Fruits
@@ -407,8 +345,8 @@ AliasedClosedGeneric: MyTuple<AliasedString, AliasedEnum>
 AliasedOptional: int?
 AliasedGenericOptional<T>: T?
 AliasedGenericUnion2<T1,T2>: [T1, T2]
-AliasedGenericVector<T>: !vector { items: T }
-AliasedGenericFixedVector<T>: !vector { items: T, length: 3 }
+AliasedGenericVector<T>: T*
+AliasedGenericFixedVector<T>: T*3
 
 Aliases: !protocol
   sequence:
@@ -436,27 +374,16 @@ StreamsOfAliasedUnions: !protocol
 
 RecordWithComputedFields: !record
   fields:
-    arrayField: !array
-      items: int
-      dimensions: [x, y]
-    arrayFieldMapDimensions: !array
-      items: int
-      dimensions:
-        x:
-        y:
-    dynamicArrayField: !array
-      items: int
-    fixedArrayField: !array
-      items: int
-      dimensions:
-        x: 3
-        y: 4
+    arrayField: int[x, y]
+    arrayFieldMapDimensions: int[x,y]
+    dynamicArrayField: int[]
+    fixedArrayField: int[x:3, y:4]
     intField: int
     stringField: string
     tupleField: MyTuple<int, int>
-    vectorField: !vector { items: int }
-    vectorOfVectorsField: !vector { items: !vector { items: int } }
-    fixedVectorField: !vector { items: int, length: 3 }
+    vectorField: int*
+    vectorOfVectorsField: int**
+    fixedVectorField: int*3
     optionalNamedArray: NamedNDArray?
     intFloatUnion: [int, float]
     nullableIntFloatUnion: [null, int, float]
