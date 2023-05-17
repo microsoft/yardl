@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-#include "../generated/yardl/detail/binary/stream.h"
+#include "../generated/yardl/detail/stream/stream.h"
 
 #include <fstream>
 #include <iostream>
@@ -12,7 +12,7 @@
 
 #include "../yardl_testing.h"
 
-using namespace yardl::binary;
+using namespace yardl::stream;
 using namespace yardl::testing;
 using ::testing::StrictMock;
 

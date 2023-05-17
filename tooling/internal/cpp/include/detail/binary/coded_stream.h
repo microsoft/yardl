@@ -10,7 +10,7 @@
 #include <utility>
 #include <vector>
 
-#include "stream.h"
+#include "../stream/stream.h"
 
 namespace yardl::binary {
 
@@ -159,7 +159,7 @@ class CodedOutputStream {
     }
   }
 
-  WritableStream stream_;
+  yardl::stream::WritableStream stream_;
   std::vector<uint8_t> buffer_;
   uint8_t* buffer_ptr_;
   uint8_t* buffer_end_ptr_;
@@ -352,7 +352,7 @@ class CodedInputStream {
     return buffer_end_ptr_ - buffer_ptr_;
   }
 
-  ReadableStream stream_;
+  yardl::stream::ReadableStream stream_;
   std::vector<uint8_t> buffer_;
   uint8_t* buffer_ptr_;
   uint8_t* buffer_end_ptr_;

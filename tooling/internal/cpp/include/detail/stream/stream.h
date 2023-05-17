@@ -7,7 +7,7 @@
 #include <memory>
 #include <variant>
 
-namespace yardl::binary {
+namespace yardl::stream {
 
 template <typename T, typename = void>
 struct IsWritable : std::false_type {
@@ -255,4 +255,4 @@ class ReadableStream {
 
   std::unique_ptr<ReadableStreamImpl> impl_;
 };
-}  // namespace yardl::binary
+}  // namespace yardl::stream
