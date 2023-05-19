@@ -33,8 +33,10 @@ func WriteNdJson(env *dsl.Environment, options packaging.CppCodegenOptions) erro
 	// writeIsTriviallySerializableSpecializations(w, env)
 	// writeUnionSerializers(w, env)
 	for _, ns := range env.Namespaces {
+		w.WriteStringln("using json = nlohmann::ordered_json;")
+
 		fmt.Fprintf(w, "namespace %s::ndjson {\n", common.NamespaceIdentifierName(ns.Name))
-		// writeNamespaceDefinitions(w, ns)
+		writeNamespaceDefinitions(w, ns)
 		fmt.Fprintf(w, "} // namespace %s::ndjson", common.NamespaceIdentifierName(ns.Name))
 	}
 
@@ -70,13 +72,18 @@ func writeHeaderFile(env *dsl.Environment, options packaging.CppCodegenOptions) 
 			fmt.Fprintf(w, "class %s : public %s, yardl::ndjson::NDJsonWriter {\n", writerClassName, common.QualifiedAbstractWriterName(protocol))
 			w.Indented(func() {
 				w.WriteStringln("public:")
-				common.WriteComment(w, "The stream_arg parameter can either be a std::string filename")
-				common.WriteComment(w, "or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::ostream.")
-				w.WriteStringln("template <typename TStreamArg>")
-				fmt.Fprintf(w, "%s(TStreamArg&& stream_arg)\n", writerClassName)
+				fmt.Fprintf(w, "%s(std::ostream& stream)\n", writerClassName)
 				w.Indented(func() {
 					w.Indented(func() {
-						w.WriteStringln(": yardl::ndjson::NDJsonWriter(std::forward<TStreamArg>(stream_arg), schema_) {")
+						w.WriteStringln(": yardl::ndjson::NDJsonWriter(stream, schema_) {")
+					})
+				})
+				w.WriteStringln("}\n")
+
+				fmt.Fprintf(w, "%s(std::string file_name)\n", writerClassName)
+				w.Indented(func() {
+					w.Indented(func() {
+						w.WriteStringln(": yardl::ndjson::NDJsonWriter(file_name, schema_) {")
 					})
 				})
 				w.WriteStringln("}\n")
@@ -106,13 +113,18 @@ func writeHeaderFile(env *dsl.Environment, options packaging.CppCodegenOptions) 
 			fmt.Fprintf(w, "class %s : public %s, yardl::ndjson::NDJsonReader {\n", readerClassName, common.QualifiedAbstractReaderName(protocol))
 			w.Indented(func() {
 				fmt.Fprintln(w, "public:")
-				common.WriteComment(w, "The stream_arg parameter can either be a std::string filename")
-				common.WriteComment(w, "or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::istream.")
-				w.WriteStringln("template <typename TStreamArg>")
-				fmt.Fprintf(w, "%s(TStreamArg&& stream_arg)\n", readerClassName)
+				fmt.Fprintf(w, "%s(std::istream& stream)\n", readerClassName)
 				w.Indented(func() {
 					w.Indented(func() {
-						w.WriteStringln(": yardl::ndjson::NDJsonReader(std::forward<TStreamArg>(stream_arg), schema_) {")
+						w.WriteStringln(": yardl::ndjson::NDJsonReader(stream, schema_) {")
+					})
+				})
+				w.WriteStringln("}\n")
+
+				fmt.Fprintf(w, "%s(std::string file_name)\n", readerClassName)
+				w.Indented(func() {
+					w.Indented(func() {
+						w.WriteStringln(": yardl::ndjson::NDJsonReader(file_name, schema_) {")
 					})
 				})
 				w.WriteStringln("}\n")
@@ -147,6 +159,92 @@ func writeHeaderFile(env *dsl.Environment, options packaging.CppCodegenOptions) 
 
 	filePath := path.Join(options.SourcesOutputDir, "protocols.h")
 	return iocommon.WriteFileIfNeeded(filePath, b.Bytes(), 0644)
+}
+
+func writeNamespaceDefinitions(w *formatting.IndentedWriter, ns *dsl.Namespace) {
+	if len(ns.TypeDefinitions) > 0 {
+		w.WriteStringln("namespace {")
+		// for _, typeDef := range ns.TypeDefinitions {
+		// 	writeSerializers(w, typeDef)
+		// }
+		w.WriteString("} // namespace\n\n")
+	}
+
+	for _, protocol := range ns.Protocols {
+		writeProtocolMethods(w, protocol)
+	}
+}
+
+func writeProtocolMethods(w *formatting.IndentedWriter, p *dsl.ProtocolDefinition) {
+	writerClassName := JsonWriterClassName(p)
+
+	for _, step := range p.Sequence {
+		fmt.Fprintf(w, "void %s::%s([[maybe_unused]]%s const& value) {\n", writerClassName, common.ProtocolWriteImplMethodName(step), common.TypeSyntax(step.Type))
+		w.Indented(func() {
+			w.WriteStringln("json json_value = value;")
+			fmt.Fprintf(w, "yardl::ndjson::WriteProtocolValue(stream_, \"%s\", json_value);", step.Name)
+
+			// if step.IsStream() {
+			// 	w.WriteString("yardl::binary::WriteInteger(stream_, 1U);\n")
+			// }
+			// fmt.Fprintf(w, "%s(stream_, value);\n", typeRwFunction(step.Type, true))
+		})
+		w.WriteString("}\n\n")
+
+		// if step.IsStream() {
+		// 	fmt.Fprintf(w, "void %s::%s([[maybe_unused]]std::vector<%s> const& values) {\n", writerClassName, common.ProtocolWriteImplMethodName(step), common.TypeSyntax(step.Type))
+		// 	// w.Indented(func() {
+		// 	// 	w.WriteStringln("if (!values.empty()) {")
+		// 	// 	w.Indented(func() {
+		// 	// 		vectorType := *step.Type.(*dsl.GeneralizedType)
+		// 	// 		vectorType.Dimensionality = &dsl.Vector{}
+		// 	// 		fmt.Fprintf(w, "%s(stream_, values);\n", typeRwFunction(&vectorType, true))
+		// 	// 	})
+		// 	// 	w.WriteStringln("}")
+		// 	// })
+		// 	w.WriteString("}\n\n")
+
+		// 	fmt.Fprintf(w, "void %s::%s() {\n", writerClassName, common.ProtocolWriteEndImplMethodName(step))
+		// 	// w.Indented(func() {
+		// 	// 	w.WriteString("yardl::binary::WriteInteger(stream_, 0U);\n")
+		// 	// })
+		// 	w.WriteString("}\n\n")
+		// }
+	}
+
+	fmt.Fprintf(w, "void %s::Flush() {\n", writerClassName)
+	w.Indented(func() {
+		w.WriteString("stream_.flush();\n")
+	})
+	w.WriteString("}\n\n")
+
+	fmt.Fprintf(w, "void %s::CloseImpl() {\n", writerClassName)
+	w.Indented(func() {
+		w.WriteString("stream_.flush();\n")
+	})
+	w.WriteString("}\n\n")
+
+	readerClassName := JsonReaderClassName(p)
+	for _, step := range p.Sequence {
+		returnType := "void"
+		if step.IsStream() {
+			returnType = "bool"
+		}
+
+		fmt.Fprintf(w, "%s %s::%s([[maybe_unused]]%s& value) {\n", returnType, readerClassName, common.ProtocolReadImplMethodName(step), common.TypeSyntax(step.Type))
+		w.Indented(func() {
+			fmt.Fprintf(w, "yardl::ndjson::ReadProtocolValue(stream_, line_, \"%s\", %t, unused_step_, value);\n", step.Name, step.IsStream())
+
+		})
+		w.WriteString("}\n\n")
+
+	}
+
+	fmt.Fprintf(w, "void %s::CloseImpl() {\n", readerClassName)
+	w.Indented(func() {
+		w.WriteString("VerifyFinished();\n")
+	})
+	w.WriteString("}\n\n")
 }
 
 func JsonWriterClassName(p *dsl.ProtocolDefinition) string {

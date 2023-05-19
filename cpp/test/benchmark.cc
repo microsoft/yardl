@@ -64,7 +64,7 @@ void BenchmarkFloatVlen() {
   }
 
   size_t const repetitions = 10000;
-  size_t const total_size =  sizeof(float) * a.size()  * repetitions;
+  size_t const total_size = sizeof(float) * a.size() * repetitions;
   {
     TimedScope<TWriter> scope(__FUNCTION__, total_size);
     std::unique_ptr<BenchmarkFloatVlenWriterBase> writer = std::make_unique<TWriter>(kOutputFileName);

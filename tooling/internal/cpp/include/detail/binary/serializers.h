@@ -8,8 +8,8 @@
 #include <optional>
 #include <unordered_map>
 #include <utility>
-#include <vector>
 #include <variant>
+#include <vector>
 
 #include "../../yardl.h"
 #include "coded_stream.h"

@@ -71,3 +71,6 @@ validate-with-no-changes: validate
       echo "there are changed files"
       exit 1
     fi
+
+format:
+    find . \( -name generated -prune \) -o \( -name "*.h" -o -name "*.cc" \) -exec clang-format -i {} \;

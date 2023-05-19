@@ -32,6 +32,7 @@ class BinaryWriter {
 
  private:
   std::unique_ptr<std::ofstream> owned_file_stream_{};
+
  protected:
   yardl::binary::CodedOutputStream stream_;
 };
@@ -59,6 +60,7 @@ class BinaryReader {
 
  private:
   std::unique_ptr<std::ifstream> owned_file_stream_{};
+
  protected:
   yardl::binary::CodedInputStream stream_;
 };
