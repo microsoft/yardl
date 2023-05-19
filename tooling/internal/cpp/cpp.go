@@ -15,6 +15,7 @@ import (
 	"github.com/microsoft/yardl/tooling/internal/cpp/binary"
 	"github.com/microsoft/yardl/tooling/internal/cpp/hdf5"
 	"github.com/microsoft/yardl/tooling/internal/cpp/mocks"
+	"github.com/microsoft/yardl/tooling/internal/cpp/ndjson"
 	"github.com/microsoft/yardl/tooling/internal/cpp/protocols"
 	"github.com/microsoft/yardl/tooling/internal/cpp/types"
 	"github.com/microsoft/yardl/tooling/internal/iocommon"
@@ -42,6 +43,11 @@ func Generate(env *dsl.Environment, options packaging.CppCodegenOptions) error {
 	}
 
 	err = protocols.WriteProtocols(env, options)
+	if err != nil {
+		return err
+	}
+
+	err = ndjson.WriteNdJson(env, options)
 	if err != nil {
 		return err
 	}
