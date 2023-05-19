@@ -100,20 +100,6 @@ TEST(CodedStreamTests, ReadOneLessThanBufferLength) {
   r.VerifyFinished();
 }
 
-struct MockOStream {
-  MOCK_METHOD(void, write, (char const* data, std::streamsize size), (const));
-  MOCK_METHOD(bool, bad, (), (const));
-};
-
-TEST(CodedStreamTests, BadStreamThrows) {
-  ::testing::NiceMock<MockOStream> s;
-  EXPECT_CALL(s, bad()).WillOnce(::testing::Return(true));
-
-  CodedOutputStream w(s);
-  WriteInteger(w, 1);
-  EXPECT_ANY_THROW(w.Flush());
-}
-
 TEST(CodedStreamTests, ScalarByte) {
   std::stringstream ss;
   {

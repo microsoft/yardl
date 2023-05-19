@@ -10,8 +10,6 @@
 #include <utility>
 #include <vector>
 
-#include "../stream/stream.h"
-
 namespace yardl::binary {
 
 static int const MAX_VARINT32_BYTES = 5;
@@ -33,9 +31,8 @@ class EndOfStreamException : public std::exception {
  */
 class CodedOutputStream {
  public:
-  template <typename TStreamArg>
-  CodedOutputStream(TStreamArg&& stream_arg, size_t buffer_size = 65536)
-      : stream_(std::forward<TStreamArg>(stream_arg)),
+  CodedOutputStream(std::ostream& stream, size_t buffer_size = 65536)
+      : stream_(stream),
         buffer_(buffer_size),
         buffer_ptr_(buffer_.data()),
         buffer_end_ptr_(buffer_ptr_ + buffer_.size()) {
@@ -119,7 +116,7 @@ class CodedOutputStream {
 
   void Flush() {
     FlushBuffer();
-    stream_.Flush();
+    stream_.flush();
   }
 
  private:
@@ -151,15 +148,15 @@ class CodedOutputStream {
       return;
     }
 
-    stream_.Write(reinterpret_cast<char*>(const_cast<uint8_t*>(buffer_.data())),
+    stream_.write(reinterpret_cast<char*>(const_cast<uint8_t*>(buffer_.data())),
                   buffer_ptr_ - buffer_.data());
     buffer_ptr_ = buffer_.data();
-    if (stream_.Bad()) {
+    if (stream_.bad()) {
       throw std::runtime_error("Failed to write to stream");
     }
   }
 
-  yardl::stream::WritableStream stream_;
+  std::ostream& stream_;
   std::vector<uint8_t> buffer_;
   uint8_t* buffer_ptr_;
   uint8_t* buffer_end_ptr_;
@@ -171,9 +168,8 @@ class CodedOutputStream {
  */
 class CodedInputStream {
  public:
-  template <typename TStreamArg>
-  CodedInputStream(TStreamArg&& stream_arg, size_t buffer_size = 65536)
-      : stream_(std::forward<TStreamArg>(stream_arg)),
+  CodedInputStream(std::istream& stream, size_t buffer_size = 65536)
+      : stream_(stream),
         buffer_(buffer_size),
         buffer_ptr_(buffer_.data()),
         buffer_end_ptr_(buffer_ptr_) {
@@ -339,9 +335,9 @@ class CodedInputStream {
       throw EndOfStreamException();
     }
 
-    stream_.Read(reinterpret_cast<char*>(buffer_.data()), buffer_.size());
-    at_eof_ = stream_.Eof();
-    auto bytes_read = stream_.GCount();
+    stream_.read(reinterpret_cast<char*>(buffer_.data()), buffer_.size());
+    at_eof_ = stream_.eof();
+    auto bytes_read = stream_.gcount();
     buffer_ptr_ = buffer_.data();
     buffer_end_ptr_ = buffer_ptr_ + bytes_read;
     return bytes_read;
@@ -352,7 +348,7 @@ class CodedInputStream {
     return buffer_end_ptr_ - buffer_ptr_;
   }
 
-  yardl::stream::ReadableStream stream_;
+  std::istream& stream_;
   std::vector<uint8_t> buffer_;
   uint8_t* buffer_ptr_;
   uint8_t* buffer_end_ptr_;

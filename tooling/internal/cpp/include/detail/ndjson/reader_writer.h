@@ -3,51 +3,67 @@
 
 #pragma once
 
+#include <fstream>
+
 #include <nlohmann/json.hpp>
 
-#include "../stream/stream.h"
 #include "serializers.h"
 
 namespace yardl::ndjson {
 using json = nlohmann::json;
 
-// static inline uint32_t kJsonFormatVersionNumber = 1;
 class NDJsonWriter {
  protected:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::ostream.
-  template <typename TStreamArg>
-  NDJsonWriter(TStreamArg&& stream_arg, std::string& schema)
-      : stream_(std::forward<TStreamArg>(stream_arg)) {
-    [[maybe_unused]] auto j = json::parse(schema);
-
-    // WriteStartObject(stream_);
-    // WriteFieldName(stream_, "yardl");
-    // WriteStartObject(stream_);
-    // WriteFieldName(stream_, "version");
-    // WriteInteger(stream_, kJsonFormatVersionNumber);
-    // WriteComma(stream_);
-    // WriteFieldName(stream_, "schema");
-    // stream_.Write(schema.data(), schema.size());
-    // WriteEndObject(stream_);
-    // WriteEndObject(stream_);
+  NDJsonWriter(std::ostream& stream, [[maybe_unused]]std::string& schema)
+      : stream_(stream) {
+    //WriteHeader(stream_, schema);
   }
 
-  yardl::stream::WritableStream stream_;
+  NDJsonWriter(std::string file_name, [[maybe_unused]]std::string& schema) : owned_file_stream_(open_file(file_name)), stream_(*owned_file_stream_) {
+    //WriteHeader(stream_, schema);
+  }
+
+ private:
+  static std::unique_ptr<std::ofstream> open_file(std::string filename) {
+    auto file_stream = std::make_unique<std::ofstream>(filename, std::ios::out);
+    if (!file_stream->good()) {
+      throw std::runtime_error("Failed to open file for writing.");
+    }
+
+    return file_stream;
+  }
+
+ private:
+  std::unique_ptr<std::ofstream> owned_file_stream_{};
+ protected:
+  std::ostream& stream_;
 };
 
 class NDJsonReader {
  protected:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::istream.
-  template <typename TStreamArg>
-  NDJsonReader(TStreamArg&& stream_arg, std::string& schema)
-      : stream_(std::forward<TStreamArg>(stream_arg)) {
-    // ReadHeader(stream_, schema);
+  NDJsonReader(std::istream& stream, [[maybe_unused]]std::string& schema)
+      : stream_(stream) {
+    //ReadHeader(stream_, schema);
   }
 
+  NDJsonReader(std::string file_name, [[maybe_unused]]std::string& schema) : owned_file_stream_(open_file(file_name)), stream_(*owned_file_stream_) {
+    //ReadHeader(stream_, schema);
+  }
+
+ private:
+  static std::unique_ptr<std::ifstream> open_file(std::string filename) {
+    auto file_stream = std::make_unique<std::ifstream>(filename, std::ios::in);
+    if (!file_stream->good()) {
+      throw std::runtime_error("Failed to open file for reading.");
+    }
+
+    return file_stream;
+  }
+
+ private:
+  std::unique_ptr<std::ifstream> owned_file_stream_{};
  protected:
-  yardl::stream::ReadableStream stream_;
+  std::istream& stream_;
 };
 
 }  // namespace yardl::ndjson

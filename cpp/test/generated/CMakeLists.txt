@@ -21,6 +21,7 @@ find_package(HDF5 REQUIRED COMPONENTS C CXX)
 find_package(xtensor REQUIRED)
 add_library(test_model_generated OBJECT
   protocols.cc
+  ndjson/protocols.cc
   binary/protocols.cc
   hdf5/protocols.cc
   mocks.cc

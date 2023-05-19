@@ -16,11 +16,12 @@ namespace test_model::binary {
 // Binary writer for the BenchmarkFloat256x256 protocol.
 class BenchmarkFloat256x256Writer : public test_model::BenchmarkFloat256x256WriterBase, yardl::binary::BinaryWriter {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::ostream.
-  template <typename TStreamArg>
-  BenchmarkFloat256x256Writer(TStreamArg&& stream_arg)
-      : yardl::binary::BinaryWriter(std::forward<TStreamArg>(stream_arg), schema_) {
+  BenchmarkFloat256x256Writer(std::ostream& stream)
+      : yardl::binary::BinaryWriter(stream, schema_) {
+  }
+
+  BenchmarkFloat256x256Writer(std::string file_name)
+      : yardl::binary::BinaryWriter(file_name, schema_) {
   }
 
   void Flush() override;
@@ -35,11 +36,12 @@ class BenchmarkFloat256x256Writer : public test_model::BenchmarkFloat256x256Writ
 // Binary reader for the BenchmarkFloat256x256 protocol.
 class BenchmarkFloat256x256Reader : public test_model::BenchmarkFloat256x256ReaderBase, yardl::binary::BinaryReader {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::istream.
-  template <typename TStreamArg>
-  BenchmarkFloat256x256Reader(TStreamArg&& stream_arg)
-      : yardl::binary::BinaryReader(std::forward<TStreamArg>(stream_arg), schema_) {
+  BenchmarkFloat256x256Reader(std::istream& stream)
+      : yardl::binary::BinaryReader(stream, schema_) {
+  }
+
+  BenchmarkFloat256x256Reader(std::string file_name)
+      : yardl::binary::BinaryReader(file_name, schema_) {
   }
 
   protected:
@@ -54,11 +56,12 @@ class BenchmarkFloat256x256Reader : public test_model::BenchmarkFloat256x256Read
 // Binary writer for the BenchmarkFloatVlen protocol.
 class BenchmarkFloatVlenWriter : public test_model::BenchmarkFloatVlenWriterBase, yardl::binary::BinaryWriter {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::ostream.
-  template <typename TStreamArg>
-  BenchmarkFloatVlenWriter(TStreamArg&& stream_arg)
-      : yardl::binary::BinaryWriter(std::forward<TStreamArg>(stream_arg), schema_) {
+  BenchmarkFloatVlenWriter(std::ostream& stream)
+      : yardl::binary::BinaryWriter(stream, schema_) {
+  }
+
+  BenchmarkFloatVlenWriter(std::string file_name)
+      : yardl::binary::BinaryWriter(file_name, schema_) {
   }
 
   void Flush() override;
@@ -73,11 +76,12 @@ class BenchmarkFloatVlenWriter : public test_model::BenchmarkFloatVlenWriterBase
 // Binary reader for the BenchmarkFloatVlen protocol.
 class BenchmarkFloatVlenReader : public test_model::BenchmarkFloatVlenReaderBase, yardl::binary::BinaryReader {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::istream.
-  template <typename TStreamArg>
-  BenchmarkFloatVlenReader(TStreamArg&& stream_arg)
-      : yardl::binary::BinaryReader(std::forward<TStreamArg>(stream_arg), schema_) {
+  BenchmarkFloatVlenReader(std::istream& stream)
+      : yardl::binary::BinaryReader(stream, schema_) {
+  }
+
+  BenchmarkFloatVlenReader(std::string file_name)
+      : yardl::binary::BinaryReader(file_name, schema_) {
   }
 
   protected:
@@ -92,11 +96,12 @@ class BenchmarkFloatVlenReader : public test_model::BenchmarkFloatVlenReaderBase
 // Binary writer for the BenchmarkSmallRecord protocol.
 class BenchmarkSmallRecordWriter : public test_model::BenchmarkSmallRecordWriterBase, yardl::binary::BinaryWriter {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::ostream.
-  template <typename TStreamArg>
-  BenchmarkSmallRecordWriter(TStreamArg&& stream_arg)
-      : yardl::binary::BinaryWriter(std::forward<TStreamArg>(stream_arg), schema_) {
+  BenchmarkSmallRecordWriter(std::ostream& stream)
+      : yardl::binary::BinaryWriter(stream, schema_) {
+  }
+
+  BenchmarkSmallRecordWriter(std::string file_name)
+      : yardl::binary::BinaryWriter(file_name, schema_) {
   }
 
   void Flush() override;
@@ -111,11 +116,12 @@ class BenchmarkSmallRecordWriter : public test_model::BenchmarkSmallRecordWriter
 // Binary reader for the BenchmarkSmallRecord protocol.
 class BenchmarkSmallRecordReader : public test_model::BenchmarkSmallRecordReaderBase, yardl::binary::BinaryReader {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::istream.
-  template <typename TStreamArg>
-  BenchmarkSmallRecordReader(TStreamArg&& stream_arg)
-      : yardl::binary::BinaryReader(std::forward<TStreamArg>(stream_arg), schema_) {
+  BenchmarkSmallRecordReader(std::istream& stream)
+      : yardl::binary::BinaryReader(stream, schema_) {
+  }
+
+  BenchmarkSmallRecordReader(std::string file_name)
+      : yardl::binary::BinaryReader(file_name, schema_) {
   }
 
   protected:
@@ -130,11 +136,12 @@ class BenchmarkSmallRecordReader : public test_model::BenchmarkSmallRecordReader
 // Binary writer for the BenchmarkSmallRecordWithOptionals protocol.
 class BenchmarkSmallRecordWithOptionalsWriter : public test_model::BenchmarkSmallRecordWithOptionalsWriterBase, yardl::binary::BinaryWriter {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::ostream.
-  template <typename TStreamArg>
-  BenchmarkSmallRecordWithOptionalsWriter(TStreamArg&& stream_arg)
-      : yardl::binary::BinaryWriter(std::forward<TStreamArg>(stream_arg), schema_) {
+  BenchmarkSmallRecordWithOptionalsWriter(std::ostream& stream)
+      : yardl::binary::BinaryWriter(stream, schema_) {
+  }
+
+  BenchmarkSmallRecordWithOptionalsWriter(std::string file_name)
+      : yardl::binary::BinaryWriter(file_name, schema_) {
   }
 
   void Flush() override;
@@ -149,11 +156,12 @@ class BenchmarkSmallRecordWithOptionalsWriter : public test_model::BenchmarkSmal
 // Binary reader for the BenchmarkSmallRecordWithOptionals protocol.
 class BenchmarkSmallRecordWithOptionalsReader : public test_model::BenchmarkSmallRecordWithOptionalsReaderBase, yardl::binary::BinaryReader {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::istream.
-  template <typename TStreamArg>
-  BenchmarkSmallRecordWithOptionalsReader(TStreamArg&& stream_arg)
-      : yardl::binary::BinaryReader(std::forward<TStreamArg>(stream_arg), schema_) {
+  BenchmarkSmallRecordWithOptionalsReader(std::istream& stream)
+      : yardl::binary::BinaryReader(stream, schema_) {
+  }
+
+  BenchmarkSmallRecordWithOptionalsReader(std::string file_name)
+      : yardl::binary::BinaryReader(file_name, schema_) {
   }
 
   protected:
@@ -168,11 +176,12 @@ class BenchmarkSmallRecordWithOptionalsReader : public test_model::BenchmarkSmal
 // Binary writer for the BenchmarkSimpleMrd protocol.
 class BenchmarkSimpleMrdWriter : public test_model::BenchmarkSimpleMrdWriterBase, yardl::binary::BinaryWriter {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::ostream.
-  template <typename TStreamArg>
-  BenchmarkSimpleMrdWriter(TStreamArg&& stream_arg)
-      : yardl::binary::BinaryWriter(std::forward<TStreamArg>(stream_arg), schema_) {
+  BenchmarkSimpleMrdWriter(std::ostream& stream)
+      : yardl::binary::BinaryWriter(stream, schema_) {
+  }
+
+  BenchmarkSimpleMrdWriter(std::string file_name)
+      : yardl::binary::BinaryWriter(file_name, schema_) {
   }
 
   void Flush() override;
@@ -187,11 +196,12 @@ class BenchmarkSimpleMrdWriter : public test_model::BenchmarkSimpleMrdWriterBase
 // Binary reader for the BenchmarkSimpleMrd protocol.
 class BenchmarkSimpleMrdReader : public test_model::BenchmarkSimpleMrdReaderBase, yardl::binary::BinaryReader {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::istream.
-  template <typename TStreamArg>
-  BenchmarkSimpleMrdReader(TStreamArg&& stream_arg)
-      : yardl::binary::BinaryReader(std::forward<TStreamArg>(stream_arg), schema_) {
+  BenchmarkSimpleMrdReader(std::istream& stream)
+      : yardl::binary::BinaryReader(stream, schema_) {
+  }
+
+  BenchmarkSimpleMrdReader(std::string file_name)
+      : yardl::binary::BinaryReader(file_name, schema_) {
   }
 
   protected:
@@ -206,11 +216,12 @@ class BenchmarkSimpleMrdReader : public test_model::BenchmarkSimpleMrdReaderBase
 // Binary writer for the Scalars protocol.
 class ScalarsWriter : public test_model::ScalarsWriterBase, yardl::binary::BinaryWriter {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::ostream.
-  template <typename TStreamArg>
-  ScalarsWriter(TStreamArg&& stream_arg)
-      : yardl::binary::BinaryWriter(std::forward<TStreamArg>(stream_arg), schema_) {
+  ScalarsWriter(std::ostream& stream)
+      : yardl::binary::BinaryWriter(stream, schema_) {
+  }
+
+  ScalarsWriter(std::string file_name)
+      : yardl::binary::BinaryWriter(file_name, schema_) {
   }
 
   void Flush() override;
@@ -224,11 +235,12 @@ class ScalarsWriter : public test_model::ScalarsWriterBase, yardl::binary::Binar
 // Binary reader for the Scalars protocol.
 class ScalarsReader : public test_model::ScalarsReaderBase, yardl::binary::BinaryReader {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::istream.
-  template <typename TStreamArg>
-  ScalarsReader(TStreamArg&& stream_arg)
-      : yardl::binary::BinaryReader(std::forward<TStreamArg>(stream_arg), schema_) {
+  ScalarsReader(std::istream& stream)
+      : yardl::binary::BinaryReader(stream, schema_) {
+  }
+
+  ScalarsReader(std::string file_name)
+      : yardl::binary::BinaryReader(file_name, schema_) {
   }
 
   protected:
@@ -240,11 +252,12 @@ class ScalarsReader : public test_model::ScalarsReaderBase, yardl::binary::Binar
 // Binary writer for the ScalarOptionals protocol.
 class ScalarOptionalsWriter : public test_model::ScalarOptionalsWriterBase, yardl::binary::BinaryWriter {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::ostream.
-  template <typename TStreamArg>
-  ScalarOptionalsWriter(TStreamArg&& stream_arg)
-      : yardl::binary::BinaryWriter(std::forward<TStreamArg>(stream_arg), schema_) {
+  ScalarOptionalsWriter(std::ostream& stream)
+      : yardl::binary::BinaryWriter(stream, schema_) {
+  }
+
+  ScalarOptionalsWriter(std::string file_name)
+      : yardl::binary::BinaryWriter(file_name, schema_) {
   }
 
   void Flush() override;
@@ -260,11 +273,12 @@ class ScalarOptionalsWriter : public test_model::ScalarOptionalsWriterBase, yard
 // Binary reader for the ScalarOptionals protocol.
 class ScalarOptionalsReader : public test_model::ScalarOptionalsReaderBase, yardl::binary::BinaryReader {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::istream.
-  template <typename TStreamArg>
-  ScalarOptionalsReader(TStreamArg&& stream_arg)
-      : yardl::binary::BinaryReader(std::forward<TStreamArg>(stream_arg), schema_) {
+  ScalarOptionalsReader(std::istream& stream)
+      : yardl::binary::BinaryReader(stream, schema_) {
+  }
+
+  ScalarOptionalsReader(std::string file_name)
+      : yardl::binary::BinaryReader(file_name, schema_) {
   }
 
   protected:
@@ -278,11 +292,12 @@ class ScalarOptionalsReader : public test_model::ScalarOptionalsReaderBase, yard
 // Binary writer for the NestedRecords protocol.
 class NestedRecordsWriter : public test_model::NestedRecordsWriterBase, yardl::binary::BinaryWriter {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::ostream.
-  template <typename TStreamArg>
-  NestedRecordsWriter(TStreamArg&& stream_arg)
-      : yardl::binary::BinaryWriter(std::forward<TStreamArg>(stream_arg), schema_) {
+  NestedRecordsWriter(std::ostream& stream)
+      : yardl::binary::BinaryWriter(stream, schema_) {
+  }
+
+  NestedRecordsWriter(std::string file_name)
+      : yardl::binary::BinaryWriter(file_name, schema_) {
   }
 
   void Flush() override;
@@ -295,11 +310,12 @@ class NestedRecordsWriter : public test_model::NestedRecordsWriterBase, yardl::b
 // Binary reader for the NestedRecords protocol.
 class NestedRecordsReader : public test_model::NestedRecordsReaderBase, yardl::binary::BinaryReader {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::istream.
-  template <typename TStreamArg>
-  NestedRecordsReader(TStreamArg&& stream_arg)
-      : yardl::binary::BinaryReader(std::forward<TStreamArg>(stream_arg), schema_) {
+  NestedRecordsReader(std::istream& stream)
+      : yardl::binary::BinaryReader(stream, schema_) {
+  }
+
+  NestedRecordsReader(std::string file_name)
+      : yardl::binary::BinaryReader(file_name, schema_) {
   }
 
   protected:
@@ -310,11 +326,12 @@ class NestedRecordsReader : public test_model::NestedRecordsReaderBase, yardl::b
 // Binary writer for the Vlens protocol.
 class VlensWriter : public test_model::VlensWriterBase, yardl::binary::BinaryWriter {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::ostream.
-  template <typename TStreamArg>
-  VlensWriter(TStreamArg&& stream_arg)
-      : yardl::binary::BinaryWriter(std::forward<TStreamArg>(stream_arg), schema_) {
+  VlensWriter(std::ostream& stream)
+      : yardl::binary::BinaryWriter(stream, schema_) {
+  }
+
+  VlensWriter(std::string file_name)
+      : yardl::binary::BinaryWriter(file_name, schema_) {
   }
 
   void Flush() override;
@@ -330,11 +347,12 @@ class VlensWriter : public test_model::VlensWriterBase, yardl::binary::BinaryWri
 // Binary reader for the Vlens protocol.
 class VlensReader : public test_model::VlensReaderBase, yardl::binary::BinaryReader {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::istream.
-  template <typename TStreamArg>
-  VlensReader(TStreamArg&& stream_arg)
-      : yardl::binary::BinaryReader(std::forward<TStreamArg>(stream_arg), schema_) {
+  VlensReader(std::istream& stream)
+      : yardl::binary::BinaryReader(stream, schema_) {
+  }
+
+  VlensReader(std::string file_name)
+      : yardl::binary::BinaryReader(file_name, schema_) {
   }
 
   protected:
@@ -348,11 +366,12 @@ class VlensReader : public test_model::VlensReaderBase, yardl::binary::BinaryRea
 // Binary writer for the Strings protocol.
 class StringsWriter : public test_model::StringsWriterBase, yardl::binary::BinaryWriter {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::ostream.
-  template <typename TStreamArg>
-  StringsWriter(TStreamArg&& stream_arg)
-      : yardl::binary::BinaryWriter(std::forward<TStreamArg>(stream_arg), schema_) {
+  StringsWriter(std::ostream& stream)
+      : yardl::binary::BinaryWriter(stream, schema_) {
+  }
+
+  StringsWriter(std::string file_name)
+      : yardl::binary::BinaryWriter(file_name, schema_) {
   }
 
   void Flush() override;
@@ -366,11 +385,12 @@ class StringsWriter : public test_model::StringsWriterBase, yardl::binary::Binar
 // Binary reader for the Strings protocol.
 class StringsReader : public test_model::StringsReaderBase, yardl::binary::BinaryReader {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::istream.
-  template <typename TStreamArg>
-  StringsReader(TStreamArg&& stream_arg)
-      : yardl::binary::BinaryReader(std::forward<TStreamArg>(stream_arg), schema_) {
+  StringsReader(std::istream& stream)
+      : yardl::binary::BinaryReader(stream, schema_) {
+  }
+
+  StringsReader(std::string file_name)
+      : yardl::binary::BinaryReader(file_name, schema_) {
   }
 
   protected:
@@ -382,11 +402,12 @@ class StringsReader : public test_model::StringsReaderBase, yardl::binary::Binar
 // Binary writer for the OptionalVectors protocol.
 class OptionalVectorsWriter : public test_model::OptionalVectorsWriterBase, yardl::binary::BinaryWriter {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::ostream.
-  template <typename TStreamArg>
-  OptionalVectorsWriter(TStreamArg&& stream_arg)
-      : yardl::binary::BinaryWriter(std::forward<TStreamArg>(stream_arg), schema_) {
+  OptionalVectorsWriter(std::ostream& stream)
+      : yardl::binary::BinaryWriter(stream, schema_) {
+  }
+
+  OptionalVectorsWriter(std::string file_name)
+      : yardl::binary::BinaryWriter(file_name, schema_) {
   }
 
   void Flush() override;
@@ -399,11 +420,12 @@ class OptionalVectorsWriter : public test_model::OptionalVectorsWriterBase, yard
 // Binary reader for the OptionalVectors protocol.
 class OptionalVectorsReader : public test_model::OptionalVectorsReaderBase, yardl::binary::BinaryReader {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::istream.
-  template <typename TStreamArg>
-  OptionalVectorsReader(TStreamArg&& stream_arg)
-      : yardl::binary::BinaryReader(std::forward<TStreamArg>(stream_arg), schema_) {
+  OptionalVectorsReader(std::istream& stream)
+      : yardl::binary::BinaryReader(stream, schema_) {
+  }
+
+  OptionalVectorsReader(std::string file_name)
+      : yardl::binary::BinaryReader(file_name, schema_) {
   }
 
   protected:
@@ -414,11 +436,12 @@ class OptionalVectorsReader : public test_model::OptionalVectorsReaderBase, yard
 // Binary writer for the FixedVectors protocol.
 class FixedVectorsWriter : public test_model::FixedVectorsWriterBase, yardl::binary::BinaryWriter {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::ostream.
-  template <typename TStreamArg>
-  FixedVectorsWriter(TStreamArg&& stream_arg)
-      : yardl::binary::BinaryWriter(std::forward<TStreamArg>(stream_arg), schema_) {
+  FixedVectorsWriter(std::ostream& stream)
+      : yardl::binary::BinaryWriter(stream, schema_) {
+  }
+
+  FixedVectorsWriter(std::string file_name)
+      : yardl::binary::BinaryWriter(file_name, schema_) {
   }
 
   void Flush() override;
@@ -434,11 +457,12 @@ class FixedVectorsWriter : public test_model::FixedVectorsWriterBase, yardl::bin
 // Binary reader for the FixedVectors protocol.
 class FixedVectorsReader : public test_model::FixedVectorsReaderBase, yardl::binary::BinaryReader {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::istream.
-  template <typename TStreamArg>
-  FixedVectorsReader(TStreamArg&& stream_arg)
-      : yardl::binary::BinaryReader(std::forward<TStreamArg>(stream_arg), schema_) {
+  FixedVectorsReader(std::istream& stream)
+      : yardl::binary::BinaryReader(stream, schema_) {
+  }
+
+  FixedVectorsReader(std::string file_name)
+      : yardl::binary::BinaryReader(file_name, schema_) {
   }
 
   protected:
@@ -452,11 +476,12 @@ class FixedVectorsReader : public test_model::FixedVectorsReaderBase, yardl::bin
 // Binary writer for the Streams protocol.
 class StreamsWriter : public test_model::StreamsWriterBase, yardl::binary::BinaryWriter {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::ostream.
-  template <typename TStreamArg>
-  StreamsWriter(TStreamArg&& stream_arg)
-      : yardl::binary::BinaryWriter(std::forward<TStreamArg>(stream_arg), schema_) {
+  StreamsWriter(std::ostream& stream)
+      : yardl::binary::BinaryWriter(stream, schema_) {
+  }
+
+  StreamsWriter(std::string file_name)
+      : yardl::binary::BinaryWriter(file_name, schema_) {
   }
 
   void Flush() override;
@@ -480,11 +505,12 @@ class StreamsWriter : public test_model::StreamsWriterBase, yardl::binary::Binar
 // Binary reader for the Streams protocol.
 class StreamsReader : public test_model::StreamsReaderBase, yardl::binary::BinaryReader {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::istream.
-  template <typename TStreamArg>
-  StreamsReader(TStreamArg&& stream_arg)
-      : yardl::binary::BinaryReader(std::forward<TStreamArg>(stream_arg), schema_) {
+  StreamsReader(std::istream& stream)
+      : yardl::binary::BinaryReader(stream, schema_) {
+  }
+
+  StreamsReader(std::string file_name)
+      : yardl::binary::BinaryReader(file_name, schema_) {
   }
 
   protected:
@@ -505,11 +531,12 @@ class StreamsReader : public test_model::StreamsReaderBase, yardl::binary::Binar
 // Binary writer for the FixedArrays protocol.
 class FixedArraysWriter : public test_model::FixedArraysWriterBase, yardl::binary::BinaryWriter {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::ostream.
-  template <typename TStreamArg>
-  FixedArraysWriter(TStreamArg&& stream_arg)
-      : yardl::binary::BinaryWriter(std::forward<TStreamArg>(stream_arg), schema_) {
+  FixedArraysWriter(std::ostream& stream)
+      : yardl::binary::BinaryWriter(stream, schema_) {
+  }
+
+  FixedArraysWriter(std::string file_name)
+      : yardl::binary::BinaryWriter(file_name, schema_) {
   }
 
   void Flush() override;
@@ -526,11 +553,12 @@ class FixedArraysWriter : public test_model::FixedArraysWriterBase, yardl::binar
 // Binary reader for the FixedArrays protocol.
 class FixedArraysReader : public test_model::FixedArraysReaderBase, yardl::binary::BinaryReader {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::istream.
-  template <typename TStreamArg>
-  FixedArraysReader(TStreamArg&& stream_arg)
-      : yardl::binary::BinaryReader(std::forward<TStreamArg>(stream_arg), schema_) {
+  FixedArraysReader(std::istream& stream)
+      : yardl::binary::BinaryReader(stream, schema_) {
+  }
+
+  FixedArraysReader(std::string file_name)
+      : yardl::binary::BinaryReader(file_name, schema_) {
   }
 
   protected:
@@ -545,11 +573,12 @@ class FixedArraysReader : public test_model::FixedArraysReaderBase, yardl::binar
 // Binary writer for the NDArrays protocol.
 class NDArraysWriter : public test_model::NDArraysWriterBase, yardl::binary::BinaryWriter {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::ostream.
-  template <typename TStreamArg>
-  NDArraysWriter(TStreamArg&& stream_arg)
-      : yardl::binary::BinaryWriter(std::forward<TStreamArg>(stream_arg), schema_) {
+  NDArraysWriter(std::ostream& stream)
+      : yardl::binary::BinaryWriter(stream, schema_) {
+  }
+
+  NDArraysWriter(std::string file_name)
+      : yardl::binary::BinaryWriter(file_name, schema_) {
   }
 
   void Flush() override;
@@ -566,11 +595,12 @@ class NDArraysWriter : public test_model::NDArraysWriterBase, yardl::binary::Bin
 // Binary reader for the NDArrays protocol.
 class NDArraysReader : public test_model::NDArraysReaderBase, yardl::binary::BinaryReader {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::istream.
-  template <typename TStreamArg>
-  NDArraysReader(TStreamArg&& stream_arg)
-      : yardl::binary::BinaryReader(std::forward<TStreamArg>(stream_arg), schema_) {
+  NDArraysReader(std::istream& stream)
+      : yardl::binary::BinaryReader(stream, schema_) {
+  }
+
+  NDArraysReader(std::string file_name)
+      : yardl::binary::BinaryReader(file_name, schema_) {
   }
 
   protected:
@@ -585,11 +615,12 @@ class NDArraysReader : public test_model::NDArraysReaderBase, yardl::binary::Bin
 // Binary writer for the NDArraysSingleDimension protocol.
 class NDArraysSingleDimensionWriter : public test_model::NDArraysSingleDimensionWriterBase, yardl::binary::BinaryWriter {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::ostream.
-  template <typename TStreamArg>
-  NDArraysSingleDimensionWriter(TStreamArg&& stream_arg)
-      : yardl::binary::BinaryWriter(std::forward<TStreamArg>(stream_arg), schema_) {
+  NDArraysSingleDimensionWriter(std::ostream& stream)
+      : yardl::binary::BinaryWriter(stream, schema_) {
+  }
+
+  NDArraysSingleDimensionWriter(std::string file_name)
+      : yardl::binary::BinaryWriter(file_name, schema_) {
   }
 
   void Flush() override;
@@ -605,11 +636,12 @@ class NDArraysSingleDimensionWriter : public test_model::NDArraysSingleDimension
 // Binary reader for the NDArraysSingleDimension protocol.
 class NDArraysSingleDimensionReader : public test_model::NDArraysSingleDimensionReaderBase, yardl::binary::BinaryReader {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::istream.
-  template <typename TStreamArg>
-  NDArraysSingleDimensionReader(TStreamArg&& stream_arg)
-      : yardl::binary::BinaryReader(std::forward<TStreamArg>(stream_arg), schema_) {
+  NDArraysSingleDimensionReader(std::istream& stream)
+      : yardl::binary::BinaryReader(stream, schema_) {
+  }
+
+  NDArraysSingleDimensionReader(std::string file_name)
+      : yardl::binary::BinaryReader(file_name, schema_) {
   }
 
   protected:
@@ -623,11 +655,12 @@ class NDArraysSingleDimensionReader : public test_model::NDArraysSingleDimension
 // Binary writer for the DynamicNDArrays protocol.
 class DynamicNDArraysWriter : public test_model::DynamicNDArraysWriterBase, yardl::binary::BinaryWriter {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::ostream.
-  template <typename TStreamArg>
-  DynamicNDArraysWriter(TStreamArg&& stream_arg)
-      : yardl::binary::BinaryWriter(std::forward<TStreamArg>(stream_arg), schema_) {
+  DynamicNDArraysWriter(std::ostream& stream)
+      : yardl::binary::BinaryWriter(stream, schema_) {
+  }
+
+  DynamicNDArraysWriter(std::string file_name)
+      : yardl::binary::BinaryWriter(file_name, schema_) {
   }
 
   void Flush() override;
@@ -643,11 +676,12 @@ class DynamicNDArraysWriter : public test_model::DynamicNDArraysWriterBase, yard
 // Binary reader for the DynamicNDArrays protocol.
 class DynamicNDArraysReader : public test_model::DynamicNDArraysReaderBase, yardl::binary::BinaryReader {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::istream.
-  template <typename TStreamArg>
-  DynamicNDArraysReader(TStreamArg&& stream_arg)
-      : yardl::binary::BinaryReader(std::forward<TStreamArg>(stream_arg), schema_) {
+  DynamicNDArraysReader(std::istream& stream)
+      : yardl::binary::BinaryReader(stream, schema_) {
+  }
+
+  DynamicNDArraysReader(std::string file_name)
+      : yardl::binary::BinaryReader(file_name, schema_) {
   }
 
   protected:
@@ -661,11 +695,12 @@ class DynamicNDArraysReader : public test_model::DynamicNDArraysReaderBase, yard
 // Binary writer for the Maps protocol.
 class MapsWriter : public test_model::MapsWriterBase, yardl::binary::BinaryWriter {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::ostream.
-  template <typename TStreamArg>
-  MapsWriter(TStreamArg&& stream_arg)
-      : yardl::binary::BinaryWriter(std::forward<TStreamArg>(stream_arg), schema_) {
+  MapsWriter(std::ostream& stream)
+      : yardl::binary::BinaryWriter(stream, schema_) {
+  }
+
+  MapsWriter(std::string file_name)
+      : yardl::binary::BinaryWriter(file_name, schema_) {
   }
 
   void Flush() override;
@@ -680,11 +715,12 @@ class MapsWriter : public test_model::MapsWriterBase, yardl::binary::BinaryWrite
 // Binary reader for the Maps protocol.
 class MapsReader : public test_model::MapsReaderBase, yardl::binary::BinaryReader {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::istream.
-  template <typename TStreamArg>
-  MapsReader(TStreamArg&& stream_arg)
-      : yardl::binary::BinaryReader(std::forward<TStreamArg>(stream_arg), schema_) {
+  MapsReader(std::istream& stream)
+      : yardl::binary::BinaryReader(stream, schema_) {
+  }
+
+  MapsReader(std::string file_name)
+      : yardl::binary::BinaryReader(file_name, schema_) {
   }
 
   protected:
@@ -697,11 +733,12 @@ class MapsReader : public test_model::MapsReaderBase, yardl::binary::BinaryReade
 // Binary writer for the Unions protocol.
 class UnionsWriter : public test_model::UnionsWriterBase, yardl::binary::BinaryWriter {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::ostream.
-  template <typename TStreamArg>
-  UnionsWriter(TStreamArg&& stream_arg)
-      : yardl::binary::BinaryWriter(std::forward<TStreamArg>(stream_arg), schema_) {
+  UnionsWriter(std::ostream& stream)
+      : yardl::binary::BinaryWriter(stream, schema_) {
+  }
+
+  UnionsWriter(std::string file_name)
+      : yardl::binary::BinaryWriter(file_name, schema_) {
   }
 
   void Flush() override;
@@ -716,11 +753,12 @@ class UnionsWriter : public test_model::UnionsWriterBase, yardl::binary::BinaryW
 // Binary reader for the Unions protocol.
 class UnionsReader : public test_model::UnionsReaderBase, yardl::binary::BinaryReader {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::istream.
-  template <typename TStreamArg>
-  UnionsReader(TStreamArg&& stream_arg)
-      : yardl::binary::BinaryReader(std::forward<TStreamArg>(stream_arg), schema_) {
+  UnionsReader(std::istream& stream)
+      : yardl::binary::BinaryReader(stream, schema_) {
+  }
+
+  UnionsReader(std::string file_name)
+      : yardl::binary::BinaryReader(file_name, schema_) {
   }
 
   protected:
@@ -733,11 +771,12 @@ class UnionsReader : public test_model::UnionsReaderBase, yardl::binary::BinaryR
 // Binary writer for the StreamsOfUnions protocol.
 class StreamsOfUnionsWriter : public test_model::StreamsOfUnionsWriterBase, yardl::binary::BinaryWriter {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::ostream.
-  template <typename TStreamArg>
-  StreamsOfUnionsWriter(TStreamArg&& stream_arg)
-      : yardl::binary::BinaryWriter(std::forward<TStreamArg>(stream_arg), schema_) {
+  StreamsOfUnionsWriter(std::ostream& stream)
+      : yardl::binary::BinaryWriter(stream, schema_) {
+  }
+
+  StreamsOfUnionsWriter(std::string file_name)
+      : yardl::binary::BinaryWriter(file_name, schema_) {
   }
 
   void Flush() override;
@@ -755,11 +794,12 @@ class StreamsOfUnionsWriter : public test_model::StreamsOfUnionsWriterBase, yard
 // Binary reader for the StreamsOfUnions protocol.
 class StreamsOfUnionsReader : public test_model::StreamsOfUnionsReaderBase, yardl::binary::BinaryReader {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::istream.
-  template <typename TStreamArg>
-  StreamsOfUnionsReader(TStreamArg&& stream_arg)
-      : yardl::binary::BinaryReader(std::forward<TStreamArg>(stream_arg), schema_) {
+  StreamsOfUnionsReader(std::istream& stream)
+      : yardl::binary::BinaryReader(stream, schema_) {
+  }
+
+  StreamsOfUnionsReader(std::string file_name)
+      : yardl::binary::BinaryReader(file_name, schema_) {
   }
 
   protected:
@@ -776,11 +816,12 @@ class StreamsOfUnionsReader : public test_model::StreamsOfUnionsReaderBase, yard
 // Binary writer for the Enums protocol.
 class EnumsWriter : public test_model::EnumsWriterBase, yardl::binary::BinaryWriter {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::ostream.
-  template <typename TStreamArg>
-  EnumsWriter(TStreamArg&& stream_arg)
-      : yardl::binary::BinaryWriter(std::forward<TStreamArg>(stream_arg), schema_) {
+  EnumsWriter(std::ostream& stream)
+      : yardl::binary::BinaryWriter(stream, schema_) {
+  }
+
+  EnumsWriter(std::string file_name)
+      : yardl::binary::BinaryWriter(file_name, schema_) {
   }
 
   void Flush() override;
@@ -795,11 +836,12 @@ class EnumsWriter : public test_model::EnumsWriterBase, yardl::binary::BinaryWri
 // Binary reader for the Enums protocol.
 class EnumsReader : public test_model::EnumsReaderBase, yardl::binary::BinaryReader {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::istream.
-  template <typename TStreamArg>
-  EnumsReader(TStreamArg&& stream_arg)
-      : yardl::binary::BinaryReader(std::forward<TStreamArg>(stream_arg), schema_) {
+  EnumsReader(std::istream& stream)
+      : yardl::binary::BinaryReader(stream, schema_) {
+  }
+
+  EnumsReader(std::string file_name)
+      : yardl::binary::BinaryReader(file_name, schema_) {
   }
 
   protected:
@@ -812,11 +854,12 @@ class EnumsReader : public test_model::EnumsReaderBase, yardl::binary::BinaryRea
 // Binary writer for the StateTest protocol.
 class StateTestWriter : public test_model::StateTestWriterBase, yardl::binary::BinaryWriter {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::ostream.
-  template <typename TStreamArg>
-  StateTestWriter(TStreamArg&& stream_arg)
-      : yardl::binary::BinaryWriter(std::forward<TStreamArg>(stream_arg), schema_) {
+  StateTestWriter(std::ostream& stream)
+      : yardl::binary::BinaryWriter(stream, schema_) {
+  }
+
+  StateTestWriter(std::string file_name)
+      : yardl::binary::BinaryWriter(file_name, schema_) {
   }
 
   void Flush() override;
@@ -833,11 +876,12 @@ class StateTestWriter : public test_model::StateTestWriterBase, yardl::binary::B
 // Binary reader for the StateTest protocol.
 class StateTestReader : public test_model::StateTestReaderBase, yardl::binary::BinaryReader {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::istream.
-  template <typename TStreamArg>
-  StateTestReader(TStreamArg&& stream_arg)
-      : yardl::binary::BinaryReader(std::forward<TStreamArg>(stream_arg), schema_) {
+  StateTestReader(std::istream& stream)
+      : yardl::binary::BinaryReader(stream, schema_) {
+  }
+
+  StateTestReader(std::string file_name)
+      : yardl::binary::BinaryReader(file_name, schema_) {
   }
 
   protected:
@@ -854,11 +898,12 @@ class StateTestReader : public test_model::StateTestReaderBase, yardl::binary::B
 // Binary writer for the SimpleGenerics protocol.
 class SimpleGenericsWriter : public test_model::SimpleGenericsWriterBase, yardl::binary::BinaryWriter {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::ostream.
-  template <typename TStreamArg>
-  SimpleGenericsWriter(TStreamArg&& stream_arg)
-      : yardl::binary::BinaryWriter(std::forward<TStreamArg>(stream_arg), schema_) {
+  SimpleGenericsWriter(std::ostream& stream)
+      : yardl::binary::BinaryWriter(stream, schema_) {
+  }
+
+  SimpleGenericsWriter(std::string file_name)
+      : yardl::binary::BinaryWriter(file_name, schema_) {
   }
 
   void Flush() override;
@@ -881,11 +926,12 @@ class SimpleGenericsWriter : public test_model::SimpleGenericsWriterBase, yardl:
 // Binary reader for the SimpleGenerics protocol.
 class SimpleGenericsReader : public test_model::SimpleGenericsReaderBase, yardl::binary::BinaryReader {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::istream.
-  template <typename TStreamArg>
-  SimpleGenericsReader(TStreamArg&& stream_arg)
-      : yardl::binary::BinaryReader(std::forward<TStreamArg>(stream_arg), schema_) {
+  SimpleGenericsReader(std::istream& stream)
+      : yardl::binary::BinaryReader(stream, schema_) {
+  }
+
+  SimpleGenericsReader(std::string file_name)
+      : yardl::binary::BinaryReader(file_name, schema_) {
   }
 
   protected:
@@ -908,11 +954,12 @@ class SimpleGenericsReader : public test_model::SimpleGenericsReaderBase, yardl:
 // Binary writer for the AdvancedGenerics protocol.
 class AdvancedGenericsWriter : public test_model::AdvancedGenericsWriterBase, yardl::binary::BinaryWriter {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::ostream.
-  template <typename TStreamArg>
-  AdvancedGenericsWriter(TStreamArg&& stream_arg)
-      : yardl::binary::BinaryWriter(std::forward<TStreamArg>(stream_arg), schema_) {
+  AdvancedGenericsWriter(std::ostream& stream)
+      : yardl::binary::BinaryWriter(stream, schema_) {
+  }
+
+  AdvancedGenericsWriter(std::string file_name)
+      : yardl::binary::BinaryWriter(file_name, schema_) {
   }
 
   void Flush() override;
@@ -929,11 +976,12 @@ class AdvancedGenericsWriter : public test_model::AdvancedGenericsWriterBase, ya
 // Binary reader for the AdvancedGenerics protocol.
 class AdvancedGenericsReader : public test_model::AdvancedGenericsReaderBase, yardl::binary::BinaryReader {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::istream.
-  template <typename TStreamArg>
-  AdvancedGenericsReader(TStreamArg&& stream_arg)
-      : yardl::binary::BinaryReader(std::forward<TStreamArg>(stream_arg), schema_) {
+  AdvancedGenericsReader(std::istream& stream)
+      : yardl::binary::BinaryReader(stream, schema_) {
+  }
+
+  AdvancedGenericsReader(std::string file_name)
+      : yardl::binary::BinaryReader(file_name, schema_) {
   }
 
   protected:
@@ -948,11 +996,12 @@ class AdvancedGenericsReader : public test_model::AdvancedGenericsReaderBase, ya
 // Binary writer for the Aliases protocol.
 class AliasesWriter : public test_model::AliasesWriterBase, yardl::binary::BinaryWriter {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::ostream.
-  template <typename TStreamArg>
-  AliasesWriter(TStreamArg&& stream_arg)
-      : yardl::binary::BinaryWriter(std::forward<TStreamArg>(stream_arg), schema_) {
+  AliasesWriter(std::ostream& stream)
+      : yardl::binary::BinaryWriter(stream, schema_) {
+  }
+
+  AliasesWriter(std::string file_name)
+      : yardl::binary::BinaryWriter(file_name, schema_) {
   }
 
   void Flush() override;
@@ -976,11 +1025,12 @@ class AliasesWriter : public test_model::AliasesWriterBase, yardl::binary::Binar
 // Binary reader for the Aliases protocol.
 class AliasesReader : public test_model::AliasesReaderBase, yardl::binary::BinaryReader {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::istream.
-  template <typename TStreamArg>
-  AliasesReader(TStreamArg&& stream_arg)
-      : yardl::binary::BinaryReader(std::forward<TStreamArg>(stream_arg), schema_) {
+  AliasesReader(std::istream& stream)
+      : yardl::binary::BinaryReader(stream, schema_) {
+  }
+
+  AliasesReader(std::string file_name)
+      : yardl::binary::BinaryReader(file_name, schema_) {
   }
 
   protected:
@@ -1004,11 +1054,12 @@ class AliasesReader : public test_model::AliasesReaderBase, yardl::binary::Binar
 // Binary writer for the StreamsOfAliasedUnions protocol.
 class StreamsOfAliasedUnionsWriter : public test_model::StreamsOfAliasedUnionsWriterBase, yardl::binary::BinaryWriter {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::ostream.
-  template <typename TStreamArg>
-  StreamsOfAliasedUnionsWriter(TStreamArg&& stream_arg)
-      : yardl::binary::BinaryWriter(std::forward<TStreamArg>(stream_arg), schema_) {
+  StreamsOfAliasedUnionsWriter(std::ostream& stream)
+      : yardl::binary::BinaryWriter(stream, schema_) {
+  }
+
+  StreamsOfAliasedUnionsWriter(std::string file_name)
+      : yardl::binary::BinaryWriter(file_name, schema_) {
   }
 
   void Flush() override;
@@ -1026,11 +1077,12 @@ class StreamsOfAliasedUnionsWriter : public test_model::StreamsOfAliasedUnionsWr
 // Binary reader for the StreamsOfAliasedUnions protocol.
 class StreamsOfAliasedUnionsReader : public test_model::StreamsOfAliasedUnionsReaderBase, yardl::binary::BinaryReader {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::istream.
-  template <typename TStreamArg>
-  StreamsOfAliasedUnionsReader(TStreamArg&& stream_arg)
-      : yardl::binary::BinaryReader(std::forward<TStreamArg>(stream_arg), schema_) {
+  StreamsOfAliasedUnionsReader(std::istream& stream)
+      : yardl::binary::BinaryReader(stream, schema_) {
+  }
+
+  StreamsOfAliasedUnionsReader(std::string file_name)
+      : yardl::binary::BinaryReader(file_name, schema_) {
   }
 
   protected:
@@ -1047,11 +1099,12 @@ class StreamsOfAliasedUnionsReader : public test_model::StreamsOfAliasedUnionsRe
 // Binary writer for the ProtocolWithComputedFields protocol.
 class ProtocolWithComputedFieldsWriter : public test_model::ProtocolWithComputedFieldsWriterBase, yardl::binary::BinaryWriter {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::ostream.
-  template <typename TStreamArg>
-  ProtocolWithComputedFieldsWriter(TStreamArg&& stream_arg)
-      : yardl::binary::BinaryWriter(std::forward<TStreamArg>(stream_arg), schema_) {
+  ProtocolWithComputedFieldsWriter(std::ostream& stream)
+      : yardl::binary::BinaryWriter(stream, schema_) {
+  }
+
+  ProtocolWithComputedFieldsWriter(std::string file_name)
+      : yardl::binary::BinaryWriter(file_name, schema_) {
   }
 
   void Flush() override;
@@ -1064,11 +1117,12 @@ class ProtocolWithComputedFieldsWriter : public test_model::ProtocolWithComputed
 // Binary reader for the ProtocolWithComputedFields protocol.
 class ProtocolWithComputedFieldsReader : public test_model::ProtocolWithComputedFieldsReaderBase, yardl::binary::BinaryReader {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::istream.
-  template <typename TStreamArg>
-  ProtocolWithComputedFieldsReader(TStreamArg&& stream_arg)
-      : yardl::binary::BinaryReader(std::forward<TStreamArg>(stream_arg), schema_) {
+  ProtocolWithComputedFieldsReader(std::istream& stream)
+      : yardl::binary::BinaryReader(stream, schema_) {
+  }
+
+  ProtocolWithComputedFieldsReader(std::string file_name)
+      : yardl::binary::BinaryReader(file_name, schema_) {
   }
 
   protected:
@@ -1079,11 +1133,12 @@ class ProtocolWithComputedFieldsReader : public test_model::ProtocolWithComputed
 // Binary writer for the ProtocolWithKeywordSteps protocol.
 class ProtocolWithKeywordStepsWriter : public test_model::ProtocolWithKeywordStepsWriterBase, yardl::binary::BinaryWriter {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::ostream.
-  template <typename TStreamArg>
-  ProtocolWithKeywordStepsWriter(TStreamArg&& stream_arg)
-      : yardl::binary::BinaryWriter(std::forward<TStreamArg>(stream_arg), schema_) {
+  ProtocolWithKeywordStepsWriter(std::ostream& stream)
+      : yardl::binary::BinaryWriter(stream, schema_) {
+  }
+
+  ProtocolWithKeywordStepsWriter(std::string file_name)
+      : yardl::binary::BinaryWriter(file_name, schema_) {
   }
 
   void Flush() override;
@@ -1099,11 +1154,12 @@ class ProtocolWithKeywordStepsWriter : public test_model::ProtocolWithKeywordSte
 // Binary reader for the ProtocolWithKeywordSteps protocol.
 class ProtocolWithKeywordStepsReader : public test_model::ProtocolWithKeywordStepsReaderBase, yardl::binary::BinaryReader {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::istream.
-  template <typename TStreamArg>
-  ProtocolWithKeywordStepsReader(TStreamArg&& stream_arg)
-      : yardl::binary::BinaryReader(std::forward<TStreamArg>(stream_arg), schema_) {
+  ProtocolWithKeywordStepsReader(std::istream& stream)
+      : yardl::binary::BinaryReader(stream, schema_) {
+  }
+
+  ProtocolWithKeywordStepsReader(std::string file_name)
+      : yardl::binary::BinaryReader(file_name, schema_) {
   }
 
   protected:

@@ -14,42 +14,42 @@
 
 namespace yardl::ndjson {
 
-inline static void WriteStartObject(yardl::stream::WritableStream& stream) {
-  stream.Write("{", 1);
-}
+// inline static void WriteStartObject(yardl::stream::WritableStream& stream) {
+//   stream.Write("{", 1);
+// }
 
-inline void WriteEndObject(yardl::stream::WritableStream& stream) {
-  stream.Write("}", 1);
-}
+// inline void WriteEndObject(yardl::stream::WritableStream& stream) {
+//   stream.Write("}", 1);
+// }
 
-inline void WriteComma(yardl::stream::WritableStream& stream) {
-  stream.Write(",", 1);
-}
+// inline void WriteComma(yardl::stream::WritableStream& stream) {
+//   stream.Write(",", 1);
+// }
 
-inline void WriteStringNoEscaping(yardl::stream::WritableStream& stream, std::string const& value) {
-  stream.Write("\"", 1);
-  stream.Write(value.data(), value.size());
-  stream.Write("\"", 1);
-}
+// inline void WriteStringNoEscaping(yardl::stream::WritableStream& stream, std::string const& value) {
+//   stream.Write("\"", 1);
+//   stream.Write(value.data(), value.size());
+//   stream.Write("\"", 1);
+// }
 
-inline void WriteFieldName(yardl::stream::WritableStream& stream, std::string const& name) {
-  WriteStringNoEscaping(stream, name);
-  stream.Write(":", 1);
-}
+// inline void WriteFieldName(yardl::stream::WritableStream& stream, std::string const& name) {
+//   WriteStringNoEscaping(stream, name);
+//   stream.Write(":", 1);
+// }
 
-template <typename T>
-void WriteFloatingPoint(yardl::stream::WritableStream& ws, T value) {
-  std::array<char, 64> b;
-  auto c = snprintf(b.data(), b.size(), "%.15g", value);
-  ws.Write(b.data(), c);
-}
+// template <typename T>
+// void WriteFloatingPoint(yardl::stream::WritableStream& ws, T value) {
+//   std::array<char, 64> b;
+//   auto c = snprintf(b.data(), b.size(), "%.15g", value);
+//   ws.Write(b.data(), c);
+// }
 
-template <typename T>
-void WriteInteger(yardl::stream::WritableStream& ws, T value) {
-  std::array<char, 64> b;
-  auto c = snprintf(b.data(), b.size(), "%d", value);
-  ws.Write(b.data(), c);
-}
+// template <typename T>
+// void WriteInteger(yardl::stream::WritableStream& ws, T value) {
+//   std::array<char, 64> b;
+//   auto c = snprintf(b.data(), b.size(), "%d", value);
+//   ws.Write(b.data(), c);
+// }
 
 // /**
 //  * @brief Function pointer type for writing a single value to a stream.
