@@ -98,8 +98,7 @@ func writeHeaderFile(env *dsl.Environment, options packaging.CppCodegenOptions) 
 					fmt.Fprintf(w, "void %s(%s const& value) override;\n", common.ProtocolWriteImplMethodName(step), common.TypeSyntax(step.Type))
 
 					if step.IsStream() {
-						fmt.Fprintf(w, "void %s(std::vector<%s> const& values) override;\n", common.ProtocolWriteImplMethodName(step), common.TypeSyntax(step.Type))
-						fmt.Fprintf(w, "void %s() override;\n", endMethodName)
+						fmt.Fprintf(w, "void %s() override {}\n", endMethodName)
 					}
 				}
 
@@ -141,9 +140,6 @@ func writeHeaderFile(env *dsl.Environment, options packaging.CppCodegenOptions) 
 						returnType = "bool"
 					}
 					fmt.Fprintf(w, "%s %s(%s& value) override;\n", returnType, common.ProtocolReadImplMethodName(step), common.TypeSyntax(step.Type))
-					if step.IsStream() {
-						fmt.Fprintf(w, "bool %s(std::vector<%s>& values) override;\n", common.ProtocolReadImplMethodName(step), common.TypeSyntax(step.Type))
-					}
 				}
 
 				w.WriteString("void CloseImpl() override;\n")
@@ -183,33 +179,8 @@ func writeProtocolMethods(w *formatting.IndentedWriter, p *dsl.ProtocolDefinitio
 		w.Indented(func() {
 			w.WriteStringln("json json_value = value;")
 			fmt.Fprintf(w, "yardl::ndjson::WriteProtocolValue(stream_, \"%s\", json_value);", step.Name)
-
-			// if step.IsStream() {
-			// 	w.WriteString("yardl::binary::WriteInteger(stream_, 1U);\n")
-			// }
-			// fmt.Fprintf(w, "%s(stream_, value);\n", typeRwFunction(step.Type, true))
 		})
 		w.WriteString("}\n\n")
-
-		// if step.IsStream() {
-		// 	fmt.Fprintf(w, "void %s::%s([[maybe_unused]]std::vector<%s> const& values) {\n", writerClassName, common.ProtocolWriteImplMethodName(step), common.TypeSyntax(step.Type))
-		// 	// w.Indented(func() {
-		// 	// 	w.WriteStringln("if (!values.empty()) {")
-		// 	// 	w.Indented(func() {
-		// 	// 		vectorType := *step.Type.(*dsl.GeneralizedType)
-		// 	// 		vectorType.Dimensionality = &dsl.Vector{}
-		// 	// 		fmt.Fprintf(w, "%s(stream_, values);\n", typeRwFunction(&vectorType, true))
-		// 	// 	})
-		// 	// 	w.WriteStringln("}")
-		// 	// })
-		// 	w.WriteString("}\n\n")
-
-		// 	fmt.Fprintf(w, "void %s::%s() {\n", writerClassName, common.ProtocolWriteEndImplMethodName(step))
-		// 	// w.Indented(func() {
-		// 	// 	w.WriteString("yardl::binary::WriteInteger(stream_, 0U);\n")
-		// 	// })
-		// 	w.WriteString("}\n\n")
-		// }
 	}
 
 	fmt.Fprintf(w, "void %s::Flush() {\n", writerClassName)
@@ -233,7 +204,10 @@ func writeProtocolMethods(w *formatting.IndentedWriter, p *dsl.ProtocolDefinitio
 
 		fmt.Fprintf(w, "%s %s::%s([[maybe_unused]]%s& value) {\n", returnType, readerClassName, common.ProtocolReadImplMethodName(step), common.TypeSyntax(step.Type))
 		w.Indented(func() {
-			fmt.Fprintf(w, "yardl::ndjson::ReadProtocolValue(stream_, line_, \"%s\", %t, unused_step_, value);\n", step.Name, step.IsStream())
+			if step.IsStream() {
+				w.WriteString("return ")
+			}
+			fmt.Fprintf(w, "yardl::ndjson::ReadProtocolValue(stream_, line_, \"%s\", %t, unused_step_, value);\n", step.Name, !step.IsStream())
 
 		})
 		w.WriteString("}\n\n")

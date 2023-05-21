@@ -88,4 +88,73 @@ struct adl_serializer<std::optional<T>> {
   }
 };
 
+template <typename T>
+struct adl_serializer<std::complex<T>> {
+  static void to_json(ordered_json& j, std::complex<T> const& value) {
+    j = ordered_json::array({value.real(), value.imag()});
+  }
+
+  static void from_json(ordered_json const& j, std::complex<T>& value) {
+    value = std::complex<T>{j.at(0).get<T>(), j.at(1).get<T>()};
+  }
+};
+
+template <typename T>
+struct adl_serializer<yardl::DynamicNDArray<T>> {
+  static void to_json(ordered_json& j, yardl::DynamicNDArray<T> const& value) {
+    auto shape = value.shape();
+    auto data_array = ordered_json::array();
+    for (auto const& v : value) {
+      data_array.push_back(v);
+    }
+    j = ordered_json{{"shape", shape}, {"data", data_array}};
+  }
+
+  static void from_json([[maybe_unused]] ordered_json const& j, [[maybe_unused]] yardl::DynamicNDArray<T>& value) {
+    value.resize(j.at("shape").get<std::vector<size_t>>());
+    auto data_array = j.at("data").get<std::vector<T>>();
+    for (size_t i = 0; i < data_array.size(); ++i) {
+      value[i] = data_array[i];
+    }
+  }
+};
+
+template <typename T, size_t N>
+struct adl_serializer<yardl::NDArray<T, N>> {
+  static void to_json(ordered_json& j, yardl::NDArray<T, N> const& value) {
+    auto shape = value.shape();
+    auto data_array = ordered_json::array();
+    for (auto const& v : value) {
+      data_array.push_back(v);
+    }
+    j = ordered_json{{"shape", shape}, {"data", data_array}};
+  }
+
+  static void from_json([[maybe_unused]] ordered_json const& j, yardl::NDArray<T, N>& value) {
+    value.resize(j.at("shape").get<std::vector<size_t>>());
+    auto data_array = j.at("data").get<std::vector<T>>();
+    for (size_t i = 0; i < data_array.size(); ++i) {
+      value[i] = data_array[i];
+    }
+  }
+};
+
+template <typename T, size_t... Dims>
+struct adl_serializer<yardl::FixedNDArray<T, Dims...>> {
+  static void to_json(ordered_json& j, yardl::FixedNDArray<T, Dims...> const& value) {
+    auto data_array = ordered_json::array();
+    for (auto const& v : value) {
+      data_array.push_back(v);
+    }
+    j = data_array;
+  }
+
+  static void from_json([[maybe_unused]] ordered_json const& j, yardl::FixedNDArray<T, Dims...>& value) {
+    auto data_array = j.at("data").get<std::vector<T>>();
+    for (size_t i = 0; i < data_array.size(); ++i) {
+      value[i] = data_array[i];
+    }
+  }
+};
+
 NLOHMANN_JSON_NAMESPACE_END
