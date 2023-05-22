@@ -61,7 +61,7 @@ class NDJsonReader {
   }
 
   void VerifyFinished() {
-    if (unused_step_ || !stream_.eof()) {
+    if (unused_step_ || stream_.peek() != EOF) {
       throw std::runtime_error("The stream was not read to completion.");
     }
   }
