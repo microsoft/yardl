@@ -30,13 +30,21 @@ func WriteNdJson(env *dsl.Environment, options packaging.CppCodegenOptions) erro
 
 	w.WriteStringln(`#include "protocols.h"
 `)
-	// writeIsTriviallySerializableSpecializations(w, env)
-	// writeUnionSerializers(w, env)
 	for _, ns := range env.Namespaces {
-		w.WriteStringln("using json = nlohmann::ordered_json;")
+		w.WriteString("using json = nlohmann::ordered_json;\n\n")
+
+		if len(ns.TypeDefinitions) > 0 {
+			fmt.Fprintf(w, "namespace %s {\n", common.NamespaceIdentifierName(ns.Name))
+			for _, typeDef := range ns.TypeDefinitions {
+				writeConverters(w, typeDef)
+			}
+			fmt.Fprintf(w, "} // namespace %s\n\n", common.NamespaceIdentifierName(ns.Name))
+		}
 
 		fmt.Fprintf(w, "namespace %s::ndjson {\n", common.NamespaceIdentifierName(ns.Name))
-		writeNamespaceDefinitions(w, ns)
+		for _, protocol := range ns.Protocols {
+			writeProtocolMethods(w, protocol)
+		}
 		fmt.Fprintf(w, "} // namespace %s::ndjson", common.NamespaceIdentifierName(ns.Name))
 	}
 
@@ -157,18 +165,73 @@ func writeHeaderFile(env *dsl.Environment, options packaging.CppCodegenOptions) 
 	return iocommon.WriteFileIfNeeded(filePath, b.Bytes(), 0644)
 }
 
-func writeNamespaceDefinitions(w *formatting.IndentedWriter, ns *dsl.Namespace) {
-	if len(ns.TypeDefinitions) > 0 {
-		w.WriteStringln("namespace {")
-		// for _, typeDef := range ns.TypeDefinitions {
-		// 	writeSerializers(w, typeDef)
-		// }
-		w.WriteString("} // namespace\n\n")
-	}
+func writeConverters(w *formatting.IndentedWriter, t dsl.TypeDefinition) {
+	typeName := common.TypeDefinitionSyntax(t)
+	fmt.Fprintf(w, "void to_json(json& j, %s const& value) {\n", typeName)
+	w.Indented(func() {
+		switch t := t.(type) {
+		case *dsl.RecordDefinition:
+			w.WriteStringln("j = json{")
+			w.Indented(func() {
+				for _, field := range t.Fields {
+					fmt.Fprintf(w, "{\"%s\", value.%s},\n", field.Name, common.FieldIdentifierName(field.Name))
+				}
+			})
+			w.WriteStringln("};")
+		case *dsl.EnumDefinition:
+			w.WriteStringln("switch (value) {")
+			w.Indented(func() {
+				for _, v := range t.Values {
+					fmt.Fprintf(w, "case %s::%s:\n", typeName, common.EnumValueIdentifierName(v.Symbol))
+					w.Indented(func() {
+						fmt.Fprintf(w, "j = \"%s\";\n", v.Symbol)
+						w.WriteStringln("break;")
+					})
+				}
+				w.WriteStringln("default:")
+				w.Indented(func() {
+					fmt.Fprintf(w, "using underlying_type = typename std::underlying_type<%s>::type;\n", typeName)
+					w.WriteStringln("j = static_cast<underlying_type>(value);")
+					w.WriteStringln("break;")
+				})
+			})
+			w.WriteStringln("}")
+		default:
+			panic(fmt.Sprintf("Unsupported type: %T", t))
+		}
+	})
+	w.WriteStringln("}\n")
 
-	for _, protocol := range ns.Protocols {
-		writeProtocolMethods(w, protocol)
-	}
+	fmt.Fprintf(w, "void from_json(json const& j, %s& value) {\n", common.TypeDefinitionSyntax(t))
+	w.Indented(func() {
+		switch t := t.(type) {
+		case *dsl.RecordDefinition:
+			for _, field := range t.Fields {
+				fmt.Fprintf(w, "j.at(\"%s\").get_to(value.%s);\n", field.Name, common.FieldIdentifierName(field.Name))
+			}
+		case *dsl.EnumDefinition:
+			w.WriteStringln("if (j.is_string()) {")
+			w.Indented(func() {
+				w.WriteStringln("std::string_view symbol = j.get<std::string_view>();")
+				for _, v := range t.Values {
+					fmt.Fprintf(w, "if (symbol == \"%s\") {\n", v.Symbol)
+					w.Indented(func() {
+						fmt.Fprintf(w, "value = %s::%s;\n", typeName, common.EnumValueIdentifierName(v.Symbol))
+						w.WriteStringln("return;")
+					})
+					w.WriteStringln("}")
+				}
+				fmt.Fprintf(w, "throw std::runtime_error(\"Invalid enum value '\" + std::string(symbol) + \"' for enum %s\");\n", typeName)
+			})
+			w.WriteStringln("}")
+			fmt.Fprintf(w, "using underlying_type = typename std::underlying_type<%s>::type;\n", typeName)
+			fmt.Fprintf(w, "value = static_cast<%s>(j.get<underlying_type>());\n", typeName)
+
+		default:
+			panic(fmt.Sprintf("Unsupported type: %T", t))
+		}
+	})
+	w.WriteStringln("}\n")
 }
 
 func writeProtocolMethods(w *formatting.IndentedWriter, p *dsl.ProtocolDefinition) {
