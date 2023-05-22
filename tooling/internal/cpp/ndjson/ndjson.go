@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"strings"
 
 	"github.com/microsoft/yardl/tooling/internal/cpp/common"
 	"github.com/microsoft/yardl/tooling/internal/formatting"
@@ -12,6 +13,40 @@ import (
 	"github.com/microsoft/yardl/tooling/pkg/dsl"
 	"github.com/microsoft/yardl/tooling/pkg/packaging"
 )
+
+type jsonDataType int
+
+const (
+	jsonNull jsonDataType = 1 << iota
+	jsonBoolean
+	jsonNumber
+	jsonString
+	jsonArray
+	jsonObject
+)
+
+func (t jsonDataType) typeCheck(varName string) string {
+	options := make([]string, 0, 1)
+	if t&jsonNull != 0 {
+		options = append(options, fmt.Sprintf("%s.is_null()", varName))
+	}
+	if t&jsonBoolean != 0 {
+		options = append(options, fmt.Sprintf("%s.is_boolean()", varName))
+	}
+	if t&jsonNumber != 0 {
+		options = append(options, fmt.Sprintf("%s.is_number()", varName))
+	}
+	if t&jsonString != 0 {
+		options = append(options, fmt.Sprintf("%s.is_string()", varName))
+	}
+	if t&jsonArray != 0 {
+		options = append(options, fmt.Sprintf("%s.is_array()", varName))
+	}
+	if t&jsonObject != 0 {
+		options = append(options, fmt.Sprintf("%s.is_object()", varName))
+	}
+	return fmt.Sprintf("(%s)", strings.Join(options, " || "))
+}
 
 func WriteNdJson(env *dsl.Environment, options packaging.CppCodegenOptions) error {
 	options = options.ChangeOutputDir("ndjson")
@@ -30,16 +65,49 @@ func WriteNdJson(env *dsl.Environment, options packaging.CppCodegenOptions) erro
 
 	w.WriteStringln(`#include "protocols.h"
 `)
+
 	for _, ns := range env.Namespaces {
+
+		unionsBySyntax := make(map[string]*dsl.GeneralizedType)
+		dsl.Visit(ns, func(self dsl.Visitor, node dsl.Node) {
+			switch t := node.(type) {
+			case *dsl.GeneralizedType:
+				if t.Cases.IsUnion() {
+					scalarType := t.ToScalar().(*dsl.GeneralizedType)
+					typeSyntax := common.TypeSyntax(scalarType)
+					if _, ok := unionsBySyntax[typeSyntax]; !ok {
+						if len(unionsBySyntax) == 0 {
+							w.WriteStringln("NLOHMANN_JSON_NAMESPACE_BEGIN\n")
+						}
+						unionsBySyntax[typeSyntax] = t
+						writeUnionConverters(w, t)
+					}
+				}
+
+				self.VisitChildren(node)
+			default:
+				self.VisitChildren(node)
+			}
+		})
+
+		if len(unionsBySyntax) > 0 {
+			w.WriteStringln("NLOHMANN_JSON_NAMESPACE_END\n")
+		}
+
+		fmt.Fprintf(w, "namespace %s {\n", common.NamespaceIdentifierName(ns.Name))
+
 		w.WriteString("using json = nlohmann::ordered_json;\n\n")
 
-		if len(ns.TypeDefinitions) > 0 {
-			fmt.Fprintf(w, "namespace %s {\n", common.NamespaceIdentifierName(ns.Name))
-			for _, typeDef := range ns.TypeDefinitions {
-				writeConverters(w, typeDef)
+		for _, t := range ns.TypeDefinitions {
+			switch t := t.(type) {
+			case *dsl.EnumDefinition:
+				writeEnumConverters(w, t)
+			case *dsl.RecordDefinition:
+				writeRecordConverters(w, t)
 			}
-			fmt.Fprintf(w, "} // namespace %s\n\n", common.NamespaceIdentifierName(ns.Name))
 		}
+
+		fmt.Fprintf(w, "} // namespace %s\n\n", common.NamespaceIdentifierName(ns.Name))
 
 		fmt.Fprintf(w, "namespace %s::ndjson {\n", common.NamespaceIdentifierName(ns.Name))
 		for _, protocol := range ns.Protocols {
@@ -165,73 +233,198 @@ func writeHeaderFile(env *dsl.Environment, options packaging.CppCodegenOptions) 
 	return iocommon.WriteFileIfNeeded(filePath, b.Bytes(), 0644)
 }
 
-func writeConverters(w *formatting.IndentedWriter, t dsl.TypeDefinition) {
+func writeRecordConverters(w *formatting.IndentedWriter, t *dsl.RecordDefinition) {
 	typeName := common.TypeDefinitionSyntax(t)
 	fmt.Fprintf(w, "void to_json(json& j, %s const& value) {\n", typeName)
 	w.Indented(func() {
-		switch t := t.(type) {
-		case *dsl.RecordDefinition:
-			w.WriteStringln("j = json{")
-			w.Indented(func() {
-				for _, field := range t.Fields {
-					fmt.Fprintf(w, "{\"%s\", value.%s},\n", field.Name, common.FieldIdentifierName(field.Name))
-				}
-			})
-			w.WriteStringln("};")
-		case *dsl.EnumDefinition:
-			w.WriteStringln("switch (value) {")
-			w.Indented(func() {
-				for _, v := range t.Values {
-					fmt.Fprintf(w, "case %s::%s:\n", typeName, common.EnumValueIdentifierName(v.Symbol))
-					w.Indented(func() {
-						fmt.Fprintf(w, "j = \"%s\";\n", v.Symbol)
-						w.WriteStringln("break;")
-					})
-				}
-				w.WriteStringln("default:")
+		w.WriteStringln("j = json{")
+		w.Indented(func() {
+			for _, field := range t.Fields {
+				fmt.Fprintf(w, "{\"%s\", value.%s},\n", field.Name, common.FieldIdentifierName(field.Name))
+			}
+		})
+		w.WriteStringln("};")
+	})
+	w.WriteStringln("}\n")
+
+	fmt.Fprintf(w, "void from_json(json const& j, %s& value) {\n", typeName)
+	w.Indented(func() {
+		for _, field := range t.Fields {
+			fmt.Fprintf(w, "j.at(\"%s\").get_to(value.%s);\n", field.Name, common.FieldIdentifierName(field.Name))
+		}
+	})
+	w.WriteStringln("}\n")
+}
+
+func writeEnumConverters(w *formatting.IndentedWriter, t *dsl.EnumDefinition) {
+	typeName := common.TypeDefinitionSyntax(t)
+	fmt.Fprintf(w, "void to_json(json& j, %s const& value) {\n", typeName)
+	w.Indented(func() {
+		w.WriteStringln("switch (value) {")
+		w.Indented(func() {
+			for _, v := range t.Values {
+				fmt.Fprintf(w, "case %s::%s:\n", typeName, common.EnumValueIdentifierName(v.Symbol))
 				w.Indented(func() {
-					fmt.Fprintf(w, "using underlying_type = typename std::underlying_type<%s>::type;\n", typeName)
-					w.WriteStringln("j = static_cast<underlying_type>(value);")
+					fmt.Fprintf(w, "j = \"%s\";\n", v.Symbol)
 					w.WriteStringln("break;")
 				})
+			}
+			w.WriteStringln("default:")
+			w.Indented(func() {
+				fmt.Fprintf(w, "using underlying_type = typename std::underlying_type<%s>::type;\n", typeName)
+				w.WriteStringln("j = static_cast<underlying_type>(value);")
+				w.WriteStringln("break;")
 			})
-			w.WriteStringln("}")
-		default:
-			panic(fmt.Sprintf("Unsupported type: %T", t))
-		}
+		})
+		w.WriteStringln("}")
 	})
 	w.WriteStringln("}\n")
 
 	fmt.Fprintf(w, "void from_json(json const& j, %s& value) {\n", common.TypeDefinitionSyntax(t))
 	w.Indented(func() {
-		switch t := t.(type) {
-		case *dsl.RecordDefinition:
-			for _, field := range t.Fields {
-				fmt.Fprintf(w, "j.at(\"%s\").get_to(value.%s);\n", field.Name, common.FieldIdentifierName(field.Name))
+		w.WriteStringln("if (j.is_string()) {")
+		w.Indented(func() {
+			w.WriteStringln("std::string_view symbol = j.get<std::string_view>();")
+			for _, v := range t.Values {
+				fmt.Fprintf(w, "if (symbol == \"%s\") {\n", v.Symbol)
+				w.Indented(func() {
+					fmt.Fprintf(w, "value = %s::%s;\n", typeName, common.EnumValueIdentifierName(v.Symbol))
+					w.WriteStringln("return;")
+				})
+				w.WriteStringln("}")
 			}
-		case *dsl.EnumDefinition:
-			w.WriteStringln("if (j.is_string()) {")
-			w.Indented(func() {
-				w.WriteStringln("std::string_view symbol = j.get<std::string_view>();")
-				for _, v := range t.Values {
-					fmt.Fprintf(w, "if (symbol == \"%s\") {\n", v.Symbol)
+			fmt.Fprintf(w, "throw std::runtime_error(\"Invalid enum value '\" + std::string(symbol) + \"' for enum %s\");\n", typeName)
+		})
+		w.WriteStringln("}")
+		fmt.Fprintf(w, "using underlying_type = typename std::underlying_type<%s>::type;\n", typeName)
+		fmt.Fprintf(w, "value = static_cast<%s>(j.get<underlying_type>());\n", typeName)
+	})
+	w.WriteStringln("}\n")
+}
+
+func writeUnionConverters(w *formatting.IndentedWriter, unionType *dsl.GeneralizedType) {
+	simplfied := true
+	var possibleTypes jsonDataType
+	for _, c := range unionType.Cases {
+		thisType := getJsonDataType(c.Type)
+		if thisType&possibleTypes != 0 {
+			simplfied = false
+		}
+		possibleTypes |= thisType
+	}
+
+	unionTypeSyntax := common.TypeSyntax(unionType)
+
+	w.WriteStringln("template<>")
+	fmt.Fprintf(w, "struct adl_serializer<%s> {\n", unionTypeSyntax)
+	w.Indented(func() {
+
+		fmt.Fprintf(w, "static void to_json(ordered_json& j, %s const& value) {\n", unionTypeSyntax)
+		w.Indented(func() {
+			if simplfied {
+				w.WriteStringln("std::visit([&j](auto const& v) {j = v;}, value);")
+			} else {
+				w.WriteStringln("switch (value.index()) {")
+				w.Indented(func() {
+					for i, c := range unionType.Cases {
+						fmt.Fprintf(w, "case %d:\n", i)
+						w.Indented(func() {
+							fmt.Fprintf(w, "j = ordered_json{ {\"%s\", std::get<%s>(value)} };\n", c.Label, common.TypeSyntax(c.Type))
+							w.WriteStringln("break;")
+						})
+					}
+					w.WriteStringln("default:")
 					w.Indented(func() {
-						fmt.Fprintf(w, "value = %s::%s;\n", typeName, common.EnumValueIdentifierName(v.Symbol))
+						w.WriteStringln("throw std::runtime_error(\"Invalid union value\");")
+					})
+				})
+				w.WriteStringln("}")
+			}
+
+		})
+		w.WriteStringln("}\n")
+
+		fmt.Fprintf(w, "static void from_json(ordered_json const& j, %s& value) {\n", unionTypeSyntax)
+		w.Indented(func() {
+			if simplfied {
+				for _, c := range unionType.Cases {
+					dt := getJsonDataType(c.Type)
+					fmt.Fprintf(w, "if (%s) {\n", dt.typeCheck("j"))
+					w.Indented(func() {
+						fmt.Fprintf(w, "value = j.get<%s>();\n", common.TypeSyntax(c.Type))
 						w.WriteStringln("return;")
 					})
 					w.WriteStringln("}")
 				}
-				fmt.Fprintf(w, "throw std::runtime_error(\"Invalid enum value '\" + std::string(symbol) + \"' for enum %s\");\n", typeName)
-			})
-			w.WriteStringln("}")
-			fmt.Fprintf(w, "using underlying_type = typename std::underlying_type<%s>::type;\n", typeName)
-			fmt.Fprintf(w, "value = static_cast<%s>(j.get<underlying_type>());\n", typeName)
 
-		default:
-			panic(fmt.Sprintf("Unsupported type: %T", t))
-		}
+				w.WriteStringln("throw std::runtime_error(\"Invalid union value\");")
+			} else {
+				w.WriteStringln("auto it = j.begin();")
+				w.WriteStringln("std::string label = it.key();")
+				for _, v := range unionType.Cases {
+					fmt.Fprintf(w, "if (label == \"%s\") {\n", v.Label)
+					w.Indented(func() {
+						fmt.Fprintf(w, "value = it.value().get<%s>();\n", common.TypeSyntax(v.Type))
+						w.WriteStringln("return;")
+					})
+					w.WriteStringln("}")
+				}
+			}
+		})
+		w.WriteStringln("}")
 	})
-	w.WriteStringln("}\n")
+	w.WriteStringln("};\n")
+
+}
+
+func getJsonDataType(t dsl.Type) jsonDataType {
+	if t == nil {
+		return jsonNull
+	}
+	gt := dsl.ToGeneralizedType(t)
+	switch d := gt.Dimensionality.(type) {
+	case *dsl.Vector:
+		return jsonArray
+	case *dsl.Array:
+		if d.IsFixed() {
+			return jsonArray
+		}
+		return jsonObject
+	case *dsl.Map:
+		if p, ok := dsl.GetPrimitiveType(d.KeyType); ok && p == dsl.String {
+			return jsonObject
+		}
+		return jsonArray
+	}
+
+	if len(gt.Cases) > 1 {
+		panic("unexpected union type")
+	}
+
+	scalarType := gt.Cases[0].Type.(*dsl.SimpleType)
+	switch td := scalarType.ResolvedDefinition.(type) {
+	case dsl.PrimitiveDefinition:
+		switch td {
+		case dsl.String:
+			return jsonString
+		case dsl.Int8, dsl.Int16, dsl.Int32, dsl.Int64, dsl.Uint8, dsl.Uint16, dsl.Uint32, dsl.Uint64, dsl.Size, dsl.Float32, dsl.Float64:
+			return jsonNumber
+		case dsl.Bool:
+			return jsonBoolean
+		case dsl.ComplexFloat32, dsl.ComplexFloat64:
+			return jsonArray
+		case dsl.Time, dsl.DateTime:
+			return jsonString
+		default:
+			panic(fmt.Sprintf("unexpected primitive type %s", td))
+		}
+	case *dsl.EnumDefinition:
+		return jsonString | jsonNumber
+	case *dsl.RecordDefinition:
+		return jsonObject
+	}
+
+	panic(fmt.Sprintf("unexpected type %s", scalarType))
 }
 
 func writeProtocolMethods(w *formatting.IndentedWriter, p *dsl.ProtocolDefinition) {

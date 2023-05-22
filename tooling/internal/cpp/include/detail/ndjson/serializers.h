@@ -71,19 +71,32 @@ NLOHMANN_JSON_NAMESPACE_BEGIN
 
 template <typename T>
 struct adl_serializer<std::optional<T>> {
-  static void to_json(ordered_json& j, std::optional<T> const& opt) {
-    if (opt) {
-      j = *opt;
+  static void to_json(ordered_json& j, std::optional<T> const& value) {
+    if (value) {
+      j = *value;
     } else {
       j = nullptr;
     }
   }
 
-  static void from_json(ordered_json const& j, std::optional<T>& opt) {
+  static void from_json(ordered_json const& j, std::optional<T>& value) {
     if (j.is_null()) {
-      opt = std::nullopt;
+      value = std::nullopt;
     } else {
-      opt = j.get<T>();
+      value = j.get<T>();
+    }
+  }
+};
+
+template <>
+struct adl_serializer<std::monostate> {
+  static void to_json(ordered_json& j, [[maybe_unused]] std::monostate const& value) {
+    j = nullptr;
+  }
+
+  static void from_json(ordered_json const& j, [[maybe_unused]] std::monostate& value) {
+    if (!j.is_null()) {
+      throw std::runtime_error("expected null");
     }
   }
 };
