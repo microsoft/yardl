@@ -8,7 +8,7 @@
 
 set -euo pipefail
 
-brew install hdf5 xtensor howard-hinnant-date
+brew install hdf5 xtensor howard-hinnant-date nlohmann-json
 
 cd "$(dirname "$0")"
 
