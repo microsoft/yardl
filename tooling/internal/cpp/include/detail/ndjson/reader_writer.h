@@ -16,12 +16,12 @@ static inline uint32_t kNDJsonFormatVersionNumber = 1;
 
 class NDJsonWriter {
  protected:
-  NDJsonWriter(std::ostream& stream, [[maybe_unused]] std::string& schema)
+  NDJsonWriter(std::ostream& stream, std::string& schema)
       : stream_(stream) {
     WriteHeader(schema);
   }
 
-  NDJsonWriter(std::string file_name, [[maybe_unused]] std::string& schema) : owned_file_stream_(open_file(file_name)), stream_(*owned_file_stream_) {
+  NDJsonWriter(std::string file_name, std::string& schema) : owned_file_stream_(open_file(file_name)), stream_(*owned_file_stream_) {
     WriteHeader(schema);
   }
 
@@ -51,7 +51,7 @@ class NDJsonWriter {
 
 class NDJsonReader {
  protected:
-  NDJsonReader(std::istream& stream, [[maybe_unused]] std::string& schema)
+  NDJsonReader(std::istream& stream, std::string& schema)
       : stream_(stream) {
     ReadHeader(schema);
   }

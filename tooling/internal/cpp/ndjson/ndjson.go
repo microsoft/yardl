@@ -483,7 +483,7 @@ func writeProtocolMethods(w *formatting.IndentedWriter, p *dsl.ProtocolDefinitio
 	writerClassName := NDJsonWriterClassName(p)
 
 	for _, step := range p.Sequence {
-		fmt.Fprintf(w, "void %s::%s([[maybe_unused]]%s const& value) {\n", writerClassName, common.ProtocolWriteImplMethodName(step), common.TypeSyntax(step.Type))
+		fmt.Fprintf(w, "void %s::%s(%s const& value) {\n", writerClassName, common.ProtocolWriteImplMethodName(step), common.TypeSyntax(step.Type))
 		w.Indented(func() {
 			w.WriteStringln("ordered_json json_value = value;")
 			fmt.Fprintf(w, "yardl::ndjson::WriteProtocolValue(stream_, \"%s\", json_value);", step.Name)
@@ -510,7 +510,7 @@ func writeProtocolMethods(w *formatting.IndentedWriter, p *dsl.ProtocolDefinitio
 			returnType = "bool"
 		}
 
-		fmt.Fprintf(w, "%s %s::%s([[maybe_unused]]%s& value) {\n", returnType, readerClassName, common.ProtocolReadImplMethodName(step), common.TypeSyntax(step.Type))
+		fmt.Fprintf(w, "%s %s::%s(%s& value) {\n", returnType, readerClassName, common.ProtocolReadImplMethodName(step), common.TypeSyntax(step.Type))
 		w.Indented(func() {
 			if step.IsStream() {
 				w.WriteString("return ")
