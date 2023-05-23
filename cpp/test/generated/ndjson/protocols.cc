@@ -2,5 +2,1991 @@
 
 #include "protocols.h"
 
+namespace test_model {
+using ordered_json = nlohmann::ordered_json;
+
+void to_json(ordered_json& j, test_model::SmallBenchmarkRecord const& value);
+void from_json(ordered_json const& j, test_model::SmallBenchmarkRecord& value);
+
+void to_json(ordered_json& j, test_model::SimpleEncodingCounters const& value);
+void from_json(ordered_json const& j, test_model::SimpleEncodingCounters& value);
+
+void to_json(ordered_json& j, test_model::SimpleAcquisition const& value);
+void from_json(ordered_json const& j, test_model::SimpleAcquisition& value);
+
+void to_json(ordered_json& j, test_model::SimpleRecord const& value);
+void from_json(ordered_json const& j, test_model::SimpleRecord& value);
+
+void to_json(ordered_json& j, test_model::RecordWithPrimitives const& value);
+void from_json(ordered_json const& j, test_model::RecordWithPrimitives& value);
+
+void to_json(ordered_json& j, test_model::RecordWithPrimitiveAliases const& value);
+void from_json(ordered_json const& j, test_model::RecordWithPrimitiveAliases& value);
+
+void to_json(ordered_json& j, test_model::TupleWithRecords const& value);
+void from_json(ordered_json const& j, test_model::TupleWithRecords& value);
+
+void to_json(ordered_json& j, test_model::RecordWithVectors const& value);
+void from_json(ordered_json const& j, test_model::RecordWithVectors& value);
+
+void to_json(ordered_json& j, test_model::RecordWithArrays const& value);
+void from_json(ordered_json const& j, test_model::RecordWithArrays& value);
+
+void to_json(ordered_json& j, test_model::RecordWithArraysSimpleSyntax const& value);
+void from_json(ordered_json const& j, test_model::RecordWithArraysSimpleSyntax& value);
+
+void to_json(ordered_json& j, test_model::RecordWithOptionalFields const& value);
+void from_json(ordered_json const& j, test_model::RecordWithOptionalFields& value);
+
+void to_json(ordered_json& j, test_model::RecordWithVlens const& value);
+void from_json(ordered_json const& j, test_model::RecordWithVlens& value);
+
+void to_json(ordered_json& j, test_model::RecordWithStrings const& value);
+void from_json(ordered_json const& j, test_model::RecordWithStrings& value);
+
+void to_json(ordered_json& j, test_model::RecordWithOptionalVector const& value);
+void from_json(ordered_json const& j, test_model::RecordWithOptionalVector& value);
+
+void to_json(ordered_json& j, test_model::RecordWithFixedVectors const& value);
+void from_json(ordered_json const& j, test_model::RecordWithFixedVectors& value);
+
+void to_json(ordered_json& j, test_model::RecordWithFixedArrays const& value);
+void from_json(ordered_json const& j, test_model::RecordWithFixedArrays& value);
+
+void to_json(ordered_json& j, test_model::RecordWithNDArrays const& value);
+void from_json(ordered_json const& j, test_model::RecordWithNDArrays& value);
+
+void to_json(ordered_json& j, test_model::RecordWithNDArraysSingleDimension const& value);
+void from_json(ordered_json const& j, test_model::RecordWithNDArraysSingleDimension& value);
+
+void to_json(ordered_json& j, test_model::RecordWithDynamicNDArrays const& value);
+void from_json(ordered_json const& j, test_model::RecordWithDynamicNDArrays& value);
+
+void to_json(ordered_json& j, test_model::Fruits const& value);
+void from_json(ordered_json const& j, test_model::Fruits& value);
+
+void to_json(ordered_json& j, test_model::UInt64Enum const& value);
+void from_json(ordered_json const& j, test_model::UInt64Enum& value);
+
+void to_json(ordered_json& j, test_model::Int64Enum const& value);
+void from_json(ordered_json const& j, test_model::Int64Enum& value);
+
+void to_json(ordered_json& j, test_model::SizeBasedEnum const& value);
+void from_json(ordered_json const& j, test_model::SizeBasedEnum& value);
+
+template <typename T1, typename T2>
+void to_json(ordered_json& j, test_model::GenericRecord<T1, T2> const& value);
+template <typename T1, typename T2>
+void from_json(ordered_json const& j, test_model::GenericRecord<T1, T2>& value);
+
+template <typename T1, typename T2>
+void to_json(ordered_json& j, test_model::MyTuple<T1, T2> const& value);
+template <typename T1, typename T2>
+void from_json(ordered_json const& j, test_model::MyTuple<T1, T2>& value);
+
+template <typename T0, typename T1>
+void to_json(ordered_json& j, test_model::GenericRecordWithComputedFields<T0, T1> const& value);
+template <typename T0, typename T1>
+void from_json(ordered_json const& j, test_model::GenericRecordWithComputedFields<T0, T1>& value);
+
+void to_json(ordered_json& j, test_model::RecordWithComputedFields const& value);
+void from_json(ordered_json const& j, test_model::RecordWithComputedFields& value);
+
+void to_json(ordered_json& j, test_model::EnumWithKeywordSymbols const& value);
+void from_json(ordered_json const& j, test_model::EnumWithKeywordSymbols& value);
+
+void to_json(ordered_json& j, test_model::RecordWithKeywordFields const& value);
+void from_json(ordered_json const& j, test_model::RecordWithKeywordFields& value);
+
+} // namespace test_model
+
+NLOHMANN_JSON_NAMESPACE_BEGIN
+
+template<>struct adl_serializer<std::variant<test_model::SimpleAcquisition, test_model::Image<float>>> {
+  static void to_json(ordered_json& j, std::variant<test_model::SimpleAcquisition, test_model::Image<float>> const& value) {
+    switch (value.index()) {
+      case 0:
+        j = ordered_json{ {"SimpleAcquisition", std::get<test_model::SimpleAcquisition>(value)} };
+        break;
+      case 1:
+        j = ordered_json{ {"Image<float32>", std::get<test_model::Image<float>>(value)} };
+        break;
+      default:
+        throw std::runtime_error("Invalid union value");
+    }
+  }
+
+  static void from_json(ordered_json const& j, std::variant<test_model::SimpleAcquisition, test_model::Image<float>>& value) {
+    auto it = j.begin();
+    std::string label = it.key();
+    if (label == "SimpleAcquisition") {
+      value = it.value().get<test_model::SimpleAcquisition>();
+      return;
+    }
+    if (label == "Image<float32>") {
+      value = it.value().get<test_model::Image<float>>();
+      return;
+    }
+  }
+};
+
+template<>struct adl_serializer<std::variant<std::string, int32_t>> {
+  static void to_json(ordered_json& j, std::variant<std::string, int32_t> const& value) {
+    std::visit([&j](auto const& v) {j = v;}, value);
+  }
+
+  static void from_json(ordered_json const& j, std::variant<std::string, int32_t>& value) {
+    if ((j.is_string())) {
+      value = j.get<std::string>();
+      return;
+    }
+    if ((j.is_number())) {
+      value = j.get<int32_t>();
+      return;
+    }
+    throw std::runtime_error("Invalid union value");
+  }
+};
+
+template<>struct adl_serializer<std::variant<int32_t, test_model::SimpleRecord>> {
+  static void to_json(ordered_json& j, std::variant<int32_t, test_model::SimpleRecord> const& value) {
+    std::visit([&j](auto const& v) {j = v;}, value);
+  }
+
+  static void from_json(ordered_json const& j, std::variant<int32_t, test_model::SimpleRecord>& value) {
+    if ((j.is_number())) {
+      value = j.get<int32_t>();
+      return;
+    }
+    if ((j.is_object())) {
+      value = j.get<test_model::SimpleRecord>();
+      return;
+    }
+    throw std::runtime_error("Invalid union value");
+  }
+};
+
+template<>struct adl_serializer<std::variant<int32_t, test_model::RecordWithVlens>> {
+  static void to_json(ordered_json& j, std::variant<int32_t, test_model::RecordWithVlens> const& value) {
+    std::visit([&j](auto const& v) {j = v;}, value);
+  }
+
+  static void from_json(ordered_json const& j, std::variant<int32_t, test_model::RecordWithVlens>& value) {
+    if ((j.is_number())) {
+      value = j.get<int32_t>();
+      return;
+    }
+    if ((j.is_object())) {
+      value = j.get<test_model::RecordWithVlens>();
+      return;
+    }
+    throw std::runtime_error("Invalid union value");
+  }
+};
+
+template<>struct adl_serializer<std::variant<std::monostate, int32_t, test_model::SimpleRecord>> {
+  static void to_json(ordered_json& j, std::variant<std::monostate, int32_t, test_model::SimpleRecord> const& value) {
+    std::visit([&j](auto const& v) {j = v;}, value);
+  }
+
+  static void from_json(ordered_json const& j, std::variant<std::monostate, int32_t, test_model::SimpleRecord>& value) {
+    if ((j.is_null())) {
+      value = j.get<std::monostate>();
+      return;
+    }
+    if ((j.is_number())) {
+      value = j.get<int32_t>();
+      return;
+    }
+    if ((j.is_object())) {
+      value = j.get<test_model::SimpleRecord>();
+      return;
+    }
+    throw std::runtime_error("Invalid union value");
+  }
+};
+
+template<>struct adl_serializer<std::variant<test_model::Image<float>, test_model::Image<double>>> {
+  static void to_json(ordered_json& j, std::variant<test_model::Image<float>, test_model::Image<double>> const& value) {
+    switch (value.index()) {
+      case 0:
+        j = ordered_json{ {"Image<float32>", std::get<test_model::Image<float>>(value)} };
+        break;
+      case 1:
+        j = ordered_json{ {"Image<float64>", std::get<test_model::Image<double>>(value)} };
+        break;
+      default:
+        throw std::runtime_error("Invalid union value");
+    }
+  }
+
+  static void from_json(ordered_json const& j, std::variant<test_model::Image<float>, test_model::Image<double>>& value) {
+    auto it = j.begin();
+    std::string label = it.key();
+    if (label == "Image<float32>") {
+      value = it.value().get<test_model::Image<float>>();
+      return;
+    }
+    if (label == "Image<float64>") {
+      value = it.value().get<test_model::Image<double>>();
+      return;
+    }
+  }
+};
+
+template<>struct adl_serializer<std::variant<test_model::AliasedString, test_model::AliasedEnum>> {
+  static void to_json(ordered_json& j, std::variant<test_model::AliasedString, test_model::AliasedEnum> const& value) {
+    switch (value.index()) {
+      case 0:
+        j = ordered_json{ {"T1", std::get<test_model::AliasedString>(value)} };
+        break;
+      case 1:
+        j = ordered_json{ {"T2", std::get<test_model::AliasedEnum>(value)} };
+        break;
+      default:
+        throw std::runtime_error("Invalid union value");
+    }
+  }
+
+  static void from_json(ordered_json const& j, std::variant<test_model::AliasedString, test_model::AliasedEnum>& value) {
+    auto it = j.begin();
+    std::string label = it.key();
+    if (label == "T1") {
+      value = it.value().get<test_model::AliasedString>();
+      return;
+    }
+    if (label == "T2") {
+      value = it.value().get<test_model::AliasedEnum>();
+      return;
+    }
+  }
+};
+
+template<>struct adl_serializer<std::variant<int32_t, float>> {
+  static void to_json(ordered_json& j, std::variant<int32_t, float> const& value) {
+    switch (value.index()) {
+      case 0:
+        j = ordered_json{ {"int32", std::get<int32_t>(value)} };
+        break;
+      case 1:
+        j = ordered_json{ {"float32", std::get<float>(value)} };
+        break;
+      default:
+        throw std::runtime_error("Invalid union value");
+    }
+  }
+
+  static void from_json(ordered_json const& j, std::variant<int32_t, float>& value) {
+    auto it = j.begin();
+    std::string label = it.key();
+    if (label == "int32") {
+      value = it.value().get<int32_t>();
+      return;
+    }
+    if (label == "float32") {
+      value = it.value().get<float>();
+      return;
+    }
+  }
+};
+
+template<>struct adl_serializer<std::variant<std::monostate, int32_t, float>> {
+  static void to_json(ordered_json& j, std::variant<std::monostate, int32_t, float> const& value) {
+    switch (value.index()) {
+      case 0:
+        j = ordered_json{ {"", std::get<std::monostate>(value)} };
+        break;
+      case 1:
+        j = ordered_json{ {"int32", std::get<int32_t>(value)} };
+        break;
+      case 2:
+        j = ordered_json{ {"float32", std::get<float>(value)} };
+        break;
+      default:
+        throw std::runtime_error("Invalid union value");
+    }
+  }
+
+  static void from_json(ordered_json const& j, std::variant<std::monostate, int32_t, float>& value) {
+    auto it = j.begin();
+    std::string label = it.key();
+    if (label == "") {
+      value = it.value().get<std::monostate>();
+      return;
+    }
+    if (label == "int32") {
+      value = it.value().get<int32_t>();
+      return;
+    }
+    if (label == "float32") {
+      value = it.value().get<float>();
+      return;
+    }
+  }
+};
+
+template<>struct adl_serializer<std::variant<int32_t, test_model::GenericRecordWithComputedFields<std::string, float>>> {
+  static void to_json(ordered_json& j, std::variant<int32_t, test_model::GenericRecordWithComputedFields<std::string, float>> const& value) {
+    std::visit([&j](auto const& v) {j = v;}, value);
+  }
+
+  static void from_json(ordered_json const& j, std::variant<int32_t, test_model::GenericRecordWithComputedFields<std::string, float>>& value) {
+    if ((j.is_number())) {
+      value = j.get<int32_t>();
+      return;
+    }
+    if ((j.is_object())) {
+      value = j.get<test_model::GenericRecordWithComputedFields<std::string, float>>();
+      return;
+    }
+    throw std::runtime_error("Invalid union value");
+  }
+};
+
+template<>struct adl_serializer<std::variant<std::string, float>> {
+  static void to_json(ordered_json& j, std::variant<std::string, float> const& value) {
+    std::visit([&j](auto const& v) {j = v;}, value);
+  }
+
+  static void from_json(ordered_json const& j, std::variant<std::string, float>& value) {
+    if ((j.is_string())) {
+      value = j.get<std::string>();
+      return;
+    }
+    if ((j.is_number())) {
+      value = j.get<float>();
+      return;
+    }
+    throw std::runtime_error("Invalid union value");
+  }
+};
+
+NLOHMANN_JSON_NAMESPACE_END
+
+namespace test_model {
+using ordered_json = nlohmann::ordered_json;
+
+void to_json(ordered_json& j, test_model::SmallBenchmarkRecord const& value) {
+  j = ordered_json{
+    {"a", value.a},
+    {"b", value.b},
+    {"c", value.c},
+  };
+}
+
+void from_json(ordered_json const& j, test_model::SmallBenchmarkRecord& value) {
+  j.at("a").get_to(value.a);
+  j.at("b").get_to(value.b);
+  j.at("c").get_to(value.c);
+}
+
+void to_json(ordered_json& j, test_model::SimpleEncodingCounters const& value) {
+  j = ordered_json{
+    {"e1", value.e1},
+    {"e2", value.e2},
+    {"slice", value.slice},
+    {"repetition", value.repetition},
+  };
+}
+
+void from_json(ordered_json const& j, test_model::SimpleEncodingCounters& value) {
+  j.at("e1").get_to(value.e1);
+  j.at("e2").get_to(value.e2);
+  j.at("slice").get_to(value.slice);
+  j.at("repetition").get_to(value.repetition);
+}
+
+void to_json(ordered_json& j, test_model::SimpleAcquisition const& value) {
+  j = ordered_json{
+    {"flags", value.flags},
+    {"idx", value.idx},
+    {"data", value.data},
+    {"trajectory", value.trajectory},
+  };
+}
+
+void from_json(ordered_json const& j, test_model::SimpleAcquisition& value) {
+  j.at("flags").get_to(value.flags);
+  j.at("idx").get_to(value.idx);
+  j.at("data").get_to(value.data);
+  j.at("trajectory").get_to(value.trajectory);
+}
+
+void to_json(ordered_json& j, test_model::SimpleRecord const& value) {
+  j = ordered_json{
+    {"x", value.x},
+    {"y", value.y},
+    {"z", value.z},
+  };
+}
+
+void from_json(ordered_json const& j, test_model::SimpleRecord& value) {
+  j.at("x").get_to(value.x);
+  j.at("y").get_to(value.y);
+  j.at("z").get_to(value.z);
+}
+
+void to_json(ordered_json& j, test_model::RecordWithPrimitives const& value) {
+  j = ordered_json{
+    {"boolField", value.bool_field},
+    {"int8Field", value.int8_field},
+    {"uint8Field", value.uint8_field},
+    {"int16Field", value.int16_field},
+    {"uint16Field", value.uint16_field},
+    {"int32Field", value.int32_field},
+    {"uint32Field", value.uint32_field},
+    {"int64Field", value.int64_field},
+    {"uint64Field", value.uint64_field},
+    {"sizeField", value.size_field},
+    {"float32Field", value.float32_field},
+    {"float64Field", value.float64_field},
+    {"complexfloat32Field", value.complexfloat32_field},
+    {"complexfloat64Field", value.complexfloat64_field},
+    {"dateField", value.date_field},
+    {"timeField", value.time_field},
+    {"datetimeField", value.datetime_field},
+  };
+}
+
+void from_json(ordered_json const& j, test_model::RecordWithPrimitives& value) {
+  j.at("boolField").get_to(value.bool_field);
+  j.at("int8Field").get_to(value.int8_field);
+  j.at("uint8Field").get_to(value.uint8_field);
+  j.at("int16Field").get_to(value.int16_field);
+  j.at("uint16Field").get_to(value.uint16_field);
+  j.at("int32Field").get_to(value.int32_field);
+  j.at("uint32Field").get_to(value.uint32_field);
+  j.at("int64Field").get_to(value.int64_field);
+  j.at("uint64Field").get_to(value.uint64_field);
+  j.at("sizeField").get_to(value.size_field);
+  j.at("float32Field").get_to(value.float32_field);
+  j.at("float64Field").get_to(value.float64_field);
+  j.at("complexfloat32Field").get_to(value.complexfloat32_field);
+  j.at("complexfloat64Field").get_to(value.complexfloat64_field);
+  j.at("dateField").get_to(value.date_field);
+  j.at("timeField").get_to(value.time_field);
+  j.at("datetimeField").get_to(value.datetime_field);
+}
+
+void to_json(ordered_json& j, test_model::RecordWithPrimitiveAliases const& value) {
+  j = ordered_json{
+    {"byteField", value.byte_field},
+    {"intField", value.int_field},
+    {"uintField", value.uint_field},
+    {"longField", value.long_field},
+    {"ulongField", value.ulong_field},
+    {"floatField", value.float_field},
+    {"doubleField", value.double_field},
+    {"complexfloatField", value.complexfloat_field},
+    {"complexdoubleField", value.complexdouble_field},
+  };
+}
+
+void from_json(ordered_json const& j, test_model::RecordWithPrimitiveAliases& value) {
+  j.at("byteField").get_to(value.byte_field);
+  j.at("intField").get_to(value.int_field);
+  j.at("uintField").get_to(value.uint_field);
+  j.at("longField").get_to(value.long_field);
+  j.at("ulongField").get_to(value.ulong_field);
+  j.at("floatField").get_to(value.float_field);
+  j.at("doubleField").get_to(value.double_field);
+  j.at("complexfloatField").get_to(value.complexfloat_field);
+  j.at("complexdoubleField").get_to(value.complexdouble_field);
+}
+
+void to_json(ordered_json& j, test_model::TupleWithRecords const& value) {
+  j = ordered_json{
+    {"a", value.a},
+    {"b", value.b},
+  };
+}
+
+void from_json(ordered_json const& j, test_model::TupleWithRecords& value) {
+  j.at("a").get_to(value.a);
+  j.at("b").get_to(value.b);
+}
+
+void to_json(ordered_json& j, test_model::RecordWithVectors const& value) {
+  j = ordered_json{
+    {"defaultVector", value.default_vector},
+    {"defaultVectorFixedLength", value.default_vector_fixed_length},
+    {"vectorOfVectors", value.vector_of_vectors},
+  };
+}
+
+void from_json(ordered_json const& j, test_model::RecordWithVectors& value) {
+  j.at("defaultVector").get_to(value.default_vector);
+  j.at("defaultVectorFixedLength").get_to(value.default_vector_fixed_length);
+  j.at("vectorOfVectors").get_to(value.vector_of_vectors);
+}
+
+void to_json(ordered_json& j, test_model::RecordWithArrays const& value) {
+  j = ordered_json{
+    {"defaultArray", value.default_array},
+    {"defaultArrayWithEmptyDimension", value.default_array_with_empty_dimension},
+    {"rank1Array", value.rank1_array},
+    {"rank2Array", value.rank2_array},
+    {"rank2ArrayWithNamedDimensions", value.rank2_array_with_named_dimensions},
+    {"rank2FixedArray", value.rank2_fixed_array},
+    {"rank2FixedArrayWithNamedDimensions", value.rank2_fixed_array_with_named_dimensions},
+    {"dynamicArray", value.dynamic_array},
+    {"arrayOfVectors", value.array_of_vectors},
+  };
+}
+
+void from_json(ordered_json const& j, test_model::RecordWithArrays& value) {
+  j.at("defaultArray").get_to(value.default_array);
+  j.at("defaultArrayWithEmptyDimension").get_to(value.default_array_with_empty_dimension);
+  j.at("rank1Array").get_to(value.rank1_array);
+  j.at("rank2Array").get_to(value.rank2_array);
+  j.at("rank2ArrayWithNamedDimensions").get_to(value.rank2_array_with_named_dimensions);
+  j.at("rank2FixedArray").get_to(value.rank2_fixed_array);
+  j.at("rank2FixedArrayWithNamedDimensions").get_to(value.rank2_fixed_array_with_named_dimensions);
+  j.at("dynamicArray").get_to(value.dynamic_array);
+  j.at("arrayOfVectors").get_to(value.array_of_vectors);
+}
+
+void to_json(ordered_json& j, test_model::RecordWithArraysSimpleSyntax const& value) {
+  j = ordered_json{
+    {"defaultArray", value.default_array},
+    {"defaultArrayWithEmptyDimension", value.default_array_with_empty_dimension},
+    {"rank1Array", value.rank1_array},
+    {"rank2Array", value.rank2_array},
+    {"rank2ArrayWithNamedDimensions", value.rank2_array_with_named_dimensions},
+    {"rank2FixedArray", value.rank2_fixed_array},
+    {"rank2FixedArrayWithNamedDimensions", value.rank2_fixed_array_with_named_dimensions},
+    {"dynamicArray", value.dynamic_array},
+    {"arrayOfVectors", value.array_of_vectors},
+  };
+}
+
+void from_json(ordered_json const& j, test_model::RecordWithArraysSimpleSyntax& value) {
+  j.at("defaultArray").get_to(value.default_array);
+  j.at("defaultArrayWithEmptyDimension").get_to(value.default_array_with_empty_dimension);
+  j.at("rank1Array").get_to(value.rank1_array);
+  j.at("rank2Array").get_to(value.rank2_array);
+  j.at("rank2ArrayWithNamedDimensions").get_to(value.rank2_array_with_named_dimensions);
+  j.at("rank2FixedArray").get_to(value.rank2_fixed_array);
+  j.at("rank2FixedArrayWithNamedDimensions").get_to(value.rank2_fixed_array_with_named_dimensions);
+  j.at("dynamicArray").get_to(value.dynamic_array);
+  j.at("arrayOfVectors").get_to(value.array_of_vectors);
+}
+
+void to_json(ordered_json& j, test_model::RecordWithOptionalFields const& value) {
+  j = ordered_json{
+    {"optionalInt", value.optional_int},
+    {"optionalIntAlternateSyntax", value.optional_int_alternate_syntax},
+  };
+}
+
+void from_json(ordered_json const& j, test_model::RecordWithOptionalFields& value) {
+  j.at("optionalInt").get_to(value.optional_int);
+  j.at("optionalIntAlternateSyntax").get_to(value.optional_int_alternate_syntax);
+}
+
+void to_json(ordered_json& j, test_model::RecordWithVlens const& value) {
+  j = ordered_json{
+    {"a", value.a},
+    {"b", value.b},
+    {"c", value.c},
+  };
+}
+
+void from_json(ordered_json const& j, test_model::RecordWithVlens& value) {
+  j.at("a").get_to(value.a);
+  j.at("b").get_to(value.b);
+  j.at("c").get_to(value.c);
+}
+
+void to_json(ordered_json& j, test_model::RecordWithStrings const& value) {
+  j = ordered_json{
+    {"a", value.a},
+    {"b", value.b},
+  };
+}
+
+void from_json(ordered_json const& j, test_model::RecordWithStrings& value) {
+  j.at("a").get_to(value.a);
+  j.at("b").get_to(value.b);
+}
+
+void to_json(ordered_json& j, test_model::RecordWithOptionalVector const& value) {
+  j = ordered_json{
+    {"optionalVector", value.optional_vector},
+  };
+}
+
+void from_json(ordered_json const& j, test_model::RecordWithOptionalVector& value) {
+  j.at("optionalVector").get_to(value.optional_vector);
+}
+
+void to_json(ordered_json& j, test_model::RecordWithFixedVectors const& value) {
+  j = ordered_json{
+    {"fixedIntVector", value.fixed_int_vector},
+    {"fixedSimpleRecordVector", value.fixed_simple_record_vector},
+    {"fixedRecordWithVlensVector", value.fixed_record_with_vlens_vector},
+  };
+}
+
+void from_json(ordered_json const& j, test_model::RecordWithFixedVectors& value) {
+  j.at("fixedIntVector").get_to(value.fixed_int_vector);
+  j.at("fixedSimpleRecordVector").get_to(value.fixed_simple_record_vector);
+  j.at("fixedRecordWithVlensVector").get_to(value.fixed_record_with_vlens_vector);
+}
+
+void to_json(ordered_json& j, test_model::RecordWithFixedArrays const& value) {
+  j = ordered_json{
+    {"ints", value.ints},
+    {"fixedSimpleRecordArray", value.fixed_simple_record_array},
+    {"fixedRecordWithVlensArray", value.fixed_record_with_vlens_array},
+  };
+}
+
+void from_json(ordered_json const& j, test_model::RecordWithFixedArrays& value) {
+  j.at("ints").get_to(value.ints);
+  j.at("fixedSimpleRecordArray").get_to(value.fixed_simple_record_array);
+  j.at("fixedRecordWithVlensArray").get_to(value.fixed_record_with_vlens_array);
+}
+
+void to_json(ordered_json& j, test_model::RecordWithNDArrays const& value) {
+  j = ordered_json{
+    {"ints", value.ints},
+    {"fixedSimpleRecordArray", value.fixed_simple_record_array},
+    {"fixedRecordWithVlensArray", value.fixed_record_with_vlens_array},
+  };
+}
+
+void from_json(ordered_json const& j, test_model::RecordWithNDArrays& value) {
+  j.at("ints").get_to(value.ints);
+  j.at("fixedSimpleRecordArray").get_to(value.fixed_simple_record_array);
+  j.at("fixedRecordWithVlensArray").get_to(value.fixed_record_with_vlens_array);
+}
+
+void to_json(ordered_json& j, test_model::RecordWithNDArraysSingleDimension const& value) {
+  j = ordered_json{
+    {"ints", value.ints},
+    {"fixedSimpleRecordArray", value.fixed_simple_record_array},
+    {"fixedRecordWithVlensArray", value.fixed_record_with_vlens_array},
+  };
+}
+
+void from_json(ordered_json const& j, test_model::RecordWithNDArraysSingleDimension& value) {
+  j.at("ints").get_to(value.ints);
+  j.at("fixedSimpleRecordArray").get_to(value.fixed_simple_record_array);
+  j.at("fixedRecordWithVlensArray").get_to(value.fixed_record_with_vlens_array);
+}
+
+void to_json(ordered_json& j, test_model::RecordWithDynamicNDArrays const& value) {
+  j = ordered_json{
+    {"ints", value.ints},
+    {"fixedSimpleRecordArray", value.fixed_simple_record_array},
+    {"fixedRecordWithVlensArray", value.fixed_record_with_vlens_array},
+  };
+}
+
+void from_json(ordered_json const& j, test_model::RecordWithDynamicNDArrays& value) {
+  j.at("ints").get_to(value.ints);
+  j.at("fixedSimpleRecordArray").get_to(value.fixed_simple_record_array);
+  j.at("fixedRecordWithVlensArray").get_to(value.fixed_record_with_vlens_array);
+}
+
+void to_json(ordered_json& j, test_model::Fruits const& value) {
+  switch (value) {
+    case test_model::Fruits::kApple:
+      j = "apple";
+      break;
+    case test_model::Fruits::kBanana:
+      j = "banana";
+      break;
+    case test_model::Fruits::kPear:
+      j = "pear";
+      break;
+    default:
+      using underlying_type = typename std::underlying_type<test_model::Fruits>::type;
+      j = static_cast<underlying_type>(value);
+      break;
+  }
+}
+
+void from_json(ordered_json const& j, test_model::Fruits& value) {
+  if (j.is_string()) {
+    std::string_view symbol = j.get<std::string_view>();
+    if (symbol == "apple") {
+      value = test_model::Fruits::kApple;
+      return;
+    }
+    if (symbol == "banana") {
+      value = test_model::Fruits::kBanana;
+      return;
+    }
+    if (symbol == "pear") {
+      value = test_model::Fruits::kPear;
+      return;
+    }
+    throw std::runtime_error("Invalid enum value '" + std::string(symbol) + "' for enum test_model::Fruits");
+  }
+  using underlying_type = typename std::underlying_type<test_model::Fruits>::type;
+  value = static_cast<test_model::Fruits>(j.get<underlying_type>());
+}
+
+void to_json(ordered_json& j, test_model::UInt64Enum const& value) {
+  switch (value) {
+    case test_model::UInt64Enum::kA:
+      j = "a";
+      break;
+    default:
+      using underlying_type = typename std::underlying_type<test_model::UInt64Enum>::type;
+      j = static_cast<underlying_type>(value);
+      break;
+  }
+}
+
+void from_json(ordered_json const& j, test_model::UInt64Enum& value) {
+  if (j.is_string()) {
+    std::string_view symbol = j.get<std::string_view>();
+    if (symbol == "a") {
+      value = test_model::UInt64Enum::kA;
+      return;
+    }
+    throw std::runtime_error("Invalid enum value '" + std::string(symbol) + "' for enum test_model::UInt64Enum");
+  }
+  using underlying_type = typename std::underlying_type<test_model::UInt64Enum>::type;
+  value = static_cast<test_model::UInt64Enum>(j.get<underlying_type>());
+}
+
+void to_json(ordered_json& j, test_model::Int64Enum const& value) {
+  switch (value) {
+    case test_model::Int64Enum::kB:
+      j = "b";
+      break;
+    default:
+      using underlying_type = typename std::underlying_type<test_model::Int64Enum>::type;
+      j = static_cast<underlying_type>(value);
+      break;
+  }
+}
+
+void from_json(ordered_json const& j, test_model::Int64Enum& value) {
+  if (j.is_string()) {
+    std::string_view symbol = j.get<std::string_view>();
+    if (symbol == "b") {
+      value = test_model::Int64Enum::kB;
+      return;
+    }
+    throw std::runtime_error("Invalid enum value '" + std::string(symbol) + "' for enum test_model::Int64Enum");
+  }
+  using underlying_type = typename std::underlying_type<test_model::Int64Enum>::type;
+  value = static_cast<test_model::Int64Enum>(j.get<underlying_type>());
+}
+
+void to_json(ordered_json& j, test_model::SizeBasedEnum const& value) {
+  switch (value) {
+    case test_model::SizeBasedEnum::kA:
+      j = "a";
+      break;
+    case test_model::SizeBasedEnum::kB:
+      j = "b";
+      break;
+    case test_model::SizeBasedEnum::kC:
+      j = "c";
+      break;
+    default:
+      using underlying_type = typename std::underlying_type<test_model::SizeBasedEnum>::type;
+      j = static_cast<underlying_type>(value);
+      break;
+  }
+}
+
+void from_json(ordered_json const& j, test_model::SizeBasedEnum& value) {
+  if (j.is_string()) {
+    std::string_view symbol = j.get<std::string_view>();
+    if (symbol == "a") {
+      value = test_model::SizeBasedEnum::kA;
+      return;
+    }
+    if (symbol == "b") {
+      value = test_model::SizeBasedEnum::kB;
+      return;
+    }
+    if (symbol == "c") {
+      value = test_model::SizeBasedEnum::kC;
+      return;
+    }
+    throw std::runtime_error("Invalid enum value '" + std::string(symbol) + "' for enum test_model::SizeBasedEnum");
+  }
+  using underlying_type = typename std::underlying_type<test_model::SizeBasedEnum>::type;
+  value = static_cast<test_model::SizeBasedEnum>(j.get<underlying_type>());
+}
+
+template <typename T1, typename T2>
+void to_json(ordered_json& j, test_model::GenericRecord<T1, T2> const& value) {
+  j = ordered_json{
+    {"scalar1", value.scalar1},
+    {"scalar2", value.scalar2},
+    {"vector1", value.vector1},
+    {"image2", value.image2},
+  };
+}
+
+template <typename T1, typename T2>
+void from_json(ordered_json const& j, test_model::GenericRecord<T1, T2>& value) {
+  j.at("scalar1").get_to(value.scalar1);
+  j.at("scalar2").get_to(value.scalar2);
+  j.at("vector1").get_to(value.vector1);
+  j.at("image2").get_to(value.image2);
+}
+
+template <typename T1, typename T2>
+void to_json(ordered_json& j, test_model::MyTuple<T1, T2> const& value) {
+  j = ordered_json{
+    {"v1", value.v1},
+    {"v2", value.v2},
+  };
+}
+
+template <typename T1, typename T2>
+void from_json(ordered_json const& j, test_model::MyTuple<T1, T2>& value) {
+  j.at("v1").get_to(value.v1);
+  j.at("v2").get_to(value.v2);
+}
+
+template <typename T0, typename T1>
+void to_json(ordered_json& j, test_model::GenericRecordWithComputedFields<T0, T1> const& value) {
+  j = ordered_json{
+    {"f1", value.f1},
+  };
+}
+
+template <typename T0, typename T1>
+void from_json(ordered_json const& j, test_model::GenericRecordWithComputedFields<T0, T1>& value) {
+  j.at("f1").get_to(value.f1);
+}
+
+void to_json(ordered_json& j, test_model::RecordWithComputedFields const& value) {
+  j = ordered_json{
+    {"arrayField", value.array_field},
+    {"arrayFieldMapDimensions", value.array_field_map_dimensions},
+    {"dynamicArrayField", value.dynamic_array_field},
+    {"fixedArrayField", value.fixed_array_field},
+    {"intField", value.int_field},
+    {"stringField", value.string_field},
+    {"tupleField", value.tuple_field},
+    {"vectorField", value.vector_field},
+    {"vectorOfVectorsField", value.vector_of_vectors_field},
+    {"fixedVectorField", value.fixed_vector_field},
+    {"optionalNamedArray", value.optional_named_array},
+    {"intFloatUnion", value.int_float_union},
+    {"nullableIntFloatUnion", value.nullable_int_float_union},
+    {"unionWithNestedGenericUnion", value.union_with_nested_generic_union},
+    {"mapField", value.map_field},
+  };
+}
+
+void from_json(ordered_json const& j, test_model::RecordWithComputedFields& value) {
+  j.at("arrayField").get_to(value.array_field);
+  j.at("arrayFieldMapDimensions").get_to(value.array_field_map_dimensions);
+  j.at("dynamicArrayField").get_to(value.dynamic_array_field);
+  j.at("fixedArrayField").get_to(value.fixed_array_field);
+  j.at("intField").get_to(value.int_field);
+  j.at("stringField").get_to(value.string_field);
+  j.at("tupleField").get_to(value.tuple_field);
+  j.at("vectorField").get_to(value.vector_field);
+  j.at("vectorOfVectorsField").get_to(value.vector_of_vectors_field);
+  j.at("fixedVectorField").get_to(value.fixed_vector_field);
+  j.at("optionalNamedArray").get_to(value.optional_named_array);
+  j.at("intFloatUnion").get_to(value.int_float_union);
+  j.at("nullableIntFloatUnion").get_to(value.nullable_int_float_union);
+  j.at("unionWithNestedGenericUnion").get_to(value.union_with_nested_generic_union);
+  j.at("mapField").get_to(value.map_field);
+}
+
+void to_json(ordered_json& j, test_model::EnumWithKeywordSymbols const& value) {
+  switch (value) {
+    case test_model::EnumWithKeywordSymbols::kTry:
+      j = "try";
+      break;
+    case test_model::EnumWithKeywordSymbols::kCatch:
+      j = "catch";
+      break;
+    default:
+      using underlying_type = typename std::underlying_type<test_model::EnumWithKeywordSymbols>::type;
+      j = static_cast<underlying_type>(value);
+      break;
+  }
+}
+
+void from_json(ordered_json const& j, test_model::EnumWithKeywordSymbols& value) {
+  if (j.is_string()) {
+    std::string_view symbol = j.get<std::string_view>();
+    if (symbol == "try") {
+      value = test_model::EnumWithKeywordSymbols::kTry;
+      return;
+    }
+    if (symbol == "catch") {
+      value = test_model::EnumWithKeywordSymbols::kCatch;
+      return;
+    }
+    throw std::runtime_error("Invalid enum value '" + std::string(symbol) + "' for enum test_model::EnumWithKeywordSymbols");
+  }
+  using underlying_type = typename std::underlying_type<test_model::EnumWithKeywordSymbols>::type;
+  value = static_cast<test_model::EnumWithKeywordSymbols>(j.get<underlying_type>());
+}
+
+void to_json(ordered_json& j, test_model::RecordWithKeywordFields const& value) {
+  j = ordered_json{
+    {"int", value.int_field},
+    {"sizeof", value.sizeof_field},
+    {"if", value.if_field},
+  };
+}
+
+void from_json(ordered_json const& j, test_model::RecordWithKeywordFields& value) {
+  j.at("int").get_to(value.int_field);
+  j.at("sizeof").get_to(value.sizeof_field);
+  j.at("if").get_to(value.if_field);
+}
+
+} // namespace test_model
+
 namespace test_model::ndjson {
+void BenchmarkFloat256x256Writer::WriteFloat256x256Impl([[maybe_unused]]yardl::FixedNDArray<float, 256, 256> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "float256x256", json_value);}
+
+void BenchmarkFloat256x256Writer::Flush() {
+  stream_.flush();
+}
+
+void BenchmarkFloat256x256Writer::CloseImpl() {
+  stream_.flush();
+}
+
+bool BenchmarkFloat256x256Reader::ReadFloat256x256Impl([[maybe_unused]]yardl::FixedNDArray<float, 256, 256>& value) {
+  return yardl::ndjson::ReadProtocolValue(stream_, line_, "float256x256", false, unused_step_, value);
+}
+
+void BenchmarkFloat256x256Reader::CloseImpl() {
+  VerifyFinished();
+}
+
+void BenchmarkFloatVlenWriter::WriteFloatArrayImpl([[maybe_unused]]yardl::NDArray<float, 2> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "floatArray", json_value);}
+
+void BenchmarkFloatVlenWriter::Flush() {
+  stream_.flush();
+}
+
+void BenchmarkFloatVlenWriter::CloseImpl() {
+  stream_.flush();
+}
+
+bool BenchmarkFloatVlenReader::ReadFloatArrayImpl([[maybe_unused]]yardl::NDArray<float, 2>& value) {
+  return yardl::ndjson::ReadProtocolValue(stream_, line_, "floatArray", false, unused_step_, value);
+}
+
+void BenchmarkFloatVlenReader::CloseImpl() {
+  VerifyFinished();
+}
+
+void BenchmarkSmallRecordWriter::WriteSmallRecordImpl([[maybe_unused]]test_model::SmallBenchmarkRecord const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "smallRecord", json_value);}
+
+void BenchmarkSmallRecordWriter::Flush() {
+  stream_.flush();
+}
+
+void BenchmarkSmallRecordWriter::CloseImpl() {
+  stream_.flush();
+}
+
+bool BenchmarkSmallRecordReader::ReadSmallRecordImpl([[maybe_unused]]test_model::SmallBenchmarkRecord& value) {
+  return yardl::ndjson::ReadProtocolValue(stream_, line_, "smallRecord", false, unused_step_, value);
+}
+
+void BenchmarkSmallRecordReader::CloseImpl() {
+  VerifyFinished();
+}
+
+void BenchmarkSmallRecordWithOptionalsWriter::WriteSmallRecordImpl([[maybe_unused]]test_model::SimpleEncodingCounters const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "smallRecord", json_value);}
+
+void BenchmarkSmallRecordWithOptionalsWriter::Flush() {
+  stream_.flush();
+}
+
+void BenchmarkSmallRecordWithOptionalsWriter::CloseImpl() {
+  stream_.flush();
+}
+
+bool BenchmarkSmallRecordWithOptionalsReader::ReadSmallRecordImpl([[maybe_unused]]test_model::SimpleEncodingCounters& value) {
+  return yardl::ndjson::ReadProtocolValue(stream_, line_, "smallRecord", false, unused_step_, value);
+}
+
+void BenchmarkSmallRecordWithOptionalsReader::CloseImpl() {
+  VerifyFinished();
+}
+
+void BenchmarkSimpleMrdWriter::WriteDataImpl([[maybe_unused]]std::variant<test_model::SimpleAcquisition, test_model::Image<float>> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "data", json_value);}
+
+void BenchmarkSimpleMrdWriter::Flush() {
+  stream_.flush();
+}
+
+void BenchmarkSimpleMrdWriter::CloseImpl() {
+  stream_.flush();
+}
+
+bool BenchmarkSimpleMrdReader::ReadDataImpl([[maybe_unused]]std::variant<test_model::SimpleAcquisition, test_model::Image<float>>& value) {
+  return yardl::ndjson::ReadProtocolValue(stream_, line_, "data", false, unused_step_, value);
+}
+
+void BenchmarkSimpleMrdReader::CloseImpl() {
+  VerifyFinished();
+}
+
+void ScalarsWriter::WriteInt32Impl([[maybe_unused]]int32_t const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "int32", json_value);}
+
+void ScalarsWriter::WriteRecordImpl([[maybe_unused]]test_model::RecordWithPrimitives const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "record", json_value);}
+
+void ScalarsWriter::Flush() {
+  stream_.flush();
+}
+
+void ScalarsWriter::CloseImpl() {
+  stream_.flush();
+}
+
+void ScalarsReader::ReadInt32Impl([[maybe_unused]]int32_t& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "int32", true, unused_step_, value);
+}
+
+void ScalarsReader::ReadRecordImpl([[maybe_unused]]test_model::RecordWithPrimitives& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "record", true, unused_step_, value);
+}
+
+void ScalarsReader::CloseImpl() {
+  VerifyFinished();
+}
+
+void ScalarOptionalsWriter::WriteOptionalIntImpl([[maybe_unused]]std::optional<int32_t> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "optionalInt", json_value);}
+
+void ScalarOptionalsWriter::WriteOptionalRecordImpl([[maybe_unused]]std::optional<test_model::SimpleRecord> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "optionalRecord", json_value);}
+
+void ScalarOptionalsWriter::WriteRecordWithOptionalFieldsImpl([[maybe_unused]]test_model::RecordWithOptionalFields const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "recordWithOptionalFields", json_value);}
+
+void ScalarOptionalsWriter::WriteOptionalRecordWithOptionalFieldsImpl([[maybe_unused]]std::optional<test_model::RecordWithOptionalFields> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "optionalRecordWithOptionalFields", json_value);}
+
+void ScalarOptionalsWriter::Flush() {
+  stream_.flush();
+}
+
+void ScalarOptionalsWriter::CloseImpl() {
+  stream_.flush();
+}
+
+void ScalarOptionalsReader::ReadOptionalIntImpl([[maybe_unused]]std::optional<int32_t>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "optionalInt", true, unused_step_, value);
+}
+
+void ScalarOptionalsReader::ReadOptionalRecordImpl([[maybe_unused]]std::optional<test_model::SimpleRecord>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "optionalRecord", true, unused_step_, value);
+}
+
+void ScalarOptionalsReader::ReadRecordWithOptionalFieldsImpl([[maybe_unused]]test_model::RecordWithOptionalFields& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "recordWithOptionalFields", true, unused_step_, value);
+}
+
+void ScalarOptionalsReader::ReadOptionalRecordWithOptionalFieldsImpl([[maybe_unused]]std::optional<test_model::RecordWithOptionalFields>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "optionalRecordWithOptionalFields", true, unused_step_, value);
+}
+
+void ScalarOptionalsReader::CloseImpl() {
+  VerifyFinished();
+}
+
+void NestedRecordsWriter::WriteTupleWithRecordsImpl([[maybe_unused]]test_model::TupleWithRecords const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "tupleWithRecords", json_value);}
+
+void NestedRecordsWriter::Flush() {
+  stream_.flush();
+}
+
+void NestedRecordsWriter::CloseImpl() {
+  stream_.flush();
+}
+
+void NestedRecordsReader::ReadTupleWithRecordsImpl([[maybe_unused]]test_model::TupleWithRecords& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "tupleWithRecords", true, unused_step_, value);
+}
+
+void NestedRecordsReader::CloseImpl() {
+  VerifyFinished();
+}
+
+void VlensWriter::WriteIntVectorImpl([[maybe_unused]]std::vector<int32_t> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "intVector", json_value);}
+
+void VlensWriter::WriteComplexVectorImpl([[maybe_unused]]std::vector<std::complex<float>> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "complexVector", json_value);}
+
+void VlensWriter::WriteRecordWithVlensImpl([[maybe_unused]]test_model::RecordWithVlens const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "recordWithVlens", json_value);}
+
+void VlensWriter::WriteVlenOfRecordWithVlensImpl([[maybe_unused]]std::vector<test_model::RecordWithVlens> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "vlenOfRecordWithVlens", json_value);}
+
+void VlensWriter::Flush() {
+  stream_.flush();
+}
+
+void VlensWriter::CloseImpl() {
+  stream_.flush();
+}
+
+void VlensReader::ReadIntVectorImpl([[maybe_unused]]std::vector<int32_t>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "intVector", true, unused_step_, value);
+}
+
+void VlensReader::ReadComplexVectorImpl([[maybe_unused]]std::vector<std::complex<float>>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "complexVector", true, unused_step_, value);
+}
+
+void VlensReader::ReadRecordWithVlensImpl([[maybe_unused]]test_model::RecordWithVlens& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "recordWithVlens", true, unused_step_, value);
+}
+
+void VlensReader::ReadVlenOfRecordWithVlensImpl([[maybe_unused]]std::vector<test_model::RecordWithVlens>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "vlenOfRecordWithVlens", true, unused_step_, value);
+}
+
+void VlensReader::CloseImpl() {
+  VerifyFinished();
+}
+
+void StringsWriter::WriteSingleStringImpl([[maybe_unused]]std::string const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "singleString", json_value);}
+
+void StringsWriter::WriteRecWithStringImpl([[maybe_unused]]test_model::RecordWithStrings const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "recWithString", json_value);}
+
+void StringsWriter::Flush() {
+  stream_.flush();
+}
+
+void StringsWriter::CloseImpl() {
+  stream_.flush();
+}
+
+void StringsReader::ReadSingleStringImpl([[maybe_unused]]std::string& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "singleString", true, unused_step_, value);
+}
+
+void StringsReader::ReadRecWithStringImpl([[maybe_unused]]test_model::RecordWithStrings& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "recWithString", true, unused_step_, value);
+}
+
+void StringsReader::CloseImpl() {
+  VerifyFinished();
+}
+
+void OptionalVectorsWriter::WriteRecordWithOptionalVectorImpl([[maybe_unused]]test_model::RecordWithOptionalVector const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "recordWithOptionalVector", json_value);}
+
+void OptionalVectorsWriter::Flush() {
+  stream_.flush();
+}
+
+void OptionalVectorsWriter::CloseImpl() {
+  stream_.flush();
+}
+
+void OptionalVectorsReader::ReadRecordWithOptionalVectorImpl([[maybe_unused]]test_model::RecordWithOptionalVector& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "recordWithOptionalVector", true, unused_step_, value);
+}
+
+void OptionalVectorsReader::CloseImpl() {
+  VerifyFinished();
+}
+
+void FixedVectorsWriter::WriteFixedIntVectorImpl([[maybe_unused]]std::array<int32_t, 5> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "fixedIntVector", json_value);}
+
+void FixedVectorsWriter::WriteFixedSimpleRecordVectorImpl([[maybe_unused]]std::array<test_model::SimpleRecord, 3> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "fixedSimpleRecordVector", json_value);}
+
+void FixedVectorsWriter::WriteFixedRecordWithVlensVectorImpl([[maybe_unused]]std::array<test_model::RecordWithVlens, 2> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "fixedRecordWithVlensVector", json_value);}
+
+void FixedVectorsWriter::WriteRecordWithFixedVectorsImpl([[maybe_unused]]test_model::RecordWithFixedVectors const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "recordWithFixedVectors", json_value);}
+
+void FixedVectorsWriter::Flush() {
+  stream_.flush();
+}
+
+void FixedVectorsWriter::CloseImpl() {
+  stream_.flush();
+}
+
+void FixedVectorsReader::ReadFixedIntVectorImpl([[maybe_unused]]std::array<int32_t, 5>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "fixedIntVector", true, unused_step_, value);
+}
+
+void FixedVectorsReader::ReadFixedSimpleRecordVectorImpl([[maybe_unused]]std::array<test_model::SimpleRecord, 3>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "fixedSimpleRecordVector", true, unused_step_, value);
+}
+
+void FixedVectorsReader::ReadFixedRecordWithVlensVectorImpl([[maybe_unused]]std::array<test_model::RecordWithVlens, 2>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "fixedRecordWithVlensVector", true, unused_step_, value);
+}
+
+void FixedVectorsReader::ReadRecordWithFixedVectorsImpl([[maybe_unused]]test_model::RecordWithFixedVectors& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "recordWithFixedVectors", true, unused_step_, value);
+}
+
+void FixedVectorsReader::CloseImpl() {
+  VerifyFinished();
+}
+
+void StreamsWriter::WriteIntDataImpl([[maybe_unused]]int32_t const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "intData", json_value);}
+
+void StreamsWriter::WriteOptionalIntDataImpl([[maybe_unused]]std::optional<int32_t> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "optionalIntData", json_value);}
+
+void StreamsWriter::WriteRecordWithOptionalVectorDataImpl([[maybe_unused]]test_model::RecordWithOptionalVector const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "recordWithOptionalVectorData", json_value);}
+
+void StreamsWriter::WriteFixedVectorImpl([[maybe_unused]]std::array<int32_t, 3> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "fixedVector", json_value);}
+
+void StreamsWriter::Flush() {
+  stream_.flush();
+}
+
+void StreamsWriter::CloseImpl() {
+  stream_.flush();
+}
+
+bool StreamsReader::ReadIntDataImpl([[maybe_unused]]int32_t& value) {
+  return yardl::ndjson::ReadProtocolValue(stream_, line_, "intData", false, unused_step_, value);
+}
+
+bool StreamsReader::ReadOptionalIntDataImpl([[maybe_unused]]std::optional<int32_t>& value) {
+  return yardl::ndjson::ReadProtocolValue(stream_, line_, "optionalIntData", false, unused_step_, value);
+}
+
+bool StreamsReader::ReadRecordWithOptionalVectorDataImpl([[maybe_unused]]test_model::RecordWithOptionalVector& value) {
+  return yardl::ndjson::ReadProtocolValue(stream_, line_, "recordWithOptionalVectorData", false, unused_step_, value);
+}
+
+bool StreamsReader::ReadFixedVectorImpl([[maybe_unused]]std::array<int32_t, 3>& value) {
+  return yardl::ndjson::ReadProtocolValue(stream_, line_, "fixedVector", false, unused_step_, value);
+}
+
+void StreamsReader::CloseImpl() {
+  VerifyFinished();
+}
+
+void FixedArraysWriter::WriteIntsImpl([[maybe_unused]]yardl::FixedNDArray<int32_t, 2, 3> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "ints", json_value);}
+
+void FixedArraysWriter::WriteFixedSimpleRecordArrayImpl([[maybe_unused]]yardl::FixedNDArray<test_model::SimpleRecord, 3, 2> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "fixedSimpleRecordArray", json_value);}
+
+void FixedArraysWriter::WriteFixedRecordWithVlensArrayImpl([[maybe_unused]]yardl::FixedNDArray<test_model::RecordWithVlens, 2, 2> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "fixedRecordWithVlensArray", json_value);}
+
+void FixedArraysWriter::WriteRecordWithFixedArraysImpl([[maybe_unused]]test_model::RecordWithFixedArrays const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "recordWithFixedArrays", json_value);}
+
+void FixedArraysWriter::WriteNamedArrayImpl([[maybe_unused]]test_model::NamedFixedNDArray const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "namedArray", json_value);}
+
+void FixedArraysWriter::Flush() {
+  stream_.flush();
+}
+
+void FixedArraysWriter::CloseImpl() {
+  stream_.flush();
+}
+
+void FixedArraysReader::ReadIntsImpl([[maybe_unused]]yardl::FixedNDArray<int32_t, 2, 3>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "ints", true, unused_step_, value);
+}
+
+void FixedArraysReader::ReadFixedSimpleRecordArrayImpl([[maybe_unused]]yardl::FixedNDArray<test_model::SimpleRecord, 3, 2>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "fixedSimpleRecordArray", true, unused_step_, value);
+}
+
+void FixedArraysReader::ReadFixedRecordWithVlensArrayImpl([[maybe_unused]]yardl::FixedNDArray<test_model::RecordWithVlens, 2, 2>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "fixedRecordWithVlensArray", true, unused_step_, value);
+}
+
+void FixedArraysReader::ReadRecordWithFixedArraysImpl([[maybe_unused]]test_model::RecordWithFixedArrays& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "recordWithFixedArrays", true, unused_step_, value);
+}
+
+void FixedArraysReader::ReadNamedArrayImpl([[maybe_unused]]test_model::NamedFixedNDArray& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "namedArray", true, unused_step_, value);
+}
+
+void FixedArraysReader::CloseImpl() {
+  VerifyFinished();
+}
+
+void NDArraysWriter::WriteIntsImpl([[maybe_unused]]yardl::NDArray<int32_t, 2> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "ints", json_value);}
+
+void NDArraysWriter::WriteSimpleRecordArrayImpl([[maybe_unused]]yardl::NDArray<test_model::SimpleRecord, 2> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "simpleRecordArray", json_value);}
+
+void NDArraysWriter::WriteRecordWithVlensArrayImpl([[maybe_unused]]yardl::NDArray<test_model::RecordWithVlens, 2> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "recordWithVlensArray", json_value);}
+
+void NDArraysWriter::WriteRecordWithNDArraysImpl([[maybe_unused]]test_model::RecordWithNDArrays const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "recordWithNDArrays", json_value);}
+
+void NDArraysWriter::WriteNamedArrayImpl([[maybe_unused]]test_model::NamedNDArray const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "namedArray", json_value);}
+
+void NDArraysWriter::Flush() {
+  stream_.flush();
+}
+
+void NDArraysWriter::CloseImpl() {
+  stream_.flush();
+}
+
+void NDArraysReader::ReadIntsImpl([[maybe_unused]]yardl::NDArray<int32_t, 2>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "ints", true, unused_step_, value);
+}
+
+void NDArraysReader::ReadSimpleRecordArrayImpl([[maybe_unused]]yardl::NDArray<test_model::SimpleRecord, 2>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "simpleRecordArray", true, unused_step_, value);
+}
+
+void NDArraysReader::ReadRecordWithVlensArrayImpl([[maybe_unused]]yardl::NDArray<test_model::RecordWithVlens, 2>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "recordWithVlensArray", true, unused_step_, value);
+}
+
+void NDArraysReader::ReadRecordWithNDArraysImpl([[maybe_unused]]test_model::RecordWithNDArrays& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "recordWithNDArrays", true, unused_step_, value);
+}
+
+void NDArraysReader::ReadNamedArrayImpl([[maybe_unused]]test_model::NamedNDArray& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "namedArray", true, unused_step_, value);
+}
+
+void NDArraysReader::CloseImpl() {
+  VerifyFinished();
+}
+
+void NDArraysSingleDimensionWriter::WriteIntsImpl([[maybe_unused]]yardl::NDArray<int32_t, 1> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "ints", json_value);}
+
+void NDArraysSingleDimensionWriter::WriteSimpleRecordArrayImpl([[maybe_unused]]yardl::NDArray<test_model::SimpleRecord, 1> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "simpleRecordArray", json_value);}
+
+void NDArraysSingleDimensionWriter::WriteRecordWithVlensArrayImpl([[maybe_unused]]yardl::NDArray<test_model::RecordWithVlens, 1> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "recordWithVlensArray", json_value);}
+
+void NDArraysSingleDimensionWriter::WriteRecordWithNDArraysImpl([[maybe_unused]]test_model::RecordWithNDArraysSingleDimension const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "recordWithNDArrays", json_value);}
+
+void NDArraysSingleDimensionWriter::Flush() {
+  stream_.flush();
+}
+
+void NDArraysSingleDimensionWriter::CloseImpl() {
+  stream_.flush();
+}
+
+void NDArraysSingleDimensionReader::ReadIntsImpl([[maybe_unused]]yardl::NDArray<int32_t, 1>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "ints", true, unused_step_, value);
+}
+
+void NDArraysSingleDimensionReader::ReadSimpleRecordArrayImpl([[maybe_unused]]yardl::NDArray<test_model::SimpleRecord, 1>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "simpleRecordArray", true, unused_step_, value);
+}
+
+void NDArraysSingleDimensionReader::ReadRecordWithVlensArrayImpl([[maybe_unused]]yardl::NDArray<test_model::RecordWithVlens, 1>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "recordWithVlensArray", true, unused_step_, value);
+}
+
+void NDArraysSingleDimensionReader::ReadRecordWithNDArraysImpl([[maybe_unused]]test_model::RecordWithNDArraysSingleDimension& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "recordWithNDArrays", true, unused_step_, value);
+}
+
+void NDArraysSingleDimensionReader::CloseImpl() {
+  VerifyFinished();
+}
+
+void DynamicNDArraysWriter::WriteIntsImpl([[maybe_unused]]yardl::DynamicNDArray<int32_t> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "ints", json_value);}
+
+void DynamicNDArraysWriter::WriteSimpleRecordArrayImpl([[maybe_unused]]yardl::DynamicNDArray<test_model::SimpleRecord> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "simpleRecordArray", json_value);}
+
+void DynamicNDArraysWriter::WriteRecordWithVlensArrayImpl([[maybe_unused]]yardl::DynamicNDArray<test_model::RecordWithVlens> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "recordWithVlensArray", json_value);}
+
+void DynamicNDArraysWriter::WriteRecordWithDynamicNDArraysImpl([[maybe_unused]]test_model::RecordWithDynamicNDArrays const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "recordWithDynamicNDArrays", json_value);}
+
+void DynamicNDArraysWriter::Flush() {
+  stream_.flush();
+}
+
+void DynamicNDArraysWriter::CloseImpl() {
+  stream_.flush();
+}
+
+void DynamicNDArraysReader::ReadIntsImpl([[maybe_unused]]yardl::DynamicNDArray<int32_t>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "ints", true, unused_step_, value);
+}
+
+void DynamicNDArraysReader::ReadSimpleRecordArrayImpl([[maybe_unused]]yardl::DynamicNDArray<test_model::SimpleRecord>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "simpleRecordArray", true, unused_step_, value);
+}
+
+void DynamicNDArraysReader::ReadRecordWithVlensArrayImpl([[maybe_unused]]yardl::DynamicNDArray<test_model::RecordWithVlens>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "recordWithVlensArray", true, unused_step_, value);
+}
+
+void DynamicNDArraysReader::ReadRecordWithDynamicNDArraysImpl([[maybe_unused]]test_model::RecordWithDynamicNDArrays& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "recordWithDynamicNDArrays", true, unused_step_, value);
+}
+
+void DynamicNDArraysReader::CloseImpl() {
+  VerifyFinished();
+}
+
+void MapsWriter::WriteStringToIntImpl([[maybe_unused]]std::unordered_map<std::string, int32_t> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "stringToInt", json_value);}
+
+void MapsWriter::WriteStringToUnionImpl([[maybe_unused]]std::unordered_map<std::string, std::variant<std::string, int32_t>> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "stringToUnion", json_value);}
+
+void MapsWriter::WriteAliasedGenericImpl([[maybe_unused]]test_model::AliasedMap<std::string, int32_t> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "aliasedGeneric", json_value);}
+
+void MapsWriter::Flush() {
+  stream_.flush();
+}
+
+void MapsWriter::CloseImpl() {
+  stream_.flush();
+}
+
+void MapsReader::ReadStringToIntImpl([[maybe_unused]]std::unordered_map<std::string, int32_t>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "stringToInt", true, unused_step_, value);
+}
+
+void MapsReader::ReadStringToUnionImpl([[maybe_unused]]std::unordered_map<std::string, std::variant<std::string, int32_t>>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "stringToUnion", true, unused_step_, value);
+}
+
+void MapsReader::ReadAliasedGenericImpl([[maybe_unused]]test_model::AliasedMap<std::string, int32_t>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "aliasedGeneric", true, unused_step_, value);
+}
+
+void MapsReader::CloseImpl() {
+  VerifyFinished();
+}
+
+void UnionsWriter::WriteIntOrSimpleRecordImpl([[maybe_unused]]std::variant<int32_t, test_model::SimpleRecord> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "intOrSimpleRecord", json_value);}
+
+void UnionsWriter::WriteIntOrRecordWithVlensImpl([[maybe_unused]]std::variant<int32_t, test_model::RecordWithVlens> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "intOrRecordWithVlens", json_value);}
+
+void UnionsWriter::WriteMonosotateOrIntOrSimpleRecordImpl([[maybe_unused]]std::variant<std::monostate, int32_t, test_model::SimpleRecord> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "monosotateOrIntOrSimpleRecord", json_value);}
+
+void UnionsWriter::Flush() {
+  stream_.flush();
+}
+
+void UnionsWriter::CloseImpl() {
+  stream_.flush();
+}
+
+void UnionsReader::ReadIntOrSimpleRecordImpl([[maybe_unused]]std::variant<int32_t, test_model::SimpleRecord>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "intOrSimpleRecord", true, unused_step_, value);
+}
+
+void UnionsReader::ReadIntOrRecordWithVlensImpl([[maybe_unused]]std::variant<int32_t, test_model::RecordWithVlens>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "intOrRecordWithVlens", true, unused_step_, value);
+}
+
+void UnionsReader::ReadMonosotateOrIntOrSimpleRecordImpl([[maybe_unused]]std::variant<std::monostate, int32_t, test_model::SimpleRecord>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "monosotateOrIntOrSimpleRecord", true, unused_step_, value);
+}
+
+void UnionsReader::CloseImpl() {
+  VerifyFinished();
+}
+
+void StreamsOfUnionsWriter::WriteIntOrSimpleRecordImpl([[maybe_unused]]std::variant<int32_t, test_model::SimpleRecord> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "intOrSimpleRecord", json_value);}
+
+void StreamsOfUnionsWriter::WriteNullableIntOrSimpleRecordImpl([[maybe_unused]]std::variant<std::monostate, int32_t, test_model::SimpleRecord> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "nullableIntOrSimpleRecord", json_value);}
+
+void StreamsOfUnionsWriter::Flush() {
+  stream_.flush();
+}
+
+void StreamsOfUnionsWriter::CloseImpl() {
+  stream_.flush();
+}
+
+bool StreamsOfUnionsReader::ReadIntOrSimpleRecordImpl([[maybe_unused]]std::variant<int32_t, test_model::SimpleRecord>& value) {
+  return yardl::ndjson::ReadProtocolValue(stream_, line_, "intOrSimpleRecord", false, unused_step_, value);
+}
+
+bool StreamsOfUnionsReader::ReadNullableIntOrSimpleRecordImpl([[maybe_unused]]std::variant<std::monostate, int32_t, test_model::SimpleRecord>& value) {
+  return yardl::ndjson::ReadProtocolValue(stream_, line_, "nullableIntOrSimpleRecord", false, unused_step_, value);
+}
+
+void StreamsOfUnionsReader::CloseImpl() {
+  VerifyFinished();
+}
+
+void EnumsWriter::WriteSingleImpl([[maybe_unused]]test_model::Fruits const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "single", json_value);}
+
+void EnumsWriter::WriteVecImpl([[maybe_unused]]std::vector<test_model::Fruits> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "vec", json_value);}
+
+void EnumsWriter::WriteSizeImpl([[maybe_unused]]test_model::SizeBasedEnum const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "size", json_value);}
+
+void EnumsWriter::Flush() {
+  stream_.flush();
+}
+
+void EnumsWriter::CloseImpl() {
+  stream_.flush();
+}
+
+void EnumsReader::ReadSingleImpl([[maybe_unused]]test_model::Fruits& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "single", true, unused_step_, value);
+}
+
+void EnumsReader::ReadVecImpl([[maybe_unused]]std::vector<test_model::Fruits>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "vec", true, unused_step_, value);
+}
+
+void EnumsReader::ReadSizeImpl([[maybe_unused]]test_model::SizeBasedEnum& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "size", true, unused_step_, value);
+}
+
+void EnumsReader::CloseImpl() {
+  VerifyFinished();
+}
+
+void StateTestWriter::WriteAnIntImpl([[maybe_unused]]int32_t const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "anInt", json_value);}
+
+void StateTestWriter::WriteAStreamImpl([[maybe_unused]]int32_t const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "aStream", json_value);}
+
+void StateTestWriter::WriteAnotherIntImpl([[maybe_unused]]int32_t const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "anotherInt", json_value);}
+
+void StateTestWriter::Flush() {
+  stream_.flush();
+}
+
+void StateTestWriter::CloseImpl() {
+  stream_.flush();
+}
+
+void StateTestReader::ReadAnIntImpl([[maybe_unused]]int32_t& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "anInt", true, unused_step_, value);
+}
+
+bool StateTestReader::ReadAStreamImpl([[maybe_unused]]int32_t& value) {
+  return yardl::ndjson::ReadProtocolValue(stream_, line_, "aStream", false, unused_step_, value);
+}
+
+void StateTestReader::ReadAnotherIntImpl([[maybe_unused]]int32_t& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "anotherInt", true, unused_step_, value);
+}
+
+void StateTestReader::CloseImpl() {
+  VerifyFinished();
+}
+
+void SimpleGenericsWriter::WriteFloatImageImpl([[maybe_unused]]test_model::Image<float> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "floatImage", json_value);}
+
+void SimpleGenericsWriter::WriteIntImageImpl([[maybe_unused]]test_model::Image<int32_t> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "intImage", json_value);}
+
+void SimpleGenericsWriter::WriteIntImageAlternateSyntaxImpl([[maybe_unused]]test_model::Image<int32_t> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "intImageAlternateSyntax", json_value);}
+
+void SimpleGenericsWriter::WriteStringImageImpl([[maybe_unused]]test_model::Image<std::string> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "stringImage", json_value);}
+
+void SimpleGenericsWriter::WriteIntFloatTupleImpl([[maybe_unused]]test_model::MyTuple<int32_t, float> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "intFloatTuple", json_value);}
+
+void SimpleGenericsWriter::WriteFloatFloatTupleImpl([[maybe_unused]]test_model::MyTuple<float, float> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "floatFloatTuple", json_value);}
+
+void SimpleGenericsWriter::WriteIntFloatTupleAlternateSyntaxImpl([[maybe_unused]]test_model::MyTuple<int32_t, float> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "intFloatTupleAlternateSyntax", json_value);}
+
+void SimpleGenericsWriter::WriteIntStringTupleImpl([[maybe_unused]]test_model::MyTuple<int32_t, std::string> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "intStringTuple", json_value);}
+
+void SimpleGenericsWriter::WriteStreamOfTypeVariantsImpl([[maybe_unused]]std::variant<test_model::Image<float>, test_model::Image<double>> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "streamOfTypeVariants", json_value);}
+
+void SimpleGenericsWriter::Flush() {
+  stream_.flush();
+}
+
+void SimpleGenericsWriter::CloseImpl() {
+  stream_.flush();
+}
+
+void SimpleGenericsReader::ReadFloatImageImpl([[maybe_unused]]test_model::Image<float>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "floatImage", true, unused_step_, value);
+}
+
+void SimpleGenericsReader::ReadIntImageImpl([[maybe_unused]]test_model::Image<int32_t>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "intImage", true, unused_step_, value);
+}
+
+void SimpleGenericsReader::ReadIntImageAlternateSyntaxImpl([[maybe_unused]]test_model::Image<int32_t>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "intImageAlternateSyntax", true, unused_step_, value);
+}
+
+void SimpleGenericsReader::ReadStringImageImpl([[maybe_unused]]test_model::Image<std::string>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "stringImage", true, unused_step_, value);
+}
+
+void SimpleGenericsReader::ReadIntFloatTupleImpl([[maybe_unused]]test_model::MyTuple<int32_t, float>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "intFloatTuple", true, unused_step_, value);
+}
+
+void SimpleGenericsReader::ReadFloatFloatTupleImpl([[maybe_unused]]test_model::MyTuple<float, float>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "floatFloatTuple", true, unused_step_, value);
+}
+
+void SimpleGenericsReader::ReadIntFloatTupleAlternateSyntaxImpl([[maybe_unused]]test_model::MyTuple<int32_t, float>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "intFloatTupleAlternateSyntax", true, unused_step_, value);
+}
+
+void SimpleGenericsReader::ReadIntStringTupleImpl([[maybe_unused]]test_model::MyTuple<int32_t, std::string>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "intStringTuple", true, unused_step_, value);
+}
+
+bool SimpleGenericsReader::ReadStreamOfTypeVariantsImpl([[maybe_unused]]std::variant<test_model::Image<float>, test_model::Image<double>>& value) {
+  return yardl::ndjson::ReadProtocolValue(stream_, line_, "streamOfTypeVariants", false, unused_step_, value);
+}
+
+void SimpleGenericsReader::CloseImpl() {
+  VerifyFinished();
+}
+
+void AdvancedGenericsWriter::WriteIntImageImageImpl([[maybe_unused]]test_model::Image<test_model::Image<float>> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "intImageImage", json_value);}
+
+void AdvancedGenericsWriter::WriteGenericRecord1Impl([[maybe_unused]]test_model::GenericRecord<int32_t, std::string> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "genericRecord1", json_value);}
+
+void AdvancedGenericsWriter::WriteTupleOfOptionalsImpl([[maybe_unused]]test_model::MyTuple<std::optional<int32_t>, std::optional<std::string>> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "tupleOfOptionals", json_value);}
+
+void AdvancedGenericsWriter::WriteTupleOfOptionalsAlternateSyntaxImpl([[maybe_unused]]test_model::MyTuple<std::optional<int32_t>, std::optional<std::string>> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "tupleOfOptionalsAlternateSyntax", json_value);}
+
+void AdvancedGenericsWriter::WriteTupleOfVectorsImpl([[maybe_unused]]test_model::MyTuple<std::vector<int32_t>, std::vector<float>> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "tupleOfVectors", json_value);}
+
+void AdvancedGenericsWriter::Flush() {
+  stream_.flush();
+}
+
+void AdvancedGenericsWriter::CloseImpl() {
+  stream_.flush();
+}
+
+void AdvancedGenericsReader::ReadIntImageImageImpl([[maybe_unused]]test_model::Image<test_model::Image<float>>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "intImageImage", true, unused_step_, value);
+}
+
+void AdvancedGenericsReader::ReadGenericRecord1Impl([[maybe_unused]]test_model::GenericRecord<int32_t, std::string>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "genericRecord1", true, unused_step_, value);
+}
+
+void AdvancedGenericsReader::ReadTupleOfOptionalsImpl([[maybe_unused]]test_model::MyTuple<std::optional<int32_t>, std::optional<std::string>>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "tupleOfOptionals", true, unused_step_, value);
+}
+
+void AdvancedGenericsReader::ReadTupleOfOptionalsAlternateSyntaxImpl([[maybe_unused]]test_model::MyTuple<std::optional<int32_t>, std::optional<std::string>>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "tupleOfOptionalsAlternateSyntax", true, unused_step_, value);
+}
+
+void AdvancedGenericsReader::ReadTupleOfVectorsImpl([[maybe_unused]]test_model::MyTuple<std::vector<int32_t>, std::vector<float>>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "tupleOfVectors", true, unused_step_, value);
+}
+
+void AdvancedGenericsReader::CloseImpl() {
+  VerifyFinished();
+}
+
+void AliasesWriter::WriteAliasedStringImpl([[maybe_unused]]test_model::AliasedString const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "aliasedString", json_value);}
+
+void AliasesWriter::WriteAliasedEnumImpl([[maybe_unused]]test_model::AliasedEnum const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "aliasedEnum", json_value);}
+
+void AliasesWriter::WriteAliasedOpenGenericImpl([[maybe_unused]]test_model::AliasedOpenGeneric<test_model::AliasedString, test_model::AliasedEnum> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "aliasedOpenGeneric", json_value);}
+
+void AliasesWriter::WriteAliasedClosedGenericImpl([[maybe_unused]]test_model::AliasedClosedGeneric const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "aliasedClosedGeneric", json_value);}
+
+void AliasesWriter::WriteAliasedOptionalImpl([[maybe_unused]]test_model::AliasedOptional const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "aliasedOptional", json_value);}
+
+void AliasesWriter::WriteAliasedGenericOptionalImpl([[maybe_unused]]test_model::AliasedGenericOptional<float> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "aliasedGenericOptional", json_value);}
+
+void AliasesWriter::WriteAliasedGenericUnion2Impl([[maybe_unused]]test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "aliasedGenericUnion2", json_value);}
+
+void AliasesWriter::WriteAliasedGenericVectorImpl([[maybe_unused]]test_model::AliasedGenericVector<float> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "aliasedGenericVector", json_value);}
+
+void AliasesWriter::WriteAliasedGenericFixedVectorImpl([[maybe_unused]]test_model::AliasedGenericFixedVector<float> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "aliasedGenericFixedVector", json_value);}
+
+void AliasesWriter::WriteStreamOfAliasedGenericUnion2Impl([[maybe_unused]]test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "streamOfAliasedGenericUnion2", json_value);}
+
+void AliasesWriter::Flush() {
+  stream_.flush();
+}
+
+void AliasesWriter::CloseImpl() {
+  stream_.flush();
+}
+
+void AliasesReader::ReadAliasedStringImpl([[maybe_unused]]test_model::AliasedString& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "aliasedString", true, unused_step_, value);
+}
+
+void AliasesReader::ReadAliasedEnumImpl([[maybe_unused]]test_model::AliasedEnum& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "aliasedEnum", true, unused_step_, value);
+}
+
+void AliasesReader::ReadAliasedOpenGenericImpl([[maybe_unused]]test_model::AliasedOpenGeneric<test_model::AliasedString, test_model::AliasedEnum>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "aliasedOpenGeneric", true, unused_step_, value);
+}
+
+void AliasesReader::ReadAliasedClosedGenericImpl([[maybe_unused]]test_model::AliasedClosedGeneric& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "aliasedClosedGeneric", true, unused_step_, value);
+}
+
+void AliasesReader::ReadAliasedOptionalImpl([[maybe_unused]]test_model::AliasedOptional& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "aliasedOptional", true, unused_step_, value);
+}
+
+void AliasesReader::ReadAliasedGenericOptionalImpl([[maybe_unused]]test_model::AliasedGenericOptional<float>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "aliasedGenericOptional", true, unused_step_, value);
+}
+
+void AliasesReader::ReadAliasedGenericUnion2Impl([[maybe_unused]]test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "aliasedGenericUnion2", true, unused_step_, value);
+}
+
+void AliasesReader::ReadAliasedGenericVectorImpl([[maybe_unused]]test_model::AliasedGenericVector<float>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "aliasedGenericVector", true, unused_step_, value);
+}
+
+void AliasesReader::ReadAliasedGenericFixedVectorImpl([[maybe_unused]]test_model::AliasedGenericFixedVector<float>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "aliasedGenericFixedVector", true, unused_step_, value);
+}
+
+bool AliasesReader::ReadStreamOfAliasedGenericUnion2Impl([[maybe_unused]]test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum>& value) {
+  return yardl::ndjson::ReadProtocolValue(stream_, line_, "streamOfAliasedGenericUnion2", false, unused_step_, value);
+}
+
+void AliasesReader::CloseImpl() {
+  VerifyFinished();
+}
+
+void StreamsOfAliasedUnionsWriter::WriteIntOrSimpleRecordImpl([[maybe_unused]]test_model::AliasedIntOrSimpleRecord const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "intOrSimpleRecord", json_value);}
+
+void StreamsOfAliasedUnionsWriter::WriteNullableIntOrSimpleRecordImpl([[maybe_unused]]test_model::AliasedNullableIntSimpleRecord const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "nullableIntOrSimpleRecord", json_value);}
+
+void StreamsOfAliasedUnionsWriter::Flush() {
+  stream_.flush();
+}
+
+void StreamsOfAliasedUnionsWriter::CloseImpl() {
+  stream_.flush();
+}
+
+bool StreamsOfAliasedUnionsReader::ReadIntOrSimpleRecordImpl([[maybe_unused]]test_model::AliasedIntOrSimpleRecord& value) {
+  return yardl::ndjson::ReadProtocolValue(stream_, line_, "intOrSimpleRecord", false, unused_step_, value);
+}
+
+bool StreamsOfAliasedUnionsReader::ReadNullableIntOrSimpleRecordImpl([[maybe_unused]]test_model::AliasedNullableIntSimpleRecord& value) {
+  return yardl::ndjson::ReadProtocolValue(stream_, line_, "nullableIntOrSimpleRecord", false, unused_step_, value);
+}
+
+void StreamsOfAliasedUnionsReader::CloseImpl() {
+  VerifyFinished();
+}
+
+void ProtocolWithComputedFieldsWriter::WriteRecordWithComputedFieldsImpl([[maybe_unused]]test_model::RecordWithComputedFields const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "recordWithComputedFields", json_value);}
+
+void ProtocolWithComputedFieldsWriter::Flush() {
+  stream_.flush();
+}
+
+void ProtocolWithComputedFieldsWriter::CloseImpl() {
+  stream_.flush();
+}
+
+void ProtocolWithComputedFieldsReader::ReadRecordWithComputedFieldsImpl([[maybe_unused]]test_model::RecordWithComputedFields& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "recordWithComputedFields", true, unused_step_, value);
+}
+
+void ProtocolWithComputedFieldsReader::CloseImpl() {
+  VerifyFinished();
+}
+
+void ProtocolWithKeywordStepsWriter::WriteIntImpl([[maybe_unused]]test_model::RecordWithKeywordFields const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "int", json_value);}
+
+void ProtocolWithKeywordStepsWriter::WriteFloatImpl([[maybe_unused]]test_model::EnumWithKeywordSymbols const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "float", json_value);}
+
+void ProtocolWithKeywordStepsWriter::Flush() {
+  stream_.flush();
+}
+
+void ProtocolWithKeywordStepsWriter::CloseImpl() {
+  stream_.flush();
+}
+
+bool ProtocolWithKeywordStepsReader::ReadIntImpl([[maybe_unused]]test_model::RecordWithKeywordFields& value) {
+  return yardl::ndjson::ReadProtocolValue(stream_, line_, "int", false, unused_step_, value);
+}
+
+void ProtocolWithKeywordStepsReader::ReadFloatImpl([[maybe_unused]]test_model::EnumWithKeywordSymbols& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "float", true, unused_step_, value);
+}
+
+void ProtocolWithKeywordStepsReader::CloseImpl() {
+  VerifyFinished();
+}
+
 } // namespace test_model::ndjson

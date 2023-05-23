@@ -8,6 +8,7 @@
 #include "../yardl_testing.h"
 #include "binary/protocols.h"
 #include "hdf5/protocols.h"
+#include "ndjson/protocols.h"
 #include "types.h"
 
 namespace test_model {
@@ -3517,6 +3518,8 @@ std::unique_ptr<test_model::BenchmarkFloat256x256WriterBase> CreateValidatingWri
     return std::make_unique<test_model::TestBenchmarkFloat256x256WriterBase>(std::make_unique<test_model::hdf5::BenchmarkFloat256x256Writer>(filename), [filename](){ return std::make_unique<test_model::hdf5::BenchmarkFloat256x256Reader>(filename);});
   case Format::kBinary:
     return std::make_unique<test_model::TestBenchmarkFloat256x256WriterBase>(std::make_unique<test_model::binary::BenchmarkFloat256x256Writer>(filename), [filename](){return std::make_unique<test_model::binary::BenchmarkFloat256x256Reader>(filename);});
+  case Format::kNDJson:
+    return std::make_unique<test_model::TestBenchmarkFloat256x256WriterBase>(std::make_unique<test_model::ndjson::BenchmarkFloat256x256Writer>(filename), [filename](){return std::make_unique<test_model::ndjson::BenchmarkFloat256x256Reader>(filename);});
   default:
     throw std::runtime_error("Unknown format");
   }
@@ -3529,6 +3532,8 @@ std::unique_ptr<test_model::BenchmarkFloatVlenWriterBase> CreateValidatingWriter
     return std::make_unique<test_model::TestBenchmarkFloatVlenWriterBase>(std::make_unique<test_model::hdf5::BenchmarkFloatVlenWriter>(filename), [filename](){ return std::make_unique<test_model::hdf5::BenchmarkFloatVlenReader>(filename);});
   case Format::kBinary:
     return std::make_unique<test_model::TestBenchmarkFloatVlenWriterBase>(std::make_unique<test_model::binary::BenchmarkFloatVlenWriter>(filename), [filename](){return std::make_unique<test_model::binary::BenchmarkFloatVlenReader>(filename);});
+  case Format::kNDJson:
+    return std::make_unique<test_model::TestBenchmarkFloatVlenWriterBase>(std::make_unique<test_model::ndjson::BenchmarkFloatVlenWriter>(filename), [filename](){return std::make_unique<test_model::ndjson::BenchmarkFloatVlenReader>(filename);});
   default:
     throw std::runtime_error("Unknown format");
   }
@@ -3541,6 +3546,8 @@ std::unique_ptr<test_model::BenchmarkSmallRecordWriterBase> CreateValidatingWrit
     return std::make_unique<test_model::TestBenchmarkSmallRecordWriterBase>(std::make_unique<test_model::hdf5::BenchmarkSmallRecordWriter>(filename), [filename](){ return std::make_unique<test_model::hdf5::BenchmarkSmallRecordReader>(filename);});
   case Format::kBinary:
     return std::make_unique<test_model::TestBenchmarkSmallRecordWriterBase>(std::make_unique<test_model::binary::BenchmarkSmallRecordWriter>(filename), [filename](){return std::make_unique<test_model::binary::BenchmarkSmallRecordReader>(filename);});
+  case Format::kNDJson:
+    return std::make_unique<test_model::TestBenchmarkSmallRecordWriterBase>(std::make_unique<test_model::ndjson::BenchmarkSmallRecordWriter>(filename), [filename](){return std::make_unique<test_model::ndjson::BenchmarkSmallRecordReader>(filename);});
   default:
     throw std::runtime_error("Unknown format");
   }
@@ -3553,6 +3560,8 @@ std::unique_ptr<test_model::BenchmarkSmallRecordWithOptionalsWriterBase> CreateV
     return std::make_unique<test_model::TestBenchmarkSmallRecordWithOptionalsWriterBase>(std::make_unique<test_model::hdf5::BenchmarkSmallRecordWithOptionalsWriter>(filename), [filename](){ return std::make_unique<test_model::hdf5::BenchmarkSmallRecordWithOptionalsReader>(filename);});
   case Format::kBinary:
     return std::make_unique<test_model::TestBenchmarkSmallRecordWithOptionalsWriterBase>(std::make_unique<test_model::binary::BenchmarkSmallRecordWithOptionalsWriter>(filename), [filename](){return std::make_unique<test_model::binary::BenchmarkSmallRecordWithOptionalsReader>(filename);});
+  case Format::kNDJson:
+    return std::make_unique<test_model::TestBenchmarkSmallRecordWithOptionalsWriterBase>(std::make_unique<test_model::ndjson::BenchmarkSmallRecordWithOptionalsWriter>(filename), [filename](){return std::make_unique<test_model::ndjson::BenchmarkSmallRecordWithOptionalsReader>(filename);});
   default:
     throw std::runtime_error("Unknown format");
   }
@@ -3565,6 +3574,8 @@ std::unique_ptr<test_model::BenchmarkSimpleMrdWriterBase> CreateValidatingWriter
     return std::make_unique<test_model::TestBenchmarkSimpleMrdWriterBase>(std::make_unique<test_model::hdf5::BenchmarkSimpleMrdWriter>(filename), [filename](){ return std::make_unique<test_model::hdf5::BenchmarkSimpleMrdReader>(filename);});
   case Format::kBinary:
     return std::make_unique<test_model::TestBenchmarkSimpleMrdWriterBase>(std::make_unique<test_model::binary::BenchmarkSimpleMrdWriter>(filename), [filename](){return std::make_unique<test_model::binary::BenchmarkSimpleMrdReader>(filename);});
+  case Format::kNDJson:
+    return std::make_unique<test_model::TestBenchmarkSimpleMrdWriterBase>(std::make_unique<test_model::ndjson::BenchmarkSimpleMrdWriter>(filename), [filename](){return std::make_unique<test_model::ndjson::BenchmarkSimpleMrdReader>(filename);});
   default:
     throw std::runtime_error("Unknown format");
   }
@@ -3577,6 +3588,8 @@ std::unique_ptr<test_model::ScalarsWriterBase> CreateValidatingWriter<test_model
     return std::make_unique<test_model::TestScalarsWriterBase>(std::make_unique<test_model::hdf5::ScalarsWriter>(filename), [filename](){ return std::make_unique<test_model::hdf5::ScalarsReader>(filename);});
   case Format::kBinary:
     return std::make_unique<test_model::TestScalarsWriterBase>(std::make_unique<test_model::binary::ScalarsWriter>(filename), [filename](){return std::make_unique<test_model::binary::ScalarsReader>(filename);});
+  case Format::kNDJson:
+    return std::make_unique<test_model::TestScalarsWriterBase>(std::make_unique<test_model::ndjson::ScalarsWriter>(filename), [filename](){return std::make_unique<test_model::ndjson::ScalarsReader>(filename);});
   default:
     throw std::runtime_error("Unknown format");
   }
@@ -3589,6 +3602,8 @@ std::unique_ptr<test_model::ScalarOptionalsWriterBase> CreateValidatingWriter<te
     return std::make_unique<test_model::TestScalarOptionalsWriterBase>(std::make_unique<test_model::hdf5::ScalarOptionalsWriter>(filename), [filename](){ return std::make_unique<test_model::hdf5::ScalarOptionalsReader>(filename);});
   case Format::kBinary:
     return std::make_unique<test_model::TestScalarOptionalsWriterBase>(std::make_unique<test_model::binary::ScalarOptionalsWriter>(filename), [filename](){return std::make_unique<test_model::binary::ScalarOptionalsReader>(filename);});
+  case Format::kNDJson:
+    return std::make_unique<test_model::TestScalarOptionalsWriterBase>(std::make_unique<test_model::ndjson::ScalarOptionalsWriter>(filename), [filename](){return std::make_unique<test_model::ndjson::ScalarOptionalsReader>(filename);});
   default:
     throw std::runtime_error("Unknown format");
   }
@@ -3601,6 +3616,8 @@ std::unique_ptr<test_model::NestedRecordsWriterBase> CreateValidatingWriter<test
     return std::make_unique<test_model::TestNestedRecordsWriterBase>(std::make_unique<test_model::hdf5::NestedRecordsWriter>(filename), [filename](){ return std::make_unique<test_model::hdf5::NestedRecordsReader>(filename);});
   case Format::kBinary:
     return std::make_unique<test_model::TestNestedRecordsWriterBase>(std::make_unique<test_model::binary::NestedRecordsWriter>(filename), [filename](){return std::make_unique<test_model::binary::NestedRecordsReader>(filename);});
+  case Format::kNDJson:
+    return std::make_unique<test_model::TestNestedRecordsWriterBase>(std::make_unique<test_model::ndjson::NestedRecordsWriter>(filename), [filename](){return std::make_unique<test_model::ndjson::NestedRecordsReader>(filename);});
   default:
     throw std::runtime_error("Unknown format");
   }
@@ -3613,6 +3630,8 @@ std::unique_ptr<test_model::VlensWriterBase> CreateValidatingWriter<test_model::
     return std::make_unique<test_model::TestVlensWriterBase>(std::make_unique<test_model::hdf5::VlensWriter>(filename), [filename](){ return std::make_unique<test_model::hdf5::VlensReader>(filename);});
   case Format::kBinary:
     return std::make_unique<test_model::TestVlensWriterBase>(std::make_unique<test_model::binary::VlensWriter>(filename), [filename](){return std::make_unique<test_model::binary::VlensReader>(filename);});
+  case Format::kNDJson:
+    return std::make_unique<test_model::TestVlensWriterBase>(std::make_unique<test_model::ndjson::VlensWriter>(filename), [filename](){return std::make_unique<test_model::ndjson::VlensReader>(filename);});
   default:
     throw std::runtime_error("Unknown format");
   }
@@ -3625,6 +3644,8 @@ std::unique_ptr<test_model::StringsWriterBase> CreateValidatingWriter<test_model
     return std::make_unique<test_model::TestStringsWriterBase>(std::make_unique<test_model::hdf5::StringsWriter>(filename), [filename](){ return std::make_unique<test_model::hdf5::StringsReader>(filename);});
   case Format::kBinary:
     return std::make_unique<test_model::TestStringsWriterBase>(std::make_unique<test_model::binary::StringsWriter>(filename), [filename](){return std::make_unique<test_model::binary::StringsReader>(filename);});
+  case Format::kNDJson:
+    return std::make_unique<test_model::TestStringsWriterBase>(std::make_unique<test_model::ndjson::StringsWriter>(filename), [filename](){return std::make_unique<test_model::ndjson::StringsReader>(filename);});
   default:
     throw std::runtime_error("Unknown format");
   }
@@ -3637,6 +3658,8 @@ std::unique_ptr<test_model::OptionalVectorsWriterBase> CreateValidatingWriter<te
     return std::make_unique<test_model::TestOptionalVectorsWriterBase>(std::make_unique<test_model::hdf5::OptionalVectorsWriter>(filename), [filename](){ return std::make_unique<test_model::hdf5::OptionalVectorsReader>(filename);});
   case Format::kBinary:
     return std::make_unique<test_model::TestOptionalVectorsWriterBase>(std::make_unique<test_model::binary::OptionalVectorsWriter>(filename), [filename](){return std::make_unique<test_model::binary::OptionalVectorsReader>(filename);});
+  case Format::kNDJson:
+    return std::make_unique<test_model::TestOptionalVectorsWriterBase>(std::make_unique<test_model::ndjson::OptionalVectorsWriter>(filename), [filename](){return std::make_unique<test_model::ndjson::OptionalVectorsReader>(filename);});
   default:
     throw std::runtime_error("Unknown format");
   }
@@ -3649,6 +3672,8 @@ std::unique_ptr<test_model::FixedVectorsWriterBase> CreateValidatingWriter<test_
     return std::make_unique<test_model::TestFixedVectorsWriterBase>(std::make_unique<test_model::hdf5::FixedVectorsWriter>(filename), [filename](){ return std::make_unique<test_model::hdf5::FixedVectorsReader>(filename);});
   case Format::kBinary:
     return std::make_unique<test_model::TestFixedVectorsWriterBase>(std::make_unique<test_model::binary::FixedVectorsWriter>(filename), [filename](){return std::make_unique<test_model::binary::FixedVectorsReader>(filename);});
+  case Format::kNDJson:
+    return std::make_unique<test_model::TestFixedVectorsWriterBase>(std::make_unique<test_model::ndjson::FixedVectorsWriter>(filename), [filename](){return std::make_unique<test_model::ndjson::FixedVectorsReader>(filename);});
   default:
     throw std::runtime_error("Unknown format");
   }
@@ -3661,6 +3686,8 @@ std::unique_ptr<test_model::StreamsWriterBase> CreateValidatingWriter<test_model
     return std::make_unique<test_model::TestStreamsWriterBase>(std::make_unique<test_model::hdf5::StreamsWriter>(filename), [filename](){ return std::make_unique<test_model::hdf5::StreamsReader>(filename);});
   case Format::kBinary:
     return std::make_unique<test_model::TestStreamsWriterBase>(std::make_unique<test_model::binary::StreamsWriter>(filename), [filename](){return std::make_unique<test_model::binary::StreamsReader>(filename);});
+  case Format::kNDJson:
+    return std::make_unique<test_model::TestStreamsWriterBase>(std::make_unique<test_model::ndjson::StreamsWriter>(filename), [filename](){return std::make_unique<test_model::ndjson::StreamsReader>(filename);});
   default:
     throw std::runtime_error("Unknown format");
   }
@@ -3673,6 +3700,8 @@ std::unique_ptr<test_model::FixedArraysWriterBase> CreateValidatingWriter<test_m
     return std::make_unique<test_model::TestFixedArraysWriterBase>(std::make_unique<test_model::hdf5::FixedArraysWriter>(filename), [filename](){ return std::make_unique<test_model::hdf5::FixedArraysReader>(filename);});
   case Format::kBinary:
     return std::make_unique<test_model::TestFixedArraysWriterBase>(std::make_unique<test_model::binary::FixedArraysWriter>(filename), [filename](){return std::make_unique<test_model::binary::FixedArraysReader>(filename);});
+  case Format::kNDJson:
+    return std::make_unique<test_model::TestFixedArraysWriterBase>(std::make_unique<test_model::ndjson::FixedArraysWriter>(filename), [filename](){return std::make_unique<test_model::ndjson::FixedArraysReader>(filename);});
   default:
     throw std::runtime_error("Unknown format");
   }
@@ -3685,6 +3714,8 @@ std::unique_ptr<test_model::NDArraysWriterBase> CreateValidatingWriter<test_mode
     return std::make_unique<test_model::TestNDArraysWriterBase>(std::make_unique<test_model::hdf5::NDArraysWriter>(filename), [filename](){ return std::make_unique<test_model::hdf5::NDArraysReader>(filename);});
   case Format::kBinary:
     return std::make_unique<test_model::TestNDArraysWriterBase>(std::make_unique<test_model::binary::NDArraysWriter>(filename), [filename](){return std::make_unique<test_model::binary::NDArraysReader>(filename);});
+  case Format::kNDJson:
+    return std::make_unique<test_model::TestNDArraysWriterBase>(std::make_unique<test_model::ndjson::NDArraysWriter>(filename), [filename](){return std::make_unique<test_model::ndjson::NDArraysReader>(filename);});
   default:
     throw std::runtime_error("Unknown format");
   }
@@ -3697,6 +3728,8 @@ std::unique_ptr<test_model::NDArraysSingleDimensionWriterBase> CreateValidatingW
     return std::make_unique<test_model::TestNDArraysSingleDimensionWriterBase>(std::make_unique<test_model::hdf5::NDArraysSingleDimensionWriter>(filename), [filename](){ return std::make_unique<test_model::hdf5::NDArraysSingleDimensionReader>(filename);});
   case Format::kBinary:
     return std::make_unique<test_model::TestNDArraysSingleDimensionWriterBase>(std::make_unique<test_model::binary::NDArraysSingleDimensionWriter>(filename), [filename](){return std::make_unique<test_model::binary::NDArraysSingleDimensionReader>(filename);});
+  case Format::kNDJson:
+    return std::make_unique<test_model::TestNDArraysSingleDimensionWriterBase>(std::make_unique<test_model::ndjson::NDArraysSingleDimensionWriter>(filename), [filename](){return std::make_unique<test_model::ndjson::NDArraysSingleDimensionReader>(filename);});
   default:
     throw std::runtime_error("Unknown format");
   }
@@ -3709,6 +3742,8 @@ std::unique_ptr<test_model::DynamicNDArraysWriterBase> CreateValidatingWriter<te
     return std::make_unique<test_model::TestDynamicNDArraysWriterBase>(std::make_unique<test_model::hdf5::DynamicNDArraysWriter>(filename), [filename](){ return std::make_unique<test_model::hdf5::DynamicNDArraysReader>(filename);});
   case Format::kBinary:
     return std::make_unique<test_model::TestDynamicNDArraysWriterBase>(std::make_unique<test_model::binary::DynamicNDArraysWriter>(filename), [filename](){return std::make_unique<test_model::binary::DynamicNDArraysReader>(filename);});
+  case Format::kNDJson:
+    return std::make_unique<test_model::TestDynamicNDArraysWriterBase>(std::make_unique<test_model::ndjson::DynamicNDArraysWriter>(filename), [filename](){return std::make_unique<test_model::ndjson::DynamicNDArraysReader>(filename);});
   default:
     throw std::runtime_error("Unknown format");
   }
@@ -3721,6 +3756,8 @@ std::unique_ptr<test_model::MapsWriterBase> CreateValidatingWriter<test_model::M
     return std::make_unique<test_model::TestMapsWriterBase>(std::make_unique<test_model::hdf5::MapsWriter>(filename), [filename](){ return std::make_unique<test_model::hdf5::MapsReader>(filename);});
   case Format::kBinary:
     return std::make_unique<test_model::TestMapsWriterBase>(std::make_unique<test_model::binary::MapsWriter>(filename), [filename](){return std::make_unique<test_model::binary::MapsReader>(filename);});
+  case Format::kNDJson:
+    return std::make_unique<test_model::TestMapsWriterBase>(std::make_unique<test_model::ndjson::MapsWriter>(filename), [filename](){return std::make_unique<test_model::ndjson::MapsReader>(filename);});
   default:
     throw std::runtime_error("Unknown format");
   }
@@ -3733,6 +3770,8 @@ std::unique_ptr<test_model::UnionsWriterBase> CreateValidatingWriter<test_model:
     return std::make_unique<test_model::TestUnionsWriterBase>(std::make_unique<test_model::hdf5::UnionsWriter>(filename), [filename](){ return std::make_unique<test_model::hdf5::UnionsReader>(filename);});
   case Format::kBinary:
     return std::make_unique<test_model::TestUnionsWriterBase>(std::make_unique<test_model::binary::UnionsWriter>(filename), [filename](){return std::make_unique<test_model::binary::UnionsReader>(filename);});
+  case Format::kNDJson:
+    return std::make_unique<test_model::TestUnionsWriterBase>(std::make_unique<test_model::ndjson::UnionsWriter>(filename), [filename](){return std::make_unique<test_model::ndjson::UnionsReader>(filename);});
   default:
     throw std::runtime_error("Unknown format");
   }
@@ -3745,6 +3784,8 @@ std::unique_ptr<test_model::StreamsOfUnionsWriterBase> CreateValidatingWriter<te
     return std::make_unique<test_model::TestStreamsOfUnionsWriterBase>(std::make_unique<test_model::hdf5::StreamsOfUnionsWriter>(filename), [filename](){ return std::make_unique<test_model::hdf5::StreamsOfUnionsReader>(filename);});
   case Format::kBinary:
     return std::make_unique<test_model::TestStreamsOfUnionsWriterBase>(std::make_unique<test_model::binary::StreamsOfUnionsWriter>(filename), [filename](){return std::make_unique<test_model::binary::StreamsOfUnionsReader>(filename);});
+  case Format::kNDJson:
+    return std::make_unique<test_model::TestStreamsOfUnionsWriterBase>(std::make_unique<test_model::ndjson::StreamsOfUnionsWriter>(filename), [filename](){return std::make_unique<test_model::ndjson::StreamsOfUnionsReader>(filename);});
   default:
     throw std::runtime_error("Unknown format");
   }
@@ -3757,6 +3798,8 @@ std::unique_ptr<test_model::EnumsWriterBase> CreateValidatingWriter<test_model::
     return std::make_unique<test_model::TestEnumsWriterBase>(std::make_unique<test_model::hdf5::EnumsWriter>(filename), [filename](){ return std::make_unique<test_model::hdf5::EnumsReader>(filename);});
   case Format::kBinary:
     return std::make_unique<test_model::TestEnumsWriterBase>(std::make_unique<test_model::binary::EnumsWriter>(filename), [filename](){return std::make_unique<test_model::binary::EnumsReader>(filename);});
+  case Format::kNDJson:
+    return std::make_unique<test_model::TestEnumsWriterBase>(std::make_unique<test_model::ndjson::EnumsWriter>(filename), [filename](){return std::make_unique<test_model::ndjson::EnumsReader>(filename);});
   default:
     throw std::runtime_error("Unknown format");
   }
@@ -3769,6 +3812,8 @@ std::unique_ptr<test_model::StateTestWriterBase> CreateValidatingWriter<test_mod
     return std::make_unique<test_model::TestStateTestWriterBase>(std::make_unique<test_model::hdf5::StateTestWriter>(filename), [filename](){ return std::make_unique<test_model::hdf5::StateTestReader>(filename);});
   case Format::kBinary:
     return std::make_unique<test_model::TestStateTestWriterBase>(std::make_unique<test_model::binary::StateTestWriter>(filename), [filename](){return std::make_unique<test_model::binary::StateTestReader>(filename);});
+  case Format::kNDJson:
+    return std::make_unique<test_model::TestStateTestWriterBase>(std::make_unique<test_model::ndjson::StateTestWriter>(filename), [filename](){return std::make_unique<test_model::ndjson::StateTestReader>(filename);});
   default:
     throw std::runtime_error("Unknown format");
   }
@@ -3781,6 +3826,8 @@ std::unique_ptr<test_model::SimpleGenericsWriterBase> CreateValidatingWriter<tes
     return std::make_unique<test_model::TestSimpleGenericsWriterBase>(std::make_unique<test_model::hdf5::SimpleGenericsWriter>(filename), [filename](){ return std::make_unique<test_model::hdf5::SimpleGenericsReader>(filename);});
   case Format::kBinary:
     return std::make_unique<test_model::TestSimpleGenericsWriterBase>(std::make_unique<test_model::binary::SimpleGenericsWriter>(filename), [filename](){return std::make_unique<test_model::binary::SimpleGenericsReader>(filename);});
+  case Format::kNDJson:
+    return std::make_unique<test_model::TestSimpleGenericsWriterBase>(std::make_unique<test_model::ndjson::SimpleGenericsWriter>(filename), [filename](){return std::make_unique<test_model::ndjson::SimpleGenericsReader>(filename);});
   default:
     throw std::runtime_error("Unknown format");
   }
@@ -3793,6 +3840,8 @@ std::unique_ptr<test_model::AdvancedGenericsWriterBase> CreateValidatingWriter<t
     return std::make_unique<test_model::TestAdvancedGenericsWriterBase>(std::make_unique<test_model::hdf5::AdvancedGenericsWriter>(filename), [filename](){ return std::make_unique<test_model::hdf5::AdvancedGenericsReader>(filename);});
   case Format::kBinary:
     return std::make_unique<test_model::TestAdvancedGenericsWriterBase>(std::make_unique<test_model::binary::AdvancedGenericsWriter>(filename), [filename](){return std::make_unique<test_model::binary::AdvancedGenericsReader>(filename);});
+  case Format::kNDJson:
+    return std::make_unique<test_model::TestAdvancedGenericsWriterBase>(std::make_unique<test_model::ndjson::AdvancedGenericsWriter>(filename), [filename](){return std::make_unique<test_model::ndjson::AdvancedGenericsReader>(filename);});
   default:
     throw std::runtime_error("Unknown format");
   }
@@ -3805,6 +3854,8 @@ std::unique_ptr<test_model::AliasesWriterBase> CreateValidatingWriter<test_model
     return std::make_unique<test_model::TestAliasesWriterBase>(std::make_unique<test_model::hdf5::AliasesWriter>(filename), [filename](){ return std::make_unique<test_model::hdf5::AliasesReader>(filename);});
   case Format::kBinary:
     return std::make_unique<test_model::TestAliasesWriterBase>(std::make_unique<test_model::binary::AliasesWriter>(filename), [filename](){return std::make_unique<test_model::binary::AliasesReader>(filename);});
+  case Format::kNDJson:
+    return std::make_unique<test_model::TestAliasesWriterBase>(std::make_unique<test_model::ndjson::AliasesWriter>(filename), [filename](){return std::make_unique<test_model::ndjson::AliasesReader>(filename);});
   default:
     throw std::runtime_error("Unknown format");
   }
@@ -3817,6 +3868,8 @@ std::unique_ptr<test_model::StreamsOfAliasedUnionsWriterBase> CreateValidatingWr
     return std::make_unique<test_model::TestStreamsOfAliasedUnionsWriterBase>(std::make_unique<test_model::hdf5::StreamsOfAliasedUnionsWriter>(filename), [filename](){ return std::make_unique<test_model::hdf5::StreamsOfAliasedUnionsReader>(filename);});
   case Format::kBinary:
     return std::make_unique<test_model::TestStreamsOfAliasedUnionsWriterBase>(std::make_unique<test_model::binary::StreamsOfAliasedUnionsWriter>(filename), [filename](){return std::make_unique<test_model::binary::StreamsOfAliasedUnionsReader>(filename);});
+  case Format::kNDJson:
+    return std::make_unique<test_model::TestStreamsOfAliasedUnionsWriterBase>(std::make_unique<test_model::ndjson::StreamsOfAliasedUnionsWriter>(filename), [filename](){return std::make_unique<test_model::ndjson::StreamsOfAliasedUnionsReader>(filename);});
   default:
     throw std::runtime_error("Unknown format");
   }
@@ -3829,6 +3882,8 @@ std::unique_ptr<test_model::ProtocolWithComputedFieldsWriterBase> CreateValidati
     return std::make_unique<test_model::TestProtocolWithComputedFieldsWriterBase>(std::make_unique<test_model::hdf5::ProtocolWithComputedFieldsWriter>(filename), [filename](){ return std::make_unique<test_model::hdf5::ProtocolWithComputedFieldsReader>(filename);});
   case Format::kBinary:
     return std::make_unique<test_model::TestProtocolWithComputedFieldsWriterBase>(std::make_unique<test_model::binary::ProtocolWithComputedFieldsWriter>(filename), [filename](){return std::make_unique<test_model::binary::ProtocolWithComputedFieldsReader>(filename);});
+  case Format::kNDJson:
+    return std::make_unique<test_model::TestProtocolWithComputedFieldsWriterBase>(std::make_unique<test_model::ndjson::ProtocolWithComputedFieldsWriter>(filename), [filename](){return std::make_unique<test_model::ndjson::ProtocolWithComputedFieldsReader>(filename);});
   default:
     throw std::runtime_error("Unknown format");
   }
@@ -3841,6 +3896,8 @@ std::unique_ptr<test_model::ProtocolWithKeywordStepsWriterBase> CreateValidating
     return std::make_unique<test_model::TestProtocolWithKeywordStepsWriterBase>(std::make_unique<test_model::hdf5::ProtocolWithKeywordStepsWriter>(filename), [filename](){ return std::make_unique<test_model::hdf5::ProtocolWithKeywordStepsReader>(filename);});
   case Format::kBinary:
     return std::make_unique<test_model::TestProtocolWithKeywordStepsWriterBase>(std::make_unique<test_model::binary::ProtocolWithKeywordStepsWriter>(filename), [filename](){return std::make_unique<test_model::binary::ProtocolWithKeywordStepsReader>(filename);});
+  case Format::kNDJson:
+    return std::make_unique<test_model::TestProtocolWithKeywordStepsWriterBase>(std::make_unique<test_model::ndjson::ProtocolWithKeywordStepsWriter>(filename), [filename](){return std::make_unique<test_model::ndjson::ProtocolWithKeywordStepsReader>(filename);});
   default:
     throw std::runtime_error("Unknown format");
   }

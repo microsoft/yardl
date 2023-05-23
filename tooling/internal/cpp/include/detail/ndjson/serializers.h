@@ -10,6 +10,7 @@
 #include <utility>
 #include <vector>
 
+#include <date/date.h>
 #include <nlohmann/json.hpp>
 
 #include "../../yardl.h"
@@ -101,6 +102,64 @@ struct adl_serializer<std::monostate> {
   }
 };
 
+template <>
+struct adl_serializer<yardl::Date> {
+  static void to_json(ordered_json& j, yardl::Date const& value) {
+#if __cplusplus < 202002L
+    j = date::format("%F", value);
+#else
+    date::local_days ld(value.time_since_epoch());
+    j = date::format("%F", ld);
+#endif
+  }
+
+  static void from_json(ordered_json const& j, yardl::Date& value) {
+    std::stringstream ss{j.get<std::string>()};
+
+#if __cplusplus < 202002L
+    ss >> date::parse("%F", value);
+#else
+    date::local_days ld;
+    ss >> date::parse("%F", ld);
+    value = yardl::Date(ld.time_since_epoch());
+#endif
+
+    if (ss.fail()) {
+      throw std::runtime_error("invalid date format");
+    }
+  }
+};
+
+template <>
+struct adl_serializer<yardl::Time> {
+  static void to_json(ordered_json& j, yardl::Time const& value) {
+    j = date::format("%T", value);
+  }
+
+  static void from_json(ordered_json const& j, yardl::Time& value) {
+    std::stringstream ss{j.get<std::string>()};
+    ss >> date::parse("%T", value);
+    if (ss.fail()) {
+      throw std::runtime_error("invalid time format");
+    }
+  }
+};
+
+template <>
+struct adl_serializer<yardl::DateTime> {
+  static void to_json(ordered_json& j, yardl::DateTime const& value) {
+    j = date::format("%FT%TZ", value);
+  }
+
+  static void from_json(ordered_json const& j, yardl::DateTime& value) {
+    std::stringstream ss{j.get<std::string>()};
+    ss >> date::parse("%FT%TZ", value);
+    if (ss.fail()) {
+      throw std::runtime_error("invalid datetime format");
+    }
+  }
+};
+
 template <typename T>
 struct adl_serializer<std::complex<T>> {
   static void to_json(ordered_json& j, std::complex<T> const& value) {
@@ -123,7 +182,7 @@ struct adl_serializer<yardl::DynamicNDArray<T>> {
     j = ordered_json{{"shape", shape}, {"data", data_array}};
   }
 
-  static void from_json([[maybe_unused]] ordered_json const& j, [[maybe_unused]] yardl::DynamicNDArray<T>& value) {
+  static void from_json(ordered_json const& j, yardl::DynamicNDArray<T>& value) {
     value.resize(j.at("shape").get<std::vector<size_t>>());
     auto data_array = j.at("data").get<std::vector<T>>();
     for (size_t i = 0; i < data_array.size(); ++i) {
@@ -143,7 +202,7 @@ struct adl_serializer<yardl::NDArray<T, N>> {
     j = ordered_json{{"shape", shape}, {"data", data_array}};
   }
 
-  static void from_json([[maybe_unused]] ordered_json const& j, yardl::NDArray<T, N>& value) {
+  static void from_json(ordered_json const& j, yardl::NDArray<T, N>& value) {
     value.resize(j.at("shape").get<std::vector<size_t>>());
     auto data_array = j.at("data").get<std::vector<T>>();
     for (size_t i = 0; i < data_array.size(); ++i) {
@@ -162,8 +221,8 @@ struct adl_serializer<yardl::FixedNDArray<T, Dims...>> {
     j = data_array;
   }
 
-  static void from_json([[maybe_unused]] ordered_json const& j, yardl::FixedNDArray<T, Dims...>& value) {
-    auto data_array = j.at("data").get<std::vector<T>>();
+  static void from_json(ordered_json const& j, yardl::FixedNDArray<T, Dims...>& value) {
+    auto data_array = j.get<std::vector<T>>();
     for (size_t i = 0; i < data_array.size(); ++i) {
       value[i] = data_array[i];
     }

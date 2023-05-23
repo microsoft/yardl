@@ -67,36 +67,69 @@ func WriteNdJson(env *dsl.Environment, options packaging.CppCodegenOptions) erro
 `)
 
 	for _, ns := range env.Namespaces {
+		fmt.Fprintf(w, "namespace %s {\n", common.NamespaceIdentifierName(ns.Name))
+		w.WriteString("using ordered_json = nlohmann::ordered_json;\n\n")
 
-		unionsBySyntax := make(map[string]*dsl.GeneralizedType)
-		dsl.Visit(ns, func(self dsl.Visitor, node dsl.Node) {
-			switch t := node.(type) {
-			case *dsl.GeneralizedType:
-				if t.Cases.IsUnion() {
-					scalarType := t.ToScalar().(*dsl.GeneralizedType)
-					typeSyntax := common.TypeSyntax(scalarType)
-					if _, ok := unionsBySyntax[typeSyntax]; !ok {
-						if len(unionsBySyntax) == 0 {
-							w.WriteStringln("NLOHMANN_JSON_NAMESPACE_BEGIN\n")
+		for _, t := range ns.TypeDefinitions {
+			switch t := t.(type) {
+			case *dsl.EnumDefinition, *dsl.RecordDefinition:
+				typeName := common.TypeDefinitionSyntax(t)
+				typeParameters := t.GetDefinitionMeta().TypeParameters
+				var templateDeclarationBuilder strings.Builder
+				if len(typeParameters) > 0 {
+					templateDeclarationBuilder.WriteString("template <")
+					for i, tp := range typeParameters {
+						if i > 0 {
+							templateDeclarationBuilder.WriteString(", ")
 						}
-						unionsBySyntax[typeSyntax] = t
-						writeUnionConverters(w, t)
+						templateDeclarationBuilder.WriteString(fmt.Sprintf("typename %s", tp.Name))
+					}
+					templateDeclarationBuilder.WriteString(">\n")
+				}
+				w.WriteString(templateDeclarationBuilder.String())
+				fmt.Fprintf(w, "void to_json(ordered_json& j, %s const& value);\n", typeName)
+				w.WriteString(templateDeclarationBuilder.String())
+				fmt.Fprintf(w, "void from_json(ordered_json const& j, %s& value);\n\n", typeName)
+			}
+		}
+
+		fmt.Fprintf(w, "} // namespace %s\n\n", common.NamespaceIdentifierName(ns.Name))
+	}
+
+	unionsBySyntax := make(map[string]*dsl.GeneralizedType)
+	for _, ns := range env.Namespaces {
+		for _, p := range ns.Protocols {
+			dsl.Visit(p, func(self dsl.Visitor, node dsl.Node) {
+				switch t := node.(type) {
+				case *dsl.SimpleType:
+					self.Visit(t.ResolvedDefinition)
+				case *dsl.GeneralizedType:
+					if t.Cases.IsUnion() {
+						scalarType := t.ToScalar().(*dsl.GeneralizedType)
+						typeSyntax := common.TypeSyntax(scalarType)
+						if _, ok := unionsBySyntax[typeSyntax]; !ok {
+							if len(unionsBySyntax) == 0 {
+								w.WriteStringln("NLOHMANN_JSON_NAMESPACE_BEGIN\n")
+							}
+							unionsBySyntax[typeSyntax] = t
+							writeUnionConverters(w, scalarType)
+						}
 					}
 				}
 
 				self.VisitChildren(node)
-			default:
-				self.VisitChildren(node)
-			}
-		})
-
-		if len(unionsBySyntax) > 0 {
-			w.WriteStringln("NLOHMANN_JSON_NAMESPACE_END\n")
+			})
 		}
+	}
 
+	if len(unionsBySyntax) > 0 {
+		w.WriteStringln("NLOHMANN_JSON_NAMESPACE_END\n")
+	}
+
+	for _, ns := range env.Namespaces {
 		fmt.Fprintf(w, "namespace %s {\n", common.NamespaceIdentifierName(ns.Name))
 
-		w.WriteString("using json = nlohmann::ordered_json;\n\n")
+		w.WriteString("using ordered_json = nlohmann::ordered_json;\n\n")
 
 		for _, t := range ns.TypeDefinitions {
 			switch t := t.(type) {
@@ -235,9 +268,23 @@ func writeHeaderFile(env *dsl.Environment, options packaging.CppCodegenOptions) 
 
 func writeRecordConverters(w *formatting.IndentedWriter, t *dsl.RecordDefinition) {
 	typeName := common.TypeDefinitionSyntax(t)
-	fmt.Fprintf(w, "void to_json(json& j, %s const& value) {\n", typeName)
+	typeParameters := t.GetDefinitionMeta().TypeParameters
+	var templateDeclarationBuilder strings.Builder
+	if len(typeParameters) > 0 {
+		templateDeclarationBuilder.WriteString("template <")
+		for i, tp := range typeParameters {
+			if i > 0 {
+				templateDeclarationBuilder.WriteString(", ")
+			}
+			templateDeclarationBuilder.WriteString(fmt.Sprintf("typename %s", tp.Name))
+		}
+		templateDeclarationBuilder.WriteString(">\n")
+	}
+
+	w.WriteString(templateDeclarationBuilder.String())
+	fmt.Fprintf(w, "void to_json(ordered_json& j, %s const& value) {\n", typeName)
 	w.Indented(func() {
-		w.WriteStringln("j = json{")
+		w.WriteStringln("j = ordered_json{")
 		w.Indented(func() {
 			for _, field := range t.Fields {
 				fmt.Fprintf(w, "{\"%s\", value.%s},\n", field.Name, common.FieldIdentifierName(field.Name))
@@ -247,7 +294,8 @@ func writeRecordConverters(w *formatting.IndentedWriter, t *dsl.RecordDefinition
 	})
 	w.WriteStringln("}\n")
 
-	fmt.Fprintf(w, "void from_json(json const& j, %s& value) {\n", typeName)
+	w.WriteString(templateDeclarationBuilder.String())
+	fmt.Fprintf(w, "void from_json(ordered_json const& j, %s& value) {\n", typeName)
 	w.Indented(func() {
 		for _, field := range t.Fields {
 			fmt.Fprintf(w, "j.at(\"%s\").get_to(value.%s);\n", field.Name, common.FieldIdentifierName(field.Name))
@@ -258,7 +306,7 @@ func writeRecordConverters(w *formatting.IndentedWriter, t *dsl.RecordDefinition
 
 func writeEnumConverters(w *formatting.IndentedWriter, t *dsl.EnumDefinition) {
 	typeName := common.TypeDefinitionSyntax(t)
-	fmt.Fprintf(w, "void to_json(json& j, %s const& value) {\n", typeName)
+	fmt.Fprintf(w, "void to_json(ordered_json& j, %s const& value) {\n", typeName)
 	w.Indented(func() {
 		w.WriteStringln("switch (value) {")
 		w.Indented(func() {
@@ -280,7 +328,7 @@ func writeEnumConverters(w *formatting.IndentedWriter, t *dsl.EnumDefinition) {
 	})
 	w.WriteStringln("}\n")
 
-	fmt.Fprintf(w, "void from_json(json const& j, %s& value) {\n", common.TypeDefinitionSyntax(t))
+	fmt.Fprintf(w, "void from_json(ordered_json const& j, %s& value) {\n", common.TypeDefinitionSyntax(t))
 	w.Indented(func() {
 		w.WriteStringln("if (j.is_string()) {")
 		w.Indented(func() {
@@ -315,7 +363,7 @@ func writeUnionConverters(w *formatting.IndentedWriter, unionType *dsl.Generaliz
 
 	unionTypeSyntax := common.TypeSyntax(unionType)
 
-	w.WriteStringln("template<>")
+	w.WriteString("template<>")
 	fmt.Fprintf(w, "struct adl_serializer<%s> {\n", unionTypeSyntax)
 	w.Indented(func() {
 
@@ -413,8 +461,8 @@ func getJsonDataType(t dsl.Type) jsonDataType {
 			return jsonBoolean
 		case dsl.ComplexFloat32, dsl.ComplexFloat64:
 			return jsonArray
-		case dsl.Time, dsl.DateTime:
-			return jsonString
+		case dsl.Date, dsl.Time, dsl.DateTime:
+			return jsonNumber
 		default:
 			panic(fmt.Sprintf("unexpected primitive type %s", td))
 		}
@@ -422,9 +470,13 @@ func getJsonDataType(t dsl.Type) jsonDataType {
 		return jsonString | jsonNumber
 	case *dsl.RecordDefinition:
 		return jsonObject
+	case *dsl.GenericTypeParameter:
+		return jsonObject
+	case *dsl.NamedType:
+		return getJsonDataType(td.Type)
+	default:
+		panic(fmt.Sprintf("unexpected type %T", td))
 	}
-
-	panic(fmt.Sprintf("unexpected type %s", scalarType))
 }
 
 func writeProtocolMethods(w *formatting.IndentedWriter, p *dsl.ProtocolDefinition) {
@@ -433,7 +485,7 @@ func writeProtocolMethods(w *formatting.IndentedWriter, p *dsl.ProtocolDefinitio
 	for _, step := range p.Sequence {
 		fmt.Fprintf(w, "void %s::%s([[maybe_unused]]%s const& value) {\n", writerClassName, common.ProtocolWriteImplMethodName(step), common.TypeSyntax(step.Type))
 		w.Indented(func() {
-			w.WriteStringln("json json_value = value;")
+			w.WriteStringln("ordered_json json_value = value;")
 			fmt.Fprintf(w, "yardl::ndjson::WriteProtocolValue(stream_, \"%s\", json_value);", step.Name)
 		})
 		w.WriteString("}\n\n")

@@ -16,35 +16,35 @@ namespace test_model::ndjson {
 // Json writer for the BenchmarkFloat256x256 protocol.
 class BenchmarkFloat256x256Writer : public test_model::BenchmarkFloat256x256WriterBase, yardl::ndjson::NDJsonWriter {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::ostream.
-  template <typename TStreamArg>
-  BenchmarkFloat256x256Writer(TStreamArg&& stream_arg)
-      : yardl::ndjson::NDJsonWriter(std::forward<TStreamArg>(stream_arg), schema_) {
+  BenchmarkFloat256x256Writer(std::ostream& stream)
+      : yardl::ndjson::NDJsonWriter(stream, schema_) {
+  }
+
+  BenchmarkFloat256x256Writer(std::string file_name)
+      : yardl::ndjson::NDJsonWriter(file_name, schema_) {
   }
 
   void Flush() override;
 
   protected:
   void WriteFloat256x256Impl(yardl::FixedNDArray<float, 256, 256> const& value) override;
-  void WriteFloat256x256Impl(std::vector<yardl::FixedNDArray<float, 256, 256>> const& values) override;
-  void EndFloat256x256Impl() override;
+  void EndFloat256x256Impl() override {}
   void CloseImpl() override;
 };
 
 // Json reader for the BenchmarkFloat256x256 protocol.
 class BenchmarkFloat256x256Reader : public test_model::BenchmarkFloat256x256ReaderBase, yardl::ndjson::NDJsonReader {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::istream.
-  template <typename TStreamArg>
-  BenchmarkFloat256x256Reader(TStreamArg&& stream_arg)
-      : yardl::ndjson::NDJsonReader(std::forward<TStreamArg>(stream_arg), schema_) {
+  BenchmarkFloat256x256Reader(std::istream& stream)
+      : yardl::ndjson::NDJsonReader(stream, schema_) {
+  }
+
+  BenchmarkFloat256x256Reader(std::string file_name)
+      : yardl::ndjson::NDJsonReader(file_name, schema_) {
   }
 
   protected:
   bool ReadFloat256x256Impl(yardl::FixedNDArray<float, 256, 256>& value) override;
-  bool ReadFloat256x256Impl(std::vector<yardl::FixedNDArray<float, 256, 256>>& values) override;
   void CloseImpl() override;
 
   private:
@@ -54,35 +54,35 @@ class BenchmarkFloat256x256Reader : public test_model::BenchmarkFloat256x256Read
 // Json writer for the BenchmarkFloatVlen protocol.
 class BenchmarkFloatVlenWriter : public test_model::BenchmarkFloatVlenWriterBase, yardl::ndjson::NDJsonWriter {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::ostream.
-  template <typename TStreamArg>
-  BenchmarkFloatVlenWriter(TStreamArg&& stream_arg)
-      : yardl::ndjson::NDJsonWriter(std::forward<TStreamArg>(stream_arg), schema_) {
+  BenchmarkFloatVlenWriter(std::ostream& stream)
+      : yardl::ndjson::NDJsonWriter(stream, schema_) {
+  }
+
+  BenchmarkFloatVlenWriter(std::string file_name)
+      : yardl::ndjson::NDJsonWriter(file_name, schema_) {
   }
 
   void Flush() override;
 
   protected:
   void WriteFloatArrayImpl(yardl::NDArray<float, 2> const& value) override;
-  void WriteFloatArrayImpl(std::vector<yardl::NDArray<float, 2>> const& values) override;
-  void EndFloatArrayImpl() override;
+  void EndFloatArrayImpl() override {}
   void CloseImpl() override;
 };
 
 // Json reader for the BenchmarkFloatVlen protocol.
 class BenchmarkFloatVlenReader : public test_model::BenchmarkFloatVlenReaderBase, yardl::ndjson::NDJsonReader {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::istream.
-  template <typename TStreamArg>
-  BenchmarkFloatVlenReader(TStreamArg&& stream_arg)
-      : yardl::ndjson::NDJsonReader(std::forward<TStreamArg>(stream_arg), schema_) {
+  BenchmarkFloatVlenReader(std::istream& stream)
+      : yardl::ndjson::NDJsonReader(stream, schema_) {
+  }
+
+  BenchmarkFloatVlenReader(std::string file_name)
+      : yardl::ndjson::NDJsonReader(file_name, schema_) {
   }
 
   protected:
   bool ReadFloatArrayImpl(yardl::NDArray<float, 2>& value) override;
-  bool ReadFloatArrayImpl(std::vector<yardl::NDArray<float, 2>>& values) override;
   void CloseImpl() override;
 
   private:
@@ -92,35 +92,35 @@ class BenchmarkFloatVlenReader : public test_model::BenchmarkFloatVlenReaderBase
 // Json writer for the BenchmarkSmallRecord protocol.
 class BenchmarkSmallRecordWriter : public test_model::BenchmarkSmallRecordWriterBase, yardl::ndjson::NDJsonWriter {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::ostream.
-  template <typename TStreamArg>
-  BenchmarkSmallRecordWriter(TStreamArg&& stream_arg)
-      : yardl::ndjson::NDJsonWriter(std::forward<TStreamArg>(stream_arg), schema_) {
+  BenchmarkSmallRecordWriter(std::ostream& stream)
+      : yardl::ndjson::NDJsonWriter(stream, schema_) {
+  }
+
+  BenchmarkSmallRecordWriter(std::string file_name)
+      : yardl::ndjson::NDJsonWriter(file_name, schema_) {
   }
 
   void Flush() override;
 
   protected:
   void WriteSmallRecordImpl(test_model::SmallBenchmarkRecord const& value) override;
-  void WriteSmallRecordImpl(std::vector<test_model::SmallBenchmarkRecord> const& values) override;
-  void EndSmallRecordImpl() override;
+  void EndSmallRecordImpl() override {}
   void CloseImpl() override;
 };
 
 // Json reader for the BenchmarkSmallRecord protocol.
 class BenchmarkSmallRecordReader : public test_model::BenchmarkSmallRecordReaderBase, yardl::ndjson::NDJsonReader {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::istream.
-  template <typename TStreamArg>
-  BenchmarkSmallRecordReader(TStreamArg&& stream_arg)
-      : yardl::ndjson::NDJsonReader(std::forward<TStreamArg>(stream_arg), schema_) {
+  BenchmarkSmallRecordReader(std::istream& stream)
+      : yardl::ndjson::NDJsonReader(stream, schema_) {
+  }
+
+  BenchmarkSmallRecordReader(std::string file_name)
+      : yardl::ndjson::NDJsonReader(file_name, schema_) {
   }
 
   protected:
   bool ReadSmallRecordImpl(test_model::SmallBenchmarkRecord& value) override;
-  bool ReadSmallRecordImpl(std::vector<test_model::SmallBenchmarkRecord>& values) override;
   void CloseImpl() override;
 
   private:
@@ -130,35 +130,35 @@ class BenchmarkSmallRecordReader : public test_model::BenchmarkSmallRecordReader
 // Json writer for the BenchmarkSmallRecordWithOptionals protocol.
 class BenchmarkSmallRecordWithOptionalsWriter : public test_model::BenchmarkSmallRecordWithOptionalsWriterBase, yardl::ndjson::NDJsonWriter {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::ostream.
-  template <typename TStreamArg>
-  BenchmarkSmallRecordWithOptionalsWriter(TStreamArg&& stream_arg)
-      : yardl::ndjson::NDJsonWriter(std::forward<TStreamArg>(stream_arg), schema_) {
+  BenchmarkSmallRecordWithOptionalsWriter(std::ostream& stream)
+      : yardl::ndjson::NDJsonWriter(stream, schema_) {
+  }
+
+  BenchmarkSmallRecordWithOptionalsWriter(std::string file_name)
+      : yardl::ndjson::NDJsonWriter(file_name, schema_) {
   }
 
   void Flush() override;
 
   protected:
   void WriteSmallRecordImpl(test_model::SimpleEncodingCounters const& value) override;
-  void WriteSmallRecordImpl(std::vector<test_model::SimpleEncodingCounters> const& values) override;
-  void EndSmallRecordImpl() override;
+  void EndSmallRecordImpl() override {}
   void CloseImpl() override;
 };
 
 // Json reader for the BenchmarkSmallRecordWithOptionals protocol.
 class BenchmarkSmallRecordWithOptionalsReader : public test_model::BenchmarkSmallRecordWithOptionalsReaderBase, yardl::ndjson::NDJsonReader {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::istream.
-  template <typename TStreamArg>
-  BenchmarkSmallRecordWithOptionalsReader(TStreamArg&& stream_arg)
-      : yardl::ndjson::NDJsonReader(std::forward<TStreamArg>(stream_arg), schema_) {
+  BenchmarkSmallRecordWithOptionalsReader(std::istream& stream)
+      : yardl::ndjson::NDJsonReader(stream, schema_) {
+  }
+
+  BenchmarkSmallRecordWithOptionalsReader(std::string file_name)
+      : yardl::ndjson::NDJsonReader(file_name, schema_) {
   }
 
   protected:
   bool ReadSmallRecordImpl(test_model::SimpleEncodingCounters& value) override;
-  bool ReadSmallRecordImpl(std::vector<test_model::SimpleEncodingCounters>& values) override;
   void CloseImpl() override;
 
   private:
@@ -168,35 +168,35 @@ class BenchmarkSmallRecordWithOptionalsReader : public test_model::BenchmarkSmal
 // Json writer for the BenchmarkSimpleMrd protocol.
 class BenchmarkSimpleMrdWriter : public test_model::BenchmarkSimpleMrdWriterBase, yardl::ndjson::NDJsonWriter {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::ostream.
-  template <typename TStreamArg>
-  BenchmarkSimpleMrdWriter(TStreamArg&& stream_arg)
-      : yardl::ndjson::NDJsonWriter(std::forward<TStreamArg>(stream_arg), schema_) {
+  BenchmarkSimpleMrdWriter(std::ostream& stream)
+      : yardl::ndjson::NDJsonWriter(stream, schema_) {
+  }
+
+  BenchmarkSimpleMrdWriter(std::string file_name)
+      : yardl::ndjson::NDJsonWriter(file_name, schema_) {
   }
 
   void Flush() override;
 
   protected:
   void WriteDataImpl(std::variant<test_model::SimpleAcquisition, test_model::Image<float>> const& value) override;
-  void WriteDataImpl(std::vector<std::variant<test_model::SimpleAcquisition, test_model::Image<float>>> const& values) override;
-  void EndDataImpl() override;
+  void EndDataImpl() override {}
   void CloseImpl() override;
 };
 
 // Json reader for the BenchmarkSimpleMrd protocol.
 class BenchmarkSimpleMrdReader : public test_model::BenchmarkSimpleMrdReaderBase, yardl::ndjson::NDJsonReader {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::istream.
-  template <typename TStreamArg>
-  BenchmarkSimpleMrdReader(TStreamArg&& stream_arg)
-      : yardl::ndjson::NDJsonReader(std::forward<TStreamArg>(stream_arg), schema_) {
+  BenchmarkSimpleMrdReader(std::istream& stream)
+      : yardl::ndjson::NDJsonReader(stream, schema_) {
+  }
+
+  BenchmarkSimpleMrdReader(std::string file_name)
+      : yardl::ndjson::NDJsonReader(file_name, schema_) {
   }
 
   protected:
   bool ReadDataImpl(std::variant<test_model::SimpleAcquisition, test_model::Image<float>>& value) override;
-  bool ReadDataImpl(std::vector<std::variant<test_model::SimpleAcquisition, test_model::Image<float>>>& values) override;
   void CloseImpl() override;
 
   private:
@@ -206,11 +206,12 @@ class BenchmarkSimpleMrdReader : public test_model::BenchmarkSimpleMrdReaderBase
 // Json writer for the Scalars protocol.
 class ScalarsWriter : public test_model::ScalarsWriterBase, yardl::ndjson::NDJsonWriter {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::ostream.
-  template <typename TStreamArg>
-  ScalarsWriter(TStreamArg&& stream_arg)
-      : yardl::ndjson::NDJsonWriter(std::forward<TStreamArg>(stream_arg), schema_) {
+  ScalarsWriter(std::ostream& stream)
+      : yardl::ndjson::NDJsonWriter(stream, schema_) {
+  }
+
+  ScalarsWriter(std::string file_name)
+      : yardl::ndjson::NDJsonWriter(file_name, schema_) {
   }
 
   void Flush() override;
@@ -224,11 +225,12 @@ class ScalarsWriter : public test_model::ScalarsWriterBase, yardl::ndjson::NDJso
 // Json reader for the Scalars protocol.
 class ScalarsReader : public test_model::ScalarsReaderBase, yardl::ndjson::NDJsonReader {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::istream.
-  template <typename TStreamArg>
-  ScalarsReader(TStreamArg&& stream_arg)
-      : yardl::ndjson::NDJsonReader(std::forward<TStreamArg>(stream_arg), schema_) {
+  ScalarsReader(std::istream& stream)
+      : yardl::ndjson::NDJsonReader(stream, schema_) {
+  }
+
+  ScalarsReader(std::string file_name)
+      : yardl::ndjson::NDJsonReader(file_name, schema_) {
   }
 
   protected:
@@ -240,11 +242,12 @@ class ScalarsReader : public test_model::ScalarsReaderBase, yardl::ndjson::NDJso
 // Json writer for the ScalarOptionals protocol.
 class ScalarOptionalsWriter : public test_model::ScalarOptionalsWriterBase, yardl::ndjson::NDJsonWriter {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::ostream.
-  template <typename TStreamArg>
-  ScalarOptionalsWriter(TStreamArg&& stream_arg)
-      : yardl::ndjson::NDJsonWriter(std::forward<TStreamArg>(stream_arg), schema_) {
+  ScalarOptionalsWriter(std::ostream& stream)
+      : yardl::ndjson::NDJsonWriter(stream, schema_) {
+  }
+
+  ScalarOptionalsWriter(std::string file_name)
+      : yardl::ndjson::NDJsonWriter(file_name, schema_) {
   }
 
   void Flush() override;
@@ -260,11 +263,12 @@ class ScalarOptionalsWriter : public test_model::ScalarOptionalsWriterBase, yard
 // Json reader for the ScalarOptionals protocol.
 class ScalarOptionalsReader : public test_model::ScalarOptionalsReaderBase, yardl::ndjson::NDJsonReader {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::istream.
-  template <typename TStreamArg>
-  ScalarOptionalsReader(TStreamArg&& stream_arg)
-      : yardl::ndjson::NDJsonReader(std::forward<TStreamArg>(stream_arg), schema_) {
+  ScalarOptionalsReader(std::istream& stream)
+      : yardl::ndjson::NDJsonReader(stream, schema_) {
+  }
+
+  ScalarOptionalsReader(std::string file_name)
+      : yardl::ndjson::NDJsonReader(file_name, schema_) {
   }
 
   protected:
@@ -278,11 +282,12 @@ class ScalarOptionalsReader : public test_model::ScalarOptionalsReaderBase, yard
 // Json writer for the NestedRecords protocol.
 class NestedRecordsWriter : public test_model::NestedRecordsWriterBase, yardl::ndjson::NDJsonWriter {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::ostream.
-  template <typename TStreamArg>
-  NestedRecordsWriter(TStreamArg&& stream_arg)
-      : yardl::ndjson::NDJsonWriter(std::forward<TStreamArg>(stream_arg), schema_) {
+  NestedRecordsWriter(std::ostream& stream)
+      : yardl::ndjson::NDJsonWriter(stream, schema_) {
+  }
+
+  NestedRecordsWriter(std::string file_name)
+      : yardl::ndjson::NDJsonWriter(file_name, schema_) {
   }
 
   void Flush() override;
@@ -295,11 +300,12 @@ class NestedRecordsWriter : public test_model::NestedRecordsWriterBase, yardl::n
 // Json reader for the NestedRecords protocol.
 class NestedRecordsReader : public test_model::NestedRecordsReaderBase, yardl::ndjson::NDJsonReader {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::istream.
-  template <typename TStreamArg>
-  NestedRecordsReader(TStreamArg&& stream_arg)
-      : yardl::ndjson::NDJsonReader(std::forward<TStreamArg>(stream_arg), schema_) {
+  NestedRecordsReader(std::istream& stream)
+      : yardl::ndjson::NDJsonReader(stream, schema_) {
+  }
+
+  NestedRecordsReader(std::string file_name)
+      : yardl::ndjson::NDJsonReader(file_name, schema_) {
   }
 
   protected:
@@ -310,11 +316,12 @@ class NestedRecordsReader : public test_model::NestedRecordsReaderBase, yardl::n
 // Json writer for the Vlens protocol.
 class VlensWriter : public test_model::VlensWriterBase, yardl::ndjson::NDJsonWriter {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::ostream.
-  template <typename TStreamArg>
-  VlensWriter(TStreamArg&& stream_arg)
-      : yardl::ndjson::NDJsonWriter(std::forward<TStreamArg>(stream_arg), schema_) {
+  VlensWriter(std::ostream& stream)
+      : yardl::ndjson::NDJsonWriter(stream, schema_) {
+  }
+
+  VlensWriter(std::string file_name)
+      : yardl::ndjson::NDJsonWriter(file_name, schema_) {
   }
 
   void Flush() override;
@@ -330,11 +337,12 @@ class VlensWriter : public test_model::VlensWriterBase, yardl::ndjson::NDJsonWri
 // Json reader for the Vlens protocol.
 class VlensReader : public test_model::VlensReaderBase, yardl::ndjson::NDJsonReader {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::istream.
-  template <typename TStreamArg>
-  VlensReader(TStreamArg&& stream_arg)
-      : yardl::ndjson::NDJsonReader(std::forward<TStreamArg>(stream_arg), schema_) {
+  VlensReader(std::istream& stream)
+      : yardl::ndjson::NDJsonReader(stream, schema_) {
+  }
+
+  VlensReader(std::string file_name)
+      : yardl::ndjson::NDJsonReader(file_name, schema_) {
   }
 
   protected:
@@ -348,11 +356,12 @@ class VlensReader : public test_model::VlensReaderBase, yardl::ndjson::NDJsonRea
 // Json writer for the Strings protocol.
 class StringsWriter : public test_model::StringsWriterBase, yardl::ndjson::NDJsonWriter {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::ostream.
-  template <typename TStreamArg>
-  StringsWriter(TStreamArg&& stream_arg)
-      : yardl::ndjson::NDJsonWriter(std::forward<TStreamArg>(stream_arg), schema_) {
+  StringsWriter(std::ostream& stream)
+      : yardl::ndjson::NDJsonWriter(stream, schema_) {
+  }
+
+  StringsWriter(std::string file_name)
+      : yardl::ndjson::NDJsonWriter(file_name, schema_) {
   }
 
   void Flush() override;
@@ -366,11 +375,12 @@ class StringsWriter : public test_model::StringsWriterBase, yardl::ndjson::NDJso
 // Json reader for the Strings protocol.
 class StringsReader : public test_model::StringsReaderBase, yardl::ndjson::NDJsonReader {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::istream.
-  template <typename TStreamArg>
-  StringsReader(TStreamArg&& stream_arg)
-      : yardl::ndjson::NDJsonReader(std::forward<TStreamArg>(stream_arg), schema_) {
+  StringsReader(std::istream& stream)
+      : yardl::ndjson::NDJsonReader(stream, schema_) {
+  }
+
+  StringsReader(std::string file_name)
+      : yardl::ndjson::NDJsonReader(file_name, schema_) {
   }
 
   protected:
@@ -382,11 +392,12 @@ class StringsReader : public test_model::StringsReaderBase, yardl::ndjson::NDJso
 // Json writer for the OptionalVectors protocol.
 class OptionalVectorsWriter : public test_model::OptionalVectorsWriterBase, yardl::ndjson::NDJsonWriter {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::ostream.
-  template <typename TStreamArg>
-  OptionalVectorsWriter(TStreamArg&& stream_arg)
-      : yardl::ndjson::NDJsonWriter(std::forward<TStreamArg>(stream_arg), schema_) {
+  OptionalVectorsWriter(std::ostream& stream)
+      : yardl::ndjson::NDJsonWriter(stream, schema_) {
+  }
+
+  OptionalVectorsWriter(std::string file_name)
+      : yardl::ndjson::NDJsonWriter(file_name, schema_) {
   }
 
   void Flush() override;
@@ -399,11 +410,12 @@ class OptionalVectorsWriter : public test_model::OptionalVectorsWriterBase, yard
 // Json reader for the OptionalVectors protocol.
 class OptionalVectorsReader : public test_model::OptionalVectorsReaderBase, yardl::ndjson::NDJsonReader {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::istream.
-  template <typename TStreamArg>
-  OptionalVectorsReader(TStreamArg&& stream_arg)
-      : yardl::ndjson::NDJsonReader(std::forward<TStreamArg>(stream_arg), schema_) {
+  OptionalVectorsReader(std::istream& stream)
+      : yardl::ndjson::NDJsonReader(stream, schema_) {
+  }
+
+  OptionalVectorsReader(std::string file_name)
+      : yardl::ndjson::NDJsonReader(file_name, schema_) {
   }
 
   protected:
@@ -414,11 +426,12 @@ class OptionalVectorsReader : public test_model::OptionalVectorsReaderBase, yard
 // Json writer for the FixedVectors protocol.
 class FixedVectorsWriter : public test_model::FixedVectorsWriterBase, yardl::ndjson::NDJsonWriter {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::ostream.
-  template <typename TStreamArg>
-  FixedVectorsWriter(TStreamArg&& stream_arg)
-      : yardl::ndjson::NDJsonWriter(std::forward<TStreamArg>(stream_arg), schema_) {
+  FixedVectorsWriter(std::ostream& stream)
+      : yardl::ndjson::NDJsonWriter(stream, schema_) {
+  }
+
+  FixedVectorsWriter(std::string file_name)
+      : yardl::ndjson::NDJsonWriter(file_name, schema_) {
   }
 
   void Flush() override;
@@ -434,11 +447,12 @@ class FixedVectorsWriter : public test_model::FixedVectorsWriterBase, yardl::ndj
 // Json reader for the FixedVectors protocol.
 class FixedVectorsReader : public test_model::FixedVectorsReaderBase, yardl::ndjson::NDJsonReader {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::istream.
-  template <typename TStreamArg>
-  FixedVectorsReader(TStreamArg&& stream_arg)
-      : yardl::ndjson::NDJsonReader(std::forward<TStreamArg>(stream_arg), schema_) {
+  FixedVectorsReader(std::istream& stream)
+      : yardl::ndjson::NDJsonReader(stream, schema_) {
+  }
+
+  FixedVectorsReader(std::string file_name)
+      : yardl::ndjson::NDJsonReader(file_name, schema_) {
   }
 
   protected:
@@ -452,50 +466,44 @@ class FixedVectorsReader : public test_model::FixedVectorsReaderBase, yardl::ndj
 // Json writer for the Streams protocol.
 class StreamsWriter : public test_model::StreamsWriterBase, yardl::ndjson::NDJsonWriter {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::ostream.
-  template <typename TStreamArg>
-  StreamsWriter(TStreamArg&& stream_arg)
-      : yardl::ndjson::NDJsonWriter(std::forward<TStreamArg>(stream_arg), schema_) {
+  StreamsWriter(std::ostream& stream)
+      : yardl::ndjson::NDJsonWriter(stream, schema_) {
+  }
+
+  StreamsWriter(std::string file_name)
+      : yardl::ndjson::NDJsonWriter(file_name, schema_) {
   }
 
   void Flush() override;
 
   protected:
   void WriteIntDataImpl(int32_t const& value) override;
-  void WriteIntDataImpl(std::vector<int32_t> const& values) override;
-  void EndIntDataImpl() override;
+  void EndIntDataImpl() override {}
   void WriteOptionalIntDataImpl(std::optional<int32_t> const& value) override;
-  void WriteOptionalIntDataImpl(std::vector<std::optional<int32_t>> const& values) override;
-  void EndOptionalIntDataImpl() override;
+  void EndOptionalIntDataImpl() override {}
   void WriteRecordWithOptionalVectorDataImpl(test_model::RecordWithOptionalVector const& value) override;
-  void WriteRecordWithOptionalVectorDataImpl(std::vector<test_model::RecordWithOptionalVector> const& values) override;
-  void EndRecordWithOptionalVectorDataImpl() override;
+  void EndRecordWithOptionalVectorDataImpl() override {}
   void WriteFixedVectorImpl(std::array<int32_t, 3> const& value) override;
-  void WriteFixedVectorImpl(std::vector<std::array<int32_t, 3>> const& values) override;
-  void EndFixedVectorImpl() override;
+  void EndFixedVectorImpl() override {}
   void CloseImpl() override;
 };
 
 // Json reader for the Streams protocol.
 class StreamsReader : public test_model::StreamsReaderBase, yardl::ndjson::NDJsonReader {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::istream.
-  template <typename TStreamArg>
-  StreamsReader(TStreamArg&& stream_arg)
-      : yardl::ndjson::NDJsonReader(std::forward<TStreamArg>(stream_arg), schema_) {
+  StreamsReader(std::istream& stream)
+      : yardl::ndjson::NDJsonReader(stream, schema_) {
+  }
+
+  StreamsReader(std::string file_name)
+      : yardl::ndjson::NDJsonReader(file_name, schema_) {
   }
 
   protected:
   bool ReadIntDataImpl(int32_t& value) override;
-  bool ReadIntDataImpl(std::vector<int32_t>& values) override;
   bool ReadOptionalIntDataImpl(std::optional<int32_t>& value) override;
-  bool ReadOptionalIntDataImpl(std::vector<std::optional<int32_t>>& values) override;
   bool ReadRecordWithOptionalVectorDataImpl(test_model::RecordWithOptionalVector& value) override;
-  bool ReadRecordWithOptionalVectorDataImpl(std::vector<test_model::RecordWithOptionalVector>& values) override;
   bool ReadFixedVectorImpl(std::array<int32_t, 3>& value) override;
-  bool ReadFixedVectorImpl(std::vector<std::array<int32_t, 3>>& values) override;
   void CloseImpl() override;
 
   private:
@@ -505,11 +513,12 @@ class StreamsReader : public test_model::StreamsReaderBase, yardl::ndjson::NDJso
 // Json writer for the FixedArrays protocol.
 class FixedArraysWriter : public test_model::FixedArraysWriterBase, yardl::ndjson::NDJsonWriter {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::ostream.
-  template <typename TStreamArg>
-  FixedArraysWriter(TStreamArg&& stream_arg)
-      : yardl::ndjson::NDJsonWriter(std::forward<TStreamArg>(stream_arg), schema_) {
+  FixedArraysWriter(std::ostream& stream)
+      : yardl::ndjson::NDJsonWriter(stream, schema_) {
+  }
+
+  FixedArraysWriter(std::string file_name)
+      : yardl::ndjson::NDJsonWriter(file_name, schema_) {
   }
 
   void Flush() override;
@@ -526,11 +535,12 @@ class FixedArraysWriter : public test_model::FixedArraysWriterBase, yardl::ndjso
 // Json reader for the FixedArrays protocol.
 class FixedArraysReader : public test_model::FixedArraysReaderBase, yardl::ndjson::NDJsonReader {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::istream.
-  template <typename TStreamArg>
-  FixedArraysReader(TStreamArg&& stream_arg)
-      : yardl::ndjson::NDJsonReader(std::forward<TStreamArg>(stream_arg), schema_) {
+  FixedArraysReader(std::istream& stream)
+      : yardl::ndjson::NDJsonReader(stream, schema_) {
+  }
+
+  FixedArraysReader(std::string file_name)
+      : yardl::ndjson::NDJsonReader(file_name, schema_) {
   }
 
   protected:
@@ -545,11 +555,12 @@ class FixedArraysReader : public test_model::FixedArraysReaderBase, yardl::ndjso
 // Json writer for the NDArrays protocol.
 class NDArraysWriter : public test_model::NDArraysWriterBase, yardl::ndjson::NDJsonWriter {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::ostream.
-  template <typename TStreamArg>
-  NDArraysWriter(TStreamArg&& stream_arg)
-      : yardl::ndjson::NDJsonWriter(std::forward<TStreamArg>(stream_arg), schema_) {
+  NDArraysWriter(std::ostream& stream)
+      : yardl::ndjson::NDJsonWriter(stream, schema_) {
+  }
+
+  NDArraysWriter(std::string file_name)
+      : yardl::ndjson::NDJsonWriter(file_name, schema_) {
   }
 
   void Flush() override;
@@ -566,11 +577,12 @@ class NDArraysWriter : public test_model::NDArraysWriterBase, yardl::ndjson::NDJ
 // Json reader for the NDArrays protocol.
 class NDArraysReader : public test_model::NDArraysReaderBase, yardl::ndjson::NDJsonReader {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::istream.
-  template <typename TStreamArg>
-  NDArraysReader(TStreamArg&& stream_arg)
-      : yardl::ndjson::NDJsonReader(std::forward<TStreamArg>(stream_arg), schema_) {
+  NDArraysReader(std::istream& stream)
+      : yardl::ndjson::NDJsonReader(stream, schema_) {
+  }
+
+  NDArraysReader(std::string file_name)
+      : yardl::ndjson::NDJsonReader(file_name, schema_) {
   }
 
   protected:
@@ -585,11 +597,12 @@ class NDArraysReader : public test_model::NDArraysReaderBase, yardl::ndjson::NDJ
 // Json writer for the NDArraysSingleDimension protocol.
 class NDArraysSingleDimensionWriter : public test_model::NDArraysSingleDimensionWriterBase, yardl::ndjson::NDJsonWriter {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::ostream.
-  template <typename TStreamArg>
-  NDArraysSingleDimensionWriter(TStreamArg&& stream_arg)
-      : yardl::ndjson::NDJsonWriter(std::forward<TStreamArg>(stream_arg), schema_) {
+  NDArraysSingleDimensionWriter(std::ostream& stream)
+      : yardl::ndjson::NDJsonWriter(stream, schema_) {
+  }
+
+  NDArraysSingleDimensionWriter(std::string file_name)
+      : yardl::ndjson::NDJsonWriter(file_name, schema_) {
   }
 
   void Flush() override;
@@ -605,11 +618,12 @@ class NDArraysSingleDimensionWriter : public test_model::NDArraysSingleDimension
 // Json reader for the NDArraysSingleDimension protocol.
 class NDArraysSingleDimensionReader : public test_model::NDArraysSingleDimensionReaderBase, yardl::ndjson::NDJsonReader {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::istream.
-  template <typename TStreamArg>
-  NDArraysSingleDimensionReader(TStreamArg&& stream_arg)
-      : yardl::ndjson::NDJsonReader(std::forward<TStreamArg>(stream_arg), schema_) {
+  NDArraysSingleDimensionReader(std::istream& stream)
+      : yardl::ndjson::NDJsonReader(stream, schema_) {
+  }
+
+  NDArraysSingleDimensionReader(std::string file_name)
+      : yardl::ndjson::NDJsonReader(file_name, schema_) {
   }
 
   protected:
@@ -623,11 +637,12 @@ class NDArraysSingleDimensionReader : public test_model::NDArraysSingleDimension
 // Json writer for the DynamicNDArrays protocol.
 class DynamicNDArraysWriter : public test_model::DynamicNDArraysWriterBase, yardl::ndjson::NDJsonWriter {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::ostream.
-  template <typename TStreamArg>
-  DynamicNDArraysWriter(TStreamArg&& stream_arg)
-      : yardl::ndjson::NDJsonWriter(std::forward<TStreamArg>(stream_arg), schema_) {
+  DynamicNDArraysWriter(std::ostream& stream)
+      : yardl::ndjson::NDJsonWriter(stream, schema_) {
+  }
+
+  DynamicNDArraysWriter(std::string file_name)
+      : yardl::ndjson::NDJsonWriter(file_name, schema_) {
   }
 
   void Flush() override;
@@ -643,11 +658,12 @@ class DynamicNDArraysWriter : public test_model::DynamicNDArraysWriterBase, yard
 // Json reader for the DynamicNDArrays protocol.
 class DynamicNDArraysReader : public test_model::DynamicNDArraysReaderBase, yardl::ndjson::NDJsonReader {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::istream.
-  template <typename TStreamArg>
-  DynamicNDArraysReader(TStreamArg&& stream_arg)
-      : yardl::ndjson::NDJsonReader(std::forward<TStreamArg>(stream_arg), schema_) {
+  DynamicNDArraysReader(std::istream& stream)
+      : yardl::ndjson::NDJsonReader(stream, schema_) {
+  }
+
+  DynamicNDArraysReader(std::string file_name)
+      : yardl::ndjson::NDJsonReader(file_name, schema_) {
   }
 
   protected:
@@ -661,11 +677,12 @@ class DynamicNDArraysReader : public test_model::DynamicNDArraysReaderBase, yard
 // Json writer for the Maps protocol.
 class MapsWriter : public test_model::MapsWriterBase, yardl::ndjson::NDJsonWriter {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::ostream.
-  template <typename TStreamArg>
-  MapsWriter(TStreamArg&& stream_arg)
-      : yardl::ndjson::NDJsonWriter(std::forward<TStreamArg>(stream_arg), schema_) {
+  MapsWriter(std::ostream& stream)
+      : yardl::ndjson::NDJsonWriter(stream, schema_) {
+  }
+
+  MapsWriter(std::string file_name)
+      : yardl::ndjson::NDJsonWriter(file_name, schema_) {
   }
 
   void Flush() override;
@@ -680,11 +697,12 @@ class MapsWriter : public test_model::MapsWriterBase, yardl::ndjson::NDJsonWrite
 // Json reader for the Maps protocol.
 class MapsReader : public test_model::MapsReaderBase, yardl::ndjson::NDJsonReader {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::istream.
-  template <typename TStreamArg>
-  MapsReader(TStreamArg&& stream_arg)
-      : yardl::ndjson::NDJsonReader(std::forward<TStreamArg>(stream_arg), schema_) {
+  MapsReader(std::istream& stream)
+      : yardl::ndjson::NDJsonReader(stream, schema_) {
+  }
+
+  MapsReader(std::string file_name)
+      : yardl::ndjson::NDJsonReader(file_name, schema_) {
   }
 
   protected:
@@ -697,11 +715,12 @@ class MapsReader : public test_model::MapsReaderBase, yardl::ndjson::NDJsonReade
 // Json writer for the Unions protocol.
 class UnionsWriter : public test_model::UnionsWriterBase, yardl::ndjson::NDJsonWriter {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::ostream.
-  template <typename TStreamArg>
-  UnionsWriter(TStreamArg&& stream_arg)
-      : yardl::ndjson::NDJsonWriter(std::forward<TStreamArg>(stream_arg), schema_) {
+  UnionsWriter(std::ostream& stream)
+      : yardl::ndjson::NDJsonWriter(stream, schema_) {
+  }
+
+  UnionsWriter(std::string file_name)
+      : yardl::ndjson::NDJsonWriter(file_name, schema_) {
   }
 
   void Flush() override;
@@ -716,11 +735,12 @@ class UnionsWriter : public test_model::UnionsWriterBase, yardl::ndjson::NDJsonW
 // Json reader for the Unions protocol.
 class UnionsReader : public test_model::UnionsReaderBase, yardl::ndjson::NDJsonReader {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::istream.
-  template <typename TStreamArg>
-  UnionsReader(TStreamArg&& stream_arg)
-      : yardl::ndjson::NDJsonReader(std::forward<TStreamArg>(stream_arg), schema_) {
+  UnionsReader(std::istream& stream)
+      : yardl::ndjson::NDJsonReader(stream, schema_) {
+  }
+
+  UnionsReader(std::string file_name)
+      : yardl::ndjson::NDJsonReader(file_name, schema_) {
   }
 
   protected:
@@ -733,40 +753,38 @@ class UnionsReader : public test_model::UnionsReaderBase, yardl::ndjson::NDJsonR
 // Json writer for the StreamsOfUnions protocol.
 class StreamsOfUnionsWriter : public test_model::StreamsOfUnionsWriterBase, yardl::ndjson::NDJsonWriter {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::ostream.
-  template <typename TStreamArg>
-  StreamsOfUnionsWriter(TStreamArg&& stream_arg)
-      : yardl::ndjson::NDJsonWriter(std::forward<TStreamArg>(stream_arg), schema_) {
+  StreamsOfUnionsWriter(std::ostream& stream)
+      : yardl::ndjson::NDJsonWriter(stream, schema_) {
+  }
+
+  StreamsOfUnionsWriter(std::string file_name)
+      : yardl::ndjson::NDJsonWriter(file_name, schema_) {
   }
 
   void Flush() override;
 
   protected:
   void WriteIntOrSimpleRecordImpl(std::variant<int32_t, test_model::SimpleRecord> const& value) override;
-  void WriteIntOrSimpleRecordImpl(std::vector<std::variant<int32_t, test_model::SimpleRecord>> const& values) override;
-  void EndIntOrSimpleRecordImpl() override;
+  void EndIntOrSimpleRecordImpl() override {}
   void WriteNullableIntOrSimpleRecordImpl(std::variant<std::monostate, int32_t, test_model::SimpleRecord> const& value) override;
-  void WriteNullableIntOrSimpleRecordImpl(std::vector<std::variant<std::monostate, int32_t, test_model::SimpleRecord>> const& values) override;
-  void EndNullableIntOrSimpleRecordImpl() override;
+  void EndNullableIntOrSimpleRecordImpl() override {}
   void CloseImpl() override;
 };
 
 // Json reader for the StreamsOfUnions protocol.
 class StreamsOfUnionsReader : public test_model::StreamsOfUnionsReaderBase, yardl::ndjson::NDJsonReader {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::istream.
-  template <typename TStreamArg>
-  StreamsOfUnionsReader(TStreamArg&& stream_arg)
-      : yardl::ndjson::NDJsonReader(std::forward<TStreamArg>(stream_arg), schema_) {
+  StreamsOfUnionsReader(std::istream& stream)
+      : yardl::ndjson::NDJsonReader(stream, schema_) {
+  }
+
+  StreamsOfUnionsReader(std::string file_name)
+      : yardl::ndjson::NDJsonReader(file_name, schema_) {
   }
 
   protected:
   bool ReadIntOrSimpleRecordImpl(std::variant<int32_t, test_model::SimpleRecord>& value) override;
-  bool ReadIntOrSimpleRecordImpl(std::vector<std::variant<int32_t, test_model::SimpleRecord>>& values) override;
   bool ReadNullableIntOrSimpleRecordImpl(std::variant<std::monostate, int32_t, test_model::SimpleRecord>& value) override;
-  bool ReadNullableIntOrSimpleRecordImpl(std::vector<std::variant<std::monostate, int32_t, test_model::SimpleRecord>>& values) override;
   void CloseImpl() override;
 
   private:
@@ -776,11 +794,12 @@ class StreamsOfUnionsReader : public test_model::StreamsOfUnionsReaderBase, yard
 // Json writer for the Enums protocol.
 class EnumsWriter : public test_model::EnumsWriterBase, yardl::ndjson::NDJsonWriter {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::ostream.
-  template <typename TStreamArg>
-  EnumsWriter(TStreamArg&& stream_arg)
-      : yardl::ndjson::NDJsonWriter(std::forward<TStreamArg>(stream_arg), schema_) {
+  EnumsWriter(std::ostream& stream)
+      : yardl::ndjson::NDJsonWriter(stream, schema_) {
+  }
+
+  EnumsWriter(std::string file_name)
+      : yardl::ndjson::NDJsonWriter(file_name, schema_) {
   }
 
   void Flush() override;
@@ -795,11 +814,12 @@ class EnumsWriter : public test_model::EnumsWriterBase, yardl::ndjson::NDJsonWri
 // Json reader for the Enums protocol.
 class EnumsReader : public test_model::EnumsReaderBase, yardl::ndjson::NDJsonReader {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::istream.
-  template <typename TStreamArg>
-  EnumsReader(TStreamArg&& stream_arg)
-      : yardl::ndjson::NDJsonReader(std::forward<TStreamArg>(stream_arg), schema_) {
+  EnumsReader(std::istream& stream)
+      : yardl::ndjson::NDJsonReader(stream, schema_) {
+  }
+
+  EnumsReader(std::string file_name)
+      : yardl::ndjson::NDJsonReader(file_name, schema_) {
   }
 
   protected:
@@ -812,11 +832,12 @@ class EnumsReader : public test_model::EnumsReaderBase, yardl::ndjson::NDJsonRea
 // Json writer for the StateTest protocol.
 class StateTestWriter : public test_model::StateTestWriterBase, yardl::ndjson::NDJsonWriter {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::ostream.
-  template <typename TStreamArg>
-  StateTestWriter(TStreamArg&& stream_arg)
-      : yardl::ndjson::NDJsonWriter(std::forward<TStreamArg>(stream_arg), schema_) {
+  StateTestWriter(std::ostream& stream)
+      : yardl::ndjson::NDJsonWriter(stream, schema_) {
+  }
+
+  StateTestWriter(std::string file_name)
+      : yardl::ndjson::NDJsonWriter(file_name, schema_) {
   }
 
   void Flush() override;
@@ -824,8 +845,7 @@ class StateTestWriter : public test_model::StateTestWriterBase, yardl::ndjson::N
   protected:
   void WriteAnIntImpl(int32_t const& value) override;
   void WriteAStreamImpl(int32_t const& value) override;
-  void WriteAStreamImpl(std::vector<int32_t> const& values) override;
-  void EndAStreamImpl() override;
+  void EndAStreamImpl() override {}
   void WriteAnotherIntImpl(int32_t const& value) override;
   void CloseImpl() override;
 };
@@ -833,17 +853,17 @@ class StateTestWriter : public test_model::StateTestWriterBase, yardl::ndjson::N
 // Json reader for the StateTest protocol.
 class StateTestReader : public test_model::StateTestReaderBase, yardl::ndjson::NDJsonReader {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::istream.
-  template <typename TStreamArg>
-  StateTestReader(TStreamArg&& stream_arg)
-      : yardl::ndjson::NDJsonReader(std::forward<TStreamArg>(stream_arg), schema_) {
+  StateTestReader(std::istream& stream)
+      : yardl::ndjson::NDJsonReader(stream, schema_) {
+  }
+
+  StateTestReader(std::string file_name)
+      : yardl::ndjson::NDJsonReader(file_name, schema_) {
   }
 
   protected:
   void ReadAnIntImpl(int32_t& value) override;
   bool ReadAStreamImpl(int32_t& value) override;
-  bool ReadAStreamImpl(std::vector<int32_t>& values) override;
   void ReadAnotherIntImpl(int32_t& value) override;
   void CloseImpl() override;
 
@@ -854,11 +874,12 @@ class StateTestReader : public test_model::StateTestReaderBase, yardl::ndjson::N
 // Json writer for the SimpleGenerics protocol.
 class SimpleGenericsWriter : public test_model::SimpleGenericsWriterBase, yardl::ndjson::NDJsonWriter {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::ostream.
-  template <typename TStreamArg>
-  SimpleGenericsWriter(TStreamArg&& stream_arg)
-      : yardl::ndjson::NDJsonWriter(std::forward<TStreamArg>(stream_arg), schema_) {
+  SimpleGenericsWriter(std::ostream& stream)
+      : yardl::ndjson::NDJsonWriter(stream, schema_) {
+  }
+
+  SimpleGenericsWriter(std::string file_name)
+      : yardl::ndjson::NDJsonWriter(file_name, schema_) {
   }
 
   void Flush() override;
@@ -873,19 +894,19 @@ class SimpleGenericsWriter : public test_model::SimpleGenericsWriterBase, yardl:
   void WriteIntFloatTupleAlternateSyntaxImpl(test_model::MyTuple<int32_t, float> const& value) override;
   void WriteIntStringTupleImpl(test_model::MyTuple<int32_t, std::string> const& value) override;
   void WriteStreamOfTypeVariantsImpl(std::variant<test_model::Image<float>, test_model::Image<double>> const& value) override;
-  void WriteStreamOfTypeVariantsImpl(std::vector<std::variant<test_model::Image<float>, test_model::Image<double>>> const& values) override;
-  void EndStreamOfTypeVariantsImpl() override;
+  void EndStreamOfTypeVariantsImpl() override {}
   void CloseImpl() override;
 };
 
 // Json reader for the SimpleGenerics protocol.
 class SimpleGenericsReader : public test_model::SimpleGenericsReaderBase, yardl::ndjson::NDJsonReader {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::istream.
-  template <typename TStreamArg>
-  SimpleGenericsReader(TStreamArg&& stream_arg)
-      : yardl::ndjson::NDJsonReader(std::forward<TStreamArg>(stream_arg), schema_) {
+  SimpleGenericsReader(std::istream& stream)
+      : yardl::ndjson::NDJsonReader(stream, schema_) {
+  }
+
+  SimpleGenericsReader(std::string file_name)
+      : yardl::ndjson::NDJsonReader(file_name, schema_) {
   }
 
   protected:
@@ -898,7 +919,6 @@ class SimpleGenericsReader : public test_model::SimpleGenericsReaderBase, yardl:
   void ReadIntFloatTupleAlternateSyntaxImpl(test_model::MyTuple<int32_t, float>& value) override;
   void ReadIntStringTupleImpl(test_model::MyTuple<int32_t, std::string>& value) override;
   bool ReadStreamOfTypeVariantsImpl(std::variant<test_model::Image<float>, test_model::Image<double>>& value) override;
-  bool ReadStreamOfTypeVariantsImpl(std::vector<std::variant<test_model::Image<float>, test_model::Image<double>>>& values) override;
   void CloseImpl() override;
 
   private:
@@ -908,11 +928,12 @@ class SimpleGenericsReader : public test_model::SimpleGenericsReaderBase, yardl:
 // Json writer for the AdvancedGenerics protocol.
 class AdvancedGenericsWriter : public test_model::AdvancedGenericsWriterBase, yardl::ndjson::NDJsonWriter {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::ostream.
-  template <typename TStreamArg>
-  AdvancedGenericsWriter(TStreamArg&& stream_arg)
-      : yardl::ndjson::NDJsonWriter(std::forward<TStreamArg>(stream_arg), schema_) {
+  AdvancedGenericsWriter(std::ostream& stream)
+      : yardl::ndjson::NDJsonWriter(stream, schema_) {
+  }
+
+  AdvancedGenericsWriter(std::string file_name)
+      : yardl::ndjson::NDJsonWriter(file_name, schema_) {
   }
 
   void Flush() override;
@@ -929,11 +950,12 @@ class AdvancedGenericsWriter : public test_model::AdvancedGenericsWriterBase, ya
 // Json reader for the AdvancedGenerics protocol.
 class AdvancedGenericsReader : public test_model::AdvancedGenericsReaderBase, yardl::ndjson::NDJsonReader {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::istream.
-  template <typename TStreamArg>
-  AdvancedGenericsReader(TStreamArg&& stream_arg)
-      : yardl::ndjson::NDJsonReader(std::forward<TStreamArg>(stream_arg), schema_) {
+  AdvancedGenericsReader(std::istream& stream)
+      : yardl::ndjson::NDJsonReader(stream, schema_) {
+  }
+
+  AdvancedGenericsReader(std::string file_name)
+      : yardl::ndjson::NDJsonReader(file_name, schema_) {
   }
 
   protected:
@@ -948,11 +970,12 @@ class AdvancedGenericsReader : public test_model::AdvancedGenericsReaderBase, ya
 // Json writer for the Aliases protocol.
 class AliasesWriter : public test_model::AliasesWriterBase, yardl::ndjson::NDJsonWriter {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::ostream.
-  template <typename TStreamArg>
-  AliasesWriter(TStreamArg&& stream_arg)
-      : yardl::ndjson::NDJsonWriter(std::forward<TStreamArg>(stream_arg), schema_) {
+  AliasesWriter(std::ostream& stream)
+      : yardl::ndjson::NDJsonWriter(stream, schema_) {
+  }
+
+  AliasesWriter(std::string file_name)
+      : yardl::ndjson::NDJsonWriter(file_name, schema_) {
   }
 
   void Flush() override;
@@ -968,19 +991,19 @@ class AliasesWriter : public test_model::AliasesWriterBase, yardl::ndjson::NDJso
   void WriteAliasedGenericVectorImpl(test_model::AliasedGenericVector<float> const& value) override;
   void WriteAliasedGenericFixedVectorImpl(test_model::AliasedGenericFixedVector<float> const& value) override;
   void WriteStreamOfAliasedGenericUnion2Impl(test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum> const& value) override;
-  void WriteStreamOfAliasedGenericUnion2Impl(std::vector<test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum>> const& values) override;
-  void EndStreamOfAliasedGenericUnion2Impl() override;
+  void EndStreamOfAliasedGenericUnion2Impl() override {}
   void CloseImpl() override;
 };
 
 // Json reader for the Aliases protocol.
 class AliasesReader : public test_model::AliasesReaderBase, yardl::ndjson::NDJsonReader {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::istream.
-  template <typename TStreamArg>
-  AliasesReader(TStreamArg&& stream_arg)
-      : yardl::ndjson::NDJsonReader(std::forward<TStreamArg>(stream_arg), schema_) {
+  AliasesReader(std::istream& stream)
+      : yardl::ndjson::NDJsonReader(stream, schema_) {
+  }
+
+  AliasesReader(std::string file_name)
+      : yardl::ndjson::NDJsonReader(file_name, schema_) {
   }
 
   protected:
@@ -994,7 +1017,6 @@ class AliasesReader : public test_model::AliasesReaderBase, yardl::ndjson::NDJso
   void ReadAliasedGenericVectorImpl(test_model::AliasedGenericVector<float>& value) override;
   void ReadAliasedGenericFixedVectorImpl(test_model::AliasedGenericFixedVector<float>& value) override;
   bool ReadStreamOfAliasedGenericUnion2Impl(test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum>& value) override;
-  bool ReadStreamOfAliasedGenericUnion2Impl(std::vector<test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum>>& values) override;
   void CloseImpl() override;
 
   private:
@@ -1004,40 +1026,38 @@ class AliasesReader : public test_model::AliasesReaderBase, yardl::ndjson::NDJso
 // Json writer for the StreamsOfAliasedUnions protocol.
 class StreamsOfAliasedUnionsWriter : public test_model::StreamsOfAliasedUnionsWriterBase, yardl::ndjson::NDJsonWriter {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::ostream.
-  template <typename TStreamArg>
-  StreamsOfAliasedUnionsWriter(TStreamArg&& stream_arg)
-      : yardl::ndjson::NDJsonWriter(std::forward<TStreamArg>(stream_arg), schema_) {
+  StreamsOfAliasedUnionsWriter(std::ostream& stream)
+      : yardl::ndjson::NDJsonWriter(stream, schema_) {
+  }
+
+  StreamsOfAliasedUnionsWriter(std::string file_name)
+      : yardl::ndjson::NDJsonWriter(file_name, schema_) {
   }
 
   void Flush() override;
 
   protected:
   void WriteIntOrSimpleRecordImpl(test_model::AliasedIntOrSimpleRecord const& value) override;
-  void WriteIntOrSimpleRecordImpl(std::vector<test_model::AliasedIntOrSimpleRecord> const& values) override;
-  void EndIntOrSimpleRecordImpl() override;
+  void EndIntOrSimpleRecordImpl() override {}
   void WriteNullableIntOrSimpleRecordImpl(test_model::AliasedNullableIntSimpleRecord const& value) override;
-  void WriteNullableIntOrSimpleRecordImpl(std::vector<test_model::AliasedNullableIntSimpleRecord> const& values) override;
-  void EndNullableIntOrSimpleRecordImpl() override;
+  void EndNullableIntOrSimpleRecordImpl() override {}
   void CloseImpl() override;
 };
 
 // Json reader for the StreamsOfAliasedUnions protocol.
 class StreamsOfAliasedUnionsReader : public test_model::StreamsOfAliasedUnionsReaderBase, yardl::ndjson::NDJsonReader {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::istream.
-  template <typename TStreamArg>
-  StreamsOfAliasedUnionsReader(TStreamArg&& stream_arg)
-      : yardl::ndjson::NDJsonReader(std::forward<TStreamArg>(stream_arg), schema_) {
+  StreamsOfAliasedUnionsReader(std::istream& stream)
+      : yardl::ndjson::NDJsonReader(stream, schema_) {
+  }
+
+  StreamsOfAliasedUnionsReader(std::string file_name)
+      : yardl::ndjson::NDJsonReader(file_name, schema_) {
   }
 
   protected:
   bool ReadIntOrSimpleRecordImpl(test_model::AliasedIntOrSimpleRecord& value) override;
-  bool ReadIntOrSimpleRecordImpl(std::vector<test_model::AliasedIntOrSimpleRecord>& values) override;
   bool ReadNullableIntOrSimpleRecordImpl(test_model::AliasedNullableIntSimpleRecord& value) override;
-  bool ReadNullableIntOrSimpleRecordImpl(std::vector<test_model::AliasedNullableIntSimpleRecord>& values) override;
   void CloseImpl() override;
 
   private:
@@ -1047,11 +1067,12 @@ class StreamsOfAliasedUnionsReader : public test_model::StreamsOfAliasedUnionsRe
 // Json writer for the ProtocolWithComputedFields protocol.
 class ProtocolWithComputedFieldsWriter : public test_model::ProtocolWithComputedFieldsWriterBase, yardl::ndjson::NDJsonWriter {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::ostream.
-  template <typename TStreamArg>
-  ProtocolWithComputedFieldsWriter(TStreamArg&& stream_arg)
-      : yardl::ndjson::NDJsonWriter(std::forward<TStreamArg>(stream_arg), schema_) {
+  ProtocolWithComputedFieldsWriter(std::ostream& stream)
+      : yardl::ndjson::NDJsonWriter(stream, schema_) {
+  }
+
+  ProtocolWithComputedFieldsWriter(std::string file_name)
+      : yardl::ndjson::NDJsonWriter(file_name, schema_) {
   }
 
   void Flush() override;
@@ -1064,11 +1085,12 @@ class ProtocolWithComputedFieldsWriter : public test_model::ProtocolWithComputed
 // Json reader for the ProtocolWithComputedFields protocol.
 class ProtocolWithComputedFieldsReader : public test_model::ProtocolWithComputedFieldsReaderBase, yardl::ndjson::NDJsonReader {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::istream.
-  template <typename TStreamArg>
-  ProtocolWithComputedFieldsReader(TStreamArg&& stream_arg)
-      : yardl::ndjson::NDJsonReader(std::forward<TStreamArg>(stream_arg), schema_) {
+  ProtocolWithComputedFieldsReader(std::istream& stream)
+      : yardl::ndjson::NDJsonReader(stream, schema_) {
+  }
+
+  ProtocolWithComputedFieldsReader(std::string file_name)
+      : yardl::ndjson::NDJsonReader(file_name, schema_) {
   }
 
   protected:
@@ -1079,19 +1101,19 @@ class ProtocolWithComputedFieldsReader : public test_model::ProtocolWithComputed
 // Json writer for the ProtocolWithKeywordSteps protocol.
 class ProtocolWithKeywordStepsWriter : public test_model::ProtocolWithKeywordStepsWriterBase, yardl::ndjson::NDJsonWriter {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::ostream.
-  template <typename TStreamArg>
-  ProtocolWithKeywordStepsWriter(TStreamArg&& stream_arg)
-      : yardl::ndjson::NDJsonWriter(std::forward<TStreamArg>(stream_arg), schema_) {
+  ProtocolWithKeywordStepsWriter(std::ostream& stream)
+      : yardl::ndjson::NDJsonWriter(stream, schema_) {
+  }
+
+  ProtocolWithKeywordStepsWriter(std::string file_name)
+      : yardl::ndjson::NDJsonWriter(file_name, schema_) {
   }
 
   void Flush() override;
 
   protected:
   void WriteIntImpl(test_model::RecordWithKeywordFields const& value) override;
-  void WriteIntImpl(std::vector<test_model::RecordWithKeywordFields> const& values) override;
-  void EndIntImpl() override;
+  void EndIntImpl() override {}
   void WriteFloatImpl(test_model::EnumWithKeywordSymbols const& value) override;
   void CloseImpl() override;
 };
@@ -1099,16 +1121,16 @@ class ProtocolWithKeywordStepsWriter : public test_model::ProtocolWithKeywordSte
 // Json reader for the ProtocolWithKeywordSteps protocol.
 class ProtocolWithKeywordStepsReader : public test_model::ProtocolWithKeywordStepsReaderBase, yardl::ndjson::NDJsonReader {
   public:
-  // The stream_arg parameter can either be a std::string filename
-  // or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::istream.
-  template <typename TStreamArg>
-  ProtocolWithKeywordStepsReader(TStreamArg&& stream_arg)
-      : yardl::ndjson::NDJsonReader(std::forward<TStreamArg>(stream_arg), schema_) {
+  ProtocolWithKeywordStepsReader(std::istream& stream)
+      : yardl::ndjson::NDJsonReader(stream, schema_) {
+  }
+
+  ProtocolWithKeywordStepsReader(std::string file_name)
+      : yardl::ndjson::NDJsonReader(file_name, schema_) {
   }
 
   protected:
   bool ReadIntImpl(test_model::RecordWithKeywordFields& value) override;
-  bool ReadIntImpl(std::vector<test_model::RecordWithKeywordFields>& values) override;
   void ReadFloatImpl(test_model::EnumWithKeywordSymbols& value) override;
   void CloseImpl() override;
 
