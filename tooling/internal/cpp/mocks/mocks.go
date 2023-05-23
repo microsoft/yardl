@@ -62,7 +62,7 @@ func WriteMocks(env *dsl.Environment, options packaging.CppCodegenOptions) error
 				})
 				w.WriteStringln("case Format::kNDJson:")
 				w.Indented(func() {
-					fmt.Fprintf(w, "return std::make_unique<%s>(std::make_unique<%s>(filename), [filename](){return std::make_unique<%s>(filename);});\n", qualifiedTestWriterName(protocol), ndjson.QualifiedJsonWriterClassName(protocol), ndjson.QualifiedJsonReaderClassName(protocol))
+					fmt.Fprintf(w, "return std::make_unique<%s>(std::make_unique<%s>(filename), [filename](){return std::make_unique<%s>(filename);});\n", qualifiedTestWriterName(protocol), ndjson.QualifiedNDJsonWriterClassName(protocol), ndjson.QualifiedNDJsonReaderClassName(protocol))
 				})
 				w.WriteStringln("default:")
 				w.Indented(func() {

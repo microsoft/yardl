@@ -177,7 +177,7 @@ func writeHeaderFile(env *dsl.Environment, options packaging.CppCodegenOptions) 
 		for _, protocol := range ns.Protocols {
 			common.WriteComment(w, fmt.Sprintf("Json writer for the %s protocol.", protocol.Name))
 			common.WriteComment(w, protocol.Comment)
-			writerClassName := JsonWriterClassName(protocol)
+			writerClassName := NDJsonWriterClassName(protocol)
 			fmt.Fprintf(w, "class %s : public %s, yardl::ndjson::NDJsonWriter {\n", writerClassName, common.QualifiedAbstractWriterName(protocol))
 			w.Indented(func() {
 				w.WriteStringln("public:")
@@ -217,7 +217,7 @@ func writeHeaderFile(env *dsl.Environment, options packaging.CppCodegenOptions) 
 
 			common.WriteComment(w, fmt.Sprintf("Json reader for the %s protocol.", protocol.Name))
 			common.WriteComment(w, protocol.Comment)
-			readerClassName := JsonReaderClassName(protocol)
+			readerClassName := NDJsonReaderClassName(protocol)
 			fmt.Fprintf(w, "class %s : public %s, yardl::ndjson::NDJsonReader {\n", readerClassName, common.QualifiedAbstractReaderName(protocol))
 			w.Indented(func() {
 				fmt.Fprintln(w, "public:")
@@ -480,7 +480,7 @@ func getJsonDataType(t dsl.Type) jsonDataType {
 }
 
 func writeProtocolMethods(w *formatting.IndentedWriter, p *dsl.ProtocolDefinition) {
-	writerClassName := JsonWriterClassName(p)
+	writerClassName := NDJsonWriterClassName(p)
 
 	for _, step := range p.Sequence {
 		fmt.Fprintf(w, "void %s::%s([[maybe_unused]]%s const& value) {\n", writerClassName, common.ProtocolWriteImplMethodName(step), common.TypeSyntax(step.Type))
@@ -503,7 +503,7 @@ func writeProtocolMethods(w *formatting.IndentedWriter, p *dsl.ProtocolDefinitio
 	})
 	w.WriteString("}\n\n")
 
-	readerClassName := JsonReaderClassName(p)
+	readerClassName := NDJsonReaderClassName(p)
 	for _, step := range p.Sequence {
 		returnType := "void"
 		if step.IsStream() {
@@ -529,18 +529,18 @@ func writeProtocolMethods(w *formatting.IndentedWriter, p *dsl.ProtocolDefinitio
 	w.WriteString("}\n\n")
 }
 
-func JsonWriterClassName(p *dsl.ProtocolDefinition) string {
+func NDJsonWriterClassName(p *dsl.ProtocolDefinition) string {
 	return fmt.Sprintf("%sWriter", p.Name)
 }
 
-func QualifiedJsonWriterClassName(p *dsl.ProtocolDefinition) string {
-	return fmt.Sprintf("%s::ndjson::%s", common.TypeNamespaceIdentifierName(p), JsonWriterClassName(p))
+func QualifiedNDJsonWriterClassName(p *dsl.ProtocolDefinition) string {
+	return fmt.Sprintf("%s::ndjson::%s", common.TypeNamespaceIdentifierName(p), NDJsonWriterClassName(p))
 }
 
-func JsonReaderClassName(p *dsl.ProtocolDefinition) string {
+func NDJsonReaderClassName(p *dsl.ProtocolDefinition) string {
 	return fmt.Sprintf("%sReader", p.Name)
 }
 
-func QualifiedJsonReaderClassName(p *dsl.ProtocolDefinition) string {
-	return fmt.Sprintf("%s::ndjson::%s", common.TypeNamespaceIdentifierName(p), JsonReaderClassName(p))
+func QualifiedNDJsonReaderClassName(p *dsl.ProtocolDefinition) string {
+	return fmt.Sprintf("%s::ndjson::%s", common.TypeNamespaceIdentifierName(p), NDJsonReaderClassName(p))
 }

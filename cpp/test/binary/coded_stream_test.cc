@@ -100,6 +100,14 @@ TEST(CodedStreamTests, ReadOneLessThanBufferLength) {
   r.VerifyFinished();
 }
 
+TEST(CodedStreamTests, BadStreamThrows) {
+  std::stringstream ss;
+  CodedOutputStream w(ss);
+  WriteInteger(w, 1);
+  ss.setstate(std::ios::badbit);
+  EXPECT_ANY_THROW(w.Flush());
+}
+
 TEST(CodedStreamTests, ScalarByte) {
   std::stringstream ss;
   {
