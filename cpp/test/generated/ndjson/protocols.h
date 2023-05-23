@@ -46,9 +46,6 @@ class BenchmarkFloat256x256Reader : public test_model::BenchmarkFloat256x256Read
   protected:
   bool ReadFloat256x256Impl(yardl::FixedNDArray<float, 256, 256>& value) override;
   void CloseImpl() override;
-
-  private:
-  size_t current_block_remaining_ = 0;
 };
 
 // Json writer for the BenchmarkFloatVlen protocol.
@@ -84,9 +81,6 @@ class BenchmarkFloatVlenReader : public test_model::BenchmarkFloatVlenReaderBase
   protected:
   bool ReadFloatArrayImpl(yardl::NDArray<float, 2>& value) override;
   void CloseImpl() override;
-
-  private:
-  size_t current_block_remaining_ = 0;
 };
 
 // Json writer for the BenchmarkSmallRecord protocol.
@@ -122,9 +116,6 @@ class BenchmarkSmallRecordReader : public test_model::BenchmarkSmallRecordReader
   protected:
   bool ReadSmallRecordImpl(test_model::SmallBenchmarkRecord& value) override;
   void CloseImpl() override;
-
-  private:
-  size_t current_block_remaining_ = 0;
 };
 
 // Json writer for the BenchmarkSmallRecordWithOptionals protocol.
@@ -160,9 +151,6 @@ class BenchmarkSmallRecordWithOptionalsReader : public test_model::BenchmarkSmal
   protected:
   bool ReadSmallRecordImpl(test_model::SimpleEncodingCounters& value) override;
   void CloseImpl() override;
-
-  private:
-  size_t current_block_remaining_ = 0;
 };
 
 // Json writer for the BenchmarkSimpleMrd protocol.
@@ -198,9 +186,6 @@ class BenchmarkSimpleMrdReader : public test_model::BenchmarkSimpleMrdReaderBase
   protected:
   bool ReadDataImpl(std::variant<test_model::SimpleAcquisition, test_model::Image<float>>& value) override;
   void CloseImpl() override;
-
-  private:
-  size_t current_block_remaining_ = 0;
 };
 
 // Json writer for the Scalars protocol.
@@ -505,9 +490,6 @@ class StreamsReader : public test_model::StreamsReaderBase, yardl::ndjson::NDJso
   bool ReadRecordWithOptionalVectorDataImpl(test_model::RecordWithOptionalVector& value) override;
   bool ReadFixedVectorImpl(std::array<int32_t, 3>& value) override;
   void CloseImpl() override;
-
-  private:
-  size_t current_block_remaining_ = 0;
 };
 
 // Json writer for the FixedArrays protocol.
@@ -786,9 +768,6 @@ class StreamsOfUnionsReader : public test_model::StreamsOfUnionsReaderBase, yard
   bool ReadIntOrSimpleRecordImpl(std::variant<int32_t, test_model::SimpleRecord>& value) override;
   bool ReadNullableIntOrSimpleRecordImpl(std::variant<std::monostate, int32_t, test_model::SimpleRecord>& value) override;
   void CloseImpl() override;
-
-  private:
-  size_t current_block_remaining_ = 0;
 };
 
 // Json writer for the Enums protocol.
@@ -866,9 +845,6 @@ class StateTestReader : public test_model::StateTestReaderBase, yardl::ndjson::N
   bool ReadAStreamImpl(int32_t& value) override;
   void ReadAnotherIntImpl(int32_t& value) override;
   void CloseImpl() override;
-
-  private:
-  size_t current_block_remaining_ = 0;
 };
 
 // Json writer for the SimpleGenerics protocol.
@@ -920,9 +896,6 @@ class SimpleGenericsReader : public test_model::SimpleGenericsReaderBase, yardl:
   void ReadIntStringTupleImpl(test_model::MyTuple<int32_t, std::string>& value) override;
   bool ReadStreamOfTypeVariantsImpl(std::variant<test_model::Image<float>, test_model::Image<double>>& value) override;
   void CloseImpl() override;
-
-  private:
-  size_t current_block_remaining_ = 0;
 };
 
 // Json writer for the AdvancedGenerics protocol.
@@ -1018,9 +991,6 @@ class AliasesReader : public test_model::AliasesReaderBase, yardl::ndjson::NDJso
   void ReadAliasedGenericFixedVectorImpl(test_model::AliasedGenericFixedVector<float>& value) override;
   bool ReadStreamOfAliasedGenericUnion2Impl(test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum>& value) override;
   void CloseImpl() override;
-
-  private:
-  size_t current_block_remaining_ = 0;
 };
 
 // Json writer for the StreamsOfAliasedUnions protocol.
@@ -1059,9 +1029,6 @@ class StreamsOfAliasedUnionsReader : public test_model::StreamsOfAliasedUnionsRe
   bool ReadIntOrSimpleRecordImpl(test_model::AliasedIntOrSimpleRecord& value) override;
   bool ReadNullableIntOrSimpleRecordImpl(test_model::AliasedNullableIntSimpleRecord& value) override;
   void CloseImpl() override;
-
-  private:
-  size_t current_block_remaining_ = 0;
 };
 
 // Json writer for the ProtocolWithComputedFields protocol.
@@ -1133,9 +1100,6 @@ class ProtocolWithKeywordStepsReader : public test_model::ProtocolWithKeywordSte
   bool ReadIntImpl(test_model::RecordWithKeywordFields& value) override;
   void ReadFloatImpl(test_model::EnumWithKeywordSymbols& value) override;
   void CloseImpl() override;
-
-  private:
-  size_t current_block_remaining_ = 0;
 };
 
 }

@@ -238,12 +238,7 @@ func writeHeaderFile(env *dsl.Environment, options packaging.CppCodegenOptions) 
 				w.WriteStringln("}\n")
 
 				w.WriteStringln("protected:")
-				hasStream := false
 				for _, step := range protocol.Sequence {
-					if step.IsStream() {
-						hasStream = true
-					}
-
 					returnType := "void"
 					if step.IsStream() {
 						returnType = "bool"
@@ -252,10 +247,6 @@ func writeHeaderFile(env *dsl.Environment, options packaging.CppCodegenOptions) 
 				}
 
 				w.WriteString("void CloseImpl() override;\n")
-				if hasStream {
-					w.WriteStringln("\nprivate:")
-					w.WriteStringln("size_t current_block_remaining_ = 0;")
-				}
 			})
 			fmt.Fprint(w, "};\n\n")
 		}
