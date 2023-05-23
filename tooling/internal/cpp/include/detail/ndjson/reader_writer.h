@@ -21,7 +21,8 @@ class NDJsonWriter {
     WriteHeader(schema);
   }
 
-  NDJsonWriter(std::string file_name, std::string& schema) : owned_file_stream_(open_file(file_name)), stream_(*owned_file_stream_) {
+  NDJsonWriter(std::string file_name, std::string& schema)
+      : owned_file_stream_(open_file(file_name)), stream_(*owned_file_stream_) {
     WriteHeader(schema);
   }
 
@@ -56,7 +57,8 @@ class NDJsonReader {
     ReadHeader(schema);
   }
 
-  NDJsonReader(std::string file_name, [[maybe_unused]] std::string& schema) : owned_file_stream_(open_file(file_name)), stream_(*owned_file_stream_) {
+  NDJsonReader(std::string file_name, std::string& schema)
+      : owned_file_stream_(open_file(file_name)), stream_(*owned_file_stream_) {
     ReadHeader(schema);
   }
 
@@ -80,15 +82,20 @@ class NDJsonReader {
     json expected_schema_json = json::parse(expected_schema);
     std::string line;
     std::getline(stream_, line);
-    json actual_header_json = json::parse(line);
-    actual_header_json = actual_header_json["yardl"];
-    if (actual_header_json["version"] != kNDJsonFormatVersionNumber) {
+    try {
+      json actual_header_json = json::parse(line);
+      actual_header_json = actual_header_json.at("yardl");
+      if (actual_header_json["version"] != kNDJsonFormatVersionNumber) {
+        throw std::runtime_error(
+            "Unsupported Yardl NDJSON format version.");
+      }
+      if (expected_schema_json != actual_header_json.at("schema")) {
+        throw std::runtime_error(
+            "The schema of the data to be read is not compatible with the current protocol.");
+      }
+    } catch (ordered_json::exception const&) {
       throw std::runtime_error(
-          "Data in the stream is not in the expected format.");
-    }
-    if (expected_schema_json != actual_header_json["schema"]) {
-      throw std::runtime_error(
-          "The schema of the data to be read is not compatible with the current protocol.");
+          "Data in the stream is not in the expected Yardl NDJSON format.");
     }
   }
 

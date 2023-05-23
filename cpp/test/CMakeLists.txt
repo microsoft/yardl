@@ -9,6 +9,7 @@ add_executable(tests
   computed_fields_test.cc
   definitions_test.cc
   hdf5/hdf5_test.cc
+  ndjson/schema_test.cc
   protocol_state_test.cc
   roundtrip_test.cc
 )

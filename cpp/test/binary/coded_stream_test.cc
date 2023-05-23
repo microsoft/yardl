@@ -4,7 +4,6 @@
 #include <fstream>
 #include <iostream>
 
-#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
 #include "../generated/yardl/detail/binary/serializers.h"
