@@ -8,6 +8,7 @@
 
 #include "generated/binary/protocols.h"
 #include "generated/hdf5/protocols.h"
+#include "generated/ndjson/protocols.h"
 #include "generated/protocols.h"
 #include "generated/types.h"
 
@@ -57,6 +58,15 @@ int main() {
 
   std::cout << "\nhexdump output:\n\n";
   std::system(("hexdump -C " + filename).c_str());
+
+  std::cout << "\n================NDJSON================\n\n";
+  filename = "sandbox.ndjson";
+  std::remove(filename.c_str());
+  Write<sandbox::ndjson::HelloWorldWriter>(filename);
+  Read<sandbox::ndjson::HelloWorldReader>(filename);
+
+  std::cout << "\noutput:\n\n";
+  std::system(("cat " + filename).c_str());
 
   return 0;
 }
