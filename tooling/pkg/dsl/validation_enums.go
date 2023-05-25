@@ -17,17 +17,24 @@ func validateEnums(env *Environment, errorSink *validation.ErrorSink) *Environme
 			return
 		}
 
+		var enumKind string
+		if enum.IsFlags {
+			enumKind = "flags"
+		} else {
+			enumKind = "enum"
+		}
+
 		// verify that the enum symbols and integer values are unique
 		symbols := make(map[string]any)
 		symbolsByVal := make(map[string][]string)
 		for _, enumValue := range enum.Values {
 			if !memberNameRegex.MatchString(enumValue.Symbol) {
-				errorSink.Add(validationError(enumValue, "in enum '%s', the symbol name '%s' must be camelCased matching the format %s", enum.Name, enumValue.Symbol, memberNameRegex.String()))
+				errorSink.Add(validationError(enumValue, "in %s '%s', the symbol name '%s' must be camelCased matching the format %s", enumKind, enum.Name, enumValue.Symbol, memberNameRegex.String()))
 			}
 
 			symbolsByVal[enumValue.IntegerValue.String()] = append(symbolsByVal[enumValue.IntegerValue.String()], enumValue.Symbol)
 			if _, found := symbols[enumValue.Symbol]; found {
-				errorSink.Add(validationError(enum, "in enum '%s', the symbol '%s' is defined more than once", enum.Name, enumValue.Symbol))
+				errorSink.Add(validationError(enum, "in %s '%s', the symbol '%s' is defined more than once", enumKind, enum.Name, enumValue.Symbol))
 			} else {
 				symbols[enumValue.Symbol] = nil
 			}
@@ -35,7 +42,7 @@ func validateEnums(env *Environment, errorSink *validation.ErrorSink) *Environme
 
 		for v, syms := range symbolsByVal {
 			if len(syms) > 1 {
-				errorSink.Add(validationError(enum, "in enum '%s', the symbols %v have the same value of %s", enum.Name, syms, v))
+				errorSink.Add(validationError(enum, "in %s '%s', the symbols %v have the same value of %s", enumKind, enum.Name, syms, v))
 			}
 		}
 
@@ -83,13 +90,13 @@ func validateEnums(env *Environment, errorSink *validation.ErrorSink) *Environme
 			minValue = Zero
 			maxValue = MaxUint64
 		default:
-			errorSink.Add(validationError(enum, "in enum '%s', the base type must be an integer type", enum.Name))
+			errorSink.Add(validationError(enum, "in %s '%s', the base type must be an integer type", enumKind, enum.Name))
 			return
 		}
 
 		for _, enumValue := range enum.Values {
 			if enumValue.IntegerValue.Cmp(minValue) < 0 || enumValue.IntegerValue.Cmp(maxValue) > 0 {
-				errorSink.Add(validationError(enumValue, "in enum '%s', the value '%s' for symbol '%s' is out of range for the base type '%s'", enum.Name, enumValue.IntegerValue.String(), enumValue.Symbol, baseType))
+				errorSink.Add(validationError(enumValue, "in %s '%s', the value '%s' for symbol '%s' is out of range for the base type '%s'", enumKind, enum.Name, enumValue.IntegerValue.String(), enumValue.Symbol, baseType))
 			}
 		}
 	})

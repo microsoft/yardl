@@ -986,6 +986,9 @@ func UnmarshalEnumValues(flags bool, value *yaml.Node) (*EnumValues, error) {
 						val.IntegerValue.SetInt64(1)
 					} else {
 						prevVal := vals[i/2-1].IntegerValue
+						if prevVal.Sign() < 0 {
+							return nil, parseError(v, "flag value following a negative value must be explicitly specified")
+						}
 						newVal := big.NewInt(1)
 						for ; newVal.Cmp(&prevVal) <= 0; newVal.Lsh(newVal, 1) {
 						}
@@ -997,16 +1000,17 @@ func UnmarshalEnumValues(flags bool, value *yaml.Node) (*EnumValues, error) {
 					} else {
 						prevVal := vals[i/2-1].IntegerValue
 						var newVal big.Int
-						newVal.Add(&prevVal, big.NewInt(1))
+						if prevVal.Sign() < 0 {
+							newVal.Sub(&prevVal, big.NewInt(1))
+						} else {
+							newVal.Add(&prevVal, big.NewInt(1))
+						}
 						val.IntegerValue = newVal
 					}
 				}
 			} else {
 				if err := val.IntegerValue.UnmarshalText([]byte(v.Value)); err != nil {
 					return nil, err
-				}
-				if flags && val.IntegerValue.Sign() < 0 {
-					return nil, parseError(v, "flag value cannot be negative")
 				}
 			}
 
