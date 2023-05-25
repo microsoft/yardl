@@ -916,6 +916,68 @@
           }
         },
         {
+          "flags": {
+            "name": "DaysOfWeek",
+            "values": [
+              {
+                "symbol": "monday",
+                "value": 1
+              },
+              {
+                "symbol": "tuesday",
+                "value": 2
+              },
+              {
+                "symbol": "wednesday",
+                "value": 4
+              },
+              {
+                "symbol": "thursday",
+                "value": 8
+              },
+              {
+                "symbol": "friday",
+                "value": 16
+              },
+              {
+                "symbol": "saturday",
+                "value": 32
+              },
+              {
+                "symbol": "sunday",
+                "value": 64
+              }
+            ]
+          }
+        },
+        {
+          "flags": {
+            "name": "TextFormat",
+            "values": [
+              {
+                "symbol": "regular",
+                "value": 0
+              },
+              {
+                "symbol": "bold",
+                "value": 1
+              },
+              {
+                "symbol": "italic",
+                "value": 2
+              },
+              {
+                "symbol": "underline",
+                "value": 4
+              },
+              {
+                "symbol": "strikethrough",
+                "value": 8
+              }
+            ]
+          }
+        },
+        {
           "alias": {
             "name": "Image",
             "typeParameters": [
@@ -2864,6 +2926,27 @@
             {
               "name": "size",
               "type": "TestModel.SizeBasedEnum"
+            }
+          ]
+        },
+        {
+          "name": "Flags",
+          "sequence": [
+            {
+              "name": "days",
+              "type": {
+                "stream": {
+                  "items": "TestModel.DaysOfWeek"
+                }
+              }
+            },
+            {
+              "name": "formats",
+              "type": {
+                "stream": {
+                  "items": "TestModel.TextFormat"
+                }
+              }
             }
           ]
         },

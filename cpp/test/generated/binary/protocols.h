@@ -853,6 +853,51 @@ class EnumsReader : public test_model::EnumsReaderBase, yardl::binary::BinaryRea
   void CloseImpl() override;
 };
 
+// Binary writer for the Flags protocol.
+class FlagsWriter : public test_model::FlagsWriterBase, yardl::binary::BinaryWriter {
+  public:
+  FlagsWriter(std::ostream& stream)
+      : yardl::binary::BinaryWriter(stream, schema_) {
+  }
+
+  FlagsWriter(std::string file_name)
+      : yardl::binary::BinaryWriter(file_name, schema_) {
+  }
+
+  void Flush() override;
+
+  protected:
+  void WriteDaysImpl(test_model::DaysOfWeek const& value) override;
+  void WriteDaysImpl(std::vector<test_model::DaysOfWeek> const& values) override;
+  void EndDaysImpl() override;
+  void WriteFormatsImpl(test_model::TextFormat const& value) override;
+  void WriteFormatsImpl(std::vector<test_model::TextFormat> const& values) override;
+  void EndFormatsImpl() override;
+  void CloseImpl() override;
+};
+
+// Binary reader for the Flags protocol.
+class FlagsReader : public test_model::FlagsReaderBase, yardl::binary::BinaryReader {
+  public:
+  FlagsReader(std::istream& stream)
+      : yardl::binary::BinaryReader(stream, schema_) {
+  }
+
+  FlagsReader(std::string file_name)
+      : yardl::binary::BinaryReader(file_name, schema_) {
+  }
+
+  protected:
+  bool ReadDaysImpl(test_model::DaysOfWeek& value) override;
+  bool ReadDaysImpl(std::vector<test_model::DaysOfWeek>& values) override;
+  bool ReadFormatsImpl(test_model::TextFormat& value) override;
+  bool ReadFormatsImpl(std::vector<test_model::TextFormat>& values) override;
+  void CloseImpl() override;
+
+  private:
+  size_t current_block_remaining_ = 0;
+};
+
 // Binary writer for the StateTest protocol.
 class StateTestWriter : public test_model::StateTestWriterBase, yardl::binary::BinaryWriter {
   public:

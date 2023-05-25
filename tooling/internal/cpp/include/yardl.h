@@ -74,4 +74,55 @@ using DateTime = std::chrono::time_point<std::chrono::system_clock,
  */
 using Size = std::conditional_t<sizeof(size_t) == sizeof(uint64_t), size_t, uint64_t>;
 
+template <class E, class Enabler = void>
+struct is_flags_enum_t
+    : public std::false_type {};
+
+template <typename _Tp>
+inline constexpr bool is_flags_enum_v = is_flags_enum_t<_Tp>::value;
+
+template <typename TEnum, std::enable_if_t<std::is_enum_v<TEnum> && is_flags_enum_v<TEnum>, bool> = true>
+constexpr bool HasFlag(TEnum value, TEnum flag) {
+  using integer_type = std::underlying_type_t<TEnum>;
+  return (static_cast<integer_type>(value) & static_cast<integer_type>(flag)) == static_cast<integer_type>(flag);
+}
+
 }  // namespace yardl
+
+// operators that only apply to flags enums
+template <typename TEnum, std::enable_if_t<std::is_enum_v<TEnum> && yardl::is_flags_enum_v<TEnum>, bool> = true>
+constexpr TEnum operator|(TEnum lhs, TEnum rhs) {
+  using integer_type = std::underlying_type_t<TEnum>;
+  return static_cast<TEnum>(static_cast<integer_type>(lhs) | static_cast<integer_type>(rhs));
+}
+
+template <typename TEnum, std::enable_if_t<std::is_enum_v<TEnum> && yardl::is_flags_enum_v<TEnum>, bool> = true>
+constexpr TEnum operator&(TEnum lhs, TEnum rhs) {
+  using integer_type = std::underlying_type_t<TEnum>;
+  return static_cast<TEnum>(static_cast<integer_type>(lhs) & static_cast<integer_type>(rhs));
+}
+
+template <typename TEnum, std::enable_if_t<std::is_enum_v<TEnum> && yardl::is_flags_enum_v<TEnum>, bool> = true>
+constexpr TEnum operator^(TEnum lhs, TEnum rhs) {
+  using integer_type = std::underlying_type_t<TEnum>;
+  return static_cast<TEnum>(static_cast<integer_type>(lhs) ^ static_cast<integer_type>(rhs));
+}
+
+template <typename TEnum, std::enable_if_t<std::is_enum_v<TEnum> && yardl::is_flags_enum_v<TEnum>, bool> = true>
+constexpr void operator|=(TEnum& lhs, TEnum rhs) {
+  lhs = lhs | rhs;
+}
+template <typename TEnum, std::enable_if_t<std::is_enum_v<TEnum> && yardl::is_flags_enum_v<TEnum>, bool> = true>
+constexpr void operator&=(TEnum& lhs, TEnum rhs) {
+  lhs = lhs & rhs;
+}
+template <typename TEnum, std::enable_if_t<std::is_enum_v<TEnum> && yardl::is_flags_enum_v<TEnum>, bool> = true>
+constexpr void operator^=(TEnum& lhs, TEnum rhs) {
+  lhs = lhs ^ rhs;
+}
+
+template <typename TEnum, std::enable_if_t<std::is_enum_v<TEnum> && yardl::is_flags_enum_v<TEnum>, bool> = true>
+constexpr TEnum operator~(TEnum value) {
+  using integer_type = std::underlying_type_t<TEnum>;
+  return static_cast<TEnum>(~static_cast<integer_type>(value));
+}

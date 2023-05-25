@@ -77,6 +77,12 @@ void from_json(ordered_json const& j, test_model::Int64Enum& value);
 void to_json(ordered_json& j, test_model::SizeBasedEnum const& value);
 void from_json(ordered_json const& j, test_model::SizeBasedEnum& value);
 
+void to_json(ordered_json& j, test_model::DaysOfWeek const& value);
+void from_json(ordered_json const& j, test_model::DaysOfWeek& value);
+
+void to_json(ordered_json& j, test_model::TextFormat const& value);
+void from_json(ordered_json const& j, test_model::TextFormat& value);
+
 template <typename T1, typename T2>
 void to_json(ordered_json& j, test_model::GenericRecord<T1, T2> const& value);
 template <typename T1, typename T2>
@@ -1193,6 +1199,191 @@ void from_json(ordered_json const& j, test_model::SizeBasedEnum& value) {
   value = static_cast<test_model::SizeBasedEnum>(j.get<underlying_type>());
 }
 
+void to_json(ordered_json& j, test_model::DaysOfWeek const& value) {
+  auto arr = ordered_json::array();
+  using underlying_type = typename std::underlying_type<test_model::DaysOfWeek>::type;
+  if (static_cast<underlying_type>(value) == 0) {
+    j = arr;
+    return;
+  }
+  auto remaining = value;
+  if (yardl::HasFlag(remaining, test_model::DaysOfWeek::kMonday)) {
+    arr.push_back("monday");
+    remaining &= ~test_model::DaysOfWeek::kMonday;
+    if (static_cast<underlying_type>(remaining) == 0) {
+      j = arr;
+      return;
+    }
+  }
+  if (yardl::HasFlag(remaining, test_model::DaysOfWeek::kTuesday)) {
+    arr.push_back("tuesday");
+    remaining &= ~test_model::DaysOfWeek::kTuesday;
+    if (static_cast<underlying_type>(remaining) == 0) {
+      j = arr;
+      return;
+    }
+  }
+  if (yardl::HasFlag(remaining, test_model::DaysOfWeek::kWednesday)) {
+    arr.push_back("wednesday");
+    remaining &= ~test_model::DaysOfWeek::kWednesday;
+    if (static_cast<underlying_type>(remaining) == 0) {
+      j = arr;
+      return;
+    }
+  }
+  if (yardl::HasFlag(remaining, test_model::DaysOfWeek::kThursday)) {
+    arr.push_back("thursday");
+    remaining &= ~test_model::DaysOfWeek::kThursday;
+    if (static_cast<underlying_type>(remaining) == 0) {
+      j = arr;
+      return;
+    }
+  }
+  if (yardl::HasFlag(remaining, test_model::DaysOfWeek::kFriday)) {
+    arr.push_back("friday");
+    remaining &= ~test_model::DaysOfWeek::kFriday;
+    if (static_cast<underlying_type>(remaining) == 0) {
+      j = arr;
+      return;
+    }
+  }
+  if (yardl::HasFlag(remaining, test_model::DaysOfWeek::kSaturday)) {
+    arr.push_back("saturday");
+    remaining &= ~test_model::DaysOfWeek::kSaturday;
+    if (static_cast<underlying_type>(remaining) == 0) {
+      j = arr;
+      return;
+    }
+  }
+  if (yardl::HasFlag(remaining, test_model::DaysOfWeek::kSunday)) {
+    arr.push_back("sunday");
+    remaining &= ~test_model::DaysOfWeek::kSunday;
+    if (static_cast<underlying_type>(remaining) == 0) {
+      j = arr;
+      return;
+    }
+  }
+  j = static_cast<underlying_type>(value);
+}
+
+void from_json(ordered_json const& j, test_model::DaysOfWeek& value) {
+  if (j.is_number()) {
+    using underlying_type = typename std::underlying_type<test_model::DaysOfWeek>::type;
+    value = static_cast<test_model::DaysOfWeek>(j.get<underlying_type>());
+    return;
+  }
+  std::vector<std::string> arr = j;
+  value = {};
+  for (auto const& item : arr) {
+    if (item == "monday") {
+      value |= test_model::DaysOfWeek::kMonday;
+      continue;
+    }
+    if (item == "tuesday") {
+      value |= test_model::DaysOfWeek::kTuesday;
+      continue;
+    }
+    if (item == "wednesday") {
+      value |= test_model::DaysOfWeek::kWednesday;
+      continue;
+    }
+    if (item == "thursday") {
+      value |= test_model::DaysOfWeek::kThursday;
+      continue;
+    }
+    if (item == "friday") {
+      value |= test_model::DaysOfWeek::kFriday;
+      continue;
+    }
+    if (item == "saturday") {
+      value |= test_model::DaysOfWeek::kSaturday;
+      continue;
+    }
+    if (item == "sunday") {
+      value |= test_model::DaysOfWeek::kSunday;
+      continue;
+    }
+    throw std::runtime_error("Invalid enum value '" + item + "' for enum test_model::DaysOfWeek");
+  }
+}
+
+void to_json(ordered_json& j, test_model::TextFormat const& value) {
+  auto arr = ordered_json::array();
+  if (value == test_model::TextFormat::kRegular) {
+    arr.push_back("regular");
+    j = arr;
+    return;
+  }
+  auto remaining = value;
+  if (yardl::HasFlag(remaining, test_model::TextFormat::kBold)) {
+    arr.push_back("bold");
+    remaining &= ~test_model::TextFormat::kBold;
+    if (remaining == test_model::TextFormat::kRegular) {
+      j = arr;
+      return;
+    }
+  }
+  if (yardl::HasFlag(remaining, test_model::TextFormat::kItalic)) {
+    arr.push_back("italic");
+    remaining &= ~test_model::TextFormat::kItalic;
+    if (remaining == test_model::TextFormat::kRegular) {
+      j = arr;
+      return;
+    }
+  }
+  if (yardl::HasFlag(remaining, test_model::TextFormat::kUnderline)) {
+    arr.push_back("underline");
+    remaining &= ~test_model::TextFormat::kUnderline;
+    if (remaining == test_model::TextFormat::kRegular) {
+      j = arr;
+      return;
+    }
+  }
+  if (yardl::HasFlag(remaining, test_model::TextFormat::kStrikethrough)) {
+    arr.push_back("strikethrough");
+    remaining &= ~test_model::TextFormat::kStrikethrough;
+    if (remaining == test_model::TextFormat::kRegular) {
+      j = arr;
+      return;
+    }
+  }
+  using underlying_type = typename std::underlying_type<test_model::TextFormat>::type;
+  j = static_cast<underlying_type>(value);
+}
+
+void from_json(ordered_json const& j, test_model::TextFormat& value) {
+  if (j.is_number()) {
+    using underlying_type = typename std::underlying_type<test_model::TextFormat>::type;
+    value = static_cast<test_model::TextFormat>(j.get<underlying_type>());
+    return;
+  }
+  std::vector<std::string> arr = j;
+  value = {};
+  for (auto const& item : arr) {
+    if (item == "regular") {
+      value |= test_model::TextFormat::kRegular;
+      continue;
+    }
+    if (item == "bold") {
+      value |= test_model::TextFormat::kBold;
+      continue;
+    }
+    if (item == "italic") {
+      value |= test_model::TextFormat::kItalic;
+      continue;
+    }
+    if (item == "underline") {
+      value |= test_model::TextFormat::kUnderline;
+      continue;
+    }
+    if (item == "strikethrough") {
+      value |= test_model::TextFormat::kStrikethrough;
+      continue;
+    }
+    throw std::runtime_error("Invalid enum value '" + item + "' for enum test_model::TextFormat");
+  }
+}
+
 template <typename T1, typename T2>
 void to_json(ordered_json& j, test_model::GenericRecord<T1, T2> const& value) {
   j = ordered_json::object();
@@ -2124,6 +2315,34 @@ void EnumsReader::ReadSizeImpl(test_model::SizeBasedEnum& value) {
 }
 
 void EnumsReader::CloseImpl() {
+  VerifyFinished();
+}
+
+void FlagsWriter::WriteDaysImpl(test_model::DaysOfWeek const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "days", json_value);}
+
+void FlagsWriter::WriteFormatsImpl(test_model::TextFormat const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "formats", json_value);}
+
+void FlagsWriter::Flush() {
+  stream_.flush();
+}
+
+void FlagsWriter::CloseImpl() {
+  stream_.flush();
+}
+
+bool FlagsReader::ReadDaysImpl(test_model::DaysOfWeek& value) {
+  return yardl::ndjson::ReadProtocolValue(stream_, line_, "days", false, unused_step_, value);
+}
+
+bool FlagsReader::ReadFormatsImpl(test_model::TextFormat& value) {
+  return yardl::ndjson::ReadProtocolValue(stream_, line_, "formats", false, unused_step_, value);
+}
+
+void FlagsReader::CloseImpl() {
   VerifyFinished();
 }
 

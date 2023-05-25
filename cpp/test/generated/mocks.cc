@@ -2371,6 +2371,141 @@ class TestEnumsWriterBase : public EnumsWriterBase {
   bool close_called_ = false;
 };
 
+class MockFlagsWriter : public FlagsWriterBase {
+  public:
+  void WriteDaysImpl (test_model::DaysOfWeek const& value) override {
+    if (WriteDaysImpl_expected_values_.empty()) {
+      throw std::runtime_error("Unexpected call to WriteDaysImpl");
+    }
+    if (WriteDaysImpl_expected_values_.front() != value) {
+      throw std::runtime_error("Unexpected argument value for call to WriteDaysImpl");
+    }
+    WriteDaysImpl_expected_values_.pop();
+  }
+
+  std::queue<test_model::DaysOfWeek> WriteDaysImpl_expected_values_;
+
+  void ExpectWriteDaysImpl (test_model::DaysOfWeek const& value) {
+    WriteDaysImpl_expected_values_.push(value);
+  }
+
+  void EndDaysImpl () override {
+    if (--EndDaysImpl_expected_call_count_ < 0) {
+      throw std::runtime_error("Unexpected call to EndDaysImpl");
+    }
+  }
+
+  int EndDaysImpl_expected_call_count_ = 0;
+
+  void ExpectEndDaysImpl () {
+    EndDaysImpl_expected_call_count_++;
+  }
+
+  void WriteFormatsImpl (test_model::TextFormat const& value) override {
+    if (WriteFormatsImpl_expected_values_.empty()) {
+      throw std::runtime_error("Unexpected call to WriteFormatsImpl");
+    }
+    if (WriteFormatsImpl_expected_values_.front() != value) {
+      throw std::runtime_error("Unexpected argument value for call to WriteFormatsImpl");
+    }
+    WriteFormatsImpl_expected_values_.pop();
+  }
+
+  std::queue<test_model::TextFormat> WriteFormatsImpl_expected_values_;
+
+  void ExpectWriteFormatsImpl (test_model::TextFormat const& value) {
+    WriteFormatsImpl_expected_values_.push(value);
+  }
+
+  void EndFormatsImpl () override {
+    if (--EndFormatsImpl_expected_call_count_ < 0) {
+      throw std::runtime_error("Unexpected call to EndFormatsImpl");
+    }
+  }
+
+  int EndFormatsImpl_expected_call_count_ = 0;
+
+  void ExpectEndFormatsImpl () {
+    EndFormatsImpl_expected_call_count_++;
+  }
+
+  void Verify() {
+    if (!WriteDaysImpl_expected_values_.empty()) {
+      throw std::runtime_error("Expected call to WriteDaysImpl was not received");
+    }
+    if (EndDaysImpl_expected_call_count_ > 0) {
+      throw std::runtime_error("Expected call to EndDaysImpl was not received");
+    }
+    if (!WriteFormatsImpl_expected_values_.empty()) {
+      throw std::runtime_error("Expected call to WriteFormatsImpl was not received");
+    }
+    if (EndFormatsImpl_expected_call_count_ > 0) {
+      throw std::runtime_error("Expected call to EndFormatsImpl was not received");
+    }
+  }
+};
+
+class TestFlagsWriterBase : public FlagsWriterBase {
+  public:
+  TestFlagsWriterBase(std::unique_ptr<test_model::FlagsWriterBase> writer, std::function<std::unique_ptr<FlagsReaderBase>()> create_reader) : writer_(std::move(writer)), create_reader_(create_reader) {
+  }
+
+  ~TestFlagsWriterBase() {
+    if (!close_called_ && !std::uncaught_exceptions()) {
+      ADD_FAILURE() << "Close() needs to be called on 'TestFlagsWriterBase' to verify mocks";
+    }
+  }
+
+  protected:
+  void WriteDaysImpl(test_model::DaysOfWeek const& value) override {
+    writer_->WriteDays(value);
+    mock_writer_.ExpectWriteDaysImpl(value);
+  }
+
+  void WriteDaysImpl(std::vector<test_model::DaysOfWeek> const& values) override {
+    writer_->WriteDays(values);
+    for (auto const& v : values) {
+      mock_writer_.ExpectWriteDaysImpl(v);
+    }
+  }
+
+  void EndDaysImpl() override {
+    writer_->EndDays();
+    mock_writer_.ExpectEndDaysImpl();
+  }
+
+  void WriteFormatsImpl(test_model::TextFormat const& value) override {
+    writer_->WriteFormats(value);
+    mock_writer_.ExpectWriteFormatsImpl(value);
+  }
+
+  void WriteFormatsImpl(std::vector<test_model::TextFormat> const& values) override {
+    writer_->WriteFormats(values);
+    for (auto const& v : values) {
+      mock_writer_.ExpectWriteFormatsImpl(v);
+    }
+  }
+
+  void EndFormatsImpl() override {
+    writer_->EndFormats();
+    mock_writer_.ExpectEndFormatsImpl();
+  }
+
+  void CloseImpl() override {
+    close_called_ = true;
+    writer_->Close();
+    std::unique_ptr<FlagsReaderBase> reader = create_reader_();
+    reader->CopyTo(mock_writer_, 2, 1);
+    mock_writer_.Verify();
+  }
+
+  private:
+  std::unique_ptr<test_model::FlagsWriterBase> writer_;
+  std::function<std::unique_ptr<test_model::FlagsReaderBase>()> create_reader_;
+  MockFlagsWriter mock_writer_;
+  bool close_called_ = false;
+};
+
 class MockStateTestWriter : public StateTestWriterBase {
   public:
   void WriteAnIntImpl (int32_t const& value) override {
@@ -3824,6 +3959,20 @@ std::unique_ptr<test_model::EnumsWriterBase> CreateValidatingWriter<test_model::
     return std::make_unique<test_model::TestEnumsWriterBase>(std::make_unique<test_model::binary::EnumsWriter>(filename), [filename](){return std::make_unique<test_model::binary::EnumsReader>(filename);});
   case Format::kNDJson:
     return std::make_unique<test_model::TestEnumsWriterBase>(std::make_unique<test_model::ndjson::EnumsWriter>(filename), [filename](){return std::make_unique<test_model::ndjson::EnumsReader>(filename);});
+  default:
+    throw std::runtime_error("Unknown format");
+  }
+}
+
+template<>
+std::unique_ptr<test_model::FlagsWriterBase> CreateValidatingWriter<test_model::FlagsWriterBase>(Format format, std::string const& filename) {
+  switch (format) {
+  case Format::kHdf5:
+    return std::make_unique<test_model::TestFlagsWriterBase>(std::make_unique<test_model::hdf5::FlagsWriter>(filename), [filename](){ return std::make_unique<test_model::hdf5::FlagsReader>(filename);});
+  case Format::kBinary:
+    return std::make_unique<test_model::TestFlagsWriterBase>(std::make_unique<test_model::binary::FlagsWriter>(filename), [filename](){return std::make_unique<test_model::binary::FlagsReader>(filename);});
+  case Format::kNDJson:
+    return std::make_unique<test_model::TestFlagsWriterBase>(std::make_unique<test_model::ndjson::FlagsWriter>(filename), [filename](){return std::make_unique<test_model::ndjson::FlagsReader>(filename);});
   default:
     throw std::runtime_error("Unknown format");
   }

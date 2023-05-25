@@ -134,7 +134,11 @@ func WriteNdJson(env *dsl.Environment, options packaging.CppCodegenOptions) erro
 		for _, t := range ns.TypeDefinitions {
 			switch t := t.(type) {
 			case *dsl.EnumDefinition:
-				writeEnumConverters(w, t)
+				if t.IsFlags {
+					writeFlagsConverters(w, t)
+				} else {
+					writeEnumConverters(w, t)
+				}
 			case *dsl.RecordDefinition:
 				writeRecordConverters(w, t)
 			}
@@ -346,6 +350,99 @@ func writeEnumConverters(w *formatting.IndentedWriter, t *dsl.EnumDefinition) {
 	w.WriteStringln("}\n")
 }
 
+func writeFlagsConverters(w *formatting.IndentedWriter, t *dsl.EnumDefinition) {
+	// If the value is not a combination of the defined flags, we write it as the integer value.
+	// Otherwise, we write it as an array of strings.
+	// If the value is zero and there is a zero value defined, we write it as the zero value,
+	// otherwise, the array will be empty.
+
+	typeName := common.TypeDefinitionSyntax(t)
+	zero := t.GetZeroValue()
+	fmt.Fprintf(w, "void to_json(ordered_json& j, %s const& value) {\n", typeName)
+	w.Indented(func() {
+		w.WriteStringln("auto arr = ordered_json::array();")
+		if zero == nil {
+			fmt.Fprintf(w, "using underlying_type = typename std::underlying_type<%s>::type;\n", typeName)
+			w.WriteStringln("if (static_cast<underlying_type>(value) == 0) {")
+			w.Indented(func() {
+				w.WriteStringln("j = arr;")
+				w.WriteStringln("return;")
+			})
+			w.WriteStringln("}")
+		}
+		if zero != nil {
+			fmt.Fprintf(w, "if (value == %s::%s) {\n", typeName, common.EnumValueIdentifierName(zero.Symbol))
+			w.Indented(func() {
+				fmt.Fprintf(w, "arr.push_back(\"%s\");\n", zero.Symbol)
+				w.WriteStringln("j = arr;")
+				w.WriteStringln("return;")
+			})
+			w.WriteStringln("}")
+		}
+
+		w.WriteStringln("auto remaining = value;")
+		for _, v := range t.Values {
+			if v == zero {
+				continue
+			}
+			fmt.Fprintf(w, "if (yardl::HasFlag(remaining, %s::%s)) {\n", typeName, common.EnumValueIdentifierName(v.Symbol))
+			w.Indented(func() {
+				fmt.Fprintf(w, "arr.push_back(\"%s\");\n", v.Symbol)
+				fmt.Fprintf(w, "remaining &= ~%s::%s;\n", typeName, common.EnumValueIdentifierName(v.Symbol))
+				if zero != nil {
+					fmt.Fprintf(w, "if (remaining == %s::%s) {\n", typeName, common.EnumValueIdentifierName(zero.Symbol))
+					w.Indented(func() {
+						w.WriteStringln("j = arr;")
+						w.WriteStringln("return;")
+					})
+					w.WriteStringln("}")
+				} else {
+					w.WriteStringln("if (static_cast<underlying_type>(remaining) == 0) {")
+					w.Indented(func() {
+						w.WriteStringln("j = arr;")
+						w.WriteStringln("return;")
+					})
+					w.WriteStringln("}")
+				}
+			})
+			w.WriteStringln("}")
+		}
+
+		if zero != nil {
+			fmt.Fprintf(w, "using underlying_type = typename std::underlying_type<%s>::type;\n", typeName)
+		}
+		w.WriteStringln("j = static_cast<underlying_type>(value);")
+	})
+	w.WriteStringln("}\n")
+
+	fmt.Fprintf(w, "void from_json(ordered_json const& j, %s& value) {\n", common.TypeDefinitionSyntax(t))
+	w.Indented(func() {
+		w.WriteStringln("if (j.is_number()) {")
+		w.Indented(func() {
+			fmt.Fprintf(w, "using underlying_type = typename std::underlying_type<%s>::type;\n", typeName)
+			fmt.Fprintf(w, "value = static_cast<%s>(j.get<underlying_type>());\n", typeName)
+			w.WriteStringln("return;")
+		})
+		w.WriteStringln("}")
+		w.WriteStringln("std::vector<std::string> arr = j;")
+		w.WriteStringln("value = {};")
+		w.WriteStringln("for (auto const& item : arr) {")
+		w.Indented(func() {
+			for _, v := range t.Values {
+				fmt.Fprintf(w, "if (item == \"%s\") {\n", v.Symbol)
+				w.Indented(func() {
+					fmt.Fprintf(w, "value |= %s::%s;\n", typeName, common.EnumValueIdentifierName(v.Symbol))
+					w.WriteStringln("continue;")
+				})
+				w.WriteStringln("}")
+			}
+			fmt.Fprintf(w, "throw std::runtime_error(\"Invalid enum value '\" + item + \"' for enum %s\");\n", typeName)
+		})
+		w.WriteStringln("}")
+	})
+	w.WriteStringln("}\n")
+}
+
 func writeUnionConverters(w *formatting.IndentedWriter, unionType *dsl.GeneralizedType) {
 	simplfied := true
 	var possibleTypes jsonDataType
@@ -463,6 +560,9 @@ func getJsonDataType(t dsl.Type) jsonDataType {
 			panic(fmt.Sprintf("unexpected primitive type %s", td))
 		}
 	case *dsl.EnumDefinition:
+		if td.IsFlags {
+			return jsonArray
+		}
 		return jsonString | jsonNumber
 	case *dsl.RecordDefinition:
 		return jsonObject

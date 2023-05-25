@@ -34,7 +34,8 @@ func WriteTypes(env *dsl.Environment, options packaging.CppCodegenOptions) error
 	for _, ns := range env.Namespaces {
 		fmt.Fprintf(w, "namespace %s {\n", common.NamespaceIdentifierName(ns.Name))
 		writeNamespaceMembers(w, ns)
-		w.WriteStringln("}")
+		fmt.Fprintf(w, "} // namespace %s\n", common.NamespaceIdentifierName(ns.Name))
+		writeFlagsTraitsSpecializations(w, ns)
 	}
 
 	definitionsPath := path.Join(options.SourcesOutputDir, "types.h")
@@ -337,4 +338,29 @@ func writeSwitchCaseOverOptional(w *formatting.IndentedWriter, switchCase *dsl.S
 	default:
 		panic(fmt.Sprintf("Unknown pattern type '%T'", switchCase.Pattern))
 	}
+}
+
+func writeFlagsTraitsSpecializations(w *formatting.IndentedWriter, ns *dsl.Namespace) {
+	any := false
+
+	for _, t := range ns.TypeDefinitions {
+		switch t := t.(type) {
+		case *dsl.EnumDefinition:
+			if t.IsFlags {
+				if !any {
+					any = true
+					w.WriteStringln("\nnamespace yardl {")
+				} else {
+					w.WriteString("\n")
+				}
+
+				fmt.Fprintf(w, "template<>\nstruct is_flags_enum_t<%s> : std::true_type {};\n", common.TypeDefinitionSyntax(t))
+			}
+		}
+	}
+
+	if any {
+		w.WriteStringln("} // namespace yardl")
+	}
+
 }

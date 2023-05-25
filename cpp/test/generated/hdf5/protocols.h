@@ -658,6 +658,46 @@ class EnumsReader : public test_model::EnumsReaderBase, public yardl::hdf5::Hdf5
 
   private:
 };
+// HDF5 writer for the Flags protocol.
+class FlagsWriter : public test_model::FlagsWriterBase, public yardl::hdf5::Hdf5Writer {
+  public:
+  FlagsWriter(std::string path);
+
+  protected:
+  void WriteDaysImpl(test_model::DaysOfWeek const& value) override;
+
+  void WriteDaysImpl(std::vector<test_model::DaysOfWeek> const& values) override;
+
+  void EndDaysImpl() override;
+
+  void WriteFormatsImpl(test_model::TextFormat const& value) override;
+
+  void WriteFormatsImpl(std::vector<test_model::TextFormat> const& values) override;
+
+  void EndFormatsImpl() override;
+
+  private:
+  std::unique_ptr<yardl::hdf5::DatasetWriter> days_dataset_state_;
+  std::unique_ptr<yardl::hdf5::DatasetWriter> formats_dataset_state_;
+};
+
+// HDF5 reader for the Flags protocol.
+class FlagsReader : public test_model::FlagsReaderBase, public yardl::hdf5::Hdf5Reader {
+  public:
+  FlagsReader(std::string path);
+
+  bool ReadDaysImpl(test_model::DaysOfWeek& value) override;
+
+  bool ReadDaysImpl(std::vector<test_model::DaysOfWeek>& values) override;
+
+  bool ReadFormatsImpl(test_model::TextFormat& value) override;
+
+  bool ReadFormatsImpl(std::vector<test_model::TextFormat>& values) override;
+
+  private:
+  std::unique_ptr<yardl::hdf5::DatasetReader> days_dataset_state_;
+  std::unique_ptr<yardl::hdf5::DatasetReader> formats_dataset_state_;
+};
 // HDF5 writer for the StateTest protocol.
 class StateTestWriter : public test_model::StateTestWriterBase, public yardl::hdf5::Hdf5Writer {
   public:

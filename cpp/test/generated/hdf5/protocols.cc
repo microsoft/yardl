@@ -146,6 +146,40 @@ namespace {
   return t;
 };
 
+[[maybe_unused]] H5::EnumType GetDaysOfWeekHdf5Ddl() {
+  H5::EnumType t(H5::PredType::NATIVE_INT32);
+  int32_t i = 1;
+  t.insert("monday", &i);
+  i = 2;
+  t.insert("tuesday", &i);
+  i = 4;
+  t.insert("wednesday", &i);
+  i = 8;
+  t.insert("thursday", &i);
+  i = 16;
+  t.insert("friday", &i);
+  i = 32;
+  t.insert("saturday", &i);
+  i = 64;
+  t.insert("sunday", &i);
+  return t;
+};
+
+[[maybe_unused]] H5::EnumType GetTextFormatHdf5Ddl() {
+  H5::EnumType t(H5::PredType::NATIVE_INT32);
+  int32_t i = 0;
+  t.insert("regular", &i);
+  i = 1;
+  t.insert("bold", &i);
+  i = 2;
+  t.insert("italic", &i);
+  i = 4;
+  t.insert("underline", &i);
+  i = 8;
+  t.insert("strikethrough", &i);
+  return t;
+};
+
 [[maybe_unused]] H5::EnumType GetEnumWithKeywordSymbolsHdf5Ddl() {
   H5::EnumType t(H5::PredType::NATIVE_INT32);
   int32_t i = 2;
@@ -1975,6 +2009,114 @@ void EnumsReader::ReadVecImpl(std::vector<test_model::Fruits>& value) {
 
 void EnumsReader::ReadSizeImpl(test_model::SizeBasedEnum& value) {
   yardl::hdf5::ReadScalarDataset<test_model::SizeBasedEnum, test_model::SizeBasedEnum>(group_, "size", test_model::hdf5::GetSizeBasedEnumHdf5Ddl(), value);
+}
+
+FlagsWriter::FlagsWriter(std::string path)
+    : yardl::hdf5::Hdf5Writer::Hdf5Writer(path, "Flags", schema_) {
+}
+
+void FlagsWriter::WriteDaysImpl(test_model::DaysOfWeek const& value) {
+  if (!days_dataset_state_) {
+    days_dataset_state_ = std::make_unique<yardl::hdf5::DatasetWriter>(group_, "days", test_model::hdf5::GetDaysOfWeekHdf5Ddl(), 0);
+  }
+
+  days_dataset_state_->Append<test_model::DaysOfWeek, test_model::DaysOfWeek>(value);
+}
+
+void FlagsWriter::WriteDaysImpl(std::vector<test_model::DaysOfWeek> const& values) {
+  if (!days_dataset_state_) {
+    days_dataset_state_ = std::make_unique<yardl::hdf5::DatasetWriter>(group_, "days", test_model::hdf5::GetDaysOfWeekHdf5Ddl(), 0);
+  }
+
+  days_dataset_state_->AppendBatch<test_model::DaysOfWeek, test_model::DaysOfWeek>(values);
+}
+
+void FlagsWriter::EndDaysImpl() {
+  if (!days_dataset_state_) {
+    days_dataset_state_ = std::make_unique<yardl::hdf5::DatasetWriter>(group_, "days", test_model::hdf5::GetDaysOfWeekHdf5Ddl(), 0);
+  }
+
+  days_dataset_state_.reset();
+}
+
+void FlagsWriter::WriteFormatsImpl(test_model::TextFormat const& value) {
+  if (!formats_dataset_state_) {
+    formats_dataset_state_ = std::make_unique<yardl::hdf5::DatasetWriter>(group_, "formats", test_model::hdf5::GetTextFormatHdf5Ddl(), 0);
+  }
+
+  formats_dataset_state_->Append<test_model::TextFormat, test_model::TextFormat>(value);
+}
+
+void FlagsWriter::WriteFormatsImpl(std::vector<test_model::TextFormat> const& values) {
+  if (!formats_dataset_state_) {
+    formats_dataset_state_ = std::make_unique<yardl::hdf5::DatasetWriter>(group_, "formats", test_model::hdf5::GetTextFormatHdf5Ddl(), 0);
+  }
+
+  formats_dataset_state_->AppendBatch<test_model::TextFormat, test_model::TextFormat>(values);
+}
+
+void FlagsWriter::EndFormatsImpl() {
+  if (!formats_dataset_state_) {
+    formats_dataset_state_ = std::make_unique<yardl::hdf5::DatasetWriter>(group_, "formats", test_model::hdf5::GetTextFormatHdf5Ddl(), 0);
+  }
+
+  formats_dataset_state_.reset();
+}
+
+FlagsReader::FlagsReader(std::string path)
+    : yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "Flags", schema_) {
+}
+
+bool FlagsReader::ReadDaysImpl(test_model::DaysOfWeek& value) {
+  if (!days_dataset_state_) {
+    days_dataset_state_ = std::make_unique<yardl::hdf5::DatasetReader>(group_, "days", test_model::hdf5::GetDaysOfWeekHdf5Ddl(), 0);
+  }
+
+  bool has_value = days_dataset_state_->Read<test_model::DaysOfWeek, test_model::DaysOfWeek>(value);
+  if (!has_value) {
+    days_dataset_state_.reset();
+  }
+
+  return has_value;
+}
+
+bool FlagsReader::ReadDaysImpl(std::vector<test_model::DaysOfWeek>& values) {
+  if (!days_dataset_state_) {
+    days_dataset_state_ = std::make_unique<yardl::hdf5::DatasetReader>(group_, "days", test_model::hdf5::GetDaysOfWeekHdf5Ddl());
+  }
+
+  bool has_more = days_dataset_state_->ReadBatch<test_model::DaysOfWeek, test_model::DaysOfWeek>(values);
+  if (!has_more) {
+    days_dataset_state_.reset();
+  }
+
+  return has_more;
+}
+
+bool FlagsReader::ReadFormatsImpl(test_model::TextFormat& value) {
+  if (!formats_dataset_state_) {
+    formats_dataset_state_ = std::make_unique<yardl::hdf5::DatasetReader>(group_, "formats", test_model::hdf5::GetTextFormatHdf5Ddl(), 0);
+  }
+
+  bool has_value = formats_dataset_state_->Read<test_model::TextFormat, test_model::TextFormat>(value);
+  if (!has_value) {
+    formats_dataset_state_.reset();
+  }
+
+  return has_value;
+}
+
+bool FlagsReader::ReadFormatsImpl(std::vector<test_model::TextFormat>& values) {
+  if (!formats_dataset_state_) {
+    formats_dataset_state_ = std::make_unique<yardl::hdf5::DatasetReader>(group_, "formats", test_model::hdf5::GetTextFormatHdf5Ddl());
+  }
+
+  bool has_more = formats_dataset_state_->ReadBatch<test_model::TextFormat, test_model::TextFormat>(values);
+  if (!has_more) {
+    formats_dataset_state_.reset();
+  }
+
+  return has_more;
 }
 
 StateTestWriter::StateTestWriter(std::string path)
