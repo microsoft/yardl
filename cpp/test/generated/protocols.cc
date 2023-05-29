@@ -109,7 +109,9 @@ bool BenchmarkFloat256x256ReaderBase::ReadFloat256x256(std::vector<yardl::FixedN
     BenchmarkFloat256x256ReaderBaseInvalidState(0, state_);
   }
 
-  if (!ReadFloat256x256Impl(values)) {state_ = 1;
+  if (!ReadFloat256x256Impl(values)) {
+    state_ = 1;
+    return values.size() > 0;
   }
   return true;
 }
@@ -256,7 +258,9 @@ bool BenchmarkFloatVlenReaderBase::ReadFloatArray(std::vector<yardl::NDArray<flo
     BenchmarkFloatVlenReaderBaseInvalidState(0, state_);
   }
 
-  if (!ReadFloatArrayImpl(values)) {state_ = 1;
+  if (!ReadFloatArrayImpl(values)) {
+    state_ = 1;
+    return values.size() > 0;
   }
   return true;
 }
@@ -403,7 +407,9 @@ bool BenchmarkSmallRecordReaderBase::ReadSmallRecord(std::vector<test_model::Sma
     BenchmarkSmallRecordReaderBaseInvalidState(0, state_);
   }
 
-  if (!ReadSmallRecordImpl(values)) {state_ = 1;
+  if (!ReadSmallRecordImpl(values)) {
+    state_ = 1;
+    return values.size() > 0;
   }
   return true;
 }
@@ -550,7 +556,9 @@ bool BenchmarkSmallRecordWithOptionalsReaderBase::ReadSmallRecord(std::vector<te
     BenchmarkSmallRecordWithOptionalsReaderBaseInvalidState(0, state_);
   }
 
-  if (!ReadSmallRecordImpl(values)) {state_ = 1;
+  if (!ReadSmallRecordImpl(values)) {
+    state_ = 1;
+    return values.size() > 0;
   }
   return true;
 }
@@ -697,7 +705,9 @@ bool BenchmarkSimpleMrdReaderBase::ReadData(std::vector<std::variant<test_model:
     BenchmarkSimpleMrdReaderBaseInvalidState(0, state_);
   }
 
-  if (!ReadDataImpl(values)) {state_ = 1;
+  if (!ReadDataImpl(values)) {
+    state_ = 1;
+    return values.size() > 0;
   }
   return true;
 }
@@ -1739,7 +1749,9 @@ bool StreamsReaderBase::ReadIntData(std::vector<int32_t>& values) {
     StreamsReaderBaseInvalidState(0, state_);
   }
 
-  if (!ReadIntDataImpl(values)) {state_ = 1;
+  if (!ReadIntDataImpl(values)) {
+    state_ = 1;
+    return values.size() > 0;
   }
   return true;
 }
@@ -1799,7 +1811,9 @@ bool StreamsReaderBase::ReadOptionalIntData(std::vector<std::optional<int32_t>>&
     }
   }
 
-  if (!ReadOptionalIntDataImpl(values)) {state_ = 3;
+  if (!ReadOptionalIntDataImpl(values)) {
+    state_ = 3;
+    return values.size() > 0;
   }
   return true;
 }
@@ -1859,7 +1873,9 @@ bool StreamsReaderBase::ReadRecordWithOptionalVectorData(std::vector<test_model:
     }
   }
 
-  if (!ReadRecordWithOptionalVectorDataImpl(values)) {state_ = 5;
+  if (!ReadRecordWithOptionalVectorDataImpl(values)) {
+    state_ = 5;
+    return values.size() > 0;
   }
   return true;
 }
@@ -1919,7 +1935,9 @@ bool StreamsReaderBase::ReadFixedVector(std::vector<std::array<int32_t, 3>>& val
     }
   }
 
-  if (!ReadFixedVectorImpl(values)) {state_ = 7;
+  if (!ReadFixedVectorImpl(values)) {
+    state_ = 7;
+    return values.size() > 0;
   }
   return true;
 }
@@ -3069,7 +3087,9 @@ bool StreamsOfUnionsReaderBase::ReadIntOrSimpleRecord(std::vector<std::variant<i
     StreamsOfUnionsReaderBaseInvalidState(0, state_);
   }
 
-  if (!ReadIntOrSimpleRecordImpl(values)) {state_ = 1;
+  if (!ReadIntOrSimpleRecordImpl(values)) {
+    state_ = 1;
+    return values.size() > 0;
   }
   return true;
 }
@@ -3129,7 +3149,9 @@ bool StreamsOfUnionsReaderBase::ReadNullableIntOrSimpleRecord(std::vector<std::v
     }
   }
 
-  if (!ReadNullableIntOrSimpleRecordImpl(values)) {state_ = 3;
+  if (!ReadNullableIntOrSimpleRecordImpl(values)) {
+    state_ = 3;
+    return values.size() > 0;
   }
   return true;
 }
@@ -3447,7 +3469,9 @@ bool StateTestReaderBase::ReadAStream(std::vector<int32_t>& values) {
     StateTestReaderBaseInvalidState(2, state_);
   }
 
-  if (!ReadAStreamImpl(values)) {state_ = 3;
+  if (!ReadAStreamImpl(values)) {
+    state_ = 3;
+    return values.size() > 0;
   }
   return true;
 }
@@ -3785,7 +3809,9 @@ bool SimpleGenericsReaderBase::ReadStreamOfTypeVariants(std::vector<std::variant
     SimpleGenericsReaderBaseInvalidState(16, state_);
   }
 
-  if (!ReadStreamOfTypeVariantsImpl(values)) {state_ = 17;
+  if (!ReadStreamOfTypeVariantsImpl(values)) {
+    state_ = 17;
+    return values.size() > 0;
   }
   return true;
 }
@@ -4337,7 +4363,9 @@ bool AliasesReaderBase::ReadStreamOfAliasedGenericUnion2(std::vector<test_model:
     AliasesReaderBaseInvalidState(18, state_);
   }
 
-  if (!ReadStreamOfAliasedGenericUnion2Impl(values)) {state_ = 19;
+  if (!ReadStreamOfAliasedGenericUnion2Impl(values)) {
+    state_ = 19;
+    return values.size() > 0;
   }
   return true;
 }
@@ -4564,7 +4592,9 @@ bool StreamsOfAliasedUnionsReaderBase::ReadIntOrSimpleRecord(std::vector<test_mo
     StreamsOfAliasedUnionsReaderBaseInvalidState(0, state_);
   }
 
-  if (!ReadIntOrSimpleRecordImpl(values)) {state_ = 1;
+  if (!ReadIntOrSimpleRecordImpl(values)) {
+    state_ = 1;
+    return values.size() > 0;
   }
   return true;
 }
@@ -4624,7 +4654,9 @@ bool StreamsOfAliasedUnionsReaderBase::ReadNullableIntOrSimpleRecord(std::vector
     }
   }
 
-  if (!ReadNullableIntOrSimpleRecordImpl(values)) {state_ = 3;
+  if (!ReadNullableIntOrSimpleRecordImpl(values)) {
+    state_ = 3;
+    return values.size() > 0;
   }
   return true;
 }
@@ -4869,7 +4901,9 @@ bool ProtocolWithKeywordStepsReaderBase::ReadInt(std::vector<test_model::RecordW
     ProtocolWithKeywordStepsReaderBaseInvalidState(0, state_);
   }
 
-  if (!ReadIntImpl(values)) {state_ = 1;
+  if (!ReadIntImpl(values)) {
+    state_ = 1;
+    return values.size() > 0;
   }
   return true;
 }

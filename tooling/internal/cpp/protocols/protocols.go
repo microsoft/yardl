@@ -294,9 +294,10 @@ func writeDefinitions(w *formatting.IndentedWriter, ns *dsl.Namespace, symbolTab
 					w.WriteStringln("}")
 					writeReaderStateCheckIfStatement(w, p, i, true)
 
-					fmt.Fprintf(w, "if (!%s(values)) {", common.ProtocolReadImplMethodName(step))
+					fmt.Fprintf(w, "if (!%s(values)) {\n", common.ProtocolReadImplMethodName(step))
 					w.Indented(func() {
 						fmt.Fprintf(w, "state_ = %d;\n", 2*i+1)
+						w.WriteStringln("return values.size() > 0;")
 					})
 					w.WriteStringln("}")
 					w.WriteStringln("return true;")

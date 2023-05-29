@@ -10,6 +10,7 @@
 
 #include "generated/yardl/detail/binary/reader_writer.h"
 #include "generated/yardl/detail/hdf5/io.h"
+#include "generated/yardl/detail/ndjson/reader_writer.h"
 
 namespace yardl::testing {
 
@@ -39,30 +40,33 @@ inline void WriteBenchmarkTableHeader() {
             << " | " << std::setw(25) << "Scenario"
             << " | " << std::setw(6) << "Action"
             << " | " << std::setw(10) << "MiB/s"
-            << " | " << std::setw(6) << "GiB"
             << " |" << std::endl;
   std::cout << std::right << std::setfill('-')
             << "| " << std::setw(8) << ""
             << " | " << std::setw(25) << ""
             << " | " << std::setw(6) << ""
             << " | " << std::setw(10) << ""
-            << " | " << std::setw(6) << ""
             << " | " << std::setfill(' ') << std::left << std::endl;
 }
 
 inline void WriteBenchmarkTableRow(std::string& provider, std::string& scenario,
-                                   std::string& action, double throughput_mi_byte_s,
-                                   double total_size_gi_byte) {
-  std::string provider_color = provider == "binary"
-                                   ? (action == "write" ? BOLDCYAN : CYAN)
-                                   : (action == "write" ? BOLDBLUE : BLUE);
+                                   std::string& action, double throughput_mi_byte_s) {
+  std::string provider_color;
+  if (provider == "binary") {
+    provider_color = action == "write" ? BOLDCYAN : CYAN;
+  } else if (provider == "hdf5") {
+    provider_color = action == "write" ? BOLDBLUE : BLUE;
+  } else if (provider == "ndjson") {
+    provider_color = action == "write" ? BOLDGREEN : GREEN;
+  } else {
+    provider_color = action == "write" ? BOLDRED : RED;
+  }
 
   std::cout << std::left
             << "| " << provider_color << std::setw(8) << provider << RESET
             << " | " << provider_color << std::setw(25) << scenario << RESET
             << " | " << provider_color << std::setw(6) << action << RESET
             << " | " << provider_color << std::setw(10) << std::right << std::fixed << std::setprecision(2) << throughput_mi_byte_s << RESET
-            << " | " << provider_color << std::setw(6) << std::right << std::fixed << std::setprecision(2) << total_size_gi_byte << RESET
             << " |" << std::endl;
 }
 
@@ -92,6 +96,12 @@ class TimedScope {
     } else if constexpr (std::is_base_of_v<yardl::hdf5::Hdf5Reader, T>) {
       action = "read";
       provider = "hdf5";
+    } else if constexpr (std::is_base_of_v<yardl::ndjson::NDJsonWriter, T>) {
+      action = "write";
+      provider = "ndjson";
+    } else if constexpr (std::is_base_of_v<yardl::ndjson::NDJsonReader, T>) {
+      action = "read";
+      provider = "ndjson";
     } else {
       throw std::runtime_error("Unknown type");
     }
@@ -104,7 +114,7 @@ class TimedScope {
     float total_size_mi_byte = total_size_bytes_ / 1024.0 / 1024.0;
     float throughput_mi_byte_s = total_size_mi_byte / elapsed_seconds;
 
-    WriteBenchmarkTableRow(provider, scenario_name_, action, throughput_mi_byte_s, total_size_mi_byte / 1024.0);
+    WriteBenchmarkTableRow(provider, scenario_name_, action, throughput_mi_byte_s);
   }
 
  private:

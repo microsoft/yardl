@@ -7,6 +7,7 @@
 
 #include "generated/binary/protocols.h"
 #include "generated/hdf5/protocols.h"
+#include "generated/ndjson/protocols.h"
 
 using namespace test_model;
 
@@ -23,6 +24,15 @@ void AssertRepetitionsSame(size_t expected, size_t actual) {
   }
 }
 
+template <typename TWriter>
+constexpr size_t ScaleRepetitions(size_t repetitions) {
+  if constexpr (std::is_base_of_v<yardl::ndjson::NDJsonWriter, TWriter>) {
+    return repetitions / 500;
+  }
+
+  return repetitions;
+}
+
 template <typename TWriter, typename TReader>
 void BenchmarkFloat256x256() {
   std::remove(kOutputFileName.c_str());
@@ -33,7 +43,7 @@ void BenchmarkFloat256x256() {
     x = static_cast<float>(++i) - std::numeric_limits<float>::epsilon();
   }
 
-  size_t const repetitions = 10000;
+  size_t const repetitions = ScaleRepetitions<TWriter>(10000);
   size_t const total_size = sizeof(a) * repetitions;
   {
     TimedScope<TWriter> scope(__FUNCTION__, total_size);
@@ -63,7 +73,7 @@ void BenchmarkFloatVlen() {
     x = static_cast<float>(++i) - std::numeric_limits<float>::epsilon();
   }
 
-  size_t const repetitions = 10000;
+  size_t const repetitions = ScaleRepetitions<TWriter>(10000);
   size_t const total_size = sizeof(float) * a.size() * repetitions;
   {
     TimedScope<TWriter> scope(__FUNCTION__, total_size);
@@ -89,7 +99,7 @@ void BenchmarkSmallRecord() {
 
   SmallBenchmarkRecord record{73278383.23123213, 78323.2820379, -2938923.29882};
 
-  size_t const repetitions = 1000000;
+  size_t const repetitions = ScaleRepetitions<TWriter>(1000000);
   size_t const total_size = sizeof(record) * repetitions;
   {
     TimedScope<TWriter> scope(__FUNCTION__, total_size);
@@ -116,7 +126,7 @@ void BenchmarkSmallRecordBatched() {
   SmallBenchmarkRecord const record{73278383.23123213, 78323.2820379, -2938923.29882};
   std::vector<SmallBenchmarkRecord> batch(8192, record);
 
-  size_t const repetitions = 50000;
+  size_t const repetitions = ScaleRepetitions<TWriter>(50000);
   size_t const total_size = batch.size() * sizeof(record) * repetitions;
 
   {
@@ -144,7 +154,7 @@ void SmallOptionalsBatched() {
   SimpleEncodingCounters const record{26723, 92738, 7899};
   std::vector<SimpleEncodingCounters> batch(8192, record);
 
-  size_t repetitions = 10000;
+  size_t repetitions = ScaleRepetitions<TWriter>(10000);
   size_t total_size = batch.size() * sizeof(record) * repetitions;
 
   {
@@ -175,7 +185,7 @@ void BenchmarkSimpleMrd() {
   acq.trajectory = yardl::NDArray<float, 2>({32, 2});
   std::variant<SimpleAcquisition, Image<float>> value = acq;
 
-  size_t const repetitions = 50000;
+  size_t const repetitions = ScaleRepetitions<TWriter>(50000);
   size_t const total_size = (sizeof(value) + acq.data.size() * sizeof(std::complex<float>) + acq.trajectory.size() * sizeof(float)) * repetitions;
   {
     TimedScope<TWriter> scope(__FUNCTION__, total_size);
@@ -201,19 +211,25 @@ int main() {
 
   BenchmarkFloat256x256<binary::BenchmarkFloat256x256Writer, binary::BenchmarkFloat256x256Reader>();
   BenchmarkFloat256x256<hdf5::BenchmarkFloat256x256Writer, hdf5::BenchmarkFloat256x256Reader>();
+  BenchmarkFloat256x256<ndjson::BenchmarkFloat256x256Writer, ndjson::BenchmarkFloat256x256Reader>();
 
   BenchmarkFloatVlen<binary::BenchmarkFloatVlenWriter, binary::BenchmarkFloatVlenReader>();
   BenchmarkFloatVlen<hdf5::BenchmarkFloatVlenWriter, hdf5::BenchmarkFloatVlenReader>();
+  BenchmarkFloatVlen<ndjson::BenchmarkFloatVlenWriter, ndjson::BenchmarkFloatVlenReader>();
 
   BenchmarkSmallRecord<binary::BenchmarkSmallRecordWriter, binary::BenchmarkSmallRecordReader>();
   BenchmarkSmallRecord<hdf5::BenchmarkSmallRecordWriter, hdf5::BenchmarkSmallRecordReader>();
+  BenchmarkSmallRecord<ndjson::BenchmarkSmallRecordWriter, ndjson::BenchmarkSmallRecordReader>();
 
   BenchmarkSmallRecordBatched<binary::BenchmarkSmallRecordWriter, binary::BenchmarkSmallRecordReader>();
   BenchmarkSmallRecordBatched<hdf5::BenchmarkSmallRecordWriter, hdf5::BenchmarkSmallRecordReader>();
+  BenchmarkSmallRecordBatched<ndjson::BenchmarkSmallRecordWriter, ndjson::BenchmarkSmallRecordReader>();
 
   SmallOptionalsBatched<binary::BenchmarkSmallRecordWithOptionalsWriter, binary::BenchmarkSmallRecordWithOptionalsReader>();
   SmallOptionalsBatched<hdf5::BenchmarkSmallRecordWithOptionalsWriter, hdf5::BenchmarkSmallRecordWithOptionalsReader>();
+  SmallOptionalsBatched<ndjson::BenchmarkSmallRecordWithOptionalsWriter, ndjson::BenchmarkSmallRecordWithOptionalsReader>();
 
   BenchmarkSimpleMrd<binary::BenchmarkSimpleMrdWriter, binary::BenchmarkSimpleMrdReader>();
   BenchmarkSimpleMrd<hdf5::BenchmarkSimpleMrdWriter, hdf5::BenchmarkSimpleMrdReader>();
+  BenchmarkSimpleMrd<ndjson::BenchmarkSimpleMrdWriter, ndjson::BenchmarkSimpleMrdReader>();
 }
