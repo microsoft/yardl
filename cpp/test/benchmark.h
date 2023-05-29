@@ -32,6 +32,17 @@ namespace yardl::testing {
 #define BOLDCYAN "\033[1m\033[36m"
 #define BOLDWHITE "\033[1m\033[37m"
 
+inline void AssertRepetitionsSame(size_t expected, size_t actual) {
+  if (expected != actual) {
+    throw std::runtime_error("Expected " + std::to_string(expected) +
+                             " repetitions, but got " + std::to_string(actual));
+  }
+}
+
+inline size_t ScaleRepetitions(size_t repetitions, double scale = 1) {
+  return static_cast<size_t>(repetitions * scale);
+}
+
 inline void WriteSeparatorRow() {
   std::cout << std::right << std::setfill('-')
             << "| " << std::setw(25) << ""
