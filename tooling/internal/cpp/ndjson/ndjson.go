@@ -175,7 +175,7 @@ func writeHeaderFile(env *dsl.Environment, options packaging.CppCodegenOptions) 
 	for _, ns := range env.Namespaces {
 		fmt.Fprintf(w, "namespace %s::ndjson {\n", common.NamespaceIdentifierName(ns.Name))
 		for _, protocol := range ns.Protocols {
-			common.WriteComment(w, fmt.Sprintf("Json writer for the %s protocol.", protocol.Name))
+			common.WriteComment(w, fmt.Sprintf("NDJSON writer for the %s protocol.", protocol.Name))
 			common.WriteComment(w, protocol.Comment)
 			writerClassName := NDJsonWriterClassName(protocol)
 			fmt.Fprintf(w, "class %s : public %s, yardl::ndjson::NDJsonWriter {\n", writerClassName, common.QualifiedAbstractWriterName(protocol))
@@ -215,7 +215,7 @@ func writeHeaderFile(env *dsl.Environment, options packaging.CppCodegenOptions) 
 			})
 			fmt.Fprint(w, "};\n\n")
 
-			common.WriteComment(w, fmt.Sprintf("Json reader for the %s protocol.", protocol.Name))
+			common.WriteComment(w, fmt.Sprintf("NDJSON reader for the %s protocol.", protocol.Name))
 			common.WriteComment(w, protocol.Comment)
 			readerClassName := NDJsonReaderClassName(protocol)
 			fmt.Fprintf(w, "class %s : public %s, yardl::ndjson::NDJsonReader {\n", readerClassName, common.QualifiedAbstractReaderName(protocol))
@@ -275,13 +275,14 @@ func writeRecordConverters(w *formatting.IndentedWriter, t *dsl.RecordDefinition
 	w.WriteString(templateDeclarationBuilder.String())
 	fmt.Fprintf(w, "void to_json(ordered_json& j, %s const& value) {\n", typeName)
 	w.Indented(func() {
-		w.WriteStringln("j = ordered_json{")
-		w.Indented(func() {
-			for _, field := range t.Fields {
-				fmt.Fprintf(w, "{\"%s\", value.%s},\n", field.Name, common.FieldIdentifierName(field.Name))
-			}
-		})
-		w.WriteStringln("};")
+		w.WriteStringln("j = ordered_json::object();")
+		for _, field := range t.Fields {
+			fmt.Fprintf(w, "if (yardl::ndjson::ShouldSerializeFieldValue(value.%s)) {\n", common.FieldIdentifierName(field.Name))
+			w.Indented(func() {
+				fmt.Fprintf(w, "j.push_back({\"%s\", value.%s});\n", field.Name, common.FieldIdentifierName(field.Name))
+			})
+			w.WriteStringln("}")
+		}
 	})
 	w.WriteStringln("}\n")
 
@@ -289,7 +290,11 @@ func writeRecordConverters(w *formatting.IndentedWriter, t *dsl.RecordDefinition
 	fmt.Fprintf(w, "void from_json(ordered_json const& j, %s& value) {\n", typeName)
 	w.Indented(func() {
 		for _, field := range t.Fields {
-			fmt.Fprintf(w, "j.at(\"%s\").get_to(value.%s);\n", field.Name, common.FieldIdentifierName(field.Name))
+			fmt.Fprintf(w, "if (auto it = j.find(\"%s\"); it != j.end()) {\n", field.Name)
+			w.Indented(func() {
+				fmt.Fprintf(w, "it->get_to(value.%s);\n", common.FieldIdentifierName(field.Name))
+			})
+			w.WriteStringln("}")
 		}
 	})
 	w.WriteStringln("}\n")
@@ -354,7 +359,7 @@ func writeUnionConverters(w *formatting.IndentedWriter, unionType *dsl.Generaliz
 
 	unionTypeSyntax := common.TypeSyntax(unionType)
 
-	w.WriteString("template<>")
+	w.WriteStringln("template<>")
 	fmt.Fprintf(w, "struct adl_serializer<%s> {\n", unionTypeSyntax)
 	w.Indented(func() {
 

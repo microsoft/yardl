@@ -13,7 +13,7 @@
 #include "../types.h"
 
 namespace test_model::ndjson {
-// Json writer for the BenchmarkFloat256x256 protocol.
+// NDJSON writer for the BenchmarkFloat256x256 protocol.
 class BenchmarkFloat256x256Writer : public test_model::BenchmarkFloat256x256WriterBase, yardl::ndjson::NDJsonWriter {
   public:
   BenchmarkFloat256x256Writer(std::ostream& stream)
@@ -32,7 +32,7 @@ class BenchmarkFloat256x256Writer : public test_model::BenchmarkFloat256x256Writ
   void CloseImpl() override;
 };
 
-// Json reader for the BenchmarkFloat256x256 protocol.
+// NDJSON reader for the BenchmarkFloat256x256 protocol.
 class BenchmarkFloat256x256Reader : public test_model::BenchmarkFloat256x256ReaderBase, yardl::ndjson::NDJsonReader {
   public:
   BenchmarkFloat256x256Reader(std::istream& stream)
@@ -48,7 +48,7 @@ class BenchmarkFloat256x256Reader : public test_model::BenchmarkFloat256x256Read
   void CloseImpl() override;
 };
 
-// Json writer for the BenchmarkFloatVlen protocol.
+// NDJSON writer for the BenchmarkFloatVlen protocol.
 class BenchmarkFloatVlenWriter : public test_model::BenchmarkFloatVlenWriterBase, yardl::ndjson::NDJsonWriter {
   public:
   BenchmarkFloatVlenWriter(std::ostream& stream)
@@ -67,7 +67,7 @@ class BenchmarkFloatVlenWriter : public test_model::BenchmarkFloatVlenWriterBase
   void CloseImpl() override;
 };
 
-// Json reader for the BenchmarkFloatVlen protocol.
+// NDJSON reader for the BenchmarkFloatVlen protocol.
 class BenchmarkFloatVlenReader : public test_model::BenchmarkFloatVlenReaderBase, yardl::ndjson::NDJsonReader {
   public:
   BenchmarkFloatVlenReader(std::istream& stream)
@@ -83,7 +83,7 @@ class BenchmarkFloatVlenReader : public test_model::BenchmarkFloatVlenReaderBase
   void CloseImpl() override;
 };
 
-// Json writer for the BenchmarkSmallRecord protocol.
+// NDJSON writer for the BenchmarkSmallRecord protocol.
 class BenchmarkSmallRecordWriter : public test_model::BenchmarkSmallRecordWriterBase, yardl::ndjson::NDJsonWriter {
   public:
   BenchmarkSmallRecordWriter(std::ostream& stream)
@@ -102,7 +102,7 @@ class BenchmarkSmallRecordWriter : public test_model::BenchmarkSmallRecordWriter
   void CloseImpl() override;
 };
 
-// Json reader for the BenchmarkSmallRecord protocol.
+// NDJSON reader for the BenchmarkSmallRecord protocol.
 class BenchmarkSmallRecordReader : public test_model::BenchmarkSmallRecordReaderBase, yardl::ndjson::NDJsonReader {
   public:
   BenchmarkSmallRecordReader(std::istream& stream)
@@ -118,7 +118,7 @@ class BenchmarkSmallRecordReader : public test_model::BenchmarkSmallRecordReader
   void CloseImpl() override;
 };
 
-// Json writer for the BenchmarkSmallRecordWithOptionals protocol.
+// NDJSON writer for the BenchmarkSmallRecordWithOptionals protocol.
 class BenchmarkSmallRecordWithOptionalsWriter : public test_model::BenchmarkSmallRecordWithOptionalsWriterBase, yardl::ndjson::NDJsonWriter {
   public:
   BenchmarkSmallRecordWithOptionalsWriter(std::ostream& stream)
@@ -137,7 +137,7 @@ class BenchmarkSmallRecordWithOptionalsWriter : public test_model::BenchmarkSmal
   void CloseImpl() override;
 };
 
-// Json reader for the BenchmarkSmallRecordWithOptionals protocol.
+// NDJSON reader for the BenchmarkSmallRecordWithOptionals protocol.
 class BenchmarkSmallRecordWithOptionalsReader : public test_model::BenchmarkSmallRecordWithOptionalsReaderBase, yardl::ndjson::NDJsonReader {
   public:
   BenchmarkSmallRecordWithOptionalsReader(std::istream& stream)
@@ -153,7 +153,7 @@ class BenchmarkSmallRecordWithOptionalsReader : public test_model::BenchmarkSmal
   void CloseImpl() override;
 };
 
-// Json writer for the BenchmarkSimpleMrd protocol.
+// NDJSON writer for the BenchmarkSimpleMrd protocol.
 class BenchmarkSimpleMrdWriter : public test_model::BenchmarkSimpleMrdWriterBase, yardl::ndjson::NDJsonWriter {
   public:
   BenchmarkSimpleMrdWriter(std::ostream& stream)
@@ -172,7 +172,7 @@ class BenchmarkSimpleMrdWriter : public test_model::BenchmarkSimpleMrdWriterBase
   void CloseImpl() override;
 };
 
-// Json reader for the BenchmarkSimpleMrd protocol.
+// NDJSON reader for the BenchmarkSimpleMrd protocol.
 class BenchmarkSimpleMrdReader : public test_model::BenchmarkSimpleMrdReaderBase, yardl::ndjson::NDJsonReader {
   public:
   BenchmarkSimpleMrdReader(std::istream& stream)
@@ -188,7 +188,7 @@ class BenchmarkSimpleMrdReader : public test_model::BenchmarkSimpleMrdReaderBase
   void CloseImpl() override;
 };
 
-// Json writer for the Scalars protocol.
+// NDJSON writer for the Scalars protocol.
 class ScalarsWriter : public test_model::ScalarsWriterBase, yardl::ndjson::NDJsonWriter {
   public:
   ScalarsWriter(std::ostream& stream)
@@ -207,7 +207,7 @@ class ScalarsWriter : public test_model::ScalarsWriterBase, yardl::ndjson::NDJso
   void CloseImpl() override;
 };
 
-// Json reader for the Scalars protocol.
+// NDJSON reader for the Scalars protocol.
 class ScalarsReader : public test_model::ScalarsReaderBase, yardl::ndjson::NDJsonReader {
   public:
   ScalarsReader(std::istream& stream)
@@ -224,7 +224,7 @@ class ScalarsReader : public test_model::ScalarsReaderBase, yardl::ndjson::NDJso
   void CloseImpl() override;
 };
 
-// Json writer for the ScalarOptionals protocol.
+// NDJSON writer for the ScalarOptionals protocol.
 class ScalarOptionalsWriter : public test_model::ScalarOptionalsWriterBase, yardl::ndjson::NDJsonWriter {
   public:
   ScalarOptionalsWriter(std::ostream& stream)
@@ -245,7 +245,7 @@ class ScalarOptionalsWriter : public test_model::ScalarOptionalsWriterBase, yard
   void CloseImpl() override;
 };
 
-// Json reader for the ScalarOptionals protocol.
+// NDJSON reader for the ScalarOptionals protocol.
 class ScalarOptionalsReader : public test_model::ScalarOptionalsReaderBase, yardl::ndjson::NDJsonReader {
   public:
   ScalarOptionalsReader(std::istream& stream)
@@ -264,7 +264,7 @@ class ScalarOptionalsReader : public test_model::ScalarOptionalsReaderBase, yard
   void CloseImpl() override;
 };
 
-// Json writer for the NestedRecords protocol.
+// NDJSON writer for the NestedRecords protocol.
 class NestedRecordsWriter : public test_model::NestedRecordsWriterBase, yardl::ndjson::NDJsonWriter {
   public:
   NestedRecordsWriter(std::ostream& stream)
@@ -282,7 +282,7 @@ class NestedRecordsWriter : public test_model::NestedRecordsWriterBase, yardl::n
   void CloseImpl() override;
 };
 
-// Json reader for the NestedRecords protocol.
+// NDJSON reader for the NestedRecords protocol.
 class NestedRecordsReader : public test_model::NestedRecordsReaderBase, yardl::ndjson::NDJsonReader {
   public:
   NestedRecordsReader(std::istream& stream)
@@ -298,7 +298,7 @@ class NestedRecordsReader : public test_model::NestedRecordsReaderBase, yardl::n
   void CloseImpl() override;
 };
 
-// Json writer for the Vlens protocol.
+// NDJSON writer for the Vlens protocol.
 class VlensWriter : public test_model::VlensWriterBase, yardl::ndjson::NDJsonWriter {
   public:
   VlensWriter(std::ostream& stream)
@@ -319,7 +319,7 @@ class VlensWriter : public test_model::VlensWriterBase, yardl::ndjson::NDJsonWri
   void CloseImpl() override;
 };
 
-// Json reader for the Vlens protocol.
+// NDJSON reader for the Vlens protocol.
 class VlensReader : public test_model::VlensReaderBase, yardl::ndjson::NDJsonReader {
   public:
   VlensReader(std::istream& stream)
@@ -338,7 +338,7 @@ class VlensReader : public test_model::VlensReaderBase, yardl::ndjson::NDJsonRea
   void CloseImpl() override;
 };
 
-// Json writer for the Strings protocol.
+// NDJSON writer for the Strings protocol.
 class StringsWriter : public test_model::StringsWriterBase, yardl::ndjson::NDJsonWriter {
   public:
   StringsWriter(std::ostream& stream)
@@ -357,7 +357,7 @@ class StringsWriter : public test_model::StringsWriterBase, yardl::ndjson::NDJso
   void CloseImpl() override;
 };
 
-// Json reader for the Strings protocol.
+// NDJSON reader for the Strings protocol.
 class StringsReader : public test_model::StringsReaderBase, yardl::ndjson::NDJsonReader {
   public:
   StringsReader(std::istream& stream)
@@ -374,7 +374,7 @@ class StringsReader : public test_model::StringsReaderBase, yardl::ndjson::NDJso
   void CloseImpl() override;
 };
 
-// Json writer for the OptionalVectors protocol.
+// NDJSON writer for the OptionalVectors protocol.
 class OptionalVectorsWriter : public test_model::OptionalVectorsWriterBase, yardl::ndjson::NDJsonWriter {
   public:
   OptionalVectorsWriter(std::ostream& stream)
@@ -392,7 +392,7 @@ class OptionalVectorsWriter : public test_model::OptionalVectorsWriterBase, yard
   void CloseImpl() override;
 };
 
-// Json reader for the OptionalVectors protocol.
+// NDJSON reader for the OptionalVectors protocol.
 class OptionalVectorsReader : public test_model::OptionalVectorsReaderBase, yardl::ndjson::NDJsonReader {
   public:
   OptionalVectorsReader(std::istream& stream)
@@ -408,7 +408,7 @@ class OptionalVectorsReader : public test_model::OptionalVectorsReaderBase, yard
   void CloseImpl() override;
 };
 
-// Json writer for the FixedVectors protocol.
+// NDJSON writer for the FixedVectors protocol.
 class FixedVectorsWriter : public test_model::FixedVectorsWriterBase, yardl::ndjson::NDJsonWriter {
   public:
   FixedVectorsWriter(std::ostream& stream)
@@ -429,7 +429,7 @@ class FixedVectorsWriter : public test_model::FixedVectorsWriterBase, yardl::ndj
   void CloseImpl() override;
 };
 
-// Json reader for the FixedVectors protocol.
+// NDJSON reader for the FixedVectors protocol.
 class FixedVectorsReader : public test_model::FixedVectorsReaderBase, yardl::ndjson::NDJsonReader {
   public:
   FixedVectorsReader(std::istream& stream)
@@ -448,7 +448,7 @@ class FixedVectorsReader : public test_model::FixedVectorsReaderBase, yardl::ndj
   void CloseImpl() override;
 };
 
-// Json writer for the Streams protocol.
+// NDJSON writer for the Streams protocol.
 class StreamsWriter : public test_model::StreamsWriterBase, yardl::ndjson::NDJsonWriter {
   public:
   StreamsWriter(std::ostream& stream)
@@ -473,7 +473,7 @@ class StreamsWriter : public test_model::StreamsWriterBase, yardl::ndjson::NDJso
   void CloseImpl() override;
 };
 
-// Json reader for the Streams protocol.
+// NDJSON reader for the Streams protocol.
 class StreamsReader : public test_model::StreamsReaderBase, yardl::ndjson::NDJsonReader {
   public:
   StreamsReader(std::istream& stream)
@@ -492,7 +492,7 @@ class StreamsReader : public test_model::StreamsReaderBase, yardl::ndjson::NDJso
   void CloseImpl() override;
 };
 
-// Json writer for the FixedArrays protocol.
+// NDJSON writer for the FixedArrays protocol.
 class FixedArraysWriter : public test_model::FixedArraysWriterBase, yardl::ndjson::NDJsonWriter {
   public:
   FixedArraysWriter(std::ostream& stream)
@@ -514,7 +514,7 @@ class FixedArraysWriter : public test_model::FixedArraysWriterBase, yardl::ndjso
   void CloseImpl() override;
 };
 
-// Json reader for the FixedArrays protocol.
+// NDJSON reader for the FixedArrays protocol.
 class FixedArraysReader : public test_model::FixedArraysReaderBase, yardl::ndjson::NDJsonReader {
   public:
   FixedArraysReader(std::istream& stream)
@@ -534,7 +534,7 @@ class FixedArraysReader : public test_model::FixedArraysReaderBase, yardl::ndjso
   void CloseImpl() override;
 };
 
-// Json writer for the NDArrays protocol.
+// NDJSON writer for the NDArrays protocol.
 class NDArraysWriter : public test_model::NDArraysWriterBase, yardl::ndjson::NDJsonWriter {
   public:
   NDArraysWriter(std::ostream& stream)
@@ -556,7 +556,7 @@ class NDArraysWriter : public test_model::NDArraysWriterBase, yardl::ndjson::NDJ
   void CloseImpl() override;
 };
 
-// Json reader for the NDArrays protocol.
+// NDJSON reader for the NDArrays protocol.
 class NDArraysReader : public test_model::NDArraysReaderBase, yardl::ndjson::NDJsonReader {
   public:
   NDArraysReader(std::istream& stream)
@@ -576,7 +576,7 @@ class NDArraysReader : public test_model::NDArraysReaderBase, yardl::ndjson::NDJ
   void CloseImpl() override;
 };
 
-// Json writer for the NDArraysSingleDimension protocol.
+// NDJSON writer for the NDArraysSingleDimension protocol.
 class NDArraysSingleDimensionWriter : public test_model::NDArraysSingleDimensionWriterBase, yardl::ndjson::NDJsonWriter {
   public:
   NDArraysSingleDimensionWriter(std::ostream& stream)
@@ -597,7 +597,7 @@ class NDArraysSingleDimensionWriter : public test_model::NDArraysSingleDimension
   void CloseImpl() override;
 };
 
-// Json reader for the NDArraysSingleDimension protocol.
+// NDJSON reader for the NDArraysSingleDimension protocol.
 class NDArraysSingleDimensionReader : public test_model::NDArraysSingleDimensionReaderBase, yardl::ndjson::NDJsonReader {
   public:
   NDArraysSingleDimensionReader(std::istream& stream)
@@ -616,7 +616,7 @@ class NDArraysSingleDimensionReader : public test_model::NDArraysSingleDimension
   void CloseImpl() override;
 };
 
-// Json writer for the DynamicNDArrays protocol.
+// NDJSON writer for the DynamicNDArrays protocol.
 class DynamicNDArraysWriter : public test_model::DynamicNDArraysWriterBase, yardl::ndjson::NDJsonWriter {
   public:
   DynamicNDArraysWriter(std::ostream& stream)
@@ -637,7 +637,7 @@ class DynamicNDArraysWriter : public test_model::DynamicNDArraysWriterBase, yard
   void CloseImpl() override;
 };
 
-// Json reader for the DynamicNDArrays protocol.
+// NDJSON reader for the DynamicNDArrays protocol.
 class DynamicNDArraysReader : public test_model::DynamicNDArraysReaderBase, yardl::ndjson::NDJsonReader {
   public:
   DynamicNDArraysReader(std::istream& stream)
@@ -656,7 +656,7 @@ class DynamicNDArraysReader : public test_model::DynamicNDArraysReaderBase, yard
   void CloseImpl() override;
 };
 
-// Json writer for the Maps protocol.
+// NDJSON writer for the Maps protocol.
 class MapsWriter : public test_model::MapsWriterBase, yardl::ndjson::NDJsonWriter {
   public:
   MapsWriter(std::ostream& stream)
@@ -676,7 +676,7 @@ class MapsWriter : public test_model::MapsWriterBase, yardl::ndjson::NDJsonWrite
   void CloseImpl() override;
 };
 
-// Json reader for the Maps protocol.
+// NDJSON reader for the Maps protocol.
 class MapsReader : public test_model::MapsReaderBase, yardl::ndjson::NDJsonReader {
   public:
   MapsReader(std::istream& stream)
@@ -694,7 +694,7 @@ class MapsReader : public test_model::MapsReaderBase, yardl::ndjson::NDJsonReade
   void CloseImpl() override;
 };
 
-// Json writer for the Unions protocol.
+// NDJSON writer for the Unions protocol.
 class UnionsWriter : public test_model::UnionsWriterBase, yardl::ndjson::NDJsonWriter {
   public:
   UnionsWriter(std::ostream& stream)
@@ -714,7 +714,7 @@ class UnionsWriter : public test_model::UnionsWriterBase, yardl::ndjson::NDJsonW
   void CloseImpl() override;
 };
 
-// Json reader for the Unions protocol.
+// NDJSON reader for the Unions protocol.
 class UnionsReader : public test_model::UnionsReaderBase, yardl::ndjson::NDJsonReader {
   public:
   UnionsReader(std::istream& stream)
@@ -732,7 +732,7 @@ class UnionsReader : public test_model::UnionsReaderBase, yardl::ndjson::NDJsonR
   void CloseImpl() override;
 };
 
-// Json writer for the StreamsOfUnions protocol.
+// NDJSON writer for the StreamsOfUnions protocol.
 class StreamsOfUnionsWriter : public test_model::StreamsOfUnionsWriterBase, yardl::ndjson::NDJsonWriter {
   public:
   StreamsOfUnionsWriter(std::ostream& stream)
@@ -753,7 +753,7 @@ class StreamsOfUnionsWriter : public test_model::StreamsOfUnionsWriterBase, yard
   void CloseImpl() override;
 };
 
-// Json reader for the StreamsOfUnions protocol.
+// NDJSON reader for the StreamsOfUnions protocol.
 class StreamsOfUnionsReader : public test_model::StreamsOfUnionsReaderBase, yardl::ndjson::NDJsonReader {
   public:
   StreamsOfUnionsReader(std::istream& stream)
@@ -770,7 +770,7 @@ class StreamsOfUnionsReader : public test_model::StreamsOfUnionsReaderBase, yard
   void CloseImpl() override;
 };
 
-// Json writer for the Enums protocol.
+// NDJSON writer for the Enums protocol.
 class EnumsWriter : public test_model::EnumsWriterBase, yardl::ndjson::NDJsonWriter {
   public:
   EnumsWriter(std::ostream& stream)
@@ -790,7 +790,7 @@ class EnumsWriter : public test_model::EnumsWriterBase, yardl::ndjson::NDJsonWri
   void CloseImpl() override;
 };
 
-// Json reader for the Enums protocol.
+// NDJSON reader for the Enums protocol.
 class EnumsReader : public test_model::EnumsReaderBase, yardl::ndjson::NDJsonReader {
   public:
   EnumsReader(std::istream& stream)
@@ -808,7 +808,7 @@ class EnumsReader : public test_model::EnumsReaderBase, yardl::ndjson::NDJsonRea
   void CloseImpl() override;
 };
 
-// Json writer for the StateTest protocol.
+// NDJSON writer for the StateTest protocol.
 class StateTestWriter : public test_model::StateTestWriterBase, yardl::ndjson::NDJsonWriter {
   public:
   StateTestWriter(std::ostream& stream)
@@ -829,7 +829,7 @@ class StateTestWriter : public test_model::StateTestWriterBase, yardl::ndjson::N
   void CloseImpl() override;
 };
 
-// Json reader for the StateTest protocol.
+// NDJSON reader for the StateTest protocol.
 class StateTestReader : public test_model::StateTestReaderBase, yardl::ndjson::NDJsonReader {
   public:
   StateTestReader(std::istream& stream)
@@ -847,7 +847,7 @@ class StateTestReader : public test_model::StateTestReaderBase, yardl::ndjson::N
   void CloseImpl() override;
 };
 
-// Json writer for the SimpleGenerics protocol.
+// NDJSON writer for the SimpleGenerics protocol.
 class SimpleGenericsWriter : public test_model::SimpleGenericsWriterBase, yardl::ndjson::NDJsonWriter {
   public:
   SimpleGenericsWriter(std::ostream& stream)
@@ -874,7 +874,7 @@ class SimpleGenericsWriter : public test_model::SimpleGenericsWriterBase, yardl:
   void CloseImpl() override;
 };
 
-// Json reader for the SimpleGenerics protocol.
+// NDJSON reader for the SimpleGenerics protocol.
 class SimpleGenericsReader : public test_model::SimpleGenericsReaderBase, yardl::ndjson::NDJsonReader {
   public:
   SimpleGenericsReader(std::istream& stream)
@@ -898,7 +898,7 @@ class SimpleGenericsReader : public test_model::SimpleGenericsReaderBase, yardl:
   void CloseImpl() override;
 };
 
-// Json writer for the AdvancedGenerics protocol.
+// NDJSON writer for the AdvancedGenerics protocol.
 class AdvancedGenericsWriter : public test_model::AdvancedGenericsWriterBase, yardl::ndjson::NDJsonWriter {
   public:
   AdvancedGenericsWriter(std::ostream& stream)
@@ -920,7 +920,7 @@ class AdvancedGenericsWriter : public test_model::AdvancedGenericsWriterBase, ya
   void CloseImpl() override;
 };
 
-// Json reader for the AdvancedGenerics protocol.
+// NDJSON reader for the AdvancedGenerics protocol.
 class AdvancedGenericsReader : public test_model::AdvancedGenericsReaderBase, yardl::ndjson::NDJsonReader {
   public:
   AdvancedGenericsReader(std::istream& stream)
@@ -940,7 +940,7 @@ class AdvancedGenericsReader : public test_model::AdvancedGenericsReaderBase, ya
   void CloseImpl() override;
 };
 
-// Json writer for the Aliases protocol.
+// NDJSON writer for the Aliases protocol.
 class AliasesWriter : public test_model::AliasesWriterBase, yardl::ndjson::NDJsonWriter {
   public:
   AliasesWriter(std::ostream& stream)
@@ -968,7 +968,7 @@ class AliasesWriter : public test_model::AliasesWriterBase, yardl::ndjson::NDJso
   void CloseImpl() override;
 };
 
-// Json reader for the Aliases protocol.
+// NDJSON reader for the Aliases protocol.
 class AliasesReader : public test_model::AliasesReaderBase, yardl::ndjson::NDJsonReader {
   public:
   AliasesReader(std::istream& stream)
@@ -993,7 +993,7 @@ class AliasesReader : public test_model::AliasesReaderBase, yardl::ndjson::NDJso
   void CloseImpl() override;
 };
 
-// Json writer for the StreamsOfAliasedUnions protocol.
+// NDJSON writer for the StreamsOfAliasedUnions protocol.
 class StreamsOfAliasedUnionsWriter : public test_model::StreamsOfAliasedUnionsWriterBase, yardl::ndjson::NDJsonWriter {
   public:
   StreamsOfAliasedUnionsWriter(std::ostream& stream)
@@ -1014,7 +1014,7 @@ class StreamsOfAliasedUnionsWriter : public test_model::StreamsOfAliasedUnionsWr
   void CloseImpl() override;
 };
 
-// Json reader for the StreamsOfAliasedUnions protocol.
+// NDJSON reader for the StreamsOfAliasedUnions protocol.
 class StreamsOfAliasedUnionsReader : public test_model::StreamsOfAliasedUnionsReaderBase, yardl::ndjson::NDJsonReader {
   public:
   StreamsOfAliasedUnionsReader(std::istream& stream)
@@ -1031,7 +1031,7 @@ class StreamsOfAliasedUnionsReader : public test_model::StreamsOfAliasedUnionsRe
   void CloseImpl() override;
 };
 
-// Json writer for the ProtocolWithComputedFields protocol.
+// NDJSON writer for the ProtocolWithComputedFields protocol.
 class ProtocolWithComputedFieldsWriter : public test_model::ProtocolWithComputedFieldsWriterBase, yardl::ndjson::NDJsonWriter {
   public:
   ProtocolWithComputedFieldsWriter(std::ostream& stream)
@@ -1049,7 +1049,7 @@ class ProtocolWithComputedFieldsWriter : public test_model::ProtocolWithComputed
   void CloseImpl() override;
 };
 
-// Json reader for the ProtocolWithComputedFields protocol.
+// NDJSON reader for the ProtocolWithComputedFields protocol.
 class ProtocolWithComputedFieldsReader : public test_model::ProtocolWithComputedFieldsReaderBase, yardl::ndjson::NDJsonReader {
   public:
   ProtocolWithComputedFieldsReader(std::istream& stream)
@@ -1065,7 +1065,7 @@ class ProtocolWithComputedFieldsReader : public test_model::ProtocolWithComputed
   void CloseImpl() override;
 };
 
-// Json writer for the ProtocolWithKeywordSteps protocol.
+// NDJSON writer for the ProtocolWithKeywordSteps protocol.
 class ProtocolWithKeywordStepsWriter : public test_model::ProtocolWithKeywordStepsWriterBase, yardl::ndjson::NDJsonWriter {
   public:
   ProtocolWithKeywordStepsWriter(std::ostream& stream)
@@ -1085,7 +1085,7 @@ class ProtocolWithKeywordStepsWriter : public test_model::ProtocolWithKeywordSte
   void CloseImpl() override;
 };
 
-// Json reader for the ProtocolWithKeywordSteps protocol.
+// NDJSON reader for the ProtocolWithKeywordSteps protocol.
 class ProtocolWithKeywordStepsReader : public test_model::ProtocolWithKeywordStepsReaderBase, yardl::ndjson::NDJsonReader {
   public:
   ProtocolWithKeywordStepsReader(std::istream& stream)

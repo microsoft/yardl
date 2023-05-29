@@ -66,6 +66,16 @@ inline bool ReadProtocolValue(std::istream& stream, std::string& line, std::stri
   return true;
 }
 
+template <typename T>
+constexpr bool ShouldSerializeFieldValue(T const&) {
+  return true;
+}
+
+template <typename T>
+constexpr bool ShouldSerializeFieldValue(std::optional<T> const& value) {
+  return value.has_value();
+}
+
 }  // namespace yardl::ndjson
 
 NLOHMANN_JSON_NAMESPACE_BEGIN

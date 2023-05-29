@@ -102,7 +102,8 @@ void from_json(ordered_json const& j, test_model::RecordWithKeywordFields& value
 
 NLOHMANN_JSON_NAMESPACE_BEGIN
 
-template<>struct adl_serializer<std::variant<test_model::SimpleAcquisition, test_model::Image<float>>> {
+template<>
+struct adl_serializer<std::variant<test_model::SimpleAcquisition, test_model::Image<float>>> {
   static void to_json(ordered_json& j, std::variant<test_model::SimpleAcquisition, test_model::Image<float>> const& value) {
     switch (value.index()) {
       case 0:
@@ -130,7 +131,8 @@ template<>struct adl_serializer<std::variant<test_model::SimpleAcquisition, test
   }
 };
 
-template<>struct adl_serializer<std::variant<std::string, int32_t>> {
+template<>
+struct adl_serializer<std::variant<std::string, int32_t>> {
   static void to_json(ordered_json& j, std::variant<std::string, int32_t> const& value) {
     std::visit([&j](auto const& v) {j = v;}, value);
   }
@@ -148,7 +150,8 @@ template<>struct adl_serializer<std::variant<std::string, int32_t>> {
   }
 };
 
-template<>struct adl_serializer<std::variant<int32_t, test_model::SimpleRecord>> {
+template<>
+struct adl_serializer<std::variant<int32_t, test_model::SimpleRecord>> {
   static void to_json(ordered_json& j, std::variant<int32_t, test_model::SimpleRecord> const& value) {
     std::visit([&j](auto const& v) {j = v;}, value);
   }
@@ -166,7 +169,8 @@ template<>struct adl_serializer<std::variant<int32_t, test_model::SimpleRecord>>
   }
 };
 
-template<>struct adl_serializer<std::variant<int32_t, test_model::RecordWithVlens>> {
+template<>
+struct adl_serializer<std::variant<int32_t, test_model::RecordWithVlens>> {
   static void to_json(ordered_json& j, std::variant<int32_t, test_model::RecordWithVlens> const& value) {
     std::visit([&j](auto const& v) {j = v;}, value);
   }
@@ -184,7 +188,8 @@ template<>struct adl_serializer<std::variant<int32_t, test_model::RecordWithVlen
   }
 };
 
-template<>struct adl_serializer<std::variant<std::monostate, int32_t, test_model::SimpleRecord>> {
+template<>
+struct adl_serializer<std::variant<std::monostate, int32_t, test_model::SimpleRecord>> {
   static void to_json(ordered_json& j, std::variant<std::monostate, int32_t, test_model::SimpleRecord> const& value) {
     std::visit([&j](auto const& v) {j = v;}, value);
   }
@@ -206,7 +211,8 @@ template<>struct adl_serializer<std::variant<std::monostate, int32_t, test_model
   }
 };
 
-template<>struct adl_serializer<std::variant<test_model::Image<float>, test_model::Image<double>>> {
+template<>
+struct adl_serializer<std::variant<test_model::Image<float>, test_model::Image<double>>> {
   static void to_json(ordered_json& j, std::variant<test_model::Image<float>, test_model::Image<double>> const& value) {
     switch (value.index()) {
       case 0:
@@ -234,7 +240,8 @@ template<>struct adl_serializer<std::variant<test_model::Image<float>, test_mode
   }
 };
 
-template<>struct adl_serializer<std::variant<test_model::AliasedString, test_model::AliasedEnum>> {
+template<>
+struct adl_serializer<std::variant<test_model::AliasedString, test_model::AliasedEnum>> {
   static void to_json(ordered_json& j, std::variant<test_model::AliasedString, test_model::AliasedEnum> const& value) {
     switch (value.index()) {
       case 0:
@@ -262,7 +269,8 @@ template<>struct adl_serializer<std::variant<test_model::AliasedString, test_mod
   }
 };
 
-template<>struct adl_serializer<std::variant<int32_t, float>> {
+template<>
+struct adl_serializer<std::variant<int32_t, float>> {
   static void to_json(ordered_json& j, std::variant<int32_t, float> const& value) {
     switch (value.index()) {
       case 0:
@@ -290,7 +298,8 @@ template<>struct adl_serializer<std::variant<int32_t, float>> {
   }
 };
 
-template<>struct adl_serializer<std::variant<std::monostate, int32_t, float>> {
+template<>
+struct adl_serializer<std::variant<std::monostate, int32_t, float>> {
   static void to_json(ordered_json& j, std::variant<std::monostate, int32_t, float> const& value) {
     switch (value.index()) {
       case 0:
@@ -325,7 +334,8 @@ template<>struct adl_serializer<std::variant<std::monostate, int32_t, float>> {
   }
 };
 
-template<>struct adl_serializer<std::variant<int32_t, test_model::GenericRecordWithComputedFields<std::string, float>>> {
+template<>
+struct adl_serializer<std::variant<int32_t, test_model::GenericRecordWithComputedFields<std::string, float>>> {
   static void to_json(ordered_json& j, std::variant<int32_t, test_model::GenericRecordWithComputedFields<std::string, float>> const& value) {
     std::visit([&j](auto const& v) {j = v;}, value);
   }
@@ -343,7 +353,8 @@ template<>struct adl_serializer<std::variant<int32_t, test_model::GenericRecordW
   }
 };
 
-template<>struct adl_serializer<std::variant<std::string, float>> {
+template<>
+struct adl_serializer<std::variant<std::string, float>> {
   static void to_json(ordered_json& j, std::variant<std::string, float> const& value) {
     std::visit([&j](auto const& v) {j = v;}, value);
   }
@@ -367,327 +378,652 @@ namespace test_model {
 using ordered_json = nlohmann::ordered_json;
 
 void to_json(ordered_json& j, test_model::SmallBenchmarkRecord const& value) {
-  j = ordered_json{
-    {"a", value.a},
-    {"b", value.b},
-    {"c", value.c},
-  };
+  j = ordered_json::object();
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.a)) {
+    j.push_back({"a", value.a});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.b)) {
+    j.push_back({"b", value.b});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.c)) {
+    j.push_back({"c", value.c});
+  }
 }
 
 void from_json(ordered_json const& j, test_model::SmallBenchmarkRecord& value) {
-  j.at("a").get_to(value.a);
-  j.at("b").get_to(value.b);
-  j.at("c").get_to(value.c);
+  if (auto it = j.find("a"); it != j.end()) {
+    it->get_to(value.a);
+  }
+  if (auto it = j.find("b"); it != j.end()) {
+    it->get_to(value.b);
+  }
+  if (auto it = j.find("c"); it != j.end()) {
+    it->get_to(value.c);
+  }
 }
 
 void to_json(ordered_json& j, test_model::SimpleEncodingCounters const& value) {
-  j = ordered_json{
-    {"e1", value.e1},
-    {"e2", value.e2},
-    {"slice", value.slice},
-    {"repetition", value.repetition},
-  };
+  j = ordered_json::object();
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.e1)) {
+    j.push_back({"e1", value.e1});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.e2)) {
+    j.push_back({"e2", value.e2});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.slice)) {
+    j.push_back({"slice", value.slice});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.repetition)) {
+    j.push_back({"repetition", value.repetition});
+  }
 }
 
 void from_json(ordered_json const& j, test_model::SimpleEncodingCounters& value) {
-  j.at("e1").get_to(value.e1);
-  j.at("e2").get_to(value.e2);
-  j.at("slice").get_to(value.slice);
-  j.at("repetition").get_to(value.repetition);
+  if (auto it = j.find("e1"); it != j.end()) {
+    it->get_to(value.e1);
+  }
+  if (auto it = j.find("e2"); it != j.end()) {
+    it->get_to(value.e2);
+  }
+  if (auto it = j.find("slice"); it != j.end()) {
+    it->get_to(value.slice);
+  }
+  if (auto it = j.find("repetition"); it != j.end()) {
+    it->get_to(value.repetition);
+  }
 }
 
 void to_json(ordered_json& j, test_model::SimpleAcquisition const& value) {
-  j = ordered_json{
-    {"flags", value.flags},
-    {"idx", value.idx},
-    {"data", value.data},
-    {"trajectory", value.trajectory},
-  };
+  j = ordered_json::object();
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.flags)) {
+    j.push_back({"flags", value.flags});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.idx)) {
+    j.push_back({"idx", value.idx});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.data)) {
+    j.push_back({"data", value.data});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.trajectory)) {
+    j.push_back({"trajectory", value.trajectory});
+  }
 }
 
 void from_json(ordered_json const& j, test_model::SimpleAcquisition& value) {
-  j.at("flags").get_to(value.flags);
-  j.at("idx").get_to(value.idx);
-  j.at("data").get_to(value.data);
-  j.at("trajectory").get_to(value.trajectory);
+  if (auto it = j.find("flags"); it != j.end()) {
+    it->get_to(value.flags);
+  }
+  if (auto it = j.find("idx"); it != j.end()) {
+    it->get_to(value.idx);
+  }
+  if (auto it = j.find("data"); it != j.end()) {
+    it->get_to(value.data);
+  }
+  if (auto it = j.find("trajectory"); it != j.end()) {
+    it->get_to(value.trajectory);
+  }
 }
 
 void to_json(ordered_json& j, test_model::SimpleRecord const& value) {
-  j = ordered_json{
-    {"x", value.x},
-    {"y", value.y},
-    {"z", value.z},
-  };
+  j = ordered_json::object();
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.x)) {
+    j.push_back({"x", value.x});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.y)) {
+    j.push_back({"y", value.y});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.z)) {
+    j.push_back({"z", value.z});
+  }
 }
 
 void from_json(ordered_json const& j, test_model::SimpleRecord& value) {
-  j.at("x").get_to(value.x);
-  j.at("y").get_to(value.y);
-  j.at("z").get_to(value.z);
+  if (auto it = j.find("x"); it != j.end()) {
+    it->get_to(value.x);
+  }
+  if (auto it = j.find("y"); it != j.end()) {
+    it->get_to(value.y);
+  }
+  if (auto it = j.find("z"); it != j.end()) {
+    it->get_to(value.z);
+  }
 }
 
 void to_json(ordered_json& j, test_model::RecordWithPrimitives const& value) {
-  j = ordered_json{
-    {"boolField", value.bool_field},
-    {"int8Field", value.int8_field},
-    {"uint8Field", value.uint8_field},
-    {"int16Field", value.int16_field},
-    {"uint16Field", value.uint16_field},
-    {"int32Field", value.int32_field},
-    {"uint32Field", value.uint32_field},
-    {"int64Field", value.int64_field},
-    {"uint64Field", value.uint64_field},
-    {"sizeField", value.size_field},
-    {"float32Field", value.float32_field},
-    {"float64Field", value.float64_field},
-    {"complexfloat32Field", value.complexfloat32_field},
-    {"complexfloat64Field", value.complexfloat64_field},
-    {"dateField", value.date_field},
-    {"timeField", value.time_field},
-    {"datetimeField", value.datetime_field},
-  };
+  j = ordered_json::object();
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.bool_field)) {
+    j.push_back({"boolField", value.bool_field});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.int8_field)) {
+    j.push_back({"int8Field", value.int8_field});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.uint8_field)) {
+    j.push_back({"uint8Field", value.uint8_field});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.int16_field)) {
+    j.push_back({"int16Field", value.int16_field});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.uint16_field)) {
+    j.push_back({"uint16Field", value.uint16_field});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.int32_field)) {
+    j.push_back({"int32Field", value.int32_field});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.uint32_field)) {
+    j.push_back({"uint32Field", value.uint32_field});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.int64_field)) {
+    j.push_back({"int64Field", value.int64_field});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.uint64_field)) {
+    j.push_back({"uint64Field", value.uint64_field});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.size_field)) {
+    j.push_back({"sizeField", value.size_field});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.float32_field)) {
+    j.push_back({"float32Field", value.float32_field});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.float64_field)) {
+    j.push_back({"float64Field", value.float64_field});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.complexfloat32_field)) {
+    j.push_back({"complexfloat32Field", value.complexfloat32_field});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.complexfloat64_field)) {
+    j.push_back({"complexfloat64Field", value.complexfloat64_field});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.date_field)) {
+    j.push_back({"dateField", value.date_field});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.time_field)) {
+    j.push_back({"timeField", value.time_field});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.datetime_field)) {
+    j.push_back({"datetimeField", value.datetime_field});
+  }
 }
 
 void from_json(ordered_json const& j, test_model::RecordWithPrimitives& value) {
-  j.at("boolField").get_to(value.bool_field);
-  j.at("int8Field").get_to(value.int8_field);
-  j.at("uint8Field").get_to(value.uint8_field);
-  j.at("int16Field").get_to(value.int16_field);
-  j.at("uint16Field").get_to(value.uint16_field);
-  j.at("int32Field").get_to(value.int32_field);
-  j.at("uint32Field").get_to(value.uint32_field);
-  j.at("int64Field").get_to(value.int64_field);
-  j.at("uint64Field").get_to(value.uint64_field);
-  j.at("sizeField").get_to(value.size_field);
-  j.at("float32Field").get_to(value.float32_field);
-  j.at("float64Field").get_to(value.float64_field);
-  j.at("complexfloat32Field").get_to(value.complexfloat32_field);
-  j.at("complexfloat64Field").get_to(value.complexfloat64_field);
-  j.at("dateField").get_to(value.date_field);
-  j.at("timeField").get_to(value.time_field);
-  j.at("datetimeField").get_to(value.datetime_field);
+  if (auto it = j.find("boolField"); it != j.end()) {
+    it->get_to(value.bool_field);
+  }
+  if (auto it = j.find("int8Field"); it != j.end()) {
+    it->get_to(value.int8_field);
+  }
+  if (auto it = j.find("uint8Field"); it != j.end()) {
+    it->get_to(value.uint8_field);
+  }
+  if (auto it = j.find("int16Field"); it != j.end()) {
+    it->get_to(value.int16_field);
+  }
+  if (auto it = j.find("uint16Field"); it != j.end()) {
+    it->get_to(value.uint16_field);
+  }
+  if (auto it = j.find("int32Field"); it != j.end()) {
+    it->get_to(value.int32_field);
+  }
+  if (auto it = j.find("uint32Field"); it != j.end()) {
+    it->get_to(value.uint32_field);
+  }
+  if (auto it = j.find("int64Field"); it != j.end()) {
+    it->get_to(value.int64_field);
+  }
+  if (auto it = j.find("uint64Field"); it != j.end()) {
+    it->get_to(value.uint64_field);
+  }
+  if (auto it = j.find("sizeField"); it != j.end()) {
+    it->get_to(value.size_field);
+  }
+  if (auto it = j.find("float32Field"); it != j.end()) {
+    it->get_to(value.float32_field);
+  }
+  if (auto it = j.find("float64Field"); it != j.end()) {
+    it->get_to(value.float64_field);
+  }
+  if (auto it = j.find("complexfloat32Field"); it != j.end()) {
+    it->get_to(value.complexfloat32_field);
+  }
+  if (auto it = j.find("complexfloat64Field"); it != j.end()) {
+    it->get_to(value.complexfloat64_field);
+  }
+  if (auto it = j.find("dateField"); it != j.end()) {
+    it->get_to(value.date_field);
+  }
+  if (auto it = j.find("timeField"); it != j.end()) {
+    it->get_to(value.time_field);
+  }
+  if (auto it = j.find("datetimeField"); it != j.end()) {
+    it->get_to(value.datetime_field);
+  }
 }
 
 void to_json(ordered_json& j, test_model::RecordWithPrimitiveAliases const& value) {
-  j = ordered_json{
-    {"byteField", value.byte_field},
-    {"intField", value.int_field},
-    {"uintField", value.uint_field},
-    {"longField", value.long_field},
-    {"ulongField", value.ulong_field},
-    {"floatField", value.float_field},
-    {"doubleField", value.double_field},
-    {"complexfloatField", value.complexfloat_field},
-    {"complexdoubleField", value.complexdouble_field},
-  };
+  j = ordered_json::object();
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.byte_field)) {
+    j.push_back({"byteField", value.byte_field});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.int_field)) {
+    j.push_back({"intField", value.int_field});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.uint_field)) {
+    j.push_back({"uintField", value.uint_field});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.long_field)) {
+    j.push_back({"longField", value.long_field});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.ulong_field)) {
+    j.push_back({"ulongField", value.ulong_field});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.float_field)) {
+    j.push_back({"floatField", value.float_field});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.double_field)) {
+    j.push_back({"doubleField", value.double_field});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.complexfloat_field)) {
+    j.push_back({"complexfloatField", value.complexfloat_field});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.complexdouble_field)) {
+    j.push_back({"complexdoubleField", value.complexdouble_field});
+  }
 }
 
 void from_json(ordered_json const& j, test_model::RecordWithPrimitiveAliases& value) {
-  j.at("byteField").get_to(value.byte_field);
-  j.at("intField").get_to(value.int_field);
-  j.at("uintField").get_to(value.uint_field);
-  j.at("longField").get_to(value.long_field);
-  j.at("ulongField").get_to(value.ulong_field);
-  j.at("floatField").get_to(value.float_field);
-  j.at("doubleField").get_to(value.double_field);
-  j.at("complexfloatField").get_to(value.complexfloat_field);
-  j.at("complexdoubleField").get_to(value.complexdouble_field);
+  if (auto it = j.find("byteField"); it != j.end()) {
+    it->get_to(value.byte_field);
+  }
+  if (auto it = j.find("intField"); it != j.end()) {
+    it->get_to(value.int_field);
+  }
+  if (auto it = j.find("uintField"); it != j.end()) {
+    it->get_to(value.uint_field);
+  }
+  if (auto it = j.find("longField"); it != j.end()) {
+    it->get_to(value.long_field);
+  }
+  if (auto it = j.find("ulongField"); it != j.end()) {
+    it->get_to(value.ulong_field);
+  }
+  if (auto it = j.find("floatField"); it != j.end()) {
+    it->get_to(value.float_field);
+  }
+  if (auto it = j.find("doubleField"); it != j.end()) {
+    it->get_to(value.double_field);
+  }
+  if (auto it = j.find("complexfloatField"); it != j.end()) {
+    it->get_to(value.complexfloat_field);
+  }
+  if (auto it = j.find("complexdoubleField"); it != j.end()) {
+    it->get_to(value.complexdouble_field);
+  }
 }
 
 void to_json(ordered_json& j, test_model::TupleWithRecords const& value) {
-  j = ordered_json{
-    {"a", value.a},
-    {"b", value.b},
-  };
+  j = ordered_json::object();
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.a)) {
+    j.push_back({"a", value.a});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.b)) {
+    j.push_back({"b", value.b});
+  }
 }
 
 void from_json(ordered_json const& j, test_model::TupleWithRecords& value) {
-  j.at("a").get_to(value.a);
-  j.at("b").get_to(value.b);
+  if (auto it = j.find("a"); it != j.end()) {
+    it->get_to(value.a);
+  }
+  if (auto it = j.find("b"); it != j.end()) {
+    it->get_to(value.b);
+  }
 }
 
 void to_json(ordered_json& j, test_model::RecordWithVectors const& value) {
-  j = ordered_json{
-    {"defaultVector", value.default_vector},
-    {"defaultVectorFixedLength", value.default_vector_fixed_length},
-    {"vectorOfVectors", value.vector_of_vectors},
-  };
+  j = ordered_json::object();
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.default_vector)) {
+    j.push_back({"defaultVector", value.default_vector});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.default_vector_fixed_length)) {
+    j.push_back({"defaultVectorFixedLength", value.default_vector_fixed_length});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.vector_of_vectors)) {
+    j.push_back({"vectorOfVectors", value.vector_of_vectors});
+  }
 }
 
 void from_json(ordered_json const& j, test_model::RecordWithVectors& value) {
-  j.at("defaultVector").get_to(value.default_vector);
-  j.at("defaultVectorFixedLength").get_to(value.default_vector_fixed_length);
-  j.at("vectorOfVectors").get_to(value.vector_of_vectors);
+  if (auto it = j.find("defaultVector"); it != j.end()) {
+    it->get_to(value.default_vector);
+  }
+  if (auto it = j.find("defaultVectorFixedLength"); it != j.end()) {
+    it->get_to(value.default_vector_fixed_length);
+  }
+  if (auto it = j.find("vectorOfVectors"); it != j.end()) {
+    it->get_to(value.vector_of_vectors);
+  }
 }
 
 void to_json(ordered_json& j, test_model::RecordWithArrays const& value) {
-  j = ordered_json{
-    {"defaultArray", value.default_array},
-    {"defaultArrayWithEmptyDimension", value.default_array_with_empty_dimension},
-    {"rank1Array", value.rank1_array},
-    {"rank2Array", value.rank2_array},
-    {"rank2ArrayWithNamedDimensions", value.rank2_array_with_named_dimensions},
-    {"rank2FixedArray", value.rank2_fixed_array},
-    {"rank2FixedArrayWithNamedDimensions", value.rank2_fixed_array_with_named_dimensions},
-    {"dynamicArray", value.dynamic_array},
-    {"arrayOfVectors", value.array_of_vectors},
-  };
+  j = ordered_json::object();
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.default_array)) {
+    j.push_back({"defaultArray", value.default_array});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.default_array_with_empty_dimension)) {
+    j.push_back({"defaultArrayWithEmptyDimension", value.default_array_with_empty_dimension});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.rank1_array)) {
+    j.push_back({"rank1Array", value.rank1_array});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.rank2_array)) {
+    j.push_back({"rank2Array", value.rank2_array});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.rank2_array_with_named_dimensions)) {
+    j.push_back({"rank2ArrayWithNamedDimensions", value.rank2_array_with_named_dimensions});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.rank2_fixed_array)) {
+    j.push_back({"rank2FixedArray", value.rank2_fixed_array});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.rank2_fixed_array_with_named_dimensions)) {
+    j.push_back({"rank2FixedArrayWithNamedDimensions", value.rank2_fixed_array_with_named_dimensions});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.dynamic_array)) {
+    j.push_back({"dynamicArray", value.dynamic_array});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.array_of_vectors)) {
+    j.push_back({"arrayOfVectors", value.array_of_vectors});
+  }
 }
 
 void from_json(ordered_json const& j, test_model::RecordWithArrays& value) {
-  j.at("defaultArray").get_to(value.default_array);
-  j.at("defaultArrayWithEmptyDimension").get_to(value.default_array_with_empty_dimension);
-  j.at("rank1Array").get_to(value.rank1_array);
-  j.at("rank2Array").get_to(value.rank2_array);
-  j.at("rank2ArrayWithNamedDimensions").get_to(value.rank2_array_with_named_dimensions);
-  j.at("rank2FixedArray").get_to(value.rank2_fixed_array);
-  j.at("rank2FixedArrayWithNamedDimensions").get_to(value.rank2_fixed_array_with_named_dimensions);
-  j.at("dynamicArray").get_to(value.dynamic_array);
-  j.at("arrayOfVectors").get_to(value.array_of_vectors);
+  if (auto it = j.find("defaultArray"); it != j.end()) {
+    it->get_to(value.default_array);
+  }
+  if (auto it = j.find("defaultArrayWithEmptyDimension"); it != j.end()) {
+    it->get_to(value.default_array_with_empty_dimension);
+  }
+  if (auto it = j.find("rank1Array"); it != j.end()) {
+    it->get_to(value.rank1_array);
+  }
+  if (auto it = j.find("rank2Array"); it != j.end()) {
+    it->get_to(value.rank2_array);
+  }
+  if (auto it = j.find("rank2ArrayWithNamedDimensions"); it != j.end()) {
+    it->get_to(value.rank2_array_with_named_dimensions);
+  }
+  if (auto it = j.find("rank2FixedArray"); it != j.end()) {
+    it->get_to(value.rank2_fixed_array);
+  }
+  if (auto it = j.find("rank2FixedArrayWithNamedDimensions"); it != j.end()) {
+    it->get_to(value.rank2_fixed_array_with_named_dimensions);
+  }
+  if (auto it = j.find("dynamicArray"); it != j.end()) {
+    it->get_to(value.dynamic_array);
+  }
+  if (auto it = j.find("arrayOfVectors"); it != j.end()) {
+    it->get_to(value.array_of_vectors);
+  }
 }
 
 void to_json(ordered_json& j, test_model::RecordWithArraysSimpleSyntax const& value) {
-  j = ordered_json{
-    {"defaultArray", value.default_array},
-    {"defaultArrayWithEmptyDimension", value.default_array_with_empty_dimension},
-    {"rank1Array", value.rank1_array},
-    {"rank2Array", value.rank2_array},
-    {"rank2ArrayWithNamedDimensions", value.rank2_array_with_named_dimensions},
-    {"rank2FixedArray", value.rank2_fixed_array},
-    {"rank2FixedArrayWithNamedDimensions", value.rank2_fixed_array_with_named_dimensions},
-    {"dynamicArray", value.dynamic_array},
-    {"arrayOfVectors", value.array_of_vectors},
-  };
+  j = ordered_json::object();
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.default_array)) {
+    j.push_back({"defaultArray", value.default_array});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.default_array_with_empty_dimension)) {
+    j.push_back({"defaultArrayWithEmptyDimension", value.default_array_with_empty_dimension});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.rank1_array)) {
+    j.push_back({"rank1Array", value.rank1_array});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.rank2_array)) {
+    j.push_back({"rank2Array", value.rank2_array});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.rank2_array_with_named_dimensions)) {
+    j.push_back({"rank2ArrayWithNamedDimensions", value.rank2_array_with_named_dimensions});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.rank2_fixed_array)) {
+    j.push_back({"rank2FixedArray", value.rank2_fixed_array});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.rank2_fixed_array_with_named_dimensions)) {
+    j.push_back({"rank2FixedArrayWithNamedDimensions", value.rank2_fixed_array_with_named_dimensions});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.dynamic_array)) {
+    j.push_back({"dynamicArray", value.dynamic_array});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.array_of_vectors)) {
+    j.push_back({"arrayOfVectors", value.array_of_vectors});
+  }
 }
 
 void from_json(ordered_json const& j, test_model::RecordWithArraysSimpleSyntax& value) {
-  j.at("defaultArray").get_to(value.default_array);
-  j.at("defaultArrayWithEmptyDimension").get_to(value.default_array_with_empty_dimension);
-  j.at("rank1Array").get_to(value.rank1_array);
-  j.at("rank2Array").get_to(value.rank2_array);
-  j.at("rank2ArrayWithNamedDimensions").get_to(value.rank2_array_with_named_dimensions);
-  j.at("rank2FixedArray").get_to(value.rank2_fixed_array);
-  j.at("rank2FixedArrayWithNamedDimensions").get_to(value.rank2_fixed_array_with_named_dimensions);
-  j.at("dynamicArray").get_to(value.dynamic_array);
-  j.at("arrayOfVectors").get_to(value.array_of_vectors);
+  if (auto it = j.find("defaultArray"); it != j.end()) {
+    it->get_to(value.default_array);
+  }
+  if (auto it = j.find("defaultArrayWithEmptyDimension"); it != j.end()) {
+    it->get_to(value.default_array_with_empty_dimension);
+  }
+  if (auto it = j.find("rank1Array"); it != j.end()) {
+    it->get_to(value.rank1_array);
+  }
+  if (auto it = j.find("rank2Array"); it != j.end()) {
+    it->get_to(value.rank2_array);
+  }
+  if (auto it = j.find("rank2ArrayWithNamedDimensions"); it != j.end()) {
+    it->get_to(value.rank2_array_with_named_dimensions);
+  }
+  if (auto it = j.find("rank2FixedArray"); it != j.end()) {
+    it->get_to(value.rank2_fixed_array);
+  }
+  if (auto it = j.find("rank2FixedArrayWithNamedDimensions"); it != j.end()) {
+    it->get_to(value.rank2_fixed_array_with_named_dimensions);
+  }
+  if (auto it = j.find("dynamicArray"); it != j.end()) {
+    it->get_to(value.dynamic_array);
+  }
+  if (auto it = j.find("arrayOfVectors"); it != j.end()) {
+    it->get_to(value.array_of_vectors);
+  }
 }
 
 void to_json(ordered_json& j, test_model::RecordWithOptionalFields const& value) {
-  j = ordered_json{
-    {"optionalInt", value.optional_int},
-    {"optionalIntAlternateSyntax", value.optional_int_alternate_syntax},
-  };
+  j = ordered_json::object();
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.optional_int)) {
+    j.push_back({"optionalInt", value.optional_int});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.optional_int_alternate_syntax)) {
+    j.push_back({"optionalIntAlternateSyntax", value.optional_int_alternate_syntax});
+  }
 }
 
 void from_json(ordered_json const& j, test_model::RecordWithOptionalFields& value) {
-  j.at("optionalInt").get_to(value.optional_int);
-  j.at("optionalIntAlternateSyntax").get_to(value.optional_int_alternate_syntax);
+  if (auto it = j.find("optionalInt"); it != j.end()) {
+    it->get_to(value.optional_int);
+  }
+  if (auto it = j.find("optionalIntAlternateSyntax"); it != j.end()) {
+    it->get_to(value.optional_int_alternate_syntax);
+  }
 }
 
 void to_json(ordered_json& j, test_model::RecordWithVlens const& value) {
-  j = ordered_json{
-    {"a", value.a},
-    {"b", value.b},
-    {"c", value.c},
-  };
+  j = ordered_json::object();
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.a)) {
+    j.push_back({"a", value.a});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.b)) {
+    j.push_back({"b", value.b});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.c)) {
+    j.push_back({"c", value.c});
+  }
 }
 
 void from_json(ordered_json const& j, test_model::RecordWithVlens& value) {
-  j.at("a").get_to(value.a);
-  j.at("b").get_to(value.b);
-  j.at("c").get_to(value.c);
+  if (auto it = j.find("a"); it != j.end()) {
+    it->get_to(value.a);
+  }
+  if (auto it = j.find("b"); it != j.end()) {
+    it->get_to(value.b);
+  }
+  if (auto it = j.find("c"); it != j.end()) {
+    it->get_to(value.c);
+  }
 }
 
 void to_json(ordered_json& j, test_model::RecordWithStrings const& value) {
-  j = ordered_json{
-    {"a", value.a},
-    {"b", value.b},
-  };
+  j = ordered_json::object();
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.a)) {
+    j.push_back({"a", value.a});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.b)) {
+    j.push_back({"b", value.b});
+  }
 }
 
 void from_json(ordered_json const& j, test_model::RecordWithStrings& value) {
-  j.at("a").get_to(value.a);
-  j.at("b").get_to(value.b);
+  if (auto it = j.find("a"); it != j.end()) {
+    it->get_to(value.a);
+  }
+  if (auto it = j.find("b"); it != j.end()) {
+    it->get_to(value.b);
+  }
 }
 
 void to_json(ordered_json& j, test_model::RecordWithOptionalVector const& value) {
-  j = ordered_json{
-    {"optionalVector", value.optional_vector},
-  };
+  j = ordered_json::object();
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.optional_vector)) {
+    j.push_back({"optionalVector", value.optional_vector});
+  }
 }
 
 void from_json(ordered_json const& j, test_model::RecordWithOptionalVector& value) {
-  j.at("optionalVector").get_to(value.optional_vector);
+  if (auto it = j.find("optionalVector"); it != j.end()) {
+    it->get_to(value.optional_vector);
+  }
 }
 
 void to_json(ordered_json& j, test_model::RecordWithFixedVectors const& value) {
-  j = ordered_json{
-    {"fixedIntVector", value.fixed_int_vector},
-    {"fixedSimpleRecordVector", value.fixed_simple_record_vector},
-    {"fixedRecordWithVlensVector", value.fixed_record_with_vlens_vector},
-  };
+  j = ordered_json::object();
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.fixed_int_vector)) {
+    j.push_back({"fixedIntVector", value.fixed_int_vector});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.fixed_simple_record_vector)) {
+    j.push_back({"fixedSimpleRecordVector", value.fixed_simple_record_vector});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.fixed_record_with_vlens_vector)) {
+    j.push_back({"fixedRecordWithVlensVector", value.fixed_record_with_vlens_vector});
+  }
 }
 
 void from_json(ordered_json const& j, test_model::RecordWithFixedVectors& value) {
-  j.at("fixedIntVector").get_to(value.fixed_int_vector);
-  j.at("fixedSimpleRecordVector").get_to(value.fixed_simple_record_vector);
-  j.at("fixedRecordWithVlensVector").get_to(value.fixed_record_with_vlens_vector);
+  if (auto it = j.find("fixedIntVector"); it != j.end()) {
+    it->get_to(value.fixed_int_vector);
+  }
+  if (auto it = j.find("fixedSimpleRecordVector"); it != j.end()) {
+    it->get_to(value.fixed_simple_record_vector);
+  }
+  if (auto it = j.find("fixedRecordWithVlensVector"); it != j.end()) {
+    it->get_to(value.fixed_record_with_vlens_vector);
+  }
 }
 
 void to_json(ordered_json& j, test_model::RecordWithFixedArrays const& value) {
-  j = ordered_json{
-    {"ints", value.ints},
-    {"fixedSimpleRecordArray", value.fixed_simple_record_array},
-    {"fixedRecordWithVlensArray", value.fixed_record_with_vlens_array},
-  };
+  j = ordered_json::object();
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.ints)) {
+    j.push_back({"ints", value.ints});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.fixed_simple_record_array)) {
+    j.push_back({"fixedSimpleRecordArray", value.fixed_simple_record_array});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.fixed_record_with_vlens_array)) {
+    j.push_back({"fixedRecordWithVlensArray", value.fixed_record_with_vlens_array});
+  }
 }
 
 void from_json(ordered_json const& j, test_model::RecordWithFixedArrays& value) {
-  j.at("ints").get_to(value.ints);
-  j.at("fixedSimpleRecordArray").get_to(value.fixed_simple_record_array);
-  j.at("fixedRecordWithVlensArray").get_to(value.fixed_record_with_vlens_array);
+  if (auto it = j.find("ints"); it != j.end()) {
+    it->get_to(value.ints);
+  }
+  if (auto it = j.find("fixedSimpleRecordArray"); it != j.end()) {
+    it->get_to(value.fixed_simple_record_array);
+  }
+  if (auto it = j.find("fixedRecordWithVlensArray"); it != j.end()) {
+    it->get_to(value.fixed_record_with_vlens_array);
+  }
 }
 
 void to_json(ordered_json& j, test_model::RecordWithNDArrays const& value) {
-  j = ordered_json{
-    {"ints", value.ints},
-    {"fixedSimpleRecordArray", value.fixed_simple_record_array},
-    {"fixedRecordWithVlensArray", value.fixed_record_with_vlens_array},
-  };
+  j = ordered_json::object();
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.ints)) {
+    j.push_back({"ints", value.ints});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.fixed_simple_record_array)) {
+    j.push_back({"fixedSimpleRecordArray", value.fixed_simple_record_array});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.fixed_record_with_vlens_array)) {
+    j.push_back({"fixedRecordWithVlensArray", value.fixed_record_with_vlens_array});
+  }
 }
 
 void from_json(ordered_json const& j, test_model::RecordWithNDArrays& value) {
-  j.at("ints").get_to(value.ints);
-  j.at("fixedSimpleRecordArray").get_to(value.fixed_simple_record_array);
-  j.at("fixedRecordWithVlensArray").get_to(value.fixed_record_with_vlens_array);
+  if (auto it = j.find("ints"); it != j.end()) {
+    it->get_to(value.ints);
+  }
+  if (auto it = j.find("fixedSimpleRecordArray"); it != j.end()) {
+    it->get_to(value.fixed_simple_record_array);
+  }
+  if (auto it = j.find("fixedRecordWithVlensArray"); it != j.end()) {
+    it->get_to(value.fixed_record_with_vlens_array);
+  }
 }
 
 void to_json(ordered_json& j, test_model::RecordWithNDArraysSingleDimension const& value) {
-  j = ordered_json{
-    {"ints", value.ints},
-    {"fixedSimpleRecordArray", value.fixed_simple_record_array},
-    {"fixedRecordWithVlensArray", value.fixed_record_with_vlens_array},
-  };
+  j = ordered_json::object();
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.ints)) {
+    j.push_back({"ints", value.ints});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.fixed_simple_record_array)) {
+    j.push_back({"fixedSimpleRecordArray", value.fixed_simple_record_array});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.fixed_record_with_vlens_array)) {
+    j.push_back({"fixedRecordWithVlensArray", value.fixed_record_with_vlens_array});
+  }
 }
 
 void from_json(ordered_json const& j, test_model::RecordWithNDArraysSingleDimension& value) {
-  j.at("ints").get_to(value.ints);
-  j.at("fixedSimpleRecordArray").get_to(value.fixed_simple_record_array);
-  j.at("fixedRecordWithVlensArray").get_to(value.fixed_record_with_vlens_array);
+  if (auto it = j.find("ints"); it != j.end()) {
+    it->get_to(value.ints);
+  }
+  if (auto it = j.find("fixedSimpleRecordArray"); it != j.end()) {
+    it->get_to(value.fixed_simple_record_array);
+  }
+  if (auto it = j.find("fixedRecordWithVlensArray"); it != j.end()) {
+    it->get_to(value.fixed_record_with_vlens_array);
+  }
 }
 
 void to_json(ordered_json& j, test_model::RecordWithDynamicNDArrays const& value) {
-  j = ordered_json{
-    {"ints", value.ints},
-    {"fixedSimpleRecordArray", value.fixed_simple_record_array},
-    {"fixedRecordWithVlensArray", value.fixed_record_with_vlens_array},
-  };
+  j = ordered_json::object();
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.ints)) {
+    j.push_back({"ints", value.ints});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.fixed_simple_record_array)) {
+    j.push_back({"fixedSimpleRecordArray", value.fixed_simple_record_array});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.fixed_record_with_vlens_array)) {
+    j.push_back({"fixedRecordWithVlensArray", value.fixed_record_with_vlens_array});
+  }
 }
 
 void from_json(ordered_json const& j, test_model::RecordWithDynamicNDArrays& value) {
-  j.at("ints").get_to(value.ints);
-  j.at("fixedSimpleRecordArray").get_to(value.fixed_simple_record_array);
-  j.at("fixedRecordWithVlensArray").get_to(value.fixed_record_with_vlens_array);
+  if (auto it = j.find("ints"); it != j.end()) {
+    it->get_to(value.ints);
+  }
+  if (auto it = j.find("fixedSimpleRecordArray"); it != j.end()) {
+    it->get_to(value.fixed_simple_record_array);
+  }
+  if (auto it = j.find("fixedRecordWithVlensArray"); it != j.end()) {
+    it->get_to(value.fixed_record_with_vlens_array);
+  }
 }
 
 void to_json(ordered_json& j, test_model::Fruits const& value) {
@@ -820,84 +1156,168 @@ void from_json(ordered_json const& j, test_model::SizeBasedEnum& value) {
 
 template <typename T1, typename T2>
 void to_json(ordered_json& j, test_model::GenericRecord<T1, T2> const& value) {
-  j = ordered_json{
-    {"scalar1", value.scalar1},
-    {"scalar2", value.scalar2},
-    {"vector1", value.vector1},
-    {"image2", value.image2},
-  };
+  j = ordered_json::object();
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.scalar1)) {
+    j.push_back({"scalar1", value.scalar1});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.scalar2)) {
+    j.push_back({"scalar2", value.scalar2});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.vector1)) {
+    j.push_back({"vector1", value.vector1});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.image2)) {
+    j.push_back({"image2", value.image2});
+  }
 }
 
 template <typename T1, typename T2>
 void from_json(ordered_json const& j, test_model::GenericRecord<T1, T2>& value) {
-  j.at("scalar1").get_to(value.scalar1);
-  j.at("scalar2").get_to(value.scalar2);
-  j.at("vector1").get_to(value.vector1);
-  j.at("image2").get_to(value.image2);
+  if (auto it = j.find("scalar1"); it != j.end()) {
+    it->get_to(value.scalar1);
+  }
+  if (auto it = j.find("scalar2"); it != j.end()) {
+    it->get_to(value.scalar2);
+  }
+  if (auto it = j.find("vector1"); it != j.end()) {
+    it->get_to(value.vector1);
+  }
+  if (auto it = j.find("image2"); it != j.end()) {
+    it->get_to(value.image2);
+  }
 }
 
 template <typename T1, typename T2>
 void to_json(ordered_json& j, test_model::MyTuple<T1, T2> const& value) {
-  j = ordered_json{
-    {"v1", value.v1},
-    {"v2", value.v2},
-  };
+  j = ordered_json::object();
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.v1)) {
+    j.push_back({"v1", value.v1});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.v2)) {
+    j.push_back({"v2", value.v2});
+  }
 }
 
 template <typename T1, typename T2>
 void from_json(ordered_json const& j, test_model::MyTuple<T1, T2>& value) {
-  j.at("v1").get_to(value.v1);
-  j.at("v2").get_to(value.v2);
+  if (auto it = j.find("v1"); it != j.end()) {
+    it->get_to(value.v1);
+  }
+  if (auto it = j.find("v2"); it != j.end()) {
+    it->get_to(value.v2);
+  }
 }
 
 template <typename T0, typename T1>
 void to_json(ordered_json& j, test_model::GenericRecordWithComputedFields<T0, T1> const& value) {
-  j = ordered_json{
-    {"f1", value.f1},
-  };
+  j = ordered_json::object();
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.f1)) {
+    j.push_back({"f1", value.f1});
+  }
 }
 
 template <typename T0, typename T1>
 void from_json(ordered_json const& j, test_model::GenericRecordWithComputedFields<T0, T1>& value) {
-  j.at("f1").get_to(value.f1);
+  if (auto it = j.find("f1"); it != j.end()) {
+    it->get_to(value.f1);
+  }
 }
 
 void to_json(ordered_json& j, test_model::RecordWithComputedFields const& value) {
-  j = ordered_json{
-    {"arrayField", value.array_field},
-    {"arrayFieldMapDimensions", value.array_field_map_dimensions},
-    {"dynamicArrayField", value.dynamic_array_field},
-    {"fixedArrayField", value.fixed_array_field},
-    {"intField", value.int_field},
-    {"stringField", value.string_field},
-    {"tupleField", value.tuple_field},
-    {"vectorField", value.vector_field},
-    {"vectorOfVectorsField", value.vector_of_vectors_field},
-    {"fixedVectorField", value.fixed_vector_field},
-    {"optionalNamedArray", value.optional_named_array},
-    {"intFloatUnion", value.int_float_union},
-    {"nullableIntFloatUnion", value.nullable_int_float_union},
-    {"unionWithNestedGenericUnion", value.union_with_nested_generic_union},
-    {"mapField", value.map_field},
-  };
+  j = ordered_json::object();
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.array_field)) {
+    j.push_back({"arrayField", value.array_field});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.array_field_map_dimensions)) {
+    j.push_back({"arrayFieldMapDimensions", value.array_field_map_dimensions});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.dynamic_array_field)) {
+    j.push_back({"dynamicArrayField", value.dynamic_array_field});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.fixed_array_field)) {
+    j.push_back({"fixedArrayField", value.fixed_array_field});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.int_field)) {
+    j.push_back({"intField", value.int_field});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.string_field)) {
+    j.push_back({"stringField", value.string_field});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.tuple_field)) {
+    j.push_back({"tupleField", value.tuple_field});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.vector_field)) {
+    j.push_back({"vectorField", value.vector_field});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.vector_of_vectors_field)) {
+    j.push_back({"vectorOfVectorsField", value.vector_of_vectors_field});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.fixed_vector_field)) {
+    j.push_back({"fixedVectorField", value.fixed_vector_field});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.optional_named_array)) {
+    j.push_back({"optionalNamedArray", value.optional_named_array});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.int_float_union)) {
+    j.push_back({"intFloatUnion", value.int_float_union});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.nullable_int_float_union)) {
+    j.push_back({"nullableIntFloatUnion", value.nullable_int_float_union});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.union_with_nested_generic_union)) {
+    j.push_back({"unionWithNestedGenericUnion", value.union_with_nested_generic_union});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.map_field)) {
+    j.push_back({"mapField", value.map_field});
+  }
 }
 
 void from_json(ordered_json const& j, test_model::RecordWithComputedFields& value) {
-  j.at("arrayField").get_to(value.array_field);
-  j.at("arrayFieldMapDimensions").get_to(value.array_field_map_dimensions);
-  j.at("dynamicArrayField").get_to(value.dynamic_array_field);
-  j.at("fixedArrayField").get_to(value.fixed_array_field);
-  j.at("intField").get_to(value.int_field);
-  j.at("stringField").get_to(value.string_field);
-  j.at("tupleField").get_to(value.tuple_field);
-  j.at("vectorField").get_to(value.vector_field);
-  j.at("vectorOfVectorsField").get_to(value.vector_of_vectors_field);
-  j.at("fixedVectorField").get_to(value.fixed_vector_field);
-  j.at("optionalNamedArray").get_to(value.optional_named_array);
-  j.at("intFloatUnion").get_to(value.int_float_union);
-  j.at("nullableIntFloatUnion").get_to(value.nullable_int_float_union);
-  j.at("unionWithNestedGenericUnion").get_to(value.union_with_nested_generic_union);
-  j.at("mapField").get_to(value.map_field);
+  if (auto it = j.find("arrayField"); it != j.end()) {
+    it->get_to(value.array_field);
+  }
+  if (auto it = j.find("arrayFieldMapDimensions"); it != j.end()) {
+    it->get_to(value.array_field_map_dimensions);
+  }
+  if (auto it = j.find("dynamicArrayField"); it != j.end()) {
+    it->get_to(value.dynamic_array_field);
+  }
+  if (auto it = j.find("fixedArrayField"); it != j.end()) {
+    it->get_to(value.fixed_array_field);
+  }
+  if (auto it = j.find("intField"); it != j.end()) {
+    it->get_to(value.int_field);
+  }
+  if (auto it = j.find("stringField"); it != j.end()) {
+    it->get_to(value.string_field);
+  }
+  if (auto it = j.find("tupleField"); it != j.end()) {
+    it->get_to(value.tuple_field);
+  }
+  if (auto it = j.find("vectorField"); it != j.end()) {
+    it->get_to(value.vector_field);
+  }
+  if (auto it = j.find("vectorOfVectorsField"); it != j.end()) {
+    it->get_to(value.vector_of_vectors_field);
+  }
+  if (auto it = j.find("fixedVectorField"); it != j.end()) {
+    it->get_to(value.fixed_vector_field);
+  }
+  if (auto it = j.find("optionalNamedArray"); it != j.end()) {
+    it->get_to(value.optional_named_array);
+  }
+  if (auto it = j.find("intFloatUnion"); it != j.end()) {
+    it->get_to(value.int_float_union);
+  }
+  if (auto it = j.find("nullableIntFloatUnion"); it != j.end()) {
+    it->get_to(value.nullable_int_float_union);
+  }
+  if (auto it = j.find("unionWithNestedGenericUnion"); it != j.end()) {
+    it->get_to(value.union_with_nested_generic_union);
+  }
+  if (auto it = j.find("mapField"); it != j.end()) {
+    it->get_to(value.map_field);
+  }
 }
 
 void to_json(ordered_json& j, test_model::EnumWithKeywordSymbols const& value) {
@@ -933,17 +1353,28 @@ void from_json(ordered_json const& j, test_model::EnumWithKeywordSymbols& value)
 }
 
 void to_json(ordered_json& j, test_model::RecordWithKeywordFields const& value) {
-  j = ordered_json{
-    {"int", value.int_field},
-    {"sizeof", value.sizeof_field},
-    {"if", value.if_field},
-  };
+  j = ordered_json::object();
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.int_field)) {
+    j.push_back({"int", value.int_field});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.sizeof_field)) {
+    j.push_back({"sizeof", value.sizeof_field});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.if_field)) {
+    j.push_back({"if", value.if_field});
+  }
 }
 
 void from_json(ordered_json const& j, test_model::RecordWithKeywordFields& value) {
-  j.at("int").get_to(value.int_field);
-  j.at("sizeof").get_to(value.sizeof_field);
-  j.at("if").get_to(value.if_field);
+  if (auto it = j.find("int"); it != j.end()) {
+    it->get_to(value.int_field);
+  }
+  if (auto it = j.find("sizeof"); it != j.end()) {
+    it->get_to(value.sizeof_field);
+  }
+  if (auto it = j.find("if"); it != j.end()) {
+    it->get_to(value.if_field);
+  }
 }
 
 } // namespace test_model
