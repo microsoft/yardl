@@ -2052,6 +2052,22 @@ class MockUnionsWriter : public UnionsWriterBase {
     WriteMonosotateOrIntOrSimpleRecordImpl_expected_values_.push(value);
   }
 
+  void WriteRecordWithUnionsImpl (test_model::RecordWithUnions const& value) override {
+    if (WriteRecordWithUnionsImpl_expected_values_.empty()) {
+      throw std::runtime_error("Unexpected call to WriteRecordWithUnionsImpl");
+    }
+    if (WriteRecordWithUnionsImpl_expected_values_.front() != value) {
+      throw std::runtime_error("Unexpected argument value for call to WriteRecordWithUnionsImpl");
+    }
+    WriteRecordWithUnionsImpl_expected_values_.pop();
+  }
+
+  std::queue<test_model::RecordWithUnions> WriteRecordWithUnionsImpl_expected_values_;
+
+  void ExpectWriteRecordWithUnionsImpl (test_model::RecordWithUnions const& value) {
+    WriteRecordWithUnionsImpl_expected_values_.push(value);
+  }
+
   void Verify() {
     if (!WriteIntOrSimpleRecordImpl_expected_values_.empty()) {
       throw std::runtime_error("Expected call to WriteIntOrSimpleRecordImpl was not received");
@@ -2061,6 +2077,9 @@ class MockUnionsWriter : public UnionsWriterBase {
     }
     if (!WriteMonosotateOrIntOrSimpleRecordImpl_expected_values_.empty()) {
       throw std::runtime_error("Expected call to WriteMonosotateOrIntOrSimpleRecordImpl was not received");
+    }
+    if (!WriteRecordWithUnionsImpl_expected_values_.empty()) {
+      throw std::runtime_error("Expected call to WriteRecordWithUnionsImpl was not received");
     }
   }
 };
@@ -2090,6 +2109,11 @@ class TestUnionsWriterBase : public UnionsWriterBase {
   void WriteMonosotateOrIntOrSimpleRecordImpl(std::variant<std::monostate, int32_t, test_model::SimpleRecord> const& value) override {
     writer_->WriteMonosotateOrIntOrSimpleRecord(value);
     mock_writer_.ExpectWriteMonosotateOrIntOrSimpleRecordImpl(value);
+  }
+
+  void WriteRecordWithUnionsImpl(test_model::RecordWithUnions const& value) override {
+    writer_->WriteRecordWithUnions(value);
+    mock_writer_.ExpectWriteRecordWithUnionsImpl(value);
   }
 
   void CloseImpl() override {

@@ -747,6 +747,7 @@ class UnionsWriter : public test_model::UnionsWriterBase, yardl::binary::BinaryW
   void WriteIntOrSimpleRecordImpl(std::variant<int32_t, test_model::SimpleRecord> const& value) override;
   void WriteIntOrRecordWithVlensImpl(std::variant<int32_t, test_model::RecordWithVlens> const& value) override;
   void WriteMonosotateOrIntOrSimpleRecordImpl(std::variant<std::monostate, int32_t, test_model::SimpleRecord> const& value) override;
+  void WriteRecordWithUnionsImpl(test_model::RecordWithUnions const& value) override;
   void CloseImpl() override;
 };
 
@@ -765,6 +766,7 @@ class UnionsReader : public test_model::UnionsReaderBase, yardl::binary::BinaryR
   void ReadIntOrSimpleRecordImpl(std::variant<int32_t, test_model::SimpleRecord>& value) override;
   void ReadIntOrRecordWithVlensImpl(std::variant<int32_t, test_model::RecordWithVlens>& value) override;
   void ReadMonosotateOrIntOrSimpleRecordImpl(std::variant<std::monostate, int32_t, test_model::SimpleRecord>& value) override;
+  void ReadRecordWithUnionsImpl(test_model::RecordWithUnions& value) override;
   void CloseImpl() override;
 };
 

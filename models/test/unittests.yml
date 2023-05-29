@@ -245,11 +245,16 @@ Maps: !protocol
       values: [string, int]
     aliasedGeneric: AliasedMap<string, int>
 
+RecordWithUnions: !record
+  fields:
+    nullOrIntOrString: [null, int, string]
+
 Unions: !protocol
   sequence:
     intOrSimpleRecord: [int, SimpleRecord]
     intOrRecordWithVlens: [int, RecordWithVlens]
     monosotateOrIntOrSimpleRecord: [null, int, SimpleRecord]
+    recordWithUnions: RecordWithUnions
 
 StreamsOfUnions: !protocol
   sequence:

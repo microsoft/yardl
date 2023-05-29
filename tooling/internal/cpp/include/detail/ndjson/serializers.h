@@ -76,6 +76,15 @@ constexpr bool ShouldSerializeFieldValue(std::optional<T> const& value) {
   return value.has_value();
 }
 
+template <typename... Ts>
+constexpr bool ShouldSerializeFieldValue(std::variant<Ts...> const& var) {
+  if constexpr (std::is_same_v<std::monostate, std::variant_alternative_t<0, std::variant<Ts...>>>) {
+    return var.index() != 0;
+  }
+
+  return true;
+}
+
 }  // namespace yardl::ndjson
 
 NLOHMANN_JSON_NAMESPACE_BEGIN
