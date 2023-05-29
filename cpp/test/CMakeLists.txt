@@ -6,10 +6,10 @@ find_package(GTest REQUIRED)
 add_executable(tests
   binary/coded_stream_test.cc
   binary/header_test.cc
-  binary/stream_test.cc
   computed_fields_test.cc
   definitions_test.cc
   hdf5/hdf5_test.cc
+  ndjson/schema_test.cc
   protocol_state_test.cc
   roundtrip_test.cc
 )

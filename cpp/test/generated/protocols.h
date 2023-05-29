@@ -1246,6 +1246,9 @@ class UnionsWriterBase {
   // Ordinal 2.
   void WriteMonosotateOrIntOrSimpleRecord(std::variant<std::monostate, int32_t, test_model::SimpleRecord> const& value);
 
+  // Ordinal 3.
+  void WriteRecordWithUnions(test_model::RecordWithUnions const& value);
+
   // Optionaly close this writer before destructing. Validates that all steps were completed.
   void Close();
 
@@ -1258,6 +1261,7 @@ class UnionsWriterBase {
   virtual void WriteIntOrSimpleRecordImpl(std::variant<int32_t, test_model::SimpleRecord> const& value) = 0;
   virtual void WriteIntOrRecordWithVlensImpl(std::variant<int32_t, test_model::RecordWithVlens> const& value) = 0;
   virtual void WriteMonosotateOrIntOrSimpleRecordImpl(std::variant<std::monostate, int32_t, test_model::SimpleRecord> const& value) = 0;
+  virtual void WriteRecordWithUnionsImpl(test_model::RecordWithUnions const& value) = 0;
   virtual void CloseImpl() {}
 
   static std::string schema_;
@@ -1280,6 +1284,9 @@ class UnionsReaderBase {
   // Ordinal 2.
   void ReadMonosotateOrIntOrSimpleRecord(std::variant<std::monostate, int32_t, test_model::SimpleRecord>& value);
 
+  // Ordinal 3.
+  void ReadRecordWithUnions(test_model::RecordWithUnions& value);
+
   // Optionaly close this writer before destructing. Validates that all steps were completely read.
   void Close();
 
@@ -1291,6 +1298,7 @@ class UnionsReaderBase {
   virtual void ReadIntOrSimpleRecordImpl(std::variant<int32_t, test_model::SimpleRecord>& value) = 0;
   virtual void ReadIntOrRecordWithVlensImpl(std::variant<int32_t, test_model::RecordWithVlens>& value) = 0;
   virtual void ReadMonosotateOrIntOrSimpleRecordImpl(std::variant<std::monostate, int32_t, test_model::SimpleRecord>& value) = 0;
+  virtual void ReadRecordWithUnionsImpl(test_model::RecordWithUnions& value) = 0;
   virtual void CloseImpl() {}
   static std::string schema_;
 

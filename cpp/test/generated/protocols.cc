@@ -109,7 +109,9 @@ bool BenchmarkFloat256x256ReaderBase::ReadFloat256x256(std::vector<yardl::FixedN
     BenchmarkFloat256x256ReaderBaseInvalidState(0, state_);
   }
 
-  if (!ReadFloat256x256Impl(values)) {state_ = 1;
+  if (!ReadFloat256x256Impl(values)) {
+    state_ = 1;
+    return values.size() > 0;
   }
   return true;
 }
@@ -256,7 +258,9 @@ bool BenchmarkFloatVlenReaderBase::ReadFloatArray(std::vector<yardl::NDArray<flo
     BenchmarkFloatVlenReaderBaseInvalidState(0, state_);
   }
 
-  if (!ReadFloatArrayImpl(values)) {state_ = 1;
+  if (!ReadFloatArrayImpl(values)) {
+    state_ = 1;
+    return values.size() > 0;
   }
   return true;
 }
@@ -403,7 +407,9 @@ bool BenchmarkSmallRecordReaderBase::ReadSmallRecord(std::vector<test_model::Sma
     BenchmarkSmallRecordReaderBaseInvalidState(0, state_);
   }
 
-  if (!ReadSmallRecordImpl(values)) {state_ = 1;
+  if (!ReadSmallRecordImpl(values)) {
+    state_ = 1;
+    return values.size() > 0;
   }
   return true;
 }
@@ -550,7 +556,9 @@ bool BenchmarkSmallRecordWithOptionalsReaderBase::ReadSmallRecord(std::vector<te
     BenchmarkSmallRecordWithOptionalsReaderBaseInvalidState(0, state_);
   }
 
-  if (!ReadSmallRecordImpl(values)) {state_ = 1;
+  if (!ReadSmallRecordImpl(values)) {
+    state_ = 1;
+    return values.size() > 0;
   }
   return true;
 }
@@ -697,7 +705,9 @@ bool BenchmarkSimpleMrdReaderBase::ReadData(std::vector<std::variant<test_model:
     BenchmarkSimpleMrdReaderBaseInvalidState(0, state_);
   }
 
-  if (!ReadDataImpl(values)) {state_ = 1;
+  if (!ReadDataImpl(values)) {
+    state_ = 1;
+    return values.size() > 0;
   }
   return true;
 }
@@ -1739,7 +1749,9 @@ bool StreamsReaderBase::ReadIntData(std::vector<int32_t>& values) {
     StreamsReaderBaseInvalidState(0, state_);
   }
 
-  if (!ReadIntDataImpl(values)) {state_ = 1;
+  if (!ReadIntDataImpl(values)) {
+    state_ = 1;
+    return values.size() > 0;
   }
   return true;
 }
@@ -1799,7 +1811,9 @@ bool StreamsReaderBase::ReadOptionalIntData(std::vector<std::optional<int32_t>>&
     }
   }
 
-  if (!ReadOptionalIntDataImpl(values)) {state_ = 3;
+  if (!ReadOptionalIntDataImpl(values)) {
+    state_ = 3;
+    return values.size() > 0;
   }
   return true;
 }
@@ -1859,7 +1873,9 @@ bool StreamsReaderBase::ReadRecordWithOptionalVectorData(std::vector<test_model:
     }
   }
 
-  if (!ReadRecordWithOptionalVectorDataImpl(values)) {state_ = 5;
+  if (!ReadRecordWithOptionalVectorDataImpl(values)) {
+    state_ = 5;
+    return values.size() > 0;
   }
   return true;
 }
@@ -1919,7 +1935,9 @@ bool StreamsReaderBase::ReadFixedVector(std::vector<std::array<int32_t, 3>>& val
     }
   }
 
-  if (!ReadFixedVectorImpl(values)) {state_ = 7;
+  if (!ReadFixedVectorImpl(values)) {
+    state_ = 7;
+    return values.size() > 0;
   }
   return true;
 }
@@ -2791,13 +2809,15 @@ void UnionsWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end, 
   case 0: expected_method = "WriteIntOrSimpleRecord()"; break;
   case 1: expected_method = "WriteIntOrRecordWithVlens()"; break;
   case 2: expected_method = "WriteMonosotateOrIntOrSimpleRecord()"; break;
+  case 3: expected_method = "WriteRecordWithUnions()"; break;
   }
   std::string attempted_method;
   switch (attempted) {
   case 0: attempted_method = "WriteIntOrSimpleRecord()"; break;
   case 1: attempted_method = "WriteIntOrRecordWithVlens()"; break;
   case 2: attempted_method = "WriteMonosotateOrIntOrSimpleRecord()"; break;
-  case 3: attempted_method = "Close()"; break;
+  case 3: attempted_method = "WriteRecordWithUnions()"; break;
+  case 4: attempted_method = "Close()"; break;
   }
   throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
 }
@@ -2808,7 +2828,8 @@ void UnionsReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
     case 0: return "ReadIntOrSimpleRecord()";
     case 1: return "ReadIntOrRecordWithVlens()";
     case 2: return "ReadMonosotateOrIntOrSimpleRecord()";
-    case 3: return "Close()";
+    case 3: return "ReadRecordWithUnions()";
+    case 4: return "Close()";
     default: return "<unknown>";
     }
   };
@@ -2817,7 +2838,7 @@ void UnionsReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
 
 } // namespace 
 
-std::string UnionsWriterBase::schema_ = R"({"protocol":{"name":"Unions","sequence":[{"name":"intOrSimpleRecord","type":[{"label":"int32","type":"int32"},{"label":"SimpleRecord","type":"TestModel.SimpleRecord"}]},{"name":"intOrRecordWithVlens","type":[{"label":"int32","type":"int32"},{"label":"RecordWithVlens","type":"TestModel.RecordWithVlens"}]},{"name":"monosotateOrIntOrSimpleRecord","type":[null,{"label":"int32","type":"int32"},{"label":"SimpleRecord","type":"TestModel.SimpleRecord"}]}]},"types":[{"name":"RecordWithVlens","fields":[{"name":"a","type":{"vector":{"items":"TestModel.SimpleRecord"}}},{"name":"b","type":"int32"},{"name":"c","type":"int32"}]},{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]}]})";
+std::string UnionsWriterBase::schema_ = R"({"protocol":{"name":"Unions","sequence":[{"name":"intOrSimpleRecord","type":[{"label":"int32","type":"int32"},{"label":"SimpleRecord","type":"TestModel.SimpleRecord"}]},{"name":"intOrRecordWithVlens","type":[{"label":"int32","type":"int32"},{"label":"RecordWithVlens","type":"TestModel.RecordWithVlens"}]},{"name":"monosotateOrIntOrSimpleRecord","type":[null,{"label":"int32","type":"int32"},{"label":"SimpleRecord","type":"TestModel.SimpleRecord"}]},{"name":"recordWithUnions","type":"TestModel.RecordWithUnions"}]},"types":[{"name":"RecordWithUnions","fields":[{"name":"nullOrIntOrString","type":[null,{"label":"int32","type":"int32"},{"label":"string","type":"string"}]}]},{"name":"RecordWithVlens","fields":[{"name":"a","type":{"vector":{"items":"TestModel.SimpleRecord"}}},{"name":"b","type":"int32"},{"name":"c","type":"int32"}]},{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]}]})";
 
 void UnionsWriterBase::WriteIntOrSimpleRecord(std::variant<int32_t, test_model::SimpleRecord> const& value) {
   if (unlikely(state_ != 0)) {
@@ -2846,9 +2867,18 @@ void UnionsWriterBase::WriteMonosotateOrIntOrSimpleRecord(std::variant<std::mono
   state_ = 3;
 }
 
-void UnionsWriterBase::Close() {
+void UnionsWriterBase::WriteRecordWithUnions(test_model::RecordWithUnions const& value) {
   if (unlikely(state_ != 3)) {
     UnionsWriterBaseInvalidState(3, false, state_);
+  }
+
+  WriteRecordWithUnionsImpl(value);
+  state_ = 4;
+}
+
+void UnionsWriterBase::Close() {
+  if (unlikely(state_ != 4)) {
+    UnionsWriterBaseInvalidState(4, false, state_);
   }
 
   CloseImpl();
@@ -2883,9 +2913,18 @@ void UnionsReaderBase::ReadMonosotateOrIntOrSimpleRecord(std::variant<std::monos
   state_ = 6;
 }
 
-void UnionsReaderBase::Close() {
+void UnionsReaderBase::ReadRecordWithUnions(test_model::RecordWithUnions& value) {
   if (unlikely(state_ != 6)) {
     UnionsReaderBaseInvalidState(6, state_);
+  }
+
+  ReadRecordWithUnionsImpl(value);
+  state_ = 8;
+}
+
+void UnionsReaderBase::Close() {
+  if (unlikely(state_ != 8)) {
+    UnionsReaderBaseInvalidState(8, state_);
   }
 
   CloseImpl();
@@ -2905,6 +2944,11 @@ void UnionsReaderBase::CopyTo(UnionsWriterBase& writer) {
     std::variant<std::monostate, int32_t, test_model::SimpleRecord> value;
     ReadMonosotateOrIntOrSimpleRecord(value);
     writer.WriteMonosotateOrIntOrSimpleRecord(value);
+  }
+  {
+    test_model::RecordWithUnions value;
+    ReadRecordWithUnions(value);
+    writer.WriteRecordWithUnions(value);
   }
 }
 
@@ -3043,7 +3087,9 @@ bool StreamsOfUnionsReaderBase::ReadIntOrSimpleRecord(std::vector<std::variant<i
     StreamsOfUnionsReaderBaseInvalidState(0, state_);
   }
 
-  if (!ReadIntOrSimpleRecordImpl(values)) {state_ = 1;
+  if (!ReadIntOrSimpleRecordImpl(values)) {
+    state_ = 1;
+    return values.size() > 0;
   }
   return true;
 }
@@ -3103,7 +3149,9 @@ bool StreamsOfUnionsReaderBase::ReadNullableIntOrSimpleRecord(std::vector<std::v
     }
   }
 
-  if (!ReadNullableIntOrSimpleRecordImpl(values)) {state_ = 3;
+  if (!ReadNullableIntOrSimpleRecordImpl(values)) {
+    state_ = 3;
+    return values.size() > 0;
   }
   return true;
 }
@@ -3421,7 +3469,9 @@ bool StateTestReaderBase::ReadAStream(std::vector<int32_t>& values) {
     StateTestReaderBaseInvalidState(2, state_);
   }
 
-  if (!ReadAStreamImpl(values)) {state_ = 3;
+  if (!ReadAStreamImpl(values)) {
+    state_ = 3;
+    return values.size() > 0;
   }
   return true;
 }
@@ -3759,7 +3809,9 @@ bool SimpleGenericsReaderBase::ReadStreamOfTypeVariants(std::vector<std::variant
     SimpleGenericsReaderBaseInvalidState(16, state_);
   }
 
-  if (!ReadStreamOfTypeVariantsImpl(values)) {state_ = 17;
+  if (!ReadStreamOfTypeVariantsImpl(values)) {
+    state_ = 17;
+    return values.size() > 0;
   }
   return true;
 }
@@ -4311,7 +4363,9 @@ bool AliasesReaderBase::ReadStreamOfAliasedGenericUnion2(std::vector<test_model:
     AliasesReaderBaseInvalidState(18, state_);
   }
 
-  if (!ReadStreamOfAliasedGenericUnion2Impl(values)) {state_ = 19;
+  if (!ReadStreamOfAliasedGenericUnion2Impl(values)) {
+    state_ = 19;
+    return values.size() > 0;
   }
   return true;
 }
@@ -4538,7 +4592,9 @@ bool StreamsOfAliasedUnionsReaderBase::ReadIntOrSimpleRecord(std::vector<test_mo
     StreamsOfAliasedUnionsReaderBaseInvalidState(0, state_);
   }
 
-  if (!ReadIntOrSimpleRecordImpl(values)) {state_ = 1;
+  if (!ReadIntOrSimpleRecordImpl(values)) {
+    state_ = 1;
+    return values.size() > 0;
   }
   return true;
 }
@@ -4598,7 +4654,9 @@ bool StreamsOfAliasedUnionsReaderBase::ReadNullableIntOrSimpleRecord(std::vector
     }
   }
 
-  if (!ReadNullableIntOrSimpleRecordImpl(values)) {state_ = 3;
+  if (!ReadNullableIntOrSimpleRecordImpl(values)) {
+    state_ = 3;
+    return values.size() > 0;
   }
   return true;
 }
@@ -4843,7 +4901,9 @@ bool ProtocolWithKeywordStepsReaderBase::ReadInt(std::vector<test_model::RecordW
     ProtocolWithKeywordStepsReaderBaseInvalidState(0, state_);
   }
 
-  if (!ReadIntImpl(values)) {state_ = 1;
+  if (!ReadIntImpl(values)) {
+    state_ = 1;
+    return values.size() > 0;
   }
   return true;
 }

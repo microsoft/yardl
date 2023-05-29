@@ -13,7 +13,9 @@ primarily with raw medical instrument signal data in mind. Some of its features
 are:
 
 - Persistence to [HDF5](https://www.hdfgroup.org/solutions/hdf5/) files as well
-  as a compact binary format suitable for streaming over a network
+  as a compact binary format suitable for streaming over a network. There is
+  also a much less efficient NDJSON format that is easier to manually inspect or
+  use with other tools.
 - Built-in support for multidimensional arrays and complex numbers.
 - The schema is always embedded in the serialized data
 - "Clean" generated code with types that are easy to program against.

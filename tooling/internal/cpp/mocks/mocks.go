@@ -11,6 +11,7 @@ import (
 	"github.com/microsoft/yardl/tooling/internal/cpp/binary"
 	"github.com/microsoft/yardl/tooling/internal/cpp/common"
 	"github.com/microsoft/yardl/tooling/internal/cpp/hdf5"
+	"github.com/microsoft/yardl/tooling/internal/cpp/ndjson"
 	"github.com/microsoft/yardl/tooling/internal/formatting"
 	"github.com/microsoft/yardl/tooling/internal/iocommon"
 	"github.com/microsoft/yardl/tooling/pkg/dsl"
@@ -30,6 +31,7 @@ func WriteMocks(env *dsl.Environment, options packaging.CppCodegenOptions) error
 #include "../yardl_testing.h"
 #include "binary/protocols.h"
 #include "hdf5/protocols.h"
+#include "ndjson/protocols.h"
 #include "types.h"
 `)
 
@@ -57,6 +59,10 @@ func WriteMocks(env *dsl.Environment, options packaging.CppCodegenOptions) error
 				w.WriteStringln("case Format::kBinary:")
 				w.Indented(func() {
 					fmt.Fprintf(w, "return std::make_unique<%s>(std::make_unique<%s>(filename), [filename](){return std::make_unique<%s>(filename);});\n", qualifiedTestWriterName(protocol), binary.QualifiedBinaryWriterClassName(protocol), binary.QualifiedBinaryReaderClassName(protocol))
+				})
+				w.WriteStringln("case Format::kNDJson:")
+				w.Indented(func() {
+					fmt.Fprintf(w, "return std::make_unique<%s>(std::make_unique<%s>(filename), [filename](){return std::make_unique<%s>(filename);});\n", qualifiedTestWriterName(protocol), ndjson.QualifiedNDJsonWriterClassName(protocol), ndjson.QualifiedNDJsonReaderClassName(protocol))
 				})
 				w.WriteStringln("default:")
 				w.Indented(func() {

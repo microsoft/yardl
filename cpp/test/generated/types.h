@@ -380,6 +380,18 @@ using NamedNDArray = yardl::NDArray<int32_t, 2>;
 template <typename K, typename V>
 using AliasedMap = std::unordered_map<K, V>;
 
+struct RecordWithUnions {
+  std::variant<std::monostate, int32_t, std::string> null_or_int_or_string{};
+
+  bool operator==(const RecordWithUnions& other) const {
+    return null_or_int_or_string == other.null_or_int_or_string;
+  }
+
+  bool operator!=(const RecordWithUnions& other) const {
+    return !(*this == other);
+  }
+};
+
 enum class Fruits {
   kApple = 0,
   kBanana = 1,

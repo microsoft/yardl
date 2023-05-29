@@ -12,6 +12,7 @@ namespace yardl::testing {
 enum class Format {
   kBinary,
   kHdf5,
+  kNDJson,
 };
 
 inline std::ostream& operator<<(std::ostream& os, Format const& format) {
@@ -20,6 +21,8 @@ inline std::ostream& operator<<(std::ostream& os, Format const& format) {
       return os << "Binary";
     case Format::kHdf5:
       return os << "HDF5";
+    case Format::kNDJson:
+      return os << "NDJson";
     default:
       return os << std::to_string(static_cast<int>(format));
   }
@@ -39,6 +42,10 @@ static inline std::string TestFilename(Format format, bool ensure_deleted = true
     case Format::kHdf5:
       test_output_dir /= "hdf5";
       extension = ".h5";
+      break;
+    case Format::kNDJson:
+      test_output_dir /= "ndjson";
+      extension = ".ndjson";
       break;
   }
 

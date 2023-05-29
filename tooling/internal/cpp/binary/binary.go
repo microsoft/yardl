@@ -81,13 +81,18 @@ func writeHeaderFile(env *dsl.Environment, options packaging.CppCodegenOptions) 
 			fmt.Fprintf(w, "class %s : public %s, yardl::binary::BinaryWriter {\n", writerClassName, common.QualifiedAbstractWriterName(protocol))
 			w.Indented(func() {
 				w.WriteStringln("public:")
-				common.WriteComment(w, "The stream_arg parameter can either be a std::string filename")
-				common.WriteComment(w, "or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::ostream.")
-				w.WriteStringln("template <typename TStreamArg>")
-				fmt.Fprintf(w, "%s(TStreamArg&& stream_arg)\n", writerClassName)
+				fmt.Fprintf(w, "%s(std::ostream& stream)\n", writerClassName)
 				w.Indented(func() {
 					w.Indented(func() {
-						w.WriteStringln(": yardl::binary::BinaryWriter(std::forward<TStreamArg>(stream_arg), schema_) {")
+						w.WriteStringln(": yardl::binary::BinaryWriter(stream, schema_) {")
+					})
+				})
+				w.WriteStringln("}\n")
+
+				fmt.Fprintf(w, "%s(std::string file_name)\n", writerClassName)
+				w.Indented(func() {
+					w.Indented(func() {
+						w.WriteStringln(": yardl::binary::BinaryWriter(file_name, schema_) {")
 					})
 				})
 				w.WriteStringln("}\n")
@@ -117,13 +122,18 @@ func writeHeaderFile(env *dsl.Environment, options packaging.CppCodegenOptions) 
 			fmt.Fprintf(w, "class %s : public %s, yardl::binary::BinaryReader {\n", readerClassName, common.QualifiedAbstractReaderName(protocol))
 			w.Indented(func() {
 				fmt.Fprintln(w, "public:")
-				common.WriteComment(w, "The stream_arg parameter can either be a std::string filename")
-				common.WriteComment(w, "or a reference, std::unique_ptr, or std::shared_ptr to a stream-like object, such as std::istream.")
-				w.WriteStringln("template <typename TStreamArg>")
-				fmt.Fprintf(w, "%s(TStreamArg&& stream_arg)\n", readerClassName)
+				fmt.Fprintf(w, "%s(std::istream& stream)\n", readerClassName)
 				w.Indented(func() {
 					w.Indented(func() {
-						w.WriteStringln(": yardl::binary::BinaryReader(std::forward<TStreamArg>(stream_arg), schema_) {")
+						w.WriteStringln(": yardl::binary::BinaryReader(stream, schema_) {")
+					})
+				})
+				w.WriteStringln("}\n")
+
+				fmt.Fprintf(w, "%s(std::string file_name)\n", readerClassName)
+				w.Indented(func() {
+					w.Indented(func() {
+						w.WriteStringln(": yardl::binary::BinaryReader(file_name, schema_) {")
 					})
 				})
 				w.WriteStringln("}\n")

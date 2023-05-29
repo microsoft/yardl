@@ -87,7 +87,8 @@
         "ms-vscode.cpptools",
         "sclu1034.justfile",
         "timonwong.shellcheck",
-        "twxs.cmake"
+        "twxs.cmake",
+        "yzhang.markdown-all-in-one"
       ]
     }
   },

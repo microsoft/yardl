@@ -28,10 +28,7 @@ func writeCMakeLists(env *dsl.Environment, options packaging.CppCodegenOptions) 
 # target_link_libraries(<your target> %s)
 # add_subdirectory(<path to this directory>)
 
-if(NOT DEFINED CMAKE_CXX_STANDARD OR CMAKE_CXX_STANDARD LESS 20)
-  set(USE_DATE true)
-  find_package(date REQUIRED)
-endif()
+find_package(date REQUIRED)
 
 if(VCPKG_TARGET_TRIPLET)
   set(HDF5_CXX_LIBRARIES hdf5::hdf5_cpp-shared)
@@ -46,6 +43,7 @@ find_package(xtensor REQUIRED)
 	fmt.Fprintf(w, "add_library(%s OBJECT\n", objectLibraryName)
 	w.Indented(func() {
 		w.WriteStringln("protocols.cc")
+		w.WriteStringln("ndjson/protocols.cc")
 		w.WriteStringln("binary/protocols.cc")
 		w.WriteStringln("hdf5/protocols.cc")
 		if options.InternalGenerateMocks {
@@ -59,14 +57,9 @@ find_package(xtensor REQUIRED)
 		w.WriteStringln("PUBLIC ${HDF5_C_LIBRARIES}")
 		w.WriteStringln("PUBLIC ${HDF5_CXX_LIBRARIES}")
 		w.WriteStringln("PUBLIC xtensor")
+		w.WriteStringln("PUBLIC date::date")
 	})
 	w.WriteString(")\n")
-
-	w.WriteString("if (USE_DATE)\n")
-	w.Indented(func() {
-		fmt.Fprintf(w, "target_link_libraries(%s PUBLIC date::date)\n", objectLibraryName)
-	})
-	w.WriteString("endif()\n")
 
 	definitionsPath := path.Join(options.SourcesOutputDir, "CMakeLists.txt")
 	return iocommon.WriteFileIfNeeded(definitionsPath, b.Bytes(), 0644)

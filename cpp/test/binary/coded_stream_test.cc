@@ -4,7 +4,6 @@
 #include <fstream>
 #include <iostream>
 
-#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
 #include "../generated/yardl/detail/binary/serializers.h"
@@ -100,17 +99,11 @@ TEST(CodedStreamTests, ReadOneLessThanBufferLength) {
   r.VerifyFinished();
 }
 
-struct MockOStream {
-  MOCK_METHOD(void, write, (char const* data, std::streamsize size), (const));
-  MOCK_METHOD(bool, bad, (), (const));
-};
-
 TEST(CodedStreamTests, BadStreamThrows) {
-  ::testing::NiceMock<MockOStream> s;
-  EXPECT_CALL(s, bad()).WillOnce(::testing::Return(true));
-
-  CodedOutputStream w(s);
+  std::stringstream ss;
+  CodedOutputStream w(ss);
   WriteInteger(w, 1);
+  ss.setstate(std::ios::badbit);
   EXPECT_ANY_THROW(w.Flush());
 }
 

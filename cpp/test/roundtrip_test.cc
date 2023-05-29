@@ -376,6 +376,7 @@ TEST_P(RoundTripTests, Unions_FirstOption) {
   tw->WriteIntOrSimpleRecord({2});
   tw->WriteIntOrRecordWithVlens({2});
   tw->WriteMonosotateOrIntOrSimpleRecord({});
+  tw->WriteRecordWithUnions({std::monostate{}});
 
   tw->Close();
 }
@@ -391,6 +392,7 @@ TEST_P(RoundTripTests, Unions_SecondOption) {
           12,
       });
   tw->WriteMonosotateOrIntOrSimpleRecord({6});
+  tw->WriteRecordWithUnions({77});
 
   tw->Close();
 }
@@ -569,13 +571,16 @@ INSTANTIATE_TEST_SUITE_P(,
                          RoundTripTests,
                          ::testing::Values(
                              Format::kBinary,
-                             Format::kHdf5),
+                             Format::kHdf5,
+                             Format::kNDJson),
                          [](::testing::TestParamInfo<Format> const& info) {
   switch (info.param) {
   case Format::kBinary:
     return "Binary";
   case Format::kHdf5:
     return "HDF5";
+  case Format::kNDJson:
+    return "NDJson";
   default:
     return "Unknown";
   } });
