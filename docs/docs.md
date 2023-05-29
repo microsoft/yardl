@@ -19,6 +19,7 @@
 - [Performance Tips](#performance-tips)
   - [Batched Reads and Writes](#batched-reads-and-writes)
   - [Use Fixed Data Types When Possible](#use-fixed-data-types-when-possible)
+  - [Avoid NDJSON Encoding](#avoid-ndjson-encoding)
 - [Protocol Schema JSON Reference](#protocol-schema-json-reference)
   - [References to Primitive Types](#references-to-primitive-types)
   - [References to Top-Level Types](#references-to-top-level-types)
@@ -47,6 +48,7 @@
   - [Records](#records-2)
   - [Streams](#streams-1)
   - [Example](#example)
+- [NDJSON Encoding Reference](#ndjson-encoding-reference)
 
 ## Installation
 
@@ -67,14 +69,15 @@ C++17 (or more recent) compiler and the following dependencies installed:
 
 1. HDF5 with the [C++ API](https://support.hdfgroup.org/HDF5/doc/cpplus_RM/).
 2. [xtensor](https://xtensor.readthedocs.io/en/latest/)
-3. If using C++17, Howard Hinnant's
-   [date](https://howardhinnant.github.io/date/date.html) library.
+3. Howard Hinnant's [date](https://howardhinnant.github.io/date/date.html)
+   library.
+4. [JSON for Modern C++](https://github.com/nlohmann/json).
 
 If using the [Conda](https://docs.conda.io/en/latest/) package manager, these
 can be installed with:
 
 ``` bash
-conda install -c conda-forge hdf5 xtensor howardhinnant_date
+conda install -c conda-forge hdf5 xtensor howardhinnant_date nlohmann-json
 ```
 
 Alternatively, you can create a new conda environment with all dependencies and
@@ -188,6 +191,9 @@ $ tree -L 2 --dirsfirst
 ├── hdf5
 │   ├── protocols.cc
 │   └── protocols.h
+├── ndjson
+│   ├── protocols.cc
+│   └── protocols.h
 ├── yardl
 │   ├── detail
 │   └── yardl.h
@@ -200,9 +206,10 @@ $ tree -L 2 --dirsfirst
 In the root directory, `types.h` contains generated code for named types like
 records and enums. `protocols.h` declares abstract protocol readers and writers,
 which are the base classes for implementations in `binary/protocols.h` and
-`hdf5/protocols.h`. The `yardl/yardl.h` file defines core datatypes like arrays and
-dates, and the header files in `yardl/detail/` are included in generated files
-but are not intended to be included by consuming code.
+`hdf5/protocols.h`, and `ndjson/protocols.h`. The `yardl/yardl.h` file defines
+core datatypes like arrays and dates, and the header files in `yardl/detail/`
+are included in generated files but are not intended to be included by consuming
+code.
 
 Ok, let's write some code! In the parent directory of the generated code, `cpp`,
 create `playground.cc` that looks like this:
@@ -736,6 +743,12 @@ especially for HDF5 files.
 For HDF5, using variable-length collections (like `!vector` without a length or
 `!array` without fixed dimension sizes) has lower throughput than their fixed-sized
 counterparts.
+
+### Avoid NDJSON Encoding
+
+The NDJSON serialization format is great for debugging and interoperability with
+other tools (like `jq`) but is it orders of magnitude less efficient than the
+binary or HDF5 formats.
 
 ## Protocol Schema JSON Reference
 
@@ -1301,3 +1314,123 @@ HEX:    9a 99 99 3f 9a 99 59 40 33 33 b3 40 9a 99 f9 40 03 01 04 03 08 05 0c 02 
                                                         i = signed varint
                                                         p = point
 ```
+
+## NDJSON Encoding Reference
+
+> **Warning**<br>
+> We might make breaking changes to this format before V1.
+
+The NDJSON format is meant for easy debugging or interoperability in scenarios where performance is less of a concern.
+
+Here is an example protocol illustrates what what the format looks like. We will define the following model:
+
+```yaml
+MyRecord: !record
+  fields:
+    x: int
+    y: int
+    z: int?
+
+MyEnum: !enum
+  values:
+    - a
+    - b
+    - c
+
+HelloNDJson: !protocol
+  sequence:
+    anIntStream: !stream
+      items: int
+    aBoolean: bool
+    aString: string
+    aComplex: complexdouble
+    aDate: date
+    aTime: time
+    aDateTime: datetime
+
+    anEnum: MyEnum
+
+    anOptionalIntThatIsNotSet: int?
+    anOptionalIntThatIsSet: int?
+
+    aRecordWithOptionalNotSet: MyRecord
+    aRecordWithOptionalSet: MyRecord
+
+    aVector: int*
+    aDynamicArray: int[]
+    aFixedArray: int[2,3]
+
+    aMapWithAStringKey: string->int
+    aMapWithAnIntKey: int->int
+
+    aUnionWithSimpleRepresentation: [int, bool]
+    aUnionRequiringTag: [string, MyEnum]
+
+  ```
+
+  And then write some data to an NDJSON protocol writer. The output looks like this:
+
+```json
+{"yardl":{"version":1,"schema":{"protocol":{"name":"HelloNDJson","sequence":[{"name":"anIntStream","type":{"stream":{"items":"int32"}}},{"name":"aBoolean","type":"bool"},{"name":"aString","type":"string"},{"name":"aComplex","type":"complexfloat64"},{"name":"aDate","type":"date"},{"name":"aTime","type":"time"},{"name":"aDateTime","type":"datetime"},{"name":"anEnum","type":"Sandbox.MyEnum"},{"name":"anOptionalIntThatIsNotSet","type":[null,"int32"]},{"name":"anOptionalIntThatIsSet","type":[null,"int32"]},{"name":"aRecordWithOptionalNotSet","type":"Sandbox.MyRecord"},{"name":"aRecordWithOptionalSet","type":"Sandbox.MyRecord"},{"name":"aVector","type":{"vector":{"items":"int32"}}},{"name":"aDynamicArray","type":{"array":{"items":"int32"}}},{"name":"aFixedArray","type":{"array":{"items":"int32","dimensions":[{"length":2},{"length":3}]}}},{"name":"aMapWithAStringKey","type":{"map":{"keys":"string","values":"int32"}}},{"name":"aMapWithAnIntKey","type":{"map":{"keys":"int32","values":"int32"}}},{"name":"aUnionWithSimpleRepresentation","type":[{"label":"int32","type":"int32"},{"label":"bool","type":"bool"}]},{"name":"aUnionRequiringTag","type":[{"label":"string","type":"string"},{"label":"MyEnum","type":"Sandbox.MyEnum"}]}]},"types":[{"name":"MyEnum","values":[{"symbol":"a","value":0},{"symbol":"b","value":1},{"symbol":"c","value":2}]},{"name":"MyRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":[null,"int32"]}]}]}}}
+{"anIntStream":1}
+{"anIntStream":2}
+{"anIntStream":3}
+{"aBoolean":true}
+{"aString":"hello"}
+{"aComplex":[1.0,2.0]}
+{"aDate":"2020-01-17"}
+{"aTime":"10:50:25.777888999"}
+{"aDateTime":"2023-05-29T23:00:59.296464750Z"}
+{"anEnum":"a"}
+{"anOptionalIntThatIsNotSet":null}
+{"anOptionalIntThatIsSet":42}
+{"aRecordWithOptionalNotSet":{"x":1,"y":2}}
+{"aRecordWithOptionalSet":{"x":1,"y":2,"z":3}}
+{"aVector":[1,2,3]}
+{"aDynamicArray":{"shape":[2,3],"data":[1,2,3,4,5,6]}}
+{"aFixedArray":[1,2,3,4,5,6]}
+{"aMapWithAStringKey":{"b":2,"a":1}}
+{"aMapWithAnIntKey":[[2,2],[1,1]]}
+{"aUnionWithSimpleRepresentation":22}
+{"aUnionRequiringTag":{"string":"a"}}
+```
+
+Each line is a JSON document. The first contains the encoding format version
+along with the [protocol schema](#protocol-schema-json-reference). Each
+subsequent line is a JSON object with a single field. The name of the field is the
+protocol step name, and its value is payload value. Note that in the case of
+streams, there can be many contiguous lines with same protocol step name.
+
+Datatypes are serialized as follows:
+
+- Booleans are serialized as JSON booleans.
+- Integers and floating-point numbers are serialized as JSON numbers.
+- Complex numbers are serialized as a JSON array of the real component followed
+  by the imaginary component.
+- Strings are serialized as JSON strings.
+- Enums are serialized as their symbolic string value.
+- Dates, Times, and DateTimes are formatted as strings. Dates are formatted as
+  `YYYY-MM-DD`, times as `HH:mm:SS.FFFFFFFFF`, and datetimes as
+  `YYYY-MM-DDTHH:mm:ss:FFFFFFFFFZ`
+- Records are serialized as JSON objects, with a JSON field for each record
+  fields. Fields are skipped if they are options or unions with `null` as a
+  option and are the value is `null`.
+- Vectors are serialized as JSON arrays.
+- Fixed multidimensional arrays are serialized as a flattened JSON array with
+  the values written in row-major order.
+- Multidimensional arrays where the dimension sizes are not fixed are serialized
+  as a JSON object with two fields: `shape` and `data`. `shape` is an array of
+  dimension sizes and `data` is an array of the values in row-major order.
+- Maps where the key is a string are written as a JSON object.
+- Other maps are written as an array of arrays, with each inner array holding
+  the key and value of each entry.
+- Optional values are serialized as the inner value if present, and `null` if
+  not.
+- If each type case of a union serializes to a distict JSON datatype (number,
+  string, boolean, array, object), the inner value is serialized directy. For
+  example the union `[int, bool]` can be written simply as `29` or `true`. In
+  other cases, the value is serialized a JSON object with a single field. The
+  field's name is the label of the type case set (see [here](#unions-1) for a
+  description of the labels) and the field's value is the JSON serialization of
+  the inner value. For example, a value of the union `[float, double]` could be
+  written as `{"float32": 29.9}` or `{"float64": 882.2}`.
