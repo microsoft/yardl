@@ -87,7 +87,7 @@ struct BaseFlags {
  public:
   BaseFlags() = default;
   BaseFlags(TValue value) : value_(value) {}
-  BaseFlags(BaseFlags const&) = default;
+  BaseFlags(TDerived const& other) : value_(other.value_){};
 
   using value_type = TValue;
 
@@ -107,7 +107,7 @@ struct BaseFlags {
     return TDerived(~value_);
   }
 
-  TDerived& operator=(TDerived rhs) {
+  TDerived& operator=(TDerived const& rhs) {
     value_ = rhs.value_;
     return static_cast<TDerived&>(*this);
   }
