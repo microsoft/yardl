@@ -106,6 +106,11 @@ struct BaseFlags {
     return static_cast<TDerived&>(*this);
   }
 
+  TDerived& operator=(TValue rhs) {
+    value_ = rhs;
+    return static_cast<TDerived&>(*this);
+  }
+
   TDerived& operator|=(TDerived rhs) {
     value_ |= rhs.value_;
     return static_cast<TDerived&>(*this);
@@ -123,6 +128,10 @@ struct BaseFlags {
 
   bool operator==(TDerived rhs) const {
     return value_ == rhs.value_;
+  }
+
+  bool operator==(TValue rhs) const {
+    return value_ == rhs;
   }
 
   bool operator!=(TDerived rhs) const {

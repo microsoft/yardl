@@ -433,7 +433,7 @@ inline void ReadFlags(CodedInputStream& stream, T& value) {
   using underlying_type = typename T::value_type;
   underlying_type underlying_value;
   yardl::binary::ReadInteger(stream, underlying_value);
-  value = T(underlying_value);
+  value = underlying_value;
 }
 
 template <typename T, Reader<T> ReadElement>

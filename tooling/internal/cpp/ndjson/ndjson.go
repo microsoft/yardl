@@ -362,24 +362,12 @@ func writeFlagsConverters(w *formatting.IndentedWriter, t *dsl.EnumDefinition) {
 	fmt.Fprintf(w, "void to_json(ordered_json& j, %s const& value) {\n", typeName)
 	w.Indented(func() {
 		w.WriteStringln("auto arr = ordered_json::array();")
-		if zero == nil {
-			fmt.Fprintf(w, "using underlying_type = typename %s::value_type;\n", typeName)
-			w.WriteStringln("if (static_cast<underlying_type>(value) == 0) {")
-			w.Indented(func() {
-				w.WriteStringln("j = arr;")
-				w.WriteStringln("return;")
-			})
-			w.WriteStringln("}")
-		}
-		if zero != nil {
-			fmt.Fprintf(w, "if (value == %s::%s) {\n", typeName, common.EnumValueIdentifierName(zero.Symbol))
-			w.Indented(func() {
-				fmt.Fprintf(w, "arr.push_back(\"%s\");\n", zero.Symbol)
-				w.WriteStringln("j = arr;")
-				w.WriteStringln("return;")
-			})
-			w.WriteStringln("}")
-		}
+		w.WriteStringln("if (value == 0) {")
+		w.Indented(func() {
+			w.WriteStringln("j = arr;")
+			w.WriteStringln("return;")
+		})
+		w.WriteStringln("}")
 
 		w.WriteStringln("auto remaining = value;")
 		for _, v := range t.Values {
@@ -390,21 +378,12 @@ func writeFlagsConverters(w *formatting.IndentedWriter, t *dsl.EnumDefinition) {
 			w.Indented(func() {
 				fmt.Fprintf(w, "arr.push_back(\"%s\");\n", v.Symbol)
 				fmt.Fprintf(w, "remaining &= ~%s::%s;\n", typeName, common.EnumValueIdentifierName(v.Symbol))
-				if zero != nil {
-					fmt.Fprintf(w, "if (remaining == %s::%s) {\n", typeName, common.EnumValueIdentifierName(zero.Symbol))
-					w.Indented(func() {
-						w.WriteStringln("j = arr;")
-						w.WriteStringln("return;")
-					})
-					w.WriteStringln("}")
-				} else {
-					w.WriteStringln("if (static_cast<underlying_type>(remaining) == 0) {")
-					w.Indented(func() {
-						w.WriteStringln("j = arr;")
-						w.WriteStringln("return;")
-					})
-					w.WriteStringln("}")
-				}
+				w.WriteStringln("if (remaining == 0) {")
+				w.Indented(func() {
+					w.WriteStringln("j = arr;")
+					w.WriteStringln("return;")
+				})
+				w.WriteStringln("}")
 			})
 			w.WriteStringln("}")
 		}
@@ -418,7 +397,7 @@ func writeFlagsConverters(w *formatting.IndentedWriter, t *dsl.EnumDefinition) {
 		w.WriteStringln("if (j.is_number()) {")
 		w.Indented(func() {
 			fmt.Fprintf(w, "using underlying_type = typename %s::value_type;\n", typeName)
-			fmt.Fprintf(w, "value = static_cast<%s>(j.get<underlying_type>());\n", typeName)
+			w.WriteStringln("value = j.get<underlying_type>();")
 			w.WriteStringln("return;")
 		})
 		w.WriteStringln("}")
