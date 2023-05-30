@@ -423,6 +423,19 @@ inline void ReadEnum(CodedInputStream& stream, T& value) {
   value = static_cast<T>(underlying_value);
 }
 
+template <typename T>
+inline void WriteFlags(CodedOutputStream& stream, T const& value) {
+  yardl::binary::WriteInteger(stream, value.Value());
+}
+
+template <typename T>
+inline void ReadFlags(CodedInputStream& stream, T& value) {
+  using underlying_type = typename T::value_type;
+  underlying_type underlying_value;
+  yardl::binary::ReadInteger(stream, underlying_value);
+  value = T(underlying_value);
+}
+
 template <typename T, Reader<T> ReadElement>
 inline void ReadBlocksIntoVector(CodedInputStream& stream, size_t& current_block_remaining, std::vector<T>& destination) {
   if (current_block_remaining == 0) {

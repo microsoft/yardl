@@ -362,7 +362,7 @@ func writeFlagsConverters(w *formatting.IndentedWriter, t *dsl.EnumDefinition) {
 	w.Indented(func() {
 		w.WriteStringln("auto arr = ordered_json::array();")
 		if zero == nil {
-			fmt.Fprintf(w, "using underlying_type = typename std::underlying_type<%s>::type;\n", typeName)
+			fmt.Fprintf(w, "using underlying_type = typename %s::value_type;\n", typeName)
 			w.WriteStringln("if (static_cast<underlying_type>(value) == 0) {")
 			w.Indented(func() {
 				w.WriteStringln("j = arr;")
@@ -385,7 +385,7 @@ func writeFlagsConverters(w *formatting.IndentedWriter, t *dsl.EnumDefinition) {
 			if v == zero {
 				continue
 			}
-			fmt.Fprintf(w, "if (yardl::HasFlag(remaining, %s::%s)) {\n", typeName, common.EnumValueIdentifierName(v.Symbol))
+			fmt.Fprintf(w, "if (remaining.HasFlags(%s::%s)) {\n", typeName, common.EnumValueIdentifierName(v.Symbol))
 			w.Indented(func() {
 				fmt.Fprintf(w, "arr.push_back(\"%s\");\n", v.Symbol)
 				fmt.Fprintf(w, "remaining &= ~%s::%s;\n", typeName, common.EnumValueIdentifierName(v.Symbol))
@@ -408,10 +408,7 @@ func writeFlagsConverters(w *formatting.IndentedWriter, t *dsl.EnumDefinition) {
 			w.WriteStringln("}")
 		}
 
-		if zero != nil {
-			fmt.Fprintf(w, "using underlying_type = typename std::underlying_type<%s>::type;\n", typeName)
-		}
-		w.WriteStringln("j = static_cast<underlying_type>(value);")
+		w.WriteStringln("j = value.Value();")
 	})
 	w.WriteStringln("}\n")
 
@@ -419,7 +416,7 @@ func writeFlagsConverters(w *formatting.IndentedWriter, t *dsl.EnumDefinition) {
 	w.Indented(func() {
 		w.WriteStringln("if (j.is_number()) {")
 		w.Indented(func() {
-			fmt.Fprintf(w, "using underlying_type = typename std::underlying_type<%s>::type;\n", typeName)
+			fmt.Fprintf(w, "using underlying_type = typename %s::value_type;\n", typeName)
 			fmt.Fprintf(w, "value = static_cast<%s>(j.get<underlying_type>());\n", typeName)
 			w.WriteStringln("return;")
 		})

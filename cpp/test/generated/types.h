@@ -412,22 +412,24 @@ enum class SizeBasedEnum : yardl::Size {
   kC = 2ULL,
 };
 
-enum class DaysOfWeek {
-  kMonday = 1,
-  kTuesday = 2,
-  kWednesday = 4,
-  kThursday = 8,
-  kFriday = 16,
-  kSaturday = 32,
-  kSunday = 64,
+struct DaysOfWeek : yardl::BaseFlags<int32_t, DaysOfWeek> {
+  using BaseFlags::BaseFlags;
+  static const DaysOfWeek kMonday;
+  static const DaysOfWeek kTuesday;
+  static const DaysOfWeek kWednesday;
+  static const DaysOfWeek kThursday;
+  static const DaysOfWeek kFriday;
+  static const DaysOfWeek kSaturday;
+  static const DaysOfWeek kSunday;
 };
 
-enum class TextFormat {
-  kRegular = 0,
-  kBold = 1,
-  kItalic = 2,
-  kUnderline = 4,
-  kStrikethrough = 8,
+struct TextFormat : yardl::BaseFlags<int32_t, TextFormat> {
+  using BaseFlags::BaseFlags;
+  static const TextFormat kRegular;
+  static const TextFormat kBold;
+  static const TextFormat kItalic;
+  static const TextFormat kUnderline;
+  static const TextFormat kStrikethrough;
 };
 
 template <typename T>
@@ -944,11 +946,3 @@ struct RecordWithKeywordFields {
 };
 
 } // namespace test_model
-
-namespace yardl {
-template<>
-struct is_flags_enum_t<test_model::DaysOfWeek> : std::true_type {};
-
-template<>
-struct is_flags_enum_t<test_model::TextFormat> : std::true_type {};
-} // namespace yardl

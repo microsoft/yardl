@@ -1201,13 +1201,13 @@ void from_json(ordered_json const& j, test_model::SizeBasedEnum& value) {
 
 void to_json(ordered_json& j, test_model::DaysOfWeek const& value) {
   auto arr = ordered_json::array();
-  using underlying_type = typename std::underlying_type<test_model::DaysOfWeek>::type;
+  using underlying_type = typename test_model::DaysOfWeek::value_type;
   if (static_cast<underlying_type>(value) == 0) {
     j = arr;
     return;
   }
   auto remaining = value;
-  if (yardl::HasFlag(remaining, test_model::DaysOfWeek::kMonday)) {
+  if (remaining.HasFlags(test_model::DaysOfWeek::kMonday)) {
     arr.push_back("monday");
     remaining &= ~test_model::DaysOfWeek::kMonday;
     if (static_cast<underlying_type>(remaining) == 0) {
@@ -1215,7 +1215,7 @@ void to_json(ordered_json& j, test_model::DaysOfWeek const& value) {
       return;
     }
   }
-  if (yardl::HasFlag(remaining, test_model::DaysOfWeek::kTuesday)) {
+  if (remaining.HasFlags(test_model::DaysOfWeek::kTuesday)) {
     arr.push_back("tuesday");
     remaining &= ~test_model::DaysOfWeek::kTuesday;
     if (static_cast<underlying_type>(remaining) == 0) {
@@ -1223,7 +1223,7 @@ void to_json(ordered_json& j, test_model::DaysOfWeek const& value) {
       return;
     }
   }
-  if (yardl::HasFlag(remaining, test_model::DaysOfWeek::kWednesday)) {
+  if (remaining.HasFlags(test_model::DaysOfWeek::kWednesday)) {
     arr.push_back("wednesday");
     remaining &= ~test_model::DaysOfWeek::kWednesday;
     if (static_cast<underlying_type>(remaining) == 0) {
@@ -1231,7 +1231,7 @@ void to_json(ordered_json& j, test_model::DaysOfWeek const& value) {
       return;
     }
   }
-  if (yardl::HasFlag(remaining, test_model::DaysOfWeek::kThursday)) {
+  if (remaining.HasFlags(test_model::DaysOfWeek::kThursday)) {
     arr.push_back("thursday");
     remaining &= ~test_model::DaysOfWeek::kThursday;
     if (static_cast<underlying_type>(remaining) == 0) {
@@ -1239,7 +1239,7 @@ void to_json(ordered_json& j, test_model::DaysOfWeek const& value) {
       return;
     }
   }
-  if (yardl::HasFlag(remaining, test_model::DaysOfWeek::kFriday)) {
+  if (remaining.HasFlags(test_model::DaysOfWeek::kFriday)) {
     arr.push_back("friday");
     remaining &= ~test_model::DaysOfWeek::kFriday;
     if (static_cast<underlying_type>(remaining) == 0) {
@@ -1247,7 +1247,7 @@ void to_json(ordered_json& j, test_model::DaysOfWeek const& value) {
       return;
     }
   }
-  if (yardl::HasFlag(remaining, test_model::DaysOfWeek::kSaturday)) {
+  if (remaining.HasFlags(test_model::DaysOfWeek::kSaturday)) {
     arr.push_back("saturday");
     remaining &= ~test_model::DaysOfWeek::kSaturday;
     if (static_cast<underlying_type>(remaining) == 0) {
@@ -1255,7 +1255,7 @@ void to_json(ordered_json& j, test_model::DaysOfWeek const& value) {
       return;
     }
   }
-  if (yardl::HasFlag(remaining, test_model::DaysOfWeek::kSunday)) {
+  if (remaining.HasFlags(test_model::DaysOfWeek::kSunday)) {
     arr.push_back("sunday");
     remaining &= ~test_model::DaysOfWeek::kSunday;
     if (static_cast<underlying_type>(remaining) == 0) {
@@ -1263,12 +1263,12 @@ void to_json(ordered_json& j, test_model::DaysOfWeek const& value) {
       return;
     }
   }
-  j = static_cast<underlying_type>(value);
+  j = value.Value();
 }
 
 void from_json(ordered_json const& j, test_model::DaysOfWeek& value) {
   if (j.is_number()) {
-    using underlying_type = typename std::underlying_type<test_model::DaysOfWeek>::type;
+    using underlying_type = typename test_model::DaysOfWeek::value_type;
     value = static_cast<test_model::DaysOfWeek>(j.get<underlying_type>());
     return;
   }
@@ -1315,7 +1315,7 @@ void to_json(ordered_json& j, test_model::TextFormat const& value) {
     return;
   }
   auto remaining = value;
-  if (yardl::HasFlag(remaining, test_model::TextFormat::kBold)) {
+  if (remaining.HasFlags(test_model::TextFormat::kBold)) {
     arr.push_back("bold");
     remaining &= ~test_model::TextFormat::kBold;
     if (remaining == test_model::TextFormat::kRegular) {
@@ -1323,7 +1323,7 @@ void to_json(ordered_json& j, test_model::TextFormat const& value) {
       return;
     }
   }
-  if (yardl::HasFlag(remaining, test_model::TextFormat::kItalic)) {
+  if (remaining.HasFlags(test_model::TextFormat::kItalic)) {
     arr.push_back("italic");
     remaining &= ~test_model::TextFormat::kItalic;
     if (remaining == test_model::TextFormat::kRegular) {
@@ -1331,7 +1331,7 @@ void to_json(ordered_json& j, test_model::TextFormat const& value) {
       return;
     }
   }
-  if (yardl::HasFlag(remaining, test_model::TextFormat::kUnderline)) {
+  if (remaining.HasFlags(test_model::TextFormat::kUnderline)) {
     arr.push_back("underline");
     remaining &= ~test_model::TextFormat::kUnderline;
     if (remaining == test_model::TextFormat::kRegular) {
@@ -1339,7 +1339,7 @@ void to_json(ordered_json& j, test_model::TextFormat const& value) {
       return;
     }
   }
-  if (yardl::HasFlag(remaining, test_model::TextFormat::kStrikethrough)) {
+  if (remaining.HasFlags(test_model::TextFormat::kStrikethrough)) {
     arr.push_back("strikethrough");
     remaining &= ~test_model::TextFormat::kStrikethrough;
     if (remaining == test_model::TextFormat::kRegular) {
@@ -1347,13 +1347,12 @@ void to_json(ordered_json& j, test_model::TextFormat const& value) {
       return;
     }
   }
-  using underlying_type = typename std::underlying_type<test_model::TextFormat>::type;
-  j = static_cast<underlying_type>(value);
+  j = value.Value();
 }
 
 void from_json(ordered_json const& j, test_model::TextFormat& value) {
   if (j.is_number()) {
-    using underlying_type = typename std::underlying_type<test_model::TextFormat>::type;
+    using underlying_type = typename test_model::TextFormat::value_type;
     value = static_cast<test_model::TextFormat>(j.get<underlying_type>());
     return;
   }

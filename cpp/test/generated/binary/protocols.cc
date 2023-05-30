@@ -2356,12 +2356,12 @@ void EnumsReader::CloseImpl() {
 
 void FlagsWriter::WriteDaysImpl(test_model::DaysOfWeek const& value) {
   yardl::binary::WriteInteger(stream_, 1U);
-  yardl::binary::WriteEnum<test_model::DaysOfWeek>(stream_, value);
+  yardl::binary::WriteFlags<test_model::DaysOfWeek>(stream_, value);
 }
 
 void FlagsWriter::WriteDaysImpl(std::vector<test_model::DaysOfWeek> const& values) {
   if (!values.empty()) {
-    yardl::binary::WriteVector<test_model::DaysOfWeek, yardl::binary::WriteEnum<test_model::DaysOfWeek>>(stream_, values);
+    yardl::binary::WriteVector<test_model::DaysOfWeek, yardl::binary::WriteFlags<test_model::DaysOfWeek>>(stream_, values);
   }
 }
 
@@ -2371,12 +2371,12 @@ void FlagsWriter::EndDaysImpl() {
 
 void FlagsWriter::WriteFormatsImpl(test_model::TextFormat const& value) {
   yardl::binary::WriteInteger(stream_, 1U);
-  yardl::binary::WriteEnum<test_model::TextFormat>(stream_, value);
+  yardl::binary::WriteFlags<test_model::TextFormat>(stream_, value);
 }
 
 void FlagsWriter::WriteFormatsImpl(std::vector<test_model::TextFormat> const& values) {
   if (!values.empty()) {
-    yardl::binary::WriteVector<test_model::TextFormat, yardl::binary::WriteEnum<test_model::TextFormat>>(stream_, values);
+    yardl::binary::WriteVector<test_model::TextFormat, yardl::binary::WriteFlags<test_model::TextFormat>>(stream_, values);
   }
 }
 
@@ -2399,13 +2399,13 @@ bool FlagsReader::ReadDaysImpl(test_model::DaysOfWeek& value) {
       return false;
     }
   }
-  yardl::binary::ReadEnum<test_model::DaysOfWeek>(stream_, value);
+  yardl::binary::ReadFlags<test_model::DaysOfWeek>(stream_, value);
   current_block_remaining_--;
   return true;
 }
 
 bool FlagsReader::ReadDaysImpl(std::vector<test_model::DaysOfWeek>& values) {
-  yardl::binary::ReadBlocksIntoVector<test_model::DaysOfWeek, yardl::binary::ReadEnum<test_model::DaysOfWeek>>(stream_, current_block_remaining_, values);
+  yardl::binary::ReadBlocksIntoVector<test_model::DaysOfWeek, yardl::binary::ReadFlags<test_model::DaysOfWeek>>(stream_, current_block_remaining_, values);
   return current_block_remaining_ != 0;
 }
 
@@ -2416,13 +2416,13 @@ bool FlagsReader::ReadFormatsImpl(test_model::TextFormat& value) {
       return false;
     }
   }
-  yardl::binary::ReadEnum<test_model::TextFormat>(stream_, value);
+  yardl::binary::ReadFlags<test_model::TextFormat>(stream_, value);
   current_block_remaining_--;
   return true;
 }
 
 bool FlagsReader::ReadFormatsImpl(std::vector<test_model::TextFormat>& values) {
-  yardl::binary::ReadBlocksIntoVector<test_model::TextFormat, yardl::binary::ReadEnum<test_model::TextFormat>>(stream_, current_block_remaining_, values);
+  yardl::binary::ReadBlocksIntoVector<test_model::TextFormat, yardl::binary::ReadFlags<test_model::TextFormat>>(stream_, current_block_remaining_, values);
   return current_block_remaining_ != 0;
 }
 

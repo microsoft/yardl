@@ -410,14 +410,14 @@ TEST_P(RoundTripTests, Flags) {
   auto tw = CreateValidatingWriter<FlagsWriterBase>();
   tw->WriteDays(DaysOfWeek::kSunday);
   tw->WriteDays(DaysOfWeek::kMonday | DaysOfWeek::kWednesday | DaysOfWeek::kFriday);
-  tw->WriteDays({});
-  tw->WriteDays(static_cast<DaysOfWeek>(282839));
+  tw->WriteDays(DaysOfWeek());
+  tw->WriteDays(DaysOfWeek(282839));
   tw->EndDays();
 
   tw->WriteFormats(TextFormat::kBold);
   tw->WriteFormats(TextFormat::kBold | TextFormat::kItalic);
   tw->WriteFormats(TextFormat::kRegular);
-  tw->WriteFormats(static_cast<TextFormat>(232932));
+  tw->WriteFormats(TextFormat(232932));
   tw->EndFormats();
 
   tw->Close();
