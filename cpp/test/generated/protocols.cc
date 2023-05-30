@@ -3337,6 +3337,266 @@ void EnumsReaderBase::CopyTo(EnumsWriterBase& writer) {
 }
 
 namespace {
+void FlagsWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end, uint8_t current) {
+  std::string expected_method;
+  switch (current) {
+  case 0: expected_method = "WriteDays() or EndDays()"; break;
+  case 1: expected_method = "WriteFormats() or EndFormats()"; break;
+  }
+  std::string attempted_method;
+  switch (attempted) {
+  case 0: attempted_method = end ? "EndDays()" : "WriteDays()"; break;
+  case 1: attempted_method = end ? "EndFormats()" : "WriteFormats()"; break;
+  case 2: attempted_method = "Close()"; break;
+  }
+  throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
+}
+
+void FlagsReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
+  auto f = [](uint8_t i) -> std::string {
+    switch (i/2) {
+    case 0: return "ReadDays()";
+    case 1: return "ReadFormats()";
+    case 2: return "Close()";
+    default: return "<unknown>";
+    }
+  };
+  throw std::runtime_error("Expected call to " + f(current) + " but received call to " + f(attempted) + " instead.");
+}
+
+} // namespace 
+
+std::string FlagsWriterBase::schema_ = R"({"protocol":{"name":"Flags","sequence":[{"name":"days","type":{"stream":{"items":"TestModel.DaysOfWeek"}}},{"name":"formats","type":{"stream":{"items":"TestModel.TextFormat"}}}]},"types":[{"name":"DaysOfWeek","values":[{"symbol":"monday","value":1},{"symbol":"tuesday","value":2},{"symbol":"wednesday","value":4},{"symbol":"thursday","value":8},{"symbol":"friday","value":16},{"symbol":"saturday","value":32},{"symbol":"sunday","value":64}]},{"name":"TextFormat","values":[{"symbol":"regular","value":0},{"symbol":"bold","value":1},{"symbol":"italic","value":2},{"symbol":"underline","value":4},{"symbol":"strikethrough","value":8}]}]})";
+
+void FlagsWriterBase::WriteDays(test_model::DaysOfWeek const& value) {
+  if (unlikely(state_ != 0)) {
+    FlagsWriterBaseInvalidState(0, false, state_);
+  }
+
+  WriteDaysImpl(value);
+}
+
+void FlagsWriterBase::WriteDays(std::vector<test_model::DaysOfWeek> const& values) {
+  if (unlikely(state_ != 0)) {
+    FlagsWriterBaseInvalidState(0, false, state_);
+  }
+
+  WriteDaysImpl(values);
+}
+
+void FlagsWriterBase::EndDays() {
+  if (unlikely(state_ != 0)) {
+    FlagsWriterBaseInvalidState(0, true, state_);
+  }
+
+  EndDaysImpl();
+  state_ = 1;
+}
+
+// fallback implementation
+void FlagsWriterBase::WriteDaysImpl(std::vector<test_model::DaysOfWeek> const& values) {
+  for (auto const& v : values) {
+    WriteDaysImpl(v);
+  }
+}
+
+void FlagsWriterBase::WriteFormats(test_model::TextFormat const& value) {
+  if (unlikely(state_ != 1)) {
+    FlagsWriterBaseInvalidState(1, false, state_);
+  }
+
+  WriteFormatsImpl(value);
+}
+
+void FlagsWriterBase::WriteFormats(std::vector<test_model::TextFormat> const& values) {
+  if (unlikely(state_ != 1)) {
+    FlagsWriterBaseInvalidState(1, false, state_);
+  }
+
+  WriteFormatsImpl(values);
+}
+
+void FlagsWriterBase::EndFormats() {
+  if (unlikely(state_ != 1)) {
+    FlagsWriterBaseInvalidState(1, true, state_);
+  }
+
+  EndFormatsImpl();
+  state_ = 2;
+}
+
+// fallback implementation
+void FlagsWriterBase::WriteFormatsImpl(std::vector<test_model::TextFormat> const& values) {
+  for (auto const& v : values) {
+    WriteFormatsImpl(v);
+  }
+}
+
+void FlagsWriterBase::Close() {
+  if (unlikely(state_ != 2)) {
+    FlagsWriterBaseInvalidState(2, false, state_);
+  }
+
+  CloseImpl();
+}
+
+std::string FlagsReaderBase::schema_ = FlagsWriterBase::schema_;
+
+bool FlagsReaderBase::ReadDays(test_model::DaysOfWeek& value) {
+  if (unlikely(state_ != 0)) {
+    if (state_ == 1) {
+      state_ = 2;
+      return false;
+    }
+    FlagsReaderBaseInvalidState(0, state_);
+  }
+
+  bool result = ReadDaysImpl(value);
+  if (!result) {
+    state_ = 2;
+  }
+  return result;
+}
+
+bool FlagsReaderBase::ReadDays(std::vector<test_model::DaysOfWeek>& values) {
+  if (values.capacity() == 0) {
+    throw std::runtime_error("vector must have a nonzero capacity.");
+  }
+  if (unlikely(state_ != 0)) {
+    if (state_ == 1) {
+      state_ = 2;
+      values.clear();
+      return false;
+    }
+    FlagsReaderBaseInvalidState(0, state_);
+  }
+
+  if (!ReadDaysImpl(values)) {
+    state_ = 1;
+    return values.size() > 0;
+  }
+  return true;
+}
+
+// fallback implementation
+bool FlagsReaderBase::ReadDaysImpl(std::vector<test_model::DaysOfWeek>& values) {
+  size_t i = 0;
+  while (true) {
+    if (i == values.size()) {
+      values.resize(i + 1);
+    }
+    if (!ReadDaysImpl(values[i])) {
+      values.resize(i);
+      return false;
+    }
+    i++;
+    if (i == values.capacity()) {
+      return true;
+    }
+  }
+}
+
+bool FlagsReaderBase::ReadFormats(test_model::TextFormat& value) {
+  if (unlikely(state_ != 2)) {
+    if (state_ == 3) {
+      state_ = 4;
+      return false;
+    }
+    if (state_ == 1) {
+      state_ = 2;
+    } else {
+      FlagsReaderBaseInvalidState(2, state_);
+    }
+  }
+
+  bool result = ReadFormatsImpl(value);
+  if (!result) {
+    state_ = 4;
+  }
+  return result;
+}
+
+bool FlagsReaderBase::ReadFormats(std::vector<test_model::TextFormat>& values) {
+  if (values.capacity() == 0) {
+    throw std::runtime_error("vector must have a nonzero capacity.");
+  }
+  if (unlikely(state_ != 2)) {
+    if (state_ == 3) {
+      state_ = 4;
+      values.clear();
+      return false;
+    }
+    if (state_ == 1) {
+      state_ = 2;
+    } else {
+      FlagsReaderBaseInvalidState(2, state_);
+    }
+  }
+
+  if (!ReadFormatsImpl(values)) {
+    state_ = 3;
+    return values.size() > 0;
+  }
+  return true;
+}
+
+// fallback implementation
+bool FlagsReaderBase::ReadFormatsImpl(std::vector<test_model::TextFormat>& values) {
+  size_t i = 0;
+  while (true) {
+    if (i == values.size()) {
+      values.resize(i + 1);
+    }
+    if (!ReadFormatsImpl(values[i])) {
+      values.resize(i);
+      return false;
+    }
+    i++;
+    if (i == values.capacity()) {
+      return true;
+    }
+  }
+}
+
+void FlagsReaderBase::Close() {
+  if (unlikely(state_ != 4)) {
+    FlagsReaderBaseInvalidState(4, state_);
+  }
+
+  CloseImpl();
+}
+void FlagsReaderBase::CopyTo(FlagsWriterBase& writer, size_t days_buffer_size, size_t formats_buffer_size) {
+  if (days_buffer_size > 1) {
+    std::vector<test_model::DaysOfWeek> values;
+    values.reserve(days_buffer_size);
+    while(ReadDays(values)) {
+      writer.WriteDays(values);
+    }
+    writer.EndDays();
+  } else {
+    test_model::DaysOfWeek value;
+    while(ReadDays(value)) {
+      writer.WriteDays(value);
+    }
+    writer.EndDays();
+  }
+  if (formats_buffer_size > 1) {
+    std::vector<test_model::TextFormat> values;
+    values.reserve(formats_buffer_size);
+    while(ReadFormats(values)) {
+      writer.WriteFormats(values);
+    }
+    writer.EndFormats();
+  } else {
+    test_model::TextFormat value;
+    while(ReadFormats(value)) {
+      writer.WriteFormats(value);
+    }
+    writer.EndFormats();
+  }
+}
+
+namespace {
 void StateTestWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end, uint8_t current) {
   std::string expected_method;
   switch (current) {

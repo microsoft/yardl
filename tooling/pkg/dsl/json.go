@@ -110,6 +110,7 @@ func (dims ArrayDimensions) MarshalJSON() ([]byte, error) {
 func (tc *TypeDefinitions) MarshalJSON() ([]byte, error) {
 	type expanded struct {
 		Enum   *EnumDefinition   `json:"enum,omitempty"`
+		Flags  *EnumDefinition   `json:"flags,omitempty"`
 		Record *RecordDefinition `json:"record,omitempty"`
 		Alias  *NamedType        `json:"alias,omitempty"`
 	}
@@ -119,7 +120,11 @@ func (tc *TypeDefinitions) MarshalJSON() ([]byte, error) {
 		e := expanded{}
 		switch t := typeDefinition.(type) {
 		case *EnumDefinition:
-			e.Enum = t
+			if t.IsFlags {
+				e.Flags = t
+			} else {
+				e.Enum = t
+			}
 		case *NamedType:
 			e.Alias = t
 		case *RecordDefinition:

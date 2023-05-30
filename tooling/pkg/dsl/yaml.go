@@ -770,8 +770,8 @@ func UnmarshalTypeDefinition(value *yaml.Node, definitionMeta *DefinitionMeta) (
 		rec := &RecordDefinition{DefinitionMeta: definitionMeta}
 		err := value.DecodeWithOptions(rec, yaml.DecodeOptions{KnownFields: true})
 		return rec, err
-	case "!enum":
-		enum := &EnumDefinition{DefinitionMeta: definitionMeta}
+	case "!enum", "!flags":
+		enum := &EnumDefinition{DefinitionMeta: definitionMeta, IsFlags: value.Tag == "!flags"}
 		err := value.DecodeWithOptions(enum, yaml.DecodeOptions{KnownFields: true})
 		return enum, err
 	case "!protocol":
@@ -922,10 +922,12 @@ func (enum *EnumDefinition) UnmarshalYAML(value *yaml.Node) error {
 			}
 			enum.BaseType = base
 		case "values":
-			err := v.DecodeWithOptions(&enum.Values, yaml.DecodeOptions{KnownFields: true})
+			vals, err := UnmarshalEnumValues(enum.IsFlags, v)
 			if err != nil {
 				return err
 			}
+
+			enum.Values = *vals
 		default:
 			return parseError(k, "field '%s' is not valid on an !enum specification", k.Value)
 		}
@@ -934,23 +936,31 @@ func (enum *EnumDefinition) UnmarshalYAML(value *yaml.Node) error {
 	return nil
 }
 
-func (evs *EnumValues) UnmarshalYAML(value *yaml.Node) error {
+func UnmarshalEnumValues(flags bool, value *yaml.Node) (*EnumValues, error) {
+	vals := EnumValues{}
 	switch value.Tag {
 	case "!!seq":
 		for i, v := range value.Content {
 			if v.Tag != "!!str" {
 				goto err
 			}
+			var integerValue big.Int
+			if flags {
+				integerValue.SetBit(&integerValue, i, 1)
+			} else {
+				integerValue.SetInt64(int64(i))
+			}
+
 			ev := &EnumValue{
 				NodeMeta:     createNodeMeta(v),
 				Comment:      normalizeComment(v.HeadComment),
 				Symbol:       v.Value,
-				IntegerValue: *big.NewInt(int64(i)),
+				IntegerValue: integerValue,
 			}
-			*evs = append(*evs, ev)
+			vals = append(vals, ev)
 		}
 
-		return nil
+		return &vals, nil
 
 	case "!!map":
 		for i := 0; i < len(value.Content); i += 2 {
@@ -961,7 +971,7 @@ func (evs *EnumValues) UnmarshalYAML(value *yaml.Node) error {
 			}
 
 			if v.Kind != yaml.ScalarNode {
-				return parseError(v, "enum value must be an integer")
+				return nil, parseError(v, "enum or flag value must be an integer or empty")
 			}
 
 			val := &EnumValue{
@@ -970,16 +980,46 @@ func (evs *EnumValues) UnmarshalYAML(value *yaml.Node) error {
 				Symbol:   k.Value,
 			}
 
-			if err := val.IntegerValue.UnmarshalText([]byte(v.Value)); err != nil {
-				return err
+			if v.Value == "" {
+				if flags {
+					if i == 0 {
+						val.IntegerValue.SetInt64(1)
+					} else {
+						prevVal := vals[i/2-1].IntegerValue
+						if prevVal.Sign() < 0 {
+							return nil, parseError(v, "flag value following a negative value must be explicitly specified")
+						}
+						newVal := big.NewInt(1)
+						for ; newVal.Cmp(&prevVal) <= 0; newVal.Lsh(newVal, 1) {
+						}
+						val.IntegerValue = *newVal
+					}
+				} else {
+					if i == 0 {
+						val.IntegerValue.SetInt64(0)
+					} else {
+						prevVal := vals[i/2-1].IntegerValue
+						var newVal big.Int
+						if prevVal.Sign() < 0 {
+							newVal.Sub(&prevVal, big.NewInt(1))
+						} else {
+							newVal.Add(&prevVal, big.NewInt(1))
+						}
+						val.IntegerValue = newVal
+					}
+				}
+			} else {
+				if err := val.IntegerValue.UnmarshalText([]byte(v.Value)); err != nil {
+					return nil, err
+				}
 			}
 
-			*evs = append(*evs, val)
+			vals = append(vals, val)
 		}
-		return nil
+		return &vals, nil
 	}
 err:
-	return parseError(value, "invalid enum specification")
+	return nil, parseError(value, "invalid enum or flag specification")
 }
 
 func parseError(node *yaml.Node, message string, args ...any) validation.ValidationError {

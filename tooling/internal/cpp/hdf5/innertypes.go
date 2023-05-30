@@ -612,6 +612,18 @@ func typeDefinitionDdlExpression(t dsl.TypeDefinition) string {
 		}
 	case *dsl.NamedType:
 		return typeDdlExpression(t.Type)
+	case *dsl.EnumDefinition:
+		if !t.IsFlags {
+			break
+		}
+
+		var baseType dsl.Type
+		if t.BaseType != nil {
+			baseType = t.BaseType
+		} else {
+			baseType = dsl.Int32Type
+		}
+		return typeDdlExpression(baseType)
 	case *dsl.GenericTypeParameter:
 		return fmt.Sprintf("%s_type", t.Name)
 	}

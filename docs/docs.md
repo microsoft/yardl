@@ -10,6 +10,7 @@
   - [Primitive Types](#primitive-types)
   - [Unions](#unions)
   - [Enums](#enums)
+  - [Flags](#flags)
   - [Vectors](#vectors)
   - [Arrays](#arrays)
   - [Maps](#maps)
@@ -29,6 +30,7 @@
   - [Maps](#maps-1)
   - [Streams](#streams)
   - [Enums](#enums-1)
+  - [Flags](#flags-1)
   - [Records](#records-1)
   - [Aliases](#aliases)
   - [Protocols](#protocols-1)
@@ -44,7 +46,7 @@
   - [Vectors](#vectors-2)
   - [Arrays](#arrays-2)
   - [Maps](#maps-2)
-  - [Enums](#enums-2)
+  - [Enums and Flags](#enums-and-flags)
   - [Records](#records-2)
   - [Streams](#streams-1)
   - [Example](#example)
@@ -528,6 +530,38 @@ UInt64Enum: !enum
     c: 20
 ```
 
+Any integer values that are left blank will be:
+  - 0 if the first value
+  - 1 greater than the previous value if positive
+  - 1 less that the previous value if negative.
+
+### Flags
+
+Flags are similar to enums but are meant to represent a bit field i.e. multiple values can be set at once.
+
+They can be dedfined with automatic values:
+
+```yaml
+Permissions: !flags
+  values:
+    - read
+    - write
+    - execute
+```
+
+Or explicit values and a base type can be given:
+
+```yaml
+Permissions: !flags
+  base: unit8
+  values:
+    read: 1
+    write: 2
+    execute:
+```
+
+Any value without an integer value will have the next power of two bit set that is greater than the previous value. In the example above, `execute` would have the value 4.
+
 ### Vectors
 
 Vectors are one-dimensional arrays. They can optionally have a fixed length. The simple syntax for vectors is `<type>*[length]`.
@@ -958,6 +992,40 @@ Is represented in JSON as:
 
 The `base` field is only present in the JSON if it is specified in the Yardl.
 
+### Flags
+
+Like enums, flags are top-level types and cannot be declared inline. They represented just like enums except for the "flags" field name:
+
+```JSON
+{
+  "flags": {
+    "name": "TextFormat",
+    "values": [
+      {
+        "symbol": "regular",
+        "value": 0
+      },
+      {
+        "symbol": "bold",
+        "value": 1
+      },
+      {
+        "symbol": "italic",
+        "value": 2
+      },
+      {
+        "symbol": "underline",
+        "value": 4
+      },
+      {
+        "symbol": "strikethrough",
+        "value": 8
+      }
+    ]
+  }
+},
+```
+
 ### Records
 
 Records are top-level types that cannot be declared inline.
@@ -1228,11 +1296,11 @@ The format is:
 1. The length of map as an unsigned varint
 2. For each entry, the key followed by the value.
 
-### Enums
+### Enums and Flags
 
-Enums are written as a varint encoding of the integer value of the enum. Note
-that the value is signed if the base type is signed, which is the default case
-if the `base` properly is not specified.
+Enums and flags are written as a varint encoding of the underlying integer
+value. Note that the value is signed if the underlying type is signed, which is
+the default case if the `base` properly is not specified.
 
 ### Records
 
@@ -1337,6 +1405,12 @@ MyEnum: !enum
     - b
     - c
 
+MyFlags: !flags
+  values:
+    - a
+    - b
+    - c
+
 HelloNDJson: !protocol
   sequence:
     anIntStream: !stream
@@ -1349,6 +1423,7 @@ HelloNDJson: !protocol
     aDateTime: datetime
 
     anEnum: MyEnum
+    someFlags: MyFlags
 
     anOptionalIntThatIsNotSet: int?
     anOptionalIntThatIsSet: int?
@@ -1365,13 +1440,12 @@ HelloNDJson: !protocol
 
     aUnionWithSimpleRepresentation: [int, bool]
     aUnionRequiringTag: [string, MyEnum]
-
   ```
 
   And then write some data to an NDJSON protocol writer. The output looks like this:
 
 ```json
-{"yardl":{"version":1,"schema":{"protocol":{"name":"HelloNDJson","sequence":[{"name":"anIntStream","type":{"stream":{"items":"int32"}}},{"name":"aBoolean","type":"bool"},{"name":"aString","type":"string"},{"name":"aComplex","type":"complexfloat64"},{"name":"aDate","type":"date"},{"name":"aTime","type":"time"},{"name":"aDateTime","type":"datetime"},{"name":"anEnum","type":"Sandbox.MyEnum"},{"name":"anOptionalIntThatIsNotSet","type":[null,"int32"]},{"name":"anOptionalIntThatIsSet","type":[null,"int32"]},{"name":"aRecordWithOptionalNotSet","type":"Sandbox.MyRecord"},{"name":"aRecordWithOptionalSet","type":"Sandbox.MyRecord"},{"name":"aVector","type":{"vector":{"items":"int32"}}},{"name":"aDynamicArray","type":{"array":{"items":"int32"}}},{"name":"aFixedArray","type":{"array":{"items":"int32","dimensions":[{"length":2},{"length":3}]}}},{"name":"aMapWithAStringKey","type":{"map":{"keys":"string","values":"int32"}}},{"name":"aMapWithAnIntKey","type":{"map":{"keys":"int32","values":"int32"}}},{"name":"aUnionWithSimpleRepresentation","type":[{"label":"int32","type":"int32"},{"label":"bool","type":"bool"}]},{"name":"aUnionRequiringTag","type":[{"label":"string","type":"string"},{"label":"MyEnum","type":"Sandbox.MyEnum"}]}]},"types":[{"name":"MyEnum","values":[{"symbol":"a","value":0},{"symbol":"b","value":1},{"symbol":"c","value":2}]},{"name":"MyRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":[null,"int32"]}]}]}}}
+{"yardl":{"version":1,"schema":{"protocol":{"name":"HelloNDJson","sequence":[{"name":"anIntStream","type":{"stream":{"items":"int32"}}},{"name":"aBoolean","type":"bool"},{"name":"aString","type":"string"},{"name":"aComplex","type":"complexfloat64"},{"name":"aDate","type":"date"},{"name":"aTime","type":"time"},{"name":"aDateTime","type":"datetime"},{"name":"anEnum","type":"Sandbox.MyEnum"},{"name":"someFlags","type":"Sandbox.MyFlags"},{"name":"anOptionalIntThatIsNotSet","type":[null,"int32"]},{"name":"anOptionalIntThatIsSet","type":[null,"int32"]},{"name":"aRecordWithOptionalNotSet","type":"Sandbox.MyRecord"},{"name":"aRecordWithOptionalSet","type":"Sandbox.MyRecord"},{"name":"aVector","type":{"vector":{"items":"int32"}}},{"name":"aDynamicArray","type":{"array":{"items":"int32"}}},{"name":"aFixedArray","type":{"array":{"items":"int32","dimensions":[{"length":2},{"length":3}]}}},{"name":"aMapWithAStringKey","type":{"map":{"keys":"string","values":"int32"}}},{"name":"aMapWithAnIntKey","type":{"map":{"keys":"int32","values":"int32"}}},{"name":"aUnionWithSimpleRepresentation","type":[{"label":"int32","type":"int32"},{"label":"bool","type":"bool"}]},{"name":"aUnionRequiringTag","type":[{"label":"string","type":"string"},{"label":"MyEnum","type":"Sandbox.MyEnum"}]}]},"types":[{"name":"MyEnum","values":[{"symbol":"a","value":0},{"symbol":"b","value":1},{"symbol":"c","value":2}]},{"name":"MyFlags","values":[{"symbol":"a","value":1},{"symbol":"b","value":2},{"symbol":"c","value":4}]},{"name":"MyRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":[null,"int32"]}]}]}}}
 {"anIntStream":1}
 {"anIntStream":2}
 {"anIntStream":3}
@@ -1380,8 +1454,9 @@ HelloNDJson: !protocol
 {"aComplex":[1.0,2.0]}
 {"aDate":"2020-01-17"}
 {"aTime":"10:50:25.777888999"}
-{"aDateTime":"2023-05-29T23:00:59.296464750Z"}
+{"aDateTime":"2023-05-30T18:36:56.708792349Z"}
 {"anEnum":"a"}
+{"someFlags":["a","b"]}
 {"anOptionalIntThatIsNotSet":null}
 {"anOptionalIntThatIsSet":42}
 {"aRecordWithOptionalNotSet":{"x":1,"y":2}}
@@ -1408,7 +1483,11 @@ Datatypes are serialized as follows:
 - Complex numbers are serialized as a JSON array of the real component followed
   by the imaginary component.
 - Strings are serialized as JSON strings.
-- Enums are serialized as their symbolic string value.
+- Enums are serialized as their symbolic string value or as the integer value if
+  the value is outside of the defined values.
+- Flags are serialized as an array of the symbolic string values that are set.
+  If the value is outside of the defined values, the underlying integer value is
+  written instead of the array.
 - Dates, Times, and DateTimes are formatted as strings. Dates are formatted as
   `YYYY-MM-DD`, times as `HH:mm:SS.FFFFFFFFF`, and datetimes as
   `YYYY-MM-DDTHH:mm:ss:FFFFFFFFFZ`

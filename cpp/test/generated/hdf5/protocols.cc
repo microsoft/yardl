@@ -1977,6 +1977,114 @@ void EnumsReader::ReadSizeImpl(test_model::SizeBasedEnum& value) {
   yardl::hdf5::ReadScalarDataset<test_model::SizeBasedEnum, test_model::SizeBasedEnum>(group_, "size", test_model::hdf5::GetSizeBasedEnumHdf5Ddl(), value);
 }
 
+FlagsWriter::FlagsWriter(std::string path)
+    : yardl::hdf5::Hdf5Writer::Hdf5Writer(path, "Flags", schema_) {
+}
+
+void FlagsWriter::WriteDaysImpl(test_model::DaysOfWeek const& value) {
+  if (!days_dataset_state_) {
+    days_dataset_state_ = std::make_unique<yardl::hdf5::DatasetWriter>(group_, "days", H5::PredType::NATIVE_INT32, 0);
+  }
+
+  days_dataset_state_->Append<test_model::DaysOfWeek, test_model::DaysOfWeek>(value);
+}
+
+void FlagsWriter::WriteDaysImpl(std::vector<test_model::DaysOfWeek> const& values) {
+  if (!days_dataset_state_) {
+    days_dataset_state_ = std::make_unique<yardl::hdf5::DatasetWriter>(group_, "days", H5::PredType::NATIVE_INT32, 0);
+  }
+
+  days_dataset_state_->AppendBatch<test_model::DaysOfWeek, test_model::DaysOfWeek>(values);
+}
+
+void FlagsWriter::EndDaysImpl() {
+  if (!days_dataset_state_) {
+    days_dataset_state_ = std::make_unique<yardl::hdf5::DatasetWriter>(group_, "days", H5::PredType::NATIVE_INT32, 0);
+  }
+
+  days_dataset_state_.reset();
+}
+
+void FlagsWriter::WriteFormatsImpl(test_model::TextFormat const& value) {
+  if (!formats_dataset_state_) {
+    formats_dataset_state_ = std::make_unique<yardl::hdf5::DatasetWriter>(group_, "formats", H5::PredType::NATIVE_INT32, 0);
+  }
+
+  formats_dataset_state_->Append<test_model::TextFormat, test_model::TextFormat>(value);
+}
+
+void FlagsWriter::WriteFormatsImpl(std::vector<test_model::TextFormat> const& values) {
+  if (!formats_dataset_state_) {
+    formats_dataset_state_ = std::make_unique<yardl::hdf5::DatasetWriter>(group_, "formats", H5::PredType::NATIVE_INT32, 0);
+  }
+
+  formats_dataset_state_->AppendBatch<test_model::TextFormat, test_model::TextFormat>(values);
+}
+
+void FlagsWriter::EndFormatsImpl() {
+  if (!formats_dataset_state_) {
+    formats_dataset_state_ = std::make_unique<yardl::hdf5::DatasetWriter>(group_, "formats", H5::PredType::NATIVE_INT32, 0);
+  }
+
+  formats_dataset_state_.reset();
+}
+
+FlagsReader::FlagsReader(std::string path)
+    : yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "Flags", schema_) {
+}
+
+bool FlagsReader::ReadDaysImpl(test_model::DaysOfWeek& value) {
+  if (!days_dataset_state_) {
+    days_dataset_state_ = std::make_unique<yardl::hdf5::DatasetReader>(group_, "days", H5::PredType::NATIVE_INT32, 0);
+  }
+
+  bool has_value = days_dataset_state_->Read<test_model::DaysOfWeek, test_model::DaysOfWeek>(value);
+  if (!has_value) {
+    days_dataset_state_.reset();
+  }
+
+  return has_value;
+}
+
+bool FlagsReader::ReadDaysImpl(std::vector<test_model::DaysOfWeek>& values) {
+  if (!days_dataset_state_) {
+    days_dataset_state_ = std::make_unique<yardl::hdf5::DatasetReader>(group_, "days", H5::PredType::NATIVE_INT32);
+  }
+
+  bool has_more = days_dataset_state_->ReadBatch<test_model::DaysOfWeek, test_model::DaysOfWeek>(values);
+  if (!has_more) {
+    days_dataset_state_.reset();
+  }
+
+  return has_more;
+}
+
+bool FlagsReader::ReadFormatsImpl(test_model::TextFormat& value) {
+  if (!formats_dataset_state_) {
+    formats_dataset_state_ = std::make_unique<yardl::hdf5::DatasetReader>(group_, "formats", H5::PredType::NATIVE_INT32, 0);
+  }
+
+  bool has_value = formats_dataset_state_->Read<test_model::TextFormat, test_model::TextFormat>(value);
+  if (!has_value) {
+    formats_dataset_state_.reset();
+  }
+
+  return has_value;
+}
+
+bool FlagsReader::ReadFormatsImpl(std::vector<test_model::TextFormat>& values) {
+  if (!formats_dataset_state_) {
+    formats_dataset_state_ = std::make_unique<yardl::hdf5::DatasetReader>(group_, "formats", H5::PredType::NATIVE_INT32);
+  }
+
+  bool has_more = formats_dataset_state_->ReadBatch<test_model::TextFormat, test_model::TextFormat>(values);
+  if (!has_more) {
+    formats_dataset_state_.reset();
+  }
+
+  return has_more;
+}
+
 StateTestWriter::StateTestWriter(std::string path)
     : yardl::hdf5::Hdf5Writer::Hdf5Writer(path, "StateTest", schema_) {
 }

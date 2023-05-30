@@ -810,6 +810,44 @@ class EnumsReader : public test_model::EnumsReaderBase, yardl::ndjson::NDJsonRea
   void CloseImpl() override;
 };
 
+// NDJSON writer for the Flags protocol.
+class FlagsWriter : public test_model::FlagsWriterBase, yardl::ndjson::NDJsonWriter {
+  public:
+  FlagsWriter(std::ostream& stream)
+      : yardl::ndjson::NDJsonWriter(stream, schema_) {
+  }
+
+  FlagsWriter(std::string file_name)
+      : yardl::ndjson::NDJsonWriter(file_name, schema_) {
+  }
+
+  void Flush() override;
+
+  protected:
+  void WriteDaysImpl(test_model::DaysOfWeek const& value) override;
+  void EndDaysImpl() override {}
+  void WriteFormatsImpl(test_model::TextFormat const& value) override;
+  void EndFormatsImpl() override {}
+  void CloseImpl() override;
+};
+
+// NDJSON reader for the Flags protocol.
+class FlagsReader : public test_model::FlagsReaderBase, yardl::ndjson::NDJsonReader {
+  public:
+  FlagsReader(std::istream& stream)
+      : yardl::ndjson::NDJsonReader(stream, schema_) {
+  }
+
+  FlagsReader(std::string file_name)
+      : yardl::ndjson::NDJsonReader(file_name, schema_) {
+  }
+
+  protected:
+  bool ReadDaysImpl(test_model::DaysOfWeek& value) override;
+  bool ReadFormatsImpl(test_model::TextFormat& value) override;
+  void CloseImpl() override;
+};
+
 // NDJSON writer for the StateTest protocol.
 class StateTestWriter : public test_model::StateTestWriterBase, yardl::ndjson::NDJsonWriter {
   public:

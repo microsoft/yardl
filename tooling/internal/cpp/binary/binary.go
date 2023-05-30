@@ -567,6 +567,9 @@ func typeDefinitionRwFunction(t dsl.TypeDefinition, write bool) string {
 		}
 		return "yardl::binary::Read" + suffix
 	case *dsl.EnumDefinition:
+		if t.IsFlags {
+			return fmt.Sprintf("yardl::binary::%sFlags<%s>", verb(write), common.TypeDefinitionSyntax(t))
+		}
 		return fmt.Sprintf("yardl::binary::%sEnum<%s>", verb(write), common.TypeDefinitionSyntax(t))
 	case *dsl.GenericTypeParameter:
 		return fmt.Sprintf("%s%s", verb(write), common.TypeDefinitionSyntax(t))

@@ -57,7 +57,9 @@ func writeNamespaceDefinitions(w *formatting.IndentedWriter, ns *dsl.Namespace) 
 	for _, t := range ns.TypeDefinitions {
 		switch t := t.(type) {
 		case *dsl.EnumDefinition:
-			writeEnumDdlFunction(w, t)
+			if !t.IsFlags {
+				writeEnumDdlFunction(w, t)
+			}
 		}
 	}
 

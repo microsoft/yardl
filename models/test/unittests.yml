@@ -289,6 +289,31 @@ Enums: !protocol
     vec: Fruits*
     size: SizeBasedEnum
 
+DaysOfWeek: !flags
+  values:
+    - monday
+    - tuesday
+    - wednesday
+    - thursday
+    - friday
+    - saturday
+    - sunday
+
+TextFormat: !flags
+  values:
+    regular: 0
+    bold:
+    italic:
+    underline:
+    strikethrough:
+
+Flags: !protocol
+  sequence:
+    days: !stream
+      items: DaysOfWeek
+    formats: !stream
+      items: TextFormat
+
 StateTest: !protocol
   sequence:
     anInt: int

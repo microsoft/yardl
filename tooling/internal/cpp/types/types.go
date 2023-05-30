@@ -16,6 +16,15 @@ import (
 )
 
 func WriteTypes(env *dsl.Environment, options packaging.CppCodegenOptions) error {
+	err := writeHeaderFile(env, options)
+	if err != nil {
+		return err
+	}
+
+	return writeSourceFile(env, options)
+}
+
+func writeHeaderFile(env *dsl.Environment, options packaging.CppCodegenOptions) error {
 	b := bytes.Buffer{}
 	w := formatting.NewIndentedWriter(&b, "  ")
 	common.WriteGeneratedFileHeader(w)
@@ -34,10 +43,39 @@ func WriteTypes(env *dsl.Environment, options packaging.CppCodegenOptions) error
 	for _, ns := range env.Namespaces {
 		fmt.Fprintf(w, "namespace %s {\n", common.NamespaceIdentifierName(ns.Name))
 		writeNamespaceMembers(w, ns)
-		w.WriteStringln("}")
+		fmt.Fprintf(w, "} // namespace %s\n", common.NamespaceIdentifierName(ns.Name))
 	}
 
 	definitionsPath := path.Join(options.SourcesOutputDir, "types.h")
+	return iocommon.WriteFileIfNeeded(definitionsPath, b.Bytes(), 0644)
+}
+
+func writeSourceFile(env *dsl.Environment, options packaging.CppCodegenOptions) error {
+	b := bytes.Buffer{}
+	w := formatting.NewIndentedWriter(&b, "  ")
+	common.WriteGeneratedFileHeader(w)
+
+	w.WriteStringln(`#include "types.h"`)
+	w.WriteStringln(`#include "yardl/yardl.h"`)
+
+	for _, ns := range env.Namespaces {
+		fmt.Fprintf(w, "namespace %s {\n", common.NamespaceIdentifierName(ns.Name))
+
+		for _, td := range ns.TypeDefinitions {
+			switch td := td.(type) {
+			case *dsl.EnumDefinition:
+				if td.IsFlags {
+					typeName := common.TypeIdentifierName(td.Name)
+					for _, v := range td.Values {
+						fmt.Fprintf(w, "const %s %s::%s = %s(%s);\n", typeName, typeName, common.EnumValueIdentifierName(v.Symbol), typeName, common.EnumIntegerLiteral(td, v))
+					}
+				}
+			}
+		}
+		fmt.Fprintf(w, "} // namespace %s\n", common.NamespaceIdentifierName(ns.Name))
+	}
+
+	definitionsPath := path.Join(options.SourcesOutputDir, "types.cc")
 	return iocommon.WriteFileIfNeeded(definitionsPath, b.Bytes(), 0644)
 }
 
@@ -45,19 +83,43 @@ func writeNamespaceMembers(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 	for _, td := range ns.TypeDefinitions {
 		switch td := td.(type) {
 		case *dsl.EnumDefinition:
-			common.WriteComment(w, td.Comment)
-			fmt.Fprintf(w, "enum class %s ", common.TypeIdentifierName(td.Name))
-			if td.BaseType != nil {
-				fmt.Fprintf(w, ": %s ", common.TypeSyntax(td.BaseType))
-			}
-			fmt.Fprintln(w, "{")
-			w.Indented(func() {
-				for _, enumValue := range td.Values {
-					common.WriteComment(w, enumValue.Comment)
-					fmt.Fprintf(w, "%s = %s,\n", common.EnumValueIdentifierName(enumValue.Symbol), common.EnumIntegerLiteral(td, enumValue))
+			if td.IsFlags {
+				common.WriteComment(w, td.Comment)
+
+				typeName := common.TypeIdentifierName(td.Name)
+				var valueTypeSyntax string
+				if td.BaseType != nil {
+					valueTypeSyntax = common.TypeSyntax(td.BaseType)
+				} else {
+					valueTypeSyntax = common.TypeSyntax(dsl.Int32Type)
 				}
-			})
-			fmt.Fprint(w, "};\n\n")
+
+				fmt.Fprintf(w, "struct %s : yardl::BaseFlags<%s, %s> {\n", typeName, valueTypeSyntax, typeName)
+				w.Indented(func() {
+					w.WriteStringln("using BaseFlags::BaseFlags;")
+
+					for _, v := range td.Values {
+						common.WriteComment(w, v.Comment)
+						fmt.Fprintf(w, "static const %s %s;\n", typeName, common.EnumValueIdentifierName(v.Symbol))
+					}
+				})
+				fmt.Fprint(w, "};\n\n")
+
+			} else {
+				common.WriteComment(w, td.Comment)
+				fmt.Fprintf(w, "enum class %s ", common.TypeIdentifierName(td.Name))
+				if td.BaseType != nil {
+					fmt.Fprintf(w, ": %s ", common.TypeSyntax(td.BaseType))
+				}
+				fmt.Fprintln(w, "{")
+				w.Indented(func() {
+					for _, enumValue := range td.Values {
+						common.WriteComment(w, enumValue.Comment)
+						fmt.Fprintf(w, "%s = %s,\n", common.EnumValueIdentifierName(enumValue.Symbol), common.EnumIntegerLiteral(td, enumValue))
+					}
+				})
+				fmt.Fprint(w, "};\n\n")
+			}
 
 		case *dsl.NamedType:
 			writeNamedTypeDefinition(w, td)

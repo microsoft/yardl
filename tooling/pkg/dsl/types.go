@@ -390,11 +390,23 @@ func (tc *TypeCase) IsNullType() bool {
 type EnumDefinition struct {
 	*DefinitionMeta `yaml:"-,inline"`
 	BaseType        Type       `json:"base,omitempty"`
+	IsFlags         bool       `json:"-"`
 	Values          EnumValues `json:"values"`
 }
 
 func (e *EnumDefinition) GetDefinitionMeta() *DefinitionMeta {
 	return e.DefinitionMeta
+}
+
+func (e *EnumDefinition) GetZeroValue() *EnumValue {
+	zero := big.NewInt(0)
+	for _, v := range e.Values {
+		if v.IntegerValue.Cmp(zero) == 0 {
+			return v
+		}
+	}
+
+	return nil
 }
 
 type EnumValues []*EnumValue

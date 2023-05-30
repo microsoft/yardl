@@ -412,6 +412,26 @@ enum class SizeBasedEnum : yardl::Size {
   kC = 2ULL,
 };
 
+struct DaysOfWeek : yardl::BaseFlags<int32_t, DaysOfWeek> {
+  using BaseFlags::BaseFlags;
+  static const DaysOfWeek kMonday;
+  static const DaysOfWeek kTuesday;
+  static const DaysOfWeek kWednesday;
+  static const DaysOfWeek kThursday;
+  static const DaysOfWeek kFriday;
+  static const DaysOfWeek kSaturday;
+  static const DaysOfWeek kSunday;
+};
+
+struct TextFormat : yardl::BaseFlags<int32_t, TextFormat> {
+  using BaseFlags::BaseFlags;
+  static const TextFormat kRegular;
+  static const TextFormat kBold;
+  static const TextFormat kItalic;
+  static const TextFormat kUnderline;
+  static const TextFormat kStrikethrough;
+};
+
 template <typename T>
 using Image = yardl::NDArray<T, 2>;
 
@@ -925,4 +945,4 @@ struct RecordWithKeywordFields {
   }
 };
 
-}
+} // namespace test_model

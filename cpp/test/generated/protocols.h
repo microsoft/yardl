@@ -1454,6 +1454,90 @@ class EnumsReaderBase {
   uint8_t state_ = 0;
 };
 
+// Abstract writer for the Flags protocol.
+class FlagsWriterBase {
+  public:
+  // Ordinal 0.
+  // Call this method for each element of the `days` stream, then call `EndDays() when done.`
+  void WriteDays(test_model::DaysOfWeek const& value);
+
+  // Ordinal 0.
+  // Call this method to write many values to the `days` stream, then call `EndDays()` when done.
+  void WriteDays(std::vector<test_model::DaysOfWeek> const& values);
+
+  // Marks the end of the `days` stream.
+  void EndDays();
+
+  // Ordinal 1.
+  // Call this method for each element of the `formats` stream, then call `EndFormats() when done.`
+  void WriteFormats(test_model::TextFormat const& value);
+
+  // Ordinal 1.
+  // Call this method to write many values to the `formats` stream, then call `EndFormats()` when done.
+  void WriteFormats(std::vector<test_model::TextFormat> const& values);
+
+  // Marks the end of the `formats` stream.
+  void EndFormats();
+
+  // Optionaly close this writer before destructing. Validates that all steps were completed.
+  void Close();
+
+  virtual ~FlagsWriterBase() = default;
+
+  // Flushes all buffered data.
+  virtual void Flush() {}
+
+  protected:
+  virtual void WriteDaysImpl(test_model::DaysOfWeek const& value) = 0;
+  virtual void WriteDaysImpl(std::vector<test_model::DaysOfWeek> const& value);
+  virtual void EndDaysImpl() = 0;
+  virtual void WriteFormatsImpl(test_model::TextFormat const& value) = 0;
+  virtual void WriteFormatsImpl(std::vector<test_model::TextFormat> const& value);
+  virtual void EndFormatsImpl() = 0;
+  virtual void CloseImpl() {}
+
+  static std::string schema_;
+
+  private:
+  uint8_t state_ = 0;
+
+  friend class FlagsReaderBase;
+};
+
+// Abstract reader for the Flags protocol.
+class FlagsReaderBase {
+  public:
+  // Ordinal 0.
+  [[nodiscard]] bool ReadDays(test_model::DaysOfWeek& value);
+
+  // Ordinal 0.
+  [[nodiscard]] bool ReadDays(std::vector<test_model::DaysOfWeek>& values);
+
+  // Ordinal 1.
+  [[nodiscard]] bool ReadFormats(test_model::TextFormat& value);
+
+  // Ordinal 1.
+  [[nodiscard]] bool ReadFormats(std::vector<test_model::TextFormat>& values);
+
+  // Optionaly close this writer before destructing. Validates that all steps were completely read.
+  void Close();
+
+  void CopyTo(FlagsWriterBase& writer, size_t days_buffer_size = 1, size_t formats_buffer_size = 1);
+
+  virtual ~FlagsReaderBase() = default;
+
+  protected:
+  virtual bool ReadDaysImpl(test_model::DaysOfWeek& value) = 0;
+  virtual bool ReadDaysImpl(std::vector<test_model::DaysOfWeek>& values);
+  virtual bool ReadFormatsImpl(test_model::TextFormat& value) = 0;
+  virtual bool ReadFormatsImpl(std::vector<test_model::TextFormat>& values);
+  virtual void CloseImpl() {}
+  static std::string schema_;
+
+  private:
+  uint8_t state_ = 0;
+};
+
 // Abstract writer for the StateTest protocol.
 class StateTestWriterBase {
   public:
