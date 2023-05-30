@@ -7,10 +7,8 @@
 
 #include <nlohmann/json.hpp>
 
-#include "serializers.h"
-
 namespace yardl::ndjson {
-using json = nlohmann::ordered_json;
+using ordered_json = nlohmann::ordered_json;
 
 static inline uint32_t kNDJsonFormatVersionNumber = 1;
 
@@ -37,9 +35,9 @@ class NDJsonWriter {
   }
 
   void WriteHeader(std::string& schema) {
-    auto parsed_schema = json::parse(schema);
+    auto parsed_schema = ordered_json::parse(schema);
 
-    json metadata = {{"yardl", {{"version", kNDJsonFormatVersionNumber}, {"schema", parsed_schema}}}};
+    ordered_json metadata = {{"yardl", {{"version", kNDJsonFormatVersionNumber}, {"schema", parsed_schema}}}};
     stream_ << metadata << "\n";
   }
 
@@ -79,11 +77,11 @@ class NDJsonReader {
   }
 
   void ReadHeader(std::string& expected_schema) {
-    json expected_schema_json = json::parse(expected_schema);
+    ordered_json expected_schema_json = ordered_json::parse(expected_schema);
     std::string line;
     std::getline(stream_, line);
     try {
-      json actual_header_json = json::parse(line);
+      ordered_json actual_header_json = ordered_json::parse(line);
       actual_header_json = actual_header_json.at("yardl");
       if (actual_header_json["version"] != kNDJsonFormatVersionNumber) {
         throw std::runtime_error(
@@ -105,7 +103,7 @@ class NDJsonReader {
  protected:
   std::istream& stream_;
   std::string line_{};
-  std::optional<nlohmann::ordered_json> unused_step_{};
+  std::optional<ordered_json> unused_step_{};
 };
 
 }  // namespace yardl::ndjson

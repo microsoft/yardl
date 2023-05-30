@@ -63,7 +63,8 @@ func WriteNdJson(env *dsl.Environment, options packaging.CppCodegenOptions) erro
 	w := formatting.NewIndentedWriter(&b, "  ")
 	common.WriteGeneratedFileHeader(w)
 
-	w.WriteStringln(`#include "protocols.h"
+	w.WriteStringln(`#include "../yardl/detail/ndjson/serializers.h"
+#include "protocols.h"
 `)
 
 	for _, ns := range env.Namespaces {
