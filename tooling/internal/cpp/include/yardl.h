@@ -74,6 +74,12 @@ using DateTime = std::chrono::time_point<std::chrono::system_clock,
  */
 using Size = std::conditional_t<sizeof(size_t) == sizeof(uint64_t), size_t, uint64_t>;
 
+/**
+ * @brief A base template for generated flags classes
+
+ * @tparam TValue the underlying integral type
+ * @tparam TDerived the derived flags class
+ */
 template <typename TValue, typename TDerived>
 struct BaseFlags {
   static_assert(std::is_integral_v<TValue>, "TValue must be an integral type");

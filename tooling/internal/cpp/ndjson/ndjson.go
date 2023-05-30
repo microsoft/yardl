@@ -135,6 +135,7 @@ func WriteNdJson(env *dsl.Environment, options packaging.CppCodegenOptions) erro
 		for _, t := range ns.TypeDefinitions {
 			switch t := t.(type) {
 			case *dsl.EnumDefinition:
+				writeEnumValuesMap(w, t)
 				if t.IsFlags {
 					writeFlagsConverters(w, t)
 				} else {
@@ -157,6 +158,21 @@ func WriteNdJson(env *dsl.Environment, options packaging.CppCodegenOptions) erro
 	filePath := path.Join(options.SourcesOutputDir, "protocols.cc")
 	return iocommon.WriteFileIfNeeded(filePath, b.Bytes(), 0644)
 
+}
+
+func writeEnumValuesMap(w *formatting.IndentedWriter, t *dsl.EnumDefinition) {
+	w.WriteStringln("namespace {")
+	fmt.Fprintf(w, "std::unordered_map<std::string, %s> const %s = {\n", common.TypeDefinitionSyntax(t), enumValuesMapName(t))
+	for _, v := range t.Values {
+		fmt.Fprintf(w, "  {\"%s\", %s::%s},\n", v.Symbol, common.TypeDefinitionSyntax(t), common.EnumValueIdentifierName(v.Symbol))
+	}
+	w.WriteStringln("};")
+
+	w.WriteStringln("} //namespace\n")
+}
+
+func enumValuesMapName(enum *dsl.EnumDefinition) string {
+	return fmt.Sprintf("__%s_values", common.TypeIdentifierName(enum.Name))
 }
 
 func writeHeaderFile(env *dsl.Environment, options packaging.CppCodegenOptions) error {
@@ -333,16 +349,14 @@ func writeEnumConverters(w *formatting.IndentedWriter, t *dsl.EnumDefinition) {
 	w.Indented(func() {
 		w.WriteStringln("if (j.is_string()) {")
 		w.Indented(func() {
-			w.WriteStringln("std::string_view symbol = j.get<std::string_view>();")
-			for _, v := range t.Values {
-				fmt.Fprintf(w, "if (symbol == \"%s\") {\n", v.Symbol)
-				w.Indented(func() {
-					fmt.Fprintf(w, "value = %s::%s;\n", typeName, common.EnumValueIdentifierName(v.Symbol))
-					w.WriteStringln("return;")
-				})
-				w.WriteStringln("}")
-			}
-			fmt.Fprintf(w, "throw std::runtime_error(\"Invalid enum value '\" + std::string(symbol) + \"' for enum %s\");\n", typeName)
+			w.WriteStringln("auto symbol = j.get<std::string>();")
+			fmt.Fprintf(w, "if (auto res = %s.find(symbol); res != %s.end()) {\n", enumValuesMapName(t), enumValuesMapName(t))
+			w.Indented(func() {
+				fmt.Fprintf(w, "value = res->second;\n")
+				w.WriteStringln("return;")
+			})
+			w.WriteStringln("}")
+			fmt.Fprintf(w, "throw std::runtime_error(\"Invalid enum value '\" + symbol + \"' for enum %s\");\n", typeName)
 		})
 		w.WriteStringln("}")
 		fmt.Fprintf(w, "using underlying_type = typename std::underlying_type<%s>::type;\n", typeName)
@@ -364,6 +378,9 @@ func writeFlagsConverters(w *formatting.IndentedWriter, t *dsl.EnumDefinition) {
 		w.WriteStringln("auto arr = ordered_json::array();")
 		w.WriteStringln("if (value == 0) {")
 		w.Indented(func() {
+			if zero != nil {
+				fmt.Fprintf(w, "arr.push_back(\"%s\");\n", zero.Symbol)
+			}
 			w.WriteStringln("j = arr;")
 			w.WriteStringln("return;")
 		})
@@ -376,8 +393,8 @@ func writeFlagsConverters(w *formatting.IndentedWriter, t *dsl.EnumDefinition) {
 			}
 			fmt.Fprintf(w, "if (remaining.HasFlags(%s::%s)) {\n", typeName, common.EnumValueIdentifierName(v.Symbol))
 			w.Indented(func() {
+				fmt.Fprintf(w, "remaining.UnsetFlags(%s::%s);\n", typeName, common.EnumValueIdentifierName(v.Symbol))
 				fmt.Fprintf(w, "arr.push_back(\"%s\");\n", v.Symbol)
-				fmt.Fprintf(w, "remaining &= ~%s::%s;\n", typeName, common.EnumValueIdentifierName(v.Symbol))
 				w.WriteStringln("if (remaining == 0) {")
 				w.Indented(func() {
 					w.WriteStringln("j = arr;")
@@ -405,14 +422,12 @@ func writeFlagsConverters(w *formatting.IndentedWriter, t *dsl.EnumDefinition) {
 		w.WriteStringln("value = {};")
 		w.WriteStringln("for (auto const& item : arr) {")
 		w.Indented(func() {
-			for _, v := range t.Values {
-				fmt.Fprintf(w, "if (item == \"%s\") {\n", v.Symbol)
-				w.Indented(func() {
-					fmt.Fprintf(w, "value |= %s::%s;\n", typeName, common.EnumValueIdentifierName(v.Symbol))
-					w.WriteStringln("continue;")
-				})
-				w.WriteStringln("}")
-			}
+			fmt.Fprintf(w, "if (auto res = %s.find(item); res != %s.end()) {\n", enumValuesMapName(t), enumValuesMapName(t))
+			w.Indented(func() {
+				fmt.Fprintf(w, "value |= res->second;\n")
+				w.WriteStringln("continue;")
+			})
+			w.WriteStringln("}")
 			fmt.Fprintf(w, "throw std::runtime_error(\"Invalid enum value '\" + item + \"' for enum %s\");\n", typeName)
 		})
 		w.WriteStringln("}")
