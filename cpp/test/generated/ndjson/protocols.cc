@@ -1293,7 +1293,7 @@ void to_json(ordered_json& j, test_model::DaysOfWeek const& value) {
 void from_json(ordered_json const& j, test_model::DaysOfWeek& value) {
   if (j.is_number()) {
     using underlying_type = typename test_model::DaysOfWeek::value_type;
-    value = j.get<underlying_type>();
+    value = test_model::DaysOfWeek(j.get<underlying_type>());
     return;
   }
   std::vector<std::string> arr = j;
@@ -1363,7 +1363,7 @@ void to_json(ordered_json& j, test_model::TextFormat const& value) {
 void from_json(ordered_json const& j, test_model::TextFormat& value) {
   if (j.is_number()) {
     using underlying_type = typename test_model::TextFormat::value_type;
-    value = j.get<underlying_type>();
+    value = test_model::TextFormat(j.get<underlying_type>());
     return;
   }
   std::vector<std::string> arr = j;

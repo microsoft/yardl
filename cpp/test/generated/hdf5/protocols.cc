@@ -2007,7 +2007,7 @@ void FlagsWriter::EndDaysImpl() {
 
 void FlagsWriter::WriteFormatsImpl(test_model::TextFormat const& value) {
   if (!formats_dataset_state_) {
-    formats_dataset_state_ = std::make_unique<yardl::hdf5::DatasetWriter>(group_, "formats", H5::PredType::NATIVE_INT32, 0);
+    formats_dataset_state_ = std::make_unique<yardl::hdf5::DatasetWriter>(group_, "formats", H5::PredType::NATIVE_UINT64, 0);
   }
 
   formats_dataset_state_->Append<test_model::TextFormat, test_model::TextFormat>(value);
@@ -2015,7 +2015,7 @@ void FlagsWriter::WriteFormatsImpl(test_model::TextFormat const& value) {
 
 void FlagsWriter::WriteFormatsImpl(std::vector<test_model::TextFormat> const& values) {
   if (!formats_dataset_state_) {
-    formats_dataset_state_ = std::make_unique<yardl::hdf5::DatasetWriter>(group_, "formats", H5::PredType::NATIVE_INT32, 0);
+    formats_dataset_state_ = std::make_unique<yardl::hdf5::DatasetWriter>(group_, "formats", H5::PredType::NATIVE_UINT64, 0);
   }
 
   formats_dataset_state_->AppendBatch<test_model::TextFormat, test_model::TextFormat>(values);
@@ -2023,7 +2023,7 @@ void FlagsWriter::WriteFormatsImpl(std::vector<test_model::TextFormat> const& va
 
 void FlagsWriter::EndFormatsImpl() {
   if (!formats_dataset_state_) {
-    formats_dataset_state_ = std::make_unique<yardl::hdf5::DatasetWriter>(group_, "formats", H5::PredType::NATIVE_INT32, 0);
+    formats_dataset_state_ = std::make_unique<yardl::hdf5::DatasetWriter>(group_, "formats", H5::PredType::NATIVE_UINT64, 0);
   }
 
   formats_dataset_state_.reset();
@@ -2061,7 +2061,7 @@ bool FlagsReader::ReadDaysImpl(std::vector<test_model::DaysOfWeek>& values) {
 
 bool FlagsReader::ReadFormatsImpl(test_model::TextFormat& value) {
   if (!formats_dataset_state_) {
-    formats_dataset_state_ = std::make_unique<yardl::hdf5::DatasetReader>(group_, "formats", H5::PredType::NATIVE_INT32, 0);
+    formats_dataset_state_ = std::make_unique<yardl::hdf5::DatasetReader>(group_, "formats", H5::PredType::NATIVE_UINT64, 0);
   }
 
   bool has_value = formats_dataset_state_->Read<test_model::TextFormat, test_model::TextFormat>(value);
@@ -2074,7 +2074,7 @@ bool FlagsReader::ReadFormatsImpl(test_model::TextFormat& value) {
 
 bool FlagsReader::ReadFormatsImpl(std::vector<test_model::TextFormat>& values) {
   if (!formats_dataset_state_) {
-    formats_dataset_state_ = std::make_unique<yardl::hdf5::DatasetReader>(group_, "formats", H5::PredType::NATIVE_INT32);
+    formats_dataset_state_ = std::make_unique<yardl::hdf5::DatasetReader>(group_, "formats", H5::PredType::NATIVE_UINT64);
   }
 
   bool has_more = formats_dataset_state_->ReadBatch<test_model::TextFormat, test_model::TextFormat>(values);

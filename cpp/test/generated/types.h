@@ -423,7 +423,7 @@ struct DaysOfWeek : yardl::BaseFlags<int32_t, DaysOfWeek> {
   static const DaysOfWeek kSunday;
 };
 
-struct TextFormat : yardl::BaseFlags<int32_t, TextFormat> {
+struct TextFormat : yardl::BaseFlags<uint64_t, TextFormat> {
   using BaseFlags::BaseFlags;
   static const TextFormat kRegular;
   static const TextFormat kBold;

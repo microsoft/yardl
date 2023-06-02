@@ -300,6 +300,7 @@ DaysOfWeek: !flags
     - sunday
 
 TextFormat: !flags
+  base: uint64
   values:
     regular: 0
     bold:
