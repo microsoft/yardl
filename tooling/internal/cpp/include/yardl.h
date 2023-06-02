@@ -86,7 +86,7 @@ struct BaseFlags {
 
  public:
   BaseFlags() = default;
-  explicit BaseFlags(TValue value) : value_(value) {}
+  BaseFlags(TValue value) : value_(value) {}
   BaseFlags(TDerived const& other) : value_(other.value_){};
 
   using value_type = TValue;
@@ -136,12 +136,16 @@ struct BaseFlags {
     return value_ == rhs.value_;
   }
 
+  bool operator==(TValue rhs) const {
+    return value_ == rhs;
+  }
+
   bool operator!=(TDerived rhs) const {
     return value_ != rhs.value_;
   }
 
-  operator bool() const {
-    return value_ != 0;
+  bool operator!=(TValue rhs) const {
+    return value_ != rhs;
   }
 
   [[nodiscard]] bool HasFlags(TDerived flag) const {

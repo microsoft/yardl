@@ -414,7 +414,7 @@ func writeFlagsConverters(w *formatting.IndentedWriter, t *dsl.EnumDefinition) {
 		w.WriteStringln("if (j.is_number()) {")
 		w.Indented(func() {
 			fmt.Fprintf(w, "using underlying_type = typename %s::value_type;\n", typeName)
-			fmt.Fprintf(w, "value = %s(j.get<underlying_type>());\n", typeName)
+			w.WriteStringln("value = j.get<underlying_type>();")
 			w.WriteStringln("return;")
 		})
 		w.WriteStringln("}")
