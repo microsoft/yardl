@@ -953,6 +953,7 @@
         {
           "flags": {
             "name": "TextFormat",
+            "base": "uint64",
             "values": [
               {
                 "symbol": "regular",

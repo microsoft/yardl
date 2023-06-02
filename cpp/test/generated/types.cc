@@ -10,9 +10,9 @@ const DaysOfWeek DaysOfWeek::kThursday = DaysOfWeek(8);
 const DaysOfWeek DaysOfWeek::kFriday = DaysOfWeek(16);
 const DaysOfWeek DaysOfWeek::kSaturday = DaysOfWeek(32);
 const DaysOfWeek DaysOfWeek::kSunday = DaysOfWeek(64);
-const TextFormat TextFormat::kRegular = TextFormat(0);
-const TextFormat TextFormat::kBold = TextFormat(1);
-const TextFormat TextFormat::kItalic = TextFormat(2);
-const TextFormat TextFormat::kUnderline = TextFormat(4);
-const TextFormat TextFormat::kStrikethrough = TextFormat(8);
+const TextFormat TextFormat::kRegular = TextFormat(0ULL);
+const TextFormat TextFormat::kBold = TextFormat(1ULL);
+const TextFormat TextFormat::kItalic = TextFormat(2ULL);
+const TextFormat TextFormat::kUnderline = TextFormat(4ULL);
+const TextFormat TextFormat::kStrikethrough = TextFormat(8ULL);
 } // namespace test_model

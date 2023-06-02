@@ -144,8 +144,8 @@ struct BaseFlags {
     return value_ != rhs.value_;
   }
 
-  operator bool() const {
-    return value_ != 0;
+  bool operator!=(TValue rhs) const {
+    return value_ != rhs;
   }
 
   [[nodiscard]] bool HasFlags(TDerived flag) const {
