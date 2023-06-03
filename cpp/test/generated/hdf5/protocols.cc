@@ -223,11 +223,11 @@ struct _Inner_RecordWithArrays {
   _Inner_RecordWithArrays(test_model::RecordWithArrays const& o) 
       : default_array(o.default_array),
       default_array_with_empty_dimension(o.default_array_with_empty_dimension),
-      rank1_array(o.rank1_array),
-      rank2_array(o.rank2_array),
-      rank2_array_with_named_dimensions(o.rank2_array_with_named_dimensions),
-      rank2_fixed_array(o.rank2_fixed_array),
-      rank2_fixed_array_with_named_dimensions(o.rank2_fixed_array_with_named_dimensions),
+      rank_1_array(o.rank_1_array),
+      rank_2_array(o.rank_2_array),
+      rank_2_array_with_named_dimensions(o.rank_2_array_with_named_dimensions),
+      rank_2_fixed_array(o.rank_2_fixed_array),
+      rank_2_fixed_array_with_named_dimensions(o.rank_2_fixed_array_with_named_dimensions),
       dynamic_array(o.dynamic_array),
       array_of_vectors(o.array_of_vectors) {
   }
@@ -235,22 +235,22 @@ struct _Inner_RecordWithArrays {
   void ToOuter (test_model::RecordWithArrays& o) const {
     yardl::hdf5::ToOuter(default_array, o.default_array);
     yardl::hdf5::ToOuter(default_array_with_empty_dimension, o.default_array_with_empty_dimension);
-    yardl::hdf5::ToOuter(rank1_array, o.rank1_array);
-    yardl::hdf5::ToOuter(rank2_array, o.rank2_array);
-    yardl::hdf5::ToOuter(rank2_array_with_named_dimensions, o.rank2_array_with_named_dimensions);
-    yardl::hdf5::ToOuter(rank2_fixed_array, o.rank2_fixed_array);
-    yardl::hdf5::ToOuter(rank2_fixed_array_with_named_dimensions, o.rank2_fixed_array_with_named_dimensions);
+    yardl::hdf5::ToOuter(rank_1_array, o.rank_1_array);
+    yardl::hdf5::ToOuter(rank_2_array, o.rank_2_array);
+    yardl::hdf5::ToOuter(rank_2_array_with_named_dimensions, o.rank_2_array_with_named_dimensions);
+    yardl::hdf5::ToOuter(rank_2_fixed_array, o.rank_2_fixed_array);
+    yardl::hdf5::ToOuter(rank_2_fixed_array_with_named_dimensions, o.rank_2_fixed_array_with_named_dimensions);
     yardl::hdf5::ToOuter(dynamic_array, o.dynamic_array);
     yardl::hdf5::ToOuter(array_of_vectors, o.array_of_vectors);
   }
 
   yardl::hdf5::InnerDynamicNdArray<int32_t, int32_t> default_array;
   yardl::hdf5::InnerDynamicNdArray<int32_t, int32_t> default_array_with_empty_dimension;
-  yardl::hdf5::InnerVlen<int32_t, int32_t> rank1_array;
-  yardl::hdf5::InnerNdArray<int32_t, int32_t, 2> rank2_array;
-  yardl::hdf5::InnerNdArray<int32_t, int32_t, 2> rank2_array_with_named_dimensions;
-  yardl::FixedNDArray<int32_t, 3, 4> rank2_fixed_array;
-  yardl::FixedNDArray<int32_t, 3, 4> rank2_fixed_array_with_named_dimensions;
+  yardl::hdf5::InnerVlen<int32_t, int32_t> rank_1_array;
+  yardl::hdf5::InnerNdArray<int32_t, int32_t, 2> rank_2_array;
+  yardl::hdf5::InnerNdArray<int32_t, int32_t, 2> rank_2_array_with_named_dimensions;
+  yardl::FixedNDArray<int32_t, 3, 4> rank_2_fixed_array;
+  yardl::FixedNDArray<int32_t, 3, 4> rank_2_fixed_array_with_named_dimensions;
   yardl::hdf5::InnerDynamicNdArray<int32_t, int32_t> dynamic_array;
   yardl::FixedNDArray<std::array<int32_t, 4>, 5> array_of_vectors;
 };
@@ -260,11 +260,11 @@ struct _Inner_RecordWithArraysSimpleSyntax {
   _Inner_RecordWithArraysSimpleSyntax(test_model::RecordWithArraysSimpleSyntax const& o) 
       : default_array(o.default_array),
       default_array_with_empty_dimension(o.default_array_with_empty_dimension),
-      rank1_array(o.rank1_array),
-      rank2_array(o.rank2_array),
-      rank2_array_with_named_dimensions(o.rank2_array_with_named_dimensions),
-      rank2_fixed_array(o.rank2_fixed_array),
-      rank2_fixed_array_with_named_dimensions(o.rank2_fixed_array_with_named_dimensions),
+      rank_1_array(o.rank_1_array),
+      rank_2_array(o.rank_2_array),
+      rank_2_array_with_named_dimensions(o.rank_2_array_with_named_dimensions),
+      rank_2_fixed_array(o.rank_2_fixed_array),
+      rank_2_fixed_array_with_named_dimensions(o.rank_2_fixed_array_with_named_dimensions),
       dynamic_array(o.dynamic_array),
       array_of_vectors(o.array_of_vectors) {
   }
@@ -272,22 +272,22 @@ struct _Inner_RecordWithArraysSimpleSyntax {
   void ToOuter (test_model::RecordWithArraysSimpleSyntax& o) const {
     yardl::hdf5::ToOuter(default_array, o.default_array);
     yardl::hdf5::ToOuter(default_array_with_empty_dimension, o.default_array_with_empty_dimension);
-    yardl::hdf5::ToOuter(rank1_array, o.rank1_array);
-    yardl::hdf5::ToOuter(rank2_array, o.rank2_array);
-    yardl::hdf5::ToOuter(rank2_array_with_named_dimensions, o.rank2_array_with_named_dimensions);
-    yardl::hdf5::ToOuter(rank2_fixed_array, o.rank2_fixed_array);
-    yardl::hdf5::ToOuter(rank2_fixed_array_with_named_dimensions, o.rank2_fixed_array_with_named_dimensions);
+    yardl::hdf5::ToOuter(rank_1_array, o.rank_1_array);
+    yardl::hdf5::ToOuter(rank_2_array, o.rank_2_array);
+    yardl::hdf5::ToOuter(rank_2_array_with_named_dimensions, o.rank_2_array_with_named_dimensions);
+    yardl::hdf5::ToOuter(rank_2_fixed_array, o.rank_2_fixed_array);
+    yardl::hdf5::ToOuter(rank_2_fixed_array_with_named_dimensions, o.rank_2_fixed_array_with_named_dimensions);
     yardl::hdf5::ToOuter(dynamic_array, o.dynamic_array);
     yardl::hdf5::ToOuter(array_of_vectors, o.array_of_vectors);
   }
 
   yardl::hdf5::InnerDynamicNdArray<int32_t, int32_t> default_array;
   yardl::hdf5::InnerDynamicNdArray<int32_t, int32_t> default_array_with_empty_dimension;
-  yardl::hdf5::InnerVlen<int32_t, int32_t> rank1_array;
-  yardl::hdf5::InnerNdArray<int32_t, int32_t, 2> rank2_array;
-  yardl::hdf5::InnerNdArray<int32_t, int32_t, 2> rank2_array_with_named_dimensions;
-  yardl::FixedNDArray<int32_t, 3, 4> rank2_fixed_array;
-  yardl::FixedNDArray<int32_t, 3, 4> rank2_fixed_array_with_named_dimensions;
+  yardl::hdf5::InnerVlen<int32_t, int32_t> rank_1_array;
+  yardl::hdf5::InnerNdArray<int32_t, int32_t, 2> rank_2_array;
+  yardl::hdf5::InnerNdArray<int32_t, int32_t, 2> rank_2_array_with_named_dimensions;
+  yardl::FixedNDArray<int32_t, 3, 4> rank_2_fixed_array;
+  yardl::FixedNDArray<int32_t, 3, 4> rank_2_fixed_array_with_named_dimensions;
   yardl::hdf5::InnerDynamicNdArray<int32_t, int32_t> dynamic_array;
   yardl::FixedNDArray<std::array<int32_t, 4>, 5> array_of_vectors;
 };
@@ -468,23 +468,23 @@ template <typename _T1_Inner, typename T1, typename _T2_Inner, typename T2>
 struct _Inner_GenericRecord {
   _Inner_GenericRecord() {} 
   _Inner_GenericRecord(test_model::GenericRecord<T1, T2> const& o) 
-      : scalar1(o.scalar1),
-      scalar2(o.scalar2),
-      vector1(o.vector1),
-      image2(o.image2) {
+      : scalar_1(o.scalar_1),
+      scalar_2(o.scalar_2),
+      vector_1(o.vector_1),
+      image_2(o.image_2) {
   }
 
   void ToOuter (test_model::GenericRecord<T1, T2>& o) const {
-    yardl::hdf5::ToOuter(scalar1, o.scalar1);
-    yardl::hdf5::ToOuter(scalar2, o.scalar2);
-    yardl::hdf5::ToOuter(vector1, o.vector1);
-    yardl::hdf5::ToOuter(image2, o.image2);
+    yardl::hdf5::ToOuter(scalar_1, o.scalar_1);
+    yardl::hdf5::ToOuter(scalar_2, o.scalar_2);
+    yardl::hdf5::ToOuter(vector_1, o.vector_1);
+    yardl::hdf5::ToOuter(image_2, o.image_2);
   }
 
-  _T1_Inner scalar1;
-  _T2_Inner scalar2;
-  yardl::hdf5::InnerVlen<_T1_Inner, T1> vector1;
-  yardl::hdf5::InnerNdArray<_T2_Inner, T2, 2> image2;
+  _T1_Inner scalar_1;
+  _T2_Inner scalar_2;
+  yardl::hdf5::InnerVlen<_T1_Inner, T1> vector_1;
+  yardl::hdf5::InnerNdArray<_T2_Inner, T2, 2> image_2;
 };
 
 template <typename _T1_Inner, typename T1, typename _T2_Inner, typename T2>
@@ -634,19 +634,19 @@ struct _Inner_RecordWithKeywordFields {
   using RecordType = test_model::RecordWithPrimitives;
   H5::CompType t(sizeof(RecordType));
   t.insertMember("boolField", HOFFSET(RecordType, bool_field), H5::PredType::NATIVE_HBOOL);
-  t.insertMember("int8Field", HOFFSET(RecordType, int8_field), H5::PredType::NATIVE_INT8);
-  t.insertMember("uint8Field", HOFFSET(RecordType, uint8_field), H5::PredType::NATIVE_UINT8);
-  t.insertMember("int16Field", HOFFSET(RecordType, int16_field), H5::PredType::NATIVE_INT16);
-  t.insertMember("uint16Field", HOFFSET(RecordType, uint16_field), H5::PredType::NATIVE_UINT16);
-  t.insertMember("int32Field", HOFFSET(RecordType, int32_field), H5::PredType::NATIVE_INT32);
-  t.insertMember("uint32Field", HOFFSET(RecordType, uint32_field), H5::PredType::NATIVE_UINT32);
-  t.insertMember("int64Field", HOFFSET(RecordType, int64_field), H5::PredType::NATIVE_INT64);
-  t.insertMember("uint64Field", HOFFSET(RecordType, uint64_field), H5::PredType::NATIVE_UINT64);
+  t.insertMember("int8Field", HOFFSET(RecordType, int_8_field), H5::PredType::NATIVE_INT8);
+  t.insertMember("uint8Field", HOFFSET(RecordType, uint_8_field), H5::PredType::NATIVE_UINT8);
+  t.insertMember("int16Field", HOFFSET(RecordType, int_16_field), H5::PredType::NATIVE_INT16);
+  t.insertMember("uint16Field", HOFFSET(RecordType, uint_16_field), H5::PredType::NATIVE_UINT16);
+  t.insertMember("int32Field", HOFFSET(RecordType, int_32_field), H5::PredType::NATIVE_INT32);
+  t.insertMember("uint32Field", HOFFSET(RecordType, uint_32_field), H5::PredType::NATIVE_UINT32);
+  t.insertMember("int64Field", HOFFSET(RecordType, int_64_field), H5::PredType::NATIVE_INT64);
+  t.insertMember("uint64Field", HOFFSET(RecordType, uint_64_field), H5::PredType::NATIVE_UINT64);
   t.insertMember("sizeField", HOFFSET(RecordType, size_field), yardl::hdf5::SizeTypeDdl());
-  t.insertMember("float32Field", HOFFSET(RecordType, float32_field), H5::PredType::NATIVE_FLOAT);
-  t.insertMember("float64Field", HOFFSET(RecordType, float64_field), H5::PredType::NATIVE_DOUBLE);
-  t.insertMember("complexfloat32Field", HOFFSET(RecordType, complexfloat32_field), yardl::hdf5::ComplexTypeDdl<float>());
-  t.insertMember("complexfloat64Field", HOFFSET(RecordType, complexfloat64_field), yardl::hdf5::ComplexTypeDdl<double>());
+  t.insertMember("float32Field", HOFFSET(RecordType, float_32_field), H5::PredType::NATIVE_FLOAT);
+  t.insertMember("float64Field", HOFFSET(RecordType, float_64_field), H5::PredType::NATIVE_DOUBLE);
+  t.insertMember("complexfloat32Field", HOFFSET(RecordType, complexfloat_32_field), yardl::hdf5::ComplexTypeDdl<float>());
+  t.insertMember("complexfloat64Field", HOFFSET(RecordType, complexfloat_64_field), yardl::hdf5::ComplexTypeDdl<double>());
   t.insertMember("dateField", HOFFSET(RecordType, date_field), yardl::hdf5::DateTypeDdl());
   t.insertMember("timeField", HOFFSET(RecordType, time_field), yardl::hdf5::TimeTypeDdl());
   t.insertMember("datetimeField", HOFFSET(RecordType, datetime_field), yardl::hdf5::DateTimeTypeDdl());
@@ -690,11 +690,11 @@ struct _Inner_RecordWithKeywordFields {
   H5::CompType t(sizeof(RecordType));
   t.insertMember("defaultArray", HOFFSET(RecordType, default_array), yardl::hdf5::DynamicNDArrayDdl<int32_t, int32_t>(H5::PredType::NATIVE_INT32));
   t.insertMember("defaultArrayWithEmptyDimension", HOFFSET(RecordType, default_array_with_empty_dimension), yardl::hdf5::DynamicNDArrayDdl<int32_t, int32_t>(H5::PredType::NATIVE_INT32));
-  t.insertMember("rank1Array", HOFFSET(RecordType, rank1_array), yardl::hdf5::InnerVlenDdl(H5::PredType::NATIVE_INT32));
-  t.insertMember("rank2Array", HOFFSET(RecordType, rank2_array), yardl::hdf5::NDArrayDdl<int32_t, int32_t, 2>(H5::PredType::NATIVE_INT32));
-  t.insertMember("rank2ArrayWithNamedDimensions", HOFFSET(RecordType, rank2_array_with_named_dimensions), yardl::hdf5::NDArrayDdl<int32_t, int32_t, 2>(H5::PredType::NATIVE_INT32));
-  t.insertMember("rank2FixedArray", HOFFSET(RecordType, rank2_fixed_array), yardl::hdf5::FixedNDArrayDdl(H5::PredType::NATIVE_INT32, {3, 4}));
-  t.insertMember("rank2FixedArrayWithNamedDimensions", HOFFSET(RecordType, rank2_fixed_array_with_named_dimensions), yardl::hdf5::FixedNDArrayDdl(H5::PredType::NATIVE_INT32, {3, 4}));
+  t.insertMember("rank1Array", HOFFSET(RecordType, rank_1_array), yardl::hdf5::InnerVlenDdl(H5::PredType::NATIVE_INT32));
+  t.insertMember("rank2Array", HOFFSET(RecordType, rank_2_array), yardl::hdf5::NDArrayDdl<int32_t, int32_t, 2>(H5::PredType::NATIVE_INT32));
+  t.insertMember("rank2ArrayWithNamedDimensions", HOFFSET(RecordType, rank_2_array_with_named_dimensions), yardl::hdf5::NDArrayDdl<int32_t, int32_t, 2>(H5::PredType::NATIVE_INT32));
+  t.insertMember("rank2FixedArray", HOFFSET(RecordType, rank_2_fixed_array), yardl::hdf5::FixedNDArrayDdl(H5::PredType::NATIVE_INT32, {3, 4}));
+  t.insertMember("rank2FixedArrayWithNamedDimensions", HOFFSET(RecordType, rank_2_fixed_array_with_named_dimensions), yardl::hdf5::FixedNDArrayDdl(H5::PredType::NATIVE_INT32, {3, 4}));
   t.insertMember("dynamicArray", HOFFSET(RecordType, dynamic_array), yardl::hdf5::DynamicNDArrayDdl<int32_t, int32_t>(H5::PredType::NATIVE_INT32));
   t.insertMember("arrayOfVectors", HOFFSET(RecordType, array_of_vectors), yardl::hdf5::FixedNDArrayDdl(yardl::hdf5::FixedVectorDdl(H5::PredType::NATIVE_INT32, 4), {5}));
   return t;
@@ -705,11 +705,11 @@ struct _Inner_RecordWithKeywordFields {
   H5::CompType t(sizeof(RecordType));
   t.insertMember("defaultArray", HOFFSET(RecordType, default_array), yardl::hdf5::DynamicNDArrayDdl<int32_t, int32_t>(H5::PredType::NATIVE_INT32));
   t.insertMember("defaultArrayWithEmptyDimension", HOFFSET(RecordType, default_array_with_empty_dimension), yardl::hdf5::DynamicNDArrayDdl<int32_t, int32_t>(H5::PredType::NATIVE_INT32));
-  t.insertMember("rank1Array", HOFFSET(RecordType, rank1_array), yardl::hdf5::InnerVlenDdl(H5::PredType::NATIVE_INT32));
-  t.insertMember("rank2Array", HOFFSET(RecordType, rank2_array), yardl::hdf5::NDArrayDdl<int32_t, int32_t, 2>(H5::PredType::NATIVE_INT32));
-  t.insertMember("rank2ArrayWithNamedDimensions", HOFFSET(RecordType, rank2_array_with_named_dimensions), yardl::hdf5::NDArrayDdl<int32_t, int32_t, 2>(H5::PredType::NATIVE_INT32));
-  t.insertMember("rank2FixedArray", HOFFSET(RecordType, rank2_fixed_array), yardl::hdf5::FixedNDArrayDdl(H5::PredType::NATIVE_INT32, {3, 4}));
-  t.insertMember("rank2FixedArrayWithNamedDimensions", HOFFSET(RecordType, rank2_fixed_array_with_named_dimensions), yardl::hdf5::FixedNDArrayDdl(H5::PredType::NATIVE_INT32, {3, 4}));
+  t.insertMember("rank1Array", HOFFSET(RecordType, rank_1_array), yardl::hdf5::InnerVlenDdl(H5::PredType::NATIVE_INT32));
+  t.insertMember("rank2Array", HOFFSET(RecordType, rank_2_array), yardl::hdf5::NDArrayDdl<int32_t, int32_t, 2>(H5::PredType::NATIVE_INT32));
+  t.insertMember("rank2ArrayWithNamedDimensions", HOFFSET(RecordType, rank_2_array_with_named_dimensions), yardl::hdf5::NDArrayDdl<int32_t, int32_t, 2>(H5::PredType::NATIVE_INT32));
+  t.insertMember("rank2FixedArray", HOFFSET(RecordType, rank_2_fixed_array), yardl::hdf5::FixedNDArrayDdl(H5::PredType::NATIVE_INT32, {3, 4}));
+  t.insertMember("rank2FixedArrayWithNamedDimensions", HOFFSET(RecordType, rank_2_fixed_array_with_named_dimensions), yardl::hdf5::FixedNDArrayDdl(H5::PredType::NATIVE_INT32, {3, 4}));
   t.insertMember("dynamicArray", HOFFSET(RecordType, dynamic_array), yardl::hdf5::DynamicNDArrayDdl<int32_t, int32_t>(H5::PredType::NATIVE_INT32));
   t.insertMember("arrayOfVectors", HOFFSET(RecordType, array_of_vectors), yardl::hdf5::FixedNDArrayDdl(yardl::hdf5::FixedVectorDdl(H5::PredType::NATIVE_INT32, 4), {5}));
   return t;
@@ -803,10 +803,10 @@ template <typename _T1_Inner, typename T1, typename _T2_Inner, typename T2>
 [[maybe_unused]] H5::CompType GetGenericRecordHdf5Ddl(H5::DataType const& T1_type, H5::DataType const& T2_type) {
   using RecordType = test_model::hdf5::_Inner_GenericRecord<_T1_Inner, T1, _T2_Inner, T2>;
   H5::CompType t(sizeof(RecordType));
-  t.insertMember("scalar1", HOFFSET(RecordType, scalar1), T1_type);
-  t.insertMember("scalar2", HOFFSET(RecordType, scalar2), T2_type);
-  t.insertMember("vector1", HOFFSET(RecordType, vector1), yardl::hdf5::InnerVlenDdl(T1_type));
-  t.insertMember("image2", HOFFSET(RecordType, image2), yardl::hdf5::NDArrayDdl<_T2_Inner, T2, 2>(T2_type));
+  t.insertMember("scalar1", HOFFSET(RecordType, scalar_1), T1_type);
+  t.insertMember("scalar2", HOFFSET(RecordType, scalar_2), T2_type);
+  t.insertMember("vector1", HOFFSET(RecordType, vector_1), yardl::hdf5::InnerVlenDdl(T1_type));
+  t.insertMember("image2", HOFFSET(RecordType, image_2), yardl::hdf5::NDArrayDdl<_T2_Inner, T2, 2>(T2_type));
   return t;
 };
 

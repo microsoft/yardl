@@ -81,38 +81,38 @@ struct SimpleRecord {
 
 struct RecordWithPrimitives {
   bool bool_field{};
-  int8_t int8_field{};
-  uint8_t uint8_field{};
-  int16_t int16_field{};
-  uint16_t uint16_field{};
-  int32_t int32_field{};
-  uint32_t uint32_field{};
-  int64_t int64_field{};
-  uint64_t uint64_field{};
+  int8_t int_8_field{};
+  uint8_t uint_8_field{};
+  int16_t int_16_field{};
+  uint16_t uint_16_field{};
+  int32_t int_32_field{};
+  uint32_t uint_32_field{};
+  int64_t int_64_field{};
+  uint64_t uint_64_field{};
   yardl::Size size_field{};
-  float float32_field{};
-  double float64_field{};
-  std::complex<float> complexfloat32_field{};
-  std::complex<double> complexfloat64_field{};
+  float float_32_field{};
+  double float_64_field{};
+  std::complex<float> complexfloat_32_field{};
+  std::complex<double> complexfloat_64_field{};
   yardl::Date date_field{};
   yardl::Time time_field{};
   yardl::DateTime datetime_field{};
 
   bool operator==(const RecordWithPrimitives& other) const {
     return bool_field == other.bool_field &&
-      int8_field == other.int8_field &&
-      uint8_field == other.uint8_field &&
-      int16_field == other.int16_field &&
-      uint16_field == other.uint16_field &&
-      int32_field == other.int32_field &&
-      uint32_field == other.uint32_field &&
-      int64_field == other.int64_field &&
-      uint64_field == other.uint64_field &&
+      int_8_field == other.int_8_field &&
+      uint_8_field == other.uint_8_field &&
+      int_16_field == other.int_16_field &&
+      uint_16_field == other.uint_16_field &&
+      int_32_field == other.int_32_field &&
+      uint_32_field == other.uint_32_field &&
+      int_64_field == other.int_64_field &&
+      uint_64_field == other.uint_64_field &&
       size_field == other.size_field &&
-      float32_field == other.float32_field &&
-      float64_field == other.float64_field &&
-      complexfloat32_field == other.complexfloat32_field &&
-      complexfloat64_field == other.complexfloat64_field &&
+      float_32_field == other.float_32_field &&
+      float_64_field == other.float_64_field &&
+      complexfloat_32_field == other.complexfloat_32_field &&
+      complexfloat_64_field == other.complexfloat_64_field &&
       date_field == other.date_field &&
       time_field == other.time_field &&
       datetime_field == other.datetime_field;
@@ -184,22 +184,22 @@ struct RecordWithVectors {
 struct RecordWithArrays {
   yardl::DynamicNDArray<int32_t> default_array{};
   yardl::DynamicNDArray<int32_t> default_array_with_empty_dimension{};
-  yardl::NDArray<int32_t, 1> rank1_array{};
-  yardl::NDArray<int32_t, 2> rank2_array{};
-  yardl::NDArray<int32_t, 2> rank2_array_with_named_dimensions{};
-  yardl::FixedNDArray<int32_t, 3, 4> rank2_fixed_array{};
-  yardl::FixedNDArray<int32_t, 3, 4> rank2_fixed_array_with_named_dimensions{};
+  yardl::NDArray<int32_t, 1> rank_1_array{};
+  yardl::NDArray<int32_t, 2> rank_2_array{};
+  yardl::NDArray<int32_t, 2> rank_2_array_with_named_dimensions{};
+  yardl::FixedNDArray<int32_t, 3, 4> rank_2_fixed_array{};
+  yardl::FixedNDArray<int32_t, 3, 4> rank_2_fixed_array_with_named_dimensions{};
   yardl::DynamicNDArray<int32_t> dynamic_array{};
   yardl::FixedNDArray<std::array<int32_t, 4>, 5> array_of_vectors{};
 
   bool operator==(const RecordWithArrays& other) const {
     return default_array == other.default_array &&
       default_array_with_empty_dimension == other.default_array_with_empty_dimension &&
-      rank1_array == other.rank1_array &&
-      rank2_array == other.rank2_array &&
-      rank2_array_with_named_dimensions == other.rank2_array_with_named_dimensions &&
-      rank2_fixed_array == other.rank2_fixed_array &&
-      rank2_fixed_array_with_named_dimensions == other.rank2_fixed_array_with_named_dimensions &&
+      rank_1_array == other.rank_1_array &&
+      rank_2_array == other.rank_2_array &&
+      rank_2_array_with_named_dimensions == other.rank_2_array_with_named_dimensions &&
+      rank_2_fixed_array == other.rank_2_fixed_array &&
+      rank_2_fixed_array_with_named_dimensions == other.rank_2_fixed_array_with_named_dimensions &&
       dynamic_array == other.dynamic_array &&
       array_of_vectors == other.array_of_vectors;
   }
@@ -212,22 +212,22 @@ struct RecordWithArrays {
 struct RecordWithArraysSimpleSyntax {
   yardl::DynamicNDArray<int32_t> default_array{};
   yardl::DynamicNDArray<int32_t> default_array_with_empty_dimension{};
-  yardl::NDArray<int32_t, 1> rank1_array{};
-  yardl::NDArray<int32_t, 2> rank2_array{};
-  yardl::NDArray<int32_t, 2> rank2_array_with_named_dimensions{};
-  yardl::FixedNDArray<int32_t, 3, 4> rank2_fixed_array{};
-  yardl::FixedNDArray<int32_t, 3, 4> rank2_fixed_array_with_named_dimensions{};
+  yardl::NDArray<int32_t, 1> rank_1_array{};
+  yardl::NDArray<int32_t, 2> rank_2_array{};
+  yardl::NDArray<int32_t, 2> rank_2_array_with_named_dimensions{};
+  yardl::FixedNDArray<int32_t, 3, 4> rank_2_fixed_array{};
+  yardl::FixedNDArray<int32_t, 3, 4> rank_2_fixed_array_with_named_dimensions{};
   yardl::DynamicNDArray<int32_t> dynamic_array{};
   yardl::FixedNDArray<std::array<int32_t, 4>, 5> array_of_vectors{};
 
   bool operator==(const RecordWithArraysSimpleSyntax& other) const {
     return default_array == other.default_array &&
       default_array_with_empty_dimension == other.default_array_with_empty_dimension &&
-      rank1_array == other.rank1_array &&
-      rank2_array == other.rank2_array &&
-      rank2_array_with_named_dimensions == other.rank2_array_with_named_dimensions &&
-      rank2_fixed_array == other.rank2_fixed_array &&
-      rank2_fixed_array_with_named_dimensions == other.rank2_fixed_array_with_named_dimensions &&
+      rank_1_array == other.rank_1_array &&
+      rank_2_array == other.rank_2_array &&
+      rank_2_array_with_named_dimensions == other.rank_2_array_with_named_dimensions &&
+      rank_2_fixed_array == other.rank_2_fixed_array &&
+      rank_2_fixed_array_with_named_dimensions == other.rank_2_fixed_array_with_named_dimensions &&
       dynamic_array == other.dynamic_array &&
       array_of_vectors == other.array_of_vectors;
   }
@@ -437,16 +437,16 @@ using Image = yardl::NDArray<T, 2>;
 
 template <typename T1, typename T2>
 struct GenericRecord {
-  T1 scalar1{};
-  T2 scalar2{};
-  std::vector<T1> vector1{};
-  test_model::Image<T2> image2{};
+  T1 scalar_1{};
+  T2 scalar_2{};
+  std::vector<T1> vector_1{};
+  test_model::Image<T2> image_2{};
 
   bool operator==(const GenericRecord& other) const {
-    return scalar1 == other.scalar1 &&
-      scalar2 == other.scalar2 &&
-      vector1 == other.vector1 &&
-      image2 == other.image2;
+    return scalar_1 == other.scalar_1 &&
+      scalar_2 == other.scalar_2 &&
+      vector_1 == other.vector_1 &&
+      image_2 == other.image_2;
   }
 
   bool operator!=(const GenericRecord& other) const {

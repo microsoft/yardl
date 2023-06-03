@@ -141,10 +141,10 @@ void BenchmarkFloat256x256ReaderBase::Close() {
 
   CloseImpl();
 }
-void BenchmarkFloat256x256ReaderBase::CopyTo(BenchmarkFloat256x256WriterBase& writer, size_t float256x256_buffer_size) {
-  if (float256x256_buffer_size > 1) {
+void BenchmarkFloat256x256ReaderBase::CopyTo(BenchmarkFloat256x256WriterBase& writer, size_t float_256x_256_buffer_size) {
+  if (float_256x_256_buffer_size > 1) {
     std::vector<yardl::FixedNDArray<float, 256, 256>> values;
-    values.reserve(float256x256_buffer_size);
+    values.reserve(float_256x_256_buffer_size);
     while(ReadFloat256x256(values)) {
       writer.WriteFloat256x256(values);
     }
@@ -4655,7 +4655,7 @@ void AliasesReaderBase::Close() {
 
   CloseImpl();
 }
-void AliasesReaderBase::CopyTo(AliasesWriterBase& writer, size_t stream_of_aliased_generic_union2_buffer_size) {
+void AliasesReaderBase::CopyTo(AliasesWriterBase& writer, size_t stream_of_aliased_generic_union_2_buffer_size) {
   {
     test_model::AliasedString value;
     ReadAliasedString(value);
@@ -4701,9 +4701,9 @@ void AliasesReaderBase::CopyTo(AliasesWriterBase& writer, size_t stream_of_alias
     ReadAliasedGenericFixedVector(value);
     writer.WriteAliasedGenericFixedVector(value);
   }
-  if (stream_of_aliased_generic_union2_buffer_size > 1) {
+  if (stream_of_aliased_generic_union_2_buffer_size > 1) {
     std::vector<test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum>> values;
-    values.reserve(stream_of_aliased_generic_union2_buffer_size);
+    values.reserve(stream_of_aliased_generic_union_2_buffer_size);
     while(ReadStreamOfAliasedGenericUnion2(values)) {
       writer.WriteStreamOfAliasedGenericUnion2(values);
     }
