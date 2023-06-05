@@ -70,24 +70,24 @@ struct IsTriviallySerializable<test_model::RecordWithPrimitives> {
   static constexpr bool value = 
     std::is_standard_layout_v<__T__> &&
     IsTriviallySerializable<decltype(__T__::bool_field)>::value &&
-    IsTriviallySerializable<decltype(__T__::int8_field)>::value &&
-    IsTriviallySerializable<decltype(__T__::uint8_field)>::value &&
-    IsTriviallySerializable<decltype(__T__::int16_field)>::value &&
-    IsTriviallySerializable<decltype(__T__::uint16_field)>::value &&
-    IsTriviallySerializable<decltype(__T__::int32_field)>::value &&
-    IsTriviallySerializable<decltype(__T__::uint32_field)>::value &&
-    IsTriviallySerializable<decltype(__T__::int64_field)>::value &&
-    IsTriviallySerializable<decltype(__T__::uint64_field)>::value &&
+    IsTriviallySerializable<decltype(__T__::int_8_field)>::value &&
+    IsTriviallySerializable<decltype(__T__::uint_8_field)>::value &&
+    IsTriviallySerializable<decltype(__T__::int_16_field)>::value &&
+    IsTriviallySerializable<decltype(__T__::uint_16_field)>::value &&
+    IsTriviallySerializable<decltype(__T__::int_32_field)>::value &&
+    IsTriviallySerializable<decltype(__T__::uint_32_field)>::value &&
+    IsTriviallySerializable<decltype(__T__::int_64_field)>::value &&
+    IsTriviallySerializable<decltype(__T__::uint_64_field)>::value &&
     IsTriviallySerializable<decltype(__T__::size_field)>::value &&
-    IsTriviallySerializable<decltype(__T__::float32_field)>::value &&
-    IsTriviallySerializable<decltype(__T__::float64_field)>::value &&
-    IsTriviallySerializable<decltype(__T__::complexfloat32_field)>::value &&
-    IsTriviallySerializable<decltype(__T__::complexfloat64_field)>::value &&
+    IsTriviallySerializable<decltype(__T__::float_32_field)>::value &&
+    IsTriviallySerializable<decltype(__T__::float_64_field)>::value &&
+    IsTriviallySerializable<decltype(__T__::complexfloat_32_field)>::value &&
+    IsTriviallySerializable<decltype(__T__::complexfloat_64_field)>::value &&
     IsTriviallySerializable<decltype(__T__::date_field)>::value &&
     IsTriviallySerializable<decltype(__T__::time_field)>::value &&
     IsTriviallySerializable<decltype(__T__::datetime_field)>::value &&
-    (sizeof(__T__) == (sizeof(__T__::bool_field) + sizeof(__T__::int8_field) + sizeof(__T__::uint8_field) + sizeof(__T__::int16_field) + sizeof(__T__::uint16_field) + sizeof(__T__::int32_field) + sizeof(__T__::uint32_field) + sizeof(__T__::int64_field) + sizeof(__T__::uint64_field) + sizeof(__T__::size_field) + sizeof(__T__::float32_field) + sizeof(__T__::float64_field) + sizeof(__T__::complexfloat32_field) + sizeof(__T__::complexfloat64_field) + sizeof(__T__::date_field) + sizeof(__T__::time_field) + sizeof(__T__::datetime_field))) &&
-    offsetof(__T__, bool_field) < offsetof(__T__, int8_field) && offsetof(__T__, int8_field) < offsetof(__T__, uint8_field) && offsetof(__T__, uint8_field) < offsetof(__T__, int16_field) && offsetof(__T__, int16_field) < offsetof(__T__, uint16_field) && offsetof(__T__, uint16_field) < offsetof(__T__, int32_field) && offsetof(__T__, int32_field) < offsetof(__T__, uint32_field) && offsetof(__T__, uint32_field) < offsetof(__T__, int64_field) && offsetof(__T__, int64_field) < offsetof(__T__, uint64_field) && offsetof(__T__, uint64_field) < offsetof(__T__, size_field) && offsetof(__T__, size_field) < offsetof(__T__, float32_field) && offsetof(__T__, float32_field) < offsetof(__T__, float64_field) && offsetof(__T__, float64_field) < offsetof(__T__, complexfloat32_field) && offsetof(__T__, complexfloat32_field) < offsetof(__T__, complexfloat64_field) && offsetof(__T__, complexfloat64_field) < offsetof(__T__, date_field) && offsetof(__T__, date_field) < offsetof(__T__, time_field) && offsetof(__T__, time_field) < offsetof(__T__, datetime_field);
+    (sizeof(__T__) == (sizeof(__T__::bool_field) + sizeof(__T__::int_8_field) + sizeof(__T__::uint_8_field) + sizeof(__T__::int_16_field) + sizeof(__T__::uint_16_field) + sizeof(__T__::int_32_field) + sizeof(__T__::uint_32_field) + sizeof(__T__::int_64_field) + sizeof(__T__::uint_64_field) + sizeof(__T__::size_field) + sizeof(__T__::float_32_field) + sizeof(__T__::float_64_field) + sizeof(__T__::complexfloat_32_field) + sizeof(__T__::complexfloat_64_field) + sizeof(__T__::date_field) + sizeof(__T__::time_field) + sizeof(__T__::datetime_field))) &&
+    offsetof(__T__, bool_field) < offsetof(__T__, int_8_field) && offsetof(__T__, int_8_field) < offsetof(__T__, uint_8_field) && offsetof(__T__, uint_8_field) < offsetof(__T__, int_16_field) && offsetof(__T__, int_16_field) < offsetof(__T__, uint_16_field) && offsetof(__T__, uint_16_field) < offsetof(__T__, int_32_field) && offsetof(__T__, int_32_field) < offsetof(__T__, uint_32_field) && offsetof(__T__, uint_32_field) < offsetof(__T__, int_64_field) && offsetof(__T__, int_64_field) < offsetof(__T__, uint_64_field) && offsetof(__T__, uint_64_field) < offsetof(__T__, size_field) && offsetof(__T__, size_field) < offsetof(__T__, float_32_field) && offsetof(__T__, float_32_field) < offsetof(__T__, float_64_field) && offsetof(__T__, float_64_field) < offsetof(__T__, complexfloat_32_field) && offsetof(__T__, complexfloat_32_field) < offsetof(__T__, complexfloat_64_field) && offsetof(__T__, complexfloat_64_field) < offsetof(__T__, date_field) && offsetof(__T__, date_field) < offsetof(__T__, time_field) && offsetof(__T__, time_field) < offsetof(__T__, datetime_field);
 };
 
 template <>
@@ -138,15 +138,15 @@ struct IsTriviallySerializable<test_model::RecordWithArrays> {
     std::is_standard_layout_v<__T__> &&
     IsTriviallySerializable<decltype(__T__::default_array)>::value &&
     IsTriviallySerializable<decltype(__T__::default_array_with_empty_dimension)>::value &&
-    IsTriviallySerializable<decltype(__T__::rank1_array)>::value &&
-    IsTriviallySerializable<decltype(__T__::rank2_array)>::value &&
-    IsTriviallySerializable<decltype(__T__::rank2_array_with_named_dimensions)>::value &&
-    IsTriviallySerializable<decltype(__T__::rank2_fixed_array)>::value &&
-    IsTriviallySerializable<decltype(__T__::rank2_fixed_array_with_named_dimensions)>::value &&
+    IsTriviallySerializable<decltype(__T__::rank_1_array)>::value &&
+    IsTriviallySerializable<decltype(__T__::rank_2_array)>::value &&
+    IsTriviallySerializable<decltype(__T__::rank_2_array_with_named_dimensions)>::value &&
+    IsTriviallySerializable<decltype(__T__::rank_2_fixed_array)>::value &&
+    IsTriviallySerializable<decltype(__T__::rank_2_fixed_array_with_named_dimensions)>::value &&
     IsTriviallySerializable<decltype(__T__::dynamic_array)>::value &&
     IsTriviallySerializable<decltype(__T__::array_of_vectors)>::value &&
-    (sizeof(__T__) == (sizeof(__T__::default_array) + sizeof(__T__::default_array_with_empty_dimension) + sizeof(__T__::rank1_array) + sizeof(__T__::rank2_array) + sizeof(__T__::rank2_array_with_named_dimensions) + sizeof(__T__::rank2_fixed_array) + sizeof(__T__::rank2_fixed_array_with_named_dimensions) + sizeof(__T__::dynamic_array) + sizeof(__T__::array_of_vectors))) &&
-    offsetof(__T__, default_array) < offsetof(__T__, default_array_with_empty_dimension) && offsetof(__T__, default_array_with_empty_dimension) < offsetof(__T__, rank1_array) && offsetof(__T__, rank1_array) < offsetof(__T__, rank2_array) && offsetof(__T__, rank2_array) < offsetof(__T__, rank2_array_with_named_dimensions) && offsetof(__T__, rank2_array_with_named_dimensions) < offsetof(__T__, rank2_fixed_array) && offsetof(__T__, rank2_fixed_array) < offsetof(__T__, rank2_fixed_array_with_named_dimensions) && offsetof(__T__, rank2_fixed_array_with_named_dimensions) < offsetof(__T__, dynamic_array) && offsetof(__T__, dynamic_array) < offsetof(__T__, array_of_vectors);
+    (sizeof(__T__) == (sizeof(__T__::default_array) + sizeof(__T__::default_array_with_empty_dimension) + sizeof(__T__::rank_1_array) + sizeof(__T__::rank_2_array) + sizeof(__T__::rank_2_array_with_named_dimensions) + sizeof(__T__::rank_2_fixed_array) + sizeof(__T__::rank_2_fixed_array_with_named_dimensions) + sizeof(__T__::dynamic_array) + sizeof(__T__::array_of_vectors))) &&
+    offsetof(__T__, default_array) < offsetof(__T__, default_array_with_empty_dimension) && offsetof(__T__, default_array_with_empty_dimension) < offsetof(__T__, rank_1_array) && offsetof(__T__, rank_1_array) < offsetof(__T__, rank_2_array) && offsetof(__T__, rank_2_array) < offsetof(__T__, rank_2_array_with_named_dimensions) && offsetof(__T__, rank_2_array_with_named_dimensions) < offsetof(__T__, rank_2_fixed_array) && offsetof(__T__, rank_2_fixed_array) < offsetof(__T__, rank_2_fixed_array_with_named_dimensions) && offsetof(__T__, rank_2_fixed_array_with_named_dimensions) < offsetof(__T__, dynamic_array) && offsetof(__T__, dynamic_array) < offsetof(__T__, array_of_vectors);
 };
 
 template <>
@@ -156,15 +156,15 @@ struct IsTriviallySerializable<test_model::RecordWithArraysSimpleSyntax> {
     std::is_standard_layout_v<__T__> &&
     IsTriviallySerializable<decltype(__T__::default_array)>::value &&
     IsTriviallySerializable<decltype(__T__::default_array_with_empty_dimension)>::value &&
-    IsTriviallySerializable<decltype(__T__::rank1_array)>::value &&
-    IsTriviallySerializable<decltype(__T__::rank2_array)>::value &&
-    IsTriviallySerializable<decltype(__T__::rank2_array_with_named_dimensions)>::value &&
-    IsTriviallySerializable<decltype(__T__::rank2_fixed_array)>::value &&
-    IsTriviallySerializable<decltype(__T__::rank2_fixed_array_with_named_dimensions)>::value &&
+    IsTriviallySerializable<decltype(__T__::rank_1_array)>::value &&
+    IsTriviallySerializable<decltype(__T__::rank_2_array)>::value &&
+    IsTriviallySerializable<decltype(__T__::rank_2_array_with_named_dimensions)>::value &&
+    IsTriviallySerializable<decltype(__T__::rank_2_fixed_array)>::value &&
+    IsTriviallySerializable<decltype(__T__::rank_2_fixed_array_with_named_dimensions)>::value &&
     IsTriviallySerializable<decltype(__T__::dynamic_array)>::value &&
     IsTriviallySerializable<decltype(__T__::array_of_vectors)>::value &&
-    (sizeof(__T__) == (sizeof(__T__::default_array) + sizeof(__T__::default_array_with_empty_dimension) + sizeof(__T__::rank1_array) + sizeof(__T__::rank2_array) + sizeof(__T__::rank2_array_with_named_dimensions) + sizeof(__T__::rank2_fixed_array) + sizeof(__T__::rank2_fixed_array_with_named_dimensions) + sizeof(__T__::dynamic_array) + sizeof(__T__::array_of_vectors))) &&
-    offsetof(__T__, default_array) < offsetof(__T__, default_array_with_empty_dimension) && offsetof(__T__, default_array_with_empty_dimension) < offsetof(__T__, rank1_array) && offsetof(__T__, rank1_array) < offsetof(__T__, rank2_array) && offsetof(__T__, rank2_array) < offsetof(__T__, rank2_array_with_named_dimensions) && offsetof(__T__, rank2_array_with_named_dimensions) < offsetof(__T__, rank2_fixed_array) && offsetof(__T__, rank2_fixed_array) < offsetof(__T__, rank2_fixed_array_with_named_dimensions) && offsetof(__T__, rank2_fixed_array_with_named_dimensions) < offsetof(__T__, dynamic_array) && offsetof(__T__, dynamic_array) < offsetof(__T__, array_of_vectors);
+    (sizeof(__T__) == (sizeof(__T__::default_array) + sizeof(__T__::default_array_with_empty_dimension) + sizeof(__T__::rank_1_array) + sizeof(__T__::rank_2_array) + sizeof(__T__::rank_2_array_with_named_dimensions) + sizeof(__T__::rank_2_fixed_array) + sizeof(__T__::rank_2_fixed_array_with_named_dimensions) + sizeof(__T__::dynamic_array) + sizeof(__T__::array_of_vectors))) &&
+    offsetof(__T__, default_array) < offsetof(__T__, default_array_with_empty_dimension) && offsetof(__T__, default_array_with_empty_dimension) < offsetof(__T__, rank_1_array) && offsetof(__T__, rank_1_array) < offsetof(__T__, rank_2_array) && offsetof(__T__, rank_2_array) < offsetof(__T__, rank_2_array_with_named_dimensions) && offsetof(__T__, rank_2_array_with_named_dimensions) < offsetof(__T__, rank_2_fixed_array) && offsetof(__T__, rank_2_fixed_array) < offsetof(__T__, rank_2_fixed_array_with_named_dimensions) && offsetof(__T__, rank_2_fixed_array_with_named_dimensions) < offsetof(__T__, dynamic_array) && offsetof(__T__, dynamic_array) < offsetof(__T__, array_of_vectors);
 };
 
 template <>
@@ -284,12 +284,12 @@ struct IsTriviallySerializable<test_model::GenericRecord<T1, T2>> {
   using __T__ = test_model::GenericRecord<T1, T2>;
   static constexpr bool value = 
     std::is_standard_layout_v<__T__> &&
-    IsTriviallySerializable<decltype(__T__::scalar1)>::value &&
-    IsTriviallySerializable<decltype(__T__::scalar2)>::value &&
-    IsTriviallySerializable<decltype(__T__::vector1)>::value &&
-    IsTriviallySerializable<decltype(__T__::image2)>::value &&
-    (sizeof(__T__) == (sizeof(__T__::scalar1) + sizeof(__T__::scalar2) + sizeof(__T__::vector1) + sizeof(__T__::image2))) &&
-    offsetof(__T__, scalar1) < offsetof(__T__, scalar2) && offsetof(__T__, scalar2) < offsetof(__T__, vector1) && offsetof(__T__, vector1) < offsetof(__T__, image2);
+    IsTriviallySerializable<decltype(__T__::scalar_1)>::value &&
+    IsTriviallySerializable<decltype(__T__::scalar_2)>::value &&
+    IsTriviallySerializable<decltype(__T__::vector_1)>::value &&
+    IsTriviallySerializable<decltype(__T__::image_2)>::value &&
+    (sizeof(__T__) == (sizeof(__T__::scalar_1) + sizeof(__T__::scalar_2) + sizeof(__T__::vector_1) + sizeof(__T__::image_2))) &&
+    offsetof(__T__, scalar_1) < offsetof(__T__, scalar_2) && offsetof(__T__, scalar_2) < offsetof(__T__, vector_1) && offsetof(__T__, vector_1) < offsetof(__T__, image_2);
 };
 
 template <typename T1, typename T2>
@@ -545,19 +545,19 @@ namespace {
   }
 
   yardl::binary::WriteInteger(stream, value.bool_field);
-  yardl::binary::WriteInteger(stream, value.int8_field);
-  yardl::binary::WriteInteger(stream, value.uint8_field);
-  yardl::binary::WriteInteger(stream, value.int16_field);
-  yardl::binary::WriteInteger(stream, value.uint16_field);
-  yardl::binary::WriteInteger(stream, value.int32_field);
-  yardl::binary::WriteInteger(stream, value.uint32_field);
-  yardl::binary::WriteInteger(stream, value.int64_field);
-  yardl::binary::WriteInteger(stream, value.uint64_field);
+  yardl::binary::WriteInteger(stream, value.int_8_field);
+  yardl::binary::WriteInteger(stream, value.uint_8_field);
+  yardl::binary::WriteInteger(stream, value.int_16_field);
+  yardl::binary::WriteInteger(stream, value.uint_16_field);
+  yardl::binary::WriteInteger(stream, value.int_32_field);
+  yardl::binary::WriteInteger(stream, value.uint_32_field);
+  yardl::binary::WriteInteger(stream, value.int_64_field);
+  yardl::binary::WriteInteger(stream, value.uint_64_field);
   yardl::binary::WriteInteger(stream, value.size_field);
-  yardl::binary::WriteFloatingPoint(stream, value.float32_field);
-  yardl::binary::WriteFloatingPoint(stream, value.float64_field);
-  yardl::binary::WriteFloatingPoint(stream, value.complexfloat32_field);
-  yardl::binary::WriteFloatingPoint(stream, value.complexfloat64_field);
+  yardl::binary::WriteFloatingPoint(stream, value.float_32_field);
+  yardl::binary::WriteFloatingPoint(stream, value.float_64_field);
+  yardl::binary::WriteFloatingPoint(stream, value.complexfloat_32_field);
+  yardl::binary::WriteFloatingPoint(stream, value.complexfloat_64_field);
   yardl::binary::WriteDate(stream, value.date_field);
   yardl::binary::WriteTime(stream, value.time_field);
   yardl::binary::WriteDateTime(stream, value.datetime_field);
@@ -570,19 +570,19 @@ namespace {
   }
 
   yardl::binary::ReadInteger(stream, value.bool_field);
-  yardl::binary::ReadInteger(stream, value.int8_field);
-  yardl::binary::ReadInteger(stream, value.uint8_field);
-  yardl::binary::ReadInteger(stream, value.int16_field);
-  yardl::binary::ReadInteger(stream, value.uint16_field);
-  yardl::binary::ReadInteger(stream, value.int32_field);
-  yardl::binary::ReadInteger(stream, value.uint32_field);
-  yardl::binary::ReadInteger(stream, value.int64_field);
-  yardl::binary::ReadInteger(stream, value.uint64_field);
+  yardl::binary::ReadInteger(stream, value.int_8_field);
+  yardl::binary::ReadInteger(stream, value.uint_8_field);
+  yardl::binary::ReadInteger(stream, value.int_16_field);
+  yardl::binary::ReadInteger(stream, value.uint_16_field);
+  yardl::binary::ReadInteger(stream, value.int_32_field);
+  yardl::binary::ReadInteger(stream, value.uint_32_field);
+  yardl::binary::ReadInteger(stream, value.int_64_field);
+  yardl::binary::ReadInteger(stream, value.uint_64_field);
   yardl::binary::ReadInteger(stream, value.size_field);
-  yardl::binary::ReadFloatingPoint(stream, value.float32_field);
-  yardl::binary::ReadFloatingPoint(stream, value.float64_field);
-  yardl::binary::ReadFloatingPoint(stream, value.complexfloat32_field);
-  yardl::binary::ReadFloatingPoint(stream, value.complexfloat64_field);
+  yardl::binary::ReadFloatingPoint(stream, value.float_32_field);
+  yardl::binary::ReadFloatingPoint(stream, value.float_64_field);
+  yardl::binary::ReadFloatingPoint(stream, value.complexfloat_32_field);
+  yardl::binary::ReadFloatingPoint(stream, value.complexfloat_64_field);
   yardl::binary::ReadDate(stream, value.date_field);
   yardl::binary::ReadTime(stream, value.time_field);
   yardl::binary::ReadDateTime(stream, value.datetime_field);
@@ -672,11 +672,11 @@ namespace {
 
   yardl::binary::WriteDynamicNDArray<int32_t, yardl::binary::WriteInteger>(stream, value.default_array);
   yardl::binary::WriteDynamicNDArray<int32_t, yardl::binary::WriteInteger>(stream, value.default_array_with_empty_dimension);
-  yardl::binary::WriteNDArray<int32_t, yardl::binary::WriteInteger, 1>(stream, value.rank1_array);
-  yardl::binary::WriteNDArray<int32_t, yardl::binary::WriteInteger, 2>(stream, value.rank2_array);
-  yardl::binary::WriteNDArray<int32_t, yardl::binary::WriteInteger, 2>(stream, value.rank2_array_with_named_dimensions);
-  yardl::binary::WriteFixedNDArray<int32_t, yardl::binary::WriteInteger, 3, 4>(stream, value.rank2_fixed_array);
-  yardl::binary::WriteFixedNDArray<int32_t, yardl::binary::WriteInteger, 3, 4>(stream, value.rank2_fixed_array_with_named_dimensions);
+  yardl::binary::WriteNDArray<int32_t, yardl::binary::WriteInteger, 1>(stream, value.rank_1_array);
+  yardl::binary::WriteNDArray<int32_t, yardl::binary::WriteInteger, 2>(stream, value.rank_2_array);
+  yardl::binary::WriteNDArray<int32_t, yardl::binary::WriteInteger, 2>(stream, value.rank_2_array_with_named_dimensions);
+  yardl::binary::WriteFixedNDArray<int32_t, yardl::binary::WriteInteger, 3, 4>(stream, value.rank_2_fixed_array);
+  yardl::binary::WriteFixedNDArray<int32_t, yardl::binary::WriteInteger, 3, 4>(stream, value.rank_2_fixed_array_with_named_dimensions);
   yardl::binary::WriteDynamicNDArray<int32_t, yardl::binary::WriteInteger>(stream, value.dynamic_array);
   yardl::binary::WriteFixedNDArray<std::array<int32_t, 4>, yardl::binary::WriteArray<int32_t, yardl::binary::WriteInteger, 4>, 5>(stream, value.array_of_vectors);
 }
@@ -689,11 +689,11 @@ namespace {
 
   yardl::binary::ReadDynamicNDArray<int32_t, yardl::binary::ReadInteger>(stream, value.default_array);
   yardl::binary::ReadDynamicNDArray<int32_t, yardl::binary::ReadInteger>(stream, value.default_array_with_empty_dimension);
-  yardl::binary::ReadNDArray<int32_t, yardl::binary::ReadInteger, 1>(stream, value.rank1_array);
-  yardl::binary::ReadNDArray<int32_t, yardl::binary::ReadInteger, 2>(stream, value.rank2_array);
-  yardl::binary::ReadNDArray<int32_t, yardl::binary::ReadInteger, 2>(stream, value.rank2_array_with_named_dimensions);
-  yardl::binary::ReadFixedNDArray<int32_t, yardl::binary::ReadInteger, 3, 4>(stream, value.rank2_fixed_array);
-  yardl::binary::ReadFixedNDArray<int32_t, yardl::binary::ReadInteger, 3, 4>(stream, value.rank2_fixed_array_with_named_dimensions);
+  yardl::binary::ReadNDArray<int32_t, yardl::binary::ReadInteger, 1>(stream, value.rank_1_array);
+  yardl::binary::ReadNDArray<int32_t, yardl::binary::ReadInteger, 2>(stream, value.rank_2_array);
+  yardl::binary::ReadNDArray<int32_t, yardl::binary::ReadInteger, 2>(stream, value.rank_2_array_with_named_dimensions);
+  yardl::binary::ReadFixedNDArray<int32_t, yardl::binary::ReadInteger, 3, 4>(stream, value.rank_2_fixed_array);
+  yardl::binary::ReadFixedNDArray<int32_t, yardl::binary::ReadInteger, 3, 4>(stream, value.rank_2_fixed_array_with_named_dimensions);
   yardl::binary::ReadDynamicNDArray<int32_t, yardl::binary::ReadInteger>(stream, value.dynamic_array);
   yardl::binary::ReadFixedNDArray<std::array<int32_t, 4>, yardl::binary::ReadArray<int32_t, yardl::binary::ReadInteger, 4>, 5>(stream, value.array_of_vectors);
 }
@@ -706,11 +706,11 @@ namespace {
 
   yardl::binary::WriteDynamicNDArray<int32_t, yardl::binary::WriteInteger>(stream, value.default_array);
   yardl::binary::WriteDynamicNDArray<int32_t, yardl::binary::WriteInteger>(stream, value.default_array_with_empty_dimension);
-  yardl::binary::WriteNDArray<int32_t, yardl::binary::WriteInteger, 1>(stream, value.rank1_array);
-  yardl::binary::WriteNDArray<int32_t, yardl::binary::WriteInteger, 2>(stream, value.rank2_array);
-  yardl::binary::WriteNDArray<int32_t, yardl::binary::WriteInteger, 2>(stream, value.rank2_array_with_named_dimensions);
-  yardl::binary::WriteFixedNDArray<int32_t, yardl::binary::WriteInteger, 3, 4>(stream, value.rank2_fixed_array);
-  yardl::binary::WriteFixedNDArray<int32_t, yardl::binary::WriteInteger, 3, 4>(stream, value.rank2_fixed_array_with_named_dimensions);
+  yardl::binary::WriteNDArray<int32_t, yardl::binary::WriteInteger, 1>(stream, value.rank_1_array);
+  yardl::binary::WriteNDArray<int32_t, yardl::binary::WriteInteger, 2>(stream, value.rank_2_array);
+  yardl::binary::WriteNDArray<int32_t, yardl::binary::WriteInteger, 2>(stream, value.rank_2_array_with_named_dimensions);
+  yardl::binary::WriteFixedNDArray<int32_t, yardl::binary::WriteInteger, 3, 4>(stream, value.rank_2_fixed_array);
+  yardl::binary::WriteFixedNDArray<int32_t, yardl::binary::WriteInteger, 3, 4>(stream, value.rank_2_fixed_array_with_named_dimensions);
   yardl::binary::WriteDynamicNDArray<int32_t, yardl::binary::WriteInteger>(stream, value.dynamic_array);
   yardl::binary::WriteFixedNDArray<std::array<int32_t, 4>, yardl::binary::WriteArray<int32_t, yardl::binary::WriteInteger, 4>, 5>(stream, value.array_of_vectors);
 }
@@ -723,11 +723,11 @@ namespace {
 
   yardl::binary::ReadDynamicNDArray<int32_t, yardl::binary::ReadInteger>(stream, value.default_array);
   yardl::binary::ReadDynamicNDArray<int32_t, yardl::binary::ReadInteger>(stream, value.default_array_with_empty_dimension);
-  yardl::binary::ReadNDArray<int32_t, yardl::binary::ReadInteger, 1>(stream, value.rank1_array);
-  yardl::binary::ReadNDArray<int32_t, yardl::binary::ReadInteger, 2>(stream, value.rank2_array);
-  yardl::binary::ReadNDArray<int32_t, yardl::binary::ReadInteger, 2>(stream, value.rank2_array_with_named_dimensions);
-  yardl::binary::ReadFixedNDArray<int32_t, yardl::binary::ReadInteger, 3, 4>(stream, value.rank2_fixed_array);
-  yardl::binary::ReadFixedNDArray<int32_t, yardl::binary::ReadInteger, 3, 4>(stream, value.rank2_fixed_array_with_named_dimensions);
+  yardl::binary::ReadNDArray<int32_t, yardl::binary::ReadInteger, 1>(stream, value.rank_1_array);
+  yardl::binary::ReadNDArray<int32_t, yardl::binary::ReadInteger, 2>(stream, value.rank_2_array);
+  yardl::binary::ReadNDArray<int32_t, yardl::binary::ReadInteger, 2>(stream, value.rank_2_array_with_named_dimensions);
+  yardl::binary::ReadFixedNDArray<int32_t, yardl::binary::ReadInteger, 3, 4>(stream, value.rank_2_fixed_array);
+  yardl::binary::ReadFixedNDArray<int32_t, yardl::binary::ReadInteger, 3, 4>(stream, value.rank_2_fixed_array_with_named_dimensions);
   yardl::binary::ReadDynamicNDArray<int32_t, yardl::binary::ReadInteger>(stream, value.dynamic_array);
   yardl::binary::ReadFixedNDArray<std::array<int32_t, 4>, yardl::binary::ReadArray<int32_t, yardl::binary::ReadInteger, 4>, 5>(stream, value.array_of_vectors);
 }
@@ -1023,10 +1023,10 @@ template<typename T1, yardl::binary::Writer<T1> WriteT1, typename T2, yardl::bin
     return;
   }
 
-  WriteT1(stream, value.scalar1);
-  WriteT2(stream, value.scalar2);
-  yardl::binary::WriteVector<T1, WriteT1>(stream, value.vector1);
-  test_model::binary::WriteImage<T2, WriteT2>(stream, value.image2);
+  WriteT1(stream, value.scalar_1);
+  WriteT2(stream, value.scalar_2);
+  yardl::binary::WriteVector<T1, WriteT1>(stream, value.vector_1);
+  test_model::binary::WriteImage<T2, WriteT2>(stream, value.image_2);
 }
 
 template<typename T1, yardl::binary::Reader<T1> ReadT1, typename T2, yardl::binary::Reader<T2> ReadT2>
@@ -1036,10 +1036,10 @@ template<typename T1, yardl::binary::Reader<T1> ReadT1, typename T2, yardl::bina
     return;
   }
 
-  ReadT1(stream, value.scalar1);
-  ReadT2(stream, value.scalar2);
-  yardl::binary::ReadVector<T1, ReadT1>(stream, value.vector1);
-  test_model::binary::ReadImage<T2, ReadT2>(stream, value.image2);
+  ReadT1(stream, value.scalar_1);
+  ReadT2(stream, value.scalar_2);
+  yardl::binary::ReadVector<T1, ReadT1>(stream, value.vector_1);
+  test_model::binary::ReadImage<T2, ReadT2>(stream, value.image_2);
 }
 
 template<typename T1, yardl::binary::Writer<T1> WriteT1, typename T2, yardl::binary::Writer<T2> WriteT2>

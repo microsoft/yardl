@@ -52,7 +52,7 @@ class BenchmarkFloat256x256ReaderBase {
   // Optionaly close this writer before destructing. Validates that all steps were completely read.
   void Close();
 
-  void CopyTo(BenchmarkFloat256x256WriterBase& writer, size_t float256x256_buffer_size = 1);
+  void CopyTo(BenchmarkFloat256x256WriterBase& writer, size_t float_256x_256_buffer_size = 1);
 
   virtual ~BenchmarkFloat256x256ReaderBase() = default;
 
@@ -1933,7 +1933,7 @@ class AliasesReaderBase {
   // Optionaly close this writer before destructing. Validates that all steps were completely read.
   void Close();
 
-  void CopyTo(AliasesWriterBase& writer, size_t stream_of_aliased_generic_union2_buffer_size = 1);
+  void CopyTo(AliasesWriterBase& writer, size_t stream_of_aliased_generic_union_2_buffer_size = 1);
 
   virtual ~AliasesReaderBase() = default;
 

@@ -112,11 +112,7 @@ func ToPascalCase(s string) string {
 	return b.String()
 }
 
-// Copied from the from the VSCode "transform to snake case" command implementation.
-// Note that their implementation has since been changed to use two regexes instead of using
-// lookbehinds and lookaheads, but the implementation here is actually about two orders of magnitude faster.
-// Note that in order to use lookbehinds, we need to use the regexp2 package.
-var snakeCaseRegex = regexp2.MustCompile(`(?<=\p{Ll})(\p{Lu})|(?<!\b|_)(\p{Lu})(?=\p{Ll})`, regexp2.ExplicitCapture)
+var snakeCaseRegex = regexp2.MustCompile(`((?<=\p{Ll})(\p{Lu}))|(?<!(\b|_)\p{Ll})((?<=\p{Ll})(\d))|(?<!\b|_)(\p{Lu})(?=\p{Ll})`, regexp2.ExplicitCapture)
 
 func ToSnakeCase(str string) string {
 	s, err := snakeCaseRegex.Replace(str, `_$&`, -1, -1)

@@ -40,19 +40,19 @@ TEST_P(RoundTripTests, Scalars) {
 
   RecordWithPrimitives rec;
   rec.bool_field = true;
-  rec.int8_field = -33;
-  rec.uint8_field = 33;
-  rec.uint16_field = -44;
-  rec.uint16_field = 44;
-  rec.int32_field = -55;
-  rec.uint32_field = 55;
-  rec.int64_field = -66;
-  rec.uint64_field = 66;
+  rec.int_8_field = -33;
+  rec.uint_8_field = 33;
+  rec.uint_16_field = -44;
+  rec.uint_16_field = 44;
+  rec.int_32_field = -55;
+  rec.uint_32_field = 55;
+  rec.int_64_field = -66;
+  rec.uint_64_field = 66;
   rec.size_field = UINT64_MAX;
-  rec.float32_field = 4290.39;
-  rec.float64_field = 2234290.39;
-  rec.complexfloat32_field = {1.3, 2.2};
-  rec.complexfloat64_field = {-2.4, 999.3};
+  rec.float_32_field = 4290.39;
+  rec.float_64_field = 2234290.39;
+  rec.complexfloat_32_field = {1.3, 2.2};
+  rec.complexfloat_64_field = {-2.4, 999.3};
   rec.date_field = Date(year{2022} / 9 / 8);
   rec.time_field = std::chrono::hours(10) + std::chrono::minutes(50) +
                    std::chrono::seconds(25) + std::chrono::milliseconds(777);

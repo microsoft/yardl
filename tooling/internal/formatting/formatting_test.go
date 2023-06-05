@@ -64,9 +64,18 @@ func TestPascalOrCamelToSnakeCase(t *testing.T) {
 		{"Capital_Snake_Case", "capital_snake_case"},
 		{"YAML", "yaml"},
 		{"YAML2", "yaml2"},
-		{"yaml2Spec", "yaml2_spec"},
+		{"yaml2Spec", "yaml_2_spec"},
 		{"YAML2Spec", "yaml2_spec"},
 		{"YAML42Spec", "yaml42_spec"},
+		{"Super42", "super_42"},
+		{"Super42car", "super_42car"},
+		{"Super42Car", "super_42_car"},
+		{"myM1Processor", "my_m1_processor"},
+		{"myM1", "my_m1"},
+		{"m1", "m1"},
+		{"myMP3", "my_mp3"},
+		{"snake3C3ase", "snake_3c3ase"},
+		{"kspaceEncodeStep1", "kspace_encode_step_1"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.intput, func(t *testing.T) {

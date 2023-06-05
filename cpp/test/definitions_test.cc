@@ -35,15 +35,15 @@ TEST(DefinitionsTests, ArrayFieldsHaveExpectedType) {
                                yardl::DynamicNDArray<int32_t>>);
   static_assert(std::is_same_v<decltype(RecordWithArrays::default_array_with_empty_dimension),
                                yardl::DynamicNDArray<int32_t>>);
-  static_assert(std::is_same_v<decltype(RecordWithArrays::rank1_array),
+  static_assert(std::is_same_v<decltype(RecordWithArrays::rank_1_array),
                                yardl::NDArray<int32_t, 1>>);
-  static_assert(std::is_same_v<decltype(RecordWithArrays::rank2_array),
+  static_assert(std::is_same_v<decltype(RecordWithArrays::rank_2_array),
                                yardl::NDArray<int32_t, 2>>);
-  static_assert(std::is_same_v<decltype(RecordWithArrays::rank2_array_with_named_dimensions),
+  static_assert(std::is_same_v<decltype(RecordWithArrays::rank_2_array_with_named_dimensions),
                                yardl::NDArray<int32_t, 2>>);
-  static_assert(std::is_same_v<decltype(RecordWithArrays::rank2_fixed_array),
+  static_assert(std::is_same_v<decltype(RecordWithArrays::rank_2_fixed_array),
                                yardl::FixedNDArray<int32_t, 3, 4>>);
-  static_assert(std::is_same_v<decltype(RecordWithArrays::rank2_fixed_array_with_named_dimensions),
+  static_assert(std::is_same_v<decltype(RecordWithArrays::rank_2_fixed_array_with_named_dimensions),
                                yardl::FixedNDArray<int32_t, 3, 4>>);
   static_assert(std::is_same_v<decltype(RecordWithArrays::dynamic_array),
                                yardl::DynamicNDArray<int32_t>>);
@@ -56,16 +56,16 @@ TEST(DefinitionsTests, ArrayFieldsWithSimpleSyntaxHaveExpectedType) {
                                decltype(RecordWithArraysSimpleSyntax::default_array)>);
   static_assert(std::is_same_v<decltype(RecordWithArrays::default_array_with_empty_dimension),
                                decltype(RecordWithArraysSimpleSyntax::default_array_with_empty_dimension)>);
-  static_assert(std::is_same_v<decltype(RecordWithArrays::rank1_array),
-                               decltype(RecordWithArraysSimpleSyntax::rank1_array)>);
-  static_assert(std::is_same_v<decltype(RecordWithArrays::rank2_array),
-                               decltype(RecordWithArraysSimpleSyntax::rank2_array)>);
-  static_assert(std::is_same_v<decltype(RecordWithArrays::rank2_array_with_named_dimensions),
-                               decltype(RecordWithArraysSimpleSyntax::rank2_array_with_named_dimensions)>);
-  static_assert(std::is_same_v<decltype(RecordWithArrays::rank2_fixed_array),
-                               decltype(RecordWithArraysSimpleSyntax::rank2_fixed_array)>);
-  static_assert(std::is_same_v<decltype(RecordWithArrays::rank2_fixed_array_with_named_dimensions),
-                               decltype(RecordWithArraysSimpleSyntax::rank2_fixed_array_with_named_dimensions)>);
+  static_assert(std::is_same_v<decltype(RecordWithArrays::rank_1_array),
+                               decltype(RecordWithArraysSimpleSyntax::rank_1_array)>);
+  static_assert(std::is_same_v<decltype(RecordWithArrays::rank_2_array),
+                               decltype(RecordWithArraysSimpleSyntax::rank_2_array)>);
+  static_assert(std::is_same_v<decltype(RecordWithArrays::rank_2_array_with_named_dimensions),
+                               decltype(RecordWithArraysSimpleSyntax::rank_2_array_with_named_dimensions)>);
+  static_assert(std::is_same_v<decltype(RecordWithArrays::rank_2_fixed_array),
+                               decltype(RecordWithArraysSimpleSyntax::rank_2_fixed_array)>);
+  static_assert(std::is_same_v<decltype(RecordWithArrays::rank_2_fixed_array_with_named_dimensions),
+                               decltype(RecordWithArraysSimpleSyntax::rank_2_fixed_array_with_named_dimensions)>);
   static_assert(std::is_same_v<decltype(RecordWithArrays::dynamic_array),
                                decltype(RecordWithArraysSimpleSyntax::dynamic_array)>);
   static_assert(std::is_same_v<decltype(RecordWithArrays::array_of_vectors),
