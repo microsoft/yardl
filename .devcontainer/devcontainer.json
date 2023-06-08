@@ -83,6 +83,8 @@
         "matepek.vscode-catch2-test-adapter",
         "mhutchie.git-graph",
         "ms-python.python",
+        "ms-python.python",
+        "ms-toolsai.jupyter",
         "ms-vscode.cmake-tools",
         "ms-vscode.cpptools",
         "sclu1034.justfile",

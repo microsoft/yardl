@@ -21,6 +21,14 @@
       "program": "${workspaceFolder}/tooling/cmd/yardl",
       "cwd": "${workspaceFolder}/models/test",
       "args": ["generate"]
+    },
+    {
+      "name": "Python: Current File",
+      "type": "python",
+      "request": "launch",
+      "program": "${file}",
+      "console": "integratedTerminal",
+      "justMyCode": false
     }
   ]
 }

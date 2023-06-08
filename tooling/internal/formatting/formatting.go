@@ -114,10 +114,20 @@ func ToPascalCase(s string) string {
 
 var snakeCaseRegex = regexp2.MustCompile(`((?<=\p{Ll})(\p{Lu}))|(?<!(\b|_)\p{Ll})((?<=\p{Ll})(\d))|(?<!\b|_)(\p{Lu})(?=\p{Ll})`, regexp2.ExplicitCapture)
 
-func ToSnakeCase(str string) string {
+func delimitWithUnderscores(str string) string {
 	s, err := snakeCaseRegex.Replace(str, `_$&`, -1, -1)
 	if err != nil {
 		panic(err)
 	}
-	return strings.ToLower(s)
+	return s
+}
+
+func ToSnakeCase(str string) string {
+	str = delimitWithUnderscores(str)
+	return strings.ToLower(str)
+}
+
+func ToUpperSnakeCase(str string) string {
+	str = delimitWithUnderscores(str)
+	return strings.ToUpper(str)
 }

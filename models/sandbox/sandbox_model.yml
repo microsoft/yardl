@@ -1,7 +1,22 @@
-HelloWorld: !protocol
-  sequence:
-    data: !stream
-      items: !array
-        items: complexdouble
-        dimensions:
-          - 2
+# This is my enum
+MyFlags: !flags
+  values:
+    # This is the "A" value
+    - a
+    - b
+    - c
+
+MyRec<T>: !record
+  fields:
+    f1: int?
+    f2: T
+    f3: MyFlags
+
+# This is a string
+MyString: string
+
+R2<T>: !record
+  fields:
+    r: MyRec<T>
+
+R: MyRec<string>

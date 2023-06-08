@@ -17,6 +17,7 @@ import (
 	"github.com/inancgumus/screen"
 	"github.com/microsoft/yardl/tooling/internal/cpp"
 	"github.com/microsoft/yardl/tooling/internal/iocommon"
+	"github.com/microsoft/yardl/tooling/internal/python"
 	"github.com/microsoft/yardl/tooling/pkg/dsl"
 	"github.com/microsoft/yardl/tooling/pkg/packaging"
 	"github.com/spf13/cobra"
@@ -132,6 +133,9 @@ func WriteSuccessfulSummary(packageInfo packaging.PackageInfo) {
 	if packageInfo.Cpp != nil {
 		fmt.Printf("✅ Wrote C++ to %s.\n", packageInfo.Cpp.SourcesOutputDir)
 	}
+	if packageInfo.Python != nil {
+		fmt.Printf("✅ Wrote Python to %s.\n", packageInfo.Python.OutputDir)
+	}
 	if packageInfo.Json != nil {
 		fmt.Printf("✅ Wrote JSON to %s.\n", packageInfo.Json.OutputDir)
 	}
@@ -156,6 +160,13 @@ func generateCore() (packaging.PackageInfo, error) {
 
 	if packageInfo.Cpp != nil {
 		err = cpp.Generate(env, *packageInfo.Cpp)
+		if err != nil {
+			return packageInfo, err
+		}
+	}
+
+	if packageInfo.Python != nil {
+		err = python.Generate(env, *packageInfo.Python)
 		if err != nil {
 			return packageInfo, err
 		}
