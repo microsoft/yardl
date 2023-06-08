@@ -62,7 +62,7 @@ cpp_version := "17"
     watchexec -c -w models/sandbox/ -w cpp/ -i **/cpp/build/** -i **/cpp/test/** -i **/cpp/sandbox/generated/** -w tooling/ -- "just generate-sandbox && cd cpp/build && printf 'Building... ' && ninja --quiet sandbox_exec && printf 'done.\n\n' && ./sandbox_exec"
 
 @watch-exec-sandbox-python:
-    watchexec -c -w models/sandbox/ -w python/run_sandbox.py -- "just generate-sandbox && echo "" && ./python/run_sandbox.py"
+    watchexec -c -w models/sandbox/ -w python/run_sandbox.py -w tooling/ -- "just generate-sandbox && echo "" && ./python/run_sandbox.py"
 
 @validate: build-all test run-sandbox-quiet benchmark
 

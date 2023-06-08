@@ -9,10 +9,8 @@ import numpy as np
 
 class MyFlags(enum.Flag):
     """This is my enum"""
-
     A = 1
     """This is the "A" value"""
-
     B = 2
     C = 4
 
@@ -26,11 +24,10 @@ class MyRec(typing.Generic[T]):
 MyString = str
 """This is a string"""
 
-
 T = typing.TypeVar('T')
 @dataclasses.dataclass(kw_only=True)
 class R2(typing.Generic[T]):
-    r: MyRec[T]
+    r2: MyRec[T]
 
 R = MyRec[str]
 

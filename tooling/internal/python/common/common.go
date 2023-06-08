@@ -218,8 +218,47 @@ func WriteDocstring(w *formatting.IndentedWriter, comment string) {
 			w.WriteStringln("")
 		}
 		w.WriteStringln(`"""`)
-		w.WriteStringln("")
 	}
+}
+
+func WriteDocstringWithLeadingLine(w *formatting.IndentedWriter, first, rest string) {
+	first = strings.TrimSpace(first)
+	if first == "" {
+		WriteDocstring(w, rest)
+		return
+	}
+
+	rest = strings.TrimSpace(rest)
+	if rest == "" {
+		WriteDocstring(w, first)
+		return
+	}
+
+	WriteDocstring(w, first+"\n\n"+rest)
+}
+
+func AbstractWriterName(p *dsl.ProtocolDefinition) string {
+	return fmt.Sprintf("%sWriterBase", formatting.ToPascalCase(p.Name))
+}
+
+func AbstractReaderName(p *dsl.ProtocolDefinition) string {
+	return fmt.Sprintf("%sReaderBase", formatting.ToPascalCase(p.Name))
+}
+
+func ProtocolWriteMethodName(s *dsl.ProtocolStep) string {
+	return fmt.Sprintf("write_%s", formatting.ToSnakeCase(s.Name))
+}
+
+func ProtocolWriteImplMethodName(s *dsl.ProtocolStep) string {
+	return fmt.Sprintf("_write_%s", formatting.ToSnakeCase(s.Name))
+}
+
+func ProtocolReadMethodName(s *dsl.ProtocolStep) string {
+	return fmt.Sprintf("read_%s", formatting.ToSnakeCase(s.Name))
+}
+
+func ProtocolReadImplMethodName(s *dsl.ProtocolStep) string {
+	return fmt.Sprintf("_read_%s", formatting.ToSnakeCase(s.Name))
 }
 
 func WriteGeneratedFileHeader(w *formatting.IndentedWriter) {

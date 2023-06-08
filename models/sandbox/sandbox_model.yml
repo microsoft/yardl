@@ -17,6 +17,12 @@ MyString: string
 
 R2<T>: !record
   fields:
-    r: MyRec<T>
+    r2: MyRec<T>
 
 R: MyRec<string>
+
+P1: !protocol
+  sequence:
+    anInt: int
+    aStream: !stream
+      items: int
