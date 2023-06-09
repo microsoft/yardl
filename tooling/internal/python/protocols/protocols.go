@@ -11,7 +11,7 @@ import (
 	"github.com/microsoft/yardl/tooling/pkg/dsl"
 )
 
-func WriteProtocols(ns *dsl.Namespace, packageDir string) error {
+func WriteProtocols(ns *dsl.Namespace, st dsl.SymbolTable, packageDir string) error {
 	b := bytes.Buffer{}
 	w := formatting.NewIndentedWriter(&b, "    ")
 	common.WriteGeneratedFileHeader(w)
@@ -22,19 +22,22 @@ import datetime
 import numpy as np
 `)
 
-	writeProtocols(w, ns)
+	writeProtocols(w, ns, st)
 
 	definitionsPath := path.Join(packageDir, "protocols.py")
 	return iocommon.WriteFileIfNeeded(definitionsPath, b.Bytes(), 0644)
 }
 
-func writeProtocols(w *formatting.IndentedWriter, ns *dsl.Namespace) {
+func writeProtocols(w *formatting.IndentedWriter, ns *dsl.Namespace, st dsl.SymbolTable) {
 	for _, p := range ns.Protocols {
 		// abstract writer
 		fmt.Fprintf(w, "class %s(abc.ABC):\n", common.AbstractWriterName(p))
 		w.Indented(func() {
 			common.WriteDocstringWithLeadingLine(w, fmt.Sprintf("Abstract writer for the %s protocol.", p.Name), p.Comment)
 			w.WriteStringln("")
+
+			fmt.Fprintf(w, `_schema = """%s"""`, dsl.GetProtocolSchemaString(p, st))
+			w.WriteStringln("\n")
 
 			for i, step := range p.Sequence {
 				valueType := common.TypeSyntax(step.Type, ns.Name)
@@ -70,6 +73,9 @@ func writeProtocols(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 		w.Indented(func() {
 			common.WriteDocstringWithLeadingLine(w, fmt.Sprintf("Abstract reader for the %s protocol.", p.Name), p.Comment)
 			w.WriteStringln("")
+
+			fmt.Fprintf(w, `_schema = %s._schema`, common.AbstractWriterName(p))
+			w.WriteStringln("\n")
 
 			for i, step := range p.Sequence {
 				valueType := common.TypeSyntax(step.Type, ns.Name)

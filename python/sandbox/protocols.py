@@ -9,6 +9,8 @@ import numpy as np
 class P1WriterBase(abc.ABC):
     """Abstract writer for the P1 protocol."""
 
+    _schema = """{"protocol":{"name":"P1","sequence":[{"name":"anInt","type":"int32"},{"name":"aStream","type":{"stream":{"items":"int32"}}}]},"types":null}"""
+
     def write_an_int(self, value: int) -> None:
         """Ordinal 0"""
         self._write_an_int(value)
@@ -27,6 +29,8 @@ class P1WriterBase(abc.ABC):
 
 class P1ReaderBase(abc.ABC):
     """Abstract reader for the P1 protocol."""
+
+    _schema = P1WriterBase._schema
 
     def read_an_int(self) -> int:
         """Ordinal 0"""

@@ -6,11 +6,8 @@ package cpp
 import (
 	"embed"
 	_ "embed"
-	"fmt"
 	"os"
 	"path"
-	"path/filepath"
-	"runtime"
 
 	"github.com/microsoft/yardl/tooling/internal/cpp/binary"
 	"github.com/microsoft/yardl/tooling/internal/cpp/hdf5"
@@ -32,7 +29,7 @@ func Generate(env *dsl.Environment, options packaging.CppCodegenOptions) error {
 		return err
 	}
 
-	err = copyStaticHeaderFiles(options)
+	err = iocommon.CopyEmbeddedStaticFiles(path.Join(options.SourcesOutputDir, "yardl"), options.InternalSymlinkStaticHeaders, includes)
 	if err != nil {
 		return err
 	}
@@ -74,81 +71,4 @@ func Generate(env *dsl.Environment, options packaging.CppCodegenOptions) error {
 	}
 
 	return err
-}
-
-func getCompileTimeIncludeDirPath() string {
-	_, filename, _, _ := runtime.Caller(0)
-	return path.Join(filepath.Dir(filename), "include")
-}
-
-func copyStaticHeaderFiles(options packaging.CppCodegenOptions) error {
-	destinationDir := path.Join(options.SourcesOutputDir, "yardl")
-	if !options.InternalSymlinkStaticHeaders {
-		return copyEmbeddedIncludeDir("include", destinationDir)
-	}
-
-	includeDir, _ := filepath.Rel(options.SourcesOutputDir, getCompileTimeIncludeDirPath())
-
-	stat, err := os.Lstat(destinationDir)
-	if err != nil {
-		if !os.IsNotExist(err) {
-			return err
-		}
-	} else {
-		if stat.Mode()&os.ModeSymlink == 0 {
-			return fmt.Errorf("static headers destination dir %s exists and is not a symlink", destinationDir)
-		}
-
-		currentTarget, err := os.Readlink(destinationDir)
-		if err != nil {
-			return err
-		}
-		if currentTarget == includeDir {
-			return nil
-		}
-
-		err = os.Remove(destinationDir)
-		if err != nil {
-			return err
-		}
-	}
-
-	return os.Symlink(includeDir, destinationDir)
-}
-
-func copyEmbeddedIncludeDir(sourceDir, destDir string) error {
-	entries, err := includes.ReadDir(sourceDir)
-	if err != nil {
-		return err
-	}
-
-	if len(entries) == 0 {
-		return nil
-	}
-
-	err = os.MkdirAll(destDir, 0775)
-	if err != nil {
-		return err
-	}
-
-	for _, entry := range entries {
-		if entry.IsDir() {
-
-			err = copyEmbeddedIncludeDir(path.Join(sourceDir, entry.Name()), path.Join(destDir, entry.Name()))
-			if err != nil {
-				return err
-			}
-		} else {
-			content, err := includes.ReadFile(path.Join(sourceDir, entry.Name()))
-			if err != nil {
-				return err
-			}
-			err = iocommon.WriteFileIfNeeded(path.Join(destDir, entry.Name()), content, 0664)
-			if err != nil {
-				return err
-			}
-		}
-	}
-
-	return nil
 }
