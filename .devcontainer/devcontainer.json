@@ -19,7 +19,8 @@
         "files.insertFinalNewline": true,
 
         "files.readonlyInclude": {
-          "**/generated/**": true
+          "**/generated/**": true,
+          "python/sandbox": true
         },
 
         "go.toolsManagement.checkForUpdates": "local",
