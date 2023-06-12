@@ -119,21 +119,21 @@ namespace {
   i = 2;
   t.insert("pear", &i);
   return t;
-};
+}
 
 [[maybe_unused]] H5::EnumType GetUInt64EnumHdf5Ddl() {
   H5::EnumType t(H5::PredType::NATIVE_UINT64);
   uint64_t i = 9223372036854775808ULL;
   t.insert("a", &i);
   return t;
-};
+}
 
 [[maybe_unused]] H5::EnumType GetInt64EnumHdf5Ddl() {
   H5::EnumType t(H5::PredType::NATIVE_INT64);
   int64_t i = -4611686018427387904LL;
   t.insert("b", &i);
   return t;
-};
+}
 
 [[maybe_unused]] H5::EnumType GetSizeBasedEnumHdf5Ddl() {
   H5::EnumType t(yardl::hdf5::SizeTypeDdl());
@@ -144,7 +144,7 @@ namespace {
   i = 2ULL;
   t.insert("c", &i);
   return t;
-};
+}
 
 [[maybe_unused]] H5::EnumType GetEnumWithKeywordSymbolsHdf5Ddl() {
   H5::EnumType t(H5::PredType::NATIVE_INT32);
@@ -153,7 +153,7 @@ namespace {
   i = 1;
   t.insert("catch", &i);
   return t;
-};
+}
 
 struct _Inner_SimpleEncodingCounters {
   _Inner_SimpleEncodingCounters() {} 
@@ -599,7 +599,7 @@ struct _Inner_RecordWithKeywordFields {
   t.insertMember("b", HOFFSET(RecordType, b), H5::PredType::NATIVE_FLOAT);
   t.insertMember("c", HOFFSET(RecordType, c), H5::PredType::NATIVE_FLOAT);
   return t;
-};
+}
 
 [[maybe_unused]] H5::CompType GetSimpleEncodingCountersHdf5Ddl() {
   using RecordType = test_model::hdf5::_Inner_SimpleEncodingCounters;
@@ -609,7 +609,7 @@ struct _Inner_RecordWithKeywordFields {
   t.insertMember("slice", HOFFSET(RecordType, slice), yardl::hdf5::OptionalTypeDdl<uint32_t, uint32_t>(H5::PredType::NATIVE_UINT32));
   t.insertMember("repetition", HOFFSET(RecordType, repetition), yardl::hdf5::OptionalTypeDdl<uint32_t, uint32_t>(H5::PredType::NATIVE_UINT32));
   return t;
-};
+}
 
 [[maybe_unused]] H5::CompType GetSimpleAcquisitionHdf5Ddl() {
   using RecordType = test_model::hdf5::_Inner_SimpleAcquisition;
@@ -619,7 +619,7 @@ struct _Inner_RecordWithKeywordFields {
   t.insertMember("data", HOFFSET(RecordType, data), yardl::hdf5::NDArrayDdl<std::complex<float>, std::complex<float>, 2>(yardl::hdf5::ComplexTypeDdl<float>()));
   t.insertMember("trajectory", HOFFSET(RecordType, trajectory), yardl::hdf5::NDArrayDdl<float, float, 2>(H5::PredType::NATIVE_FLOAT));
   return t;
-};
+}
 
 [[maybe_unused]] H5::CompType GetSimpleRecordHdf5Ddl() {
   using RecordType = test_model::SimpleRecord;
@@ -628,7 +628,7 @@ struct _Inner_RecordWithKeywordFields {
   t.insertMember("y", HOFFSET(RecordType, y), H5::PredType::NATIVE_INT32);
   t.insertMember("z", HOFFSET(RecordType, z), H5::PredType::NATIVE_INT32);
   return t;
-};
+}
 
 [[maybe_unused]] H5::CompType GetRecordWithPrimitivesHdf5Ddl() {
   using RecordType = test_model::RecordWithPrimitives;
@@ -651,7 +651,7 @@ struct _Inner_RecordWithKeywordFields {
   t.insertMember("timeField", HOFFSET(RecordType, time_field), yardl::hdf5::TimeTypeDdl());
   t.insertMember("datetimeField", HOFFSET(RecordType, datetime_field), yardl::hdf5::DateTimeTypeDdl());
   return t;
-};
+}
 
 [[maybe_unused]] H5::CompType GetRecordWithPrimitiveAliasesHdf5Ddl() {
   using RecordType = test_model::RecordWithPrimitiveAliases;
@@ -666,7 +666,7 @@ struct _Inner_RecordWithKeywordFields {
   t.insertMember("complexfloatField", HOFFSET(RecordType, complexfloat_field), yardl::hdf5::ComplexTypeDdl<float>());
   t.insertMember("complexdoubleField", HOFFSET(RecordType, complexdouble_field), yardl::hdf5::ComplexTypeDdl<double>());
   return t;
-};
+}
 
 [[maybe_unused]] H5::CompType GetTupleWithRecordsHdf5Ddl() {
   using RecordType = test_model::TupleWithRecords;
@@ -674,7 +674,7 @@ struct _Inner_RecordWithKeywordFields {
   t.insertMember("a", HOFFSET(RecordType, a), test_model::hdf5::GetSimpleRecordHdf5Ddl());
   t.insertMember("b", HOFFSET(RecordType, b), test_model::hdf5::GetSimpleRecordHdf5Ddl());
   return t;
-};
+}
 
 [[maybe_unused]] H5::CompType GetRecordWithVectorsHdf5Ddl() {
   using RecordType = test_model::hdf5::_Inner_RecordWithVectors;
@@ -683,7 +683,7 @@ struct _Inner_RecordWithKeywordFields {
   t.insertMember("defaultVectorFixedLength", HOFFSET(RecordType, default_vector_fixed_length), yardl::hdf5::FixedVectorDdl(H5::PredType::NATIVE_INT32, 3));
   t.insertMember("vectorOfVectors", HOFFSET(RecordType, vector_of_vectors), yardl::hdf5::InnerVlenDdl(yardl::hdf5::FixedVectorDdl(H5::PredType::NATIVE_INT32, 2)));
   return t;
-};
+}
 
 [[maybe_unused]] H5::CompType GetRecordWithArraysHdf5Ddl() {
   using RecordType = test_model::hdf5::_Inner_RecordWithArrays;
@@ -698,7 +698,7 @@ struct _Inner_RecordWithKeywordFields {
   t.insertMember("dynamicArray", HOFFSET(RecordType, dynamic_array), yardl::hdf5::DynamicNDArrayDdl<int32_t, int32_t>(H5::PredType::NATIVE_INT32));
   t.insertMember("arrayOfVectors", HOFFSET(RecordType, array_of_vectors), yardl::hdf5::FixedNDArrayDdl(yardl::hdf5::FixedVectorDdl(H5::PredType::NATIVE_INT32, 4), {5}));
   return t;
-};
+}
 
 [[maybe_unused]] H5::CompType GetRecordWithArraysSimpleSyntaxHdf5Ddl() {
   using RecordType = test_model::hdf5::_Inner_RecordWithArraysSimpleSyntax;
@@ -713,7 +713,7 @@ struct _Inner_RecordWithKeywordFields {
   t.insertMember("dynamicArray", HOFFSET(RecordType, dynamic_array), yardl::hdf5::DynamicNDArrayDdl<int32_t, int32_t>(H5::PredType::NATIVE_INT32));
   t.insertMember("arrayOfVectors", HOFFSET(RecordType, array_of_vectors), yardl::hdf5::FixedNDArrayDdl(yardl::hdf5::FixedVectorDdl(H5::PredType::NATIVE_INT32, 4), {5}));
   return t;
-};
+}
 
 [[maybe_unused]] H5::CompType GetRecordWithOptionalFieldsHdf5Ddl() {
   using RecordType = test_model::hdf5::_Inner_RecordWithOptionalFields;
@@ -721,7 +721,7 @@ struct _Inner_RecordWithKeywordFields {
   t.insertMember("optionalInt", HOFFSET(RecordType, optional_int), yardl::hdf5::OptionalTypeDdl<int32_t, int32_t>(H5::PredType::NATIVE_INT32));
   t.insertMember("optionalIntAlternateSyntax", HOFFSET(RecordType, optional_int_alternate_syntax), yardl::hdf5::OptionalTypeDdl<int32_t, int32_t>(H5::PredType::NATIVE_INT32));
   return t;
-};
+}
 
 [[maybe_unused]] H5::CompType GetRecordWithVlensHdf5Ddl() {
   using RecordType = test_model::hdf5::_Inner_RecordWithVlens;
@@ -730,7 +730,7 @@ struct _Inner_RecordWithKeywordFields {
   t.insertMember("b", HOFFSET(RecordType, b), H5::PredType::NATIVE_INT32);
   t.insertMember("c", HOFFSET(RecordType, c), H5::PredType::NATIVE_INT32);
   return t;
-};
+}
 
 [[maybe_unused]] H5::CompType GetRecordWithStringsHdf5Ddl() {
   using RecordType = test_model::hdf5::_Inner_RecordWithStrings;
@@ -738,14 +738,14 @@ struct _Inner_RecordWithKeywordFields {
   t.insertMember("a", HOFFSET(RecordType, a), yardl::hdf5::InnerVlenStringDdl());
   t.insertMember("b", HOFFSET(RecordType, b), yardl::hdf5::InnerVlenStringDdl());
   return t;
-};
+}
 
 [[maybe_unused]] H5::CompType GetRecordWithOptionalVectorHdf5Ddl() {
   using RecordType = test_model::hdf5::_Inner_RecordWithOptionalVector;
   H5::CompType t(sizeof(RecordType));
   t.insertMember("optionalVector", HOFFSET(RecordType, optional_vector), yardl::hdf5::OptionalTypeDdl<yardl::hdf5::InnerVlen<int32_t, int32_t>, std::vector<int32_t>>(yardl::hdf5::InnerVlenDdl(H5::PredType::NATIVE_INT32)));
   return t;
-};
+}
 
 [[maybe_unused]] H5::CompType GetRecordWithFixedVectorsHdf5Ddl() {
   using RecordType = test_model::hdf5::_Inner_RecordWithFixedVectors;
@@ -754,7 +754,7 @@ struct _Inner_RecordWithKeywordFields {
   t.insertMember("fixedSimpleRecordVector", HOFFSET(RecordType, fixed_simple_record_vector), yardl::hdf5::FixedVectorDdl(test_model::hdf5::GetSimpleRecordHdf5Ddl(), 3));
   t.insertMember("fixedRecordWithVlensVector", HOFFSET(RecordType, fixed_record_with_vlens_vector), yardl::hdf5::FixedVectorDdl(test_model::hdf5::GetRecordWithVlensHdf5Ddl(), 2));
   return t;
-};
+}
 
 [[maybe_unused]] H5::CompType GetRecordWithFixedArraysHdf5Ddl() {
   using RecordType = test_model::hdf5::_Inner_RecordWithFixedArrays;
@@ -763,7 +763,7 @@ struct _Inner_RecordWithKeywordFields {
   t.insertMember("fixedSimpleRecordArray", HOFFSET(RecordType, fixed_simple_record_array), yardl::hdf5::FixedNDArrayDdl(test_model::hdf5::GetSimpleRecordHdf5Ddl(), {3, 2}));
   t.insertMember("fixedRecordWithVlensArray", HOFFSET(RecordType, fixed_record_with_vlens_array), yardl::hdf5::FixedNDArrayDdl(test_model::hdf5::GetRecordWithVlensHdf5Ddl(), {2, 2}));
   return t;
-};
+}
 
 [[maybe_unused]] H5::CompType GetRecordWithNDArraysHdf5Ddl() {
   using RecordType = test_model::hdf5::_Inner_RecordWithNDArrays;
@@ -772,7 +772,7 @@ struct _Inner_RecordWithKeywordFields {
   t.insertMember("fixedSimpleRecordArray", HOFFSET(RecordType, fixed_simple_record_array), yardl::hdf5::NDArrayDdl<test_model::SimpleRecord, test_model::SimpleRecord, 2>(test_model::hdf5::GetSimpleRecordHdf5Ddl()));
   t.insertMember("fixedRecordWithVlensArray", HOFFSET(RecordType, fixed_record_with_vlens_array), yardl::hdf5::NDArrayDdl<test_model::hdf5::_Inner_RecordWithVlens, test_model::RecordWithVlens, 2>(test_model::hdf5::GetRecordWithVlensHdf5Ddl()));
   return t;
-};
+}
 
 [[maybe_unused]] H5::CompType GetRecordWithNDArraysSingleDimensionHdf5Ddl() {
   using RecordType = test_model::hdf5::_Inner_RecordWithNDArraysSingleDimension;
@@ -781,7 +781,7 @@ struct _Inner_RecordWithKeywordFields {
   t.insertMember("fixedSimpleRecordArray", HOFFSET(RecordType, fixed_simple_record_array), yardl::hdf5::InnerVlenDdl(test_model::hdf5::GetSimpleRecordHdf5Ddl()));
   t.insertMember("fixedRecordWithVlensArray", HOFFSET(RecordType, fixed_record_with_vlens_array), yardl::hdf5::InnerVlenDdl(test_model::hdf5::GetRecordWithVlensHdf5Ddl()));
   return t;
-};
+}
 
 [[maybe_unused]] H5::CompType GetRecordWithDynamicNDArraysHdf5Ddl() {
   using RecordType = test_model::hdf5::_Inner_RecordWithDynamicNDArrays;
@@ -790,14 +790,14 @@ struct _Inner_RecordWithKeywordFields {
   t.insertMember("fixedSimpleRecordArray", HOFFSET(RecordType, fixed_simple_record_array), yardl::hdf5::DynamicNDArrayDdl<test_model::SimpleRecord, test_model::SimpleRecord>(test_model::hdf5::GetSimpleRecordHdf5Ddl()));
   t.insertMember("fixedRecordWithVlensArray", HOFFSET(RecordType, fixed_record_with_vlens_array), yardl::hdf5::DynamicNDArrayDdl<test_model::hdf5::_Inner_RecordWithVlens, test_model::RecordWithVlens>(test_model::hdf5::GetRecordWithVlensHdf5Ddl()));
   return t;
-};
+}
 
 [[maybe_unused]] H5::CompType GetRecordWithUnionsHdf5Ddl() {
   using RecordType = test_model::hdf5::_Inner_RecordWithUnions;
   H5::CompType t(sizeof(RecordType));
   t.insertMember("nullOrIntOrString", HOFFSET(RecordType, null_or_int_or_string), ::InnerUnion2Ddl<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string>(true, H5::PredType::NATIVE_INT32, "int32", yardl::hdf5::InnerVlenStringDdl(), "string"));
   return t;
-};
+}
 
 template <typename _T1_Inner, typename T1, typename _T2_Inner, typename T2>
 [[maybe_unused]] H5::CompType GetGenericRecordHdf5Ddl(H5::DataType const& T1_type, H5::DataType const& T2_type) {
@@ -808,7 +808,7 @@ template <typename _T1_Inner, typename T1, typename _T2_Inner, typename T2>
   t.insertMember("vector1", HOFFSET(RecordType, vector_1), yardl::hdf5::InnerVlenDdl(T1_type));
   t.insertMember("image2", HOFFSET(RecordType, image_2), yardl::hdf5::NDArrayDdl<_T2_Inner, T2, 2>(T2_type));
   return t;
-};
+}
 
 template <typename _T1_Inner, typename T1, typename _T2_Inner, typename T2>
 [[maybe_unused]] H5::CompType GetMyTupleHdf5Ddl(H5::DataType const& T1_type, H5::DataType const& T2_type) {
@@ -817,7 +817,7 @@ template <typename _T1_Inner, typename T1, typename _T2_Inner, typename T2>
   t.insertMember("v1", HOFFSET(RecordType, v1), T1_type);
   t.insertMember("v2", HOFFSET(RecordType, v2), T2_type);
   return t;
-};
+}
 
 template <typename _T0_Inner, typename T0, typename _T1_Inner, typename T1>
 [[maybe_unused]] H5::CompType GetGenericRecordWithComputedFieldsHdf5Ddl(H5::DataType const& T0_type, H5::DataType const& T1_type) {
@@ -825,7 +825,7 @@ template <typename _T0_Inner, typename T0, typename _T1_Inner, typename T1>
   H5::CompType t(sizeof(RecordType));
   t.insertMember("f1", HOFFSET(RecordType, f1), ::InnerUnion2Ddl<_T0_Inner, T0, _T1_Inner, T1>(false, T0_type, "T0", T1_type, "T1"));
   return t;
-};
+}
 
 [[maybe_unused]] H5::CompType GetRecordWithComputedFieldsHdf5Ddl() {
   using RecordType = test_model::hdf5::_Inner_RecordWithComputedFields;
@@ -846,7 +846,7 @@ template <typename _T0_Inner, typename T0, typename _T1_Inner, typename T1>
   t.insertMember("unionWithNestedGenericUnion", HOFFSET(RecordType, union_with_nested_generic_union), ::InnerUnion2Ddl<int32_t, int32_t, test_model::hdf5::_Inner_GenericRecordWithComputedFields<yardl::hdf5::InnerVlenString, std::string, float, float>, test_model::GenericRecordWithComputedFields<std::string, float>>(false, H5::PredType::NATIVE_INT32, "int32", test_model::hdf5::GetGenericRecordWithComputedFieldsHdf5Ddl<yardl::hdf5::InnerVlenString, std::string, float, float>(yardl::hdf5::InnerVlenStringDdl(), H5::PredType::NATIVE_FLOAT), "GenericRecordWithComputedFields<string,float32>"));
   t.insertMember("mapField", HOFFSET(RecordType, map_field), yardl::hdf5::InnerMapDdl<yardl::hdf5::InnerVlenString, yardl::hdf5::InnerVlenString>(yardl::hdf5::InnerVlenStringDdl(), yardl::hdf5::InnerVlenStringDdl()));
   return t;
-};
+}
 
 [[maybe_unused]] H5::CompType GetRecordWithKeywordFieldsHdf5Ddl() {
   using RecordType = test_model::hdf5::_Inner_RecordWithKeywordFields;
@@ -855,7 +855,7 @@ template <typename _T0_Inner, typename T0, typename _T1_Inner, typename T1>
   t.insertMember("sizeof", HOFFSET(RecordType, sizeof_field), yardl::hdf5::NDArrayDdl<int32_t, int32_t, 2>(H5::PredType::NATIVE_INT32));
   t.insertMember("if", HOFFSET(RecordType, if_field), test_model::hdf5::GetEnumWithKeywordSymbolsHdf5Ddl());
   return t;
-};
+}
 
 } // namespace 
 
