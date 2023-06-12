@@ -22,3 +22,5 @@ dist/
 
 cpp/build/
 cpp/sandbox/generated/
+
+**/*.bin

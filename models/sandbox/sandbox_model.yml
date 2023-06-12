@@ -21,6 +21,8 @@ R2<T>: !record
 
 R: MyRec<string>
 
+MyInt: [int, float]
+
 P1: !protocol
   sequence:
     anInt: int

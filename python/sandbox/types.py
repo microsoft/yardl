@@ -31,3 +31,5 @@ class R2(typing.Generic[T]):
 
 R = MyRec[str]
 
+MyInt = int | float
+
