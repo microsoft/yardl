@@ -11,8 +11,10 @@ from datetime import date, time, datetime, timedelta
 import sys
 import ctypes
 
+
 class Point(ctypes.Structure):
-    _fields_ = [("x", ctypes.c_int),("y", ctypes.c_int)]
+    _fields_ = [("x", ctypes.c_int), ("y", ctypes.c_int)]
+
 
 MyTime = time | np.timedelta64
 
@@ -23,8 +25,7 @@ MyInt2 = int | np.int32
 
 
 def x(p: int) -> int:
-    return p *2
-
+    return p * 2
 
 
 def main():
@@ -34,7 +35,6 @@ def main():
         w.write_optional(2)
         w.write_union(22)
         w.write_date(date.today())
-
 
     r = sandbox.MyRec(f2="hello", f3=sandbox.MyFlags.A | sandbox.MyFlags.B)
     print(r)
@@ -46,6 +46,5 @@ def main():
     print(c2)
 
 
-
-if  __name__ == "__main__"    :
+if __name__ == "__main__":
     main()

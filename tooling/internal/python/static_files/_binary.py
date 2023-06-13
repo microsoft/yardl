@@ -10,28 +10,28 @@ import numpy as np
 import numpy.typing as npt
 from .yardl_types import *
 
-MAGIC_BYTES : bytes = b"yardl"
-CURRENT_BINARY_FORMAT_VERSION:int = 1
+MAGIC_BYTES: bytes = b"yardl"
+CURRENT_BINARY_FORMAT_VERSION: int = 1
 
-INT8_MIN:int = np.iinfo(np.int8).min
-INT8_MAX:int = np.iinfo(np.int8).max
+INT8_MIN: int = np.iinfo(np.int8).min
+INT8_MAX: int = np.iinfo(np.int8).max
 
-UINT8_MAX:int = np.iinfo(np.uint8).max
+UINT8_MAX: int = np.iinfo(np.uint8).max
 
-INT16_MIN:int = np.iinfo(np.int16).min
-INT16_MAX:int = np.iinfo(np.int16).max
+INT16_MIN: int = np.iinfo(np.int16).min
+INT16_MAX: int = np.iinfo(np.int16).max
 
-UINT16_MAX:int = np.iinfo(np.uint16).max
+UINT16_MAX: int = np.iinfo(np.uint16).max
 
-INT32_MIN:int = np.iinfo(np.int32).min
-INT32_MAX:int = np.iinfo(np.int32).max
+INT32_MIN: int = np.iinfo(np.int32).min
+INT32_MAX: int = np.iinfo(np.int32).max
 
-UINT32_MAX:int = np.iinfo(np.uint32).max
+UINT32_MAX: int = np.iinfo(np.uint32).max
 
-INT64_MIN:int = np.iinfo(np.int64).min
-INT64_MAX:int = np.iinfo(np.int64).max
+INT64_MIN: int = np.iinfo(np.int64).min
+INT64_MAX: int = np.iinfo(np.int64).max
 
-UINT64_MAX:int = np.iinfo(np.uint64).max
+UINT64_MAX: int = np.iinfo(np.uint64).max
 
 
 class BinaryProtocolWriter(ABC):
@@ -44,7 +44,12 @@ class BinaryProtocolWriter(ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: Optional[type[BaseException]], exc: Optional[BaseException], traceback: Optional[TracebackType]) -> None:
+    def __exit__(
+        self,
+        exc_type: Optional[type[BaseException]],
+        exc: Optional[BaseException],
+        traceback: Optional[TracebackType],
+    ) -> None:
         self.close()
 
     def close(self) -> None:
@@ -58,21 +63,26 @@ class BinaryProtocolWriter(ABC):
 
 
 class CodedOutputStream:
-    def __init__(self, stream: BinaryIO | str,*, buffer_size:int=65536) -> None:
+    def __init__(self, stream: BinaryIO | str, *, buffer_size: int = 65536) -> None:
         if isinstance(stream, str):
             self._stream = open(stream, "wb")
             self._owns_stream = True
         else:
-            self._stream  = stream
+            self._stream = stream
             self._owns_stream = False
 
         self._buffer = bytearray(buffer_size)
         self._view = memoryview(self._buffer)
 
-    def __enter__(self) -> 'CodedOutputStream':
+    def __enter__(self) -> "CodedOutputStream":
         return self
 
-    def __exit__(self, exc_type: Optional[type[BaseException]], exc: Optional[BaseException], traceback: Optional[TracebackType]) -> None:
+    def __exit__(
+        self,
+        exc_type: Optional[type[BaseException]],
+        exc: Optional[BaseException],
+        traceback: Optional[TracebackType],
+    ) -> None:
         self.close()
 
     def close(self) -> None:
@@ -87,20 +97,20 @@ class CodedOutputStream:
             self._stream.flush()
             self._view = memoryview(self._buffer)
 
-    def write(self, formatter: struct.Struct, *args : Any) -> None:
+    def write(self, formatter: struct.Struct, *args: Any) -> None:
         if len(self._view) < formatter.size:
             self.flush()
 
         formatter.pack_into(self._view, 0, *args)
-        self._view = self._view[formatter.size:]
+        self._view = self._view[formatter.size :]
 
     def write_bytes(self, data: bytes | bytearray) -> None:
         if len(data) > len(self._view):
             self.flush()
             self._stream.write(data)
         else:
-            self._view[:len(data)] = data
-            self._view = self._view[len(data):]
+            self._view[: len(data)] = data
+            self._view = self._view[len(data) :]
 
     def write_bytes_directly(self, data: bytes | bytearray | memoryview) -> None:
         self.flush()
@@ -130,102 +140,144 @@ class CodedOutputStream:
         self.write_unsigned_varint(self.zigzag_encode(value))
 
     def write_string(self, value: str) -> None:
-        self.write_bytes(value.encode('utf-8'))
+        self.write_bytes(value.encode("utf-8"))
 
-bool_struct = struct.Struct('<?')
+
+bool_struct = struct.Struct("<?")
 assert bool_struct.size == 1
+
 
 def write_bool(stream: CodedOutputStream, value: Bool) -> None:
     stream.write(bool_struct, value)
 
-int8_struct = struct.Struct('<b')
+
+int8_struct = struct.Struct("<b")
 assert int8_struct.size == 1
+
 
 def write_int8(stream: CodedOutputStream, value: Int8) -> None:
     stream.write(int8_struct, value)
 
-uint8_struct = struct.Struct('<B')
+
+uint8_struct = struct.Struct("<B")
 assert uint8_struct.size == 1
+
 
 def write_uint8(stream: CodedOutputStream, value: UInt8) -> None:
     stream.write(uint8_struct, value)
 
+
 def write_int16(stream: CodedOutputStream, value: Int16) -> None:
     if value < INT16_MIN or value > INT16_MAX:
-        raise ValueError(f"Value {value} is outside the range of a signed 16-bit integer")
+        raise ValueError(
+            f"Value {value} is outside the range of a signed 16-bit integer"
+        )
     stream.write_signed_varint(value)
+
 
 def write_uint16(stream: CodedOutputStream, value: UInt16) -> None:
     if value < 0 or value > UINT16_MAX:
-        raise ValueError(f"Value {value} is outside the range of an unsigned 16-bit integer")
+        raise ValueError(
+            f"Value {value} is outside the range of an unsigned 16-bit integer"
+        )
     stream.write_unsigned_varint(value)
+
 
 def write_int32(stream: CodedOutputStream, value: Int32) -> None:
     if value < INT32_MIN or value > INT32_MAX:
-        raise ValueError(f"Value {value} is outside the range of a signed 32-bit integer")
+        raise ValueError(
+            f"Value {value} is outside the range of a signed 32-bit integer"
+        )
     stream.write_signed_varint(value)
+
 
 def write_uint32(stream: CodedOutputStream, value: UInt32) -> None:
     if value < 0 or value > UINT32_MAX:
-        raise ValueError(f"Value {value} is outside the range of an unsigned 32-bit integer")
+        raise ValueError(
+            f"Value {value} is outside the range of an unsigned 32-bit integer"
+        )
     stream.write_unsigned_varint(value)
+
 
 def write_int64(stream: CodedOutputStream, value: Int64) -> None:
     if value < INT64_MIN or value > INT64_MAX:
-        raise ValueError(f"Value {value} is outside the range of a signed 64-bit integer")
+        raise ValueError(
+            f"Value {value} is outside the range of a signed 64-bit integer"
+        )
     stream.write_signed_varint(value)
+
 
 def write_uint64(stream: CodedOutputStream, value: UInt64) -> None:
     if value < 0 or value > UINT64_MAX:
-        raise ValueError(f"Value {value} is outside the range of an unsigned 64-bit integer")
+        raise ValueError(
+            f"Value {value} is outside the range of an unsigned 64-bit integer"
+        )
     stream.write_unsigned_varint(value)
+
 
 def write_size(stream: CodedOutputStream, value: Size) -> None:
     write_uint64(stream, value)
 
-float32_struct = struct.Struct('<f')
+
+float32_struct = struct.Struct("<f")
 assert float32_struct.size == 4
+
 
 def write_float32(stream: CodedOutputStream, value: float) -> None:
     stream.write(float32_struct, value)
 
-float64_struct = struct.Struct('<d')
+
+float64_struct = struct.Struct("<d")
 assert float64_struct.size == 8
+
 
 def write_float64(stream: CodedOutputStream, value: float) -> None:
     stream.write(float64_struct, value)
 
-complex32_struct = struct.Struct('<ff')
+
+complex32_struct = struct.Struct("<ff")
 assert complex32_struct.size == 8
+
 
 def write_complex32(stream: CodedOutputStream, value: complex) -> None:
     stream.write(complex32_struct, value.real, value.imag)
 
-complex64_struct = struct.Struct('<dd')
+
+complex64_struct = struct.Struct("<dd")
 assert complex64_struct.size == 16
+
 
 def write_complex64(stream: CodedOutputStream, value: complex) -> None:
     stream.write(complex64_struct, value.real, value.imag)
 
+
 def write_string(stream: CodedOutputStream, value: str) -> None:
     stream.write_string(value)
 
+
 EPOCH_ORDINAL_DAYS = datetime.date(1970, 1, 1).toordinal()
-DATETIME_DAYS_DTYPE = np.dtype('datetime64[D]')
+DATETIME_DAYS_DTYPE = np.dtype("datetime64[D]")
+
 
 def write_date(stream: CodedOutputStream, value: Date) -> None:
     if isinstance(value, datetime.date):
         stream.write_signed_varint(value.toordinal() - EPOCH_ORDINAL_DAYS)
     else:
         if not isinstance(value, np.datetime64):
-            raise TypeError(f"Expected datetime.date or numpy.datetime64, got {type(value)}")
+            raise TypeError(
+                f"Expected datetime.date or numpy.datetime64, got {type(value)}"
+            )
 
         if value.dtype == DATETIME_DAYS_DTYPE:
             stream.write_signed_varint(value.astype(np.int32))
         else:
-            stream.write_signed_varint(value.astype(DATETIME_DAYS_DTYPE).astype(np.int32))
+            stream.write_signed_varint(
+                value.astype(DATETIME_DAYS_DTYPE).astype(np.int32)
+            )
 
-TIMEDELTA_NANOSECONDS_DTYPE = np.dtype('timedelta64[ns]')
+
+TIMEDELTA_NANOSECONDS_DTYPE = np.dtype("timedelta64[ns]")
+
 
 def write_time(stream: CodedOutputStream, value: Time) -> None:
     if isinstance(value, datetime.time):
@@ -238,16 +290,21 @@ def write_time(stream: CodedOutputStream, value: Time) -> None:
         stream.write_signed_varint(nanoseconds_since_midnight)
     else:
         if not isinstance(value, np.timedelta64):
-            raise TypeError(f"Expected a datetime.time or np.timedelta64, got {type(value)}")
+            raise TypeError(
+                f"Expected a datetime.time or np.timedelta64, got {type(value)}"
+            )
 
         if value.dtype == TIMEDELTA_NANOSECONDS_DTYPE:
             stream.write_signed_varint(value.astype(np.int64))
         else:
-            stream.write_signed_varint(value.astype(DATETIME_NANOSECONDS_DTYPE).astype(np.int64))
+            stream.write_signed_varint(
+                value.astype(DATETIME_NANOSECONDS_DTYPE).astype(np.int64)
+            )
 
 
-DATETIME_NANOSECONDS_DTYPE = np.dtype('datetime64[ns]')
+DATETIME_NANOSECONDS_DTYPE = np.dtype("datetime64[ns]")
 EPOCH_DATETIME = datetime.datetime.utcfromtimestamp(0)
+
 
 def write_datetime(stream: CodedOutputStream, value: DateTime) -> None:
     if isinstance(value, datetime.datetime):
@@ -256,18 +313,25 @@ def write_datetime(stream: CodedOutputStream, value: DateTime) -> None:
         stream.write_signed_varint(nanoseconds_since_epoch)
     else:
         if not isinstance(value, np.datetime64):
-            raise TypeError(f"Expected datetime.datetime or numpy.datetime64, got {type(value)}")
+            raise TypeError(
+                f"Expected datetime.datetime or numpy.datetime64, got {type(value)}"
+            )
 
         if value.dtype == DATETIME_NANOSECONDS_DTYPE:
             stream.write_signed_varint(value.astype(np.int64))
         else:
-            stream.write_signed_varint(value.astype(DATETIME_NANOSECONDS_DTYPE).astype(np.int64))
+            stream.write_signed_varint(
+                value.astype(DATETIME_NANOSECONDS_DTYPE).astype(np.int64)
+            )
+
 
 def write_none(stream: CodedOutputStream, value: None) -> None:
     pass
 
-T = TypeVar('T', contravariant=True)
+
+T = TypeVar("T", contravariant=True)
 Writer = Callable[[CodedOutputStream, T], None]
+
 
 class OptionalWriter(Generic[T]):
     def __init__(self, write_element: Writer[T]) -> None:
@@ -279,6 +343,7 @@ class OptionalWriter(Generic[T]):
         else:
             stream.write_byte(1)
             self.write_element(stream, value)
+
 
 class UnionWriter:
     def __init__(self, cases: list[Tuple[type | None, Writer[Any]]]) -> None:
@@ -295,7 +360,7 @@ class UnionWriter:
                 case_writer(stream, value)
                 return
 
-        raise ValueError(f'Incorrect union type {type(value)}')
+        raise ValueError(f"Incorrect union type {type(value)}")
 
 
 class StreamWriter(Generic[T]):
@@ -307,6 +372,7 @@ class StreamWriter(Generic[T]):
             stream.write_byte(1)
             self.write_element(stream, element)
 
+
 class FixedVectorWriter(Generic[T]):
     def __init__(self, length: int, write_element: Writer[T]) -> None:
         self.length = length
@@ -317,6 +383,7 @@ class FixedVectorWriter(Generic[T]):
         for element in value:
             self.write_element(stream, element)
 
+
 class DynamicVectorWriter(Generic[T]):
     def __init__(self, write_element: Writer[T]) -> None:
         self.write_element = write_element
@@ -326,8 +393,11 @@ class DynamicVectorWriter(Generic[T]):
         for element in value:
             self.write_element(stream, element)
 
-TKey = TypeVar('TKey')
-TValue = TypeVar('TValue')
+
+TKey = TypeVar("TKey")
+TValue = TypeVar("TValue")
+
+
 class MapWriter(Generic[TKey, TValue]):
     def __init__(self, write_key: Writer[TKey], write_value: Writer[TValue]) -> None:
         self.write_key = write_key
@@ -339,8 +409,14 @@ class MapWriter(Generic[TKey, TValue]):
             self.write_key(stream, k)
             self.write_value(stream, v)
 
+
 class DynamicNDArrayWriter(Generic[T]):
-    def __init__(self, write_element: Writer[T], dtype: np.dtype[Any], trivially_serializable: bool) -> None:
+    def __init__(
+        self,
+        write_element: Writer[T],
+        dtype: np.dtype[Any],
+        trivially_serializable: bool,
+    ) -> None:
         self.dtype = dtype
         self.write_element = write_element
         self.trivially_serializable = trivially_serializable
@@ -357,8 +433,15 @@ class DynamicNDArrayWriter(Generic[T]):
             for element in value.flat:
                 self.write_element(stream, element)
 
+
 class NDArrayWriter(Generic[T]):
-    def __init__(self, write_element: Writer[T], dtype: np.dtype[Any], ndims: int,  trivially_serializable: bool) -> None:
+    def __init__(
+        self,
+        write_element: Writer[T],
+        dtype: np.dtype[Any],
+        ndims: int,
+        trivially_serializable: bool,
+    ) -> None:
         self.write_element = write_element
         self.dtype = dtype
         self.ndims = ndims
@@ -377,8 +460,15 @@ class NDArrayWriter(Generic[T]):
             for element in value.flat:
                 self.write_element(stream, element)
 
+
 class FixedNDArrayWriter(Generic[T]):
-    def __init__(self, write_element: Writer[T], dtype: np.dtype[Any], shape: tuple[int, ...], trivially_serializable: bool) -> None:
+    def __init__(
+        self,
+        write_element: Writer[T],
+        dtype: np.dtype[Any],
+        shape: tuple[int, ...],
+        trivially_serializable: bool,
+    ) -> None:
         self.write_element = write_element
         self.dtype = dtype
         self.shape = shape
@@ -394,11 +484,15 @@ class FixedNDArrayWriter(Generic[T]):
             for element in value.flat:
                 self.write_element(stream, element)
 
+
 # Only used in the header
-int32_struct = struct.Struct('<i')
+int32_struct = struct.Struct("<i")
 assert int32_struct.size == 4
+
 
 def write_fixed_int32(stream: CodedOutputStream, value: int) -> None:
     if value < INT32_MIN or value > INT32_MAX:
-        raise ValueError(f"Value {value} is outside the range of a signed 32-bit integer")
+        raise ValueError(
+            f"Value {value} is outside the range of a signed 32-bit integer"
+        )
     stream.write(int32_struct, value)
