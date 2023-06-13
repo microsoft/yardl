@@ -3,11 +3,14 @@ package python
 import (
 	"bytes"
 	"embed"
+	"fmt"
 	"os"
 	"path"
+	"strings"
 
 	"github.com/microsoft/yardl/tooling/internal/formatting"
 	"github.com/microsoft/yardl/tooling/internal/iocommon"
+	"github.com/microsoft/yardl/tooling/internal/python/binary"
 	"github.com/microsoft/yardl/tooling/internal/python/common"
 	"github.com/microsoft/yardl/tooling/internal/python/protocols"
 	"github.com/microsoft/yardl/tooling/internal/python/types"
@@ -41,7 +44,7 @@ func writeNamespace(ns *dsl.Namespace, st dsl.SymbolTable, options packaging.Pyt
 	}
 
 	// Write __init__.py
-	if err := writePackageInitFile(packageDir); err != nil {
+	if err := writePackageInitFile(packageDir, ns); err != nil {
 		return err
 	}
 
@@ -55,14 +58,38 @@ func writeNamespace(ns *dsl.Namespace, st dsl.SymbolTable, options packaging.Pyt
 		return err
 	}
 
+	if err := binary.WriteBinary(ns, packageDir); err != nil {
+		return err
+	}
+
 	return nil
 }
 
-func writePackageInitFile(packageDir string) error {
+func writePackageInitFile(packageDir string, ns *dsl.Namespace) error {
 	b := bytes.Buffer{}
 	w := formatting.NewIndentedWriter(&b, "    ")
 	common.WriteGeneratedFileHeader(w)
-	w.WriteStringln("from .types import *")
-	w.WriteStringln("from .protocols import *")
+
+	typeNames := make([]string, 0)
+	for _, t := range ns.TypeDefinitions {
+		typeNames = append(typeNames, common.TypeDefinitionSyntax(t, ns.Name))
+	}
+
+	fmt.Fprintf(w, "from .types import %s\n", strings.Join(typeNames, ", "))
+
+	protocolTypes := make([]string, 0)
+	for _, p := range ns.Protocols {
+		protocolTypes = append(protocolTypes, common.AbstractWriterName(p), common.AbstractReaderName(p))
+	}
+
+	fmt.Fprintf(w, "from .protocols import %s\n", strings.Join(protocolTypes, ", "))
+
+	for i, p := range ns.Protocols {
+		protocolTypes[i*2] = binary.BinaryWriterName(p)
+		protocolTypes[i*2+1] = binary.BinaryReaderName(p)
+	}
+
+	fmt.Fprintf(w, "from .binary import %s\n", strings.Join(protocolTypes, ", "))
+
 	return iocommon.WriteFileIfNeeded(path.Join(packageDir, "__init__.py"), b.Bytes(), 0644)
 }

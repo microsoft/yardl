@@ -25,6 +25,8 @@ MyInt: [int, float]
 
 P1: !protocol
   sequence:
-    anInt: int
+    anInt: uint
     aStream: !stream
       items: int
+    optional: int?
+    union: [null, int, string]

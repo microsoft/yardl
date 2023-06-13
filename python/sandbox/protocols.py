@@ -9,7 +9,7 @@ import numpy as np
 class P1WriterBase(abc.ABC):
     """Abstract writer for the P1 protocol."""
 
-    _schema = """{"protocol":{"name":"P1","sequence":[{"name":"anInt","type":"int32"},{"name":"aStream","type":{"stream":{"items":"int32"}}}]},"types":null}"""
+    _schema = """{"protocol":{"name":"P1","sequence":[{"name":"anInt","type":"uint32"},{"name":"aStream","type":{"stream":{"items":"int32"}}},{"name":"optional","type":[null,"int32"]},{"name":"union","type":[null,{"label":"int32","type":"int32"},{"label":"string","type":"string"}]}]},"types":null}"""
 
     def write_an_int(self, value: int) -> None:
         """Ordinal 0"""
@@ -19,12 +19,28 @@ class P1WriterBase(abc.ABC):
         """Ordinal 1"""
         self._write_a_stream(value)
 
+    def write_optional(self, value: int | None) -> None:
+        """Ordinal 2"""
+        self._write_optional(value)
+
+    def write_union(self, value: int | str | None) -> None:
+        """Ordinal 3"""
+        self._write_union(value)
+
     @abc.abstractmethod
     def _write_an_int(self, value: int) -> None:
         raise NotImplementedError()
 
     @abc.abstractmethod
     def _write_a_stream(self, value: collections.abc.Iterable[int]) -> None:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _write_optional(self, value: int | None) -> None:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _write_union(self, value: int | str | None) -> None:
         raise NotImplementedError()
 
 class P1ReaderBase(abc.ABC):
@@ -40,11 +56,27 @@ class P1ReaderBase(abc.ABC):
         """Ordinal 1"""
         return self._read_a_stream()
 
+    def read_optional(self) -> int | None:
+        """Ordinal 2"""
+        return self._read_optional()
+
+    def read_union(self) -> int | str | None:
+        """Ordinal 3"""
+        return self._read_union()
+
     @abc.abstractmethod
     def _read_an_int(self) -> int:
         raise NotImplementedError()
 
     @abc.abstractmethod
     def _read_a_stream(self) -> collections.abc.Iterable[int]:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _read_optional(self) -> int | None:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _read_union(self) -> int | str | None:
         raise NotImplementedError()
 
