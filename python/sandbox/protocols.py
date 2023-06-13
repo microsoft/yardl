@@ -5,78 +5,95 @@ import abc
 import collections.abc
 import datetime
 import numpy as np
+from . import yardl_types as yardl
 
 class P1WriterBase(abc.ABC):
     """Abstract writer for the P1 protocol."""
 
-    _schema = """{"protocol":{"name":"P1","sequence":[{"name":"anInt","type":"uint32"},{"name":"aStream","type":{"stream":{"items":"int32"}}},{"name":"optional","type":[null,"int32"]},{"name":"union","type":[null,{"label":"int32","type":"int32"},{"label":"string","type":"string"}]}]},"types":null}"""
+    schema = """{"protocol":{"name":"P1","sequence":[{"name":"anInt","type":"uint32"},{"name":"aStream","type":{"stream":{"items":"int32"}}},{"name":"optional","type":[null,"int32"]},{"name":"union","type":[null,{"label":"int32","type":"int32"},{"label":"string","type":"string"}]},{"name":"date","type":"date"}]},"types":null}"""
 
-    def write_an_int(self, value: int) -> None:
+    def write_an_int(self, value: yardl.UInt32) -> None:
         """Ordinal 0"""
         self._write_an_int(value)
 
-    def write_a_stream(self, value: collections.abc.Iterable[int]) -> None:
+    def write_a_stream(self, value: collections.abc.Iterable[yardl.Int32]) -> None:
         """Ordinal 1"""
         self._write_a_stream(value)
 
-    def write_optional(self, value: int | None) -> None:
+    def write_optional(self, value: yardl.Int32 | None) -> None:
         """Ordinal 2"""
         self._write_optional(value)
 
-    def write_union(self, value: int | str | None) -> None:
+    def write_union(self, value: yardl.Int32 | str | None) -> None:
         """Ordinal 3"""
         self._write_union(value)
 
+    def write_date(self, value: yardl.Date) -> None:
+        """Ordinal 4"""
+        self._write_date(value)
+
     @abc.abstractmethod
-    def _write_an_int(self, value: int) -> None:
+    def _write_an_int(self, value: yardl.UInt32) -> None:
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def _write_a_stream(self, value: collections.abc.Iterable[int]) -> None:
+    def _write_a_stream(self, value: collections.abc.Iterable[yardl.Int32]) -> None:
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def _write_optional(self, value: int | None) -> None:
+    def _write_optional(self, value: yardl.Int32 | None) -> None:
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def _write_union(self, value: int | str | None) -> None:
+    def _write_union(self, value: yardl.Int32 | str | None) -> None:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _write_date(self, value: yardl.Date) -> None:
         raise NotImplementedError()
 
 class P1ReaderBase(abc.ABC):
     """Abstract reader for the P1 protocol."""
 
-    _schema = P1WriterBase._schema
+    schema = P1WriterBase.schema
 
-    def read_an_int(self) -> int:
+    def read_an_int(self) -> yardl.UInt32:
         """Ordinal 0"""
         return self._read_an_int()
 
-    def read_a_stream(self) -> collections.abc.Iterable[int]:
+    def read_a_stream(self) -> collections.abc.Iterable[yardl.Int32]:
         """Ordinal 1"""
         return self._read_a_stream()
 
-    def read_optional(self) -> int | None:
+    def read_optional(self) -> yardl.Int32 | None:
         """Ordinal 2"""
         return self._read_optional()
 
-    def read_union(self) -> int | str | None:
+    def read_union(self) -> yardl.Int32 | str | None:
         """Ordinal 3"""
         return self._read_union()
 
+    def read_date(self) -> yardl.Date:
+        """Ordinal 4"""
+        return self._read_date()
+
     @abc.abstractmethod
-    def _read_an_int(self) -> int:
+    def _read_an_int(self) -> yardl.UInt32:
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def _read_a_stream(self) -> collections.abc.Iterable[int]:
+    def _read_a_stream(self) -> collections.abc.Iterable[yardl.Int32]:
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def _read_optional(self) -> int | None:
+    def _read_optional(self) -> yardl.Int32 | None:
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def _read_union(self) -> int | str | None:
+    def _read_union(self) -> yardl.Int32 | str | None:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _read_date(self) -> yardl.Date:
         raise NotImplementedError()
 

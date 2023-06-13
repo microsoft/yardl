@@ -20,6 +20,7 @@ import abc
 import collections.abc
 import datetime
 import numpy as np
+from . import yardl_types as yardl
 `)
 
 	writeProtocols(w, ns, st)
@@ -36,7 +37,7 @@ func writeProtocols(w *formatting.IndentedWriter, ns *dsl.Namespace, st dsl.Symb
 			common.WriteDocstringWithLeadingLine(w, fmt.Sprintf("Abstract writer for the %s protocol.", p.Name), p.Comment)
 			w.WriteStringln("")
 
-			fmt.Fprintf(w, `_schema = """%s"""`, dsl.GetProtocolSchemaString(p, st))
+			fmt.Fprintf(w, `schema = """%s"""`, dsl.GetProtocolSchemaString(p, st))
 			w.WriteStringln("\n")
 
 			for i, step := range p.Sequence {
@@ -74,7 +75,7 @@ func writeProtocols(w *formatting.IndentedWriter, ns *dsl.Namespace, st dsl.Symb
 			common.WriteDocstringWithLeadingLine(w, fmt.Sprintf("Abstract reader for the %s protocol.", p.Name), p.Comment)
 			w.WriteStringln("")
 
-			fmt.Fprintf(w, `_schema = %s._schema`, common.AbstractWriterName(p))
+			fmt.Fprintf(w, `schema = %s.schema`, common.AbstractWriterName(p))
 			w.WriteStringln("\n")
 
 			for i, step := range p.Sequence {

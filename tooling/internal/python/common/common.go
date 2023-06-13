@@ -137,22 +137,42 @@ func TypeDefinitionSyntax(t dsl.TypeDefinition, contextNamespace string) string 
 
 func PrimitiveSyntax(p dsl.PrimitiveDefinition) string {
 	switch p {
-	case dsl.Int8, dsl.Uint8, dsl.Int16, dsl.Uint16, dsl.Int32, dsl.Uint32, dsl.Int64, dsl.Uint64, dsl.Size:
-		return "int"
-	case dsl.Float32, dsl.Float64:
-		return "float"
-	case dsl.ComplexFloat32, dsl.ComplexFloat64:
-		return "complex"
 	case dsl.Bool:
-		return "bool"
+		return "yardl.Bool"
+	case dsl.Int8:
+		return "yardl.Int8"
+	case dsl.Uint8:
+		return "yardl.UInt8"
+	case dsl.Int16:
+		return "yardl.Int16"
+	case dsl.Uint16:
+		return "yardl.UInt16"
+	case dsl.Int32:
+		return "yardl.Int32"
+	case dsl.Uint32:
+		return "yardl.UInt32"
+	case dsl.Int64:
+		return "yardl.Int64"
+	case dsl.Uint64:
+		return "yardl.UInt64"
+	case dsl.Size:
+		return "yardl.Size"
+	case dsl.Float32:
+		return "yardl.Float32"
+	case dsl.Float64:
+		return "yardl.Float64"
+	case dsl.ComplexFloat32:
+		return "yardl.ComplexFloat"
+	case dsl.ComplexFloat64:
+		return "yardl.ComplexDouble"
 	case dsl.String:
 		return "str"
 	case dsl.Date:
-		return "datetime.date"
+		return "yardl.Date"
 	case dsl.Time:
-		return "datetime.time"
+		return "yardl.Time"
 	case dsl.DateTime:
-		return "datetime.datetime"
+		return "yardl.DateTime"
 	default:
 		panic(fmt.Sprintf("primitive '%v' not yet supported", p))
 	}

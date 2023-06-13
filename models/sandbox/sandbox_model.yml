@@ -30,3 +30,4 @@ P1: !protocol
       items: int
     optional: int?
     union: [null, int, string]
+    date: date

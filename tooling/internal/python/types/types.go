@@ -22,6 +22,7 @@ import datetime
 import enum
 import typing
 import numpy as np
+from . import yardl_types as yardl
 `)
 
 	writeTypes(w, ns)
@@ -31,6 +32,20 @@ import numpy as np
 }
 
 func writeTypes(w *formatting.IndentedWriter, ns *dsl.Namespace) {
+	typeVars := make(map[string]any)
+	for _, td := range ns.TypeDefinitions {
+		for _, tp := range td.GetDefinitionMeta().TypeParameters {
+			identifier := common.TypeIdentifierName(tp.Name)
+			if _, ok := typeVars[identifier]; !ok {
+				typeVars[identifier] = nil
+				fmt.Fprintf(w, "%s = typing.TypeVar('%s')\n", identifier, identifier)
+			}
+		}
+	}
+	if len(typeVars) > 0 {
+		w.WriteStringln("")
+	}
+
 	for _, td := range ns.TypeDefinitions {
 		switch td := td.(type) {
 		case *dsl.EnumDefinition:
@@ -46,16 +61,13 @@ func writeTypes(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 }
 
 func writeNamedType(w *formatting.IndentedWriter, td *dsl.NamedType) {
-	DeclareTypeVars(w, td)
 	fmt.Fprintf(w, "%s = %s\n", common.TypeDefinitionSyntax(td, td.Namespace), common.TypeSyntax(td.Type, td.Namespace))
 	common.WriteDocstring(w, td.Comment)
 	w.Indent().WriteStringln("")
 }
 
 func writeRecord(w *formatting.IndentedWriter, rec *dsl.RecordDefinition) {
-	DeclareTypeVars(w, rec)
-
-	w.WriteStringln("@dataclasses.dataclass(kw_only=True)")
+	w.WriteStringln("@dataclasses.dataclass(slots=True, kw_only=True)")
 	fmt.Fprintf(w, "class %s%s:\n", common.TypeDefinitionSyntax(rec, rec.Namespace), GetGenericBase(rec))
 	w.Indented(func() {
 		common.WriteDocstring(w, rec.Comment)
@@ -75,13 +87,6 @@ func writeRecord(w *formatting.IndentedWriter, rec *dsl.RecordDefinition) {
 		}
 	})
 	w.WriteStringln("")
-}
-
-func DeclareTypeVars(w *formatting.IndentedWriter, td dsl.TypeDefinition) {
-	for _, tp := range td.GetDefinitionMeta().TypeParameters {
-		identifier := common.TypeIdentifierName(tp.Name)
-		fmt.Fprintf(w, "%s = typing.TypeVar('%s')\n", identifier, identifier)
-	}
 }
 
 func GetGenericBase(t dsl.TypeDefinition) string {

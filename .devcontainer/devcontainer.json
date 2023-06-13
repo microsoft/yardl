@@ -45,10 +45,15 @@
         "cmake.buildDirectory": "${workspaceFolder}/cpp/build",
 
         // Python linting.
-        "python.analysis.typeCheckingMode": "basic",
+        "python.analysis.typeCheckingMode": "strict",
+        "python.analysis.diagnosticMode": "workspace",
+        "python.analysis.diagnosticSeverityOverrides": {
+          "reportUnusedImport": "none",
+          "reportMissingParameterType": "information",
+          "reportUnnecessaryIsInstance": "none"
+        },
         "python.linting.ignorePatterns": ["**/conftest.py", "**/test_*.py"],
         "python.defaultInterpreterPath": "/opt/conda/envs/yardl/bin/python",
-        "python.formatting.autopep8Path": "/opt/conda/envs/yardl/bin/autopep8",
         "python.terminal.activateEnvironment": false, // Disable the extension calling activate when the integrated terminal launches. We take care of this in ~/.bashrc.
 
         "testMate.cpp.test.executables": "cpp/{build,Build,BUILD,out,Out,OUT}/**/*{test,Test,TEST}*",

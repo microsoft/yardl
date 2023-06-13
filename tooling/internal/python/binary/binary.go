@@ -25,6 +25,7 @@ import numpy as np
 
 from . import *
 from . import _binary
+from . import yardl_types as yardl
 `)
 
 	writeProtocols(w, ns)
@@ -45,7 +46,7 @@ func writeProtocols(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 			w.WriteStringln("def __init__(self, stream: typing.BinaryIO | str) -> None:")
 			w.Indented(func() {
 				fmt.Fprintf(w, "%s.__init__(self)\n", common.AbstractWriterName(p))
-				fmt.Fprintf(w, "_binary.BinaryProtocolWriter.__init__(self, stream, %s._schema)\n", common.AbstractWriterName(p))
+				fmt.Fprintf(w, "_binary.BinaryProtocolWriter.__init__(self, stream, %s.schema)\n", common.AbstractWriterName(p))
 			})
 			w.WriteStringln("")
 

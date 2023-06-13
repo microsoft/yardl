@@ -6,6 +6,9 @@ import datetime
 import enum
 import typing
 import numpy as np
+from . import yardl_types as yardl
+
+T = typing.TypeVar('T')
 
 class MyFlags(enum.Flag):
     """This is my enum"""
@@ -14,22 +17,20 @@ class MyFlags(enum.Flag):
     B = 2
     C = 4
 
-T = typing.TypeVar('T')
-@dataclasses.dataclass(kw_only=True)
+@dataclasses.dataclass(slots=True, kw_only=True)
 class MyRec(typing.Generic[T]):
-    f1: int | None = None
+    f1: yardl.Int32 | None = None
     f2: T
     f3: MyFlags
 
 MyString = str
 """This is a string"""
 
-T = typing.TypeVar('T')
-@dataclasses.dataclass(kw_only=True)
+@dataclasses.dataclass(slots=True, kw_only=True)
 class R2(typing.Generic[T]):
     r2: MyRec[T]
 
 R = MyRec[str]
 
-MyInt = int | float
+MyInt = yardl.Int32 | yardl.Float32
 
