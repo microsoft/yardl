@@ -7,22 +7,27 @@ MyFlags: !flags
     - b
     - c
 
-MyRec<T>: !record
+# MyRec<T>: !record
+#   fields:
+#     f1: int?
+#     f2: T
+#     f3: MyFlags
+
+# # This is a string
+# MyString: string
+
+# R2<T>: !record
+#   fields:
+#     r2: MyRec<T>
+
+# R: MyRec<string>
+
+# MyInt: [int, float]
+
+Point: !record
   fields:
-    f1: int?
-    f2: T
-    f3: MyFlags
-
-# This is a string
-MyString: string
-
-R2<T>: !record
-  fields:
-    r2: MyRec<T>
-
-R: MyRec<string>
-
-MyInt: [int, float]
+    x: int
+    y: int
 
 P1: !protocol
   sequence:
@@ -33,3 +38,6 @@ P1: !protocol
     union: [null, int, uint]
     date: date
     flag: MyFlags
+    vec: int*3
+    arr: uint[]
+    map: string->int

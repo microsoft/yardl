@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"path"
+	"strconv"
 	"strings"
 
 	"github.com/microsoft/yardl/tooling/internal/formatting"
@@ -22,16 +23,35 @@ import collections.abc
 import datetime
 import typing
 import numpy as np
+import numpy.typing as npt
 
 from . import *
 from . import _binary
 from . import yardl_types as yardl
 `)
 
+	writeRecordSerializers(w, ns)
 	writeProtocols(w, ns)
 
 	definitionsPath := path.Join(packageDir, "binary.py")
 	return iocommon.WriteFileIfNeeded(definitionsPath, b.Bytes(), 0644)
+}
+
+func writeRecordSerializers(w *formatting.IndentedWriter, ns *dsl.Namespace) {
+	for _, td := range ns.TypeDefinitions {
+		switch td := td.(type) {
+		case *dsl.RecordDefinition:
+			fmt.Fprintf(w, "class %s:\n", recordRwClassName(td, true))
+			w.Indented(func() {
+				w.WriteStringln("pass")
+			})
+			w.WriteStringln("")
+		}
+	}
+}
+
+func recordRwClassName(record *dsl.RecordDefinition, write bool) string {
+	return fmt.Sprintf("_%s%s", formatting.ToPascalCase(record.Name), noun(write))
 }
 
 func writeProtocols(w *formatting.IndentedWriter, ns *dsl.Namespace) {
@@ -137,17 +157,78 @@ func typeRwCallable(t dsl.Type, write bool, contextNamespace string) string {
 			return fmt.Sprintf("_binary.Union%s([%s])", noun(write), strings.Join(options, ", "))
 
 		}()
-		switch t.Dimensionality.(type) {
+		switch td := t.Dimensionality.(type) {
 		case nil:
 			return scalarCallable
 		case *dsl.Stream:
 			return fmt.Sprintf("_binary.Stream%s(%s)", noun(write), scalarCallable)
+		case *dsl.Vector:
+			if td.Length != nil {
+				return fmt.Sprintf("_binary.FixedVector%s(%s, %d)", noun(write), scalarCallable, *td.Length)
+			}
+
+			return fmt.Sprintf("_binary.Vector%s(%s)", noun(write), scalarCallable)
+		case *dsl.Array:
+			dtype := common.TypeDTypeSyntax(t.ToScalar())
+			triviallySerializable := isTypeTriviallySerializableExpr(t.ToScalar())
+			if td.IsFixed() {
+				dims := make([]string, len(*td.Dimensions))
+				for i, d := range *td.Dimensions {
+					dims[i] = strconv.FormatUint(*d.Length, 10)
+				}
+
+				return fmt.Sprintf("_binary.FixedNDArray%s(%s, %s, %s, (%s,))", noun(write), scalarCallable, dtype, triviallySerializable, strings.Join(dims, ", "))
+			}
+
+			if td.HasKnownNumberOfDimensions() {
+				return fmt.Sprintf("_binary.NDArray%s(%s, %s, %s, %d)", noun(write), scalarCallable, dtype, triviallySerializable, len(*td.Dimensions))
+			}
+
+			return fmt.Sprintf("_binary.DynamicNDArray%s(%s, %s, %s)", noun(write), scalarCallable, dtype, triviallySerializable)
+
+		case *dsl.Map:
+			keyCallable := typeRwCallable(td.KeyType, write, contextNamespace)
+			valueCallable := typeRwCallable(t.ToScalar(), write, contextNamespace)
+
+			return fmt.Sprintf("_binary.Map%s(%s, %s)", noun(write), keyCallable, valueCallable)
 		default:
 			panic(fmt.Sprintf("Not implemented %T", t.Dimensionality))
 		}
 	default:
 		panic(fmt.Sprintf("Not implemented %T", t))
 	}
+}
+
+func isTypeDefinitionTriviallySerializableExpr(t dsl.TypeDefinition) string {
+	switch t := t.(type) {
+	case dsl.PrimitiveDefinition:
+		switch t {
+		case dsl.Uint8, dsl.Int8, dsl.Float32, dsl.Float64, dsl.ComplexFloat32, dsl.ComplexFloat64:
+			return boolSyntax(true)
+		}
+	case *dsl.EnumDefinition:
+		if t.BaseType != nil {
+			return isTypeTriviallySerializableExpr(t.BaseType)
+		}
+	}
+
+	return boolSyntax(false)
+}
+
+func isTypeTriviallySerializableExpr(t dsl.Type) string {
+	switch t := t.(type) {
+	case *dsl.SimpleType:
+		return isTypeDefinitionTriviallySerializableExpr(t.ResolvedDefinition)
+	}
+
+	return boolSyntax(false)
+}
+
+func boolSyntax(b bool) string {
+	if b {
+		return "True"
+	}
+	return "False"
 }
 
 func verb(write bool) string {

@@ -22,6 +22,7 @@ import datetime
 import enum
 import typing
 import numpy as np
+import numpy.typing as npt
 from . import yardl_types as yardl
 `)
 

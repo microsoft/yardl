@@ -98,7 +98,7 @@ func TypeSyntax(t dsl.Type, contextNamespace string) string {
 		case *dsl.Vector:
 			return fmt.Sprintf("list[%s]", scalarString)
 		case *dsl.Array:
-			return "np.array"
+			return fmt.Sprintf("npt.NDArray[%s]", TypeDTypeTypeArgument(t.ToScalar()))
 		case *dsl.Map:
 			return fmt.Sprintf("dict[%s, %s]", TypeSyntax(d.KeyType, contextNamespace), scalarString)
 		default:
@@ -176,6 +176,52 @@ func PrimitiveSyntax(p dsl.PrimitiveDefinition) string {
 	default:
 		panic(fmt.Sprintf("primitive '%v' not yet supported", p))
 	}
+}
+
+func TypeDTypeSyntax(t dsl.Type) string {
+	switch t := t.(type) {
+	case *dsl.SimpleType:
+		return TypeDefinitionDTypeSyntax(t.ResolvedDefinition)
+	default:
+		panic(fmt.Sprintf("Dype for %T not implemented", t))
+	}
+}
+
+func TypeDefinitionDTypeSyntax(t dsl.TypeDefinition) string {
+	switch t := t.(type) {
+	case dsl.PrimitiveDefinition:
+		switch t {
+		case dsl.Bool:
+			return "np.bool_"
+		case dsl.Int8, dsl.Uint8, dsl.Int16, dsl.Uint16, dsl.Int32, dsl.Uint32, dsl.Int64, dsl.Uint64, dsl.Float32, dsl.Float64:
+			return fmt.Sprintf("np.%s", strings.ToLower(string(t)))
+		case dsl.ComplexFloat32:
+			return "np.complex64"
+		case dsl.ComplexFloat64:
+			return "np.complex128"
+		case dsl.Date:
+			return "np.datetime64"
+		case dsl.Time:
+			return "np.timedelta64"
+		case dsl.DateTime:
+			return "np.datetime64"
+		case dsl.String:
+			return "np.object_"
+		default:
+			panic(fmt.Sprintf("Not implemented %s", t))
+		}
+	default:
+		panic(fmt.Sprintf("Not implemented %T", t))
+	}
+}
+
+func TypeDTypeTypeArgument(t dsl.Type) string {
+	dTypeSyntax := TypeDTypeSyntax(t)
+	if strings.HasSuffix(dTypeSyntax, ")") {
+		return "typing.Any"
+	}
+
+	return dTypeSyntax
 }
 
 func NamespaceIdentifierName(namespace string) string {

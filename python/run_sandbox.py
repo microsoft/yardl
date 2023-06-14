@@ -7,6 +7,7 @@ import timeit
 import sandbox
 import sandbox._binary
 import numpy as np
+import numpy.typing as npt
 import typing
 from datetime import date, time, datetime, timedelta
 import sys
@@ -24,7 +25,12 @@ def main():
         # w.write_a_stream([1, 2, 3, 4, 5])
         # w.write_optional(2)
         # w.write_union(None)
-        w.write_flag(sandbox.MyFlags.A | sandbox.MyFlags.B)
+        # w.write_flag(sandbox.MyFlags.A | sandbox.MyFlags.B)
+        # w.write_vec([1,2,3])
+        new_var = np.array([[1,2,3],[4,5,6]], dtype=np.uint32)
+        w.write_arr(new_var)
+        # w.write_map({"a": 1, "b": 2})
+
 
         pass
 
@@ -37,7 +43,13 @@ def main():
     c2 = sandbox.R(f2="hello", f3=sandbox.MyFlags.A | sandbox.MyFlags.B)
     print(c2)
 
+    print(np.dtype('object'))
 
+    def f(arr : npt.NDArray[np.int32]):
+        print(arr)
+
+    new_var = np.array([[1,2,3],[4,5,6]], dtype=np.int32)
+    f(new_var)
 
 
 

@@ -5,13 +5,14 @@ import abc
 import collections.abc
 import datetime
 import numpy as np
+import numpy.typing as npt
 from . import *
 from . import yardl_types as yardl
 
 class P1WriterBase(abc.ABC):
     """Abstract writer for the P1 protocol."""
 
-    schema = """{"protocol":{"name":"P1","sequence":[{"name":"anInt","type":"uint32"},{"name":"aStream","type":{"stream":{"items":"int32"}}},{"name":"optional","type":[null,"int32"]},{"name":"union","type":[null,{"label":"int32","type":"int32"},{"label":"uint32","type":"uint32"}]},{"name":"date","type":"date"},{"name":"flag","type":"Sandbox.MyFlags"}]},"types":[{"name":"MyFlags","base":"uint32","values":[{"symbol":"a","value":1},{"symbol":"b","value":2},{"symbol":"c","value":4}]}]}"""
+    schema = """{"protocol":{"name":"P1","sequence":[{"name":"anInt","type":"uint32"},{"name":"aStream","type":{"stream":{"items":"int32"}}},{"name":"optional","type":[null,"int32"]},{"name":"union","type":[null,{"label":"int32","type":"int32"},{"label":"uint32","type":"uint32"}]},{"name":"date","type":"date"},{"name":"flag","type":"Sandbox.MyFlags"},{"name":"vec","type":{"vector":{"items":"int32","length":3}}},{"name":"arr","type":{"array":{"items":"uint32"}}},{"name":"map","type":{"map":{"keys":"string","values":"int32"}}}]},"types":[{"name":"MyFlags","base":"uint32","values":[{"symbol":"a","value":1},{"symbol":"b","value":2},{"symbol":"c","value":4}]}]}"""
 
     def write_an_int(self, value: yardl.UInt32) -> None:
         """Ordinal 0"""
@@ -37,6 +38,18 @@ class P1WriterBase(abc.ABC):
         """Ordinal 5"""
         self._write_flag(value)
 
+    def write_vec(self, value: list[yardl.Int32]) -> None:
+        """Ordinal 6"""
+        self._write_vec(value)
+
+    def write_arr(self, value: npt.NDArray[np.uint32]) -> None:
+        """Ordinal 7"""
+        self._write_arr(value)
+
+    def write_map(self, value: dict[str, yardl.Int32]) -> None:
+        """Ordinal 8"""
+        self._write_map(value)
+
     @abc.abstractmethod
     def _write_an_int(self, value: yardl.UInt32) -> None:
         raise NotImplementedError()
@@ -59,6 +72,18 @@ class P1WriterBase(abc.ABC):
 
     @abc.abstractmethod
     def _write_flag(self, value: MyFlags) -> None:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _write_vec(self, value: list[yardl.Int32]) -> None:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _write_arr(self, value: npt.NDArray[np.uint32]) -> None:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _write_map(self, value: dict[str, yardl.Int32]) -> None:
         raise NotImplementedError()
 
 class P1ReaderBase(abc.ABC):
@@ -90,6 +115,18 @@ class P1ReaderBase(abc.ABC):
         """Ordinal 5"""
         return self._read_flag()
 
+    def read_vec(self) -> list[yardl.Int32]:
+        """Ordinal 6"""
+        return self._read_vec()
+
+    def read_arr(self) -> npt.NDArray[np.uint32]:
+        """Ordinal 7"""
+        return self._read_arr()
+
+    def read_map(self) -> dict[str, yardl.Int32]:
+        """Ordinal 8"""
+        return self._read_map()
+
     @abc.abstractmethod
     def _read_an_int(self) -> yardl.UInt32:
         raise NotImplementedError()
@@ -112,5 +149,17 @@ class P1ReaderBase(abc.ABC):
 
     @abc.abstractmethod
     def _read_flag(self) -> MyFlags:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _read_vec(self) -> list[yardl.Int32]:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _read_arr(self) -> npt.NDArray[np.uint32]:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _read_map(self) -> dict[str, yardl.Int32]:
         raise NotImplementedError()
 

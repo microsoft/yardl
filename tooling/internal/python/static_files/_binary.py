@@ -39,7 +39,7 @@ class BinaryProtocolWriter(ABC):
         self._stream = CodedOutputStream(stream)
         self._stream.write_bytes(MAGIC_BYTES)
         write_fixed_int32(self._stream, CURRENT_BINARY_FORMAT_VERSION)
-        self._stream.write_string(schema)
+        write_string(self._stream, schema)
 
     def __enter__(self):
         return self
@@ -138,9 +138,6 @@ class CodedOutputStream:
 
     def write_signed_varint(self, value: Integer) -> None:
         self.write_unsigned_varint(self.zigzag_encode(value))
-
-    def write_string(self, value: str) -> None:
-        self.write_bytes(value.encode("utf-8"))
 
 
 bool_struct = struct.Struct("<?")
@@ -252,7 +249,9 @@ def write_complex64(stream: CodedOutputStream, value: complex) -> None:
 
 
 def write_string(stream: CodedOutputStream, value: str) -> None:
-    stream.write_string(value)
+    b = value.encode("utf-8")
+    stream.write_unsigned_varint(len(b))
+    stream.write_bytes(b)
 
 
 EPOCH_ORDINAL_DAYS = datetime.date(1970, 1, 1).toordinal()
@@ -381,17 +380,20 @@ class StreamWriter(Generic[T]):
 
 
 class FixedVectorWriter(Generic[T]):
-    def __init__(self, length: int, write_element: Writer[T]) -> None:
-        self.length = length
+    def __init__(self, write_element: Writer[T], length: int) -> None:
         self.write_element = write_element
+        self.length = length
 
     def __call__(self, stream: CodedOutputStream, value: list[T]) -> None:
-        assert len(value) == self.length
+        if len(value) != self.length:
+            raise ValueError(
+                f"Expected a list of length {self.length}, got {len(value)}"
+            )
         for element in value:
             self.write_element(stream, element)
 
 
-class DynamicVectorWriter(Generic[T]):
+class VectorWriter(Generic[T]):
     def __init__(self, write_element: Writer[T]) -> None:
         self.write_element = write_element
 
@@ -416,80 +418,81 @@ class MapWriter(Generic[TKey, TValue]):
             self.write_key(stream, k)
             self.write_value(stream, v)
 
-
-class DynamicNDArrayWriter(Generic[T]):
+class NDArrayWriterBase(Generic[T]):
     def __init__(
         self,
         write_element: Writer[T],
-        dtype: np.dtype[Any],
+        dtype: npt.DTypeLike,
         trivially_serializable: bool,
     ) -> None:
         self.dtype = dtype
         self.write_element = write_element
         self.trivially_serializable = trivially_serializable
 
+    def _write_data(self, stream: CodedOutputStream, value: npt.NDArray[Any]) -> None:
+        if value.dtype != self.dtype:
+            raise ValueError(f"Expected dtype {self.dtype}, got {value.dtype}")
+
+        if self.trivially_serializable and value.flags.c_contiguous:
+            stream.write_bytes_directly(value.data)
+        else:
+            for element in value.flat:
+                self.write_element(stream, element)
+
+class DynamicNDArrayWriter(Generic[T], NDArrayWriterBase[T]):
+    def __init__(
+        self,
+        write_element: Writer[T],
+        dtype: npt.DTypeLike,
+        trivially_serializable: bool,
+    ) -> None:
+        super().__init__(write_element, dtype, trivially_serializable)
+
     def __call__(self, stream: CodedOutputStream, value: npt.NDArray[Any]) -> None:
-        assert value.dtype == self.dtype, "dtype mismatch"
         stream.write_unsigned_varint(value.ndim)
         for dim in value.shape:
             stream.write_unsigned_varint(dim)
 
-        if self.trivially_serializable and value.flags.c_contiguous:
-            stream.write_bytes_directly(value.data)
-        else:
-            for element in value.flat:
-                self.write_element(stream, element)
+        self._write_data(stream, value)
 
 
-class NDArrayWriter(Generic[T]):
+class NDArrayWriter(Generic[T], NDArrayWriterBase[T]):
     def __init__(
         self,
         write_element: Writer[T],
-        dtype: np.dtype[Any],
-        ndims: int,
+        dtype: npt.DTypeLike,
         trivially_serializable: bool,
+        ndims: int,
     ) -> None:
-        self.write_element = write_element
-        self.dtype = dtype
+        super().__init__(write_element, dtype, trivially_serializable)
         self.ndims = ndims
-        self.trivially_serializable = trivially_serializable
 
     def __call__(self, stream: CodedOutputStream, value: npt.NDArray[Any]) -> None:
-        assert value.dtype == self.dtype, "dtype mismatch"
-        assert value.ndim == self.ndims, "dimension count mismatch"
+        if value.ndim != self.ndims:
+            raise ValueError(f"Expected {self.ndims} dimensions, got {value.ndim}")
 
         for dim in value.shape:
             stream.write_unsigned_varint(dim)
 
-        if self.trivially_serializable and value.flags.c_contiguous:
-            stream.write_bytes_directly(value.data)
-        else:
-            for element in value.flat:
-                self.write_element(stream, element)
+        self._write_data(stream, value)
 
 
-class FixedNDArrayWriter(Generic[T]):
+class FixedNDArrayWriter(Generic[T], NDArrayWriterBase[T]):
     def __init__(
         self,
         write_element: Writer[T],
-        dtype: np.dtype[Any],
-        shape: tuple[int, ...],
+        dtype: npt.DTypeLike,
         trivially_serializable: bool,
+        shape: tuple[int, ...],
     ) -> None:
-        self.write_element = write_element
-        self.dtype = dtype
+        super().__init__(write_element, dtype, trivially_serializable)
         self.shape = shape
-        self.trivially_serializable = trivially_serializable
 
     def __call__(self, stream: CodedOutputStream, value: npt.NDArray[Any]) -> None:
-        assert value.dtype == self.dtype, "dtype mismatch"
-        assert value.shape == self.shape, "shape mismatch"
+        if value.shape != self.shape:
+            raise ValueError(f"Expected shape {self.shape}, got {value.shape}")
 
-        if self.trivially_serializable and value.flags.c_contiguous:
-            stream.write_bytes_directly(value.data)
-        else:
-            for element in value.flat:
-                self.write_element(stream, element)
+        self._write_data(stream, value)
 
 
 # Only used in the header

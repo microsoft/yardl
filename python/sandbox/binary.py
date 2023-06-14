@@ -6,10 +6,14 @@ import collections.abc
 import datetime
 import typing
 import numpy as np
+import numpy.typing as npt
 
 from . import *
 from . import _binary
 from . import yardl_types as yardl
+
+class _PointWriter:
+    pass
 
 class BinaryP1Writer(P1WriterBase, _binary.BinaryProtocolWriter):
     """Binary writer for the P1 protocol."""
@@ -36,6 +40,15 @@ class BinaryP1Writer(P1WriterBase, _binary.BinaryProtocolWriter):
     def _write_flag(self, value: MyFlags) -> None:
         _binary.EnumWriter(_binary.write_uint32)(self._stream, value)
 
+    def _write_vec(self, value: list[yardl.Int32]) -> None:
+        _binary.FixedVectorWriter(_binary.write_int32, 3)(self._stream, value)
+
+    def _write_arr(self, value: npt.NDArray[np.uint32]) -> None:
+        _binary.DynamicNDArrayWriter(_binary.write_uint32, np.uint32, False)(self._stream, value)
+
+    def _write_map(self, value: dict[str, yardl.Int32]) -> None:
+        _binary.MapWriter(_binary.write_string, _binary.write_int32)(self._stream, value)
+
 
 class BinaryP1Reader(P1ReaderBase):
     """Binary writer for the P1 protocol."""
@@ -56,5 +69,14 @@ class BinaryP1Reader(P1ReaderBase):
         raise NotImplementedError()
 
     def _read_flag(self) -> MyFlags:
+        raise NotImplementedError()
+
+    def _read_vec(self) -> list[yardl.Int32]:
+        raise NotImplementedError()
+
+    def _read_arr(self) -> npt.NDArray[np.uint32]:
+        raise NotImplementedError()
+
+    def _read_map(self) -> dict[str, yardl.Int32]:
         raise NotImplementedError()
 
