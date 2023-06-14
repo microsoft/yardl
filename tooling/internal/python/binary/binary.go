@@ -93,6 +93,16 @@ func typeDefinitionRwCallable(t dsl.TypeDefinition, write bool) string {
 	case dsl.PrimitiveDefinition:
 		suffix := strings.ToLower(string(t))
 		return fmt.Sprintf("_binary.%s_%s", verb(write), suffix)
+	case *dsl.EnumDefinition:
+		var baseType dsl.Type
+		if t.BaseType != nil {
+			baseType = t.BaseType
+		} else {
+			baseType = dsl.Int32Type
+		}
+
+		baseRwCallable := typeRwCallable(baseType, write, "")
+		return fmt.Sprintf("_binary.Enum%s(%s)", noun(write), baseRwCallable)
 	default:
 		panic(fmt.Sprintf("Not implemented %T", t))
 	}
@@ -115,7 +125,13 @@ func typeRwCallable(t dsl.Type, write bool, contextNamespace string) string {
 
 			options := make([]string, len(t.Cases))
 			for i, c := range t.Cases {
-				options[i] = fmt.Sprintf("(%s, %s)", common.TypeSyntax(c.Type, contextNamespace), typeRwCallable(c.Type, write, contextNamespace))
+				var typeSyntax string
+				if c.Type == nil {
+					typeSyntax = "None.__class__"
+				} else {
+					typeSyntax = common.TypeSyntax(c.Type, contextNamespace)
+				}
+				options[i] = fmt.Sprintf("(%s, %s)", typeSyntax, typeRwCallable(c.Type, write, contextNamespace))
 			}
 
 			return fmt.Sprintf("_binary.Union%s([%s])", noun(write), strings.Join(options, ", "))

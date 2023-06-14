@@ -27,11 +27,14 @@ class BinaryP1Writer(P1WriterBase, _binary.BinaryProtocolWriter):
     def _write_optional(self, value: yardl.Int32 | None) -> None:
         _binary.OptionalWriter(_binary.write_int32)(self._stream, value)
 
-    def _write_union(self, value: yardl.Int32 | str | None) -> None:
-        _binary.UnionWriter([(None, _binary.write_none), (yardl.Int32, _binary.write_int32), (str, _binary.write_string)])(self._stream, value)
+    def _write_union(self, value: yardl.Int32 | yardl.UInt32 | None) -> None:
+        _binary.UnionWriter([(None.__class__, _binary.write_none), (yardl.Int32, _binary.write_int32), (yardl.UInt32, _binary.write_uint32)])(self._stream, value)
 
     def _write_date(self, value: yardl.Date) -> None:
         _binary.write_date(self._stream, value)
+
+    def _write_flag(self, value: MyFlags) -> None:
+        _binary.EnumWriter(_binary.write_uint32)(self._stream, value)
 
 
 class BinaryP1Reader(P1ReaderBase):
@@ -46,9 +49,12 @@ class BinaryP1Reader(P1ReaderBase):
     def _read_optional(self) -> yardl.Int32 | None:
         raise NotImplementedError()
 
-    def _read_union(self) -> yardl.Int32 | str | None:
+    def _read_union(self) -> yardl.Int32 | yardl.UInt32 | None:
         raise NotImplementedError()
 
     def _read_date(self) -> yardl.Date:
+        raise NotImplementedError()
+
+    def _read_flag(self) -> MyFlags:
         raise NotImplementedError()
 

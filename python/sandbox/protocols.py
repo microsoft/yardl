@@ -5,12 +5,13 @@ import abc
 import collections.abc
 import datetime
 import numpy as np
+from . import *
 from . import yardl_types as yardl
 
 class P1WriterBase(abc.ABC):
     """Abstract writer for the P1 protocol."""
 
-    schema = """{"protocol":{"name":"P1","sequence":[{"name":"anInt","type":"uint32"},{"name":"aStream","type":{"stream":{"items":"int32"}}},{"name":"optional","type":[null,"int32"]},{"name":"union","type":[null,{"label":"int32","type":"int32"},{"label":"string","type":"string"}]},{"name":"date","type":"date"}]},"types":null}"""
+    schema = """{"protocol":{"name":"P1","sequence":[{"name":"anInt","type":"uint32"},{"name":"aStream","type":{"stream":{"items":"int32"}}},{"name":"optional","type":[null,"int32"]},{"name":"union","type":[null,{"label":"int32","type":"int32"},{"label":"uint32","type":"uint32"}]},{"name":"date","type":"date"},{"name":"flag","type":"Sandbox.MyFlags"}]},"types":[{"name":"MyFlags","base":"uint32","values":[{"symbol":"a","value":1},{"symbol":"b","value":2},{"symbol":"c","value":4}]}]}"""
 
     def write_an_int(self, value: yardl.UInt32) -> None:
         """Ordinal 0"""
@@ -24,13 +25,17 @@ class P1WriterBase(abc.ABC):
         """Ordinal 2"""
         self._write_optional(value)
 
-    def write_union(self, value: yardl.Int32 | str | None) -> None:
+    def write_union(self, value: yardl.Int32 | yardl.UInt32 | None) -> None:
         """Ordinal 3"""
         self._write_union(value)
 
     def write_date(self, value: yardl.Date) -> None:
         """Ordinal 4"""
         self._write_date(value)
+
+    def write_flag(self, value: MyFlags) -> None:
+        """Ordinal 5"""
+        self._write_flag(value)
 
     @abc.abstractmethod
     def _write_an_int(self, value: yardl.UInt32) -> None:
@@ -45,11 +50,15 @@ class P1WriterBase(abc.ABC):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def _write_union(self, value: yardl.Int32 | str | None) -> None:
+    def _write_union(self, value: yardl.Int32 | yardl.UInt32 | None) -> None:
         raise NotImplementedError()
 
     @abc.abstractmethod
     def _write_date(self, value: yardl.Date) -> None:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _write_flag(self, value: MyFlags) -> None:
         raise NotImplementedError()
 
 class P1ReaderBase(abc.ABC):
@@ -69,13 +78,17 @@ class P1ReaderBase(abc.ABC):
         """Ordinal 2"""
         return self._read_optional()
 
-    def read_union(self) -> yardl.Int32 | str | None:
+    def read_union(self) -> yardl.Int32 | yardl.UInt32 | None:
         """Ordinal 3"""
         return self._read_union()
 
     def read_date(self) -> yardl.Date:
         """Ordinal 4"""
         return self._read_date()
+
+    def read_flag(self) -> MyFlags:
+        """Ordinal 5"""
+        return self._read_flag()
 
     @abc.abstractmethod
     def _read_an_int(self) -> yardl.UInt32:
@@ -90,10 +103,14 @@ class P1ReaderBase(abc.ABC):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def _read_union(self) -> yardl.Int32 | str | None:
+    def _read_union(self) -> yardl.Int32 | yardl.UInt32 | None:
         raise NotImplementedError()
 
     @abc.abstractmethod
     def _read_date(self) -> yardl.Date:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _read_flag(self) -> MyFlags:
         raise NotImplementedError()
 

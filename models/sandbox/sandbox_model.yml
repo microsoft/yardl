@@ -1,5 +1,6 @@
 # This is my enum
 MyFlags: !flags
+  base: uint32
   values:
     # This is the "A" value
     - a
@@ -29,5 +30,6 @@ P1: !protocol
     aStream: !stream
       items: int
     optional: int?
-    union: [null, int, string]
+    union: [null, int, uint]
     date: date
+    flag: MyFlags

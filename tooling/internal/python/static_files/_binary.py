@@ -329,8 +329,19 @@ def write_none(stream: CodedOutputStream, value: None) -> None:
     pass
 
 
-T = TypeVar("T", contravariant=True)
+def write_enum(stream: CodedOutputStream, value: Enum) -> None:
+    stream.write_signed_varint(value.value)
+
+
+T = TypeVar("T")
 Writer = Callable[[CodedOutputStream, T], None]
+
+class EnumWriter(Generic[T]):
+    def __init__(self, write_integer: Writer[T]) -> None:
+        self.write_integer = write_integer
+
+    def __call__(self, stream: CodedOutputStream, value: Enum) -> None:
+        self.write_integer(stream, value.value)
 
 
 class OptionalWriter(Generic[T]):
@@ -346,16 +357,12 @@ class OptionalWriter(Generic[T]):
 
 
 class UnionWriter:
-    def __init__(self, cases: list[Tuple[type | None, Writer[Any]]]) -> None:
+    def __init__(self, cases: list[Tuple[type, Writer[Any]]]) -> None:
         self.cases = cases
 
     def __call__(self, stream: CodedOutputStream, value: Any) -> None:
         for i, (case_type, case_writer) in enumerate(self.cases):
-            if case_type is None:
-                if value is None:
-                    stream.write_byte(i)
-                    return
-            elif isinstance(value, case_type):
+            if isinstance(value, case_type):
                 stream.write_byte(i)
                 case_writer(stream, value)
                 return
