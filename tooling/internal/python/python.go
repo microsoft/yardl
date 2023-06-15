@@ -75,21 +75,25 @@ func writePackageInitFile(packageDir string, ns *dsl.Namespace) error {
 		typeNames = append(typeNames, common.TypeDefinitionSyntax(t, ns.Name, false))
 	}
 
-	fmt.Fprintf(w, "from .types import %s\n", strings.Join(typeNames, ", "))
+	if len(typeNames) > 0 {
+		fmt.Fprintf(w, "from .types import %s\n", strings.Join(typeNames, ", "))
+	}
 
 	protocolTypes := make([]string, 0)
 	for _, p := range ns.Protocols {
 		protocolTypes = append(protocolTypes, common.AbstractWriterName(p), common.AbstractReaderName(p))
 	}
 
-	fmt.Fprintf(w, "from .protocols import %s\n", strings.Join(protocolTypes, ", "))
+	if len(protocolTypes) > 0 {
+		fmt.Fprintf(w, "from .protocols import %s\n", strings.Join(protocolTypes, ", "))
 
-	for i, p := range ns.Protocols {
-		protocolTypes[i*2] = binary.BinaryWriterName(p)
-		protocolTypes[i*2+1] = binary.BinaryReaderName(p)
+		for i, p := range ns.Protocols {
+			protocolTypes[i*2] = binary.BinaryWriterName(p)
+			protocolTypes[i*2+1] = binary.BinaryReaderName(p)
+		}
+
+		fmt.Fprintf(w, "from .binary import %s\n", strings.Join(protocolTypes, ", "))
 	}
-
-	fmt.Fprintf(w, "from .binary import %s\n", strings.Join(protocolTypes, ", "))
 
 	return iocommon.WriteFileIfNeeded(path.Join(packageDir, "__init__.py"), b.Bytes(), 0644)
 }

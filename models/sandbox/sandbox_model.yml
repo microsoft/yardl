@@ -13,14 +13,14 @@ MyRec<T>: !record
     f2: T
     f3: MyFlags
 
-# # This is a string
-# MyString: string
+# # # This is a string
+# # MyString: string
 
-# R2<T>: !record
-#   fields:
-#     r2: MyRec<T>
+# # R2<T>: !record
+# #   fields:
+# #     r2: MyRec<T>
 
-# R: MyRec<string>
+# # R: MyRec<string>
 
 MyInt: [int, float]
 
@@ -52,9 +52,9 @@ P1: !protocol
     # arr: uint[]
     # map: string->int
     # point: Point
-    # points: Point[]
+    # points: Point*2
     # genRec: MyRec<float>[(1)]
     # myint: MyInt
     # image: Image<int>
     # intimage: IntImage
-    complicatedArr: MyStruct<float>[]
+    complicatedArr: MyStruct2<float>[]

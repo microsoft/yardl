@@ -13,7 +13,7 @@ from . import yardl_types as yardl
 class P1WriterBase(abc.ABC):
     """Abstract writer for the P1 protocol."""
 
-    schema = """{"protocol":{"name":"P1","sequence":[{"name":"complicatedArr","type":{"array":{"items":{"name":"Sandbox.MyStruct","typeArguments":["float32"]}}}}]},"types":[{"name":"MyStruct","typeParameters":["T"],"fields":[{"name":"points","type":{"array":{"items":{"name":"Sandbox.Point","typeArguments":["T"]},"dimensions":[{"length":2}]}}}]},{"name":"Point","typeParameters":["T"],"fields":[{"name":"x","type":"T"},{"name":"y","type":"T"}]}]}"""
+    schema = """{"protocol":{"name":"P1","sequence":[{"name":"complicatedArr","type":{"array":{"items":{"name":"Sandbox.MyStruct2","typeArguments":["float32"]}}}}]},"types":[{"name":"MyStruct","typeParameters":["T"],"fields":[{"name":"points","type":{"array":{"items":{"name":"Sandbox.Point","typeArguments":["T"]},"dimensions":[{"length":2}]}}}]},{"name":"MyStruct2","typeParameters":["T"],"type":{"name":"Sandbox.MyStruct","typeArguments":["T"]}},{"name":"Point","typeParameters":["T"],"fields":[{"name":"x","type":"T"},{"name":"y","type":"T"}]}]}"""
 
     def write_complicated_arr(self, value: npt.NDArray[np.void]) -> None:
         """Ordinal 0
@@ -29,7 +29,7 @@ class P1WriterBase(abc.ABC):
         arr: uint[]
         map: string->int
         point: Point
-        points: Point[]
+        points: Point*2
         genRec: MyRec<float>[(1)]
         myint: MyInt
         image: Image<int>
@@ -60,7 +60,7 @@ class P1ReaderBase(abc.ABC):
         arr: uint[]
         map: string->int
         point: Point
-        points: Point[]
+        points: Point*2
         genRec: MyRec<float>[(1)]
         myint: MyInt
         image: Image<int>

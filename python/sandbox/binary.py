@@ -16,27 +16,27 @@ from . import yardl_types as yardl
 
 T = typing.TypeVar('T')
 
-class _MyRecWriter(_binary.RecordWriter[MyRec[T]]):
-    def __init__(self, write_t: _binary.Writer[T]) -> None:
-        super().__init__([_binary.write_int8, write_t, _binary.EnumWriter(_binary.write_uint8)])
+class _MyRecDescriptor(_binary.RecordDescriptor[MyRec[T]]):
+    def __init__(self, t_descriptor: _binary.TypeDescriptor[T]) -> None:
+        super().__init__([("f1", _binary.int8_descriptor), ("f2", t_descriptor), ("f3", _binary.EnumDescriptor(_binary.uint8_descriptor))])
 
-    def __call__(self, stream: _binary.CodedOutputStream, value: MyRec[T]) -> None:
+    def write(self, stream: _binary.CodedOutputStream, value: MyRec[T]) -> None:
         self._write(stream, value.f1, value.f2, value.f3)
 
 
-class _PointWriter(_binary.RecordWriter[Point[T]]):
-    def __init__(self, write_t: _binary.Writer[T]) -> None:
-        super().__init__([write_t, write_t])
+class _PointDescriptor(_binary.RecordDescriptor[Point[T]]):
+    def __init__(self, t_descriptor: _binary.TypeDescriptor[T]) -> None:
+        super().__init__([("x", t_descriptor), ("y", t_descriptor)])
 
-    def __call__(self, stream: _binary.CodedOutputStream, value: Point[T]) -> None:
+    def write(self, stream: _binary.CodedOutputStream, value: Point[T]) -> None:
         self._write(stream, value.x, value.y)
 
 
-class _MyStructWriter(_binary.RecordWriter[MyStruct[T]]):
-    def __init__(self, write_t: _binary.Writer[T]) -> None:
-        super().__init__([_binary.FixedNDArrayWriter(_PointWriter(write_t), np.dtype([('x', np.object_), ('y', np.object_)], align=True), False, (2,))])
+class _MyStructDescriptor(_binary.RecordDescriptor[MyStruct[T]]):
+    def __init__(self, t_descriptor: _binary.TypeDescriptor[T]) -> None:
+        super().__init__([("points", _binary.FixedNDArrayDescriptor(_PointDescriptor(t_descriptor), np.dtype([('x', t_descriptor.overall_dtype()), ('y', t_descriptor.overall_dtype())], align=True), False, (2,)))])
 
-    def __call__(self, stream: _binary.CodedOutputStream, value: MyStruct[T]) -> None:
+    def write(self, stream: _binary.CodedOutputStream, value: MyStruct[T]) -> None:
         self._write(stream, value.points)
 
 
@@ -48,7 +48,7 @@ class BinaryP1Writer(P1WriterBase, _binary.BinaryProtocolWriter):
         _binary.BinaryProtocolWriter.__init__(self, stream, P1WriterBase.schema)
 
     def _write_complicated_arr(self, value: npt.NDArray[np.void]) -> None:
-        _binary.DynamicNDArrayWriter(_MyStructWriter(_binary.write_float32), np.dtype([('points', np.dtype([('x', np.float32), ('y', np.float32)], align=True), (2))], align=True), True)(self._stream, value)
+        _binary.DynamicNDArrayDescriptor(_MyStructDescriptor(_binary.float32_descriptor), np.dtype([('points', np.dtype([('x', np.float32), ('y', np.float32)], align=True), (2))], align=True), False).write(self._stream, value)
 
 
 class BinaryP1Reader(P1ReaderBase):

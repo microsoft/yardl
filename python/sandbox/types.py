@@ -25,14 +25,14 @@ class MyRec(typing.Generic[T]):
     f3: MyFlags
 
 MyInt = yardl.Int32 | yardl.Float32
-"""# This is a string
-MyString: string
+"""# # This is a string
+# MyString: string
 
-R2<T>: !record
-  fields:
-    r2: MyRec<T>
+# R2<T>: !record
+#   fields:
+#     r2: MyRec<T>
 
-R: MyRec<string>
+# R: MyRec<string>
 """
 
 Image = list[T]
