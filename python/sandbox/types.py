@@ -48,3 +48,5 @@ class Point(typing.Generic[T]):
 class MyStruct(typing.Generic[T]):
     points: npt.NDArray[np.void]
 
+MyStruct2 = MyStruct[T]
+

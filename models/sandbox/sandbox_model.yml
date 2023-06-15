@@ -37,6 +37,8 @@ MyStruct<T>: !record
   fields:
     points: Point<T>[(2)]
 
+MyStruct2<T>: MyStruct<T>
+
 P1: !protocol
   sequence:
     # anInt: uint

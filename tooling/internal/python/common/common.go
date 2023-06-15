@@ -256,6 +256,8 @@ func TypeDefinitionDTypeSyntax(t dsl.TypeDefinition) string {
 		}
 
 		return TypeDTypeSyntax(t.BaseType)
+	case *dsl.NamedType:
+		return TypeDTypeSyntax(t.Type)
 	case *dsl.GenericTypeParameter:
 		return "np.object_"
 	default:

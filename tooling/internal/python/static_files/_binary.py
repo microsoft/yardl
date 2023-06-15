@@ -180,7 +180,7 @@ def write_uint16(stream: CodedOutputStream, value: UInt16) -> None:
             raise ValueError(
                 f"Value {value} is outside the range of an unsigned 16-bit integer"
             )
-    elif not isinstance(value, np.uint16):
+    elif not isinstance(value, cast(type, np.uint16)):
         raise ValueError(f"Value in not an unsigned 16-bit integer: {value}")
 
     stream.write_unsigned_varint(value)
@@ -192,7 +192,7 @@ def write_int32(stream: CodedOutputStream, value: Int32) -> None:
             raise ValueError(
                 f"Value {value} is outside the range of a signed 32-bit integer"
             )
-    elif not isinstance(value, np.int32):
+    elif not isinstance(value, cast(type, np.int32)):
         raise ValueError(f"Value in not a signed 32-bit integer: {value}")
 
     stream.write_signed_varint(value)
@@ -204,7 +204,7 @@ def write_uint32(stream: CodedOutputStream, value: UInt32) -> None:
             raise ValueError(
                 f"Value {value} is outside the range of an unsigned 32-bit integer"
             )
-    elif not isinstance(value, np.uint32):
+    elif not isinstance(value, cast(type, np.uint32)):
         raise ValueError(f"Value in not an unsigned 32-bit integer: {value}")
 
     stream.write_unsigned_varint(value)
@@ -216,7 +216,7 @@ def write_int64(stream: CodedOutputStream, value: Int64) -> None:
             raise ValueError(
                 f"Value {value} is outside the range of a signed 64-bit integer"
             )
-    elif not isinstance(value, np.int64):
+    elif not isinstance(value, cast(type, np.int64)):
         raise ValueError(f"Value in not a signed 64-bit integer: {value}")
 
     stream.write_signed_varint(value)
@@ -228,7 +228,7 @@ def write_uint64(stream: CodedOutputStream, value: UInt64) -> None:
             raise ValueError(
                 f"Value {value} is outside the range of an unsigned 64-bit integer"
             )
-    elif not isinstance(value, np.uint64):
+    elif not isinstance(value, cast(type, np.uint64)):
         raise ValueError(f"Value in not an unsigned 64-bit integer: {value}")
 
     stream.write_unsigned_varint(value)

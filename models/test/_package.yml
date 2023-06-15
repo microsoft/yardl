@@ -5,5 +5,8 @@ cpp:
   internalGenerateMocks: true
   internalSymlinkStaticHeaders: true
 
+python:
+  outputDir: ../../python/
+
 json:
   outputDir: ../../cpp/test/generated
