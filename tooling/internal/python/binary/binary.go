@@ -278,6 +278,23 @@ func isTypePotentiallyTriviallySerializable(t dsl.Type) bool {
 	switch t := t.(type) {
 	case *dsl.SimpleType:
 		return isTypeDefinitionPotentiallyTriviallySerializable(t.ResolvedDefinition)
+	case *dsl.GeneralizedType:
+		if !t.Cases.IsSingle() {
+			return false
+		}
+		switch td := t.Dimensionality.(type) {
+		case nil:
+			return isTypePotentiallyTriviallySerializable(t.ToScalar())
+		case *dsl.Array:
+			if td.IsFixed() {
+				return isTypePotentiallyTriviallySerializable(t.ToScalar())
+			}
+
+		case *dsl.Vector:
+			if td.Length != nil {
+				return isTypePotentiallyTriviallySerializable(t.ToScalar())
+			}
+		}
 	}
 
 	return false

@@ -24,19 +24,19 @@ class _MyRecWriter(_binary.RecordWriter[MyRec[T]]):
         self._write(stream, value.f1, value.f2, value.f3)
 
 
-class _PointWriter(_binary.RecordWriter[Point]):
-    def __init__(self) -> None:
-        super().__init__([_binary.write_float32, _binary.write_float32])
+class _PointWriter(_binary.RecordWriter[Point[T]]):
+    def __init__(self, write_t: _binary.Writer[T]) -> None:
+        super().__init__([write_t, write_t])
 
-    def __call__(self, stream: _binary.CodedOutputStream, value: Point) -> None:
+    def __call__(self, stream: _binary.CodedOutputStream, value: Point[T]) -> None:
         self._write(stream, value.x, value.y)
 
 
-class _MyStructWriter(_binary.RecordWriter[MyStruct]):
-    def __init__(self) -> None:
-        super().__init__([_binary.FixedNDArrayWriter(_PointWriter(), np.dtype([('x', np.float32), ('y', np.float32)], align=True), True, (2,))])
+class _MyStructWriter(_binary.RecordWriter[MyStruct[T]]):
+    def __init__(self, write_t: _binary.Writer[T]) -> None:
+        super().__init__([_binary.FixedNDArrayWriter(_PointWriter(write_t), np.dtype([('x', np.object_), ('y', np.object_)], align=True), False, (2,))])
 
-    def __call__(self, stream: _binary.CodedOutputStream, value: MyStruct) -> None:
+    def __call__(self, stream: _binary.CodedOutputStream, value: MyStruct[T]) -> None:
         self._write(stream, value.points)
 
 
@@ -48,7 +48,7 @@ class BinaryP1Writer(P1WriterBase, _binary.BinaryProtocolWriter):
         _binary.BinaryProtocolWriter.__init__(self, stream, P1WriterBase.schema)
 
     def _write_complicated_arr(self, value: npt.NDArray[np.void]) -> None:
-        _binary.DynamicNDArrayWriter(_MyStructWriter(), np.dtype([('points', np.dtype([('x', np.float32), ('y', np.float32)], align=True), (2))], align=True), False)(self._stream, value)
+        _binary.DynamicNDArrayWriter(_MyStructWriter(_binary.write_float32), np.dtype([('points', np.dtype([('x', np.float32), ('y', np.float32)], align=True), (2))], align=True), True)(self._stream, value)
 
 
 class BinaryP1Reader(P1ReaderBase):

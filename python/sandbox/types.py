@@ -40,11 +40,11 @@ Image = list[T]
 IntImage = Image[yardl.Float32]
 
 @dataclasses.dataclass(slots=True, kw_only=True)
-class Point:
-    x: yardl.Float32
-    y: yardl.Float32
+class Point(typing.Generic[T]):
+    x: T
+    y: T
 
 @dataclasses.dataclass(slots=True, kw_only=True)
-class MyStruct:
+class MyStruct(typing.Generic[T]):
     points: npt.NDArray[np.void]
 

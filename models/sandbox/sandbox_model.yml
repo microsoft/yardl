@@ -28,14 +28,14 @@ Image<T>: T*
 
 IntImage: Image<float>
 
-Point: !record
+Point<T>: !record
   fields:
-    x: float32
-    y: float32
+    x: T
+    y: T
 
-MyStruct: !record
+MyStruct<T>: !record
   fields:
-    points: Point[(2)]
+    points: Point<T>[(2)]
 
 P1: !protocol
   sequence:
@@ -55,4 +55,4 @@ P1: !protocol
     # myint: MyInt
     # image: Image<int>
     # intimage: IntImage
-    complicatedArr: MyStruct[]
+    complicatedArr: MyStruct<float>[]

@@ -13,7 +13,7 @@ from . import yardl_types as yardl
 class P1WriterBase(abc.ABC):
     """Abstract writer for the P1 protocol."""
 
-    schema = """{"protocol":{"name":"P1","sequence":[{"name":"complicatedArr","type":{"array":{"items":"Sandbox.MyStruct"}}}]},"types":[{"name":"MyStruct","fields":[{"name":"points","type":{"array":{"items":"Sandbox.Point","dimensions":[{"length":2}]}}}]},{"name":"Point","fields":[{"name":"x","type":"float32"},{"name":"y","type":"float32"}]}]}"""
+    schema = """{"protocol":{"name":"P1","sequence":[{"name":"complicatedArr","type":{"array":{"items":{"name":"Sandbox.MyStruct","typeArguments":["float32"]}}}}]},"types":[{"name":"MyStruct","typeParameters":["T"],"fields":[{"name":"points","type":{"array":{"items":{"name":"Sandbox.Point","typeArguments":["T"]},"dimensions":[{"length":2}]}}}]},{"name":"Point","typeParameters":["T"],"fields":[{"name":"x","type":"T"},{"name":"y","type":"T"}]}]}"""
 
     def write_complicated_arr(self, value: npt.NDArray[np.void]) -> None:
         """Ordinal 0

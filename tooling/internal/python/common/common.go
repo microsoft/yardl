@@ -256,7 +256,8 @@ func TypeDefinitionDTypeSyntax(t dsl.TypeDefinition) string {
 		}
 
 		return TypeDTypeSyntax(t.BaseType)
-
+	case *dsl.GenericTypeParameter:
+		return "np.object_"
 	default:
 		panic(fmt.Sprintf("Not implemented %T", t))
 	}
