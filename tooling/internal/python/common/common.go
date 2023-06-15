@@ -54,19 +54,19 @@ var reservedNames = map[string]any{
 	"str":     nil,
 }
 
-func TypeSyntax(t dsl.Type, contextNamespace string) string {
+func TypeSyntax(t dsl.Type, contextNamespace string, includeTypeParameters bool) string {
 	switch t := t.(type) {
 	case nil:
 		return "None"
 	case *dsl.SimpleType:
-		return TypeDefinitionSyntax(t.ResolvedDefinition, contextNamespace)
+		return TypeDefinitionSyntax(t.ResolvedDefinition, contextNamespace, includeTypeParameters)
 	case *dsl.GeneralizedType:
 		scalarString := func() string {
 			if t.Cases.IsSingle() {
-				return TypeSyntax(t.Cases[0].Type, contextNamespace)
+				return TypeSyntax(t.Cases[0].Type, contextNamespace, includeTypeParameters)
 			}
 			if t.Cases.IsOptional() {
-				return fmt.Sprintf("%s | None", TypeSyntax(t.Cases[1].Type, contextNamespace))
+				return fmt.Sprintf("%s | None", TypeSyntax(t.Cases[1].Type, contextNamespace, includeTypeParameters))
 			}
 
 			typeMap := make(map[string]any)
@@ -77,7 +77,7 @@ func TypeSyntax(t dsl.Type, contextNamespace string) string {
 					continue
 				}
 
-				syntax := TypeSyntax(typeCase.Type, contextNamespace)
+				syntax := TypeSyntax(typeCase.Type, contextNamespace, includeTypeParameters)
 
 				if _, ok := typeMap[syntax]; !ok {
 					typeMap[syntax] = nil
@@ -100,7 +100,7 @@ func TypeSyntax(t dsl.Type, contextNamespace string) string {
 		case *dsl.Array:
 			return fmt.Sprintf("npt.NDArray[%s]", TypeDTypeTypeArgument(t.ToScalar()))
 		case *dsl.Map:
-			return fmt.Sprintf("dict[%s, %s]", TypeSyntax(d.KeyType, contextNamespace), scalarString)
+			return fmt.Sprintf("dict[%s, %s]", TypeSyntax(d.KeyType, contextNamespace, includeTypeParameters), scalarString)
 		default:
 			panic(fmt.Sprintf("unexpected type %T", d))
 		}
@@ -109,7 +109,7 @@ func TypeSyntax(t dsl.Type, contextNamespace string) string {
 	}
 }
 
-func TypeDefinitionSyntax(t dsl.TypeDefinition, contextNamespace string) string {
+func TypeDefinitionSyntax(t dsl.TypeDefinition, contextNamespace string, includeTypeParameters bool) string {
 	switch t := t.(type) {
 	case dsl.PrimitiveDefinition:
 		return PrimitiveSyntax(t)
@@ -122,13 +122,19 @@ func TypeDefinitionSyntax(t dsl.TypeDefinition, contextNamespace string) string 
 			typeName = fmt.Sprintf("%s.%s", formatting.ToSnakeCase(meta.Namespace), typeName)
 		}
 
-		if len(meta.TypeArguments) == 0 {
+		if len(meta.TypeParameters) == 0 || !includeTypeParameters && len(meta.TypeArguments) == 0 {
 			return typeName
 		}
 
-		typeArguments := make([]string, 0, len(meta.TypeArguments))
-		for _, typeArgument := range meta.TypeArguments {
-			typeArguments = append(typeArguments, TypeSyntax(typeArgument, contextNamespace))
+		typeArguments := make([]string, len(meta.TypeParameters))
+		if len(meta.TypeArguments) > 0 {
+			for i, typeArg := range meta.TypeArguments {
+				typeArguments[i] = TypeSyntax(typeArg, contextNamespace, includeTypeParameters)
+			}
+		} else {
+			for i, typeParam := range meta.TypeParameters {
+				typeArguments[i] = TypeDefinitionSyntax(typeParam, contextNamespace, includeTypeParameters)
+			}
 		}
 
 		return fmt.Sprintf("%s[%s]", typeName, strings.Join(typeArguments, ", "))
@@ -182,6 +188,33 @@ func TypeDTypeSyntax(t dsl.Type) string {
 	switch t := t.(type) {
 	case *dsl.SimpleType:
 		return TypeDefinitionDTypeSyntax(t.ResolvedDefinition)
+	case *dsl.GeneralizedType:
+		if len(t.Cases) > 1 {
+			return "np.object_"
+		}
+		switch td := t.Dimensionality.(type) {
+		case nil:
+			return TypeDTypeSyntax(t.Cases[0].Type)
+		case *dsl.Vector:
+			if td.Length == nil {
+				return "np.object_"
+			}
+			scalarDType := TypeDTypeSyntax(t.ToScalar())
+			return fmt.Sprintf("%s, (%d,)", scalarDType, *td.Length)
+		case *dsl.Array:
+			if !td.IsFixed() {
+				return "np.object_"
+			}
+			scalarDType := TypeDTypeSyntax(t.ToScalar())
+			dims := make([]string, len(*td.Dimensions))
+			for i, dim := range *td.Dimensions {
+				dims[i] = fmt.Sprintf("%d", *dim.Length)
+			}
+			return fmt.Sprintf("%s, (%s)", scalarDType, strings.Join(dims, ", "))
+
+		default:
+			return "np.object_"
+		}
 	default:
 		panic(fmt.Sprintf("Dype for %T not implemented", t))
 	}
@@ -210,6 +243,20 @@ func TypeDefinitionDTypeSyntax(t dsl.TypeDefinition) string {
 		default:
 			panic(fmt.Sprintf("Not implemented %s", t))
 		}
+	case *dsl.RecordDefinition:
+		fields := make([]string, len(t.Fields))
+		for i, field := range t.Fields {
+			fields[i] = fmt.Sprintf("('%s', %s)", field.Name, TypeDTypeSyntax(field.Type))
+		}
+
+		return fmt.Sprintf("np.dtype([%s], align=True)", strings.Join(fields, ", "))
+	case *dsl.EnumDefinition:
+		if t.BaseType == nil {
+			return TypeDefinitionDTypeSyntax(dsl.PrimitiveInt32)
+		}
+
+		return TypeDTypeSyntax(t.BaseType)
+
 	default:
 		panic(fmt.Sprintf("Not implemented %T", t))
 	}
@@ -217,8 +264,10 @@ func TypeDefinitionDTypeSyntax(t dsl.TypeDefinition) string {
 
 func TypeDTypeTypeArgument(t dsl.Type) string {
 	dTypeSyntax := TypeDTypeSyntax(t)
+	// check if this is a record
+	// TODO: this is a hack
 	if strings.HasSuffix(dTypeSyntax, ")") {
-		return "typing.Any"
+		return "np.void"
 	}
 
 	return dTypeSyntax
@@ -330,4 +379,20 @@ func ProtocolReadImplMethodName(s *dsl.ProtocolStep) string {
 func WriteGeneratedFileHeader(w *formatting.IndentedWriter) {
 	WriteComment(w, "This file was generated by the \"yardl\" tool. DO NOT EDIT.")
 	w.WriteStringln("")
+}
+
+func WriteTypeVars(w *formatting.IndentedWriter, ns *dsl.Namespace) {
+	typeVars := make(map[string]any)
+	for _, td := range ns.TypeDefinitions {
+		for _, tp := range td.GetDefinitionMeta().TypeParameters {
+			identifier := TypeIdentifierName(tp.Name)
+			if _, ok := typeVars[identifier]; !ok {
+				typeVars[identifier] = nil
+				fmt.Fprintf(w, "%s = typing.TypeVar('%s')\n", identifier, identifier)
+			}
+		}
+	}
+	if len(typeVars) > 0 {
+		w.WriteStringln("")
+	}
 }

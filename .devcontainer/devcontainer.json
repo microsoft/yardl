@@ -48,9 +48,8 @@
         "python.analysis.typeCheckingMode": "strict",
         "python.analysis.diagnosticMode": "workspace",
         "python.analysis.diagnosticSeverityOverrides": {
-          "reportUnusedImport": "none",
-          "reportMissingParameterType": "information",
-          "reportUnnecessaryIsInstance": "none"
+          "reportUnnecessaryIsInstance": "none",
+          "reportUnusedImport": "none"
         },
         "python.linting.ignorePatterns": ["**/conftest.py", "**/test_*.py"],
         "python.defaultInterpreterPath": "/opt/conda/envs/yardl/bin/python",

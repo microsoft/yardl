@@ -12,8 +12,33 @@ from . import *
 from . import _binary
 from . import yardl_types as yardl
 
-class _PointWriter:
-    pass
+# pyright: reportUnusedClass=false
+
+T = typing.TypeVar('T')
+
+class _MyRecWriter(_binary.RecordWriter[MyRec[T]]):
+    def __init__(self, write_t: _binary.Writer[T]) -> None:
+        super().__init__([_binary.write_int8, write_t, _binary.EnumWriter(_binary.write_uint8)])
+
+    def __call__(self, stream: _binary.CodedOutputStream, value: MyRec[T]) -> None:
+        self._write(stream, value.f1, value.f2, value.f3)
+
+
+class _PointWriter(_binary.RecordWriter[Point]):
+    def __init__(self) -> None:
+        super().__init__([_binary.write_float32, _binary.write_float32])
+
+    def __call__(self, stream: _binary.CodedOutputStream, value: Point) -> None:
+        self._write(stream, value.x, value.y)
+
+
+class _MyStructWriter(_binary.RecordWriter[MyStruct]):
+    def __init__(self) -> None:
+        super().__init__([_binary.FixedNDArrayWriter(_PointWriter(), np.dtype([('x', np.float32), ('y', np.float32)], align=True), True, (2,))])
+
+    def __call__(self, stream: _binary.CodedOutputStream, value: MyStruct) -> None:
+        self._write(stream, value.points)
+
 
 class BinaryP1Writer(P1WriterBase, _binary.BinaryProtocolWriter):
     """Binary writer for the P1 protocol."""
@@ -22,61 +47,13 @@ class BinaryP1Writer(P1WriterBase, _binary.BinaryProtocolWriter):
         P1WriterBase.__init__(self)
         _binary.BinaryProtocolWriter.__init__(self, stream, P1WriterBase.schema)
 
-    def _write_an_int(self, value: yardl.UInt32) -> None:
-        _binary.write_uint32(self._stream, value)
-
-    def _write_a_stream(self, value: collections.abc.Iterable[yardl.Int32]) -> None:
-        _binary.StreamWriter(_binary.write_int32)(self._stream, value)
-
-    def _write_optional(self, value: yardl.Int32 | None) -> None:
-        _binary.OptionalWriter(_binary.write_int32)(self._stream, value)
-
-    def _write_union(self, value: yardl.Int32 | yardl.UInt32 | None) -> None:
-        _binary.UnionWriter([(None.__class__, _binary.write_none), (yardl.Int32, _binary.write_int32), (yardl.UInt32, _binary.write_uint32)])(self._stream, value)
-
-    def _write_date(self, value: yardl.Date) -> None:
-        _binary.write_date(self._stream, value)
-
-    def _write_flag(self, value: MyFlags) -> None:
-        _binary.EnumWriter(_binary.write_uint32)(self._stream, value)
-
-    def _write_vec(self, value: list[yardl.Int32]) -> None:
-        _binary.FixedVectorWriter(_binary.write_int32, 3)(self._stream, value)
-
-    def _write_arr(self, value: npt.NDArray[np.uint32]) -> None:
-        _binary.DynamicNDArrayWriter(_binary.write_uint32, np.uint32, False)(self._stream, value)
-
-    def _write_map(self, value: dict[str, yardl.Int32]) -> None:
-        _binary.MapWriter(_binary.write_string, _binary.write_int32)(self._stream, value)
+    def _write_complicated_arr(self, value: npt.NDArray[np.void]) -> None:
+        _binary.DynamicNDArrayWriter(_MyStructWriter(), np.dtype([('points', np.dtype([('x', np.float32), ('y', np.float32)], align=True), (2))], align=True), False)(self._stream, value)
 
 
 class BinaryP1Reader(P1ReaderBase):
     """Binary writer for the P1 protocol."""
 
-    def _read_an_int(self) -> yardl.UInt32:
-        raise NotImplementedError()
-
-    def _read_a_stream(self) -> collections.abc.Iterable[yardl.Int32]:
-        raise NotImplementedError()
-
-    def _read_optional(self) -> yardl.Int32 | None:
-        raise NotImplementedError()
-
-    def _read_union(self) -> yardl.Int32 | yardl.UInt32 | None:
-        raise NotImplementedError()
-
-    def _read_date(self) -> yardl.Date:
-        raise NotImplementedError()
-
-    def _read_flag(self) -> MyFlags:
-        raise NotImplementedError()
-
-    def _read_vec(self) -> list[yardl.Int32]:
-        raise NotImplementedError()
-
-    def _read_arr(self) -> npt.NDArray[np.uint32]:
-        raise NotImplementedError()
-
-    def _read_map(self) -> dict[str, yardl.Int32]:
+    def _read_complicated_arr(self) -> npt.NDArray[np.void]:
         raise NotImplementedError()
 

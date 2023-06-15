@@ -33,19 +33,7 @@ from . import yardl_types as yardl
 }
 
 func writeTypes(w *formatting.IndentedWriter, ns *dsl.Namespace) {
-	typeVars := make(map[string]any)
-	for _, td := range ns.TypeDefinitions {
-		for _, tp := range td.GetDefinitionMeta().TypeParameters {
-			identifier := common.TypeIdentifierName(tp.Name)
-			if _, ok := typeVars[identifier]; !ok {
-				typeVars[identifier] = nil
-				fmt.Fprintf(w, "%s = typing.TypeVar('%s')\n", identifier, identifier)
-			}
-		}
-	}
-	if len(typeVars) > 0 {
-		w.WriteStringln("")
-	}
+	common.WriteTypeVars(w, ns)
 
 	for _, td := range ns.TypeDefinitions {
 		switch td := td.(type) {
@@ -62,18 +50,18 @@ func writeTypes(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 }
 
 func writeNamedType(w *formatting.IndentedWriter, td *dsl.NamedType) {
-	fmt.Fprintf(w, "%s = %s\n", common.TypeDefinitionSyntax(td, td.Namespace), common.TypeSyntax(td.Type, td.Namespace))
+	fmt.Fprintf(w, "%s = %s\n", common.TypeDefinitionSyntax(td, td.Namespace, false), common.TypeSyntax(td.Type, td.Namespace, true))
 	common.WriteDocstring(w, td.Comment)
 	w.Indent().WriteStringln("")
 }
 
 func writeRecord(w *formatting.IndentedWriter, rec *dsl.RecordDefinition) {
 	w.WriteStringln("@dataclasses.dataclass(slots=True, kw_only=True)")
-	fmt.Fprintf(w, "class %s%s:\n", common.TypeDefinitionSyntax(rec, rec.Namespace), GetGenericBase(rec))
+	fmt.Fprintf(w, "class %s%s:\n", common.TypeDefinitionSyntax(rec, rec.Namespace, false), GetGenericBase(rec))
 	w.Indented(func() {
 		common.WriteDocstring(w, rec.Comment)
 		for _, field := range rec.Fields {
-			fmt.Fprintf(w, "%s: %s", common.FieldIdentifierName(field.Name), common.TypeSyntax(field.Type, rec.Namespace))
+			fmt.Fprintf(w, "%s: %s", common.FieldIdentifierName(field.Name), common.TypeSyntax(field.Type, rec.Namespace, true))
 			if gt, ok := field.Type.(*dsl.GeneralizedType); ok && gt.Cases.HasNullOption() {
 				w.WriteStringln(" = None")
 			} else {
@@ -111,7 +99,7 @@ func writeEnum(w *formatting.IndentedWriter, enum *dsl.EnumDefinition) {
 	} else {
 		baseType = "enum.Enum"
 	}
-	fmt.Fprintf(w, "class %s(%s):\n", common.TypeDefinitionSyntax(enum, enum.Namespace), baseType)
+	fmt.Fprintf(w, "class %s(%s):\n", common.TypeDefinitionSyntax(enum, enum.Namespace, false), baseType)
 
 	w.Indented(func() {
 		common.WriteDocstring(w, enum.Comment)

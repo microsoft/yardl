@@ -28,8 +28,11 @@ import numpy.typing as npt
 from . import *
 from . import _binary
 from . import yardl_types as yardl
+
+# pyright: reportUnusedClass=false
 `)
 
+	common.WriteTypeVars(w, ns)
 	writeRecordSerializers(w, ns)
 	writeProtocols(w, ns)
 
@@ -41,9 +44,39 @@ func writeRecordSerializers(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 	for _, td := range ns.TypeDefinitions {
 		switch td := td.(type) {
 		case *dsl.RecordDefinition:
-			fmt.Fprintf(w, "class %s:\n", recordRwClassName(td, true))
+			typeSyntax := common.TypeDefinitionSyntax(td, ns.Name, true)
+			fmt.Fprintf(w, "class %s(_binary.RecordWriter[%s]):\n", recordRwClassName(td, true), typeSyntax)
+
 			w.Indented(func() {
-				w.WriteStringln("pass")
+				if len(td.TypeParameters) > 0 {
+					typeParamWriters := make([]string, len(td.TypeParameters))
+					for i, tp := range td.TypeParameters {
+						typeParamWriters[i] = fmt.Sprintf("%s: _binary.Writer[%s]", typeDefinitionRwCallable(tp, true, ns.Name), common.TypeDefinitionSyntax(tp, ns.Name, true))
+					}
+
+					fmt.Fprintf(w, "def __init__(self, %s) -> None:\n", strings.Join(typeParamWriters, ", "))
+				} else {
+					w.WriteStringln("def __init__(self) -> None:")
+				}
+
+				w.Indented(func() {
+					fieldWriters := make([]string, len(td.Fields))
+					for i, field := range td.Fields {
+						fieldWriters[i] = typeRwCallable(field.Type, true, ns.Name)
+					}
+					fmt.Fprintf(w, "super().__init__([%s])\n", strings.Join(fieldWriters, ", "))
+				})
+				w.WriteStringln("")
+
+				fmt.Fprintf(w, "def __call__(self, stream: _binary.CodedOutputStream, value: %s) -> None:\n", typeSyntax)
+				w.Indented(func() {
+					fieldAccesses := make([]string, len(td.Fields))
+					for i, field := range td.Fields {
+						fieldAccesses[i] = fmt.Sprintf("value.%s", common.FieldIdentifierName(field.Name))
+					}
+					fmt.Fprintf(w, "self._write(stream, %s)\n", strings.Join(fieldAccesses, ", "))
+				})
+				w.WriteStringln("")
 			})
 			w.WriteStringln("")
 		}
@@ -71,7 +104,7 @@ func writeProtocols(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 			w.WriteStringln("")
 
 			for _, step := range p.Sequence {
-				valueType := common.TypeSyntax(step.Type, ns.Name)
+				valueType := common.TypeSyntax(step.Type, ns.Name, false)
 				if step.IsStream() {
 					valueType = fmt.Sprintf("collections.abc.Iterable[%s]", valueType)
 				}
@@ -93,7 +126,7 @@ func writeProtocols(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 			w.WriteStringln("")
 
 			for _, step := range p.Sequence {
-				valueType := common.TypeSyntax(step.Type, ns.Name)
+				valueType := common.TypeSyntax(step.Type, ns.Name, false)
 				if step.IsStream() {
 					valueType = fmt.Sprintf("collections.abc.Iterable[%s]", valueType)
 				}
@@ -108,7 +141,7 @@ func writeProtocols(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 	}
 }
 
-func typeDefinitionRwCallable(t dsl.TypeDefinition, write bool) string {
+func typeDefinitionRwCallable(t dsl.TypeDefinition, write bool, contextNamespace string) string {
 	switch t := t.(type) {
 	case dsl.PrimitiveDefinition:
 		suffix := strings.ToLower(string(t))
@@ -123,6 +156,24 @@ func typeDefinitionRwCallable(t dsl.TypeDefinition, write bool) string {
 
 		baseRwCallable := typeRwCallable(baseType, write, "")
 		return fmt.Sprintf("_binary.Enum%s(%s)", noun(write), baseRwCallable)
+	case *dsl.RecordDefinition:
+		rwClassName := recordRwClassName(t, write)
+		if len(t.TypeParameters) == 0 {
+			return fmt.Sprintf("%s()", rwClassName)
+		}
+		if len(t.TypeArguments) == 0 {
+			panic("Expected type arguments")
+		}
+
+		typeArguments := make([]string, len(t.TypeArguments))
+		for i, arg := range t.TypeArguments {
+			typeArguments[i] = typeRwCallable(arg, write, "")
+		}
+		return fmt.Sprintf("%s(%s)", rwClassName, strings.Join(typeArguments, ", "))
+	case *dsl.GenericTypeParameter:
+		return fmt.Sprintf("%s_%s", verb(write), formatting.ToSnakeCase(t.Name))
+	case *dsl.NamedType:
+		return typeRwCallable(t.Type, write, contextNamespace)
 	default:
 		panic(fmt.Sprintf("Not implemented %T", t))
 	}
@@ -133,7 +184,7 @@ func typeRwCallable(t dsl.Type, write bool, contextNamespace string) string {
 	case nil:
 		return fmt.Sprintf("_binary.%s_none", verb(write))
 	case *dsl.SimpleType:
-		return typeDefinitionRwCallable(t.ResolvedDefinition, write)
+		return typeDefinitionRwCallable(t.ResolvedDefinition, write, contextNamespace)
 	case *dsl.GeneralizedType:
 		scalarCallable := func() string {
 			if t.Cases.IsSingle() {
@@ -149,7 +200,7 @@ func typeRwCallable(t dsl.Type, write bool, contextNamespace string) string {
 				if c.Type == nil {
 					typeSyntax = "None.__class__"
 				} else {
-					typeSyntax = common.TypeSyntax(c.Type, contextNamespace)
+					typeSyntax = common.TypeSyntax(c.Type, contextNamespace, true)
 				}
 				options[i] = fmt.Sprintf("(%s, %s)", typeSyntax, typeRwCallable(c.Type, write, contextNamespace))
 			}
@@ -170,7 +221,7 @@ func typeRwCallable(t dsl.Type, write bool, contextNamespace string) string {
 			return fmt.Sprintf("_binary.Vector%s(%s)", noun(write), scalarCallable)
 		case *dsl.Array:
 			dtype := common.TypeDTypeSyntax(t.ToScalar())
-			triviallySerializable := isTypeTriviallySerializableExpr(t.ToScalar())
+			triviallySerializable := boolSyntax(isTypePotentiallyTriviallySerializable(t.ToScalar()))
 			if td.IsFixed() {
 				dims := make([]string, len(*td.Dimensions))
 				for i, d := range *td.Dimensions {
@@ -199,29 +250,37 @@ func typeRwCallable(t dsl.Type, write bool, contextNamespace string) string {
 	}
 }
 
-func isTypeDefinitionTriviallySerializableExpr(t dsl.TypeDefinition) string {
+func isTypeDefinitionPotentiallyTriviallySerializable(t dsl.TypeDefinition) bool {
 	switch t := t.(type) {
 	case dsl.PrimitiveDefinition:
 		switch t {
 		case dsl.Uint8, dsl.Int8, dsl.Float32, dsl.Float64, dsl.ComplexFloat32, dsl.ComplexFloat64:
-			return boolSyntax(true)
+			return true
 		}
 	case *dsl.EnumDefinition:
 		if t.BaseType != nil {
-			return isTypeTriviallySerializableExpr(t.BaseType)
+			return isTypePotentiallyTriviallySerializable(t.BaseType)
 		}
+	case *dsl.RecordDefinition:
+		for _, f := range t.Fields {
+			if !isTypePotentiallyTriviallySerializable(f.Type) {
+				return false
+			}
+		}
+
+		return true
 	}
 
-	return boolSyntax(false)
+	return false
 }
 
-func isTypeTriviallySerializableExpr(t dsl.Type) string {
+func isTypePotentiallyTriviallySerializable(t dsl.Type) bool {
 	switch t := t.(type) {
 	case *dsl.SimpleType:
-		return isTypeDefinitionTriviallySerializableExpr(t.ResolvedDefinition)
+		return isTypeDefinitionPotentiallyTriviallySerializable(t.ResolvedDefinition)
 	}
 
-	return boolSyntax(false)
+	return false
 }
 
 func boolSyntax(b bool) string {

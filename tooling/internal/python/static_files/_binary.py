@@ -1,12 +1,13 @@
 import datetime
 from types import TracebackType
-from typing import BinaryIO, Iterable, TypeVar, Protocol, Generic, Any, Optional, Tuple
+from typing import BinaryIO, Iterable, TypeVar, Protocol, Generic, Any, Optional, Tuple, cast
 from collections.abc import Callable
 from abc import ABC
 from functools import partial
 import struct
 import sys
 import numpy as np
+from numpy.lib import recfunctions
 import numpy.typing as npt
 from .yardl_types import *
 
@@ -139,76 +140,97 @@ class CodedOutputStream:
     def write_signed_varint(self, value: Integer) -> None:
         self.write_unsigned_varint(self.zigzag_encode(value))
 
+T = TypeVar("T")
+Writer = Callable[[CodedOutputStream, T], None]
 
-bool_struct = struct.Struct("<?")
-assert bool_struct.size == 1
+class StructWriter(Generic[T]):
+    def __init__(self, format_string: str) -> None:
+        self.struct = struct.Struct(format_string)
 
+    def __call__(self, stream: CodedOutputStream, value: T) -> None:
+        stream.write(self.struct, value)
 
-def write_bool(stream: CodedOutputStream, value: Bool) -> None:
-    stream.write(bool_struct, value)
+    def endianless_format_str(self) -> str:
+        fmt_str = self.struct.format
+        if fmt_str.startswith("<") or fmt_str.startswith(">"):
+            return fmt_str[1:]
+        return fmt_str
 
+class BoolWriter(StructWriter[bool]):
+    def __init__(self) -> None:
+        super().__init__("<?")
 
-int8_struct = struct.Struct("<b")
-assert int8_struct.size == 1
+write_bool = BoolWriter()
 
+class Int8Writer(StructWriter[Int8]):
+    def __init__(self) -> None:
+        super().__init__("<b")
 
-def write_int8(stream: CodedOutputStream, value: Int8) -> None:
-    stream.write(int8_struct, value)
+write_int8 = Int8Writer()
 
+class UInt8Writer(StructWriter[UInt8]):
+    def __init__(self) -> None:
+        super().__init__("<B")
 
-uint8_struct = struct.Struct("<B")
-assert uint8_struct.size == 1
-
-
-def write_uint8(stream: CodedOutputStream, value: UInt8) -> None:
-    stream.write(uint8_struct, value)
-
-
-def write_int16(stream: CodedOutputStream, value: Int16) -> None:
-    if value < INT16_MIN or value > INT16_MAX:
-        raise ValueError(
-            f"Value {value} is outside the range of a signed 16-bit integer"
-        )
-    stream.write_signed_varint(value)
-
+write_uint8 = UInt8Writer()
 
 def write_uint16(stream: CodedOutputStream, value: UInt16) -> None:
-    if value < 0 or value > UINT16_MAX:
-        raise ValueError(
-            f"Value {value} is outside the range of an unsigned 16-bit integer"
-        )
+    if isinstance(value, int):
+        if value < 0 or value > UINT16_MAX:
+            raise ValueError(
+                f"Value {value} is outside the range of an unsigned 16-bit integer"
+            )
+    elif not isinstance(value, np.uint16):
+        raise ValueError(f"Value in not an unsigned 16-bit integer: {value}")
+
     stream.write_unsigned_varint(value)
 
 
 def write_int32(stream: CodedOutputStream, value: Int32) -> None:
-    if value < INT32_MIN or value > INT32_MAX:
-        raise ValueError(
-            f"Value {value} is outside the range of a signed 32-bit integer"
-        )
+    if isinstance(value, int):
+        if value < INT32_MIN or value > INT32_MAX:
+            raise ValueError(
+                f"Value {value} is outside the range of a signed 32-bit integer"
+            )
+    elif not isinstance(value, np.int32):
+        raise ValueError(f"Value in not a signed 32-bit integer: {value}")
+
     stream.write_signed_varint(value)
 
 
 def write_uint32(stream: CodedOutputStream, value: UInt32) -> None:
-    if value < 0 or value > UINT32_MAX:
-        raise ValueError(
-            f"Value {value} is outside the range of an unsigned 32-bit integer"
-        )
+    if isinstance(value, int):
+        if value < 0 or value > UINT32_MAX:
+            raise ValueError(
+                f"Value {value} is outside the range of an unsigned 32-bit integer"
+            )
+    elif not isinstance(value, np.uint32):
+        raise ValueError(f"Value in not an unsigned 32-bit integer: {value}")
+
     stream.write_unsigned_varint(value)
 
 
 def write_int64(stream: CodedOutputStream, value: Int64) -> None:
-    if value < INT64_MIN or value > INT64_MAX:
-        raise ValueError(
-            f"Value {value} is outside the range of a signed 64-bit integer"
-        )
+    if isinstance(value, int):
+        if value < INT64_MIN or value > INT64_MAX:
+            raise ValueError(
+                f"Value {value} is outside the range of a signed 64-bit integer"
+            )
+    elif not isinstance(value, np.int64):
+        raise ValueError(f"Value in not a signed 64-bit integer: {value}")
+
     stream.write_signed_varint(value)
 
 
 def write_uint64(stream: CodedOutputStream, value: UInt64) -> None:
-    if value < 0 or value > UINT64_MAX:
-        raise ValueError(
-            f"Value {value} is outside the range of an unsigned 64-bit integer"
-        )
+    if isinstance(value, int):
+        if value < 0 or value > UINT64_MAX:
+            raise ValueError(
+                f"Value {value} is outside the range of an unsigned 64-bit integer"
+            )
+    elif not isinstance(value, np.uint64):
+        raise ValueError(f"Value in not an unsigned 64-bit integer: {value}")
+
     stream.write_unsigned_varint(value)
 
 
@@ -216,36 +238,27 @@ def write_size(stream: CodedOutputStream, value: Size) -> None:
     write_uint64(stream, value)
 
 
-float32_struct = struct.Struct("<f")
-assert float32_struct.size == 4
+class Float32Writer(StructWriter[Float32]):
+    def __init__(self) -> None:
+        super().__init__("<f")
 
+write_float32 = Float32Writer()
 
-def write_float32(stream: CodedOutputStream, value: float) -> None:
-    stream.write(float32_struct, value)
+class Float64Writer(StructWriter[Float64]):
+    def __init__(self) -> None:
+        super().__init__("<d")
 
+write_float64 = Float64Writer()
 
-float64_struct = struct.Struct("<d")
-assert float64_struct.size == 8
+class Complex32Writer(StructWriter[ComplexFloat]):
+    def __init__(self) -> None:
+        super().__init__("<ff")
 
+write_complex32 = Complex32Writer()
 
-def write_float64(stream: CodedOutputStream, value: float) -> None:
-    stream.write(float64_struct, value)
-
-
-complex32_struct = struct.Struct("<ff")
-assert complex32_struct.size == 8
-
-
-def write_complex32(stream: CodedOutputStream, value: complex) -> None:
-    stream.write(complex32_struct, value.real, value.imag)
-
-
-complex64_struct = struct.Struct("<dd")
-assert complex64_struct.size == 16
-
-
-def write_complex64(stream: CodedOutputStream, value: complex) -> None:
-    stream.write(complex64_struct, value.real, value.imag)
+class Complex64Writer(StructWriter[ComplexDouble]):
+    def __init__(self) -> None:
+        super().__init__("<dd")
 
 
 def write_string(stream: CodedOutputStream, value: str) -> None:
@@ -331,9 +344,6 @@ def write_none(stream: CodedOutputStream, value: None) -> None:
 def write_enum(stream: CodedOutputStream, value: Enum) -> None:
     stream.write_signed_varint(value.value)
 
-
-T = TypeVar("T")
-Writer = Callable[[CodedOutputStream, T], None]
 
 class EnumWriter(Generic[T]):
     def __init__(self, write_integer: Writer[T]) -> None:
@@ -423,30 +433,39 @@ class NDArrayWriterBase(Generic[T]):
         self,
         write_element: Writer[T],
         dtype: npt.DTypeLike,
-        trivially_serializable: bool,
+        potentially_trivially_serializable: bool,
     ) -> None:
-        self.dtype = dtype
+        self.dtype: np.dtype[Any] = dtype if isinstance(dtype, np.dtype) else np.dtype(dtype)
         self.write_element = write_element
-        self.trivially_serializable = trivially_serializable
+        self.potentially_trivially_serializable = potentially_trivially_serializable
 
     def _write_data(self, stream: CodedOutputStream, value: npt.NDArray[Any]) -> None:
         if value.dtype != self.dtype:
-            raise ValueError(f"Expected dtype {self.dtype}, got {value.dtype}")
+            # see if it's the same dtype but packed, not aligned
+            packed_dtype = recfunctions.repack_fields(self.dtype, align=False, recurse=True)
+            if packed_dtype != value.dtype:
+                raise ValueError(f"Expected dtype {self.dtype} or {packed_dtype}, got {value.dtype}")
 
-        if self.trivially_serializable and value.flags.c_contiguous:
+        if self._is_trivially_serializable(value):
             stream.write_bytes_directly(value.data)
         else:
-            for element in value.flat:
+            to_iterate = value if value.dtype.fields is None else cast(npt.NDArray[Any], value.view(np.recarray))
+            for element in to_iterate.flat:
                 self.write_element(stream, element)
+
+    def _is_trivially_serializable(self, value: npt.NDArray[Any]) -> bool:
+        return self.potentially_trivially_serializable and value.flags.c_contiguous \
+            and (self.dtype.fields is None or all(f != "" for f in self.dtype.fields))
+
 
 class DynamicNDArrayWriter(Generic[T], NDArrayWriterBase[T]):
     def __init__(
         self,
         write_element: Writer[T],
         dtype: npt.DTypeLike,
-        trivially_serializable: bool,
+        potentially_trivially_serializable: bool,
     ) -> None:
-        super().__init__(write_element, dtype, trivially_serializable)
+        super().__init__(write_element, dtype, potentially_trivially_serializable)
 
     def __call__(self, stream: CodedOutputStream, value: npt.NDArray[Any]) -> None:
         stream.write_unsigned_varint(value.ndim)
@@ -461,10 +480,10 @@ class NDArrayWriter(Generic[T], NDArrayWriterBase[T]):
         self,
         write_element: Writer[T],
         dtype: npt.DTypeLike,
-        trivially_serializable: bool,
+        potentially_trivially_serializable: bool,
         ndims: int,
     ) -> None:
-        super().__init__(write_element, dtype, trivially_serializable)
+        super().__init__(write_element, dtype, potentially_trivially_serializable)
         self.ndims = ndims
 
     def __call__(self, stream: CodedOutputStream, value: npt.NDArray[Any]) -> None:
@@ -482,10 +501,10 @@ class FixedNDArrayWriter(Generic[T], NDArrayWriterBase[T]):
         self,
         write_element: Writer[T],
         dtype: npt.DTypeLike,
-        trivially_serializable: bool,
+        potentially_trivially_serializable: bool,
         shape: tuple[int, ...],
     ) -> None:
-        super().__init__(write_element, dtype, trivially_serializable)
+        super().__init__(write_element, dtype, potentially_trivially_serializable)
         self.shape = shape
 
     def __call__(self, stream: CodedOutputStream, value: npt.NDArray[Any]) -> None:
@@ -493,6 +512,24 @@ class FixedNDArrayWriter(Generic[T], NDArrayWriterBase[T]):
             raise ValueError(f"Expected shape {self.shape}, got {value.shape}")
 
         self._write_data(stream, value)
+
+
+class RecordWriter(Generic[T], ABC):
+    def __init__(self, field_writers: list[Writer[Any]]) -> None:
+        if all(isinstance(w, StructWriter) for w in field_writers):
+            combined_format = "".join(cast(StructWriter[Any], w).endianless_format_str() for w in field_writers)
+            self._struct = struct.Struct(combined_format)
+        else:
+            self._struct = None
+
+        self._field_writers = field_writers
+
+    def _write(self, stream: CodedOutputStream, *values: Any) -> None:
+        if self._struct:
+            stream.write(self._struct, *values)
+        else:
+            for i, writer in enumerate(self._field_writers):
+                writer(stream, values[i])
 
 
 # Only used in the header

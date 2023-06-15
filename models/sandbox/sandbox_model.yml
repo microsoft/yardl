@@ -1,17 +1,17 @@
 # This is my enum
 MyFlags: !flags
-  base: uint32
+  base: uint8
   values:
     # This is the "A" value
     - a
     - b
     - c
 
-# MyRec<T>: !record
-#   fields:
-#     f1: int?
-#     f2: T
-#     f3: MyFlags
+MyRec<T>: !record
+  fields:
+    f1: int8
+    f2: T
+    f3: MyFlags
 
 # # This is a string
 # MyString: string
@@ -22,22 +22,37 @@ MyFlags: !flags
 
 # R: MyRec<string>
 
-# MyInt: [int, float]
+MyInt: [int, float]
+
+Image<T>: T*
+
+IntImage: Image<float>
 
 Point: !record
   fields:
-    x: int
-    y: int
+    x: float32
+    y: float32
+
+MyStruct: !record
+  fields:
+    points: Point[(2)]
 
 P1: !protocol
   sequence:
-    anInt: uint
-    aStream: !stream
-      items: int
-    optional: int?
-    union: [null, int, uint]
-    date: date
-    flag: MyFlags
-    vec: int*3
-    arr: uint[]
-    map: string->int
+    # anInt: uint
+    # aStream: !stream
+    #   items: int
+    # optional: int?
+    # union: [null, int, uint]
+    # date: date
+    # flag: MyFlags
+    # vec: int*3
+    # arr: uint[]
+    # map: string->int
+    # point: Point
+    # points: Point[]
+    # genRec: MyRec<float>[(1)]
+    # myint: MyInt
+    # image: Image<int>
+    # intimage: IntImage
+    complicatedArr: MyStruct[]

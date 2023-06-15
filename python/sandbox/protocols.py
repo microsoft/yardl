@@ -6,84 +6,39 @@ import collections.abc
 import datetime
 import numpy as np
 import numpy.typing as npt
+import typing
 from . import *
 from . import yardl_types as yardl
 
 class P1WriterBase(abc.ABC):
     """Abstract writer for the P1 protocol."""
 
-    schema = """{"protocol":{"name":"P1","sequence":[{"name":"anInt","type":"uint32"},{"name":"aStream","type":{"stream":{"items":"int32"}}},{"name":"optional","type":[null,"int32"]},{"name":"union","type":[null,{"label":"int32","type":"int32"},{"label":"uint32","type":"uint32"}]},{"name":"date","type":"date"},{"name":"flag","type":"Sandbox.MyFlags"},{"name":"vec","type":{"vector":{"items":"int32","length":3}}},{"name":"arr","type":{"array":{"items":"uint32"}}},{"name":"map","type":{"map":{"keys":"string","values":"int32"}}}]},"types":[{"name":"MyFlags","base":"uint32","values":[{"symbol":"a","value":1},{"symbol":"b","value":2},{"symbol":"c","value":4}]}]}"""
+    schema = """{"protocol":{"name":"P1","sequence":[{"name":"complicatedArr","type":{"array":{"items":"Sandbox.MyStruct"}}}]},"types":[{"name":"MyStruct","fields":[{"name":"points","type":{"array":{"items":"Sandbox.Point","dimensions":[{"length":2}]}}}]},{"name":"Point","fields":[{"name":"x","type":"float32"},{"name":"y","type":"float32"}]}]}"""
 
-    def write_an_int(self, value: yardl.UInt32) -> None:
-        """Ordinal 0"""
-        self._write_an_int(value)
+    def write_complicated_arr(self, value: npt.NDArray[np.void]) -> None:
+        """Ordinal 0
 
-    def write_a_stream(self, value: collections.abc.Iterable[yardl.Int32]) -> None:
-        """Ordinal 1"""
-        self._write_a_stream(value)
-
-    def write_optional(self, value: yardl.Int32 | None) -> None:
-        """Ordinal 2"""
-        self._write_optional(value)
-
-    def write_union(self, value: yardl.Int32 | yardl.UInt32 | None) -> None:
-        """Ordinal 3"""
-        self._write_union(value)
-
-    def write_date(self, value: yardl.Date) -> None:
-        """Ordinal 4"""
-        self._write_date(value)
-
-    def write_flag(self, value: MyFlags) -> None:
-        """Ordinal 5"""
-        self._write_flag(value)
-
-    def write_vec(self, value: list[yardl.Int32]) -> None:
-        """Ordinal 6"""
-        self._write_vec(value)
-
-    def write_arr(self, value: npt.NDArray[np.uint32]) -> None:
-        """Ordinal 7"""
-        self._write_arr(value)
-
-    def write_map(self, value: dict[str, yardl.Int32]) -> None:
-        """Ordinal 8"""
-        self._write_map(value)
+        anInt: uint
+        aStream: !stream
+          items: int
+        optional: int?
+        union: [null, int, uint]
+        date: date
+        flag: MyFlags
+        vec: int*3
+        arr: uint[]
+        map: string->int
+        point: Point
+        points: Point[]
+        genRec: MyRec<float>[(1)]
+        myint: MyInt
+        image: Image<int>
+        intimage: IntImage
+        """
+        self._write_complicated_arr(value)
 
     @abc.abstractmethod
-    def _write_an_int(self, value: yardl.UInt32) -> None:
-        raise NotImplementedError()
-
-    @abc.abstractmethod
-    def _write_a_stream(self, value: collections.abc.Iterable[yardl.Int32]) -> None:
-        raise NotImplementedError()
-
-    @abc.abstractmethod
-    def _write_optional(self, value: yardl.Int32 | None) -> None:
-        raise NotImplementedError()
-
-    @abc.abstractmethod
-    def _write_union(self, value: yardl.Int32 | yardl.UInt32 | None) -> None:
-        raise NotImplementedError()
-
-    @abc.abstractmethod
-    def _write_date(self, value: yardl.Date) -> None:
-        raise NotImplementedError()
-
-    @abc.abstractmethod
-    def _write_flag(self, value: MyFlags) -> None:
-        raise NotImplementedError()
-
-    @abc.abstractmethod
-    def _write_vec(self, value: list[yardl.Int32]) -> None:
-        raise NotImplementedError()
-
-    @abc.abstractmethod
-    def _write_arr(self, value: npt.NDArray[np.uint32]) -> None:
-        raise NotImplementedError()
-
-    @abc.abstractmethod
-    def _write_map(self, value: dict[str, yardl.Int32]) -> None:
+    def _write_complicated_arr(self, value: npt.NDArray[np.void]) -> None:
         raise NotImplementedError()
 
 class P1ReaderBase(abc.ABC):
@@ -91,75 +46,29 @@ class P1ReaderBase(abc.ABC):
 
     schema = P1WriterBase.schema
 
-    def read_an_int(self) -> yardl.UInt32:
-        """Ordinal 0"""
-        return self._read_an_int()
+    def read_complicated_arr(self) -> npt.NDArray[np.void]:
+        """Ordinal 0
 
-    def read_a_stream(self) -> collections.abc.Iterable[yardl.Int32]:
-        """Ordinal 1"""
-        return self._read_a_stream()
-
-    def read_optional(self) -> yardl.Int32 | None:
-        """Ordinal 2"""
-        return self._read_optional()
-
-    def read_union(self) -> yardl.Int32 | yardl.UInt32 | None:
-        """Ordinal 3"""
-        return self._read_union()
-
-    def read_date(self) -> yardl.Date:
-        """Ordinal 4"""
-        return self._read_date()
-
-    def read_flag(self) -> MyFlags:
-        """Ordinal 5"""
-        return self._read_flag()
-
-    def read_vec(self) -> list[yardl.Int32]:
-        """Ordinal 6"""
-        return self._read_vec()
-
-    def read_arr(self) -> npt.NDArray[np.uint32]:
-        """Ordinal 7"""
-        return self._read_arr()
-
-    def read_map(self) -> dict[str, yardl.Int32]:
-        """Ordinal 8"""
-        return self._read_map()
+        anInt: uint
+        aStream: !stream
+          items: int
+        optional: int?
+        union: [null, int, uint]
+        date: date
+        flag: MyFlags
+        vec: int*3
+        arr: uint[]
+        map: string->int
+        point: Point
+        points: Point[]
+        genRec: MyRec<float>[(1)]
+        myint: MyInt
+        image: Image<int>
+        intimage: IntImage
+        """
+        return self._read_complicated_arr()
 
     @abc.abstractmethod
-    def _read_an_int(self) -> yardl.UInt32:
-        raise NotImplementedError()
-
-    @abc.abstractmethod
-    def _read_a_stream(self) -> collections.abc.Iterable[yardl.Int32]:
-        raise NotImplementedError()
-
-    @abc.abstractmethod
-    def _read_optional(self) -> yardl.Int32 | None:
-        raise NotImplementedError()
-
-    @abc.abstractmethod
-    def _read_union(self) -> yardl.Int32 | yardl.UInt32 | None:
-        raise NotImplementedError()
-
-    @abc.abstractmethod
-    def _read_date(self) -> yardl.Date:
-        raise NotImplementedError()
-
-    @abc.abstractmethod
-    def _read_flag(self) -> MyFlags:
-        raise NotImplementedError()
-
-    @abc.abstractmethod
-    def _read_vec(self) -> list[yardl.Int32]:
-        raise NotImplementedError()
-
-    @abc.abstractmethod
-    def _read_arr(self) -> npt.NDArray[np.uint32]:
-        raise NotImplementedError()
-
-    @abc.abstractmethod
-    def _read_map(self) -> dict[str, yardl.Int32]:
+    def _read_complicated_arr(self) -> npt.NDArray[np.void]:
         raise NotImplementedError()
 

@@ -21,6 +21,7 @@ import collections.abc
 import datetime
 import numpy as np
 import numpy.typing as npt
+import typing
 from . import *
 from . import yardl_types as yardl
 `)
@@ -43,7 +44,7 @@ func writeProtocols(w *formatting.IndentedWriter, ns *dsl.Namespace, st dsl.Symb
 			w.WriteStringln("\n")
 
 			for i, step := range p.Sequence {
-				valueType := common.TypeSyntax(step.Type, ns.Name)
+				valueType := common.TypeSyntax(step.Type, ns.Name, false)
 				if step.IsStream() {
 					valueType = fmt.Sprintf("collections.abc.Iterable[%s]", valueType)
 				}
@@ -57,7 +58,7 @@ func writeProtocols(w *formatting.IndentedWriter, ns *dsl.Namespace, st dsl.Symb
 			}
 
 			for _, step := range p.Sequence {
-				valueType := common.TypeSyntax(step.Type, ns.Name)
+				valueType := common.TypeSyntax(step.Type, ns.Name, false)
 				if step.IsStream() {
 					valueType = fmt.Sprintf("collections.abc.Iterable[%s]", valueType)
 				}
@@ -81,7 +82,7 @@ func writeProtocols(w *formatting.IndentedWriter, ns *dsl.Namespace, st dsl.Symb
 			w.WriteStringln("\n")
 
 			for i, step := range p.Sequence {
-				valueType := common.TypeSyntax(step.Type, ns.Name)
+				valueType := common.TypeSyntax(step.Type, ns.Name, false)
 				if step.IsStream() {
 					valueType = fmt.Sprintf("collections.abc.Iterable[%s]", valueType)
 				}
@@ -95,7 +96,7 @@ func writeProtocols(w *formatting.IndentedWriter, ns *dsl.Namespace, st dsl.Symb
 			}
 
 			for _, step := range p.Sequence {
-				valueType := common.TypeSyntax(step.Type, ns.Name)
+				valueType := common.TypeSyntax(step.Type, ns.Name, false)
 				if step.IsStream() {
 					valueType = fmt.Sprintf("collections.abc.Iterable[%s]", valueType)
 				}
