@@ -38,6 +38,15 @@ def main():
 
     os.system("hexdump -C test.bin")
 
+    ba = bytearray(16)
+    arr = np.frombuffer(ba, dtype=np.int32)
+    print(arr)
+    ba[0] = 3
+    print(arr)
+    np.int32.frombuffer(ba, offset=4, count=1)[0] = 4
+
+
+
     s = "asd"
     print(s[0])
 

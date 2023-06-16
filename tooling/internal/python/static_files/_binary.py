@@ -75,17 +75,6 @@ class CodedOutputStream:
         self._buffer = bytearray(buffer_size)
         self._view = memoryview(self._buffer)
 
-    def __enter__(self) -> "CodedOutputStream":
-        return self
-
-    def __exit__(
-        self,
-        exc_type: Optional[type[BaseException]],
-        exc: Optional[BaseException],
-        traceback: Optional[TracebackType],
-    ) -> None:
-        self.close()
-
     def close(self) -> None:
         self.flush()
         if self._owns_stream:
@@ -139,6 +128,33 @@ class CodedOutputStream:
 
     def write_signed_varint(self, value: Integer) -> None:
         self.write_unsigned_varint(self.zigzag_encode(value))
+
+class CodedInputStream:
+    def __init__(self, stream: BinaryIO | str, *, buffer_size: int = 65536) -> None:
+        if isinstance(stream, str):
+            self._stream = open(stream, "rb")
+            self._owns_stream = True
+        else:
+            self._stream = stream
+            self._owns_stream = False
+
+        self._buffer = bytearray(buffer_size)
+        self._view = memoryview(self._buffer)
+        self._buffer_filled_count = 0
+
+    def close(self) -> None:
+        if self._owns_stream:
+            self._stream.close()
+
+    def read(self, formatter: struct.Struct) -> tuple[Any, ...]:
+        if self._buffer_filled_count < formatter.size:
+            self._fill_buffer()
+
+        result = formatter.unpack_from(self._view, 0)
+        self._view = self._view[formatter.size :]
+        self._buffer_filled_count -= formatter.size
+        return result
+
 
 T = TypeVar("T")
 
