@@ -17,8 +17,8 @@ func WriteBinary(ns *dsl.Namespace, packageDir string) error {
 	b := bytes.Buffer{}
 	w := formatting.NewIndentedWriter(&b, "    ")
 	common.WriteGeneratedFileHeader(w)
-	w.WriteStringln(`
-import abc
+	w.WriteStringln(`# pyright: reportUnusedClass=false
+
 import collections.abc
 import datetime
 import typing
@@ -28,8 +28,6 @@ import numpy.typing as npt
 from . import *
 from . import _binary
 from . import yardl_types as yardl
-
-# pyright: reportUnusedClass=false
 `)
 
 	common.WriteTypeVars(w, ns)
@@ -219,22 +217,20 @@ func typeDescriptor(t dsl.Type, contextNamespace string) string {
 
 			return fmt.Sprintf("_binary.VectorDescriptor(%s)", scalarDescriptor)
 		case *dsl.Array:
-			dtype := common.TypeDTypeSyntax(t.ToScalar())
-			triviallySerializable := boolSyntax(isTypePotentiallyTriviallySerializable(t.ToScalar()))
 			if td.IsFixed() {
 				dims := make([]string, len(*td.Dimensions))
 				for i, d := range *td.Dimensions {
 					dims[i] = strconv.FormatUint(*d.Length, 10)
 				}
 
-				return fmt.Sprintf("_binary.FixedNDArrayDescriptor(%s, %s, %s, (%s,))", scalarDescriptor, dtype, triviallySerializable, strings.Join(dims, ", "))
+				return fmt.Sprintf("_binary.FixedNDArrayDescriptor(%s, (%s,))", scalarDescriptor, strings.Join(dims, ", "))
 			}
 
 			if td.HasKnownNumberOfDimensions() {
-				return fmt.Sprintf("_binary.NDArrayDescriptor(%s, %s, %s, %d)", scalarDescriptor, dtype, triviallySerializable, len(*td.Dimensions))
+				return fmt.Sprintf("_binary.NDArrayDescriptor(%s, %d)", scalarDescriptor, len(*td.Dimensions))
 			}
 
-			return fmt.Sprintf("_binary.DynamicNDArrayDescriptor(%s, %s, %s)", scalarDescriptor, dtype, triviallySerializable)
+			return fmt.Sprintf("_binary.DynamicNDArrayDescriptor(%s)", scalarDescriptor)
 
 		case *dsl.Map:
 			keyDescriptor := typeDescriptor(td.KeyType, contextNamespace)
@@ -247,61 +243,6 @@ func typeDescriptor(t dsl.Type, contextNamespace string) string {
 	default:
 		panic(fmt.Sprintf("Not implemented %T", t))
 	}
-}
-
-func isTypeDefinitionPotentiallyTriviallySerializable(t dsl.TypeDefinition) bool {
-	switch t := t.(type) {
-	case dsl.PrimitiveDefinition:
-		switch t {
-		case dsl.Uint8, dsl.Int8, dsl.Float32, dsl.Float64, dsl.ComplexFloat32, dsl.ComplexFloat64:
-			return true
-		}
-	case *dsl.EnumDefinition:
-		if t.BaseType != nil {
-			return isTypePotentiallyTriviallySerializable(t.BaseType)
-		}
-	case *dsl.RecordDefinition:
-		for _, f := range t.Fields {
-			if !isTypePotentiallyTriviallySerializable(f.Type) {
-				return false
-			}
-		}
-
-		return true
-	}
-
-	return false
-}
-
-func isTypePotentiallyTriviallySerializable(t dsl.Type) bool {
-	switch t := t.(type) {
-	case *dsl.SimpleType:
-		return isTypeDefinitionPotentiallyTriviallySerializable(t.ResolvedDefinition)
-	case *dsl.GeneralizedType:
-		if !t.Cases.IsSingle() {
-			return false
-		}
-		switch td := t.Dimensionality.(type) {
-		case *dsl.Array:
-			if td.IsFixed() {
-				return isTypePotentiallyTriviallySerializable(t.ToScalar())
-			}
-
-		case *dsl.Vector:
-			if td.Length != nil {
-				return isTypePotentiallyTriviallySerializable(t.ToScalar())
-			}
-		}
-	}
-
-	return false
-}
-
-func boolSyntax(b bool) string {
-	if b {
-		return "True"
-	}
-	return "False"
 }
 
 func BinaryWriterName(p *dsl.ProtocolDefinition) string {

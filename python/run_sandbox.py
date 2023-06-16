@@ -2,7 +2,6 @@
 
 import os
 import sandbox
-import sandbox._binary
 import numpy as np
 
 
@@ -29,7 +28,7 @@ def main():
         # w._write_image([1,2,3])
         # w.write_intimage([1,2,3])
 
-        dtype = np.dtype([('points', [('x', '<f4'), ('y', '<f4')], (2,))])
+        dtype = np.dtype([('points', [('x', '<i4'), ('y', '<i4')], (2,))])
 
         arr = np.array([([(1.1, 2.2),(3.3, 4.4)],)], dtype=dtype)
         w.write_complicated_arr(arr)

@@ -156,6 +156,9 @@ class TypeDescriptor(Generic[T], ABC):
     def write(self, stream: CodedOutputStream, value: T) -> None:
         raise NotImplementedError
 
+    def is_trivially_serializable(self) -> bool:
+        return False
+
 class StructDescriptor(TypeDescriptor[T]):
     def __init__(self, dtype: npt.DTypeLike, format_string: str) -> None:
         super().__init__(dtype)
@@ -177,11 +180,17 @@ class Int8Descriptor(StructDescriptor[Int8]):
     def __init__(self) -> None:
         super().__init__(np.int8, "<b")
 
+    def is_trivially_serializable(self) -> bool:
+        return True
+
 int8_descriptor = Int8Descriptor()
 
 class UInt8Descriptor(StructDescriptor[UInt8]):
     def __init__(self) -> None:
         super().__init__(np.uint8, "<B")
+
+    def is_trivially_serializable(self) -> bool:
+        return True
 
 uint8_descriptor = UInt8Descriptor()
 
@@ -294,11 +303,17 @@ class Float32Descriptor(StructDescriptor[Float32]):
     def __init__(self) -> None:
         super().__init__(np.float32, "<f")
 
+    def is_trivially_serializable(self) -> bool:
+        return True
+
 float32_descriptor = Float32Descriptor()
 
 class Float64Descriptor(StructDescriptor[Float64]):
     def __init__(self) -> None:
         super().__init__(np.float64, "<d")
+
+    def is_trivially_serializable(self) -> bool:
+        return True
 
 float64_descriptor = Float64Descriptor()
 
@@ -306,11 +321,17 @@ class Complex32Descriptor(StructDescriptor[ComplexFloat]):
     def __init__(self) -> None:
         super().__init__(np.complex64, "<ff")
 
+    def is_trivially_serializable(self) -> bool:
+        return True
+
 complex32_descriptor = Complex32Descriptor()
 
 class Complex64Descriptor(StructDescriptor[ComplexDouble]):
     def __init__(self) -> None:
         super().__init__(np.complex128, "<dd")
+
+    def is_trivially_serializable(self) -> bool:
+        return True
 
 complex64_descriptor = Complex64Descriptor()
 
@@ -427,6 +448,9 @@ class EnumDescriptor(Generic[T], TypeDescriptor[Enum]):
     def write(self, stream: CodedOutputStream, value: Enum) -> None:
         self.integer_descriptor.write(stream, value.value)
 
+    def is_trivially_serializable(self) -> bool:
+        return self.integer_descriptor.is_trivially_serializable()
+
 
 class OptionalDescriptor(TypeDescriptor[T]):
     def __init__(self, element_descriptor: TypeDescriptor[T]) -> None:
@@ -481,6 +505,9 @@ class FixedVectorDescriptor(TypeDescriptor[list[T]]):
         for element in value:
             self.element_descriptor.write(stream, element)
 
+    def is_trivially_serializable(self) -> bool:
+        return self.element_descriptor.is_trivially_serializable()
+
 
 class VectorDescriptor(TypeDescriptor[list[T]]):
     def __init__(self, element_descriptor: TypeDescriptor[T]) -> None:
@@ -515,12 +542,10 @@ class NDArrayDescriptorBase(Generic[T], TypeDescriptor[npt.NDArray[Any]]):
         overall_dtype: npt.DTypeLike,
         element_descriptor: TypeDescriptor[T],
         dtype: npt.DTypeLike,
-        potentially_trivially_serializable: bool,
     ) -> None:
         super().__init__(overall_dtype)
         self._array_dtype: np.dtype[Any] = dtype if isinstance(dtype, np.dtype) else np.dtype(dtype)
         self._element_descriptor = element_descriptor
-        self._potentially_trivially_serializable = potentially_trivially_serializable
 
     def _write_data(self, stream: CodedOutputStream, value: npt.NDArray[Any]) -> None:
         if value.dtype != self._array_dtype:
@@ -529,15 +554,15 @@ class NDArrayDescriptorBase(Generic[T], TypeDescriptor[npt.NDArray[Any]]):
             if packed_dtype != value.dtype:
                 raise ValueError(f"Expected dtype {self._array_dtype} or {packed_dtype}, got {value.dtype}")
 
-        if self._is_trivially_serializable(value):
+        if self._is_current_array_trivially_serializable(value):
             stream.write_bytes_directly(value.data)
         else:
             to_iterate = value if value.dtype.fields is None else cast(npt.NDArray[Any], value.view(np.recarray))
             for element in to_iterate.flat:
                 self._element_descriptor.write(stream, element)
 
-    def _is_trivially_serializable(self, value: npt.NDArray[Any]) -> bool:
-        return self._potentially_trivially_serializable and value.flags.c_contiguous \
+    def _is_current_array_trivially_serializable(self, value: npt.NDArray[Any]) -> bool:
+        return self._element_descriptor.is_trivially_serializable() and value.flags.c_contiguous \
             and (self._array_dtype.fields is None or all(f != "" for f in self._array_dtype.fields))
 
 
@@ -545,10 +570,8 @@ class DynamicNDArrayDescriptor(NDArrayDescriptorBase[T]):
     def __init__(
         self,
         element_descriptor: TypeDescriptor[T],
-        dtype: npt.DTypeLike,
-        potentially_trivially_serializable: bool,
     ) -> None:
-        super().__init__(np.object_, element_descriptor, dtype, potentially_trivially_serializable)
+        super().__init__(np.object_, element_descriptor, element_descriptor.overall_dtype())
 
     def write(self, stream: CodedOutputStream, value: npt.NDArray[Any]) -> None:
         stream.write_unsigned_varint(value.ndim)
@@ -562,11 +585,10 @@ class NDArrayDescriptor(Generic[T], NDArrayDescriptorBase[T]):
     def __init__(
         self,
         element_descriptor: TypeDescriptor[T],
-        dtype: npt.DTypeLike,
         potentially_trivially_serializable: bool,
         ndims: int,
     ) -> None:
-        super().__init__(np.object_, element_descriptor, dtype, potentially_trivially_serializable)
+        super().__init__(np.object_, element_descriptor, element_descriptor.overall_dtype())
         self.ndims = ndims
 
     def write(self, stream: CodedOutputStream, value: npt.NDArray[Any]) -> None:
@@ -583,11 +605,10 @@ class FixedNDArrayDescriptor(Generic[T], NDArrayDescriptorBase[T]):
     def __init__(
         self,
         element_descriptor: TypeDescriptor[T],
-        dtype: npt.DTypeLike,
-        potentially_trivially_serializable: bool,
         shape: tuple[int, ...],
     ) -> None:
-        super().__init__(np.dtype((dtype, shape)), element_descriptor, dtype, potentially_trivially_serializable)
+        dtype = element_descriptor.overall_dtype()
+        super().__init__(np.dtype((dtype, shape)), element_descriptor, dtype)
         self.shape = shape
 
     def write(self, stream: CodedOutputStream, value: npt.NDArray[Any]) -> None:
@@ -595,6 +616,9 @@ class FixedNDArrayDescriptor(Generic[T], NDArrayDescriptorBase[T]):
             raise ValueError(f"Expected shape {self.shape}, got {value.shape}")
 
         self._write_data(stream, value)
+
+    def is_trivially_serializable(self) -> bool:
+        return self._element_descriptor.is_trivially_serializable()
 
 
 class RecordDescriptor(TypeDescriptor[T]):
@@ -615,6 +639,9 @@ class RecordDescriptor(TypeDescriptor[T]):
             self._struct = struct.Struct(combined_format)
 
         self._field_descriptors = field_descriptors
+
+    def is_trivially_serializable(self) -> bool:
+        return all(descriptor.is_trivially_serializable() for _, descriptor in self._field_descriptors)
 
     def _write(self, stream: CodedOutputStream, *values: Any) -> None:
         if self._struct:
