@@ -1,4 +1,5 @@
 import datetime
+from io import BufferedIOBase, BufferedReader, RawIOBase
 from types import TracebackType
 from typing import BinaryIO, Iterable, TypeVar, Protocol, Generic, Any, Optional, Tuple, cast
 from collections.abc import Callable
@@ -133,30 +134,116 @@ class CodedOutputStream:
         self.write_unsigned_varint(self.zigzag_encode(value))
 
 class CodedInputStream:
-    def __init__(self, stream: BinaryIO | str, *, buffer_size: int = 65536) -> None:
+    def __init__(self, stream: BufferedReader | str, *, buffer_size: int = 65536) -> None:
         if isinstance(stream, str):
             self._stream = open(stream, "rb")
             self._owns_stream = True
         else:
-            self._stream = stream
+            if not isinstance(stream, BufferedReader):
+                self._stream = BufferedReader(stream)
+            else:
+                self._stream = stream
             self._owns_stream = False
 
+        self._last_read_count = 0
         self._buffer = bytearray(buffer_size)
         self._view = memoryview(self._buffer)
-        self._buffer_filled_count = 0
+        self._offset = 0
+        self._at_end = False
 
     def close(self) -> None:
         if self._owns_stream:
             self._stream.close()
 
     def read(self, formatter: struct.Struct) -> tuple[Any, ...]:
-        if self._buffer_filled_count < formatter.size:
-            self._fill_buffer()
+        if self._last_read_count - self._offset < formatter.size:
+            self._fill_buffer(formatter.size)
 
-        result = formatter.unpack_from(self._view, 0)
-        self._view = self._view[formatter.size :]
-        self._buffer_filled_count -= formatter.size
+        result = formatter.unpack_from(self._buffer, self._offset)
+        self._offset += formatter.size
         return result
+
+    def read_byte(self) -> int:
+        if self._last_read_count - self._offset < 1:
+            self._fill_buffer(1)
+
+        result = self._buffer[self._offset]
+        self._offset += 1
+        return result
+
+    def read_unsigned_varint(self) -> int:
+        result = 0
+        shift = 0
+        while True:
+            if self._last_read_count - self._offset < 1:
+                self._fill_buffer(1)
+
+            byte = self._buffer[self._offset]
+            self._offset += 1
+            result |= (byte & 0x7F) << shift
+            if byte < 0x80:
+                return result
+            shift += 7
+
+    def zigzag_decode(self, value: int) -> int:
+        return (value >> 1) ^ -(value & 1)
+
+    def read_signed_varint(self) -> int:
+        return self.zigzag_decode(self.read_unsigned_varint())
+
+    def read_view(self, count: int) -> memoryview:
+        if count <= (self._last_read_count - self._offset):
+            self._offset += count
+            return self._view[self._offset : self._offset + count]
+
+        if count > len(self._buffer):
+            local_buf = bytearray(count)
+            local_view = memoryview(local_buf)
+            remaining = self._last_read_count - self._offset
+            local_view[:remaining] = self._view[self._offset : self._last_read_count]
+            self._offset = self._last_read_count
+            if self._stream.readinto(local_view[remaining:]) < count - remaining:
+                raise EOFError("Unexpected EOF")
+            return local_view
+
+        self._fill_buffer(count)
+        result = self._view[self._offset : self._offset + count]
+        self._offset += count
+        return result
+
+    def read_bytearray(self, count: int) -> bytearray:
+        if count <= (self._last_read_count - self._offset):
+            self._offset += count
+            return bytearray(self._view[self._offset : self._offset + count])
+
+        if count > len(self._buffer):
+            local_buf = bytearray(count)
+            local_view = memoryview(local_buf)
+            remaining = self._last_read_count - self._offset
+            local_view[:remaining] = self._view[self._offset : self._last_read_count]
+            self._offset = self._last_read_count
+            if self._stream.readinto(local_view[remaining:]) < count - remaining:
+                raise EOFError("Unexpected EOF")
+            return local_buf
+
+        self._fill_buffer(count)
+        result = self._view[self._offset : self._offset + count]
+        self._offset += count
+        return bytearray(result)
+
+    def _fill_buffer(self, min_count: int = 0) -> None:
+        remaining = self._last_read_count - self._offset
+        if remaining > 0:
+            remaining_view = memoryview(self._buffer)[self._offset:]
+            self._buffer[:remaining] = remaining_view
+
+        slice = memoryview(self._buffer)[remaining:]
+        read_count = self._stream.readinto(slice)
+        if read_count == 0:
+            self._at_end = True
+        if min_count > 0 and (read_count + remaining) < min_count:
+            raise EOFError("Unexpected EOF")
+
 
 
 T = TypeVar("T")

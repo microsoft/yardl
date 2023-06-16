@@ -1,6 +1,9 @@
 #! /usr/bin/env python3
 
 import os
+import io
+import sys
+import typing
 import sandbox
 import numpy as np
 
@@ -38,16 +41,12 @@ def main():
 
     os.system("hexdump -C test.bin")
 
-    ba = bytearray(16)
-    arr = np.frombuffer(ba, dtype=np.int32)
-    print(arr)
-    ba[0] = 3
-    print(arr)
+    buf = bytearray(16)
+    buf2 = bytearray("asdasdadasd", "utf-8")
+    buf[0:len(buf2)] = buf2
+    print(buf)
 
 
-
-    s = "asd"
-    print(s[0])
 
 
 if __name__ == "__main__":
