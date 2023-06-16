@@ -67,7 +67,7 @@ class BinaryP1Writer(P1WriterBase, _binary.BinaryProtocolWriter):
         _binary.FixedVectorDescriptor(_binary.int32_descriptor, 3).write(self._stream, value)
 
     def _write_arr(self, value: npt.NDArray[np.uint32]) -> None:
-        _binary.DynamicNDArrayDescriptor(_binary.uint32_descriptor).write(self._stream, value)
+        _binary.NDArrayDescriptor(_binary.uint32_descriptor, 1).write(self._stream, value)
 
     def _write_map(self, value: dict[str, yardl.Int32]) -> None:
         _binary.MapDescriptor(_binary.string_descriptor, _binary.int32_descriptor).write(self._stream, value)

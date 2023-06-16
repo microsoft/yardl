@@ -313,7 +313,7 @@ class Int16Descriptor(TypeDescriptor[Int16]):
         elif not isinstance(value, cast(type, np.uint16)):
             raise ValueError(f"Value in not an unsigned 16-bit integer: {value}")
 
-        stream.write_unsigned_varint(value)
+        stream.write_signed_varint(value)
 
 int16_descriptor = Int16Descriptor()
 
@@ -347,7 +347,7 @@ class Int32Descriptor(TypeDescriptor[Int32]):
         elif not isinstance(value, cast(type, np.int32)):
             raise ValueError(f"Value in not an unsigned 32-bit integer: {value}")
 
-        stream.write_unsigned_varint(value)
+        stream.write_signed_varint(value)
 
 int32_descriptor = Int32Descriptor()
 
@@ -403,7 +403,6 @@ class UInt64Descriptor(TypeDescriptor[UInt64]):
 uint64_descriptor = UInt64Descriptor()
 
 size_descriptor = uint64_descriptor
-
 
 class Float32Descriptor(StructDescriptor[Float32]):
     def __init__(self) -> None:
@@ -596,6 +595,8 @@ class StreamDescriptor(TypeDescriptor[Iterable[T]]):
             stream.write_byte(1)
             self.element_descriptor.write(stream, element)
 
+        stream.write_byte(0)
+
 
 class FixedVectorDescriptor(TypeDescriptor[list[T]]):
     def __init__(self, element_descriptor: TypeDescriptor[T], length: int) -> None:
@@ -691,7 +692,6 @@ class NDArrayDescriptor(Generic[T], NDArrayDescriptorBase[T]):
     def __init__(
         self,
         element_descriptor: TypeDescriptor[T],
-        potentially_trivially_serializable: bool,
         ndims: int,
     ) -> None:
         super().__init__(np.object_, element_descriptor, element_descriptor.overall_dtype())

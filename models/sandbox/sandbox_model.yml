@@ -51,7 +51,7 @@ P1: !protocol
     date: date
     flag: MyFlags
     vec: int*3
-    arr: uint[]
+    arr: uint[x]
     map: string->int
     point: Point<int>
     points: Point<int>*2
