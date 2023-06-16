@@ -11,6 +11,9 @@ from numpy.lib import recfunctions
 import numpy.typing as npt
 from .yardl_types import *
 
+if sys.byteorder != "little":
+    raise RuntimeError("Only little-endian systems are currently supported")
+
 MAGIC_BYTES: bytes = b"yardl"
 CURRENT_BINARY_FORMAT_VERSION: int = 1
 

@@ -43,7 +43,6 @@ def main():
     print(arr)
     ba[0] = 3
     print(arr)
-    np.int32.frombuffer(ba, offset=4, count=1)[0] = 4
 
 
 
