@@ -77,9 +77,9 @@ func writeRecordSerializers(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 				})
 				w.WriteStringln("")
 
-				fmt.Fprintf(w, "def read(self, stream: _binary.CodedInputStream) -> %s:\n", typeSyntax)
+				fmt.Fprintf(w, "def read(self, stream: _binary.CodedInputStream, read_as_numpy: Types) -> %s:\n", typeSyntax)
 				w.Indented(func() {
-					w.WriteStringln("field_values = self._read(stream)")
+					w.WriteStringln("field_values = self._read(stream, read_as_numpy)")
 					args := make([]string, len(td.Fields))
 					for i, field := range td.Fields {
 						args[i] = fmt.Sprintf("%s=field_values[%d]", common.FieldIdentifierName(field.Name), i)
@@ -137,9 +137,9 @@ func writeProtocols(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 			common.WriteDocstringWithLeadingLine(w, fmt.Sprintf("Binary writer for the %s protocol.", p.Name), p.Comment)
 			w.WriteStringln("")
 
-			w.WriteStringln("def __init__(self, stream: io.BufferedReader | str) -> None:")
+			w.WriteStringln("def __init__(self, stream: io.BufferedReader | str, read_as_numpy: Types) -> None:")
 			w.Indented(func() {
-				fmt.Fprintf(w, "%s.__init__(self)\n", common.AbstractReaderName(p))
+				fmt.Fprintf(w, "%s.__init__(self, read_as_numpy)\n", common.AbstractReaderName(p))
 				fmt.Fprintf(w, "_binary.BinaryProtocolReader.__init__(self, stream, %s.schema)\n", common.AbstractReaderName(p))
 			})
 			w.WriteStringln("")
@@ -153,7 +153,7 @@ func writeProtocols(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 				fmt.Fprintf(w, "def %s(self) -> %s:\n", common.ProtocolReadImplMethodName(step), valueType)
 				w.Indented(func() {
 					descriptor := typeDescriptor(step.Type, ns.Name)
-					fmt.Fprintf(w, "return %s.read(self._stream)\n", descriptor)
+					fmt.Fprintf(w, "return %s.read(self._stream, self._read_as_numpy)\n", descriptor)
 				})
 				w.WriteStringln("")
 			}

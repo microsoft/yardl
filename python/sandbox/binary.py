@@ -20,8 +20,8 @@ class _PointDescriptor(_binary.RecordDescriptor[Point]):
     def write(self, stream: _binary.CodedOutputStream, value: Point) -> None:
         self._write(stream, value.x, value.y)
 
-    def read(self, stream: _binary.CodedInputStream) -> Point:
-        field_values = self._read(stream)
+    def read(self, stream: _binary.CodedInputStream, read_as_numpy: Types) -> Point:
+        field_values = self._read(stream, read_as_numpy)
         return Point(x=field_values[0], y=field_values[1])
 
 
@@ -32,17 +32,17 @@ class BinaryP1Writer(P1WriterBase, _binary.BinaryProtocolWriter):
         P1WriterBase.__init__(self)
         _binary.BinaryProtocolWriter.__init__(self, stream, P1WriterBase.schema)
 
-    def _write_my_value(self, value: Point) -> None:
-        _PointDescriptor().write(self._stream, value)
+    def _write_my_value(self, value: yardl.DateTime) -> None:
+        _binary.datetime_descriptor.write(self._stream, value)
 
 
 class BinaryP1Reader(P1ReaderBase, _binary.BinaryProtocolReader):
     """Binary writer for the P1 protocol."""
 
-    def __init__(self, stream: io.BufferedReader | str) -> None:
-        P1ReaderBase.__init__(self)
+    def __init__(self, stream: io.BufferedReader | str, read_as_numpy: Types) -> None:
+        P1ReaderBase.__init__(self, read_as_numpy)
         _binary.BinaryProtocolReader.__init__(self, stream, P1ReaderBase.schema)
 
-    def _read_my_value(self) -> Point:
-        return _PointDescriptor().read(self._stream)
+    def _read_my_value(self) -> yardl.DateTime:
+        return _binary.datetime_descriptor.read(self._stream, self._read_as_numpy)
 

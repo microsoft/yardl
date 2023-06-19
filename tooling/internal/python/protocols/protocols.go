@@ -78,6 +78,12 @@ func writeProtocols(w *formatting.IndentedWriter, ns *dsl.Namespace, st dsl.Symb
 			common.WriteDocstringWithLeadingLine(w, fmt.Sprintf("Abstract reader for the %s protocol.", p.Name), p.Comment)
 			w.WriteStringln("")
 
+			w.WriteStringln("def __init__(self, read_as_numpy: Types = Types.NONE) -> None:")
+			w.Indented(func() {
+				w.WriteStringln("self._read_as_numpy = read_as_numpy")
+			})
+			w.WriteStringln("")
+
 			fmt.Fprintf(w, `schema = %s.schema`, common.AbstractWriterName(p))
 			w.WriteStringln("\n")
 

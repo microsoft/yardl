@@ -70,6 +70,8 @@ func writePackageInitFile(packageDir string, ns *dsl.Namespace) error {
 	w := formatting.NewIndentedWriter(&b, "    ")
 	common.WriteGeneratedFileHeader(w)
 
+	fmt.Fprintf(w, "from .yardl_types import Types\n")
+
 	typeNames := make([]string, 0)
 	for _, t := range ns.TypeDefinitions {
 		typeNames = append(typeNames, common.TypeDefinitionSyntax(t, ns.Name, false))
