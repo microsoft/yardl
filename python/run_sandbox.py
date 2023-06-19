@@ -25,9 +25,5 @@ def main():
         print(f"{v} {type(v)}")
 
 
-
-
-
-
 if __name__ == "__main__":
     main()
