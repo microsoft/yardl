@@ -9,46 +9,8 @@ import numpy as np
 import numpy.typing as npt
 from . import yardl_types as yardl
 
-T = typing.TypeVar('T')
-
-class MyFlags(enum.Flag):
-    """This is my enum"""
+class MyEnum(enum.Flag):
     A = 1
-    """This is the "A" value"""
     B = 2
     C = 4
-
-@dataclasses.dataclass(slots=True, kw_only=True)
-class MyRec(typing.Generic[T]):
-    f1: yardl.Int8
-    f2: T
-    f3: MyFlags
-
-MyInt = yardl.Int32 | yardl.Float32
-"""# This is a string
-MyString: string
-
-R2<T>: !record
-  fields:
-    r2: MyRec<T>
-
-R: MyRec<string>
-"""
-
-Image = list[T]
-
-IntImage = Image[yardl.Float32]
-
-@dataclasses.dataclass(slots=True, kw_only=True)
-class Point(typing.Generic[T]):
-    x: T
-    y: T
-
-@dataclasses.dataclass(slots=True, kw_only=True)
-class MyStruct(typing.Generic[T]):
-    points: npt.NDArray[np.void]
-
-MyStruct2 = MyStruct[T]
-
-MyStruct3 = MyStruct[yardl.Int32]
 

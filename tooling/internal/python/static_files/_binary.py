@@ -10,6 +10,7 @@ import sys
 import numpy as np
 from numpy.lib import recfunctions
 import numpy.typing as npt
+
 from .yardl_types import *
 
 if sys.byteorder != "little":
@@ -65,6 +66,42 @@ class BinaryProtocolWriter(ABC):
 
     def _close(self) -> None:
         pass
+
+class BinaryProtocolReader(ABC):
+    def __init__(self, stream: BufferedReader | str, expected_schema : str) -> None:
+        self._stream = CodedInputStream(stream)
+        magic_bytes = self._stream.read_view(len(MAGIC_BYTES))
+        if magic_bytes != MAGIC_BYTES:
+            raise RuntimeError("Invalid magic bytes")
+
+        version = read_fixed_int32(self._stream)
+        if version != CURRENT_BINARY_FORMAT_VERSION:
+            raise RuntimeError("Invalid binary format version")
+
+        self._schema = string_descriptor.read(self._stream)
+        if self._schema != expected_schema:
+            raise RuntimeError("Invalid schema")
+
+    def __enter__(self):
+        return self
+
+    def __exit__(
+        self,
+        exc_type: Optional[type[BaseException]],
+        exc: Optional[BaseException],
+        traceback: Optional[TracebackType],
+    ) -> None:
+        self.close()
+
+    def close(self) -> None:
+        try:
+            self._close()
+        finally:
+            self._stream.close()
+
+    def _close(self) -> None:
+        pass
+
 
 
 class CodedOutputStream:
@@ -193,8 +230,9 @@ class CodedInputStream:
 
     def read_view(self, count: int) -> memoryview:
         if count <= (self._last_read_count - self._offset):
+            res = self._view[self._offset : self._offset + count]
             self._offset += count
-            return self._view[self._offset : self._offset + count]
+            return res
 
         if count > len(self._buffer):
             local_buf = bytearray(count)
@@ -213,8 +251,9 @@ class CodedInputStream:
 
     def read_bytearray(self, count: int) -> bytearray:
         if count <= (self._last_read_count - self._offset):
+            res = bytearray(self._view[self._offset : self._offset + count])
             self._offset += count
-            return bytearray(self._view[self._offset : self._offset + count])
+            return res
 
         if count > len(self._buffer):
             local_buf = bytearray(count)
@@ -238,10 +277,11 @@ class CodedInputStream:
             self._buffer[:remaining] = remaining_view
 
         slice = memoryview(self._buffer)[remaining:]
-        read_count = self._stream.readinto(slice)
-        if read_count == 0:
+        self._last_read_count = self._stream.readinto(slice)
+        self._offset = 0
+        if self._last_read_count == 0:
             self._at_end = True
-        if min_count > 0 and (read_count + remaining) < min_count:
+        if min_count > 0 and (self._last_read_count + remaining) < min_count:
             raise EOFError("Unexpected EOF")
 
 
@@ -262,6 +302,10 @@ class TypeDescriptor(Generic[T], ABC):
     def write(self, stream: CodedOutputStream, value: T) -> None:
         raise NotImplementedError
 
+    #@abstractmethod
+    def read(self, stream: CodedInputStream) -> T:
+        raise NotImplementedError
+
     def is_trivially_serializable(self) -> bool:
         return False
 
@@ -272,6 +316,9 @@ class StructDescriptor(TypeDescriptor[T]):
 
     def write(self, stream: CodedOutputStream, value: T) -> None:
         stream.write(self.struct, value)
+
+    def read(self, stream: CodedInputStream) -> T:
+        return cast(T, stream.read(self.struct)[0])
 
     def struct_format_str(self) -> str:
         return self.struct.format
@@ -315,6 +362,9 @@ class Int16Descriptor(TypeDescriptor[Int16]):
 
         stream.write_signed_varint(value)
 
+    def read(self, stream: CodedInputStream) -> Int16:
+        return cast(Int16, stream.read_signed_varint())
+
 int16_descriptor = Int16Descriptor()
 
 class UInt16Descriptor(TypeDescriptor[UInt16]):
@@ -331,6 +381,9 @@ class UInt16Descriptor(TypeDescriptor[UInt16]):
             raise ValueError(f"Value in not an unsigned 16-bit integer: {value}")
 
         stream.write_unsigned_varint(value)
+
+    def read(self, stream: CodedInputStream) -> UInt16:
+        return cast(UInt16, stream.read_unsigned_varint())
 
 uint16_descriptor = UInt16Descriptor()
 
@@ -349,6 +402,9 @@ class Int32Descriptor(TypeDescriptor[Int32]):
 
         stream.write_signed_varint(value)
 
+    def read(self, stream: CodedInputStream) -> Int32:
+        return cast(Int32, stream.read_signed_varint())
+
 int32_descriptor = Int32Descriptor()
 
 class UInt32Descriptor(TypeDescriptor[UInt32]):
@@ -365,6 +421,10 @@ class UInt32Descriptor(TypeDescriptor[UInt32]):
             raise ValueError(f"Value in not an unsigned 32-bit integer: {value}")
 
         stream.write_unsigned_varint(value)
+
+    def read(self, stream: CodedInputStream) -> UInt32:
+        return cast(UInt32, stream.read_unsigned_varint())
+
 
 uint32_descriptor = UInt32Descriptor()
 
@@ -383,6 +443,9 @@ class Int64Descriptor(TypeDescriptor[Int64]):
 
         stream.write_signed_varint(value)
 
+    def read(self, stream: CodedInputStream) -> Int64:
+        return cast(Int64, stream.read_signed_varint())
+
 int64_descriptor = Int64Descriptor()
 
 class UInt64Descriptor(TypeDescriptor[UInt64]):
@@ -399,6 +462,9 @@ class UInt64Descriptor(TypeDescriptor[UInt64]):
             raise ValueError(f"Value in not an unsigned 64-bit integer: {value}")
 
         stream.write_unsigned_varint(value)
+
+    def read(self, stream: CodedInputStream) -> UInt64:
+        return cast(UInt64, stream.read_unsigned_varint())
 
 uint64_descriptor = UInt64Descriptor()
 
@@ -449,6 +515,11 @@ class StringDescriptor(TypeDescriptor[str]):
         stream.write_unsigned_varint(len(b))
         stream.write_bytes(b)
 
+    def read(self, stream: CodedInputStream) -> str:
+        length = stream.read_unsigned_varint()
+        view = stream.read_view(length)
+        return str(view, "utf-8")
+
 string_descriptor = StringDescriptor()
 
 EPOCH_ORDINAL_DAYS = datetime.date(1970, 1, 1).toordinal()
@@ -473,6 +544,11 @@ class DateDescriptor(TypeDescriptor[Date]):
                 stream.write_signed_varint(
                     value.astype(DATETIME_DAYS_DTYPE).astype(np.int32)
                 )
+
+    def read(self, stream: CodedInputStream) -> Date:
+        days_since_epoch = stream.read_signed_varint()
+        return datetime.datetime.fromordinal(days_since_epoch + EPOCH_ORDINAL_DAYS)
+
 
 date_descriptor = DateDescriptor()
 
@@ -504,6 +580,14 @@ class TimeDescriptor(TypeDescriptor[Time]):
                     value.astype(DATETIME_NANOSECONDS_DTYPE).astype(np.int64)
                 )
 
+    def read(self, stream: CodedInputStream) -> Time:
+        nanoseconds_since_midnight = stream.read_signed_varint()
+        hours, r = divmod(nanoseconds_since_midnight, 3_600_000_000_000)
+        minutes, r = divmod(r, 60_000_000_000)
+        seconds, r = divmod(r, 1_000_000_000)
+        microseconds = r // 1000
+        return datetime.time(hours, minutes, seconds, microseconds)
+
 time_descriptor = TimeDescriptor()
 
 DATETIME_NANOSECONDS_DTYPE = np.dtype("datetime64[ns]")
@@ -531,6 +615,11 @@ class DateTimeDescriptor(TypeDescriptor[DateTime]):
                     value.astype(DATETIME_NANOSECONDS_DTYPE).astype(np.int64)
                 )
 
+    def read(self, stream: CodedInputStream) -> DateTime:
+        nanoseconds_since_epoch = stream.read_signed_varint()
+        return EPOCH_DATETIME + datetime.timedelta(microseconds=nanoseconds_since_epoch / 1000)
+
+
 datetime_descriptor = DateTimeDescriptor()
 
 class NoneDescriptor(TypeDescriptor[None]):
@@ -540,24 +629,29 @@ class NoneDescriptor(TypeDescriptor[None]):
     def write(self, stream: CodedOutputStream, value: None) -> None:
         pass
 
+    def read(self, stream: CodedInputStream) -> None:
+        return None
+
 none_descriptor = NoneDescriptor()
 
-def write_none(stream: CodedOutputStream, value: None) -> None:
-    pass
-
-class EnumDescriptor(Generic[T], TypeDescriptor[Enum]):
-    def __init__(self, integer_descriptor: TypeDescriptor[T]) -> None:
+TEnum = TypeVar("TEnum", bound=Enum)
+class EnumDescriptor(Generic[TEnum], TypeDescriptor[TEnum]):
+    def __init__(self, integer_descriptor: TypeDescriptor[TEnum], enum_type: type) -> None:
         super().__init__(integer_descriptor.overall_dtype())
-        self.integer_descriptor = integer_descriptor
+        self._integer_descriptor = integer_descriptor
+        self._enum_type = enum_type
 
-    def write(self, stream: CodedOutputStream, value: Enum) -> None:
-        self.integer_descriptor.write(stream, value.value)
+    def write(self, stream: CodedOutputStream, value: TEnum) -> None:
+        self._integer_descriptor.write(stream, value.value)
+
+    def read(self, stream: CodedInputStream) -> TEnum:
+        return self._enum_type(self._integer_descriptor.read(stream))
 
     def is_trivially_serializable(self) -> bool:
-        return self.integer_descriptor.is_trivially_serializable()
+        return self._integer_descriptor.is_trivially_serializable()
 
 
-class OptionalDescriptor(TypeDescriptor[T]):
+class OptionalDescriptor(TypeDescriptor[Optional[T]]):
     def __init__(self, element_descriptor: TypeDescriptor[T]) -> None:
         super().__init__(np.dtype([("has_value", np.bool_), ("value", element_descriptor.overall_dtype())]))
         self.element_descriptor = element_descriptor
@@ -568,6 +662,13 @@ class OptionalDescriptor(TypeDescriptor[T]):
         else:
             stream.write_byte(1)
             self.element_descriptor.write(stream, value)
+
+    def read(self, stream: CodedInputStream) -> Optional[T]:
+        has_value = stream.read_byte()
+        if has_value == 0:
+            return None
+        else:
+            return self.element_descriptor.read(stream)
 
 
 class UnionDescriptor(TypeDescriptor[Any]):
@@ -584,6 +685,11 @@ class UnionDescriptor(TypeDescriptor[Any]):
 
         raise ValueError(f"Incorrect union type {type(value)}")
 
+    def read(self, stream: CodedInputStream) -> Any:
+        case_index = stream.read_byte()
+        _, case_descriptor = self.cases[case_index]
+        return case_descriptor.read(stream)
+
 
 class StreamDescriptor(TypeDescriptor[Iterable[T]]):
     def __init__(self, element_descriptor: TypeDescriptor[T]) -> None:
@@ -596,6 +702,10 @@ class StreamDescriptor(TypeDescriptor[Iterable[T]]):
             self.element_descriptor.write(stream, element)
 
         stream.write_byte(0)
+
+    def read(self, stream: CodedInputStream) -> Iterable[T]:
+        while stream.read_byte():
+            yield self.element_descriptor.read(stream)
 
 
 class FixedVectorDescriptor(TypeDescriptor[list[T]]):
@@ -612,6 +722,12 @@ class FixedVectorDescriptor(TypeDescriptor[list[T]]):
         for element in value:
             self.element_descriptor.write(stream, element)
 
+    def read(self, stream: CodedInputStream) -> list[T]:
+        return [
+            self.element_descriptor.read(stream)
+            for _ in range(self.length)
+        ]
+
     def is_trivially_serializable(self) -> bool:
         return self.element_descriptor.is_trivially_serializable()
 
@@ -625,6 +741,13 @@ class VectorDescriptor(TypeDescriptor[list[T]]):
         stream.write_unsigned_varint(len(value))
         for element in value:
             self.element_descriptor.write(stream, element)
+
+    def read(self, stream: CodedInputStream) -> list[T]:
+        length = stream.read_unsigned_varint()
+        return [
+            self.element_descriptor.read(stream)
+            for _ in range(length)
+        ]
 
 
 TKey = TypeVar("TKey")
@@ -642,6 +765,13 @@ class MapDescriptor(TypeDescriptor[dict[TKey, TValue]]):
         for k, v in value.items():
             self.key_descriptor.write(stream, k)
             self.value_descriptor.write(stream, v)
+
+    def read(self, stream: CodedInputStream) -> dict[TKey, TValue]:
+        length = stream.read_unsigned_varint()
+        return {
+            self.key_descriptor.read(stream): self.value_descriptor.read(stream)
+            for _ in range(length)
+        }
 
 class NDArrayDescriptorBase(Generic[T], TypeDescriptor[npt.NDArray[Any]]):
     def __init__(
@@ -768,3 +898,7 @@ def write_fixed_int32(stream: CodedOutputStream, value: int) -> None:
             f"Value {value} is outside the range of a signed 32-bit integer"
         )
     stream.write(int32_struct, value)
+
+
+def read_fixed_int32(stream: CodedInputStream) -> int:
+    return stream.read(int32_struct)[0]

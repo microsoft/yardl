@@ -21,6 +21,7 @@ func WriteBinary(ns *dsl.Namespace, packageDir string) error {
 
 import collections.abc
 import datetime
+import io
 import typing
 import numpy as np
 import numpy.typing as npt
@@ -118,9 +119,16 @@ func writeProtocols(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 		w.WriteStringln("")
 
 		// reader
-		fmt.Fprintf(w, "class %s(%s):\n", BinaryReaderName(p), common.AbstractReaderName(p))
+		fmt.Fprintf(w, "class %s(%s, _binary.BinaryProtocolReader):\n", BinaryReaderName(p), common.AbstractReaderName(p))
 		w.Indented(func() {
 			common.WriteDocstringWithLeadingLine(w, fmt.Sprintf("Binary writer for the %s protocol.", p.Name), p.Comment)
+			w.WriteStringln("")
+
+			w.WriteStringln("def __init__(self, stream: io.BufferedReader | str) -> None:")
+			w.Indented(func() {
+				fmt.Fprintf(w, "%s.__init__(self)\n", common.AbstractReaderName(p))
+				fmt.Fprintf(w, "_binary.BinaryProtocolReader.__init__(self, stream, %s.schema)\n", common.AbstractReaderName(p))
+			})
 			w.WriteStringln("")
 
 			for _, step := range p.Sequence {
@@ -131,7 +139,8 @@ func writeProtocols(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 
 				fmt.Fprintf(w, "def %s(self) -> %s:\n", common.ProtocolReadImplMethodName(step), valueType)
 				w.Indented(func() {
-					w.WriteStringln("raise NotImplementedError()")
+					descriptor := typeDescriptor(step.Type, ns.Name)
+					fmt.Fprintf(w, "return %s.read(self._stream)\n", descriptor)
 				})
 				w.WriteStringln("")
 			}
@@ -152,7 +161,7 @@ func typeDefinitionDescriptor(t dsl.TypeDefinition, contextNamespace string) str
 		}
 
 		elementDescriptor := typeDescriptor(baseType, contextNamespace)
-		return fmt.Sprintf("_binary.EnumDescriptor(%s)", elementDescriptor)
+		return fmt.Sprintf("_binary.EnumDescriptor(%s, %s)", elementDescriptor, common.TypeDefinitionSyntax(t, contextNamespace, false))
 	case *dsl.RecordDefinition:
 		rwClassName := recordDescriptorClassName(t)
 		if len(t.TypeParameters) == 0 {
