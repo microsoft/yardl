@@ -11,7 +11,9 @@ import numpy as np
 
 def main():
     with sandbox.BinaryP1Writer("test.bin") as w:
-        w.write_my_value({"a": 1, "b": 2})
+        value = sandbox.Point(x=1, y=2)
+        print(value)
+        w.write_my_value(value)
         pass
 
     os.system("hexdump -C test.bin")

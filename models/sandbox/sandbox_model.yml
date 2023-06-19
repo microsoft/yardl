@@ -1,6 +1,11 @@
 P1: !protocol
   sequence:
-    myValue: string->int
+    myValue: Point
 
 MyEnum: !flags
   values: [a,b,c]
+
+Point: !record
+  fields:
+    x: int
+    y: int

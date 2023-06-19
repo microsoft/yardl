@@ -13,14 +13,14 @@ from . import yardl_types as yardl
 class P1WriterBase(abc.ABC):
     """Abstract writer for the P1 protocol."""
 
-    schema = """{"protocol":{"name":"P1","sequence":[{"name":"myValue","type":{"map":{"keys":"string","values":"int32"}}}]},"types":null}"""
+    schema = """{"protocol":{"name":"P1","sequence":[{"name":"myValue","type":"Sandbox.Point"}]},"types":[{"name":"Point","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"}]}]}"""
 
-    def write_my_value(self, value: dict[str, yardl.Int32]) -> None:
+    def write_my_value(self, value: Point) -> None:
         """Ordinal 0"""
         self._write_my_value(value)
 
     @abc.abstractmethod
-    def _write_my_value(self, value: dict[str, yardl.Int32]) -> None:
+    def _write_my_value(self, value: Point) -> None:
         raise NotImplementedError()
 
 class P1ReaderBase(abc.ABC):
@@ -28,11 +28,11 @@ class P1ReaderBase(abc.ABC):
 
     schema = P1WriterBase.schema
 
-    def read_my_value(self) -> dict[str, yardl.Int32]:
+    def read_my_value(self) -> Point:
         """Ordinal 0"""
         return self._read_my_value()
 
     @abc.abstractmethod
-    def _read_my_value(self) -> dict[str, yardl.Int32]:
+    def _read_my_value(self) -> Point:
         raise NotImplementedError()
 

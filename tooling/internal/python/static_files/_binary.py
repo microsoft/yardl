@@ -1,10 +1,8 @@
 import datetime
-from io import BufferedIOBase, BufferedReader, RawIOBase
+from io import BufferedReader
 from types import TracebackType
-from typing import BinaryIO, Iterable, TypeVar, Protocol, Generic, Any, Optional, Tuple, cast
-from collections.abc import Callable
+from typing import BinaryIO, Iterable, TypeVar, Generic, Any, Optional, Tuple, cast
 from abc import ABC, abstractmethod
-from functools import partial
 import struct
 import sys
 import numpy as np
@@ -302,7 +300,7 @@ class TypeDescriptor(Generic[T], ABC):
     def write(self, stream: CodedOutputStream, value: T) -> None:
         raise NotImplementedError
 
-    #@abstractmethod
+    @abstractmethod
     def read(self, stream: CodedInputStream) -> T:
         raise NotImplementedError
 
@@ -798,6 +796,20 @@ class NDArrayDescriptorBase(Generic[T], TypeDescriptor[npt.NDArray[Any]]):
             for element in to_iterate.flat:
                 self._element_descriptor.write(stream, element)
 
+    def _read_data(self, stream: CodedInputStream, shape: tuple[int, ...]) -> npt.NDArray[Any]:
+        flat_length = int(np.prod(shape))
+
+        if self._element_descriptor.is_trivially_serializable():
+            flat_byte_length = flat_length * self._array_dtype.itemsize
+            byte_array = stream.read_bytearray(flat_byte_length)
+            return np.frombuffer(byte_array, dtype=self._array_dtype).reshape(shape)
+
+        result = np.empty((flat_length,), dtype=self._array_dtype)
+        for i in range(flat_length):
+            result[i] = self._element_descriptor.read(stream)
+
+        return result.reshape(shape)
+
     def _is_current_array_trivially_serializable(self, value: npt.NDArray[Any]) -> bool:
         return self._element_descriptor.is_trivially_serializable() and value.flags.c_contiguous \
             and (self._array_dtype.fields is None or all(f != "" for f in self._array_dtype.fields))
@@ -816,6 +828,11 @@ class DynamicNDArrayDescriptor(NDArrayDescriptorBase[T]):
             stream.write_unsigned_varint(dim)
 
         self._write_data(stream, value)
+
+    def read(self, stream: CodedInputStream) -> npt.NDArray[Any]:
+        ndims = stream.read_unsigned_varint()
+        shape = tuple(stream.read_unsigned_varint() for _ in range(ndims))
+        return self._read_data(stream, shape)
 
 
 class NDArrayDescriptor(Generic[T], NDArrayDescriptorBase[T]):
@@ -836,6 +853,10 @@ class NDArrayDescriptor(Generic[T], NDArrayDescriptorBase[T]):
 
         self._write_data(stream, value)
 
+    def read(self, stream: CodedInputStream) -> npt.NDArray[Any]:
+        shape = tuple(stream.read_unsigned_varint() for _ in range(self.ndims))
+        return self._read_data(stream, shape)
+
 
 class FixedNDArrayDescriptor(Generic[T], NDArrayDescriptorBase[T]):
     def __init__(
@@ -852,6 +873,9 @@ class FixedNDArrayDescriptor(Generic[T], NDArrayDescriptorBase[T]):
             raise ValueError(f"Expected shape {self.shape}, got {value.shape}")
 
         self._write_data(stream, value)
+
+    def read(self, stream: CodedInputStream) -> npt.NDArray[Any]:
+        return self._read_data(stream, self.shape)
 
     def is_trivially_serializable(self) -> bool:
         return self._element_descriptor.is_trivially_serializable()
@@ -885,6 +909,12 @@ class RecordDescriptor(TypeDescriptor[T]):
         else:
             for i, (_,descriptor) in enumerate(self._field_descriptors):
                 descriptor.write(stream, values[i])
+
+    def _read(self, stream: CodedInputStream) -> tuple[Any, ...]:
+        if self._struct:
+            return stream.read(self._struct)
+        else:
+            return tuple(descriptor.read(stream) for _, descriptor in self._field_descriptors)
 
 
 # Only used in the header

@@ -76,6 +76,19 @@ func writeRecordSerializers(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 					fmt.Fprintf(w, "self._write(stream, %s)\n", strings.Join(fieldAccesses, ", "))
 				})
 				w.WriteStringln("")
+
+				fmt.Fprintf(w, "def read(self, stream: _binary.CodedInputStream) -> %s:\n", typeSyntax)
+				w.Indented(func() {
+					w.WriteStringln("field_values = self._read(stream)")
+					args := make([]string, len(td.Fields))
+					for i, field := range td.Fields {
+						args[i] = fmt.Sprintf("%s=field_values[%d]", common.FieldIdentifierName(field.Name), i)
+					}
+
+					fmt.Fprintf(w, "return %s(%s)\n", typeSyntax, strings.Join(args, ", "))
+
+				})
+				w.WriteStringln("")
 			})
 			w.WriteStringln("")
 		}

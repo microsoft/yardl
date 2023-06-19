@@ -14,3 +14,8 @@ class MyEnum(enum.Flag):
     B = 2
     C = 4
 
+@dataclasses.dataclass(slots=True, kw_only=True)
+class Point:
+    x: yardl.Int32
+    y: yardl.Int32
+
