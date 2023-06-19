@@ -27,9 +27,11 @@ Integer = Int8 | UInt8 | Int16 | UInt16 | Int32 | UInt32 | Int64 | UInt64 | Size
 Float = Float32 | Float64
 Complex = ComplexFloat | ComplexDouble
 
+
 class TypePreference(Enum):
     PYTHON = auto()
     NUMPY = auto()
+
 
 @dataclass(frozen=True, slots=True, kw_only=True)
 class ReadTypePreferences:

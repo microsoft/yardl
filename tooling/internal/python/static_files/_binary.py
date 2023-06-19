@@ -65,8 +65,9 @@ class BinaryProtocolWriter(ABC):
     def _close(self) -> None:
         pass
 
+
 class BinaryProtocolReader(ABC):
-    def __init__(self, stream: BufferedReader | str, expected_schema : str) -> None:
+    def __init__(self, stream: BufferedReader | str, expected_schema: str) -> None:
         self._stream = CodedInputStream(stream)
         magic_bytes = self._stream.read_view(len(MAGIC_BYTES))
         if magic_bytes != MAGIC_BYTES:
@@ -99,7 +100,6 @@ class BinaryProtocolReader(ABC):
 
     def _close(self) -> None:
         pass
-
 
 
 class CodedOutputStream:
@@ -168,8 +168,11 @@ class CodedOutputStream:
     def write_signed_varint(self, value: Integer) -> None:
         self.write_unsigned_varint(self.zigzag_encode(value))
 
+
 class CodedInputStream:
-    def __init__(self, stream: BufferedReader | str, *, buffer_size: int = 65536) -> None:
+    def __init__(
+        self, stream: BufferedReader | str, *, buffer_size: int = 65536
+    ) -> None:
         if isinstance(stream, str):
             self._stream = open(stream, "rb")
             self._owns_stream = True
@@ -271,7 +274,7 @@ class CodedInputStream:
     def _fill_buffer(self, min_count: int = 0) -> None:
         remaining = self._last_read_count - self._offset
         if remaining > 0:
-            remaining_view = memoryview(self._buffer)[self._offset:]
+            remaining_view = memoryview(self._buffer)[self._offset :]
             self._buffer[:remaining] = remaining_view
 
         slice = memoryview(self._buffer)[remaining:]
@@ -283,8 +286,8 @@ class CodedInputStream:
             raise EOFError("Unexpected EOF")
 
 
-
 T = TypeVar("T")
+
 
 class TypeDescriptor(Generic[T], ABC):
     def __init__(self, dtype: npt.DTypeLike) -> None:
@@ -307,6 +310,7 @@ class TypeDescriptor(Generic[T], ABC):
     def is_trivially_serializable(self) -> bool:
         return False
 
+
 class StructDescriptor(TypeDescriptor[T]):
     def __init__(self, dtype: npt.DTypeLike, format_string: str) -> None:
         super().__init__(dtype)
@@ -321,11 +325,14 @@ class StructDescriptor(TypeDescriptor[T]):
     def struct_format_str(self) -> str:
         return self.struct.format
 
+
 class BoolDescriptor(StructDescriptor[bool]):
     def __init__(self) -> None:
         super().__init__(np.bool_, "<?")
 
+
 write_descriptor = BoolDescriptor()
+
 
 class Int8Descriptor(StructDescriptor[Int8]):
     def __init__(self) -> None:
@@ -334,7 +341,9 @@ class Int8Descriptor(StructDescriptor[Int8]):
     def is_trivially_serializable(self) -> bool:
         return True
 
+
 int8_descriptor = Int8Descriptor()
+
 
 class UInt8Descriptor(StructDescriptor[UInt8]):
     def __init__(self) -> None:
@@ -343,7 +352,9 @@ class UInt8Descriptor(StructDescriptor[UInt8]):
     def is_trivially_serializable(self) -> bool:
         return True
 
+
 uint8_descriptor = UInt8Descriptor()
+
 
 class Int16Descriptor(TypeDescriptor[Int16]):
     def __init__(self) -> None:
@@ -363,7 +374,9 @@ class Int16Descriptor(TypeDescriptor[Int16]):
     def read(self, stream: CodedInputStream) -> Int16:
         return cast(Int16, stream.read_signed_varint())
 
+
 int16_descriptor = Int16Descriptor()
+
 
 class UInt16Descriptor(TypeDescriptor[UInt16]):
     def __init__(self) -> None:
@@ -383,7 +396,9 @@ class UInt16Descriptor(TypeDescriptor[UInt16]):
     def read(self, stream: CodedInputStream) -> UInt16:
         return cast(UInt16, stream.read_unsigned_varint())
 
+
 uint16_descriptor = UInt16Descriptor()
+
 
 class Int32Descriptor(TypeDescriptor[Int32]):
     def __init__(self) -> None:
@@ -403,7 +418,9 @@ class Int32Descriptor(TypeDescriptor[Int32]):
     def read(self, stream: CodedInputStream) -> Int32:
         return cast(Int32, stream.read_signed_varint())
 
+
 int32_descriptor = Int32Descriptor()
+
 
 class UInt32Descriptor(TypeDescriptor[UInt32]):
     def __init__(self) -> None:
@@ -426,6 +443,7 @@ class UInt32Descriptor(TypeDescriptor[UInt32]):
 
 uint32_descriptor = UInt32Descriptor()
 
+
 class Int64Descriptor(TypeDescriptor[Int64]):
     def __init__(self) -> None:
         super().__init__(np.int64)
@@ -444,7 +462,9 @@ class Int64Descriptor(TypeDescriptor[Int64]):
     def read(self, stream: CodedInputStream) -> Int64:
         return cast(Int64, stream.read_signed_varint())
 
+
 int64_descriptor = Int64Descriptor()
+
 
 class UInt64Descriptor(TypeDescriptor[UInt64]):
     def __init__(self) -> None:
@@ -464,9 +484,11 @@ class UInt64Descriptor(TypeDescriptor[UInt64]):
     def read(self, stream: CodedInputStream) -> UInt64:
         return cast(UInt64, stream.read_unsigned_varint())
 
+
 uint64_descriptor = UInt64Descriptor()
 
 size_descriptor = uint64_descriptor
+
 
 class Float32Descriptor(StructDescriptor[Float32]):
     def __init__(self) -> None:
@@ -475,7 +497,9 @@ class Float32Descriptor(StructDescriptor[Float32]):
     def is_trivially_serializable(self) -> bool:
         return True
 
+
 float32_descriptor = Float32Descriptor()
+
 
 class Float64Descriptor(StructDescriptor[Float64]):
     def __init__(self) -> None:
@@ -484,7 +508,9 @@ class Float64Descriptor(StructDescriptor[Float64]):
     def is_trivially_serializable(self) -> bool:
         return True
 
+
 float64_descriptor = Float64Descriptor()
+
 
 class Complex32Descriptor(StructDescriptor[ComplexFloat]):
     def __init__(self) -> None:
@@ -493,7 +519,9 @@ class Complex32Descriptor(StructDescriptor[ComplexFloat]):
     def is_trivially_serializable(self) -> bool:
         return True
 
+
 complex32_descriptor = Complex32Descriptor()
+
 
 class Complex64Descriptor(StructDescriptor[ComplexDouble]):
     def __init__(self) -> None:
@@ -502,7 +530,9 @@ class Complex64Descriptor(StructDescriptor[ComplexDouble]):
     def is_trivially_serializable(self) -> bool:
         return True
 
+
 complex64_descriptor = Complex64Descriptor()
+
 
 class StringDescriptor(TypeDescriptor[str]):
     def __init__(self) -> None:
@@ -518,10 +548,12 @@ class StringDescriptor(TypeDescriptor[str]):
         view = stream.read_view(length)
         return str(view, "utf-8")
 
+
 string_descriptor = StringDescriptor()
 
 EPOCH_ORDINAL_DAYS = datetime.date(1970, 1, 1).toordinal()
 DATETIME_DAYS_DTYPE = np.dtype("datetime64[D]")
+
 
 class DateDescriptor(TypeDescriptor[Date]):
     def __init__(self) -> None:
@@ -551,6 +583,7 @@ class DateDescriptor(TypeDescriptor[Date]):
 date_descriptor = DateDescriptor()
 
 TIMEDELTA_NANOSECONDS_DTYPE = np.dtype("timedelta64[ns]")
+
 
 class TimeDescriptor(TypeDescriptor[Time]):
     def __init__(self) -> None:
@@ -586,10 +619,12 @@ class TimeDescriptor(TypeDescriptor[Time]):
         microseconds = r // 1000
         return datetime.time(hours, minutes, seconds, microseconds)
 
+
 time_descriptor = TimeDescriptor()
 
 DATETIME_NANOSECONDS_DTYPE = np.dtype("datetime64[ns]")
 EPOCH_DATETIME = datetime.datetime.utcfromtimestamp(0)
+
 
 class DateTimeDescriptor(TypeDescriptor[DateTime]):
     def __init__(self) -> None:
@@ -615,10 +650,13 @@ class DateTimeDescriptor(TypeDescriptor[DateTime]):
 
     def read(self, stream: CodedInputStream) -> DateTime:
         nanoseconds_since_epoch = stream.read_signed_varint()
-        return EPOCH_DATETIME + datetime.timedelta(microseconds=nanoseconds_since_epoch / 1000)
+        return EPOCH_DATETIME + datetime.timedelta(
+            microseconds=nanoseconds_since_epoch / 1000
+        )
 
 
 datetime_descriptor = DateTimeDescriptor()
+
 
 class NoneDescriptor(TypeDescriptor[None]):
     def __init__(self) -> None:
@@ -630,11 +668,16 @@ class NoneDescriptor(TypeDescriptor[None]):
     def read(self, stream: CodedInputStream) -> None:
         return None
 
+
 none_descriptor = NoneDescriptor()
 
 TEnum = TypeVar("TEnum", bound=Enum)
+
+
 class EnumDescriptor(Generic[TEnum], TypeDescriptor[TEnum]):
-    def __init__(self, integer_descriptor: TypeDescriptor[TEnum], enum_type: type) -> None:
+    def __init__(
+        self, integer_descriptor: TypeDescriptor[TEnum], enum_type: type
+    ) -> None:
         super().__init__(integer_descriptor.overall_dtype())
         self._integer_descriptor = integer_descriptor
         self._enum_type = enum_type
@@ -651,7 +694,11 @@ class EnumDescriptor(Generic[TEnum], TypeDescriptor[TEnum]):
 
 class OptionalDescriptor(TypeDescriptor[Optional[T]]):
     def __init__(self, element_descriptor: TypeDescriptor[T]) -> None:
-        super().__init__(np.dtype([("has_value", np.bool_), ("value", element_descriptor.overall_dtype())]))
+        super().__init__(
+            np.dtype(
+                [("has_value", np.bool_), ("value", element_descriptor.overall_dtype())]
+            )
+        )
         self.element_descriptor = element_descriptor
 
     def write(self, stream: CodedOutputStream, value: Optional[T]) -> None:
@@ -721,10 +768,7 @@ class FixedVectorDescriptor(TypeDescriptor[list[T]]):
             self.element_descriptor.write(stream, element)
 
     def read(self, stream: CodedInputStream) -> list[T]:
-        return [
-            self.element_descriptor.read(stream)
-            for _ in range(self.length)
-        ]
+        return [self.element_descriptor.read(stream) for _ in range(self.length)]
 
     def is_trivially_serializable(self) -> bool:
         return self.element_descriptor.is_trivially_serializable()
@@ -742,10 +786,7 @@ class VectorDescriptor(TypeDescriptor[list[T]]):
 
     def read(self, stream: CodedInputStream) -> list[T]:
         length = stream.read_unsigned_varint()
-        return [
-            self.element_descriptor.read(stream)
-            for _ in range(length)
-        ]
+        return [self.element_descriptor.read(stream) for _ in range(length)]
 
 
 TKey = TypeVar("TKey")
@@ -753,7 +794,11 @@ TValue = TypeVar("TValue")
 
 
 class MapDescriptor(TypeDescriptor[dict[TKey, TValue]]):
-    def __init__(self, key_descriptor: TypeDescriptor[TKey], value_descriptor: TypeDescriptor[TValue]) -> None:
+    def __init__(
+        self,
+        key_descriptor: TypeDescriptor[TKey],
+        value_descriptor: TypeDescriptor[TValue],
+    ) -> None:
         super().__init__(np.object_)
         self.key_descriptor = key_descriptor
         self.value_descriptor = value_descriptor
@@ -771,6 +816,7 @@ class MapDescriptor(TypeDescriptor[dict[TKey, TValue]]):
             for _ in range(length)
         }
 
+
 class NDArrayDescriptorBase(Generic[T], TypeDescriptor[npt.NDArray[Any]]):
     def __init__(
         self,
@@ -779,24 +825,34 @@ class NDArrayDescriptorBase(Generic[T], TypeDescriptor[npt.NDArray[Any]]):
         dtype: npt.DTypeLike,
     ) -> None:
         super().__init__(overall_dtype)
-        self._array_dtype: np.dtype[Any] = dtype if isinstance(dtype, np.dtype) else np.dtype(dtype)
+        self._array_dtype: np.dtype[Any] = (
+            dtype if isinstance(dtype, np.dtype) else np.dtype(dtype)
+        )
         self._element_descriptor = element_descriptor
 
     def _write_data(self, stream: CodedOutputStream, value: npt.NDArray[Any]) -> None:
         if value.dtype != self._array_dtype:
             # see if it's the same dtype but packed, not aligned
-            packed_dtype = recfunctions.repack_fields(self._array_dtype, align=False, recurse=True) # type: ignore
+            packed_dtype = recfunctions.repack_fields(self._array_dtype, align=False, recurse=True)  # type: ignore
             if packed_dtype != value.dtype:
-                raise ValueError(f"Expected dtype {self._array_dtype} or {packed_dtype}, got {value.dtype}")
+                raise ValueError(
+                    f"Expected dtype {self._array_dtype} or {packed_dtype}, got {value.dtype}"
+                )
 
         if self._is_current_array_trivially_serializable(value):
             stream.write_bytes_directly(value.data)
         else:
-            to_iterate = value if value.dtype.fields is None else cast(npt.NDArray[Any], value.view(np.recarray))
+            to_iterate = (
+                value
+                if value.dtype.fields is None
+                else cast(npt.NDArray[Any], value.view(np.recarray))
+            )
             for element in to_iterate.flat:
                 self._element_descriptor.write(stream, element)
 
-    def _read_data(self, stream: CodedInputStream, shape: tuple[int, ...]) -> npt.NDArray[Any]:
+    def _read_data(
+        self, stream: CodedInputStream, shape: tuple[int, ...]
+    ) -> npt.NDArray[Any]:
         flat_length = int(np.prod(shape))
 
         if self._element_descriptor.is_trivially_serializable():
@@ -811,8 +867,14 @@ class NDArrayDescriptorBase(Generic[T], TypeDescriptor[npt.NDArray[Any]]):
         return result.reshape(shape)
 
     def _is_current_array_trivially_serializable(self, value: npt.NDArray[Any]) -> bool:
-        return self._element_descriptor.is_trivially_serializable() and value.flags.c_contiguous \
-            and (self._array_dtype.fields is None or all(f != "" for f in self._array_dtype.fields))
+        return (
+            self._element_descriptor.is_trivially_serializable()
+            and value.flags.c_contiguous
+            and (
+                self._array_dtype.fields is None
+                or all(f != "" for f in self._array_dtype.fields)
+            )
+        )
 
 
 class DynamicNDArrayDescriptor(NDArrayDescriptorBase[T]):
@@ -820,7 +882,9 @@ class DynamicNDArrayDescriptor(NDArrayDescriptorBase[T]):
         self,
         element_descriptor: TypeDescriptor[T],
     ) -> None:
-        super().__init__(np.object_, element_descriptor, element_descriptor.overall_dtype())
+        super().__init__(
+            np.object_, element_descriptor, element_descriptor.overall_dtype()
+        )
 
     def write(self, stream: CodedOutputStream, value: npt.NDArray[Any]) -> None:
         stream.write_unsigned_varint(value.ndim)
@@ -841,7 +905,9 @@ class NDArrayDescriptor(Generic[T], NDArrayDescriptorBase[T]):
         element_descriptor: TypeDescriptor[T],
         ndims: int,
     ) -> None:
-        super().__init__(np.object_, element_descriptor, element_descriptor.overall_dtype())
+        super().__init__(
+            np.object_, element_descriptor, element_descriptor.overall_dtype()
+        )
         self.ndims = ndims
 
     def write(self, stream: CodedOutputStream, value: npt.NDArray[Any]) -> None:
@@ -882,8 +948,18 @@ class FixedNDArrayDescriptor(Generic[T], NDArrayDescriptorBase[T]):
 
 
 class RecordDescriptor(TypeDescriptor[T]):
-    def __init__(self, field_descriptors: list[Tuple[str, TypeDescriptor[Any]]]) -> None:
-        super().__init__(np.dtype([(name, descriptor.overall_dtype()) for name, descriptor in field_descriptors], align=True))
+    def __init__(
+        self, field_descriptors: list[Tuple[str, TypeDescriptor[Any]]]
+    ) -> None:
+        super().__init__(
+            np.dtype(
+                [
+                    (name, descriptor.overall_dtype())
+                    for name, descriptor in field_descriptors
+                ],
+                align=True,
+            )
+        )
         combined_format = "<"
         for _, field_descriptor in field_descriptors:
             fmt = field_descriptor.struct_format_str()
@@ -891,7 +967,7 @@ class RecordDescriptor(TypeDescriptor[T]):
                 combined_format = None
                 break
             else:
-                combined_format += fmt[1:] if fmt[0] == '<' else fmt
+                combined_format += fmt[1:] if fmt[0] == "<" else fmt
 
         if combined_format is None:
             self._struct = None
@@ -901,20 +977,25 @@ class RecordDescriptor(TypeDescriptor[T]):
         self._field_descriptors = field_descriptors
 
     def is_trivially_serializable(self) -> bool:
-        return all(descriptor.is_trivially_serializable() for _, descriptor in self._field_descriptors)
+        return all(
+            descriptor.is_trivially_serializable()
+            for _, descriptor in self._field_descriptors
+        )
 
     def _write(self, stream: CodedOutputStream, *values: Any) -> None:
         if self._struct:
             stream.write(self._struct, *values)
         else:
-            for i, (_,descriptor) in enumerate(self._field_descriptors):
+            for i, (_, descriptor) in enumerate(self._field_descriptors):
                 descriptor.write(stream, values[i])
 
     def _read(self, stream: CodedInputStream) -> tuple[Any, ...]:
         if self._struct:
             return stream.read(self._struct)
         else:
-            return tuple(descriptor.read(stream) for _, descriptor in self._field_descriptors)
+            return tuple(
+                descriptor.read(stream) for _, descriptor in self._field_descriptors
+            )
 
 
 # Only used in the header

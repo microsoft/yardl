@@ -22,5 +22,6 @@ def main():
         v = r.read_my_value()
         print(v)
 
+
 if __name__ == "__main__":
     main()
