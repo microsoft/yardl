@@ -13,6 +13,8 @@ from . import *
 from . import _binary
 from . import yardl_types as yardl
 
+T = typing.TypeVar('T')
+
 class BinaryP1Writer(_binary.BinaryProtocolWriter, P1WriterBase):
     """Binary writer for the P1 protocol."""
 
@@ -21,7 +23,7 @@ class BinaryP1Writer(_binary.BinaryProtocolWriter, P1WriterBase):
         _binary.BinaryProtocolWriter.__init__(self, stream, P1WriterBase.schema)
 
     def _write_my_value(self, value: npt.NDArray[np.void]) -> None:
-        _binary.DynamicNDArraySerializer(_Point_NumpySerializer()).write(self._stream, value)
+        _binary.DynamicNDArraySerializer(_Line_NumpySerializer(_binary.int32_serializer)).write(self._stream, value)
 
 
 class BinaryP1Reader(_binary.BinaryProtocolReader, P1ReaderBase):
@@ -32,26 +34,49 @@ class BinaryP1Reader(_binary.BinaryProtocolReader, P1ReaderBase):
         _binary.BinaryProtocolReader.__init__(self, stream, P1ReaderBase.schema)
 
     def _read_my_value(self) -> npt.NDArray[np.void]:
-        return _binary.DynamicNDArraySerializer(_Point_NumpySerializer()).read(self._stream, self._read_as_numpy)
+        return _binary.DynamicNDArraySerializer(_Line_NumpySerializer(_binary.int32_serializer)).read(self._stream, self._read_as_numpy)
 
-class _PointSerializer(_binary.RecordSerializer[Point]):
-    def __init__(self) -> None:
-        super().__init__([("x", _binary.int32_serializer), ("y", _binary.int32_serializer)])
+class _PointSerializer(_binary.RecordSerializer[Point[T]]):
+    def __init__(self, t_serializer: _binary.TypeSerializer[T]) -> None:
+        super().__init__([("x", t_serializer), ("y", t_serializer)])
 
-    def write(self, stream: _binary.CodedOutputStream, value: Point) -> None:
+    def write(self, stream: _binary.CodedOutputStream, value: Point[T]) -> None:
         self._write(stream, value.x, value.y)
 
-    def read(self, stream: _binary.CodedInputStream, read_as_numpy: Types) -> Point:
+    def read(self, stream: _binary.CodedInputStream, read_as_numpy: Types) -> Point[T]:
         field_values = self._read(stream, read_as_numpy)
-        return Point(x=field_values[0], y=field_values[1])
+        return Point[T](x=field_values[0], y=field_values[1])
 
 
-class _Point_NumpySerializer(_binary.RecordSerializer[typing.Any]):
-    def __init__(self) -> None:
-        super().__init__([("x", _binary.int32_serializer), ("y", _binary.int32_serializer)])
+class _Point_NumpySerializer(typing.Generic[T], _binary.RecordSerializer[typing.Any]):
+    def __init__(self, t_serializer: _binary.TypeSerializer[T]) -> None:
+        super().__init__([("x", t_serializer), ("y", t_serializer)])
 
     def write(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
         self._write(stream, value["x"], value["y"])
+
+    def read(self, stream: _binary.CodedInputStream, read_as_numpy: Types) -> tuple[typing.Any, ...]:
+        return self._read(stream, read_as_numpy)
+
+
+class _LineSerializer(_binary.RecordSerializer[Line[T]]):
+    def __init__(self, t_serializer: _binary.TypeSerializer[T]) -> None:
+        super().__init__([("start", _PointSerializer(t_serializer)), ("end", _PointSerializer(t_serializer))])
+
+    def write(self, stream: _binary.CodedOutputStream, value: Line[T]) -> None:
+        self._write(stream, value.start, value.end)
+
+    def read(self, stream: _binary.CodedInputStream, read_as_numpy: Types) -> Line[T]:
+        field_values = self._read(stream, read_as_numpy)
+        return Line[T](start=field_values[0], end=field_values[1])
+
+
+class _Line_NumpySerializer(typing.Generic[T], _binary.RecordSerializer[typing.Any]):
+    def __init__(self, t_serializer: _binary.TypeSerializer[T]) -> None:
+        super().__init__([("start", _Point_NumpySerializer(t_serializer)), ("end", _Point_NumpySerializer(t_serializer))])
+
+    def write(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
+        self._write(stream, value["start"], value["end"])
 
     def read(self, stream: _binary.CodedInputStream, read_as_numpy: Types) -> tuple[typing.Any, ...]:
         return self._read(stream, read_as_numpy)

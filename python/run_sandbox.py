@@ -9,13 +9,23 @@ import sys
 import typing
 import sandbox
 import numpy as np
+import numpy.typing as npt
+
+
+class Z(enum.Flag):
+    A = 1
+    B = 2
+    C = 4
+
+    @staticmethod
+    def dtype() -> npt.DTypeLike:
+        return np.int32
 
 
 def main():
     with sandbox.BinaryP1Writer("test.bin") as w:
 
-        dt = np.dtype([('x', np.int32), ('y', np.int32)])
-        value = np.array([(1, 2), (3, 4)], dtype=dt)
+        value = np.array([((1, 2), (3, 4))], dtype=sandbox.Line.dtype(np.int32))
         print(f"{value} {type(value)}")
         w.write_my_value(value)
         pass

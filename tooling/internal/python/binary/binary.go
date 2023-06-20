@@ -43,7 +43,7 @@ func writeRecordSerializers(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 	for _, td := range ns.TypeDefinitions {
 		switch td := td.(type) {
 		case *dsl.RecordDefinition:
-			writeInit := func() {
+			writeInit := func(numpy bool) {
 				if len(td.TypeParameters) > 0 {
 					typeParamSerializers := make([]string, len(td.TypeParameters))
 					for i, tp := range td.TypeParameters {
@@ -58,7 +58,7 @@ func writeRecordSerializers(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 				w.Indented(func() {
 					fieldSerializers := make([]string, len(td.Fields))
 					for i, field := range td.Fields {
-						fieldSerializers[i] = fmt.Sprintf(`("%s", %s)`, common.FieldIdentifierName(field.Name), typeSerializer(field.Type, false, ns.Name))
+						fieldSerializers[i] = fmt.Sprintf(`("%s", %s)`, common.FieldIdentifierName(field.Name), typeSerializer(field.Type, numpy, ns.Name))
 					}
 					fmt.Fprintf(w, "super().__init__([%s])\n", strings.Join(fieldSerializers, ", "))
 				})
@@ -68,7 +68,7 @@ func writeRecordSerializers(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 			typeSyntax := common.TypeDefinitionSyntax(td, ns.Name, true)
 			fmt.Fprintf(w, "class %s(_binary.RecordSerializer[%s]):\n", recordSerializerClassName(td, false), typeSyntax)
 			w.Indented(func() {
-				writeInit()
+				writeInit(false)
 
 				fmt.Fprintf(w, "def write(self, stream: _binary.CodedOutputStream, value: %s) -> None:\n", typeSyntax)
 				w.Indented(func() {
@@ -95,9 +95,19 @@ func writeRecordSerializers(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 			})
 			w.WriteStringln("")
 
-			fmt.Fprintf(w, "class %s(_binary.RecordSerializer[typing.Any]):\n", recordSerializerClassName(td, true))
+			genericSpec := ""
+			if len(td.TypeParameters) > 0 {
+				params := make([]string, len(td.TypeParameters))
+				for i, tp := range td.TypeParameters {
+					params[i] = common.TypeDefinitionSyntax(tp, ns.Name, true)
+				}
+
+				genericSpec = fmt.Sprintf("typing.Generic[%s], ", strings.Join(params, ", "))
+			}
+
+			fmt.Fprintf(w, "class %s(%s_binary.RecordSerializer[typing.Any]):\n", recordSerializerClassName(td, true), genericSpec)
 			w.Indented(func() {
-				writeInit()
+				writeInit(true)
 
 				fmt.Fprintf(w, "def write(self, stream: _binary.CodedOutputStream, value: np.void) -> None:\n")
 				w.Indented(func() {

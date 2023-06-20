@@ -16,7 +16,7 @@ class P1WriterBase(abc.ABC):
     def __init__(self) -> None:
         self._state = 0
 
-    schema = """{"protocol":{"name":"P1","sequence":[{"name":"myValue","type":{"array":{"items":"Sandbox.Point"}}}]},"types":[{"name":"Point","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"}]}]}"""
+    schema = """{"protocol":{"name":"P1","sequence":[{"name":"myValue","type":{"array":{"items":{"name":"Sandbox.Line","typeArguments":["int32"]}}}}]},"types":[{"name":"Line","typeParameters":["T"],"fields":[{"name":"start","type":{"name":"Sandbox.Point","typeArguments":["T"]}},{"name":"end","type":{"name":"Sandbox.Point","typeArguments":["T"]}}]},{"name":"Point","typeParameters":["T"],"fields":[{"name":"x","type":"T"},{"name":"y","type":"T"}]}]}"""
 
     def __enter__(self):
         return self

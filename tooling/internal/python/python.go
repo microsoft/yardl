@@ -50,7 +50,7 @@ func writeNamespace(ns *dsl.Namespace, st dsl.SymbolTable, options packaging.Pyt
 
 	iocommon.CopyEmbeddedStaticFiles(packageDir, false, staticFiles)
 
-	if err := types.WriteTypes(ns, packageDir); err != nil {
+	if err := types.WriteTypes(ns, st, packageDir); err != nil {
 		return err
 	}
 

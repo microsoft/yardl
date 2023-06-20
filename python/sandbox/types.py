@@ -9,13 +9,23 @@ import numpy as np
 import numpy.typing as npt
 from . import yardl_types as yardl
 
-class MyEnum(enum.Flag):
-    A = 1
-    B = 2
-    C = 4
+T = typing.TypeVar('T')
 
 @dataclasses.dataclass(slots=True, kw_only=True)
-class Point:
-    x: yardl.Int32
-    y: yardl.Int32
+class Point(typing.Generic[T]):
+    x: T
+    y: T
+
+    @staticmethod
+    def dtype(t_dtype: npt.DTypeLike) -> npt.DTypeLike:
+        return np.dtype([('x', t_dtype), ('y', t_dtype)], align=True)
+
+@dataclasses.dataclass(slots=True, kw_only=True)
+class Line(typing.Generic[T]):
+    start: Point[T]
+    end: Point[T]
+
+    @staticmethod
+    def dtype(t_dtype: npt.DTypeLike) -> npt.DTypeLike:
+        return np.dtype([('start', np.dtype([('x', t_dtype), ('y', t_dtype)], align=True)), ('end', np.dtype([('x', t_dtype), ('y', t_dtype)], align=True))], align=True)
 

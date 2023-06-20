@@ -1,11 +1,13 @@
 P1: !protocol
   sequence:
-    myValue: Point[]
+    myValue: Line<int>[]
 
-MyEnum: !flags
-  values: [a,b,c]
-
-Point: !record
+Point<T>: !record
   fields:
-    x: int
-    y: int
+    x: T
+    y: T
+
+Line<T>: !record
+  fields:
+    start: Point<T>
+    end: Point<T>
