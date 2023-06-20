@@ -13,6 +13,27 @@ from . import *
 from . import _binary
 from . import yardl_types as yardl
 
+class BinaryP1Writer(_binary.BinaryProtocolWriter, P1WriterBase):
+    """Binary writer for the P1 protocol."""
+
+    def __init__(self, stream: typing.BinaryIO | str) -> None:
+        P1WriterBase.__init__(self)
+        _binary.BinaryProtocolWriter.__init__(self, stream, P1WriterBase.schema)
+
+    def _write_my_value(self, value: npt.NDArray[np.void]) -> None:
+        _binary.DynamicNDArraySerializer(_Point_NumpySerializer()).write(self._stream, value)
+
+
+class BinaryP1Reader(_binary.BinaryProtocolReader, P1ReaderBase):
+    """Binary writer for the P1 protocol."""
+
+    def __init__(self, stream: io.BufferedReader | str, read_as_numpy: Types) -> None:
+        P1ReaderBase.__init__(self, read_as_numpy)
+        _binary.BinaryProtocolReader.__init__(self, stream, P1ReaderBase.schema)
+
+    def _read_my_value(self) -> npt.NDArray[np.void]:
+        return _binary.DynamicNDArraySerializer(_Point_NumpySerializer()).read(self._stream, self._read_as_numpy)
+
 class _PointSerializer(_binary.RecordSerializer[Point]):
     def __init__(self) -> None:
         super().__init__([("x", _binary.int32_serializer), ("y", _binary.int32_serializer)])
@@ -25,30 +46,14 @@ class _PointSerializer(_binary.RecordSerializer[Point]):
         return Point(x=field_values[0], y=field_values[1])
 
 
-class BinaryP1Writer(_binary.BinaryProtocolWriter, P1WriterBase):
-    """Binary writer for the P1 protocol."""
+class _Point_NumpySerializer(_binary.RecordSerializer[typing.Any]):
+    def __init__(self) -> None:
+        super().__init__([("x", _binary.int32_serializer), ("y", _binary.int32_serializer)])
 
-    def __init__(self, stream: typing.BinaryIO | str) -> None:
-        P1WriterBase.__init__(self)
-        _binary.BinaryProtocolWriter.__init__(self, stream, P1WriterBase.schema)
+    def write(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
+        self._write(stream, value["x"], value["y"])
 
-    def _write_my_value(self, value: yardl.DateTime) -> None:
-        _binary.datetime_serializer.write(self._stream, value)
+    def read(self, stream: _binary.CodedInputStream, read_as_numpy: Types) -> tuple[typing.Any, ...]:
+        return self._read(stream, read_as_numpy)
 
-    def _write_my_initial_value(self, value: collections.abc.Iterable[yardl.Int32]) -> None:
-        _binary.StreamSerializer(_binary.int32_serializer).write(self._stream, value)
-
-
-class BinaryP1Reader(_binary.BinaryProtocolReader, P1ReaderBase):
-    """Binary writer for the P1 protocol."""
-
-    def __init__(self, stream: io.BufferedReader | str, read_as_numpy: Types) -> None:
-        P1ReaderBase.__init__(self, read_as_numpy)
-        _binary.BinaryProtocolReader.__init__(self, stream, P1ReaderBase.schema)
-
-    def _read_my_value(self) -> yardl.DateTime:
-        return _binary.datetime_serializer.read(self._stream, self._read_as_numpy)
-
-    def _read_my_initial_value(self) -> collections.abc.Iterable[yardl.Int32]:
-        return _binary.StreamSerializer(_binary.int32_serializer).read(self._stream, self._read_as_numpy)
 

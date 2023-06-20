@@ -1,8 +1,6 @@
 P1: !protocol
   sequence:
-    myValue: datetime
-    myInitialValue: !stream
-      items: int
+    myValue: Point[]
 
 MyEnum: !flags
   values: [a,b,c]

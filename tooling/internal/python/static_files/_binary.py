@@ -908,12 +908,7 @@ class NDArraySerializerBase(Generic[T], TypeSerializer[npt.NDArray[Any]]):
         if self._is_current_array_trivially_serializable(value):
             stream.write_bytes_directly(value.data)
         else:
-            to_iterate = (
-                value
-                if value.dtype.fields is None
-                else cast(npt.NDArray[Any], value.view(np.recarray))
-            )
-            for element in to_iterate.flat:
+            for element in value.flat:
                 self._element_serializer.write(stream, element)
 
     def _read_data(

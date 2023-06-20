@@ -14,19 +14,17 @@ import numpy as np
 def main():
     with sandbox.BinaryP1Writer("test.bin") as w:
 
-        value = datetime.datetime.now()
+        dt = np.dtype([('x', np.int32), ('y', np.int32)])
+        value = np.array([(1, 2), (3, 4)], dtype=dt)
         print(f"{value} {type(value)}")
         w.write_my_value(value)
-        w.write_my_initial_value([42])
         pass
 
     # os.system("hexdump -C test.bin")
 
     with sandbox.BinaryP1Reader("test.bin", sandbox.Types.INTEGER) as r:
         v = r.read_my_value()
-        v = r.read_my_initial_value()
-        list(v)
-        print(f"{list(v)} {type(v)}")
+        print(f"{v} {type(v)}")
 
 if __name__ == "__main__":
     main()
