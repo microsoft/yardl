@@ -54,3 +54,6 @@ class Types(Flag):
     DATETIME = auto()
     VECTOR = auto()
     ARRAY = auto()
+
+class ProtocolError(Exception):
+    pass

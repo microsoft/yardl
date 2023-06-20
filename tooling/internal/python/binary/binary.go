@@ -103,7 +103,7 @@ func writeProtocols(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 	for _, p := range ns.Protocols {
 
 		// writer
-		fmt.Fprintf(w, "class %s(%s, _binary.BinaryProtocolWriter):\n", BinaryWriterName(p), common.AbstractWriterName(p))
+		fmt.Fprintf(w, "class %s(_binary.BinaryProtocolWriter, %s):\n", BinaryWriterName(p), common.AbstractWriterName(p))
 		w.Indented(func() {
 			common.WriteDocstringWithLeadingLine(w, fmt.Sprintf("Binary writer for the %s protocol.", p.Name), p.Comment)
 			w.WriteStringln("")
@@ -132,7 +132,7 @@ func writeProtocols(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 		w.WriteStringln("")
 
 		// reader
-		fmt.Fprintf(w, "class %s(%s, _binary.BinaryProtocolReader):\n", BinaryReaderName(p), common.AbstractReaderName(p))
+		fmt.Fprintf(w, "class %s(_binary.BinaryProtocolReader, %s):\n", BinaryReaderName(p), common.AbstractReaderName(p))
 		w.Indented(func() {
 			common.WriteDocstringWithLeadingLine(w, fmt.Sprintf("Binary writer for the %s protocol.", p.Name), p.Comment)
 			w.WriteStringln("")

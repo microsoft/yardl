@@ -46,26 +46,8 @@ class BinaryProtocolWriter(ABC):
         write_fixed_int32(self._stream, CURRENT_BINARY_FORMAT_VERSION)
         string_descriptor.write(self._stream, schema)
 
-    def __enter__(self):
-        return self
-
-    def __exit__(
-        self,
-        exc_type: Optional[type[BaseException]],
-        exc: Optional[BaseException],
-        traceback: Optional[TracebackType],
-    ) -> None:
-        self.close()
-
     def close(self) -> None:
-        try:
-            self._close()
-        finally:
-            self._stream.close()
-
-    def _close(self) -> None:
-        pass
-
+        self._stream.close()
 
 class BinaryProtocolReader(ABC):
     def __init__(self, stream: BufferedReader | str, expected_schema: str) -> None:
@@ -82,25 +64,9 @@ class BinaryProtocolReader(ABC):
         if self._schema != expected_schema:
             raise RuntimeError("Invalid schema")
 
-    def __enter__(self):
-        return self
-
-    def __exit__(
-        self,
-        exc_type: Optional[type[BaseException]],
-        exc: Optional[BaseException],
-        traceback: Optional[TracebackType],
-    ) -> None:
-        self.close()
-
     def close(self) -> None:
-        try:
-            self._close()
-        finally:
-            self._stream.close()
+        self._stream.close()
 
-    def _close(self) -> None:
-        pass
 
 
 class CodedOutputStream:
@@ -646,7 +612,7 @@ class DateDescriptor(TypeDescriptor[Date]):
             stream.write_signed_varint(value.toordinal() - EPOCH_ORDINAL_DAYS)
         else:
             if not isinstance(value, np.datetime64):
-                raise TypeError(
+                raise ValueError(
                     f"Expected datetime.date or numpy.datetime64, got {type(value)}"
                 )
 
@@ -685,7 +651,7 @@ class TimeDescriptor(TypeDescriptor[Time]):
             stream.write_signed_varint(nanoseconds_since_midnight)
         else:
             if not isinstance(value, np.timedelta64):
-                raise TypeError(
+                raise ValueError(
                     f"Expected a datetime.time or np.timedelta64, got {type(value)}"
                 )
 
@@ -725,7 +691,7 @@ class DateTimeDescriptor(TypeDescriptor[DateTime]):
             stream.write_signed_varint(nanoseconds_since_epoch)
         else:
             if not isinstance(value, np.datetime64):
-                raise TypeError(
+                raise ValueError(
                     f"Expected datetime.datetime or numpy.datetime64, got {type(value)}"
                 )
 

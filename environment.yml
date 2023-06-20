@@ -19,8 +19,9 @@ dependencies:
   - just=1.5.0
   - ninja=1.11.0
   - nlohmann_json=3.11.2
-  - numpy=1.24.3 # local
-  - python=3.11.3 # local
+  - numpy=1.24.3
+  - pytest=7.3.2
+  - python=3.11.3
   - shellcheck=0.8.0 # local
   - valgrind=3.18.1 # local
   - xtensor=0.24.2
