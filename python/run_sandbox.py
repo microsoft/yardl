@@ -22,7 +22,7 @@ def main():
 
     # os.system("hexdump -C test.bin")
 
-    with sandbox.BinaryP1Reader("test.bin", sandbox.Types.DATETIME) as r:
+    with sandbox.BinaryP1Reader("test.bin", sandbox.Types.INTEGER) as r:
         v = r.read_my_value()
         v = r.read_my_initial_value()
         list(v)

@@ -182,7 +182,7 @@ else:
 		w.WriteStringln("")
 
 		w.WriteStringln("@abc.abstractmethod")
-		w.WriteStringln("def close(self) -> typing.Iterator[typing.Any]:")
+		w.WriteStringln("def close(self) -> None:")
 		w.Indented(func() {
 			w.WriteStringln("raise NotImplementedError()")
 		})

@@ -91,7 +91,7 @@ class P1ReaderBase(abc.ABC):
             	
 
     @abc.abstractmethod
-    def close(self) -> typing.Iterator[typing.Any]:
+    def close(self) -> None:
         raise NotImplementedError()
 
     def read_my_value(self) -> yardl.DateTime:
