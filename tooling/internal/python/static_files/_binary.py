@@ -44,7 +44,7 @@ class BinaryProtocolWriter(ABC):
         self._stream = CodedOutputStream(stream)
         self._stream.write_bytes(MAGIC_BYTES)
         write_fixed_int32(self._stream, CURRENT_BINARY_FORMAT_VERSION)
-        string_descriptor.write(self._stream, schema)
+        string_serializer.write(self._stream, schema)
 
     def close(self) -> None:
         self._stream.close()
@@ -60,7 +60,7 @@ class BinaryProtocolReader(ABC):
         if version != CURRENT_BINARY_FORMAT_VERSION:
             raise RuntimeError("Invalid binary format version")
 
-        self._schema = string_descriptor.read(self._stream, Types.NONE)
+        self._schema = string_serializer.read(self._stream, Types.NONE)
         if self._schema != expected_schema:
             raise RuntimeError("Invalid schema")
 
@@ -256,7 +256,7 @@ class CodedInputStream:
 T = TypeVar("T")
 
 
-class TypeDescriptor(Generic[T], ABC):
+class TypeSerializer(Generic[T], ABC):
     def __init__(self, dtype: npt.DTypeLike) -> None:
         self._dtype: np.dtype[Any] = np.dtype(dtype)
 
@@ -278,7 +278,7 @@ class TypeDescriptor(Generic[T], ABC):
         return False
 
 
-class StructDescriptor(TypeDescriptor[T]):
+class StructSerializer(TypeSerializer[T]):
     def __init__(self, dtype: npt.DTypeLike, format_string: str) -> None:
         super().__init__(dtype)
         self._struct = struct.Struct(format_string)
@@ -293,7 +293,7 @@ class StructDescriptor(TypeDescriptor[T]):
         return self._struct.format
 
 
-class BoolDescriptor(StructDescriptor[Bool]):
+class BoolSerializer(StructSerializer[Bool]):
     def __init__(self) -> None:
         super().__init__(np.bool_, "<?")
 
@@ -302,10 +302,10 @@ class BoolDescriptor(StructDescriptor[Bool]):
         return np.bool_(python_value) if Types.BOOL in read_as_numpy else python_value
 
 
-bool_descriptor = BoolDescriptor()
+bool_serializer = BoolSerializer()
 
 
-class Int8Descriptor(StructDescriptor[Int8]):
+class Int8Serializer(StructSerializer[Int8]):
     def __init__(self) -> None:
         super().__init__(np.int8, "<b")
 
@@ -317,10 +317,10 @@ class Int8Descriptor(StructDescriptor[Int8]):
         return True
 
 
-int8_descriptor = Int8Descriptor()
+int8_serializer = Int8Serializer()
 
 
-class UInt8Descriptor(StructDescriptor[UInt8]):
+class UInt8Serializer(StructSerializer[UInt8]):
     def __init__(self) -> None:
         super().__init__(np.uint8, "<B")
 
@@ -332,10 +332,10 @@ class UInt8Descriptor(StructDescriptor[UInt8]):
         return True
 
 
-uint8_descriptor = UInt8Descriptor()
+uint8_serializer = UInt8Serializer()
 
 
-class Int16Descriptor(TypeDescriptor[Int16]):
+class Int16Serializer(TypeSerializer[Int16]):
     def __init__(self) -> None:
         super().__init__(np.int16)
 
@@ -355,10 +355,10 @@ class Int16Descriptor(TypeDescriptor[Int16]):
         return np.int16(python_value) if Types.INT16 in read_as_numpy else python_value
 
 
-int16_descriptor = Int16Descriptor()
+int16_serializer = Int16Serializer()
 
 
-class UInt16Descriptor(TypeDescriptor[UInt16]):
+class UInt16Serializer(TypeSerializer[UInt16]):
     def __init__(self) -> None:
         super().__init__(np.uint16)
 
@@ -380,10 +380,10 @@ class UInt16Descriptor(TypeDescriptor[UInt16]):
         )
 
 
-uint16_descriptor = UInt16Descriptor()
+uint16_serializer = UInt16Serializer()
 
 
-class Int32Descriptor(TypeDescriptor[Int32]):
+class Int32Serializer(TypeSerializer[Int32]):
     def __init__(self) -> None:
         super().__init__(np.int32)
 
@@ -403,10 +403,10 @@ class Int32Descriptor(TypeDescriptor[Int32]):
         return np.int32(python_val) if Types.INT32 in read_as_numpy else python_val
 
 
-int32_descriptor = Int32Descriptor()
+int32_serializer = Int32Serializer()
 
 
-class UInt32Descriptor(TypeDescriptor[UInt32]):
+class UInt32Serializer(TypeSerializer[UInt32]):
     def __init__(self) -> None:
         super().__init__(np.uint32)
 
@@ -428,10 +428,10 @@ class UInt32Descriptor(TypeDescriptor[UInt32]):
         )
 
 
-uint32_descriptor = UInt32Descriptor()
+uint32_serializer = UInt32Serializer()
 
 
-class Int64Descriptor(TypeDescriptor[Int64]):
+class Int64Serializer(TypeSerializer[Int64]):
     def __init__(self) -> None:
         super().__init__(np.int64)
 
@@ -451,10 +451,10 @@ class Int64Descriptor(TypeDescriptor[Int64]):
         return np.int64(python_value) if Types.INT64 in read_as_numpy else python_value
 
 
-int64_descriptor = Int64Descriptor()
+int64_serializer = Int64Serializer()
 
 
-class UInt64Descriptor(TypeDescriptor[UInt64]):
+class UInt64Serializer(TypeSerializer[UInt64]):
     def __init__(self) -> None:
         super().__init__(np.uint64)
 
@@ -476,10 +476,10 @@ class UInt64Descriptor(TypeDescriptor[UInt64]):
         )
 
 
-uint64_descriptor = UInt64Descriptor()
+uint64_serializer = UInt64Serializer()
 
 
-class SizeDescriptor(TypeDescriptor[Size]):
+class SizeSerializer(TypeSerializer[Size]):
     def __init__(self) -> None:
         super().__init__(np.uint64)
 
@@ -499,10 +499,10 @@ class SizeDescriptor(TypeDescriptor[Size]):
         return np.uint64(python_value) if Types.SIZE in read_as_numpy else python_value
 
 
-size_descriptor = SizeDescriptor()
+size_serializer = SizeSerializer()
 
 
-class Float32Descriptor(StructDescriptor[Float32]):
+class Float32Serializer(StructSerializer[Float32]):
     def __init__(self) -> None:
         super().__init__(np.float32, "<f")
 
@@ -516,10 +516,10 @@ class Float32Descriptor(StructDescriptor[Float32]):
         return True
 
 
-float32_descriptor = Float32Descriptor()
+float32_serializer = Float32Serializer()
 
 
-class Float64Descriptor(StructDescriptor[Float64]):
+class Float64Serializer(StructSerializer[Float64]):
     def __init__(self) -> None:
         super().__init__(np.float64, "<d")
 
@@ -533,10 +533,10 @@ class Float64Descriptor(StructDescriptor[Float64]):
         return True
 
 
-float64_descriptor = Float64Descriptor()
+float64_serializer = Float64Serializer()
 
 
-class Complex32Descriptor(StructDescriptor[ComplexFloat]):
+class Complex32Serializer(StructSerializer[ComplexFloat]):
     def __init__(self) -> None:
         super().__init__(np.complex64, "<ff")
 
@@ -556,10 +556,10 @@ class Complex32Descriptor(StructDescriptor[ComplexFloat]):
         return True
 
 
-complexfloat32_descriptor = Complex32Descriptor()
+complexfloat32_serializer = Complex32Serializer()
 
 
-class Complex64Descriptor(StructDescriptor[ComplexDouble]):
+class Complex64Serializer(StructSerializer[ComplexDouble]):
     def __init__(self) -> None:
         super().__init__(np.complex128, "<dd")
 
@@ -579,10 +579,10 @@ class Complex64Descriptor(StructDescriptor[ComplexDouble]):
         return True
 
 
-complexfloat64_descriptor = Complex64Descriptor()
+complexfloat64_serializer = Complex64Serializer()
 
 
-class StringDescriptor(TypeDescriptor[str]):
+class StringSerializer(TypeSerializer[str]):
     def __init__(self) -> None:
         super().__init__(np.object_)
 
@@ -597,13 +597,13 @@ class StringDescriptor(TypeDescriptor[str]):
         return str(view, "utf-8")
 
 
-string_descriptor = StringDescriptor()
+string_serializer = StringSerializer()
 
 EPOCH_ORDINAL_DAYS = datetime.date(1970, 1, 1).toordinal()
 DATETIME_DAYS_DTYPE = np.dtype("datetime64[D]")
 
 
-class DateDescriptor(TypeDescriptor[Date]):
+class DateSerializer(TypeSerializer[Date]):
     def __init__(self) -> None:
         super().__init__(np.datetime64)
 
@@ -631,12 +631,12 @@ class DateDescriptor(TypeDescriptor[Date]):
         return datetime.date.fromordinal(days_since_epoch + EPOCH_ORDINAL_DAYS)
 
 
-date_descriptor = DateDescriptor()
+date_serializer = DateSerializer()
 
 TIMEDELTA_NANOSECONDS_DTYPE = np.dtype("timedelta64[ns]")
 
 
-class TimeDescriptor(TypeDescriptor[Time]):
+class TimeSerializer(TypeSerializer[Time]):
     def __init__(self) -> None:
         super().__init__(np.timedelta64)
 
@@ -674,13 +674,13 @@ class TimeDescriptor(TypeDescriptor[Time]):
         return datetime.time(hours, minutes, seconds, microseconds)
 
 
-time_descriptor = TimeDescriptor()
+time_serializer = TimeSerializer()
 
 DATETIME_NANOSECONDS_DTYPE = np.dtype("datetime64[ns]")
 EPOCH_DATETIME = datetime.datetime.utcfromtimestamp(0)
 
 
-class DateTimeDescriptor(TypeDescriptor[DateTime]):
+class DateTimeSerializer(TypeSerializer[DateTime]):
     def __init__(self) -> None:
         super().__init__(np.datetime64)
 
@@ -712,10 +712,10 @@ class DateTimeDescriptor(TypeDescriptor[DateTime]):
         )
 
 
-datetime_descriptor = DateTimeDescriptor()
+datetime_serializer = DateTimeSerializer()
 
 
-class NoneDescriptor(TypeDescriptor[None]):
+class NoneSerializer(TypeSerializer[None]):
     def __init__(self) -> None:
         super().__init__(np.object_)
 
@@ -726,94 +726,94 @@ class NoneDescriptor(TypeDescriptor[None]):
         return None
 
 
-none_descriptor = NoneDescriptor()
+none_serializer = NoneSerializer()
 
 TEnum = TypeVar("TEnum", bound=Enum)
 
 
-class EnumDescriptor(Generic[TEnum], TypeDescriptor[TEnum]):
+class EnumSerializer(Generic[TEnum], TypeSerializer[TEnum]):
     def __init__(
-        self, integer_descriptor: TypeDescriptor[TEnum], enum_type: type
+        self, integer_serializer: TypeSerializer[TEnum], enum_type: type
     ) -> None:
-        super().__init__(integer_descriptor.overall_dtype())
-        self._integer_descriptor = integer_descriptor
+        super().__init__(integer_serializer.overall_dtype())
+        self._integer_serializer = integer_serializer
         self._enum_type = enum_type
 
     def write(self, stream: CodedOutputStream, value: TEnum) -> None:
-        self._integer_descriptor.write(stream, value.value)
+        self._integer_serializer.write(stream, value.value)
 
     def read(self, stream: CodedInputStream, read_as_numpy: Types) -> TEnum:
-        return self._enum_type(self._integer_descriptor.read(stream, read_as_numpy))
+        return self._enum_type(self._integer_serializer.read(stream, read_as_numpy))
 
     def is_trivially_serializable(self) -> bool:
-        return self._integer_descriptor.is_trivially_serializable()
+        return self._integer_serializer.is_trivially_serializable()
 
 
-class OptionalDescriptor(TypeDescriptor[Optional[T]]):
-    def __init__(self, element_descriptor: TypeDescriptor[T]) -> None:
+class OptionalSerializer(TypeSerializer[Optional[T]]):
+    def __init__(self, element_serializer: TypeSerializer[T]) -> None:
         super().__init__(
             np.dtype(
-                [("has_value", np.bool_), ("value", element_descriptor.overall_dtype())]
+                [("has_value", np.bool_), ("value", element_serializer.overall_dtype())]
             )
         )
-        self.element_descriptor = element_descriptor
+        self.element_serializer = element_serializer
 
     def write(self, stream: CodedOutputStream, value: Optional[T]) -> None:
         if value is None:
             stream.write_byte(0)
         else:
             stream.write_byte(1)
-            self.element_descriptor.write(stream, value)
+            self.element_serializer.write(stream, value)
 
     def read(self, stream: CodedInputStream, read_as_numpy: Types) -> Optional[T]:
         has_value = stream.read_byte()
         if has_value == 0:
             return None
         else:
-            return self.element_descriptor.read(stream, read_as_numpy)
+            return self.element_serializer.read(stream, read_as_numpy)
 
 
-class UnionDescriptor(TypeDescriptor[Any]):
-    def __init__(self, cases: list[Tuple[type, TypeDescriptor[Any]]]) -> None:
+class UnionSerializer(TypeSerializer[Any]):
+    def __init__(self, cases: list[Tuple[type, TypeSerializer[Any]]]) -> None:
         super().__init__(np.object_)
         self.cases = cases
 
     def write(self, stream: CodedOutputStream, value: Any) -> None:
-        for i, (case_type, case_descriptor) in enumerate(self.cases):
+        for i, (case_type, case_serializer) in enumerate(self.cases):
             if isinstance(value, case_type):
                 stream.write_byte(i)
-                case_descriptor.write(stream, value)
+                case_serializer.write(stream, value)
                 return
 
         raise ValueError(f"Incorrect union type {type(value)}")
 
     def read(self, stream: CodedInputStream, read_as_numpy: Types) -> Any:
         case_index = stream.read_byte()
-        _, case_descriptor = self.cases[case_index]
-        return case_descriptor.read(stream, read_as_numpy)
+        _, case_serializer = self.cases[case_index]
+        return case_serializer.read(stream, read_as_numpy)
 
 
-class StreamDescriptor(TypeDescriptor[Iterable[T]]):
-    def __init__(self, element_descriptor: TypeDescriptor[T]) -> None:
+class StreamSerializer(TypeSerializer[Iterable[T]]):
+    def __init__(self, element_serializer: TypeSerializer[T]) -> None:
         super().__init__(np.object_)
-        self.element_descriptor = element_descriptor
+        self.element_serializer = element_serializer
 
     def write(self, stream: CodedOutputStream, value: Iterable[T]) -> None:
         for element in value:
             stream.write_byte(1)
-            self.element_descriptor.write(stream, element)
+            self.element_serializer.write(stream, element)
 
         stream.write_byte(0)
 
     def read(self, stream: CodedInputStream, read_as_numpy: Types) -> Iterable[T]:
         while stream.read_byte():
-            yield self.element_descriptor.read(stream, read_as_numpy)
+            yield self.element_serializer.read(stream, read_as_numpy)
 
 
-class FixedVectorDescriptor(TypeDescriptor[list[T]]):
-    def __init__(self, element_descriptor: TypeDescriptor[T], length: int) -> None:
-        super().__init__(np.dtype((element_descriptor.overall_dtype(), length)))
-        self.element_descriptor = element_descriptor
+class FixedVectorSerializer(TypeSerializer[list[T]]):
+    def __init__(self, element_serializer: TypeSerializer[T], length: int) -> None:
+        super().__init__(np.dtype((element_serializer.overall_dtype(), length)))
+        self.element_serializer = element_serializer
         self.length = length
 
     def write(self, stream: CodedOutputStream, value: list[T]) -> None:
@@ -822,32 +822,32 @@ class FixedVectorDescriptor(TypeDescriptor[list[T]]):
                 f"Expected a list of length {self.length}, got {len(value)}"
             )
         for element in value:
-            self.element_descriptor.write(stream, element)
+            self.element_serializer.write(stream, element)
 
     def read(self, stream: CodedInputStream, read_as_numpy: Types) -> list[T]:
         return [
-            self.element_descriptor.read(stream, read_as_numpy)
+            self.element_serializer.read(stream, read_as_numpy)
             for _ in range(self.length)
         ]
 
     def is_trivially_serializable(self) -> bool:
-        return self.element_descriptor.is_trivially_serializable()
+        return self.element_serializer.is_trivially_serializable()
 
 
-class VectorDescriptor(TypeDescriptor[list[T]]):
-    def __init__(self, element_descriptor: TypeDescriptor[T]) -> None:
+class VectorSerializer(TypeSerializer[list[T]]):
+    def __init__(self, element_serializer: TypeSerializer[T]) -> None:
         super().__init__(np.object_)
-        self.element_descriptor = element_descriptor
+        self.element_serializer = element_serializer
 
     def write(self, stream: CodedOutputStream, value: list[T]) -> None:
         stream.write_unsigned_varint(len(value))
         for element in value:
-            self.element_descriptor.write(stream, element)
+            self.element_serializer.write(stream, element)
 
     def read(self, stream: CodedInputStream, read_as_numpy: Types) -> list[T]:
         length = stream.read_unsigned_varint()
         return [
-            self.element_descriptor.read(stream, read_as_numpy) for _ in range(length)
+            self.element_serializer.read(stream, read_as_numpy) for _ in range(length)
         ]
 
 
@@ -855,46 +855,46 @@ TKey = TypeVar("TKey")
 TValue = TypeVar("TValue")
 
 
-class MapDescriptor(TypeDescriptor[dict[TKey, TValue]]):
+class MapSerializer(TypeSerializer[dict[TKey, TValue]]):
     def __init__(
         self,
-        key_descriptor: TypeDescriptor[TKey],
-        value_descriptor: TypeDescriptor[TValue],
+        key_serializer: TypeSerializer[TKey],
+        value_serializer: TypeSerializer[TValue],
     ) -> None:
         super().__init__(np.object_)
-        self.key_descriptor = key_descriptor
-        self.value_descriptor = value_descriptor
+        self.key_serializer = key_serializer
+        self.value_serializer = value_serializer
 
     def write(self, stream: CodedOutputStream, value: dict[TKey, TValue]) -> None:
         stream.write_unsigned_varint(len(value))
         for k, v in value.items():
-            self.key_descriptor.write(stream, k)
-            self.value_descriptor.write(stream, v)
+            self.key_serializer.write(stream, k)
+            self.value_serializer.write(stream, v)
 
     def read(
         self, stream: CodedInputStream, read_as_numpy: Types
     ) -> dict[TKey, TValue]:
         length = stream.read_unsigned_varint()
         return {
-            self.key_descriptor.read(stream, read_as_numpy): self.value_descriptor.read(
+            self.key_serializer.read(stream, read_as_numpy): self.value_serializer.read(
                 stream, read_as_numpy
             )
             for _ in range(length)
         }
 
 
-class NDArrayDescriptorBase(Generic[T], TypeDescriptor[npt.NDArray[Any]]):
+class NDArraySerializerBase(Generic[T], TypeSerializer[npt.NDArray[Any]]):
     def __init__(
         self,
         overall_dtype: npt.DTypeLike,
-        element_descriptor: TypeDescriptor[T],
+        element_serializer: TypeSerializer[T],
         dtype: npt.DTypeLike,
     ) -> None:
         super().__init__(overall_dtype)
         self._array_dtype: np.dtype[Any] = (
             dtype if isinstance(dtype, np.dtype) else np.dtype(dtype)
         )
-        self._element_descriptor = element_descriptor
+        self._element_serializer = element_serializer
 
     def _write_data(self, stream: CodedOutputStream, value: npt.NDArray[Any]) -> None:
         if value.dtype != self._array_dtype:
@@ -914,27 +914,27 @@ class NDArrayDescriptorBase(Generic[T], TypeDescriptor[npt.NDArray[Any]]):
                 else cast(npt.NDArray[Any], value.view(np.recarray))
             )
             for element in to_iterate.flat:
-                self._element_descriptor.write(stream, element)
+                self._element_serializer.write(stream, element)
 
     def _read_data(
         self, stream: CodedInputStream, shape: tuple[int, ...], read_as_numpy: Types
     ) -> npt.NDArray[Any]:
         flat_length = int(np.prod(shape))  # type: ignore
 
-        if self._element_descriptor.is_trivially_serializable():
+        if self._element_serializer.is_trivially_serializable():
             flat_byte_length = flat_length * self._array_dtype.itemsize
             byte_array = stream.read_bytearray(flat_byte_length)
             return np.frombuffer(byte_array, dtype=self._array_dtype).reshape(shape)
 
         result = np.empty((flat_length,), dtype=self._array_dtype)
         for i in range(flat_length):
-            result[i] = self._element_descriptor.read(stream, read_as_numpy)
+            result[i] = self._element_serializer.read(stream, read_as_numpy)
 
         return result.reshape(shape)
 
     def _is_current_array_trivially_serializable(self, value: npt.NDArray[Any]) -> bool:
         return (
-            self._element_descriptor.is_trivially_serializable()
+            self._element_serializer.is_trivially_serializable()
             and value.flags.c_contiguous
             and (
                 self._array_dtype.fields is None
@@ -943,13 +943,13 @@ class NDArrayDescriptorBase(Generic[T], TypeDescriptor[npt.NDArray[Any]]):
         )
 
 
-class DynamicNDArrayDescriptor(NDArrayDescriptorBase[T]):
+class DynamicNDArraySerializer(NDArraySerializerBase[T]):
     def __init__(
         self,
-        element_descriptor: TypeDescriptor[T],
+        element_serializer: TypeSerializer[T],
     ) -> None:
         super().__init__(
-            np.object_, element_descriptor, element_descriptor.overall_dtype()
+            np.object_, element_serializer, element_serializer.overall_dtype()
         )
 
     def write(self, stream: CodedOutputStream, value: npt.NDArray[Any]) -> None:
@@ -965,14 +965,14 @@ class DynamicNDArrayDescriptor(NDArrayDescriptorBase[T]):
         return self._read_data(stream, shape, read_as_numpy)
 
 
-class NDArrayDescriptor(Generic[T], NDArrayDescriptorBase[T]):
+class NDArraySerializer(Generic[T], NDArraySerializerBase[T]):
     def __init__(
         self,
-        element_descriptor: TypeDescriptor[T],
+        element_serializer: TypeSerializer[T],
         ndims: int,
     ) -> None:
         super().__init__(
-            np.object_, element_descriptor, element_descriptor.overall_dtype()
+            np.object_, element_serializer, element_serializer.overall_dtype()
         )
         self.ndims = ndims
 
@@ -990,14 +990,14 @@ class NDArrayDescriptor(Generic[T], NDArrayDescriptorBase[T]):
         return self._read_data(stream, shape, read_as_numpy)
 
 
-class FixedNDArrayDescriptor(Generic[T], NDArrayDescriptorBase[T]):
+class FixedNDArraySerializer(Generic[T], NDArraySerializerBase[T]):
     def __init__(
         self,
-        element_descriptor: TypeDescriptor[T],
+        element_serializer: TypeSerializer[T],
         shape: tuple[int, ...],
     ) -> None:
-        dtype = element_descriptor.overall_dtype()
-        super().__init__(np.dtype((dtype, shape)), element_descriptor, dtype)
+        dtype = element_serializer.overall_dtype()
+        super().__init__(np.dtype((dtype, shape)), element_serializer, dtype)
         self.shape = shape
 
     def write(self, stream: CodedOutputStream, value: npt.NDArray[Any]) -> None:
@@ -1010,25 +1010,25 @@ class FixedNDArrayDescriptor(Generic[T], NDArrayDescriptorBase[T]):
         return self._read_data(stream, self.shape, read_as_numpy)
 
     def is_trivially_serializable(self) -> bool:
-        return self._element_descriptor.is_trivially_serializable()
+        return self._element_serializer.is_trivially_serializable()
 
 
-class RecordDescriptor(TypeDescriptor[T]):
+class RecordSerializer(TypeSerializer[T]):
     def __init__(
-        self, field_descriptors: list[Tuple[str, TypeDescriptor[Any]]]
+        self, field_serializers: list[Tuple[str, TypeSerializer[Any]]]
     ) -> None:
         super().__init__(
             np.dtype(
                 [
-                    (name, descriptor.overall_dtype())
-                    for name, descriptor in field_descriptors
+                    (name, serializer.overall_dtype())
+                    for name, serializer in field_serializers
                 ],
                 align=True,
             )
         )
         combined_format = "<"
-        for _, field_descriptor in field_descriptors:
-            fmt = field_descriptor.struct_format_str()
+        for _, field_serializer in field_serializers:
+            fmt = field_serializer.struct_format_str()
             if fmt is None:
                 combined_format = None
                 break
@@ -1040,28 +1040,28 @@ class RecordDescriptor(TypeDescriptor[T]):
         else:
             self._struct = struct.Struct(combined_format)
 
-        self._field_descriptors = field_descriptors
+        self._field_serializers = field_serializers
 
     def is_trivially_serializable(self) -> bool:
         return all(
-            descriptor.is_trivially_serializable()
-            for _, descriptor in self._field_descriptors
+            serializer.is_trivially_serializable()
+            for _, serializer in self._field_serializers
         )
 
     def _write(self, stream: CodedOutputStream, *values: Any) -> None:
         if self._struct:
             stream.write(self._struct, *values)
         else:
-            for i, (_, descriptor) in enumerate(self._field_descriptors):
-                descriptor.write(stream, values[i])
+            for i, (_, serializer) in enumerate(self._field_serializers):
+                serializer.write(stream, values[i])
 
     def _read(self, stream: CodedInputStream, read_as_numpy: Types) -> tuple[Any, ...]:
         if self._struct:
             return stream.read(self._struct)
         else:
             return tuple(
-                descriptor.read(stream, read_as_numpy)
-                for _, descriptor in self._field_descriptors
+                serializer.read(stream, read_as_numpy)
+                for _, serializer in self._field_serializers
             )
 
 

@@ -44,26 +44,26 @@ func writeRecordSerializers(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 		switch td := td.(type) {
 		case *dsl.RecordDefinition:
 			typeSyntax := common.TypeDefinitionSyntax(td, ns.Name, true)
-			fmt.Fprintf(w, "class %s(_binary.RecordDescriptor[%s]):\n", recordDescriptorClassName(td), typeSyntax)
+			fmt.Fprintf(w, "class %s(_binary.RecordSerializer[%s]):\n", recordSerializerClassName(td), typeSyntax)
 
 			w.Indented(func() {
 				if len(td.TypeParameters) > 0 {
-					typeParamDescriptors := make([]string, len(td.TypeParameters))
+					typeParamSerializers := make([]string, len(td.TypeParameters))
 					for i, tp := range td.TypeParameters {
-						typeParamDescriptors[i] = fmt.Sprintf("%s: _binary.TypeDescriptor[%s]", typeDefinitionDescriptor(tp, ns.Name), common.TypeDefinitionSyntax(tp, ns.Name, true))
+						typeParamSerializers[i] = fmt.Sprintf("%s: _binary.TypeSerializer[%s]", typeDefinitionSerializer(tp, ns.Name), common.TypeDefinitionSyntax(tp, ns.Name, true))
 					}
 
-					fmt.Fprintf(w, "def __init__(self, %s) -> None:\n", strings.Join(typeParamDescriptors, ", "))
+					fmt.Fprintf(w, "def __init__(self, %s) -> None:\n", strings.Join(typeParamSerializers, ", "))
 				} else {
 					w.WriteStringln("def __init__(self) -> None:")
 				}
 
 				w.Indented(func() {
-					fieldDescriptors := make([]string, len(td.Fields))
+					fieldSerializers := make([]string, len(td.Fields))
 					for i, field := range td.Fields {
-						fieldDescriptors[i] = fmt.Sprintf(`("%s", %s)`, common.FieldIdentifierName(field.Name), typeDescriptor(field.Type, ns.Name))
+						fieldSerializers[i] = fmt.Sprintf(`("%s", %s)`, common.FieldIdentifierName(field.Name), typeSerializer(field.Type, ns.Name))
 					}
-					fmt.Fprintf(w, "super().__init__([%s])\n", strings.Join(fieldDescriptors, ", "))
+					fmt.Fprintf(w, "super().__init__([%s])\n", strings.Join(fieldSerializers, ", "))
 				})
 				w.WriteStringln("")
 
@@ -95,8 +95,8 @@ func writeRecordSerializers(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 	}
 }
 
-func recordDescriptorClassName(record *dsl.RecordDefinition) string {
-	return fmt.Sprintf("_%sDescriptor", formatting.ToPascalCase(record.Name))
+func recordSerializerClassName(record *dsl.RecordDefinition) string {
+	return fmt.Sprintf("_%sSerializer", formatting.ToPascalCase(record.Name))
 }
 
 func writeProtocols(w *formatting.IndentedWriter, ns *dsl.Namespace) {
@@ -122,8 +122,8 @@ func writeProtocols(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 				}
 				fmt.Fprintf(w, "def %s(self, value: %s) -> None:\n", common.ProtocolWriteImplMethodName(step), valueType)
 				w.Indented(func() {
-					descriptor := typeDescriptor(step.Type, ns.Name)
-					fmt.Fprintf(w, "%s.write(self._stream, value)\n", descriptor)
+					serializer := typeSerializer(step.Type, ns.Name)
+					fmt.Fprintf(w, "%s.write(self._stream, value)\n", serializer)
 				})
 				w.WriteStringln("")
 			}
@@ -152,8 +152,8 @@ func writeProtocols(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 
 				fmt.Fprintf(w, "def %s(self) -> %s:\n", common.ProtocolReadImplMethodName(step), valueType)
 				w.Indented(func() {
-					descriptor := typeDescriptor(step.Type, ns.Name)
-					fmt.Fprintf(w, "return %s.read(self._stream, self._read_as_numpy)\n", descriptor)
+					serializer := typeSerializer(step.Type, ns.Name)
+					fmt.Fprintf(w, "return %s.read(self._stream, self._read_as_numpy)\n", serializer)
 				})
 				w.WriteStringln("")
 			}
@@ -161,10 +161,10 @@ func writeProtocols(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 	}
 }
 
-func typeDefinitionDescriptor(t dsl.TypeDefinition, contextNamespace string) string {
+func typeDefinitionSerializer(t dsl.TypeDefinition, contextNamespace string) string {
 	switch t := t.(type) {
 	case dsl.PrimitiveDefinition:
-		return fmt.Sprintf("_binary.%s_descriptor", strings.ToLower(string(t)))
+		return fmt.Sprintf("_binary.%s_serializer", strings.ToLower(string(t)))
 	case *dsl.EnumDefinition:
 		var baseType dsl.Type
 		if t.BaseType != nil {
@@ -173,10 +173,10 @@ func typeDefinitionDescriptor(t dsl.TypeDefinition, contextNamespace string) str
 			baseType = dsl.Int32Type
 		}
 
-		elementDescriptor := typeDescriptor(baseType, contextNamespace)
-		return fmt.Sprintf("_binary.EnumDescriptor(%s, %s)", elementDescriptor, common.TypeDefinitionSyntax(t, contextNamespace, false))
+		elementSerializer := typeSerializer(baseType, contextNamespace)
+		return fmt.Sprintf("_binary.EnumSerializer(%s, %s)", elementSerializer, common.TypeDefinitionSyntax(t, contextNamespace, false))
 	case *dsl.RecordDefinition:
-		rwClassName := recordDescriptorClassName(t)
+		rwClassName := recordSerializerClassName(t)
 		if len(t.TypeParameters) == 0 {
 			return fmt.Sprintf("%s()", rwClassName)
 		}
@@ -186,31 +186,31 @@ func typeDefinitionDescriptor(t dsl.TypeDefinition, contextNamespace string) str
 
 		typeArguments := make([]string, len(t.TypeArguments))
 		for i, arg := range t.TypeArguments {
-			typeArguments[i] = typeDescriptor(arg, "")
+			typeArguments[i] = typeSerializer(arg, "")
 		}
 		return fmt.Sprintf("%s(%s)", rwClassName, strings.Join(typeArguments, ", "))
 	case *dsl.GenericTypeParameter:
-		return fmt.Sprintf("%s_descriptor", formatting.ToSnakeCase(t.Name))
+		return fmt.Sprintf("%s_serializer", formatting.ToSnakeCase(t.Name))
 	case *dsl.NamedType:
-		return typeDescriptor(t.Type, contextNamespace)
+		return typeSerializer(t.Type, contextNamespace)
 	default:
 		panic(fmt.Sprintf("Not implemented %T", t))
 	}
 }
 
-func typeDescriptor(t dsl.Type, contextNamespace string) string {
+func typeSerializer(t dsl.Type, contextNamespace string) string {
 	switch t := t.(type) {
 	case nil:
-		return "_binary.none_descriptor"
+		return "_binary.none_serializer"
 	case *dsl.SimpleType:
-		return typeDefinitionDescriptor(t.ResolvedDefinition, contextNamespace)
+		return typeDefinitionSerializer(t.ResolvedDefinition, contextNamespace)
 	case *dsl.GeneralizedType:
-		scalarDescriptor := func() string {
+		scalarSerializer := func() string {
 			if t.Cases.IsSingle() {
-				return typeDescriptor(t.Cases[0].Type, contextNamespace)
+				return typeSerializer(t.Cases[0].Type, contextNamespace)
 			}
 			if t.Cases.IsOptional() {
-				return fmt.Sprintf("_binary.OptionalDescriptor(%s)", typeDescriptor(t.Cases[1].Type, contextNamespace))
+				return fmt.Sprintf("_binary.OptionalSerializer(%s)", typeSerializer(t.Cases[1].Type, contextNamespace))
 			}
 
 			options := make([]string, len(t.Cases))
@@ -221,23 +221,23 @@ func typeDescriptor(t dsl.Type, contextNamespace string) string {
 				} else {
 					typeSyntax = common.TypeSyntax(c.Type, contextNamespace, true)
 				}
-				options[i] = fmt.Sprintf("(%s, %s)", typeSyntax, typeDescriptor(c.Type, contextNamespace))
+				options[i] = fmt.Sprintf("(%s, %s)", typeSyntax, typeSerializer(c.Type, contextNamespace))
 			}
 
-			return fmt.Sprintf("_binary.UnionDescriptor([%s])", strings.Join(options, ", "))
+			return fmt.Sprintf("_binary.UnionSerializer([%s])", strings.Join(options, ", "))
 
 		}()
 		switch td := t.Dimensionality.(type) {
 		case nil:
-			return scalarDescriptor
+			return scalarSerializer
 		case *dsl.Stream:
-			return fmt.Sprintf("_binary.StreamDescriptor(%s)", scalarDescriptor)
+			return fmt.Sprintf("_binary.StreamSerializer(%s)", scalarSerializer)
 		case *dsl.Vector:
 			if td.Length != nil {
-				return fmt.Sprintf("_binary.FixedVectorDescriptor(%s, %d)", scalarDescriptor, *td.Length)
+				return fmt.Sprintf("_binary.FixedVectorSerializer(%s, %d)", scalarSerializer, *td.Length)
 			}
 
-			return fmt.Sprintf("_binary.VectorDescriptor(%s)", scalarDescriptor)
+			return fmt.Sprintf("_binary.VectorSerializer(%s)", scalarSerializer)
 		case *dsl.Array:
 			if td.IsFixed() {
 				dims := make([]string, len(*td.Dimensions))
@@ -245,20 +245,20 @@ func typeDescriptor(t dsl.Type, contextNamespace string) string {
 					dims[i] = strconv.FormatUint(*d.Length, 10)
 				}
 
-				return fmt.Sprintf("_binary.FixedNDArrayDescriptor(%s, (%s,))", scalarDescriptor, strings.Join(dims, ", "))
+				return fmt.Sprintf("_binary.FixedNDArraySerializer(%s, (%s,))", scalarSerializer, strings.Join(dims, ", "))
 			}
 
 			if td.HasKnownNumberOfDimensions() {
-				return fmt.Sprintf("_binary.NDArrayDescriptor(%s, %d)", scalarDescriptor, len(*td.Dimensions))
+				return fmt.Sprintf("_binary.NDArraySerializer(%s, %d)", scalarSerializer, len(*td.Dimensions))
 			}
 
-			return fmt.Sprintf("_binary.DynamicNDArrayDescriptor(%s)", scalarDescriptor)
+			return fmt.Sprintf("_binary.DynamicNDArraySerializer(%s)", scalarSerializer)
 
 		case *dsl.Map:
-			keyDescriptor := typeDescriptor(td.KeyType, contextNamespace)
-			valueDescriptor := typeDescriptor(t.ToScalar(), contextNamespace)
+			keySerializer := typeSerializer(td.KeyType, contextNamespace)
+			valueSerializer := typeSerializer(t.ToScalar(), contextNamespace)
 
-			return fmt.Sprintf("_binary.MapDescriptor(%s, %s)", keyDescriptor, valueDescriptor)
+			return fmt.Sprintf("_binary.MapSerializer(%s, %s)", keySerializer, valueSerializer)
 		default:
 			panic(fmt.Sprintf("Not implemented %T", t.Dimensionality))
 		}

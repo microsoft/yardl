@@ -26,7 +26,7 @@ def main():
         v = r.read_my_value()
         v = r.read_my_initial_value()
         list(v)
-        print(f"{v} {type(v)}")
+        print(f"{list(v)} {type(v)}")
 
 if __name__ == "__main__":
     main()

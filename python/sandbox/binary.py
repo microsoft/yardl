@@ -13,9 +13,9 @@ from . import *
 from . import _binary
 from . import yardl_types as yardl
 
-class _PointDescriptor(_binary.RecordDescriptor[Point]):
+class _PointSerializer(_binary.RecordSerializer[Point]):
     def __init__(self) -> None:
-        super().__init__([("x", _binary.int32_descriptor), ("y", _binary.int32_descriptor)])
+        super().__init__([("x", _binary.int32_serializer), ("y", _binary.int32_serializer)])
 
     def write(self, stream: _binary.CodedOutputStream, value: Point) -> None:
         self._write(stream, value.x, value.y)
@@ -33,10 +33,10 @@ class BinaryP1Writer(_binary.BinaryProtocolWriter, P1WriterBase):
         _binary.BinaryProtocolWriter.__init__(self, stream, P1WriterBase.schema)
 
     def _write_my_value(self, value: yardl.DateTime) -> None:
-        _binary.datetime_descriptor.write(self._stream, value)
+        _binary.datetime_serializer.write(self._stream, value)
 
     def _write_my_initial_value(self, value: collections.abc.Iterable[yardl.Int32]) -> None:
-        _binary.StreamDescriptor(_binary.int32_descriptor).write(self._stream, value)
+        _binary.StreamSerializer(_binary.int32_serializer).write(self._stream, value)
 
 
 class BinaryP1Reader(_binary.BinaryProtocolReader, P1ReaderBase):
@@ -47,8 +47,8 @@ class BinaryP1Reader(_binary.BinaryProtocolReader, P1ReaderBase):
         _binary.BinaryProtocolReader.__init__(self, stream, P1ReaderBase.schema)
 
     def _read_my_value(self) -> yardl.DateTime:
-        return _binary.datetime_descriptor.read(self._stream, self._read_as_numpy)
+        return _binary.datetime_serializer.read(self._stream, self._read_as_numpy)
 
     def _read_my_initial_value(self) -> collections.abc.Iterable[yardl.Int32]:
-        return _binary.StreamDescriptor(_binary.int32_descriptor).read(self._stream, self._read_as_numpy)
+        return _binary.StreamSerializer(_binary.int32_serializer).read(self._stream, self._read_as_numpy)
 

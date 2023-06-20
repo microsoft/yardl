@@ -259,7 +259,7 @@ func TypeDefinitionDTypeSyntax(t dsl.TypeDefinition) string {
 	case *dsl.NamedType:
 		return TypeDTypeSyntax(t.Type)
 	case *dsl.GenericTypeParameter:
-		return fmt.Sprintf("%s_descriptor.overall_dtype()", formatting.ToSnakeCase(t.Name))
+		return fmt.Sprintf("%s_serializer.overall_dtype()", formatting.ToSnakeCase(t.Name))
 	default:
 		panic(fmt.Sprintf("Not implemented %T", t))
 	}
