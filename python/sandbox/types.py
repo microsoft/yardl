@@ -29,3 +29,7 @@ class Line(typing.Generic[T]):
     def dtype(t_dtype: npt.DTypeLike) -> npt.DTypeLike:
         return np.dtype([('start', np.dtype([('x', t_dtype), ('y', t_dtype)], align=True)), ('end', np.dtype([('x', t_dtype), ('y', t_dtype)], align=True))], align=True)
 
+PointAlias = Point[T]
+
+Image = npt.NDArray[t_dtype]
+

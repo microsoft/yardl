@@ -22,7 +22,7 @@ class BinaryP1Writer(_binary.BinaryProtocolWriter, P1WriterBase):
         P1WriterBase.__init__(self)
         _binary.BinaryProtocolWriter.__init__(self, stream, P1WriterBase.schema)
 
-    def _write_my_value(self, value: npt.NDArray[np.void]) -> None:
+    def _write_my_value(self, value: npt.NDArray[np.dtype([('start', np.dtype([('x', np.int32), ('y', np.int32)], align=True)), ('end', np.dtype([('x', np.int32), ('y', np.int32)], align=True))], align=True)]) -> None:
         _binary.DynamicNDArraySerializer(_Line_NumpySerializer(_binary.int32_serializer)).write(self._stream, value)
 
 
@@ -33,7 +33,7 @@ class BinaryP1Reader(_binary.BinaryProtocolReader, P1ReaderBase):
         P1ReaderBase.__init__(self, read_as_numpy)
         _binary.BinaryProtocolReader.__init__(self, stream, P1ReaderBase.schema)
 
-    def _read_my_value(self) -> npt.NDArray[np.void]:
+    def _read_my_value(self) -> npt.NDArray[np.dtype([('start', np.dtype([('x', np.int32), ('y', np.int32)], align=True)), ('end', np.dtype([('x', np.int32), ('y', np.int32)], align=True))], align=True)]:
         return _binary.DynamicNDArraySerializer(_Line_NumpySerializer(_binary.int32_serializer)).read(self._stream, self._read_as_numpy)
 
 class _PointSerializer(_binary.RecordSerializer[Point[T]]):

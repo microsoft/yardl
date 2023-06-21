@@ -11,3 +11,9 @@ Line<T>: !record
   fields:
     start: Point<T>
     end: Point<T>
+
+PointAlias<T>: Point<T>
+
+Image<T>: T[x, y]
+
+# FloatImage: Image<float>

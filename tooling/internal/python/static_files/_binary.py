@@ -72,7 +72,7 @@ class BinaryProtocolReader(ABC):
 class CodedOutputStream:
     def __init__(self, stream: BinaryIO | str, *, buffer_size: int = 65536) -> None:
         if isinstance(stream, str):
-            self._stream = open(stream, "wb")
+            self._stream = cast(BinaryIO, open(stream, "wb"))
             self._owns_stream = True
         else:
             self._stream = stream
@@ -1021,17 +1021,17 @@ class RecordSerializer(TypeSerializer[T]):
                 align=True,
             )
         )
-        combined_format = "<"
+        combined_format: str = "<"
         for _, field_serializer in field_serializers:
             fmt = field_serializer.struct_format_str()
             if fmt is None:
-                combined_format = None
+                combined_format = ""
                 break
             else:
                 combined_format += fmt[1:] if fmt[0] == "<" else fmt
 
-        if combined_format is None:
-            self._struct = None
+        if combined_format == "":
+            self._struct : struct.Struct | None = None
         else:
             self._struct = struct.Struct(combined_format)
 

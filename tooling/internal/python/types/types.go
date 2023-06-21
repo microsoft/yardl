@@ -35,6 +35,24 @@ from . import yardl_types as yardl
 func writeTypes(w *formatting.IndentedWriter, st dsl.SymbolTable, ns *dsl.Namespace) {
 	common.WriteTypeVars(w, ns)
 
+	typeDefinitionsUsedInArrays := getTypeDefinitionsReachableFromArrays(ns, st)
+
+	for _, td := range ns.TypeDefinitions {
+		generateDTypeMethod := typeDefinitionsUsedInArrays[td]
+		switch td := td.(type) {
+		case *dsl.EnumDefinition:
+			writeEnum(w, td, generateDTypeMethod)
+		case *dsl.RecordDefinition:
+			writeRecord(w, td, generateDTypeMethod)
+		case *dsl.NamedType:
+			writeNamedType(w, td)
+		default:
+			panic(fmt.Sprintf("unsupported type definition: %T", td))
+		}
+	}
+}
+
+func getTypeDefinitionsReachableFromArrays(ns *dsl.Namespace, st dsl.SymbolTable) map[dsl.TypeDefinition]bool {
 	typeDefinitionsUsedInArrays := make(map[dsl.TypeDefinition]bool)
 	dsl.VisitWithContext(ns, false, func(self dsl.VisitorWithContext[bool], node dsl.Node, inArray bool) {
 		switch t := node.(type) {
@@ -63,24 +81,11 @@ func writeTypes(w *formatting.IndentedWriter, st dsl.SymbolTable, ns *dsl.Namesp
 
 		self.VisitChildren(node, inArray)
 	})
-
-	for _, td := range ns.TypeDefinitions {
-		generateDTypeMethod := typeDefinitionsUsedInArrays[td]
-		switch td := td.(type) {
-		case *dsl.EnumDefinition:
-			writeEnum(w, td, generateDTypeMethod)
-		case *dsl.RecordDefinition:
-			writeRecord(w, td, generateDTypeMethod)
-		case *dsl.NamedType:
-			writeNamedType(w, td)
-		default:
-			panic(fmt.Sprintf("unsupported type definition: %T", td))
-		}
-	}
+	return typeDefinitionsUsedInArrays
 }
 
 func writeNamedType(w *formatting.IndentedWriter, td *dsl.NamedType) {
-	fmt.Fprintf(w, "%s = %s\n", common.TypeDefinitionSyntax(td, td.Namespace, false), common.TypeSyntax(td.Type, td.Namespace, true))
+	fmt.Fprintf(w, "%s = %s\n", common.TypeDefinitionSyntax(td, td.Namespace, false), common.TypeSyntax(td.Type, td.Namespace, false))
 	common.WriteDocstring(w, td.Comment)
 	w.Indent().WriteStringln("")
 }

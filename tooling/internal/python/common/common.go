@@ -98,7 +98,7 @@ func TypeSyntax(t dsl.Type, contextNamespace string, includeTypeParameters bool)
 		case *dsl.Vector:
 			return fmt.Sprintf("list[%s]", scalarString)
 		case *dsl.Array:
-			return fmt.Sprintf("npt.NDArray[%s]", TypeDTypeTypeArgument(t.ToScalar()))
+			return fmt.Sprintf("npt.NDArray[%s]", TypeArrayTypeArgument(t.ToScalar()))
 		case *dsl.Map:
 			return fmt.Sprintf("dict[%s, %s]", TypeSyntax(d.KeyType, contextNamespace, includeTypeParameters), scalarString)
 		default:
@@ -265,15 +265,51 @@ func TypeDefinitionDTypeSyntax(t dsl.TypeDefinition) string {
 	}
 }
 
-func TypeDTypeTypeArgument(t dsl.Type) string {
-	dTypeSyntax := TypeDTypeSyntax(t)
-	// check if this is a record
-	// TODO: this is a hack
-	if strings.HasSuffix(dTypeSyntax, ")") {
+func TypeDefinitionArrayTypeArgument(t dsl.TypeDefinition) string {
+	switch t := t.(type) {
+	case *dsl.RecordDefinition:
 		return "np.void"
+	case *dsl.GenericTypeParameter:
+		return fmt.Sprintf("%s_foopar", formatting.ToSnakeCase(t.Name))
+	default:
+		return TypeDefinitionDTypeSyntax(t)
 	}
+}
 
-	return dTypeSyntax
+func TypeArrayTypeArgument(t dsl.Type) string {
+	switch t := t.(type) {
+	case *dsl.SimpleType:
+		return TypeDefinitionDTypeSyntax(t.ResolvedDefinition)
+	case *dsl.GeneralizedType:
+		if len(t.Cases) > 1 {
+			return "np.object_"
+		}
+		switch td := t.Dimensionality.(type) {
+		case nil:
+			return TypeDTypeSyntax(t.Cases[0].Type)
+		case *dsl.Vector:
+			if td.Length == nil {
+				return "np.object_"
+			}
+			scalarDType := TypeDTypeSyntax(t.ToScalar())
+			return fmt.Sprintf("%s, (%d,)", scalarDType, *td.Length)
+		case *dsl.Array:
+			if !td.IsFixed() {
+				return "np.object_"
+			}
+			scalarDType := TypeDTypeSyntax(t.ToScalar())
+			dims := make([]string, len(*td.Dimensions))
+			for i, dim := range *td.Dimensions {
+				dims[i] = fmt.Sprintf("%d", *dim.Length)
+			}
+			return fmt.Sprintf("%s, (%s)", scalarDType, strings.Join(dims, ", "))
+
+		default:
+			return "np.object_"
+		}
+	default:
+		panic(fmt.Sprintf("Dype for %T not implemented", t))
+	}
 }
 
 func NamespaceIdentifierName(namespace string) string {

@@ -27,7 +27,7 @@ class P1WriterBase(abc.ABC):
             expected_method = self._state_to_method_name(self._state)
             raise ProtocolException(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
 
-    def write_my_value(self, value: npt.NDArray[np.void]) -> None:
+    def write_my_value(self, value: npt.NDArray[np.dtype([('start', np.dtype([('x', np.int32), ('y', np.int32)], align=True)), ('end', np.dtype([('x', np.int32), ('y', np.int32)], align=True))], align=True)]) -> None:
         """Ordinal 0"""
         if self._state != 0:
             self._raise_unexpected_state(0)
@@ -36,7 +36,7 @@ class P1WriterBase(abc.ABC):
         self._state = 1
 
     @abc.abstractmethod
-    def _write_my_value(self, value: npt.NDArray[np.void]) -> None:
+    def _write_my_value(self, value: npt.NDArray[np.dtype([('start', np.dtype([('x', np.int32), ('y', np.int32)], align=True)), ('end', np.dtype([('x', np.int32), ('y', np.int32)], align=True))], align=True)]) -> None:
         raise NotImplementedError()
 
     @abc.abstractmethod
@@ -80,7 +80,7 @@ class P1ReaderBase(abc.ABC):
     def close(self) -> None:
         raise NotImplementedError()
 
-    def read_my_value(self) -> npt.NDArray[np.void]:
+    def read_my_value(self) -> npt.NDArray[np.dtype([('start', np.dtype([('x', np.int32), ('y', np.int32)], align=True)), ('end', np.dtype([('x', np.int32), ('y', np.int32)], align=True))], align=True)]:
         """Ordinal 0"""
         if self._state != 0:
             self._raise_unexpected_state(0)
@@ -90,7 +90,7 @@ class P1ReaderBase(abc.ABC):
         return value
 
     @abc.abstractmethod
-    def _read_my_value(self) -> npt.NDArray[np.void]:
+    def _read_my_value(self) -> npt.NDArray[np.dtype([('start', np.dtype([('x', np.int32), ('y', np.int32)], align=True)), ('end', np.dtype([('x', np.int32), ('y', np.int32)], align=True))], align=True)]:
         raise NotImplementedError()
 
     T = typing.TypeVar('T')
