@@ -26,7 +26,7 @@ func resolveComputedFields(env *Environment, errorSink *validation.ErrorSink) *E
 		return env
 	}
 
-	return RewriteWithContext(env, &ComputedFieldScope{}, func(node Node, context *ComputedFieldScope, self RewriterWithContext[*ComputedFieldScope]) Node {
+	return RewriteWithContext(env, &ComputedFieldScope{}, func(node Node, context *ComputedFieldScope, self *RewriterWithContext[*ComputedFieldScope]) Node {
 		switch t := node.(type) {
 		case *RecordDefinition:
 			if len(t.ComputedFields) == 0 {
@@ -437,7 +437,7 @@ func insertConversion(expression Expression, targetType Type) Expression {
 	}
 }
 
-func resolveSwitchCase(switchCase *SwitchCase, typeCases TypeCases, self RewriterWithContext[*ComputedFieldScope], context *ComputedFieldScope, errorSink *validation.ErrorSink) *SwitchCase {
+func resolveSwitchCase(switchCase *SwitchCase, typeCases TypeCases, self *RewriterWithContext[*ComputedFieldScope], context *ComputedFieldScope, errorSink *validation.ErrorSink) *SwitchCase {
 	validateType := func(typePattern *TypePattern) bool {
 		isValid := false
 		for _, typeCase := range typeCases {
@@ -485,7 +485,7 @@ func resolveSwitchCase(switchCase *SwitchCase, typeCases TypeCases, self Rewrite
 	}
 }
 
-func resolveDimensionCountFunctionCall(functionCall *FunctionCallExpression, visitor RewriterWithContext[*ComputedFieldScope], context *ComputedFieldScope, errorSink *validation.ErrorSink) Expression {
+func resolveDimensionCountFunctionCall(functionCall *FunctionCallExpression, visitor *RewriterWithContext[*ComputedFieldScope], context *ComputedFieldScope, errorSink *validation.ErrorSink) Expression {
 	functionCall = visitor.DefaultRewrite(functionCall, context).(*FunctionCallExpression)
 	functionCall.ResolvedType = SizeType
 
@@ -518,7 +518,7 @@ func resolveDimensionCountFunctionCall(functionCall *FunctionCallExpression, vis
 	return functionCall
 }
 
-func resolveDimensionIndexFunctionCall(functionCall *FunctionCallExpression, visitor RewriterWithContext[*ComputedFieldScope], context *ComputedFieldScope, errorSink *validation.ErrorSink) Expression {
+func resolveDimensionIndexFunctionCall(functionCall *FunctionCallExpression, visitor *RewriterWithContext[*ComputedFieldScope], context *ComputedFieldScope, errorSink *validation.ErrorSink) Expression {
 	functionCall = visitor.DefaultRewrite(functionCall, context).(*FunctionCallExpression)
 	functionCall.ResolvedType = SizeType
 
@@ -582,7 +582,7 @@ func resolveDimensionIndexFunctionCall(functionCall *FunctionCallExpression, vis
 	return functionCall
 }
 
-func resolveSizeFunctionCall(functionCall *FunctionCallExpression, visitor RewriterWithContext[*ComputedFieldScope], context *ComputedFieldScope, errorSink *validation.ErrorSink) Expression {
+func resolveSizeFunctionCall(functionCall *FunctionCallExpression, visitor *RewriterWithContext[*ComputedFieldScope], context *ComputedFieldScope, errorSink *validation.ErrorSink) Expression {
 	functionCall = visitor.DefaultRewrite(functionCall, context).(*FunctionCallExpression)
 	functionCall.ResolvedType = SizeType
 

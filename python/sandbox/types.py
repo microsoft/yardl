@@ -11,6 +11,8 @@ from . import yardl_types as yardl
 
 T = typing.TypeVar('T')
 T_NP = typing.TypeVar('T_NP', bound=np.generic)
+s = typing.TypeVar('s')
+s_NP = typing.TypeVar('s_NP', bound=np.generic)
 
 @dataclasses.dataclass(slots=True, kw_only=True)
 class Point(typing.Generic[T]):
@@ -39,4 +41,7 @@ class MyRec(typing.Generic[T]):
 @dataclasses.dataclass(slots=True, kw_only=True)
 class OtherRec:
     my_rec: MyRec[yardl.Float32]
+
+MyRec2 = npt.NDArray[s_NP]
+"""FloatImage: Image<float>"""
 

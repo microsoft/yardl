@@ -64,9 +64,16 @@ func validateTypeDefinitionNames(env *Environment, errorSink *validation.ErrorSi
 	Visit(env, func(self Visitor, node Node) {
 		switch t := node.(type) {
 		case TypeDefinition:
-			name := t.GetDefinitionMeta().Name
+			meta := t.GetDefinitionMeta()
+			name := meta.Name
 			if !typeNameRegex.MatchString(name) {
 				errorSink.Add(validationError(t, "type name '%s' must be PascalCased matching the format %s", name, typeNameRegex.String()))
+			}
+
+			for _, tp := range meta.TypeParameters {
+				if !typeNameRegex.MatchString(tp.Name) {
+					errorSink.Add(validationError(t, "generic type parameter name '%s' must be PascalCased matching the format %s", tp.Name, typeNameRegex.String()))
+				}
 			}
 
 		default:

@@ -18,8 +18,12 @@ MyRec<T>: !record
   fields:
     arr: T[,]
 
+
+
 OtherRec: !record
   fields:
     myRec: MyRec<float>
 
 # FloatImage: Image<float>
+
+MyRec_2<T>: T[]

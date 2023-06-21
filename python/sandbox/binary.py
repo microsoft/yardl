@@ -15,6 +15,8 @@ from . import yardl_types as yardl
 
 T = typing.TypeVar('T')
 T_NP = typing.TypeVar('T_NP', bound=np.generic)
+s = typing.TypeVar('s')
+s_NP = typing.TypeVar('s_NP', bound=np.generic)
 
 class BinaryP1Writer(_binary.BinaryProtocolWriter, P1WriterBase):
     """Binary writer for the P1 protocol."""

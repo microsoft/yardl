@@ -23,7 +23,7 @@ func MakeGenericType(genericTypeDefinition TypeDefinition, typeArguments []Type,
 	}
 
 	errorSink := validation.ErrorSink{}
-	rewritten := Rewrite(genericTypeDefinition, func(self Rewriter, node Node) Node {
+	rewritten := Rewrite(genericTypeDefinition, func(self *Rewriter, node Node) Node {
 		switch t := node.(type) {
 		case *DefinitionMeta:
 			newMeta := *t

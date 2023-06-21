@@ -6,7 +6,31 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestFoo(t *testing.T) {
+func TestTestSymbolTableUpdatedWhenFieldChanged(t *testing.T) {
+	src := `
+Rec: !record
+  fields:
+    f: int
+`
+	env, err := parseAndValidate(t, src)
+	assert.NoError(t, err)
+	newEnv := Rewrite(env, func(self *Rewriter, node Node) Node {
+		switch node := node.(type) {
+		case *SimpleType:
+			return &SimpleType{
+				NodeMeta:           node.NodeMeta,
+				Name:               String,
+				ResolvedDefinition: PrimitiveString,
+			}
+		}
+		return self.DefaultRewrite(node)
+	}).(*Environment)
+
+	assert.Equal(t, PrimitiveString, newEnv.SymbolTable["test.Rec"].(*RecordDefinition).Fields[0].Type.(*SimpleType).ResolvedDefinition)
+	assert.Equal(t, PrimitiveInt32, env.SymbolTable["test.Rec"].(*RecordDefinition).Fields[0].Type.(*SimpleType).ResolvedDefinition)
+}
+
+func TestResolvedReferencesUpdatedWhenTargetRewritten(t *testing.T) {
 	src := `
 Rec: !record
   fields:
@@ -18,7 +42,7 @@ OtherRec: !record
 `
 	env, err := parseAndValidate(t, src)
 	assert.NoError(t, err)
-	newEnv := Rewrite(env, func(self Rewriter, node Node) Node {
+	newEnv := Rewrite(env, func(self *Rewriter, node Node) Node {
 		switch node := node.(type) {
 		case *RecordDefinition:
 
@@ -31,11 +55,5 @@ OtherRec: !record
 		return self.DefaultRewrite(node)
 	}).(*Environment)
 
-	nsName := newEnv.Namespaces[0].Name
-	qualifiedRecName := nsName + ".Rec"
-	l := len(newEnv.SymbolTable[qualifiedRecName].(*RecordDefinition).Fields)
-	assert.Equal(t, 2, l)
-
-	l2 := len(newEnv.Namespaces[0].TypeDefinitions[1].(*RecordDefinition).Fields[0].Type.(*SimpleType).ResolvedDefinition.(*RecordDefinition).Fields)
-	assert.Equal(t, 2, l2)
+	assert.Equal(t, 2, len(newEnv.Namespaces[0].TypeDefinitions[1].(*RecordDefinition).Fields[0].Type.(*SimpleType).ResolvedDefinition.(*RecordDefinition).Fields))
 }

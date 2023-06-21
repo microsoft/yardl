@@ -39,7 +39,7 @@ Proto: !protocol
 	assert.ErrorContains(t, err, "protocol step name '_b' must be camelCased matching the format")
 }
 
-func TestInvalidTypeName1(t *testing.T) {
+func TestInvalidProtocolName(t *testing.T) {
 	src := `
 abc: !protocol
   sequence:
@@ -47,4 +47,14 @@ abc: !protocol
 `
 	_, err := parseAndValidate(t, src)
 	assert.ErrorContains(t, err, "type name 'abc' must be PascalCased matching the format")
+}
+
+func TestInvalidGenericTypeParameterName(t *testing.T) {
+	src := `
+Abc<T_A>: !record
+  fields:
+    a: t
+`
+	_, err := parseAndValidate(t, src)
+	assert.ErrorContains(t, err, "generic type parameter name 'T_A' must be PascalCased matching the format")
 }
