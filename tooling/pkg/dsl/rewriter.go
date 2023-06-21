@@ -16,6 +16,7 @@ func Rewrite(node Node, rewriterFunc RewriterFunc) Node {
 
 	if env, ok := node.(*Environment); ok {
 		wrapper.symbolTable = &env.SymbolTable
+		wrapper.rewriterWithContext.symbolTable = &env.SymbolTable
 	}
 
 	return wrapper.Rewrite(node)

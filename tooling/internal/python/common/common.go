@@ -270,16 +270,20 @@ func TypeDefinitionArrayTypeArgument(t dsl.TypeDefinition) string {
 	case *dsl.RecordDefinition:
 		return "np.void"
 	case *dsl.GenericTypeParameter:
-		return fmt.Sprintf("%s_foopar", formatting.ToSnakeCase(t.Name))
+		return NumpyTypeParameter(t)
 	default:
 		return TypeDefinitionDTypeSyntax(t)
 	}
 }
 
+func NumpyTypeParameter(p *dsl.GenericTypeParameter) string {
+	return fmt.Sprintf("%s_NP", TypeIdentifierName(p.Name))
+}
+
 func TypeArrayTypeArgument(t dsl.Type) string {
 	switch t := t.(type) {
 	case *dsl.SimpleType:
-		return TypeDefinitionDTypeSyntax(t.ResolvedDefinition)
+		return TypeDefinitionArrayTypeArgument(t.ResolvedDefinition)
 	case *dsl.GeneralizedType:
 		if len(t.Cases) > 1 {
 			return "np.object_"
@@ -428,6 +432,8 @@ func WriteTypeVars(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 			if _, ok := typeVars[identifier]; !ok {
 				typeVars[identifier] = nil
 				fmt.Fprintf(w, "%s = typing.TypeVar('%s')\n", identifier, identifier)
+				numpyTypeVarName := NumpyTypeParameter(tp)
+				fmt.Fprintf(w, "%s = typing.TypeVar('%s', bound=np.generic)\n", numpyTypeVarName, numpyTypeVarName)
 			}
 		}
 	}

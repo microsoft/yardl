@@ -10,6 +10,7 @@ import numpy.typing as npt
 from . import yardl_types as yardl
 
 T = typing.TypeVar('T')
+T_NP = typing.TypeVar('T_NP', bound=np.generic)
 
 @dataclasses.dataclass(slots=True, kw_only=True)
 class Point(typing.Generic[T]):
@@ -31,5 +32,11 @@ class Line(typing.Generic[T]):
 
 PointAlias = Point[T]
 
-Image = npt.NDArray[t_dtype]
+@dataclasses.dataclass(slots=True, kw_only=True)
+class MyRec(typing.Generic[T]):
+    arr: npt.NDArray[T_NP]
+
+@dataclasses.dataclass(slots=True, kw_only=True)
+class OtherRec:
+    my_rec: MyRec[yardl.Float32]
 

@@ -14,6 +14,12 @@ Line<T>: !record
 
 PointAlias<T>: Point<T>
 
-Image<T>: T[x, y]
+MyRec<T>: !record
+  fields:
+    arr: T[,]
+
+OtherRec: !record
+  fields:
+    myRec: MyRec<float>
 
 # FloatImage: Image<float>

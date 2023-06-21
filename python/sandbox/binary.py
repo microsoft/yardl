@@ -14,6 +14,7 @@ from . import _binary
 from . import yardl_types as yardl
 
 T = typing.TypeVar('T')
+T_NP = typing.TypeVar('T_NP', bound=np.generic)
 
 class BinaryP1Writer(_binary.BinaryProtocolWriter, P1WriterBase):
     """Binary writer for the P1 protocol."""
@@ -22,7 +23,7 @@ class BinaryP1Writer(_binary.BinaryProtocolWriter, P1WriterBase):
         P1WriterBase.__init__(self)
         _binary.BinaryProtocolWriter.__init__(self, stream, P1WriterBase.schema)
 
-    def _write_my_value(self, value: npt.NDArray[np.dtype([('start', np.dtype([('x', np.int32), ('y', np.int32)], align=True)), ('end', np.dtype([('x', np.int32), ('y', np.int32)], align=True))], align=True)]) -> None:
+    def _write_my_value(self, value: npt.NDArray[np.void]) -> None:
         _binary.DynamicNDArraySerializer(_Line_NumpySerializer(_binary.int32_serializer)).write(self._stream, value)
 
 
@@ -33,7 +34,7 @@ class BinaryP1Reader(_binary.BinaryProtocolReader, P1ReaderBase):
         P1ReaderBase.__init__(self, read_as_numpy)
         _binary.BinaryProtocolReader.__init__(self, stream, P1ReaderBase.schema)
 
-    def _read_my_value(self) -> npt.NDArray[np.dtype([('start', np.dtype([('x', np.int32), ('y', np.int32)], align=True)), ('end', np.dtype([('x', np.int32), ('y', np.int32)], align=True))], align=True)]:
+    def _read_my_value(self) -> npt.NDArray[np.void]:
         return _binary.DynamicNDArraySerializer(_Line_NumpySerializer(_binary.int32_serializer)).read(self._stream, self._read_as_numpy)
 
 class _PointSerializer(_binary.RecordSerializer[Point[T]]):
@@ -77,6 +78,52 @@ class _Line_NumpySerializer(typing.Generic[T], _binary.RecordSerializer[typing.A
 
     def write(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
         self._write(stream, value["start"], value["end"])
+
+    def read(self, stream: _binary.CodedInputStream, read_as_numpy: Types) -> tuple[typing.Any, ...]:
+        return self._read(stream, read_as_numpy)
+
+
+class _MyRecSerializer(_binary.RecordSerializer[MyRec[T]]):
+    def __init__(self, t_serializer: _binary.TypeSerializer[T]) -> None:
+        super().__init__([("arr", _binary.NDArraySerializer(t_serializer, 2))])
+
+    def write(self, stream: _binary.CodedOutputStream, value: MyRec[T]) -> None:
+        self._write(stream, value.arr)
+
+    def read(self, stream: _binary.CodedInputStream, read_as_numpy: Types) -> MyRec[T]:
+        field_values = self._read(stream, read_as_numpy)
+        return MyRec[T](arr=field_values[0])
+
+
+class _MyRec_NumpySerializer(typing.Generic[T], _binary.RecordSerializer[typing.Any]):
+    def __init__(self, t_serializer: _binary.TypeSerializer[T]) -> None:
+        super().__init__([("arr", _binary.NDArraySerializer(t_serializer, 2))])
+
+    def write(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
+        self._write(stream, value["arr"])
+
+    def read(self, stream: _binary.CodedInputStream, read_as_numpy: Types) -> tuple[typing.Any, ...]:
+        return self._read(stream, read_as_numpy)
+
+
+class _OtherRecSerializer(_binary.RecordSerializer[OtherRec]):
+    def __init__(self) -> None:
+        super().__init__([("my_rec", _MyRecSerializer(_binary.float32_serializer))])
+
+    def write(self, stream: _binary.CodedOutputStream, value: OtherRec) -> None:
+        self._write(stream, value.my_rec)
+
+    def read(self, stream: _binary.CodedInputStream, read_as_numpy: Types) -> OtherRec:
+        field_values = self._read(stream, read_as_numpy)
+        return OtherRec(my_rec=field_values[0])
+
+
+class _OtherRec_NumpySerializer(_binary.RecordSerializer[typing.Any]):
+    def __init__(self) -> None:
+        super().__init__([("my_rec", _MyRec_NumpySerializer(_binary.float32_serializer))])
+
+    def write(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
+        self._write(stream, value["my_rec"])
 
     def read(self, stream: _binary.CodedInputStream, read_as_numpy: Types) -> tuple[typing.Any, ...]:
         return self._read(stream, read_as_numpy)
