@@ -316,24 +316,17 @@ func TypeArrayTypeArgument(t dsl.Type) string {
 		}
 		switch td := t.Dimensionality.(type) {
 		case nil:
-			return TypeDTypeSyntax(t.Cases[0].Type)
+			return TypeArrayTypeArgument(t.Cases[0].Type)
 		case *dsl.Vector:
 			if td.Length == nil {
 				return "np.object_"
 			}
-			scalarDType := TypeDTypeSyntax(t.ToScalar())
-			return fmt.Sprintf("%s, (%d,)", scalarDType, *td.Length)
+			return TypeArrayTypeArgument(t.ToScalar())
 		case *dsl.Array:
 			if !td.IsFixed() {
 				return "np.object_"
 			}
-			scalarDType := TypeDTypeSyntax(t.ToScalar())
-			dims := make([]string, len(*td.Dimensions))
-			for i, dim := range *td.Dimensions {
-				dims[i] = fmt.Sprintf("%d", *dim.Length)
-			}
-			return fmt.Sprintf("%s, (%s)", scalarDType, strings.Join(dims, ", "))
-
+			return TypeArrayTypeArgument(t.ToScalar())
 		default:
 			return "np.object_"
 		}

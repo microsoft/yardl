@@ -16,7 +16,7 @@ class P1WriterBase(abc.ABC):
     def __init__(self) -> None:
         self._state = 0
 
-    schema = """{"protocol":{"name":"P1","sequence":[{"name":"myValue","type":{"name":"Sandbox.DualGenRec","typeArguments":["int32"]}}]},"types":[{"name":"DualGenRec","typeParameters":["T"],"fields":[{"name":"s","type":"T"},{"name":"arr","type":{"name":"Sandbox.Image","typeArguments":["T"]}}]},{"name":"Image","typeParameters":["T"],"type":{"array":{"items":"T","dimensions":[{"name":"x"},{"name":"y"}]}}}]}"""
+    schema = """{"protocol":{"name":"P1","sequence":[{"name":"myValue","type":[{"label":"PT\u003cint32\u003e","type":{"name":"Sandbox.PT","typeArguments":["int32"]}},{"label":"PT\u003cfloat32\u003e","type":{"name":"Sandbox.PT","typeArguments":["float32"]}},{"label":"PT\u003ccomplexfloat32\u003e","type":{"name":"Sandbox.PT","typeArguments":["complexfloat32"]}}]}]},"types":[{"name":"PT","typeParameters":["T"],"fields":[{"name":"x","type":"T"},{"name":"y","type":"T"}]}]}"""
 
     def __enter__(self):
         return self
@@ -27,7 +27,7 @@ class P1WriterBase(abc.ABC):
             expected_method = self._state_to_method_name(self._state)
             raise ProtocolException(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
 
-    def write_my_value(self, value: DualGenRec[yardl.Int32, np.int32]) -> None:
+    def write_my_value(self, value: PT[yardl.Int32] | PT[yardl.Float32] | PT[yardl.ComplexFloat]) -> None:
         """Ordinal 0"""
         if self._state != 0:
             self._raise_unexpected_state(0)
@@ -36,7 +36,7 @@ class P1WriterBase(abc.ABC):
         self._state = 1
 
     @abc.abstractmethod
-    def _write_my_value(self, value: DualGenRec[yardl.Int32, np.int32]) -> None:
+    def _write_my_value(self, value: PT[yardl.Int32] | PT[yardl.Float32] | PT[yardl.ComplexFloat]) -> None:
         raise NotImplementedError()
 
     @abc.abstractmethod
@@ -80,7 +80,7 @@ class P1ReaderBase(abc.ABC):
     def close(self) -> None:
         raise NotImplementedError()
 
-    def read_my_value(self) -> DualGenRec[yardl.Int32, np.int32]:
+    def read_my_value(self) -> PT[yardl.Int32] | PT[yardl.Float32] | PT[yardl.ComplexFloat]:
         """Ordinal 0"""
         if self._state != 0:
             self._raise_unexpected_state(0)
@@ -90,7 +90,7 @@ class P1ReaderBase(abc.ABC):
         return value
 
     @abc.abstractmethod
-    def _read_my_value(self) -> DualGenRec[yardl.Int32, np.int32]:
+    def _read_my_value(self) -> PT[yardl.Int32] | PT[yardl.Float32] | PT[yardl.ComplexFloat]:
         raise NotImplementedError()
 
     T = typing.TypeVar('T')

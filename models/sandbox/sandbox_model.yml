@@ -1,6 +1,9 @@
 P1: !protocol
   sequence:
-    myValue: DualGenRec<int>
+    myValue:
+      - PT<int>
+      - PT<float>
+      - PT<complexfloat>
 
 Image<T>: T[x,y]
 

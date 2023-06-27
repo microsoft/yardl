@@ -84,6 +84,12 @@ func writeRecordSerializers(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 
 				fmt.Fprintf(w, "def write(self, stream: _binary.CodedOutputStream, value: %s) -> None:\n", typeSyntax)
 				w.Indented(func() {
+					w.WriteStringln("if isinstance(value, np.void):")
+					w.Indented(func() {
+						w.WriteStringln("self.write_numpy(stream, value)")
+						w.WriteStringln("return")
+					})
+
 					fieldAccesses := make([]string, len(td.Fields))
 					for i, field := range td.Fields {
 						fieldAccesses[i] = fmt.Sprintf("value.%s", common.FieldIdentifierName(field.Name))
@@ -111,7 +117,37 @@ func writeRecordSerializers(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 					}
 
 					fmt.Fprintf(w, "return %s(%s)\n", typeSyntax, strings.Join(args, ", "))
+				})
+				w.WriteStringln("")
 
+				w.WriteStringln("def is_value_supported(self, value: Any) -> bool:")
+				w.Indented(func() {
+					fmt.Fprintf(w, "if isinstance(value, np.void) and value.dtype == self.overall_dtype():\n")
+					w.Indented(func() {
+						w.WriteStringln("return True")
+					})
+					w.WriteStringln("")
+
+					if len(td.TypeParameters) == 0 {
+						fmt.Fprintf(w, "return isinstance(value, %s)\n", typeSyntax)
+					} else {
+						fmt.Fprintf(w, "if not isinstance(value, %s):\n", common.TypeDefinitionSyntax(td, ns.Name, false))
+						w.Indented(func() {
+							w.WriteStringln("return False")
+						})
+
+						if len(td.Fields) == 0 {
+							w.WriteStringln("return True")
+						}
+
+						w.WriteStringln("return (")
+						w.Indented(func() {
+							formatting.Delimited(w, "and ", td.Fields, func(w *formatting.IndentedWriter, i int, item *dsl.Field) {
+								fmt.Fprintf(w, "self._field_serializers[%d][1].is_value_supported(value.%s)\n", i, common.FieldIdentifierName(item.Name))
+							})
+						})
+						w.WriteStringln(")")
+					}
 				})
 				w.WriteStringln("")
 			})
@@ -248,13 +284,7 @@ func typeSerializer(t dsl.Type, numpy bool, contextNamespace string) string {
 
 			options := make([]string, len(t.Cases))
 			for i, c := range t.Cases {
-				var typeSyntax string
-				if c.Type == nil {
-					typeSyntax = "None.__class__"
-				} else {
-					typeSyntax = common.TypeSyntax(c.Type, contextNamespace, true)
-				}
-				options[i] = fmt.Sprintf("(%s, %s)", typeSyntax, typeSerializer(c.Type, numpy, contextNamespace))
+				options[i] = typeSerializer(c.Type, numpy, contextNamespace)
 			}
 
 			return fmt.Sprintf("_binary.UnionSerializer([%s])", strings.Join(options, ", "))
