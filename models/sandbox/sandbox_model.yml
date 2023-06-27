@@ -1,29 +1,35 @@
 P1: !protocol
   sequence:
-    myValue: Line<int>[]
+    myValue: DualGenRec<int>
 
-Point<T>: !record
+Image<T>: T[x,y]
+
+PT<T>: !record
   fields:
     x: T
     y: T
 
-Line<T>: !record
+PFloat: !record
   fields:
-    start: Point<T>
-    end: Point<T>
+    x: float
+    y: float
 
-PointAlias<T>: Point<T>
-
-MyRec<T>: !record
+PInt: !record
   fields:
-    arr: T[,]
+    x: int
+    y: int
 
 
-
-OtherRec: !record
+Rec: !record
   fields:
-    myRec: MyRec<float>
+    i: Image<float>
 
-# FloatImage: Image<float>
+GenRec<T>: !record
+  fields:
+    i: Image<T>
 
-MyRec_2<T>: T[]
+
+DualGenRec<T>: !record
+  fields:
+    s: T
+    arr: Image<T>

@@ -1338,24 +1338,22 @@ template<typename T0, yardl::binary::Reader<T0> ReadT0, typename T1, yardl::bina
   yardl::binary::ReadMap<std::string, std::string, yardl::binary::ReadString, yardl::binary::ReadString>(stream, value.map_field);
 }
 
-template<typename INT16_MAX_Type, yardl::binary::Writer<INT16_MAX_Type> WriteINT16_MAX_Type>
-[[maybe_unused]] void WriteArrayWithKeywordDimensionNames(yardl::binary::CodedOutputStream& stream, test_model::ArrayWithKeywordDimensionNames<INT16_MAX_Type> const& value) {
-  if constexpr (yardl::binary::IsTriviallySerializable<test_model::ArrayWithKeywordDimensionNames<INT16_MAX_Type>>::value) {
+[[maybe_unused]] void WriteArrayWithKeywordDimensionNames(yardl::binary::CodedOutputStream& stream, test_model::ArrayWithKeywordDimensionNames const& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<test_model::ArrayWithKeywordDimensionNames>::value) {
     yardl::binary::WriteTriviallySerializable(stream, value);
     return;
   }
 
-  yardl::binary::WriteNDArray<INT16_MAX_Type, WriteINT16_MAX_Type, 2>(stream, value);
+  yardl::binary::WriteNDArray<int32_t, yardl::binary::WriteInteger, 2>(stream, value);
 }
 
-template<typename INT16_MAX_Type, yardl::binary::Reader<INT16_MAX_Type> ReadINT16_MAX_Type>
-[[maybe_unused]] void ReadArrayWithKeywordDimensionNames(yardl::binary::CodedInputStream& stream, test_model::ArrayWithKeywordDimensionNames<INT16_MAX_Type>& value) {
-  if constexpr (yardl::binary::IsTriviallySerializable<test_model::ArrayWithKeywordDimensionNames<INT16_MAX_Type>>::value) {
+[[maybe_unused]] void ReadArrayWithKeywordDimensionNames(yardl::binary::CodedInputStream& stream, test_model::ArrayWithKeywordDimensionNames& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<test_model::ArrayWithKeywordDimensionNames>::value) {
     yardl::binary::ReadTriviallySerializable(stream, value);
     return;
   }
 
-  yardl::binary::ReadNDArray<INT16_MAX_Type, ReadINT16_MAX_Type, 2>(stream, value);
+  yardl::binary::ReadNDArray<int32_t, yardl::binary::ReadInteger, 2>(stream, value);
 }
 
 [[maybe_unused]] void WriteRecordWithKeywordFields(yardl::binary::CodedOutputStream& stream, test_model::RecordWithKeywordFields const& value) {
@@ -1365,7 +1363,7 @@ template<typename INT16_MAX_Type, yardl::binary::Reader<INT16_MAX_Type> ReadINT1
   }
 
   yardl::binary::WriteString(stream, value.int_field);
-  test_model::binary::WriteArrayWithKeywordDimensionNames<int32_t, yardl::binary::WriteInteger>(stream, value.sizeof_field);
+  test_model::binary::WriteArrayWithKeywordDimensionNames(stream, value.sizeof_field);
   yardl::binary::WriteEnum<test_model::EnumWithKeywordSymbols>(stream, value.if_field);
 }
 
@@ -1376,7 +1374,7 @@ template<typename INT16_MAX_Type, yardl::binary::Reader<INT16_MAX_Type> ReadINT1
   }
 
   yardl::binary::ReadString(stream, value.int_field);
-  test_model::binary::ReadArrayWithKeywordDimensionNames<int32_t, yardl::binary::ReadInteger>(stream, value.sizeof_field);
+  test_model::binary::ReadArrayWithKeywordDimensionNames(stream, value.sizeof_field);
   yardl::binary::ReadEnum<test_model::EnumWithKeywordSymbols>(stream, value.if_field);
 }
 

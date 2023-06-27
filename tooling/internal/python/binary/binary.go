@@ -45,9 +45,9 @@ func writeRecordSerializers(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 		case *dsl.RecordDefinition:
 			writeInit := func(numpy bool) {
 				if len(td.TypeParameters) > 0 {
-					typeParamSerializers := make([]string, len(td.TypeParameters))
-					for i, tp := range td.TypeParameters {
-						typeParamSerializers[i] = fmt.Sprintf("%s: _binary.TypeSerializer[%s]", typeDefinitionSerializer(tp, false, ns.Name), common.TypeDefinitionSyntax(tp, ns.Name, true))
+					typeParamSerializers := make([]string, 0, len(td.TypeParameters))
+					for _, tp := range td.TypeParameters {
+						typeParamSerializers = append(typeParamSerializers, fmt.Sprintf("%s: _binary.TypeSerializer[%s, %s]", typeDefinitionSerializer(tp, false, ns.Name), common.TypeParameterSyntax(tp, false), common.TypeParameterSyntax(tp, true)))
 					}
 
 					fmt.Fprintf(w, "def __init__(self, %s) -> None:\n", strings.Join(typeParamSerializers, ", "))
@@ -58,7 +58,7 @@ func writeRecordSerializers(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 				w.Indented(func() {
 					fieldSerializers := make([]string, len(td.Fields))
 					for i, field := range td.Fields {
-						fieldSerializers[i] = fmt.Sprintf(`("%s", %s)`, common.FieldIdentifierName(field.Name), typeSerializer(field.Type, numpy, ns.Name))
+						fieldSerializers[i] = fmt.Sprintf(`("%s", %s)`, common.FieldIdentifierName(field.Name), typeSerializer(field.Type, false, ns.Name))
 					}
 					fmt.Fprintf(w, "super().__init__([%s])\n", strings.Join(fieldSerializers, ", "))
 				})
@@ -66,7 +66,19 @@ func writeRecordSerializers(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 			}
 
 			typeSyntax := common.TypeDefinitionSyntax(td, ns.Name, true)
-			fmt.Fprintf(w, "class %s(_binary.RecordSerializer[%s]):\n", recordSerializerClassName(td, false), typeSyntax)
+			var genericSpec string
+			if len(td.TypeParameters) > 0 {
+				params := make([]string, 2*len(td.TypeParameters))
+				for i, tp := range td.TypeParameters {
+					params[2*i] = common.TypeParameterSyntax(tp, false)
+					params[2*i+1] = common.TypeParameterSyntax(tp, true)
+				}
+				genericSpec = fmt.Sprintf("typing.Generic[%s], ", strings.Join(params, ", "))
+			} else {
+				genericSpec = ""
+			}
+
+			fmt.Fprintf(w, "class %s(%s_binary.RecordSerializer[%s]):\n", recordSerializerClassName(td, false), genericSpec, typeSyntax)
 			w.Indented(func() {
 				writeInit(false)
 
@@ -75,6 +87,16 @@ func writeRecordSerializers(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 					fieldAccesses := make([]string, len(td.Fields))
 					for i, field := range td.Fields {
 						fieldAccesses[i] = fmt.Sprintf("value.%s", common.FieldIdentifierName(field.Name))
+					}
+					fmt.Fprintf(w, "self._write(stream, %s)\n", strings.Join(fieldAccesses, ", "))
+				})
+				w.WriteStringln("")
+
+				fmt.Fprintf(w, "def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:\n")
+				w.Indented(func() {
+					fieldAccesses := make([]string, len(td.Fields))
+					for i, field := range td.Fields {
+						fieldAccesses[i] = fmt.Sprintf(`value['%s']`, common.FieldIdentifierName(field.Name))
 					}
 					fmt.Fprintf(w, "self._write(stream, %s)\n", strings.Join(fieldAccesses, ", "))
 				})
@@ -90,38 +112,6 @@ func writeRecordSerializers(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 
 					fmt.Fprintf(w, "return %s(%s)\n", typeSyntax, strings.Join(args, ", "))
 
-				})
-				w.WriteStringln("")
-			})
-			w.WriteStringln("")
-
-			genericSpec := ""
-			if len(td.TypeParameters) > 0 {
-				params := make([]string, len(td.TypeParameters))
-				for i, tp := range td.TypeParameters {
-					params[i] = common.TypeDefinitionSyntax(tp, ns.Name, true)
-				}
-
-				genericSpec = fmt.Sprintf("typing.Generic[%s], ", strings.Join(params, ", "))
-			}
-
-			fmt.Fprintf(w, "class %s(%s_binary.RecordSerializer[typing.Any]):\n", recordSerializerClassName(td, true), genericSpec)
-			w.Indented(func() {
-				writeInit(true)
-
-				fmt.Fprintf(w, "def write(self, stream: _binary.CodedOutputStream, value: np.void) -> None:\n")
-				w.Indented(func() {
-					fieldAccesses := make([]string, len(td.Fields))
-					for i, field := range td.Fields {
-						fieldAccesses[i] = fmt.Sprintf(`value["%s"]`, common.FieldIdentifierName(field.Name))
-					}
-					fmt.Fprintf(w, "self._write(stream, %s)\n", strings.Join(fieldAccesses, ", "))
-				})
-				w.WriteStringln("")
-
-				fmt.Fprintf(w, "def read(self, stream: _binary.CodedInputStream, read_as_numpy: Types) -> tuple[typing.Any, ...]:\n")
-				w.Indented(func() {
-					w.WriteStringln("return self._read(stream, read_as_numpy)")
 				})
 				w.WriteStringln("")
 			})
@@ -214,7 +204,7 @@ func typeDefinitionSerializer(t dsl.TypeDefinition, numpy bool, contextNamespace
 		elementSerializer := typeSerializer(baseType, false, contextNamespace)
 		return fmt.Sprintf("_binary.EnumSerializer(%s, %s)", elementSerializer, common.TypeDefinitionSyntax(t, contextNamespace, false))
 	case *dsl.RecordDefinition:
-		rwClassName := recordSerializerClassName(t, numpy)
+		rwClassName := recordSerializerClassName(t, false)
 		if len(t.TypeParameters) == 0 {
 			return fmt.Sprintf("%s()", rwClassName)
 		}
@@ -222,10 +212,15 @@ func typeDefinitionSerializer(t dsl.TypeDefinition, numpy bool, contextNamespace
 			panic("Expected type arguments")
 		}
 
-		typeArguments := make([]string, len(t.TypeArguments))
-		for i, arg := range t.TypeArguments {
-			typeArguments[i] = typeSerializer(arg, false, "")
+		typeArguments := make([]string, 0, len(t.TypeArguments))
+		for _, arg := range t.TypeArguments {
+			typeArguments = append(typeArguments, typeSerializer(arg, false, contextNamespace))
 		}
+
+		if len(typeArguments) == 0 {
+			return fmt.Sprintf("%s()", rwClassName)
+		}
+
 		return fmt.Sprintf("%s(%s)", rwClassName, strings.Join(typeArguments, ", "))
 	case *dsl.GenericTypeParameter:
 		return fmt.Sprintf("%s_serializer", formatting.ToSnakeCase(t.Name))

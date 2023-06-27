@@ -896,8 +896,7 @@ struct RecordWithComputedFields {
   }
 };
 
-template <typename INT16_MAX_Type>
-using ArrayWithKeywordDimensionNames = yardl::NDArray<INT16_MAX_Type, 2>;
+using ArrayWithKeywordDimensionNames = yardl::NDArray<int32_t, 2>;
 
 enum class EnumWithKeywordSymbols {
   kTry = 2,
@@ -907,7 +906,7 @@ enum class EnumWithKeywordSymbols {
 // BEGIN delibrately using C++ keywords and macros as identitiers
 struct RecordWithKeywordFields {
   std::string int_field{};
-  test_model::ArrayWithKeywordDimensionNames<int32_t> sizeof_field{};
+  test_model::ArrayWithKeywordDimensionNames sizeof_field{};
   test_model::EnumWithKeywordSymbols if_field{};
 
   std::string const& Float() const {

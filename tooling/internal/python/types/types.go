@@ -125,7 +125,17 @@ func GetGenericBase(t dsl.TypeDefinition) string {
 
 	var typeParams []string
 	for _, tp := range meta.TypeParameters {
-		typeParams = append(typeParams, common.TypeIdentifierName(tp.Name))
+		use := tp.Tags[common.TypeParameterUseTagKey].(common.TypeParameterUse)
+		if use&common.TypeParameterUseScalar != 0 {
+			typeParams = append(typeParams, common.TypeIdentifierName(tp.Name))
+		}
+		if use&common.TypeParameterUseArray != 0 {
+			typeParams = append(typeParams, common.NumpyTypeParameterSyntax(tp))
+		}
+	}
+
+	if len(typeParams) == 0 {
+		return ""
 	}
 
 	return fmt.Sprintf("(typing.Generic[%s])", strings.Join(typeParams, ", "))

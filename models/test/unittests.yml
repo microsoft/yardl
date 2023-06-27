@@ -517,7 +517,7 @@ ProtocolWithComputedFields: !protocol
 RecordWithKeywordFields: !record
   fields:
     int: string
-    sizeof: ArrayWithKeywordDimensionNames<int>
+    sizeof: ArrayWithKeywordDimensionNames
     if: EnumWithKeywordSymbols
   computedFields:
     float: int
@@ -529,8 +529,8 @@ EnumWithKeywordSymbols: !enum
     try: 2
     catch: 1
 
-ArrayWithKeywordDimensionNames<INT16_MAX>: !array
-  items: INT16_MAX
+ArrayWithKeywordDimensionNames: !array
+  items: int
   dimensions:
     while:
     do:

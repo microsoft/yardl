@@ -126,15 +126,33 @@ func TypeDefinitionSyntax(t dsl.TypeDefinition, contextNamespace string, include
 			return typeName
 		}
 
-		typeArguments := make([]string, len(meta.TypeParameters))
+		typeArguments := make([]string, 0, len(meta.TypeParameters))
 		if len(meta.TypeArguments) > 0 {
 			for i, typeArg := range meta.TypeArguments {
-				typeArguments[i] = TypeSyntax(typeArg, contextNamespace, includeTypeParameters)
+				typeParameter := meta.TypeParameters[i]
+				use := typeParameter.Tags[TypeParameterUseTagKey].(TypeParameterUse)
+				if use&TypeParameterUseScalar != 0 {
+					typeArguments = append(typeArguments, TypeSyntax(typeArg, contextNamespace, includeTypeParameters))
+				}
+				if use&TypeParameterUseArray != 0 {
+					typeArguments = append(typeArguments, TypeArrayTypeArgument(typeArg))
+				}
 			}
 		} else {
 			for i, typeParam := range meta.TypeParameters {
-				typeArguments[i] = TypeDefinitionSyntax(typeParam, contextNamespace, includeTypeParameters)
+				typeParameter := meta.TypeParameters[i]
+				use := typeParameter.Tags[TypeParameterUseTagKey].(TypeParameterUse)
+				if use&TypeParameterUseScalar != 0 {
+					typeArguments = append(typeArguments, TypeDefinitionSyntax(typeParam, contextNamespace, includeTypeParameters))
+				}
+				if use&TypeParameterUseArray != 0 {
+					typeArguments = append(typeArguments, NumpyTypeParameterSyntax(typeParam))
+				}
 			}
+		}
+
+		if len(typeArguments) == 0 {
+			return typeName
 		}
 
 		return fmt.Sprintf("%s[%s]", typeName, strings.Join(typeArguments, ", "))
@@ -270,13 +288,21 @@ func TypeDefinitionArrayTypeArgument(t dsl.TypeDefinition) string {
 	case *dsl.RecordDefinition:
 		return "np.void"
 	case *dsl.GenericTypeParameter:
-		return NumpyTypeParameter(t)
+		return NumpyTypeParameterSyntax(t)
 	default:
 		return TypeDefinitionDTypeSyntax(t)
 	}
 }
 
-func NumpyTypeParameter(p *dsl.GenericTypeParameter) string {
+func TypeParameterSyntax(p *dsl.GenericTypeParameter, numpy bool) string {
+	if numpy {
+		return NumpyTypeParameterSyntax(p)
+	}
+
+	return TypeIdentifierName(p.Name)
+}
+
+func NumpyTypeParameterSyntax(p *dsl.GenericTypeParameter) string {
 	return fmt.Sprintf("%s_NP", TypeIdentifierName(p.Name))
 }
 
@@ -432,7 +458,7 @@ func WriteTypeVars(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 			if _, ok := typeVars[identifier]; !ok {
 				typeVars[identifier] = nil
 				fmt.Fprintf(w, "%s = typing.TypeVar('%s')\n", identifier, identifier)
-				numpyTypeVarName := NumpyTypeParameter(tp)
+				numpyTypeVarName := NumpyTypeParameterSyntax(tp)
 				fmt.Fprintf(w, "%s = typing.TypeVar('%s', bound=np.generic)\n", numpyTypeVarName, numpyTypeVarName)
 			}
 		}

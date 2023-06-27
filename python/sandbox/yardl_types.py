@@ -55,5 +55,7 @@ class Types(Flag):
     VECTOR = auto()
     ARRAY = auto()
 
+    ALL = BOOL | INTEGER | FLOATS | COMPLEX | STRING | DATE | TIME | DATETIME | VECTOR | ARRAY
+
 class ProtocolError(Exception):
     pass

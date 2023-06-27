@@ -438,8 +438,14 @@ func updateSymbolTable[T any](original, rewritten Node, rewriterWithContext *Rew
 
 	if rewritten != original {
 		if td, ok := rewritten.(TypeDefinition); ok {
-			name := td.GetDefinitionMeta().GetQualifiedName()
-			if existingInTable, wasFound := (*rewriterWithContext.symbolTable)[name]; wasFound && existingInTable == original {
+			meta := td.GetDefinitionMeta()
+			if len(meta.TypeArguments) > 0 {
+				// This is a generic type with arguments (not a generic type definition),
+				// so it does not belong in the symbol table
+				return
+			}
+			name := meta.GetQualifiedName()
+			if _, wasFound := (*rewriterWithContext.symbolTable)[name]; wasFound {
 				if len(rewriterWithContext.updatedSymbols) == 0 {
 					rewriterWithContext.updatedSymbols = make(map[string]TypeDefinition)
 					newSymbolTable := rewriterWithContext.symbolTable.Clone()

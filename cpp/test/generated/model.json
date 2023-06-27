@@ -2223,12 +2223,9 @@
         {
           "alias": {
             "name": "ArrayWithKeywordDimensionNames",
-            "typeParameters": [
-              "INT16_MAX"
-            ],
             "type": {
               "array": {
-                "items": "INT16_MAX",
+                "items": "int32",
                 "dimensions": [
                   {
                     "name": "while"
@@ -2267,12 +2264,7 @@
               },
               {
                 "name": "sizeof",
-                "type": {
-                  "name": "TestModel.ArrayWithKeywordDimensionNames",
-                  "typeArguments": [
-                    "int32"
-                  ]
-                }
+                "type": "TestModel.ArrayWithKeywordDimensionNames"
               },
               {
                 "name": "if",

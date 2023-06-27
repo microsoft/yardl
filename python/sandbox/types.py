@@ -11,37 +11,34 @@ from . import yardl_types as yardl
 
 T = typing.TypeVar('T')
 T_NP = typing.TypeVar('T_NP', bound=np.generic)
-s = typing.TypeVar('s')
-s_NP = typing.TypeVar('s_NP', bound=np.generic)
+
+Image = npt.NDArray[T_NP]
 
 @dataclasses.dataclass(slots=True, kw_only=True)
-class Point(typing.Generic[T]):
+class PT(typing.Generic[T]):
     x: T
     y: T
 
-    @staticmethod
-    def dtype(t_dtype: npt.DTypeLike) -> npt.DTypeLike:
-        return np.dtype([('x', t_dtype), ('y', t_dtype)], align=True)
+@dataclasses.dataclass(slots=True, kw_only=True)
+class PFloat:
+    x: yardl.Float32
+    y: yardl.Float32
 
 @dataclasses.dataclass(slots=True, kw_only=True)
-class Line(typing.Generic[T]):
-    start: Point[T]
-    end: Point[T]
-
-    @staticmethod
-    def dtype(t_dtype: npt.DTypeLike) -> npt.DTypeLike:
-        return np.dtype([('start', np.dtype([('x', t_dtype), ('y', t_dtype)], align=True)), ('end', np.dtype([('x', t_dtype), ('y', t_dtype)], align=True))], align=True)
-
-PointAlias = Point[T]
+class PInt:
+    x: yardl.Int32
+    y: yardl.Int32
 
 @dataclasses.dataclass(slots=True, kw_only=True)
-class MyRec(typing.Generic[T]):
-    arr: npt.NDArray[T_NP]
+class Rec:
+    i: Image[np.float32]
 
 @dataclasses.dataclass(slots=True, kw_only=True)
-class OtherRec:
-    my_rec: MyRec[yardl.Float32]
+class GenRec(typing.Generic[T_NP]):
+    i: Image[T_NP]
 
-MyRec2 = npt.NDArray[s_NP]
-"""FloatImage: Image<float>"""
+@dataclasses.dataclass(slots=True, kw_only=True)
+class DualGenRec(typing.Generic[T, T_NP]):
+    s: T
+    arr: Image[T_NP]
 

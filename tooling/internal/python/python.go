@@ -22,6 +22,8 @@ import (
 var staticFiles embed.FS
 
 func Generate(env *dsl.Environment, options packaging.PythonCodegenOptions) error {
+	common.AnnotateGenerics(env)
+
 	err := os.MkdirAll(options.OutputDir, 0775)
 	if err != nil {
 		return err
@@ -70,7 +72,7 @@ func writePackageInitFile(packageDir string, ns *dsl.Namespace) error {
 	w := formatting.NewIndentedWriter(&b, "    ")
 	common.WriteGeneratedFileHeader(w)
 
-	fmt.Fprintf(w, "from .yardl_types import Types\n")
+	fmt.Fprintf(w, "from .yardl_types import *\n")
 
 	typeNames := make([]string, 0)
 	for _, t := range ns.TypeDefinitions {
