@@ -735,10 +735,9 @@ string_serializer = StringSerializer()
 EPOCH_ORDINAL_DAYS = datetime.date(1970, 1, 1).toordinal()
 DATETIME_DAYS_DTYPE = np.dtype("datetime64[D]")
 
-
 class DateSerializer(TypeSerializer[Date, np.datetime64]):
     def __init__(self) -> None:
-        super().__init__(np.datetime64)
+        super().__init__(DATETIME_DAYS_DTYPE)
 
     def write(self, stream: CodedOutputStream, value: Date) -> None:
         if isinstance(value, datetime.date):
@@ -781,7 +780,7 @@ TIMEDELTA_NANOSECONDS_DTYPE = np.dtype("timedelta64[ns]")
 
 class TimeSerializer(TypeSerializer[Time, np.timedelta64]):
     def __init__(self) -> None:
-        super().__init__(np.timedelta64)
+        super().__init__(TIMEDELTA_NANOSECONDS_DTYPE)
 
     def write(self, stream: CodedOutputStream, value: Time) -> None:
         if isinstance(value, datetime.time):
@@ -835,7 +834,7 @@ EPOCH_DATETIME = datetime.datetime.utcfromtimestamp(0)
 
 class DateTimeSerializer(TypeSerializer[DateTime, np.datetime64]):
     def __init__(self) -> None:
-        super().__init__(np.datetime64)
+        super().__init__(DATETIME_NANOSECONDS_DTYPE)
 
     def write(self, stream: CodedOutputStream, value: DateTime) -> None:
         if isinstance(value, datetime.datetime):

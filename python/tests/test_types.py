@@ -1,4 +1,5 @@
 import datetime
+import typing
 
 import numpy as np
 import pytest
@@ -38,3 +39,14 @@ def test_defaulting():
 
     # The error goes away when you provide values for the fields.
     tm.MyTuple(v1=1, v2=2.0)
+
+def test_get_dtype():
+    assert tm.get_dtype(tm.Int32) == np.int32
+    assert tm.get_dtype(int) == np.int64
+    assert tm.get_dtype(tm.String) == np.object_
+    assert tm.get_dtype(tm.SimpleRecord) == np.dtype([('x', '<i4'), ('y', '<i4'), ('z', '<i4')], align=True)
+    assert tm.get_dtype(tm.TupleWithRecords) == np.dtype([('a', tm.get_dtype(tm.SimpleRecord)), ('b', tm.get_dtype(tm.SimpleRecord))], align=True)
+    assert tm.get_dtype(tm.MyTuple[tm.Int32, tm.Float32]) == np.dtype([('v1', '<i4'), ('v2', '<f4')], align=True)
+    assert tm.get_dtype(tm.MyTuple[tm.SimpleRecord, tm.Float32]) == np.dtype([('v1', tm.get_dtype(tm.SimpleRecord)), ('v2', '<f4')], align=True)
+    assert tm.get_dtype(tm.Int32 | None) == np.dtype([('has_value', '?'), ('value', '<i4')], align=True)
+    assert tm.get_dtype(tm.SimpleRecord | None) == np.dtype([('has_value', '?'), ('value', tm.get_dtype(tm.SimpleRecord))], align=True)
