@@ -2256,7 +2256,6 @@
         {
           "record": {
             "name": "RecordWithKeywordFields",
-            "comment": "BEGIN delibrately using C++ keywords and macros as identitiers\n",
             "fields": [
               {
                 "name": "int",

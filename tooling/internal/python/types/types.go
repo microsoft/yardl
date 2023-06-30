@@ -66,8 +66,15 @@ func writeRecord(w *formatting.IndentedWriter, rec *dsl.RecordDefinition, st dsl
 	w.Indented(func() {
 		common.WriteDocstring(w, rec.Comment)
 		for _, field := range rec.Fields {
-
 			fmt.Fprintf(w, "%s: %s", common.FieldIdentifierName(field.Name), common.TypeSyntax(field.Type, rec.Namespace))
+
+			if containsGenericTypeParameter(field.Type) {
+				// cannot default generic type parameters
+				// because they don't really exist at runtime
+				w.WriteStringln("")
+				continue
+			}
+
 			defaultExpr, defaultKind := typeDefault(field.Type, rec.Namespace, st)
 			if defaultKind == defaultValueKindNone || defaultExpr == "" {
 				w.WriteStringln("")
@@ -257,12 +264,6 @@ func typeDefinitionDefault(t dsl.TypeDefinition, contextNamespace string, st dsl
 
 		// generic record with type arguments
 
-		for _, t2 := range t.TypeArguments {
-			if containsGenericTypeParameter(t2) {
-				return "", defaultValueKindNone
-			}
-		}
-
 		genericDef := st[t.GetQualifiedName()].(*dsl.RecordDefinition)
 
 		args := make([]string, 0)
@@ -290,21 +291,6 @@ func typeDefinitionDefault(t dsl.TypeDefinition, contextNamespace string, st dsl
 	}
 
 	return "", defaultValueKindNone
-}
-
-func containsGenericTypeParameter(node dsl.Node) bool {
-	contains := false
-	dsl.Visit(node, func(self dsl.Visitor, node dsl.Node) {
-		switch node := node.(type) {
-		case *dsl.GenericTypeParameter:
-			contains = true
-			return
-		case *dsl.SimpleType:
-			self.Visit(node.ResolvedDefinition)
-		}
-		self.VisitChildren(node)
-	})
-	return contains
 }
 
 func writeGetDTypeFunc(w *formatting.IndentedWriter, ns *dsl.Namespace) {
@@ -344,6 +330,8 @@ func typeDefinitionDTypeExpression(t dsl.TypeDefinition, context dTypeExpression
 				return "np.dtype(np.bool_)"
 			case dsl.Int8, dsl.Uint8, dsl.Int16, dsl.Uint16, dsl.Int32, dsl.Uint32, dsl.Int64, dsl.Uint64, dsl.Float32, dsl.Float64:
 				return fmt.Sprintf("np.dtype(np.%s)", strings.ToLower(string(t)))
+			case dsl.Size:
+				return "np.dtype(np.uint64)"
 			case dsl.ComplexFloat32:
 				return "np.dtype(np.complex64)"
 			case dsl.ComplexFloat64:
@@ -469,4 +457,22 @@ func getTypeSyntaxWithGenricArgsReadFromTupleArgs(t dsl.Type, context dTypeExpre
 	}
 
 	return f.ToSyntax(t, context.namespace)
+}
+
+func containsGenericTypeParameter(node dsl.Node) bool {
+	contains := false
+	dsl.Visit(node, func(self dsl.Visitor, node dsl.Node) {
+		switch node := node.(type) {
+		case *dsl.GenericTypeParameter:
+			contains = true
+			return
+		case *dsl.SimpleType:
+			self.VisitChildren(node)
+			self.Visit(node.ResolvedDefinition)
+		}
+
+		self.VisitChildren(node)
+	})
+
+	return contains
 }

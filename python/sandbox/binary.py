@@ -116,6 +116,87 @@ class _PIntSerializer(_binary.RecordSerializer[PInt]):
         return isinstance(value, PInt)
 
 
+class _RecSerializer(_binary.RecordSerializer[Rec]):
+    def __init__(self) -> None:
+        super().__init__([("d", _binary.MapSerializer(_binary.string_serializer, _binary.int32_serializer)), ("f", _binary.EnumSerializer(_binary.int32_serializer, F)), ("g", _binary.OptionalSerializer(_PIntSerializer())), ("v", _binary.VectorSerializer(_binary.int32_serializer)), ("pf", _binary.FixedVectorSerializer(_binary.int32_serializer, 3)), ("pt", _binary.FixedVectorSerializer(_PTSerializer(_binary.int32_serializer), 3))])
+
+    def write(self, stream: _binary.CodedOutputStream, value: Rec) -> None:
+        if isinstance(value, np.void):
+            self.write_numpy(stream, value)
+            return
+        self._write(stream, value.d, value.f, value.g, value.v, value.pf, value.pt)
+
+    def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
+        self._write(stream, value['d'], value['f'], value['g'], value['v'], value['pf'], value['pt'])
+
+    def read(self, stream: _binary.CodedInputStream, read_as_numpy: Types) -> Rec:
+        field_values = self._read(stream, read_as_numpy)
+        return Rec(d=field_values[0], f=field_values[1], g=field_values[2], v=field_values[3], pf=field_values[4], pt=field_values[5])
+
+    def is_value_supported(self, value: Any) -> bool:
+        if isinstance(value, np.void) and value.dtype == self.overall_dtype():
+            return True
+
+        return isinstance(value, Rec)
+
+
+class _GenRecSerializer(typing.Generic[T, T_NP], _binary.RecordSerializer[GenRec[T]]):
+    def __init__(self, t_serializer: _binary.TypeSerializer[T, T_NP]) -> None:
+        super().__init__([("t", t_serializer)])
+
+    def write(self, stream: _binary.CodedOutputStream, value: GenRec[T]) -> None:
+        if isinstance(value, np.void):
+            self.write_numpy(stream, value)
+            return
+        self._write(stream, value.t)
+
+    def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
+        self._write(stream, value['t'])
+
+    def read(self, stream: _binary.CodedInputStream, read_as_numpy: Types) -> GenRec[T]:
+        field_values = self._read(stream, read_as_numpy)
+        return GenRec[T](t=field_values[0])
+
+    def is_value_supported(self, value: Any) -> bool:
+        if isinstance(value, np.void) and value.dtype == self.overall_dtype():
+            return True
+
+        if not isinstance(value, GenRec):
+            return False
+        return (
+            self._field_serializers[0][1].is_value_supported(value.t)
+        )
+
+
+class _DualGenRecSerializer(typing.Generic[T, T_NP], _binary.RecordSerializer[DualGenRec[T, T_NP]]):
+    def __init__(self, t_serializer: _binary.TypeSerializer[T, T_NP]) -> None:
+        super().__init__([("s", t_serializer), ("arr", _binary.DynamicNDArraySerializer(t_serializer))])
+
+    def write(self, stream: _binary.CodedOutputStream, value: DualGenRec[T, T_NP]) -> None:
+        if isinstance(value, np.void):
+            self.write_numpy(stream, value)
+            return
+        self._write(stream, value.s, value.arr)
+
+    def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
+        self._write(stream, value['s'], value['arr'])
+
+    def read(self, stream: _binary.CodedInputStream, read_as_numpy: Types) -> DualGenRec[T, T_NP]:
+        field_values = self._read(stream, read_as_numpy)
+        return DualGenRec[T, T_NP](s=field_values[0], arr=field_values[1])
+
+    def is_value_supported(self, value: Any) -> bool:
+        if isinstance(value, np.void) and value.dtype == self.overall_dtype():
+            return True
+
+        if not isinstance(value, DualGenRec):
+            return False
+        return (
+            self._field_serializers[0][1].is_value_supported(value.s)
+            and self._field_serializers[1][1].is_value_supported(value.arr)
+        )
+
+
 class _ASerializer(_binary.RecordSerializer[A]):
     def __init__(self) -> None:
         super().__init__([("pi", _binary.int32_serializer)])
@@ -167,6 +248,30 @@ class _LineSerializer(typing.Generic[T, T_NP], _binary.RecordSerializer[Line[T]]
             self._field_serializers[0][1].is_value_supported(value.start)
             and self._field_serializers[1][1].is_value_supported(value.end)
         )
+
+
+class _LineIntSerializer(_binary.RecordSerializer[LineInt]):
+    def __init__(self) -> None:
+        super().__init__([("start", _PIntSerializer()), ("end", _PIntSerializer())])
+
+    def write(self, stream: _binary.CodedOutputStream, value: LineInt) -> None:
+        if isinstance(value, np.void):
+            self.write_numpy(stream, value)
+            return
+        self._write(stream, value.start, value.end)
+
+    def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
+        self._write(stream, value['start'], value['end'])
+
+    def read(self, stream: _binary.CodedInputStream, read_as_numpy: Types) -> LineInt:
+        field_values = self._read(stream, read_as_numpy)
+        return LineInt(start=field_values[0], end=field_values[1])
+
+    def is_value_supported(self, value: Any) -> bool:
+        if isinstance(value, np.void) and value.dtype == self.overall_dtype():
+            return True
+
+        return isinstance(value, LineInt)
 
 
 class _FooSerializer(_binary.RecordSerializer[Foo]):

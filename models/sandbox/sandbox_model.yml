@@ -17,34 +17,33 @@ PInt: !record
     x: int
     y: int
 
-# F: !enum
-#   values:
-#     none: 0
-#     a:
-#     b:
+F: !enum
+  values:
+    none: 0
+    a:
+    b:
 
-# Rec: !record
-#   fields:
-#     d: string->int
-#     f: NT
-#     g: [null, PInt]
-#     v: int*
-#     pf: int*3
-#     pt: PT<int>*3
+Rec: !record
+  fields:
+    d: string->int
+    f: NT
+    g: [null, PInt]
+    v: int*
+    pf: int*3
+    pt: PT<int>*3
 
-# NT: F
+NT: F
 
-# GenRec<T>: !record
-#   fields:
-#     t: T
+GenRec<T>: !record
+  fields:
+    t: T
 
 
-# DualGenRec<T>: !record
-#   fields:
-#     s: T
-#     arr: T[]
+DualGenRec<T>: !record
+  fields:
+    s: T
+    arr: T[]
 
-# Hello
 
 X: int[2,2]
 
@@ -57,10 +56,10 @@ Line<T>: !record
     start: PT<T>
     end: PT<T>
 
-# LineInt: !record
-#   fields:
-#     start: PInt
-#     end: PInt
+LineInt: !record
+  fields:
+    start: PInt
+    end: PInt
 
 FixedImg: float[x,y]
 

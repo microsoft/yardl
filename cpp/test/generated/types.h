@@ -903,7 +903,6 @@ enum class EnumWithKeywordSymbols {
   kCatch = 1,
 };
 
-// BEGIN delibrately using C++ keywords and macros as identitiers
 struct RecordWithKeywordFields {
   std::string int_field{};
   test_model::ArrayWithKeywordDimensionNames sizeof_field{};
