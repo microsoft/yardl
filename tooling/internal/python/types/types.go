@@ -197,7 +197,7 @@ func typeDefault(t dsl.Type, contextNamespace string, st dsl.SymbolTable) (strin
 				return fmt.Sprintf("np.zeros(%s, dtype=%s)", shape, dtype), defaultValueKindLambda
 			}
 
-			return fmt.Sprintf("np.zeros(0, dtype=%s)", dtype), defaultValueKindLambda
+			return fmt.Sprintf("np.zeros((), dtype=%s)", dtype), defaultValueKindLambda
 
 		case *dsl.Map:
 			return "dict", defaultValueKindFactory

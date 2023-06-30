@@ -42,10 +42,16 @@ cpp_version := "17"
     cd tooling; \
     watchexec -r -c -w . -- 'go test ./... | { grep -v "\\[[no test files\\]" || true; }'
 
-@test: tooling-test generate ensure-build-dir
+@python-test: generate
+    cd python; \
+    python3 -m pytest tests
+
+@cpp-test: tooling-test generate ensure-build-dir
     cd cpp/build; \
     ninja tests; \
     ./tests --gtest_brief=1
+
+@test: tooling-test python-test cpp-test
 
 @benchmark: generate ensure-build-dir
     cd cpp/build; \
@@ -77,3 +83,7 @@ validate-with-no-changes: validate
 
 @format:
     find . \( -name generated -prune \) -o \( -name "*.h" -o -name "*.cc" \) -exec clang-format -i {} \;
+
+
+@watch-python-test:
+    watchexec -c -w models/test/ -w python/ -i **/__pycache__/** -w tooling/ -- "just python-test"
