@@ -65,7 +65,7 @@ func writeRecordSerializers(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 				w.WriteStringln("")
 			}
 
-			typeSyntax := common.TypeDefinitionSyntax(td, ns.Name, true)
+			typeSyntax := common.TypeSyntax(td, ns.Name)
 			var genericSpec string
 			if len(td.TypeParameters) > 0 {
 				params := make([]string, 2*len(td.TypeParameters))
@@ -131,7 +131,7 @@ func writeRecordSerializers(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 					if len(td.TypeParameters) == 0 {
 						fmt.Fprintf(w, "return isinstance(value, %s)\n", typeSyntax)
 					} else {
-						fmt.Fprintf(w, "if not isinstance(value, %s):\n", common.TypeDefinitionSyntax(td, ns.Name, false))
+						fmt.Fprintf(w, "if not isinstance(value, %s):\n", common.TypeSyntaxWithoutTypeParameters(td, ns.Name))
 						w.Indented(func() {
 							w.WriteStringln("return False")
 						})
@@ -180,7 +180,7 @@ func writeProtocols(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 			w.WriteStringln("")
 
 			for _, step := range p.Sequence {
-				valueType := common.TypeSyntax(step.Type, ns.Name, false)
+				valueType := common.TypeSyntax(step.Type, ns.Name)
 				if step.IsStream() {
 					valueType = fmt.Sprintf("collections.abc.Iterable[%s]", valueType)
 				}
@@ -209,7 +209,7 @@ func writeProtocols(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 			w.WriteStringln("")
 
 			for _, step := range p.Sequence {
-				valueType := common.TypeSyntax(step.Type, ns.Name, false)
+				valueType := common.TypeSyntax(step.Type, ns.Name)
 				if step.IsStream() {
 					valueType = fmt.Sprintf("collections.abc.Iterable[%s]", valueType)
 				}
@@ -238,7 +238,7 @@ func typeDefinitionSerializer(t dsl.TypeDefinition, numpy bool, contextNamespace
 		}
 
 		elementSerializer := typeSerializer(baseType, false, contextNamespace)
-		return fmt.Sprintf("_binary.EnumSerializer(%s, %s)", elementSerializer, common.TypeDefinitionSyntax(t, contextNamespace, false))
+		return fmt.Sprintf("_binary.EnumSerializer(%s, %s)", elementSerializer, common.TypeSyntax(t, contextNamespace))
 	case *dsl.RecordDefinition:
 		rwClassName := recordSerializerClassName(t, false)
 		if len(t.TypeParameters) == 0 {

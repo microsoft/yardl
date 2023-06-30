@@ -203,8 +203,20 @@ func normalizeComment(comments string) string {
 	}
 
 	lines := strings.Split(comments, "\n")
+
+	// There cannot be an empty line beteen a comment and the Yardl
+	// element for it to be considered a documentation comment.
+	i := len(lines) - 1
+	for ; i >= 0; i-- {
+		if !strings.HasPrefix(lines[i], "#") {
+			break
+		}
+	}
+
+	lines = lines[i+1:]
+
 	for i := range lines {
-		lines[i] = strings.TrimPrefix(lines[i], "# ")
+		lines[i] = strings.TrimPrefix(strings.TrimPrefix(lines[i], "# "), "#")
 	}
 	return strings.Join(lines, "\n")
 }

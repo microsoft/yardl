@@ -76,12 +76,14 @@ func writePackageInitFile(packageDir string, ns *dsl.Namespace) error {
 
 	typeNames := make([]string, 0)
 	for _, t := range ns.TypeDefinitions {
-		typeNames = append(typeNames, common.TypeDefinitionSyntax(t, ns.Name, false))
+		typeNames = append(typeNames, common.TypeSyntaxWithoutTypeParameters(t, ns.Name))
 	}
 
 	if len(typeNames) > 0 {
 		fmt.Fprintf(w, "from .types import %s\n", strings.Join(typeNames, ", "))
 	}
+
+	w.WriteStringln("from .types import get_dtype")
 
 	protocolTypes := make([]string, 0)
 	for _, p := range ns.Protocols {

@@ -48,6 +48,11 @@
         "python.analysis.typeCheckingMode": "strict",
         "python.analysis.diagnosticMode": "workspace",
         "python.analysis.diagnosticSeverityOverrides": {
+          "reportUnknownArgumentType": "none",
+          "reportUnknownLambdaType": "none",
+          "reportUnknownMemberType": "none",
+          "reportUnknownParameterType": "none",
+          "reportUnknownVariableType": "none",
           "reportUnnecessaryIsInstance": "none",
           "reportUnusedImport": "none"
         },

@@ -1,11 +1,6 @@
-P1: !protocol
+P: !protocol
   sequence:
-    myValue:
-      - PT<int>
-      - PT<float>
-      - PT<complexfloat>
-
-Image<T>: T[x,y]
+    a: Line<int>
 
 PT<T>: !record
   fields:
@@ -22,17 +17,60 @@ PInt: !record
     x: int
     y: int
 
+# F: !enum
+#   values:
+#     none: 0
+#     a:
+#     b:
 
-Rec: !record
+# Rec: !record
+#   fields:
+#     d: string->int
+#     f: NT
+#     g: [null, PInt]
+#     v: int*
+#     pf: int*3
+#     pt: PT<int>*3
+
+# NT: F
+
+# GenRec<T>: !record
+#   fields:
+#     t: T
+
+
+# DualGenRec<T>: !record
+#   fields:
+#     s: T
+#     arr: T[]
+
+# Hello
+
+X: int[2,2]
+
+A: !record
   fields:
-    i: Image<float>
+    pi: int
 
-GenRec<T>: !record
+Line<T>: !record
   fields:
-    i: Image<T>
+    start: PT<T>
+    end: PT<T>
 
+# LineInt: !record
+#   fields:
+#     start: PInt
+#     end: PInt
 
-DualGenRec<T>: !record
+FixedImg: float[x,y]
+
+Foo: !record
   fields:
-    s: T
-    arr: Image<T>
+    a: int
+    b: FixedImg
+
+
+Person: !record
+  fields:
+    numbers: PT<int>[2,2]
+    d: datetime

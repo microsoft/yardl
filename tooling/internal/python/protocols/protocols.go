@@ -74,7 +74,7 @@ func writeAbstractWriter(w *formatting.IndentedWriter, p *dsl.ProtocolDefinition
 
 		// public write methods
 		for i, step := range p.Sequence {
-			valueType := common.TypeSyntax(step.Type, ns.Name, false)
+			valueType := common.TypeSyntax(step.Type, ns.Name)
 			if step.IsStream() {
 				valueType = fmt.Sprintf("collections.abc.Iterable[%s]", valueType)
 			}
@@ -95,7 +95,7 @@ func writeAbstractWriter(w *formatting.IndentedWriter, p *dsl.ProtocolDefinition
 
 		// protected abstract write methods
 		for _, step := range p.Sequence {
-			valueType := common.TypeSyntax(step.Type, ns.Name, false)
+			valueType := common.TypeSyntax(step.Type, ns.Name)
 			if step.IsStream() {
 				valueType = fmt.Sprintf("collections.abc.Iterable[%s]", valueType)
 			}
@@ -190,7 +190,7 @@ else:
 
 		// public read methods
 		for i, step := range p.Sequence {
-			valueType := common.TypeSyntax(step.Type, ns.Name, false)
+			valueType := common.TypeSyntax(step.Type, ns.Name)
 			if step.IsStream() {
 				valueType = fmt.Sprintf("collections.abc.Iterable[%s]", valueType)
 			}
@@ -218,7 +218,7 @@ else:
 
 		// protected abstract read methods
 		for _, step := range p.Sequence {
-			valueType := common.TypeSyntax(step.Type, ns.Name, false)
+			valueType := common.TypeSyntax(step.Type, ns.Name)
 			if step.IsStream() {
 				valueType = fmt.Sprintf("collections.abc.Iterable[%s]", valueType)
 			}
