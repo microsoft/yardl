@@ -1,7 +1,7 @@
 import datetime
 import functools
-from types import GenericAlias, UnionType
-from typing import Any, Callable, cast, get_args, get_origin
+from types import GenericAlias, NoneType, UnionType
+from typing import Any, Callable, Optional, Union, cast, get_args, get_origin
 import numpy as np
 import numpy.typing as npt
 from . import yardl_types as yardl
@@ -42,8 +42,12 @@ def make_get_dtype_func(dtype_map :dict[type | GenericAlias, np.dtype[Any] | Cal
         if isinstance(t, type) or isinstance(t, UnionType):
             if (res := dtype_map.get(t, None)) is not None:
                 if callable(res):
-                    raise RuntimeError(f"Generic type arguments for {t} not provided")
+                    raise RuntimeError(f"Generic type arguments not provided for {t}")
                 return res
+
+        if isinstance(t, UnionType):
+            return _get_union_dtype(get_args(t))
+
 
         origin = get_origin(t)
         if origin == np.ndarray:
@@ -57,8 +61,19 @@ def make_get_dtype_func(dtype_map :dict[type | GenericAlias, np.dtype[Any] | Cal
                 if callable(res):
                     return res(get_args(t))
 
+        if origin == Union:
+            # A union specified with syntax Union[A, B] or Optional[A]
+            return _get_union_dtype(get_args(t))
+
 
         raise RuntimeError(f"Cannot find dtype for {t}")
+
+    def _get_union_dtype(args : tuple[type, ...]) -> np.dtype[Any]:
+        if len(args) == 2 and args[1] == NoneType:
+            # This is an optional type
+            inner_type = get_dtype_impl(dtype_map, args[0])
+            return np.dtype([("has_value", np.bool_), ("value", inner_type)], align=True)
+        return np.dtype(np.object_)
 
 
     return lambda t: get_dtype_impl(dtype_map, t)
