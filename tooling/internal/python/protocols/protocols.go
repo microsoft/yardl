@@ -216,6 +216,15 @@ else:
 			w.WriteStringln("")
 		}
 
+		// copy_to method
+		fmt.Fprintf(w, "def copy_to(self, writer: %s) -> None:\n", common.AbstractWriterName(p))
+		w.Indented(func() {
+			for _, step := range p.Sequence {
+				fmt.Fprintf(w, "writer.%s(self.%s())\n", common.ProtocolWriteMethodName(step), common.ProtocolReadMethodName(step))
+			}
+		})
+		w.WriteStringln("")
+
 		// protected abstract read methods
 		for _, step := range p.Sequence {
 			valueType := common.TypeSyntax(step.Type, ns.Name)

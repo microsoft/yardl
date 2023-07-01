@@ -50,7 +50,7 @@ class BinaryProtocolWriter(ABC):
         self._stream.close()
 
 class BinaryProtocolReader(ABC):
-    def __init__(self, stream: BufferedReader | str, expected_schema: str) -> None:
+    def __init__(self, stream: BufferedReader | str, expected_schema: str | None) -> None:
         self._stream = CodedInputStream(stream)
         magic_bytes = self._stream.read_view(len(MAGIC_BYTES))
         if magic_bytes != MAGIC_BYTES:
@@ -61,7 +61,7 @@ class BinaryProtocolReader(ABC):
             raise RuntimeError("Invalid binary format version")
 
         self._schema = string_serializer.read(self._stream, Types.NONE)
-        if self._schema != expected_schema:
+        if expected_schema and self._schema != expected_schema:
             raise RuntimeError("Invalid schema")
 
     def close(self) -> None:
@@ -120,6 +120,8 @@ class CodedOutputStream:
     def write_unsigned_varint(self, value: Integer) -> None:
         if len(self._view) < 10:
             self.flush()
+
+        value = int(value) # bitwise ops not supported on numpy types
 
         while True:
             if value < 0x80:
@@ -379,12 +381,12 @@ class Int16Serializer(TypeSerializer[Int16, np.int16]):
 
     def write(self, stream: CodedOutputStream, value: Int16) -> None:
         if isinstance(value, int):
-            if value < 0 or value > UINT16_MAX:
+            if value < INT16_MIN or value > INT16_MAX:
                 raise ValueError(
-                    f"Value {value} is outside the range of an unsigned 16-bit integer"
+                    f"Value {value} is outside the range of a signed 16-bit integer"
                 )
-        elif not isinstance(value, cast(type, np.uint16)):
-            raise ValueError(f"Value in not an unsigned 16-bit integer: {value}")
+        elif not isinstance(value, cast(type, np.int16)):
+            raise ValueError(f"Value in not an signed 16-bit integer: {value}")
 
         stream.write_signed_varint(value)
 
@@ -448,7 +450,7 @@ class Int32Serializer(TypeSerializer[Int32, np.int32]):
 
     def write(self, stream: CodedOutputStream, value: Int32) -> None:
         if isinstance(value, int):
-            if value < 0 or value > UINT32_MAX:
+            if value < INT32_MIN or value > INT32_MAX:
                 raise ValueError(
                     f"Value {value} is outside the range of an unsigned 32-bit integer"
                 )
@@ -556,6 +558,8 @@ class UInt64Serializer(TypeSerializer[UInt64, np.uint64]):
                 )
         elif not isinstance(value, cast(type, np.uint64)):
             raise ValueError(f"Value in not an unsigned 64-bit integer: {value}")
+
+        stream.write_unsigned_varint(value)
 
     def write_numpy(self, stream: CodedOutputStream, value: np.uint64) -> None:
 

@@ -51,7 +51,7 @@ cpp_version := "17"
     ninja tests; \
     ./tests --gtest_brief=1
 
-@test: tooling-test python-test cpp-test
+@test: tooling-test cpp-test python-test
 
 @benchmark: generate ensure-build-dir
     cd cpp/build; \

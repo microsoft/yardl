@@ -93,6 +93,9 @@ class BenchmarkFloat256x256ReaderBase(abc.ABC):
         self._state = 1
         return self._wrap_iterable(value, 2)
 
+    def copy_to(self, writer: BenchmarkFloat256x256WriterBase) -> None:
+        writer.write_float_256x_256(self.read_float_256x_256())
+
     @abc.abstractmethod
     def _read_float_256x_256(self) -> collections.abc.Iterable[npt.NDArray[np.float32]]:
         raise NotImplementedError()
@@ -198,6 +201,9 @@ class BenchmarkFloatVlenReaderBase(abc.ABC):
         value = self._read_float_array()
         self._state = 1
         return self._wrap_iterable(value, 2)
+
+    def copy_to(self, writer: BenchmarkFloatVlenWriterBase) -> None:
+        writer.write_float_array(self.read_float_array())
 
     @abc.abstractmethod
     def _read_float_array(self) -> collections.abc.Iterable[npt.NDArray[np.float32]]:
@@ -305,6 +311,9 @@ class BenchmarkSmallRecordReaderBase(abc.ABC):
         self._state = 1
         return self._wrap_iterable(value, 2)
 
+    def copy_to(self, writer: BenchmarkSmallRecordWriterBase) -> None:
+        writer.write_small_record(self.read_small_record())
+
     @abc.abstractmethod
     def _read_small_record(self) -> collections.abc.Iterable[SmallBenchmarkRecord]:
         raise NotImplementedError()
@@ -411,6 +420,9 @@ class BenchmarkSmallRecordWithOptionalsReaderBase(abc.ABC):
         self._state = 1
         return self._wrap_iterable(value, 2)
 
+    def copy_to(self, writer: BenchmarkSmallRecordWithOptionalsWriterBase) -> None:
+        writer.write_small_record(self.read_small_record())
+
     @abc.abstractmethod
     def _read_small_record(self) -> collections.abc.Iterable[SimpleEncodingCounters]:
         raise NotImplementedError()
@@ -516,6 +528,9 @@ class BenchmarkSimpleMrdReaderBase(abc.ABC):
         value = self._read_data()
         self._state = 1
         return self._wrap_iterable(value, 2)
+
+    def copy_to(self, writer: BenchmarkSimpleMrdWriterBase) -> None:
+        writer.write_data(self.read_data())
 
     @abc.abstractmethod
     def _read_data(self) -> collections.abc.Iterable[SimpleAcquisition | Image[np.float32]]:
@@ -647,6 +662,10 @@ class ScalarsReaderBase(abc.ABC):
         value = self._read_record()
         self._state = 4
         return value
+
+    def copy_to(self, writer: ScalarsWriterBase) -> None:
+        writer.write_int_32(self.read_int_32())
+        writer.write_record(self.read_record())
 
     @abc.abstractmethod
     def _read_int_32(self) -> yardl.Int32:
@@ -835,6 +854,12 @@ class ScalarOptionalsReaderBase(abc.ABC):
         self._state = 8
         return value
 
+    def copy_to(self, writer: ScalarOptionalsWriterBase) -> None:
+        writer.write_optional_int(self.read_optional_int())
+        writer.write_optional_record(self.read_optional_record())
+        writer.write_record_with_optional_fields(self.read_record_with_optional_fields())
+        writer.write_optional_record_with_optional_fields(self.read_optional_record_with_optional_fields())
+
     @abc.abstractmethod
     def _read_optional_int(self) -> yardl.Int32 | None:
         raise NotImplementedError()
@@ -958,6 +983,9 @@ class NestedRecordsReaderBase(abc.ABC):
         value = self._read_tuple_with_records()
         self._state = 2
         return value
+
+    def copy_to(self, writer: NestedRecordsWriterBase) -> None:
+        writer.write_tuple_with_records(self.read_tuple_with_records())
 
     @abc.abstractmethod
     def _read_tuple_with_records(self) -> TupleWithRecords:
@@ -1140,6 +1168,12 @@ class VlensReaderBase(abc.ABC):
         self._state = 8
         return value
 
+    def copy_to(self, writer: VlensWriterBase) -> None:
+        writer.write_int_vector(self.read_int_vector())
+        writer.write_complex_vector(self.read_complex_vector())
+        writer.write_record_with_vlens(self.read_record_with_vlens())
+        writer.write_vlen_of_record_with_vlens(self.read_vlen_of_record_with_vlens())
+
     @abc.abstractmethod
     def _read_int_vector(self) -> list[yardl.Int32]:
         raise NotImplementedError()
@@ -1289,6 +1323,10 @@ class StringsReaderBase(abc.ABC):
         self._state = 4
         return value
 
+    def copy_to(self, writer: StringsWriterBase) -> None:
+        writer.write_single_string(self.read_single_string())
+        writer.write_rec_with_string(self.read_rec_with_string())
+
     @abc.abstractmethod
     def _read_single_string(self) -> str:
         raise NotImplementedError()
@@ -1400,6 +1438,9 @@ class OptionalVectorsReaderBase(abc.ABC):
         value = self._read_record_with_optional_vector()
         self._state = 2
         return value
+
+    def copy_to(self, writer: OptionalVectorsWriterBase) -> None:
+        writer.write_record_with_optional_vector(self.read_record_with_optional_vector())
 
     @abc.abstractmethod
     def _read_record_with_optional_vector(self) -> RecordWithOptionalVector:
@@ -1581,6 +1622,12 @@ class FixedVectorsReaderBase(abc.ABC):
         value = self._read_record_with_fixed_vectors()
         self._state = 8
         return value
+
+    def copy_to(self, writer: FixedVectorsWriterBase) -> None:
+        writer.write_fixed_int_vector(self.read_fixed_int_vector())
+        writer.write_fixed_simple_record_vector(self.read_fixed_simple_record_vector())
+        writer.write_fixed_record_with_vlens_vector(self.read_fixed_record_with_vlens_vector())
+        writer.write_record_with_fixed_vectors(self.read_record_with_fixed_vectors())
 
     @abc.abstractmethod
     def _read_fixed_int_vector(self) -> list[yardl.Int32]:
@@ -1780,6 +1827,12 @@ class StreamsReaderBase(abc.ABC):
         value = self._read_fixed_vector()
         self._state = 7
         return self._wrap_iterable(value, 8)
+
+    def copy_to(self, writer: StreamsWriterBase) -> None:
+        writer.write_int_data(self.read_int_data())
+        writer.write_optional_int_data(self.read_optional_int_data())
+        writer.write_record_with_optional_vector_data(self.read_record_with_optional_vector_data())
+        writer.write_fixed_vector(self.read_fixed_vector())
 
     @abc.abstractmethod
     def _read_int_data(self) -> collections.abc.Iterable[yardl.Int32]:
@@ -2004,6 +2057,13 @@ class FixedArraysReaderBase(abc.ABC):
         value = self._read_named_array()
         self._state = 10
         return value
+
+    def copy_to(self, writer: FixedArraysWriterBase) -> None:
+        writer.write_ints(self.read_ints())
+        writer.write_fixed_simple_record_array(self.read_fixed_simple_record_array())
+        writer.write_fixed_record_with_vlens_array(self.read_fixed_record_with_vlens_array())
+        writer.write_record_with_fixed_arrays(self.read_record_with_fixed_arrays())
+        writer.write_named_array(self.read_named_array())
 
     @abc.abstractmethod
     def _read_ints(self) -> npt.NDArray[np.int32]:
@@ -2235,6 +2295,13 @@ class NDArraysReaderBase(abc.ABC):
         self._state = 10
         return value
 
+    def copy_to(self, writer: NDArraysWriterBase) -> None:
+        writer.write_ints(self.read_ints())
+        writer.write_simple_record_array(self.read_simple_record_array())
+        writer.write_record_with_vlens_array(self.read_record_with_vlens_array())
+        writer.write_record_with_nd_arrays(self.read_record_with_nd_arrays())
+        writer.write_named_array(self.read_named_array())
+
     @abc.abstractmethod
     def _read_ints(self) -> npt.NDArray[np.int32]:
         raise NotImplementedError()
@@ -2440,6 +2507,12 @@ class NDArraysSingleDimensionReaderBase(abc.ABC):
         self._state = 8
         return value
 
+    def copy_to(self, writer: NDArraysSingleDimensionWriterBase) -> None:
+        writer.write_ints(self.read_ints())
+        writer.write_simple_record_array(self.read_simple_record_array())
+        writer.write_record_with_vlens_array(self.read_record_with_vlens_array())
+        writer.write_record_with_nd_arrays(self.read_record_with_nd_arrays())
+
     @abc.abstractmethod
     def _read_ints(self) -> npt.NDArray[np.int32]:
         raise NotImplementedError()
@@ -2639,6 +2712,12 @@ class DynamicNDArraysReaderBase(abc.ABC):
         self._state = 8
         return value
 
+    def copy_to(self, writer: DynamicNDArraysWriterBase) -> None:
+        writer.write_ints(self.read_ints())
+        writer.write_simple_record_array(self.read_simple_record_array())
+        writer.write_record_with_vlens_array(self.read_record_with_vlens_array())
+        writer.write_record_with_dynamic_nd_arrays(self.read_record_with_dynamic_nd_arrays())
+
     @abc.abstractmethod
     def _read_ints(self) -> npt.NDArray[np.int32]:
         raise NotImplementedError()
@@ -2812,6 +2891,11 @@ class MapsReaderBase(abc.ABC):
         value = self._read_aliased_generic()
         self._state = 6
         return value
+
+    def copy_to(self, writer: MapsWriterBase) -> None:
+        writer.write_string_to_int(self.read_string_to_int())
+        writer.write_string_to_union(self.read_string_to_union())
+        writer.write_aliased_generic(self.read_aliased_generic())
 
     @abc.abstractmethod
     def _read_string_to_int(self) -> dict[str, yardl.Int32]:
@@ -3006,6 +3090,12 @@ class UnionsReaderBase(abc.ABC):
         self._state = 8
         return value
 
+    def copy_to(self, writer: UnionsWriterBase) -> None:
+        writer.write_int_or_simple_record(self.read_int_or_simple_record())
+        writer.write_int_or_record_with_vlens(self.read_int_or_record_with_vlens())
+        writer.write_monosotate_or_int_or_simple_record(self.read_monosotate_or_int_or_simple_record())
+        writer.write_record_with_unions(self.read_record_with_unions())
+
     @abc.abstractmethod
     def _read_int_or_simple_record(self) -> yardl.Int32 | SimpleRecord:
         raise NotImplementedError()
@@ -3154,6 +3244,10 @@ class StreamsOfUnionsReaderBase(abc.ABC):
         value = self._read_nullable_int_or_simple_record()
         self._state = 3
         return self._wrap_iterable(value, 4)
+
+    def copy_to(self, writer: StreamsOfUnionsWriterBase) -> None:
+        writer.write_int_or_simple_record(self.read_int_or_simple_record())
+        writer.write_nullable_int_or_simple_record(self.read_nullable_int_or_simple_record())
 
     @abc.abstractmethod
     def _read_int_or_simple_record(self) -> collections.abc.Iterable[yardl.Int32 | SimpleRecord]:
@@ -3317,6 +3411,11 @@ class EnumsReaderBase(abc.ABC):
         self._state = 6
         return value
 
+    def copy_to(self, writer: EnumsWriterBase) -> None:
+        writer.write_single(self.read_single())
+        writer.write_vec(self.read_vec())
+        writer.write_size(self.read_size())
+
     @abc.abstractmethod
     def _read_single(self) -> Fruits:
         raise NotImplementedError()
@@ -3459,6 +3558,10 @@ class FlagsReaderBase(abc.ABC):
         value = self._read_formats()
         self._state = 3
         return self._wrap_iterable(value, 4)
+
+    def copy_to(self, writer: FlagsWriterBase) -> None:
+        writer.write_days(self.read_days())
+        writer.write_formats(self.read_formats())
 
     @abc.abstractmethod
     def _read_days(self) -> collections.abc.Iterable[DaysOfWeek]:
@@ -3621,6 +3724,11 @@ class StateTestReaderBase(abc.ABC):
         value = self._read_another_int()
         self._state = 6
         return value
+
+    def copy_to(self, writer: StateTestWriterBase) -> None:
+        writer.write_an_int(self.read_an_int())
+        writer.write_a_stream(self.read_a_stream())
+        writer.write_another_int(self.read_another_int())
 
     @abc.abstractmethod
     def _read_an_int(self) -> yardl.Int32:
@@ -3940,6 +4048,17 @@ class SimpleGenericsReaderBase(abc.ABC):
         self._state = 17
         return self._wrap_iterable(value, 18)
 
+    def copy_to(self, writer: SimpleGenericsWriterBase) -> None:
+        writer.write_float_image(self.read_float_image())
+        writer.write_int_image(self.read_int_image())
+        writer.write_int_image_alternate_syntax(self.read_int_image_alternate_syntax())
+        writer.write_string_image(self.read_string_image())
+        writer.write_int_float_tuple(self.read_int_float_tuple())
+        writer.write_float_float_tuple(self.read_float_float_tuple())
+        writer.write_int_float_tuple_alternate_syntax(self.read_int_float_tuple_alternate_syntax())
+        writer.write_int_string_tuple(self.read_int_string_tuple())
+        writer.write_stream_of_type_variants(self.read_stream_of_type_variants())
+
     @abc.abstractmethod
     def _read_float_image(self) -> Image[np.float32]:
         raise NotImplementedError()
@@ -4193,6 +4312,13 @@ class AdvancedGenericsReaderBase(abc.ABC):
         value = self._read_tuple_of_vectors()
         self._state = 10
         return value
+
+    def copy_to(self, writer: AdvancedGenericsWriterBase) -> None:
+        writer.write_int_image_image(self.read_int_image_image())
+        writer.write_generic_record_1(self.read_generic_record_1())
+        writer.write_tuple_of_optionals(self.read_tuple_of_optionals())
+        writer.write_tuple_of_optionals_alternate_syntax(self.read_tuple_of_optionals_alternate_syntax())
+        writer.write_tuple_of_vectors(self.read_tuple_of_vectors())
 
     @abc.abstractmethod
     def _read_int_image_image(self) -> Image[np.object_]:
@@ -4549,6 +4675,18 @@ class AliasesReaderBase(abc.ABC):
         self._state = 19
         return self._wrap_iterable(value, 20)
 
+    def copy_to(self, writer: AliasesWriterBase) -> None:
+        writer.write_aliased_string(self.read_aliased_string())
+        writer.write_aliased_enum(self.read_aliased_enum())
+        writer.write_aliased_open_generic(self.read_aliased_open_generic())
+        writer.write_aliased_closed_generic(self.read_aliased_closed_generic())
+        writer.write_aliased_optional(self.read_aliased_optional())
+        writer.write_aliased_generic_optional(self.read_aliased_generic_optional())
+        writer.write_aliased_generic_union_2(self.read_aliased_generic_union_2())
+        writer.write_aliased_generic_vector(self.read_aliased_generic_vector())
+        writer.write_aliased_generic_fixed_vector(self.read_aliased_generic_fixed_vector())
+        writer.write_stream_of_aliased_generic_union_2(self.read_stream_of_aliased_generic_union_2())
+
     @abc.abstractmethod
     def _read_aliased_string(self) -> AliasedString:
         raise NotImplementedError()
@@ -4734,6 +4872,10 @@ class StreamsOfAliasedUnionsReaderBase(abc.ABC):
         self._state = 3
         return self._wrap_iterable(value, 4)
 
+    def copy_to(self, writer: StreamsOfAliasedUnionsWriterBase) -> None:
+        writer.write_int_or_simple_record(self.read_int_or_simple_record())
+        writer.write_nullable_int_or_simple_record(self.read_nullable_int_or_simple_record())
+
     @abc.abstractmethod
     def _read_int_or_simple_record(self) -> collections.abc.Iterable[AliasedIntOrSimpleRecord]:
         raise NotImplementedError()
@@ -4845,6 +4987,9 @@ class ProtocolWithComputedFieldsReaderBase(abc.ABC):
         value = self._read_record_with_computed_fields()
         self._state = 2
         return value
+
+    def copy_to(self, writer: ProtocolWithComputedFieldsWriterBase) -> None:
+        writer.write_record_with_computed_fields(self.read_record_with_computed_fields())
 
     @abc.abstractmethod
     def _read_record_with_computed_fields(self) -> RecordWithComputedFields:
@@ -4976,6 +5121,10 @@ class ProtocolWithKeywordStepsReaderBase(abc.ABC):
         value = self._read_float()
         self._state = 4
         return value
+
+    def copy_to(self, writer: ProtocolWithKeywordStepsWriterBase) -> None:
+        writer.write_int(self.read_int())
+        writer.write_float(self.read_float())
 
     @abc.abstractmethod
     def _read_int(self) -> collections.abc.Iterable[RecordWithKeywordFields]:
