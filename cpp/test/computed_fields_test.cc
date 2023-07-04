@@ -74,8 +74,6 @@ TEST(ComputedFieldsTest, DimensionCount) {
   EXPECT_EQ(r.DynamicArrayDimensionCount(), 2);
   r.dynamic_array_field = {1, 2, 3};
   EXPECT_EQ(r.DynamicArrayDimensionCount(), 1);
-
-  EXPECT_EQ(r.FixedVectorSize(), 3);
 }
 
 TEST(ComputedFieldsTests, VectorSize) {

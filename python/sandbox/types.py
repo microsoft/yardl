@@ -13,94 +13,26 @@ from . import _dtypes
 
 T = typing.TypeVar('T')
 T_NP = typing.TypeVar('T_NP', bound=np.generic)
+U = typing.TypeVar('U')
+U_NP = typing.TypeVar('U_NP', bound=np.generic)
 
 @dataclasses.dataclass(slots=True, kw_only=True)
 class PT(typing.Generic[T]):
     x: T
     y: T
+    z: yardl.Int32 = 0
+
 
 @dataclasses.dataclass(slots=True, kw_only=True)
-class PFloat:
-    x: yardl.Float32 = 0.0
-    y: yardl.Float32 = 0.0
-
-@dataclasses.dataclass(slots=True, kw_only=True)
-class PInt:
-    x: yardl.Int32 = 0
-    y: yardl.Int32 = 0
-
-class F(enum.Enum):
-    NONE = 0
-    A = 1
-    B = 2
-
-NT = F
-
-@dataclasses.dataclass(slots=True, kw_only=True)
-class Rec:
-    d: dict[str, yardl.Int32] = dataclasses.field(default_factory=dict)
-    f: NT = F.NONE
-    g: PInt | None = None
-    v: list[yardl.Int32] = dataclasses.field(default_factory=list)
-    pf: list[yardl.Int32] = dataclasses.field(default_factory=lambda: [0] * 3)
-    pt: list[PT[yardl.Int32]] = dataclasses.field(default_factory=lambda: [PT(x=0, y=0) for _ in range(3)])
-
-@dataclasses.dataclass(slots=True, kw_only=True)
-class GenRec(typing.Generic[T]):
-    t: T
-
-@dataclasses.dataclass(slots=True, kw_only=True)
-class DualGenRec(typing.Generic[T, T_NP]):
-    s: T
-    arr: npt.NDArray[T_NP]
-
-X = npt.NDArray[np.int32]
-
-@dataclasses.dataclass(slots=True, kw_only=True)
-class A:
-    pi: yardl.Int32 = 0
-
-@dataclasses.dataclass(slots=True, kw_only=True)
-class Line(typing.Generic[T]):
-    start: PT[T]
-    end: PT[T]
-
-@dataclasses.dataclass(slots=True, kw_only=True)
-class LineInt:
-    start: PInt = dataclasses.field(default_factory=PInt)
-    end: PInt = dataclasses.field(default_factory=PInt)
-
-FixedImg = npt.NDArray[np.float32]
-
-@dataclasses.dataclass(slots=True, kw_only=True)
-class Foo:
-    a: yardl.Int32 = 0
-    b: FixedImg = dataclasses.field(default_factory=lambda: np.zeros((0,0), dtype=np.dtype(np.float32)))
-
-@dataclasses.dataclass(slots=True, kw_only=True)
-class Person:
-    numbers: npt.NDArray[np.void] = dataclasses.field(default_factory=lambda: np.zeros((2, 2,), dtype=get_dtype(types.GenericAlias(PT, (yardl.Int32,)))))
-    d: yardl.DateTime = dataclasses.field(default_factory=lambda: datetime.datetime(1970, 1, 1, 0, 0, 0))
+class WithUnion(typing.Generic[T, U]):
+    f: T | U
 
 def _mk_get_dtype():
     dtype_map: dict[type | types.GenericAlias, np.dtype[typing.Any] | typing.Callable[[tuple[type, ...]], np.dtype[typing.Any]]] = {}
     get_dtype = _dtypes.make_get_dtype_func(dtype_map)
 
-    dtype_map[PT] = lambda type_args: np.dtype([('x', get_dtype(type_args[0])), ('y', get_dtype(type_args[0]))], align=True)
-    dtype_map[PFloat] = np.dtype([('x', np.dtype(np.float32)), ('y', np.dtype(np.float32))], align=True)
-    dtype_map[PInt] = np.dtype([('x', np.dtype(np.int32)), ('y', np.dtype(np.int32))], align=True)
-    dtype_map[F] = np.dtype(np.int32)
-    dtype_map[NT] = get_dtype(F)
-    dtype_map[Rec] = np.dtype([('d', np.dtype(np.object_)), ('f', get_dtype(NT)), ('g', np.dtype([('has_value', np.dtype(np.bool_)), ('value', get_dtype(PInt))], align=True)), ('v', np.dtype(np.object_)), ('pf', np.dtype(np.int32), (3,)), ('pt', get_dtype(types.GenericAlias(PT, (yardl.Int32,))), (3,))], align=True)
-    dtype_map[GenRec] = lambda type_args: np.dtype([('t', get_dtype(type_args[0]))], align=True)
-    dtype_map[DualGenRec] = lambda type_args: np.dtype([('s', get_dtype(type_args[0])), ('arr', np.dtype(np.object_))], align=True)
-    dtype_map[X] = np.dtype(np.int32)
-    dtype_map[A] = np.dtype([('pi', np.dtype(np.int32))], align=True)
-    dtype_map[Line] = lambda type_args: np.dtype([('start', get_dtype(types.GenericAlias(PT, (type_args[0],)))), ('end', get_dtype(types.GenericAlias(PT, (type_args[0],))))], align=True)
-    dtype_map[LineInt] = np.dtype([('start', get_dtype(PInt)), ('end', get_dtype(PInt))], align=True)
-    dtype_map[FixedImg] = np.dtype(np.object_)
-    dtype_map[Foo] = np.dtype([('a', np.dtype(np.int32)), ('b', get_dtype(FixedImg))], align=True)
-    dtype_map[Person] = np.dtype([('numbers', get_dtype(types.GenericAlias(PT, (yardl.Int32,))), (2, 2,)), ('d', np.dtype(np.datetime64))], align=True)
+    dtype_map[PT] = lambda type_args: np.dtype([('x', get_dtype(type_args[0])), ('y', get_dtype(type_args[0])), ('z', np.dtype(np.int32))], align=True)
+    dtype_map[WithUnion] = lambda type_args: np.dtype([('f', np.dtype(np.object_))], align=True)
 
     return get_dtype
 

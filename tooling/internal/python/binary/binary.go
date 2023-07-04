@@ -140,11 +140,16 @@ func writeRecordSerializers(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 							w.WriteStringln("return True")
 						}
 
+						fieldChecks := make([]string, 0)
+						for i, field := range td.Fields {
+							if dsl.ContainsGenericTypeParameter(field.Type) {
+								fieldChecks = append(fieldChecks, fmt.Sprintf("self._field_serializers[%d][1].is_value_supported(value.%s)\n", i, common.FieldIdentifierName(field.Name)))
+							}
+						}
+
 						w.WriteStringln("return (")
 						w.Indented(func() {
-							formatting.Delimited(w, "and ", td.Fields, func(w *formatting.IndentedWriter, i int, item *dsl.Field) {
-								fmt.Fprintf(w, "self._field_serializers[%d][1].is_value_supported(value.%s)\n", i, common.FieldIdentifierName(item.Name))
-							})
+							w.WriteString(strings.Join(fieldChecks, "and "))
 						})
 						w.WriteStringln(")")
 					}

@@ -27,145 +27,231 @@ T0_NP = typing.TypeVar('T0_NP', bound=np.generic)
 @dataclasses.dataclass(slots=True, kw_only=True)
 class SmallBenchmarkRecord:
     a: yardl.Float64 = 0.0
+
     b: yardl.Float32 = 0.0
+
     c: yardl.Float32 = 0.0
+
 
 @dataclasses.dataclass(slots=True, kw_only=True)
 class SimpleEncodingCounters:
     e1: yardl.UInt32 | None = None
+
     e2: yardl.UInt32 | None = None
+
     slice: yardl.UInt32 | None = None
+
     repetition: yardl.UInt32 | None = None
+
 
 @dataclasses.dataclass(slots=True, kw_only=True)
 class SimpleAcquisition:
     flags: yardl.UInt64 = 0
+
     idx: SimpleEncodingCounters = dataclasses.field(default_factory=SimpleEncodingCounters)
+
     data: npt.NDArray[np.complex64] = dataclasses.field(default_factory=lambda: np.zeros((0,0), dtype=np.dtype(np.complex64)))
+
     trajectory: npt.NDArray[np.float32] = dataclasses.field(default_factory=lambda: np.zeros((0,0), dtype=np.dtype(np.float32)))
+
 
 @dataclasses.dataclass(slots=True, kw_only=True)
 class SimpleRecord:
     x: yardl.Int32 = 0
+
     y: yardl.Int32 = 0
+
     z: yardl.Int32 = 0
+
 
 @dataclasses.dataclass(slots=True, kw_only=True)
 class RecordWithPrimitives:
     bool_field: yardl.Bool = False
+
     int_8_field: yardl.Int8 = 0
+
     uint_8_field: yardl.UInt8 = 0
+
     int_16_field: yardl.Int16 = 0
+
     uint_16_field: yardl.UInt16 = 0
+
     int_32_field: yardl.Int32 = 0
+
     uint_32_field: yardl.UInt32 = 0
+
     int_64_field: yardl.Int64 = 0
+
     uint_64_field: yardl.UInt64 = 0
+
     size_field: yardl.Size = 0
+
     float_32_field: yardl.Float32 = 0.0
+
     float_64_field: yardl.Float64 = 0.0
+
     complexfloat_32_field: yardl.ComplexFloat = 0j
+
     complexfloat_64_field: yardl.ComplexDouble = 0j
+
     date_field: yardl.Date = dataclasses.field(default_factory=lambda: datetime.date(1970, 1, 1))
+
     time_field: yardl.Time = dataclasses.field(default_factory=lambda: datetime.time(0, 0, 0))
+
     datetime_field: yardl.DateTime = dataclasses.field(default_factory=lambda: datetime.datetime(1970, 1, 1, 0, 0, 0))
+
 
 @dataclasses.dataclass(slots=True, kw_only=True)
 class RecordWithPrimitiveAliases:
     byte_field: yardl.UInt8 = 0
+
     int_field: yardl.Int32 = 0
+
     uint_field: yardl.UInt32 = 0
+
     long_field: yardl.Int64 = 0
+
     ulong_field: yardl.UInt64 = 0
+
     float_field: yardl.Float32 = 0.0
+
     double_field: yardl.Float64 = 0.0
+
     complexfloat_field: yardl.ComplexFloat = 0j
+
     complexdouble_field: yardl.ComplexDouble = 0j
+
 
 @dataclasses.dataclass(slots=True, kw_only=True)
 class TupleWithRecords:
     a: SimpleRecord = dataclasses.field(default_factory=SimpleRecord)
+
     b: SimpleRecord = dataclasses.field(default_factory=SimpleRecord)
+
 
 @dataclasses.dataclass(slots=True, kw_only=True)
 class RecordWithVectors:
     default_vector: list[yardl.Int32] = dataclasses.field(default_factory=list)
+
     default_vector_fixed_length: list[yardl.Int32] = dataclasses.field(default_factory=lambda: [0] * 3)
+
     vector_of_vectors: list[list[yardl.Int32]] = dataclasses.field(default_factory=list)
+
 
 @dataclasses.dataclass(slots=True, kw_only=True)
 class RecordWithArrays:
     default_array: npt.NDArray[np.int32] = dataclasses.field(default_factory=lambda: np.zeros((), dtype=np.dtype(np.int32)))
+
     default_array_with_empty_dimension: npt.NDArray[np.int32] = dataclasses.field(default_factory=lambda: np.zeros((), dtype=np.dtype(np.int32)))
+
     rank_1_array: npt.NDArray[np.int32] = dataclasses.field(default_factory=lambda: np.zeros((0), dtype=np.dtype(np.int32)))
+
     rank_2_array: npt.NDArray[np.int32] = dataclasses.field(default_factory=lambda: np.zeros((0,0), dtype=np.dtype(np.int32)))
+
     rank_2_array_with_named_dimensions: npt.NDArray[np.int32] = dataclasses.field(default_factory=lambda: np.zeros((0,0), dtype=np.dtype(np.int32)))
+
     rank_2_fixed_array: npt.NDArray[np.int32] = dataclasses.field(default_factory=lambda: np.zeros((3, 4,), dtype=np.dtype(np.int32)))
+
     rank_2_fixed_array_with_named_dimensions: npt.NDArray[np.int32] = dataclasses.field(default_factory=lambda: np.zeros((3, 4,), dtype=np.dtype(np.int32)))
+
     dynamic_array: npt.NDArray[np.int32] = dataclasses.field(default_factory=lambda: np.zeros((), dtype=np.dtype(np.int32)))
+
     array_of_vectors: npt.NDArray[np.int32] = dataclasses.field(default_factory=lambda: np.zeros((5,), dtype=np.dtype(np.object_)))
+
 
 @dataclasses.dataclass(slots=True, kw_only=True)
 class RecordWithArraysSimpleSyntax:
     default_array: npt.NDArray[np.int32] = dataclasses.field(default_factory=lambda: np.zeros((), dtype=np.dtype(np.int32)))
+
     default_array_with_empty_dimension: npt.NDArray[np.int32] = dataclasses.field(default_factory=lambda: np.zeros((), dtype=np.dtype(np.int32)))
+
     rank_1_array: npt.NDArray[np.int32] = dataclasses.field(default_factory=lambda: np.zeros((0), dtype=np.dtype(np.int32)))
+
     rank_2_array: npt.NDArray[np.int32] = dataclasses.field(default_factory=lambda: np.zeros((0,0), dtype=np.dtype(np.int32)))
+
     rank_2_array_with_named_dimensions: npt.NDArray[np.int32] = dataclasses.field(default_factory=lambda: np.zeros((0,0), dtype=np.dtype(np.int32)))
+
     rank_2_fixed_array: npt.NDArray[np.int32] = dataclasses.field(default_factory=lambda: np.zeros((3, 4,), dtype=np.dtype(np.int32)))
+
     rank_2_fixed_array_with_named_dimensions: npt.NDArray[np.int32] = dataclasses.field(default_factory=lambda: np.zeros((3, 4,), dtype=np.dtype(np.int32)))
+
     dynamic_array: npt.NDArray[np.int32] = dataclasses.field(default_factory=lambda: np.zeros((), dtype=np.dtype(np.int32)))
+
     array_of_vectors: npt.NDArray[np.int32] = dataclasses.field(default_factory=lambda: np.zeros((5,), dtype=np.dtype(np.object_)))
+
 
 @dataclasses.dataclass(slots=True, kw_only=True)
 class RecordWithOptionalFields:
     optional_int: yardl.Int32 | None = None
+
     optional_int_alternate_syntax: yardl.Int32 | None = None
+
 
 @dataclasses.dataclass(slots=True, kw_only=True)
 class RecordWithVlens:
     a: list[SimpleRecord] = dataclasses.field(default_factory=list)
+
     b: yardl.Int32 = 0
+
     c: yardl.Int32 = 0
+
 
 @dataclasses.dataclass(slots=True, kw_only=True)
 class RecordWithStrings:
     a: str = ""
+
     b: str = ""
+
 
 @dataclasses.dataclass(slots=True, kw_only=True)
 class RecordWithOptionalVector:
     optional_vector: list[yardl.Int32] | None = None
 
+
 @dataclasses.dataclass(slots=True, kw_only=True)
 class RecordWithFixedVectors:
     fixed_int_vector: list[yardl.Int32] = dataclasses.field(default_factory=lambda: [0] * 5)
+
     fixed_simple_record_vector: list[SimpleRecord] = dataclasses.field(default_factory=lambda: [SimpleRecord() for _ in range(3)])
+
     fixed_record_with_vlens_vector: list[RecordWithVlens] = dataclasses.field(default_factory=lambda: [RecordWithVlens() for _ in range(2)])
+
 
 @dataclasses.dataclass(slots=True, kw_only=True)
 class RecordWithFixedArrays:
     ints: npt.NDArray[np.int32] = dataclasses.field(default_factory=lambda: np.zeros((2, 3,), dtype=np.dtype(np.int32)))
+
     fixed_simple_record_array: npt.NDArray[np.void] = dataclasses.field(default_factory=lambda: np.zeros((3, 2,), dtype=get_dtype(SimpleRecord)))
+
     fixed_record_with_vlens_array: npt.NDArray[np.void] = dataclasses.field(default_factory=lambda: np.zeros((2, 2,), dtype=get_dtype(RecordWithVlens)))
+
 
 @dataclasses.dataclass(slots=True, kw_only=True)
 class RecordWithNDArrays:
     ints: npt.NDArray[np.int32] = dataclasses.field(default_factory=lambda: np.zeros((0,0), dtype=np.dtype(np.int32)))
+
     fixed_simple_record_array: npt.NDArray[np.void] = dataclasses.field(default_factory=lambda: np.zeros((0,0), dtype=get_dtype(SimpleRecord)))
+
     fixed_record_with_vlens_array: npt.NDArray[np.void] = dataclasses.field(default_factory=lambda: np.zeros((0,0), dtype=get_dtype(RecordWithVlens)))
+
 
 @dataclasses.dataclass(slots=True, kw_only=True)
 class RecordWithNDArraysSingleDimension:
     ints: npt.NDArray[np.int32] = dataclasses.field(default_factory=lambda: np.zeros((0), dtype=np.dtype(np.int32)))
+
     fixed_simple_record_array: npt.NDArray[np.void] = dataclasses.field(default_factory=lambda: np.zeros((0), dtype=get_dtype(SimpleRecord)))
+
     fixed_record_with_vlens_array: npt.NDArray[np.void] = dataclasses.field(default_factory=lambda: np.zeros((0), dtype=get_dtype(RecordWithVlens)))
+
 
 @dataclasses.dataclass(slots=True, kw_only=True)
 class RecordWithDynamicNDArrays:
     ints: npt.NDArray[np.int32] = dataclasses.field(default_factory=lambda: np.zeros((), dtype=np.dtype(np.int32)))
+
     fixed_simple_record_array: npt.NDArray[np.void] = dataclasses.field(default_factory=lambda: np.zeros((), dtype=get_dtype(SimpleRecord)))
+
     fixed_record_with_vlens_array: npt.NDArray[np.void] = dataclasses.field(default_factory=lambda: np.zeros((), dtype=get_dtype(RecordWithVlens)))
+
 
 NamedFixedNDArray = npt.NDArray[np.int32]
 
@@ -176,6 +262,7 @@ AliasedMap = dict[K, V]
 @dataclasses.dataclass(slots=True, kw_only=True)
 class RecordWithUnions:
     null_or_int_or_string: yardl.Int32 | str | None = None
+
 
 class Fruits(enum.Enum):
     APPLE = 0
@@ -248,24 +335,206 @@ AliasedNullableIntSimpleRecord = yardl.Int32 | SimpleRecord | None
 @dataclasses.dataclass(slots=True, kw_only=True)
 class GenericRecordWithComputedFields(typing.Generic[T0, T1]):
     f1: T0 | T1
+    def type_index(self) -> yardl.UInt8:
+        return 
+
 
 @dataclasses.dataclass(slots=True, kw_only=True)
 class RecordWithComputedFields:
     array_field: npt.NDArray[np.int32] = dataclasses.field(default_factory=lambda: np.zeros((0,0), dtype=np.dtype(np.int32)))
+
     array_field_map_dimensions: npt.NDArray[np.int32] = dataclasses.field(default_factory=lambda: np.zeros((0,0), dtype=np.dtype(np.int32)))
+
     dynamic_array_field: npt.NDArray[np.int32] = dataclasses.field(default_factory=lambda: np.zeros((), dtype=np.dtype(np.int32)))
+
     fixed_array_field: npt.NDArray[np.int32] = dataclasses.field(default_factory=lambda: np.zeros((3, 4,), dtype=np.dtype(np.int32)))
+
     int_field: yardl.Int32 = 0
+
     string_field: str = ""
+
     tuple_field: MyTuple[yardl.Int32, yardl.Int32] = dataclasses.field(default_factory=lambda: MyTuple(v1=0, v2=0))
+
     vector_field: list[yardl.Int32] = dataclasses.field(default_factory=list)
+
     vector_of_vectors_field: list[list[yardl.Int32]] = dataclasses.field(default_factory=list)
+
     fixed_vector_field: list[yardl.Int32] = dataclasses.field(default_factory=lambda: [0] * 3)
+
     optional_named_array: NamedNDArray | None = None
+
     int_float_union: yardl.Int32 | yardl.Float32 = 0
+
     nullable_int_float_union: yardl.Int32 | yardl.Float32 | None = None
+
     union_with_nested_generic_union: yardl.Int32 | GenericRecordWithComputedFields[str, yardl.Float32] = 0
+
     map_field: dict[str, str] = dataclasses.field(default_factory=dict)
+
+    def int_literal(self) -> yardl.UInt8:
+        return 42
+
+    def large_negative_int_64_literal(self) -> yardl.Int64:
+        return -4611686018427387904
+
+    def large_u_int_64_literal(self) -> yardl.UInt64:
+        return 9223372036854775808
+
+    def string_literal(self) -> str:
+        return "hello"
+
+    def string_literal_2(self) -> str:
+        return "hello"
+
+    def string_literal_3(self) -> str:
+        return "hello"
+
+    def string_literal_4(self) -> str:
+        return "hello"
+
+    def access_other_computed_field(self) -> yardl.Int32:
+        return self.int_field
+
+    def access_int_field(self) -> yardl.Int32:
+        return self.int_field
+
+    def access_string_field(self) -> str:
+        return self.string_field
+
+    def access_tuple_field(self) -> MyTuple[yardl.Int32, yardl.Int32]:
+        return self.tuple_field
+
+    def access_nested_tuple_field(self) -> yardl.Int32:
+        return self.tuple_field.v2
+
+    def access_array_field(self) -> npt.NDArray[np.int32]:
+        return self.array_field
+
+    def access_array_field_element(self) -> yardl.Int32:
+        return typing.cast(yardl.Int32, self.array_field[0, 1])
+
+    def access_array_field_element_by_name(self) -> yardl.Int32:
+        return typing.cast(yardl.Int32, self.array_field[0, 1])
+
+    def access_vector_field(self) -> list[yardl.Int32]:
+        return self.vector_field
+
+    def access_vector_field_element(self) -> yardl.Int32:
+        return self.vector_field[1]
+
+    def access_vector_of_vectors_field(self) -> yardl.Int32:
+        return self.vector_of_vectors_field[1][2]
+
+    def array_size(self) -> yardl.Size:
+        return self.array_field.size
+
+    def array_x_size(self) -> yardl.Size:
+        return self.array_field.shape[0]
+
+    def array_y_size(self) -> yardl.Size:
+        return self.array_field.shape[1]
+
+    def array_0_size(self) -> yardl.Size:
+        return self.array_field.shape[0]
+
+    def array_1_size(self) -> yardl.Size:
+        return self.array_field.shape[1]
+
+    def array_size_from_int_field(self) -> yardl.Size:
+        return self.array_field.shape[self.int_field]
+
+    def array_size_from_string_field(self) -> yardl.Size:
+        def _helper_0(dim_name: str) -> int:
+            if dim_name == "x":
+                return 0
+            if dim_name == "y":
+                return 1
+            raise KeyError(f"Unknown dimension name: '{dim_name}'")
+
+        return self.array_field.shape[_helper_0(self.string_field)]
+
+    def array_size_from_nested_int_field(self) -> yardl.Size:
+        return self.array_field.shape[self.tuple_field.v1]
+
+    def array_field_map_dimensions_x_size(self) -> yardl.Size:
+        return self.array_field_map_dimensions.shape[0]
+
+    def fixed_array_size(self) -> yardl.Size:
+        return 12
+
+    def fixed_array_x_size(self) -> yardl.Size:
+        return 3
+
+    def fixed_array_0_size(self) -> yardl.Size:
+        return 3
+
+    def vector_size(self) -> yardl.Size:
+        return len(self.vector_field)
+
+    def fixed_vector_size(self) -> yardl.Size:
+        return 3
+
+    def array_dimension_x_index(self) -> yardl.Size:
+        return 0
+
+    def array_dimension_y_index(self) -> yardl.Size:
+        return 1
+
+    def array_dimension_index_from_string_field(self) -> yardl.Size:
+        def _helper_0(dim_name: str) -> int:
+            if dim_name == "x":
+                return 0
+            if dim_name == "y":
+                return 1
+            raise KeyError(f"Unknown dimension name: '{dim_name}'")
+
+        return _helper_0(self.string_field)
+
+    def array_dimension_count(self) -> yardl.Size:
+        return 2
+
+    def dynamic_array_dimension_count(self) -> yardl.Size:
+        return self.dynamic_array_field.ndim
+
+    def access_map(self) -> dict[str, str]:
+        return self.map_field
+
+    def map_size(self) -> yardl.Size:
+        return len(self.map_field)
+
+    def access_map_entry(self) -> str:
+        return self.map_field["hello"]
+
+    def string_computed_field(self) -> str:
+        return "hello"
+
+    def access_map_entry_with_computed_field(self) -> str:
+        return self.map_field[self.string_computed_field()]
+
+    def access_map_entry_with_computed_field_nested(self) -> str:
+        return self.map_field[self.map_field[self.string_computed_field()]]
+
+    def access_missing_map_entry(self) -> str:
+        return self.map_field["missing"]
+
+    def optional_named_array_length(self) -> yardl.Size:
+        return 
+
+    def optional_named_array_length_with_discard(self) -> yardl.Size:
+        return 
+
+    def int_float_union_as_float(self) -> yardl.Float32:
+        return 
+
+    def nullable_int_float_union_string(self) -> str:
+        return 
+
+    def nested_switch(self) -> yardl.Int16:
+        return 
+
+    def use_nested_computed_field(self) -> yardl.Int16:
+        return 
+
 
 ArrayWithKeywordDimensionNames = npt.NDArray[np.int32]
 
@@ -276,8 +545,20 @@ class EnumWithKeywordSymbols(enum.Enum):
 @dataclasses.dataclass(slots=True, kw_only=True)
 class RecordWithKeywordFields:
     int_: str = ""
+
     sizeof: ArrayWithKeywordDimensionNames = dataclasses.field(default_factory=lambda: np.zeros((0,0), dtype=np.dtype(np.int32)))
+
     if_: EnumWithKeywordSymbols
+
+    def float_(self) -> str:
+        return self.int_
+
+    def double(self) -> str:
+        return self.float_()
+
+    def return_(self) -> yardl.Int32:
+        return self.sizeof[1, 2]
+
 
 def _mk_get_dtype():
     dtype_map: dict[type | types.GenericAlias, np.dtype[typing.Any] | typing.Callable[[tuple[type, ...]], np.dtype[typing.Any]]] = {}

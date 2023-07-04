@@ -646,3 +646,21 @@ func GetCommonType(a, b Type) (Type, error) {
 
 	return nil, ErrNoCommonType
 }
+
+func ContainsGenericTypeParameter(node Node) bool {
+	contains := false
+	Visit(node, func(self Visitor, node Node) {
+		switch node := node.(type) {
+		case *GenericTypeParameter:
+			contains = true
+			return
+		case *SimpleType:
+			self.VisitChildren(node)
+			self.Visit(node.ResolvedDefinition)
+		}
+
+		self.VisitChildren(node)
+	})
+
+	return contains
+}

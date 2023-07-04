@@ -68,7 +68,7 @@ func writeRecord(w *formatting.IndentedWriter, rec *dsl.RecordDefinition, st dsl
 		for _, field := range rec.Fields {
 			fmt.Fprintf(w, "%s: %s", common.FieldIdentifierName(field.Name), common.TypeSyntax(field.Type, rec.Namespace))
 
-			if containsGenericTypeParameter(field.Type) {
+			if dsl.ContainsGenericTypeParameter(field.Type) {
 				// cannot default generic type parameters
 				// because they don't really exist at runtime
 				w.WriteStringln("")
@@ -87,13 +87,137 @@ func writeRecord(w *formatting.IndentedWriter, rec *dsl.RecordDefinition, st dsl
 			}
 
 			common.WriteDocstring(w, field.Comment)
+			w.WriteStringln("")
 		}
 
-		if len(rec.Fields) == 0 {
+		for _, computedField := range rec.ComputedFields {
+			expressionTypeSyntax := common.TypeSyntax(computedField.Expression.GetResolvedType(), rec.Namespace)
+			fieldName := common.ComputedFieldIdentifierName(computedField.Name)
+			fmt.Fprintf(w, "def %s(self) -> %s:\n", fieldName, expressionTypeSyntax)
+			w.Indented(func() {
+				common.WriteDocstring(w, computedField.Comment)
+				writeComputedFieldExpression(w, computedField.Expression, rec.Namespace)
+				w.WriteStringln("\n")
+			})
+		}
+
+		if len(rec.Fields)+len(rec.ComputedFields) == 0 {
 			w.WriteStringln("pass")
 		}
 	})
 	w.WriteStringln("")
+}
+
+func writeComputedFieldExpression(w *formatting.IndentedWriter, expression dsl.Expression, contextNamespace string) {
+
+	helperFunctionLookup := make(map[any]string)
+
+	dsl.Visit(expression, func(self dsl.Visitor, node dsl.Node) {
+		switch t := node.(type) {
+		case *dsl.FunctionCallExpression:
+			if t.FunctionName == dsl.FunctionDimensionIndex {
+				arrType := (t.Arguments[0].GetResolvedType())
+				if _, ok := helperFunctionLookup[arrType]; !ok {
+					funcName := fmt.Sprintf("_helper_%d", len(helperFunctionLookup))
+					helperFunctionLookup[arrType] = funcName
+					fmt.Fprintf(w, "def %s(dim_name: str) -> int:\n", funcName)
+					w.Indented(func() {
+						dims := dsl.ToGeneralizedType(arrType).Dimensionality.(*dsl.Array).Dimensions
+						for i, d := range *dims {
+							fmt.Fprintf(w, "if dim_name == \"%s\":\n", *d.Name)
+							w.Indented(func() {
+								fmt.Fprintf(w, "return %d\n", i)
+							})
+						}
+						fmt.Fprintf(w, "raise KeyError(f\"Unknown dimension name: '{dim_name}'\")\n")
+						w.WriteStringln("")
+					})
+				}
+			}
+		}
+		self.VisitChildren(node)
+	})
+
+	w.WriteString("return ")
+	dsl.Visit(expression, func(self dsl.Visitor, node dsl.Node) {
+		switch t := node.(type) {
+		case *dsl.IntegerLiteralExpression:
+			fmt.Fprintf(w, "%d", &t.Value)
+		case *dsl.StringLiteralExpression:
+			fmt.Fprintf(w, "%q", t.Value)
+		case *dsl.MemberAccessExpression:
+			if t.Target == nil {
+				w.WriteString("self")
+			} else {
+				self.Visit(t.Target)
+			}
+			w.WriteString(".")
+			if t.IsComputedField {
+				fmt.Fprintf(w, "%s()", common.ComputedFieldIdentifierName(t.Member))
+			} else {
+				w.WriteString(common.FieldIdentifierName(t.Member))
+			}
+		case *dsl.IndexExpression:
+			isTargetArray := false
+			if t.Target != nil {
+				if gt, ok := t.Target.GetResolvedType().(*dsl.GeneralizedType); ok {
+					if _, ok := gt.Dimensionality.(*dsl.Array); ok {
+						isTargetArray = true
+					}
+				}
+			}
+			if isTargetArray {
+				// a cast is needed for numpy subscripting
+				fmt.Fprintf(w, "typing.cast(%s, ", common.TypeSyntax(t.GetResolvedType(), contextNamespace))
+			}
+
+			self.Visit(t.Target)
+			w.WriteString("[")
+			formatting.Delimited(w, ", ", t.Arguments, func(w *formatting.IndentedWriter, i int, a *dsl.IndexArgument) {
+				self.Visit(a.Value)
+			})
+			w.WriteString("]")
+
+			if isTargetArray {
+				w.WriteString(")")
+			}
+		case *dsl.FunctionCallExpression:
+			switch t.FunctionName {
+			case dsl.FunctionSize:
+				switch dsl.ToGeneralizedType(dsl.GetUnderlyingType(t.Arguments[0].GetResolvedType())).Dimensionality.(type) {
+				case *dsl.Vector, *dsl.Map:
+					fmt.Fprintf(w, "len(")
+					self.Visit(t.Arguments[0])
+					fmt.Fprintf(w, ")")
+				case *dsl.Array:
+					self.Visit(t.Arguments[0])
+
+					if len(t.Arguments) == 1 {
+						fmt.Fprintf(w, ".size")
+					} else {
+						fmt.Fprintf(w, ".shape[")
+						remainingArgs := t.Arguments[1:]
+						formatting.Delimited(w, ", ", remainingArgs, func(w *formatting.IndentedWriter, i int, arg dsl.Expression) {
+							self.Visit(arg)
+						})
+						fmt.Fprintf(w, "]")
+					}
+				}
+			case dsl.FunctionDimensionIndex:
+				helperFuncName := helperFunctionLookup[t.Arguments[0].GetResolvedType()]
+				fmt.Fprintf(w, "%s(", helperFuncName)
+				self.Visit(t.Arguments[1])
+				w.WriteString(")")
+
+			case dsl.FunctionDimensionCount:
+				self.Visit(t.Arguments[0])
+				fmt.Fprintf(w, ".ndim")
+			default:
+				panic(fmt.Sprintf("Unknown function '%s'", t.FunctionName))
+			}
+		}
+
+	})
 }
 
 func GetGenericBase(t dsl.TypeDefinition) string {
@@ -457,22 +581,4 @@ func getTypeSyntaxWithGenricArgsReadFromTupleArgs(t dsl.Type, context dTypeExpre
 	}
 
 	return f.ToSyntax(t, context.namespace)
-}
-
-func containsGenericTypeParameter(node dsl.Node) bool {
-	contains := false
-	dsl.Visit(node, func(self dsl.Visitor, node dsl.Node) {
-		switch node := node.(type) {
-		case *dsl.GenericTypeParameter:
-			contains = true
-			return
-		case *dsl.SimpleType:
-			self.VisitChildren(node)
-			self.Visit(node.ResolvedDefinition)
-		}
-
-		self.VisitChildren(node)
-	})
-
-	return contains
 }

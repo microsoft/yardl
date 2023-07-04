@@ -1,75 +1,13 @@
 P: !protocol
   sequence:
-    a: Line<int>
+    value: WithUnion<int, float>
 
 PT<T>: !record
   fields:
     x: T
     y: T
+    z: int
 
-PFloat: !record
+WithUnion<T, U>: !record
   fields:
-    x: float
-    y: float
-
-PInt: !record
-  fields:
-    x: int
-    y: int
-
-F: !enum
-  values:
-    none: 0
-    a:
-    b:
-
-Rec: !record
-  fields:
-    d: string->int
-    f: NT
-    g: [null, PInt]
-    v: int*
-    pf: int*3
-    pt: PT<int>*3
-
-NT: F
-
-GenRec<T>: !record
-  fields:
-    t: T
-
-
-DualGenRec<T>: !record
-  fields:
-    s: T
-    arr: T[]
-
-
-X: int[2,2]
-
-A: !record
-  fields:
-    pi: int
-
-Line<T>: !record
-  fields:
-    start: PT<T>
-    end: PT<T>
-
-LineInt: !record
-  fields:
-    start: PInt
-    end: PInt
-
-FixedImg: float[x,y]
-
-Foo: !record
-  fields:
-    a: int
-    b: FixedImg
-
-
-Person: !record
-  fields:
-    numbers: PT<int>[2,2]
-    d: datetime
+    f: [T, U]
