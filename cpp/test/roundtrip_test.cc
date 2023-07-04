@@ -55,7 +55,8 @@ TEST_P(RoundTripTests, Scalars) {
   rec.complexfloat_64_field = {-2.4, 999.3};
   rec.date_field = Date(year{2022} / 9 / 8);
   rec.time_field = std::chrono::hours(10) + std::chrono::minutes(50) +
-                   std::chrono::seconds(25) + std::chrono::milliseconds(777);
+                   std::chrono::seconds(25) + std::chrono::milliseconds(777) +
+                   std::chrono::microseconds(888) + std::chrono::nanoseconds(999);
   rec.datetime_field = std::chrono::system_clock::now();
   tw->WriteRecord(rec);
 
