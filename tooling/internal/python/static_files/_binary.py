@@ -1,6 +1,6 @@
 import datetime
 from enum import Enum
-from io import BufferedReader
+from io import BufferedIOBase, BufferedReader, BytesIO
 from types import TracebackType
 from typing import BinaryIO, Iterable, TypeVar, Generic, Any, Optional, Tuple, cast
 from abc import ABC, abstractmethod
@@ -140,13 +140,13 @@ class CodedOutputStream:
 
 class CodedInputStream:
     def __init__(
-        self, stream: BufferedReader | str, *, buffer_size: int = 65536
+        self, stream: BufferedReader | BytesIO | str, *, buffer_size: int = 65536
     ) -> None:
         if isinstance(stream, str):
             self._stream = open(stream, "rb")
             self._owns_stream = True
         else:
-            if not isinstance(stream, BufferedReader):
+            if not isinstance(stream, BufferedIOBase):
                 self._stream = BufferedReader(stream)
             else:
                 self._stream = stream
@@ -921,7 +921,8 @@ class EnumSerializer(Generic[TEnum, T, T_NP], TypeSerializer[TEnum, T_NP]):
         return self._integer_serializer.write_numpy(stream, value)
 
     def read(self, stream: CodedInputStream, read_as_numpy: Types) -> TEnum:
-        return self._enum_type(self._integer_serializer.read(stream, read_as_numpy))
+        int_value = self._integer_serializer.read(stream, Types.NONE)
+        return self._enum_type(int_value)
 
     def read_numpy(self, stream: CodedInputStream) -> T_NP:
         return self._integer_serializer.read_numpy(stream)
@@ -1034,8 +1035,9 @@ class StreamSerializer(TypeSerializer[Iterable[T], Any]):
         raise NotImplementedError()
 
     def read(self, stream: CodedInputStream, read_as_numpy: Types) -> Iterable[T]:
-        while stream.read_byte():
-            yield self.element_serializer.read(stream, read_as_numpy)
+        while (i := stream.read_unsigned_varint()) > 0:
+            for _ in range(i):
+                yield self.element_serializer.read(stream, read_as_numpy)
 
     def read_numpy(self, stream: CodedInputStream) -> np.object_:
         raise NotImplementedError()
@@ -1270,7 +1272,7 @@ class DynamicNDArraySerializer(NDArraySerializerBase[T, T_NP]):
         return self._read_data(stream, shape, read_as_numpy)
 
     def read_numpy(self, stream: CodedInputStream) -> np.object_:
-        return np.object_(self.read(stream, Types.ALL))
+        return cast(np.object_, self.read(stream, Types.ALL))
 
     def is_value_supported(self, value: Any) -> bool:
         return isinstance(value, np.ndarray) and cast(npt.NDArray[Any], value).dtype == self._array_dtype
@@ -1304,7 +1306,7 @@ class NDArraySerializer(Generic[T, T_NP], NDArraySerializerBase[T, T_NP]):
         return self._read_data(stream, shape, read_as_numpy)
 
     def read_numpy(self, stream: CodedInputStream) -> np.object_:
-        return np.object_(self.read(stream, Types.ALL))
+        return cast(np.object_, self.read(stream, Types.ALL))
 
     def is_value_supported(self, value: Any) -> bool:
         if not isinstance(value, np.ndarray):
@@ -1336,7 +1338,7 @@ class FixedNDArraySerializer(Generic[T, T_NP], NDArraySerializerBase[T, T_NP]):
         return self._read_data(stream, self.shape, read_as_numpy)
 
     def read_numpy(self, stream: CodedInputStream) -> np.object_:
-        return np.object_(self.read(stream, Types.ALL))
+        return cast(np.object_, self.read(stream, Types.ALL))
 
     def is_trivially_serializable(self) -> bool:
         return self._element_serializer.is_trivially_serializable()

@@ -121,13 +121,13 @@ func GetGenericBase(t dsl.TypeDefinition) string {
 }
 
 func writeEnum(w *formatting.IndentedWriter, enum *dsl.EnumDefinition) {
-	var baseType string
+	var base string
 	if enum.IsFlags {
-		baseType = "enum.Flag"
+		base = "enum.Flag, boundary=enum.KEEP"
 	} else {
-		baseType = "enum.Enum"
+		base = "enum.Enum"
 	}
-	fmt.Fprintf(w, "class %s(%s):\n", common.TypeSyntaxWithoutTypeParameters(enum, enum.Namespace), baseType)
+	fmt.Fprintf(w, "class %s(%s):\n", common.TypeSyntaxWithoutTypeParameters(enum, enum.Namespace), base)
 
 	w.Indented(func() {
 		common.WriteDocstring(w, enum.Comment)

@@ -193,7 +193,7 @@ class SizeBasedEnum(enum.Enum):
     B = 1
     C = 2
 
-class DaysOfWeek(enum.Flag):
+class DaysOfWeek(enum.Flag, boundary=enum.KEEP):
     MONDAY = 1
     TUESDAY = 2
     WEDNESDAY = 4
@@ -202,7 +202,7 @@ class DaysOfWeek(enum.Flag):
     SATURDAY = 32
     SUNDAY = 64
 
-class TextFormat(enum.Flag):
+class TextFormat(enum.Flag, boundary=enum.KEEP):
     REGULAR = 0
     BOLD = 1
     ITALIC = 2

@@ -51,7 +51,7 @@ func writeAbstractWriter(w *formatting.IndentedWriter, p *dsl.ProtocolDefinition
 		w.WriteStringln("")
 
 		// schema field
-		fmt.Fprintf(w, `schema = """%s"""`, dsl.GetProtocolSchemaString(p, st))
+		fmt.Fprintf(w, `schema = r"""%s"""`, dsl.GetProtocolSchemaString(p, st))
 		w.WriteStringln("\n")
 
 		// dunder methods
