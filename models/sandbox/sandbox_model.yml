@@ -1,6 +1,6 @@
 P: !protocol
   sequence:
-    value: WithUnion<int, float>
+    value: WithUnion
 
 PT<T>: !record
   fields:
@@ -8,6 +8,23 @@ PT<T>: !record
     y: T
     z: int
 
-WithUnion<T, U>: !record
+# WithGenericUnion<T, U>: !record
+#   fields:
+#     f: [PT<T>, PT<U>]
+
+MyString: string
+
+PInt: !record
   fields:
-    f: [T, U]
+    x: int
+    y: int
+
+WithUnion: !record
+  fields:
+    f:
+      - null
+      - int
+      - float
+      - MyString
+      - PInt
+      - string->int

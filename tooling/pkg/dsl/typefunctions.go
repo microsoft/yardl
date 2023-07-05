@@ -26,6 +26,16 @@ func MakeGenericType(genericTypeDefinition TypeDefinition, typeArguments []Type,
 	rewritten := Rewrite(genericTypeDefinition, func(self *Rewriter, node Node) Node {
 		switch t := node.(type) {
 		case *DefinitionMeta:
+			if t != genericTypeDefinition.GetDefinitionMeta() {
+				rewrittenArgs := rewriteInterfaceSlice[any, Type](t.TypeArguments, nil, &self.rewriterWithContext)
+				if rewrittenArgs == nil {
+					return t
+				}
+				newMeta := *t
+				newMeta.TypeArguments = rewrittenArgs
+				return &newMeta
+			}
+
 			newMeta := *t
 			newMeta.TypeArguments = typeArguments
 			return &newMeta

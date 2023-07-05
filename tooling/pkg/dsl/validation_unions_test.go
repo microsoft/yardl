@@ -277,7 +277,8 @@ func TestUnionLabels_SimpleVectorsAndArrays(t *testing.T) {
 X: !record
   fields:
     f: [!vector {items: int}, !vector {items: string}]
-    g: [!array {items: int}, !array {items: string}]`
+    g: [!array {items: int}, !array {items: string}]
+    h: [string->int, string->string]`
 	env, err := parseAndValidate(t, src)
 	require.Nil(t, err)
 
@@ -287,6 +288,9 @@ X: !record
 	g := env.Namespaces[0].TypeDefinitions[0].(*RecordDefinition).Fields[1]
 	require.Equal(t, "int32Array", g.Type.(*GeneralizedType).Cases[0].Label)
 	require.Equal(t, "stringArray", g.Type.(*GeneralizedType).Cases[1].Label)
+	h := env.Namespaces[0].TypeDefinitions[0].(*RecordDefinition).Fields[2]
+	require.Equal(t, "Map[string,int32]", h.Type.(*GeneralizedType).Cases[0].Label)
+	require.Equal(t, "Map[string,string]", h.Type.(*GeneralizedType).Cases[1].Label)
 }
 
 func TestUnionLabels_VectorsAndArraysWithDisambiguation(t *testing.T) {

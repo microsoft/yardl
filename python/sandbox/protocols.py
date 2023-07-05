@@ -17,7 +17,7 @@ class PWriterBase(abc.ABC):
     def __init__(self) -> None:
         self._state = 0
 
-    schema = r"""{"protocol":{"name":"P","sequence":[{"name":"value","type":{"name":"Sandbox.WithUnion","typeArguments":["int32","float32"]}}]},"types":[{"name":"WithUnion","typeParameters":["T","U"],"fields":[{"name":"f","type":[{"label":"T","type":"T"},{"label":"U","type":"U"}]}]}]}"""
+    schema = r"""{"protocol":{"name":"P","sequence":[{"name":"value","type":"Sandbox.WithUnion"}]},"types":[{"name":"MyString","type":"string"},{"name":"PInt","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"}]},{"name":"WithUnion","fields":[{"name":"f","type":[null,{"label":"int32","type":"int32"},{"label":"float32","type":"float32"},{"label":"MyString","type":"Sandbox.MyString"},{"label":"PInt","type":"Sandbox.PInt"},{"label":"Map[string,int32]","type":{"map":{"keys":"string","values":"int32"}}}]}]}]}"""
 
     def __enter__(self):
         return self
@@ -28,7 +28,7 @@ class PWriterBase(abc.ABC):
             expected_method = self._state_to_method_name(self._state)
             raise ProtocolException(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
 
-    def write_value(self, value: WithUnion[yardl.Int32, yardl.Float32]) -> None:
+    def write_value(self, value: WithUnion) -> None:
         """Ordinal 0"""
 
         if self._state != 0:
@@ -38,7 +38,7 @@ class PWriterBase(abc.ABC):
         self._state = 1
 
     @abc.abstractmethod
-    def _write_value(self, value: WithUnion[yardl.Int32, yardl.Float32]) -> None:
+    def _write_value(self, value: WithUnion) -> None:
         raise NotImplementedError()
 
     @abc.abstractmethod
@@ -83,7 +83,7 @@ class PReaderBase(abc.ABC):
     def close(self) -> None:
         raise NotImplementedError()
 
-    def read_value(self) -> WithUnion[yardl.Int32, yardl.Float32]:
+    def read_value(self) -> WithUnion:
         """Ordinal 0"""
 
         if self._state != 0:
@@ -97,7 +97,7 @@ class PReaderBase(abc.ABC):
         writer.write_value(self.read_value())
 
     @abc.abstractmethod
-    def _read_value(self) -> WithUnion[yardl.Int32, yardl.Float32]:
+    def _read_value(self) -> WithUnion:
         raise NotImplementedError()
 
     T = typing.TypeVar('T')

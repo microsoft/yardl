@@ -223,7 +223,9 @@ func typeLabel(t Type, simple bool) string {
 			}
 
 			return fmt.Sprintf("%s[%s]", simpleLabel, strings.Repeat(",", len(*d.Dimensions)))
-
+		case *Map:
+			keyLabel := typeLabel(d.KeyType, simple)
+			return fmt.Sprintf("Map[%s,%s]", keyLabel, casesLabel)
 		default:
 			panic(fmt.Sprintf("unexpected type %T", d))
 		}
