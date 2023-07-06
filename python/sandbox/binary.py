@@ -58,17 +58,6 @@ class _PTSerializer(typing.Generic[T, T_NP], _binary.RecordSerializer[PT[T]]):
         field_values = self._read(stream, read_as_numpy)
         return PT[T](x=field_values[0], y=field_values[1], z=field_values[2])
 
-    def is_value_supported(self, value: Any) -> bool:
-        if isinstance(value, np.void) and value.dtype == self.overall_dtype():
-            return True
-
-        if not isinstance(value, PT):
-            return False
-        return (
-            self._field_serializers[0][1].is_value_supported(value.x)
-            and self._field_serializers[1][1].is_value_supported(value.y)
-        )
-
 
 class _PIntSerializer(_binary.RecordSerializer[PInt]):
     def __init__(self) -> None:
@@ -87,16 +76,10 @@ class _PIntSerializer(_binary.RecordSerializer[PInt]):
         field_values = self._read(stream, read_as_numpy)
         return PInt(x=field_values[0], y=field_values[1])
 
-    def is_value_supported(self, value: Any) -> bool:
-        if isinstance(value, np.void) and value.dtype == self.overall_dtype():
-            return True
-
-        return isinstance(value, PInt)
-
 
 class _WithUnionSerializer(_binary.RecordSerializer[WithUnion]):
     def __init__(self) -> None:
-        super().__init__([("f", _binary.UnionSerializer([_binary.none_serializer, _binary.int32_serializer, _binary.VectorSerializer(_binary.float32_serializer), _binary.string_serializer, _PIntSerializer(), _binary.MapSerializer(_binary.string_serializer, _binary.int32_serializer)]))])
+        super().__init__([("f", _binary.UnionSerializer([None, ("int32", _binary.int32_serializer), ("float32*", _binary.VectorSerializer(_binary.float32_serializer)), ("MyString", _binary.string_serializer), ("PInt", _PIntSerializer()), ("string->int32", _binary.MapSerializer(_binary.string_serializer, _binary.int32_serializer))]))])
 
     def write(self, stream: _binary.CodedOutputStream, value: WithUnion) -> None:
         if isinstance(value, np.void):
@@ -110,11 +93,5 @@ class _WithUnionSerializer(_binary.RecordSerializer[WithUnion]):
     def read(self, stream: _binary.CodedInputStream, read_as_numpy: Types) -> WithUnion:
         field_values = self._read(stream, read_as_numpy)
         return WithUnion(f=field_values[0])
-
-    def is_value_supported(self, value: Any) -> bool:
-        if isinstance(value, np.void) and value.dtype == self.overall_dtype():
-            return True
-
-        return isinstance(value, WithUnion)
 
 

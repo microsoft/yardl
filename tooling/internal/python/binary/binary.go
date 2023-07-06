@@ -119,42 +119,6 @@ func writeRecordSerializers(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 					fmt.Fprintf(w, "return %s(%s)\n", typeSyntax, strings.Join(args, ", "))
 				})
 				w.WriteStringln("")
-
-				w.WriteStringln("def is_value_supported(self, value: Any) -> bool:")
-				w.Indented(func() {
-					fmt.Fprintf(w, "if isinstance(value, np.void) and value.dtype == self.overall_dtype():\n")
-					w.Indented(func() {
-						w.WriteStringln("return True")
-					})
-					w.WriteStringln("")
-
-					if len(td.TypeParameters) == 0 {
-						fmt.Fprintf(w, "return isinstance(value, %s)\n", typeSyntax)
-					} else {
-						fmt.Fprintf(w, "if not isinstance(value, %s):\n", common.TypeSyntaxWithoutTypeParameters(td, ns.Name))
-						w.Indented(func() {
-							w.WriteStringln("return False")
-						})
-
-						if len(td.Fields) == 0 {
-							w.WriteStringln("return True")
-						}
-
-						fieldChecks := make([]string, 0)
-						for i, field := range td.Fields {
-							if dsl.ContainsGenericTypeParameter(field.Type) {
-								fieldChecks = append(fieldChecks, fmt.Sprintf("self._field_serializers[%d][1].is_value_supported(value.%s)\n", i, common.FieldIdentifierName(field.Name)))
-							}
-						}
-
-						w.WriteStringln("return (")
-						w.Indented(func() {
-							w.WriteString(strings.Join(fieldChecks, "and "))
-						})
-						w.WriteStringln(")")
-					}
-				})
-				w.WriteStringln("")
 			})
 			w.WriteStringln("")
 		}
@@ -289,7 +253,11 @@ func typeSerializer(t dsl.Type, numpy bool, contextNamespace string) string {
 
 			options := make([]string, len(t.Cases))
 			for i, c := range t.Cases {
-				options[i] = typeSerializer(c.Type, numpy, contextNamespace)
+				if c.Type == nil {
+					options[i] = "None"
+				} else {
+					options[i] = fmt.Sprintf("(\"%s\", %s)", c.Label, typeSerializer(c.Type, numpy, contextNamespace))
+				}
 			}
 
 			return fmt.Sprintf("_binary.UnionSerializer([%s])", strings.Join(options, ", "))

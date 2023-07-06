@@ -285,10 +285,6 @@ class TypeSerializer(Generic[T, T_NP], ABC):
     def write_numpy(self, stream: CodedOutputStream, value: T_NP) -> None:
         raise NotImplementedError
 
-    @abstractmethod
-    def is_value_supported(self, value: Any) -> bool:
-        raise NotImplementedError
-
     def is_trivially_serializable(self) -> bool:
         return False
 
@@ -328,9 +324,6 @@ class BoolSerializer(StructSerializer[Bool, np.bool_]):
     def read_numpy(self, stream: CodedInputStream) -> np.bool_:
         return super().read_numpy(stream)
 
-    def is_value_supported(self, value: Any) -> bool:
-        return isinstance(value, bool) or isinstance(value, np.bool_)
-
 bool_serializer = BoolSerializer()
 
 
@@ -346,9 +339,6 @@ class Int8Serializer(StructSerializer[Int8, np.int8]):
 
     def is_trivially_serializable(self) -> bool:
         return True
-
-    def is_value_supported(self, value: Any) -> bool:
-        return isinstance(value, cast(type, np.int8)) or isinstance(value, int) and value >= INT8_MIN and value <= INT8_MAX
 
 
 int8_serializer = Int8Serializer()
@@ -368,8 +358,6 @@ class UInt8Serializer(StructSerializer[UInt8, np.uint8]):
     def is_trivially_serializable(self) -> bool:
         return True
 
-    def is_value_supported(self, value: Any) -> bool:
-        return isinstance(value, cast(type, np.uint8)) or isinstance(value, int) and value >= 0 and value <= UINT8_MAX
 
 
 uint8_serializer = UInt8Serializer()
@@ -401,9 +389,6 @@ class Int16Serializer(TypeSerializer[Int16, np.int16]):
 
     def read_numpy(self, stream: CodedInputStream) -> np.int16:
         return np.int16(stream.read_signed_varint())
-
-    def is_value_supported(self, value: Any) -> bool:
-        return isinstance(value, cast(type, np.int16)) or isinstance(value, int) and value >= INT16_MIN and value <= INT16_MAX
 
 
 int16_serializer = Int16Serializer()
@@ -437,9 +422,6 @@ class UInt16Serializer(TypeSerializer[UInt16, np.uint16]):
     def read_numpy(self, stream: CodedInputStream) -> np.uint16:
         return np.uint16(stream.read_unsigned_varint())
 
-    def is_value_supported(self, value: Any) -> bool:
-        return isinstance(value, cast(type, np.uint16)) or isinstance(value, int) and value >= 0 and value <= UINT16_MAX
-
 
 uint16_serializer = UInt16Serializer()
 
@@ -470,9 +452,6 @@ class Int32Serializer(TypeSerializer[Int32, np.int32]):
 
     def read_numpy(self, stream: CodedInputStream) -> np.int32:
         return np.int32(stream.read_signed_varint())
-
-    def is_value_supported(self, value: Any) -> bool:
-        return isinstance(value, cast(type, np.int32)) or isinstance(value, int) and value >= INT32_MIN and value <= INT32_MAX
 
 
 int32_serializer = Int32Serializer()
@@ -505,9 +484,6 @@ class UInt32Serializer(TypeSerializer[UInt32, np.uint32]):
     def read_numpy(self, stream: CodedInputStream) -> np.uint32:
         return np.uint32(stream.read_unsigned_varint())
 
-    def is_value_supported(self, value: Any) -> bool:
-        return isinstance(value, cast(type, np.uint32)) or isinstance(value, int) and value >= 0 and value <= UINT32_MAX
-
 
 uint32_serializer = UInt32Serializer()
 
@@ -538,9 +514,6 @@ class Int64Serializer(TypeSerializer[Int64, np.int64]):
 
     def read_numpy(self, stream: CodedInputStream) -> np.int64:
         return np.int64(stream.read_signed_varint())
-
-    def is_value_supported(self, value: Any) -> bool:
-        return isinstance(value, cast(type, np.int64)) or isinstance(value, int) and value >= INT64_MIN and value <= INT64_MAX
 
 
 int64_serializer = Int64Serializer()
@@ -575,9 +548,6 @@ class UInt64Serializer(TypeSerializer[UInt64, np.uint64]):
     def read_numpy(self, stream: CodedInputStream) -> np.uint64:
         return np.uint64(stream.read_unsigned_varint())
 
-    def is_value_supported(self, value: Any) -> bool:
-        return isinstance(value, cast(type, np.uint64)) or isinstance(value, int) and value >= 0 and value <= UINT64_MAX
-
 
 uint64_serializer = UInt64Serializer()
 
@@ -609,9 +579,6 @@ class SizeSerializer(TypeSerializer[Size, np.uint64]):
     def read_numpy(self, stream: CodedInputStream) -> np.uint64:
         return np.uint64(stream.read_unsigned_varint())
 
-    def is_value_supported(self, value: Any) -> bool:
-        return isinstance(value, cast(type, np.uint64)) or isinstance(value, int) and value >= 0 and value <= UINT64_MAX
-
 
 size_serializer = SizeSerializer()
 
@@ -629,9 +596,6 @@ class Float32Serializer(StructSerializer[Float32, np.float32]):
     def is_trivially_serializable(self) -> bool:
         return True
 
-    def is_value_supported(self, value: Any) -> bool:
-        return isinstance(value, cast(type, np.float32)) or isinstance(value, float)
-
 
 float32_serializer = Float32Serializer()
 
@@ -647,9 +611,6 @@ class Float64Serializer(StructSerializer[Float64, np.float64]):
 
     def is_trivially_serializable(self) -> bool:
         return True
-
-    def is_value_supported(self, value: Any) -> bool:
-        return isinstance(value, cast(type, np.float64)) or isinstance(value, float)
 
 
 float64_serializer = Float64Serializer()
@@ -674,9 +635,6 @@ class Complex32Serializer(StructSerializer[ComplexFloat, np.complex64]):
 
     def is_trivially_serializable(self) -> bool:
         return True
-
-    def is_value_supported(self, value: Any) -> bool:
-        return isinstance(value, cast(type, np.complex64)) or isinstance(value, complex)
 
 
 complexfloat32_serializer = Complex32Serializer()
@@ -703,9 +661,6 @@ class Complex64Serializer(StructSerializer[ComplexDouble, np.complex128]):
     def is_trivially_serializable(self) -> bool:
         return True
 
-    def is_value_supported(self, value: Any) -> bool:
-        return isinstance(value, cast(type, np.complex128)) or isinstance(value, complex)
-
 
 complexfloat64_serializer = Complex64Serializer()
 
@@ -729,9 +684,6 @@ class StringSerializer(TypeSerializer[str, np.object_]):
 
     def read_numpy(self, stream: CodedInputStream) -> np.object_:
         return np.object_(self.read(stream, Types.STRING))
-
-    def is_value_supported(self, value: Any) -> bool:
-        return isinstance(value, str)
 
 
 string_serializer = StringSerializer()
@@ -772,9 +724,6 @@ class DateSerializer(TypeSerializer[Date, np.datetime64]):
     def read_numpy(self, stream: CodedInputStream) -> np.datetime64:
         days_since_epoch = stream.read_signed_varint()
         return np.datetime64(days_since_epoch, "D")
-
-    def is_value_supported(self, value: Any) -> bool:
-        return isinstance(value, np.datetime64) or isinstance(value, datetime.date)
 
 
 date_serializer = DateSerializer()
@@ -826,9 +775,6 @@ class TimeSerializer(TypeSerializer[Time, np.timedelta64]):
         nanoseconds_since_midnight = stream.read_signed_varint()
         return np.timedelta64(nanoseconds_since_midnight, "ns")
 
-    def is_value_supported(self, value: Any) -> bool:
-        return isinstance(value, np.timedelta64) or isinstance(value, datetime.time)
-
 
 time_serializer = TimeSerializer()
 
@@ -874,9 +820,6 @@ class DateTimeSerializer(TypeSerializer[DateTime, np.datetime64]):
         nanoseconds_since_epoch = stream.read_signed_varint()
         return np.datetime64(nanoseconds_since_epoch, "ns")
 
-    def is_value_supported(self, value: Any) -> bool:
-        return isinstance(value, np.datetime64) or isinstance(value, datetime.datetime)
-
 
 datetime_serializer = DateTimeSerializer()
 
@@ -896,9 +839,6 @@ class NoneSerializer(TypeSerializer[None, Any]):
 
     def read_numpy(self, stream: CodedInputStream) -> Any:
         return np.object_()
-
-    def is_value_supported(self, value: Any) -> bool:
-        return value is None
 
 
 none_serializer = NoneSerializer()
@@ -929,9 +869,6 @@ class EnumSerializer(Generic[TEnum, T, T_NP], TypeSerializer[TEnum, T_NP]):
 
     def is_trivially_serializable(self) -> bool:
         return self._integer_serializer.is_trivially_serializable()
-
-    def is_value_supported(self, value: Any) -> bool:
-        return isinstance(value, self._enum_type) or (isinstance(value, np.generic) and self._integer_serializer.is_value_supported(value))
 
 
 class OptionalSerializer(Generic[T, T_NP], TypeSerializer[Optional[T], np.void]):
@@ -975,9 +912,6 @@ class OptionalSerializer(Generic[T, T_NP], TypeSerializer[Optional[T], np.void])
     def is_trivially_serializable(self) -> bool:
         return super().is_trivially_serializable()
 
-    def is_value_supported(self, value: Any) -> bool:
-        return value is None or self.element_serializer.is_value_supported(value) or (isinstance(value, np.void) and value.dtype == self.overall_dtype())
-
 
 
 class UnionSerializer(TypeSerializer[tuple[str, Any] | None, np.object_]):
@@ -1012,10 +946,21 @@ class UnionSerializer(TypeSerializer[tuple[str, Any] | None, np.object_]):
 
 
     def write_numpy(self, stream: CodedOutputStream, value: np.object_) -> None:
-        for i, case_serializer in enumerate(self._cases):
-            if case_serializer.is_value_supported(value):
-                stream.write_byte(i)
-                case_serializer.write_numpy(stream, value)
+        if value is None: #type: ignore
+            if self._offset == 1:
+                stream.write_byte(0)
+                return
+            else:
+                raise ValueError("None is not a valid for this union type")
+
+        if not isinstance(value, tuple) or len(value) != 2:
+            raise ValueError(f"Union values cannot be {type(value)} must be tuples[str, object] | None")
+
+        tag, inner_value = value
+        for i, (case_tag, case_serializer) in enumerate(self._cases):
+            if case_tag == tag:
+                stream.write_byte(i + self._offset)
+                case_serializer.write_numpy(stream, inner_value)
                 return
 
         raise ValueError(f"Incorrect union type {type(value)}")
@@ -1023,16 +968,15 @@ class UnionSerializer(TypeSerializer[tuple[str, Any] | None, np.object_]):
 
     def read(self, stream: CodedInputStream, read_as_numpy: Types) -> Any:
         case_index = stream.read_byte()
-        case_serializer = self._cases[case_index]
-        return case_serializer.read(stream, read_as_numpy)
+        if case_index == 0 and self._offset == 1:
+            return None
+
+
+        case_tag, case_serializer = self._cases[case_index - self._offset]
+        return (case_tag, case_serializer.read(stream, read_as_numpy))
 
     def read_numpy(self, stream: CodedInputStream) -> np.object_:
-        case_index = stream.read_byte()
-        case_serializer = self._cases[case_index]
-        return case_serializer.read_numpy(stream)
-
-    def is_value_supported(self, value: Any) -> bool:
-        return any(case_serializer.is_value_supported(value) for case_serializer in self._cases)
+        return self.read(stream, Types.ALL)
 
 
 class StreamSerializer(TypeSerializer[Iterable[T], Any]):
@@ -1056,9 +1000,6 @@ class StreamSerializer(TypeSerializer[Iterable[T], Any]):
                 yield self.element_serializer.read(stream, read_as_numpy)
 
     def read_numpy(self, stream: CodedInputStream) -> np.object_:
-        raise NotImplementedError()
-
-    def is_value_supported(self, value: Any) -> bool:
         raise NotImplementedError()
 
 
@@ -1099,19 +1040,6 @@ class FixedVectorSerializer(Generic[T, T_NP], TypeSerializer[list[T], np.object_
     def is_trivially_serializable(self) -> bool:
         return self.element_serializer.is_trivially_serializable()
 
-    def is_value_supported(self, value: Any) -> bool:
-        if not isinstance(value, list):
-            return False
-
-        typed_value = cast(list[T], value)
-        return (
-            len(typed_value) == self.length
-            and all(
-                self.element_serializer.is_value_supported(element)
-                for element in typed_value
-            )
-        )
-
 
 class VectorSerializer(Generic[T, T_NP], TypeSerializer[list[T], np.object_]):
     def __init__(self, element_serializer: TypeSerializer[T, T_NP]) -> None:
@@ -1139,17 +1067,6 @@ class VectorSerializer(Generic[T, T_NP], TypeSerializer[list[T], np.object_]):
 
     def read_numpy(self, stream: CodedInputStream) -> np.object_:
         return np.object_(self.read(stream, Types.ALL))
-
-    def is_value_supported(self, value: Any) -> bool:
-        if not isinstance(value, list):
-            return False
-
-        typed_value = cast(list[T], value)
-
-        return all(
-            self.element_serializer.is_value_supported(element)
-            for element in typed_value
-        )
 
 
 TKey = TypeVar("TKey")
@@ -1190,18 +1107,6 @@ class MapSerializer(Generic[TKey, TKey_NP, TValue, TValue_NP], TypeSerializer[di
 
     def read_numpy(self, stream: CodedInputStream) -> np.object_:
         return np.object_(self.read(stream, Types.ALL))
-
-    def is_value_supported(self, value: Any) -> bool:
-        if not isinstance(value, dict):
-            return False
-
-        typed_value = cast(dict[TKey, TValue], value)
-
-        return all(
-            self.key_serializer.is_value_supported(key)
-            and self.value_serializer.is_value_supported(value)
-            for key, value in typed_value.items()
-        )
 
 
 
@@ -1290,9 +1195,6 @@ class DynamicNDArraySerializer(NDArraySerializerBase[T, T_NP]):
     def read_numpy(self, stream: CodedInputStream) -> np.object_:
         return cast(np.object_, self.read(stream, Types.ALL))
 
-    def is_value_supported(self, value: Any) -> bool:
-        return isinstance(value, np.ndarray) and cast(npt.NDArray[Any], value).dtype == self._array_dtype
-
 
 class NDArraySerializer(Generic[T, T_NP], NDArraySerializerBase[T, T_NP]):
     def __init__(
@@ -1324,13 +1226,6 @@ class NDArraySerializer(Generic[T, T_NP], NDArraySerializerBase[T, T_NP]):
     def read_numpy(self, stream: CodedInputStream) -> np.object_:
         return cast(np.object_, self.read(stream, Types.ALL))
 
-    def is_value_supported(self, value: Any) -> bool:
-        if not isinstance(value, np.ndarray):
-            return False
-        typedValue = cast(npt.NDArray[Any], value)
-        return typedValue.dtype == self._array_dtype and typedValue.ndim == self.ndims
-
-
 class FixedNDArraySerializer(Generic[T, T_NP], NDArraySerializerBase[T, T_NP]):
     def __init__(
         self,
@@ -1358,12 +1253,6 @@ class FixedNDArraySerializer(Generic[T, T_NP], NDArraySerializerBase[T, T_NP]):
 
     def is_trivially_serializable(self) -> bool:
         return self._element_serializer.is_trivially_serializable()
-
-    def is_value_supported(self, value: Any) -> bool:
-        if not isinstance(value, np.ndarray):
-            return False
-        typedValue = cast(npt.NDArray[Any], value)
-        return typedValue.dtype == self._array_dtype and typedValue.shape == self.shape
 
 
 class RecordSerializer(TypeSerializer[T, np.void]):
