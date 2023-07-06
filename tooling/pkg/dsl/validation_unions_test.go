@@ -283,35 +283,14 @@ X: !record
 	require.Nil(t, err)
 
 	f := env.Namespaces[0].TypeDefinitions[0].(*RecordDefinition).Fields[0]
-	require.Equal(t, "int32Vector", f.Type.(*GeneralizedType).Cases[0].Label)
-	require.Equal(t, "stringVector", f.Type.(*GeneralizedType).Cases[1].Label)
+	require.Equal(t, "int32*", f.Type.(*GeneralizedType).Cases[0].Label)
+	require.Equal(t, "string*", f.Type.(*GeneralizedType).Cases[1].Label)
 	g := env.Namespaces[0].TypeDefinitions[0].(*RecordDefinition).Fields[1]
-	require.Equal(t, "int32Array", g.Type.(*GeneralizedType).Cases[0].Label)
-	require.Equal(t, "stringArray", g.Type.(*GeneralizedType).Cases[1].Label)
+	require.Equal(t, "int32[]", g.Type.(*GeneralizedType).Cases[0].Label)
+	require.Equal(t, "string[]", g.Type.(*GeneralizedType).Cases[1].Label)
 	h := env.Namespaces[0].TypeDefinitions[0].(*RecordDefinition).Fields[2]
-	require.Equal(t, "Map[string,int32]", h.Type.(*GeneralizedType).Cases[0].Label)
-	require.Equal(t, "Map[string,string]", h.Type.(*GeneralizedType).Cases[1].Label)
-}
-
-func TestUnionLabels_VectorsAndArraysWithDisambiguation(t *testing.T) {
-	src := `
-X: !record
-  fields:
-    f: [!vector {items: string}, !vector {items: string, length: 10}]
-    g: [!array {items: string}, !array {items: string, dimensions: 2}]
-    h: [!array {items: string, dimensions: [2,3]}, !array {items: string, dimensions: 2}]`
-	env, err := parseAndValidate(t, src)
-	require.Nil(t, err)
-
-	f := env.Namespaces[0].TypeDefinitions[0].(*RecordDefinition).Fields[0]
-	require.Equal(t, "stringVector", f.Type.(*GeneralizedType).Cases[0].Label)
-	require.Equal(t, "stringVector[10]", f.Type.(*GeneralizedType).Cases[1].Label)
-	g := env.Namespaces[0].TypeDefinitions[0].(*RecordDefinition).Fields[1]
-	require.Equal(t, "stringArray", g.Type.(*GeneralizedType).Cases[0].Label)
-	require.Equal(t, "stringArray[,,]", g.Type.(*GeneralizedType).Cases[1].Label)
-	h := env.Namespaces[0].TypeDefinitions[0].(*RecordDefinition).Fields[2]
-	require.Equal(t, "stringArray[2,3]", h.Type.(*GeneralizedType).Cases[0].Label)
-	require.Equal(t, "stringArray[,,]", h.Type.(*GeneralizedType).Cases[1].Label)
+	require.Equal(t, "string->int32", h.Type.(*GeneralizedType).Cases[0].Label)
+	require.Equal(t, "string->string", h.Type.(*GeneralizedType).Cases[1].Label)
 }
 
 func TestUnionsCannotContainUnions(t *testing.T) {

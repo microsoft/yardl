@@ -4,10 +4,6 @@
 package dsl
 
 import (
-	"fmt"
-	"strconv"
-	"strings"
-
 	"github.com/microsoft/yardl/tooling/internal/validation"
 )
 
@@ -16,23 +12,8 @@ func assignUnionCaseLabels(env *Environment, errorSink *validation.ErrorSink) *E
 		if t, ok := node.(*GeneralizedType); ok && t.Cases.IsUnion() {
 			// assign labels to union cases
 			for _, typeCase := range t.Cases {
-				if !typeCase.IsNullType() {
-					typeCase.Label = typeLabel(typeCase.Type, true)
-				}
-			}
-
-			duplicates := make(map[string][]int)
-			for i, typeCase := range t.Cases {
-				if !typeCase.IsNullType() {
-					duplicates[typeCase.Label] = append(duplicates[typeCase.Label], i)
-				}
-			}
-
-			for _, v := range duplicates {
-				if len(v) > 1 {
-					for _, i := range v {
-						t.Cases[i].Label = typeLabel(t.Cases[i].Type, false)
-					}
+				if typeCase.Label == "" {
+					typeCase.Label = TypeToShortSyntax(typeCase.Type, false)
 				}
 			}
 
@@ -159,77 +140,4 @@ func validateUnionCases(env *Environment, errorSink *validation.ErrorSink) *Envi
 	})
 
 	return env
-}
-
-func typeLabel(t Type, simple bool) string {
-	switch t := t.(type) {
-	case nil:
-		return "null"
-	case *SimpleType:
-		baseName := func() string {
-			if simple && t.ResolvedDefinition != nil {
-				return t.ResolvedDefinition.GetDefinitionMeta().Name
-			}
-			return t.Name
-		}()
-
-		if len(t.TypeArguments) == 0 {
-			return baseName
-		}
-		typeArguments := make([]string, len(t.TypeArguments))
-		for i, typeArg := range t.TypeArguments {
-			typeArguments[i] = typeLabel(typeArg, simple)
-		}
-
-		return fmt.Sprintf("%s<%s>", baseName, strings.Join(typeArguments, ","))
-
-	case *GeneralizedType:
-		casesLabel := func() string {
-			if len(t.Cases) == 1 {
-				return typeLabel(t.Cases[0].Type, simple)
-			}
-
-			caseLabels := make([]string, len(t.Cases))
-			for i, typeCase := range t.Cases {
-				caseLabels[i] = typeLabel(typeCase.Type, simple)
-			}
-
-			return fmt.Sprintf("{%s}", strings.Join(caseLabels, ","))
-		}()
-
-		switch d := t.Dimensionality.(type) {
-		case nil:
-			return casesLabel
-		case *Vector:
-			simpleLabel := casesLabel + "Vector"
-			if simple || d.Length == nil {
-				return simpleLabel
-			}
-
-			return fmt.Sprintf("%s[%d]", simpleLabel, *d.Length)
-		case *Array:
-			simpleLabel := casesLabel + "Array"
-			if simple || !d.HasKnownNumberOfDimensions() {
-				return simpleLabel
-			}
-
-			if d.IsFixed() {
-				dims := make([]string, len(*d.Dimensions))
-				for i, dim := range *d.Dimensions {
-					dims[i] = strconv.FormatUint(*dim.Length, 10)
-				}
-
-				return fmt.Sprintf("%s[%s]", simpleLabel, strings.Join(dims, ","))
-			}
-
-			return fmt.Sprintf("%s[%s]", simpleLabel, strings.Repeat(",", len(*d.Dimensions)))
-		case *Map:
-			keyLabel := typeLabel(d.KeyType, simple)
-			return fmt.Sprintf("Map[%s,%s]", keyLabel, casesLabel)
-		default:
-			panic(fmt.Sprintf("unexpected type %T", d))
-		}
-	default:
-		panic(fmt.Sprintf("unexpected type %T", t))
-	}
 }
