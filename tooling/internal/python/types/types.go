@@ -228,7 +228,7 @@ func GetGenericBase(t dsl.TypeDefinition) string {
 
 	var typeParams []string
 	for _, tp := range meta.TypeParameters {
-		use := tp.Tags[common.TypeParameterUseTagKey].(common.TypeParameterUse)
+		use := tp.Annotations[common.TypeParameterUseAnnotationKey].(common.TypeParameterUse)
 		if use&common.TypeParameterUseScalar != 0 {
 			typeParams = append(typeParams, common.TypeIdentifierName(tp.Name))
 		}

@@ -37,14 +37,14 @@ Image<T>: T[]
 
 	rec := env.SymbolTable["test.Rec"].(*dsl.RecordDefinition)
 
-	assert.Equal(t, TypeParameterUseArray, rec.TypeParameters[0].Tags[TypeParameterUseTagKey])
-	assert.Equal(t, TypeParameterUseScalar, rec.TypeParameters[1].Tags[TypeParameterUseTagKey])
-	assert.Equal(t, TypeParameterUseBoth, rec.TypeParameters[2].Tags[TypeParameterUseTagKey])
-	assert.Equal(t, TypeParameterUseNone, rec.TypeParameters[3].Tags[TypeParameterUseTagKey])
-	assert.Equal(t, TypeParameterUseScalar, rec.TypeParameters[4].Tags[TypeParameterUseTagKey])
-	assert.Equal(t, TypeParameterUseNone, rec.TypeParameters[5].Tags[TypeParameterUseTagKey])
-	assert.Equal(t, TypeParameterUseNone, rec.TypeParameters[6].Tags[TypeParameterUseTagKey])
-	assert.Equal(t, TypeParameterUseArray, rec.TypeParameters[7].Tags[TypeParameterUseTagKey])
+	assert.Equal(t, TypeParameterUseArray, rec.TypeParameters[0].Annotations[TypeParameterUseAnnotationKey])
+	assert.Equal(t, TypeParameterUseScalar, rec.TypeParameters[1].Annotations[TypeParameterUseAnnotationKey])
+	assert.Equal(t, TypeParameterUseBoth, rec.TypeParameters[2].Annotations[TypeParameterUseAnnotationKey])
+	assert.Equal(t, TypeParameterUseNone, rec.TypeParameters[3].Annotations[TypeParameterUseAnnotationKey])
+	assert.Equal(t, TypeParameterUseScalar, rec.TypeParameters[4].Annotations[TypeParameterUseAnnotationKey])
+	assert.Equal(t, TypeParameterUseNone, rec.TypeParameters[5].Annotations[TypeParameterUseAnnotationKey])
+	assert.Equal(t, TypeParameterUseNone, rec.TypeParameters[6].Annotations[TypeParameterUseAnnotationKey])
+	assert.Equal(t, TypeParameterUseArray, rec.TypeParameters[7].Annotations[TypeParameterUseAnnotationKey])
 }
 
 func parseAndValidate(t *testing.T, src string) (*dsl.Environment, error) {

@@ -4,7 +4,7 @@ import "github.com/microsoft/yardl/tooling/pkg/dsl"
 
 type TypeParameterUse int
 
-const TypeParameterUseTagKey = "typeParameterUse"
+const TypeParameterUseAnnotationKey = "typeParameterUse"
 
 const (
 	TypeParameterUseNone   TypeParameterUse = 0
@@ -26,10 +26,10 @@ func AnnotateGenerics(env *dsl.Environment) {
 
 			for _, typeParameter := range definitionMeta.TypeParameters {
 				use := GetTypeParameterUse(node, typeParameter)
-				if typeParameter.Tags == nil {
-					typeParameter.Tags = make(map[string]any)
+				if typeParameter.Annotations == nil {
+					typeParameter.Annotations = make(map[string]any)
 				}
-				typeParameter.Tags["typeParameterUse"] = use
+				typeParameter.Annotations["typeParameterUse"] = use
 			}
 		default:
 			self.VisitChildren(node)

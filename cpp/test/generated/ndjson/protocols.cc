@@ -336,7 +336,7 @@ struct adl_serializer<std::variant<std::monostate, int32_t, float>> {
   static void to_json(ordered_json& j, std::variant<std::monostate, int32_t, float> const& value) {
     switch (value.index()) {
       case 0:
-        j = ordered_json{ {"", std::get<std::monostate>(value)} };
+        j = ordered_json{ {"null", std::get<std::monostate>(value)} };
         break;
       case 1:
         j = ordered_json{ {"int32", std::get<int32_t>(value)} };
@@ -352,7 +352,7 @@ struct adl_serializer<std::variant<std::monostate, int32_t, float>> {
   static void from_json(ordered_json const& j, std::variant<std::monostate, int32_t, float>& value) {
     auto it = j.begin();
     std::string label = it.key();
-    if (label == "") {
+    if (label == "null") {
       value = it.value().get<std::monostate>();
       return;
     }

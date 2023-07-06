@@ -114,7 +114,7 @@ var TypeSyntaxWriter dsl.TypeSyntaxWriter[string] = func(self dsl.TypeSyntaxWrit
 		if len(meta.TypeArguments) > 0 {
 			for i, typeArg := range meta.TypeArguments {
 				typeParameter := meta.TypeParameters[i]
-				use := typeParameter.Tags[TypeParameterUseTagKey].(TypeParameterUse)
+				use := typeParameter.Annotations[TypeParameterUseAnnotationKey].(TypeParameterUse)
 				if use&TypeParameterUseScalar != 0 {
 					typeArguments = append(typeArguments, self.ToSyntax(typeArg, contextNamespace))
 				}
@@ -125,7 +125,7 @@ var TypeSyntaxWriter dsl.TypeSyntaxWriter[string] = func(self dsl.TypeSyntaxWrit
 		} else {
 			for i, typeParam := range meta.TypeParameters {
 				typeParameter := meta.TypeParameters[i]
-				use := typeParameter.Tags[TypeParameterUseTagKey].(TypeParameterUse)
+				use := typeParameter.Annotations[TypeParameterUseAnnotationKey].(TypeParameterUse)
 				if use&TypeParameterUseScalar != 0 {
 					typeArguments = append(typeArguments, self.ToSyntax(typeParam, contextNamespace))
 				}

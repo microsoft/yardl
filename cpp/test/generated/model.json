@@ -1395,7 +1395,7 @@
                     "type": "int32"
                   },
                   {
-                    "label": "GenericRecordWithComputedFields\u003cstring,float32\u003e",
+                    "label": "GenericRecordWithComputedFields\u003cstring, float32\u003e",
                     "type": {
                       "name": "TestModel.GenericRecordWithComputedFields",
                       "typeArguments": [

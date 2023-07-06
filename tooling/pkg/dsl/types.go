@@ -16,10 +16,10 @@ type Node interface {
 }
 
 type NodeMeta struct {
-	File   string         `json:"-"`
-	Line   int            `json:"-"`
-	Column int            `json:"-"`
-	Tags   map[string]any `json:"-"`
+	File        string         `json:"-"`
+	Line        int            `json:"-"`
+	Column      int            `json:"-"`
+	Annotations map[string]any `json:"-"`
 }
 
 func (n *NodeMeta) String() string {
