@@ -19,12 +19,14 @@ PInt: !record
     x: int
     y: int
 
+MyUnion<T, U>: [T, U]
+
 WithUnion: !record
   fields:
     f:
       - null
       - int
-      - float
+      - float*
       - MyString
       - PInt
       - string->int

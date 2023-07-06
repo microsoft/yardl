@@ -13,6 +13,8 @@ from . import _dtypes
 
 T = typing.TypeVar('T')
 T_NP = typing.TypeVar('T_NP', bound=np.generic)
+U = typing.TypeVar('U')
+U_NP = typing.TypeVar('U_NP', bound=np.generic)
 
 @dataclasses.dataclass(slots=True, kw_only=True)
 class PT(typing.Generic[T]):
@@ -30,9 +32,21 @@ class PInt:
     y: yardl.Int32 = 0
 
 
+MyUnion = (
+    tuple[typing.Literal["T"], T]
+    | tuple[typing.Literal["U"], U]
+)
+
 @dataclasses.dataclass(slots=True, kw_only=True)
 class WithUnion:
-    f: yardl.Int32 | yardl.Float32 | MyString | PInt | dict[str, yardl.Int32] | None = None
+    f: (
+        tuple[typing.Literal["int32"], yardl.Int32]
+        | tuple[typing.Literal["float32*"], list[yardl.Float32]]
+        | tuple[typing.Literal["MyString"], MyString]
+        | tuple[typing.Literal["PInt"], PInt]
+        | tuple[typing.Literal["string->int32"], dict[str, yardl.Int32]]
+        | None
+    ) = None
 
 
 def _mk_get_dtype():
@@ -42,6 +56,7 @@ def _mk_get_dtype():
     dtype_map[PT] = lambda type_args: np.dtype([('x', get_dtype(type_args[0])), ('y', get_dtype(type_args[0])), ('z', np.dtype(np.int32))], align=True)
     dtype_map[MyString] = np.dtype(np.object_)
     dtype_map[PInt] = np.dtype([('x', np.dtype(np.int32)), ('y', np.dtype(np.int32))], align=True)
+    dtype_map[MyUnion] = lambda type_args: np.dtype(np.object_)
     dtype_map[WithUnion] = np.dtype([('f', np.dtype(np.object_))], align=True)
 
     return get_dtype

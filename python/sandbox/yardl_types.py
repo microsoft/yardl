@@ -4,6 +4,8 @@ import numpy as np
 import datetime
 from dataclasses import dataclass
 
+use_numpy = True
+
 Bool = bool | np.bool_
 Int8 = int | np.int8
 UInt8 = int | np.uint8
@@ -24,8 +26,6 @@ String = str | np.object_
 Date = datetime.date | np.datetime64
 Time = datetime.time | np.timedelta64
 DateTime = datetime.datetime | np.datetime64
-
-
 
 Integer = Int8 | UInt8 | Int16 | UInt16 | Int32 | UInt32 | Int64 | UInt64 | Size
 Floating = Float32 | Float64

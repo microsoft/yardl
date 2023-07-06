@@ -17,7 +17,7 @@ class PWriterBase(abc.ABC):
     def __init__(self) -> None:
         self._state = 0
 
-    schema = r"""{"protocol":{"name":"P","sequence":[{"name":"value","type":"Sandbox.WithUnion"}]},"types":[{"name":"MyString","type":"string"},{"name":"PInt","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"}]},{"name":"WithUnion","fields":[{"name":"f","type":[null,{"label":"int32","type":"int32"},{"label":"float32","type":"float32"},{"label":"MyString","type":"Sandbox.MyString"},{"label":"PInt","type":"Sandbox.PInt"},{"label":"Map[string,int32]","type":{"map":{"keys":"string","values":"int32"}}}]}]}]}"""
+    schema = r"""{"protocol":{"name":"P","sequence":[{"name":"value","type":"Sandbox.WithUnion"}]},"types":[{"name":"MyString","type":"string"},{"name":"PInt","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"}]},{"name":"WithUnion","fields":[{"name":"f","type":[null,{"label":"int32","type":"int32"},{"label":"float32*","type":{"vector":{"items":"float32"}}},{"label":"MyString","type":"Sandbox.MyString"},{"label":"PInt","type":"Sandbox.PInt"},{"label":"string-\u003eint32","type":{"map":{"keys":"string","values":"int32"}}}]}]}]}"""
 
     def __enter__(self):
         return self

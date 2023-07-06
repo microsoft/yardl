@@ -153,27 +153,23 @@ var TypeSyntaxWriter dsl.TypeSyntaxWriter[string] = func(self dsl.TypeSyntaxWrit
 				return fmt.Sprintf("%s | None", self.ToSyntax(t.Cases[1].Type, contextNamespace))
 			}
 
-			typeMap := make(map[string]any)
-
-			caseStrings := make([]string, 0, len(t.Cases))
-			for _, typeCase := range t.Cases {
+			sb := &strings.Builder{}
+			sb.WriteString("(\n")
+			for i, typeCase := range t.Cases {
 				if typeCase.Type == nil {
 					continue
 				}
-
-				syntax := self.ToSyntax(typeCase.Type, contextNamespace)
-
-				if _, ok := typeMap[syntax]; !ok {
-					typeMap[syntax] = nil
-					caseStrings = append(caseStrings, syntax)
+				sb.WriteString("    ")
+				if !t.Cases.HasNullOption() && i > 0 || t.Cases.HasNullOption() && i > 1 {
+					sb.WriteString("| ")
 				}
+				fmt.Fprintf(sb, "tuple[typing.Literal[\"%s\"], %s]\n", typeCase.Label, self.ToSyntax(typeCase.Type, contextNamespace))
 			}
-
 			if t.Cases.HasNullOption() {
-				caseStrings = append(caseStrings, "None")
+				sb.WriteString("    | None\n")
 			}
-
-			return strings.Join(caseStrings, " | ")
+			sb.WriteString(")")
+			return sb.String()
 		}()
 
 		switch d := t.Dimensionality.(type) {

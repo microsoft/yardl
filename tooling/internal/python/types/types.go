@@ -281,7 +281,12 @@ func typeDefault(t dsl.Type, contextNamespace string, st dsl.SymbolTable) (strin
 	case *dsl.GeneralizedType:
 		switch td := t.Dimensionality.(type) {
 		case nil:
-			return typeDefault(t.Cases[0].Type, contextNamespace, st)
+			defaultExpression, defaultKind := typeDefault(t.Cases[0].Type, contextNamespace, st)
+			if t.Cases.IsSingle() || t.Cases.HasNullOption() {
+				return defaultExpression, defaultKind
+			}
+
+			return fmt.Sprintf(`("%s", %s)`, t.Cases[0].Label, defaultExpression), defaultValueKindValue
 		case *dsl.Vector:
 			if td.Length == nil {
 				return "list", defaultValueKindFactory

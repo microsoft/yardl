@@ -15,6 +15,8 @@ from . import yardl_types as yardl
 
 T = typing.TypeVar('T')
 T_NP = typing.TypeVar('T_NP', bound=np.generic)
+U = typing.TypeVar('U')
+U_NP = typing.TypeVar('U_NP', bound=np.generic)
 
 class BinaryPWriter(_binary.BinaryProtocolWriter, PWriterBase):
     """Binary writer for the P protocol."""
@@ -94,7 +96,7 @@ class _PIntSerializer(_binary.RecordSerializer[PInt]):
 
 class _WithUnionSerializer(_binary.RecordSerializer[WithUnion]):
     def __init__(self) -> None:
-        super().__init__([("f", _binary.UnionSerializer([_binary.none_serializer, _binary.int32_serializer, _binary.float32_serializer, _binary.string_serializer, _PIntSerializer(), _binary.MapSerializer(_binary.string_serializer, _binary.int32_serializer)]))])
+        super().__init__([("f", _binary.UnionSerializer([_binary.none_serializer, _binary.int32_serializer, _binary.VectorSerializer(_binary.float32_serializer), _binary.string_serializer, _PIntSerializer(), _binary.MapSerializer(_binary.string_serializer, _binary.int32_serializer)]))])
 
     def write(self, stream: _binary.CodedOutputStream, value: WithUnion) -> None:
         if isinstance(value, np.void):

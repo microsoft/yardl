@@ -980,23 +980,39 @@ class OptionalSerializer(Generic[T, T_NP], TypeSerializer[Optional[T], np.void])
 
 
 
-class UnionSerializer(TypeSerializer[Any, np.object_]):
-    def __init__(self, cases: list[TypeSerializer[Any, Any]]) -> None:
+class UnionSerializer(TypeSerializer[tuple[str, Any] | None, np.object_]):
+    def __init__(self, cases: list[tuple[str, TypeSerializer[Any, Any]] | None]) -> None:
         super().__init__(np.object_)
-        self.cases = cases
+        if cases[0] is None:
+            self._offset = 1
+            self._cases = cast(list[tuple[str, TypeSerializer[Any, Any]]], cases[1:])
+        else:
+            self._offset = 0
+            self._cases = cast(list[tuple[str, TypeSerializer[Any, Any]]], cases)
 
-    def write(self, stream: CodedOutputStream, value: Any) -> None:
-        for i, case_serializer in enumerate(self.cases):
-            if case_serializer.is_value_supported(value):
-                stream.write_byte(i)
-                case_serializer.write(stream, value)
+    def write(self, stream: CodedOutputStream, value: tuple[str, Any] | None) -> None:
+        if value is None:
+            if self._offset == 1:
+                stream.write_byte(0)
+                return
+            else:
+                raise ValueError("None is not a valid for this union type")
+
+        if not isinstance(value, tuple) or len(value) != 2:
+            raise ValueError(f"Union values cannot be {type(value)} must be tuples[str, object] | None")
+
+        tag, inner_value = value
+        for i, (case_tag, case_serializer) in enumerate(self._cases):
+            if case_tag == tag:
+                stream.write_byte(i + self._offset)
+                case_serializer.write(stream, inner_value)
                 return
 
         raise ValueError(f"Incorrect union type {type(value)}")
 
 
     def write_numpy(self, stream: CodedOutputStream, value: np.object_) -> None:
-        for i, case_serializer in enumerate(self.cases):
+        for i, case_serializer in enumerate(self._cases):
             if case_serializer.is_value_supported(value):
                 stream.write_byte(i)
                 case_serializer.write_numpy(stream, value)
@@ -1007,16 +1023,16 @@ class UnionSerializer(TypeSerializer[Any, np.object_]):
 
     def read(self, stream: CodedInputStream, read_as_numpy: Types) -> Any:
         case_index = stream.read_byte()
-        case_serializer = self.cases[case_index]
+        case_serializer = self._cases[case_index]
         return case_serializer.read(stream, read_as_numpy)
 
     def read_numpy(self, stream: CodedInputStream) -> np.object_:
         case_index = stream.read_byte()
-        case_serializer = self.cases[case_index]
+        case_serializer = self._cases[case_index]
         return case_serializer.read_numpy(stream)
 
     def is_value_supported(self, value: Any) -> bool:
-        return any(case_serializer.is_value_supported(value) for case_serializer in self.cases)
+        return any(case_serializer.is_value_supported(value) for case_serializer in self._cases)
 
 
 class StreamSerializer(TypeSerializer[Iterable[T], Any]):
