@@ -97,7 +97,7 @@ func writeRecord(w *formatting.IndentedWriter, rec *dsl.RecordDefinition, st dsl
 			w.Indented(func() {
 				common.WriteDocstring(w, computedField.Comment)
 				writeComputedFieldExpression(w, computedField.Expression, rec.Namespace)
-				w.WriteStringln("\n")
+				w.WriteStringln("")
 			})
 		}
 
@@ -108,10 +108,38 @@ func writeRecord(w *formatting.IndentedWriter, rec *dsl.RecordDefinition, st dsl
 	w.WriteStringln("")
 }
 
+type tailHandler func(next func())
+
+type tailWrapper struct {
+	outer   *tailWrapper
+	handler tailHandler
+}
+
+func (t tailWrapper) Append(handler tailHandler) tailWrapper {
+	return tailWrapper{
+		outer:   &t,
+		handler: handler,
+	}
+}
+
+func (t tailWrapper) Run(body func()) {
+	t.composeFunc(body)()
+}
+
+func (t tailWrapper) composeFunc(next func()) func() {
+	if t.handler == nil {
+		return next
+	}
+	this := func() { t.handler(next) }
+	if t.outer == nil {
+		return this
+	}
+
+	return t.outer.composeFunc(this)
+}
+
 func writeComputedFieldExpression(w *formatting.IndentedWriter, expression dsl.Expression, contextNamespace string) {
-
 	helperFunctionLookup := make(map[any]string)
-
 	dsl.Visit(expression, func(self dsl.Visitor, node dsl.Node) {
 		switch t := node.(type) {
 		case *dsl.FunctionCallExpression:
@@ -138,86 +166,260 @@ func writeComputedFieldExpression(w *formatting.IndentedWriter, expression dsl.E
 		self.VisitChildren(node)
 	})
 
-	w.WriteString("return ")
-	dsl.Visit(expression, func(self dsl.Visitor, node dsl.Node) {
+	varCounter := 0
+	newVarName := func() string {
+		varName := fmt.Sprintf("_var%d", varCounter)
+		varCounter++
+		return varName
+	}
+
+	tail := tailWrapper{}.Append(func(next func()) {
+		w.WriteString("return ")
+		next()
+		w.WriteStringln("")
+	})
+
+	dsl.VisitWithContext(expression, tail, func(self dsl.VisitorWithContext[tailWrapper], node dsl.Node, tail tailWrapper) {
 		switch t := node.(type) {
 		case *dsl.IntegerLiteralExpression:
-			fmt.Fprintf(w, "%d", &t.Value)
-		case *dsl.StringLiteralExpression:
-			fmt.Fprintf(w, "%q", t.Value)
-		case *dsl.MemberAccessExpression:
-			if t.Target == nil {
-				w.WriteString("self")
-			} else {
-				self.Visit(t.Target)
-			}
-			w.WriteString(".")
-			if t.IsComputedField {
-				fmt.Fprintf(w, "%s()", common.ComputedFieldIdentifierName(t.Member))
-			} else {
-				w.WriteString(common.FieldIdentifierName(t.Member))
-			}
-		case *dsl.IndexExpression:
-			isTargetArray := false
-			if t.Target != nil {
-				if gt, ok := t.Target.GetResolvedType().(*dsl.GeneralizedType); ok {
-					if _, ok := gt.Dimensionality.(*dsl.Array); ok {
-						isTargetArray = true
-					}
-				}
-			}
-			if isTargetArray {
-				// a cast is needed for numpy subscripting
-				fmt.Fprintf(w, "typing.cast(%s, ", common.TypeSyntax(t.GetResolvedType(), contextNamespace))
-			}
-
-			self.Visit(t.Target)
-			w.WriteString("[")
-			formatting.Delimited(w, ", ", t.Arguments, func(w *formatting.IndentedWriter, i int, a *dsl.IndexArgument) {
-				self.Visit(a.Value)
+			tail.Run(func() {
+				fmt.Fprintf(w, "%d", &t.Value)
 			})
-			w.WriteString("]")
+		case *dsl.StringLiteralExpression:
+			tail.Run(func() {
+				fmt.Fprintf(w, "%q", t.Value)
+			})
+		case *dsl.MemberAccessExpression:
+			tail.Run(func() {
+				if t.Target == nil {
+					if t.Kind == dsl.MemberAccessVariable {
+						w.WriteString(common.FieldIdentifierName(t.Member))
+						return
+					}
 
-			if isTargetArray {
-				w.WriteString(")")
-			}
-		case *dsl.FunctionCallExpression:
-			switch t.FunctionName {
-			case dsl.FunctionSize:
-				switch dsl.ToGeneralizedType(dsl.GetUnderlyingType(t.Arguments[0].GetResolvedType())).Dimensionality.(type) {
-				case *dsl.Vector, *dsl.Map:
-					fmt.Fprintf(w, "len(")
-					self.Visit(t.Arguments[0])
-					fmt.Fprintf(w, ")")
-				case *dsl.Array:
-					self.Visit(t.Arguments[0])
-
-					if len(t.Arguments) == 1 {
-						fmt.Fprintf(w, ".size")
-					} else {
-						fmt.Fprintf(w, ".shape[")
-						remainingArgs := t.Arguments[1:]
-						formatting.Delimited(w, ", ", remainingArgs, func(w *formatting.IndentedWriter, i int, arg dsl.Expression) {
-							self.Visit(arg)
-						})
-						fmt.Fprintf(w, "]")
+					w.WriteString("self")
+				} else {
+					self.Visit(t.Target, tailWrapper{})
+				}
+				w.WriteString(".")
+				if t.Kind == dsl.MemberAccessComputedField {
+					fmt.Fprintf(w, "%s()", common.ComputedFieldIdentifierName(t.Member))
+				} else {
+					w.WriteString(common.FieldIdentifierName(t.Member))
+				}
+			})
+		case *dsl.IndexExpression:
+			tail.Run(func() {
+				isTargetArray := false
+				if t.Target != nil {
+					if gt, ok := t.Target.GetResolvedType().(*dsl.GeneralizedType); ok {
+						if _, ok := gt.Dimensionality.(*dsl.Array); ok {
+							isTargetArray = true
+						}
 					}
 				}
-			case dsl.FunctionDimensionIndex:
-				helperFuncName := helperFunctionLookup[t.Arguments[0].GetResolvedType()]
-				fmt.Fprintf(w, "%s(", helperFuncName)
-				self.Visit(t.Arguments[1])
-				w.WriteString(")")
+				if isTargetArray {
+					// a cast is needed for numpy subscripting
+					fmt.Fprintf(w, "typing.cast(%s, ", common.TypeSyntax(t.GetResolvedType(), contextNamespace))
+				}
 
-			case dsl.FunctionDimensionCount:
-				self.Visit(t.Arguments[0])
-				fmt.Fprintf(w, ".ndim")
-			default:
-				panic(fmt.Sprintf("Unknown function '%s'", t.FunctionName))
+				self.Visit(t.Target, tailWrapper{})
+				w.WriteString("[")
+				formatting.Delimited(w, ", ", t.Arguments, func(w *formatting.IndentedWriter, i int, a *dsl.IndexArgument) {
+					self.Visit(a.Value, tailWrapper{})
+				})
+				w.WriteString("]")
+
+				if isTargetArray {
+					w.WriteString(")")
+				}
+			})
+		case *dsl.FunctionCallExpression:
+			tail.Run(func() {
+				switch t.FunctionName {
+				case dsl.FunctionSize:
+					switch dsl.ToGeneralizedType(dsl.GetUnderlyingType(t.Arguments[0].GetResolvedType())).Dimensionality.(type) {
+					case *dsl.Vector, *dsl.Map:
+						fmt.Fprintf(w, "len(")
+						self.Visit(t.Arguments[0], tailWrapper{})
+						fmt.Fprintf(w, ")")
+					case *dsl.Array:
+						self.Visit(t.Arguments[0], tailWrapper{})
+
+						if len(t.Arguments) == 1 {
+							fmt.Fprintf(w, ".size")
+						} else {
+							fmt.Fprintf(w, ".shape[")
+							remainingArgs := t.Arguments[1:]
+							formatting.Delimited(w, ", ", remainingArgs, func(w *formatting.IndentedWriter, i int, arg dsl.Expression) {
+								self.Visit(arg, tailWrapper{})
+							})
+							fmt.Fprintf(w, "]")
+						}
+					}
+				case dsl.FunctionDimensionIndex:
+					helperFuncName := helperFunctionLookup[t.Arguments[0].GetResolvedType()]
+					fmt.Fprintf(w, "%s(", helperFuncName)
+					self.Visit(t.Arguments[1], tailWrapper{})
+					w.WriteString(")")
+
+				case dsl.FunctionDimensionCount:
+					self.Visit(t.Arguments[0], tailWrapper{})
+					fmt.Fprintf(w, ".ndim")
+				default:
+					panic(fmt.Sprintf("Unknown function '%s'", t.FunctionName))
+				}
+			})
+		case *dsl.SwitchExpression:
+			targetType := dsl.ToGeneralizedType(dsl.GetUnderlyingType(t.Target.GetResolvedType()))
+
+			unionVariableName := newVarName()
+			fmt.Fprintf(w, "%s = ", unionVariableName)
+			self.Visit(t.Target, tailWrapper{})
+			w.WriteStringln("")
+
+			if targetType.Cases.IsOptional() {
+				for i, switchCase := range t.Cases {
+					writeSwitchCaseOverOptional(w, switchCase, unionVariableName, i == len(targetType.Cases)-1, self, tail)
+				}
+				return
 			}
+
+			if targetType.Cases.IsUnion() {
+				for _, switchCase := range t.Cases {
+					writeSwitchCaseOverUnion(w, targetType, switchCase, unionVariableName, self, tail)
+				}
+
+				fmt.Fprintf(w, "raise RuntimeError(\"Unexpected union case\")\n")
+				return
+			}
+
+			// this is over a single type
+			if len(t.Cases) != 1 {
+				panic("switch expression over a single type expected to have exactly one case")
+			}
+			switchCase := t.Cases[0]
+			switch pattern := switchCase.Pattern.(type) {
+			case *dsl.DeclarationPattern:
+				fmt.Fprintf(w, "%s = %s\n", common.FieldIdentifierName(pattern.Identifier), unionVariableName)
+				self.Visit(switchCase.Expression, tail)
+			case *dsl.TypePattern, *dsl.DiscardPattern:
+				self.Visit(switchCase.Expression, tail)
+			default:
+				panic(fmt.Sprintf("Unexpected pattern type %T", t.Cases[0].Pattern))
+			}
+
+		case *dsl.TypeConversionExpression:
+			tail = tail.Append(func(next func()) {
+				fmt.Fprintf(w, "%s(", typeConversionCallable(t.Type))
+				next()
+				w.WriteString(")")
+			})
+
+			self.Visit(t.Expression, tail)
+		}
+	})
+}
+
+func writeSwitchCaseOverOptional(w *formatting.IndentedWriter, switchCase *dsl.SwitchCase, variableName string, isLastCase bool, visitor dsl.VisitorWithContext[tailWrapper], tail tailWrapper) {
+	writeCore := func(typePattern *dsl.TypePattern, declarationIdentifier string) {
+		if declarationIdentifier != "" {
+			fmt.Fprintf(w, "%s = %s\n", declarationIdentifier, variableName)
+		}
+		visitor.Visit(switchCase.Expression, tail)
+	}
+
+	writeTypeCase := func(typePattern *dsl.TypePattern, declarationIdentifier string) {
+		if isLastCase {
+			writeCore(typePattern, declarationIdentifier)
+			return
 		}
 
-	})
+		if typePattern.Type == nil {
+			fmt.Fprintf(w, "if %s is None:\n", variableName)
+		} else {
+			fmt.Fprintf(w, "if %s is not None:\n", variableName)
+		}
+
+		w.Indented(func() {
+			writeCore(typePattern, declarationIdentifier)
+		})
+	}
+
+	switch t := switchCase.Pattern.(type) {
+	case *dsl.TypePattern:
+		writeTypeCase(t, "")
+	case *dsl.DeclarationPattern:
+		writeTypeCase(&t.TypePattern, common.FieldIdentifierName(t.Identifier))
+	case *dsl.DiscardPattern:
+		writeCore(nil, "")
+	default:
+		panic(fmt.Sprintf("Unknown pattern type '%T'", switchCase.Pattern))
+	}
+}
+
+func writeSwitchCaseOverUnion(w *formatting.IndentedWriter, unionType *dsl.GeneralizedType, switchCase *dsl.SwitchCase, variableName string, visitor dsl.VisitorWithContext[tailWrapper], tail tailWrapper) {
+	writeTypeCase := func(typePattern *dsl.TypePattern, declarationIdentifier string) {
+		for _, typeCase := range unionType.Cases {
+			if dsl.TypesEqual(typePattern.Type, typeCase.Type) {
+				if typePattern.Type == nil {
+					fmt.Fprintf(w, "if %s is None:\n", variableName)
+					w.Indented(func() {
+						visitor.Visit(switchCase.Expression, tail)
+					})
+				} else {
+					fmt.Fprintf(w, "if %s[0] == \"%s\":\n", variableName, typeCase.Label)
+					w.Indented(func() {
+						if declarationIdentifier != "" {
+							fmt.Fprintf(w, "%s = %s[1]\n", declarationIdentifier, variableName)
+						}
+						visitor.Visit(switchCase.Expression, tail)
+					})
+				}
+				return
+			}
+		}
+		panic(fmt.Sprintf("Did not find pattern type  '%s'", dsl.TypeToShortSyntax(typePattern.Type, false)))
+	}
+
+	switch t := switchCase.Pattern.(type) {
+	case *dsl.TypePattern:
+		writeTypeCase(t, "")
+	case *dsl.DeclarationPattern:
+		writeTypeCase(&t.TypePattern, common.FieldIdentifierName(t.Identifier))
+	case *dsl.DiscardPattern:
+		visitor.Visit(switchCase.Expression, tail)
+	default:
+		panic(fmt.Sprintf("Unknown pattern type '%T'", switchCase.Pattern))
+	}
+}
+
+func typeConversionCallable(t dsl.Type) string {
+	switch t := t.(type) {
+	case *dsl.SimpleType:
+		switch t := t.ResolvedDefinition.(type) {
+		case dsl.PrimitiveDefinition:
+			switch t {
+			case dsl.Bool:
+				return "bool"
+			case dsl.Int8, dsl.Uint8, dsl.Int16, dsl.Uint16, dsl.Int32, dsl.Uint32, dsl.Int64, dsl.Uint64, dsl.Size:
+				return "int"
+			case dsl.Float32, dsl.Float64:
+				return "float"
+			case dsl.ComplexFloat32, dsl.ComplexFloat64:
+				return "complex"
+			case dsl.String:
+				return "str"
+			case dsl.Date:
+				return "datetime.date"
+			case dsl.Time:
+				return "datetime.time"
+			case dsl.DateTime:
+				return "datetime.datetime"
+			}
+		}
+	}
+	panic(fmt.Sprintf("Unsupported type '%s'", t))
 }
 
 func GetGenericBase(t dsl.TypeDefinition) string {

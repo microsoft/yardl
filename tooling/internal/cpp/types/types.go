@@ -216,7 +216,7 @@ func writeComputedFieldExpression(w *formatting.IndentedWriter, expression dsl.E
 				self.Visit(t.Target)
 				w.WriteString(".")
 			}
-			if t.IsComputedField {
+			if t.Kind == dsl.MemberAccessComputedField {
 				fmt.Fprintf(w, "%s()", common.ComputedFieldIdentifierName(t.Member))
 			} else {
 				w.WriteString(common.FieldIdentifierName(t.Member))
@@ -307,7 +307,7 @@ func writeComputedFieldExpression(w *formatting.IndentedWriter, expression dsl.E
 			}
 			switch pattern := t.Cases[0].Pattern.(type) {
 			case *dsl.DeclarationPattern:
-				fmt.Fprintf(w, "[]([[maybe_unused]]auto&& %s) -> %s {\n", pattern.Identifier, common.TypeSyntax(t.ResolvedType))
+				fmt.Fprintf(w, "[]([[maybe_unused]]auto&& %s) -> %s {\n", common.FieldIdentifierName(pattern.Identifier), common.TypeSyntax(t.ResolvedType))
 				w.Indented(func() {
 					w.WriteString("return ")
 					self.Visit(t.Cases[0].Expression)
@@ -319,7 +319,7 @@ func writeComputedFieldExpression(w *formatting.IndentedWriter, expression dsl.E
 			case *dsl.TypePattern, *dsl.DiscardPattern:
 				self.Visit(t.Target)
 			default:
-				panic(fmt.Sprintf("Unexected pattern type %T", t.Cases[0].Pattern))
+				panic(fmt.Sprintf("Unexpected pattern type %T", t.Cases[0].Pattern))
 			}
 
 		case *dsl.TypeConversionExpression:
@@ -351,7 +351,7 @@ func writeSwitchCaseOverUnion(w *formatting.IndentedWriter, switchCase *dsl.Swit
 	case *dsl.TypePattern:
 		writeTypeCase(t, "")
 	case *dsl.DeclarationPattern:
-		writeTypeCase(&t.TypePattern, t.Identifier)
+		writeTypeCase(&t.TypePattern, common.FieldIdentifierName(t.Identifier))
 	case *dsl.DiscardPattern:
 		w.WriteString("return ")
 		visitor.Visit(switchCase.Expression)
@@ -393,7 +393,7 @@ func writeSwitchCaseOverOptional(w *formatting.IndentedWriter, switchCase *dsl.S
 	case *dsl.TypePattern:
 		writeTypeCase(t, "")
 	case *dsl.DeclarationPattern:
-		writeTypeCase(&t.TypePattern, t.Identifier)
+		writeTypeCase(&t.TypePattern, common.FieldIdentifierName(t.Identifier))
 	case *dsl.DiscardPattern:
 		writeCore(nil, "")
 	default:

@@ -147,6 +147,21 @@ func (e *StringLiteralExpression) MarshalJSON() ([]byte, error) {
 	return json.Marshal(fmt.Sprintf("%q", e.Value))
 }
 
+func (k *MemberAccessKind) MarshalJSON() ([]byte, error) {
+	switch *k {
+	case MemberAccessUnknown:
+		return json.Marshal("unknown")
+	case MemberAccessField:
+		return json.Marshal("field")
+	case MemberAccessComputedField:
+		return json.Marshal("computedField")
+	case MemberAccessVariable:
+		return json.Marshal("variable")
+	default:
+		panic(fmt.Sprintf("unexpected member access kind %d", *k))
+	}
+}
+
 func (e *MemberAccessExpression) MarshalJSON() ([]byte, error) {
 	type Alias MemberAccessExpression
 	return json.Marshal(struct {

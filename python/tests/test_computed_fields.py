@@ -107,3 +107,45 @@ def test_array_size():
 
     r.array_field_map_dimensions = np.array([[1, 2, 3], [4,5,6]], dtype=np.int32)
     assert r.array_field_map_dimensions_x_size() == 2
+
+
+def test_switch_expression():
+    r = tm.RecordWithComputedFields()
+    r.optional_named_array = np.array([[1, 2, 3], [4,5,6]], dtype=np.int32)
+    assert r.optional_named_array_length() == 6
+    assert r.optional_named_array_length_with_discard() == 6
+
+    r.optional_named_array = None
+    assert r.optional_named_array_length() == 0
+    assert r.optional_named_array_length_with_discard() == 0
+
+    r.int_float_union = ("int32", 42)
+    assert r.int_float_union_as_float() == 42.0
+    r.int_float_union = ("float32", 42.9)
+    assert r.int_float_union_as_float() == 42.9
+
+    r.nullable_int_float_union = None
+    assert r.nullable_int_float_union_string() == "null"
+    r.nullable_int_float_union = ("int32", 42)
+    assert r.nullable_int_float_union_string() == "int"
+    r.nullable_int_float_union = ("float32", 42.9)
+    assert r.nullable_int_float_union_string() == "float"
+
+    r.union_with_nested_generic_union = ("int32", 42)
+    assert r.nested_switch() == -1
+    assert r.use_nested_computed_field() == -1
+
+    r.union_with_nested_generic_union = ("GenericRecordWithComputedFields<string, float32>", tm.GenericRecordWithComputedFields(f1 = ("T0", "hi")))
+    assert r.nested_switch() == 10
+    assert r.use_nested_computed_field() == 0
+    r.union_with_nested_generic_union = ("GenericRecordWithComputedFields<string, float32>", tm.GenericRecordWithComputedFields(f1 = ("T1", 42.9)))
+    assert r.nested_switch() == 20
+    assert r.use_nested_computed_field() == 1
+
+    r.int_field = 10
+    assert r.switch_over_sigle_value() == 10
+
+    gr = tm.GenericRecordWithComputedFields(f1 = ("T0", 42 ))
+    assert gr.type_index() == 0
+    gr.f1 = ("T1", 42.9)
+    assert gr.type_index() == 1

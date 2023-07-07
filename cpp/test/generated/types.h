@@ -811,8 +811,8 @@ struct RecordWithComputedFields {
     return std::visit(
       [&](auto&& __case_arg__) -> float {
         if constexpr (std::is_same_v<std::decay_t<decltype(__case_arg__)>, int32_t>) {
-          int32_t const& i = __case_arg__;
-          return static_cast<float>(i);
+          int32_t const& i_foo = __case_arg__;
+          return static_cast<float>(i_foo);
         }
         if constexpr (std::is_same_v<std::decay_t<decltype(__case_arg__)>, float>) {
           float const& f = __case_arg__;
@@ -871,6 +871,12 @@ struct RecordWithComputedFields {
         }
       },
       union_with_nested_generic_union);
+  }
+
+  int32_t SwitchOverSigleValue() const {
+    return []([[maybe_unused]]auto&& ii) -> int32_t {
+      return ii;
+    }(int_field);
   }
 
   bool operator==(const RecordWithComputedFields& other) const {

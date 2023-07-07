@@ -18,6 +18,8 @@ PInt: !record
   fields:
     x: int
     y: int
+  computedFields:
+    x1: x
 
 MyUnion<T, U>: [T, U]
 
@@ -30,3 +32,35 @@ WithUnion: !record
       - MyString
       - PInt
       - string->int
+
+
+GenericRecordWithComputedFields<T0, T1>: !record
+  fields:
+    f1: [T0, T1]
+  computedFields:
+    typeIndex:
+      !switch f1:
+        T0: 0
+        T1: 1
+
+
+RecordWithComputedFields: !record
+  fields:
+    unionWithNestedGenericUnion:
+      - int
+      - GenericRecordWithComputedFields<string, float>
+    mapField: string->string
+  computedFields:
+
+    # nestedSwitch:
+    #   !switch unionWithNestedGenericUnion:
+    #     int: -1
+    #     GenericRecordWithComputedFields<string, float> rec:
+    #       !switch rec.f1:
+    #         float f: 20
+    #         string s: 10
+
+    useNestedComputedField:
+      !switch unionWithNestedGenericUnion:
+        int: -1
+        GenericRecordWithComputedFields<string, float> rec: rec.typeIndex

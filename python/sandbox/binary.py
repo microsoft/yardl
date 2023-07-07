@@ -17,6 +17,10 @@ T = typing.TypeVar('T')
 T_NP = typing.TypeVar('T_NP', bound=np.generic)
 U = typing.TypeVar('U')
 U_NP = typing.TypeVar('U_NP', bound=np.generic)
+T0 = typing.TypeVar('T0')
+T0_NP = typing.TypeVar('T0_NP', bound=np.generic)
+T1 = typing.TypeVar('T1')
+T1_NP = typing.TypeVar('T1_NP', bound=np.generic)
 
 class BinaryPWriter(_binary.BinaryProtocolWriter, PWriterBase):
     """Binary writer for the P protocol."""
@@ -93,5 +97,41 @@ class _WithUnionSerializer(_binary.RecordSerializer[WithUnion]):
     def read(self, stream: _binary.CodedInputStream, read_as_numpy: Types) -> WithUnion:
         field_values = self._read(stream, read_as_numpy)
         return WithUnion(f=field_values[0])
+
+
+class _GenericRecordWithComputedFieldsSerializer(typing.Generic[T0, T0_NP, T1, T1_NP], _binary.RecordSerializer[GenericRecordWithComputedFields[T0, T1]]):
+    def __init__(self, t0_serializer: _binary.TypeSerializer[T0, T0_NP], t1_serializer: _binary.TypeSerializer[T1, T1_NP]) -> None:
+        super().__init__([("f1", _binary.UnionSerializer([("T0", t0_serializer), ("T1", t1_serializer)]))])
+
+    def write(self, stream: _binary.CodedOutputStream, value: GenericRecordWithComputedFields[T0, T1]) -> None:
+        if isinstance(value, np.void):
+            self.write_numpy(stream, value)
+            return
+        self._write(stream, value.f1)
+
+    def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
+        self._write(stream, value['f1'])
+
+    def read(self, stream: _binary.CodedInputStream, read_as_numpy: Types) -> GenericRecordWithComputedFields[T0, T1]:
+        field_values = self._read(stream, read_as_numpy)
+        return GenericRecordWithComputedFields[T0, T1](f1=field_values[0])
+
+
+class _RecordWithComputedFieldsSerializer(_binary.RecordSerializer[RecordWithComputedFields]):
+    def __init__(self) -> None:
+        super().__init__([("union_with_nested_generic_union", _binary.UnionSerializer([("int32", _binary.int32_serializer), ("GenericRecordWithComputedFields<string, float32>", _GenericRecordWithComputedFieldsSerializer(_binary.string_serializer, _binary.float32_serializer))])), ("map_field", _binary.MapSerializer(_binary.string_serializer, _binary.string_serializer))])
+
+    def write(self, stream: _binary.CodedOutputStream, value: RecordWithComputedFields) -> None:
+        if isinstance(value, np.void):
+            self.write_numpy(stream, value)
+            return
+        self._write(stream, value.union_with_nested_generic_union, value.map_field)
+
+    def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
+        self._write(stream, value['union_with_nested_generic_union'], value['map_field'])
+
+    def read(self, stream: _binary.CodedInputStream, read_as_numpy: Types) -> RecordWithComputedFields:
+        field_values = self._read(stream, read_as_numpy)
+        return RecordWithComputedFields(union_with_nested_generic_union=field_values[0], map_field=field_values[1])
 
 

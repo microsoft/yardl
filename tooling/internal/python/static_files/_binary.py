@@ -954,7 +954,7 @@ class UnionSerializer(TypeSerializer[tuple[str, Any] | None, np.object_]):
                 raise ValueError("None is not a valid for this union type")
 
         if not isinstance(value, tuple) or len(value) != 2:
-            raise ValueError(f"Union values cannot be {type(value)} must be tuples[str, object] | None")
+            raise ValueError(f"Union values cannot be {type(value)} must be `tuples[str, object] | None`")
 
         tag, inner_value = value
         for i, (case_tag, case_serializer) in enumerate(self._cases):

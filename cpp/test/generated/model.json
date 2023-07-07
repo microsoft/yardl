@@ -1221,7 +1221,8 @@
                   "switch": {
                     "target": {
                       "memberAccess": {
-                        "member": "f1"
+                        "member": "f1",
+                        "kind": "field"
                       }
                     },
                     "cases": [
@@ -1449,7 +1450,8 @@
                 "name": "accessOtherComputedField",
                 "expression": {
                   "memberAccess": {
-                    "member": "intField"
+                    "member": "intField",
+                    "kind": "field"
                   }
                 }
               },
@@ -1457,7 +1459,8 @@
                 "name": "accessIntField",
                 "expression": {
                   "memberAccess": {
-                    "member": "intField"
+                    "member": "intField",
+                    "kind": "field"
                   }
                 }
               },
@@ -1465,7 +1468,8 @@
                 "name": "accessStringField",
                 "expression": {
                   "memberAccess": {
-                    "member": "stringField"
+                    "member": "stringField",
+                    "kind": "field"
                   }
                 }
               },
@@ -1473,7 +1477,8 @@
                 "name": "accessTupleField",
                 "expression": {
                   "memberAccess": {
-                    "member": "tupleField"
+                    "member": "tupleField",
+                    "kind": "field"
                   }
                 }
               },
@@ -1483,10 +1488,12 @@
                   "memberAccess": {
                     "target": {
                       "memberAccess": {
-                        "member": "tupleField"
+                        "member": "tupleField",
+                        "kind": "field"
                       }
                     },
-                    "member": "v2"
+                    "member": "v2",
+                    "kind": "field"
                   }
                 }
               },
@@ -1494,7 +1501,8 @@
                 "name": "accessArrayField",
                 "expression": {
                   "memberAccess": {
-                    "member": "arrayField"
+                    "member": "arrayField",
+                    "kind": "field"
                   }
                 }
               },
@@ -1504,7 +1512,8 @@
                   "index": {
                     "target": {
                       "memberAccess": {
-                        "member": "arrayField"
+                        "member": "arrayField",
+                        "kind": "field"
                       }
                     },
                     "arguments": [
@@ -1524,7 +1533,8 @@
                   "index": {
                     "target": {
                       "memberAccess": {
-                        "member": "arrayField"
+                        "member": "arrayField",
+                        "kind": "field"
                       }
                     },
                     "arguments": [
@@ -1544,7 +1554,8 @@
                 "name": "accessVectorField",
                 "expression": {
                   "memberAccess": {
-                    "member": "vectorField"
+                    "member": "vectorField",
+                    "kind": "field"
                   }
                 }
               },
@@ -1554,7 +1565,8 @@
                   "index": {
                     "target": {
                       "memberAccess": {
-                        "member": "vectorField"
+                        "member": "vectorField",
+                        "kind": "field"
                       }
                     },
                     "arguments": [
@@ -1573,7 +1585,8 @@
                       "index": {
                         "target": {
                           "memberAccess": {
-                            "member": "vectorOfVectorsField"
+                            "member": "vectorOfVectorsField",
+                            "kind": "field"
                           }
                         },
                         "arguments": [
@@ -1599,7 +1612,8 @@
                     "arguments": [
                       {
                         "memberAccess": {
-                          "member": "arrayField"
+                          "member": "arrayField",
+                          "kind": "field"
                         }
                       }
                     ]
@@ -1614,7 +1628,8 @@
                     "arguments": [
                       {
                         "memberAccess": {
-                          "member": "arrayField"
+                          "member": "arrayField",
+                          "kind": "field"
                         }
                       },
                       0
@@ -1630,7 +1645,8 @@
                     "arguments": [
                       {
                         "memberAccess": {
-                          "member": "arrayField"
+                          "member": "arrayField",
+                          "kind": "field"
                         }
                       },
                       1
@@ -1646,7 +1662,8 @@
                     "arguments": [
                       {
                         "memberAccess": {
-                          "member": "arrayField"
+                          "member": "arrayField",
+                          "kind": "field"
                         }
                       },
                       0
@@ -1662,7 +1679,8 @@
                     "arguments": [
                       {
                         "memberAccess": {
-                          "member": "arrayField"
+                          "member": "arrayField",
+                          "kind": "field"
                         }
                       },
                       1
@@ -1678,12 +1696,14 @@
                     "arguments": [
                       {
                         "memberAccess": {
-                          "member": "arrayField"
+                          "member": "arrayField",
+                          "kind": "field"
                         }
                       },
                       {
                         "memberAccess": {
-                          "member": "intField"
+                          "member": "intField",
+                          "kind": "field"
                         }
                       }
                     ]
@@ -1698,7 +1718,8 @@
                     "arguments": [
                       {
                         "memberAccess": {
-                          "member": "arrayField"
+                          "member": "arrayField",
+                          "kind": "field"
                         }
                       },
                       {
@@ -1707,12 +1728,14 @@
                           "arguments": [
                             {
                               "memberAccess": {
-                                "member": "arrayField"
+                                "member": "arrayField",
+                                "kind": "field"
                               }
                             },
                             {
                               "memberAccess": {
-                                "member": "stringField"
+                                "member": "stringField",
+                                "kind": "field"
                               }
                             }
                           ]
@@ -1730,17 +1753,20 @@
                     "arguments": [
                       {
                         "memberAccess": {
-                          "member": "arrayField"
+                          "member": "arrayField",
+                          "kind": "field"
                         }
                       },
                       {
                         "memberAccess": {
                           "target": {
                             "memberAccess": {
-                              "member": "tupleField"
+                              "member": "tupleField",
+                              "kind": "field"
                             }
                           },
-                          "member": "v1"
+                          "member": "v1",
+                          "kind": "field"
                         }
                       }
                     ]
@@ -1755,7 +1781,8 @@
                     "arguments": [
                       {
                         "memberAccess": {
-                          "member": "arrayFieldMapDimensions"
+                          "member": "arrayFieldMapDimensions",
+                          "kind": "field"
                         }
                       },
                       0
@@ -1783,7 +1810,8 @@
                     "arguments": [
                       {
                         "memberAccess": {
-                          "member": "vectorField"
+                          "member": "vectorField",
+                          "kind": "field"
                         }
                       }
                     ]
@@ -1810,12 +1838,14 @@
                     "arguments": [
                       {
                         "memberAccess": {
-                          "member": "arrayField"
+                          "member": "arrayField",
+                          "kind": "field"
                         }
                       },
                       {
                         "memberAccess": {
-                          "member": "stringField"
+                          "member": "stringField",
+                          "kind": "field"
                         }
                       }
                     ]
@@ -1834,7 +1864,8 @@
                     "arguments": [
                       {
                         "memberAccess": {
-                          "member": "dynamicArrayField"
+                          "member": "dynamicArrayField",
+                          "kind": "field"
                         }
                       }
                     ]
@@ -1845,7 +1876,8 @@
                 "name": "accessMap",
                 "expression": {
                   "memberAccess": {
-                    "member": "mapField"
+                    "member": "mapField",
+                    "kind": "field"
                   }
                 }
               },
@@ -1857,7 +1889,8 @@
                     "arguments": [
                       {
                         "memberAccess": {
-                          "member": "mapField"
+                          "member": "mapField",
+                          "kind": "field"
                         }
                       }
                     ]
@@ -1870,7 +1903,8 @@
                   "index": {
                     "target": {
                       "memberAccess": {
-                        "member": "mapField"
+                        "member": "mapField",
+                        "kind": "field"
                       }
                     },
                     "arguments": [
@@ -1891,7 +1925,8 @@
                   "index": {
                     "target": {
                       "memberAccess": {
-                        "member": "mapField"
+                        "member": "mapField",
+                        "kind": "field"
                       }
                     },
                     "arguments": [
@@ -1899,7 +1934,7 @@
                         "expression": {
                           "memberAccess": {
                             "member": "stringComputedField",
-                            "isComputed": true
+                            "kind": "computedField"
                           }
                         }
                       }
@@ -1913,7 +1948,8 @@
                   "index": {
                     "target": {
                       "memberAccess": {
-                        "member": "mapField"
+                        "member": "mapField",
+                        "kind": "field"
                       }
                     },
                     "arguments": [
@@ -1922,7 +1958,8 @@
                           "index": {
                             "target": {
                               "memberAccess": {
-                                "member": "mapField"
+                                "member": "mapField",
+                                "kind": "field"
                               }
                             },
                             "arguments": [
@@ -1930,7 +1967,7 @@
                                 "expression": {
                                   "memberAccess": {
                                     "member": "stringComputedField",
-                                    "isComputed": true
+                                    "kind": "computedField"
                                   }
                                 }
                               }
@@ -1948,7 +1985,8 @@
                   "index": {
                     "target": {
                       "memberAccess": {
-                        "member": "mapField"
+                        "member": "mapField",
+                        "kind": "field"
                       }
                     },
                     "arguments": [
@@ -1965,7 +2003,8 @@
                   "switch": {
                     "target": {
                       "memberAccess": {
-                        "member": "optionalNamedArray"
+                        "member": "optionalNamedArray",
+                        "kind": "field"
                       }
                     },
                     "cases": [
@@ -1980,7 +2019,8 @@
                             "arguments": [
                               {
                                 "memberAccess": {
-                                  "member": "arr"
+                                  "member": "arr",
+                                  "kind": "variable"
                                 }
                               }
                             ]
@@ -2003,7 +2043,8 @@
                   "switch": {
                     "target": {
                       "memberAccess": {
-                        "member": "optionalNamedArray"
+                        "member": "optionalNamedArray",
+                        "kind": "field"
                       }
                     },
                     "cases": [
@@ -2018,7 +2059,8 @@
                             "arguments": [
                               {
                                 "memberAccess": {
-                                  "member": "arr"
+                                  "member": "arr",
+                                  "kind": "variable"
                                 }
                               }
                             ]
@@ -2039,20 +2081,22 @@
                   "switch": {
                     "target": {
                       "memberAccess": {
-                        "member": "intFloatUnion"
+                        "member": "intFloatUnion",
+                        "kind": "field"
                       }
                     },
                     "cases": [
                       {
                         "pattern": {
                           "type": "int32",
-                          "identifier": "i"
+                          "identifier": "iFoo"
                         },
                         "expression": {
                           "convert": {
                             "expression": {
                               "memberAccess": {
-                                "member": "i"
+                                "member": "iFoo",
+                                "kind": "variable"
                               }
                             },
                             "type": "float32"
@@ -2066,7 +2110,8 @@
                         },
                         "expression": {
                           "memberAccess": {
-                            "member": "f"
+                            "member": "f",
+                            "kind": "variable"
                           }
                         }
                       }
@@ -2080,7 +2125,8 @@
                   "switch": {
                     "target": {
                       "memberAccess": {
-                        "member": "nullableIntFloatUnion"
+                        "member": "nullableIntFloatUnion",
+                        "kind": "field"
                       }
                     },
                     "cases": [
@@ -2110,7 +2156,8 @@
                   "switch": {
                     "target": {
                       "memberAccess": {
-                        "member": "unionWithNestedGenericUnion"
+                        "member": "unionWithNestedGenericUnion",
+                        "kind": "field"
                       }
                     },
                     "cases": [
@@ -2139,10 +2186,12 @@
                                   "memberAccess": {
                                     "target": {
                                       "memberAccess": {
-                                        "member": "rec"
+                                        "member": "rec",
+                                        "kind": "variable"
                                       }
                                     },
-                                    "member": "f1"
+                                    "member": "f1",
+                                    "kind": "field"
                                   }
                                 },
                                 "cases": [
@@ -2175,7 +2224,8 @@
                   "switch": {
                     "target": {
                       "memberAccess": {
-                        "member": "unionWithNestedGenericUnion"
+                        "member": "unionWithNestedGenericUnion",
+                        "kind": "field"
                       }
                     },
                     "cases": [
@@ -2202,14 +2252,42 @@
                               "memberAccess": {
                                 "target": {
                                   "memberAccess": {
-                                    "member": "rec"
+                                    "member": "rec",
+                                    "kind": "variable"
                                   }
                                 },
                                 "member": "typeIndex",
-                                "isComputed": true
+                                "kind": "computedField"
                               }
                             },
                             "type": "int16"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "name": "switchOverSigleValue",
+                "expression": {
+                  "switch": {
+                    "target": {
+                      "memberAccess": {
+                        "member": "intField",
+                        "kind": "field"
+                      }
+                    },
+                    "cases": [
+                      {
+                        "pattern": {
+                          "type": "int32",
+                          "identifier": "ii"
+                        },
+                        "expression": {
+                          "memberAccess": {
+                            "member": "ii",
+                            "kind": "variable"
                           }
                         }
                       }
@@ -2275,7 +2353,8 @@
                 "name": "float",
                 "expression": {
                   "memberAccess": {
-                    "member": "int"
+                    "member": "int",
+                    "kind": "field"
                   }
                 }
               },
@@ -2284,7 +2363,7 @@
                 "expression": {
                   "memberAccess": {
                     "member": "float",
-                    "isComputed": true
+                    "kind": "computedField"
                   }
                 }
               },
@@ -2294,7 +2373,8 @@
                   "index": {
                     "target": {
                       "memberAccess": {
-                        "member": "sizeof"
+                        "member": "sizeof",
+                        "kind": "field"
                       }
                     },
                     "arguments": [

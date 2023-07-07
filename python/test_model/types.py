@@ -261,7 +261,11 @@ AliasedMap = dict[K, V]
 
 @dataclasses.dataclass(slots=True, kw_only=True)
 class RecordWithUnions:
-    null_or_int_or_string: yardl.Int32 | str | None = None
+    null_or_int_or_string: (
+        tuple[typing.Literal["int32"], yardl.Int32]
+        | tuple[typing.Literal["string"], str]
+        | None
+    ) = None
 
 
 class Fruits(enum.Enum):
@@ -322,21 +326,39 @@ AliasedOptional = yardl.Int32 | None
 
 AliasedGenericOptional = T | None
 
-AliasedGenericUnion2 = T1 | T2
+AliasedGenericUnion2 = (
+    tuple[typing.Literal["T1"], T1]
+    | tuple[typing.Literal["T2"], T2]
+)
 
 AliasedGenericVector = list[T]
 
 AliasedGenericFixedVector = list[T]
 
-AliasedIntOrSimpleRecord = yardl.Int32 | SimpleRecord
+AliasedIntOrSimpleRecord = (
+    tuple[typing.Literal["int32"], yardl.Int32]
+    | tuple[typing.Literal["SimpleRecord"], SimpleRecord]
+)
 
-AliasedNullableIntSimpleRecord = yardl.Int32 | SimpleRecord | None
+AliasedNullableIntSimpleRecord = (
+    tuple[typing.Literal["int32"], yardl.Int32]
+    | tuple[typing.Literal["SimpleRecord"], SimpleRecord]
+    | None
+)
 
 @dataclasses.dataclass(slots=True, kw_only=True)
 class GenericRecordWithComputedFields(typing.Generic[T0, T1]):
-    f1: T0 | T1
+    f1: (
+        tuple[typing.Literal["T0"], T0]
+        | tuple[typing.Literal["T1"], T1]
+    )
     def type_index(self) -> yardl.UInt8:
-        return 
+        _var0 = self.f1
+        if _var0[0] == "T0":
+            return 0
+        if _var0[0] == "T1":
+            return 1
+        raise RuntimeError("Unexpected union case")
 
 
 @dataclasses.dataclass(slots=True, kw_only=True)
@@ -363,11 +385,21 @@ class RecordWithComputedFields:
 
     optional_named_array: NamedNDArray | None = None
 
-    int_float_union: yardl.Int32 | yardl.Float32 = 0
+    int_float_union: (
+        tuple[typing.Literal["int32"], yardl.Int32]
+        | tuple[typing.Literal["float32"], yardl.Float32]
+    ) = ("int32", 0)
 
-    nullable_int_float_union: yardl.Int32 | yardl.Float32 | None = None
+    nullable_int_float_union: (
+        tuple[typing.Literal["int32"], yardl.Int32]
+        | tuple[typing.Literal["float32"], yardl.Float32]
+        | None
+    ) = None
 
-    union_with_nested_generic_union: yardl.Int32 | GenericRecordWithComputedFields[str, yardl.Float32] = 0
+    union_with_nested_generic_union: (
+        tuple[typing.Literal["int32"], yardl.Int32]
+        | tuple[typing.Literal["GenericRecordWithComputedFields<string, float32>"], GenericRecordWithComputedFields[str, yardl.Float32]]
+    ) = ("int32", 0)
 
     map_field: dict[str, str] = dataclasses.field(default_factory=dict)
 
@@ -518,22 +550,65 @@ class RecordWithComputedFields:
         return self.map_field["missing"]
 
     def optional_named_array_length(self) -> yardl.Size:
-        return 
+        _var0 = self.optional_named_array
+        if _var0 is not None:
+            arr = _var0
+            return arr.size
+        return 0
 
     def optional_named_array_length_with_discard(self) -> yardl.Size:
-        return 
+        _var0 = self.optional_named_array
+        if _var0 is not None:
+            arr = _var0
+            return arr.size
+        return 0
 
     def int_float_union_as_float(self) -> yardl.Float32:
-        return 
+        _var0 = self.int_float_union
+        if _var0[0] == "int32":
+            i_foo = _var0[1]
+            return float(i_foo)
+        if _var0[0] == "float32":
+            f = _var0[1]
+            return f
+        raise RuntimeError("Unexpected union case")
 
     def nullable_int_float_union_string(self) -> str:
-        return 
+        _var0 = self.nullable_int_float_union
+        if _var0 is None:
+            return "null"
+        if _var0[0] == "int32":
+            return "int"
+        return "float"
+        raise RuntimeError("Unexpected union case")
 
     def nested_switch(self) -> yardl.Int16:
-        return 
+        _var0 = self.union_with_nested_generic_union
+        if _var0[0] == "int32":
+            return -1
+        if _var0[0] == "GenericRecordWithComputedFields<string, float32>":
+            rec = _var0[1]
+            _var1 = rec.f1
+            if _var1[0] == "T1":
+                return int(20)
+            if _var1[0] == "T0":
+                return int(10)
+            raise RuntimeError("Unexpected union case")
+        raise RuntimeError("Unexpected union case")
 
     def use_nested_computed_field(self) -> yardl.Int16:
-        return 
+        _var0 = self.union_with_nested_generic_union
+        if _var0[0] == "int32":
+            return -1
+        if _var0[0] == "GenericRecordWithComputedFields<string, float32>":
+            rec = _var0[1]
+            return int(rec.type_index())
+        raise RuntimeError("Unexpected union case")
+
+    def switch_over_sigle_value(self) -> yardl.Int32:
+        _var0 = self.int_field
+        ii = _var0
+        return ii
 
 
 ArrayWithKeywordDimensionNames = npt.NDArray[np.int32]

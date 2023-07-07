@@ -41,6 +41,7 @@ func Validate(namespaces []*Namespace) (*Environment, error) {
 		validateUnionCases,
 		validateEnums,
 		resolveComputedFields,
+		removeUnusedDeclarationPatterns,
 		validateGenericParametersUsed,
 	}
 

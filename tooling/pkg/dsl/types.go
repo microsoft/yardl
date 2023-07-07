@@ -490,12 +490,21 @@ func (e *StringLiteralExpression) IsReference() bool {
 	return false
 }
 
+type MemberAccessKind int
+
+const (
+	MemberAccessUnknown MemberAccessKind = iota
+	MemberAccessField
+	MemberAccessComputedField
+	MemberAccessVariable
+)
+
 type MemberAccessExpression struct {
 	NodeMeta
-	Target          Expression `json:"target,omitempty"`
-	Member          string     `json:"member,omitempty"`
-	IsComputedField bool       `json:"isComputed,omitempty"`
-	ResolvedType    Type       `json:"-"`
+	Target       Expression       `json:"target,omitempty"`
+	Member       string           `json:"member,omitempty"`
+	Kind         MemberAccessKind `json:"kind"`
+	ResolvedType Type             `json:"-"`
 }
 
 func (e *MemberAccessExpression) _expression() {}
