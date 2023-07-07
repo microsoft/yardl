@@ -501,7 +501,7 @@ RecordWithComputedFields: !record
 
     switchOverSigleValue:
       !switch intField:
-        int ii: ii
+        int i: i
 
 GenericRecordWithComputedFields<T0, T1>: !record
   fields:

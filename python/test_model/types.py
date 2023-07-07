@@ -716,8 +716,8 @@ class RecordWithComputedFields:
 
     def switch_over_sigle_value(self) -> yardl.Int32:
         _var0 = self.int_field
-        ii = _var0
-        return ii
+        i = _var0
+        return i
 
 
 ArrayWithKeywordDimensionNames = npt.NDArray[np.int32]

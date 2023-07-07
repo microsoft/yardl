@@ -874,8 +874,8 @@ struct RecordWithComputedFields {
   }
 
   int32_t SwitchOverSigleValue() const {
-    return []([[maybe_unused]]auto&& ii) -> int32_t {
-      return ii;
+    return []([[maybe_unused]]auto&& i) -> int32_t {
+      return i;
     }(int_field);
   }
 
