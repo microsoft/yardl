@@ -1,8 +1,6 @@
 from enum import Flag, auto
-from typing import Any
 import numpy as np
 import datetime
-from dataclasses import dataclass
 
 use_numpy = True
 
@@ -58,7 +56,19 @@ class Types(Flag):
     VECTOR = auto()
     ARRAY = auto()
 
-    ALL = BOOL | INTEGER | FLOATS | COMPLEX | STRING | DATE | TIME | DATETIME | VECTOR | ARRAY
+    ALL = (
+        BOOL
+        | INTEGER
+        | FLOATS
+        | COMPLEX
+        | STRING
+        | DATE
+        | TIME
+        | DATETIME
+        | VECTOR
+        | ARRAY
+    )
+
 
 class ProtocolError(Exception):
     pass

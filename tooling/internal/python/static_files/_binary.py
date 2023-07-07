@@ -1,7 +1,6 @@
 import datetime
 from enum import Enum
 from io import BufferedIOBase, BufferedReader, BytesIO
-from types import TracebackType
 from typing import BinaryIO, Iterable, TypeVar, Generic, Any, Optional, Tuple, cast
 from abc import ABC, abstractmethod
 import struct
@@ -49,8 +48,11 @@ class BinaryProtocolWriter(ABC):
     def close(self) -> None:
         self._stream.close()
 
+
 class BinaryProtocolReader(ABC):
-    def __init__(self, stream: BufferedReader | str, expected_schema: str | None) -> None:
+    def __init__(
+        self, stream: BufferedReader | str, expected_schema: str | None
+    ) -> None:
         self._stream = CodedInputStream(stream)
         magic_bytes = self._stream.read_view(len(MAGIC_BYTES))
         if magic_bytes != MAGIC_BYTES:
@@ -66,7 +68,6 @@ class BinaryProtocolReader(ABC):
 
     def close(self) -> None:
         self._stream.close()
-
 
 
 class CodedOutputStream:
@@ -121,7 +122,7 @@ class CodedOutputStream:
         if len(self._view) < 10:
             self.flush()
 
-        value = int(value) # bitwise ops not supported on numpy types
+        value = int(value)  # bitwise ops not supported on numpy types
 
         while True:
             if value < 0x80:
@@ -324,6 +325,7 @@ class BoolSerializer(StructSerializer[Bool, np.bool_]):
     def read_numpy(self, stream: CodedInputStream) -> np.bool_:
         return super().read_numpy(stream)
 
+
 bool_serializer = BoolSerializer()
 
 
@@ -354,10 +356,8 @@ class UInt8Serializer(StructSerializer[UInt8, np.uint8]):
 
         return super().read(stream, read_as_numpy)
 
-
     def is_trivially_serializable(self) -> bool:
         return True
-
 
 
 uint8_serializer = UInt8Serializer()
@@ -417,7 +417,6 @@ class UInt16Serializer(TypeSerializer[UInt16, np.uint16]):
             return self.read_numpy(stream)
 
         return stream.read_unsigned_varint()
-
 
     def read_numpy(self, stream: CodedInputStream) -> np.uint16:
         return np.uint16(stream.read_unsigned_varint())
@@ -535,13 +534,11 @@ class UInt64Serializer(TypeSerializer[UInt64, np.uint64]):
         stream.write_unsigned_varint(value)
 
     def write_numpy(self, stream: CodedOutputStream, value: np.uint64) -> None:
-
         stream.write_unsigned_varint(value)
 
     def read(self, stream: CodedInputStream, read_as_numpy: Types) -> UInt64:
         if Types.UINT64 in read_as_numpy:
             return self.read_numpy(stream)
-
 
         return stream.read_unsigned_varint()
 
@@ -599,6 +596,7 @@ class Float32Serializer(StructSerializer[Float32, np.float32]):
 
 float32_serializer = Float32Serializer()
 
+
 class Float64Serializer(StructSerializer[Float64, np.float64]):
     def __init__(self) -> None:
         super().__init__(np.float64, "<d")
@@ -647,7 +645,6 @@ class Complex64Serializer(StructSerializer[ComplexDouble, np.complex128]):
     def write(self, stream: CodedOutputStream, value: ComplexDouble) -> None:
         stream.write(self._struct, value.real, value.imag)
 
-
     def read(self, stream: CodedInputStream, read_as_numpy: Types) -> ComplexDouble:
         if Types.COMPLEX_FLOAT64 in read_as_numpy:
             return self.read_numpy(stream)
@@ -690,6 +687,7 @@ string_serializer = StringSerializer()
 
 EPOCH_ORDINAL_DAYS = datetime.date(1970, 1, 1).toordinal()
 DATETIME_DAYS_DTYPE = np.dtype("datetime64[D]")
+
 
 class DateSerializer(TypeSerializer[Date, np.datetime64]):
     def __init__(self) -> None:
@@ -805,7 +803,7 @@ class DateTimeSerializer(TypeSerializer[DateTime, np.datetime64]):
         else:
             stream.write_signed_varint(
                 value.astype(DATETIME_NANOSECONDS_DTYPE).astype(np.int64)
-                )
+            )
 
     def read(self, stream: CodedInputStream, read_as_numpy: Types) -> DateTime:
         if Types.DATETIME in read_as_numpy:
@@ -889,11 +887,11 @@ class OptionalSerializer(Generic[T, T_NP], TypeSerializer[Optional[T], np.void])
             self.element_serializer.write(stream, value)
 
     def write_numpy(self, stream: CodedOutputStream, value: np.void) -> None:
-        if not value['has_value']:
+        if not value["has_value"]:
             stream.write_byte(0)
         else:
             stream.write_byte(1)
-            self.element_serializer.write_numpy(stream, value['value'])
+            self.element_serializer.write_numpy(stream, value["value"])
 
     def read(self, stream: CodedInputStream, read_as_numpy: Types) -> Optional[T]:
         has_value = stream.read_byte()
@@ -913,9 +911,10 @@ class OptionalSerializer(Generic[T, T_NP], TypeSerializer[Optional[T], np.void])
         return super().is_trivially_serializable()
 
 
-
 class UnionSerializer(TypeSerializer[tuple[str, Any] | None, np.object_]):
-    def __init__(self, cases: list[tuple[str, TypeSerializer[Any, Any]] | None]) -> None:
+    def __init__(
+        self, cases: list[tuple[str, TypeSerializer[Any, Any]] | None]
+    ) -> None:
         super().__init__(np.object_)
         if cases[0] is None:
             self._offset = 1
@@ -933,7 +932,9 @@ class UnionSerializer(TypeSerializer[tuple[str, Any] | None, np.object_]):
                 raise ValueError("None is not a valid for this union type")
 
         if not isinstance(value, tuple) or len(value) != 2:
-            raise ValueError(f"Union values cannot be {type(value)} must be tuples[str, object] | None")
+            raise ValueError(
+                f"Union values cannot be {type(value)} must be tuples[str, object] | None"
+            )
 
         tag, inner_value = value
         for i, (case_tag, case_serializer) in enumerate(self._cases):
@@ -944,9 +945,8 @@ class UnionSerializer(TypeSerializer[tuple[str, Any] | None, np.object_]):
 
         raise ValueError(f"Incorrect union type {type(value)}")
 
-
     def write_numpy(self, stream: CodedOutputStream, value: np.object_) -> None:
-        if value is None: #type: ignore
+        if value is None:  # type: ignore
             if self._offset == 1:
                 stream.write_byte(0)
                 return
@@ -954,7 +954,9 @@ class UnionSerializer(TypeSerializer[tuple[str, Any] | None, np.object_]):
                 raise ValueError("None is not a valid for this union type")
 
         if not isinstance(value, tuple) or len(value) != 2:
-            raise ValueError(f"Union values cannot be {type(value)} must be `tuples[str, object] | None`")
+            raise ValueError(
+                f"Union values cannot be {type(value)} must be `tuples[str, object] | None`"
+            )
 
         tag, inner_value = value
         for i, (case_tag, case_serializer) in enumerate(self._cases):
@@ -965,12 +967,10 @@ class UnionSerializer(TypeSerializer[tuple[str, Any] | None, np.object_]):
 
         raise ValueError(f"Incorrect union type {type(value)}")
 
-
     def read(self, stream: CodedInputStream, read_as_numpy: Types) -> Any:
         case_index = stream.read_byte()
         if case_index == 0 and self._offset == 1:
             return None
-
 
         case_tag, case_serializer = self._cases[case_index - self._offset]
         return (case_tag, case_serializer.read(stream, read_as_numpy))
@@ -1004,7 +1004,9 @@ class StreamSerializer(TypeSerializer[Iterable[T], Any]):
 
 
 class FixedVectorSerializer(Generic[T, T_NP], TypeSerializer[list[T], np.object_]):
-    def __init__(self, element_serializer: TypeSerializer[T, T_NP], length: int) -> None:
+    def __init__(
+        self, element_serializer: TypeSerializer[T, T_NP], length: int
+    ) -> None:
         super().__init__(np.dtype((element_serializer.overall_dtype(), length)))
         self.element_serializer = element_serializer
         self.length = length
@@ -1075,7 +1077,10 @@ TValue = TypeVar("TValue")
 TValue_NP = TypeVar("TValue_NP", bound=np.generic)
 
 
-class MapSerializer(Generic[TKey, TKey_NP, TValue, TValue_NP], TypeSerializer[dict[TKey, TValue], np.object_]):
+class MapSerializer(
+    Generic[TKey, TKey_NP, TValue, TValue_NP],
+    TypeSerializer[dict[TKey, TValue], np.object_],
+):
     def __init__(
         self,
         key_serializer: TypeSerializer[TKey, TKey_NP],
@@ -1109,8 +1114,9 @@ class MapSerializer(Generic[TKey, TKey_NP, TValue, TValue_NP], TypeSerializer[di
         return np.object_(self.read(stream, Types.ALL))
 
 
-
-class NDArraySerializerBase(Generic[T, T_NP], TypeSerializer[npt.NDArray[Any], np.object_]):
+class NDArraySerializerBase(
+    Generic[T, T_NP], TypeSerializer[npt.NDArray[Any], np.object_]
+):
     def __init__(
         self,
         overall_dtype: npt.DTypeLike,
@@ -1225,6 +1231,7 @@ class NDArraySerializer(Generic[T, T_NP], NDArraySerializerBase[T, T_NP]):
 
     def read_numpy(self, stream: CodedInputStream) -> np.object_:
         return cast(np.object_, self.read(stream, Types.ALL))
+
 
 class FixedNDArraySerializer(Generic[T, T_NP], NDArraySerializerBase[T, T_NP]):
     def __init__(

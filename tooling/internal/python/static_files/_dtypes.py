@@ -7,7 +7,11 @@ import numpy.typing as npt
 from . import yardl_types as yardl
 
 
-def make_get_dtype_func(dtype_map :dict[type | GenericAlias, np.dtype[Any] | Callable[[tuple[type, ...]], np.dtype[Any]]]) -> Callable[[type | GenericAlias], np.dtype[Any]]:
+def make_get_dtype_func(
+    dtype_map: dict[
+        type | GenericAlias, np.dtype[Any] | Callable[[tuple[type, ...]], np.dtype[Any]]
+    ]
+) -> Callable[[type | GenericAlias], np.dtype[Any]]:
     dtype_map[yardl.Bool] = np.dtype(np.bool_)
     dtype_map[yardl.Int8] = np.dtype(np.int8)
     dtype_map[yardl.UInt8] = np.dtype(np.uint8)
@@ -38,7 +42,13 @@ def make_get_dtype_func(dtype_map :dict[type | GenericAlias, np.dtype[Any] | Cal
     dtype_map[datetime.time] = dtype_map[yardl.Time]
     dtype_map[datetime.datetime] = dtype_map[yardl.DateTime]
 
-    def get_dtype_impl(dtype_map : dict[type | GenericAlias, np.dtype[Any] | Callable[[tuple[type, ...]], np.dtype[Any]]], t: type | GenericAlias) -> np.dtype[Any]:
+    def get_dtype_impl(
+        dtype_map: dict[
+            type | GenericAlias,
+            np.dtype[Any] | Callable[[tuple[type, ...]], np.dtype[Any]],
+        ],
+        t: type | GenericAlias,
+    ) -> np.dtype[Any]:
         if isinstance(t, type) or isinstance(t, UnionType):
             if (res := dtype_map.get(t, None)) is not None:
                 if callable(res):
@@ -47,7 +57,6 @@ def make_get_dtype_func(dtype_map :dict[type | GenericAlias, np.dtype[Any] | Cal
 
         if isinstance(t, UnionType):
             return _get_union_dtype(get_args(t))
-
 
         origin = get_origin(t)
         if origin == np.ndarray:
@@ -65,15 +74,15 @@ def make_get_dtype_func(dtype_map :dict[type | GenericAlias, np.dtype[Any] | Cal
             # A union specified with syntax Union[A, B] or Optional[A]
             return _get_union_dtype(get_args(t))
 
-
         raise RuntimeError(f"Cannot find dtype for {t}")
 
-    def _get_union_dtype(args : tuple[type, ...]) -> np.dtype[Any]:
+    def _get_union_dtype(args: tuple[type, ...]) -> np.dtype[Any]:
         if len(args) == 2 and args[1] == NoneType:
             # This is an optional type
             inner_type = get_dtype_impl(dtype_map, args[0])
-            return np.dtype([("has_value", np.bool_), ("value", inner_type)], align=True)
+            return np.dtype(
+                [("has_value", np.bool_), ("value", inner_type)], align=True
+            )
         return np.dtype(np.object_)
-
 
     return lambda t: get_dtype_impl(dtype_map, t)
