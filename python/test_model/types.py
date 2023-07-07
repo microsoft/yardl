@@ -24,6 +24,7 @@ T2_NP = typing.TypeVar("T2_NP", bound=np.generic)
 T0 = typing.TypeVar("T0")
 T0_NP = typing.TypeVar("T0_NP", bound=np.generic)
 
+
 @dataclasses.dataclass(slots=True, kw_only=True)
 class SmallBenchmarkRecord:
     a: yardl.Float64 = 0.0
@@ -48,11 +49,17 @@ class SimpleEncodingCounters:
 class SimpleAcquisition:
     flags: yardl.UInt64 = 0
 
-    idx: SimpleEncodingCounters = dataclasses.field(default_factory=SimpleEncodingCounters)
+    idx: SimpleEncodingCounters = dataclasses.field(
+        default_factory=SimpleEncodingCounters
+    )
 
-    data: npt.NDArray[np.complex64] = dataclasses.field(default_factory=lambda: np.zeros((0,0), dtype=np.dtype(np.complex64)))
+    data: npt.NDArray[np.complex64] = dataclasses.field(
+        default_factory=lambda: np.zeros((0, 0), dtype=np.dtype(np.complex64))
+    )
 
-    trajectory: npt.NDArray[np.float32] = dataclasses.field(default_factory=lambda: np.zeros((0,0), dtype=np.dtype(np.float32)))
+    trajectory: npt.NDArray[np.float32] = dataclasses.field(
+        default_factory=lambda: np.zeros((0, 0), dtype=np.dtype(np.float32))
+    )
 
 
 @dataclasses.dataclass(slots=True, kw_only=True)
@@ -94,11 +101,17 @@ class RecordWithPrimitives:
 
     complexfloat_64_field: yardl.ComplexDouble = 0j
 
-    date_field: yardl.Date = dataclasses.field(default_factory=lambda: datetime.date(1970, 1, 1))
+    date_field: yardl.Date = dataclasses.field(
+        default_factory=lambda: datetime.date(1970, 1, 1)
+    )
 
-    time_field: yardl.Time = dataclasses.field(default_factory=lambda: datetime.time(0, 0, 0))
+    time_field: yardl.Time = dataclasses.field(
+        default_factory=lambda: datetime.time(0, 0, 0)
+    )
 
-    datetime_field: yardl.DateTime = dataclasses.field(default_factory=lambda: datetime.datetime(1970, 1, 1, 0, 0, 0))
+    datetime_field: yardl.DateTime = dataclasses.field(
+        default_factory=lambda: datetime.datetime(1970, 1, 1, 0, 0, 0)
+    )
 
 
 @dataclasses.dataclass(slots=True, kw_only=True)
@@ -124,60 +137,106 @@ class RecordWithPrimitiveAliases:
 
 @dataclasses.dataclass(slots=True, kw_only=True)
 class TupleWithRecords:
-    a: SimpleRecord = dataclasses.field(default_factory=SimpleRecord)
+    a: SimpleRecord = dataclasses.field(
+        default_factory=SimpleRecord
+    )
 
-    b: SimpleRecord = dataclasses.field(default_factory=SimpleRecord)
+    b: SimpleRecord = dataclasses.field(
+        default_factory=SimpleRecord
+    )
 
 
 @dataclasses.dataclass(slots=True, kw_only=True)
 class RecordWithVectors:
-    default_vector: list[yardl.Int32] = dataclasses.field(default_factory=list)
+    default_vector: list[yardl.Int32] = dataclasses.field(
+        default_factory=list
+    )
 
-    default_vector_fixed_length: list[yardl.Int32] = dataclasses.field(default_factory=lambda: [0] * 3)
+    default_vector_fixed_length: list[yardl.Int32] = dataclasses.field(
+        default_factory=lambda: [0] * 3
+    )
 
-    vector_of_vectors: list[list[yardl.Int32]] = dataclasses.field(default_factory=list)
+    vector_of_vectors: list[list[yardl.Int32]] = dataclasses.field(
+        default_factory=list
+    )
 
 
 @dataclasses.dataclass(slots=True, kw_only=True)
 class RecordWithArrays:
-    default_array: npt.NDArray[np.int32] = dataclasses.field(default_factory=lambda: np.zeros((), dtype=np.dtype(np.int32)))
+    default_array: npt.NDArray[np.int32] = dataclasses.field(
+        default_factory=lambda: np.zeros((), dtype=np.dtype(np.int32))
+    )
 
-    default_array_with_empty_dimension: npt.NDArray[np.int32] = dataclasses.field(default_factory=lambda: np.zeros((), dtype=np.dtype(np.int32)))
+    default_array_with_empty_dimension: npt.NDArray[np.int32] = dataclasses.field(
+        default_factory=lambda: np.zeros((), dtype=np.dtype(np.int32))
+    )
 
-    rank_1_array: npt.NDArray[np.int32] = dataclasses.field(default_factory=lambda: np.zeros((0), dtype=np.dtype(np.int32)))
+    rank_1_array: npt.NDArray[np.int32] = dataclasses.field(
+        default_factory=lambda: np.zeros((0), dtype=np.dtype(np.int32))
+    )
 
-    rank_2_array: npt.NDArray[np.int32] = dataclasses.field(default_factory=lambda: np.zeros((0,0), dtype=np.dtype(np.int32)))
+    rank_2_array: npt.NDArray[np.int32] = dataclasses.field(
+        default_factory=lambda: np.zeros((0, 0), dtype=np.dtype(np.int32))
+    )
 
-    rank_2_array_with_named_dimensions: npt.NDArray[np.int32] = dataclasses.field(default_factory=lambda: np.zeros((0,0), dtype=np.dtype(np.int32)))
+    rank_2_array_with_named_dimensions: npt.NDArray[np.int32] = dataclasses.field(
+        default_factory=lambda: np.zeros((0, 0), dtype=np.dtype(np.int32))
+    )
 
-    rank_2_fixed_array: npt.NDArray[np.int32] = dataclasses.field(default_factory=lambda: np.zeros((3, 4,), dtype=np.dtype(np.int32)))
+    rank_2_fixed_array: npt.NDArray[np.int32] = dataclasses.field(
+        default_factory=lambda: np.zeros((3, 4,), dtype=np.dtype(np.int32))
+    )
 
-    rank_2_fixed_array_with_named_dimensions: npt.NDArray[np.int32] = dataclasses.field(default_factory=lambda: np.zeros((3, 4,), dtype=np.dtype(np.int32)))
+    rank_2_fixed_array_with_named_dimensions: npt.NDArray[np.int32] = dataclasses.field(
+        default_factory=lambda: np.zeros((3, 4,), dtype=np.dtype(np.int32))
+    )
 
-    dynamic_array: npt.NDArray[np.int32] = dataclasses.field(default_factory=lambda: np.zeros((), dtype=np.dtype(np.int32)))
+    dynamic_array: npt.NDArray[np.int32] = dataclasses.field(
+        default_factory=lambda: np.zeros((), dtype=np.dtype(np.int32))
+    )
 
-    array_of_vectors: npt.NDArray[np.int32] = dataclasses.field(default_factory=lambda: np.zeros((5,), dtype=np.dtype(np.object_)))
+    array_of_vectors: npt.NDArray[np.int32] = dataclasses.field(
+        default_factory=lambda: np.zeros((5,), dtype=np.dtype(np.object_))
+    )
 
 
 @dataclasses.dataclass(slots=True, kw_only=True)
 class RecordWithArraysSimpleSyntax:
-    default_array: npt.NDArray[np.int32] = dataclasses.field(default_factory=lambda: np.zeros((), dtype=np.dtype(np.int32)))
+    default_array: npt.NDArray[np.int32] = dataclasses.field(
+        default_factory=lambda: np.zeros((), dtype=np.dtype(np.int32))
+    )
 
-    default_array_with_empty_dimension: npt.NDArray[np.int32] = dataclasses.field(default_factory=lambda: np.zeros((), dtype=np.dtype(np.int32)))
+    default_array_with_empty_dimension: npt.NDArray[np.int32] = dataclasses.field(
+        default_factory=lambda: np.zeros((), dtype=np.dtype(np.int32))
+    )
 
-    rank_1_array: npt.NDArray[np.int32] = dataclasses.field(default_factory=lambda: np.zeros((0), dtype=np.dtype(np.int32)))
+    rank_1_array: npt.NDArray[np.int32] = dataclasses.field(
+        default_factory=lambda: np.zeros((0), dtype=np.dtype(np.int32))
+    )
 
-    rank_2_array: npt.NDArray[np.int32] = dataclasses.field(default_factory=lambda: np.zeros((0,0), dtype=np.dtype(np.int32)))
+    rank_2_array: npt.NDArray[np.int32] = dataclasses.field(
+        default_factory=lambda: np.zeros((0, 0), dtype=np.dtype(np.int32))
+    )
 
-    rank_2_array_with_named_dimensions: npt.NDArray[np.int32] = dataclasses.field(default_factory=lambda: np.zeros((0,0), dtype=np.dtype(np.int32)))
+    rank_2_array_with_named_dimensions: npt.NDArray[np.int32] = dataclasses.field(
+        default_factory=lambda: np.zeros((0, 0), dtype=np.dtype(np.int32))
+    )
 
-    rank_2_fixed_array: npt.NDArray[np.int32] = dataclasses.field(default_factory=lambda: np.zeros((3, 4,), dtype=np.dtype(np.int32)))
+    rank_2_fixed_array: npt.NDArray[np.int32] = dataclasses.field(
+        default_factory=lambda: np.zeros((3, 4,), dtype=np.dtype(np.int32))
+    )
 
-    rank_2_fixed_array_with_named_dimensions: npt.NDArray[np.int32] = dataclasses.field(default_factory=lambda: np.zeros((3, 4,), dtype=np.dtype(np.int32)))
+    rank_2_fixed_array_with_named_dimensions: npt.NDArray[np.int32] = dataclasses.field(
+        default_factory=lambda: np.zeros((3, 4,), dtype=np.dtype(np.int32))
+    )
 
-    dynamic_array: npt.NDArray[np.int32] = dataclasses.field(default_factory=lambda: np.zeros((), dtype=np.dtype(np.int32)))
+    dynamic_array: npt.NDArray[np.int32] = dataclasses.field(
+        default_factory=lambda: np.zeros((), dtype=np.dtype(np.int32))
+    )
 
-    array_of_vectors: npt.NDArray[np.int32] = dataclasses.field(default_factory=lambda: np.zeros((5,), dtype=np.dtype(np.object_)))
+    array_of_vectors: npt.NDArray[np.int32] = dataclasses.field(
+        default_factory=lambda: np.zeros((5,), dtype=np.dtype(np.object_))
+    )
 
 
 @dataclasses.dataclass(slots=True, kw_only=True)
@@ -189,7 +248,9 @@ class RecordWithOptionalFields:
 
 @dataclasses.dataclass(slots=True, kw_only=True)
 class RecordWithVlens:
-    a: list[SimpleRecord] = dataclasses.field(default_factory=list)
+    a: list[SimpleRecord] = dataclasses.field(
+        default_factory=list
+    )
 
     b: yardl.Int32 = 0
 
@@ -210,47 +271,77 @@ class RecordWithOptionalVector:
 
 @dataclasses.dataclass(slots=True, kw_only=True)
 class RecordWithFixedVectors:
-    fixed_int_vector: list[yardl.Int32] = dataclasses.field(default_factory=lambda: [0] * 5)
+    fixed_int_vector: list[yardl.Int32] = dataclasses.field(
+        default_factory=lambda: [0] * 5
+    )
 
-    fixed_simple_record_vector: list[SimpleRecord] = dataclasses.field(default_factory=lambda: [SimpleRecord() for _ in range(3)])
+    fixed_simple_record_vector: list[SimpleRecord] = dataclasses.field(
+        default_factory=lambda: [SimpleRecord() for _ in range(3)]
+    )
 
-    fixed_record_with_vlens_vector: list[RecordWithVlens] = dataclasses.field(default_factory=lambda: [RecordWithVlens() for _ in range(2)])
+    fixed_record_with_vlens_vector: list[RecordWithVlens] = dataclasses.field(
+        default_factory=lambda: [RecordWithVlens() for _ in range(2)]
+    )
 
 
 @dataclasses.dataclass(slots=True, kw_only=True)
 class RecordWithFixedArrays:
-    ints: npt.NDArray[np.int32] = dataclasses.field(default_factory=lambda: np.zeros((2, 3,), dtype=np.dtype(np.int32)))
+    ints: npt.NDArray[np.int32] = dataclasses.field(
+        default_factory=lambda: np.zeros((2, 3,), dtype=np.dtype(np.int32))
+    )
 
-    fixed_simple_record_array: npt.NDArray[np.void] = dataclasses.field(default_factory=lambda: np.zeros((3, 2,), dtype=get_dtype(SimpleRecord)))
+    fixed_simple_record_array: npt.NDArray[np.void] = dataclasses.field(
+        default_factory=lambda: np.zeros((3, 2,), dtype=get_dtype(SimpleRecord))
+    )
 
-    fixed_record_with_vlens_array: npt.NDArray[np.void] = dataclasses.field(default_factory=lambda: np.zeros((2, 2,), dtype=get_dtype(RecordWithVlens)))
+    fixed_record_with_vlens_array: npt.NDArray[np.void] = dataclasses.field(
+        default_factory=lambda: np.zeros((2, 2,), dtype=get_dtype(RecordWithVlens))
+    )
 
 
 @dataclasses.dataclass(slots=True, kw_only=True)
 class RecordWithNDArrays:
-    ints: npt.NDArray[np.int32] = dataclasses.field(default_factory=lambda: np.zeros((0,0), dtype=np.dtype(np.int32)))
+    ints: npt.NDArray[np.int32] = dataclasses.field(
+        default_factory=lambda: np.zeros((0, 0), dtype=np.dtype(np.int32))
+    )
 
-    fixed_simple_record_array: npt.NDArray[np.void] = dataclasses.field(default_factory=lambda: np.zeros((0,0), dtype=get_dtype(SimpleRecord)))
+    fixed_simple_record_array: npt.NDArray[np.void] = dataclasses.field(
+        default_factory=lambda: np.zeros((0, 0), dtype=get_dtype(SimpleRecord))
+    )
 
-    fixed_record_with_vlens_array: npt.NDArray[np.void] = dataclasses.field(default_factory=lambda: np.zeros((0,0), dtype=get_dtype(RecordWithVlens)))
+    fixed_record_with_vlens_array: npt.NDArray[np.void] = dataclasses.field(
+        default_factory=lambda: np.zeros((0, 0), dtype=get_dtype(RecordWithVlens))
+    )
 
 
 @dataclasses.dataclass(slots=True, kw_only=True)
 class RecordWithNDArraysSingleDimension:
-    ints: npt.NDArray[np.int32] = dataclasses.field(default_factory=lambda: np.zeros((0), dtype=np.dtype(np.int32)))
+    ints: npt.NDArray[np.int32] = dataclasses.field(
+        default_factory=lambda: np.zeros((0), dtype=np.dtype(np.int32))
+    )
 
-    fixed_simple_record_array: npt.NDArray[np.void] = dataclasses.field(default_factory=lambda: np.zeros((0), dtype=get_dtype(SimpleRecord)))
+    fixed_simple_record_array: npt.NDArray[np.void] = dataclasses.field(
+        default_factory=lambda: np.zeros((0), dtype=get_dtype(SimpleRecord))
+    )
 
-    fixed_record_with_vlens_array: npt.NDArray[np.void] = dataclasses.field(default_factory=lambda: np.zeros((0), dtype=get_dtype(RecordWithVlens)))
+    fixed_record_with_vlens_array: npt.NDArray[np.void] = dataclasses.field(
+        default_factory=lambda: np.zeros((0), dtype=get_dtype(RecordWithVlens))
+    )
 
 
 @dataclasses.dataclass(slots=True, kw_only=True)
 class RecordWithDynamicNDArrays:
-    ints: npt.NDArray[np.int32] = dataclasses.field(default_factory=lambda: np.zeros((), dtype=np.dtype(np.int32)))
+    ints: npt.NDArray[np.int32] = dataclasses.field(
+        default_factory=lambda: np.zeros((), dtype=np.dtype(np.int32))
+    )
 
-    fixed_simple_record_array: npt.NDArray[np.void] = dataclasses.field(default_factory=lambda: np.zeros((), dtype=get_dtype(SimpleRecord)))
+    fixed_simple_record_array: npt.NDArray[np.void] = dataclasses.field(
+        default_factory=lambda: np.zeros((), dtype=get_dtype(SimpleRecord))
+    )
 
-    fixed_record_with_vlens_array: npt.NDArray[np.void] = dataclasses.field(default_factory=lambda: np.zeros((), dtype=get_dtype(RecordWithVlens)))
+    fixed_record_with_vlens_array: npt.NDArray[np.void] = dataclasses.field(
+        default_factory=lambda: np.zeros((), dtype=get_dtype(RecordWithVlens))
+    )
 
 
 NamedFixedNDArray = npt.NDArray[np.int32]
@@ -363,25 +454,41 @@ class GenericRecordWithComputedFields(typing.Generic[T0, T1]):
 
 @dataclasses.dataclass(slots=True, kw_only=True)
 class RecordWithComputedFields:
-    array_field: npt.NDArray[np.int32] = dataclasses.field(default_factory=lambda: np.zeros((0,0), dtype=np.dtype(np.int32)))
+    array_field: npt.NDArray[np.int32] = dataclasses.field(
+        default_factory=lambda: np.zeros((0, 0), dtype=np.dtype(np.int32))
+    )
 
-    array_field_map_dimensions: npt.NDArray[np.int32] = dataclasses.field(default_factory=lambda: np.zeros((0,0), dtype=np.dtype(np.int32)))
+    array_field_map_dimensions: npt.NDArray[np.int32] = dataclasses.field(
+        default_factory=lambda: np.zeros((0, 0), dtype=np.dtype(np.int32))
+    )
 
-    dynamic_array_field: npt.NDArray[np.int32] = dataclasses.field(default_factory=lambda: np.zeros((), dtype=np.dtype(np.int32)))
+    dynamic_array_field: npt.NDArray[np.int32] = dataclasses.field(
+        default_factory=lambda: np.zeros((), dtype=np.dtype(np.int32))
+    )
 
-    fixed_array_field: npt.NDArray[np.int32] = dataclasses.field(default_factory=lambda: np.zeros((3, 4,), dtype=np.dtype(np.int32)))
+    fixed_array_field: npt.NDArray[np.int32] = dataclasses.field(
+        default_factory=lambda: np.zeros((3, 4,), dtype=np.dtype(np.int32))
+    )
 
     int_field: yardl.Int32 = 0
 
     string_field: str = ""
 
-    tuple_field: MyTuple[yardl.Int32, yardl.Int32] = dataclasses.field(default_factory=lambda: MyTuple(v1=0, v2=0))
+    tuple_field: MyTuple[yardl.Int32, yardl.Int32] = dataclasses.field(
+        default_factory=lambda: MyTuple(v1=0, v2=0)
+    )
 
-    vector_field: list[yardl.Int32] = dataclasses.field(default_factory=list)
+    vector_field: list[yardl.Int32] = dataclasses.field(
+        default_factory=list
+    )
 
-    vector_of_vectors_field: list[list[yardl.Int32]] = dataclasses.field(default_factory=list)
+    vector_of_vectors_field: list[list[yardl.Int32]] = dataclasses.field(
+        default_factory=list
+    )
 
-    fixed_vector_field: list[yardl.Int32] = dataclasses.field(default_factory=lambda: [0] * 3)
+    fixed_vector_field: list[yardl.Int32] = dataclasses.field(
+        default_factory=lambda: [0] * 3
+    )
 
     optional_named_array: NamedNDArray | None = None
 
@@ -401,7 +508,9 @@ class RecordWithComputedFields:
         | tuple[typing.Literal["GenericRecordWithComputedFields<string, float32>"], GenericRecordWithComputedFields[str, yardl.Float32]]
     ) = ("int32", 0)
 
-    map_field: dict[str, str] = dataclasses.field(default_factory=dict)
+    map_field: dict[str, str] = dataclasses.field(
+        default_factory=dict
+    )
 
     def int_literal(self) -> yardl.UInt8:
         return 42
@@ -621,7 +730,9 @@ class EnumWithKeywordSymbols(enum.Enum):
 class RecordWithKeywordFields:
     int_: str = ""
 
-    sizeof: ArrayWithKeywordDimensionNames = dataclasses.field(default_factory=lambda: np.zeros((0,0), dtype=np.dtype(np.int32)))
+    sizeof: ArrayWithKeywordDimensionNames = dataclasses.field(
+        default_factory=lambda: np.zeros((0, 0), dtype=np.dtype(np.int32))
+    )
 
     if_: EnumWithKeywordSymbols
 
@@ -691,3 +802,4 @@ def _mk_get_dtype():
     return get_dtype
 
 get_dtype = _mk_get_dtype()
+

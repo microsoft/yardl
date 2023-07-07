@@ -81,9 +81,17 @@ func writeRecord(w *formatting.IndentedWriter, rec *dsl.RecordDefinition, st dsl
 			} else if defaultKind == defaultValueKindValue {
 				fmt.Fprintf(w, " = %s\n", defaultExpr)
 			} else if defaultKind == defaultValueKindFactory {
-				fmt.Fprintf(w, " = dataclasses.field(default_factory=%s)\n", defaultExpr)
+				fmt.Fprintf(w, " = dataclasses.field(\n")
+				w.Indented(func() {
+					fmt.Fprintf(w, "default_factory=%s\n", defaultExpr)
+				})
+				w.WriteStringln(")")
 			} else if defaultKind == defaultValueKindLambda {
-				fmt.Fprintf(w, " = dataclasses.field(default_factory=lambda: %s)\n", defaultExpr)
+				fmt.Fprintf(w, " = dataclasses.field(\n")
+				w.Indented(func() {
+					fmt.Fprintf(w, "default_factory=lambda: %s\n", defaultExpr)
+				})
+				w.WriteStringln(")")
 			}
 
 			common.WriteDocstring(w, field.Comment)
@@ -524,7 +532,7 @@ func typeDefault(t dsl.Type, contextNamespace string, st dsl.SymbolTable) (strin
 			}
 
 			if td.HasKnownNumberOfDimensions() {
-				shape := fmt.Sprintf("(%s)", strings.Repeat("0,", len(*td.Dimensions))[0:len(*td.Dimensions)*2-1])
+				shape := fmt.Sprintf("(%s)", strings.Repeat("0, ", len(*td.Dimensions))[0:len(*td.Dimensions)*3-2])
 				return fmt.Sprintf("np.zeros(%s, dtype=%s)", shape, dtype), defaultValueKindLambda
 			}
 

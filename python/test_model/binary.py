@@ -26,6 +26,7 @@ T2_NP = typing.TypeVar("T2_NP", bound=np.generic)
 T0 = typing.TypeVar("T0")
 T0_NP = typing.TypeVar("T0_NP", bound=np.generic)
 
+
 class BinaryBenchmarkFloat256x256Writer(_binary.BinaryProtocolWriter, BenchmarkFloat256x256WriterBase):
     """Binary writer for the BenchmarkFloat256x256 protocol."""
 

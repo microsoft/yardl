@@ -470,6 +470,6 @@ func WriteTypeVars(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 		}
 	}
 	if len(typeVars) > 0 {
-		w.WriteStringln("")
+		w.WriteStringln("\n")
 	}
 }
