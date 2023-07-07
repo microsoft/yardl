@@ -259,7 +259,7 @@ X: !record
 	assert.ErrorContains(t, err, "length cannot be negative")
 }
 
-func TestUnionLabels_Simple(t *testing.T) {
+func TestUnionTags_Simple(t *testing.T) {
 	src := `
 X: !record
   fields:
@@ -268,11 +268,11 @@ X: !record
 	require.Nil(t, err)
 
 	f := env.Namespaces[0].TypeDefinitions[0].(*RecordDefinition).Fields[0]
-	require.Equal(t, "int32", f.Type.(*GeneralizedType).Cases[1].Label)
-	require.Equal(t, "string", f.Type.(*GeneralizedType).Cases[2].Label)
+	require.Equal(t, "int32", f.Type.(*GeneralizedType).Cases[1].Tag)
+	require.Equal(t, "string", f.Type.(*GeneralizedType).Cases[2].Tag)
 }
 
-func TestUnionLabels_SimpleVectorsAndArrays(t *testing.T) {
+func TestUnionTags_SimpleVectorsAndArrays(t *testing.T) {
 	src := `
 X: !record
   fields:
@@ -283,14 +283,14 @@ X: !record
 	require.Nil(t, err)
 
 	f := env.Namespaces[0].TypeDefinitions[0].(*RecordDefinition).Fields[0]
-	require.Equal(t, "int32*", f.Type.(*GeneralizedType).Cases[0].Label)
-	require.Equal(t, "string*", f.Type.(*GeneralizedType).Cases[1].Label)
+	require.Equal(t, "int32*", f.Type.(*GeneralizedType).Cases[0].Tag)
+	require.Equal(t, "string*", f.Type.(*GeneralizedType).Cases[1].Tag)
 	g := env.Namespaces[0].TypeDefinitions[0].(*RecordDefinition).Fields[1]
-	require.Equal(t, "int32[]", g.Type.(*GeneralizedType).Cases[0].Label)
-	require.Equal(t, "string[]", g.Type.(*GeneralizedType).Cases[1].Label)
+	require.Equal(t, "int32[]", g.Type.(*GeneralizedType).Cases[0].Tag)
+	require.Equal(t, "string[]", g.Type.(*GeneralizedType).Cases[1].Tag)
 	h := env.Namespaces[0].TypeDefinitions[0].(*RecordDefinition).Fields[2]
-	require.Equal(t, "string->int32", h.Type.(*GeneralizedType).Cases[0].Label)
-	require.Equal(t, "string->string", h.Type.(*GeneralizedType).Cases[1].Label)
+	require.Equal(t, "string->int32", h.Type.(*GeneralizedType).Cases[0].Tag)
+	require.Equal(t, "string->string", h.Type.(*GeneralizedType).Cases[1].Tag)
 }
 
 func TestUnionsCannotContainUnions(t *testing.T) {

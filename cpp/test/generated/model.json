@@ -840,11 +840,11 @@
                 "type": [
                   null,
                   {
-                    "label": "int32",
+                    "tag": "int32",
                     "type": "int32"
                   },
                   {
-                    "label": "string",
+                    "tag": "string",
                     "type": "string"
                   }
                 ]
@@ -1124,11 +1124,11 @@
             ],
             "type": [
               {
-                "label": "T1",
+                "tag": "T1",
                 "type": "T1"
               },
               {
-                "label": "T2",
+                "tag": "T2",
                 "type": "T2"
               }
             ]
@@ -1166,11 +1166,11 @@
             "name": "AliasedIntOrSimpleRecord",
             "type": [
               {
-                "label": "int32",
+                "tag": "int32",
                 "type": "int32"
               },
               {
-                "label": "SimpleRecord",
+                "tag": "SimpleRecord",
                 "type": "TestModel.SimpleRecord"
               }
             ]
@@ -1182,11 +1182,11 @@
             "type": [
               null,
               {
-                "label": "int32",
+                "tag": "int32",
                 "type": "int32"
               },
               {
-                "label": "SimpleRecord",
+                "tag": "SimpleRecord",
                 "type": "TestModel.SimpleRecord"
               }
             ]
@@ -1204,11 +1204,11 @@
                 "name": "f1",
                 "type": [
                   {
-                    "label": "T0",
+                    "tag": "T0",
                     "type": "T0"
                   },
                   {
-                    "label": "T1",
+                    "tag": "T1",
                     "type": "T1"
                   }
                 ]
@@ -1365,11 +1365,11 @@
                 "name": "intFloatUnion",
                 "type": [
                   {
-                    "label": "int32",
+                    "tag": "int32",
                     "type": "int32"
                   },
                   {
-                    "label": "float32",
+                    "tag": "float32",
                     "type": "float32"
                   }
                 ]
@@ -1379,11 +1379,11 @@
                 "type": [
                   null,
                   {
-                    "label": "int32",
+                    "tag": "int32",
                     "type": "int32"
                   },
                   {
-                    "label": "float32",
+                    "tag": "float32",
                     "type": "float32"
                   }
                 ]
@@ -1392,11 +1392,11 @@
                 "name": "unionWithNestedGenericUnion",
                 "type": [
                   {
-                    "label": "int32",
+                    "tag": "int32",
                     "type": "int32"
                   },
                   {
-                    "label": "GenericRecordWithComputedFields\u003cstring, float32\u003e",
+                    "tag": "GenericRecordWithComputedFields\u003cstring, float32\u003e",
                     "type": {
                       "name": "TestModel.GenericRecordWithComputedFields",
                       "typeArguments": [
@@ -2473,11 +2473,11 @@
                 "stream": {
                   "items": [
                     {
-                      "label": "SimpleAcquisition",
+                      "tag": "SimpleAcquisition",
                       "type": "TestModel.SimpleAcquisition"
                     },
                     {
-                      "label": "Image\u003cfloat32\u003e",
+                      "tag": "Image\u003cfloat32\u003e",
                       "type": {
                         "name": "TestModel.Image",
                         "typeArguments": [
@@ -2868,11 +2868,11 @@
                   "keys": "string",
                   "values": [
                     {
-                      "label": "string",
+                      "tag": "string",
                       "type": "string"
                     },
                     {
-                      "label": "int32",
+                      "tag": "int32",
                       "type": "int32"
                     }
                   ]
@@ -2898,11 +2898,11 @@
               "name": "intOrSimpleRecord",
               "type": [
                 {
-                  "label": "int32",
+                  "tag": "int32",
                   "type": "int32"
                 },
                 {
-                  "label": "SimpleRecord",
+                  "tag": "SimpleRecord",
                   "type": "TestModel.SimpleRecord"
                 }
               ]
@@ -2911,11 +2911,11 @@
               "name": "intOrRecordWithVlens",
               "type": [
                 {
-                  "label": "int32",
+                  "tag": "int32",
                   "type": "int32"
                 },
                 {
-                  "label": "RecordWithVlens",
+                  "tag": "RecordWithVlens",
                   "type": "TestModel.RecordWithVlens"
                 }
               ]
@@ -2925,11 +2925,11 @@
               "type": [
                 null,
                 {
-                  "label": "int32",
+                  "tag": "int32",
                   "type": "int32"
                 },
                 {
-                  "label": "SimpleRecord",
+                  "tag": "SimpleRecord",
                   "type": "TestModel.SimpleRecord"
                 }
               ]
@@ -2949,11 +2949,11 @@
                 "stream": {
                   "items": [
                     {
-                      "label": "int32",
+                      "tag": "int32",
                       "type": "int32"
                     },
                     {
-                      "label": "SimpleRecord",
+                      "tag": "SimpleRecord",
                       "type": "TestModel.SimpleRecord"
                     }
                   ]
@@ -2967,11 +2967,11 @@
                   "items": [
                     null,
                     {
-                      "label": "int32",
+                      "tag": "int32",
                       "type": "int32"
                     },
                     {
-                      "label": "SimpleRecord",
+                      "tag": "SimpleRecord",
                       "type": "TestModel.SimpleRecord"
                     }
                   ]
@@ -3128,7 +3128,7 @@
                 "stream": {
                   "items": [
                     {
-                      "label": "Image\u003cfloat32\u003e",
+                      "tag": "Image\u003cfloat32\u003e",
                       "type": {
                         "name": "TestModel.Image",
                         "typeArguments": [
@@ -3137,7 +3137,7 @@
                       }
                     },
                     {
-                      "label": "Image\u003cfloat64\u003e",
+                      "tag": "Image\u003cfloat64\u003e",
                       "type": {
                         "name": "TestModel.Image",
                         "typeArguments": [

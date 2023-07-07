@@ -98,12 +98,12 @@ class InnerUnion2 {
 };
 
 template <typename TInner0, typename TOuter0, typename TInner1, typename TOuter1>
-H5::CompType InnerUnion2Ddl(bool nullable, H5::DataType const& t0, std::string const& label0, H5::DataType const& t1, std::string const& label1) {
+H5::CompType InnerUnion2Ddl(bool nullable, H5::DataType const& t0, std::string const& tag0, H5::DataType const& t1, std::string const& tag1) {
   using UnionType = ::InnerUnion2<TInner0, TOuter0, TInner1, TOuter1>;
   H5::CompType rtn(sizeof(UnionType));
-  rtn.insertMember("$type", HOFFSET(UnionType, type_index_), yardl::hdf5::UnionTypeEnumDdl(nullable, label0, label1));
-  rtn.insertMember(label0, HOFFSET(UnionType, value0_), t0);
-  rtn.insertMember(label1, HOFFSET(UnionType, value1_), t1);
+  rtn.insertMember("$type", HOFFSET(UnionType, type_index_), yardl::hdf5::UnionTypeEnumDdl(nullable, tag0, tag1));
+  rtn.insertMember(tag0, HOFFSET(UnionType, value0_), t0);
+  rtn.insertMember(tag1, HOFFSET(UnionType, value1_), t1);
   return rtn;
 }
 }

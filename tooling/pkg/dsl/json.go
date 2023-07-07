@@ -88,7 +88,7 @@ func (tc *TypeCase) MarshalJSON() ([]byte, error) {
 	if tc.IsNullType() {
 		return json.Marshal(nil)
 	}
-	if tc.Label == "" {
+	if tc.Tag == "" {
 		return json.Marshal(tc.Type)
 	}
 

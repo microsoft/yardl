@@ -368,7 +368,7 @@ func writeSwitchCaseOverUnion(w *formatting.IndentedWriter, unionType *dsl.Gener
 						visitor.Visit(switchCase.Expression, tail)
 					})
 				} else {
-					fmt.Fprintf(w, "if %s[0] == \"%s\":\n", variableName, typeCase.Label)
+					fmt.Fprintf(w, "if %s[0] == \"%s\":\n", variableName, typeCase.Tag)
 					w.Indented(func() {
 						if declarationIdentifier != "" {
 							fmt.Fprintf(w, "%s = %s[1]\n", declarationIdentifier, variableName)
@@ -488,7 +488,7 @@ func typeDefault(t dsl.Type, contextNamespace string, st dsl.SymbolTable) (strin
 				return defaultExpression, defaultKind
 			}
 
-			return fmt.Sprintf(`("%s", %s)`, t.Cases[0].Label, defaultExpression), defaultValueKindValue
+			return fmt.Sprintf(`("%s", %s)`, t.Cases[0].Tag, defaultExpression), defaultValueKindValue
 		case *dsl.Vector:
 			if td.Length == nil {
 				return "list", defaultValueKindFactory

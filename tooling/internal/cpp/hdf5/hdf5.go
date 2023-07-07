@@ -117,7 +117,7 @@ func writeProtocolMethods(w *formatting.IndentedWriter, p *dsl.ProtocolDefinitio
 						typeLabelPairs := make([]string, 0)
 						for _, typeCase := range underlyingStepType.Cases {
 							if !typeCase.IsNullType() {
-								typeLabelPairs = append(typeLabelPairs, fmt.Sprintf("std::make_tuple(%s, \"%s\", static_cast<size_t>(%s))", typeDdlExpression(typeCase.Type), typeCase.Label, getConversionBufferSizeExpression(underlyingStepType)))
+								typeLabelPairs = append(typeLabelPairs, fmt.Sprintf("std::make_tuple(%s, \"%s\", static_cast<size_t>(%s))", typeDdlExpression(typeCase.Type), typeCase.Tag, getConversionBufferSizeExpression(underlyingStepType)))
 							}
 						}
 						fmt.Fprintf(w, "%s = std::make_unique<yardl::hdf5::UnionDatasetWriter<%d>>(group_, \"%s\", %t, %s);\n", dsWriterName, getUnionDatasetNestedCount(step), step.Name, underlyingStepType.Cases.HasNullOption(), strings.Join(typeLabelPairs, ", "))
@@ -242,7 +242,7 @@ func writeProtocolMethods(w *formatting.IndentedWriter, p *dsl.ProtocolDefinitio
 						typeLabelPairs := make([]string, 0)
 						for _, typeCase := range underlyingStepType.Cases {
 							if !typeCase.IsNullType() {
-								typeLabelPairs = append(typeLabelPairs, fmt.Sprintf("std::make_tuple(%s, \"%s\", static_cast<size_t>(%s))", typeDdlExpression(typeCase.Type), typeCase.Label, getConversionBufferSizeExpression(underlyingStepType)))
+								typeLabelPairs = append(typeLabelPairs, fmt.Sprintf("std::make_tuple(%s, \"%s\", static_cast<size_t>(%s))", typeDdlExpression(typeCase.Type), typeCase.Tag, getConversionBufferSizeExpression(underlyingStepType)))
 							}
 						}
 						fmt.Fprintf(w, "%s = std::make_unique<yardl::hdf5::UnionDatasetReader<%d>>(group_, \"%s\", %t, %s);\n", readerFieldName, getUnionDatasetNestedCount(step), step.Name, underlyingStepType.Cases.HasNullOption(), strings.Join(typeLabelPairs, ", "))

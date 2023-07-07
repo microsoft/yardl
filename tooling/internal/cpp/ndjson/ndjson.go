@@ -462,7 +462,7 @@ func writeUnionConverters(w *formatting.IndentedWriter, unionType *dsl.Generaliz
 					for i, c := range unionType.Cases {
 						fmt.Fprintf(w, "case %d:\n", i)
 						w.Indented(func() {
-							fmt.Fprintf(w, "j = ordered_json{ {\"%s\", std::get<%s>(value)} };\n", c.Label, common.TypeSyntax(c.Type))
+							fmt.Fprintf(w, "j = ordered_json{ {\"%s\", std::get<%s>(value)} };\n", c.Tag, common.TypeSyntax(c.Type))
 							w.WriteStringln("break;")
 						})
 					}
@@ -493,9 +493,9 @@ func writeUnionConverters(w *formatting.IndentedWriter, unionType *dsl.Generaliz
 				w.WriteStringln("throw std::runtime_error(\"Invalid union value\");")
 			} else {
 				w.WriteStringln("auto it = j.begin();")
-				w.WriteStringln("std::string label = it.key();")
+				w.WriteStringln("std::string tag = it.key();")
 				for _, v := range unionType.Cases {
-					fmt.Fprintf(w, "if (label == \"%s\") {\n", v.Label)
+					fmt.Fprintf(w, "if (tag == \"%s\") {\n", v.Tag)
 					w.Indented(func() {
 						fmt.Fprintf(w, "value = it.value().get<%s>();\n", common.TypeSyntax(v.Type))
 						w.WriteStringln("return;")

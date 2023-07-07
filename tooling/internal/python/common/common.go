@@ -163,7 +163,7 @@ var TypeSyntaxWriter dsl.TypeSyntaxWriter[string] = func(self dsl.TypeSyntaxWrit
 				if !t.Cases.HasNullOption() && i > 0 || t.Cases.HasNullOption() && i > 1 {
 					sb.WriteString("| ")
 				}
-				fmt.Fprintf(sb, "tuple[typing.Literal[\"%s\"], %s]\n", typeCase.Label, self.ToSyntax(typeCase.Type, contextNamespace))
+				fmt.Fprintf(sb, "tuple[typing.Literal[\"%s\"], %s]\n", typeCase.Tag, self.ToSyntax(typeCase.Type, contextNamespace))
 			}
 			if t.Cases.HasNullOption() {
 				sb.WriteString("    | None\n")

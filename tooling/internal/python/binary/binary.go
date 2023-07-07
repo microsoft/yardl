@@ -256,7 +256,7 @@ func typeSerializer(t dsl.Type, numpy bool, contextNamespace string) string {
 				if c.Type == nil {
 					options[i] = "None"
 				} else {
-					options[i] = fmt.Sprintf("(\"%s\", %s)", c.Label, typeSerializer(c.Type, numpy, contextNamespace))
+					options[i] = fmt.Sprintf("(\"%s\", %s)", c.Tag, typeSerializer(c.Type, numpy, contextNamespace))
 				}
 			}
 

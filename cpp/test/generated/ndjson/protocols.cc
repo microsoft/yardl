@@ -129,12 +129,12 @@ struct adl_serializer<std::variant<test_model::SimpleAcquisition, test_model::Im
 
   static void from_json(ordered_json const& j, std::variant<test_model::SimpleAcquisition, test_model::Image<float>>& value) {
     auto it = j.begin();
-    std::string label = it.key();
-    if (label == "SimpleAcquisition") {
+    std::string tag = it.key();
+    if (tag == "SimpleAcquisition") {
       value = it.value().get<test_model::SimpleAcquisition>();
       return;
     }
-    if (label == "Image<float32>") {
+    if (tag == "Image<float32>") {
       value = it.value().get<test_model::Image<float>>();
       return;
     }
@@ -261,12 +261,12 @@ struct adl_serializer<std::variant<test_model::Image<float>, test_model::Image<d
 
   static void from_json(ordered_json const& j, std::variant<test_model::Image<float>, test_model::Image<double>>& value) {
     auto it = j.begin();
-    std::string label = it.key();
-    if (label == "Image<float32>") {
+    std::string tag = it.key();
+    if (tag == "Image<float32>") {
       value = it.value().get<test_model::Image<float>>();
       return;
     }
-    if (label == "Image<float64>") {
+    if (tag == "Image<float64>") {
       value = it.value().get<test_model::Image<double>>();
       return;
     }
@@ -290,12 +290,12 @@ struct adl_serializer<std::variant<test_model::AliasedString, test_model::Aliase
 
   static void from_json(ordered_json const& j, std::variant<test_model::AliasedString, test_model::AliasedEnum>& value) {
     auto it = j.begin();
-    std::string label = it.key();
-    if (label == "T1") {
+    std::string tag = it.key();
+    if (tag == "T1") {
       value = it.value().get<test_model::AliasedString>();
       return;
     }
-    if (label == "T2") {
+    if (tag == "T2") {
       value = it.value().get<test_model::AliasedEnum>();
       return;
     }
@@ -319,12 +319,12 @@ struct adl_serializer<std::variant<int32_t, float>> {
 
   static void from_json(ordered_json const& j, std::variant<int32_t, float>& value) {
     auto it = j.begin();
-    std::string label = it.key();
-    if (label == "int32") {
+    std::string tag = it.key();
+    if (tag == "int32") {
       value = it.value().get<int32_t>();
       return;
     }
-    if (label == "float32") {
+    if (tag == "float32") {
       value = it.value().get<float>();
       return;
     }
@@ -351,16 +351,16 @@ struct adl_serializer<std::variant<std::monostate, int32_t, float>> {
 
   static void from_json(ordered_json const& j, std::variant<std::monostate, int32_t, float>& value) {
     auto it = j.begin();
-    std::string label = it.key();
-    if (label == "null") {
+    std::string tag = it.key();
+    if (tag == "null") {
       value = it.value().get<std::monostate>();
       return;
     }
-    if (label == "int32") {
+    if (tag == "int32") {
       value = it.value().get<int32_t>();
       return;
     }
-    if (label == "float32") {
+    if (tag == "float32") {
       value = it.value().get<float>();
       return;
     }

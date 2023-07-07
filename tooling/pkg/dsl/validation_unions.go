@@ -7,21 +7,21 @@ import (
 	"github.com/microsoft/yardl/tooling/internal/validation"
 )
 
-func assignUnionCaseLabels(env *Environment, errorSink *validation.ErrorSink) *Environment {
+func assignUnionCaseTags(env *Environment, errorSink *validation.ErrorSink) *Environment {
 	Visit(env, func(self Visitor, node Node) {
 		if t, ok := node.(*GeneralizedType); ok && t.Cases.IsUnion() {
-			// assign labels to union cases
+			// assign tags to union cases
 			for _, typeCase := range t.Cases {
-				if typeCase.Label == "" {
-					typeCase.Label = TypeToShortSyntax(typeCase.Type, false)
+				if typeCase.Tag == "" {
+					typeCase.Tag = TypeToShortSyntax(typeCase.Type, false)
 				}
 			}
 
-			labels := make(map[string]any)
+			tags := make(map[string]any)
 			for _, item := range t.Cases {
 				if item != nil {
-					if _, found := labels[item.Label]; found {
-						errorSink.Add(validationError(node, "internal error: union cases must have distinct labels within the union"))
+					if _, found := tags[item.Tag]; found {
+						errorSink.Add(validationError(node, "internal error: union cases must have distinct tags within the union"))
 					}
 				}
 			}

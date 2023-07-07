@@ -35,7 +35,7 @@ func Validate(namespaces []*Namespace) (*Environment, error) {
 		validateStreams,
 		buildSymbolTable,
 		resolveTypes,
-		assignUnionCaseLabels,
+		assignUnionCaseTags,
 		topologicalSortTypes,
 		convertGenericReferences,
 		validateUnionCases,
