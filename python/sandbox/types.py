@@ -11,99 +11,10 @@ import numpy.typing as npt
 from . import yardl_types as yardl
 from . import _dtypes
 
-T = typing.TypeVar('T')
-T_NP = typing.TypeVar('T_NP', bound=np.generic)
-U = typing.TypeVar('U')
-U_NP = typing.TypeVar('U_NP', bound=np.generic)
-T0 = typing.TypeVar('T0')
-T0_NP = typing.TypeVar('T0_NP', bound=np.generic)
-T1 = typing.TypeVar('T1')
-T1_NP = typing.TypeVar('T1_NP', bound=np.generic)
-
-@dataclasses.dataclass(slots=True, kw_only=True)
-class PT(typing.Generic[T]):
-    x: T
-    y: T
-    z: yardl.Int32 = 0
-
-
-MyString = str
-
-@dataclasses.dataclass(slots=True, kw_only=True)
-class PInt:
-    x: yardl.Int32 = 0
-
-    y: yardl.Int32 = 0
-
-    def x1(self) -> yardl.Int32:
-        return self.x
-
-
-
-MyUnion = (
-    tuple[typing.Literal["T"], T]
-    | tuple[typing.Literal["U"], U]
-)
-
-@dataclasses.dataclass(slots=True, kw_only=True)
-class WithUnion:
-    f: (
-        tuple[typing.Literal["int32"], yardl.Int32]
-        | tuple[typing.Literal["float32*"], list[yardl.Float32]]
-        | tuple[typing.Literal["MyString"], MyString]
-        | tuple[typing.Literal["PInt"], PInt]
-        | tuple[typing.Literal["string->int32"], dict[str, yardl.Int32]]
-        | None
-    ) = None
-
-
-@dataclasses.dataclass(slots=True, kw_only=True)
-class GenericRecordWithComputedFields(typing.Generic[T0, T1]):
-    f1: (
-        tuple[typing.Literal["T0"], T0]
-        | tuple[typing.Literal["T1"], T1]
-    )
-    def type_index(self) -> yardl.UInt8:
-        _var0 = self.f1
-        if _var0[0] == "T0":
-            return 0
-        if _var0[0] == "T1":
-            return 1
-        raise RuntimeError("Unexpected union case")
-
-
-
-@dataclasses.dataclass(slots=True, kw_only=True)
-class RecordWithComputedFields:
-    union_with_nested_generic_union: (
-        tuple[typing.Literal["int32"], yardl.Int32]
-        | tuple[typing.Literal["GenericRecordWithComputedFields<string, float32>"], GenericRecordWithComputedFields[str, yardl.Float32]]
-    ) = ("int32", 0)
-
-    map_field: dict[str, str] = dataclasses.field(default_factory=dict)
-
-    def use_nested_computed_field(self) -> yardl.Int16:
-        _var0 = self.union_with_nested_generic_union
-        if _var0[0] == "int32":
-            return -1
-        if _var0[0] == "GenericRecordWithComputedFields<string, float32>":
-            rec = _var0[1]
-            return int(rec.type_index())
-        raise RuntimeError("Unexpected union case")
-
-
-
 def _mk_get_dtype():
     dtype_map: dict[type | types.GenericAlias, np.dtype[typing.Any] | typing.Callable[[tuple[type, ...]], np.dtype[typing.Any]]] = {}
     get_dtype = _dtypes.make_get_dtype_func(dtype_map)
 
-    dtype_map[PT] = lambda type_args: np.dtype([('x', get_dtype(type_args[0])), ('y', get_dtype(type_args[0])), ('z', np.dtype(np.int32))], align=True)
-    dtype_map[MyString] = np.dtype(np.object_)
-    dtype_map[PInt] = np.dtype([('x', np.dtype(np.int32)), ('y', np.dtype(np.int32))], align=True)
-    dtype_map[MyUnion] = lambda type_args: np.dtype(np.object_)
-    dtype_map[WithUnion] = np.dtype([('f', np.dtype(np.object_))], align=True)
-    dtype_map[GenericRecordWithComputedFields] = lambda type_args: np.dtype([('f1', np.dtype(np.object_))], align=True)
-    dtype_map[RecordWithComputedFields] = np.dtype([('unionWithNestedGenericUnion', np.dtype(np.object_)), ('mapField', np.dtype(np.object_))], align=True)
 
     return get_dtype
 

@@ -13,125 +13,26 @@ from . import *
 from . import _binary
 from . import yardl_types as yardl
 
-T = typing.TypeVar('T')
-T_NP = typing.TypeVar('T_NP', bound=np.generic)
-U = typing.TypeVar('U')
-U_NP = typing.TypeVar('U_NP', bound=np.generic)
-T0 = typing.TypeVar('T0')
-T0_NP = typing.TypeVar('T0_NP', bound=np.generic)
-T1 = typing.TypeVar('T1')
-T1_NP = typing.TypeVar('T1_NP', bound=np.generic)
-
-class BinaryPWriter(_binary.BinaryProtocolWriter, PWriterBase):
-    """Binary writer for the P protocol."""
+class BinaryHelloWorldWriter(_binary.BinaryProtocolWriter, HelloWorldWriterBase):
+    """Binary writer for the HelloWorld protocol."""
 
 
     def __init__(self, stream: typing.BinaryIO | str) -> None:
-        PWriterBase.__init__(self)
-        _binary.BinaryProtocolWriter.__init__(self, stream, PWriterBase.schema)
+        HelloWorldWriterBase.__init__(self)
+        _binary.BinaryProtocolWriter.__init__(self, stream, HelloWorldWriterBase.schema)
 
-    def _write_value(self, value: WithUnion) -> None:
-        _WithUnionSerializer().write(self._stream, value)
+    def _write_data(self, value: collections.abc.Iterable[npt.NDArray[np.complex128]]) -> None:
+        _binary.StreamSerializer(_binary.FixedNDArraySerializer(_binary.complexfloat64_serializer, (2,))).write(self._stream, value)
 
 
-class BinaryPReader(_binary.BinaryProtocolReader, PReaderBase):
-    """Binary writer for the P protocol."""
+class BinaryHelloWorldReader(_binary.BinaryProtocolReader, HelloWorldReaderBase):
+    """Binary writer for the HelloWorld protocol."""
 
 
     def __init__(self, stream: io.BufferedReader | str, read_as_numpy: Types = Types.NONE) -> None:
-        PReaderBase.__init__(self, read_as_numpy)
-        _binary.BinaryProtocolReader.__init__(self, stream, PReaderBase.schema)
+        HelloWorldReaderBase.__init__(self, read_as_numpy)
+        _binary.BinaryProtocolReader.__init__(self, stream, HelloWorldReaderBase.schema)
 
-    def _read_value(self) -> WithUnion:
-        return _WithUnionSerializer().read(self._stream, self._read_as_numpy)
-
-class _PTSerializer(typing.Generic[T, T_NP], _binary.RecordSerializer[PT[T]]):
-    def __init__(self, t_serializer: _binary.TypeSerializer[T, T_NP]) -> None:
-        super().__init__([("x", t_serializer), ("y", t_serializer), ("z", _binary.int32_serializer)])
-
-    def write(self, stream: _binary.CodedOutputStream, value: PT[T]) -> None:
-        if isinstance(value, np.void):
-            self.write_numpy(stream, value)
-            return
-        self._write(stream, value.x, value.y, value.z)
-
-    def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
-        self._write(stream, value['x'], value['y'], value['z'])
-
-    def read(self, stream: _binary.CodedInputStream, read_as_numpy: Types) -> PT[T]:
-        field_values = self._read(stream, read_as_numpy)
-        return PT[T](x=field_values[0], y=field_values[1], z=field_values[2])
-
-
-class _PIntSerializer(_binary.RecordSerializer[PInt]):
-    def __init__(self) -> None:
-        super().__init__([("x", _binary.int32_serializer), ("y", _binary.int32_serializer)])
-
-    def write(self, stream: _binary.CodedOutputStream, value: PInt) -> None:
-        if isinstance(value, np.void):
-            self.write_numpy(stream, value)
-            return
-        self._write(stream, value.x, value.y)
-
-    def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
-        self._write(stream, value['x'], value['y'])
-
-    def read(self, stream: _binary.CodedInputStream, read_as_numpy: Types) -> PInt:
-        field_values = self._read(stream, read_as_numpy)
-        return PInt(x=field_values[0], y=field_values[1])
-
-
-class _WithUnionSerializer(_binary.RecordSerializer[WithUnion]):
-    def __init__(self) -> None:
-        super().__init__([("f", _binary.UnionSerializer([None, ("int32", _binary.int32_serializer), ("float32*", _binary.VectorSerializer(_binary.float32_serializer)), ("MyString", _binary.string_serializer), ("PInt", _PIntSerializer()), ("string->int32", _binary.MapSerializer(_binary.string_serializer, _binary.int32_serializer))]))])
-
-    def write(self, stream: _binary.CodedOutputStream, value: WithUnion) -> None:
-        if isinstance(value, np.void):
-            self.write_numpy(stream, value)
-            return
-        self._write(stream, value.f)
-
-    def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
-        self._write(stream, value['f'])
-
-    def read(self, stream: _binary.CodedInputStream, read_as_numpy: Types) -> WithUnion:
-        field_values = self._read(stream, read_as_numpy)
-        return WithUnion(f=field_values[0])
-
-
-class _GenericRecordWithComputedFieldsSerializer(typing.Generic[T0, T0_NP, T1, T1_NP], _binary.RecordSerializer[GenericRecordWithComputedFields[T0, T1]]):
-    def __init__(self, t0_serializer: _binary.TypeSerializer[T0, T0_NP], t1_serializer: _binary.TypeSerializer[T1, T1_NP]) -> None:
-        super().__init__([("f1", _binary.UnionSerializer([("T0", t0_serializer), ("T1", t1_serializer)]))])
-
-    def write(self, stream: _binary.CodedOutputStream, value: GenericRecordWithComputedFields[T0, T1]) -> None:
-        if isinstance(value, np.void):
-            self.write_numpy(stream, value)
-            return
-        self._write(stream, value.f1)
-
-    def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
-        self._write(stream, value['f1'])
-
-    def read(self, stream: _binary.CodedInputStream, read_as_numpy: Types) -> GenericRecordWithComputedFields[T0, T1]:
-        field_values = self._read(stream, read_as_numpy)
-        return GenericRecordWithComputedFields[T0, T1](f1=field_values[0])
-
-
-class _RecordWithComputedFieldsSerializer(_binary.RecordSerializer[RecordWithComputedFields]):
-    def __init__(self) -> None:
-        super().__init__([("union_with_nested_generic_union", _binary.UnionSerializer([("int32", _binary.int32_serializer), ("GenericRecordWithComputedFields<string, float32>", _GenericRecordWithComputedFieldsSerializer(_binary.string_serializer, _binary.float32_serializer))])), ("map_field", _binary.MapSerializer(_binary.string_serializer, _binary.string_serializer))])
-
-    def write(self, stream: _binary.CodedOutputStream, value: RecordWithComputedFields) -> None:
-        if isinstance(value, np.void):
-            self.write_numpy(stream, value)
-            return
-        self._write(stream, value.union_with_nested_generic_union, value.map_field)
-
-    def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
-        self._write(stream, value['union_with_nested_generic_union'], value['map_field'])
-
-    def read(self, stream: _binary.CodedInputStream, read_as_numpy: Types) -> RecordWithComputedFields:
-        field_values = self._read(stream, read_as_numpy)
-        return RecordWithComputedFields(union_with_nested_generic_union=field_values[0], map_field=field_values[1])
-
+    def _read_data(self) -> collections.abc.Iterable[npt.NDArray[np.complex128]]:
+        return _binary.StreamSerializer(_binary.FixedNDArraySerializer(_binary.complexfloat64_serializer, (2,))).read(self._stream, self._read_as_numpy)
 

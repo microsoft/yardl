@@ -10,14 +10,14 @@ import typing
 from . import *
 from . import yardl_types as yardl
 
-class PWriterBase(abc.ABC):
-    """Abstract writer for the P protocol."""
+class HelloWorldWriterBase(abc.ABC):
+    """Abstract writer for the HelloWorld protocol."""
 
 
     def __init__(self) -> None:
         self._state = 0
 
-    schema = r"""{"protocol":{"name":"P","sequence":[{"name":"value","type":"Sandbox.WithUnion"}]},"types":[{"name":"MyString","type":"string"},{"name":"PInt","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"}]},{"name":"WithUnion","fields":[{"name":"f","type":[null,{"label":"int32","type":"int32"},{"label":"float32*","type":{"vector":{"items":"float32"}}},{"label":"MyString","type":"Sandbox.MyString"},{"label":"PInt","type":"Sandbox.PInt"},{"label":"string-\u003eint32","type":{"map":{"keys":"string","values":"int32"}}}]}]}]}"""
+    schema = r"""{"protocol":{"name":"HelloWorld","sequence":[{"name":"data","type":{"stream":{"items":{"array":{"items":"complexfloat64","dimensions":[{"length":2}]}}}}}]},"types":null}"""
 
     def __enter__(self):
         return self
@@ -28,17 +28,17 @@ class PWriterBase(abc.ABC):
             expected_method = self._state_to_method_name(self._state)
             raise ProtocolException(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
 
-    def write_value(self, value: WithUnion) -> None:
+    def write_data(self, value: collections.abc.Iterable[npt.NDArray[np.complex128]]) -> None:
         """Ordinal 0"""
 
         if self._state != 0:
             self._raise_unexpected_state(0)
 
-        self._write_value(value)
+        self._write_data(value)
         self._state = 1
 
     @abc.abstractmethod
-    def _write_value(self, value: WithUnion) -> None:
+    def _write_data(self, value: collections.abc.Iterable[npt.NDArray[np.complex128]]) -> None:
         raise NotImplementedError()
 
     @abc.abstractmethod
@@ -52,18 +52,18 @@ class PWriterBase(abc.ABC):
 
     def _state_to_method_name(self, state: int) -> str:
         if state == 0:
-            return 'write_value'
+            return 'write_data'
         return "<unknown>"
 
-class PReaderBase(abc.ABC):
-    """Abstract reader for the P protocol."""
+class HelloWorldReaderBase(abc.ABC):
+    """Abstract reader for the HelloWorld protocol."""
 
 
     def __init__(self, read_as_numpy: Types = Types.NONE) -> None:
         self._read_as_numpy = read_as_numpy
         self._state = 0
 
-    schema = PWriterBase.schema
+    schema = HelloWorldWriterBase.schema
 
     def __enter__(self):
         return self
@@ -83,21 +83,21 @@ class PReaderBase(abc.ABC):
     def close(self) -> None:
         raise NotImplementedError()
 
-    def read_value(self) -> WithUnion:
+    def read_data(self) -> collections.abc.Iterable[npt.NDArray[np.complex128]]:
         """Ordinal 0"""
 
         if self._state != 0:
             self._raise_unexpected_state(0)
 
-        value = self._read_value()
-        self._state = 2
-        return value
+        value = self._read_data()
+        self._state = 1
+        return self._wrap_iterable(value, 2)
 
-    def copy_to(self, writer: PWriterBase) -> None:
-        writer.write_value(self.read_value())
+    def copy_to(self, writer: HelloWorldWriterBase) -> None:
+        writer.write_data(self.read_data())
 
     @abc.abstractmethod
-    def _read_value(self) -> WithUnion:
+    def _read_data(self) -> collections.abc.Iterable[npt.NDArray[np.complex128]]:
         raise NotImplementedError()
 
     T = typing.TypeVar('T')
@@ -116,7 +116,7 @@ class PReaderBase(abc.ABC):
         	
     def _state_to_method_name(self, state: int) -> str:
         if state == 0:
-            return 'read_value'
+            return 'read_data'
         return "<unknown>"
 
 class ProtocolException(Exception):

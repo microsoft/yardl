@@ -6,7 +6,10 @@ import test_model as tm
 import pathlib
 from test_model._binary import BinaryProtocolReader
 
-cpp_test_output_dir = (pathlib.Path(__file__).parent / "../../cpp/build/test_output/binary/").resolve()
+cpp_test_output_dir = (
+    pathlib.Path(__file__).parent / "../../cpp/build/test_output/binary/"
+).resolve()
+
 
 def cases():
     for path in cpp_test_output_dir.glob("RoundTripTests_*_Binary.bin"):
@@ -21,9 +24,13 @@ def path_from_case_name(name):
 def readers_writers_by_json():
     pairs = {}
     for name, obj in inspect.getmembers(tm.binary):
-        if inspect.isclass(obj) and issubclass(obj, BinaryProtocolReader) and obj != BinaryProtocolReader:
+        if (
+            inspect.isclass(obj)
+            and issubclass(obj, BinaryProtocolReader)
+            and obj != BinaryProtocolReader
+        ):
             reader = obj
-            writer =  getattr(tm.binary, name.removesuffix("Reader") + "Writer")
+            writer = getattr(tm.binary, name.removesuffix("Reader") + "Writer")
             schema = getattr(obj, "schema")
             pairs[schema] = (reader, writer)
 
@@ -45,7 +52,6 @@ def test_cpp_roundtrip(case_name, readers_writers_by_json, read_as_numpy):
     x = io.BytesIO()
     with reader_type(path, read_as_numpy) as r, writer_type(x) as w:
         r.copy_to(w)
-
 
     if case_name == "SimpleDatasets":
         pytest.skip("we do not support writing streams with batches yet")
