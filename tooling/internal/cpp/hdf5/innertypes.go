@@ -477,7 +477,7 @@ func writeRecordDdlFunction(w *formatting.IndentedWriter, rec *dsl.RecordDefinit
 
 		w.WriteStringln("return t;")
 	})
-	w.WriteString("};\n\n")
+	w.WriteString("}\n\n")
 }
 
 func writeEnumDdlFunction(w *formatting.IndentedWriter, e *dsl.EnumDefinition) {
@@ -504,7 +504,7 @@ func writeEnumDdlFunction(w *formatting.IndentedWriter, e *dsl.EnumDefinition) {
 		}
 		w.WriteString("return t;\n")
 	})
-	w.WriteString("};\n\n")
+	w.WriteString("}\n\n")
 }
 
 func typeDdlExpression(t dsl.Type) string {
