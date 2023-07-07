@@ -463,9 +463,9 @@ func WriteTypeVars(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 			identifier := TypeIdentifierName(tp.Name)
 			if _, ok := typeVars[identifier]; !ok {
 				typeVars[identifier] = nil
-				fmt.Fprintf(w, "%s = typing.TypeVar('%s')\n", identifier, identifier)
+				fmt.Fprintf(w, "%s = typing.TypeVar(\"%s\")\n", identifier, identifier)
 				numpyTypeVarName := NumpyTypeParameterSyntax(tp)
-				fmt.Fprintf(w, "%s = typing.TypeVar('%s', bound=np.generic)\n", numpyTypeVarName, numpyTypeVarName)
+				fmt.Fprintf(w, "%s = typing.TypeVar(\"%s\", bound=np.generic)\n", numpyTypeVarName, numpyTypeVarName)
 			}
 		}
 	}
