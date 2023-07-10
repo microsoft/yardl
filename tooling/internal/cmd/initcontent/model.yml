@@ -4,7 +4,11 @@
 # followed by a stream of zero or more Sample values
 MyProtocol: !protocol
   sequence:
+
+    # A Header value
     header: Header
+
+    # A stream of Samples
     samples: !stream
       items: Sample
 
@@ -17,6 +21,9 @@ Header: !record
 # a vector of integers
 Sample: !record
   fields:
+
+    # The time the sample was taken
     timestamp: datetime
-    data: !vector
-      items: int
+
+    # A vector of integers
+    data: int*
