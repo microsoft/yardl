@@ -2,8 +2,6 @@ from enum import Flag, auto
 import numpy as np
 import datetime
 
-use_numpy = True
-
 Bool = bool | np.bool_
 Int8 = int | np.int8
 UInt8 = int | np.uint8
@@ -19,7 +17,7 @@ Float64 = float | np.float64
 ComplexFloat = complex | np.complex64
 ComplexDouble = complex | np.complex128
 
-String = str | np.object_
+String = str
 
 Date = datetime.date | np.datetime64
 Time = datetime.time | np.timedelta64

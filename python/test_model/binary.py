@@ -43,7 +43,7 @@ class BinaryBenchmarkFloat256x256Reader(_binary.BinaryProtocolReader, BenchmarkF
     """Binary writer for the BenchmarkFloat256x256 protocol."""
 
 
-    def __init__(self, stream: io.BufferedReader | str, read_as_numpy: Types = Types.NONE) -> None:
+    def __init__(self, stream: io.BufferedReader | io.BytesIO | typing.BinaryIO | str, read_as_numpy: Types = Types.NONE) -> None:
         BenchmarkFloat256x256ReaderBase.__init__(self, read_as_numpy)
         _binary.BinaryProtocolReader.__init__(self, stream, BenchmarkFloat256x256ReaderBase.schema)
 
@@ -66,7 +66,7 @@ class BinaryBenchmarkFloatVlenReader(_binary.BinaryProtocolReader, BenchmarkFloa
     """Binary writer for the BenchmarkFloatVlen protocol."""
 
 
-    def __init__(self, stream: io.BufferedReader | str, read_as_numpy: Types = Types.NONE) -> None:
+    def __init__(self, stream: io.BufferedReader | io.BytesIO | typing.BinaryIO | str, read_as_numpy: Types = Types.NONE) -> None:
         BenchmarkFloatVlenReaderBase.__init__(self, read_as_numpy)
         _binary.BinaryProtocolReader.__init__(self, stream, BenchmarkFloatVlenReaderBase.schema)
 
@@ -89,7 +89,7 @@ class BinaryBenchmarkSmallRecordReader(_binary.BinaryProtocolReader, BenchmarkSm
     """Binary writer for the BenchmarkSmallRecord protocol."""
 
 
-    def __init__(self, stream: io.BufferedReader | str, read_as_numpy: Types = Types.NONE) -> None:
+    def __init__(self, stream: io.BufferedReader | io.BytesIO | typing.BinaryIO | str, read_as_numpy: Types = Types.NONE) -> None:
         BenchmarkSmallRecordReaderBase.__init__(self, read_as_numpy)
         _binary.BinaryProtocolReader.__init__(self, stream, BenchmarkSmallRecordReaderBase.schema)
 
@@ -112,7 +112,7 @@ class BinaryBenchmarkSmallRecordWithOptionalsReader(_binary.BinaryProtocolReader
     """Binary writer for the BenchmarkSmallRecordWithOptionals protocol."""
 
 
-    def __init__(self, stream: io.BufferedReader | str, read_as_numpy: Types = Types.NONE) -> None:
+    def __init__(self, stream: io.BufferedReader | io.BytesIO | typing.BinaryIO | str, read_as_numpy: Types = Types.NONE) -> None:
         BenchmarkSmallRecordWithOptionalsReaderBase.__init__(self, read_as_numpy)
         _binary.BinaryProtocolReader.__init__(self, stream, BenchmarkSmallRecordWithOptionalsReaderBase.schema)
 
@@ -138,7 +138,7 @@ class BinaryBenchmarkSimpleMrdReader(_binary.BinaryProtocolReader, BenchmarkSimp
     """Binary writer for the BenchmarkSimpleMrd protocol."""
 
 
-    def __init__(self, stream: io.BufferedReader | str, read_as_numpy: Types = Types.NONE) -> None:
+    def __init__(self, stream: io.BufferedReader | io.BytesIO | typing.BinaryIO | str, read_as_numpy: Types = Types.NONE) -> None:
         BenchmarkSimpleMrdReaderBase.__init__(self, read_as_numpy)
         _binary.BinaryProtocolReader.__init__(self, stream, BenchmarkSimpleMrdReaderBase.schema)
 
@@ -167,7 +167,7 @@ class BinaryScalarsReader(_binary.BinaryProtocolReader, ScalarsReaderBase):
     """Binary writer for the Scalars protocol."""
 
 
-    def __init__(self, stream: io.BufferedReader | str, read_as_numpy: Types = Types.NONE) -> None:
+    def __init__(self, stream: io.BufferedReader | io.BytesIO | typing.BinaryIO | str, read_as_numpy: Types = Types.NONE) -> None:
         ScalarsReaderBase.__init__(self, read_as_numpy)
         _binary.BinaryProtocolReader.__init__(self, stream, ScalarsReaderBase.schema)
 
@@ -202,7 +202,7 @@ class BinaryScalarOptionalsReader(_binary.BinaryProtocolReader, ScalarOptionalsR
     """Binary writer for the ScalarOptionals protocol."""
 
 
-    def __init__(self, stream: io.BufferedReader | str, read_as_numpy: Types = Types.NONE) -> None:
+    def __init__(self, stream: io.BufferedReader | io.BytesIO | typing.BinaryIO | str, read_as_numpy: Types = Types.NONE) -> None:
         ScalarOptionalsReaderBase.__init__(self, read_as_numpy)
         _binary.BinaryProtocolReader.__init__(self, stream, ScalarOptionalsReaderBase.schema)
 
@@ -234,7 +234,7 @@ class BinaryNestedRecordsReader(_binary.BinaryProtocolReader, NestedRecordsReade
     """Binary writer for the NestedRecords protocol."""
 
 
-    def __init__(self, stream: io.BufferedReader | str, read_as_numpy: Types = Types.NONE) -> None:
+    def __init__(self, stream: io.BufferedReader | io.BytesIO | typing.BinaryIO | str, read_as_numpy: Types = Types.NONE) -> None:
         NestedRecordsReaderBase.__init__(self, read_as_numpy)
         _binary.BinaryProtocolReader.__init__(self, stream, NestedRecordsReaderBase.schema)
 
@@ -266,7 +266,7 @@ class BinaryVlensReader(_binary.BinaryProtocolReader, VlensReaderBase):
     """Binary writer for the Vlens protocol."""
 
 
-    def __init__(self, stream: io.BufferedReader | str, read_as_numpy: Types = Types.NONE) -> None:
+    def __init__(self, stream: io.BufferedReader | io.BytesIO | typing.BinaryIO | str, read_as_numpy: Types = Types.NONE) -> None:
         VlensReaderBase.__init__(self, read_as_numpy)
         _binary.BinaryProtocolReader.__init__(self, stream, VlensReaderBase.schema)
 
@@ -301,7 +301,7 @@ class BinaryStringsReader(_binary.BinaryProtocolReader, StringsReaderBase):
     """Binary writer for the Strings protocol."""
 
 
-    def __init__(self, stream: io.BufferedReader | str, read_as_numpy: Types = Types.NONE) -> None:
+    def __init__(self, stream: io.BufferedReader | io.BytesIO | typing.BinaryIO | str, read_as_numpy: Types = Types.NONE) -> None:
         StringsReaderBase.__init__(self, read_as_numpy)
         _binary.BinaryProtocolReader.__init__(self, stream, StringsReaderBase.schema)
 
@@ -327,7 +327,7 @@ class BinaryOptionalVectorsReader(_binary.BinaryProtocolReader, OptionalVectorsR
     """Binary writer for the OptionalVectors protocol."""
 
 
-    def __init__(self, stream: io.BufferedReader | str, read_as_numpy: Types = Types.NONE) -> None:
+    def __init__(self, stream: io.BufferedReader | io.BytesIO | typing.BinaryIO | str, read_as_numpy: Types = Types.NONE) -> None:
         OptionalVectorsReaderBase.__init__(self, read_as_numpy)
         _binary.BinaryProtocolReader.__init__(self, stream, OptionalVectorsReaderBase.schema)
 
@@ -359,7 +359,7 @@ class BinaryFixedVectorsReader(_binary.BinaryProtocolReader, FixedVectorsReaderB
     """Binary writer for the FixedVectors protocol."""
 
 
-    def __init__(self, stream: io.BufferedReader | str, read_as_numpy: Types = Types.NONE) -> None:
+    def __init__(self, stream: io.BufferedReader | io.BytesIO | typing.BinaryIO | str, read_as_numpy: Types = Types.NONE) -> None:
         FixedVectorsReaderBase.__init__(self, read_as_numpy)
         _binary.BinaryProtocolReader.__init__(self, stream, FixedVectorsReaderBase.schema)
 
@@ -400,7 +400,7 @@ class BinaryStreamsReader(_binary.BinaryProtocolReader, StreamsReaderBase):
     """Binary writer for the Streams protocol."""
 
 
-    def __init__(self, stream: io.BufferedReader | str, read_as_numpy: Types = Types.NONE) -> None:
+    def __init__(self, stream: io.BufferedReader | io.BytesIO | typing.BinaryIO | str, read_as_numpy: Types = Types.NONE) -> None:
         StreamsReaderBase.__init__(self, read_as_numpy)
         _binary.BinaryProtocolReader.__init__(self, stream, StreamsReaderBase.schema)
 
@@ -444,7 +444,7 @@ class BinaryFixedArraysReader(_binary.BinaryProtocolReader, FixedArraysReaderBas
     """Binary writer for the FixedArrays protocol."""
 
 
-    def __init__(self, stream: io.BufferedReader | str, read_as_numpy: Types = Types.NONE) -> None:
+    def __init__(self, stream: io.BufferedReader | io.BytesIO | typing.BinaryIO | str, read_as_numpy: Types = Types.NONE) -> None:
         FixedArraysReaderBase.__init__(self, read_as_numpy)
         _binary.BinaryProtocolReader.__init__(self, stream, FixedArraysReaderBase.schema)
 
@@ -491,7 +491,7 @@ class BinaryNDArraysReader(_binary.BinaryProtocolReader, NDArraysReaderBase):
     """Binary writer for the NDArrays protocol."""
 
 
-    def __init__(self, stream: io.BufferedReader | str, read_as_numpy: Types = Types.NONE) -> None:
+    def __init__(self, stream: io.BufferedReader | io.BytesIO | typing.BinaryIO | str, read_as_numpy: Types = Types.NONE) -> None:
         NDArraysReaderBase.__init__(self, read_as_numpy)
         _binary.BinaryProtocolReader.__init__(self, stream, NDArraysReaderBase.schema)
 
@@ -535,7 +535,7 @@ class BinaryNDArraysSingleDimensionReader(_binary.BinaryProtocolReader, NDArrays
     """Binary writer for the NDArraysSingleDimension protocol."""
 
 
-    def __init__(self, stream: io.BufferedReader | str, read_as_numpy: Types = Types.NONE) -> None:
+    def __init__(self, stream: io.BufferedReader | io.BytesIO | typing.BinaryIO | str, read_as_numpy: Types = Types.NONE) -> None:
         NDArraysSingleDimensionReaderBase.__init__(self, read_as_numpy)
         _binary.BinaryProtocolReader.__init__(self, stream, NDArraysSingleDimensionReaderBase.schema)
 
@@ -576,7 +576,7 @@ class BinaryDynamicNDArraysReader(_binary.BinaryProtocolReader, DynamicNDArraysR
     """Binary writer for the DynamicNDArrays protocol."""
 
 
-    def __init__(self, stream: io.BufferedReader | str, read_as_numpy: Types = Types.NONE) -> None:
+    def __init__(self, stream: io.BufferedReader | io.BytesIO | typing.BinaryIO | str, read_as_numpy: Types = Types.NONE) -> None:
         DynamicNDArraysReaderBase.__init__(self, read_as_numpy)
         _binary.BinaryProtocolReader.__init__(self, stream, DynamicNDArraysReaderBase.schema)
 
@@ -617,7 +617,7 @@ class BinaryMapsReader(_binary.BinaryProtocolReader, MapsReaderBase):
     """Binary writer for the Maps protocol."""
 
 
-    def __init__(self, stream: io.BufferedReader | str, read_as_numpy: Types = Types.NONE) -> None:
+    def __init__(self, stream: io.BufferedReader | io.BytesIO | typing.BinaryIO | str, read_as_numpy: Types = Types.NONE) -> None:
         MapsReaderBase.__init__(self, read_as_numpy)
         _binary.BinaryProtocolReader.__init__(self, stream, MapsReaderBase.schema)
 
@@ -668,7 +668,7 @@ class BinaryUnionsReader(_binary.BinaryProtocolReader, UnionsReaderBase):
     """Binary writer for the Unions protocol."""
 
 
-    def __init__(self, stream: io.BufferedReader | str, read_as_numpy: Types = Types.NONE) -> None:
+    def __init__(self, stream: io.BufferedReader | io.BytesIO | typing.BinaryIO | str, read_as_numpy: Types = Types.NONE) -> None:
         UnionsReaderBase.__init__(self, read_as_numpy)
         _binary.BinaryProtocolReader.__init__(self, stream, UnionsReaderBase.schema)
 
@@ -720,7 +720,7 @@ class BinaryStreamsOfUnionsReader(_binary.BinaryProtocolReader, StreamsOfUnionsR
     """Binary writer for the StreamsOfUnions protocol."""
 
 
-    def __init__(self, stream: io.BufferedReader | str, read_as_numpy: Types = Types.NONE) -> None:
+    def __init__(self, stream: io.BufferedReader | io.BytesIO | typing.BinaryIO | str, read_as_numpy: Types = Types.NONE) -> None:
         StreamsOfUnionsReaderBase.__init__(self, read_as_numpy)
         _binary.BinaryProtocolReader.__init__(self, stream, StreamsOfUnionsReaderBase.schema)
 
@@ -759,7 +759,7 @@ class BinaryEnumsReader(_binary.BinaryProtocolReader, EnumsReaderBase):
     """Binary writer for the Enums protocol."""
 
 
-    def __init__(self, stream: io.BufferedReader | str, read_as_numpy: Types = Types.NONE) -> None:
+    def __init__(self, stream: io.BufferedReader | io.BytesIO | typing.BinaryIO | str, read_as_numpy: Types = Types.NONE) -> None:
         EnumsReaderBase.__init__(self, read_as_numpy)
         _binary.BinaryProtocolReader.__init__(self, stream, EnumsReaderBase.schema)
 
@@ -791,7 +791,7 @@ class BinaryFlagsReader(_binary.BinaryProtocolReader, FlagsReaderBase):
     """Binary writer for the Flags protocol."""
 
 
-    def __init__(self, stream: io.BufferedReader | str, read_as_numpy: Types = Types.NONE) -> None:
+    def __init__(self, stream: io.BufferedReader | io.BytesIO | typing.BinaryIO | str, read_as_numpy: Types = Types.NONE) -> None:
         FlagsReaderBase.__init__(self, read_as_numpy)
         _binary.BinaryProtocolReader.__init__(self, stream, FlagsReaderBase.schema)
 
@@ -823,7 +823,7 @@ class BinaryStateTestReader(_binary.BinaryProtocolReader, StateTestReaderBase):
     """Binary writer for the StateTest protocol."""
 
 
-    def __init__(self, stream: io.BufferedReader | str, read_as_numpy: Types = Types.NONE) -> None:
+    def __init__(self, stream: io.BufferedReader | io.BytesIO | typing.BinaryIO | str, read_as_numpy: Types = Types.NONE) -> None:
         StateTestReaderBase.__init__(self, read_as_numpy)
         _binary.BinaryProtocolReader.__init__(self, stream, StateTestReaderBase.schema)
 
@@ -879,7 +879,7 @@ class BinarySimpleGenericsReader(_binary.BinaryProtocolReader, SimpleGenericsRea
     """Binary writer for the SimpleGenerics protocol."""
 
 
-    def __init__(self, stream: io.BufferedReader | str, read_as_numpy: Types = Types.NONE) -> None:
+    def __init__(self, stream: io.BufferedReader | io.BytesIO | typing.BinaryIO | str, read_as_numpy: Types = Types.NONE) -> None:
         SimpleGenericsReaderBase.__init__(self, read_as_numpy)
         _binary.BinaryProtocolReader.__init__(self, stream, SimpleGenericsReaderBase.schema)
 
@@ -941,7 +941,7 @@ class BinaryAdvancedGenericsReader(_binary.BinaryProtocolReader, AdvancedGeneric
     """Binary writer for the AdvancedGenerics protocol."""
 
 
-    def __init__(self, stream: io.BufferedReader | str, read_as_numpy: Types = Types.NONE) -> None:
+    def __init__(self, stream: io.BufferedReader | io.BytesIO | typing.BinaryIO | str, read_as_numpy: Types = Types.NONE) -> None:
         AdvancedGenericsReaderBase.__init__(self, read_as_numpy)
         _binary.BinaryProtocolReader.__init__(self, stream, AdvancedGenericsReaderBase.schema)
 
@@ -1003,7 +1003,7 @@ class BinaryAliasesReader(_binary.BinaryProtocolReader, AliasesReaderBase):
     """Binary writer for the Aliases protocol."""
 
 
-    def __init__(self, stream: io.BufferedReader | str, read_as_numpy: Types = Types.NONE) -> None:
+    def __init__(self, stream: io.BufferedReader | io.BytesIO | typing.BinaryIO | str, read_as_numpy: Types = Types.NONE) -> None:
         AliasesReaderBase.__init__(self, read_as_numpy)
         _binary.BinaryProtocolReader.__init__(self, stream, AliasesReaderBase.schema)
 
@@ -1056,7 +1056,7 @@ class BinaryStreamsOfAliasedUnionsReader(_binary.BinaryProtocolReader, StreamsOf
     """Binary writer for the StreamsOfAliasedUnions protocol."""
 
 
-    def __init__(self, stream: io.BufferedReader | str, read_as_numpy: Types = Types.NONE) -> None:
+    def __init__(self, stream: io.BufferedReader | io.BytesIO | typing.BinaryIO | str, read_as_numpy: Types = Types.NONE) -> None:
         StreamsOfAliasedUnionsReaderBase.__init__(self, read_as_numpy)
         _binary.BinaryProtocolReader.__init__(self, stream, StreamsOfAliasedUnionsReaderBase.schema)
 
@@ -1082,7 +1082,7 @@ class BinaryProtocolWithComputedFieldsReader(_binary.BinaryProtocolReader, Proto
     """Binary writer for the ProtocolWithComputedFields protocol."""
 
 
-    def __init__(self, stream: io.BufferedReader | str, read_as_numpy: Types = Types.NONE) -> None:
+    def __init__(self, stream: io.BufferedReader | io.BytesIO | typing.BinaryIO | str, read_as_numpy: Types = Types.NONE) -> None:
         ProtocolWithComputedFieldsReaderBase.__init__(self, read_as_numpy)
         _binary.BinaryProtocolReader.__init__(self, stream, ProtocolWithComputedFieldsReaderBase.schema)
 
@@ -1108,7 +1108,7 @@ class BinaryProtocolWithKeywordStepsReader(_binary.BinaryProtocolReader, Protoco
     """Binary writer for the ProtocolWithKeywordSteps protocol."""
 
 
-    def __init__(self, stream: io.BufferedReader | str, read_as_numpy: Types = Types.NONE) -> None:
+    def __init__(self, stream: io.BufferedReader | io.BytesIO | typing.BinaryIO | str, read_as_numpy: Types = Types.NONE) -> None:
         ProtocolWithKeywordStepsReaderBase.__init__(self, read_as_numpy)
         _binary.BinaryProtocolReader.__init__(self, stream, ProtocolWithKeywordStepsReaderBase.schema)
 
