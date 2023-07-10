@@ -31,6 +31,12 @@ cpp_version := "17"
 @run-sandbox-quiet: build-sandbox
     cd cpp/build && ./sandbox_exec > /dev/null
 
+@run-sandbox-python: build-sandbox
+    python python/run_sandbox.py
+
+@run-sandbox-python-quiet: build-sandbox
+    python python/run_sandbox.py > /dev/null
+
 @build-all: generate generate-sandbox configure
     cd cpp/build && ninja
 

@@ -51,7 +51,7 @@ class BinaryProtocolWriter(ABC):
 
 class BinaryProtocolReader(ABC):
     def __init__(
-        self, stream: BufferedReader | str, expected_schema: str | None
+        self, stream: BufferedReader | BytesIO | BinaryIO | str, expected_schema: str | None
     ) -> None:
         self._stream = CodedInputStream(stream)
         magic_bytes = self._stream.read_view(len(MAGIC_BYTES))
@@ -141,14 +141,14 @@ class CodedOutputStream:
 
 class CodedInputStream:
     def __init__(
-        self, stream: BufferedReader | BytesIO | str, *, buffer_size: int = 65536
+        self, stream: BufferedReader | BytesIO | BinaryIO | str, *, buffer_size: int = 65536
     ) -> None:
         if isinstance(stream, str):
             self._stream = open(stream, "rb")
             self._owns_stream = True
         else:
             if not isinstance(stream, BufferedIOBase):
-                self._stream = BufferedReader(stream)
+                self._stream = BufferedReader(stream) # type: ignore
             else:
                 self._stream = stream
             self._owns_stream = False
