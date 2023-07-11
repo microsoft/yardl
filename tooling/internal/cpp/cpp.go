@@ -14,6 +14,7 @@ import (
 	"github.com/microsoft/yardl/tooling/internal/cpp/mocks"
 	"github.com/microsoft/yardl/tooling/internal/cpp/ndjson"
 	"github.com/microsoft/yardl/tooling/internal/cpp/protocols"
+	"github.com/microsoft/yardl/tooling/internal/cpp/translator"
 	"github.com/microsoft/yardl/tooling/internal/cpp/types"
 	"github.com/microsoft/yardl/tooling/internal/iocommon"
 	"github.com/microsoft/yardl/tooling/pkg/dsl"
@@ -61,6 +62,13 @@ func Generate(env *dsl.Environment, options packaging.CppCodegenOptions) error {
 
 	if options.InternalGenerateMocks {
 		err = mocks.WriteMocks(env, options)
+		if err != nil {
+			return err
+		}
+	}
+
+	if options.InternalGenerateTranslator {
+		err = translator.WriteTranslator(env, options)
 		if err != nil {
 			return err
 		}

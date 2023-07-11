@@ -41,11 +41,11 @@ class BinaryReader {
  protected:
   BinaryReader(std::istream& stream, std::string& schema)
       : stream_(stream) {
-    ReadHeader(stream_, schema);
+    ReadAndValidateHeader(stream_, schema);
   }
 
   BinaryReader(std::string file_name, std::string& schema) : owned_file_stream_(open_file(file_name)), stream_(*owned_file_stream_) {
-    ReadHeader(stream_, schema);
+    ReadAndValidateHeader(stream_, schema);
   }
 
  private:

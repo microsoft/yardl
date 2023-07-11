@@ -23,6 +23,7 @@ add_library(test_model_generated OBJECT
   binary/protocols.cc
   hdf5/protocols.cc
   mocks.cc
+  translator_impl.cc
 )
 
 target_link_libraries(test_model_generated

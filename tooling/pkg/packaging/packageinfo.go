@@ -35,6 +35,7 @@ type CppCodegenOptions struct {
 
 	InternalSymlinkStaticHeaders bool `yaml:"internalSymlinkStaticHeaders"`
 	InternalGenerateMocks        bool `yaml:"internalGenerateMocks"`
+	InternalGenerateTranslator   bool `yaml:"internalGenerateTranslator"`
 }
 
 func (o CppCodegenOptions) ChangeOutputDir(newRelativeDir string) CppCodegenOptions {
