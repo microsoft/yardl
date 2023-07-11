@@ -56,8 +56,9 @@ type JsonCodegenOptions struct {
 }
 
 type PythonCodegenOptions struct {
-	PackageInfo *PackageInfo `yaml:"-"`
-	OutputDir   string       `yaml:"outputDir"`
+	PackageInfo                *PackageInfo `yaml:"-"`
+	OutputDir                  string       `yaml:"outputDir"`
+	InternalSymlinkStaticFiles bool         `yaml:"internalSymlinkStaticFiles"`
 }
 
 func ReadPackageInfo(directory string) (PackageInfo, error) {

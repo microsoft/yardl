@@ -6,6 +6,8 @@ import test_model as tm
 import pathlib
 from test_model._binary import BinaryProtocolReader
 
+# pyright: basic
+
 cpp_test_output_dir = (
     pathlib.Path(__file__).parent / "../../cpp/build/test_output/binary/"
 ).resolve()
@@ -16,7 +18,7 @@ def cases():
         yield path.name.removeprefix("RoundTripTests_").removesuffix("_Binary.bin")
 
 
-def path_from_case_name(name):
+def path_from_case_name(name: str):
     return str(cpp_test_output_dir / f"RoundTripTests_{name}_Binary.bin")
 
 
@@ -39,7 +41,7 @@ def readers_writers_by_json():
 
 @pytest.mark.parametrize("read_as_numpy", [tm.Types.ALL, tm.Types.NONE])
 @pytest.mark.parametrize("case_name", cases())
-def test_cpp_roundtrip(case_name, readers_writers_by_json, read_as_numpy):
+def test_cpp_roundtrip(case_name: str, readers_writers_by_json: dict[str, tuple[type, type]], read_as_numpy : tm.Types):
     path = path_from_case_name(case_name)
 
     with open(path, "rb") as f:

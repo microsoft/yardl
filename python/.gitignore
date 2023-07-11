@@ -1,3 +1,5 @@
-**/_*.py
+**/_binary.py
+**/_dtypes.py
+**/yardl_types.py
 
 sandbox/

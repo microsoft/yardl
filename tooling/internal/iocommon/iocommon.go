@@ -3,7 +3,6 @@ package iocommon
 import (
 	"bytes"
 	"embed"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"path"
@@ -23,48 +22,79 @@ func WriteFileIfNeeded(filename string, contents []byte, perm os.FileMode) error
 }
 
 func CopyEmbeddedStaticFiles(destinationDir string, symlink bool, embeddedFiles embed.FS) error {
-	if !symlink {
-		return copyEmbeddedDir(".", destinationDir, embeddedFiles)
+	if symlink {
+		entries, err := embeddedFiles.ReadDir(".")
+		if err != nil {
+			return err
+		}
+
+		if len(entries) != 1 || !entries[0].IsDir() {
+			panic("expected a single embedded directory")
+		}
+
+		_, callerFilename, _, _ := runtime.Caller(1)
+		symLinkTarget := path.Join(filepath.Dir(callerFilename), entries[0].Name())
+		// relativeTargetDir, _ := filepath.Rel(path.Dir(destinationDir), symLinkTarget)
+
+		return symLinkEmbeddedDir(".", destinationDir, symLinkTarget, embeddedFiles)
 	}
 
-	entries, err := embeddedFiles.ReadDir(".")
+	return copyEmbeddedDir(".", destinationDir, embeddedFiles)
+}
+
+func symLinkEmbeddedDir(emdeddedSourceDir, destDir string, relativeTargetDir string, embeddedFiles embed.FS) error {
+	entries, err := embeddedFiles.ReadDir(emdeddedSourceDir)
 	if err != nil {
 		return err
 	}
 
-	if len(entries) != 1 || !entries[0].IsDir() {
-		panic("expected a single embedded directory")
+	if emdeddedSourceDir == "." {
+		if len(entries) != 1 || !entries[0].IsDir() {
+			panic("expected a single embedded directory")
+		}
+		return symLinkEmbeddedDir(entries[0].Name(), destDir, relativeTargetDir, embeddedFiles)
 	}
 
-	_, callerFilename, _, _ := runtime.Caller(1)
-	symLinkTarget := path.Join(filepath.Dir(callerFilename), entries[0].Name())
-	relativeTargetDir, _ := filepath.Rel(path.Dir(destinationDir), symLinkTarget)
-
-	stat, err := os.Lstat(destinationDir)
+	stat, err := os.Lstat(destDir)
 	if err != nil {
 		if !os.IsNotExist(err) {
 			return err
 		}
 	} else {
-		if stat.Mode()&os.ModeSymlink == 0 {
-			return fmt.Errorf("static headers destination dir %s exists and is not a symlink", destinationDir)
-		}
+		mode := stat.Mode()
+		if mode&os.ModeSymlink != 0 {
+			currentTarget, err := os.Readlink(destDir)
+			if err != nil {
+				return err
+			}
+			if currentTarget == relativeTargetDir {
+				return nil
+			}
 
-		currentTarget, err := os.Readlink(destinationDir)
-		if err != nil {
-			return err
-		}
-		if currentTarget == relativeTargetDir {
+			err = os.Remove(destDir)
+			if err != nil {
+				return err
+			}
+		} else if mode&os.ModeDir != 0 {
+			for _, entry := range entries {
+				if entry.IsDir() {
+					err = symLinkEmbeddedDir(path.Join(emdeddedSourceDir, entry.Name()), path.Join(emdeddedSourceDir, entry.Name()), path.Join(relativeTargetDir, entry.Name()), embeddedFiles)
+					if err != nil {
+						return err
+					}
+				} else {
+					err = os.Symlink(path.Join(relativeTargetDir, entry.Name()), path.Join(destDir, entry.Name()))
+					if err != nil {
+						return err
+					}
+				}
+			}
+
 			return nil
-		}
-
-		err = os.Remove(destinationDir)
-		if err != nil {
-			return err
 		}
 	}
 
-	return os.Symlink(relativeTargetDir, destinationDir)
+	return os.Symlink(relativeTargetDir, destDir)
 }
 
 func copyEmbeddedDir(sourceDir, destDir string, embeddedFiles embed.FS) error {

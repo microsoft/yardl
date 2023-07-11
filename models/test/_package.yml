@@ -7,6 +7,7 @@ cpp:
 
 python:
   outputDir: ../../python/
+  internalSymlinkStaticFiles: true
 
 json:
   outputDir: ../../cpp/test/generated

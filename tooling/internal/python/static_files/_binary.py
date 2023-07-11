@@ -911,7 +911,7 @@ class OptionalSerializer(Generic[T, T_NP], TypeSerializer[Optional[T], np.void])
         return super().is_trivially_serializable()
 
 
-class UnionSerializer(TypeSerializer[tuple[str, Any] | None, np.object_]):
+class UnionSerializer(TypeSerializer[T, np.object_]):
     def __init__(
         self, cases: list[tuple[str, TypeSerializer[Any, Any]] | None]
     ) -> None:
@@ -923,7 +923,7 @@ class UnionSerializer(TypeSerializer[tuple[str, Any] | None, np.object_]):
             self._offset = 0
             self._cases = cast(list[tuple[str, TypeSerializer[Any, Any]]], cases)
 
-    def write(self, stream: CodedOutputStream, value: tuple[str, Any] | None) -> None:
+    def write(self, stream: CodedOutputStream, value: T) -> None:
         if value is None:
             if self._offset == 1:
                 stream.write_byte(0)
@@ -967,16 +967,16 @@ class UnionSerializer(TypeSerializer[tuple[str, Any] | None, np.object_]):
 
         raise ValueError(f"Incorrect union type {type(value)}")
 
-    def read(self, stream: CodedInputStream, read_as_numpy: Types) -> Any:
+    def read(self, stream: CodedInputStream, read_as_numpy: Types) -> T:
         case_index = stream.read_byte()
         if case_index == 0 and self._offset == 1:
-            return None
+            return None # type: ignore
 
         case_tag, case_serializer = self._cases[case_index - self._offset]
-        return (case_tag, case_serializer.read(stream, read_as_numpy))
+        return (case_tag, case_serializer.read(stream, read_as_numpy)) # type: ignore
 
     def read_numpy(self, stream: CodedInputStream) -> np.object_:
-        return self.read(stream, Types.ALL)
+        return self.read(stream, Types.ALL) # type: ignore
 
 
 class StreamSerializer(TypeSerializer[Iterable[T], Any]):

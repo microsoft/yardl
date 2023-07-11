@@ -20,8 +20,7 @@
 
         "files.readonlyInclude": {
           "**/generated/**": true,
-          "python/sandbox": true,
-          "python/test_model": true
+          "python/sandbox": true
         },
 
         "go.toolsManagement.checkForUpdates": "local",
