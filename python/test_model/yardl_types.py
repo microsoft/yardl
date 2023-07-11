@@ -1,1 +1,0 @@
-/workspaces/yardl/tooling/internal/python/static_files/yardl_types.py
