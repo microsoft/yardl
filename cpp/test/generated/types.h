@@ -181,6 +181,18 @@ struct RecordWithVectors {
   }
 };
 
+struct RecordWithVectorOfTimes {
+  std::vector<yardl::Time> times{};
+
+  bool operator==(const RecordWithVectorOfTimes& other) const {
+    return times == other.times;
+  }
+
+  bool operator!=(const RecordWithVectorOfTimes& other) const {
+    return !(*this == other);
+  }
+};
+
 struct RecordWithArrays {
   yardl::DynamicNDArray<int32_t> default_array{};
   yardl::DynamicNDArray<int32_t> default_array_with_empty_dimension{};
@@ -240,10 +252,12 @@ struct RecordWithArraysSimpleSyntax {
 struct RecordWithOptionalFields {
   std::optional<int32_t> optional_int{};
   std::optional<int32_t> optional_int_alternate_syntax{};
+  std::optional<yardl::Time> optional_time{};
 
   bool operator==(const RecordWithOptionalFields& other) const {
     return optional_int == other.optional_int &&
-      optional_int_alternate_syntax == other.optional_int_alternate_syntax;
+      optional_int_alternate_syntax == other.optional_int_alternate_syntax &&
+      optional_time == other.optional_time;
   }
 
   bool operator!=(const RecordWithOptionalFields& other) const {
@@ -382,9 +396,11 @@ using AliasedMap = std::unordered_map<K, V>;
 
 struct RecordWithUnions {
   std::variant<std::monostate, int32_t, std::string> null_or_int_or_string{};
+  std::variant<yardl::Time, yardl::DateTime> date_or_datetime{};
 
   bool operator==(const RecordWithUnions& other) const {
-    return null_or_int_or_string == other.null_or_int_or_string;
+    return null_or_int_or_string == other.null_or_int_or_string &&
+      date_or_datetime == other.date_or_datetime;
   }
 
   bool operator!=(const RecordWithUnions& other) const {
@@ -430,6 +446,20 @@ struct TextFormat : yardl::BaseFlags<uint64_t, TextFormat> {
   static const TextFormat kItalic;
   static const TextFormat kUnderline;
   static const TextFormat kStrikethrough;
+};
+
+struct RecordWithEnums {
+  test_model::Fruits enum_field{};
+  test_model::DaysOfWeek flags{};
+
+  bool operator==(const RecordWithEnums& other) const {
+    return enum_field == other.enum_field &&
+      flags == other.flags;
+  }
+
+  bool operator!=(const RecordWithEnums& other) const {
+    return !(*this == other);
+  }
 };
 
 template <typename T>

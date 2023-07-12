@@ -132,6 +132,15 @@ struct IsTriviallySerializable<test_model::RecordWithVectors> {
 };
 
 template <>
+struct IsTriviallySerializable<test_model::RecordWithVectorOfTimes> {
+  using __T__ = test_model::RecordWithVectorOfTimes;
+  static constexpr bool value = 
+    std::is_standard_layout_v<__T__> &&
+    IsTriviallySerializable<decltype(__T__::times)>::value &&
+    (sizeof(__T__) == (sizeof(__T__::times)));
+};
+
+template <>
 struct IsTriviallySerializable<test_model::RecordWithArrays> {
   using __T__ = test_model::RecordWithArrays;
   static constexpr bool value = 
@@ -174,8 +183,9 @@ struct IsTriviallySerializable<test_model::RecordWithOptionalFields> {
     std::is_standard_layout_v<__T__> &&
     IsTriviallySerializable<decltype(__T__::optional_int)>::value &&
     IsTriviallySerializable<decltype(__T__::optional_int_alternate_syntax)>::value &&
-    (sizeof(__T__) == (sizeof(__T__::optional_int) + sizeof(__T__::optional_int_alternate_syntax))) &&
-    offsetof(__T__, optional_int) < offsetof(__T__, optional_int_alternate_syntax);
+    IsTriviallySerializable<decltype(__T__::optional_time)>::value &&
+    (sizeof(__T__) == (sizeof(__T__::optional_int) + sizeof(__T__::optional_int_alternate_syntax) + sizeof(__T__::optional_time))) &&
+    offsetof(__T__, optional_int) < offsetof(__T__, optional_int_alternate_syntax) && offsetof(__T__, optional_int_alternate_syntax) < offsetof(__T__, optional_time);
 };
 
 template <>
@@ -276,7 +286,20 @@ struct IsTriviallySerializable<test_model::RecordWithUnions> {
   static constexpr bool value = 
     std::is_standard_layout_v<__T__> &&
     IsTriviallySerializable<decltype(__T__::null_or_int_or_string)>::value &&
-    (sizeof(__T__) == (sizeof(__T__::null_or_int_or_string)));
+    IsTriviallySerializable<decltype(__T__::date_or_datetime)>::value &&
+    (sizeof(__T__) == (sizeof(__T__::null_or_int_or_string) + sizeof(__T__::date_or_datetime))) &&
+    offsetof(__T__, null_or_int_or_string) < offsetof(__T__, date_or_datetime);
+};
+
+template <>
+struct IsTriviallySerializable<test_model::RecordWithEnums> {
+  using __T__ = test_model::RecordWithEnums;
+  static constexpr bool value = 
+    std::is_standard_layout_v<__T__> &&
+    IsTriviallySerializable<decltype(__T__::enum_field)>::value &&
+    IsTriviallySerializable<decltype(__T__::flags)>::value &&
+    (sizeof(__T__) == (sizeof(__T__::enum_field) + sizeof(__T__::flags))) &&
+    offsetof(__T__, enum_field) < offsetof(__T__, flags);
 };
 
 template <typename T1, typename T2>
@@ -664,6 +687,24 @@ namespace {
   yardl::binary::ReadVector<std::array<int32_t, 2>, yardl::binary::ReadArray<int32_t, yardl::binary::ReadInteger, 2>>(stream, value.vector_of_vectors);
 }
 
+[[maybe_unused]] void WriteRecordWithVectorOfTimes(yardl::binary::CodedOutputStream& stream, test_model::RecordWithVectorOfTimes const& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<test_model::RecordWithVectorOfTimes>::value) {
+    yardl::binary::WriteTriviallySerializable(stream, value);
+    return;
+  }
+
+  yardl::binary::WriteVector<yardl::Time, yardl::binary::WriteTime>(stream, value.times);
+}
+
+[[maybe_unused]] void ReadRecordWithVectorOfTimes(yardl::binary::CodedInputStream& stream, test_model::RecordWithVectorOfTimes& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<test_model::RecordWithVectorOfTimes>::value) {
+    yardl::binary::ReadTriviallySerializable(stream, value);
+    return;
+  }
+
+  yardl::binary::ReadVector<yardl::Time, yardl::binary::ReadTime>(stream, value.times);
+}
+
 [[maybe_unused]] void WriteRecordWithArrays(yardl::binary::CodedOutputStream& stream, test_model::RecordWithArrays const& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<test_model::RecordWithArrays>::value) {
     yardl::binary::WriteTriviallySerializable(stream, value);
@@ -740,6 +781,7 @@ namespace {
 
   yardl::binary::WriteOptional<int32_t, yardl::binary::WriteInteger>(stream, value.optional_int);
   yardl::binary::WriteOptional<int32_t, yardl::binary::WriteInteger>(stream, value.optional_int_alternate_syntax);
+  yardl::binary::WriteOptional<yardl::Time, yardl::binary::WriteTime>(stream, value.optional_time);
 }
 
 [[maybe_unused]] void ReadRecordWithOptionalFields(yardl::binary::CodedInputStream& stream, test_model::RecordWithOptionalFields& value) {
@@ -750,6 +792,7 @@ namespace {
 
   yardl::binary::ReadOptional<int32_t, yardl::binary::ReadInteger>(stream, value.optional_int);
   yardl::binary::ReadOptional<int32_t, yardl::binary::ReadInteger>(stream, value.optional_int_alternate_syntax);
+  yardl::binary::ReadOptional<yardl::Time, yardl::binary::ReadTime>(stream, value.optional_time);
 }
 
 [[maybe_unused]] void WriteRecordWithVlens(yardl::binary::CodedOutputStream& stream, test_model::RecordWithVlens const& value) {
@@ -985,6 +1028,7 @@ template<typename K, yardl::binary::Reader<K> ReadK, typename V, yardl::binary::
   }
 
   WriteUnion<std::monostate, yardl::binary::WriteMonostate, int32_t, yardl::binary::WriteInteger, std::string, yardl::binary::WriteString>(stream, value.null_or_int_or_string);
+  WriteUnion<yardl::Time, yardl::binary::WriteTime, yardl::DateTime, yardl::binary::WriteDateTime>(stream, value.date_or_datetime);
 }
 
 [[maybe_unused]] void ReadRecordWithUnions(yardl::binary::CodedInputStream& stream, test_model::RecordWithUnions& value) {
@@ -994,6 +1038,27 @@ template<typename K, yardl::binary::Reader<K> ReadK, typename V, yardl::binary::
   }
 
   ReadUnion<std::monostate, yardl::binary::ReadMonostate, int32_t, yardl::binary::ReadInteger, std::string, yardl::binary::ReadString>(stream, value.null_or_int_or_string);
+  ReadUnion<yardl::Time, yardl::binary::ReadTime, yardl::DateTime, yardl::binary::ReadDateTime>(stream, value.date_or_datetime);
+}
+
+[[maybe_unused]] void WriteRecordWithEnums(yardl::binary::CodedOutputStream& stream, test_model::RecordWithEnums const& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<test_model::RecordWithEnums>::value) {
+    yardl::binary::WriteTriviallySerializable(stream, value);
+    return;
+  }
+
+  yardl::binary::WriteEnum<test_model::Fruits>(stream, value.enum_field);
+  yardl::binary::WriteFlags<test_model::DaysOfWeek>(stream, value.flags);
+}
+
+[[maybe_unused]] void ReadRecordWithEnums(yardl::binary::CodedInputStream& stream, test_model::RecordWithEnums& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<test_model::RecordWithEnums>::value) {
+    yardl::binary::ReadTriviallySerializable(stream, value);
+    return;
+  }
+
+  yardl::binary::ReadEnum<test_model::Fruits>(stream, value.enum_field);
+  yardl::binary::ReadFlags<test_model::DaysOfWeek>(stream, value.flags);
 }
 
 template<typename T, yardl::binary::Writer<T> WriteT>

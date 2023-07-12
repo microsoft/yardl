@@ -30,6 +30,9 @@ void from_json(ordered_json const& j, test_model::TupleWithRecords& value);
 void to_json(ordered_json& j, test_model::RecordWithVectors const& value);
 void from_json(ordered_json const& j, test_model::RecordWithVectors& value);
 
+void to_json(ordered_json& j, test_model::RecordWithVectorOfTimes const& value);
+void from_json(ordered_json const& j, test_model::RecordWithVectorOfTimes& value);
+
 void to_json(ordered_json& j, test_model::RecordWithArrays const& value);
 void from_json(ordered_json const& j, test_model::RecordWithArrays& value);
 
@@ -83,6 +86,9 @@ void from_json(ordered_json const& j, test_model::DaysOfWeek& value);
 
 void to_json(ordered_json& j, test_model::TextFormat const& value);
 void from_json(ordered_json const& j, test_model::TextFormat& value);
+
+void to_json(ordered_json& j, test_model::RecordWithEnums const& value);
+void from_json(ordered_json const& j, test_model::RecordWithEnums& value);
 
 template <typename T1, typename T2>
 void to_json(ordered_json& j, test_model::GenericRecord<T1, T2> const& value);
@@ -241,6 +247,35 @@ struct adl_serializer<std::variant<std::monostate, int32_t, std::string>> {
       return;
     }
     throw std::runtime_error("Invalid union value");
+  }
+};
+
+template<>
+struct adl_serializer<std::variant<yardl::Time, yardl::DateTime>> {
+  static void to_json(ordered_json& j, std::variant<yardl::Time, yardl::DateTime> const& value) {
+    switch (value.index()) {
+      case 0:
+        j = ordered_json{ {"time", std::get<yardl::Time>(value)} };
+        break;
+      case 1:
+        j = ordered_json{ {"datetime", std::get<yardl::DateTime>(value)} };
+        break;
+      default:
+        throw std::runtime_error("Invalid union value");
+    }
+  }
+
+  static void from_json(ordered_json const& j, std::variant<yardl::Time, yardl::DateTime>& value) {
+    auto it = j.begin();
+    std::string tag = it.key();
+    if (tag == "time") {
+      value = it.value().get<yardl::Time>();
+      return;
+    }
+    if (tag == "datetime") {
+      value = it.value().get<yardl::DateTime>();
+      return;
+    }
   }
 };
 
@@ -736,6 +771,19 @@ void from_json(ordered_json const& j, test_model::RecordWithVectors& value) {
   }
 }
 
+void to_json(ordered_json& j, test_model::RecordWithVectorOfTimes const& value) {
+  j = ordered_json::object();
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.times)) {
+    j.push_back({"times", value.times});
+  }
+}
+
+void from_json(ordered_json const& j, test_model::RecordWithVectorOfTimes& value) {
+  if (auto it = j.find("times"); it != j.end()) {
+    it->get_to(value.times);
+  }
+}
+
 void to_json(ordered_json& j, test_model::RecordWithArrays const& value) {
   j = ordered_json::object();
   if (yardl::ndjson::ShouldSerializeFieldValue(value.default_array)) {
@@ -866,6 +914,9 @@ void to_json(ordered_json& j, test_model::RecordWithOptionalFields const& value)
   if (yardl::ndjson::ShouldSerializeFieldValue(value.optional_int_alternate_syntax)) {
     j.push_back({"optionalIntAlternateSyntax", value.optional_int_alternate_syntax});
   }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.optional_time)) {
+    j.push_back({"optionalTime", value.optional_time});
+  }
 }
 
 void from_json(ordered_json const& j, test_model::RecordWithOptionalFields& value) {
@@ -874,6 +925,9 @@ void from_json(ordered_json const& j, test_model::RecordWithOptionalFields& valu
   }
   if (auto it = j.find("optionalIntAlternateSyntax"); it != j.end()) {
     it->get_to(value.optional_int_alternate_syntax);
+  }
+  if (auto it = j.find("optionalTime"); it != j.end()) {
+    it->get_to(value.optional_time);
   }
 }
 
@@ -1064,11 +1118,17 @@ void to_json(ordered_json& j, test_model::RecordWithUnions const& value) {
   if (yardl::ndjson::ShouldSerializeFieldValue(value.null_or_int_or_string)) {
     j.push_back({"nullOrIntOrString", value.null_or_int_or_string});
   }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.date_or_datetime)) {
+    j.push_back({"dateOrDatetime", value.date_or_datetime});
+  }
 }
 
 void from_json(ordered_json const& j, test_model::RecordWithUnions& value) {
   if (auto it = j.find("nullOrIntOrString"); it != j.end()) {
     it->get_to(value.null_or_int_or_string);
+  }
+  if (auto it = j.find("dateOrDatetime"); it != j.end()) {
+    it->get_to(value.date_or_datetime);
   }
 }
 
@@ -1374,6 +1434,25 @@ void from_json(ordered_json const& j, test_model::TextFormat& value) {
       continue;
     }
     throw std::runtime_error("Invalid enum value '" + item + "' for enum test_model::TextFormat");
+  }
+}
+
+void to_json(ordered_json& j, test_model::RecordWithEnums const& value) {
+  j = ordered_json::object();
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.enum_field)) {
+    j.push_back({"enum", value.enum_field});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.flags)) {
+    j.push_back({"flags", value.flags});
+  }
+}
+
+void from_json(ordered_json const& j, test_model::RecordWithEnums& value) {
+  if (auto it = j.find("enum"); it != j.end()) {
+    it->get_to(value.enum_field);
+  }
+  if (auto it = j.find("flags"); it != j.end()) {
+    it->get_to(value.flags);
   }
 }
 

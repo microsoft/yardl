@@ -31,6 +31,11 @@
           "editor.formatOnSave": true
         },
 
+        "[python]": {
+          "editor.defaultFormatter": "ms-python.black-formatter",
+          "editor.formatOnSave": true
+        },
+
         "[json]": {
           "editor.defaultFormatter": "esbenp.prettier-vscode",
           "editor.formatOnSave": true
@@ -97,7 +102,7 @@
         "jinliming2.vscode-go-template",
         "matepek.vscode-catch2-test-adapter",
         "mhutchie.git-graph",
-        "ms-python.python",
+        "ms-python.black-formatter",
         "ms-python.python",
         "ms-toolsai.jupyter",
         "ms-vscode.cmake-tools",

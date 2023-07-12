@@ -51,7 +51,9 @@ class BinaryProtocolWriter(ABC):
 
 class BinaryProtocolReader(ABC):
     def __init__(
-        self, stream: BufferedReader | BytesIO | BinaryIO | str, expected_schema: str | None
+        self,
+        stream: BufferedReader | BytesIO | BinaryIO | str,
+        expected_schema: str | None,
     ) -> None:
         self._stream = CodedInputStream(stream)
         magic_bytes = self._stream.read_view(len(MAGIC_BYTES))
@@ -141,14 +143,17 @@ class CodedOutputStream:
 
 class CodedInputStream:
     def __init__(
-        self, stream: BufferedReader | BytesIO | BinaryIO | str, *, buffer_size: int = 65536
+        self,
+        stream: BufferedReader | BytesIO | BinaryIO | str,
+        *,
+        buffer_size: int = 65536,
     ) -> None:
         if isinstance(stream, str):
             self._stream = open(stream, "rb")
             self._owns_stream = True
         else:
             if not isinstance(stream, BufferedIOBase):
-                self._stream = BufferedReader(stream) # type: ignore
+                self._stream = BufferedReader(stream)  # type: ignore
             else:
                 self._stream = stream
             self._owns_stream = False
@@ -787,7 +792,7 @@ class DateTimeSerializer(TypeSerializer[DateTime, np.datetime64]):
     def write(self, stream: CodedOutputStream, value: DateTime) -> None:
         if isinstance(value, datetime.datetime):
             delta = value - EPOCH_DATETIME
-            nanoseconds_since_epoch = int(delta.total_seconds() * 1e9)
+            nanoseconds_since_epoch = int(delta.total_seconds() * 1e6) * 1000
             stream.write_signed_varint(nanoseconds_since_epoch)
         else:
             if not isinstance(value, np.datetime64):
@@ -970,13 +975,13 @@ class UnionSerializer(TypeSerializer[T, np.object_]):
     def read(self, stream: CodedInputStream, read_as_numpy: Types) -> T:
         case_index = stream.read_byte()
         if case_index == 0 and self._offset == 1:
-            return None # type: ignore
+            return None  # type: ignore
 
         case_tag, case_serializer = self._cases[case_index - self._offset]
-        return (case_tag, case_serializer.read(stream, read_as_numpy)) # type: ignore
+        return (case_tag, case_serializer.read(stream, read_as_numpy))  # type: ignore
 
     def read_numpy(self, stream: CodedInputStream) -> np.object_:
-        return self.read(stream, Types.ALL) # type: ignore
+        return self.read(stream, Types.ALL)  # type: ignore
 
 
 class StreamSerializer(TypeSerializer[Iterable[T], Any]):

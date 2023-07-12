@@ -281,6 +281,21 @@
         },
         {
           "record": {
+            "name": "RecordWithVectorOfTimes",
+            "fields": [
+              {
+                "name": "times",
+                "type": {
+                  "vector": {
+                    "items": "time"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "record": {
             "name": "RecordWithArrays",
             "fields": [
               {
@@ -529,6 +544,13 @@
                 "type": [
                   null,
                   "int32"
+                ]
+              },
+              {
+                "name": "optionalTime",
+                "type": [
+                  null,
+                  "time"
                 ]
               }
             ]
@@ -848,6 +870,19 @@
                     "type": "string"
                   }
                 ]
+              },
+              {
+                "name": "dateOrDatetime",
+                "type": [
+                  {
+                    "tag": "time",
+                    "type": "time"
+                  },
+                  {
+                    "tag": "datetime",
+                    "type": "datetime"
+                  }
+                ]
               }
             ]
           }
@@ -974,6 +1009,21 @@
               {
                 "symbol": "strikethrough",
                 "value": 8
+              }
+            ]
+          }
+        },
+        {
+          "record": {
+            "name": "RecordWithEnums",
+            "fields": [
+              {
+                "name": "enum",
+                "type": "TestModel.Fruits"
+              },
+              {
+                "name": "flags",
+                "type": "TestModel.DaysOfWeek"
               }
             ]
           }

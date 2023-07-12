@@ -61,7 +61,7 @@ func writeNamedType(w *formatting.IndentedWriter, td *dsl.NamedType) {
 }
 
 func writeRecord(w *formatting.IndentedWriter, rec *dsl.RecordDefinition, st dsl.SymbolTable) {
-	w.WriteStringln("@dataclasses.dataclass(slots=True, kw_only=True)")
+	w.WriteStringln("@dataclasses.dataclass(slots=True, kw_only=True, eq=False)")
 	fmt.Fprintf(w, "class %s%s:\n", common.TypeSyntaxWithoutTypeParameters(rec, rec.Namespace), GetGenericBase(rec))
 	w.Indented(func() {
 		common.WriteDocstring(w, rec.Comment)
@@ -109,11 +109,104 @@ func writeRecord(w *formatting.IndentedWriter, rec *dsl.RecordDefinition, st dsl
 			})
 		}
 
-		if len(rec.Fields)+len(rec.ComputedFields) == 0 {
-			w.WriteStringln("pass")
+		writeEqMethod(w, rec)
+	})
+	w.WriteStringln("")
+}
+
+func writeEqMethod(w *formatting.IndentedWriter, rec *dsl.RecordDefinition) {
+	w.WriteStringln("def __eq__(self, other: object) -> bool:")
+	w.Indented(func() {
+		fmt.Fprintf(w, "if not isinstance(other, %s):\n", common.TypeSyntaxWithoutTypeParameters(rec, rec.Namespace))
+		w.Indented(func() {
+			w.WriteStringln("return False")
+		})
+		if len(rec.Fields) == 0 {
+			w.WriteStringln("return True")
+		} else {
+			w.WriteStringln("return (")
+			w.Indented(func() {
+				for i, field := range rec.Fields {
+					if i > 0 {
+						w.WriteString("and ")
+					}
+
+					fieldIdentifier := common.FieldIdentifierName(field.Name)
+					w.WriteStringln(typeEqualityExpression(field.Type, "self."+fieldIdentifier, "other."+fieldIdentifier))
+				}
+			})
+			w.WriteStringln(")")
 		}
 	})
 	w.WriteStringln("")
+}
+
+func typeEqualityExpression(t dsl.Type, a, b string) string {
+	if hasSimpleEquality(t) {
+		return fmt.Sprintf("%s == %s", a, b)
+	}
+
+	switch t := t.(type) {
+	case *dsl.SimpleType:
+		return typeDefinitionEqualityExpression(t.ResolvedDefinition, a, b)
+	case *dsl.GeneralizedType:
+		switch t.Dimensionality.(type) {
+		case nil:
+			if t.Cases.IsSingle() {
+				return typeEqualityExpression(t.Cases[0].Type, a, b)
+			}
+			if t.Cases.IsOptional() {
+				return fmt.Sprintf("%s is None if %s is None else (%s is not None and %s)", b, a, b, typeEqualityExpression(t.Cases[1].Type, a, b))
+			}
+		case *dsl.Vector:
+			return fmt.Sprintf("len(%s) == len(%s) and all(%s for %s, %s in zip(%s, %s))", a, b, typeEqualityExpression(t.ToScalar(), "a", "b"), "a", "b", a, b)
+		}
+		return fmt.Sprintf("yardl.structural_equal(%s, %s)", a, b)
+	default:
+		panic(fmt.Sprintf("unsupported type: %T", t))
+	}
+}
+
+func typeDefinitionEqualityExpression(t dsl.TypeDefinition, a, b string) string {
+	switch t := t.(type) {
+	case dsl.PrimitiveDefinition:
+		switch t {
+		case dsl.Date:
+			return fmt.Sprintf("yardl.dates_equal(%s, %s)", a, b)
+		case dsl.Time:
+			return fmt.Sprintf("yardl.times_equal(%s, %s)", a, b)
+		case dsl.DateTime:
+			return fmt.Sprintf("yardl.datetimes_equal(%s, %s)", a, b)
+		}
+	case *dsl.GenericTypeParameter:
+		return fmt.Sprintf("yardl.structural_equal(%s, %s)", a, b)
+	case *dsl.NamedType:
+		return typeEqualityExpression(t.Type, a, b)
+	}
+
+	return fmt.Sprintf("%s == %s", a, b)
+}
+
+func hasSimpleEquality(t dsl.Node) bool {
+	res := true
+	dsl.Visit(t, func(self dsl.Visitor, node dsl.Node) {
+		switch t := node.(type) {
+		case *dsl.SimpleType:
+			self.Visit(t.ResolvedDefinition)
+		case dsl.PrimitiveDefinition:
+			switch t {
+			case dsl.Date, dsl.Time, dsl.DateTime:
+				res = false
+			}
+			return
+		case *dsl.Array, *dsl.GenericTypeParameter:
+			res = false
+			return
+		}
+
+		self.VisitChildren(node)
+	})
+	return res
 }
 
 type tailHandler func(next func())

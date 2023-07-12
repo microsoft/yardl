@@ -47,6 +47,10 @@ RecordWithVectors: !record
     defaultVectorFixedLength: int*3
     vectorOfVectors: int*2*
 
+RecordWithVectorOfTimes: !record
+  fields:
+    times: time*
+
 RecordWithArrays: !record
   fields:
     defaultArray: !array
@@ -102,6 +106,7 @@ RecordWithOptionalFields: !record
   fields:
     optionalInt: [null, int]
     optionalIntAlternateSyntax: int?
+    optionalTime: time?
 
 ScalarOptionals: !protocol
   sequence:
@@ -248,6 +253,7 @@ Maps: !protocol
 RecordWithUnions: !record
   fields:
     nullOrIntOrString: [null, int, string]
+    dateOrDatetime: [time, datetime]
 
 Unions: !protocol
   sequence:
@@ -307,6 +313,12 @@ TextFormat: !flags
     italic:
     underline:
     strikethrough:
+
+RecordWithEnums: !record
+  fields:
+    enum: Fruits
+    flags: DaysOfWeek
+
 
 Flags: !protocol
   sequence:

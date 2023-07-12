@@ -218,6 +218,19 @@ struct _Inner_RecordWithVectors {
   yardl::hdf5::InnerVlen<std::array<int32_t, 2>, std::array<int32_t, 2>> vector_of_vectors;
 };
 
+struct _Inner_RecordWithVectorOfTimes {
+  _Inner_RecordWithVectorOfTimes() {} 
+  _Inner_RecordWithVectorOfTimes(test_model::RecordWithVectorOfTimes const& o) 
+      : times(o.times) {
+  }
+
+  void ToOuter (test_model::RecordWithVectorOfTimes& o) const {
+    yardl::hdf5::ToOuter(times, o.times);
+  }
+
+  yardl::hdf5::InnerVlen<yardl::Time, yardl::Time> times;
+};
+
 struct _Inner_RecordWithArrays {
   _Inner_RecordWithArrays() {} 
   _Inner_RecordWithArrays(test_model::RecordWithArrays const& o) 
@@ -296,16 +309,19 @@ struct _Inner_RecordWithOptionalFields {
   _Inner_RecordWithOptionalFields() {} 
   _Inner_RecordWithOptionalFields(test_model::RecordWithOptionalFields const& o) 
       : optional_int(o.optional_int),
-      optional_int_alternate_syntax(o.optional_int_alternate_syntax) {
+      optional_int_alternate_syntax(o.optional_int_alternate_syntax),
+      optional_time(o.optional_time) {
   }
 
   void ToOuter (test_model::RecordWithOptionalFields& o) const {
     yardl::hdf5::ToOuter(optional_int, o.optional_int);
     yardl::hdf5::ToOuter(optional_int_alternate_syntax, o.optional_int_alternate_syntax);
+    yardl::hdf5::ToOuter(optional_time, o.optional_time);
   }
 
   yardl::hdf5::InnerOptional<int32_t, int32_t> optional_int;
   yardl::hdf5::InnerOptional<int32_t, int32_t> optional_int_alternate_syntax;
+  yardl::hdf5::InnerOptional<yardl::Time, yardl::Time> optional_time;
 };
 
 struct _Inner_RecordWithVlens {
@@ -454,14 +470,17 @@ struct _Inner_RecordWithDynamicNDArrays {
 struct _Inner_RecordWithUnions {
   _Inner_RecordWithUnions() {} 
   _Inner_RecordWithUnions(test_model::RecordWithUnions const& o) 
-      : null_or_int_or_string(o.null_or_int_or_string) {
+      : null_or_int_or_string(o.null_or_int_or_string),
+      date_or_datetime(o.date_or_datetime) {
   }
 
   void ToOuter (test_model::RecordWithUnions& o) const {
     yardl::hdf5::ToOuter(null_or_int_or_string, o.null_or_int_or_string);
+    yardl::hdf5::ToOuter(date_or_datetime, o.date_or_datetime);
   }
 
   ::InnerUnion2<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string> null_or_int_or_string;
+  ::InnerUnion2<yardl::Time, yardl::Time, yardl::DateTime, yardl::DateTime> date_or_datetime;
 };
 
 template <typename _T1_Inner, typename T1, typename _T2_Inner, typename T2>
@@ -685,6 +704,13 @@ struct _Inner_RecordWithKeywordFields {
   return t;
 }
 
+[[maybe_unused]] H5::CompType GetRecordWithVectorOfTimesHdf5Ddl() {
+  using RecordType = test_model::hdf5::_Inner_RecordWithVectorOfTimes;
+  H5::CompType t(sizeof(RecordType));
+  t.insertMember("times", HOFFSET(RecordType, times), yardl::hdf5::InnerVlenDdl(yardl::hdf5::TimeTypeDdl()));
+  return t;
+}
+
 [[maybe_unused]] H5::CompType GetRecordWithArraysHdf5Ddl() {
   using RecordType = test_model::hdf5::_Inner_RecordWithArrays;
   H5::CompType t(sizeof(RecordType));
@@ -720,6 +746,7 @@ struct _Inner_RecordWithKeywordFields {
   H5::CompType t(sizeof(RecordType));
   t.insertMember("optionalInt", HOFFSET(RecordType, optional_int), yardl::hdf5::OptionalTypeDdl<int32_t, int32_t>(H5::PredType::NATIVE_INT32));
   t.insertMember("optionalIntAlternateSyntax", HOFFSET(RecordType, optional_int_alternate_syntax), yardl::hdf5::OptionalTypeDdl<int32_t, int32_t>(H5::PredType::NATIVE_INT32));
+  t.insertMember("optionalTime", HOFFSET(RecordType, optional_time), yardl::hdf5::OptionalTypeDdl<yardl::Time, yardl::Time>(yardl::hdf5::TimeTypeDdl()));
   return t;
 }
 
@@ -796,6 +823,15 @@ struct _Inner_RecordWithKeywordFields {
   using RecordType = test_model::hdf5::_Inner_RecordWithUnions;
   H5::CompType t(sizeof(RecordType));
   t.insertMember("nullOrIntOrString", HOFFSET(RecordType, null_or_int_or_string), ::InnerUnion2Ddl<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string>(true, H5::PredType::NATIVE_INT32, "int32", yardl::hdf5::InnerVlenStringDdl(), "string"));
+  t.insertMember("dateOrDatetime", HOFFSET(RecordType, date_or_datetime), ::InnerUnion2Ddl<yardl::Time, yardl::Time, yardl::DateTime, yardl::DateTime>(false, yardl::hdf5::TimeTypeDdl(), "time", yardl::hdf5::DateTimeTypeDdl(), "datetime"));
+  return t;
+}
+
+[[maybe_unused]] H5::CompType GetRecordWithEnumsHdf5Ddl() {
+  using RecordType = test_model::RecordWithEnums;
+  H5::CompType t(sizeof(RecordType));
+  t.insertMember("enum", HOFFSET(RecordType, enum_field), test_model::hdf5::GetFruitsHdf5Ddl());
+  t.insertMember("flags", HOFFSET(RecordType, flags), H5::PredType::NATIVE_INT32);
   return t;
 }
 

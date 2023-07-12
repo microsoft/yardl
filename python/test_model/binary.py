@@ -1262,6 +1262,24 @@ class _RecordWithVectorsSerializer(_binary.RecordSerializer[RecordWithVectors]):
         return RecordWithVectors(default_vector=field_values[0], default_vector_fixed_length=field_values[1], vector_of_vectors=field_values[2])
 
 
+class _RecordWithVectorOfTimesSerializer(_binary.RecordSerializer[RecordWithVectorOfTimes]):
+    def __init__(self) -> None:
+        super().__init__([("times", _binary.VectorSerializer(_binary.time_serializer))])
+
+    def write(self, stream: _binary.CodedOutputStream, value: RecordWithVectorOfTimes) -> None:
+        if isinstance(value, np.void):
+            self.write_numpy(stream, value)
+            return
+        self._write(stream, value.times)
+
+    def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
+        self._write(stream, value['times'])
+
+    def read(self, stream: _binary.CodedInputStream, read_as_numpy: Types) -> RecordWithVectorOfTimes:
+        field_values = self._read(stream, read_as_numpy)
+        return RecordWithVectorOfTimes(times=field_values[0])
+
+
 class _RecordWithArraysSerializer(_binary.RecordSerializer[RecordWithArrays]):
     def __init__(self) -> None:
         super().__init__([("default_array", _binary.DynamicNDArraySerializer(_binary.int32_serializer)), ("default_array_with_empty_dimension", _binary.DynamicNDArraySerializer(_binary.int32_serializer)), ("rank_1_array", _binary.NDArraySerializer(_binary.int32_serializer, 1)), ("rank_2_array", _binary.NDArraySerializer(_binary.int32_serializer, 2)), ("rank_2_array_with_named_dimensions", _binary.NDArraySerializer(_binary.int32_serializer, 2)), ("rank_2_fixed_array", _binary.FixedNDArraySerializer(_binary.int32_serializer, (3, 4,))), ("rank_2_fixed_array_with_named_dimensions", _binary.FixedNDArraySerializer(_binary.int32_serializer, (3, 4,))), ("dynamic_array", _binary.DynamicNDArraySerializer(_binary.int32_serializer)), ("array_of_vectors", _binary.FixedNDArraySerializer(_binary.FixedVectorSerializer(_binary.int32_serializer, 4), (5,)))])
@@ -1300,20 +1318,20 @@ class _RecordWithArraysSimpleSyntaxSerializer(_binary.RecordSerializer[RecordWit
 
 class _RecordWithOptionalFieldsSerializer(_binary.RecordSerializer[RecordWithOptionalFields]):
     def __init__(self) -> None:
-        super().__init__([("optional_int", _binary.OptionalSerializer(_binary.int32_serializer)), ("optional_int_alternate_syntax", _binary.OptionalSerializer(_binary.int32_serializer))])
+        super().__init__([("optional_int", _binary.OptionalSerializer(_binary.int32_serializer)), ("optional_int_alternate_syntax", _binary.OptionalSerializer(_binary.int32_serializer)), ("optional_time", _binary.OptionalSerializer(_binary.time_serializer))])
 
     def write(self, stream: _binary.CodedOutputStream, value: RecordWithOptionalFields) -> None:
         if isinstance(value, np.void):
             self.write_numpy(stream, value)
             return
-        self._write(stream, value.optional_int, value.optional_int_alternate_syntax)
+        self._write(stream, value.optional_int, value.optional_int_alternate_syntax, value.optional_time)
 
     def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
-        self._write(stream, value['optional_int'], value['optional_int_alternate_syntax'])
+        self._write(stream, value['optional_int'], value['optional_int_alternate_syntax'], value['optional_time'])
 
     def read(self, stream: _binary.CodedInputStream, read_as_numpy: Types) -> RecordWithOptionalFields:
         field_values = self._read(stream, read_as_numpy)
-        return RecordWithOptionalFields(optional_int=field_values[0], optional_int_alternate_syntax=field_values[1])
+        return RecordWithOptionalFields(optional_int=field_values[0], optional_int_alternate_syntax=field_values[1], optional_time=field_values[2])
 
 
 class _RecordWithVlensSerializer(_binary.RecordSerializer[RecordWithVlens]):
@@ -1462,20 +1480,38 @@ class _RecordWithDynamicNDArraysSerializer(_binary.RecordSerializer[RecordWithDy
 
 class _RecordWithUnionsSerializer(_binary.RecordSerializer[RecordWithUnions]):
     def __init__(self) -> None:
-        super().__init__([("null_or_int_or_string", _binary.UnionSerializer([None, ("int32", _binary.int32_serializer), ("string", _binary.string_serializer)]))])
+        super().__init__([("null_or_int_or_string", _binary.UnionSerializer([None, ("int32", _binary.int32_serializer), ("string", _binary.string_serializer)])), ("date_or_datetime", _binary.UnionSerializer([("time", _binary.time_serializer), ("datetime", _binary.datetime_serializer)]))])
 
     def write(self, stream: _binary.CodedOutputStream, value: RecordWithUnions) -> None:
         if isinstance(value, np.void):
             self.write_numpy(stream, value)
             return
-        self._write(stream, value.null_or_int_or_string)
+        self._write(stream, value.null_or_int_or_string, value.date_or_datetime)
 
     def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
-        self._write(stream, value['null_or_int_or_string'])
+        self._write(stream, value['null_or_int_or_string'], value['date_or_datetime'])
 
     def read(self, stream: _binary.CodedInputStream, read_as_numpy: Types) -> RecordWithUnions:
         field_values = self._read(stream, read_as_numpy)
-        return RecordWithUnions(null_or_int_or_string=field_values[0])
+        return RecordWithUnions(null_or_int_or_string=field_values[0], date_or_datetime=field_values[1])
+
+
+class _RecordWithEnumsSerializer(_binary.RecordSerializer[RecordWithEnums]):
+    def __init__(self) -> None:
+        super().__init__([("enum", _binary.EnumSerializer(_binary.int32_serializer, Fruits)), ("flags", _binary.EnumSerializer(_binary.int32_serializer, DaysOfWeek))])
+
+    def write(self, stream: _binary.CodedOutputStream, value: RecordWithEnums) -> None:
+        if isinstance(value, np.void):
+            self.write_numpy(stream, value)
+            return
+        self._write(stream, value.enum, value.flags)
+
+    def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
+        self._write(stream, value['enum'], value['flags'])
+
+    def read(self, stream: _binary.CodedInputStream, read_as_numpy: Types) -> RecordWithEnums:
+        field_values = self._read(stream, read_as_numpy)
+        return RecordWithEnums(enum=field_values[0], flags=field_values[1])
 
 
 class _GenericRecordSerializer(typing.Generic[T1, T1_NP, T2, T2_NP], _binary.RecordSerializer[GenericRecord[T1, T2, T2_NP]]):

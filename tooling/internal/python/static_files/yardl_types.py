@@ -70,3 +70,108 @@ class Types(Flag):
 
 class ProtocolError(Exception):
     pass
+
+
+_EPOCH_ORDINAL_DAYS = datetime.date(1970, 1, 1).toordinal()
+
+
+def dates_equal(a: Date, b: Date) -> bool:
+    if type(a) == type(b):
+        return a == b
+
+    if isinstance(a, datetime.date):
+        if isinstance(b, np.datetime64):
+            b, a = a, b
+        else:
+            return False
+    else:
+        if not isinstance(a, np.datetime64) or not isinstance(b, datetime.date):
+            return False
+
+    # a is now a datetime64 and b is a datetime.date
+    b_days_since_epoch = b.toordinal() - _EPOCH_ORDINAL_DAYS
+
+    return a == np.datetime64(b_days_since_epoch, "D")
+
+
+def times_equal(a: Time, b: Time) -> bool:
+    if type(a) == type(b):
+        return a == b
+
+    if isinstance(a, datetime.time):
+        if isinstance(b, np.timedelta64):
+            b, a = a, b
+        else:
+            return False
+    else:
+        if not isinstance(a, np.timedelta64) or not isinstance(b, datetime.time):
+            return False
+
+    # a is now a timedelta64 and b is a datetime.time
+    b_nanoseconds_since_midnight = (
+        b.hour * 3_600_000_000_000
+        + b.minute * 60_000_000_000
+        + b.second * 1_000_000_000
+        + b.microsecond * 1_000
+    )
+
+    return a == np.timedelta64(b_nanoseconds_since_midnight, "ns")
+
+
+_EPOCH_DATETIME = datetime.datetime.utcfromtimestamp(0)
+
+
+def datetimes_equal(a: DateTime, b: DateTime) -> bool:
+    if type(a) == type(b):
+        return a == b
+
+    if isinstance(a, datetime.datetime):
+        if isinstance(b, np.datetime64):
+            b, a = a, b
+        else:
+            return False
+    else:
+        if not isinstance(a, np.datetime64) or not isinstance(b, datetime.datetime):
+            return False
+
+    # a is now a datetime64 and b is a datetime.datetime
+    b_delta = b - _EPOCH_DATETIME
+    b_nanoseconds_since_epoch = int(b_delta.total_seconds() * 1e6) * 1000
+
+    return a == np.datetime64(b_nanoseconds_since_epoch, "ns")
+
+
+def structural_equal(a: object, b: object) -> bool:
+    if a is None:
+        return b is None
+
+    if isinstance(a, list):
+        return (
+            isinstance(b, list)
+            and len(a) == len(b)
+            and all(structural_equal(x, y) for x, y in zip(a, b))
+        )
+
+    if isinstance(a, np.ndarray):
+        if a.dtype.hasobject:
+            return (
+                a.dtype == b.dtype
+                and a.shape == b.shape
+                and all(structural_equal(x, y) for x, y in zip(a, b))
+            )
+        return np.array_equal(a, b)
+
+    if isinstance(a, tuple):
+        return (
+            isinstance(b, tuple)
+            and len(a) == len(b)
+            and all(structural_equal(x, y) for x, y in zip(a, b))
+        )
+
+    if isinstance(a, datetime.time) or isinstance(a, np.timedelta64):
+        return times_equal(a, b)
+
+    if isinstance(a, datetime.datetime) or isinstance(a, np.datetime64):
+        return datetimes_equal(a, b)
+
+    return a == b
