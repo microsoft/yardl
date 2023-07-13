@@ -48,7 +48,11 @@ cpp_version := "17"
     cd tooling; \
     watchexec -r -c -w . -- 'go test ./... | { grep -v "\\[[no test files\\]" || true; }'
 
-@python-test: generate
+@build-translator:
+    cd cpp/build; \
+    ninja translator; \
+
+@python-test: generate build-translator
     cd python; \
     python3 -m pytest tests
 

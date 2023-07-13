@@ -17,17 +17,16 @@ translator_path = (
 ).resolve()
 
 
-def invoke_translator(pyBuf):
+def invoke_translator(py_buf):
     with subprocess.Popen(
         [translator_path, "binary", "binary"],
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
     ) as proc:
-        assert proc.stdin != None
-        cpp_output = proc.communicate(input=pyBuf)[0]
-        assert proc.wait() == 0
+        cpp_output = proc.communicate(input=py_buf)[0]
+        assert proc.wait() == 0, "translator failed"
 
-        assert cpp_output == pyBuf
+        assert cpp_output == py_buf
 
 
 # base writer type -> (derived writer type, derived reader type)
@@ -161,7 +160,7 @@ def create_validating_writer_class(
     return create_recording_class()
 
 
-def test_xyz():
+def test_scalar_primitives():
     with create_validating_writer_class(tm.ScalarsWriterBase)() as w:
         w.write_int_32(42)
         rec = tm.RecordWithPrimitives(
@@ -184,3 +183,36 @@ def test_xyz():
             datetime_field=datetime.datetime(2024, 4, 2, 12, 34, 56, 111222),
         )
         w.write_record(rec)
+
+
+def test_scalar_optionals():
+    c = create_validating_writer_class(tm.ScalarOptionalsWriterBase)
+
+    with c() as w:
+        w.write_optional_int(None)
+        w.write_optional_record(None)
+        w.write_record_with_optional_fields(tm.RecordWithOptionalFields())
+        w.write_optional_record_with_optional_fields(None)
+
+    with c() as w:
+        w.write_optional_int(55)
+        w.write_optional_record(tm.SimpleRecord(x=8, y=9, z=10))
+        w.write_record_with_optional_fields(
+            tm.RecordWithOptionalFields(
+                optional_int=44, optional_time=datetime.time(12, 34, 56)
+            )
+        )
+        w.write_optional_record_with_optional_fields(
+            tm.RecordWithOptionalFields(
+                optional_int=12, optional_time=datetime.time(11, 32, 26)
+            )
+        )
+
+
+def test_nested_records():
+    with create_validating_writer_class(tm.NestedRecordsWriterBase)() as w:
+        w.write_tuple_with_records(
+            tm.TupleWithRecords(
+                a=tm.SimpleRecord(x=1, y=2, z=3), b=tm.SimpleRecord(x=4, y=5, z=6)
+            )
+        )
