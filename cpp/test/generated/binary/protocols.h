@@ -570,6 +570,42 @@ class FixedArraysReader : public test_model::FixedArraysReaderBase, yardl::binar
   void CloseImpl() override;
 };
 
+// Binary writer for the Subarrays protocol.
+class SubarraysWriter : public test_model::SubarraysWriterBase, yardl::binary::BinaryWriter {
+  public:
+  SubarraysWriter(std::ostream& stream)
+      : yardl::binary::BinaryWriter(stream, schema_) {
+  }
+
+  SubarraysWriter(std::string file_name)
+      : yardl::binary::BinaryWriter(file_name, schema_) {
+  }
+
+  void Flush() override;
+
+  protected:
+  void WriteWithFixedSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithFixedCollections> const& value) override;
+  void WriteWithVlenSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithVlenCollections> const& value) override;
+  void CloseImpl() override;
+};
+
+// Binary reader for the Subarrays protocol.
+class SubarraysReader : public test_model::SubarraysReaderBase, yardl::binary::BinaryReader {
+  public:
+  SubarraysReader(std::istream& stream)
+      : yardl::binary::BinaryReader(stream, schema_) {
+  }
+
+  SubarraysReader(std::string file_name)
+      : yardl::binary::BinaryReader(file_name, schema_) {
+  }
+
+  protected:
+  void ReadWithFixedSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithFixedCollections>& value) override;
+  void ReadWithVlenSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithVlenCollections>& value) override;
+  void CloseImpl() override;
+};
+
 // Binary writer for the NDArrays protocol.
 class NDArraysWriter : public test_model::NDArraysWriterBase, yardl::binary::BinaryWriter {
   public:

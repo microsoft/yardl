@@ -946,6 +946,62 @@ class FixedArraysReaderBase {
   uint8_t state_ = 0;
 };
 
+// Abstract writer for the Subarrays protocol.
+class SubarraysWriterBase {
+  public:
+  // Ordinal 0.
+  void WriteWithFixedSubarrays(yardl::DynamicNDArray<test_model::RecordWithFixedCollections> const& value);
+
+  // Ordinal 1.
+  void WriteWithVlenSubarrays(yardl::DynamicNDArray<test_model::RecordWithVlenCollections> const& value);
+
+  // Optionaly close this writer before destructing. Validates that all steps were completed.
+  void Close();
+
+  virtual ~SubarraysWriterBase() = default;
+
+  // Flushes all buffered data.
+  virtual void Flush() {}
+
+  protected:
+  virtual void WriteWithFixedSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithFixedCollections> const& value) = 0;
+  virtual void WriteWithVlenSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithVlenCollections> const& value) = 0;
+  virtual void CloseImpl() {}
+
+  static std::string schema_;
+
+  private:
+  uint8_t state_ = 0;
+
+  friend class SubarraysReaderBase;
+};
+
+// Abstract reader for the Subarrays protocol.
+class SubarraysReaderBase {
+  public:
+  // Ordinal 0.
+  void ReadWithFixedSubarrays(yardl::DynamicNDArray<test_model::RecordWithFixedCollections>& value);
+
+  // Ordinal 1.
+  void ReadWithVlenSubarrays(yardl::DynamicNDArray<test_model::RecordWithVlenCollections>& value);
+
+  // Optionaly close this writer before destructing. Validates that all steps were completely read.
+  void Close();
+
+  void CopyTo(SubarraysWriterBase& writer);
+
+  virtual ~SubarraysReaderBase() = default;
+
+  protected:
+  virtual void ReadWithFixedSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithFixedCollections>& value) = 0;
+  virtual void ReadWithVlenSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithVlenCollections>& value) = 0;
+  virtual void CloseImpl() {}
+  static std::string schema_;
+
+  private:
+  uint8_t state_ = 0;
+};
+
 // Abstract writer for the NDArrays protocol.
 class NDArraysWriterBase {
   public:

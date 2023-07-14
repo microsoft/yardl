@@ -821,6 +821,62 @@
           }
         },
         {
+          "record": {
+            "name": "RecordWithFixedCollections",
+            "fields": [
+              {
+                "name": "fixedVector",
+                "type": {
+                  "vector": {
+                    "items": "int32",
+                    "length": 3
+                  }
+                }
+              },
+              {
+                "name": "fixedArray",
+                "type": {
+                  "array": {
+                    "items": "int32",
+                    "dimensions": [
+                      {
+                        "length": 2
+                      },
+                      {
+                        "length": 3
+                      }
+                    ]
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "record": {
+            "name": "RecordWithVlenCollections",
+            "fields": [
+              {
+                "name": "fixedVector",
+                "type": {
+                  "vector": {
+                    "items": "int32"
+                  }
+                }
+              },
+              {
+                "name": "fixedArray",
+                "type": {
+                  "array": {
+                    "items": "int32",
+                    "dimensions": 2
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
           "alias": {
             "name": "NamedNDArray",
             "type": {
@@ -2787,6 +2843,27 @@
             {
               "name": "namedArray",
               "type": "TestModel.NamedFixedNDArray"
+            }
+          ]
+        },
+        {
+          "name": "Subarrays",
+          "sequence": [
+            {
+              "name": "withFixedSubarrays",
+              "type": {
+                "array": {
+                  "items": "TestModel.RecordWithFixedCollections"
+                }
+              }
+            },
+            {
+              "name": "withVlenSubarrays",
+              "type": {
+                "array": {
+                  "items": "TestModel.RecordWithVlenCollections"
+                }
+              }
             }
           ]
         },

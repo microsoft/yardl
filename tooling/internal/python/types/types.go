@@ -119,7 +119,26 @@ func writeEqMethod(w *formatting.IndentedWriter, rec *dsl.RecordDefinition) {
 	w.Indented(func() {
 		fmt.Fprintf(w, "if not isinstance(other, %s):\n", common.TypeSyntaxWithoutTypeParameters(rec, rec.Namespace))
 		w.Indented(func() {
-			w.WriteStringln("return False")
+			w.WriteStringln("if (")
+			w.Indented(func() {
+				fmt.Fprintf(w, "not isinstance(other, np.void)\nor other.dtype.fields is None\nor len(other.dtype.fields) != %d\n", len(rec.Fields))
+			})
+			w.WriteStringln("):")
+			w.Indented(func() {
+				w.WriteStringln("return False")
+			})
+			w.WriteStringln("return (")
+			w.Indented(func() {
+				for i, field := range rec.Fields {
+					if i > 0 {
+						w.WriteString("and ")
+					}
+
+					fieldIdentifier := common.FieldIdentifierName(field.Name)
+					w.WriteStringln(typeEqualityExpression(field.Type, "self."+fieldIdentifier, fmt.Sprintf(`other["%s"]`, fieldIdentifier)))
+				}
+			})
+			w.WriteStringln(")")
 		})
 		if len(rec.Fields) == 0 {
 			w.WriteStringln("return True")
@@ -842,7 +861,7 @@ func typeDefinitionDTypeExpression(t dsl.TypeDefinition, context dTypeExpression
 				subarrayShape = fmt.Sprintf(", %s", subarrayShape)
 			}
 
-			fields[i] = fmt.Sprintf("('%s', %s%s)", f.Name, typeDTypeExpression(f.Type, context), subarrayShape)
+			fields[i] = fmt.Sprintf("('%s', %s%s)", common.FieldIdentifierName(f.Name), typeDTypeExpression(f.Type, context), subarrayShape)
 		}
 
 		return fmt.Sprintf("%snp.dtype([%s], align=True)", lambdaDeclaration, strings.Join(fields, ", "))

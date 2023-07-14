@@ -1486,6 +1486,87 @@ class TestFixedArraysWriterBase : public FixedArraysWriterBase {
   bool close_called_ = false;
 };
 
+class MockSubarraysWriter : public SubarraysWriterBase {
+  public:
+  void WriteWithFixedSubarraysImpl (yardl::DynamicNDArray<test_model::RecordWithFixedCollections> const& value) override {
+    if (WriteWithFixedSubarraysImpl_expected_values_.empty()) {
+      throw std::runtime_error("Unexpected call to WriteWithFixedSubarraysImpl");
+    }
+    if (WriteWithFixedSubarraysImpl_expected_values_.front() != value) {
+      throw std::runtime_error("Unexpected argument value for call to WriteWithFixedSubarraysImpl");
+    }
+    WriteWithFixedSubarraysImpl_expected_values_.pop();
+  }
+
+  std::queue<yardl::DynamicNDArray<test_model::RecordWithFixedCollections>> WriteWithFixedSubarraysImpl_expected_values_;
+
+  void ExpectWriteWithFixedSubarraysImpl (yardl::DynamicNDArray<test_model::RecordWithFixedCollections> const& value) {
+    WriteWithFixedSubarraysImpl_expected_values_.push(value);
+  }
+
+  void WriteWithVlenSubarraysImpl (yardl::DynamicNDArray<test_model::RecordWithVlenCollections> const& value) override {
+    if (WriteWithVlenSubarraysImpl_expected_values_.empty()) {
+      throw std::runtime_error("Unexpected call to WriteWithVlenSubarraysImpl");
+    }
+    if (WriteWithVlenSubarraysImpl_expected_values_.front() != value) {
+      throw std::runtime_error("Unexpected argument value for call to WriteWithVlenSubarraysImpl");
+    }
+    WriteWithVlenSubarraysImpl_expected_values_.pop();
+  }
+
+  std::queue<yardl::DynamicNDArray<test_model::RecordWithVlenCollections>> WriteWithVlenSubarraysImpl_expected_values_;
+
+  void ExpectWriteWithVlenSubarraysImpl (yardl::DynamicNDArray<test_model::RecordWithVlenCollections> const& value) {
+    WriteWithVlenSubarraysImpl_expected_values_.push(value);
+  }
+
+  void Verify() {
+    if (!WriteWithFixedSubarraysImpl_expected_values_.empty()) {
+      throw std::runtime_error("Expected call to WriteWithFixedSubarraysImpl was not received");
+    }
+    if (!WriteWithVlenSubarraysImpl_expected_values_.empty()) {
+      throw std::runtime_error("Expected call to WriteWithVlenSubarraysImpl was not received");
+    }
+  }
+};
+
+class TestSubarraysWriterBase : public SubarraysWriterBase {
+  public:
+  TestSubarraysWriterBase(std::unique_ptr<test_model::SubarraysWriterBase> writer, std::function<std::unique_ptr<SubarraysReaderBase>()> create_reader) : writer_(std::move(writer)), create_reader_(create_reader) {
+  }
+
+  ~TestSubarraysWriterBase() {
+    if (!close_called_ && !std::uncaught_exceptions()) {
+      ADD_FAILURE() << "Close() needs to be called on 'TestSubarraysWriterBase' to verify mocks";
+    }
+  }
+
+  protected:
+  void WriteWithFixedSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithFixedCollections> const& value) override {
+    writer_->WriteWithFixedSubarrays(value);
+    mock_writer_.ExpectWriteWithFixedSubarraysImpl(value);
+  }
+
+  void WriteWithVlenSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithVlenCollections> const& value) override {
+    writer_->WriteWithVlenSubarrays(value);
+    mock_writer_.ExpectWriteWithVlenSubarraysImpl(value);
+  }
+
+  void CloseImpl() override {
+    close_called_ = true;
+    writer_->Close();
+    std::unique_ptr<SubarraysReaderBase> reader = create_reader_();
+    reader->CopyTo(mock_writer_);
+    mock_writer_.Verify();
+  }
+
+  private:
+  std::unique_ptr<test_model::SubarraysWriterBase> writer_;
+  std::function<std::unique_ptr<test_model::SubarraysReaderBase>()> create_reader_;
+  MockSubarraysWriter mock_writer_;
+  bool close_called_ = false;
+};
+
 class MockNDArraysWriter : public NDArraysWriterBase {
   public:
   void WriteIntsImpl (yardl::NDArray<int32_t, 2> const& value) override {
@@ -3861,6 +3942,20 @@ std::unique_ptr<test_model::FixedArraysWriterBase> CreateValidatingWriter<test_m
     return std::make_unique<test_model::TestFixedArraysWriterBase>(std::make_unique<test_model::binary::FixedArraysWriter>(filename), [filename](){return std::make_unique<test_model::binary::FixedArraysReader>(filename);});
   case Format::kNDJson:
     return std::make_unique<test_model::TestFixedArraysWriterBase>(std::make_unique<test_model::ndjson::FixedArraysWriter>(filename), [filename](){return std::make_unique<test_model::ndjson::FixedArraysReader>(filename);});
+  default:
+    throw std::runtime_error("Unknown format");
+  }
+}
+
+template<>
+std::unique_ptr<test_model::SubarraysWriterBase> CreateValidatingWriter<test_model::SubarraysWriterBase>(Format format, std::string const& filename) {
+  switch (format) {
+  case Format::kHdf5:
+    return std::make_unique<test_model::TestSubarraysWriterBase>(std::make_unique<test_model::hdf5::SubarraysWriter>(filename), [filename](){ return std::make_unique<test_model::hdf5::SubarraysReader>(filename);});
+  case Format::kBinary:
+    return std::make_unique<test_model::TestSubarraysWriterBase>(std::make_unique<test_model::binary::SubarraysWriter>(filename), [filename](){return std::make_unique<test_model::binary::SubarraysReader>(filename);});
+  case Format::kNDJson:
+    return std::make_unique<test_model::TestSubarraysWriterBase>(std::make_unique<test_model::ndjson::SubarraysWriter>(filename), [filename](){return std::make_unique<test_model::ndjson::SubarraysReader>(filename);});
   default:
     throw std::runtime_error("Unknown format");
   }

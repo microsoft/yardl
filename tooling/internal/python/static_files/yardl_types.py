@@ -146,13 +146,21 @@ def structural_equal(a: object, b: object) -> bool:
         return b is None
 
     if isinstance(a, list):
-        return (
-            isinstance(b, list)
-            and len(a) == len(b)
-            and all(structural_equal(x, y) for x, y in zip(a, b))
-        )
+        if not isinstance(b, list):
+            if isinstance(b, np.ndarray):
+                return b.shape == (len(a),) and all(
+                    structural_equal(x, y) for x, y in zip(a, b)
+                )
+            return False
+        return len(a) == len(b) and all(structural_equal(x, y) for x, y in zip(a, b))
 
     if isinstance(a, np.ndarray):
+        if not isinstance(b, np.ndarray):
+            if isinstance(b, list):
+                return a.shape == (len(b),) and all(
+                    structural_equal(x, y) for x, y in zip(a, b)
+                )
+            return False
         if a.dtype.hasobject:
             return (
                 a.dtype == b.dtype
@@ -160,6 +168,14 @@ def structural_equal(a: object, b: object) -> bool:
                 and all(structural_equal(x, y) for x, y in zip(a, b))
             )
         return np.array_equal(a, b)
+
+    if isinstance(a, np.void):
+        if not isinstance(b, np.void):
+            return b == a
+        return a.dtype == b.dtype and all(structural_equal(x, y) for x, y in zip(a, b))
+
+    if isinstance(b, np.void):
+        return a == b
 
     if isinstance(a, tuple):
         return (

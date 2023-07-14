@@ -389,6 +389,34 @@ struct RecordWithDynamicNDArrays {
 
 using NamedFixedNDArray = yardl::FixedNDArray<int32_t, 2, 4>;
 
+struct RecordWithFixedCollections {
+  std::array<int32_t, 3> fixed_vector{};
+  yardl::FixedNDArray<int32_t, 2, 3> fixed_array{};
+
+  bool operator==(const RecordWithFixedCollections& other) const {
+    return fixed_vector == other.fixed_vector &&
+      fixed_array == other.fixed_array;
+  }
+
+  bool operator!=(const RecordWithFixedCollections& other) const {
+    return !(*this == other);
+  }
+};
+
+struct RecordWithVlenCollections {
+  std::vector<int32_t> fixed_vector{};
+  yardl::NDArray<int32_t, 2> fixed_array{};
+
+  bool operator==(const RecordWithVlenCollections& other) const {
+    return fixed_vector == other.fixed_vector &&
+      fixed_array == other.fixed_array;
+  }
+
+  bool operator!=(const RecordWithVlenCollections& other) const {
+    return !(*this == other);
+  }
+};
+
 using NamedNDArray = yardl::NDArray<int32_t, 2>;
 
 template <typename K, typename V>

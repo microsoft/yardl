@@ -155,6 +155,33 @@ def test_simple_array_equality():
     assert a != c
 
 
+def test_array_list_equality():
+    a = np.array([1, 2, 3], np.int32)
+    b = [1, 2, 3]
+    assert tm.structural_equal(a, b)
+    assert tm.structural_equal(b, a)
+
+
+def test_structured_array_list_equality():
+    a = np.array(
+        [(1, 2, 3), (4, 5, 6)],
+        dtype=[("x", np.int32), ("y", np.int32), ("z", np.int32)],
+    )
+    b = [tm.SimpleRecord(x=1, y=2, z=3), tm.SimpleRecord(x=4, y=5, z=6)]
+    assert tm.structural_equal(a, b)
+    assert tm.structural_equal(b, a)
+
+
+def test_array_structural_equality_with_object():
+    a = np.array(
+        [(1, 2, "hello"), (3, 4, "world")],
+        dtype=[("a", np.int32), ("b", np.int32), ("c", np.object_)],
+    )
+    b = a
+    assert tm.structural_equal(a, b)
+    assert tm.structural_equal(b, a)
+
+
 def test_simple_union_equality():
     a = tm.RecordWithUnions(null_or_int_or_string=None)
     b = tm.RecordWithUnions(null_or_int_or_string=None)

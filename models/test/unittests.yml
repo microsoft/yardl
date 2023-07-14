@@ -216,6 +216,21 @@ FixedArrays: !protocol
     recordWithFixedArrays: RecordWithFixedArrays
     namedArray: NamedFixedNDArray
 
+RecordWithFixedCollections: !record
+  fields:
+    fixedVector: int*3
+    fixedArray: int[2,3]
+
+RecordWithVlenCollections: !record
+  fields:
+    fixedVector: int*
+    fixedArray: int[,]
+
+Subarrays: !protocol
+  sequence:
+    withFixedSubarrays: RecordWithFixedCollections[]
+    withVlenSubarrays: RecordWithVlenCollections[]
+
 NamedNDArray: int[dimA, dimB]
 
 NDArrays: !protocol

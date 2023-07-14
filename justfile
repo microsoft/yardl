@@ -56,7 +56,7 @@ cpp_version := "17"
     cd python; \
     python3 -m pytest tests
 
-@cpp-test: tooling-test generate ensure-build-dir
+@cpp-test: generate ensure-build-dir
     cd cpp/build; \
     ninja tests; \
     ./tests --gtest_brief=1

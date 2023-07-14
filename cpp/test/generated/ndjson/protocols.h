@@ -534,6 +534,42 @@ class FixedArraysReader : public test_model::FixedArraysReaderBase, yardl::ndjso
   void CloseImpl() override;
 };
 
+// NDJSON writer for the Subarrays protocol.
+class SubarraysWriter : public test_model::SubarraysWriterBase, yardl::ndjson::NDJsonWriter {
+  public:
+  SubarraysWriter(std::ostream& stream)
+      : yardl::ndjson::NDJsonWriter(stream, schema_) {
+  }
+
+  SubarraysWriter(std::string file_name)
+      : yardl::ndjson::NDJsonWriter(file_name, schema_) {
+  }
+
+  void Flush() override;
+
+  protected:
+  void WriteWithFixedSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithFixedCollections> const& value) override;
+  void WriteWithVlenSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithVlenCollections> const& value) override;
+  void CloseImpl() override;
+};
+
+// NDJSON reader for the Subarrays protocol.
+class SubarraysReader : public test_model::SubarraysReaderBase, yardl::ndjson::NDJsonReader {
+  public:
+  SubarraysReader(std::istream& stream)
+      : yardl::ndjson::NDJsonReader(stream, schema_) {
+  }
+
+  SubarraysReader(std::string file_name)
+      : yardl::ndjson::NDJsonReader(file_name, schema_) {
+  }
+
+  protected:
+  void ReadWithFixedSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithFixedCollections>& value) override;
+  void ReadWithVlenSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithVlenCollections>& value) override;
+  void CloseImpl() override;
+};
+
 // NDJSON writer for the NDArrays protocol.
 class NDArraysWriter : public test_model::NDArraysWriterBase, yardl::ndjson::NDJsonWriter {
   public:

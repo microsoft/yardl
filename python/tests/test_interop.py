@@ -216,3 +216,174 @@ def test_nested_records():
                 a=tm.SimpleRecord(x=1, y=2, z=3), b=tm.SimpleRecord(x=4, y=5, z=6)
             )
         )
+
+
+def test_variable_length_vectors():
+    with create_validating_writer_class(tm.VlensWriterBase)() as w:
+        w.write_int_vector([1, 2, 3])
+        w.write_complex_vector([complex(1, 2), complex(3, 4)])
+        rec_with_vlens = tm.RecordWithVlens(
+            a=[tm.SimpleRecord(x=1, y=2, z=3), tm.SimpleRecord(x=4, y=5, z=6)],
+            b=4,
+            c=2,
+        )
+
+        w.write_record_with_vlens(rec_with_vlens)
+        w.write_vlen_of_record_with_vlens([rec_with_vlens, rec_with_vlens])
+
+
+def test_strings():
+    with create_validating_writer_class(tm.StringsWriterBase)() as w:
+        w.write_single_string("hello")
+        w.write_rec_with_string(tm.RecordWithStrings(a="Montréal", b="臺北市"))
+
+
+def test_optional_vectors():
+    c = create_validating_writer_class(tm.OptionalVectorsWriterBase)
+    with c() as w:
+        w.write_record_with_optional_vector(tm.RecordWithOptionalVector())
+
+    with c() as w:
+        w.write_record_with_optional_vector(
+            tm.RecordWithOptionalVector(optional_vector=[1, 2, 3])
+        )
+
+
+def test_fixed_vectors():
+    with create_validating_writer_class(tm.FixedVectorsWriterBase)() as w:
+        int_list: list[tm.Int32] = [1, 2, 3, 4, 5]
+        w.write_fixed_int_vector(int_list)
+        simple_rec_list = [
+            tm.SimpleRecord(x=1, y=2, z=3),
+            tm.SimpleRecord(x=4, y=5, z=6),
+            tm.SimpleRecord(x=7, y=8, z=9),
+        ]
+        w.write_fixed_simple_record_vector(simple_rec_list)
+        rec_with_vlens_list = [
+            tm.RecordWithVlens(
+                a=[tm.SimpleRecord(x=1, y=2, z=3), tm.SimpleRecord(x=4, y=5, z=6)],
+                b=4,
+                c=2,
+            ),
+            tm.RecordWithVlens(
+                a=[tm.SimpleRecord(x=7, y=8, z=9), tm.SimpleRecord(x=10, y=11, z=12)],
+                b=5,
+                c=3,
+            ),
+        ]
+        w.write_fixed_record_with_vlens_vector(rec_with_vlens_list)
+        rec_with_fixed_list = tm.RecordWithFixedVectors(
+            fixed_int_vector=int_list,
+            fixed_simple_record_vector=simple_rec_list,
+            fixed_record_with_vlens_vector=rec_with_vlens_list,
+        )
+        w.write_record_with_fixed_vectors(rec_with_fixed_list)
+
+
+def test_fixed_arrays():
+    with create_validating_writer_class(tm.FixedArraysWriterBase)() as w:
+        w.write_ints(np.array([[1, 2, 3], [4, 5, 6]], dtype=np.int32))
+        simple_record_array = np.array(
+            [
+                [(1, 2, 3), (4, 5, 6)],
+                [(11, 12, 13), (14, 15, 16)],
+                [(21, 22, 23), (24, 25, 26)],
+            ],
+            dtype=tm.get_dtype(tm.SimpleRecord),
+        )
+
+        w.write_fixed_simple_record_array(simple_record_array)
+
+        # TODO: Note the inner lists of the record classes, not the tuples!
+        # If the inner vector were fixed, it would be treated as a subarray.
+        # Not sure that's best in this cases.
+        fixed_record_with_vlen_arrays = np.array(
+            [
+                [
+                    (
+                        [
+                            tm.SimpleRecord(x=1, y=2, z=3),
+                            tm.SimpleRecord(x=7, y=8, z=9),
+                        ],
+                        13,
+                        14,
+                    ),
+                    (
+                        [
+                            tm.SimpleRecord(x=21, y=22, z=23),
+                        ],
+                        113,
+                        114,
+                    ),
+                ],
+                [
+                    (
+                        [
+                            tm.SimpleRecord(x=31, y=32, z=33),
+                            tm.SimpleRecord(x=34, y=35, z=36),
+                            tm.SimpleRecord(x=37, y=38, z=39),
+                        ],
+                        213,
+                        214,
+                    ),
+                    (
+                        [
+                            tm.SimpleRecord(x=41, y=42, z=43),
+                        ],
+                        313,
+                        314,
+                    ),
+                ],
+            ],
+            dtype=tm.get_dtype(tm.RecordWithVlens),
+        )
+
+        w.write_fixed_record_with_vlens_array(fixed_record_with_vlen_arrays)
+
+        w.write_record_with_fixed_arrays(
+            tm.RecordWithFixedArrays(
+                ints=np.array([[1, 2, 3], [4, 5, 6]], dtype=np.int32),
+                fixed_simple_record_array=simple_record_array,
+                fixed_record_with_vlens_array=fixed_record_with_vlen_arrays,
+            )
+        )
+
+        # TODO: named fixed arrays are kind of broken since it
+        # doesn't seem to be possible to specify the shape of the array in the type
+        named_fixed_array = np.array([[1, 2, 3, 4], [5, 6, 7, 8]], dtype=np.int32)
+        w.write_named_array(named_fixed_array)
+
+
+def test_subarrays():
+    fixed_dtype = tm.get_dtype(tm.RecordWithFixedCollections)
+    assert fixed_dtype == np.dtype(
+        [("fixed_vector", "<i4", (3,)), ("fixed_array", "<i4", (2, 3))], align=True
+    )
+
+    vlen_dtype = tm.get_dtype(tm.RecordWithVlenCollections)
+    assert vlen_dtype == np.dtype(
+        [("fixed_vector", "O"), ("fixed_array", "O")], align=True
+    )
+
+    with create_validating_writer_class(tm.SubarraysWriterBase)() as w:
+        w.write_with_fixed_subarrays(
+            np.array(
+                [
+                    ([1, 2, 3], [[11, 12, 13], [14, 15, 16]]),
+                    ([101, 102, 103], [[1011, 1012, 1013], [1014, 15, 16]]),
+                ],
+                dtype=fixed_dtype,
+            )
+        )
+
+        w.write_with_vlen_subarrays(
+            np.array(
+                [
+                    (
+                        np.array([1, 2, 3], dtype=np.int32),
+                        np.array([[11, 12, 13], [14, 15, 16]], dtype=np.int32),
+                    )
+                ],
+                dtype=vlen_dtype,
+            )
+        )

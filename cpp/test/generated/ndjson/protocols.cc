@@ -66,6 +66,12 @@ void from_json(ordered_json const& j, test_model::RecordWithNDArraysSingleDimens
 void to_json(ordered_json& j, test_model::RecordWithDynamicNDArrays const& value);
 void from_json(ordered_json const& j, test_model::RecordWithDynamicNDArrays& value);
 
+void to_json(ordered_json& j, test_model::RecordWithFixedCollections const& value);
+void from_json(ordered_json const& j, test_model::RecordWithFixedCollections& value);
+
+void to_json(ordered_json& j, test_model::RecordWithVlenCollections const& value);
+void from_json(ordered_json const& j, test_model::RecordWithVlenCollections& value);
+
 void to_json(ordered_json& j, test_model::RecordWithUnions const& value);
 void from_json(ordered_json const& j, test_model::RecordWithUnions& value);
 
@@ -1113,6 +1119,44 @@ void from_json(ordered_json const& j, test_model::RecordWithDynamicNDArrays& val
   }
 }
 
+void to_json(ordered_json& j, test_model::RecordWithFixedCollections const& value) {
+  j = ordered_json::object();
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.fixed_vector)) {
+    j.push_back({"fixedVector", value.fixed_vector});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.fixed_array)) {
+    j.push_back({"fixedArray", value.fixed_array});
+  }
+}
+
+void from_json(ordered_json const& j, test_model::RecordWithFixedCollections& value) {
+  if (auto it = j.find("fixedVector"); it != j.end()) {
+    it->get_to(value.fixed_vector);
+  }
+  if (auto it = j.find("fixedArray"); it != j.end()) {
+    it->get_to(value.fixed_array);
+  }
+}
+
+void to_json(ordered_json& j, test_model::RecordWithVlenCollections const& value) {
+  j = ordered_json::object();
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.fixed_vector)) {
+    j.push_back({"fixedVector", value.fixed_vector});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.fixed_array)) {
+    j.push_back({"fixedArray", value.fixed_array});
+  }
+}
+
+void from_json(ordered_json const& j, test_model::RecordWithVlenCollections& value) {
+  if (auto it = j.find("fixedVector"); it != j.end()) {
+    it->get_to(value.fixed_vector);
+  }
+  if (auto it = j.find("fixedArray"); it != j.end()) {
+    it->get_to(value.fixed_array);
+  }
+}
+
 void to_json(ordered_json& j, test_model::RecordWithUnions const& value) {
   j = ordered_json::object();
   if (yardl::ndjson::ShouldSerializeFieldValue(value.null_or_int_or_string)) {
@@ -2106,6 +2150,34 @@ void FixedArraysReader::ReadNamedArrayImpl(test_model::NamedFixedNDArray& value)
 }
 
 void FixedArraysReader::CloseImpl() {
+  VerifyFinished();
+}
+
+void SubarraysWriter::WriteWithFixedSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithFixedCollections> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "withFixedSubarrays", json_value);}
+
+void SubarraysWriter::WriteWithVlenSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithVlenCollections> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "withVlenSubarrays", json_value);}
+
+void SubarraysWriter::Flush() {
+  stream_.flush();
+}
+
+void SubarraysWriter::CloseImpl() {
+  stream_.flush();
+}
+
+void SubarraysReader::ReadWithFixedSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithFixedCollections>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "withFixedSubarrays", true, unused_step_, value);
+}
+
+void SubarraysReader::ReadWithVlenSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithVlenCollections>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "withVlenSubarrays", true, unused_step_, value);
+}
+
+void SubarraysReader::CloseImpl() {
   VerifyFinished();
 }
 

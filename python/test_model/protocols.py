@@ -2124,6 +2124,147 @@ class FixedArraysReaderBase(abc.ABC):
             return 'read_named_array'
         return "<unknown>"
 
+class SubarraysWriterBase(abc.ABC):
+    """Abstract writer for the Subarrays protocol."""
+
+
+    def __init__(self) -> None:
+        self._state = 0
+
+    schema = r"""{"protocol":{"name":"Subarrays","sequence":[{"name":"withFixedSubarrays","type":{"array":{"items":"TestModel.RecordWithFixedCollections"}}},{"name":"withVlenSubarrays","type":{"array":{"items":"TestModel.RecordWithVlenCollections"}}}]},"types":[{"name":"RecordWithFixedCollections","fields":[{"name":"fixedVector","type":{"vector":{"items":"int32","length":3}}},{"name":"fixedArray","type":{"array":{"items":"int32","dimensions":[{"length":2},{"length":3}]}}}]},{"name":"RecordWithVlenCollections","fields":[{"name":"fixedVector","type":{"vector":{"items":"int32"}}},{"name":"fixedArray","type":{"array":{"items":"int32","dimensions":2}}}]}]}"""
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: typing.Any | None) -> None:
+        self.close()
+        if exc is None and self._state != 2:
+            expected_method = self._state_to_method_name(self._state)
+            raise ProtocolException(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+
+    def write_with_fixed_subarrays(self, value: npt.NDArray[np.void]) -> None:
+        """Ordinal 0"""
+
+        if self._state != 0:
+            self._raise_unexpected_state(0)
+
+        self._write_with_fixed_subarrays(value)
+        self._state = 1
+
+    def write_with_vlen_subarrays(self, value: npt.NDArray[np.void]) -> None:
+        """Ordinal 1"""
+
+        if self._state != 1:
+            self._raise_unexpected_state(1)
+
+        self._write_with_vlen_subarrays(value)
+        self._state = 2
+
+    @abc.abstractmethod
+    def _write_with_fixed_subarrays(self, value: npt.NDArray[np.void]) -> None:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _write_with_vlen_subarrays(self, value: npt.NDArray[np.void]) -> None:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def close(self) -> None:
+        raise NotImplementedError()
+
+    def _raise_unexpected_state(self, actual: int) -> None:
+        expected_method = self._state_to_method_name(self._state)
+        actual_method = self._state_to_method_name(actual)
+        raise ProtocolException(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
+
+    def _state_to_method_name(self, state: int) -> str:
+        if state == 0:
+            return 'write_with_fixed_subarrays'
+        if state == 1:
+            return 'write_with_vlen_subarrays'
+        return "<unknown>"
+
+class SubarraysReaderBase(abc.ABC):
+    """Abstract reader for the Subarrays protocol."""
+
+
+    def __init__(self, read_as_numpy: Types = Types.NONE) -> None:
+        self._read_as_numpy = read_as_numpy
+        self._state = 0
+
+    schema = SubarraysWriterBase.schema
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: typing.Any | None) -> None:
+        self.close()
+        if exc is None and self._state != 4:
+            if self._state % 2 == 1:
+                previous_method = self._state_to_method_name(self._state - 1)
+                raise ProtocolException(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
+            else:
+                expected_method = self._state_to_method_name(self._state)
+                raise ProtocolException(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
+            	
+
+    @abc.abstractmethod
+    def close(self) -> None:
+        raise NotImplementedError()
+
+    def read_with_fixed_subarrays(self) -> npt.NDArray[np.void]:
+        """Ordinal 0"""
+
+        if self._state != 0:
+            self._raise_unexpected_state(0)
+
+        value = self._read_with_fixed_subarrays()
+        self._state = 2
+        return value
+
+    def read_with_vlen_subarrays(self) -> npt.NDArray[np.void]:
+        """Ordinal 1"""
+
+        if self._state != 2:
+            self._raise_unexpected_state(2)
+
+        value = self._read_with_vlen_subarrays()
+        self._state = 4
+        return value
+
+    def copy_to(self, writer: SubarraysWriterBase) -> None:
+        writer.write_with_fixed_subarrays(self.read_with_fixed_subarrays())
+        writer.write_with_vlen_subarrays(self.read_with_vlen_subarrays())
+
+    @abc.abstractmethod
+    def _read_with_fixed_subarrays(self) -> npt.NDArray[np.void]:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _read_with_vlen_subarrays(self) -> npt.NDArray[np.void]:
+        raise NotImplementedError()
+
+    T = typing.TypeVar('T')
+    def _wrap_iterable(self, iterable: collections.abc.Iterable[T], final_state: int) -> collections.abc.Iterable[T]:
+        yield from iterable
+        self._state = final_state
+
+    def _raise_unexpected_state(self, actual: int) -> None:
+        actual_method = self._state_to_method_name(actual)
+        if self._state % 2 == 1:
+            previous_method = self._state_to_method_name(self._state - 1)
+            raise ProtocolException(f"Received call to '{actual_method}' but the iterable returned by '{previous_method}' was not fully consumed.")
+        else:
+            expected_method = self._state_to_method_name(self._state)
+            raise ProtocolException(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
+        	
+    def _state_to_method_name(self, state: int) -> str:
+        if state == 0:
+            return 'read_with_fixed_subarrays'
+        if state == 2:
+            return 'read_with_vlen_subarrays'
+        return "<unknown>"
+
 class NDArraysWriterBase(abc.ABC):
     """Abstract writer for the NDArrays protocol."""
 

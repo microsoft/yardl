@@ -435,6 +435,30 @@ class FixedArraysReader : public test_model::FixedArraysReaderBase, public yardl
 
   private:
 };
+// HDF5 writer for the Subarrays protocol.
+class SubarraysWriter : public test_model::SubarraysWriterBase, public yardl::hdf5::Hdf5Writer {
+  public:
+  SubarraysWriter(std::string path);
+
+  protected:
+  void WriteWithFixedSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithFixedCollections> const& value) override;
+
+  void WriteWithVlenSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithVlenCollections> const& value) override;
+
+  private:
+};
+
+// HDF5 reader for the Subarrays protocol.
+class SubarraysReader : public test_model::SubarraysReaderBase, public yardl::hdf5::Hdf5Reader {
+  public:
+  SubarraysReader(std::string path);
+
+  void ReadWithFixedSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithFixedCollections>& value) override;
+
+  void ReadWithVlenSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithVlenCollections>& value) override;
+
+  private:
+};
 // HDF5 writer for the NDArrays protocol.
 class NDArraysWriter : public test_model::NDArraysWriterBase, public yardl::hdf5::Hdf5Writer {
   public:

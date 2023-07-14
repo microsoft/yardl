@@ -2203,6 +2203,104 @@ void FixedArraysReaderBase::CopyTo(FixedArraysWriterBase& writer) {
 }
 
 namespace {
+void SubarraysWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end, uint8_t current) {
+  std::string expected_method;
+  switch (current) {
+  case 0: expected_method = "WriteWithFixedSubarrays()"; break;
+  case 1: expected_method = "WriteWithVlenSubarrays()"; break;
+  }
+  std::string attempted_method;
+  switch (attempted) {
+  case 0: attempted_method = "WriteWithFixedSubarrays()"; break;
+  case 1: attempted_method = "WriteWithVlenSubarrays()"; break;
+  case 2: attempted_method = "Close()"; break;
+  }
+  throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
+}
+
+void SubarraysReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
+  auto f = [](uint8_t i) -> std::string {
+    switch (i/2) {
+    case 0: return "ReadWithFixedSubarrays()";
+    case 1: return "ReadWithVlenSubarrays()";
+    case 2: return "Close()";
+    default: return "<unknown>";
+    }
+  };
+  throw std::runtime_error("Expected call to " + f(current) + " but received call to " + f(attempted) + " instead.");
+}
+
+} // namespace 
+
+std::string SubarraysWriterBase::schema_ = R"({"protocol":{"name":"Subarrays","sequence":[{"name":"withFixedSubarrays","type":{"array":{"items":"TestModel.RecordWithFixedCollections"}}},{"name":"withVlenSubarrays","type":{"array":{"items":"TestModel.RecordWithVlenCollections"}}}]},"types":[{"name":"RecordWithFixedCollections","fields":[{"name":"fixedVector","type":{"vector":{"items":"int32","length":3}}},{"name":"fixedArray","type":{"array":{"items":"int32","dimensions":[{"length":2},{"length":3}]}}}]},{"name":"RecordWithVlenCollections","fields":[{"name":"fixedVector","type":{"vector":{"items":"int32"}}},{"name":"fixedArray","type":{"array":{"items":"int32","dimensions":2}}}]}]})";
+
+void SubarraysWriterBase::WriteWithFixedSubarrays(yardl::DynamicNDArray<test_model::RecordWithFixedCollections> const& value) {
+  if (unlikely(state_ != 0)) {
+    SubarraysWriterBaseInvalidState(0, false, state_);
+  }
+
+  WriteWithFixedSubarraysImpl(value);
+  state_ = 1;
+}
+
+void SubarraysWriterBase::WriteWithVlenSubarrays(yardl::DynamicNDArray<test_model::RecordWithVlenCollections> const& value) {
+  if (unlikely(state_ != 1)) {
+    SubarraysWriterBaseInvalidState(1, false, state_);
+  }
+
+  WriteWithVlenSubarraysImpl(value);
+  state_ = 2;
+}
+
+void SubarraysWriterBase::Close() {
+  if (unlikely(state_ != 2)) {
+    SubarraysWriterBaseInvalidState(2, false, state_);
+  }
+
+  CloseImpl();
+}
+
+std::string SubarraysReaderBase::schema_ = SubarraysWriterBase::schema_;
+
+void SubarraysReaderBase::ReadWithFixedSubarrays(yardl::DynamicNDArray<test_model::RecordWithFixedCollections>& value) {
+  if (unlikely(state_ != 0)) {
+    SubarraysReaderBaseInvalidState(0, state_);
+  }
+
+  ReadWithFixedSubarraysImpl(value);
+  state_ = 2;
+}
+
+void SubarraysReaderBase::ReadWithVlenSubarrays(yardl::DynamicNDArray<test_model::RecordWithVlenCollections>& value) {
+  if (unlikely(state_ != 2)) {
+    SubarraysReaderBaseInvalidState(2, state_);
+  }
+
+  ReadWithVlenSubarraysImpl(value);
+  state_ = 4;
+}
+
+void SubarraysReaderBase::Close() {
+  if (unlikely(state_ != 4)) {
+    SubarraysReaderBaseInvalidState(4, state_);
+  }
+
+  CloseImpl();
+}
+void SubarraysReaderBase::CopyTo(SubarraysWriterBase& writer) {
+  {
+    yardl::DynamicNDArray<test_model::RecordWithFixedCollections> value;
+    ReadWithFixedSubarrays(value);
+    writer.WriteWithFixedSubarrays(value);
+  }
+  {
+    yardl::DynamicNDArray<test_model::RecordWithVlenCollections> value;
+    ReadWithVlenSubarrays(value);
+    writer.WriteWithVlenSubarrays(value);
+  }
+}
+
+namespace {
 void NDArraysWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end, uint8_t current) {
   std::string expected_method;
   switch (current) {
