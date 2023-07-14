@@ -1491,20 +1491,20 @@ class _RecordWithNDArraysSingleDimensionSerializer(_binary.RecordSerializer[Reco
 
 class _RecordWithDynamicNDArraysSerializer(_binary.RecordSerializer[RecordWithDynamicNDArrays]):
     def __init__(self) -> None:
-        super().__init__([("ints", _binary.DynamicNDArraySerializer(_binary.int32_serializer)), ("fixed_simple_record_array", _binary.DynamicNDArraySerializer(_SimpleRecordSerializer())), ("fixed_record_with_vlens_array", _binary.DynamicNDArraySerializer(_RecordWithVlensSerializer()))])
+        super().__init__([("ints", _binary.DynamicNDArraySerializer(_binary.int32_serializer)), ("simple_record_array", _binary.DynamicNDArraySerializer(_SimpleRecordSerializer())), ("record_with_vlens_array", _binary.DynamicNDArraySerializer(_RecordWithVlensSerializer()))])
 
     def write(self, stream: _binary.CodedOutputStream, value: RecordWithDynamicNDArrays) -> None:
         if isinstance(value, np.void):
             self.write_numpy(stream, value)
             return
-        self._write(stream, value.ints, value.fixed_simple_record_array, value.fixed_record_with_vlens_array)
+        self._write(stream, value.ints, value.simple_record_array, value.record_with_vlens_array)
 
     def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
-        self._write(stream, value['ints'], value['fixed_simple_record_array'], value['fixed_record_with_vlens_array'])
+        self._write(stream, value['ints'], value['simple_record_array'], value['record_with_vlens_array'])
 
     def read(self, stream: _binary.CodedInputStream, read_as_numpy: Types) -> RecordWithDynamicNDArrays:
         field_values = self._read(stream, read_as_numpy)
-        return RecordWithDynamicNDArrays(ints=field_values[0], fixed_simple_record_array=field_values[1], fixed_record_with_vlens_array=field_values[2])
+        return RecordWithDynamicNDArrays(ints=field_values[0], simple_record_array=field_values[1], record_with_vlens_array=field_values[2])
 
 
 class _RecordWithFixedCollectionsSerializer(_binary.RecordSerializer[RecordWithFixedCollections]):

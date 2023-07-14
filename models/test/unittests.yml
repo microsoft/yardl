@@ -203,8 +203,8 @@ RecordWithNDArraysSingleDimension: !record
 RecordWithDynamicNDArrays: !record
   fields:
     ints: int[]
-    fixedSimpleRecordArray: SimpleRecord[]
-    fixedRecordWithVlensArray: RecordWithVlens[]
+    simpleRecordArray: SimpleRecord[]
+    recordWithVlensArray: RecordWithVlens[]
 
 NamedFixedNDArray: int[dimA:2, dimB:4]
 

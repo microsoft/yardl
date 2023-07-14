@@ -274,10 +274,10 @@ struct IsTriviallySerializable<test_model::RecordWithDynamicNDArrays> {
   static constexpr bool value = 
     std::is_standard_layout_v<__T__> &&
     IsTriviallySerializable<decltype(__T__::ints)>::value &&
-    IsTriviallySerializable<decltype(__T__::fixed_simple_record_array)>::value &&
-    IsTriviallySerializable<decltype(__T__::fixed_record_with_vlens_array)>::value &&
-    (sizeof(__T__) == (sizeof(__T__::ints) + sizeof(__T__::fixed_simple_record_array) + sizeof(__T__::fixed_record_with_vlens_array))) &&
-    offsetof(__T__, ints) < offsetof(__T__, fixed_simple_record_array) && offsetof(__T__, fixed_simple_record_array) < offsetof(__T__, fixed_record_with_vlens_array);
+    IsTriviallySerializable<decltype(__T__::simple_record_array)>::value &&
+    IsTriviallySerializable<decltype(__T__::record_with_vlens_array)>::value &&
+    (sizeof(__T__) == (sizeof(__T__::ints) + sizeof(__T__::simple_record_array) + sizeof(__T__::record_with_vlens_array))) &&
+    offsetof(__T__, ints) < offsetof(__T__, simple_record_array) && offsetof(__T__, simple_record_array) < offsetof(__T__, record_with_vlens_array);
 };
 
 template <>
@@ -972,8 +972,8 @@ namespace {
   }
 
   yardl::binary::WriteDynamicNDArray<int32_t, yardl::binary::WriteInteger>(stream, value.ints);
-  yardl::binary::WriteDynamicNDArray<test_model::SimpleRecord, test_model::binary::WriteSimpleRecord>(stream, value.fixed_simple_record_array);
-  yardl::binary::WriteDynamicNDArray<test_model::RecordWithVlens, test_model::binary::WriteRecordWithVlens>(stream, value.fixed_record_with_vlens_array);
+  yardl::binary::WriteDynamicNDArray<test_model::SimpleRecord, test_model::binary::WriteSimpleRecord>(stream, value.simple_record_array);
+  yardl::binary::WriteDynamicNDArray<test_model::RecordWithVlens, test_model::binary::WriteRecordWithVlens>(stream, value.record_with_vlens_array);
 }
 
 [[maybe_unused]] void ReadRecordWithDynamicNDArrays(yardl::binary::CodedInputStream& stream, test_model::RecordWithDynamicNDArrays& value) {
@@ -983,8 +983,8 @@ namespace {
   }
 
   yardl::binary::ReadDynamicNDArray<int32_t, yardl::binary::ReadInteger>(stream, value.ints);
-  yardl::binary::ReadDynamicNDArray<test_model::SimpleRecord, test_model::binary::ReadSimpleRecord>(stream, value.fixed_simple_record_array);
-  yardl::binary::ReadDynamicNDArray<test_model::RecordWithVlens, test_model::binary::ReadRecordWithVlens>(stream, value.fixed_record_with_vlens_array);
+  yardl::binary::ReadDynamicNDArray<test_model::SimpleRecord, test_model::binary::ReadSimpleRecord>(stream, value.simple_record_array);
+  yardl::binary::ReadDynamicNDArray<test_model::RecordWithVlens, test_model::binary::ReadRecordWithVlens>(stream, value.record_with_vlens_array);
 }
 
 [[maybe_unused]] void WriteNamedFixedNDArray(yardl::binary::CodedOutputStream& stream, test_model::NamedFixedNDArray const& value) {

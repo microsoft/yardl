@@ -285,7 +285,7 @@ TEST_P(RoundTripTests, NDArrays) {
   tw->Close();
 }
 
-// We optimize storage for NDArrays with a single dimension.
+// We optimize HDF5 storage for NDArrays with a single dimension.
 TEST_P(RoundTripTests, NDArraysSingleDimension) {
   auto tw = CreateValidatingWriter<NDArraysSingleDimensionWriterBase>();
 

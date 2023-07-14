@@ -1099,11 +1099,11 @@ void to_json(ordered_json& j, test_model::RecordWithDynamicNDArrays const& value
   if (yardl::ndjson::ShouldSerializeFieldValue(value.ints)) {
     j.push_back({"ints", value.ints});
   }
-  if (yardl::ndjson::ShouldSerializeFieldValue(value.fixed_simple_record_array)) {
-    j.push_back({"fixedSimpleRecordArray", value.fixed_simple_record_array});
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.simple_record_array)) {
+    j.push_back({"simpleRecordArray", value.simple_record_array});
   }
-  if (yardl::ndjson::ShouldSerializeFieldValue(value.fixed_record_with_vlens_array)) {
-    j.push_back({"fixedRecordWithVlensArray", value.fixed_record_with_vlens_array});
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.record_with_vlens_array)) {
+    j.push_back({"recordWithVlensArray", value.record_with_vlens_array});
   }
 }
 
@@ -1111,11 +1111,11 @@ void from_json(ordered_json const& j, test_model::RecordWithDynamicNDArrays& val
   if (auto it = j.find("ints"); it != j.end()) {
     it->get_to(value.ints);
   }
-  if (auto it = j.find("fixedSimpleRecordArray"); it != j.end()) {
-    it->get_to(value.fixed_simple_record_array);
+  if (auto it = j.find("simpleRecordArray"); it != j.end()) {
+    it->get_to(value.simple_record_array);
   }
-  if (auto it = j.find("fixedRecordWithVlensArray"); it != j.end()) {
-    it->get_to(value.fixed_record_with_vlens_array);
+  if (auto it = j.find("recordWithVlensArray"); it != j.end()) {
+    it->get_to(value.record_with_vlens_array);
   }
 }
 

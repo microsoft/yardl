@@ -387,3 +387,147 @@ def test_subarrays():
                 dtype=vlen_dtype,
             )
         )
+
+
+def test_arrays_with_known_dimension_count():
+    with create_validating_writer_class(tm.NDArraysWriterBase)() as w:
+        w.write_ints(np.array([[1, 2, 3], [4, 5, 6]], dtype=np.int32))
+        w.write_simple_record_array(
+            np.array(
+                [
+                    [(1, 2, 3), (4, 5, 6)],
+                    [(11, 12, 13), (14, 15, 16)],
+                    [(21, 22, 23), (24, 25, 26)],
+                ],
+                dtype=tm.get_dtype(tm.SimpleRecord),
+            )
+        )
+
+        simple_record_type = tm.get_dtype(tm.SimpleRecord)
+        w.write_record_with_vlens_array(
+            np.array(
+                [
+                    [
+                        (
+                            np.array([(1, 2, 3), (4, 5, 6)], simple_record_type),
+                            -7,
+                            22,
+                        ),
+                        (
+                            np.array([(1, 2, 3), (4, 5, 6)], simple_record_type),
+                            -7,
+                            22,
+                        ),
+                    ],
+                    [
+                        (
+                            np.array([(1, 2, 3), (4, 5, 6)], simple_record_type),
+                            -7,
+                            22,
+                        ),
+                        (
+                            np.array([(1, 2, 3), (4, 5, 6)], simple_record_type),
+                            -7,
+                            22,
+                        ),
+                    ],
+                ],
+                tm.get_dtype(tm.RecordWithVlens),
+            )
+        )
+
+        w.write_record_with_nd_arrays(
+            tm.RecordWithNDArrays(
+                ints=np.array([[1, 2, 3], [4, 5, 6]], dtype=np.int32),
+                fixed_simple_record_array=np.array(
+                    [[(1, 2, 3)], [(4, 5, 6)]], dtype=tm.get_dtype(tm.SimpleRecord)
+                ),
+                fixed_record_with_vlens_array=np.array(
+                    [
+                        [
+                            (
+                                np.array([(1, 2, 3)], tm.get_dtype(tm.SimpleRecord)),
+                                -33,
+                                44,
+                            )
+                        ],
+                        [
+                            (
+                                np.array(
+                                    [(8, 2, 9), (28, 43, 9)],
+                                    tm.get_dtype(tm.SimpleRecord),
+                                ),
+                                233,
+                                347,
+                            )
+                        ],
+                    ],
+                    tm.get_dtype(tm.RecordWithVlens),
+                ),
+            )
+        )
+
+        w.write_named_array(np.array([[1, 2, 3], [4, 5, 6]], np.int32))
+
+
+def test_dynamic_ndarrays():
+    with create_validating_writer_class(tm.DynamicNDArraysWriterBase)() as w:
+        w.write_ints(np.ndarray((4, 3), dtype=np.int32))
+        w.write_simple_record_array(
+            np.ndarray((2, 3), dtype=tm.get_dtype(tm.SimpleRecord))
+        )
+        w.write_record_with_vlens_array(
+            np.array(
+                [
+                    [
+                        (
+                            np.array([(1, 2, 3)], tm.get_dtype(tm.SimpleRecord)),
+                            -33,
+                            44,
+                        )
+                    ],
+                    [
+                        (
+                            np.array(
+                                [(8, 2, 9), (28, 43, 9)],
+                                tm.get_dtype(tm.SimpleRecord),
+                            ),
+                            233,
+                            347,
+                        )
+                    ],
+                ],
+                tm.get_dtype(tm.RecordWithVlens),
+            ),
+        )
+
+        w.write_record_with_dynamic_nd_arrays(
+            tm.RecordWithDynamicNDArrays(
+                ints=np.array([[1, 2, 3], [4, 5, 6]], dtype=np.int32),
+                simple_record_array=np.array(
+                    [[(1, 2, 3)], [(4, 5, 6)]], dtype=tm.get_dtype(tm.SimpleRecord)
+                ),
+                record_with_vlens_array=np.array(
+                    [
+                        [
+                            (
+                                np.array([(1, 2, 3)], tm.get_dtype(tm.SimpleRecord)),
+                                -33,
+                                44,
+                            )
+                        ],
+                        [
+                            (
+                                np.array(
+                                    [(8, 2, 9), (28, 43, 9)],
+                                    tm.get_dtype(tm.SimpleRecord),
+                                ),
+                                233,
+                                347,
+                            )
+                        ],
+                    ],
+                    tm.get_dtype(tm.RecordWithVlens),
+                ),
+            )
+        )

@@ -373,13 +373,13 @@ struct RecordWithNDArraysSingleDimension {
 
 struct RecordWithDynamicNDArrays {
   yardl::DynamicNDArray<int32_t> ints{};
-  yardl::DynamicNDArray<test_model::SimpleRecord> fixed_simple_record_array{};
-  yardl::DynamicNDArray<test_model::RecordWithVlens> fixed_record_with_vlens_array{};
+  yardl::DynamicNDArray<test_model::SimpleRecord> simple_record_array{};
+  yardl::DynamicNDArray<test_model::RecordWithVlens> record_with_vlens_array{};
 
   bool operator==(const RecordWithDynamicNDArrays& other) const {
     return ints == other.ints &&
-      fixed_simple_record_array == other.fixed_simple_record_array &&
-      fixed_record_with_vlens_array == other.fixed_record_with_vlens_array;
+      simple_record_array == other.simple_record_array &&
+      record_with_vlens_array == other.record_with_vlens_array;
   }
 
   bool operator!=(const RecordWithDynamicNDArrays& other) const {

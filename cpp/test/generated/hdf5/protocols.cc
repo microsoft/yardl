@@ -452,19 +452,19 @@ struct _Inner_RecordWithDynamicNDArrays {
   _Inner_RecordWithDynamicNDArrays() {} 
   _Inner_RecordWithDynamicNDArrays(test_model::RecordWithDynamicNDArrays const& o) 
       : ints(o.ints),
-      fixed_simple_record_array(o.fixed_simple_record_array),
-      fixed_record_with_vlens_array(o.fixed_record_with_vlens_array) {
+      simple_record_array(o.simple_record_array),
+      record_with_vlens_array(o.record_with_vlens_array) {
   }
 
   void ToOuter (test_model::RecordWithDynamicNDArrays& o) const {
     yardl::hdf5::ToOuter(ints, o.ints);
-    yardl::hdf5::ToOuter(fixed_simple_record_array, o.fixed_simple_record_array);
-    yardl::hdf5::ToOuter(fixed_record_with_vlens_array, o.fixed_record_with_vlens_array);
+    yardl::hdf5::ToOuter(simple_record_array, o.simple_record_array);
+    yardl::hdf5::ToOuter(record_with_vlens_array, o.record_with_vlens_array);
   }
 
   yardl::hdf5::InnerDynamicNdArray<int32_t, int32_t> ints;
-  yardl::hdf5::InnerDynamicNdArray<test_model::SimpleRecord, test_model::SimpleRecord> fixed_simple_record_array;
-  yardl::hdf5::InnerDynamicNdArray<test_model::hdf5::_Inner_RecordWithVlens, test_model::RecordWithVlens> fixed_record_with_vlens_array;
+  yardl::hdf5::InnerDynamicNdArray<test_model::SimpleRecord, test_model::SimpleRecord> simple_record_array;
+  yardl::hdf5::InnerDynamicNdArray<test_model::hdf5::_Inner_RecordWithVlens, test_model::RecordWithVlens> record_with_vlens_array;
 };
 
 struct _Inner_RecordWithVlenCollections {
@@ -830,8 +830,8 @@ struct _Inner_RecordWithKeywordFields {
   using RecordType = test_model::hdf5::_Inner_RecordWithDynamicNDArrays;
   H5::CompType t(sizeof(RecordType));
   t.insertMember("ints", HOFFSET(RecordType, ints), yardl::hdf5::DynamicNDArrayDdl<int32_t, int32_t>(H5::PredType::NATIVE_INT32));
-  t.insertMember("fixedSimpleRecordArray", HOFFSET(RecordType, fixed_simple_record_array), yardl::hdf5::DynamicNDArrayDdl<test_model::SimpleRecord, test_model::SimpleRecord>(test_model::hdf5::GetSimpleRecordHdf5Ddl()));
-  t.insertMember("fixedRecordWithVlensArray", HOFFSET(RecordType, fixed_record_with_vlens_array), yardl::hdf5::DynamicNDArrayDdl<test_model::hdf5::_Inner_RecordWithVlens, test_model::RecordWithVlens>(test_model::hdf5::GetRecordWithVlensHdf5Ddl()));
+  t.insertMember("simpleRecordArray", HOFFSET(RecordType, simple_record_array), yardl::hdf5::DynamicNDArrayDdl<test_model::SimpleRecord, test_model::SimpleRecord>(test_model::hdf5::GetSimpleRecordHdf5Ddl()));
+  t.insertMember("recordWithVlensArray", HOFFSET(RecordType, record_with_vlens_array), yardl::hdf5::DynamicNDArrayDdl<test_model::hdf5::_Inner_RecordWithVlens, test_model::RecordWithVlens>(test_model::hdf5::GetRecordWithVlensHdf5Ddl()));
   return t;
 }
 

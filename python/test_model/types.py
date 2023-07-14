@@ -761,11 +761,11 @@ class RecordWithDynamicNDArrays:
         default_factory=lambda: np.zeros((), dtype=np.dtype(np.int32))
     )
 
-    fixed_simple_record_array: npt.NDArray[np.void] = dataclasses.field(
+    simple_record_array: npt.NDArray[np.void] = dataclasses.field(
         default_factory=lambda: np.zeros((), dtype=get_dtype(SimpleRecord))
     )
 
-    fixed_record_with_vlens_array: npt.NDArray[np.void] = dataclasses.field(
+    record_with_vlens_array: npt.NDArray[np.void] = dataclasses.field(
         default_factory=lambda: np.zeros((), dtype=get_dtype(RecordWithVlens))
     )
 
@@ -779,13 +779,13 @@ class RecordWithDynamicNDArrays:
                 return False
             return (
                 yardl.structural_equal(self.ints, other["ints"])
-                and yardl.structural_equal(self.fixed_simple_record_array, other["fixed_simple_record_array"])
-                and yardl.structural_equal(self.fixed_record_with_vlens_array, other["fixed_record_with_vlens_array"])
+                and yardl.structural_equal(self.simple_record_array, other["simple_record_array"])
+                and yardl.structural_equal(self.record_with_vlens_array, other["record_with_vlens_array"])
             )
         return (
             yardl.structural_equal(self.ints, other.ints)
-            and yardl.structural_equal(self.fixed_simple_record_array, other.fixed_simple_record_array)
-            and yardl.structural_equal(self.fixed_record_with_vlens_array, other.fixed_record_with_vlens_array)
+            and yardl.structural_equal(self.simple_record_array, other.simple_record_array)
+            and yardl.structural_equal(self.record_with_vlens_array, other.record_with_vlens_array)
         )
 
 
@@ -1431,7 +1431,7 @@ def _mk_get_dtype():
     dtype_map[RecordWithFixedArrays] = np.dtype([('ints', np.dtype(np.int32), (2, 3,)), ('fixed_simple_record_array', get_dtype(SimpleRecord), (3, 2,)), ('fixed_record_with_vlens_array', get_dtype(RecordWithVlens), (2, 2,))], align=True)
     dtype_map[RecordWithNDArrays] = np.dtype([('ints', np.dtype(np.object_)), ('fixed_simple_record_array', np.dtype(np.object_)), ('fixed_record_with_vlens_array', np.dtype(np.object_))], align=True)
     dtype_map[RecordWithNDArraysSingleDimension] = np.dtype([('ints', np.dtype(np.object_)), ('fixed_simple_record_array', np.dtype(np.object_)), ('fixed_record_with_vlens_array', np.dtype(np.object_))], align=True)
-    dtype_map[RecordWithDynamicNDArrays] = np.dtype([('ints', np.dtype(np.object_)), ('fixed_simple_record_array', np.dtype(np.object_)), ('fixed_record_with_vlens_array', np.dtype(np.object_))], align=True)
+    dtype_map[RecordWithDynamicNDArrays] = np.dtype([('ints', np.dtype(np.object_)), ('simple_record_array', np.dtype(np.object_)), ('record_with_vlens_array', np.dtype(np.object_))], align=True)
     dtype_map[NamedFixedNDArray] = np.dtype(np.int32)
     dtype_map[RecordWithFixedCollections] = np.dtype([('fixed_vector', np.dtype(np.int32), (3,)), ('fixed_array', np.dtype(np.int32), (2, 3,))], align=True)
     dtype_map[RecordWithVlenCollections] = np.dtype([('fixed_vector', np.dtype(np.object_)), ('fixed_array', np.dtype(np.object_))], align=True)

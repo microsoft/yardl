@@ -782,7 +782,7 @@
                 }
               },
               {
-                "name": "fixedSimpleRecordArray",
+                "name": "simpleRecordArray",
                 "type": {
                   "array": {
                     "items": "TestModel.SimpleRecord"
@@ -790,7 +790,7 @@
                 }
               },
               {
-                "name": "fixedRecordWithVlensArray",
+                "name": "recordWithVlensArray",
                 "type": {
                   "array": {
                     "items": "TestModel.RecordWithVlens"
