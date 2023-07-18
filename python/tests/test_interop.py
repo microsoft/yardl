@@ -11,7 +11,6 @@ import test_model as tm
 import test_model.binary as tmb
 from test_model._binary import BinaryProtocolWriter
 
-
 translator_path = (
     pathlib.Path(__file__).parent / "../../cpp/build/translator"
 ).resolve()
@@ -73,7 +72,9 @@ def create_validating_writer_class(
             def mk_wrapper(method_snapshot=method):
                 def wrapper(*args, **kwargs):
                     recorded_args = args[0]._recorded_arguments
-                    if isinstance(args[1], types.GeneratorType):
+                    if isinstance(args[1], types.GeneratorType) or isinstance(
+                        args[1], range
+                    ):
                         arg_list = list(args)
                         arg_list[1] = list(args[1])
                         args = tuple(arg_list)
@@ -105,7 +106,9 @@ def create_validating_writer_class(
             def mk_wrapper(method_snapshot=method):
                 def wrapper(*args, **kwargs):
                     recorded_args = args[0]._recorded_arguments
-                    if isinstance(args[1], types.GeneratorType):
+                    if isinstance(args[1], types.GeneratorType) or isinstance(
+                        args[1], range
+                    ):
                         arg_list = list(args)
                         arg_list[1] = list(args[1])
                         args = tuple(arg_list)
@@ -596,5 +599,52 @@ def test_flags():
                 tm.TextFormat.BOLD | tm.TextFormat.ITALIC,
                 tm.TextFormat.REGULAR,
                 tm.TextFormat(232932),
+            ]
+        )
+
+
+def test_simple_streams():
+    c = create_validating_writer_class(tm.StreamsWriterBase)
+
+    with c() as w:
+        w.write_int_data(range(10))
+
+        w.write_optional_int_data([1, 2, None, 4, 5, None, 7, 8, 9, 10])
+        w.write_record_with_optional_vector_data(
+            [
+                tm.RecordWithOptionalVector(),
+                tm.RecordWithOptionalVector(optional_vector=[1, 2, 3]),
+                tm.RecordWithOptionalVector(
+                    optional_vector=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+                ),
+            ]
+        )
+        w.write_fixed_vector(([1, 2, 3] for _ in range(4)))
+
+    # empty streams
+    with c() as w:
+        w.write_int_data(range(0))
+        w.write_optional_int_data([])
+        w.write_record_with_optional_vector_data([])
+        w.write_fixed_vector([])
+
+
+def test_streams_of_unions():
+    with create_validating_writer_class(tm.StreamsOfUnionsWriterBase)() as w:
+        w.write_int_or_simple_record(
+            [
+                ("int32", 1),
+                ("SimpleRecord", tm.SimpleRecord(x=1, y=2, z=3)),
+                ("int32", 2),
+            ]
+        )
+        w.write_nullable_int_or_simple_record(
+            [
+                None,
+                ("int32", 1),
+                ("SimpleRecord", tm.SimpleRecord(x=1, y=2, z=3)),
+                None,
+                ("int32", 2),
+                None,
             ]
         )

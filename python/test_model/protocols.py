@@ -22,7 +22,7 @@ class BenchmarkFloat256x256WriterBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: typing.Any | None) -> None:
+    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
         self.close()
         if exc is None and self._state != 1:
             expected_method = self._state_to_method_name(self._state)
@@ -68,7 +68,7 @@ class BenchmarkFloat256x256ReaderBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: typing.Any | None) -> None:
+    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
         self.close()
         if exc is None and self._state != 2:
             if self._state % 2 == 1:
@@ -131,7 +131,7 @@ class BenchmarkFloatVlenWriterBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: typing.Any | None) -> None:
+    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
         self.close()
         if exc is None and self._state != 1:
             expected_method = self._state_to_method_name(self._state)
@@ -177,7 +177,7 @@ class BenchmarkFloatVlenReaderBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: typing.Any | None) -> None:
+    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
         self.close()
         if exc is None and self._state != 2:
             if self._state % 2 == 1:
@@ -240,7 +240,7 @@ class BenchmarkSmallRecordWriterBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: typing.Any | None) -> None:
+    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
         self.close()
         if exc is None and self._state != 1:
             expected_method = self._state_to_method_name(self._state)
@@ -286,7 +286,7 @@ class BenchmarkSmallRecordReaderBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: typing.Any | None) -> None:
+    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
         self.close()
         if exc is None and self._state != 2:
             if self._state % 2 == 1:
@@ -349,7 +349,7 @@ class BenchmarkSmallRecordWithOptionalsWriterBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: typing.Any | None) -> None:
+    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
         self.close()
         if exc is None and self._state != 1:
             expected_method = self._state_to_method_name(self._state)
@@ -395,7 +395,7 @@ class BenchmarkSmallRecordWithOptionalsReaderBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: typing.Any | None) -> None:
+    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
         self.close()
         if exc is None and self._state != 2:
             if self._state % 2 == 1:
@@ -458,7 +458,7 @@ class BenchmarkSimpleMrdWriterBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: typing.Any | None) -> None:
+    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
         self.close()
         if exc is None and self._state != 1:
             expected_method = self._state_to_method_name(self._state)
@@ -510,7 +510,7 @@ class BenchmarkSimpleMrdReaderBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: typing.Any | None) -> None:
+    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
         self.close()
         if exc is None and self._state != 2:
             if self._state % 2 == 1:
@@ -579,7 +579,7 @@ class ScalarsWriterBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: typing.Any | None) -> None:
+    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
         self.close()
         if exc is None and self._state != 2:
             expected_method = self._state_to_method_name(self._state)
@@ -640,7 +640,7 @@ class ScalarsReaderBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: typing.Any | None) -> None:
+    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
         self.close()
         if exc is None and self._state != 4:
             if self._state % 2 == 1:
@@ -720,7 +720,7 @@ class ScalarOptionalsWriterBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: typing.Any | None) -> None:
+    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
         self.close()
         if exc is None and self._state != 4:
             expected_method = self._state_to_method_name(self._state)
@@ -811,7 +811,7 @@ class ScalarOptionalsReaderBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: typing.Any | None) -> None:
+    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
         self.close()
         if exc is None and self._state != 8:
             if self._state % 2 == 1:
@@ -925,7 +925,7 @@ class NestedRecordsWriterBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: typing.Any | None) -> None:
+    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
         self.close()
         if exc is None and self._state != 1:
             expected_method = self._state_to_method_name(self._state)
@@ -971,7 +971,7 @@ class NestedRecordsReaderBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: typing.Any | None) -> None:
+    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
         self.close()
         if exc is None and self._state != 2:
             if self._state % 2 == 1:
@@ -1034,7 +1034,7 @@ class VlensWriterBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: typing.Any | None) -> None:
+    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
         self.close()
         if exc is None and self._state != 4:
             expected_method = self._state_to_method_name(self._state)
@@ -1125,7 +1125,7 @@ class VlensReaderBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: typing.Any | None) -> None:
+    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
         self.close()
         if exc is None and self._state != 8:
             if self._state % 2 == 1:
@@ -1239,7 +1239,7 @@ class StringsWriterBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: typing.Any | None) -> None:
+    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
         self.close()
         if exc is None and self._state != 2:
             expected_method = self._state_to_method_name(self._state)
@@ -1300,7 +1300,7 @@ class StringsReaderBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: typing.Any | None) -> None:
+    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
         self.close()
         if exc is None and self._state != 4:
             if self._state % 2 == 1:
@@ -1380,7 +1380,7 @@ class OptionalVectorsWriterBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: typing.Any | None) -> None:
+    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
         self.close()
         if exc is None and self._state != 1:
             expected_method = self._state_to_method_name(self._state)
@@ -1426,7 +1426,7 @@ class OptionalVectorsReaderBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: typing.Any | None) -> None:
+    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
         self.close()
         if exc is None and self._state != 2:
             if self._state % 2 == 1:
@@ -1489,7 +1489,7 @@ class FixedVectorsWriterBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: typing.Any | None) -> None:
+    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
         self.close()
         if exc is None and self._state != 4:
             expected_method = self._state_to_method_name(self._state)
@@ -1580,7 +1580,7 @@ class FixedVectorsReaderBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: typing.Any | None) -> None:
+    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
         self.close()
         if exc is None and self._state != 8:
             if self._state % 2 == 1:
@@ -1694,7 +1694,7 @@ class StreamsWriterBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: typing.Any | None) -> None:
+    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
         self.close()
         if exc is None and self._state != 4:
             expected_method = self._state_to_method_name(self._state)
@@ -1785,7 +1785,7 @@ class StreamsReaderBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: typing.Any | None) -> None:
+    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
         self.close()
         if exc is None and self._state != 8:
             if self._state % 2 == 1:
@@ -1899,7 +1899,7 @@ class FixedArraysWriterBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: typing.Any | None) -> None:
+    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
         self.close()
         if exc is None and self._state != 5:
             expected_method = self._state_to_method_name(self._state)
@@ -2005,7 +2005,7 @@ class FixedArraysReaderBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: typing.Any | None) -> None:
+    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
         self.close()
         if exc is None and self._state != 10:
             if self._state % 2 == 1:
@@ -2136,7 +2136,7 @@ class SubarraysWriterBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: typing.Any | None) -> None:
+    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
         self.close()
         if exc is None and self._state != 2:
             expected_method = self._state_to_method_name(self._state)
@@ -2197,7 +2197,7 @@ class SubarraysReaderBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: typing.Any | None) -> None:
+    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
         self.close()
         if exc is None and self._state != 4:
             if self._state % 2 == 1:
@@ -2277,7 +2277,7 @@ class NDArraysWriterBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: typing.Any | None) -> None:
+    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
         self.close()
         if exc is None and self._state != 5:
             expected_method = self._state_to_method_name(self._state)
@@ -2383,7 +2383,7 @@ class NDArraysReaderBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: typing.Any | None) -> None:
+    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
         self.close()
         if exc is None and self._state != 10:
             if self._state % 2 == 1:
@@ -2514,7 +2514,7 @@ class NDArraysSingleDimensionWriterBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: typing.Any | None) -> None:
+    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
         self.close()
         if exc is None and self._state != 4:
             expected_method = self._state_to_method_name(self._state)
@@ -2605,7 +2605,7 @@ class NDArraysSingleDimensionReaderBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: typing.Any | None) -> None:
+    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
         self.close()
         if exc is None and self._state != 8:
             if self._state % 2 == 1:
@@ -2719,7 +2719,7 @@ class DynamicNDArraysWriterBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: typing.Any | None) -> None:
+    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
         self.close()
         if exc is None and self._state != 4:
             expected_method = self._state_to_method_name(self._state)
@@ -2810,7 +2810,7 @@ class DynamicNDArraysReaderBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: typing.Any | None) -> None:
+    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
         self.close()
         if exc is None and self._state != 8:
             if self._state % 2 == 1:
@@ -2924,7 +2924,7 @@ class MapsWriterBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: typing.Any | None) -> None:
+    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
         self.close()
         if exc is None and self._state != 3:
             expected_method = self._state_to_method_name(self._state)
@@ -3006,7 +3006,7 @@ class MapsReaderBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: typing.Any | None) -> None:
+    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
         self.close()
         if exc is None and self._state != 6:
             if self._state % 2 == 1:
@@ -3109,7 +3109,7 @@ class UnionsWriterBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: typing.Any | None) -> None:
+    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
         self.close()
         if exc is None and self._state != 4:
             expected_method = self._state_to_method_name(self._state)
@@ -3220,7 +3220,7 @@ class UnionsReaderBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: typing.Any | None) -> None:
+    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
         self.close()
         if exc is None and self._state != 8:
             if self._state % 2 == 1:
@@ -3354,7 +3354,7 @@ class StreamsOfUnionsWriterBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: typing.Any | None) -> None:
+    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
         self.close()
         if exc is None and self._state != 2:
             expected_method = self._state_to_method_name(self._state)
@@ -3429,7 +3429,7 @@ class StreamsOfUnionsReaderBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: typing.Any | None) -> None:
+    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
         self.close()
         if exc is None and self._state != 4:
             if self._state % 2 == 1:
@@ -3523,7 +3523,7 @@ class EnumsWriterBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: typing.Any | None) -> None:
+    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
         self.close()
         if exc is None and self._state != 3:
             expected_method = self._state_to_method_name(self._state)
@@ -3599,7 +3599,7 @@ class EnumsReaderBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: typing.Any | None) -> None:
+    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
         self.close()
         if exc is None and self._state != 6:
             if self._state % 2 == 1:
@@ -3696,7 +3696,7 @@ class FlagsWriterBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: typing.Any | None) -> None:
+    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
         self.close()
         if exc is None and self._state != 2:
             expected_method = self._state_to_method_name(self._state)
@@ -3757,7 +3757,7 @@ class FlagsReaderBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: typing.Any | None) -> None:
+    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
         self.close()
         if exc is None and self._state != 4:
             if self._state % 2 == 1:
@@ -3837,7 +3837,7 @@ class StateTestWriterBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: typing.Any | None) -> None:
+    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
         self.close()
         if exc is None and self._state != 3:
             expected_method = self._state_to_method_name(self._state)
@@ -3913,7 +3913,7 @@ class StateTestReaderBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: typing.Any | None) -> None:
+    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
         self.close()
         if exc is None and self._state != 6:
             if self._state % 2 == 1:
@@ -4010,7 +4010,7 @@ class SimpleGenericsWriterBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: typing.Any | None) -> None:
+    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
         self.close()
         if exc is None and self._state != 9:
             expected_method = self._state_to_method_name(self._state)
@@ -4182,7 +4182,7 @@ class SimpleGenericsReaderBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: typing.Any | None) -> None:
+    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
         self.close()
         if exc is None and self._state != 18:
             if self._state % 2 == 1:
@@ -4387,7 +4387,7 @@ class AdvancedGenericsWriterBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: typing.Any | None) -> None:
+    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
         self.close()
         if exc is None and self._state != 5:
             expected_method = self._state_to_method_name(self._state)
@@ -4493,7 +4493,7 @@ class AdvancedGenericsReaderBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: typing.Any | None) -> None:
+    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
         self.close()
         if exc is None and self._state != 10:
             if self._state % 2 == 1:
@@ -4624,7 +4624,7 @@ class AliasesWriterBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: typing.Any | None) -> None:
+    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
         self.close()
         if exc is None and self._state != 10:
             expected_method = self._state_to_method_name(self._state)
@@ -4805,7 +4805,7 @@ class AliasesReaderBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: typing.Any | None) -> None:
+    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
         self.close()
         if exc is None and self._state != 20:
             if self._state % 2 == 1:
@@ -5021,7 +5021,7 @@ class StreamsOfAliasedUnionsWriterBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: typing.Any | None) -> None:
+    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
         self.close()
         if exc is None and self._state != 2:
             expected_method = self._state_to_method_name(self._state)
@@ -5082,7 +5082,7 @@ class StreamsOfAliasedUnionsReaderBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: typing.Any | None) -> None:
+    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
         self.close()
         if exc is None and self._state != 4:
             if self._state % 2 == 1:
@@ -5162,7 +5162,7 @@ class ProtocolWithComputedFieldsWriterBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: typing.Any | None) -> None:
+    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
         self.close()
         if exc is None and self._state != 1:
             expected_method = self._state_to_method_name(self._state)
@@ -5208,7 +5208,7 @@ class ProtocolWithComputedFieldsReaderBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: typing.Any | None) -> None:
+    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
         self.close()
         if exc is None and self._state != 2:
             if self._state % 2 == 1:
@@ -5271,7 +5271,7 @@ class ProtocolWithKeywordStepsWriterBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: typing.Any | None) -> None:
+    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
         self.close()
         if exc is None and self._state != 2:
             expected_method = self._state_to_method_name(self._state)
@@ -5332,7 +5332,7 @@ class ProtocolWithKeywordStepsReaderBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: typing.Any | None) -> None:
+    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
         self.close()
         if exc is None and self._state != 4:
             if self._state % 2 == 1:

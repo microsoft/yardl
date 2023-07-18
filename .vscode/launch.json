@@ -34,7 +34,7 @@
       "name": "Debug Python Unit Test",
       "type": "python",
       "request": "test",
-      "justMyCode": false
+      "justMyCode": true
     }
   ]
 }
