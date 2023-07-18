@@ -1489,6 +1489,9 @@ void to_json(ordered_json& j, test_model::RecordWithEnums const& value) {
   if (yardl::ndjson::ShouldSerializeFieldValue(value.flags)) {
     j.push_back({"flags", value.flags});
   }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.flags_2)) {
+    j.push_back({"flags2", value.flags_2});
+  }
 }
 
 void from_json(ordered_json const& j, test_model::RecordWithEnums& value) {
@@ -1497,6 +1500,9 @@ void from_json(ordered_json const& j, test_model::RecordWithEnums& value) {
   }
   if (auto it = j.find("flags"); it != j.end()) {
     it->get_to(value.flags);
+  }
+  if (auto it = j.find("flags2"); it != j.end()) {
+    it->get_to(value.flags_2);
   }
 }
 

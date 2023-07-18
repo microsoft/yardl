@@ -17,7 +17,7 @@ translator_path = (
 ).resolve()
 
 
-def invoke_translator(py_buf):
+def invoke_translator(py_buf: bytes) -> bytes:
     with subprocess.Popen(
         [translator_path, "binary", "binary"],
         stdin=subprocess.PIPE,
@@ -25,8 +25,7 @@ def invoke_translator(py_buf):
     ) as proc:
         cpp_output = proc.communicate(input=py_buf)[0]
         assert proc.wait() == 0, "translator failed"
-
-        assert cpp_output == py_buf
+        return cpp_output
 
 
 # base writer type -> (derived writer type, derived reader type)
@@ -106,6 +105,10 @@ def create_validating_writer_class(
             def mk_wrapper(method_snapshot=method):
                 def wrapper(*args, **kwargs):
                     recorded_args = args[0]._recorded_arguments
+                    if isinstance(args[1], types.GeneratorType):
+                        arg_list = list(args)
+                        arg_list[1] = list(args[1])
+                        args = tuple(arg_list)
                     recorded_args[method_snapshot.__name__] = args[1]
                     return method_snapshot(*args, **kwargs)
 
@@ -132,7 +135,9 @@ def create_validating_writer_class(
             reader = reader_class(io.BytesIO(this_buffer), tm.Types.ALL)
             reader.copy_to(validating_instance)
 
-            invoke_translator(this_buffer)
+            cpp_output = invoke_translator(this_buffer)
+            reader = reader_class(io.BytesIO(cpp_output), tm.Types.ALL)
+            reader.copy_to(validating_instance)
 
             return result
 
@@ -530,4 +535,66 @@ def test_dynamic_ndarrays():
                     tm.get_dtype(tm.RecordWithVlens),
                 ),
             )
+        )
+
+
+def test_maps():
+    with create_validating_writer_class(tm.MapsWriterBase)() as w:
+        w.write_string_to_int({"a": 1, "b": 2, "c": 3})
+        w.write_string_to_union({"a": ("int32", 1), "b": ("string", "2")})
+        w.write_aliased_generic({"a": 1, "b": 2, "c": 3})
+
+
+def test_unions():
+    c = create_validating_writer_class(tm.UnionsWriterBase)
+
+    # first option
+    with c() as w:
+        w.write_int_or_simple_record(("int32", 1))
+        w.write_int_or_record_with_vlens(("int32", 2))
+        w.write_monosotate_or_int_or_simple_record(None)
+        w.write_record_with_unions(tm.RecordWithUnions())
+
+    # second option
+    with c() as w:
+        w.write_int_or_simple_record(("SimpleRecord", tm.SimpleRecord(x=1, y=2, z=3)))
+        w.write_int_or_record_with_vlens(
+            (
+                "RecordWithVlens",
+                tm.RecordWithVlens(a=[tm.SimpleRecord(x=1, y=2, z=3)], b=12, c=13),
+            )
+        )
+        w.write_monosotate_or_int_or_simple_record(("int32", 6))
+        w.write_record_with_unions(
+            tm.RecordWithUnions(
+                null_or_int_or_string=("int32", 7),
+                date_or_datetime=("datetime", datetime.datetime(2025, 3, 4)),
+            )
+        )
+
+
+def test_enums():
+    with create_validating_writer_class(tm.EnumsWriterBase)() as w:
+        w.write_single(tm.Fruits.APPLE)
+        w.write_vec([tm.Fruits.APPLE, tm.Fruits.BANANA, tm.Fruits(233983)])
+        w.write_size(tm.SizeBasedEnum.C)
+
+
+def test_flags():
+    def days():
+        yield tm.DaysOfWeek.SUNDAY
+        yield tm.DaysOfWeek.MONDAY | tm.DaysOfWeek.WEDNESDAY | tm.DaysOfWeek.FRIDAY
+        yield tm.DaysOfWeek(0)
+        yield tm.DaysOfWeek(282839)
+        yield tm.DaysOfWeek(234532)
+
+    with create_validating_writer_class(tm.FlagsWriterBase)() as w:
+        w.write_days(days())
+        w.write_formats(
+            [
+                tm.TextFormat.BOLD,
+                tm.TextFormat.BOLD | tm.TextFormat.ITALIC,
+                tm.TextFormat.REGULAR,
+                tm.TextFormat(232932),
+            ]
         )

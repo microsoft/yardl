@@ -569,17 +569,34 @@ func GetGenericBase(t dsl.TypeDefinition) string {
 func writeEnum(w *formatting.IndentedWriter, enum *dsl.EnumDefinition) {
 	var base string
 	if enum.IsFlags {
-		base = "enum.Flag, boundary=enum.KEEP"
+		base = "enum.IntFlag"
 	} else {
-		base = "enum.Enum"
+		base = "yardl.OutOfRangeEnum"
 	}
-	fmt.Fprintf(w, "class %s(%s):\n", common.TypeSyntaxWithoutTypeParameters(enum, enum.Namespace), base)
+
+	enumTypeSyntax := common.TypeSyntax(enum, enum.Namespace)
+	fmt.Fprintf(w, "class %s(%s):\n", enumTypeSyntax, base)
 
 	w.Indented(func() {
 		common.WriteDocstring(w, enum.Comment)
 		for _, value := range enum.Values {
 			fmt.Fprintf(w, "%s = %d\n", common.EnumValueIdentifierName(value.Symbol), &value.IntegerValue)
 			common.WriteDocstring(w, value.Comment)
+		}
+
+		if enum.IsFlags {
+			w.WriteStringln("")
+			w.WriteStringln("def __eq__(self, other: object) -> bool:")
+			w.Indented(func() {
+				fmt.Fprintf(w, "return isinstance(other, %s) and self.value == other.value\n", enumTypeSyntax)
+			})
+			w.WriteStringln("")
+
+			w.WriteStringln("def __hash__(self) -> int:")
+			w.Indented(func() {
+				w.WriteStringln("return hash(self.value)")
+			})
+
 		}
 	})
 	w.WriteStringln("")

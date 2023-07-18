@@ -1,4 +1,4 @@
-from enum import Flag, auto
+from enum import Enum, Flag, auto
 import numpy as np
 import datetime
 
@@ -70,6 +70,38 @@ class Types(Flag):
 
 class ProtocolError(Exception):
     pass
+
+
+class OutOfRangeEnum(Enum):
+    """Enum that allows values outside of the its defined values."""
+
+    @classmethod
+    def _missing_(cls, value: object):
+        if not isinstance(value, int):
+            return None
+
+        obj = object.__new__(cls)
+        obj._value_ = value
+        obj._name_ = ""
+        return obj
+
+    def __eq__(self, other: object):
+        return isinstance(other, self.__class__) and self.value == other.value
+
+    def __hash__(self) -> int:
+        return hash(self.value)
+
+    def __str__(self) -> str:
+        if self._name_ != "":
+            return super().__str__()
+
+        return f"{self.__class__.__name__}({self.value})"
+
+    def __repr__(self) -> str:
+        if self._name_ != "":
+            return super().__repr__()
+
+        return f"<{self.__class__.__name__}: {self.value}>"
 
 
 _EPOCH_ORDINAL_DAYS = datetime.date(1970, 1, 1).toordinal()

@@ -1563,20 +1563,20 @@ class _RecordWithUnionsSerializer(_binary.RecordSerializer[RecordWithUnions]):
 
 class _RecordWithEnumsSerializer(_binary.RecordSerializer[RecordWithEnums]):
     def __init__(self) -> None:
-        super().__init__([("enum", _binary.EnumSerializer(_binary.int32_serializer, Fruits)), ("flags", _binary.EnumSerializer(_binary.int32_serializer, DaysOfWeek))])
+        super().__init__([("enum", _binary.EnumSerializer(_binary.int32_serializer, Fruits)), ("flags", _binary.EnumSerializer(_binary.int32_serializer, DaysOfWeek)), ("flags_2", _binary.EnumSerializer(_binary.uint64_serializer, TextFormat))])
 
     def write(self, stream: _binary.CodedOutputStream, value: RecordWithEnums) -> None:
         if isinstance(value, np.void):
             self.write_numpy(stream, value)
             return
-        self._write(stream, value.enum, value.flags)
+        self._write(stream, value.enum, value.flags, value.flags_2)
 
     def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
-        self._write(stream, value['enum'], value['flags'])
+        self._write(stream, value['enum'], value['flags'], value['flags_2'])
 
     def read(self, stream: _binary.CodedInputStream, read_as_numpy: Types) -> RecordWithEnums:
         field_values = self._read(stream, read_as_numpy)
-        return RecordWithEnums(enum=field_values[0], flags=field_values[1])
+        return RecordWithEnums(enum=field_values[0], flags=field_values[1], flags_2=field_values[2])
 
 
 class _GenericRecordSerializer(typing.Generic[T1, T1_NP, T2, T2_NP], _binary.RecordSerializer[GenericRecord[T1, T2, T2_NP]]):

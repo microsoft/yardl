@@ -320,8 +320,9 @@ struct IsTriviallySerializable<test_model::RecordWithEnums> {
     std::is_standard_layout_v<__T__> &&
     IsTriviallySerializable<decltype(__T__::enum_field)>::value &&
     IsTriviallySerializable<decltype(__T__::flags)>::value &&
-    (sizeof(__T__) == (sizeof(__T__::enum_field) + sizeof(__T__::flags))) &&
-    offsetof(__T__, enum_field) < offsetof(__T__, flags);
+    IsTriviallySerializable<decltype(__T__::flags_2)>::value &&
+    (sizeof(__T__) == (sizeof(__T__::enum_field) + sizeof(__T__::flags) + sizeof(__T__::flags_2))) &&
+    offsetof(__T__, enum_field) < offsetof(__T__, flags) && offsetof(__T__, flags) < offsetof(__T__, flags_2);
 };
 
 template <typename T1, typename T2>
@@ -1111,6 +1112,7 @@ template<typename K, yardl::binary::Reader<K> ReadK, typename V, yardl::binary::
 
   yardl::binary::WriteEnum<test_model::Fruits>(stream, value.enum_field);
   yardl::binary::WriteFlags<test_model::DaysOfWeek>(stream, value.flags);
+  yardl::binary::WriteFlags<test_model::TextFormat>(stream, value.flags_2);
 }
 
 [[maybe_unused]] void ReadRecordWithEnums(yardl::binary::CodedInputStream& stream, test_model::RecordWithEnums& value) {
@@ -1121,6 +1123,7 @@ template<typename K, yardl::binary::Reader<K> ReadK, typename V, yardl::binary::
 
   yardl::binary::ReadEnum<test_model::Fruits>(stream, value.enum_field);
   yardl::binary::ReadFlags<test_model::DaysOfWeek>(stream, value.flags);
+  yardl::binary::ReadFlags<test_model::TextFormat>(stream, value.flags_2);
 }
 
 template<typename T, yardl::binary::Writer<T> WriteT>

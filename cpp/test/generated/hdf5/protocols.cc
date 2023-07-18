@@ -864,6 +864,7 @@ struct _Inner_RecordWithKeywordFields {
   H5::CompType t(sizeof(RecordType));
   t.insertMember("enum", HOFFSET(RecordType, enum_field), test_model::hdf5::GetFruitsHdf5Ddl());
   t.insertMember("flags", HOFFSET(RecordType, flags), H5::PredType::NATIVE_INT32);
+  t.insertMember("flags2", HOFFSET(RecordType, flags_2), H5::PredType::NATIVE_UINT64);
   return t;
 }
 

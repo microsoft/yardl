@@ -882,23 +882,23 @@ class RecordWithUnions:
         )
 
 
-class Fruits(enum.Enum):
+class Fruits(yardl.OutOfRangeEnum):
     APPLE = 0
     BANANA = 1
     PEAR = 2
 
-class UInt64Enum(enum.Enum):
+class UInt64Enum(yardl.OutOfRangeEnum):
     A = 9223372036854775808
 
-class Int64Enum(enum.Enum):
+class Int64Enum(yardl.OutOfRangeEnum):
     B = -4611686018427387904
 
-class SizeBasedEnum(enum.Enum):
+class SizeBasedEnum(yardl.OutOfRangeEnum):
     A = 0
     B = 1
     C = 2
 
-class DaysOfWeek(enum.Flag, boundary=enum.KEEP):
+class DaysOfWeek(enum.IntFlag):
     MONDAY = 1
     TUESDAY = 2
     WEDNESDAY = 4
@@ -907,12 +907,24 @@ class DaysOfWeek(enum.Flag, boundary=enum.KEEP):
     SATURDAY = 32
     SUNDAY = 64
 
-class TextFormat(enum.Flag, boundary=enum.KEEP):
+    def __eq__(self, other: object) -> bool:
+        return isinstance(other, DaysOfWeek) and self.value == other.value
+
+    def __hash__(self) -> int:
+        return hash(self.value)
+
+class TextFormat(enum.IntFlag):
     REGULAR = 0
     BOLD = 1
     ITALIC = 2
     UNDERLINE = 4
     STRIKETHROUGH = 8
+
+    def __eq__(self, other: object) -> bool:
+        return isinstance(other, TextFormat) and self.value == other.value
+
+    def __hash__(self) -> int:
+        return hash(self.value)
 
 @dataclasses.dataclass(slots=True, kw_only=True, eq=False)
 class RecordWithEnums:
@@ -920,21 +932,25 @@ class RecordWithEnums:
 
     flags: DaysOfWeek = DaysOfWeek(0)
 
+    flags_2: TextFormat = TextFormat.REGULAR
+
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, RecordWithEnums):
             if (
                 not isinstance(other, np.void)
                 or other.dtype.fields is None
-                or len(other.dtype.fields) != 2
+                or len(other.dtype.fields) != 3
             ):
                 return False
             return (
                 self.enum == other["enum"]
                 and self.flags == other["flags"]
+                and self.flags_2 == other["flags_2"]
             )
         return (
             self.enum == other.enum
             and self.flags == other.flags
+            and self.flags_2 == other.flags_2
         )
 
 
@@ -1365,7 +1381,7 @@ class RecordWithComputedFields:
 
 ArrayWithKeywordDimensionNames = npt.NDArray[np.int32]
 
-class EnumWithKeywordSymbols(enum.Enum):
+class EnumWithKeywordSymbols(yardl.OutOfRangeEnum):
     TRY = 2
     CATCH = 1
 
@@ -1444,7 +1460,7 @@ def _mk_get_dtype():
     dtype_map[SizeBasedEnum] = np.dtype(np.uint64)
     dtype_map[DaysOfWeek] = np.dtype(np.int32)
     dtype_map[TextFormat] = np.dtype(np.uint64)
-    dtype_map[RecordWithEnums] = np.dtype([('enum', get_dtype(Fruits)), ('flags', get_dtype(DaysOfWeek))], align=True)
+    dtype_map[RecordWithEnums] = np.dtype([('enum', get_dtype(Fruits)), ('flags', get_dtype(DaysOfWeek)), ('flags_2', get_dtype(TextFormat))], align=True)
     dtype_map[Image] = lambda type_args: np.dtype(np.object_)
     dtype_map[GenericRecord] = lambda type_args: np.dtype([('scalar_1', get_dtype(type_args[0])), ('scalar_2', get_dtype(type_args[1])), ('vector_1', np.dtype(np.object_)), ('image_2', get_dtype(types.GenericAlias(Image, (type_args[1],))))], align=True)
     dtype_map[MyTuple] = lambda type_args: np.dtype([('v1', get_dtype(type_args[0])), ('v2', get_dtype(type_args[1]))], align=True)

@@ -479,10 +479,12 @@ struct TextFormat : yardl::BaseFlags<uint64_t, TextFormat> {
 struct RecordWithEnums {
   test_model::Fruits enum_field{};
   test_model::DaysOfWeek flags{};
+  test_model::TextFormat flags_2{};
 
   bool operator==(const RecordWithEnums& other) const {
     return enum_field == other.enum_field &&
-      flags == other.flags;
+      flags == other.flags &&
+      flags_2 == other.flags_2;
   }
 
   bool operator!=(const RecordWithEnums& other) const {

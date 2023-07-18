@@ -1080,6 +1080,10 @@
               {
                 "name": "flags",
                 "type": "TestModel.DaysOfWeek"
+              },
+              {
+                "name": "flags2",
+                "type": "TestModel.TextFormat"
               }
             ]
           }

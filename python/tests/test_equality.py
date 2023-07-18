@@ -15,6 +15,45 @@ def test_simple_equality():
     assert a == b
 
 
+def test_flags_equality():
+    a = tm.DaysOfWeek.MONDAY | tm.DaysOfWeek.TUESDAY
+    b = tm.DaysOfWeek.MONDAY | tm.DaysOfWeek.TUESDAY
+    assert a == b
+
+    c = tm.DaysOfWeek(0)
+    d = tm.DaysOfWeek(0)
+    assert c == d
+    assert a != c
+
+    e = tm.DaysOfWeek(0xFFFF)
+    f = tm.DaysOfWeek(0xFFFF)
+    assert e == f
+
+
+def test_enum_equality():
+    a = tm.Fruits.APPLE
+    b = tm.Fruits.APPLE
+    assert a == b
+    assert hash(a) == hash(b)
+
+    c = tm.Fruits(10000)
+    d = tm.Fruits(10000)
+    assert c == d
+
+
+def test_record_with_enum_equality():
+    a = tm.RecordWithEnums(
+        enum=tm.Fruits.APPLE, flags=tm.DaysOfWeek.SATURDAY | tm.DaysOfWeek.SUNDAY
+    )
+    b = tm.RecordWithEnums(
+        enum=tm.Fruits.APPLE, flags=tm.DaysOfWeek.SATURDAY | tm.DaysOfWeek.SUNDAY
+    )
+    assert a == b
+
+    c = tm.RecordWithEnums(enum=tm.Fruits.APPLE, flags=tm.DaysOfWeek.SATURDAY)
+    assert a != c
+
+
 def test_date_equality():
     a = tm.RecordWithPrimitives(date_field=datetime.date(2020, 1, 1))
     b = tm.RecordWithPrimitives(
@@ -211,19 +250,6 @@ def test_time_union_equality():
     )
 
     assert a == b
-
-
-def test_enum_equality():
-    a = tm.RecordWithEnums(
-        enum=tm.Fruits.APPLE, flags=tm.DaysOfWeek.SATURDAY | tm.DaysOfWeek.SUNDAY
-    )
-    b = tm.RecordWithEnums(
-        enum=tm.Fruits.APPLE, flags=tm.DaysOfWeek.SATURDAY | tm.DaysOfWeek.SUNDAY
-    )
-    assert a == b
-
-    c = tm.RecordWithEnums(enum=tm.Fruits.APPLE, flags=tm.DaysOfWeek.SATURDAY)
-    assert a != c
 
 
 def test_generic_equality():

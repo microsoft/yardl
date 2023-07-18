@@ -990,9 +990,14 @@ class StreamSerializer(TypeSerializer[Iterable[T], Any]):
         self.element_serializer = element_serializer
 
     def write(self, stream: CodedOutputStream, value: Iterable[T]) -> None:
-        for element in value:
-            stream.write_byte(1)
-            self.element_serializer.write(stream, element)
+        if isinstance(value, list):
+            stream.write_unsigned_varint(len(value))
+            for element in value:
+                self.element_serializer.write(stream, element)
+        else:
+            for element in value:
+                stream.write_byte(1)
+                self.element_serializer.write(stream, element)
 
         stream.write_byte(0)
 
