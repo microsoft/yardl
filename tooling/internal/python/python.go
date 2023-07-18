@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path"
-	"strings"
+	"sort"
 
 	"github.com/microsoft/yardl/tooling/internal/formatting"
 	"github.com/microsoft/yardl/tooling/internal/iocommon"
@@ -74,31 +74,58 @@ func writePackageInitFile(packageDir string, ns *dsl.Namespace) error {
 
 	fmt.Fprintf(w, "from .yardl_types import *\n")
 
-	typeNames := make([]string, 0)
+	typesMembers := make([]string, 0)
+	typesMembers = append(typesMembers, "get_dtype")
 	for _, t := range ns.TypeDefinitions {
-		typeNames = append(typeNames, common.TypeSyntaxWithoutTypeParameters(t, ns.Name))
+		typesMembers = append(typesMembers, common.TypeSyntaxWithoutTypeParameters(t, ns.Name))
 	}
 
-	if len(typeNames) > 0 {
-		fmt.Fprintf(w, "from .types import %s\n", strings.Join(typeNames, ", "))
-	}
+	sort.Slice(typesMembers, func(i, j int) bool {
+		return typesMembers[i] < typesMembers[j]
+	})
 
-	w.WriteStringln("from .types import get_dtype")
+	fmt.Fprintf(w, "from .types import (\n")
+	w.Indented(func() {
+		for _, t := range typesMembers {
+			fmt.Fprintf(w, "%s,\n", t)
+		}
+	})
+	fmt.Fprintf(w, ")\n")
 
-	protocolTypes := make([]string, 0)
+	protocolsMembers := make([]string, 0)
 	for _, p := range ns.Protocols {
-		protocolTypes = append(protocolTypes, common.AbstractWriterName(p), common.AbstractReaderName(p))
+		protocolsMembers = append(protocolsMembers, common.AbstractWriterName(p), common.AbstractReaderName(p))
 	}
 
-	if len(protocolTypes) > 0 {
-		fmt.Fprintf(w, "from .protocols import %s\n", strings.Join(protocolTypes, ", "))
+	if len(protocolsMembers) > 0 {
+		sort.Slice(protocolsMembers, func(i, j int) bool {
+			return protocolsMembers[i] < protocolsMembers[j]
+		})
+
+		fmt.Fprintf(w, "from .protocols import (\n")
+		w.Indented(func() {
+			for _, p := range protocolsMembers {
+				fmt.Fprintf(w, "%s,\n", p)
+			}
+		})
+		fmt.Fprintf(w, ")\n")
 
 		for i, p := range ns.Protocols {
-			protocolTypes[i*2] = binary.BinaryWriterName(p)
-			protocolTypes[i*2+1] = binary.BinaryReaderName(p)
+			protocolsMembers[i*2] = binary.BinaryWriterName(p)
+			protocolsMembers[i*2+1] = binary.BinaryReaderName(p)
 		}
 
-		fmt.Fprintf(w, "from .binary import %s\n", strings.Join(protocolTypes, ", "))
+		sort.Slice(protocolsMembers, func(i, j int) bool {
+			return protocolsMembers[i] < protocolsMembers[j]
+		})
+
+		fmt.Fprintf(w, "from .binary import (\n")
+		w.Indented(func() {
+			for _, p := range protocolsMembers {
+				fmt.Fprintf(w, "%s,\n", p)
+			}
+		})
+		fmt.Fprintf(w, ")\n")
 	}
 
 	return iocommon.WriteFileIfNeeded(path.Join(packageDir, "__init__.py"), b.Bytes(), 0644)
