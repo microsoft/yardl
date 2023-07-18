@@ -3286,7 +3286,7 @@
           "name": "AdvancedGenerics",
           "sequence": [
             {
-              "name": "intImageImage",
+              "name": "floatImageImage",
               "type": {
                 "name": "TestModel.Image",
                 "typeArguments": [

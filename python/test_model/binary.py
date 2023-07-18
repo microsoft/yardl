@@ -950,7 +950,7 @@ class BinaryAdvancedGenericsWriter(_binary.BinaryProtocolWriter, AdvancedGeneric
         AdvancedGenericsWriterBase.__init__(self)
         _binary.BinaryProtocolWriter.__init__(self, stream, AdvancedGenericsWriterBase.schema)
 
-    def _write_int_image_image(self, value: Image[np.object_]) -> None:
+    def _write_float_image_image(self, value: Image[np.object_]) -> None:
         _binary.NDArraySerializer(_binary.NDArraySerializer(_binary.float32_serializer, 2), 2).write(self._stream, value)
 
     def _write_generic_record_1(self, value: GenericRecord[yardl.Int32, str, np.object_]) -> None:
@@ -974,7 +974,7 @@ class BinaryAdvancedGenericsReader(_binary.BinaryProtocolReader, AdvancedGeneric
         AdvancedGenericsReaderBase.__init__(self, read_as_numpy)
         _binary.BinaryProtocolReader.__init__(self, stream, AdvancedGenericsReaderBase.schema)
 
-    def _read_int_image_image(self) -> Image[np.object_]:
+    def _read_float_image_image(self) -> Image[np.object_]:
         return _binary.NDArraySerializer(_binary.NDArraySerializer(_binary.float32_serializer, 2), 2).read(self._stream, self._read_as_numpy)
 
     def _read_generic_record_1(self) -> GenericRecord[yardl.Int32, str, np.object_]:

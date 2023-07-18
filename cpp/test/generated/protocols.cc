@@ -4260,7 +4260,7 @@ namespace {
 void AdvancedGenericsWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end, uint8_t current) {
   std::string expected_method;
   switch (current) {
-  case 0: expected_method = "WriteIntImageImage()"; break;
+  case 0: expected_method = "WriteFloatImageImage()"; break;
   case 1: expected_method = "WriteGenericRecord1()"; break;
   case 2: expected_method = "WriteTupleOfOptionals()"; break;
   case 3: expected_method = "WriteTupleOfOptionalsAlternateSyntax()"; break;
@@ -4268,7 +4268,7 @@ void AdvancedGenericsWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] 
   }
   std::string attempted_method;
   switch (attempted) {
-  case 0: attempted_method = "WriteIntImageImage()"; break;
+  case 0: attempted_method = "WriteFloatImageImage()"; break;
   case 1: attempted_method = "WriteGenericRecord1()"; break;
   case 2: attempted_method = "WriteTupleOfOptionals()"; break;
   case 3: attempted_method = "WriteTupleOfOptionalsAlternateSyntax()"; break;
@@ -4281,7 +4281,7 @@ void AdvancedGenericsWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] 
 void AdvancedGenericsReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
   auto f = [](uint8_t i) -> std::string {
     switch (i/2) {
-    case 0: return "ReadIntImageImage()";
+    case 0: return "ReadFloatImageImage()";
     case 1: return "ReadGenericRecord1()";
     case 2: return "ReadTupleOfOptionals()";
     case 3: return "ReadTupleOfOptionalsAlternateSyntax()";
@@ -4295,14 +4295,14 @@ void AdvancedGenericsReaderBaseInvalidState(uint8_t attempted, uint8_t current) 
 
 } // namespace 
 
-std::string AdvancedGenericsWriterBase::schema_ = R"({"protocol":{"name":"AdvancedGenerics","sequence":[{"name":"intImageImage","type":{"name":"TestModel.Image","typeArguments":[{"name":"TestModel.Image","typeArguments":["float32"]}]}},{"name":"genericRecord1","type":{"name":"TestModel.GenericRecord","typeArguments":["int32","string"]}},{"name":"tupleOfOptionals","type":{"name":"TestModel.MyTuple","typeArguments":[[null,"int32"],[null,"string"]]}},{"name":"tupleOfOptionalsAlternateSyntax","type":{"name":"TestModel.MyTuple","typeArguments":[[null,"int32"],[null,"string"]]}},{"name":"tupleOfVectors","type":{"name":"TestModel.MyTuple","typeArguments":[{"vector":{"items":"int32"}},{"vector":{"items":"float32"}}]}}]},"types":[{"name":"GenericRecord","typeParameters":["T1","T2"],"fields":[{"name":"scalar1","type":"T1"},{"name":"scalar2","type":"T2"},{"name":"vector1","type":{"vector":{"items":"T1"}}},{"name":"image2","type":{"name":"TestModel.Image","typeArguments":["T2"]}}]},{"name":"Image","typeParameters":["T"],"type":{"array":{"items":"T","dimensions":[{"name":"x"},{"name":"y"}]}}},{"name":"MyTuple","typeParameters":["T1","T2"],"fields":[{"name":"v1","type":"T1"},{"name":"v2","type":"T2"}]}]})";
+std::string AdvancedGenericsWriterBase::schema_ = R"({"protocol":{"name":"AdvancedGenerics","sequence":[{"name":"floatImageImage","type":{"name":"TestModel.Image","typeArguments":[{"name":"TestModel.Image","typeArguments":["float32"]}]}},{"name":"genericRecord1","type":{"name":"TestModel.GenericRecord","typeArguments":["int32","string"]}},{"name":"tupleOfOptionals","type":{"name":"TestModel.MyTuple","typeArguments":[[null,"int32"],[null,"string"]]}},{"name":"tupleOfOptionalsAlternateSyntax","type":{"name":"TestModel.MyTuple","typeArguments":[[null,"int32"],[null,"string"]]}},{"name":"tupleOfVectors","type":{"name":"TestModel.MyTuple","typeArguments":[{"vector":{"items":"int32"}},{"vector":{"items":"float32"}}]}}]},"types":[{"name":"GenericRecord","typeParameters":["T1","T2"],"fields":[{"name":"scalar1","type":"T1"},{"name":"scalar2","type":"T2"},{"name":"vector1","type":{"vector":{"items":"T1"}}},{"name":"image2","type":{"name":"TestModel.Image","typeArguments":["T2"]}}]},{"name":"Image","typeParameters":["T"],"type":{"array":{"items":"T","dimensions":[{"name":"x"},{"name":"y"}]}}},{"name":"MyTuple","typeParameters":["T1","T2"],"fields":[{"name":"v1","type":"T1"},{"name":"v2","type":"T2"}]}]})";
 
-void AdvancedGenericsWriterBase::WriteIntImageImage(test_model::Image<test_model::Image<float>> const& value) {
+void AdvancedGenericsWriterBase::WriteFloatImageImage(test_model::Image<test_model::Image<float>> const& value) {
   if (unlikely(state_ != 0)) {
     AdvancedGenericsWriterBaseInvalidState(0, false, state_);
   }
 
-  WriteIntImageImageImpl(value);
+  WriteFloatImageImageImpl(value);
   state_ = 1;
 }
 
@@ -4352,12 +4352,12 @@ void AdvancedGenericsWriterBase::Close() {
 
 std::string AdvancedGenericsReaderBase::schema_ = AdvancedGenericsWriterBase::schema_;
 
-void AdvancedGenericsReaderBase::ReadIntImageImage(test_model::Image<test_model::Image<float>>& value) {
+void AdvancedGenericsReaderBase::ReadFloatImageImage(test_model::Image<test_model::Image<float>>& value) {
   if (unlikely(state_ != 0)) {
     AdvancedGenericsReaderBaseInvalidState(0, state_);
   }
 
-  ReadIntImageImageImpl(value);
+  ReadFloatImageImageImpl(value);
   state_ = 2;
 }
 
@@ -4407,8 +4407,8 @@ void AdvancedGenericsReaderBase::Close() {
 void AdvancedGenericsReaderBase::CopyTo(AdvancedGenericsWriterBase& writer) {
   {
     test_model::Image<test_model::Image<float>> value;
-    ReadIntImageImage(value);
-    writer.WriteIntImageImage(value);
+    ReadFloatImageImage(value);
+    writer.WriteFloatImageImage(value);
   }
   {
     test_model::GenericRecord<int32_t, std::string> value;

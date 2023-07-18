@@ -648,3 +648,89 @@ def test_streams_of_unions():
                 None,
             ]
         )
+
+
+def test_simple_generics():
+    with create_validating_writer_class(tm.SimpleGenericsWriterBase)() as w:
+        w.write_float_image(np.array([[1.0, 2.0], [3.0, 4.0]], dtype=np.float32))
+        w.write_int_image(np.array([[1, 2], [3, 4]], dtype=np.int32))
+        w.write_int_image_alternate_syntax(np.array([[1, 2], [3, 4]], dtype=np.int32))
+        w.write_string_image(np.array([["a", "b"], ["c", "d"]], dtype=np.object_))
+
+        w.write_int_float_tuple(tm.MyTuple(v1=1, v2=2.0))
+        w.write_float_float_tuple(tm.MyTuple(v1=1.0, v2=2.0))
+
+        t = tm.MyTuple(v1=1, v2=2.0)
+        w.write_int_float_tuple_alternate_syntax(t)
+
+        w.write_int_string_tuple(tm.MyTuple(v1=1, v2="2"))
+
+        w.write_stream_of_type_variants(
+            [
+                (
+                    "Image<float32>",
+                    np.array([[1.0, 2.0], [3.0, 4.0]], dtype=np.float32),
+                ),
+                (
+                    "Image<float64>",
+                    np.array([[1.0, 2.0], [3.0, 4.0]], dtype=np.float64),
+                ),
+            ]
+        )
+
+
+def test_advanced_generics():
+    with create_validating_writer_class(tm.AdvancedGenericsWriterBase)() as w:
+        i1: tm.Image[np.float32] = np.array([[3, 4, 5], [6, 7, 8]], dtype=np.float32)
+        i2: tm.Image[np.float32] = np.array(
+            [[30, 40, 50], [60, 70, 80]], dtype=np.float32
+        )
+        i3: tm.Image[np.float32] = np.array(
+            [[300, 400, 500], [600, 700, 800]], dtype=np.float32
+        )
+        i4: tm.Image[np.float32] = np.array(
+            [[3000, 4000, 5000], [6000, 7000, 8000]], dtype=np.float32
+        )
+
+        img_img_array = np.ndarray((2, 2), dtype=np.object_)
+        img_img_array[:] = [[i1, i2], [i3, i4]]
+
+        w.write_float_image_image(img_img_array)
+
+        w.write_generic_record_1(
+            tm.GenericRecord(
+                scalar_1=1,
+                scalar_2="hello",
+                vector_1=[1, 2, 3],
+                image_2=np.array([["abc", "def"], ["a", "b"]], tm.get_dtype(str)),
+            )
+        )
+
+        w.write_tuple_of_optionals(tm.MyTuple(v1=None, v2="hello"))
+        w.write_tuple_of_optionals_alternate_syntax(tm.MyTuple(v1=34, v2=None))
+        w.write_tuple_of_vectors(tm.MyTuple(v1=[1, 2, 3], v2=[4.0, 5.0, 6.0]))
+
+
+def test_aliases():
+    with create_validating_writer_class(tm.AliasesWriterBase)() as w:
+        w.write_aliased_string("hello")
+        w.write_aliased_enum(tm.Fruits.APPLE)
+        w.write_aliased_open_generic(
+            tm.AliasedClosedGeneric(v1="hello", v2=tm.Fruits.BANANA)
+        )
+        w.write_aliased_closed_generic(
+            tm.AliasedClosedGeneric(v1="hello", v2=tm.Fruits.PEAR)
+        )
+        w.write_aliased_optional(23)
+        w.write_aliased_generic_optional(44.0)
+
+        # This is not great. ("string", "hello") would be better
+        w.write_aliased_generic_union_2(("T1", "hello"))
+
+        w.write_aliased_generic_vector([1.0, 33.0, 44.0])
+        w.write_aliased_generic_fixed_vector([1.0, 33.0, 44.0])
+
+        # Same comment as above
+        w.write_stream_of_aliased_generic_union_2(
+            [("T1", "hello"), ("T2", tm.Fruits.APPLE)]
+        )

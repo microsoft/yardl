@@ -2388,8 +2388,8 @@ AdvancedGenericsWriter::AdvancedGenericsWriter(std::string path)
     : yardl::hdf5::Hdf5Writer::Hdf5Writer(path, "AdvancedGenerics", schema_) {
 }
 
-void AdvancedGenericsWriter::WriteIntImageImageImpl(test_model::Image<test_model::Image<float>> const& value) {
-  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerNdArray<yardl::hdf5::InnerNdArray<float, float, 2>, test_model::Image<float>, 2>, test_model::Image<test_model::Image<float>>>(group_, "intImageImage", yardl::hdf5::NDArrayDdl<yardl::hdf5::InnerNdArray<float, float, 2>, test_model::Image<float>, 2>(yardl::hdf5::NDArrayDdl<float, float, 2>(H5::PredType::NATIVE_FLOAT)), value);
+void AdvancedGenericsWriter::WriteFloatImageImageImpl(test_model::Image<test_model::Image<float>> const& value) {
+  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerNdArray<yardl::hdf5::InnerNdArray<float, float, 2>, test_model::Image<float>, 2>, test_model::Image<test_model::Image<float>>>(group_, "floatImageImage", yardl::hdf5::NDArrayDdl<yardl::hdf5::InnerNdArray<float, float, 2>, test_model::Image<float>, 2>(yardl::hdf5::NDArrayDdl<float, float, 2>(H5::PredType::NATIVE_FLOAT)), value);
 }
 
 void AdvancedGenericsWriter::WriteGenericRecord1Impl(test_model::GenericRecord<int32_t, std::string> const& value) {
@@ -2412,8 +2412,8 @@ AdvancedGenericsReader::AdvancedGenericsReader(std::string path)
     : yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "AdvancedGenerics", schema_) {
 }
 
-void AdvancedGenericsReader::ReadIntImageImageImpl(test_model::Image<test_model::Image<float>>& value) {
-  yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerNdArray<yardl::hdf5::InnerNdArray<float, float, 2>, test_model::Image<float>, 2>, test_model::Image<test_model::Image<float>>>(group_, "intImageImage", yardl::hdf5::NDArrayDdl<yardl::hdf5::InnerNdArray<float, float, 2>, test_model::Image<float>, 2>(yardl::hdf5::NDArrayDdl<float, float, 2>(H5::PredType::NATIVE_FLOAT)), value);
+void AdvancedGenericsReader::ReadFloatImageImageImpl(test_model::Image<test_model::Image<float>>& value) {
+  yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerNdArray<yardl::hdf5::InnerNdArray<float, float, 2>, test_model::Image<float>, 2>, test_model::Image<test_model::Image<float>>>(group_, "floatImageImage", yardl::hdf5::NDArrayDdl<yardl::hdf5::InnerNdArray<float, float, 2>, test_model::Image<float>, 2>(yardl::hdf5::NDArrayDdl<float, float, 2>(H5::PredType::NATIVE_FLOAT)), value);
 }
 
 void AdvancedGenericsReader::ReadGenericRecord1Impl(test_model::GenericRecord<int32_t, std::string>& value) {

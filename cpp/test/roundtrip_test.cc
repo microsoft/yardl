@@ -513,12 +513,12 @@ TEST_P(RoundTripTests, SimpleGenerics) {
 TEST_P(RoundTripTests, AdvancedGenerics) {
   auto tw = CreateValidatingWriter<AdvancedGenericsWriterBase>();
 
-  Image<int> i1 = {{3, 4, 5}, {6, 7, 8}};
-  Image<int> i2 = {{30, 40, 50}, {60, 70, 80}};
-  Image<int> i3 = {{300, 400, 500}, {600, 700, 800}};
-  Image<int> i4 = {{3000, 4000, 5000}, {6000, 7000, 8000}};
+  Image<float> f1 = {{3, 4, 5}, {6, 7, 8}};
+  Image<float> f2 = {{30, 40, 50}, {60, 70, 80}};
+  Image<float> f3 = {{300, 400, 500}, {600, 700, 800}};
+  Image<float> f4 = {{3000, 4000, 5000}, {6000, 7000, 8000}};
 
-  tw->WriteIntImageImage({{i1, i2}, {i3, i4}});
+  tw->WriteFloatImageImage({{f1, f2}, {f3, f4}});
 
   GenericRecord<int, std::string> r1{
       7,

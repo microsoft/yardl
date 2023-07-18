@@ -988,7 +988,7 @@ class AdvancedGenericsWriter : public test_model::AdvancedGenericsWriterBase, ya
   void Flush() override;
 
   protected:
-  void WriteIntImageImageImpl(test_model::Image<test_model::Image<float>> const& value) override;
+  void WriteFloatImageImageImpl(test_model::Image<test_model::Image<float>> const& value) override;
   void WriteGenericRecord1Impl(test_model::GenericRecord<int32_t, std::string> const& value) override;
   void WriteTupleOfOptionalsImpl(test_model::MyTuple<std::optional<int32_t>, std::optional<std::string>> const& value) override;
   void WriteTupleOfOptionalsAlternateSyntaxImpl(test_model::MyTuple<std::optional<int32_t>, std::optional<std::string>> const& value) override;
@@ -1008,7 +1008,7 @@ class AdvancedGenericsReader : public test_model::AdvancedGenericsReaderBase, ya
   }
 
   protected:
-  void ReadIntImageImageImpl(test_model::Image<test_model::Image<float>>& value) override;
+  void ReadFloatImageImageImpl(test_model::Image<test_model::Image<float>>& value) override;
   void ReadGenericRecord1Impl(test_model::GenericRecord<int32_t, std::string>& value) override;
   void ReadTupleOfOptionalsImpl(test_model::MyTuple<std::optional<int32_t>, std::optional<std::string>>& value) override;
   void ReadTupleOfOptionalsAlternateSyntaxImpl(test_model::MyTuple<std::optional<int32_t>, std::optional<std::string>>& value) override;

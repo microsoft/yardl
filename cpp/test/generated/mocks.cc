@@ -2997,20 +2997,20 @@ class TestSimpleGenericsWriterBase : public SimpleGenericsWriterBase {
 
 class MockAdvancedGenericsWriter : public AdvancedGenericsWriterBase {
   public:
-  void WriteIntImageImageImpl (test_model::Image<test_model::Image<float>> const& value) override {
-    if (WriteIntImageImageImpl_expected_values_.empty()) {
-      throw std::runtime_error("Unexpected call to WriteIntImageImageImpl");
+  void WriteFloatImageImageImpl (test_model::Image<test_model::Image<float>> const& value) override {
+    if (WriteFloatImageImageImpl_expected_values_.empty()) {
+      throw std::runtime_error("Unexpected call to WriteFloatImageImageImpl");
     }
-    if (WriteIntImageImageImpl_expected_values_.front() != value) {
-      throw std::runtime_error("Unexpected argument value for call to WriteIntImageImageImpl");
+    if (WriteFloatImageImageImpl_expected_values_.front() != value) {
+      throw std::runtime_error("Unexpected argument value for call to WriteFloatImageImageImpl");
     }
-    WriteIntImageImageImpl_expected_values_.pop();
+    WriteFloatImageImageImpl_expected_values_.pop();
   }
 
-  std::queue<test_model::Image<test_model::Image<float>>> WriteIntImageImageImpl_expected_values_;
+  std::queue<test_model::Image<test_model::Image<float>>> WriteFloatImageImageImpl_expected_values_;
 
-  void ExpectWriteIntImageImageImpl (test_model::Image<test_model::Image<float>> const& value) {
-    WriteIntImageImageImpl_expected_values_.push(value);
+  void ExpectWriteFloatImageImageImpl (test_model::Image<test_model::Image<float>> const& value) {
+    WriteFloatImageImageImpl_expected_values_.push(value);
   }
 
   void WriteGenericRecord1Impl (test_model::GenericRecord<int32_t, std::string> const& value) override {
@@ -3078,8 +3078,8 @@ class MockAdvancedGenericsWriter : public AdvancedGenericsWriterBase {
   }
 
   void Verify() {
-    if (!WriteIntImageImageImpl_expected_values_.empty()) {
-      throw std::runtime_error("Expected call to WriteIntImageImageImpl was not received");
+    if (!WriteFloatImageImageImpl_expected_values_.empty()) {
+      throw std::runtime_error("Expected call to WriteFloatImageImageImpl was not received");
     }
     if (!WriteGenericRecord1Impl_expected_values_.empty()) {
       throw std::runtime_error("Expected call to WriteGenericRecord1Impl was not received");
@@ -3108,9 +3108,9 @@ class TestAdvancedGenericsWriterBase : public AdvancedGenericsWriterBase {
   }
 
   protected:
-  void WriteIntImageImageImpl(test_model::Image<test_model::Image<float>> const& value) override {
-    writer_->WriteIntImageImage(value);
-    mock_writer_.ExpectWriteIntImageImageImpl(value);
+  void WriteFloatImageImageImpl(test_model::Image<test_model::Image<float>> const& value) override {
+    writer_->WriteFloatImageImage(value);
+    mock_writer_.ExpectWriteFloatImageImageImpl(value);
   }
 
   void WriteGenericRecord1Impl(test_model::GenericRecord<int32_t, std::string> const& value) override {

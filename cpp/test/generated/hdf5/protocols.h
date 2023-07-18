@@ -823,7 +823,7 @@ class AdvancedGenericsWriter : public test_model::AdvancedGenericsWriterBase, pu
   AdvancedGenericsWriter(std::string path);
 
   protected:
-  void WriteIntImageImageImpl(test_model::Image<test_model::Image<float>> const& value) override;
+  void WriteFloatImageImageImpl(test_model::Image<test_model::Image<float>> const& value) override;
 
   void WriteGenericRecord1Impl(test_model::GenericRecord<int32_t, std::string> const& value) override;
 
@@ -841,7 +841,7 @@ class AdvancedGenericsReader : public test_model::AdvancedGenericsReaderBase, pu
   public:
   AdvancedGenericsReader(std::string path);
 
-  void ReadIntImageImageImpl(test_model::Image<test_model::Image<float>>& value) override;
+  void ReadFloatImageImageImpl(test_model::Image<test_model::Image<float>>& value) override;
 
   void ReadGenericRecord1Impl(test_model::GenericRecord<int32_t, std::string>& value) override;
 

@@ -1802,7 +1802,7 @@ class SimpleGenericsReaderBase {
 class AdvancedGenericsWriterBase {
   public:
   // Ordinal 0.
-  void WriteIntImageImage(test_model::Image<test_model::Image<float>> const& value);
+  void WriteFloatImageImage(test_model::Image<test_model::Image<float>> const& value);
 
   // Ordinal 1.
   void WriteGenericRecord1(test_model::GenericRecord<int32_t, std::string> const& value);
@@ -1825,7 +1825,7 @@ class AdvancedGenericsWriterBase {
   virtual void Flush() {}
 
   protected:
-  virtual void WriteIntImageImageImpl(test_model::Image<test_model::Image<float>> const& value) = 0;
+  virtual void WriteFloatImageImageImpl(test_model::Image<test_model::Image<float>> const& value) = 0;
   virtual void WriteGenericRecord1Impl(test_model::GenericRecord<int32_t, std::string> const& value) = 0;
   virtual void WriteTupleOfOptionalsImpl(test_model::MyTuple<std::optional<int32_t>, std::optional<std::string>> const& value) = 0;
   virtual void WriteTupleOfOptionalsAlternateSyntaxImpl(test_model::MyTuple<std::optional<int32_t>, std::optional<std::string>> const& value) = 0;
@@ -1844,7 +1844,7 @@ class AdvancedGenericsWriterBase {
 class AdvancedGenericsReaderBase {
   public:
   // Ordinal 0.
-  void ReadIntImageImage(test_model::Image<test_model::Image<float>>& value);
+  void ReadFloatImageImage(test_model::Image<test_model::Image<float>>& value);
 
   // Ordinal 1.
   void ReadGenericRecord1(test_model::GenericRecord<int32_t, std::string>& value);
@@ -1866,7 +1866,7 @@ class AdvancedGenericsReaderBase {
   virtual ~AdvancedGenericsReaderBase() = default;
 
   protected:
-  virtual void ReadIntImageImageImpl(test_model::Image<test_model::Image<float>>& value) = 0;
+  virtual void ReadFloatImageImageImpl(test_model::Image<test_model::Image<float>>& value) = 0;
   virtual void ReadGenericRecord1Impl(test_model::GenericRecord<int32_t, std::string>& value) = 0;
   virtual void ReadTupleOfOptionalsImpl(test_model::MyTuple<std::optional<int32_t>, std::optional<std::string>>& value) = 0;
   virtual void ReadTupleOfOptionalsAlternateSyntaxImpl(test_model::MyTuple<std::optional<int32_t>, std::optional<std::string>>& value) = 0;

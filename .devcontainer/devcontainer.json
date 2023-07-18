@@ -61,9 +61,13 @@
           "reportUnnecessaryIsInstance": "none",
           "reportUnusedImport": "none"
         },
-        "python.linting.ignorePatterns": ["**/conftest.py", "**/test_*.py"],
+
         "python.defaultInterpreterPath": "/opt/conda/envs/yardl/bin/python",
         "python.terminal.activateEnvironment": false, // Disable the extension calling activate when the integrated terminal launches. We take care of this in ~/.bashrc.
+
+        "python.testing.pytestArgs": ["python"],
+        "python.testing.unittestEnabled": false,
+        "python.testing.pytestEnabled": true,
 
         "testMate.cpp.test.executables": "cpp/{build,Build,BUILD,out,Out,OUT}/**/*{test,Test,TEST}*",
 

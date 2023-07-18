@@ -4382,7 +4382,7 @@ class AdvancedGenericsWriterBase(abc.ABC):
     def __init__(self) -> None:
         self._state = 0
 
-    schema = r"""{"protocol":{"name":"AdvancedGenerics","sequence":[{"name":"intImageImage","type":{"name":"TestModel.Image","typeArguments":[{"name":"TestModel.Image","typeArguments":["float32"]}]}},{"name":"genericRecord1","type":{"name":"TestModel.GenericRecord","typeArguments":["int32","string"]}},{"name":"tupleOfOptionals","type":{"name":"TestModel.MyTuple","typeArguments":[[null,"int32"],[null,"string"]]}},{"name":"tupleOfOptionalsAlternateSyntax","type":{"name":"TestModel.MyTuple","typeArguments":[[null,"int32"],[null,"string"]]}},{"name":"tupleOfVectors","type":{"name":"TestModel.MyTuple","typeArguments":[{"vector":{"items":"int32"}},{"vector":{"items":"float32"}}]}}]},"types":[{"name":"GenericRecord","typeParameters":["T1","T2"],"fields":[{"name":"scalar1","type":"T1"},{"name":"scalar2","type":"T2"},{"name":"vector1","type":{"vector":{"items":"T1"}}},{"name":"image2","type":{"name":"TestModel.Image","typeArguments":["T2"]}}]},{"name":"Image","typeParameters":["T"],"type":{"array":{"items":"T","dimensions":[{"name":"x"},{"name":"y"}]}}},{"name":"MyTuple","typeParameters":["T1","T2"],"fields":[{"name":"v1","type":"T1"},{"name":"v2","type":"T2"}]}]}"""
+    schema = r"""{"protocol":{"name":"AdvancedGenerics","sequence":[{"name":"floatImageImage","type":{"name":"TestModel.Image","typeArguments":[{"name":"TestModel.Image","typeArguments":["float32"]}]}},{"name":"genericRecord1","type":{"name":"TestModel.GenericRecord","typeArguments":["int32","string"]}},{"name":"tupleOfOptionals","type":{"name":"TestModel.MyTuple","typeArguments":[[null,"int32"],[null,"string"]]}},{"name":"tupleOfOptionalsAlternateSyntax","type":{"name":"TestModel.MyTuple","typeArguments":[[null,"int32"],[null,"string"]]}},{"name":"tupleOfVectors","type":{"name":"TestModel.MyTuple","typeArguments":[{"vector":{"items":"int32"}},{"vector":{"items":"float32"}}]}}]},"types":[{"name":"GenericRecord","typeParameters":["T1","T2"],"fields":[{"name":"scalar1","type":"T1"},{"name":"scalar2","type":"T2"},{"name":"vector1","type":{"vector":{"items":"T1"}}},{"name":"image2","type":{"name":"TestModel.Image","typeArguments":["T2"]}}]},{"name":"Image","typeParameters":["T"],"type":{"array":{"items":"T","dimensions":[{"name":"x"},{"name":"y"}]}}},{"name":"MyTuple","typeParameters":["T1","T2"],"fields":[{"name":"v1","type":"T1"},{"name":"v2","type":"T2"}]}]}"""
 
     def __enter__(self):
         return self
@@ -4393,13 +4393,13 @@ class AdvancedGenericsWriterBase(abc.ABC):
             expected_method = self._state_to_method_name(self._state)
             raise ProtocolException(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
 
-    def write_int_image_image(self, value: Image[np.object_]) -> None:
+    def write_float_image_image(self, value: Image[np.object_]) -> None:
         """Ordinal 0"""
 
         if self._state != 0:
             self._raise_unexpected_state(0)
 
-        self._write_int_image_image(value)
+        self._write_float_image_image(value)
         self._state = 1
 
     def write_generic_record_1(self, value: GenericRecord[yardl.Int32, str, np.object_]) -> None:
@@ -4439,7 +4439,7 @@ class AdvancedGenericsWriterBase(abc.ABC):
         self._state = 5
 
     @abc.abstractmethod
-    def _write_int_image_image(self, value: Image[np.object_]) -> None:
+    def _write_float_image_image(self, value: Image[np.object_]) -> None:
         raise NotImplementedError()
 
     @abc.abstractmethod
@@ -4469,7 +4469,7 @@ class AdvancedGenericsWriterBase(abc.ABC):
 
     def _state_to_method_name(self, state: int) -> str:
         if state == 0:
-            return 'write_int_image_image'
+            return 'write_float_image_image'
         if state == 1:
             return 'write_generic_record_1'
         if state == 2:
@@ -4508,13 +4508,13 @@ class AdvancedGenericsReaderBase(abc.ABC):
     def close(self) -> None:
         raise NotImplementedError()
 
-    def read_int_image_image(self) -> Image[np.object_]:
+    def read_float_image_image(self) -> Image[np.object_]:
         """Ordinal 0"""
 
         if self._state != 0:
             self._raise_unexpected_state(0)
 
-        value = self._read_int_image_image()
+        value = self._read_float_image_image()
         self._state = 2
         return value
 
@@ -4559,14 +4559,14 @@ class AdvancedGenericsReaderBase(abc.ABC):
         return value
 
     def copy_to(self, writer: AdvancedGenericsWriterBase) -> None:
-        writer.write_int_image_image(self.read_int_image_image())
+        writer.write_float_image_image(self.read_float_image_image())
         writer.write_generic_record_1(self.read_generic_record_1())
         writer.write_tuple_of_optionals(self.read_tuple_of_optionals())
         writer.write_tuple_of_optionals_alternate_syntax(self.read_tuple_of_optionals_alternate_syntax())
         writer.write_tuple_of_vectors(self.read_tuple_of_vectors())
 
     @abc.abstractmethod
-    def _read_int_image_image(self) -> Image[np.object_]:
+    def _read_float_image_image(self) -> Image[np.object_]:
         raise NotImplementedError()
 
     @abc.abstractmethod
@@ -4601,7 +4601,7 @@ class AdvancedGenericsReaderBase(abc.ABC):
         	
     def _state_to_method_name(self, state: int) -> str:
         if state == 0:
-            return 'read_int_image_image'
+            return 'read_float_image_image'
         if state == 2:
             return 'read_generic_record_1'
         if state == 4:

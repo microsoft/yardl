@@ -383,7 +383,7 @@ SimpleGenerics: !protocol
 
 AdvancedGenerics: !protocol
   sequence:
-    intImageImage: Image<Image<float>>
+    floatImageImage: Image<Image<float>>
     genericRecord1: GenericRecord<int, string>
     tupleOfOptionals: MyTuple<int?, string?>
     tupleOfOptionalsAlternateSyntax: !generic

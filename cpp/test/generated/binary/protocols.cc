@@ -2754,7 +2754,7 @@ void SimpleGenericsReader::CloseImpl() {
   stream_.VerifyFinished();
 }
 
-void AdvancedGenericsWriter::WriteIntImageImageImpl(test_model::Image<test_model::Image<float>> const& value) {
+void AdvancedGenericsWriter::WriteFloatImageImageImpl(test_model::Image<test_model::Image<float>> const& value) {
   test_model::binary::WriteImage<test_model::Image<float>, test_model::binary::WriteImage<float, yardl::binary::WriteFloatingPoint>>(stream_, value);
 }
 
@@ -2782,7 +2782,7 @@ void AdvancedGenericsWriter::CloseImpl() {
   stream_.Flush();
 }
 
-void AdvancedGenericsReader::ReadIntImageImageImpl(test_model::Image<test_model::Image<float>>& value) {
+void AdvancedGenericsReader::ReadFloatImageImageImpl(test_model::Image<test_model::Image<float>>& value) {
   test_model::binary::ReadImage<test_model::Image<float>, test_model::binary::ReadImage<float, yardl::binary::ReadFloatingPoint>>(stream_, value);
 }
 

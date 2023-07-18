@@ -2619,9 +2619,9 @@ void SimpleGenericsReader::CloseImpl() {
   VerifyFinished();
 }
 
-void AdvancedGenericsWriter::WriteIntImageImageImpl(test_model::Image<test_model::Image<float>> const& value) {
+void AdvancedGenericsWriter::WriteFloatImageImageImpl(test_model::Image<test_model::Image<float>> const& value) {
   ordered_json json_value = value;
-  yardl::ndjson::WriteProtocolValue(stream_, "intImageImage", json_value);}
+  yardl::ndjson::WriteProtocolValue(stream_, "floatImageImage", json_value);}
 
 void AdvancedGenericsWriter::WriteGenericRecord1Impl(test_model::GenericRecord<int32_t, std::string> const& value) {
   ordered_json json_value = value;
@@ -2647,8 +2647,8 @@ void AdvancedGenericsWriter::CloseImpl() {
   stream_.flush();
 }
 
-void AdvancedGenericsReader::ReadIntImageImageImpl(test_model::Image<test_model::Image<float>>& value) {
-  yardl::ndjson::ReadProtocolValue(stream_, line_, "intImageImage", true, unused_step_, value);
+void AdvancedGenericsReader::ReadFloatImageImageImpl(test_model::Image<test_model::Image<float>>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "floatImageImage", true, unused_step_, value);
 }
 
 void AdvancedGenericsReader::ReadGenericRecord1Impl(test_model::GenericRecord<int32_t, std::string>& value) {
