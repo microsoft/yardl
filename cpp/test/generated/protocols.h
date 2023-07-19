@@ -973,6 +973,9 @@ class SubarraysWriterBase {
   // Ordinal 7.
   void WriteDynamicWithFixedVectorSubarray(yardl::DynamicNDArray<std::array<int32_t, 3>> const& value);
 
+  // Ordinal 8.
+  void WriteGenericSubarray(test_model::Image<yardl::FixedNDArray<int32_t, 3>> const& value);
+
   // Optionaly close this writer before destructing. Validates that all steps were completed.
   void Close();
 
@@ -990,6 +993,7 @@ class SubarraysWriterBase {
   virtual void WriteFixedWithFixedFloatSubarrayImpl(yardl::FixedNDArray<yardl::FixedNDArray<float, 3>, 2> const& value) = 0;
   virtual void WriteNestedSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>> const& value) = 0;
   virtual void WriteDynamicWithFixedVectorSubarrayImpl(yardl::DynamicNDArray<std::array<int32_t, 3>> const& value) = 0;
+  virtual void WriteGenericSubarrayImpl(test_model::Image<yardl::FixedNDArray<int32_t, 3>> const& value) = 0;
   virtual void CloseImpl() {}
 
   static std::string schema_;
@@ -1027,6 +1031,9 @@ class SubarraysReaderBase {
   // Ordinal 7.
   void ReadDynamicWithFixedVectorSubarray(yardl::DynamicNDArray<std::array<int32_t, 3>>& value);
 
+  // Ordinal 8.
+  void ReadGenericSubarray(test_model::Image<yardl::FixedNDArray<int32_t, 3>>& value);
+
   // Optionaly close this writer before destructing. Validates that all steps were completely read.
   void Close();
 
@@ -1043,6 +1050,7 @@ class SubarraysReaderBase {
   virtual void ReadFixedWithFixedFloatSubarrayImpl(yardl::FixedNDArray<yardl::FixedNDArray<float, 3>, 2>& value) = 0;
   virtual void ReadNestedSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>>& value) = 0;
   virtual void ReadDynamicWithFixedVectorSubarrayImpl(yardl::DynamicNDArray<std::array<int32_t, 3>>& value) = 0;
+  virtual void ReadGenericSubarrayImpl(test_model::Image<yardl::FixedNDArray<int32_t, 3>>& value) = 0;
   virtual void CloseImpl() {}
   static std::string schema_;
 

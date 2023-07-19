@@ -459,6 +459,16 @@ def test_subarrays():
             np.array([[1, 2, 3], [4, 5, 6]], dtype=np.int32)
         )
 
+        w.write_generic_subarray(
+            np.array(
+                [
+                    [[1, 2, 3], [4, 5, 6]],
+                    [[10, 12, 13], [14, 15, 16]],
+                ],
+                dtype=np.int32,
+            )
+        )
+
 
 def test_subarrays_in_records():
     fixed_dtype = tm.get_dtype(tm.RecordWithFixedCollections)
@@ -467,9 +477,7 @@ def test_subarrays_in_records():
     )
 
     vlen_dtype = tm.get_dtype(tm.RecordWithVlenCollections)
-    assert vlen_dtype == np.dtype(
-        [("fixed_vector", "O"), ("fixed_array", "O")], align=True
-    )
+    assert vlen_dtype == np.dtype([("vector", "O"), ("array", "O")], align=True)
 
     with create_validating_writer_class(tm.SubarraysInRecordsWriterBase)() as w:
         w.write_with_fixed_subarrays(

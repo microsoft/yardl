@@ -404,12 +404,12 @@ struct RecordWithFixedCollections {
 };
 
 struct RecordWithVlenCollections {
-  std::vector<int32_t> fixed_vector{};
-  yardl::NDArray<int32_t, 2> fixed_array{};
+  std::vector<int32_t> vector{};
+  yardl::NDArray<int32_t, 2> array{};
 
   bool operator==(const RecordWithVlenCollections& other) const {
-    return fixed_vector == other.fixed_vector &&
-      fixed_array == other.fixed_array;
+    return vector == other.vector &&
+      array == other.array;
   }
 
   bool operator!=(const RecordWithVlenCollections& other) const {

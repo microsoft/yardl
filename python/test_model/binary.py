@@ -495,6 +495,9 @@ class BinarySubarraysWriter(_binary.BinaryProtocolWriter, SubarraysWriterBase):
     def _write_dynamic_with_fixed_vector_subarray(self, value: npt.NDArray[np.int32]) -> None:
         _binary.DynamicNDArraySerializer(_binary.FixedVectorSerializer(_binary.int32_serializer, 3)).write(self._stream, value)
 
+    def _write_generic_subarray(self, value: Image[np.int32]) -> None:
+        _binary.NDArraySerializer(_binary.FixedNDArraySerializer(_binary.int32_serializer, (3,)), 2).write(self._stream, value)
+
 
 class BinarySubarraysReader(_binary.BinaryProtocolReader, SubarraysReaderBase):
     """Binary writer for the Subarrays protocol."""
@@ -527,6 +530,9 @@ class BinarySubarraysReader(_binary.BinaryProtocolReader, SubarraysReaderBase):
 
     def _read_dynamic_with_fixed_vector_subarray(self) -> npt.NDArray[np.int32]:
         return _binary.DynamicNDArraySerializer(_binary.FixedVectorSerializer(_binary.int32_serializer, 3)).read(self._stream, self._read_as_numpy)
+
+    def _read_generic_subarray(self) -> Image[np.int32]:
+        return _binary.NDArraySerializer(_binary.FixedNDArraySerializer(_binary.int32_serializer, (3,)), 2).read(self._stream, self._read_as_numpy)
 
 class BinarySubarraysInRecordsWriter(_binary.BinaryProtocolWriter, SubarraysInRecordsWriterBase):
     """Binary writer for the SubarraysInRecords protocol."""
@@ -1592,20 +1598,20 @@ class _RecordWithFixedCollectionsSerializer(_binary.RecordSerializer[RecordWithF
 
 class _RecordWithVlenCollectionsSerializer(_binary.RecordSerializer[RecordWithVlenCollections]):
     def __init__(self) -> None:
-        super().__init__([("fixed_vector", _binary.VectorSerializer(_binary.int32_serializer)), ("fixed_array", _binary.NDArraySerializer(_binary.int32_serializer, 2))])
+        super().__init__([("vector", _binary.VectorSerializer(_binary.int32_serializer)), ("array", _binary.NDArraySerializer(_binary.int32_serializer, 2))])
 
     def write(self, stream: _binary.CodedOutputStream, value: RecordWithVlenCollections) -> None:
         if isinstance(value, np.void):
             self.write_numpy(stream, value)
             return
-        self._write(stream, value.fixed_vector, value.fixed_array)
+        self._write(stream, value.vector, value.array)
 
     def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
-        self._write(stream, value['fixed_vector'], value['fixed_array'])
+        self._write(stream, value['vector'], value['array'])
 
     def read(self, stream: _binary.CodedInputStream, read_as_numpy: Types) -> RecordWithVlenCollections:
         field_values = self._read(stream, read_as_numpy)
-        return RecordWithVlenCollections(fixed_vector=field_values[0], fixed_array=field_values[1])
+        return RecordWithVlenCollections(vector=field_values[0], array=field_values[1])
 
 
 class _RecordWithUnionsSerializer(_binary.RecordSerializer[RecordWithUnions]):

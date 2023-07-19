@@ -1140,20 +1140,20 @@ void from_json(ordered_json const& j, test_model::RecordWithFixedCollections& va
 
 void to_json(ordered_json& j, test_model::RecordWithVlenCollections const& value) {
   j = ordered_json::object();
-  if (yardl::ndjson::ShouldSerializeFieldValue(value.fixed_vector)) {
-    j.push_back({"fixedVector", value.fixed_vector});
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.vector)) {
+    j.push_back({"vector", value.vector});
   }
-  if (yardl::ndjson::ShouldSerializeFieldValue(value.fixed_array)) {
-    j.push_back({"fixedArray", value.fixed_array});
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.array)) {
+    j.push_back({"array", value.array});
   }
 }
 
 void from_json(ordered_json const& j, test_model::RecordWithVlenCollections& value) {
-  if (auto it = j.find("fixedVector"); it != j.end()) {
-    it->get_to(value.fixed_vector);
+  if (auto it = j.find("vector"); it != j.end()) {
+    it->get_to(value.vector);
   }
-  if (auto it = j.find("fixedArray"); it != j.end()) {
-    it->get_to(value.fixed_array);
+  if (auto it = j.find("array"); it != j.end()) {
+    it->get_to(value.array);
   }
 }
 
@@ -2191,6 +2191,10 @@ void SubarraysWriter::WriteDynamicWithFixedVectorSubarrayImpl(yardl::DynamicNDAr
   ordered_json json_value = value;
   yardl::ndjson::WriteProtocolValue(stream_, "dynamicWithFixedVectorSubarray", json_value);}
 
+void SubarraysWriter::WriteGenericSubarrayImpl(test_model::Image<yardl::FixedNDArray<int32_t, 3>> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "genericSubarray", json_value);}
+
 void SubarraysWriter::Flush() {
   stream_.flush();
 }
@@ -2229,6 +2233,10 @@ void SubarraysReader::ReadNestedSubarrayImpl(yardl::DynamicNDArray<yardl::FixedN
 
 void SubarraysReader::ReadDynamicWithFixedVectorSubarrayImpl(yardl::DynamicNDArray<std::array<int32_t, 3>>& value) {
   yardl::ndjson::ReadProtocolValue(stream_, line_, "dynamicWithFixedVectorSubarray", true, unused_step_, value);
+}
+
+void SubarraysReader::ReadGenericSubarrayImpl(test_model::Image<yardl::FixedNDArray<int32_t, 3>>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "genericSubarray", true, unused_step_, value);
 }
 
 void SubarraysReader::CloseImpl() {

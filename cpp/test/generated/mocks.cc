@@ -1616,6 +1616,22 @@ class MockSubarraysWriter : public SubarraysWriterBase {
     WriteDynamicWithFixedVectorSubarrayImpl_expected_values_.push(value);
   }
 
+  void WriteGenericSubarrayImpl (test_model::Image<yardl::FixedNDArray<int32_t, 3>> const& value) override {
+    if (WriteGenericSubarrayImpl_expected_values_.empty()) {
+      throw std::runtime_error("Unexpected call to WriteGenericSubarrayImpl");
+    }
+    if (WriteGenericSubarrayImpl_expected_values_.front() != value) {
+      throw std::runtime_error("Unexpected argument value for call to WriteGenericSubarrayImpl");
+    }
+    WriteGenericSubarrayImpl_expected_values_.pop();
+  }
+
+  std::queue<test_model::Image<yardl::FixedNDArray<int32_t, 3>>> WriteGenericSubarrayImpl_expected_values_;
+
+  void ExpectWriteGenericSubarrayImpl (test_model::Image<yardl::FixedNDArray<int32_t, 3>> const& value) {
+    WriteGenericSubarrayImpl_expected_values_.push(value);
+  }
+
   void Verify() {
     if (!WriteDynamicWithFixedIntSubarrayImpl_expected_values_.empty()) {
       throw std::runtime_error("Expected call to WriteDynamicWithFixedIntSubarrayImpl was not received");
@@ -1640,6 +1656,9 @@ class MockSubarraysWriter : public SubarraysWriterBase {
     }
     if (!WriteDynamicWithFixedVectorSubarrayImpl_expected_values_.empty()) {
       throw std::runtime_error("Expected call to WriteDynamicWithFixedVectorSubarrayImpl was not received");
+    }
+    if (!WriteGenericSubarrayImpl_expected_values_.empty()) {
+      throw std::runtime_error("Expected call to WriteGenericSubarrayImpl was not received");
     }
   }
 };
@@ -1694,6 +1713,11 @@ class TestSubarraysWriterBase : public SubarraysWriterBase {
   void WriteDynamicWithFixedVectorSubarrayImpl(yardl::DynamicNDArray<std::array<int32_t, 3>> const& value) override {
     writer_->WriteDynamicWithFixedVectorSubarray(value);
     mock_writer_.ExpectWriteDynamicWithFixedVectorSubarrayImpl(value);
+  }
+
+  void WriteGenericSubarrayImpl(test_model::Image<yardl::FixedNDArray<int32_t, 3>> const& value) override {
+    writer_->WriteGenericSubarray(value);
+    mock_writer_.ExpectWriteGenericSubarrayImpl(value);
   }
 
   void CloseImpl() override {

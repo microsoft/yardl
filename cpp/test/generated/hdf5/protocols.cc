@@ -470,17 +470,17 @@ struct _Inner_RecordWithDynamicNDArrays {
 struct _Inner_RecordWithVlenCollections {
   _Inner_RecordWithVlenCollections() {} 
   _Inner_RecordWithVlenCollections(test_model::RecordWithVlenCollections const& o) 
-      : fixed_vector(o.fixed_vector),
-      fixed_array(o.fixed_array) {
+      : vector(o.vector),
+      array(o.array) {
   }
 
   void ToOuter (test_model::RecordWithVlenCollections& o) const {
-    yardl::hdf5::ToOuter(fixed_vector, o.fixed_vector);
-    yardl::hdf5::ToOuter(fixed_array, o.fixed_array);
+    yardl::hdf5::ToOuter(vector, o.vector);
+    yardl::hdf5::ToOuter(array, o.array);
   }
 
-  yardl::hdf5::InnerVlen<int32_t, int32_t> fixed_vector;
-  yardl::hdf5::InnerNdArray<int32_t, int32_t, 2> fixed_array;
+  yardl::hdf5::InnerVlen<int32_t, int32_t> vector;
+  yardl::hdf5::InnerNdArray<int32_t, int32_t, 2> array;
 };
 
 struct _Inner_RecordWithUnions {
@@ -846,8 +846,8 @@ struct _Inner_RecordWithKeywordFields {
 [[maybe_unused]] H5::CompType GetRecordWithVlenCollectionsHdf5Ddl() {
   using RecordType = test_model::hdf5::_Inner_RecordWithVlenCollections;
   H5::CompType t(sizeof(RecordType));
-  t.insertMember("fixedVector", HOFFSET(RecordType, fixed_vector), yardl::hdf5::InnerVlenDdl(H5::PredType::NATIVE_INT32));
-  t.insertMember("fixedArray", HOFFSET(RecordType, fixed_array), yardl::hdf5::NDArrayDdl<int32_t, int32_t, 2>(H5::PredType::NATIVE_INT32));
+  t.insertMember("vector", HOFFSET(RecordType, vector), yardl::hdf5::InnerVlenDdl(H5::PredType::NATIVE_INT32));
+  t.insertMember("array", HOFFSET(RecordType, array), yardl::hdf5::NDArrayDdl<int32_t, int32_t, 2>(H5::PredType::NATIVE_INT32));
   return t;
 }
 
@@ -1720,6 +1720,10 @@ void SubarraysWriter::WriteDynamicWithFixedVectorSubarrayImpl(yardl::DynamicNDAr
   yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerDynamicNdArray<std::array<int32_t, 3>, std::array<int32_t, 3>>, yardl::DynamicNDArray<std::array<int32_t, 3>>>(group_, "dynamicWithFixedVectorSubarray", yardl::hdf5::DynamicNDArrayDdl<std::array<int32_t, 3>, std::array<int32_t, 3>>(yardl::hdf5::FixedVectorDdl(H5::PredType::NATIVE_INT32, 3)), value);
 }
 
+void SubarraysWriter::WriteGenericSubarrayImpl(test_model::Image<yardl::FixedNDArray<int32_t, 3>> const& value) {
+  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerNdArray<yardl::FixedNDArray<int32_t, 3>, yardl::FixedNDArray<int32_t, 3>, 2>, test_model::Image<yardl::FixedNDArray<int32_t, 3>>>(group_, "genericSubarray", yardl::hdf5::NDArrayDdl<yardl::FixedNDArray<int32_t, 3>, yardl::FixedNDArray<int32_t, 3>, 2>(yardl::hdf5::FixedNDArrayDdl(H5::PredType::NATIVE_INT32, {3})), value);
+}
+
 SubarraysReader::SubarraysReader(std::string path)
     : yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "Subarrays", schema_) {
 }
@@ -1754,6 +1758,10 @@ void SubarraysReader::ReadNestedSubarrayImpl(yardl::DynamicNDArray<yardl::FixedN
 
 void SubarraysReader::ReadDynamicWithFixedVectorSubarrayImpl(yardl::DynamicNDArray<std::array<int32_t, 3>>& value) {
   yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerDynamicNdArray<std::array<int32_t, 3>, std::array<int32_t, 3>>, yardl::DynamicNDArray<std::array<int32_t, 3>>>(group_, "dynamicWithFixedVectorSubarray", yardl::hdf5::DynamicNDArrayDdl<std::array<int32_t, 3>, std::array<int32_t, 3>>(yardl::hdf5::FixedVectorDdl(H5::PredType::NATIVE_INT32, 3)), value);
+}
+
+void SubarraysReader::ReadGenericSubarrayImpl(test_model::Image<yardl::FixedNDArray<int32_t, 3>>& value) {
+  yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerNdArray<yardl::FixedNDArray<int32_t, 3>, yardl::FixedNDArray<int32_t, 3>, 2>, test_model::Image<yardl::FixedNDArray<int32_t, 3>>>(group_, "genericSubarray", yardl::hdf5::NDArrayDdl<yardl::FixedNDArray<int32_t, 3>, yardl::FixedNDArray<int32_t, 3>, 2>(yardl::hdf5::FixedNDArrayDdl(H5::PredType::NATIVE_INT32, {3})), value);
 }
 
 SubarraysInRecordsWriter::SubarraysInRecordsWriter(std::string path)

@@ -821,11 +821,11 @@ class RecordWithFixedCollections:
 
 @dataclasses.dataclass(slots=True, kw_only=True, eq=False)
 class RecordWithVlenCollections:
-    fixed_vector: list[yardl.Int32] = dataclasses.field(
+    vector: list[yardl.Int32] = dataclasses.field(
         default_factory=list
     )
 
-    fixed_array: npt.NDArray[np.int32] = dataclasses.field(
+    array: npt.NDArray[np.int32] = dataclasses.field(
         default_factory=lambda: np.zeros((0, 0), dtype=np.dtype(np.int32))
     )
 
@@ -838,12 +838,12 @@ class RecordWithVlenCollections:
             ):
                 return False
             return (
-                self.fixed_vector == other["fixed_vector"]
-                and yardl.structural_equal(self.fixed_array, other["fixed_array"])
+                self.vector == other["vector"]
+                and yardl.structural_equal(self.array, other["array"])
             )
         return (
-            self.fixed_vector == other.fixed_vector
-            and yardl.structural_equal(self.fixed_array, other.fixed_array)
+            self.vector == other.vector
+            and yardl.structural_equal(self.array, other.array)
         )
 
 
@@ -1450,7 +1450,7 @@ def _mk_get_dtype():
     dtype_map[RecordWithDynamicNDArrays] = np.dtype([('ints', np.dtype(np.object_)), ('simple_record_array', np.dtype(np.object_)), ('record_with_vlens_array', np.dtype(np.object_))], align=True)
     dtype_map[NamedFixedNDArray] = np.dtype(np.int32)
     dtype_map[RecordWithFixedCollections] = np.dtype([('fixed_vector', np.dtype(np.int32), (3,)), ('fixed_array', np.dtype(np.int32), (2, 3,))], align=True)
-    dtype_map[RecordWithVlenCollections] = np.dtype([('fixed_vector', np.dtype(np.object_)), ('fixed_array', np.dtype(np.object_))], align=True)
+    dtype_map[RecordWithVlenCollections] = np.dtype([('vector', np.dtype(np.object_)), ('array', np.dtype(np.object_))], align=True)
     dtype_map[NamedNDArray] = np.dtype(np.object_)
     dtype_map[AliasedMap] = lambda type_args: np.dtype(np.object_)
     dtype_map[RecordWithUnions] = np.dtype([('null_or_int_or_string', np.dtype(np.object_)), ('date_or_datetime', np.dtype(np.object_))], align=True)

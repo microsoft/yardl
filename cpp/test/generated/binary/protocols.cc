@@ -296,10 +296,10 @@ struct IsTriviallySerializable<test_model::RecordWithVlenCollections> {
   using __T__ = test_model::RecordWithVlenCollections;
   static constexpr bool value = 
     std::is_standard_layout_v<__T__> &&
-    IsTriviallySerializable<decltype(__T__::fixed_vector)>::value &&
-    IsTriviallySerializable<decltype(__T__::fixed_array)>::value &&
-    (sizeof(__T__) == (sizeof(__T__::fixed_vector) + sizeof(__T__::fixed_array))) &&
-    offsetof(__T__, fixed_vector) < offsetof(__T__, fixed_array);
+    IsTriviallySerializable<decltype(__T__::vector)>::value &&
+    IsTriviallySerializable<decltype(__T__::array)>::value &&
+    (sizeof(__T__) == (sizeof(__T__::vector) + sizeof(__T__::array))) &&
+    offsetof(__T__, vector) < offsetof(__T__, array);
 };
 
 template <>
@@ -1032,8 +1032,8 @@ namespace {
     return;
   }
 
-  yardl::binary::WriteVector<int32_t, yardl::binary::WriteInteger>(stream, value.fixed_vector);
-  yardl::binary::WriteNDArray<int32_t, yardl::binary::WriteInteger, 2>(stream, value.fixed_array);
+  yardl::binary::WriteVector<int32_t, yardl::binary::WriteInteger>(stream, value.vector);
+  yardl::binary::WriteNDArray<int32_t, yardl::binary::WriteInteger, 2>(stream, value.array);
 }
 
 [[maybe_unused]] void ReadRecordWithVlenCollections(yardl::binary::CodedInputStream& stream, test_model::RecordWithVlenCollections& value) {
@@ -1042,8 +1042,8 @@ namespace {
     return;
   }
 
-  yardl::binary::ReadVector<int32_t, yardl::binary::ReadInteger>(stream, value.fixed_vector);
-  yardl::binary::ReadNDArray<int32_t, yardl::binary::ReadInteger, 2>(stream, value.fixed_array);
+  yardl::binary::ReadVector<int32_t, yardl::binary::ReadInteger>(stream, value.vector);
+  yardl::binary::ReadNDArray<int32_t, yardl::binary::ReadInteger, 2>(stream, value.array);
 }
 
 [[maybe_unused]] void WriteNamedNDArray(yardl::binary::CodedOutputStream& stream, test_model::NamedNDArray const& value) {
@@ -2182,6 +2182,10 @@ void SubarraysWriter::WriteDynamicWithFixedVectorSubarrayImpl(yardl::DynamicNDAr
   yardl::binary::WriteDynamicNDArray<std::array<int32_t, 3>, yardl::binary::WriteArray<int32_t, yardl::binary::WriteInteger, 3>>(stream_, value);
 }
 
+void SubarraysWriter::WriteGenericSubarrayImpl(test_model::Image<yardl::FixedNDArray<int32_t, 3>> const& value) {
+  test_model::binary::WriteImage<yardl::FixedNDArray<int32_t, 3>, yardl::binary::WriteFixedNDArray<int32_t, yardl::binary::WriteInteger, 3>>(stream_, value);
+}
+
 void SubarraysWriter::Flush() {
   stream_.Flush();
 }
@@ -2220,6 +2224,10 @@ void SubarraysReader::ReadNestedSubarrayImpl(yardl::DynamicNDArray<yardl::FixedN
 
 void SubarraysReader::ReadDynamicWithFixedVectorSubarrayImpl(yardl::DynamicNDArray<std::array<int32_t, 3>>& value) {
   yardl::binary::ReadDynamicNDArray<std::array<int32_t, 3>, yardl::binary::ReadArray<int32_t, yardl::binary::ReadInteger, 3>>(stream_, value);
+}
+
+void SubarraysReader::ReadGenericSubarrayImpl(test_model::Image<yardl::FixedNDArray<int32_t, 3>>& value) {
+  test_model::binary::ReadImage<yardl::FixedNDArray<int32_t, 3>, yardl::binary::ReadFixedNDArray<int32_t, yardl::binary::ReadInteger, 3>>(stream_, value);
 }
 
 void SubarraysReader::CloseImpl() {

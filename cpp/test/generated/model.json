@@ -857,7 +857,7 @@
             "name": "RecordWithVlenCollections",
             "fields": [
               {
-                "name": "fixedVector",
+                "name": "vector",
                 "type": {
                   "vector": {
                     "items": "int32"
@@ -865,7 +865,7 @@
                 }
               },
               {
-                "name": "fixedArray",
+                "name": "array",
                 "type": {
                   "array": {
                     "items": "int32",
@@ -3004,6 +3004,24 @@
                     }
                   }
                 }
+              }
+            },
+            {
+              "name": "genericSubarray",
+              "type": {
+                "name": "TestModel.Image",
+                "typeArguments": [
+                  {
+                    "array": {
+                      "items": "int32",
+                      "dimensions": [
+                        {
+                          "length": 3
+                        }
+                      ]
+                    }
+                  }
+                ]
               }
             }
           ]

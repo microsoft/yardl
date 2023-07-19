@@ -223,8 +223,8 @@ RecordWithFixedCollections: !record
 
 RecordWithVlenCollections: !record
   fields:
-    fixedVector: int*
-    fixedArray: int[,]
+    vector: int*
+    array: int[,]
 
 Subarrays: !protocol
   sequence:
@@ -240,6 +240,8 @@ Subarrays: !protocol
     nestedSubarray: int[3][2][]
 
     dynamicWithFixedVectorSubarray: int*3[]
+
+    genericSubarray: Image<int[3]>
 
 
 SubarraysInRecords: !protocol

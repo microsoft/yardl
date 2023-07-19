@@ -1228,8 +1228,7 @@ class DynamicNDArraySerializer(NDArraySerializerBase[T, T_NP]):
                 stream.write_unsigned_varint(dim)
         else:
             if len(value.shape) < len(self._subarray_shape) or (
-                value.shape[len(value.shape) - len(self._subarray_shape) :]
-                != self._subarray_shape
+                value.shape[-len(self._subarray_shape) :] != self._subarray_shape
             ):
                 raise ValueError(
                     f"The array is required to have shape (..., {(', '.join((str(i) for i in self._subarray_shape)))})"
@@ -1282,7 +1281,7 @@ class NDArraySerializer(Generic[T, T_NP], NDArraySerializerBase[T, T_NP]):
             if value.ndim != total_dims:
                 raise ValueError(f"Expected {total_dims} dimensions, got {value.ndim}")
 
-            if value.shape[len(self._subarray_shape) :] != self._subarray_shape:
+            if value.shape[-len(self._subarray_shape) :] != self._subarray_shape:
                 raise ValueError(
                     f"The array is required to have shape (..., {(', '.join((str(i) for i in self._subarray_shape)))})"
                 )

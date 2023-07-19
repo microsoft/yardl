@@ -2214,6 +2214,7 @@ void SubarraysWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool en
   case 5: expected_method = "WriteFixedWithFixedFloatSubarray()"; break;
   case 6: expected_method = "WriteNestedSubarray()"; break;
   case 7: expected_method = "WriteDynamicWithFixedVectorSubarray()"; break;
+  case 8: expected_method = "WriteGenericSubarray()"; break;
   }
   std::string attempted_method;
   switch (attempted) {
@@ -2225,7 +2226,8 @@ void SubarraysWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool en
   case 5: attempted_method = "WriteFixedWithFixedFloatSubarray()"; break;
   case 6: attempted_method = "WriteNestedSubarray()"; break;
   case 7: attempted_method = "WriteDynamicWithFixedVectorSubarray()"; break;
-  case 8: attempted_method = "Close()"; break;
+  case 8: attempted_method = "WriteGenericSubarray()"; break;
+  case 9: attempted_method = "Close()"; break;
   }
   throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
 }
@@ -2241,7 +2243,8 @@ void SubarraysReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
     case 5: return "ReadFixedWithFixedFloatSubarray()";
     case 6: return "ReadNestedSubarray()";
     case 7: return "ReadDynamicWithFixedVectorSubarray()";
-    case 8: return "Close()";
+    case 8: return "ReadGenericSubarray()";
+    case 9: return "Close()";
     default: return "<unknown>";
     }
   };
@@ -2250,7 +2253,7 @@ void SubarraysReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
 
 } // namespace 
 
-std::string SubarraysWriterBase::schema_ = R"({"protocol":{"name":"Subarrays","sequence":[{"name":"dynamicWithFixedIntSubarray","type":{"array":{"items":{"array":{"items":"int32","dimensions":[{"length":3}]}}}}},{"name":"dynamicWithFixedFloatSubarray","type":{"array":{"items":{"array":{"items":"float32","dimensions":[{"length":3}]}}}}},{"name":"knownDimCountWithFixedIntSubarray","type":{"array":{"items":{"array":{"items":"int32","dimensions":[{"length":3}]}},"dimensions":1}}},{"name":"knownDimCountWithFixedFloatSubarray","type":{"array":{"items":{"array":{"items":"float32","dimensions":[{"length":3}]}},"dimensions":1}}},{"name":"fixedWithFixedIntSubarray","type":{"array":{"items":{"array":{"items":"int32","dimensions":[{"length":3}]}},"dimensions":[{"length":2}]}}},{"name":"fixedWithFixedFloatSubarray","type":{"array":{"items":{"array":{"items":"float32","dimensions":[{"length":3}]}},"dimensions":[{"length":2}]}}},{"name":"nestedSubarray","type":{"array":{"items":{"array":{"items":{"array":{"items":"int32","dimensions":[{"length":3}]}},"dimensions":[{"length":2}]}}}}},{"name":"dynamicWithFixedVectorSubarray","type":{"array":{"items":{"vector":{"items":"int32","length":3}}}}}]},"types":null})";
+std::string SubarraysWriterBase::schema_ = R"({"protocol":{"name":"Subarrays","sequence":[{"name":"dynamicWithFixedIntSubarray","type":{"array":{"items":{"array":{"items":"int32","dimensions":[{"length":3}]}}}}},{"name":"dynamicWithFixedFloatSubarray","type":{"array":{"items":{"array":{"items":"float32","dimensions":[{"length":3}]}}}}},{"name":"knownDimCountWithFixedIntSubarray","type":{"array":{"items":{"array":{"items":"int32","dimensions":[{"length":3}]}},"dimensions":1}}},{"name":"knownDimCountWithFixedFloatSubarray","type":{"array":{"items":{"array":{"items":"float32","dimensions":[{"length":3}]}},"dimensions":1}}},{"name":"fixedWithFixedIntSubarray","type":{"array":{"items":{"array":{"items":"int32","dimensions":[{"length":3}]}},"dimensions":[{"length":2}]}}},{"name":"fixedWithFixedFloatSubarray","type":{"array":{"items":{"array":{"items":"float32","dimensions":[{"length":3}]}},"dimensions":[{"length":2}]}}},{"name":"nestedSubarray","type":{"array":{"items":{"array":{"items":{"array":{"items":"int32","dimensions":[{"length":3}]}},"dimensions":[{"length":2}]}}}}},{"name":"dynamicWithFixedVectorSubarray","type":{"array":{"items":{"vector":{"items":"int32","length":3}}}}},{"name":"genericSubarray","type":{"name":"TestModel.Image","typeArguments":[{"array":{"items":"int32","dimensions":[{"length":3}]}}]}}]},"types":[{"name":"Image","typeParameters":["T"],"type":{"array":{"items":"T","dimensions":[{"name":"x"},{"name":"y"}]}}}]})";
 
 void SubarraysWriterBase::WriteDynamicWithFixedIntSubarray(yardl::DynamicNDArray<yardl::FixedNDArray<int32_t, 3>> const& value) {
   if (unlikely(state_ != 0)) {
@@ -2324,9 +2327,18 @@ void SubarraysWriterBase::WriteDynamicWithFixedVectorSubarray(yardl::DynamicNDAr
   state_ = 8;
 }
 
-void SubarraysWriterBase::Close() {
+void SubarraysWriterBase::WriteGenericSubarray(test_model::Image<yardl::FixedNDArray<int32_t, 3>> const& value) {
   if (unlikely(state_ != 8)) {
     SubarraysWriterBaseInvalidState(8, false, state_);
+  }
+
+  WriteGenericSubarrayImpl(value);
+  state_ = 9;
+}
+
+void SubarraysWriterBase::Close() {
+  if (unlikely(state_ != 9)) {
+    SubarraysWriterBaseInvalidState(9, false, state_);
   }
 
   CloseImpl();
@@ -2406,9 +2418,18 @@ void SubarraysReaderBase::ReadDynamicWithFixedVectorSubarray(yardl::DynamicNDArr
   state_ = 16;
 }
 
-void SubarraysReaderBase::Close() {
+void SubarraysReaderBase::ReadGenericSubarray(test_model::Image<yardl::FixedNDArray<int32_t, 3>>& value) {
   if (unlikely(state_ != 16)) {
     SubarraysReaderBaseInvalidState(16, state_);
+  }
+
+  ReadGenericSubarrayImpl(value);
+  state_ = 18;
+}
+
+void SubarraysReaderBase::Close() {
+  if (unlikely(state_ != 18)) {
+    SubarraysReaderBaseInvalidState(18, state_);
   }
 
   CloseImpl();
@@ -2454,6 +2475,11 @@ void SubarraysReaderBase::CopyTo(SubarraysWriterBase& writer) {
     ReadDynamicWithFixedVectorSubarray(value);
     writer.WriteDynamicWithFixedVectorSubarray(value);
   }
+  {
+    test_model::Image<yardl::FixedNDArray<int32_t, 3>> value;
+    ReadGenericSubarray(value);
+    writer.WriteGenericSubarray(value);
+  }
 }
 
 namespace {
@@ -2486,7 +2512,7 @@ void SubarraysInRecordsReaderBaseInvalidState(uint8_t attempted, uint8_t current
 
 } // namespace 
 
-std::string SubarraysInRecordsWriterBase::schema_ = R"({"protocol":{"name":"SubarraysInRecords","sequence":[{"name":"withFixedSubarrays","type":{"array":{"items":"TestModel.RecordWithFixedCollections"}}},{"name":"withVlenSubarrays","type":{"array":{"items":"TestModel.RecordWithVlenCollections"}}}]},"types":[{"name":"RecordWithFixedCollections","fields":[{"name":"fixedVector","type":{"vector":{"items":"int32","length":3}}},{"name":"fixedArray","type":{"array":{"items":"int32","dimensions":[{"length":2},{"length":3}]}}}]},{"name":"RecordWithVlenCollections","fields":[{"name":"fixedVector","type":{"vector":{"items":"int32"}}},{"name":"fixedArray","type":{"array":{"items":"int32","dimensions":2}}}]}]})";
+std::string SubarraysInRecordsWriterBase::schema_ = R"({"protocol":{"name":"SubarraysInRecords","sequence":[{"name":"withFixedSubarrays","type":{"array":{"items":"TestModel.RecordWithFixedCollections"}}},{"name":"withVlenSubarrays","type":{"array":{"items":"TestModel.RecordWithVlenCollections"}}}]},"types":[{"name":"RecordWithFixedCollections","fields":[{"name":"fixedVector","type":{"vector":{"items":"int32","length":3}}},{"name":"fixedArray","type":{"array":{"items":"int32","dimensions":[{"length":2},{"length":3}]}}}]},{"name":"RecordWithVlenCollections","fields":[{"name":"vector","type":{"vector":{"items":"int32"}}},{"name":"array","type":{"array":{"items":"int32","dimensions":2}}}]}]})";
 
 void SubarraysInRecordsWriterBase::WriteWithFixedSubarrays(yardl::DynamicNDArray<test_model::RecordWithFixedCollections> const& value) {
   if (unlikely(state_ != 0)) {
