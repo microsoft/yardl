@@ -2854,6 +2854,151 @@
           "name": "Subarrays",
           "sequence": [
             {
+              "name": "dynamicWithFixedIntSubarray",
+              "type": {
+                "array": {
+                  "items": {
+                    "array": {
+                      "items": "int32",
+                      "dimensions": [
+                        {
+                          "length": 3
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "name": "dynamicWithFixedFloatSubarray",
+              "type": {
+                "array": {
+                  "items": {
+                    "array": {
+                      "items": "float32",
+                      "dimensions": [
+                        {
+                          "length": 3
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "name": "knownDimCountWithFixedIntSubarray",
+              "type": {
+                "array": {
+                  "items": {
+                    "array": {
+                      "items": "int32",
+                      "dimensions": [
+                        {
+                          "length": 3
+                        }
+                      ]
+                    }
+                  },
+                  "dimensions": 1
+                }
+              }
+            },
+            {
+              "name": "knownDimCountWithFixedFloatSubarray",
+              "type": {
+                "array": {
+                  "items": {
+                    "array": {
+                      "items": "float32",
+                      "dimensions": [
+                        {
+                          "length": 3
+                        }
+                      ]
+                    }
+                  },
+                  "dimensions": 1
+                }
+              }
+            },
+            {
+              "name": "fixedWithFixedIntSubarray",
+              "type": {
+                "array": {
+                  "items": {
+                    "array": {
+                      "items": "int32",
+                      "dimensions": [
+                        {
+                          "length": 3
+                        }
+                      ]
+                    }
+                  },
+                  "dimensions": [
+                    {
+                      "length": 2
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "fixedWithFixedFloatSubarray",
+              "type": {
+                "array": {
+                  "items": {
+                    "array": {
+                      "items": "float32",
+                      "dimensions": [
+                        {
+                          "length": 3
+                        }
+                      ]
+                    }
+                  },
+                  "dimensions": [
+                    {
+                      "length": 2
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "nestedSubarray",
+              "type": {
+                "array": {
+                  "items": {
+                    "array": {
+                      "items": {
+                        "array": {
+                          "items": "int32",
+                          "dimensions": [
+                            {
+                              "length": 3
+                            }
+                          ]
+                        }
+                      },
+                      "dimensions": [
+                        {
+                          "length": 2
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "SubarraysInRecords",
+          "sequence": [
+            {
               "name": "withFixedSubarrays",
               "type": {
                 "array": {

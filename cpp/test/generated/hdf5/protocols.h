@@ -441,9 +441,19 @@ class SubarraysWriter : public test_model::SubarraysWriterBase, public yardl::hd
   SubarraysWriter(std::string path);
 
   protected:
-  void WriteWithFixedSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithFixedCollections> const& value) override;
+  void WriteDynamicWithFixedIntSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<int32_t, 3>> const& value) override;
 
-  void WriteWithVlenSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithVlenCollections> const& value) override;
+  void WriteDynamicWithFixedFloatSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<float, 3>> const& value) override;
+
+  void WriteKnownDimCountWithFixedIntSubarrayImpl(yardl::NDArray<yardl::FixedNDArray<int32_t, 3>, 1> const& value) override;
+
+  void WriteKnownDimCountWithFixedFloatSubarrayImpl(yardl::NDArray<yardl::FixedNDArray<float, 3>, 1> const& value) override;
+
+  void WriteFixedWithFixedIntSubarrayImpl(yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2> const& value) override;
+
+  void WriteFixedWithFixedFloatSubarrayImpl(yardl::FixedNDArray<yardl::FixedNDArray<float, 3>, 2> const& value) override;
+
+  void WriteNestedSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>> const& value) override;
 
   private:
 };
@@ -452,6 +462,40 @@ class SubarraysWriter : public test_model::SubarraysWriterBase, public yardl::hd
 class SubarraysReader : public test_model::SubarraysReaderBase, public yardl::hdf5::Hdf5Reader {
   public:
   SubarraysReader(std::string path);
+
+  void ReadDynamicWithFixedIntSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<int32_t, 3>>& value) override;
+
+  void ReadDynamicWithFixedFloatSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<float, 3>>& value) override;
+
+  void ReadKnownDimCountWithFixedIntSubarrayImpl(yardl::NDArray<yardl::FixedNDArray<int32_t, 3>, 1>& value) override;
+
+  void ReadKnownDimCountWithFixedFloatSubarrayImpl(yardl::NDArray<yardl::FixedNDArray<float, 3>, 1>& value) override;
+
+  void ReadFixedWithFixedIntSubarrayImpl(yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>& value) override;
+
+  void ReadFixedWithFixedFloatSubarrayImpl(yardl::FixedNDArray<yardl::FixedNDArray<float, 3>, 2>& value) override;
+
+  void ReadNestedSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>>& value) override;
+
+  private:
+};
+// HDF5 writer for the SubarraysInRecords protocol.
+class SubarraysInRecordsWriter : public test_model::SubarraysInRecordsWriterBase, public yardl::hdf5::Hdf5Writer {
+  public:
+  SubarraysInRecordsWriter(std::string path);
+
+  protected:
+  void WriteWithFixedSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithFixedCollections> const& value) override;
+
+  void WriteWithVlenSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithVlenCollections> const& value) override;
+
+  private:
+};
+
+// HDF5 reader for the SubarraysInRecords protocol.
+class SubarraysInRecordsReader : public test_model::SubarraysInRecordsReaderBase, public yardl::hdf5::Hdf5Reader {
+  public:
+  SubarraysInRecordsReader(std::string path);
 
   void ReadWithFixedSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithFixedCollections>& value) override;
 

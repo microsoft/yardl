@@ -1134,10 +1134,28 @@ class NDArraySerializerBase(
         dtype: npt.DTypeLike,
     ) -> None:
         super().__init__(overall_dtype)
-        self._array_dtype: np.dtype[Any] = (
+        self._element_serializer = element_serializer
+
+        (
+            self._array_dtype,
+            self._subarray_shape,
+        ) = NDArraySerializerBase._get_dtype_and_subarray_shape(
             dtype if isinstance(dtype, np.dtype) else np.dtype(dtype)
         )
-        self._element_serializer = element_serializer
+        if self._subarray_shape == ():
+            self._subarray_shape = None
+        else:
+            if isinstance(element_serializer, NDArraySerializerBase):
+                self._element_serializer = element_serializer._element_serializer
+
+    @staticmethod
+    def _get_dtype_and_subarray_shape(
+        dtype: np.dtype[Any],
+    ) -> tuple[np.dtype[Any], tuple[int, ...]]:
+        if dtype.subdtype is None:
+            return dtype, ()
+        subres = NDArraySerializerBase._get_dtype_and_subarray_shape(dtype.subdtype[0])
+        return (subres[0], dtype.subdtype[1] + subres[1])
 
     def _write_data(self, stream: CodedOutputStream, value: npt.NDArray[Any]) -> None:
         if value.dtype != self._array_dtype:
@@ -1154,8 +1172,12 @@ class NDArraySerializerBase(
         if self._is_current_array_trivially_serializable(value):
             stream.write_bytes_directly(value.data)
         else:
-            for element in value.flat:
-                self._element_serializer.write_numpy(stream, element)
+            if self._subarray_shape is None:
+                for element in value.flat:
+                    self._element_serializer.write_numpy(stream, element)
+            else:
+                for element in value.flat:
+                    self._element_serializer.write_numpy(stream, element)
 
     def _read_data(
         self, stream: CodedInputStream, shape: tuple[int, ...], read_as_numpy: Types
@@ -1168,8 +1190,12 @@ class NDArraySerializerBase(
             return np.frombuffer(byte_array, dtype=self._array_dtype).reshape(shape)
 
         result = np.empty((flat_length,), dtype=self._array_dtype)
-        for i in range(flat_length):
-            result[i] = self._element_serializer.read_numpy(stream)
+        if self._subarray_shape is None:
+            for i in range(flat_length):
+                result[i] = self._element_serializer.read_numpy(stream)
+        else:
+            for i in range(flat_length):
+                result[i] = self._element_serializer.read_numpy(stream)
 
         return result.reshape(shape)
 
@@ -1194,9 +1220,21 @@ class DynamicNDArraySerializer(NDArraySerializerBase[T, T_NP]):
         )
 
     def write(self, stream: CodedOutputStream, value: npt.NDArray[Any]) -> None:
-        stream.write_unsigned_varint(value.ndim)
-        for dim in value.shape:
-            stream.write_unsigned_varint(dim)
+        if self._subarray_shape is None:
+            stream.write_unsigned_varint(value.ndim)
+            for dim in value.shape:
+                stream.write_unsigned_varint(dim)
+        else:
+            if len(value.shape) < len(self._subarray_shape) or (
+                value.shape[len(value.shape) - len(self._subarray_shape) :]
+                != self._subarray_shape
+            ):
+                raise ValueError(
+                    f"The array is required to have shape (..., {(', '.join((str(i) for i in self._subarray_shape)))})"
+                )
+            stream.write_unsigned_varint(value.ndim - len(self._subarray_shape))
+            for dim in value.shape[: -len(self._subarray_shape)]:
+                stream.write_unsigned_varint(dim)
 
         self._write_data(stream, value)
 
@@ -1204,8 +1242,15 @@ class DynamicNDArraySerializer(NDArraySerializerBase[T, T_NP]):
         self.write(stream, cast(npt.NDArray[Any], value))
 
     def read(self, stream: CodedInputStream, read_as_numpy: Types) -> npt.NDArray[Any]:
-        ndims = stream.read_unsigned_varint()
-        shape = tuple(stream.read_unsigned_varint() for _ in range(ndims))
+        if self._subarray_shape is None:
+            ndims = stream.read_unsigned_varint()
+            shape = tuple(stream.read_unsigned_varint() for _ in range(ndims))
+        else:
+            ndims = stream.read_unsigned_varint()
+            shape = (
+                tuple(stream.read_unsigned_varint() for _ in range(ndims))
+                + self._subarray_shape
+            )
         return self._read_data(stream, shape, read_as_numpy)
 
     def read_numpy(self, stream: CodedInputStream) -> np.object_:
@@ -1224,11 +1269,24 @@ class NDArraySerializer(Generic[T, T_NP], NDArraySerializerBase[T, T_NP]):
         self.ndims = ndims
 
     def write(self, stream: CodedOutputStream, value: npt.NDArray[Any]) -> None:
-        if value.ndim != self.ndims:
-            raise ValueError(f"Expected {self.ndims} dimensions, got {value.ndim}")
+        if self._subarray_shape is None:
+            if value.ndim != self.ndims:
+                raise ValueError(f"Expected {self.ndims} dimensions, got {value.ndim}")
 
-        for dim in value.shape:
-            stream.write_unsigned_varint(dim)
+            for dim in value.shape:
+                stream.write_unsigned_varint(dim)
+        else:
+            total_dims = len(self._subarray_shape) + self.ndims
+            if value.ndim != total_dims:
+                raise ValueError(f"Expected {total_dims} dimensions, got {value.ndim}")
+
+            if value.shape[len(self._subarray_shape) :] != self._subarray_shape:
+                raise ValueError(
+                    f"The array is required to have shape (..., {(', '.join((str(i) for i in self._subarray_shape)))})"
+                )
+
+            for dim in value.shape[: -len(self._subarray_shape)]:
+                stream.write_unsigned_varint(dim)
 
         self._write_data(stream, value)
 
@@ -1237,6 +1295,9 @@ class NDArraySerializer(Generic[T, T_NP], NDArraySerializerBase[T, T_NP]):
 
     def read(self, stream: CodedInputStream, read_as_numpy: Types) -> npt.NDArray[Any]:
         shape = tuple(stream.read_unsigned_varint() for _ in range(self.ndims))
+        if self._subarray_shape is not None:
+            shape += self._subarray_shape
+
         return self._read_data(stream, shape, read_as_numpy)
 
     def read_numpy(self, stream: CodedInputStream) -> np.object_:
@@ -1254,8 +1315,13 @@ class FixedNDArraySerializer(Generic[T, T_NP], NDArraySerializerBase[T, T_NP]):
         self.shape = shape
 
     def write(self, stream: CodedOutputStream, value: npt.NDArray[Any]) -> None:
-        if value.shape != self.shape:
-            raise ValueError(f"Expected shape {self.shape}, got {value.shape}")
+        required_shape = (
+            self.shape
+            if self._subarray_shape is None
+            else self.shape + self._subarray_shape
+        )
+        if value.shape != required_shape:
+            raise ValueError(f"Expected shape {required_shape}, got {value.shape}")
 
         self._write_data(stream, value)
 
@@ -1263,7 +1329,12 @@ class FixedNDArraySerializer(Generic[T, T_NP], NDArraySerializerBase[T, T_NP]):
         self.write(stream, cast(npt.NDArray[Any], value))
 
     def read(self, stream: CodedInputStream, read_as_numpy: Types) -> npt.NDArray[Any]:
-        return self._read_data(stream, self.shape, read_as_numpy)
+        full_shape = (
+            self.shape
+            if self._subarray_shape is None
+            else self.shape + self._subarray_shape
+        )
+        return self._read_data(stream, full_shape, read_as_numpy)
 
     def read_numpy(self, stream: CodedInputStream) -> np.object_:
         return cast(np.object_, self.read(stream, Types.ALL))

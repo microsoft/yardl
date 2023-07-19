@@ -1688,23 +1688,87 @@ SubarraysWriter::SubarraysWriter(std::string path)
     : yardl::hdf5::Hdf5Writer::Hdf5Writer(path, "Subarrays", schema_) {
 }
 
-void SubarraysWriter::WriteWithFixedSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithFixedCollections> const& value) {
-  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerDynamicNdArray<test_model::RecordWithFixedCollections, test_model::RecordWithFixedCollections>, yardl::DynamicNDArray<test_model::RecordWithFixedCollections>>(group_, "withFixedSubarrays", yardl::hdf5::DynamicNDArrayDdl<test_model::RecordWithFixedCollections, test_model::RecordWithFixedCollections>(test_model::hdf5::GetRecordWithFixedCollectionsHdf5Ddl()), value);
+void SubarraysWriter::WriteDynamicWithFixedIntSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<int32_t, 3>> const& value) {
+  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerDynamicNdArray<yardl::FixedNDArray<int32_t, 3>, yardl::FixedNDArray<int32_t, 3>>, yardl::DynamicNDArray<yardl::FixedNDArray<int32_t, 3>>>(group_, "dynamicWithFixedIntSubarray", yardl::hdf5::DynamicNDArrayDdl<yardl::FixedNDArray<int32_t, 3>, yardl::FixedNDArray<int32_t, 3>>(yardl::hdf5::FixedNDArrayDdl(H5::PredType::NATIVE_INT32, {3})), value);
 }
 
-void SubarraysWriter::WriteWithVlenSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithVlenCollections> const& value) {
-  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerDynamicNdArray<test_model::hdf5::_Inner_RecordWithVlenCollections, test_model::RecordWithVlenCollections>, yardl::DynamicNDArray<test_model::RecordWithVlenCollections>>(group_, "withVlenSubarrays", yardl::hdf5::DynamicNDArrayDdl<test_model::hdf5::_Inner_RecordWithVlenCollections, test_model::RecordWithVlenCollections>(test_model::hdf5::GetRecordWithVlenCollectionsHdf5Ddl()), value);
+void SubarraysWriter::WriteDynamicWithFixedFloatSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<float, 3>> const& value) {
+  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerDynamicNdArray<yardl::FixedNDArray<float, 3>, yardl::FixedNDArray<float, 3>>, yardl::DynamicNDArray<yardl::FixedNDArray<float, 3>>>(group_, "dynamicWithFixedFloatSubarray", yardl::hdf5::DynamicNDArrayDdl<yardl::FixedNDArray<float, 3>, yardl::FixedNDArray<float, 3>>(yardl::hdf5::FixedNDArrayDdl(H5::PredType::NATIVE_FLOAT, {3})), value);
+}
+
+void SubarraysWriter::WriteKnownDimCountWithFixedIntSubarrayImpl(yardl::NDArray<yardl::FixedNDArray<int32_t, 3>, 1> const& value) {
+  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerVlen<yardl::FixedNDArray<int32_t, 3>, yardl::FixedNDArray<int32_t, 3>>, yardl::NDArray<yardl::FixedNDArray<int32_t, 3>, 1>>(group_, "knownDimCountWithFixedIntSubarray", yardl::hdf5::InnerVlenDdl(yardl::hdf5::FixedNDArrayDdl(H5::PredType::NATIVE_INT32, {3})), value);
+}
+
+void SubarraysWriter::WriteKnownDimCountWithFixedFloatSubarrayImpl(yardl::NDArray<yardl::FixedNDArray<float, 3>, 1> const& value) {
+  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerVlen<yardl::FixedNDArray<float, 3>, yardl::FixedNDArray<float, 3>>, yardl::NDArray<yardl::FixedNDArray<float, 3>, 1>>(group_, "knownDimCountWithFixedFloatSubarray", yardl::hdf5::InnerVlenDdl(yardl::hdf5::FixedNDArrayDdl(H5::PredType::NATIVE_FLOAT, {3})), value);
+}
+
+void SubarraysWriter::WriteFixedWithFixedIntSubarrayImpl(yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2> const& value) {
+  yardl::hdf5::WriteScalarDataset<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>, yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>>(group_, "fixedWithFixedIntSubarray", yardl::hdf5::FixedNDArrayDdl(yardl::hdf5::FixedNDArrayDdl(H5::PredType::NATIVE_INT32, {3}), {2}), value);
+}
+
+void SubarraysWriter::WriteFixedWithFixedFloatSubarrayImpl(yardl::FixedNDArray<yardl::FixedNDArray<float, 3>, 2> const& value) {
+  yardl::hdf5::WriteScalarDataset<yardl::FixedNDArray<yardl::FixedNDArray<float, 3>, 2>, yardl::FixedNDArray<yardl::FixedNDArray<float, 3>, 2>>(group_, "fixedWithFixedFloatSubarray", yardl::hdf5::FixedNDArrayDdl(yardl::hdf5::FixedNDArrayDdl(H5::PredType::NATIVE_FLOAT, {3}), {2}), value);
+}
+
+void SubarraysWriter::WriteNestedSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>> const& value) {
+  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerDynamicNdArray<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>, yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>>, yardl::DynamicNDArray<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>>>(group_, "nestedSubarray", yardl::hdf5::DynamicNDArrayDdl<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>, yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>>(yardl::hdf5::FixedNDArrayDdl(yardl::hdf5::FixedNDArrayDdl(H5::PredType::NATIVE_INT32, {3}), {2})), value);
 }
 
 SubarraysReader::SubarraysReader(std::string path)
     : yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "Subarrays", schema_) {
 }
 
-void SubarraysReader::ReadWithFixedSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithFixedCollections>& value) {
+void SubarraysReader::ReadDynamicWithFixedIntSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<int32_t, 3>>& value) {
+  yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerDynamicNdArray<yardl::FixedNDArray<int32_t, 3>, yardl::FixedNDArray<int32_t, 3>>, yardl::DynamicNDArray<yardl::FixedNDArray<int32_t, 3>>>(group_, "dynamicWithFixedIntSubarray", yardl::hdf5::DynamicNDArrayDdl<yardl::FixedNDArray<int32_t, 3>, yardl::FixedNDArray<int32_t, 3>>(yardl::hdf5::FixedNDArrayDdl(H5::PredType::NATIVE_INT32, {3})), value);
+}
+
+void SubarraysReader::ReadDynamicWithFixedFloatSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<float, 3>>& value) {
+  yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerDynamicNdArray<yardl::FixedNDArray<float, 3>, yardl::FixedNDArray<float, 3>>, yardl::DynamicNDArray<yardl::FixedNDArray<float, 3>>>(group_, "dynamicWithFixedFloatSubarray", yardl::hdf5::DynamicNDArrayDdl<yardl::FixedNDArray<float, 3>, yardl::FixedNDArray<float, 3>>(yardl::hdf5::FixedNDArrayDdl(H5::PredType::NATIVE_FLOAT, {3})), value);
+}
+
+void SubarraysReader::ReadKnownDimCountWithFixedIntSubarrayImpl(yardl::NDArray<yardl::FixedNDArray<int32_t, 3>, 1>& value) {
+  yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerVlen<yardl::FixedNDArray<int32_t, 3>, yardl::FixedNDArray<int32_t, 3>>, yardl::NDArray<yardl::FixedNDArray<int32_t, 3>, 1>>(group_, "knownDimCountWithFixedIntSubarray", yardl::hdf5::InnerVlenDdl(yardl::hdf5::FixedNDArrayDdl(H5::PredType::NATIVE_INT32, {3})), value);
+}
+
+void SubarraysReader::ReadKnownDimCountWithFixedFloatSubarrayImpl(yardl::NDArray<yardl::FixedNDArray<float, 3>, 1>& value) {
+  yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerVlen<yardl::FixedNDArray<float, 3>, yardl::FixedNDArray<float, 3>>, yardl::NDArray<yardl::FixedNDArray<float, 3>, 1>>(group_, "knownDimCountWithFixedFloatSubarray", yardl::hdf5::InnerVlenDdl(yardl::hdf5::FixedNDArrayDdl(H5::PredType::NATIVE_FLOAT, {3})), value);
+}
+
+void SubarraysReader::ReadFixedWithFixedIntSubarrayImpl(yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>& value) {
+  yardl::hdf5::ReadScalarDataset<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>, yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>>(group_, "fixedWithFixedIntSubarray", yardl::hdf5::FixedNDArrayDdl(yardl::hdf5::FixedNDArrayDdl(H5::PredType::NATIVE_INT32, {3}), {2}), value);
+}
+
+void SubarraysReader::ReadFixedWithFixedFloatSubarrayImpl(yardl::FixedNDArray<yardl::FixedNDArray<float, 3>, 2>& value) {
+  yardl::hdf5::ReadScalarDataset<yardl::FixedNDArray<yardl::FixedNDArray<float, 3>, 2>, yardl::FixedNDArray<yardl::FixedNDArray<float, 3>, 2>>(group_, "fixedWithFixedFloatSubarray", yardl::hdf5::FixedNDArrayDdl(yardl::hdf5::FixedNDArrayDdl(H5::PredType::NATIVE_FLOAT, {3}), {2}), value);
+}
+
+void SubarraysReader::ReadNestedSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>>& value) {
+  yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerDynamicNdArray<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>, yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>>, yardl::DynamicNDArray<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>>>(group_, "nestedSubarray", yardl::hdf5::DynamicNDArrayDdl<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>, yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>>(yardl::hdf5::FixedNDArrayDdl(yardl::hdf5::FixedNDArrayDdl(H5::PredType::NATIVE_INT32, {3}), {2})), value);
+}
+
+SubarraysInRecordsWriter::SubarraysInRecordsWriter(std::string path)
+    : yardl::hdf5::Hdf5Writer::Hdf5Writer(path, "SubarraysInRecords", schema_) {
+}
+
+void SubarraysInRecordsWriter::WriteWithFixedSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithFixedCollections> const& value) {
+  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerDynamicNdArray<test_model::RecordWithFixedCollections, test_model::RecordWithFixedCollections>, yardl::DynamicNDArray<test_model::RecordWithFixedCollections>>(group_, "withFixedSubarrays", yardl::hdf5::DynamicNDArrayDdl<test_model::RecordWithFixedCollections, test_model::RecordWithFixedCollections>(test_model::hdf5::GetRecordWithFixedCollectionsHdf5Ddl()), value);
+}
+
+void SubarraysInRecordsWriter::WriteWithVlenSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithVlenCollections> const& value) {
+  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerDynamicNdArray<test_model::hdf5::_Inner_RecordWithVlenCollections, test_model::RecordWithVlenCollections>, yardl::DynamicNDArray<test_model::RecordWithVlenCollections>>(group_, "withVlenSubarrays", yardl::hdf5::DynamicNDArrayDdl<test_model::hdf5::_Inner_RecordWithVlenCollections, test_model::RecordWithVlenCollections>(test_model::hdf5::GetRecordWithVlenCollectionsHdf5Ddl()), value);
+}
+
+SubarraysInRecordsReader::SubarraysInRecordsReader(std::string path)
+    : yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "SubarraysInRecords", schema_) {
+}
+
+void SubarraysInRecordsReader::ReadWithFixedSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithFixedCollections>& value) {
   yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerDynamicNdArray<test_model::RecordWithFixedCollections, test_model::RecordWithFixedCollections>, yardl::DynamicNDArray<test_model::RecordWithFixedCollections>>(group_, "withFixedSubarrays", yardl::hdf5::DynamicNDArrayDdl<test_model::RecordWithFixedCollections, test_model::RecordWithFixedCollections>(test_model::hdf5::GetRecordWithFixedCollectionsHdf5Ddl()), value);
 }
 
-void SubarraysReader::ReadWithVlenSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithVlenCollections>& value) {
+void SubarraysInRecordsReader::ReadWithVlenSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithVlenCollections>& value) {
   yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerDynamicNdArray<test_model::hdf5::_Inner_RecordWithVlenCollections, test_model::RecordWithVlenCollections>, yardl::DynamicNDArray<test_model::RecordWithVlenCollections>>(group_, "withVlenSubarrays", yardl::hdf5::DynamicNDArrayDdl<test_model::hdf5::_Inner_RecordWithVlenCollections, test_model::RecordWithVlenCollections>(test_model::hdf5::GetRecordWithVlenCollectionsHdf5Ddl()), value);
 }
 

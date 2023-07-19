@@ -2131,7 +2131,308 @@ class SubarraysWriterBase(abc.ABC):
     def __init__(self) -> None:
         self._state = 0
 
-    schema = r"""{"protocol":{"name":"Subarrays","sequence":[{"name":"withFixedSubarrays","type":{"array":{"items":"TestModel.RecordWithFixedCollections"}}},{"name":"withVlenSubarrays","type":{"array":{"items":"TestModel.RecordWithVlenCollections"}}}]},"types":[{"name":"RecordWithFixedCollections","fields":[{"name":"fixedVector","type":{"vector":{"items":"int32","length":3}}},{"name":"fixedArray","type":{"array":{"items":"int32","dimensions":[{"length":2},{"length":3}]}}}]},{"name":"RecordWithVlenCollections","fields":[{"name":"fixedVector","type":{"vector":{"items":"int32"}}},{"name":"fixedArray","type":{"array":{"items":"int32","dimensions":2}}}]}]}"""
+    schema = r"""{"protocol":{"name":"Subarrays","sequence":[{"name":"dynamicWithFixedIntSubarray","type":{"array":{"items":{"array":{"items":"int32","dimensions":[{"length":3}]}}}}},{"name":"dynamicWithFixedFloatSubarray","type":{"array":{"items":{"array":{"items":"float32","dimensions":[{"length":3}]}}}}},{"name":"knownDimCountWithFixedIntSubarray","type":{"array":{"items":{"array":{"items":"int32","dimensions":[{"length":3}]}},"dimensions":1}}},{"name":"knownDimCountWithFixedFloatSubarray","type":{"array":{"items":{"array":{"items":"float32","dimensions":[{"length":3}]}},"dimensions":1}}},{"name":"fixedWithFixedIntSubarray","type":{"array":{"items":{"array":{"items":"int32","dimensions":[{"length":3}]}},"dimensions":[{"length":2}]}}},{"name":"fixedWithFixedFloatSubarray","type":{"array":{"items":{"array":{"items":"float32","dimensions":[{"length":3}]}},"dimensions":[{"length":2}]}}},{"name":"nestedSubarray","type":{"array":{"items":{"array":{"items":{"array":{"items":"int32","dimensions":[{"length":3}]}},"dimensions":[{"length":2}]}}}}}]},"types":null}"""
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
+        self.close()
+        if exc is None and self._state != 7:
+            expected_method = self._state_to_method_name(self._state)
+            raise ProtocolException(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+
+    def write_dynamic_with_fixed_int_subarray(self, value: npt.NDArray[np.int32]) -> None:
+        """Ordinal 0"""
+
+        if self._state != 0:
+            self._raise_unexpected_state(0)
+
+        self._write_dynamic_with_fixed_int_subarray(value)
+        self._state = 1
+
+    def write_dynamic_with_fixed_float_subarray(self, value: npt.NDArray[np.float32]) -> None:
+        """Ordinal 1"""
+
+        if self._state != 1:
+            self._raise_unexpected_state(1)
+
+        self._write_dynamic_with_fixed_float_subarray(value)
+        self._state = 2
+
+    def write_known_dim_count_with_fixed_int_subarray(self, value: npt.NDArray[np.int32]) -> None:
+        """Ordinal 2"""
+
+        if self._state != 2:
+            self._raise_unexpected_state(2)
+
+        self._write_known_dim_count_with_fixed_int_subarray(value)
+        self._state = 3
+
+    def write_known_dim_count_with_fixed_float_subarray(self, value: npt.NDArray[np.float32]) -> None:
+        """Ordinal 3"""
+
+        if self._state != 3:
+            self._raise_unexpected_state(3)
+
+        self._write_known_dim_count_with_fixed_float_subarray(value)
+        self._state = 4
+
+    def write_fixed_with_fixed_int_subarray(self, value: npt.NDArray[np.int32]) -> None:
+        """Ordinal 4"""
+
+        if self._state != 4:
+            self._raise_unexpected_state(4)
+
+        self._write_fixed_with_fixed_int_subarray(value)
+        self._state = 5
+
+    def write_fixed_with_fixed_float_subarray(self, value: npt.NDArray[np.float32]) -> None:
+        """Ordinal 5"""
+
+        if self._state != 5:
+            self._raise_unexpected_state(5)
+
+        self._write_fixed_with_fixed_float_subarray(value)
+        self._state = 6
+
+    def write_nested_subarray(self, value: npt.NDArray[np.int32]) -> None:
+        """Ordinal 6"""
+
+        if self._state != 6:
+            self._raise_unexpected_state(6)
+
+        self._write_nested_subarray(value)
+        self._state = 7
+
+    @abc.abstractmethod
+    def _write_dynamic_with_fixed_int_subarray(self, value: npt.NDArray[np.int32]) -> None:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _write_dynamic_with_fixed_float_subarray(self, value: npt.NDArray[np.float32]) -> None:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _write_known_dim_count_with_fixed_int_subarray(self, value: npt.NDArray[np.int32]) -> None:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _write_known_dim_count_with_fixed_float_subarray(self, value: npt.NDArray[np.float32]) -> None:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _write_fixed_with_fixed_int_subarray(self, value: npt.NDArray[np.int32]) -> None:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _write_fixed_with_fixed_float_subarray(self, value: npt.NDArray[np.float32]) -> None:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _write_nested_subarray(self, value: npt.NDArray[np.int32]) -> None:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def close(self) -> None:
+        raise NotImplementedError()
+
+    def _raise_unexpected_state(self, actual: int) -> None:
+        expected_method = self._state_to_method_name(self._state)
+        actual_method = self._state_to_method_name(actual)
+        raise ProtocolException(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
+
+    def _state_to_method_name(self, state: int) -> str:
+        if state == 0:
+            return 'write_dynamic_with_fixed_int_subarray'
+        if state == 1:
+            return 'write_dynamic_with_fixed_float_subarray'
+        if state == 2:
+            return 'write_known_dim_count_with_fixed_int_subarray'
+        if state == 3:
+            return 'write_known_dim_count_with_fixed_float_subarray'
+        if state == 4:
+            return 'write_fixed_with_fixed_int_subarray'
+        if state == 5:
+            return 'write_fixed_with_fixed_float_subarray'
+        if state == 6:
+            return 'write_nested_subarray'
+        return "<unknown>"
+
+class SubarraysReaderBase(abc.ABC):
+    """Abstract reader for the Subarrays protocol."""
+
+
+    def __init__(self, read_as_numpy: Types = Types.NONE) -> None:
+        self._read_as_numpy = read_as_numpy
+        self._state = 0
+
+    schema = SubarraysWriterBase.schema
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
+        self.close()
+        if exc is None and self._state != 14:
+            if self._state % 2 == 1:
+                previous_method = self._state_to_method_name(self._state - 1)
+                raise ProtocolException(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
+            else:
+                expected_method = self._state_to_method_name(self._state)
+                raise ProtocolException(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
+            	
+
+    @abc.abstractmethod
+    def close(self) -> None:
+        raise NotImplementedError()
+
+    def read_dynamic_with_fixed_int_subarray(self) -> npt.NDArray[np.int32]:
+        """Ordinal 0"""
+
+        if self._state != 0:
+            self._raise_unexpected_state(0)
+
+        value = self._read_dynamic_with_fixed_int_subarray()
+        self._state = 2
+        return value
+
+    def read_dynamic_with_fixed_float_subarray(self) -> npt.NDArray[np.float32]:
+        """Ordinal 1"""
+
+        if self._state != 2:
+            self._raise_unexpected_state(2)
+
+        value = self._read_dynamic_with_fixed_float_subarray()
+        self._state = 4
+        return value
+
+    def read_known_dim_count_with_fixed_int_subarray(self) -> npt.NDArray[np.int32]:
+        """Ordinal 2"""
+
+        if self._state != 4:
+            self._raise_unexpected_state(4)
+
+        value = self._read_known_dim_count_with_fixed_int_subarray()
+        self._state = 6
+        return value
+
+    def read_known_dim_count_with_fixed_float_subarray(self) -> npt.NDArray[np.float32]:
+        """Ordinal 3"""
+
+        if self._state != 6:
+            self._raise_unexpected_state(6)
+
+        value = self._read_known_dim_count_with_fixed_float_subarray()
+        self._state = 8
+        return value
+
+    def read_fixed_with_fixed_int_subarray(self) -> npt.NDArray[np.int32]:
+        """Ordinal 4"""
+
+        if self._state != 8:
+            self._raise_unexpected_state(8)
+
+        value = self._read_fixed_with_fixed_int_subarray()
+        self._state = 10
+        return value
+
+    def read_fixed_with_fixed_float_subarray(self) -> npt.NDArray[np.float32]:
+        """Ordinal 5"""
+
+        if self._state != 10:
+            self._raise_unexpected_state(10)
+
+        value = self._read_fixed_with_fixed_float_subarray()
+        self._state = 12
+        return value
+
+    def read_nested_subarray(self) -> npt.NDArray[np.int32]:
+        """Ordinal 6"""
+
+        if self._state != 12:
+            self._raise_unexpected_state(12)
+
+        value = self._read_nested_subarray()
+        self._state = 14
+        return value
+
+    def copy_to(self, writer: SubarraysWriterBase) -> None:
+        writer.write_dynamic_with_fixed_int_subarray(self.read_dynamic_with_fixed_int_subarray())
+        writer.write_dynamic_with_fixed_float_subarray(self.read_dynamic_with_fixed_float_subarray())
+        writer.write_known_dim_count_with_fixed_int_subarray(self.read_known_dim_count_with_fixed_int_subarray())
+        writer.write_known_dim_count_with_fixed_float_subarray(self.read_known_dim_count_with_fixed_float_subarray())
+        writer.write_fixed_with_fixed_int_subarray(self.read_fixed_with_fixed_int_subarray())
+        writer.write_fixed_with_fixed_float_subarray(self.read_fixed_with_fixed_float_subarray())
+        writer.write_nested_subarray(self.read_nested_subarray())
+
+    @abc.abstractmethod
+    def _read_dynamic_with_fixed_int_subarray(self) -> npt.NDArray[np.int32]:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _read_dynamic_with_fixed_float_subarray(self) -> npt.NDArray[np.float32]:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _read_known_dim_count_with_fixed_int_subarray(self) -> npt.NDArray[np.int32]:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _read_known_dim_count_with_fixed_float_subarray(self) -> npt.NDArray[np.float32]:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _read_fixed_with_fixed_int_subarray(self) -> npt.NDArray[np.int32]:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _read_fixed_with_fixed_float_subarray(self) -> npt.NDArray[np.float32]:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _read_nested_subarray(self) -> npt.NDArray[np.int32]:
+        raise NotImplementedError()
+
+    T = typing.TypeVar('T')
+    def _wrap_iterable(self, iterable: collections.abc.Iterable[T], final_state: int) -> collections.abc.Iterable[T]:
+        yield from iterable
+        self._state = final_state
+
+    def _raise_unexpected_state(self, actual: int) -> None:
+        actual_method = self._state_to_method_name(actual)
+        if self._state % 2 == 1:
+            previous_method = self._state_to_method_name(self._state - 1)
+            raise ProtocolException(f"Received call to '{actual_method}' but the iterable returned by '{previous_method}' was not fully consumed.")
+        else:
+            expected_method = self._state_to_method_name(self._state)
+            raise ProtocolException(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
+        	
+    def _state_to_method_name(self, state: int) -> str:
+        if state == 0:
+            return 'read_dynamic_with_fixed_int_subarray'
+        if state == 2:
+            return 'read_dynamic_with_fixed_float_subarray'
+        if state == 4:
+            return 'read_known_dim_count_with_fixed_int_subarray'
+        if state == 6:
+            return 'read_known_dim_count_with_fixed_float_subarray'
+        if state == 8:
+            return 'read_fixed_with_fixed_int_subarray'
+        if state == 10:
+            return 'read_fixed_with_fixed_float_subarray'
+        if state == 12:
+            return 'read_nested_subarray'
+        return "<unknown>"
+
+class SubarraysInRecordsWriterBase(abc.ABC):
+    """Abstract writer for the SubarraysInRecords protocol."""
+
+
+    def __init__(self) -> None:
+        self._state = 0
+
+    schema = r"""{"protocol":{"name":"SubarraysInRecords","sequence":[{"name":"withFixedSubarrays","type":{"array":{"items":"TestModel.RecordWithFixedCollections"}}},{"name":"withVlenSubarrays","type":{"array":{"items":"TestModel.RecordWithVlenCollections"}}}]},"types":[{"name":"RecordWithFixedCollections","fields":[{"name":"fixedVector","type":{"vector":{"items":"int32","length":3}}},{"name":"fixedArray","type":{"array":{"items":"int32","dimensions":[{"length":2},{"length":3}]}}}]},{"name":"RecordWithVlenCollections","fields":[{"name":"fixedVector","type":{"vector":{"items":"int32"}}},{"name":"fixedArray","type":{"array":{"items":"int32","dimensions":2}}}]}]}"""
 
     def __enter__(self):
         return self
@@ -2184,15 +2485,15 @@ class SubarraysWriterBase(abc.ABC):
             return 'write_with_vlen_subarrays'
         return "<unknown>"
 
-class SubarraysReaderBase(abc.ABC):
-    """Abstract reader for the Subarrays protocol."""
+class SubarraysInRecordsReaderBase(abc.ABC):
+    """Abstract reader for the SubarraysInRecords protocol."""
 
 
     def __init__(self, read_as_numpy: Types = Types.NONE) -> None:
         self._read_as_numpy = read_as_numpy
         self._state = 0
 
-    schema = SubarraysWriterBase.schema
+    schema = SubarraysInRecordsWriterBase.schema
 
     def __enter__(self):
         return self
@@ -2232,7 +2533,7 @@ class SubarraysReaderBase(abc.ABC):
         self._state = 4
         return value
 
-    def copy_to(self, writer: SubarraysWriterBase) -> None:
+    def copy_to(self, writer: SubarraysInRecordsWriterBase) -> None:
         writer.write_with_fixed_subarrays(self.read_with_fixed_subarrays())
         writer.write_with_vlen_subarrays(self.read_with_vlen_subarrays())
 

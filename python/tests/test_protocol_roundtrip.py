@@ -2,11 +2,14 @@ import datetime
 import inspect
 import io
 import pathlib
+import re
 import subprocess
 import types
 from typing import Callable, TypeVar, cast
 
 import numpy as np
+import pytest
+
 import test_model as tm
 import test_model.binary as tmb
 from test_model._binary import BinaryProtocolWriter
@@ -363,6 +366,97 @@ def test_fixed_arrays():
 
 
 def test_subarrays():
+    with create_validating_writer_class(tm.SubarraysWriterBase)() as w:
+        with pytest.raises(
+            ValueError, match=re.escape("The array is required to have shape (..., 3)")
+        ):
+            w.write_dynamic_with_fixed_int_subarray(
+                np.array([[1, 2, 3, 4], [11, 12, 13, 14]], dtype=np.int32)
+            )
+
+        with pytest.raises(
+            ValueError, match=re.escape("The array is required to have shape (..., 3)")
+        ):
+            w.write_dynamic_with_fixed_int_subarray(np.ndarray((), dtype=np.int32))
+
+        w.write_dynamic_with_fixed_int_subarray(
+            np.array([[1, 2, 3], [4, 5, 6]], dtype=np.int32)
+        )
+        w.write_dynamic_with_fixed_float_subarray(
+            np.array([[1, 2, 3], [4, 5, 6]], dtype=np.float32)
+        )
+
+        with pytest.raises(
+            ValueError, match=re.escape("The array is required to have shape (..., 3)")
+        ):
+            w.write_known_dim_count_with_fixed_int_subarray(
+                np.array([[1, 2, 3, 4], [11, 12, 13, 14]], dtype=np.int32)
+            )
+
+        w.write_known_dim_count_with_fixed_int_subarray(
+            np.array([[1, 2, 3], [4, 5, 6]], dtype=np.int32)
+        )
+        w.write_known_dim_count_with_fixed_float_subarray(
+            np.array([[1, 2, 3], [4, 5, 6]], dtype=np.float32)
+        )
+
+        with pytest.raises(
+            ValueError, match=re.escape("Expected shape (2, 3), got (2, 4)")
+        ):
+            w.write_fixed_with_fixed_int_subarray(
+                np.array([[1, 2, 3, 4], [11, 12, 13, 14]], dtype=np.int32)
+            )
+
+        w.write_fixed_with_fixed_int_subarray(
+            np.array([[1, 2, 3], [4, 5, 6]], dtype=np.int32)
+        )
+        w.write_fixed_with_fixed_float_subarray(
+            np.array([[1, 2, 3], [4, 5, 6]], dtype=np.float32)
+        )
+
+        with pytest.raises(
+            ValueError,
+            match=re.escape("The array is required to have shape (..., 2, 3)"),
+        ):
+            w.write_nested_subarray(
+                np.array(
+                    [
+                        [[1, 2, 3, 9], [4, 5, 6, 9]],
+                        [[10, 20, 30, 90], [40, 50, 60, 90]],
+                        [[100, 200, 300, 900], [400, 500, 600, 900]],
+                    ],
+                    dtype=np.int32,
+                )
+            )
+
+        with pytest.raises(
+            ValueError,
+            match=re.escape("The array is required to have shape (..., 2, 3)"),
+        ):
+            w.write_nested_subarray(
+                np.array(
+                    [
+                        [[1, 2, 3], [4, 5, 6], [7, 8, 9]],
+                        [[10, 20, 30], [40, 50, 60], [70, 80, 90]],
+                        [[100, 200, 300], [400, 500, 600], [700, 800, 900]],
+                    ],
+                    dtype=np.int32,
+                )
+            )
+
+        w.write_nested_subarray(
+            np.array(
+                [
+                    [[1, 2, 3], [4, 5, 6]],
+                    [[10, 20, 30], [40, 50, 60]],
+                    [[100, 200, 300], [400, 500, 600]],
+                ],
+                dtype=np.int32,
+            )
+        )
+
+
+def test_subarrays_in_records():
     fixed_dtype = tm.get_dtype(tm.RecordWithFixedCollections)
     assert fixed_dtype == np.dtype(
         [("fixed_vector", "<i4", (3,)), ("fixed_array", "<i4", (2, 3))], align=True
@@ -373,7 +467,7 @@ def test_subarrays():
         [("fixed_vector", "O"), ("fixed_array", "O")], align=True
     )
 
-    with create_validating_writer_class(tm.SubarraysWriterBase)() as w:
+    with create_validating_writer_class(tm.SubarraysInRecordsWriterBase)() as w:
         w.write_with_fixed_subarrays(
             np.array(
                 [

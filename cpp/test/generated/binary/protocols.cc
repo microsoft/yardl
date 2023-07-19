@@ -2150,12 +2150,32 @@ void FixedArraysReader::CloseImpl() {
   stream_.VerifyFinished();
 }
 
-void SubarraysWriter::WriteWithFixedSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithFixedCollections> const& value) {
-  yardl::binary::WriteDynamicNDArray<test_model::RecordWithFixedCollections, test_model::binary::WriteRecordWithFixedCollections>(stream_, value);
+void SubarraysWriter::WriteDynamicWithFixedIntSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<int32_t, 3>> const& value) {
+  yardl::binary::WriteDynamicNDArray<yardl::FixedNDArray<int32_t, 3>, yardl::binary::WriteFixedNDArray<int32_t, yardl::binary::WriteInteger, 3>>(stream_, value);
 }
 
-void SubarraysWriter::WriteWithVlenSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithVlenCollections> const& value) {
-  yardl::binary::WriteDynamicNDArray<test_model::RecordWithVlenCollections, test_model::binary::WriteRecordWithVlenCollections>(stream_, value);
+void SubarraysWriter::WriteDynamicWithFixedFloatSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<float, 3>> const& value) {
+  yardl::binary::WriteDynamicNDArray<yardl::FixedNDArray<float, 3>, yardl::binary::WriteFixedNDArray<float, yardl::binary::WriteFloatingPoint, 3>>(stream_, value);
+}
+
+void SubarraysWriter::WriteKnownDimCountWithFixedIntSubarrayImpl(yardl::NDArray<yardl::FixedNDArray<int32_t, 3>, 1> const& value) {
+  yardl::binary::WriteNDArray<yardl::FixedNDArray<int32_t, 3>, yardl::binary::WriteFixedNDArray<int32_t, yardl::binary::WriteInteger, 3>, 1>(stream_, value);
+}
+
+void SubarraysWriter::WriteKnownDimCountWithFixedFloatSubarrayImpl(yardl::NDArray<yardl::FixedNDArray<float, 3>, 1> const& value) {
+  yardl::binary::WriteNDArray<yardl::FixedNDArray<float, 3>, yardl::binary::WriteFixedNDArray<float, yardl::binary::WriteFloatingPoint, 3>, 1>(stream_, value);
+}
+
+void SubarraysWriter::WriteFixedWithFixedIntSubarrayImpl(yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2> const& value) {
+  yardl::binary::WriteFixedNDArray<yardl::FixedNDArray<int32_t, 3>, yardl::binary::WriteFixedNDArray<int32_t, yardl::binary::WriteInteger, 3>, 2>(stream_, value);
+}
+
+void SubarraysWriter::WriteFixedWithFixedFloatSubarrayImpl(yardl::FixedNDArray<yardl::FixedNDArray<float, 3>, 2> const& value) {
+  yardl::binary::WriteFixedNDArray<yardl::FixedNDArray<float, 3>, yardl::binary::WriteFixedNDArray<float, yardl::binary::WriteFloatingPoint, 3>, 2>(stream_, value);
+}
+
+void SubarraysWriter::WriteNestedSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>> const& value) {
+  yardl::binary::WriteDynamicNDArray<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>, yardl::binary::WriteFixedNDArray<yardl::FixedNDArray<int32_t, 3>, yardl::binary::WriteFixedNDArray<int32_t, yardl::binary::WriteInteger, 3>, 2>>(stream_, value);
 }
 
 void SubarraysWriter::Flush() {
@@ -2166,15 +2186,63 @@ void SubarraysWriter::CloseImpl() {
   stream_.Flush();
 }
 
-void SubarraysReader::ReadWithFixedSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithFixedCollections>& value) {
-  yardl::binary::ReadDynamicNDArray<test_model::RecordWithFixedCollections, test_model::binary::ReadRecordWithFixedCollections>(stream_, value);
+void SubarraysReader::ReadDynamicWithFixedIntSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<int32_t, 3>>& value) {
+  yardl::binary::ReadDynamicNDArray<yardl::FixedNDArray<int32_t, 3>, yardl::binary::ReadFixedNDArray<int32_t, yardl::binary::ReadInteger, 3>>(stream_, value);
 }
 
-void SubarraysReader::ReadWithVlenSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithVlenCollections>& value) {
-  yardl::binary::ReadDynamicNDArray<test_model::RecordWithVlenCollections, test_model::binary::ReadRecordWithVlenCollections>(stream_, value);
+void SubarraysReader::ReadDynamicWithFixedFloatSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<float, 3>>& value) {
+  yardl::binary::ReadDynamicNDArray<yardl::FixedNDArray<float, 3>, yardl::binary::ReadFixedNDArray<float, yardl::binary::ReadFloatingPoint, 3>>(stream_, value);
+}
+
+void SubarraysReader::ReadKnownDimCountWithFixedIntSubarrayImpl(yardl::NDArray<yardl::FixedNDArray<int32_t, 3>, 1>& value) {
+  yardl::binary::ReadNDArray<yardl::FixedNDArray<int32_t, 3>, yardl::binary::ReadFixedNDArray<int32_t, yardl::binary::ReadInteger, 3>, 1>(stream_, value);
+}
+
+void SubarraysReader::ReadKnownDimCountWithFixedFloatSubarrayImpl(yardl::NDArray<yardl::FixedNDArray<float, 3>, 1>& value) {
+  yardl::binary::ReadNDArray<yardl::FixedNDArray<float, 3>, yardl::binary::ReadFixedNDArray<float, yardl::binary::ReadFloatingPoint, 3>, 1>(stream_, value);
+}
+
+void SubarraysReader::ReadFixedWithFixedIntSubarrayImpl(yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>& value) {
+  yardl::binary::ReadFixedNDArray<yardl::FixedNDArray<int32_t, 3>, yardl::binary::ReadFixedNDArray<int32_t, yardl::binary::ReadInteger, 3>, 2>(stream_, value);
+}
+
+void SubarraysReader::ReadFixedWithFixedFloatSubarrayImpl(yardl::FixedNDArray<yardl::FixedNDArray<float, 3>, 2>& value) {
+  yardl::binary::ReadFixedNDArray<yardl::FixedNDArray<float, 3>, yardl::binary::ReadFixedNDArray<float, yardl::binary::ReadFloatingPoint, 3>, 2>(stream_, value);
+}
+
+void SubarraysReader::ReadNestedSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>>& value) {
+  yardl::binary::ReadDynamicNDArray<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>, yardl::binary::ReadFixedNDArray<yardl::FixedNDArray<int32_t, 3>, yardl::binary::ReadFixedNDArray<int32_t, yardl::binary::ReadInteger, 3>, 2>>(stream_, value);
 }
 
 void SubarraysReader::CloseImpl() {
+  stream_.VerifyFinished();
+}
+
+void SubarraysInRecordsWriter::WriteWithFixedSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithFixedCollections> const& value) {
+  yardl::binary::WriteDynamicNDArray<test_model::RecordWithFixedCollections, test_model::binary::WriteRecordWithFixedCollections>(stream_, value);
+}
+
+void SubarraysInRecordsWriter::WriteWithVlenSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithVlenCollections> const& value) {
+  yardl::binary::WriteDynamicNDArray<test_model::RecordWithVlenCollections, test_model::binary::WriteRecordWithVlenCollections>(stream_, value);
+}
+
+void SubarraysInRecordsWriter::Flush() {
+  stream_.Flush();
+}
+
+void SubarraysInRecordsWriter::CloseImpl() {
+  stream_.Flush();
+}
+
+void SubarraysInRecordsReader::ReadWithFixedSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithFixedCollections>& value) {
+  yardl::binary::ReadDynamicNDArray<test_model::RecordWithFixedCollections, test_model::binary::ReadRecordWithFixedCollections>(stream_, value);
+}
+
+void SubarraysInRecordsReader::ReadWithVlenSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithVlenCollections>& value) {
+  yardl::binary::ReadDynamicNDArray<test_model::RecordWithVlenCollections, test_model::binary::ReadRecordWithVlenCollections>(stream_, value);
+}
+
+void SubarraysInRecordsReader::CloseImpl() {
   stream_.VerifyFinished();
 }
 

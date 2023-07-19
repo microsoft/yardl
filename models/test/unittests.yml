@@ -228,6 +228,20 @@ RecordWithVlenCollections: !record
 
 Subarrays: !protocol
   sequence:
+    dynamicWithFixedIntSubarray: int[3][]
+    dynamicWithFixedFloatSubarray: float[3][]
+
+    knownDimCountWithFixedIntSubarray: int[3][()]
+    knownDimCountWithFixedFloatSubarray: float[3][()]
+
+    fixedWithFixedIntSubarray: int[3][2]
+    fixedWithFixedFloatSubarray: float[3][2]
+
+    nestedSubarray: int[3][2][]
+
+
+SubarraysInRecords: !protocol
+  sequence:
     withFixedSubarrays: RecordWithFixedCollections[]
     withVlenSubarrays: RecordWithVlenCollections[]
 

@@ -183,6 +183,17 @@ void TranslateStream(std::string const& protocol_name, yardl::testing::Format in
     reader->CopyTo(*writer);
     return;
   }
+  if (protocol_name == "SubarraysInRecords") {
+    auto reader = input_format == yardl::testing::Format::kBinary
+      ? std::unique_ptr<test_model::SubarraysInRecordsReaderBase>(new test_model::binary::SubarraysInRecordsReader(input))
+      : std::unique_ptr<test_model::SubarraysInRecordsReaderBase>(new test_model::ndjson::SubarraysInRecordsReader(input));
+
+    auto writer = output_format == yardl::testing::Format::kBinary
+      ? std::unique_ptr<test_model::SubarraysInRecordsWriterBase>(new test_model::binary::SubarraysInRecordsWriter(output))
+      : std::unique_ptr<test_model::SubarraysInRecordsWriterBase>(new test_model::ndjson::SubarraysInRecordsWriter(output));
+    reader->CopyTo(*writer);
+    return;
+  }
   if (protocol_name == "NDArrays") {
     auto reader = input_format == yardl::testing::Format::kBinary
       ? std::unique_ptr<test_model::NDArraysReaderBase>(new test_model::binary::NDArraysReader(input))

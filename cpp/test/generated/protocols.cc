@@ -2206,6 +2206,234 @@ namespace {
 void SubarraysWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end, uint8_t current) {
   std::string expected_method;
   switch (current) {
+  case 0: expected_method = "WriteDynamicWithFixedIntSubarray()"; break;
+  case 1: expected_method = "WriteDynamicWithFixedFloatSubarray()"; break;
+  case 2: expected_method = "WriteKnownDimCountWithFixedIntSubarray()"; break;
+  case 3: expected_method = "WriteKnownDimCountWithFixedFloatSubarray()"; break;
+  case 4: expected_method = "WriteFixedWithFixedIntSubarray()"; break;
+  case 5: expected_method = "WriteFixedWithFixedFloatSubarray()"; break;
+  case 6: expected_method = "WriteNestedSubarray()"; break;
+  }
+  std::string attempted_method;
+  switch (attempted) {
+  case 0: attempted_method = "WriteDynamicWithFixedIntSubarray()"; break;
+  case 1: attempted_method = "WriteDynamicWithFixedFloatSubarray()"; break;
+  case 2: attempted_method = "WriteKnownDimCountWithFixedIntSubarray()"; break;
+  case 3: attempted_method = "WriteKnownDimCountWithFixedFloatSubarray()"; break;
+  case 4: attempted_method = "WriteFixedWithFixedIntSubarray()"; break;
+  case 5: attempted_method = "WriteFixedWithFixedFloatSubarray()"; break;
+  case 6: attempted_method = "WriteNestedSubarray()"; break;
+  case 7: attempted_method = "Close()"; break;
+  }
+  throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
+}
+
+void SubarraysReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
+  auto f = [](uint8_t i) -> std::string {
+    switch (i/2) {
+    case 0: return "ReadDynamicWithFixedIntSubarray()";
+    case 1: return "ReadDynamicWithFixedFloatSubarray()";
+    case 2: return "ReadKnownDimCountWithFixedIntSubarray()";
+    case 3: return "ReadKnownDimCountWithFixedFloatSubarray()";
+    case 4: return "ReadFixedWithFixedIntSubarray()";
+    case 5: return "ReadFixedWithFixedFloatSubarray()";
+    case 6: return "ReadNestedSubarray()";
+    case 7: return "Close()";
+    default: return "<unknown>";
+    }
+  };
+  throw std::runtime_error("Expected call to " + f(current) + " but received call to " + f(attempted) + " instead.");
+}
+
+} // namespace 
+
+std::string SubarraysWriterBase::schema_ = R"({"protocol":{"name":"Subarrays","sequence":[{"name":"dynamicWithFixedIntSubarray","type":{"array":{"items":{"array":{"items":"int32","dimensions":[{"length":3}]}}}}},{"name":"dynamicWithFixedFloatSubarray","type":{"array":{"items":{"array":{"items":"float32","dimensions":[{"length":3}]}}}}},{"name":"knownDimCountWithFixedIntSubarray","type":{"array":{"items":{"array":{"items":"int32","dimensions":[{"length":3}]}},"dimensions":1}}},{"name":"knownDimCountWithFixedFloatSubarray","type":{"array":{"items":{"array":{"items":"float32","dimensions":[{"length":3}]}},"dimensions":1}}},{"name":"fixedWithFixedIntSubarray","type":{"array":{"items":{"array":{"items":"int32","dimensions":[{"length":3}]}},"dimensions":[{"length":2}]}}},{"name":"fixedWithFixedFloatSubarray","type":{"array":{"items":{"array":{"items":"float32","dimensions":[{"length":3}]}},"dimensions":[{"length":2}]}}},{"name":"nestedSubarray","type":{"array":{"items":{"array":{"items":{"array":{"items":"int32","dimensions":[{"length":3}]}},"dimensions":[{"length":2}]}}}}}]},"types":null})";
+
+void SubarraysWriterBase::WriteDynamicWithFixedIntSubarray(yardl::DynamicNDArray<yardl::FixedNDArray<int32_t, 3>> const& value) {
+  if (unlikely(state_ != 0)) {
+    SubarraysWriterBaseInvalidState(0, false, state_);
+  }
+
+  WriteDynamicWithFixedIntSubarrayImpl(value);
+  state_ = 1;
+}
+
+void SubarraysWriterBase::WriteDynamicWithFixedFloatSubarray(yardl::DynamicNDArray<yardl::FixedNDArray<float, 3>> const& value) {
+  if (unlikely(state_ != 1)) {
+    SubarraysWriterBaseInvalidState(1, false, state_);
+  }
+
+  WriteDynamicWithFixedFloatSubarrayImpl(value);
+  state_ = 2;
+}
+
+void SubarraysWriterBase::WriteKnownDimCountWithFixedIntSubarray(yardl::NDArray<yardl::FixedNDArray<int32_t, 3>, 1> const& value) {
+  if (unlikely(state_ != 2)) {
+    SubarraysWriterBaseInvalidState(2, false, state_);
+  }
+
+  WriteKnownDimCountWithFixedIntSubarrayImpl(value);
+  state_ = 3;
+}
+
+void SubarraysWriterBase::WriteKnownDimCountWithFixedFloatSubarray(yardl::NDArray<yardl::FixedNDArray<float, 3>, 1> const& value) {
+  if (unlikely(state_ != 3)) {
+    SubarraysWriterBaseInvalidState(3, false, state_);
+  }
+
+  WriteKnownDimCountWithFixedFloatSubarrayImpl(value);
+  state_ = 4;
+}
+
+void SubarraysWriterBase::WriteFixedWithFixedIntSubarray(yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2> const& value) {
+  if (unlikely(state_ != 4)) {
+    SubarraysWriterBaseInvalidState(4, false, state_);
+  }
+
+  WriteFixedWithFixedIntSubarrayImpl(value);
+  state_ = 5;
+}
+
+void SubarraysWriterBase::WriteFixedWithFixedFloatSubarray(yardl::FixedNDArray<yardl::FixedNDArray<float, 3>, 2> const& value) {
+  if (unlikely(state_ != 5)) {
+    SubarraysWriterBaseInvalidState(5, false, state_);
+  }
+
+  WriteFixedWithFixedFloatSubarrayImpl(value);
+  state_ = 6;
+}
+
+void SubarraysWriterBase::WriteNestedSubarray(yardl::DynamicNDArray<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>> const& value) {
+  if (unlikely(state_ != 6)) {
+    SubarraysWriterBaseInvalidState(6, false, state_);
+  }
+
+  WriteNestedSubarrayImpl(value);
+  state_ = 7;
+}
+
+void SubarraysWriterBase::Close() {
+  if (unlikely(state_ != 7)) {
+    SubarraysWriterBaseInvalidState(7, false, state_);
+  }
+
+  CloseImpl();
+}
+
+std::string SubarraysReaderBase::schema_ = SubarraysWriterBase::schema_;
+
+void SubarraysReaderBase::ReadDynamicWithFixedIntSubarray(yardl::DynamicNDArray<yardl::FixedNDArray<int32_t, 3>>& value) {
+  if (unlikely(state_ != 0)) {
+    SubarraysReaderBaseInvalidState(0, state_);
+  }
+
+  ReadDynamicWithFixedIntSubarrayImpl(value);
+  state_ = 2;
+}
+
+void SubarraysReaderBase::ReadDynamicWithFixedFloatSubarray(yardl::DynamicNDArray<yardl::FixedNDArray<float, 3>>& value) {
+  if (unlikely(state_ != 2)) {
+    SubarraysReaderBaseInvalidState(2, state_);
+  }
+
+  ReadDynamicWithFixedFloatSubarrayImpl(value);
+  state_ = 4;
+}
+
+void SubarraysReaderBase::ReadKnownDimCountWithFixedIntSubarray(yardl::NDArray<yardl::FixedNDArray<int32_t, 3>, 1>& value) {
+  if (unlikely(state_ != 4)) {
+    SubarraysReaderBaseInvalidState(4, state_);
+  }
+
+  ReadKnownDimCountWithFixedIntSubarrayImpl(value);
+  state_ = 6;
+}
+
+void SubarraysReaderBase::ReadKnownDimCountWithFixedFloatSubarray(yardl::NDArray<yardl::FixedNDArray<float, 3>, 1>& value) {
+  if (unlikely(state_ != 6)) {
+    SubarraysReaderBaseInvalidState(6, state_);
+  }
+
+  ReadKnownDimCountWithFixedFloatSubarrayImpl(value);
+  state_ = 8;
+}
+
+void SubarraysReaderBase::ReadFixedWithFixedIntSubarray(yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>& value) {
+  if (unlikely(state_ != 8)) {
+    SubarraysReaderBaseInvalidState(8, state_);
+  }
+
+  ReadFixedWithFixedIntSubarrayImpl(value);
+  state_ = 10;
+}
+
+void SubarraysReaderBase::ReadFixedWithFixedFloatSubarray(yardl::FixedNDArray<yardl::FixedNDArray<float, 3>, 2>& value) {
+  if (unlikely(state_ != 10)) {
+    SubarraysReaderBaseInvalidState(10, state_);
+  }
+
+  ReadFixedWithFixedFloatSubarrayImpl(value);
+  state_ = 12;
+}
+
+void SubarraysReaderBase::ReadNestedSubarray(yardl::DynamicNDArray<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>>& value) {
+  if (unlikely(state_ != 12)) {
+    SubarraysReaderBaseInvalidState(12, state_);
+  }
+
+  ReadNestedSubarrayImpl(value);
+  state_ = 14;
+}
+
+void SubarraysReaderBase::Close() {
+  if (unlikely(state_ != 14)) {
+    SubarraysReaderBaseInvalidState(14, state_);
+  }
+
+  CloseImpl();
+}
+void SubarraysReaderBase::CopyTo(SubarraysWriterBase& writer) {
+  {
+    yardl::DynamicNDArray<yardl::FixedNDArray<int32_t, 3>> value;
+    ReadDynamicWithFixedIntSubarray(value);
+    writer.WriteDynamicWithFixedIntSubarray(value);
+  }
+  {
+    yardl::DynamicNDArray<yardl::FixedNDArray<float, 3>> value;
+    ReadDynamicWithFixedFloatSubarray(value);
+    writer.WriteDynamicWithFixedFloatSubarray(value);
+  }
+  {
+    yardl::NDArray<yardl::FixedNDArray<int32_t, 3>, 1> value;
+    ReadKnownDimCountWithFixedIntSubarray(value);
+    writer.WriteKnownDimCountWithFixedIntSubarray(value);
+  }
+  {
+    yardl::NDArray<yardl::FixedNDArray<float, 3>, 1> value;
+    ReadKnownDimCountWithFixedFloatSubarray(value);
+    writer.WriteKnownDimCountWithFixedFloatSubarray(value);
+  }
+  {
+    yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2> value;
+    ReadFixedWithFixedIntSubarray(value);
+    writer.WriteFixedWithFixedIntSubarray(value);
+  }
+  {
+    yardl::FixedNDArray<yardl::FixedNDArray<float, 3>, 2> value;
+    ReadFixedWithFixedFloatSubarray(value);
+    writer.WriteFixedWithFixedFloatSubarray(value);
+  }
+  {
+    yardl::DynamicNDArray<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>> value;
+    ReadNestedSubarray(value);
+    writer.WriteNestedSubarray(value);
+  }
+}
+
+namespace {
+void SubarraysInRecordsWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end, uint8_t current) {
+  std::string expected_method;
+  switch (current) {
   case 0: expected_method = "WriteWithFixedSubarrays()"; break;
   case 1: expected_method = "WriteWithVlenSubarrays()"; break;
   }
@@ -2218,7 +2446,7 @@ void SubarraysWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool en
   throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
 }
 
-void SubarraysReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
+void SubarraysInRecordsReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
   auto f = [](uint8_t i) -> std::string {
     switch (i/2) {
     case 0: return "ReadWithFixedSubarrays()";
@@ -2232,62 +2460,62 @@ void SubarraysReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
 
 } // namespace 
 
-std::string SubarraysWriterBase::schema_ = R"({"protocol":{"name":"Subarrays","sequence":[{"name":"withFixedSubarrays","type":{"array":{"items":"TestModel.RecordWithFixedCollections"}}},{"name":"withVlenSubarrays","type":{"array":{"items":"TestModel.RecordWithVlenCollections"}}}]},"types":[{"name":"RecordWithFixedCollections","fields":[{"name":"fixedVector","type":{"vector":{"items":"int32","length":3}}},{"name":"fixedArray","type":{"array":{"items":"int32","dimensions":[{"length":2},{"length":3}]}}}]},{"name":"RecordWithVlenCollections","fields":[{"name":"fixedVector","type":{"vector":{"items":"int32"}}},{"name":"fixedArray","type":{"array":{"items":"int32","dimensions":2}}}]}]})";
+std::string SubarraysInRecordsWriterBase::schema_ = R"({"protocol":{"name":"SubarraysInRecords","sequence":[{"name":"withFixedSubarrays","type":{"array":{"items":"TestModel.RecordWithFixedCollections"}}},{"name":"withVlenSubarrays","type":{"array":{"items":"TestModel.RecordWithVlenCollections"}}}]},"types":[{"name":"RecordWithFixedCollections","fields":[{"name":"fixedVector","type":{"vector":{"items":"int32","length":3}}},{"name":"fixedArray","type":{"array":{"items":"int32","dimensions":[{"length":2},{"length":3}]}}}]},{"name":"RecordWithVlenCollections","fields":[{"name":"fixedVector","type":{"vector":{"items":"int32"}}},{"name":"fixedArray","type":{"array":{"items":"int32","dimensions":2}}}]}]})";
 
-void SubarraysWriterBase::WriteWithFixedSubarrays(yardl::DynamicNDArray<test_model::RecordWithFixedCollections> const& value) {
+void SubarraysInRecordsWriterBase::WriteWithFixedSubarrays(yardl::DynamicNDArray<test_model::RecordWithFixedCollections> const& value) {
   if (unlikely(state_ != 0)) {
-    SubarraysWriterBaseInvalidState(0, false, state_);
+    SubarraysInRecordsWriterBaseInvalidState(0, false, state_);
   }
 
   WriteWithFixedSubarraysImpl(value);
   state_ = 1;
 }
 
-void SubarraysWriterBase::WriteWithVlenSubarrays(yardl::DynamicNDArray<test_model::RecordWithVlenCollections> const& value) {
+void SubarraysInRecordsWriterBase::WriteWithVlenSubarrays(yardl::DynamicNDArray<test_model::RecordWithVlenCollections> const& value) {
   if (unlikely(state_ != 1)) {
-    SubarraysWriterBaseInvalidState(1, false, state_);
+    SubarraysInRecordsWriterBaseInvalidState(1, false, state_);
   }
 
   WriteWithVlenSubarraysImpl(value);
   state_ = 2;
 }
 
-void SubarraysWriterBase::Close() {
+void SubarraysInRecordsWriterBase::Close() {
   if (unlikely(state_ != 2)) {
-    SubarraysWriterBaseInvalidState(2, false, state_);
+    SubarraysInRecordsWriterBaseInvalidState(2, false, state_);
   }
 
   CloseImpl();
 }
 
-std::string SubarraysReaderBase::schema_ = SubarraysWriterBase::schema_;
+std::string SubarraysInRecordsReaderBase::schema_ = SubarraysInRecordsWriterBase::schema_;
 
-void SubarraysReaderBase::ReadWithFixedSubarrays(yardl::DynamicNDArray<test_model::RecordWithFixedCollections>& value) {
+void SubarraysInRecordsReaderBase::ReadWithFixedSubarrays(yardl::DynamicNDArray<test_model::RecordWithFixedCollections>& value) {
   if (unlikely(state_ != 0)) {
-    SubarraysReaderBaseInvalidState(0, state_);
+    SubarraysInRecordsReaderBaseInvalidState(0, state_);
   }
 
   ReadWithFixedSubarraysImpl(value);
   state_ = 2;
 }
 
-void SubarraysReaderBase::ReadWithVlenSubarrays(yardl::DynamicNDArray<test_model::RecordWithVlenCollections>& value) {
+void SubarraysInRecordsReaderBase::ReadWithVlenSubarrays(yardl::DynamicNDArray<test_model::RecordWithVlenCollections>& value) {
   if (unlikely(state_ != 2)) {
-    SubarraysReaderBaseInvalidState(2, state_);
+    SubarraysInRecordsReaderBaseInvalidState(2, state_);
   }
 
   ReadWithVlenSubarraysImpl(value);
   state_ = 4;
 }
 
-void SubarraysReaderBase::Close() {
+void SubarraysInRecordsReaderBase::Close() {
   if (unlikely(state_ != 4)) {
-    SubarraysReaderBaseInvalidState(4, state_);
+    SubarraysInRecordsReaderBaseInvalidState(4, state_);
   }
 
   CloseImpl();
 }
-void SubarraysReaderBase::CopyTo(SubarraysWriterBase& writer) {
+void SubarraysInRecordsReaderBase::CopyTo(SubarraysInRecordsWriterBase& writer) {
   {
     yardl::DynamicNDArray<test_model::RecordWithFixedCollections> value;
     ReadWithFixedSubarrays(value);

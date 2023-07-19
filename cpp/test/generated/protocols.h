@@ -950,10 +950,25 @@ class FixedArraysReaderBase {
 class SubarraysWriterBase {
   public:
   // Ordinal 0.
-  void WriteWithFixedSubarrays(yardl::DynamicNDArray<test_model::RecordWithFixedCollections> const& value);
+  void WriteDynamicWithFixedIntSubarray(yardl::DynamicNDArray<yardl::FixedNDArray<int32_t, 3>> const& value);
 
   // Ordinal 1.
-  void WriteWithVlenSubarrays(yardl::DynamicNDArray<test_model::RecordWithVlenCollections> const& value);
+  void WriteDynamicWithFixedFloatSubarray(yardl::DynamicNDArray<yardl::FixedNDArray<float, 3>> const& value);
+
+  // Ordinal 2.
+  void WriteKnownDimCountWithFixedIntSubarray(yardl::NDArray<yardl::FixedNDArray<int32_t, 3>, 1> const& value);
+
+  // Ordinal 3.
+  void WriteKnownDimCountWithFixedFloatSubarray(yardl::NDArray<yardl::FixedNDArray<float, 3>, 1> const& value);
+
+  // Ordinal 4.
+  void WriteFixedWithFixedIntSubarray(yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2> const& value);
+
+  // Ordinal 5.
+  void WriteFixedWithFixedFloatSubarray(yardl::FixedNDArray<yardl::FixedNDArray<float, 3>, 2> const& value);
+
+  // Ordinal 6.
+  void WriteNestedSubarray(yardl::DynamicNDArray<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>> const& value);
 
   // Optionaly close this writer before destructing. Validates that all steps were completed.
   void Close();
@@ -964,8 +979,13 @@ class SubarraysWriterBase {
   virtual void Flush() {}
 
   protected:
-  virtual void WriteWithFixedSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithFixedCollections> const& value) = 0;
-  virtual void WriteWithVlenSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithVlenCollections> const& value) = 0;
+  virtual void WriteDynamicWithFixedIntSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<int32_t, 3>> const& value) = 0;
+  virtual void WriteDynamicWithFixedFloatSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<float, 3>> const& value) = 0;
+  virtual void WriteKnownDimCountWithFixedIntSubarrayImpl(yardl::NDArray<yardl::FixedNDArray<int32_t, 3>, 1> const& value) = 0;
+  virtual void WriteKnownDimCountWithFixedFloatSubarrayImpl(yardl::NDArray<yardl::FixedNDArray<float, 3>, 1> const& value) = 0;
+  virtual void WriteFixedWithFixedIntSubarrayImpl(yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2> const& value) = 0;
+  virtual void WriteFixedWithFixedFloatSubarrayImpl(yardl::FixedNDArray<yardl::FixedNDArray<float, 3>, 2> const& value) = 0;
+  virtual void WriteNestedSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>> const& value) = 0;
   virtual void CloseImpl() {}
 
   static std::string schema_;
@@ -980,6 +1000,82 @@ class SubarraysWriterBase {
 class SubarraysReaderBase {
   public:
   // Ordinal 0.
+  void ReadDynamicWithFixedIntSubarray(yardl::DynamicNDArray<yardl::FixedNDArray<int32_t, 3>>& value);
+
+  // Ordinal 1.
+  void ReadDynamicWithFixedFloatSubarray(yardl::DynamicNDArray<yardl::FixedNDArray<float, 3>>& value);
+
+  // Ordinal 2.
+  void ReadKnownDimCountWithFixedIntSubarray(yardl::NDArray<yardl::FixedNDArray<int32_t, 3>, 1>& value);
+
+  // Ordinal 3.
+  void ReadKnownDimCountWithFixedFloatSubarray(yardl::NDArray<yardl::FixedNDArray<float, 3>, 1>& value);
+
+  // Ordinal 4.
+  void ReadFixedWithFixedIntSubarray(yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>& value);
+
+  // Ordinal 5.
+  void ReadFixedWithFixedFloatSubarray(yardl::FixedNDArray<yardl::FixedNDArray<float, 3>, 2>& value);
+
+  // Ordinal 6.
+  void ReadNestedSubarray(yardl::DynamicNDArray<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>>& value);
+
+  // Optionaly close this writer before destructing. Validates that all steps were completely read.
+  void Close();
+
+  void CopyTo(SubarraysWriterBase& writer);
+
+  virtual ~SubarraysReaderBase() = default;
+
+  protected:
+  virtual void ReadDynamicWithFixedIntSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<int32_t, 3>>& value) = 0;
+  virtual void ReadDynamicWithFixedFloatSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<float, 3>>& value) = 0;
+  virtual void ReadKnownDimCountWithFixedIntSubarrayImpl(yardl::NDArray<yardl::FixedNDArray<int32_t, 3>, 1>& value) = 0;
+  virtual void ReadKnownDimCountWithFixedFloatSubarrayImpl(yardl::NDArray<yardl::FixedNDArray<float, 3>, 1>& value) = 0;
+  virtual void ReadFixedWithFixedIntSubarrayImpl(yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>& value) = 0;
+  virtual void ReadFixedWithFixedFloatSubarrayImpl(yardl::FixedNDArray<yardl::FixedNDArray<float, 3>, 2>& value) = 0;
+  virtual void ReadNestedSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>>& value) = 0;
+  virtual void CloseImpl() {}
+  static std::string schema_;
+
+  private:
+  uint8_t state_ = 0;
+};
+
+// Abstract writer for the SubarraysInRecords protocol.
+class SubarraysInRecordsWriterBase {
+  public:
+  // Ordinal 0.
+  void WriteWithFixedSubarrays(yardl::DynamicNDArray<test_model::RecordWithFixedCollections> const& value);
+
+  // Ordinal 1.
+  void WriteWithVlenSubarrays(yardl::DynamicNDArray<test_model::RecordWithVlenCollections> const& value);
+
+  // Optionaly close this writer before destructing. Validates that all steps were completed.
+  void Close();
+
+  virtual ~SubarraysInRecordsWriterBase() = default;
+
+  // Flushes all buffered data.
+  virtual void Flush() {}
+
+  protected:
+  virtual void WriteWithFixedSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithFixedCollections> const& value) = 0;
+  virtual void WriteWithVlenSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithVlenCollections> const& value) = 0;
+  virtual void CloseImpl() {}
+
+  static std::string schema_;
+
+  private:
+  uint8_t state_ = 0;
+
+  friend class SubarraysInRecordsReaderBase;
+};
+
+// Abstract reader for the SubarraysInRecords protocol.
+class SubarraysInRecordsReaderBase {
+  public:
+  // Ordinal 0.
   void ReadWithFixedSubarrays(yardl::DynamicNDArray<test_model::RecordWithFixedCollections>& value);
 
   // Ordinal 1.
@@ -988,9 +1084,9 @@ class SubarraysReaderBase {
   // Optionaly close this writer before destructing. Validates that all steps were completely read.
   void Close();
 
-  void CopyTo(SubarraysWriterBase& writer);
+  void CopyTo(SubarraysInRecordsWriterBase& writer);
 
-  virtual ~SubarraysReaderBase() = default;
+  virtual ~SubarraysInRecordsReaderBase() = default;
 
   protected:
   virtual void ReadWithFixedSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithFixedCollections>& value) = 0;

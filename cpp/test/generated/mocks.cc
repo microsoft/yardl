@@ -1488,6 +1488,207 @@ class TestFixedArraysWriterBase : public FixedArraysWriterBase {
 
 class MockSubarraysWriter : public SubarraysWriterBase {
   public:
+  void WriteDynamicWithFixedIntSubarrayImpl (yardl::DynamicNDArray<yardl::FixedNDArray<int32_t, 3>> const& value) override {
+    if (WriteDynamicWithFixedIntSubarrayImpl_expected_values_.empty()) {
+      throw std::runtime_error("Unexpected call to WriteDynamicWithFixedIntSubarrayImpl");
+    }
+    if (WriteDynamicWithFixedIntSubarrayImpl_expected_values_.front() != value) {
+      throw std::runtime_error("Unexpected argument value for call to WriteDynamicWithFixedIntSubarrayImpl");
+    }
+    WriteDynamicWithFixedIntSubarrayImpl_expected_values_.pop();
+  }
+
+  std::queue<yardl::DynamicNDArray<yardl::FixedNDArray<int32_t, 3>>> WriteDynamicWithFixedIntSubarrayImpl_expected_values_;
+
+  void ExpectWriteDynamicWithFixedIntSubarrayImpl (yardl::DynamicNDArray<yardl::FixedNDArray<int32_t, 3>> const& value) {
+    WriteDynamicWithFixedIntSubarrayImpl_expected_values_.push(value);
+  }
+
+  void WriteDynamicWithFixedFloatSubarrayImpl (yardl::DynamicNDArray<yardl::FixedNDArray<float, 3>> const& value) override {
+    if (WriteDynamicWithFixedFloatSubarrayImpl_expected_values_.empty()) {
+      throw std::runtime_error("Unexpected call to WriteDynamicWithFixedFloatSubarrayImpl");
+    }
+    if (WriteDynamicWithFixedFloatSubarrayImpl_expected_values_.front() != value) {
+      throw std::runtime_error("Unexpected argument value for call to WriteDynamicWithFixedFloatSubarrayImpl");
+    }
+    WriteDynamicWithFixedFloatSubarrayImpl_expected_values_.pop();
+  }
+
+  std::queue<yardl::DynamicNDArray<yardl::FixedNDArray<float, 3>>> WriteDynamicWithFixedFloatSubarrayImpl_expected_values_;
+
+  void ExpectWriteDynamicWithFixedFloatSubarrayImpl (yardl::DynamicNDArray<yardl::FixedNDArray<float, 3>> const& value) {
+    WriteDynamicWithFixedFloatSubarrayImpl_expected_values_.push(value);
+  }
+
+  void WriteKnownDimCountWithFixedIntSubarrayImpl (yardl::NDArray<yardl::FixedNDArray<int32_t, 3>, 1> const& value) override {
+    if (WriteKnownDimCountWithFixedIntSubarrayImpl_expected_values_.empty()) {
+      throw std::runtime_error("Unexpected call to WriteKnownDimCountWithFixedIntSubarrayImpl");
+    }
+    if (WriteKnownDimCountWithFixedIntSubarrayImpl_expected_values_.front() != value) {
+      throw std::runtime_error("Unexpected argument value for call to WriteKnownDimCountWithFixedIntSubarrayImpl");
+    }
+    WriteKnownDimCountWithFixedIntSubarrayImpl_expected_values_.pop();
+  }
+
+  std::queue<yardl::NDArray<yardl::FixedNDArray<int32_t, 3>, 1>> WriteKnownDimCountWithFixedIntSubarrayImpl_expected_values_;
+
+  void ExpectWriteKnownDimCountWithFixedIntSubarrayImpl (yardl::NDArray<yardl::FixedNDArray<int32_t, 3>, 1> const& value) {
+    WriteKnownDimCountWithFixedIntSubarrayImpl_expected_values_.push(value);
+  }
+
+  void WriteKnownDimCountWithFixedFloatSubarrayImpl (yardl::NDArray<yardl::FixedNDArray<float, 3>, 1> const& value) override {
+    if (WriteKnownDimCountWithFixedFloatSubarrayImpl_expected_values_.empty()) {
+      throw std::runtime_error("Unexpected call to WriteKnownDimCountWithFixedFloatSubarrayImpl");
+    }
+    if (WriteKnownDimCountWithFixedFloatSubarrayImpl_expected_values_.front() != value) {
+      throw std::runtime_error("Unexpected argument value for call to WriteKnownDimCountWithFixedFloatSubarrayImpl");
+    }
+    WriteKnownDimCountWithFixedFloatSubarrayImpl_expected_values_.pop();
+  }
+
+  std::queue<yardl::NDArray<yardl::FixedNDArray<float, 3>, 1>> WriteKnownDimCountWithFixedFloatSubarrayImpl_expected_values_;
+
+  void ExpectWriteKnownDimCountWithFixedFloatSubarrayImpl (yardl::NDArray<yardl::FixedNDArray<float, 3>, 1> const& value) {
+    WriteKnownDimCountWithFixedFloatSubarrayImpl_expected_values_.push(value);
+  }
+
+  void WriteFixedWithFixedIntSubarrayImpl (yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2> const& value) override {
+    if (WriteFixedWithFixedIntSubarrayImpl_expected_values_.empty()) {
+      throw std::runtime_error("Unexpected call to WriteFixedWithFixedIntSubarrayImpl");
+    }
+    if (WriteFixedWithFixedIntSubarrayImpl_expected_values_.front() != value) {
+      throw std::runtime_error("Unexpected argument value for call to WriteFixedWithFixedIntSubarrayImpl");
+    }
+    WriteFixedWithFixedIntSubarrayImpl_expected_values_.pop();
+  }
+
+  std::queue<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>> WriteFixedWithFixedIntSubarrayImpl_expected_values_;
+
+  void ExpectWriteFixedWithFixedIntSubarrayImpl (yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2> const& value) {
+    WriteFixedWithFixedIntSubarrayImpl_expected_values_.push(value);
+  }
+
+  void WriteFixedWithFixedFloatSubarrayImpl (yardl::FixedNDArray<yardl::FixedNDArray<float, 3>, 2> const& value) override {
+    if (WriteFixedWithFixedFloatSubarrayImpl_expected_values_.empty()) {
+      throw std::runtime_error("Unexpected call to WriteFixedWithFixedFloatSubarrayImpl");
+    }
+    if (WriteFixedWithFixedFloatSubarrayImpl_expected_values_.front() != value) {
+      throw std::runtime_error("Unexpected argument value for call to WriteFixedWithFixedFloatSubarrayImpl");
+    }
+    WriteFixedWithFixedFloatSubarrayImpl_expected_values_.pop();
+  }
+
+  std::queue<yardl::FixedNDArray<yardl::FixedNDArray<float, 3>, 2>> WriteFixedWithFixedFloatSubarrayImpl_expected_values_;
+
+  void ExpectWriteFixedWithFixedFloatSubarrayImpl (yardl::FixedNDArray<yardl::FixedNDArray<float, 3>, 2> const& value) {
+    WriteFixedWithFixedFloatSubarrayImpl_expected_values_.push(value);
+  }
+
+  void WriteNestedSubarrayImpl (yardl::DynamicNDArray<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>> const& value) override {
+    if (WriteNestedSubarrayImpl_expected_values_.empty()) {
+      throw std::runtime_error("Unexpected call to WriteNestedSubarrayImpl");
+    }
+    if (WriteNestedSubarrayImpl_expected_values_.front() != value) {
+      throw std::runtime_error("Unexpected argument value for call to WriteNestedSubarrayImpl");
+    }
+    WriteNestedSubarrayImpl_expected_values_.pop();
+  }
+
+  std::queue<yardl::DynamicNDArray<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>>> WriteNestedSubarrayImpl_expected_values_;
+
+  void ExpectWriteNestedSubarrayImpl (yardl::DynamicNDArray<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>> const& value) {
+    WriteNestedSubarrayImpl_expected_values_.push(value);
+  }
+
+  void Verify() {
+    if (!WriteDynamicWithFixedIntSubarrayImpl_expected_values_.empty()) {
+      throw std::runtime_error("Expected call to WriteDynamicWithFixedIntSubarrayImpl was not received");
+    }
+    if (!WriteDynamicWithFixedFloatSubarrayImpl_expected_values_.empty()) {
+      throw std::runtime_error("Expected call to WriteDynamicWithFixedFloatSubarrayImpl was not received");
+    }
+    if (!WriteKnownDimCountWithFixedIntSubarrayImpl_expected_values_.empty()) {
+      throw std::runtime_error("Expected call to WriteKnownDimCountWithFixedIntSubarrayImpl was not received");
+    }
+    if (!WriteKnownDimCountWithFixedFloatSubarrayImpl_expected_values_.empty()) {
+      throw std::runtime_error("Expected call to WriteKnownDimCountWithFixedFloatSubarrayImpl was not received");
+    }
+    if (!WriteFixedWithFixedIntSubarrayImpl_expected_values_.empty()) {
+      throw std::runtime_error("Expected call to WriteFixedWithFixedIntSubarrayImpl was not received");
+    }
+    if (!WriteFixedWithFixedFloatSubarrayImpl_expected_values_.empty()) {
+      throw std::runtime_error("Expected call to WriteFixedWithFixedFloatSubarrayImpl was not received");
+    }
+    if (!WriteNestedSubarrayImpl_expected_values_.empty()) {
+      throw std::runtime_error("Expected call to WriteNestedSubarrayImpl was not received");
+    }
+  }
+};
+
+class TestSubarraysWriterBase : public SubarraysWriterBase {
+  public:
+  TestSubarraysWriterBase(std::unique_ptr<test_model::SubarraysWriterBase> writer, std::function<std::unique_ptr<SubarraysReaderBase>()> create_reader) : writer_(std::move(writer)), create_reader_(create_reader) {
+  }
+
+  ~TestSubarraysWriterBase() {
+    if (!close_called_ && !std::uncaught_exceptions()) {
+      ADD_FAILURE() << "Close() needs to be called on 'TestSubarraysWriterBase' to verify mocks";
+    }
+  }
+
+  protected:
+  void WriteDynamicWithFixedIntSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<int32_t, 3>> const& value) override {
+    writer_->WriteDynamicWithFixedIntSubarray(value);
+    mock_writer_.ExpectWriteDynamicWithFixedIntSubarrayImpl(value);
+  }
+
+  void WriteDynamicWithFixedFloatSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<float, 3>> const& value) override {
+    writer_->WriteDynamicWithFixedFloatSubarray(value);
+    mock_writer_.ExpectWriteDynamicWithFixedFloatSubarrayImpl(value);
+  }
+
+  void WriteKnownDimCountWithFixedIntSubarrayImpl(yardl::NDArray<yardl::FixedNDArray<int32_t, 3>, 1> const& value) override {
+    writer_->WriteKnownDimCountWithFixedIntSubarray(value);
+    mock_writer_.ExpectWriteKnownDimCountWithFixedIntSubarrayImpl(value);
+  }
+
+  void WriteKnownDimCountWithFixedFloatSubarrayImpl(yardl::NDArray<yardl::FixedNDArray<float, 3>, 1> const& value) override {
+    writer_->WriteKnownDimCountWithFixedFloatSubarray(value);
+    mock_writer_.ExpectWriteKnownDimCountWithFixedFloatSubarrayImpl(value);
+  }
+
+  void WriteFixedWithFixedIntSubarrayImpl(yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2> const& value) override {
+    writer_->WriteFixedWithFixedIntSubarray(value);
+    mock_writer_.ExpectWriteFixedWithFixedIntSubarrayImpl(value);
+  }
+
+  void WriteFixedWithFixedFloatSubarrayImpl(yardl::FixedNDArray<yardl::FixedNDArray<float, 3>, 2> const& value) override {
+    writer_->WriteFixedWithFixedFloatSubarray(value);
+    mock_writer_.ExpectWriteFixedWithFixedFloatSubarrayImpl(value);
+  }
+
+  void WriteNestedSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>> const& value) override {
+    writer_->WriteNestedSubarray(value);
+    mock_writer_.ExpectWriteNestedSubarrayImpl(value);
+  }
+
+  void CloseImpl() override {
+    close_called_ = true;
+    writer_->Close();
+    std::unique_ptr<SubarraysReaderBase> reader = create_reader_();
+    reader->CopyTo(mock_writer_);
+    mock_writer_.Verify();
+  }
+
+  private:
+  std::unique_ptr<test_model::SubarraysWriterBase> writer_;
+  std::function<std::unique_ptr<test_model::SubarraysReaderBase>()> create_reader_;
+  MockSubarraysWriter mock_writer_;
+  bool close_called_ = false;
+};
+
+class MockSubarraysInRecordsWriter : public SubarraysInRecordsWriterBase {
+  public:
   void WriteWithFixedSubarraysImpl (yardl::DynamicNDArray<test_model::RecordWithFixedCollections> const& value) override {
     if (WriteWithFixedSubarraysImpl_expected_values_.empty()) {
       throw std::runtime_error("Unexpected call to WriteWithFixedSubarraysImpl");
@@ -1530,14 +1731,14 @@ class MockSubarraysWriter : public SubarraysWriterBase {
   }
 };
 
-class TestSubarraysWriterBase : public SubarraysWriterBase {
+class TestSubarraysInRecordsWriterBase : public SubarraysInRecordsWriterBase {
   public:
-  TestSubarraysWriterBase(std::unique_ptr<test_model::SubarraysWriterBase> writer, std::function<std::unique_ptr<SubarraysReaderBase>()> create_reader) : writer_(std::move(writer)), create_reader_(create_reader) {
+  TestSubarraysInRecordsWriterBase(std::unique_ptr<test_model::SubarraysInRecordsWriterBase> writer, std::function<std::unique_ptr<SubarraysInRecordsReaderBase>()> create_reader) : writer_(std::move(writer)), create_reader_(create_reader) {
   }
 
-  ~TestSubarraysWriterBase() {
+  ~TestSubarraysInRecordsWriterBase() {
     if (!close_called_ && !std::uncaught_exceptions()) {
-      ADD_FAILURE() << "Close() needs to be called on 'TestSubarraysWriterBase' to verify mocks";
+      ADD_FAILURE() << "Close() needs to be called on 'TestSubarraysInRecordsWriterBase' to verify mocks";
     }
   }
 
@@ -1555,15 +1756,15 @@ class TestSubarraysWriterBase : public SubarraysWriterBase {
   void CloseImpl() override {
     close_called_ = true;
     writer_->Close();
-    std::unique_ptr<SubarraysReaderBase> reader = create_reader_();
+    std::unique_ptr<SubarraysInRecordsReaderBase> reader = create_reader_();
     reader->CopyTo(mock_writer_);
     mock_writer_.Verify();
   }
 
   private:
-  std::unique_ptr<test_model::SubarraysWriterBase> writer_;
-  std::function<std::unique_ptr<test_model::SubarraysReaderBase>()> create_reader_;
-  MockSubarraysWriter mock_writer_;
+  std::unique_ptr<test_model::SubarraysInRecordsWriterBase> writer_;
+  std::function<std::unique_ptr<test_model::SubarraysInRecordsReaderBase>()> create_reader_;
+  MockSubarraysInRecordsWriter mock_writer_;
   bool close_called_ = false;
 };
 
@@ -3956,6 +4157,20 @@ std::unique_ptr<test_model::SubarraysWriterBase> CreateValidatingWriter<test_mod
     return std::make_unique<test_model::TestSubarraysWriterBase>(std::make_unique<test_model::binary::SubarraysWriter>(filename), [filename](){return std::make_unique<test_model::binary::SubarraysReader>(filename);});
   case Format::kNDJson:
     return std::make_unique<test_model::TestSubarraysWriterBase>(std::make_unique<test_model::ndjson::SubarraysWriter>(filename), [filename](){return std::make_unique<test_model::ndjson::SubarraysReader>(filename);});
+  default:
+    throw std::runtime_error("Unknown format");
+  }
+}
+
+template<>
+std::unique_ptr<test_model::SubarraysInRecordsWriterBase> CreateValidatingWriter<test_model::SubarraysInRecordsWriterBase>(Format format, std::string const& filename) {
+  switch (format) {
+  case Format::kHdf5:
+    return std::make_unique<test_model::TestSubarraysInRecordsWriterBase>(std::make_unique<test_model::hdf5::SubarraysInRecordsWriter>(filename), [filename](){ return std::make_unique<test_model::hdf5::SubarraysInRecordsReader>(filename);});
+  case Format::kBinary:
+    return std::make_unique<test_model::TestSubarraysInRecordsWriterBase>(std::make_unique<test_model::binary::SubarraysInRecordsWriter>(filename), [filename](){return std::make_unique<test_model::binary::SubarraysInRecordsReader>(filename);});
+  case Format::kNDJson:
+    return std::make_unique<test_model::TestSubarraysInRecordsWriterBase>(std::make_unique<test_model::ndjson::SubarraysInRecordsWriter>(filename), [filename](){return std::make_unique<test_model::ndjson::SubarraysInRecordsReader>(filename);});
   default:
     throw std::runtime_error("Unknown format");
   }

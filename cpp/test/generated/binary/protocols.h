@@ -584,8 +584,13 @@ class SubarraysWriter : public test_model::SubarraysWriterBase, yardl::binary::B
   void Flush() override;
 
   protected:
-  void WriteWithFixedSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithFixedCollections> const& value) override;
-  void WriteWithVlenSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithVlenCollections> const& value) override;
+  void WriteDynamicWithFixedIntSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<int32_t, 3>> const& value) override;
+  void WriteDynamicWithFixedFloatSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<float, 3>> const& value) override;
+  void WriteKnownDimCountWithFixedIntSubarrayImpl(yardl::NDArray<yardl::FixedNDArray<int32_t, 3>, 1> const& value) override;
+  void WriteKnownDimCountWithFixedFloatSubarrayImpl(yardl::NDArray<yardl::FixedNDArray<float, 3>, 1> const& value) override;
+  void WriteFixedWithFixedIntSubarrayImpl(yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2> const& value) override;
+  void WriteFixedWithFixedFloatSubarrayImpl(yardl::FixedNDArray<yardl::FixedNDArray<float, 3>, 2> const& value) override;
+  void WriteNestedSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>> const& value) override;
   void CloseImpl() override;
 };
 
@@ -597,6 +602,47 @@ class SubarraysReader : public test_model::SubarraysReaderBase, yardl::binary::B
   }
 
   SubarraysReader(std::string file_name)
+      : yardl::binary::BinaryReader(file_name, schema_) {
+  }
+
+  protected:
+  void ReadDynamicWithFixedIntSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<int32_t, 3>>& value) override;
+  void ReadDynamicWithFixedFloatSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<float, 3>>& value) override;
+  void ReadKnownDimCountWithFixedIntSubarrayImpl(yardl::NDArray<yardl::FixedNDArray<int32_t, 3>, 1>& value) override;
+  void ReadKnownDimCountWithFixedFloatSubarrayImpl(yardl::NDArray<yardl::FixedNDArray<float, 3>, 1>& value) override;
+  void ReadFixedWithFixedIntSubarrayImpl(yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>& value) override;
+  void ReadFixedWithFixedFloatSubarrayImpl(yardl::FixedNDArray<yardl::FixedNDArray<float, 3>, 2>& value) override;
+  void ReadNestedSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>>& value) override;
+  void CloseImpl() override;
+};
+
+// Binary writer for the SubarraysInRecords protocol.
+class SubarraysInRecordsWriter : public test_model::SubarraysInRecordsWriterBase, yardl::binary::BinaryWriter {
+  public:
+  SubarraysInRecordsWriter(std::ostream& stream)
+      : yardl::binary::BinaryWriter(stream, schema_) {
+  }
+
+  SubarraysInRecordsWriter(std::string file_name)
+      : yardl::binary::BinaryWriter(file_name, schema_) {
+  }
+
+  void Flush() override;
+
+  protected:
+  void WriteWithFixedSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithFixedCollections> const& value) override;
+  void WriteWithVlenSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithVlenCollections> const& value) override;
+  void CloseImpl() override;
+};
+
+// Binary reader for the SubarraysInRecords protocol.
+class SubarraysInRecordsReader : public test_model::SubarraysInRecordsReaderBase, yardl::binary::BinaryReader {
+  public:
+  SubarraysInRecordsReader(std::istream& stream)
+      : yardl::binary::BinaryReader(stream, schema_) {
+  }
+
+  SubarraysInRecordsReader(std::string file_name)
       : yardl::binary::BinaryReader(file_name, schema_) {
   }
 

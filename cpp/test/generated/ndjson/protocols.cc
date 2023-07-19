@@ -2159,13 +2159,33 @@ void FixedArraysReader::CloseImpl() {
   VerifyFinished();
 }
 
-void SubarraysWriter::WriteWithFixedSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithFixedCollections> const& value) {
+void SubarraysWriter::WriteDynamicWithFixedIntSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<int32_t, 3>> const& value) {
   ordered_json json_value = value;
-  yardl::ndjson::WriteProtocolValue(stream_, "withFixedSubarrays", json_value);}
+  yardl::ndjson::WriteProtocolValue(stream_, "dynamicWithFixedIntSubarray", json_value);}
 
-void SubarraysWriter::WriteWithVlenSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithVlenCollections> const& value) {
+void SubarraysWriter::WriteDynamicWithFixedFloatSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<float, 3>> const& value) {
   ordered_json json_value = value;
-  yardl::ndjson::WriteProtocolValue(stream_, "withVlenSubarrays", json_value);}
+  yardl::ndjson::WriteProtocolValue(stream_, "dynamicWithFixedFloatSubarray", json_value);}
+
+void SubarraysWriter::WriteKnownDimCountWithFixedIntSubarrayImpl(yardl::NDArray<yardl::FixedNDArray<int32_t, 3>, 1> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "knownDimCountWithFixedIntSubarray", json_value);}
+
+void SubarraysWriter::WriteKnownDimCountWithFixedFloatSubarrayImpl(yardl::NDArray<yardl::FixedNDArray<float, 3>, 1> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "knownDimCountWithFixedFloatSubarray", json_value);}
+
+void SubarraysWriter::WriteFixedWithFixedIntSubarrayImpl(yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "fixedWithFixedIntSubarray", json_value);}
+
+void SubarraysWriter::WriteFixedWithFixedFloatSubarrayImpl(yardl::FixedNDArray<yardl::FixedNDArray<float, 3>, 2> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "fixedWithFixedFloatSubarray", json_value);}
+
+void SubarraysWriter::WriteNestedSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "nestedSubarray", json_value);}
 
 void SubarraysWriter::Flush() {
   stream_.flush();
@@ -2175,15 +2195,63 @@ void SubarraysWriter::CloseImpl() {
   stream_.flush();
 }
 
-void SubarraysReader::ReadWithFixedSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithFixedCollections>& value) {
-  yardl::ndjson::ReadProtocolValue(stream_, line_, "withFixedSubarrays", true, unused_step_, value);
+void SubarraysReader::ReadDynamicWithFixedIntSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<int32_t, 3>>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "dynamicWithFixedIntSubarray", true, unused_step_, value);
 }
 
-void SubarraysReader::ReadWithVlenSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithVlenCollections>& value) {
-  yardl::ndjson::ReadProtocolValue(stream_, line_, "withVlenSubarrays", true, unused_step_, value);
+void SubarraysReader::ReadDynamicWithFixedFloatSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<float, 3>>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "dynamicWithFixedFloatSubarray", true, unused_step_, value);
+}
+
+void SubarraysReader::ReadKnownDimCountWithFixedIntSubarrayImpl(yardl::NDArray<yardl::FixedNDArray<int32_t, 3>, 1>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "knownDimCountWithFixedIntSubarray", true, unused_step_, value);
+}
+
+void SubarraysReader::ReadKnownDimCountWithFixedFloatSubarrayImpl(yardl::NDArray<yardl::FixedNDArray<float, 3>, 1>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "knownDimCountWithFixedFloatSubarray", true, unused_step_, value);
+}
+
+void SubarraysReader::ReadFixedWithFixedIntSubarrayImpl(yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "fixedWithFixedIntSubarray", true, unused_step_, value);
+}
+
+void SubarraysReader::ReadFixedWithFixedFloatSubarrayImpl(yardl::FixedNDArray<yardl::FixedNDArray<float, 3>, 2>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "fixedWithFixedFloatSubarray", true, unused_step_, value);
+}
+
+void SubarraysReader::ReadNestedSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "nestedSubarray", true, unused_step_, value);
 }
 
 void SubarraysReader::CloseImpl() {
+  VerifyFinished();
+}
+
+void SubarraysInRecordsWriter::WriteWithFixedSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithFixedCollections> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "withFixedSubarrays", json_value);}
+
+void SubarraysInRecordsWriter::WriteWithVlenSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithVlenCollections> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "withVlenSubarrays", json_value);}
+
+void SubarraysInRecordsWriter::Flush() {
+  stream_.flush();
+}
+
+void SubarraysInRecordsWriter::CloseImpl() {
+  stream_.flush();
+}
+
+void SubarraysInRecordsReader::ReadWithFixedSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithFixedCollections>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "withFixedSubarrays", true, unused_step_, value);
+}
+
+void SubarraysInRecordsReader::ReadWithVlenSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithVlenCollections>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "withVlenSubarrays", true, unused_step_, value);
+}
+
+void SubarraysInRecordsReader::CloseImpl() {
   VerifyFinished();
 }
 
