@@ -299,7 +299,7 @@ class StructSerializer(TypeSerializer[T, T_NP]):
     def __init__(self, numpy_type: type, format_string: str) -> None:
         super().__init__(numpy_type)
         self._struct = struct.Struct(format_string)
-        self.numpy_type = numpy_type
+        self._numpy_type = numpy_type
 
     def write(self, stream: CodedOutputStream, value: T) -> None:
         stream.write(self._struct, value)
@@ -311,7 +311,7 @@ class StructSerializer(TypeSerializer[T, T_NP]):
         return cast(T, stream.read(self._struct)[0])
 
     def read_numpy(self, stream: CodedInputStream) -> T_NP:
-        return cast(T_NP, self.numpy_type(stream.read(self._struct)[0]))
+        return cast(T_NP, self._numpy_type(stream.read(self._struct)[0]))
 
     def struct_format_str(self) -> str:
         return self._struct.format
@@ -881,7 +881,7 @@ class OptionalSerializer(Generic[T, T_NP], TypeSerializer[Optional[T], np.void])
                 [("has_value", np.bool_), ("value", element_serializer.overall_dtype())]
             )
         )
-        self.element_serializer = element_serializer
+        self._element_serializer = element_serializer
         self._none = cast(np.void, np.zeros((), dtype=self.overall_dtype())[()])
 
     def write(self, stream: CodedOutputStream, value: Optional[T]) -> None:
@@ -889,28 +889,28 @@ class OptionalSerializer(Generic[T, T_NP], TypeSerializer[Optional[T], np.void])
             stream.write_byte(0)
         else:
             stream.write_byte(1)
-            self.element_serializer.write(stream, value)
+            self._element_serializer.write(stream, value)
 
     def write_numpy(self, stream: CodedOutputStream, value: np.void) -> None:
         if not value["has_value"]:
             stream.write_byte(0)
         else:
             stream.write_byte(1)
-            self.element_serializer.write_numpy(stream, value["value"])
+            self._element_serializer.write_numpy(stream, value["value"])
 
     def read(self, stream: CodedInputStream, read_as_numpy: Types) -> Optional[T]:
         has_value = stream.read_byte()
         if has_value == 0:
             return None
         else:
-            return self.element_serializer.read(stream, read_as_numpy)
+            return self._element_serializer.read(stream, read_as_numpy)
 
     def read_numpy(self, stream: CodedInputStream) -> np.void:
         has_value = stream.read_byte()
         if has_value == 0:
             return self._none
         else:
-            return cast(np.void, (True, self.element_serializer.read_numpy(stream)))
+            return cast(np.void, (True, self._element_serializer.read_numpy(stream)))
 
     def is_trivially_serializable(self) -> bool:
         return super().is_trivially_serializable()
@@ -987,17 +987,17 @@ class UnionSerializer(TypeSerializer[T, np.object_]):
 class StreamSerializer(TypeSerializer[Iterable[T], Any]):
     def __init__(self, element_serializer: TypeSerializer[T, T_NP]) -> None:
         super().__init__(np.object_)
-        self.element_serializer = element_serializer
+        self._element_serializer = element_serializer
 
     def write(self, stream: CodedOutputStream, value: Iterable[T]) -> None:
         if isinstance(value, list):
             stream.write_unsigned_varint(len(value))
             for element in value:
-                self.element_serializer.write(stream, element)
+                self._element_serializer.write(stream, element)
         else:
             for element in value:
                 stream.write_byte(1)
-                self.element_serializer.write(stream, element)
+                self._element_serializer.write(stream, element)
 
         stream.write_byte(0)
 
@@ -1007,7 +1007,7 @@ class StreamSerializer(TypeSerializer[Iterable[T], Any]):
     def read(self, stream: CodedInputStream, read_as_numpy: Types) -> Iterable[T]:
         while (i := stream.read_unsigned_varint()) > 0:
             for _ in range(i):
-                yield self.element_serializer.read(stream, read_as_numpy)
+                yield self._element_serializer.read(stream, read_as_numpy)
 
     def read_numpy(self, stream: CodedInputStream) -> np.object_:
         raise NotImplementedError()
@@ -1018,50 +1018,50 @@ class FixedVectorSerializer(Generic[T, T_NP], TypeSerializer[list[T], np.object_
         self, element_serializer: TypeSerializer[T, T_NP], length: int
     ) -> None:
         super().__init__(np.dtype((element_serializer.overall_dtype(), length)))
-        self.element_serializer = element_serializer
-        self.length = length
+        self._element_serializer = element_serializer
+        self._length = length
 
     def write(self, stream: CodedOutputStream, value: list[T]) -> None:
-        if len(value) != self.length:
+        if len(value) != self._length:
             raise ValueError(
-                f"Expected a list of length {self.length}, got {len(value)}"
+                f"Expected a list of length {self._length}, got {len(value)}"
             )
         for element in value:
-            self.element_serializer.write(stream, element)
+            self._element_serializer.write(stream, element)
 
     def write_numpy(self, stream: CodedOutputStream, value: np.object_) -> None:
         if not isinstance(value, list):
             raise ValueError(f"Expected a list, got {type(value)}")
 
-        if len(value) != self.length:
+        if len(value) != self._length:
             raise ValueError(
-                f"Expected a list of length {self.length}, got {len(value)}"
+                f"Expected a list of length {self._length}, got {len(value)}"
             )
         for element in cast(list[T], value):
-            self.element_serializer.write(stream, element)
+            self._element_serializer.write(stream, element)
 
     def read(self, stream: CodedInputStream, read_as_numpy: Types) -> list[T]:
         return [
-            self.element_serializer.read(stream, read_as_numpy)
-            for _ in range(self.length)
+            self._element_serializer.read(stream, read_as_numpy)
+            for _ in range(self._length)
         ]
 
     def read_numpy(self, stream: CodedInputStream) -> np.object_:
         return np.object_(self.read(stream, Types.ALL))
 
     def is_trivially_serializable(self) -> bool:
-        return self.element_serializer.is_trivially_serializable()
+        return self._element_serializer.is_trivially_serializable()
 
 
 class VectorSerializer(Generic[T, T_NP], TypeSerializer[list[T], np.object_]):
     def __init__(self, element_serializer: TypeSerializer[T, T_NP]) -> None:
         super().__init__(np.object_)
-        self.element_serializer = element_serializer
+        self._element_serializer = element_serializer
 
     def write(self, stream: CodedOutputStream, value: list[T]) -> None:
         stream.write_unsigned_varint(len(value))
         for element in value:
-            self.element_serializer.write(stream, element)
+            self._element_serializer.write(stream, element)
 
     def write_numpy(self, stream: CodedOutputStream, value: np.object_) -> None:
         if not isinstance(value, list):
@@ -1069,12 +1069,12 @@ class VectorSerializer(Generic[T, T_NP], TypeSerializer[list[T], np.object_]):
 
         stream.write_unsigned_varint(len(value))
         for element in cast(list[T], value):
-            self.element_serializer.write(stream, element)
+            self._element_serializer.write(stream, element)
 
     def read(self, stream: CodedInputStream, read_as_numpy: Types) -> list[T]:
         length = stream.read_unsigned_varint()
         return [
-            self.element_serializer.read(stream, read_as_numpy) for _ in range(length)
+            self._element_serializer.read(stream, read_as_numpy) for _ in range(length)
         ]
 
     def read_numpy(self, stream: CodedInputStream) -> np.object_:
@@ -1097,14 +1097,14 @@ class MapSerializer(
         value_serializer: TypeSerializer[TValue, TValue_NP],
     ) -> None:
         super().__init__(np.object_)
-        self.key_serializer = key_serializer
-        self.value_serializer = value_serializer
+        self._key_serializer = key_serializer
+        self._value_serializer = value_serializer
 
     def write(self, stream: CodedOutputStream, value: dict[TKey, TValue]) -> None:
         stream.write_unsigned_varint(len(value))
         for k, v in value.items():
-            self.key_serializer.write(stream, k)
-            self.value_serializer.write(stream, v)
+            self._key_serializer.write(stream, k)
+            self._value_serializer.write(stream, v)
 
     def write_numpy(self, stream: CodedOutputStream, value: np.object_) -> None:
         self.write(stream, cast(dict[TKey, TValue], value))
@@ -1114,9 +1114,9 @@ class MapSerializer(
     ) -> dict[TKey, TValue]:
         length = stream.read_unsigned_varint()
         return {
-            self.key_serializer.read(stream, read_as_numpy): self.value_serializer.read(
+            self._key_serializer.read(
                 stream, read_as_numpy
-            )
+            ): self._value_serializer.read(stream, read_as_numpy)
             for _ in range(length)
         }
 
@@ -1145,7 +1145,9 @@ class NDArraySerializerBase(
         if self._subarray_shape == ():
             self._subarray_shape = None
         else:
-            if isinstance(element_serializer, NDArraySerializerBase):
+            if isinstance(element_serializer, FixedNDArraySerializer) or isinstance(
+                element_serializer, FixedVectorSerializer
+            ):
                 self._element_serializer = element_serializer._element_serializer
 
     @staticmethod
@@ -1266,17 +1268,17 @@ class NDArraySerializer(Generic[T, T_NP], NDArraySerializerBase[T, T_NP]):
         super().__init__(
             np.object_, element_serializer, element_serializer.overall_dtype()
         )
-        self.ndims = ndims
+        self._ndims = ndims
 
     def write(self, stream: CodedOutputStream, value: npt.NDArray[Any]) -> None:
         if self._subarray_shape is None:
-            if value.ndim != self.ndims:
-                raise ValueError(f"Expected {self.ndims} dimensions, got {value.ndim}")
+            if value.ndim != self._ndims:
+                raise ValueError(f"Expected {self._ndims} dimensions, got {value.ndim}")
 
             for dim in value.shape:
                 stream.write_unsigned_varint(dim)
         else:
-            total_dims = len(self._subarray_shape) + self.ndims
+            total_dims = len(self._subarray_shape) + self._ndims
             if value.ndim != total_dims:
                 raise ValueError(f"Expected {total_dims} dimensions, got {value.ndim}")
 
@@ -1294,7 +1296,7 @@ class NDArraySerializer(Generic[T, T_NP], NDArraySerializerBase[T, T_NP]):
         self.write(stream, cast(npt.NDArray[Any], value))
 
     def read(self, stream: CodedInputStream, read_as_numpy: Types) -> npt.NDArray[Any]:
-        shape = tuple(stream.read_unsigned_varint() for _ in range(self.ndims))
+        shape = tuple(stream.read_unsigned_varint() for _ in range(self._ndims))
         if self._subarray_shape is not None:
             shape += self._subarray_shape
 
@@ -1312,13 +1314,13 @@ class FixedNDArraySerializer(Generic[T, T_NP], NDArraySerializerBase[T, T_NP]):
     ) -> None:
         dtype = element_serializer.overall_dtype()
         super().__init__(np.dtype((dtype, shape)), element_serializer, dtype)
-        self.shape = shape
+        self._shape = shape
 
     def write(self, stream: CodedOutputStream, value: npt.NDArray[Any]) -> None:
         required_shape = (
-            self.shape
+            self._shape
             if self._subarray_shape is None
-            else self.shape + self._subarray_shape
+            else self._shape + self._subarray_shape
         )
         if value.shape != required_shape:
             raise ValueError(f"Expected shape {required_shape}, got {value.shape}")
@@ -1330,9 +1332,9 @@ class FixedNDArraySerializer(Generic[T, T_NP], NDArraySerializerBase[T, T_NP]):
 
     def read(self, stream: CodedInputStream, read_as_numpy: Types) -> npt.NDArray[Any]:
         full_shape = (
-            self.shape
+            self._shape
             if self._subarray_shape is None
-            else self.shape + self._subarray_shape
+            else self._shape + self._subarray_shape
         )
         return self._read_data(stream, full_shape, read_as_numpy)
 

@@ -1,11 +1,14 @@
 #! /usr/bin/env python3
 
+import datetime
 import os
+import time
 from typing import (
     Any,
 )
 import sandbox
 import numpy as np
+import pandas as pd
 
 
 def print_value(value: Any) -> None:
@@ -38,3 +41,22 @@ with sandbox.BinaryHelloWorldReader(file, sandbox.Types.NONE) as r:
     print_value(list(value))
 
 os.system(f"hexdump -C {file}")
+
+
+print(np.datetime64("2023-07-18T19:19:17.732594999", "D").dtype)
+print(time.gmtime(0))
+
+
+fa = np.array([1, 2, 3], dtype=np.int32)
+dt = np.dtype((fa.dtype, fa.shape))
+print(f"dt={dt.shape}")
+da = np.ndarray((2,), dtype=dt)
+print(f"da.dtype={da.dtype}")
+da[0:] = fa
+
+print(da.dtype)
+print(da.shape)
+print(da)
+
+with sandbox.BinaryHello2Writer(file) as w:
+    w.write_data(da)

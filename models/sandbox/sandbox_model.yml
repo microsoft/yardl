@@ -5,3 +5,8 @@ HelloWorld: !protocol
         items: complexdouble
         dimensions:
           - 2
+
+
+Hello2: !protocol
+  sequence:
+    data: int[3][]

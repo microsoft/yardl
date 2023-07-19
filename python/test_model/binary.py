@@ -492,6 +492,9 @@ class BinarySubarraysWriter(_binary.BinaryProtocolWriter, SubarraysWriterBase):
     def _write_nested_subarray(self, value: npt.NDArray[np.int32]) -> None:
         _binary.DynamicNDArraySerializer(_binary.FixedNDArraySerializer(_binary.FixedNDArraySerializer(_binary.int32_serializer, (3,)), (2,))).write(self._stream, value)
 
+    def _write_dynamic_with_fixed_vector_subarray(self, value: npt.NDArray[np.int32]) -> None:
+        _binary.DynamicNDArraySerializer(_binary.FixedVectorSerializer(_binary.int32_serializer, 3)).write(self._stream, value)
+
 
 class BinarySubarraysReader(_binary.BinaryProtocolReader, SubarraysReaderBase):
     """Binary writer for the Subarrays protocol."""
@@ -521,6 +524,9 @@ class BinarySubarraysReader(_binary.BinaryProtocolReader, SubarraysReaderBase):
 
     def _read_nested_subarray(self) -> npt.NDArray[np.int32]:
         return _binary.DynamicNDArraySerializer(_binary.FixedNDArraySerializer(_binary.FixedNDArraySerializer(_binary.int32_serializer, (3,)), (2,))).read(self._stream, self._read_as_numpy)
+
+    def _read_dynamic_with_fixed_vector_subarray(self) -> npt.NDArray[np.int32]:
+        return _binary.DynamicNDArraySerializer(_binary.FixedVectorSerializer(_binary.int32_serializer, 3)).read(self._stream, self._read_as_numpy)
 
 class BinarySubarraysInRecordsWriter(_binary.BinaryProtocolWriter, SubarraysInRecordsWriterBase):
     """Binary writer for the SubarraysInRecords protocol."""

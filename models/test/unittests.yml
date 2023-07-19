@@ -239,6 +239,8 @@ Subarrays: !protocol
 
     nestedSubarray: int[3][2][]
 
+    dynamicWithFixedVectorSubarray: int*3[]
+
 
 SubarraysInRecords: !protocol
   sequence:

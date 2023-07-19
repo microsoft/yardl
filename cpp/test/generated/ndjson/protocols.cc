@@ -2187,6 +2187,10 @@ void SubarraysWriter::WriteNestedSubarrayImpl(yardl::DynamicNDArray<yardl::Fixed
   ordered_json json_value = value;
   yardl::ndjson::WriteProtocolValue(stream_, "nestedSubarray", json_value);}
 
+void SubarraysWriter::WriteDynamicWithFixedVectorSubarrayImpl(yardl::DynamicNDArray<std::array<int32_t, 3>> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "dynamicWithFixedVectorSubarray", json_value);}
+
 void SubarraysWriter::Flush() {
   stream_.flush();
 }
@@ -2221,6 +2225,10 @@ void SubarraysReader::ReadFixedWithFixedFloatSubarrayImpl(yardl::FixedNDArray<ya
 
 void SubarraysReader::ReadNestedSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>>& value) {
   yardl::ndjson::ReadProtocolValue(stream_, line_, "nestedSubarray", true, unused_step_, value);
+}
+
+void SubarraysReader::ReadDynamicWithFixedVectorSubarrayImpl(yardl::DynamicNDArray<std::array<int32_t, 3>>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "dynamicWithFixedVectorSubarray", true, unused_step_, value);
 }
 
 void SubarraysReader::CloseImpl() {

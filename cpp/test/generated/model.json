@@ -2992,6 +2992,19 @@
                   }
                 }
               }
+            },
+            {
+              "name": "dynamicWithFixedVectorSubarray",
+              "type": {
+                "array": {
+                  "items": {
+                    "vector": {
+                      "items": "int32",
+                      "length": 3
+                    }
+                  }
+                }
+              }
             }
           ]
         },

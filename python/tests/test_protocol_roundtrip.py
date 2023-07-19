@@ -455,6 +455,10 @@ def test_subarrays():
             )
         )
 
+        w.write_dynamic_with_fixed_vector_subarray(
+            np.array([[1, 2, 3], [4, 5, 6]], dtype=np.int32)
+        )
+
 
 def test_subarrays_in_records():
     fixed_dtype = tm.get_dtype(tm.RecordWithFixedCollections)

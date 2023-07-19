@@ -2178,6 +2178,10 @@ void SubarraysWriter::WriteNestedSubarrayImpl(yardl::DynamicNDArray<yardl::Fixed
   yardl::binary::WriteDynamicNDArray<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>, yardl::binary::WriteFixedNDArray<yardl::FixedNDArray<int32_t, 3>, yardl::binary::WriteFixedNDArray<int32_t, yardl::binary::WriteInteger, 3>, 2>>(stream_, value);
 }
 
+void SubarraysWriter::WriteDynamicWithFixedVectorSubarrayImpl(yardl::DynamicNDArray<std::array<int32_t, 3>> const& value) {
+  yardl::binary::WriteDynamicNDArray<std::array<int32_t, 3>, yardl::binary::WriteArray<int32_t, yardl::binary::WriteInteger, 3>>(stream_, value);
+}
+
 void SubarraysWriter::Flush() {
   stream_.Flush();
 }
@@ -2212,6 +2216,10 @@ void SubarraysReader::ReadFixedWithFixedFloatSubarrayImpl(yardl::FixedNDArray<ya
 
 void SubarraysReader::ReadNestedSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>>& value) {
   yardl::binary::ReadDynamicNDArray<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>, yardl::binary::ReadFixedNDArray<yardl::FixedNDArray<int32_t, 3>, yardl::binary::ReadFixedNDArray<int32_t, yardl::binary::ReadInteger, 3>, 2>>(stream_, value);
+}
+
+void SubarraysReader::ReadDynamicWithFixedVectorSubarrayImpl(yardl::DynamicNDArray<std::array<int32_t, 3>>& value) {
+  yardl::binary::ReadDynamicNDArray<std::array<int32_t, 3>, yardl::binary::ReadArray<int32_t, yardl::binary::ReadInteger, 3>>(stream_, value);
 }
 
 void SubarraysReader::CloseImpl() {

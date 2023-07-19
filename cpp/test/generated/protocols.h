@@ -970,6 +970,9 @@ class SubarraysWriterBase {
   // Ordinal 6.
   void WriteNestedSubarray(yardl::DynamicNDArray<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>> const& value);
 
+  // Ordinal 7.
+  void WriteDynamicWithFixedVectorSubarray(yardl::DynamicNDArray<std::array<int32_t, 3>> const& value);
+
   // Optionaly close this writer before destructing. Validates that all steps were completed.
   void Close();
 
@@ -986,6 +989,7 @@ class SubarraysWriterBase {
   virtual void WriteFixedWithFixedIntSubarrayImpl(yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2> const& value) = 0;
   virtual void WriteFixedWithFixedFloatSubarrayImpl(yardl::FixedNDArray<yardl::FixedNDArray<float, 3>, 2> const& value) = 0;
   virtual void WriteNestedSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>> const& value) = 0;
+  virtual void WriteDynamicWithFixedVectorSubarrayImpl(yardl::DynamicNDArray<std::array<int32_t, 3>> const& value) = 0;
   virtual void CloseImpl() {}
 
   static std::string schema_;
@@ -1020,6 +1024,9 @@ class SubarraysReaderBase {
   // Ordinal 6.
   void ReadNestedSubarray(yardl::DynamicNDArray<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>>& value);
 
+  // Ordinal 7.
+  void ReadDynamicWithFixedVectorSubarray(yardl::DynamicNDArray<std::array<int32_t, 3>>& value);
+
   // Optionaly close this writer before destructing. Validates that all steps were completely read.
   void Close();
 
@@ -1035,6 +1042,7 @@ class SubarraysReaderBase {
   virtual void ReadFixedWithFixedIntSubarrayImpl(yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>& value) = 0;
   virtual void ReadFixedWithFixedFloatSubarrayImpl(yardl::FixedNDArray<yardl::FixedNDArray<float, 3>, 2>& value) = 0;
   virtual void ReadNestedSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>>& value) = 0;
+  virtual void ReadDynamicWithFixedVectorSubarrayImpl(yardl::DynamicNDArray<std::array<int32_t, 3>>& value) = 0;
   virtual void CloseImpl() {}
   static std::string schema_;
 

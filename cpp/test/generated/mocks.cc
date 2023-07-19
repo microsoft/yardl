@@ -1600,6 +1600,22 @@ class MockSubarraysWriter : public SubarraysWriterBase {
     WriteNestedSubarrayImpl_expected_values_.push(value);
   }
 
+  void WriteDynamicWithFixedVectorSubarrayImpl (yardl::DynamicNDArray<std::array<int32_t, 3>> const& value) override {
+    if (WriteDynamicWithFixedVectorSubarrayImpl_expected_values_.empty()) {
+      throw std::runtime_error("Unexpected call to WriteDynamicWithFixedVectorSubarrayImpl");
+    }
+    if (WriteDynamicWithFixedVectorSubarrayImpl_expected_values_.front() != value) {
+      throw std::runtime_error("Unexpected argument value for call to WriteDynamicWithFixedVectorSubarrayImpl");
+    }
+    WriteDynamicWithFixedVectorSubarrayImpl_expected_values_.pop();
+  }
+
+  std::queue<yardl::DynamicNDArray<std::array<int32_t, 3>>> WriteDynamicWithFixedVectorSubarrayImpl_expected_values_;
+
+  void ExpectWriteDynamicWithFixedVectorSubarrayImpl (yardl::DynamicNDArray<std::array<int32_t, 3>> const& value) {
+    WriteDynamicWithFixedVectorSubarrayImpl_expected_values_.push(value);
+  }
+
   void Verify() {
     if (!WriteDynamicWithFixedIntSubarrayImpl_expected_values_.empty()) {
       throw std::runtime_error("Expected call to WriteDynamicWithFixedIntSubarrayImpl was not received");
@@ -1621,6 +1637,9 @@ class MockSubarraysWriter : public SubarraysWriterBase {
     }
     if (!WriteNestedSubarrayImpl_expected_values_.empty()) {
       throw std::runtime_error("Expected call to WriteNestedSubarrayImpl was not received");
+    }
+    if (!WriteDynamicWithFixedVectorSubarrayImpl_expected_values_.empty()) {
+      throw std::runtime_error("Expected call to WriteDynamicWithFixedVectorSubarrayImpl was not received");
     }
   }
 };
@@ -1670,6 +1689,11 @@ class TestSubarraysWriterBase : public SubarraysWriterBase {
   void WriteNestedSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>> const& value) override {
     writer_->WriteNestedSubarray(value);
     mock_writer_.ExpectWriteNestedSubarrayImpl(value);
+  }
+
+  void WriteDynamicWithFixedVectorSubarrayImpl(yardl::DynamicNDArray<std::array<int32_t, 3>> const& value) override {
+    writer_->WriteDynamicWithFixedVectorSubarray(value);
+    mock_writer_.ExpectWriteDynamicWithFixedVectorSubarrayImpl(value);
   }
 
   void CloseImpl() override {

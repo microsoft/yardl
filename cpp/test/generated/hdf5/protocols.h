@@ -455,6 +455,8 @@ class SubarraysWriter : public test_model::SubarraysWriterBase, public yardl::hd
 
   void WriteNestedSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>> const& value) override;
 
+  void WriteDynamicWithFixedVectorSubarrayImpl(yardl::DynamicNDArray<std::array<int32_t, 3>> const& value) override;
+
   private:
 };
 
@@ -476,6 +478,8 @@ class SubarraysReader : public test_model::SubarraysReaderBase, public yardl::hd
   void ReadFixedWithFixedFloatSubarrayImpl(yardl::FixedNDArray<yardl::FixedNDArray<float, 3>, 2>& value) override;
 
   void ReadNestedSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>>& value) override;
+
+  void ReadDynamicWithFixedVectorSubarrayImpl(yardl::DynamicNDArray<std::array<int32_t, 3>>& value) override;
 
   private:
 };

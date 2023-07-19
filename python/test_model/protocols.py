@@ -2131,14 +2131,14 @@ class SubarraysWriterBase(abc.ABC):
     def __init__(self) -> None:
         self._state = 0
 
-    schema = r"""{"protocol":{"name":"Subarrays","sequence":[{"name":"dynamicWithFixedIntSubarray","type":{"array":{"items":{"array":{"items":"int32","dimensions":[{"length":3}]}}}}},{"name":"dynamicWithFixedFloatSubarray","type":{"array":{"items":{"array":{"items":"float32","dimensions":[{"length":3}]}}}}},{"name":"knownDimCountWithFixedIntSubarray","type":{"array":{"items":{"array":{"items":"int32","dimensions":[{"length":3}]}},"dimensions":1}}},{"name":"knownDimCountWithFixedFloatSubarray","type":{"array":{"items":{"array":{"items":"float32","dimensions":[{"length":3}]}},"dimensions":1}}},{"name":"fixedWithFixedIntSubarray","type":{"array":{"items":{"array":{"items":"int32","dimensions":[{"length":3}]}},"dimensions":[{"length":2}]}}},{"name":"fixedWithFixedFloatSubarray","type":{"array":{"items":{"array":{"items":"float32","dimensions":[{"length":3}]}},"dimensions":[{"length":2}]}}},{"name":"nestedSubarray","type":{"array":{"items":{"array":{"items":{"array":{"items":"int32","dimensions":[{"length":3}]}},"dimensions":[{"length":2}]}}}}}]},"types":null}"""
+    schema = r"""{"protocol":{"name":"Subarrays","sequence":[{"name":"dynamicWithFixedIntSubarray","type":{"array":{"items":{"array":{"items":"int32","dimensions":[{"length":3}]}}}}},{"name":"dynamicWithFixedFloatSubarray","type":{"array":{"items":{"array":{"items":"float32","dimensions":[{"length":3}]}}}}},{"name":"knownDimCountWithFixedIntSubarray","type":{"array":{"items":{"array":{"items":"int32","dimensions":[{"length":3}]}},"dimensions":1}}},{"name":"knownDimCountWithFixedFloatSubarray","type":{"array":{"items":{"array":{"items":"float32","dimensions":[{"length":3}]}},"dimensions":1}}},{"name":"fixedWithFixedIntSubarray","type":{"array":{"items":{"array":{"items":"int32","dimensions":[{"length":3}]}},"dimensions":[{"length":2}]}}},{"name":"fixedWithFixedFloatSubarray","type":{"array":{"items":{"array":{"items":"float32","dimensions":[{"length":3}]}},"dimensions":[{"length":2}]}}},{"name":"nestedSubarray","type":{"array":{"items":{"array":{"items":{"array":{"items":"int32","dimensions":[{"length":3}]}},"dimensions":[{"length":2}]}}}}},{"name":"dynamicWithFixedVectorSubarray","type":{"array":{"items":{"vector":{"items":"int32","length":3}}}}}]},"types":null}"""
 
     def __enter__(self):
         return self
 
     def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
         self.close()
-        if exc is None and self._state != 7:
+        if exc is None and self._state != 8:
             expected_method = self._state_to_method_name(self._state)
             raise ProtocolException(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
 
@@ -2205,6 +2205,15 @@ class SubarraysWriterBase(abc.ABC):
         self._write_nested_subarray(value)
         self._state = 7
 
+    def write_dynamic_with_fixed_vector_subarray(self, value: npt.NDArray[np.int32]) -> None:
+        """Ordinal 7"""
+
+        if self._state != 7:
+            self._raise_unexpected_state(7)
+
+        self._write_dynamic_with_fixed_vector_subarray(value)
+        self._state = 8
+
     @abc.abstractmethod
     def _write_dynamic_with_fixed_int_subarray(self, value: npt.NDArray[np.int32]) -> None:
         raise NotImplementedError()
@@ -2234,6 +2243,10 @@ class SubarraysWriterBase(abc.ABC):
         raise NotImplementedError()
 
     @abc.abstractmethod
+    def _write_dynamic_with_fixed_vector_subarray(self, value: npt.NDArray[np.int32]) -> None:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
     def close(self) -> None:
         raise NotImplementedError()
 
@@ -2257,6 +2270,8 @@ class SubarraysWriterBase(abc.ABC):
             return 'write_fixed_with_fixed_float_subarray'
         if state == 6:
             return 'write_nested_subarray'
+        if state == 7:
+            return 'write_dynamic_with_fixed_vector_subarray'
         return "<unknown>"
 
 class SubarraysReaderBase(abc.ABC):
@@ -2274,7 +2289,7 @@ class SubarraysReaderBase(abc.ABC):
 
     def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
         self.close()
-        if exc is None and self._state != 14:
+        if exc is None and self._state != 16:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolException(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
@@ -2357,6 +2372,16 @@ class SubarraysReaderBase(abc.ABC):
         self._state = 14
         return value
 
+    def read_dynamic_with_fixed_vector_subarray(self) -> npt.NDArray[np.int32]:
+        """Ordinal 7"""
+
+        if self._state != 14:
+            self._raise_unexpected_state(14)
+
+        value = self._read_dynamic_with_fixed_vector_subarray()
+        self._state = 16
+        return value
+
     def copy_to(self, writer: SubarraysWriterBase) -> None:
         writer.write_dynamic_with_fixed_int_subarray(self.read_dynamic_with_fixed_int_subarray())
         writer.write_dynamic_with_fixed_float_subarray(self.read_dynamic_with_fixed_float_subarray())
@@ -2365,6 +2390,7 @@ class SubarraysReaderBase(abc.ABC):
         writer.write_fixed_with_fixed_int_subarray(self.read_fixed_with_fixed_int_subarray())
         writer.write_fixed_with_fixed_float_subarray(self.read_fixed_with_fixed_float_subarray())
         writer.write_nested_subarray(self.read_nested_subarray())
+        writer.write_dynamic_with_fixed_vector_subarray(self.read_dynamic_with_fixed_vector_subarray())
 
     @abc.abstractmethod
     def _read_dynamic_with_fixed_int_subarray(self) -> npt.NDArray[np.int32]:
@@ -2392,6 +2418,10 @@ class SubarraysReaderBase(abc.ABC):
 
     @abc.abstractmethod
     def _read_nested_subarray(self) -> npt.NDArray[np.int32]:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _read_dynamic_with_fixed_vector_subarray(self) -> npt.NDArray[np.int32]:
         raise NotImplementedError()
 
     T = typing.TypeVar('T')
@@ -2423,6 +2453,8 @@ class SubarraysReaderBase(abc.ABC):
             return 'read_fixed_with_fixed_float_subarray'
         if state == 12:
             return 'read_nested_subarray'
+        if state == 14:
+            return 'read_dynamic_with_fixed_vector_subarray'
         return "<unknown>"
 
 class SubarraysInRecordsWriterBase(abc.ABC):
