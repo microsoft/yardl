@@ -327,11 +327,11 @@ class StructSerializer(TypeSerializer[T, T_NP]):
         return self._struct.format
 
 
-class BoolSerializer(StructSerializer[Bool, np.bool_]):
+class BoolSerializer(StructSerializer[bool, np.bool_]):
     def __init__(self) -> None:
         super().__init__(np.bool_, "<?")
 
-    def read(self, stream: CodedInputStream) -> Bool:
+    def read(self, stream: CodedInputStream) -> bool:
         return super().read(stream)
 
     def read_numpy(self, stream: CodedInputStream) -> np.bool_:
@@ -662,11 +662,11 @@ EPOCH_ORDINAL_DAYS = datetime.date(1970, 1, 1).toordinal()
 DATETIME_DAYS_DTYPE = np.dtype("datetime64[D]")
 
 
-class DateSerializer(TypeSerializer[Date, np.datetime64]):
+class DateSerializer(TypeSerializer[datetime.date, np.datetime64]):
     def __init__(self) -> None:
         super().__init__(DATETIME_DAYS_DTYPE)
 
-    def write(self, stream: CodedOutputStream, value: Date) -> None:
+    def write(self, stream: CodedOutputStream, value: datetime.date) -> None:
         if isinstance(value, datetime.date):
             stream.write_signed_varint(value.toordinal() - EPOCH_ORDINAL_DAYS)
         else:
@@ -685,7 +685,7 @@ class DateSerializer(TypeSerializer[Date, np.datetime64]):
                 value.astype(DATETIME_DAYS_DTYPE).astype(np.int32)
             )
 
-    def read(self, stream: CodedInputStream) -> Date:
+    def read(self, stream: CodedInputStream) -> datetime.date:
         days_since_epoch = stream.read_signed_varint()
         return datetime.date.fromordinal(days_since_epoch + EPOCH_ORDINAL_DAYS)
 

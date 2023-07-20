@@ -213,7 +213,6 @@ class Time:
         )
 
 
-Bool = bool
 Int8 = Annotated[int, "Int8"]
 UInt8 = Annotated[int, "UInt8"]
 Int16 = Annotated[int, "Int16"]
@@ -227,14 +226,6 @@ Float32 = Annotated[float, "Float32"]
 Float64 = Annotated[float, "Float64"]
 ComplexFloat = Annotated[complex, "ComplexFloat"]
 ComplexDouble = Annotated[complex, "ComplexDouble"]
-
-String = str
-
-Date = datetime.date
-
-Integer = Int8 | UInt8 | Int16 | UInt16 | Int32 | UInt32 | Int64 | UInt64 | Size
-Floating = Float32 | Float64
-Complex = ComplexFloat | ComplexDouble
 
 
 def structural_equal(a: object, b: object) -> bool:

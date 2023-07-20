@@ -44,8 +44,9 @@ def test_defaulting():
 
 def test_get_dtype():
     assert tm.get_dtype(tm.Int32) == np.int32
+    assert tm.get_dtype(bool) == np.bool_
     assert tm.get_dtype(int) == np.int64
-    assert tm.get_dtype(tm.String) == np.object_
+    assert tm.get_dtype(str) == np.object_
     assert tm.get_dtype(tm.SimpleRecord) == np.dtype(
         [("x", "<i4"), ("y", "<i4"), ("z", "<i4")], align=True
     )

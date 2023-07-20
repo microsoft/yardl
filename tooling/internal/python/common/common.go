@@ -59,7 +59,7 @@ var TypeSyntaxWriter dsl.TypeSyntaxWriter[string] = func(self dsl.TypeSyntaxWrit
 	case dsl.PrimitiveDefinition:
 		switch t {
 		case dsl.Bool:
-			return "yardl.Bool"
+			return "bool"
 		case dsl.Int8:
 			return "yardl.Int8"
 		case dsl.Uint8:
@@ -89,7 +89,7 @@ var TypeSyntaxWriter dsl.TypeSyntaxWriter[string] = func(self dsl.TypeSyntaxWrit
 		case dsl.String:
 			return "str"
 		case dsl.Date:
-			return "yardl.Date"
+			return "datetime.date"
 		case dsl.Time:
 			return "yardl.Time"
 		case dsl.DateTime:

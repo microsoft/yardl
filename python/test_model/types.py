@@ -107,7 +107,7 @@ class SimpleRecord:
 
 @dataclasses.dataclass(slots=True, kw_only=True, eq=False)
 class RecordWithPrimitives:
-    bool_field: yardl.Bool = False
+    bool_field: bool = False
 
     int_8_field: yardl.Int8 = 0
 
@@ -135,7 +135,7 @@ class RecordWithPrimitives:
 
     complexfloat_64_field: yardl.ComplexDouble = 0j
 
-    date_field: yardl.Date = dataclasses.field(
+    date_field: datetime.date = dataclasses.field(
         default_factory=lambda: datetime.date(1970, 1, 1)
     )
 
