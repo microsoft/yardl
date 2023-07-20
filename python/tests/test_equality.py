@@ -11,9 +11,6 @@ def test_simple_equality():
     c = tm.SimpleRecord(x=1, y=2, z=4)
     assert a != c
 
-    b = tm.SimpleRecord(x=np.int32(1), y=np.int32(2), z=np.int32(3))
-    assert a == b
-
 
 def test_flags_equality():
     a = tm.DaysOfWeek.MONDAY | tm.DaysOfWeek.TUESDAY
@@ -56,51 +53,12 @@ def test_record_with_enum_equality():
 
 def test_date_equality():
     a = tm.RecordWithPrimitives(date_field=datetime.date(2020, 1, 1))
-    b = tm.RecordWithPrimitives(
-        date_field=np.datetime64(datetime.date(2020, 1, 1), "ns")
-    )
+    b = tm.RecordWithPrimitives(date_field=datetime.date(2020, 1, 1))
     assert a == b
 
-    c = tm.RecordWithPrimitives(date_field=np.datetime64(datetime.date(2020, 1, 2)))
+    c = tm.RecordWithPrimitives(date_field=datetime.date(2020, 1, 2))
     assert a != c
     assert b != c
-
-
-def test_datetime_equality():
-    a = tm.RecordWithPrimitives(
-        datetime_field=datetime.datetime(2020, 1, 1, 1, 1, 1, 1)
-    )
-    b = tm.RecordWithPrimitives(
-        datetime_field=np.datetime64(datetime.datetime(2020, 1, 1, 1, 1, 1, 1), "ns")
-    )
-    assert a == b
-
-    c = tm.RecordWithPrimitives(
-        datetime_field=np.datetime64(datetime.datetime(2020, 1, 1, 1, 1, 1, 2))
-    )
-    assert a != c
-    assert b != c
-
-
-def test_time_equality():
-    a = tm.RecordWithPrimitives(time_field=datetime.time(1, 1, 1, 1))
-    b = tm.RecordWithPrimitives(
-        time_field=np.timedelta64(
-            datetime.timedelta(hours=1, minutes=1, seconds=1, microseconds=1)
-        )
-    )
-    assert a == b
-    assert b == a
-
-    c = tm.RecordWithPrimitives(
-        time_field=np.timedelta64(
-            datetime.timedelta(hours=1, minutes=1, seconds=1, microseconds=2)
-        )
-    )
-    assert a != c
-    assert c != a
-    assert b != c
-    assert c != b
 
 
 def test_string_equality():
@@ -142,19 +100,12 @@ def test_optional_int_equality():
 
 
 def test_optional_time_equality():
-    a = tm.RecordWithOptionalFields(optional_time=datetime.time(1, 1, 1, 1))
-    b = tm.RecordWithOptionalFields(
-        optional_time=np.timedelta64(
-            datetime.timedelta(hours=1, minutes=1, seconds=1, microseconds=1)
-        )
-    )
+    a = tm.RecordWithOptionalFields(optional_time=tm.Time.from_components(1, 1, 1, 1))
+    b = tm.RecordWithOptionalFields(optional_time=tm.Time.from_components(1, 1, 1, 1))
+
     assert a == b
 
-    c = tm.RecordWithOptionalFields(
-        optional_time=np.timedelta64(
-            datetime.timedelta(hours=1, minutes=1, seconds=1, microseconds=2)
-        )
-    )
+    c = tm.RecordWithOptionalFields(optional_time=tm.Time.from_components(1, 1, 1, 2))
     assert a != c
     assert b != c
 
@@ -166,21 +117,14 @@ def test_optional_time_equality():
 
 def test_time_vector_equality():
     a = tm.RecordWithVectorOfTimes(
-        times=[datetime.time(1, 1, 1, 1), datetime.time(1, 1, 1, 1)]
+        times=[tm.Time.from_components(1, 1, 1, 1), tm.Time.from_components(1, 1, 1, 1)]
     )
     b = tm.RecordWithVectorOfTimes(
-        times=[
-            np.timedelta64(
-                datetime.timedelta(hours=1, minutes=1, seconds=1, microseconds=1)
-            ),
-            np.timedelta64(
-                datetime.timedelta(hours=1, minutes=1, seconds=1, microseconds=1)
-            ),
-        ]
+        times=[tm.Time.from_components(1, 1, 1, 1), tm.Time.from_components(1, 1, 1, 1)]
     )
     assert a == b
     c = tm.RecordWithVectorOfTimes(
-        times=[datetime.time(1, 1, 1, 1), datetime.time(1, 1, 1, 2)]
+        times=[tm.Time.from_components(1, 1, 1, 1), tm.Time.from_components(1, 1, 1, 2)]
     )
     assert a != c
 
@@ -239,14 +183,11 @@ def test_simple_union_equality():
 
 
 def test_time_union_equality():
-    a = tm.RecordWithUnions(date_or_datetime=("time", datetime.time(1, 1, 1, 1)))
+    a = tm.RecordWithUnions(
+        date_or_datetime=("time", tm.Time.from_components(1, 1, 1, 1))
+    )
     b = tm.RecordWithUnions(
-        date_or_datetime=(
-            "time",
-            np.timedelta64(
-                datetime.timedelta(hours=1, minutes=1, seconds=1, microseconds=1)
-            ),
-        )
+        date_or_datetime=("time", tm.Time.from_components(1, 1, 1, 1))
     )
 
     assert a == b

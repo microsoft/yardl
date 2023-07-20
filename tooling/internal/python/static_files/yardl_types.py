@@ -98,7 +98,11 @@ class DateTime:
         return f"DateTime({self})"
 
     def __eq__(self, other: object) -> bool:
-        return isinstance(other, DateTime) and self._value == other._value
+        return (
+            self._value == other._value
+            if isinstance(other, DateTime)
+            else (isinstance(other, np.datetime64) and self._value == other)
+        )
 
     def __hash__(self) -> int:
         return hash(self._value)
@@ -202,7 +206,11 @@ class Time:
         return f"Time({self})"
 
     def __eq__(self, other: object) -> bool:
-        return isinstance(other, Time) and self._value == other._value
+        return (
+            self._value == other._value
+            if isinstance(other, Time)
+            else (isinstance(other, np.timedelta64) and self._value == other)
+        )
 
 
 Bool = bool
@@ -232,7 +240,7 @@ Complex = ComplexFloat | ComplexDouble
 _EPOCH_ORDINAL_DAYS = datetime.date(1970, 1, 1).toordinal()
 
 
-def dates_equal(a: Date, b: Date) -> bool:
+def dates_equal(a: object, b: object) -> bool:
     if type(a) == type(b):
         return a == b
 
@@ -251,51 +259,12 @@ def dates_equal(a: Date, b: Date) -> bool:
     return a == np.datetime64(b_days_since_epoch, "D")
 
 
-def times_equal(a: Time, b: Time) -> bool:
-    if type(a) == type(b):
-        return a == b
-
-    if isinstance(a, datetime.time):
-        if isinstance(b, np.timedelta64):
-            b, a = a, b
-        else:
-            return False
-    else:
-        if not isinstance(a, np.timedelta64) or not isinstance(b, datetime.time):
-            return False
-
-    # a is now a timedelta64 and b is a datetime.time
-    b_nanoseconds_since_midnight = (
-        b.hour * 3_600_000_000_000
-        + b.minute * 60_000_000_000
-        + b.second * 1_000_000_000
-        + b.microsecond * 1_000
-    )
-
-    return a == np.timedelta64(b_nanoseconds_since_midnight, "ns")
+def times_equal(a: object, b: object) -> bool:
+    return a == b if isinstance(a, Time) else b == a
 
 
-_EPOCH_DATETIME = datetime.datetime.utcfromtimestamp(0)
-
-
-def datetimes_equal(a: DateTime, b: DateTime) -> bool:
-    if type(a) == type(b):
-        return a == b
-
-    if isinstance(a, datetime.datetime):
-        if isinstance(b, np.datetime64):
-            b, a = a, b
-        else:
-            return False
-    else:
-        if not isinstance(a, np.datetime64) or not isinstance(b, datetime.datetime):
-            return False
-
-    # a is now a datetime64 and b is a datetime.datetime
-    b_delta = b - _EPOCH_DATETIME
-    b_nanoseconds_since_epoch = int(b_delta.total_seconds() * 1e6) * 1000
-
-    return a == np.datetime64(b_nanoseconds_since_epoch, "ns")
+def datetimes_equal(a: object, b: object) -> bool:
+    return a == b if isinstance(a, DateTime) else b == a
 
 
 def structural_equal(a: object, b: object) -> bool:
@@ -329,7 +298,10 @@ def structural_equal(a: object, b: object) -> bool:
     if isinstance(a, np.void):
         if not isinstance(b, np.void):
             return b == a
-        return a.dtype == b.dtype and all(structural_equal(x, y) for x, y in zip(a, b))
+        return a.dtype == b.dtype and all(
+            structural_equal(x, y)
+            for x, y in zip(a, b)  # pyright: ignore [reportGeneralTypeIssues]
+        )
 
     if isinstance(b, np.void):
         return a == b
@@ -341,10 +313,12 @@ def structural_equal(a: object, b: object) -> bool:
             and all(structural_equal(x, y) for x, y in zip(a, b))
         )
 
-    if isinstance(a, datetime.time) or isinstance(a, np.timedelta64):
+    if isinstance(a, datetime.date) or isinstance(b, datetime.date):
+        return dates_equal(a, b)
+
+    if isinstance(a, Time) or isinstance(a, np.timedelta64):
         return times_equal(a, b)
 
-    if isinstance(a, datetime.datetime) or isinstance(a, np.datetime64):
+    if isinstance(a, DateTime) or isinstance(a, np.datetime64):
         return datetimes_equal(a, b)
-
     return a == b
