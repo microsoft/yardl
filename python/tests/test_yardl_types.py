@@ -11,9 +11,20 @@ def test_datetime_from_valid_datetime():
     assert str(dt) == "2020-02-29T12:22:44.111222000"
 
 
-def test_datetime_from_invalid_datetime():
+def test_datetime_from_valid_components():
+    dt = yt.DateTime.from_components(2020, 2, 29, 12, 22, 44, 111222333)
+    assert str(dt) == "2020-02-29T12:22:44.111222333"
+
+
+def test_datetime_from_invalid_components():
+    with pytest.raises(ValueError, match="second must be in 0..59"):
+        yt.DateTime.from_components(2021, 2, 15, 12, 22, 74)
+
     with pytest.raises(ValueError, match="day is out of range for month"):
-        yt.DateTime.from_datetime(datetime.datetime(2021, 2, 29, 12, 22, 44, 111222))
+        yt.DateTime.from_components(2021, 2, 29, 12, 22, 44, 111222)
+
+    with pytest.raises(ValueError, match="nanosecond must be in 0..999_999_999"):
+        yt.DateTime.from_components(2021, 2, 15, 12, 22, 44, 9999999999999999)
 
 
 def test_datetime_from_int():
@@ -31,12 +42,31 @@ def test_now():
     assert isinstance(dt, yt.DateTime)
 
 
+def test_time_from_valid_components():
+    t = yt.Time.from_components(12, 22, 44, 111222333)
+    assert str(t) == "12:22:44.111222333"
+
+
+def test_time_from_invalid_components():
+    with pytest.raises(ValueError, match="hour must be in 0..23"):
+        yt.Time.from_components(24, 00, 00)
+
+    with pytest.raises(ValueError, match="minute must be in 0..59"):
+        yt.Time.from_components(12, -3, 00)
+
+    with pytest.raises(ValueError, match="second must be in 0..59"):
+        yt.Time.from_components(12, 22, 74)
+
+    with pytest.raises(ValueError, match="nanosecond must be in 0..999_999_999"):
+        yt.Time.from_components(12, 22, 44, 9999999999999999)
+
+
 def test_time_from_time():
     t = yt.Time.from_time(datetime.time(12, 22, 44, 111222))
     assert str(t) == "12:22:44.111222"
 
 
-def test_parse():
+def test_time_parse():
     assert str(yt.Time.parse("12:22:44.111222")) == "12:22:44.111222"
     assert str(yt.Time.parse("12:22:44.111222333")) == "12:22:44.111222333"
     assert str(yt.Time.parse("12:22:44.1")) == "12:22:44.1"
@@ -47,7 +77,7 @@ def test_parse():
     assert str(yt.Time.parse("12:22:44.0000000000000000001")) == "12:22:44"
 
 
-def test_parse_invalid():
+def test_time_parse_invalid():
     with pytest.raises(ValueError):
         yt.Time.parse("a")
     with pytest.raises(ValueError):

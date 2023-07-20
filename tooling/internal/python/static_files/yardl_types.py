@@ -82,7 +82,7 @@ class OutOfRangeEnum(Enum):
 
 
 class DateTime:
-    """A barebones datetime with nanosecond precision, always in UTC."""
+    """A basic datetime with nanosecond precision, always in UTC."""
 
     def __init__(self, nanoseconds_from_epoch: int | np.datetime64 = 0):
         if isinstance(nanoseconds_from_epoch, np.datetime64):
@@ -99,6 +99,25 @@ class DateTime:
 
     def to_datetime(self) -> datetime.datetime:
         return datetime.datetime.utcfromtimestamp(self._value.astype(int) / 1e9)
+
+    @staticmethod
+    def from_components(
+        year: int,
+        month: int,
+        day: int,
+        hour: int = 0,
+        minute: int = 0,
+        second: int = 0,
+        nanosecond: int = 0,
+    ) -> "DateTime":
+        if not 0 <= nanosecond <= 999_999_999:
+            raise ValueError("nanosecond must be in 0..999_999_999", nanosecond)
+
+        return DateTime(
+            int(datetime.datetime(year, month, day, hour, minute, second).timestamp())
+            * 1_000_000_000
+            + nanosecond
+        )
 
     @staticmethod
     def from_datetime(dt: datetime.datetime) -> "DateTime":
@@ -126,8 +145,8 @@ class DateTime:
 
 
 class Time:
-    """A barebones time of day with nanosecond precision. This is not timezone-aware and is meant
-    to represent a clock time.
+    """A basic time of day with nanosecond precision. It is not timezone-aware and is meant
+    to represent a wall clock time.
     """
 
     _NANOSECONDS_PER_DAY = 24 * 60 * 60 * 1_000_000_000
@@ -153,6 +172,26 @@ class Time:
     @property
     def numpy_value(self) -> np.timedelta64:
         return self._value
+
+    @staticmethod
+    def from_components(
+        hour: int, minute: int, second: int = 0, nanosecond: int = 0
+    ) -> "Time":
+        if not 0 <= hour <= 23:
+            raise ValueError("hour must be in 0..23", hour)
+        if not 0 <= minute <= 59:
+            raise ValueError("minute must be in 0..59", minute)
+        if not 0 <= second <= 59:
+            raise ValueError("second must be in 0..59", second)
+        if not 0 <= nanosecond <= 999_999_999:
+            raise ValueError("nanosecond must be in 0..999_999_999", nanosecond)
+
+        return Time(
+            hour * 3_600_000_000_000
+            + minute * 60_000_000_000
+            + second * 1_000_000_000
+            + nanosecond
+        )
 
     @staticmethod
     def from_time(t: datetime.time) -> "Time":
