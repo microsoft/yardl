@@ -364,24 +364,36 @@ def test_arrays_with_known_dimension_count():
                 [
                     [
                         (
-                            np.array([(1, 2, 3), (4, 5, 6)], simple_record_type),
+                            [
+                                tm.SimpleRecord(x=1, y=2, z=3),
+                                tm.SimpleRecord(x=4, y=5, z=6),
+                            ],
                             -7,
                             22,
                         ),
                         (
-                            np.array([(1, 2, 3), (4, 5, 6)], simple_record_type),
+                            [
+                                tm.SimpleRecord(x=1, y=2, z=3),
+                                tm.SimpleRecord(x=4, y=5, z=6),
+                            ],
                             -7,
                             22,
                         ),
                     ],
                     [
                         (
-                            np.array([(1, 2, 3), (4, 5, 6)], simple_record_type),
+                            [
+                                tm.SimpleRecord(x=1, y=2, z=3),
+                                tm.SimpleRecord(x=4, y=5, z=6),
+                            ],
                             -7,
                             22,
                         ),
                         (
-                            np.array([(1, 2, 3), (4, 5, 6)], simple_record_type),
+                            [
+                                tm.SimpleRecord(x=1, y=2, z=3),
+                                tm.SimpleRecord(x=4, y=5, z=6),
+                            ],
                             -7,
                             22,
                         ),
@@ -401,17 +413,20 @@ def test_arrays_with_known_dimension_count():
                     [
                         [
                             (
-                                np.array([(1, 2, 3)], tm.get_dtype(tm.SimpleRecord)),
+                                [
+                                    tm.SimpleRecord(x=1, y=2, z=3),
+                                    tm.SimpleRecord(x=4, y=5, z=6),
+                                ],
                                 -33,
                                 44,
                             )
                         ],
                         [
                             (
-                                np.array(
-                                    [(8, 2, 9), (28, 43, 9)],
-                                    tm.get_dtype(tm.SimpleRecord),
-                                ),
+                                [
+                                    tm.SimpleRecord(x=1, y=2, z=3),
+                                    tm.SimpleRecord(x=432, y=235, z=342),
+                                ],
                                 233,
                                 347,
                             )
@@ -436,17 +451,17 @@ def test_dynamic_ndarrays():
                 [
                     [
                         (
-                            np.array([(1, 2, 3)], tm.get_dtype(tm.SimpleRecord)),
+                            [tm.SimpleRecord(x=1, y=2, z=3)],
                             -33,
                             44,
                         )
                     ],
                     [
                         (
-                            np.array(
-                                [(8, 2, 9), (28, 43, 9)],
-                                tm.get_dtype(tm.SimpleRecord),
-                            ),
+                            [
+                                tm.SimpleRecord(x=8, y=2, z=9),
+                                tm.SimpleRecord(x=28, y=3, z=34),
+                            ],
                             233,
                             347,
                         )
@@ -466,17 +481,17 @@ def test_dynamic_ndarrays():
                     [
                         [
                             (
-                                np.array([(1, 2, 3)], tm.get_dtype(tm.SimpleRecord)),
+                                [tm.SimpleRecord(x=1, y=2, z=3)],
                                 -33,
                                 44,
                             )
                         ],
                         [
                             (
-                                np.array(
-                                    [(8, 2, 9), (28, 43, 9)],
-                                    tm.get_dtype(tm.SimpleRecord),
-                                ),
+                                [
+                                    tm.SimpleRecord(x=8, y=2, z=9),
+                                    tm.SimpleRecord(x=28, y=3, z=34),
+                                ],
                                 233,
                                 347,
                             )

@@ -117,39 +117,12 @@ func writeRecord(w *formatting.IndentedWriter, rec *dsl.RecordDefinition, st dsl
 func writeEqMethod(w *formatting.IndentedWriter, rec *dsl.RecordDefinition) {
 	w.WriteStringln("def __eq__(self, other: object) -> bool:")
 	w.Indented(func() {
-		fmt.Fprintf(w, "if not isinstance(other, %s):\n", common.TypeSyntaxWithoutTypeParameters(rec, rec.Namespace))
-		w.Indented(func() {
-			w.WriteStringln("if (")
-			w.Indented(func() {
-				fmt.Fprintf(w, "not isinstance(other, np.void)\nor other.dtype.fields is None\nor len(other.dtype.fields) != %d\n", len(rec.Fields))
-			})
-			w.WriteStringln("):")
-			w.Indented(func() {
-				w.WriteStringln("return False")
-			})
+		{
 			w.WriteStringln("return (")
 			w.Indented(func() {
-				for i, field := range rec.Fields {
-					if i > 0 {
-						w.WriteString("and ")
-					}
-
-					fieldIdentifier := common.FieldIdentifierName(field.Name)
-					w.WriteStringln(typeEqualityExpression(field.Type, "self."+fieldIdentifier, fmt.Sprintf(`other["%s"]`, fieldIdentifier)))
-				}
-			})
-			w.WriteStringln(")")
-		})
-		if len(rec.Fields) == 0 {
-			w.WriteStringln("return True")
-		} else {
-			w.WriteStringln("return (")
-			w.Indented(func() {
-				for i, field := range rec.Fields {
-					if i > 0 {
-						w.WriteString("and ")
-					}
-
+				fmt.Fprintf(w, "isinstance(other, %s)\n", common.TypeSyntaxWithoutTypeParameters(rec, rec.Namespace))
+				for _, field := range rec.Fields {
+					w.WriteString("and ")
 					fieldIdentifier := common.FieldIdentifierName(field.Name)
 					w.WriteStringln(typeEqualityExpression(field.Type, "self."+fieldIdentifier, "other."+fieldIdentifier))
 				}
@@ -188,15 +161,6 @@ func typeEqualityExpression(t dsl.Type, a, b string) string {
 
 func typeDefinitionEqualityExpression(t dsl.TypeDefinition, a, b string) string {
 	switch t := t.(type) {
-	case dsl.PrimitiveDefinition:
-		switch t {
-		case dsl.Date:
-			return fmt.Sprintf("yardl.dates_equal(%s, %s)", a, b)
-		case dsl.Time:
-			return fmt.Sprintf("yardl.times_equal(%s, %s)", a, b)
-		case dsl.DateTime:
-			return fmt.Sprintf("yardl.datetimes_equal(%s, %s)", a, b)
-		}
 	case *dsl.GenericTypeParameter:
 		return fmt.Sprintf("yardl.structural_equal(%s, %s)", a, b)
 	case *dsl.NamedType:
@@ -212,12 +176,6 @@ func hasSimpleEquality(t dsl.Node) bool {
 		switch t := node.(type) {
 		case *dsl.SimpleType:
 			self.Visit(t.ResolvedDefinition)
-		case dsl.PrimitiveDefinition:
-			switch t {
-			case dsl.Date, dsl.Time, dsl.DateTime:
-				res = false
-			}
-			return
 		case *dsl.Array, *dsl.GenericTypeParameter:
 			res = false
 			return

@@ -145,16 +145,6 @@ def test_array_list_equality():
     assert tm.structural_equal(b, a)
 
 
-def test_structured_array_list_equality():
-    a = np.array(
-        [(1, 2, 3), (4, 5, 6)],
-        dtype=[("x", np.int32), ("y", np.int32), ("z", np.int32)],
-    )
-    b = [tm.SimpleRecord(x=1, y=2, z=3), tm.SimpleRecord(x=4, y=5, z=6)]
-    assert tm.structural_equal(a, b)
-    assert tm.structural_equal(b, a)
-
-
 def test_array_structural_equality_with_object():
     a = np.array(
         [(1, 2, "hello"), (3, 4, "world")],

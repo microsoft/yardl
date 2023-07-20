@@ -237,36 +237,6 @@ Floating = Float32 | Float64
 Complex = ComplexFloat | ComplexDouble
 
 
-_EPOCH_ORDINAL_DAYS = datetime.date(1970, 1, 1).toordinal()
-
-
-def dates_equal(a: object, b: object) -> bool:
-    if type(a) == type(b):
-        return a == b
-
-    if isinstance(a, datetime.date):
-        if isinstance(b, np.datetime64):
-            b, a = a, b
-        else:
-            return False
-    else:
-        if not isinstance(a, np.datetime64) or not isinstance(b, datetime.date):
-            return False
-
-    # a is now a datetime64 and b is a datetime.date
-    b_days_since_epoch = b.toordinal() - _EPOCH_ORDINAL_DAYS
-
-    return a == np.datetime64(b_days_since_epoch, "D")
-
-
-def times_equal(a: object, b: object) -> bool:
-    return a == b if isinstance(a, Time) else b == a
-
-
-def datetimes_equal(a: object, b: object) -> bool:
-    return a == b if isinstance(a, DateTime) else b == a
-
-
 def structural_equal(a: object, b: object) -> bool:
     if a is None:
         return b is None
@@ -313,12 +283,4 @@ def structural_equal(a: object, b: object) -> bool:
             and all(structural_equal(x, y) for x, y in zip(a, b))
         )
 
-    if isinstance(a, datetime.date) or isinstance(b, datetime.date):
-        return dates_equal(a, b)
-
-    if isinstance(a, Time) or isinstance(a, np.timedelta64):
-        return times_equal(a, b)
-
-    if isinstance(a, DateTime) or isinstance(a, np.datetime64):
-        return datetimes_equal(a, b)
     return a == b

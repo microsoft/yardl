@@ -34,20 +34,9 @@ class SmallBenchmarkRecord:
     c: yardl.Float32 = 0.0
 
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, SmallBenchmarkRecord):
-            if (
-                not isinstance(other, np.void)
-                or other.dtype.fields is None
-                or len(other.dtype.fields) != 3
-            ):
-                return False
-            return (
-                self.a == other["a"]
-                and self.b == other["b"]
-                and self.c == other["c"]
-            )
         return (
-            self.a == other.a
+            isinstance(other, SmallBenchmarkRecord)
+            and self.a == other.a
             and self.b == other.b
             and self.c == other.c
         )
@@ -64,21 +53,9 @@ class SimpleEncodingCounters:
     repetition: yardl.UInt32 | None = None
 
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, SimpleEncodingCounters):
-            if (
-                not isinstance(other, np.void)
-                or other.dtype.fields is None
-                or len(other.dtype.fields) != 4
-            ):
-                return False
-            return (
-                self.e1 == other["e1"]
-                and self.e2 == other["e2"]
-                and self.slice == other["slice"]
-                and self.repetition == other["repetition"]
-            )
         return (
-            self.e1 == other.e1
+            isinstance(other, SimpleEncodingCounters)
+            and self.e1 == other.e1
             and self.e2 == other.e2
             and self.slice == other.slice
             and self.repetition == other.repetition
@@ -102,21 +79,9 @@ class SimpleAcquisition:
     )
 
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, SimpleAcquisition):
-            if (
-                not isinstance(other, np.void)
-                or other.dtype.fields is None
-                or len(other.dtype.fields) != 4
-            ):
-                return False
-            return (
-                self.flags == other["flags"]
-                and self.idx == other["idx"]
-                and yardl.structural_equal(self.data, other["data"])
-                and yardl.structural_equal(self.trajectory, other["trajectory"])
-            )
         return (
-            self.flags == other.flags
+            isinstance(other, SimpleAcquisition)
+            and self.flags == other.flags
             and self.idx == other.idx
             and yardl.structural_equal(self.data, other.data)
             and yardl.structural_equal(self.trajectory, other.trajectory)
@@ -132,20 +97,9 @@ class SimpleRecord:
     z: yardl.Int32 = 0
 
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, SimpleRecord):
-            if (
-                not isinstance(other, np.void)
-                or other.dtype.fields is None
-                or len(other.dtype.fields) != 3
-            ):
-                return False
-            return (
-                self.x == other["x"]
-                and self.y == other["y"]
-                and self.z == other["z"]
-            )
         return (
-            self.x == other.x
+            isinstance(other, SimpleRecord)
+            and self.x == other.x
             and self.y == other.y
             and self.z == other.z
         )
@@ -194,34 +148,9 @@ class RecordWithPrimitives:
     )
 
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, RecordWithPrimitives):
-            if (
-                not isinstance(other, np.void)
-                or other.dtype.fields is None
-                or len(other.dtype.fields) != 17
-            ):
-                return False
-            return (
-                self.bool_field == other["bool_field"]
-                and self.int_8_field == other["int_8_field"]
-                and self.uint_8_field == other["uint_8_field"]
-                and self.int_16_field == other["int_16_field"]
-                and self.uint_16_field == other["uint_16_field"]
-                and self.int_32_field == other["int_32_field"]
-                and self.uint_32_field == other["uint_32_field"]
-                and self.int_64_field == other["int_64_field"]
-                and self.uint_64_field == other["uint_64_field"]
-                and self.size_field == other["size_field"]
-                and self.float_32_field == other["float_32_field"]
-                and self.float_64_field == other["float_64_field"]
-                and self.complexfloat_32_field == other["complexfloat_32_field"]
-                and self.complexfloat_64_field == other["complexfloat_64_field"]
-                and yardl.dates_equal(self.date_field, other["date_field"])
-                and yardl.times_equal(self.time_field, other["time_field"])
-                and yardl.datetimes_equal(self.datetime_field, other["datetime_field"])
-            )
         return (
-            self.bool_field == other.bool_field
+            isinstance(other, RecordWithPrimitives)
+            and self.bool_field == other.bool_field
             and self.int_8_field == other.int_8_field
             and self.uint_8_field == other.uint_8_field
             and self.int_16_field == other.int_16_field
@@ -235,9 +164,9 @@ class RecordWithPrimitives:
             and self.float_64_field == other.float_64_field
             and self.complexfloat_32_field == other.complexfloat_32_field
             and self.complexfloat_64_field == other.complexfloat_64_field
-            and yardl.dates_equal(self.date_field, other.date_field)
-            and yardl.times_equal(self.time_field, other.time_field)
-            and yardl.datetimes_equal(self.datetime_field, other.datetime_field)
+            and self.date_field == other.date_field
+            and self.time_field == other.time_field
+            and self.datetime_field == other.datetime_field
         )
 
 
@@ -262,26 +191,9 @@ class RecordWithPrimitiveAliases:
     complexdouble_field: yardl.ComplexDouble = 0j
 
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, RecordWithPrimitiveAliases):
-            if (
-                not isinstance(other, np.void)
-                or other.dtype.fields is None
-                or len(other.dtype.fields) != 9
-            ):
-                return False
-            return (
-                self.byte_field == other["byte_field"]
-                and self.int_field == other["int_field"]
-                and self.uint_field == other["uint_field"]
-                and self.long_field == other["long_field"]
-                and self.ulong_field == other["ulong_field"]
-                and self.float_field == other["float_field"]
-                and self.double_field == other["double_field"]
-                and self.complexfloat_field == other["complexfloat_field"]
-                and self.complexdouble_field == other["complexdouble_field"]
-            )
         return (
-            self.byte_field == other.byte_field
+            isinstance(other, RecordWithPrimitiveAliases)
+            and self.byte_field == other.byte_field
             and self.int_field == other.int_field
             and self.uint_field == other.uint_field
             and self.long_field == other.long_field
@@ -304,19 +216,9 @@ class TupleWithRecords:
     )
 
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, TupleWithRecords):
-            if (
-                not isinstance(other, np.void)
-                or other.dtype.fields is None
-                or len(other.dtype.fields) != 2
-            ):
-                return False
-            return (
-                self.a == other["a"]
-                and self.b == other["b"]
-            )
         return (
-            self.a == other.a
+            isinstance(other, TupleWithRecords)
+            and self.a == other.a
             and self.b == other.b
         )
 
@@ -336,20 +238,9 @@ class RecordWithVectors:
     )
 
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, RecordWithVectors):
-            if (
-                not isinstance(other, np.void)
-                or other.dtype.fields is None
-                or len(other.dtype.fields) != 3
-            ):
-                return False
-            return (
-                self.default_vector == other["default_vector"]
-                and self.default_vector_fixed_length == other["default_vector_fixed_length"]
-                and self.vector_of_vectors == other["vector_of_vectors"]
-            )
         return (
-            self.default_vector == other.default_vector
+            isinstance(other, RecordWithVectors)
+            and self.default_vector == other.default_vector
             and self.default_vector_fixed_length == other.default_vector_fixed_length
             and self.vector_of_vectors == other.vector_of_vectors
         )
@@ -362,18 +253,9 @@ class RecordWithVectorOfTimes:
     )
 
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, RecordWithVectorOfTimes):
-            if (
-                not isinstance(other, np.void)
-                or other.dtype.fields is None
-                or len(other.dtype.fields) != 1
-            ):
-                return False
-            return (
-                len(self.times) == len(other["times"]) and all(yardl.times_equal(a, b) for a, b in zip(self.times, other["times"]))
-            )
         return (
-            len(self.times) == len(other.times) and all(yardl.times_equal(a, b) for a, b in zip(self.times, other.times))
+            isinstance(other, RecordWithVectorOfTimes)
+            and self.times == other.times
         )
 
 
@@ -416,26 +298,9 @@ class RecordWithArrays:
     )
 
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, RecordWithArrays):
-            if (
-                not isinstance(other, np.void)
-                or other.dtype.fields is None
-                or len(other.dtype.fields) != 9
-            ):
-                return False
-            return (
-                yardl.structural_equal(self.default_array, other["default_array"])
-                and yardl.structural_equal(self.default_array_with_empty_dimension, other["default_array_with_empty_dimension"])
-                and yardl.structural_equal(self.rank_1_array, other["rank_1_array"])
-                and yardl.structural_equal(self.rank_2_array, other["rank_2_array"])
-                and yardl.structural_equal(self.rank_2_array_with_named_dimensions, other["rank_2_array_with_named_dimensions"])
-                and yardl.structural_equal(self.rank_2_fixed_array, other["rank_2_fixed_array"])
-                and yardl.structural_equal(self.rank_2_fixed_array_with_named_dimensions, other["rank_2_fixed_array_with_named_dimensions"])
-                and yardl.structural_equal(self.dynamic_array, other["dynamic_array"])
-                and yardl.structural_equal(self.array_of_vectors, other["array_of_vectors"])
-            )
         return (
-            yardl.structural_equal(self.default_array, other.default_array)
+            isinstance(other, RecordWithArrays)
+            and yardl.structural_equal(self.default_array, other.default_array)
             and yardl.structural_equal(self.default_array_with_empty_dimension, other.default_array_with_empty_dimension)
             and yardl.structural_equal(self.rank_1_array, other.rank_1_array)
             and yardl.structural_equal(self.rank_2_array, other.rank_2_array)
@@ -486,26 +351,9 @@ class RecordWithArraysSimpleSyntax:
     )
 
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, RecordWithArraysSimpleSyntax):
-            if (
-                not isinstance(other, np.void)
-                or other.dtype.fields is None
-                or len(other.dtype.fields) != 9
-            ):
-                return False
-            return (
-                yardl.structural_equal(self.default_array, other["default_array"])
-                and yardl.structural_equal(self.default_array_with_empty_dimension, other["default_array_with_empty_dimension"])
-                and yardl.structural_equal(self.rank_1_array, other["rank_1_array"])
-                and yardl.structural_equal(self.rank_2_array, other["rank_2_array"])
-                and yardl.structural_equal(self.rank_2_array_with_named_dimensions, other["rank_2_array_with_named_dimensions"])
-                and yardl.structural_equal(self.rank_2_fixed_array, other["rank_2_fixed_array"])
-                and yardl.structural_equal(self.rank_2_fixed_array_with_named_dimensions, other["rank_2_fixed_array_with_named_dimensions"])
-                and yardl.structural_equal(self.dynamic_array, other["dynamic_array"])
-                and yardl.structural_equal(self.array_of_vectors, other["array_of_vectors"])
-            )
         return (
-            yardl.structural_equal(self.default_array, other.default_array)
+            isinstance(other, RecordWithArraysSimpleSyntax)
+            and yardl.structural_equal(self.default_array, other.default_array)
             and yardl.structural_equal(self.default_array_with_empty_dimension, other.default_array_with_empty_dimension)
             and yardl.structural_equal(self.rank_1_array, other.rank_1_array)
             and yardl.structural_equal(self.rank_2_array, other.rank_2_array)
@@ -526,22 +374,11 @@ class RecordWithOptionalFields:
     optional_time: yardl.Time | None = None
 
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, RecordWithOptionalFields):
-            if (
-                not isinstance(other, np.void)
-                or other.dtype.fields is None
-                or len(other.dtype.fields) != 3
-            ):
-                return False
-            return (
-                self.optional_int == other["optional_int"]
-                and self.optional_int_alternate_syntax == other["optional_int_alternate_syntax"]
-                and other["optional_time"] is None if self.optional_time is None else (other["optional_time"] is not None and yardl.times_equal(self.optional_time, other["optional_time"]))
-            )
         return (
-            self.optional_int == other.optional_int
+            isinstance(other, RecordWithOptionalFields)
+            and self.optional_int == other.optional_int
             and self.optional_int_alternate_syntax == other.optional_int_alternate_syntax
-            and other.optional_time is None if self.optional_time is None else (other.optional_time is not None and yardl.times_equal(self.optional_time, other.optional_time))
+            and self.optional_time == other.optional_time
         )
 
 
@@ -556,20 +393,9 @@ class RecordWithVlens:
     c: yardl.Int32 = 0
 
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, RecordWithVlens):
-            if (
-                not isinstance(other, np.void)
-                or other.dtype.fields is None
-                or len(other.dtype.fields) != 3
-            ):
-                return False
-            return (
-                self.a == other["a"]
-                and self.b == other["b"]
-                and self.c == other["c"]
-            )
         return (
-            self.a == other.a
+            isinstance(other, RecordWithVlens)
+            and self.a == other.a
             and self.b == other.b
             and self.c == other.c
         )
@@ -582,19 +408,9 @@ class RecordWithStrings:
     b: str = ""
 
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, RecordWithStrings):
-            if (
-                not isinstance(other, np.void)
-                or other.dtype.fields is None
-                or len(other.dtype.fields) != 2
-            ):
-                return False
-            return (
-                self.a == other["a"]
-                and self.b == other["b"]
-            )
         return (
-            self.a == other.a
+            isinstance(other, RecordWithStrings)
+            and self.a == other.a
             and self.b == other.b
         )
 
@@ -604,18 +420,9 @@ class RecordWithOptionalVector:
     optional_vector: list[yardl.Int32] | None = None
 
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, RecordWithOptionalVector):
-            if (
-                not isinstance(other, np.void)
-                or other.dtype.fields is None
-                or len(other.dtype.fields) != 1
-            ):
-                return False
-            return (
-                self.optional_vector == other["optional_vector"]
-            )
         return (
-            self.optional_vector == other.optional_vector
+            isinstance(other, RecordWithOptionalVector)
+            and self.optional_vector == other.optional_vector
         )
 
 
@@ -634,20 +441,9 @@ class RecordWithFixedVectors:
     )
 
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, RecordWithFixedVectors):
-            if (
-                not isinstance(other, np.void)
-                or other.dtype.fields is None
-                or len(other.dtype.fields) != 3
-            ):
-                return False
-            return (
-                self.fixed_int_vector == other["fixed_int_vector"]
-                and self.fixed_simple_record_vector == other["fixed_simple_record_vector"]
-                and self.fixed_record_with_vlens_vector == other["fixed_record_with_vlens_vector"]
-            )
         return (
-            self.fixed_int_vector == other.fixed_int_vector
+            isinstance(other, RecordWithFixedVectors)
+            and self.fixed_int_vector == other.fixed_int_vector
             and self.fixed_simple_record_vector == other.fixed_simple_record_vector
             and self.fixed_record_with_vlens_vector == other.fixed_record_with_vlens_vector
         )
@@ -668,20 +464,9 @@ class RecordWithFixedArrays:
     )
 
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, RecordWithFixedArrays):
-            if (
-                not isinstance(other, np.void)
-                or other.dtype.fields is None
-                or len(other.dtype.fields) != 3
-            ):
-                return False
-            return (
-                yardl.structural_equal(self.ints, other["ints"])
-                and yardl.structural_equal(self.fixed_simple_record_array, other["fixed_simple_record_array"])
-                and yardl.structural_equal(self.fixed_record_with_vlens_array, other["fixed_record_with_vlens_array"])
-            )
         return (
-            yardl.structural_equal(self.ints, other.ints)
+            isinstance(other, RecordWithFixedArrays)
+            and yardl.structural_equal(self.ints, other.ints)
             and yardl.structural_equal(self.fixed_simple_record_array, other.fixed_simple_record_array)
             and yardl.structural_equal(self.fixed_record_with_vlens_array, other.fixed_record_with_vlens_array)
         )
@@ -702,20 +487,9 @@ class RecordWithNDArrays:
     )
 
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, RecordWithNDArrays):
-            if (
-                not isinstance(other, np.void)
-                or other.dtype.fields is None
-                or len(other.dtype.fields) != 3
-            ):
-                return False
-            return (
-                yardl.structural_equal(self.ints, other["ints"])
-                and yardl.structural_equal(self.fixed_simple_record_array, other["fixed_simple_record_array"])
-                and yardl.structural_equal(self.fixed_record_with_vlens_array, other["fixed_record_with_vlens_array"])
-            )
         return (
-            yardl.structural_equal(self.ints, other.ints)
+            isinstance(other, RecordWithNDArrays)
+            and yardl.structural_equal(self.ints, other.ints)
             and yardl.structural_equal(self.fixed_simple_record_array, other.fixed_simple_record_array)
             and yardl.structural_equal(self.fixed_record_with_vlens_array, other.fixed_record_with_vlens_array)
         )
@@ -736,20 +510,9 @@ class RecordWithNDArraysSingleDimension:
     )
 
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, RecordWithNDArraysSingleDimension):
-            if (
-                not isinstance(other, np.void)
-                or other.dtype.fields is None
-                or len(other.dtype.fields) != 3
-            ):
-                return False
-            return (
-                yardl.structural_equal(self.ints, other["ints"])
-                and yardl.structural_equal(self.fixed_simple_record_array, other["fixed_simple_record_array"])
-                and yardl.structural_equal(self.fixed_record_with_vlens_array, other["fixed_record_with_vlens_array"])
-            )
         return (
-            yardl.structural_equal(self.ints, other.ints)
+            isinstance(other, RecordWithNDArraysSingleDimension)
+            and yardl.structural_equal(self.ints, other.ints)
             and yardl.structural_equal(self.fixed_simple_record_array, other.fixed_simple_record_array)
             and yardl.structural_equal(self.fixed_record_with_vlens_array, other.fixed_record_with_vlens_array)
         )
@@ -770,20 +533,9 @@ class RecordWithDynamicNDArrays:
     )
 
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, RecordWithDynamicNDArrays):
-            if (
-                not isinstance(other, np.void)
-                or other.dtype.fields is None
-                or len(other.dtype.fields) != 3
-            ):
-                return False
-            return (
-                yardl.structural_equal(self.ints, other["ints"])
-                and yardl.structural_equal(self.simple_record_array, other["simple_record_array"])
-                and yardl.structural_equal(self.record_with_vlens_array, other["record_with_vlens_array"])
-            )
         return (
-            yardl.structural_equal(self.ints, other.ints)
+            isinstance(other, RecordWithDynamicNDArrays)
+            and yardl.structural_equal(self.ints, other.ints)
             and yardl.structural_equal(self.simple_record_array, other.simple_record_array)
             and yardl.structural_equal(self.record_with_vlens_array, other.record_with_vlens_array)
         )
@@ -802,19 +554,9 @@ class RecordWithFixedCollections:
     )
 
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, RecordWithFixedCollections):
-            if (
-                not isinstance(other, np.void)
-                or other.dtype.fields is None
-                or len(other.dtype.fields) != 2
-            ):
-                return False
-            return (
-                self.fixed_vector == other["fixed_vector"]
-                and yardl.structural_equal(self.fixed_array, other["fixed_array"])
-            )
         return (
-            self.fixed_vector == other.fixed_vector
+            isinstance(other, RecordWithFixedCollections)
+            and self.fixed_vector == other.fixed_vector
             and yardl.structural_equal(self.fixed_array, other.fixed_array)
         )
 
@@ -830,19 +572,9 @@ class RecordWithVlenCollections:
     )
 
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, RecordWithVlenCollections):
-            if (
-                not isinstance(other, np.void)
-                or other.dtype.fields is None
-                or len(other.dtype.fields) != 2
-            ):
-                return False
-            return (
-                self.vector == other["vector"]
-                and yardl.structural_equal(self.array, other["array"])
-            )
         return (
-            self.vector == other.vector
+            isinstance(other, RecordWithVlenCollections)
+            and self.vector == other.vector
             and yardl.structural_equal(self.array, other.array)
         )
 
@@ -867,20 +599,10 @@ class RecordWithUnions:
     )
 
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, RecordWithUnions):
-            if (
-                not isinstance(other, np.void)
-                or other.dtype.fields is None
-                or len(other.dtype.fields) != 2
-            ):
-                return False
-            return (
-                self.null_or_int_or_string == other["null_or_int_or_string"]
-                and yardl.structural_equal(self.date_or_datetime, other["date_or_datetime"])
-            )
         return (
-            self.null_or_int_or_string == other.null_or_int_or_string
-            and yardl.structural_equal(self.date_or_datetime, other.date_or_datetime)
+            isinstance(other, RecordWithUnions)
+            and self.null_or_int_or_string == other.null_or_int_or_string
+            and self.date_or_datetime == other.date_or_datetime
         )
 
 
@@ -937,20 +659,9 @@ class RecordWithEnums:
     flags_2: TextFormat = TextFormat.REGULAR
 
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, RecordWithEnums):
-            if (
-                not isinstance(other, np.void)
-                or other.dtype.fields is None
-                or len(other.dtype.fields) != 3
-            ):
-                return False
-            return (
-                self.enum == other["enum"]
-                and self.flags == other["flags"]
-                and self.flags_2 == other["flags_2"]
-            )
         return (
-            self.enum == other.enum
+            isinstance(other, RecordWithEnums)
+            and self.enum == other.enum
             and self.flags == other.flags
             and self.flags_2 == other.flags_2
         )
@@ -965,21 +676,9 @@ class GenericRecord(typing.Generic[T1, T2, T2_NP]):
     vector_1: list[T1]
     image_2: Image[T2_NP]
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, GenericRecord):
-            if (
-                not isinstance(other, np.void)
-                or other.dtype.fields is None
-                or len(other.dtype.fields) != 4
-            ):
-                return False
-            return (
-                yardl.structural_equal(self.scalar_1, other["scalar_1"])
-                and yardl.structural_equal(self.scalar_2, other["scalar_2"])
-                and len(self.vector_1) == len(other["vector_1"]) and all(yardl.structural_equal(a, b) for a, b in zip(self.vector_1, other["vector_1"]))
-                and yardl.structural_equal(self.image_2, other["image_2"])
-            )
         return (
-            yardl.structural_equal(self.scalar_1, other.scalar_1)
+            isinstance(other, GenericRecord)
+            and yardl.structural_equal(self.scalar_1, other.scalar_1)
             and yardl.structural_equal(self.scalar_2, other.scalar_2)
             and len(self.vector_1) == len(other.vector_1) and all(yardl.structural_equal(a, b) for a, b in zip(self.vector_1, other.vector_1))
             and yardl.structural_equal(self.image_2, other.image_2)
@@ -991,19 +690,9 @@ class MyTuple(typing.Generic[T1, T2]):
     v1: T1
     v2: T2
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, MyTuple):
-            if (
-                not isinstance(other, np.void)
-                or other.dtype.fields is None
-                or len(other.dtype.fields) != 2
-            ):
-                return False
-            return (
-                yardl.structural_equal(self.v1, other["v1"])
-                and yardl.structural_equal(self.v2, other["v2"])
-            )
         return (
-            yardl.structural_equal(self.v1, other.v1)
+            isinstance(other, MyTuple)
+            and yardl.structural_equal(self.v1, other.v1)
             and yardl.structural_equal(self.v2, other.v2)
         )
 
@@ -1055,18 +744,9 @@ class GenericRecordWithComputedFields(typing.Generic[T0, T1]):
         raise RuntimeError("Unexpected union case")
 
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, GenericRecordWithComputedFields):
-            if (
-                not isinstance(other, np.void)
-                or other.dtype.fields is None
-                or len(other.dtype.fields) != 1
-            ):
-                return False
-            return (
-                yardl.structural_equal(self.f1, other["f1"])
-            )
         return (
-            yardl.structural_equal(self.f1, other.f1)
+            isinstance(other, GenericRecordWithComputedFields)
+            and yardl.structural_equal(self.f1, other.f1)
         )
 
 
@@ -1338,32 +1018,9 @@ class RecordWithComputedFields:
         return i
 
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, RecordWithComputedFields):
-            if (
-                not isinstance(other, np.void)
-                or other.dtype.fields is None
-                or len(other.dtype.fields) != 15
-            ):
-                return False
-            return (
-                yardl.structural_equal(self.array_field, other["array_field"])
-                and yardl.structural_equal(self.array_field_map_dimensions, other["array_field_map_dimensions"])
-                and yardl.structural_equal(self.dynamic_array_field, other["dynamic_array_field"])
-                and yardl.structural_equal(self.fixed_array_field, other["fixed_array_field"])
-                and self.int_field == other["int_field"]
-                and self.string_field == other["string_field"]
-                and self.tuple_field == other["tuple_field"]
-                and self.vector_field == other["vector_field"]
-                and self.vector_of_vectors_field == other["vector_of_vectors_field"]
-                and self.fixed_vector_field == other["fixed_vector_field"]
-                and other["optional_named_array"] is None if self.optional_named_array is None else (other["optional_named_array"] is not None and yardl.structural_equal(self.optional_named_array, other["optional_named_array"]))
-                and self.int_float_union == other["int_float_union"]
-                and self.nullable_int_float_union == other["nullable_int_float_union"]
-                and self.union_with_nested_generic_union == other["union_with_nested_generic_union"]
-                and self.map_field == other["map_field"]
-            )
         return (
-            yardl.structural_equal(self.array_field, other.array_field)
+            isinstance(other, RecordWithComputedFields)
+            and yardl.structural_equal(self.array_field, other.array_field)
             and yardl.structural_equal(self.array_field_map_dimensions, other.array_field_map_dimensions)
             and yardl.structural_equal(self.dynamic_array_field, other.dynamic_array_field)
             and yardl.structural_equal(self.fixed_array_field, other.fixed_array_field)
@@ -1407,20 +1064,9 @@ class RecordWithKeywordFields:
         return self.sizeof[1, 2]
 
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, RecordWithKeywordFields):
-            if (
-                not isinstance(other, np.void)
-                or other.dtype.fields is None
-                or len(other.dtype.fields) != 3
-            ):
-                return False
-            return (
-                self.int_ == other["int_"]
-                and yardl.structural_equal(self.sizeof, other["sizeof"])
-                and self.if_ == other["if_"]
-            )
         return (
-            self.int_ == other.int_
+            isinstance(other, RecordWithKeywordFields)
+            and self.int_ == other.int_
             and yardl.structural_equal(self.sizeof, other.sizeof)
             and self.if_ == other.if_
         )
