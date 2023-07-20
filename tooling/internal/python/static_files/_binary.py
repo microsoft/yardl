@@ -259,15 +259,17 @@ class CodedInputStream:
     def _fill_buffer(self, min_count: int = 0) -> None:
         remaining = self._last_read_count - self._offset
         if remaining > 0:
-            remaining_view = memoryview(self._buffer)[self._offset :]
+            remaining_view = memoryview(self._buffer)[
+                self._offset : self._offset + remaining + 1
+            ]
             self._buffer[:remaining] = remaining_view
 
         slice = memoryview(self._buffer)[remaining:]
-        self._last_read_count = self._stream.readinto(slice)
+        self._last_read_count = self._stream.readinto(slice) + remaining
         self._offset = 0
         if self._last_read_count == 0:
             self._at_end = True
-        if min_count > 0 and (self._last_read_count + remaining) < min_count:
+        if min_count > 0 and (self._last_read_count) < min_count:
             raise EOFError("Unexpected EOF")
 
 
