@@ -11,8 +11,8 @@ def test_defaulting():
     assert p.bool_field == False
     assert p.int_32_field == 0
     assert p.date_field == datetime.date(1970, 1, 1)
-    assert p.time_field == datetime.time(0, 0, 0)
-    assert p.datetime_field == datetime.datetime(1970, 1, 1, 0, 0, 0)
+    assert p.time_field == tm.Time(0)
+    assert p.datetime_field == tm.DateTime(0)
 
     v = tm.RecordWithVectors()
     assert v.default_vector == []

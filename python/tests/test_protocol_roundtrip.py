@@ -190,8 +190,10 @@ def test_scalar_primitives():
             complexfloat_32_field=complex(32.0, 64.0),
             complexfloat_64_field=64.64 + 32.32j,
             date_field=datetime.date(2024, 4, 2),
-            time_field=datetime.time(12, 34, 56),
-            datetime_field=datetime.datetime(2024, 4, 2, 12, 34, 56, 111222),
+            time_field=tm.Time.from_time(datetime.time(12, 34, 56)),
+            datetime_field=tm.DateTime.from_datetime(
+                datetime.datetime(2024, 4, 2, 12, 34, 56, 111222)
+            ),
         )
         w.write_record(rec)
 
@@ -210,12 +212,14 @@ def test_scalar_optionals():
         w.write_optional_record(tm.SimpleRecord(x=8, y=9, z=10))
         w.write_record_with_optional_fields(
             tm.RecordWithOptionalFields(
-                optional_int=44, optional_time=datetime.time(12, 34, 56)
+                optional_int=44,
+                optional_time=tm.Time.from_time(datetime.time(12, 34, 56)),
             )
         )
         w.write_optional_record_with_optional_fields(
             tm.RecordWithOptionalFields(
-                optional_int=12, optional_time=datetime.time(11, 32, 26)
+                optional_int=12,
+                optional_time=tm.Time.from_time(datetime.time(11, 32, 26)),
             )
         )
 
@@ -677,7 +681,10 @@ def test_unions():
         w.write_record_with_unions(
             tm.RecordWithUnions(
                 null_or_int_or_string=("int32", 7),
-                date_or_datetime=("datetime", datetime.datetime(2025, 3, 4)),
+                date_or_datetime=(
+                    "datetime",
+                    tm.DateTime.from_datetime(datetime.datetime(2025, 3, 4)),
+                ),
             )
         )
 

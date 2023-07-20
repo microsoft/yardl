@@ -1,7 +1,7 @@
 import datetime
 import functools
 from types import GenericAlias, NoneType, UnionType
-from typing import Any, Callable, Optional, Union, cast, get_args, get_origin
+from typing import Any, Annotated, Callable, Union, cast, get_args, get_origin
 import numpy as np
 import numpy.typing as npt
 from . import yardl_types as yardl
@@ -42,6 +42,8 @@ def make_get_dtype_func(
     dtype_map[datetime.time] = dtype_map[yardl.Time]
     dtype_map[datetime.datetime] = dtype_map[yardl.DateTime]
 
+    annotatedRuntimeType = type(yardl.Int32)
+
     def get_dtype_impl(
         dtype_map: dict[
             type | GenericAlias,
@@ -49,7 +51,11 @@ def make_get_dtype_func(
         ],
         t: type | GenericAlias,
     ) -> np.dtype[Any]:
-        if isinstance(t, type) or isinstance(t, UnionType):
+        if (
+            isinstance(t, type)
+            or isinstance(t, UnionType)
+            or isinstance(t, annotatedRuntimeType)
+        ):
             if (res := dtype_map.get(t, None)) is not None:
                 if callable(res):
                     raise RuntimeError(f"Generic type arguments not provided for {t}")

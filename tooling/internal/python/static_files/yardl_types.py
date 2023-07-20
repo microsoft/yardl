@@ -1,31 +1,8 @@
 from enum import Enum, Flag, auto
+from typing import Annotated, NewType
 import numpy as np
 import datetime
-
-Bool = bool | np.bool_
-Int8 = int | np.int8
-UInt8 = int | np.uint8
-Int16 = int | np.int16
-UInt16 = int | np.uint16
-Int32 = int | np.int32
-UInt32 = int | np.uint32
-Int64 = int | np.int64
-UInt64 = int | np.uint64
-Size = int | np.uint64
-Float32 = float | np.float32
-Float64 = float | np.float64
-ComplexFloat = complex | np.complex64
-ComplexDouble = complex | np.complex128
-
-String = str
-
-Date = datetime.date | np.datetime64
-Time = datetime.time | np.timedelta64
-DateTime = datetime.datetime | np.datetime64
-
-Integer = Int8 | UInt8 | Int16 | UInt16 | Int32 | UInt32 | Int64 | UInt64 | Size
-Floating = Float32 | Float64
-Complex = ComplexFloat | ComplexDouble
+import time
 
 
 class Types(Flag):
@@ -102,6 +79,155 @@ class OutOfRangeEnum(Enum):
             return super().__repr__()
 
         return f"<{self.__class__.__name__}: {self.value}>"
+
+
+class DateTime:
+    """A barebones datetime with nanosecond precision, always in UTC."""
+
+    def __init__(self, nanoseconds_from_epoch: int | np.datetime64 = 0):
+        if isinstance(nanoseconds_from_epoch, np.datetime64):
+            if nanoseconds_from_epoch.dtype != "datetime64[ns]":
+                self._value = np.datetime64(nanoseconds_from_epoch, "ns")
+            else:
+                self._value = nanoseconds_from_epoch
+        else:
+            self._value = np.datetime64(nanoseconds_from_epoch, "ns")
+
+    @property
+    def numpy_value(self) -> np.datetime64:
+        return self._value
+
+    def to_datetime(self) -> datetime.datetime:
+        return datetime.datetime.utcfromtimestamp(self._value.astype(int) / 1e9)
+
+    @staticmethod
+    def from_datetime(dt: datetime.datetime) -> "DateTime":
+        return DateTime(round(dt.timestamp() * 1e6) * 1000)
+
+    @staticmethod
+    def parse(s: str) -> "DateTime":
+        return DateTime(np.datetime64(s, "ns"))
+
+    @staticmethod
+    def now() -> "DateTime":
+        return DateTime(time.time_ns())
+
+    def __str__(self) -> str:
+        return str(self._value)
+
+    def __repr__(self) -> str:
+        return f"DateTime({self})"
+
+    def __eq__(self, other: object) -> bool:
+        return isinstance(other, DateTime) and self._value == other._value
+
+    def __hash__(self) -> int:
+        return hash(self._value)
+
+
+class Time:
+    """A barebones time of day with nanosecond precision. This is not timezone-aware and is meant
+    to represent a clock time.
+    """
+
+    _NANOSECONDS_PER_DAY = 24 * 60 * 60 * 1_000_000_000
+
+    def __init__(self, nanoseconds_since_midnight: int | np.timedelta64 = 0):
+        if isinstance(nanoseconds_since_midnight, np.timedelta64):
+            if nanoseconds_since_midnight.dtype != "timedelta64[ns]":
+                self._value = np.timedelta64(nanoseconds_since_midnight, "ns")
+                nanoseconds_since_midnight = nanoseconds_since_midnight.astype(int)
+            else:
+                self._value = nanoseconds_since_midnight
+        else:
+            self._value = np.timedelta64(nanoseconds_since_midnight, "ns")
+
+        if (
+            nanoseconds_since_midnight < 0
+            or nanoseconds_since_midnight >= Time._NANOSECONDS_PER_DAY
+        ):
+            raise ValueError(
+                "TimeOfDay must be between 00:00:00 and 23:59:59.999999999"
+            )
+
+    @property
+    def numpy_value(self) -> np.timedelta64:
+        return self._value
+
+    @staticmethod
+    def from_time(t: datetime.time) -> "Time":
+        return Time(
+            t.hour * 3_600_000_000_000
+            + t.minute * 60_000_000_000
+            + t.second * 1_000_000_000
+            + t.microsecond * 1_000
+        )
+
+    @staticmethod
+    def parse(s: str) -> "Time":
+        components = s.split(":")
+        if len(components) == 2:
+            hour = int(components[0])
+            minute = int(components[1])
+            return Time(hour * 3_600_000_000_000 + minute * 60_000_000_000)
+        if len(components) == 3:
+            hour = int(components[0])
+            minute = int(components[1])
+            second_components = components[2].split(".")
+            if len(second_components) <= 2:
+                second = int(second_components[0])
+                if len(second_components) == 2:
+                    fraction = int(second_components[1].ljust(9, "0")[:9])
+                else:
+                    fraction = 0
+                return Time(
+                    hour * 3_600_000_000_000
+                    + minute * 60_000_000_000
+                    + second * 1_000_000_000
+                    + fraction
+                )
+
+        raise ValueError("TimeOfDay must be in the format HH:MM:SS[.fffffffff]")
+
+    def __str__(self) -> str:
+        nanoseconds_since_midnight = self._value.astype(int)
+        hours, r = divmod(nanoseconds_since_midnight, 3_600_000_000_000)
+        minutes, r = divmod(r, 60_000_000_000)
+        seconds, nanoseconds = divmod(r, 1_000_000_000)
+        if nanoseconds == 0:
+            return f"{hours:02}:{minutes:02}:{seconds:02}"
+
+        return f"{hours:02}:{minutes:02}:{seconds:02}.{str(nanoseconds).rjust(9, '0').rstrip('0')}"
+
+    def __repr__(self) -> str:
+        return f"Time({self})"
+
+    def __eq__(self, other: object) -> bool:
+        return isinstance(other, Time) and self._value == other._value
+
+
+Bool = bool
+Int8 = Annotated[int, "Int8"]
+UInt8 = Annotated[int, "UInt8"]
+Int16 = Annotated[int, "Int16"]
+UInt16 = Annotated[int, "UInt16"]
+Int32 = Annotated[int, "Int32"]
+UInt32 = Annotated[int, "UInt32"]
+Int64 = Annotated[int, "Int64"]
+UInt64 = Annotated[int, "UInt64"]
+Size = Annotated[int, "Size"]
+Float32 = Annotated[float, "Float32"]
+Float64 = Annotated[float, "Float64"]
+ComplexFloat = Annotated[complex, "ComplexFloat"]
+ComplexDouble = Annotated[complex, "ComplexDouble"]
+
+String = str
+
+Date = datetime.date
+
+Integer = Int8 | UInt8 | Int16 | UInt16 | Int32 | UInt32 | Int64 | UInt64 | Size
+Floating = Float32 | Float64
+Complex = ComplexFloat | ComplexDouble
 
 
 _EPOCH_ORDINAL_DAYS = datetime.date(1970, 1, 1).toordinal()

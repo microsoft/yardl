@@ -115,29 +115,39 @@ class CodedOutputStream:
         self.flush()
         self._stream.write(data)
 
-    def write_byte(self, value: Integer) -> None:
+    def write_byte(self, value: int) -> None:
         assert 0 <= value <= UINT8_MAX
         self._view[0] = value
         self._view = self._view[1:]
 
-    def write_unsigned_varint(self, value: Integer) -> None:
+    def write_unsigned_varint(
+        self,
+        value: int | np.uint8 | np.uint16 | np.uint32 | np.uint64,
+    ) -> None:
         if len(self._view) < 10:
             self.flush()
 
-        value = int(value)  # bitwise ops not supported on numpy types
+        int_val = int(value)  # bitwise ops not supported on numpy types
 
         while True:
-            if value < 0x80:
-                self.write_byte(value)
+            if int_val < 0x80:
+                self.write_byte(int_val)
                 return
 
-            self.write_byte((value & 0x7F) | 0x80)
-            value >>= 7
+            self.write_byte((int_val & 0x7F) | 0x80)
+            int_val >>= 7
 
-    def zigzag_encode(self, value: Integer) -> Integer:
-        return (value << 1) ^ (value >> 63)
+    def zigzag_encode(
+        self,
+        value: int | np.int8 | np.int16 | np.int32 | np.int64,
+    ) -> int:
+        int_val = int(value)
+        return (int_val << 1) ^ (int_val >> 63)
 
-    def write_signed_varint(self, value: Integer) -> None:
+    def write_signed_varint(
+        self,
+        value: int | np.int8 | np.int16 | np.int32 | np.int64,
+    ) -> None:
         self.write_unsigned_varint(self.zigzag_encode(value))
 
 
@@ -322,9 +332,6 @@ class BoolSerializer(StructSerializer[Bool, np.bool_]):
         super().__init__(np.bool_, "<?")
 
     def read(self, stream: CodedInputStream, read_as_numpy: Types) -> Bool:
-        if Types.BOOL in read_as_numpy:
-            return self.read_numpy(stream)
-
         return super().read(stream, read_as_numpy)
 
     def read_numpy(self, stream: CodedInputStream) -> np.bool_:
@@ -339,9 +346,6 @@ class Int8Serializer(StructSerializer[Int8, np.int8]):
         super().__init__(np.int8, "<b")
 
     def read(self, stream: CodedInputStream, read_as_numpy: Types) -> Int8:
-        if Types.INT8 in read_as_numpy:
-            return self.read_numpy(stream)
-
         return super().read(stream, read_as_numpy)
 
     def is_trivially_serializable(self) -> bool:
@@ -356,9 +360,6 @@ class UInt8Serializer(StructSerializer[UInt8, np.uint8]):
         super().__init__(np.uint8, "<B")
 
     def read(self, stream: CodedInputStream, read_as_numpy: Types) -> UInt8:
-        if Types.UINT8 in read_as_numpy:
-            return self.read_numpy(stream)
-
         return super().read(stream, read_as_numpy)
 
     def is_trivially_serializable(self) -> bool:
@@ -387,10 +388,7 @@ class Int16Serializer(TypeSerializer[Int16, np.int16]):
         stream.write_signed_varint(value)
 
     def read(self, stream: CodedInputStream, read_as_numpy: Types) -> Int16:
-        if Types.INT16 in read_as_numpy:
-            return self.read_numpy(stream)
-
-        return stream.read_signed_varint()
+        return cast(Int16, stream.read_signed_varint())
 
     def read_numpy(self, stream: CodedInputStream) -> np.int16:
         return np.int16(stream.read_signed_varint())
@@ -418,10 +416,7 @@ class UInt16Serializer(TypeSerializer[UInt16, np.uint16]):
         stream.write_unsigned_varint(value)
 
     def read(self, stream: CodedInputStream, read_as_numpy: Types) -> UInt16:
-        if Types.UINT16 in read_as_numpy:
-            return self.read_numpy(stream)
-
-        return stream.read_unsigned_varint()
+        return cast(UInt16, stream.read_unsigned_varint())
 
     def read_numpy(self, stream: CodedInputStream) -> np.uint16:
         return np.uint16(stream.read_unsigned_varint())
@@ -449,10 +444,7 @@ class Int32Serializer(TypeSerializer[Int32, np.int32]):
         stream.write_signed_varint(value)
 
     def read(self, stream: CodedInputStream, read_as_numpy: Types) -> Int32:
-        if Types.INT32 in read_as_numpy:
-            return self.read_numpy(stream)
-
-        return stream.read_signed_varint()
+        return cast(Int32, stream.read_signed_varint())
 
     def read_numpy(self, stream: CodedInputStream) -> np.int32:
         return np.int32(stream.read_signed_varint())
@@ -480,10 +472,7 @@ class UInt32Serializer(TypeSerializer[UInt32, np.uint32]):
         stream.write_unsigned_varint(value)
 
     def read(self, stream: CodedInputStream, read_as_numpy: Types) -> UInt32:
-        if Types.UINT32 in read_as_numpy:
-            return self.read_numpy(stream)
-
-        return stream.read_unsigned_varint()
+        return cast(UInt32, stream.read_unsigned_varint())
 
     def read_numpy(self, stream: CodedInputStream) -> np.uint32:
         return np.uint32(stream.read_unsigned_varint())
@@ -511,10 +500,7 @@ class Int64Serializer(TypeSerializer[Int64, np.int64]):
         stream.write_signed_varint(value)
 
     def read(self, stream: CodedInputStream, read_as_numpy: Types) -> Int64:
-        if Types.INT64 in read_as_numpy:
-            return self.read_numpy(stream)
-
-        return stream.read_signed_varint()
+        return cast(Int64, stream.read_signed_varint())
 
     def read_numpy(self, stream: CodedInputStream) -> np.int64:
         return np.int64(stream.read_signed_varint())
@@ -542,10 +528,7 @@ class UInt64Serializer(TypeSerializer[UInt64, np.uint64]):
         stream.write_unsigned_varint(value)
 
     def read(self, stream: CodedInputStream, read_as_numpy: Types) -> UInt64:
-        if Types.UINT64 in read_as_numpy:
-            return self.read_numpy(stream)
-
-        return stream.read_unsigned_varint()
+        return cast(UInt64, stream.read_unsigned_varint())
 
     def read_numpy(self, stream: CodedInputStream) -> np.uint64:
         return np.uint64(stream.read_unsigned_varint())
@@ -573,10 +556,7 @@ class SizeSerializer(TypeSerializer[Size, np.uint64]):
         stream.write_unsigned_varint(value)
 
     def read(self, stream: CodedInputStream, read_as_numpy: Types) -> Size:
-        if Types.SIZE in read_as_numpy:
-            return self.read_numpy(stream)
-
-        return stream.read_unsigned_varint()
+        return cast(Size, stream.read_unsigned_varint())
 
     def read_numpy(self, stream: CodedInputStream) -> np.uint64:
         return np.uint64(stream.read_unsigned_varint())
@@ -590,10 +570,7 @@ class Float32Serializer(StructSerializer[Float32, np.float32]):
         super().__init__(np.float32, "<f")
 
     def read(self, stream: CodedInputStream, read_as_numpy: Types) -> Float32:
-        if Types.FLOAT32 in read_as_numpy:
-            return self.read_numpy(stream)
-
-        return super().read(stream, read_as_numpy)
+        return cast(Float32, super().read(stream, read_as_numpy))
 
     def is_trivially_serializable(self) -> bool:
         return True
@@ -607,9 +584,6 @@ class Float64Serializer(StructSerializer[Float64, np.float64]):
         super().__init__(np.float64, "<d")
 
     def read(self, stream: CodedInputStream, read_as_numpy: Types) -> Float64:
-        if Types.FLOAT64 in read_as_numpy:
-            return self.read_numpy(stream)
-
         return super().read(stream, read_as_numpy)
 
     def is_trivially_serializable(self) -> bool:
@@ -627,10 +601,7 @@ class Complex32Serializer(StructSerializer[ComplexFloat, np.complex64]):
         stream.write(self._struct, value.real, value.imag)
 
     def read(self, stream: CodedInputStream, read_as_numpy: Types) -> ComplexFloat:
-        if Types.COMPLEX_FLOAT32 in read_as_numpy:
-            return self.read_numpy(stream)
-
-        return complex(*stream.read(self._struct))
+        return ComplexFloat(*stream.read(self._struct))
 
     def read_numpy(self, stream: CodedInputStream) -> np.complex64:
         real, imag = stream.read(self._struct)
@@ -651,10 +622,7 @@ class Complex64Serializer(StructSerializer[ComplexDouble, np.complex128]):
         stream.write(self._struct, value.real, value.imag)
 
     def read(self, stream: CodedInputStream, read_as_numpy: Types) -> ComplexDouble:
-        if Types.COMPLEX_FLOAT64 in read_as_numpy:
-            return self.read_numpy(stream)
-
-        return complex(*stream.read(self._struct))
+        return ComplexDouble(*stream.read(self._struct))
 
     def read_numpy(self, stream: CodedInputStream) -> np.complex128:
         real, imag = stream.read(self._struct)
@@ -718,9 +686,6 @@ class DateSerializer(TypeSerializer[Date, np.datetime64]):
             )
 
     def read(self, stream: CodedInputStream, read_as_numpy: Types) -> Date:
-        if Types.DATE in read_as_numpy:
-            return self.read_numpy(stream)
-
         days_since_epoch = stream.read_signed_varint()
         return datetime.date.fromordinal(days_since_epoch + EPOCH_ORDINAL_DAYS)
 
@@ -739,18 +704,14 @@ class TimeSerializer(TypeSerializer[Time, np.timedelta64]):
         super().__init__(TIMEDELTA_NANOSECONDS_DTYPE)
 
     def write(self, stream: CodedOutputStream, value: Time) -> None:
-        if isinstance(value, datetime.time):
-            nanoseconds_since_midnight = (
-                value.hour * 3_600_000_000_000
-                + value.minute * 60_000_000_000
-                + value.second * 1_000_000_000
-                + value.microsecond * 1_000
-            )
-            stream.write_signed_varint(nanoseconds_since_midnight)
+        if isinstance(value, Time):
+            self.write_numpy(stream, value.numpy_value)
+        elif isinstance(value, datetime.time):
+            self.write_numpy(stream, Time.from_time(value).numpy_value)
         else:
             if not isinstance(value, np.timedelta64):
                 raise ValueError(
-                    f"Expected a datetime.time or np.timedelta64, got {type(value)}"
+                    f"Expected a Time, datetime.time or np.timedelta64, got {type(value)}"
                 )
 
             self.write_numpy(stream, value)
@@ -764,15 +725,8 @@ class TimeSerializer(TypeSerializer[Time, np.timedelta64]):
             )
 
     def read(self, stream: CodedInputStream, read_as_numpy: Types) -> Time:
-        if Types.TIME in read_as_numpy:
-            return self.read_numpy(stream)
-
         nanoseconds_since_midnight = stream.read_signed_varint()
-        hours, r = divmod(nanoseconds_since_midnight, 3_600_000_000_000)
-        minutes, r = divmod(r, 60_000_000_000)
-        seconds, r = divmod(r, 1_000_000_000)
-        microseconds = r // 1000
-        return datetime.time(hours, minutes, seconds, microseconds)
+        return Time(nanoseconds_since_midnight)
 
     def read_numpy(self, stream: CodedInputStream) -> np.timedelta64:
         nanoseconds_since_midnight = stream.read_signed_varint()
@@ -790,10 +744,10 @@ class DateTimeSerializer(TypeSerializer[DateTime, np.datetime64]):
         super().__init__(DATETIME_NANOSECONDS_DTYPE)
 
     def write(self, stream: CodedOutputStream, value: DateTime) -> None:
-        if isinstance(value, datetime.datetime):
-            delta = value - EPOCH_DATETIME
-            nanoseconds_since_epoch = int(delta.total_seconds() * 1e6) * 1000
-            stream.write_signed_varint(nanoseconds_since_epoch)
+        if isinstance(value, DateTime):
+            self.write_numpy(stream, value.numpy_value)
+        elif isinstance(value, datetime.datetime):
+            self.write_numpy(stream, DateTime.from_datetime(value).numpy_value)
         else:
             if not isinstance(value, np.datetime64):
                 raise ValueError(
@@ -811,13 +765,8 @@ class DateTimeSerializer(TypeSerializer[DateTime, np.datetime64]):
             )
 
     def read(self, stream: CodedInputStream, read_as_numpy: Types) -> DateTime:
-        if Types.DATETIME in read_as_numpy:
-            return self.read_numpy(stream)
-
         nanoseconds_since_epoch = stream.read_signed_varint()
-        return EPOCH_DATETIME + datetime.timedelta(
-            microseconds=nanoseconds_since_epoch / 1000
-        )
+        return DateTime(nanoseconds_since_epoch)
 
     def read_numpy(self, stream: CodedInputStream) -> np.datetime64:
         nanoseconds_since_epoch = stream.read_signed_varint()

@@ -186,11 +186,11 @@ class RecordWithPrimitives:
     )
 
     time_field: yardl.Time = dataclasses.field(
-        default_factory=lambda: datetime.time(0, 0, 0)
+        default_factory=yardl.Time
     )
 
     datetime_field: yardl.DateTime = dataclasses.field(
-        default_factory=lambda: datetime.datetime(1970, 1, 1, 0, 0, 0)
+        default_factory=yardl.DateTime
     )
 
     def __eq__(self, other: object) -> bool:
@@ -862,7 +862,9 @@ class RecordWithUnions:
     date_or_datetime: (
         tuple[typing.Literal["time"], yardl.Time]
         | tuple[typing.Literal["datetime"], yardl.DateTime]
-    ) = ("time", datetime.time(0, 0, 0))
+    ) = dataclasses.field(
+        default_factory=lambda: ("time", yardl.Time())
+    )
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, RecordWithUnions):

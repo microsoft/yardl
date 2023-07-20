@@ -3,9 +3,7 @@
 import datetime
 import os
 import time
-from typing import (
-    Any,
-)
+from typing import Any, Annotated
 import sandbox
 import numpy as np
 import pandas as pd
@@ -60,3 +58,16 @@ print(da)
 
 with sandbox.BinaryHello2Writer(file) as w:
     w.write_data(da)
+
+
+MyInt = Annotated[int, "MyInt"]
+
+x: MyInt = 1
+
+x = 2
+
+
+sandbox.get_dtype(sandbox.Int32)
+
+
+f(MyInt)

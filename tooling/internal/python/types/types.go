@@ -625,6 +625,15 @@ func typeDefault(t dsl.Type, contextNamespace string, st dsl.SymbolTable) (strin
 				return defaultExpression, defaultKind
 			}
 
+			switch defaultKind {
+			case defaultValueKindNone:
+				return "", defaultKind
+			case defaultValueKindValue, defaultValueKindLambda:
+				return fmt.Sprintf(`("%s", %s)`, t.Cases[0].Tag, defaultExpression), defaultKind
+			case defaultValueKindFactory:
+				return fmt.Sprintf(`("%s", %s())`, t.Cases[0].Tag, defaultExpression), defaultValueKindLambda
+			}
+
 			return fmt.Sprintf(`("%s", %s)`, t.Cases[0].Tag, defaultExpression), defaultValueKindValue
 		case *dsl.Vector:
 			if td.Length == nil {
@@ -692,9 +701,9 @@ func typeDefinitionDefault(t dsl.TypeDefinition, contextNamespace string, st dsl
 		case dsl.Date:
 			return "datetime.date(1970, 1, 1)", defaultValueKindLambda
 		case dsl.Time:
-			return "datetime.time(0, 0, 0)", defaultValueKindLambda
+			return "yardl.Time", defaultValueKindFactory
 		case dsl.DateTime:
-			return "datetime.datetime(1970, 1, 1, 0, 0, 0)", defaultValueKindLambda
+			return "yardl.DateTime", defaultValueKindFactory
 		}
 	case *dsl.EnumDefinition:
 		zeroValue := t.GetZeroValue()
