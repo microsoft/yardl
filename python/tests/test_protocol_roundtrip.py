@@ -133,16 +133,11 @@ def create_validating_writer_class(
             validating_instance = validating_class(io.BytesIO())
             validating_instance._recorded_arguments = self._recorded_arguments
 
-            # read as python types
-            reader = reader_class(io.BytesIO(this_buffer), tm.Types.NONE)
-            reader.copy_to(validating_instance)
-
-            # now read as numpy types
-            reader = reader_class(io.BytesIO(this_buffer), tm.Types.ALL)
+            reader = reader_class(io.BytesIO(this_buffer))
             reader.copy_to(validating_instance)
 
             cpp_output = invoke_translator(this_buffer)
-            reader = reader_class(io.BytesIO(cpp_output), tm.Types.ALL)
+            reader = reader_class(io.BytesIO(cpp_output))
             reader.copy_to(validating_instance)
 
             return result

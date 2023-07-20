@@ -59,8 +59,7 @@ class BenchmarkFloat256x256ReaderBase(abc.ABC):
     """Abstract reader for the BenchmarkFloat256x256 protocol."""
 
 
-    def __init__(self, read_as_numpy: Types = Types.NONE) -> None:
-        self._read_as_numpy = read_as_numpy
+    def __init__(self) -> None:
         self._state = 0
 
     schema = BenchmarkFloat256x256WriterBase.schema
@@ -168,8 +167,7 @@ class BenchmarkFloatVlenReaderBase(abc.ABC):
     """Abstract reader for the BenchmarkFloatVlen protocol."""
 
 
-    def __init__(self, read_as_numpy: Types = Types.NONE) -> None:
-        self._read_as_numpy = read_as_numpy
+    def __init__(self) -> None:
         self._state = 0
 
     schema = BenchmarkFloatVlenWriterBase.schema
@@ -277,8 +275,7 @@ class BenchmarkSmallRecordReaderBase(abc.ABC):
     """Abstract reader for the BenchmarkSmallRecord protocol."""
 
 
-    def __init__(self, read_as_numpy: Types = Types.NONE) -> None:
-        self._read_as_numpy = read_as_numpy
+    def __init__(self) -> None:
         self._state = 0
 
     schema = BenchmarkSmallRecordWriterBase.schema
@@ -386,8 +383,7 @@ class BenchmarkSmallRecordWithOptionalsReaderBase(abc.ABC):
     """Abstract reader for the BenchmarkSmallRecordWithOptionals protocol."""
 
 
-    def __init__(self, read_as_numpy: Types = Types.NONE) -> None:
-        self._read_as_numpy = read_as_numpy
+    def __init__(self) -> None:
         self._state = 0
 
     schema = BenchmarkSmallRecordWithOptionalsWriterBase.schema
@@ -501,8 +497,7 @@ class BenchmarkSimpleMrdReaderBase(abc.ABC):
     """Abstract reader for the BenchmarkSimpleMrd protocol."""
 
 
-    def __init__(self, read_as_numpy: Types = Types.NONE) -> None:
-        self._read_as_numpy = read_as_numpy
+    def __init__(self) -> None:
         self._state = 0
 
     schema = BenchmarkSimpleMrdWriterBase.schema
@@ -631,8 +626,7 @@ class ScalarsReaderBase(abc.ABC):
     """Abstract reader for the Scalars protocol."""
 
 
-    def __init__(self, read_as_numpy: Types = Types.NONE) -> None:
-        self._read_as_numpy = read_as_numpy
+    def __init__(self) -> None:
         self._state = 0
 
     schema = ScalarsWriterBase.schema
@@ -802,8 +796,7 @@ class ScalarOptionalsReaderBase(abc.ABC):
     """Abstract reader for the ScalarOptionals protocol."""
 
 
-    def __init__(self, read_as_numpy: Types = Types.NONE) -> None:
-        self._read_as_numpy = read_as_numpy
+    def __init__(self) -> None:
         self._state = 0
 
     schema = ScalarOptionalsWriterBase.schema
@@ -962,8 +955,7 @@ class NestedRecordsReaderBase(abc.ABC):
     """Abstract reader for the NestedRecords protocol."""
 
 
-    def __init__(self, read_as_numpy: Types = Types.NONE) -> None:
-        self._read_as_numpy = read_as_numpy
+    def __init__(self) -> None:
         self._state = 0
 
     schema = NestedRecordsWriterBase.schema
@@ -1116,8 +1108,7 @@ class VlensReaderBase(abc.ABC):
     """Abstract reader for the Vlens protocol."""
 
 
-    def __init__(self, read_as_numpy: Types = Types.NONE) -> None:
-        self._read_as_numpy = read_as_numpy
+    def __init__(self) -> None:
         self._state = 0
 
     schema = VlensWriterBase.schema
@@ -1291,8 +1282,7 @@ class StringsReaderBase(abc.ABC):
     """Abstract reader for the Strings protocol."""
 
 
-    def __init__(self, read_as_numpy: Types = Types.NONE) -> None:
-        self._read_as_numpy = read_as_numpy
+    def __init__(self) -> None:
         self._state = 0
 
     schema = StringsWriterBase.schema
@@ -1417,8 +1407,7 @@ class OptionalVectorsReaderBase(abc.ABC):
     """Abstract reader for the OptionalVectors protocol."""
 
 
-    def __init__(self, read_as_numpy: Types = Types.NONE) -> None:
-        self._read_as_numpy = read_as_numpy
+    def __init__(self) -> None:
         self._state = 0
 
     schema = OptionalVectorsWriterBase.schema
@@ -1571,8 +1560,7 @@ class FixedVectorsReaderBase(abc.ABC):
     """Abstract reader for the FixedVectors protocol."""
 
 
-    def __init__(self, read_as_numpy: Types = Types.NONE) -> None:
-        self._read_as_numpy = read_as_numpy
+    def __init__(self) -> None:
         self._state = 0
 
     schema = FixedVectorsWriterBase.schema
@@ -1776,8 +1764,7 @@ class StreamsReaderBase(abc.ABC):
     """Abstract reader for the Streams protocol."""
 
 
-    def __init__(self, read_as_numpy: Types = Types.NONE) -> None:
-        self._read_as_numpy = read_as_numpy
+    def __init__(self) -> None:
         self._state = 0
 
     schema = StreamsWriterBase.schema
@@ -1996,8 +1983,7 @@ class FixedArraysReaderBase(abc.ABC):
     """Abstract reader for the FixedArrays protocol."""
 
 
-    def __init__(self, read_as_numpy: Types = Types.NONE) -> None:
-        self._read_as_numpy = read_as_numpy
+    def __init__(self) -> None:
         self._state = 0
 
     schema = FixedArraysWriterBase.schema
@@ -2293,8 +2279,7 @@ class SubarraysReaderBase(abc.ABC):
     """Abstract reader for the Subarrays protocol."""
 
 
-    def __init__(self, read_as_numpy: Types = Types.NONE) -> None:
-        self._read_as_numpy = read_as_numpy
+    def __init__(self) -> None:
         self._state = 0
 
     schema = SubarraysWriterBase.schema
@@ -2553,8 +2538,7 @@ class SubarraysInRecordsReaderBase(abc.ABC):
     """Abstract reader for the SubarraysInRecords protocol."""
 
 
-    def __init__(self, read_as_numpy: Types = Types.NONE) -> None:
-        self._read_as_numpy = read_as_numpy
+    def __init__(self) -> None:
         self._state = 0
 
     schema = SubarraysInRecordsWriterBase.schema
@@ -2739,8 +2723,7 @@ class NDArraysReaderBase(abc.ABC):
     """Abstract reader for the NDArrays protocol."""
 
 
-    def __init__(self, read_as_numpy: Types = Types.NONE) -> None:
-        self._read_as_numpy = read_as_numpy
+    def __init__(self) -> None:
         self._state = 0
 
     schema = NDArraysWriterBase.schema
@@ -2961,8 +2944,7 @@ class NDArraysSingleDimensionReaderBase(abc.ABC):
     """Abstract reader for the NDArraysSingleDimension protocol."""
 
 
-    def __init__(self, read_as_numpy: Types = Types.NONE) -> None:
-        self._read_as_numpy = read_as_numpy
+    def __init__(self) -> None:
         self._state = 0
 
     schema = NDArraysSingleDimensionWriterBase.schema
@@ -3166,8 +3148,7 @@ class DynamicNDArraysReaderBase(abc.ABC):
     """Abstract reader for the DynamicNDArrays protocol."""
 
 
-    def __init__(self, read_as_numpy: Types = Types.NONE) -> None:
-        self._read_as_numpy = read_as_numpy
+    def __init__(self) -> None:
         self._state = 0
 
     schema = DynamicNDArraysWriterBase.schema
@@ -3362,8 +3343,7 @@ class MapsReaderBase(abc.ABC):
     """Abstract reader for the Maps protocol."""
 
 
-    def __init__(self, read_as_numpy: Types = Types.NONE) -> None:
-        self._read_as_numpy = read_as_numpy
+    def __init__(self) -> None:
         self._state = 0
 
     schema = MapsWriterBase.schema
@@ -3576,8 +3556,7 @@ class UnionsReaderBase(abc.ABC):
     """Abstract reader for the Unions protocol."""
 
 
-    def __init__(self, read_as_numpy: Types = Types.NONE) -> None:
-        self._read_as_numpy = read_as_numpy
+    def __init__(self) -> None:
         self._state = 0
 
     schema = UnionsWriterBase.schema
@@ -3785,8 +3764,7 @@ class StreamsOfUnionsReaderBase(abc.ABC):
     """Abstract reader for the StreamsOfUnions protocol."""
 
 
-    def __init__(self, read_as_numpy: Types = Types.NONE) -> None:
-        self._read_as_numpy = read_as_numpy
+    def __init__(self) -> None:
         self._state = 0
 
     schema = StreamsOfUnionsWriterBase.schema
@@ -3955,8 +3933,7 @@ class EnumsReaderBase(abc.ABC):
     """Abstract reader for the Enums protocol."""
 
 
-    def __init__(self, read_as_numpy: Types = Types.NONE) -> None:
-        self._read_as_numpy = read_as_numpy
+    def __init__(self) -> None:
         self._state = 0
 
     schema = EnumsWriterBase.schema
@@ -4113,8 +4090,7 @@ class FlagsReaderBase(abc.ABC):
     """Abstract reader for the Flags protocol."""
 
 
-    def __init__(self, read_as_numpy: Types = Types.NONE) -> None:
-        self._read_as_numpy = read_as_numpy
+    def __init__(self) -> None:
         self._state = 0
 
     schema = FlagsWriterBase.schema
@@ -4269,8 +4245,7 @@ class StateTestReaderBase(abc.ABC):
     """Abstract reader for the StateTest protocol."""
 
 
-    def __init__(self, read_as_numpy: Types = Types.NONE) -> None:
-        self._read_as_numpy = read_as_numpy
+    def __init__(self) -> None:
         self._state = 0
 
     schema = StateTestWriterBase.schema
@@ -4538,8 +4513,7 @@ class SimpleGenericsReaderBase(abc.ABC):
     """Abstract reader for the SimpleGenerics protocol."""
 
 
-    def __init__(self, read_as_numpy: Types = Types.NONE) -> None:
-        self._read_as_numpy = read_as_numpy
+    def __init__(self) -> None:
         self._state = 0
 
     schema = SimpleGenericsWriterBase.schema
@@ -4849,8 +4823,7 @@ class AdvancedGenericsReaderBase(abc.ABC):
     """Abstract reader for the AdvancedGenerics protocol."""
 
 
-    def __init__(self, read_as_numpy: Types = Types.NONE) -> None:
-        self._read_as_numpy = read_as_numpy
+    def __init__(self) -> None:
         self._state = 0
 
     schema = AdvancedGenericsWriterBase.schema
@@ -5161,8 +5134,7 @@ class AliasesReaderBase(abc.ABC):
     """Abstract reader for the Aliases protocol."""
 
 
-    def __init__(self, read_as_numpy: Types = Types.NONE) -> None:
-        self._read_as_numpy = read_as_numpy
+    def __init__(self) -> None:
         self._state = 0
 
     schema = AliasesWriterBase.schema
@@ -5438,8 +5410,7 @@ class StreamsOfAliasedUnionsReaderBase(abc.ABC):
     """Abstract reader for the StreamsOfAliasedUnions protocol."""
 
 
-    def __init__(self, read_as_numpy: Types = Types.NONE) -> None:
-        self._read_as_numpy = read_as_numpy
+    def __init__(self) -> None:
         self._state = 0
 
     schema = StreamsOfAliasedUnionsWriterBase.schema
@@ -5564,8 +5535,7 @@ class ProtocolWithComputedFieldsReaderBase(abc.ABC):
     """Abstract reader for the ProtocolWithComputedFields protocol."""
 
 
-    def __init__(self, read_as_numpy: Types = Types.NONE) -> None:
-        self._read_as_numpy = read_as_numpy
+    def __init__(self) -> None:
         self._state = 0
 
     schema = ProtocolWithComputedFieldsWriterBase.schema
@@ -5688,8 +5658,7 @@ class ProtocolWithKeywordStepsReaderBase(abc.ABC):
     """Abstract reader for the ProtocolWithKeywordSteps protocol."""
 
 
-    def __init__(self, read_as_numpy: Types = Types.NONE) -> None:
-        self._read_as_numpy = read_as_numpy
+    def __init__(self) -> None:
         self._state = 0
 
     schema = ProtocolWithKeywordStepsWriterBase.schema

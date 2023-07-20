@@ -147,9 +147,8 @@ func writeAbstractReader(w *formatting.IndentedWriter, p *dsl.ProtocolDefinition
 		w.WriteStringln("")
 
 		// init method
-		w.WriteStringln("def __init__(self, read_as_numpy: Types = Types.NONE) -> None:")
+		w.WriteStringln("def __init__(self) -> None:")
 		w.Indented(func() {
-			w.WriteStringln("self._read_as_numpy = read_as_numpy")
 			w.WriteStringln("self._state = 0")
 		})
 		w.WriteStringln("")

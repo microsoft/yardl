@@ -64,7 +64,7 @@ class BinaryProtocolReader(ABC):
         if version != CURRENT_BINARY_FORMAT_VERSION:
             raise RuntimeError("Invalid binary format version")
 
-        self._schema = string_serializer.read(self._stream, Types.NONE)
+        self._schema = string_serializer.read(self._stream)
         if expected_schema and self._schema != expected_schema:
             raise RuntimeError("Invalid schema")
 
@@ -290,7 +290,7 @@ class TypeSerializer(Generic[T, T_NP], ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def read(self, stream: CodedInputStream, read_as_numpy: Types) -> T:
+    def read(self, stream: CodedInputStream) -> T:
         raise NotImplementedError
 
     @abstractmethod
@@ -317,7 +317,7 @@ class StructSerializer(TypeSerializer[T, T_NP]):
     def write_numpy(self, stream: CodedOutputStream, value: T_NP) -> None:
         stream.write(self._struct, value)
 
-    def read(self, stream: CodedInputStream, read_as_numpy: Types) -> T:
+    def read(self, stream: CodedInputStream) -> T:
         return cast(T, stream.read(self._struct)[0])
 
     def read_numpy(self, stream: CodedInputStream) -> T_NP:
@@ -331,8 +331,8 @@ class BoolSerializer(StructSerializer[Bool, np.bool_]):
     def __init__(self) -> None:
         super().__init__(np.bool_, "<?")
 
-    def read(self, stream: CodedInputStream, read_as_numpy: Types) -> Bool:
-        return super().read(stream, read_as_numpy)
+    def read(self, stream: CodedInputStream) -> Bool:
+        return super().read(stream)
 
     def read_numpy(self, stream: CodedInputStream) -> np.bool_:
         return super().read_numpy(stream)
@@ -345,8 +345,8 @@ class Int8Serializer(StructSerializer[Int8, np.int8]):
     def __init__(self) -> None:
         super().__init__(np.int8, "<b")
 
-    def read(self, stream: CodedInputStream, read_as_numpy: Types) -> Int8:
-        return super().read(stream, read_as_numpy)
+    def read(self, stream: CodedInputStream) -> Int8:
+        return super().read(stream)
 
     def is_trivially_serializable(self) -> bool:
         return True
@@ -359,8 +359,8 @@ class UInt8Serializer(StructSerializer[UInt8, np.uint8]):
     def __init__(self) -> None:
         super().__init__(np.uint8, "<B")
 
-    def read(self, stream: CodedInputStream, read_as_numpy: Types) -> UInt8:
-        return super().read(stream, read_as_numpy)
+    def read(self, stream: CodedInputStream) -> UInt8:
+        return super().read(stream)
 
     def is_trivially_serializable(self) -> bool:
         return True
@@ -387,8 +387,8 @@ class Int16Serializer(TypeSerializer[Int16, np.int16]):
     def write_numpy(self, stream: CodedOutputStream, value: np.int16) -> None:
         stream.write_signed_varint(value)
 
-    def read(self, stream: CodedInputStream, read_as_numpy: Types) -> Int16:
-        return cast(Int16, stream.read_signed_varint())
+    def read(self, stream: CodedInputStream) -> Int16:
+        return stream.read_signed_varint()
 
     def read_numpy(self, stream: CodedInputStream) -> np.int16:
         return np.int16(stream.read_signed_varint())
@@ -415,8 +415,8 @@ class UInt16Serializer(TypeSerializer[UInt16, np.uint16]):
     def write_numpy(self, stream: CodedOutputStream, value: np.uint16) -> None:
         stream.write_unsigned_varint(value)
 
-    def read(self, stream: CodedInputStream, read_as_numpy: Types) -> UInt16:
-        return cast(UInt16, stream.read_unsigned_varint())
+    def read(self, stream: CodedInputStream) -> UInt16:
+        return stream.read_unsigned_varint()
 
     def read_numpy(self, stream: CodedInputStream) -> np.uint16:
         return np.uint16(stream.read_unsigned_varint())
@@ -443,8 +443,8 @@ class Int32Serializer(TypeSerializer[Int32, np.int32]):
     def write_numpy(self, stream: CodedOutputStream, value: np.int32) -> None:
         stream.write_signed_varint(value)
 
-    def read(self, stream: CodedInputStream, read_as_numpy: Types) -> Int32:
-        return cast(Int32, stream.read_signed_varint())
+    def read(self, stream: CodedInputStream) -> Int32:
+        return stream.read_signed_varint()
 
     def read_numpy(self, stream: CodedInputStream) -> np.int32:
         return np.int32(stream.read_signed_varint())
@@ -471,8 +471,8 @@ class UInt32Serializer(TypeSerializer[UInt32, np.uint32]):
     def write_numpy(self, stream: CodedOutputStream, value: np.uint32) -> None:
         stream.write_unsigned_varint(value)
 
-    def read(self, stream: CodedInputStream, read_as_numpy: Types) -> UInt32:
-        return cast(UInt32, stream.read_unsigned_varint())
+    def read(self, stream: CodedInputStream) -> UInt32:
+        return stream.read_unsigned_varint()
 
     def read_numpy(self, stream: CodedInputStream) -> np.uint32:
         return np.uint32(stream.read_unsigned_varint())
@@ -499,8 +499,8 @@ class Int64Serializer(TypeSerializer[Int64, np.int64]):
     def write_numpy(self, stream: CodedOutputStream, value: np.int64) -> None:
         stream.write_signed_varint(value)
 
-    def read(self, stream: CodedInputStream, read_as_numpy: Types) -> Int64:
-        return cast(Int64, stream.read_signed_varint())
+    def read(self, stream: CodedInputStream) -> Int64:
+        return stream.read_signed_varint()
 
     def read_numpy(self, stream: CodedInputStream) -> np.int64:
         return np.int64(stream.read_signed_varint())
@@ -527,8 +527,8 @@ class UInt64Serializer(TypeSerializer[UInt64, np.uint64]):
     def write_numpy(self, stream: CodedOutputStream, value: np.uint64) -> None:
         stream.write_unsigned_varint(value)
 
-    def read(self, stream: CodedInputStream, read_as_numpy: Types) -> UInt64:
-        return cast(UInt64, stream.read_unsigned_varint())
+    def read(self, stream: CodedInputStream) -> UInt64:
+        return stream.read_unsigned_varint()
 
     def read_numpy(self, stream: CodedInputStream) -> np.uint64:
         return np.uint64(stream.read_unsigned_varint())
@@ -555,8 +555,8 @@ class SizeSerializer(TypeSerializer[Size, np.uint64]):
     def write_numpy(self, stream: CodedOutputStream, value: np.uint64) -> None:
         stream.write_unsigned_varint(value)
 
-    def read(self, stream: CodedInputStream, read_as_numpy: Types) -> Size:
-        return cast(Size, stream.read_unsigned_varint())
+    def read(self, stream: CodedInputStream) -> Size:
+        return stream.read_unsigned_varint()
 
     def read_numpy(self, stream: CodedInputStream) -> np.uint64:
         return np.uint64(stream.read_unsigned_varint())
@@ -569,8 +569,8 @@ class Float32Serializer(StructSerializer[Float32, np.float32]):
     def __init__(self) -> None:
         super().__init__(np.float32, "<f")
 
-    def read(self, stream: CodedInputStream, read_as_numpy: Types) -> Float32:
-        return cast(Float32, super().read(stream, read_as_numpy))
+    def read(self, stream: CodedInputStream) -> Float32:
+        return super().read(stream)
 
     def is_trivially_serializable(self) -> bool:
         return True
@@ -583,8 +583,8 @@ class Float64Serializer(StructSerializer[Float64, np.float64]):
     def __init__(self) -> None:
         super().__init__(np.float64, "<d")
 
-    def read(self, stream: CodedInputStream, read_as_numpy: Types) -> Float64:
-        return super().read(stream, read_as_numpy)
+    def read(self, stream: CodedInputStream) -> Float64:
+        return super().read(stream)
 
     def is_trivially_serializable(self) -> bool:
         return True
@@ -600,7 +600,7 @@ class Complex32Serializer(StructSerializer[ComplexFloat, np.complex64]):
     def write(self, stream: CodedOutputStream, value: ComplexFloat) -> None:
         stream.write(self._struct, value.real, value.imag)
 
-    def read(self, stream: CodedInputStream, read_as_numpy: Types) -> ComplexFloat:
+    def read(self, stream: CodedInputStream) -> ComplexFloat:
         return ComplexFloat(*stream.read(self._struct))
 
     def read_numpy(self, stream: CodedInputStream) -> np.complex64:
@@ -621,7 +621,7 @@ class Complex64Serializer(StructSerializer[ComplexDouble, np.complex128]):
     def write(self, stream: CodedOutputStream, value: ComplexDouble) -> None:
         stream.write(self._struct, value.real, value.imag)
 
-    def read(self, stream: CodedInputStream, read_as_numpy: Types) -> ComplexDouble:
+    def read(self, stream: CodedInputStream) -> ComplexDouble:
         return ComplexDouble(*stream.read(self._struct))
 
     def read_numpy(self, stream: CodedInputStream) -> np.complex128:
@@ -647,13 +647,13 @@ class StringSerializer(TypeSerializer[str, np.object_]):
     def write_numpy(self, stream: CodedOutputStream, value: np.object_) -> None:
         self.write(stream, cast(str, value))
 
-    def read(self, stream: CodedInputStream, read_as_numpy: Types) -> str:
+    def read(self, stream: CodedInputStream) -> str:
         length = stream.read_unsigned_varint()
         view = stream.read_view(length)
         return str(view, "utf-8")
 
     def read_numpy(self, stream: CodedInputStream) -> np.object_:
-        return np.object_(self.read(stream, Types.STRING))
+        return np.object_(self.read(stream))
 
 
 string_serializer = StringSerializer()
@@ -685,7 +685,7 @@ class DateSerializer(TypeSerializer[Date, np.datetime64]):
                 value.astype(DATETIME_DAYS_DTYPE).astype(np.int32)
             )
 
-    def read(self, stream: CodedInputStream, read_as_numpy: Types) -> Date:
+    def read(self, stream: CodedInputStream) -> Date:
         days_since_epoch = stream.read_signed_varint()
         return datetime.date.fromordinal(days_since_epoch + EPOCH_ORDINAL_DAYS)
 
@@ -724,7 +724,7 @@ class TimeSerializer(TypeSerializer[Time, np.timedelta64]):
                 value.astype(DATETIME_NANOSECONDS_DTYPE).astype(np.int64)
             )
 
-    def read(self, stream: CodedInputStream, read_as_numpy: Types) -> Time:
+    def read(self, stream: CodedInputStream) -> Time:
         nanoseconds_since_midnight = stream.read_signed_varint()
         return Time(nanoseconds_since_midnight)
 
@@ -764,7 +764,7 @@ class DateTimeSerializer(TypeSerializer[DateTime, np.datetime64]):
                 value.astype(DATETIME_NANOSECONDS_DTYPE).astype(np.int64)
             )
 
-    def read(self, stream: CodedInputStream, read_as_numpy: Types) -> DateTime:
+    def read(self, stream: CodedInputStream) -> DateTime:
         nanoseconds_since_epoch = stream.read_signed_varint()
         return DateTime(nanoseconds_since_epoch)
 
@@ -786,7 +786,7 @@ class NoneSerializer(TypeSerializer[None, Any]):
     def write_numpy(self, stream: CodedOutputStream, value: Any) -> None:
         pass
 
-    def read(self, stream: CodedInputStream, read_as_numpy: Types) -> None:
+    def read(self, stream: CodedInputStream) -> None:
         return None
 
     def read_numpy(self, stream: CodedInputStream) -> Any:
@@ -812,8 +812,8 @@ class EnumSerializer(Generic[TEnum, T, T_NP], TypeSerializer[TEnum, T_NP]):
     def write_numpy(self, stream: CodedOutputStream, value: T_NP) -> None:
         return self._integer_serializer.write_numpy(stream, value)
 
-    def read(self, stream: CodedInputStream, read_as_numpy: Types) -> TEnum:
-        int_value = self._integer_serializer.read(stream, Types.NONE)
+    def read(self, stream: CodedInputStream) -> TEnum:
+        int_value = self._integer_serializer.read(stream)
         return self._enum_type(int_value)
 
     def read_numpy(self, stream: CodedInputStream) -> T_NP:
@@ -847,12 +847,12 @@ class OptionalSerializer(Generic[T, T_NP], TypeSerializer[Optional[T], np.void])
             stream.write_byte(1)
             self._element_serializer.write_numpy(stream, value["value"])
 
-    def read(self, stream: CodedInputStream, read_as_numpy: Types) -> Optional[T]:
+    def read(self, stream: CodedInputStream) -> Optional[T]:
         has_value = stream.read_byte()
         if has_value == 0:
             return None
         else:
-            return self._element_serializer.read(stream, read_as_numpy)
+            return self._element_serializer.read(stream)
 
     def read_numpy(self, stream: CodedInputStream) -> np.void:
         has_value = stream.read_byte()
@@ -921,16 +921,16 @@ class UnionSerializer(TypeSerializer[T, np.object_]):
 
         raise ValueError(f"Incorrect union type {type(value)}")
 
-    def read(self, stream: CodedInputStream, read_as_numpy: Types) -> T:
+    def read(self, stream: CodedInputStream) -> T:
         case_index = stream.read_byte()
         if case_index == 0 and self._offset == 1:
             return None  # type: ignore
 
         case_tag, case_serializer = self._cases[case_index - self._offset]
-        return (case_tag, case_serializer.read(stream, read_as_numpy))  # type: ignore
+        return (case_tag, case_serializer.read(stream))  # type: ignore
 
     def read_numpy(self, stream: CodedInputStream) -> np.object_:
-        return self.read(stream, Types.ALL)  # type: ignore
+        return self.read(stream)  # type: ignore
 
 
 class StreamSerializer(TypeSerializer[Iterable[T], Any]):
@@ -953,10 +953,10 @@ class StreamSerializer(TypeSerializer[Iterable[T], Any]):
     def write_numpy(self, stream: CodedOutputStream, value: Any) -> None:
         raise NotImplementedError()
 
-    def read(self, stream: CodedInputStream, read_as_numpy: Types) -> Iterable[T]:
+    def read(self, stream: CodedInputStream) -> Iterable[T]:
         while (i := stream.read_unsigned_varint()) > 0:
             for _ in range(i):
-                yield self._element_serializer.read(stream, read_as_numpy)
+                yield self._element_serializer.read(stream)
 
     def read_numpy(self, stream: CodedInputStream) -> np.object_:
         raise NotImplementedError()
@@ -989,14 +989,11 @@ class FixedVectorSerializer(Generic[T, T_NP], TypeSerializer[list[T], np.object_
         for element in cast(list[T], value):
             self._element_serializer.write(stream, element)
 
-    def read(self, stream: CodedInputStream, read_as_numpy: Types) -> list[T]:
-        return [
-            self._element_serializer.read(stream, read_as_numpy)
-            for _ in range(self._length)
-        ]
+    def read(self, stream: CodedInputStream) -> list[T]:
+        return [self._element_serializer.read(stream) for _ in range(self._length)]
 
     def read_numpy(self, stream: CodedInputStream) -> np.object_:
-        return np.object_(self.read(stream, Types.ALL))
+        return np.object_(self.read(stream))
 
     def is_trivially_serializable(self) -> bool:
         return self._element_serializer.is_trivially_serializable()
@@ -1020,14 +1017,12 @@ class VectorSerializer(Generic[T, T_NP], TypeSerializer[list[T], np.object_]):
         for element in cast(list[T], value):
             self._element_serializer.write(stream, element)
 
-    def read(self, stream: CodedInputStream, read_as_numpy: Types) -> list[T]:
+    def read(self, stream: CodedInputStream) -> list[T]:
         length = stream.read_unsigned_varint()
-        return [
-            self._element_serializer.read(stream, read_as_numpy) for _ in range(length)
-        ]
+        return [self._element_serializer.read(stream) for _ in range(length)]
 
     def read_numpy(self, stream: CodedInputStream) -> np.object_:
-        return np.object_(self.read(stream, Types.ALL))
+        return np.object_(self.read(stream))
 
 
 TKey = TypeVar("TKey")
@@ -1058,19 +1053,15 @@ class MapSerializer(
     def write_numpy(self, stream: CodedOutputStream, value: np.object_) -> None:
         self.write(stream, cast(dict[TKey, TValue], value))
 
-    def read(
-        self, stream: CodedInputStream, read_as_numpy: Types
-    ) -> dict[TKey, TValue]:
+    def read(self, stream: CodedInputStream) -> dict[TKey, TValue]:
         length = stream.read_unsigned_varint()
         return {
-            self._key_serializer.read(
-                stream, read_as_numpy
-            ): self._value_serializer.read(stream, read_as_numpy)
+            self._key_serializer.read(stream): self._value_serializer.read(stream)
             for _ in range(length)
         }
 
     def read_numpy(self, stream: CodedInputStream) -> np.object_:
-        return np.object_(self.read(stream, Types.ALL))
+        return np.object_(self.read(stream))
 
 
 class NDArraySerializerBase(
@@ -1131,7 +1122,7 @@ class NDArraySerializerBase(
                     self._element_serializer.write_numpy(stream, element)
 
     def _read_data(
-        self, stream: CodedInputStream, shape: tuple[int, ...], read_as_numpy: Types
+        self, stream: CodedInputStream, shape: tuple[int, ...]
     ) -> npt.NDArray[Any]:
         flat_length = int(np.prod(shape))  # type: ignore
 
@@ -1191,7 +1182,7 @@ class DynamicNDArraySerializer(NDArraySerializerBase[T, T_NP]):
     def write_numpy(self, stream: CodedOutputStream, value: np.object_) -> None:
         self.write(stream, cast(npt.NDArray[Any], value))
 
-    def read(self, stream: CodedInputStream, read_as_numpy: Types) -> npt.NDArray[Any]:
+    def read(self, stream: CodedInputStream) -> npt.NDArray[Any]:
         if self._subarray_shape is None:
             ndims = stream.read_unsigned_varint()
             shape = tuple(stream.read_unsigned_varint() for _ in range(ndims))
@@ -1201,10 +1192,10 @@ class DynamicNDArraySerializer(NDArraySerializerBase[T, T_NP]):
                 tuple(stream.read_unsigned_varint() for _ in range(ndims))
                 + self._subarray_shape
             )
-        return self._read_data(stream, shape, read_as_numpy)
+        return self._read_data(stream, shape)
 
     def read_numpy(self, stream: CodedInputStream) -> np.object_:
-        return cast(np.object_, self.read(stream, Types.ALL))
+        return cast(np.object_, self.read(stream))
 
 
 class NDArraySerializer(Generic[T, T_NP], NDArraySerializerBase[T, T_NP]):
@@ -1243,15 +1234,15 @@ class NDArraySerializer(Generic[T, T_NP], NDArraySerializerBase[T, T_NP]):
     def write_numpy(self, stream: CodedOutputStream, value: np.object_) -> None:
         self.write(stream, cast(npt.NDArray[Any], value))
 
-    def read(self, stream: CodedInputStream, read_as_numpy: Types) -> npt.NDArray[Any]:
+    def read(self, stream: CodedInputStream) -> npt.NDArray[Any]:
         shape = tuple(stream.read_unsigned_varint() for _ in range(self._ndims))
         if self._subarray_shape is not None:
             shape += self._subarray_shape
 
-        return self._read_data(stream, shape, read_as_numpy)
+        return self._read_data(stream, shape)
 
     def read_numpy(self, stream: CodedInputStream) -> np.object_:
-        return cast(np.object_, self.read(stream, Types.ALL))
+        return cast(np.object_, self.read(stream))
 
 
 class FixedNDArraySerializer(Generic[T, T_NP], NDArraySerializerBase[T, T_NP]):
@@ -1278,16 +1269,16 @@ class FixedNDArraySerializer(Generic[T, T_NP], NDArraySerializerBase[T, T_NP]):
     def write_numpy(self, stream: CodedOutputStream, value: np.object_) -> None:
         self.write(stream, cast(npt.NDArray[Any], value))
 
-    def read(self, stream: CodedInputStream, read_as_numpy: Types) -> npt.NDArray[Any]:
+    def read(self, stream: CodedInputStream) -> npt.NDArray[Any]:
         full_shape = (
             self._shape
             if self._subarray_shape is None
             else self._shape + self._subarray_shape
         )
-        return self._read_data(stream, full_shape, read_as_numpy)
+        return self._read_data(stream, full_shape)
 
     def read_numpy(self, stream: CodedInputStream) -> np.object_:
-        return cast(np.object_, self.read(stream, Types.ALL))
+        return cast(np.object_, self.read(stream))
 
     def is_trivially_serializable(self) -> bool:
         return self._element_serializer.is_trivially_serializable()
@@ -1319,14 +1310,13 @@ class RecordSerializer(TypeSerializer[T, np.void]):
         for i, (_, serializer) in enumerate(self._field_serializers):
             serializer.write(stream, values[i])
 
-    def _read(self, stream: CodedInputStream, read_as_numpy: Types) -> tuple[Any, ...]:
+    def _read(self, stream: CodedInputStream) -> tuple[Any, ...]:
         return tuple(
-            serializer.read(stream, read_as_numpy)
-            for _, serializer in self._field_serializers
+            serializer.read(stream) for _, serializer in self._field_serializers
         )
 
     def read_numpy(self, stream: CodedInputStream) -> np.void:
-        return cast(np.void, self._read(stream, Types.ALL))
+        return cast(np.void, self._read(stream))
 
 
 # Only used in the header

@@ -34,40 +34,8 @@ with sandbox.BinaryHelloWorldWriter(file) as w:
     w.write_data(data_items_stream())
     pass
 
-with sandbox.BinaryHelloWorldReader(file, sandbox.Types.NONE) as r:
+with sandbox.BinaryHelloWorldReader(file) as r:
     value = r.read_data()
     print_value(list(value))
 
 os.system(f"hexdump -C {file}")
-
-
-print(np.datetime64("2023-07-18T19:19:17.732594999", "D").dtype)
-print(time.gmtime(0))
-
-
-fa = np.array([1, 2, 3], dtype=np.int32)
-dt = np.dtype((fa.dtype, fa.shape))
-print(f"dt={dt.shape}")
-da = np.ndarray((2,), dtype=dt)
-print(f"da.dtype={da.dtype}")
-da[0:] = fa
-
-print(da.dtype)
-print(da.shape)
-print(da)
-
-with sandbox.BinaryHello2Writer(file) as w:
-    w.write_data(da)
-
-
-MyInt = Annotated[int, "MyInt"]
-
-x: MyInt = 1
-
-x = 2
-
-
-sandbox.get_dtype(sandbox.Int32)
-
-
-f(MyInt)

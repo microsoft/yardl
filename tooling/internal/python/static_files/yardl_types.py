@@ -5,46 +5,6 @@ import datetime
 import time
 
 
-class Types(Flag):
-    NONE = 0
-    BOOL = auto()
-    INT8 = auto()
-    UINT8 = auto()
-    INT16 = auto()
-    UINT16 = auto()
-    INT32 = auto()
-    UINT32 = auto()
-    INT64 = auto()
-    UINT64 = auto()
-    SIZE = auto()
-    INTEGER = INT8 | UINT8 | INT16 | UINT16 | INT32 | UINT32 | INT64 | UINT64 | SIZE
-    FLOAT32 = auto()
-    FLOAT64 = auto()
-    FLOATS = FLOAT32 | FLOAT64
-    COMPLEX_FLOAT32 = auto()
-    COMPLEX_FLOAT64 = auto()
-    COMPLEX = COMPLEX_FLOAT32 | COMPLEX_FLOAT64
-    STRING = auto()
-    DATE = auto()
-    TIME = auto()
-    DATETIME = auto()
-    VECTOR = auto()
-    ARRAY = auto()
-
-    ALL = (
-        BOOL
-        | INTEGER
-        | FLOATS
-        | COMPLEX
-        | STRING
-        | DATE
-        | TIME
-        | DATETIME
-        | VECTOR
-        | ARRAY
-    )
-
-
 class ProtocolError(Exception):
     pass
 
