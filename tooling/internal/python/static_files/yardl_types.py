@@ -1,5 +1,5 @@
-from enum import Enum, Flag, auto
-from typing import Annotated, NewType
+from enum import Enum
+from typing import Annotated, Union
 import numpy as np
 import datetime
 import time
@@ -44,7 +44,7 @@ class OutOfRangeEnum(Enum):
 class DateTime:
     """A basic datetime with nanosecond precision, always in UTC."""
 
-    def __init__(self, nanoseconds_from_epoch: int | np.datetime64 = 0):
+    def __init__(self, nanoseconds_from_epoch: Union[int, np.datetime64] = 0):
         if isinstance(nanoseconds_from_epoch, np.datetime64):
             if nanoseconds_from_epoch.dtype != "datetime64[ns]":
                 self._value = np.datetime64(nanoseconds_from_epoch, "ns")
@@ -115,7 +115,7 @@ class Time:
 
     _NANOSECONDS_PER_DAY = 24 * 60 * 60 * 1_000_000_000
 
-    def __init__(self, nanoseconds_since_midnight: int | np.timedelta64 = 0):
+    def __init__(self, nanoseconds_since_midnight: Union[int, np.timedelta64] = 0):
         if isinstance(nanoseconds_since_midnight, np.timedelta64):
             if nanoseconds_since_midnight.dtype != "timedelta64[ns]":
                 self._value = np.timedelta64(nanoseconds_since_midnight, "ns")

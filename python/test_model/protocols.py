@@ -22,7 +22,7 @@ class BenchmarkFloat256x256WriterBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
         if exc is None and self._state != 1:
             expected_method = self._state_to_method_name(self._state)
@@ -67,7 +67,7 @@ class BenchmarkFloat256x256ReaderBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
         if exc is None and self._state != 2:
             if self._state % 2 == 1:
@@ -130,7 +130,7 @@ class BenchmarkFloatVlenWriterBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
         if exc is None and self._state != 1:
             expected_method = self._state_to_method_name(self._state)
@@ -175,7 +175,7 @@ class BenchmarkFloatVlenReaderBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
         if exc is None and self._state != 2:
             if self._state % 2 == 1:
@@ -238,7 +238,7 @@ class BenchmarkSmallRecordWriterBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
         if exc is None and self._state != 1:
             expected_method = self._state_to_method_name(self._state)
@@ -283,7 +283,7 @@ class BenchmarkSmallRecordReaderBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
         if exc is None and self._state != 2:
             if self._state % 2 == 1:
@@ -346,7 +346,7 @@ class BenchmarkSmallRecordWithOptionalsWriterBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
         if exc is None and self._state != 1:
             expected_method = self._state_to_method_name(self._state)
@@ -391,7 +391,7 @@ class BenchmarkSmallRecordWithOptionalsReaderBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
         if exc is None and self._state != 2:
             if self._state % 2 == 1:
@@ -454,16 +454,16 @@ class BenchmarkSimpleMrdWriterBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
         if exc is None and self._state != 1:
             expected_method = self._state_to_method_name(self._state)
             raise ProtocolException(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
 
-    def write_data(self, value: collections.abc.Iterable[(
-        tuple[typing.Literal["SimpleAcquisition"], SimpleAcquisition]
-        | tuple[typing.Literal["Image<float32>"], Image[np.float32]]
-    )]) -> None:
+    def write_data(self, value: collections.abc.Iterable[typing.Union[
+        tuple[typing.Literal["SimpleAcquisition"], SimpleAcquisition],
+        tuple[typing.Literal["Image<float32>"], Image[np.float32]],
+    ]]) -> None:
         """Ordinal 0"""
 
         if self._state != 0:
@@ -473,10 +473,10 @@ class BenchmarkSimpleMrdWriterBase(abc.ABC):
         self._state = 1
 
     @abc.abstractmethod
-    def _write_data(self, value: collections.abc.Iterable[(
-        tuple[typing.Literal["SimpleAcquisition"], SimpleAcquisition]
-        | tuple[typing.Literal["Image<float32>"], Image[np.float32]]
-    )]) -> None:
+    def _write_data(self, value: collections.abc.Iterable[typing.Union[
+        tuple[typing.Literal["SimpleAcquisition"], SimpleAcquisition],
+        tuple[typing.Literal["Image<float32>"], Image[np.float32]],
+    ]]) -> None:
         raise NotImplementedError()
 
     @abc.abstractmethod
@@ -505,7 +505,7 @@ class BenchmarkSimpleMrdReaderBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
         if exc is None and self._state != 2:
             if self._state % 2 == 1:
@@ -520,10 +520,10 @@ class BenchmarkSimpleMrdReaderBase(abc.ABC):
     def close(self) -> None:
         raise NotImplementedError()
 
-    def read_data(self) -> collections.abc.Iterable[(
-        tuple[typing.Literal["SimpleAcquisition"], SimpleAcquisition]
-        | tuple[typing.Literal["Image<float32>"], Image[np.float32]]
-    )]:
+    def read_data(self) -> collections.abc.Iterable[typing.Union[
+        tuple[typing.Literal["SimpleAcquisition"], SimpleAcquisition],
+        tuple[typing.Literal["Image<float32>"], Image[np.float32]],
+    ]]:
         """Ordinal 0"""
 
         if self._state != 0:
@@ -537,10 +537,10 @@ class BenchmarkSimpleMrdReaderBase(abc.ABC):
         writer.write_data(self.read_data())
 
     @abc.abstractmethod
-    def _read_data(self) -> collections.abc.Iterable[(
-        tuple[typing.Literal["SimpleAcquisition"], SimpleAcquisition]
-        | tuple[typing.Literal["Image<float32>"], Image[np.float32]]
-    )]:
+    def _read_data(self) -> collections.abc.Iterable[typing.Union[
+        tuple[typing.Literal["SimpleAcquisition"], SimpleAcquisition],
+        tuple[typing.Literal["Image<float32>"], Image[np.float32]],
+    ]]:
         raise NotImplementedError()
 
     T = typing.TypeVar('T')
@@ -574,7 +574,7 @@ class ScalarsWriterBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
         if exc is None and self._state != 2:
             expected_method = self._state_to_method_name(self._state)
@@ -634,7 +634,7 @@ class ScalarsReaderBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
         if exc is None and self._state != 4:
             if self._state % 2 == 1:
@@ -714,13 +714,13 @@ class ScalarOptionalsWriterBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
         if exc is None and self._state != 4:
             expected_method = self._state_to_method_name(self._state)
             raise ProtocolException(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
 
-    def write_optional_int(self, value: yardl.Int32 | None) -> None:
+    def write_optional_int(self, value: typing.Optional[yardl.Int32]) -> None:
         """Ordinal 0"""
 
         if self._state != 0:
@@ -729,7 +729,7 @@ class ScalarOptionalsWriterBase(abc.ABC):
         self._write_optional_int(value)
         self._state = 1
 
-    def write_optional_record(self, value: SimpleRecord | None) -> None:
+    def write_optional_record(self, value: typing.Optional[SimpleRecord]) -> None:
         """Ordinal 1"""
 
         if self._state != 1:
@@ -747,7 +747,7 @@ class ScalarOptionalsWriterBase(abc.ABC):
         self._write_record_with_optional_fields(value)
         self._state = 3
 
-    def write_optional_record_with_optional_fields(self, value: RecordWithOptionalFields | None) -> None:
+    def write_optional_record_with_optional_fields(self, value: typing.Optional[RecordWithOptionalFields]) -> None:
         """Ordinal 3"""
 
         if self._state != 3:
@@ -757,11 +757,11 @@ class ScalarOptionalsWriterBase(abc.ABC):
         self._state = 4
 
     @abc.abstractmethod
-    def _write_optional_int(self, value: yardl.Int32 | None) -> None:
+    def _write_optional_int(self, value: typing.Optional[yardl.Int32]) -> None:
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def _write_optional_record(self, value: SimpleRecord | None) -> None:
+    def _write_optional_record(self, value: typing.Optional[SimpleRecord]) -> None:
         raise NotImplementedError()
 
     @abc.abstractmethod
@@ -769,7 +769,7 @@ class ScalarOptionalsWriterBase(abc.ABC):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def _write_optional_record_with_optional_fields(self, value: RecordWithOptionalFields | None) -> None:
+    def _write_optional_record_with_optional_fields(self, value: typing.Optional[RecordWithOptionalFields]) -> None:
         raise NotImplementedError()
 
     @abc.abstractmethod
@@ -804,7 +804,7 @@ class ScalarOptionalsReaderBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
         if exc is None and self._state != 8:
             if self._state % 2 == 1:
@@ -819,7 +819,7 @@ class ScalarOptionalsReaderBase(abc.ABC):
     def close(self) -> None:
         raise NotImplementedError()
 
-    def read_optional_int(self) -> yardl.Int32 | None:
+    def read_optional_int(self) -> typing.Optional[yardl.Int32]:
         """Ordinal 0"""
 
         if self._state != 0:
@@ -829,7 +829,7 @@ class ScalarOptionalsReaderBase(abc.ABC):
         self._state = 2
         return value
 
-    def read_optional_record(self) -> SimpleRecord | None:
+    def read_optional_record(self) -> typing.Optional[SimpleRecord]:
         """Ordinal 1"""
 
         if self._state != 2:
@@ -849,7 +849,7 @@ class ScalarOptionalsReaderBase(abc.ABC):
         self._state = 6
         return value
 
-    def read_optional_record_with_optional_fields(self) -> RecordWithOptionalFields | None:
+    def read_optional_record_with_optional_fields(self) -> typing.Optional[RecordWithOptionalFields]:
         """Ordinal 3"""
 
         if self._state != 6:
@@ -866,11 +866,11 @@ class ScalarOptionalsReaderBase(abc.ABC):
         writer.write_optional_record_with_optional_fields(self.read_optional_record_with_optional_fields())
 
     @abc.abstractmethod
-    def _read_optional_int(self) -> yardl.Int32 | None:
+    def _read_optional_int(self) -> typing.Optional[yardl.Int32]:
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def _read_optional_record(self) -> SimpleRecord | None:
+    def _read_optional_record(self) -> typing.Optional[SimpleRecord]:
         raise NotImplementedError()
 
     @abc.abstractmethod
@@ -878,7 +878,7 @@ class ScalarOptionalsReaderBase(abc.ABC):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def _read_optional_record_with_optional_fields(self) -> RecordWithOptionalFields | None:
+    def _read_optional_record_with_optional_fields(self) -> typing.Optional[RecordWithOptionalFields]:
         raise NotImplementedError()
 
     T = typing.TypeVar('T')
@@ -918,7 +918,7 @@ class NestedRecordsWriterBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
         if exc is None and self._state != 1:
             expected_method = self._state_to_method_name(self._state)
@@ -963,7 +963,7 @@ class NestedRecordsReaderBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
         if exc is None and self._state != 2:
             if self._state % 2 == 1:
@@ -1026,7 +1026,7 @@ class VlensWriterBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
         if exc is None and self._state != 4:
             expected_method = self._state_to_method_name(self._state)
@@ -1116,7 +1116,7 @@ class VlensReaderBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
         if exc is None and self._state != 8:
             if self._state % 2 == 1:
@@ -1230,7 +1230,7 @@ class StringsWriterBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
         if exc is None and self._state != 2:
             expected_method = self._state_to_method_name(self._state)
@@ -1290,7 +1290,7 @@ class StringsReaderBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
         if exc is None and self._state != 4:
             if self._state % 2 == 1:
@@ -1370,7 +1370,7 @@ class OptionalVectorsWriterBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
         if exc is None and self._state != 1:
             expected_method = self._state_to_method_name(self._state)
@@ -1415,7 +1415,7 @@ class OptionalVectorsReaderBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
         if exc is None and self._state != 2:
             if self._state % 2 == 1:
@@ -1478,7 +1478,7 @@ class FixedVectorsWriterBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
         if exc is None and self._state != 4:
             expected_method = self._state_to_method_name(self._state)
@@ -1568,7 +1568,7 @@ class FixedVectorsReaderBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
         if exc is None and self._state != 8:
             if self._state % 2 == 1:
@@ -1682,7 +1682,7 @@ class StreamsWriterBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
         if exc is None and self._state != 4:
             expected_method = self._state_to_method_name(self._state)
@@ -1697,7 +1697,7 @@ class StreamsWriterBase(abc.ABC):
         self._write_int_data(value)
         self._state = 1
 
-    def write_optional_int_data(self, value: collections.abc.Iterable[yardl.Int32 | None]) -> None:
+    def write_optional_int_data(self, value: collections.abc.Iterable[typing.Optional[yardl.Int32]]) -> None:
         """Ordinal 1"""
 
         if self._state != 1:
@@ -1729,7 +1729,7 @@ class StreamsWriterBase(abc.ABC):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def _write_optional_int_data(self, value: collections.abc.Iterable[yardl.Int32 | None]) -> None:
+    def _write_optional_int_data(self, value: collections.abc.Iterable[typing.Optional[yardl.Int32]]) -> None:
         raise NotImplementedError()
 
     @abc.abstractmethod
@@ -1772,7 +1772,7 @@ class StreamsReaderBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
         if exc is None and self._state != 8:
             if self._state % 2 == 1:
@@ -1797,7 +1797,7 @@ class StreamsReaderBase(abc.ABC):
         self._state = 1
         return self._wrap_iterable(value, 2)
 
-    def read_optional_int_data(self) -> collections.abc.Iterable[yardl.Int32 | None]:
+    def read_optional_int_data(self) -> collections.abc.Iterable[typing.Optional[yardl.Int32]]:
         """Ordinal 1"""
 
         if self._state != 2:
@@ -1838,7 +1838,7 @@ class StreamsReaderBase(abc.ABC):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def _read_optional_int_data(self) -> collections.abc.Iterable[yardl.Int32 | None]:
+    def _read_optional_int_data(self) -> collections.abc.Iterable[typing.Optional[yardl.Int32]]:
         raise NotImplementedError()
 
     @abc.abstractmethod
@@ -1886,7 +1886,7 @@ class FixedArraysWriterBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
         if exc is None and self._state != 5:
             expected_method = self._state_to_method_name(self._state)
@@ -1991,7 +1991,7 @@ class FixedArraysReaderBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
         if exc is None and self._state != 10:
             if self._state % 2 == 1:
@@ -2122,7 +2122,7 @@ class SubarraysWriterBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
         if exc is None and self._state != 9:
             expected_method = self._state_to_method_name(self._state)
@@ -2287,7 +2287,7 @@ class SubarraysReaderBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
         if exc is None and self._state != 18:
             if self._state % 2 == 1:
@@ -2486,7 +2486,7 @@ class SubarraysInRecordsWriterBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
         if exc is None and self._state != 2:
             expected_method = self._state_to_method_name(self._state)
@@ -2546,7 +2546,7 @@ class SubarraysInRecordsReaderBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
         if exc is None and self._state != 4:
             if self._state % 2 == 1:
@@ -2626,7 +2626,7 @@ class NDArraysWriterBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
         if exc is None and self._state != 5:
             expected_method = self._state_to_method_name(self._state)
@@ -2731,7 +2731,7 @@ class NDArraysReaderBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
         if exc is None and self._state != 10:
             if self._state % 2 == 1:
@@ -2862,7 +2862,7 @@ class NDArraysSingleDimensionWriterBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
         if exc is None and self._state != 4:
             expected_method = self._state_to_method_name(self._state)
@@ -2952,7 +2952,7 @@ class NDArraysSingleDimensionReaderBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
         if exc is None and self._state != 8:
             if self._state % 2 == 1:
@@ -3066,7 +3066,7 @@ class DynamicNDArraysWriterBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
         if exc is None and self._state != 4:
             expected_method = self._state_to_method_name(self._state)
@@ -3156,7 +3156,7 @@ class DynamicNDArraysReaderBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
         if exc is None and self._state != 8:
             if self._state % 2 == 1:
@@ -3270,7 +3270,7 @@ class MapsWriterBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
         if exc is None and self._state != 3:
             expected_method = self._state_to_method_name(self._state)
@@ -3285,10 +3285,10 @@ class MapsWriterBase(abc.ABC):
         self._write_string_to_int(value)
         self._state = 1
 
-    def write_string_to_union(self, value: dict[str, (
-        tuple[typing.Literal["string"], str]
-        | tuple[typing.Literal["int32"], yardl.Int32]
-    )]) -> None:
+    def write_string_to_union(self, value: dict[str, typing.Union[
+        tuple[typing.Literal["string"], str],
+        tuple[typing.Literal["int32"], yardl.Int32],
+    ]]) -> None:
         """Ordinal 1"""
 
         if self._state != 1:
@@ -3311,10 +3311,10 @@ class MapsWriterBase(abc.ABC):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def _write_string_to_union(self, value: dict[str, (
-        tuple[typing.Literal["string"], str]
-        | tuple[typing.Literal["int32"], yardl.Int32]
-    )]) -> None:
+    def _write_string_to_union(self, value: dict[str, typing.Union[
+        tuple[typing.Literal["string"], str],
+        tuple[typing.Literal["int32"], yardl.Int32],
+    ]]) -> None:
         raise NotImplementedError()
 
     @abc.abstractmethod
@@ -3351,7 +3351,7 @@ class MapsReaderBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
         if exc is None and self._state != 6:
             if self._state % 2 == 1:
@@ -3376,10 +3376,10 @@ class MapsReaderBase(abc.ABC):
         self._state = 2
         return value
 
-    def read_string_to_union(self) -> dict[str, (
-        tuple[typing.Literal["string"], str]
-        | tuple[typing.Literal["int32"], yardl.Int32]
-    )]:
+    def read_string_to_union(self) -> dict[str, typing.Union[
+        tuple[typing.Literal["string"], str],
+        tuple[typing.Literal["int32"], yardl.Int32],
+    ]]:
         """Ordinal 1"""
 
         if self._state != 2:
@@ -3409,10 +3409,10 @@ class MapsReaderBase(abc.ABC):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def _read_string_to_union(self) -> dict[str, (
-        tuple[typing.Literal["string"], str]
-        | tuple[typing.Literal["int32"], yardl.Int32]
-    )]:
+    def _read_string_to_union(self) -> dict[str, typing.Union[
+        tuple[typing.Literal["string"], str],
+        tuple[typing.Literal["int32"], yardl.Int32],
+    ]]:
         raise NotImplementedError()
 
     @abc.abstractmethod
@@ -3454,16 +3454,16 @@ class UnionsWriterBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
         if exc is None and self._state != 4:
             expected_method = self._state_to_method_name(self._state)
             raise ProtocolException(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
 
-    def write_int_or_simple_record(self, value: (
-        tuple[typing.Literal["int32"], yardl.Int32]
-        | tuple[typing.Literal["SimpleRecord"], SimpleRecord]
-    )) -> None:
+    def write_int_or_simple_record(self, value: typing.Union[
+        tuple[typing.Literal["int32"], yardl.Int32],
+        tuple[typing.Literal["SimpleRecord"], SimpleRecord],
+    ]) -> None:
         """Ordinal 0"""
 
         if self._state != 0:
@@ -3472,10 +3472,10 @@ class UnionsWriterBase(abc.ABC):
         self._write_int_or_simple_record(value)
         self._state = 1
 
-    def write_int_or_record_with_vlens(self, value: (
-        tuple[typing.Literal["int32"], yardl.Int32]
-        | tuple[typing.Literal["RecordWithVlens"], RecordWithVlens]
-    )) -> None:
+    def write_int_or_record_with_vlens(self, value: typing.Union[
+        tuple[typing.Literal["int32"], yardl.Int32],
+        tuple[typing.Literal["RecordWithVlens"], RecordWithVlens],
+    ]) -> None:
         """Ordinal 1"""
 
         if self._state != 1:
@@ -3484,11 +3484,11 @@ class UnionsWriterBase(abc.ABC):
         self._write_int_or_record_with_vlens(value)
         self._state = 2
 
-    def write_monosotate_or_int_or_simple_record(self, value: (
-        tuple[typing.Literal["int32"], yardl.Int32]
-        | tuple[typing.Literal["SimpleRecord"], SimpleRecord]
-        | None
-    )) -> None:
+    def write_monosotate_or_int_or_simple_record(self, value: typing.Union[
+        tuple[typing.Literal["int32"], yardl.Int32],
+        tuple[typing.Literal["SimpleRecord"], SimpleRecord],
+        None
+    ]) -> None:
         """Ordinal 2"""
 
         if self._state != 2:
@@ -3507,25 +3507,25 @@ class UnionsWriterBase(abc.ABC):
         self._state = 4
 
     @abc.abstractmethod
-    def _write_int_or_simple_record(self, value: (
-        tuple[typing.Literal["int32"], yardl.Int32]
-        | tuple[typing.Literal["SimpleRecord"], SimpleRecord]
-    )) -> None:
+    def _write_int_or_simple_record(self, value: typing.Union[
+        tuple[typing.Literal["int32"], yardl.Int32],
+        tuple[typing.Literal["SimpleRecord"], SimpleRecord],
+    ]) -> None:
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def _write_int_or_record_with_vlens(self, value: (
-        tuple[typing.Literal["int32"], yardl.Int32]
-        | tuple[typing.Literal["RecordWithVlens"], RecordWithVlens]
-    )) -> None:
+    def _write_int_or_record_with_vlens(self, value: typing.Union[
+        tuple[typing.Literal["int32"], yardl.Int32],
+        tuple[typing.Literal["RecordWithVlens"], RecordWithVlens],
+    ]) -> None:
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def _write_monosotate_or_int_or_simple_record(self, value: (
-        tuple[typing.Literal["int32"], yardl.Int32]
-        | tuple[typing.Literal["SimpleRecord"], SimpleRecord]
-        | None
-    )) -> None:
+    def _write_monosotate_or_int_or_simple_record(self, value: typing.Union[
+        tuple[typing.Literal["int32"], yardl.Int32],
+        tuple[typing.Literal["SimpleRecord"], SimpleRecord],
+        None
+    ]) -> None:
         raise NotImplementedError()
 
     @abc.abstractmethod
@@ -3564,7 +3564,7 @@ class UnionsReaderBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
         if exc is None and self._state != 8:
             if self._state % 2 == 1:
@@ -3579,10 +3579,10 @@ class UnionsReaderBase(abc.ABC):
     def close(self) -> None:
         raise NotImplementedError()
 
-    def read_int_or_simple_record(self) -> (
-        tuple[typing.Literal["int32"], yardl.Int32]
-        | tuple[typing.Literal["SimpleRecord"], SimpleRecord]
-    ):
+    def read_int_or_simple_record(self) -> typing.Union[
+        tuple[typing.Literal["int32"], yardl.Int32],
+        tuple[typing.Literal["SimpleRecord"], SimpleRecord],
+    ]:
         """Ordinal 0"""
 
         if self._state != 0:
@@ -3592,10 +3592,10 @@ class UnionsReaderBase(abc.ABC):
         self._state = 2
         return value
 
-    def read_int_or_record_with_vlens(self) -> (
-        tuple[typing.Literal["int32"], yardl.Int32]
-        | tuple[typing.Literal["RecordWithVlens"], RecordWithVlens]
-    ):
+    def read_int_or_record_with_vlens(self) -> typing.Union[
+        tuple[typing.Literal["int32"], yardl.Int32],
+        tuple[typing.Literal["RecordWithVlens"], RecordWithVlens],
+    ]:
         """Ordinal 1"""
 
         if self._state != 2:
@@ -3605,11 +3605,11 @@ class UnionsReaderBase(abc.ABC):
         self._state = 4
         return value
 
-    def read_monosotate_or_int_or_simple_record(self) -> (
-        tuple[typing.Literal["int32"], yardl.Int32]
-        | tuple[typing.Literal["SimpleRecord"], SimpleRecord]
-        | None
-    ):
+    def read_monosotate_or_int_or_simple_record(self) -> typing.Union[
+        tuple[typing.Literal["int32"], yardl.Int32],
+        tuple[typing.Literal["SimpleRecord"], SimpleRecord],
+        None
+    ]:
         """Ordinal 2"""
 
         if self._state != 4:
@@ -3636,25 +3636,25 @@ class UnionsReaderBase(abc.ABC):
         writer.write_record_with_unions(self.read_record_with_unions())
 
     @abc.abstractmethod
-    def _read_int_or_simple_record(self) -> (
-        tuple[typing.Literal["int32"], yardl.Int32]
-        | tuple[typing.Literal["SimpleRecord"], SimpleRecord]
-    ):
+    def _read_int_or_simple_record(self) -> typing.Union[
+        tuple[typing.Literal["int32"], yardl.Int32],
+        tuple[typing.Literal["SimpleRecord"], SimpleRecord],
+    ]:
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def _read_int_or_record_with_vlens(self) -> (
-        tuple[typing.Literal["int32"], yardl.Int32]
-        | tuple[typing.Literal["RecordWithVlens"], RecordWithVlens]
-    ):
+    def _read_int_or_record_with_vlens(self) -> typing.Union[
+        tuple[typing.Literal["int32"], yardl.Int32],
+        tuple[typing.Literal["RecordWithVlens"], RecordWithVlens],
+    ]:
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def _read_monosotate_or_int_or_simple_record(self) -> (
-        tuple[typing.Literal["int32"], yardl.Int32]
-        | tuple[typing.Literal["SimpleRecord"], SimpleRecord]
-        | None
-    ):
+    def _read_monosotate_or_int_or_simple_record(self) -> typing.Union[
+        tuple[typing.Literal["int32"], yardl.Int32],
+        tuple[typing.Literal["SimpleRecord"], SimpleRecord],
+        None
+    ]:
         raise NotImplementedError()
 
     @abc.abstractmethod
@@ -3698,16 +3698,16 @@ class StreamsOfUnionsWriterBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
         if exc is None and self._state != 2:
             expected_method = self._state_to_method_name(self._state)
             raise ProtocolException(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
 
-    def write_int_or_simple_record(self, value: collections.abc.Iterable[(
-        tuple[typing.Literal["int32"], yardl.Int32]
-        | tuple[typing.Literal["SimpleRecord"], SimpleRecord]
-    )]) -> None:
+    def write_int_or_simple_record(self, value: collections.abc.Iterable[typing.Union[
+        tuple[typing.Literal["int32"], yardl.Int32],
+        tuple[typing.Literal["SimpleRecord"], SimpleRecord],
+    ]]) -> None:
         """Ordinal 0"""
 
         if self._state != 0:
@@ -3716,11 +3716,11 @@ class StreamsOfUnionsWriterBase(abc.ABC):
         self._write_int_or_simple_record(value)
         self._state = 1
 
-    def write_nullable_int_or_simple_record(self, value: collections.abc.Iterable[(
-        tuple[typing.Literal["int32"], yardl.Int32]
-        | tuple[typing.Literal["SimpleRecord"], SimpleRecord]
-        | None
-    )]) -> None:
+    def write_nullable_int_or_simple_record(self, value: collections.abc.Iterable[typing.Union[
+        tuple[typing.Literal["int32"], yardl.Int32],
+        tuple[typing.Literal["SimpleRecord"], SimpleRecord],
+        None
+    ]]) -> None:
         """Ordinal 1"""
 
         if self._state != 1:
@@ -3730,18 +3730,18 @@ class StreamsOfUnionsWriterBase(abc.ABC):
         self._state = 2
 
     @abc.abstractmethod
-    def _write_int_or_simple_record(self, value: collections.abc.Iterable[(
-        tuple[typing.Literal["int32"], yardl.Int32]
-        | tuple[typing.Literal["SimpleRecord"], SimpleRecord]
-    )]) -> None:
+    def _write_int_or_simple_record(self, value: collections.abc.Iterable[typing.Union[
+        tuple[typing.Literal["int32"], yardl.Int32],
+        tuple[typing.Literal["SimpleRecord"], SimpleRecord],
+    ]]) -> None:
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def _write_nullable_int_or_simple_record(self, value: collections.abc.Iterable[(
-        tuple[typing.Literal["int32"], yardl.Int32]
-        | tuple[typing.Literal["SimpleRecord"], SimpleRecord]
-        | None
-    )]) -> None:
+    def _write_nullable_int_or_simple_record(self, value: collections.abc.Iterable[typing.Union[
+        tuple[typing.Literal["int32"], yardl.Int32],
+        tuple[typing.Literal["SimpleRecord"], SimpleRecord],
+        None
+    ]]) -> None:
         raise NotImplementedError()
 
     @abc.abstractmethod
@@ -3772,7 +3772,7 @@ class StreamsOfUnionsReaderBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
         if exc is None and self._state != 4:
             if self._state % 2 == 1:
@@ -3787,10 +3787,10 @@ class StreamsOfUnionsReaderBase(abc.ABC):
     def close(self) -> None:
         raise NotImplementedError()
 
-    def read_int_or_simple_record(self) -> collections.abc.Iterable[(
-        tuple[typing.Literal["int32"], yardl.Int32]
-        | tuple[typing.Literal["SimpleRecord"], SimpleRecord]
-    )]:
+    def read_int_or_simple_record(self) -> collections.abc.Iterable[typing.Union[
+        tuple[typing.Literal["int32"], yardl.Int32],
+        tuple[typing.Literal["SimpleRecord"], SimpleRecord],
+    ]]:
         """Ordinal 0"""
 
         if self._state != 0:
@@ -3800,11 +3800,11 @@ class StreamsOfUnionsReaderBase(abc.ABC):
         self._state = 1
         return self._wrap_iterable(value, 2)
 
-    def read_nullable_int_or_simple_record(self) -> collections.abc.Iterable[(
-        tuple[typing.Literal["int32"], yardl.Int32]
-        | tuple[typing.Literal["SimpleRecord"], SimpleRecord]
-        | None
-    )]:
+    def read_nullable_int_or_simple_record(self) -> collections.abc.Iterable[typing.Union[
+        tuple[typing.Literal["int32"], yardl.Int32],
+        tuple[typing.Literal["SimpleRecord"], SimpleRecord],
+        None
+    ]]:
         """Ordinal 1"""
 
         if self._state != 2:
@@ -3819,18 +3819,18 @@ class StreamsOfUnionsReaderBase(abc.ABC):
         writer.write_nullable_int_or_simple_record(self.read_nullable_int_or_simple_record())
 
     @abc.abstractmethod
-    def _read_int_or_simple_record(self) -> collections.abc.Iterable[(
-        tuple[typing.Literal["int32"], yardl.Int32]
-        | tuple[typing.Literal["SimpleRecord"], SimpleRecord]
-    )]:
+    def _read_int_or_simple_record(self) -> collections.abc.Iterable[typing.Union[
+        tuple[typing.Literal["int32"], yardl.Int32],
+        tuple[typing.Literal["SimpleRecord"], SimpleRecord],
+    ]]:
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def _read_nullable_int_or_simple_record(self) -> collections.abc.Iterable[(
-        tuple[typing.Literal["int32"], yardl.Int32]
-        | tuple[typing.Literal["SimpleRecord"], SimpleRecord]
-        | None
-    )]:
+    def _read_nullable_int_or_simple_record(self) -> collections.abc.Iterable[typing.Union[
+        tuple[typing.Literal["int32"], yardl.Int32],
+        tuple[typing.Literal["SimpleRecord"], SimpleRecord],
+        None
+    ]]:
         raise NotImplementedError()
 
     T = typing.TypeVar('T')
@@ -3866,7 +3866,7 @@ class EnumsWriterBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
         if exc is None and self._state != 3:
             expected_method = self._state_to_method_name(self._state)
@@ -3941,7 +3941,7 @@ class EnumsReaderBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
         if exc is None and self._state != 6:
             if self._state % 2 == 1:
@@ -4038,7 +4038,7 @@ class FlagsWriterBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
         if exc is None and self._state != 2:
             expected_method = self._state_to_method_name(self._state)
@@ -4098,7 +4098,7 @@ class FlagsReaderBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
         if exc is None and self._state != 4:
             if self._state % 2 == 1:
@@ -4178,7 +4178,7 @@ class StateTestWriterBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
         if exc is None and self._state != 3:
             expected_method = self._state_to_method_name(self._state)
@@ -4253,7 +4253,7 @@ class StateTestReaderBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
         if exc is None and self._state != 6:
             if self._state % 2 == 1:
@@ -4350,7 +4350,7 @@ class SimpleGenericsWriterBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
         if exc is None and self._state != 9:
             expected_method = self._state_to_method_name(self._state)
@@ -4428,10 +4428,10 @@ class SimpleGenericsWriterBase(abc.ABC):
         self._write_int_string_tuple(value)
         self._state = 8
 
-    def write_stream_of_type_variants(self, value: collections.abc.Iterable[(
-        tuple[typing.Literal["Image<float32>"], Image[np.float32]]
-        | tuple[typing.Literal["Image<float64>"], Image[np.float64]]
-    )]) -> None:
+    def write_stream_of_type_variants(self, value: collections.abc.Iterable[typing.Union[
+        tuple[typing.Literal["Image<float32>"], Image[np.float32]],
+        tuple[typing.Literal["Image<float64>"], Image[np.float64]],
+    ]]) -> None:
         """Ordinal 8"""
 
         if self._state != 8:
@@ -4473,10 +4473,10 @@ class SimpleGenericsWriterBase(abc.ABC):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def _write_stream_of_type_variants(self, value: collections.abc.Iterable[(
-        tuple[typing.Literal["Image<float32>"], Image[np.float32]]
-        | tuple[typing.Literal["Image<float64>"], Image[np.float64]]
-    )]) -> None:
+    def _write_stream_of_type_variants(self, value: collections.abc.Iterable[typing.Union[
+        tuple[typing.Literal["Image<float32>"], Image[np.float32]],
+        tuple[typing.Literal["Image<float64>"], Image[np.float64]],
+    ]]) -> None:
         raise NotImplementedError()
 
     @abc.abstractmethod
@@ -4521,7 +4521,7 @@ class SimpleGenericsReaderBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
         if exc is None and self._state != 18:
             if self._state % 2 == 1:
@@ -4616,10 +4616,10 @@ class SimpleGenericsReaderBase(abc.ABC):
         self._state = 16
         return value
 
-    def read_stream_of_type_variants(self) -> collections.abc.Iterable[(
-        tuple[typing.Literal["Image<float32>"], Image[np.float32]]
-        | tuple[typing.Literal["Image<float64>"], Image[np.float64]]
-    )]:
+    def read_stream_of_type_variants(self) -> collections.abc.Iterable[typing.Union[
+        tuple[typing.Literal["Image<float32>"], Image[np.float32]],
+        tuple[typing.Literal["Image<float64>"], Image[np.float64]],
+    ]]:
         """Ordinal 8"""
 
         if self._state != 16:
@@ -4673,10 +4673,10 @@ class SimpleGenericsReaderBase(abc.ABC):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def _read_stream_of_type_variants(self) -> collections.abc.Iterable[(
-        tuple[typing.Literal["Image<float32>"], Image[np.float32]]
-        | tuple[typing.Literal["Image<float64>"], Image[np.float64]]
-    )]:
+    def _read_stream_of_type_variants(self) -> collections.abc.Iterable[typing.Union[
+        tuple[typing.Literal["Image<float32>"], Image[np.float32]],
+        tuple[typing.Literal["Image<float64>"], Image[np.float64]],
+    ]]:
         raise NotImplementedError()
 
     T = typing.TypeVar('T')
@@ -4726,7 +4726,7 @@ class AdvancedGenericsWriterBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
         if exc is None and self._state != 5:
             expected_method = self._state_to_method_name(self._state)
@@ -4750,7 +4750,7 @@ class AdvancedGenericsWriterBase(abc.ABC):
         self._write_generic_record_1(value)
         self._state = 2
 
-    def write_tuple_of_optionals(self, value: MyTuple[yardl.Int32 | None, str | None]) -> None:
+    def write_tuple_of_optionals(self, value: MyTuple[typing.Optional[yardl.Int32], typing.Optional[str]]) -> None:
         """Ordinal 2"""
 
         if self._state != 2:
@@ -4759,7 +4759,7 @@ class AdvancedGenericsWriterBase(abc.ABC):
         self._write_tuple_of_optionals(value)
         self._state = 3
 
-    def write_tuple_of_optionals_alternate_syntax(self, value: MyTuple[yardl.Int32 | None, str | None]) -> None:
+    def write_tuple_of_optionals_alternate_syntax(self, value: MyTuple[typing.Optional[yardl.Int32], typing.Optional[str]]) -> None:
         """Ordinal 3"""
 
         if self._state != 3:
@@ -4786,11 +4786,11 @@ class AdvancedGenericsWriterBase(abc.ABC):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def _write_tuple_of_optionals(self, value: MyTuple[yardl.Int32 | None, str | None]) -> None:
+    def _write_tuple_of_optionals(self, value: MyTuple[typing.Optional[yardl.Int32], typing.Optional[str]]) -> None:
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def _write_tuple_of_optionals_alternate_syntax(self, value: MyTuple[yardl.Int32 | None, str | None]) -> None:
+    def _write_tuple_of_optionals_alternate_syntax(self, value: MyTuple[typing.Optional[yardl.Int32], typing.Optional[str]]) -> None:
         raise NotImplementedError()
 
     @abc.abstractmethod
@@ -4831,7 +4831,7 @@ class AdvancedGenericsReaderBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
         if exc is None and self._state != 10:
             if self._state % 2 == 1:
@@ -4866,7 +4866,7 @@ class AdvancedGenericsReaderBase(abc.ABC):
         self._state = 4
         return value
 
-    def read_tuple_of_optionals(self) -> MyTuple[yardl.Int32 | None, str | None]:
+    def read_tuple_of_optionals(self) -> MyTuple[typing.Optional[yardl.Int32], typing.Optional[str]]:
         """Ordinal 2"""
 
         if self._state != 4:
@@ -4876,7 +4876,7 @@ class AdvancedGenericsReaderBase(abc.ABC):
         self._state = 6
         return value
 
-    def read_tuple_of_optionals_alternate_syntax(self) -> MyTuple[yardl.Int32 | None, str | None]:
+    def read_tuple_of_optionals_alternate_syntax(self) -> MyTuple[typing.Optional[yardl.Int32], typing.Optional[str]]:
         """Ordinal 3"""
 
         if self._state != 6:
@@ -4912,11 +4912,11 @@ class AdvancedGenericsReaderBase(abc.ABC):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def _read_tuple_of_optionals(self) -> MyTuple[yardl.Int32 | None, str | None]:
+    def _read_tuple_of_optionals(self) -> MyTuple[typing.Optional[yardl.Int32], typing.Optional[str]]:
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def _read_tuple_of_optionals_alternate_syntax(self) -> MyTuple[yardl.Int32 | None, str | None]:
+    def _read_tuple_of_optionals_alternate_syntax(self) -> MyTuple[typing.Optional[yardl.Int32], typing.Optional[str]]:
         raise NotImplementedError()
 
     @abc.abstractmethod
@@ -4962,7 +4962,7 @@ class AliasesWriterBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
         if exc is None and self._state != 10:
             expected_method = self._state_to_method_name(self._state)
@@ -5142,7 +5142,7 @@ class AliasesReaderBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
         if exc is None and self._state != 20:
             if self._state % 2 == 1:
@@ -5358,7 +5358,7 @@ class StreamsOfAliasedUnionsWriterBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
         if exc is None and self._state != 2:
             expected_method = self._state_to_method_name(self._state)
@@ -5418,7 +5418,7 @@ class StreamsOfAliasedUnionsReaderBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
         if exc is None and self._state != 4:
             if self._state % 2 == 1:
@@ -5498,7 +5498,7 @@ class ProtocolWithComputedFieldsWriterBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
         if exc is None and self._state != 1:
             expected_method = self._state_to_method_name(self._state)
@@ -5543,7 +5543,7 @@ class ProtocolWithComputedFieldsReaderBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
         if exc is None and self._state != 2:
             if self._state % 2 == 1:
@@ -5606,7 +5606,7 @@ class ProtocolWithKeywordStepsWriterBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
         if exc is None and self._state != 2:
             expected_method = self._state_to_method_name(self._state)
@@ -5666,7 +5666,7 @@ class ProtocolWithKeywordStepsReaderBase(abc.ABC):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
         if exc is None and self._state != 4:
             if self._state % 2 == 1:

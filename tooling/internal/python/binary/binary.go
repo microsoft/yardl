@@ -141,7 +141,7 @@ func writeProtocols(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 			common.WriteDocstringWithLeadingLine(w, fmt.Sprintf("Binary writer for the %s protocol.", p.Name), p.Comment)
 			w.WriteStringln("")
 
-			w.WriteStringln("def __init__(self, stream: typing.BinaryIO | str) -> None:")
+			w.WriteStringln("def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:")
 			w.Indented(func() {
 				fmt.Fprintf(w, "%s.__init__(self)\n", common.AbstractWriterName(p))
 				fmt.Fprintf(w, "_binary.BinaryProtocolWriter.__init__(self, stream, %s.schema)\n", common.AbstractWriterName(p))
@@ -170,7 +170,7 @@ func writeProtocols(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 			common.WriteDocstringWithLeadingLine(w, fmt.Sprintf("Binary writer for the %s protocol.", p.Name), p.Comment)
 			w.WriteStringln("")
 
-			w.WriteStringln("def __init__(self, stream: io.BufferedReader | io.BytesIO | typing.BinaryIO | str) -> None:")
+			w.WriteStringln("def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:")
 			w.Indented(func() {
 				fmt.Fprintf(w, "%s.__init__(self)\n", common.AbstractReaderName(p))
 				fmt.Fprintf(w, "_binary.BinaryProtocolReader.__init__(self, stream, %s.schema)\n", common.AbstractReaderName(p))

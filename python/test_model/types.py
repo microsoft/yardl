@@ -25,13 +25,19 @@ T0 = typing.TypeVar("T0")
 T0_NP = typing.TypeVar("T0_NP", bound=np.generic)
 
 
-@dataclasses.dataclass(slots=True, kw_only=True, eq=False)
 class SmallBenchmarkRecord:
-    a: yardl.Float64 = 0.0
+    a: yardl.Float64
+    b: yardl.Float32
+    c: yardl.Float32
 
-    b: yardl.Float32 = 0.0
-
-    c: yardl.Float32 = 0.0
+    def __init__(self, *,
+        a: yardl.Float64 = 0.0,
+        b: yardl.Float32 = 0.0,
+        c: yardl.Float32 = 0.0,
+    ):
+        self.a = a
+        self.b = b
+        self.c = c
 
     def __eq__(self, other: object) -> bool:
         return (
@@ -42,15 +48,22 @@ class SmallBenchmarkRecord:
         )
 
 
-@dataclasses.dataclass(slots=True, kw_only=True, eq=False)
 class SimpleEncodingCounters:
-    e1: yardl.UInt32 | None = None
+    e1: typing.Optional[yardl.UInt32]
+    e2: typing.Optional[yardl.UInt32]
+    slice: typing.Optional[yardl.UInt32]
+    repetition: typing.Optional[yardl.UInt32]
 
-    e2: yardl.UInt32 | None = None
-
-    slice: yardl.UInt32 | None = None
-
-    repetition: yardl.UInt32 | None = None
+    def __init__(self, *,
+        e1: typing.Optional[yardl.UInt32] = None,
+        e2: typing.Optional[yardl.UInt32] = None,
+        slice: typing.Optional[yardl.UInt32] = None,
+        repetition: typing.Optional[yardl.UInt32] = None,
+    ):
+        self.e1 = e1
+        self.e2 = e2
+        self.slice = slice
+        self.repetition = repetition
 
     def __eq__(self, other: object) -> bool:
         return (
@@ -62,21 +75,22 @@ class SimpleEncodingCounters:
         )
 
 
-@dataclasses.dataclass(slots=True, kw_only=True, eq=False)
 class SimpleAcquisition:
-    flags: yardl.UInt64 = 0
+    flags: yardl.UInt64
+    idx: SimpleEncodingCounters
+    data: npt.NDArray[np.complex64]
+    trajectory: npt.NDArray[np.float32]
 
-    idx: SimpleEncodingCounters = dataclasses.field(
-        default_factory=SimpleEncodingCounters
-    )
-
-    data: npt.NDArray[np.complex64] = dataclasses.field(
-        default_factory=lambda: np.zeros((0, 0), dtype=np.dtype(np.complex64))
-    )
-
-    trajectory: npt.NDArray[np.float32] = dataclasses.field(
-        default_factory=lambda: np.zeros((0, 0), dtype=np.dtype(np.float32))
-    )
+    def __init__(self, *,
+        flags: yardl.UInt64 = 0,
+        idx: typing.Optional[SimpleEncodingCounters] = None,
+        data: typing.Optional[npt.NDArray[np.complex64]] = None,
+        trajectory: typing.Optional[npt.NDArray[np.float32]] = None,
+    ):
+        self.flags = flags
+        self.idx = idx if idx is not None else SimpleEncodingCounters()
+        self.data = data if data is not None else np.zeros((0, 0), dtype=np.dtype(np.complex64))
+        self.trajectory = trajectory if trajectory is not None else np.zeros((0, 0), dtype=np.dtype(np.float32))
 
     def __eq__(self, other: object) -> bool:
         return (
@@ -88,13 +102,19 @@ class SimpleAcquisition:
         )
 
 
-@dataclasses.dataclass(slots=True, kw_only=True, eq=False)
 class SimpleRecord:
-    x: yardl.Int32 = 0
+    x: yardl.Int32
+    y: yardl.Int32
+    z: yardl.Int32
 
-    y: yardl.Int32 = 0
-
-    z: yardl.Int32 = 0
+    def __init__(self, *,
+        x: yardl.Int32 = 0,
+        y: yardl.Int32 = 0,
+        z: yardl.Int32 = 0,
+    ):
+        self.x = x
+        self.y = y
+        self.z = z
 
     def __eq__(self, other: object) -> bool:
         return (
@@ -105,47 +125,61 @@ class SimpleRecord:
         )
 
 
-@dataclasses.dataclass(slots=True, kw_only=True, eq=False)
 class RecordWithPrimitives:
-    bool_field: bool = False
+    bool_field: bool
+    int_8_field: yardl.Int8
+    uint_8_field: yardl.UInt8
+    int_16_field: yardl.Int16
+    uint_16_field: yardl.UInt16
+    int_32_field: yardl.Int32
+    uint_32_field: yardl.UInt32
+    int_64_field: yardl.Int64
+    uint_64_field: yardl.UInt64
+    size_field: yardl.Size
+    float_32_field: yardl.Float32
+    float_64_field: yardl.Float64
+    complexfloat_32_field: yardl.ComplexFloat
+    complexfloat_64_field: yardl.ComplexDouble
+    date_field: datetime.date
+    time_field: yardl.Time
+    datetime_field: yardl.DateTime
 
-    int_8_field: yardl.Int8 = 0
-
-    uint_8_field: yardl.UInt8 = 0
-
-    int_16_field: yardl.Int16 = 0
-
-    uint_16_field: yardl.UInt16 = 0
-
-    int_32_field: yardl.Int32 = 0
-
-    uint_32_field: yardl.UInt32 = 0
-
-    int_64_field: yardl.Int64 = 0
-
-    uint_64_field: yardl.UInt64 = 0
-
-    size_field: yardl.Size = 0
-
-    float_32_field: yardl.Float32 = 0.0
-
-    float_64_field: yardl.Float64 = 0.0
-
-    complexfloat_32_field: yardl.ComplexFloat = 0j
-
-    complexfloat_64_field: yardl.ComplexDouble = 0j
-
-    date_field: datetime.date = dataclasses.field(
-        default_factory=lambda: datetime.date(1970, 1, 1)
-    )
-
-    time_field: yardl.Time = dataclasses.field(
-        default_factory=yardl.Time
-    )
-
-    datetime_field: yardl.DateTime = dataclasses.field(
-        default_factory=yardl.DateTime
-    )
+    def __init__(self, *,
+        bool_field: bool = False,
+        int_8_field: yardl.Int8 = 0,
+        uint_8_field: yardl.UInt8 = 0,
+        int_16_field: yardl.Int16 = 0,
+        uint_16_field: yardl.UInt16 = 0,
+        int_32_field: yardl.Int32 = 0,
+        uint_32_field: yardl.UInt32 = 0,
+        int_64_field: yardl.Int64 = 0,
+        uint_64_field: yardl.UInt64 = 0,
+        size_field: yardl.Size = 0,
+        float_32_field: yardl.Float32 = 0.0,
+        float_64_field: yardl.Float64 = 0.0,
+        complexfloat_32_field: yardl.ComplexFloat = 0j,
+        complexfloat_64_field: yardl.ComplexDouble = 0j,
+        date_field: datetime.date = datetime.date(1970, 1, 1),
+        time_field: yardl.Time = yardl.Time(),
+        datetime_field: yardl.DateTime = yardl.DateTime(),
+    ):
+        self.bool_field = bool_field
+        self.int_8_field = int_8_field
+        self.uint_8_field = uint_8_field
+        self.int_16_field = int_16_field
+        self.uint_16_field = uint_16_field
+        self.int_32_field = int_32_field
+        self.uint_32_field = uint_32_field
+        self.int_64_field = int_64_field
+        self.uint_64_field = uint_64_field
+        self.size_field = size_field
+        self.float_32_field = float_32_field
+        self.float_64_field = float_64_field
+        self.complexfloat_32_field = complexfloat_32_field
+        self.complexfloat_64_field = complexfloat_64_field
+        self.date_field = date_field
+        self.time_field = time_field
+        self.datetime_field = datetime_field
 
     def __eq__(self, other: object) -> bool:
         return (
@@ -170,25 +204,37 @@ class RecordWithPrimitives:
         )
 
 
-@dataclasses.dataclass(slots=True, kw_only=True, eq=False)
 class RecordWithPrimitiveAliases:
-    byte_field: yardl.UInt8 = 0
+    byte_field: yardl.UInt8
+    int_field: yardl.Int32
+    uint_field: yardl.UInt32
+    long_field: yardl.Int64
+    ulong_field: yardl.UInt64
+    float_field: yardl.Float32
+    double_field: yardl.Float64
+    complexfloat_field: yardl.ComplexFloat
+    complexdouble_field: yardl.ComplexDouble
 
-    int_field: yardl.Int32 = 0
-
-    uint_field: yardl.UInt32 = 0
-
-    long_field: yardl.Int64 = 0
-
-    ulong_field: yardl.UInt64 = 0
-
-    float_field: yardl.Float32 = 0.0
-
-    double_field: yardl.Float64 = 0.0
-
-    complexfloat_field: yardl.ComplexFloat = 0j
-
-    complexdouble_field: yardl.ComplexDouble = 0j
+    def __init__(self, *,
+        byte_field: yardl.UInt8 = 0,
+        int_field: yardl.Int32 = 0,
+        uint_field: yardl.UInt32 = 0,
+        long_field: yardl.Int64 = 0,
+        ulong_field: yardl.UInt64 = 0,
+        float_field: yardl.Float32 = 0.0,
+        double_field: yardl.Float64 = 0.0,
+        complexfloat_field: yardl.ComplexFloat = 0j,
+        complexdouble_field: yardl.ComplexDouble = 0j,
+    ):
+        self.byte_field = byte_field
+        self.int_field = int_field
+        self.uint_field = uint_field
+        self.long_field = long_field
+        self.ulong_field = ulong_field
+        self.float_field = float_field
+        self.double_field = double_field
+        self.complexfloat_field = complexfloat_field
+        self.complexdouble_field = complexdouble_field
 
     def __eq__(self, other: object) -> bool:
         return (
@@ -205,15 +251,16 @@ class RecordWithPrimitiveAliases:
         )
 
 
-@dataclasses.dataclass(slots=True, kw_only=True, eq=False)
 class TupleWithRecords:
-    a: SimpleRecord = dataclasses.field(
-        default_factory=SimpleRecord
-    )
+    a: SimpleRecord
+    b: SimpleRecord
 
-    b: SimpleRecord = dataclasses.field(
-        default_factory=SimpleRecord
-    )
+    def __init__(self, *,
+        a: typing.Optional[SimpleRecord] = None,
+        b: typing.Optional[SimpleRecord] = None,
+    ):
+        self.a = a if a is not None else SimpleRecord()
+        self.b = b if b is not None else SimpleRecord()
 
     def __eq__(self, other: object) -> bool:
         return (
@@ -223,19 +270,19 @@ class TupleWithRecords:
         )
 
 
-@dataclasses.dataclass(slots=True, kw_only=True, eq=False)
 class RecordWithVectors:
-    default_vector: list[yardl.Int32] = dataclasses.field(
-        default_factory=list
-    )
+    default_vector: list[yardl.Int32]
+    default_vector_fixed_length: list[yardl.Int32]
+    vector_of_vectors: list[list[yardl.Int32]]
 
-    default_vector_fixed_length: list[yardl.Int32] = dataclasses.field(
-        default_factory=lambda: [0] * 3
-    )
-
-    vector_of_vectors: list[list[yardl.Int32]] = dataclasses.field(
-        default_factory=list
-    )
+    def __init__(self, *,
+        default_vector: typing.Optional[list[yardl.Int32]] = None,
+        default_vector_fixed_length: typing.Optional[list[yardl.Int32]] = None,
+        vector_of_vectors: typing.Optional[list[list[yardl.Int32]]] = None,
+    ):
+        self.default_vector = default_vector if default_vector is not None else []
+        self.default_vector_fixed_length = default_vector_fixed_length if default_vector_fixed_length is not None else [0] * 3
+        self.vector_of_vectors = vector_of_vectors if vector_of_vectors is not None else []
 
     def __eq__(self, other: object) -> bool:
         return (
@@ -246,11 +293,13 @@ class RecordWithVectors:
         )
 
 
-@dataclasses.dataclass(slots=True, kw_only=True, eq=False)
 class RecordWithVectorOfTimes:
-    times: list[yardl.Time] = dataclasses.field(
-        default_factory=list
-    )
+    times: list[yardl.Time]
+
+    def __init__(self, *,
+        times: typing.Optional[list[yardl.Time]] = None,
+    ):
+        self.times = times if times is not None else []
 
     def __eq__(self, other: object) -> bool:
         return (
@@ -259,43 +308,37 @@ class RecordWithVectorOfTimes:
         )
 
 
-@dataclasses.dataclass(slots=True, kw_only=True, eq=False)
 class RecordWithArrays:
-    default_array: npt.NDArray[np.int32] = dataclasses.field(
-        default_factory=lambda: np.zeros((), dtype=np.dtype(np.int32))
-    )
+    default_array: npt.NDArray[np.int32]
+    default_array_with_empty_dimension: npt.NDArray[np.int32]
+    rank_1_array: npt.NDArray[np.int32]
+    rank_2_array: npt.NDArray[np.int32]
+    rank_2_array_with_named_dimensions: npt.NDArray[np.int32]
+    rank_2_fixed_array: npt.NDArray[np.int32]
+    rank_2_fixed_array_with_named_dimensions: npt.NDArray[np.int32]
+    dynamic_array: npt.NDArray[np.int32]
+    array_of_vectors: npt.NDArray[np.int32]
 
-    default_array_with_empty_dimension: npt.NDArray[np.int32] = dataclasses.field(
-        default_factory=lambda: np.zeros((), dtype=np.dtype(np.int32))
-    )
-
-    rank_1_array: npt.NDArray[np.int32] = dataclasses.field(
-        default_factory=lambda: np.zeros((0), dtype=np.dtype(np.int32))
-    )
-
-    rank_2_array: npt.NDArray[np.int32] = dataclasses.field(
-        default_factory=lambda: np.zeros((0, 0), dtype=np.dtype(np.int32))
-    )
-
-    rank_2_array_with_named_dimensions: npt.NDArray[np.int32] = dataclasses.field(
-        default_factory=lambda: np.zeros((0, 0), dtype=np.dtype(np.int32))
-    )
-
-    rank_2_fixed_array: npt.NDArray[np.int32] = dataclasses.field(
-        default_factory=lambda: np.zeros((3, 4,), dtype=np.dtype(np.int32))
-    )
-
-    rank_2_fixed_array_with_named_dimensions: npt.NDArray[np.int32] = dataclasses.field(
-        default_factory=lambda: np.zeros((3, 4,), dtype=np.dtype(np.int32))
-    )
-
-    dynamic_array: npt.NDArray[np.int32] = dataclasses.field(
-        default_factory=lambda: np.zeros((), dtype=np.dtype(np.int32))
-    )
-
-    array_of_vectors: npt.NDArray[np.int32] = dataclasses.field(
-        default_factory=lambda: np.zeros((5,), dtype=np.dtype(np.object_))
-    )
+    def __init__(self, *,
+        default_array: typing.Optional[npt.NDArray[np.int32]] = None,
+        default_array_with_empty_dimension: typing.Optional[npt.NDArray[np.int32]] = None,
+        rank_1_array: typing.Optional[npt.NDArray[np.int32]] = None,
+        rank_2_array: typing.Optional[npt.NDArray[np.int32]] = None,
+        rank_2_array_with_named_dimensions: typing.Optional[npt.NDArray[np.int32]] = None,
+        rank_2_fixed_array: typing.Optional[npt.NDArray[np.int32]] = None,
+        rank_2_fixed_array_with_named_dimensions: typing.Optional[npt.NDArray[np.int32]] = None,
+        dynamic_array: typing.Optional[npt.NDArray[np.int32]] = None,
+        array_of_vectors: typing.Optional[npt.NDArray[np.int32]] = None,
+    ):
+        self.default_array = default_array if default_array is not None else np.zeros((), dtype=np.dtype(np.int32))
+        self.default_array_with_empty_dimension = default_array_with_empty_dimension if default_array_with_empty_dimension is not None else np.zeros((), dtype=np.dtype(np.int32))
+        self.rank_1_array = rank_1_array if rank_1_array is not None else np.zeros((0), dtype=np.dtype(np.int32))
+        self.rank_2_array = rank_2_array if rank_2_array is not None else np.zeros((0, 0), dtype=np.dtype(np.int32))
+        self.rank_2_array_with_named_dimensions = rank_2_array_with_named_dimensions if rank_2_array_with_named_dimensions is not None else np.zeros((0, 0), dtype=np.dtype(np.int32))
+        self.rank_2_fixed_array = rank_2_fixed_array if rank_2_fixed_array is not None else np.zeros((3, 4,), dtype=np.dtype(np.int32))
+        self.rank_2_fixed_array_with_named_dimensions = rank_2_fixed_array_with_named_dimensions if rank_2_fixed_array_with_named_dimensions is not None else np.zeros((3, 4,), dtype=np.dtype(np.int32))
+        self.dynamic_array = dynamic_array if dynamic_array is not None else np.zeros((), dtype=np.dtype(np.int32))
+        self.array_of_vectors = array_of_vectors if array_of_vectors is not None else np.zeros((5,), dtype=np.dtype(np.object_))
 
     def __eq__(self, other: object) -> bool:
         return (
@@ -312,43 +355,37 @@ class RecordWithArrays:
         )
 
 
-@dataclasses.dataclass(slots=True, kw_only=True, eq=False)
 class RecordWithArraysSimpleSyntax:
-    default_array: npt.NDArray[np.int32] = dataclasses.field(
-        default_factory=lambda: np.zeros((), dtype=np.dtype(np.int32))
-    )
+    default_array: npt.NDArray[np.int32]
+    default_array_with_empty_dimension: npt.NDArray[np.int32]
+    rank_1_array: npt.NDArray[np.int32]
+    rank_2_array: npt.NDArray[np.int32]
+    rank_2_array_with_named_dimensions: npt.NDArray[np.int32]
+    rank_2_fixed_array: npt.NDArray[np.int32]
+    rank_2_fixed_array_with_named_dimensions: npt.NDArray[np.int32]
+    dynamic_array: npt.NDArray[np.int32]
+    array_of_vectors: npt.NDArray[np.int32]
 
-    default_array_with_empty_dimension: npt.NDArray[np.int32] = dataclasses.field(
-        default_factory=lambda: np.zeros((), dtype=np.dtype(np.int32))
-    )
-
-    rank_1_array: npt.NDArray[np.int32] = dataclasses.field(
-        default_factory=lambda: np.zeros((0), dtype=np.dtype(np.int32))
-    )
-
-    rank_2_array: npt.NDArray[np.int32] = dataclasses.field(
-        default_factory=lambda: np.zeros((0, 0), dtype=np.dtype(np.int32))
-    )
-
-    rank_2_array_with_named_dimensions: npt.NDArray[np.int32] = dataclasses.field(
-        default_factory=lambda: np.zeros((0, 0), dtype=np.dtype(np.int32))
-    )
-
-    rank_2_fixed_array: npt.NDArray[np.int32] = dataclasses.field(
-        default_factory=lambda: np.zeros((3, 4,), dtype=np.dtype(np.int32))
-    )
-
-    rank_2_fixed_array_with_named_dimensions: npt.NDArray[np.int32] = dataclasses.field(
-        default_factory=lambda: np.zeros((3, 4,), dtype=np.dtype(np.int32))
-    )
-
-    dynamic_array: npt.NDArray[np.int32] = dataclasses.field(
-        default_factory=lambda: np.zeros((), dtype=np.dtype(np.int32))
-    )
-
-    array_of_vectors: npt.NDArray[np.int32] = dataclasses.field(
-        default_factory=lambda: np.zeros((5,), dtype=np.dtype(np.object_))
-    )
+    def __init__(self, *,
+        default_array: typing.Optional[npt.NDArray[np.int32]] = None,
+        default_array_with_empty_dimension: typing.Optional[npt.NDArray[np.int32]] = None,
+        rank_1_array: typing.Optional[npt.NDArray[np.int32]] = None,
+        rank_2_array: typing.Optional[npt.NDArray[np.int32]] = None,
+        rank_2_array_with_named_dimensions: typing.Optional[npt.NDArray[np.int32]] = None,
+        rank_2_fixed_array: typing.Optional[npt.NDArray[np.int32]] = None,
+        rank_2_fixed_array_with_named_dimensions: typing.Optional[npt.NDArray[np.int32]] = None,
+        dynamic_array: typing.Optional[npt.NDArray[np.int32]] = None,
+        array_of_vectors: typing.Optional[npt.NDArray[np.int32]] = None,
+    ):
+        self.default_array = default_array if default_array is not None else np.zeros((), dtype=np.dtype(np.int32))
+        self.default_array_with_empty_dimension = default_array_with_empty_dimension if default_array_with_empty_dimension is not None else np.zeros((), dtype=np.dtype(np.int32))
+        self.rank_1_array = rank_1_array if rank_1_array is not None else np.zeros((0), dtype=np.dtype(np.int32))
+        self.rank_2_array = rank_2_array if rank_2_array is not None else np.zeros((0, 0), dtype=np.dtype(np.int32))
+        self.rank_2_array_with_named_dimensions = rank_2_array_with_named_dimensions if rank_2_array_with_named_dimensions is not None else np.zeros((0, 0), dtype=np.dtype(np.int32))
+        self.rank_2_fixed_array = rank_2_fixed_array if rank_2_fixed_array is not None else np.zeros((3, 4,), dtype=np.dtype(np.int32))
+        self.rank_2_fixed_array_with_named_dimensions = rank_2_fixed_array_with_named_dimensions if rank_2_fixed_array_with_named_dimensions is not None else np.zeros((3, 4,), dtype=np.dtype(np.int32))
+        self.dynamic_array = dynamic_array if dynamic_array is not None else np.zeros((), dtype=np.dtype(np.int32))
+        self.array_of_vectors = array_of_vectors if array_of_vectors is not None else np.zeros((5,), dtype=np.dtype(np.object_))
 
     def __eq__(self, other: object) -> bool:
         return (
@@ -365,13 +402,19 @@ class RecordWithArraysSimpleSyntax:
         )
 
 
-@dataclasses.dataclass(slots=True, kw_only=True, eq=False)
 class RecordWithOptionalFields:
-    optional_int: yardl.Int32 | None = None
+    optional_int: typing.Optional[yardl.Int32]
+    optional_int_alternate_syntax: typing.Optional[yardl.Int32]
+    optional_time: typing.Optional[yardl.Time]
 
-    optional_int_alternate_syntax: yardl.Int32 | None = None
-
-    optional_time: yardl.Time | None = None
+    def __init__(self, *,
+        optional_int: typing.Optional[yardl.Int32] = None,
+        optional_int_alternate_syntax: typing.Optional[yardl.Int32] = None,
+        optional_time: typing.Optional[yardl.Time] = None,
+    ):
+        self.optional_int = optional_int
+        self.optional_int_alternate_syntax = optional_int_alternate_syntax
+        self.optional_time = optional_time
 
     def __eq__(self, other: object) -> bool:
         return (
@@ -382,15 +425,19 @@ class RecordWithOptionalFields:
         )
 
 
-@dataclasses.dataclass(slots=True, kw_only=True, eq=False)
 class RecordWithVlens:
-    a: list[SimpleRecord] = dataclasses.field(
-        default_factory=list
-    )
+    a: list[SimpleRecord]
+    b: yardl.Int32
+    c: yardl.Int32
 
-    b: yardl.Int32 = 0
-
-    c: yardl.Int32 = 0
+    def __init__(self, *,
+        a: typing.Optional[list[SimpleRecord]] = None,
+        b: yardl.Int32 = 0,
+        c: yardl.Int32 = 0,
+    ):
+        self.a = a if a is not None else []
+        self.b = b
+        self.c = c
 
     def __eq__(self, other: object) -> bool:
         return (
@@ -401,11 +448,16 @@ class RecordWithVlens:
         )
 
 
-@dataclasses.dataclass(slots=True, kw_only=True, eq=False)
 class RecordWithStrings:
-    a: str = ""
+    a: str
+    b: str
 
-    b: str = ""
+    def __init__(self, *,
+        a: str = "",
+        b: str = "",
+    ):
+        self.a = a
+        self.b = b
 
     def __eq__(self, other: object) -> bool:
         return (
@@ -415,9 +467,13 @@ class RecordWithStrings:
         )
 
 
-@dataclasses.dataclass(slots=True, kw_only=True, eq=False)
 class RecordWithOptionalVector:
-    optional_vector: list[yardl.Int32] | None = None
+    optional_vector: typing.Optional[list[yardl.Int32]]
+
+    def __init__(self, *,
+        optional_vector: typing.Optional[list[yardl.Int32]] = None,
+    ):
+        self.optional_vector = optional_vector
 
     def __eq__(self, other: object) -> bool:
         return (
@@ -426,19 +482,19 @@ class RecordWithOptionalVector:
         )
 
 
-@dataclasses.dataclass(slots=True, kw_only=True, eq=False)
 class RecordWithFixedVectors:
-    fixed_int_vector: list[yardl.Int32] = dataclasses.field(
-        default_factory=lambda: [0] * 5
-    )
+    fixed_int_vector: list[yardl.Int32]
+    fixed_simple_record_vector: list[SimpleRecord]
+    fixed_record_with_vlens_vector: list[RecordWithVlens]
 
-    fixed_simple_record_vector: list[SimpleRecord] = dataclasses.field(
-        default_factory=lambda: [SimpleRecord() for _ in range(3)]
-    )
-
-    fixed_record_with_vlens_vector: list[RecordWithVlens] = dataclasses.field(
-        default_factory=lambda: [RecordWithVlens() for _ in range(2)]
-    )
+    def __init__(self, *,
+        fixed_int_vector: typing.Optional[list[yardl.Int32]] = None,
+        fixed_simple_record_vector: typing.Optional[list[SimpleRecord]] = None,
+        fixed_record_with_vlens_vector: typing.Optional[list[RecordWithVlens]] = None,
+    ):
+        self.fixed_int_vector = fixed_int_vector if fixed_int_vector is not None else [0] * 5
+        self.fixed_simple_record_vector = fixed_simple_record_vector if fixed_simple_record_vector is not None else [SimpleRecord()() for _ in range(3)]
+        self.fixed_record_with_vlens_vector = fixed_record_with_vlens_vector if fixed_record_with_vlens_vector is not None else [RecordWithVlens()() for _ in range(2)]
 
     def __eq__(self, other: object) -> bool:
         return (
@@ -449,19 +505,19 @@ class RecordWithFixedVectors:
         )
 
 
-@dataclasses.dataclass(slots=True, kw_only=True, eq=False)
 class RecordWithFixedArrays:
-    ints: npt.NDArray[np.int32] = dataclasses.field(
-        default_factory=lambda: np.zeros((2, 3,), dtype=np.dtype(np.int32))
-    )
+    ints: npt.NDArray[np.int32]
+    fixed_simple_record_array: npt.NDArray[np.void]
+    fixed_record_with_vlens_array: npt.NDArray[np.void]
 
-    fixed_simple_record_array: npt.NDArray[np.void] = dataclasses.field(
-        default_factory=lambda: np.zeros((3, 2,), dtype=get_dtype(SimpleRecord))
-    )
-
-    fixed_record_with_vlens_array: npt.NDArray[np.void] = dataclasses.field(
-        default_factory=lambda: np.zeros((2, 2,), dtype=get_dtype(RecordWithVlens))
-    )
+    def __init__(self, *,
+        ints: typing.Optional[npt.NDArray[np.int32]] = None,
+        fixed_simple_record_array: typing.Optional[npt.NDArray[np.void]] = None,
+        fixed_record_with_vlens_array: typing.Optional[npt.NDArray[np.void]] = None,
+    ):
+        self.ints = ints if ints is not None else np.zeros((2, 3,), dtype=np.dtype(np.int32))
+        self.fixed_simple_record_array = fixed_simple_record_array if fixed_simple_record_array is not None else np.zeros((3, 2,), dtype=get_dtype(SimpleRecord))
+        self.fixed_record_with_vlens_array = fixed_record_with_vlens_array if fixed_record_with_vlens_array is not None else np.zeros((2, 2,), dtype=get_dtype(RecordWithVlens))
 
     def __eq__(self, other: object) -> bool:
         return (
@@ -472,19 +528,19 @@ class RecordWithFixedArrays:
         )
 
 
-@dataclasses.dataclass(slots=True, kw_only=True, eq=False)
 class RecordWithNDArrays:
-    ints: npt.NDArray[np.int32] = dataclasses.field(
-        default_factory=lambda: np.zeros((0, 0), dtype=np.dtype(np.int32))
-    )
+    ints: npt.NDArray[np.int32]
+    fixed_simple_record_array: npt.NDArray[np.void]
+    fixed_record_with_vlens_array: npt.NDArray[np.void]
 
-    fixed_simple_record_array: npt.NDArray[np.void] = dataclasses.field(
-        default_factory=lambda: np.zeros((0, 0), dtype=get_dtype(SimpleRecord))
-    )
-
-    fixed_record_with_vlens_array: npt.NDArray[np.void] = dataclasses.field(
-        default_factory=lambda: np.zeros((0, 0), dtype=get_dtype(RecordWithVlens))
-    )
+    def __init__(self, *,
+        ints: typing.Optional[npt.NDArray[np.int32]] = None,
+        fixed_simple_record_array: typing.Optional[npt.NDArray[np.void]] = None,
+        fixed_record_with_vlens_array: typing.Optional[npt.NDArray[np.void]] = None,
+    ):
+        self.ints = ints if ints is not None else np.zeros((0, 0), dtype=np.dtype(np.int32))
+        self.fixed_simple_record_array = fixed_simple_record_array if fixed_simple_record_array is not None else np.zeros((0, 0), dtype=get_dtype(SimpleRecord))
+        self.fixed_record_with_vlens_array = fixed_record_with_vlens_array if fixed_record_with_vlens_array is not None else np.zeros((0, 0), dtype=get_dtype(RecordWithVlens))
 
     def __eq__(self, other: object) -> bool:
         return (
@@ -495,19 +551,19 @@ class RecordWithNDArrays:
         )
 
 
-@dataclasses.dataclass(slots=True, kw_only=True, eq=False)
 class RecordWithNDArraysSingleDimension:
-    ints: npt.NDArray[np.int32] = dataclasses.field(
-        default_factory=lambda: np.zeros((0), dtype=np.dtype(np.int32))
-    )
+    ints: npt.NDArray[np.int32]
+    fixed_simple_record_array: npt.NDArray[np.void]
+    fixed_record_with_vlens_array: npt.NDArray[np.void]
 
-    fixed_simple_record_array: npt.NDArray[np.void] = dataclasses.field(
-        default_factory=lambda: np.zeros((0), dtype=get_dtype(SimpleRecord))
-    )
-
-    fixed_record_with_vlens_array: npt.NDArray[np.void] = dataclasses.field(
-        default_factory=lambda: np.zeros((0), dtype=get_dtype(RecordWithVlens))
-    )
+    def __init__(self, *,
+        ints: typing.Optional[npt.NDArray[np.int32]] = None,
+        fixed_simple_record_array: typing.Optional[npt.NDArray[np.void]] = None,
+        fixed_record_with_vlens_array: typing.Optional[npt.NDArray[np.void]] = None,
+    ):
+        self.ints = ints if ints is not None else np.zeros((0), dtype=np.dtype(np.int32))
+        self.fixed_simple_record_array = fixed_simple_record_array if fixed_simple_record_array is not None else np.zeros((0), dtype=get_dtype(SimpleRecord))
+        self.fixed_record_with_vlens_array = fixed_record_with_vlens_array if fixed_record_with_vlens_array is not None else np.zeros((0), dtype=get_dtype(RecordWithVlens))
 
     def __eq__(self, other: object) -> bool:
         return (
@@ -518,19 +574,19 @@ class RecordWithNDArraysSingleDimension:
         )
 
 
-@dataclasses.dataclass(slots=True, kw_only=True, eq=False)
 class RecordWithDynamicNDArrays:
-    ints: npt.NDArray[np.int32] = dataclasses.field(
-        default_factory=lambda: np.zeros((), dtype=np.dtype(np.int32))
-    )
+    ints: npt.NDArray[np.int32]
+    simple_record_array: npt.NDArray[np.void]
+    record_with_vlens_array: npt.NDArray[np.void]
 
-    simple_record_array: npt.NDArray[np.void] = dataclasses.field(
-        default_factory=lambda: np.zeros((), dtype=get_dtype(SimpleRecord))
-    )
-
-    record_with_vlens_array: npt.NDArray[np.void] = dataclasses.field(
-        default_factory=lambda: np.zeros((), dtype=get_dtype(RecordWithVlens))
-    )
+    def __init__(self, *,
+        ints: typing.Optional[npt.NDArray[np.int32]] = None,
+        simple_record_array: typing.Optional[npt.NDArray[np.void]] = None,
+        record_with_vlens_array: typing.Optional[npt.NDArray[np.void]] = None,
+    ):
+        self.ints = ints if ints is not None else np.zeros((), dtype=np.dtype(np.int32))
+        self.simple_record_array = simple_record_array if simple_record_array is not None else np.zeros((), dtype=get_dtype(SimpleRecord))
+        self.record_with_vlens_array = record_with_vlens_array if record_with_vlens_array is not None else np.zeros((), dtype=get_dtype(RecordWithVlens))
 
     def __eq__(self, other: object) -> bool:
         return (
@@ -543,15 +599,16 @@ class RecordWithDynamicNDArrays:
 
 NamedFixedNDArray = npt.NDArray[np.int32]
 
-@dataclasses.dataclass(slots=True, kw_only=True, eq=False)
 class RecordWithFixedCollections:
-    fixed_vector: list[yardl.Int32] = dataclasses.field(
-        default_factory=lambda: [0] * 3
-    )
+    fixed_vector: list[yardl.Int32]
+    fixed_array: npt.NDArray[np.int32]
 
-    fixed_array: npt.NDArray[np.int32] = dataclasses.field(
-        default_factory=lambda: np.zeros((2, 3,), dtype=np.dtype(np.int32))
-    )
+    def __init__(self, *,
+        fixed_vector: typing.Optional[list[yardl.Int32]] = None,
+        fixed_array: typing.Optional[npt.NDArray[np.int32]] = None,
+    ):
+        self.fixed_vector = fixed_vector if fixed_vector is not None else [0] * 3
+        self.fixed_array = fixed_array if fixed_array is not None else np.zeros((2, 3,), dtype=np.dtype(np.int32))
 
     def __eq__(self, other: object) -> bool:
         return (
@@ -561,15 +618,16 @@ class RecordWithFixedCollections:
         )
 
 
-@dataclasses.dataclass(slots=True, kw_only=True, eq=False)
 class RecordWithVlenCollections:
-    vector: list[yardl.Int32] = dataclasses.field(
-        default_factory=list
-    )
+    vector: list[yardl.Int32]
+    array: npt.NDArray[np.int32]
 
-    array: npt.NDArray[np.int32] = dataclasses.field(
-        default_factory=lambda: np.zeros((0, 0), dtype=np.dtype(np.int32))
-    )
+    def __init__(self, *,
+        vector: typing.Optional[list[yardl.Int32]] = None,
+        array: typing.Optional[npt.NDArray[np.int32]] = None,
+    ):
+        self.vector = vector if vector is not None else []
+        self.array = array if array is not None else np.zeros((0, 0), dtype=np.dtype(np.int32))
 
     def __eq__(self, other: object) -> bool:
         return (
@@ -583,20 +641,30 @@ NamedNDArray = npt.NDArray[np.int32]
 
 AliasedMap = dict[K, V]
 
-@dataclasses.dataclass(slots=True, kw_only=True, eq=False)
 class RecordWithUnions:
-    null_or_int_or_string: (
-        tuple[typing.Literal["int32"], yardl.Int32]
-        | tuple[typing.Literal["string"], str]
-        | None
-    ) = None
+    null_or_int_or_string: typing.Union[
+        tuple[typing.Literal["int32"], yardl.Int32],
+        tuple[typing.Literal["string"], str],
+        None
+    ]
+    date_or_datetime: typing.Union[
+        tuple[typing.Literal["time"], yardl.Time],
+        tuple[typing.Literal["datetime"], yardl.DateTime],
+    ]
 
-    date_or_datetime: (
-        tuple[typing.Literal["time"], yardl.Time]
-        | tuple[typing.Literal["datetime"], yardl.DateTime]
-    ) = dataclasses.field(
-        default_factory=lambda: ("time", yardl.Time())
-    )
+    def __init__(self, *,
+        null_or_int_or_string: typing.Union[
+            tuple[typing.Literal["int32"], yardl.Int32],
+            tuple[typing.Literal["string"], str],
+            None
+        ] = None,
+        date_or_datetime: typing.Union[
+            tuple[typing.Literal["time"], yardl.Time],
+            tuple[typing.Literal["datetime"], yardl.DateTime],
+        ] = ("time", yardl.Time()),
+    ):
+        self.null_or_int_or_string = null_or_int_or_string
+        self.date_or_datetime = date_or_datetime
 
     def __eq__(self, other: object) -> bool:
         return (
@@ -650,13 +718,19 @@ class TextFormat(enum.IntFlag):
     def __hash__(self) -> int:
         return hash(self.value)
 
-@dataclasses.dataclass(slots=True, kw_only=True, eq=False)
 class RecordWithEnums:
-    enum: Fruits = Fruits.APPLE
+    enum: Fruits
+    flags: DaysOfWeek
+    flags_2: TextFormat
 
-    flags: DaysOfWeek = DaysOfWeek(0)
-
-    flags_2: TextFormat = TextFormat.REGULAR
+    def __init__(self, *,
+        enum: Fruits = Fruits.APPLE,
+        flags: DaysOfWeek = DaysOfWeek(0),
+        flags_2: TextFormat = TextFormat.REGULAR,
+    ):
+        self.enum = enum
+        self.flags = flags
+        self.flags_2 = flags_2
 
     def __eq__(self, other: object) -> bool:
         return (
@@ -669,12 +743,23 @@ class RecordWithEnums:
 
 Image = npt.NDArray[T_NP]
 
-@dataclasses.dataclass(slots=True, kw_only=True, eq=False)
 class GenericRecord(typing.Generic[T1, T2, T2_NP]):
     scalar_1: T1
     scalar_2: T2
     vector_1: list[T1]
     image_2: Image[T2_NP]
+
+    def __init__(self, *,
+        scalar_1: T1,
+        scalar_2: T2,
+        vector_1: list[T1],
+        image_2: Image[T2_NP],
+    ):
+        self.scalar_1 = scalar_1
+        self.scalar_2 = scalar_2
+        self.vector_1 = vector_1
+        self.image_2 = image_2
+
     def __eq__(self, other: object) -> bool:
         return (
             isinstance(other, GenericRecord)
@@ -685,10 +770,17 @@ class GenericRecord(typing.Generic[T1, T2, T2_NP]):
         )
 
 
-@dataclasses.dataclass(slots=True, kw_only=True, eq=False)
 class MyTuple(typing.Generic[T1, T2]):
     v1: T1
     v2: T2
+
+    def __init__(self, *,
+        v1: T1,
+        v2: T2,
+    ):
+        self.v1 = v1
+        self.v2 = v2
+
     def __eq__(self, other: object) -> bool:
         return (
             isinstance(other, MyTuple)
@@ -705,36 +797,44 @@ AliasedOpenGeneric = MyTuple[T1, T2]
 
 AliasedClosedGeneric = MyTuple[AliasedString, AliasedEnum]
 
-AliasedOptional = yardl.Int32 | None
+AliasedOptional = typing.Optional[yardl.Int32]
 
-AliasedGenericOptional = T | None
+AliasedGenericOptional = typing.Optional[T]
 
-AliasedGenericUnion2 = (
-    tuple[typing.Literal["T1"], T1]
-    | tuple[typing.Literal["T2"], T2]
-)
+AliasedGenericUnion2 = typing.Union[
+    tuple[typing.Literal["T1"], T1],
+    tuple[typing.Literal["T2"], T2],
+]
 
 AliasedGenericVector = list[T]
 
 AliasedGenericFixedVector = list[T]
 
-AliasedIntOrSimpleRecord = (
-    tuple[typing.Literal["int32"], yardl.Int32]
-    | tuple[typing.Literal["SimpleRecord"], SimpleRecord]
-)
+AliasedIntOrSimpleRecord = typing.Union[
+    tuple[typing.Literal["int32"], yardl.Int32],
+    tuple[typing.Literal["SimpleRecord"], SimpleRecord],
+]
 
-AliasedNullableIntSimpleRecord = (
-    tuple[typing.Literal["int32"], yardl.Int32]
-    | tuple[typing.Literal["SimpleRecord"], SimpleRecord]
-    | None
-)
+AliasedNullableIntSimpleRecord = typing.Union[
+    tuple[typing.Literal["int32"], yardl.Int32],
+    tuple[typing.Literal["SimpleRecord"], SimpleRecord],
+    None
+]
 
-@dataclasses.dataclass(slots=True, kw_only=True, eq=False)
 class GenericRecordWithComputedFields(typing.Generic[T0, T1]):
-    f1: (
-        tuple[typing.Literal["T0"], T0]
-        | tuple[typing.Literal["T1"], T1]
-    )
+    f1: typing.Union[
+        tuple[typing.Literal["T0"], T0],
+        tuple[typing.Literal["T1"], T1],
+    ]
+
+    def __init__(self, *,
+        f1: typing.Union[
+            tuple[typing.Literal["T0"], T0],
+            tuple[typing.Literal["T1"], T1],
+        ],
+    ):
+        self.f1 = f1
+
     def type_index(self) -> yardl.UInt8:
         _var0 = self.f1
         if _var0[0] == "T0":
@@ -750,65 +850,75 @@ class GenericRecordWithComputedFields(typing.Generic[T0, T1]):
         )
 
 
-@dataclasses.dataclass(slots=True, kw_only=True, eq=False)
 class RecordWithComputedFields:
-    array_field: npt.NDArray[np.int32] = dataclasses.field(
-        default_factory=lambda: np.zeros((0, 0), dtype=np.dtype(np.int32))
-    )
+    array_field: npt.NDArray[np.int32]
+    array_field_map_dimensions: npt.NDArray[np.int32]
+    dynamic_array_field: npt.NDArray[np.int32]
+    fixed_array_field: npt.NDArray[np.int32]
+    int_field: yardl.Int32
+    string_field: str
+    tuple_field: MyTuple[yardl.Int32, yardl.Int32]
+    vector_field: list[yardl.Int32]
+    vector_of_vectors_field: list[list[yardl.Int32]]
+    fixed_vector_field: list[yardl.Int32]
+    optional_named_array: typing.Optional[NamedNDArray]
+    int_float_union: typing.Union[
+        tuple[typing.Literal["int32"], yardl.Int32],
+        tuple[typing.Literal["float32"], yardl.Float32],
+    ]
+    nullable_int_float_union: typing.Union[
+        tuple[typing.Literal["int32"], yardl.Int32],
+        tuple[typing.Literal["float32"], yardl.Float32],
+        None
+    ]
+    union_with_nested_generic_union: typing.Union[
+        tuple[typing.Literal["int32"], yardl.Int32],
+        tuple[typing.Literal["GenericRecordWithComputedFields<string, float32>"], GenericRecordWithComputedFields[str, yardl.Float32]],
+    ]
+    map_field: dict[str, str]
 
-    array_field_map_dimensions: npt.NDArray[np.int32] = dataclasses.field(
-        default_factory=lambda: np.zeros((0, 0), dtype=np.dtype(np.int32))
-    )
-
-    dynamic_array_field: npt.NDArray[np.int32] = dataclasses.field(
-        default_factory=lambda: np.zeros((), dtype=np.dtype(np.int32))
-    )
-
-    fixed_array_field: npt.NDArray[np.int32] = dataclasses.field(
-        default_factory=lambda: np.zeros((3, 4,), dtype=np.dtype(np.int32))
-    )
-
-    int_field: yardl.Int32 = 0
-
-    string_field: str = ""
-
-    tuple_field: MyTuple[yardl.Int32, yardl.Int32] = dataclasses.field(
-        default_factory=lambda: MyTuple(v1=0, v2=0)
-    )
-
-    vector_field: list[yardl.Int32] = dataclasses.field(
-        default_factory=list
-    )
-
-    vector_of_vectors_field: list[list[yardl.Int32]] = dataclasses.field(
-        default_factory=list
-    )
-
-    fixed_vector_field: list[yardl.Int32] = dataclasses.field(
-        default_factory=lambda: [0] * 3
-    )
-
-    optional_named_array: NamedNDArray | None = None
-
-    int_float_union: (
-        tuple[typing.Literal["int32"], yardl.Int32]
-        | tuple[typing.Literal["float32"], yardl.Float32]
-    ) = ("int32", 0)
-
-    nullable_int_float_union: (
-        tuple[typing.Literal["int32"], yardl.Int32]
-        | tuple[typing.Literal["float32"], yardl.Float32]
-        | None
-    ) = None
-
-    union_with_nested_generic_union: (
-        tuple[typing.Literal["int32"], yardl.Int32]
-        | tuple[typing.Literal["GenericRecordWithComputedFields<string, float32>"], GenericRecordWithComputedFields[str, yardl.Float32]]
-    ) = ("int32", 0)
-
-    map_field: dict[str, str] = dataclasses.field(
-        default_factory=dict
-    )
+    def __init__(self, *,
+        array_field: typing.Optional[npt.NDArray[np.int32]] = None,
+        array_field_map_dimensions: typing.Optional[npt.NDArray[np.int32]] = None,
+        dynamic_array_field: typing.Optional[npt.NDArray[np.int32]] = None,
+        fixed_array_field: typing.Optional[npt.NDArray[np.int32]] = None,
+        int_field: yardl.Int32 = 0,
+        string_field: str = "",
+        tuple_field: typing.Optional[MyTuple[yardl.Int32, yardl.Int32]] = None,
+        vector_field: typing.Optional[list[yardl.Int32]] = None,
+        vector_of_vectors_field: typing.Optional[list[list[yardl.Int32]]] = None,
+        fixed_vector_field: typing.Optional[list[yardl.Int32]] = None,
+        optional_named_array: typing.Optional[NamedNDArray] = None,
+        int_float_union: typing.Union[
+            tuple[typing.Literal["int32"], yardl.Int32],
+            tuple[typing.Literal["float32"], yardl.Float32],
+        ] = ("int32", 0),
+        nullable_int_float_union: typing.Union[
+            tuple[typing.Literal["int32"], yardl.Int32],
+            tuple[typing.Literal["float32"], yardl.Float32],
+            None
+        ] = None,
+        union_with_nested_generic_union: typing.Union[
+            tuple[typing.Literal["int32"], yardl.Int32],
+            tuple[typing.Literal["GenericRecordWithComputedFields<string, float32>"], GenericRecordWithComputedFields[str, yardl.Float32]],
+        ] = ("int32", 0),
+        map_field: typing.Optional[dict[str, str]] = None,
+    ):
+        self.array_field = array_field if array_field is not None else np.zeros((0, 0), dtype=np.dtype(np.int32))
+        self.array_field_map_dimensions = array_field_map_dimensions if array_field_map_dimensions is not None else np.zeros((0, 0), dtype=np.dtype(np.int32))
+        self.dynamic_array_field = dynamic_array_field if dynamic_array_field is not None else np.zeros((), dtype=np.dtype(np.int32))
+        self.fixed_array_field = fixed_array_field if fixed_array_field is not None else np.zeros((3, 4,), dtype=np.dtype(np.int32))
+        self.int_field = int_field
+        self.string_field = string_field
+        self.tuple_field = tuple_field if tuple_field is not None else MyTuple(v1=0, v2=0)
+        self.vector_field = vector_field if vector_field is not None else []
+        self.vector_of_vectors_field = vector_of_vectors_field if vector_of_vectors_field is not None else []
+        self.fixed_vector_field = fixed_vector_field if fixed_vector_field is not None else [0] * 3
+        self.optional_named_array = optional_named_array
+        self.int_float_union = int_float_union
+        self.nullable_int_float_union = nullable_int_float_union
+        self.union_with_nested_generic_union = union_with_nested_generic_union
+        self.map_field = map_field if map_field is not None else {}
 
     def int_literal(self) -> yardl.UInt8:
         return 42
@@ -1044,15 +1154,19 @@ class EnumWithKeywordSymbols(yardl.OutOfRangeEnum):
     TRY = 2
     CATCH = 1
 
-@dataclasses.dataclass(slots=True, kw_only=True, eq=False)
 class RecordWithKeywordFields:
-    int_: str = ""
-
-    sizeof: ArrayWithKeywordDimensionNames = dataclasses.field(
-        default_factory=lambda: np.zeros((0, 0), dtype=np.dtype(np.int32))
-    )
-
+    int_: str
+    sizeof: ArrayWithKeywordDimensionNames
     if_: EnumWithKeywordSymbols
+
+    def __init__(self, *,
+        int_: str = "",
+        sizeof: typing.Optional[ArrayWithKeywordDimensionNames] = None,
+        if_: EnumWithKeywordSymbols,
+    ):
+        self.int_ = int_
+        self.sizeof = sizeof if sizeof is not None else np.zeros((0, 0), dtype=np.dtype(np.int32))
+        self.if_ = if_
 
     def float_(self) -> str:
         return self.int_

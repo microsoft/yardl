@@ -44,7 +44,9 @@ _type_map = {
         ]: cast(type, derived)
         for _, derived in inspect.getmembers(
             tm,
-            lambda x: inspect.isclass(x) and issubclass(x, BinaryProtocolWriter),
+            lambda x: inspect.isclass(x)
+            and not isinstance(x, types.GenericAlias)
+            and issubclass(x, BinaryProtocolWriter),
         )
     }.items()
 }

@@ -1,5 +1,6 @@
 import datetime
 import typing
+import sys
 
 import numpy as np
 import pytest
@@ -64,14 +65,17 @@ def test_get_dtype():
         [("v1", tm.get_dtype(tm.SimpleRecord)), ("v2", "<f4")], align=True
     )
 
-    assert tm.get_dtype(tm.Int32 | None) == np.dtype(
-        [("has_value", "?"), ("value", "<i4")], align=True
-    )
-    assert tm.get_dtype(tm.SimpleRecord | None) == np.dtype(
-        [("has_value", "?"), ("value", tm.get_dtype(tm.SimpleRecord))], align=True
-    )
+    if sys.version_info >= (3, 10):
+        assert tm.get_dtype(tm.Int32 | None) == np.dtype(
+            [("has_value", "?"), ("value", "<i4")], align=True
+        )
+        assert tm.get_dtype(tm.SimpleRecord | None) == np.dtype(
+            [("has_value", "?"), ("value", tm.get_dtype(tm.SimpleRecord))], align=True
+        )
+        assert tm.get_dtype(tm.Int32 | tm.Float32) == np.object_
+
     assert tm.get_dtype(typing.Optional[tm.SimpleRecord]) == np.dtype(
         [("has_value", "?"), ("value", tm.get_dtype(tm.SimpleRecord))], align=True
     )
-    assert tm.get_dtype(tm.Int32 | tm.Float32) == np.object_
+
     assert tm.get_dtype(typing.Union[tm.Int32, tm.Float32]) == np.object_

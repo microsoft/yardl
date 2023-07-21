@@ -39,7 +39,7 @@ UINT64_MAX: int = np.iinfo(np.uint64).max
 
 
 class BinaryProtocolWriter(ABC):
-    def __init__(self, stream: BinaryIO | str, schema: str) -> None:
+    def __init__(self, stream: Union[BinaryIO, str], schema: str) -> None:
         self._stream = CodedOutputStream(stream)
         self._stream.write_bytes(MAGIC_BYTES)
         write_fixed_int32(self._stream, CURRENT_BINARY_FORMAT_VERSION)
@@ -52,8 +52,8 @@ class BinaryProtocolWriter(ABC):
 class BinaryProtocolReader(ABC):
     def __init__(
         self,
-        stream: BufferedReader | BytesIO | BinaryIO | str,
-        expected_schema: str | None,
+        stream: Union[BufferedReader, BytesIO, BinaryIO, str],
+        expected_schema: Optional[str],
     ) -> None:
         self._stream = CodedInputStream(stream)
         magic_bytes = self._stream.read_view(len(MAGIC_BYTES))
@@ -73,7 +73,9 @@ class BinaryProtocolReader(ABC):
 
 
 class CodedOutputStream:
-    def __init__(self, stream: BinaryIO | str, *, buffer_size: int = 65536) -> None:
+    def __init__(
+        self, stream: Union[BinaryIO, str], *, buffer_size: int = 65536
+    ) -> None:
         if isinstance(stream, str):
             self._stream = cast(BinaryIO, open(stream, "wb"))
             self._owns_stream = True
@@ -103,7 +105,7 @@ class CodedOutputStream:
         formatter.pack_into(self._view, 0, *args)
         self._view = self._view[formatter.size :]
 
-    def write_bytes(self, data: bytes | bytearray) -> None:
+    def write_bytes(self, data: Union[bytes, bytearray]) -> None:
         if len(data) > len(self._view):
             self.flush()
             self._stream.write(data)
@@ -111,7 +113,7 @@ class CodedOutputStream:
             self._view[: len(data)] = data
             self._view = self._view[len(data) :]
 
-    def write_bytes_directly(self, data: bytes | bytearray | memoryview) -> None:
+    def write_bytes_directly(self, data: Union[bytes, bytearray, memoryview]) -> None:
         self.flush()
         self._stream.write(data)
 
@@ -122,7 +124,7 @@ class CodedOutputStream:
 
     def write_unsigned_varint(
         self,
-        value: int | np.uint8 | np.uint16 | np.uint32 | np.uint64,
+        value: Union[int, np.uint8, np.uint16, np.uint32, np.uint64],
     ) -> None:
         if len(self._view) < 10:
             self.flush()
@@ -139,14 +141,14 @@ class CodedOutputStream:
 
     def zigzag_encode(
         self,
-        value: int | np.int8 | np.int16 | np.int32 | np.int64,
+        value: Union[int, np.int8, np.int16, np.int32, np.int64],
     ) -> int:
         int_val = int(value)
         return (int_val << 1) ^ (int_val >> 63)
 
     def write_signed_varint(
         self,
-        value: int | np.int8 | np.int16 | np.int32 | np.int64,
+        value: Union[int, np.int8, np.int16, np.int32, np.int64],
     ) -> None:
         self.write_unsigned_varint(self.zigzag_encode(value))
 
@@ -154,7 +156,7 @@ class CodedOutputStream:
 class CodedInputStream:
     def __init__(
         self,
-        stream: BufferedReader | BytesIO | BinaryIO | str,
+        stream: Union[BufferedReader, BytesIO, BinaryIO, str],
         *,
         buffer_size: int = 65536,
     ) -> None:
@@ -284,7 +286,7 @@ class TypeSerializer(Generic[T, T_NP], ABC):
     def overall_dtype(self) -> np.dtype[Any]:
         return self._dtype
 
-    def struct_format_str(self) -> str | None:
+    def struct_format_str(self) -> Optional[str]:
         return None
 
     @abstractmethod
@@ -869,7 +871,7 @@ class OptionalSerializer(Generic[T, T_NP], TypeSerializer[Optional[T], np.void])
 
 class UnionSerializer(TypeSerializer[T, np.object_]):
     def __init__(
-        self, cases: list[tuple[str, TypeSerializer[Any, Any]] | None]
+        self, cases: list[Optional[tuple[str, TypeSerializer[Any, Any]]]]
     ) -> None:
         super().__init__(np.object_)
         if cases[0] is None:

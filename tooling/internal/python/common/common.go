@@ -150,25 +150,22 @@ var TypeSyntaxWriter dsl.TypeSyntaxWriter[string] = func(self dsl.TypeSyntaxWrit
 				return self.ToSyntax(t.Cases[0].Type, contextNamespace)
 			}
 			if t.Cases.IsOptional() {
-				return fmt.Sprintf("%s | None", self.ToSyntax(t.Cases[1].Type, contextNamespace))
+				return fmt.Sprintf("typing.Optional[%s]", self.ToSyntax(t.Cases[1].Type, contextNamespace))
 			}
 
 			sb := &strings.Builder{}
-			sb.WriteString("(\n")
-			for i, typeCase := range t.Cases {
+			sb.WriteString("typing.Union[\n")
+			for _, typeCase := range t.Cases {
 				if typeCase.Type == nil {
 					continue
 				}
 				sb.WriteString("    ")
-				if !t.Cases.HasNullOption() && i > 0 || t.Cases.HasNullOption() && i > 1 {
-					sb.WriteString("| ")
-				}
-				fmt.Fprintf(sb, "tuple[typing.Literal[\"%s\"], %s]\n", typeCase.Tag, self.ToSyntax(typeCase.Type, contextNamespace))
+				fmt.Fprintf(sb, "tuple[typing.Literal[\"%s\"], %s],\n", typeCase.Tag, self.ToSyntax(typeCase.Type, contextNamespace))
 			}
 			if t.Cases.HasNullOption() {
-				sb.WriteString("    | None\n")
+				sb.WriteString("    None\n")
 			}
-			sb.WriteString(")")
+			sb.WriteString("]")
 			return sb.String()
 		}()
 

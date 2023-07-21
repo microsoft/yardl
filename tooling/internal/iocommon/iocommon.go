@@ -85,6 +85,9 @@ func symLinkEmbeddedDir(emdeddedSourceDir, destDir string, relativeTargetDir str
 				} else {
 					err = os.Symlink(path.Join(relativeTargetDir, entry.Name()), path.Join(destDir, entry.Name()))
 					if err != nil {
+						if _, ok := err.(*os.LinkError); ok {
+							continue // TODO: full check
+						}
 						return err
 					}
 				}

@@ -61,40 +61,66 @@ func writeNamedType(w *formatting.IndentedWriter, td *dsl.NamedType) {
 }
 
 func writeRecord(w *formatting.IndentedWriter, rec *dsl.RecordDefinition, st dsl.SymbolTable) {
-	w.WriteStringln("@dataclasses.dataclass(slots=True, kw_only=True, eq=False)")
 	fmt.Fprintf(w, "class %s%s:\n", common.TypeSyntaxWithoutTypeParameters(rec, rec.Namespace), GetGenericBase(rec))
 	w.Indented(func() {
 		common.WriteDocstring(w, rec.Comment)
 		for _, field := range rec.Fields {
 			fmt.Fprintf(w, "%s: %s", common.FieldIdentifierName(field.Name), common.TypeSyntax(field.Type, rec.Namespace))
 
-			if dsl.ContainsGenericTypeParameter(field.Type) {
-				// cannot default generic type parameters
-				// because they don't really exist at runtime
-				w.WriteStringln("")
-				continue
-			}
-
-			defaultExpr, defaultKind := typeDefault(field.Type, rec.Namespace, st)
-			if defaultKind == defaultValueKindNone || defaultExpr == "" {
-				w.WriteStringln("")
-			} else if defaultKind == defaultValueKindValue {
-				fmt.Fprintf(w, " = %s\n", defaultExpr)
-			} else if defaultKind == defaultValueKindFactory {
-				fmt.Fprintf(w, " = dataclasses.field(\n")
-				w.Indented(func() {
-					fmt.Fprintf(w, "default_factory=%s\n", defaultExpr)
-				})
-				w.WriteStringln(")")
-			} else if defaultKind == defaultValueKindLambda {
-				fmt.Fprintf(w, " = dataclasses.field(\n")
-				w.Indented(func() {
-					fmt.Fprintf(w, "default_factory=lambda: %s\n", defaultExpr)
-				})
-				w.WriteStringln(")")
-			}
-
 			common.WriteDocstring(w, field.Comment)
+			w.WriteStringln("")
+		}
+		w.WriteStringln("")
+
+		if len(rec.Fields) > 0 {
+			w.WriteStringln("def __init__(self, *,")
+			w.Indented(func() {
+				for _, f := range rec.Fields {
+					fieldName := common.FieldIdentifierName(f.Name)
+					fieldTypeSyntax := common.TypeSyntax(f.Type, rec.Namespace)
+					fmt.Fprintf(w, "%s: ", fieldName)
+
+					var defaultExpression string
+					var defaultExpressionKind defaultValueKind
+					if dsl.ContainsGenericTypeParameter(f.Type) {
+						// cannot default generic type parameters
+						// because they don't really exist at runtime
+						defaultExpressionKind = defaultValueKindNone
+					} else {
+						defaultExpression, defaultExpressionKind = typeDefault(f.Type, rec.Namespace, st)
+					}
+					switch defaultExpressionKind {
+					case defaultValueKindNone:
+						w.WriteString(fieldTypeSyntax)
+					case defaultValueKindImmutable:
+						fmt.Fprintf(w, "%s = %s", fieldTypeSyntax, defaultExpression)
+					case defaultValueKindMutable:
+						fmt.Fprintf(w, "typing.Optional[%s] = None", fieldTypeSyntax)
+					}
+					w.WriteStringln(",")
+				}
+			})
+
+			w.WriteStringln("):")
+			w.Indented(func() {
+				for _, f := range rec.Fields {
+					fieldName := common.FieldIdentifierName(f.Name)
+					var defaultExpression string
+					var defaultExpressionKind defaultValueKind
+					if dsl.ContainsGenericTypeParameter(f.Type) {
+						defaultExpressionKind = defaultValueKindNone
+					} else {
+						defaultExpression, defaultExpressionKind = typeDefault(f.Type, rec.Namespace, st)
+					}
+
+					switch defaultExpressionKind {
+					case defaultValueKindNone, defaultValueKindImmutable:
+						fmt.Fprintf(w, "self.%s = %s\n", fieldName, fieldName)
+					case defaultValueKindMutable:
+						fmt.Fprintf(w, "self.%s = %s if %s is not None else %s\n", fieldName, fieldName, fieldName, defaultExpression)
+					}
+				}
+			})
 			w.WriteStringln("")
 		}
 
@@ -564,15 +590,14 @@ type defaultValueKind int
 
 const (
 	defaultValueKindNone defaultValueKind = iota
-	defaultValueKindValue
-	defaultValueKindFactory
-	defaultValueKindLambda
+	defaultValueKindImmutable
+	defaultValueKindMutable
 )
 
 func typeDefault(t dsl.Type, contextNamespace string, st dsl.SymbolTable) (string, defaultValueKind) {
 	switch t := t.(type) {
 	case nil:
-		return "None", defaultValueKindValue
+		return "None", defaultValueKindImmutable
 	case *dsl.SimpleType:
 		return typeDefinitionDefault(t.ResolvedDefinition, contextNamespace, st)
 	case *dsl.GeneralizedType:
@@ -586,16 +611,16 @@ func typeDefault(t dsl.Type, contextNamespace string, st dsl.SymbolTable) (strin
 			switch defaultKind {
 			case defaultValueKindNone:
 				return "", defaultKind
-			case defaultValueKindValue, defaultValueKindLambda:
+			case defaultValueKindImmutable:
 				return fmt.Sprintf(`("%s", %s)`, t.Cases[0].Tag, defaultExpression), defaultKind
-			case defaultValueKindFactory:
-				return fmt.Sprintf(`("%s", %s())`, t.Cases[0].Tag, defaultExpression), defaultValueKindLambda
+			case defaultValueKindMutable:
+				return fmt.Sprintf(`("%s", %s())`, t.Cases[0].Tag, defaultExpression), defaultValueKindMutable
 			}
 
-			return fmt.Sprintf(`("%s", %s)`, t.Cases[0].Tag, defaultExpression), defaultValueKindValue
+			return fmt.Sprintf(`("%s", %s)`, t.Cases[0].Tag, defaultExpression), defaultValueKindImmutable
 		case *dsl.Vector:
 			if td.Length == nil {
-				return "list", defaultValueKindFactory
+				return "[]", defaultValueKindMutable
 			}
 
 			scalarDefault, scalarDefaultKind := typeDefault(t.Cases[0].Type, contextNamespace, st)
@@ -603,12 +628,10 @@ func typeDefault(t dsl.Type, contextNamespace string, st dsl.SymbolTable) (strin
 			switch scalarDefaultKind {
 			case defaultValueKindNone:
 				return "", defaultValueKindNone
-			case defaultValueKindValue:
-				return fmt.Sprintf("[%s] * %d", scalarDefault, *td.Length), defaultValueKindLambda
-			case defaultValueKindFactory:
-				return fmt.Sprintf("[%s() for _ in range(%d)]", scalarDefault, *td.Length), defaultValueKindLambda
-			case defaultValueKindLambda:
-				return fmt.Sprintf("[%s for _ in range(%d)]", scalarDefault, *td.Length), defaultValueKindLambda
+			case defaultValueKindImmutable:
+				return fmt.Sprintf("[%s] * %d", scalarDefault, *td.Length), defaultValueKindMutable
+			case defaultValueKindMutable:
+				return fmt.Sprintf("[%s() for _ in range(%d)]", scalarDefault, *td.Length), defaultValueKindMutable
 			}
 
 		case *dsl.Array:
@@ -624,18 +647,18 @@ func typeDefault(t dsl.Type, contextNamespace string, st dsl.SymbolTable) (strin
 					dims[i] = strconv.FormatUint(*d.Length, 10)
 				}
 
-				return fmt.Sprintf("np.zeros((%s,), dtype=%s)", strings.Join(dims, ", "), dtype), defaultValueKindLambda
+				return fmt.Sprintf("np.zeros((%s,), dtype=%s)", strings.Join(dims, ", "), dtype), defaultValueKindMutable
 			}
 
 			if td.HasKnownNumberOfDimensions() {
 				shape := fmt.Sprintf("(%s)", strings.Repeat("0, ", len(*td.Dimensions))[0:len(*td.Dimensions)*3-2])
-				return fmt.Sprintf("np.zeros(%s, dtype=%s)", shape, dtype), defaultValueKindLambda
+				return fmt.Sprintf("np.zeros(%s, dtype=%s)", shape, dtype), defaultValueKindMutable
 			}
 
-			return fmt.Sprintf("np.zeros((), dtype=%s)", dtype), defaultValueKindLambda
+			return fmt.Sprintf("np.zeros((), dtype=%s)", dtype), defaultValueKindMutable
 
 		case *dsl.Map:
-			return "dict", defaultValueKindFactory
+			return "{}", defaultValueKindMutable
 		}
 	}
 
@@ -647,29 +670,29 @@ func typeDefinitionDefault(t dsl.TypeDefinition, contextNamespace string, st dsl
 	case dsl.PrimitiveDefinition:
 		switch t {
 		case dsl.Bool:
-			return "False", defaultValueKindValue
+			return "False", defaultValueKindImmutable
 		case dsl.Int8, dsl.Uint8, dsl.Int16, dsl.Uint16, dsl.Int32, dsl.Uint32, dsl.Int64, dsl.Uint64, dsl.Size:
-			return "0", defaultValueKindValue
+			return "0", defaultValueKindImmutable
 		case dsl.Float32, dsl.Float64:
-			return "0.0", defaultValueKindValue
+			return "0.0", defaultValueKindImmutable
 		case dsl.ComplexFloat32, dsl.ComplexFloat64:
-			return "0j", defaultValueKindValue
+			return "0j", defaultValueKindImmutable
 		case dsl.String:
-			return `""`, defaultValueKindValue
+			return `""`, defaultValueKindImmutable
 		case dsl.Date:
-			return "datetime.date(1970, 1, 1)", defaultValueKindLambda
+			return "datetime.date(1970, 1, 1)", defaultValueKindImmutable
 		case dsl.Time:
-			return "yardl.Time", defaultValueKindFactory
+			return "yardl.Time()", defaultValueKindImmutable
 		case dsl.DateTime:
-			return "yardl.DateTime", defaultValueKindFactory
+			return "yardl.DateTime()", defaultValueKindImmutable
 		}
 	case *dsl.EnumDefinition:
 		zeroValue := t.GetZeroValue()
 		if t.IsFlags {
 			if zeroValue == nil {
-				return fmt.Sprintf("%s(0)", common.TypeSyntax(t, contextNamespace)), defaultValueKindValue
+				return fmt.Sprintf("%s(0)", common.TypeSyntax(t, contextNamespace)), defaultValueKindImmutable
 			} else {
-				return fmt.Sprintf("%s.%s", common.TypeSyntax(t, contextNamespace), common.EnumValueIdentifierName(zeroValue.Symbol)), defaultValueKindValue
+				return fmt.Sprintf("%s.%s", common.TypeSyntax(t, contextNamespace), common.EnumValueIdentifierName(zeroValue.Symbol)), defaultValueKindImmutable
 			}
 		}
 
@@ -677,7 +700,7 @@ func typeDefinitionDefault(t dsl.TypeDefinition, contextNamespace string, st dsl
 			return "", defaultValueKindNone
 		}
 
-		return fmt.Sprintf("%s.%s", common.TypeSyntax(t, contextNamespace), common.EnumValueIdentifierName(zeroValue.Symbol)), defaultValueKindValue
+		return fmt.Sprintf("%s.%s", common.TypeSyntax(t, contextNamespace), common.EnumValueIdentifierName(zeroValue.Symbol)), defaultValueKindImmutable
 	case *dsl.NamedType:
 		return typeDefault(t.Type, contextNamespace, st)
 
@@ -694,7 +717,7 @@ func typeDefinitionDefault(t dsl.TypeDefinition, contextNamespace string, st dsl
 				}
 			}
 
-			return common.TypeSyntaxWithoutTypeParameters(t, contextNamespace), defaultValueKindFactory
+			return fmt.Sprintf("%s()", common.TypeSyntaxWithoutTypeParameters(t, contextNamespace)), defaultValueKindMutable
 		}
 
 		// generic record with type arguments
@@ -711,18 +734,11 @@ func typeDefinitionDefault(t dsl.TypeDefinition, contextNamespace string, st dsl
 
 			_, genDefaultKind := typeDefault(genericDef.Fields[i].Type, contextNamespace, st)
 			if genDefaultKind == defaultValueKindNone {
-				switch fieldDefaultKind {
-				case defaultValueKindValue:
-					args = append(args, fmt.Sprintf("%s=%s", common.FieldIdentifierName(f.Name), fieldDefaultExpr))
-				case defaultValueKindFactory:
-					args = append(args, fmt.Sprintf("%s=%s()", common.FieldIdentifierName(f.Name), fieldDefaultExpr))
-				case defaultValueKindLambda:
-					args = append(args, fmt.Sprintf("%s=%s", common.FieldIdentifierName(f.Name), fieldDefaultExpr))
-				}
+				args = append(args, fmt.Sprintf("%s=%s", common.FieldIdentifierName(f.Name), fieldDefaultExpr))
 			}
 		}
 
-		return fmt.Sprintf("%s(%s)", common.TypeSyntaxWithoutTypeParameters(t, contextNamespace), strings.Join(args, ", ")), defaultValueKindLambda
+		return fmt.Sprintf("%s(%s)", common.TypeSyntaxWithoutTypeParameters(t, contextNamespace), strings.Join(args, ", ")), defaultValueKindMutable
 	}
 
 	return "", defaultValueKindNone

@@ -61,7 +61,7 @@ func writeAbstractWriter(w *formatting.IndentedWriter, p *dsl.ProtocolDefinition
 		})
 		w.WriteStringln("")
 
-		w.WriteStringln("def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:")
+		w.WriteStringln("def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:")
 		w.Indented(func() {
 			w.WriteStringln("self.close()")
 			fmt.Fprintf(w, "if exc is None and self._state != %d:\n", len(p.Sequence))
@@ -164,7 +164,7 @@ func writeAbstractReader(w *formatting.IndentedWriter, p *dsl.ProtocolDefinition
 		})
 		w.WriteStringln("")
 
-		w.WriteStringln("def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: object | None) -> None:")
+		w.WriteStringln("def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:")
 		w.Indented(func() {
 			w.WriteStringln("self.close()")
 			fmt.Fprintf(w, "if exc is None and self._state != %d:\n", len(p.Sequence)*2)
