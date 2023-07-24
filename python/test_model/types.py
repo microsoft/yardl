@@ -493,8 +493,8 @@ class RecordWithFixedVectors:
         fixed_record_with_vlens_vector: typing.Optional[list[RecordWithVlens]] = None,
     ):
         self.fixed_int_vector = fixed_int_vector if fixed_int_vector is not None else [0] * 5
-        self.fixed_simple_record_vector = fixed_simple_record_vector if fixed_simple_record_vector is not None else [SimpleRecord()() for _ in range(3)]
-        self.fixed_record_with_vlens_vector = fixed_record_with_vlens_vector if fixed_record_with_vlens_vector is not None else [RecordWithVlens()() for _ in range(2)]
+        self.fixed_simple_record_vector = fixed_simple_record_vector if fixed_simple_record_vector is not None else [SimpleRecord() for _ in range(3)]
+        self.fixed_record_with_vlens_vector = fixed_record_with_vlens_vector if fixed_record_with_vlens_vector is not None else [RecordWithVlens() for _ in range(2)]
 
     def __eq__(self, other: object) -> bool:
         return (
@@ -1187,7 +1187,7 @@ class RecordWithKeywordFields:
 
 
 def _mk_get_dtype():
-    dtype_map: dict[type | types.GenericAlias, np.dtype[typing.Any] | typing.Callable[[tuple[type, ...]], np.dtype[typing.Any]]] = {}
+    dtype_map: dict[typing.Union[type, types.GenericAlias], typing.Union[np.dtype[typing.Any], typing.Callable[[tuple[type, ...]], np.dtype[typing.Any]]]] = {}
     get_dtype = _dtypes.make_get_dtype_func(dtype_map)
 
     dtype_map[SmallBenchmarkRecord] = np.dtype([('a', np.dtype(np.float64)), ('b', np.dtype(np.float32)), ('c', np.dtype(np.float32))], align=True)

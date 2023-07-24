@@ -358,7 +358,6 @@ def test_arrays_with_known_dimension_count():
             )
         )
 
-        simple_record_type = tm.get_dtype(tm.SimpleRecord)
         w.write_record_with_vlens_array(
             np.array(
                 [

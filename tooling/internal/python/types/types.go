@@ -631,7 +631,7 @@ func typeDefault(t dsl.Type, contextNamespace string, st dsl.SymbolTable) (strin
 			case defaultValueKindImmutable:
 				return fmt.Sprintf("[%s] * %d", scalarDefault, *td.Length), defaultValueKindMutable
 			case defaultValueKindMutable:
-				return fmt.Sprintf("[%s() for _ in range(%d)]", scalarDefault, *td.Length), defaultValueKindMutable
+				return fmt.Sprintf("[%s for _ in range(%d)]", scalarDefault, *td.Length), defaultValueKindMutable
 			}
 
 		case *dsl.Array:
@@ -747,7 +747,7 @@ func typeDefinitionDefault(t dsl.TypeDefinition, contextNamespace string, st dsl
 func writeGetDTypeFunc(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 	w.WriteStringln("def _mk_get_dtype():")
 	w.Indented(func() {
-		w.WriteStringln("dtype_map: dict[type | types.GenericAlias, np.dtype[typing.Any] | typing.Callable[[tuple[type, ...]], np.dtype[typing.Any]]] = {}")
+		w.WriteStringln("dtype_map: dict[typing.Union[type, types.GenericAlias], typing.Union[np.dtype[typing.Any], typing.Callable[[tuple[type, ...]], np.dtype[typing.Any]]]] = {}")
 		w.WriteStringln("get_dtype = _dtypes.make_get_dtype_func(dtype_map)\n")
 
 		context := dTypeExpressionContext{
