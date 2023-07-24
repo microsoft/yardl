@@ -1140,7 +1140,7 @@ class RecordWithComputedFields:
             and self.vector_field == other.vector_field
             and self.vector_of_vectors_field == other.vector_of_vectors_field
             and self.fixed_vector_field == other.fixed_vector_field
-            and other.optional_named_array is None if self.optional_named_array is None else (other.optional_named_array is not None and yardl.structural_equal(self.optional_named_array, other.optional_named_array))
+            and (other.optional_named_array is None if self.optional_named_array is None else (other.optional_named_array is not None and yardl.structural_equal(self.optional_named_array, other.optional_named_array)))
             and self.int_float_union == other.int_float_union
             and self.nullable_int_float_union == other.nullable_int_float_union
             and self.union_with_nested_generic_union == other.union_with_nested_generic_union

@@ -174,7 +174,7 @@ func typeEqualityExpression(t dsl.Type, a, b string) string {
 				return typeEqualityExpression(t.Cases[0].Type, a, b)
 			}
 			if t.Cases.IsOptional() {
-				return fmt.Sprintf("%s is None if %s is None else (%s is not None and %s)", b, a, b, typeEqualityExpression(t.Cases[1].Type, a, b))
+				return fmt.Sprintf("(%s is None if %s is None else (%s is not None and %s))", b, a, b, typeEqualityExpression(t.Cases[1].Type, a, b))
 			}
 		case *dsl.Vector:
 			return fmt.Sprintf("len(%s) == len(%s) and all(%s for %s, %s in zip(%s, %s))", a, b, typeEqualityExpression(t.ToScalar(), "a", "b"), "a", "b", a, b)
