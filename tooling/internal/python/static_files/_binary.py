@@ -48,6 +48,9 @@ class BinaryProtocolWriter(ABC):
     def close(self) -> None:
         self._stream.close()
 
+    def _end_stream(self) -> None:
+        self._stream.write_byte(0)
+
 
 class BinaryProtocolReader(ABC):
     def __init__(
@@ -943,6 +946,8 @@ class StreamSerializer(TypeSerializer[Iterable[T], Any]):
         self._element_serializer = element_serializer
 
     def write(self, stream: CodedOutputStream, value: Iterable[T]) -> None:
+        # Note that the final 0 is missing and will be added before the next protocol step
+        # or the protocol is closed.
         if isinstance(value, list):
             stream.write_unsigned_varint(len(value))
             for element in value:
@@ -951,8 +956,6 @@ class StreamSerializer(TypeSerializer[Iterable[T], Any]):
             for element in value:
                 stream.write_byte(1)
                 self._element_serializer.write(stream, element)
-
-        stream.write_byte(0)
 
     def write_numpy(self, stream: CodedOutputStream, value: Any) -> None:
         raise NotImplementedError()

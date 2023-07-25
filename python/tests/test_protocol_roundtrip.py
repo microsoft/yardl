@@ -572,6 +572,7 @@ def test_simple_streams():
 
     with c() as w:
         w.write_int_data(range(10))
+        w.write_int_data(range(20))
 
         w.write_optional_int_data([1, 2, None, 4, 5, None, 7, 8, 9, 10])
         w.write_record_with_optional_vector_data(

@@ -6,6 +6,8 @@ import time
 
 
 class ProtocolError(Exception):
+    """Raised when the contract of a protocol is not respected."""
+
     pass
 
 

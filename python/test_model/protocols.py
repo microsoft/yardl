@@ -23,15 +23,21 @@ class BenchmarkFloat256x256WriterBase(abc.ABC):
         return self
 
     def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
+        if exc is None and self._state == 1:
+            try:
+                self._end_stream()
+                return
+            finally:
+                self.close()
         self.close()
-        if exc is None and self._state != 1:
-            expected_method = self._state_to_method_name(self._state)
-            raise ProtocolException(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+        if exc is None and self._state != 2:
+            expected_method = self._state_to_method_name((self._state + 1) & ~1)
+            raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
 
     def write_float_256x_256(self, value: collections.abc.Iterable[npt.NDArray[np.float32]]) -> None:
         """Ordinal 0"""
 
-        if self._state != 0:
+        if self._state & ~1 != 0:
             self._raise_unexpected_state(0)
 
         self._write_float_256x_256(value)
@@ -43,12 +49,16 @@ class BenchmarkFloat256x256WriterBase(abc.ABC):
 
     @abc.abstractmethod
     def close(self) -> None:
-        raise NotImplementedError()
+        pass
+
+    @abc.abstractmethod
+    def _end_stream(self) -> None:
+        pass
 
     def _raise_unexpected_state(self, actual: int) -> None:
         expected_method = self._state_to_method_name(self._state)
         actual_method = self._state_to_method_name(actual)
-        raise ProtocolException(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
+        raise ProtocolError(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
 
     def _state_to_method_name(self, state: int) -> str:
         if state == 0:
@@ -72,10 +82,10 @@ class BenchmarkFloat256x256ReaderBase(abc.ABC):
         if exc is None and self._state != 2:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
-                raise ProtocolException(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
+                raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
             else:
                 expected_method = self._state_to_method_name(self._state)
-                raise ProtocolException(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
+                raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
 
     @abc.abstractmethod
@@ -108,10 +118,10 @@ class BenchmarkFloat256x256ReaderBase(abc.ABC):
         actual_method = self._state_to_method_name(actual)
         if self._state % 2 == 1:
             previous_method = self._state_to_method_name(self._state - 1)
-            raise ProtocolException(f"Received call to '{actual_method}' but the iterable returned by '{previous_method}' was not fully consumed.")
+            raise ProtocolError(f"Received call to '{actual_method}' but the iterable returned by '{previous_method}' was not fully consumed.")
         else:
             expected_method = self._state_to_method_name(self._state)
-            raise ProtocolException(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
+            raise ProtocolError(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
         	
     def _state_to_method_name(self, state: int) -> str:
         if state == 0:
@@ -131,15 +141,21 @@ class BenchmarkFloatVlenWriterBase(abc.ABC):
         return self
 
     def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
+        if exc is None and self._state == 1:
+            try:
+                self._end_stream()
+                return
+            finally:
+                self.close()
         self.close()
-        if exc is None and self._state != 1:
-            expected_method = self._state_to_method_name(self._state)
-            raise ProtocolException(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+        if exc is None and self._state != 2:
+            expected_method = self._state_to_method_name((self._state + 1) & ~1)
+            raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
 
     def write_float_array(self, value: collections.abc.Iterable[npt.NDArray[np.float32]]) -> None:
         """Ordinal 0"""
 
-        if self._state != 0:
+        if self._state & ~1 != 0:
             self._raise_unexpected_state(0)
 
         self._write_float_array(value)
@@ -151,12 +167,16 @@ class BenchmarkFloatVlenWriterBase(abc.ABC):
 
     @abc.abstractmethod
     def close(self) -> None:
-        raise NotImplementedError()
+        pass
+
+    @abc.abstractmethod
+    def _end_stream(self) -> None:
+        pass
 
     def _raise_unexpected_state(self, actual: int) -> None:
         expected_method = self._state_to_method_name(self._state)
         actual_method = self._state_to_method_name(actual)
-        raise ProtocolException(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
+        raise ProtocolError(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
 
     def _state_to_method_name(self, state: int) -> str:
         if state == 0:
@@ -180,10 +200,10 @@ class BenchmarkFloatVlenReaderBase(abc.ABC):
         if exc is None and self._state != 2:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
-                raise ProtocolException(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
+                raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
             else:
                 expected_method = self._state_to_method_name(self._state)
-                raise ProtocolException(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
+                raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
 
     @abc.abstractmethod
@@ -216,10 +236,10 @@ class BenchmarkFloatVlenReaderBase(abc.ABC):
         actual_method = self._state_to_method_name(actual)
         if self._state % 2 == 1:
             previous_method = self._state_to_method_name(self._state - 1)
-            raise ProtocolException(f"Received call to '{actual_method}' but the iterable returned by '{previous_method}' was not fully consumed.")
+            raise ProtocolError(f"Received call to '{actual_method}' but the iterable returned by '{previous_method}' was not fully consumed.")
         else:
             expected_method = self._state_to_method_name(self._state)
-            raise ProtocolException(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
+            raise ProtocolError(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
         	
     def _state_to_method_name(self, state: int) -> str:
         if state == 0:
@@ -239,15 +259,21 @@ class BenchmarkSmallRecordWriterBase(abc.ABC):
         return self
 
     def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
+        if exc is None and self._state == 1:
+            try:
+                self._end_stream()
+                return
+            finally:
+                self.close()
         self.close()
-        if exc is None and self._state != 1:
-            expected_method = self._state_to_method_name(self._state)
-            raise ProtocolException(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+        if exc is None and self._state != 2:
+            expected_method = self._state_to_method_name((self._state + 1) & ~1)
+            raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
 
     def write_small_record(self, value: collections.abc.Iterable[SmallBenchmarkRecord]) -> None:
         """Ordinal 0"""
 
-        if self._state != 0:
+        if self._state & ~1 != 0:
             self._raise_unexpected_state(0)
 
         self._write_small_record(value)
@@ -259,12 +285,16 @@ class BenchmarkSmallRecordWriterBase(abc.ABC):
 
     @abc.abstractmethod
     def close(self) -> None:
-        raise NotImplementedError()
+        pass
+
+    @abc.abstractmethod
+    def _end_stream(self) -> None:
+        pass
 
     def _raise_unexpected_state(self, actual: int) -> None:
         expected_method = self._state_to_method_name(self._state)
         actual_method = self._state_to_method_name(actual)
-        raise ProtocolException(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
+        raise ProtocolError(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
 
     def _state_to_method_name(self, state: int) -> str:
         if state == 0:
@@ -288,10 +318,10 @@ class BenchmarkSmallRecordReaderBase(abc.ABC):
         if exc is None and self._state != 2:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
-                raise ProtocolException(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
+                raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
             else:
                 expected_method = self._state_to_method_name(self._state)
-                raise ProtocolException(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
+                raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
 
     @abc.abstractmethod
@@ -324,10 +354,10 @@ class BenchmarkSmallRecordReaderBase(abc.ABC):
         actual_method = self._state_to_method_name(actual)
         if self._state % 2 == 1:
             previous_method = self._state_to_method_name(self._state - 1)
-            raise ProtocolException(f"Received call to '{actual_method}' but the iterable returned by '{previous_method}' was not fully consumed.")
+            raise ProtocolError(f"Received call to '{actual_method}' but the iterable returned by '{previous_method}' was not fully consumed.")
         else:
             expected_method = self._state_to_method_name(self._state)
-            raise ProtocolException(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
+            raise ProtocolError(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
         	
     def _state_to_method_name(self, state: int) -> str:
         if state == 0:
@@ -347,15 +377,21 @@ class BenchmarkSmallRecordWithOptionalsWriterBase(abc.ABC):
         return self
 
     def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
+        if exc is None and self._state == 1:
+            try:
+                self._end_stream()
+                return
+            finally:
+                self.close()
         self.close()
-        if exc is None and self._state != 1:
-            expected_method = self._state_to_method_name(self._state)
-            raise ProtocolException(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+        if exc is None and self._state != 2:
+            expected_method = self._state_to_method_name((self._state + 1) & ~1)
+            raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
 
     def write_small_record(self, value: collections.abc.Iterable[SimpleEncodingCounters]) -> None:
         """Ordinal 0"""
 
-        if self._state != 0:
+        if self._state & ~1 != 0:
             self._raise_unexpected_state(0)
 
         self._write_small_record(value)
@@ -367,12 +403,16 @@ class BenchmarkSmallRecordWithOptionalsWriterBase(abc.ABC):
 
     @abc.abstractmethod
     def close(self) -> None:
-        raise NotImplementedError()
+        pass
+
+    @abc.abstractmethod
+    def _end_stream(self) -> None:
+        pass
 
     def _raise_unexpected_state(self, actual: int) -> None:
         expected_method = self._state_to_method_name(self._state)
         actual_method = self._state_to_method_name(actual)
-        raise ProtocolException(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
+        raise ProtocolError(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
 
     def _state_to_method_name(self, state: int) -> str:
         if state == 0:
@@ -396,10 +436,10 @@ class BenchmarkSmallRecordWithOptionalsReaderBase(abc.ABC):
         if exc is None and self._state != 2:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
-                raise ProtocolException(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
+                raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
             else:
                 expected_method = self._state_to_method_name(self._state)
-                raise ProtocolException(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
+                raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
 
     @abc.abstractmethod
@@ -432,10 +472,10 @@ class BenchmarkSmallRecordWithOptionalsReaderBase(abc.ABC):
         actual_method = self._state_to_method_name(actual)
         if self._state % 2 == 1:
             previous_method = self._state_to_method_name(self._state - 1)
-            raise ProtocolException(f"Received call to '{actual_method}' but the iterable returned by '{previous_method}' was not fully consumed.")
+            raise ProtocolError(f"Received call to '{actual_method}' but the iterable returned by '{previous_method}' was not fully consumed.")
         else:
             expected_method = self._state_to_method_name(self._state)
-            raise ProtocolException(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
+            raise ProtocolError(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
         	
     def _state_to_method_name(self, state: int) -> str:
         if state == 0:
@@ -455,10 +495,16 @@ class BenchmarkSimpleMrdWriterBase(abc.ABC):
         return self
 
     def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
+        if exc is None and self._state == 1:
+            try:
+                self._end_stream()
+                return
+            finally:
+                self.close()
         self.close()
-        if exc is None and self._state != 1:
-            expected_method = self._state_to_method_name(self._state)
-            raise ProtocolException(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+        if exc is None and self._state != 2:
+            expected_method = self._state_to_method_name((self._state + 1) & ~1)
+            raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
 
     def write_data(self, value: collections.abc.Iterable[typing.Union[
         tuple[typing.Literal["SimpleAcquisition"], SimpleAcquisition],
@@ -466,7 +512,7 @@ class BenchmarkSimpleMrdWriterBase(abc.ABC):
     ]]) -> None:
         """Ordinal 0"""
 
-        if self._state != 0:
+        if self._state & ~1 != 0:
             self._raise_unexpected_state(0)
 
         self._write_data(value)
@@ -481,12 +527,16 @@ class BenchmarkSimpleMrdWriterBase(abc.ABC):
 
     @abc.abstractmethod
     def close(self) -> None:
-        raise NotImplementedError()
+        pass
+
+    @abc.abstractmethod
+    def _end_stream(self) -> None:
+        pass
 
     def _raise_unexpected_state(self, actual: int) -> None:
         expected_method = self._state_to_method_name(self._state)
         actual_method = self._state_to_method_name(actual)
-        raise ProtocolException(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
+        raise ProtocolError(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
 
     def _state_to_method_name(self, state: int) -> str:
         if state == 0:
@@ -510,10 +560,10 @@ class BenchmarkSimpleMrdReaderBase(abc.ABC):
         if exc is None and self._state != 2:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
-                raise ProtocolException(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
+                raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
             else:
                 expected_method = self._state_to_method_name(self._state)
-                raise ProtocolException(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
+                raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
 
     @abc.abstractmethod
@@ -552,10 +602,10 @@ class BenchmarkSimpleMrdReaderBase(abc.ABC):
         actual_method = self._state_to_method_name(actual)
         if self._state % 2 == 1:
             previous_method = self._state_to_method_name(self._state - 1)
-            raise ProtocolException(f"Received call to '{actual_method}' but the iterable returned by '{previous_method}' was not fully consumed.")
+            raise ProtocolError(f"Received call to '{actual_method}' but the iterable returned by '{previous_method}' was not fully consumed.")
         else:
             expected_method = self._state_to_method_name(self._state)
-            raise ProtocolException(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
+            raise ProtocolError(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
         	
     def _state_to_method_name(self, state: int) -> str:
         if state == 0:
@@ -576,9 +626,9 @@ class ScalarsWriterBase(abc.ABC):
 
     def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
-        if exc is None and self._state != 2:
-            expected_method = self._state_to_method_name(self._state)
-            raise ProtocolException(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+        if exc is None and self._state != 4:
+            expected_method = self._state_to_method_name((self._state + 1) & ~1)
+            raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
 
     def write_int_32(self, value: yardl.Int32) -> None:
         """Ordinal 0"""
@@ -587,16 +637,16 @@ class ScalarsWriterBase(abc.ABC):
             self._raise_unexpected_state(0)
 
         self._write_int_32(value)
-        self._state = 1
+        self._state = 2
 
     def write_record(self, value: RecordWithPrimitives) -> None:
         """Ordinal 1"""
 
-        if self._state != 1:
-            self._raise_unexpected_state(1)
+        if self._state != 2:
+            self._raise_unexpected_state(2)
 
         self._write_record(value)
-        self._state = 2
+        self._state = 4
 
     @abc.abstractmethod
     def _write_int_32(self, value: yardl.Int32) -> None:
@@ -608,17 +658,21 @@ class ScalarsWriterBase(abc.ABC):
 
     @abc.abstractmethod
     def close(self) -> None:
-        raise NotImplementedError()
+        pass
+
+    @abc.abstractmethod
+    def _end_stream(self) -> None:
+        pass
 
     def _raise_unexpected_state(self, actual: int) -> None:
         expected_method = self._state_to_method_name(self._state)
         actual_method = self._state_to_method_name(actual)
-        raise ProtocolException(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
+        raise ProtocolError(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
 
     def _state_to_method_name(self, state: int) -> str:
         if state == 0:
             return 'write_int_32'
-        if state == 1:
+        if state == 2:
             return 'write_record'
         return "<unknown>"
 
@@ -639,10 +693,10 @@ class ScalarsReaderBase(abc.ABC):
         if exc is None and self._state != 4:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
-                raise ProtocolException(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
+                raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
             else:
                 expected_method = self._state_to_method_name(self._state)
-                raise ProtocolException(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
+                raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
 
     @abc.abstractmethod
@@ -690,10 +744,10 @@ class ScalarsReaderBase(abc.ABC):
         actual_method = self._state_to_method_name(actual)
         if self._state % 2 == 1:
             previous_method = self._state_to_method_name(self._state - 1)
-            raise ProtocolException(f"Received call to '{actual_method}' but the iterable returned by '{previous_method}' was not fully consumed.")
+            raise ProtocolError(f"Received call to '{actual_method}' but the iterable returned by '{previous_method}' was not fully consumed.")
         else:
             expected_method = self._state_to_method_name(self._state)
-            raise ProtocolException(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
+            raise ProtocolError(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
         	
     def _state_to_method_name(self, state: int) -> str:
         if state == 0:
@@ -716,9 +770,9 @@ class ScalarOptionalsWriterBase(abc.ABC):
 
     def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
-        if exc is None and self._state != 4:
-            expected_method = self._state_to_method_name(self._state)
-            raise ProtocolException(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+        if exc is None and self._state != 8:
+            expected_method = self._state_to_method_name((self._state + 1) & ~1)
+            raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
 
     def write_optional_int(self, value: typing.Optional[yardl.Int32]) -> None:
         """Ordinal 0"""
@@ -727,34 +781,34 @@ class ScalarOptionalsWriterBase(abc.ABC):
             self._raise_unexpected_state(0)
 
         self._write_optional_int(value)
-        self._state = 1
+        self._state = 2
 
     def write_optional_record(self, value: typing.Optional[SimpleRecord]) -> None:
         """Ordinal 1"""
 
-        if self._state != 1:
-            self._raise_unexpected_state(1)
+        if self._state != 2:
+            self._raise_unexpected_state(2)
 
         self._write_optional_record(value)
-        self._state = 2
+        self._state = 4
 
     def write_record_with_optional_fields(self, value: RecordWithOptionalFields) -> None:
         """Ordinal 2"""
 
-        if self._state != 2:
-            self._raise_unexpected_state(2)
+        if self._state != 4:
+            self._raise_unexpected_state(4)
 
         self._write_record_with_optional_fields(value)
-        self._state = 3
+        self._state = 6
 
     def write_optional_record_with_optional_fields(self, value: typing.Optional[RecordWithOptionalFields]) -> None:
         """Ordinal 3"""
 
-        if self._state != 3:
-            self._raise_unexpected_state(3)
+        if self._state != 6:
+            self._raise_unexpected_state(6)
 
         self._write_optional_record_with_optional_fields(value)
-        self._state = 4
+        self._state = 8
 
     @abc.abstractmethod
     def _write_optional_int(self, value: typing.Optional[yardl.Int32]) -> None:
@@ -774,21 +828,25 @@ class ScalarOptionalsWriterBase(abc.ABC):
 
     @abc.abstractmethod
     def close(self) -> None:
-        raise NotImplementedError()
+        pass
+
+    @abc.abstractmethod
+    def _end_stream(self) -> None:
+        pass
 
     def _raise_unexpected_state(self, actual: int) -> None:
         expected_method = self._state_to_method_name(self._state)
         actual_method = self._state_to_method_name(actual)
-        raise ProtocolException(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
+        raise ProtocolError(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
 
     def _state_to_method_name(self, state: int) -> str:
         if state == 0:
             return 'write_optional_int'
-        if state == 1:
-            return 'write_optional_record'
         if state == 2:
+            return 'write_optional_record'
+        if state == 4:
             return 'write_record_with_optional_fields'
-        if state == 3:
+        if state == 6:
             return 'write_optional_record_with_optional_fields'
         return "<unknown>"
 
@@ -809,10 +867,10 @@ class ScalarOptionalsReaderBase(abc.ABC):
         if exc is None and self._state != 8:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
-                raise ProtocolException(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
+                raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
             else:
                 expected_method = self._state_to_method_name(self._state)
-                raise ProtocolException(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
+                raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
 
     @abc.abstractmethod
@@ -890,10 +948,10 @@ class ScalarOptionalsReaderBase(abc.ABC):
         actual_method = self._state_to_method_name(actual)
         if self._state % 2 == 1:
             previous_method = self._state_to_method_name(self._state - 1)
-            raise ProtocolException(f"Received call to '{actual_method}' but the iterable returned by '{previous_method}' was not fully consumed.")
+            raise ProtocolError(f"Received call to '{actual_method}' but the iterable returned by '{previous_method}' was not fully consumed.")
         else:
             expected_method = self._state_to_method_name(self._state)
-            raise ProtocolException(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
+            raise ProtocolError(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
         	
     def _state_to_method_name(self, state: int) -> str:
         if state == 0:
@@ -920,9 +978,9 @@ class NestedRecordsWriterBase(abc.ABC):
 
     def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
-        if exc is None and self._state != 1:
-            expected_method = self._state_to_method_name(self._state)
-            raise ProtocolException(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+        if exc is None and self._state != 2:
+            expected_method = self._state_to_method_name((self._state + 1) & ~1)
+            raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
 
     def write_tuple_with_records(self, value: TupleWithRecords) -> None:
         """Ordinal 0"""
@@ -931,7 +989,7 @@ class NestedRecordsWriterBase(abc.ABC):
             self._raise_unexpected_state(0)
 
         self._write_tuple_with_records(value)
-        self._state = 1
+        self._state = 2
 
     @abc.abstractmethod
     def _write_tuple_with_records(self, value: TupleWithRecords) -> None:
@@ -939,12 +997,16 @@ class NestedRecordsWriterBase(abc.ABC):
 
     @abc.abstractmethod
     def close(self) -> None:
-        raise NotImplementedError()
+        pass
+
+    @abc.abstractmethod
+    def _end_stream(self) -> None:
+        pass
 
     def _raise_unexpected_state(self, actual: int) -> None:
         expected_method = self._state_to_method_name(self._state)
         actual_method = self._state_to_method_name(actual)
-        raise ProtocolException(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
+        raise ProtocolError(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
 
     def _state_to_method_name(self, state: int) -> str:
         if state == 0:
@@ -968,10 +1030,10 @@ class NestedRecordsReaderBase(abc.ABC):
         if exc is None and self._state != 2:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
-                raise ProtocolException(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
+                raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
             else:
                 expected_method = self._state_to_method_name(self._state)
-                raise ProtocolException(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
+                raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
 
     @abc.abstractmethod
@@ -1004,10 +1066,10 @@ class NestedRecordsReaderBase(abc.ABC):
         actual_method = self._state_to_method_name(actual)
         if self._state % 2 == 1:
             previous_method = self._state_to_method_name(self._state - 1)
-            raise ProtocolException(f"Received call to '{actual_method}' but the iterable returned by '{previous_method}' was not fully consumed.")
+            raise ProtocolError(f"Received call to '{actual_method}' but the iterable returned by '{previous_method}' was not fully consumed.")
         else:
             expected_method = self._state_to_method_name(self._state)
-            raise ProtocolException(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
+            raise ProtocolError(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
         	
     def _state_to_method_name(self, state: int) -> str:
         if state == 0:
@@ -1028,9 +1090,9 @@ class VlensWriterBase(abc.ABC):
 
     def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
-        if exc is None and self._state != 4:
-            expected_method = self._state_to_method_name(self._state)
-            raise ProtocolException(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+        if exc is None and self._state != 8:
+            expected_method = self._state_to_method_name((self._state + 1) & ~1)
+            raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
 
     def write_int_vector(self, value: list[yardl.Int32]) -> None:
         """Ordinal 0"""
@@ -1039,34 +1101,34 @@ class VlensWriterBase(abc.ABC):
             self._raise_unexpected_state(0)
 
         self._write_int_vector(value)
-        self._state = 1
+        self._state = 2
 
     def write_complex_vector(self, value: list[yardl.ComplexFloat]) -> None:
         """Ordinal 1"""
 
-        if self._state != 1:
-            self._raise_unexpected_state(1)
+        if self._state != 2:
+            self._raise_unexpected_state(2)
 
         self._write_complex_vector(value)
-        self._state = 2
+        self._state = 4
 
     def write_record_with_vlens(self, value: RecordWithVlens) -> None:
         """Ordinal 2"""
 
-        if self._state != 2:
-            self._raise_unexpected_state(2)
+        if self._state != 4:
+            self._raise_unexpected_state(4)
 
         self._write_record_with_vlens(value)
-        self._state = 3
+        self._state = 6
 
     def write_vlen_of_record_with_vlens(self, value: list[RecordWithVlens]) -> None:
         """Ordinal 3"""
 
-        if self._state != 3:
-            self._raise_unexpected_state(3)
+        if self._state != 6:
+            self._raise_unexpected_state(6)
 
         self._write_vlen_of_record_with_vlens(value)
-        self._state = 4
+        self._state = 8
 
     @abc.abstractmethod
     def _write_int_vector(self, value: list[yardl.Int32]) -> None:
@@ -1086,21 +1148,25 @@ class VlensWriterBase(abc.ABC):
 
     @abc.abstractmethod
     def close(self) -> None:
-        raise NotImplementedError()
+        pass
+
+    @abc.abstractmethod
+    def _end_stream(self) -> None:
+        pass
 
     def _raise_unexpected_state(self, actual: int) -> None:
         expected_method = self._state_to_method_name(self._state)
         actual_method = self._state_to_method_name(actual)
-        raise ProtocolException(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
+        raise ProtocolError(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
 
     def _state_to_method_name(self, state: int) -> str:
         if state == 0:
             return 'write_int_vector'
-        if state == 1:
-            return 'write_complex_vector'
         if state == 2:
+            return 'write_complex_vector'
+        if state == 4:
             return 'write_record_with_vlens'
-        if state == 3:
+        if state == 6:
             return 'write_vlen_of_record_with_vlens'
         return "<unknown>"
 
@@ -1121,10 +1187,10 @@ class VlensReaderBase(abc.ABC):
         if exc is None and self._state != 8:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
-                raise ProtocolException(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
+                raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
             else:
                 expected_method = self._state_to_method_name(self._state)
-                raise ProtocolException(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
+                raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
 
     @abc.abstractmethod
@@ -1202,10 +1268,10 @@ class VlensReaderBase(abc.ABC):
         actual_method = self._state_to_method_name(actual)
         if self._state % 2 == 1:
             previous_method = self._state_to_method_name(self._state - 1)
-            raise ProtocolException(f"Received call to '{actual_method}' but the iterable returned by '{previous_method}' was not fully consumed.")
+            raise ProtocolError(f"Received call to '{actual_method}' but the iterable returned by '{previous_method}' was not fully consumed.")
         else:
             expected_method = self._state_to_method_name(self._state)
-            raise ProtocolException(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
+            raise ProtocolError(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
         	
     def _state_to_method_name(self, state: int) -> str:
         if state == 0:
@@ -1232,9 +1298,9 @@ class StringsWriterBase(abc.ABC):
 
     def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
-        if exc is None and self._state != 2:
-            expected_method = self._state_to_method_name(self._state)
-            raise ProtocolException(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+        if exc is None and self._state != 4:
+            expected_method = self._state_to_method_name((self._state + 1) & ~1)
+            raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
 
     def write_single_string(self, value: str) -> None:
         """Ordinal 0"""
@@ -1243,16 +1309,16 @@ class StringsWriterBase(abc.ABC):
             self._raise_unexpected_state(0)
 
         self._write_single_string(value)
-        self._state = 1
+        self._state = 2
 
     def write_rec_with_string(self, value: RecordWithStrings) -> None:
         """Ordinal 1"""
 
-        if self._state != 1:
-            self._raise_unexpected_state(1)
+        if self._state != 2:
+            self._raise_unexpected_state(2)
 
         self._write_rec_with_string(value)
-        self._state = 2
+        self._state = 4
 
     @abc.abstractmethod
     def _write_single_string(self, value: str) -> None:
@@ -1264,17 +1330,21 @@ class StringsWriterBase(abc.ABC):
 
     @abc.abstractmethod
     def close(self) -> None:
-        raise NotImplementedError()
+        pass
+
+    @abc.abstractmethod
+    def _end_stream(self) -> None:
+        pass
 
     def _raise_unexpected_state(self, actual: int) -> None:
         expected_method = self._state_to_method_name(self._state)
         actual_method = self._state_to_method_name(actual)
-        raise ProtocolException(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
+        raise ProtocolError(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
 
     def _state_to_method_name(self, state: int) -> str:
         if state == 0:
             return 'write_single_string'
-        if state == 1:
+        if state == 2:
             return 'write_rec_with_string'
         return "<unknown>"
 
@@ -1295,10 +1365,10 @@ class StringsReaderBase(abc.ABC):
         if exc is None and self._state != 4:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
-                raise ProtocolException(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
+                raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
             else:
                 expected_method = self._state_to_method_name(self._state)
-                raise ProtocolException(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
+                raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
 
     @abc.abstractmethod
@@ -1346,10 +1416,10 @@ class StringsReaderBase(abc.ABC):
         actual_method = self._state_to_method_name(actual)
         if self._state % 2 == 1:
             previous_method = self._state_to_method_name(self._state - 1)
-            raise ProtocolException(f"Received call to '{actual_method}' but the iterable returned by '{previous_method}' was not fully consumed.")
+            raise ProtocolError(f"Received call to '{actual_method}' but the iterable returned by '{previous_method}' was not fully consumed.")
         else:
             expected_method = self._state_to_method_name(self._state)
-            raise ProtocolException(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
+            raise ProtocolError(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
         	
     def _state_to_method_name(self, state: int) -> str:
         if state == 0:
@@ -1372,9 +1442,9 @@ class OptionalVectorsWriterBase(abc.ABC):
 
     def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
-        if exc is None and self._state != 1:
-            expected_method = self._state_to_method_name(self._state)
-            raise ProtocolException(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+        if exc is None and self._state != 2:
+            expected_method = self._state_to_method_name((self._state + 1) & ~1)
+            raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
 
     def write_record_with_optional_vector(self, value: RecordWithOptionalVector) -> None:
         """Ordinal 0"""
@@ -1383,7 +1453,7 @@ class OptionalVectorsWriterBase(abc.ABC):
             self._raise_unexpected_state(0)
 
         self._write_record_with_optional_vector(value)
-        self._state = 1
+        self._state = 2
 
     @abc.abstractmethod
     def _write_record_with_optional_vector(self, value: RecordWithOptionalVector) -> None:
@@ -1391,12 +1461,16 @@ class OptionalVectorsWriterBase(abc.ABC):
 
     @abc.abstractmethod
     def close(self) -> None:
-        raise NotImplementedError()
+        pass
+
+    @abc.abstractmethod
+    def _end_stream(self) -> None:
+        pass
 
     def _raise_unexpected_state(self, actual: int) -> None:
         expected_method = self._state_to_method_name(self._state)
         actual_method = self._state_to_method_name(actual)
-        raise ProtocolException(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
+        raise ProtocolError(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
 
     def _state_to_method_name(self, state: int) -> str:
         if state == 0:
@@ -1420,10 +1494,10 @@ class OptionalVectorsReaderBase(abc.ABC):
         if exc is None and self._state != 2:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
-                raise ProtocolException(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
+                raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
             else:
                 expected_method = self._state_to_method_name(self._state)
-                raise ProtocolException(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
+                raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
 
     @abc.abstractmethod
@@ -1456,10 +1530,10 @@ class OptionalVectorsReaderBase(abc.ABC):
         actual_method = self._state_to_method_name(actual)
         if self._state % 2 == 1:
             previous_method = self._state_to_method_name(self._state - 1)
-            raise ProtocolException(f"Received call to '{actual_method}' but the iterable returned by '{previous_method}' was not fully consumed.")
+            raise ProtocolError(f"Received call to '{actual_method}' but the iterable returned by '{previous_method}' was not fully consumed.")
         else:
             expected_method = self._state_to_method_name(self._state)
-            raise ProtocolException(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
+            raise ProtocolError(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
         	
     def _state_to_method_name(self, state: int) -> str:
         if state == 0:
@@ -1480,9 +1554,9 @@ class FixedVectorsWriterBase(abc.ABC):
 
     def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
-        if exc is None and self._state != 4:
-            expected_method = self._state_to_method_name(self._state)
-            raise ProtocolException(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+        if exc is None and self._state != 8:
+            expected_method = self._state_to_method_name((self._state + 1) & ~1)
+            raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
 
     def write_fixed_int_vector(self, value: list[yardl.Int32]) -> None:
         """Ordinal 0"""
@@ -1491,34 +1565,34 @@ class FixedVectorsWriterBase(abc.ABC):
             self._raise_unexpected_state(0)
 
         self._write_fixed_int_vector(value)
-        self._state = 1
+        self._state = 2
 
     def write_fixed_simple_record_vector(self, value: list[SimpleRecord]) -> None:
         """Ordinal 1"""
 
-        if self._state != 1:
-            self._raise_unexpected_state(1)
+        if self._state != 2:
+            self._raise_unexpected_state(2)
 
         self._write_fixed_simple_record_vector(value)
-        self._state = 2
+        self._state = 4
 
     def write_fixed_record_with_vlens_vector(self, value: list[RecordWithVlens]) -> None:
         """Ordinal 2"""
 
-        if self._state != 2:
-            self._raise_unexpected_state(2)
+        if self._state != 4:
+            self._raise_unexpected_state(4)
 
         self._write_fixed_record_with_vlens_vector(value)
-        self._state = 3
+        self._state = 6
 
     def write_record_with_fixed_vectors(self, value: RecordWithFixedVectors) -> None:
         """Ordinal 3"""
 
-        if self._state != 3:
-            self._raise_unexpected_state(3)
+        if self._state != 6:
+            self._raise_unexpected_state(6)
 
         self._write_record_with_fixed_vectors(value)
-        self._state = 4
+        self._state = 8
 
     @abc.abstractmethod
     def _write_fixed_int_vector(self, value: list[yardl.Int32]) -> None:
@@ -1538,21 +1612,25 @@ class FixedVectorsWriterBase(abc.ABC):
 
     @abc.abstractmethod
     def close(self) -> None:
-        raise NotImplementedError()
+        pass
+
+    @abc.abstractmethod
+    def _end_stream(self) -> None:
+        pass
 
     def _raise_unexpected_state(self, actual: int) -> None:
         expected_method = self._state_to_method_name(self._state)
         actual_method = self._state_to_method_name(actual)
-        raise ProtocolException(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
+        raise ProtocolError(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
 
     def _state_to_method_name(self, state: int) -> str:
         if state == 0:
             return 'write_fixed_int_vector'
-        if state == 1:
-            return 'write_fixed_simple_record_vector'
         if state == 2:
+            return 'write_fixed_simple_record_vector'
+        if state == 4:
             return 'write_fixed_record_with_vlens_vector'
-        if state == 3:
+        if state == 6:
             return 'write_record_with_fixed_vectors'
         return "<unknown>"
 
@@ -1573,10 +1651,10 @@ class FixedVectorsReaderBase(abc.ABC):
         if exc is None and self._state != 8:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
-                raise ProtocolException(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
+                raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
             else:
                 expected_method = self._state_to_method_name(self._state)
-                raise ProtocolException(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
+                raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
 
     @abc.abstractmethod
@@ -1654,10 +1732,10 @@ class FixedVectorsReaderBase(abc.ABC):
         actual_method = self._state_to_method_name(actual)
         if self._state % 2 == 1:
             previous_method = self._state_to_method_name(self._state - 1)
-            raise ProtocolException(f"Received call to '{actual_method}' but the iterable returned by '{previous_method}' was not fully consumed.")
+            raise ProtocolError(f"Received call to '{actual_method}' but the iterable returned by '{previous_method}' was not fully consumed.")
         else:
             expected_method = self._state_to_method_name(self._state)
-            raise ProtocolException(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
+            raise ProtocolError(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
         	
     def _state_to_method_name(self, state: int) -> str:
         if state == 0:
@@ -1683,15 +1761,21 @@ class StreamsWriterBase(abc.ABC):
         return self
 
     def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
+        if exc is None and self._state == 7:
+            try:
+                self._end_stream()
+                return
+            finally:
+                self.close()
         self.close()
-        if exc is None and self._state != 4:
-            expected_method = self._state_to_method_name(self._state)
-            raise ProtocolException(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+        if exc is None and self._state != 8:
+            expected_method = self._state_to_method_name((self._state + 1) & ~1)
+            raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
 
     def write_int_data(self, value: collections.abc.Iterable[yardl.Int32]) -> None:
         """Ordinal 0"""
 
-        if self._state != 0:
+        if self._state & ~1 != 0:
             self._raise_unexpected_state(0)
 
         self._write_int_data(value)
@@ -1700,29 +1784,38 @@ class StreamsWriterBase(abc.ABC):
     def write_optional_int_data(self, value: collections.abc.Iterable[typing.Optional[yardl.Int32]]) -> None:
         """Ordinal 1"""
 
-        if self._state != 1:
-            self._raise_unexpected_state(1)
+        if self._state == 1:
+            self._end_stream()
+            self._state = 2
+        elif self._state & ~1 != 2:
+            self._raise_unexpected_state(2)
 
         self._write_optional_int_data(value)
-        self._state = 2
+        self._state = 3
 
     def write_record_with_optional_vector_data(self, value: collections.abc.Iterable[RecordWithOptionalVector]) -> None:
         """Ordinal 2"""
 
-        if self._state != 2:
-            self._raise_unexpected_state(2)
+        if self._state == 3:
+            self._end_stream()
+            self._state = 4
+        elif self._state & ~1 != 4:
+            self._raise_unexpected_state(4)
 
         self._write_record_with_optional_vector_data(value)
-        self._state = 3
+        self._state = 5
 
     def write_fixed_vector(self, value: collections.abc.Iterable[list[yardl.Int32]]) -> None:
         """Ordinal 3"""
 
-        if self._state != 3:
-            self._raise_unexpected_state(3)
+        if self._state == 5:
+            self._end_stream()
+            self._state = 6
+        elif self._state & ~1 != 6:
+            self._raise_unexpected_state(6)
 
         self._write_fixed_vector(value)
-        self._state = 4
+        self._state = 7
 
     @abc.abstractmethod
     def _write_int_data(self, value: collections.abc.Iterable[yardl.Int32]) -> None:
@@ -1742,21 +1835,25 @@ class StreamsWriterBase(abc.ABC):
 
     @abc.abstractmethod
     def close(self) -> None:
-        raise NotImplementedError()
+        pass
+
+    @abc.abstractmethod
+    def _end_stream(self) -> None:
+        pass
 
     def _raise_unexpected_state(self, actual: int) -> None:
         expected_method = self._state_to_method_name(self._state)
         actual_method = self._state_to_method_name(actual)
-        raise ProtocolException(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
+        raise ProtocolError(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
 
     def _state_to_method_name(self, state: int) -> str:
         if state == 0:
             return 'write_int_data'
-        if state == 1:
-            return 'write_optional_int_data'
         if state == 2:
+            return 'write_optional_int_data'
+        if state == 4:
             return 'write_record_with_optional_vector_data'
-        if state == 3:
+        if state == 6:
             return 'write_fixed_vector'
         return "<unknown>"
 
@@ -1777,10 +1874,10 @@ class StreamsReaderBase(abc.ABC):
         if exc is None and self._state != 8:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
-                raise ProtocolException(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
+                raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
             else:
                 expected_method = self._state_to_method_name(self._state)
-                raise ProtocolException(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
+                raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
 
     @abc.abstractmethod
@@ -1858,10 +1955,10 @@ class StreamsReaderBase(abc.ABC):
         actual_method = self._state_to_method_name(actual)
         if self._state % 2 == 1:
             previous_method = self._state_to_method_name(self._state - 1)
-            raise ProtocolException(f"Received call to '{actual_method}' but the iterable returned by '{previous_method}' was not fully consumed.")
+            raise ProtocolError(f"Received call to '{actual_method}' but the iterable returned by '{previous_method}' was not fully consumed.")
         else:
             expected_method = self._state_to_method_name(self._state)
-            raise ProtocolException(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
+            raise ProtocolError(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
         	
     def _state_to_method_name(self, state: int) -> str:
         if state == 0:
@@ -1888,9 +1985,9 @@ class FixedArraysWriterBase(abc.ABC):
 
     def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
-        if exc is None and self._state != 5:
-            expected_method = self._state_to_method_name(self._state)
-            raise ProtocolException(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+        if exc is None and self._state != 10:
+            expected_method = self._state_to_method_name((self._state + 1) & ~1)
+            raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
 
     def write_ints(self, value: npt.NDArray[np.int32]) -> None:
         """Ordinal 0"""
@@ -1899,43 +1996,43 @@ class FixedArraysWriterBase(abc.ABC):
             self._raise_unexpected_state(0)
 
         self._write_ints(value)
-        self._state = 1
+        self._state = 2
 
     def write_fixed_simple_record_array(self, value: npt.NDArray[np.void]) -> None:
         """Ordinal 1"""
 
-        if self._state != 1:
-            self._raise_unexpected_state(1)
+        if self._state != 2:
+            self._raise_unexpected_state(2)
 
         self._write_fixed_simple_record_array(value)
-        self._state = 2
+        self._state = 4
 
     def write_fixed_record_with_vlens_array(self, value: npt.NDArray[np.void]) -> None:
         """Ordinal 2"""
 
-        if self._state != 2:
-            self._raise_unexpected_state(2)
+        if self._state != 4:
+            self._raise_unexpected_state(4)
 
         self._write_fixed_record_with_vlens_array(value)
-        self._state = 3
+        self._state = 6
 
     def write_record_with_fixed_arrays(self, value: RecordWithFixedArrays) -> None:
         """Ordinal 3"""
 
-        if self._state != 3:
-            self._raise_unexpected_state(3)
+        if self._state != 6:
+            self._raise_unexpected_state(6)
 
         self._write_record_with_fixed_arrays(value)
-        self._state = 4
+        self._state = 8
 
     def write_named_array(self, value: NamedFixedNDArray) -> None:
         """Ordinal 4"""
 
-        if self._state != 4:
-            self._raise_unexpected_state(4)
+        if self._state != 8:
+            self._raise_unexpected_state(8)
 
         self._write_named_array(value)
-        self._state = 5
+        self._state = 10
 
     @abc.abstractmethod
     def _write_ints(self, value: npt.NDArray[np.int32]) -> None:
@@ -1959,23 +2056,27 @@ class FixedArraysWriterBase(abc.ABC):
 
     @abc.abstractmethod
     def close(self) -> None:
-        raise NotImplementedError()
+        pass
+
+    @abc.abstractmethod
+    def _end_stream(self) -> None:
+        pass
 
     def _raise_unexpected_state(self, actual: int) -> None:
         expected_method = self._state_to_method_name(self._state)
         actual_method = self._state_to_method_name(actual)
-        raise ProtocolException(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
+        raise ProtocolError(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
 
     def _state_to_method_name(self, state: int) -> str:
         if state == 0:
             return 'write_ints'
-        if state == 1:
-            return 'write_fixed_simple_record_array'
         if state == 2:
-            return 'write_fixed_record_with_vlens_array'
-        if state == 3:
-            return 'write_record_with_fixed_arrays'
+            return 'write_fixed_simple_record_array'
         if state == 4:
+            return 'write_fixed_record_with_vlens_array'
+        if state == 6:
+            return 'write_record_with_fixed_arrays'
+        if state == 8:
             return 'write_named_array'
         return "<unknown>"
 
@@ -1996,10 +2097,10 @@ class FixedArraysReaderBase(abc.ABC):
         if exc is None and self._state != 10:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
-                raise ProtocolException(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
+                raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
             else:
                 expected_method = self._state_to_method_name(self._state)
-                raise ProtocolException(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
+                raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
 
     @abc.abstractmethod
@@ -2092,10 +2193,10 @@ class FixedArraysReaderBase(abc.ABC):
         actual_method = self._state_to_method_name(actual)
         if self._state % 2 == 1:
             previous_method = self._state_to_method_name(self._state - 1)
-            raise ProtocolException(f"Received call to '{actual_method}' but the iterable returned by '{previous_method}' was not fully consumed.")
+            raise ProtocolError(f"Received call to '{actual_method}' but the iterable returned by '{previous_method}' was not fully consumed.")
         else:
             expected_method = self._state_to_method_name(self._state)
-            raise ProtocolException(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
+            raise ProtocolError(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
         	
     def _state_to_method_name(self, state: int) -> str:
         if state == 0:
@@ -2124,9 +2225,9 @@ class SubarraysWriterBase(abc.ABC):
 
     def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
-        if exc is None and self._state != 9:
-            expected_method = self._state_to_method_name(self._state)
-            raise ProtocolException(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+        if exc is None and self._state != 18:
+            expected_method = self._state_to_method_name((self._state + 1) & ~1)
+            raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
 
     def write_dynamic_with_fixed_int_subarray(self, value: npt.NDArray[np.int32]) -> None:
         """Ordinal 0"""
@@ -2135,79 +2236,79 @@ class SubarraysWriterBase(abc.ABC):
             self._raise_unexpected_state(0)
 
         self._write_dynamic_with_fixed_int_subarray(value)
-        self._state = 1
+        self._state = 2
 
     def write_dynamic_with_fixed_float_subarray(self, value: npt.NDArray[np.float32]) -> None:
         """Ordinal 1"""
 
-        if self._state != 1:
-            self._raise_unexpected_state(1)
+        if self._state != 2:
+            self._raise_unexpected_state(2)
 
         self._write_dynamic_with_fixed_float_subarray(value)
-        self._state = 2
+        self._state = 4
 
     def write_known_dim_count_with_fixed_int_subarray(self, value: npt.NDArray[np.int32]) -> None:
         """Ordinal 2"""
 
-        if self._state != 2:
-            self._raise_unexpected_state(2)
+        if self._state != 4:
+            self._raise_unexpected_state(4)
 
         self._write_known_dim_count_with_fixed_int_subarray(value)
-        self._state = 3
+        self._state = 6
 
     def write_known_dim_count_with_fixed_float_subarray(self, value: npt.NDArray[np.float32]) -> None:
         """Ordinal 3"""
 
-        if self._state != 3:
-            self._raise_unexpected_state(3)
+        if self._state != 6:
+            self._raise_unexpected_state(6)
 
         self._write_known_dim_count_with_fixed_float_subarray(value)
-        self._state = 4
+        self._state = 8
 
     def write_fixed_with_fixed_int_subarray(self, value: npt.NDArray[np.int32]) -> None:
         """Ordinal 4"""
 
-        if self._state != 4:
-            self._raise_unexpected_state(4)
+        if self._state != 8:
+            self._raise_unexpected_state(8)
 
         self._write_fixed_with_fixed_int_subarray(value)
-        self._state = 5
+        self._state = 10
 
     def write_fixed_with_fixed_float_subarray(self, value: npt.NDArray[np.float32]) -> None:
         """Ordinal 5"""
 
-        if self._state != 5:
-            self._raise_unexpected_state(5)
+        if self._state != 10:
+            self._raise_unexpected_state(10)
 
         self._write_fixed_with_fixed_float_subarray(value)
-        self._state = 6
+        self._state = 12
 
     def write_nested_subarray(self, value: npt.NDArray[np.int32]) -> None:
         """Ordinal 6"""
 
-        if self._state != 6:
-            self._raise_unexpected_state(6)
+        if self._state != 12:
+            self._raise_unexpected_state(12)
 
         self._write_nested_subarray(value)
-        self._state = 7
+        self._state = 14
 
     def write_dynamic_with_fixed_vector_subarray(self, value: npt.NDArray[np.int32]) -> None:
         """Ordinal 7"""
 
-        if self._state != 7:
-            self._raise_unexpected_state(7)
+        if self._state != 14:
+            self._raise_unexpected_state(14)
 
         self._write_dynamic_with_fixed_vector_subarray(value)
-        self._state = 8
+        self._state = 16
 
     def write_generic_subarray(self, value: Image[np.int32]) -> None:
         """Ordinal 8"""
 
-        if self._state != 8:
-            self._raise_unexpected_state(8)
+        if self._state != 16:
+            self._raise_unexpected_state(16)
 
         self._write_generic_subarray(value)
-        self._state = 9
+        self._state = 18
 
     @abc.abstractmethod
     def _write_dynamic_with_fixed_int_subarray(self, value: npt.NDArray[np.int32]) -> None:
@@ -2247,31 +2348,35 @@ class SubarraysWriterBase(abc.ABC):
 
     @abc.abstractmethod
     def close(self) -> None:
-        raise NotImplementedError()
+        pass
+
+    @abc.abstractmethod
+    def _end_stream(self) -> None:
+        pass
 
     def _raise_unexpected_state(self, actual: int) -> None:
         expected_method = self._state_to_method_name(self._state)
         actual_method = self._state_to_method_name(actual)
-        raise ProtocolException(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
+        raise ProtocolError(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
 
     def _state_to_method_name(self, state: int) -> str:
         if state == 0:
             return 'write_dynamic_with_fixed_int_subarray'
-        if state == 1:
-            return 'write_dynamic_with_fixed_float_subarray'
         if state == 2:
-            return 'write_known_dim_count_with_fixed_int_subarray'
-        if state == 3:
-            return 'write_known_dim_count_with_fixed_float_subarray'
+            return 'write_dynamic_with_fixed_float_subarray'
         if state == 4:
-            return 'write_fixed_with_fixed_int_subarray'
-        if state == 5:
-            return 'write_fixed_with_fixed_float_subarray'
+            return 'write_known_dim_count_with_fixed_int_subarray'
         if state == 6:
-            return 'write_nested_subarray'
-        if state == 7:
-            return 'write_dynamic_with_fixed_vector_subarray'
+            return 'write_known_dim_count_with_fixed_float_subarray'
         if state == 8:
+            return 'write_fixed_with_fixed_int_subarray'
+        if state == 10:
+            return 'write_fixed_with_fixed_float_subarray'
+        if state == 12:
+            return 'write_nested_subarray'
+        if state == 14:
+            return 'write_dynamic_with_fixed_vector_subarray'
+        if state == 16:
             return 'write_generic_subarray'
         return "<unknown>"
 
@@ -2292,10 +2397,10 @@ class SubarraysReaderBase(abc.ABC):
         if exc is None and self._state != 18:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
-                raise ProtocolException(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
+                raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
             else:
                 expected_method = self._state_to_method_name(self._state)
-                raise ProtocolException(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
+                raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
 
     @abc.abstractmethod
@@ -2448,10 +2553,10 @@ class SubarraysReaderBase(abc.ABC):
         actual_method = self._state_to_method_name(actual)
         if self._state % 2 == 1:
             previous_method = self._state_to_method_name(self._state - 1)
-            raise ProtocolException(f"Received call to '{actual_method}' but the iterable returned by '{previous_method}' was not fully consumed.")
+            raise ProtocolError(f"Received call to '{actual_method}' but the iterable returned by '{previous_method}' was not fully consumed.")
         else:
             expected_method = self._state_to_method_name(self._state)
-            raise ProtocolException(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
+            raise ProtocolError(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
         	
     def _state_to_method_name(self, state: int) -> str:
         if state == 0:
@@ -2488,9 +2593,9 @@ class SubarraysInRecordsWriterBase(abc.ABC):
 
     def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
-        if exc is None and self._state != 2:
-            expected_method = self._state_to_method_name(self._state)
-            raise ProtocolException(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+        if exc is None and self._state != 4:
+            expected_method = self._state_to_method_name((self._state + 1) & ~1)
+            raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
 
     def write_with_fixed_subarrays(self, value: npt.NDArray[np.void]) -> None:
         """Ordinal 0"""
@@ -2499,16 +2604,16 @@ class SubarraysInRecordsWriterBase(abc.ABC):
             self._raise_unexpected_state(0)
 
         self._write_with_fixed_subarrays(value)
-        self._state = 1
+        self._state = 2
 
     def write_with_vlen_subarrays(self, value: npt.NDArray[np.void]) -> None:
         """Ordinal 1"""
 
-        if self._state != 1:
-            self._raise_unexpected_state(1)
+        if self._state != 2:
+            self._raise_unexpected_state(2)
 
         self._write_with_vlen_subarrays(value)
-        self._state = 2
+        self._state = 4
 
     @abc.abstractmethod
     def _write_with_fixed_subarrays(self, value: npt.NDArray[np.void]) -> None:
@@ -2520,17 +2625,21 @@ class SubarraysInRecordsWriterBase(abc.ABC):
 
     @abc.abstractmethod
     def close(self) -> None:
-        raise NotImplementedError()
+        pass
+
+    @abc.abstractmethod
+    def _end_stream(self) -> None:
+        pass
 
     def _raise_unexpected_state(self, actual: int) -> None:
         expected_method = self._state_to_method_name(self._state)
         actual_method = self._state_to_method_name(actual)
-        raise ProtocolException(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
+        raise ProtocolError(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
 
     def _state_to_method_name(self, state: int) -> str:
         if state == 0:
             return 'write_with_fixed_subarrays'
-        if state == 1:
+        if state == 2:
             return 'write_with_vlen_subarrays'
         return "<unknown>"
 
@@ -2551,10 +2660,10 @@ class SubarraysInRecordsReaderBase(abc.ABC):
         if exc is None and self._state != 4:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
-                raise ProtocolException(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
+                raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
             else:
                 expected_method = self._state_to_method_name(self._state)
-                raise ProtocolException(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
+                raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
 
     @abc.abstractmethod
@@ -2602,10 +2711,10 @@ class SubarraysInRecordsReaderBase(abc.ABC):
         actual_method = self._state_to_method_name(actual)
         if self._state % 2 == 1:
             previous_method = self._state_to_method_name(self._state - 1)
-            raise ProtocolException(f"Received call to '{actual_method}' but the iterable returned by '{previous_method}' was not fully consumed.")
+            raise ProtocolError(f"Received call to '{actual_method}' but the iterable returned by '{previous_method}' was not fully consumed.")
         else:
             expected_method = self._state_to_method_name(self._state)
-            raise ProtocolException(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
+            raise ProtocolError(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
         	
     def _state_to_method_name(self, state: int) -> str:
         if state == 0:
@@ -2628,9 +2737,9 @@ class NDArraysWriterBase(abc.ABC):
 
     def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
-        if exc is None and self._state != 5:
-            expected_method = self._state_to_method_name(self._state)
-            raise ProtocolException(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+        if exc is None and self._state != 10:
+            expected_method = self._state_to_method_name((self._state + 1) & ~1)
+            raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
 
     def write_ints(self, value: npt.NDArray[np.int32]) -> None:
         """Ordinal 0"""
@@ -2639,43 +2748,43 @@ class NDArraysWriterBase(abc.ABC):
             self._raise_unexpected_state(0)
 
         self._write_ints(value)
-        self._state = 1
+        self._state = 2
 
     def write_simple_record_array(self, value: npt.NDArray[np.void]) -> None:
         """Ordinal 1"""
 
-        if self._state != 1:
-            self._raise_unexpected_state(1)
+        if self._state != 2:
+            self._raise_unexpected_state(2)
 
         self._write_simple_record_array(value)
-        self._state = 2
+        self._state = 4
 
     def write_record_with_vlens_array(self, value: npt.NDArray[np.void]) -> None:
         """Ordinal 2"""
 
-        if self._state != 2:
-            self._raise_unexpected_state(2)
+        if self._state != 4:
+            self._raise_unexpected_state(4)
 
         self._write_record_with_vlens_array(value)
-        self._state = 3
+        self._state = 6
 
     def write_record_with_nd_arrays(self, value: RecordWithNDArrays) -> None:
         """Ordinal 3"""
 
-        if self._state != 3:
-            self._raise_unexpected_state(3)
+        if self._state != 6:
+            self._raise_unexpected_state(6)
 
         self._write_record_with_nd_arrays(value)
-        self._state = 4
+        self._state = 8
 
     def write_named_array(self, value: NamedNDArray) -> None:
         """Ordinal 4"""
 
-        if self._state != 4:
-            self._raise_unexpected_state(4)
+        if self._state != 8:
+            self._raise_unexpected_state(8)
 
         self._write_named_array(value)
-        self._state = 5
+        self._state = 10
 
     @abc.abstractmethod
     def _write_ints(self, value: npt.NDArray[np.int32]) -> None:
@@ -2699,23 +2808,27 @@ class NDArraysWriterBase(abc.ABC):
 
     @abc.abstractmethod
     def close(self) -> None:
-        raise NotImplementedError()
+        pass
+
+    @abc.abstractmethod
+    def _end_stream(self) -> None:
+        pass
 
     def _raise_unexpected_state(self, actual: int) -> None:
         expected_method = self._state_to_method_name(self._state)
         actual_method = self._state_to_method_name(actual)
-        raise ProtocolException(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
+        raise ProtocolError(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
 
     def _state_to_method_name(self, state: int) -> str:
         if state == 0:
             return 'write_ints'
-        if state == 1:
-            return 'write_simple_record_array'
         if state == 2:
-            return 'write_record_with_vlens_array'
-        if state == 3:
-            return 'write_record_with_nd_arrays'
+            return 'write_simple_record_array'
         if state == 4:
+            return 'write_record_with_vlens_array'
+        if state == 6:
+            return 'write_record_with_nd_arrays'
+        if state == 8:
             return 'write_named_array'
         return "<unknown>"
 
@@ -2736,10 +2849,10 @@ class NDArraysReaderBase(abc.ABC):
         if exc is None and self._state != 10:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
-                raise ProtocolException(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
+                raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
             else:
                 expected_method = self._state_to_method_name(self._state)
-                raise ProtocolException(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
+                raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
 
     @abc.abstractmethod
@@ -2832,10 +2945,10 @@ class NDArraysReaderBase(abc.ABC):
         actual_method = self._state_to_method_name(actual)
         if self._state % 2 == 1:
             previous_method = self._state_to_method_name(self._state - 1)
-            raise ProtocolException(f"Received call to '{actual_method}' but the iterable returned by '{previous_method}' was not fully consumed.")
+            raise ProtocolError(f"Received call to '{actual_method}' but the iterable returned by '{previous_method}' was not fully consumed.")
         else:
             expected_method = self._state_to_method_name(self._state)
-            raise ProtocolException(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
+            raise ProtocolError(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
         	
     def _state_to_method_name(self, state: int) -> str:
         if state == 0:
@@ -2864,9 +2977,9 @@ class NDArraysSingleDimensionWriterBase(abc.ABC):
 
     def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
-        if exc is None and self._state != 4:
-            expected_method = self._state_to_method_name(self._state)
-            raise ProtocolException(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+        if exc is None and self._state != 8:
+            expected_method = self._state_to_method_name((self._state + 1) & ~1)
+            raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
 
     def write_ints(self, value: npt.NDArray[np.int32]) -> None:
         """Ordinal 0"""
@@ -2875,34 +2988,34 @@ class NDArraysSingleDimensionWriterBase(abc.ABC):
             self._raise_unexpected_state(0)
 
         self._write_ints(value)
-        self._state = 1
+        self._state = 2
 
     def write_simple_record_array(self, value: npt.NDArray[np.void]) -> None:
         """Ordinal 1"""
 
-        if self._state != 1:
-            self._raise_unexpected_state(1)
+        if self._state != 2:
+            self._raise_unexpected_state(2)
 
         self._write_simple_record_array(value)
-        self._state = 2
+        self._state = 4
 
     def write_record_with_vlens_array(self, value: npt.NDArray[np.void]) -> None:
         """Ordinal 2"""
 
-        if self._state != 2:
-            self._raise_unexpected_state(2)
+        if self._state != 4:
+            self._raise_unexpected_state(4)
 
         self._write_record_with_vlens_array(value)
-        self._state = 3
+        self._state = 6
 
     def write_record_with_nd_arrays(self, value: RecordWithNDArraysSingleDimension) -> None:
         """Ordinal 3"""
 
-        if self._state != 3:
-            self._raise_unexpected_state(3)
+        if self._state != 6:
+            self._raise_unexpected_state(6)
 
         self._write_record_with_nd_arrays(value)
-        self._state = 4
+        self._state = 8
 
     @abc.abstractmethod
     def _write_ints(self, value: npt.NDArray[np.int32]) -> None:
@@ -2922,21 +3035,25 @@ class NDArraysSingleDimensionWriterBase(abc.ABC):
 
     @abc.abstractmethod
     def close(self) -> None:
-        raise NotImplementedError()
+        pass
+
+    @abc.abstractmethod
+    def _end_stream(self) -> None:
+        pass
 
     def _raise_unexpected_state(self, actual: int) -> None:
         expected_method = self._state_to_method_name(self._state)
         actual_method = self._state_to_method_name(actual)
-        raise ProtocolException(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
+        raise ProtocolError(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
 
     def _state_to_method_name(self, state: int) -> str:
         if state == 0:
             return 'write_ints'
-        if state == 1:
-            return 'write_simple_record_array'
         if state == 2:
+            return 'write_simple_record_array'
+        if state == 4:
             return 'write_record_with_vlens_array'
-        if state == 3:
+        if state == 6:
             return 'write_record_with_nd_arrays'
         return "<unknown>"
 
@@ -2957,10 +3074,10 @@ class NDArraysSingleDimensionReaderBase(abc.ABC):
         if exc is None and self._state != 8:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
-                raise ProtocolException(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
+                raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
             else:
                 expected_method = self._state_to_method_name(self._state)
-                raise ProtocolException(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
+                raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
 
     @abc.abstractmethod
@@ -3038,10 +3155,10 @@ class NDArraysSingleDimensionReaderBase(abc.ABC):
         actual_method = self._state_to_method_name(actual)
         if self._state % 2 == 1:
             previous_method = self._state_to_method_name(self._state - 1)
-            raise ProtocolException(f"Received call to '{actual_method}' but the iterable returned by '{previous_method}' was not fully consumed.")
+            raise ProtocolError(f"Received call to '{actual_method}' but the iterable returned by '{previous_method}' was not fully consumed.")
         else:
             expected_method = self._state_to_method_name(self._state)
-            raise ProtocolException(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
+            raise ProtocolError(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
         	
     def _state_to_method_name(self, state: int) -> str:
         if state == 0:
@@ -3068,9 +3185,9 @@ class DynamicNDArraysWriterBase(abc.ABC):
 
     def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
-        if exc is None and self._state != 4:
-            expected_method = self._state_to_method_name(self._state)
-            raise ProtocolException(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+        if exc is None and self._state != 8:
+            expected_method = self._state_to_method_name((self._state + 1) & ~1)
+            raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
 
     def write_ints(self, value: npt.NDArray[np.int32]) -> None:
         """Ordinal 0"""
@@ -3079,34 +3196,34 @@ class DynamicNDArraysWriterBase(abc.ABC):
             self._raise_unexpected_state(0)
 
         self._write_ints(value)
-        self._state = 1
+        self._state = 2
 
     def write_simple_record_array(self, value: npt.NDArray[np.void]) -> None:
         """Ordinal 1"""
 
-        if self._state != 1:
-            self._raise_unexpected_state(1)
+        if self._state != 2:
+            self._raise_unexpected_state(2)
 
         self._write_simple_record_array(value)
-        self._state = 2
+        self._state = 4
 
     def write_record_with_vlens_array(self, value: npt.NDArray[np.void]) -> None:
         """Ordinal 2"""
 
-        if self._state != 2:
-            self._raise_unexpected_state(2)
+        if self._state != 4:
+            self._raise_unexpected_state(4)
 
         self._write_record_with_vlens_array(value)
-        self._state = 3
+        self._state = 6
 
     def write_record_with_dynamic_nd_arrays(self, value: RecordWithDynamicNDArrays) -> None:
         """Ordinal 3"""
 
-        if self._state != 3:
-            self._raise_unexpected_state(3)
+        if self._state != 6:
+            self._raise_unexpected_state(6)
 
         self._write_record_with_dynamic_nd_arrays(value)
-        self._state = 4
+        self._state = 8
 
     @abc.abstractmethod
     def _write_ints(self, value: npt.NDArray[np.int32]) -> None:
@@ -3126,21 +3243,25 @@ class DynamicNDArraysWriterBase(abc.ABC):
 
     @abc.abstractmethod
     def close(self) -> None:
-        raise NotImplementedError()
+        pass
+
+    @abc.abstractmethod
+    def _end_stream(self) -> None:
+        pass
 
     def _raise_unexpected_state(self, actual: int) -> None:
         expected_method = self._state_to_method_name(self._state)
         actual_method = self._state_to_method_name(actual)
-        raise ProtocolException(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
+        raise ProtocolError(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
 
     def _state_to_method_name(self, state: int) -> str:
         if state == 0:
             return 'write_ints'
-        if state == 1:
-            return 'write_simple_record_array'
         if state == 2:
+            return 'write_simple_record_array'
+        if state == 4:
             return 'write_record_with_vlens_array'
-        if state == 3:
+        if state == 6:
             return 'write_record_with_dynamic_nd_arrays'
         return "<unknown>"
 
@@ -3161,10 +3282,10 @@ class DynamicNDArraysReaderBase(abc.ABC):
         if exc is None and self._state != 8:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
-                raise ProtocolException(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
+                raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
             else:
                 expected_method = self._state_to_method_name(self._state)
-                raise ProtocolException(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
+                raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
 
     @abc.abstractmethod
@@ -3242,10 +3363,10 @@ class DynamicNDArraysReaderBase(abc.ABC):
         actual_method = self._state_to_method_name(actual)
         if self._state % 2 == 1:
             previous_method = self._state_to_method_name(self._state - 1)
-            raise ProtocolException(f"Received call to '{actual_method}' but the iterable returned by '{previous_method}' was not fully consumed.")
+            raise ProtocolError(f"Received call to '{actual_method}' but the iterable returned by '{previous_method}' was not fully consumed.")
         else:
             expected_method = self._state_to_method_name(self._state)
-            raise ProtocolException(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
+            raise ProtocolError(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
         	
     def _state_to_method_name(self, state: int) -> str:
         if state == 0:
@@ -3272,9 +3393,9 @@ class MapsWriterBase(abc.ABC):
 
     def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
-        if exc is None and self._state != 3:
-            expected_method = self._state_to_method_name(self._state)
-            raise ProtocolException(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+        if exc is None and self._state != 6:
+            expected_method = self._state_to_method_name((self._state + 1) & ~1)
+            raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
 
     def write_string_to_int(self, value: dict[str, yardl.Int32]) -> None:
         """Ordinal 0"""
@@ -3283,7 +3404,7 @@ class MapsWriterBase(abc.ABC):
             self._raise_unexpected_state(0)
 
         self._write_string_to_int(value)
-        self._state = 1
+        self._state = 2
 
     def write_string_to_union(self, value: dict[str, typing.Union[
         tuple[typing.Literal["string"], str],
@@ -3291,20 +3412,20 @@ class MapsWriterBase(abc.ABC):
     ]]) -> None:
         """Ordinal 1"""
 
-        if self._state != 1:
-            self._raise_unexpected_state(1)
+        if self._state != 2:
+            self._raise_unexpected_state(2)
 
         self._write_string_to_union(value)
-        self._state = 2
+        self._state = 4
 
     def write_aliased_generic(self, value: AliasedMap[str, yardl.Int32]) -> None:
         """Ordinal 2"""
 
-        if self._state != 2:
-            self._raise_unexpected_state(2)
+        if self._state != 4:
+            self._raise_unexpected_state(4)
 
         self._write_aliased_generic(value)
-        self._state = 3
+        self._state = 6
 
     @abc.abstractmethod
     def _write_string_to_int(self, value: dict[str, yardl.Int32]) -> None:
@@ -3323,19 +3444,23 @@ class MapsWriterBase(abc.ABC):
 
     @abc.abstractmethod
     def close(self) -> None:
-        raise NotImplementedError()
+        pass
+
+    @abc.abstractmethod
+    def _end_stream(self) -> None:
+        pass
 
     def _raise_unexpected_state(self, actual: int) -> None:
         expected_method = self._state_to_method_name(self._state)
         actual_method = self._state_to_method_name(actual)
-        raise ProtocolException(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
+        raise ProtocolError(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
 
     def _state_to_method_name(self, state: int) -> str:
         if state == 0:
             return 'write_string_to_int'
-        if state == 1:
-            return 'write_string_to_union'
         if state == 2:
+            return 'write_string_to_union'
+        if state == 4:
             return 'write_aliased_generic'
         return "<unknown>"
 
@@ -3356,10 +3481,10 @@ class MapsReaderBase(abc.ABC):
         if exc is None and self._state != 6:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
-                raise ProtocolException(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
+                raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
             else:
                 expected_method = self._state_to_method_name(self._state)
-                raise ProtocolException(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
+                raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
 
     @abc.abstractmethod
@@ -3428,10 +3553,10 @@ class MapsReaderBase(abc.ABC):
         actual_method = self._state_to_method_name(actual)
         if self._state % 2 == 1:
             previous_method = self._state_to_method_name(self._state - 1)
-            raise ProtocolException(f"Received call to '{actual_method}' but the iterable returned by '{previous_method}' was not fully consumed.")
+            raise ProtocolError(f"Received call to '{actual_method}' but the iterable returned by '{previous_method}' was not fully consumed.")
         else:
             expected_method = self._state_to_method_name(self._state)
-            raise ProtocolException(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
+            raise ProtocolError(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
         	
     def _state_to_method_name(self, state: int) -> str:
         if state == 0:
@@ -3456,9 +3581,9 @@ class UnionsWriterBase(abc.ABC):
 
     def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
-        if exc is None and self._state != 4:
-            expected_method = self._state_to_method_name(self._state)
-            raise ProtocolException(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+        if exc is None and self._state != 8:
+            expected_method = self._state_to_method_name((self._state + 1) & ~1)
+            raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
 
     def write_int_or_simple_record(self, value: typing.Union[
         tuple[typing.Literal["int32"], yardl.Int32],
@@ -3470,7 +3595,7 @@ class UnionsWriterBase(abc.ABC):
             self._raise_unexpected_state(0)
 
         self._write_int_or_simple_record(value)
-        self._state = 1
+        self._state = 2
 
     def write_int_or_record_with_vlens(self, value: typing.Union[
         tuple[typing.Literal["int32"], yardl.Int32],
@@ -3478,11 +3603,11 @@ class UnionsWriterBase(abc.ABC):
     ]) -> None:
         """Ordinal 1"""
 
-        if self._state != 1:
-            self._raise_unexpected_state(1)
+        if self._state != 2:
+            self._raise_unexpected_state(2)
 
         self._write_int_or_record_with_vlens(value)
-        self._state = 2
+        self._state = 4
 
     def write_monosotate_or_int_or_simple_record(self, value: typing.Union[
         tuple[typing.Literal["int32"], yardl.Int32],
@@ -3491,20 +3616,20 @@ class UnionsWriterBase(abc.ABC):
     ]) -> None:
         """Ordinal 2"""
 
-        if self._state != 2:
-            self._raise_unexpected_state(2)
+        if self._state != 4:
+            self._raise_unexpected_state(4)
 
         self._write_monosotate_or_int_or_simple_record(value)
-        self._state = 3
+        self._state = 6
 
     def write_record_with_unions(self, value: RecordWithUnions) -> None:
         """Ordinal 3"""
 
-        if self._state != 3:
-            self._raise_unexpected_state(3)
+        if self._state != 6:
+            self._raise_unexpected_state(6)
 
         self._write_record_with_unions(value)
-        self._state = 4
+        self._state = 8
 
     @abc.abstractmethod
     def _write_int_or_simple_record(self, value: typing.Union[
@@ -3534,21 +3659,25 @@ class UnionsWriterBase(abc.ABC):
 
     @abc.abstractmethod
     def close(self) -> None:
-        raise NotImplementedError()
+        pass
+
+    @abc.abstractmethod
+    def _end_stream(self) -> None:
+        pass
 
     def _raise_unexpected_state(self, actual: int) -> None:
         expected_method = self._state_to_method_name(self._state)
         actual_method = self._state_to_method_name(actual)
-        raise ProtocolException(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
+        raise ProtocolError(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
 
     def _state_to_method_name(self, state: int) -> str:
         if state == 0:
             return 'write_int_or_simple_record'
-        if state == 1:
-            return 'write_int_or_record_with_vlens'
         if state == 2:
+            return 'write_int_or_record_with_vlens'
+        if state == 4:
             return 'write_monosotate_or_int_or_simple_record'
-        if state == 3:
+        if state == 6:
             return 'write_record_with_unions'
         return "<unknown>"
 
@@ -3569,10 +3698,10 @@ class UnionsReaderBase(abc.ABC):
         if exc is None and self._state != 8:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
-                raise ProtocolException(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
+                raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
             else:
                 expected_method = self._state_to_method_name(self._state)
-                raise ProtocolException(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
+                raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
 
     @abc.abstractmethod
@@ -3670,10 +3799,10 @@ class UnionsReaderBase(abc.ABC):
         actual_method = self._state_to_method_name(actual)
         if self._state % 2 == 1:
             previous_method = self._state_to_method_name(self._state - 1)
-            raise ProtocolException(f"Received call to '{actual_method}' but the iterable returned by '{previous_method}' was not fully consumed.")
+            raise ProtocolError(f"Received call to '{actual_method}' but the iterable returned by '{previous_method}' was not fully consumed.")
         else:
             expected_method = self._state_to_method_name(self._state)
-            raise ProtocolException(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
+            raise ProtocolError(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
         	
     def _state_to_method_name(self, state: int) -> str:
         if state == 0:
@@ -3699,10 +3828,16 @@ class StreamsOfUnionsWriterBase(abc.ABC):
         return self
 
     def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
+        if exc is None and self._state == 3:
+            try:
+                self._end_stream()
+                return
+            finally:
+                self.close()
         self.close()
-        if exc is None and self._state != 2:
-            expected_method = self._state_to_method_name(self._state)
-            raise ProtocolException(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+        if exc is None and self._state != 4:
+            expected_method = self._state_to_method_name((self._state + 1) & ~1)
+            raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
 
     def write_int_or_simple_record(self, value: collections.abc.Iterable[typing.Union[
         tuple[typing.Literal["int32"], yardl.Int32],
@@ -3710,7 +3845,7 @@ class StreamsOfUnionsWriterBase(abc.ABC):
     ]]) -> None:
         """Ordinal 0"""
 
-        if self._state != 0:
+        if self._state & ~1 != 0:
             self._raise_unexpected_state(0)
 
         self._write_int_or_simple_record(value)
@@ -3723,11 +3858,14 @@ class StreamsOfUnionsWriterBase(abc.ABC):
     ]]) -> None:
         """Ordinal 1"""
 
-        if self._state != 1:
-            self._raise_unexpected_state(1)
+        if self._state == 1:
+            self._end_stream()
+            self._state = 2
+        elif self._state & ~1 != 2:
+            self._raise_unexpected_state(2)
 
         self._write_nullable_int_or_simple_record(value)
-        self._state = 2
+        self._state = 3
 
     @abc.abstractmethod
     def _write_int_or_simple_record(self, value: collections.abc.Iterable[typing.Union[
@@ -3746,17 +3884,21 @@ class StreamsOfUnionsWriterBase(abc.ABC):
 
     @abc.abstractmethod
     def close(self) -> None:
-        raise NotImplementedError()
+        pass
+
+    @abc.abstractmethod
+    def _end_stream(self) -> None:
+        pass
 
     def _raise_unexpected_state(self, actual: int) -> None:
         expected_method = self._state_to_method_name(self._state)
         actual_method = self._state_to_method_name(actual)
-        raise ProtocolException(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
+        raise ProtocolError(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
 
     def _state_to_method_name(self, state: int) -> str:
         if state == 0:
             return 'write_int_or_simple_record'
-        if state == 1:
+        if state == 2:
             return 'write_nullable_int_or_simple_record'
         return "<unknown>"
 
@@ -3777,10 +3919,10 @@ class StreamsOfUnionsReaderBase(abc.ABC):
         if exc is None and self._state != 4:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
-                raise ProtocolException(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
+                raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
             else:
                 expected_method = self._state_to_method_name(self._state)
-                raise ProtocolException(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
+                raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
 
     @abc.abstractmethod
@@ -3842,10 +3984,10 @@ class StreamsOfUnionsReaderBase(abc.ABC):
         actual_method = self._state_to_method_name(actual)
         if self._state % 2 == 1:
             previous_method = self._state_to_method_name(self._state - 1)
-            raise ProtocolException(f"Received call to '{actual_method}' but the iterable returned by '{previous_method}' was not fully consumed.")
+            raise ProtocolError(f"Received call to '{actual_method}' but the iterable returned by '{previous_method}' was not fully consumed.")
         else:
             expected_method = self._state_to_method_name(self._state)
-            raise ProtocolException(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
+            raise ProtocolError(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
         	
     def _state_to_method_name(self, state: int) -> str:
         if state == 0:
@@ -3868,9 +4010,9 @@ class EnumsWriterBase(abc.ABC):
 
     def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
-        if exc is None and self._state != 3:
-            expected_method = self._state_to_method_name(self._state)
-            raise ProtocolException(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+        if exc is None and self._state != 6:
+            expected_method = self._state_to_method_name((self._state + 1) & ~1)
+            raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
 
     def write_single(self, value: Fruits) -> None:
         """Ordinal 0"""
@@ -3879,25 +4021,25 @@ class EnumsWriterBase(abc.ABC):
             self._raise_unexpected_state(0)
 
         self._write_single(value)
-        self._state = 1
+        self._state = 2
 
     def write_vec(self, value: list[Fruits]) -> None:
         """Ordinal 1"""
 
-        if self._state != 1:
-            self._raise_unexpected_state(1)
+        if self._state != 2:
+            self._raise_unexpected_state(2)
 
         self._write_vec(value)
-        self._state = 2
+        self._state = 4
 
     def write_size(self, value: SizeBasedEnum) -> None:
         """Ordinal 2"""
 
-        if self._state != 2:
-            self._raise_unexpected_state(2)
+        if self._state != 4:
+            self._raise_unexpected_state(4)
 
         self._write_size(value)
-        self._state = 3
+        self._state = 6
 
     @abc.abstractmethod
     def _write_single(self, value: Fruits) -> None:
@@ -3913,19 +4055,23 @@ class EnumsWriterBase(abc.ABC):
 
     @abc.abstractmethod
     def close(self) -> None:
-        raise NotImplementedError()
+        pass
+
+    @abc.abstractmethod
+    def _end_stream(self) -> None:
+        pass
 
     def _raise_unexpected_state(self, actual: int) -> None:
         expected_method = self._state_to_method_name(self._state)
         actual_method = self._state_to_method_name(actual)
-        raise ProtocolException(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
+        raise ProtocolError(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
 
     def _state_to_method_name(self, state: int) -> str:
         if state == 0:
             return 'write_single'
-        if state == 1:
-            return 'write_vec'
         if state == 2:
+            return 'write_vec'
+        if state == 4:
             return 'write_size'
         return "<unknown>"
 
@@ -3946,10 +4092,10 @@ class EnumsReaderBase(abc.ABC):
         if exc is None and self._state != 6:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
-                raise ProtocolException(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
+                raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
             else:
                 expected_method = self._state_to_method_name(self._state)
-                raise ProtocolException(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
+                raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
 
     @abc.abstractmethod
@@ -4012,10 +4158,10 @@ class EnumsReaderBase(abc.ABC):
         actual_method = self._state_to_method_name(actual)
         if self._state % 2 == 1:
             previous_method = self._state_to_method_name(self._state - 1)
-            raise ProtocolException(f"Received call to '{actual_method}' but the iterable returned by '{previous_method}' was not fully consumed.")
+            raise ProtocolError(f"Received call to '{actual_method}' but the iterable returned by '{previous_method}' was not fully consumed.")
         else:
             expected_method = self._state_to_method_name(self._state)
-            raise ProtocolException(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
+            raise ProtocolError(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
         	
     def _state_to_method_name(self, state: int) -> str:
         if state == 0:
@@ -4039,15 +4185,21 @@ class FlagsWriterBase(abc.ABC):
         return self
 
     def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
+        if exc is None and self._state == 3:
+            try:
+                self._end_stream()
+                return
+            finally:
+                self.close()
         self.close()
-        if exc is None and self._state != 2:
-            expected_method = self._state_to_method_name(self._state)
-            raise ProtocolException(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+        if exc is None and self._state != 4:
+            expected_method = self._state_to_method_name((self._state + 1) & ~1)
+            raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
 
     def write_days(self, value: collections.abc.Iterable[DaysOfWeek]) -> None:
         """Ordinal 0"""
 
-        if self._state != 0:
+        if self._state & ~1 != 0:
             self._raise_unexpected_state(0)
 
         self._write_days(value)
@@ -4056,11 +4208,14 @@ class FlagsWriterBase(abc.ABC):
     def write_formats(self, value: collections.abc.Iterable[TextFormat]) -> None:
         """Ordinal 1"""
 
-        if self._state != 1:
-            self._raise_unexpected_state(1)
+        if self._state == 1:
+            self._end_stream()
+            self._state = 2
+        elif self._state & ~1 != 2:
+            self._raise_unexpected_state(2)
 
         self._write_formats(value)
-        self._state = 2
+        self._state = 3
 
     @abc.abstractmethod
     def _write_days(self, value: collections.abc.Iterable[DaysOfWeek]) -> None:
@@ -4072,17 +4227,21 @@ class FlagsWriterBase(abc.ABC):
 
     @abc.abstractmethod
     def close(self) -> None:
-        raise NotImplementedError()
+        pass
+
+    @abc.abstractmethod
+    def _end_stream(self) -> None:
+        pass
 
     def _raise_unexpected_state(self, actual: int) -> None:
         expected_method = self._state_to_method_name(self._state)
         actual_method = self._state_to_method_name(actual)
-        raise ProtocolException(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
+        raise ProtocolError(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
 
     def _state_to_method_name(self, state: int) -> str:
         if state == 0:
             return 'write_days'
-        if state == 1:
+        if state == 2:
             return 'write_formats'
         return "<unknown>"
 
@@ -4103,10 +4262,10 @@ class FlagsReaderBase(abc.ABC):
         if exc is None and self._state != 4:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
-                raise ProtocolException(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
+                raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
             else:
                 expected_method = self._state_to_method_name(self._state)
-                raise ProtocolException(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
+                raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
 
     @abc.abstractmethod
@@ -4154,10 +4313,10 @@ class FlagsReaderBase(abc.ABC):
         actual_method = self._state_to_method_name(actual)
         if self._state % 2 == 1:
             previous_method = self._state_to_method_name(self._state - 1)
-            raise ProtocolException(f"Received call to '{actual_method}' but the iterable returned by '{previous_method}' was not fully consumed.")
+            raise ProtocolError(f"Received call to '{actual_method}' but the iterable returned by '{previous_method}' was not fully consumed.")
         else:
             expected_method = self._state_to_method_name(self._state)
-            raise ProtocolException(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
+            raise ProtocolError(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
         	
     def _state_to_method_name(self, state: int) -> str:
         if state == 0:
@@ -4180,9 +4339,9 @@ class StateTestWriterBase(abc.ABC):
 
     def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
-        if exc is None and self._state != 3:
-            expected_method = self._state_to_method_name(self._state)
-            raise ProtocolException(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+        if exc is None and self._state != 6:
+            expected_method = self._state_to_method_name((self._state + 1) & ~1)
+            raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
 
     def write_an_int(self, value: yardl.Int32) -> None:
         """Ordinal 0"""
@@ -4191,25 +4350,28 @@ class StateTestWriterBase(abc.ABC):
             self._raise_unexpected_state(0)
 
         self._write_an_int(value)
-        self._state = 1
+        self._state = 2
 
     def write_a_stream(self, value: collections.abc.Iterable[yardl.Int32]) -> None:
         """Ordinal 1"""
 
-        if self._state != 1:
-            self._raise_unexpected_state(1)
+        if self._state & ~1 != 2:
+            self._raise_unexpected_state(2)
 
         self._write_a_stream(value)
-        self._state = 2
+        self._state = 3
 
     def write_another_int(self, value: yardl.Int32) -> None:
         """Ordinal 2"""
 
-        if self._state != 2:
-            self._raise_unexpected_state(2)
+        if self._state == 3:
+            self._end_stream()
+            self._state = 4
+        elif self._state != 4:
+            self._raise_unexpected_state(4)
 
         self._write_another_int(value)
-        self._state = 3
+        self._state = 6
 
     @abc.abstractmethod
     def _write_an_int(self, value: yardl.Int32) -> None:
@@ -4225,19 +4387,23 @@ class StateTestWriterBase(abc.ABC):
 
     @abc.abstractmethod
     def close(self) -> None:
-        raise NotImplementedError()
+        pass
+
+    @abc.abstractmethod
+    def _end_stream(self) -> None:
+        pass
 
     def _raise_unexpected_state(self, actual: int) -> None:
         expected_method = self._state_to_method_name(self._state)
         actual_method = self._state_to_method_name(actual)
-        raise ProtocolException(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
+        raise ProtocolError(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
 
     def _state_to_method_name(self, state: int) -> str:
         if state == 0:
             return 'write_an_int'
-        if state == 1:
-            return 'write_a_stream'
         if state == 2:
+            return 'write_a_stream'
+        if state == 4:
             return 'write_another_int'
         return "<unknown>"
 
@@ -4258,10 +4424,10 @@ class StateTestReaderBase(abc.ABC):
         if exc is None and self._state != 6:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
-                raise ProtocolException(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
+                raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
             else:
                 expected_method = self._state_to_method_name(self._state)
-                raise ProtocolException(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
+                raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
 
     @abc.abstractmethod
@@ -4324,10 +4490,10 @@ class StateTestReaderBase(abc.ABC):
         actual_method = self._state_to_method_name(actual)
         if self._state % 2 == 1:
             previous_method = self._state_to_method_name(self._state - 1)
-            raise ProtocolException(f"Received call to '{actual_method}' but the iterable returned by '{previous_method}' was not fully consumed.")
+            raise ProtocolError(f"Received call to '{actual_method}' but the iterable returned by '{previous_method}' was not fully consumed.")
         else:
             expected_method = self._state_to_method_name(self._state)
-            raise ProtocolException(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
+            raise ProtocolError(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
         	
     def _state_to_method_name(self, state: int) -> str:
         if state == 0:
@@ -4351,10 +4517,16 @@ class SimpleGenericsWriterBase(abc.ABC):
         return self
 
     def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
+        if exc is None and self._state == 17:
+            try:
+                self._end_stream()
+                return
+            finally:
+                self.close()
         self.close()
-        if exc is None and self._state != 9:
-            expected_method = self._state_to_method_name(self._state)
-            raise ProtocolException(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+        if exc is None and self._state != 18:
+            expected_method = self._state_to_method_name((self._state + 1) & ~1)
+            raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
 
     def write_float_image(self, value: Image[np.float32]) -> None:
         """Ordinal 0"""
@@ -4363,70 +4535,70 @@ class SimpleGenericsWriterBase(abc.ABC):
             self._raise_unexpected_state(0)
 
         self._write_float_image(value)
-        self._state = 1
+        self._state = 2
 
     def write_int_image(self, value: Image[np.int32]) -> None:
         """Ordinal 1"""
 
-        if self._state != 1:
-            self._raise_unexpected_state(1)
+        if self._state != 2:
+            self._raise_unexpected_state(2)
 
         self._write_int_image(value)
-        self._state = 2
+        self._state = 4
 
     def write_int_image_alternate_syntax(self, value: Image[np.int32]) -> None:
         """Ordinal 2"""
 
-        if self._state != 2:
-            self._raise_unexpected_state(2)
+        if self._state != 4:
+            self._raise_unexpected_state(4)
 
         self._write_int_image_alternate_syntax(value)
-        self._state = 3
+        self._state = 6
 
     def write_string_image(self, value: Image[np.object_]) -> None:
         """Ordinal 3"""
 
-        if self._state != 3:
-            self._raise_unexpected_state(3)
+        if self._state != 6:
+            self._raise_unexpected_state(6)
 
         self._write_string_image(value)
-        self._state = 4
+        self._state = 8
 
     def write_int_float_tuple(self, value: MyTuple[yardl.Int32, yardl.Float32]) -> None:
         """Ordinal 4"""
 
-        if self._state != 4:
-            self._raise_unexpected_state(4)
+        if self._state != 8:
+            self._raise_unexpected_state(8)
 
         self._write_int_float_tuple(value)
-        self._state = 5
+        self._state = 10
 
     def write_float_float_tuple(self, value: MyTuple[yardl.Float32, yardl.Float32]) -> None:
         """Ordinal 5"""
 
-        if self._state != 5:
-            self._raise_unexpected_state(5)
+        if self._state != 10:
+            self._raise_unexpected_state(10)
 
         self._write_float_float_tuple(value)
-        self._state = 6
+        self._state = 12
 
     def write_int_float_tuple_alternate_syntax(self, value: MyTuple[yardl.Int32, yardl.Float32]) -> None:
         """Ordinal 6"""
 
-        if self._state != 6:
-            self._raise_unexpected_state(6)
+        if self._state != 12:
+            self._raise_unexpected_state(12)
 
         self._write_int_float_tuple_alternate_syntax(value)
-        self._state = 7
+        self._state = 14
 
     def write_int_string_tuple(self, value: MyTuple[yardl.Int32, str]) -> None:
         """Ordinal 7"""
 
-        if self._state != 7:
-            self._raise_unexpected_state(7)
+        if self._state != 14:
+            self._raise_unexpected_state(14)
 
         self._write_int_string_tuple(value)
-        self._state = 8
+        self._state = 16
 
     def write_stream_of_type_variants(self, value: collections.abc.Iterable[typing.Union[
         tuple[typing.Literal["Image<float32>"], Image[np.float32]],
@@ -4434,11 +4606,11 @@ class SimpleGenericsWriterBase(abc.ABC):
     ]]) -> None:
         """Ordinal 8"""
 
-        if self._state != 8:
-            self._raise_unexpected_state(8)
+        if self._state & ~1 != 16:
+            self._raise_unexpected_state(16)
 
         self._write_stream_of_type_variants(value)
-        self._state = 9
+        self._state = 17
 
     @abc.abstractmethod
     def _write_float_image(self, value: Image[np.float32]) -> None:
@@ -4481,31 +4653,35 @@ class SimpleGenericsWriterBase(abc.ABC):
 
     @abc.abstractmethod
     def close(self) -> None:
-        raise NotImplementedError()
+        pass
+
+    @abc.abstractmethod
+    def _end_stream(self) -> None:
+        pass
 
     def _raise_unexpected_state(self, actual: int) -> None:
         expected_method = self._state_to_method_name(self._state)
         actual_method = self._state_to_method_name(actual)
-        raise ProtocolException(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
+        raise ProtocolError(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
 
     def _state_to_method_name(self, state: int) -> str:
         if state == 0:
             return 'write_float_image'
-        if state == 1:
-            return 'write_int_image'
         if state == 2:
-            return 'write_int_image_alternate_syntax'
-        if state == 3:
-            return 'write_string_image'
+            return 'write_int_image'
         if state == 4:
-            return 'write_int_float_tuple'
-        if state == 5:
-            return 'write_float_float_tuple'
+            return 'write_int_image_alternate_syntax'
         if state == 6:
-            return 'write_int_float_tuple_alternate_syntax'
-        if state == 7:
-            return 'write_int_string_tuple'
+            return 'write_string_image'
         if state == 8:
+            return 'write_int_float_tuple'
+        if state == 10:
+            return 'write_float_float_tuple'
+        if state == 12:
+            return 'write_int_float_tuple_alternate_syntax'
+        if state == 14:
+            return 'write_int_string_tuple'
+        if state == 16:
             return 'write_stream_of_type_variants'
         return "<unknown>"
 
@@ -4526,10 +4702,10 @@ class SimpleGenericsReaderBase(abc.ABC):
         if exc is None and self._state != 18:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
-                raise ProtocolException(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
+                raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
             else:
                 expected_method = self._state_to_method_name(self._state)
-                raise ProtocolException(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
+                raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
 
     @abc.abstractmethod
@@ -4688,10 +4864,10 @@ class SimpleGenericsReaderBase(abc.ABC):
         actual_method = self._state_to_method_name(actual)
         if self._state % 2 == 1:
             previous_method = self._state_to_method_name(self._state - 1)
-            raise ProtocolException(f"Received call to '{actual_method}' but the iterable returned by '{previous_method}' was not fully consumed.")
+            raise ProtocolError(f"Received call to '{actual_method}' but the iterable returned by '{previous_method}' was not fully consumed.")
         else:
             expected_method = self._state_to_method_name(self._state)
-            raise ProtocolException(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
+            raise ProtocolError(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
         	
     def _state_to_method_name(self, state: int) -> str:
         if state == 0:
@@ -4728,9 +4904,9 @@ class AdvancedGenericsWriterBase(abc.ABC):
 
     def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
-        if exc is None and self._state != 5:
-            expected_method = self._state_to_method_name(self._state)
-            raise ProtocolException(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+        if exc is None and self._state != 10:
+            expected_method = self._state_to_method_name((self._state + 1) & ~1)
+            raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
 
     def write_float_image_image(self, value: Image[np.object_]) -> None:
         """Ordinal 0"""
@@ -4739,43 +4915,43 @@ class AdvancedGenericsWriterBase(abc.ABC):
             self._raise_unexpected_state(0)
 
         self._write_float_image_image(value)
-        self._state = 1
+        self._state = 2
 
     def write_generic_record_1(self, value: GenericRecord[yardl.Int32, str, np.object_]) -> None:
         """Ordinal 1"""
 
-        if self._state != 1:
-            self._raise_unexpected_state(1)
+        if self._state != 2:
+            self._raise_unexpected_state(2)
 
         self._write_generic_record_1(value)
-        self._state = 2
+        self._state = 4
 
     def write_tuple_of_optionals(self, value: MyTuple[typing.Optional[yardl.Int32], typing.Optional[str]]) -> None:
         """Ordinal 2"""
 
-        if self._state != 2:
-            self._raise_unexpected_state(2)
+        if self._state != 4:
+            self._raise_unexpected_state(4)
 
         self._write_tuple_of_optionals(value)
-        self._state = 3
+        self._state = 6
 
     def write_tuple_of_optionals_alternate_syntax(self, value: MyTuple[typing.Optional[yardl.Int32], typing.Optional[str]]) -> None:
         """Ordinal 3"""
 
-        if self._state != 3:
-            self._raise_unexpected_state(3)
+        if self._state != 6:
+            self._raise_unexpected_state(6)
 
         self._write_tuple_of_optionals_alternate_syntax(value)
-        self._state = 4
+        self._state = 8
 
     def write_tuple_of_vectors(self, value: MyTuple[list[yardl.Int32], list[yardl.Float32]]) -> None:
         """Ordinal 4"""
 
-        if self._state != 4:
-            self._raise_unexpected_state(4)
+        if self._state != 8:
+            self._raise_unexpected_state(8)
 
         self._write_tuple_of_vectors(value)
-        self._state = 5
+        self._state = 10
 
     @abc.abstractmethod
     def _write_float_image_image(self, value: Image[np.object_]) -> None:
@@ -4799,23 +4975,27 @@ class AdvancedGenericsWriterBase(abc.ABC):
 
     @abc.abstractmethod
     def close(self) -> None:
-        raise NotImplementedError()
+        pass
+
+    @abc.abstractmethod
+    def _end_stream(self) -> None:
+        pass
 
     def _raise_unexpected_state(self, actual: int) -> None:
         expected_method = self._state_to_method_name(self._state)
         actual_method = self._state_to_method_name(actual)
-        raise ProtocolException(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
+        raise ProtocolError(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
 
     def _state_to_method_name(self, state: int) -> str:
         if state == 0:
             return 'write_float_image_image'
-        if state == 1:
-            return 'write_generic_record_1'
         if state == 2:
-            return 'write_tuple_of_optionals'
-        if state == 3:
-            return 'write_tuple_of_optionals_alternate_syntax'
+            return 'write_generic_record_1'
         if state == 4:
+            return 'write_tuple_of_optionals'
+        if state == 6:
+            return 'write_tuple_of_optionals_alternate_syntax'
+        if state == 8:
             return 'write_tuple_of_vectors'
         return "<unknown>"
 
@@ -4836,10 +5016,10 @@ class AdvancedGenericsReaderBase(abc.ABC):
         if exc is None and self._state != 10:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
-                raise ProtocolException(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
+                raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
             else:
                 expected_method = self._state_to_method_name(self._state)
-                raise ProtocolException(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
+                raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
 
     @abc.abstractmethod
@@ -4932,10 +5112,10 @@ class AdvancedGenericsReaderBase(abc.ABC):
         actual_method = self._state_to_method_name(actual)
         if self._state % 2 == 1:
             previous_method = self._state_to_method_name(self._state - 1)
-            raise ProtocolException(f"Received call to '{actual_method}' but the iterable returned by '{previous_method}' was not fully consumed.")
+            raise ProtocolError(f"Received call to '{actual_method}' but the iterable returned by '{previous_method}' was not fully consumed.")
         else:
             expected_method = self._state_to_method_name(self._state)
-            raise ProtocolException(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
+            raise ProtocolError(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
         	
     def _state_to_method_name(self, state: int) -> str:
         if state == 0:
@@ -4963,10 +5143,16 @@ class AliasesWriterBase(abc.ABC):
         return self
 
     def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
+        if exc is None and self._state == 19:
+            try:
+                self._end_stream()
+                return
+            finally:
+                self.close()
         self.close()
-        if exc is None and self._state != 10:
-            expected_method = self._state_to_method_name(self._state)
-            raise ProtocolException(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+        if exc is None and self._state != 20:
+            expected_method = self._state_to_method_name((self._state + 1) & ~1)
+            raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
 
     def write_aliased_string(self, value: AliasedString) -> None:
         """Ordinal 0"""
@@ -4975,88 +5161,88 @@ class AliasesWriterBase(abc.ABC):
             self._raise_unexpected_state(0)
 
         self._write_aliased_string(value)
-        self._state = 1
+        self._state = 2
 
     def write_aliased_enum(self, value: AliasedEnum) -> None:
         """Ordinal 1"""
 
-        if self._state != 1:
-            self._raise_unexpected_state(1)
+        if self._state != 2:
+            self._raise_unexpected_state(2)
 
         self._write_aliased_enum(value)
-        self._state = 2
+        self._state = 4
 
     def write_aliased_open_generic(self, value: AliasedOpenGeneric[AliasedString, AliasedEnum]) -> None:
         """Ordinal 2"""
 
-        if self._state != 2:
-            self._raise_unexpected_state(2)
+        if self._state != 4:
+            self._raise_unexpected_state(4)
 
         self._write_aliased_open_generic(value)
-        self._state = 3
+        self._state = 6
 
     def write_aliased_closed_generic(self, value: AliasedClosedGeneric) -> None:
         """Ordinal 3"""
 
-        if self._state != 3:
-            self._raise_unexpected_state(3)
+        if self._state != 6:
+            self._raise_unexpected_state(6)
 
         self._write_aliased_closed_generic(value)
-        self._state = 4
+        self._state = 8
 
     def write_aliased_optional(self, value: AliasedOptional) -> None:
         """Ordinal 4"""
 
-        if self._state != 4:
-            self._raise_unexpected_state(4)
+        if self._state != 8:
+            self._raise_unexpected_state(8)
 
         self._write_aliased_optional(value)
-        self._state = 5
+        self._state = 10
 
     def write_aliased_generic_optional(self, value: AliasedGenericOptional[yardl.Float32]) -> None:
         """Ordinal 5"""
 
-        if self._state != 5:
-            self._raise_unexpected_state(5)
+        if self._state != 10:
+            self._raise_unexpected_state(10)
 
         self._write_aliased_generic_optional(value)
-        self._state = 6
+        self._state = 12
 
     def write_aliased_generic_union_2(self, value: AliasedGenericUnion2[AliasedString, AliasedEnum]) -> None:
         """Ordinal 6"""
 
-        if self._state != 6:
-            self._raise_unexpected_state(6)
+        if self._state != 12:
+            self._raise_unexpected_state(12)
 
         self._write_aliased_generic_union_2(value)
-        self._state = 7
+        self._state = 14
 
     def write_aliased_generic_vector(self, value: AliasedGenericVector[yardl.Float32]) -> None:
         """Ordinal 7"""
 
-        if self._state != 7:
-            self._raise_unexpected_state(7)
+        if self._state != 14:
+            self._raise_unexpected_state(14)
 
         self._write_aliased_generic_vector(value)
-        self._state = 8
+        self._state = 16
 
     def write_aliased_generic_fixed_vector(self, value: AliasedGenericFixedVector[yardl.Float32]) -> None:
         """Ordinal 8"""
 
-        if self._state != 8:
-            self._raise_unexpected_state(8)
+        if self._state != 16:
+            self._raise_unexpected_state(16)
 
         self._write_aliased_generic_fixed_vector(value)
-        self._state = 9
+        self._state = 18
 
     def write_stream_of_aliased_generic_union_2(self, value: collections.abc.Iterable[AliasedGenericUnion2[AliasedString, AliasedEnum]]) -> None:
         """Ordinal 9"""
 
-        if self._state != 9:
-            self._raise_unexpected_state(9)
+        if self._state & ~1 != 18:
+            self._raise_unexpected_state(18)
 
         self._write_stream_of_aliased_generic_union_2(value)
-        self._state = 10
+        self._state = 19
 
     @abc.abstractmethod
     def _write_aliased_string(self, value: AliasedString) -> None:
@@ -5100,33 +5286,37 @@ class AliasesWriterBase(abc.ABC):
 
     @abc.abstractmethod
     def close(self) -> None:
-        raise NotImplementedError()
+        pass
+
+    @abc.abstractmethod
+    def _end_stream(self) -> None:
+        pass
 
     def _raise_unexpected_state(self, actual: int) -> None:
         expected_method = self._state_to_method_name(self._state)
         actual_method = self._state_to_method_name(actual)
-        raise ProtocolException(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
+        raise ProtocolError(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
 
     def _state_to_method_name(self, state: int) -> str:
         if state == 0:
             return 'write_aliased_string'
-        if state == 1:
-            return 'write_aliased_enum'
         if state == 2:
-            return 'write_aliased_open_generic'
-        if state == 3:
-            return 'write_aliased_closed_generic'
+            return 'write_aliased_enum'
         if state == 4:
-            return 'write_aliased_optional'
-        if state == 5:
-            return 'write_aliased_generic_optional'
+            return 'write_aliased_open_generic'
         if state == 6:
-            return 'write_aliased_generic_union_2'
-        if state == 7:
-            return 'write_aliased_generic_vector'
+            return 'write_aliased_closed_generic'
         if state == 8:
+            return 'write_aliased_optional'
+        if state == 10:
+            return 'write_aliased_generic_optional'
+        if state == 12:
+            return 'write_aliased_generic_union_2'
+        if state == 14:
+            return 'write_aliased_generic_vector'
+        if state == 16:
             return 'write_aliased_generic_fixed_vector'
-        if state == 9:
+        if state == 18:
             return 'write_stream_of_aliased_generic_union_2'
         return "<unknown>"
 
@@ -5147,10 +5337,10 @@ class AliasesReaderBase(abc.ABC):
         if exc is None and self._state != 20:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
-                raise ProtocolException(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
+                raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
             else:
                 expected_method = self._state_to_method_name(self._state)
-                raise ProtocolException(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
+                raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
 
     @abc.abstractmethod
@@ -5318,10 +5508,10 @@ class AliasesReaderBase(abc.ABC):
         actual_method = self._state_to_method_name(actual)
         if self._state % 2 == 1:
             previous_method = self._state_to_method_name(self._state - 1)
-            raise ProtocolException(f"Received call to '{actual_method}' but the iterable returned by '{previous_method}' was not fully consumed.")
+            raise ProtocolError(f"Received call to '{actual_method}' but the iterable returned by '{previous_method}' was not fully consumed.")
         else:
             expected_method = self._state_to_method_name(self._state)
-            raise ProtocolException(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
+            raise ProtocolError(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
         	
     def _state_to_method_name(self, state: int) -> str:
         if state == 0:
@@ -5359,15 +5549,21 @@ class StreamsOfAliasedUnionsWriterBase(abc.ABC):
         return self
 
     def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
+        if exc is None and self._state == 3:
+            try:
+                self._end_stream()
+                return
+            finally:
+                self.close()
         self.close()
-        if exc is None and self._state != 2:
-            expected_method = self._state_to_method_name(self._state)
-            raise ProtocolException(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+        if exc is None and self._state != 4:
+            expected_method = self._state_to_method_name((self._state + 1) & ~1)
+            raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
 
     def write_int_or_simple_record(self, value: collections.abc.Iterable[AliasedIntOrSimpleRecord]) -> None:
         """Ordinal 0"""
 
-        if self._state != 0:
+        if self._state & ~1 != 0:
             self._raise_unexpected_state(0)
 
         self._write_int_or_simple_record(value)
@@ -5376,11 +5572,14 @@ class StreamsOfAliasedUnionsWriterBase(abc.ABC):
     def write_nullable_int_or_simple_record(self, value: collections.abc.Iterable[AliasedNullableIntSimpleRecord]) -> None:
         """Ordinal 1"""
 
-        if self._state != 1:
-            self._raise_unexpected_state(1)
+        if self._state == 1:
+            self._end_stream()
+            self._state = 2
+        elif self._state & ~1 != 2:
+            self._raise_unexpected_state(2)
 
         self._write_nullable_int_or_simple_record(value)
-        self._state = 2
+        self._state = 3
 
     @abc.abstractmethod
     def _write_int_or_simple_record(self, value: collections.abc.Iterable[AliasedIntOrSimpleRecord]) -> None:
@@ -5392,17 +5591,21 @@ class StreamsOfAliasedUnionsWriterBase(abc.ABC):
 
     @abc.abstractmethod
     def close(self) -> None:
-        raise NotImplementedError()
+        pass
+
+    @abc.abstractmethod
+    def _end_stream(self) -> None:
+        pass
 
     def _raise_unexpected_state(self, actual: int) -> None:
         expected_method = self._state_to_method_name(self._state)
         actual_method = self._state_to_method_name(actual)
-        raise ProtocolException(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
+        raise ProtocolError(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
 
     def _state_to_method_name(self, state: int) -> str:
         if state == 0:
             return 'write_int_or_simple_record'
-        if state == 1:
+        if state == 2:
             return 'write_nullable_int_or_simple_record'
         return "<unknown>"
 
@@ -5423,10 +5626,10 @@ class StreamsOfAliasedUnionsReaderBase(abc.ABC):
         if exc is None and self._state != 4:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
-                raise ProtocolException(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
+                raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
             else:
                 expected_method = self._state_to_method_name(self._state)
-                raise ProtocolException(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
+                raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
 
     @abc.abstractmethod
@@ -5474,10 +5677,10 @@ class StreamsOfAliasedUnionsReaderBase(abc.ABC):
         actual_method = self._state_to_method_name(actual)
         if self._state % 2 == 1:
             previous_method = self._state_to_method_name(self._state - 1)
-            raise ProtocolException(f"Received call to '{actual_method}' but the iterable returned by '{previous_method}' was not fully consumed.")
+            raise ProtocolError(f"Received call to '{actual_method}' but the iterable returned by '{previous_method}' was not fully consumed.")
         else:
             expected_method = self._state_to_method_name(self._state)
-            raise ProtocolException(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
+            raise ProtocolError(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
         	
     def _state_to_method_name(self, state: int) -> str:
         if state == 0:
@@ -5500,9 +5703,9 @@ class ProtocolWithComputedFieldsWriterBase(abc.ABC):
 
     def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
-        if exc is None and self._state != 1:
-            expected_method = self._state_to_method_name(self._state)
-            raise ProtocolException(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+        if exc is None and self._state != 2:
+            expected_method = self._state_to_method_name((self._state + 1) & ~1)
+            raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
 
     def write_record_with_computed_fields(self, value: RecordWithComputedFields) -> None:
         """Ordinal 0"""
@@ -5511,7 +5714,7 @@ class ProtocolWithComputedFieldsWriterBase(abc.ABC):
             self._raise_unexpected_state(0)
 
         self._write_record_with_computed_fields(value)
-        self._state = 1
+        self._state = 2
 
     @abc.abstractmethod
     def _write_record_with_computed_fields(self, value: RecordWithComputedFields) -> None:
@@ -5519,12 +5722,16 @@ class ProtocolWithComputedFieldsWriterBase(abc.ABC):
 
     @abc.abstractmethod
     def close(self) -> None:
-        raise NotImplementedError()
+        pass
+
+    @abc.abstractmethod
+    def _end_stream(self) -> None:
+        pass
 
     def _raise_unexpected_state(self, actual: int) -> None:
         expected_method = self._state_to_method_name(self._state)
         actual_method = self._state_to_method_name(actual)
-        raise ProtocolException(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
+        raise ProtocolError(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
 
     def _state_to_method_name(self, state: int) -> str:
         if state == 0:
@@ -5548,10 +5755,10 @@ class ProtocolWithComputedFieldsReaderBase(abc.ABC):
         if exc is None and self._state != 2:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
-                raise ProtocolException(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
+                raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
             else:
                 expected_method = self._state_to_method_name(self._state)
-                raise ProtocolException(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
+                raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
 
     @abc.abstractmethod
@@ -5584,10 +5791,10 @@ class ProtocolWithComputedFieldsReaderBase(abc.ABC):
         actual_method = self._state_to_method_name(actual)
         if self._state % 2 == 1:
             previous_method = self._state_to_method_name(self._state - 1)
-            raise ProtocolException(f"Received call to '{actual_method}' but the iterable returned by '{previous_method}' was not fully consumed.")
+            raise ProtocolError(f"Received call to '{actual_method}' but the iterable returned by '{previous_method}' was not fully consumed.")
         else:
             expected_method = self._state_to_method_name(self._state)
-            raise ProtocolException(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
+            raise ProtocolError(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
         	
     def _state_to_method_name(self, state: int) -> str:
         if state == 0:
@@ -5608,14 +5815,14 @@ class ProtocolWithKeywordStepsWriterBase(abc.ABC):
 
     def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
-        if exc is None and self._state != 2:
-            expected_method = self._state_to_method_name(self._state)
-            raise ProtocolException(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+        if exc is None and self._state != 4:
+            expected_method = self._state_to_method_name((self._state + 1) & ~1)
+            raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
 
     def write_int(self, value: collections.abc.Iterable[RecordWithKeywordFields]) -> None:
         """Ordinal 0"""
 
-        if self._state != 0:
+        if self._state & ~1 != 0:
             self._raise_unexpected_state(0)
 
         self._write_int(value)
@@ -5624,11 +5831,14 @@ class ProtocolWithKeywordStepsWriterBase(abc.ABC):
     def write_float(self, value: EnumWithKeywordSymbols) -> None:
         """Ordinal 1"""
 
-        if self._state != 1:
-            self._raise_unexpected_state(1)
+        if self._state == 1:
+            self._end_stream()
+            self._state = 2
+        elif self._state != 2:
+            self._raise_unexpected_state(2)
 
         self._write_float(value)
-        self._state = 2
+        self._state = 4
 
     @abc.abstractmethod
     def _write_int(self, value: collections.abc.Iterable[RecordWithKeywordFields]) -> None:
@@ -5640,17 +5850,21 @@ class ProtocolWithKeywordStepsWriterBase(abc.ABC):
 
     @abc.abstractmethod
     def close(self) -> None:
-        raise NotImplementedError()
+        pass
+
+    @abc.abstractmethod
+    def _end_stream(self) -> None:
+        pass
 
     def _raise_unexpected_state(self, actual: int) -> None:
         expected_method = self._state_to_method_name(self._state)
         actual_method = self._state_to_method_name(actual)
-        raise ProtocolException(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
+        raise ProtocolError(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
 
     def _state_to_method_name(self, state: int) -> str:
         if state == 0:
             return 'write_int'
-        if state == 1:
+        if state == 2:
             return 'write_float'
         return "<unknown>"
 
@@ -5671,10 +5885,10 @@ class ProtocolWithKeywordStepsReaderBase(abc.ABC):
         if exc is None and self._state != 4:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
-                raise ProtocolException(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
+                raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
             else:
                 expected_method = self._state_to_method_name(self._state)
-                raise ProtocolException(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
+                raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
 
     @abc.abstractmethod
@@ -5722,10 +5936,10 @@ class ProtocolWithKeywordStepsReaderBase(abc.ABC):
         actual_method = self._state_to_method_name(actual)
         if self._state % 2 == 1:
             previous_method = self._state_to_method_name(self._state - 1)
-            raise ProtocolException(f"Received call to '{actual_method}' but the iterable returned by '{previous_method}' was not fully consumed.")
+            raise ProtocolError(f"Received call to '{actual_method}' but the iterable returned by '{previous_method}' was not fully consumed.")
         else:
             expected_method = self._state_to_method_name(self._state)
-            raise ProtocolException(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
+            raise ProtocolError(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
         	
     def _state_to_method_name(self, state: int) -> str:
         if state == 0:
@@ -5734,6 +5948,3 @@ class ProtocolWithKeywordStepsReaderBase(abc.ABC):
             return 'read_float'
         return "<unknown>"
 
-class ProtocolException(Exception):
-    """Raised when the contract of a protocol is not respected."""
-    pass

@@ -31,8 +31,6 @@ from . import yardl_types as yardl
 		writeAbstractReader(w, p, ns)
 	}
 
-	writeExceptions(w)
-
 	definitionsPath := path.Join(packageDir, "protocols.py")
 	return iocommon.WriteFileIfNeeded(definitionsPath, b.Bytes(), 0644)
 }
@@ -63,11 +61,25 @@ func writeAbstractWriter(w *formatting.IndentedWriter, p *dsl.ProtocolDefinition
 
 		w.WriteStringln("def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:")
 		w.Indented(func() {
+			if len(p.Sequence) > 0 && p.Sequence[len(p.Sequence)-1].IsStream() {
+				fmt.Fprintf(w, "if exc is None and self._state == %d:\n", len(p.Sequence)*2-1)
+				w.Indented(func() {
+					w.WriteStringln("try:")
+					w.Indented(func() {
+						w.WriteStringln("self._end_stream()")
+						w.WriteStringln("return")
+					})
+					w.WriteStringln("finally:")
+					w.Indented(func() {
+						w.WriteStringln("self.close()")
+					})
+				})
+			}
 			w.WriteStringln("self.close()")
-			fmt.Fprintf(w, "if exc is None and self._state != %d:\n", len(p.Sequence))
+			fmt.Fprintf(w, "if exc is None and self._state != %d:\n", len(p.Sequence)*2)
 			w.Indented(func() {
-				w.WriteStringln("expected_method = self._state_to_method_name(self._state)")
-				w.WriteStringln(`raise ProtocolException(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")`)
+				w.WriteStringln("expected_method = self._state_to_method_name((self._state + 1) & ~1)")
+				w.WriteStringln(`raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")`)
 			})
 		})
 		w.WriteStringln("")
@@ -82,13 +94,32 @@ func writeAbstractWriter(w *formatting.IndentedWriter, p *dsl.ProtocolDefinition
 			fmt.Fprintf(w, "def %s(self, value: %s) -> None:\n", common.ProtocolWriteMethodName(step), valueType)
 			w.Indented(func() {
 				common.WriteDocstringWithLeadingLine(w, fmt.Sprintf("Ordinal %d", i), step.Comment)
-				fmt.Fprintf(w, "if self._state != %d:\n", i)
+
+				prevIsStream := i > 0 && p.Sequence[i-1].IsStream()
+				if prevIsStream {
+					fmt.Fprintf(w, "if self._state == %d:\n", i*2-1)
+					w.Indented(func() {
+						w.WriteStringln("self._end_stream()")
+						fmt.Fprintf(w, "self._state = %d\n", i*2)
+					})
+					w.WriteString("el")
+				}
+
+				if step.IsStream() {
+					fmt.Fprintf(w, "if self._state & ~1 != %d:\n", i*2)
+				} else {
+					fmt.Fprintf(w, "if self._state != %d:\n", i*2)
+				}
 				w.Indented(func() {
-					fmt.Fprintf(w, "self._raise_unexpected_state(%d)\n", i)
+					fmt.Fprintf(w, "self._raise_unexpected_state(%d)\n", i*2)
 				})
 				w.WriteStringln("")
 				fmt.Fprintf(w, "self.%s(value)\n", common.ProtocolWriteImplMethodName(step))
-				fmt.Fprintf(w, "self._state = %d\n", i+1)
+				if step.IsStream() {
+					fmt.Fprintf(w, "self._state = %d\n", i*2+1)
+				} else {
+					fmt.Fprintf(w, "self._state = %d\n", (i+1)*2)
+				}
 			})
 			w.WriteStringln("")
 		}
@@ -112,7 +143,14 @@ func writeAbstractWriter(w *formatting.IndentedWriter, p *dsl.ProtocolDefinition
 		w.WriteStringln("@abc.abstractmethod")
 		w.WriteStringln("def close(self) -> None:")
 		w.Indented(func() {
-			w.WriteStringln("raise NotImplementedError()")
+			w.WriteStringln("pass")
+		})
+		w.WriteStringln("")
+
+		w.WriteStringln("@abc.abstractmethod")
+		w.WriteStringln("def _end_stream(self) -> None:")
+		w.Indented(func() {
+			w.WriteStringln("pass")
 		})
 		w.WriteStringln("")
 
@@ -121,7 +159,7 @@ func writeAbstractWriter(w *formatting.IndentedWriter, p *dsl.ProtocolDefinition
 		w.Indented(func() {
 			w.WriteStringln("expected_method = self._state_to_method_name(self._state)")
 			w.WriteStringln("actual_method = self._state_to_method_name(actual)")
-			w.WriteStringln(`raise ProtocolException(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")`)
+			w.WriteStringln(`raise ProtocolError(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")`)
 		})
 		w.WriteStringln("")
 
@@ -129,7 +167,7 @@ func writeAbstractWriter(w *formatting.IndentedWriter, p *dsl.ProtocolDefinition
 		w.WriteStringln("def _state_to_method_name(self, state: int) -> str:")
 		w.Indented(func() {
 			for i, step := range p.Sequence {
-				fmt.Fprintf(w, "if state == %d:\n", i)
+				fmt.Fprintf(w, "if state == %d:\n", i*2)
 				w.Indented(func() {
 					fmt.Fprintf(w, "return '%s'\n", common.ProtocolWriteMethodName(step))
 				})
@@ -171,10 +209,10 @@ func writeAbstractReader(w *formatting.IndentedWriter, p *dsl.ProtocolDefinition
 			w.Indented(func() {
 				w.WriteStringln(`if self._state % 2 == 1:
     previous_method = self._state_to_method_name(self._state - 1)
-    raise ProtocolException(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
+    raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
 else:
     expected_method = self._state_to_method_name(self._state)
-    raise ProtocolException(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
+    raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
 	`)
 			})
 		})
@@ -254,10 +292,10 @@ else:
 			w.WriteStringln("actual_method = self._state_to_method_name(actual)")
 			w.WriteStringln(`if self._state % 2 == 1:
     previous_method = self._state_to_method_name(self._state - 1)
-    raise ProtocolException(f"Received call to '{actual_method}' but the iterable returned by '{previous_method}' was not fully consumed.")
+    raise ProtocolError(f"Received call to '{actual_method}' but the iterable returned by '{previous_method}' was not fully consumed.")
 else:
     expected_method = self._state_to_method_name(self._state)
-    raise ProtocolException(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
+    raise ProtocolError(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
 	`)
 		})
 
@@ -273,13 +311,5 @@ else:
 			w.WriteStringln(`return "<unknown>"`)
 		})
 		w.WriteStringln("")
-	})
-}
-
-func writeExceptions(w *formatting.IndentedWriter) {
-	w.WriteStringln("class ProtocolException(Exception):")
-	w.Indented(func() {
-		w.WriteStringln(`"""Raised when the contract of a protocol is not respected."""`)
-		w.WriteStringln("pass")
 	})
 }

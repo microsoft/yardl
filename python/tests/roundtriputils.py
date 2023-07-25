@@ -113,8 +113,21 @@ def create_validating_writer_class(
                         arg_list = list(args)
                         arg_list[1] = list(args[1])
                         args = tuple(arg_list)
-                    recorded_args[method_snapshot.__name__] = args[1]
-                    return method_snapshot(*args, **kwargs)
+                    if method_snapshot.__name__ in recorded_args:
+                        existing = recorded_args[method_snapshot.__name__]
+                        recorded_args[method_snapshot.__name__] = existing + args[1]
+                    else:
+                        recorded_args[method_snapshot.__name__] = args[1]
+                        existing = None
+
+                    try:
+                        return method_snapshot(*args, **kwargs)
+                    except:
+                        if existing is not None:
+                            recorded_args[method_snapshot.__name__] = existing
+                        else:
+                            recorded_args.pop(method_snapshot.__name__)
+                        raise
 
                 return wrapper
 
