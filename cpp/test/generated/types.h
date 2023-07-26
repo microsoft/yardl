@@ -81,38 +81,38 @@ struct SimpleRecord {
 
 struct RecordWithPrimitives {
   bool bool_field{};
-  int8_t int_8_field{};
-  uint8_t uint_8_field{};
-  int16_t int_16_field{};
-  uint16_t uint_16_field{};
-  int32_t int_32_field{};
-  uint32_t uint_32_field{};
-  int64_t int_64_field{};
-  uint64_t uint_64_field{};
+  int8_t int8_field{};
+  uint8_t uint8_field{};
+  int16_t int16_field{};
+  uint16_t uint16_field{};
+  int32_t int32_field{};
+  uint32_t uint32_field{};
+  int64_t int64_field{};
+  uint64_t uint64_field{};
   yardl::Size size_field{};
-  float float_32_field{};
-  double float_64_field{};
-  std::complex<float> complexfloat_32_field{};
-  std::complex<double> complexfloat_64_field{};
+  float float32_field{};
+  double float64_field{};
+  std::complex<float> complexfloat32_field{};
+  std::complex<double> complexfloat64_field{};
   yardl::Date date_field{};
   yardl::Time time_field{};
   yardl::DateTime datetime_field{};
 
   bool operator==(const RecordWithPrimitives& other) const {
     return bool_field == other.bool_field &&
-      int_8_field == other.int_8_field &&
-      uint_8_field == other.uint_8_field &&
-      int_16_field == other.int_16_field &&
-      uint_16_field == other.uint_16_field &&
-      int_32_field == other.int_32_field &&
-      uint_32_field == other.uint_32_field &&
-      int_64_field == other.int_64_field &&
-      uint_64_field == other.uint_64_field &&
+      int8_field == other.int8_field &&
+      uint8_field == other.uint8_field &&
+      int16_field == other.int16_field &&
+      uint16_field == other.uint16_field &&
+      int32_field == other.int32_field &&
+      uint32_field == other.uint32_field &&
+      int64_field == other.int64_field &&
+      uint64_field == other.uint64_field &&
       size_field == other.size_field &&
-      float_32_field == other.float_32_field &&
-      float_64_field == other.float_64_field &&
-      complexfloat_32_field == other.complexfloat_32_field &&
-      complexfloat_64_field == other.complexfloat_64_field &&
+      float32_field == other.float32_field &&
+      float64_field == other.float64_field &&
+      complexfloat32_field == other.complexfloat32_field &&
+      complexfloat64_field == other.complexfloat64_field &&
       date_field == other.date_field &&
       time_field == other.time_field &&
       datetime_field == other.datetime_field;

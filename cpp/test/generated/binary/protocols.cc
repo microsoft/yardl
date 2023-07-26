@@ -70,24 +70,24 @@ struct IsTriviallySerializable<test_model::RecordWithPrimitives> {
   static constexpr bool value = 
     std::is_standard_layout_v<__T__> &&
     IsTriviallySerializable<decltype(__T__::bool_field)>::value &&
-    IsTriviallySerializable<decltype(__T__::int_8_field)>::value &&
-    IsTriviallySerializable<decltype(__T__::uint_8_field)>::value &&
-    IsTriviallySerializable<decltype(__T__::int_16_field)>::value &&
-    IsTriviallySerializable<decltype(__T__::uint_16_field)>::value &&
-    IsTriviallySerializable<decltype(__T__::int_32_field)>::value &&
-    IsTriviallySerializable<decltype(__T__::uint_32_field)>::value &&
-    IsTriviallySerializable<decltype(__T__::int_64_field)>::value &&
-    IsTriviallySerializable<decltype(__T__::uint_64_field)>::value &&
+    IsTriviallySerializable<decltype(__T__::int8_field)>::value &&
+    IsTriviallySerializable<decltype(__T__::uint8_field)>::value &&
+    IsTriviallySerializable<decltype(__T__::int16_field)>::value &&
+    IsTriviallySerializable<decltype(__T__::uint16_field)>::value &&
+    IsTriviallySerializable<decltype(__T__::int32_field)>::value &&
+    IsTriviallySerializable<decltype(__T__::uint32_field)>::value &&
+    IsTriviallySerializable<decltype(__T__::int64_field)>::value &&
+    IsTriviallySerializable<decltype(__T__::uint64_field)>::value &&
     IsTriviallySerializable<decltype(__T__::size_field)>::value &&
-    IsTriviallySerializable<decltype(__T__::float_32_field)>::value &&
-    IsTriviallySerializable<decltype(__T__::float_64_field)>::value &&
-    IsTriviallySerializable<decltype(__T__::complexfloat_32_field)>::value &&
-    IsTriviallySerializable<decltype(__T__::complexfloat_64_field)>::value &&
+    IsTriviallySerializable<decltype(__T__::float32_field)>::value &&
+    IsTriviallySerializable<decltype(__T__::float64_field)>::value &&
+    IsTriviallySerializable<decltype(__T__::complexfloat32_field)>::value &&
+    IsTriviallySerializable<decltype(__T__::complexfloat64_field)>::value &&
     IsTriviallySerializable<decltype(__T__::date_field)>::value &&
     IsTriviallySerializable<decltype(__T__::time_field)>::value &&
     IsTriviallySerializable<decltype(__T__::datetime_field)>::value &&
-    (sizeof(__T__) == (sizeof(__T__::bool_field) + sizeof(__T__::int_8_field) + sizeof(__T__::uint_8_field) + sizeof(__T__::int_16_field) + sizeof(__T__::uint_16_field) + sizeof(__T__::int_32_field) + sizeof(__T__::uint_32_field) + sizeof(__T__::int_64_field) + sizeof(__T__::uint_64_field) + sizeof(__T__::size_field) + sizeof(__T__::float_32_field) + sizeof(__T__::float_64_field) + sizeof(__T__::complexfloat_32_field) + sizeof(__T__::complexfloat_64_field) + sizeof(__T__::date_field) + sizeof(__T__::time_field) + sizeof(__T__::datetime_field))) &&
-    offsetof(__T__, bool_field) < offsetof(__T__, int_8_field) && offsetof(__T__, int_8_field) < offsetof(__T__, uint_8_field) && offsetof(__T__, uint_8_field) < offsetof(__T__, int_16_field) && offsetof(__T__, int_16_field) < offsetof(__T__, uint_16_field) && offsetof(__T__, uint_16_field) < offsetof(__T__, int_32_field) && offsetof(__T__, int_32_field) < offsetof(__T__, uint_32_field) && offsetof(__T__, uint_32_field) < offsetof(__T__, int_64_field) && offsetof(__T__, int_64_field) < offsetof(__T__, uint_64_field) && offsetof(__T__, uint_64_field) < offsetof(__T__, size_field) && offsetof(__T__, size_field) < offsetof(__T__, float_32_field) && offsetof(__T__, float_32_field) < offsetof(__T__, float_64_field) && offsetof(__T__, float_64_field) < offsetof(__T__, complexfloat_32_field) && offsetof(__T__, complexfloat_32_field) < offsetof(__T__, complexfloat_64_field) && offsetof(__T__, complexfloat_64_field) < offsetof(__T__, date_field) && offsetof(__T__, date_field) < offsetof(__T__, time_field) && offsetof(__T__, time_field) < offsetof(__T__, datetime_field);
+    (sizeof(__T__) == (sizeof(__T__::bool_field) + sizeof(__T__::int8_field) + sizeof(__T__::uint8_field) + sizeof(__T__::int16_field) + sizeof(__T__::uint16_field) + sizeof(__T__::int32_field) + sizeof(__T__::uint32_field) + sizeof(__T__::int64_field) + sizeof(__T__::uint64_field) + sizeof(__T__::size_field) + sizeof(__T__::float32_field) + sizeof(__T__::float64_field) + sizeof(__T__::complexfloat32_field) + sizeof(__T__::complexfloat64_field) + sizeof(__T__::date_field) + sizeof(__T__::time_field) + sizeof(__T__::datetime_field))) &&
+    offsetof(__T__, bool_field) < offsetof(__T__, int8_field) && offsetof(__T__, int8_field) < offsetof(__T__, uint8_field) && offsetof(__T__, uint8_field) < offsetof(__T__, int16_field) && offsetof(__T__, int16_field) < offsetof(__T__, uint16_field) && offsetof(__T__, uint16_field) < offsetof(__T__, int32_field) && offsetof(__T__, int32_field) < offsetof(__T__, uint32_field) && offsetof(__T__, uint32_field) < offsetof(__T__, int64_field) && offsetof(__T__, int64_field) < offsetof(__T__, uint64_field) && offsetof(__T__, uint64_field) < offsetof(__T__, size_field) && offsetof(__T__, size_field) < offsetof(__T__, float32_field) && offsetof(__T__, float32_field) < offsetof(__T__, float64_field) && offsetof(__T__, float64_field) < offsetof(__T__, complexfloat32_field) && offsetof(__T__, complexfloat32_field) < offsetof(__T__, complexfloat64_field) && offsetof(__T__, complexfloat64_field) < offsetof(__T__, date_field) && offsetof(__T__, date_field) < offsetof(__T__, time_field) && offsetof(__T__, time_field) < offsetof(__T__, datetime_field);
 };
 
 template <>
@@ -591,19 +591,19 @@ namespace {
   }
 
   yardl::binary::WriteInteger(stream, value.bool_field);
-  yardl::binary::WriteInteger(stream, value.int_8_field);
-  yardl::binary::WriteInteger(stream, value.uint_8_field);
-  yardl::binary::WriteInteger(stream, value.int_16_field);
-  yardl::binary::WriteInteger(stream, value.uint_16_field);
-  yardl::binary::WriteInteger(stream, value.int_32_field);
-  yardl::binary::WriteInteger(stream, value.uint_32_field);
-  yardl::binary::WriteInteger(stream, value.int_64_field);
-  yardl::binary::WriteInteger(stream, value.uint_64_field);
+  yardl::binary::WriteInteger(stream, value.int8_field);
+  yardl::binary::WriteInteger(stream, value.uint8_field);
+  yardl::binary::WriteInteger(stream, value.int16_field);
+  yardl::binary::WriteInteger(stream, value.uint16_field);
+  yardl::binary::WriteInteger(stream, value.int32_field);
+  yardl::binary::WriteInteger(stream, value.uint32_field);
+  yardl::binary::WriteInteger(stream, value.int64_field);
+  yardl::binary::WriteInteger(stream, value.uint64_field);
   yardl::binary::WriteInteger(stream, value.size_field);
-  yardl::binary::WriteFloatingPoint(stream, value.float_32_field);
-  yardl::binary::WriteFloatingPoint(stream, value.float_64_field);
-  yardl::binary::WriteFloatingPoint(stream, value.complexfloat_32_field);
-  yardl::binary::WriteFloatingPoint(stream, value.complexfloat_64_field);
+  yardl::binary::WriteFloatingPoint(stream, value.float32_field);
+  yardl::binary::WriteFloatingPoint(stream, value.float64_field);
+  yardl::binary::WriteFloatingPoint(stream, value.complexfloat32_field);
+  yardl::binary::WriteFloatingPoint(stream, value.complexfloat64_field);
   yardl::binary::WriteDate(stream, value.date_field);
   yardl::binary::WriteTime(stream, value.time_field);
   yardl::binary::WriteDateTime(stream, value.datetime_field);
@@ -616,19 +616,19 @@ namespace {
   }
 
   yardl::binary::ReadInteger(stream, value.bool_field);
-  yardl::binary::ReadInteger(stream, value.int_8_field);
-  yardl::binary::ReadInteger(stream, value.uint_8_field);
-  yardl::binary::ReadInteger(stream, value.int_16_field);
-  yardl::binary::ReadInteger(stream, value.uint_16_field);
-  yardl::binary::ReadInteger(stream, value.int_32_field);
-  yardl::binary::ReadInteger(stream, value.uint_32_field);
-  yardl::binary::ReadInteger(stream, value.int_64_field);
-  yardl::binary::ReadInteger(stream, value.uint_64_field);
+  yardl::binary::ReadInteger(stream, value.int8_field);
+  yardl::binary::ReadInteger(stream, value.uint8_field);
+  yardl::binary::ReadInteger(stream, value.int16_field);
+  yardl::binary::ReadInteger(stream, value.uint16_field);
+  yardl::binary::ReadInteger(stream, value.int32_field);
+  yardl::binary::ReadInteger(stream, value.uint32_field);
+  yardl::binary::ReadInteger(stream, value.int64_field);
+  yardl::binary::ReadInteger(stream, value.uint64_field);
   yardl::binary::ReadInteger(stream, value.size_field);
-  yardl::binary::ReadFloatingPoint(stream, value.float_32_field);
-  yardl::binary::ReadFloatingPoint(stream, value.float_64_field);
-  yardl::binary::ReadFloatingPoint(stream, value.complexfloat_32_field);
-  yardl::binary::ReadFloatingPoint(stream, value.complexfloat_64_field);
+  yardl::binary::ReadFloatingPoint(stream, value.float32_field);
+  yardl::binary::ReadFloatingPoint(stream, value.float64_field);
+  yardl::binary::ReadFloatingPoint(stream, value.complexfloat32_field);
+  yardl::binary::ReadFloatingPoint(stream, value.complexfloat64_field);
   yardl::binary::ReadDate(stream, value.date_field);
   yardl::binary::ReadTime(stream, value.time_field);
   yardl::binary::ReadDateTime(stream, value.datetime_field);

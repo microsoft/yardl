@@ -52,7 +52,7 @@ class BenchmarkFloat256x256ReaderBase {
   // Optionaly close this writer before destructing. Validates that all steps were completely read.
   void Close();
 
-  void CopyTo(BenchmarkFloat256x256WriterBase& writer, size_t float_256x_256_buffer_size = 1);
+  void CopyTo(BenchmarkFloat256x256WriterBase& writer, size_t float256x256_buffer_size = 1);
 
   virtual ~BenchmarkFloat256x256ReaderBase() = default;
 

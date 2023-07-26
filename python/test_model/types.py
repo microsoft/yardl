@@ -127,56 +127,56 @@ class SimpleRecord:
 
 class RecordWithPrimitives:
     bool_field: bool
-    int_8_field: yardl.Int8
-    uint_8_field: yardl.UInt8
-    int_16_field: yardl.Int16
-    uint_16_field: yardl.UInt16
-    int_32_field: yardl.Int32
-    uint_32_field: yardl.UInt32
-    int_64_field: yardl.Int64
-    uint_64_field: yardl.UInt64
+    int8_field: yardl.Int8
+    uint8_field: yardl.UInt8
+    int16_field: yardl.Int16
+    uint16_field: yardl.UInt16
+    int32_field: yardl.Int32
+    uint32_field: yardl.UInt32
+    int64_field: yardl.Int64
+    uint64_field: yardl.UInt64
     size_field: yardl.Size
-    float_32_field: yardl.Float32
-    float_64_field: yardl.Float64
-    complexfloat_32_field: yardl.ComplexFloat
-    complexfloat_64_field: yardl.ComplexDouble
+    float32_field: yardl.Float32
+    float64_field: yardl.Float64
+    complexfloat32_field: yardl.ComplexFloat
+    complexfloat64_field: yardl.ComplexDouble
     date_field: datetime.date
     time_field: yardl.Time
     datetime_field: yardl.DateTime
 
     def __init__(self, *,
         bool_field: bool = False,
-        int_8_field: yardl.Int8 = 0,
-        uint_8_field: yardl.UInt8 = 0,
-        int_16_field: yardl.Int16 = 0,
-        uint_16_field: yardl.UInt16 = 0,
-        int_32_field: yardl.Int32 = 0,
-        uint_32_field: yardl.UInt32 = 0,
-        int_64_field: yardl.Int64 = 0,
-        uint_64_field: yardl.UInt64 = 0,
+        int8_field: yardl.Int8 = 0,
+        uint8_field: yardl.UInt8 = 0,
+        int16_field: yardl.Int16 = 0,
+        uint16_field: yardl.UInt16 = 0,
+        int32_field: yardl.Int32 = 0,
+        uint32_field: yardl.UInt32 = 0,
+        int64_field: yardl.Int64 = 0,
+        uint64_field: yardl.UInt64 = 0,
         size_field: yardl.Size = 0,
-        float_32_field: yardl.Float32 = 0.0,
-        float_64_field: yardl.Float64 = 0.0,
-        complexfloat_32_field: yardl.ComplexFloat = 0j,
-        complexfloat_64_field: yardl.ComplexDouble = 0j,
+        float32_field: yardl.Float32 = 0.0,
+        float64_field: yardl.Float64 = 0.0,
+        complexfloat32_field: yardl.ComplexFloat = 0j,
+        complexfloat64_field: yardl.ComplexDouble = 0j,
         date_field: datetime.date = datetime.date(1970, 1, 1),
         time_field: yardl.Time = yardl.Time(),
         datetime_field: yardl.DateTime = yardl.DateTime(),
     ):
         self.bool_field = bool_field
-        self.int_8_field = int_8_field
-        self.uint_8_field = uint_8_field
-        self.int_16_field = int_16_field
-        self.uint_16_field = uint_16_field
-        self.int_32_field = int_32_field
-        self.uint_32_field = uint_32_field
-        self.int_64_field = int_64_field
-        self.uint_64_field = uint_64_field
+        self.int8_field = int8_field
+        self.uint8_field = uint8_field
+        self.int16_field = int16_field
+        self.uint16_field = uint16_field
+        self.int32_field = int32_field
+        self.uint32_field = uint32_field
+        self.int64_field = int64_field
+        self.uint64_field = uint64_field
         self.size_field = size_field
-        self.float_32_field = float_32_field
-        self.float_64_field = float_64_field
-        self.complexfloat_32_field = complexfloat_32_field
-        self.complexfloat_64_field = complexfloat_64_field
+        self.float32_field = float32_field
+        self.float64_field = float64_field
+        self.complexfloat32_field = complexfloat32_field
+        self.complexfloat64_field = complexfloat64_field
         self.date_field = date_field
         self.time_field = time_field
         self.datetime_field = datetime_field
@@ -185,19 +185,19 @@ class RecordWithPrimitives:
         return (
             isinstance(other, RecordWithPrimitives)
             and self.bool_field == other.bool_field
-            and self.int_8_field == other.int_8_field
-            and self.uint_8_field == other.uint_8_field
-            and self.int_16_field == other.int_16_field
-            and self.uint_16_field == other.uint_16_field
-            and self.int_32_field == other.int_32_field
-            and self.uint_32_field == other.uint_32_field
-            and self.int_64_field == other.int_64_field
-            and self.uint_64_field == other.uint_64_field
+            and self.int8_field == other.int8_field
+            and self.uint8_field == other.uint8_field
+            and self.int16_field == other.int16_field
+            and self.uint16_field == other.uint16_field
+            and self.int32_field == other.int32_field
+            and self.uint32_field == other.uint32_field
+            and self.int64_field == other.int64_field
+            and self.uint64_field == other.uint64_field
             and self.size_field == other.size_field
-            and self.float_32_field == other.float_32_field
-            and self.float_64_field == other.float_64_field
-            and self.complexfloat_32_field == other.complexfloat_32_field
-            and self.complexfloat_64_field == other.complexfloat_64_field
+            and self.float32_field == other.float32_field
+            and self.float64_field == other.float64_field
+            and self.complexfloat32_field == other.complexfloat32_field
+            and self.complexfloat64_field == other.complexfloat64_field
             and self.date_field == other.date_field
             and self.time_field == other.time_field
             and self.datetime_field == other.datetime_field
@@ -923,10 +923,10 @@ class RecordWithComputedFields:
     def int_literal(self) -> yardl.UInt8:
         return 42
 
-    def large_negative_int_64_literal(self) -> yardl.Int64:
+    def large_negative_int64_literal(self) -> yardl.Int64:
         return -4611686018427387904
 
-    def large_u_int_64_literal(self) -> yardl.UInt64:
+    def large_u_int64_literal(self) -> yardl.UInt64:
         return 9223372036854775808
 
     def string_literal(self) -> str:
@@ -1194,7 +1194,7 @@ def _mk_get_dtype():
     dtype_map[SimpleEncodingCounters] = np.dtype([('e1', np.dtype([('has_value', np.dtype(np.bool_)), ('value', np.dtype(np.uint32))], align=True)), ('e2', np.dtype([('has_value', np.dtype(np.bool_)), ('value', np.dtype(np.uint32))], align=True)), ('slice', np.dtype([('has_value', np.dtype(np.bool_)), ('value', np.dtype(np.uint32))], align=True)), ('repetition', np.dtype([('has_value', np.dtype(np.bool_)), ('value', np.dtype(np.uint32))], align=True))], align=True)
     dtype_map[SimpleAcquisition] = np.dtype([('flags', np.dtype(np.uint64)), ('idx', get_dtype(SimpleEncodingCounters)), ('data', np.dtype(np.object_)), ('trajectory', np.dtype(np.object_))], align=True)
     dtype_map[SimpleRecord] = np.dtype([('x', np.dtype(np.int32)), ('y', np.dtype(np.int32)), ('z', np.dtype(np.int32))], align=True)
-    dtype_map[RecordWithPrimitives] = np.dtype([('bool_field', np.dtype(np.bool_)), ('int_8_field', np.dtype(np.int8)), ('uint_8_field', np.dtype(np.uint8)), ('int_16_field', np.dtype(np.int16)), ('uint_16_field', np.dtype(np.uint16)), ('int_32_field', np.dtype(np.int32)), ('uint_32_field', np.dtype(np.uint32)), ('int_64_field', np.dtype(np.int64)), ('uint_64_field', np.dtype(np.uint64)), ('size_field', np.dtype(np.uint64)), ('float_32_field', np.dtype(np.float32)), ('float_64_field', np.dtype(np.float64)), ('complexfloat_32_field', np.dtype(np.complex64)), ('complexfloat_64_field', np.dtype(np.complex128)), ('date_field', np.dtype(np.datetime64)), ('time_field', np.dtype(np.timedelta64)), ('datetime_field', np.dtype(np.datetime64))], align=True)
+    dtype_map[RecordWithPrimitives] = np.dtype([('bool_field', np.dtype(np.bool_)), ('int8_field', np.dtype(np.int8)), ('uint8_field', np.dtype(np.uint8)), ('int16_field', np.dtype(np.int16)), ('uint16_field', np.dtype(np.uint16)), ('int32_field', np.dtype(np.int32)), ('uint32_field', np.dtype(np.uint32)), ('int64_field', np.dtype(np.int64)), ('uint64_field', np.dtype(np.uint64)), ('size_field', np.dtype(np.uint64)), ('float32_field', np.dtype(np.float32)), ('float64_field', np.dtype(np.float64)), ('complexfloat32_field', np.dtype(np.complex64)), ('complexfloat64_field', np.dtype(np.complex128)), ('date_field', np.dtype(np.datetime64)), ('time_field', np.dtype(np.timedelta64)), ('datetime_field', np.dtype(np.datetime64))], align=True)
     dtype_map[RecordWithPrimitiveAliases] = np.dtype([('byte_field', np.dtype(np.uint8)), ('int_field', np.dtype(np.int32)), ('uint_field', np.dtype(np.uint32)), ('long_field', np.dtype(np.int64)), ('ulong_field', np.dtype(np.uint64)), ('float_field', np.dtype(np.float32)), ('double_field', np.dtype(np.float64)), ('complexfloat_field', np.dtype(np.complex64)), ('complexdouble_field', np.dtype(np.complex128))], align=True)
     dtype_map[TupleWithRecords] = np.dtype([('a', get_dtype(SimpleRecord)), ('b', get_dtype(SimpleRecord))], align=True)
     dtype_map[RecordWithVectors] = np.dtype([('default_vector', np.dtype(np.object_)), ('default_vector_fixed_length', np.dtype(np.int32), (3,)), ('vector_of_vectors', np.dtype(np.object_))], align=True)

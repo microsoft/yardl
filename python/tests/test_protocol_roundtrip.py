@@ -10,22 +10,22 @@ from .roundtriputils import create_validating_writer_class
 
 def test_scalar_primitives():
     with create_validating_writer_class(tm.ScalarsWriterBase)() as w:
-        w.write_int_32(42)
+        w.write_int32(42)
         rec = tm.RecordWithPrimitives(
             bool_field=True,
-            int_8_field=-88,
-            uint_8_field=88,
-            int_16_field=-1616,
-            uint_16_field=1616,
-            int_32_field=-3232,
-            uint_32_field=3232,
-            int_64_field=-64646464,
-            uint_64_field=64646464,
+            int8_field=-88,
+            uint8_field=88,
+            int16_field=-1616,
+            uint16_field=1616,
+            int32_field=-3232,
+            uint32_field=3232,
+            int64_field=-64646464,
+            uint64_field=64646464,
             size_field=64646464,
-            float_32_field=32.0,
-            float_64_field=64.64,
-            complexfloat_32_field=complex(32.0, 64.0),
-            complexfloat_64_field=64.64 + 32.32j,
+            float32_field=32.0,
+            float64_field=64.64,
+            complexfloat32_field=complex(32.0, 64.0),
+            complexfloat64_field=64.64 + 32.32j,
             date_field=datetime.date(2024, 4, 2),
             time_field=tm.Time.from_components(12, 34, 56),
             datetime_field=tm.DateTime.from_components(

@@ -10,7 +10,7 @@ import test_model as tm
 def test_defaulting():
     p = tm.RecordWithPrimitives()
     assert p.bool_field == False
-    assert p.int_32_field == 0
+    assert p.int32_field == 0
     assert p.date_field == datetime.date(1970, 1, 1)
     assert p.time_field == tm.Time(0)
     assert p.datetime_field == tm.DateTime(0)

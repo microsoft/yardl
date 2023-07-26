@@ -34,17 +34,17 @@ class BenchmarkFloat256x256WriterBase(abc.ABC):
             expected_method = self._state_to_method_name((self._state + 1) & ~1)
             raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
 
-    def write_float_256x_256(self, value: collections.abc.Iterable[npt.NDArray[np.float32]]) -> None:
+    def write_float256x256(self, value: collections.abc.Iterable[npt.NDArray[np.float32]]) -> None:
         """Ordinal 0"""
 
         if self._state & ~1 != 0:
             self._raise_unexpected_state(0)
 
-        self._write_float_256x_256(value)
+        self._write_float256x256(value)
         self._state = 1
 
     @abc.abstractmethod
-    def _write_float_256x_256(self, value: collections.abc.Iterable[npt.NDArray[np.float32]]) -> None:
+    def _write_float256x256(self, value: collections.abc.Iterable[npt.NDArray[np.float32]]) -> None:
         raise NotImplementedError()
 
     @abc.abstractmethod
@@ -62,7 +62,7 @@ class BenchmarkFloat256x256WriterBase(abc.ABC):
 
     def _state_to_method_name(self, state: int) -> str:
         if state == 0:
-            return 'write_float_256x_256'
+            return 'write_float256x256'
         return "<unknown>"
 
 class BenchmarkFloat256x256ReaderBase(abc.ABC):
@@ -92,21 +92,21 @@ class BenchmarkFloat256x256ReaderBase(abc.ABC):
     def close(self) -> None:
         raise NotImplementedError()
 
-    def read_float_256x_256(self) -> collections.abc.Iterable[npt.NDArray[np.float32]]:
+    def read_float256x256(self) -> collections.abc.Iterable[npt.NDArray[np.float32]]:
         """Ordinal 0"""
 
         if self._state != 0:
             self._raise_unexpected_state(0)
 
-        value = self._read_float_256x_256()
+        value = self._read_float256x256()
         self._state = 1
         return self._wrap_iterable(value, 2)
 
     def copy_to(self, writer: BenchmarkFloat256x256WriterBase) -> None:
-        writer.write_float_256x_256(self.read_float_256x_256())
+        writer.write_float256x256(self.read_float256x256())
 
     @abc.abstractmethod
-    def _read_float_256x_256(self) -> collections.abc.Iterable[npt.NDArray[np.float32]]:
+    def _read_float256x256(self) -> collections.abc.Iterable[npt.NDArray[np.float32]]:
         raise NotImplementedError()
 
     T = typing.TypeVar('T')
@@ -125,7 +125,7 @@ class BenchmarkFloat256x256ReaderBase(abc.ABC):
         	
     def _state_to_method_name(self, state: int) -> str:
         if state == 0:
-            return 'read_float_256x_256'
+            return 'read_float256x256'
         return "<unknown>"
 
 class BenchmarkFloatVlenWriterBase(abc.ABC):
@@ -630,13 +630,13 @@ class ScalarsWriterBase(abc.ABC):
             expected_method = self._state_to_method_name((self._state + 1) & ~1)
             raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
 
-    def write_int_32(self, value: yardl.Int32) -> None:
+    def write_int32(self, value: yardl.Int32) -> None:
         """Ordinal 0"""
 
         if self._state != 0:
             self._raise_unexpected_state(0)
 
-        self._write_int_32(value)
+        self._write_int32(value)
         self._state = 2
 
     def write_record(self, value: RecordWithPrimitives) -> None:
@@ -649,7 +649,7 @@ class ScalarsWriterBase(abc.ABC):
         self._state = 4
 
     @abc.abstractmethod
-    def _write_int_32(self, value: yardl.Int32) -> None:
+    def _write_int32(self, value: yardl.Int32) -> None:
         raise NotImplementedError()
 
     @abc.abstractmethod
@@ -671,7 +671,7 @@ class ScalarsWriterBase(abc.ABC):
 
     def _state_to_method_name(self, state: int) -> str:
         if state == 0:
-            return 'write_int_32'
+            return 'write_int32'
         if state == 2:
             return 'write_record'
         return "<unknown>"
@@ -703,13 +703,13 @@ class ScalarsReaderBase(abc.ABC):
     def close(self) -> None:
         raise NotImplementedError()
 
-    def read_int_32(self) -> yardl.Int32:
+    def read_int32(self) -> yardl.Int32:
         """Ordinal 0"""
 
         if self._state != 0:
             self._raise_unexpected_state(0)
 
-        value = self._read_int_32()
+        value = self._read_int32()
         self._state = 2
         return value
 
@@ -724,11 +724,11 @@ class ScalarsReaderBase(abc.ABC):
         return value
 
     def copy_to(self, writer: ScalarsWriterBase) -> None:
-        writer.write_int_32(self.read_int_32())
+        writer.write_int32(self.read_int32())
         writer.write_record(self.read_record())
 
     @abc.abstractmethod
-    def _read_int_32(self) -> yardl.Int32:
+    def _read_int32(self) -> yardl.Int32:
         raise NotImplementedError()
 
     @abc.abstractmethod
@@ -751,7 +751,7 @@ class ScalarsReaderBase(abc.ABC):
         	
     def _state_to_method_name(self, state: int) -> str:
         if state == 0:
-            return 'read_int_32'
+            return 'read_int32'
         if state == 2:
             return 'read_record'
         return "<unknown>"

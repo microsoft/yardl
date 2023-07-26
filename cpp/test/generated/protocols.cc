@@ -141,10 +141,10 @@ void BenchmarkFloat256x256ReaderBase::Close() {
 
   CloseImpl();
 }
-void BenchmarkFloat256x256ReaderBase::CopyTo(BenchmarkFloat256x256WriterBase& writer, size_t float_256x_256_buffer_size) {
-  if (float_256x_256_buffer_size > 1) {
+void BenchmarkFloat256x256ReaderBase::CopyTo(BenchmarkFloat256x256WriterBase& writer, size_t float256x256_buffer_size) {
+  if (float256x256_buffer_size > 1) {
     std::vector<yardl::FixedNDArray<float, 256, 256>> values;
-    values.reserve(float_256x_256_buffer_size);
+    values.reserve(float256x256_buffer_size);
     while(ReadFloat256x256(values)) {
       writer.WriteFloat256x256(values);
     }

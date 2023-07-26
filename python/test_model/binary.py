@@ -35,7 +35,7 @@ class BinaryBenchmarkFloat256x256Writer(_binary.BinaryProtocolWriter, BenchmarkF
         BenchmarkFloat256x256WriterBase.__init__(self)
         _binary.BinaryProtocolWriter.__init__(self, stream, BenchmarkFloat256x256WriterBase.schema)
 
-    def _write_float_256x_256(self, value: collections.abc.Iterable[npt.NDArray[np.float32]]) -> None:
+    def _write_float256x256(self, value: collections.abc.Iterable[npt.NDArray[np.float32]]) -> None:
         _binary.StreamSerializer(_binary.FixedNDArraySerializer(_binary.float32_serializer, (256, 256,))).write(self._stream, value)
 
 
@@ -47,7 +47,7 @@ class BinaryBenchmarkFloat256x256Reader(_binary.BinaryProtocolReader, BenchmarkF
         BenchmarkFloat256x256ReaderBase.__init__(self)
         _binary.BinaryProtocolReader.__init__(self, stream, BenchmarkFloat256x256ReaderBase.schema)
 
-    def _read_float_256x_256(self) -> collections.abc.Iterable[npt.NDArray[np.float32]]:
+    def _read_float256x256(self) -> collections.abc.Iterable[npt.NDArray[np.float32]]:
         return _binary.StreamSerializer(_binary.FixedNDArraySerializer(_binary.float32_serializer, (256, 256,))).read(self._stream)
 
 class BinaryBenchmarkFloatVlenWriter(_binary.BinaryProtocolWriter, BenchmarkFloatVlenWriterBase):
@@ -156,7 +156,7 @@ class BinaryScalarsWriter(_binary.BinaryProtocolWriter, ScalarsWriterBase):
         ScalarsWriterBase.__init__(self)
         _binary.BinaryProtocolWriter.__init__(self, stream, ScalarsWriterBase.schema)
 
-    def _write_int_32(self, value: yardl.Int32) -> None:
+    def _write_int32(self, value: yardl.Int32) -> None:
         _binary.int32_serializer.write(self._stream, value)
 
     def _write_record(self, value: RecordWithPrimitives) -> None:
@@ -171,7 +171,7 @@ class BinaryScalarsReader(_binary.BinaryProtocolReader, ScalarsReaderBase):
         ScalarsReaderBase.__init__(self)
         _binary.BinaryProtocolReader.__init__(self, stream, ScalarsReaderBase.schema)
 
-    def _read_int_32(self) -> yardl.Int32:
+    def _read_int32(self) -> yardl.Int32:
         return _binary.int32_serializer.read(self._stream)
 
     def _read_record(self) -> RecordWithPrimitives:
@@ -1292,20 +1292,20 @@ class _SimpleRecordSerializer(_binary.RecordSerializer[SimpleRecord]):
 
 class _RecordWithPrimitivesSerializer(_binary.RecordSerializer[RecordWithPrimitives]):
     def __init__(self) -> None:
-        super().__init__([("bool_field", _binary.bool_serializer), ("int_8_field", _binary.int8_serializer), ("uint_8_field", _binary.uint8_serializer), ("int_16_field", _binary.int16_serializer), ("uint_16_field", _binary.uint16_serializer), ("int_32_field", _binary.int32_serializer), ("uint_32_field", _binary.uint32_serializer), ("int_64_field", _binary.int64_serializer), ("uint_64_field", _binary.uint64_serializer), ("size_field", _binary.size_serializer), ("float_32_field", _binary.float32_serializer), ("float_64_field", _binary.float64_serializer), ("complexfloat_32_field", _binary.complexfloat32_serializer), ("complexfloat_64_field", _binary.complexfloat64_serializer), ("date_field", _binary.date_serializer), ("time_field", _binary.time_serializer), ("datetime_field", _binary.datetime_serializer)])
+        super().__init__([("bool_field", _binary.bool_serializer), ("int8_field", _binary.int8_serializer), ("uint8_field", _binary.uint8_serializer), ("int16_field", _binary.int16_serializer), ("uint16_field", _binary.uint16_serializer), ("int32_field", _binary.int32_serializer), ("uint32_field", _binary.uint32_serializer), ("int64_field", _binary.int64_serializer), ("uint64_field", _binary.uint64_serializer), ("size_field", _binary.size_serializer), ("float32_field", _binary.float32_serializer), ("float64_field", _binary.float64_serializer), ("complexfloat32_field", _binary.complexfloat32_serializer), ("complexfloat64_field", _binary.complexfloat64_serializer), ("date_field", _binary.date_serializer), ("time_field", _binary.time_serializer), ("datetime_field", _binary.datetime_serializer)])
 
     def write(self, stream: _binary.CodedOutputStream, value: RecordWithPrimitives) -> None:
         if isinstance(value, np.void):
             self.write_numpy(stream, value)
             return
-        self._write(stream, value.bool_field, value.int_8_field, value.uint_8_field, value.int_16_field, value.uint_16_field, value.int_32_field, value.uint_32_field, value.int_64_field, value.uint_64_field, value.size_field, value.float_32_field, value.float_64_field, value.complexfloat_32_field, value.complexfloat_64_field, value.date_field, value.time_field, value.datetime_field)
+        self._write(stream, value.bool_field, value.int8_field, value.uint8_field, value.int16_field, value.uint16_field, value.int32_field, value.uint32_field, value.int64_field, value.uint64_field, value.size_field, value.float32_field, value.float64_field, value.complexfloat32_field, value.complexfloat64_field, value.date_field, value.time_field, value.datetime_field)
 
     def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
-        self._write(stream, value['bool_field'], value['int_8_field'], value['uint_8_field'], value['int_16_field'], value['uint_16_field'], value['int_32_field'], value['uint_32_field'], value['int_64_field'], value['uint_64_field'], value['size_field'], value['float_32_field'], value['float_64_field'], value['complexfloat_32_field'], value['complexfloat_64_field'], value['date_field'], value['time_field'], value['datetime_field'])
+        self._write(stream, value['bool_field'], value['int8_field'], value['uint8_field'], value['int16_field'], value['uint16_field'], value['int32_field'], value['uint32_field'], value['int64_field'], value['uint64_field'], value['size_field'], value['float32_field'], value['float64_field'], value['complexfloat32_field'], value['complexfloat64_field'], value['date_field'], value['time_field'], value['datetime_field'])
 
     def read(self, stream: _binary.CodedInputStream) -> RecordWithPrimitives:
         field_values = self._read(stream)
-        return RecordWithPrimitives(bool_field=field_values[0], int_8_field=field_values[1], uint_8_field=field_values[2], int_16_field=field_values[3], uint_16_field=field_values[4], int_32_field=field_values[5], uint_32_field=field_values[6], int_64_field=field_values[7], uint_64_field=field_values[8], size_field=field_values[9], float_32_field=field_values[10], float_64_field=field_values[11], complexfloat_32_field=field_values[12], complexfloat_64_field=field_values[13], date_field=field_values[14], time_field=field_values[15], datetime_field=field_values[16])
+        return RecordWithPrimitives(bool_field=field_values[0], int8_field=field_values[1], uint8_field=field_values[2], int16_field=field_values[3], uint16_field=field_values[4], int32_field=field_values[5], uint32_field=field_values[6], int64_field=field_values[7], uint64_field=field_values[8], size_field=field_values[9], float32_field=field_values[10], float64_field=field_values[11], complexfloat32_field=field_values[12], complexfloat64_field=field_values[13], date_field=field_values[14], time_field=field_values[15], datetime_field=field_values[16])
 
 
 class _RecordWithPrimitiveAliasesSerializer(_binary.RecordSerializer[RecordWithPrimitiveAliases]):

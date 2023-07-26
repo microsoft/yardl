@@ -38,8 +38,8 @@ def test_field_access():
 def test_literals():
     r = tm.RecordWithComputedFields()
     assert r.int_literal() == 42
-    assert r.large_negative_int_64_literal() == -0x4000000000000000
-    assert r.large_u_int_64_literal() == 0x8000000000000000
+    assert r.large_negative_int64_literal() == -0x4000000000000000
+    assert r.large_u_int64_literal() == 0x8000000000000000
     assert r.string_literal() == "hello"
 
 
