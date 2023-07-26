@@ -76,6 +76,14 @@ func TestPascalOrCamelToSnakeCase(t *testing.T) {
 		{"myMP3", "my_mp3"},
 		{"snake3C3ase", "snake_3c3ase"},
 		{"kspaceEncodeStep1", "kspace_encode_step_1"},
+		{"int4", "int_4"},
+		{"int7", "int_7"},
+		{"int8", "int8"},
+		{"int9", "int_9"},
+		{"int16", "int16"},
+		{"int32", "int32"},
+		{"int64", "int64"},
+		{"int128", "int128"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.intput, func(t *testing.T) {

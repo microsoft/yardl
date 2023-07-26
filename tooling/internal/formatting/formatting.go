@@ -7,6 +7,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"strconv"
 	"strings"
 
 	"github.com/dlclark/regexp2"
@@ -112,10 +113,31 @@ func ToPascalCase(s string) string {
 	return b.String()
 }
 
-var snakeCaseRegex = regexp2.MustCompile(`((?<=\p{Ll})(\p{Lu}))|(?<!(\b|_)\p{Ll})((?<=\p{Ll})(\d))|(?<!\b|_)(\p{Lu})(?=\p{Ll})`, regexp2.ExplicitCapture)
+var initialSnakeCaseRegex = regexp2.MustCompile(`((?<=\p{Ll})(\p{Lu}))|(?<!(\b|_)\p{Ll})((?<=\p{Ll})(\d))|(?<!\b|_)(\p{Lu})(?=\p{Ll})`, regexp2.ExplicitCapture)
+var digitGroupSnakeCaseRegex = regexp2.MustCompile(`_\d+`, regexp2.ExplicitCapture)
 
+// A PascalCased of camelCased string will be converted to snake_case
+// Numbers will be separated by an underscore, unless preceded by an uppercase
+// or the number is greater than 4 and a power of 2. This is to not break apart type
+// names like int32 or bas64.
 func ToSnakeCase(str string) string {
-	s, err := snakeCaseRegex.Replace(str, `_$&`, -1, -1)
+	s, err := initialSnakeCaseRegex.Replace(str, `_$&`, -1, -1)
+	if err != nil {
+		panic(err)
+	}
+
+	s, err = digitGroupSnakeCaseRegex.ReplaceFunc(s, func(m regexp2.Match) string {
+		matchString := m.String()
+		digitString := matchString[1:]
+		i, _ := strconv.Atoi(digitString)
+		if i > 4 && (i&(i-1)) == 0 {
+			return digitString
+		}
+
+		return matchString
+
+	}, -1, -1)
+
 	if err != nil {
 		panic(err)
 	}
