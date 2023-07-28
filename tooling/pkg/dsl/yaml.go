@@ -852,7 +852,7 @@ func UnmarshalUnionYAML(value *yaml.Node) (*GeneralizedType, error) {
 			return nil, err
 		}
 
-		cases = append(cases, &TypeCase{Tag: tag, Type: parsedType, NodeMeta: createNodeMeta(tagNode)})
+		cases = append(cases, &TypeCase{Tag: tag, ExplicitTag: true, Type: parsedType, NodeMeta: createNodeMeta(tagNode)})
 	}
 
 	return &GeneralizedType{NodeMeta: createNodeMeta(value), Cases: cases, Dimensionality: nil}, nil

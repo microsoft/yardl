@@ -32,9 +32,9 @@ BenchmarkSmallRecordWithOptionals: !protocol
 BenchmarkSimpleMrd: !protocol
   sequence:
     data: !stream
-      items:
-        - SimpleAcquisition
-        - Image<float>
+      items: !union
+        acquisition: SimpleAcquisition
+        image: Image<float>
 
 SimpleEncodingCounters: !record
   fields:

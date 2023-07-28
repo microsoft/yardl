@@ -1502,11 +1502,13 @@
                 "name": "unionWithNestedGenericUnion",
                 "type": [
                   {
-                    "tag": "int32",
+                    "tag": "int",
+                    "explicitTag": true,
                     "type": "int32"
                   },
                   {
-                    "tag": "GenericRecordWithComputedFields\u003cstring, float32\u003e",
+                    "tag": "genericRecordWithComputedFields",
+                    "explicitTag": true,
                     "type": {
                       "name": "TestModel.GenericRecordWithComputedFields",
                       "typeArguments": [
@@ -2583,11 +2585,13 @@
                 "stream": {
                   "items": [
                     {
-                      "tag": "SimpleAcquisition",
+                      "tag": "acquisition",
+                      "explicitTag": true,
                       "type": "TestModel.SimpleAcquisition"
                     },
                     {
-                      "tag": "Image\u003cfloat32\u003e",
+                      "tag": "image",
+                      "explicitTag": true,
                       "type": {
                         "name": "TestModel.Image",
                         "typeArguments": [
@@ -3435,7 +3439,8 @@
                 "stream": {
                   "items": [
                     {
-                      "tag": "Image\u003cfloat32\u003e",
+                      "tag": "imageFloat",
+                      "explicitTag": true,
                       "type": {
                         "name": "TestModel.Image",
                         "typeArguments": [
@@ -3444,7 +3449,8 @@
                       }
                     },
                     {
-                      "tag": "Image\u003cfloat64\u003e",
+                      "tag": "imageDouble",
+                      "explicitTag": true,
                       "type": {
                         "name": "TestModel.Image",
                         "typeArguments": [

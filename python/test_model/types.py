@@ -872,8 +872,8 @@ class RecordWithComputedFields:
         None
     ]
     union_with_nested_generic_union: typing.Union[
-        tuple[typing.Literal["int32"], yardl.Int32],
-        tuple[typing.Literal["GenericRecordWithComputedFields<string, float32>"], GenericRecordWithComputedFields[str, yardl.Float32]],
+        tuple[typing.Literal["int"], yardl.Int32],
+        tuple[typing.Literal["genericRecordWithComputedFields"], GenericRecordWithComputedFields[str, yardl.Float32]],
     ]
     map_field: dict[str, str]
 
@@ -899,9 +899,9 @@ class RecordWithComputedFields:
             None
         ] = None,
         union_with_nested_generic_union: typing.Union[
-            tuple[typing.Literal["int32"], yardl.Int32],
-            tuple[typing.Literal["GenericRecordWithComputedFields<string, float32>"], GenericRecordWithComputedFields[str, yardl.Float32]],
-        ] = ("int32", 0),
+            tuple[typing.Literal["int"], yardl.Int32],
+            tuple[typing.Literal["genericRecordWithComputedFields"], GenericRecordWithComputedFields[str, yardl.Float32]],
+        ] = ("int", 0),
         map_field: typing.Optional[dict[str, str]] = None,
     ):
         self.array_field = array_field if array_field is not None else np.zeros((0, 0), dtype=np.dtype(np.int32))
@@ -1101,9 +1101,9 @@ class RecordWithComputedFields:
 
     def nested_switch(self) -> yardl.Int16:
         _var0 = self.union_with_nested_generic_union
-        if _var0[0] == "int32":
+        if _var0[0] == "int":
             return -1
-        if _var0[0] == "GenericRecordWithComputedFields<string, float32>":
+        if _var0[0] == "genericRecordWithComputedFields":
             rec = _var0[1]
             _var1 = rec.f1
             if _var1[0] == "T1":
@@ -1115,9 +1115,9 @@ class RecordWithComputedFields:
 
     def use_nested_computed_field(self) -> yardl.Int16:
         _var0 = self.union_with_nested_generic_union
-        if _var0[0] == "int32":
+        if _var0[0] == "int":
             return -1
-        if _var0[0] == "GenericRecordWithComputedFields<string, float32>":
+        if _var0[0] == "genericRecordWithComputedFields":
             rec = _var0[1]
             return int(rec.type_index())
         raise RuntimeError("Unexpected union case")

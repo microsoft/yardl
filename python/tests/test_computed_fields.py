@@ -136,18 +136,18 @@ def test_switch_expression():
     r.nullable_int_float_union = ("float32", 42.9)
     assert r.nullable_int_float_union_string() == "float"
 
-    r.union_with_nested_generic_union = ("int32", 42)
+    r.union_with_nested_generic_union = ("int", 42)
     assert r.nested_switch() == -1
     assert r.use_nested_computed_field() == -1
 
     r.union_with_nested_generic_union = (
-        "GenericRecordWithComputedFields<string, float32>",
+        "genericRecordWithComputedFields",
         tm.GenericRecordWithComputedFields(f1=("T0", "hi")),
     )
     assert r.nested_switch() == 10
     assert r.use_nested_computed_field() == 0
     r.union_with_nested_generic_union = (
-        "GenericRecordWithComputedFields<string, float32>",
+        "genericRecordWithComputedFields",
         tm.GenericRecordWithComputedFields(f1=("T1", 42.9)),
     )
     assert r.nested_switch() == 20

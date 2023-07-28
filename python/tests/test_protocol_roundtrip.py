@@ -633,11 +633,11 @@ def test_simple_generics():
         w.write_stream_of_type_variants(
             [
                 (
-                    "Image<float32>",
+                    "imageFloat",
                     np.array([[1.0, 2.0], [3.0, 4.0]], dtype=np.float32),
                 ),
                 (
-                    "Image<float64>",
+                    "imageDouble",
                     np.array([[1.0, 2.0], [3.0, 4.0]], dtype=np.float64),
                 ),
             ]

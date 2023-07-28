@@ -489,7 +489,7 @@ class BenchmarkSimpleMrdWriterBase(abc.ABC):
     def __init__(self) -> None:
         self._state = 0
 
-    schema = r"""{"protocol":{"name":"BenchmarkSimpleMrd","sequence":[{"name":"data","type":{"stream":{"items":[{"tag":"SimpleAcquisition","type":"TestModel.SimpleAcquisition"},{"tag":"Image\u003cfloat32\u003e","type":{"name":"TestModel.Image","typeArguments":["float32"]}}]}}}]},"types":[{"name":"Image","typeParameters":["T"],"type":{"array":{"items":"T","dimensions":[{"name":"x"},{"name":"y"}]}}},{"name":"SimpleAcquisition","fields":[{"name":"flags","type":"uint64"},{"name":"idx","type":"TestModel.SimpleEncodingCounters"},{"name":"data","type":{"array":{"items":"complexfloat32","dimensions":2}}},{"name":"trajectory","type":{"array":{"items":"float32","dimensions":2}}}]},{"name":"SimpleEncodingCounters","fields":[{"name":"e1","type":[null,"uint32"]},{"name":"e2","type":[null,"uint32"]},{"name":"slice","type":[null,"uint32"]},{"name":"repetition","type":[null,"uint32"]}]}]}"""
+    schema = r"""{"protocol":{"name":"BenchmarkSimpleMrd","sequence":[{"name":"data","type":{"stream":{"items":[{"tag":"acquisition","explicitTag":true,"type":"TestModel.SimpleAcquisition"},{"tag":"image","explicitTag":true,"type":{"name":"TestModel.Image","typeArguments":["float32"]}}]}}}]},"types":[{"name":"Image","typeParameters":["T"],"type":{"array":{"items":"T","dimensions":[{"name":"x"},{"name":"y"}]}}},{"name":"SimpleAcquisition","fields":[{"name":"flags","type":"uint64"},{"name":"idx","type":"TestModel.SimpleEncodingCounters"},{"name":"data","type":{"array":{"items":"complexfloat32","dimensions":2}}},{"name":"trajectory","type":{"array":{"items":"float32","dimensions":2}}}]},{"name":"SimpleEncodingCounters","fields":[{"name":"e1","type":[null,"uint32"]},{"name":"e2","type":[null,"uint32"]},{"name":"slice","type":[null,"uint32"]},{"name":"repetition","type":[null,"uint32"]}]}]}"""
 
     def __enter__(self):
         return self
@@ -507,8 +507,8 @@ class BenchmarkSimpleMrdWriterBase(abc.ABC):
             raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
 
     def write_data(self, value: collections.abc.Iterable[typing.Union[
-        tuple[typing.Literal["SimpleAcquisition"], SimpleAcquisition],
-        tuple[typing.Literal["Image<float32>"], Image[np.float32]],
+        tuple[typing.Literal["acquisition"], SimpleAcquisition],
+        tuple[typing.Literal["image"], Image[np.float32]],
     ]]) -> None:
         """Ordinal 0"""
 
@@ -520,8 +520,8 @@ class BenchmarkSimpleMrdWriterBase(abc.ABC):
 
     @abc.abstractmethod
     def _write_data(self, value: collections.abc.Iterable[typing.Union[
-        tuple[typing.Literal["SimpleAcquisition"], SimpleAcquisition],
-        tuple[typing.Literal["Image<float32>"], Image[np.float32]],
+        tuple[typing.Literal["acquisition"], SimpleAcquisition],
+        tuple[typing.Literal["image"], Image[np.float32]],
     ]]) -> None:
         raise NotImplementedError()
 
@@ -571,8 +571,8 @@ class BenchmarkSimpleMrdReaderBase(abc.ABC):
         raise NotImplementedError()
 
     def read_data(self) -> collections.abc.Iterable[typing.Union[
-        tuple[typing.Literal["SimpleAcquisition"], SimpleAcquisition],
-        tuple[typing.Literal["Image<float32>"], Image[np.float32]],
+        tuple[typing.Literal["acquisition"], SimpleAcquisition],
+        tuple[typing.Literal["image"], Image[np.float32]],
     ]]:
         """Ordinal 0"""
 
@@ -588,8 +588,8 @@ class BenchmarkSimpleMrdReaderBase(abc.ABC):
 
     @abc.abstractmethod
     def _read_data(self) -> collections.abc.Iterable[typing.Union[
-        tuple[typing.Literal["SimpleAcquisition"], SimpleAcquisition],
-        tuple[typing.Literal["Image<float32>"], Image[np.float32]],
+        tuple[typing.Literal["acquisition"], SimpleAcquisition],
+        tuple[typing.Literal["image"], Image[np.float32]],
     ]]:
         raise NotImplementedError()
 
@@ -4511,7 +4511,7 @@ class SimpleGenericsWriterBase(abc.ABC):
     def __init__(self) -> None:
         self._state = 0
 
-    schema = r"""{"protocol":{"name":"SimpleGenerics","sequence":[{"name":"floatImage","type":{"name":"TestModel.Image","typeArguments":["float32"]}},{"name":"intImage","type":{"name":"TestModel.Image","typeArguments":["int32"]}},{"name":"intImageAlternateSyntax","type":{"name":"TestModel.Image","typeArguments":["int32"]}},{"name":"stringImage","type":{"name":"TestModel.Image","typeArguments":["string"]}},{"name":"intFloatTuple","type":{"name":"TestModel.MyTuple","typeArguments":["int32","float32"]}},{"name":"floatFloatTuple","type":{"name":"TestModel.MyTuple","typeArguments":["float32","float32"]}},{"name":"intFloatTupleAlternateSyntax","type":{"name":"TestModel.MyTuple","typeArguments":["int32","float32"]}},{"name":"intStringTuple","type":{"name":"TestModel.MyTuple","typeArguments":["int32","string"]}},{"name":"streamOfTypeVariants","type":{"stream":{"items":[{"tag":"Image\u003cfloat32\u003e","type":{"name":"TestModel.Image","typeArguments":["float32"]}},{"tag":"Image\u003cfloat64\u003e","type":{"name":"TestModel.Image","typeArguments":["float64"]}}]}}}]},"types":[{"name":"Image","typeParameters":["T"],"type":{"array":{"items":"T","dimensions":[{"name":"x"},{"name":"y"}]}}},{"name":"MyTuple","typeParameters":["T1","T2"],"fields":[{"name":"v1","type":"T1"},{"name":"v2","type":"T2"}]}]}"""
+    schema = r"""{"protocol":{"name":"SimpleGenerics","sequence":[{"name":"floatImage","type":{"name":"TestModel.Image","typeArguments":["float32"]}},{"name":"intImage","type":{"name":"TestModel.Image","typeArguments":["int32"]}},{"name":"intImageAlternateSyntax","type":{"name":"TestModel.Image","typeArguments":["int32"]}},{"name":"stringImage","type":{"name":"TestModel.Image","typeArguments":["string"]}},{"name":"intFloatTuple","type":{"name":"TestModel.MyTuple","typeArguments":["int32","float32"]}},{"name":"floatFloatTuple","type":{"name":"TestModel.MyTuple","typeArguments":["float32","float32"]}},{"name":"intFloatTupleAlternateSyntax","type":{"name":"TestModel.MyTuple","typeArguments":["int32","float32"]}},{"name":"intStringTuple","type":{"name":"TestModel.MyTuple","typeArguments":["int32","string"]}},{"name":"streamOfTypeVariants","type":{"stream":{"items":[{"tag":"imageFloat","explicitTag":true,"type":{"name":"TestModel.Image","typeArguments":["float32"]}},{"tag":"imageDouble","explicitTag":true,"type":{"name":"TestModel.Image","typeArguments":["float64"]}}]}}}]},"types":[{"name":"Image","typeParameters":["T"],"type":{"array":{"items":"T","dimensions":[{"name":"x"},{"name":"y"}]}}},{"name":"MyTuple","typeParameters":["T1","T2"],"fields":[{"name":"v1","type":"T1"},{"name":"v2","type":"T2"}]}]}"""
 
     def __enter__(self):
         return self
@@ -4601,8 +4601,8 @@ class SimpleGenericsWriterBase(abc.ABC):
         self._state = 16
 
     def write_stream_of_type_variants(self, value: collections.abc.Iterable[typing.Union[
-        tuple[typing.Literal["Image<float32>"], Image[np.float32]],
-        tuple[typing.Literal["Image<float64>"], Image[np.float64]],
+        tuple[typing.Literal["imageFloat"], Image[np.float32]],
+        tuple[typing.Literal["imageDouble"], Image[np.float64]],
     ]]) -> None:
         """Ordinal 8"""
 
@@ -4646,8 +4646,8 @@ class SimpleGenericsWriterBase(abc.ABC):
 
     @abc.abstractmethod
     def _write_stream_of_type_variants(self, value: collections.abc.Iterable[typing.Union[
-        tuple[typing.Literal["Image<float32>"], Image[np.float32]],
-        tuple[typing.Literal["Image<float64>"], Image[np.float64]],
+        tuple[typing.Literal["imageFloat"], Image[np.float32]],
+        tuple[typing.Literal["imageDouble"], Image[np.float64]],
     ]]) -> None:
         raise NotImplementedError()
 
@@ -4793,8 +4793,8 @@ class SimpleGenericsReaderBase(abc.ABC):
         return value
 
     def read_stream_of_type_variants(self) -> collections.abc.Iterable[typing.Union[
-        tuple[typing.Literal["Image<float32>"], Image[np.float32]],
-        tuple[typing.Literal["Image<float64>"], Image[np.float64]],
+        tuple[typing.Literal["imageFloat"], Image[np.float32]],
+        tuple[typing.Literal["imageDouble"], Image[np.float64]],
     ]]:
         """Ordinal 8"""
 
@@ -4850,8 +4850,8 @@ class SimpleGenericsReaderBase(abc.ABC):
 
     @abc.abstractmethod
     def _read_stream_of_type_variants(self) -> collections.abc.Iterable[typing.Union[
-        tuple[typing.Literal["Image<float32>"], Image[np.float32]],
-        tuple[typing.Literal["Image<float64>"], Image[np.float64]],
+        tuple[typing.Literal["imageFloat"], Image[np.float32]],
+        tuple[typing.Literal["imageDouble"], Image[np.float64]],
     ]]:
         raise NotImplementedError()
 
@@ -5696,7 +5696,7 @@ class ProtocolWithComputedFieldsWriterBase(abc.ABC):
     def __init__(self) -> None:
         self._state = 0
 
-    schema = r"""{"protocol":{"name":"ProtocolWithComputedFields","sequence":[{"name":"recordWithComputedFields","type":"TestModel.RecordWithComputedFields"}]},"types":[{"name":"GenericRecordWithComputedFields","typeParameters":["T0","T1"],"fields":[{"name":"f1","type":[{"tag":"T0","type":"T0"},{"tag":"T1","type":"T1"}]}]},{"name":"MyTuple","typeParameters":["T1","T2"],"fields":[{"name":"v1","type":"T1"},{"name":"v2","type":"T2"}]},{"name":"NamedNDArray","type":{"array":{"items":"int32","dimensions":[{"name":"dimA"},{"name":"dimB"}]}}},{"name":"RecordWithComputedFields","fields":[{"name":"arrayField","type":{"array":{"items":"int32","dimensions":[{"name":"x"},{"name":"y"}]}}},{"name":"arrayFieldMapDimensions","type":{"array":{"items":"int32","dimensions":[{"name":"x"},{"name":"y"}]}}},{"name":"dynamicArrayField","type":{"array":{"items":"int32"}}},{"name":"fixedArrayField","type":{"array":{"items":"int32","dimensions":[{"name":"x","length":3},{"name":"y","length":4}]}}},{"name":"intField","type":"int32"},{"name":"stringField","type":"string"},{"name":"tupleField","type":{"name":"TestModel.MyTuple","typeArguments":["int32","int32"]}},{"name":"vectorField","type":{"vector":{"items":"int32"}}},{"name":"vectorOfVectorsField","type":{"vector":{"items":{"vector":{"items":"int32"}}}}},{"name":"fixedVectorField","type":{"vector":{"items":"int32","length":3}}},{"name":"optionalNamedArray","type":[null,"TestModel.NamedNDArray"]},{"name":"intFloatUnion","type":[{"tag":"int32","type":"int32"},{"tag":"float32","type":"float32"}]},{"name":"nullableIntFloatUnion","type":[null,{"tag":"int32","type":"int32"},{"tag":"float32","type":"float32"}]},{"name":"unionWithNestedGenericUnion","type":[{"tag":"int32","type":"int32"},{"tag":"GenericRecordWithComputedFields\u003cstring, float32\u003e","type":{"name":"TestModel.GenericRecordWithComputedFields","typeArguments":["string","float32"]}}]},{"name":"mapField","type":{"map":{"keys":"string","values":"string"}}}]}]}"""
+    schema = r"""{"protocol":{"name":"ProtocolWithComputedFields","sequence":[{"name":"recordWithComputedFields","type":"TestModel.RecordWithComputedFields"}]},"types":[{"name":"GenericRecordWithComputedFields","typeParameters":["T0","T1"],"fields":[{"name":"f1","type":[{"tag":"T0","type":"T0"},{"tag":"T1","type":"T1"}]}]},{"name":"MyTuple","typeParameters":["T1","T2"],"fields":[{"name":"v1","type":"T1"},{"name":"v2","type":"T2"}]},{"name":"NamedNDArray","type":{"array":{"items":"int32","dimensions":[{"name":"dimA"},{"name":"dimB"}]}}},{"name":"RecordWithComputedFields","fields":[{"name":"arrayField","type":{"array":{"items":"int32","dimensions":[{"name":"x"},{"name":"y"}]}}},{"name":"arrayFieldMapDimensions","type":{"array":{"items":"int32","dimensions":[{"name":"x"},{"name":"y"}]}}},{"name":"dynamicArrayField","type":{"array":{"items":"int32"}}},{"name":"fixedArrayField","type":{"array":{"items":"int32","dimensions":[{"name":"x","length":3},{"name":"y","length":4}]}}},{"name":"intField","type":"int32"},{"name":"stringField","type":"string"},{"name":"tupleField","type":{"name":"TestModel.MyTuple","typeArguments":["int32","int32"]}},{"name":"vectorField","type":{"vector":{"items":"int32"}}},{"name":"vectorOfVectorsField","type":{"vector":{"items":{"vector":{"items":"int32"}}}}},{"name":"fixedVectorField","type":{"vector":{"items":"int32","length":3}}},{"name":"optionalNamedArray","type":[null,"TestModel.NamedNDArray"]},{"name":"intFloatUnion","type":[{"tag":"int32","type":"int32"},{"tag":"float32","type":"float32"}]},{"name":"nullableIntFloatUnion","type":[null,{"tag":"int32","type":"int32"},{"tag":"float32","type":"float32"}]},{"name":"unionWithNestedGenericUnion","type":[{"tag":"int","explicitTag":true,"type":"int32"},{"tag":"genericRecordWithComputedFields","explicitTag":true,"type":{"name":"TestModel.GenericRecordWithComputedFields","typeArguments":["string","float32"]}}]},{"name":"mapField","type":{"map":{"keys":"string","values":"string"}}}]}]}"""
 
     def __enter__(self):
         return self

@@ -378,8 +378,9 @@ func (tcs *TypeCases) HasNullOption() bool {
 
 type TypeCase struct {
 	NodeMeta
-	Tag  string `json:"tag,omitempty"`
-	Type Type   `json:"type"`
+	Tag         string `json:"tag,omitempty"`
+	ExplicitTag bool   `json:"explicitTag,omitempty"`
+	Type        Type   `json:"type"`
 }
 
 func (tc *TypeCase) IsNullType() bool {

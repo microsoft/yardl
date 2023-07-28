@@ -397,7 +397,9 @@ SimpleGenerics: !protocol
       args: [int, float]
     intStringTuple: MyTuple<int,string>
     streamOfTypeVariants: !stream
-      items: [Image<float>, Image<double>]
+      items: !union
+        imageFloat: Image<float>
+        imageDouble: Image<double>
 
 AdvancedGenerics: !protocol
   sequence:
@@ -464,9 +466,9 @@ RecordWithComputedFields: !record
     optionalNamedArray: NamedNDArray?
     intFloatUnion: [int, float]
     nullableIntFloatUnion: [null, int, float]
-    unionWithNestedGenericUnion:
-      - int
-      - GenericRecordWithComputedFields<string, float>
+    unionWithNestedGenericUnion: !union
+      int: int
+      genericRecordWithComputedFields: GenericRecordWithComputedFields<string, float>
     mapField: string->string
   computedFields:
     intLiteral: 42 # this comment is ignored

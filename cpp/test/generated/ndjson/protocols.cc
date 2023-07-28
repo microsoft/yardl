@@ -129,10 +129,10 @@ struct adl_serializer<std::variant<test_model::SimpleAcquisition, test_model::Im
   static void to_json(ordered_json& j, std::variant<test_model::SimpleAcquisition, test_model::Image<float>> const& value) {
     switch (value.index()) {
       case 0:
-        j = ordered_json{ {"SimpleAcquisition", std::get<test_model::SimpleAcquisition>(value)} };
+        j = ordered_json{ {"acquisition", std::get<test_model::SimpleAcquisition>(value)} };
         break;
       case 1:
-        j = ordered_json{ {"Image<float32>", std::get<test_model::Image<float>>(value)} };
+        j = ordered_json{ {"image", std::get<test_model::Image<float>>(value)} };
         break;
       default:
         throw std::runtime_error("Invalid union value");
@@ -142,11 +142,11 @@ struct adl_serializer<std::variant<test_model::SimpleAcquisition, test_model::Im
   static void from_json(ordered_json const& j, std::variant<test_model::SimpleAcquisition, test_model::Image<float>>& value) {
     auto it = j.begin();
     std::string tag = it.key();
-    if (tag == "SimpleAcquisition") {
+    if (tag == "acquisition") {
       value = it.value().get<test_model::SimpleAcquisition>();
       return;
     }
-    if (tag == "Image<float32>") {
+    if (tag == "image") {
       value = it.value().get<test_model::Image<float>>();
       return;
     }
@@ -290,10 +290,10 @@ struct adl_serializer<std::variant<test_model::Image<float>, test_model::Image<d
   static void to_json(ordered_json& j, std::variant<test_model::Image<float>, test_model::Image<double>> const& value) {
     switch (value.index()) {
       case 0:
-        j = ordered_json{ {"Image<float32>", std::get<test_model::Image<float>>(value)} };
+        j = ordered_json{ {"imageFloat", std::get<test_model::Image<float>>(value)} };
         break;
       case 1:
-        j = ordered_json{ {"Image<float64>", std::get<test_model::Image<double>>(value)} };
+        j = ordered_json{ {"imageDouble", std::get<test_model::Image<double>>(value)} };
         break;
       default:
         throw std::runtime_error("Invalid union value");
@@ -303,11 +303,11 @@ struct adl_serializer<std::variant<test_model::Image<float>, test_model::Image<d
   static void from_json(ordered_json const& j, std::variant<test_model::Image<float>, test_model::Image<double>>& value) {
     auto it = j.begin();
     std::string tag = it.key();
-    if (tag == "Image<float32>") {
+    if (tag == "imageFloat") {
       value = it.value().get<test_model::Image<float>>();
       return;
     }
-    if (tag == "Image<float64>") {
+    if (tag == "imageDouble") {
       value = it.value().get<test_model::Image<double>>();
       return;
     }

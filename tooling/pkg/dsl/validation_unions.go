@@ -4,12 +4,15 @@
 package dsl
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/microsoft/yardl/tooling/internal/validation"
 )
 
 func assignUnionCaseTags(env *Environment, errorSink *validation.ErrorSink) *Environment {
 	Visit(env, func(self Visitor, node Node) {
-		if t, ok := node.(*GeneralizedType); ok && t.Cases.IsUnion() {
+		if t, ok := node.(*GeneralizedType); ok && (t.Cases.IsUnion() || (len(t.Cases) > 0 && t.Cases[0].Tag != "")) {
 			// assign tags to union cases
 			for _, typeCase := range t.Cases {
 				if typeCase.Tag == "" {
@@ -22,6 +25,25 @@ func assignUnionCaseTags(env *Environment, errorSink *validation.ErrorSink) *Env
 	})
 
 	return env
+}
+
+func containsOpenGeneric(node Node) bool {
+	res := false
+	Visit(node, func(self Visitor, node Node) {
+		switch t := node.(type) {
+		case *GenericTypeParameter:
+			res = true
+			return
+		case *SimpleType:
+			if _, ok := t.ResolvedDefinition.(*GenericTypeParameter); ok {
+				res = true
+				return
+			}
+		}
+		self.VisitChildren(node)
+	})
+
+	return res
 }
 
 func validateUnionCases(env *Environment, errorSink *validation.ErrorSink) *Environment {
@@ -117,16 +139,40 @@ func validateUnionCases(env *Environment, errorSink *validation.ErrorSink) *Envi
 						}
 					}
 				}
+			}
 
-				if t.Cases.IsUnion() && len(errorSink.Errors) == errorCountSnapshot && !visitingReference {
-					tags := make(map[string]any)
-					for _, item := range t.Cases {
-						if item != nil {
-							if _, found := tags[item.Tag]; found {
-								errorSink.Add(validationError(node, "all union cases must have distinct tags"))
-							} else {
-								tags[item.Tag] = nil
-							}
+			// validate tags
+			if (t.Cases.IsUnion() || len(t.Cases) > 0 && t.Cases[0].ExplicitTag) &&
+				len(errorSink.Errors) == errorCountSnapshot && !visitingReference {
+				for _, typeCase := range t.Cases {
+					if typeCase.ExplicitTag {
+						if !memberNameRegex.MatchString(typeCase.Tag) {
+							errorSink.Add(validationError(typeCase, "union tag '%s' must be camelCased matching the format %s", typeCase.Tag, memberNameRegex.String()))
+						}
+					} else if !memberNameRegex.MatchString(strings.ToLower(typeCase.Tag)) {
+						explicitExample := fmt.Sprintf("!union { myTag: \"%s\", ... }", typeCase.Tag)
+						if containsOpenGeneric(t) {
+							errorSink.Add(
+								validationError(
+									typeCase, "the type '%s' cannot be used as a tag for the union case. An explicit tag can be given using the `!union` syntax (e.g. `%s`)",
+									typeCase.Tag, explicitExample))
+						} else {
+							aliasExample := fmt.Sprintf("MyTypeAlias = %s\nMyUnion = [..., MyTypeAlias, ...]", typeCase.Tag)
+							errorSink.Add(
+								validationError(
+									typeCase, "the type '%s' cannot be used as a tag for the union case. Explicit tags can be given using the `!union` syntax (e.g. `%s`) or the type can be aliased for the type case (e.g. `%s`)",
+									typeCase.Tag, explicitExample, aliasExample))
+						}
+					}
+				}
+
+				tags := make(map[string]any)
+				for _, item := range t.Cases {
+					if item != nil {
+						if _, found := tags[item.Tag]; found {
+							errorSink.Add(validationError(node, "all union cases must have distinct tags"))
+						} else {
+							tags[item.Tag] = nil
 						}
 					}
 				}

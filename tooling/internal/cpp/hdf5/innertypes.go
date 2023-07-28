@@ -530,6 +530,9 @@ func typeDdlExpression(t dsl.Type) string {
 			arguments := make([]string, 0)
 			for _, typeCase := range t.Cases {
 				if !typeCase.IsNullType() {
+					if typeCase.Tag == "" {
+						panic("tag is empty")
+					}
 					arguments = append(arguments, typeDdlExpression(typeCase.Type))
 					arguments = append(arguments, fmt.Sprintf("\"%s\"", typeCase.Tag))
 				}
