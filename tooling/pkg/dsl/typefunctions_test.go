@@ -26,6 +26,7 @@ X: `
 		{input: "!generic {name: G, args: [int32, [int32, float32]]}", expected: "G<int32, int32 | float32>"},
 		{input: "int32?"},
 		{input: "[null, int32, float32]", expected: "null | int32 | float32"},
+		{input: "!union {anInt: int, aFloat: float}", expected: "anInt: int32 | aFloat: float32"},
 		{input: "int32->string"},
 		{input: "int32->(string?)", expected: "int32->string?"},
 		{input: "(int32->string)?", expected: "(int32->string)?"},

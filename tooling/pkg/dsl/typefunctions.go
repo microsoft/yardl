@@ -721,7 +721,11 @@ func TypeToShortSyntax(t Type, qualified bool) string {
 
 			cases := make([]string, len(t.Cases))
 			for i, c := range t.Cases {
-				cases[i] = TypeToShortSyntax(c.Type, qualified)
+				caseTypeSyntax := TypeToShortSyntax(c.Type, qualified)
+				if c.Tag != caseTypeSyntax {
+					caseTypeSyntax = fmt.Sprintf("%s: %s", c.Tag, caseTypeSyntax)
+				}
+				cases[i] = caseTypeSyntax
 			}
 
 			return strings.Join(cases, " | ")

@@ -37,7 +37,7 @@ X: !record
   fields:
     f: []`
 	_, err := parseAndValidate(t, src)
-	assert.ErrorContains(t, err, "a field cannot be a union type with no options")
+	assert.ErrorContains(t, err, "a union type must have at least one option")
 }
 
 func TestNullMustBeFirstUnionElement(t *testing.T) {
@@ -300,6 +300,15 @@ X: !record
     f: [int, [null, int]]`
 	_, err := parseAndValidate(t, src)
 	assert.ErrorContains(t, err, "unions may not immediately contain other unions")
+}
+
+func TestUnionsHaveDistinctTags(t *testing.T) {
+	src := `
+U: !union
+  s: string
+  s: int`
+	_, err := parseAndValidate(t, src)
+	assert.ErrorContains(t, err, "all union cases must have distinct tags")
 }
 
 func parseAndValidate(t *testing.T, src string) (*Environment, error) {

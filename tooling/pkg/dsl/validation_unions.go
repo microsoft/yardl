@@ -16,15 +16,6 @@ func assignUnionCaseTags(env *Environment, errorSink *validation.ErrorSink) *Env
 					typeCase.Tag = TypeToShortSyntax(typeCase.Type, false)
 				}
 			}
-
-			tags := make(map[string]any)
-			for _, item := range t.Cases {
-				if item != nil {
-					if _, found := tags[item.Tag]; found {
-						errorSink.Add(validationError(node, "internal error: union cases must have distinct tags within the union"))
-					}
-				}
-			}
 		}
 
 		self.VisitChildren(node)
@@ -42,9 +33,10 @@ func validateUnionCases(env *Environment, errorSink *validation.ErrorSink) *Envi
 	VisitWithContext(env, false, func(self VisitorWithContext[bool], node Node, visitingReference bool) {
 		switch t := node.(type) {
 		case *GeneralizedType:
+			errorCountSnapshot := len(errorSink.Errors)
 			cases := t.Cases
 			if len(cases) == 0 {
-				errorSink.Add(validationError(node, "a field cannot be a union type with no options"))
+				errorSink.Add(validationError(node, "a union type must have at least one option"))
 			}
 
 			if len(cases) == 1 && cases[0].IsNullType() {
@@ -118,9 +110,22 @@ func validateUnionCases(env *Environment, errorSink *validation.ErrorSink) *Envi
 							}
 							// No contributions from type arguments.
 							// To avoid reporting the same error multiple times, we only report the error
-							// if we we visiting the type directly, i.e. not through a reference.
+							// if we are visiting the type directly, i.e. not through a reference.
 							if !visitingReference {
 								errorSink.Add(validationError(item, "redundant union type cases%s", additionalExplanation))
+							}
+						}
+					}
+				}
+
+				if t.Cases.IsUnion() && len(errorSink.Errors) == errorCountSnapshot && !visitingReference {
+					tags := make(map[string]any)
+					for _, item := range t.Cases {
+						if item != nil {
+							if _, found := tags[item.Tag]; found {
+								errorSink.Add(validationError(node, "all union cases must have distinct tags"))
+							} else {
+								tags[item.Tag] = nil
 							}
 						}
 					}
