@@ -355,6 +355,36 @@ U: !union
 	assert.ErrorContains(t, err, "union tag 's*' must be camelCased matching the format ^[a-z][a-zA-Z0-9]{0,63}$")
 }
 
+func TestUnionsWithSameTypesAndTags(t *testing.T) {
+	src := `
+Rec: !record
+  fields:
+    f: [int, float]
+    g: [int, float]
+    h: !union
+      int32: int
+      float32: float
+    i: !union
+      int32: int
+      float32: float`
+	_, err := parseAndValidate(t, src)
+	assert.NoError(t, err)
+}
+
+func TestUnionsSameTagsDifferentTypes(t *testing.T) {
+	src := `
+Rec: !record
+  fields:
+    h: !union
+      a: int
+      b: float
+    i: !union
+      a: string
+      b: float`
+	_, err := parseAndValidate(t, src)
+	assert.ErrorContains(t, err, "the combination of tags used by the union are already in use with different types in file")
+}
+
 func parseAndValidate(t *testing.T, src string) (*Environment, error) {
 	d := t.TempDir()
 	os.WriteFile(path.Join(d, "t.yaml"), []byte(src), 0644)

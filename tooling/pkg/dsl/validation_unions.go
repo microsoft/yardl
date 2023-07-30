@@ -52,6 +52,8 @@ func validateUnionCases(env *Environment, errorSink *validation.ErrorSink) *Envi
 		return env
 	}
 
+	tagTypeMap := make(map[string]Type)
+
 	VisitWithContext(env, false, func(self VisitorWithContext[bool], node Node, visitingReference bool) {
 		switch t := node.(type) {
 		case *GeneralizedType:
@@ -167,13 +169,32 @@ func validateUnionCases(env *Environment, errorSink *validation.ErrorSink) *Envi
 				}
 
 				tags := make(map[string]any)
+				areCustomTags := false
 				for _, item := range t.Cases {
 					if item != nil {
+						areCustomTags = areCustomTags || item.ExplicitTag
 						if _, found := tags[item.Tag]; found {
 							errorSink.Add(validationError(node, "all union cases must have distinct tags"))
 						} else {
 							tags[item.Tag] = nil
 						}
+					}
+				}
+
+				if areCustomTags {
+					keys := make([]string, 0, len(tags))
+					for k := range tags {
+						keys = append(keys, k)
+					}
+
+					tagsString := strings.Join(keys, ", ")
+					if existing, found := tagTypeMap[tagsString]; found {
+						if !TypesEqual(existing, t.ToScalar()) {
+							existingNodeMeta := existing.GetNodeMeta()
+							errorSink.Add(validationError(node, "the combination of tags used by the union are already in use with different types in file '%s' line '%d'", existingNodeMeta.File, existingNodeMeta.Line))
+						}
+					} else {
+						tagTypeMap[tagsString] = t.ToScalar()
 					}
 				}
 			}
