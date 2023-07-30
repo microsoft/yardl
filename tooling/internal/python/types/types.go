@@ -66,12 +66,12 @@ func writeUnionClasses(w *formatting.IndentedWriter, td dsl.TypeDefinition, unio
 		switch node := node.(type) {
 		case *dsl.GeneralizedType:
 			if node.Cases.IsUnion() {
-				unionClassName := common.UnionClassName(node)
+				unionClassName, typeParameters := common.UnionClassName(node)
 				if _, ok := unions[unionClassName]; !ok {
 					if len(unions) == 0 {
 						w.WriteStringln("_T = typing.TypeVar('_T')\n")
 					}
-					writeUnionClass(w, unionClassName, node, td.GetDefinitionMeta().Namespace)
+					writeUnionClass(w, unionClassName, typeParameters, node, td.GetDefinitionMeta().Namespace)
 					unions[unionClassName] = nil
 				}
 			}
@@ -80,21 +80,13 @@ func writeUnionClasses(w *formatting.IndentedWriter, td dsl.TypeDefinition, unio
 	})
 }
 
-func writeUnionClass(w *formatting.IndentedWriter, className string, generalizedType *dsl.GeneralizedType, contextNamespace string) {
+func writeUnionClass(w *formatting.IndentedWriter, className string, typeParameters string, generalizedType *dsl.GeneralizedType, contextNamespace string) {
 	typeCases := generalizedType.Cases
-	typeParameters := common.GetOpenGenericTypeParameters(generalizedType)
 	var baseClassSpec string
 	var genericSubscript string
-	var typeParametersString string
 	if len(typeParameters) > 0 {
-		tpString := make([]string, len(typeParameters))
-		for i, tp := range typeParameters {
-			tpString[i] = tp.Name
-		}
-
-		typeParametersString = strings.Join(tpString, ", ")
-		baseClassSpec = fmt.Sprintf("(typing.Generic[%s])", typeParametersString)
-		genericSubscript = fmt.Sprintf("[%s]", typeParametersString)
+		baseClassSpec = fmt.Sprintf("(typing.Generic[%s])", typeParameters)
+		genericSubscript = fmt.Sprintf("[%s]", typeParameters)
 	}
 
 	unionCaseType := fmt.Sprintf("%sUnionCase", className)
@@ -106,7 +98,7 @@ func writeUnionClass(w *formatting.IndentedWriter, className string, generalized
 			}
 
 			if len(typeParameters) > 0 {
-				fmt.Fprintf(w, "%s: type[\"%s[%s, %s]\"]\n", formatting.ToPascalCase(tc.Tag), unionCaseType, typeParametersString, common.TypeSyntax(tc.Type, contextNamespace))
+				fmt.Fprintf(w, "%s: type[\"%s[%s, %s]\"]\n", formatting.ToPascalCase(tc.Tag), unionCaseType, typeParameters, common.TypeSyntax(tc.Type, contextNamespace))
 			} else {
 				fmt.Fprintf(w, "%s: typing.ClassVar[type[\"%s[%s]\"]]\n", formatting.ToPascalCase(tc.Tag), unionCaseType, common.TypeSyntax(tc.Type, contextNamespace))
 			}
@@ -541,7 +533,7 @@ func writeSwitchCaseOverOptional(w *formatting.IndentedWriter, switchCase *dsl.S
 }
 
 func writeSwitchCaseOverUnion(w *formatting.IndentedWriter, unionType *dsl.GeneralizedType, switchCase *dsl.SwitchCase, variableName string, visitor dsl.VisitorWithContext[tailWrapper], tail tailWrapper) {
-	unionClassName := common.UnionClassName(unionType)
+	unionClassName, _ := common.UnionClassName(unionType)
 	writeTypeCase := func(typePattern *dsl.TypePattern, declarationIdentifier string) {
 		for _, typeCase := range unionType.Cases {
 			if dsl.TypesEqual(typePattern.Type, typeCase.Type) {
@@ -687,7 +679,9 @@ func typeDefault(t dsl.Type, contextNamespace string, st dsl.SymbolTable) (strin
 				return defaultExpression, defaultKind
 			}
 
-			unionCaseConstructor := fmt.Sprintf("%s.%s", common.UnionClassName(t), formatting.ToPascalCase(t.Cases[0].Tag))
+			unionClassName, _ := common.UnionClassName(t)
+
+			unionCaseConstructor := fmt.Sprintf("%s.%s", unionClassName, formatting.ToPascalCase(t.Cases[0].Tag))
 
 			switch defaultKind {
 			case defaultValueKindNone:

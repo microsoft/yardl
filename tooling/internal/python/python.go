@@ -87,7 +87,7 @@ func writePackageInitFile(packageDir string, ns *dsl.Namespace) error {
 		switch node := node.(type) {
 		case *dsl.GeneralizedType:
 			if node.Cases.IsUnion() {
-				unionClassName := common.UnionClassName(node)
+				unionClassName, _ := common.UnionClassName(node)
 				if _, ok := unions[unionClassName]; !ok {
 					unions[unionClassName] = nil
 					typesMembers = append(typesMembers, unionClassName)

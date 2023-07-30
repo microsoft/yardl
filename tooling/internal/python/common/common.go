@@ -375,7 +375,7 @@ func TypeIdentifierName(name string) string {
 	return name + "_"
 }
 
-func UnionClassName(gt *dsl.GeneralizedType) string {
+func UnionClassName(gt *dsl.GeneralizedType) (className string, typeParameters string) {
 	if !gt.Cases.IsUnion() {
 		panic("Not a union")
 	}
@@ -388,29 +388,30 @@ func UnionClassName(gt *dsl.GeneralizedType) string {
 		cases = append(cases, formatting.ToPascalCase(typeCase.Tag))
 	}
 
-	return strings.Join(cases, "Or")
+	return strings.Join(cases, "Or"), GetOpenGenericTypeParameters(gt)
 }
 
 func UnionSyntax(gt *dsl.GeneralizedType) string {
-	syntax := UnionClassName(gt)
-	typeParamerers := GetOpenGenericTypeParameters(gt)
-	if len(typeParamerers) > 0 {
-		typeParameterStrings := make([]string, len(typeParamerers))
-		for i, typeParameter := range typeParamerers {
-			typeParameterStrings[i] = typeParameter.Name
-		}
-		syntax = fmt.Sprintf("%s[%s]", syntax, strings.Join(typeParameterStrings, ", "))
+	className, typeParameters := UnionClassName(gt)
+	var syntax string
+	if len(typeParameters) > 0 {
+		syntax = fmt.Sprintf("%s[%s]", className, typeParameters)
+	} else {
+		syntax = className
 	}
 
-	if gt.Cases[0].Type == nil {
+	if gt.Cases.HasNullOption() {
 		return fmt.Sprintf("typing.Optional[%s]", syntax)
 	}
 
 	return syntax
 }
 
-func GetOpenGenericTypeParameters(node dsl.Node) []*dsl.GenericTypeParameter {
+// Returns open type parameters used within the node as a comma-separated string.
+// e.g. "T1, T2, T2_NP, T3"
+func GetOpenGenericTypeParameters(node dsl.Node) string {
 	var res []*dsl.GenericTypeParameter
+	var paramStrings []string
 
 	dsl.Visit(node, func(self dsl.Visitor, node dsl.Node) {
 		switch t := node.(type) {
@@ -420,10 +421,7 @@ func GetOpenGenericTypeParameters(node dsl.Node) []*dsl.GenericTypeParameter {
 					return
 				}
 			}
-			if res == nil {
-				res = make([]*dsl.GenericTypeParameter, 0, 1)
-			}
-			res = append(res, t)
+			paramStrings = appendGenericTypeParameterUses(paramStrings, t)
 		case *dsl.SimpleType:
 			if gtp, ok := t.ResolvedDefinition.(*dsl.GenericTypeParameter); ok {
 				found := false
@@ -433,17 +431,33 @@ func GetOpenGenericTypeParameters(node dsl.Node) []*dsl.GenericTypeParameter {
 					}
 				}
 				if !found {
-					if res == nil {
-						res = make([]*dsl.GenericTypeParameter, 0, 1)
-					}
-					res = append(res, gtp)
+					paramStrings = appendGenericTypeParameterUses(paramStrings, gtp)
 				}
 			}
 		}
 		self.VisitChildren(node)
 	})
 
-	return res
+	if len(paramStrings) > 0 {
+		return strings.Join(paramStrings, ", ")
+	}
+
+	return ""
+}
+
+func appendGenericTypeParameterUses(slice []string, typeParameter *dsl.GenericTypeParameter) []string {
+	if slice == nil {
+		slice = make([]string, 0, 1)
+	}
+	use := typeParameter.Annotations[TypeParameterUseAnnotationKey].(TypeParameterUse)
+	if use&TypeParameterUseScalar != 0 {
+		slice = append(slice, TypeParameterSyntax(typeParameter, false))
+	}
+	if use&TypeParameterUseArray != 0 {
+		slice = append(slice, TypeParameterSyntax(typeParameter, true))
+	}
+
+	return slice
 }
 
 func WriteComment(w *formatting.IndentedWriter, comment string) {

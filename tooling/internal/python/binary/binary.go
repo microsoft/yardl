@@ -251,13 +251,19 @@ func typeSerializer(t dsl.Type, numpy bool, contextNamespace string) string {
 				return fmt.Sprintf("_binary.OptionalSerializer(%s)", typeSerializer(t.Cases[1].Type, numpy, contextNamespace))
 			}
 
-			unionClassName := common.UnionClassName(t)
+			unionClassName, typeParameters := common.UnionClassName(t)
+			var classSyntax string
+			if len(typeParameters) == 0 {
+				classSyntax = unionClassName
+			} else {
+				classSyntax = fmt.Sprintf("%s[%s]", unionClassName, typeParameters)
+			}
 			options := make([]string, len(t.Cases))
 			for i, c := range t.Cases {
 				if c.Type == nil {
 					options[i] = "None"
 				} else {
-					options[i] = fmt.Sprintf("(%s.%s, %s)", unionClassName, formatting.ToPascalCase(c.Tag), typeSerializer(c.Type, numpy, contextNamespace))
+					options[i] = fmt.Sprintf("(%s.%s, %s)", classSyntax, formatting.ToPascalCase(c.Tag), typeSerializer(c.Type, numpy, contextNamespace))
 				}
 			}
 

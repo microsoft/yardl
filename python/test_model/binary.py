@@ -1636,7 +1636,7 @@ class _MyTupleSerializer(typing.Generic[T1, T1_NP, T2, T2_NP], _binary.RecordSer
 
 class _GenericRecordWithComputedFieldsSerializer(typing.Generic[T0, T0_NP, T1, T1_NP], _binary.RecordSerializer[GenericRecordWithComputedFields[T0, T1]]):
     def __init__(self, t0_serializer: _binary.TypeSerializer[T0, T0_NP], t1_serializer: _binary.TypeSerializer[T1, T1_NP]) -> None:
-        super().__init__([("f1", _binary.UnionSerializer(T0OrT1, [(T0OrT1.T0, t0_serializer), (T0OrT1.T1, t1_serializer)]))])
+        super().__init__([("f1", _binary.UnionSerializer(T0OrT1, [(T0OrT1[T0, T1].T0, t0_serializer), (T0OrT1[T0, T1].T1, t1_serializer)]))])
 
     def write(self, stream: _binary.CodedOutputStream, value: GenericRecordWithComputedFields[T0, T1]) -> None:
         if isinstance(value, np.void):
