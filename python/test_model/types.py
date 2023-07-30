@@ -650,8 +650,8 @@ class Int32OrString:
 class Int32OrStringUnionCase(Int32OrString, yardl.UnionCase[_T]):
     pass
 
-Int32OrString.Int32 = type("Int32OrString.Int32", (Int32OrStringUnionCase,), {"index": 0})
-Int32OrString.String = type("Int32OrString.String", (Int32OrStringUnionCase,), {"index": 1})
+Int32OrString.Int32 = type("Int32OrString.Int32", (Int32OrStringUnionCase,), {"_index": 0})
+Int32OrString.String = type("Int32OrString.String", (Int32OrStringUnionCase,), {"_index": 1})
 del Int32OrStringUnionCase
 
 class TimeOrDatetime:
@@ -661,8 +661,8 @@ class TimeOrDatetime:
 class TimeOrDatetimeUnionCase(TimeOrDatetime, yardl.UnionCase[_T]):
     pass
 
-TimeOrDatetime.Time = type("TimeOrDatetime.Time", (TimeOrDatetimeUnionCase,), {"index": 0})
-TimeOrDatetime.Datetime = type("TimeOrDatetime.Datetime", (TimeOrDatetimeUnionCase,), {"index": 1})
+TimeOrDatetime.Time = type("TimeOrDatetime.Time", (TimeOrDatetimeUnionCase,), {"_index": 0})
+TimeOrDatetime.Datetime = type("TimeOrDatetime.Datetime", (TimeOrDatetimeUnionCase,), {"_index": 1})
 del TimeOrDatetimeUnionCase
 
 class RecordWithUnions:
@@ -818,8 +818,8 @@ class T1OrT2(typing.Generic[T1, T2]):
 class T1OrT2UnionCase(T1OrT2[T1, T2], yardl.UnionCase[_T]):
     pass
 
-T1OrT2.T1 = type("T1OrT2.T1", (T1OrT2UnionCase,), {"index": 0})
-T1OrT2.T2 = type("T1OrT2.T2", (T1OrT2UnionCase,), {"index": 1})
+T1OrT2.T1 = type("T1OrT2.T1", (T1OrT2UnionCase,), {"_index": 0})
+T1OrT2.T2 = type("T1OrT2.T2", (T1OrT2UnionCase,), {"_index": 1})
 del T1OrT2UnionCase
 
 AliasedGenericUnion2 = T1OrT2[T1, T2]
@@ -835,8 +835,8 @@ class Int32OrSimpleRecord:
 class Int32OrSimpleRecordUnionCase(Int32OrSimpleRecord, yardl.UnionCase[_T]):
     pass
 
-Int32OrSimpleRecord.Int32 = type("Int32OrSimpleRecord.Int32", (Int32OrSimpleRecordUnionCase,), {"index": 0})
-Int32OrSimpleRecord.SimpleRecord = type("Int32OrSimpleRecord.SimpleRecord", (Int32OrSimpleRecordUnionCase,), {"index": 1})
+Int32OrSimpleRecord.Int32 = type("Int32OrSimpleRecord.Int32", (Int32OrSimpleRecordUnionCase,), {"_index": 0})
+Int32OrSimpleRecord.SimpleRecord = type("Int32OrSimpleRecord.SimpleRecord", (Int32OrSimpleRecordUnionCase,), {"_index": 1})
 del Int32OrSimpleRecordUnionCase
 
 AliasedIntOrSimpleRecord = Int32OrSimpleRecord
@@ -850,8 +850,8 @@ class T0OrT1(typing.Generic[T0, T1]):
 class T0OrT1UnionCase(T0OrT1[T0, T1], yardl.UnionCase[_T]):
     pass
 
-T0OrT1.T0 = type("T0OrT1.T0", (T0OrT1UnionCase,), {"index": 0})
-T0OrT1.T1 = type("T0OrT1.T1", (T0OrT1UnionCase,), {"index": 1})
+T0OrT1.T0 = type("T0OrT1.T0", (T0OrT1UnionCase,), {"_index": 0})
+T0OrT1.T1 = type("T0OrT1.T1", (T0OrT1UnionCase,), {"_index": 1})
 del T0OrT1UnionCase
 
 class GenericRecordWithComputedFields(typing.Generic[T0, T1]):
@@ -884,8 +884,8 @@ class Int32OrFloat32:
 class Int32OrFloat32UnionCase(Int32OrFloat32, yardl.UnionCase[_T]):
     pass
 
-Int32OrFloat32.Int32 = type("Int32OrFloat32.Int32", (Int32OrFloat32UnionCase,), {"index": 0})
-Int32OrFloat32.Float32 = type("Int32OrFloat32.Float32", (Int32OrFloat32UnionCase,), {"index": 1})
+Int32OrFloat32.Int32 = type("Int32OrFloat32.Int32", (Int32OrFloat32UnionCase,), {"_index": 0})
+Int32OrFloat32.Float32 = type("Int32OrFloat32.Float32", (Int32OrFloat32UnionCase,), {"_index": 1})
 del Int32OrFloat32UnionCase
 
 class IntOrGenericRecordWithComputedFields:
@@ -895,8 +895,8 @@ class IntOrGenericRecordWithComputedFields:
 class IntOrGenericRecordWithComputedFieldsUnionCase(IntOrGenericRecordWithComputedFields, yardl.UnionCase[_T]):
     pass
 
-IntOrGenericRecordWithComputedFields.Int = type("IntOrGenericRecordWithComputedFields.Int", (IntOrGenericRecordWithComputedFieldsUnionCase,), {"index": 0})
-IntOrGenericRecordWithComputedFields.GenericRecordWithComputedFields = type("IntOrGenericRecordWithComputedFields.GenericRecordWithComputedFields", (IntOrGenericRecordWithComputedFieldsUnionCase,), {"index": 1})
+IntOrGenericRecordWithComputedFields.Int = type("IntOrGenericRecordWithComputedFields.Int", (IntOrGenericRecordWithComputedFieldsUnionCase,), {"_index": 0})
+IntOrGenericRecordWithComputedFields.GenericRecordWithComputedFields = type("IntOrGenericRecordWithComputedFields.GenericRecordWithComputedFields", (IntOrGenericRecordWithComputedFieldsUnionCase,), {"_index": 1})
 del IntOrGenericRecordWithComputedFieldsUnionCase
 
 class RecordWithComputedFields:
@@ -1222,8 +1222,8 @@ class AcquisitionOrImage:
 class AcquisitionOrImageUnionCase(AcquisitionOrImage, yardl.UnionCase[_T]):
     pass
 
-AcquisitionOrImage.Acquisition = type("AcquisitionOrImage.Acquisition", (AcquisitionOrImageUnionCase,), {"index": 0})
-AcquisitionOrImage.Image = type("AcquisitionOrImage.Image", (AcquisitionOrImageUnionCase,), {"index": 1})
+AcquisitionOrImage.Acquisition = type("AcquisitionOrImage.Acquisition", (AcquisitionOrImageUnionCase,), {"_index": 0})
+AcquisitionOrImage.Image = type("AcquisitionOrImage.Image", (AcquisitionOrImageUnionCase,), {"_index": 1})
 del AcquisitionOrImageUnionCase
 
 class StringOrInt32:
@@ -1233,8 +1233,8 @@ class StringOrInt32:
 class StringOrInt32UnionCase(StringOrInt32, yardl.UnionCase[_T]):
     pass
 
-StringOrInt32.String = type("StringOrInt32.String", (StringOrInt32UnionCase,), {"index": 0})
-StringOrInt32.Int32 = type("StringOrInt32.Int32", (StringOrInt32UnionCase,), {"index": 1})
+StringOrInt32.String = type("StringOrInt32.String", (StringOrInt32UnionCase,), {"_index": 0})
+StringOrInt32.Int32 = type("StringOrInt32.Int32", (StringOrInt32UnionCase,), {"_index": 1})
 del StringOrInt32UnionCase
 
 class Int32OrRecordWithVlens:
@@ -1244,8 +1244,8 @@ class Int32OrRecordWithVlens:
 class Int32OrRecordWithVlensUnionCase(Int32OrRecordWithVlens, yardl.UnionCase[_T]):
     pass
 
-Int32OrRecordWithVlens.Int32 = type("Int32OrRecordWithVlens.Int32", (Int32OrRecordWithVlensUnionCase,), {"index": 0})
-Int32OrRecordWithVlens.RecordWithVlens = type("Int32OrRecordWithVlens.RecordWithVlens", (Int32OrRecordWithVlensUnionCase,), {"index": 1})
+Int32OrRecordWithVlens.Int32 = type("Int32OrRecordWithVlens.Int32", (Int32OrRecordWithVlensUnionCase,), {"_index": 0})
+Int32OrRecordWithVlens.RecordWithVlens = type("Int32OrRecordWithVlens.RecordWithVlens", (Int32OrRecordWithVlensUnionCase,), {"_index": 1})
 del Int32OrRecordWithVlensUnionCase
 
 class ImageFloatOrImageDouble:
@@ -1255,8 +1255,8 @@ class ImageFloatOrImageDouble:
 class ImageFloatOrImageDoubleUnionCase(ImageFloatOrImageDouble, yardl.UnionCase[_T]):
     pass
 
-ImageFloatOrImageDouble.ImageFloat = type("ImageFloatOrImageDouble.ImageFloat", (ImageFloatOrImageDoubleUnionCase,), {"index": 0})
-ImageFloatOrImageDouble.ImageDouble = type("ImageFloatOrImageDouble.ImageDouble", (ImageFloatOrImageDoubleUnionCase,), {"index": 1})
+ImageFloatOrImageDouble.ImageFloat = type("ImageFloatOrImageDouble.ImageFloat", (ImageFloatOrImageDoubleUnionCase,), {"_index": 0})
+ImageFloatOrImageDouble.ImageDouble = type("ImageFloatOrImageDouble.ImageDouble", (ImageFloatOrImageDoubleUnionCase,), {"_index": 1})
 del ImageFloatOrImageDoubleUnionCase
 
 def _mk_get_dtype():

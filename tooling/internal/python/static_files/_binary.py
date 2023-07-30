@@ -896,7 +896,7 @@ class UnionSerializer(TypeSerializer[T, np.object_]):
                 f"Expected union value of type {self._union_type} but got {type(value)}"
             )
 
-        tag_index = value.index + self._offset  # type: ignore
+        tag_index = value._index + self._offset  # type: ignore
         stream.write_byte(tag_index)
         self._cases[tag_index][1].write(stream, value.value)  # type: ignore
 

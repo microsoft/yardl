@@ -5,3 +5,7 @@ HelloWorld: !protocol
         items: complexdouble
         dimensions:
           - 2
+
+Rec: !record
+  fields:
+    f: [int, float]

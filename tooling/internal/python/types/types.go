@@ -117,7 +117,7 @@ func writeUnionClass(w *formatting.IndentedWriter, className string, typeParamet
 			continue
 		}
 		tag := formatting.ToPascalCase(tc.Tag)
-		fmt.Fprintf(w, "%s.%s = type(\"%s.%s\", (%s,), {\"index\": %d})\n", className, tag, className, tag, unionCaseType, i)
+		fmt.Fprintf(w, "%s.%s = type(\"%s.%s\", (%s,), {\"_index\": %d})\n", className, tag, className, tag, unionCaseType, i)
 		i++
 	}
 	fmt.Fprintf(w, "del %s\n", unionCaseType)
