@@ -153,20 +153,7 @@ var TypeSyntaxWriter dsl.TypeSyntaxWriter[string] = func(self dsl.TypeSyntaxWrit
 				return fmt.Sprintf("typing.Optional[%s]", self.ToSyntax(t.Cases[1].Type, contextNamespace))
 			}
 
-			sb := &strings.Builder{}
-			sb.WriteString("typing.Union[\n")
-			for _, typeCase := range t.Cases {
-				if typeCase.Type == nil {
-					continue
-				}
-				sb.WriteString("    ")
-				fmt.Fprintf(sb, "tuple[typing.Literal[\"%s\"], %s],\n", typeCase.Tag, self.ToSyntax(typeCase.Type, contextNamespace))
-			}
-			if t.Cases.HasNullOption() {
-				sb.WriteString("    None\n")
-			}
-			sb.WriteString("]")
-			return sb.String()
+			return UnionSyntax(t)
 		}()
 
 		switch d := t.Dimensionality.(type) {
@@ -386,6 +373,77 @@ func TypeIdentifierName(name string) string {
 	}
 
 	return name + "_"
+}
+
+func UnionClassName(gt *dsl.GeneralizedType) string {
+	if !gt.Cases.IsUnion() {
+		panic("Not a union")
+	}
+
+	cases := make([]string, 0, len(gt.Cases))
+	for _, typeCase := range gt.Cases {
+		if typeCase.Type == nil {
+			continue
+		}
+		cases = append(cases, formatting.ToPascalCase(typeCase.Tag))
+	}
+
+	return strings.Join(cases, "Or")
+}
+
+func UnionSyntax(gt *dsl.GeneralizedType) string {
+	syntax := UnionClassName(gt)
+	typeParamerers := GetOpenGenericTypeParameters(gt)
+	if len(typeParamerers) > 0 {
+		typeParameterStrings := make([]string, len(typeParamerers))
+		for i, typeParameter := range typeParamerers {
+			typeParameterStrings[i] = typeParameter.Name
+		}
+		syntax = fmt.Sprintf("%s[%s]", syntax, strings.Join(typeParameterStrings, ", "))
+	}
+
+	if gt.Cases[0].Type == nil {
+		return fmt.Sprintf("typing.Optional[%s]", syntax)
+	}
+
+	return syntax
+}
+
+func GetOpenGenericTypeParameters(node dsl.Node) []*dsl.GenericTypeParameter {
+	var res []*dsl.GenericTypeParameter
+
+	dsl.Visit(node, func(self dsl.Visitor, node dsl.Node) {
+		switch t := node.(type) {
+		case *dsl.GenericTypeParameter:
+			for _, existing := range res {
+				if t == existing {
+					return
+				}
+			}
+			if res == nil {
+				res = make([]*dsl.GenericTypeParameter, 0, 1)
+			}
+			res = append(res, t)
+		case *dsl.SimpleType:
+			if gtp, ok := t.ResolvedDefinition.(*dsl.GenericTypeParameter); ok {
+				found := false
+				for _, existing := range res {
+					if gtp == existing {
+						found = true
+					}
+				}
+				if !found {
+					if res == nil {
+						res = make([]*dsl.GenericTypeParameter, 0, 1)
+					}
+					res = append(res, gtp)
+				}
+			}
+		}
+		self.VisitChildren(node)
+	})
+
+	return res
 }
 
 func WriteComment(w *formatting.IndentedWriter, comment string) {

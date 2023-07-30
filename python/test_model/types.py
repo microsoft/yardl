@@ -641,27 +641,37 @@ NamedNDArray = npt.NDArray[np.int32]
 
 AliasedMap = dict[K, V]
 
+_T = typing.TypeVar('_T')
+
+class Int32OrString:
+    Int32: typing.ClassVar[type["Int32OrStringUnionCase[yardl.Int32]"]]
+    String: typing.ClassVar[type["Int32OrStringUnionCase[str]"]]
+
+class Int32OrStringUnionCase(Int32OrString, yardl.UnionCase[_T]):
+    pass
+
+Int32OrString.Int32 = type("Int32OrString.Int32", (Int32OrStringUnionCase,), {"index": 0})
+Int32OrString.String = type("Int32OrString.String", (Int32OrStringUnionCase,), {"index": 1})
+del Int32OrStringUnionCase
+
+class TimeOrDatetime:
+    Time: typing.ClassVar[type["TimeOrDatetimeUnionCase[yardl.Time]"]]
+    Datetime: typing.ClassVar[type["TimeOrDatetimeUnionCase[yardl.DateTime]"]]
+
+class TimeOrDatetimeUnionCase(TimeOrDatetime, yardl.UnionCase[_T]):
+    pass
+
+TimeOrDatetime.Time = type("TimeOrDatetime.Time", (TimeOrDatetimeUnionCase,), {"index": 0})
+TimeOrDatetime.Datetime = type("TimeOrDatetime.Datetime", (TimeOrDatetimeUnionCase,), {"index": 1})
+del TimeOrDatetimeUnionCase
+
 class RecordWithUnions:
-    null_or_int_or_string: typing.Union[
-        tuple[typing.Literal["int32"], yardl.Int32],
-        tuple[typing.Literal["string"], str],
-        None
-    ]
-    date_or_datetime: typing.Union[
-        tuple[typing.Literal["time"], yardl.Time],
-        tuple[typing.Literal["datetime"], yardl.DateTime],
-    ]
+    null_or_int_or_string: typing.Optional[Int32OrString]
+    date_or_datetime: TimeOrDatetime
 
     def __init__(self, *,
-        null_or_int_or_string: typing.Union[
-            tuple[typing.Literal["int32"], yardl.Int32],
-            tuple[typing.Literal["string"], str],
-            None
-        ] = None,
-        date_or_datetime: typing.Union[
-            tuple[typing.Literal["time"], yardl.Time],
-            tuple[typing.Literal["datetime"], yardl.DateTime],
-        ] = ("time", yardl.Time()),
+        null_or_int_or_string: typing.Optional[Int32OrString] = None,
+        date_or_datetime: TimeOrDatetime = TimeOrDatetime.Time(yardl.Time()),
     ):
         self.null_or_int_or_string = null_or_int_or_string
         self.date_or_datetime = date_or_datetime
@@ -801,45 +811,62 @@ AliasedOptional = typing.Optional[yardl.Int32]
 
 AliasedGenericOptional = typing.Optional[T]
 
-AliasedGenericUnion2 = typing.Union[
-    tuple[typing.Literal["T1"], T1],
-    tuple[typing.Literal["T2"], T2],
-]
+class T1OrT2(typing.Generic[T1, T2]):
+    T1: type["T1OrT2UnionCase[T1, T2, T1]"]
+    T2: type["T1OrT2UnionCase[T1, T2, T2]"]
+
+class T1OrT2UnionCase(T1OrT2[T1, T2], yardl.UnionCase[_T]):
+    pass
+
+T1OrT2.T1 = type("T1OrT2.T1", (T1OrT2UnionCase,), {"index": 0})
+T1OrT2.T2 = type("T1OrT2.T2", (T1OrT2UnionCase,), {"index": 1})
+del T1OrT2UnionCase
+
+AliasedGenericUnion2 = T1OrT2[T1, T2]
 
 AliasedGenericVector = list[T]
 
 AliasedGenericFixedVector = list[T]
 
-AliasedIntOrSimpleRecord = typing.Union[
-    tuple[typing.Literal["int32"], yardl.Int32],
-    tuple[typing.Literal["SimpleRecord"], SimpleRecord],
-]
+class Int32OrSimpleRecord:
+    Int32: typing.ClassVar[type["Int32OrSimpleRecordUnionCase[yardl.Int32]"]]
+    SimpleRecord: typing.ClassVar[type["Int32OrSimpleRecordUnionCase[SimpleRecord]"]]
 
-AliasedNullableIntSimpleRecord = typing.Union[
-    tuple[typing.Literal["int32"], yardl.Int32],
-    tuple[typing.Literal["SimpleRecord"], SimpleRecord],
-    None
-]
+class Int32OrSimpleRecordUnionCase(Int32OrSimpleRecord, yardl.UnionCase[_T]):
+    pass
+
+Int32OrSimpleRecord.Int32 = type("Int32OrSimpleRecord.Int32", (Int32OrSimpleRecordUnionCase,), {"index": 0})
+Int32OrSimpleRecord.SimpleRecord = type("Int32OrSimpleRecord.SimpleRecord", (Int32OrSimpleRecordUnionCase,), {"index": 1})
+del Int32OrSimpleRecordUnionCase
+
+AliasedIntOrSimpleRecord = Int32OrSimpleRecord
+
+AliasedNullableIntSimpleRecord = typing.Optional[Int32OrSimpleRecord]
+
+class T0OrT1(typing.Generic[T0, T1]):
+    T0: type["T0OrT1UnionCase[T0, T1, T0]"]
+    T1: type["T0OrT1UnionCase[T0, T1, T1]"]
+
+class T0OrT1UnionCase(T0OrT1[T0, T1], yardl.UnionCase[_T]):
+    pass
+
+T0OrT1.T0 = type("T0OrT1.T0", (T0OrT1UnionCase,), {"index": 0})
+T0OrT1.T1 = type("T0OrT1.T1", (T0OrT1UnionCase,), {"index": 1})
+del T0OrT1UnionCase
 
 class GenericRecordWithComputedFields(typing.Generic[T0, T1]):
-    f1: typing.Union[
-        tuple[typing.Literal["T0"], T0],
-        tuple[typing.Literal["T1"], T1],
-    ]
+    f1: T0OrT1[T0, T1]
 
     def __init__(self, *,
-        f1: typing.Union[
-            tuple[typing.Literal["T0"], T0],
-            tuple[typing.Literal["T1"], T1],
-        ],
+        f1: T0OrT1[T0, T1],
     ):
         self.f1 = f1
 
     def type_index(self) -> yardl.UInt8:
         _var0 = self.f1
-        if _var0[0] == "T0":
+        if isinstance(_var0, T0OrT1.T0):
             return 0
-        if _var0[0] == "T1":
+        if isinstance(_var0, T0OrT1.T1):
             return 1
         raise RuntimeError("Unexpected union case")
 
@@ -849,6 +876,28 @@ class GenericRecordWithComputedFields(typing.Generic[T0, T1]):
             and yardl.structural_equal(self.f1, other.f1)
         )
 
+
+class Int32OrFloat32:
+    Int32: typing.ClassVar[type["Int32OrFloat32UnionCase[yardl.Int32]"]]
+    Float32: typing.ClassVar[type["Int32OrFloat32UnionCase[yardl.Float32]"]]
+
+class Int32OrFloat32UnionCase(Int32OrFloat32, yardl.UnionCase[_T]):
+    pass
+
+Int32OrFloat32.Int32 = type("Int32OrFloat32.Int32", (Int32OrFloat32UnionCase,), {"index": 0})
+Int32OrFloat32.Float32 = type("Int32OrFloat32.Float32", (Int32OrFloat32UnionCase,), {"index": 1})
+del Int32OrFloat32UnionCase
+
+class IntOrGenericRecordWithComputedFields:
+    Int: typing.ClassVar[type["IntOrGenericRecordWithComputedFieldsUnionCase[yardl.Int32]"]]
+    GenericRecordWithComputedFields: typing.ClassVar[type["IntOrGenericRecordWithComputedFieldsUnionCase[GenericRecordWithComputedFields[str, yardl.Float32]]"]]
+
+class IntOrGenericRecordWithComputedFieldsUnionCase(IntOrGenericRecordWithComputedFields, yardl.UnionCase[_T]):
+    pass
+
+IntOrGenericRecordWithComputedFields.Int = type("IntOrGenericRecordWithComputedFields.Int", (IntOrGenericRecordWithComputedFieldsUnionCase,), {"index": 0})
+IntOrGenericRecordWithComputedFields.GenericRecordWithComputedFields = type("IntOrGenericRecordWithComputedFields.GenericRecordWithComputedFields", (IntOrGenericRecordWithComputedFieldsUnionCase,), {"index": 1})
+del IntOrGenericRecordWithComputedFieldsUnionCase
 
 class RecordWithComputedFields:
     array_field: npt.NDArray[np.int32]
@@ -862,19 +911,9 @@ class RecordWithComputedFields:
     vector_of_vectors_field: list[list[yardl.Int32]]
     fixed_vector_field: list[yardl.Int32]
     optional_named_array: typing.Optional[NamedNDArray]
-    int_float_union: typing.Union[
-        tuple[typing.Literal["int32"], yardl.Int32],
-        tuple[typing.Literal["float32"], yardl.Float32],
-    ]
-    nullable_int_float_union: typing.Union[
-        tuple[typing.Literal["int32"], yardl.Int32],
-        tuple[typing.Literal["float32"], yardl.Float32],
-        None
-    ]
-    union_with_nested_generic_union: typing.Union[
-        tuple[typing.Literal["int"], yardl.Int32],
-        tuple[typing.Literal["genericRecordWithComputedFields"], GenericRecordWithComputedFields[str, yardl.Float32]],
-    ]
+    int_float_union: Int32OrFloat32
+    nullable_int_float_union: typing.Optional[Int32OrFloat32]
+    union_with_nested_generic_union: IntOrGenericRecordWithComputedFields
     map_field: dict[str, str]
 
     def __init__(self, *,
@@ -889,19 +928,9 @@ class RecordWithComputedFields:
         vector_of_vectors_field: typing.Optional[list[list[yardl.Int32]]] = None,
         fixed_vector_field: typing.Optional[list[yardl.Int32]] = None,
         optional_named_array: typing.Optional[NamedNDArray] = None,
-        int_float_union: typing.Union[
-            tuple[typing.Literal["int32"], yardl.Int32],
-            tuple[typing.Literal["float32"], yardl.Float32],
-        ] = ("int32", 0),
-        nullable_int_float_union: typing.Union[
-            tuple[typing.Literal["int32"], yardl.Int32],
-            tuple[typing.Literal["float32"], yardl.Float32],
-            None
-        ] = None,
-        union_with_nested_generic_union: typing.Union[
-            tuple[typing.Literal["int"], yardl.Int32],
-            tuple[typing.Literal["genericRecordWithComputedFields"], GenericRecordWithComputedFields[str, yardl.Float32]],
-        ] = ("int", 0),
+        int_float_union: Int32OrFloat32 = Int32OrFloat32.Int32(0),
+        nullable_int_float_union: typing.Optional[Int32OrFloat32] = None,
+        union_with_nested_generic_union: IntOrGenericRecordWithComputedFields = IntOrGenericRecordWithComputedFields.Int(0),
         map_field: typing.Optional[dict[str, str]] = None,
     ):
         self.array_field = array_field if array_field is not None else np.zeros((0, 0), dtype=np.dtype(np.int32))
@@ -1082,11 +1111,11 @@ class RecordWithComputedFields:
 
     def int_float_union_as_float(self) -> yardl.Float32:
         _var0 = self.int_float_union
-        if _var0[0] == "int32":
-            i_foo = _var0[1]
+        if isinstance(_var0, Int32OrFloat32.Int32):
+            i_foo = _var0.value
             return float(i_foo)
-        if _var0[0] == "float32":
-            f = _var0[1]
+        if isinstance(_var0, Int32OrFloat32.Float32):
+            f = _var0.value
             return f
         raise RuntimeError("Unexpected union case")
 
@@ -1094,31 +1123,31 @@ class RecordWithComputedFields:
         _var0 = self.nullable_int_float_union
         if _var0 is None:
             return "null"
-        if _var0[0] == "int32":
+        if isinstance(_var0, Int32OrFloat32.Int32):
             return "int"
         return "float"
         raise RuntimeError("Unexpected union case")
 
     def nested_switch(self) -> yardl.Int16:
         _var0 = self.union_with_nested_generic_union
-        if _var0[0] == "int":
+        if isinstance(_var0, IntOrGenericRecordWithComputedFields.Int):
             return -1
-        if _var0[0] == "genericRecordWithComputedFields":
-            rec = _var0[1]
+        if isinstance(_var0, IntOrGenericRecordWithComputedFields.GenericRecordWithComputedFields):
+            rec = _var0.value
             _var1 = rec.f1
-            if _var1[0] == "T1":
+            if isinstance(_var1, T0OrT1.T1):
                 return int(20)
-            if _var1[0] == "T0":
+            if isinstance(_var1, T0OrT1.T0):
                 return int(10)
             raise RuntimeError("Unexpected union case")
         raise RuntimeError("Unexpected union case")
 
     def use_nested_computed_field(self) -> yardl.Int16:
         _var0 = self.union_with_nested_generic_union
-        if _var0[0] == "int":
+        if isinstance(_var0, IntOrGenericRecordWithComputedFields.Int):
             return -1
-        if _var0[0] == "genericRecordWithComputedFields":
-            rec = _var0[1]
+        if isinstance(_var0, IntOrGenericRecordWithComputedFields.GenericRecordWithComputedFields):
+            rec = _var0.value
             return int(rec.type_index())
         raise RuntimeError("Unexpected union case")
 
@@ -1185,6 +1214,50 @@ class RecordWithKeywordFields:
             and self.if_ == other.if_
         )
 
+
+class AcquisitionOrImage:
+    Acquisition: typing.ClassVar[type["AcquisitionOrImageUnionCase[SimpleAcquisition]"]]
+    Image: typing.ClassVar[type["AcquisitionOrImageUnionCase[Image[np.float32]]"]]
+
+class AcquisitionOrImageUnionCase(AcquisitionOrImage, yardl.UnionCase[_T]):
+    pass
+
+AcquisitionOrImage.Acquisition = type("AcquisitionOrImage.Acquisition", (AcquisitionOrImageUnionCase,), {"index": 0})
+AcquisitionOrImage.Image = type("AcquisitionOrImage.Image", (AcquisitionOrImageUnionCase,), {"index": 1})
+del AcquisitionOrImageUnionCase
+
+class StringOrInt32:
+    String: typing.ClassVar[type["StringOrInt32UnionCase[str]"]]
+    Int32: typing.ClassVar[type["StringOrInt32UnionCase[yardl.Int32]"]]
+
+class StringOrInt32UnionCase(StringOrInt32, yardl.UnionCase[_T]):
+    pass
+
+StringOrInt32.String = type("StringOrInt32.String", (StringOrInt32UnionCase,), {"index": 0})
+StringOrInt32.Int32 = type("StringOrInt32.Int32", (StringOrInt32UnionCase,), {"index": 1})
+del StringOrInt32UnionCase
+
+class Int32OrRecordWithVlens:
+    Int32: typing.ClassVar[type["Int32OrRecordWithVlensUnionCase[yardl.Int32]"]]
+    RecordWithVlens: typing.ClassVar[type["Int32OrRecordWithVlensUnionCase[RecordWithVlens]"]]
+
+class Int32OrRecordWithVlensUnionCase(Int32OrRecordWithVlens, yardl.UnionCase[_T]):
+    pass
+
+Int32OrRecordWithVlens.Int32 = type("Int32OrRecordWithVlens.Int32", (Int32OrRecordWithVlensUnionCase,), {"index": 0})
+Int32OrRecordWithVlens.RecordWithVlens = type("Int32OrRecordWithVlens.RecordWithVlens", (Int32OrRecordWithVlensUnionCase,), {"index": 1})
+del Int32OrRecordWithVlensUnionCase
+
+class ImageFloatOrImageDouble:
+    ImageFloat: typing.ClassVar[type["ImageFloatOrImageDoubleUnionCase[Image[np.float32]]"]]
+    ImageDouble: typing.ClassVar[type["ImageFloatOrImageDoubleUnionCase[Image[np.float64]]"]]
+
+class ImageFloatOrImageDoubleUnionCase(ImageFloatOrImageDouble, yardl.UnionCase[_T]):
+    pass
+
+ImageFloatOrImageDouble.ImageFloat = type("ImageFloatOrImageDouble.ImageFloat", (ImageFloatOrImageDoubleUnionCase,), {"index": 0})
+ImageFloatOrImageDouble.ImageDouble = type("ImageFloatOrImageDouble.ImageDouble", (ImageFloatOrImageDoubleUnionCase,), {"index": 1})
+del ImageFloatOrImageDoubleUnionCase
 
 def _mk_get_dtype():
     dtype_map: dict[typing.Union[type, types.GenericAlias], typing.Union[np.dtype[typing.Any], typing.Callable[[tuple[type, ...]], np.dtype[typing.Any]]]] = {}

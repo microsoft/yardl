@@ -504,8 +504,11 @@ def test_dynamic_ndarrays():
 
 def test_maps():
     with create_validating_writer_class(tm.MapsWriterBase)() as w:
-        w.write_string_to_int({"a": 1, "b": 2, "c": 3})
-        w.write_string_to_union({"a": ("int32", 1), "b": ("string", "2")})
+        d = {"a": 1, "b": 2, "c": 3}
+        w.write_string_to_int(d)
+        w.write_string_to_union(
+            {"a": tm.StringOrInt32.Int32(1), "b": tm.StringOrInt32.String("2")}
+        )
         w.write_aliased_generic({"a": 1, "b": 2, "c": 3})
 
 
@@ -514,26 +517,26 @@ def test_unions():
 
     # first option
     with c() as w:
-        w.write_int_or_simple_record(("int32", 1))
-        w.write_int_or_record_with_vlens(("int32", 2))
+        w.write_int_or_simple_record(tm.Int32OrSimpleRecord.Int32(1))
+        w.write_int_or_record_with_vlens(tm.Int32OrRecordWithVlens.Int32(2))
         w.write_monosotate_or_int_or_simple_record(None)
         w.write_record_with_unions(tm.RecordWithUnions())
 
     # second option
     with c() as w:
-        w.write_int_or_simple_record(("SimpleRecord", tm.SimpleRecord(x=1, y=2, z=3)))
+        w.write_int_or_simple_record(
+            tm.Int32OrSimpleRecord.SimpleRecord(tm.SimpleRecord(x=1, y=2, z=3))
+        )
         w.write_int_or_record_with_vlens(
-            (
-                "RecordWithVlens",
-                tm.RecordWithVlens(a=[tm.SimpleRecord(x=1, y=2, z=3)], b=12, c=13),
+            tm.Int32OrRecordWithVlens.RecordWithVlens(
+                tm.RecordWithVlens(a=[tm.SimpleRecord(x=1, y=2, z=3)], b=12, c=13)
             )
         )
-        w.write_monosotate_or_int_or_simple_record(("int32", 6))
+        w.write_monosotate_or_int_or_simple_record(tm.Int32OrSimpleRecord.Int32(6))
         w.write_record_with_unions(
             tm.RecordWithUnions(
-                null_or_int_or_string=("int32", 7),
-                date_or_datetime=(
-                    "datetime",
+                null_or_int_or_string=tm.Int32OrString.Int32(7),
+                date_or_datetime=tm.TimeOrDatetime.Datetime(
                     tm.DateTime.from_components(2025, 3, 4),
                 ),
             )
@@ -598,18 +601,18 @@ def test_streams_of_unions():
     with create_validating_writer_class(tm.StreamsOfUnionsWriterBase)() as w:
         w.write_int_or_simple_record(
             [
-                ("int32", 1),
-                ("SimpleRecord", tm.SimpleRecord(x=1, y=2, z=3)),
-                ("int32", 2),
+                tm.Int32OrSimpleRecord.Int32(1),
+                tm.Int32OrSimpleRecord.SimpleRecord(tm.SimpleRecord(x=1, y=2, z=3)),
+                tm.Int32OrSimpleRecord.Int32(2),
             ]
         )
         w.write_nullable_int_or_simple_record(
             [
                 None,
-                ("int32", 1),
-                ("SimpleRecord", tm.SimpleRecord(x=1, y=2, z=3)),
+                tm.Int32OrSimpleRecord.Int32(1),
+                tm.Int32OrSimpleRecord.SimpleRecord(tm.SimpleRecord(x=1, y=2, z=3)),
                 None,
-                ("int32", 2),
+                tm.Int32OrSimpleRecord.Int32(2),
                 None,
             ]
         )
@@ -632,12 +635,10 @@ def test_simple_generics():
 
         w.write_stream_of_type_variants(
             [
-                (
-                    "imageFloat",
+                tm.ImageFloatOrImageDouble.ImageFloat(
                     np.array([[1.0, 2.0], [3.0, 4.0]], dtype=np.float32),
                 ),
-                (
-                    "imageDouble",
+                tm.ImageFloatOrImageDouble.ImageDouble(
                     np.array([[1.0, 2.0], [3.0, 4.0]], dtype=np.float64),
                 ),
             ]
@@ -689,13 +690,18 @@ def test_aliases():
         w.write_aliased_optional(23)
         w.write_aliased_generic_optional(44.0)
 
-        # This is not great. ("string", "hello") would be better
-        w.write_aliased_generic_union_2(("T1", "hello"))
+        w.write_aliased_generic_union_2(
+            tm.AliasedGenericUnion2[tm.AliasedString, tm.AliasedEnum].T1("hello")
+        )
 
         w.write_aliased_generic_vector([1.0, 33.0, 44.0])
         w.write_aliased_generic_fixed_vector([1.0, 33.0, 44.0])
 
-        # Same comment as above
         w.write_stream_of_aliased_generic_union_2(
-            [("T1", "hello"), ("T2", tm.Fruits.APPLE)]
+            [
+                tm.AliasedGenericUnion2[tm.AliasedString, tm.AliasedEnum].T1("hello"),
+                tm.AliasedGenericUnion2[tm.AliasedString, tm.AliasedEnum].T2(
+                    tm.Fruits.APPLE
+                ),
+            ]
         )

@@ -127,11 +127,8 @@ class BinaryBenchmarkSimpleMrdWriter(_binary.BinaryProtocolWriter, BenchmarkSimp
         BenchmarkSimpleMrdWriterBase.__init__(self)
         _binary.BinaryProtocolWriter.__init__(self, stream, BenchmarkSimpleMrdWriterBase.schema)
 
-    def _write_data(self, value: collections.abc.Iterable[typing.Union[
-        tuple[typing.Literal["acquisition"], SimpleAcquisition],
-        tuple[typing.Literal["image"], Image[np.float32]],
-    ]]) -> None:
-        _binary.StreamSerializer(_binary.UnionSerializer([("acquisition", _SimpleAcquisitionSerializer()), ("image", _binary.NDArraySerializer(_binary.float32_serializer, 2))])).write(self._stream, value)
+    def _write_data(self, value: collections.abc.Iterable[AcquisitionOrImage]) -> None:
+        _binary.StreamSerializer(_binary.UnionSerializer(AcquisitionOrImage, [(AcquisitionOrImage.Acquisition, _SimpleAcquisitionSerializer()), (AcquisitionOrImage.Image, _binary.NDArraySerializer(_binary.float32_serializer, 2))])).write(self._stream, value)
 
 
 class BinaryBenchmarkSimpleMrdReader(_binary.BinaryProtocolReader, BenchmarkSimpleMrdReaderBase):
@@ -142,11 +139,8 @@ class BinaryBenchmarkSimpleMrdReader(_binary.BinaryProtocolReader, BenchmarkSimp
         BenchmarkSimpleMrdReaderBase.__init__(self)
         _binary.BinaryProtocolReader.__init__(self, stream, BenchmarkSimpleMrdReaderBase.schema)
 
-    def _read_data(self) -> collections.abc.Iterable[typing.Union[
-        tuple[typing.Literal["acquisition"], SimpleAcquisition],
-        tuple[typing.Literal["image"], Image[np.float32]],
-    ]]:
-        return _binary.StreamSerializer(_binary.UnionSerializer([("acquisition", _SimpleAcquisitionSerializer()), ("image", _binary.NDArraySerializer(_binary.float32_serializer, 2))])).read(self._stream)
+    def _read_data(self) -> collections.abc.Iterable[AcquisitionOrImage]:
+        return _binary.StreamSerializer(_binary.UnionSerializer(AcquisitionOrImage, [(AcquisitionOrImage.Acquisition, _SimpleAcquisitionSerializer()), (AcquisitionOrImage.Image, _binary.NDArraySerializer(_binary.float32_serializer, 2))])).read(self._stream)
 
 class BinaryScalarsWriter(_binary.BinaryProtocolWriter, ScalarsWriterBase):
     """Binary writer for the Scalars protocol."""
@@ -703,11 +697,8 @@ class BinaryMapsWriter(_binary.BinaryProtocolWriter, MapsWriterBase):
     def _write_string_to_int(self, value: dict[str, yardl.Int32]) -> None:
         _binary.MapSerializer(_binary.string_serializer, _binary.int32_serializer).write(self._stream, value)
 
-    def _write_string_to_union(self, value: dict[str, typing.Union[
-        tuple[typing.Literal["string"], str],
-        tuple[typing.Literal["int32"], yardl.Int32],
-    ]]) -> None:
-        _binary.MapSerializer(_binary.string_serializer, _binary.UnionSerializer([("string", _binary.string_serializer), ("int32", _binary.int32_serializer)])).write(self._stream, value)
+    def _write_string_to_union(self, value: dict[str, StringOrInt32]) -> None:
+        _binary.MapSerializer(_binary.string_serializer, _binary.UnionSerializer(StringOrInt32, [(StringOrInt32.String, _binary.string_serializer), (StringOrInt32.Int32, _binary.int32_serializer)])).write(self._stream, value)
 
     def _write_aliased_generic(self, value: AliasedMap[str, yardl.Int32]) -> None:
         _binary.MapSerializer(_binary.string_serializer, _binary.int32_serializer).write(self._stream, value)
@@ -724,11 +715,8 @@ class BinaryMapsReader(_binary.BinaryProtocolReader, MapsReaderBase):
     def _read_string_to_int(self) -> dict[str, yardl.Int32]:
         return _binary.MapSerializer(_binary.string_serializer, _binary.int32_serializer).read(self._stream)
 
-    def _read_string_to_union(self) -> dict[str, typing.Union[
-        tuple[typing.Literal["string"], str],
-        tuple[typing.Literal["int32"], yardl.Int32],
-    ]]:
-        return _binary.MapSerializer(_binary.string_serializer, _binary.UnionSerializer([("string", _binary.string_serializer), ("int32", _binary.int32_serializer)])).read(self._stream)
+    def _read_string_to_union(self) -> dict[str, StringOrInt32]:
+        return _binary.MapSerializer(_binary.string_serializer, _binary.UnionSerializer(StringOrInt32, [(StringOrInt32.String, _binary.string_serializer), (StringOrInt32.Int32, _binary.int32_serializer)])).read(self._stream)
 
     def _read_aliased_generic(self) -> AliasedMap[str, yardl.Int32]:
         return _binary.MapSerializer(_binary.string_serializer, _binary.int32_serializer).read(self._stream)
@@ -741,24 +729,14 @@ class BinaryUnionsWriter(_binary.BinaryProtocolWriter, UnionsWriterBase):
         UnionsWriterBase.__init__(self)
         _binary.BinaryProtocolWriter.__init__(self, stream, UnionsWriterBase.schema)
 
-    def _write_int_or_simple_record(self, value: typing.Union[
-        tuple[typing.Literal["int32"], yardl.Int32],
-        tuple[typing.Literal["SimpleRecord"], SimpleRecord],
-    ]) -> None:
-        _binary.UnionSerializer([("int32", _binary.int32_serializer), ("SimpleRecord", _SimpleRecordSerializer())]).write(self._stream, value)
+    def _write_int_or_simple_record(self, value: Int32OrSimpleRecord) -> None:
+        _binary.UnionSerializer(Int32OrSimpleRecord, [(Int32OrSimpleRecord.Int32, _binary.int32_serializer), (Int32OrSimpleRecord.SimpleRecord, _SimpleRecordSerializer())]).write(self._stream, value)
 
-    def _write_int_or_record_with_vlens(self, value: typing.Union[
-        tuple[typing.Literal["int32"], yardl.Int32],
-        tuple[typing.Literal["RecordWithVlens"], RecordWithVlens],
-    ]) -> None:
-        _binary.UnionSerializer([("int32", _binary.int32_serializer), ("RecordWithVlens", _RecordWithVlensSerializer())]).write(self._stream, value)
+    def _write_int_or_record_with_vlens(self, value: Int32OrRecordWithVlens) -> None:
+        _binary.UnionSerializer(Int32OrRecordWithVlens, [(Int32OrRecordWithVlens.Int32, _binary.int32_serializer), (Int32OrRecordWithVlens.RecordWithVlens, _RecordWithVlensSerializer())]).write(self._stream, value)
 
-    def _write_monosotate_or_int_or_simple_record(self, value: typing.Union[
-        tuple[typing.Literal["int32"], yardl.Int32],
-        tuple[typing.Literal["SimpleRecord"], SimpleRecord],
-        None
-    ]) -> None:
-        _binary.UnionSerializer([None, ("int32", _binary.int32_serializer), ("SimpleRecord", _SimpleRecordSerializer())]).write(self._stream, value)
+    def _write_monosotate_or_int_or_simple_record(self, value: typing.Optional[Int32OrSimpleRecord]) -> None:
+        _binary.UnionSerializer(Int32OrSimpleRecord, [None, (Int32OrSimpleRecord.Int32, _binary.int32_serializer), (Int32OrSimpleRecord.SimpleRecord, _SimpleRecordSerializer())]).write(self._stream, value)
 
     def _write_record_with_unions(self, value: RecordWithUnions) -> None:
         _RecordWithUnionsSerializer().write(self._stream, value)
@@ -772,24 +750,14 @@ class BinaryUnionsReader(_binary.BinaryProtocolReader, UnionsReaderBase):
         UnionsReaderBase.__init__(self)
         _binary.BinaryProtocolReader.__init__(self, stream, UnionsReaderBase.schema)
 
-    def _read_int_or_simple_record(self) -> typing.Union[
-        tuple[typing.Literal["int32"], yardl.Int32],
-        tuple[typing.Literal["SimpleRecord"], SimpleRecord],
-    ]:
-        return _binary.UnionSerializer([("int32", _binary.int32_serializer), ("SimpleRecord", _SimpleRecordSerializer())]).read(self._stream)
+    def _read_int_or_simple_record(self) -> Int32OrSimpleRecord:
+        return _binary.UnionSerializer(Int32OrSimpleRecord, [(Int32OrSimpleRecord.Int32, _binary.int32_serializer), (Int32OrSimpleRecord.SimpleRecord, _SimpleRecordSerializer())]).read(self._stream)
 
-    def _read_int_or_record_with_vlens(self) -> typing.Union[
-        tuple[typing.Literal["int32"], yardl.Int32],
-        tuple[typing.Literal["RecordWithVlens"], RecordWithVlens],
-    ]:
-        return _binary.UnionSerializer([("int32", _binary.int32_serializer), ("RecordWithVlens", _RecordWithVlensSerializer())]).read(self._stream)
+    def _read_int_or_record_with_vlens(self) -> Int32OrRecordWithVlens:
+        return _binary.UnionSerializer(Int32OrRecordWithVlens, [(Int32OrRecordWithVlens.Int32, _binary.int32_serializer), (Int32OrRecordWithVlens.RecordWithVlens, _RecordWithVlensSerializer())]).read(self._stream)
 
-    def _read_monosotate_or_int_or_simple_record(self) -> typing.Union[
-        tuple[typing.Literal["int32"], yardl.Int32],
-        tuple[typing.Literal["SimpleRecord"], SimpleRecord],
-        None
-    ]:
-        return _binary.UnionSerializer([None, ("int32", _binary.int32_serializer), ("SimpleRecord", _SimpleRecordSerializer())]).read(self._stream)
+    def _read_monosotate_or_int_or_simple_record(self) -> typing.Optional[Int32OrSimpleRecord]:
+        return _binary.UnionSerializer(Int32OrSimpleRecord, [None, (Int32OrSimpleRecord.Int32, _binary.int32_serializer), (Int32OrSimpleRecord.SimpleRecord, _SimpleRecordSerializer())]).read(self._stream)
 
     def _read_record_with_unions(self) -> RecordWithUnions:
         return _RecordWithUnionsSerializer().read(self._stream)
@@ -802,18 +770,11 @@ class BinaryStreamsOfUnionsWriter(_binary.BinaryProtocolWriter, StreamsOfUnionsW
         StreamsOfUnionsWriterBase.__init__(self)
         _binary.BinaryProtocolWriter.__init__(self, stream, StreamsOfUnionsWriterBase.schema)
 
-    def _write_int_or_simple_record(self, value: collections.abc.Iterable[typing.Union[
-        tuple[typing.Literal["int32"], yardl.Int32],
-        tuple[typing.Literal["SimpleRecord"], SimpleRecord],
-    ]]) -> None:
-        _binary.StreamSerializer(_binary.UnionSerializer([("int32", _binary.int32_serializer), ("SimpleRecord", _SimpleRecordSerializer())])).write(self._stream, value)
+    def _write_int_or_simple_record(self, value: collections.abc.Iterable[Int32OrSimpleRecord]) -> None:
+        _binary.StreamSerializer(_binary.UnionSerializer(Int32OrSimpleRecord, [(Int32OrSimpleRecord.Int32, _binary.int32_serializer), (Int32OrSimpleRecord.SimpleRecord, _SimpleRecordSerializer())])).write(self._stream, value)
 
-    def _write_nullable_int_or_simple_record(self, value: collections.abc.Iterable[typing.Union[
-        tuple[typing.Literal["int32"], yardl.Int32],
-        tuple[typing.Literal["SimpleRecord"], SimpleRecord],
-        None
-    ]]) -> None:
-        _binary.StreamSerializer(_binary.UnionSerializer([None, ("int32", _binary.int32_serializer), ("SimpleRecord", _SimpleRecordSerializer())])).write(self._stream, value)
+    def _write_nullable_int_or_simple_record(self, value: collections.abc.Iterable[typing.Optional[Int32OrSimpleRecord]]) -> None:
+        _binary.StreamSerializer(_binary.UnionSerializer(Int32OrSimpleRecord, [None, (Int32OrSimpleRecord.Int32, _binary.int32_serializer), (Int32OrSimpleRecord.SimpleRecord, _SimpleRecordSerializer())])).write(self._stream, value)
 
 
 class BinaryStreamsOfUnionsReader(_binary.BinaryProtocolReader, StreamsOfUnionsReaderBase):
@@ -824,18 +785,11 @@ class BinaryStreamsOfUnionsReader(_binary.BinaryProtocolReader, StreamsOfUnionsR
         StreamsOfUnionsReaderBase.__init__(self)
         _binary.BinaryProtocolReader.__init__(self, stream, StreamsOfUnionsReaderBase.schema)
 
-    def _read_int_or_simple_record(self) -> collections.abc.Iterable[typing.Union[
-        tuple[typing.Literal["int32"], yardl.Int32],
-        tuple[typing.Literal["SimpleRecord"], SimpleRecord],
-    ]]:
-        return _binary.StreamSerializer(_binary.UnionSerializer([("int32", _binary.int32_serializer), ("SimpleRecord", _SimpleRecordSerializer())])).read(self._stream)
+    def _read_int_or_simple_record(self) -> collections.abc.Iterable[Int32OrSimpleRecord]:
+        return _binary.StreamSerializer(_binary.UnionSerializer(Int32OrSimpleRecord, [(Int32OrSimpleRecord.Int32, _binary.int32_serializer), (Int32OrSimpleRecord.SimpleRecord, _SimpleRecordSerializer())])).read(self._stream)
 
-    def _read_nullable_int_or_simple_record(self) -> collections.abc.Iterable[typing.Union[
-        tuple[typing.Literal["int32"], yardl.Int32],
-        tuple[typing.Literal["SimpleRecord"], SimpleRecord],
-        None
-    ]]:
-        return _binary.StreamSerializer(_binary.UnionSerializer([None, ("int32", _binary.int32_serializer), ("SimpleRecord", _SimpleRecordSerializer())])).read(self._stream)
+    def _read_nullable_int_or_simple_record(self) -> collections.abc.Iterable[typing.Optional[Int32OrSimpleRecord]]:
+        return _binary.StreamSerializer(_binary.UnionSerializer(Int32OrSimpleRecord, [None, (Int32OrSimpleRecord.Int32, _binary.int32_serializer), (Int32OrSimpleRecord.SimpleRecord, _SimpleRecordSerializer())])).read(self._stream)
 
 class BinaryEnumsWriter(_binary.BinaryProtocolWriter, EnumsWriterBase):
     """Binary writer for the Enums protocol."""
@@ -968,11 +922,8 @@ class BinarySimpleGenericsWriter(_binary.BinaryProtocolWriter, SimpleGenericsWri
     def _write_int_string_tuple(self, value: MyTuple[yardl.Int32, str]) -> None:
         _MyTupleSerializer(_binary.int32_serializer, _binary.string_serializer).write(self._stream, value)
 
-    def _write_stream_of_type_variants(self, value: collections.abc.Iterable[typing.Union[
-        tuple[typing.Literal["imageFloat"], Image[np.float32]],
-        tuple[typing.Literal["imageDouble"], Image[np.float64]],
-    ]]) -> None:
-        _binary.StreamSerializer(_binary.UnionSerializer([("imageFloat", _binary.NDArraySerializer(_binary.float32_serializer, 2)), ("imageDouble", _binary.NDArraySerializer(_binary.float64_serializer, 2))])).write(self._stream, value)
+    def _write_stream_of_type_variants(self, value: collections.abc.Iterable[ImageFloatOrImageDouble]) -> None:
+        _binary.StreamSerializer(_binary.UnionSerializer(ImageFloatOrImageDouble, [(ImageFloatOrImageDouble.ImageFloat, _binary.NDArraySerializer(_binary.float32_serializer, 2)), (ImageFloatOrImageDouble.ImageDouble, _binary.NDArraySerializer(_binary.float64_serializer, 2))])).write(self._stream, value)
 
 
 class BinarySimpleGenericsReader(_binary.BinaryProtocolReader, SimpleGenericsReaderBase):
@@ -1007,11 +958,8 @@ class BinarySimpleGenericsReader(_binary.BinaryProtocolReader, SimpleGenericsRea
     def _read_int_string_tuple(self) -> MyTuple[yardl.Int32, str]:
         return _MyTupleSerializer(_binary.int32_serializer, _binary.string_serializer).read(self._stream)
 
-    def _read_stream_of_type_variants(self) -> collections.abc.Iterable[typing.Union[
-        tuple[typing.Literal["imageFloat"], Image[np.float32]],
-        tuple[typing.Literal["imageDouble"], Image[np.float64]],
-    ]]:
-        return _binary.StreamSerializer(_binary.UnionSerializer([("imageFloat", _binary.NDArraySerializer(_binary.float32_serializer, 2)), ("imageDouble", _binary.NDArraySerializer(_binary.float64_serializer, 2))])).read(self._stream)
+    def _read_stream_of_type_variants(self) -> collections.abc.Iterable[ImageFloatOrImageDouble]:
+        return _binary.StreamSerializer(_binary.UnionSerializer(ImageFloatOrImageDouble, [(ImageFloatOrImageDouble.ImageFloat, _binary.NDArraySerializer(_binary.float32_serializer, 2)), (ImageFloatOrImageDouble.ImageDouble, _binary.NDArraySerializer(_binary.float64_serializer, 2))])).read(self._stream)
 
 class BinaryAdvancedGenericsWriter(_binary.BinaryProtocolWriter, AdvancedGenericsWriterBase):
     """Binary writer for the AdvancedGenerics protocol."""
@@ -1087,7 +1035,7 @@ class BinaryAliasesWriter(_binary.BinaryProtocolWriter, AliasesWriterBase):
         _binary.OptionalSerializer(_binary.float32_serializer).write(self._stream, value)
 
     def _write_aliased_generic_union_2(self, value: AliasedGenericUnion2[AliasedString, AliasedEnum]) -> None:
-        _binary.UnionSerializer([("T1", _binary.string_serializer), ("T2", _binary.EnumSerializer(_binary.int32_serializer, Fruits))]).write(self._stream, value)
+        _binary.UnionSerializer(T1OrT2, [(T1OrT2.T1, _binary.string_serializer), (T1OrT2.T2, _binary.EnumSerializer(_binary.int32_serializer, Fruits))]).write(self._stream, value)
 
     def _write_aliased_generic_vector(self, value: AliasedGenericVector[yardl.Float32]) -> None:
         _binary.VectorSerializer(_binary.float32_serializer).write(self._stream, value)
@@ -1096,7 +1044,7 @@ class BinaryAliasesWriter(_binary.BinaryProtocolWriter, AliasesWriterBase):
         _binary.FixedVectorSerializer(_binary.float32_serializer, 3).write(self._stream, value)
 
     def _write_stream_of_aliased_generic_union_2(self, value: collections.abc.Iterable[AliasedGenericUnion2[AliasedString, AliasedEnum]]) -> None:
-        _binary.StreamSerializer(_binary.UnionSerializer([("T1", _binary.string_serializer), ("T2", _binary.EnumSerializer(_binary.int32_serializer, Fruits))])).write(self._stream, value)
+        _binary.StreamSerializer(_binary.UnionSerializer(T1OrT2, [(T1OrT2.T1, _binary.string_serializer), (T1OrT2.T2, _binary.EnumSerializer(_binary.int32_serializer, Fruits))])).write(self._stream, value)
 
 
 class BinaryAliasesReader(_binary.BinaryProtocolReader, AliasesReaderBase):
@@ -1126,7 +1074,7 @@ class BinaryAliasesReader(_binary.BinaryProtocolReader, AliasesReaderBase):
         return _binary.OptionalSerializer(_binary.float32_serializer).read(self._stream)
 
     def _read_aliased_generic_union_2(self) -> AliasedGenericUnion2[AliasedString, AliasedEnum]:
-        return _binary.UnionSerializer([("T1", _binary.string_serializer), ("T2", _binary.EnumSerializer(_binary.int32_serializer, Fruits))]).read(self._stream)
+        return _binary.UnionSerializer(T1OrT2, [(T1OrT2.T1, _binary.string_serializer), (T1OrT2.T2, _binary.EnumSerializer(_binary.int32_serializer, Fruits))]).read(self._stream)
 
     def _read_aliased_generic_vector(self) -> AliasedGenericVector[yardl.Float32]:
         return _binary.VectorSerializer(_binary.float32_serializer).read(self._stream)
@@ -1135,7 +1083,7 @@ class BinaryAliasesReader(_binary.BinaryProtocolReader, AliasesReaderBase):
         return _binary.FixedVectorSerializer(_binary.float32_serializer, 3).read(self._stream)
 
     def _read_stream_of_aliased_generic_union_2(self) -> collections.abc.Iterable[AliasedGenericUnion2[AliasedString, AliasedEnum]]:
-        return _binary.StreamSerializer(_binary.UnionSerializer([("T1", _binary.string_serializer), ("T2", _binary.EnumSerializer(_binary.int32_serializer, Fruits))])).read(self._stream)
+        return _binary.StreamSerializer(_binary.UnionSerializer(T1OrT2, [(T1OrT2.T1, _binary.string_serializer), (T1OrT2.T2, _binary.EnumSerializer(_binary.int32_serializer, Fruits))])).read(self._stream)
 
 class BinaryStreamsOfAliasedUnionsWriter(_binary.BinaryProtocolWriter, StreamsOfAliasedUnionsWriterBase):
     """Binary writer for the StreamsOfAliasedUnions protocol."""
@@ -1146,10 +1094,10 @@ class BinaryStreamsOfAliasedUnionsWriter(_binary.BinaryProtocolWriter, StreamsOf
         _binary.BinaryProtocolWriter.__init__(self, stream, StreamsOfAliasedUnionsWriterBase.schema)
 
     def _write_int_or_simple_record(self, value: collections.abc.Iterable[AliasedIntOrSimpleRecord]) -> None:
-        _binary.StreamSerializer(_binary.UnionSerializer([("int32", _binary.int32_serializer), ("SimpleRecord", _SimpleRecordSerializer())])).write(self._stream, value)
+        _binary.StreamSerializer(_binary.UnionSerializer(Int32OrSimpleRecord, [(Int32OrSimpleRecord.Int32, _binary.int32_serializer), (Int32OrSimpleRecord.SimpleRecord, _SimpleRecordSerializer())])).write(self._stream, value)
 
     def _write_nullable_int_or_simple_record(self, value: collections.abc.Iterable[AliasedNullableIntSimpleRecord]) -> None:
-        _binary.StreamSerializer(_binary.UnionSerializer([None, ("int32", _binary.int32_serializer), ("SimpleRecord", _SimpleRecordSerializer())])).write(self._stream, value)
+        _binary.StreamSerializer(_binary.UnionSerializer(Int32OrSimpleRecord, [None, (Int32OrSimpleRecord.Int32, _binary.int32_serializer), (Int32OrSimpleRecord.SimpleRecord, _SimpleRecordSerializer())])).write(self._stream, value)
 
 
 class BinaryStreamsOfAliasedUnionsReader(_binary.BinaryProtocolReader, StreamsOfAliasedUnionsReaderBase):
@@ -1161,10 +1109,10 @@ class BinaryStreamsOfAliasedUnionsReader(_binary.BinaryProtocolReader, StreamsOf
         _binary.BinaryProtocolReader.__init__(self, stream, StreamsOfAliasedUnionsReaderBase.schema)
 
     def _read_int_or_simple_record(self) -> collections.abc.Iterable[AliasedIntOrSimpleRecord]:
-        return _binary.StreamSerializer(_binary.UnionSerializer([("int32", _binary.int32_serializer), ("SimpleRecord", _SimpleRecordSerializer())])).read(self._stream)
+        return _binary.StreamSerializer(_binary.UnionSerializer(Int32OrSimpleRecord, [(Int32OrSimpleRecord.Int32, _binary.int32_serializer), (Int32OrSimpleRecord.SimpleRecord, _SimpleRecordSerializer())])).read(self._stream)
 
     def _read_nullable_int_or_simple_record(self) -> collections.abc.Iterable[AliasedNullableIntSimpleRecord]:
-        return _binary.StreamSerializer(_binary.UnionSerializer([None, ("int32", _binary.int32_serializer), ("SimpleRecord", _SimpleRecordSerializer())])).read(self._stream)
+        return _binary.StreamSerializer(_binary.UnionSerializer(Int32OrSimpleRecord, [None, (Int32OrSimpleRecord.Int32, _binary.int32_serializer), (Int32OrSimpleRecord.SimpleRecord, _SimpleRecordSerializer())])).read(self._stream)
 
 class BinaryProtocolWithComputedFieldsWriter(_binary.BinaryProtocolWriter, ProtocolWithComputedFieldsWriterBase):
     """Binary writer for the ProtocolWithComputedFields protocol."""
@@ -1616,7 +1564,7 @@ class _RecordWithVlenCollectionsSerializer(_binary.RecordSerializer[RecordWithVl
 
 class _RecordWithUnionsSerializer(_binary.RecordSerializer[RecordWithUnions]):
     def __init__(self) -> None:
-        super().__init__([("null_or_int_or_string", _binary.UnionSerializer([None, ("int32", _binary.int32_serializer), ("string", _binary.string_serializer)])), ("date_or_datetime", _binary.UnionSerializer([("time", _binary.time_serializer), ("datetime", _binary.datetime_serializer)]))])
+        super().__init__([("null_or_int_or_string", _binary.UnionSerializer(Int32OrString, [None, (Int32OrString.Int32, _binary.int32_serializer), (Int32OrString.String, _binary.string_serializer)])), ("date_or_datetime", _binary.UnionSerializer(TimeOrDatetime, [(TimeOrDatetime.Time, _binary.time_serializer), (TimeOrDatetime.Datetime, _binary.datetime_serializer)]))])
 
     def write(self, stream: _binary.CodedOutputStream, value: RecordWithUnions) -> None:
         if isinstance(value, np.void):
@@ -1688,7 +1636,7 @@ class _MyTupleSerializer(typing.Generic[T1, T1_NP, T2, T2_NP], _binary.RecordSer
 
 class _GenericRecordWithComputedFieldsSerializer(typing.Generic[T0, T0_NP, T1, T1_NP], _binary.RecordSerializer[GenericRecordWithComputedFields[T0, T1]]):
     def __init__(self, t0_serializer: _binary.TypeSerializer[T0, T0_NP], t1_serializer: _binary.TypeSerializer[T1, T1_NP]) -> None:
-        super().__init__([("f1", _binary.UnionSerializer([("T0", t0_serializer), ("T1", t1_serializer)]))])
+        super().__init__([("f1", _binary.UnionSerializer(T0OrT1, [(T0OrT1.T0, t0_serializer), (T0OrT1.T1, t1_serializer)]))])
 
     def write(self, stream: _binary.CodedOutputStream, value: GenericRecordWithComputedFields[T0, T1]) -> None:
         if isinstance(value, np.void):
@@ -1706,7 +1654,7 @@ class _GenericRecordWithComputedFieldsSerializer(typing.Generic[T0, T0_NP, T1, T
 
 class _RecordWithComputedFieldsSerializer(_binary.RecordSerializer[RecordWithComputedFields]):
     def __init__(self) -> None:
-        super().__init__([("array_field", _binary.NDArraySerializer(_binary.int32_serializer, 2)), ("array_field_map_dimensions", _binary.NDArraySerializer(_binary.int32_serializer, 2)), ("dynamic_array_field", _binary.DynamicNDArraySerializer(_binary.int32_serializer)), ("fixed_array_field", _binary.FixedNDArraySerializer(_binary.int32_serializer, (3, 4,))), ("int_field", _binary.int32_serializer), ("string_field", _binary.string_serializer), ("tuple_field", _MyTupleSerializer(_binary.int32_serializer, _binary.int32_serializer)), ("vector_field", _binary.VectorSerializer(_binary.int32_serializer)), ("vector_of_vectors_field", _binary.VectorSerializer(_binary.VectorSerializer(_binary.int32_serializer))), ("fixed_vector_field", _binary.FixedVectorSerializer(_binary.int32_serializer, 3)), ("optional_named_array", _binary.OptionalSerializer(_binary.NDArraySerializer(_binary.int32_serializer, 2))), ("int_float_union", _binary.UnionSerializer([("int32", _binary.int32_serializer), ("float32", _binary.float32_serializer)])), ("nullable_int_float_union", _binary.UnionSerializer([None, ("int32", _binary.int32_serializer), ("float32", _binary.float32_serializer)])), ("union_with_nested_generic_union", _binary.UnionSerializer([("int", _binary.int32_serializer), ("genericRecordWithComputedFields", _GenericRecordWithComputedFieldsSerializer(_binary.string_serializer, _binary.float32_serializer))])), ("map_field", _binary.MapSerializer(_binary.string_serializer, _binary.string_serializer))])
+        super().__init__([("array_field", _binary.NDArraySerializer(_binary.int32_serializer, 2)), ("array_field_map_dimensions", _binary.NDArraySerializer(_binary.int32_serializer, 2)), ("dynamic_array_field", _binary.DynamicNDArraySerializer(_binary.int32_serializer)), ("fixed_array_field", _binary.FixedNDArraySerializer(_binary.int32_serializer, (3, 4,))), ("int_field", _binary.int32_serializer), ("string_field", _binary.string_serializer), ("tuple_field", _MyTupleSerializer(_binary.int32_serializer, _binary.int32_serializer)), ("vector_field", _binary.VectorSerializer(_binary.int32_serializer)), ("vector_of_vectors_field", _binary.VectorSerializer(_binary.VectorSerializer(_binary.int32_serializer))), ("fixed_vector_field", _binary.FixedVectorSerializer(_binary.int32_serializer, 3)), ("optional_named_array", _binary.OptionalSerializer(_binary.NDArraySerializer(_binary.int32_serializer, 2))), ("int_float_union", _binary.UnionSerializer(Int32OrFloat32, [(Int32OrFloat32.Int32, _binary.int32_serializer), (Int32OrFloat32.Float32, _binary.float32_serializer)])), ("nullable_int_float_union", _binary.UnionSerializer(Int32OrFloat32, [None, (Int32OrFloat32.Int32, _binary.int32_serializer), (Int32OrFloat32.Float32, _binary.float32_serializer)])), ("union_with_nested_generic_union", _binary.UnionSerializer(IntOrGenericRecordWithComputedFields, [(IntOrGenericRecordWithComputedFields.Int, _binary.int32_serializer), (IntOrGenericRecordWithComputedFields.GenericRecordWithComputedFields, _GenericRecordWithComputedFieldsSerializer(_binary.string_serializer, _binary.float32_serializer))])), ("map_field", _binary.MapSerializer(_binary.string_serializer, _binary.string_serializer))])
 
     def write(self, stream: _binary.CodedOutputStream, value: RecordWithComputedFields) -> None:
         if isinstance(value, np.void):

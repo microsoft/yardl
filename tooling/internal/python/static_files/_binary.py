@@ -874,67 +874,41 @@ class OptionalSerializer(Generic[T, T_NP], TypeSerializer[Optional[T], np.void])
 
 class UnionSerializer(TypeSerializer[T, np.object_]):
     def __init__(
-        self, cases: list[Optional[tuple[str, TypeSerializer[Any, Any]]]]
+        self,
+        union_type: type,
+        cases: list[Optional[tuple[type, TypeSerializer[Any, Any]]]],
     ) -> None:
         super().__init__(np.object_)
-        if cases[0] is None:
-            self._offset = 1
-            self._cases = cast(list[tuple[str, TypeSerializer[Any, Any]]], cases[1:])
-        else:
-            self._offset = 0
-            self._cases = cast(list[tuple[str, TypeSerializer[Any, Any]]], cases)
+        self._union_type = union_type
+        self._cases = cases
+        self._offset = 1 if cases[0] is None else 0
 
     def write(self, stream: CodedOutputStream, value: T) -> None:
         if value is None:
-            if self._offset == 1:
+            if self._cases[0] is None:
                 stream.write_byte(0)
                 return
             else:
                 raise ValueError("None is not a valid for this union type")
 
-        if not isinstance(value, tuple) or len(value) != 2:
+        if not isinstance(value, self._union_type):
             raise ValueError(
-                f"Union values cannot be {type(value)} must be tuples[str, object] | None"
+                f"Expected union value of type {self._union_type} but got {type(value)}"
             )
 
-        tag, inner_value = value
-        for i, (case_tag, case_serializer) in enumerate(self._cases):
-            if case_tag == tag:
-                stream.write_byte(i + self._offset)
-                case_serializer.write(stream, inner_value)
-                return
-
-        raise ValueError(f"Incorrect union type {type(value)}")
+        tag_index = value.index + self._offset  # type: ignore
+        stream.write_byte(tag_index)
+        self._cases[tag_index][1].write(stream, value.value)  # type: ignore
 
     def write_numpy(self, stream: CodedOutputStream, value: np.object_) -> None:
-        if value is None:  # type: ignore
-            if self._offset == 1:
-                stream.write_byte(0)
-                return
-            else:
-                raise ValueError("None is not a valid for this union type")
-
-        if not isinstance(value, tuple) or len(value) != 2:
-            raise ValueError(
-                f"Union values cannot be {type(value)} must be `tuples[str, object] | None`"
-            )
-
-        tag, inner_value = value
-        for i, (case_tag, case_serializer) in enumerate(self._cases):
-            if case_tag == tag:
-                stream.write_byte(i + self._offset)
-                case_serializer.write_numpy(stream, inner_value)
-                return
-
-        raise ValueError(f"Incorrect union type {type(value)}")
+        self.write(stream, cast(T, value))
 
     def read(self, stream: CodedInputStream) -> T:
         case_index = stream.read_byte()
         if case_index == 0 and self._offset == 1:
             return None  # type: ignore
-
-        case_tag, case_serializer = self._cases[case_index - self._offset]
-        return (case_tag, case_serializer.read(stream))  # type: ignore
+        case_type, case_serializer = self._cases[case_index]  # type: ignore
+        return case_type(case_serializer.read(stream))  # type: ignore
 
     def read_numpy(self, stream: CodedInputStream) -> np.object_:
         return self.read(stream)  # type: ignore

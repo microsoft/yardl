@@ -160,13 +160,13 @@ def test_simple_union_equality():
     b = tm.RecordWithUnions(null_or_int_or_string=None)
     assert a == b
 
-    c = tm.RecordWithUnions(null_or_int_or_string=("int32", 1))
-    d = tm.RecordWithUnions(null_or_int_or_string=("int32", 1))
+    c = tm.RecordWithUnions(null_or_int_or_string=tm.Int32OrString.Int32(1))
+    d = tm.RecordWithUnions(null_or_int_or_string=tm.Int32OrString.Int32(1))
     assert c == d
     assert a != c
 
-    e = tm.RecordWithUnions(null_or_int_or_string=("string", "hello"))
-    f = tm.RecordWithUnions(null_or_int_or_string=("string", "hello"))
+    e = tm.RecordWithUnions(null_or_int_or_string=tm.Int32OrString.String("hello"))
+    f = tm.RecordWithUnions(null_or_int_or_string=tm.Int32OrString.String("hello"))
     assert e == f
     assert a != e
     assert c != e
@@ -174,10 +174,10 @@ def test_simple_union_equality():
 
 def test_time_union_equality():
     a = tm.RecordWithUnions(
-        date_or_datetime=("time", tm.Time.from_components(1, 1, 1, 1))
+        date_or_datetime=tm.TimeOrDatetime.Time(tm.Time.from_components(1, 1, 1, 1))
     )
     b = tm.RecordWithUnions(
-        date_or_datetime=("time", tm.Time.from_components(1, 1, 1, 1))
+        date_or_datetime=tm.TimeOrDatetime.Time(tm.Time.from_components(1, 1, 1, 1))
     )
 
     assert a == b

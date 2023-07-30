@@ -124,31 +124,34 @@ def test_switch_expression():
     assert r.optional_named_array_length() == 0
     assert r.optional_named_array_length_with_discard() == 0
 
-    r.int_float_union = ("int32", 42)
+    r.int_float_union = tm.Int32OrFloat32.Int32(42)
     assert r.int_float_union_as_float() == 42.0
-    r.int_float_union = ("float32", 42.9)
+    r.int_float_union = tm.Int32OrFloat32.Float32(42.9)
     assert r.int_float_union_as_float() == 42.9
 
     r.nullable_int_float_union = None
     assert r.nullable_int_float_union_string() == "null"
-    r.nullable_int_float_union = ("int32", 42)
+    r.nullable_int_float_union = tm.Int32OrFloat32.Int32(42)
     assert r.nullable_int_float_union_string() == "int"
-    r.nullable_int_float_union = ("float32", 42.9)
+    r.nullable_int_float_union = tm.Int32OrFloat32.Float32(42.9)
     assert r.nullable_int_float_union_string() == "float"
 
-    r.union_with_nested_generic_union = ("int", 42)
+    r.union_with_nested_generic_union = tm.IntOrGenericRecordWithComputedFields.Int(42)
     assert r.nested_switch() == -1
     assert r.use_nested_computed_field() == -1
 
     r.union_with_nested_generic_union = (
-        "genericRecordWithComputedFields",
-        tm.GenericRecordWithComputedFields(f1=("T0", "hi")),
+        tm.IntOrGenericRecordWithComputedFields.GenericRecordWithComputedFields(
+            tm.GenericRecordWithComputedFields(f1=tm.T0OrT1[str, tm.Float32].T0("hi"))
+        )
     )
+
     assert r.nested_switch() == 10
     assert r.use_nested_computed_field() == 0
     r.union_with_nested_generic_union = (
-        "genericRecordWithComputedFields",
-        tm.GenericRecordWithComputedFields(f1=("T1", 42.9)),
+        tm.IntOrGenericRecordWithComputedFields.GenericRecordWithComputedFields(
+            tm.GenericRecordWithComputedFields(f1=tm.T0OrT1[str, tm.Float32].T1(42.9))
+        )
     )
     assert r.nested_switch() == 20
     assert r.use_nested_computed_field() == 1
@@ -156,7 +159,7 @@ def test_switch_expression():
     r.int_field = 10
     assert r.switch_over_sigle_value() == 10
 
-    gr = tm.GenericRecordWithComputedFields(f1=("T0", 42))
+    gr = tm.GenericRecordWithComputedFields(f1=tm.T0OrT1[tm.Int32, tm.Float32].T0(42))
     assert gr.type_index() == 0
-    gr.f1 = ("T1", 42.9)
+    gr.f1 = tm.T0OrT1[tm.Int32, tm.Float32].T1(42.9)
     assert gr.type_index() == 1

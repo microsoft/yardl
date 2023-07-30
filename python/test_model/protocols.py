@@ -506,10 +506,7 @@ class BenchmarkSimpleMrdWriterBase(abc.ABC):
             expected_method = self._state_to_method_name((self._state + 1) & ~1)
             raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
 
-    def write_data(self, value: collections.abc.Iterable[typing.Union[
-        tuple[typing.Literal["acquisition"], SimpleAcquisition],
-        tuple[typing.Literal["image"], Image[np.float32]],
-    ]]) -> None:
+    def write_data(self, value: collections.abc.Iterable[AcquisitionOrImage]) -> None:
         """Ordinal 0"""
 
         if self._state & ~1 != 0:
@@ -519,10 +516,7 @@ class BenchmarkSimpleMrdWriterBase(abc.ABC):
         self._state = 1
 
     @abc.abstractmethod
-    def _write_data(self, value: collections.abc.Iterable[typing.Union[
-        tuple[typing.Literal["acquisition"], SimpleAcquisition],
-        tuple[typing.Literal["image"], Image[np.float32]],
-    ]]) -> None:
+    def _write_data(self, value: collections.abc.Iterable[AcquisitionOrImage]) -> None:
         raise NotImplementedError()
 
     @abc.abstractmethod
@@ -570,10 +564,7 @@ class BenchmarkSimpleMrdReaderBase(abc.ABC):
     def close(self) -> None:
         raise NotImplementedError()
 
-    def read_data(self) -> collections.abc.Iterable[typing.Union[
-        tuple[typing.Literal["acquisition"], SimpleAcquisition],
-        tuple[typing.Literal["image"], Image[np.float32]],
-    ]]:
+    def read_data(self) -> collections.abc.Iterable[AcquisitionOrImage]:
         """Ordinal 0"""
 
         if self._state != 0:
@@ -587,10 +578,7 @@ class BenchmarkSimpleMrdReaderBase(abc.ABC):
         writer.write_data(self.read_data())
 
     @abc.abstractmethod
-    def _read_data(self) -> collections.abc.Iterable[typing.Union[
-        tuple[typing.Literal["acquisition"], SimpleAcquisition],
-        tuple[typing.Literal["image"], Image[np.float32]],
-    ]]:
+    def _read_data(self) -> collections.abc.Iterable[AcquisitionOrImage]:
         raise NotImplementedError()
 
     T = typing.TypeVar('T')
@@ -3406,10 +3394,7 @@ class MapsWriterBase(abc.ABC):
         self._write_string_to_int(value)
         self._state = 2
 
-    def write_string_to_union(self, value: dict[str, typing.Union[
-        tuple[typing.Literal["string"], str],
-        tuple[typing.Literal["int32"], yardl.Int32],
-    ]]) -> None:
+    def write_string_to_union(self, value: dict[str, StringOrInt32]) -> None:
         """Ordinal 1"""
 
         if self._state != 2:
@@ -3432,10 +3417,7 @@ class MapsWriterBase(abc.ABC):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def _write_string_to_union(self, value: dict[str, typing.Union[
-        tuple[typing.Literal["string"], str],
-        tuple[typing.Literal["int32"], yardl.Int32],
-    ]]) -> None:
+    def _write_string_to_union(self, value: dict[str, StringOrInt32]) -> None:
         raise NotImplementedError()
 
     @abc.abstractmethod
@@ -3501,10 +3483,7 @@ class MapsReaderBase(abc.ABC):
         self._state = 2
         return value
 
-    def read_string_to_union(self) -> dict[str, typing.Union[
-        tuple[typing.Literal["string"], str],
-        tuple[typing.Literal["int32"], yardl.Int32],
-    ]]:
+    def read_string_to_union(self) -> dict[str, StringOrInt32]:
         """Ordinal 1"""
 
         if self._state != 2:
@@ -3534,10 +3513,7 @@ class MapsReaderBase(abc.ABC):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def _read_string_to_union(self) -> dict[str, typing.Union[
-        tuple[typing.Literal["string"], str],
-        tuple[typing.Literal["int32"], yardl.Int32],
-    ]]:
+    def _read_string_to_union(self) -> dict[str, StringOrInt32]:
         raise NotImplementedError()
 
     @abc.abstractmethod
@@ -3585,10 +3561,7 @@ class UnionsWriterBase(abc.ABC):
             expected_method = self._state_to_method_name((self._state + 1) & ~1)
             raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
 
-    def write_int_or_simple_record(self, value: typing.Union[
-        tuple[typing.Literal["int32"], yardl.Int32],
-        tuple[typing.Literal["SimpleRecord"], SimpleRecord],
-    ]) -> None:
+    def write_int_or_simple_record(self, value: Int32OrSimpleRecord) -> None:
         """Ordinal 0"""
 
         if self._state != 0:
@@ -3597,10 +3570,7 @@ class UnionsWriterBase(abc.ABC):
         self._write_int_or_simple_record(value)
         self._state = 2
 
-    def write_int_or_record_with_vlens(self, value: typing.Union[
-        tuple[typing.Literal["int32"], yardl.Int32],
-        tuple[typing.Literal["RecordWithVlens"], RecordWithVlens],
-    ]) -> None:
+    def write_int_or_record_with_vlens(self, value: Int32OrRecordWithVlens) -> None:
         """Ordinal 1"""
 
         if self._state != 2:
@@ -3609,11 +3579,7 @@ class UnionsWriterBase(abc.ABC):
         self._write_int_or_record_with_vlens(value)
         self._state = 4
 
-    def write_monosotate_or_int_or_simple_record(self, value: typing.Union[
-        tuple[typing.Literal["int32"], yardl.Int32],
-        tuple[typing.Literal["SimpleRecord"], SimpleRecord],
-        None
-    ]) -> None:
+    def write_monosotate_or_int_or_simple_record(self, value: typing.Optional[Int32OrSimpleRecord]) -> None:
         """Ordinal 2"""
 
         if self._state != 4:
@@ -3632,25 +3598,15 @@ class UnionsWriterBase(abc.ABC):
         self._state = 8
 
     @abc.abstractmethod
-    def _write_int_or_simple_record(self, value: typing.Union[
-        tuple[typing.Literal["int32"], yardl.Int32],
-        tuple[typing.Literal["SimpleRecord"], SimpleRecord],
-    ]) -> None:
+    def _write_int_or_simple_record(self, value: Int32OrSimpleRecord) -> None:
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def _write_int_or_record_with_vlens(self, value: typing.Union[
-        tuple[typing.Literal["int32"], yardl.Int32],
-        tuple[typing.Literal["RecordWithVlens"], RecordWithVlens],
-    ]) -> None:
+    def _write_int_or_record_with_vlens(self, value: Int32OrRecordWithVlens) -> None:
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def _write_monosotate_or_int_or_simple_record(self, value: typing.Union[
-        tuple[typing.Literal["int32"], yardl.Int32],
-        tuple[typing.Literal["SimpleRecord"], SimpleRecord],
-        None
-    ]) -> None:
+    def _write_monosotate_or_int_or_simple_record(self, value: typing.Optional[Int32OrSimpleRecord]) -> None:
         raise NotImplementedError()
 
     @abc.abstractmethod
@@ -3708,10 +3664,7 @@ class UnionsReaderBase(abc.ABC):
     def close(self) -> None:
         raise NotImplementedError()
 
-    def read_int_or_simple_record(self) -> typing.Union[
-        tuple[typing.Literal["int32"], yardl.Int32],
-        tuple[typing.Literal["SimpleRecord"], SimpleRecord],
-    ]:
+    def read_int_or_simple_record(self) -> Int32OrSimpleRecord:
         """Ordinal 0"""
 
         if self._state != 0:
@@ -3721,10 +3674,7 @@ class UnionsReaderBase(abc.ABC):
         self._state = 2
         return value
 
-    def read_int_or_record_with_vlens(self) -> typing.Union[
-        tuple[typing.Literal["int32"], yardl.Int32],
-        tuple[typing.Literal["RecordWithVlens"], RecordWithVlens],
-    ]:
+    def read_int_or_record_with_vlens(self) -> Int32OrRecordWithVlens:
         """Ordinal 1"""
 
         if self._state != 2:
@@ -3734,11 +3684,7 @@ class UnionsReaderBase(abc.ABC):
         self._state = 4
         return value
 
-    def read_monosotate_or_int_or_simple_record(self) -> typing.Union[
-        tuple[typing.Literal["int32"], yardl.Int32],
-        tuple[typing.Literal["SimpleRecord"], SimpleRecord],
-        None
-    ]:
+    def read_monosotate_or_int_or_simple_record(self) -> typing.Optional[Int32OrSimpleRecord]:
         """Ordinal 2"""
 
         if self._state != 4:
@@ -3765,25 +3711,15 @@ class UnionsReaderBase(abc.ABC):
         writer.write_record_with_unions(self.read_record_with_unions())
 
     @abc.abstractmethod
-    def _read_int_or_simple_record(self) -> typing.Union[
-        tuple[typing.Literal["int32"], yardl.Int32],
-        tuple[typing.Literal["SimpleRecord"], SimpleRecord],
-    ]:
+    def _read_int_or_simple_record(self) -> Int32OrSimpleRecord:
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def _read_int_or_record_with_vlens(self) -> typing.Union[
-        tuple[typing.Literal["int32"], yardl.Int32],
-        tuple[typing.Literal["RecordWithVlens"], RecordWithVlens],
-    ]:
+    def _read_int_or_record_with_vlens(self) -> Int32OrRecordWithVlens:
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def _read_monosotate_or_int_or_simple_record(self) -> typing.Union[
-        tuple[typing.Literal["int32"], yardl.Int32],
-        tuple[typing.Literal["SimpleRecord"], SimpleRecord],
-        None
-    ]:
+    def _read_monosotate_or_int_or_simple_record(self) -> typing.Optional[Int32OrSimpleRecord]:
         raise NotImplementedError()
 
     @abc.abstractmethod
@@ -3839,10 +3775,7 @@ class StreamsOfUnionsWriterBase(abc.ABC):
             expected_method = self._state_to_method_name((self._state + 1) & ~1)
             raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
 
-    def write_int_or_simple_record(self, value: collections.abc.Iterable[typing.Union[
-        tuple[typing.Literal["int32"], yardl.Int32],
-        tuple[typing.Literal["SimpleRecord"], SimpleRecord],
-    ]]) -> None:
+    def write_int_or_simple_record(self, value: collections.abc.Iterable[Int32OrSimpleRecord]) -> None:
         """Ordinal 0"""
 
         if self._state & ~1 != 0:
@@ -3851,11 +3784,7 @@ class StreamsOfUnionsWriterBase(abc.ABC):
         self._write_int_or_simple_record(value)
         self._state = 1
 
-    def write_nullable_int_or_simple_record(self, value: collections.abc.Iterable[typing.Union[
-        tuple[typing.Literal["int32"], yardl.Int32],
-        tuple[typing.Literal["SimpleRecord"], SimpleRecord],
-        None
-    ]]) -> None:
+    def write_nullable_int_or_simple_record(self, value: collections.abc.Iterable[typing.Optional[Int32OrSimpleRecord]]) -> None:
         """Ordinal 1"""
 
         if self._state == 1:
@@ -3868,18 +3797,11 @@ class StreamsOfUnionsWriterBase(abc.ABC):
         self._state = 3
 
     @abc.abstractmethod
-    def _write_int_or_simple_record(self, value: collections.abc.Iterable[typing.Union[
-        tuple[typing.Literal["int32"], yardl.Int32],
-        tuple[typing.Literal["SimpleRecord"], SimpleRecord],
-    ]]) -> None:
+    def _write_int_or_simple_record(self, value: collections.abc.Iterable[Int32OrSimpleRecord]) -> None:
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def _write_nullable_int_or_simple_record(self, value: collections.abc.Iterable[typing.Union[
-        tuple[typing.Literal["int32"], yardl.Int32],
-        tuple[typing.Literal["SimpleRecord"], SimpleRecord],
-        None
-    ]]) -> None:
+    def _write_nullable_int_or_simple_record(self, value: collections.abc.Iterable[typing.Optional[Int32OrSimpleRecord]]) -> None:
         raise NotImplementedError()
 
     @abc.abstractmethod
@@ -3929,10 +3851,7 @@ class StreamsOfUnionsReaderBase(abc.ABC):
     def close(self) -> None:
         raise NotImplementedError()
 
-    def read_int_or_simple_record(self) -> collections.abc.Iterable[typing.Union[
-        tuple[typing.Literal["int32"], yardl.Int32],
-        tuple[typing.Literal["SimpleRecord"], SimpleRecord],
-    ]]:
+    def read_int_or_simple_record(self) -> collections.abc.Iterable[Int32OrSimpleRecord]:
         """Ordinal 0"""
 
         if self._state != 0:
@@ -3942,11 +3861,7 @@ class StreamsOfUnionsReaderBase(abc.ABC):
         self._state = 1
         return self._wrap_iterable(value, 2)
 
-    def read_nullable_int_or_simple_record(self) -> collections.abc.Iterable[typing.Union[
-        tuple[typing.Literal["int32"], yardl.Int32],
-        tuple[typing.Literal["SimpleRecord"], SimpleRecord],
-        None
-    ]]:
+    def read_nullable_int_or_simple_record(self) -> collections.abc.Iterable[typing.Optional[Int32OrSimpleRecord]]:
         """Ordinal 1"""
 
         if self._state != 2:
@@ -3961,18 +3876,11 @@ class StreamsOfUnionsReaderBase(abc.ABC):
         writer.write_nullable_int_or_simple_record(self.read_nullable_int_or_simple_record())
 
     @abc.abstractmethod
-    def _read_int_or_simple_record(self) -> collections.abc.Iterable[typing.Union[
-        tuple[typing.Literal["int32"], yardl.Int32],
-        tuple[typing.Literal["SimpleRecord"], SimpleRecord],
-    ]]:
+    def _read_int_or_simple_record(self) -> collections.abc.Iterable[Int32OrSimpleRecord]:
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def _read_nullable_int_or_simple_record(self) -> collections.abc.Iterable[typing.Union[
-        tuple[typing.Literal["int32"], yardl.Int32],
-        tuple[typing.Literal["SimpleRecord"], SimpleRecord],
-        None
-    ]]:
+    def _read_nullable_int_or_simple_record(self) -> collections.abc.Iterable[typing.Optional[Int32OrSimpleRecord]]:
         raise NotImplementedError()
 
     T = typing.TypeVar('T')
@@ -4600,10 +4508,7 @@ class SimpleGenericsWriterBase(abc.ABC):
         self._write_int_string_tuple(value)
         self._state = 16
 
-    def write_stream_of_type_variants(self, value: collections.abc.Iterable[typing.Union[
-        tuple[typing.Literal["imageFloat"], Image[np.float32]],
-        tuple[typing.Literal["imageDouble"], Image[np.float64]],
-    ]]) -> None:
+    def write_stream_of_type_variants(self, value: collections.abc.Iterable[ImageFloatOrImageDouble]) -> None:
         """Ordinal 8"""
 
         if self._state & ~1 != 16:
@@ -4645,10 +4550,7 @@ class SimpleGenericsWriterBase(abc.ABC):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def _write_stream_of_type_variants(self, value: collections.abc.Iterable[typing.Union[
-        tuple[typing.Literal["imageFloat"], Image[np.float32]],
-        tuple[typing.Literal["imageDouble"], Image[np.float64]],
-    ]]) -> None:
+    def _write_stream_of_type_variants(self, value: collections.abc.Iterable[ImageFloatOrImageDouble]) -> None:
         raise NotImplementedError()
 
     @abc.abstractmethod
@@ -4792,10 +4694,7 @@ class SimpleGenericsReaderBase(abc.ABC):
         self._state = 16
         return value
 
-    def read_stream_of_type_variants(self) -> collections.abc.Iterable[typing.Union[
-        tuple[typing.Literal["imageFloat"], Image[np.float32]],
-        tuple[typing.Literal["imageDouble"], Image[np.float64]],
-    ]]:
+    def read_stream_of_type_variants(self) -> collections.abc.Iterable[ImageFloatOrImageDouble]:
         """Ordinal 8"""
 
         if self._state != 16:
@@ -4849,10 +4748,7 @@ class SimpleGenericsReaderBase(abc.ABC):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def _read_stream_of_type_variants(self) -> collections.abc.Iterable[typing.Union[
-        tuple[typing.Literal["imageFloat"], Image[np.float32]],
-        tuple[typing.Literal["imageDouble"], Image[np.float64]],
-    ]]:
+    def _read_stream_of_type_variants(self) -> collections.abc.Iterable[ImageFloatOrImageDouble]:
         raise NotImplementedError()
 
     T = typing.TypeVar('T')

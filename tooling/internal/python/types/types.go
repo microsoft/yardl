@@ -40,7 +40,10 @@ from . import _dtypes
 func writeTypes(w *formatting.IndentedWriter, st dsl.SymbolTable, ns *dsl.Namespace) {
 	common.WriteTypeVars(w, ns)
 
+	unions := make(map[string]any)
+
 	for _, td := range ns.TypeDefinitions {
+		writeUnionClasses(w, td, unions)
 		switch td := td.(type) {
 		case *dsl.EnumDefinition:
 			writeEnum(w, td)
@@ -52,6 +55,81 @@ func writeTypes(w *formatting.IndentedWriter, st dsl.SymbolTable, ns *dsl.Namesp
 			panic(fmt.Sprintf("unsupported type definition: %T", td))
 		}
 	}
+
+	for _, p := range ns.Protocols {
+		writeUnionClasses(w, p, unions)
+	}
+}
+
+func writeUnionClasses(w *formatting.IndentedWriter, td dsl.TypeDefinition, unions map[string]any) {
+	dsl.Visit(td, func(self dsl.Visitor, node dsl.Node) {
+		switch node := node.(type) {
+		case *dsl.GeneralizedType:
+			if node.Cases.IsUnion() {
+				unionClassName := common.UnionClassName(node)
+				if _, ok := unions[unionClassName]; !ok {
+					if len(unions) == 0 {
+						w.WriteStringln("_T = typing.TypeVar('_T')\n")
+					}
+					writeUnionClass(w, unionClassName, node, td.GetDefinitionMeta().Namespace)
+					unions[unionClassName] = nil
+				}
+			}
+		}
+		self.VisitChildren(node)
+	})
+}
+
+func writeUnionClass(w *formatting.IndentedWriter, className string, generalizedType *dsl.GeneralizedType, contextNamespace string) {
+	typeCases := generalizedType.Cases
+	typeParameters := common.GetOpenGenericTypeParameters(generalizedType)
+	var baseClassSpec string
+	var genericSubscript string
+	var typeParametersString string
+	if len(typeParameters) > 0 {
+		tpString := make([]string, len(typeParameters))
+		for i, tp := range typeParameters {
+			tpString[i] = tp.Name
+		}
+
+		typeParametersString = strings.Join(tpString, ", ")
+		baseClassSpec = fmt.Sprintf("(typing.Generic[%s])", typeParametersString)
+		genericSubscript = fmt.Sprintf("[%s]", typeParametersString)
+	}
+
+	unionCaseType := fmt.Sprintf("%sUnionCase", className)
+	fmt.Fprintf(w, "class %s%s:\n", className, baseClassSpec)
+	w.Indented(func() {
+		for _, tc := range typeCases {
+			if tc.Type == nil {
+				continue
+			}
+
+			if len(typeParameters) > 0 {
+				fmt.Fprintf(w, "%s: type[\"%s[%s, %s]\"]\n", formatting.ToPascalCase(tc.Tag), unionCaseType, typeParametersString, common.TypeSyntax(tc.Type, contextNamespace))
+			} else {
+				fmt.Fprintf(w, "%s: typing.ClassVar[type[\"%s[%s]\"]]\n", formatting.ToPascalCase(tc.Tag), unionCaseType, common.TypeSyntax(tc.Type, contextNamespace))
+			}
+		}
+	})
+	w.WriteStringln("")
+
+	fmt.Fprintf(w, "class %s(%s%s, yardl.UnionCase[_T]):\n", unionCaseType, className, genericSubscript)
+	w.Indented(func() {
+		w.WriteStringln("pass")
+	})
+	w.WriteStringln("")
+	i := 0
+	for _, tc := range typeCases {
+		if tc.Type == nil {
+			continue
+		}
+		tag := formatting.ToPascalCase(tc.Tag)
+		fmt.Fprintf(w, "%s.%s = type(\"%s.%s\", (%s,), {\"index\": %d})\n", className, tag, className, tag, unionCaseType, i)
+		i++
+	}
+	fmt.Fprintf(w, "del %s\n", unionCaseType)
+	w.WriteStringln("")
 }
 
 func writeNamedType(w *formatting.IndentedWriter, td *dsl.NamedType) {
@@ -463,6 +541,7 @@ func writeSwitchCaseOverOptional(w *formatting.IndentedWriter, switchCase *dsl.S
 }
 
 func writeSwitchCaseOverUnion(w *formatting.IndentedWriter, unionType *dsl.GeneralizedType, switchCase *dsl.SwitchCase, variableName string, visitor dsl.VisitorWithContext[tailWrapper], tail tailWrapper) {
+	unionClassName := common.UnionClassName(unionType)
 	writeTypeCase := func(typePattern *dsl.TypePattern, declarationIdentifier string) {
 		for _, typeCase := range unionType.Cases {
 			if dsl.TypesEqual(typePattern.Type, typeCase.Type) {
@@ -472,10 +551,10 @@ func writeSwitchCaseOverUnion(w *formatting.IndentedWriter, unionType *dsl.Gener
 						visitor.Visit(switchCase.Expression, tail)
 					})
 				} else {
-					fmt.Fprintf(w, "if %s[0] == \"%s\":\n", variableName, typeCase.Tag)
+					fmt.Fprintf(w, "if isinstance(%s, %s.%s):\n", variableName, unionClassName, formatting.ToPascalCase(typeCase.Tag))
 					w.Indented(func() {
 						if declarationIdentifier != "" {
-							fmt.Fprintf(w, "%s = %s[1]\n", declarationIdentifier, variableName)
+							fmt.Fprintf(w, "%s = %s.value\n", declarationIdentifier, variableName)
 						}
 						visitor.Visit(switchCase.Expression, tail)
 					})
@@ -608,13 +687,15 @@ func typeDefault(t dsl.Type, contextNamespace string, st dsl.SymbolTable) (strin
 				return defaultExpression, defaultKind
 			}
 
+			unionCaseConstructor := fmt.Sprintf("%s.%s", common.UnionClassName(t), formatting.ToPascalCase(t.Cases[0].Tag))
+
 			switch defaultKind {
 			case defaultValueKindNone:
 				return "", defaultKind
 			case defaultValueKindImmutable:
-				return fmt.Sprintf(`("%s", %s)`, t.Cases[0].Tag, defaultExpression), defaultKind
+				return fmt.Sprintf(`%s(%s)`, unionCaseConstructor, defaultExpression), defaultKind
 			case defaultValueKindMutable:
-				return fmt.Sprintf(`("%s", %s())`, t.Cases[0].Tag, defaultExpression), defaultValueKindMutable
+				return fmt.Sprintf(`%s(%s())`, unionCaseConstructor, defaultExpression), defaultValueKindMutable
 			}
 
 			return fmt.Sprintf(`("%s", %s)`, t.Cases[0].Tag, defaultExpression), defaultValueKindImmutable

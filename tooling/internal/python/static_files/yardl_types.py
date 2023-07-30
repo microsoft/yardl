@@ -1,5 +1,6 @@
+from abc import ABC
 from enum import Enum
-from typing import Annotated, Union
+from typing import Annotated, Generic, TypeVar, Union
 import numpy as np
 import datetime
 import time
@@ -269,11 +270,27 @@ def structural_equal(a: object, b: object) -> bool:
     if isinstance(b, np.void):
         return a == b
 
-    if isinstance(a, tuple):
-        return (
-            isinstance(b, tuple)
-            and len(a) == len(b)
-            and all(structural_equal(x, y) for x, y in zip(a, b))
-        )
-
     return a == b
+
+
+_T = TypeVar("_T")
+
+
+class UnionCase(ABC, Generic[_T]):
+    index: int
+
+    def __init__(self, value: _T) -> None:
+        self.value = value
+
+    def __str__(self) -> str:
+        return str(self.value)
+
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}({self.value})"
+
+    def __eq__(self, other: object) -> bool:
+        # Note we could codegen a more efficient version of this that does not
+        # (always) call structural_equal
+        return type(self) == type(other) and structural_equal(
+            self.value, other.value  # pyright: ignore [reportGeneralTypeIssues]
+        )

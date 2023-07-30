@@ -2,6 +2,7 @@
 
 from .yardl_types import *
 from .types import (
+    AcquisitionOrImage,
     AliasedClosedGeneric,
     AliasedEnum,
     AliasedGenericFixedVector,
@@ -21,7 +22,13 @@ from .types import (
     GenericRecord,
     GenericRecordWithComputedFields,
     Image,
+    ImageFloatOrImageDouble,
+    Int32OrFloat32,
+    Int32OrRecordWithVlens,
+    Int32OrSimpleRecord,
+    Int32OrString,
     Int64Enum,
+    IntOrGenericRecordWithComputedFields,
     MyTuple,
     NamedFixedNDArray,
     NamedNDArray,
@@ -51,7 +58,11 @@ from .types import (
     SimpleRecord,
     SizeBasedEnum,
     SmallBenchmarkRecord,
+    StringOrInt32,
+    T0OrT1,
+    T1OrT2,
     TextFormat,
+    TimeOrDatetime,
     TupleWithRecords,
     UInt64Enum,
     get_dtype,

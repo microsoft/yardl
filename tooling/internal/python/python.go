@@ -82,6 +82,21 @@ func writePackageInitFile(packageDir string, ns *dsl.Namespace) error {
 		typesMembers = append(typesMembers, common.TypeSyntaxWithoutTypeParameters(t, ns.Name))
 	}
 
+	unions := make(map[string]interface{})
+	dsl.Visit(ns, func(self dsl.Visitor, node dsl.Node) {
+		switch node := node.(type) {
+		case *dsl.GeneralizedType:
+			if node.Cases.IsUnion() {
+				unionClassName := common.UnionClassName(node)
+				if _, ok := unions[unionClassName]; !ok {
+					unions[unionClassName] = nil
+					typesMembers = append(typesMembers, unionClassName)
+				}
+			}
+		}
+		self.VisitChildren(node)
+	})
+
 	sort.Slice(typesMembers, func(i, j int) bool {
 		return typesMembers[i] < typesMembers[j]
 	})
