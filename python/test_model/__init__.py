@@ -60,7 +60,6 @@ from .types import (
     SmallBenchmarkRecord,
     StringOrInt32,
     T0OrT1,
-    T1OrT2,
     TextFormat,
     TimeOrDatetime,
     TupleWithRecords,

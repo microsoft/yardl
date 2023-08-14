@@ -50,7 +50,9 @@ func writeTypes(w *formatting.IndentedWriter, st dsl.SymbolTable, ns *dsl.Namesp
 		case *dsl.RecordDefinition:
 			writeRecord(w, td, st)
 		case *dsl.NamedType:
-			writeNamedType(w, td)
+			if _, found := unions[td.Name]; !found {
+				writeNamedType(w, td)
+			}
 		default:
 			panic(fmt.Sprintf("unsupported type definition: %T", td))
 		}
@@ -68,6 +70,10 @@ func writeUnionClasses(w *formatting.IndentedWriter, td dsl.TypeDefinition, unio
 			if node.Cases.IsUnion() {
 				unionClassName, typeParameters := common.UnionClassName(node)
 				if _, ok := unions[unionClassName]; !ok {
+					if _, isNamedType := td.(*dsl.NamedType); isNamedType {
+						// This is a named type defining a union, so we will use the named type's name instead
+						unionClassName = td.GetDefinitionMeta().Name
+					}
 					if len(unions) == 0 {
 						w.WriteStringln("_T = typing.TypeVar('_T')\n")
 					}

@@ -811,37 +811,42 @@ AliasedOptional = typing.Optional[yardl.Int32]
 
 AliasedGenericOptional = typing.Optional[T]
 
-class T1OrT2(typing.Generic[T1, T2]):
-    T1: type["T1OrT2UnionCase[T1, T2, T1]"]
-    T2: type["T1OrT2UnionCase[T1, T2, T2]"]
+class AliasedGenericUnion2(typing.Generic[T1, T2]):
+    T1: type["AliasedGenericUnion2UnionCase[T1, T2, T1]"]
+    T2: type["AliasedGenericUnion2UnionCase[T1, T2, T2]"]
 
-class T1OrT2UnionCase(T1OrT2[T1, T2], yardl.UnionCase[_T]):
+class AliasedGenericUnion2UnionCase(AliasedGenericUnion2[T1, T2], yardl.UnionCase[_T]):
     pass
 
-T1OrT2.T1 = type("T1OrT2.T1", (T1OrT2UnionCase,), {"_index": 0})
-T1OrT2.T2 = type("T1OrT2.T2", (T1OrT2UnionCase,), {"_index": 1})
-del T1OrT2UnionCase
-
-AliasedGenericUnion2 = T1OrT2[T1, T2]
+AliasedGenericUnion2.T1 = type("AliasedGenericUnion2.T1", (AliasedGenericUnion2UnionCase,), {"_index": 0})
+AliasedGenericUnion2.T2 = type("AliasedGenericUnion2.T2", (AliasedGenericUnion2UnionCase,), {"_index": 1})
+del AliasedGenericUnion2UnionCase
 
 AliasedGenericVector = list[T]
 
 AliasedGenericFixedVector = list[T]
 
-class Int32OrSimpleRecord:
-    Int32: typing.ClassVar[type["Int32OrSimpleRecordUnionCase[yardl.Int32]"]]
-    SimpleRecord: typing.ClassVar[type["Int32OrSimpleRecordUnionCase[SimpleRecord]"]]
+class AliasedIntOrSimpleRecord:
+    Int32: typing.ClassVar[type["AliasedIntOrSimpleRecordUnionCase[yardl.Int32]"]]
+    SimpleRecord: typing.ClassVar[type["AliasedIntOrSimpleRecordUnionCase[SimpleRecord]"]]
 
-class Int32OrSimpleRecordUnionCase(Int32OrSimpleRecord, yardl.UnionCase[_T]):
+class AliasedIntOrSimpleRecordUnionCase(AliasedIntOrSimpleRecord, yardl.UnionCase[_T]):
     pass
 
-Int32OrSimpleRecord.Int32 = type("Int32OrSimpleRecord.Int32", (Int32OrSimpleRecordUnionCase,), {"_index": 0})
-Int32OrSimpleRecord.SimpleRecord = type("Int32OrSimpleRecord.SimpleRecord", (Int32OrSimpleRecordUnionCase,), {"_index": 1})
-del Int32OrSimpleRecordUnionCase
+AliasedIntOrSimpleRecord.Int32 = type("AliasedIntOrSimpleRecord.Int32", (AliasedIntOrSimpleRecordUnionCase,), {"_index": 0})
+AliasedIntOrSimpleRecord.SimpleRecord = type("AliasedIntOrSimpleRecord.SimpleRecord", (AliasedIntOrSimpleRecordUnionCase,), {"_index": 1})
+del AliasedIntOrSimpleRecordUnionCase
 
-AliasedIntOrSimpleRecord = Int32OrSimpleRecord
+class AliasedNullableIntSimpleRecord:
+    Int32: typing.ClassVar[type["AliasedNullableIntSimpleRecordUnionCase[yardl.Int32]"]]
+    SimpleRecord: typing.ClassVar[type["AliasedNullableIntSimpleRecordUnionCase[SimpleRecord]"]]
 
-AliasedNullableIntSimpleRecord = typing.Optional[Int32OrSimpleRecord]
+class AliasedNullableIntSimpleRecordUnionCase(AliasedNullableIntSimpleRecord, yardl.UnionCase[_T]):
+    pass
+
+AliasedNullableIntSimpleRecord.Int32 = type("AliasedNullableIntSimpleRecord.Int32", (AliasedNullableIntSimpleRecordUnionCase,), {"_index": 0})
+AliasedNullableIntSimpleRecord.SimpleRecord = type("AliasedNullableIntSimpleRecord.SimpleRecord", (AliasedNullableIntSimpleRecordUnionCase,), {"_index": 1})
+del AliasedNullableIntSimpleRecordUnionCase
 
 class T0OrT1(typing.Generic[T0, T1]):
     T0: type["T0OrT1UnionCase[T0, T1, T0]"]
@@ -1236,6 +1241,17 @@ class StringOrInt32UnionCase(StringOrInt32, yardl.UnionCase[_T]):
 StringOrInt32.String = type("StringOrInt32.String", (StringOrInt32UnionCase,), {"_index": 0})
 StringOrInt32.Int32 = type("StringOrInt32.Int32", (StringOrInt32UnionCase,), {"_index": 1})
 del StringOrInt32UnionCase
+
+class Int32OrSimpleRecord:
+    Int32: typing.ClassVar[type["Int32OrSimpleRecordUnionCase[yardl.Int32]"]]
+    SimpleRecord: typing.ClassVar[type["Int32OrSimpleRecordUnionCase[SimpleRecord]"]]
+
+class Int32OrSimpleRecordUnionCase(Int32OrSimpleRecord, yardl.UnionCase[_T]):
+    pass
+
+Int32OrSimpleRecord.Int32 = type("Int32OrSimpleRecord.Int32", (Int32OrSimpleRecordUnionCase,), {"_index": 0})
+Int32OrSimpleRecord.SimpleRecord = type("Int32OrSimpleRecord.SimpleRecord", (Int32OrSimpleRecordUnionCase,), {"_index": 1})
+del Int32OrSimpleRecordUnionCase
 
 class Int32OrRecordWithVlens:
     Int32: typing.ClassVar[type["Int32OrRecordWithVlensUnionCase[yardl.Int32]"]]

@@ -58,7 +58,7 @@ func writeRecordSerializers(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 				w.Indented(func() {
 					fieldSerializers := make([]string, len(td.Fields))
 					for i, field := range td.Fields {
-						fieldSerializers[i] = fmt.Sprintf(`("%s", %s)`, common.FieldIdentifierName(field.Name), typeSerializer(field.Type, false, ns.Name))
+						fieldSerializers[i] = fmt.Sprintf(`("%s", %s)`, common.FieldIdentifierName(field.Name), typeSerializer(field.Type, false, ns.Name, nil))
 					}
 					fmt.Fprintf(w, "super().__init__([%s])\n", strings.Join(fieldSerializers, ", "))
 				})
@@ -155,7 +155,7 @@ func writeProtocols(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 				}
 				fmt.Fprintf(w, "def %s(self, value: %s) -> None:\n", common.ProtocolWriteImplMethodName(step), valueType)
 				w.Indented(func() {
-					serializer := typeSerializer(step.Type, false, ns.Name)
+					serializer := typeSerializer(step.Type, false, ns.Name, nil)
 					fmt.Fprintf(w, "%s.write(self._stream, value)\n", serializer)
 				})
 				w.WriteStringln("")
@@ -185,7 +185,7 @@ func writeProtocols(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 
 				fmt.Fprintf(w, "def %s(self) -> %s:\n", common.ProtocolReadImplMethodName(step), valueType)
 				w.Indented(func() {
-					serializer := typeSerializer(step.Type, false, ns.Name)
+					serializer := typeSerializer(step.Type, false, ns.Name, nil)
 					fmt.Fprintf(w, "return %s.read(self._stream)\n", serializer)
 				})
 				w.WriteStringln("")
@@ -206,7 +206,7 @@ func typeDefinitionSerializer(t dsl.TypeDefinition, numpy bool, contextNamespace
 			baseType = dsl.Int32Type
 		}
 
-		elementSerializer := typeSerializer(baseType, false, contextNamespace)
+		elementSerializer := typeSerializer(baseType, false, contextNamespace, nil)
 		return fmt.Sprintf("_binary.EnumSerializer(%s, %s)", elementSerializer, common.TypeSyntax(t, contextNamespace))
 	case *dsl.RecordDefinition:
 		rwClassName := recordSerializerClassName(t, false)
@@ -219,7 +219,7 @@ func typeDefinitionSerializer(t dsl.TypeDefinition, numpy bool, contextNamespace
 
 		typeArguments := make([]string, 0, len(t.TypeArguments))
 		for _, arg := range t.TypeArguments {
-			typeArguments = append(typeArguments, typeSerializer(arg, false, contextNamespace))
+			typeArguments = append(typeArguments, typeSerializer(arg, false, contextNamespace, nil))
 		}
 
 		if len(typeArguments) == 0 {
@@ -230,13 +230,13 @@ func typeDefinitionSerializer(t dsl.TypeDefinition, numpy bool, contextNamespace
 	case *dsl.GenericTypeParameter:
 		return fmt.Sprintf("%s_serializer", formatting.ToSnakeCase(t.Name))
 	case *dsl.NamedType:
-		return typeSerializer(t.Type, false, contextNamespace)
+		return typeSerializer(t.Type, false, contextNamespace, t)
 	default:
 		panic(fmt.Sprintf("Not implemented %T", t))
 	}
 }
 
-func typeSerializer(t dsl.Type, numpy bool, contextNamespace string) string {
+func typeSerializer(t dsl.Type, numpy bool, contextNamespace string, namedType *dsl.NamedType) string {
 	switch t := t.(type) {
 	case nil:
 		return "_binary.none_serializer"
@@ -245,13 +245,17 @@ func typeSerializer(t dsl.Type, numpy bool, contextNamespace string) string {
 	case *dsl.GeneralizedType:
 		getScalarSerializer := func(numpy bool) string {
 			if t.Cases.IsSingle() {
-				return typeSerializer(t.Cases[0].Type, numpy, contextNamespace)
+				return typeSerializer(t.Cases[0].Type, numpy, contextNamespace, namedType)
 			}
 			if t.Cases.IsOptional() {
-				return fmt.Sprintf("_binary.OptionalSerializer(%s)", typeSerializer(t.Cases[1].Type, numpy, contextNamespace))
+				return fmt.Sprintf("_binary.OptionalSerializer(%s)", typeSerializer(t.Cases[1].Type, numpy, contextNamespace, namedType))
 			}
 
 			unionClassName, typeParameters := common.UnionClassName(t)
+			if namedType != nil {
+				unionClassName = namedType.Name
+			}
+
 			var classSyntax string
 			if len(typeParameters) == 0 {
 				classSyntax = unionClassName
@@ -263,7 +267,7 @@ func typeSerializer(t dsl.Type, numpy bool, contextNamespace string) string {
 				if c.Type == nil {
 					options[i] = "None"
 				} else {
-					options[i] = fmt.Sprintf("(%s.%s, %s)", classSyntax, formatting.ToPascalCase(c.Tag), typeSerializer(c.Type, numpy, contextNamespace))
+					options[i] = fmt.Sprintf("(%s.%s, %s)", classSyntax, formatting.ToPascalCase(c.Tag), typeSerializer(c.Type, numpy, contextNamespace, namedType))
 				}
 			}
 
@@ -298,8 +302,8 @@ func typeSerializer(t dsl.Type, numpy bool, contextNamespace string) string {
 			return fmt.Sprintf("_binary.DynamicNDArraySerializer(%s)", getScalarSerializer(true))
 
 		case *dsl.Map:
-			keySerializer := typeSerializer(td.KeyType, numpy, contextNamespace)
-			valueSerializer := typeSerializer(t.ToScalar(), numpy, contextNamespace)
+			keySerializer := typeSerializer(td.KeyType, numpy, contextNamespace, namedType)
+			valueSerializer := typeSerializer(t.ToScalar(), numpy, contextNamespace, namedType)
 
 			return fmt.Sprintf("_binary.MapSerializer(%s, %s)", keySerializer, valueSerializer)
 		default:

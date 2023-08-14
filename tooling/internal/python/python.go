@@ -85,6 +85,12 @@ func writePackageInitFile(packageDir string, ns *dsl.Namespace) error {
 	unions := make(map[string]interface{})
 	dsl.Visit(ns, func(self dsl.Visitor, node dsl.Node) {
 		switch node := node.(type) {
+		case *dsl.NamedType:
+			if gt, ok := node.Type.(*dsl.GeneralizedType); ok && gt.Cases.IsUnion() {
+				// We use the alias name for the union type, which will be imported
+				// below.
+				return
+			}
 		case *dsl.GeneralizedType:
 			if node.Cases.IsUnion() {
 				unionClassName, _ := common.UnionClassName(node)
