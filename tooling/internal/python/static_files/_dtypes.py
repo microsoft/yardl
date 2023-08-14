@@ -1,14 +1,12 @@
 import datetime
-import functools
 from types import GenericAlias
 import sys
 
 if sys.version_info >= (3, 10):
     from types import UnionType
 
-from typing import Any, Annotated, Callable, Union, cast, get_args, get_origin
+from typing import Any, Callable, Union, cast, get_args, get_origin
 import numpy as np
-import numpy.typing as npt
 from . import yardl_types as yardl
 
 

@@ -19,6 +19,11 @@ import (
 )
 
 func WriteMocks(env *dsl.Environment, options packaging.CppCodegenOptions) error {
+	err := writeFactories(env, options)
+	if err != nil {
+		return err
+	}
+
 	b := bytes.Buffer{}
 	w := formatting.NewIndentedWriter(&b, "  ")
 	common.WriteGeneratedFileHeader(w)
@@ -51,25 +56,12 @@ func WriteMocks(env *dsl.Environment, options packaging.CppCodegenOptions) error
 			w.WriteStringln("template<>")
 			fmt.Fprintf(w, "std::unique_ptr<%s> CreateValidatingWriter<%s>(Format format, std::string const& filename) {\n", common.QualifiedAbstractWriterName(protocol), common.QualifiedAbstractWriterName(protocol))
 			w.Indented(func() {
-				w.WriteStringln("switch (format) {")
-				w.WriteStringln("case Format::kHdf5:")
+				fmt.Fprintf(w, "return std::make_unique<%s>(\n", qualifiedTestWriterName(protocol))
 				w.Indented(func() {
-					fmt.Fprintf(w, "return std::make_unique<%s>(std::make_unique<%s>(filename), [filename](){ return std::make_unique<%s>(filename);});\n", qualifiedTestWriterName(protocol), hdf5.QualifiedHdf5WriterClassName(protocol), hdf5.QualifiedHdf5ReaderClassName(protocol))
+					fmt.Fprintf(w, "CreateWriter<%s>(format, filename),\n", common.QualifiedAbstractWriterName(protocol))
+					fmt.Fprintf(w, "[format, filename](){ return CreateReader<%s>(format, filename);}\n", common.QualifiedAbstractReaderName(protocol))
 				})
-				w.WriteStringln("case Format::kBinary:")
-				w.Indented(func() {
-					fmt.Fprintf(w, "return std::make_unique<%s>(std::make_unique<%s>(filename), [filename](){return std::make_unique<%s>(filename);});\n", qualifiedTestWriterName(protocol), binary.QualifiedBinaryWriterClassName(protocol), binary.QualifiedBinaryReaderClassName(protocol))
-				})
-				w.WriteStringln("case Format::kNDJson:")
-				w.Indented(func() {
-					fmt.Fprintf(w, "return std::make_unique<%s>(std::make_unique<%s>(filename), [filename](){return std::make_unique<%s>(filename);});\n", qualifiedTestWriterName(protocol), ndjson.QualifiedNDJsonWriterClassName(protocol), ndjson.QualifiedNDJsonReaderClassName(protocol))
-				})
-				w.WriteStringln("default:")
-				w.Indented(func() {
-					w.WriteStringln("throw std::runtime_error(\"Unknown format\");")
-				})
-
-				w.WriteStringln("}")
+				w.WriteStringln(");")
 			})
 			w.WriteStringln("}\n")
 		}
@@ -245,4 +237,76 @@ func testWriterName(p *dsl.ProtocolDefinition) string {
 
 func qualifiedTestWriterName(p *dsl.ProtocolDefinition) string {
 	return fmt.Sprintf("%s::%s", common.TypeNamespaceIdentifierName(p), testWriterName(p))
+}
+
+func writeFactories(env *dsl.Environment, options packaging.CppCodegenOptions) error {
+	b := bytes.Buffer{}
+	w := formatting.NewIndentedWriter(&b, "  ")
+	common.WriteGeneratedFileHeader(w)
+
+	w.WriteStringln(`#include <functional>
+#include "../factories.h"
+#include "binary/protocols.h"
+#include "hdf5/protocols.h"
+#include "ndjson/protocols.h"
+`)
+
+	w.WriteStringln("namespace yardl::testing {")
+	for _, ns := range env.Namespaces {
+		for _, protocol := range ns.Protocols {
+			w.WriteStringln("template<>")
+			fmt.Fprintf(w, "std::unique_ptr<%s> CreateWriter<%s>(Format format, std::string const& filename) {\n", common.QualifiedAbstractWriterName(protocol), common.QualifiedAbstractWriterName(protocol))
+			w.Indented(func() {
+				w.WriteStringln("switch (format) {")
+				w.WriteStringln("case Format::kHdf5:")
+				w.Indented(func() {
+					fmt.Fprintf(w, "return std::make_unique<%s>(filename);\n", hdf5.QualifiedHdf5WriterClassName(protocol))
+				})
+				w.WriteStringln("case Format::kBinary:")
+				w.Indented(func() {
+					fmt.Fprintf(w, "return std::make_unique<%s>(filename);\n", binary.QualifiedBinaryWriterClassName(protocol))
+				})
+				w.WriteStringln("case Format::kNDJson:")
+				w.Indented(func() {
+					fmt.Fprintf(w, "return std::make_unique<%s>(filename);\n", ndjson.QualifiedNDJsonWriterClassName(protocol))
+				})
+				w.WriteStringln("default:")
+				w.Indented(func() {
+					w.WriteStringln("throw std::runtime_error(\"Unknown format\");")
+				})
+
+				w.WriteStringln("}")
+			})
+			w.WriteStringln("}\n")
+
+			w.WriteStringln("template<>")
+			fmt.Fprintf(w, "std::unique_ptr<%s> CreateReader<%s>(Format format, std::string const& filename) {\n", common.QualifiedAbstractReaderName(protocol), common.QualifiedAbstractReaderName(protocol))
+			w.Indented(func() {
+				w.WriteStringln("switch (format) {")
+				w.WriteStringln("case Format::kHdf5:")
+				w.Indented(func() {
+					fmt.Fprintf(w, "return std::make_unique<%s>(filename);\n", hdf5.QualifiedHdf5ReaderClassName(protocol))
+				})
+				w.WriteStringln("case Format::kBinary:")
+				w.Indented(func() {
+					fmt.Fprintf(w, "return std::make_unique<%s>(filename);\n", binary.QualifiedBinaryReaderClassName(protocol))
+				})
+				w.WriteStringln("case Format::kNDJson:")
+				w.Indented(func() {
+					fmt.Fprintf(w, "return std::make_unique<%s>(filename);\n", ndjson.QualifiedNDJsonReaderClassName(protocol))
+				})
+				w.WriteStringln("default:")
+				w.Indented(func() {
+					w.WriteStringln("throw std::runtime_error(\"Unknown format\");")
+				})
+
+				w.WriteStringln("}")
+			})
+			w.WriteStringln("}\n")
+		}
+	}
+	w.WriteStringln("}")
+
+	definitionsPath := path.Join(options.SourcesOutputDir, "factories.cc")
+	return iocommon.WriteFileIfNeeded(definitionsPath, b.Bytes(), 0644)
 }

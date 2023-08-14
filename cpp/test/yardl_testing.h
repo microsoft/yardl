@@ -7,6 +7,7 @@
 
 #include <fmt/core.h>
 
+#include "factories.h"
 #include "format.h"
 
 namespace yardl::testing {
