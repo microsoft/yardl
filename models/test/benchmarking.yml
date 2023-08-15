@@ -5,6 +5,13 @@ BenchmarkFloat256x256: !protocol
         items: float
         dimensions: [256, 256]
 
+BenchmarkInt256x256: !protocol
+  sequence:
+    int256x256: !stream
+      items: !array
+        items: int
+        dimensions: [256, 256]
+
 BenchmarkFloatVlen: !protocol
   sequence:
     floatArray: !stream

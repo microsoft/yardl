@@ -98,6 +98,43 @@ Result BenchmarkFloatVlen(Format format) {
       });
 }
 
+Result BenchmarkSmallInt256x256(Format format) {
+  auto scale = [format]() -> double {
+    switch (format) {
+      case Format::kNDJson:
+        return 0.01;
+      default:
+        return 1;
+    }
+  }();
+
+  yardl::FixedNDArray<int, 256, 256> a;
+  for (auto& x : a) {
+    x = 37;
+  }
+
+  size_t const repetitions = ScaleRepetitions(6000, scale);
+  size_t const total_size = sizeof(a) * repetitions;
+
+  return TimeScenario(
+      total_size,
+      [&]() {
+        auto writer = CreateWriter<BenchmarkInt256x256WriterBase>(format, kOutputFileName);
+        for (size_t i = 0; i < repetitions; ++i) {
+          writer->WriteInt256x256(a);
+        }
+        writer->EndInt256x256();
+      },
+      [&]() {
+        auto reader = CreateReader<BenchmarkInt256x256ReaderBase>(format, kOutputFileName);
+        size_t read_repetitions = 0;
+        while (reader->ReadInt256x256(a)) {
+          read_repetitions++;
+        }
+        AssertRepetitionsSame(repetitions, read_repetitions);
+      });
+}
+
 Result BenchmarkSmallRecord(Format format) {
   auto scale = [format]() -> double {
     switch (format) {
@@ -253,6 +290,7 @@ Result BenchmarkSimpleMrd(Format format) {
 std::map<std::string, std::function<Result(Format)>>
     function_map = {
         {"float256x256", BenchmarkFloat256x256},
+        {"smallint256x256", BenchmarkSmallInt256x256},
         {"floatvlen", BenchmarkFloatVlen},
         {"smallrecord", BenchmarkSmallRecord},
         {"smallrecordbatched", BenchmarkSmallRecordBatched},

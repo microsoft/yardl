@@ -36,6 +36,34 @@ std::unique_ptr<test_model::BenchmarkFloat256x256ReaderBase> CreateReader<test_m
 }
 
 template<>
+std::unique_ptr<test_model::BenchmarkInt256x256WriterBase> CreateWriter<test_model::BenchmarkInt256x256WriterBase>(Format format, std::string const& filename) {
+  switch (format) {
+  case Format::kHdf5:
+    return std::make_unique<test_model::hdf5::BenchmarkInt256x256Writer>(filename);
+  case Format::kBinary:
+    return std::make_unique<test_model::binary::BenchmarkInt256x256Writer>(filename);
+  case Format::kNDJson:
+    return std::make_unique<test_model::ndjson::BenchmarkInt256x256Writer>(filename);
+  default:
+    throw std::runtime_error("Unknown format");
+  }
+}
+
+template<>
+std::unique_ptr<test_model::BenchmarkInt256x256ReaderBase> CreateReader<test_model::BenchmarkInt256x256ReaderBase>(Format format, std::string const& filename) {
+  switch (format) {
+  case Format::kHdf5:
+    return std::make_unique<test_model::hdf5::BenchmarkInt256x256Reader>(filename);
+  case Format::kBinary:
+    return std::make_unique<test_model::binary::BenchmarkInt256x256Reader>(filename);
+  case Format::kNDJson:
+    return std::make_unique<test_model::ndjson::BenchmarkInt256x256Reader>(filename);
+  default:
+    throw std::runtime_error("Unknown format");
+  }
+}
+
+template<>
 std::unique_ptr<test_model::BenchmarkFloatVlenWriterBase> CreateWriter<test_model::BenchmarkFloatVlenWriterBase>(Format format, std::string const& filename) {
   switch (format) {
   case Format::kHdf5:

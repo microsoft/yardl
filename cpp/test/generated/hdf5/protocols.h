@@ -40,6 +40,34 @@ class BenchmarkFloat256x256Reader : public test_model::BenchmarkFloat256x256Read
   private:
   std::unique_ptr<yardl::hdf5::DatasetReader> float256x256_dataset_state_;
 };
+// HDF5 writer for the BenchmarkInt256x256 protocol.
+class BenchmarkInt256x256Writer : public test_model::BenchmarkInt256x256WriterBase, public yardl::hdf5::Hdf5Writer {
+  public:
+  BenchmarkInt256x256Writer(std::string path);
+
+  protected:
+  void WriteInt256x256Impl(yardl::FixedNDArray<int32_t, 256, 256> const& value) override;
+
+  void WriteInt256x256Impl(std::vector<yardl::FixedNDArray<int32_t, 256, 256>> const& values) override;
+
+  void EndInt256x256Impl() override;
+
+  private:
+  std::unique_ptr<yardl::hdf5::DatasetWriter> int256x256_dataset_state_;
+};
+
+// HDF5 reader for the BenchmarkInt256x256 protocol.
+class BenchmarkInt256x256Reader : public test_model::BenchmarkInt256x256ReaderBase, public yardl::hdf5::Hdf5Reader {
+  public:
+  BenchmarkInt256x256Reader(std::string path);
+
+  bool ReadInt256x256Impl(yardl::FixedNDArray<int32_t, 256, 256>& value) override;
+
+  bool ReadInt256x256Impl(std::vector<yardl::FixedNDArray<int32_t, 256, 256>>& values) override;
+
+  private:
+  std::unique_ptr<yardl::hdf5::DatasetReader> int256x256_dataset_state_;
+};
 // HDF5 writer for the BenchmarkFloatVlen protocol.
 class BenchmarkFloatVlenWriter : public test_model::BenchmarkFloatVlenWriterBase, public yardl::hdf5::Hdf5Writer {
   public:

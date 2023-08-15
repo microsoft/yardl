@@ -66,6 +66,68 @@ class BenchmarkFloat256x256ReaderBase {
   uint8_t state_ = 0;
 };
 
+// Abstract writer for the BenchmarkInt256x256 protocol.
+class BenchmarkInt256x256WriterBase {
+  public:
+  // Ordinal 0.
+  // Call this method for each element of the `int256x256` stream, then call `EndInt256x256() when done.`
+  void WriteInt256x256(yardl::FixedNDArray<int32_t, 256, 256> const& value);
+
+  // Ordinal 0.
+  // Call this method to write many values to the `int256x256` stream, then call `EndInt256x256()` when done.
+  void WriteInt256x256(std::vector<yardl::FixedNDArray<int32_t, 256, 256>> const& values);
+
+  // Marks the end of the `int256x256` stream.
+  void EndInt256x256();
+
+  // Optionaly close this writer before destructing. Validates that all steps were completed.
+  void Close();
+
+  virtual ~BenchmarkInt256x256WriterBase() = default;
+
+  // Flushes all buffered data.
+  virtual void Flush() {}
+
+  protected:
+  virtual void WriteInt256x256Impl(yardl::FixedNDArray<int32_t, 256, 256> const& value) = 0;
+  virtual void WriteInt256x256Impl(std::vector<yardl::FixedNDArray<int32_t, 256, 256>> const& value);
+  virtual void EndInt256x256Impl() = 0;
+  virtual void CloseImpl() {}
+
+  static std::string schema_;
+
+  private:
+  uint8_t state_ = 0;
+
+  friend class BenchmarkInt256x256ReaderBase;
+};
+
+// Abstract reader for the BenchmarkInt256x256 protocol.
+class BenchmarkInt256x256ReaderBase {
+  public:
+  // Ordinal 0.
+  [[nodiscard]] bool ReadInt256x256(yardl::FixedNDArray<int32_t, 256, 256>& value);
+
+  // Ordinal 0.
+  [[nodiscard]] bool ReadInt256x256(std::vector<yardl::FixedNDArray<int32_t, 256, 256>>& values);
+
+  // Optionaly close this writer before destructing. Validates that all steps were completely read.
+  void Close();
+
+  void CopyTo(BenchmarkInt256x256WriterBase& writer, size_t int256x256_buffer_size = 1);
+
+  virtual ~BenchmarkInt256x256ReaderBase() = default;
+
+  protected:
+  virtual bool ReadInt256x256Impl(yardl::FixedNDArray<int32_t, 256, 256>& value) = 0;
+  virtual bool ReadInt256x256Impl(std::vector<yardl::FixedNDArray<int32_t, 256, 256>>& values);
+  virtual void CloseImpl() {}
+  static std::string schema_;
+
+  private:
+  uint8_t state_ = 0;
+};
+
 // Abstract writer for the BenchmarkFloatVlen protocol.
 class BenchmarkFloatVlenWriterBase {
   public:

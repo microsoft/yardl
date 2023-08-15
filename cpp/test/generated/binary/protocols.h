@@ -53,6 +53,46 @@ class BenchmarkFloat256x256Reader : public test_model::BenchmarkFloat256x256Read
   size_t current_block_remaining_ = 0;
 };
 
+// Binary writer for the BenchmarkInt256x256 protocol.
+class BenchmarkInt256x256Writer : public test_model::BenchmarkInt256x256WriterBase, yardl::binary::BinaryWriter {
+  public:
+  BenchmarkInt256x256Writer(std::ostream& stream)
+      : yardl::binary::BinaryWriter(stream, schema_) {
+  }
+
+  BenchmarkInt256x256Writer(std::string file_name)
+      : yardl::binary::BinaryWriter(file_name, schema_) {
+  }
+
+  void Flush() override;
+
+  protected:
+  void WriteInt256x256Impl(yardl::FixedNDArray<int32_t, 256, 256> const& value) override;
+  void WriteInt256x256Impl(std::vector<yardl::FixedNDArray<int32_t, 256, 256>> const& values) override;
+  void EndInt256x256Impl() override;
+  void CloseImpl() override;
+};
+
+// Binary reader for the BenchmarkInt256x256 protocol.
+class BenchmarkInt256x256Reader : public test_model::BenchmarkInt256x256ReaderBase, yardl::binary::BinaryReader {
+  public:
+  BenchmarkInt256x256Reader(std::istream& stream)
+      : yardl::binary::BinaryReader(stream, schema_) {
+  }
+
+  BenchmarkInt256x256Reader(std::string file_name)
+      : yardl::binary::BinaryReader(file_name, schema_) {
+  }
+
+  protected:
+  bool ReadInt256x256Impl(yardl::FixedNDArray<int32_t, 256, 256>& value) override;
+  bool ReadInt256x256Impl(std::vector<yardl::FixedNDArray<int32_t, 256, 256>>& values) override;
+  void CloseImpl() override;
+
+  private:
+  size_t current_block_remaining_ = 0;
+};
+
 // Binary writer for the BenchmarkFloatVlen protocol.
 class BenchmarkFloatVlenWriter : public test_model::BenchmarkFloatVlenWriterBase, yardl::binary::BinaryWriter {
   public:

@@ -50,6 +50,29 @@ class BinaryBenchmarkFloat256x256Reader(_binary.BinaryProtocolReader, BenchmarkF
     def _read_float256x256(self) -> collections.abc.Iterable[npt.NDArray[np.float32]]:
         return _binary.StreamSerializer(_binary.FixedNDArraySerializer(_binary.float32_serializer, (256, 256,))).read(self._stream)
 
+class BinaryBenchmarkInt256x256Writer(_binary.BinaryProtocolWriter, BenchmarkInt256x256WriterBase):
+    """Binary writer for the BenchmarkInt256x256 protocol."""
+
+
+    def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
+        BenchmarkInt256x256WriterBase.__init__(self)
+        _binary.BinaryProtocolWriter.__init__(self, stream, BenchmarkInt256x256WriterBase.schema)
+
+    def _write_int256x256(self, value: collections.abc.Iterable[npt.NDArray[np.int32]]) -> None:
+        _binary.StreamSerializer(_binary.FixedNDArraySerializer(_binary.int32_serializer, (256, 256,))).write(self._stream, value)
+
+
+class BinaryBenchmarkInt256x256Reader(_binary.BinaryProtocolReader, BenchmarkInt256x256ReaderBase):
+    """Binary writer for the BenchmarkInt256x256 protocol."""
+
+
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
+        BenchmarkInt256x256ReaderBase.__init__(self)
+        _binary.BinaryProtocolReader.__init__(self, stream, BenchmarkInt256x256ReaderBase.schema)
+
+    def _read_int256x256(self) -> collections.abc.Iterable[npt.NDArray[np.int32]]:
+        return _binary.StreamSerializer(_binary.FixedNDArraySerializer(_binary.int32_serializer, (256, 256,))).read(self._stream)
+
 class BinaryBenchmarkFloatVlenWriter(_binary.BinaryProtocolWriter, BenchmarkFloatVlenWriterBase):
     """Binary writer for the BenchmarkFloatVlen protocol."""
 

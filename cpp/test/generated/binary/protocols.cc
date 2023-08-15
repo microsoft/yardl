@@ -1554,6 +1554,50 @@ void BenchmarkFloat256x256Reader::CloseImpl() {
   stream_.VerifyFinished();
 }
 
+void BenchmarkInt256x256Writer::WriteInt256x256Impl(yardl::FixedNDArray<int32_t, 256, 256> const& value) {
+  yardl::binary::WriteInteger(stream_, 1U);
+  yardl::binary::WriteFixedNDArray<int32_t, yardl::binary::WriteInteger, 256, 256>(stream_, value);
+}
+
+void BenchmarkInt256x256Writer::WriteInt256x256Impl(std::vector<yardl::FixedNDArray<int32_t, 256, 256>> const& values) {
+  if (!values.empty()) {
+    yardl::binary::WriteVector<yardl::FixedNDArray<int32_t, 256, 256>, yardl::binary::WriteFixedNDArray<int32_t, yardl::binary::WriteInteger, 256, 256>>(stream_, values);
+  }
+}
+
+void BenchmarkInt256x256Writer::EndInt256x256Impl() {
+  yardl::binary::WriteInteger(stream_, 0U);
+}
+
+void BenchmarkInt256x256Writer::Flush() {
+  stream_.Flush();
+}
+
+void BenchmarkInt256x256Writer::CloseImpl() {
+  stream_.Flush();
+}
+
+bool BenchmarkInt256x256Reader::ReadInt256x256Impl(yardl::FixedNDArray<int32_t, 256, 256>& value) {
+  if (current_block_remaining_ == 0) {
+    yardl::binary::ReadInteger(stream_, current_block_remaining_);
+    if (current_block_remaining_ == 0) {
+      return false;
+    }
+  }
+  yardl::binary::ReadFixedNDArray<int32_t, yardl::binary::ReadInteger, 256, 256>(stream_, value);
+  current_block_remaining_--;
+  return true;
+}
+
+bool BenchmarkInt256x256Reader::ReadInt256x256Impl(std::vector<yardl::FixedNDArray<int32_t, 256, 256>>& values) {
+  yardl::binary::ReadBlocksIntoVector<yardl::FixedNDArray<int32_t, 256, 256>, yardl::binary::ReadFixedNDArray<int32_t, yardl::binary::ReadInteger, 256, 256>>(stream_, current_block_remaining_, values);
+  return current_block_remaining_ != 0;
+}
+
+void BenchmarkInt256x256Reader::CloseImpl() {
+  stream_.VerifyFinished();
+}
+
 void BenchmarkFloatVlenWriter::WriteFloatArrayImpl(yardl::NDArray<float, 2> const& value) {
   yardl::binary::WriteInteger(stream_, 1U);
   yardl::binary::WriteNDArray<float, yardl::binary::WriteFloatingPoint, 2>(stream_, value);

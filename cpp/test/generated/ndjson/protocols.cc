@@ -1755,6 +1755,26 @@ void BenchmarkFloat256x256Reader::CloseImpl() {
   VerifyFinished();
 }
 
+void BenchmarkInt256x256Writer::WriteInt256x256Impl(yardl::FixedNDArray<int32_t, 256, 256> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "int256x256", json_value);}
+
+void BenchmarkInt256x256Writer::Flush() {
+  stream_.flush();
+}
+
+void BenchmarkInt256x256Writer::CloseImpl() {
+  stream_.flush();
+}
+
+bool BenchmarkInt256x256Reader::ReadInt256x256Impl(yardl::FixedNDArray<int32_t, 256, 256>& value) {
+  return yardl::ndjson::ReadProtocolValue(stream_, line_, "int256x256", false, unused_step_, value);
+}
+
+void BenchmarkInt256x256Reader::CloseImpl() {
+  VerifyFinished();
+}
+
 void BenchmarkFloatVlenWriter::WriteFloatArrayImpl(yardl::NDArray<float, 2> const& value) {
   ordered_json json_value = value;
   yardl::ndjson::WriteProtocolValue(stream_, "floatArray", json_value);}

@@ -81,7 +81,7 @@ def time_scenario(
     )
 
 
-def benchmark_float256x256(format: Format) -> Optional[Result]:
+def benchmark_float_256x256(format: Format) -> Optional[Result]:
     if format != Format.BINARY:
         return None
 
@@ -120,6 +120,29 @@ def benchmark_float_vlen(format: Format) -> Optional[Result]:
     def read():
         with tm.BinaryBenchmarkFloatVlenReader(OUTPUT_FILE) as r:
             for _ in r.read_float_array():
+                pass
+
+    return time_scenario(total_size_bytes, write, read)
+
+
+def benchmark_small_int_256x256(format: Format) -> Optional[Result]:
+    if format != Format.BINARY:
+        return None
+
+    scale = 0.02
+
+    arr = np.full((256, 256), 37, dtype=np.int32)
+
+    repetitions = scale_repetitions(1000, scale)
+    total_size_bytes = arr.nbytes * repetitions
+
+    def write():
+        with tm.BinaryBenchmarkInt256x256Writer(OUTPUT_FILE) as w:
+            w.write_int256x256(arr for _ in range(repetitions))
+
+    def read():
+        with tm.BinaryBenchmarkInt256x256Reader(OUTPUT_FILE) as r:
+            for _ in r.read_int256x256():
                 pass
 
     return time_scenario(total_size_bytes, write, read)

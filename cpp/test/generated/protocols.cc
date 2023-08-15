@@ -159,6 +159,155 @@ void BenchmarkFloat256x256ReaderBase::CopyTo(BenchmarkFloat256x256WriterBase& wr
 }
 
 namespace {
+void BenchmarkInt256x256WriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end, uint8_t current) {
+  std::string expected_method;
+  switch (current) {
+  case 0: expected_method = "WriteInt256x256() or EndInt256x256()"; break;
+  }
+  std::string attempted_method;
+  switch (attempted) {
+  case 0: attempted_method = end ? "EndInt256x256()" : "WriteInt256x256()"; break;
+  case 1: attempted_method = "Close()"; break;
+  }
+  throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
+}
+
+void BenchmarkInt256x256ReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
+  auto f = [](uint8_t i) -> std::string {
+    switch (i/2) {
+    case 0: return "ReadInt256x256()";
+    case 1: return "Close()";
+    default: return "<unknown>";
+    }
+  };
+  throw std::runtime_error("Expected call to " + f(current) + " but received call to " + f(attempted) + " instead.");
+}
+
+} // namespace 
+
+std::string BenchmarkInt256x256WriterBase::schema_ = R"({"protocol":{"name":"BenchmarkInt256x256","sequence":[{"name":"int256x256","type":{"stream":{"items":{"array":{"items":"int32","dimensions":[{"length":256},{"length":256}]}}}}}]},"types":null})";
+
+void BenchmarkInt256x256WriterBase::WriteInt256x256(yardl::FixedNDArray<int32_t, 256, 256> const& value) {
+  if (unlikely(state_ != 0)) {
+    BenchmarkInt256x256WriterBaseInvalidState(0, false, state_);
+  }
+
+  WriteInt256x256Impl(value);
+}
+
+void BenchmarkInt256x256WriterBase::WriteInt256x256(std::vector<yardl::FixedNDArray<int32_t, 256, 256>> const& values) {
+  if (unlikely(state_ != 0)) {
+    BenchmarkInt256x256WriterBaseInvalidState(0, false, state_);
+  }
+
+  WriteInt256x256Impl(values);
+}
+
+void BenchmarkInt256x256WriterBase::EndInt256x256() {
+  if (unlikely(state_ != 0)) {
+    BenchmarkInt256x256WriterBaseInvalidState(0, true, state_);
+  }
+
+  EndInt256x256Impl();
+  state_ = 1;
+}
+
+// fallback implementation
+void BenchmarkInt256x256WriterBase::WriteInt256x256Impl(std::vector<yardl::FixedNDArray<int32_t, 256, 256>> const& values) {
+  for (auto const& v : values) {
+    WriteInt256x256Impl(v);
+  }
+}
+
+void BenchmarkInt256x256WriterBase::Close() {
+  if (unlikely(state_ != 1)) {
+    BenchmarkInt256x256WriterBaseInvalidState(1, false, state_);
+  }
+
+  CloseImpl();
+}
+
+std::string BenchmarkInt256x256ReaderBase::schema_ = BenchmarkInt256x256WriterBase::schema_;
+
+bool BenchmarkInt256x256ReaderBase::ReadInt256x256(yardl::FixedNDArray<int32_t, 256, 256>& value) {
+  if (unlikely(state_ != 0)) {
+    if (state_ == 1) {
+      state_ = 2;
+      return false;
+    }
+    BenchmarkInt256x256ReaderBaseInvalidState(0, state_);
+  }
+
+  bool result = ReadInt256x256Impl(value);
+  if (!result) {
+    state_ = 2;
+  }
+  return result;
+}
+
+bool BenchmarkInt256x256ReaderBase::ReadInt256x256(std::vector<yardl::FixedNDArray<int32_t, 256, 256>>& values) {
+  if (values.capacity() == 0) {
+    throw std::runtime_error("vector must have a nonzero capacity.");
+  }
+  if (unlikely(state_ != 0)) {
+    if (state_ == 1) {
+      state_ = 2;
+      values.clear();
+      return false;
+    }
+    BenchmarkInt256x256ReaderBaseInvalidState(0, state_);
+  }
+
+  if (!ReadInt256x256Impl(values)) {
+    state_ = 1;
+    return values.size() > 0;
+  }
+  return true;
+}
+
+// fallback implementation
+bool BenchmarkInt256x256ReaderBase::ReadInt256x256Impl(std::vector<yardl::FixedNDArray<int32_t, 256, 256>>& values) {
+  size_t i = 0;
+  while (true) {
+    if (i == values.size()) {
+      values.resize(i + 1);
+    }
+    if (!ReadInt256x256Impl(values[i])) {
+      values.resize(i);
+      return false;
+    }
+    i++;
+    if (i == values.capacity()) {
+      return true;
+    }
+  }
+}
+
+void BenchmarkInt256x256ReaderBase::Close() {
+  if (unlikely(state_ != 2)) {
+    BenchmarkInt256x256ReaderBaseInvalidState(2, state_);
+  }
+
+  CloseImpl();
+}
+void BenchmarkInt256x256ReaderBase::CopyTo(BenchmarkInt256x256WriterBase& writer, size_t int256x256_buffer_size) {
+  if (int256x256_buffer_size > 1) {
+    std::vector<yardl::FixedNDArray<int32_t, 256, 256>> values;
+    values.reserve(int256x256_buffer_size);
+    while(ReadInt256x256(values)) {
+      writer.WriteInt256x256(values);
+    }
+    writer.EndInt256x256();
+  } else {
+    yardl::FixedNDArray<int32_t, 256, 256> value;
+    while(ReadInt256x256(value)) {
+      writer.WriteInt256x256(value);
+    }
+    writer.EndInt256x256();
+  }
+}
+
+namespace {
 void BenchmarkFloatVlenWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end, uint8_t current) {
   std::string expected_method;
   switch (current) {

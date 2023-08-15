@@ -986,6 +986,64 @@ bool BenchmarkFloat256x256Reader::ReadFloat256x256Impl(std::vector<yardl::FixedN
   return has_more;
 }
 
+BenchmarkInt256x256Writer::BenchmarkInt256x256Writer(std::string path)
+    : yardl::hdf5::Hdf5Writer::Hdf5Writer(path, "BenchmarkInt256x256", schema_) {
+}
+
+void BenchmarkInt256x256Writer::WriteInt256x256Impl(yardl::FixedNDArray<int32_t, 256, 256> const& value) {
+  if (!int256x256_dataset_state_) {
+    int256x256_dataset_state_ = std::make_unique<yardl::hdf5::DatasetWriter>(group_, "int256x256", yardl::hdf5::FixedNDArrayDdl(H5::PredType::NATIVE_INT32, {256, 256}), 0);
+  }
+
+  int256x256_dataset_state_->Append<yardl::FixedNDArray<int32_t, 256, 256>, yardl::FixedNDArray<int32_t, 256, 256>>(value);
+}
+
+void BenchmarkInt256x256Writer::WriteInt256x256Impl(std::vector<yardl::FixedNDArray<int32_t, 256, 256>> const& values) {
+  if (!int256x256_dataset_state_) {
+    int256x256_dataset_state_ = std::make_unique<yardl::hdf5::DatasetWriter>(group_, "int256x256", yardl::hdf5::FixedNDArrayDdl(H5::PredType::NATIVE_INT32, {256, 256}), 0);
+  }
+
+  int256x256_dataset_state_->AppendBatch<yardl::FixedNDArray<int32_t, 256, 256>, yardl::FixedNDArray<int32_t, 256, 256>>(values);
+}
+
+void BenchmarkInt256x256Writer::EndInt256x256Impl() {
+  if (!int256x256_dataset_state_) {
+    int256x256_dataset_state_ = std::make_unique<yardl::hdf5::DatasetWriter>(group_, "int256x256", yardl::hdf5::FixedNDArrayDdl(H5::PredType::NATIVE_INT32, {256, 256}), 0);
+  }
+
+  int256x256_dataset_state_.reset();
+}
+
+BenchmarkInt256x256Reader::BenchmarkInt256x256Reader(std::string path)
+    : yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "BenchmarkInt256x256", schema_) {
+}
+
+bool BenchmarkInt256x256Reader::ReadInt256x256Impl(yardl::FixedNDArray<int32_t, 256, 256>& value) {
+  if (!int256x256_dataset_state_) {
+    int256x256_dataset_state_ = std::make_unique<yardl::hdf5::DatasetReader>(group_, "int256x256", yardl::hdf5::FixedNDArrayDdl(H5::PredType::NATIVE_INT32, {256, 256}), 0);
+  }
+
+  bool has_value = int256x256_dataset_state_->Read<yardl::FixedNDArray<int32_t, 256, 256>, yardl::FixedNDArray<int32_t, 256, 256>>(value);
+  if (!has_value) {
+    int256x256_dataset_state_.reset();
+  }
+
+  return has_value;
+}
+
+bool BenchmarkInt256x256Reader::ReadInt256x256Impl(std::vector<yardl::FixedNDArray<int32_t, 256, 256>>& values) {
+  if (!int256x256_dataset_state_) {
+    int256x256_dataset_state_ = std::make_unique<yardl::hdf5::DatasetReader>(group_, "int256x256", yardl::hdf5::FixedNDArrayDdl(H5::PredType::NATIVE_INT32, {256, 256}));
+  }
+
+  bool has_more = int256x256_dataset_state_->ReadBatch<yardl::FixedNDArray<int32_t, 256, 256>, yardl::FixedNDArray<int32_t, 256, 256>>(values);
+  if (!has_more) {
+    int256x256_dataset_state_.reset();
+  }
+
+  return has_more;
+}
+
 BenchmarkFloatVlenWriter::BenchmarkFloatVlenWriter(std::string path)
     : yardl::hdf5::Hdf5Writer::Hdf5Writer(path, "BenchmarkFloatVlen", schema_) {
 }

@@ -97,6 +97,90 @@ class TestBenchmarkFloat256x256WriterBase : public BenchmarkFloat256x256WriterBa
   bool close_called_ = false;
 };
 
+class MockBenchmarkInt256x256Writer : public BenchmarkInt256x256WriterBase {
+  public:
+  void WriteInt256x256Impl (yardl::FixedNDArray<int32_t, 256, 256> const& value) override {
+    if (WriteInt256x256Impl_expected_values_.empty()) {
+      throw std::runtime_error("Unexpected call to WriteInt256x256Impl");
+    }
+    if (WriteInt256x256Impl_expected_values_.front() != value) {
+      throw std::runtime_error("Unexpected argument value for call to WriteInt256x256Impl");
+    }
+    WriteInt256x256Impl_expected_values_.pop();
+  }
+
+  std::queue<yardl::FixedNDArray<int32_t, 256, 256>> WriteInt256x256Impl_expected_values_;
+
+  void ExpectWriteInt256x256Impl (yardl::FixedNDArray<int32_t, 256, 256> const& value) {
+    WriteInt256x256Impl_expected_values_.push(value);
+  }
+
+  void EndInt256x256Impl () override {
+    if (--EndInt256x256Impl_expected_call_count_ < 0) {
+      throw std::runtime_error("Unexpected call to EndInt256x256Impl");
+    }
+  }
+
+  int EndInt256x256Impl_expected_call_count_ = 0;
+
+  void ExpectEndInt256x256Impl () {
+    EndInt256x256Impl_expected_call_count_++;
+  }
+
+  void Verify() {
+    if (!WriteInt256x256Impl_expected_values_.empty()) {
+      throw std::runtime_error("Expected call to WriteInt256x256Impl was not received");
+    }
+    if (EndInt256x256Impl_expected_call_count_ > 0) {
+      throw std::runtime_error("Expected call to EndInt256x256Impl was not received");
+    }
+  }
+};
+
+class TestBenchmarkInt256x256WriterBase : public BenchmarkInt256x256WriterBase {
+  public:
+  TestBenchmarkInt256x256WriterBase(std::unique_ptr<test_model::BenchmarkInt256x256WriterBase> writer, std::function<std::unique_ptr<BenchmarkInt256x256ReaderBase>()> create_reader) : writer_(std::move(writer)), create_reader_(create_reader) {
+  }
+
+  ~TestBenchmarkInt256x256WriterBase() {
+    if (!close_called_ && !std::uncaught_exceptions()) {
+      ADD_FAILURE() << "Close() needs to be called on 'TestBenchmarkInt256x256WriterBase' to verify mocks";
+    }
+  }
+
+  protected:
+  void WriteInt256x256Impl(yardl::FixedNDArray<int32_t, 256, 256> const& value) override {
+    writer_->WriteInt256x256(value);
+    mock_writer_.ExpectWriteInt256x256Impl(value);
+  }
+
+  void WriteInt256x256Impl(std::vector<yardl::FixedNDArray<int32_t, 256, 256>> const& values) override {
+    writer_->WriteInt256x256(values);
+    for (auto const& v : values) {
+      mock_writer_.ExpectWriteInt256x256Impl(v);
+    }
+  }
+
+  void EndInt256x256Impl() override {
+    writer_->EndInt256x256();
+    mock_writer_.ExpectEndInt256x256Impl();
+  }
+
+  void CloseImpl() override {
+    close_called_ = true;
+    writer_->Close();
+    std::unique_ptr<BenchmarkInt256x256ReaderBase> reader = create_reader_();
+    reader->CopyTo(mock_writer_, 2);
+    mock_writer_.Verify();
+  }
+
+  private:
+  std::unique_ptr<test_model::BenchmarkInt256x256WriterBase> writer_;
+  std::function<std::unique_ptr<test_model::BenchmarkInt256x256ReaderBase>()> create_reader_;
+  MockBenchmarkInt256x256Writer mock_writer_;
+  bool close_called_ = false;
+};
+
 class MockBenchmarkFloatVlenWriter : public BenchmarkFloatVlenWriterBase {
   public:
   void WriteFloatArrayImpl (yardl::NDArray<float, 2> const& value) override {
@@ -4005,6 +4089,14 @@ std::unique_ptr<test_model::BenchmarkFloat256x256WriterBase> CreateValidatingWri
   return std::make_unique<test_model::TestBenchmarkFloat256x256WriterBase>(
     CreateWriter<test_model::BenchmarkFloat256x256WriterBase>(format, filename),
     [format, filename](){ return CreateReader<test_model::BenchmarkFloat256x256ReaderBase>(format, filename);}
+  );
+}
+
+template<>
+std::unique_ptr<test_model::BenchmarkInt256x256WriterBase> CreateValidatingWriter<test_model::BenchmarkInt256x256WriterBase>(Format format, std::string const& filename) {
+  return std::make_unique<test_model::TestBenchmarkInt256x256WriterBase>(
+    CreateWriter<test_model::BenchmarkInt256x256WriterBase>(format, filename),
+    [format, filename](){ return CreateReader<test_model::BenchmarkInt256x256ReaderBase>(format, filename);}
   );
 }
 

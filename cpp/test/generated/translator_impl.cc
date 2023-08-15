@@ -29,6 +29,17 @@ void TranslateStream(std::string const& protocol_name, yardl::testing::Format in
     reader->CopyTo(*writer);
     return;
   }
+  if (protocol_name == "BenchmarkInt256x256") {
+    auto reader = input_format == yardl::testing::Format::kBinary
+      ? std::unique_ptr<test_model::BenchmarkInt256x256ReaderBase>(new test_model::binary::BenchmarkInt256x256Reader(input))
+      : std::unique_ptr<test_model::BenchmarkInt256x256ReaderBase>(new test_model::ndjson::BenchmarkInt256x256Reader(input));
+
+    auto writer = output_format == yardl::testing::Format::kBinary
+      ? std::unique_ptr<test_model::BenchmarkInt256x256WriterBase>(new test_model::binary::BenchmarkInt256x256Writer(output))
+      : std::unique_ptr<test_model::BenchmarkInt256x256WriterBase>(new test_model::ndjson::BenchmarkInt256x256Writer(output));
+    reader->CopyTo(*writer);
+    return;
+  }
   if (protocol_name == "BenchmarkFloatVlen") {
     auto reader = input_format == yardl::testing::Format::kBinary
       ? std::unique_ptr<test_model::BenchmarkFloatVlenReaderBase>(new test_model::binary::BenchmarkFloatVlenReader(input))

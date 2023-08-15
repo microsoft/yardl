@@ -128,6 +128,124 @@ class BenchmarkFloat256x256ReaderBase(abc.ABC):
             return 'read_float256x256'
         return "<unknown>"
 
+class BenchmarkInt256x256WriterBase(abc.ABC):
+    """Abstract writer for the BenchmarkInt256x256 protocol."""
+
+
+    def __init__(self) -> None:
+        self._state = 0
+
+    schema = r"""{"protocol":{"name":"BenchmarkInt256x256","sequence":[{"name":"int256x256","type":{"stream":{"items":{"array":{"items":"int32","dimensions":[{"length":256},{"length":256}]}}}}}]},"types":null}"""
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
+        if exc is None and self._state == 1:
+            try:
+                self._end_stream()
+                return
+            finally:
+                self.close()
+        self.close()
+        if exc is None and self._state != 2:
+            expected_method = self._state_to_method_name((self._state + 1) & ~1)
+            raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+
+    def write_int256x256(self, value: collections.abc.Iterable[npt.NDArray[np.int32]]) -> None:
+        """Ordinal 0"""
+
+        if self._state & ~1 != 0:
+            self._raise_unexpected_state(0)
+
+        self._write_int256x256(value)
+        self._state = 1
+
+    @abc.abstractmethod
+    def _write_int256x256(self, value: collections.abc.Iterable[npt.NDArray[np.int32]]) -> None:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def close(self) -> None:
+        pass
+
+    @abc.abstractmethod
+    def _end_stream(self) -> None:
+        pass
+
+    def _raise_unexpected_state(self, actual: int) -> None:
+        expected_method = self._state_to_method_name(self._state)
+        actual_method = self._state_to_method_name(actual)
+        raise ProtocolError(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
+
+    def _state_to_method_name(self, state: int) -> str:
+        if state == 0:
+            return 'write_int256x256'
+        return "<unknown>"
+
+class BenchmarkInt256x256ReaderBase(abc.ABC):
+    """Abstract reader for the BenchmarkInt256x256 protocol."""
+
+
+    def __init__(self) -> None:
+        self._state = 0
+
+    schema = BenchmarkInt256x256WriterBase.schema
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
+        self.close()
+        if exc is None and self._state != 2:
+            if self._state % 2 == 1:
+                previous_method = self._state_to_method_name(self._state - 1)
+                raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
+            else:
+                expected_method = self._state_to_method_name(self._state)
+                raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
+            	
+
+    @abc.abstractmethod
+    def close(self) -> None:
+        raise NotImplementedError()
+
+    def read_int256x256(self) -> collections.abc.Iterable[npt.NDArray[np.int32]]:
+        """Ordinal 0"""
+
+        if self._state != 0:
+            self._raise_unexpected_state(0)
+
+        value = self._read_int256x256()
+        self._state = 1
+        return self._wrap_iterable(value, 2)
+
+    def copy_to(self, writer: BenchmarkInt256x256WriterBase) -> None:
+        writer.write_int256x256(self.read_int256x256())
+
+    @abc.abstractmethod
+    def _read_int256x256(self) -> collections.abc.Iterable[npt.NDArray[np.int32]]:
+        raise NotImplementedError()
+
+    T = typing.TypeVar('T')
+    def _wrap_iterable(self, iterable: collections.abc.Iterable[T], final_state: int) -> collections.abc.Iterable[T]:
+        yield from iterable
+        self._state = final_state
+
+    def _raise_unexpected_state(self, actual: int) -> None:
+        actual_method = self._state_to_method_name(actual)
+        if self._state % 2 == 1:
+            previous_method = self._state_to_method_name(self._state - 1)
+            raise ProtocolError(f"Received call to '{actual_method}' but the iterable returned by '{previous_method}' was not fully consumed.")
+        else:
+            expected_method = self._state_to_method_name(self._state)
+            raise ProtocolError(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
+        	
+    def _state_to_method_name(self, state: int) -> str:
+        if state == 0:
+            return 'read_int256x256'
+        return "<unknown>"
+
 class BenchmarkFloatVlenWriterBase(abc.ABC):
     """Abstract writer for the BenchmarkFloatVlen protocol."""
 
