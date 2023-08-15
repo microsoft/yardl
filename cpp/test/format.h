@@ -1,6 +1,9 @@
 #pragma once
 
+#include <algorithm>
+#include <cctype>
 #include <iostream>
+#include <string>
 
 namespace yardl::testing {
 
@@ -22,4 +25,17 @@ inline std::ostream& operator<<(std::ostream& os, Format const& format) {
       return os << std::to_string(static_cast<int>(format));
   }
 }
+
+inline Format ParseFormat(std::string format) {
+  std::transform(format.begin(), format.end(), format.begin(), [](unsigned char c) { return std::tolower(c); });
+  if (format == "binary") {
+    return Format::kBinary;
+  } else if (format == "hdf5") {
+    return Format::kHdf5;
+  } else if (format == "ndjson") {
+    return Format::kNDJson;
+  }
+  throw std::runtime_error("Unknown format: " + format);
+}
+
 }  // namespace yardl::testing

@@ -66,7 +66,8 @@ cpp_version := "17"
 @benchmark: generate ensure-build-dir
     cd cpp/build; \
     ninja benchmark; \
-    ./benchmark
+    cd ../..; \
+    python/benchmarks/benchmark.py
 
 @watch-generate-test: install
     watchexec -r -c -w tooling/ -- "just install && cd models/test && yardl generate --watch"
