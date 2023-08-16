@@ -49,7 +49,8 @@ class BinaryProtocolWriter(ABC):
         self._stream.close()
 
     def _end_stream(self) -> None:
-        self._stream.write_byte(0)
+        self._stream.ensure_capacity(1)
+        self._stream.write_byte_no_check(0)
 
 
 class BinaryProtocolReader(ABC):
@@ -76,6 +77,8 @@ class BinaryProtocolReader(ABC):
 
 
 class CodedOutputStream:
+    __slots__ = ["_stream", "_owns_stream", "_buffer", "_offset"]
+
     def __init__(
         self, stream: Union[BinaryIO, str], *, buffer_size: int = 65536
     ) -> None:
@@ -87,59 +90,63 @@ class CodedOutputStream:
             self._owns_stream = False
 
         self._buffer = bytearray(buffer_size)
-        self._view = memoryview(self._buffer)
+        self._offset = 0
 
     def close(self) -> None:
         self.flush()
         if self._owns_stream:
             self._stream.close()
 
-    def flush(self) -> None:
-        buffer_filled_count = len(self._buffer) - len(self._view)
-        if buffer_filled_count > 0:
-            self._stream.write(self._buffer[:buffer_filled_count])
-            self._stream.flush()
-            self._view = memoryview(self._buffer)
-
-    def write(self, formatter: struct.Struct, *args: Any) -> None:
-        if len(self._view) < formatter.size:
+    def ensure_capacity(self, size: int) -> None:
+        if (len(self._buffer) - self._offset) < size:
             self.flush()
 
-        formatter.pack_into(self._view, 0, *args)
-        self._view = self._view[formatter.size :]
+    def flush(self) -> None:
+        if self._offset > 0:
+            self._stream.write(self._buffer[: self._offset])
+            self._stream.flush()
+            self._offset = 0
+
+    def write(self, formatter: struct.Struct, *args: Any) -> None:
+        size = formatter.size
+        if (len(self._buffer) - self._offset) < size:
+            self.flush()
+
+        formatter.pack_into(self._buffer, self._offset, *args)
+        self._offset += size
 
     def write_bytes(self, data: Union[bytes, bytearray]) -> None:
-        if len(data) > len(self._view):
+        if len(data) > (len(self._buffer) - self._offset):
             self.flush()
             self._stream.write(data)
         else:
-            self._view[: len(data)] = data
-            self._view = self._view[len(data) :]
+            self._buffer[self._offset : self._offset + len(data)] = data
+            self._offset += len(data)
 
     def write_bytes_directly(self, data: Union[bytes, bytearray, memoryview]) -> None:
         self.flush()
         self._stream.write(data)
 
-    def write_byte(self, value: int) -> None:
+    def write_byte_no_check(self, value: int) -> None:
         assert 0 <= value <= UINT8_MAX
-        self._view[0] = value
-        self._view = self._view[1:]
+        self._buffer[self._offset] = value
+        self._offset += 1
 
     def write_unsigned_varint(
         self,
         value: Union[int, np.uint8, np.uint16, np.uint32, np.uint64],
     ) -> None:
-        if len(self._view) < 10:
+        if (len(self._buffer) - self._offset) < 10:
             self.flush()
 
         int_val = int(value)  # bitwise ops not supported on numpy types
 
         while True:
             if int_val < 0x80:
-                self.write_byte(int_val)
+                self.write_byte_no_check(int_val)
                 return
 
-            self.write_byte((int_val & 0x7F) | 0x80)
+            self.write_byte_no_check((int_val & 0x7F) | 0x80)
             int_val >>= 7
 
     def zigzag_encode(
@@ -841,17 +848,19 @@ class OptionalSerializer(Generic[T, T_NP], TypeSerializer[Optional[T], np.void])
         self._none = cast(np.void, np.zeros((), dtype=self.overall_dtype())[()])
 
     def write(self, stream: CodedOutputStream, value: Optional[T]) -> None:
+        stream.ensure_capacity(1)
         if value is None:
-            stream.write_byte(0)
+            stream.write_byte_no_check(0)
         else:
-            stream.write_byte(1)
+            stream.write_byte_no_check(1)
             self._element_serializer.write(stream, value)
 
     def write_numpy(self, stream: CodedOutputStream, value: np.void) -> None:
+        stream.ensure_capacity(1)
         if not value["has_value"]:
-            stream.write_byte(0)
+            stream.write_byte_no_check(0)
         else:
-            stream.write_byte(1)
+            stream.write_byte_no_check(1)
             self._element_serializer.write_numpy(stream, value["value"])
 
     def read(self, stream: CodedInputStream) -> Optional[T]:
@@ -886,7 +895,7 @@ class UnionSerializer(TypeSerializer[T, np.object_]):
     def write(self, stream: CodedOutputStream, value: T) -> None:
         if value is None:
             if self._cases[0] is None:
-                stream.write_byte(0)
+                stream.write_byte_no_check(0)
                 return
             else:
                 raise ValueError("None is not a valid for this union type")
@@ -897,7 +906,8 @@ class UnionSerializer(TypeSerializer[T, np.object_]):
             )
 
         tag_index = value._index + self._offset  # type: ignore
-        stream.write_byte(tag_index)
+        stream.ensure_capacity(1)
+        stream.write_byte_no_check(tag_index)
         self._cases[tag_index][1].write(stream, value.value)  # type: ignore
 
     def write_numpy(self, stream: CodedOutputStream, value: np.object_) -> None:
@@ -928,7 +938,7 @@ class StreamSerializer(TypeSerializer[Iterable[T], Any]):
                 self._element_serializer.write(stream, element)
         else:
             for element in value:
-                stream.write_byte(1)
+                stream.write_byte_no_check(1)
                 self._element_serializer.write(stream, element)
 
     def write_numpy(self, stream: CodedOutputStream, value: Any) -> None:
