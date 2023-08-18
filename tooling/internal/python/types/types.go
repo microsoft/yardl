@@ -122,8 +122,8 @@ func writeUnionClass(w *formatting.IndentedWriter, className string, typeParamet
 		if tc.Type == nil {
 			continue
 		}
-		tag := formatting.ToPascalCase(tc.Tag)
-		fmt.Fprintf(w, "%s.%s = type(\"%s.%s\", (%s,), {\"_index\": %d})\n", className, tag, className, tag, unionCaseType, i)
+		pascalTag := formatting.ToPascalCase(tc.Tag)
+		fmt.Fprintf(w, "%s.%s = type(\"%s.%s\", (%s,), {\"_index\": %d, \"_tag\": \"%s\"})\n", className, pascalTag, className, pascalTag, unionCaseType, i, tc.Tag)
 		i++
 	}
 	fmt.Fprintf(w, "del %s\n", unionCaseType)
@@ -657,6 +657,9 @@ func writeEnum(w *formatting.IndentedWriter, enum *dsl.EnumDefinition) {
 			w.Indented(func() {
 				w.WriteStringln("return hash(self.value)")
 			})
+			w.WriteStringln("")
+
+			w.WriteStringln("__str__ = enum.Flag.__str__ # type: ignore")
 
 		}
 	})

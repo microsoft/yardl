@@ -35,8 +35,8 @@ from . import yardl_types as yardl
 	writeProtocols(w, ns)
 	writeRecordSerializers(w, ns)
 
-	definitionsPath := path.Join(packageDir, "binary.py")
-	return iocommon.WriteFileIfNeeded(definitionsPath, b.Bytes(), 0644)
+	binaryPath := path.Join(packageDir, "binary.py")
+	return iocommon.WriteFileIfNeeded(binaryPath, b.Bytes(), 0644)
 }
 
 func writeRecordSerializers(w *formatting.IndentedWriter, ns *dsl.Namespace) {
@@ -47,7 +47,9 @@ func writeRecordSerializers(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 				if len(td.TypeParameters) > 0 {
 					typeParamSerializers := make([]string, 0, len(td.TypeParameters))
 					for _, tp := range td.TypeParameters {
-						typeParamSerializers = append(typeParamSerializers, fmt.Sprintf("%s: _binary.TypeSerializer[%s, %s]", typeDefinitionSerializer(tp, ns.Name), common.TypeParameterSyntax(tp, false), common.TypeParameterSyntax(tp, true)))
+						typeParamSerializers = append(
+							typeParamSerializers,
+							fmt.Sprintf("%s: _binary.TypeSerializer[%s, %s]", typeDefinitionSerializer(tp, ns.Name), common.TypeParameterSyntax(tp, false), common.TypeParameterSyntax(tp, true)))
 					}
 
 					fmt.Fprintf(w, "def __init__(self, %s) -> None:\n", strings.Join(typeParamSerializers, ", "))
@@ -78,7 +80,7 @@ func writeRecordSerializers(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 				genericSpec = ""
 			}
 
-			fmt.Fprintf(w, "class %s(%s_binary.RecordSerializer[%s]):\n", recordSerializerClassName(td, false), genericSpec, typeSyntax)
+			fmt.Fprintf(w, "class %s(%s_binary.RecordSerializer[%s]):\n", recordSerializerClassName(td), genericSpec, typeSyntax)
 			w.Indented(func() {
 				writeInit(false)
 
@@ -125,10 +127,7 @@ func writeRecordSerializers(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 	}
 }
 
-func recordSerializerClassName(record *dsl.RecordDefinition, numpy bool) string {
-	if numpy {
-		return fmt.Sprintf("_%s_NumpySerializer", formatting.ToPascalCase(record.Name))
-	}
+func recordSerializerClassName(record *dsl.RecordDefinition) string {
 	return fmt.Sprintf("_%sSerializer", formatting.ToPascalCase(record.Name))
 }
 
@@ -209,9 +208,9 @@ func typeDefinitionSerializer(t dsl.TypeDefinition, contextNamespace string) str
 		elementSerializer := typeSerializer(baseType, contextNamespace, nil)
 		return fmt.Sprintf("_binary.EnumSerializer(%s, %s)", elementSerializer, common.TypeSyntax(t, contextNamespace))
 	case *dsl.RecordDefinition:
-		rwClassName := recordSerializerClassName(t, false)
+		serializerName := recordSerializerClassName(t)
 		if len(t.TypeParameters) == 0 {
-			return fmt.Sprintf("%s()", rwClassName)
+			return fmt.Sprintf("%s()", serializerName)
 		}
 		if len(t.TypeArguments) == 0 {
 			panic("Expected type arguments")
@@ -223,10 +222,10 @@ func typeDefinitionSerializer(t dsl.TypeDefinition, contextNamespace string) str
 		}
 
 		if len(typeArguments) == 0 {
-			return fmt.Sprintf("%s()", rwClassName)
+			return fmt.Sprintf("%s()", serializerName)
 		}
 
-		return fmt.Sprintf("%s(%s)", rwClassName, strings.Join(typeArguments, ", "))
+		return fmt.Sprintf("%s(%s)", serializerName, strings.Join(typeArguments, ", "))
 	case *dsl.GenericTypeParameter:
 		return fmt.Sprintf("%s_serializer", formatting.ToSnakeCase(t.Name))
 	case *dsl.NamedType:

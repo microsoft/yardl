@@ -3198,6 +3198,15 @@
               }
             },
             {
+              "name": "intToString",
+              "type": {
+                "map": {
+                  "keys": "int32",
+                  "values": "string"
+                }
+              }
+            },
+            {
               "name": "stringToUnion",
               "type": {
                 "map": {

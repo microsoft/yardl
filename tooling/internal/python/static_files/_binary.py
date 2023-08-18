@@ -77,8 +77,6 @@ class BinaryProtocolReader(ABC):
 
 
 class CodedOutputStream:
-    __slots__ = ["_stream", "_owns_stream", "_buffer", "_offset"]
-
     def __init__(
         self, stream: Union[BinaryIO, str], *, buffer_size: int = 65536
     ) -> None:
@@ -304,15 +302,15 @@ class TypeSerializer(Generic[T, T_NP], ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def write_numpy(self, stream: CodedOutputStream, value: T_NP) -> None:
+        raise NotImplementedError
+
+    @abstractmethod
     def read(self, stream: CodedInputStream) -> T:
         raise NotImplementedError
 
     @abstractmethod
     def read_numpy(self, stream: CodedInputStream) -> T_NP:
-        raise NotImplementedError
-
-    @abstractmethod
-    def write_numpy(self, stream: CodedOutputStream, value: T_NP) -> None:
         raise NotImplementedError
 
     def is_trivially_serializable(self) -> bool:
@@ -447,10 +445,10 @@ class Int32Serializer(TypeSerializer[Int32, np.int32]):
         if isinstance(value, int):
             if value < INT32_MIN or value > INT32_MAX:
                 raise ValueError(
-                    f"Value {value} is outside the range of an unsigned 32-bit integer"
+                    f"Value {value} is outside the range of a signed 32-bit integer"
                 )
         elif not isinstance(value, cast(type, np.int32)):
-            raise ValueError(f"Value in not an unsigned 32-bit integer: {value}")
+            raise ValueError(f"Value in not a signed 32-bit integer: {value}")
 
         stream.write_signed_varint(value)
 

@@ -278,6 +278,7 @@ AliasedMap<K,V>: K->V
 Maps: !protocol
   sequence:
     stringToInt: string->int
+    intToString: int->string
     stringToUnion: !map
       keys: string
       values: [string, int]

@@ -2329,6 +2329,22 @@ class MockMapsWriter : public MapsWriterBase {
     WriteStringToIntImpl_expected_values_.push(value);
   }
 
+  void WriteIntToStringImpl (std::unordered_map<int32_t, std::string> const& value) override {
+    if (WriteIntToStringImpl_expected_values_.empty()) {
+      throw std::runtime_error("Unexpected call to WriteIntToStringImpl");
+    }
+    if (WriteIntToStringImpl_expected_values_.front() != value) {
+      throw std::runtime_error("Unexpected argument value for call to WriteIntToStringImpl");
+    }
+    WriteIntToStringImpl_expected_values_.pop();
+  }
+
+  std::queue<std::unordered_map<int32_t, std::string>> WriteIntToStringImpl_expected_values_;
+
+  void ExpectWriteIntToStringImpl (std::unordered_map<int32_t, std::string> const& value) {
+    WriteIntToStringImpl_expected_values_.push(value);
+  }
+
   void WriteStringToUnionImpl (std::unordered_map<std::string, std::variant<std::string, int32_t>> const& value) override {
     if (WriteStringToUnionImpl_expected_values_.empty()) {
       throw std::runtime_error("Unexpected call to WriteStringToUnionImpl");
@@ -2365,6 +2381,9 @@ class MockMapsWriter : public MapsWriterBase {
     if (!WriteStringToIntImpl_expected_values_.empty()) {
       throw std::runtime_error("Expected call to WriteStringToIntImpl was not received");
     }
+    if (!WriteIntToStringImpl_expected_values_.empty()) {
+      throw std::runtime_error("Expected call to WriteIntToStringImpl was not received");
+    }
     if (!WriteStringToUnionImpl_expected_values_.empty()) {
       throw std::runtime_error("Expected call to WriteStringToUnionImpl was not received");
     }
@@ -2389,6 +2408,11 @@ class TestMapsWriterBase : public MapsWriterBase {
   void WriteStringToIntImpl(std::unordered_map<std::string, int32_t> const& value) override {
     writer_->WriteStringToInt(value);
     mock_writer_.ExpectWriteStringToIntImpl(value);
+  }
+
+  void WriteIntToStringImpl(std::unordered_map<int32_t, std::string> const& value) override {
+    writer_->WriteIntToString(value);
+    mock_writer_.ExpectWriteIntToStringImpl(value);
   }
 
   void WriteStringToUnionImpl(std::unordered_map<std::string, std::variant<std::string, int32_t>> const& value) override {

@@ -243,6 +243,8 @@ func TypeDefinitionDTypeSyntax(t dsl.TypeDefinition) string {
 			return "np.bool_"
 		case dsl.Int8, dsl.Uint8, dsl.Int16, dsl.Uint16, dsl.Int32, dsl.Uint32, dsl.Int64, dsl.Uint64, dsl.Float32, dsl.Float64:
 			return fmt.Sprintf("np.%s", strings.ToLower(string(t)))
+		case dsl.Size:
+			return "np.uint64"
 		case dsl.ComplexFloat32:
 			return "np.complex64"
 		case dsl.ComplexFloat64:

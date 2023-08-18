@@ -720,6 +720,9 @@ class BinaryMapsWriter(_binary.BinaryProtocolWriter, MapsWriterBase):
     def _write_string_to_int(self, value: dict[str, yardl.Int32]) -> None:
         _binary.MapSerializer(_binary.string_serializer, _binary.int32_serializer).write(self._stream, value)
 
+    def _write_int_to_string(self, value: dict[yardl.Int32, str]) -> None:
+        _binary.MapSerializer(_binary.int32_serializer, _binary.string_serializer).write(self._stream, value)
+
     def _write_string_to_union(self, value: dict[str, StringOrInt32]) -> None:
         _binary.MapSerializer(_binary.string_serializer, _binary.UnionSerializer(StringOrInt32, [(StringOrInt32.String, _binary.string_serializer), (StringOrInt32.Int32, _binary.int32_serializer)])).write(self._stream, value)
 
@@ -737,6 +740,9 @@ class BinaryMapsReader(_binary.BinaryProtocolReader, MapsReaderBase):
 
     def _read_string_to_int(self) -> dict[str, yardl.Int32]:
         return _binary.MapSerializer(_binary.string_serializer, _binary.int32_serializer).read(self._stream)
+
+    def _read_int_to_string(self) -> dict[yardl.Int32, str]:
+        return _binary.MapSerializer(_binary.int32_serializer, _binary.string_serializer).read(self._stream)
 
     def _read_string_to_union(self) -> dict[str, StringOrInt32]:
         return _binary.MapSerializer(_binary.string_serializer, _binary.UnionSerializer(StringOrInt32, [(StringOrInt32.String, _binary.string_serializer), (StringOrInt32.Int32, _binary.int32_serializer)])).read(self._stream)

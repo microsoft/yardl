@@ -506,6 +506,7 @@ def test_maps():
     with create_validating_writer_class(tm.MapsWriterBase)() as w:
         d = {"a": 1, "b": 2, "c": 3}
         w.write_string_to_int(d)
+        w.write_int_to_string({1: "a", 2: "b", 3: "c"})
         w.write_string_to_union(
             {"a": tm.StringOrInt32.Int32(1), "b": tm.StringOrInt32.String("2")}
         )

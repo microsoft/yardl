@@ -833,6 +833,7 @@ class MapsWriter : public test_model::MapsWriterBase, yardl::binary::BinaryWrite
 
   protected:
   void WriteStringToIntImpl(std::unordered_map<std::string, int32_t> const& value) override;
+  void WriteIntToStringImpl(std::unordered_map<int32_t, std::string> const& value) override;
   void WriteStringToUnionImpl(std::unordered_map<std::string, std::variant<std::string, int32_t>> const& value) override;
   void WriteAliasedGenericImpl(test_model::AliasedMap<std::string, int32_t> const& value) override;
   void CloseImpl() override;
@@ -851,6 +852,7 @@ class MapsReader : public test_model::MapsReaderBase, yardl::binary::BinaryReade
 
   protected:
   void ReadStringToIntImpl(std::unordered_map<std::string, int32_t>& value) override;
+  void ReadIntToStringImpl(std::unordered_map<int32_t, std::string>& value) override;
   void ReadStringToUnionImpl(std::unordered_map<std::string, std::variant<std::string, int32_t>>& value) override;
   void ReadAliasedGenericImpl(test_model::AliasedMap<std::string, int32_t>& value) override;
   void CloseImpl() override;

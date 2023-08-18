@@ -1407,9 +1407,12 @@ class MapsWriterBase {
   void WriteStringToInt(std::unordered_map<std::string, int32_t> const& value);
 
   // Ordinal 1.
-  void WriteStringToUnion(std::unordered_map<std::string, std::variant<std::string, int32_t>> const& value);
+  void WriteIntToString(std::unordered_map<int32_t, std::string> const& value);
 
   // Ordinal 2.
+  void WriteStringToUnion(std::unordered_map<std::string, std::variant<std::string, int32_t>> const& value);
+
+  // Ordinal 3.
   void WriteAliasedGeneric(test_model::AliasedMap<std::string, int32_t> const& value);
 
   // Optionaly close this writer before destructing. Validates that all steps were completed.
@@ -1422,6 +1425,7 @@ class MapsWriterBase {
 
   protected:
   virtual void WriteStringToIntImpl(std::unordered_map<std::string, int32_t> const& value) = 0;
+  virtual void WriteIntToStringImpl(std::unordered_map<int32_t, std::string> const& value) = 0;
   virtual void WriteStringToUnionImpl(std::unordered_map<std::string, std::variant<std::string, int32_t>> const& value) = 0;
   virtual void WriteAliasedGenericImpl(test_model::AliasedMap<std::string, int32_t> const& value) = 0;
   virtual void CloseImpl() {}
@@ -1441,9 +1445,12 @@ class MapsReaderBase {
   void ReadStringToInt(std::unordered_map<std::string, int32_t>& value);
 
   // Ordinal 1.
-  void ReadStringToUnion(std::unordered_map<std::string, std::variant<std::string, int32_t>>& value);
+  void ReadIntToString(std::unordered_map<int32_t, std::string>& value);
 
   // Ordinal 2.
+  void ReadStringToUnion(std::unordered_map<std::string, std::variant<std::string, int32_t>>& value);
+
+  // Ordinal 3.
   void ReadAliasedGeneric(test_model::AliasedMap<std::string, int32_t>& value);
 
   // Optionaly close this writer before destructing. Validates that all steps were completely read.
@@ -1455,6 +1462,7 @@ class MapsReaderBase {
 
   protected:
   virtual void ReadStringToIntImpl(std::unordered_map<std::string, int32_t>& value) = 0;
+  virtual void ReadIntToStringImpl(std::unordered_map<int32_t, std::string>& value) = 0;
   virtual void ReadStringToUnionImpl(std::unordered_map<std::string, std::variant<std::string, int32_t>>& value) = 0;
   virtual void ReadAliasedGenericImpl(test_model::AliasedMap<std::string, int32_t>& value) = 0;
   virtual void CloseImpl() {}

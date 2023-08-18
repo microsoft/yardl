@@ -2435,6 +2435,10 @@ void MapsWriter::WriteStringToIntImpl(std::unordered_map<std::string, int32_t> c
   ordered_json json_value = value;
   yardl::ndjson::WriteProtocolValue(stream_, "stringToInt", json_value);}
 
+void MapsWriter::WriteIntToStringImpl(std::unordered_map<int32_t, std::string> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "intToString", json_value);}
+
 void MapsWriter::WriteStringToUnionImpl(std::unordered_map<std::string, std::variant<std::string, int32_t>> const& value) {
   ordered_json json_value = value;
   yardl::ndjson::WriteProtocolValue(stream_, "stringToUnion", json_value);}
@@ -2453,6 +2457,10 @@ void MapsWriter::CloseImpl() {
 
 void MapsReader::ReadStringToIntImpl(std::unordered_map<std::string, int32_t>& value) {
   yardl::ndjson::ReadProtocolValue(stream_, line_, "stringToInt", true, unused_step_, value);
+}
+
+void MapsReader::ReadIntToStringImpl(std::unordered_map<int32_t, std::string>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "intToString", true, unused_step_, value);
 }
 
 void MapsReader::ReadStringToUnionImpl(std::unordered_map<std::string, std::variant<std::string, int32_t>>& value) {

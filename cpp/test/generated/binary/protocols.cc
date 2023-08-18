@@ -2450,6 +2450,10 @@ void MapsWriter::WriteStringToIntImpl(std::unordered_map<std::string, int32_t> c
   yardl::binary::WriteMap<std::string, int32_t, yardl::binary::WriteString, yardl::binary::WriteInteger>(stream_, value);
 }
 
+void MapsWriter::WriteIntToStringImpl(std::unordered_map<int32_t, std::string> const& value) {
+  yardl::binary::WriteMap<int32_t, std::string, yardl::binary::WriteInteger, yardl::binary::WriteString>(stream_, value);
+}
+
 void MapsWriter::WriteStringToUnionImpl(std::unordered_map<std::string, std::variant<std::string, int32_t>> const& value) {
   yardl::binary::WriteMap<std::string, std::variant<std::string, int32_t>, yardl::binary::WriteString, WriteUnion<std::string, yardl::binary::WriteString, int32_t, yardl::binary::WriteInteger>>(stream_, value);
 }
@@ -2468,6 +2472,10 @@ void MapsWriter::CloseImpl() {
 
 void MapsReader::ReadStringToIntImpl(std::unordered_map<std::string, int32_t>& value) {
   yardl::binary::ReadMap<std::string, int32_t, yardl::binary::ReadString, yardl::binary::ReadInteger>(stream_, value);
+}
+
+void MapsReader::ReadIntToStringImpl(std::unordered_map<int32_t, std::string>& value) {
+  yardl::binary::ReadMap<int32_t, std::string, yardl::binary::ReadInteger, yardl::binary::ReadString>(stream_, value);
 }
 
 void MapsReader::ReadStringToUnionImpl(std::unordered_map<std::string, std::variant<std::string, int32_t>>& value) {

@@ -1982,6 +1982,10 @@ void MapsWriter::WriteStringToIntImpl(std::unordered_map<std::string, int32_t> c
   yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerMap<yardl::hdf5::InnerVlenString, std::string, int32_t, int32_t>, std::unordered_map<std::string, int32_t>>(group_, "stringToInt", yardl::hdf5::InnerMapDdl<yardl::hdf5::InnerVlenString, int32_t>(yardl::hdf5::InnerVlenStringDdl(), H5::PredType::NATIVE_INT32), value);
 }
 
+void MapsWriter::WriteIntToStringImpl(std::unordered_map<int32_t, std::string> const& value) {
+  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerMap<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string>, std::unordered_map<int32_t, std::string>>(group_, "intToString", yardl::hdf5::InnerMapDdl<int32_t, yardl::hdf5::InnerVlenString>(H5::PredType::NATIVE_INT32, yardl::hdf5::InnerVlenStringDdl()), value);
+}
+
 void MapsWriter::WriteStringToUnionImpl(std::unordered_map<std::string, std::variant<std::string, int32_t>> const& value) {
   yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerMap<yardl::hdf5::InnerVlenString, std::string, ::InnerUnion2<yardl::hdf5::InnerVlenString, std::string, int32_t, int32_t>, std::variant<std::string, int32_t>>, std::unordered_map<std::string, std::variant<std::string, int32_t>>>(group_, "stringToUnion", yardl::hdf5::InnerMapDdl<yardl::hdf5::InnerVlenString, ::InnerUnion2<yardl::hdf5::InnerVlenString, std::string, int32_t, int32_t>>(yardl::hdf5::InnerVlenStringDdl(), ::InnerUnion2Ddl<yardl::hdf5::InnerVlenString, std::string, int32_t, int32_t>(false, yardl::hdf5::InnerVlenStringDdl(), "string", H5::PredType::NATIVE_INT32, "int32")), value);
 }
@@ -1996,6 +2000,10 @@ MapsReader::MapsReader(std::string path)
 
 void MapsReader::ReadStringToIntImpl(std::unordered_map<std::string, int32_t>& value) {
   yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerMap<yardl::hdf5::InnerVlenString, std::string, int32_t, int32_t>, std::unordered_map<std::string, int32_t>>(group_, "stringToInt", yardl::hdf5::InnerMapDdl<yardl::hdf5::InnerVlenString, int32_t>(yardl::hdf5::InnerVlenStringDdl(), H5::PredType::NATIVE_INT32), value);
+}
+
+void MapsReader::ReadIntToStringImpl(std::unordered_map<int32_t, std::string>& value) {
+  yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerMap<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string>, std::unordered_map<int32_t, std::string>>(group_, "intToString", yardl::hdf5::InnerMapDdl<int32_t, yardl::hdf5::InnerVlenString>(H5::PredType::NATIVE_INT32, yardl::hdf5::InnerVlenStringDdl()), value);
 }
 
 void MapsReader::ReadStringToUnionImpl(std::unordered_map<std::string, std::variant<std::string, int32_t>>& value) {

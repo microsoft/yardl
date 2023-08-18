@@ -3492,14 +3492,14 @@ class MapsWriterBase(abc.ABC):
     def __init__(self) -> None:
         self._state = 0
 
-    schema = r"""{"protocol":{"name":"Maps","sequence":[{"name":"stringToInt","type":{"map":{"keys":"string","values":"int32"}}},{"name":"stringToUnion","type":{"map":{"keys":"string","values":[{"tag":"string","type":"string"},{"tag":"int32","type":"int32"}]}}},{"name":"aliasedGeneric","type":{"name":"TestModel.AliasedMap","typeArguments":["string","int32"]}}]},"types":[{"name":"AliasedMap","typeParameters":["K","V"],"type":{"map":{"keys":"K","values":"V"}}}]}"""
+    schema = r"""{"protocol":{"name":"Maps","sequence":[{"name":"stringToInt","type":{"map":{"keys":"string","values":"int32"}}},{"name":"intToString","type":{"map":{"keys":"int32","values":"string"}}},{"name":"stringToUnion","type":{"map":{"keys":"string","values":[{"tag":"string","type":"string"},{"tag":"int32","type":"int32"}]}}},{"name":"aliasedGeneric","type":{"name":"TestModel.AliasedMap","typeArguments":["string","int32"]}}]},"types":[{"name":"AliasedMap","typeParameters":["K","V"],"type":{"map":{"keys":"K","values":"V"}}}]}"""
 
     def __enter__(self):
         return self
 
     def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
-        if exc is None and self._state != 6:
+        if exc is None and self._state != 8:
             expected_method = self._state_to_method_name((self._state + 1) & ~1)
             raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
 
@@ -3512,26 +3512,39 @@ class MapsWriterBase(abc.ABC):
         self._write_string_to_int(value)
         self._state = 2
 
-    def write_string_to_union(self, value: dict[str, StringOrInt32]) -> None:
+    def write_int_to_string(self, value: dict[yardl.Int32, str]) -> None:
         """Ordinal 1"""
 
         if self._state != 2:
             self._raise_unexpected_state(2)
 
-        self._write_string_to_union(value)
+        self._write_int_to_string(value)
         self._state = 4
 
-    def write_aliased_generic(self, value: AliasedMap[str, yardl.Int32]) -> None:
+    def write_string_to_union(self, value: dict[str, StringOrInt32]) -> None:
         """Ordinal 2"""
 
         if self._state != 4:
             self._raise_unexpected_state(4)
 
-        self._write_aliased_generic(value)
+        self._write_string_to_union(value)
         self._state = 6
+
+    def write_aliased_generic(self, value: AliasedMap[str, yardl.Int32]) -> None:
+        """Ordinal 3"""
+
+        if self._state != 6:
+            self._raise_unexpected_state(6)
+
+        self._write_aliased_generic(value)
+        self._state = 8
 
     @abc.abstractmethod
     def _write_string_to_int(self, value: dict[str, yardl.Int32]) -> None:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _write_int_to_string(self, value: dict[yardl.Int32, str]) -> None:
         raise NotImplementedError()
 
     @abc.abstractmethod
@@ -3559,8 +3572,10 @@ class MapsWriterBase(abc.ABC):
         if state == 0:
             return 'write_string_to_int'
         if state == 2:
-            return 'write_string_to_union'
+            return 'write_int_to_string'
         if state == 4:
+            return 'write_string_to_union'
+        if state == 6:
             return 'write_aliased_generic'
         return "<unknown>"
 
@@ -3578,7 +3593,7 @@ class MapsReaderBase(abc.ABC):
 
     def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
         self.close()
-        if exc is None and self._state != 6:
+        if exc is None and self._state != 8:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
@@ -3601,33 +3616,48 @@ class MapsReaderBase(abc.ABC):
         self._state = 2
         return value
 
-    def read_string_to_union(self) -> dict[str, StringOrInt32]:
+    def read_int_to_string(self) -> dict[yardl.Int32, str]:
         """Ordinal 1"""
 
         if self._state != 2:
             self._raise_unexpected_state(2)
 
-        value = self._read_string_to_union()
+        value = self._read_int_to_string()
         self._state = 4
         return value
 
-    def read_aliased_generic(self) -> AliasedMap[str, yardl.Int32]:
+    def read_string_to_union(self) -> dict[str, StringOrInt32]:
         """Ordinal 2"""
 
         if self._state != 4:
             self._raise_unexpected_state(4)
 
-        value = self._read_aliased_generic()
+        value = self._read_string_to_union()
         self._state = 6
+        return value
+
+    def read_aliased_generic(self) -> AliasedMap[str, yardl.Int32]:
+        """Ordinal 3"""
+
+        if self._state != 6:
+            self._raise_unexpected_state(6)
+
+        value = self._read_aliased_generic()
+        self._state = 8
         return value
 
     def copy_to(self, writer: MapsWriterBase) -> None:
         writer.write_string_to_int(self.read_string_to_int())
+        writer.write_int_to_string(self.read_int_to_string())
         writer.write_string_to_union(self.read_string_to_union())
         writer.write_aliased_generic(self.read_aliased_generic())
 
     @abc.abstractmethod
     def _read_string_to_int(self) -> dict[str, yardl.Int32]:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _read_int_to_string(self) -> dict[yardl.Int32, str]:
         raise NotImplementedError()
 
     @abc.abstractmethod
@@ -3656,8 +3686,10 @@ class MapsReaderBase(abc.ABC):
         if state == 0:
             return 'read_string_to_int'
         if state == 2:
-            return 'read_string_to_union'
+            return 'read_int_to_string'
         if state == 4:
+            return 'read_string_to_union'
+        if state == 6:
             return 'read_aliased_generic'
         return "<unknown>"
 

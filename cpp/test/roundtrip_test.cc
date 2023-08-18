@@ -367,6 +367,7 @@ TEST_P(RoundTripTests, Maps) {
   auto tw = CreateValidatingWriter<MapsWriterBase>();
 
   tw->WriteStringToInt({{"a", 1}, {"b", 2}, {"c", 3}});
+  tw->WriteIntToString({{1, "a"}, {2, "b"}, {3, "c"}});
   tw->WriteStringToUnion({{"a", 1}, {"b", "2"}});
   tw->WriteAliasedGeneric({{"a", 1}, {"b", 2}, {"c", 3}});
 

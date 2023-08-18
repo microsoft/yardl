@@ -12,6 +12,7 @@ import (
 	"github.com/microsoft/yardl/tooling/internal/iocommon"
 	"github.com/microsoft/yardl/tooling/internal/python/binary"
 	"github.com/microsoft/yardl/tooling/internal/python/common"
+	"github.com/microsoft/yardl/tooling/internal/python/ndjson"
 	"github.com/microsoft/yardl/tooling/internal/python/protocols"
 	"github.com/microsoft/yardl/tooling/internal/python/types"
 	"github.com/microsoft/yardl/tooling/pkg/dsl"
@@ -63,6 +64,10 @@ func writeNamespace(ns *dsl.Namespace, st dsl.SymbolTable, options packaging.Pyt
 	}
 
 	if err := binary.WriteBinary(ns, packageDir); err != nil {
+		return err
+	}
+
+	if err := ndjson.WriteNDJson(ns, packageDir); err != nil {
 		return err
 	}
 
@@ -143,6 +148,23 @@ func writePackageInitFile(packageDir string, ns *dsl.Namespace) error {
 		})
 
 		fmt.Fprintf(w, "from .binary import (\n")
+		w.Indented(func() {
+			for _, p := range protocolsMembers {
+				fmt.Fprintf(w, "%s,\n", p)
+			}
+		})
+		fmt.Fprintf(w, ")\n")
+
+		for i, p := range ns.Protocols {
+			protocolsMembers[i*2] = ndjson.NDJsonWriterName(p)
+			protocolsMembers[i*2+1] = ndjson.NDJsonReaderName(p)
+		}
+
+		sort.Slice(protocolsMembers, func(i, j int) bool {
+			return protocolsMembers[i] < protocolsMembers[j]
+		})
+
+		fmt.Fprintf(w, "from .ndjson import (\n")
 		w.Indented(func() {
 			for _, p := range protocolsMembers {
 				fmt.Fprintf(w, "%s,\n", p)
