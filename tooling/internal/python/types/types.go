@@ -141,10 +141,9 @@ func writeRecord(w *formatting.IndentedWriter, rec *dsl.RecordDefinition, st dsl
 	w.Indented(func() {
 		common.WriteDocstring(w, rec.Comment)
 		for _, field := range rec.Fields {
-			fmt.Fprintf(w, "%s: %s", common.FieldIdentifierName(field.Name), common.TypeSyntax(field.Type, rec.Namespace))
+			fmt.Fprintf(w, "%s: %s\n", common.FieldIdentifierName(field.Name), common.TypeSyntax(field.Type, rec.Namespace))
 
 			common.WriteDocstring(w, field.Comment)
-			w.WriteStringln("")
 		}
 		w.WriteStringln("")
 
