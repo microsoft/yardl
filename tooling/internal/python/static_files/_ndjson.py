@@ -80,10 +80,7 @@ class NDJsonProtocolReader:
             self._stream = open(stream, "r", encoding="utf-8")
             self._owns_stream = True
         else:
-            if not isinstance(stream, BufferedIOBase):
-                self._stream = io.BufferedReader(stream)  # type: ignore
-            else:
-                self._stream = stream
+            self._stream = stream
             self._owns_stream = False
 
         self._unused_value: Optional[dict[str, object]] = None
@@ -131,7 +128,7 @@ class NDJsonProtocolReader:
         line = self._stream.readline()
         if line == "":
             if not required:
-                return None
+                return MISSING_SENTINEL
             raise ValueError(
                 f"Encountered EOF but expected to find protocol step '{stepName}'."
             )
@@ -142,7 +139,7 @@ class NDJsonProtocolReader:
 
         if not required:
             self._unused_value = json_object
-            return None
+            return MISSING_SENTINEL
 
         raise ValueError(f"Expected protocol step '{stepName}' not found.")
 
@@ -510,7 +507,7 @@ class Complex32Converter(JsonConverter[complex, np.complex64]):
         return np.complex64(self.from_json(json_object))
 
 
-complex32_converter = Complex32Converter()
+complexfloat32_converter = Complex32Converter()
 
 
 class Complex64Converter(JsonConverter[complex, np.complex128]):
@@ -536,7 +533,7 @@ class Complex64Converter(JsonConverter[complex, np.complex128]):
         return np.complex128(self.from_json(json_object))
 
 
-complex64_converter = Complex64Converter()
+complexfloat64_converter = Complex64Converter()
 
 
 class StringConverter(JsonConverter[str, np.object_]):
@@ -630,7 +627,7 @@ class DateTimeConverter(JsonConverter[DateTime, np.datetime64]):
         return self.from_json(json_object).numpy_value
 
 
-date_converter = DateConverter()
+datetime_converter = DateTimeConverter()
 
 TEnum = TypeVar("TEnum", bound=OutOfRangeEnum)
 

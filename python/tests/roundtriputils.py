@@ -1,3 +1,4 @@
+from enum import Enum
 import inspect
 import io
 import pathlib
@@ -10,31 +11,62 @@ from test_model._binary import BinaryProtocolWriter
 
 # pyright: basic
 
+
+class Format(Enum):
+    BINARY = 0
+    NDJSON = 1
+
+    def __str__(self) -> str:
+        return self.name.lower()
+
+
 _translator_path = (
     pathlib.Path(__file__).parent / "../../cpp/build/translator"
 ).resolve()
 
 
-def invoke_translator(py_buf: bytes) -> bytes:
+def invoke_translator(
+    input: bytes | str, input_format: Format, output_format: Format
+) -> bytes | str:
+    if isinstance(input, str):
+        print(input)
+        input = input.encode("utf-8")
+
     with subprocess.Popen(
-        [_translator_path, "binary", "binary"],
+        [_translator_path, str(input_format), str(output_format)],
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
     ) as proc:
-        cpp_output = proc.communicate(input=py_buf)[0]
+        cpp_output = proc.communicate(input=input)[0]
         assert proc.wait() == 0, "translator failed"
+        if output_format == Format.NDJSON:
+            cpp_output = cpp_output.decode("utf-8")
         return cpp_output
 
 
 # base writer type -> (derived writer type, derived reader type)
 _type_map = {
     base: (
-        derived,
-        cast(
-            type,
-            getattr(
-                inspect.getmodule(derived),
-                derived.__name__.removesuffix("Writer") + "Reader",
+        (
+            derived,
+            cast(
+                type,
+                getattr(
+                    tm,
+                    derived.__name__.removesuffix("Writer") + "Reader",
+                ),
+            ),
+        ),
+        (
+            cast(type, getattr(tm, "NDJson" + derived.__name__.removeprefix("Binary"))),
+            cast(
+                type,
+                getattr(
+                    tm,
+                    "NDJson"
+                    + derived.__name__.removeprefix("Binary").removesuffix("Writer")
+                    + "Reader",
+                ),
             ),
         ),
     )
@@ -56,9 +88,10 @@ T = TypeVar("T")
 
 
 def create_validating_writer_class(
-    base_class: type[T],
+    format: Format, base_class: type[T]
 ) -> Callable[[], T]:
-    writer_class, reader_class = _type_map[base_class]
+    writer_class, reader_class = _type_map[base_class][format.value]
+    in_memory_stream_class = io.BytesIO if format == Format.BINARY else io.StringIO
 
     write_methods = [
         cast(types.FunctionType, attr)
@@ -143,16 +176,16 @@ def create_validating_writer_class(
 
             self = args[0]
             this_buffer = self._buffer.getvalue()
-            validating_instance = validating_class(io.BytesIO())
+            validating_instance = validating_class(in_memory_stream_class())
             validating_instance._recorded_arguments = (  # pyright: ignore[reportGeneralTypeIssues]
                 self._recorded_arguments
             )
 
-            reader = reader_class(io.BytesIO(this_buffer))
+            reader = reader_class(in_memory_stream_class(this_buffer))
             reader.copy_to(validating_instance)
 
-            cpp_output = invoke_translator(this_buffer)
-            reader = reader_class(io.BytesIO(cpp_output))
+            cpp_output = invoke_translator(this_buffer, format, format)
+            reader = reader_class(in_memory_stream_class(cpp_output))
             reader.copy_to(validating_instance)
 
             return result
@@ -162,7 +195,7 @@ def create_validating_writer_class(
         def init_wrapper(*args, **kwargs):
             recorded_args = {}
             args[0]._recorded_arguments = recorded_args
-            buf = io.BytesIO()
+            buf = in_memory_stream_class()
             args[0]._buffer = buf
             return writer_class.__init__(
                 args[0], buf, **kwargs

@@ -47,6 +47,12 @@ class SmallBenchmarkRecord:
             and self.c == other.c
         )
 
+    def __str__(self) -> str:
+        return f"SmallBenchmarkRecord(a={self.a}, b={self.b}, c={self.c})"
+
+    def __repr__(self) -> str:
+        return f"SmallBenchmarkRecord(a={repr(self.a)}, b={repr(self.b)}, c={repr(self.c)})"
+
 
 class SimpleEncodingCounters:
     e1: typing.Optional[yardl.UInt32]
@@ -73,6 +79,12 @@ class SimpleEncodingCounters:
             and self.slice == other.slice
             and self.repetition == other.repetition
         )
+
+    def __str__(self) -> str:
+        return f"SimpleEncodingCounters(e1={self.e1}, e2={self.e2}, slice={self.slice}, repetition={self.repetition})"
+
+    def __repr__(self) -> str:
+        return f"SimpleEncodingCounters(e1={repr(self.e1)}, e2={repr(self.e2)}, slice={repr(self.slice)}, repetition={repr(self.repetition)})"
 
 
 class SimpleAcquisition:
@@ -101,6 +113,12 @@ class SimpleAcquisition:
             and yardl.structural_equal(self.trajectory, other.trajectory)
         )
 
+    def __str__(self) -> str:
+        return f"SimpleAcquisition(flags={self.flags}, idx={self.idx}, data={self.data}, trajectory={self.trajectory})"
+
+    def __repr__(self) -> str:
+        return f"SimpleAcquisition(flags={repr(self.flags)}, idx={repr(self.idx)}, data={repr(self.data)}, trajectory={repr(self.trajectory)})"
+
 
 class SimpleRecord:
     x: yardl.Int32
@@ -123,6 +141,12 @@ class SimpleRecord:
             and self.y == other.y
             and self.z == other.z
         )
+
+    def __str__(self) -> str:
+        return f"SimpleRecord(x={self.x}, y={self.y}, z={self.z})"
+
+    def __repr__(self) -> str:
+        return f"SimpleRecord(x={repr(self.x)}, y={repr(self.y)}, z={repr(self.z)})"
 
 
 class RecordWithPrimitives:
@@ -203,6 +227,12 @@ class RecordWithPrimitives:
             and self.datetime_field == other.datetime_field
         )
 
+    def __str__(self) -> str:
+        return f"RecordWithPrimitives(boolField={self.bool_field}, int8Field={self.int8_field}, uint8Field={self.uint8_field}, int16Field={self.int16_field}, uint16Field={self.uint16_field}, int32Field={self.int32_field}, uint32Field={self.uint32_field}, int64Field={self.int64_field}, uint64Field={self.uint64_field}, sizeField={self.size_field}, float32Field={self.float32_field}, float64Field={self.float64_field}, complexfloat32Field={self.complexfloat32_field}, complexfloat64Field={self.complexfloat64_field}, dateField={self.date_field}, timeField={self.time_field}, datetimeField={self.datetime_field})"
+
+    def __repr__(self) -> str:
+        return f"RecordWithPrimitives(boolField={repr(self.bool_field)}, int8Field={repr(self.int8_field)}, uint8Field={repr(self.uint8_field)}, int16Field={repr(self.int16_field)}, uint16Field={repr(self.uint16_field)}, int32Field={repr(self.int32_field)}, uint32Field={repr(self.uint32_field)}, int64Field={repr(self.int64_field)}, uint64Field={repr(self.uint64_field)}, sizeField={repr(self.size_field)}, float32Field={repr(self.float32_field)}, float64Field={repr(self.float64_field)}, complexfloat32Field={repr(self.complexfloat32_field)}, complexfloat64Field={repr(self.complexfloat64_field)}, dateField={repr(self.date_field)}, timeField={repr(self.time_field)}, datetimeField={repr(self.datetime_field)})"
+
 
 class RecordWithPrimitiveAliases:
     byte_field: yardl.UInt8
@@ -250,6 +280,12 @@ class RecordWithPrimitiveAliases:
             and self.complexdouble_field == other.complexdouble_field
         )
 
+    def __str__(self) -> str:
+        return f"RecordWithPrimitiveAliases(byteField={self.byte_field}, intField={self.int_field}, uintField={self.uint_field}, longField={self.long_field}, ulongField={self.ulong_field}, floatField={self.float_field}, doubleField={self.double_field}, complexfloatField={self.complexfloat_field}, complexdoubleField={self.complexdouble_field})"
+
+    def __repr__(self) -> str:
+        return f"RecordWithPrimitiveAliases(byteField={repr(self.byte_field)}, intField={repr(self.int_field)}, uintField={repr(self.uint_field)}, longField={repr(self.long_field)}, ulongField={repr(self.ulong_field)}, floatField={repr(self.float_field)}, doubleField={repr(self.double_field)}, complexfloatField={repr(self.complexfloat_field)}, complexdoubleField={repr(self.complexdouble_field)})"
+
 
 class TupleWithRecords:
     a: SimpleRecord
@@ -268,6 +304,12 @@ class TupleWithRecords:
             and self.a == other.a
             and self.b == other.b
         )
+
+    def __str__(self) -> str:
+        return f"TupleWithRecords(a={self.a}, b={self.b})"
+
+    def __repr__(self) -> str:
+        return f"TupleWithRecords(a={repr(self.a)}, b={repr(self.b)})"
 
 
 class RecordWithVectors:
@@ -292,6 +334,12 @@ class RecordWithVectors:
             and self.vector_of_vectors == other.vector_of_vectors
         )
 
+    def __str__(self) -> str:
+        return f"RecordWithVectors(defaultVector={self.default_vector}, defaultVectorFixedLength={self.default_vector_fixed_length}, vectorOfVectors={self.vector_of_vectors})"
+
+    def __repr__(self) -> str:
+        return f"RecordWithVectors(defaultVector={repr(self.default_vector)}, defaultVectorFixedLength={repr(self.default_vector_fixed_length)}, vectorOfVectors={repr(self.vector_of_vectors)})"
+
 
 class RecordWithVectorOfTimes:
     times: list[yardl.Time]
@@ -306,6 +354,12 @@ class RecordWithVectorOfTimes:
             isinstance(other, RecordWithVectorOfTimes)
             and self.times == other.times
         )
+
+    def __str__(self) -> str:
+        return f"RecordWithVectorOfTimes(times={self.times})"
+
+    def __repr__(self) -> str:
+        return f"RecordWithVectorOfTimes(times={repr(self.times)})"
 
 
 class RecordWithArrays:
@@ -354,6 +408,12 @@ class RecordWithArrays:
             and yardl.structural_equal(self.array_of_vectors, other.array_of_vectors)
         )
 
+    def __str__(self) -> str:
+        return f"RecordWithArrays(defaultArray={self.default_array}, defaultArrayWithEmptyDimension={self.default_array_with_empty_dimension}, rank1Array={self.rank_1_array}, rank2Array={self.rank_2_array}, rank2ArrayWithNamedDimensions={self.rank_2_array_with_named_dimensions}, rank2FixedArray={self.rank_2_fixed_array}, rank2FixedArrayWithNamedDimensions={self.rank_2_fixed_array_with_named_dimensions}, dynamicArray={self.dynamic_array}, arrayOfVectors={self.array_of_vectors})"
+
+    def __repr__(self) -> str:
+        return f"RecordWithArrays(defaultArray={repr(self.default_array)}, defaultArrayWithEmptyDimension={repr(self.default_array_with_empty_dimension)}, rank1Array={repr(self.rank_1_array)}, rank2Array={repr(self.rank_2_array)}, rank2ArrayWithNamedDimensions={repr(self.rank_2_array_with_named_dimensions)}, rank2FixedArray={repr(self.rank_2_fixed_array)}, rank2FixedArrayWithNamedDimensions={repr(self.rank_2_fixed_array_with_named_dimensions)}, dynamicArray={repr(self.dynamic_array)}, arrayOfVectors={repr(self.array_of_vectors)})"
+
 
 class RecordWithArraysSimpleSyntax:
     default_array: npt.NDArray[np.int32]
@@ -401,6 +461,12 @@ class RecordWithArraysSimpleSyntax:
             and yardl.structural_equal(self.array_of_vectors, other.array_of_vectors)
         )
 
+    def __str__(self) -> str:
+        return f"RecordWithArraysSimpleSyntax(defaultArray={self.default_array}, defaultArrayWithEmptyDimension={self.default_array_with_empty_dimension}, rank1Array={self.rank_1_array}, rank2Array={self.rank_2_array}, rank2ArrayWithNamedDimensions={self.rank_2_array_with_named_dimensions}, rank2FixedArray={self.rank_2_fixed_array}, rank2FixedArrayWithNamedDimensions={self.rank_2_fixed_array_with_named_dimensions}, dynamicArray={self.dynamic_array}, arrayOfVectors={self.array_of_vectors})"
+
+    def __repr__(self) -> str:
+        return f"RecordWithArraysSimpleSyntax(defaultArray={repr(self.default_array)}, defaultArrayWithEmptyDimension={repr(self.default_array_with_empty_dimension)}, rank1Array={repr(self.rank_1_array)}, rank2Array={repr(self.rank_2_array)}, rank2ArrayWithNamedDimensions={repr(self.rank_2_array_with_named_dimensions)}, rank2FixedArray={repr(self.rank_2_fixed_array)}, rank2FixedArrayWithNamedDimensions={repr(self.rank_2_fixed_array_with_named_dimensions)}, dynamicArray={repr(self.dynamic_array)}, arrayOfVectors={repr(self.array_of_vectors)})"
+
 
 class RecordWithOptionalFields:
     optional_int: typing.Optional[yardl.Int32]
@@ -423,6 +489,12 @@ class RecordWithOptionalFields:
             and self.optional_int_alternate_syntax == other.optional_int_alternate_syntax
             and self.optional_time == other.optional_time
         )
+
+    def __str__(self) -> str:
+        return f"RecordWithOptionalFields(optionalInt={self.optional_int}, optionalIntAlternateSyntax={self.optional_int_alternate_syntax}, optionalTime={self.optional_time})"
+
+    def __repr__(self) -> str:
+        return f"RecordWithOptionalFields(optionalInt={repr(self.optional_int)}, optionalIntAlternateSyntax={repr(self.optional_int_alternate_syntax)}, optionalTime={repr(self.optional_time)})"
 
 
 class RecordWithVlens:
@@ -447,6 +519,12 @@ class RecordWithVlens:
             and self.c == other.c
         )
 
+    def __str__(self) -> str:
+        return f"RecordWithVlens(a={self.a}, b={self.b}, c={self.c})"
+
+    def __repr__(self) -> str:
+        return f"RecordWithVlens(a={repr(self.a)}, b={repr(self.b)}, c={repr(self.c)})"
+
 
 class RecordWithStrings:
     a: str
@@ -466,6 +544,12 @@ class RecordWithStrings:
             and self.b == other.b
         )
 
+    def __str__(self) -> str:
+        return f"RecordWithStrings(a={self.a}, b={self.b})"
+
+    def __repr__(self) -> str:
+        return f"RecordWithStrings(a={repr(self.a)}, b={repr(self.b)})"
+
 
 class RecordWithOptionalVector:
     optional_vector: typing.Optional[list[yardl.Int32]]
@@ -480,6 +564,12 @@ class RecordWithOptionalVector:
             isinstance(other, RecordWithOptionalVector)
             and self.optional_vector == other.optional_vector
         )
+
+    def __str__(self) -> str:
+        return f"RecordWithOptionalVector(optionalVector={self.optional_vector})"
+
+    def __repr__(self) -> str:
+        return f"RecordWithOptionalVector(optionalVector={repr(self.optional_vector)})"
 
 
 class RecordWithFixedVectors:
@@ -504,6 +594,12 @@ class RecordWithFixedVectors:
             and self.fixed_record_with_vlens_vector == other.fixed_record_with_vlens_vector
         )
 
+    def __str__(self) -> str:
+        return f"RecordWithFixedVectors(fixedIntVector={self.fixed_int_vector}, fixedSimpleRecordVector={self.fixed_simple_record_vector}, fixedRecordWithVlensVector={self.fixed_record_with_vlens_vector})"
+
+    def __repr__(self) -> str:
+        return f"RecordWithFixedVectors(fixedIntVector={repr(self.fixed_int_vector)}, fixedSimpleRecordVector={repr(self.fixed_simple_record_vector)}, fixedRecordWithVlensVector={repr(self.fixed_record_with_vlens_vector)})"
+
 
 class RecordWithFixedArrays:
     ints: npt.NDArray[np.int32]
@@ -526,6 +622,12 @@ class RecordWithFixedArrays:
             and yardl.structural_equal(self.fixed_simple_record_array, other.fixed_simple_record_array)
             and yardl.structural_equal(self.fixed_record_with_vlens_array, other.fixed_record_with_vlens_array)
         )
+
+    def __str__(self) -> str:
+        return f"RecordWithFixedArrays(ints={self.ints}, fixedSimpleRecordArray={self.fixed_simple_record_array}, fixedRecordWithVlensArray={self.fixed_record_with_vlens_array})"
+
+    def __repr__(self) -> str:
+        return f"RecordWithFixedArrays(ints={repr(self.ints)}, fixedSimpleRecordArray={repr(self.fixed_simple_record_array)}, fixedRecordWithVlensArray={repr(self.fixed_record_with_vlens_array)})"
 
 
 class RecordWithNDArrays:
@@ -550,6 +652,12 @@ class RecordWithNDArrays:
             and yardl.structural_equal(self.fixed_record_with_vlens_array, other.fixed_record_with_vlens_array)
         )
 
+    def __str__(self) -> str:
+        return f"RecordWithNDArrays(ints={self.ints}, fixedSimpleRecordArray={self.fixed_simple_record_array}, fixedRecordWithVlensArray={self.fixed_record_with_vlens_array})"
+
+    def __repr__(self) -> str:
+        return f"RecordWithNDArrays(ints={repr(self.ints)}, fixedSimpleRecordArray={repr(self.fixed_simple_record_array)}, fixedRecordWithVlensArray={repr(self.fixed_record_with_vlens_array)})"
+
 
 class RecordWithNDArraysSingleDimension:
     ints: npt.NDArray[np.int32]
@@ -572,6 +680,12 @@ class RecordWithNDArraysSingleDimension:
             and yardl.structural_equal(self.fixed_simple_record_array, other.fixed_simple_record_array)
             and yardl.structural_equal(self.fixed_record_with_vlens_array, other.fixed_record_with_vlens_array)
         )
+
+    def __str__(self) -> str:
+        return f"RecordWithNDArraysSingleDimension(ints={self.ints}, fixedSimpleRecordArray={self.fixed_simple_record_array}, fixedRecordWithVlensArray={self.fixed_record_with_vlens_array})"
+
+    def __repr__(self) -> str:
+        return f"RecordWithNDArraysSingleDimension(ints={repr(self.ints)}, fixedSimpleRecordArray={repr(self.fixed_simple_record_array)}, fixedRecordWithVlensArray={repr(self.fixed_record_with_vlens_array)})"
 
 
 class RecordWithDynamicNDArrays:
@@ -596,6 +710,12 @@ class RecordWithDynamicNDArrays:
             and yardl.structural_equal(self.record_with_vlens_array, other.record_with_vlens_array)
         )
 
+    def __str__(self) -> str:
+        return f"RecordWithDynamicNDArrays(ints={self.ints}, simpleRecordArray={self.simple_record_array}, recordWithVlensArray={self.record_with_vlens_array})"
+
+    def __repr__(self) -> str:
+        return f"RecordWithDynamicNDArrays(ints={repr(self.ints)}, simpleRecordArray={repr(self.simple_record_array)}, recordWithVlensArray={repr(self.record_with_vlens_array)})"
+
 
 NamedFixedNDArray = npt.NDArray[np.int32]
 
@@ -617,6 +737,12 @@ class RecordWithFixedCollections:
             and yardl.structural_equal(self.fixed_array, other.fixed_array)
         )
 
+    def __str__(self) -> str:
+        return f"RecordWithFixedCollections(fixedVector={self.fixed_vector}, fixedArray={self.fixed_array})"
+
+    def __repr__(self) -> str:
+        return f"RecordWithFixedCollections(fixedVector={repr(self.fixed_vector)}, fixedArray={repr(self.fixed_array)})"
+
 
 class RecordWithVlenCollections:
     vector: list[yardl.Int32]
@@ -635,6 +761,12 @@ class RecordWithVlenCollections:
             and self.vector == other.vector
             and yardl.structural_equal(self.array, other.array)
         )
+
+    def __str__(self) -> str:
+        return f"RecordWithVlenCollections(vector={self.vector}, array={self.array})"
+
+    def __repr__(self) -> str:
+        return f"RecordWithVlenCollections(vector={repr(self.vector)}, array={repr(self.array)})"
 
 
 NamedNDArray = npt.NDArray[np.int32]
@@ -682,6 +814,12 @@ class RecordWithUnions:
             and self.null_or_int_or_string == other.null_or_int_or_string
             and self.date_or_datetime == other.date_or_datetime
         )
+
+    def __str__(self) -> str:
+        return f"RecordWithUnions(nullOrIntOrString={self.null_or_int_or_string}, dateOrDatetime={self.date_or_datetime})"
+
+    def __repr__(self) -> str:
+        return f"RecordWithUnions(nullOrIntOrString={repr(self.null_or_int_or_string)}, dateOrDatetime={repr(self.date_or_datetime)})"
 
 
 class Fruits(yardl.OutOfRangeEnum):
@@ -754,6 +892,12 @@ class RecordWithEnums:
             and self.flags_2 == other.flags_2
         )
 
+    def __str__(self) -> str:
+        return f"RecordWithEnums(enum={self.enum}, flags={self.flags}, flags2={self.flags_2})"
+
+    def __repr__(self) -> str:
+        return f"RecordWithEnums(enum={repr(self.enum)}, flags={repr(self.flags)}, flags2={repr(self.flags_2)})"
+
 
 Image = npt.NDArray[T_NP]
 
@@ -783,6 +927,12 @@ class GenericRecord(typing.Generic[T1, T2, T2_NP]):
             and yardl.structural_equal(self.image_2, other.image_2)
         )
 
+    def __str__(self) -> str:
+        return f"GenericRecord(scalar1={self.scalar_1}, scalar2={self.scalar_2}, vector1={self.vector_1}, image2={self.image_2})"
+
+    def __repr__(self) -> str:
+        return f"GenericRecord(scalar1={repr(self.scalar_1)}, scalar2={repr(self.scalar_2)}, vector1={repr(self.vector_1)}, image2={repr(self.image_2)})"
+
 
 class MyTuple(typing.Generic[T1, T2]):
     v1: T1
@@ -801,6 +951,12 @@ class MyTuple(typing.Generic[T1, T2]):
             and yardl.structural_equal(self.v1, other.v1)
             and yardl.structural_equal(self.v2, other.v2)
         )
+
+    def __str__(self) -> str:
+        return f"MyTuple(v1={self.v1}, v2={self.v2})"
+
+    def __repr__(self) -> str:
+        return f"MyTuple(v1={repr(self.v1)}, v2={repr(self.v2)})"
 
 
 AliasedString = str
@@ -884,6 +1040,12 @@ class GenericRecordWithComputedFields(typing.Generic[T0, T1]):
             isinstance(other, GenericRecordWithComputedFields)
             and yardl.structural_equal(self.f1, other.f1)
         )
+
+    def __str__(self) -> str:
+        return f"GenericRecordWithComputedFields(f1={self.f1})"
+
+    def __repr__(self) -> str:
+        return f"GenericRecordWithComputedFields(f1={repr(self.f1)})"
 
 
 class Int32OrFloat32:
@@ -1185,6 +1347,12 @@ class RecordWithComputedFields:
             and self.map_field == other.map_field
         )
 
+    def __str__(self) -> str:
+        return f"RecordWithComputedFields(arrayField={self.array_field}, arrayFieldMapDimensions={self.array_field_map_dimensions}, dynamicArrayField={self.dynamic_array_field}, fixedArrayField={self.fixed_array_field}, intField={self.int_field}, stringField={self.string_field}, tupleField={self.tuple_field}, vectorField={self.vector_field}, vectorOfVectorsField={self.vector_of_vectors_field}, fixedVectorField={self.fixed_vector_field}, optionalNamedArray={self.optional_named_array}, intFloatUnion={self.int_float_union}, nullableIntFloatUnion={self.nullable_int_float_union}, unionWithNestedGenericUnion={self.union_with_nested_generic_union}, mapField={self.map_field})"
+
+    def __repr__(self) -> str:
+        return f"RecordWithComputedFields(arrayField={repr(self.array_field)}, arrayFieldMapDimensions={repr(self.array_field_map_dimensions)}, dynamicArrayField={repr(self.dynamic_array_field)}, fixedArrayField={repr(self.fixed_array_field)}, intField={repr(self.int_field)}, stringField={repr(self.string_field)}, tupleField={repr(self.tuple_field)}, vectorField={repr(self.vector_field)}, vectorOfVectorsField={repr(self.vector_of_vectors_field)}, fixedVectorField={repr(self.fixed_vector_field)}, optionalNamedArray={repr(self.optional_named_array)}, intFloatUnion={repr(self.int_float_union)}, nullableIntFloatUnion={repr(self.nullable_int_float_union)}, unionWithNestedGenericUnion={repr(self.union_with_nested_generic_union)}, mapField={repr(self.map_field)})"
+
 
 ArrayWithKeywordDimensionNames = npt.NDArray[np.int32]
 
@@ -1222,6 +1390,12 @@ class RecordWithKeywordFields:
             and yardl.structural_equal(self.sizeof, other.sizeof)
             and self.if_ == other.if_
         )
+
+    def __str__(self) -> str:
+        return f"RecordWithKeywordFields(int={self.int_}, sizeof={self.sizeof}, if={self.if_})"
+
+    def __repr__(self) -> str:
+        return f"RecordWithKeywordFields(int={repr(self.int_)}, sizeof={repr(self.sizeof)}, if={repr(self.if_)})"
 
 
 class AcquisitionOrImage:

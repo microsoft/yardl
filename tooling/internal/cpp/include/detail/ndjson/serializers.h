@@ -168,12 +168,12 @@ struct adl_serializer<yardl::Time> {
 template <>
 struct adl_serializer<yardl::DateTime> {
   static void to_json(ordered_json& j, yardl::DateTime const& value) {
-    j = date::format("%FT%TZ", value);
+    j = date::format("%FT%T", value);
   }
 
   static void from_json(ordered_json const& j, yardl::DateTime& value) {
     std::stringstream ss{j.get<std::string>()};
-    ss >> date::parse("%FT%TZ", value);
+    ss >> date::parse("%FT%T", value);
     if (ss.fail()) {
       throw std::runtime_error("invalid datetime format");
     }

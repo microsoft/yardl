@@ -1,15 +1,24 @@
 import datetime
 import re
+from typing import Callable, TypeVar
 
 import numpy as np
 import pytest
 
 import test_model as tm
-from .roundtriputils import create_validating_writer_class
+from .roundtriputils import create_validating_writer_class, Format
 
 
-def test_scalar_primitives():
-    with create_validating_writer_class(tm.ScalarsWriterBase)() as w:
+T = TypeVar("T")
+
+
+@pytest.fixture(scope="module", params=[Format.BINARY, Format.NDJSON])
+def format(request: pytest.FixtureRequest):
+    return request.param
+
+
+def test_scalar_primitives(format: Format):
+    with create_validating_writer_class(format, tm.ScalarsWriterBase)() as w:
         w.write_int32(42)
         rec = tm.RecordWithPrimitives(
             bool_field=True,
@@ -35,8 +44,8 @@ def test_scalar_primitives():
         w.write_record(rec)
 
 
-def test_scalar_optionals():
-    c = create_validating_writer_class(tm.ScalarOptionalsWriterBase)
+def test_scalar_optionals(format: Format):
+    c = create_validating_writer_class(format, tm.ScalarOptionalsWriterBase)
 
     with c() as w:
         w.write_optional_int(None)
@@ -61,8 +70,8 @@ def test_scalar_optionals():
         )
 
 
-def test_nested_records():
-    with create_validating_writer_class(tm.NestedRecordsWriterBase)() as w:
+def test_nested_records(format: Format):
+    with create_validating_writer_class(format, tm.NestedRecordsWriterBase)() as w:
         w.write_tuple_with_records(
             tm.TupleWithRecords(
                 a=tm.SimpleRecord(x=1, y=2, z=3), b=tm.SimpleRecord(x=4, y=5, z=6)
@@ -70,8 +79,8 @@ def test_nested_records():
         )
 
 
-def test_variable_length_vectors():
-    with create_validating_writer_class(tm.VlensWriterBase)() as w:
+def test_variable_length_vectors(format: Format):
+    with create_validating_writer_class(format, tm.VlensWriterBase)() as w:
         w.write_int_vector([1, 2, 3])
         w.write_complex_vector([complex(1, 2), complex(3, 4)])
         rec_with_vlens = tm.RecordWithVlens(
@@ -84,14 +93,14 @@ def test_variable_length_vectors():
         w.write_vlen_of_record_with_vlens([rec_with_vlens, rec_with_vlens])
 
 
-def test_strings():
-    with create_validating_writer_class(tm.StringsWriterBase)() as w:
+def test_strings(format: Format):
+    with create_validating_writer_class(format, tm.StringsWriterBase)() as w:
         w.write_single_string("hello")
         w.write_rec_with_string(tm.RecordWithStrings(a="Montréal", b="臺北市"))
 
 
-def test_optional_vectors():
-    c = create_validating_writer_class(tm.OptionalVectorsWriterBase)
+def test_optional_vectors(format: Format):
+    c = create_validating_writer_class(format, tm.OptionalVectorsWriterBase)
     with c() as w:
         w.write_record_with_optional_vector(tm.RecordWithOptionalVector())
 
@@ -101,8 +110,8 @@ def test_optional_vectors():
         )
 
 
-def test_fixed_vectors():
-    with create_validating_writer_class(tm.FixedVectorsWriterBase)() as w:
+def test_fixed_vectors(format: Format):
+    with create_validating_writer_class(format, tm.FixedVectorsWriterBase)() as w:
         int_list: list[tm.Int32] = [1, 2, 3, 4, 5]
         w.write_fixed_int_vector(int_list)
         simple_rec_list = [
@@ -132,8 +141,8 @@ def test_fixed_vectors():
         w.write_record_with_fixed_vectors(rec_with_fixed_list)
 
 
-def test_fixed_arrays():
-    with create_validating_writer_class(tm.FixedArraysWriterBase)() as w:
+def test_fixed_arrays(format: Format):
+    with create_validating_writer_class(format, tm.FixedArraysWriterBase)() as w:
         w.write_ints(np.array([[1, 2, 3], [4, 5, 6]], dtype=np.int32))
         simple_record_array = np.array(
             [
@@ -206,8 +215,8 @@ def test_fixed_arrays():
         w.write_named_array(named_fixed_array)
 
 
-def test_subarrays():
-    with create_validating_writer_class(tm.SubarraysWriterBase)() as w:
+def test_subarrays(format: Format):
+    with create_validating_writer_class(format, tm.SubarraysWriterBase)() as w:
         with pytest.raises(
             ValueError, match=re.escape("The array is required to have shape (..., 3)")
         ):
@@ -311,7 +320,7 @@ def test_subarrays():
         )
 
 
-def test_subarrays_in_records():
+def test_subarrays_in_records(format: Format):
     fixed_dtype = tm.get_dtype(tm.RecordWithFixedCollections)
     assert fixed_dtype == np.dtype(
         [("fixed_vector", "<i4", (3,)), ("fixed_array", "<i4", (2, 3))], align=True
@@ -320,7 +329,7 @@ def test_subarrays_in_records():
     vlen_dtype = tm.get_dtype(tm.RecordWithVlenCollections)
     assert vlen_dtype == np.dtype([("vector", "O"), ("array", "O")], align=True)
 
-    with create_validating_writer_class(tm.SubarraysInRecordsWriterBase)() as w:
+    with create_validating_writer_class(format, tm.SubarraysInRecordsWriterBase)() as w:
         w.write_with_fixed_subarrays(
             np.array(
                 [
@@ -344,8 +353,8 @@ def test_subarrays_in_records():
         )
 
 
-def test_arrays_with_known_dimension_count():
-    with create_validating_writer_class(tm.NDArraysWriterBase)() as w:
+def test_arrays_with_known_dimension_count(format: Format):
+    with create_validating_writer_class(format, tm.NDArraysWriterBase)() as w:
         w.write_ints(np.array([[1, 2, 3], [4, 5, 6]], dtype=np.int32))
         w.write_simple_record_array(
             np.array(
@@ -439,8 +448,8 @@ def test_arrays_with_known_dimension_count():
         w.write_named_array(np.array([[1, 2, 3], [4, 5, 6]], np.int32))
 
 
-def test_dynamic_ndarrays():
-    with create_validating_writer_class(tm.DynamicNDArraysWriterBase)() as w:
+def test_dynamic_ndarrays(format: Format):
+    with create_validating_writer_class(format, tm.DynamicNDArraysWriterBase)() as w:
         w.write_ints(np.ndarray((4, 3), dtype=np.int32))
         w.write_simple_record_array(
             np.ndarray((2, 3), dtype=tm.get_dtype(tm.SimpleRecord))
@@ -502,8 +511,8 @@ def test_dynamic_ndarrays():
         )
 
 
-def test_maps():
-    with create_validating_writer_class(tm.MapsWriterBase)() as w:
+def test_maps(format: Format):
+    with create_validating_writer_class(format, tm.MapsWriterBase)() as w:
         d = {"a": 1, "b": 2, "c": 3}
         w.write_string_to_int(d)
         w.write_int_to_string({1: "a", 2: "b", 3: "c"})
@@ -513,8 +522,8 @@ def test_maps():
         w.write_aliased_generic({"a": 1, "b": 2, "c": 3})
 
 
-def test_unions():
-    c = create_validating_writer_class(tm.UnionsWriterBase)
+def test_unions(format: Format):
+    c = create_validating_writer_class(format, tm.UnionsWriterBase)
 
     # first option
     with c() as w:
@@ -544,14 +553,14 @@ def test_unions():
         )
 
 
-def test_enums():
-    with create_validating_writer_class(tm.EnumsWriterBase)() as w:
+def test_enums(format: Format):
+    with create_validating_writer_class(format, tm.EnumsWriterBase)() as w:
         w.write_single(tm.Fruits.APPLE)
         w.write_vec([tm.Fruits.APPLE, tm.Fruits.BANANA, tm.Fruits(233983)])
         w.write_size(tm.SizeBasedEnum.C)
 
 
-def test_flags():
+def test_flags(format: Format):
     def days():
         yield tm.DaysOfWeek.SUNDAY
         yield tm.DaysOfWeek.MONDAY | tm.DaysOfWeek.WEDNESDAY | tm.DaysOfWeek.FRIDAY
@@ -559,7 +568,7 @@ def test_flags():
         yield tm.DaysOfWeek(282839)
         yield tm.DaysOfWeek(234532)
 
-    with create_validating_writer_class(tm.FlagsWriterBase)() as w:
+    with create_validating_writer_class(format, tm.FlagsWriterBase)() as w:
         w.write_days(days())
         w.write_formats(
             [
@@ -571,8 +580,8 @@ def test_flags():
         )
 
 
-def test_simple_streams():
-    c = create_validating_writer_class(tm.StreamsWriterBase)
+def test_simple_streams(format: Format):
+    c = create_validating_writer_class(format, tm.StreamsWriterBase)
 
     with c() as w:
         w.write_int_data(range(10))
@@ -598,8 +607,8 @@ def test_simple_streams():
         w.write_fixed_vector([])
 
 
-def test_streams_of_unions():
-    with create_validating_writer_class(tm.StreamsOfUnionsWriterBase)() as w:
+def test_streams_of_unions(format: Format):
+    with create_validating_writer_class(format, tm.StreamsOfUnionsWriterBase)() as w:
         w.write_int_or_simple_record(
             [
                 tm.Int32OrSimpleRecord.Int32(1),
@@ -619,8 +628,8 @@ def test_streams_of_unions():
         )
 
 
-def test_simple_generics():
-    with create_validating_writer_class(tm.SimpleGenericsWriterBase)() as w:
+def test_simple_generics(format: Format):
+    with create_validating_writer_class(format, tm.SimpleGenericsWriterBase)() as w:
         w.write_float_image(np.array([[1.0, 2.0], [3.0, 4.0]], dtype=np.float32))
         w.write_int_image(np.array([[1, 2], [3, 4]], dtype=np.int32))
         w.write_int_image_alternate_syntax(np.array([[1, 2], [3, 4]], dtype=np.int32))
@@ -646,8 +655,8 @@ def test_simple_generics():
         )
 
 
-def test_advanced_generics():
-    with create_validating_writer_class(tm.AdvancedGenericsWriterBase)() as w:
+def test_advanced_generics(format: Format):
+    with create_validating_writer_class(format, tm.AdvancedGenericsWriterBase)() as w:
         i1: tm.Image[np.float32] = np.array([[3, 4, 5], [6, 7, 8]], dtype=np.float32)
         i2: tm.Image[np.float32] = np.array(
             [[30, 40, 50], [60, 70, 80]], dtype=np.float32
@@ -678,8 +687,8 @@ def test_advanced_generics():
         w.write_tuple_of_vectors(tm.MyTuple(v1=[1, 2, 3], v2=[4.0, 5.0, 6.0]))
 
 
-def test_aliases():
-    with create_validating_writer_class(tm.AliasesWriterBase)() as w:
+def test_aliases(format: Format):
+    with create_validating_writer_class(format, tm.AliasesWriterBase)() as w:
         w.write_aliased_string("hello")
         w.write_aliased_enum(tm.Fruits.APPLE)
         w.write_aliased_open_generic(

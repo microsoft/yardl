@@ -212,6 +212,26 @@ func writeRecord(w *formatting.IndentedWriter, rec *dsl.RecordDefinition, st dsl
 		}
 
 		writeEqMethod(w, rec)
+
+		w.WriteStringln("def __str__(self) -> str:")
+		w.Indented(func() {
+			fmt.Fprintf(w, "return f\"%s(", common.TypeSyntaxWithoutTypeParameters(rec, rec.Namespace))
+			formatting.Delimited(w, ", ", rec.Fields, func(w *formatting.IndentedWriter, i int, f *dsl.Field) {
+				fmt.Fprintf(w, "%s={self.%s}", f.Name, common.FieldIdentifierName(f.Name))
+			})
+			w.WriteString(")\"\n")
+		})
+		w.WriteStringln("")
+
+		w.WriteStringln("def __repr__(self) -> str:")
+		w.Indented(func() {
+			fmt.Fprintf(w, "return f\"%s(", common.TypeSyntaxWithoutTypeParameters(rec, rec.Namespace))
+			formatting.Delimited(w, ", ", rec.Fields, func(w *formatting.IndentedWriter, i int, f *dsl.Field) {
+				fmt.Fprintf(w, "%s={repr(self.%s)}", f.Name, common.FieldIdentifierName(f.Name))
+			})
+			w.WriteString(")\"\n")
+		})
+		w.WriteStringln("")
 	})
 	w.WriteStringln("")
 }

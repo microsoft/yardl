@@ -45,8 +45,143 @@ func writeConverters(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 		switch t := t.(type) {
 		case *dsl.EnumDefinition:
 			writeEnumMaps(t, w, ns)
+		case *dsl.RecordDefinition:
+			writeRecordConverter(t, w, ns)
 		}
+
 	}
+}
+
+func writeRecordConverter(td *dsl.RecordDefinition, w *formatting.IndentedWriter, ns *dsl.Namespace) {
+	typeSyntax := common.TypeSyntax(td, ns.Name)
+	var genericSpec string
+	if len(td.TypeParameters) > 0 {
+		params := make([]string, 2*len(td.TypeParameters))
+		for i, tp := range td.TypeParameters {
+			params[2*i] = common.TypeParameterSyntax(tp, false)
+			params[2*i+1] = common.TypeParameterSyntax(tp, true)
+		}
+		genericSpec = fmt.Sprintf("typing.Generic[%s], ", strings.Join(params, ", "))
+	} else {
+		genericSpec = ""
+	}
+
+	fmt.Fprintf(w, "class %s(%s_ndjson.JsonConverter[%s, np.void]):\n", recordConverterClassName(td), genericSpec, typeSyntax)
+	w.Indented(func() {
+		if len(td.TypeParameters) > 0 {
+			typeParamSerializers := make([]string, 0, len(td.TypeParameters))
+			for _, tp := range td.TypeParameters {
+				typeParamSerializers = append(
+					typeParamSerializers,
+					fmt.Sprintf("%s: _ndjson.JsonConverter[%s, %s]", typeDefinitionConverter(tp, ns.Name), common.TypeParameterSyntax(tp, false), common.TypeParameterSyntax(tp, true)))
+			}
+
+			fmt.Fprintf(w, "def __init__(self, %s) -> None:\n", strings.Join(typeParamSerializers, ", "))
+		} else {
+			w.WriteStringln("def __init__(self) -> None:")
+		}
+		w.Indented(func() {
+			for _, f := range td.Fields {
+				fmt.Fprintf(w, "self._%s_converter = %s\n", formatting.ToSnakeCase(f.Name), typeConverter(f.Type, ns.Name, nil))
+			}
+
+			fmt.Fprintf(w, "super().__init__(np.dtype([\n")
+			w.Indented(func() {
+				for _, v := range td.Fields {
+					fmt.Fprintf(w, "(\"%s\", self._%s_converter.overall_dtype()),\n", v.Name, formatting.ToSnakeCase(v.Name))
+				}
+			})
+			fmt.Fprintf(w, "]))\n")
+
+		})
+		w.WriteStringln("")
+
+		fmt.Fprintf(w, "def to_json(self, value: %s) -> object:\n", typeSyntax)
+		w.Indented(func() {
+			fmt.Fprintf(w, "if not isinstance(value, %s):\n", common.TypeSyntaxWithoutTypeParameters(td, ns.Name))
+			w.Indented(func() {
+				fmt.Fprintf(w, "raise TypeError(\"Expected '%s' instance\")\n", typeSyntax)
+			})
+			w.WriteStringln("json_object = {}\n")
+
+			for _, f := range td.Fields {
+				if g, ok := f.Type.(*dsl.GeneralizedType); ok && g.Cases.HasNullOption() && g.Dimensionality == nil {
+					fmt.Fprintf(w, "if value.%s is not None:\n", common.FieldIdentifierName(f.Name))
+					w.Indented(func() {
+						fmt.Fprintf(w, "json_object[\"%s\"] = self._%s_converter.to_json(value.%s)\n", f.Name, formatting.ToSnakeCase(f.Name), common.FieldIdentifierName(f.Name))
+					})
+				} else {
+					fmt.Fprintf(w, "json_object[\"%s\"] = self._%s_converter.to_json(value.%s)\n", f.Name, formatting.ToSnakeCase(f.Name), common.FieldIdentifierName(f.Name))
+				}
+			}
+			fmt.Fprintf(w, "return json_object\n")
+		})
+		w.WriteStringln("")
+
+		fmt.Fprintf(w, "def numpy_to_json(self, value: np.void) -> object:\n")
+		w.Indented(func() {
+			fmt.Fprintf(w, "if not isinstance(value, np.void):\n")
+			w.Indented(func() {
+				fmt.Fprintf(w, "raise TypeError(\"Expected 'np.void' instance\")\n")
+			})
+			w.WriteStringln("json_object = {}\n")
+
+			for _, f := range td.Fields {
+				if g, ok := f.Type.(*dsl.GeneralizedType); ok && g.Cases.HasNullOption() && g.Dimensionality == nil {
+					fmt.Fprintf(w, "if (field_val := value[\"%s\"]) is not None:\n", common.FieldIdentifierName(f.Name))
+					w.Indented(func() {
+						fmt.Fprintf(w, "json_object[\"%s\"] = self._%s_converter.numpy_to_json(field_val)\n", f.Name, formatting.ToSnakeCase(f.Name))
+					})
+				} else {
+					fmt.Fprintf(w, "json_object[\"%s\"] = self._%s_converter.numpy_to_json(value[\"%s\"])\n", f.Name, formatting.ToSnakeCase(f.Name), common.FieldIdentifierName(f.Name))
+				}
+			}
+			fmt.Fprintf(w, "return json_object\n")
+		})
+		w.WriteStringln("")
+
+		fmt.Fprintf(w, "def from_json(self, json_object: object) -> %s:\n", typeSyntax)
+		w.Indented(func() {
+			fmt.Fprintf(w, "if not isinstance(json_object, dict):\n")
+			w.Indented(func() {
+				fmt.Fprintf(w, "raise TypeError(\"Expected 'dict' instance\")\n")
+			})
+			fmt.Fprintf(w, "return %s(\n", typeSyntax)
+			w.Indented(func() {
+				for _, f := range td.Fields {
+					if g, ok := f.Type.(*dsl.GeneralizedType); ok && g.Cases.HasNullOption() && g.Dimensionality == nil {
+						fmt.Fprintf(w, "%s=self._%s_converter.from_json(json_object.get(\"%s\")),\n", common.FieldIdentifierName(f.Name), formatting.ToSnakeCase(f.Name), f.Name)
+					} else {
+						fmt.Fprintf(w, "%s=self._%s_converter.from_json(json_object[\"%s\"],),\n", common.FieldIdentifierName(f.Name), formatting.ToSnakeCase(f.Name), f.Name)
+					}
+				}
+			})
+			fmt.Fprintf(w, ")\n")
+		})
+		w.WriteStringln("")
+
+		fmt.Fprintf(w, "def from_json_to_numpy(self, json_object: object) -> np.void:\n")
+		w.Indented(func() {
+			fmt.Fprintf(w, "if not isinstance(json_object, dict):\n")
+			w.Indented(func() {
+				fmt.Fprintf(w, "raise TypeError(\"Expected 'dict' instance\")\n")
+			})
+			fmt.Fprintf(w, "return (\n")
+			w.Indented(func() {
+				for _, f := range td.Fields {
+					if g, ok := f.Type.(*dsl.GeneralizedType); ok && g.Cases.HasNullOption() && g.Dimensionality == nil {
+						fmt.Fprintf(w, "self._%s_converter.from_json_to_numpy(json_object.get(\"%s\")),\n", formatting.ToSnakeCase(f.Name), f.Name)
+					} else {
+						fmt.Fprintf(w, "self._%s_converter.from_json_to_numpy(json_object[\"%s\"]),\n", formatting.ToSnakeCase(f.Name), f.Name)
+					}
+				}
+			})
+			fmt.Fprintf(w, ") # type:ignore \n")
+		})
+		w.WriteStringln("")
+	})
+
+	w.WriteStringln("")
 }
 
 func writeEnumMaps(t *dsl.EnumDefinition, w *formatting.IndentedWriter, ns *dsl.Namespace) {
@@ -136,7 +271,7 @@ func writeProtocols(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 					fmt.Fprintf(w, "def %s(self) -> collections.abc.Iterable[%s]:\n", common.ProtocolReadImplMethodName(step), valueType)
 					w.Indented(func() {
 						fmt.Fprintf(w, "converter = %s\n", typeConverter(step.Type, ns.Name, nil))
-						fmt.Fprintf(w, "while (json_object := self._read_json_line(\"%s\", False)) is not None:\n", step.Name)
+						fmt.Fprintf(w, "while (json_object := self._read_json_line(\"%s\", False)) is not _ndjson.MISSING_SENTINEL:\n", step.Name)
 						w.Indented(func() {
 							fmt.Fprintf(w, "yield converter.from_json(json_object)\n")
 						})
@@ -176,7 +311,7 @@ func typeDefinitionConverter(t dsl.TypeDefinition, contextNamespace string) stri
 			className = "_ndjson.EnumConverter"
 		}
 
-		return fmt.Sprintf("%s(%s, %s, %s, %s)", className, common.TypeSyntax(t, contextNamespace), common.TypeSyntax(baseType, contextNamespace), enumNameToValueMapName(t), enumValueToNameMapName(t))
+		return fmt.Sprintf("%s(%s, %s, %s, %s)", className, common.TypeSyntax(t, contextNamespace), common.TypeDTypeSyntax(baseType), enumNameToValueMapName(t), enumValueToNameMapName(t))
 	case *dsl.RecordDefinition:
 		converterName := recordConverterClassName(t)
 		if len(t.TypeParameters) == 0 {
