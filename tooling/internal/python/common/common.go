@@ -106,40 +106,47 @@ var TypeSyntaxWriter dsl.TypeSyntaxWriter[string] = func(self dsl.TypeSyntaxWrit
 			typeName = fmt.Sprintf("%s.%s", formatting.ToSnakeCase(meta.Namespace), typeName)
 		}
 
-		if len(meta.TypeParameters) == 0 {
-			return typeName
-		}
+		typeSyntax := typeName
 
-		typeArguments := make([]string, 0, len(meta.TypeParameters))
-		if len(meta.TypeArguments) > 0 {
-			for i, typeArg := range meta.TypeArguments {
-				typeParameter := meta.TypeParameters[i]
-				use := typeParameter.Annotations[TypeParameterUseAnnotationKey].(TypeParameterUse)
-				if use&TypeParameterUseScalar != 0 {
-					typeArguments = append(typeArguments, self.ToSyntax(typeArg, contextNamespace))
+		if len(meta.TypeParameters) > 0 {
+
+			typeArguments := make([]string, 0, len(meta.TypeParameters))
+			if len(meta.TypeArguments) > 0 {
+				for i, typeArg := range meta.TypeArguments {
+					typeParameter := meta.TypeParameters[i]
+					use := typeParameter.Annotations[TypeParameterUseAnnotationKey].(TypeParameterUse)
+					if use&TypeParameterUseScalar != 0 {
+						typeArguments = append(typeArguments, self.ToSyntax(typeArg, contextNamespace))
+					}
+					if use&TypeParameterUseArray != 0 {
+						typeArguments = append(typeArguments, TypeArrayTypeArgument(typeArg))
+					}
 				}
-				if use&TypeParameterUseArray != 0 {
-					typeArguments = append(typeArguments, TypeArrayTypeArgument(typeArg))
+			} else {
+				for i, typeParam := range meta.TypeParameters {
+					typeParameter := meta.TypeParameters[i]
+					use := typeParameter.Annotations[TypeParameterUseAnnotationKey].(TypeParameterUse)
+					if use&TypeParameterUseScalar != 0 {
+						typeArguments = append(typeArguments, self.ToSyntax(typeParam, contextNamespace))
+					}
+					if use&TypeParameterUseArray != 0 {
+						typeArguments = append(typeArguments, NumpyTypeParameterSyntax(typeParam))
+					}
 				}
 			}
-		} else {
-			for i, typeParam := range meta.TypeParameters {
-				typeParameter := meta.TypeParameters[i]
-				use := typeParameter.Annotations[TypeParameterUseAnnotationKey].(TypeParameterUse)
-				if use&TypeParameterUseScalar != 0 {
-					typeArguments = append(typeArguments, self.ToSyntax(typeParam, contextNamespace))
-				}
-				if use&TypeParameterUseArray != 0 {
-					typeArguments = append(typeArguments, NumpyTypeParameterSyntax(typeParam))
-				}
+
+			typeSyntax = fmt.Sprintf("%s[%s]", typeName, strings.Join(typeArguments, ", "))
+		}
+
+		if nt, ok := t.(*dsl.NamedType); ok {
+			underlyingType := dsl.GetUnderlyingType(nt.Type)
+			if gt, ok := underlyingType.(*dsl.GeneralizedType); ok && gt.Cases.HasNullOption() {
+				typeSyntax = fmt.Sprintf("typing.Optional[%s]", typeSyntax)
 			}
 		}
 
-		if len(typeArguments) == 0 {
-			return typeName
-		}
+		return typeSyntax
 
-		return fmt.Sprintf("%s[%s]", typeName, strings.Join(typeArguments, ", "))
 	case nil:
 		return "None"
 	case *dsl.SimpleType:

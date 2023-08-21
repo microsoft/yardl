@@ -131,7 +131,7 @@ func writeUnionClass(w *formatting.IndentedWriter, className string, typeParamet
 }
 
 func writeNamedType(w *formatting.IndentedWriter, td *dsl.NamedType) {
-	fmt.Fprintf(w, "%s = %s\n", common.TypeSyntaxWithoutTypeParameters(td, td.Namespace), common.TypeSyntax(td.Type, td.Namespace))
+	fmt.Fprintf(w, "%s = %s\n", common.TypeIdentifierName(td.Name), common.TypeSyntax(td.Type, td.Namespace))
 	common.WriteDocstring(w, td.Comment)
 	w.Indent().WriteStringln("")
 }

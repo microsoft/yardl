@@ -3019,11 +3019,11 @@ class NDJsonAliasesWriter(_ndjson.NDJsonProtocolWriter, AliasesWriterBase):
         json_value = _MyTupleConverter(_ndjson.string_converter, _ndjson.EnumConverter(Fruits, np.int32, _fruits_name_to_value_map, _fruits_value_to_name_map)).to_json(value)
         self._write_json_line({"aliasedClosedGeneric": json_value})
 
-    def _write_aliased_optional(self, value: AliasedOptional) -> None:
+    def _write_aliased_optional(self, value: typing.Optional[AliasedOptional]) -> None:
         json_value = _ndjson.OptionalConverter(_ndjson.int32_converter).to_json(value)
         self._write_json_line({"aliasedOptional": json_value})
 
-    def _write_aliased_generic_optional(self, value: AliasedGenericOptional[yardl.Float32]) -> None:
+    def _write_aliased_generic_optional(self, value: typing.Optional[AliasedGenericOptional[yardl.Float32]]) -> None:
         json_value = _ndjson.OptionalConverter(_ndjson.float32_converter).to_json(value)
         self._write_json_line({"aliasedGenericOptional": json_value})
 
@@ -3070,11 +3070,11 @@ class NDJsonAliasesReader(_ndjson.NDJsonProtocolReader, AliasesReaderBase):
         json_object = self._read_json_line("aliasedClosedGeneric", True)
         return _MyTupleConverter(_ndjson.string_converter, _ndjson.EnumConverter(Fruits, np.int32, _fruits_name_to_value_map, _fruits_value_to_name_map)).from_json(json_object)
 
-    def _read_aliased_optional(self) -> AliasedOptional:
+    def _read_aliased_optional(self) -> typing.Optional[AliasedOptional]:
         json_object = self._read_json_line("aliasedOptional", True)
         return _ndjson.OptionalConverter(_ndjson.int32_converter).from_json(json_object)
 
-    def _read_aliased_generic_optional(self) -> AliasedGenericOptional[yardl.Float32]:
+    def _read_aliased_generic_optional(self) -> typing.Optional[AliasedGenericOptional[yardl.Float32]]:
         json_object = self._read_json_line("aliasedGenericOptional", True)
         return _ndjson.OptionalConverter(_ndjson.float32_converter).from_json(json_object)
 
@@ -3109,7 +3109,7 @@ class NDJsonStreamsOfAliasedUnionsWriter(_ndjson.NDJsonProtocolWriter, StreamsOf
             json_item = converter.to_json(item)
             self._write_json_line({"intOrSimpleRecord": json_item})
 
-    def _write_nullable_int_or_simple_record(self, value: collections.abc.Iterable[AliasedNullableIntSimpleRecord]) -> None:
+    def _write_nullable_int_or_simple_record(self, value: collections.abc.Iterable[typing.Optional[AliasedNullableIntSimpleRecord]]) -> None:
         converter = _ndjson.UnionConverter(AliasedNullableIntSimpleRecord, [None, (AliasedNullableIntSimpleRecord.Int32, _ndjson.int32_converter, [int, float]), (AliasedNullableIntSimpleRecord.SimpleRecord, _SimpleRecordConverter(), [dict])], True)
         for item in value:
             json_item = converter.to_json(item)
@@ -3129,7 +3129,7 @@ class NDJsonStreamsOfAliasedUnionsReader(_ndjson.NDJsonProtocolReader, StreamsOf
         while (json_object := self._read_json_line("intOrSimpleRecord", False)) is not _ndjson.MISSING_SENTINEL:
             yield converter.from_json(json_object)
 
-    def _read_nullable_int_or_simple_record(self) -> collections.abc.Iterable[AliasedNullableIntSimpleRecord]:
+    def _read_nullable_int_or_simple_record(self) -> collections.abc.Iterable[typing.Optional[AliasedNullableIntSimpleRecord]]:
         converter = _ndjson.UnionConverter(AliasedNullableIntSimpleRecord, [None, (AliasedNullableIntSimpleRecord.Int32, _ndjson.int32_converter, [int, float]), (AliasedNullableIntSimpleRecord.SimpleRecord, _SimpleRecordConverter(), [dict])], True)
         while (json_object := self._read_json_line("nullableIntOrSimpleRecord", False)) is not _ndjson.MISSING_SENTINEL:
             yield converter.from_json(json_object)

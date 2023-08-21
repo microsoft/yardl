@@ -628,6 +628,33 @@ def test_streams_of_unions(format: Format):
         )
 
 
+def test_streams_of_aliased_unions(format: Format):
+    with create_validating_writer_class(
+        format, tm.StreamsOfAliasedUnionsWriterBase
+    )() as w:
+        w.write_int_or_simple_record(
+            [
+                tm.AliasedIntOrSimpleRecord.Int32(1),
+                tm.AliasedIntOrSimpleRecord.SimpleRecord(
+                    tm.SimpleRecord(x=1, y=2, z=3)
+                ),
+                tm.AliasedIntOrSimpleRecord.Int32(2),
+            ]
+        )
+        w.write_nullable_int_or_simple_record(
+            [
+                None,
+                tm.AliasedNullableIntSimpleRecord.Int32(1),
+                tm.AliasedNullableIntSimpleRecord.SimpleRecord(
+                    tm.SimpleRecord(x=1, y=2, z=3)
+                ),
+                None,
+                tm.AliasedNullableIntSimpleRecord.Int32(2),
+                None,
+            ]
+        )
+
+
 def test_simple_generics(format: Format):
     with create_validating_writer_class(format, tm.SimpleGenericsWriterBase)() as w:
         w.write_float_image(np.array([[1.0, 2.0], [3.0, 4.0]], dtype=np.float32))

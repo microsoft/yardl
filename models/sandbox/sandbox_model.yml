@@ -1,7 +1,53 @@
-HelloWorld: !protocol
+MyEnum: !enum
+  values:
+    - a
+    - b
+    - c
+
+MyFlags: !flags
+  values:
+    none: 0
+    a: 1
+    b: 2
+
+# My record
+MyRecord: !record
+  fields:
+    # an x
+    x: int
+    # a y
+    y: int
+    z: int?
+    z2: int?
+
+HelloNDJson: !protocol
   sequence:
-    data: !stream
-      items: !array
-        items: complexdouble
-        dimensions:
-          - 2
+    # anIntStream: !stream
+    #   items: int
+    aBoolean: bool
+    aBooleanStream: !stream
+      items: bool
+    # aString: string
+    # aComplex: complexdouble
+    # aDate: date
+    # aTime: time
+    # aDateTime: datetime
+
+    anEnum: MyEnum
+    someFlags: MyFlags
+
+    anOptionalIntThatIsNotSet: int?
+    anOptionalIntThatIsSet: int?
+
+    # aVector: int*
+    # aDynamicArray: int[]
+    # aFixedArray: int[2,3]
+
+    # aMapWithAStringKey: string->int
+    # aMapWithAnIntKey: int->int
+
+    aUnionWithSimpleRepresentation: [null, int, bool]
+    aUnionRequiringTag: [null, string, MyEnum]
+
+    aRecordWithOptionalNotSet: MyRecord
+    aRecordWithOptionalSet: MyRecord

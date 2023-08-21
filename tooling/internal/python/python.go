@@ -84,7 +84,7 @@ func writePackageInitFile(packageDir string, ns *dsl.Namespace) error {
 	typesMembers := make([]string, 0)
 	typesMembers = append(typesMembers, "get_dtype")
 	for _, t := range ns.TypeDefinitions {
-		typesMembers = append(typesMembers, common.TypeSyntaxWithoutTypeParameters(t, ns.Name))
+		typesMembers = append(typesMembers, common.TypeIdentifierName(t.GetDefinitionMeta().Name))
 	}
 
 	unions := make(map[string]interface{})
