@@ -824,3 +824,113 @@ class UnionConverter(JsonConverter[T, np.object_]):
 
     def from_json_to_numpy(self, json_object: object) -> np.object_:
         return self.from_json(json_object)  # type: ignore
+
+
+class VectorConverter(Generic[T, T_NP], JsonConverter[list[T], np.object_]):
+    def __init__(self, element_converter: JsonConverter[T, T_NP]) -> None:
+        super().__init__(np.object_)
+        self._element_converter = element_converter
+
+    def to_json(self, value: list[T]) -> object:
+        if not isinstance(value, list):
+            raise ValueError(f"Value in not a list: {value}")
+        return [self._element_converter.to_json(v) for v in value]
+
+    def numpy_to_json(self, value: np.object_) -> object:
+        return self.to_json(cast(list[T], value))
+
+    def from_json(self, json_object: object) -> list[T]:
+        if not isinstance(json_object, list):
+            raise ValueError(f"Value in not a list: {json_object}")
+        return [self._element_converter.from_json(v) for v in json_object]
+
+    def from_json_to_numpy(self, json_object: object) -> np.object_:
+        return cast(np.object_, self.from_json(json_object))
+
+
+class FixedVectorConverter(Generic[T, T_NP], JsonConverter[list[T], np.object_]):
+    def __init__(self, element_converter: JsonConverter[T, T_NP], length: int) -> None:
+        super().__init__(np.dtype((element_converter.overall_dtype(), length)))
+        self._element_converter = element_converter
+        self._length = length
+
+    def to_json(self, value: list[T]) -> object:
+        if not isinstance(value, list):
+            raise ValueError(f"Value in not a list: {value}")
+        if len(value) != self._length:
+            raise ValueError(f"Value in not a list of length {self._length}: {value}")
+        return [self._element_converter.to_json(v) for v in value]
+
+    def numpy_to_json(self, value: np.object_) -> object:
+        raise NotImplementedError("Internal error: expected this to be a subarray")
+
+    def from_json(self, json_object: object) -> list[T]:
+        if not isinstance(json_object, list):
+            raise ValueError(f"Value in not a list: {json_object}")
+        if len(json_object) != self._length:
+            raise ValueError(
+                f"Value in not a list of length {self._length}: {json_object}"
+            )
+        return [self._element_converter.from_json(v) for v in json_object]
+
+    def from_json_to_numpy(self, json_object: object) -> np.object_:
+        raise NotImplementedError("Internal error: expected this to be a subarray")
+
+
+TKey = TypeVar("TKey")
+TKey_NP = TypeVar("TKey_NP", bound=np.generic)
+TValue = TypeVar("TValue")
+TValue_NP = TypeVar("TValue_NP", bound=np.generic)
+
+
+class MapConverter(
+    Generic[TKey, TKey_NP, TValue, TValue_NP],
+    JsonConverter[dict[TKey, TValue], np.object_],
+):
+    def __init__(
+        self,
+        key_converter: JsonConverter[TKey, TKey_NP],
+        value_converter: JsonConverter[TValue, TValue_NP],
+    ) -> None:
+        super().__init__(np.object_)
+        self._key_converter = key_converter
+        self._value_converter = value_converter
+
+    def to_json(self, value: dict[TKey, TValue]) -> object:
+        if not isinstance(value, dict):
+            raise ValueError(f"Value in not a dict: {value}")
+
+        if isinstance(self._key_converter, StringConverter):
+            return {
+                self._key_converter.to_json(k): self._value_converter.to_json(v)
+                for k, v in value.items()
+            }
+
+        return [
+            [self._key_converter.to_json(k), self._value_converter.to_json(v)]
+            for k, v in value.items()
+        ]
+
+    def numpy_to_json(self, value: np.object_) -> object:
+        return self.to_json(cast(dict[TKey, TValue], value))
+
+    def from_json(self, json_object: object) -> dict[TKey, TValue]:
+        if isinstance(self._key_converter, StringConverter):
+            if not isinstance(json_object, dict):
+                raise ValueError(f"Value in not a dict: {json_object}")
+
+            return {
+                self._key_converter.from_json(k): self._value_converter.from_json(v)
+                for k, v in json_object.items()
+            }
+
+        if not isinstance(json_object, list):
+            raise ValueError(f"Value in not a list: {json_object}")
+
+        return {
+            self._key_converter.from_json(k): self._value_converter.from_json(v)
+            for [k, v] in json_object
+        }
+
+    def from_json_to_numpy(self, json_object: object) -> np.object_:
+        return cast(np.object_, self.from_json(json_object))

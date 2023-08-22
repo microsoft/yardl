@@ -968,21 +968,13 @@ class FixedVectorSerializer(Generic[T, T_NP], TypeSerializer[list[T], np.object_
             self._element_serializer.write(stream, element)
 
     def write_numpy(self, stream: CodedOutputStream, value: np.object_) -> None:
-        if not isinstance(value, list):
-            raise ValueError(f"Expected a list, got {type(value)}")
-
-        if len(value) != self._length:
-            raise ValueError(
-                f"Expected a list of length {self._length}, got {len(value)}"
-            )
-        for element in cast(list[T], value):
-            self._element_serializer.write(stream, element)
+        raise NotImplementedError("Internal error: expected this to be a subarray")
 
     def read(self, stream: CodedInputStream) -> list[T]:
         return [self._element_serializer.read(stream) for _ in range(self._length)]
 
     def read_numpy(self, stream: CodedInputStream) -> np.object_:
-        return np.object_(self.read(stream))
+        raise NotImplementedError("Internal error: expected this to be a subarray")
 
     def is_trivially_serializable(self) -> bool:
         return self._element_serializer.is_trivially_serializable()
