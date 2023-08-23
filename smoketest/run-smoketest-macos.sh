@@ -21,8 +21,8 @@ yardl generate
 cd ..
 
 # Verify python
-pip install numpy
-python python/run_smoketest.py
+pip3 install numpy
+python3 python/run_smoketest.py
 
 # Verify C++
 brew install hdf5 xtensor howard-hinnant-date nlohmann-json

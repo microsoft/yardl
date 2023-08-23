@@ -27,8 +27,11 @@ try
 
     # Verify Python
     cd $scriptDir
-    pip install numpy
-    python python/run_smoketest.py
+    pip3 install numpy
+    python3 python/run_smoketest.py
+    if ($LastExitCode -ne 0) {
+        throw "Python script failed"
+    }
 
     # verify C++
     cd $scriptDir\cpp
