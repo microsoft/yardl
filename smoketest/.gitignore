@@ -1,3 +1,5 @@
 model/
 cpp/build/
 cpp/generated/
+
+python/smoketest/

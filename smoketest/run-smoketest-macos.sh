@@ -8,18 +8,31 @@
 
 set -euo pipefail
 
-brew install hdf5 xtensor howard-hinnant-date nlohmann-json
-
 cd "$(dirname "$0")"
 
 rm -rf model
+
+# Create model
+yardl init smoketest
+
+cd model
+yardl generate
+
+cd ..
+
+# Verify python
+pip install numpy
+python python/run
+
+# Verify C++
+brew install hdf5 xtensor howard-hinnant-date nlohmann-json
 
 yardl init smoketest
 
 cd model
 yardl generate
 
-cd ../cpp
+cd cpp
 rm -rf build
 mkdir build
 cd build

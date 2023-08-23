@@ -19,11 +19,18 @@ try
     cd $scriptDir
     rm -Recurse -Force model -ErrorAction SilentlyContinue
 
+    # Create the model
     yardl init smoketest
 
     cd model
     yardl generate
 
+    # Verify Python
+    cd $scriptDir
+    pip install numpy
+    python python/run_smoketest.py
+
+    # verify C++
     cd $scriptDir\cpp
     rm -Recurse -Force $scriptDir\cpp\build -ErrorAction SilentlyContinue
     mkdir -Force $scriptDir\cpp\build | Out-Null
