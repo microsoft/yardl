@@ -22,6 +22,7 @@ dependencies:
   - numpy=1.24.3
   - pytest=7.3.2
   - python=3.11.3
+  - rich=10.15.2
   - shellcheck=0.8.0 # local
   - valgrind=3.18.1 # local
   - xtensor=0.24.2
