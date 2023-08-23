@@ -1,7 +1,6 @@
 #! /usr/bin/env python3
 
 from dataclasses import dataclass
-from enum import StrEnum
 import inspect
 import json
 import os
@@ -16,6 +15,11 @@ from rich.live import Live
 from rich.table import Table
 
 import test_model as tm
+from tests.factories import (
+    Format,
+    get_reader_type,
+    get_writer_type,
+)
 
 
 OUTPUT_FILE = "/tmp/benchmark_data.dat"
@@ -40,12 +44,6 @@ class MutlitingualResults(NamedTuple):
 _cpp_benchmark_path = (
     pathlib.Path(__file__).parent / "../../cpp/build/benchmark"
 ).resolve()
-
-
-class Format(StrEnum):
-    HDF5 = "hdf5"
-    BINARY = "binary"
-    NDJSON = "ndjson"
 
 
 def scale_repetitions(repetitions: int, scale: float):
@@ -82,21 +80,29 @@ def time_scenario(
 
 
 def benchmark_float_256x256(format: Format) -> Optional[Result]:
-    if format != Format.BINARY:
+    if format == Format.HDF5:
         return None
 
-    scale = 1
+    if format == Format.NDJSON:
+        scale = 0.002
+    else:
+        scale = 1
+
     arr = np.random.random_sample((256, 256)).astype(np.float32)
 
     repetitions = scale_repetitions(10000, scale)
     total_size_bytes = arr.nbytes * repetitions
 
     def write():
-        with tm.BinaryBenchmarkFloat256x256Writer(OUTPUT_FILE) as w:
+        with get_writer_type(format, tm.BenchmarkFloat256x256WriterBase)(
+            OUTPUT_FILE
+        ) as w:
             w.write_float256x256(arr for _ in range(repetitions))
 
     def read():
-        with tm.BinaryBenchmarkFloat256x256Reader(OUTPUT_FILE) as r:
+        with get_reader_type(format, tm.BenchmarkFloat256x256ReaderBase)(
+            OUTPUT_FILE
+        ) as r:
             for _ in r.read_float256x256():
                 pass
 
@@ -104,21 +110,25 @@ def benchmark_float_256x256(format: Format) -> Optional[Result]:
 
 
 def benchmark_float_vlen(format: Format) -> Optional[Result]:
-    if format != Format.BINARY:
+    if format == Format.HDF5:
         return None
 
-    scale = 1
+    if format == Format.NDJSON:
+        scale = 0.002
+    else:
+        scale = 1
+
     arr = np.random.random_sample((256, 256)).astype(np.float32)
 
     repetitions = scale_repetitions(10000, scale)
     total_size_bytes = arr.nbytes * repetitions
 
     def write():
-        with tm.BinaryBenchmarkFloatVlenWriter(OUTPUT_FILE) as w:
+        with get_writer_type(format, tm.BenchmarkFloatVlenWriterBase)(OUTPUT_FILE) as w:
             w.write_float_array(arr for _ in range(repetitions))
 
     def read():
-        with tm.BinaryBenchmarkFloatVlenReader(OUTPUT_FILE) as r:
+        with get_reader_type(format, tm.BenchmarkFloatVlenReaderBase)(OUTPUT_FILE) as r:
             for _ in r.read_float_array():
                 pass
 
@@ -126,10 +136,13 @@ def benchmark_float_vlen(format: Format) -> Optional[Result]:
 
 
 def benchmark_small_int_256x256(format: Format) -> Optional[Result]:
-    if format != Format.BINARY:
+    if format == Format.HDF5:
         return None
 
-    scale = 0.02
+    if format == Format.NDJSON:
+        scale = 0.03
+    else:
+        scale = 0.02
 
     arr = np.full((256, 256), 37, dtype=np.int32)
 
@@ -137,11 +150,15 @@ def benchmark_small_int_256x256(format: Format) -> Optional[Result]:
     total_size_bytes = arr.nbytes * repetitions
 
     def write():
-        with tm.BinaryBenchmarkInt256x256Writer(OUTPUT_FILE) as w:
+        with get_writer_type(format, tm.BenchmarkInt256x256WriterBase)(
+            OUTPUT_FILE
+        ) as w:
             w.write_int256x256(arr for _ in range(repetitions))
 
     def read():
-        with tm.BinaryBenchmarkInt256x256Reader(OUTPUT_FILE) as r:
+        with get_reader_type(format, tm.BenchmarkInt256x256ReaderBase)(
+            OUTPUT_FILE
+        ) as r:
             for _ in r.read_int256x256():
                 pass
 
@@ -149,23 +166,31 @@ def benchmark_small_int_256x256(format: Format) -> Optional[Result]:
 
 
 def benchmark_small_record(format: Format) -> Optional[Result]:
-    if format != Format.BINARY:
+    if format == Format.HDF5:
         return None
+
+    if format == Format.NDJSON:
+        scale = 0.002
+    else:
+        scale = 0.005
 
     record = tm.SmallBenchmarkRecord(
         a=73278383.23123213, b=78323.2820379, c=-2938923.29882
     )
 
-    scale = 0.005
     repetitions = scale_repetitions(50000000, scale)
     total_size_bytes = 16 * repetitions
 
     def write():
-        with tm.BinaryBenchmarkSmallRecordWriter(OUTPUT_FILE) as w:
+        with get_writer_type(format, tm.BenchmarkSmallRecordWriterBase)(
+            OUTPUT_FILE
+        ) as w:
             w.write_small_record(record for _ in range(repetitions))
 
     def read():
-        with tm.BinaryBenchmarkSmallRecordReader(OUTPUT_FILE) as r:
+        with get_reader_type(format, tm.BenchmarkSmallRecordReaderBase)(
+            OUTPUT_FILE
+        ) as r:
             for _ in r.read_small_record():
                 pass
 
@@ -183,8 +208,13 @@ def benchmark_small_optionals_batched(format: Format) -> Optional[Result]:
 
 
 def benchmark_simple_mrd(format: Format) -> Optional[Result]:
-    if format != Format.BINARY:
+    if format == Format.HDF5:
         return None
+
+    if format == Format.NDJSON:
+        scale = 0.002
+    else:
+        scale = 0.5
 
     acq = tm.SimpleAcquisition()
     acq.data.resize((32, 256))
@@ -192,16 +222,15 @@ def benchmark_simple_mrd(format: Format) -> Optional[Result]:
 
     data = tm.AcquisitionOrImage.Acquisition(acq)
 
-    scale = 0.5
     repetitions = scale_repetitions(30000, scale)
     total_size_bytes = 66032 * repetitions
 
     def write():
-        with tm.BinaryBenchmarkSimpleMrdWriter(OUTPUT_FILE) as w:
+        with get_writer_type(format, tm.BenchmarkSimpleMrdWriterBase)(OUTPUT_FILE) as w:
             w.write_data(data for _ in range(repetitions))
 
     def read():
-        with tm.BinaryBenchmarkSimpleMrdReader(OUTPUT_FILE) as r:
+        with get_reader_type(format, tm.BenchmarkSimpleMrdReaderBase)(OUTPUT_FILE) as r:
             for _ in r.read_data():
                 pass
 
@@ -261,7 +290,7 @@ def update_table(
     if DISPLAY_DURATIONS:
         table.add_row(
             scenario_name(scenario_func),
-            format,
+            str(format),
             format_float(results.cpp.roundtrip_duration_seconds)
             if results.cpp
             else None,
@@ -273,7 +302,7 @@ def update_table(
     else:
         table.add_row(
             scenario_name(scenario_func),
-            format,
+            str(format),
             format_float(results.cpp.write_mi_bytes_per_second)
             if results.cpp
             else None,

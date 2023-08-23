@@ -1,5 +1,3 @@
-from enum import Enum
-import inspect
 import io
 import pathlib
 import subprocess
@@ -7,17 +5,10 @@ import types
 from typing import Callable, TypeVar, cast
 
 import test_model as tm
-from test_model._binary import BinaryProtocolWriter
+from .factories import Format
+from .factories import get_reader_writer_types
 
 # pyright: basic
-
-
-class Format(Enum):
-    BINARY = 0
-    NDJSON = 1
-
-    def __str__(self) -> str:
-        return self.name.lower()
 
 
 _translator_path = (
@@ -44,53 +35,13 @@ def invoke_translator(
         return cpp_output
 
 
-# base writer type -> (derived writer type, derived reader type)
-_type_map = {
-    base: (
-        (
-            derived,
-            cast(
-                type,
-                getattr(
-                    tm,
-                    derived.__name__.removesuffix("Writer") + "Reader",
-                ),
-            ),
-        ),
-        (
-            cast(type, getattr(tm, "NDJson" + derived.__name__.removeprefix("Binary"))),
-            cast(
-                type,
-                getattr(
-                    tm,
-                    "NDJson"
-                    + derived.__name__.removeprefix("Binary").removesuffix("Writer")
-                    + "Reader",
-                ),
-            ),
-        ),
-    )
-    for base, derived in {
-        [base for base in inspect.getmro(derived) if base.__name__.endswith("Base")][
-            0
-        ]: cast(type, derived)
-        for _, derived in inspect.getmembers(
-            tm,
-            lambda x: inspect.isclass(x)
-            and not isinstance(x, types.GenericAlias)
-            and issubclass(x, BinaryProtocolWriter),
-        )
-    }.items()
-}
-
-
 T = TypeVar("T")
 
 
 def create_validating_writer_class(
     format: Format, base_class: type[T]
 ) -> Callable[[], T]:
-    writer_class, reader_class = _type_map[base_class][format.value]
+    reader_class, writer_class = get_reader_writer_types(format, base_class)
     in_memory_stream_class = io.BytesIO if format == Format.BINARY else io.StringIO
 
     write_methods = [
