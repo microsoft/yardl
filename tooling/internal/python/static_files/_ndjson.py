@@ -1010,6 +1010,20 @@ class NDArrayConverterBase(
 
                 raise ValueError(message)
 
+    def _read(
+        self, shape: tuple[int, ...], json_object: list[object]
+    ) -> npt.NDArray[Any]:
+        subarray_shape_not_none = (
+            () if self._subarray_shape is None else self._subarray_shape
+        )
+
+        partially_flattened_shape = (np.prod(shape),) + subarray_shape_not_none
+        result = np.ndarray(partially_flattened_shape, dtype=self._array_dtype)
+        for i in range(partially_flattened_shape[0]):
+            result[i] = self._element_converter.from_json_to_numpy(json_object[i])
+
+        return result.reshape(shape + subarray_shape_not_none)
+
 
 class FixedNDArrayConverter(Generic[T, T_NP], NDArrayConverterBase[T, T_NP]):
     def __init__(
@@ -1049,18 +1063,7 @@ class FixedNDArrayConverter(Generic[T, T_NP], NDArrayConverterBase[T, T_NP]):
         if not isinstance(json_object, list):
             raise ValueError(f"Value in not a list: {json_object}")
 
-        if self._subarray_shape is None:
-            return np.array(
-                [self._element_converter.from_json_to_numpy(v) for v in json_object],
-                dtype=self._array_dtype,
-            ).reshape(self._shape)
-
-        required_shape = self._shape + self._subarray_shape
-
-        return np.array(
-            [self._element_converter.from_json_to_numpy(v) for v in json_object],
-            dtype=self._array_dtype,
-        ).reshape(required_shape)
+        return self._read(self._shape, json_object)
 
     def from_json_to_numpy(self, json_object: object) -> np.object_:
         return cast(np.object_, self.from_json(json_object))
@@ -1113,17 +1116,7 @@ class DynamicNDArrayConverter(NDArrayConverterBase[T, T_NP]):
         shape = tuple(json_object["shape"])
         data = json_object["data"]
 
-        result = np.array(
-            [self._element_converter.from_json_to_numpy(v) for v in data],
-            dtype=self._array_dtype,
-        )
-
-        if self._subarray_shape is not None:
-            result = result.reshape(shape + self._subarray_shape)
-        else:
-            result = result.reshape(shape)
-
-        return result
+        return self._read(shape, data)
 
     def from_json_to_numpy(self, json_object: object) -> np.object_:
         return cast(np.object_, self.from_json(json_object))
@@ -1183,18 +1176,7 @@ class NDArrayConverter(Generic[T, T_NP], NDArrayConverterBase[T, T_NP]):
         shape = tuple(json_object["shape"])
         data = json_object["data"]
 
-        subarray_shape_not_none = (
-            () if self._subarray_shape is None else self._subarray_shape
-        )
-
-        partially_flattened_shape = (np.prod(shape),) + subarray_shape_not_none
-        result = np.ndarray(partially_flattened_shape, dtype=self._array_dtype)
-        for i in range(partially_flattened_shape[0]):
-            result[i] = self._element_converter.from_json_to_numpy(data[i])
-
-        return result.reshape(shape + subarray_shape_not_none)
-
-        return result
+        return self._read(shape, data)
 
     def from_json_to_numpy(self, json_object: object) -> np.object_:
         return cast(np.object_, self.from_json(json_object))

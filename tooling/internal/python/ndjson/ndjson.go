@@ -82,13 +82,17 @@ func writeRecordConverter(td *dsl.RecordDefinition, w *formatting.IndentedWriter
 		}
 		w.Indented(func() {
 			for _, f := range td.Fields {
-				fmt.Fprintf(w, "self._%s_converter = %s\n", formatting.ToSnakeCase(f.Name), typeConverter(f.Type, ns.Name, nil))
+				fieldId := common.FieldIdentifierName(f.Name)
+				fmt.Fprintf(w, "self._%s_converter = %s\n", fieldId, typeConverter(f.Type, ns.Name, nil))
+				if dsl.ContainsGenericTypeParameter(f.Type) {
+					fmt.Fprintf(w, "self._%s_supports_none = self._%s_converter.supports_none()\n", fieldId, fieldId)
+				}
 			}
 
 			fmt.Fprintf(w, "super().__init__(np.dtype([\n")
 			w.Indented(func() {
-				for _, v := range td.Fields {
-					fmt.Fprintf(w, "(\"%s\", self._%s_converter.overall_dtype()),\n", v.Name, formatting.ToSnakeCase(v.Name))
+				for _, f := range td.Fields {
+					fmt.Fprintf(w, "(\"%s\", self._%s_converter.overall_dtype()),\n", common.FieldIdentifierName(f.Name), formatting.ToSnakeCase(f.Name))
 				}
 			})
 			fmt.Fprintf(w, "]))\n")
@@ -105,13 +109,19 @@ func writeRecordConverter(td *dsl.RecordDefinition, w *formatting.IndentedWriter
 			w.WriteStringln("json_object = {}\n")
 
 			for _, f := range td.Fields {
+				fieldId := common.FieldIdentifierName(f.Name)
 				if g, ok := f.Type.(*dsl.GeneralizedType); ok && g.Cases.HasNullOption() && g.Dimensionality == nil {
-					fmt.Fprintf(w, "if value.%s is not None:\n", common.FieldIdentifierName(f.Name))
+					fmt.Fprintf(w, "if value.%s is not None:\n", fieldId)
 					w.Indented(func() {
-						fmt.Fprintf(w, "json_object[\"%s\"] = self._%s_converter.to_json(value.%s)\n", f.Name, formatting.ToSnakeCase(f.Name), common.FieldIdentifierName(f.Name))
+						fmt.Fprintf(w, "json_object[\"%s\"] = self._%s_converter.to_json(value.%s)\n", f.Name, fieldId, fieldId)
+					})
+				} else if dsl.ContainsGenericTypeParameter(f.Type) {
+					fmt.Fprintf(w, "if not self._%s_supports_none or value.%s is not None:\n", fieldId, fieldId)
+					w.Indented(func() {
+						fmt.Fprintf(w, "json_object[\"%s\"] = self._%s_converter.to_json(value.%s)\n", f.Name, fieldId, fieldId)
 					})
 				} else {
-					fmt.Fprintf(w, "json_object[\"%s\"] = self._%s_converter.to_json(value.%s)\n", f.Name, formatting.ToSnakeCase(f.Name), common.FieldIdentifierName(f.Name))
+					fmt.Fprintf(w, "json_object[\"%s\"] = self._%s_converter.to_json(value.%s)\n", f.Name, fieldId, fieldId)
 				}
 			}
 			fmt.Fprintf(w, "return json_object\n")
@@ -127,13 +137,19 @@ func writeRecordConverter(td *dsl.RecordDefinition, w *formatting.IndentedWriter
 			w.WriteStringln("json_object = {}\n")
 
 			for _, f := range td.Fields {
+				fieldId := common.FieldIdentifierName(f.Name)
 				if g, ok := f.Type.(*dsl.GeneralizedType); ok && g.Cases.HasNullOption() && g.Dimensionality == nil {
-					fmt.Fprintf(w, "if (field_val := value[\"%s\"]) is not None:\n", common.FieldIdentifierName(f.Name))
+					fmt.Fprintf(w, "if (field_val := value[\"%s\"]) is not None:\n", fieldId)
 					w.Indented(func() {
-						fmt.Fprintf(w, "json_object[\"%s\"] = self._%s_converter.numpy_to_json(field_val)\n", f.Name, formatting.ToSnakeCase(f.Name))
+						fmt.Fprintf(w, "json_object[\"%s\"] = self._%s_converter.numpy_to_json(field_val)\n", f.Name, fieldId)
+					})
+				} else if dsl.ContainsGenericTypeParameter(f.Type) {
+					fmt.Fprintf(w, "if not self._%s_supports_none or value[\"%s\"] is not None:\n", fieldId, fieldId)
+					w.Indented(func() {
+						fmt.Fprintf(w, "json_object[\"%s\"] = self._%s_converter.numpy_to_json(value[\"%s\"])\n", f.Name, fieldId, fieldId)
 					})
 				} else {
-					fmt.Fprintf(w, "json_object[\"%s\"] = self._%s_converter.numpy_to_json(value[\"%s\"])\n", f.Name, formatting.ToSnakeCase(f.Name), common.FieldIdentifierName(f.Name))
+					fmt.Fprintf(w, "json_object[\"%s\"] = self._%s_converter.numpy_to_json(value[\"%s\"])\n", f.Name, fieldId, fieldId)
 				}
 			}
 			fmt.Fprintf(w, "return json_object\n")
@@ -149,10 +165,13 @@ func writeRecordConverter(td *dsl.RecordDefinition, w *formatting.IndentedWriter
 			fmt.Fprintf(w, "return %s(\n", typeSyntax)
 			w.Indented(func() {
 				for _, f := range td.Fields {
+					fieldId := common.FieldIdentifierName(f.Name)
 					if g, ok := f.Type.(*dsl.GeneralizedType); ok && g.Cases.HasNullOption() && g.Dimensionality == nil {
-						fmt.Fprintf(w, "%s=self._%s_converter.from_json(json_object.get(\"%s\")),\n", common.FieldIdentifierName(f.Name), formatting.ToSnakeCase(f.Name), f.Name)
+						fmt.Fprintf(w, "%s=self._%s_converter.from_json(json_object.get(\"%s\")),\n", fieldId, fieldId, f.Name)
+					} else if dsl.ContainsGenericTypeParameter(f.Type) {
+						fmt.Fprintf(w, "%s=self._%s_converter.from_json(json_object.get(\"%s\") if self._%s_supports_none else json_object[\"%s\"]),\n", fieldId, fieldId, f.Name, fieldId, f.Name)
 					} else {
-						fmt.Fprintf(w, "%s=self._%s_converter.from_json(json_object[\"%s\"],),\n", common.FieldIdentifierName(f.Name), formatting.ToSnakeCase(f.Name), f.Name)
+						fmt.Fprintf(w, "%s=self._%s_converter.from_json(json_object[\"%s\"],),\n", fieldId, fieldId, f.Name)
 					}
 				}
 			})
@@ -169,10 +188,13 @@ func writeRecordConverter(td *dsl.RecordDefinition, w *formatting.IndentedWriter
 			fmt.Fprintf(w, "return (\n")
 			w.Indented(func() {
 				for _, f := range td.Fields {
+					fieldId := common.FieldIdentifierName(f.Name)
 					if g, ok := f.Type.(*dsl.GeneralizedType); ok && g.Cases.HasNullOption() && g.Dimensionality == nil {
-						fmt.Fprintf(w, "self._%s_converter.from_json_to_numpy(json_object.get(\"%s\")),\n", formatting.ToSnakeCase(f.Name), f.Name)
+						fmt.Fprintf(w, "self._%s_converter.from_json_to_numpy(json_object.get(\"%s\")),\n", fieldId, f.Name)
+					} else if dsl.ContainsGenericTypeParameter(f.Type) {
+						fmt.Fprintf(w, "self._%s_converter.from_json_to_numpy(json_object.get(\"%s\") if self._%s_supports_none else json_object[\"%s\"]),\n", fieldId, f.Name, fieldId, f.Name)
 					} else {
-						fmt.Fprintf(w, "self._%s_converter.from_json_to_numpy(json_object[\"%s\"]),\n", formatting.ToSnakeCase(f.Name), f.Name)
+						fmt.Fprintf(w, "self._%s_converter.from_json_to_numpy(json_object[\"%s\"]),\n", fieldId, f.Name)
 					}
 				}
 			})
