@@ -132,9 +132,18 @@ def create_validating_writer_class(
                 self._recorded_arguments
             )
 
+            validate(this_buffer, validating_instance)
+
+            return result
+
+        def validate(this_buffer, validating_instance):
+            # 1. Validate that we get the same data when we read the output back in
+
             reader = reader_class(in_memory_stream_class(this_buffer))
             reader.copy_to(validating_instance)
 
+            # 2. Now run the output though the C++ translator, and read its output back in
+            # and validate that we get the same data
             cpp_output = invoke_translator(this_buffer, format, format)
 
             reader = reader_class(
@@ -144,7 +153,28 @@ def create_validating_writer_class(
             )
             reader.copy_to(validating_instance)
 
-            return result
+            # 3. Now use the translator to convert the output to the other format,
+            # and then read it back in and make sure we get the same data.
+
+            other_format = Format.NDJSON if format == Format.BINARY else Format.BINARY
+
+            cpp_output_other_format = invoke_translator(
+                this_buffer, format, other_format
+            )
+
+            other_format_reader_class = get_reader_writer_types(
+                other_format, base_class
+            )[0]
+            in_memory_stream_class_other_format = (
+                io.BytesIO if other_format == Format.BINARY else io.StringIO
+            )
+
+            reader = other_format_reader_class(
+                in_memory_stream_class_other_format(
+                    cpp_output_other_format  # pyright: ignore[reportGeneralTypeIssues]
+                )
+            )
+            reader.copy_to(validating_instance)
 
         attrs["__exit__"] = exit_wrapper
 
