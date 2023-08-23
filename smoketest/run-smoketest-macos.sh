@@ -22,7 +22,7 @@ cd ..
 
 # Verify python
 pip install numpy
-python python/run
+python python/run_smoketest.py
 
 # Verify C++
 brew install hdf5 xtensor howard-hinnant-date nlohmann-json
