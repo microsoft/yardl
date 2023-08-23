@@ -27,11 +27,6 @@ python3 python/run_smoketest.py
 # Verify C++
 brew install hdf5 xtensor howard-hinnant-date nlohmann-json
 
-yardl init smoketest
-
-cd model
-yardl generate
-
 cd cpp
 rm -rf build
 mkdir build
