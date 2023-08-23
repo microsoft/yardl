@@ -1095,12 +1095,8 @@ class NDArraySerializerBase(
         if self._is_current_array_trivially_serializable(value):
             stream.write_bytes_directly(value.data)
         else:
-            if self._subarray_shape is None:
-                for element in value.flat:
-                    self._element_serializer.write_numpy(stream, element)
-            else:
-                for element in value.flat:
-                    self._element_serializer.write_numpy(stream, element)
+            for element in value.flat:
+                self._element_serializer.write_numpy(stream, element)
 
     def _read_data(
         self, stream: CodedInputStream, shape: tuple[int, ...]
@@ -1112,13 +1108,9 @@ class NDArraySerializerBase(
             byte_array = stream.read_bytearray(flat_byte_length)
             return np.frombuffer(byte_array, dtype=self._array_dtype).reshape(shape)
 
-        result = np.empty((flat_length,), dtype=self._array_dtype)
-        if self._subarray_shape is None:
-            for i in range(flat_length):
-                result[i] = self._element_serializer.read_numpy(stream)
-        else:
-            for i in range(flat_length):
-                result[i] = self._element_serializer.read_numpy(stream)
+        result = np.ndarray((flat_length,), dtype=self._array_dtype)
+        for i in range(flat_length):
+            result[i] = self._element_serializer.read_numpy(stream)
 
         return result.reshape(shape)
 

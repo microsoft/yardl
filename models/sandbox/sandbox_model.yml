@@ -51,3 +51,6 @@ HelloNDJson: !protocol
 
     aRecordWithOptionalNotSet: MyRecord
     aRecordWithOptionalSet: MyRecord
+
+    fixedArray: int[,]
+    dynamicWithFixedIntSubarray: int[3][()]

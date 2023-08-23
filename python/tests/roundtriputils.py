@@ -185,6 +185,7 @@ def create_validating_writer_class(
             reader.copy_to(validating_instance)
 
             cpp_output = invoke_translator(this_buffer, format, format)
+
             reader = reader_class(
                 in_memory_stream_class(
                     cpp_output  # pyright: ignore[reportGeneralTypeIssues]

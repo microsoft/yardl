@@ -267,23 +267,23 @@ class _RecordWithPrimitivesConverter(_ndjson.JsonConverter[RecordWithPrimitives,
         self._time_field_converter = _ndjson.time_converter
         self._datetime_field_converter = _ndjson.datetime_converter
         super().__init__(np.dtype([
-            ("boolField", self._bool_field_converter.overall_dtype()),
-            ("int8Field", self._int8_field_converter.overall_dtype()),
-            ("uint8Field", self._uint8_field_converter.overall_dtype()),
-            ("int16Field", self._int16_field_converter.overall_dtype()),
-            ("uint16Field", self._uint16_field_converter.overall_dtype()),
-            ("int32Field", self._int32_field_converter.overall_dtype()),
-            ("uint32Field", self._uint32_field_converter.overall_dtype()),
-            ("int64Field", self._int64_field_converter.overall_dtype()),
-            ("uint64Field", self._uint64_field_converter.overall_dtype()),
-            ("sizeField", self._size_field_converter.overall_dtype()),
-            ("float32Field", self._float32_field_converter.overall_dtype()),
-            ("float64Field", self._float64_field_converter.overall_dtype()),
-            ("complexfloat32Field", self._complexfloat32_field_converter.overall_dtype()),
-            ("complexfloat64Field", self._complexfloat64_field_converter.overall_dtype()),
-            ("dateField", self._date_field_converter.overall_dtype()),
-            ("timeField", self._time_field_converter.overall_dtype()),
-            ("datetimeField", self._datetime_field_converter.overall_dtype()),
+            ("bool_field", self._bool_field_converter.overall_dtype()),
+            ("int8_field", self._int8_field_converter.overall_dtype()),
+            ("uint8_field", self._uint8_field_converter.overall_dtype()),
+            ("int16_field", self._int16_field_converter.overall_dtype()),
+            ("uint16_field", self._uint16_field_converter.overall_dtype()),
+            ("int32_field", self._int32_field_converter.overall_dtype()),
+            ("uint32_field", self._uint32_field_converter.overall_dtype()),
+            ("int64_field", self._int64_field_converter.overall_dtype()),
+            ("uint64_field", self._uint64_field_converter.overall_dtype()),
+            ("size_field", self._size_field_converter.overall_dtype()),
+            ("float32_field", self._float32_field_converter.overall_dtype()),
+            ("float64_field", self._float64_field_converter.overall_dtype()),
+            ("complexfloat32_field", self._complexfloat32_field_converter.overall_dtype()),
+            ("complexfloat64_field", self._complexfloat64_field_converter.overall_dtype()),
+            ("date_field", self._date_field_converter.overall_dtype()),
+            ("time_field", self._time_field_converter.overall_dtype()),
+            ("datetime_field", self._datetime_field_converter.overall_dtype()),
         ]))
 
     def to_json(self, value: RecordWithPrimitives) -> object:
@@ -393,15 +393,15 @@ class _RecordWithPrimitiveAliasesConverter(_ndjson.JsonConverter[RecordWithPrimi
         self._complexfloat_field_converter = _ndjson.complexfloat32_converter
         self._complexdouble_field_converter = _ndjson.complexfloat64_converter
         super().__init__(np.dtype([
-            ("byteField", self._byte_field_converter.overall_dtype()),
-            ("intField", self._int_field_converter.overall_dtype()),
-            ("uintField", self._uint_field_converter.overall_dtype()),
-            ("longField", self._long_field_converter.overall_dtype()),
-            ("ulongField", self._ulong_field_converter.overall_dtype()),
-            ("floatField", self._float_field_converter.overall_dtype()),
-            ("doubleField", self._double_field_converter.overall_dtype()),
-            ("complexfloatField", self._complexfloat_field_converter.overall_dtype()),
-            ("complexdoubleField", self._complexdouble_field_converter.overall_dtype()),
+            ("byte_field", self._byte_field_converter.overall_dtype()),
+            ("int_field", self._int_field_converter.overall_dtype()),
+            ("uint_field", self._uint_field_converter.overall_dtype()),
+            ("long_field", self._long_field_converter.overall_dtype()),
+            ("ulong_field", self._ulong_field_converter.overall_dtype()),
+            ("float_field", self._float_field_converter.overall_dtype()),
+            ("double_field", self._double_field_converter.overall_dtype()),
+            ("complexfloat_field", self._complexfloat_field_converter.overall_dtype()),
+            ("complexdouble_field", self._complexdouble_field_converter.overall_dtype()),
         ]))
 
     def to_json(self, value: RecordWithPrimitiveAliases) -> object:
@@ -517,9 +517,9 @@ class _RecordWithVectorsConverter(_ndjson.JsonConverter[RecordWithVectors, np.vo
         self._default_vector_fixed_length_converter = _ndjson.FixedVectorConverter(_ndjson.int32_converter, 3)
         self._vector_of_vectors_converter = _ndjson.VectorConverter(_ndjson.FixedVectorConverter(_ndjson.int32_converter, 2))
         super().__init__(np.dtype([
-            ("defaultVector", self._default_vector_converter.overall_dtype()),
-            ("defaultVectorFixedLength", self._default_vector_fixed_length_converter.overall_dtype()),
-            ("vectorOfVectors", self._vector_of_vectors_converter.overall_dtype()),
+            ("default_vector", self._default_vector_converter.overall_dtype()),
+            ("default_vector_fixed_length", self._default_vector_fixed_length_converter.overall_dtype()),
+            ("vector_of_vectors", self._vector_of_vectors_converter.overall_dtype()),
         ]))
 
     def to_json(self, value: RecordWithVectors) -> object:
@@ -611,15 +611,15 @@ class _RecordWithArraysConverter(_ndjson.JsonConverter[RecordWithArrays, np.void
         self._dynamic_array_converter = _ndjson.DynamicNDArrayConverter(_ndjson.int32_converter)
         self._array_of_vectors_converter = _ndjson.FixedNDArrayConverter(_ndjson.FixedVectorConverter(_ndjson.int32_converter, 4), (5,))
         super().__init__(np.dtype([
-            ("defaultArray", self._default_array_converter.overall_dtype()),
-            ("defaultArrayWithEmptyDimension", self._default_array_with_empty_dimension_converter.overall_dtype()),
-            ("rank1Array", self._rank_1_array_converter.overall_dtype()),
-            ("rank2Array", self._rank_2_array_converter.overall_dtype()),
-            ("rank2ArrayWithNamedDimensions", self._rank_2_array_with_named_dimensions_converter.overall_dtype()),
-            ("rank2FixedArray", self._rank_2_fixed_array_converter.overall_dtype()),
-            ("rank2FixedArrayWithNamedDimensions", self._rank_2_fixed_array_with_named_dimensions_converter.overall_dtype()),
-            ("dynamicArray", self._dynamic_array_converter.overall_dtype()),
-            ("arrayOfVectors", self._array_of_vectors_converter.overall_dtype()),
+            ("default_array", self._default_array_converter.overall_dtype()),
+            ("default_array_with_empty_dimension", self._default_array_with_empty_dimension_converter.overall_dtype()),
+            ("rank_1_array", self._rank_1_array_converter.overall_dtype()),
+            ("rank_2_array", self._rank_2_array_converter.overall_dtype()),
+            ("rank_2_array_with_named_dimensions", self._rank_2_array_with_named_dimensions_converter.overall_dtype()),
+            ("rank_2_fixed_array", self._rank_2_fixed_array_converter.overall_dtype()),
+            ("rank_2_fixed_array_with_named_dimensions", self._rank_2_fixed_array_with_named_dimensions_converter.overall_dtype()),
+            ("dynamic_array", self._dynamic_array_converter.overall_dtype()),
+            ("array_of_vectors", self._array_of_vectors_converter.overall_dtype()),
         ]))
 
     def to_json(self, value: RecordWithArrays) -> object:
@@ -697,15 +697,15 @@ class _RecordWithArraysSimpleSyntaxConverter(_ndjson.JsonConverter[RecordWithArr
         self._dynamic_array_converter = _ndjson.DynamicNDArrayConverter(_ndjson.int32_converter)
         self._array_of_vectors_converter = _ndjson.FixedNDArrayConverter(_ndjson.FixedVectorConverter(_ndjson.int32_converter, 4), (5,))
         super().__init__(np.dtype([
-            ("defaultArray", self._default_array_converter.overall_dtype()),
-            ("defaultArrayWithEmptyDimension", self._default_array_with_empty_dimension_converter.overall_dtype()),
-            ("rank1Array", self._rank_1_array_converter.overall_dtype()),
-            ("rank2Array", self._rank_2_array_converter.overall_dtype()),
-            ("rank2ArrayWithNamedDimensions", self._rank_2_array_with_named_dimensions_converter.overall_dtype()),
-            ("rank2FixedArray", self._rank_2_fixed_array_converter.overall_dtype()),
-            ("rank2FixedArrayWithNamedDimensions", self._rank_2_fixed_array_with_named_dimensions_converter.overall_dtype()),
-            ("dynamicArray", self._dynamic_array_converter.overall_dtype()),
-            ("arrayOfVectors", self._array_of_vectors_converter.overall_dtype()),
+            ("default_array", self._default_array_converter.overall_dtype()),
+            ("default_array_with_empty_dimension", self._default_array_with_empty_dimension_converter.overall_dtype()),
+            ("rank_1_array", self._rank_1_array_converter.overall_dtype()),
+            ("rank_2_array", self._rank_2_array_converter.overall_dtype()),
+            ("rank_2_array_with_named_dimensions", self._rank_2_array_with_named_dimensions_converter.overall_dtype()),
+            ("rank_2_fixed_array", self._rank_2_fixed_array_converter.overall_dtype()),
+            ("rank_2_fixed_array_with_named_dimensions", self._rank_2_fixed_array_with_named_dimensions_converter.overall_dtype()),
+            ("dynamic_array", self._dynamic_array_converter.overall_dtype()),
+            ("array_of_vectors", self._array_of_vectors_converter.overall_dtype()),
         ]))
 
     def to_json(self, value: RecordWithArraysSimpleSyntax) -> object:
@@ -777,9 +777,9 @@ class _RecordWithOptionalFieldsConverter(_ndjson.JsonConverter[RecordWithOptiona
         self._optional_int_alternate_syntax_converter = _ndjson.OptionalConverter(_ndjson.int32_converter)
         self._optional_time_converter = _ndjson.OptionalConverter(_ndjson.time_converter)
         super().__init__(np.dtype([
-            ("optionalInt", self._optional_int_converter.overall_dtype()),
-            ("optionalIntAlternateSyntax", self._optional_int_alternate_syntax_converter.overall_dtype()),
-            ("optionalTime", self._optional_time_converter.overall_dtype()),
+            ("optional_int", self._optional_int_converter.overall_dtype()),
+            ("optional_int_alternate_syntax", self._optional_int_alternate_syntax_converter.overall_dtype()),
+            ("optional_time", self._optional_time_converter.overall_dtype()),
         ]))
 
     def to_json(self, value: RecordWithOptionalFields) -> object:
@@ -925,7 +925,7 @@ class _RecordWithOptionalVectorConverter(_ndjson.JsonConverter[RecordWithOptiona
     def __init__(self) -> None:
         self._optional_vector_converter = _ndjson.OptionalConverter(_ndjson.VectorConverter(_ndjson.int32_converter))
         super().__init__(np.dtype([
-            ("optionalVector", self._optional_vector_converter.overall_dtype()),
+            ("optional_vector", self._optional_vector_converter.overall_dtype()),
         ]))
 
     def to_json(self, value: RecordWithOptionalVector) -> object:
@@ -967,9 +967,9 @@ class _RecordWithFixedVectorsConverter(_ndjson.JsonConverter[RecordWithFixedVect
         self._fixed_simple_record_vector_converter = _ndjson.FixedVectorConverter(_SimpleRecordConverter(), 3)
         self._fixed_record_with_vlens_vector_converter = _ndjson.FixedVectorConverter(_RecordWithVlensConverter(), 2)
         super().__init__(np.dtype([
-            ("fixedIntVector", self._fixed_int_vector_converter.overall_dtype()),
-            ("fixedSimpleRecordVector", self._fixed_simple_record_vector_converter.overall_dtype()),
-            ("fixedRecordWithVlensVector", self._fixed_record_with_vlens_vector_converter.overall_dtype()),
+            ("fixed_int_vector", self._fixed_int_vector_converter.overall_dtype()),
+            ("fixed_simple_record_vector", self._fixed_simple_record_vector_converter.overall_dtype()),
+            ("fixed_record_with_vlens_vector", self._fixed_record_with_vlens_vector_converter.overall_dtype()),
         ]))
 
     def to_json(self, value: RecordWithFixedVectors) -> object:
@@ -1018,8 +1018,8 @@ class _RecordWithFixedArraysConverter(_ndjson.JsonConverter[RecordWithFixedArray
         self._fixed_record_with_vlens_array_converter = _ndjson.FixedNDArrayConverter(_RecordWithVlensConverter(), (2, 2,))
         super().__init__(np.dtype([
             ("ints", self._ints_converter.overall_dtype()),
-            ("fixedSimpleRecordArray", self._fixed_simple_record_array_converter.overall_dtype()),
-            ("fixedRecordWithVlensArray", self._fixed_record_with_vlens_array_converter.overall_dtype()),
+            ("fixed_simple_record_array", self._fixed_simple_record_array_converter.overall_dtype()),
+            ("fixed_record_with_vlens_array", self._fixed_record_with_vlens_array_converter.overall_dtype()),
         ]))
 
     def to_json(self, value: RecordWithFixedArrays) -> object:
@@ -1068,8 +1068,8 @@ class _RecordWithNDArraysConverter(_ndjson.JsonConverter[RecordWithNDArrays, np.
         self._fixed_record_with_vlens_array_converter = _ndjson.NDArrayConverter(_RecordWithVlensConverter(), 2)
         super().__init__(np.dtype([
             ("ints", self._ints_converter.overall_dtype()),
-            ("fixedSimpleRecordArray", self._fixed_simple_record_array_converter.overall_dtype()),
-            ("fixedRecordWithVlensArray", self._fixed_record_with_vlens_array_converter.overall_dtype()),
+            ("fixed_simple_record_array", self._fixed_simple_record_array_converter.overall_dtype()),
+            ("fixed_record_with_vlens_array", self._fixed_record_with_vlens_array_converter.overall_dtype()),
         ]))
 
     def to_json(self, value: RecordWithNDArrays) -> object:
@@ -1118,8 +1118,8 @@ class _RecordWithNDArraysSingleDimensionConverter(_ndjson.JsonConverter[RecordWi
         self._fixed_record_with_vlens_array_converter = _ndjson.NDArrayConverter(_RecordWithVlensConverter(), 1)
         super().__init__(np.dtype([
             ("ints", self._ints_converter.overall_dtype()),
-            ("fixedSimpleRecordArray", self._fixed_simple_record_array_converter.overall_dtype()),
-            ("fixedRecordWithVlensArray", self._fixed_record_with_vlens_array_converter.overall_dtype()),
+            ("fixed_simple_record_array", self._fixed_simple_record_array_converter.overall_dtype()),
+            ("fixed_record_with_vlens_array", self._fixed_record_with_vlens_array_converter.overall_dtype()),
         ]))
 
     def to_json(self, value: RecordWithNDArraysSingleDimension) -> object:
@@ -1168,8 +1168,8 @@ class _RecordWithDynamicNDArraysConverter(_ndjson.JsonConverter[RecordWithDynami
         self._record_with_vlens_array_converter = _ndjson.DynamicNDArrayConverter(_RecordWithVlensConverter())
         super().__init__(np.dtype([
             ("ints", self._ints_converter.overall_dtype()),
-            ("simpleRecordArray", self._simple_record_array_converter.overall_dtype()),
-            ("recordWithVlensArray", self._record_with_vlens_array_converter.overall_dtype()),
+            ("simple_record_array", self._simple_record_array_converter.overall_dtype()),
+            ("record_with_vlens_array", self._record_with_vlens_array_converter.overall_dtype()),
         ]))
 
     def to_json(self, value: RecordWithDynamicNDArrays) -> object:
@@ -1216,8 +1216,8 @@ class _RecordWithFixedCollectionsConverter(_ndjson.JsonConverter[RecordWithFixed
         self._fixed_vector_converter = _ndjson.FixedVectorConverter(_ndjson.int32_converter, 3)
         self._fixed_array_converter = _ndjson.FixedNDArrayConverter(_ndjson.int32_converter, (2, 3,))
         super().__init__(np.dtype([
-            ("fixedVector", self._fixed_vector_converter.overall_dtype()),
-            ("fixedArray", self._fixed_array_converter.overall_dtype()),
+            ("fixed_vector", self._fixed_vector_converter.overall_dtype()),
+            ("fixed_array", self._fixed_array_converter.overall_dtype()),
         ]))
 
     def to_json(self, value: RecordWithFixedCollections) -> object:
@@ -1304,8 +1304,8 @@ class _RecordWithUnionsConverter(_ndjson.JsonConverter[RecordWithUnions, np.void
         self._null_or_int_or_string_converter = _ndjson.UnionConverter(Int32OrString, [None, (Int32OrString.Int32, _ndjson.int32_converter, [int, float]), (Int32OrString.String, _ndjson.string_converter, [str])], True)
         self._date_or_datetime_converter = _ndjson.UnionConverter(TimeOrDatetime, [(TimeOrDatetime.Time, _ndjson.time_converter, [int, float]), (TimeOrDatetime.Datetime, _ndjson.datetime_converter, [int, float])], False)
         super().__init__(np.dtype([
-            ("nullOrIntOrString", self._null_or_int_or_string_converter.overall_dtype()),
-            ("dateOrDatetime", self._date_or_datetime_converter.overall_dtype()),
+            ("null_or_int_or_string", self._null_or_int_or_string_converter.overall_dtype()),
+            ("date_or_datetime", self._date_or_datetime_converter.overall_dtype()),
         ]))
 
     def to_json(self, value: RecordWithUnions) -> object:
@@ -1397,7 +1397,7 @@ class _RecordWithEnumsConverter(_ndjson.JsonConverter[RecordWithEnums, np.void])
         super().__init__(np.dtype([
             ("enum", self._enum_converter.overall_dtype()),
             ("flags", self._flags_converter.overall_dtype()),
-            ("flags2", self._flags_2_converter.overall_dtype()),
+            ("flags_2", self._flags_2_converter.overall_dtype()),
         ]))
 
     def to_json(self, value: RecordWithEnums) -> object:
@@ -1442,14 +1442,18 @@ class _RecordWithEnumsConverter(_ndjson.JsonConverter[RecordWithEnums, np.void])
 class _GenericRecordConverter(typing.Generic[T1, T1_NP, T2, T2_NP], _ndjson.JsonConverter[GenericRecord[T1, T2, T2_NP], np.void]):
     def __init__(self, t1_converter: _ndjson.JsonConverter[T1, T1_NP], t2_converter: _ndjson.JsonConverter[T2, T2_NP]) -> None:
         self._scalar_1_converter = t1_converter
+        self._scalar_1_supports_none = self._scalar_1_converter.supports_none()
         self._scalar_2_converter = t2_converter
+        self._scalar_2_supports_none = self._scalar_2_converter.supports_none()
         self._vector_1_converter = _ndjson.VectorConverter(t1_converter)
+        self._vector_1_supports_none = self._vector_1_converter.supports_none()
         self._image_2_converter = _ndjson.NDArrayConverter(t2_converter, 2)
+        self._image_2_supports_none = self._image_2_converter.supports_none()
         super().__init__(np.dtype([
-            ("scalar1", self._scalar_1_converter.overall_dtype()),
-            ("scalar2", self._scalar_2_converter.overall_dtype()),
-            ("vector1", self._vector_1_converter.overall_dtype()),
-            ("image2", self._image_2_converter.overall_dtype()),
+            ("scalar_1", self._scalar_1_converter.overall_dtype()),
+            ("scalar_2", self._scalar_2_converter.overall_dtype()),
+            ("vector_1", self._vector_1_converter.overall_dtype()),
+            ("image_2", self._image_2_converter.overall_dtype()),
         ]))
 
     def to_json(self, value: GenericRecord[T1, T2, T2_NP]) -> object:
@@ -1457,10 +1461,14 @@ class _GenericRecordConverter(typing.Generic[T1, T1_NP, T2, T2_NP], _ndjson.Json
             raise TypeError("Expected 'GenericRecord[T1, T2, T2_NP]' instance")
         json_object = {}
 
-        json_object["scalar1"] = self._scalar_1_converter.to_json(value.scalar_1)
-        json_object["scalar2"] = self._scalar_2_converter.to_json(value.scalar_2)
-        json_object["vector1"] = self._vector_1_converter.to_json(value.vector_1)
-        json_object["image2"] = self._image_2_converter.to_json(value.image_2)
+        if not self._scalar_1_supports_none or value.scalar_1 is not None:
+            json_object["scalar1"] = self._scalar_1_converter.to_json(value.scalar_1)
+        if not self._scalar_2_supports_none or value.scalar_2 is not None:
+            json_object["scalar2"] = self._scalar_2_converter.to_json(value.scalar_2)
+        if not self._vector_1_supports_none or value.vector_1 is not None:
+            json_object["vector1"] = self._vector_1_converter.to_json(value.vector_1)
+        if not self._image_2_supports_none or value.image_2 is not None:
+            json_object["image2"] = self._image_2_converter.to_json(value.image_2)
         return json_object
 
     def numpy_to_json(self, value: np.void) -> object:
@@ -1468,37 +1476,43 @@ class _GenericRecordConverter(typing.Generic[T1, T1_NP, T2, T2_NP], _ndjson.Json
             raise TypeError("Expected 'np.void' instance")
         json_object = {}
 
-        json_object["scalar1"] = self._scalar_1_converter.numpy_to_json(value["scalar_1"])
-        json_object["scalar2"] = self._scalar_2_converter.numpy_to_json(value["scalar_2"])
-        json_object["vector1"] = self._vector_1_converter.numpy_to_json(value["vector_1"])
-        json_object["image2"] = self._image_2_converter.numpy_to_json(value["image_2"])
+        if not self._scalar_1_supports_none or value["scalar_1"] is not None:
+            json_object["scalar1"] = self._scalar_1_converter.numpy_to_json(value["scalar_1"])
+        if not self._scalar_2_supports_none or value["scalar_2"] is not None:
+            json_object["scalar2"] = self._scalar_2_converter.numpy_to_json(value["scalar_2"])
+        if not self._vector_1_supports_none or value["vector_1"] is not None:
+            json_object["vector1"] = self._vector_1_converter.numpy_to_json(value["vector_1"])
+        if not self._image_2_supports_none or value["image_2"] is not None:
+            json_object["image2"] = self._image_2_converter.numpy_to_json(value["image_2"])
         return json_object
 
     def from_json(self, json_object: object) -> GenericRecord[T1, T2, T2_NP]:
         if not isinstance(json_object, dict):
             raise TypeError("Expected 'dict' instance")
         return GenericRecord[T1, T2, T2_NP](
-            scalar_1=self._scalar_1_converter.from_json(json_object["scalar1"],),
-            scalar_2=self._scalar_2_converter.from_json(json_object["scalar2"],),
-            vector_1=self._vector_1_converter.from_json(json_object["vector1"],),
-            image_2=self._image_2_converter.from_json(json_object["image2"],),
+            scalar_1=self._scalar_1_converter.from_json(json_object.get("scalar1") if self._scalar_1_supports_none else json_object["scalar1"]),
+            scalar_2=self._scalar_2_converter.from_json(json_object.get("scalar2") if self._scalar_2_supports_none else json_object["scalar2"]),
+            vector_1=self._vector_1_converter.from_json(json_object.get("vector1") if self._vector_1_supports_none else json_object["vector1"]),
+            image_2=self._image_2_converter.from_json(json_object.get("image2") if self._image_2_supports_none else json_object["image2"]),
         )
 
     def from_json_to_numpy(self, json_object: object) -> np.void:
         if not isinstance(json_object, dict):
             raise TypeError("Expected 'dict' instance")
         return (
-            self._scalar_1_converter.from_json_to_numpy(json_object["scalar1"]),
-            self._scalar_2_converter.from_json_to_numpy(json_object["scalar2"]),
-            self._vector_1_converter.from_json_to_numpy(json_object["vector1"]),
-            self._image_2_converter.from_json_to_numpy(json_object["image2"]),
+            self._scalar_1_converter.from_json_to_numpy(json_object.get("scalar1") if self._scalar_1_supports_none else json_object["scalar1"]),
+            self._scalar_2_converter.from_json_to_numpy(json_object.get("scalar2") if self._scalar_2_supports_none else json_object["scalar2"]),
+            self._vector_1_converter.from_json_to_numpy(json_object.get("vector1") if self._vector_1_supports_none else json_object["vector1"]),
+            self._image_2_converter.from_json_to_numpy(json_object.get("image2") if self._image_2_supports_none else json_object["image2"]),
         ) # type:ignore 
 
 
 class _MyTupleConverter(typing.Generic[T1, T1_NP, T2, T2_NP], _ndjson.JsonConverter[MyTuple[T1, T2], np.void]):
     def __init__(self, t1_converter: _ndjson.JsonConverter[T1, T1_NP], t2_converter: _ndjson.JsonConverter[T2, T2_NP]) -> None:
         self._v1_converter = t1_converter
+        self._v1_supports_none = self._v1_converter.supports_none()
         self._v2_converter = t2_converter
+        self._v2_supports_none = self._v2_converter.supports_none()
         super().__init__(np.dtype([
             ("v1", self._v1_converter.overall_dtype()),
             ("v2", self._v2_converter.overall_dtype()),
@@ -1509,8 +1523,10 @@ class _MyTupleConverter(typing.Generic[T1, T1_NP, T2, T2_NP], _ndjson.JsonConver
             raise TypeError("Expected 'MyTuple[T1, T2]' instance")
         json_object = {}
 
-        json_object["v1"] = self._v1_converter.to_json(value.v1)
-        json_object["v2"] = self._v2_converter.to_json(value.v2)
+        if not self._v1_supports_none or value.v1 is not None:
+            json_object["v1"] = self._v1_converter.to_json(value.v1)
+        if not self._v2_supports_none or value.v2 is not None:
+            json_object["v2"] = self._v2_converter.to_json(value.v2)
         return json_object
 
     def numpy_to_json(self, value: np.void) -> object:
@@ -1518,30 +1534,33 @@ class _MyTupleConverter(typing.Generic[T1, T1_NP, T2, T2_NP], _ndjson.JsonConver
             raise TypeError("Expected 'np.void' instance")
         json_object = {}
 
-        json_object["v1"] = self._v1_converter.numpy_to_json(value["v1"])
-        json_object["v2"] = self._v2_converter.numpy_to_json(value["v2"])
+        if not self._v1_supports_none or value["v1"] is not None:
+            json_object["v1"] = self._v1_converter.numpy_to_json(value["v1"])
+        if not self._v2_supports_none or value["v2"] is not None:
+            json_object["v2"] = self._v2_converter.numpy_to_json(value["v2"])
         return json_object
 
     def from_json(self, json_object: object) -> MyTuple[T1, T2]:
         if not isinstance(json_object, dict):
             raise TypeError("Expected 'dict' instance")
         return MyTuple[T1, T2](
-            v1=self._v1_converter.from_json(json_object["v1"],),
-            v2=self._v2_converter.from_json(json_object["v2"],),
+            v1=self._v1_converter.from_json(json_object.get("v1") if self._v1_supports_none else json_object["v1"]),
+            v2=self._v2_converter.from_json(json_object.get("v2") if self._v2_supports_none else json_object["v2"]),
         )
 
     def from_json_to_numpy(self, json_object: object) -> np.void:
         if not isinstance(json_object, dict):
             raise TypeError("Expected 'dict' instance")
         return (
-            self._v1_converter.from_json_to_numpy(json_object["v1"]),
-            self._v2_converter.from_json_to_numpy(json_object["v2"]),
+            self._v1_converter.from_json_to_numpy(json_object.get("v1") if self._v1_supports_none else json_object["v1"]),
+            self._v2_converter.from_json_to_numpy(json_object.get("v2") if self._v2_supports_none else json_object["v2"]),
         ) # type:ignore 
 
 
 class _GenericRecordWithComputedFieldsConverter(typing.Generic[T0, T0_NP, T1, T1_NP], _ndjson.JsonConverter[GenericRecordWithComputedFields[T0, T1], np.void]):
     def __init__(self, t0_converter: _ndjson.JsonConverter[T0, T0_NP], t1_converter: _ndjson.JsonConverter[T1, T1_NP]) -> None:
         self._f1_converter = _ndjson.UnionConverter(T0OrT1, [(T0OrT1[T0, T1].T0, t0_converter, [dict]), (T0OrT1[T0, T1].T1, t1_converter, [dict])], False)
+        self._f1_supports_none = self._f1_converter.supports_none()
         super().__init__(np.dtype([
             ("f1", self._f1_converter.overall_dtype()),
         ]))
@@ -1551,7 +1570,8 @@ class _GenericRecordWithComputedFieldsConverter(typing.Generic[T0, T0_NP, T1, T1
             raise TypeError("Expected 'GenericRecordWithComputedFields[T0, T1]' instance")
         json_object = {}
 
-        json_object["f1"] = self._f1_converter.to_json(value.f1)
+        if not self._f1_supports_none or value.f1 is not None:
+            json_object["f1"] = self._f1_converter.to_json(value.f1)
         return json_object
 
     def numpy_to_json(self, value: np.void) -> object:
@@ -1559,21 +1579,22 @@ class _GenericRecordWithComputedFieldsConverter(typing.Generic[T0, T0_NP, T1, T1
             raise TypeError("Expected 'np.void' instance")
         json_object = {}
 
-        json_object["f1"] = self._f1_converter.numpy_to_json(value["f1"])
+        if not self._f1_supports_none or value["f1"] is not None:
+            json_object["f1"] = self._f1_converter.numpy_to_json(value["f1"])
         return json_object
 
     def from_json(self, json_object: object) -> GenericRecordWithComputedFields[T0, T1]:
         if not isinstance(json_object, dict):
             raise TypeError("Expected 'dict' instance")
         return GenericRecordWithComputedFields[T0, T1](
-            f1=self._f1_converter.from_json(json_object["f1"],),
+            f1=self._f1_converter.from_json(json_object.get("f1") if self._f1_supports_none else json_object["f1"]),
         )
 
     def from_json_to_numpy(self, json_object: object) -> np.void:
         if not isinstance(json_object, dict):
             raise TypeError("Expected 'dict' instance")
         return (
-            self._f1_converter.from_json_to_numpy(json_object["f1"]),
+            self._f1_converter.from_json_to_numpy(json_object.get("f1") if self._f1_supports_none else json_object["f1"]),
         ) # type:ignore 
 
 
@@ -1595,21 +1616,21 @@ class _RecordWithComputedFieldsConverter(_ndjson.JsonConverter[RecordWithCompute
         self._union_with_nested_generic_union_converter = _ndjson.UnionConverter(IntOrGenericRecordWithComputedFields, [(IntOrGenericRecordWithComputedFields.Int, _ndjson.int32_converter, [int, float]), (IntOrGenericRecordWithComputedFields.GenericRecordWithComputedFields, _GenericRecordWithComputedFieldsConverter(_ndjson.string_converter, _ndjson.float32_converter), [dict])], True)
         self._map_field_converter = _ndjson.MapConverter(_ndjson.string_converter, _ndjson.string_converter)
         super().__init__(np.dtype([
-            ("arrayField", self._array_field_converter.overall_dtype()),
-            ("arrayFieldMapDimensions", self._array_field_map_dimensions_converter.overall_dtype()),
-            ("dynamicArrayField", self._dynamic_array_field_converter.overall_dtype()),
-            ("fixedArrayField", self._fixed_array_field_converter.overall_dtype()),
-            ("intField", self._int_field_converter.overall_dtype()),
-            ("stringField", self._string_field_converter.overall_dtype()),
-            ("tupleField", self._tuple_field_converter.overall_dtype()),
-            ("vectorField", self._vector_field_converter.overall_dtype()),
-            ("vectorOfVectorsField", self._vector_of_vectors_field_converter.overall_dtype()),
-            ("fixedVectorField", self._fixed_vector_field_converter.overall_dtype()),
-            ("optionalNamedArray", self._optional_named_array_converter.overall_dtype()),
-            ("intFloatUnion", self._int_float_union_converter.overall_dtype()),
-            ("nullableIntFloatUnion", self._nullable_int_float_union_converter.overall_dtype()),
-            ("unionWithNestedGenericUnion", self._union_with_nested_generic_union_converter.overall_dtype()),
-            ("mapField", self._map_field_converter.overall_dtype()),
+            ("array_field", self._array_field_converter.overall_dtype()),
+            ("array_field_map_dimensions", self._array_field_map_dimensions_converter.overall_dtype()),
+            ("dynamic_array_field", self._dynamic_array_field_converter.overall_dtype()),
+            ("fixed_array_field", self._fixed_array_field_converter.overall_dtype()),
+            ("int_field", self._int_field_converter.overall_dtype()),
+            ("string_field", self._string_field_converter.overall_dtype()),
+            ("tuple_field", self._tuple_field_converter.overall_dtype()),
+            ("vector_field", self._vector_field_converter.overall_dtype()),
+            ("vector_of_vectors_field", self._vector_of_vectors_field_converter.overall_dtype()),
+            ("fixed_vector_field", self._fixed_vector_field_converter.overall_dtype()),
+            ("optional_named_array", self._optional_named_array_converter.overall_dtype()),
+            ("int_float_union", self._int_float_union_converter.overall_dtype()),
+            ("nullable_int_float_union", self._nullable_int_float_union_converter.overall_dtype()),
+            ("union_with_nested_generic_union", self._union_with_nested_generic_union_converter.overall_dtype()),
+            ("map_field", self._map_field_converter.overall_dtype()),
         ]))
 
     def to_json(self, value: RecordWithComputedFields) -> object:
@@ -1711,13 +1732,13 @@ _enum_with_keyword_symbols_value_to_name_map = {v: n for n, v in _enum_with_keyw
 
 class _RecordWithKeywordFieldsConverter(_ndjson.JsonConverter[RecordWithKeywordFields, np.void]):
     def __init__(self) -> None:
-        self._int_converter = _ndjson.string_converter
+        self._int__converter = _ndjson.string_converter
         self._sizeof_converter = _ndjson.NDArrayConverter(_ndjson.int32_converter, 2)
-        self._if_converter = _ndjson.EnumConverter(EnumWithKeywordSymbols, np.int32, _enum_with_keyword_symbols_name_to_value_map, _enum_with_keyword_symbols_value_to_name_map)
+        self._if__converter = _ndjson.EnumConverter(EnumWithKeywordSymbols, np.int32, _enum_with_keyword_symbols_name_to_value_map, _enum_with_keyword_symbols_value_to_name_map)
         super().__init__(np.dtype([
-            ("int", self._int_converter.overall_dtype()),
+            ("int_", self._int_converter.overall_dtype()),
             ("sizeof", self._sizeof_converter.overall_dtype()),
-            ("if", self._if_converter.overall_dtype()),
+            ("if_", self._if_converter.overall_dtype()),
         ]))
 
     def to_json(self, value: RecordWithKeywordFields) -> object:
@@ -1725,9 +1746,9 @@ class _RecordWithKeywordFieldsConverter(_ndjson.JsonConverter[RecordWithKeywordF
             raise TypeError("Expected 'RecordWithKeywordFields' instance")
         json_object = {}
 
-        json_object["int"] = self._int_converter.to_json(value.int_)
+        json_object["int"] = self._int__converter.to_json(value.int_)
         json_object["sizeof"] = self._sizeof_converter.to_json(value.sizeof)
-        json_object["if"] = self._if_converter.to_json(value.if_)
+        json_object["if"] = self._if__converter.to_json(value.if_)
         return json_object
 
     def numpy_to_json(self, value: np.void) -> object:
@@ -1735,27 +1756,27 @@ class _RecordWithKeywordFieldsConverter(_ndjson.JsonConverter[RecordWithKeywordF
             raise TypeError("Expected 'np.void' instance")
         json_object = {}
 
-        json_object["int"] = self._int_converter.numpy_to_json(value["int_"])
+        json_object["int"] = self._int__converter.numpy_to_json(value["int_"])
         json_object["sizeof"] = self._sizeof_converter.numpy_to_json(value["sizeof"])
-        json_object["if"] = self._if_converter.numpy_to_json(value["if_"])
+        json_object["if"] = self._if__converter.numpy_to_json(value["if_"])
         return json_object
 
     def from_json(self, json_object: object) -> RecordWithKeywordFields:
         if not isinstance(json_object, dict):
             raise TypeError("Expected 'dict' instance")
         return RecordWithKeywordFields(
-            int_=self._int_converter.from_json(json_object["int"],),
+            int_=self._int__converter.from_json(json_object["int"],),
             sizeof=self._sizeof_converter.from_json(json_object["sizeof"],),
-            if_=self._if_converter.from_json(json_object["if"],),
+            if_=self._if__converter.from_json(json_object["if"],),
         )
 
     def from_json_to_numpy(self, json_object: object) -> np.void:
         if not isinstance(json_object, dict):
             raise TypeError("Expected 'dict' instance")
         return (
-            self._int_converter.from_json_to_numpy(json_object["int"]),
+            self._int__converter.from_json_to_numpy(json_object["int"]),
             self._sizeof_converter.from_json_to_numpy(json_object["sizeof"]),
-            self._if_converter.from_json_to_numpy(json_object["if"]),
+            self._if__converter.from_json_to_numpy(json_object["if"]),
         ) # type:ignore 
 
 

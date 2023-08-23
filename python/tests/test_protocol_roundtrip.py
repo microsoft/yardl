@@ -155,9 +155,6 @@ def test_fixed_arrays(format: Format):
 
         w.write_fixed_simple_record_array(simple_record_array)
 
-        # TODO: Note the inner lists of the record classes, not the tuples!
-        # If the inner vector were fixed, it would be treated as a subarray.
-        # Not sure that's best in this cases.
         fixed_record_with_vlen_arrays = np.array(
             [
                 [

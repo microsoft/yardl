@@ -8,6 +8,7 @@ from typing import Any, Generic, Optional, TextIO, TypeVar, Union, cast
 
 import numpy as np
 import numpy.typing as npt
+from numpy.lib import recfunctions
 
 from .yardl_types import *
 
@@ -170,6 +171,9 @@ class JsonConverter(Generic[T, T_NP], ABC):
     @abstractmethod
     def from_json_to_numpy(self, json_object: object) -> T_NP:
         raise NotImplementedError
+
+    def supports_none(self) -> bool:
+        return False
 
 
 class BoolConverter(JsonConverter[bool, np.bool_]):
@@ -538,7 +542,7 @@ complexfloat64_converter = Complex64Converter()
 
 class StringConverter(JsonConverter[str, np.object_]):
     def __init__(self) -> None:
-        super().__init__(np.dtype("U"))
+        super().__init__(np.object_)
 
     def to_json(self, value: str) -> object:
         if not isinstance(value, str):
@@ -757,6 +761,9 @@ class OptionalConverter(Generic[T, T_NP], JsonConverter[Optional[T], np.void]):
             return self._none
         return (True, self._element_converter.from_json_to_numpy(json_object))  # type: ignore
 
+    def supports_none(self) -> bool:
+        return True
+
 
 class UnionConverter(JsonConverter[T, np.object_]):
     def __init__(
@@ -825,6 +832,9 @@ class UnionConverter(JsonConverter[T, np.object_]):
     def from_json_to_numpy(self, json_object: object) -> np.object_:
         return self.from_json(json_object)  # type: ignore
 
+    def supports_none(self) -> bool:
+        return self._cases[0] is None
+
 
 class VectorConverter(Generic[T, T_NP], JsonConverter[list[T], np.object_]):
     def __init__(self, element_converter: JsonConverter[T, T_NP]) -> None:
@@ -837,7 +847,15 @@ class VectorConverter(Generic[T, T_NP], JsonConverter[list[T], np.object_]):
         return [self._element_converter.to_json(v) for v in value]
 
     def numpy_to_json(self, value: np.object_) -> object:
-        return self.to_json(cast(list[T], value))
+        if isinstance(value, list):
+            return [self._element_converter.to_json(v) for v in value]
+
+        if not isinstance(value, np.ndarray):
+            raise ValueError(f"Value in not a list or ndarray: {value}")
+        if value.ndim != 1:
+            raise ValueError(f"Value in not a 1-dimensional ndarray: {value}")
+
+        return [self._element_converter.numpy_to_json(v) for v in value]
 
     def from_json(self, json_object: object) -> list[T]:
         if not isinstance(json_object, list):
@@ -862,7 +880,12 @@ class FixedVectorConverter(Generic[T, T_NP], JsonConverter[list[T], np.object_])
         return [self._element_converter.to_json(v) for v in value]
 
     def numpy_to_json(self, value: np.object_) -> object:
-        raise NotImplementedError("Internal error: expected this to be a subarray")
+        if not isinstance(value, np.ndarray):
+            raise ValueError(f"Value in not an ndarray: {value}")
+        if value.shape != (self._length,):
+            raise ValueError(f"Value does not have expected shape of {self._length}")
+
+        return [self._element_converter.numpy_to_json(v) for v in value]
 
     def from_json(self, json_object: object) -> list[T]:
         if not isinstance(json_object, list):
@@ -874,7 +897,16 @@ class FixedVectorConverter(Generic[T, T_NP], JsonConverter[list[T], np.object_])
         return [self._element_converter.from_json(v) for v in json_object]
 
     def from_json_to_numpy(self, json_object: object) -> np.object_:
-        raise NotImplementedError("Internal error: expected this to be a subarray")
+        if not isinstance(json_object, list):
+            raise ValueError(f"Value in not a list: {json_object}")
+        if len(json_object) != self._length:
+            raise ValueError(
+                f"Value in not a list of length {self._length}: {json_object}"
+            )
+        return cast(
+            np.object_,
+            [self._element_converter.from_json_to_numpy(v) for v in json_object],
+        )
 
 
 TKey = TypeVar("TKey")
@@ -931,6 +963,238 @@ class MapConverter(
             self._key_converter.from_json(k): self._value_converter.from_json(v)
             for [k, v] in json_object
         }
+
+    def from_json_to_numpy(self, json_object: object) -> np.object_:
+        return cast(np.object_, self.from_json(json_object))
+
+
+class NDArrayConverterBase(
+    Generic[T, T_NP], JsonConverter[npt.NDArray[Any], np.object_]
+):
+    def __init__(
+        self,
+        overall_dtype: npt.DTypeLike,
+        element_converter: JsonConverter[T, T_NP],
+        dtype: npt.DTypeLike,
+    ) -> None:
+        super().__init__(overall_dtype)
+        self._element_converter = element_converter
+
+        (
+            self._array_dtype,
+            self._subarray_shape,
+        ) = NDArrayConverterBase._get_dtype_and_subarray_shape(
+            dtype if isinstance(dtype, np.dtype) else np.dtype(dtype)
+        )
+        if self._subarray_shape == ():
+            self._subarray_shape = None
+
+    @staticmethod
+    def _get_dtype_and_subarray_shape(
+        dtype: np.dtype[Any],
+    ) -> tuple[np.dtype[Any], tuple[int, ...]]:
+        if dtype.subdtype is None:
+            return dtype, ()
+        subres = NDArrayConverterBase._get_dtype_and_subarray_shape(dtype.subdtype[0])
+        return (subres[0], dtype.subdtype[1] + subres[1])
+
+    def check_dtype(self, input_dtype: npt.DTypeLike):
+        if input_dtype != self._array_dtype:
+            # see if it's the same dtype but packed, not aligned
+            packed_dtype = recfunctions.repack_fields(self._array_dtype, align=False, recurse=True)  # type: ignore
+            if packed_dtype != input_dtype:
+                if packed_dtype == self._array_dtype:
+                    message = f"Expected dtype {self._array_dtype}, got {input_dtype}"
+                else:
+                    message = f"Expected dtype {self._array_dtype} or {packed_dtype}, got {input_dtype}"
+
+                raise ValueError(message)
+
+
+class FixedNDArrayConverter(Generic[T, T_NP], NDArrayConverterBase[T, T_NP]):
+    def __init__(
+        self,
+        element_converter: JsonConverter[T, T_NP],
+        shape: tuple[int, ...],
+    ) -> None:
+        dtype = element_converter.overall_dtype()
+        super().__init__(np.dtype((dtype, shape)), element_converter, dtype)
+        self._shape = shape
+
+    def to_json(self, value: npt.NDArray[Any]) -> object:
+        if not isinstance(value, np.ndarray):
+            raise ValueError(f"Value in not an ndarray: {value}")
+
+        self.check_dtype(value.dtype)
+
+        required_shape = (
+            self._shape
+            if self._subarray_shape is None
+            else self._shape + self._subarray_shape
+        )
+
+        if value.shape != required_shape:
+            raise ValueError(f"Expected shape {required_shape}, got {value.shape}")
+
+        if self._subarray_shape is None:
+            return [self._element_converter.numpy_to_json(v) for v in value.flat]
+
+        reshaped = value.reshape((-1,) + self._subarray_shape)
+        return [self._element_converter.numpy_to_json(v) for v in reshaped]
+
+    def numpy_to_json(self, value: np.object_) -> object:
+        return self.to_json(cast(npt.NDArray[Any], value))
+
+    def from_json(self, json_object: object) -> npt.NDArray[Any]:
+        if not isinstance(json_object, list):
+            raise ValueError(f"Value in not a list: {json_object}")
+
+        if self._subarray_shape is None:
+            return np.array(
+                [self._element_converter.from_json_to_numpy(v) for v in json_object],
+                dtype=self._array_dtype,
+            ).reshape(self._shape)
+
+        required_shape = self._shape + self._subarray_shape
+
+        return np.array(
+            [self._element_converter.from_json_to_numpy(v) for v in json_object],
+            dtype=self._array_dtype,
+        ).reshape(required_shape)
+
+    def from_json_to_numpy(self, json_object: object) -> np.object_:
+        return cast(np.object_, self.from_json(json_object))
+
+
+class DynamicNDArrayConverter(NDArrayConverterBase[T, T_NP]):
+    def __init__(
+        self,
+        element_serializer: JsonConverter[T, T_NP],
+    ) -> None:
+        super().__init__(
+            np.object_, element_serializer, element_serializer.overall_dtype()
+        )
+
+    def to_json(self, value: npt.NDArray[Any]) -> object:
+        if not isinstance(value, np.ndarray):
+            raise ValueError(f"Value in not an ndarray: {value}")
+
+        self.check_dtype(value.dtype)
+
+        if self._subarray_shape is None:
+            return {
+                "shape": value.shape,
+                "data": [self._element_converter.numpy_to_json(v) for v in value.flat],
+            }
+
+        if len(value.shape) < len(self._subarray_shape) or (
+            value.shape[-len(self._subarray_shape) :] != self._subarray_shape
+        ):
+            raise ValueError(
+                f"The array is required to have shape (..., {(', '.join((str(i) for i in self._subarray_shape)))})"
+            )
+
+        reshaped = value.reshape((-1,) + self._subarray_shape)
+        return {
+            "shape": value.shape[: -len(self._subarray_shape)],
+            "data": [self._element_converter.numpy_to_json(v) for v in reshaped],
+        }
+
+    def numpy_to_json(self, value: np.object_) -> object:
+        return self.to_json(cast(npt.NDArray[Any], value))
+
+    def from_json(self, json_object: object) -> npt.NDArray[T_NP]:
+        if not isinstance(json_object, dict):
+            raise ValueError(f"Value in not a dict: {json_object}")
+
+        if "shape" not in json_object or "data" not in json_object:
+            raise ValueError(f"Value in not a dict with shape and data: {json_object}")
+
+        shape = tuple(json_object["shape"])
+        data = json_object["data"]
+
+        result = np.array(
+            [self._element_converter.from_json_to_numpy(v) for v in data],
+            dtype=self._array_dtype,
+        )
+
+        if self._subarray_shape is not None:
+            result = result.reshape(shape + self._subarray_shape)
+        else:
+            result = result.reshape(shape)
+
+        return result
+
+    def from_json_to_numpy(self, json_object: object) -> np.object_:
+        return cast(np.object_, self.from_json(json_object))
+
+
+class NDArrayConverter(Generic[T, T_NP], NDArrayConverterBase[T, T_NP]):
+    def __init__(
+        self,
+        element_converter: JsonConverter[T, T_NP],
+        ndims: int,
+    ) -> None:
+        super().__init__(
+            np.object_, element_converter, element_converter.overall_dtype()
+        )
+        self._ndims = ndims
+
+    def to_json(self, value: npt.NDArray[Any]) -> object:
+        if not isinstance(value, np.ndarray):
+            raise ValueError(f"Value in not an ndarray: {value}")
+
+        self.check_dtype(value.dtype)
+
+        if self._subarray_shape is None:
+            if value.ndim != self._ndims:
+                raise ValueError(f"Expected {self._ndims} dimensions, got {value.ndim}")
+
+            return {
+                "shape": value.shape,
+                "data": [self._element_converter.numpy_to_json(v) for v in value.flat],
+            }
+
+        total_dims = len(self._subarray_shape) + self._ndims
+        if value.ndim != total_dims:
+            raise ValueError(f"Expected {total_dims} dimensions, got {value.ndim}")
+
+        if value.shape[-len(self._subarray_shape) :] != self._subarray_shape:
+            raise ValueError(
+                f"The array is required to have shape (..., {(', '.join((str(i) for i in self._subarray_shape)))})"
+            )
+
+        reshaped = value.reshape((-1,) + self._subarray_shape)
+        return {
+            "shape": value.shape[: -len(self._subarray_shape)],
+            "data": [self._element_converter.numpy_to_json(v) for v in reshaped],
+        }
+
+    def numpy_to_json(self, value: np.object_) -> object:
+        return self.to_json(cast(npt.NDArray[Any], value))
+
+    def from_json(self, json_object: object) -> npt.NDArray[T_NP]:
+        if not isinstance(json_object, dict):
+            raise ValueError(f"Value in not a dict: {json_object}")
+
+        if "shape" not in json_object or "data" not in json_object:
+            raise ValueError(f"Value in not a dict with shape and data: {json_object}")
+
+        shape = tuple(json_object["shape"])
+        data = json_object["data"]
+
+        subarray_shape_not_none = (
+            () if self._subarray_shape is None else self._subarray_shape
+        )
+
+        partially_flattened_shape = (np.prod(shape),) + subarray_shape_not_none
+        result = np.ndarray(partially_flattened_shape, dtype=self._array_dtype)
+        for i in range(partially_flattened_shape[0]):
+            result[i] = self._element_converter.from_json_to_numpy(data[i])
+
+        return result.reshape(shape + subarray_shape_not_none)
+
+        return result
 
     def from_json_to_numpy(self, json_object: object) -> np.object_:
         return cast(np.object_, self.from_json(json_object))
