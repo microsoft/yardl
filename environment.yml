@@ -15,7 +15,7 @@ dependencies:
   - gxx_linux-64=11.2.0
   - hdf5=1.12.1
   - howardhinnant_date=3.0.1
-  - ipykernel=6.19.2
+  - ipykernel=6.19.2 # local
   - just=1.5.0
   - ninja=1.11.0
   - nlohmann_json=3.11.2

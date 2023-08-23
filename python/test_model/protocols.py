@@ -7,7 +7,9 @@ import datetime
 import numpy as np
 import numpy.typing as npt
 import typing
-from . import *
+
+from .types import *
+from .yardl_types import ProtocolError
 from . import yardl_types as yardl
 
 class BenchmarkFloat256x256WriterBase(abc.ABC):

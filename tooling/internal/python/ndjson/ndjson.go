@@ -27,7 +27,8 @@ import typing
 import numpy as np
 import numpy.typing as npt
 
-from . import *
+from .types import *
+from .protocols import *
 from . import _ndjson
 from . import yardl_types as yardl
 `)

@@ -67,7 +67,7 @@ cpp_version := "17"
     cd cpp/build; \
     ninja benchmark; \
     cd ../..; \
-    python/benchmarks/benchmark.py
+    python python/benchmark.py
 
 @watch-generate-test: install
     watchexec -r -c -w tooling/ -- "just install && cd models/test && yardl generate --watch"

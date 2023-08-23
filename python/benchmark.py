@@ -42,7 +42,7 @@ class MutlitingualResults(NamedTuple):
 
 
 _cpp_benchmark_path = (
-    pathlib.Path(__file__).parent / "../../cpp/build/benchmark"
+    pathlib.Path(__file__).parent / "../cpp/build/benchmark"
 ).resolve()
 
 
