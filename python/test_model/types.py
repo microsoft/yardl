@@ -1322,7 +1322,7 @@ class RecordWithComputedFields:
             return int(rec.type_index())
         raise RuntimeError("Unexpected union case")
 
-    def switch_over_sigle_value(self) -> yardl.Int32:
+    def switch_over_single_value(self) -> yardl.Int32:
         _var0 = self.int_field
         i = _var0
         return i

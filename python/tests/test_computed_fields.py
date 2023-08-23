@@ -157,7 +157,7 @@ def test_switch_expression():
     assert r.use_nested_computed_field() == 1
 
     r.int_field = 10
-    assert r.switch_over_sigle_value() == 10
+    assert r.switch_over_single_value() == 10
 
     gr = tm.GenericRecordWithComputedFields(f1=tm.T0OrT1[tm.Int32, tm.Float32].T0(42))
     assert gr.type_index() == 0

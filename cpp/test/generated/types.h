@@ -933,8 +933,8 @@ struct RecordWithComputedFields {
       union_with_nested_generic_union);
   }
 
-  int32_t SwitchOverSigleValue() const {
-    return []([[maybe_unused]]auto&& i) -> int32_t {
+  int32_t SwitchOverSingleValue() const {
+    return []([[maybe_unused]] int32_t const& i) -> int32_t {
       return i;
     }(int_field);
   }

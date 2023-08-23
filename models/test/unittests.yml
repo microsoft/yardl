@@ -548,7 +548,7 @@ RecordWithComputedFields: !record
         int: -1
         GenericRecordWithComputedFields<string, float> rec: rec.typeIndex
 
-    switchOverSigleValue:
+    switchOverSingleValue:
       !switch intField:
         int i: i
 

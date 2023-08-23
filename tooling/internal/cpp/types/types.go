@@ -307,7 +307,7 @@ func writeComputedFieldExpression(w *formatting.IndentedWriter, expression dsl.E
 			}
 			switch pattern := t.Cases[0].Pattern.(type) {
 			case *dsl.DeclarationPattern:
-				fmt.Fprintf(w, "[]([[maybe_unused]]auto&& %s) -> %s {\n", common.FieldIdentifierName(pattern.Identifier), common.TypeSyntax(t.ResolvedType))
+				fmt.Fprintf(w, "[]([[maybe_unused]] %s const& %s) -> %s {\n", common.TypeSyntax(pattern.Type), common.FieldIdentifierName(pattern.Identifier), common.TypeSyntax(t.ResolvedType))
 				w.Indented(func() {
 					w.WriteString("return ")
 					self.Visit(t.Cases[0].Expression)
