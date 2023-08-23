@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
 import datetime
 from enum import IntFlag
-from io import BufferedIOBase
 import io
 import json
 from typing import Any, Generic, Optional, TextIO, TypeVar, Union, cast

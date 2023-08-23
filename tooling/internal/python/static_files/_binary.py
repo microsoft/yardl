@@ -6,6 +6,7 @@ from abc import ABC, abstractmethod
 import struct
 import sys
 import numpy as np
+
 from numpy.lib import recfunctions
 import numpy.typing as npt
 

@@ -80,6 +80,8 @@ func writePackageInitFile(packageDir string, ns *dsl.Namespace) error {
 	common.WriteGeneratedFileHeader(w)
 
 	fmt.Fprintf(w, "from .yardl_types import *\n")
+	fmt.Fprintf(w, "from . import _binary\n")
+	fmt.Fprintf(w, "from . import _ndjson\n")
 
 	typesMembers := make([]string, 0)
 	typesMembers = append(typesMembers, "get_dtype")
