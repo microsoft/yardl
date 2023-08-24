@@ -32,7 +32,6 @@ from . import _binary
 from . import yardl_types as yardl
 `)
 
-	common.WriteTypeVars(w, ns)
 	writeProtocols(w, ns)
 	writeRecordSerializers(w, ns)
 

@@ -14,20 +14,6 @@ from .protocols import *
 from . import _ndjson
 from . import yardl_types as yardl
 
-K = typing.TypeVar("K")
-K_NP = typing.TypeVar("K_NP", bound=np.generic)
-V = typing.TypeVar("V")
-V_NP = typing.TypeVar("V_NP", bound=np.generic)
-T = typing.TypeVar("T")
-T_NP = typing.TypeVar("T_NP", bound=np.generic)
-T1 = typing.TypeVar("T1")
-T1_NP = typing.TypeVar("T1_NP", bound=np.generic)
-T2 = typing.TypeVar("T2")
-T2_NP = typing.TypeVar("T2_NP", bound=np.generic)
-T0 = typing.TypeVar("T0")
-T0_NP = typing.TypeVar("T0_NP", bound=np.generic)
-
-
 class _SmallBenchmarkRecordConverter(_ndjson.JsonConverter[SmallBenchmarkRecord, np.void]):
     def __init__(self) -> None:
         self._a_converter = _ndjson.float64_converter
@@ -1447,9 +1433,7 @@ class _GenericRecordConverter(typing.Generic[T1, T1_NP, T2, T2_NP], _ndjson.Json
         self._scalar_2_converter = t2_converter
         self._scalar_2_supports_none = self._scalar_2_converter.supports_none()
         self._vector_1_converter = _ndjson.VectorConverter(t1_converter)
-        self._vector_1_supports_none = self._vector_1_converter.supports_none()
         self._image_2_converter = _ndjson.NDArrayConverter(t2_converter, 2)
-        self._image_2_supports_none = self._image_2_converter.supports_none()
         super().__init__(np.dtype([
             ("scalar_1", self._scalar_1_converter.overall_dtype()),
             ("scalar_2", self._scalar_2_converter.overall_dtype()),
@@ -1466,10 +1450,8 @@ class _GenericRecordConverter(typing.Generic[T1, T1_NP, T2, T2_NP], _ndjson.Json
             json_object["scalar1"] = self._scalar_1_converter.to_json(value.scalar_1)
         if not self._scalar_2_supports_none or value.scalar_2 is not None:
             json_object["scalar2"] = self._scalar_2_converter.to_json(value.scalar_2)
-        if not self._vector_1_supports_none or value.vector_1 is not None:
-            json_object["vector1"] = self._vector_1_converter.to_json(value.vector_1)
-        if not self._image_2_supports_none or value.image_2 is not None:
-            json_object["image2"] = self._image_2_converter.to_json(value.image_2)
+        json_object["vector1"] = self._vector_1_converter.to_json(value.vector_1)
+        json_object["image2"] = self._image_2_converter.to_json(value.image_2)
         return json_object
 
     def numpy_to_json(self, value: np.void) -> object:
@@ -1481,10 +1463,8 @@ class _GenericRecordConverter(typing.Generic[T1, T1_NP, T2, T2_NP], _ndjson.Json
             json_object["scalar1"] = self._scalar_1_converter.numpy_to_json(value["scalar_1"])
         if not self._scalar_2_supports_none or value["scalar_2"] is not None:
             json_object["scalar2"] = self._scalar_2_converter.numpy_to_json(value["scalar_2"])
-        if not self._vector_1_supports_none or value["vector_1"] is not None:
-            json_object["vector1"] = self._vector_1_converter.numpy_to_json(value["vector_1"])
-        if not self._image_2_supports_none or value["image_2"] is not None:
-            json_object["image2"] = self._image_2_converter.numpy_to_json(value["image_2"])
+        json_object["vector1"] = self._vector_1_converter.numpy_to_json(value["vector_1"])
+        json_object["image2"] = self._image_2_converter.numpy_to_json(value["image_2"])
         return json_object
 
     def from_json(self, json_object: object) -> GenericRecord[T1, T2, T2_NP]:
@@ -1493,8 +1473,8 @@ class _GenericRecordConverter(typing.Generic[T1, T1_NP, T2, T2_NP], _ndjson.Json
         return GenericRecord[T1, T2, T2_NP](
             scalar_1=self._scalar_1_converter.from_json(json_object.get("scalar1") if self._scalar_1_supports_none else json_object["scalar1"]),
             scalar_2=self._scalar_2_converter.from_json(json_object.get("scalar2") if self._scalar_2_supports_none else json_object["scalar2"]),
-            vector_1=self._vector_1_converter.from_json(json_object.get("vector1") if self._vector_1_supports_none else json_object["vector1"]),
-            image_2=self._image_2_converter.from_json(json_object.get("image2") if self._image_2_supports_none else json_object["image2"]),
+            vector_1=self._vector_1_converter.from_json(json_object["vector1"],),
+            image_2=self._image_2_converter.from_json(json_object["image2"],),
         )
 
     def from_json_to_numpy(self, json_object: object) -> np.void:
@@ -1503,8 +1483,8 @@ class _GenericRecordConverter(typing.Generic[T1, T1_NP, T2, T2_NP], _ndjson.Json
         return (
             self._scalar_1_converter.from_json_to_numpy(json_object.get("scalar1") if self._scalar_1_supports_none else json_object["scalar1"]),
             self._scalar_2_converter.from_json_to_numpy(json_object.get("scalar2") if self._scalar_2_supports_none else json_object["scalar2"]),
-            self._vector_1_converter.from_json_to_numpy(json_object.get("vector1") if self._vector_1_supports_none else json_object["vector1"]),
-            self._image_2_converter.from_json_to_numpy(json_object.get("image2") if self._image_2_supports_none else json_object["image2"]),
+            self._vector_1_converter.from_json_to_numpy(json_object["vector1"]),
+            self._image_2_converter.from_json_to_numpy(json_object["image2"]),
         ) # type:ignore 
 
 
@@ -1561,7 +1541,6 @@ class _MyTupleConverter(typing.Generic[T1, T1_NP, T2, T2_NP], _ndjson.JsonConver
 class _GenericRecordWithComputedFieldsConverter(typing.Generic[T0, T0_NP, T1, T1_NP], _ndjson.JsonConverter[GenericRecordWithComputedFields[T0, T1], np.void]):
     def __init__(self, t0_converter: _ndjson.JsonConverter[T0, T0_NP], t1_converter: _ndjson.JsonConverter[T1, T1_NP]) -> None:
         self._f1_converter = _ndjson.UnionConverter(T0OrT1, [(T0OrT1[T0, T1].T0, t0_converter, [dict]), (T0OrT1[T0, T1].T1, t1_converter, [dict])], False)
-        self._f1_supports_none = self._f1_converter.supports_none()
         super().__init__(np.dtype([
             ("f1", self._f1_converter.overall_dtype()),
         ]))
@@ -1571,8 +1550,7 @@ class _GenericRecordWithComputedFieldsConverter(typing.Generic[T0, T0_NP, T1, T1
             raise TypeError("Expected 'GenericRecordWithComputedFields[T0, T1]' instance")
         json_object = {}
 
-        if not self._f1_supports_none or value.f1 is not None:
-            json_object["f1"] = self._f1_converter.to_json(value.f1)
+        json_object["f1"] = self._f1_converter.to_json(value.f1)
         return json_object
 
     def numpy_to_json(self, value: np.void) -> object:
@@ -1580,22 +1558,21 @@ class _GenericRecordWithComputedFieldsConverter(typing.Generic[T0, T0_NP, T1, T1
             raise TypeError("Expected 'np.void' instance")
         json_object = {}
 
-        if not self._f1_supports_none or value["f1"] is not None:
-            json_object["f1"] = self._f1_converter.numpy_to_json(value["f1"])
+        json_object["f1"] = self._f1_converter.numpy_to_json(value["f1"])
         return json_object
 
     def from_json(self, json_object: object) -> GenericRecordWithComputedFields[T0, T1]:
         if not isinstance(json_object, dict):
             raise TypeError("Expected 'dict' instance")
         return GenericRecordWithComputedFields[T0, T1](
-            f1=self._f1_converter.from_json(json_object.get("f1") if self._f1_supports_none else json_object["f1"]),
+            f1=self._f1_converter.from_json(json_object["f1"],),
         )
 
     def from_json_to_numpy(self, json_object: object) -> np.void:
         if not isinstance(json_object, dict):
             raise TypeError("Expected 'dict' instance")
         return (
-            self._f1_converter.from_json_to_numpy(json_object.get("f1") if self._f1_supports_none else json_object["f1"]),
+            self._f1_converter.from_json_to_numpy(json_object["f1"]),
         ) # type:ignore 
 
 
@@ -1737,9 +1714,9 @@ class _RecordWithKeywordFieldsConverter(_ndjson.JsonConverter[RecordWithKeywordF
         self._sizeof_converter = _ndjson.NDArrayConverter(_ndjson.int32_converter, 2)
         self._if__converter = _ndjson.EnumConverter(EnumWithKeywordSymbols, np.int32, _enum_with_keyword_symbols_name_to_value_map, _enum_with_keyword_symbols_value_to_name_map)
         super().__init__(np.dtype([
-            ("int_", self._int_converter.overall_dtype()),
+            ("int_", self._int__converter.overall_dtype()),
             ("sizeof", self._sizeof_converter.overall_dtype()),
-            ("if_", self._if_converter.overall_dtype()),
+            ("if_", self._if__converter.overall_dtype()),
         ]))
 
     def to_json(self, value: RecordWithKeywordFields) -> object:
@@ -1958,11 +1935,13 @@ class NDJsonScalarsWriter(_ndjson.NDJsonProtocolWriter, ScalarsWriterBase):
         _ndjson.NDJsonProtocolWriter.__init__(self, stream, ScalarsWriterBase.schema)
 
     def _write_int32(self, value: yardl.Int32) -> None:
-        json_value = _ndjson.int32_converter.to_json(value)
+        converter = _ndjson.int32_converter
+        json_value = converter.to_json(value)
         self._write_json_line({"int32": json_value})
 
     def _write_record(self, value: RecordWithPrimitives) -> None:
-        json_value = _RecordWithPrimitivesConverter().to_json(value)
+        converter = _RecordWithPrimitivesConverter()
+        json_value = converter.to_json(value)
         self._write_json_line({"record": json_value})
 
 
@@ -1976,11 +1955,13 @@ class NDJsonScalarsReader(_ndjson.NDJsonProtocolReader, ScalarsReaderBase):
 
     def _read_int32(self) -> yardl.Int32:
         json_object = self._read_json_line("int32", True)
-        return _ndjson.int32_converter.from_json(json_object)
+        converter = _ndjson.int32_converter
+        return converter.from_json(json_object)
 
     def _read_record(self) -> RecordWithPrimitives:
         json_object = self._read_json_line("record", True)
-        return _RecordWithPrimitivesConverter().from_json(json_object)
+        converter = _RecordWithPrimitivesConverter()
+        return converter.from_json(json_object)
 
 class NDJsonScalarOptionalsWriter(_ndjson.NDJsonProtocolWriter, ScalarOptionalsWriterBase):
     """NDJson writer for the ScalarOptionals protocol."""
@@ -1991,19 +1972,23 @@ class NDJsonScalarOptionalsWriter(_ndjson.NDJsonProtocolWriter, ScalarOptionalsW
         _ndjson.NDJsonProtocolWriter.__init__(self, stream, ScalarOptionalsWriterBase.schema)
 
     def _write_optional_int(self, value: typing.Optional[yardl.Int32]) -> None:
-        json_value = _ndjson.OptionalConverter(_ndjson.int32_converter).to_json(value)
+        converter = _ndjson.OptionalConverter(_ndjson.int32_converter)
+        json_value = converter.to_json(value)
         self._write_json_line({"optionalInt": json_value})
 
     def _write_optional_record(self, value: typing.Optional[SimpleRecord]) -> None:
-        json_value = _ndjson.OptionalConverter(_SimpleRecordConverter()).to_json(value)
+        converter = _ndjson.OptionalConverter(_SimpleRecordConverter())
+        json_value = converter.to_json(value)
         self._write_json_line({"optionalRecord": json_value})
 
     def _write_record_with_optional_fields(self, value: RecordWithOptionalFields) -> None:
-        json_value = _RecordWithOptionalFieldsConverter().to_json(value)
+        converter = _RecordWithOptionalFieldsConverter()
+        json_value = converter.to_json(value)
         self._write_json_line({"recordWithOptionalFields": json_value})
 
     def _write_optional_record_with_optional_fields(self, value: typing.Optional[RecordWithOptionalFields]) -> None:
-        json_value = _ndjson.OptionalConverter(_RecordWithOptionalFieldsConverter()).to_json(value)
+        converter = _ndjson.OptionalConverter(_RecordWithOptionalFieldsConverter())
+        json_value = converter.to_json(value)
         self._write_json_line({"optionalRecordWithOptionalFields": json_value})
 
 
@@ -2017,19 +2002,23 @@ class NDJsonScalarOptionalsReader(_ndjson.NDJsonProtocolReader, ScalarOptionalsR
 
     def _read_optional_int(self) -> typing.Optional[yardl.Int32]:
         json_object = self._read_json_line("optionalInt", True)
-        return _ndjson.OptionalConverter(_ndjson.int32_converter).from_json(json_object)
+        converter = _ndjson.OptionalConverter(_ndjson.int32_converter)
+        return converter.from_json(json_object)
 
     def _read_optional_record(self) -> typing.Optional[SimpleRecord]:
         json_object = self._read_json_line("optionalRecord", True)
-        return _ndjson.OptionalConverter(_SimpleRecordConverter()).from_json(json_object)
+        converter = _ndjson.OptionalConverter(_SimpleRecordConverter())
+        return converter.from_json(json_object)
 
     def _read_record_with_optional_fields(self) -> RecordWithOptionalFields:
         json_object = self._read_json_line("recordWithOptionalFields", True)
-        return _RecordWithOptionalFieldsConverter().from_json(json_object)
+        converter = _RecordWithOptionalFieldsConverter()
+        return converter.from_json(json_object)
 
     def _read_optional_record_with_optional_fields(self) -> typing.Optional[RecordWithOptionalFields]:
         json_object = self._read_json_line("optionalRecordWithOptionalFields", True)
-        return _ndjson.OptionalConverter(_RecordWithOptionalFieldsConverter()).from_json(json_object)
+        converter = _ndjson.OptionalConverter(_RecordWithOptionalFieldsConverter())
+        return converter.from_json(json_object)
 
 class NDJsonNestedRecordsWriter(_ndjson.NDJsonProtocolWriter, NestedRecordsWriterBase):
     """NDJson writer for the NestedRecords protocol."""
@@ -2040,7 +2029,8 @@ class NDJsonNestedRecordsWriter(_ndjson.NDJsonProtocolWriter, NestedRecordsWrite
         _ndjson.NDJsonProtocolWriter.__init__(self, stream, NestedRecordsWriterBase.schema)
 
     def _write_tuple_with_records(self, value: TupleWithRecords) -> None:
-        json_value = _TupleWithRecordsConverter().to_json(value)
+        converter = _TupleWithRecordsConverter()
+        json_value = converter.to_json(value)
         self._write_json_line({"tupleWithRecords": json_value})
 
 
@@ -2054,7 +2044,8 @@ class NDJsonNestedRecordsReader(_ndjson.NDJsonProtocolReader, NestedRecordsReade
 
     def _read_tuple_with_records(self) -> TupleWithRecords:
         json_object = self._read_json_line("tupleWithRecords", True)
-        return _TupleWithRecordsConverter().from_json(json_object)
+        converter = _TupleWithRecordsConverter()
+        return converter.from_json(json_object)
 
 class NDJsonVlensWriter(_ndjson.NDJsonProtocolWriter, VlensWriterBase):
     """NDJson writer for the Vlens protocol."""
@@ -2065,19 +2056,23 @@ class NDJsonVlensWriter(_ndjson.NDJsonProtocolWriter, VlensWriterBase):
         _ndjson.NDJsonProtocolWriter.__init__(self, stream, VlensWriterBase.schema)
 
     def _write_int_vector(self, value: list[yardl.Int32]) -> None:
-        json_value = _ndjson.VectorConverter(_ndjson.int32_converter).to_json(value)
+        converter = _ndjson.VectorConverter(_ndjson.int32_converter)
+        json_value = converter.to_json(value)
         self._write_json_line({"intVector": json_value})
 
     def _write_complex_vector(self, value: list[yardl.ComplexFloat]) -> None:
-        json_value = _ndjson.VectorConverter(_ndjson.complexfloat32_converter).to_json(value)
+        converter = _ndjson.VectorConverter(_ndjson.complexfloat32_converter)
+        json_value = converter.to_json(value)
         self._write_json_line({"complexVector": json_value})
 
     def _write_record_with_vlens(self, value: RecordWithVlens) -> None:
-        json_value = _RecordWithVlensConverter().to_json(value)
+        converter = _RecordWithVlensConverter()
+        json_value = converter.to_json(value)
         self._write_json_line({"recordWithVlens": json_value})
 
     def _write_vlen_of_record_with_vlens(self, value: list[RecordWithVlens]) -> None:
-        json_value = _ndjson.VectorConverter(_RecordWithVlensConverter()).to_json(value)
+        converter = _ndjson.VectorConverter(_RecordWithVlensConverter())
+        json_value = converter.to_json(value)
         self._write_json_line({"vlenOfRecordWithVlens": json_value})
 
 
@@ -2091,19 +2086,23 @@ class NDJsonVlensReader(_ndjson.NDJsonProtocolReader, VlensReaderBase):
 
     def _read_int_vector(self) -> list[yardl.Int32]:
         json_object = self._read_json_line("intVector", True)
-        return _ndjson.VectorConverter(_ndjson.int32_converter).from_json(json_object)
+        converter = _ndjson.VectorConverter(_ndjson.int32_converter)
+        return converter.from_json(json_object)
 
     def _read_complex_vector(self) -> list[yardl.ComplexFloat]:
         json_object = self._read_json_line("complexVector", True)
-        return _ndjson.VectorConverter(_ndjson.complexfloat32_converter).from_json(json_object)
+        converter = _ndjson.VectorConverter(_ndjson.complexfloat32_converter)
+        return converter.from_json(json_object)
 
     def _read_record_with_vlens(self) -> RecordWithVlens:
         json_object = self._read_json_line("recordWithVlens", True)
-        return _RecordWithVlensConverter().from_json(json_object)
+        converter = _RecordWithVlensConverter()
+        return converter.from_json(json_object)
 
     def _read_vlen_of_record_with_vlens(self) -> list[RecordWithVlens]:
         json_object = self._read_json_line("vlenOfRecordWithVlens", True)
-        return _ndjson.VectorConverter(_RecordWithVlensConverter()).from_json(json_object)
+        converter = _ndjson.VectorConverter(_RecordWithVlensConverter())
+        return converter.from_json(json_object)
 
 class NDJsonStringsWriter(_ndjson.NDJsonProtocolWriter, StringsWriterBase):
     """NDJson writer for the Strings protocol."""
@@ -2114,11 +2113,13 @@ class NDJsonStringsWriter(_ndjson.NDJsonProtocolWriter, StringsWriterBase):
         _ndjson.NDJsonProtocolWriter.__init__(self, stream, StringsWriterBase.schema)
 
     def _write_single_string(self, value: str) -> None:
-        json_value = _ndjson.string_converter.to_json(value)
+        converter = _ndjson.string_converter
+        json_value = converter.to_json(value)
         self._write_json_line({"singleString": json_value})
 
     def _write_rec_with_string(self, value: RecordWithStrings) -> None:
-        json_value = _RecordWithStringsConverter().to_json(value)
+        converter = _RecordWithStringsConverter()
+        json_value = converter.to_json(value)
         self._write_json_line({"recWithString": json_value})
 
 
@@ -2132,11 +2133,13 @@ class NDJsonStringsReader(_ndjson.NDJsonProtocolReader, StringsReaderBase):
 
     def _read_single_string(self) -> str:
         json_object = self._read_json_line("singleString", True)
-        return _ndjson.string_converter.from_json(json_object)
+        converter = _ndjson.string_converter
+        return converter.from_json(json_object)
 
     def _read_rec_with_string(self) -> RecordWithStrings:
         json_object = self._read_json_line("recWithString", True)
-        return _RecordWithStringsConverter().from_json(json_object)
+        converter = _RecordWithStringsConverter()
+        return converter.from_json(json_object)
 
 class NDJsonOptionalVectorsWriter(_ndjson.NDJsonProtocolWriter, OptionalVectorsWriterBase):
     """NDJson writer for the OptionalVectors protocol."""
@@ -2147,7 +2150,8 @@ class NDJsonOptionalVectorsWriter(_ndjson.NDJsonProtocolWriter, OptionalVectorsW
         _ndjson.NDJsonProtocolWriter.__init__(self, stream, OptionalVectorsWriterBase.schema)
 
     def _write_record_with_optional_vector(self, value: RecordWithOptionalVector) -> None:
-        json_value = _RecordWithOptionalVectorConverter().to_json(value)
+        converter = _RecordWithOptionalVectorConverter()
+        json_value = converter.to_json(value)
         self._write_json_line({"recordWithOptionalVector": json_value})
 
 
@@ -2161,7 +2165,8 @@ class NDJsonOptionalVectorsReader(_ndjson.NDJsonProtocolReader, OptionalVectorsR
 
     def _read_record_with_optional_vector(self) -> RecordWithOptionalVector:
         json_object = self._read_json_line("recordWithOptionalVector", True)
-        return _RecordWithOptionalVectorConverter().from_json(json_object)
+        converter = _RecordWithOptionalVectorConverter()
+        return converter.from_json(json_object)
 
 class NDJsonFixedVectorsWriter(_ndjson.NDJsonProtocolWriter, FixedVectorsWriterBase):
     """NDJson writer for the FixedVectors protocol."""
@@ -2172,19 +2177,23 @@ class NDJsonFixedVectorsWriter(_ndjson.NDJsonProtocolWriter, FixedVectorsWriterB
         _ndjson.NDJsonProtocolWriter.__init__(self, stream, FixedVectorsWriterBase.schema)
 
     def _write_fixed_int_vector(self, value: list[yardl.Int32]) -> None:
-        json_value = _ndjson.FixedVectorConverter(_ndjson.int32_converter, 5).to_json(value)
+        converter = _ndjson.FixedVectorConverter(_ndjson.int32_converter, 5)
+        json_value = converter.to_json(value)
         self._write_json_line({"fixedIntVector": json_value})
 
     def _write_fixed_simple_record_vector(self, value: list[SimpleRecord]) -> None:
-        json_value = _ndjson.FixedVectorConverter(_SimpleRecordConverter(), 3).to_json(value)
+        converter = _ndjson.FixedVectorConverter(_SimpleRecordConverter(), 3)
+        json_value = converter.to_json(value)
         self._write_json_line({"fixedSimpleRecordVector": json_value})
 
     def _write_fixed_record_with_vlens_vector(self, value: list[RecordWithVlens]) -> None:
-        json_value = _ndjson.FixedVectorConverter(_RecordWithVlensConverter(), 2).to_json(value)
+        converter = _ndjson.FixedVectorConverter(_RecordWithVlensConverter(), 2)
+        json_value = converter.to_json(value)
         self._write_json_line({"fixedRecordWithVlensVector": json_value})
 
     def _write_record_with_fixed_vectors(self, value: RecordWithFixedVectors) -> None:
-        json_value = _RecordWithFixedVectorsConverter().to_json(value)
+        converter = _RecordWithFixedVectorsConverter()
+        json_value = converter.to_json(value)
         self._write_json_line({"recordWithFixedVectors": json_value})
 
 
@@ -2198,19 +2207,23 @@ class NDJsonFixedVectorsReader(_ndjson.NDJsonProtocolReader, FixedVectorsReaderB
 
     def _read_fixed_int_vector(self) -> list[yardl.Int32]:
         json_object = self._read_json_line("fixedIntVector", True)
-        return _ndjson.FixedVectorConverter(_ndjson.int32_converter, 5).from_json(json_object)
+        converter = _ndjson.FixedVectorConverter(_ndjson.int32_converter, 5)
+        return converter.from_json(json_object)
 
     def _read_fixed_simple_record_vector(self) -> list[SimpleRecord]:
         json_object = self._read_json_line("fixedSimpleRecordVector", True)
-        return _ndjson.FixedVectorConverter(_SimpleRecordConverter(), 3).from_json(json_object)
+        converter = _ndjson.FixedVectorConverter(_SimpleRecordConverter(), 3)
+        return converter.from_json(json_object)
 
     def _read_fixed_record_with_vlens_vector(self) -> list[RecordWithVlens]:
         json_object = self._read_json_line("fixedRecordWithVlensVector", True)
-        return _ndjson.FixedVectorConverter(_RecordWithVlensConverter(), 2).from_json(json_object)
+        converter = _ndjson.FixedVectorConverter(_RecordWithVlensConverter(), 2)
+        return converter.from_json(json_object)
 
     def _read_record_with_fixed_vectors(self) -> RecordWithFixedVectors:
         json_object = self._read_json_line("recordWithFixedVectors", True)
-        return _RecordWithFixedVectorsConverter().from_json(json_object)
+        converter = _RecordWithFixedVectorsConverter()
+        return converter.from_json(json_object)
 
 class NDJsonStreamsWriter(_ndjson.NDJsonProtocolWriter, StreamsWriterBase):
     """NDJson writer for the Streams protocol."""
@@ -2282,23 +2295,28 @@ class NDJsonFixedArraysWriter(_ndjson.NDJsonProtocolWriter, FixedArraysWriterBas
         _ndjson.NDJsonProtocolWriter.__init__(self, stream, FixedArraysWriterBase.schema)
 
     def _write_ints(self, value: npt.NDArray[np.int32]) -> None:
-        json_value = _ndjson.FixedNDArrayConverter(_ndjson.int32_converter, (2, 3,)).to_json(value)
+        converter = _ndjson.FixedNDArrayConverter(_ndjson.int32_converter, (2, 3,))
+        json_value = converter.to_json(value)
         self._write_json_line({"ints": json_value})
 
     def _write_fixed_simple_record_array(self, value: npt.NDArray[np.void]) -> None:
-        json_value = _ndjson.FixedNDArrayConverter(_SimpleRecordConverter(), (3, 2,)).to_json(value)
+        converter = _ndjson.FixedNDArrayConverter(_SimpleRecordConverter(), (3, 2,))
+        json_value = converter.to_json(value)
         self._write_json_line({"fixedSimpleRecordArray": json_value})
 
     def _write_fixed_record_with_vlens_array(self, value: npt.NDArray[np.void]) -> None:
-        json_value = _ndjson.FixedNDArrayConverter(_RecordWithVlensConverter(), (2, 2,)).to_json(value)
+        converter = _ndjson.FixedNDArrayConverter(_RecordWithVlensConverter(), (2, 2,))
+        json_value = converter.to_json(value)
         self._write_json_line({"fixedRecordWithVlensArray": json_value})
 
     def _write_record_with_fixed_arrays(self, value: RecordWithFixedArrays) -> None:
-        json_value = _RecordWithFixedArraysConverter().to_json(value)
+        converter = _RecordWithFixedArraysConverter()
+        json_value = converter.to_json(value)
         self._write_json_line({"recordWithFixedArrays": json_value})
 
     def _write_named_array(self, value: NamedFixedNDArray) -> None:
-        json_value = _ndjson.FixedNDArrayConverter(_ndjson.int32_converter, (2, 4,)).to_json(value)
+        converter = _ndjson.FixedNDArrayConverter(_ndjson.int32_converter, (2, 4,))
+        json_value = converter.to_json(value)
         self._write_json_line({"namedArray": json_value})
 
 
@@ -2312,23 +2330,28 @@ class NDJsonFixedArraysReader(_ndjson.NDJsonProtocolReader, FixedArraysReaderBas
 
     def _read_ints(self) -> npt.NDArray[np.int32]:
         json_object = self._read_json_line("ints", True)
-        return _ndjson.FixedNDArrayConverter(_ndjson.int32_converter, (2, 3,)).from_json(json_object)
+        converter = _ndjson.FixedNDArrayConverter(_ndjson.int32_converter, (2, 3,))
+        return converter.from_json(json_object)
 
     def _read_fixed_simple_record_array(self) -> npt.NDArray[np.void]:
         json_object = self._read_json_line("fixedSimpleRecordArray", True)
-        return _ndjson.FixedNDArrayConverter(_SimpleRecordConverter(), (3, 2,)).from_json(json_object)
+        converter = _ndjson.FixedNDArrayConverter(_SimpleRecordConverter(), (3, 2,))
+        return converter.from_json(json_object)
 
     def _read_fixed_record_with_vlens_array(self) -> npt.NDArray[np.void]:
         json_object = self._read_json_line("fixedRecordWithVlensArray", True)
-        return _ndjson.FixedNDArrayConverter(_RecordWithVlensConverter(), (2, 2,)).from_json(json_object)
+        converter = _ndjson.FixedNDArrayConverter(_RecordWithVlensConverter(), (2, 2,))
+        return converter.from_json(json_object)
 
     def _read_record_with_fixed_arrays(self) -> RecordWithFixedArrays:
         json_object = self._read_json_line("recordWithFixedArrays", True)
-        return _RecordWithFixedArraysConverter().from_json(json_object)
+        converter = _RecordWithFixedArraysConverter()
+        return converter.from_json(json_object)
 
     def _read_named_array(self) -> NamedFixedNDArray:
         json_object = self._read_json_line("namedArray", True)
-        return _ndjson.FixedNDArrayConverter(_ndjson.int32_converter, (2, 4,)).from_json(json_object)
+        converter = _ndjson.FixedNDArrayConverter(_ndjson.int32_converter, (2, 4,))
+        return converter.from_json(json_object)
 
 class NDJsonSubarraysWriter(_ndjson.NDJsonProtocolWriter, SubarraysWriterBase):
     """NDJson writer for the Subarrays protocol."""
@@ -2339,39 +2362,48 @@ class NDJsonSubarraysWriter(_ndjson.NDJsonProtocolWriter, SubarraysWriterBase):
         _ndjson.NDJsonProtocolWriter.__init__(self, stream, SubarraysWriterBase.schema)
 
     def _write_dynamic_with_fixed_int_subarray(self, value: npt.NDArray[np.int32]) -> None:
-        json_value = _ndjson.DynamicNDArrayConverter(_ndjson.FixedNDArrayConverter(_ndjson.int32_converter, (3,))).to_json(value)
+        converter = _ndjson.DynamicNDArrayConverter(_ndjson.FixedNDArrayConverter(_ndjson.int32_converter, (3,)))
+        json_value = converter.to_json(value)
         self._write_json_line({"dynamicWithFixedIntSubarray": json_value})
 
     def _write_dynamic_with_fixed_float_subarray(self, value: npt.NDArray[np.float32]) -> None:
-        json_value = _ndjson.DynamicNDArrayConverter(_ndjson.FixedNDArrayConverter(_ndjson.float32_converter, (3,))).to_json(value)
+        converter = _ndjson.DynamicNDArrayConverter(_ndjson.FixedNDArrayConverter(_ndjson.float32_converter, (3,)))
+        json_value = converter.to_json(value)
         self._write_json_line({"dynamicWithFixedFloatSubarray": json_value})
 
     def _write_known_dim_count_with_fixed_int_subarray(self, value: npt.NDArray[np.int32]) -> None:
-        json_value = _ndjson.NDArrayConverter(_ndjson.FixedNDArrayConverter(_ndjson.int32_converter, (3,)), 1).to_json(value)
+        converter = _ndjson.NDArrayConverter(_ndjson.FixedNDArrayConverter(_ndjson.int32_converter, (3,)), 1)
+        json_value = converter.to_json(value)
         self._write_json_line({"knownDimCountWithFixedIntSubarray": json_value})
 
     def _write_known_dim_count_with_fixed_float_subarray(self, value: npt.NDArray[np.float32]) -> None:
-        json_value = _ndjson.NDArrayConverter(_ndjson.FixedNDArrayConverter(_ndjson.float32_converter, (3,)), 1).to_json(value)
+        converter = _ndjson.NDArrayConverter(_ndjson.FixedNDArrayConverter(_ndjson.float32_converter, (3,)), 1)
+        json_value = converter.to_json(value)
         self._write_json_line({"knownDimCountWithFixedFloatSubarray": json_value})
 
     def _write_fixed_with_fixed_int_subarray(self, value: npt.NDArray[np.int32]) -> None:
-        json_value = _ndjson.FixedNDArrayConverter(_ndjson.FixedNDArrayConverter(_ndjson.int32_converter, (3,)), (2,)).to_json(value)
+        converter = _ndjson.FixedNDArrayConverter(_ndjson.FixedNDArrayConverter(_ndjson.int32_converter, (3,)), (2,))
+        json_value = converter.to_json(value)
         self._write_json_line({"fixedWithFixedIntSubarray": json_value})
 
     def _write_fixed_with_fixed_float_subarray(self, value: npt.NDArray[np.float32]) -> None:
-        json_value = _ndjson.FixedNDArrayConverter(_ndjson.FixedNDArrayConverter(_ndjson.float32_converter, (3,)), (2,)).to_json(value)
+        converter = _ndjson.FixedNDArrayConverter(_ndjson.FixedNDArrayConverter(_ndjson.float32_converter, (3,)), (2,))
+        json_value = converter.to_json(value)
         self._write_json_line({"fixedWithFixedFloatSubarray": json_value})
 
     def _write_nested_subarray(self, value: npt.NDArray[np.int32]) -> None:
-        json_value = _ndjson.DynamicNDArrayConverter(_ndjson.FixedNDArrayConverter(_ndjson.FixedNDArrayConverter(_ndjson.int32_converter, (3,)), (2,))).to_json(value)
+        converter = _ndjson.DynamicNDArrayConverter(_ndjson.FixedNDArrayConverter(_ndjson.FixedNDArrayConverter(_ndjson.int32_converter, (3,)), (2,)))
+        json_value = converter.to_json(value)
         self._write_json_line({"nestedSubarray": json_value})
 
     def _write_dynamic_with_fixed_vector_subarray(self, value: npt.NDArray[np.int32]) -> None:
-        json_value = _ndjson.DynamicNDArrayConverter(_ndjson.FixedVectorConverter(_ndjson.int32_converter, 3)).to_json(value)
+        converter = _ndjson.DynamicNDArrayConverter(_ndjson.FixedVectorConverter(_ndjson.int32_converter, 3))
+        json_value = converter.to_json(value)
         self._write_json_line({"dynamicWithFixedVectorSubarray": json_value})
 
     def _write_generic_subarray(self, value: Image[np.int32]) -> None:
-        json_value = _ndjson.NDArrayConverter(_ndjson.FixedNDArrayConverter(_ndjson.int32_converter, (3,)), 2).to_json(value)
+        converter = _ndjson.NDArrayConverter(_ndjson.FixedNDArrayConverter(_ndjson.int32_converter, (3,)), 2)
+        json_value = converter.to_json(value)
         self._write_json_line({"genericSubarray": json_value})
 
 
@@ -2385,39 +2417,48 @@ class NDJsonSubarraysReader(_ndjson.NDJsonProtocolReader, SubarraysReaderBase):
 
     def _read_dynamic_with_fixed_int_subarray(self) -> npt.NDArray[np.int32]:
         json_object = self._read_json_line("dynamicWithFixedIntSubarray", True)
-        return _ndjson.DynamicNDArrayConverter(_ndjson.FixedNDArrayConverter(_ndjson.int32_converter, (3,))).from_json(json_object)
+        converter = _ndjson.DynamicNDArrayConverter(_ndjson.FixedNDArrayConverter(_ndjson.int32_converter, (3,)))
+        return converter.from_json(json_object)
 
     def _read_dynamic_with_fixed_float_subarray(self) -> npt.NDArray[np.float32]:
         json_object = self._read_json_line("dynamicWithFixedFloatSubarray", True)
-        return _ndjson.DynamicNDArrayConverter(_ndjson.FixedNDArrayConverter(_ndjson.float32_converter, (3,))).from_json(json_object)
+        converter = _ndjson.DynamicNDArrayConverter(_ndjson.FixedNDArrayConverter(_ndjson.float32_converter, (3,)))
+        return converter.from_json(json_object)
 
     def _read_known_dim_count_with_fixed_int_subarray(self) -> npt.NDArray[np.int32]:
         json_object = self._read_json_line("knownDimCountWithFixedIntSubarray", True)
-        return _ndjson.NDArrayConverter(_ndjson.FixedNDArrayConverter(_ndjson.int32_converter, (3,)), 1).from_json(json_object)
+        converter = _ndjson.NDArrayConverter(_ndjson.FixedNDArrayConverter(_ndjson.int32_converter, (3,)), 1)
+        return converter.from_json(json_object)
 
     def _read_known_dim_count_with_fixed_float_subarray(self) -> npt.NDArray[np.float32]:
         json_object = self._read_json_line("knownDimCountWithFixedFloatSubarray", True)
-        return _ndjson.NDArrayConverter(_ndjson.FixedNDArrayConverter(_ndjson.float32_converter, (3,)), 1).from_json(json_object)
+        converter = _ndjson.NDArrayConverter(_ndjson.FixedNDArrayConverter(_ndjson.float32_converter, (3,)), 1)
+        return converter.from_json(json_object)
 
     def _read_fixed_with_fixed_int_subarray(self) -> npt.NDArray[np.int32]:
         json_object = self._read_json_line("fixedWithFixedIntSubarray", True)
-        return _ndjson.FixedNDArrayConverter(_ndjson.FixedNDArrayConverter(_ndjson.int32_converter, (3,)), (2,)).from_json(json_object)
+        converter = _ndjson.FixedNDArrayConverter(_ndjson.FixedNDArrayConverter(_ndjson.int32_converter, (3,)), (2,))
+        return converter.from_json(json_object)
 
     def _read_fixed_with_fixed_float_subarray(self) -> npt.NDArray[np.float32]:
         json_object = self._read_json_line("fixedWithFixedFloatSubarray", True)
-        return _ndjson.FixedNDArrayConverter(_ndjson.FixedNDArrayConverter(_ndjson.float32_converter, (3,)), (2,)).from_json(json_object)
+        converter = _ndjson.FixedNDArrayConverter(_ndjson.FixedNDArrayConverter(_ndjson.float32_converter, (3,)), (2,))
+        return converter.from_json(json_object)
 
     def _read_nested_subarray(self) -> npt.NDArray[np.int32]:
         json_object = self._read_json_line("nestedSubarray", True)
-        return _ndjson.DynamicNDArrayConverter(_ndjson.FixedNDArrayConverter(_ndjson.FixedNDArrayConverter(_ndjson.int32_converter, (3,)), (2,))).from_json(json_object)
+        converter = _ndjson.DynamicNDArrayConverter(_ndjson.FixedNDArrayConverter(_ndjson.FixedNDArrayConverter(_ndjson.int32_converter, (3,)), (2,)))
+        return converter.from_json(json_object)
 
     def _read_dynamic_with_fixed_vector_subarray(self) -> npt.NDArray[np.int32]:
         json_object = self._read_json_line("dynamicWithFixedVectorSubarray", True)
-        return _ndjson.DynamicNDArrayConverter(_ndjson.FixedVectorConverter(_ndjson.int32_converter, 3)).from_json(json_object)
+        converter = _ndjson.DynamicNDArrayConverter(_ndjson.FixedVectorConverter(_ndjson.int32_converter, 3))
+        return converter.from_json(json_object)
 
     def _read_generic_subarray(self) -> Image[np.int32]:
         json_object = self._read_json_line("genericSubarray", True)
-        return _ndjson.NDArrayConverter(_ndjson.FixedNDArrayConverter(_ndjson.int32_converter, (3,)), 2).from_json(json_object)
+        converter = _ndjson.NDArrayConverter(_ndjson.FixedNDArrayConverter(_ndjson.int32_converter, (3,)), 2)
+        return converter.from_json(json_object)
 
 class NDJsonSubarraysInRecordsWriter(_ndjson.NDJsonProtocolWriter, SubarraysInRecordsWriterBase):
     """NDJson writer for the SubarraysInRecords protocol."""
@@ -2428,11 +2469,13 @@ class NDJsonSubarraysInRecordsWriter(_ndjson.NDJsonProtocolWriter, SubarraysInRe
         _ndjson.NDJsonProtocolWriter.__init__(self, stream, SubarraysInRecordsWriterBase.schema)
 
     def _write_with_fixed_subarrays(self, value: npt.NDArray[np.void]) -> None:
-        json_value = _ndjson.DynamicNDArrayConverter(_RecordWithFixedCollectionsConverter()).to_json(value)
+        converter = _ndjson.DynamicNDArrayConverter(_RecordWithFixedCollectionsConverter())
+        json_value = converter.to_json(value)
         self._write_json_line({"withFixedSubarrays": json_value})
 
     def _write_with_vlen_subarrays(self, value: npt.NDArray[np.void]) -> None:
-        json_value = _ndjson.DynamicNDArrayConverter(_RecordWithVlenCollectionsConverter()).to_json(value)
+        converter = _ndjson.DynamicNDArrayConverter(_RecordWithVlenCollectionsConverter())
+        json_value = converter.to_json(value)
         self._write_json_line({"withVlenSubarrays": json_value})
 
 
@@ -2446,11 +2489,13 @@ class NDJsonSubarraysInRecordsReader(_ndjson.NDJsonProtocolReader, SubarraysInRe
 
     def _read_with_fixed_subarrays(self) -> npt.NDArray[np.void]:
         json_object = self._read_json_line("withFixedSubarrays", True)
-        return _ndjson.DynamicNDArrayConverter(_RecordWithFixedCollectionsConverter()).from_json(json_object)
+        converter = _ndjson.DynamicNDArrayConverter(_RecordWithFixedCollectionsConverter())
+        return converter.from_json(json_object)
 
     def _read_with_vlen_subarrays(self) -> npt.NDArray[np.void]:
         json_object = self._read_json_line("withVlenSubarrays", True)
-        return _ndjson.DynamicNDArrayConverter(_RecordWithVlenCollectionsConverter()).from_json(json_object)
+        converter = _ndjson.DynamicNDArrayConverter(_RecordWithVlenCollectionsConverter())
+        return converter.from_json(json_object)
 
 class NDJsonNDArraysWriter(_ndjson.NDJsonProtocolWriter, NDArraysWriterBase):
     """NDJson writer for the NDArrays protocol."""
@@ -2461,23 +2506,28 @@ class NDJsonNDArraysWriter(_ndjson.NDJsonProtocolWriter, NDArraysWriterBase):
         _ndjson.NDJsonProtocolWriter.__init__(self, stream, NDArraysWriterBase.schema)
 
     def _write_ints(self, value: npt.NDArray[np.int32]) -> None:
-        json_value = _ndjson.NDArrayConverter(_ndjson.int32_converter, 2).to_json(value)
+        converter = _ndjson.NDArrayConverter(_ndjson.int32_converter, 2)
+        json_value = converter.to_json(value)
         self._write_json_line({"ints": json_value})
 
     def _write_simple_record_array(self, value: npt.NDArray[np.void]) -> None:
-        json_value = _ndjson.NDArrayConverter(_SimpleRecordConverter(), 2).to_json(value)
+        converter = _ndjson.NDArrayConverter(_SimpleRecordConverter(), 2)
+        json_value = converter.to_json(value)
         self._write_json_line({"simpleRecordArray": json_value})
 
     def _write_record_with_vlens_array(self, value: npt.NDArray[np.void]) -> None:
-        json_value = _ndjson.NDArrayConverter(_RecordWithVlensConverter(), 2).to_json(value)
+        converter = _ndjson.NDArrayConverter(_RecordWithVlensConverter(), 2)
+        json_value = converter.to_json(value)
         self._write_json_line({"recordWithVlensArray": json_value})
 
     def _write_record_with_nd_arrays(self, value: RecordWithNDArrays) -> None:
-        json_value = _RecordWithNDArraysConverter().to_json(value)
+        converter = _RecordWithNDArraysConverter()
+        json_value = converter.to_json(value)
         self._write_json_line({"recordWithNDArrays": json_value})
 
     def _write_named_array(self, value: NamedNDArray) -> None:
-        json_value = _ndjson.NDArrayConverter(_ndjson.int32_converter, 2).to_json(value)
+        converter = _ndjson.NDArrayConverter(_ndjson.int32_converter, 2)
+        json_value = converter.to_json(value)
         self._write_json_line({"namedArray": json_value})
 
 
@@ -2491,23 +2541,28 @@ class NDJsonNDArraysReader(_ndjson.NDJsonProtocolReader, NDArraysReaderBase):
 
     def _read_ints(self) -> npt.NDArray[np.int32]:
         json_object = self._read_json_line("ints", True)
-        return _ndjson.NDArrayConverter(_ndjson.int32_converter, 2).from_json(json_object)
+        converter = _ndjson.NDArrayConverter(_ndjson.int32_converter, 2)
+        return converter.from_json(json_object)
 
     def _read_simple_record_array(self) -> npt.NDArray[np.void]:
         json_object = self._read_json_line("simpleRecordArray", True)
-        return _ndjson.NDArrayConverter(_SimpleRecordConverter(), 2).from_json(json_object)
+        converter = _ndjson.NDArrayConverter(_SimpleRecordConverter(), 2)
+        return converter.from_json(json_object)
 
     def _read_record_with_vlens_array(self) -> npt.NDArray[np.void]:
         json_object = self._read_json_line("recordWithVlensArray", True)
-        return _ndjson.NDArrayConverter(_RecordWithVlensConverter(), 2).from_json(json_object)
+        converter = _ndjson.NDArrayConverter(_RecordWithVlensConverter(), 2)
+        return converter.from_json(json_object)
 
     def _read_record_with_nd_arrays(self) -> RecordWithNDArrays:
         json_object = self._read_json_line("recordWithNDArrays", True)
-        return _RecordWithNDArraysConverter().from_json(json_object)
+        converter = _RecordWithNDArraysConverter()
+        return converter.from_json(json_object)
 
     def _read_named_array(self) -> NamedNDArray:
         json_object = self._read_json_line("namedArray", True)
-        return _ndjson.NDArrayConverter(_ndjson.int32_converter, 2).from_json(json_object)
+        converter = _ndjson.NDArrayConverter(_ndjson.int32_converter, 2)
+        return converter.from_json(json_object)
 
 class NDJsonNDArraysSingleDimensionWriter(_ndjson.NDJsonProtocolWriter, NDArraysSingleDimensionWriterBase):
     """NDJson writer for the NDArraysSingleDimension protocol."""
@@ -2518,19 +2573,23 @@ class NDJsonNDArraysSingleDimensionWriter(_ndjson.NDJsonProtocolWriter, NDArrays
         _ndjson.NDJsonProtocolWriter.__init__(self, stream, NDArraysSingleDimensionWriterBase.schema)
 
     def _write_ints(self, value: npt.NDArray[np.int32]) -> None:
-        json_value = _ndjson.NDArrayConverter(_ndjson.int32_converter, 1).to_json(value)
+        converter = _ndjson.NDArrayConverter(_ndjson.int32_converter, 1)
+        json_value = converter.to_json(value)
         self._write_json_line({"ints": json_value})
 
     def _write_simple_record_array(self, value: npt.NDArray[np.void]) -> None:
-        json_value = _ndjson.NDArrayConverter(_SimpleRecordConverter(), 1).to_json(value)
+        converter = _ndjson.NDArrayConverter(_SimpleRecordConverter(), 1)
+        json_value = converter.to_json(value)
         self._write_json_line({"simpleRecordArray": json_value})
 
     def _write_record_with_vlens_array(self, value: npt.NDArray[np.void]) -> None:
-        json_value = _ndjson.NDArrayConverter(_RecordWithVlensConverter(), 1).to_json(value)
+        converter = _ndjson.NDArrayConverter(_RecordWithVlensConverter(), 1)
+        json_value = converter.to_json(value)
         self._write_json_line({"recordWithVlensArray": json_value})
 
     def _write_record_with_nd_arrays(self, value: RecordWithNDArraysSingleDimension) -> None:
-        json_value = _RecordWithNDArraysSingleDimensionConverter().to_json(value)
+        converter = _RecordWithNDArraysSingleDimensionConverter()
+        json_value = converter.to_json(value)
         self._write_json_line({"recordWithNDArrays": json_value})
 
 
@@ -2544,19 +2603,23 @@ class NDJsonNDArraysSingleDimensionReader(_ndjson.NDJsonProtocolReader, NDArrays
 
     def _read_ints(self) -> npt.NDArray[np.int32]:
         json_object = self._read_json_line("ints", True)
-        return _ndjson.NDArrayConverter(_ndjson.int32_converter, 1).from_json(json_object)
+        converter = _ndjson.NDArrayConverter(_ndjson.int32_converter, 1)
+        return converter.from_json(json_object)
 
     def _read_simple_record_array(self) -> npt.NDArray[np.void]:
         json_object = self._read_json_line("simpleRecordArray", True)
-        return _ndjson.NDArrayConverter(_SimpleRecordConverter(), 1).from_json(json_object)
+        converter = _ndjson.NDArrayConverter(_SimpleRecordConverter(), 1)
+        return converter.from_json(json_object)
 
     def _read_record_with_vlens_array(self) -> npt.NDArray[np.void]:
         json_object = self._read_json_line("recordWithVlensArray", True)
-        return _ndjson.NDArrayConverter(_RecordWithVlensConverter(), 1).from_json(json_object)
+        converter = _ndjson.NDArrayConverter(_RecordWithVlensConverter(), 1)
+        return converter.from_json(json_object)
 
     def _read_record_with_nd_arrays(self) -> RecordWithNDArraysSingleDimension:
         json_object = self._read_json_line("recordWithNDArrays", True)
-        return _RecordWithNDArraysSingleDimensionConverter().from_json(json_object)
+        converter = _RecordWithNDArraysSingleDimensionConverter()
+        return converter.from_json(json_object)
 
 class NDJsonDynamicNDArraysWriter(_ndjson.NDJsonProtocolWriter, DynamicNDArraysWriterBase):
     """NDJson writer for the DynamicNDArrays protocol."""
@@ -2567,19 +2630,23 @@ class NDJsonDynamicNDArraysWriter(_ndjson.NDJsonProtocolWriter, DynamicNDArraysW
         _ndjson.NDJsonProtocolWriter.__init__(self, stream, DynamicNDArraysWriterBase.schema)
 
     def _write_ints(self, value: npt.NDArray[np.int32]) -> None:
-        json_value = _ndjson.DynamicNDArrayConverter(_ndjson.int32_converter).to_json(value)
+        converter = _ndjson.DynamicNDArrayConverter(_ndjson.int32_converter)
+        json_value = converter.to_json(value)
         self._write_json_line({"ints": json_value})
 
     def _write_simple_record_array(self, value: npt.NDArray[np.void]) -> None:
-        json_value = _ndjson.DynamicNDArrayConverter(_SimpleRecordConverter()).to_json(value)
+        converter = _ndjson.DynamicNDArrayConverter(_SimpleRecordConverter())
+        json_value = converter.to_json(value)
         self._write_json_line({"simpleRecordArray": json_value})
 
     def _write_record_with_vlens_array(self, value: npt.NDArray[np.void]) -> None:
-        json_value = _ndjson.DynamicNDArrayConverter(_RecordWithVlensConverter()).to_json(value)
+        converter = _ndjson.DynamicNDArrayConverter(_RecordWithVlensConverter())
+        json_value = converter.to_json(value)
         self._write_json_line({"recordWithVlensArray": json_value})
 
     def _write_record_with_dynamic_nd_arrays(self, value: RecordWithDynamicNDArrays) -> None:
-        json_value = _RecordWithDynamicNDArraysConverter().to_json(value)
+        converter = _RecordWithDynamicNDArraysConverter()
+        json_value = converter.to_json(value)
         self._write_json_line({"recordWithDynamicNDArrays": json_value})
 
 
@@ -2593,19 +2660,23 @@ class NDJsonDynamicNDArraysReader(_ndjson.NDJsonProtocolReader, DynamicNDArraysR
 
     def _read_ints(self) -> npt.NDArray[np.int32]:
         json_object = self._read_json_line("ints", True)
-        return _ndjson.DynamicNDArrayConverter(_ndjson.int32_converter).from_json(json_object)
+        converter = _ndjson.DynamicNDArrayConverter(_ndjson.int32_converter)
+        return converter.from_json(json_object)
 
     def _read_simple_record_array(self) -> npt.NDArray[np.void]:
         json_object = self._read_json_line("simpleRecordArray", True)
-        return _ndjson.DynamicNDArrayConverter(_SimpleRecordConverter()).from_json(json_object)
+        converter = _ndjson.DynamicNDArrayConverter(_SimpleRecordConverter())
+        return converter.from_json(json_object)
 
     def _read_record_with_vlens_array(self) -> npt.NDArray[np.void]:
         json_object = self._read_json_line("recordWithVlensArray", True)
-        return _ndjson.DynamicNDArrayConverter(_RecordWithVlensConverter()).from_json(json_object)
+        converter = _ndjson.DynamicNDArrayConverter(_RecordWithVlensConverter())
+        return converter.from_json(json_object)
 
     def _read_record_with_dynamic_nd_arrays(self) -> RecordWithDynamicNDArrays:
         json_object = self._read_json_line("recordWithDynamicNDArrays", True)
-        return _RecordWithDynamicNDArraysConverter().from_json(json_object)
+        converter = _RecordWithDynamicNDArraysConverter()
+        return converter.from_json(json_object)
 
 class NDJsonMapsWriter(_ndjson.NDJsonProtocolWriter, MapsWriterBase):
     """NDJson writer for the Maps protocol."""
@@ -2616,19 +2687,23 @@ class NDJsonMapsWriter(_ndjson.NDJsonProtocolWriter, MapsWriterBase):
         _ndjson.NDJsonProtocolWriter.__init__(self, stream, MapsWriterBase.schema)
 
     def _write_string_to_int(self, value: dict[str, yardl.Int32]) -> None:
-        json_value = _ndjson.MapConverter(_ndjson.string_converter, _ndjson.int32_converter).to_json(value)
+        converter = _ndjson.MapConverter(_ndjson.string_converter, _ndjson.int32_converter)
+        json_value = converter.to_json(value)
         self._write_json_line({"stringToInt": json_value})
 
     def _write_int_to_string(self, value: dict[yardl.Int32, str]) -> None:
-        json_value = _ndjson.MapConverter(_ndjson.int32_converter, _ndjson.string_converter).to_json(value)
+        converter = _ndjson.MapConverter(_ndjson.int32_converter, _ndjson.string_converter)
+        json_value = converter.to_json(value)
         self._write_json_line({"intToString": json_value})
 
     def _write_string_to_union(self, value: dict[str, StringOrInt32]) -> None:
-        json_value = _ndjson.MapConverter(_ndjson.string_converter, _ndjson.UnionConverter(StringOrInt32, [(StringOrInt32.String, _ndjson.string_converter, [str]), (StringOrInt32.Int32, _ndjson.int32_converter, [int, float])], True)).to_json(value)
+        converter = _ndjson.MapConverter(_ndjson.string_converter, _ndjson.UnionConverter(StringOrInt32, [(StringOrInt32.String, _ndjson.string_converter, [str]), (StringOrInt32.Int32, _ndjson.int32_converter, [int, float])], True))
+        json_value = converter.to_json(value)
         self._write_json_line({"stringToUnion": json_value})
 
     def _write_aliased_generic(self, value: AliasedMap[str, yardl.Int32]) -> None:
-        json_value = _ndjson.MapConverter(_ndjson.string_converter, _ndjson.int32_converter).to_json(value)
+        converter = _ndjson.MapConverter(_ndjson.string_converter, _ndjson.int32_converter)
+        json_value = converter.to_json(value)
         self._write_json_line({"aliasedGeneric": json_value})
 
 
@@ -2642,19 +2717,23 @@ class NDJsonMapsReader(_ndjson.NDJsonProtocolReader, MapsReaderBase):
 
     def _read_string_to_int(self) -> dict[str, yardl.Int32]:
         json_object = self._read_json_line("stringToInt", True)
-        return _ndjson.MapConverter(_ndjson.string_converter, _ndjson.int32_converter).from_json(json_object)
+        converter = _ndjson.MapConverter(_ndjson.string_converter, _ndjson.int32_converter)
+        return converter.from_json(json_object)
 
     def _read_int_to_string(self) -> dict[yardl.Int32, str]:
         json_object = self._read_json_line("intToString", True)
-        return _ndjson.MapConverter(_ndjson.int32_converter, _ndjson.string_converter).from_json(json_object)
+        converter = _ndjson.MapConverter(_ndjson.int32_converter, _ndjson.string_converter)
+        return converter.from_json(json_object)
 
     def _read_string_to_union(self) -> dict[str, StringOrInt32]:
         json_object = self._read_json_line("stringToUnion", True)
-        return _ndjson.MapConverter(_ndjson.string_converter, _ndjson.UnionConverter(StringOrInt32, [(StringOrInt32.String, _ndjson.string_converter, [str]), (StringOrInt32.Int32, _ndjson.int32_converter, [int, float])], True)).from_json(json_object)
+        converter = _ndjson.MapConverter(_ndjson.string_converter, _ndjson.UnionConverter(StringOrInt32, [(StringOrInt32.String, _ndjson.string_converter, [str]), (StringOrInt32.Int32, _ndjson.int32_converter, [int, float])], True))
+        return converter.from_json(json_object)
 
     def _read_aliased_generic(self) -> AliasedMap[str, yardl.Int32]:
         json_object = self._read_json_line("aliasedGeneric", True)
-        return _ndjson.MapConverter(_ndjson.string_converter, _ndjson.int32_converter).from_json(json_object)
+        converter = _ndjson.MapConverter(_ndjson.string_converter, _ndjson.int32_converter)
+        return converter.from_json(json_object)
 
 class NDJsonUnionsWriter(_ndjson.NDJsonProtocolWriter, UnionsWriterBase):
     """NDJson writer for the Unions protocol."""
@@ -2665,19 +2744,23 @@ class NDJsonUnionsWriter(_ndjson.NDJsonProtocolWriter, UnionsWriterBase):
         _ndjson.NDJsonProtocolWriter.__init__(self, stream, UnionsWriterBase.schema)
 
     def _write_int_or_simple_record(self, value: Int32OrSimpleRecord) -> None:
-        json_value = _ndjson.UnionConverter(Int32OrSimpleRecord, [(Int32OrSimpleRecord.Int32, _ndjson.int32_converter, [int, float]), (Int32OrSimpleRecord.SimpleRecord, _SimpleRecordConverter(), [dict])], True).to_json(value)
+        converter = _ndjson.UnionConverter(Int32OrSimpleRecord, [(Int32OrSimpleRecord.Int32, _ndjson.int32_converter, [int, float]), (Int32OrSimpleRecord.SimpleRecord, _SimpleRecordConverter(), [dict])], True)
+        json_value = converter.to_json(value)
         self._write_json_line({"intOrSimpleRecord": json_value})
 
     def _write_int_or_record_with_vlens(self, value: Int32OrRecordWithVlens) -> None:
-        json_value = _ndjson.UnionConverter(Int32OrRecordWithVlens, [(Int32OrRecordWithVlens.Int32, _ndjson.int32_converter, [int, float]), (Int32OrRecordWithVlens.RecordWithVlens, _RecordWithVlensConverter(), [dict])], True).to_json(value)
+        converter = _ndjson.UnionConverter(Int32OrRecordWithVlens, [(Int32OrRecordWithVlens.Int32, _ndjson.int32_converter, [int, float]), (Int32OrRecordWithVlens.RecordWithVlens, _RecordWithVlensConverter(), [dict])], True)
+        json_value = converter.to_json(value)
         self._write_json_line({"intOrRecordWithVlens": json_value})
 
     def _write_monosotate_or_int_or_simple_record(self, value: typing.Optional[Int32OrSimpleRecord]) -> None:
-        json_value = _ndjson.UnionConverter(Int32OrSimpleRecord, [None, (Int32OrSimpleRecord.Int32, _ndjson.int32_converter, [int, float]), (Int32OrSimpleRecord.SimpleRecord, _SimpleRecordConverter(), [dict])], True).to_json(value)
+        converter = _ndjson.UnionConverter(Int32OrSimpleRecord, [None, (Int32OrSimpleRecord.Int32, _ndjson.int32_converter, [int, float]), (Int32OrSimpleRecord.SimpleRecord, _SimpleRecordConverter(), [dict])], True)
+        json_value = converter.to_json(value)
         self._write_json_line({"monosotateOrIntOrSimpleRecord": json_value})
 
     def _write_record_with_unions(self, value: RecordWithUnions) -> None:
-        json_value = _RecordWithUnionsConverter().to_json(value)
+        converter = _RecordWithUnionsConverter()
+        json_value = converter.to_json(value)
         self._write_json_line({"recordWithUnions": json_value})
 
 
@@ -2691,19 +2774,23 @@ class NDJsonUnionsReader(_ndjson.NDJsonProtocolReader, UnionsReaderBase):
 
     def _read_int_or_simple_record(self) -> Int32OrSimpleRecord:
         json_object = self._read_json_line("intOrSimpleRecord", True)
-        return _ndjson.UnionConverter(Int32OrSimpleRecord, [(Int32OrSimpleRecord.Int32, _ndjson.int32_converter, [int, float]), (Int32OrSimpleRecord.SimpleRecord, _SimpleRecordConverter(), [dict])], True).from_json(json_object)
+        converter = _ndjson.UnionConverter(Int32OrSimpleRecord, [(Int32OrSimpleRecord.Int32, _ndjson.int32_converter, [int, float]), (Int32OrSimpleRecord.SimpleRecord, _SimpleRecordConverter(), [dict])], True)
+        return converter.from_json(json_object)
 
     def _read_int_or_record_with_vlens(self) -> Int32OrRecordWithVlens:
         json_object = self._read_json_line("intOrRecordWithVlens", True)
-        return _ndjson.UnionConverter(Int32OrRecordWithVlens, [(Int32OrRecordWithVlens.Int32, _ndjson.int32_converter, [int, float]), (Int32OrRecordWithVlens.RecordWithVlens, _RecordWithVlensConverter(), [dict])], True).from_json(json_object)
+        converter = _ndjson.UnionConverter(Int32OrRecordWithVlens, [(Int32OrRecordWithVlens.Int32, _ndjson.int32_converter, [int, float]), (Int32OrRecordWithVlens.RecordWithVlens, _RecordWithVlensConverter(), [dict])], True)
+        return converter.from_json(json_object)
 
     def _read_monosotate_or_int_or_simple_record(self) -> typing.Optional[Int32OrSimpleRecord]:
         json_object = self._read_json_line("monosotateOrIntOrSimpleRecord", True)
-        return _ndjson.UnionConverter(Int32OrSimpleRecord, [None, (Int32OrSimpleRecord.Int32, _ndjson.int32_converter, [int, float]), (Int32OrSimpleRecord.SimpleRecord, _SimpleRecordConverter(), [dict])], True).from_json(json_object)
+        converter = _ndjson.UnionConverter(Int32OrSimpleRecord, [None, (Int32OrSimpleRecord.Int32, _ndjson.int32_converter, [int, float]), (Int32OrSimpleRecord.SimpleRecord, _SimpleRecordConverter(), [dict])], True)
+        return converter.from_json(json_object)
 
     def _read_record_with_unions(self) -> RecordWithUnions:
         json_object = self._read_json_line("recordWithUnions", True)
-        return _RecordWithUnionsConverter().from_json(json_object)
+        converter = _RecordWithUnionsConverter()
+        return converter.from_json(json_object)
 
 class NDJsonStreamsOfUnionsWriter(_ndjson.NDJsonProtocolWriter, StreamsOfUnionsWriterBase):
     """NDJson writer for the StreamsOfUnions protocol."""
@@ -2753,15 +2840,18 @@ class NDJsonEnumsWriter(_ndjson.NDJsonProtocolWriter, EnumsWriterBase):
         _ndjson.NDJsonProtocolWriter.__init__(self, stream, EnumsWriterBase.schema)
 
     def _write_single(self, value: Fruits) -> None:
-        json_value = _ndjson.EnumConverter(Fruits, np.int32, _fruits_name_to_value_map, _fruits_value_to_name_map).to_json(value)
+        converter = _ndjson.EnumConverter(Fruits, np.int32, _fruits_name_to_value_map, _fruits_value_to_name_map)
+        json_value = converter.to_json(value)
         self._write_json_line({"single": json_value})
 
     def _write_vec(self, value: list[Fruits]) -> None:
-        json_value = _ndjson.VectorConverter(_ndjson.EnumConverter(Fruits, np.int32, _fruits_name_to_value_map, _fruits_value_to_name_map)).to_json(value)
+        converter = _ndjson.VectorConverter(_ndjson.EnumConverter(Fruits, np.int32, _fruits_name_to_value_map, _fruits_value_to_name_map))
+        json_value = converter.to_json(value)
         self._write_json_line({"vec": json_value})
 
     def _write_size(self, value: SizeBasedEnum) -> None:
-        json_value = _ndjson.EnumConverter(SizeBasedEnum, np.uint64, _size_based_enum_name_to_value_map, _size_based_enum_value_to_name_map).to_json(value)
+        converter = _ndjson.EnumConverter(SizeBasedEnum, np.uint64, _size_based_enum_name_to_value_map, _size_based_enum_value_to_name_map)
+        json_value = converter.to_json(value)
         self._write_json_line({"size": json_value})
 
 
@@ -2775,15 +2865,18 @@ class NDJsonEnumsReader(_ndjson.NDJsonProtocolReader, EnumsReaderBase):
 
     def _read_single(self) -> Fruits:
         json_object = self._read_json_line("single", True)
-        return _ndjson.EnumConverter(Fruits, np.int32, _fruits_name_to_value_map, _fruits_value_to_name_map).from_json(json_object)
+        converter = _ndjson.EnumConverter(Fruits, np.int32, _fruits_name_to_value_map, _fruits_value_to_name_map)
+        return converter.from_json(json_object)
 
     def _read_vec(self) -> list[Fruits]:
         json_object = self._read_json_line("vec", True)
-        return _ndjson.VectorConverter(_ndjson.EnumConverter(Fruits, np.int32, _fruits_name_to_value_map, _fruits_value_to_name_map)).from_json(json_object)
+        converter = _ndjson.VectorConverter(_ndjson.EnumConverter(Fruits, np.int32, _fruits_name_to_value_map, _fruits_value_to_name_map))
+        return converter.from_json(json_object)
 
     def _read_size(self) -> SizeBasedEnum:
         json_object = self._read_json_line("size", True)
-        return _ndjson.EnumConverter(SizeBasedEnum, np.uint64, _size_based_enum_name_to_value_map, _size_based_enum_value_to_name_map).from_json(json_object)
+        converter = _ndjson.EnumConverter(SizeBasedEnum, np.uint64, _size_based_enum_name_to_value_map, _size_based_enum_value_to_name_map)
+        return converter.from_json(json_object)
 
 class NDJsonFlagsWriter(_ndjson.NDJsonProtocolWriter, FlagsWriterBase):
     """NDJson writer for the Flags protocol."""
@@ -2833,7 +2926,8 @@ class NDJsonStateTestWriter(_ndjson.NDJsonProtocolWriter, StateTestWriterBase):
         _ndjson.NDJsonProtocolWriter.__init__(self, stream, StateTestWriterBase.schema)
 
     def _write_an_int(self, value: yardl.Int32) -> None:
-        json_value = _ndjson.int32_converter.to_json(value)
+        converter = _ndjson.int32_converter
+        json_value = converter.to_json(value)
         self._write_json_line({"anInt": json_value})
 
     def _write_a_stream(self, value: collections.abc.Iterable[yardl.Int32]) -> None:
@@ -2843,7 +2937,8 @@ class NDJsonStateTestWriter(_ndjson.NDJsonProtocolWriter, StateTestWriterBase):
             self._write_json_line({"aStream": json_item})
 
     def _write_another_int(self, value: yardl.Int32) -> None:
-        json_value = _ndjson.int32_converter.to_json(value)
+        converter = _ndjson.int32_converter
+        json_value = converter.to_json(value)
         self._write_json_line({"anotherInt": json_value})
 
 
@@ -2857,7 +2952,8 @@ class NDJsonStateTestReader(_ndjson.NDJsonProtocolReader, StateTestReaderBase):
 
     def _read_an_int(self) -> yardl.Int32:
         json_object = self._read_json_line("anInt", True)
-        return _ndjson.int32_converter.from_json(json_object)
+        converter = _ndjson.int32_converter
+        return converter.from_json(json_object)
 
     def _read_a_stream(self) -> collections.abc.Iterable[yardl.Int32]:
         converter = _ndjson.int32_converter
@@ -2866,7 +2962,8 @@ class NDJsonStateTestReader(_ndjson.NDJsonProtocolReader, StateTestReaderBase):
 
     def _read_another_int(self) -> yardl.Int32:
         json_object = self._read_json_line("anotherInt", True)
-        return _ndjson.int32_converter.from_json(json_object)
+        converter = _ndjson.int32_converter
+        return converter.from_json(json_object)
 
 class NDJsonSimpleGenericsWriter(_ndjson.NDJsonProtocolWriter, SimpleGenericsWriterBase):
     """NDJson writer for the SimpleGenerics protocol."""
@@ -2877,35 +2974,43 @@ class NDJsonSimpleGenericsWriter(_ndjson.NDJsonProtocolWriter, SimpleGenericsWri
         _ndjson.NDJsonProtocolWriter.__init__(self, stream, SimpleGenericsWriterBase.schema)
 
     def _write_float_image(self, value: Image[np.float32]) -> None:
-        json_value = _ndjson.NDArrayConverter(_ndjson.float32_converter, 2).to_json(value)
+        converter = _ndjson.NDArrayConverter(_ndjson.float32_converter, 2)
+        json_value = converter.to_json(value)
         self._write_json_line({"floatImage": json_value})
 
     def _write_int_image(self, value: Image[np.int32]) -> None:
-        json_value = _ndjson.NDArrayConverter(_ndjson.int32_converter, 2).to_json(value)
+        converter = _ndjson.NDArrayConverter(_ndjson.int32_converter, 2)
+        json_value = converter.to_json(value)
         self._write_json_line({"intImage": json_value})
 
     def _write_int_image_alternate_syntax(self, value: Image[np.int32]) -> None:
-        json_value = _ndjson.NDArrayConverter(_ndjson.int32_converter, 2).to_json(value)
+        converter = _ndjson.NDArrayConverter(_ndjson.int32_converter, 2)
+        json_value = converter.to_json(value)
         self._write_json_line({"intImageAlternateSyntax": json_value})
 
     def _write_string_image(self, value: Image[np.object_]) -> None:
-        json_value = _ndjson.NDArrayConverter(_ndjson.string_converter, 2).to_json(value)
+        converter = _ndjson.NDArrayConverter(_ndjson.string_converter, 2)
+        json_value = converter.to_json(value)
         self._write_json_line({"stringImage": json_value})
 
     def _write_int_float_tuple(self, value: MyTuple[yardl.Int32, yardl.Float32]) -> None:
-        json_value = _MyTupleConverter(_ndjson.int32_converter, _ndjson.float32_converter).to_json(value)
+        converter = _MyTupleConverter(_ndjson.int32_converter, _ndjson.float32_converter)
+        json_value = converter.to_json(value)
         self._write_json_line({"intFloatTuple": json_value})
 
     def _write_float_float_tuple(self, value: MyTuple[yardl.Float32, yardl.Float32]) -> None:
-        json_value = _MyTupleConverter(_ndjson.float32_converter, _ndjson.float32_converter).to_json(value)
+        converter = _MyTupleConverter(_ndjson.float32_converter, _ndjson.float32_converter)
+        json_value = converter.to_json(value)
         self._write_json_line({"floatFloatTuple": json_value})
 
     def _write_int_float_tuple_alternate_syntax(self, value: MyTuple[yardl.Int32, yardl.Float32]) -> None:
-        json_value = _MyTupleConverter(_ndjson.int32_converter, _ndjson.float32_converter).to_json(value)
+        converter = _MyTupleConverter(_ndjson.int32_converter, _ndjson.float32_converter)
+        json_value = converter.to_json(value)
         self._write_json_line({"intFloatTupleAlternateSyntax": json_value})
 
     def _write_int_string_tuple(self, value: MyTuple[yardl.Int32, str]) -> None:
-        json_value = _MyTupleConverter(_ndjson.int32_converter, _ndjson.string_converter).to_json(value)
+        converter = _MyTupleConverter(_ndjson.int32_converter, _ndjson.string_converter)
+        json_value = converter.to_json(value)
         self._write_json_line({"intStringTuple": json_value})
 
     def _write_stream_of_type_variants(self, value: collections.abc.Iterable[ImageFloatOrImageDouble]) -> None:
@@ -2925,35 +3030,43 @@ class NDJsonSimpleGenericsReader(_ndjson.NDJsonProtocolReader, SimpleGenericsRea
 
     def _read_float_image(self) -> Image[np.float32]:
         json_object = self._read_json_line("floatImage", True)
-        return _ndjson.NDArrayConverter(_ndjson.float32_converter, 2).from_json(json_object)
+        converter = _ndjson.NDArrayConverter(_ndjson.float32_converter, 2)
+        return converter.from_json(json_object)
 
     def _read_int_image(self) -> Image[np.int32]:
         json_object = self._read_json_line("intImage", True)
-        return _ndjson.NDArrayConverter(_ndjson.int32_converter, 2).from_json(json_object)
+        converter = _ndjson.NDArrayConverter(_ndjson.int32_converter, 2)
+        return converter.from_json(json_object)
 
     def _read_int_image_alternate_syntax(self) -> Image[np.int32]:
         json_object = self._read_json_line("intImageAlternateSyntax", True)
-        return _ndjson.NDArrayConverter(_ndjson.int32_converter, 2).from_json(json_object)
+        converter = _ndjson.NDArrayConverter(_ndjson.int32_converter, 2)
+        return converter.from_json(json_object)
 
     def _read_string_image(self) -> Image[np.object_]:
         json_object = self._read_json_line("stringImage", True)
-        return _ndjson.NDArrayConverter(_ndjson.string_converter, 2).from_json(json_object)
+        converter = _ndjson.NDArrayConverter(_ndjson.string_converter, 2)
+        return converter.from_json(json_object)
 
     def _read_int_float_tuple(self) -> MyTuple[yardl.Int32, yardl.Float32]:
         json_object = self._read_json_line("intFloatTuple", True)
-        return _MyTupleConverter(_ndjson.int32_converter, _ndjson.float32_converter).from_json(json_object)
+        converter = _MyTupleConverter(_ndjson.int32_converter, _ndjson.float32_converter)
+        return converter.from_json(json_object)
 
     def _read_float_float_tuple(self) -> MyTuple[yardl.Float32, yardl.Float32]:
         json_object = self._read_json_line("floatFloatTuple", True)
-        return _MyTupleConverter(_ndjson.float32_converter, _ndjson.float32_converter).from_json(json_object)
+        converter = _MyTupleConverter(_ndjson.float32_converter, _ndjson.float32_converter)
+        return converter.from_json(json_object)
 
     def _read_int_float_tuple_alternate_syntax(self) -> MyTuple[yardl.Int32, yardl.Float32]:
         json_object = self._read_json_line("intFloatTupleAlternateSyntax", True)
-        return _MyTupleConverter(_ndjson.int32_converter, _ndjson.float32_converter).from_json(json_object)
+        converter = _MyTupleConverter(_ndjson.int32_converter, _ndjson.float32_converter)
+        return converter.from_json(json_object)
 
     def _read_int_string_tuple(self) -> MyTuple[yardl.Int32, str]:
         json_object = self._read_json_line("intStringTuple", True)
-        return _MyTupleConverter(_ndjson.int32_converter, _ndjson.string_converter).from_json(json_object)
+        converter = _MyTupleConverter(_ndjson.int32_converter, _ndjson.string_converter)
+        return converter.from_json(json_object)
 
     def _read_stream_of_type_variants(self) -> collections.abc.Iterable[ImageFloatOrImageDouble]:
         converter = _ndjson.UnionConverter(ImageFloatOrImageDouble, [(ImageFloatOrImageDouble.ImageFloat, _ndjson.NDArrayConverter(_ndjson.float32_converter, 2), [dict]), (ImageFloatOrImageDouble.ImageDouble, _ndjson.NDArrayConverter(_ndjson.float64_converter, 2), [dict])], False)
@@ -2969,23 +3082,28 @@ class NDJsonAdvancedGenericsWriter(_ndjson.NDJsonProtocolWriter, AdvancedGeneric
         _ndjson.NDJsonProtocolWriter.__init__(self, stream, AdvancedGenericsWriterBase.schema)
 
     def _write_float_image_image(self, value: Image[np.object_]) -> None:
-        json_value = _ndjson.NDArrayConverter(_ndjson.NDArrayConverter(_ndjson.float32_converter, 2), 2).to_json(value)
+        converter = _ndjson.NDArrayConverter(_ndjson.NDArrayConverter(_ndjson.float32_converter, 2), 2)
+        json_value = converter.to_json(value)
         self._write_json_line({"floatImageImage": json_value})
 
     def _write_generic_record_1(self, value: GenericRecord[yardl.Int32, str, np.object_]) -> None:
-        json_value = _GenericRecordConverter(_ndjson.int32_converter, _ndjson.string_converter).to_json(value)
+        converter = _GenericRecordConverter(_ndjson.int32_converter, _ndjson.string_converter)
+        json_value = converter.to_json(value)
         self._write_json_line({"genericRecord1": json_value})
 
     def _write_tuple_of_optionals(self, value: MyTuple[typing.Optional[yardl.Int32], typing.Optional[str]]) -> None:
-        json_value = _MyTupleConverter(_ndjson.OptionalConverter(_ndjson.int32_converter), _ndjson.OptionalConverter(_ndjson.string_converter)).to_json(value)
+        converter = _MyTupleConverter(_ndjson.OptionalConverter(_ndjson.int32_converter), _ndjson.OptionalConverter(_ndjson.string_converter))
+        json_value = converter.to_json(value)
         self._write_json_line({"tupleOfOptionals": json_value})
 
     def _write_tuple_of_optionals_alternate_syntax(self, value: MyTuple[typing.Optional[yardl.Int32], typing.Optional[str]]) -> None:
-        json_value = _MyTupleConverter(_ndjson.OptionalConverter(_ndjson.int32_converter), _ndjson.OptionalConverter(_ndjson.string_converter)).to_json(value)
+        converter = _MyTupleConverter(_ndjson.OptionalConverter(_ndjson.int32_converter), _ndjson.OptionalConverter(_ndjson.string_converter))
+        json_value = converter.to_json(value)
         self._write_json_line({"tupleOfOptionalsAlternateSyntax": json_value})
 
     def _write_tuple_of_vectors(self, value: MyTuple[list[yardl.Int32], list[yardl.Float32]]) -> None:
-        json_value = _MyTupleConverter(_ndjson.VectorConverter(_ndjson.int32_converter), _ndjson.VectorConverter(_ndjson.float32_converter)).to_json(value)
+        converter = _MyTupleConverter(_ndjson.VectorConverter(_ndjson.int32_converter), _ndjson.VectorConverter(_ndjson.float32_converter))
+        json_value = converter.to_json(value)
         self._write_json_line({"tupleOfVectors": json_value})
 
 
@@ -2999,23 +3117,28 @@ class NDJsonAdvancedGenericsReader(_ndjson.NDJsonProtocolReader, AdvancedGeneric
 
     def _read_float_image_image(self) -> Image[np.object_]:
         json_object = self._read_json_line("floatImageImage", True)
-        return _ndjson.NDArrayConverter(_ndjson.NDArrayConverter(_ndjson.float32_converter, 2), 2).from_json(json_object)
+        converter = _ndjson.NDArrayConverter(_ndjson.NDArrayConverter(_ndjson.float32_converter, 2), 2)
+        return converter.from_json(json_object)
 
     def _read_generic_record_1(self) -> GenericRecord[yardl.Int32, str, np.object_]:
         json_object = self._read_json_line("genericRecord1", True)
-        return _GenericRecordConverter(_ndjson.int32_converter, _ndjson.string_converter).from_json(json_object)
+        converter = _GenericRecordConverter(_ndjson.int32_converter, _ndjson.string_converter)
+        return converter.from_json(json_object)
 
     def _read_tuple_of_optionals(self) -> MyTuple[typing.Optional[yardl.Int32], typing.Optional[str]]:
         json_object = self._read_json_line("tupleOfOptionals", True)
-        return _MyTupleConverter(_ndjson.OptionalConverter(_ndjson.int32_converter), _ndjson.OptionalConverter(_ndjson.string_converter)).from_json(json_object)
+        converter = _MyTupleConverter(_ndjson.OptionalConverter(_ndjson.int32_converter), _ndjson.OptionalConverter(_ndjson.string_converter))
+        return converter.from_json(json_object)
 
     def _read_tuple_of_optionals_alternate_syntax(self) -> MyTuple[typing.Optional[yardl.Int32], typing.Optional[str]]:
         json_object = self._read_json_line("tupleOfOptionalsAlternateSyntax", True)
-        return _MyTupleConverter(_ndjson.OptionalConverter(_ndjson.int32_converter), _ndjson.OptionalConverter(_ndjson.string_converter)).from_json(json_object)
+        converter = _MyTupleConverter(_ndjson.OptionalConverter(_ndjson.int32_converter), _ndjson.OptionalConverter(_ndjson.string_converter))
+        return converter.from_json(json_object)
 
     def _read_tuple_of_vectors(self) -> MyTuple[list[yardl.Int32], list[yardl.Float32]]:
         json_object = self._read_json_line("tupleOfVectors", True)
-        return _MyTupleConverter(_ndjson.VectorConverter(_ndjson.int32_converter), _ndjson.VectorConverter(_ndjson.float32_converter)).from_json(json_object)
+        converter = _MyTupleConverter(_ndjson.VectorConverter(_ndjson.int32_converter), _ndjson.VectorConverter(_ndjson.float32_converter))
+        return converter.from_json(json_object)
 
 class NDJsonAliasesWriter(_ndjson.NDJsonProtocolWriter, AliasesWriterBase):
     """NDJson writer for the Aliases protocol."""
@@ -3026,39 +3149,48 @@ class NDJsonAliasesWriter(_ndjson.NDJsonProtocolWriter, AliasesWriterBase):
         _ndjson.NDJsonProtocolWriter.__init__(self, stream, AliasesWriterBase.schema)
 
     def _write_aliased_string(self, value: AliasedString) -> None:
-        json_value = _ndjson.string_converter.to_json(value)
+        converter = _ndjson.string_converter
+        json_value = converter.to_json(value)
         self._write_json_line({"aliasedString": json_value})
 
     def _write_aliased_enum(self, value: AliasedEnum) -> None:
-        json_value = _ndjson.EnumConverter(Fruits, np.int32, _fruits_name_to_value_map, _fruits_value_to_name_map).to_json(value)
+        converter = _ndjson.EnumConverter(Fruits, np.int32, _fruits_name_to_value_map, _fruits_value_to_name_map)
+        json_value = converter.to_json(value)
         self._write_json_line({"aliasedEnum": json_value})
 
     def _write_aliased_open_generic(self, value: AliasedOpenGeneric[AliasedString, AliasedEnum]) -> None:
-        json_value = _MyTupleConverter(_ndjson.string_converter, _ndjson.EnumConverter(Fruits, np.int32, _fruits_name_to_value_map, _fruits_value_to_name_map)).to_json(value)
+        converter = _MyTupleConverter(_ndjson.string_converter, _ndjson.EnumConverter(Fruits, np.int32, _fruits_name_to_value_map, _fruits_value_to_name_map))
+        json_value = converter.to_json(value)
         self._write_json_line({"aliasedOpenGeneric": json_value})
 
     def _write_aliased_closed_generic(self, value: AliasedClosedGeneric) -> None:
-        json_value = _MyTupleConverter(_ndjson.string_converter, _ndjson.EnumConverter(Fruits, np.int32, _fruits_name_to_value_map, _fruits_value_to_name_map)).to_json(value)
+        converter = _MyTupleConverter(_ndjson.string_converter, _ndjson.EnumConverter(Fruits, np.int32, _fruits_name_to_value_map, _fruits_value_to_name_map))
+        json_value = converter.to_json(value)
         self._write_json_line({"aliasedClosedGeneric": json_value})
 
     def _write_aliased_optional(self, value: typing.Optional[AliasedOptional]) -> None:
-        json_value = _ndjson.OptionalConverter(_ndjson.int32_converter).to_json(value)
+        converter = _ndjson.OptionalConverter(_ndjson.int32_converter)
+        json_value = converter.to_json(value)
         self._write_json_line({"aliasedOptional": json_value})
 
     def _write_aliased_generic_optional(self, value: typing.Optional[AliasedGenericOptional[yardl.Float32]]) -> None:
-        json_value = _ndjson.OptionalConverter(_ndjson.float32_converter).to_json(value)
+        converter = _ndjson.OptionalConverter(_ndjson.float32_converter)
+        json_value = converter.to_json(value)
         self._write_json_line({"aliasedGenericOptional": json_value})
 
     def _write_aliased_generic_union_2(self, value: AliasedGenericUnion2[AliasedString, AliasedEnum]) -> None:
-        json_value = _ndjson.UnionConverter(AliasedGenericUnion2, [(AliasedGenericUnion2.T1, _ndjson.string_converter, [str]), (AliasedGenericUnion2.T2, _ndjson.EnumConverter(Fruits, np.int32, _fruits_name_to_value_map, _fruits_value_to_name_map), [int, float, str])], False).to_json(value)
+        converter = _ndjson.UnionConverter(AliasedGenericUnion2, [(AliasedGenericUnion2.T1, _ndjson.string_converter, [str]), (AliasedGenericUnion2.T2, _ndjson.EnumConverter(Fruits, np.int32, _fruits_name_to_value_map, _fruits_value_to_name_map), [int, float, str])], False)
+        json_value = converter.to_json(value)
         self._write_json_line({"aliasedGenericUnion2": json_value})
 
     def _write_aliased_generic_vector(self, value: AliasedGenericVector[yardl.Float32]) -> None:
-        json_value = _ndjson.VectorConverter(_ndjson.float32_converter).to_json(value)
+        converter = _ndjson.VectorConverter(_ndjson.float32_converter)
+        json_value = converter.to_json(value)
         self._write_json_line({"aliasedGenericVector": json_value})
 
     def _write_aliased_generic_fixed_vector(self, value: AliasedGenericFixedVector[yardl.Float32]) -> None:
-        json_value = _ndjson.FixedVectorConverter(_ndjson.float32_converter, 3).to_json(value)
+        converter = _ndjson.FixedVectorConverter(_ndjson.float32_converter, 3)
+        json_value = converter.to_json(value)
         self._write_json_line({"aliasedGenericFixedVector": json_value})
 
     def _write_stream_of_aliased_generic_union_2(self, value: collections.abc.Iterable[AliasedGenericUnion2[AliasedString, AliasedEnum]]) -> None:
@@ -3078,39 +3210,48 @@ class NDJsonAliasesReader(_ndjson.NDJsonProtocolReader, AliasesReaderBase):
 
     def _read_aliased_string(self) -> AliasedString:
         json_object = self._read_json_line("aliasedString", True)
-        return _ndjson.string_converter.from_json(json_object)
+        converter = _ndjson.string_converter
+        return converter.from_json(json_object)
 
     def _read_aliased_enum(self) -> AliasedEnum:
         json_object = self._read_json_line("aliasedEnum", True)
-        return _ndjson.EnumConverter(Fruits, np.int32, _fruits_name_to_value_map, _fruits_value_to_name_map).from_json(json_object)
+        converter = _ndjson.EnumConverter(Fruits, np.int32, _fruits_name_to_value_map, _fruits_value_to_name_map)
+        return converter.from_json(json_object)
 
     def _read_aliased_open_generic(self) -> AliasedOpenGeneric[AliasedString, AliasedEnum]:
         json_object = self._read_json_line("aliasedOpenGeneric", True)
-        return _MyTupleConverter(_ndjson.string_converter, _ndjson.EnumConverter(Fruits, np.int32, _fruits_name_to_value_map, _fruits_value_to_name_map)).from_json(json_object)
+        converter = _MyTupleConverter(_ndjson.string_converter, _ndjson.EnumConverter(Fruits, np.int32, _fruits_name_to_value_map, _fruits_value_to_name_map))
+        return converter.from_json(json_object)
 
     def _read_aliased_closed_generic(self) -> AliasedClosedGeneric:
         json_object = self._read_json_line("aliasedClosedGeneric", True)
-        return _MyTupleConverter(_ndjson.string_converter, _ndjson.EnumConverter(Fruits, np.int32, _fruits_name_to_value_map, _fruits_value_to_name_map)).from_json(json_object)
+        converter = _MyTupleConverter(_ndjson.string_converter, _ndjson.EnumConverter(Fruits, np.int32, _fruits_name_to_value_map, _fruits_value_to_name_map))
+        return converter.from_json(json_object)
 
     def _read_aliased_optional(self) -> typing.Optional[AliasedOptional]:
         json_object = self._read_json_line("aliasedOptional", True)
-        return _ndjson.OptionalConverter(_ndjson.int32_converter).from_json(json_object)
+        converter = _ndjson.OptionalConverter(_ndjson.int32_converter)
+        return converter.from_json(json_object)
 
     def _read_aliased_generic_optional(self) -> typing.Optional[AliasedGenericOptional[yardl.Float32]]:
         json_object = self._read_json_line("aliasedGenericOptional", True)
-        return _ndjson.OptionalConverter(_ndjson.float32_converter).from_json(json_object)
+        converter = _ndjson.OptionalConverter(_ndjson.float32_converter)
+        return converter.from_json(json_object)
 
     def _read_aliased_generic_union_2(self) -> AliasedGenericUnion2[AliasedString, AliasedEnum]:
         json_object = self._read_json_line("aliasedGenericUnion2", True)
-        return _ndjson.UnionConverter(AliasedGenericUnion2, [(AliasedGenericUnion2.T1, _ndjson.string_converter, [str]), (AliasedGenericUnion2.T2, _ndjson.EnumConverter(Fruits, np.int32, _fruits_name_to_value_map, _fruits_value_to_name_map), [int, float, str])], False).from_json(json_object)
+        converter = _ndjson.UnionConverter(AliasedGenericUnion2, [(AliasedGenericUnion2.T1, _ndjson.string_converter, [str]), (AliasedGenericUnion2.T2, _ndjson.EnumConverter(Fruits, np.int32, _fruits_name_to_value_map, _fruits_value_to_name_map), [int, float, str])], False)
+        return converter.from_json(json_object)
 
     def _read_aliased_generic_vector(self) -> AliasedGenericVector[yardl.Float32]:
         json_object = self._read_json_line("aliasedGenericVector", True)
-        return _ndjson.VectorConverter(_ndjson.float32_converter).from_json(json_object)
+        converter = _ndjson.VectorConverter(_ndjson.float32_converter)
+        return converter.from_json(json_object)
 
     def _read_aliased_generic_fixed_vector(self) -> AliasedGenericFixedVector[yardl.Float32]:
         json_object = self._read_json_line("aliasedGenericFixedVector", True)
-        return _ndjson.FixedVectorConverter(_ndjson.float32_converter, 3).from_json(json_object)
+        converter = _ndjson.FixedVectorConverter(_ndjson.float32_converter, 3)
+        return converter.from_json(json_object)
 
     def _read_stream_of_aliased_generic_union_2(self) -> collections.abc.Iterable[AliasedGenericUnion2[AliasedString, AliasedEnum]]:
         converter = _ndjson.UnionConverter(AliasedGenericUnion2, [(AliasedGenericUnion2.T1, _ndjson.string_converter, [str]), (AliasedGenericUnion2.T2, _ndjson.EnumConverter(Fruits, np.int32, _fruits_name_to_value_map, _fruits_value_to_name_map), [int, float, str])], False)
@@ -3165,7 +3306,8 @@ class NDJsonProtocolWithComputedFieldsWriter(_ndjson.NDJsonProtocolWriter, Proto
         _ndjson.NDJsonProtocolWriter.__init__(self, stream, ProtocolWithComputedFieldsWriterBase.schema)
 
     def _write_record_with_computed_fields(self, value: RecordWithComputedFields) -> None:
-        json_value = _RecordWithComputedFieldsConverter().to_json(value)
+        converter = _RecordWithComputedFieldsConverter()
+        json_value = converter.to_json(value)
         self._write_json_line({"recordWithComputedFields": json_value})
 
 
@@ -3179,7 +3321,8 @@ class NDJsonProtocolWithComputedFieldsReader(_ndjson.NDJsonProtocolReader, Proto
 
     def _read_record_with_computed_fields(self) -> RecordWithComputedFields:
         json_object = self._read_json_line("recordWithComputedFields", True)
-        return _RecordWithComputedFieldsConverter().from_json(json_object)
+        converter = _RecordWithComputedFieldsConverter()
+        return converter.from_json(json_object)
 
 class NDJsonProtocolWithKeywordStepsWriter(_ndjson.NDJsonProtocolWriter, ProtocolWithKeywordStepsWriterBase):
     """NDJson writer for the ProtocolWithKeywordSteps protocol."""
@@ -3196,7 +3339,8 @@ class NDJsonProtocolWithKeywordStepsWriter(_ndjson.NDJsonProtocolWriter, Protoco
             self._write_json_line({"int": json_item})
 
     def _write_float(self, value: EnumWithKeywordSymbols) -> None:
-        json_value = _ndjson.EnumConverter(EnumWithKeywordSymbols, np.int32, _enum_with_keyword_symbols_name_to_value_map, _enum_with_keyword_symbols_value_to_name_map).to_json(value)
+        converter = _ndjson.EnumConverter(EnumWithKeywordSymbols, np.int32, _enum_with_keyword_symbols_name_to_value_map, _enum_with_keyword_symbols_value_to_name_map)
+        json_value = converter.to_json(value)
         self._write_json_line({"float": json_value})
 
 
@@ -3215,5 +3359,6 @@ class NDJsonProtocolWithKeywordStepsReader(_ndjson.NDJsonProtocolReader, Protoco
 
     def _read_float(self) -> EnumWithKeywordSymbols:
         json_object = self._read_json_line("float", True)
-        return _ndjson.EnumConverter(EnumWithKeywordSymbols, np.int32, _enum_with_keyword_symbols_name_to_value_map, _enum_with_keyword_symbols_value_to_name_map).from_json(json_object)
+        converter = _ndjson.EnumConverter(EnumWithKeywordSymbols, np.int32, _enum_with_keyword_symbols_name_to_value_map, _enum_with_keyword_symbols_value_to_name_map)
+        return converter.from_json(json_object)
 

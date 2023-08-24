@@ -38,7 +38,7 @@ from . import _dtypes
 }
 
 func writeTypes(w *formatting.IndentedWriter, st dsl.SymbolTable, ns *dsl.Namespace) {
-	common.WriteTypeVars(w, ns)
+	writeTypeVars(w, ns)
 
 	unions := make(map[string]any)
 
@@ -60,6 +60,24 @@ func writeTypes(w *formatting.IndentedWriter, st dsl.SymbolTable, ns *dsl.Namesp
 
 	for _, p := range ns.Protocols {
 		writeUnionClasses(w, p, unions)
+	}
+}
+
+func writeTypeVars(w *formatting.IndentedWriter, ns *dsl.Namespace) {
+	typeVars := make(map[string]any)
+	for _, td := range ns.TypeDefinitions {
+		for _, tp := range td.GetDefinitionMeta().TypeParameters {
+			identifier := common.TypeIdentifierName(tp.Name)
+			if _, ok := typeVars[identifier]; !ok {
+				typeVars[identifier] = nil
+				fmt.Fprintf(w, "%s = typing.TypeVar(\"%s\")\n", identifier, identifier)
+				numpyTypeVarName := common.NumpyTypeParameterSyntax(tp)
+				fmt.Fprintf(w, "%s = typing.TypeVar(\"%s\", bound=np.generic)\n", numpyTypeVarName, numpyTypeVarName)
+			}
+		}
+	}
+	if len(typeVars) > 0 {
+		w.WriteStringln("\n")
 	}
 }
 

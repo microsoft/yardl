@@ -14,20 +14,6 @@ from .protocols import *
 from . import _binary
 from . import yardl_types as yardl
 
-K = typing.TypeVar("K")
-K_NP = typing.TypeVar("K_NP", bound=np.generic)
-V = typing.TypeVar("V")
-V_NP = typing.TypeVar("V_NP", bound=np.generic)
-T = typing.TypeVar("T")
-T_NP = typing.TypeVar("T_NP", bound=np.generic)
-T1 = typing.TypeVar("T1")
-T1_NP = typing.TypeVar("T1_NP", bound=np.generic)
-T2 = typing.TypeVar("T2")
-T2_NP = typing.TypeVar("T2_NP", bound=np.generic)
-T0 = typing.TypeVar("T0")
-T0_NP = typing.TypeVar("T0_NP", bound=np.generic)
-
-
 class BinaryBenchmarkFloat256x256Writer(_binary.BinaryProtocolWriter, BenchmarkFloat256x256WriterBase):
     """Binary writer for the BenchmarkFloat256x256 protocol."""
 

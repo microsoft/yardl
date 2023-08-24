@@ -33,7 +33,6 @@ from . import _ndjson
 from . import yardl_types as yardl
 `)
 
-	common.WriteTypeVars(w, ns)
 	writeConverters(w, ns)
 	writeProtocols(w, ns)
 
@@ -85,7 +84,7 @@ func writeRecordConverter(td *dsl.RecordDefinition, w *formatting.IndentedWriter
 			for _, f := range td.Fields {
 				fieldId := common.FieldIdentifierName(f.Name)
 				fmt.Fprintf(w, "self._%s_converter = %s\n", fieldId, typeConverter(f.Type, ns.Name, nil))
-				if dsl.ContainsGenericTypeParameter(f.Type) {
+				if isGenericParameterReference(f.Type) {
 					fmt.Fprintf(w, "self._%s_supports_none = self._%s_converter.supports_none()\n", fieldId, fieldId)
 				}
 			}
@@ -93,7 +92,7 @@ func writeRecordConverter(td *dsl.RecordDefinition, w *formatting.IndentedWriter
 			fmt.Fprintf(w, "super().__init__(np.dtype([\n")
 			w.Indented(func() {
 				for _, f := range td.Fields {
-					fmt.Fprintf(w, "(\"%s\", self._%s_converter.overall_dtype()),\n", common.FieldIdentifierName(f.Name), formatting.ToSnakeCase(f.Name))
+					fmt.Fprintf(w, "(\"%s\", self._%s_converter.overall_dtype()),\n", common.FieldIdentifierName(f.Name), common.FieldIdentifierName(f.Name))
 				}
 			})
 			fmt.Fprintf(w, "]))\n")
@@ -116,7 +115,7 @@ func writeRecordConverter(td *dsl.RecordDefinition, w *formatting.IndentedWriter
 					w.Indented(func() {
 						fmt.Fprintf(w, "json_object[\"%s\"] = self._%s_converter.to_json(value.%s)\n", f.Name, fieldId, fieldId)
 					})
-				} else if dsl.ContainsGenericTypeParameter(f.Type) {
+				} else if isGenericParameterReference(f.Type) {
 					fmt.Fprintf(w, "if not self._%s_supports_none or value.%s is not None:\n", fieldId, fieldId)
 					w.Indented(func() {
 						fmt.Fprintf(w, "json_object[\"%s\"] = self._%s_converter.to_json(value.%s)\n", f.Name, fieldId, fieldId)
@@ -144,7 +143,7 @@ func writeRecordConverter(td *dsl.RecordDefinition, w *formatting.IndentedWriter
 					w.Indented(func() {
 						fmt.Fprintf(w, "json_object[\"%s\"] = self._%s_converter.numpy_to_json(field_val)\n", f.Name, fieldId)
 					})
-				} else if dsl.ContainsGenericTypeParameter(f.Type) {
+				} else if isGenericParameterReference(f.Type) {
 					fmt.Fprintf(w, "if not self._%s_supports_none or value[\"%s\"] is not None:\n", fieldId, fieldId)
 					w.Indented(func() {
 						fmt.Fprintf(w, "json_object[\"%s\"] = self._%s_converter.numpy_to_json(value[\"%s\"])\n", f.Name, fieldId, fieldId)
@@ -169,7 +168,7 @@ func writeRecordConverter(td *dsl.RecordDefinition, w *formatting.IndentedWriter
 					fieldId := common.FieldIdentifierName(f.Name)
 					if g, ok := f.Type.(*dsl.GeneralizedType); ok && g.Cases.HasNullOption() && g.Dimensionality == nil {
 						fmt.Fprintf(w, "%s=self._%s_converter.from_json(json_object.get(\"%s\")),\n", fieldId, fieldId, f.Name)
-					} else if dsl.ContainsGenericTypeParameter(f.Type) {
+					} else if isGenericParameterReference(f.Type) {
 						fmt.Fprintf(w, "%s=self._%s_converter.from_json(json_object.get(\"%s\") if self._%s_supports_none else json_object[\"%s\"]),\n", fieldId, fieldId, f.Name, fieldId, f.Name)
 					} else {
 						fmt.Fprintf(w, "%s=self._%s_converter.from_json(json_object[\"%s\"],),\n", fieldId, fieldId, f.Name)
@@ -192,7 +191,7 @@ func writeRecordConverter(td *dsl.RecordDefinition, w *formatting.IndentedWriter
 					fieldId := common.FieldIdentifierName(f.Name)
 					if g, ok := f.Type.(*dsl.GeneralizedType); ok && g.Cases.HasNullOption() && g.Dimensionality == nil {
 						fmt.Fprintf(w, "self._%s_converter.from_json_to_numpy(json_object.get(\"%s\")),\n", fieldId, f.Name)
-					} else if dsl.ContainsGenericTypeParameter(f.Type) {
+					} else if isGenericParameterReference(f.Type) {
 						fmt.Fprintf(w, "self._%s_converter.from_json_to_numpy(json_object.get(\"%s\") if self._%s_supports_none else json_object[\"%s\"]),\n", fieldId, f.Name, fieldId, f.Name)
 					} else {
 						fmt.Fprintf(w, "self._%s_converter.from_json_to_numpy(json_object[\"%s\"]),\n", fieldId, f.Name)
@@ -265,7 +264,8 @@ func writeProtocols(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 					fmt.Fprintf(w, "def %s(self, value: %s) -> None:\n", common.ProtocolWriteImplMethodName(step), valueType)
 					w.Indented(func() {
 						converter := typeConverter(step.Type, ns.Name, nil)
-						fmt.Fprintf(w, "json_value = %s.to_json(value)\n", converter)
+						fmt.Fprintf(w, "converter = %s\n", converter)
+						fmt.Fprintf(w, "json_value = converter.to_json(value)\n")
 						fmt.Fprintf(w, "self._write_json_line({\"%s\": json_value})\n", step.Name)
 					})
 				}
@@ -303,9 +303,9 @@ func writeProtocols(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 				} else {
 					fmt.Fprintf(w, "def %s(self) -> %s:\n", common.ProtocolReadImplMethodName(step), valueType)
 					w.Indented(func() {
-						converter := typeConverter(step.Type, ns.Name, nil)
 						fmt.Fprintf(w, "json_object = self._read_json_line(\"%s\", True)\n", step.Name)
-						fmt.Fprintf(w, "return %s.from_json(json_object)\n", converter)
+						fmt.Fprintf(w, "converter = %s\n", typeConverter(step.Type, ns.Name, nil))
+						fmt.Fprintf(w, "return converter.from_json(json_object)\n")
 					})
 				}
 
@@ -472,4 +472,14 @@ func NDJsonWriterName(p *dsl.ProtocolDefinition) string {
 
 func NDJsonReaderName(p *dsl.ProtocolDefinition) string {
 	return fmt.Sprintf("NDJson%sReader", formatting.ToPascalCase(p.Name))
+}
+
+func isGenericParameterReference(t dsl.Type) bool {
+	if st, ok := t.(*dsl.SimpleType); ok {
+		if _, ok := st.ResolvedDefinition.(*dsl.GenericTypeParameter); ok {
+			return true
+		}
+	}
+
+	return false
 }

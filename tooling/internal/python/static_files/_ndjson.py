@@ -845,12 +845,13 @@ class VectorConverter(Generic[T, T_NP], JsonConverter[list[T], np.object_]):
             raise ValueError(f"Value in not a list: {value}")
         return [self._element_converter.to_json(v) for v in value]
 
-    def numpy_to_json(self, value: np.object_) -> object:
+    def numpy_to_json(self, value: object) -> object:
         if isinstance(value, list):
             return [self._element_converter.to_json(v) for v in value]
 
         if not isinstance(value, np.ndarray):
             raise ValueError(f"Value in not a list or ndarray: {value}")
+
         if value.ndim != 1:
             raise ValueError(f"Value in not a 1-dimensional ndarray: {value}")
 
@@ -1105,7 +1106,7 @@ class DynamicNDArrayConverter(NDArrayConverterBase[T, T_NP]):
     def numpy_to_json(self, value: np.object_) -> object:
         return self.to_json(cast(npt.NDArray[Any], value))
 
-    def from_json(self, json_object: object) -> npt.NDArray[T_NP]:
+    def from_json(self, json_object: object) -> npt.NDArray[Any]:
         if not isinstance(json_object, dict):
             raise ValueError(f"Value in not a dict: {json_object}")
 
@@ -1165,7 +1166,7 @@ class NDArrayConverter(Generic[T, T_NP], NDArrayConverterBase[T, T_NP]):
     def numpy_to_json(self, value: np.object_) -> object:
         return self.to_json(cast(npt.NDArray[Any], value))
 
-    def from_json(self, json_object: object) -> npt.NDArray[T_NP]:
+    def from_json(self, json_object: object) -> npt.NDArray[Any]:
         if not isinstance(json_object, dict):
             raise ValueError(f"Value in not a dict: {json_object}")
 
