@@ -5,6 +5,7 @@ package dsl
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/microsoft/yardl/tooling/internal/validation"
@@ -186,8 +187,11 @@ func validateUnionCases(env *Environment, errorSink *validation.ErrorSink) *Envi
 					for k := range tags {
 						keys = append(keys, k)
 					}
-
+					sort.Slice(keys, func(i, j int) bool {
+						return keys[i] < keys[j]
+					})
 					tagsString := strings.Join(keys, ", ")
+
 					if existing, found := tagTypeMap[tagsString]; found {
 						if !TypesEqual(existing, t.ToScalar()) {
 							existingNodeMeta := existing.GetNodeMeta()
