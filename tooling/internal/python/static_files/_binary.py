@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
 import datetime
 from enum import Enum
 from io import BufferedIOBase, BufferedReader, BytesIO

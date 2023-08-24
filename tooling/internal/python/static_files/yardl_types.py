@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
 from abc import ABC
 from enum import Enum
 from typing import Annotated, Generic, TypeVar, Union

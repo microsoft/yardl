@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 package common
 
 import "github.com/microsoft/yardl/tooling/pkg/dsl"

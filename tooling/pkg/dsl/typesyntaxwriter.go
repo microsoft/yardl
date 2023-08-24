@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 package dsl
 
 type TypeSyntaxWriter[TContext any] func(self TypeSyntaxWriter[TContext], typeOrTypeDef Node, context TContext) string
