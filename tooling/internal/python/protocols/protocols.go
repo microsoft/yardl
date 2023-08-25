@@ -18,8 +18,7 @@ func WriteProtocols(ns *dsl.Namespace, st dsl.SymbolTable, packageDir string) er
 	b := bytes.Buffer{}
 	w := formatting.NewIndentedWriter(&b, "    ")
 	common.WriteGeneratedFileHeader(w)
-	w.WriteStringln(`
-import abc
+	w.WriteStringln(`import abc
 import collections.abc
 import datetime
 import typing

@@ -20,8 +20,7 @@ func WriteTypes(ns *dsl.Namespace, st dsl.SymbolTable, packageDir string) error 
 	b := bytes.Buffer{}
 	w := formatting.NewIndentedWriter(&b, "    ")
 	common.WriteGeneratedFileHeader(w)
-	w.WriteStringln(`
-import datetime
+	w.WriteStringln(`import datetime
 import enum
 import types
 import typing

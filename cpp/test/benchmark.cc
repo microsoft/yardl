@@ -285,8 +285,6 @@ Result BenchmarkSimpleMrd(Format format) {
       });
 }
 
-#define FOO(x)
-
 std::map<std::string, std::function<Result(Format)>>
     function_map = {
         {"float256x256", BenchmarkFloat256x256},
