@@ -40,6 +40,34 @@ class BenchmarkFloat256x256Reader : public test_model::BenchmarkFloat256x256Read
   private:
   std::unique_ptr<yardl::hdf5::DatasetReader> float256x256_dataset_state_;
 };
+// HDF5 writer for the BenchmarkInt256x256 protocol.
+class BenchmarkInt256x256Writer : public test_model::BenchmarkInt256x256WriterBase, public yardl::hdf5::Hdf5Writer {
+  public:
+  BenchmarkInt256x256Writer(std::string path);
+
+  protected:
+  void WriteInt256x256Impl(yardl::FixedNDArray<int32_t, 256, 256> const& value) override;
+
+  void WriteInt256x256Impl(std::vector<yardl::FixedNDArray<int32_t, 256, 256>> const& values) override;
+
+  void EndInt256x256Impl() override;
+
+  private:
+  std::unique_ptr<yardl::hdf5::DatasetWriter> int256x256_dataset_state_;
+};
+
+// HDF5 reader for the BenchmarkInt256x256 protocol.
+class BenchmarkInt256x256Reader : public test_model::BenchmarkInt256x256ReaderBase, public yardl::hdf5::Hdf5Reader {
+  public:
+  BenchmarkInt256x256Reader(std::string path);
+
+  bool ReadInt256x256Impl(yardl::FixedNDArray<int32_t, 256, 256>& value) override;
+
+  bool ReadInt256x256Impl(std::vector<yardl::FixedNDArray<int32_t, 256, 256>>& values) override;
+
+  private:
+  std::unique_ptr<yardl::hdf5::DatasetReader> int256x256_dataset_state_;
+};
 // HDF5 writer for the BenchmarkFloatVlen protocol.
 class BenchmarkFloatVlenWriter : public test_model::BenchmarkFloatVlenWriterBase, public yardl::hdf5::Hdf5Writer {
   public:
@@ -435,6 +463,82 @@ class FixedArraysReader : public test_model::FixedArraysReaderBase, public yardl
 
   private:
 };
+// HDF5 writer for the Subarrays protocol.
+class SubarraysWriter : public test_model::SubarraysWriterBase, public yardl::hdf5::Hdf5Writer {
+  public:
+  SubarraysWriter(std::string path);
+
+  protected:
+  void WriteDynamicWithFixedIntSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<int32_t, 3>> const& value) override;
+
+  void WriteDynamicWithFixedFloatSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<float, 3>> const& value) override;
+
+  void WriteKnownDimCountWithFixedIntSubarrayImpl(yardl::NDArray<yardl::FixedNDArray<int32_t, 3>, 1> const& value) override;
+
+  void WriteKnownDimCountWithFixedFloatSubarrayImpl(yardl::NDArray<yardl::FixedNDArray<float, 3>, 1> const& value) override;
+
+  void WriteFixedWithFixedIntSubarrayImpl(yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2> const& value) override;
+
+  void WriteFixedWithFixedFloatSubarrayImpl(yardl::FixedNDArray<yardl::FixedNDArray<float, 3>, 2> const& value) override;
+
+  void WriteNestedSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>> const& value) override;
+
+  void WriteDynamicWithFixedVectorSubarrayImpl(yardl::DynamicNDArray<std::array<int32_t, 3>> const& value) override;
+
+  void WriteGenericSubarrayImpl(test_model::Image<yardl::FixedNDArray<int32_t, 3>> const& value) override;
+
+  private:
+};
+
+// HDF5 reader for the Subarrays protocol.
+class SubarraysReader : public test_model::SubarraysReaderBase, public yardl::hdf5::Hdf5Reader {
+  public:
+  SubarraysReader(std::string path);
+
+  void ReadDynamicWithFixedIntSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<int32_t, 3>>& value) override;
+
+  void ReadDynamicWithFixedFloatSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<float, 3>>& value) override;
+
+  void ReadKnownDimCountWithFixedIntSubarrayImpl(yardl::NDArray<yardl::FixedNDArray<int32_t, 3>, 1>& value) override;
+
+  void ReadKnownDimCountWithFixedFloatSubarrayImpl(yardl::NDArray<yardl::FixedNDArray<float, 3>, 1>& value) override;
+
+  void ReadFixedWithFixedIntSubarrayImpl(yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>& value) override;
+
+  void ReadFixedWithFixedFloatSubarrayImpl(yardl::FixedNDArray<yardl::FixedNDArray<float, 3>, 2>& value) override;
+
+  void ReadNestedSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>>& value) override;
+
+  void ReadDynamicWithFixedVectorSubarrayImpl(yardl::DynamicNDArray<std::array<int32_t, 3>>& value) override;
+
+  void ReadGenericSubarrayImpl(test_model::Image<yardl::FixedNDArray<int32_t, 3>>& value) override;
+
+  private:
+};
+// HDF5 writer for the SubarraysInRecords protocol.
+class SubarraysInRecordsWriter : public test_model::SubarraysInRecordsWriterBase, public yardl::hdf5::Hdf5Writer {
+  public:
+  SubarraysInRecordsWriter(std::string path);
+
+  protected:
+  void WriteWithFixedSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithFixedCollections> const& value) override;
+
+  void WriteWithVlenSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithVlenCollections> const& value) override;
+
+  private:
+};
+
+// HDF5 reader for the SubarraysInRecords protocol.
+class SubarraysInRecordsReader : public test_model::SubarraysInRecordsReaderBase, public yardl::hdf5::Hdf5Reader {
+  public:
+  SubarraysInRecordsReader(std::string path);
+
+  void ReadWithFixedSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithFixedCollections>& value) override;
+
+  void ReadWithVlenSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithVlenCollections>& value) override;
+
+  private:
+};
 // HDF5 writer for the NDArrays protocol.
 class NDArraysWriter : public test_model::NDArraysWriterBase, public yardl::hdf5::Hdf5Writer {
   public:
@@ -543,6 +647,8 @@ class MapsWriter : public test_model::MapsWriterBase, public yardl::hdf5::Hdf5Wr
   protected:
   void WriteStringToIntImpl(std::unordered_map<std::string, int32_t> const& value) override;
 
+  void WriteIntToStringImpl(std::unordered_map<int32_t, std::string> const& value) override;
+
   void WriteStringToUnionImpl(std::unordered_map<std::string, std::variant<std::string, int32_t>> const& value) override;
 
   void WriteAliasedGenericImpl(test_model::AliasedMap<std::string, int32_t> const& value) override;
@@ -556,6 +662,8 @@ class MapsReader : public test_model::MapsReaderBase, public yardl::hdf5::Hdf5Re
   MapsReader(std::string path);
 
   void ReadStringToIntImpl(std::unordered_map<std::string, int32_t>& value) override;
+
+  void ReadIntToStringImpl(std::unordered_map<int32_t, std::string>& value) override;
 
   void ReadStringToUnionImpl(std::unordered_map<std::string, std::variant<std::string, int32_t>>& value) override;
 
@@ -799,7 +907,7 @@ class AdvancedGenericsWriter : public test_model::AdvancedGenericsWriterBase, pu
   AdvancedGenericsWriter(std::string path);
 
   protected:
-  void WriteIntImageImageImpl(test_model::Image<test_model::Image<float>> const& value) override;
+  void WriteFloatImageImageImpl(test_model::Image<test_model::Image<float>> const& value) override;
 
   void WriteGenericRecord1Impl(test_model::GenericRecord<int32_t, std::string> const& value) override;
 
@@ -817,7 +925,7 @@ class AdvancedGenericsReader : public test_model::AdvancedGenericsReaderBase, pu
   public:
   AdvancedGenericsReader(std::string path);
 
-  void ReadIntImageImageImpl(test_model::Image<test_model::Image<float>>& value) override;
+  void ReadFloatImageImageImpl(test_model::Image<test_model::Image<float>>& value) override;
 
   void ReadGenericRecord1Impl(test_model::GenericRecord<int32_t, std::string>& value) override;
 

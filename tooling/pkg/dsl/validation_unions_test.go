@@ -37,7 +37,7 @@ X: !record
   fields:
     f: []`
 	_, err := parseAndValidate(t, src)
-	assert.ErrorContains(t, err, "a field cannot be a union type with no options")
+	assert.ErrorContains(t, err, "a union type must have at least one option")
 }
 
 func TestNullMustBeFirstUnionElement(t *testing.T) {
@@ -62,7 +62,9 @@ func TestUnionElementsMustBeDistinctWithGenerics(t *testing.T) {
 	src := `
 X: !record
   fields:
-    f: [GenericRecord<int>, GenericRecord<int>]
+    f: !union
+      g1: GenericRecord<int>
+      g2: GenericRecord<int>
 GenericRecord<T>: !record`
 
 	_, err := parseAndValidate(t, src)
@@ -73,7 +75,10 @@ func TestUnionElementsAreDistinctWithGenerics(t *testing.T) {
 	src := `
 X: !record
   fields:
-    f: [GenericRecord<float>, GenericRecord<double>]
+    f: !union
+      g1: GenericRecord<float>
+      g2: GenericRecord<double>
+
 GenericRecord<T>: !record
   fields:
     t: T`
@@ -115,11 +120,11 @@ func TestUnionElementsMustBeDistinct_Complex(t *testing.T) {
 	src := `
 X: !record
   fields:
-    f:
-      - !vector
+    f: !union
+      o1: !vector
         items: [int, float]
         length: 10
-      - !vector
+      o2: !vector
         items: [int, float]
         length: 10`
 	_, err := parseAndValidate(t, src)
@@ -168,7 +173,9 @@ Image<T>: !array
   items: T
 MyRecord: !record
   fields:
-    f: [Image<double>, Image<float>]`
+    f: !union
+      di: Image<double>
+      df: Image<float>`
 	_, err := parseAndValidate(t, src)
 	assert.Nil(t, err)
 }
@@ -259,7 +266,7 @@ X: !record
 	assert.ErrorContains(t, err, "length cannot be negative")
 }
 
-func TestUnionLabels_Simple(t *testing.T) {
+func TestUnionTags_Simple(t *testing.T) {
 	src := `
 X: !record
   fields:
@@ -268,46 +275,35 @@ X: !record
 	require.Nil(t, err)
 
 	f := env.Namespaces[0].TypeDefinitions[0].(*RecordDefinition).Fields[0]
-	require.Equal(t, "int32", f.Type.(*GeneralizedType).Cases[1].Label)
-	require.Equal(t, "string", f.Type.(*GeneralizedType).Cases[2].Label)
+	require.Equal(t, "int32", f.Type.(*GeneralizedType).Cases[1].Tag)
+	require.Equal(t, "string", f.Type.(*GeneralizedType).Cases[2].Tag)
 }
 
-func TestUnionLabels_SimpleVectorsAndArrays(t *testing.T) {
+func TestUnionTags_SimpleVectorsAndArrays(t *testing.T) {
 	src := `
 X: !record
   fields:
-    f: [!vector {items: int}, !vector {items: string}]
-    g: [!array {items: int}, !array {items: string}]`
+    f: !union
+      intVector: !vector {items: int}
+      stringVector: !vector {items: string}
+    g: !union
+      intArray: !array {items: int}
+      stringArray: !array {items: string}
+    h: !union
+      stringToInt: string->int
+      stringToString: string->string`
 	env, err := parseAndValidate(t, src)
 	require.Nil(t, err)
 
 	f := env.Namespaces[0].TypeDefinitions[0].(*RecordDefinition).Fields[0]
-	require.Equal(t, "int32Vector", f.Type.(*GeneralizedType).Cases[0].Label)
-	require.Equal(t, "stringVector", f.Type.(*GeneralizedType).Cases[1].Label)
+	require.Equal(t, "intVector", f.Type.(*GeneralizedType).Cases[0].Tag)
+	require.Equal(t, "stringVector", f.Type.(*GeneralizedType).Cases[1].Tag)
 	g := env.Namespaces[0].TypeDefinitions[0].(*RecordDefinition).Fields[1]
-	require.Equal(t, "int32Array", g.Type.(*GeneralizedType).Cases[0].Label)
-	require.Equal(t, "stringArray", g.Type.(*GeneralizedType).Cases[1].Label)
-}
-
-func TestUnionLabels_VectorsAndArraysWithDisambiguation(t *testing.T) {
-	src := `
-X: !record
-  fields:
-    f: [!vector {items: string}, !vector {items: string, length: 10}]
-    g: [!array {items: string}, !array {items: string, dimensions: 2}]
-    h: [!array {items: string, dimensions: [2,3]}, !array {items: string, dimensions: 2}]`
-	env, err := parseAndValidate(t, src)
-	require.Nil(t, err)
-
-	f := env.Namespaces[0].TypeDefinitions[0].(*RecordDefinition).Fields[0]
-	require.Equal(t, "stringVector", f.Type.(*GeneralizedType).Cases[0].Label)
-	require.Equal(t, "stringVector[10]", f.Type.(*GeneralizedType).Cases[1].Label)
-	g := env.Namespaces[0].TypeDefinitions[0].(*RecordDefinition).Fields[1]
-	require.Equal(t, "stringArray", g.Type.(*GeneralizedType).Cases[0].Label)
-	require.Equal(t, "stringArray[,,]", g.Type.(*GeneralizedType).Cases[1].Label)
+	require.Equal(t, "intArray", g.Type.(*GeneralizedType).Cases[0].Tag)
+	require.Equal(t, "stringArray", g.Type.(*GeneralizedType).Cases[1].Tag)
 	h := env.Namespaces[0].TypeDefinitions[0].(*RecordDefinition).Fields[2]
-	require.Equal(t, "stringArray[2,3]", h.Type.(*GeneralizedType).Cases[0].Label)
-	require.Equal(t, "stringArray[,,]", h.Type.(*GeneralizedType).Cases[1].Label)
+	require.Equal(t, "stringToInt", h.Type.(*GeneralizedType).Cases[0].Tag)
+	require.Equal(t, "stringToString", h.Type.(*GeneralizedType).Cases[1].Tag)
 }
 
 func TestUnionsCannotContainUnions(t *testing.T) {
@@ -317,6 +313,76 @@ X: !record
     f: [int, [null, int]]`
 	_, err := parseAndValidate(t, src)
 	assert.ErrorContains(t, err, "unions may not immediately contain other unions")
+}
+
+func TestUnionsWithValidTagSyntax(t *testing.T) {
+	src := `
+U: !union
+  s: string
+  i: int`
+	_, err := parseAndValidate(t, src)
+	assert.NoError(t, err)
+}
+
+func TestUnionsHaveDistinctTags(t *testing.T) {
+	src := `
+U: !union
+  s: string
+  s: int`
+	_, err := parseAndValidate(t, src)
+	assert.ErrorContains(t, err, "all union cases must have distinct tags")
+}
+
+func TestUnionsTagsMustBeValidIdentifiers(t *testing.T) {
+	src := `
+U: [int, int*2]`
+	_, err := parseAndValidate(t, src)
+	assert.ErrorContains(t, err, "the type 'int32*2' cannot be used as a tag for the union case. Explicit tags can be given using the `!union` syntax (e.g. `!union { myTag: \"int32*2\", ... }`) or the type can be aliased for the type case (e.g. `MyTypeAlias = int32*2\nMyUnion = [..., MyTypeAlias, ...]`)")
+}
+
+func TestUnionsTagsMustBeValidIdentifiersWithOpenGeneric(t *testing.T) {
+	src := `
+VecOrList<T>: [T*, "T[]"]`
+	_, err := parseAndValidate(t, src)
+	assert.ErrorContains(t, err, "the type 'T*' cannot be used as a tag for the union case. An explicit tag can be given using the `!union` syntax (e.g. `!union { myTag: \"T*\", ... }`)")
+}
+
+func TestUnionsWithComplexTypesRequireTags(t *testing.T) {
+	src := `
+U: !union
+  s*: string`
+	_, err := parseAndValidate(t, src)
+	assert.ErrorContains(t, err, "union tag 's*' must be camelCased matching the format ^[a-z][a-zA-Z0-9]{0,63}$")
+}
+
+func TestUnionsWithSameTypesAndTags(t *testing.T) {
+	src := `
+Rec: !record
+  fields:
+    f: [int, float]
+    g: [int, float]
+    h: !union
+      int32: int
+      float32: float
+    i: !union
+      int32: int
+      float32: float`
+	_, err := parseAndValidate(t, src)
+	assert.NoError(t, err)
+}
+
+func TestUnionsSameTagsDifferentTypes(t *testing.T) {
+	src := `
+Rec: !record
+  fields:
+    h: !union
+      a: int
+      b: float
+    i: !union
+      a: string
+      b: float`
+	_, err := parseAndValidate(t, src)
+	assert.ErrorContains(t, err, "the combination of tags used by the union are already in use with different types in file")
 }
 
 func parseAndValidate(t *testing.T, src string) (*Environment, error) {

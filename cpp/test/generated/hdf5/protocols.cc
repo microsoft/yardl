@@ -98,12 +98,12 @@ class InnerUnion2 {
 };
 
 template <typename TInner0, typename TOuter0, typename TInner1, typename TOuter1>
-H5::CompType InnerUnion2Ddl(bool nullable, H5::DataType const& t0, std::string const& label0, H5::DataType const& t1, std::string const& label1) {
+H5::CompType InnerUnion2Ddl(bool nullable, H5::DataType const& t0, std::string const& tag0, H5::DataType const& t1, std::string const& tag1) {
   using UnionType = ::InnerUnion2<TInner0, TOuter0, TInner1, TOuter1>;
   H5::CompType rtn(sizeof(UnionType));
-  rtn.insertMember("$type", HOFFSET(UnionType, type_index_), yardl::hdf5::UnionTypeEnumDdl(nullable, label0, label1));
-  rtn.insertMember(label0, HOFFSET(UnionType, value0_), t0);
-  rtn.insertMember(label1, HOFFSET(UnionType, value1_), t1);
+  rtn.insertMember("$type", HOFFSET(UnionType, type_index_), yardl::hdf5::UnionTypeEnumDdl(nullable, tag0, tag1));
+  rtn.insertMember(tag0, HOFFSET(UnionType, value0_), t0);
+  rtn.insertMember(tag1, HOFFSET(UnionType, value1_), t1);
   return rtn;
 }
 }
@@ -218,6 +218,19 @@ struct _Inner_RecordWithVectors {
   yardl::hdf5::InnerVlen<std::array<int32_t, 2>, std::array<int32_t, 2>> vector_of_vectors;
 };
 
+struct _Inner_RecordWithVectorOfTimes {
+  _Inner_RecordWithVectorOfTimes() {} 
+  _Inner_RecordWithVectorOfTimes(test_model::RecordWithVectorOfTimes const& o) 
+      : times(o.times) {
+  }
+
+  void ToOuter (test_model::RecordWithVectorOfTimes& o) const {
+    yardl::hdf5::ToOuter(times, o.times);
+  }
+
+  yardl::hdf5::InnerVlen<yardl::Time, yardl::Time> times;
+};
+
 struct _Inner_RecordWithArrays {
   _Inner_RecordWithArrays() {} 
   _Inner_RecordWithArrays(test_model::RecordWithArrays const& o) 
@@ -296,16 +309,19 @@ struct _Inner_RecordWithOptionalFields {
   _Inner_RecordWithOptionalFields() {} 
   _Inner_RecordWithOptionalFields(test_model::RecordWithOptionalFields const& o) 
       : optional_int(o.optional_int),
-      optional_int_alternate_syntax(o.optional_int_alternate_syntax) {
+      optional_int_alternate_syntax(o.optional_int_alternate_syntax),
+      optional_time(o.optional_time) {
   }
 
   void ToOuter (test_model::RecordWithOptionalFields& o) const {
     yardl::hdf5::ToOuter(optional_int, o.optional_int);
     yardl::hdf5::ToOuter(optional_int_alternate_syntax, o.optional_int_alternate_syntax);
+    yardl::hdf5::ToOuter(optional_time, o.optional_time);
   }
 
   yardl::hdf5::InnerOptional<int32_t, int32_t> optional_int;
   yardl::hdf5::InnerOptional<int32_t, int32_t> optional_int_alternate_syntax;
+  yardl::hdf5::InnerOptional<yardl::Time, yardl::Time> optional_time;
 };
 
 struct _Inner_RecordWithVlens {
@@ -436,32 +452,51 @@ struct _Inner_RecordWithDynamicNDArrays {
   _Inner_RecordWithDynamicNDArrays() {} 
   _Inner_RecordWithDynamicNDArrays(test_model::RecordWithDynamicNDArrays const& o) 
       : ints(o.ints),
-      fixed_simple_record_array(o.fixed_simple_record_array),
-      fixed_record_with_vlens_array(o.fixed_record_with_vlens_array) {
+      simple_record_array(o.simple_record_array),
+      record_with_vlens_array(o.record_with_vlens_array) {
   }
 
   void ToOuter (test_model::RecordWithDynamicNDArrays& o) const {
     yardl::hdf5::ToOuter(ints, o.ints);
-    yardl::hdf5::ToOuter(fixed_simple_record_array, o.fixed_simple_record_array);
-    yardl::hdf5::ToOuter(fixed_record_with_vlens_array, o.fixed_record_with_vlens_array);
+    yardl::hdf5::ToOuter(simple_record_array, o.simple_record_array);
+    yardl::hdf5::ToOuter(record_with_vlens_array, o.record_with_vlens_array);
   }
 
   yardl::hdf5::InnerDynamicNdArray<int32_t, int32_t> ints;
-  yardl::hdf5::InnerDynamicNdArray<test_model::SimpleRecord, test_model::SimpleRecord> fixed_simple_record_array;
-  yardl::hdf5::InnerDynamicNdArray<test_model::hdf5::_Inner_RecordWithVlens, test_model::RecordWithVlens> fixed_record_with_vlens_array;
+  yardl::hdf5::InnerDynamicNdArray<test_model::SimpleRecord, test_model::SimpleRecord> simple_record_array;
+  yardl::hdf5::InnerDynamicNdArray<test_model::hdf5::_Inner_RecordWithVlens, test_model::RecordWithVlens> record_with_vlens_array;
+};
+
+struct _Inner_RecordWithVlenCollections {
+  _Inner_RecordWithVlenCollections() {} 
+  _Inner_RecordWithVlenCollections(test_model::RecordWithVlenCollections const& o) 
+      : vector(o.vector),
+      array(o.array) {
+  }
+
+  void ToOuter (test_model::RecordWithVlenCollections& o) const {
+    yardl::hdf5::ToOuter(vector, o.vector);
+    yardl::hdf5::ToOuter(array, o.array);
+  }
+
+  yardl::hdf5::InnerVlen<int32_t, int32_t> vector;
+  yardl::hdf5::InnerNdArray<int32_t, int32_t, 2> array;
 };
 
 struct _Inner_RecordWithUnions {
   _Inner_RecordWithUnions() {} 
   _Inner_RecordWithUnions(test_model::RecordWithUnions const& o) 
-      : null_or_int_or_string(o.null_or_int_or_string) {
+      : null_or_int_or_string(o.null_or_int_or_string),
+      date_or_datetime(o.date_or_datetime) {
   }
 
   void ToOuter (test_model::RecordWithUnions& o) const {
     yardl::hdf5::ToOuter(null_or_int_or_string, o.null_or_int_or_string);
+    yardl::hdf5::ToOuter(date_or_datetime, o.date_or_datetime);
   }
 
   ::InnerUnion2<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string> null_or_int_or_string;
+  ::InnerUnion2<yardl::Time, yardl::Time, yardl::DateTime, yardl::DateTime> date_or_datetime;
 };
 
 template <typename _T1_Inner, typename T1, typename _T2_Inner, typename T2>
@@ -685,6 +720,13 @@ struct _Inner_RecordWithKeywordFields {
   return t;
 }
 
+[[maybe_unused]] H5::CompType GetRecordWithVectorOfTimesHdf5Ddl() {
+  using RecordType = test_model::hdf5::_Inner_RecordWithVectorOfTimes;
+  H5::CompType t(sizeof(RecordType));
+  t.insertMember("times", HOFFSET(RecordType, times), yardl::hdf5::InnerVlenDdl(yardl::hdf5::TimeTypeDdl()));
+  return t;
+}
+
 [[maybe_unused]] H5::CompType GetRecordWithArraysHdf5Ddl() {
   using RecordType = test_model::hdf5::_Inner_RecordWithArrays;
   H5::CompType t(sizeof(RecordType));
@@ -720,6 +762,7 @@ struct _Inner_RecordWithKeywordFields {
   H5::CompType t(sizeof(RecordType));
   t.insertMember("optionalInt", HOFFSET(RecordType, optional_int), yardl::hdf5::OptionalTypeDdl<int32_t, int32_t>(H5::PredType::NATIVE_INT32));
   t.insertMember("optionalIntAlternateSyntax", HOFFSET(RecordType, optional_int_alternate_syntax), yardl::hdf5::OptionalTypeDdl<int32_t, int32_t>(H5::PredType::NATIVE_INT32));
+  t.insertMember("optionalTime", HOFFSET(RecordType, optional_time), yardl::hdf5::OptionalTypeDdl<yardl::Time, yardl::Time>(yardl::hdf5::TimeTypeDdl()));
   return t;
 }
 
@@ -787,8 +830,24 @@ struct _Inner_RecordWithKeywordFields {
   using RecordType = test_model::hdf5::_Inner_RecordWithDynamicNDArrays;
   H5::CompType t(sizeof(RecordType));
   t.insertMember("ints", HOFFSET(RecordType, ints), yardl::hdf5::DynamicNDArrayDdl<int32_t, int32_t>(H5::PredType::NATIVE_INT32));
-  t.insertMember("fixedSimpleRecordArray", HOFFSET(RecordType, fixed_simple_record_array), yardl::hdf5::DynamicNDArrayDdl<test_model::SimpleRecord, test_model::SimpleRecord>(test_model::hdf5::GetSimpleRecordHdf5Ddl()));
-  t.insertMember("fixedRecordWithVlensArray", HOFFSET(RecordType, fixed_record_with_vlens_array), yardl::hdf5::DynamicNDArrayDdl<test_model::hdf5::_Inner_RecordWithVlens, test_model::RecordWithVlens>(test_model::hdf5::GetRecordWithVlensHdf5Ddl()));
+  t.insertMember("simpleRecordArray", HOFFSET(RecordType, simple_record_array), yardl::hdf5::DynamicNDArrayDdl<test_model::SimpleRecord, test_model::SimpleRecord>(test_model::hdf5::GetSimpleRecordHdf5Ddl()));
+  t.insertMember("recordWithVlensArray", HOFFSET(RecordType, record_with_vlens_array), yardl::hdf5::DynamicNDArrayDdl<test_model::hdf5::_Inner_RecordWithVlens, test_model::RecordWithVlens>(test_model::hdf5::GetRecordWithVlensHdf5Ddl()));
+  return t;
+}
+
+[[maybe_unused]] H5::CompType GetRecordWithFixedCollectionsHdf5Ddl() {
+  using RecordType = test_model::RecordWithFixedCollections;
+  H5::CompType t(sizeof(RecordType));
+  t.insertMember("fixedVector", HOFFSET(RecordType, fixed_vector), yardl::hdf5::FixedVectorDdl(H5::PredType::NATIVE_INT32, 3));
+  t.insertMember("fixedArray", HOFFSET(RecordType, fixed_array), yardl::hdf5::FixedNDArrayDdl(H5::PredType::NATIVE_INT32, {2, 3}));
+  return t;
+}
+
+[[maybe_unused]] H5::CompType GetRecordWithVlenCollectionsHdf5Ddl() {
+  using RecordType = test_model::hdf5::_Inner_RecordWithVlenCollections;
+  H5::CompType t(sizeof(RecordType));
+  t.insertMember("vector", HOFFSET(RecordType, vector), yardl::hdf5::InnerVlenDdl(H5::PredType::NATIVE_INT32));
+  t.insertMember("array", HOFFSET(RecordType, array), yardl::hdf5::NDArrayDdl<int32_t, int32_t, 2>(H5::PredType::NATIVE_INT32));
   return t;
 }
 
@@ -796,6 +855,16 @@ struct _Inner_RecordWithKeywordFields {
   using RecordType = test_model::hdf5::_Inner_RecordWithUnions;
   H5::CompType t(sizeof(RecordType));
   t.insertMember("nullOrIntOrString", HOFFSET(RecordType, null_or_int_or_string), ::InnerUnion2Ddl<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string>(true, H5::PredType::NATIVE_INT32, "int32", yardl::hdf5::InnerVlenStringDdl(), "string"));
+  t.insertMember("dateOrDatetime", HOFFSET(RecordType, date_or_datetime), ::InnerUnion2Ddl<yardl::Time, yardl::Time, yardl::DateTime, yardl::DateTime>(false, yardl::hdf5::TimeTypeDdl(), "time", yardl::hdf5::DateTimeTypeDdl(), "datetime"));
+  return t;
+}
+
+[[maybe_unused]] H5::CompType GetRecordWithEnumsHdf5Ddl() {
+  using RecordType = test_model::RecordWithEnums;
+  H5::CompType t(sizeof(RecordType));
+  t.insertMember("enum", HOFFSET(RecordType, enum_field), test_model::hdf5::GetFruitsHdf5Ddl());
+  t.insertMember("flags", HOFFSET(RecordType, flags), H5::PredType::NATIVE_INT32);
+  t.insertMember("flags2", HOFFSET(RecordType, flags_2), H5::PredType::NATIVE_UINT64);
   return t;
 }
 
@@ -843,7 +912,7 @@ template <typename _T0_Inner, typename T0, typename _T1_Inner, typename T1>
   t.insertMember("optionalNamedArray", HOFFSET(RecordType, optional_named_array), yardl::hdf5::OptionalTypeDdl<yardl::hdf5::InnerNdArray<int32_t, int32_t, 2>, test_model::NamedNDArray>(yardl::hdf5::NDArrayDdl<int32_t, int32_t, 2>(H5::PredType::NATIVE_INT32)));
   t.insertMember("intFloatUnion", HOFFSET(RecordType, int_float_union), ::InnerUnion2Ddl<int32_t, int32_t, float, float>(false, H5::PredType::NATIVE_INT32, "int32", H5::PredType::NATIVE_FLOAT, "float32"));
   t.insertMember("nullableIntFloatUnion", HOFFSET(RecordType, nullable_int_float_union), ::InnerUnion2Ddl<int32_t, int32_t, float, float>(true, H5::PredType::NATIVE_INT32, "int32", H5::PredType::NATIVE_FLOAT, "float32"));
-  t.insertMember("unionWithNestedGenericUnion", HOFFSET(RecordType, union_with_nested_generic_union), ::InnerUnion2Ddl<int32_t, int32_t, test_model::hdf5::_Inner_GenericRecordWithComputedFields<yardl::hdf5::InnerVlenString, std::string, float, float>, test_model::GenericRecordWithComputedFields<std::string, float>>(false, H5::PredType::NATIVE_INT32, "int32", test_model::hdf5::GetGenericRecordWithComputedFieldsHdf5Ddl<yardl::hdf5::InnerVlenString, std::string, float, float>(yardl::hdf5::InnerVlenStringDdl(), H5::PredType::NATIVE_FLOAT), "GenericRecordWithComputedFields<string,float32>"));
+  t.insertMember("unionWithNestedGenericUnion", HOFFSET(RecordType, union_with_nested_generic_union), ::InnerUnion2Ddl<int32_t, int32_t, test_model::hdf5::_Inner_GenericRecordWithComputedFields<yardl::hdf5::InnerVlenString, std::string, float, float>, test_model::GenericRecordWithComputedFields<std::string, float>>(false, H5::PredType::NATIVE_INT32, "int", test_model::hdf5::GetGenericRecordWithComputedFieldsHdf5Ddl<yardl::hdf5::InnerVlenString, std::string, float, float>(yardl::hdf5::InnerVlenStringDdl(), H5::PredType::NATIVE_FLOAT), "genericRecordWithComputedFields"));
   t.insertMember("mapField", HOFFSET(RecordType, map_field), yardl::hdf5::InnerMapDdl<yardl::hdf5::InnerVlenString, yardl::hdf5::InnerVlenString>(yardl::hdf5::InnerVlenStringDdl(), yardl::hdf5::InnerVlenStringDdl()));
   return t;
 }
@@ -912,6 +981,64 @@ bool BenchmarkFloat256x256Reader::ReadFloat256x256Impl(std::vector<yardl::FixedN
   bool has_more = float256x256_dataset_state_->ReadBatch<yardl::FixedNDArray<float, 256, 256>, yardl::FixedNDArray<float, 256, 256>>(values);
   if (!has_more) {
     float256x256_dataset_state_.reset();
+  }
+
+  return has_more;
+}
+
+BenchmarkInt256x256Writer::BenchmarkInt256x256Writer(std::string path)
+    : yardl::hdf5::Hdf5Writer::Hdf5Writer(path, "BenchmarkInt256x256", schema_) {
+}
+
+void BenchmarkInt256x256Writer::WriteInt256x256Impl(yardl::FixedNDArray<int32_t, 256, 256> const& value) {
+  if (!int256x256_dataset_state_) {
+    int256x256_dataset_state_ = std::make_unique<yardl::hdf5::DatasetWriter>(group_, "int256x256", yardl::hdf5::FixedNDArrayDdl(H5::PredType::NATIVE_INT32, {256, 256}), 0);
+  }
+
+  int256x256_dataset_state_->Append<yardl::FixedNDArray<int32_t, 256, 256>, yardl::FixedNDArray<int32_t, 256, 256>>(value);
+}
+
+void BenchmarkInt256x256Writer::WriteInt256x256Impl(std::vector<yardl::FixedNDArray<int32_t, 256, 256>> const& values) {
+  if (!int256x256_dataset_state_) {
+    int256x256_dataset_state_ = std::make_unique<yardl::hdf5::DatasetWriter>(group_, "int256x256", yardl::hdf5::FixedNDArrayDdl(H5::PredType::NATIVE_INT32, {256, 256}), 0);
+  }
+
+  int256x256_dataset_state_->AppendBatch<yardl::FixedNDArray<int32_t, 256, 256>, yardl::FixedNDArray<int32_t, 256, 256>>(values);
+}
+
+void BenchmarkInt256x256Writer::EndInt256x256Impl() {
+  if (!int256x256_dataset_state_) {
+    int256x256_dataset_state_ = std::make_unique<yardl::hdf5::DatasetWriter>(group_, "int256x256", yardl::hdf5::FixedNDArrayDdl(H5::PredType::NATIVE_INT32, {256, 256}), 0);
+  }
+
+  int256x256_dataset_state_.reset();
+}
+
+BenchmarkInt256x256Reader::BenchmarkInt256x256Reader(std::string path)
+    : yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "BenchmarkInt256x256", schema_) {
+}
+
+bool BenchmarkInt256x256Reader::ReadInt256x256Impl(yardl::FixedNDArray<int32_t, 256, 256>& value) {
+  if (!int256x256_dataset_state_) {
+    int256x256_dataset_state_ = std::make_unique<yardl::hdf5::DatasetReader>(group_, "int256x256", yardl::hdf5::FixedNDArrayDdl(H5::PredType::NATIVE_INT32, {256, 256}), 0);
+  }
+
+  bool has_value = int256x256_dataset_state_->Read<yardl::FixedNDArray<int32_t, 256, 256>, yardl::FixedNDArray<int32_t, 256, 256>>(value);
+  if (!has_value) {
+    int256x256_dataset_state_.reset();
+  }
+
+  return has_value;
+}
+
+bool BenchmarkInt256x256Reader::ReadInt256x256Impl(std::vector<yardl::FixedNDArray<int32_t, 256, 256>>& values) {
+  if (!int256x256_dataset_state_) {
+    int256x256_dataset_state_ = std::make_unique<yardl::hdf5::DatasetReader>(group_, "int256x256", yardl::hdf5::FixedNDArrayDdl(H5::PredType::NATIVE_INT32, {256, 256}));
+  }
+
+  bool has_more = int256x256_dataset_state_->ReadBatch<yardl::FixedNDArray<int32_t, 256, 256>, yardl::FixedNDArray<int32_t, 256, 256>>(values);
+  if (!has_more) {
+    int256x256_dataset_state_.reset();
   }
 
   return has_more;
@@ -1097,7 +1224,7 @@ BenchmarkSimpleMrdWriter::BenchmarkSimpleMrdWriter(std::string path)
 
 void BenchmarkSimpleMrdWriter::WriteDataImpl(std::variant<test_model::SimpleAcquisition, test_model::Image<float>> const& value) {
   if (!data_dataset_state_) {
-    data_dataset_state_ = std::make_unique<yardl::hdf5::UnionDatasetWriter<2>>(group_, "data", false, std::make_tuple(test_model::hdf5::GetSimpleAcquisitionHdf5Ddl(), "SimpleAcquisition", static_cast<size_t>(std::max(sizeof(::InnerUnion2<test_model::hdf5::_Inner_SimpleAcquisition, test_model::SimpleAcquisition, yardl::hdf5::InnerNdArray<float, float, 2>, test_model::Image<float>>), sizeof(std::variant<test_model::SimpleAcquisition, test_model::Image<float>>)))), std::make_tuple(yardl::hdf5::NDArrayDdl<float, float, 2>(H5::PredType::NATIVE_FLOAT), "Image<float32>", static_cast<size_t>(std::max(sizeof(::InnerUnion2<test_model::hdf5::_Inner_SimpleAcquisition, test_model::SimpleAcquisition, yardl::hdf5::InnerNdArray<float, float, 2>, test_model::Image<float>>), sizeof(std::variant<test_model::SimpleAcquisition, test_model::Image<float>>)))));
+    data_dataset_state_ = std::make_unique<yardl::hdf5::UnionDatasetWriter<2>>(group_, "data", false, std::make_tuple(test_model::hdf5::GetSimpleAcquisitionHdf5Ddl(), "acquisition", static_cast<size_t>(std::max(sizeof(::InnerUnion2<test_model::hdf5::_Inner_SimpleAcquisition, test_model::SimpleAcquisition, yardl::hdf5::InnerNdArray<float, float, 2>, test_model::Image<float>>), sizeof(std::variant<test_model::SimpleAcquisition, test_model::Image<float>>)))), std::make_tuple(yardl::hdf5::NDArrayDdl<float, float, 2>(H5::PredType::NATIVE_FLOAT), "image", static_cast<size_t>(std::max(sizeof(::InnerUnion2<test_model::hdf5::_Inner_SimpleAcquisition, test_model::SimpleAcquisition, yardl::hdf5::InnerNdArray<float, float, 2>, test_model::Image<float>>), sizeof(std::variant<test_model::SimpleAcquisition, test_model::Image<float>>)))));
   }
 
   std::visit(
@@ -1116,7 +1243,7 @@ void BenchmarkSimpleMrdWriter::WriteDataImpl(std::variant<test_model::SimpleAcqu
 
 void BenchmarkSimpleMrdWriter::EndDataImpl() {
   if (!data_dataset_state_) {
-    data_dataset_state_ = std::make_unique<yardl::hdf5::UnionDatasetWriter<2>>(group_, "data", false, std::make_tuple(test_model::hdf5::GetSimpleAcquisitionHdf5Ddl(), "SimpleAcquisition", static_cast<size_t>(std::max(sizeof(::InnerUnion2<test_model::hdf5::_Inner_SimpleAcquisition, test_model::SimpleAcquisition, yardl::hdf5::InnerNdArray<float, float, 2>, test_model::Image<float>>), sizeof(std::variant<test_model::SimpleAcquisition, test_model::Image<float>>)))), std::make_tuple(yardl::hdf5::NDArrayDdl<float, float, 2>(H5::PredType::NATIVE_FLOAT), "Image<float32>", static_cast<size_t>(std::max(sizeof(::InnerUnion2<test_model::hdf5::_Inner_SimpleAcquisition, test_model::SimpleAcquisition, yardl::hdf5::InnerNdArray<float, float, 2>, test_model::Image<float>>), sizeof(std::variant<test_model::SimpleAcquisition, test_model::Image<float>>)))));
+    data_dataset_state_ = std::make_unique<yardl::hdf5::UnionDatasetWriter<2>>(group_, "data", false, std::make_tuple(test_model::hdf5::GetSimpleAcquisitionHdf5Ddl(), "acquisition", static_cast<size_t>(std::max(sizeof(::InnerUnion2<test_model::hdf5::_Inner_SimpleAcquisition, test_model::SimpleAcquisition, yardl::hdf5::InnerNdArray<float, float, 2>, test_model::Image<float>>), sizeof(std::variant<test_model::SimpleAcquisition, test_model::Image<float>>)))), std::make_tuple(yardl::hdf5::NDArrayDdl<float, float, 2>(H5::PredType::NATIVE_FLOAT), "image", static_cast<size_t>(std::max(sizeof(::InnerUnion2<test_model::hdf5::_Inner_SimpleAcquisition, test_model::SimpleAcquisition, yardl::hdf5::InnerNdArray<float, float, 2>, test_model::Image<float>>), sizeof(std::variant<test_model::SimpleAcquisition, test_model::Image<float>>)))));
   }
 
   data_dataset_state_.reset();
@@ -1134,7 +1261,7 @@ BenchmarkSimpleMrdReader::BenchmarkSimpleMrdReader(std::string path)
 
 bool BenchmarkSimpleMrdReader::ReadDataImpl(std::variant<test_model::SimpleAcquisition, test_model::Image<float>>& value) {
   if (!data_dataset_state_) {
-    data_dataset_state_ = std::make_unique<yardl::hdf5::UnionDatasetReader<2>>(group_, "data", false, std::make_tuple(test_model::hdf5::GetSimpleAcquisitionHdf5Ddl(), "SimpleAcquisition", static_cast<size_t>(std::max(sizeof(::InnerUnion2<test_model::hdf5::_Inner_SimpleAcquisition, test_model::SimpleAcquisition, yardl::hdf5::InnerNdArray<float, float, 2>, test_model::Image<float>>), sizeof(std::variant<test_model::SimpleAcquisition, test_model::Image<float>>)))), std::make_tuple(yardl::hdf5::NDArrayDdl<float, float, 2>(H5::PredType::NATIVE_FLOAT), "Image<float32>", static_cast<size_t>(std::max(sizeof(::InnerUnion2<test_model::hdf5::_Inner_SimpleAcquisition, test_model::SimpleAcquisition, yardl::hdf5::InnerNdArray<float, float, 2>, test_model::Image<float>>), sizeof(std::variant<test_model::SimpleAcquisition, test_model::Image<float>>)))));
+    data_dataset_state_ = std::make_unique<yardl::hdf5::UnionDatasetReader<2>>(group_, "data", false, std::make_tuple(test_model::hdf5::GetSimpleAcquisitionHdf5Ddl(), "acquisition", static_cast<size_t>(std::max(sizeof(::InnerUnion2<test_model::hdf5::_Inner_SimpleAcquisition, test_model::SimpleAcquisition, yardl::hdf5::InnerNdArray<float, float, 2>, test_model::Image<float>>), sizeof(std::variant<test_model::SimpleAcquisition, test_model::Image<float>>)))), std::make_tuple(yardl::hdf5::NDArrayDdl<float, float, 2>(H5::PredType::NATIVE_FLOAT), "image", static_cast<size_t>(std::max(sizeof(::InnerUnion2<test_model::hdf5::_Inner_SimpleAcquisition, test_model::SimpleAcquisition, yardl::hdf5::InnerNdArray<float, float, 2>, test_model::Image<float>>), sizeof(std::variant<test_model::SimpleAcquisition, test_model::Image<float>>)))));
   }
 
   auto [has_result, type_index, reader] = data_dataset_state_->ReadIndex();
@@ -1615,6 +1742,110 @@ void FixedArraysReader::ReadNamedArrayImpl(test_model::NamedFixedNDArray& value)
   yardl::hdf5::ReadScalarDataset<yardl::FixedNDArray<int32_t, 2, 4>, test_model::NamedFixedNDArray>(group_, "namedArray", yardl::hdf5::FixedNDArrayDdl(H5::PredType::NATIVE_INT32, {2, 4}), value);
 }
 
+SubarraysWriter::SubarraysWriter(std::string path)
+    : yardl::hdf5::Hdf5Writer::Hdf5Writer(path, "Subarrays", schema_) {
+}
+
+void SubarraysWriter::WriteDynamicWithFixedIntSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<int32_t, 3>> const& value) {
+  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerDynamicNdArray<yardl::FixedNDArray<int32_t, 3>, yardl::FixedNDArray<int32_t, 3>>, yardl::DynamicNDArray<yardl::FixedNDArray<int32_t, 3>>>(group_, "dynamicWithFixedIntSubarray", yardl::hdf5::DynamicNDArrayDdl<yardl::FixedNDArray<int32_t, 3>, yardl::FixedNDArray<int32_t, 3>>(yardl::hdf5::FixedNDArrayDdl(H5::PredType::NATIVE_INT32, {3})), value);
+}
+
+void SubarraysWriter::WriteDynamicWithFixedFloatSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<float, 3>> const& value) {
+  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerDynamicNdArray<yardl::FixedNDArray<float, 3>, yardl::FixedNDArray<float, 3>>, yardl::DynamicNDArray<yardl::FixedNDArray<float, 3>>>(group_, "dynamicWithFixedFloatSubarray", yardl::hdf5::DynamicNDArrayDdl<yardl::FixedNDArray<float, 3>, yardl::FixedNDArray<float, 3>>(yardl::hdf5::FixedNDArrayDdl(H5::PredType::NATIVE_FLOAT, {3})), value);
+}
+
+void SubarraysWriter::WriteKnownDimCountWithFixedIntSubarrayImpl(yardl::NDArray<yardl::FixedNDArray<int32_t, 3>, 1> const& value) {
+  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerVlen<yardl::FixedNDArray<int32_t, 3>, yardl::FixedNDArray<int32_t, 3>>, yardl::NDArray<yardl::FixedNDArray<int32_t, 3>, 1>>(group_, "knownDimCountWithFixedIntSubarray", yardl::hdf5::InnerVlenDdl(yardl::hdf5::FixedNDArrayDdl(H5::PredType::NATIVE_INT32, {3})), value);
+}
+
+void SubarraysWriter::WriteKnownDimCountWithFixedFloatSubarrayImpl(yardl::NDArray<yardl::FixedNDArray<float, 3>, 1> const& value) {
+  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerVlen<yardl::FixedNDArray<float, 3>, yardl::FixedNDArray<float, 3>>, yardl::NDArray<yardl::FixedNDArray<float, 3>, 1>>(group_, "knownDimCountWithFixedFloatSubarray", yardl::hdf5::InnerVlenDdl(yardl::hdf5::FixedNDArrayDdl(H5::PredType::NATIVE_FLOAT, {3})), value);
+}
+
+void SubarraysWriter::WriteFixedWithFixedIntSubarrayImpl(yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2> const& value) {
+  yardl::hdf5::WriteScalarDataset<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>, yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>>(group_, "fixedWithFixedIntSubarray", yardl::hdf5::FixedNDArrayDdl(yardl::hdf5::FixedNDArrayDdl(H5::PredType::NATIVE_INT32, {3}), {2}), value);
+}
+
+void SubarraysWriter::WriteFixedWithFixedFloatSubarrayImpl(yardl::FixedNDArray<yardl::FixedNDArray<float, 3>, 2> const& value) {
+  yardl::hdf5::WriteScalarDataset<yardl::FixedNDArray<yardl::FixedNDArray<float, 3>, 2>, yardl::FixedNDArray<yardl::FixedNDArray<float, 3>, 2>>(group_, "fixedWithFixedFloatSubarray", yardl::hdf5::FixedNDArrayDdl(yardl::hdf5::FixedNDArrayDdl(H5::PredType::NATIVE_FLOAT, {3}), {2}), value);
+}
+
+void SubarraysWriter::WriteNestedSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>> const& value) {
+  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerDynamicNdArray<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>, yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>>, yardl::DynamicNDArray<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>>>(group_, "nestedSubarray", yardl::hdf5::DynamicNDArrayDdl<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>, yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>>(yardl::hdf5::FixedNDArrayDdl(yardl::hdf5::FixedNDArrayDdl(H5::PredType::NATIVE_INT32, {3}), {2})), value);
+}
+
+void SubarraysWriter::WriteDynamicWithFixedVectorSubarrayImpl(yardl::DynamicNDArray<std::array<int32_t, 3>> const& value) {
+  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerDynamicNdArray<std::array<int32_t, 3>, std::array<int32_t, 3>>, yardl::DynamicNDArray<std::array<int32_t, 3>>>(group_, "dynamicWithFixedVectorSubarray", yardl::hdf5::DynamicNDArrayDdl<std::array<int32_t, 3>, std::array<int32_t, 3>>(yardl::hdf5::FixedVectorDdl(H5::PredType::NATIVE_INT32, 3)), value);
+}
+
+void SubarraysWriter::WriteGenericSubarrayImpl(test_model::Image<yardl::FixedNDArray<int32_t, 3>> const& value) {
+  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerNdArray<yardl::FixedNDArray<int32_t, 3>, yardl::FixedNDArray<int32_t, 3>, 2>, test_model::Image<yardl::FixedNDArray<int32_t, 3>>>(group_, "genericSubarray", yardl::hdf5::NDArrayDdl<yardl::FixedNDArray<int32_t, 3>, yardl::FixedNDArray<int32_t, 3>, 2>(yardl::hdf5::FixedNDArrayDdl(H5::PredType::NATIVE_INT32, {3})), value);
+}
+
+SubarraysReader::SubarraysReader(std::string path)
+    : yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "Subarrays", schema_) {
+}
+
+void SubarraysReader::ReadDynamicWithFixedIntSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<int32_t, 3>>& value) {
+  yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerDynamicNdArray<yardl::FixedNDArray<int32_t, 3>, yardl::FixedNDArray<int32_t, 3>>, yardl::DynamicNDArray<yardl::FixedNDArray<int32_t, 3>>>(group_, "dynamicWithFixedIntSubarray", yardl::hdf5::DynamicNDArrayDdl<yardl::FixedNDArray<int32_t, 3>, yardl::FixedNDArray<int32_t, 3>>(yardl::hdf5::FixedNDArrayDdl(H5::PredType::NATIVE_INT32, {3})), value);
+}
+
+void SubarraysReader::ReadDynamicWithFixedFloatSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<float, 3>>& value) {
+  yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerDynamicNdArray<yardl::FixedNDArray<float, 3>, yardl::FixedNDArray<float, 3>>, yardl::DynamicNDArray<yardl::FixedNDArray<float, 3>>>(group_, "dynamicWithFixedFloatSubarray", yardl::hdf5::DynamicNDArrayDdl<yardl::FixedNDArray<float, 3>, yardl::FixedNDArray<float, 3>>(yardl::hdf5::FixedNDArrayDdl(H5::PredType::NATIVE_FLOAT, {3})), value);
+}
+
+void SubarraysReader::ReadKnownDimCountWithFixedIntSubarrayImpl(yardl::NDArray<yardl::FixedNDArray<int32_t, 3>, 1>& value) {
+  yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerVlen<yardl::FixedNDArray<int32_t, 3>, yardl::FixedNDArray<int32_t, 3>>, yardl::NDArray<yardl::FixedNDArray<int32_t, 3>, 1>>(group_, "knownDimCountWithFixedIntSubarray", yardl::hdf5::InnerVlenDdl(yardl::hdf5::FixedNDArrayDdl(H5::PredType::NATIVE_INT32, {3})), value);
+}
+
+void SubarraysReader::ReadKnownDimCountWithFixedFloatSubarrayImpl(yardl::NDArray<yardl::FixedNDArray<float, 3>, 1>& value) {
+  yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerVlen<yardl::FixedNDArray<float, 3>, yardl::FixedNDArray<float, 3>>, yardl::NDArray<yardl::FixedNDArray<float, 3>, 1>>(group_, "knownDimCountWithFixedFloatSubarray", yardl::hdf5::InnerVlenDdl(yardl::hdf5::FixedNDArrayDdl(H5::PredType::NATIVE_FLOAT, {3})), value);
+}
+
+void SubarraysReader::ReadFixedWithFixedIntSubarrayImpl(yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>& value) {
+  yardl::hdf5::ReadScalarDataset<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>, yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>>(group_, "fixedWithFixedIntSubarray", yardl::hdf5::FixedNDArrayDdl(yardl::hdf5::FixedNDArrayDdl(H5::PredType::NATIVE_INT32, {3}), {2}), value);
+}
+
+void SubarraysReader::ReadFixedWithFixedFloatSubarrayImpl(yardl::FixedNDArray<yardl::FixedNDArray<float, 3>, 2>& value) {
+  yardl::hdf5::ReadScalarDataset<yardl::FixedNDArray<yardl::FixedNDArray<float, 3>, 2>, yardl::FixedNDArray<yardl::FixedNDArray<float, 3>, 2>>(group_, "fixedWithFixedFloatSubarray", yardl::hdf5::FixedNDArrayDdl(yardl::hdf5::FixedNDArrayDdl(H5::PredType::NATIVE_FLOAT, {3}), {2}), value);
+}
+
+void SubarraysReader::ReadNestedSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>>& value) {
+  yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerDynamicNdArray<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>, yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>>, yardl::DynamicNDArray<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>>>(group_, "nestedSubarray", yardl::hdf5::DynamicNDArrayDdl<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>, yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>>(yardl::hdf5::FixedNDArrayDdl(yardl::hdf5::FixedNDArrayDdl(H5::PredType::NATIVE_INT32, {3}), {2})), value);
+}
+
+void SubarraysReader::ReadDynamicWithFixedVectorSubarrayImpl(yardl::DynamicNDArray<std::array<int32_t, 3>>& value) {
+  yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerDynamicNdArray<std::array<int32_t, 3>, std::array<int32_t, 3>>, yardl::DynamicNDArray<std::array<int32_t, 3>>>(group_, "dynamicWithFixedVectorSubarray", yardl::hdf5::DynamicNDArrayDdl<std::array<int32_t, 3>, std::array<int32_t, 3>>(yardl::hdf5::FixedVectorDdl(H5::PredType::NATIVE_INT32, 3)), value);
+}
+
+void SubarraysReader::ReadGenericSubarrayImpl(test_model::Image<yardl::FixedNDArray<int32_t, 3>>& value) {
+  yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerNdArray<yardl::FixedNDArray<int32_t, 3>, yardl::FixedNDArray<int32_t, 3>, 2>, test_model::Image<yardl::FixedNDArray<int32_t, 3>>>(group_, "genericSubarray", yardl::hdf5::NDArrayDdl<yardl::FixedNDArray<int32_t, 3>, yardl::FixedNDArray<int32_t, 3>, 2>(yardl::hdf5::FixedNDArrayDdl(H5::PredType::NATIVE_INT32, {3})), value);
+}
+
+SubarraysInRecordsWriter::SubarraysInRecordsWriter(std::string path)
+    : yardl::hdf5::Hdf5Writer::Hdf5Writer(path, "SubarraysInRecords", schema_) {
+}
+
+void SubarraysInRecordsWriter::WriteWithFixedSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithFixedCollections> const& value) {
+  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerDynamicNdArray<test_model::RecordWithFixedCollections, test_model::RecordWithFixedCollections>, yardl::DynamicNDArray<test_model::RecordWithFixedCollections>>(group_, "withFixedSubarrays", yardl::hdf5::DynamicNDArrayDdl<test_model::RecordWithFixedCollections, test_model::RecordWithFixedCollections>(test_model::hdf5::GetRecordWithFixedCollectionsHdf5Ddl()), value);
+}
+
+void SubarraysInRecordsWriter::WriteWithVlenSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithVlenCollections> const& value) {
+  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerDynamicNdArray<test_model::hdf5::_Inner_RecordWithVlenCollections, test_model::RecordWithVlenCollections>, yardl::DynamicNDArray<test_model::RecordWithVlenCollections>>(group_, "withVlenSubarrays", yardl::hdf5::DynamicNDArrayDdl<test_model::hdf5::_Inner_RecordWithVlenCollections, test_model::RecordWithVlenCollections>(test_model::hdf5::GetRecordWithVlenCollectionsHdf5Ddl()), value);
+}
+
+SubarraysInRecordsReader::SubarraysInRecordsReader(std::string path)
+    : yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "SubarraysInRecords", schema_) {
+}
+
+void SubarraysInRecordsReader::ReadWithFixedSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithFixedCollections>& value) {
+  yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerDynamicNdArray<test_model::RecordWithFixedCollections, test_model::RecordWithFixedCollections>, yardl::DynamicNDArray<test_model::RecordWithFixedCollections>>(group_, "withFixedSubarrays", yardl::hdf5::DynamicNDArrayDdl<test_model::RecordWithFixedCollections, test_model::RecordWithFixedCollections>(test_model::hdf5::GetRecordWithFixedCollectionsHdf5Ddl()), value);
+}
+
+void SubarraysInRecordsReader::ReadWithVlenSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithVlenCollections>& value) {
+  yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerDynamicNdArray<test_model::hdf5::_Inner_RecordWithVlenCollections, test_model::RecordWithVlenCollections>, yardl::DynamicNDArray<test_model::RecordWithVlenCollections>>(group_, "withVlenSubarrays", yardl::hdf5::DynamicNDArrayDdl<test_model::hdf5::_Inner_RecordWithVlenCollections, test_model::RecordWithVlenCollections>(test_model::hdf5::GetRecordWithVlenCollectionsHdf5Ddl()), value);
+}
+
 NDArraysWriter::NDArraysWriter(std::string path)
     : yardl::hdf5::Hdf5Writer::Hdf5Writer(path, "NDArrays", schema_) {
 }
@@ -1751,6 +1982,10 @@ void MapsWriter::WriteStringToIntImpl(std::unordered_map<std::string, int32_t> c
   yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerMap<yardl::hdf5::InnerVlenString, std::string, int32_t, int32_t>, std::unordered_map<std::string, int32_t>>(group_, "stringToInt", yardl::hdf5::InnerMapDdl<yardl::hdf5::InnerVlenString, int32_t>(yardl::hdf5::InnerVlenStringDdl(), H5::PredType::NATIVE_INT32), value);
 }
 
+void MapsWriter::WriteIntToStringImpl(std::unordered_map<int32_t, std::string> const& value) {
+  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerMap<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string>, std::unordered_map<int32_t, std::string>>(group_, "intToString", yardl::hdf5::InnerMapDdl<int32_t, yardl::hdf5::InnerVlenString>(H5::PredType::NATIVE_INT32, yardl::hdf5::InnerVlenStringDdl()), value);
+}
+
 void MapsWriter::WriteStringToUnionImpl(std::unordered_map<std::string, std::variant<std::string, int32_t>> const& value) {
   yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerMap<yardl::hdf5::InnerVlenString, std::string, ::InnerUnion2<yardl::hdf5::InnerVlenString, std::string, int32_t, int32_t>, std::variant<std::string, int32_t>>, std::unordered_map<std::string, std::variant<std::string, int32_t>>>(group_, "stringToUnion", yardl::hdf5::InnerMapDdl<yardl::hdf5::InnerVlenString, ::InnerUnion2<yardl::hdf5::InnerVlenString, std::string, int32_t, int32_t>>(yardl::hdf5::InnerVlenStringDdl(), ::InnerUnion2Ddl<yardl::hdf5::InnerVlenString, std::string, int32_t, int32_t>(false, yardl::hdf5::InnerVlenStringDdl(), "string", H5::PredType::NATIVE_INT32, "int32")), value);
 }
@@ -1765,6 +2000,10 @@ MapsReader::MapsReader(std::string path)
 
 void MapsReader::ReadStringToIntImpl(std::unordered_map<std::string, int32_t>& value) {
   yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerMap<yardl::hdf5::InnerVlenString, std::string, int32_t, int32_t>, std::unordered_map<std::string, int32_t>>(group_, "stringToInt", yardl::hdf5::InnerMapDdl<yardl::hdf5::InnerVlenString, int32_t>(yardl::hdf5::InnerVlenStringDdl(), H5::PredType::NATIVE_INT32), value);
+}
+
+void MapsReader::ReadIntToStringImpl(std::unordered_map<int32_t, std::string>& value) {
+  yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerMap<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string>, std::unordered_map<int32_t, std::string>>(group_, "intToString", yardl::hdf5::InnerMapDdl<int32_t, yardl::hdf5::InnerVlenString>(H5::PredType::NATIVE_INT32, yardl::hdf5::InnerVlenStringDdl()), value);
 }
 
 void MapsReader::ReadStringToUnionImpl(std::unordered_map<std::string, std::variant<std::string, int32_t>>& value) {
@@ -2197,7 +2436,7 @@ void SimpleGenericsWriter::WriteIntStringTupleImpl(test_model::MyTuple<int32_t, 
 
 void SimpleGenericsWriter::WriteStreamOfTypeVariantsImpl(std::variant<test_model::Image<float>, test_model::Image<double>> const& value) {
   if (!streamOfTypeVariants_dataset_state_) {
-    streamOfTypeVariants_dataset_state_ = std::make_unique<yardl::hdf5::UnionDatasetWriter<2>>(group_, "streamOfTypeVariants", false, std::make_tuple(yardl::hdf5::NDArrayDdl<float, float, 2>(H5::PredType::NATIVE_FLOAT), "Image<float32>", static_cast<size_t>(std::max(sizeof(::InnerUnion2<yardl::hdf5::InnerNdArray<float, float, 2>, test_model::Image<float>, yardl::hdf5::InnerNdArray<double, double, 2>, test_model::Image<double>>), sizeof(std::variant<test_model::Image<float>, test_model::Image<double>>)))), std::make_tuple(yardl::hdf5::NDArrayDdl<double, double, 2>(H5::PredType::NATIVE_DOUBLE), "Image<float64>", static_cast<size_t>(std::max(sizeof(::InnerUnion2<yardl::hdf5::InnerNdArray<float, float, 2>, test_model::Image<float>, yardl::hdf5::InnerNdArray<double, double, 2>, test_model::Image<double>>), sizeof(std::variant<test_model::Image<float>, test_model::Image<double>>)))));
+    streamOfTypeVariants_dataset_state_ = std::make_unique<yardl::hdf5::UnionDatasetWriter<2>>(group_, "streamOfTypeVariants", false, std::make_tuple(yardl::hdf5::NDArrayDdl<float, float, 2>(H5::PredType::NATIVE_FLOAT), "imageFloat", static_cast<size_t>(std::max(sizeof(::InnerUnion2<yardl::hdf5::InnerNdArray<float, float, 2>, test_model::Image<float>, yardl::hdf5::InnerNdArray<double, double, 2>, test_model::Image<double>>), sizeof(std::variant<test_model::Image<float>, test_model::Image<double>>)))), std::make_tuple(yardl::hdf5::NDArrayDdl<double, double, 2>(H5::PredType::NATIVE_DOUBLE), "imageDouble", static_cast<size_t>(std::max(sizeof(::InnerUnion2<yardl::hdf5::InnerNdArray<float, float, 2>, test_model::Image<float>, yardl::hdf5::InnerNdArray<double, double, 2>, test_model::Image<double>>), sizeof(std::variant<test_model::Image<float>, test_model::Image<double>>)))));
   }
 
   std::visit(
@@ -2216,7 +2455,7 @@ void SimpleGenericsWriter::WriteStreamOfTypeVariantsImpl(std::variant<test_model
 
 void SimpleGenericsWriter::EndStreamOfTypeVariantsImpl() {
   if (!streamOfTypeVariants_dataset_state_) {
-    streamOfTypeVariants_dataset_state_ = std::make_unique<yardl::hdf5::UnionDatasetWriter<2>>(group_, "streamOfTypeVariants", false, std::make_tuple(yardl::hdf5::NDArrayDdl<float, float, 2>(H5::PredType::NATIVE_FLOAT), "Image<float32>", static_cast<size_t>(std::max(sizeof(::InnerUnion2<yardl::hdf5::InnerNdArray<float, float, 2>, test_model::Image<float>, yardl::hdf5::InnerNdArray<double, double, 2>, test_model::Image<double>>), sizeof(std::variant<test_model::Image<float>, test_model::Image<double>>)))), std::make_tuple(yardl::hdf5::NDArrayDdl<double, double, 2>(H5::PredType::NATIVE_DOUBLE), "Image<float64>", static_cast<size_t>(std::max(sizeof(::InnerUnion2<yardl::hdf5::InnerNdArray<float, float, 2>, test_model::Image<float>, yardl::hdf5::InnerNdArray<double, double, 2>, test_model::Image<double>>), sizeof(std::variant<test_model::Image<float>, test_model::Image<double>>)))));
+    streamOfTypeVariants_dataset_state_ = std::make_unique<yardl::hdf5::UnionDatasetWriter<2>>(group_, "streamOfTypeVariants", false, std::make_tuple(yardl::hdf5::NDArrayDdl<float, float, 2>(H5::PredType::NATIVE_FLOAT), "imageFloat", static_cast<size_t>(std::max(sizeof(::InnerUnion2<yardl::hdf5::InnerNdArray<float, float, 2>, test_model::Image<float>, yardl::hdf5::InnerNdArray<double, double, 2>, test_model::Image<double>>), sizeof(std::variant<test_model::Image<float>, test_model::Image<double>>)))), std::make_tuple(yardl::hdf5::NDArrayDdl<double, double, 2>(H5::PredType::NATIVE_DOUBLE), "imageDouble", static_cast<size_t>(std::max(sizeof(::InnerUnion2<yardl::hdf5::InnerNdArray<float, float, 2>, test_model::Image<float>, yardl::hdf5::InnerNdArray<double, double, 2>, test_model::Image<double>>), sizeof(std::variant<test_model::Image<float>, test_model::Image<double>>)))));
   }
 
   streamOfTypeVariants_dataset_state_.reset();
@@ -2266,7 +2505,7 @@ void SimpleGenericsReader::ReadIntStringTupleImpl(test_model::MyTuple<int32_t, s
 
 bool SimpleGenericsReader::ReadStreamOfTypeVariantsImpl(std::variant<test_model::Image<float>, test_model::Image<double>>& value) {
   if (!streamOfTypeVariants_dataset_state_) {
-    streamOfTypeVariants_dataset_state_ = std::make_unique<yardl::hdf5::UnionDatasetReader<2>>(group_, "streamOfTypeVariants", false, std::make_tuple(yardl::hdf5::NDArrayDdl<float, float, 2>(H5::PredType::NATIVE_FLOAT), "Image<float32>", static_cast<size_t>(std::max(sizeof(::InnerUnion2<yardl::hdf5::InnerNdArray<float, float, 2>, test_model::Image<float>, yardl::hdf5::InnerNdArray<double, double, 2>, test_model::Image<double>>), sizeof(std::variant<test_model::Image<float>, test_model::Image<double>>)))), std::make_tuple(yardl::hdf5::NDArrayDdl<double, double, 2>(H5::PredType::NATIVE_DOUBLE), "Image<float64>", static_cast<size_t>(std::max(sizeof(::InnerUnion2<yardl::hdf5::InnerNdArray<float, float, 2>, test_model::Image<float>, yardl::hdf5::InnerNdArray<double, double, 2>, test_model::Image<double>>), sizeof(std::variant<test_model::Image<float>, test_model::Image<double>>)))));
+    streamOfTypeVariants_dataset_state_ = std::make_unique<yardl::hdf5::UnionDatasetReader<2>>(group_, "streamOfTypeVariants", false, std::make_tuple(yardl::hdf5::NDArrayDdl<float, float, 2>(H5::PredType::NATIVE_FLOAT), "imageFloat", static_cast<size_t>(std::max(sizeof(::InnerUnion2<yardl::hdf5::InnerNdArray<float, float, 2>, test_model::Image<float>, yardl::hdf5::InnerNdArray<double, double, 2>, test_model::Image<double>>), sizeof(std::variant<test_model::Image<float>, test_model::Image<double>>)))), std::make_tuple(yardl::hdf5::NDArrayDdl<double, double, 2>(H5::PredType::NATIVE_DOUBLE), "imageDouble", static_cast<size_t>(std::max(sizeof(::InnerUnion2<yardl::hdf5::InnerNdArray<float, float, 2>, test_model::Image<float>, yardl::hdf5::InnerNdArray<double, double, 2>, test_model::Image<double>>), sizeof(std::variant<test_model::Image<float>, test_model::Image<double>>)))));
   }
 
   auto [has_result, type_index, reader] = streamOfTypeVariants_dataset_state_->ReadIndex();
@@ -2295,8 +2534,8 @@ AdvancedGenericsWriter::AdvancedGenericsWriter(std::string path)
     : yardl::hdf5::Hdf5Writer::Hdf5Writer(path, "AdvancedGenerics", schema_) {
 }
 
-void AdvancedGenericsWriter::WriteIntImageImageImpl(test_model::Image<test_model::Image<float>> const& value) {
-  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerNdArray<yardl::hdf5::InnerNdArray<float, float, 2>, test_model::Image<float>, 2>, test_model::Image<test_model::Image<float>>>(group_, "intImageImage", yardl::hdf5::NDArrayDdl<yardl::hdf5::InnerNdArray<float, float, 2>, test_model::Image<float>, 2>(yardl::hdf5::NDArrayDdl<float, float, 2>(H5::PredType::NATIVE_FLOAT)), value);
+void AdvancedGenericsWriter::WriteFloatImageImageImpl(test_model::Image<test_model::Image<float>> const& value) {
+  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerNdArray<yardl::hdf5::InnerNdArray<float, float, 2>, test_model::Image<float>, 2>, test_model::Image<test_model::Image<float>>>(group_, "floatImageImage", yardl::hdf5::NDArrayDdl<yardl::hdf5::InnerNdArray<float, float, 2>, test_model::Image<float>, 2>(yardl::hdf5::NDArrayDdl<float, float, 2>(H5::PredType::NATIVE_FLOAT)), value);
 }
 
 void AdvancedGenericsWriter::WriteGenericRecord1Impl(test_model::GenericRecord<int32_t, std::string> const& value) {
@@ -2319,8 +2558,8 @@ AdvancedGenericsReader::AdvancedGenericsReader(std::string path)
     : yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "AdvancedGenerics", schema_) {
 }
 
-void AdvancedGenericsReader::ReadIntImageImageImpl(test_model::Image<test_model::Image<float>>& value) {
-  yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerNdArray<yardl::hdf5::InnerNdArray<float, float, 2>, test_model::Image<float>, 2>, test_model::Image<test_model::Image<float>>>(group_, "intImageImage", yardl::hdf5::NDArrayDdl<yardl::hdf5::InnerNdArray<float, float, 2>, test_model::Image<float>, 2>(yardl::hdf5::NDArrayDdl<float, float, 2>(H5::PredType::NATIVE_FLOAT)), value);
+void AdvancedGenericsReader::ReadFloatImageImageImpl(test_model::Image<test_model::Image<float>>& value) {
+  yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerNdArray<yardl::hdf5::InnerNdArray<float, float, 2>, test_model::Image<float>, 2>, test_model::Image<test_model::Image<float>>>(group_, "floatImageImage", yardl::hdf5::NDArrayDdl<yardl::hdf5::InnerNdArray<float, float, 2>, test_model::Image<float>, 2>(yardl::hdf5::NDArrayDdl<float, float, 2>(H5::PredType::NATIVE_FLOAT)), value);
 }
 
 void AdvancedGenericsReader::ReadGenericRecord1Impl(test_model::GenericRecord<int32_t, std::string>& value) {

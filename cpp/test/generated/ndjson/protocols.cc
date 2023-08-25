@@ -30,6 +30,9 @@ void from_json(ordered_json const& j, test_model::TupleWithRecords& value);
 void to_json(ordered_json& j, test_model::RecordWithVectors const& value);
 void from_json(ordered_json const& j, test_model::RecordWithVectors& value);
 
+void to_json(ordered_json& j, test_model::RecordWithVectorOfTimes const& value);
+void from_json(ordered_json const& j, test_model::RecordWithVectorOfTimes& value);
+
 void to_json(ordered_json& j, test_model::RecordWithArrays const& value);
 void from_json(ordered_json const& j, test_model::RecordWithArrays& value);
 
@@ -63,6 +66,12 @@ void from_json(ordered_json const& j, test_model::RecordWithNDArraysSingleDimens
 void to_json(ordered_json& j, test_model::RecordWithDynamicNDArrays const& value);
 void from_json(ordered_json const& j, test_model::RecordWithDynamicNDArrays& value);
 
+void to_json(ordered_json& j, test_model::RecordWithFixedCollections const& value);
+void from_json(ordered_json const& j, test_model::RecordWithFixedCollections& value);
+
+void to_json(ordered_json& j, test_model::RecordWithVlenCollections const& value);
+void from_json(ordered_json const& j, test_model::RecordWithVlenCollections& value);
+
 void to_json(ordered_json& j, test_model::RecordWithUnions const& value);
 void from_json(ordered_json const& j, test_model::RecordWithUnions& value);
 
@@ -83,6 +92,9 @@ void from_json(ordered_json const& j, test_model::DaysOfWeek& value);
 
 void to_json(ordered_json& j, test_model::TextFormat const& value);
 void from_json(ordered_json const& j, test_model::TextFormat& value);
+
+void to_json(ordered_json& j, test_model::RecordWithEnums const& value);
+void from_json(ordered_json const& j, test_model::RecordWithEnums& value);
 
 template <typename T1, typename T2>
 void to_json(ordered_json& j, test_model::GenericRecord<T1, T2> const& value);
@@ -117,10 +129,10 @@ struct adl_serializer<std::variant<test_model::SimpleAcquisition, test_model::Im
   static void to_json(ordered_json& j, std::variant<test_model::SimpleAcquisition, test_model::Image<float>> const& value) {
     switch (value.index()) {
       case 0:
-        j = ordered_json{ {"SimpleAcquisition", std::get<test_model::SimpleAcquisition>(value)} };
+        j = ordered_json{ {"acquisition", std::get<test_model::SimpleAcquisition>(value)} };
         break;
       case 1:
-        j = ordered_json{ {"Image<float32>", std::get<test_model::Image<float>>(value)} };
+        j = ordered_json{ {"image", std::get<test_model::Image<float>>(value)} };
         break;
       default:
         throw std::runtime_error("Invalid union value");
@@ -129,12 +141,12 @@ struct adl_serializer<std::variant<test_model::SimpleAcquisition, test_model::Im
 
   static void from_json(ordered_json const& j, std::variant<test_model::SimpleAcquisition, test_model::Image<float>>& value) {
     auto it = j.begin();
-    std::string label = it.key();
-    if (label == "SimpleAcquisition") {
+    std::string tag = it.key();
+    if (tag == "acquisition") {
       value = it.value().get<test_model::SimpleAcquisition>();
       return;
     }
-    if (label == "Image<float32>") {
+    if (tag == "image") {
       value = it.value().get<test_model::Image<float>>();
       return;
     }
@@ -245,14 +257,43 @@ struct adl_serializer<std::variant<std::monostate, int32_t, std::string>> {
 };
 
 template<>
+struct adl_serializer<std::variant<yardl::Time, yardl::DateTime>> {
+  static void to_json(ordered_json& j, std::variant<yardl::Time, yardl::DateTime> const& value) {
+    switch (value.index()) {
+      case 0:
+        j = ordered_json{ {"time", std::get<yardl::Time>(value)} };
+        break;
+      case 1:
+        j = ordered_json{ {"datetime", std::get<yardl::DateTime>(value)} };
+        break;
+      default:
+        throw std::runtime_error("Invalid union value");
+    }
+  }
+
+  static void from_json(ordered_json const& j, std::variant<yardl::Time, yardl::DateTime>& value) {
+    auto it = j.begin();
+    std::string tag = it.key();
+    if (tag == "time") {
+      value = it.value().get<yardl::Time>();
+      return;
+    }
+    if (tag == "datetime") {
+      value = it.value().get<yardl::DateTime>();
+      return;
+    }
+  }
+};
+
+template<>
 struct adl_serializer<std::variant<test_model::Image<float>, test_model::Image<double>>> {
   static void to_json(ordered_json& j, std::variant<test_model::Image<float>, test_model::Image<double>> const& value) {
     switch (value.index()) {
       case 0:
-        j = ordered_json{ {"Image<float32>", std::get<test_model::Image<float>>(value)} };
+        j = ordered_json{ {"imageFloat", std::get<test_model::Image<float>>(value)} };
         break;
       case 1:
-        j = ordered_json{ {"Image<float64>", std::get<test_model::Image<double>>(value)} };
+        j = ordered_json{ {"imageDouble", std::get<test_model::Image<double>>(value)} };
         break;
       default:
         throw std::runtime_error("Invalid union value");
@@ -261,12 +302,12 @@ struct adl_serializer<std::variant<test_model::Image<float>, test_model::Image<d
 
   static void from_json(ordered_json const& j, std::variant<test_model::Image<float>, test_model::Image<double>>& value) {
     auto it = j.begin();
-    std::string label = it.key();
-    if (label == "Image<float32>") {
+    std::string tag = it.key();
+    if (tag == "imageFloat") {
       value = it.value().get<test_model::Image<float>>();
       return;
     }
-    if (label == "Image<float64>") {
+    if (tag == "imageDouble") {
       value = it.value().get<test_model::Image<double>>();
       return;
     }
@@ -290,12 +331,12 @@ struct adl_serializer<std::variant<test_model::AliasedString, test_model::Aliase
 
   static void from_json(ordered_json const& j, std::variant<test_model::AliasedString, test_model::AliasedEnum>& value) {
     auto it = j.begin();
-    std::string label = it.key();
-    if (label == "T1") {
+    std::string tag = it.key();
+    if (tag == "T1") {
       value = it.value().get<test_model::AliasedString>();
       return;
     }
-    if (label == "T2") {
+    if (tag == "T2") {
       value = it.value().get<test_model::AliasedEnum>();
       return;
     }
@@ -319,12 +360,12 @@ struct adl_serializer<std::variant<int32_t, float>> {
 
   static void from_json(ordered_json const& j, std::variant<int32_t, float>& value) {
     auto it = j.begin();
-    std::string label = it.key();
-    if (label == "int32") {
+    std::string tag = it.key();
+    if (tag == "int32") {
       value = it.value().get<int32_t>();
       return;
     }
-    if (label == "float32") {
+    if (tag == "float32") {
       value = it.value().get<float>();
       return;
     }
@@ -336,7 +377,7 @@ struct adl_serializer<std::variant<std::monostate, int32_t, float>> {
   static void to_json(ordered_json& j, std::variant<std::monostate, int32_t, float> const& value) {
     switch (value.index()) {
       case 0:
-        j = ordered_json{ {"", std::get<std::monostate>(value)} };
+        j = ordered_json{ {"null", std::get<std::monostate>(value)} };
         break;
       case 1:
         j = ordered_json{ {"int32", std::get<int32_t>(value)} };
@@ -351,16 +392,16 @@ struct adl_serializer<std::variant<std::monostate, int32_t, float>> {
 
   static void from_json(ordered_json const& j, std::variant<std::monostate, int32_t, float>& value) {
     auto it = j.begin();
-    std::string label = it.key();
-    if (label == "") {
+    std::string tag = it.key();
+    if (tag == "null") {
       value = it.value().get<std::monostate>();
       return;
     }
-    if (label == "int32") {
+    if (tag == "int32") {
       value = it.value().get<int32_t>();
       return;
     }
-    if (label == "float32") {
+    if (tag == "float32") {
       value = it.value().get<float>();
       return;
     }
@@ -736,6 +777,19 @@ void from_json(ordered_json const& j, test_model::RecordWithVectors& value) {
   }
 }
 
+void to_json(ordered_json& j, test_model::RecordWithVectorOfTimes const& value) {
+  j = ordered_json::object();
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.times)) {
+    j.push_back({"times", value.times});
+  }
+}
+
+void from_json(ordered_json const& j, test_model::RecordWithVectorOfTimes& value) {
+  if (auto it = j.find("times"); it != j.end()) {
+    it->get_to(value.times);
+  }
+}
+
 void to_json(ordered_json& j, test_model::RecordWithArrays const& value) {
   j = ordered_json::object();
   if (yardl::ndjson::ShouldSerializeFieldValue(value.default_array)) {
@@ -866,6 +920,9 @@ void to_json(ordered_json& j, test_model::RecordWithOptionalFields const& value)
   if (yardl::ndjson::ShouldSerializeFieldValue(value.optional_int_alternate_syntax)) {
     j.push_back({"optionalIntAlternateSyntax", value.optional_int_alternate_syntax});
   }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.optional_time)) {
+    j.push_back({"optionalTime", value.optional_time});
+  }
 }
 
 void from_json(ordered_json const& j, test_model::RecordWithOptionalFields& value) {
@@ -874,6 +931,9 @@ void from_json(ordered_json const& j, test_model::RecordWithOptionalFields& valu
   }
   if (auto it = j.find("optionalIntAlternateSyntax"); it != j.end()) {
     it->get_to(value.optional_int_alternate_syntax);
+  }
+  if (auto it = j.find("optionalTime"); it != j.end()) {
+    it->get_to(value.optional_time);
   }
 }
 
@@ -1039,11 +1099,11 @@ void to_json(ordered_json& j, test_model::RecordWithDynamicNDArrays const& value
   if (yardl::ndjson::ShouldSerializeFieldValue(value.ints)) {
     j.push_back({"ints", value.ints});
   }
-  if (yardl::ndjson::ShouldSerializeFieldValue(value.fixed_simple_record_array)) {
-    j.push_back({"fixedSimpleRecordArray", value.fixed_simple_record_array});
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.simple_record_array)) {
+    j.push_back({"simpleRecordArray", value.simple_record_array});
   }
-  if (yardl::ndjson::ShouldSerializeFieldValue(value.fixed_record_with_vlens_array)) {
-    j.push_back({"fixedRecordWithVlensArray", value.fixed_record_with_vlens_array});
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.record_with_vlens_array)) {
+    j.push_back({"recordWithVlensArray", value.record_with_vlens_array});
   }
 }
 
@@ -1051,11 +1111,49 @@ void from_json(ordered_json const& j, test_model::RecordWithDynamicNDArrays& val
   if (auto it = j.find("ints"); it != j.end()) {
     it->get_to(value.ints);
   }
-  if (auto it = j.find("fixedSimpleRecordArray"); it != j.end()) {
-    it->get_to(value.fixed_simple_record_array);
+  if (auto it = j.find("simpleRecordArray"); it != j.end()) {
+    it->get_to(value.simple_record_array);
   }
-  if (auto it = j.find("fixedRecordWithVlensArray"); it != j.end()) {
-    it->get_to(value.fixed_record_with_vlens_array);
+  if (auto it = j.find("recordWithVlensArray"); it != j.end()) {
+    it->get_to(value.record_with_vlens_array);
+  }
+}
+
+void to_json(ordered_json& j, test_model::RecordWithFixedCollections const& value) {
+  j = ordered_json::object();
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.fixed_vector)) {
+    j.push_back({"fixedVector", value.fixed_vector});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.fixed_array)) {
+    j.push_back({"fixedArray", value.fixed_array});
+  }
+}
+
+void from_json(ordered_json const& j, test_model::RecordWithFixedCollections& value) {
+  if (auto it = j.find("fixedVector"); it != j.end()) {
+    it->get_to(value.fixed_vector);
+  }
+  if (auto it = j.find("fixedArray"); it != j.end()) {
+    it->get_to(value.fixed_array);
+  }
+}
+
+void to_json(ordered_json& j, test_model::RecordWithVlenCollections const& value) {
+  j = ordered_json::object();
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.vector)) {
+    j.push_back({"vector", value.vector});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.array)) {
+    j.push_back({"array", value.array});
+  }
+}
+
+void from_json(ordered_json const& j, test_model::RecordWithVlenCollections& value) {
+  if (auto it = j.find("vector"); it != j.end()) {
+    it->get_to(value.vector);
+  }
+  if (auto it = j.find("array"); it != j.end()) {
+    it->get_to(value.array);
   }
 }
 
@@ -1064,11 +1162,17 @@ void to_json(ordered_json& j, test_model::RecordWithUnions const& value) {
   if (yardl::ndjson::ShouldSerializeFieldValue(value.null_or_int_or_string)) {
     j.push_back({"nullOrIntOrString", value.null_or_int_or_string});
   }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.date_or_datetime)) {
+    j.push_back({"dateOrDatetime", value.date_or_datetime});
+  }
 }
 
 void from_json(ordered_json const& j, test_model::RecordWithUnions& value) {
   if (auto it = j.find("nullOrIntOrString"); it != j.end()) {
     it->get_to(value.null_or_int_or_string);
+  }
+  if (auto it = j.find("dateOrDatetime"); it != j.end()) {
+    it->get_to(value.date_or_datetime);
   }
 }
 
@@ -1377,6 +1481,31 @@ void from_json(ordered_json const& j, test_model::TextFormat& value) {
   }
 }
 
+void to_json(ordered_json& j, test_model::RecordWithEnums const& value) {
+  j = ordered_json::object();
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.enum_field)) {
+    j.push_back({"enum", value.enum_field});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.flags)) {
+    j.push_back({"flags", value.flags});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.flags_2)) {
+    j.push_back({"flags2", value.flags_2});
+  }
+}
+
+void from_json(ordered_json const& j, test_model::RecordWithEnums& value) {
+  if (auto it = j.find("enum"); it != j.end()) {
+    it->get_to(value.enum_field);
+  }
+  if (auto it = j.find("flags"); it != j.end()) {
+    it->get_to(value.flags);
+  }
+  if (auto it = j.find("flags2"); it != j.end()) {
+    it->get_to(value.flags_2);
+  }
+}
+
 template <typename T1, typename T2>
 void to_json(ordered_json& j, test_model::GenericRecord<T1, T2> const& value) {
   j = ordered_json::object();
@@ -1623,6 +1752,26 @@ bool BenchmarkFloat256x256Reader::ReadFloat256x256Impl(yardl::FixedNDArray<float
 }
 
 void BenchmarkFloat256x256Reader::CloseImpl() {
+  VerifyFinished();
+}
+
+void BenchmarkInt256x256Writer::WriteInt256x256Impl(yardl::FixedNDArray<int32_t, 256, 256> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "int256x256", json_value);}
+
+void BenchmarkInt256x256Writer::Flush() {
+  stream_.flush();
+}
+
+void BenchmarkInt256x256Writer::CloseImpl() {
+  stream_.flush();
+}
+
+bool BenchmarkInt256x256Reader::ReadInt256x256Impl(yardl::FixedNDArray<int32_t, 256, 256>& value) {
+  return yardl::ndjson::ReadProtocolValue(stream_, line_, "int256x256", false, unused_step_, value);
+}
+
+void BenchmarkInt256x256Reader::CloseImpl() {
   VerifyFinished();
 }
 
@@ -2030,6 +2179,118 @@ void FixedArraysReader::CloseImpl() {
   VerifyFinished();
 }
 
+void SubarraysWriter::WriteDynamicWithFixedIntSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<int32_t, 3>> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "dynamicWithFixedIntSubarray", json_value);}
+
+void SubarraysWriter::WriteDynamicWithFixedFloatSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<float, 3>> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "dynamicWithFixedFloatSubarray", json_value);}
+
+void SubarraysWriter::WriteKnownDimCountWithFixedIntSubarrayImpl(yardl::NDArray<yardl::FixedNDArray<int32_t, 3>, 1> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "knownDimCountWithFixedIntSubarray", json_value);}
+
+void SubarraysWriter::WriteKnownDimCountWithFixedFloatSubarrayImpl(yardl::NDArray<yardl::FixedNDArray<float, 3>, 1> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "knownDimCountWithFixedFloatSubarray", json_value);}
+
+void SubarraysWriter::WriteFixedWithFixedIntSubarrayImpl(yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "fixedWithFixedIntSubarray", json_value);}
+
+void SubarraysWriter::WriteFixedWithFixedFloatSubarrayImpl(yardl::FixedNDArray<yardl::FixedNDArray<float, 3>, 2> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "fixedWithFixedFloatSubarray", json_value);}
+
+void SubarraysWriter::WriteNestedSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "nestedSubarray", json_value);}
+
+void SubarraysWriter::WriteDynamicWithFixedVectorSubarrayImpl(yardl::DynamicNDArray<std::array<int32_t, 3>> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "dynamicWithFixedVectorSubarray", json_value);}
+
+void SubarraysWriter::WriteGenericSubarrayImpl(test_model::Image<yardl::FixedNDArray<int32_t, 3>> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "genericSubarray", json_value);}
+
+void SubarraysWriter::Flush() {
+  stream_.flush();
+}
+
+void SubarraysWriter::CloseImpl() {
+  stream_.flush();
+}
+
+void SubarraysReader::ReadDynamicWithFixedIntSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<int32_t, 3>>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "dynamicWithFixedIntSubarray", true, unused_step_, value);
+}
+
+void SubarraysReader::ReadDynamicWithFixedFloatSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<float, 3>>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "dynamicWithFixedFloatSubarray", true, unused_step_, value);
+}
+
+void SubarraysReader::ReadKnownDimCountWithFixedIntSubarrayImpl(yardl::NDArray<yardl::FixedNDArray<int32_t, 3>, 1>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "knownDimCountWithFixedIntSubarray", true, unused_step_, value);
+}
+
+void SubarraysReader::ReadKnownDimCountWithFixedFloatSubarrayImpl(yardl::NDArray<yardl::FixedNDArray<float, 3>, 1>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "knownDimCountWithFixedFloatSubarray", true, unused_step_, value);
+}
+
+void SubarraysReader::ReadFixedWithFixedIntSubarrayImpl(yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "fixedWithFixedIntSubarray", true, unused_step_, value);
+}
+
+void SubarraysReader::ReadFixedWithFixedFloatSubarrayImpl(yardl::FixedNDArray<yardl::FixedNDArray<float, 3>, 2>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "fixedWithFixedFloatSubarray", true, unused_step_, value);
+}
+
+void SubarraysReader::ReadNestedSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "nestedSubarray", true, unused_step_, value);
+}
+
+void SubarraysReader::ReadDynamicWithFixedVectorSubarrayImpl(yardl::DynamicNDArray<std::array<int32_t, 3>>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "dynamicWithFixedVectorSubarray", true, unused_step_, value);
+}
+
+void SubarraysReader::ReadGenericSubarrayImpl(test_model::Image<yardl::FixedNDArray<int32_t, 3>>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "genericSubarray", true, unused_step_, value);
+}
+
+void SubarraysReader::CloseImpl() {
+  VerifyFinished();
+}
+
+void SubarraysInRecordsWriter::WriteWithFixedSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithFixedCollections> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "withFixedSubarrays", json_value);}
+
+void SubarraysInRecordsWriter::WriteWithVlenSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithVlenCollections> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "withVlenSubarrays", json_value);}
+
+void SubarraysInRecordsWriter::Flush() {
+  stream_.flush();
+}
+
+void SubarraysInRecordsWriter::CloseImpl() {
+  stream_.flush();
+}
+
+void SubarraysInRecordsReader::ReadWithFixedSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithFixedCollections>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "withFixedSubarrays", true, unused_step_, value);
+}
+
+void SubarraysInRecordsReader::ReadWithVlenSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithVlenCollections>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "withVlenSubarrays", true, unused_step_, value);
+}
+
+void SubarraysInRecordsReader::CloseImpl() {
+  VerifyFinished();
+}
+
 void NDArraysWriter::WriteIntsImpl(yardl::NDArray<int32_t, 2> const& value) {
   ordered_json json_value = value;
   yardl::ndjson::WriteProtocolValue(stream_, "ints", json_value);}
@@ -2174,6 +2435,10 @@ void MapsWriter::WriteStringToIntImpl(std::unordered_map<std::string, int32_t> c
   ordered_json json_value = value;
   yardl::ndjson::WriteProtocolValue(stream_, "stringToInt", json_value);}
 
+void MapsWriter::WriteIntToStringImpl(std::unordered_map<int32_t, std::string> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "intToString", json_value);}
+
 void MapsWriter::WriteStringToUnionImpl(std::unordered_map<std::string, std::variant<std::string, int32_t>> const& value) {
   ordered_json json_value = value;
   yardl::ndjson::WriteProtocolValue(stream_, "stringToUnion", json_value);}
@@ -2192,6 +2457,10 @@ void MapsWriter::CloseImpl() {
 
 void MapsReader::ReadStringToIntImpl(std::unordered_map<std::string, int32_t>& value) {
   yardl::ndjson::ReadProtocolValue(stream_, line_, "stringToInt", true, unused_step_, value);
+}
+
+void MapsReader::ReadIntToStringImpl(std::unordered_map<int32_t, std::string>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "intToString", true, unused_step_, value);
 }
 
 void MapsReader::ReadStringToUnionImpl(std::unordered_map<std::string, std::variant<std::string, int32_t>>& value) {
@@ -2462,9 +2731,9 @@ void SimpleGenericsReader::CloseImpl() {
   VerifyFinished();
 }
 
-void AdvancedGenericsWriter::WriteIntImageImageImpl(test_model::Image<test_model::Image<float>> const& value) {
+void AdvancedGenericsWriter::WriteFloatImageImageImpl(test_model::Image<test_model::Image<float>> const& value) {
   ordered_json json_value = value;
-  yardl::ndjson::WriteProtocolValue(stream_, "intImageImage", json_value);}
+  yardl::ndjson::WriteProtocolValue(stream_, "floatImageImage", json_value);}
 
 void AdvancedGenericsWriter::WriteGenericRecord1Impl(test_model::GenericRecord<int32_t, std::string> const& value) {
   ordered_json json_value = value;
@@ -2490,8 +2759,8 @@ void AdvancedGenericsWriter::CloseImpl() {
   stream_.flush();
 }
 
-void AdvancedGenericsReader::ReadIntImageImageImpl(test_model::Image<test_model::Image<float>>& value) {
-  yardl::ndjson::ReadProtocolValue(stream_, line_, "intImageImage", true, unused_step_, value);
+void AdvancedGenericsReader::ReadFloatImageImageImpl(test_model::Image<test_model::Image<float>>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "floatImageImage", true, unused_step_, value);
 }
 
 void AdvancedGenericsReader::ReadGenericRecord1Impl(test_model::GenericRecord<int32_t, std::string>& value) {

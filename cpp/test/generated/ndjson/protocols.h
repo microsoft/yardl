@@ -48,6 +48,41 @@ class BenchmarkFloat256x256Reader : public test_model::BenchmarkFloat256x256Read
   void CloseImpl() override;
 };
 
+// NDJSON writer for the BenchmarkInt256x256 protocol.
+class BenchmarkInt256x256Writer : public test_model::BenchmarkInt256x256WriterBase, yardl::ndjson::NDJsonWriter {
+  public:
+  BenchmarkInt256x256Writer(std::ostream& stream)
+      : yardl::ndjson::NDJsonWriter(stream, schema_) {
+  }
+
+  BenchmarkInt256x256Writer(std::string file_name)
+      : yardl::ndjson::NDJsonWriter(file_name, schema_) {
+  }
+
+  void Flush() override;
+
+  protected:
+  void WriteInt256x256Impl(yardl::FixedNDArray<int32_t, 256, 256> const& value) override;
+  void EndInt256x256Impl() override {}
+  void CloseImpl() override;
+};
+
+// NDJSON reader for the BenchmarkInt256x256 protocol.
+class BenchmarkInt256x256Reader : public test_model::BenchmarkInt256x256ReaderBase, yardl::ndjson::NDJsonReader {
+  public:
+  BenchmarkInt256x256Reader(std::istream& stream)
+      : yardl::ndjson::NDJsonReader(stream, schema_) {
+  }
+
+  BenchmarkInt256x256Reader(std::string file_name)
+      : yardl::ndjson::NDJsonReader(file_name, schema_) {
+  }
+
+  protected:
+  bool ReadInt256x256Impl(yardl::FixedNDArray<int32_t, 256, 256>& value) override;
+  void CloseImpl() override;
+};
+
 // NDJSON writer for the BenchmarkFloatVlen protocol.
 class BenchmarkFloatVlenWriter : public test_model::BenchmarkFloatVlenWriterBase, yardl::ndjson::NDJsonWriter {
   public:
@@ -534,6 +569,92 @@ class FixedArraysReader : public test_model::FixedArraysReaderBase, yardl::ndjso
   void CloseImpl() override;
 };
 
+// NDJSON writer for the Subarrays protocol.
+class SubarraysWriter : public test_model::SubarraysWriterBase, yardl::ndjson::NDJsonWriter {
+  public:
+  SubarraysWriter(std::ostream& stream)
+      : yardl::ndjson::NDJsonWriter(stream, schema_) {
+  }
+
+  SubarraysWriter(std::string file_name)
+      : yardl::ndjson::NDJsonWriter(file_name, schema_) {
+  }
+
+  void Flush() override;
+
+  protected:
+  void WriteDynamicWithFixedIntSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<int32_t, 3>> const& value) override;
+  void WriteDynamicWithFixedFloatSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<float, 3>> const& value) override;
+  void WriteKnownDimCountWithFixedIntSubarrayImpl(yardl::NDArray<yardl::FixedNDArray<int32_t, 3>, 1> const& value) override;
+  void WriteKnownDimCountWithFixedFloatSubarrayImpl(yardl::NDArray<yardl::FixedNDArray<float, 3>, 1> const& value) override;
+  void WriteFixedWithFixedIntSubarrayImpl(yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2> const& value) override;
+  void WriteFixedWithFixedFloatSubarrayImpl(yardl::FixedNDArray<yardl::FixedNDArray<float, 3>, 2> const& value) override;
+  void WriteNestedSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>> const& value) override;
+  void WriteDynamicWithFixedVectorSubarrayImpl(yardl::DynamicNDArray<std::array<int32_t, 3>> const& value) override;
+  void WriteGenericSubarrayImpl(test_model::Image<yardl::FixedNDArray<int32_t, 3>> const& value) override;
+  void CloseImpl() override;
+};
+
+// NDJSON reader for the Subarrays protocol.
+class SubarraysReader : public test_model::SubarraysReaderBase, yardl::ndjson::NDJsonReader {
+  public:
+  SubarraysReader(std::istream& stream)
+      : yardl::ndjson::NDJsonReader(stream, schema_) {
+  }
+
+  SubarraysReader(std::string file_name)
+      : yardl::ndjson::NDJsonReader(file_name, schema_) {
+  }
+
+  protected:
+  void ReadDynamicWithFixedIntSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<int32_t, 3>>& value) override;
+  void ReadDynamicWithFixedFloatSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<float, 3>>& value) override;
+  void ReadKnownDimCountWithFixedIntSubarrayImpl(yardl::NDArray<yardl::FixedNDArray<int32_t, 3>, 1>& value) override;
+  void ReadKnownDimCountWithFixedFloatSubarrayImpl(yardl::NDArray<yardl::FixedNDArray<float, 3>, 1>& value) override;
+  void ReadFixedWithFixedIntSubarrayImpl(yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>& value) override;
+  void ReadFixedWithFixedFloatSubarrayImpl(yardl::FixedNDArray<yardl::FixedNDArray<float, 3>, 2>& value) override;
+  void ReadNestedSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>>& value) override;
+  void ReadDynamicWithFixedVectorSubarrayImpl(yardl::DynamicNDArray<std::array<int32_t, 3>>& value) override;
+  void ReadGenericSubarrayImpl(test_model::Image<yardl::FixedNDArray<int32_t, 3>>& value) override;
+  void CloseImpl() override;
+};
+
+// NDJSON writer for the SubarraysInRecords protocol.
+class SubarraysInRecordsWriter : public test_model::SubarraysInRecordsWriterBase, yardl::ndjson::NDJsonWriter {
+  public:
+  SubarraysInRecordsWriter(std::ostream& stream)
+      : yardl::ndjson::NDJsonWriter(stream, schema_) {
+  }
+
+  SubarraysInRecordsWriter(std::string file_name)
+      : yardl::ndjson::NDJsonWriter(file_name, schema_) {
+  }
+
+  void Flush() override;
+
+  protected:
+  void WriteWithFixedSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithFixedCollections> const& value) override;
+  void WriteWithVlenSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithVlenCollections> const& value) override;
+  void CloseImpl() override;
+};
+
+// NDJSON reader for the SubarraysInRecords protocol.
+class SubarraysInRecordsReader : public test_model::SubarraysInRecordsReaderBase, yardl::ndjson::NDJsonReader {
+  public:
+  SubarraysInRecordsReader(std::istream& stream)
+      : yardl::ndjson::NDJsonReader(stream, schema_) {
+  }
+
+  SubarraysInRecordsReader(std::string file_name)
+      : yardl::ndjson::NDJsonReader(file_name, schema_) {
+  }
+
+  protected:
+  void ReadWithFixedSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithFixedCollections>& value) override;
+  void ReadWithVlenSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithVlenCollections>& value) override;
+  void CloseImpl() override;
+};
+
 // NDJSON writer for the NDArrays protocol.
 class NDArraysWriter : public test_model::NDArraysWriterBase, yardl::ndjson::NDJsonWriter {
   public:
@@ -671,6 +792,7 @@ class MapsWriter : public test_model::MapsWriterBase, yardl::ndjson::NDJsonWrite
 
   protected:
   void WriteStringToIntImpl(std::unordered_map<std::string, int32_t> const& value) override;
+  void WriteIntToStringImpl(std::unordered_map<int32_t, std::string> const& value) override;
   void WriteStringToUnionImpl(std::unordered_map<std::string, std::variant<std::string, int32_t>> const& value) override;
   void WriteAliasedGenericImpl(test_model::AliasedMap<std::string, int32_t> const& value) override;
   void CloseImpl() override;
@@ -689,6 +811,7 @@ class MapsReader : public test_model::MapsReaderBase, yardl::ndjson::NDJsonReade
 
   protected:
   void ReadStringToIntImpl(std::unordered_map<std::string, int32_t>& value) override;
+  void ReadIntToStringImpl(std::unordered_map<int32_t, std::string>& value) override;
   void ReadStringToUnionImpl(std::unordered_map<std::string, std::variant<std::string, int32_t>>& value) override;
   void ReadAliasedGenericImpl(test_model::AliasedMap<std::string, int32_t>& value) override;
   void CloseImpl() override;
@@ -952,7 +1075,7 @@ class AdvancedGenericsWriter : public test_model::AdvancedGenericsWriterBase, ya
   void Flush() override;
 
   protected:
-  void WriteIntImageImageImpl(test_model::Image<test_model::Image<float>> const& value) override;
+  void WriteFloatImageImageImpl(test_model::Image<test_model::Image<float>> const& value) override;
   void WriteGenericRecord1Impl(test_model::GenericRecord<int32_t, std::string> const& value) override;
   void WriteTupleOfOptionalsImpl(test_model::MyTuple<std::optional<int32_t>, std::optional<std::string>> const& value) override;
   void WriteTupleOfOptionalsAlternateSyntaxImpl(test_model::MyTuple<std::optional<int32_t>, std::optional<std::string>> const& value) override;
@@ -972,7 +1095,7 @@ class AdvancedGenericsReader : public test_model::AdvancedGenericsReaderBase, ya
   }
 
   protected:
-  void ReadIntImageImageImpl(test_model::Image<test_model::Image<float>>& value) override;
+  void ReadFloatImageImageImpl(test_model::Image<test_model::Image<float>>& value) override;
   void ReadGenericRecord1Impl(test_model::GenericRecord<int32_t, std::string>& value) override;
   void ReadTupleOfOptionalsImpl(test_model::MyTuple<std::optional<int32_t>, std::optional<std::string>>& value) override;
   void ReadTupleOfOptionalsAlternateSyntaxImpl(test_model::MyTuple<std::optional<int32_t>, std::optional<std::string>>& value) override;

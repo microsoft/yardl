@@ -88,7 +88,7 @@ func (tc *TypeCase) MarshalJSON() ([]byte, error) {
 	if tc.IsNullType() {
 		return json.Marshal(nil)
 	}
-	if tc.Label == "" {
+	if tc.Tag == "" {
 		return json.Marshal(tc.Type)
 	}
 
@@ -145,6 +145,21 @@ func (e *IntegerLiteralExpression) MarshalJSON() ([]byte, error) {
 
 func (e *StringLiteralExpression) MarshalJSON() ([]byte, error) {
 	return json.Marshal(fmt.Sprintf("%q", e.Value))
+}
+
+func (k *MemberAccessKind) MarshalJSON() ([]byte, error) {
+	switch *k {
+	case MemberAccessUnknown:
+		return json.Marshal("unknown")
+	case MemberAccessField:
+		return json.Marshal("field")
+	case MemberAccessComputedField:
+		return json.Marshal("computedField")
+	case MemberAccessVariable:
+		return json.Marshal("variable")
+	default:
+		panic(fmt.Sprintf("unexpected member access kind %d", *k))
+	}
 }
 
 func (e *MemberAccessExpression) MarshalJSON() ([]byte, error) {

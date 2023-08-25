@@ -193,7 +193,7 @@ static constexpr size_t GetOuterVariantOffset() {
 		fmt.Fprintf(w, "H5::CompType InnerUnion%dDdl(bool nullable, ", arity)
 		formatting.Delimited(w, ", ", elements, func(w *formatting.IndentedWriter, i int, item int) {
 			fmt.Fprintf(w, "H5::DataType const& t%d, ", i)
-			fmt.Fprintf(w, "std::string const& label%d", i)
+			fmt.Fprintf(w, "std::string const& tag%d", i)
 		})
 		w.WriteString(") {\n")
 		w.Indented(func() {
@@ -207,15 +207,15 @@ static constexpr size_t GetOuterVariantOffset() {
 			}()
 			fmt.Fprintf(w, "using UnionType = %s;\n", innerTypeName)
 			w.WriteStringln("H5::CompType rtn(sizeof(UnionType));")
-			labels := make([]string, arity)
+			tags := make([]string, arity)
 			for i := 0; i < arity; i++ {
-				labels[i] = fmt.Sprintf("label%d", i)
+				tags[i] = fmt.Sprintf("tag%d", i)
 			}
 
-			fmt.Fprintf(w, "rtn.insertMember(\"$type\", HOFFSET(UnionType, type_index_), yardl::hdf5::UnionTypeEnumDdl(nullable, %s));\n", strings.Join(labels, ", "))
+			fmt.Fprintf(w, "rtn.insertMember(\"$type\", HOFFSET(UnionType, type_index_), yardl::hdf5::UnionTypeEnumDdl(nullable, %s));\n", strings.Join(tags, ", "))
 
 			for i := 0; i < arity; i++ {
-				fmt.Fprintf(w, "rtn.insertMember(label%d, HOFFSET(UnionType, value%d_), t%d);\n", i, i, i)
+				fmt.Fprintf(w, "rtn.insertMember(tag%d, HOFFSET(UnionType, value%d_), t%d);\n", i, i, i)
 			}
 
 			w.WriteStringln("return rtn;")
@@ -530,8 +530,11 @@ func typeDdlExpression(t dsl.Type) string {
 			arguments := make([]string, 0)
 			for _, typeCase := range t.Cases {
 				if !typeCase.IsNullType() {
+					if typeCase.Tag == "" {
+						panic("tag is empty")
+					}
 					arguments = append(arguments, typeDdlExpression(typeCase.Type))
-					arguments = append(arguments, fmt.Sprintf("\"%s\"", typeCase.Label))
+					arguments = append(arguments, fmt.Sprintf("\"%s\"", typeCase.Tag))
 				}
 			}
 

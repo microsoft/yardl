@@ -97,6 +97,90 @@ class TestBenchmarkFloat256x256WriterBase : public BenchmarkFloat256x256WriterBa
   bool close_called_ = false;
 };
 
+class MockBenchmarkInt256x256Writer : public BenchmarkInt256x256WriterBase {
+  public:
+  void WriteInt256x256Impl (yardl::FixedNDArray<int32_t, 256, 256> const& value) override {
+    if (WriteInt256x256Impl_expected_values_.empty()) {
+      throw std::runtime_error("Unexpected call to WriteInt256x256Impl");
+    }
+    if (WriteInt256x256Impl_expected_values_.front() != value) {
+      throw std::runtime_error("Unexpected argument value for call to WriteInt256x256Impl");
+    }
+    WriteInt256x256Impl_expected_values_.pop();
+  }
+
+  std::queue<yardl::FixedNDArray<int32_t, 256, 256>> WriteInt256x256Impl_expected_values_;
+
+  void ExpectWriteInt256x256Impl (yardl::FixedNDArray<int32_t, 256, 256> const& value) {
+    WriteInt256x256Impl_expected_values_.push(value);
+  }
+
+  void EndInt256x256Impl () override {
+    if (--EndInt256x256Impl_expected_call_count_ < 0) {
+      throw std::runtime_error("Unexpected call to EndInt256x256Impl");
+    }
+  }
+
+  int EndInt256x256Impl_expected_call_count_ = 0;
+
+  void ExpectEndInt256x256Impl () {
+    EndInt256x256Impl_expected_call_count_++;
+  }
+
+  void Verify() {
+    if (!WriteInt256x256Impl_expected_values_.empty()) {
+      throw std::runtime_error("Expected call to WriteInt256x256Impl was not received");
+    }
+    if (EndInt256x256Impl_expected_call_count_ > 0) {
+      throw std::runtime_error("Expected call to EndInt256x256Impl was not received");
+    }
+  }
+};
+
+class TestBenchmarkInt256x256WriterBase : public BenchmarkInt256x256WriterBase {
+  public:
+  TestBenchmarkInt256x256WriterBase(std::unique_ptr<test_model::BenchmarkInt256x256WriterBase> writer, std::function<std::unique_ptr<BenchmarkInt256x256ReaderBase>()> create_reader) : writer_(std::move(writer)), create_reader_(create_reader) {
+  }
+
+  ~TestBenchmarkInt256x256WriterBase() {
+    if (!close_called_ && !std::uncaught_exceptions()) {
+      ADD_FAILURE() << "Close() needs to be called on 'TestBenchmarkInt256x256WriterBase' to verify mocks";
+    }
+  }
+
+  protected:
+  void WriteInt256x256Impl(yardl::FixedNDArray<int32_t, 256, 256> const& value) override {
+    writer_->WriteInt256x256(value);
+    mock_writer_.ExpectWriteInt256x256Impl(value);
+  }
+
+  void WriteInt256x256Impl(std::vector<yardl::FixedNDArray<int32_t, 256, 256>> const& values) override {
+    writer_->WriteInt256x256(values);
+    for (auto const& v : values) {
+      mock_writer_.ExpectWriteInt256x256Impl(v);
+    }
+  }
+
+  void EndInt256x256Impl() override {
+    writer_->EndInt256x256();
+    mock_writer_.ExpectEndInt256x256Impl();
+  }
+
+  void CloseImpl() override {
+    close_called_ = true;
+    writer_->Close();
+    std::unique_ptr<BenchmarkInt256x256ReaderBase> reader = create_reader_();
+    reader->CopyTo(mock_writer_, 2);
+    mock_writer_.Verify();
+  }
+
+  private:
+  std::unique_ptr<test_model::BenchmarkInt256x256WriterBase> writer_;
+  std::function<std::unique_ptr<test_model::BenchmarkInt256x256ReaderBase>()> create_reader_;
+  MockBenchmarkInt256x256Writer mock_writer_;
+  bool close_called_ = false;
+};
+
 class MockBenchmarkFloatVlenWriter : public BenchmarkFloatVlenWriterBase {
   public:
   void WriteFloatArrayImpl (yardl::NDArray<float, 2> const& value) override {
@@ -1486,6 +1570,336 @@ class TestFixedArraysWriterBase : public FixedArraysWriterBase {
   bool close_called_ = false;
 };
 
+class MockSubarraysWriter : public SubarraysWriterBase {
+  public:
+  void WriteDynamicWithFixedIntSubarrayImpl (yardl::DynamicNDArray<yardl::FixedNDArray<int32_t, 3>> const& value) override {
+    if (WriteDynamicWithFixedIntSubarrayImpl_expected_values_.empty()) {
+      throw std::runtime_error("Unexpected call to WriteDynamicWithFixedIntSubarrayImpl");
+    }
+    if (WriteDynamicWithFixedIntSubarrayImpl_expected_values_.front() != value) {
+      throw std::runtime_error("Unexpected argument value for call to WriteDynamicWithFixedIntSubarrayImpl");
+    }
+    WriteDynamicWithFixedIntSubarrayImpl_expected_values_.pop();
+  }
+
+  std::queue<yardl::DynamicNDArray<yardl::FixedNDArray<int32_t, 3>>> WriteDynamicWithFixedIntSubarrayImpl_expected_values_;
+
+  void ExpectWriteDynamicWithFixedIntSubarrayImpl (yardl::DynamicNDArray<yardl::FixedNDArray<int32_t, 3>> const& value) {
+    WriteDynamicWithFixedIntSubarrayImpl_expected_values_.push(value);
+  }
+
+  void WriteDynamicWithFixedFloatSubarrayImpl (yardl::DynamicNDArray<yardl::FixedNDArray<float, 3>> const& value) override {
+    if (WriteDynamicWithFixedFloatSubarrayImpl_expected_values_.empty()) {
+      throw std::runtime_error("Unexpected call to WriteDynamicWithFixedFloatSubarrayImpl");
+    }
+    if (WriteDynamicWithFixedFloatSubarrayImpl_expected_values_.front() != value) {
+      throw std::runtime_error("Unexpected argument value for call to WriteDynamicWithFixedFloatSubarrayImpl");
+    }
+    WriteDynamicWithFixedFloatSubarrayImpl_expected_values_.pop();
+  }
+
+  std::queue<yardl::DynamicNDArray<yardl::FixedNDArray<float, 3>>> WriteDynamicWithFixedFloatSubarrayImpl_expected_values_;
+
+  void ExpectWriteDynamicWithFixedFloatSubarrayImpl (yardl::DynamicNDArray<yardl::FixedNDArray<float, 3>> const& value) {
+    WriteDynamicWithFixedFloatSubarrayImpl_expected_values_.push(value);
+  }
+
+  void WriteKnownDimCountWithFixedIntSubarrayImpl (yardl::NDArray<yardl::FixedNDArray<int32_t, 3>, 1> const& value) override {
+    if (WriteKnownDimCountWithFixedIntSubarrayImpl_expected_values_.empty()) {
+      throw std::runtime_error("Unexpected call to WriteKnownDimCountWithFixedIntSubarrayImpl");
+    }
+    if (WriteKnownDimCountWithFixedIntSubarrayImpl_expected_values_.front() != value) {
+      throw std::runtime_error("Unexpected argument value for call to WriteKnownDimCountWithFixedIntSubarrayImpl");
+    }
+    WriteKnownDimCountWithFixedIntSubarrayImpl_expected_values_.pop();
+  }
+
+  std::queue<yardl::NDArray<yardl::FixedNDArray<int32_t, 3>, 1>> WriteKnownDimCountWithFixedIntSubarrayImpl_expected_values_;
+
+  void ExpectWriteKnownDimCountWithFixedIntSubarrayImpl (yardl::NDArray<yardl::FixedNDArray<int32_t, 3>, 1> const& value) {
+    WriteKnownDimCountWithFixedIntSubarrayImpl_expected_values_.push(value);
+  }
+
+  void WriteKnownDimCountWithFixedFloatSubarrayImpl (yardl::NDArray<yardl::FixedNDArray<float, 3>, 1> const& value) override {
+    if (WriteKnownDimCountWithFixedFloatSubarrayImpl_expected_values_.empty()) {
+      throw std::runtime_error("Unexpected call to WriteKnownDimCountWithFixedFloatSubarrayImpl");
+    }
+    if (WriteKnownDimCountWithFixedFloatSubarrayImpl_expected_values_.front() != value) {
+      throw std::runtime_error("Unexpected argument value for call to WriteKnownDimCountWithFixedFloatSubarrayImpl");
+    }
+    WriteKnownDimCountWithFixedFloatSubarrayImpl_expected_values_.pop();
+  }
+
+  std::queue<yardl::NDArray<yardl::FixedNDArray<float, 3>, 1>> WriteKnownDimCountWithFixedFloatSubarrayImpl_expected_values_;
+
+  void ExpectWriteKnownDimCountWithFixedFloatSubarrayImpl (yardl::NDArray<yardl::FixedNDArray<float, 3>, 1> const& value) {
+    WriteKnownDimCountWithFixedFloatSubarrayImpl_expected_values_.push(value);
+  }
+
+  void WriteFixedWithFixedIntSubarrayImpl (yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2> const& value) override {
+    if (WriteFixedWithFixedIntSubarrayImpl_expected_values_.empty()) {
+      throw std::runtime_error("Unexpected call to WriteFixedWithFixedIntSubarrayImpl");
+    }
+    if (WriteFixedWithFixedIntSubarrayImpl_expected_values_.front() != value) {
+      throw std::runtime_error("Unexpected argument value for call to WriteFixedWithFixedIntSubarrayImpl");
+    }
+    WriteFixedWithFixedIntSubarrayImpl_expected_values_.pop();
+  }
+
+  std::queue<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>> WriteFixedWithFixedIntSubarrayImpl_expected_values_;
+
+  void ExpectWriteFixedWithFixedIntSubarrayImpl (yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2> const& value) {
+    WriteFixedWithFixedIntSubarrayImpl_expected_values_.push(value);
+  }
+
+  void WriteFixedWithFixedFloatSubarrayImpl (yardl::FixedNDArray<yardl::FixedNDArray<float, 3>, 2> const& value) override {
+    if (WriteFixedWithFixedFloatSubarrayImpl_expected_values_.empty()) {
+      throw std::runtime_error("Unexpected call to WriteFixedWithFixedFloatSubarrayImpl");
+    }
+    if (WriteFixedWithFixedFloatSubarrayImpl_expected_values_.front() != value) {
+      throw std::runtime_error("Unexpected argument value for call to WriteFixedWithFixedFloatSubarrayImpl");
+    }
+    WriteFixedWithFixedFloatSubarrayImpl_expected_values_.pop();
+  }
+
+  std::queue<yardl::FixedNDArray<yardl::FixedNDArray<float, 3>, 2>> WriteFixedWithFixedFloatSubarrayImpl_expected_values_;
+
+  void ExpectWriteFixedWithFixedFloatSubarrayImpl (yardl::FixedNDArray<yardl::FixedNDArray<float, 3>, 2> const& value) {
+    WriteFixedWithFixedFloatSubarrayImpl_expected_values_.push(value);
+  }
+
+  void WriteNestedSubarrayImpl (yardl::DynamicNDArray<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>> const& value) override {
+    if (WriteNestedSubarrayImpl_expected_values_.empty()) {
+      throw std::runtime_error("Unexpected call to WriteNestedSubarrayImpl");
+    }
+    if (WriteNestedSubarrayImpl_expected_values_.front() != value) {
+      throw std::runtime_error("Unexpected argument value for call to WriteNestedSubarrayImpl");
+    }
+    WriteNestedSubarrayImpl_expected_values_.pop();
+  }
+
+  std::queue<yardl::DynamicNDArray<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>>> WriteNestedSubarrayImpl_expected_values_;
+
+  void ExpectWriteNestedSubarrayImpl (yardl::DynamicNDArray<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>> const& value) {
+    WriteNestedSubarrayImpl_expected_values_.push(value);
+  }
+
+  void WriteDynamicWithFixedVectorSubarrayImpl (yardl::DynamicNDArray<std::array<int32_t, 3>> const& value) override {
+    if (WriteDynamicWithFixedVectorSubarrayImpl_expected_values_.empty()) {
+      throw std::runtime_error("Unexpected call to WriteDynamicWithFixedVectorSubarrayImpl");
+    }
+    if (WriteDynamicWithFixedVectorSubarrayImpl_expected_values_.front() != value) {
+      throw std::runtime_error("Unexpected argument value for call to WriteDynamicWithFixedVectorSubarrayImpl");
+    }
+    WriteDynamicWithFixedVectorSubarrayImpl_expected_values_.pop();
+  }
+
+  std::queue<yardl::DynamicNDArray<std::array<int32_t, 3>>> WriteDynamicWithFixedVectorSubarrayImpl_expected_values_;
+
+  void ExpectWriteDynamicWithFixedVectorSubarrayImpl (yardl::DynamicNDArray<std::array<int32_t, 3>> const& value) {
+    WriteDynamicWithFixedVectorSubarrayImpl_expected_values_.push(value);
+  }
+
+  void WriteGenericSubarrayImpl (test_model::Image<yardl::FixedNDArray<int32_t, 3>> const& value) override {
+    if (WriteGenericSubarrayImpl_expected_values_.empty()) {
+      throw std::runtime_error("Unexpected call to WriteGenericSubarrayImpl");
+    }
+    if (WriteGenericSubarrayImpl_expected_values_.front() != value) {
+      throw std::runtime_error("Unexpected argument value for call to WriteGenericSubarrayImpl");
+    }
+    WriteGenericSubarrayImpl_expected_values_.pop();
+  }
+
+  std::queue<test_model::Image<yardl::FixedNDArray<int32_t, 3>>> WriteGenericSubarrayImpl_expected_values_;
+
+  void ExpectWriteGenericSubarrayImpl (test_model::Image<yardl::FixedNDArray<int32_t, 3>> const& value) {
+    WriteGenericSubarrayImpl_expected_values_.push(value);
+  }
+
+  void Verify() {
+    if (!WriteDynamicWithFixedIntSubarrayImpl_expected_values_.empty()) {
+      throw std::runtime_error("Expected call to WriteDynamicWithFixedIntSubarrayImpl was not received");
+    }
+    if (!WriteDynamicWithFixedFloatSubarrayImpl_expected_values_.empty()) {
+      throw std::runtime_error("Expected call to WriteDynamicWithFixedFloatSubarrayImpl was not received");
+    }
+    if (!WriteKnownDimCountWithFixedIntSubarrayImpl_expected_values_.empty()) {
+      throw std::runtime_error("Expected call to WriteKnownDimCountWithFixedIntSubarrayImpl was not received");
+    }
+    if (!WriteKnownDimCountWithFixedFloatSubarrayImpl_expected_values_.empty()) {
+      throw std::runtime_error("Expected call to WriteKnownDimCountWithFixedFloatSubarrayImpl was not received");
+    }
+    if (!WriteFixedWithFixedIntSubarrayImpl_expected_values_.empty()) {
+      throw std::runtime_error("Expected call to WriteFixedWithFixedIntSubarrayImpl was not received");
+    }
+    if (!WriteFixedWithFixedFloatSubarrayImpl_expected_values_.empty()) {
+      throw std::runtime_error("Expected call to WriteFixedWithFixedFloatSubarrayImpl was not received");
+    }
+    if (!WriteNestedSubarrayImpl_expected_values_.empty()) {
+      throw std::runtime_error("Expected call to WriteNestedSubarrayImpl was not received");
+    }
+    if (!WriteDynamicWithFixedVectorSubarrayImpl_expected_values_.empty()) {
+      throw std::runtime_error("Expected call to WriteDynamicWithFixedVectorSubarrayImpl was not received");
+    }
+    if (!WriteGenericSubarrayImpl_expected_values_.empty()) {
+      throw std::runtime_error("Expected call to WriteGenericSubarrayImpl was not received");
+    }
+  }
+};
+
+class TestSubarraysWriterBase : public SubarraysWriterBase {
+  public:
+  TestSubarraysWriterBase(std::unique_ptr<test_model::SubarraysWriterBase> writer, std::function<std::unique_ptr<SubarraysReaderBase>()> create_reader) : writer_(std::move(writer)), create_reader_(create_reader) {
+  }
+
+  ~TestSubarraysWriterBase() {
+    if (!close_called_ && !std::uncaught_exceptions()) {
+      ADD_FAILURE() << "Close() needs to be called on 'TestSubarraysWriterBase' to verify mocks";
+    }
+  }
+
+  protected:
+  void WriteDynamicWithFixedIntSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<int32_t, 3>> const& value) override {
+    writer_->WriteDynamicWithFixedIntSubarray(value);
+    mock_writer_.ExpectWriteDynamicWithFixedIntSubarrayImpl(value);
+  }
+
+  void WriteDynamicWithFixedFloatSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<float, 3>> const& value) override {
+    writer_->WriteDynamicWithFixedFloatSubarray(value);
+    mock_writer_.ExpectWriteDynamicWithFixedFloatSubarrayImpl(value);
+  }
+
+  void WriteKnownDimCountWithFixedIntSubarrayImpl(yardl::NDArray<yardl::FixedNDArray<int32_t, 3>, 1> const& value) override {
+    writer_->WriteKnownDimCountWithFixedIntSubarray(value);
+    mock_writer_.ExpectWriteKnownDimCountWithFixedIntSubarrayImpl(value);
+  }
+
+  void WriteKnownDimCountWithFixedFloatSubarrayImpl(yardl::NDArray<yardl::FixedNDArray<float, 3>, 1> const& value) override {
+    writer_->WriteKnownDimCountWithFixedFloatSubarray(value);
+    mock_writer_.ExpectWriteKnownDimCountWithFixedFloatSubarrayImpl(value);
+  }
+
+  void WriteFixedWithFixedIntSubarrayImpl(yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2> const& value) override {
+    writer_->WriteFixedWithFixedIntSubarray(value);
+    mock_writer_.ExpectWriteFixedWithFixedIntSubarrayImpl(value);
+  }
+
+  void WriteFixedWithFixedFloatSubarrayImpl(yardl::FixedNDArray<yardl::FixedNDArray<float, 3>, 2> const& value) override {
+    writer_->WriteFixedWithFixedFloatSubarray(value);
+    mock_writer_.ExpectWriteFixedWithFixedFloatSubarrayImpl(value);
+  }
+
+  void WriteNestedSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>> const& value) override {
+    writer_->WriteNestedSubarray(value);
+    mock_writer_.ExpectWriteNestedSubarrayImpl(value);
+  }
+
+  void WriteDynamicWithFixedVectorSubarrayImpl(yardl::DynamicNDArray<std::array<int32_t, 3>> const& value) override {
+    writer_->WriteDynamicWithFixedVectorSubarray(value);
+    mock_writer_.ExpectWriteDynamicWithFixedVectorSubarrayImpl(value);
+  }
+
+  void WriteGenericSubarrayImpl(test_model::Image<yardl::FixedNDArray<int32_t, 3>> const& value) override {
+    writer_->WriteGenericSubarray(value);
+    mock_writer_.ExpectWriteGenericSubarrayImpl(value);
+  }
+
+  void CloseImpl() override {
+    close_called_ = true;
+    writer_->Close();
+    std::unique_ptr<SubarraysReaderBase> reader = create_reader_();
+    reader->CopyTo(mock_writer_);
+    mock_writer_.Verify();
+  }
+
+  private:
+  std::unique_ptr<test_model::SubarraysWriterBase> writer_;
+  std::function<std::unique_ptr<test_model::SubarraysReaderBase>()> create_reader_;
+  MockSubarraysWriter mock_writer_;
+  bool close_called_ = false;
+};
+
+class MockSubarraysInRecordsWriter : public SubarraysInRecordsWriterBase {
+  public:
+  void WriteWithFixedSubarraysImpl (yardl::DynamicNDArray<test_model::RecordWithFixedCollections> const& value) override {
+    if (WriteWithFixedSubarraysImpl_expected_values_.empty()) {
+      throw std::runtime_error("Unexpected call to WriteWithFixedSubarraysImpl");
+    }
+    if (WriteWithFixedSubarraysImpl_expected_values_.front() != value) {
+      throw std::runtime_error("Unexpected argument value for call to WriteWithFixedSubarraysImpl");
+    }
+    WriteWithFixedSubarraysImpl_expected_values_.pop();
+  }
+
+  std::queue<yardl::DynamicNDArray<test_model::RecordWithFixedCollections>> WriteWithFixedSubarraysImpl_expected_values_;
+
+  void ExpectWriteWithFixedSubarraysImpl (yardl::DynamicNDArray<test_model::RecordWithFixedCollections> const& value) {
+    WriteWithFixedSubarraysImpl_expected_values_.push(value);
+  }
+
+  void WriteWithVlenSubarraysImpl (yardl::DynamicNDArray<test_model::RecordWithVlenCollections> const& value) override {
+    if (WriteWithVlenSubarraysImpl_expected_values_.empty()) {
+      throw std::runtime_error("Unexpected call to WriteWithVlenSubarraysImpl");
+    }
+    if (WriteWithVlenSubarraysImpl_expected_values_.front() != value) {
+      throw std::runtime_error("Unexpected argument value for call to WriteWithVlenSubarraysImpl");
+    }
+    WriteWithVlenSubarraysImpl_expected_values_.pop();
+  }
+
+  std::queue<yardl::DynamicNDArray<test_model::RecordWithVlenCollections>> WriteWithVlenSubarraysImpl_expected_values_;
+
+  void ExpectWriteWithVlenSubarraysImpl (yardl::DynamicNDArray<test_model::RecordWithVlenCollections> const& value) {
+    WriteWithVlenSubarraysImpl_expected_values_.push(value);
+  }
+
+  void Verify() {
+    if (!WriteWithFixedSubarraysImpl_expected_values_.empty()) {
+      throw std::runtime_error("Expected call to WriteWithFixedSubarraysImpl was not received");
+    }
+    if (!WriteWithVlenSubarraysImpl_expected_values_.empty()) {
+      throw std::runtime_error("Expected call to WriteWithVlenSubarraysImpl was not received");
+    }
+  }
+};
+
+class TestSubarraysInRecordsWriterBase : public SubarraysInRecordsWriterBase {
+  public:
+  TestSubarraysInRecordsWriterBase(std::unique_ptr<test_model::SubarraysInRecordsWriterBase> writer, std::function<std::unique_ptr<SubarraysInRecordsReaderBase>()> create_reader) : writer_(std::move(writer)), create_reader_(create_reader) {
+  }
+
+  ~TestSubarraysInRecordsWriterBase() {
+    if (!close_called_ && !std::uncaught_exceptions()) {
+      ADD_FAILURE() << "Close() needs to be called on 'TestSubarraysInRecordsWriterBase' to verify mocks";
+    }
+  }
+
+  protected:
+  void WriteWithFixedSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithFixedCollections> const& value) override {
+    writer_->WriteWithFixedSubarrays(value);
+    mock_writer_.ExpectWriteWithFixedSubarraysImpl(value);
+  }
+
+  void WriteWithVlenSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithVlenCollections> const& value) override {
+    writer_->WriteWithVlenSubarrays(value);
+    mock_writer_.ExpectWriteWithVlenSubarraysImpl(value);
+  }
+
+  void CloseImpl() override {
+    close_called_ = true;
+    writer_->Close();
+    std::unique_ptr<SubarraysInRecordsReaderBase> reader = create_reader_();
+    reader->CopyTo(mock_writer_);
+    mock_writer_.Verify();
+  }
+
+  private:
+  std::unique_ptr<test_model::SubarraysInRecordsWriterBase> writer_;
+  std::function<std::unique_ptr<test_model::SubarraysInRecordsReaderBase>()> create_reader_;
+  MockSubarraysInRecordsWriter mock_writer_;
+  bool close_called_ = false;
+};
+
 class MockNDArraysWriter : public NDArraysWriterBase {
   public:
   void WriteIntsImpl (yardl::NDArray<int32_t, 2> const& value) override {
@@ -1915,6 +2329,22 @@ class MockMapsWriter : public MapsWriterBase {
     WriteStringToIntImpl_expected_values_.push(value);
   }
 
+  void WriteIntToStringImpl (std::unordered_map<int32_t, std::string> const& value) override {
+    if (WriteIntToStringImpl_expected_values_.empty()) {
+      throw std::runtime_error("Unexpected call to WriteIntToStringImpl");
+    }
+    if (WriteIntToStringImpl_expected_values_.front() != value) {
+      throw std::runtime_error("Unexpected argument value for call to WriteIntToStringImpl");
+    }
+    WriteIntToStringImpl_expected_values_.pop();
+  }
+
+  std::queue<std::unordered_map<int32_t, std::string>> WriteIntToStringImpl_expected_values_;
+
+  void ExpectWriteIntToStringImpl (std::unordered_map<int32_t, std::string> const& value) {
+    WriteIntToStringImpl_expected_values_.push(value);
+  }
+
   void WriteStringToUnionImpl (std::unordered_map<std::string, std::variant<std::string, int32_t>> const& value) override {
     if (WriteStringToUnionImpl_expected_values_.empty()) {
       throw std::runtime_error("Unexpected call to WriteStringToUnionImpl");
@@ -1951,6 +2381,9 @@ class MockMapsWriter : public MapsWriterBase {
     if (!WriteStringToIntImpl_expected_values_.empty()) {
       throw std::runtime_error("Expected call to WriteStringToIntImpl was not received");
     }
+    if (!WriteIntToStringImpl_expected_values_.empty()) {
+      throw std::runtime_error("Expected call to WriteIntToStringImpl was not received");
+    }
     if (!WriteStringToUnionImpl_expected_values_.empty()) {
       throw std::runtime_error("Expected call to WriteStringToUnionImpl was not received");
     }
@@ -1975,6 +2408,11 @@ class TestMapsWriterBase : public MapsWriterBase {
   void WriteStringToIntImpl(std::unordered_map<std::string, int32_t> const& value) override {
     writer_->WriteStringToInt(value);
     mock_writer_.ExpectWriteStringToIntImpl(value);
+  }
+
+  void WriteIntToStringImpl(std::unordered_map<int32_t, std::string> const& value) override {
+    writer_->WriteIntToString(value);
+    mock_writer_.ExpectWriteIntToStringImpl(value);
   }
 
   void WriteStringToUnionImpl(std::unordered_map<std::string, std::variant<std::string, int32_t>> const& value) override {
@@ -2916,20 +3354,20 @@ class TestSimpleGenericsWriterBase : public SimpleGenericsWriterBase {
 
 class MockAdvancedGenericsWriter : public AdvancedGenericsWriterBase {
   public:
-  void WriteIntImageImageImpl (test_model::Image<test_model::Image<float>> const& value) override {
-    if (WriteIntImageImageImpl_expected_values_.empty()) {
-      throw std::runtime_error("Unexpected call to WriteIntImageImageImpl");
+  void WriteFloatImageImageImpl (test_model::Image<test_model::Image<float>> const& value) override {
+    if (WriteFloatImageImageImpl_expected_values_.empty()) {
+      throw std::runtime_error("Unexpected call to WriteFloatImageImageImpl");
     }
-    if (WriteIntImageImageImpl_expected_values_.front() != value) {
-      throw std::runtime_error("Unexpected argument value for call to WriteIntImageImageImpl");
+    if (WriteFloatImageImageImpl_expected_values_.front() != value) {
+      throw std::runtime_error("Unexpected argument value for call to WriteFloatImageImageImpl");
     }
-    WriteIntImageImageImpl_expected_values_.pop();
+    WriteFloatImageImageImpl_expected_values_.pop();
   }
 
-  std::queue<test_model::Image<test_model::Image<float>>> WriteIntImageImageImpl_expected_values_;
+  std::queue<test_model::Image<test_model::Image<float>>> WriteFloatImageImageImpl_expected_values_;
 
-  void ExpectWriteIntImageImageImpl (test_model::Image<test_model::Image<float>> const& value) {
-    WriteIntImageImageImpl_expected_values_.push(value);
+  void ExpectWriteFloatImageImageImpl (test_model::Image<test_model::Image<float>> const& value) {
+    WriteFloatImageImageImpl_expected_values_.push(value);
   }
 
   void WriteGenericRecord1Impl (test_model::GenericRecord<int32_t, std::string> const& value) override {
@@ -2997,8 +3435,8 @@ class MockAdvancedGenericsWriter : public AdvancedGenericsWriterBase {
   }
 
   void Verify() {
-    if (!WriteIntImageImageImpl_expected_values_.empty()) {
-      throw std::runtime_error("Expected call to WriteIntImageImageImpl was not received");
+    if (!WriteFloatImageImageImpl_expected_values_.empty()) {
+      throw std::runtime_error("Expected call to WriteFloatImageImageImpl was not received");
     }
     if (!WriteGenericRecord1Impl_expected_values_.empty()) {
       throw std::runtime_error("Expected call to WriteGenericRecord1Impl was not received");
@@ -3027,9 +3465,9 @@ class TestAdvancedGenericsWriterBase : public AdvancedGenericsWriterBase {
   }
 
   protected:
-  void WriteIntImageImageImpl(test_model::Image<test_model::Image<float>> const& value) override {
-    writer_->WriteIntImageImage(value);
-    mock_writer_.ExpectWriteIntImageImageImpl(value);
+  void WriteFloatImageImageImpl(test_model::Image<test_model::Image<float>> const& value) override {
+    writer_->WriteFloatImageImage(value);
+    mock_writer_.ExpectWriteFloatImageImageImpl(value);
   }
 
   void WriteGenericRecord1Impl(test_model::GenericRecord<int32_t, std::string> const& value) override {
@@ -3672,408 +4110,258 @@ class TestProtocolWithKeywordStepsWriterBase : public ProtocolWithKeywordStepsWr
 namespace yardl::testing {
 template<>
 std::unique_ptr<test_model::BenchmarkFloat256x256WriterBase> CreateValidatingWriter<test_model::BenchmarkFloat256x256WriterBase>(Format format, std::string const& filename) {
-  switch (format) {
-  case Format::kHdf5:
-    return std::make_unique<test_model::TestBenchmarkFloat256x256WriterBase>(std::make_unique<test_model::hdf5::BenchmarkFloat256x256Writer>(filename), [filename](){ return std::make_unique<test_model::hdf5::BenchmarkFloat256x256Reader>(filename);});
-  case Format::kBinary:
-    return std::make_unique<test_model::TestBenchmarkFloat256x256WriterBase>(std::make_unique<test_model::binary::BenchmarkFloat256x256Writer>(filename), [filename](){return std::make_unique<test_model::binary::BenchmarkFloat256x256Reader>(filename);});
-  case Format::kNDJson:
-    return std::make_unique<test_model::TestBenchmarkFloat256x256WriterBase>(std::make_unique<test_model::ndjson::BenchmarkFloat256x256Writer>(filename), [filename](){return std::make_unique<test_model::ndjson::BenchmarkFloat256x256Reader>(filename);});
-  default:
-    throw std::runtime_error("Unknown format");
-  }
+  return std::make_unique<test_model::TestBenchmarkFloat256x256WriterBase>(
+    CreateWriter<test_model::BenchmarkFloat256x256WriterBase>(format, filename),
+    [format, filename](){ return CreateReader<test_model::BenchmarkFloat256x256ReaderBase>(format, filename);}
+  );
+}
+
+template<>
+std::unique_ptr<test_model::BenchmarkInt256x256WriterBase> CreateValidatingWriter<test_model::BenchmarkInt256x256WriterBase>(Format format, std::string const& filename) {
+  return std::make_unique<test_model::TestBenchmarkInt256x256WriterBase>(
+    CreateWriter<test_model::BenchmarkInt256x256WriterBase>(format, filename),
+    [format, filename](){ return CreateReader<test_model::BenchmarkInt256x256ReaderBase>(format, filename);}
+  );
 }
 
 template<>
 std::unique_ptr<test_model::BenchmarkFloatVlenWriterBase> CreateValidatingWriter<test_model::BenchmarkFloatVlenWriterBase>(Format format, std::string const& filename) {
-  switch (format) {
-  case Format::kHdf5:
-    return std::make_unique<test_model::TestBenchmarkFloatVlenWriterBase>(std::make_unique<test_model::hdf5::BenchmarkFloatVlenWriter>(filename), [filename](){ return std::make_unique<test_model::hdf5::BenchmarkFloatVlenReader>(filename);});
-  case Format::kBinary:
-    return std::make_unique<test_model::TestBenchmarkFloatVlenWriterBase>(std::make_unique<test_model::binary::BenchmarkFloatVlenWriter>(filename), [filename](){return std::make_unique<test_model::binary::BenchmarkFloatVlenReader>(filename);});
-  case Format::kNDJson:
-    return std::make_unique<test_model::TestBenchmarkFloatVlenWriterBase>(std::make_unique<test_model::ndjson::BenchmarkFloatVlenWriter>(filename), [filename](){return std::make_unique<test_model::ndjson::BenchmarkFloatVlenReader>(filename);});
-  default:
-    throw std::runtime_error("Unknown format");
-  }
+  return std::make_unique<test_model::TestBenchmarkFloatVlenWriterBase>(
+    CreateWriter<test_model::BenchmarkFloatVlenWriterBase>(format, filename),
+    [format, filename](){ return CreateReader<test_model::BenchmarkFloatVlenReaderBase>(format, filename);}
+  );
 }
 
 template<>
 std::unique_ptr<test_model::BenchmarkSmallRecordWriterBase> CreateValidatingWriter<test_model::BenchmarkSmallRecordWriterBase>(Format format, std::string const& filename) {
-  switch (format) {
-  case Format::kHdf5:
-    return std::make_unique<test_model::TestBenchmarkSmallRecordWriterBase>(std::make_unique<test_model::hdf5::BenchmarkSmallRecordWriter>(filename), [filename](){ return std::make_unique<test_model::hdf5::BenchmarkSmallRecordReader>(filename);});
-  case Format::kBinary:
-    return std::make_unique<test_model::TestBenchmarkSmallRecordWriterBase>(std::make_unique<test_model::binary::BenchmarkSmallRecordWriter>(filename), [filename](){return std::make_unique<test_model::binary::BenchmarkSmallRecordReader>(filename);});
-  case Format::kNDJson:
-    return std::make_unique<test_model::TestBenchmarkSmallRecordWriterBase>(std::make_unique<test_model::ndjson::BenchmarkSmallRecordWriter>(filename), [filename](){return std::make_unique<test_model::ndjson::BenchmarkSmallRecordReader>(filename);});
-  default:
-    throw std::runtime_error("Unknown format");
-  }
+  return std::make_unique<test_model::TestBenchmarkSmallRecordWriterBase>(
+    CreateWriter<test_model::BenchmarkSmallRecordWriterBase>(format, filename),
+    [format, filename](){ return CreateReader<test_model::BenchmarkSmallRecordReaderBase>(format, filename);}
+  );
 }
 
 template<>
 std::unique_ptr<test_model::BenchmarkSmallRecordWithOptionalsWriterBase> CreateValidatingWriter<test_model::BenchmarkSmallRecordWithOptionalsWriterBase>(Format format, std::string const& filename) {
-  switch (format) {
-  case Format::kHdf5:
-    return std::make_unique<test_model::TestBenchmarkSmallRecordWithOptionalsWriterBase>(std::make_unique<test_model::hdf5::BenchmarkSmallRecordWithOptionalsWriter>(filename), [filename](){ return std::make_unique<test_model::hdf5::BenchmarkSmallRecordWithOptionalsReader>(filename);});
-  case Format::kBinary:
-    return std::make_unique<test_model::TestBenchmarkSmallRecordWithOptionalsWriterBase>(std::make_unique<test_model::binary::BenchmarkSmallRecordWithOptionalsWriter>(filename), [filename](){return std::make_unique<test_model::binary::BenchmarkSmallRecordWithOptionalsReader>(filename);});
-  case Format::kNDJson:
-    return std::make_unique<test_model::TestBenchmarkSmallRecordWithOptionalsWriterBase>(std::make_unique<test_model::ndjson::BenchmarkSmallRecordWithOptionalsWriter>(filename), [filename](){return std::make_unique<test_model::ndjson::BenchmarkSmallRecordWithOptionalsReader>(filename);});
-  default:
-    throw std::runtime_error("Unknown format");
-  }
+  return std::make_unique<test_model::TestBenchmarkSmallRecordWithOptionalsWriterBase>(
+    CreateWriter<test_model::BenchmarkSmallRecordWithOptionalsWriterBase>(format, filename),
+    [format, filename](){ return CreateReader<test_model::BenchmarkSmallRecordWithOptionalsReaderBase>(format, filename);}
+  );
 }
 
 template<>
 std::unique_ptr<test_model::BenchmarkSimpleMrdWriterBase> CreateValidatingWriter<test_model::BenchmarkSimpleMrdWriterBase>(Format format, std::string const& filename) {
-  switch (format) {
-  case Format::kHdf5:
-    return std::make_unique<test_model::TestBenchmarkSimpleMrdWriterBase>(std::make_unique<test_model::hdf5::BenchmarkSimpleMrdWriter>(filename), [filename](){ return std::make_unique<test_model::hdf5::BenchmarkSimpleMrdReader>(filename);});
-  case Format::kBinary:
-    return std::make_unique<test_model::TestBenchmarkSimpleMrdWriterBase>(std::make_unique<test_model::binary::BenchmarkSimpleMrdWriter>(filename), [filename](){return std::make_unique<test_model::binary::BenchmarkSimpleMrdReader>(filename);});
-  case Format::kNDJson:
-    return std::make_unique<test_model::TestBenchmarkSimpleMrdWriterBase>(std::make_unique<test_model::ndjson::BenchmarkSimpleMrdWriter>(filename), [filename](){return std::make_unique<test_model::ndjson::BenchmarkSimpleMrdReader>(filename);});
-  default:
-    throw std::runtime_error("Unknown format");
-  }
+  return std::make_unique<test_model::TestBenchmarkSimpleMrdWriterBase>(
+    CreateWriter<test_model::BenchmarkSimpleMrdWriterBase>(format, filename),
+    [format, filename](){ return CreateReader<test_model::BenchmarkSimpleMrdReaderBase>(format, filename);}
+  );
 }
 
 template<>
 std::unique_ptr<test_model::ScalarsWriterBase> CreateValidatingWriter<test_model::ScalarsWriterBase>(Format format, std::string const& filename) {
-  switch (format) {
-  case Format::kHdf5:
-    return std::make_unique<test_model::TestScalarsWriterBase>(std::make_unique<test_model::hdf5::ScalarsWriter>(filename), [filename](){ return std::make_unique<test_model::hdf5::ScalarsReader>(filename);});
-  case Format::kBinary:
-    return std::make_unique<test_model::TestScalarsWriterBase>(std::make_unique<test_model::binary::ScalarsWriter>(filename), [filename](){return std::make_unique<test_model::binary::ScalarsReader>(filename);});
-  case Format::kNDJson:
-    return std::make_unique<test_model::TestScalarsWriterBase>(std::make_unique<test_model::ndjson::ScalarsWriter>(filename), [filename](){return std::make_unique<test_model::ndjson::ScalarsReader>(filename);});
-  default:
-    throw std::runtime_error("Unknown format");
-  }
+  return std::make_unique<test_model::TestScalarsWriterBase>(
+    CreateWriter<test_model::ScalarsWriterBase>(format, filename),
+    [format, filename](){ return CreateReader<test_model::ScalarsReaderBase>(format, filename);}
+  );
 }
 
 template<>
 std::unique_ptr<test_model::ScalarOptionalsWriterBase> CreateValidatingWriter<test_model::ScalarOptionalsWriterBase>(Format format, std::string const& filename) {
-  switch (format) {
-  case Format::kHdf5:
-    return std::make_unique<test_model::TestScalarOptionalsWriterBase>(std::make_unique<test_model::hdf5::ScalarOptionalsWriter>(filename), [filename](){ return std::make_unique<test_model::hdf5::ScalarOptionalsReader>(filename);});
-  case Format::kBinary:
-    return std::make_unique<test_model::TestScalarOptionalsWriterBase>(std::make_unique<test_model::binary::ScalarOptionalsWriter>(filename), [filename](){return std::make_unique<test_model::binary::ScalarOptionalsReader>(filename);});
-  case Format::kNDJson:
-    return std::make_unique<test_model::TestScalarOptionalsWriterBase>(std::make_unique<test_model::ndjson::ScalarOptionalsWriter>(filename), [filename](){return std::make_unique<test_model::ndjson::ScalarOptionalsReader>(filename);});
-  default:
-    throw std::runtime_error("Unknown format");
-  }
+  return std::make_unique<test_model::TestScalarOptionalsWriterBase>(
+    CreateWriter<test_model::ScalarOptionalsWriterBase>(format, filename),
+    [format, filename](){ return CreateReader<test_model::ScalarOptionalsReaderBase>(format, filename);}
+  );
 }
 
 template<>
 std::unique_ptr<test_model::NestedRecordsWriterBase> CreateValidatingWriter<test_model::NestedRecordsWriterBase>(Format format, std::string const& filename) {
-  switch (format) {
-  case Format::kHdf5:
-    return std::make_unique<test_model::TestNestedRecordsWriterBase>(std::make_unique<test_model::hdf5::NestedRecordsWriter>(filename), [filename](){ return std::make_unique<test_model::hdf5::NestedRecordsReader>(filename);});
-  case Format::kBinary:
-    return std::make_unique<test_model::TestNestedRecordsWriterBase>(std::make_unique<test_model::binary::NestedRecordsWriter>(filename), [filename](){return std::make_unique<test_model::binary::NestedRecordsReader>(filename);});
-  case Format::kNDJson:
-    return std::make_unique<test_model::TestNestedRecordsWriterBase>(std::make_unique<test_model::ndjson::NestedRecordsWriter>(filename), [filename](){return std::make_unique<test_model::ndjson::NestedRecordsReader>(filename);});
-  default:
-    throw std::runtime_error("Unknown format");
-  }
+  return std::make_unique<test_model::TestNestedRecordsWriterBase>(
+    CreateWriter<test_model::NestedRecordsWriterBase>(format, filename),
+    [format, filename](){ return CreateReader<test_model::NestedRecordsReaderBase>(format, filename);}
+  );
 }
 
 template<>
 std::unique_ptr<test_model::VlensWriterBase> CreateValidatingWriter<test_model::VlensWriterBase>(Format format, std::string const& filename) {
-  switch (format) {
-  case Format::kHdf5:
-    return std::make_unique<test_model::TestVlensWriterBase>(std::make_unique<test_model::hdf5::VlensWriter>(filename), [filename](){ return std::make_unique<test_model::hdf5::VlensReader>(filename);});
-  case Format::kBinary:
-    return std::make_unique<test_model::TestVlensWriterBase>(std::make_unique<test_model::binary::VlensWriter>(filename), [filename](){return std::make_unique<test_model::binary::VlensReader>(filename);});
-  case Format::kNDJson:
-    return std::make_unique<test_model::TestVlensWriterBase>(std::make_unique<test_model::ndjson::VlensWriter>(filename), [filename](){return std::make_unique<test_model::ndjson::VlensReader>(filename);});
-  default:
-    throw std::runtime_error("Unknown format");
-  }
+  return std::make_unique<test_model::TestVlensWriterBase>(
+    CreateWriter<test_model::VlensWriterBase>(format, filename),
+    [format, filename](){ return CreateReader<test_model::VlensReaderBase>(format, filename);}
+  );
 }
 
 template<>
 std::unique_ptr<test_model::StringsWriterBase> CreateValidatingWriter<test_model::StringsWriterBase>(Format format, std::string const& filename) {
-  switch (format) {
-  case Format::kHdf5:
-    return std::make_unique<test_model::TestStringsWriterBase>(std::make_unique<test_model::hdf5::StringsWriter>(filename), [filename](){ return std::make_unique<test_model::hdf5::StringsReader>(filename);});
-  case Format::kBinary:
-    return std::make_unique<test_model::TestStringsWriterBase>(std::make_unique<test_model::binary::StringsWriter>(filename), [filename](){return std::make_unique<test_model::binary::StringsReader>(filename);});
-  case Format::kNDJson:
-    return std::make_unique<test_model::TestStringsWriterBase>(std::make_unique<test_model::ndjson::StringsWriter>(filename), [filename](){return std::make_unique<test_model::ndjson::StringsReader>(filename);});
-  default:
-    throw std::runtime_error("Unknown format");
-  }
+  return std::make_unique<test_model::TestStringsWriterBase>(
+    CreateWriter<test_model::StringsWriterBase>(format, filename),
+    [format, filename](){ return CreateReader<test_model::StringsReaderBase>(format, filename);}
+  );
 }
 
 template<>
 std::unique_ptr<test_model::OptionalVectorsWriterBase> CreateValidatingWriter<test_model::OptionalVectorsWriterBase>(Format format, std::string const& filename) {
-  switch (format) {
-  case Format::kHdf5:
-    return std::make_unique<test_model::TestOptionalVectorsWriterBase>(std::make_unique<test_model::hdf5::OptionalVectorsWriter>(filename), [filename](){ return std::make_unique<test_model::hdf5::OptionalVectorsReader>(filename);});
-  case Format::kBinary:
-    return std::make_unique<test_model::TestOptionalVectorsWriterBase>(std::make_unique<test_model::binary::OptionalVectorsWriter>(filename), [filename](){return std::make_unique<test_model::binary::OptionalVectorsReader>(filename);});
-  case Format::kNDJson:
-    return std::make_unique<test_model::TestOptionalVectorsWriterBase>(std::make_unique<test_model::ndjson::OptionalVectorsWriter>(filename), [filename](){return std::make_unique<test_model::ndjson::OptionalVectorsReader>(filename);});
-  default:
-    throw std::runtime_error("Unknown format");
-  }
+  return std::make_unique<test_model::TestOptionalVectorsWriterBase>(
+    CreateWriter<test_model::OptionalVectorsWriterBase>(format, filename),
+    [format, filename](){ return CreateReader<test_model::OptionalVectorsReaderBase>(format, filename);}
+  );
 }
 
 template<>
 std::unique_ptr<test_model::FixedVectorsWriterBase> CreateValidatingWriter<test_model::FixedVectorsWriterBase>(Format format, std::string const& filename) {
-  switch (format) {
-  case Format::kHdf5:
-    return std::make_unique<test_model::TestFixedVectorsWriterBase>(std::make_unique<test_model::hdf5::FixedVectorsWriter>(filename), [filename](){ return std::make_unique<test_model::hdf5::FixedVectorsReader>(filename);});
-  case Format::kBinary:
-    return std::make_unique<test_model::TestFixedVectorsWriterBase>(std::make_unique<test_model::binary::FixedVectorsWriter>(filename), [filename](){return std::make_unique<test_model::binary::FixedVectorsReader>(filename);});
-  case Format::kNDJson:
-    return std::make_unique<test_model::TestFixedVectorsWriterBase>(std::make_unique<test_model::ndjson::FixedVectorsWriter>(filename), [filename](){return std::make_unique<test_model::ndjson::FixedVectorsReader>(filename);});
-  default:
-    throw std::runtime_error("Unknown format");
-  }
+  return std::make_unique<test_model::TestFixedVectorsWriterBase>(
+    CreateWriter<test_model::FixedVectorsWriterBase>(format, filename),
+    [format, filename](){ return CreateReader<test_model::FixedVectorsReaderBase>(format, filename);}
+  );
 }
 
 template<>
 std::unique_ptr<test_model::StreamsWriterBase> CreateValidatingWriter<test_model::StreamsWriterBase>(Format format, std::string const& filename) {
-  switch (format) {
-  case Format::kHdf5:
-    return std::make_unique<test_model::TestStreamsWriterBase>(std::make_unique<test_model::hdf5::StreamsWriter>(filename), [filename](){ return std::make_unique<test_model::hdf5::StreamsReader>(filename);});
-  case Format::kBinary:
-    return std::make_unique<test_model::TestStreamsWriterBase>(std::make_unique<test_model::binary::StreamsWriter>(filename), [filename](){return std::make_unique<test_model::binary::StreamsReader>(filename);});
-  case Format::kNDJson:
-    return std::make_unique<test_model::TestStreamsWriterBase>(std::make_unique<test_model::ndjson::StreamsWriter>(filename), [filename](){return std::make_unique<test_model::ndjson::StreamsReader>(filename);});
-  default:
-    throw std::runtime_error("Unknown format");
-  }
+  return std::make_unique<test_model::TestStreamsWriterBase>(
+    CreateWriter<test_model::StreamsWriterBase>(format, filename),
+    [format, filename](){ return CreateReader<test_model::StreamsReaderBase>(format, filename);}
+  );
 }
 
 template<>
 std::unique_ptr<test_model::FixedArraysWriterBase> CreateValidatingWriter<test_model::FixedArraysWriterBase>(Format format, std::string const& filename) {
-  switch (format) {
-  case Format::kHdf5:
-    return std::make_unique<test_model::TestFixedArraysWriterBase>(std::make_unique<test_model::hdf5::FixedArraysWriter>(filename), [filename](){ return std::make_unique<test_model::hdf5::FixedArraysReader>(filename);});
-  case Format::kBinary:
-    return std::make_unique<test_model::TestFixedArraysWriterBase>(std::make_unique<test_model::binary::FixedArraysWriter>(filename), [filename](){return std::make_unique<test_model::binary::FixedArraysReader>(filename);});
-  case Format::kNDJson:
-    return std::make_unique<test_model::TestFixedArraysWriterBase>(std::make_unique<test_model::ndjson::FixedArraysWriter>(filename), [filename](){return std::make_unique<test_model::ndjson::FixedArraysReader>(filename);});
-  default:
-    throw std::runtime_error("Unknown format");
-  }
+  return std::make_unique<test_model::TestFixedArraysWriterBase>(
+    CreateWriter<test_model::FixedArraysWriterBase>(format, filename),
+    [format, filename](){ return CreateReader<test_model::FixedArraysReaderBase>(format, filename);}
+  );
+}
+
+template<>
+std::unique_ptr<test_model::SubarraysWriterBase> CreateValidatingWriter<test_model::SubarraysWriterBase>(Format format, std::string const& filename) {
+  return std::make_unique<test_model::TestSubarraysWriterBase>(
+    CreateWriter<test_model::SubarraysWriterBase>(format, filename),
+    [format, filename](){ return CreateReader<test_model::SubarraysReaderBase>(format, filename);}
+  );
+}
+
+template<>
+std::unique_ptr<test_model::SubarraysInRecordsWriterBase> CreateValidatingWriter<test_model::SubarraysInRecordsWriterBase>(Format format, std::string const& filename) {
+  return std::make_unique<test_model::TestSubarraysInRecordsWriterBase>(
+    CreateWriter<test_model::SubarraysInRecordsWriterBase>(format, filename),
+    [format, filename](){ return CreateReader<test_model::SubarraysInRecordsReaderBase>(format, filename);}
+  );
 }
 
 template<>
 std::unique_ptr<test_model::NDArraysWriterBase> CreateValidatingWriter<test_model::NDArraysWriterBase>(Format format, std::string const& filename) {
-  switch (format) {
-  case Format::kHdf5:
-    return std::make_unique<test_model::TestNDArraysWriterBase>(std::make_unique<test_model::hdf5::NDArraysWriter>(filename), [filename](){ return std::make_unique<test_model::hdf5::NDArraysReader>(filename);});
-  case Format::kBinary:
-    return std::make_unique<test_model::TestNDArraysWriterBase>(std::make_unique<test_model::binary::NDArraysWriter>(filename), [filename](){return std::make_unique<test_model::binary::NDArraysReader>(filename);});
-  case Format::kNDJson:
-    return std::make_unique<test_model::TestNDArraysWriterBase>(std::make_unique<test_model::ndjson::NDArraysWriter>(filename), [filename](){return std::make_unique<test_model::ndjson::NDArraysReader>(filename);});
-  default:
-    throw std::runtime_error("Unknown format");
-  }
+  return std::make_unique<test_model::TestNDArraysWriterBase>(
+    CreateWriter<test_model::NDArraysWriterBase>(format, filename),
+    [format, filename](){ return CreateReader<test_model::NDArraysReaderBase>(format, filename);}
+  );
 }
 
 template<>
 std::unique_ptr<test_model::NDArraysSingleDimensionWriterBase> CreateValidatingWriter<test_model::NDArraysSingleDimensionWriterBase>(Format format, std::string const& filename) {
-  switch (format) {
-  case Format::kHdf5:
-    return std::make_unique<test_model::TestNDArraysSingleDimensionWriterBase>(std::make_unique<test_model::hdf5::NDArraysSingleDimensionWriter>(filename), [filename](){ return std::make_unique<test_model::hdf5::NDArraysSingleDimensionReader>(filename);});
-  case Format::kBinary:
-    return std::make_unique<test_model::TestNDArraysSingleDimensionWriterBase>(std::make_unique<test_model::binary::NDArraysSingleDimensionWriter>(filename), [filename](){return std::make_unique<test_model::binary::NDArraysSingleDimensionReader>(filename);});
-  case Format::kNDJson:
-    return std::make_unique<test_model::TestNDArraysSingleDimensionWriterBase>(std::make_unique<test_model::ndjson::NDArraysSingleDimensionWriter>(filename), [filename](){return std::make_unique<test_model::ndjson::NDArraysSingleDimensionReader>(filename);});
-  default:
-    throw std::runtime_error("Unknown format");
-  }
+  return std::make_unique<test_model::TestNDArraysSingleDimensionWriterBase>(
+    CreateWriter<test_model::NDArraysSingleDimensionWriterBase>(format, filename),
+    [format, filename](){ return CreateReader<test_model::NDArraysSingleDimensionReaderBase>(format, filename);}
+  );
 }
 
 template<>
 std::unique_ptr<test_model::DynamicNDArraysWriterBase> CreateValidatingWriter<test_model::DynamicNDArraysWriterBase>(Format format, std::string const& filename) {
-  switch (format) {
-  case Format::kHdf5:
-    return std::make_unique<test_model::TestDynamicNDArraysWriterBase>(std::make_unique<test_model::hdf5::DynamicNDArraysWriter>(filename), [filename](){ return std::make_unique<test_model::hdf5::DynamicNDArraysReader>(filename);});
-  case Format::kBinary:
-    return std::make_unique<test_model::TestDynamicNDArraysWriterBase>(std::make_unique<test_model::binary::DynamicNDArraysWriter>(filename), [filename](){return std::make_unique<test_model::binary::DynamicNDArraysReader>(filename);});
-  case Format::kNDJson:
-    return std::make_unique<test_model::TestDynamicNDArraysWriterBase>(std::make_unique<test_model::ndjson::DynamicNDArraysWriter>(filename), [filename](){return std::make_unique<test_model::ndjson::DynamicNDArraysReader>(filename);});
-  default:
-    throw std::runtime_error("Unknown format");
-  }
+  return std::make_unique<test_model::TestDynamicNDArraysWriterBase>(
+    CreateWriter<test_model::DynamicNDArraysWriterBase>(format, filename),
+    [format, filename](){ return CreateReader<test_model::DynamicNDArraysReaderBase>(format, filename);}
+  );
 }
 
 template<>
 std::unique_ptr<test_model::MapsWriterBase> CreateValidatingWriter<test_model::MapsWriterBase>(Format format, std::string const& filename) {
-  switch (format) {
-  case Format::kHdf5:
-    return std::make_unique<test_model::TestMapsWriterBase>(std::make_unique<test_model::hdf5::MapsWriter>(filename), [filename](){ return std::make_unique<test_model::hdf5::MapsReader>(filename);});
-  case Format::kBinary:
-    return std::make_unique<test_model::TestMapsWriterBase>(std::make_unique<test_model::binary::MapsWriter>(filename), [filename](){return std::make_unique<test_model::binary::MapsReader>(filename);});
-  case Format::kNDJson:
-    return std::make_unique<test_model::TestMapsWriterBase>(std::make_unique<test_model::ndjson::MapsWriter>(filename), [filename](){return std::make_unique<test_model::ndjson::MapsReader>(filename);});
-  default:
-    throw std::runtime_error("Unknown format");
-  }
+  return std::make_unique<test_model::TestMapsWriterBase>(
+    CreateWriter<test_model::MapsWriterBase>(format, filename),
+    [format, filename](){ return CreateReader<test_model::MapsReaderBase>(format, filename);}
+  );
 }
 
 template<>
 std::unique_ptr<test_model::UnionsWriterBase> CreateValidatingWriter<test_model::UnionsWriterBase>(Format format, std::string const& filename) {
-  switch (format) {
-  case Format::kHdf5:
-    return std::make_unique<test_model::TestUnionsWriterBase>(std::make_unique<test_model::hdf5::UnionsWriter>(filename), [filename](){ return std::make_unique<test_model::hdf5::UnionsReader>(filename);});
-  case Format::kBinary:
-    return std::make_unique<test_model::TestUnionsWriterBase>(std::make_unique<test_model::binary::UnionsWriter>(filename), [filename](){return std::make_unique<test_model::binary::UnionsReader>(filename);});
-  case Format::kNDJson:
-    return std::make_unique<test_model::TestUnionsWriterBase>(std::make_unique<test_model::ndjson::UnionsWriter>(filename), [filename](){return std::make_unique<test_model::ndjson::UnionsReader>(filename);});
-  default:
-    throw std::runtime_error("Unknown format");
-  }
+  return std::make_unique<test_model::TestUnionsWriterBase>(
+    CreateWriter<test_model::UnionsWriterBase>(format, filename),
+    [format, filename](){ return CreateReader<test_model::UnionsReaderBase>(format, filename);}
+  );
 }
 
 template<>
 std::unique_ptr<test_model::StreamsOfUnionsWriterBase> CreateValidatingWriter<test_model::StreamsOfUnionsWriterBase>(Format format, std::string const& filename) {
-  switch (format) {
-  case Format::kHdf5:
-    return std::make_unique<test_model::TestStreamsOfUnionsWriterBase>(std::make_unique<test_model::hdf5::StreamsOfUnionsWriter>(filename), [filename](){ return std::make_unique<test_model::hdf5::StreamsOfUnionsReader>(filename);});
-  case Format::kBinary:
-    return std::make_unique<test_model::TestStreamsOfUnionsWriterBase>(std::make_unique<test_model::binary::StreamsOfUnionsWriter>(filename), [filename](){return std::make_unique<test_model::binary::StreamsOfUnionsReader>(filename);});
-  case Format::kNDJson:
-    return std::make_unique<test_model::TestStreamsOfUnionsWriterBase>(std::make_unique<test_model::ndjson::StreamsOfUnionsWriter>(filename), [filename](){return std::make_unique<test_model::ndjson::StreamsOfUnionsReader>(filename);});
-  default:
-    throw std::runtime_error("Unknown format");
-  }
+  return std::make_unique<test_model::TestStreamsOfUnionsWriterBase>(
+    CreateWriter<test_model::StreamsOfUnionsWriterBase>(format, filename),
+    [format, filename](){ return CreateReader<test_model::StreamsOfUnionsReaderBase>(format, filename);}
+  );
 }
 
 template<>
 std::unique_ptr<test_model::EnumsWriterBase> CreateValidatingWriter<test_model::EnumsWriterBase>(Format format, std::string const& filename) {
-  switch (format) {
-  case Format::kHdf5:
-    return std::make_unique<test_model::TestEnumsWriterBase>(std::make_unique<test_model::hdf5::EnumsWriter>(filename), [filename](){ return std::make_unique<test_model::hdf5::EnumsReader>(filename);});
-  case Format::kBinary:
-    return std::make_unique<test_model::TestEnumsWriterBase>(std::make_unique<test_model::binary::EnumsWriter>(filename), [filename](){return std::make_unique<test_model::binary::EnumsReader>(filename);});
-  case Format::kNDJson:
-    return std::make_unique<test_model::TestEnumsWriterBase>(std::make_unique<test_model::ndjson::EnumsWriter>(filename), [filename](){return std::make_unique<test_model::ndjson::EnumsReader>(filename);});
-  default:
-    throw std::runtime_error("Unknown format");
-  }
+  return std::make_unique<test_model::TestEnumsWriterBase>(
+    CreateWriter<test_model::EnumsWriterBase>(format, filename),
+    [format, filename](){ return CreateReader<test_model::EnumsReaderBase>(format, filename);}
+  );
 }
 
 template<>
 std::unique_ptr<test_model::FlagsWriterBase> CreateValidatingWriter<test_model::FlagsWriterBase>(Format format, std::string const& filename) {
-  switch (format) {
-  case Format::kHdf5:
-    return std::make_unique<test_model::TestFlagsWriterBase>(std::make_unique<test_model::hdf5::FlagsWriter>(filename), [filename](){ return std::make_unique<test_model::hdf5::FlagsReader>(filename);});
-  case Format::kBinary:
-    return std::make_unique<test_model::TestFlagsWriterBase>(std::make_unique<test_model::binary::FlagsWriter>(filename), [filename](){return std::make_unique<test_model::binary::FlagsReader>(filename);});
-  case Format::kNDJson:
-    return std::make_unique<test_model::TestFlagsWriterBase>(std::make_unique<test_model::ndjson::FlagsWriter>(filename), [filename](){return std::make_unique<test_model::ndjson::FlagsReader>(filename);});
-  default:
-    throw std::runtime_error("Unknown format");
-  }
+  return std::make_unique<test_model::TestFlagsWriterBase>(
+    CreateWriter<test_model::FlagsWriterBase>(format, filename),
+    [format, filename](){ return CreateReader<test_model::FlagsReaderBase>(format, filename);}
+  );
 }
 
 template<>
 std::unique_ptr<test_model::StateTestWriterBase> CreateValidatingWriter<test_model::StateTestWriterBase>(Format format, std::string const& filename) {
-  switch (format) {
-  case Format::kHdf5:
-    return std::make_unique<test_model::TestStateTestWriterBase>(std::make_unique<test_model::hdf5::StateTestWriter>(filename), [filename](){ return std::make_unique<test_model::hdf5::StateTestReader>(filename);});
-  case Format::kBinary:
-    return std::make_unique<test_model::TestStateTestWriterBase>(std::make_unique<test_model::binary::StateTestWriter>(filename), [filename](){return std::make_unique<test_model::binary::StateTestReader>(filename);});
-  case Format::kNDJson:
-    return std::make_unique<test_model::TestStateTestWriterBase>(std::make_unique<test_model::ndjson::StateTestWriter>(filename), [filename](){return std::make_unique<test_model::ndjson::StateTestReader>(filename);});
-  default:
-    throw std::runtime_error("Unknown format");
-  }
+  return std::make_unique<test_model::TestStateTestWriterBase>(
+    CreateWriter<test_model::StateTestWriterBase>(format, filename),
+    [format, filename](){ return CreateReader<test_model::StateTestReaderBase>(format, filename);}
+  );
 }
 
 template<>
 std::unique_ptr<test_model::SimpleGenericsWriterBase> CreateValidatingWriter<test_model::SimpleGenericsWriterBase>(Format format, std::string const& filename) {
-  switch (format) {
-  case Format::kHdf5:
-    return std::make_unique<test_model::TestSimpleGenericsWriterBase>(std::make_unique<test_model::hdf5::SimpleGenericsWriter>(filename), [filename](){ return std::make_unique<test_model::hdf5::SimpleGenericsReader>(filename);});
-  case Format::kBinary:
-    return std::make_unique<test_model::TestSimpleGenericsWriterBase>(std::make_unique<test_model::binary::SimpleGenericsWriter>(filename), [filename](){return std::make_unique<test_model::binary::SimpleGenericsReader>(filename);});
-  case Format::kNDJson:
-    return std::make_unique<test_model::TestSimpleGenericsWriterBase>(std::make_unique<test_model::ndjson::SimpleGenericsWriter>(filename), [filename](){return std::make_unique<test_model::ndjson::SimpleGenericsReader>(filename);});
-  default:
-    throw std::runtime_error("Unknown format");
-  }
+  return std::make_unique<test_model::TestSimpleGenericsWriterBase>(
+    CreateWriter<test_model::SimpleGenericsWriterBase>(format, filename),
+    [format, filename](){ return CreateReader<test_model::SimpleGenericsReaderBase>(format, filename);}
+  );
 }
 
 template<>
 std::unique_ptr<test_model::AdvancedGenericsWriterBase> CreateValidatingWriter<test_model::AdvancedGenericsWriterBase>(Format format, std::string const& filename) {
-  switch (format) {
-  case Format::kHdf5:
-    return std::make_unique<test_model::TestAdvancedGenericsWriterBase>(std::make_unique<test_model::hdf5::AdvancedGenericsWriter>(filename), [filename](){ return std::make_unique<test_model::hdf5::AdvancedGenericsReader>(filename);});
-  case Format::kBinary:
-    return std::make_unique<test_model::TestAdvancedGenericsWriterBase>(std::make_unique<test_model::binary::AdvancedGenericsWriter>(filename), [filename](){return std::make_unique<test_model::binary::AdvancedGenericsReader>(filename);});
-  case Format::kNDJson:
-    return std::make_unique<test_model::TestAdvancedGenericsWriterBase>(std::make_unique<test_model::ndjson::AdvancedGenericsWriter>(filename), [filename](){return std::make_unique<test_model::ndjson::AdvancedGenericsReader>(filename);});
-  default:
-    throw std::runtime_error("Unknown format");
-  }
+  return std::make_unique<test_model::TestAdvancedGenericsWriterBase>(
+    CreateWriter<test_model::AdvancedGenericsWriterBase>(format, filename),
+    [format, filename](){ return CreateReader<test_model::AdvancedGenericsReaderBase>(format, filename);}
+  );
 }
 
 template<>
 std::unique_ptr<test_model::AliasesWriterBase> CreateValidatingWriter<test_model::AliasesWriterBase>(Format format, std::string const& filename) {
-  switch (format) {
-  case Format::kHdf5:
-    return std::make_unique<test_model::TestAliasesWriterBase>(std::make_unique<test_model::hdf5::AliasesWriter>(filename), [filename](){ return std::make_unique<test_model::hdf5::AliasesReader>(filename);});
-  case Format::kBinary:
-    return std::make_unique<test_model::TestAliasesWriterBase>(std::make_unique<test_model::binary::AliasesWriter>(filename), [filename](){return std::make_unique<test_model::binary::AliasesReader>(filename);});
-  case Format::kNDJson:
-    return std::make_unique<test_model::TestAliasesWriterBase>(std::make_unique<test_model::ndjson::AliasesWriter>(filename), [filename](){return std::make_unique<test_model::ndjson::AliasesReader>(filename);});
-  default:
-    throw std::runtime_error("Unknown format");
-  }
+  return std::make_unique<test_model::TestAliasesWriterBase>(
+    CreateWriter<test_model::AliasesWriterBase>(format, filename),
+    [format, filename](){ return CreateReader<test_model::AliasesReaderBase>(format, filename);}
+  );
 }
 
 template<>
 std::unique_ptr<test_model::StreamsOfAliasedUnionsWriterBase> CreateValidatingWriter<test_model::StreamsOfAliasedUnionsWriterBase>(Format format, std::string const& filename) {
-  switch (format) {
-  case Format::kHdf5:
-    return std::make_unique<test_model::TestStreamsOfAliasedUnionsWriterBase>(std::make_unique<test_model::hdf5::StreamsOfAliasedUnionsWriter>(filename), [filename](){ return std::make_unique<test_model::hdf5::StreamsOfAliasedUnionsReader>(filename);});
-  case Format::kBinary:
-    return std::make_unique<test_model::TestStreamsOfAliasedUnionsWriterBase>(std::make_unique<test_model::binary::StreamsOfAliasedUnionsWriter>(filename), [filename](){return std::make_unique<test_model::binary::StreamsOfAliasedUnionsReader>(filename);});
-  case Format::kNDJson:
-    return std::make_unique<test_model::TestStreamsOfAliasedUnionsWriterBase>(std::make_unique<test_model::ndjson::StreamsOfAliasedUnionsWriter>(filename), [filename](){return std::make_unique<test_model::ndjson::StreamsOfAliasedUnionsReader>(filename);});
-  default:
-    throw std::runtime_error("Unknown format");
-  }
+  return std::make_unique<test_model::TestStreamsOfAliasedUnionsWriterBase>(
+    CreateWriter<test_model::StreamsOfAliasedUnionsWriterBase>(format, filename),
+    [format, filename](){ return CreateReader<test_model::StreamsOfAliasedUnionsReaderBase>(format, filename);}
+  );
 }
 
 template<>
 std::unique_ptr<test_model::ProtocolWithComputedFieldsWriterBase> CreateValidatingWriter<test_model::ProtocolWithComputedFieldsWriterBase>(Format format, std::string const& filename) {
-  switch (format) {
-  case Format::kHdf5:
-    return std::make_unique<test_model::TestProtocolWithComputedFieldsWriterBase>(std::make_unique<test_model::hdf5::ProtocolWithComputedFieldsWriter>(filename), [filename](){ return std::make_unique<test_model::hdf5::ProtocolWithComputedFieldsReader>(filename);});
-  case Format::kBinary:
-    return std::make_unique<test_model::TestProtocolWithComputedFieldsWriterBase>(std::make_unique<test_model::binary::ProtocolWithComputedFieldsWriter>(filename), [filename](){return std::make_unique<test_model::binary::ProtocolWithComputedFieldsReader>(filename);});
-  case Format::kNDJson:
-    return std::make_unique<test_model::TestProtocolWithComputedFieldsWriterBase>(std::make_unique<test_model::ndjson::ProtocolWithComputedFieldsWriter>(filename), [filename](){return std::make_unique<test_model::ndjson::ProtocolWithComputedFieldsReader>(filename);});
-  default:
-    throw std::runtime_error("Unknown format");
-  }
+  return std::make_unique<test_model::TestProtocolWithComputedFieldsWriterBase>(
+    CreateWriter<test_model::ProtocolWithComputedFieldsWriterBase>(format, filename),
+    [format, filename](){ return CreateReader<test_model::ProtocolWithComputedFieldsReaderBase>(format, filename);}
+  );
 }
 
 template<>
 std::unique_ptr<test_model::ProtocolWithKeywordStepsWriterBase> CreateValidatingWriter<test_model::ProtocolWithKeywordStepsWriterBase>(Format format, std::string const& filename) {
-  switch (format) {
-  case Format::kHdf5:
-    return std::make_unique<test_model::TestProtocolWithKeywordStepsWriterBase>(std::make_unique<test_model::hdf5::ProtocolWithKeywordStepsWriter>(filename), [filename](){ return std::make_unique<test_model::hdf5::ProtocolWithKeywordStepsReader>(filename);});
-  case Format::kBinary:
-    return std::make_unique<test_model::TestProtocolWithKeywordStepsWriterBase>(std::make_unique<test_model::binary::ProtocolWithKeywordStepsWriter>(filename), [filename](){return std::make_unique<test_model::binary::ProtocolWithKeywordStepsReader>(filename);});
-  case Format::kNDJson:
-    return std::make_unique<test_model::TestProtocolWithKeywordStepsWriterBase>(std::make_unique<test_model::ndjson::ProtocolWithKeywordStepsWriter>(filename), [filename](){return std::make_unique<test_model::ndjson::ProtocolWithKeywordStepsReader>(filename);});
-  default:
-    throw std::runtime_error("Unknown format");
-  }
+  return std::make_unique<test_model::TestProtocolWithKeywordStepsWriterBase>(
+    CreateWriter<test_model::ProtocolWithKeywordStepsWriterBase>(format, filename),
+    [format, filename](){ return CreateReader<test_model::ProtocolWithKeywordStepsReaderBase>(format, filename);}
+  );
 }
 
 }

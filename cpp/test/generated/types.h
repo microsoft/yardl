@@ -181,6 +181,18 @@ struct RecordWithVectors {
   }
 };
 
+struct RecordWithVectorOfTimes {
+  std::vector<yardl::Time> times{};
+
+  bool operator==(const RecordWithVectorOfTimes& other) const {
+    return times == other.times;
+  }
+
+  bool operator!=(const RecordWithVectorOfTimes& other) const {
+    return !(*this == other);
+  }
+};
+
 struct RecordWithArrays {
   yardl::DynamicNDArray<int32_t> default_array{};
   yardl::DynamicNDArray<int32_t> default_array_with_empty_dimension{};
@@ -240,10 +252,12 @@ struct RecordWithArraysSimpleSyntax {
 struct RecordWithOptionalFields {
   std::optional<int32_t> optional_int{};
   std::optional<int32_t> optional_int_alternate_syntax{};
+  std::optional<yardl::Time> optional_time{};
 
   bool operator==(const RecordWithOptionalFields& other) const {
     return optional_int == other.optional_int &&
-      optional_int_alternate_syntax == other.optional_int_alternate_syntax;
+      optional_int_alternate_syntax == other.optional_int_alternate_syntax &&
+      optional_time == other.optional_time;
   }
 
   bool operator!=(const RecordWithOptionalFields& other) const {
@@ -359,13 +373,13 @@ struct RecordWithNDArraysSingleDimension {
 
 struct RecordWithDynamicNDArrays {
   yardl::DynamicNDArray<int32_t> ints{};
-  yardl::DynamicNDArray<test_model::SimpleRecord> fixed_simple_record_array{};
-  yardl::DynamicNDArray<test_model::RecordWithVlens> fixed_record_with_vlens_array{};
+  yardl::DynamicNDArray<test_model::SimpleRecord> simple_record_array{};
+  yardl::DynamicNDArray<test_model::RecordWithVlens> record_with_vlens_array{};
 
   bool operator==(const RecordWithDynamicNDArrays& other) const {
     return ints == other.ints &&
-      fixed_simple_record_array == other.fixed_simple_record_array &&
-      fixed_record_with_vlens_array == other.fixed_record_with_vlens_array;
+      simple_record_array == other.simple_record_array &&
+      record_with_vlens_array == other.record_with_vlens_array;
   }
 
   bool operator!=(const RecordWithDynamicNDArrays& other) const {
@@ -375,6 +389,34 @@ struct RecordWithDynamicNDArrays {
 
 using NamedFixedNDArray = yardl::FixedNDArray<int32_t, 2, 4>;
 
+struct RecordWithFixedCollections {
+  std::array<int32_t, 3> fixed_vector{};
+  yardl::FixedNDArray<int32_t, 2, 3> fixed_array{};
+
+  bool operator==(const RecordWithFixedCollections& other) const {
+    return fixed_vector == other.fixed_vector &&
+      fixed_array == other.fixed_array;
+  }
+
+  bool operator!=(const RecordWithFixedCollections& other) const {
+    return !(*this == other);
+  }
+};
+
+struct RecordWithVlenCollections {
+  std::vector<int32_t> vector{};
+  yardl::NDArray<int32_t, 2> array{};
+
+  bool operator==(const RecordWithVlenCollections& other) const {
+    return vector == other.vector &&
+      array == other.array;
+  }
+
+  bool operator!=(const RecordWithVlenCollections& other) const {
+    return !(*this == other);
+  }
+};
+
 using NamedNDArray = yardl::NDArray<int32_t, 2>;
 
 template <typename K, typename V>
@@ -382,9 +424,11 @@ using AliasedMap = std::unordered_map<K, V>;
 
 struct RecordWithUnions {
   std::variant<std::monostate, int32_t, std::string> null_or_int_or_string{};
+  std::variant<yardl::Time, yardl::DateTime> date_or_datetime{};
 
   bool operator==(const RecordWithUnions& other) const {
-    return null_or_int_or_string == other.null_or_int_or_string;
+    return null_or_int_or_string == other.null_or_int_or_string &&
+      date_or_datetime == other.date_or_datetime;
   }
 
   bool operator!=(const RecordWithUnions& other) const {
@@ -430,6 +474,22 @@ struct TextFormat : yardl::BaseFlags<uint64_t, TextFormat> {
   static const TextFormat kItalic;
   static const TextFormat kUnderline;
   static const TextFormat kStrikethrough;
+};
+
+struct RecordWithEnums {
+  test_model::Fruits enum_field{};
+  test_model::DaysOfWeek flags{};
+  test_model::TextFormat flags_2{};
+
+  bool operator==(const RecordWithEnums& other) const {
+    return enum_field == other.enum_field &&
+      flags == other.flags &&
+      flags_2 == other.flags_2;
+  }
+
+  bool operator!=(const RecordWithEnums& other) const {
+    return !(*this == other);
+  }
 };
 
 template <typename T>
@@ -811,8 +871,8 @@ struct RecordWithComputedFields {
     return std::visit(
       [&](auto&& __case_arg__) -> float {
         if constexpr (std::is_same_v<std::decay_t<decltype(__case_arg__)>, int32_t>) {
-          int32_t const& i = __case_arg__;
-          return static_cast<float>(i);
+          int32_t const& i_foo = __case_arg__;
+          return static_cast<float>(i_foo);
         }
         if constexpr (std::is_same_v<std::decay_t<decltype(__case_arg__)>, float>) {
           float const& f = __case_arg__;
@@ -873,6 +933,12 @@ struct RecordWithComputedFields {
       union_with_nested_generic_union);
   }
 
+  int32_t SwitchOverSingleValue() const {
+    return []([[maybe_unused]] int32_t const& i) -> int32_t {
+      return i;
+    }(int_field);
+  }
+
   bool operator==(const RecordWithComputedFields& other) const {
     return array_field == other.array_field &&
       array_field_map_dimensions == other.array_field_map_dimensions &&
@@ -896,18 +962,16 @@ struct RecordWithComputedFields {
   }
 };
 
-template <typename INT16_MAX_Type>
-using ArrayWithKeywordDimensionNames = yardl::NDArray<INT16_MAX_Type, 2>;
+using ArrayWithKeywordDimensionNames = yardl::NDArray<int32_t, 2>;
 
 enum class EnumWithKeywordSymbols {
   kTry = 2,
   kCatch = 1,
 };
 
-// BEGIN delibrately using C++ keywords and macros as identitiers
 struct RecordWithKeywordFields {
   std::string int_field{};
-  test_model::ArrayWithKeywordDimensionNames<int32_t> sizeof_field{};
+  test_model::ArrayWithKeywordDimensionNames sizeof_field{};
   test_model::EnumWithKeywordSymbols if_field{};
 
   std::string const& Float() const {

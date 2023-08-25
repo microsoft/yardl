@@ -8,20 +8,35 @@ import "fmt"
 // Rewrites a Node by visiting it from the given root.
 // If the given node in an *Environment, the symbol table will be updated.
 func Rewrite(node Node, rewriterFunc RewriterFunc) Node {
-	wrapper := Rewriter{rewriterFunc: rewriterFunc}
+	wrapper := &Rewriter{rewriterFunc: rewriterFunc}
 	wrapper.rewriterWithContext = RewriterWithContext[any]{
-		rewriterFunc: func(node Node, context any, self RewriterWithContext[any]) Node {
+		rewriterFunc: func(node Node, context any, self *RewriterWithContext[any]) Node {
 			return rewriterFunc(wrapper, node)
 		}}
 
 	if env, ok := node.(*Environment); ok {
-		wrapper.symbolTable = &env.SymbolTable
+		wrapper.rewriterWithContext.symbolTable = &env.SymbolTable
 	}
 
-	return wrapper.Rewrite(node)
+	rewritten := wrapper.Rewrite(node)
+	if len(wrapper.rewriterWithContext.updatedSymbols) == 0 {
+		return rewritten
+	}
+
+	if newEnv, ok := rewritten.(*Environment); ok {
+		if newEnv == node {
+			clone := *newEnv
+			newEnv = &clone
+		}
+
+		newEnv.SymbolTable = *wrapper.rewriterWithContext.symbolTable
+		return newEnv
+	}
+
+	return rewritten
 }
 
-type RewriterFunc func(self Rewriter, node Node) Node
+type RewriterFunc func(self *Rewriter, node Node) Node
 
 // Rewrites a Node by visiting it from the given root, threading a context parameter throughout.
 // If the given node in an *Environment, the symbol table will be updated.
@@ -30,55 +45,60 @@ func RewriteWithContext[T any](node Node, context T, rewriter RewriterWithContex
 	if env, ok := node.(*Environment); ok {
 		wrapper.symbolTable = &env.SymbolTable
 	}
-	return wrapper.Rewrite(node, context)
+	rewritten := wrapper.Rewrite(node, context)
+	if len(wrapper.updatedSymbols) == 0 {
+		return rewritten
+	}
+
+	if newEnv, ok := rewritten.(*Environment); ok {
+		if newEnv == node {
+			clone := *newEnv
+			newEnv = &clone
+		}
+
+		newEnv.SymbolTable = *wrapper.symbolTable
+		return newEnv
+	}
+
+	return rewritten
 }
 
-type RewriterWithContextFunc[T any] func(node Node, context T, self RewriterWithContext[T]) Node
+type RewriterWithContextFunc[T any] func(node Node, context T, self *RewriterWithContext[T]) Node
 
 type Rewriter struct {
 	rewriterFunc        RewriterFunc
 	rewriterWithContext RewriterWithContext[any]
-	symbolTable         *SymbolTable
 }
 
-func (rewriter Rewriter) Rewrite(node Node) Node {
+func (rewriter *Rewriter) Rewrite(node Node) Node {
 	rewritten := rewriter.rewriterFunc(rewriter, node)
-	updateSymbolTable(node, rewritten, rewriter.symbolTable)
+	updateSymbolTable(node, rewritten, &rewriter.rewriterWithContext)
 	return rewritten
 }
 
-func (rewriter Rewriter) DefaultRewrite(node Node) Node {
+func (rewriter *Rewriter) DefaultRewrite(node Node) Node {
 	return rewriter.rewriterWithContext.DefaultRewrite(node, nil)
 }
 
 type RewriterWithContext[T any] struct {
-	rewriterFunc RewriterWithContextFunc[T]
-	symbolTable  *SymbolTable
+	rewriterFunc   RewriterWithContextFunc[T]
+	symbolTable    *SymbolTable
+	updatedSymbols map[string]TypeDefinition
 }
 
-func (rewriter RewriterWithContext[T]) Rewrite(node Node, context T) Node {
+func (rewriter *RewriterWithContext[T]) Rewrite(node Node, context T) Node {
 	rewritten := rewriter.rewriterFunc(node, context, rewriter)
-	updateSymbolTable(node, rewritten, rewriter.symbolTable)
+	updateSymbolTable(node, rewritten, rewriter)
 	return rewritten
 }
 
-func updateSymbolTable(original, rewritten Node, symbolTable *SymbolTable) {
-	if symbolTable == nil {
-		return
-	}
-
-	if rewritten != original {
-		if td, ok := rewritten.(TypeDefinition); ok {
-			name := td.GetDefinitionMeta().GetQualifiedName()
-			if existingInTable, wasFound := (*symbolTable)[name]; wasFound && existingInTable == original {
-				(*symbolTable)[name] = td
-			}
-		}
-	}
-
+func (rewriter *RewriterWithContext[T]) DefaultRewrite(node Node, context T) Node {
+	rewritten := defaultRewriteImpl(rewriter, node, context)
+	updateSymbolTable(node, rewritten, rewriter)
+	return rewritten
 }
 
-func (rewriter RewriterWithContext[T]) DefaultRewrite(node Node, context T) Node {
+func defaultRewriteImpl[T any](rewriter *RewriterWithContext[T], node Node, context T) Node {
 	switch t := node.(type) {
 	case *Environment:
 		rewrittenNamespaces := rewriteSlice(t.Namespaces, context, rewriter)
@@ -220,12 +240,12 @@ func (rewriter RewriterWithContext[T]) DefaultRewrite(node Node, context T) Node
 	case *SimpleType:
 		rewrittenTypeArguments := rewriteInterfaceSlice(t.TypeArguments, context, rewriter)
 		if rewrittenTypeArguments == nil {
-			return t
+			return updateTypeRefence(rewriter, t)
 		}
 
 		rewrittenSimpleType := *t
 		rewrittenSimpleType.TypeArguments = rewrittenTypeArguments
-		return &rewrittenSimpleType
+		return updateTypeRefence(rewriter, &rewrittenSimpleType)
 	case *GeneralizedType:
 		rewrittenTypeCases := rewriteInterfaceSlice(t.Cases, context, rewriter)
 
@@ -388,6 +408,57 @@ func (rewriter RewriterWithContext[T]) DefaultRewrite(node Node, context T) Node
 	}
 }
 
+func updateTypeRefence[T any](rewriter *RewriterWithContext[T], t *SimpleType) *SimpleType {
+	if rewriter.updatedSymbols == nil {
+		return t
+	}
+	updatedDefinition := rewriter.updatedSymbols[t.Name]
+	if updatedDefinition == nil {
+		return t
+	}
+
+	newType := *t
+	if len(t.TypeArguments) > 0 {
+		genericType, err := MakeGenericType(updatedDefinition, t.TypeArguments, false)
+		if err != nil {
+			panic(fmt.Sprintf("failed to make generic rewritten type: %s", err))
+		}
+		newType.ResolvedDefinition = genericType
+	} else {
+		newType.ResolvedDefinition = updatedDefinition
+	}
+
+	return &newType
+}
+
+func updateSymbolTable[T any](original, rewritten Node, rewriterWithContext *RewriterWithContext[T]) {
+	if rewriterWithContext.symbolTable == nil {
+		return
+	}
+
+	if rewritten != original {
+		if td, ok := rewritten.(TypeDefinition); ok {
+			meta := td.GetDefinitionMeta()
+			if len(meta.TypeArguments) > 0 {
+				// This is a generic type with arguments (not a generic type definition),
+				// so it does not belong in the symbol table
+				return
+			}
+			name := meta.GetQualifiedName()
+			if _, wasFound := (*rewriterWithContext.symbolTable)[name]; wasFound {
+				if len(rewriterWithContext.updatedSymbols) == 0 {
+					rewriterWithContext.updatedSymbols = make(map[string]TypeDefinition)
+					newSymbolTable := rewriterWithContext.symbolTable.Clone()
+					rewriterWithContext.symbolTable = &newSymbolTable
+				}
+
+				(*rewriterWithContext.symbolTable)[name] = td
+				rewriterWithContext.updatedSymbols[name] = td
+			}
+		}
+	}
+}
+
 // Rewrites a slice of pointers to types that implement the Node interface, e.g, []*Field
 // Returns nil if no changes were made and the original slice should be used.
 func rewriteSlice[TContext any, TElement any, T interface {
@@ -395,7 +466,7 @@ func rewriteSlice[TContext any, TElement any, T interface {
 	Node
 }, TSlice interface {
 	~[]T
-}](slice TSlice, context TContext, rewriter RewriterWithContext[TContext]) TSlice {
+}](slice TSlice, context TContext, rewriter *RewriterWithContext[TContext]) TSlice {
 	var rewrittenSlice []T
 	for i, element := range slice {
 		visited := rewriter.Rewrite(T(element), context)
@@ -413,7 +484,7 @@ func rewriteSlice[TContext any, TElement any, T interface {
 
 // Rewrites a slice of an interface that implements the Node interface, e.g, []Expression
 // Returns nil if no changes were made and the original slice should be used.
-func rewriteInterfaceSlice[TContext any, T Node](slice []T, context TContext, rewriter RewriterWithContext[TContext]) []T {
+func rewriteInterfaceSlice[TContext any, T Node](slice []T, context TContext, rewriter *RewriterWithContext[TContext]) []T {
 	var rewrittenSlice []T
 	for i, element := range slice {
 		visited := rewriter.Rewrite(T(element), context)

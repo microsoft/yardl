@@ -55,7 +55,8 @@ TEST_P(RoundTripTests, Scalars) {
   rec.complexfloat64_field = {-2.4, 999.3};
   rec.date_field = Date(year{2022} / 9 / 8);
   rec.time_field = std::chrono::hours(10) + std::chrono::minutes(50) +
-                   std::chrono::seconds(25) + std::chrono::milliseconds(777);
+                   std::chrono::seconds(25) + std::chrono::milliseconds(777) +
+                   std::chrono::microseconds(888) + std::chrono::nanoseconds(999);
   rec.datetime_field = std::chrono::system_clock::now();
   tw->WriteRecord(rec);
 
@@ -193,8 +194,9 @@ TEST_P(RoundTripTests, FixedArrays) {
   tw->WriteInts({{1, 2, 3}, {4, 5, 6}});
 
   tw->WriteFixedSimpleRecordArray({
-      {SimpleRecord{1, 2, 3}, SimpleRecord{4, 5, 6}, SimpleRecord{7, 8, 9}},
-      {SimpleRecord{11, 12, 13}, SimpleRecord{14, 15, 16}, SimpleRecord{17, 18, 19}},
+      {SimpleRecord{1, 2, 3}, SimpleRecord{4, 5, 6}},
+      {SimpleRecord{11, 12, 13}, SimpleRecord{14, 15, 16}},
+      {SimpleRecord{21, 22, 23}, SimpleRecord{24, 25, 26}},
   });
 
   tw->WriteFixedRecordWithVlensArray({
@@ -211,17 +213,18 @@ TEST_P(RoundTripTests, FixedArrays) {
   RecordWithFixedArrays rec{
       {{1, 2, 3}, {4, 5, 6}},
       {
-          {SimpleRecord{1, 2, 3}, SimpleRecord{4, 5, 6}, SimpleRecord{7, 8, 9}},
-          {SimpleRecord{11, 12, 13}, SimpleRecord{14, 15, 16}, SimpleRecord{17, 18, 19}},
+          {SimpleRecord{1, 2, 3}, SimpleRecord{4, 5, 6}},
+          {SimpleRecord{11, 12, 13}, SimpleRecord{14, 15, 16}},
+          {SimpleRecord{21, 22, 23}, SimpleRecord{24, 25, 26}},
       },
       {
           {
-              RecordWithVlens{{{SimpleRecord{1, 2, 3}, SimpleRecord{7, 8, 9}}}, 13, 14},
-              RecordWithVlens{{{SimpleRecord{1, 2, 3}, SimpleRecord{7, 8, 9}}}, 13, 14},
+              RecordWithVlens{{SimpleRecord{1, 2, 3}, SimpleRecord{4, 5, 6}}, 13, 14},
+              RecordWithVlens{{}, 13, 14},
           },
           {
-              RecordWithVlens{{{SimpleRecord{1, 2, 3}, SimpleRecord{7, 8, 9}}}, 13, 14},
-              RecordWithVlens{{{SimpleRecord{1, 2, 3}, SimpleRecord{7, 8, 9}}}, 13, 14},
+              RecordWithVlens{{SimpleRecord{1, 2, 3}, SimpleRecord{4, 5, 6}}, 13, 14},
+              RecordWithVlens{{SimpleRecord{-1, -2, -3}}, 13, 14},
           },
       }};
 
@@ -282,7 +285,7 @@ TEST_P(RoundTripTests, NDArrays) {
   tw->Close();
 }
 
-// We optimize storage for NDArrays with a single dimension.
+// We optimize HDF5 storage for NDArrays with a single dimension.
 TEST_P(RoundTripTests, NDArraysSingleDimension) {
   auto tw = CreateValidatingWriter<NDArraysSingleDimensionWriterBase>();
 
@@ -364,6 +367,7 @@ TEST_P(RoundTripTests, Maps) {
   auto tw = CreateValidatingWriter<MapsWriterBase>();
 
   tw->WriteStringToInt({{"a", 1}, {"b", 2}, {"c", 3}});
+  tw->WriteIntToString({{1, "a"}, {2, "b"}, {3, "c"}});
   tw->WriteStringToUnion({{"a", 1}, {"b", "2"}});
   tw->WriteAliasedGeneric({{"a", 1}, {"b", 2}, {"c", 3}});
 
@@ -486,7 +490,7 @@ TEST_P(RoundTripTests, StreamsOfUnions) {
   tw->Close();
 }
 
-TEST_P(RoundTripTests, Simple) {
+TEST_P(RoundTripTests, SimpleGenerics) {
   auto tw = CreateValidatingWriter<SimpleGenericsWriterBase>();
 
   tw->WriteFloatImage({{3.0, 4.0, 5.0}, {6.0, 7.0, 8.0}});
@@ -507,15 +511,15 @@ TEST_P(RoundTripTests, Simple) {
   tw->Close();
 }
 
-TEST_P(RoundTripTests, Advanced) {
+TEST_P(RoundTripTests, AdvancedGenerics) {
   auto tw = CreateValidatingWriter<AdvancedGenericsWriterBase>();
 
-  Image<int> i1 = {{3, 4, 5}, {6, 7, 8}};
-  Image<int> i2 = {{30, 40, 50}, {60, 70, 80}};
-  Image<int> i3 = {{300, 400, 500}, {600, 700, 800}};
-  Image<int> i4 = {{3000, 4000, 5000}, {6000, 7000, 8000}};
+  Image<float> f1 = {{3, 4, 5}, {6, 7, 8}};
+  Image<float> f2 = {{30, 40, 50}, {60, 70, 80}};
+  Image<float> f3 = {{300, 400, 500}, {600, 700, 800}};
+  Image<float> f4 = {{3000, 4000, 5000}, {6000, 7000, 8000}};
 
-  tw->WriteIntImageImage({{i1, i2}, {i3, i4}});
+  tw->WriteFloatImageImage({{f1, f2}, {f3, f4}});
 
   GenericRecord<int, std::string> r1{
       7,

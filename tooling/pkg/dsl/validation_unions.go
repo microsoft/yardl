@@ -5,43 +5,19 @@ package dsl
 
 import (
 	"fmt"
-	"strconv"
+	"sort"
 	"strings"
 
 	"github.com/microsoft/yardl/tooling/internal/validation"
 )
 
-func assignUnionCaseLabels(env *Environment, errorSink *validation.ErrorSink) *Environment {
+func assignUnionCaseTags(env *Environment, errorSink *validation.ErrorSink) *Environment {
 	Visit(env, func(self Visitor, node Node) {
-		if t, ok := node.(*GeneralizedType); ok && t.Cases.IsUnion() {
-			// assign labels to union cases
+		if t, ok := node.(*GeneralizedType); ok && (t.Cases.IsUnion() || (len(t.Cases) > 0 && t.Cases[0].Tag != "")) {
+			// assign tags to union cases
 			for _, typeCase := range t.Cases {
-				if !typeCase.IsNullType() {
-					typeCase.Label = typeLabel(typeCase.Type, true)
-				}
-			}
-
-			duplicates := make(map[string][]int)
-			for i, typeCase := range t.Cases {
-				if !typeCase.IsNullType() {
-					duplicates[typeCase.Label] = append(duplicates[typeCase.Label], i)
-				}
-			}
-
-			for _, v := range duplicates {
-				if len(v) > 1 {
-					for _, i := range v {
-						t.Cases[i].Label = typeLabel(t.Cases[i].Type, false)
-					}
-				}
-			}
-
-			labels := make(map[string]any)
-			for _, item := range t.Cases {
-				if item != nil {
-					if _, found := labels[item.Label]; found {
-						errorSink.Add(validationError(node, "internal error: union cases must have distinct labels within the union"))
-					}
+				if typeCase.Tag == "" {
+					typeCase.Tag = TypeToShortSyntax(typeCase.Type, false)
 				}
 			}
 		}
@@ -52,18 +28,40 @@ func assignUnionCaseLabels(env *Environment, errorSink *validation.ErrorSink) *E
 	return env
 }
 
+func containsOpenGeneric(node Node) bool {
+	res := false
+	Visit(node, func(self Visitor, node Node) {
+		switch t := node.(type) {
+		case *GenericTypeParameter:
+			res = true
+			return
+		case *SimpleType:
+			if _, ok := t.ResolvedDefinition.(*GenericTypeParameter); ok {
+				res = true
+				return
+			}
+		}
+		self.VisitChildren(node)
+	})
+
+	return res
+}
+
 func validateUnionCases(env *Environment, errorSink *validation.ErrorSink) *Environment {
 	if len(errorSink.Errors) > 0 {
 		// Only perform this if all types are resolved
 		return env
 	}
 
+	tagTypeMap := make(map[string]Type)
+
 	VisitWithContext(env, false, func(self VisitorWithContext[bool], node Node, visitingReference bool) {
 		switch t := node.(type) {
 		case *GeneralizedType:
+			errorCountSnapshot := len(errorSink.Errors)
 			cases := t.Cases
 			if len(cases) == 0 {
-				errorSink.Add(validationError(node, "a field cannot be a union type with no options"))
+				errorSink.Add(validationError(node, "a union type must have at least one option"))
 			}
 
 			if len(cases) == 1 && cases[0].IsNullType() {
@@ -137,11 +135,70 @@ func validateUnionCases(env *Environment, errorSink *validation.ErrorSink) *Envi
 							}
 							// No contributions from type arguments.
 							// To avoid reporting the same error multiple times, we only report the error
-							// if we we visiting the type directly, i.e. not through a reference.
+							// if we are visiting the type directly, i.e. not through a reference.
 							if !visitingReference {
 								errorSink.Add(validationError(item, "redundant union type cases%s", additionalExplanation))
 							}
 						}
+					}
+				}
+			}
+
+			// validate tags
+			if (t.Cases.IsUnion() || len(t.Cases) > 0 && t.Cases[0].ExplicitTag) &&
+				len(errorSink.Errors) == errorCountSnapshot && !visitingReference {
+				for _, typeCase := range t.Cases {
+					if typeCase.ExplicitTag {
+						if !memberNameRegex.MatchString(typeCase.Tag) {
+							errorSink.Add(validationError(typeCase, "union tag '%s' must be camelCased matching the format %s", typeCase.Tag, memberNameRegex.String()))
+						}
+					} else if !memberNameRegex.MatchString(strings.ToLower(typeCase.Tag)) {
+						explicitExample := fmt.Sprintf("!union { myTag: \"%s\", ... }", typeCase.Tag)
+						if containsOpenGeneric(t) {
+							errorSink.Add(
+								validationError(
+									typeCase, "the type '%s' cannot be used as a tag for the union case. An explicit tag can be given using the `!union` syntax (e.g. `%s`)",
+									typeCase.Tag, explicitExample))
+						} else {
+							aliasExample := fmt.Sprintf("MyTypeAlias = %s\nMyUnion = [..., MyTypeAlias, ...]", typeCase.Tag)
+							errorSink.Add(
+								validationError(
+									typeCase, "the type '%s' cannot be used as a tag for the union case. Explicit tags can be given using the `!union` syntax (e.g. `%s`) or the type can be aliased for the type case (e.g. `%s`)",
+									typeCase.Tag, explicitExample, aliasExample))
+						}
+					}
+				}
+
+				tags := make(map[string]any)
+				areCustomTags := false
+				for _, item := range t.Cases {
+					if item != nil {
+						areCustomTags = areCustomTags || item.ExplicitTag
+						if _, found := tags[item.Tag]; found {
+							errorSink.Add(validationError(node, "all union cases must have distinct tags"))
+						} else {
+							tags[item.Tag] = nil
+						}
+					}
+				}
+
+				if areCustomTags {
+					keys := make([]string, 0, len(tags))
+					for k := range tags {
+						keys = append(keys, k)
+					}
+					sort.Slice(keys, func(i, j int) bool {
+						return keys[i] < keys[j]
+					})
+					tagsString := strings.Join(keys, ", ")
+
+					if existing, found := tagTypeMap[tagsString]; found {
+						if !TypesEqual(existing, t.ToScalar()) {
+							existingNodeMeta := existing.GetNodeMeta()
+							errorSink.Add(validationError(node, "the combination of tags used by the union are already in use with different types in file '%s' line '%d'", existingNodeMeta.File, existingNodeMeta.Line))
+						}
+					} else {
+						tagTypeMap[tagsString] = t.ToScalar()
 					}
 				}
 			}
@@ -159,75 +216,4 @@ func validateUnionCases(env *Environment, errorSink *validation.ErrorSink) *Envi
 	})
 
 	return env
-}
-
-func typeLabel(t Type, simple bool) string {
-	switch t := t.(type) {
-	case nil:
-		return "null"
-	case *SimpleType:
-		baseName := func() string {
-			if simple && t.ResolvedDefinition != nil {
-				return t.ResolvedDefinition.GetDefinitionMeta().Name
-			}
-			return t.Name
-		}()
-
-		if len(t.TypeArguments) == 0 {
-			return baseName
-		}
-		typeArguments := make([]string, len(t.TypeArguments))
-		for i, typeArg := range t.TypeArguments {
-			typeArguments[i] = typeLabel(typeArg, simple)
-		}
-
-		return fmt.Sprintf("%s<%s>", baseName, strings.Join(typeArguments, ","))
-
-	case *GeneralizedType:
-		casesLabel := func() string {
-			if len(t.Cases) == 1 {
-				return typeLabel(t.Cases[0].Type, simple)
-			}
-
-			caseLabels := make([]string, len(t.Cases))
-			for i, typeCase := range t.Cases {
-				caseLabels[i] = typeLabel(typeCase.Type, simple)
-			}
-
-			return fmt.Sprintf("{%s}", strings.Join(caseLabels, ","))
-		}()
-
-		switch d := t.Dimensionality.(type) {
-		case nil:
-			return casesLabel
-		case *Vector:
-			simpleLabel := casesLabel + "Vector"
-			if simple || d.Length == nil {
-				return simpleLabel
-			}
-
-			return fmt.Sprintf("%s[%d]", simpleLabel, *d.Length)
-		case *Array:
-			simpleLabel := casesLabel + "Array"
-			if simple || !d.HasKnownNumberOfDimensions() {
-				return simpleLabel
-			}
-
-			if d.IsFixed() {
-				dims := make([]string, len(*d.Dimensions))
-				for i, dim := range *d.Dimensions {
-					dims[i] = strconv.FormatUint(*dim.Length, 10)
-				}
-
-				return fmt.Sprintf("%s[%s]", simpleLabel, strings.Join(dims, ","))
-			}
-
-			return fmt.Sprintf("%s[%s]", simpleLabel, strings.Repeat(",", len(*d.Dimensions)))
-
-		default:
-			panic(fmt.Sprintf("unexpected type %T", d))
-		}
-	default:
-		panic(fmt.Sprintf("unexpected type %T", t))
-	}
 }

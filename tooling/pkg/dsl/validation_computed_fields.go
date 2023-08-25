@@ -26,7 +26,7 @@ func resolveComputedFields(env *Environment, errorSink *validation.ErrorSink) *E
 		return env
 	}
 
-	return RewriteWithContext(env, &ComputedFieldScope{}, func(node Node, context *ComputedFieldScope, self RewriterWithContext[*ComputedFieldScope]) Node {
+	return RewriteWithContext(env, &ComputedFieldScope{}, func(node Node, context *ComputedFieldScope, self *RewriterWithContext[*ComputedFieldScope]) Node {
 		switch t := node.(type) {
 		case *RecordDefinition:
 			if len(t.ComputedFields) == 0 {
@@ -114,6 +114,7 @@ func resolveComputedFields(env *Environment, errorSink *validation.ErrorSink) *E
 			return &clone
 		case *MemberAccessExpression:
 			t = self.DefaultRewrite(t, context).(*MemberAccessExpression)
+			t = shallowClone(t)
 			target := context.Record
 			if t.Target != nil {
 				target = nil
@@ -138,6 +139,7 @@ func resolveComputedFields(env *Environment, errorSink *validation.ErrorSink) *E
 				for _, variable := range context.Variables {
 					if variable.Identifier == t.Member {
 						t.ResolvedType = variable.Type
+						t.Kind = MemberAccessVariable
 						return t
 					}
 				}
@@ -146,6 +148,7 @@ func resolveComputedFields(env *Environment, errorSink *validation.ErrorSink) *E
 			for _, f := range target.Fields {
 				if f.Name == t.Member {
 					t.ResolvedType = f.Type
+					t.Kind = MemberAccessField
 					return t
 				}
 			}
@@ -161,7 +164,7 @@ func resolveComputedFields(env *Environment, errorSink *validation.ErrorSink) *E
 					}
 					rewrittenField := self.Rewrite(f, innerContext).(*ComputedField)
 					t.ResolvedType = rewrittenField.Expression.GetResolvedType()
-					t.IsComputedField = true
+					t.Kind = MemberAccessComputedField
 					return t
 				}
 			}
@@ -170,9 +173,11 @@ func resolveComputedFields(env *Environment, errorSink *validation.ErrorSink) *E
 			return t
 		case *IndexExpression:
 			t = self.DefaultRewrite(t, context).(*IndexExpression)
+			t = shallowClone(t)
 			if t.Target.GetResolvedType() == nil {
 				return t
 			}
+			t = shallowClone(t)
 			targetType := ToGeneralizedType(GetUnderlyingType(t.Target.GetResolvedType()))
 			t.ResolvedType = targetType.ToScalar()
 			argumentsValidated := false
@@ -317,7 +322,6 @@ func resolveComputedFields(env *Environment, errorSink *validation.ErrorSink) *E
 			}
 		case *SwitchExpression:
 			rewrittenTarget := self.Rewrite(t.Target, context).(Expression)
-
 			resolvedTargetType := ToGeneralizedType(GetUnderlyingType(rewrittenTarget.GetResolvedType()))
 			if resolvedTargetType == nil {
 				return t
@@ -437,7 +441,12 @@ func insertConversion(expression Expression, targetType Type) Expression {
 	}
 }
 
-func resolveSwitchCase(switchCase *SwitchCase, typeCases TypeCases, self RewriterWithContext[*ComputedFieldScope], context *ComputedFieldScope, errorSink *validation.ErrorSink) *SwitchCase {
+func shallowClone[T any](in *T) *T {
+	cloned := *in
+	return &cloned
+}
+
+func resolveSwitchCase(switchCase *SwitchCase, typeCases TypeCases, self *RewriterWithContext[*ComputedFieldScope], context *ComputedFieldScope, errorSink *validation.ErrorSink) *SwitchCase {
 	validateType := func(typePattern *TypePattern) bool {
 		isValid := false
 		for _, typeCase := range typeCases {
@@ -485,8 +494,9 @@ func resolveSwitchCase(switchCase *SwitchCase, typeCases TypeCases, self Rewrite
 	}
 }
 
-func resolveDimensionCountFunctionCall(functionCall *FunctionCallExpression, visitor RewriterWithContext[*ComputedFieldScope], context *ComputedFieldScope, errorSink *validation.ErrorSink) Expression {
+func resolveDimensionCountFunctionCall(functionCall *FunctionCallExpression, visitor *RewriterWithContext[*ComputedFieldScope], context *ComputedFieldScope, errorSink *validation.ErrorSink) Expression {
 	functionCall = visitor.DefaultRewrite(functionCall, context).(*FunctionCallExpression)
+	functionCall = shallowClone(functionCall)
 	functionCall.ResolvedType = SizeType
 
 	if len(functionCall.Arguments) != 1 {
@@ -518,8 +528,9 @@ func resolveDimensionCountFunctionCall(functionCall *FunctionCallExpression, vis
 	return functionCall
 }
 
-func resolveDimensionIndexFunctionCall(functionCall *FunctionCallExpression, visitor RewriterWithContext[*ComputedFieldScope], context *ComputedFieldScope, errorSink *validation.ErrorSink) Expression {
+func resolveDimensionIndexFunctionCall(functionCall *FunctionCallExpression, visitor *RewriterWithContext[*ComputedFieldScope], context *ComputedFieldScope, errorSink *validation.ErrorSink) Expression {
 	functionCall = visitor.DefaultRewrite(functionCall, context).(*FunctionCallExpression)
+	functionCall = shallowClone(functionCall)
 	functionCall.ResolvedType = SizeType
 
 	if len(functionCall.Arguments) != 2 {
@@ -582,8 +593,9 @@ func resolveDimensionIndexFunctionCall(functionCall *FunctionCallExpression, vis
 	return functionCall
 }
 
-func resolveSizeFunctionCall(functionCall *FunctionCallExpression, visitor RewriterWithContext[*ComputedFieldScope], context *ComputedFieldScope, errorSink *validation.ErrorSink) Expression {
+func resolveSizeFunctionCall(functionCall *FunctionCallExpression, visitor *RewriterWithContext[*ComputedFieldScope], context *ComputedFieldScope, errorSink *validation.ErrorSink) Expression {
 	functionCall = visitor.DefaultRewrite(functionCall, context).(*FunctionCallExpression)
+	functionCall = shallowClone(functionCall)
 	functionCall.ResolvedType = SizeType
 
 	if len(functionCall.Arguments) == 0 || len(functionCall.Arguments) > 2 {
@@ -710,4 +722,48 @@ func resolveSizeFunctionCall(functionCall *FunctionCallExpression, visitor Rewri
 	}
 
 	return functionCall
+}
+
+func removeUnusedDeclarationPatterns(env *Environment, errorSink *validation.ErrorSink) *Environment {
+	if len(errorSink.Errors) > 0 {
+		// computed fields rely on type inference. Don't attempt
+		// if there already are errors in the model.
+		return env
+	}
+
+	return Rewrite(env, func(self *Rewriter, node Node) Node {
+		switch t := node.(type) {
+		case *RecordDefinition:
+			if len(t.ComputedFields) == 0 {
+				return t
+			}
+		case TypeDefinition:
+			return t
+
+		case *SwitchCase:
+			if decl, ok := t.Pattern.(*DeclarationPattern); ok {
+				used := false
+				Visit(t.Expression, func(self Visitor, node Node) {
+					switch e := node.(type) {
+					case *MemberAccessExpression:
+						if e.Kind == MemberAccessVariable && e.Member == decl.Identifier {
+							used = true
+							return
+						}
+					}
+
+					self.VisitChildren(node)
+				})
+
+				if !used {
+					newCase := *t
+					newCase.Pattern = &decl.TypePattern
+					return self.DefaultRewrite(&newCase)
+				}
+
+			}
+		}
+
+		return self.DefaultRewrite(node)
+	}).(*Environment)
 }

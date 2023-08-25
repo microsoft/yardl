@@ -11,6 +11,8 @@
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
 
+**/__pycache__/
+
 # a filtered environment file generated during CI runs
 ci-environment.yml
 
@@ -20,3 +22,5 @@ dist/
 
 cpp/build/
 cpp/sandbox/generated/
+
+**/*.bin

@@ -16,9 +16,10 @@ type Node interface {
 }
 
 type NodeMeta struct {
-	File   string `json:"-"`
-	Line   int    `json:"-"`
-	Column int    `json:"-"`
+	File        string         `json:"-"`
+	Line        int            `json:"-"`
+	Column      int            `json:"-"`
+	Annotations map[string]any `json:"-"`
 }
 
 func (n *NodeMeta) String() string {
@@ -377,8 +378,9 @@ func (tcs *TypeCases) HasNullOption() bool {
 
 type TypeCase struct {
 	NodeMeta
-	Label string `json:"label,omitempty"`
-	Type  Type   `json:"type"`
+	Tag         string `json:"tag,omitempty"`
+	ExplicitTag bool   `json:"explicitTag,omitempty"`
+	Type        Type   `json:"type"`
 }
 
 func (tc *TypeCase) IsNullType() bool {
@@ -489,12 +491,21 @@ func (e *StringLiteralExpression) IsReference() bool {
 	return false
 }
 
+type MemberAccessKind int
+
+const (
+	MemberAccessUnknown MemberAccessKind = iota
+	MemberAccessField
+	MemberAccessComputedField
+	MemberAccessVariable
+)
+
 type MemberAccessExpression struct {
 	NodeMeta
-	Target          Expression `json:"target,omitempty"`
-	Member          string     `json:"member,omitempty"`
-	IsComputedField bool       `json:"isComputed,omitempty"`
-	ResolvedType    Type       `json:"-"`
+	Target       Expression       `json:"target,omitempty"`
+	Member       string           `json:"member,omitempty"`
+	Kind         MemberAccessKind `json:"kind"`
+	ResolvedType Type             `json:"-"`
 }
 
 func (e *MemberAccessExpression) _expression() {}

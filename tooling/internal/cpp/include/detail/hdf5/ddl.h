@@ -173,8 +173,8 @@ H5::CompType DynamicNDArrayDdl(H5::DataType const& element_type) {
   return compType;
 }
 
-template <typename... Labels>
-H5::EnumType UnionTypeEnumDdl(bool nullable, Labels const&... labels) {
+template <typename... Tags>
+H5::EnumType UnionTypeEnumDdl(bool nullable, Tags const&... labels) {
   H5::EnumType type_enum(H5::PredType::NATIVE_INT8);
   int8_t type_value = -1;
   if (nullable) {

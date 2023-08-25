@@ -17,11 +17,22 @@
         "files.trimFinalNewlines": true,
         "files.trimTrailingWhitespace": true,
         "files.insertFinalNewline": true,
+
+        "files.readonlyInclude": {
+          "**/generated/**": true,
+          "python/sandbox/**": true
+        },
+
         "go.toolsManagement.checkForUpdates": "local",
         "go.useLanguageServer": true,
         "gopls": { "ui.semanticTokens": true },
 
         "[cpp]": {
+          "editor.formatOnSave": true
+        },
+
+        "[python]": {
+          "editor.defaultFormatter": "ms-python.black-formatter",
           "editor.formatOnSave": true
         },
 
@@ -39,11 +50,24 @@
         "cmake.buildDirectory": "${workspaceFolder}/cpp/build",
 
         // Python linting.
-        "python.analysis.typeCheckingMode": "basic",
-        "python.linting.ignorePatterns": ["**/conftest.py", "**/test_*.py"],
+        "python.analysis.typeCheckingMode": "strict",
+        "python.analysis.diagnosticMode": "workspace",
+        "python.analysis.diagnosticSeverityOverrides": {
+          "reportUnknownArgumentType": "none",
+          "reportUnknownLambdaType": "none",
+          "reportUnknownMemberType": "none",
+          "reportUnknownParameterType": "none",
+          "reportUnknownVariableType": "none",
+          "reportUnnecessaryIsInstance": "none",
+          "reportUnusedImport": "none"
+        },
+
         "python.defaultInterpreterPath": "/opt/conda/envs/yardl/bin/python",
-        "python.formatting.autopep8Path": "/opt/conda/envs/yardl/bin/autopep8",
         "python.terminal.activateEnvironment": false, // Disable the extension calling activate when the integrated terminal launches. We take care of this in ~/.bashrc.
+
+        "python.testing.pytestArgs": ["python"],
+        "python.testing.unittestEnabled": false,
+        "python.testing.pytestEnabled": true,
 
         "testMate.cpp.test.executables": "cpp/{build,Build,BUILD,out,Out,OUT}/**/*{test,Test,TEST}*",
 
@@ -82,7 +106,9 @@
         "jinliming2.vscode-go-template",
         "matepek.vscode-catch2-test-adapter",
         "mhutchie.git-graph",
+        "ms-python.black-formatter",
         "ms-python.python",
+        "ms-toolsai.jupyter",
         "ms-vscode.cmake-tools",
         "ms-vscode.cpptools",
         "sclu1034.justfile",
@@ -100,5 +126,9 @@
   // "postCreateCommand": "go version",
 
   // Comment out to connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
-  "remoteUser": "vscode"
+  "remoteUser": "vscode",
+
+  "containerEnv": {
+    "PYTHONPATH": "/workspaces/yardl/python"
+  }
 }

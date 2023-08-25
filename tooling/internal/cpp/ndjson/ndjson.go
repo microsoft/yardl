@@ -10,39 +10,29 @@ import (
 	"github.com/microsoft/yardl/tooling/internal/cpp/common"
 	"github.com/microsoft/yardl/tooling/internal/formatting"
 	"github.com/microsoft/yardl/tooling/internal/iocommon"
+	"github.com/microsoft/yardl/tooling/internal/ndjsoncommon"
 	"github.com/microsoft/yardl/tooling/pkg/dsl"
 	"github.com/microsoft/yardl/tooling/pkg/packaging"
 )
 
-type jsonDataType int
-
-const (
-	jsonNull jsonDataType = 1 << iota
-	jsonBoolean
-	jsonNumber
-	jsonString
-	jsonArray
-	jsonObject
-)
-
-func (t jsonDataType) typeCheck(varName string) string {
+func getTypeCheck(t ndjsoncommon.JsonDataType, varName string) string {
 	options := make([]string, 0, 1)
-	if t&jsonNull != 0 {
+	if t&ndjsoncommon.JsonNull != 0 {
 		options = append(options, fmt.Sprintf("%s.is_null()", varName))
 	}
-	if t&jsonBoolean != 0 {
+	if t&ndjsoncommon.JsonBoolean != 0 {
 		options = append(options, fmt.Sprintf("%s.is_boolean()", varName))
 	}
-	if t&jsonNumber != 0 {
+	if t&ndjsoncommon.JsonNumber != 0 {
 		options = append(options, fmt.Sprintf("%s.is_number()", varName))
 	}
-	if t&jsonString != 0 {
+	if t&ndjsoncommon.JsonString != 0 {
 		options = append(options, fmt.Sprintf("%s.is_string()", varName))
 	}
-	if t&jsonArray != 0 {
+	if t&ndjsoncommon.JsonArray != 0 {
 		options = append(options, fmt.Sprintf("%s.is_array()", varName))
 	}
-	if t&jsonObject != 0 {
+	if t&ndjsoncommon.JsonObject != 0 {
 		options = append(options, fmt.Sprintf("%s.is_object()", varName))
 	}
 	return fmt.Sprintf("(%s)", strings.Join(options, " || "))
@@ -437,9 +427,9 @@ func writeFlagsConverters(w *formatting.IndentedWriter, t *dsl.EnumDefinition) {
 
 func writeUnionConverters(w *formatting.IndentedWriter, unionType *dsl.GeneralizedType) {
 	simplfied := true
-	var possibleTypes jsonDataType
+	var possibleTypes ndjsoncommon.JsonDataType
 	for _, c := range unionType.Cases {
-		thisType := getJsonDataType(c.Type)
+		thisType := ndjsoncommon.GetJsonDataType(c.Type)
 		if thisType&possibleTypes != 0 {
 			simplfied = false
 		}
@@ -462,7 +452,7 @@ func writeUnionConverters(w *formatting.IndentedWriter, unionType *dsl.Generaliz
 					for i, c := range unionType.Cases {
 						fmt.Fprintf(w, "case %d:\n", i)
 						w.Indented(func() {
-							fmt.Fprintf(w, "j = ordered_json{ {\"%s\", std::get<%s>(value)} };\n", c.Label, common.TypeSyntax(c.Type))
+							fmt.Fprintf(w, "j = ordered_json{ {\"%s\", std::get<%s>(value)} };\n", c.Tag, common.TypeSyntax(c.Type))
 							w.WriteStringln("break;")
 						})
 					}
@@ -481,8 +471,8 @@ func writeUnionConverters(w *formatting.IndentedWriter, unionType *dsl.Generaliz
 		w.Indented(func() {
 			if simplfied {
 				for _, c := range unionType.Cases {
-					dt := getJsonDataType(c.Type)
-					fmt.Fprintf(w, "if (%s) {\n", dt.typeCheck("j"))
+					dt := ndjsoncommon.GetJsonDataType(c.Type)
+					fmt.Fprintf(w, "if (%s) {\n", getTypeCheck(dt, "j"))
 					w.Indented(func() {
 						fmt.Fprintf(w, "value = j.get<%s>();\n", common.TypeSyntax(c.Type))
 						w.WriteStringln("return;")
@@ -493,9 +483,9 @@ func writeUnionConverters(w *formatting.IndentedWriter, unionType *dsl.Generaliz
 				w.WriteStringln("throw std::runtime_error(\"Invalid union value\");")
 			} else {
 				w.WriteStringln("auto it = j.begin();")
-				w.WriteStringln("std::string label = it.key();")
+				w.WriteStringln("std::string tag = it.key();")
 				for _, v := range unionType.Cases {
-					fmt.Fprintf(w, "if (label == \"%s\") {\n", v.Label)
+					fmt.Fprintf(w, "if (tag == \"%s\") {\n", v.Tag)
 					w.Indented(func() {
 						fmt.Fprintf(w, "value = it.value().get<%s>();\n", common.TypeSyntax(v.Type))
 						w.WriteStringln("return;")
@@ -508,63 +498,6 @@ func writeUnionConverters(w *formatting.IndentedWriter, unionType *dsl.Generaliz
 	})
 	w.WriteStringln("};\n")
 
-}
-
-func getJsonDataType(t dsl.Type) jsonDataType {
-	if t == nil {
-		return jsonNull
-	}
-	gt := dsl.ToGeneralizedType(t)
-	switch d := gt.Dimensionality.(type) {
-	case *dsl.Vector:
-		return jsonArray
-	case *dsl.Array:
-		if d.IsFixed() {
-			return jsonArray
-		}
-		return jsonObject
-	case *dsl.Map:
-		if p, ok := dsl.GetPrimitiveType(d.KeyType); ok && p == dsl.String {
-			return jsonObject
-		}
-		return jsonArray
-	}
-
-	if len(gt.Cases) > 1 {
-		panic("unexpected union type")
-	}
-
-	scalarType := gt.Cases[0].Type.(*dsl.SimpleType)
-	switch td := scalarType.ResolvedDefinition.(type) {
-	case dsl.PrimitiveDefinition:
-		switch td {
-		case dsl.String:
-			return jsonString
-		case dsl.Int8, dsl.Int16, dsl.Int32, dsl.Int64, dsl.Uint8, dsl.Uint16, dsl.Uint32, dsl.Uint64, dsl.Size, dsl.Float32, dsl.Float64:
-			return jsonNumber
-		case dsl.Bool:
-			return jsonBoolean
-		case dsl.ComplexFloat32, dsl.ComplexFloat64:
-			return jsonArray
-		case dsl.Date, dsl.Time, dsl.DateTime:
-			return jsonNumber
-		default:
-			panic(fmt.Sprintf("unexpected primitive type %s", td))
-		}
-	case *dsl.EnumDefinition:
-		if td.IsFlags {
-			return jsonArray
-		}
-		return jsonString | jsonNumber
-	case *dsl.RecordDefinition:
-		return jsonObject
-	case *dsl.GenericTypeParameter:
-		return jsonObject
-	case *dsl.NamedType:
-		return getJsonDataType(td.Type)
-	default:
-		panic(fmt.Sprintf("unexpected type %T", td))
-	}
 }
 
 func writeProtocolMethods(w *formatting.IndentedWriter, p *dsl.ProtocolDefinition) {

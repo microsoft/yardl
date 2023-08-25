@@ -35,3 +35,12 @@ target_link_libraries(benchmark
 add_subdirectory(generated)
 
 gtest_discover_tests(tests)
+
+add_executable(translator
+  translator.cc
+)
+
+target_link_libraries(translator
+  fmt
+  test_model_generated
+)

@@ -47,6 +47,10 @@ RecordWithVectors: !record
     defaultVectorFixedLength: int*3
     vectorOfVectors: int*2*
 
+RecordWithVectorOfTimes: !record
+  fields:
+    times: time*
+
 RecordWithArrays: !record
   fields:
     defaultArray: !array
@@ -102,6 +106,7 @@ RecordWithOptionalFields: !record
   fields:
     optionalInt: [null, int]
     optionalIntAlternateSyntax: int?
+    optionalTime: time?
 
 ScalarOptionals: !protocol
   sequence:
@@ -198,8 +203,8 @@ RecordWithNDArraysSingleDimension: !record
 RecordWithDynamicNDArrays: !record
   fields:
     ints: int[]
-    fixedSimpleRecordArray: SimpleRecord[]
-    fixedRecordWithVlensArray: RecordWithVlens[]
+    simpleRecordArray: SimpleRecord[]
+    recordWithVlensArray: RecordWithVlens[]
 
 NamedFixedNDArray: int[dimA:2, dimB:4]
 
@@ -210,6 +215,39 @@ FixedArrays: !protocol
     fixedRecordWithVlensArray: RecordWithVlens[2, 2]
     recordWithFixedArrays: RecordWithFixedArrays
     namedArray: NamedFixedNDArray
+
+RecordWithFixedCollections: !record
+  fields:
+    fixedVector: int*3
+    fixedArray: int[2,3]
+
+RecordWithVlenCollections: !record
+  fields:
+    vector: int*
+    array: int[,]
+
+Subarrays: !protocol
+  sequence:
+    dynamicWithFixedIntSubarray: int[3][]
+    dynamicWithFixedFloatSubarray: float[3][]
+
+    knownDimCountWithFixedIntSubarray: int[3][()]
+    knownDimCountWithFixedFloatSubarray: float[3][()]
+
+    fixedWithFixedIntSubarray: int[3][2]
+    fixedWithFixedFloatSubarray: float[3][2]
+
+    nestedSubarray: int[3][2][]
+
+    dynamicWithFixedVectorSubarray: int*3[]
+
+    genericSubarray: Image<int[3]>
+
+
+SubarraysInRecords: !protocol
+  sequence:
+    withFixedSubarrays: RecordWithFixedCollections[]
+    withVlenSubarrays: RecordWithVlenCollections[]
 
 NamedNDArray: int[dimA, dimB]
 
@@ -240,6 +278,7 @@ AliasedMap<K,V>: K->V
 Maps: !protocol
   sequence:
     stringToInt: string->int
+    intToString: int->string
     stringToUnion: !map
       keys: string
       values: [string, int]
@@ -248,6 +287,7 @@ Maps: !protocol
 RecordWithUnions: !record
   fields:
     nullOrIntOrString: [null, int, string]
+    dateOrDatetime: [time, datetime]
 
 Unions: !protocol
   sequence:
@@ -308,6 +348,13 @@ TextFormat: !flags
     underline:
     strikethrough:
 
+RecordWithEnums: !record
+  fields:
+    enum: Fruits
+    flags: DaysOfWeek
+    flags2: TextFormat
+
+
 Flags: !protocol
   sequence:
     days: !stream
@@ -351,11 +398,13 @@ SimpleGenerics: !protocol
       args: [int, float]
     intStringTuple: MyTuple<int,string>
     streamOfTypeVariants: !stream
-      items: [Image<float>, Image<double>]
+      items: !union
+        imageFloat: Image<float>
+        imageDouble: Image<double>
 
 AdvancedGenerics: !protocol
   sequence:
-    intImageImage: Image<Image<float>>
+    floatImageImage: Image<Image<float>>
     genericRecord1: GenericRecord<int, string>
     tupleOfOptionals: MyTuple<int?, string?>
     tupleOfOptionalsAlternateSyntax: !generic
@@ -418,9 +467,9 @@ RecordWithComputedFields: !record
     optionalNamedArray: NamedNDArray?
     intFloatUnion: [int, float]
     nullableIntFloatUnion: [null, int, float]
-    unionWithNestedGenericUnion:
-      - int
-      - GenericRecordWithComputedFields<string, float>
+    unionWithNestedGenericUnion: !union
+      int: int
+      genericRecordWithComputedFields: GenericRecordWithComputedFields<string, float>
     mapField: string->string
   computedFields:
     intLiteral: 42 # this comment is ignored
@@ -480,7 +529,7 @@ RecordWithComputedFields: !record
         _: 0
     intFloatUnionAsFloat:
       !switch intFloatUnion:
-        int i: i
+        int iFoo: iFoo
         float f: f
     nullableIntFloatUnionString:
       !switch nullableIntFloatUnion:
@@ -492,12 +541,16 @@ RecordWithComputedFields: !record
         int: -1
         GenericRecordWithComputedFields<string, float> rec:
           !switch rec.f1:
-            float: 20
-            string: 10
+            float f: 20
+            string s: 10
     useNestedComputedField:
       !switch unionWithNestedGenericUnion:
         int: -1
         GenericRecordWithComputedFields<string, float> rec: rec.typeIndex
+
+    switchOverSingleValue:
+      !switch intField:
+        int i: i
 
 GenericRecordWithComputedFields<T0, T1>: !record
   fields:
@@ -517,7 +570,7 @@ ProtocolWithComputedFields: !protocol
 RecordWithKeywordFields: !record
   fields:
     int: string
-    sizeof: ArrayWithKeywordDimensionNames<int>
+    sizeof: ArrayWithKeywordDimensionNames
     if: EnumWithKeywordSymbols
   computedFields:
     float: int
@@ -529,8 +582,8 @@ EnumWithKeywordSymbols: !enum
     try: 2
     catch: 1
 
-ArrayWithKeywordDimensionNames<INT16_MAX>: !array
-  items: INT16_MAX
+ArrayWithKeywordDimensionNames: !array
+  items: int
   dimensions:
     while:
     do:

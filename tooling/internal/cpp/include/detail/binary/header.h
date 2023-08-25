@@ -15,7 +15,7 @@ inline void WriteHeader(CodedOutputStream& w, std::string& schema) {
   yardl::binary::WriteString(w, schema);
 }
 
-inline void ReadHeader(CodedInputStream& r, std::string& schema) {
+inline std::string ReadHeader(CodedInputStream& r) {
   std::array<char, 5> magic_bytes{};
   r.ReadBytes(magic_bytes.data(), magic_bytes.size());
   if (magic_bytes != MAGIC_BYTES) {
@@ -31,7 +31,12 @@ inline void ReadHeader(CodedInputStream& r, std::string& schema) {
 
   std::string actual_schema;
   yardl::binary::ReadString(r, actual_schema);
-  if (actual_schema != schema) {
+  return actual_schema;
+}
+
+inline void ReadAndValidateHeader(CodedInputStream& r, std::string& expected_schema) {
+  std::string actual_schema = ReadHeader(r);
+  if (actual_schema != expected_schema) {
     throw std::runtime_error(
         "The schema of the data to be read is not compatible with the current protocol.");
   }

@@ -85,8 +85,8 @@ RUN umask 0002 \
     && chown -R "${USERNAME}:conda" "${GOROOT}" "${GOPATH}"
 
 # Install watchexec
-ARG WATCHEXEC_VERSION=1.20.4
-RUN wget --quiet https://github.com/watchexec/watchexec/releases/download/cli-v${WATCHEXEC_VERSION}/watchexec-${WATCHEXEC_VERSION}-x86_64-unknown-linux-gnu.deb -O watchexec.deb \
+ARG WATCHEXEC_VERSION=1.22.3
+RUN wget --quiet https://github.com/watchexec/watchexec/releases/download/v${WATCHEXEC_VERSION}/watchexec-${WATCHEXEC_VERSION}-x86_64-unknown-linux-musl.deb -O watchexec.deb \
     && dpkg -i watchexec.deb
 
 # Add a file that is to be sourced from .bashrc and from the devops pipeline stages

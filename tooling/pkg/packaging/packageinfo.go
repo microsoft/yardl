@@ -23,8 +23,9 @@ type PackageInfo struct {
 	FilePath  string `yaml:"-"`
 	Namespace string `yaml:"namespace"`
 
-	Json *JsonCodegenOptions `yaml:"json,omitempty"`
-	Cpp  *CppCodegenOptions  `yaml:"cpp,omitempty"`
+	Json   *JsonCodegenOptions   `yaml:"json,omitempty"`
+	Cpp    *CppCodegenOptions    `yaml:"cpp,omitempty"`
+	Python *PythonCodegenOptions `yaml:"python,omitempty"`
 }
 
 type CppCodegenOptions struct {
@@ -34,6 +35,7 @@ type CppCodegenOptions struct {
 
 	InternalSymlinkStaticHeaders bool `yaml:"internalSymlinkStaticHeaders"`
 	InternalGenerateMocks        bool `yaml:"internalGenerateMocks"`
+	InternalGenerateTranslator   bool `yaml:"internalGenerateTranslator"`
 }
 
 func (o CppCodegenOptions) ChangeOutputDir(newRelativeDir string) CppCodegenOptions {
@@ -52,6 +54,12 @@ func (o *CppCodegenOptions) UnmarshalYAML(value *yaml.Node) error {
 type JsonCodegenOptions struct {
 	PackageInfo *PackageInfo `yaml:"-"`
 	OutputDir   string       `yaml:"outputDir"`
+}
+
+type PythonCodegenOptions struct {
+	PackageInfo                *PackageInfo `yaml:"-"`
+	OutputDir                  string       `yaml:"outputDir"`
+	InternalSymlinkStaticFiles bool         `yaml:"internalSymlinkStaticFiles"`
 }
 
 func ReadPackageInfo(directory string) (PackageInfo, error) {
@@ -101,6 +109,15 @@ func (p *PackageInfo) Validate() error {
 			errorSink.Add(validation.NewValidationError(errors.New("the 'cpp.sourcesOutputDir' field must not be empty"), p.FilePath))
 		} else {
 			p.Cpp.SourcesOutputDir = path.Join(packageDir, p.Cpp.SourcesOutputDir)
+		}
+	}
+
+	if p.Python != nil {
+		p.Python.PackageInfo = p
+		if p.Python.OutputDir == "" {
+			errorSink.Add(validation.NewValidationError(errors.New("the 'python.outputDir' field must not be empty"), p.FilePath))
+		} else {
+			p.Python.OutputDir = path.Join(packageDir, p.Python.OutputDir)
 		}
 	}
 

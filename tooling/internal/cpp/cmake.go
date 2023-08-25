@@ -42,6 +42,9 @@ find_package(xtensor REQUIRED)
 
 	fmt.Fprintf(w, "add_library(%s OBJECT\n", objectLibraryName)
 	w.Indented(func() {
+		if options.InternalGenerateMocks {
+			w.WriteStringln("factories.cc")
+		}
 		w.WriteStringln("protocols.cc")
 		w.WriteStringln("types.cc")
 		w.WriteStringln("ndjson/protocols.cc")
@@ -49,6 +52,9 @@ find_package(xtensor REQUIRED)
 		w.WriteStringln("hdf5/protocols.cc")
 		if options.InternalGenerateMocks {
 			w.WriteStringln("mocks.cc")
+		}
+		if options.InternalGenerateTranslator {
+			w.WriteStringln("translator_impl.cc")
 		}
 	})
 	w.WriteString(")\n\n")

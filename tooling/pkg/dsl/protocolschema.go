@@ -59,7 +59,7 @@ func GetProtocolSchema(protocol *ProtocolDefinition, symbolTable SymbolTable) *P
 }
 
 func removeComments[T Node](typeDefinition T) T {
-	return Rewrite(typeDefinition, func(self Rewriter, node Node) Node {
+	return Rewrite(typeDefinition, func(self *Rewriter, node Node) Node {
 		switch t := node.(type) {
 		case *DefinitionMeta:
 			if t.Comment == "" {

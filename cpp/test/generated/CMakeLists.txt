@@ -17,12 +17,14 @@ endif()
 find_package(HDF5 REQUIRED COMPONENTS C CXX)
 find_package(xtensor REQUIRED)
 add_library(test_model_generated OBJECT
+  factories.cc
   protocols.cc
   types.cc
   ndjson/protocols.cc
   binary/protocols.cc
   hdf5/protocols.cc
   mocks.cc
+  translator_impl.cc
 )
 
 target_link_libraries(test_model_generated

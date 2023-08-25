@@ -116,11 +116,11 @@ func ToPascalCase(s string) string {
 var initialSnakeCaseRegex = regexp2.MustCompile(`((?<=\p{Ll})(\p{Lu}))|(?<!(\b|_)\p{Ll})((?<=\p{Ll})(\d))|(?<!\b|_)(\p{Lu})(?=\p{Ll})`, regexp2.ExplicitCapture)
 var digitGroupSnakeCaseRegex = regexp2.MustCompile(`_\d+`, regexp2.ExplicitCapture)
 
-// A PascalCased of camelCased string will be converted to snake_case
+// A PascalCased or camelCased string will be converted to snake_case.
 // Numbers will be separated by an underscore, unless preceded by an uppercase
 // or the number is greater than 4 and a power of 2. This is to not break apart type
 // names like int32 or bas64.
-func ToSnakeCase(str string) string {
+func delimitWithUnderscores(str string) string {
 	s, err := initialSnakeCaseRegex.Replace(str, `_$&`, -1, -1)
 	if err != nil {
 		panic(err)
@@ -141,5 +141,16 @@ func ToSnakeCase(str string) string {
 	if err != nil {
 		panic(err)
 	}
-	return strings.ToLower(s)
+
+	return s
+}
+
+func ToSnakeCase(str string) string {
+	str = delimitWithUnderscores(str)
+	return strings.ToLower(str)
+}
+
+func ToUpperSnakeCase(str string) string {
+	str = delimitWithUnderscores(str)
+	return strings.ToUpper(str)
 }

@@ -66,6 +66,68 @@ class BenchmarkFloat256x256ReaderBase {
   uint8_t state_ = 0;
 };
 
+// Abstract writer for the BenchmarkInt256x256 protocol.
+class BenchmarkInt256x256WriterBase {
+  public:
+  // Ordinal 0.
+  // Call this method for each element of the `int256x256` stream, then call `EndInt256x256() when done.`
+  void WriteInt256x256(yardl::FixedNDArray<int32_t, 256, 256> const& value);
+
+  // Ordinal 0.
+  // Call this method to write many values to the `int256x256` stream, then call `EndInt256x256()` when done.
+  void WriteInt256x256(std::vector<yardl::FixedNDArray<int32_t, 256, 256>> const& values);
+
+  // Marks the end of the `int256x256` stream.
+  void EndInt256x256();
+
+  // Optionaly close this writer before destructing. Validates that all steps were completed.
+  void Close();
+
+  virtual ~BenchmarkInt256x256WriterBase() = default;
+
+  // Flushes all buffered data.
+  virtual void Flush() {}
+
+  protected:
+  virtual void WriteInt256x256Impl(yardl::FixedNDArray<int32_t, 256, 256> const& value) = 0;
+  virtual void WriteInt256x256Impl(std::vector<yardl::FixedNDArray<int32_t, 256, 256>> const& value);
+  virtual void EndInt256x256Impl() = 0;
+  virtual void CloseImpl() {}
+
+  static std::string schema_;
+
+  private:
+  uint8_t state_ = 0;
+
+  friend class BenchmarkInt256x256ReaderBase;
+};
+
+// Abstract reader for the BenchmarkInt256x256 protocol.
+class BenchmarkInt256x256ReaderBase {
+  public:
+  // Ordinal 0.
+  [[nodiscard]] bool ReadInt256x256(yardl::FixedNDArray<int32_t, 256, 256>& value);
+
+  // Ordinal 0.
+  [[nodiscard]] bool ReadInt256x256(std::vector<yardl::FixedNDArray<int32_t, 256, 256>>& values);
+
+  // Optionaly close this writer before destructing. Validates that all steps were completely read.
+  void Close();
+
+  void CopyTo(BenchmarkInt256x256WriterBase& writer, size_t int256x256_buffer_size = 1);
+
+  virtual ~BenchmarkInt256x256ReaderBase() = default;
+
+  protected:
+  virtual bool ReadInt256x256Impl(yardl::FixedNDArray<int32_t, 256, 256>& value) = 0;
+  virtual bool ReadInt256x256Impl(std::vector<yardl::FixedNDArray<int32_t, 256, 256>>& values);
+  virtual void CloseImpl() {}
+  static std::string schema_;
+
+  private:
+  uint8_t state_ = 0;
+};
+
 // Abstract writer for the BenchmarkFloatVlen protocol.
 class BenchmarkFloatVlenWriterBase {
   public:
@@ -946,6 +1008,174 @@ class FixedArraysReaderBase {
   uint8_t state_ = 0;
 };
 
+// Abstract writer for the Subarrays protocol.
+class SubarraysWriterBase {
+  public:
+  // Ordinal 0.
+  void WriteDynamicWithFixedIntSubarray(yardl::DynamicNDArray<yardl::FixedNDArray<int32_t, 3>> const& value);
+
+  // Ordinal 1.
+  void WriteDynamicWithFixedFloatSubarray(yardl::DynamicNDArray<yardl::FixedNDArray<float, 3>> const& value);
+
+  // Ordinal 2.
+  void WriteKnownDimCountWithFixedIntSubarray(yardl::NDArray<yardl::FixedNDArray<int32_t, 3>, 1> const& value);
+
+  // Ordinal 3.
+  void WriteKnownDimCountWithFixedFloatSubarray(yardl::NDArray<yardl::FixedNDArray<float, 3>, 1> const& value);
+
+  // Ordinal 4.
+  void WriteFixedWithFixedIntSubarray(yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2> const& value);
+
+  // Ordinal 5.
+  void WriteFixedWithFixedFloatSubarray(yardl::FixedNDArray<yardl::FixedNDArray<float, 3>, 2> const& value);
+
+  // Ordinal 6.
+  void WriteNestedSubarray(yardl::DynamicNDArray<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>> const& value);
+
+  // Ordinal 7.
+  void WriteDynamicWithFixedVectorSubarray(yardl::DynamicNDArray<std::array<int32_t, 3>> const& value);
+
+  // Ordinal 8.
+  void WriteGenericSubarray(test_model::Image<yardl::FixedNDArray<int32_t, 3>> const& value);
+
+  // Optionaly close this writer before destructing. Validates that all steps were completed.
+  void Close();
+
+  virtual ~SubarraysWriterBase() = default;
+
+  // Flushes all buffered data.
+  virtual void Flush() {}
+
+  protected:
+  virtual void WriteDynamicWithFixedIntSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<int32_t, 3>> const& value) = 0;
+  virtual void WriteDynamicWithFixedFloatSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<float, 3>> const& value) = 0;
+  virtual void WriteKnownDimCountWithFixedIntSubarrayImpl(yardl::NDArray<yardl::FixedNDArray<int32_t, 3>, 1> const& value) = 0;
+  virtual void WriteKnownDimCountWithFixedFloatSubarrayImpl(yardl::NDArray<yardl::FixedNDArray<float, 3>, 1> const& value) = 0;
+  virtual void WriteFixedWithFixedIntSubarrayImpl(yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2> const& value) = 0;
+  virtual void WriteFixedWithFixedFloatSubarrayImpl(yardl::FixedNDArray<yardl::FixedNDArray<float, 3>, 2> const& value) = 0;
+  virtual void WriteNestedSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>> const& value) = 0;
+  virtual void WriteDynamicWithFixedVectorSubarrayImpl(yardl::DynamicNDArray<std::array<int32_t, 3>> const& value) = 0;
+  virtual void WriteGenericSubarrayImpl(test_model::Image<yardl::FixedNDArray<int32_t, 3>> const& value) = 0;
+  virtual void CloseImpl() {}
+
+  static std::string schema_;
+
+  private:
+  uint8_t state_ = 0;
+
+  friend class SubarraysReaderBase;
+};
+
+// Abstract reader for the Subarrays protocol.
+class SubarraysReaderBase {
+  public:
+  // Ordinal 0.
+  void ReadDynamicWithFixedIntSubarray(yardl::DynamicNDArray<yardl::FixedNDArray<int32_t, 3>>& value);
+
+  // Ordinal 1.
+  void ReadDynamicWithFixedFloatSubarray(yardl::DynamicNDArray<yardl::FixedNDArray<float, 3>>& value);
+
+  // Ordinal 2.
+  void ReadKnownDimCountWithFixedIntSubarray(yardl::NDArray<yardl::FixedNDArray<int32_t, 3>, 1>& value);
+
+  // Ordinal 3.
+  void ReadKnownDimCountWithFixedFloatSubarray(yardl::NDArray<yardl::FixedNDArray<float, 3>, 1>& value);
+
+  // Ordinal 4.
+  void ReadFixedWithFixedIntSubarray(yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>& value);
+
+  // Ordinal 5.
+  void ReadFixedWithFixedFloatSubarray(yardl::FixedNDArray<yardl::FixedNDArray<float, 3>, 2>& value);
+
+  // Ordinal 6.
+  void ReadNestedSubarray(yardl::DynamicNDArray<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>>& value);
+
+  // Ordinal 7.
+  void ReadDynamicWithFixedVectorSubarray(yardl::DynamicNDArray<std::array<int32_t, 3>>& value);
+
+  // Ordinal 8.
+  void ReadGenericSubarray(test_model::Image<yardl::FixedNDArray<int32_t, 3>>& value);
+
+  // Optionaly close this writer before destructing. Validates that all steps were completely read.
+  void Close();
+
+  void CopyTo(SubarraysWriterBase& writer);
+
+  virtual ~SubarraysReaderBase() = default;
+
+  protected:
+  virtual void ReadDynamicWithFixedIntSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<int32_t, 3>>& value) = 0;
+  virtual void ReadDynamicWithFixedFloatSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<float, 3>>& value) = 0;
+  virtual void ReadKnownDimCountWithFixedIntSubarrayImpl(yardl::NDArray<yardl::FixedNDArray<int32_t, 3>, 1>& value) = 0;
+  virtual void ReadKnownDimCountWithFixedFloatSubarrayImpl(yardl::NDArray<yardl::FixedNDArray<float, 3>, 1>& value) = 0;
+  virtual void ReadFixedWithFixedIntSubarrayImpl(yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>& value) = 0;
+  virtual void ReadFixedWithFixedFloatSubarrayImpl(yardl::FixedNDArray<yardl::FixedNDArray<float, 3>, 2>& value) = 0;
+  virtual void ReadNestedSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>>& value) = 0;
+  virtual void ReadDynamicWithFixedVectorSubarrayImpl(yardl::DynamicNDArray<std::array<int32_t, 3>>& value) = 0;
+  virtual void ReadGenericSubarrayImpl(test_model::Image<yardl::FixedNDArray<int32_t, 3>>& value) = 0;
+  virtual void CloseImpl() {}
+  static std::string schema_;
+
+  private:
+  uint8_t state_ = 0;
+};
+
+// Abstract writer for the SubarraysInRecords protocol.
+class SubarraysInRecordsWriterBase {
+  public:
+  // Ordinal 0.
+  void WriteWithFixedSubarrays(yardl::DynamicNDArray<test_model::RecordWithFixedCollections> const& value);
+
+  // Ordinal 1.
+  void WriteWithVlenSubarrays(yardl::DynamicNDArray<test_model::RecordWithVlenCollections> const& value);
+
+  // Optionaly close this writer before destructing. Validates that all steps were completed.
+  void Close();
+
+  virtual ~SubarraysInRecordsWriterBase() = default;
+
+  // Flushes all buffered data.
+  virtual void Flush() {}
+
+  protected:
+  virtual void WriteWithFixedSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithFixedCollections> const& value) = 0;
+  virtual void WriteWithVlenSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithVlenCollections> const& value) = 0;
+  virtual void CloseImpl() {}
+
+  static std::string schema_;
+
+  private:
+  uint8_t state_ = 0;
+
+  friend class SubarraysInRecordsReaderBase;
+};
+
+// Abstract reader for the SubarraysInRecords protocol.
+class SubarraysInRecordsReaderBase {
+  public:
+  // Ordinal 0.
+  void ReadWithFixedSubarrays(yardl::DynamicNDArray<test_model::RecordWithFixedCollections>& value);
+
+  // Ordinal 1.
+  void ReadWithVlenSubarrays(yardl::DynamicNDArray<test_model::RecordWithVlenCollections>& value);
+
+  // Optionaly close this writer before destructing. Validates that all steps were completely read.
+  void Close();
+
+  void CopyTo(SubarraysInRecordsWriterBase& writer);
+
+  virtual ~SubarraysInRecordsReaderBase() = default;
+
+  protected:
+  virtual void ReadWithFixedSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithFixedCollections>& value) = 0;
+  virtual void ReadWithVlenSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithVlenCollections>& value) = 0;
+  virtual void CloseImpl() {}
+  static std::string schema_;
+
+  private:
+  uint8_t state_ = 0;
+};
+
 // Abstract writer for the NDArrays protocol.
 class NDArraysWriterBase {
   public:
@@ -1177,9 +1407,12 @@ class MapsWriterBase {
   void WriteStringToInt(std::unordered_map<std::string, int32_t> const& value);
 
   // Ordinal 1.
-  void WriteStringToUnion(std::unordered_map<std::string, std::variant<std::string, int32_t>> const& value);
+  void WriteIntToString(std::unordered_map<int32_t, std::string> const& value);
 
   // Ordinal 2.
+  void WriteStringToUnion(std::unordered_map<std::string, std::variant<std::string, int32_t>> const& value);
+
+  // Ordinal 3.
   void WriteAliasedGeneric(test_model::AliasedMap<std::string, int32_t> const& value);
 
   // Optionaly close this writer before destructing. Validates that all steps were completed.
@@ -1192,6 +1425,7 @@ class MapsWriterBase {
 
   protected:
   virtual void WriteStringToIntImpl(std::unordered_map<std::string, int32_t> const& value) = 0;
+  virtual void WriteIntToStringImpl(std::unordered_map<int32_t, std::string> const& value) = 0;
   virtual void WriteStringToUnionImpl(std::unordered_map<std::string, std::variant<std::string, int32_t>> const& value) = 0;
   virtual void WriteAliasedGenericImpl(test_model::AliasedMap<std::string, int32_t> const& value) = 0;
   virtual void CloseImpl() {}
@@ -1211,9 +1445,12 @@ class MapsReaderBase {
   void ReadStringToInt(std::unordered_map<std::string, int32_t>& value);
 
   // Ordinal 1.
-  void ReadStringToUnion(std::unordered_map<std::string, std::variant<std::string, int32_t>>& value);
+  void ReadIntToString(std::unordered_map<int32_t, std::string>& value);
 
   // Ordinal 2.
+  void ReadStringToUnion(std::unordered_map<std::string, std::variant<std::string, int32_t>>& value);
+
+  // Ordinal 3.
   void ReadAliasedGeneric(test_model::AliasedMap<std::string, int32_t>& value);
 
   // Optionaly close this writer before destructing. Validates that all steps were completely read.
@@ -1225,6 +1462,7 @@ class MapsReaderBase {
 
   protected:
   virtual void ReadStringToIntImpl(std::unordered_map<std::string, int32_t>& value) = 0;
+  virtual void ReadIntToStringImpl(std::unordered_map<int32_t, std::string>& value) = 0;
   virtual void ReadStringToUnionImpl(std::unordered_map<std::string, std::variant<std::string, int32_t>>& value) = 0;
   virtual void ReadAliasedGenericImpl(test_model::AliasedMap<std::string, int32_t>& value) = 0;
   virtual void CloseImpl() {}
@@ -1746,7 +1984,7 @@ class SimpleGenericsReaderBase {
 class AdvancedGenericsWriterBase {
   public:
   // Ordinal 0.
-  void WriteIntImageImage(test_model::Image<test_model::Image<float>> const& value);
+  void WriteFloatImageImage(test_model::Image<test_model::Image<float>> const& value);
 
   // Ordinal 1.
   void WriteGenericRecord1(test_model::GenericRecord<int32_t, std::string> const& value);
@@ -1769,7 +2007,7 @@ class AdvancedGenericsWriterBase {
   virtual void Flush() {}
 
   protected:
-  virtual void WriteIntImageImageImpl(test_model::Image<test_model::Image<float>> const& value) = 0;
+  virtual void WriteFloatImageImageImpl(test_model::Image<test_model::Image<float>> const& value) = 0;
   virtual void WriteGenericRecord1Impl(test_model::GenericRecord<int32_t, std::string> const& value) = 0;
   virtual void WriteTupleOfOptionalsImpl(test_model::MyTuple<std::optional<int32_t>, std::optional<std::string>> const& value) = 0;
   virtual void WriteTupleOfOptionalsAlternateSyntaxImpl(test_model::MyTuple<std::optional<int32_t>, std::optional<std::string>> const& value) = 0;
@@ -1788,7 +2026,7 @@ class AdvancedGenericsWriterBase {
 class AdvancedGenericsReaderBase {
   public:
   // Ordinal 0.
-  void ReadIntImageImage(test_model::Image<test_model::Image<float>>& value);
+  void ReadFloatImageImage(test_model::Image<test_model::Image<float>>& value);
 
   // Ordinal 1.
   void ReadGenericRecord1(test_model::GenericRecord<int32_t, std::string>& value);
@@ -1810,7 +2048,7 @@ class AdvancedGenericsReaderBase {
   virtual ~AdvancedGenericsReaderBase() = default;
 
   protected:
-  virtual void ReadIntImageImageImpl(test_model::Image<test_model::Image<float>>& value) = 0;
+  virtual void ReadFloatImageImageImpl(test_model::Image<test_model::Image<float>>& value) = 0;
   virtual void ReadGenericRecord1Impl(test_model::GenericRecord<int32_t, std::string>& value) = 0;
   virtual void ReadTupleOfOptionalsImpl(test_model::MyTuple<std::optional<int32_t>, std::optional<std::string>>& value) = 0;
   virtual void ReadTupleOfOptionalsAlternateSyntaxImpl(test_model::MyTuple<std::optional<int32_t>, std::optional<std::string>>& value) = 0;

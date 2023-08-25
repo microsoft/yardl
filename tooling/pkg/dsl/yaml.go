@@ -203,8 +203,20 @@ func normalizeComment(comments string) string {
 	}
 
 	lines := strings.Split(comments, "\n")
+
+	// There cannot be an empty line beteen a comment and the Yardl
+	// element for it to be considered a documentation comment.
+	i := len(lines) - 1
+	for ; i >= 0; i-- {
+		if !strings.HasPrefix(lines[i], "#") {
+			break
+		}
+	}
+
+	lines = lines[i+1:]
+
 	for i := range lines {
-		lines[i] = strings.TrimPrefix(lines[i], "# ")
+		lines[i] = strings.TrimPrefix(strings.TrimPrefix(lines[i], "# "), "#")
 	}
 	return strings.Join(lines, "\n")
 }
@@ -811,11 +823,39 @@ func UnmarshalTypeYAML(value *yaml.Node) (Type, error) {
 		return UnmarshalArrayYAML(value)
 	case "!map":
 		return UnmarshalMapYAML(value)
+	case "!union":
+		return UnmarshalUnionYAML(value)
 	case "!stream":
 		return UnmarshalStreamYAML(value)
 	default:
 		return nil, parseError(value, "unrecognized type kind '%s'", value.Tag)
 	}
+}
+
+func UnmarshalUnionYAML(value *yaml.Node) (*GeneralizedType, error) {
+	if value.Kind != yaml.MappingNode {
+		return nil, parseError(value, "a !union must be specified as a map from tag to type")
+	}
+
+	cases := TypeCases{}
+	for i := 0; i < len(value.Content); i += 2 {
+		tagNode := value.Content[i]
+		typeNode := value.Content[i+1]
+
+		if tagNode.Tag != "!!str" && tagNode.Tag != "!!null" {
+			return nil, parseError(tagNode, "tag must be a string")
+		}
+
+		tag := tagNode.Value
+		parsedType, err := UnmarshalTypeYAML(typeNode)
+		if err != nil {
+			return nil, err
+		}
+
+		cases = append(cases, &TypeCase{Tag: tag, ExplicitTag: true, Type: parsedType, NodeMeta: createNodeMeta(tagNode)})
+	}
+
+	return &GeneralizedType{NodeMeta: createNodeMeta(value), Cases: cases, Dimensionality: nil}, nil
 }
 
 func UnmarshalTypeCases(value *yaml.Node) (TypeCases, error) {

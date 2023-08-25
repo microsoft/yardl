@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"math"
 	"math/big"
+	"strconv"
+	"strings"
 
 	"github.com/microsoft/yardl/tooling/internal/validation"
 )
@@ -23,9 +25,19 @@ func MakeGenericType(genericTypeDefinition TypeDefinition, typeArguments []Type,
 	}
 
 	errorSink := validation.ErrorSink{}
-	rewritten := Rewrite(genericTypeDefinition, func(self Rewriter, node Node) Node {
+	rewritten := Rewrite(genericTypeDefinition, func(self *Rewriter, node Node) Node {
 		switch t := node.(type) {
 		case *DefinitionMeta:
+			if t != genericTypeDefinition.GetDefinitionMeta() {
+				rewrittenArgs := rewriteInterfaceSlice[any, Type](t.TypeArguments, nil, &self.rewriterWithContext)
+				if rewrittenArgs == nil {
+					return t
+				}
+				newMeta := *t
+				newMeta.TypeArguments = rewrittenArgs
+				return &newMeta
+			}
+
 			newMeta := *t
 			newMeta.TypeArguments = typeArguments
 			return &newMeta
@@ -645,4 +657,151 @@ func GetCommonType(a, b Type) (Type, error) {
 	}
 
 	return nil, ErrNoCommonType
+}
+
+func ContainsGenericTypeParameter(node Node) bool {
+	contains := false
+	Visit(node, func(self Visitor, node Node) {
+		switch node := node.(type) {
+		case *GenericTypeParameter:
+			contains = true
+			return
+		case *SimpleType:
+			self.VisitChildren(node)
+			self.Visit(node.ResolvedDefinition)
+		}
+
+		self.VisitChildren(node)
+	})
+
+	return contains
+}
+
+func TypeToShortSyntax(t Type, qualified bool) string {
+	switch t := t.(type) {
+	case nil:
+		return "null"
+	case *SimpleType:
+		var baseName string
+		if qualified || t.ResolvedDefinition == nil {
+			baseName = t.Name
+		} else {
+			baseName = t.ResolvedDefinition.GetDefinitionMeta().Name
+		}
+
+		if len(t.TypeArguments) == 0 {
+			return baseName
+		}
+
+		args := make([]string, len(t.TypeArguments))
+		for i, arg := range t.TypeArguments {
+			args[i] = TypeToShortSyntax(arg, qualified)
+		}
+
+		return fmt.Sprintf("%s<%s>", baseName, strings.Join(args, ", "))
+
+	case *GeneralizedType:
+		baseSyntax := func() string {
+			if t.Cases.IsSingle() {
+				return TypeToShortSyntax(t.Cases[0].Type, qualified)
+			}
+
+			if t.Cases.IsOptional() {
+				innerType := t.Cases[1]
+				innerTypeSyntax := TypeToShortSyntax(innerType.Type, qualified)
+
+				if cgt, ok := innerType.Type.(*GeneralizedType); ok {
+					if _, ok := cgt.Dimensionality.(*Map); ok {
+						return fmt.Sprintf("(%s)?", innerTypeSyntax)
+					}
+				}
+
+				return fmt.Sprintf("%s?", innerTypeSyntax)
+			}
+
+			cases := make([]string, len(t.Cases))
+			for i, c := range t.Cases {
+				caseTypeSyntax := TypeToShortSyntax(c.Type, qualified)
+				if c.Tag != "" && c.Tag != caseTypeSyntax {
+					caseTypeSyntax = fmt.Sprintf("%s: %s", c.Tag, caseTypeSyntax)
+				}
+				cases[i] = caseTypeSyntax
+			}
+
+			return strings.Join(cases, " | ")
+		}()
+
+		switch td := t.Dimensionality.(type) {
+		case nil:
+			return baseSyntax
+		case *Vector:
+			var withoutLength string
+			if t.Cases.IsUnion() {
+				withoutLength = fmt.Sprintf("(%s)*", baseSyntax)
+			} else {
+				withoutLength = fmt.Sprintf("%s*", baseSyntax)
+			}
+
+			if td.Length == nil {
+				return withoutLength
+			}
+
+			return fmt.Sprintf("%s%d", withoutLength, *td.Length)
+
+		case *Array:
+			var withoutDims string
+			if t.Cases.IsUnion() {
+				withoutDims = fmt.Sprintf("(%s)", baseSyntax)
+			} else {
+				withoutDims = baseSyntax
+			}
+			if td.IsFixed() {
+				dims := make([]string, len(*td.Dimensions))
+				for i, dim := range *td.Dimensions {
+					len := strconv.FormatUint(*dim.Length, 10)
+					if dim.Name != nil {
+						dims[i] = fmt.Sprintf("%s:%s", *dim.Name, len)
+					} else {
+						dims[i] = len
+					}
+				}
+				return fmt.Sprintf("%s[%s]", withoutDims, strings.Join(dims, ", "))
+			}
+
+			if td.HasKnownNumberOfDimensions() {
+				sb := strings.Builder{}
+				for i, dim := range *td.Dimensions {
+					if dim.Name != nil {
+						if i > 0 {
+							sb.WriteString(", ")
+						}
+						sb.WriteString(*dim.Name)
+					} else {
+						if i > 0 {
+							sb.WriteString(",")
+						}
+					}
+				}
+				return fmt.Sprintf("%s[%s]", withoutDims, sb.String())
+			}
+
+			return fmt.Sprintf("%s[]", withoutDims)
+
+		case *Map:
+			key := TypeToShortSyntax(td.KeyType, qualified)
+			if kgt, ok := td.KeyType.(*GeneralizedType); ok && kgt.Cases.IsUnion() {
+				key = fmt.Sprintf("(%s)", key)
+			}
+
+			if t.Cases.IsUnion() {
+				return fmt.Sprintf("%s->(%s)", key, baseSyntax)
+			}
+			return fmt.Sprintf("%s->%s", key, baseSyntax)
+
+		default:
+			panic(fmt.Sprintf("unknown dimensionality type: %T", t.Dimensionality))
+		}
+	default:
+		panic(fmt.Sprintf("unknown type: %T", t))
+	}
 }

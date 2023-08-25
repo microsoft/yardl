@@ -3,7 +3,12 @@ namespace: TestModel
 cpp:
   sourcesOutputDir: ../../cpp/test/generated
   internalGenerateMocks: true
+  internalGenerateTranslator: true
   internalSymlinkStaticHeaders: true
+
+python:
+  outputDir: ../../python/
+  internalSymlinkStaticFiles: true
 
 json:
   outputDir: ../../cpp/test/generated

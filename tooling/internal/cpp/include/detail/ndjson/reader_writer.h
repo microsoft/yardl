@@ -7,21 +7,21 @@
 
 #include <nlohmann/json.hpp>
 
+#include "header.h"
+
 namespace yardl::ndjson {
 using ordered_json = nlohmann::ordered_json;
-
-static inline uint32_t kNDJsonFormatVersionNumber = 1;
 
 class NDJsonWriter {
  protected:
   NDJsonWriter(std::ostream& stream, std::string& schema)
       : stream_(stream) {
-    WriteHeader(schema);
+    WriteHeader(stream_, schema);
   }
 
   NDJsonWriter(std::string file_name, std::string& schema)
       : owned_file_stream_(open_file(file_name)), stream_(*owned_file_stream_) {
-    WriteHeader(schema);
+    WriteHeader(stream_, schema);
   }
 
  private:
@@ -32,13 +32,6 @@ class NDJsonWriter {
     }
 
     return file_stream;
-  }
-
-  void WriteHeader(std::string& schema) {
-    auto parsed_schema = ordered_json::parse(schema);
-
-    ordered_json metadata = {{"yardl", {{"version", kNDJsonFormatVersionNumber}, {"schema", parsed_schema}}}};
-    stream_ << metadata << "\n";
   }
 
  private:
@@ -52,12 +45,12 @@ class NDJsonReader {
  protected:
   NDJsonReader(std::istream& stream, std::string& schema)
       : stream_(stream) {
-    ReadHeader(schema);
+    ReadAndValidateHeader(stream_, schema);
   }
 
   NDJsonReader(std::string file_name, std::string& schema)
       : owned_file_stream_(open_file(file_name)), stream_(*owned_file_stream_) {
-    ReadHeader(schema);
+    ReadAndValidateHeader(stream_, schema);
   }
 
   void VerifyFinished() {
@@ -74,27 +67,6 @@ class NDJsonReader {
     }
 
     return file_stream;
-  }
-
-  void ReadHeader(std::string& expected_schema) {
-    ordered_json expected_schema_json = ordered_json::parse(expected_schema);
-    std::string line;
-    std::getline(stream_, line);
-    try {
-      ordered_json actual_header_json = ordered_json::parse(line);
-      actual_header_json = actual_header_json.at("yardl");
-      if (actual_header_json["version"] != kNDJsonFormatVersionNumber) {
-        throw std::runtime_error(
-            "Unsupported Yardl NDJSON format version.");
-      }
-      if (expected_schema_json != actual_header_json.at("schema")) {
-        throw std::runtime_error(
-            "The schema of the data to be read is not compatible with the current protocol.");
-      }
-    } catch (ordered_json::exception const&) {
-      throw std::runtime_error(
-          "Data in the stream is not in the expected Yardl NDJSON format.");
-    }
   }
 
  private:

@@ -281,6 +281,21 @@
         },
         {
           "record": {
+            "name": "RecordWithVectorOfTimes",
+            "fields": [
+              {
+                "name": "times",
+                "type": {
+                  "vector": {
+                    "items": "time"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "record": {
             "name": "RecordWithArrays",
             "fields": [
               {
@@ -530,6 +545,13 @@
                   null,
                   "int32"
                 ]
+              },
+              {
+                "name": "optionalTime",
+                "type": [
+                  null,
+                  "time"
+                ]
               }
             ]
           }
@@ -760,7 +782,7 @@
                 }
               },
               {
-                "name": "fixedSimpleRecordArray",
+                "name": "simpleRecordArray",
                 "type": {
                   "array": {
                     "items": "TestModel.SimpleRecord"
@@ -768,7 +790,7 @@
                 }
               },
               {
-                "name": "fixedRecordWithVlensArray",
+                "name": "recordWithVlensArray",
                 "type": {
                   "array": {
                     "items": "TestModel.RecordWithVlens"
@@ -796,6 +818,62 @@
                 ]
               }
             }
+          }
+        },
+        {
+          "record": {
+            "name": "RecordWithFixedCollections",
+            "fields": [
+              {
+                "name": "fixedVector",
+                "type": {
+                  "vector": {
+                    "items": "int32",
+                    "length": 3
+                  }
+                }
+              },
+              {
+                "name": "fixedArray",
+                "type": {
+                  "array": {
+                    "items": "int32",
+                    "dimensions": [
+                      {
+                        "length": 2
+                      },
+                      {
+                        "length": 3
+                      }
+                    ]
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "record": {
+            "name": "RecordWithVlenCollections",
+            "fields": [
+              {
+                "name": "vector",
+                "type": {
+                  "vector": {
+                    "items": "int32"
+                  }
+                }
+              },
+              {
+                "name": "array",
+                "type": {
+                  "array": {
+                    "items": "int32",
+                    "dimensions": 2
+                  }
+                }
+              }
+            ]
           }
         },
         {
@@ -840,12 +918,25 @@
                 "type": [
                   null,
                   {
-                    "label": "int32",
+                    "tag": "int32",
                     "type": "int32"
                   },
                   {
-                    "label": "string",
+                    "tag": "string",
                     "type": "string"
+                  }
+                ]
+              },
+              {
+                "name": "dateOrDatetime",
+                "type": [
+                  {
+                    "tag": "time",
+                    "type": "time"
+                  },
+                  {
+                    "tag": "datetime",
+                    "type": "datetime"
                   }
                 ]
               }
@@ -974,6 +1065,25 @@
               {
                 "symbol": "strikethrough",
                 "value": 8
+              }
+            ]
+          }
+        },
+        {
+          "record": {
+            "name": "RecordWithEnums",
+            "fields": [
+              {
+                "name": "enum",
+                "type": "TestModel.Fruits"
+              },
+              {
+                "name": "flags",
+                "type": "TestModel.DaysOfWeek"
+              },
+              {
+                "name": "flags2",
+                "type": "TestModel.TextFormat"
               }
             ]
           }
@@ -1124,11 +1234,11 @@
             ],
             "type": [
               {
-                "label": "T1",
+                "tag": "T1",
                 "type": "T1"
               },
               {
-                "label": "T2",
+                "tag": "T2",
                 "type": "T2"
               }
             ]
@@ -1166,11 +1276,11 @@
             "name": "AliasedIntOrSimpleRecord",
             "type": [
               {
-                "label": "int32",
+                "tag": "int32",
                 "type": "int32"
               },
               {
-                "label": "SimpleRecord",
+                "tag": "SimpleRecord",
                 "type": "TestModel.SimpleRecord"
               }
             ]
@@ -1182,11 +1292,11 @@
             "type": [
               null,
               {
-                "label": "int32",
+                "tag": "int32",
                 "type": "int32"
               },
               {
-                "label": "SimpleRecord",
+                "tag": "SimpleRecord",
                 "type": "TestModel.SimpleRecord"
               }
             ]
@@ -1204,11 +1314,11 @@
                 "name": "f1",
                 "type": [
                   {
-                    "label": "T0",
+                    "tag": "T0",
                     "type": "T0"
                   },
                   {
-                    "label": "T1",
+                    "tag": "T1",
                     "type": "T1"
                   }
                 ]
@@ -1221,7 +1331,8 @@
                   "switch": {
                     "target": {
                       "memberAccess": {
-                        "member": "f1"
+                        "member": "f1",
+                        "kind": "field"
                       }
                     },
                     "cases": [
@@ -1364,11 +1475,11 @@
                 "name": "intFloatUnion",
                 "type": [
                   {
-                    "label": "int32",
+                    "tag": "int32",
                     "type": "int32"
                   },
                   {
-                    "label": "float32",
+                    "tag": "float32",
                     "type": "float32"
                   }
                 ]
@@ -1378,11 +1489,11 @@
                 "type": [
                   null,
                   {
-                    "label": "int32",
+                    "tag": "int32",
                     "type": "int32"
                   },
                   {
-                    "label": "float32",
+                    "tag": "float32",
                     "type": "float32"
                   }
                 ]
@@ -1391,11 +1502,13 @@
                 "name": "unionWithNestedGenericUnion",
                 "type": [
                   {
-                    "label": "int32",
+                    "tag": "int",
+                    "explicitTag": true,
                     "type": "int32"
                   },
                   {
-                    "label": "GenericRecordWithComputedFields\u003cstring,float32\u003e",
+                    "tag": "genericRecordWithComputedFields",
+                    "explicitTag": true,
                     "type": {
                       "name": "TestModel.GenericRecordWithComputedFields",
                       "typeArguments": [
@@ -1449,7 +1562,8 @@
                 "name": "accessOtherComputedField",
                 "expression": {
                   "memberAccess": {
-                    "member": "intField"
+                    "member": "intField",
+                    "kind": "field"
                   }
                 }
               },
@@ -1457,7 +1571,8 @@
                 "name": "accessIntField",
                 "expression": {
                   "memberAccess": {
-                    "member": "intField"
+                    "member": "intField",
+                    "kind": "field"
                   }
                 }
               },
@@ -1465,7 +1580,8 @@
                 "name": "accessStringField",
                 "expression": {
                   "memberAccess": {
-                    "member": "stringField"
+                    "member": "stringField",
+                    "kind": "field"
                   }
                 }
               },
@@ -1473,7 +1589,8 @@
                 "name": "accessTupleField",
                 "expression": {
                   "memberAccess": {
-                    "member": "tupleField"
+                    "member": "tupleField",
+                    "kind": "field"
                   }
                 }
               },
@@ -1483,10 +1600,12 @@
                   "memberAccess": {
                     "target": {
                       "memberAccess": {
-                        "member": "tupleField"
+                        "member": "tupleField",
+                        "kind": "field"
                       }
                     },
-                    "member": "v2"
+                    "member": "v2",
+                    "kind": "field"
                   }
                 }
               },
@@ -1494,7 +1613,8 @@
                 "name": "accessArrayField",
                 "expression": {
                   "memberAccess": {
-                    "member": "arrayField"
+                    "member": "arrayField",
+                    "kind": "field"
                   }
                 }
               },
@@ -1504,7 +1624,8 @@
                   "index": {
                     "target": {
                       "memberAccess": {
-                        "member": "arrayField"
+                        "member": "arrayField",
+                        "kind": "field"
                       }
                     },
                     "arguments": [
@@ -1524,7 +1645,8 @@
                   "index": {
                     "target": {
                       "memberAccess": {
-                        "member": "arrayField"
+                        "member": "arrayField",
+                        "kind": "field"
                       }
                     },
                     "arguments": [
@@ -1544,7 +1666,8 @@
                 "name": "accessVectorField",
                 "expression": {
                   "memberAccess": {
-                    "member": "vectorField"
+                    "member": "vectorField",
+                    "kind": "field"
                   }
                 }
               },
@@ -1554,7 +1677,8 @@
                   "index": {
                     "target": {
                       "memberAccess": {
-                        "member": "vectorField"
+                        "member": "vectorField",
+                        "kind": "field"
                       }
                     },
                     "arguments": [
@@ -1573,7 +1697,8 @@
                       "index": {
                         "target": {
                           "memberAccess": {
-                            "member": "vectorOfVectorsField"
+                            "member": "vectorOfVectorsField",
+                            "kind": "field"
                           }
                         },
                         "arguments": [
@@ -1599,7 +1724,8 @@
                     "arguments": [
                       {
                         "memberAccess": {
-                          "member": "arrayField"
+                          "member": "arrayField",
+                          "kind": "field"
                         }
                       }
                     ]
@@ -1614,7 +1740,8 @@
                     "arguments": [
                       {
                         "memberAccess": {
-                          "member": "arrayField"
+                          "member": "arrayField",
+                          "kind": "field"
                         }
                       },
                       0
@@ -1630,7 +1757,8 @@
                     "arguments": [
                       {
                         "memberAccess": {
-                          "member": "arrayField"
+                          "member": "arrayField",
+                          "kind": "field"
                         }
                       },
                       1
@@ -1646,7 +1774,8 @@
                     "arguments": [
                       {
                         "memberAccess": {
-                          "member": "arrayField"
+                          "member": "arrayField",
+                          "kind": "field"
                         }
                       },
                       0
@@ -1662,7 +1791,8 @@
                     "arguments": [
                       {
                         "memberAccess": {
-                          "member": "arrayField"
+                          "member": "arrayField",
+                          "kind": "field"
                         }
                       },
                       1
@@ -1678,12 +1808,14 @@
                     "arguments": [
                       {
                         "memberAccess": {
-                          "member": "arrayField"
+                          "member": "arrayField",
+                          "kind": "field"
                         }
                       },
                       {
                         "memberAccess": {
-                          "member": "intField"
+                          "member": "intField",
+                          "kind": "field"
                         }
                       }
                     ]
@@ -1698,7 +1830,8 @@
                     "arguments": [
                       {
                         "memberAccess": {
-                          "member": "arrayField"
+                          "member": "arrayField",
+                          "kind": "field"
                         }
                       },
                       {
@@ -1707,12 +1840,14 @@
                           "arguments": [
                             {
                               "memberAccess": {
-                                "member": "arrayField"
+                                "member": "arrayField",
+                                "kind": "field"
                               }
                             },
                             {
                               "memberAccess": {
-                                "member": "stringField"
+                                "member": "stringField",
+                                "kind": "field"
                               }
                             }
                           ]
@@ -1730,17 +1865,20 @@
                     "arguments": [
                       {
                         "memberAccess": {
-                          "member": "arrayField"
+                          "member": "arrayField",
+                          "kind": "field"
                         }
                       },
                       {
                         "memberAccess": {
                           "target": {
                             "memberAccess": {
-                              "member": "tupleField"
+                              "member": "tupleField",
+                              "kind": "field"
                             }
                           },
-                          "member": "v1"
+                          "member": "v1",
+                          "kind": "field"
                         }
                       }
                     ]
@@ -1755,7 +1893,8 @@
                     "arguments": [
                       {
                         "memberAccess": {
-                          "member": "arrayFieldMapDimensions"
+                          "member": "arrayFieldMapDimensions",
+                          "kind": "field"
                         }
                       },
                       0
@@ -1783,7 +1922,8 @@
                     "arguments": [
                       {
                         "memberAccess": {
-                          "member": "vectorField"
+                          "member": "vectorField",
+                          "kind": "field"
                         }
                       }
                     ]
@@ -1810,12 +1950,14 @@
                     "arguments": [
                       {
                         "memberAccess": {
-                          "member": "arrayField"
+                          "member": "arrayField",
+                          "kind": "field"
                         }
                       },
                       {
                         "memberAccess": {
-                          "member": "stringField"
+                          "member": "stringField",
+                          "kind": "field"
                         }
                       }
                     ]
@@ -1834,7 +1976,8 @@
                     "arguments": [
                       {
                         "memberAccess": {
-                          "member": "dynamicArrayField"
+                          "member": "dynamicArrayField",
+                          "kind": "field"
                         }
                       }
                     ]
@@ -1845,7 +1988,8 @@
                 "name": "accessMap",
                 "expression": {
                   "memberAccess": {
-                    "member": "mapField"
+                    "member": "mapField",
+                    "kind": "field"
                   }
                 }
               },
@@ -1857,7 +2001,8 @@
                     "arguments": [
                       {
                         "memberAccess": {
-                          "member": "mapField"
+                          "member": "mapField",
+                          "kind": "field"
                         }
                       }
                     ]
@@ -1870,7 +2015,8 @@
                   "index": {
                     "target": {
                       "memberAccess": {
-                        "member": "mapField"
+                        "member": "mapField",
+                        "kind": "field"
                       }
                     },
                     "arguments": [
@@ -1891,7 +2037,8 @@
                   "index": {
                     "target": {
                       "memberAccess": {
-                        "member": "mapField"
+                        "member": "mapField",
+                        "kind": "field"
                       }
                     },
                     "arguments": [
@@ -1899,7 +2046,7 @@
                         "expression": {
                           "memberAccess": {
                             "member": "stringComputedField",
-                            "isComputed": true
+                            "kind": "computedField"
                           }
                         }
                       }
@@ -1913,7 +2060,8 @@
                   "index": {
                     "target": {
                       "memberAccess": {
-                        "member": "mapField"
+                        "member": "mapField",
+                        "kind": "field"
                       }
                     },
                     "arguments": [
@@ -1922,7 +2070,8 @@
                           "index": {
                             "target": {
                               "memberAccess": {
-                                "member": "mapField"
+                                "member": "mapField",
+                                "kind": "field"
                               }
                             },
                             "arguments": [
@@ -1930,7 +2079,7 @@
                                 "expression": {
                                   "memberAccess": {
                                     "member": "stringComputedField",
-                                    "isComputed": true
+                                    "kind": "computedField"
                                   }
                                 }
                               }
@@ -1948,7 +2097,8 @@
                   "index": {
                     "target": {
                       "memberAccess": {
-                        "member": "mapField"
+                        "member": "mapField",
+                        "kind": "field"
                       }
                     },
                     "arguments": [
@@ -1965,7 +2115,8 @@
                   "switch": {
                     "target": {
                       "memberAccess": {
-                        "member": "optionalNamedArray"
+                        "member": "optionalNamedArray",
+                        "kind": "field"
                       }
                     },
                     "cases": [
@@ -1980,7 +2131,8 @@
                             "arguments": [
                               {
                                 "memberAccess": {
-                                  "member": "arr"
+                                  "member": "arr",
+                                  "kind": "variable"
                                 }
                               }
                             ]
@@ -2003,7 +2155,8 @@
                   "switch": {
                     "target": {
                       "memberAccess": {
-                        "member": "optionalNamedArray"
+                        "member": "optionalNamedArray",
+                        "kind": "field"
                       }
                     },
                     "cases": [
@@ -2018,7 +2171,8 @@
                             "arguments": [
                               {
                                 "memberAccess": {
-                                  "member": "arr"
+                                  "member": "arr",
+                                  "kind": "variable"
                                 }
                               }
                             ]
@@ -2039,20 +2193,22 @@
                   "switch": {
                     "target": {
                       "memberAccess": {
-                        "member": "intFloatUnion"
+                        "member": "intFloatUnion",
+                        "kind": "field"
                       }
                     },
                     "cases": [
                       {
                         "pattern": {
                           "type": "int32",
-                          "identifier": "i"
+                          "identifier": "iFoo"
                         },
                         "expression": {
                           "convert": {
                             "expression": {
                               "memberAccess": {
-                                "member": "i"
+                                "member": "iFoo",
+                                "kind": "variable"
                               }
                             },
                             "type": "float32"
@@ -2066,7 +2222,8 @@
                         },
                         "expression": {
                           "memberAccess": {
-                            "member": "f"
+                            "member": "f",
+                            "kind": "variable"
                           }
                         }
                       }
@@ -2080,7 +2237,8 @@
                   "switch": {
                     "target": {
                       "memberAccess": {
-                        "member": "nullableIntFloatUnion"
+                        "member": "nullableIntFloatUnion",
+                        "kind": "field"
                       }
                     },
                     "cases": [
@@ -2110,7 +2268,8 @@
                   "switch": {
                     "target": {
                       "memberAccess": {
-                        "member": "unionWithNestedGenericUnion"
+                        "member": "unionWithNestedGenericUnion",
+                        "kind": "field"
                       }
                     },
                     "cases": [
@@ -2139,10 +2298,12 @@
                                   "memberAccess": {
                                     "target": {
                                       "memberAccess": {
-                                        "member": "rec"
+                                        "member": "rec",
+                                        "kind": "variable"
                                       }
                                     },
-                                    "member": "f1"
+                                    "member": "f1",
+                                    "kind": "field"
                                   }
                                 },
                                 "cases": [
@@ -2175,7 +2336,8 @@
                   "switch": {
                     "target": {
                       "memberAccess": {
-                        "member": "unionWithNestedGenericUnion"
+                        "member": "unionWithNestedGenericUnion",
+                        "kind": "field"
                       }
                     },
                     "cases": [
@@ -2202,14 +2364,42 @@
                               "memberAccess": {
                                 "target": {
                                   "memberAccess": {
-                                    "member": "rec"
+                                    "member": "rec",
+                                    "kind": "variable"
                                   }
                                 },
                                 "member": "typeIndex",
-                                "isComputed": true
+                                "kind": "computedField"
                               }
                             },
                             "type": "int16"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "name": "switchOverSingleValue",
+                "expression": {
+                  "switch": {
+                    "target": {
+                      "memberAccess": {
+                        "member": "intField",
+                        "kind": "field"
+                      }
+                    },
+                    "cases": [
+                      {
+                        "pattern": {
+                          "type": "int32",
+                          "identifier": "i"
+                        },
+                        "expression": {
+                          "memberAccess": {
+                            "member": "i",
+                            "kind": "variable"
                           }
                         }
                       }
@@ -2223,12 +2413,9 @@
         {
           "alias": {
             "name": "ArrayWithKeywordDimensionNames",
-            "typeParameters": [
-              "INT16_MAX"
-            ],
             "type": {
               "array": {
-                "items": "INT16_MAX",
+                "items": "int32",
                 "dimensions": [
                   {
                     "name": "while"
@@ -2259,7 +2446,6 @@
         {
           "record": {
             "name": "RecordWithKeywordFields",
-            "comment": "BEGIN delibrately using C++ keywords and macros as identitiers\n",
             "fields": [
               {
                 "name": "int",
@@ -2267,12 +2453,7 @@
               },
               {
                 "name": "sizeof",
-                "type": {
-                  "name": "TestModel.ArrayWithKeywordDimensionNames",
-                  "typeArguments": [
-                    "int32"
-                  ]
-                }
+                "type": "TestModel.ArrayWithKeywordDimensionNames"
               },
               {
                 "name": "if",
@@ -2284,7 +2465,8 @@
                 "name": "float",
                 "expression": {
                   "memberAccess": {
-                    "member": "int"
+                    "member": "int",
+                    "kind": "field"
                   }
                 }
               },
@@ -2293,7 +2475,7 @@
                 "expression": {
                   "memberAccess": {
                     "member": "float",
-                    "isComputed": true
+                    "kind": "computedField"
                   }
                 }
               },
@@ -2303,7 +2485,8 @@
                   "index": {
                     "target": {
                       "memberAccess": {
-                        "member": "sizeof"
+                        "member": "sizeof",
+                        "kind": "field"
                       }
                     },
                     "arguments": [
@@ -2334,6 +2517,31 @@
                   "items": {
                     "array": {
                       "items": "float32",
+                      "dimensions": [
+                        {
+                          "length": 256
+                        },
+                        {
+                          "length": 256
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "BenchmarkInt256x256",
+          "sequence": [
+            {
+              "name": "int256x256",
+              "type": {
+                "stream": {
+                  "items": {
+                    "array": {
+                      "items": "int32",
                       "dimensions": [
                         {
                           "length": 256
@@ -2402,11 +2610,13 @@
                 "stream": {
                   "items": [
                     {
-                      "label": "SimpleAcquisition",
+                      "tag": "acquisition",
+                      "explicitTag": true,
                       "type": "TestModel.SimpleAcquisition"
                     },
                     {
-                      "label": "Image\u003cfloat32\u003e",
+                      "tag": "image",
+                      "explicitTag": true,
                       "type": {
                         "name": "TestModel.Image",
                         "typeArguments": [
@@ -2670,6 +2880,203 @@
           ]
         },
         {
+          "name": "Subarrays",
+          "sequence": [
+            {
+              "name": "dynamicWithFixedIntSubarray",
+              "type": {
+                "array": {
+                  "items": {
+                    "array": {
+                      "items": "int32",
+                      "dimensions": [
+                        {
+                          "length": 3
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "name": "dynamicWithFixedFloatSubarray",
+              "type": {
+                "array": {
+                  "items": {
+                    "array": {
+                      "items": "float32",
+                      "dimensions": [
+                        {
+                          "length": 3
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "name": "knownDimCountWithFixedIntSubarray",
+              "type": {
+                "array": {
+                  "items": {
+                    "array": {
+                      "items": "int32",
+                      "dimensions": [
+                        {
+                          "length": 3
+                        }
+                      ]
+                    }
+                  },
+                  "dimensions": 1
+                }
+              }
+            },
+            {
+              "name": "knownDimCountWithFixedFloatSubarray",
+              "type": {
+                "array": {
+                  "items": {
+                    "array": {
+                      "items": "float32",
+                      "dimensions": [
+                        {
+                          "length": 3
+                        }
+                      ]
+                    }
+                  },
+                  "dimensions": 1
+                }
+              }
+            },
+            {
+              "name": "fixedWithFixedIntSubarray",
+              "type": {
+                "array": {
+                  "items": {
+                    "array": {
+                      "items": "int32",
+                      "dimensions": [
+                        {
+                          "length": 3
+                        }
+                      ]
+                    }
+                  },
+                  "dimensions": [
+                    {
+                      "length": 2
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "fixedWithFixedFloatSubarray",
+              "type": {
+                "array": {
+                  "items": {
+                    "array": {
+                      "items": "float32",
+                      "dimensions": [
+                        {
+                          "length": 3
+                        }
+                      ]
+                    }
+                  },
+                  "dimensions": [
+                    {
+                      "length": 2
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "nestedSubarray",
+              "type": {
+                "array": {
+                  "items": {
+                    "array": {
+                      "items": {
+                        "array": {
+                          "items": "int32",
+                          "dimensions": [
+                            {
+                              "length": 3
+                            }
+                          ]
+                        }
+                      },
+                      "dimensions": [
+                        {
+                          "length": 2
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "name": "dynamicWithFixedVectorSubarray",
+              "type": {
+                "array": {
+                  "items": {
+                    "vector": {
+                      "items": "int32",
+                      "length": 3
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "name": "genericSubarray",
+              "type": {
+                "name": "TestModel.Image",
+                "typeArguments": [
+                  {
+                    "array": {
+                      "items": "int32",
+                      "dimensions": [
+                        {
+                          "length": 3
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "SubarraysInRecords",
+          "sequence": [
+            {
+              "name": "withFixedSubarrays",
+              "type": {
+                "array": {
+                  "items": "TestModel.RecordWithFixedCollections"
+                }
+              }
+            },
+            {
+              "name": "withVlenSubarrays",
+              "type": {
+                "array": {
+                  "items": "TestModel.RecordWithVlenCollections"
+                }
+              }
+            }
+          ]
+        },
+        {
           "name": "NDArrays",
           "sequence": [
             {
@@ -2791,17 +3198,26 @@
               }
             },
             {
+              "name": "intToString",
+              "type": {
+                "map": {
+                  "keys": "int32",
+                  "values": "string"
+                }
+              }
+            },
+            {
               "name": "stringToUnion",
               "type": {
                 "map": {
                   "keys": "string",
                   "values": [
                     {
-                      "label": "string",
+                      "tag": "string",
                       "type": "string"
                     },
                     {
-                      "label": "int32",
+                      "tag": "int32",
                       "type": "int32"
                     }
                   ]
@@ -2827,11 +3243,11 @@
               "name": "intOrSimpleRecord",
               "type": [
                 {
-                  "label": "int32",
+                  "tag": "int32",
                   "type": "int32"
                 },
                 {
-                  "label": "SimpleRecord",
+                  "tag": "SimpleRecord",
                   "type": "TestModel.SimpleRecord"
                 }
               ]
@@ -2840,11 +3256,11 @@
               "name": "intOrRecordWithVlens",
               "type": [
                 {
-                  "label": "int32",
+                  "tag": "int32",
                   "type": "int32"
                 },
                 {
-                  "label": "RecordWithVlens",
+                  "tag": "RecordWithVlens",
                   "type": "TestModel.RecordWithVlens"
                 }
               ]
@@ -2854,11 +3270,11 @@
               "type": [
                 null,
                 {
-                  "label": "int32",
+                  "tag": "int32",
                   "type": "int32"
                 },
                 {
-                  "label": "SimpleRecord",
+                  "tag": "SimpleRecord",
                   "type": "TestModel.SimpleRecord"
                 }
               ]
@@ -2878,11 +3294,11 @@
                 "stream": {
                   "items": [
                     {
-                      "label": "int32",
+                      "tag": "int32",
                       "type": "int32"
                     },
                     {
-                      "label": "SimpleRecord",
+                      "tag": "SimpleRecord",
                       "type": "TestModel.SimpleRecord"
                     }
                   ]
@@ -2896,11 +3312,11 @@
                   "items": [
                     null,
                     {
-                      "label": "int32",
+                      "tag": "int32",
                       "type": "int32"
                     },
                     {
-                      "label": "SimpleRecord",
+                      "tag": "SimpleRecord",
                       "type": "TestModel.SimpleRecord"
                     }
                   ]
@@ -3057,7 +3473,8 @@
                 "stream": {
                   "items": [
                     {
-                      "label": "Image\u003cfloat32\u003e",
+                      "tag": "imageFloat",
+                      "explicitTag": true,
                       "type": {
                         "name": "TestModel.Image",
                         "typeArguments": [
@@ -3066,7 +3483,8 @@
                       }
                     },
                     {
-                      "label": "Image\u003cfloat64\u003e",
+                      "tag": "imageDouble",
+                      "explicitTag": true,
                       "type": {
                         "name": "TestModel.Image",
                         "typeArguments": [
@@ -3084,7 +3502,7 @@
           "name": "AdvancedGenerics",
           "sequence": [
             {
-              "name": "intImageImage",
+              "name": "floatImageImage",
               "type": {
                 "name": "TestModel.Image",
                 "typeArguments": [
