@@ -21,13 +21,14 @@ func WriteTypes(ns *dsl.Namespace, st dsl.SymbolTable, packageDir string) error 
 	w := formatting.NewIndentedWriter(&b, "    ")
 	common.WriteGeneratedFileHeader(w)
 	w.WriteStringln(`
-import dataclasses
 import datetime
 import enum
 import types
 import typing
+
 import numpy as np
 import numpy.typing as npt
+
 from . import yardl_types as yardl
 from . import _dtypes
 `)

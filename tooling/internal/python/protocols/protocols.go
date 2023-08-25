@@ -22,9 +22,10 @@ func WriteProtocols(ns *dsl.Namespace, st dsl.SymbolTable, packageDir string) er
 import abc
 import collections.abc
 import datetime
+import typing
+
 import numpy as np
 import numpy.typing as npt
-import typing
 
 from .types import *
 from .yardl_types import ProtocolError
