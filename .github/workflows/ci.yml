@@ -151,7 +151,7 @@ jobs:
           fi
 
   publishDocs:
-    # if: github.event_name == 'push' && github.ref_type == 'tag' && github.repository == 'microsoft/yardl'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && github.repository == 'microsoft/yardl'
     needs:
       - validate
       - smoketestWindows
