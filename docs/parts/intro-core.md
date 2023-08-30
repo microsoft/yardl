@@ -1,6 +1,5 @@
 ## Motivation
 
-
 Yardl is conceptually similar to, and inspired by, [Avro](https://avro.apache.org/),
 [Protocol Buffers](https://developers.google.com/protocol-buffers),
 [Bond](https://microsoft.github.io/bond/), and others, but it was designed
@@ -25,7 +24,6 @@ code by hand:
 - You do not need to worry about consistency across different programming
   languages
 - Comments could be used to generate documentation
-
 
 ## Project Status
 

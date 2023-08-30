@@ -80,5 +80,6 @@ export default defineConfig({
       provider: "local",
     },
   },
-  base: "/yardl/"
+  base: "/yardl/",
+  srcExclude: ["README.md"]
 });
