@@ -1,6 +1,6 @@
 # Documentation Website
 
-This site uses https://vitepress.dev/ to generate a static site for documentation. To run it locally, run
+This site uses [VitePress](https://vitepress.dev/) to generate a static site for documentation. To run it locally, run
 
 ```bash
 $ just start-docs-website

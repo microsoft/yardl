@@ -13,7 +13,6 @@ C++17 (or more recent) compiler and the following dependencies installed:
    library.
 4. [JSON for Modern C++](https://github.com/nlohmann/json).
 
-
 ### Conda
 
 If using the [Conda](https://docs.conda.io/en/latest/) package manager, these

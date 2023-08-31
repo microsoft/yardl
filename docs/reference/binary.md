@@ -99,7 +99,6 @@ Example values for the union `[null, uint, float]`:
 | 6 (`uint`)      | `0x01 0x06`                |
 | 95.72 (`float`) | `0x02 0xa4 0x70 0xbf 0x42` |
 
-
 ## Vectors
 
 If the vector length is not specified in Yardl:

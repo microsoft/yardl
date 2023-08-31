@@ -42,7 +42,8 @@ Unions are represented as a JSON array:
 
 The `tag` field is unique name automatically assigned to each union case,
 derived from its type name. The labels are used in the Python codegen and in
-HDF5 encoding. The tag can be explicitly set using the expaded `!union` syntax ([C++](/cpp/language#unions)).
+HDF5 encoding. The tag can be explicitly set using the expanded `!union` syntax
+([C++](/cpp/language#unions)).
 
 If `null` is one of the cases, it is represented by `null` in the JSON as well:
 
@@ -210,7 +211,8 @@ The `base` field is only present in the JSON if it is specified in the Yardl.
 
 ## Flags
 
-Like enums, flags are top-level types and cannot be declared inline. They represented just like enums except for the "flags" field name:
+Like enums, flags are top-level types and cannot be declared inline. They
+represented just like enums except for the "flags" field name:
 
 ```JSON
 {

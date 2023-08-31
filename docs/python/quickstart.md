@@ -126,7 +126,7 @@ $ tree .
 ```
 
 `yardl_types.py` contains definitions of primitive data types. `types.py`
-contains the defitions of the non-protocol types defined in our model (in this
+contains the definitions of the non-protocol types defined in our model (in this
 case, `Header` and `Sample`). `protocols.py` contains abstract protocol reader
 and writer classes, from which concrete implementations inherit from in
 `binary.py` and `ndjson.py`.

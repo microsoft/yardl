@@ -124,7 +124,7 @@ In the root directory, `types.h` contains generated code for named types like
 records and enums. `protocols.h` declares abstract protocol readers and writers,
 which are the base classes for implementations in `binary/protocols.h` and
 `hdf5/protocols.h`, and `ndjson/protocols.h`. The `yardl/yardl.h` file defines
-core datatypes like arrays and dates, and the header files in `yardl/detail/`
+core data types like arrays and dates, and the header files in `yardl/detail/`
 are included in generated files but are not intended to be included by consuming
 code.
 

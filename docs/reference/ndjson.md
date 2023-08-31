@@ -87,12 +87,12 @@ HelloNDJson: !protocol
 ```
 
 Each line is a JSON document. The first contains the encoding format version
-along with the [protocol schema](#protocol-schema-json-reference). Each
+along with the [protocol schema](protocol-schema). Each
 subsequent line is a JSON object with a single field. The name of the field is the
 protocol step name, and its value is payload value. Note that in the case of
 streams, there can be many contiguous lines with same protocol step name.
 
-Datatypes are serialized as follows:
+Data types are serialized as follows:
 
 - Booleans are serialized as JSON booleans.
 - Integers and floating-point numbers are serialized as JSON numbers.
@@ -121,11 +121,10 @@ Datatypes are serialized as follows:
   the key and value of each entry.
 - Optional values are serialized as the inner value if present, and `null` if
   not.
-- If each type case of a union serializes to a distict JSON datatype (number,
-  string, boolean, array, object), the inner value is serialized directy. For
+- If each type case of a union serializes to a distinct JSON datatype (number,
+  string, boolean, array, object), the inner value is serialized directly. For
   example the union `[int, bool]` can be written simply as `29` or `true`. In
   other cases, the value is serialized a JSON object with a single field. The
-  field's name is the label of the type case set (see [here](#unions-1) for a
-  description of the labels) and the field's value is the JSON serialization of
-  the inner value. For example, a value of the union `[float, double]` could be
-  written as `{"float32": 29.9}` or `{"float64": 882.2}`.
+  field's name is the tag of the type case set and the field's value is the JSON
+  serialization of the inner value. For example, a value of the union `[float,
+  double]` could be written as `{"float32": 29.9}` or `{"float64": 882.2}`.
