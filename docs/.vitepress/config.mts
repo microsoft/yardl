@@ -94,51 +94,28 @@ export default defineConfig({
     search: {
       provider: "local",
       options: {
-        _render(src, env, md) {
-          switch (env.relativePath.split("/")[0]) {
-            case "cpp":
-              var searchDiscriminator = "C++";
-              break;
-            case "python":
-              var searchDiscriminator = "Python";
-              break;
-            default:
-              var searchDiscriminator = "";
-          }
-
-          if (searchDiscriminator != "") {
-            // HACK: Insert a fake title of {searchDiscriminator}
-            // and demote all other headings to be under it.
-            // The objective is to make the search results show
-            // the top-level directory. e.g.
-            // Python > The Yardl Language > Maps
-            // c++ > The Yardl Language > Maps
-
-            src = src
-              .replace(/^#+ .+$/gm, `#$&`)
-              .replace(/^## .+$/m, `# ${searchDiscriminator}\n$&`);
-          }
-
-          return md.render(src, env);
-        },
-
         miniSearch: {
-          searchOptions: {
-            boostDocument(documentId, term, storedFields:any) {
-              // filter out results that match the fake title we inserted above.
-              if (storedFields.titles.length == 0) {
-                switch (storedFields.title) {
-                  case "C++":
-                  case "Python":
-                    return 0;
+          options: {
+            extractField(document, fieldName) {
+              const fieldValue = document[fieldName];
+              if (fieldName == "titles") {
+                // Several documents have the same title in the Python and C++
+                // documentation, which makes is hard to know which language a
+                // search result is for. So we augment the "titles" field with
+                // either C++ or Python if the document is under one of those paths.
+
+                var documentId: string = document["id"];
+                if (documentId.startsWith("/yardl/cpp")) {
+                  // Include "C++"" in the search preview "path"
+                  return ["C++"].concat(fieldValue);
+                }
+
+                if (documentId.startsWith("/yardl/python")) {
+                  return ["Python"].concat(fieldValue);
                 }
               }
-              return 1;
-            },
 
-            filter(result) {
-              console.log("filtering!");
-              return true;
+              return fieldValue;
             },
           },
         },
