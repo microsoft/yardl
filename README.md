@@ -3,8 +3,63 @@
 Yardl is a simple schema language and command-line tool that generates domain
 types and serialization code.
 
-![A DSL on the left is translated to C++ code on the
-right](docs/images/overview.png)
+<details>
+<summary>Simple example</summary>
+Given a Yardl definition like this:
+
+```yaml
+# This is an example protocol, which is defined as a Header value
+# followed by a stream of zero or more Sample values
+MyProtocol: !protocol
+  sequence:
+    header: Header
+    samples: !stream
+      items: Sample
+
+# Header is a record with a single string field
+Header: !record
+  fields:
+    subject: string
+
+# Sample is a record made up of a datetime and
+# a vector of integers
+Sample: !record
+  fields:
+    timestamp: datetime
+    data: int*
+```
+
+After running `yardl generate`, you can write code like the following to write
+data to standard out in a compact binary format:
+
+```python
+import sys
+from sandbox import BinaryMyProtocolWriter, Header, Sample, DateTime
+
+def generate_samples():
+    yield Sample(timestamp=DateTime.now(), data=[1, 2, 3])
+    yield Sample(timestamp=DateTime.now(), data=[4, 5, 6])
+
+with BinaryMyProtocolWriter(sys.stdout.buffer) as w:
+    w.write_header(Header(subject="Me"))
+    w.write_samples(generate_samples())
+```
+
+And then another script can read it in from standard in:
+
+```python
+import sys
+from sandbox import BinaryMyProtocolReader
+
+with BinaryMyProtocolReader(sys.stdin.buffer) as r:
+    print(r.read_header())
+    for sample in r.read_samples():
+        print(sample)
+```
+
+</details>
+
+## Motivation
 
 It is conceptually similar to, and inspired by, [Avro](https://avro.apache.org/),
 [Protocol Buffers](https://developers.google.com/protocol-buffers),
@@ -33,7 +88,7 @@ code by hand:
 
 ## Getting Started
 
-Please check out the project [documentation](docs/docs.md).
+Please check out the project [documentation](https://aka.ms/yardl).
 
 ## Project Status
 
@@ -41,10 +96,10 @@ We are releasing this project order to get community feedback and contributions.
 It is not complete and is **not ready for production use** at this time. We
 expect to introduce breaking changes until the project reaches V1.
 
-We currently support C++ codegen and work will begin on Python soon. Other
-planned features include:
+We currently support C++ and Python codegen. Other planned features include:
 
 - Reading data with a different schema version
+- MATLAB support
 - References between packages
 - Validating schema evolution is non-breaking
 - Constraints
