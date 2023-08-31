@@ -2,6 +2,8 @@
 # https://vitepress.dev/reference/default-theme-home-page
 layout: home
 
+titleTemplate: false
+
 hero:
   name: Yardl
   text: Define and Stream Instrument Data
