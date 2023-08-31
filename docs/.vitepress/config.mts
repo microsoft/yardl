@@ -1,10 +1,11 @@
 import { defineConfig } from "vitepress";
 
+const base = "/yardl"
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
   title: "Yardl",
   description: "Yardl Documentation",
-  head: [["link", { rel: "icon", href: "/favicon.ico" }]],
+  head: [["link", { rel: "icon", href: `${base}/favicon.ico` }]],
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
     nav: [
@@ -122,6 +123,6 @@ export default defineConfig({
       },
     },
   },
-  base: "/yardl/",
+  base: base,
   srcExclude: ["README.md"],
 });
