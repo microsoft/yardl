@@ -96,8 +96,7 @@ We are releasing this project order to get community feedback and contributions.
 It is not complete and is **not ready for production use** at this time. We
 expect to introduce breaking changes until the project reaches V1.
 
-We currently support C++ codegen and work will begin on Python soon. Other
-planned features include:
+We currently support C++ and Python codegen. Other planned features include:
 
 - Reading data with a different schema version
 - MATLAB support
