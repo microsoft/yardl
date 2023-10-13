@@ -4,7 +4,7 @@
 package cmd
 
 import (
-	"fmt"
+	"log"
 	"os"
 
 	"github.com/microsoft/yardl/tooling/pkg/dsl"
@@ -22,8 +22,7 @@ func newValidateCommand() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			err := validateImpl()
 			if err != nil {
-				fmt.Fprintln(os.Stderr, err)
-				os.Exit(1)
+				log.Fatalf("Error: %v\n", err)
 			}
 		},
 	}
@@ -42,6 +41,11 @@ func validateImpl() error {
 		return err
 	}
 
+	err = packaging.CollectImports(dir, packageInfo.Imports)
+	if err != nil {
+		return err
+	}
+
 	namespace, err := dsl.ParseYamlInDir(dir, packageInfo.Namespace)
 	if err != nil {
 		return err
@@ -51,5 +55,35 @@ func validateImpl() error {
 	if err != nil {
 		return err
 	}
-	return err
+
+	// Now, load all previous versions
+
+	dirs, err := packaging.CollectPredecessors(dir, packageInfo.Predecessors)
+	if err != nil {
+		return err
+	}
+
+	for _, dir := range dirs {
+		packageInfo, err := packaging.ReadPackageInfo(dir)
+		if err != nil {
+			return err
+		}
+
+		err = packaging.CollectImports(dir, packageInfo.Imports)
+		if err != nil {
+			return err
+		}
+
+		namespace, err := dsl.ParseYamlInDir(dir, packageInfo.Namespace)
+		if err != nil {
+			return err
+		}
+
+		_, err = dsl.Validate([]*dsl.Namespace{namespace})
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

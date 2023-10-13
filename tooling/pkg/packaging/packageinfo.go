@@ -23,6 +23,9 @@ type PackageInfo struct {
 	FilePath  string `yaml:"-"`
 	Namespace string `yaml:"namespace"`
 
+	Predecessors []string `yaml:"predecessors"`
+	Imports      []string `yaml:"imports"`
+
 	Json   *JsonCodegenOptions   `yaml:"json,omitempty"`
 	Cpp    *CppCodegenOptions    `yaml:"cpp,omitempty"`
 	Python *PythonCodegenOptions `yaml:"python,omitempty"`
@@ -80,6 +83,8 @@ func ReadPackageInfo(directory string) (PackageInfo, error) {
 	if err != nil {
 		return packageInfo, validation.NewValidationError(err, packageFilePath)
 	}
+
+	//log.Printf("Parsed packageInfo with namespace: %v", packageInfo.Namespace)
 
 	return packageInfo, packageInfo.Validate()
 }

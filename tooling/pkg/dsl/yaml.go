@@ -20,6 +20,8 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+// Parses all model YAML files, combining them into a single Namespace
+// path can be a single YAML file or a directory containing YAML files
 func ParseYamlInDir(path string, namespaceName string) (*Namespace, error) {
 	errorSink := validation.ErrorSink{}
 
