@@ -25,5 +25,4 @@ dependencies:
   - python=3.11.3
   - rich=13.5.1
   - shellcheck=0.8.0 # local
-  - valgrind=3.18.1 # local
   - xtensor=0.24.2

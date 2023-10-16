@@ -7,7 +7,7 @@
 # subsequent stage and normalize the permissions.
 #########################################################
 
-FROM mcr.microsoft.com/oss/busybox/busybox:1.33.1 as file-normalizer
+FROM mcr.microsoft.com/devcontainers/base:1.0.9-ubuntu-22.04 as file-normalizer
 
 COPY environment.yml \
      .devcontainer/devcontainer.bashrc  \
@@ -20,7 +20,7 @@ RUN chmod -R 555 /data/
 # Installs all dependencies and tooling for development.
 #########################################################
 
-FROM mcr.microsoft.com/vscode/devcontainers/base:0.201.8-focal AS devcontainer
+FROM mcr.microsoft.com/devcontainers/base:1.0.9-ubuntu-22.04 AS devcontainer
 
 # Install needed packages and setup non-root user.
 ARG USERNAME="vscode"
@@ -28,7 +28,6 @@ ARG USER_UID=1000
 ARG USER_GID=$USER_UID
 ARG CONDA_GID=900
 ARG CONDA_ENVIRONMENT_NAME=yardl
-ARG VSCODE_DEV_CONTAINERS_SCRIPT_LIBRARY_VERSION=v0.229.0
 
 RUN apt-get update \
     && apt-get install -y \
@@ -41,9 +40,10 @@ RUN apt-get update \
 
 # Use the OSS Moby CLI instead of the licensed Docker CLI
 ARG USE_MOBY="false"
-ARG DOCKER_VERSION="20.10"
-RUN script=$(curl -fsSL "https://raw.githubusercontent.com/devcontainers/features/8d3685e09f18dd8b0a6bce50abe3e868dac27a69/src/docker-outside-of-docker/install.sh") \
-    && MOBY=${USE_MOBY} VERSION=${DOCKER_VERSION} bash -c "$script"
+ARG DOCKER_VERSION="24.0.6"
+ARG DOCKER_DASH_COMPOSE_VERSION="none"
+RUN script=$(curl -fsSL "https://raw.githubusercontent.com/devcontainers/features/4fca96b5e8a4bfc93679098cb19d73c65ce571eb/src/docker-outside-of-docker/install.sh") \
+    && MOBY=${USE_MOBY} VERSION=${DOCKER_VERSION} DOCKERDASHCOMPOSEVERSION=${DOCKER_DASH_COMPOSE_VERSION} bash -c "$script"
 
 # Setting the ENTRYPOINT to docker-init.sh will configure non-root access to
 # the Docker socket if "overrideCommand": false is set in devcontainer.json.
@@ -86,7 +86,13 @@ RUN umask 0002 \
 
 # Install watchexec
 ARG WATCHEXEC_VERSION=1.22.3
-RUN wget --quiet https://github.com/watchexec/watchexec/releases/download/v${WATCHEXEC_VERSION}/watchexec-${WATCHEXEC_VERSION}-x86_64-unknown-linux-musl.deb -O watchexec.deb \
+RUN arch=$(dpkg --print-architecture); \
+    if [ "$arch" = "amd64" ]; then \
+        arch=x86_64; \
+    elif [ "$arch" = "arm64" ]; then \
+        arch="aarch64"; \
+    fi; \
+wget --quiet https://github.com/watchexec/watchexec/releases/download/v${WATCHEXEC_VERSION}/watchexec-${WATCHEXEC_VERSION}-${arch}-unknown-linux-musl.deb -O watchexec.deb \
     && dpkg -i watchexec.deb
 
 # Add a file that is to be sourced from .bashrc and from the devops pipeline stages
