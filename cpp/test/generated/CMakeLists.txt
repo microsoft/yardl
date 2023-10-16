@@ -23,7 +23,6 @@ add_library(test_model_generated OBJECT
   ndjson/protocols.cc
   binary/protocols.cc
   hdf5/protocols.cc
-  mocks.cc
   translator_impl.cc
 )
 
@@ -32,4 +31,13 @@ target_link_libraries(test_model_generated
   PUBLIC ${HDF5_CXX_LIBRARIES}
   PUBLIC xtensor
   PUBLIC date::date
+)
+
+add_library(test_model_generated_mocks OBJECT
+  mocks.cc
+)
+
+target_link_libraries(test_model_generated_mocks
+  PUBLIC test_model_generated
+  PUBLIC gtest
 )

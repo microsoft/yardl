@@ -14,7 +14,7 @@ cpp_version := "17"
 
 @install:
     cd tooling/cmd/yardl; \
-    CGO_ENABLED=0 GOOS=linux go install -ldflags="-s -w" .
+    go install -ldflags="-s -w" .
 
 @generate: install
     cd models/test && yardl generate
@@ -42,7 +42,7 @@ cpp_version := "17"
 
 @tooling-test:
     cd tooling; \
-    CGO_ENABLED=0 go test ./... | { grep -v "\\[[no test files\\]" || true; }
+    go test ./... | { grep -v "\\[[no test files\\]" || true; }
 
 @watch-tooling-test:
     cd tooling; \

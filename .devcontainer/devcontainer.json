@@ -7,6 +7,12 @@
     "context": ".."
   },
   "runArgs": ["--cap-add=SYS_PTRACE", "--security-opt", "seccomp=unconfined"],
+  "overrideCommand": false,
+  "mounts": [
+    // Bind mount docker socket under an alias to support docker-from-docker
+    "source=/var/run/docker.sock,target=/var/run/docker-host.sock,type=bind"
+  ],
+  "remoteUser": "vscode",
 
   // Configure tool-specific properties.
   "customizations": {
@@ -119,16 +125,8 @@
     }
   },
 
-  // Use 'forwardPorts' to make a list of ports inside the container available locally.
-  // "forwardPorts": [],
-
-  // Use 'postCreateCommand' to run commands after the container is created.
-  // "postCreateCommand": "go version",
-
-  // Comment out to connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
-  "remoteUser": "vscode",
-
   "containerEnv": {
-    "PYTHONPATH": "/workspaces/yardl/python"
+    "PYTHONPATH": "/workspaces/yardl/python",
+    "CGO_ENABLED": "0"
   }
 }

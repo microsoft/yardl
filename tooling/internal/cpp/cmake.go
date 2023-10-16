@@ -42,7 +42,7 @@ find_package(xtensor REQUIRED)
 
 	fmt.Fprintf(w, "add_library(%s OBJECT\n", objectLibraryName)
 	w.Indented(func() {
-		if options.InternalGenerateMocks {
+		if options.InternalGenerateTranslator {
 			w.WriteStringln("factories.cc")
 		}
 		w.WriteStringln("protocols.cc")
@@ -50,9 +50,6 @@ find_package(xtensor REQUIRED)
 		w.WriteStringln("ndjson/protocols.cc")
 		w.WriteStringln("binary/protocols.cc")
 		w.WriteStringln("hdf5/protocols.cc")
-		if options.InternalGenerateMocks {
-			w.WriteStringln("mocks.cc")
-		}
 		if options.InternalGenerateTranslator {
 			w.WriteStringln("translator_impl.cc")
 		}
@@ -67,6 +64,24 @@ find_package(xtensor REQUIRED)
 		w.WriteStringln("PUBLIC date::date")
 	})
 	w.WriteString(")\n")
+
+	if options.InternalGenerateMocks {
+		w.WriteStringln("")
+
+		mocksObjectLibraryName := fmt.Sprintf("%s_mocks", objectLibraryName)
+		fmt.Fprintf(w, "add_library(%s OBJECT\n", mocksObjectLibraryName)
+		w.Indented(func() {
+			w.WriteStringln("mocks.cc")
+		})
+		w.WriteString(")\n\n")
+
+		fmt.Fprintf(w, "target_link_libraries(%s\n", mocksObjectLibraryName)
+		w.Indented(func() {
+			fmt.Fprintf(w, "PUBLIC %s\n", objectLibraryName)
+			w.WriteStringln("PUBLIC gtest")
+		})
+		w.WriteString(")\n")
+	}
 
 	definitionsPath := path.Join(options.SourcesOutputDir, "CMakeLists.txt")
 	return iocommon.WriteFileIfNeeded(definitionsPath, b.Bytes(), 0644)

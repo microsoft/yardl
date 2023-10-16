@@ -86,13 +86,7 @@ RUN umask 0002 \
 
 # Install watchexec
 ARG WATCHEXEC_VERSION=1.22.3
-RUN arch=$(dpkg --print-architecture); \
-    if [ "$arch" = "amd64" ]; then \
-        arch=x86_64; \
-    elif [ "$arch" = "arm64" ]; then \
-        arch="aarch64"; \
-    fi; \
-wget --quiet https://github.com/watchexec/watchexec/releases/download/v${WATCHEXEC_VERSION}/watchexec-${WATCHEXEC_VERSION}-${arch}-unknown-linux-musl.deb -O watchexec.deb \
+RUN wget --quiet https://github.com/watchexec/watchexec/releases/download/v${WATCHEXEC_VERSION}/watchexec-${WATCHEXEC_VERSION}-$(uname -m)-unknown-linux-musl.deb -O watchexec.deb \
     && dpkg -i watchexec.deb
 
 # Add a file that is to be sourced from .bashrc and from the devops pipeline stages
