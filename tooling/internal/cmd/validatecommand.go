@@ -36,54 +36,38 @@ func validateImpl() error {
 		return err
 	}
 
-	packageInfo, err := packaging.ReadPackageInfo(dir)
+	packageInfo, err := packaging.LoadPackage(dir)
 	if err != nil {
 		return err
 	}
 
-	err = packaging.CollectImports(dir, packageInfo.Imports)
+	_, err = validatePackage(packageInfo)
+
+	return err
+}
+
+func validatePackage(packageInfo packaging.PackageInfo) (*dsl.Environment, error) {
+	namespace, err := dsl.ParsePackageContents(packageInfo)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	namespace, err := dsl.ParseYamlInDir(dir, packageInfo.Namespace)
+	env, err := dsl.Validate([]*dsl.Namespace{namespace})
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	_, err = dsl.Validate([]*dsl.Namespace{namespace})
-	if err != nil {
-		return err
-	}
-
-	// Now, load all previous versions
-
-	dirs, err := packaging.CollectPredecessors(dir, packageInfo.Predecessors)
-	if err != nil {
-		return err
-	}
-
-	for _, dir := range dirs {
-		packageInfo, err := packaging.ReadPackageInfo(dir)
+	for _, packageInfo := range packageInfo.PreviousVersions {
+		namespace, err := dsl.ParsePackageContents(packageInfo)
 		if err != nil {
-			return err
-		}
-
-		err = packaging.CollectImports(dir, packageInfo.Imports)
-		if err != nil {
-			return err
-		}
-
-		namespace, err := dsl.ParseYamlInDir(dir, packageInfo.Namespace)
-		if err != nil {
-			return err
+			return env, err
 		}
 
 		_, err = dsl.Validate([]*dsl.Namespace{namespace})
 		if err != nil {
-			return err
+			return env, err
 		}
 	}
 
-	return nil
+	return env, nil
 }

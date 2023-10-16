@@ -37,7 +37,7 @@ func newGenerateCommand() *cobra.Command {
 		Args:                  cobra.NoArgs,
 		Run: func(*cobra.Command, []string) {
 			if !flags.watch {
-				packageInfo, err := generateCore()
+				packageInfo, err := generateImpl()
 				if err != nil {
 					// avoiding returning the error here because
 					// cobra prefixes the error with "Error: "
@@ -116,7 +116,7 @@ func generateInWatchMode() {
 		}
 	}()
 
-	packageInfo, err := generateCore()
+	packageInfo, err := generateImpl()
 	screen.Clear()
 	screen.MoveTopLeft()
 
@@ -141,19 +141,15 @@ func WriteSuccessfulSummary(packageInfo packaging.PackageInfo) {
 	}
 }
 
-func generateCore() (packaging.PackageInfo, error) {
+func generateImpl() (packaging.PackageInfo, error) {
 	inputDir, _ := os.Getwd()
-	packageInfo, err := packaging.ReadPackageInfo(inputDir)
+
+	packageInfo, err := packaging.LoadPackage(inputDir)
 	if err != nil {
 		return packageInfo, err
 	}
 
-	namespace, err := dsl.ParseYamlInDir(inputDir, packageInfo.Namespace)
-	if err != nil {
-		return packageInfo, err
-	}
-
-	env, err := dsl.Validate([]*dsl.Namespace{namespace})
+	env, err := validatePackage(packageInfo)
 	if err != nil {
 		return packageInfo, err
 	}

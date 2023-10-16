@@ -20,6 +20,10 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+func ParsePackageContents(pkgInfo packaging.PackageInfo) (*Namespace, error) {
+	return ParseYamlInDir(pkgInfo.PackageDir(), pkgInfo.Namespace)
+}
+
 // Parses all model YAML files, combining them into a single Namespace
 // path can be a single YAML file or a directory containing YAML files
 func ParseYamlInDir(path string, namespaceName string) (*Namespace, error) {

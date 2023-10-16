@@ -76,13 +76,13 @@ func initGetterClient() {
 	}
 }
 
-func CollectPredecessors(pwd string, predecessors []string) ([]string, error) {
-	log.Printf("Collecting predecessors for %v", pwd)
-	return collectDependencies(pwd, predecessors)
+func CollectPredecessors(pkgInfo PackageInfo) ([]string, error) {
+	log.Printf("Collecting predecessors for %v", pkgInfo.PackageDir())
+	return collectDependencies(pkgInfo.PackageDir(), pkgInfo.Predecessors)
 }
 
-func CollectImports(pwd string, imports []string) error {
-	return collectImportsRecursively(pwd, imports, MaxImportRecursionDepth)
+func CollectImports(pkgInfo PackageInfo) error {
+	return collectImportsRecursively(pkgInfo.PackageDir(), pkgInfo.Imports, MaxImportRecursionDepth)
 }
 
 func collectImportsRecursively(pwd string, imports []string, depthRemaining int) error {

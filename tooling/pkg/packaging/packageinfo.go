@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"path"
 	"path/filepath"
 	"regexp"
 
@@ -23,8 +22,9 @@ type PackageInfo struct {
 	FilePath  string `yaml:"-"`
 	Namespace string `yaml:"namespace"`
 
-	Predecessors []string `yaml:"predecessors"`
-	Imports      []string `yaml:"imports"`
+	Predecessors     []string      `yaml:"predecessors,omitempty"`
+	Imports          []string      `yaml:"imports,omitempty"`
+	PreviousVersions []PackageInfo `yaml:"-"`
 
 	Json   *JsonCodegenOptions   `yaml:"json,omitempty"`
 	Cpp    *CppCodegenOptions    `yaml:"cpp,omitempty"`
@@ -42,7 +42,7 @@ type CppCodegenOptions struct {
 }
 
 func (o CppCodegenOptions) ChangeOutputDir(newRelativeDir string) CppCodegenOptions {
-	o.SourcesOutputDir = path.Join(o.SourcesOutputDir, newRelativeDir)
+	o.SourcesOutputDir = filepath.Join(o.SourcesOutputDir, newRelativeDir)
 	return o
 }
 
@@ -66,7 +66,7 @@ type PythonCodegenOptions struct {
 }
 
 func ReadPackageInfo(directory string) (PackageInfo, error) {
-	packageFilePath, _ := filepath.Abs(path.Join(directory, PackageFileName))
+	packageFilePath, _ := filepath.Abs(filepath.Join(directory, PackageFileName))
 	packageInfo := PackageInfo{FilePath: packageFilePath}
 	f, err := os.Open(packageFilePath)
 	if err != nil {
@@ -89,9 +89,46 @@ func ReadPackageInfo(directory string) (PackageInfo, error) {
 	return packageInfo, packageInfo.Validate()
 }
 
+// Parses PackageInfo in dir then loads all package Imports and Predecessors
+func LoadPackage(dir string) (PackageInfo, error) {
+	packageInfo, err := ReadPackageInfo(dir)
+	if err != nil {
+		return packageInfo, err
+	}
+
+	err = CollectImports(packageInfo)
+	if err != nil {
+		return packageInfo, err
+	}
+
+	dirs, err := CollectPredecessors(packageInfo)
+	if err != nil {
+		return packageInfo, err
+	}
+
+	for _, dir := range dirs {
+		predecessorInfo, err := ReadPackageInfo(dir)
+		if err != nil {
+			return packageInfo, err
+		}
+
+		err = CollectImports(predecessorInfo)
+		if err != nil {
+			return packageInfo, err
+		}
+
+		packageInfo.PreviousVersions = append(packageInfo.PreviousVersions, predecessorInfo)
+	}
+
+	return packageInfo, nil
+}
+
+func (p *PackageInfo) PackageDir() string {
+	return filepath.Dir(p.FilePath)
+}
+
 func (p *PackageInfo) Validate() error {
 	errorSink := &validation.ErrorSink{}
-	packageDir := path.Dir(p.FilePath)
 
 	if p.Namespace == "" {
 		errorSink.Add(validation.NewValidationError(errors.New("the 'namespace' field is missing"), p.FilePath))
@@ -104,7 +141,7 @@ func (p *PackageInfo) Validate() error {
 		if p.Json.OutputDir == "" {
 			errorSink.Add(validation.NewValidationError(errors.New("the 'json.outputDir' field must not be empty"), p.FilePath))
 		} else {
-			p.Json.OutputDir = path.Join(packageDir, p.Json.OutputDir)
+			p.Json.OutputDir = filepath.Join(p.PackageDir(), p.Json.OutputDir)
 		}
 	}
 
@@ -113,7 +150,7 @@ func (p *PackageInfo) Validate() error {
 		if p.Cpp.SourcesOutputDir == "" {
 			errorSink.Add(validation.NewValidationError(errors.New("the 'cpp.sourcesOutputDir' field must not be empty"), p.FilePath))
 		} else {
-			p.Cpp.SourcesOutputDir = path.Join(packageDir, p.Cpp.SourcesOutputDir)
+			p.Cpp.SourcesOutputDir = filepath.Join(p.PackageDir(), p.Cpp.SourcesOutputDir)
 		}
 	}
 
@@ -122,7 +159,7 @@ func (p *PackageInfo) Validate() error {
 		if p.Python.OutputDir == "" {
 			errorSink.Add(validation.NewValidationError(errors.New("the 'python.outputDir' field must not be empty"), p.FilePath))
 		} else {
-			p.Python.OutputDir = path.Join(packageDir, p.Python.OutputDir)
+			p.Python.OutputDir = filepath.Join(p.PackageDir(), p.Python.OutputDir)
 		}
 	}
 
