@@ -6,9 +6,11 @@ package packaging
 import (
 	"errors"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"regexp"
+	"strings"
 
 	"github.com/microsoft/yardl/tooling/internal/validation"
 	"gopkg.in/yaml.v3"
@@ -22,9 +24,11 @@ type PackageInfo struct {
 	FilePath  string `yaml:"-"`
 	Namespace string `yaml:"namespace"`
 
-	Predecessors     []string      `yaml:"predecessors,omitempty"`
-	Imports          []string      `yaml:"imports,omitempty"`
-	PreviousVersions []PackageInfo `yaml:"-"`
+	PredecessorUrls []string `yaml:"predecessors,omitempty"`
+	ImportUrls      []string `yaml:"imports,omitempty"`
+
+	Predecessors []*PackageInfo `yaml:"-"`
+	Imports      []*PackageInfo `yaml:"-"`
 
 	Json   *JsonCodegenOptions   `yaml:"json,omitempty"`
 	Cpp    *CppCodegenOptions    `yaml:"cpp,omitempty"`
@@ -65,9 +69,9 @@ type PythonCodegenOptions struct {
 	InternalSymlinkStaticFiles bool         `yaml:"internalSymlinkStaticFiles"`
 }
 
-func ReadPackageInfo(directory string) (PackageInfo, error) {
+func ReadPackageInfo(directory string) (*PackageInfo, error) {
 	packageFilePath, _ := filepath.Abs(filepath.Join(directory, PackageFileName))
-	packageInfo := PackageInfo{FilePath: packageFilePath}
+	packageInfo := &PackageInfo{FilePath: packageFilePath}
 	f, err := os.Open(packageFilePath)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -85,49 +89,39 @@ func ReadPackageInfo(directory string) (PackageInfo, error) {
 	}
 
 	//log.Printf("Parsed packageInfo with namespace: %v", packageInfo.Namespace)
-
-	return packageInfo, packageInfo.Validate()
+	return packageInfo, packageInfo.validate()
 }
 
 // Parses PackageInfo in dir then loads all package Imports and Predecessors
-func LoadPackage(dir string) (PackageInfo, error) {
-	packageInfo, err := ReadPackageInfo(dir)
+func LoadPackage(dir string) (*PackageInfo, error) {
+	packageInfo, err := loadVersion(dir)
 	if err != nil {
-		return packageInfo, err
+		return nil, err
 	}
 
-	err = CollectImports(packageInfo)
-	if err != nil {
-		return packageInfo, err
-	}
-
-	dirs, err := CollectPredecessors(packageInfo)
+	dirs, err := collectPredecessors(packageInfo)
 	if err != nil {
 		return packageInfo, err
 	}
 
 	for _, dir := range dirs {
-		predecessorInfo, err := ReadPackageInfo(dir)
+		predecessorInfo, err := loadVersion(dir)
 		if err != nil {
 			return packageInfo, err
 		}
 
-		err = CollectImports(predecessorInfo)
-		if err != nil {
-			return packageInfo, err
-		}
-
-		packageInfo.PreviousVersions = append(packageInfo.PreviousVersions, predecessorInfo)
+		packageInfo.Predecessors = append(packageInfo.Predecessors, predecessorInfo)
 	}
 
 	return packageInfo, nil
 }
 
+// Returns path to package directory
 func (p *PackageInfo) PackageDir() string {
 	return filepath.Dir(p.FilePath)
 }
 
-func (p *PackageInfo) Validate() error {
+func (p *PackageInfo) validate() error {
 	errorSink := &validation.ErrorSink{}
 
 	if p.Namespace == "" {
@@ -164,4 +158,73 @@ func (p *PackageInfo) Validate() error {
 	}
 
 	return errorSink.AsError()
+}
+
+func loadVersion(dir string) (*PackageInfo, error) {
+	packageInfo, err := ReadPackageInfo(dir)
+	if err != nil {
+		return packageInfo, err
+	}
+
+	err = collectImportsRecursively(packageInfo, MaxImportRecursionDepth)
+	if err != nil {
+		return packageInfo, err
+	}
+
+	log.Printf("Imports collected for %v:", packageInfo.FilePath)
+	logImports(packageInfo, 0)
+
+	return packageInfo, nil
+}
+
+func logImports(p *PackageInfo, level int) {
+	indent := strings.Repeat("  ", level)
+	log.Printf("%v- %v: %v", indent, p.PackageDir(), p.Namespace)
+	for _, dep := range p.Imports {
+		logImports(dep, level+1)
+	}
+}
+
+func collectImportsRecursively(parent *PackageInfo, depthRemaining int) error {
+	if len(parent.ImportUrls) <= 0 {
+		return nil
+	}
+
+	if depthRemaining <= 0 {
+		return validation.NewValidationError(errors.New("reached maximum number of recursive imports"), parent.FilePath)
+	}
+
+	log.Printf("Collecting imports for %v", parent.PackageDir())
+	dirs, err := fetchAndCachePackages(parent.PackageDir(), parent.ImportUrls)
+	if err != nil {
+		return validation.NewValidationError(err, parent.FilePath)
+	}
+
+	for _, dir := range dirs {
+		packageInfo, err := ReadPackageInfo(dir)
+		if err != nil {
+			return err
+		}
+
+		if err := collectImportsRecursively(packageInfo, depthRemaining-1); err != nil {
+			return err
+		}
+
+		parent.Imports = append(parent.Imports, packageInfo)
+	}
+
+	return nil
+}
+
+func collectPredecessors(pkgInfo *PackageInfo) ([]string, error) {
+	if len(pkgInfo.PredecessorUrls) <= 0 {
+		return nil, nil
+	}
+
+	log.Printf("Collecting predecessors for %v", pkgInfo.PackageDir())
+	dirs, err := fetchAndCachePackages(pkgInfo.PackageDir(), pkgInfo.PredecessorUrls)
+	if err != nil {
+		err = validation.NewValidationError(err, pkgInfo.FilePath)
+	}
+	return dirs, err
 }

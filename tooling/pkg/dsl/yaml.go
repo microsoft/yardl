@@ -20,7 +20,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-func ParsePackageContents(pkgInfo packaging.PackageInfo) (*Namespace, error) {
+func ParsePackageContents(pkgInfo *packaging.PackageInfo) (*Namespace, error) {
 	return ParseYamlInDir(pkgInfo.PackageDir(), pkgInfo.Namespace)
 }
 

@@ -31,12 +31,12 @@ func newValidateCommand() *cobra.Command {
 }
 
 func validateImpl() error {
-	dir, err := os.Getwd()
+	inputDir, err := os.Getwd()
 	if err != nil {
 		return err
 	}
 
-	packageInfo, err := packaging.LoadPackage(dir)
+	packageInfo, err := packaging.LoadPackage(inputDir)
 	if err != nil {
 		return err
 	}
@@ -46,26 +46,45 @@ func validateImpl() error {
 	return err
 }
 
-func validatePackage(packageInfo packaging.PackageInfo) (*dsl.Environment, error) {
-	namespace, err := dsl.ParsePackageContents(packageInfo)
+func parseNamespaces(p *packaging.PackageInfo, namespaces *[]*dsl.Namespace) error {
+	namespace, err := dsl.ParsePackageContents(p)
+	if err != nil {
+		return nil
+	}
+
+	for _, dep := range p.Imports {
+		if err := parseNamespaces(dep, namespaces); err != nil {
+			return err
+		}
+	}
+
+	*namespaces = append(*namespaces, namespace)
+	log.Printf("Parsed namespace %v", namespace.Name)
+
+	return nil
+}
+
+func validatePackage(packageInfo *packaging.PackageInfo) (*dsl.Environment, error) {
+	var namespaces []*dsl.Namespace
+
+	if err := parseNamespaces(packageInfo, &namespaces); err != nil {
+		return nil, err
+	}
+
+	env, err := dsl.Validate(namespaces)
 	if err != nil {
 		return nil, err
 	}
 
-	env, err := dsl.Validate([]*dsl.Namespace{namespace})
-	if err != nil {
-		return nil, err
-	}
-
-	for _, packageInfo := range packageInfo.PreviousVersions {
-		namespace, err := dsl.ParsePackageContents(packageInfo)
-		if err != nil {
-			return env, err
+	for _, packageInfo := range packageInfo.Predecessors {
+		var namespaces []*dsl.Namespace
+		if err := parseNamespaces(packageInfo, &namespaces); err != nil {
+			return nil, err
 		}
 
-		_, err = dsl.Validate([]*dsl.Namespace{namespace})
+		_, err = dsl.Validate(namespaces)
 		if err != nil {
-			return env, err
+			return nil, err
 		}
 	}
 

@@ -7,7 +7,6 @@ import (
 	"context"
 	"crypto/md5"
 	"encoding/hex"
-	"errors"
 	"log"
 	"net/url"
 	"os"
@@ -76,44 +75,10 @@ func initGetterClient() {
 	}
 }
 
-func CollectPredecessors(pkgInfo PackageInfo) ([]string, error) {
-	log.Printf("Collecting predecessors for %v", pkgInfo.PackageDir())
-	return collectDependencies(pkgInfo.PackageDir(), pkgInfo.Predecessors)
-}
-
-func CollectImports(pkgInfo PackageInfo) error {
-	return collectImportsRecursively(pkgInfo.PackageDir(), pkgInfo.Imports, MaxImportRecursionDepth)
-}
-
-func collectImportsRecursively(pwd string, imports []string, depthRemaining int) error {
-	if depthRemaining <= 0 {
-		return errors.New("reached maximum number of recursive imports")
-	}
-
-	log.Printf("Collecting imports for %v", pwd)
-	dirs, err := collectDependencies(pwd, imports)
-	if err != nil {
-		return err
-	}
-
-	for _, dir := range dirs {
-		packageInfo, err := ReadPackageInfo(dir)
-		if err != nil {
-			return err
-		}
-
-		if err := collectImportsRecursively(dir, packageInfo.Imports, depthRemaining-1); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func collectDependencies(pwd string, urls []string) ([]string, error) {
+func fetchAndCachePackages(pwd string, urls []string) ([]string, error) {
 	var dirs []string
 	for _, src := range urls {
-		dst, err := collectDependency(pwd, src)
+		dst, err := fetchAndCachePackage(pwd, src)
 		if err != nil {
 			return dirs, err
 		}
@@ -125,12 +90,12 @@ func collectDependencies(pwd string, urls []string) ([]string, error) {
 // Fetches and caches a yardl schema package directory from url
 // pwd is the directory of the current schema package
 // src is the path to the dependency
-func collectDependency(pwd string, src string) (string, error) {
+func fetchAndCachePackage(pwd string, src string) (string, error) {
 	hash := md5.Sum([]byte(src))
 	dst := filepath.Join(cacheDir, hex.EncodeToString(hash[:]))
 
 	if stat, err := os.Stat(dst); err == nil && stat.IsDir() {
-		log.Printf("%v already cached in %v", src, dst)
+		log.Printf("Already cached: %v -> %v", src, dst)
 		return dst, nil
 	}
 
@@ -141,13 +106,13 @@ func collectDependency(pwd string, src string) (string, error) {
 		GetMode: getter.ModeDir,
 	}
 
-	log.Printf("Retrieving %v", req.Src)
+	log.Printf("Fetching %v", req.Src)
 	res, err := client.Get(context.Background(), req)
 	if err != nil {
 		return "", err
 	}
 	if dst == res.Dst {
-		log.Printf("Saved in: %v", res.Dst)
+		log.Printf("Cached in: %v", res.Dst)
 	}
 	return res.Dst, nil
 }

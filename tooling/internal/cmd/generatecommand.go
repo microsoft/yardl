@@ -129,7 +129,7 @@ func generateInWatchMode() {
 	}
 }
 
-func WriteSuccessfulSummary(packageInfo packaging.PackageInfo) {
+func WriteSuccessfulSummary(packageInfo *packaging.PackageInfo) {
 	if packageInfo.Cpp != nil {
 		fmt.Printf("✅ Wrote C++ to %s.\n", packageInfo.Cpp.SourcesOutputDir)
 	}
@@ -141,8 +141,11 @@ func WriteSuccessfulSummary(packageInfo packaging.PackageInfo) {
 	}
 }
 
-func generateImpl() (packaging.PackageInfo, error) {
-	inputDir, _ := os.Getwd()
+func generateImpl() (*packaging.PackageInfo, error) {
+	inputDir, err := os.Getwd()
+	if err != nil {
+		return nil, err
+	}
 
 	packageInfo, err := packaging.LoadPackage(inputDir)
 	if err != nil {
