@@ -82,6 +82,17 @@ func writePackageInitFile(packageDir string, ns *dsl.Namespace) error {
 	w := formatting.NewIndentedWriter(&b, "    ")
 	common.WriteGeneratedFileHeader(w)
 
+	w.WriteStringln("import numpy as np")
+	w.WriteStringln("from packaging import version")
+	w.WriteStringln("")
+
+	w.WriteStringln(`MIN_NUMPY_VERSION = "1.22.0"`)
+	w.WriteStringln("if version.parse(np.__version__) < version.parse(MIN_NUMPY_VERSION):")
+	w.Indented(func() {
+		w.WriteStringln(`raise ImportError(f"Your installed numpy version is {np.__version__}, but version >= {MIN_NUMPY_VERSION} is required.")`)
+	})
+	w.WriteStringln("")
+
 	fmt.Fprintf(w, "from .yardl_types import *\n")
 
 	typesMembers := make([]string, 0)

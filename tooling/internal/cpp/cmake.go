@@ -28,7 +28,8 @@ func writeCMakeLists(env *dsl.Environment, options packaging.CppCodegenOptions) 
 # target_link_libraries(<your target> %s)
 # add_subdirectory(<path to this directory>)
 
-find_package(date REQUIRED)
+set(HOWARD_HINNANT_DATE_MINIMUM_VERSION "3.0.0")
+find_package(date ${HOWARD_HINNANT_DATE_MINIMUM_VERSION} REQUIRED)
 
 if(VCPKG_TARGET_TRIPLET)
   set(HDF5_CXX_LIBRARIES hdf5::hdf5_cpp-shared)
@@ -36,8 +37,14 @@ else()
   set(HDF5_CXX_LIBRARIES hdf5::hdf5_cpp)
 endif()
 
-find_package(HDF5 REQUIRED COMPONENTS C CXX)
-find_package(xtensor REQUIRED)
+set(HDF5_MINIMUM_VERSION "1.10.5")
+find_package(HDF5 ${HDF5_MINIMUM_VERSION} REQUIRED COMPONENTS C CXX)
+
+set(XTENSOR_MINIMUM_VERSION "0.21.10")
+find_package(xtensor ${XTENSOR_MINIMUM_VERSION} REQUIRED)
+
+set(NLOHMANN_JSON_MINIMUM_VERSION "3.11.1")
+find_package(nlohmann_json ${NLOHMANN_JSON_MINIMUM_VERSION} REQUIRED)
 `, objectLibraryName)
 
 	fmt.Fprintf(w, "add_library(%s OBJECT\n", objectLibraryName)
@@ -62,6 +69,7 @@ find_package(xtensor REQUIRED)
 		w.WriteStringln("PUBLIC ${HDF5_CXX_LIBRARIES}")
 		w.WriteStringln("PUBLIC xtensor")
 		w.WriteStringln("PUBLIC date::date")
+		w.WriteStringln("PUBLIC nlohmann_json::nlohmann_json")
 	})
 	w.WriteString(")\n")
 

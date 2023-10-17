@@ -2,7 +2,7 @@ import io
 import pathlib
 import subprocess
 import types
-from typing import Callable, TypeVar, cast
+from typing import Callable, TypeVar, Union, cast
 
 import test_model as tm
 from .factories import Format
@@ -17,8 +17,8 @@ _translator_path = (
 
 
 def invoke_translator(
-    input: bytes | str, input_format: Format, output_format: Format
-) -> bytes | str:
+    input: Union[bytes, str], input_format: Format, output_format: Format
+) -> Union[bytes, str]:
     if isinstance(input, str):
         print(input)
         input = input.encode("utf-8")

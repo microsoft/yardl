@@ -205,8 +205,9 @@ struct adl_serializer<yardl::DynamicNDArray<T>> {
   static void from_json(ordered_json const& j, yardl::DynamicNDArray<T>& value) {
     value.resize(j.at("shape").get<std::vector<size_t>>());
     auto data_array = j.at("data").get<std::vector<T>>();
-    for (size_t i = 0; i < data_array.size(); ++i) {
-      value.flat(i) = data_array[i];
+    size_t i = 0;
+    for (auto& element : value) {
+      element = data_array[i++];
     }
   }
 };
@@ -225,8 +226,9 @@ struct adl_serializer<yardl::NDArray<T, N>> {
   static void from_json(ordered_json const& j, yardl::NDArray<T, N>& value) {
     value.resize(j.at("shape").get<std::vector<size_t>>());
     auto data_array = j.at("data").get<std::vector<T>>();
-    for (size_t i = 0; i < data_array.size(); ++i) {
-      value.flat(i) = data_array[i];
+    size_t i = 0;
+    for (auto& element : value) {
+      element = data_array[i++];
     }
   }
 };
@@ -243,8 +245,9 @@ struct adl_serializer<yardl::FixedNDArray<T, Dims...>> {
 
   static void from_json(ordered_json const& j, yardl::FixedNDArray<T, Dims...>& value) {
     auto data_array = j.get<std::vector<T>>();
-    for (size_t i = 0; i < data_array.size(); ++i) {
-      value.flat(i) = data_array[i];
+    size_t i = 0;
+    for (auto& element : value) {
+      element = data_array[i++];
     }
   }
 };

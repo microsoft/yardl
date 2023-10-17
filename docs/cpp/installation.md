@@ -7,11 +7,14 @@
 In order to compile the C++ code that `yardl` generates, you will need to have a
 C++17 (or more recent) compiler and the following dependencies installed:
 
-1. HDF5 with the [C++ API](https://support.hdfgroup.org/HDF5/doc/cpplus_RM/).
-2. [xtensor](https://xtensor.readthedocs.io/en/latest/)
+1. HDF5 with the [C++ API](https://support.hdfgroup.org/HDF5/doc/cpplus_RM/),
+   version 1.10.5 or later.
+2. [xtensor](https://xtensor.readthedocs.io/en/latest/), version 0.21.10 or
+   later.
 3. Howard Hinnant's [date](https://howardhinnant.github.io/date/date.html)
-   library.
-4. [JSON for Modern C++](https://github.com/nlohmann/json).
+   library, version 3.0.0 or later.
+4. [JSON for Modern C++](https://github.com/nlohmann/json), version: 3.11.1 or
+   later.
 
 ### Conda
 

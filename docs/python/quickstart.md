@@ -6,7 +6,8 @@
 
 ### Dependencies
 
-The generated Python code requires Python 3.9 or newer and you need to have [NumPy](https://numpy.org/install/) installed.
+The generated Python code requires Python 3.9 or newer and you need to have
+[NumPy](https://numpy.org/install/) version 1.22.0 or later installed.
 
 ## Getting our Feet Wet
 
