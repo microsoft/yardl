@@ -1,5 +1,11 @@
 # Compact Binary Encoding Reference
 
+The details of the binary encoding format are provided here for reference. You
+do not need to be familiar this in order to use Yardl, as it takes care of
+serialization and deserialization for you. To learn about the semantics of the
+data types and how to use them, refer to the [Python](../python/language.md) or
+[C++](../cpp/language.md) language guides.
+
 ::: warning
 We might make breaking changes to this format before V1.
 :::
@@ -141,7 +147,7 @@ The format is:
 
 Enums and flags are written as a varint encoding of the underlying integer
 value. Note that the value is signed if the underlying type is signed, which is
-the default case if the `base` properly is not specified.
+the default case if the `base` property is not specified.
 
 ## Records
 
