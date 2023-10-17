@@ -14,7 +14,7 @@ cpp_version := "17"
 
 @install:
     cd tooling/cmd/yardl; \
-    CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go install -ldflags="-s -w" .
+    go install -ldflags="-s -w" .
 
 @generate: install
     cd models/test && yardl generate
