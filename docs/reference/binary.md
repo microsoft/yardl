@@ -146,7 +146,7 @@ the default case if the `base` properly is not specified.
 ## Records
 
 Records are encoded as the concatenation of the value of its fields, in the
-order they appear in the schema.
+order they appear in the schema. Note that there is no padding between fields.
 
 ## Streams
 
