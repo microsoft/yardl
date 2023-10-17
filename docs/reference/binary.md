@@ -1,7 +1,7 @@
 # Compact Binary Encoding Reference
 
 The details of the binary encoding format are provided here for reference. You
-do not need to be familiar this in order to use Yardl, as it takes care of
+do not need to be familiar with this in order to use Yardl, as it takes care of
 serialization and deserialization for you. To learn about the semantics of the
 data types and how to use them, refer to the [Python](../python/language.md) or
 [C++](../cpp/language.md) language guides.
