@@ -3,11 +3,6 @@ project(yardl)
 
 SET(CMAKE_CXX_FLAGS_DEBUG "-O0 -ggdb")
 
-
-set(CMAKE_C_COMPILER "/opt/conda/envs/yardl/bin/aarch64-conda-linux-gnu-cc")
-set(CMAKE_CXX_COMPILER "/opt/conda/envs/yardl/bin/aarch64-conda-linux-gnu-c++")
-set(CMAKE_OSX_ARCHITECTURES "arm64")
-
 #Set the build type to Release if not specified
 if (NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release CACHE STRING
