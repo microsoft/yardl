@@ -4,7 +4,7 @@
       "name": "Linux",
       "includePath": [],
       "defines": [],
-      "compilerPath": "/opt/conda/envs/yardl/bin/x86_64-conda_cos6-linux-gnu-g++",
+      "compilerPath": "${env:GXX}",
       "cStandard": "gnu17",
       "cppStandard": "c++17",
       "intelliSenseMode": "linux-gcc-x64",

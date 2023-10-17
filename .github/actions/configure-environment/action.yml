@@ -8,7 +8,10 @@ runs:
       shell: bash
       run: |
         # filter conda environment file
-        cat environment.yml | grep -v "#.*\<\local\>" > ci-environment.yml
+        awk -v arch="$(uname -m)" '
+        !/#.*arch=/ && !/#.*\<local\>/ { print; next }
+        /#.*arch=/ && $0 ~ "arch="arch { print }
+        ' environment.yml > ci-environment.yml
 
     - uses: conda-incubator/setup-miniconda@v2
       with:

@@ -68,9 +68,14 @@ RUN wget --no-hsts --quiet https://github.com/conda-forge/miniforge/releases/dow
     && find /opt -type d | xargs -n 1 chmod g+s
 
 # Create a conda environment from the environment file in the repo root.
+# Filter out lines where the the # arch=??? comment does not match the current architecture.
 COPY --from=file-normalizer --chown=$USER_UID:conda /data/environment.yml /tmp/build/
 RUN umask 0002 \
-    && /opt/conda/bin/mamba env create -f /tmp/build/environment.yml \
+    && awk -v arch="$(uname -m)" ' \
+        !/#.*arch=/ { print; next } \
+        /#.*arch=/ && $0 ~ "arch="arch { print } \
+        ' /tmp/build/environment.yml > /tmp/build/filtered_environment.yml \
+    && /opt/conda/bin/mamba env create -f /tmp/build/filtered_environment.yml \
     && /opt/conda/bin/mamba clean -fy \
     && sudo chown -R :conda /opt/conda/envs
 
@@ -104,6 +109,8 @@ fi\n" >> /etc/bash.bashrc
 ENV CMAKE_GENERATOR=Ninja
 
 # Create a kits file for the VSCode CMake Tools extension, so you are not prompted for which kit to select whenever you open VSCode
-RUN mkdir -p /home/vscode/.local/share/CMakeTools \
-    && echo '[{"name":"GCC-10","compilers":{"C":"/opt/conda/envs/yardl/bin/x86_64-conda_cos6-linux-gnu-gcc","CXX":"/opt/conda/envs/yardl/bin/x86_64-conda_cos6-linux-gnu-g++"}}]' > /home/vscode/.local/share/CMakeTools/cmake-tools-kits.json \
+RUN . /opt/conda/etc/profile.d/conda.sh \
+    && conda activate /opt/conda/envs/yardl \
+    && mkdir -p /home/vscode/.local/share/CMakeTools \
+    && echo "[{\"name\":\"Conda\",\"compilers\":{\"C\":\"$GCC\",\"CXX\":\"$GXX\"}}]" > /home/vscode/.local/share/CMakeTools/cmake-tools-kits.json \
     && chown vscode:conda /home/vscode/.local/share/CMakeTools/cmake-tools-kits.json
