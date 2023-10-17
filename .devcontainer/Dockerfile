@@ -1,3 +1,5 @@
+ARG DEVCONTAINER_BASE=mcr.microsoft.com/devcontainers/base:1.0.9-ubuntu-22.04
+
 #########################################################
 # file-normalizer stage
 # In order to use BuildKit remote caching, input files must have
@@ -7,7 +9,7 @@
 # subsequent stage and normalize the permissions.
 #########################################################
 
-FROM mcr.microsoft.com/devcontainers/base:1.0.9-ubuntu-22.04 as file-normalizer
+FROM ${DEVCONTAINER_BASE} as file-normalizer
 
 COPY environment.yml \
      .devcontainer/devcontainer.bashrc  \
@@ -20,7 +22,7 @@ RUN chmod -R 555 /data/
 # Installs all dependencies and tooling for development.
 #########################################################
 
-FROM mcr.microsoft.com/devcontainers/base:1.0.9-ubuntu-22.04 AS devcontainer
+FROM ${DEVCONTAINER_BASE} AS devcontainer
 
 # Install needed packages and setup non-root user.
 ARG USERNAME="vscode"
