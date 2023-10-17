@@ -1,7 +1,8 @@
 # Protocol Schema JSON
 
 A protocol's schema is embedded in a JSON format in the binary, HDF5, and NDJSON
-encodings. This JSON format is informally described here.
+encodings. This JSON format is informally described here. You do not need to be
+familiar with this in order to use Yardl.
 
 ::: warning
 We might make breaking changes to this format before V1.
