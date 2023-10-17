@@ -82,16 +82,23 @@ func writePackageInitFile(packageDir string, ns *dsl.Namespace) error {
 	w := formatting.NewIndentedWriter(&b, "    ")
 	common.WriteGeneratedFileHeader(w)
 
-	w.WriteStringln("import numpy as np")
-	w.WriteStringln("from packaging import version")
-	w.WriteStringln("")
+	w.WriteStringln(`from typing import Tuple as _Tuple
+import re as _re
+import numpy as _np
 
-	w.WriteStringln(`MIN_NUMPY_VERSION = "1.22.0"`)
-	w.WriteStringln("if version.parse(np.__version__) < version.parse(MIN_NUMPY_VERSION):")
-	w.Indented(func() {
-		w.WriteStringln(`raise ImportError(f"Your installed numpy version is {np.__version__}, but version >= {MIN_NUMPY_VERSION} is required.")`)
-	})
-	w.WriteStringln("")
+_MIN_NUMPY_VERSION = (1, 22, 0)
+
+def _parse_version(version: str) -> _Tuple[int, ...]:
+    try:
+        return tuple(map(int, version.split(".")))
+    except ValueError:
+        # ignore any prerelease suffix
+        version = _re.sub(r"[^0-9.]", "", version)
+        return tuple(map(int, version.split(".")))
+
+if _parse_version(_np.__version__) < _MIN_NUMPY_VERSION:
+    raise ImportError(f"Your installed numpy version is {_np.__version__}, but version >= {'.'.join(str(i) for i in _MIN_NUMPY_VERSION)} is required.")
+`)
 
 	fmt.Fprintf(w, "from .yardl_types import *\n")
 
