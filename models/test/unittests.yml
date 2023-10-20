@@ -369,9 +369,7 @@ StateTest: !protocol
       items: int
     anotherInt: int
 
-TwoDArray<T>: T[x, y]
-
-Image<T>: TwoDArray<T>
+Image<T>: T[x, y]
 
 GenericRecord<T1, T2>: !record
   fields:
@@ -384,6 +382,13 @@ MyTuple<T1, T2>: !record
   fields:
     v1: T1
     v2: T2
+
+AliasedTuple<T1, T2>: MyTuple<T1, T2>
+
+RecordWithAliasedGenerics: !record
+  fields:
+    myStrings: MyTuple<string, string>
+    aliasedStrings: AliasedTuple<string, string>
 
 SimpleGenerics: !protocol
   sequence:

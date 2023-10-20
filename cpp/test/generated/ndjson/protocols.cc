@@ -106,6 +106,9 @@ void to_json(ordered_json& j, test_model::MyTuple<T1, T2> const& value);
 template <typename T1, typename T2>
 void from_json(ordered_json const& j, test_model::MyTuple<T1, T2>& value);
 
+void to_json(ordered_json& j, test_model::RecordWithAliasedGenerics const& value);
+void from_json(ordered_json const& j, test_model::RecordWithAliasedGenerics& value);
+
 template <typename T0, typename T1>
 void to_json(ordered_json& j, test_model::GenericRecordWithComputedFields<T0, T1> const& value);
 template <typename T0, typename T1>
@@ -1557,6 +1560,25 @@ void from_json(ordered_json const& j, test_model::MyTuple<T1, T2>& value) {
   }
   if (auto it = j.find("v2"); it != j.end()) {
     it->get_to(value.v2);
+  }
+}
+
+void to_json(ordered_json& j, test_model::RecordWithAliasedGenerics const& value) {
+  j = ordered_json::object();
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.my_strings)) {
+    j.push_back({"myStrings", value.my_strings});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.aliased_strings)) {
+    j.push_back({"aliasedStrings", value.aliased_strings});
+  }
+}
+
+void from_json(ordered_json const& j, test_model::RecordWithAliasedGenerics& value) {
+  if (auto it = j.find("myStrings"); it != j.end()) {
+    it->get_to(value.my_strings);
+  }
+  if (auto it = j.find("aliasedStrings"); it != j.end()) {
+    it->get_to(value.aliased_strings);
   }
 }
 

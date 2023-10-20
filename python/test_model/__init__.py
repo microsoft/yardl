@@ -32,6 +32,7 @@ from .types import (
     AliasedOpenGeneric,
     AliasedOptional,
     AliasedString,
+    AliasedTuple,
     ArrayWithKeywordDimensionNames,
     DaysOfWeek,
     EnumWithKeywordSymbols,
@@ -49,6 +50,7 @@ from .types import (
     MyTuple,
     NamedFixedNDArray,
     NamedNDArray,
+    RecordWithAliasedGenerics,
     RecordWithArrays,
     RecordWithArraysSimpleSyntax,
     RecordWithComputedFields,
@@ -80,7 +82,6 @@ from .types import (
     TextFormat,
     TimeOrDatetime,
     TupleWithRecords,
-    TwoDArray,
     UInt64Enum,
     get_dtype,
 )

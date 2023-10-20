@@ -1090,7 +1090,7 @@
         },
         {
           "alias": {
-            "name": "TwoDArray",
+            "name": "Image",
             "typeParameters": [
               "T"
             ],
@@ -1106,20 +1106,6 @@
                   }
                 ]
               }
-            }
-          }
-        },
-        {
-          "alias": {
-            "name": "Image",
-            "typeParameters": [
-              "T"
-            ],
-            "type": {
-              "name": "TestModel.TwoDArray",
-              "typeArguments": [
-                "T"
-              ]
             }
           }
         },
@@ -1174,6 +1160,49 @@
               {
                 "name": "v2",
                 "type": "T2"
+              }
+            ]
+          }
+        },
+        {
+          "alias": {
+            "name": "AliasedTuple",
+            "typeParameters": [
+              "T1",
+              "T2"
+            ],
+            "type": {
+              "name": "TestModel.MyTuple",
+              "typeArguments": [
+                "T1",
+                "T2"
+              ]
+            }
+          }
+        },
+        {
+          "record": {
+            "name": "RecordWithAliasedGenerics",
+            "fields": [
+              {
+                "name": "myStrings",
+                "type": {
+                  "name": "TestModel.MyTuple",
+                  "typeArguments": [
+                    "string",
+                    "string"
+                  ]
+                }
+              },
+              {
+                "name": "aliasedStrings",
+                "type": {
+                  "name": "TestModel.AliasedTuple",
+                  "typeArguments": [
+                    "string",
+                    "string"
+                  ]
+                }
               }
             ]
           }
