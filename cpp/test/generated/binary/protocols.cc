@@ -349,6 +349,17 @@ struct IsTriviallySerializable<test_model::MyTuple<T1, T2>> {
     offsetof(__T__, v1) < offsetof(__T__, v2);
 };
 
+template <>
+struct IsTriviallySerializable<test_model::RecordWithAliasedGenerics> {
+  using __T__ = test_model::RecordWithAliasedGenerics;
+  static constexpr bool value = 
+    std::is_standard_layout_v<__T__> &&
+    IsTriviallySerializable<decltype(__T__::my_strings)>::value &&
+    IsTriviallySerializable<decltype(__T__::aliased_strings)>::value &&
+    (sizeof(__T__) == (sizeof(__T__::my_strings) + sizeof(__T__::aliased_strings))) &&
+    offsetof(__T__, my_strings) < offsetof(__T__, aliased_strings);
+};
+
 template <typename T0, typename T1>
 struct IsTriviallySerializable<test_model::GenericRecordWithComputedFields<T0, T1>> {
   using __T__ = test_model::GenericRecordWithComputedFields<T0, T1>;
@@ -1192,6 +1203,46 @@ template<typename T1, yardl::binary::Reader<T1> ReadT1, typename T2, yardl::bina
 
   ReadT1(stream, value.v1);
   ReadT2(stream, value.v2);
+}
+
+template<typename T1, yardl::binary::Writer<T1> WriteT1, typename T2, yardl::binary::Writer<T2> WriteT2>
+[[maybe_unused]] void WriteAliasedTuple(yardl::binary::CodedOutputStream& stream, test_model::AliasedTuple<T1, T2> const& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<test_model::AliasedTuple<T1, T2>>::value) {
+    yardl::binary::WriteTriviallySerializable(stream, value);
+    return;
+  }
+
+  test_model::binary::WriteMyTuple<T1, WriteT1, T2, WriteT2>(stream, value);
+}
+
+template<typename T1, yardl::binary::Reader<T1> ReadT1, typename T2, yardl::binary::Reader<T2> ReadT2>
+[[maybe_unused]] void ReadAliasedTuple(yardl::binary::CodedInputStream& stream, test_model::AliasedTuple<T1, T2>& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<test_model::AliasedTuple<T1, T2>>::value) {
+    yardl::binary::ReadTriviallySerializable(stream, value);
+    return;
+  }
+
+  test_model::binary::ReadMyTuple<T1, ReadT1, T2, ReadT2>(stream, value);
+}
+
+[[maybe_unused]] void WriteRecordWithAliasedGenerics(yardl::binary::CodedOutputStream& stream, test_model::RecordWithAliasedGenerics const& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<test_model::RecordWithAliasedGenerics>::value) {
+    yardl::binary::WriteTriviallySerializable(stream, value);
+    return;
+  }
+
+  test_model::binary::WriteMyTuple<std::string, yardl::binary::WriteString, std::string, yardl::binary::WriteString>(stream, value.my_strings);
+  test_model::binary::WriteAliasedTuple<std::string, yardl::binary::WriteString, std::string, yardl::binary::WriteString>(stream, value.aliased_strings);
+}
+
+[[maybe_unused]] void ReadRecordWithAliasedGenerics(yardl::binary::CodedInputStream& stream, test_model::RecordWithAliasedGenerics& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<test_model::RecordWithAliasedGenerics>::value) {
+    yardl::binary::ReadTriviallySerializable(stream, value);
+    return;
+  }
+
+  test_model::binary::ReadMyTuple<std::string, yardl::binary::ReadString, std::string, yardl::binary::ReadString>(stream, value.my_strings);
+  test_model::binary::ReadAliasedTuple<std::string, yardl::binary::ReadString, std::string, yardl::binary::ReadString>(stream, value.aliased_strings);
 }
 
 [[maybe_unused]] void WriteAliasedString(yardl::binary::CodedOutputStream& stream, test_model::AliasedString const& value) {

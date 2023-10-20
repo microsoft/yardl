@@ -32,6 +32,12 @@ def test_defaulting():
     o = tm.RecordWithOptionalFields()
     assert o.optional_int == None
 
+    ag = tm.RecordWithAliasedGenerics()
+    assert ag.my_strings.v1 == ""
+    assert ag.my_strings.v2 == ""
+    assert ag.aliased_strings.v1 == ""
+    assert ag.aliased_strings.v2 == ""
+
     ## Need to provide default values for generic fields
     with pytest.raises(TypeError):
         eval("tm.MyTuple()")

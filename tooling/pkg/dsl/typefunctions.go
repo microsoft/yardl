@@ -666,12 +666,14 @@ func ContainsGenericTypeParameter(node Node) bool {
 		case *GenericTypeParameter:
 			contains = true
 			return
+		case *NamedType:
+			self.Visit(node.DefinitionMeta)
 		case *SimpleType:
 			self.VisitChildren(node)
 			self.Visit(node.ResolvedDefinition)
+		default:
+			self.VisitChildren(node)
 		}
-
-		self.VisitChildren(node)
 	})
 
 	return contains

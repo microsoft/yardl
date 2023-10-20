@@ -959,6 +959,33 @@ class MyTuple(typing.Generic[T1, T2]):
         return f"MyTuple(v1={repr(self.v1)}, v2={repr(self.v2)})"
 
 
+AliasedTuple = MyTuple[T1, T2]
+
+class RecordWithAliasedGenerics:
+    my_strings: MyTuple[str, str]
+    aliased_strings: AliasedTuple[str, str]
+
+    def __init__(self, *,
+        my_strings: typing.Optional[MyTuple[str, str]] = None,
+        aliased_strings: typing.Optional[AliasedTuple[str, str]] = None,
+    ):
+        self.my_strings = my_strings if my_strings is not None else MyTuple(v1="", v2="")
+        self.aliased_strings = aliased_strings if aliased_strings is not None else MyTuple(v1="", v2="")
+
+    def __eq__(self, other: object) -> bool:
+        return (
+            isinstance(other, RecordWithAliasedGenerics)
+            and self.my_strings == other.my_strings
+            and self.aliased_strings == other.aliased_strings
+        )
+
+    def __str__(self) -> str:
+        return f"RecordWithAliasedGenerics(myStrings={self.my_strings}, aliasedStrings={self.aliased_strings})"
+
+    def __repr__(self) -> str:
+        return f"RecordWithAliasedGenerics(myStrings={repr(self.my_strings)}, aliasedStrings={repr(self.aliased_strings)})"
+
+
 AliasedString = str
 
 AliasedEnum = Fruits
@@ -1493,6 +1520,8 @@ def _mk_get_dtype():
     dtype_map[Image] = lambda type_args: np.dtype(np.object_)
     dtype_map[GenericRecord] = lambda type_args: np.dtype([('scalar_1', get_dtype(type_args[0])), ('scalar_2', get_dtype(type_args[1])), ('vector_1', np.dtype(np.object_)), ('image_2', get_dtype(types.GenericAlias(Image, (type_args[1],))))], align=True)
     dtype_map[MyTuple] = lambda type_args: np.dtype([('v1', get_dtype(type_args[0])), ('v2', get_dtype(type_args[1]))], align=True)
+    dtype_map[AliasedTuple] = lambda type_args: get_dtype(types.GenericAlias(MyTuple, (type_args[0], type_args[1],)))
+    dtype_map[RecordWithAliasedGenerics] = np.dtype([('my_strings', get_dtype(types.GenericAlias(MyTuple, (str, str,)))), ('aliased_strings', get_dtype(types.GenericAlias(AliasedTuple, (str, str,))))], align=True)
     dtype_map[AliasedString] = np.dtype(np.object_)
     dtype_map[AliasedEnum] = get_dtype(Fruits)
     dtype_map[AliasedOpenGeneric] = lambda type_args: get_dtype(types.GenericAlias(MyTuple, (type_args[0], type_args[1],)))

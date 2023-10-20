@@ -539,6 +539,22 @@ struct _Inner_MyTuple {
   _T2_Inner v2;
 };
 
+struct _Inner_RecordWithAliasedGenerics {
+  _Inner_RecordWithAliasedGenerics() {} 
+  _Inner_RecordWithAliasedGenerics(test_model::RecordWithAliasedGenerics const& o) 
+      : my_strings(o.my_strings),
+      aliased_strings(o.aliased_strings) {
+  }
+
+  void ToOuter (test_model::RecordWithAliasedGenerics& o) const {
+    yardl::hdf5::ToOuter(my_strings, o.my_strings);
+    yardl::hdf5::ToOuter(aliased_strings, o.aliased_strings);
+  }
+
+  test_model::hdf5::_Inner_MyTuple<yardl::hdf5::InnerVlenString, std::string, yardl::hdf5::InnerVlenString, std::string> my_strings;
+  test_model::hdf5::_Inner_MyTuple<yardl::hdf5::InnerVlenString, std::string, yardl::hdf5::InnerVlenString, std::string> aliased_strings;
+};
+
 template <typename _T0_Inner, typename T0, typename _T1_Inner, typename T1>
 struct _Inner_GenericRecordWithComputedFields {
   _Inner_GenericRecordWithComputedFields() {} 
@@ -885,6 +901,14 @@ template <typename _T1_Inner, typename T1, typename _T2_Inner, typename T2>
   H5::CompType t(sizeof(RecordType));
   t.insertMember("v1", HOFFSET(RecordType, v1), T1_type);
   t.insertMember("v2", HOFFSET(RecordType, v2), T2_type);
+  return t;
+}
+
+[[maybe_unused]] H5::CompType GetRecordWithAliasedGenericsHdf5Ddl() {
+  using RecordType = test_model::hdf5::_Inner_RecordWithAliasedGenerics;
+  H5::CompType t(sizeof(RecordType));
+  t.insertMember("myStrings", HOFFSET(RecordType, my_strings), test_model::hdf5::GetMyTupleHdf5Ddl<yardl::hdf5::InnerVlenString, std::string, yardl::hdf5::InnerVlenString, std::string>(yardl::hdf5::InnerVlenStringDdl(), yardl::hdf5::InnerVlenStringDdl()));
+  t.insertMember("aliasedStrings", HOFFSET(RecordType, aliased_strings), test_model::hdf5::GetMyTupleHdf5Ddl<yardl::hdf5::InnerVlenString, std::string, yardl::hdf5::InnerVlenString, std::string>(yardl::hdf5::InnerVlenStringDdl(), yardl::hdf5::InnerVlenStringDdl()));
   return t;
 }
 

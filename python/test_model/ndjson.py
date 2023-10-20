@@ -1539,6 +1539,50 @@ class _MyTupleConverter(typing.Generic[T1, T1_NP, T2, T2_NP], _ndjson.JsonConver
         ) # type:ignore 
 
 
+class _RecordWithAliasedGenericsConverter(_ndjson.JsonConverter[RecordWithAliasedGenerics, np.void]):
+    def __init__(self) -> None:
+        self._my_strings_converter = _MyTupleConverter(_ndjson.string_converter, _ndjson.string_converter)
+        self._aliased_strings_converter = _MyTupleConverter(_ndjson.string_converter, _ndjson.string_converter)
+        super().__init__(np.dtype([
+            ("my_strings", self._my_strings_converter.overall_dtype()),
+            ("aliased_strings", self._aliased_strings_converter.overall_dtype()),
+        ]))
+
+    def to_json(self, value: RecordWithAliasedGenerics) -> object:
+        if not isinstance(value, RecordWithAliasedGenerics):
+            raise TypeError("Expected 'RecordWithAliasedGenerics' instance")
+        json_object = {}
+
+        json_object["myStrings"] = self._my_strings_converter.to_json(value.my_strings)
+        json_object["aliasedStrings"] = self._aliased_strings_converter.to_json(value.aliased_strings)
+        return json_object
+
+    def numpy_to_json(self, value: np.void) -> object:
+        if not isinstance(value, np.void):
+            raise TypeError("Expected 'np.void' instance")
+        json_object = {}
+
+        json_object["myStrings"] = self._my_strings_converter.numpy_to_json(value["my_strings"])
+        json_object["aliasedStrings"] = self._aliased_strings_converter.numpy_to_json(value["aliased_strings"])
+        return json_object
+
+    def from_json(self, json_object: object) -> RecordWithAliasedGenerics:
+        if not isinstance(json_object, dict):
+            raise TypeError("Expected 'dict' instance")
+        return RecordWithAliasedGenerics(
+            my_strings=self._my_strings_converter.from_json(json_object["myStrings"],),
+            aliased_strings=self._aliased_strings_converter.from_json(json_object["aliasedStrings"],),
+        )
+
+    def from_json_to_numpy(self, json_object: object) -> np.void:
+        if not isinstance(json_object, dict):
+            raise TypeError("Expected 'dict' instance")
+        return (
+            self._my_strings_converter.from_json_to_numpy(json_object["myStrings"]),
+            self._aliased_strings_converter.from_json_to_numpy(json_object["aliasedStrings"]),
+        ) # type:ignore 
+
+
 class _GenericRecordWithComputedFieldsConverter(typing.Generic[T0, T0_NP, T1, T1_NP], _ndjson.JsonConverter[GenericRecordWithComputedFields[T0, T1], np.void]):
     def __init__(self, t0_converter: _ndjson.JsonConverter[T0, T0_NP], t1_converter: _ndjson.JsonConverter[T1, T1_NP]) -> None:
         self._f1_converter = _ndjson.UnionConverter(T0OrT1, [(T0OrT1[T0, T1].T0, t0_converter, [dict]), (T0OrT1[T0, T1].T1, t1_converter, [dict])], False)

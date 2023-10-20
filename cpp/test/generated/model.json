@@ -1166,6 +1166,49 @@
         },
         {
           "alias": {
+            "name": "AliasedTuple",
+            "typeParameters": [
+              "T1",
+              "T2"
+            ],
+            "type": {
+              "name": "TestModel.MyTuple",
+              "typeArguments": [
+                "T1",
+                "T2"
+              ]
+            }
+          }
+        },
+        {
+          "record": {
+            "name": "RecordWithAliasedGenerics",
+            "fields": [
+              {
+                "name": "myStrings",
+                "type": {
+                  "name": "TestModel.MyTuple",
+                  "typeArguments": [
+                    "string",
+                    "string"
+                  ]
+                }
+              },
+              {
+                "name": "aliasedStrings",
+                "type": {
+                  "name": "TestModel.AliasedTuple",
+                  "typeArguments": [
+                    "string",
+                    "string"
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "alias": {
             "name": "AliasedString",
             "type": "string"
           }

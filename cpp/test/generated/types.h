@@ -529,6 +529,23 @@ struct MyTuple {
   }
 };
 
+template <typename T1, typename T2>
+using AliasedTuple = test_model::MyTuple<T1, T2>;
+
+struct RecordWithAliasedGenerics {
+  test_model::MyTuple<std::string, std::string> my_strings{};
+  test_model::AliasedTuple<std::string, std::string> aliased_strings{};
+
+  bool operator==(const RecordWithAliasedGenerics& other) const {
+    return my_strings == other.my_strings &&
+      aliased_strings == other.aliased_strings;
+  }
+
+  bool operator!=(const RecordWithAliasedGenerics& other) const {
+    return !(*this == other);
+  }
+};
+
 using AliasedString = std::string;
 
 using AliasedEnum = test_model::Fruits;

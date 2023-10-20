@@ -1651,6 +1651,24 @@ class _MyTupleSerializer(typing.Generic[T1, T1_NP, T2, T2_NP], _binary.RecordSer
         return MyTuple[T1, T2](v1=field_values[0], v2=field_values[1])
 
 
+class _RecordWithAliasedGenericsSerializer(_binary.RecordSerializer[RecordWithAliasedGenerics]):
+    def __init__(self) -> None:
+        super().__init__([("my_strings", _MyTupleSerializer(_binary.string_serializer, _binary.string_serializer)), ("aliased_strings", _MyTupleSerializer(_binary.string_serializer, _binary.string_serializer))])
+
+    def write(self, stream: _binary.CodedOutputStream, value: RecordWithAliasedGenerics) -> None:
+        if isinstance(value, np.void):
+            self.write_numpy(stream, value)
+            return
+        self._write(stream, value.my_strings, value.aliased_strings)
+
+    def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
+        self._write(stream, value['my_strings'], value['aliased_strings'])
+
+    def read(self, stream: _binary.CodedInputStream) -> RecordWithAliasedGenerics:
+        field_values = self._read(stream)
+        return RecordWithAliasedGenerics(my_strings=field_values[0], aliased_strings=field_values[1])
+
+
 class _GenericRecordWithComputedFieldsSerializer(typing.Generic[T0, T0_NP, T1, T1_NP], _binary.RecordSerializer[GenericRecordWithComputedFields[T0, T1]]):
     def __init__(self, t0_serializer: _binary.TypeSerializer[T0, T0_NP], t1_serializer: _binary.TypeSerializer[T1, T1_NP]) -> None:
         super().__init__([("f1", _binary.UnionSerializer(T0OrT1, [(T0OrT1[T0, T1].T0, t0_serializer), (T0OrT1[T0, T1].T1, t1_serializer)]))])

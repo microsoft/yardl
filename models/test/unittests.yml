@@ -383,6 +383,13 @@ MyTuple<T1, T2>: !record
     v1: T1
     v2: T2
 
+AliasedTuple<T1, T2>: MyTuple<T1, T2>
+
+RecordWithAliasedGenerics: !record
+  fields:
+    myStrings: MyTuple<string, string>
+    aliasedStrings: AliasedTuple<string, string>
+
 SimpleGenerics: !protocol
   sequence:
     floatImage: Image<float>
