@@ -1127,13 +1127,33 @@ template<typename K, yardl::binary::Reader<K> ReadK, typename V, yardl::binary::
 }
 
 template<typename T, yardl::binary::Writer<T> WriteT>
+[[maybe_unused]] void WriteTwoDArray(yardl::binary::CodedOutputStream& stream, test_model::TwoDArray<T> const& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<test_model::TwoDArray<T>>::value) {
+    yardl::binary::WriteTriviallySerializable(stream, value);
+    return;
+  }
+
+  yardl::binary::WriteNDArray<T, WriteT, 2>(stream, value);
+}
+
+template<typename T, yardl::binary::Reader<T> ReadT>
+[[maybe_unused]] void ReadTwoDArray(yardl::binary::CodedInputStream& stream, test_model::TwoDArray<T>& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<test_model::TwoDArray<T>>::value) {
+    yardl::binary::ReadTriviallySerializable(stream, value);
+    return;
+  }
+
+  yardl::binary::ReadNDArray<T, ReadT, 2>(stream, value);
+}
+
+template<typename T, yardl::binary::Writer<T> WriteT>
 [[maybe_unused]] void WriteImage(yardl::binary::CodedOutputStream& stream, test_model::Image<T> const& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<test_model::Image<T>>::value) {
     yardl::binary::WriteTriviallySerializable(stream, value);
     return;
   }
 
-  yardl::binary::WriteNDArray<T, WriteT, 2>(stream, value);
+  test_model::binary::WriteTwoDArray<T, WriteT>(stream, value);
 }
 
 template<typename T, yardl::binary::Reader<T> ReadT>
@@ -1143,7 +1163,7 @@ template<typename T, yardl::binary::Reader<T> ReadT>
     return;
   }
 
-  yardl::binary::ReadNDArray<T, ReadT, 2>(stream, value);
+  test_model::binary::ReadTwoDArray<T, ReadT>(stream, value);
 }
 
 template<typename T1, yardl::binary::Writer<T1> WriteT1, typename T2, yardl::binary::Writer<T2> WriteT2>

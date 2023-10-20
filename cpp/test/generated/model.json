@@ -1090,7 +1090,7 @@
         },
         {
           "alias": {
-            "name": "Image",
+            "name": "TwoDArray",
             "typeParameters": [
               "T"
             ],
@@ -1106,6 +1106,20 @@
                   }
                 ]
               }
+            }
+          }
+        },
+        {
+          "alias": {
+            "name": "Image",
+            "typeParameters": [
+              "T"
+            ],
+            "type": {
+              "name": "TestModel.TwoDArray",
+              "typeArguments": [
+                "T"
+              ]
             }
           }
         },

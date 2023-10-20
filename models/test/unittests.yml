@@ -369,7 +369,9 @@ StateTest: !protocol
       items: int
     anotherInt: int
 
-Image<T>: T[x, y]
+TwoDArray<T>: T[x, y]
+
+Image<T>: TwoDArray<T>
 
 GenericRecord<T1, T2>: !record
   fields:

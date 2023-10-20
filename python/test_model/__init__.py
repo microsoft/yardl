@@ -80,6 +80,7 @@ from .types import (
     TextFormat,
     TimeOrDatetime,
     TupleWithRecords,
+    TwoDArray,
     UInt64Enum,
     get_dtype,
 )

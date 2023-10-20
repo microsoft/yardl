@@ -493,7 +493,10 @@ struct RecordWithEnums {
 };
 
 template <typename T>
-using Image = yardl::NDArray<T, 2>;
+using TwoDArray = yardl::NDArray<T, 2>;
+
+template <typename T>
+using Image = test_model::TwoDArray<T>;
 
 template <typename T1, typename T2>
 struct GenericRecord {
