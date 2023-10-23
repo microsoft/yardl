@@ -39,6 +39,7 @@ from .types import (
     Fruits,
     GenericRecord,
     GenericRecordWithComputedFields,
+    GenericUnion2,
     Image,
     ImageFloatOrImageDouble,
     Int32OrFloat32,

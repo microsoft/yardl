@@ -1245,6 +1245,26 @@ template<typename T1, yardl::binary::Reader<T1> ReadT1, typename T2, yardl::bina
   test_model::binary::ReadAliasedTuple<std::string, yardl::binary::ReadString, std::string, yardl::binary::ReadString>(stream, value.aliased_strings);
 }
 
+template<typename T1, yardl::binary::Writer<T1> WriteT1, typename T2, yardl::binary::Writer<T2> WriteT2>
+[[maybe_unused]] void WriteGenericUnion2(yardl::binary::CodedOutputStream& stream, test_model::GenericUnion2<T1, T2> const& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<test_model::GenericUnion2<T1, T2>>::value) {
+    yardl::binary::WriteTriviallySerializable(stream, value);
+    return;
+  }
+
+  WriteUnion<T1, WriteT1, T2, WriteT2>(stream, value);
+}
+
+template<typename T1, yardl::binary::Reader<T1> ReadT1, typename T2, yardl::binary::Reader<T2> ReadT2>
+[[maybe_unused]] void ReadGenericUnion2(yardl::binary::CodedInputStream& stream, test_model::GenericUnion2<T1, T2>& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<test_model::GenericUnion2<T1, T2>>::value) {
+    yardl::binary::ReadTriviallySerializable(stream, value);
+    return;
+  }
+
+  ReadUnion<T1, ReadT1, T2, ReadT2>(stream, value);
+}
+
 [[maybe_unused]] void WriteAliasedString(yardl::binary::CodedOutputStream& stream, test_model::AliasedString const& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<test_model::AliasedString>::value) {
     yardl::binary::WriteTriviallySerializable(stream, value);
@@ -1288,7 +1308,7 @@ template<typename T1, yardl::binary::Writer<T1> WriteT1, typename T2, yardl::bin
     return;
   }
 
-  test_model::binary::WriteMyTuple<T1, WriteT1, T2, WriteT2>(stream, value);
+  test_model::binary::WriteAliasedTuple<T1, WriteT1, T2, WriteT2>(stream, value);
 }
 
 template<typename T1, yardl::binary::Reader<T1> ReadT1, typename T2, yardl::binary::Reader<T2> ReadT2>
@@ -1298,7 +1318,7 @@ template<typename T1, yardl::binary::Reader<T1> ReadT1, typename T2, yardl::bina
     return;
   }
 
-  test_model::binary::ReadMyTuple<T1, ReadT1, T2, ReadT2>(stream, value);
+  test_model::binary::ReadAliasedTuple<T1, ReadT1, T2, ReadT2>(stream, value);
 }
 
 [[maybe_unused]] void WriteAliasedClosedGeneric(yardl::binary::CodedOutputStream& stream, test_model::AliasedClosedGeneric const& value) {
@@ -1307,7 +1327,7 @@ template<typename T1, yardl::binary::Reader<T1> ReadT1, typename T2, yardl::bina
     return;
   }
 
-  test_model::binary::WriteMyTuple<test_model::AliasedString, test_model::binary::WriteAliasedString, test_model::AliasedEnum, test_model::binary::WriteAliasedEnum>(stream, value);
+  test_model::binary::WriteAliasedTuple<test_model::AliasedString, test_model::binary::WriteAliasedString, test_model::AliasedEnum, test_model::binary::WriteAliasedEnum>(stream, value);
 }
 
 [[maybe_unused]] void ReadAliasedClosedGeneric(yardl::binary::CodedInputStream& stream, test_model::AliasedClosedGeneric& value) {
@@ -1316,7 +1336,7 @@ template<typename T1, yardl::binary::Reader<T1> ReadT1, typename T2, yardl::bina
     return;
   }
 
-  test_model::binary::ReadMyTuple<test_model::AliasedString, test_model::binary::ReadAliasedString, test_model::AliasedEnum, test_model::binary::ReadAliasedEnum>(stream, value);
+  test_model::binary::ReadAliasedTuple<test_model::AliasedString, test_model::binary::ReadAliasedString, test_model::AliasedEnum, test_model::binary::ReadAliasedEnum>(stream, value);
 }
 
 [[maybe_unused]] void WriteAliasedOptional(yardl::binary::CodedOutputStream& stream, test_model::AliasedOptional const& value) {
@@ -1364,7 +1384,7 @@ template<typename T1, yardl::binary::Writer<T1> WriteT1, typename T2, yardl::bin
     return;
   }
 
-  WriteUnion<T1, WriteT1, T2, WriteT2>(stream, value);
+  test_model::binary::WriteGenericUnion2<T1, WriteT1, T2, WriteT2>(stream, value);
 }
 
 template<typename T1, yardl::binary::Reader<T1> ReadT1, typename T2, yardl::binary::Reader<T2> ReadT2>
@@ -1374,7 +1394,7 @@ template<typename T1, yardl::binary::Reader<T1> ReadT1, typename T2, yardl::bina
     return;
   }
 
-  ReadUnion<T1, ReadT1, T2, ReadT2>(stream, value);
+  test_model::binary::ReadGenericUnion2<T1, ReadT1, T2, ReadT2>(stream, value);
 }
 
 template<typename T, yardl::binary::Writer<T> WriteT>
