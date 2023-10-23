@@ -3224,7 +3224,7 @@ class NDJsonAliasesWriter(_ndjson.NDJsonProtocolWriter, AliasesWriterBase):
         self._write_json_line({"aliasedGenericOptional": json_value})
 
     def _write_aliased_generic_union_2(self, value: AliasedGenericUnion2[AliasedString, AliasedEnum]) -> None:
-        converter = _ndjson.UnionConverter(AliasedGenericUnion2, [(AliasedGenericUnion2.T1, _ndjson.string_converter, [str]), (AliasedGenericUnion2.T2, _ndjson.EnumConverter(Fruits, np.int32, _fruits_name_to_value_map, _fruits_value_to_name_map), [int, float, str])], False)
+        converter = _ndjson.UnionConverter(GenericUnion2, [(GenericUnion2.T1, _ndjson.string_converter, [str]), (GenericUnion2.T2, _ndjson.EnumConverter(Fruits, np.int32, _fruits_name_to_value_map, _fruits_value_to_name_map), [int, float, str])], False)
         json_value = converter.to_json(value)
         self._write_json_line({"aliasedGenericUnion2": json_value})
 
@@ -3239,7 +3239,7 @@ class NDJsonAliasesWriter(_ndjson.NDJsonProtocolWriter, AliasesWriterBase):
         self._write_json_line({"aliasedGenericFixedVector": json_value})
 
     def _write_stream_of_aliased_generic_union_2(self, value: collections.abc.Iterable[AliasedGenericUnion2[AliasedString, AliasedEnum]]) -> None:
-        converter = _ndjson.UnionConverter(AliasedGenericUnion2, [(AliasedGenericUnion2.T1, _ndjson.string_converter, [str]), (AliasedGenericUnion2.T2, _ndjson.EnumConverter(Fruits, np.int32, _fruits_name_to_value_map, _fruits_value_to_name_map), [int, float, str])], False)
+        converter = _ndjson.UnionConverter(GenericUnion2, [(GenericUnion2.T1, _ndjson.string_converter, [str]), (GenericUnion2.T2, _ndjson.EnumConverter(Fruits, np.int32, _fruits_name_to_value_map, _fruits_value_to_name_map), [int, float, str])], False)
         for item in value:
             json_item = converter.to_json(item)
             self._write_json_line({"streamOfAliasedGenericUnion2": json_item})
@@ -3285,7 +3285,7 @@ class NDJsonAliasesReader(_ndjson.NDJsonProtocolReader, AliasesReaderBase):
 
     def _read_aliased_generic_union_2(self) -> AliasedGenericUnion2[AliasedString, AliasedEnum]:
         json_object = self._read_json_line("aliasedGenericUnion2", True)
-        converter = _ndjson.UnionConverter(AliasedGenericUnion2, [(AliasedGenericUnion2.T1, _ndjson.string_converter, [str]), (AliasedGenericUnion2.T2, _ndjson.EnumConverter(Fruits, np.int32, _fruits_name_to_value_map, _fruits_value_to_name_map), [int, float, str])], False)
+        converter = _ndjson.UnionConverter(GenericUnion2, [(GenericUnion2.T1, _ndjson.string_converter, [str]), (GenericUnion2.T2, _ndjson.EnumConverter(Fruits, np.int32, _fruits_name_to_value_map, _fruits_value_to_name_map), [int, float, str])], False)
         return converter.from_json(json_object)
 
     def _read_aliased_generic_vector(self) -> AliasedGenericVector[yardl.Float32]:
@@ -3299,7 +3299,7 @@ class NDJsonAliasesReader(_ndjson.NDJsonProtocolReader, AliasesReaderBase):
         return converter.from_json(json_object)
 
     def _read_stream_of_aliased_generic_union_2(self) -> collections.abc.Iterable[AliasedGenericUnion2[AliasedString, AliasedEnum]]:
-        converter = _ndjson.UnionConverter(AliasedGenericUnion2, [(AliasedGenericUnion2.T1, _ndjson.string_converter, [str]), (AliasedGenericUnion2.T2, _ndjson.EnumConverter(Fruits, np.int32, _fruits_name_to_value_map, _fruits_value_to_name_map), [int, float, str])], False)
+        converter = _ndjson.UnionConverter(GenericUnion2, [(GenericUnion2.T1, _ndjson.string_converter, [str]), (GenericUnion2.T2, _ndjson.EnumConverter(Fruits, np.int32, _fruits_name_to_value_map, _fruits_value_to_name_map), [int, float, str])], False)
         while (json_object := self._read_json_line("streamOfAliasedGenericUnion2", False)) is not _ndjson.MISSING_SENTINEL:
             yield converter.from_json(json_object)
 

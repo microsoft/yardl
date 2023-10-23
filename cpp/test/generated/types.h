@@ -546,14 +546,17 @@ struct RecordWithAliasedGenerics {
   }
 };
 
+template <typename T1, typename T2>
+using GenericUnion2 = std::variant<T1, T2>;
+
 using AliasedString = std::string;
 
 using AliasedEnum = test_model::Fruits;
 
 template <typename T1, typename T2>
-using AliasedOpenGeneric = test_model::MyTuple<T1, T2>;
+using AliasedOpenGeneric = test_model::AliasedTuple<T1, T2>;
 
-using AliasedClosedGeneric = test_model::MyTuple<test_model::AliasedString, test_model::AliasedEnum>;
+using AliasedClosedGeneric = test_model::AliasedTuple<test_model::AliasedString, test_model::AliasedEnum>;
 
 using AliasedOptional = std::optional<int32_t>;
 
@@ -561,7 +564,7 @@ template <typename T>
 using AliasedGenericOptional = std::optional<T>;
 
 template <typename T1, typename T2>
-using AliasedGenericUnion2 = std::variant<T1, T2>;
+using AliasedGenericUnion2 = test_model::GenericUnion2<T1, T2>;
 
 template <typename T>
 using AliasedGenericVector = std::vector<T>;

@@ -880,7 +880,7 @@ func writeGetDTypeFunc(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 		}
 
 		for _, t := range ns.TypeDefinitions {
-			fmt.Fprintf(w, "dtype_map[%s] = %s\n", common.TypeSyntaxWithoutTypeParameters(t, ns.Name), typeDefinitionDTypeExpression(t, context))
+			fmt.Fprintf(w, "dtype_map.setdefault(%s, %s)\n", common.TypeSyntaxWithoutTypeParameters(t, ns.Name), typeDefinitionDTypeExpression(t, context))
 		}
 
 		w.WriteStringln("\nreturn get_dtype")

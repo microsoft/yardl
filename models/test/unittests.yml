@@ -425,13 +425,15 @@ AdvancedGenerics: !protocol
         - int*
         - float*
 
+GenericUnion2<T1, T2>: [T1, T2]
+
 AliasedString: string
 AliasedEnum: Fruits
-AliasedOpenGeneric<T1,T2>: MyTuple<T1,T2>
-AliasedClosedGeneric: MyTuple<AliasedString, AliasedEnum>
+AliasedOpenGeneric<T1,T2>: AliasedTuple<T1,T2>
+AliasedClosedGeneric: AliasedTuple<AliasedString, AliasedEnum>
 AliasedOptional: int?
 AliasedGenericOptional<T>: T?
-AliasedGenericUnion2<T1,T2>: [T1, T2]
+AliasedGenericUnion2<T1,T2>: GenericUnion2<T1, T2>
 AliasedGenericVector<T>: T*
 AliasedGenericFixedVector<T>: T*3
 

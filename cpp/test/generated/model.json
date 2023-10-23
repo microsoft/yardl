@@ -1209,6 +1209,25 @@
         },
         {
           "alias": {
+            "name": "GenericUnion2",
+            "typeParameters": [
+              "T1",
+              "T2"
+            ],
+            "type": [
+              {
+                "tag": "T1",
+                "type": "T1"
+              },
+              {
+                "tag": "T2",
+                "type": "T2"
+              }
+            ]
+          }
+        },
+        {
+          "alias": {
             "name": "AliasedString",
             "type": "string"
           }
@@ -1227,7 +1246,7 @@
               "T2"
             ],
             "type": {
-              "name": "TestModel.MyTuple",
+              "name": "TestModel.AliasedTuple",
               "typeArguments": [
                 "T1",
                 "T2"
@@ -1239,7 +1258,7 @@
           "alias": {
             "name": "AliasedClosedGeneric",
             "type": {
-              "name": "TestModel.MyTuple",
+              "name": "TestModel.AliasedTuple",
               "typeArguments": [
                 "TestModel.AliasedString",
                 "TestModel.AliasedEnum"
@@ -1275,16 +1294,13 @@
               "T1",
               "T2"
             ],
-            "type": [
-              {
-                "tag": "T1",
-                "type": "T1"
-              },
-              {
-                "tag": "T2",
-                "type": "T2"
-              }
-            ]
+            "type": {
+              "name": "TestModel.GenericUnion2",
+              "typeArguments": [
+                "T1",
+                "T2"
+              ]
+            }
           }
         },
         {
