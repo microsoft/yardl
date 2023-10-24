@@ -1414,7 +1414,7 @@ class RecordWithComputedFields:
         return float(7) ** float(2)
 
     def arithmetic8(self) -> yardl.ComplexFloat:
-        return self.complexfloat32_field * complex(3)
+        return self.complexfloat32_field * complex(float(3))
 
     def arithmetic_9(self) -> yardl.Float64:
         return 1.2 + float(1)

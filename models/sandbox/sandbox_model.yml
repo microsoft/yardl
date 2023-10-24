@@ -5,3 +5,7 @@ HelloWorld: !protocol
         items: complexdouble
         dimensions:
           - 2
+
+MyRec: !record
+  computedFields:
+    castFloatToComplex: 66.6 as complexfloat32

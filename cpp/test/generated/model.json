@@ -2744,7 +2744,12 @@
                     "right": {
                       "convert": {
                         "expression": {
-                          "integer": 3
+                          "convert": {
+                            "expression": {
+                              "integer": 3
+                            },
+                            "type": "float32"
+                          }
                         },
                         "type": "complexfloat32"
                       }

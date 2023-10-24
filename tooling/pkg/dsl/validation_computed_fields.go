@@ -75,24 +75,24 @@ func resolveComputedFields(env *Environment, errorSink *validation.ErrorSink) *E
 			targetTypeKind, targetTypeIsPrimitive := GetKindIfPrimitive(t.Type)
 			if innerTypeIsPrimitive && targetTypeIsPrimitive {
 				if innerTypeKind == targetTypeKind {
-					return t
+					return adjustConversion(t)
 				}
 
 				switch targetTypeKind {
 				case PrimitiveKindInteger:
 					switch innerTypeKind {
 					case PrimitiveKindFloatingPoint:
-						return t
+						return adjustConversion(t)
 					}
 				case PrimitiveKindFloatingPoint:
 					switch innerTypeKind {
 					case PrimitiveKindInteger:
-						return t
+						return adjustConversion(t)
 					}
 				case PrimitiveKindComplexFloatingPoint:
 					switch innerTypeKind {
 					case PrimitiveKindInteger, PrimitiveKindFloatingPoint:
-						return t
+						return adjustConversion(t)
 					}
 				}
 			}
@@ -513,14 +513,53 @@ func insertConversion(expression Expression, targetType Type) Expression {
 		return expression
 	}
 
-	if integerLiteral, ok := expression.(*IntegerLiteralExpression); ok && IsIntegralType(targetType) {
+	return adjustConversion(&TypeConversionExpression{
+		Expression: expression,
+		Type:       targetType,
+	})
+}
+
+func adjustConversion(conversionExpression *TypeConversionExpression) Expression {
+	sourceExpression := conversionExpression.Expression
+	sourceType := sourceExpression.GetResolvedType()
+	targetType := conversionExpression.Type
+
+	if TypesEqual(sourceType, targetType) {
+		return sourceExpression
+	}
+
+	targetPrimitiveKind, _ := GetKindIfPrimitive(targetType)
+
+	if integerLiteral, ok := sourceExpression.(*IntegerLiteralExpression); ok && targetPrimitiveKind == PrimitiveKindInteger {
 		updated := *integerLiteral
 		updated.ResolvedType = targetType
 		return &updated
 	}
+	if floatingPointLiteral, ok := sourceExpression.(*FloatingPointLiteralExpression); ok && targetPrimitiveKind == PrimitiveKindFloatingPoint {
+		updated := *floatingPointLiteral
+		updated.ResolvedType = targetType
+		return &updated
+	}
+
+	sourcePrimitiveKind, _ := GetKindIfPrimitive(sourceExpression.GetResolvedType())
+
+	if targetPrimitiveKind == PrimitiveKindComplexFloatingPoint &&
+		sourcePrimitiveKind == PrimitiveKindInteger || sourcePrimitiveKind == PrimitiveKindFloatingPoint {
+		complexType, _ := GetPrimitiveType(targetType)
+		switch complexType {
+		case ComplexFloat32:
+			sourceExpression = insertConversion(sourceExpression, Float32Type)
+		case ComplexFloat64:
+			sourceExpression = insertConversion(sourceExpression, Float64Type)
+		}
+	}
+
+	if sourceExpression == conversionExpression.Expression {
+		return conversionExpression
+	}
 
 	return &TypeConversionExpression{
-		Expression: expression,
+		Expression: sourceExpression,
 		Type:       targetType,
 	}
 }

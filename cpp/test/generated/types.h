@@ -1000,7 +1000,7 @@ struct RecordWithComputedFields {
   }
 
   std::complex<float> Arithmetic8() const {
-    return complexfloat32_field * static_cast<std::complex<float>>(3);
+    return complexfloat32_field * static_cast<std::complex<float>>(static_cast<float>(3));
   }
 
   double Arithmetic9() const {
@@ -1036,7 +1036,7 @@ struct RecordWithComputedFields {
   }
 
   std::complex<float> CastFloatToComplex() const {
-    return static_cast<std::complex<float>>(66.6);
+    return static_cast<std::complex<float>>(66.6f);
   }
 
   bool operator==(const RecordWithComputedFields& other) const {

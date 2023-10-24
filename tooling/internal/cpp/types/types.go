@@ -270,6 +270,9 @@ func writeComputedFieldExpression(w *formatting.IndentedWriter, expression dsl.E
 			w.Write([]byte(common.IntegerLiteral(t.Value, t.ResolvedType)))
 		case *dsl.FloatingPointLiteralExpression:
 			w.WriteString(t.Value)
+			if t.ResolvedType == dsl.Float32Type {
+				w.WriteString("f")
+			}
 		case *dsl.StringLiteralExpression:
 			fmt.Fprintf(w, "%q", t.Value)
 		case *dsl.MemberAccessExpression:
