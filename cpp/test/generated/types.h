@@ -608,6 +608,18 @@ struct RecordWithComputedFields {
   yardl::DynamicNDArray<int32_t> dynamic_array_field{};
   yardl::FixedNDArray<int32_t, 3, 4> fixed_array_field{};
   int32_t int_field{};
+  int8_t int8_field{};
+  uint8_t uint8_field{};
+  int16_t int16_field{};
+  uint16_t uint16_field{};
+  uint32_t uint32_field{};
+  int64_t int64_field{};
+  uint64_t uint64_field{};
+  yardl::Size size_field{};
+  float float32_field{};
+  double float64_field{};
+  std::complex<float> complexfloat32_field{};
+  std::complex<double> complexfloat64_field{};
   std::string string_field{};
   test_model::MyTuple<int32_t, int32_t> tuple_field{};
   std::vector<int32_t> vector_field{};
@@ -959,12 +971,92 @@ struct RecordWithComputedFields {
     }(int_field);
   }
 
+  int32_t Arithmetic1() const {
+    return 1 + 2;
+  }
+
+  int32_t Arithmetic2() const {
+    return 1 + 2 * 3 + 4;
+  }
+
+  int32_t Arithmetic3() const {
+    return (1 + 2) * 3 + 4;
+  }
+
+  yardl::Size Arithmetic4() const {
+    return ArraySizeFromIntField() + 2ULL;
+  }
+
+  yardl::Size Arithmetic5() const {
+    return array_field.shape(2 - 1);
+  }
+
+  int32_t Arithmetic6() const {
+    return 7 / 2;
+  }
+
+  double Arithmetic7() const {
+    return std::pow(static_cast<double>(7), static_cast<double>(2));
+  }
+
+  std::complex<float> Arithmetic8() const {
+    return complexfloat32_field * static_cast<std::complex<float>>(3);
+  }
+
+  double Arithmetic9() const {
+    return 1.2 + static_cast<double>(1);
+  }
+
+  double Arithmetic10() const {
+    return 1e10 + 9e9;
+  }
+
+  double Arithmetic11() const {
+    return -(4.3 + static_cast<double>(1));
+  }
+
+  float CastIntToFloat() const {
+    return static_cast<float>(int_field);
+  }
+
+  int32_t CastFloatToInt() const {
+    return static_cast<int32_t>(float32_field);
+  }
+
+  int32_t CastPower() const {
+    return static_cast<int32_t>(std::pow(static_cast<double>(7), static_cast<double>(2)));
+  }
+
+  std::complex<double> CastComplex32ToComplex64() const {
+    return static_cast<std::complex<double>>(complexfloat32_field);
+  }
+
+  std::complex<float> CastComplex64ToComplex32() const {
+    return static_cast<std::complex<float>>(complexfloat64_field);
+  }
+
+  std::complex<float> CastFloatToComplex() const {
+    return static_cast<std::complex<float>>(66.6);
+  }
+
   bool operator==(const RecordWithComputedFields& other) const {
     return array_field == other.array_field &&
       array_field_map_dimensions == other.array_field_map_dimensions &&
       dynamic_array_field == other.dynamic_array_field &&
       fixed_array_field == other.fixed_array_field &&
       int_field == other.int_field &&
+      int8_field == other.int8_field &&
+      uint8_field == other.uint8_field &&
+      int16_field == other.int16_field &&
+      uint16_field == other.uint16_field &&
+      uint32_field == other.uint32_field &&
+      int64_field == other.int64_field &&
+      uint64_field == other.uint64_field &&
+      size_field == other.size_field &&
+      float32_field == other.float32_field &&
+      float64_field == other.float64_field &&
+      complexfloat32_field == other.complexfloat32_field &&
+      complexfloat64_field == other.complexfloat64_field &&
       string_field == other.string_field &&
       tuple_field == other.tuple_field &&
       vector_field == other.vector_field &&

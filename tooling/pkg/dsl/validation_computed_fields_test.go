@@ -801,3 +801,84 @@ X: !record
 	_, err := parseAndValidate(t, src)
 	assert.ErrorContains(t, err, `no best type was found for the switch expression`)
 }
+
+func TestBasicArithmethic(t *testing.T) {
+	src := `
+X: !record
+  fields:
+    a: int*
+    b: float
+    c: double
+  computedFields:
+    c1: 1 + 2
+    c2: size(a) ** 2
+    c3: c * 2
+    c4: c * c
+`
+	_, err := parseAndValidate(t, src)
+	assert.NoError(t, err)
+}
+
+func TestArithmeticIncompatibleOperands(t *testing.T) {
+	src := `
+X: !record
+  computedFields:
+    c1: 1 + "2"
+`
+	_, err := parseAndValidate(t, src)
+	assert.ErrorContains(t, err, `operator not defined between operands with types 'uint8' and 'string'`)
+}
+
+func TestArithmeticNoCommonType(t *testing.T) {
+	src := `
+X: !record
+  fields:
+    a: int64
+    b: uint64
+  computedFields:
+    c1: a + b
+`
+	_, err := parseAndValidate(t, src)
+	assert.ErrorContains(t, err, `operator not defined between operands with types 'int64' and 'uint64'`)
+}
+
+func TestCastToUnrecognizedType(t *testing.T) {
+	src := `
+X: !record
+  computedFields:
+    c1: 1 as what
+`
+	_, err := parseAndValidate(t, src)
+	assert.ErrorContains(t, err, `the type 'what' is not recognized`)
+}
+func TestValidCasts(t *testing.T) {
+	src := `
+X: !record
+  computedFields:
+    c1: 1 as int
+    c2: 1.1 as int
+    c3: 1.1 as float
+    c4: 1.1 as complexfloat
+    c5: 2**8 as int
+    c6: 1.1 as float
+`
+	_, err := parseAndValidate(t, src)
+	assert.NoError(t, err)
+}
+
+func TestInvalidCasts(t *testing.T) {
+	src := `
+X<T>: !record
+  fields:
+    complex: complexfloat
+  computedFields:
+    c1: 1 as string
+    c2: 2 as T
+    c3: complex as float
+
+`
+	_, err := parseAndValidate(t, src)
+	assert.ErrorContains(t, err, "cannot cast from from 'uint8' to 'string'")
+	assert.ErrorContains(t, err, "cannot cast from from 'uint8' to 'T'")
+	assert.ErrorContains(t, err, "cannot cast from from 'complexfloat32' to 'float32'")
+}

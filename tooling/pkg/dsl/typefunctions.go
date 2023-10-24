@@ -380,8 +380,8 @@ func ExpressionsEqual(a, b Expression) bool {
 
 		return true
 
-	case *IndexExpression:
-		tb, ok := b.(*IndexExpression)
+	case *SubscriptExpression:
+		tb, ok := b.(*SubscriptExpression)
 		if !ok {
 			return false
 		}
@@ -497,18 +497,45 @@ func GetPrimitiveType(t Type) (primitive PrimitiveDefinition, ok bool) {
 	return "", false
 }
 
-func IsIntegralPrimitive(prim PrimitiveDefinition) bool {
-	switch prim {
+type PrimitiveKind int
+
+const (
+	PrimitiveKindInteger PrimitiveKind = iota
+	PrimitiveKindFloatingPoint
+	PrimitiveKindComplexFloatingPoint
+	PrimitiveKindOther
+	PrimitiveKindNotPrimitive
+)
+
+func GetPrimitiveKind(t PrimitiveDefinition) PrimitiveKind {
+	switch t {
 	case Int8, Int16, Int32, Int64, Uint8, Uint16, Uint32, Uint64, Size:
-		return true
+		return PrimitiveKindInteger
+	case Float32, Float64:
+		return PrimitiveKindFloatingPoint
+	case ComplexFloat32, ComplexFloat64:
+		return PrimitiveKindComplexFloatingPoint
 	default:
-		return false
+		return PrimitiveKindOther
 	}
 }
 
+func GetKindIfPrimitive(t Type) (primitiveKind PrimitiveKind, ok bool) {
+	prim, ok := GetPrimitiveType(t)
+	if !ok {
+		return PrimitiveKindNotPrimitive, false
+	}
+
+	return GetPrimitiveKind(prim), true
+}
+
+func IsIntegralPrimitive(prim PrimitiveDefinition) bool {
+	return GetPrimitiveKind(prim) == PrimitiveKindInteger
+}
+
 func IsIntegralType(t Type) bool {
-	primitive, ok := GetPrimitiveType(t)
-	return ok && IsIntegralPrimitive(primitive)
+	kind, ok := GetKindIfPrimitive(t)
+	return ok && kind == PrimitiveKindInteger
 }
 
 var ErrNoCommonType = errors.New("no common type")
@@ -580,6 +607,8 @@ var commonTypeMap = func() map[primitivePair]PrimitiveDefinition {
 		{Int8, Uint64, Int64},
 		{Int8, Float32, Float32},
 		{Int8, Float64, Float64},
+		{Int8, ComplexFloat32, ComplexFloat32},
+		{Int8, ComplexFloat64, ComplexFloat64},
 
 		{Int16, Int32, Int32},
 		{Int16, Int64, Int64},
@@ -588,6 +617,8 @@ var commonTypeMap = func() map[primitivePair]PrimitiveDefinition {
 		{Int16, Uint32, Int64},
 		{Int16, Float32, Float32},
 		{Int16, Float64, Float64},
+		{Int16, ComplexFloat32, ComplexFloat32},
+		{Int16, ComplexFloat64, ComplexFloat64},
 
 		{Int32, Int64, Int64},
 		{Int32, Uint8, Int32},
@@ -595,6 +626,8 @@ var commonTypeMap = func() map[primitivePair]PrimitiveDefinition {
 		{Int32, Uint32, Int64},
 		{Int32, Float32, Float32},
 		{Int32, Float64, Float64},
+		{Int32, ComplexFloat32, ComplexFloat32},
+		{Int32, ComplexFloat64, ComplexFloat64},
 
 		{Uint8, Uint16, Uint16},
 		{Uint8, Uint32, Uint32},
@@ -602,21 +635,34 @@ var commonTypeMap = func() map[primitivePair]PrimitiveDefinition {
 		{Uint8, Size, Size},
 		{Uint8, Float32, Float32},
 		{Uint8, Float64, Float64},
+		{Uint8, ComplexFloat32, ComplexFloat32},
+		{Uint8, ComplexFloat64, ComplexFloat64},
 
 		{Uint16, Uint32, Uint32},
 		{Uint16, Uint64, Uint64},
 		{Uint16, Size, Size},
 		{Uint16, Float32, Float32},
 		{Uint16, Float64, Float64},
+		{Uint16, ComplexFloat32, ComplexFloat32},
+		{Uint16, ComplexFloat64, ComplexFloat64},
 
 		{Uint32, Uint64, Uint64},
 		{Uint32, Size, Size},
 		{Uint32, Float32, Float32},
 		{Uint32, Float64, Float64},
+		{Uint32, ComplexFloat32, ComplexFloat32},
+		{Uint32, ComplexFloat64, ComplexFloat64},
 
 		{Uint64, Size, Size},
 		{Uint64, Float32, Float32},
 		{Uint64, Float64, Float64},
+		{Uint64, ComplexFloat32, ComplexFloat32},
+		{Uint64, ComplexFloat64, ComplexFloat64},
+
+		{Size, Float32, Float32},
+		{Size, Float64, Float64},
+		{Size, ComplexFloat32, ComplexFloat32},
+		{Size, ComplexFloat64, ComplexFloat64},
 
 		{Float32, Float64, Float64},
 		{ComplexFloat32, ComplexFloat64, ComplexFloat64},
@@ -657,6 +703,33 @@ func GetCommonType(a, b Type) (Type, error) {
 	}
 
 	return nil, ErrNoCommonType
+}
+
+func GetNextLargestIntegerTypeIfExists(t Type) Type {
+	prim, ok := GetPrimitiveType(t)
+	if !ok {
+		panic("GetLargestIntegerType called with a non-primitive type")
+	}
+	if !IsIntegralPrimitive(prim) {
+		panic("GetLargestIntegerType called with a non-integral primitive type")
+	}
+
+	switch prim {
+	case Int8:
+		return Int16Type
+	case Uint8:
+		return Uint16Type
+	case Int16:
+		return Int32Type
+	case Uint16:
+		return Uint32Type
+	case Int32:
+		return Int64Type
+	case Uint32:
+		return Uint64Type
+	default:
+		return t
+	}
 }
 
 func ContainsGenericTypeParameter(node Node) bool {

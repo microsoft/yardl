@@ -577,6 +577,18 @@ struct _Inner_RecordWithComputedFields {
       dynamic_array_field(o.dynamic_array_field),
       fixed_array_field(o.fixed_array_field),
       int_field(o.int_field),
+      int8_field(o.int8_field),
+      uint8_field(o.uint8_field),
+      int16_field(o.int16_field),
+      uint16_field(o.uint16_field),
+      uint32_field(o.uint32_field),
+      int64_field(o.int64_field),
+      uint64_field(o.uint64_field),
+      size_field(o.size_field),
+      float32_field(o.float32_field),
+      float64_field(o.float64_field),
+      complexfloat32_field(o.complexfloat32_field),
+      complexfloat64_field(o.complexfloat64_field),
       string_field(o.string_field),
       tuple_field(o.tuple_field),
       vector_field(o.vector_field),
@@ -595,6 +607,18 @@ struct _Inner_RecordWithComputedFields {
     yardl::hdf5::ToOuter(dynamic_array_field, o.dynamic_array_field);
     yardl::hdf5::ToOuter(fixed_array_field, o.fixed_array_field);
     yardl::hdf5::ToOuter(int_field, o.int_field);
+    yardl::hdf5::ToOuter(int8_field, o.int8_field);
+    yardl::hdf5::ToOuter(uint8_field, o.uint8_field);
+    yardl::hdf5::ToOuter(int16_field, o.int16_field);
+    yardl::hdf5::ToOuter(uint16_field, o.uint16_field);
+    yardl::hdf5::ToOuter(uint32_field, o.uint32_field);
+    yardl::hdf5::ToOuter(int64_field, o.int64_field);
+    yardl::hdf5::ToOuter(uint64_field, o.uint64_field);
+    yardl::hdf5::ToOuter(size_field, o.size_field);
+    yardl::hdf5::ToOuter(float32_field, o.float32_field);
+    yardl::hdf5::ToOuter(float64_field, o.float64_field);
+    yardl::hdf5::ToOuter(complexfloat32_field, o.complexfloat32_field);
+    yardl::hdf5::ToOuter(complexfloat64_field, o.complexfloat64_field);
     yardl::hdf5::ToOuter(string_field, o.string_field);
     yardl::hdf5::ToOuter(tuple_field, o.tuple_field);
     yardl::hdf5::ToOuter(vector_field, o.vector_field);
@@ -612,6 +636,18 @@ struct _Inner_RecordWithComputedFields {
   yardl::hdf5::InnerDynamicNdArray<int32_t, int32_t> dynamic_array_field;
   yardl::FixedNDArray<int32_t, 3, 4> fixed_array_field;
   int32_t int_field;
+  int8_t int8_field;
+  uint8_t uint8_field;
+  int16_t int16_field;
+  uint16_t uint16_field;
+  uint32_t uint32_field;
+  int64_t int64_field;
+  uint64_t uint64_field;
+  yardl::Size size_field;
+  float float32_field;
+  double float64_field;
+  std::complex<float> complexfloat32_field;
+  std::complex<double> complexfloat64_field;
   yardl::hdf5::InnerVlenString string_field;
   test_model::MyTuple<int32_t, int32_t> tuple_field;
   yardl::hdf5::InnerVlen<int32_t, int32_t> vector_field;
@@ -928,6 +964,18 @@ template <typename _T0_Inner, typename T0, typename _T1_Inner, typename T1>
   t.insertMember("dynamicArrayField", HOFFSET(RecordType, dynamic_array_field), yardl::hdf5::DynamicNDArrayDdl<int32_t, int32_t>(H5::PredType::NATIVE_INT32));
   t.insertMember("fixedArrayField", HOFFSET(RecordType, fixed_array_field), yardl::hdf5::FixedNDArrayDdl(H5::PredType::NATIVE_INT32, {3, 4}));
   t.insertMember("intField", HOFFSET(RecordType, int_field), H5::PredType::NATIVE_INT32);
+  t.insertMember("int8Field", HOFFSET(RecordType, int8_field), H5::PredType::NATIVE_INT8);
+  t.insertMember("uint8Field", HOFFSET(RecordType, uint8_field), H5::PredType::NATIVE_UINT8);
+  t.insertMember("int16Field", HOFFSET(RecordType, int16_field), H5::PredType::NATIVE_INT16);
+  t.insertMember("uint16Field", HOFFSET(RecordType, uint16_field), H5::PredType::NATIVE_UINT16);
+  t.insertMember("uint32Field", HOFFSET(RecordType, uint32_field), H5::PredType::NATIVE_UINT32);
+  t.insertMember("int64Field", HOFFSET(RecordType, int64_field), H5::PredType::NATIVE_INT64);
+  t.insertMember("uint64Field", HOFFSET(RecordType, uint64_field), H5::PredType::NATIVE_UINT64);
+  t.insertMember("sizeField", HOFFSET(RecordType, size_field), yardl::hdf5::SizeTypeDdl());
+  t.insertMember("float32Field", HOFFSET(RecordType, float32_field), H5::PredType::NATIVE_FLOAT);
+  t.insertMember("float64Field", HOFFSET(RecordType, float64_field), H5::PredType::NATIVE_DOUBLE);
+  t.insertMember("complexfloat32Field", HOFFSET(RecordType, complexfloat32_field), yardl::hdf5::ComplexTypeDdl<float>());
+  t.insertMember("complexfloat64Field", HOFFSET(RecordType, complexfloat64_field), yardl::hdf5::ComplexTypeDdl<double>());
   t.insertMember("stringField", HOFFSET(RecordType, string_field), yardl::hdf5::InnerVlenStringDdl());
   t.insertMember("tupleField", HOFFSET(RecordType, tuple_field), test_model::hdf5::GetMyTupleHdf5Ddl<int32_t, int32_t, int32_t, int32_t>(H5::PredType::NATIVE_INT32, H5::PredType::NATIVE_INT32));
   t.insertMember("vectorField", HOFFSET(RecordType, vector_field), yardl::hdf5::InnerVlenDdl(H5::PredType::NATIVE_INT32));

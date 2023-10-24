@@ -14,7 +14,7 @@ cpp_version := "17"
 
 @install:
     cd tooling/cmd/yardl; \
-    go install -ldflags="-s -w" .
+    go install -buildvcs=false -ldflags="-s -w" .
 
 @generate: install
     cd models/test && yardl generate

@@ -121,14 +121,14 @@ func (a *ArrayDimension) Parse(lex *lexer.PeekingLexer) error {
 		if lex.Peek().Type == ':' {
 			lex.Next()
 
-			l, err := parseUnit64(lex)
+			l, err := parseUint64(lex)
 			if err != nil {
 				return err
 			}
 			a.Length = &l
 		}
 	} else if lex.Peek().Type == scanner.Int {
-		l, err := parseUnit64(lex)
+		l, err := parseUint64(lex)
 		if err != nil {
 			return err
 		}
@@ -168,7 +168,7 @@ func ParsePattern(input string) (*Pattern, error) {
 	return patternParser.ParseString("", input)
 }
 
-func parseUnit64(lex *lexer.PeekingLexer) (uint64, error) {
+func parseUint64(lex *lexer.PeekingLexer) (uint64, error) {
 	if lex.Peek().Type != scanner.Int {
 		return 0, &participle.UnexpectedTokenError{
 			Unexpected: *lex.Peek(),

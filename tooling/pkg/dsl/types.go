@@ -463,6 +463,68 @@ type Expression interface {
 	_expression()
 }
 
+type UnaryOperator int
+
+const (
+	UnaryOpNegate UnaryOperator = iota
+)
+
+type UnaryExpression struct {
+	NodeMeta
+	Operator   UnaryOperator `json:"op"`
+	Expression Expression    `json:"expression"`
+}
+
+func (*UnaryExpression) _expression() {}
+func (e *UnaryExpression) GetResolvedType() Type {
+	if e.Expression == nil {
+		return nil
+	}
+	return e.Expression.GetResolvedType()
+}
+func (e *UnaryExpression) IsReference() bool {
+	return false
+}
+
+type BinaryOperator int
+
+const (
+	BinaryOpAdd BinaryOperator = iota
+	BinaryOpSub
+	BinaryOpMul
+	BinaryOpDiv
+	BinaryOpPow
+)
+
+func (o BinaryOperator) Precedence() int {
+	switch o {
+	case BinaryOpAdd, BinaryOpSub:
+		return 0
+	case BinaryOpMul, BinaryOpDiv:
+		return 1
+	case BinaryOpPow:
+		return 2
+	default:
+		panic(fmt.Sprintf("unknown binary operator: %d", o))
+	}
+}
+
+type BinaryExpression struct {
+	NodeMeta
+	Left         Expression     `json:"left"`
+	Operator     BinaryOperator `json:"op"`
+	Right        Expression     `json:"right"`
+	ResolvedType Type           `json:"-"`
+}
+
+func (*BinaryExpression) _expression() {}
+func (b *BinaryExpression) GetResolvedType() Type {
+	return b.ResolvedType
+}
+func (b *BinaryExpression) IsReference() bool {
+	return false
+}
+
 type IntegerLiteralExpression struct {
 	NodeMeta
 	Value        big.Int
@@ -474,6 +536,20 @@ func (e *IntegerLiteralExpression) GetResolvedType() Type {
 	return e.ResolvedType
 }
 func (e *IntegerLiteralExpression) IsReference() bool {
+	return false
+}
+
+type FloatingPointLiteralExpression struct {
+	NodeMeta
+	Value        string
+	ResolvedType Type
+}
+
+func (e *FloatingPointLiteralExpression) _expression() {}
+func (e *FloatingPointLiteralExpression) GetResolvedType() Type {
+	return e.ResolvedType
+}
+func (e *FloatingPointLiteralExpression) IsReference() bool {
 	return false
 }
 
@@ -516,22 +592,22 @@ func (e *MemberAccessExpression) IsReference() bool {
 	return true
 }
 
-type IndexExpression struct {
+type SubscriptExpression struct {
 	NodeMeta
-	Target       Expression       `json:"target,omitempty"`
-	Arguments    []*IndexArgument `json:"arguments"`
-	ResolvedType Type             `json:"-"`
+	Target       Expression           `json:"target,omitempty"`
+	Arguments    []*SubscriptArgument `json:"arguments"`
+	ResolvedType Type                 `json:"-"`
 }
 
-func (e *IndexExpression) _expression() {}
-func (e *IndexExpression) GetResolvedType() Type {
+func (e *SubscriptExpression) _expression() {}
+func (e *SubscriptExpression) GetResolvedType() Type {
 	return e.ResolvedType
 }
-func (e *IndexExpression) IsReference() bool {
+func (e *SubscriptExpression) IsReference() bool {
 	return true
 }
 
-type IndexArgument struct {
+type SubscriptArgument struct {
 	NodeMeta
 	Label string     `json:"label,omitempty"`
 	Value Expression `json:"expression"`
@@ -654,10 +730,13 @@ var (
 	_ Type = (*SimpleType)(nil)
 	_ Type = (*GeneralizedType)(nil)
 
+	_ Expression = (*UnaryExpression)(nil)
+	_ Expression = (*BinaryExpression)(nil)
 	_ Expression = (*IntegerLiteralExpression)(nil)
+	_ Expression = (*FloatingPointLiteralExpression)(nil)
 	_ Expression = (*StringLiteralExpression)(nil)
 	_ Expression = (*MemberAccessExpression)(nil)
-	_ Expression = (*IndexExpression)(nil)
+	_ Expression = (*SubscriptExpression)(nil)
 	_ Expression = (*FunctionCallExpression)(nil)
 	_ Expression = (*TypeConversionExpression)(nil)
 

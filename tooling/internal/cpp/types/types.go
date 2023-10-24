@@ -207,8 +207,69 @@ func writeNamedTypeDefinition(w *formatting.IndentedWriter, nt *dsl.NamedType) {
 func writeComputedFieldExpression(w *formatting.IndentedWriter, expression dsl.Expression) {
 	dsl.Visit(expression, func(self dsl.Visitor, node dsl.Node) {
 		switch t := node.(type) {
+		case *dsl.UnaryExpression:
+			if t.Operator != dsl.UnaryOpNegate {
+				panic(fmt.Sprintf("unexpected unary operator %d", t.Operator))
+			}
+			w.WriteString("-(")
+			self.Visit(t.Expression)
+			w.WriteString(")")
+		case *dsl.BinaryExpression:
+			if t.Operator == dsl.BinaryOpPow {
+				w.WriteString("std::pow(")
+				self.Visit(t.Left)
+				w.WriteString(", ")
+				self.Visit(t.Right)
+				w.WriteString(")")
+				return
+			}
+
+			requiresParentheses := false
+			if l, ok := t.Left.(*dsl.BinaryExpression); ok && l.Operator.Precedence() < t.Operator.Precedence() {
+				requiresParentheses = true
+			}
+
+			if requiresParentheses {
+				w.WriteString("(")
+			}
+			self.Visit(t.Left)
+			if requiresParentheses {
+				w.WriteString(")")
+			}
+
+			w.WriteString(" ")
+
+			switch t.Operator {
+			case dsl.BinaryOpAdd:
+				w.WriteString("+")
+			case dsl.BinaryOpSub:
+				w.WriteString("-")
+			case dsl.BinaryOpMul:
+				w.WriteString("*")
+			case dsl.BinaryOpDiv:
+				w.WriteString("/")
+			case dsl.BinaryOpPow:
+				w.WriteString("**")
+			}
+
+			w.WriteString(" ")
+
+			requiresParentheses = false
+			if r, ok := t.Right.(*dsl.BinaryExpression); ok && r.Operator.Precedence() < t.Operator.Precedence() {
+				requiresParentheses = true
+			}
+
+			if requiresParentheses {
+				w.WriteString("(")
+			}
+			self.Visit(t.Right)
+			if requiresParentheses {
+				w.WriteString(")")
+			}
 		case *dsl.IntegerLiteralExpression:
 			w.Write([]byte(common.IntegerLiteral(t.Value, t.ResolvedType)))
+		case *dsl.FloatingPointLiteralExpression:
+			w.WriteString(t.Value)
 		case *dsl.StringLiteralExpression:
 			fmt.Fprintf(w, "%q", t.Value)
 		case *dsl.MemberAccessExpression:
@@ -221,10 +282,10 @@ func writeComputedFieldExpression(w *formatting.IndentedWriter, expression dsl.E
 			} else {
 				w.WriteString(common.FieldIdentifierName(t.Member))
 			}
-		case *dsl.IndexExpression:
+		case *dsl.SubscriptExpression:
 			self.Visit(t.Target)
 			w.WriteString(".at(")
-			formatting.Delimited(w, ", ", t.Arguments, func(w *formatting.IndentedWriter, i int, a *dsl.IndexArgument) {
+			formatting.Delimited(w, ", ", t.Arguments, func(w *formatting.IndentedWriter, i int, a *dsl.SubscriptArgument) {
 				self.Visit(a.Value)
 			})
 			w.WriteString(")")

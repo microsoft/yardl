@@ -401,9 +401,67 @@ func writeComputedFieldExpression(w *formatting.IndentedWriter, expression dsl.E
 
 	dsl.VisitWithContext(expression, tail, func(self dsl.VisitorWithContext[tailWrapper], node dsl.Node, tail tailWrapper) {
 		switch t := node.(type) {
+		case *dsl.UnaryExpression:
+			tail.Run(func() {
+				if t.Operator != dsl.UnaryOpNegate {
+					panic(fmt.Sprintf("unexpected unary operator %d", t.Operator))
+				}
+				w.WriteString("-(")
+				self.Visit(t.Expression, tailWrapper{})
+				w.WriteString(")")
+			})
+		case *dsl.BinaryExpression:
+			tail.Run(func() {
+				requiresParentheses := false
+				if l, ok := t.Left.(*dsl.BinaryExpression); ok && l.Operator.Precedence() < t.Operator.Precedence() {
+					requiresParentheses = true
+				}
+
+				if requiresParentheses {
+					w.WriteString("(")
+				}
+				self.Visit(t.Left, tailWrapper{})
+				if requiresParentheses {
+					w.WriteString(")")
+				}
+
+				w.WriteString(" ")
+
+				switch t.Operator {
+				case dsl.BinaryOpAdd:
+					w.WriteString("+")
+				case dsl.BinaryOpSub:
+					w.WriteString("-")
+				case dsl.BinaryOpMul:
+					w.WriteString("*")
+				case dsl.BinaryOpDiv:
+					w.WriteString("//")
+				case dsl.BinaryOpPow:
+					w.WriteString("**")
+				}
+
+				w.WriteString(" ")
+
+				requiresParentheses = false
+				if r, ok := t.Right.(*dsl.BinaryExpression); ok && r.Operator.Precedence() < t.Operator.Precedence() {
+					requiresParentheses = true
+				}
+
+				if requiresParentheses {
+					w.WriteString("(")
+				}
+				self.Visit(t.Right, tailWrapper{})
+				if requiresParentheses {
+					w.WriteString(")")
+				}
+			})
 		case *dsl.IntegerLiteralExpression:
 			tail.Run(func() {
 				fmt.Fprintf(w, "%d", &t.Value)
+			})
+		case *dsl.FloatingPointLiteralExpression:
+			tail.Run(func() {
+				w.WriteString(t.Value)
 			})
 		case *dsl.StringLiteralExpression:
 			tail.Run(func() {
@@ -428,7 +486,7 @@ func writeComputedFieldExpression(w *formatting.IndentedWriter, expression dsl.E
 					w.WriteString(common.FieldIdentifierName(t.Member))
 				}
 			})
-		case *dsl.IndexExpression:
+		case *dsl.SubscriptExpression:
 			tail.Run(func() {
 				isTargetArray := false
 				if t.Target != nil {
@@ -445,7 +503,7 @@ func writeComputedFieldExpression(w *formatting.IndentedWriter, expression dsl.E
 
 				self.Visit(t.Target, tailWrapper{})
 				w.WriteString("[")
-				formatting.Delimited(w, ", ", t.Arguments, func(w *formatting.IndentedWriter, i int, a *dsl.IndexArgument) {
+				formatting.Delimited(w, ", ", t.Arguments, func(w *formatting.IndentedWriter, i int, a *dsl.SubscriptArgument) {
 					self.Visit(a.Value, tailWrapper{})
 				})
 				w.WriteString("]")
@@ -537,6 +595,8 @@ func writeComputedFieldExpression(w *formatting.IndentedWriter, expression dsl.E
 			})
 
 			self.Visit(t.Expression, tail)
+		default:
+			panic(fmt.Sprintf("Unknown expression type '%T'", t))
 		}
 	})
 }
