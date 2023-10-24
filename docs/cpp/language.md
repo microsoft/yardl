@@ -427,10 +427,33 @@ MyRec: !record
     accessArray: arrayField
     accessArrayElement: arrayField[0, 1]
     accessArrayElementByName: arrayField[x:0, y:1]
+    accessArrayElementAndConvert: arrayField[0, 1] as int
     sizeOfArrayField: size(arrayField)
     sizeOfFirstDimension: size(arrayField, 0)
     sizeOfXDimension: size(arrayField, 'x')
+    basicArithmentic:  arrayField[0, 1] * 2
 ```
+
+The following expression types are supported:
+- Numeric literals, such as `1`, `-1`, `0xF`, `3.4`, and `-2e-3`.
+- String literals, such as `"abc"` and `'abc'`.
+- Simple arithmethic expresions, such as `1 + 2`, `2.0 * 3`, and `2 ** 3` (`**`
+  is the power operator and yields a `float64`).
+- Type conversions using the `as` operator, such as `1 as float64`.
+- Field accesses, such as `myField`. You can access a field on another field
+  using the `.` operator, such as `myField.anotherField`.
+- Array and vector element access, such as `arrayField[0, 1]` or
+  `arrayField[x:0, y:1]` to identify the dimensions by name.
+- Function calls:
+  - `size(vector)`: returns the size (length) of the vector.
+  - `size(array)`: returns the total size of the array.
+  - `size(array, integer)`: returns the size of the array's dimension at the given
+    index.
+  - `size(array, string)`: returns the size of the array's dimension with the
+    given name.
+  - `dimensionIndex(array, string)` returns the index of the dimension with the
+    given name.
+  - `dimensionCount(array)` returns the dimension count of the array.
 
 To work with union types, you need to use a switch expression with type pattern
 matching:
@@ -449,19 +472,15 @@ MyRec: !record
         _: 0 # all other cases (here it's just null)
 ```
 
-The following function calls are supported from computed field expressions:
+Computed fields become parameterless methods on the generated C++ struct. Here
+is an example of invoking the field from the preceding Yardl definition:
 
-- `size(vector)`: returns the size (length) of the vector
-- `size(array)`: returns the total size of the array
-- `size(array, integer)`: returns the size of the array's dimension at the given
-  index
-- `size(array, string)`: returns the size of the array's dimension with the
-  given name
+```C++
+sandbox::MyRec r;
+r.my_union = 4;
 
-- `dimensionIndex(array, string)` returns the index of the dimension with the
-  given name
-
-- `dimensionCount(array)` returns the dimension count of the array
+r.MyUnionSize(); // 1
+```
 
 ## Generics
 
