@@ -705,33 +705,6 @@ func GetCommonType(a, b Type) (Type, error) {
 	return nil, ErrNoCommonType
 }
 
-func GetNextLargestIntegerTypeIfExists(t Type) Type {
-	prim, ok := GetPrimitiveType(t)
-	if !ok {
-		panic("GetLargestIntegerType called with a non-primitive type")
-	}
-	if !IsIntegralPrimitive(prim) {
-		panic("GetLargestIntegerType called with a non-integral primitive type")
-	}
-
-	switch prim {
-	case Int8:
-		return Int16Type
-	case Uint8:
-		return Uint16Type
-	case Int16:
-		return Int32Type
-	case Uint16:
-		return Uint32Type
-	case Int32:
-		return Int64Type
-	case Uint32:
-		return Uint64Type
-	default:
-		return t
-	}
-}
-
 func ContainsGenericTypeParameter(node Node) bool {
 	contains := false
 	Visit(node, func(self Visitor, node Node) {
