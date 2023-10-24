@@ -44,7 +44,7 @@ func WriteHdf5(env *dsl.Environment, options packaging.CppCodegenOptions) error 
 	for _, ns := range env.Namespaces {
 		fmt.Fprintf(w, "namespace %s::hdf5 {\n", common.NamespaceIdentifierName(ns.Name))
 		writeNamespaceDefinitions(w, ns)
-		fmt.Fprintf(w, "} // namespace %s::hdf5", common.NamespaceIdentifierName(ns.Name))
+		fmt.Fprintf(w, "} // namespace %s::hdf5\n\n", common.NamespaceIdentifierName(ns.Name))
 	}
 
 	filePath := path.Join(options.SourcesOutputDir, "protocols.cc")
@@ -79,8 +79,10 @@ func writeNamespaceDefinitions(w *formatting.IndentedWriter, ns *dsl.Namespace) 
 
 	w.WriteString("} // namespace \n\n")
 
-	for _, p := range ns.Protocols {
-		writeProtocolMethods(w, p)
+	if ns.IsTopLevel {
+		for _, p := range ns.Protocols {
+			writeProtocolMethods(w, p)
+		}
 	}
 }
 

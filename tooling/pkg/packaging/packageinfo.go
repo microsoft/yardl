@@ -35,88 +35,6 @@ type PackageInfo struct {
 	Python *PythonCodegenOptions `yaml:"python,omitempty"`
 }
 
-type CppCodegenOptions struct {
-	PackageInfo        *PackageInfo `yaml:"-"`
-	SourcesOutputDir   string       `yaml:"sourcesOutputDir"`
-	GenerateCMakeLists bool         `yaml:"generateCMakeLists"`
-
-	InternalSymlinkStaticHeaders bool `yaml:"internalSymlinkStaticHeaders"`
-	InternalGenerateMocks        bool `yaml:"internalGenerateMocks"`
-	InternalGenerateTranslator   bool `yaml:"internalGenerateTranslator"`
-}
-
-func (o CppCodegenOptions) ChangeOutputDir(newRelativeDir string) CppCodegenOptions {
-	o.SourcesOutputDir = filepath.Join(o.SourcesOutputDir, newRelativeDir)
-	return o
-}
-
-func (o *CppCodegenOptions) UnmarshalYAML(value *yaml.Node) error {
-	// Set default values
-	o.GenerateCMakeLists = true
-
-	type alias CppCodegenOptions
-	return value.DecodeWithOptions((*alias)(o), yaml.DecodeOptions{KnownFields: true})
-}
-
-type JsonCodegenOptions struct {
-	PackageInfo *PackageInfo `yaml:"-"`
-	OutputDir   string       `yaml:"outputDir"`
-}
-
-type PythonCodegenOptions struct {
-	PackageInfo                *PackageInfo `yaml:"-"`
-	OutputDir                  string       `yaml:"outputDir"`
-	InternalSymlinkStaticFiles bool         `yaml:"internalSymlinkStaticFiles"`
-}
-
-func ReadPackageInfo(directory string) (*PackageInfo, error) {
-	packageFilePath, _ := filepath.Abs(filepath.Join(directory, PackageFileName))
-	packageInfo := &PackageInfo{FilePath: packageFilePath}
-	f, err := os.Open(packageFilePath)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return packageInfo, fmt.Errorf("a '%s' file is missing from the directory '%s'", PackageFileName, directory)
-		}
-		return packageInfo, err
-	}
-	defer f.Close()
-
-	decoder := yaml.NewDecoder(f)
-	decoder.KnownFields(true)
-	err = decoder.Decode(&packageInfo)
-	if err != nil {
-		return packageInfo, validation.NewValidationError(err, packageFilePath)
-	}
-
-	//log.Printf("Parsed packageInfo with namespace: %v", packageInfo.Namespace)
-	return packageInfo, packageInfo.validate()
-}
-
-// Parses PackageInfo in dir then loads all package Imports and Predecessors
-func LoadPackage(dir string) (*PackageInfo, error) {
-	packageInfo, err := loadVersion(dir)
-	if err != nil {
-		return nil, err
-	}
-
-	dirs, err := collectPredecessors(packageInfo)
-	if err != nil {
-		return packageInfo, err
-	}
-
-	for _, dir := range dirs {
-		predecessorInfo, err := loadVersion(dir)
-		if err != nil {
-			return packageInfo, err
-		}
-
-		packageInfo.Predecessors = append(packageInfo.Predecessors, predecessorInfo)
-	}
-
-	return packageInfo, nil
-}
-
-// Returns path to package directory
 func (p *PackageInfo) PackageDir() string {
 	return filepath.Dir(p.FilePath)
 }
@@ -160,60 +78,154 @@ func (p *PackageInfo) validate() error {
 	return errorSink.AsError()
 }
 
-func loadVersion(dir string) (*PackageInfo, error) {
-	packageInfo, err := ReadPackageInfo(dir)
+type CppCodegenOptions struct {
+	PackageInfo        *PackageInfo `yaml:"-"`
+	SourcesOutputDir   string       `yaml:"sourcesOutputDir"`
+	GenerateCMakeLists bool         `yaml:"generateCMakeLists"`
+
+	InternalSymlinkStaticHeaders bool `yaml:"internalSymlinkStaticHeaders"`
+	InternalGenerateMocks        bool `yaml:"internalGenerateMocks"`
+	InternalGenerateTranslator   bool `yaml:"internalGenerateTranslator"`
+}
+
+func (o CppCodegenOptions) ChangeOutputDir(newRelativeDir string) CppCodegenOptions {
+	o.SourcesOutputDir = filepath.Join(o.SourcesOutputDir, newRelativeDir)
+	return o
+}
+
+func (o *CppCodegenOptions) UnmarshalYAML(value *yaml.Node) error {
+	// Set default values
+	o.GenerateCMakeLists = true
+
+	type alias CppCodegenOptions
+	return value.DecodeWithOptions((*alias)(o), yaml.DecodeOptions{KnownFields: true})
+}
+
+type JsonCodegenOptions struct {
+	PackageInfo *PackageInfo `yaml:"-"`
+	OutputDir   string       `yaml:"outputDir"`
+}
+
+type PythonCodegenOptions struct {
+	PackageInfo                *PackageInfo `yaml:"-"`
+	OutputDir                  string       `yaml:"outputDir"`
+	InternalSymlinkStaticFiles bool         `yaml:"internalSymlinkStaticFiles"`
+}
+
+// Parses PackageInfo in dir then loads all package Imports and Predecessors
+func LoadPackage(dir string) (*PackageInfo, error) {
+	packageInfo, err := loadPackageVersion(dir)
+	if err != nil {
+		return nil, err
+	}
+
+	dirs, err := collectPredecessors(packageInfo)
 	if err != nil {
 		return packageInfo, err
 	}
 
-	err = collectImportsRecursively(packageInfo, MaxImportRecursionDepth)
+	for _, dir := range dirs {
+		predecessorInfo, err := loadPackageVersion(dir)
+		if err != nil {
+			return packageInfo, err
+		}
+
+		packageInfo.Predecessors = append(packageInfo.Predecessors, predecessorInfo)
+	}
+
+	return packageInfo, nil
+}
+
+func loadPackageVersion(dir string) (*PackageInfo, error) {
+	pkgsCollected := make(map[string]*PackageInfo)
+	importChain := make(map[string]bool)
+	packageInfo, err := collectPackages(dir, pkgsCollected, importChain, MaxImportRecursionDepth)
 	if err != nil {
 		return packageInfo, err
 	}
 
-	log.Printf("Imports collected for %v:", packageInfo.FilePath)
 	logImports(packageInfo, 0)
 
 	return packageInfo, nil
 }
 
-func logImports(p *PackageInfo, level int) {
-	indent := strings.Repeat("  ", level)
-	log.Printf("%v- %v: %v", indent, p.PackageDir(), p.Namespace)
-	for _, dep := range p.Imports {
-		logImports(dep, level+1)
+func logImports(p *PackageInfo, indent int) {
+	log.Printf("%s- %s from %s (%p)", strings.Repeat("  ", indent), p.Namespace, p.PackageDir(), p)
+	for _, imp := range p.Imports {
+		logImports(imp, indent+1)
 	}
 }
 
-func collectImportsRecursively(parent *PackageInfo, depthRemaining int) error {
-	if len(parent.ImportUrls) <= 0 {
-		return nil
+func readPackageInfo(directory string) (*PackageInfo, error) {
+	packageFilePath, _ := filepath.Abs(filepath.Join(directory, PackageFileName))
+	packageInfo := &PackageInfo{FilePath: packageFilePath}
+	f, err := os.Open(packageFilePath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return packageInfo, fmt.Errorf("a '%s' file is missing from the directory '%s'", PackageFileName, directory)
+		}
+		return packageInfo, err
 	}
+	defer f.Close()
+
+	decoder := yaml.NewDecoder(f)
+	decoder.KnownFields(true)
+	err = decoder.Decode(&packageInfo)
+	if err != nil {
+		return packageInfo, validation.NewValidationError(err, packageFilePath)
+	}
+
+	log.Printf("Parsed packageInfo with namespace: %v", packageInfo.Namespace)
+	return packageInfo, packageInfo.validate()
+}
+
+// Recursively collects all packages starting with parentDir, building an Import tree of *PackageInfo
+// alreadyCollected is used to check for namespace conflicts (e.g. same namespace but different package directory)
+// importChain is used to check for import cycles
+// depthRemaining is used to limit the depth of the import tree
+func collectPackages(parentDir string, alreadyCollected map[string]*PackageInfo, importChain map[string]bool, depthRemaining int) (*PackageInfo, error) {
+	parentInfo, err := readPackageInfo(parentDir)
+	if err != nil {
+		return nil, err
+	}
+
+	if importChain[parentInfo.Namespace] {
+		return parentInfo, validation.NewValidationError(fmt.Errorf("import cycle detected"), parentInfo.FilePath)
+	}
+
+	if collected, found := alreadyCollected[parentInfo.Namespace]; found {
+		if collected.FilePath != parentInfo.FilePath {
+			return collected, validation.NewValidationError(fmt.Errorf("namespace '%s' conflicts with '%s'", parentInfo.Namespace, collected.FilePath), parentInfo.FilePath)
+		} else {
+			return collected, nil
+		}
+	}
+
+	alreadyCollected[parentInfo.Namespace] = parentInfo
 
 	if depthRemaining <= 0 {
-		return validation.NewValidationError(errors.New("reached maximum number of recursive imports"), parent.FilePath)
+		return parentInfo, validation.NewValidationError(errors.New("reached maximum number of recursive imports"), parentInfo.FilePath)
 	}
 
-	log.Printf("Collecting imports for %v", parent.PackageDir())
-	dirs, err := fetchAndCachePackages(parent.PackageDir(), parent.ImportUrls)
+	log.Printf("Collecting imports for %v", parentInfo.PackageDir())
+	dirs, err := fetchAndCachePackages(parentInfo.PackageDir(), parentInfo.ImportUrls)
 	if err != nil {
-		return validation.NewValidationError(err, parent.FilePath)
+		return parentInfo, validation.NewValidationError(err, parentInfo.FilePath)
 	}
 
 	for _, dir := range dirs {
-		packageInfo, err := ReadPackageInfo(dir)
+		importChain[parentInfo.Namespace] = true
+		childInfo, err := collectPackages(dir, alreadyCollected, importChain, depthRemaining-1)
 		if err != nil {
-			return err
+			return parentInfo, err
 		}
+		importChain[parentInfo.Namespace] = false
 
-		if err := collectImportsRecursively(packageInfo, depthRemaining-1); err != nil {
-			return err
-		}
-
-		parent.Imports = append(parent.Imports, packageInfo)
+		// Build the Import tree
+		parentInfo.Imports = append(parentInfo.Imports, childInfo)
 	}
 
-	return nil
+	return parentInfo, nil
 }
 
 func collectPredecessors(pkgInfo *PackageInfo) ([]string, error) {

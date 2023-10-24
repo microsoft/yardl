@@ -20,7 +20,13 @@ func WriteTypes(ns *dsl.Namespace, st dsl.SymbolTable, packageDir string) error 
 	b := bytes.Buffer{}
 	w := formatting.NewIndentedWriter(&b, "    ")
 	common.WriteGeneratedFileHeader(w)
-	w.WriteStringln(`import datetime
+
+	relativePath := ".."
+	if ns.IsTopLevel {
+		relativePath = "."
+	}
+
+	fmt.Fprintf(w, `import datetime
 import enum
 import types
 import typing
@@ -28,9 +34,15 @@ import typing
 import numpy as np
 import numpy.typing as npt
 
-from . import yardl_types as yardl
-from . import _dtypes
-`)
+from %s import yardl_types as yardl
+from %s import _dtypes
+
+`, relativePath, relativePath)
+
+	for _, ref := range ns.GetAllChildReferences() {
+		fmt.Fprintf(w, "from %s import %s\n", relativePath, common.NamespaceIdentifierName(ref.Name))
+	}
+	w.WriteStringln("")
 
 	writeTypes(w, st, ns)
 
@@ -965,6 +977,7 @@ type dTypeExpressionContext struct {
 
 func typeDefinitionDTypeExpression(t dsl.TypeDefinition, context dTypeExpressionContext) string {
 	if !context.root {
+		var dtypeExpression string
 		switch t := t.(type) {
 		case dsl.PrimitiveDefinition:
 			switch t {
@@ -1003,10 +1016,17 @@ func typeDefinitionDTypeExpression(t dsl.TypeDefinition, context dTypeExpression
 				typeArgs = append(typeArgs, getTypeSyntaxWithGenricArgsReadFromTupleArgs(ta, context))
 			}
 
-			return fmt.Sprintf("get_dtype(types.GenericAlias(%s, (%s,)))", common.TypeSyntaxWithoutTypeParameters(t, context.namespace), strings.Join(typeArgs, ", "))
+			dtypeExpression = fmt.Sprintf("get_dtype(types.GenericAlias(%s, (%s,)))", common.TypeSyntaxWithoutTypeParameters(t, context.namespace), strings.Join(typeArgs, ", "))
+		} else {
+			dtypeExpression = fmt.Sprintf("get_dtype(%s)", common.TypeSyntaxWithoutTypeParameters(t, context.namespace))
+
 		}
 
-		return fmt.Sprintf("get_dtype(%s)", common.TypeSyntaxWithoutTypeParameters(t, context.namespace))
+		if t.GetDefinitionMeta().Namespace != context.namespace {
+			dtypeExpression = fmt.Sprintf("%s.%s", common.NamespaceIdentifierName(t.GetDefinitionMeta().Namespace), dtypeExpression)
+		}
+
+		return dtypeExpression
 	}
 
 	meta := t.GetDefinitionMeta()

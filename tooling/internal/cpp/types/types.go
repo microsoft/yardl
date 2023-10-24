@@ -43,7 +43,7 @@ func writeHeaderFile(env *dsl.Environment, options packaging.CppCodegenOptions) 
 	for _, ns := range env.Namespaces {
 		fmt.Fprintf(w, "namespace %s {\n", common.NamespaceIdentifierName(ns.Name))
 		writeNamespaceMembers(w, ns)
-		fmt.Fprintf(w, "} // namespace %s\n", common.NamespaceIdentifierName(ns.Name))
+		fmt.Fprintf(w, "} // namespace %s\n\n", common.NamespaceIdentifierName(ns.Name))
 	}
 
 	definitionsPath := path.Join(options.SourcesOutputDir, "types.h")
@@ -72,7 +72,7 @@ func writeSourceFile(env *dsl.Environment, options packaging.CppCodegenOptions) 
 				}
 			}
 		}
-		fmt.Fprintf(w, "} // namespace %s\n", common.NamespaceIdentifierName(ns.Name))
+		fmt.Fprintf(w, "} // namespace %s\n\n", common.NamespaceIdentifierName(ns.Name))
 	}
 
 	definitionsPath := path.Join(options.SourcesOutputDir, "types.cc")

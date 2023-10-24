@@ -49,6 +49,9 @@ func WriteTranslator(env *dsl.Environment, options packaging.CppCodegenOptions) 
 		w.WriteStringln("}\n")
 
 		for _, ns := range env.Namespaces {
+			if !ns.IsTopLevel {
+				continue
+			}
 			for _, protocol := range ns.Protocols {
 				fmt.Fprintf(w, "if (protocol_name == \"%s\") {\n", protocol.Name)
 				w.Indented(func() {

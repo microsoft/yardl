@@ -33,6 +33,9 @@ func writeHeaderFile(env *dsl.Environment, options packaging.CppCodegenOptions) 
 `)
 
 	for _, ns := range env.Namespaces {
+		if !ns.IsTopLevel {
+			continue
+		}
 		fmt.Fprintf(w, "namespace %s::hdf5 {\n", common.NamespaceIdentifierName(ns.Name))
 		for _, protocol := range ns.Protocols {
 
@@ -108,9 +111,9 @@ func writeHeaderFile(env *dsl.Environment, options packaging.CppCodegenOptions) 
 					}
 				}
 			})
-			fmt.Fprint(w, "};\n")
+			fmt.Fprint(w, "};\n\n")
 		}
-		w.WriteStringln("}")
+		fmt.Fprintf(w, "} // namespace %s\n\n", common.NamespaceIdentifierName(ns.Name))
 	}
 
 	filePath := path.Join(options.SourcesOutputDir, "protocols.h")

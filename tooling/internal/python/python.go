@@ -33,8 +33,18 @@ func Generate(env *dsl.Environment, options packaging.PythonCodegenOptions) erro
 		return err
 	}
 
+	topNamespace := env.GetTopLevelNamespace()
+	topPackageDir := path.Join(options.OutputDir, formatting.ToSnakeCase(topNamespace.Name))
+	if err := iocommon.CopyEmbeddedStaticFiles(topPackageDir, options.InternalSymlinkStaticFiles, staticFiles); err != nil {
+		return err
+	}
+
 	for _, ns := range env.Namespaces {
-		err = writeNamespace(ns, env.SymbolTable, options)
+		packageDir := topPackageDir
+		if !ns.IsTopLevel {
+			packageDir = path.Join(packageDir, formatting.ToSnakeCase(ns.Name))
+		}
+		err = writeNamespace(ns, env.SymbolTable, packageDir)
 		if err != nil {
 			return err
 		}
@@ -43,18 +53,13 @@ func Generate(env *dsl.Environment, options packaging.PythonCodegenOptions) erro
 	return nil
 }
 
-func writeNamespace(ns *dsl.Namespace, st dsl.SymbolTable, options packaging.PythonCodegenOptions) error {
-	packageDir := path.Join(options.OutputDir, formatting.ToSnakeCase(ns.Name))
+func writeNamespace(ns *dsl.Namespace, st dsl.SymbolTable, packageDir string) error {
 	if err := os.MkdirAll(packageDir, 0775); err != nil {
 		return err
 	}
 
 	// Write __init__.py
-	if err := writePackageInitFile(packageDir, ns); err != nil {
-		return err
-	}
-
-	if err := iocommon.CopyEmbeddedStaticFiles(packageDir, options.InternalSymlinkStaticFiles, staticFiles); err != nil {
+	if err := writePackageInitFile(ns, packageDir); err != nil {
 		return err
 	}
 
@@ -62,8 +67,10 @@ func writeNamespace(ns *dsl.Namespace, st dsl.SymbolTable, options packaging.Pyt
 		return err
 	}
 
-	if err := protocols.WriteProtocols(ns, st, packageDir); err != nil {
-		return err
+	if ns.IsTopLevel {
+		if err := protocols.WriteProtocols(ns, st, packageDir); err != nil {
+			return err
+		}
 	}
 
 	if err := binary.WriteBinary(ns, packageDir); err != nil {
@@ -77,7 +84,7 @@ func writeNamespace(ns *dsl.Namespace, st dsl.SymbolTable, options packaging.Pyt
 	return nil
 }
 
-func writePackageInitFile(packageDir string, ns *dsl.Namespace) error {
+func writePackageInitFile(ns *dsl.Namespace, packageDir string) error {
 	b := bytes.Buffer{}
 	w := formatting.NewIndentedWriter(&b, "    ")
 	common.WriteGeneratedFileHeader(w)
@@ -100,7 +107,11 @@ if _parse_version(_np.__version__) < _MIN_NUMPY_VERSION:
     raise ImportError(f"Your installed numpy version is {_np.__version__}, but version >= {'.'.join(str(i) for i in _MIN_NUMPY_VERSION)} is required.")
 `)
 
-	fmt.Fprintf(w, "from .yardl_types import *\n")
+	relativePath := ".."
+	if ns.IsTopLevel {
+		relativePath = "."
+	}
+	fmt.Fprintf(w, "from %syardl_types import *\n", relativePath)
 
 	typesMembers := make([]string, 0)
 	typesMembers = append(typesMembers, "get_dtype")
@@ -141,12 +152,13 @@ if _parse_version(_np.__version__) < _MIN_NUMPY_VERSION:
 	})
 	fmt.Fprintf(w, ")\n")
 
-	protocolsMembers := make([]string, 0)
+	var binaryMembers []string
+	var ndjsonMembers []string
+	var protocolsMembers []string
 	for _, p := range ns.Protocols {
 		protocolsMembers = append(protocolsMembers, common.AbstractWriterName(p), common.AbstractReaderName(p))
 	}
-
-	if len(protocolsMembers) > 0 {
+	if ns.IsTopLevel && len(protocolsMembers) > 0 {
 		sort.Slice(protocolsMembers, func(i, j int) bool {
 			return protocolsMembers[i] < protocolsMembers[j]
 		})
@@ -168,13 +180,7 @@ if _parse_version(_np.__version__) < _MIN_NUMPY_VERSION:
 			return protocolsMembers[i] < protocolsMembers[j]
 		})
 
-		fmt.Fprintf(w, "from .binary import (\n")
-		w.Indented(func() {
-			for _, p := range protocolsMembers {
-				fmt.Fprintf(w, "%s,\n", p)
-			}
-		})
-		fmt.Fprintf(w, ")\n")
+		binaryMembers = append(binaryMembers, protocolsMembers...)
 
 		for i, p := range ns.Protocols {
 			protocolsMembers[i*2] = ndjson.NDJsonWriterName(p)
@@ -185,13 +191,33 @@ if _parse_version(_np.__version__) < _MIN_NUMPY_VERSION:
 			return protocolsMembers[i] < protocolsMembers[j]
 		})
 
-		fmt.Fprintf(w, "from .ndjson import (\n")
+		ndjsonMembers = append(ndjsonMembers, protocolsMembers...)
+	}
+
+	binaryMembers = append(binaryMembers, binary.RecordSerializerNames(ns)...)
+	if len(binaryMembers) > 0 {
+		fmt.Fprintf(w, "from .binary import (\n")
 		w.Indented(func() {
-			for _, p := range protocolsMembers {
+			for _, p := range binaryMembers {
 				fmt.Fprintf(w, "%s,\n", p)
 			}
 		})
 		fmt.Fprintf(w, ")\n")
+	}
+
+	ndjsonMembers = append(ndjsonMembers, ndjson.RecordConverterNames(ns)...)
+	if len(ndjsonMembers) > 0 {
+		fmt.Fprintf(w, "from .ndjson import (\n")
+		w.Indented(func() {
+			for _, p := range ndjsonMembers {
+				fmt.Fprintf(w, "%s,\n", p)
+			}
+		})
+		fmt.Fprintf(w, ")\n")
+	}
+
+	for _, ref := range ns.GetAllChildReferences() {
+		fmt.Fprintf(w, "from %s import %s\n", relativePath, common.NamespaceIdentifierName(ref.Name))
 	}
 
 	return iocommon.WriteFileIfNeeded(path.Join(packageDir, "__init__.py"), b.Bytes(), 0644)

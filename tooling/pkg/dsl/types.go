@@ -48,6 +48,11 @@ func (n *Environment) GetNodeMeta() *NodeMeta {
 	return &NodeMeta{}
 }
 
+func (n *Environment) GetTopLevelNamespace() *Namespace {
+	// Environment.Namespaces is *reverse* sorted by dependency, so the top-level namespace is always LAST
+	return n.Namespaces[len(n.Namespaces)-1]
+}
+
 type SymbolTable map[string]TypeDefinition
 
 func (st SymbolTable) GetGenericTypeDefinition(possiblyGenericType TypeDefinition) TypeDefinition {
@@ -77,10 +82,31 @@ type Namespace struct {
 	Name            string                `json:"name"`
 	TypeDefinitions TypeDefinitions       `json:"types,omitempty"`
 	Protocols       []*ProtocolDefinition `json:"protocols,omitempty"`
+	References      []*Namespace          `json:"-"`
+	IsTopLevel      bool                  `json:"-"`
 }
 
 func (n *Namespace) GetNodeMeta() *NodeMeta {
 	return &NodeMeta{}
+}
+
+// Returns the flattened set of all direct+indirectly referenced namespaces (e.g. imports)
+func (n *Namespace) GetAllChildReferences() []*Namespace {
+	checked := make(map[string]bool)
+	var children []*Namespace
+	var recurse func(*Namespace)
+	recurse = func(ns *Namespace) {
+		for _, ref := range ns.References {
+			// Avoid duplicate imports
+			if !checked[ref.Name] {
+				recurse(ref)
+				checked[ref.Name] = true
+				children = append(children, ref)
+			}
+		}
+	}
+	recurse(n)
+	return children
 }
 
 // ----------------------------------------------------------------------------

@@ -46,28 +46,9 @@ func validateImpl() error {
 	return err
 }
 
-func parseNamespaces(p *packaging.PackageInfo, namespaces *[]*dsl.Namespace) error {
-	namespace, err := dsl.ParsePackageContents(p)
-	if err != nil {
-		return nil
-	}
-
-	for _, dep := range p.Imports {
-		if err := parseNamespaces(dep, namespaces); err != nil {
-			return err
-		}
-	}
-
-	*namespaces = append(*namespaces, namespace)
-	log.Printf("Parsed namespace %v", namespace.Name)
-
-	return nil
-}
-
 func validatePackage(packageInfo *packaging.PackageInfo) (*dsl.Environment, error) {
-	var namespaces []*dsl.Namespace
-
-	if err := parseNamespaces(packageInfo, &namespaces); err != nil {
+	namespaces, err := parseAndFlattenNamespaces(packageInfo)
+	if err != nil {
 		return nil, err
 	}
 
@@ -77,8 +58,8 @@ func validatePackage(packageInfo *packaging.PackageInfo) (*dsl.Environment, erro
 	}
 
 	for _, packageInfo := range packageInfo.Predecessors {
-		var namespaces []*dsl.Namespace
-		if err := parseNamespaces(packageInfo, &namespaces); err != nil {
+		namespaces, err := parseAndFlattenNamespaces(packageInfo)
+		if err != nil {
 			return nil, err
 		}
 
@@ -89,4 +70,55 @@ func validatePackage(packageInfo *packaging.PackageInfo) (*dsl.Environment, erro
 	}
 
 	return env, nil
+}
+
+func parseAndFlattenNamespaces(p *packaging.PackageInfo) ([]*dsl.Namespace, error) {
+	alreadyParsed := make(map[string]*dsl.Namespace)
+	namespace, err := parsePackageNamespaces(p, alreadyParsed)
+	if err != nil {
+		return nil, err
+	}
+
+	namespace.IsTopLevel = true
+
+	deduplicator := make(map[*dsl.Namespace]bool)
+	return flattenNamespaces(namespace, deduplicator), nil
+}
+
+func parsePackageNamespaces(p *packaging.PackageInfo, alreadyParsed map[string]*dsl.Namespace) (*dsl.Namespace, error) {
+	if existing, found := alreadyParsed[p.Namespace]; found {
+		log.Printf("Already parsed namespace %s (%p)", existing.Name, existing)
+		return existing, nil
+	}
+
+	namespace, err := dsl.ParsePackageContents(p)
+	if err != nil {
+		return nil, err
+	}
+
+	alreadyParsed[p.Namespace] = namespace
+	log.Printf("Parsed namespace %s (%p)", namespace.Name, namespace)
+
+	for _, dep := range p.Imports {
+		ns, err := parsePackageNamespaces(dep, alreadyParsed)
+		if err != nil {
+			return namespace, nil
+		}
+		namespace.References = append(namespace.References, ns)
+	}
+
+	return namespace, nil
+}
+
+func flattenNamespaces(ns *dsl.Namespace, duplicate map[*dsl.Namespace]bool) (flat []*dsl.Namespace) {
+	if duplicate[ns] {
+		return flat
+	}
+	duplicate[ns] = true
+
+	for _, child := range ns.References {
+		flat = append(flat, flattenNamespaces(child, duplicate)...)
+	}
+
+	return append(flat, ns)
 }

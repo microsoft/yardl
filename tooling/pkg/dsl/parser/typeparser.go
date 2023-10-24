@@ -36,7 +36,7 @@ func (t Type) String() string {
 
 type TypeName struct {
 	Pos      lexer.Position
-	Name     string  `parser:"@Ident"`
+	Name     string  `parser:"@Ident @('.' Ident)*"`
 	TypeArgs []*Type `parser:"('<' @@ (',' @@)* '>')?"`
 }
 
