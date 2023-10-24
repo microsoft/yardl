@@ -88,30 +88,26 @@ func WriteNdJson(env *dsl.Environment, options packaging.CppCodegenOptions) erro
 	}
 
 	unionsBySyntax := make(map[string]*dsl.GeneralizedType)
-	for _, ns := range env.Namespaces {
-		for _, p := range ns.Protocols {
-			dsl.Visit(p, func(self dsl.Visitor, node dsl.Node) {
-				switch t := node.(type) {
-				case *dsl.SimpleType:
-					self.Visit(t.ResolvedDefinition)
-				case *dsl.GeneralizedType:
-					if t.Cases.IsUnion() {
-						scalarType := t.ToScalar().(*dsl.GeneralizedType)
-						typeSyntax := common.TypeSyntax(scalarType)
-						if _, ok := unionsBySyntax[typeSyntax]; !ok {
-							if len(unionsBySyntax) == 0 {
-								w.WriteStringln("NLOHMANN_JSON_NAMESPACE_BEGIN\n")
-							}
-							unionsBySyntax[typeSyntax] = t
-							writeUnionConverters(w, scalarType)
-						}
+	dsl.Visit(env, func(self dsl.Visitor, node dsl.Node) {
+		switch t := node.(type) {
+		case *dsl.SimpleType:
+			self.Visit(t.ResolvedDefinition)
+		case *dsl.GeneralizedType:
+			if t.Cases.IsUnion() {
+				scalarType := dsl.NormalizeGenericTypeParameters(t.ToScalar()).(*dsl.GeneralizedType)
+				typeSyntax := common.TypeSyntax(scalarType)
+				if _, ok := unionsBySyntax[typeSyntax]; !ok {
+					if len(unionsBySyntax) == 0 {
+						w.WriteStringln("NLOHMANN_JSON_NAMESPACE_BEGIN\n")
 					}
+					unionsBySyntax[typeSyntax] = t
+					writeUnionConverters(w, scalarType)
 				}
-
-				self.VisitChildren(node)
-			})
+			}
 		}
-	}
+
+		self.VisitChildren(node)
+	})
 
 	if len(unionsBySyntax) > 0 {
 		w.WriteStringln("NLOHMANN_JSON_NAMESPACE_END\n")
@@ -438,7 +434,33 @@ func writeUnionConverters(w *formatting.IndentedWriter, unionType *dsl.Generaliz
 
 	unionTypeSyntax := common.TypeSyntax(unionType)
 
-	w.WriteStringln("template<>")
+	typeParameters := make(map[string]any)
+	dsl.Visit(unionType, func(self dsl.Visitor, node dsl.Node) {
+		switch node := node.(type) {
+		case *dsl.GenericTypeParameter:
+			typeParameters[node.Name] = nil
+			return
+		case *dsl.NamedType:
+			self.Visit(node.DefinitionMeta)
+		case *dsl.SimpleType:
+			self.VisitChildren(node)
+			self.Visit(node.ResolvedDefinition)
+		default:
+			self.VisitChildren(node)
+		}
+	})
+
+	if len(typeParameters) == 0 {
+		w.WriteStringln("template<>")
+	} else {
+		templateParameters := make([]string, 0, len(typeParameters))
+		for k := range typeParameters {
+			templateParameters = append(templateParameters, fmt.Sprintf("typename %s", k))
+		}
+
+		fmt.Fprintf(w, "template <%s>\n", strings.Join(templateParameters, ", "))
+	}
+
 	fmt.Fprintf(w, "struct adl_serializer<%s> {\n", unionTypeSyntax)
 	w.Indented(func() {
 

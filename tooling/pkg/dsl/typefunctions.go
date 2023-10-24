@@ -71,6 +71,48 @@ func MakeGenericType(genericTypeDefinition TypeDefinition, typeArguments []Type,
 	return rewritten, errorSink.AsError()
 }
 
+// Returns a type where all generic type parameter references are replaces with type parameters
+// with names "T1", "T2", etc.
+func NormalizeGenericTypeParameters(t Type) Type {
+	var typeParameterMap map[*GenericTypeParameter]*GenericTypeParameter
+	return Rewrite(t, func(self *Rewriter, node Node) Node {
+		switch node := node.(type) {
+		case *GenericTypeParameter:
+			if typeParameterMap == nil {
+				typeParameterMap = make(map[*GenericTypeParameter]*GenericTypeParameter)
+			}
+
+			if rewritten, ok := typeParameterMap[node]; ok {
+				return rewritten
+			}
+
+			rewritten := *node
+			rewritten.Name = fmt.Sprintf("T%d", len(typeParameterMap)+1)
+			typeParameterMap[node] = &rewritten
+			return &rewritten
+		case *NamedType:
+			meta := self.DefaultRewrite(node.DefinitionMeta)
+			if meta == node.DefinitionMeta {
+				return node
+			}
+			rewritten := *node
+			rewritten.DefinitionMeta = meta.(*DefinitionMeta)
+			return &rewritten
+		case *SimpleType:
+			defaultRewritten := self.DefaultRewrite(node)
+			rewrittenResolved := self.Rewrite(node.ResolvedDefinition)
+			if defaultRewritten == node && rewrittenResolved == node.ResolvedDefinition {
+				return node
+			}
+			rewritten := *(defaultRewritten.(*SimpleType))
+			rewritten.ResolvedDefinition = rewrittenResolved.(TypeDefinition)
+			return &rewritten
+		default:
+			return self.DefaultRewrite(node)
+		}
+	}).(Type)
+}
+
 func TypeDefinitionsEqual(a, b TypeDefinition) bool {
 	if a == b {
 		return true
