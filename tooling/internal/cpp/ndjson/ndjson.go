@@ -435,10 +435,14 @@ func writeUnionConverters(w *formatting.IndentedWriter, unionType *dsl.Generaliz
 	unionTypeSyntax := common.TypeSyntax(unionType)
 
 	typeParameters := make(map[string]any)
+	templateParameters := make([]string, 0)
 	dsl.Visit(unionType, func(self dsl.Visitor, node dsl.Node) {
 		switch node := node.(type) {
 		case *dsl.GenericTypeParameter:
-			typeParameters[node.Name] = nil
+			if _, ok := typeParameters[node.Name]; !ok {
+				typeParameters[node.Name] = nil
+				templateParameters = append(templateParameters, fmt.Sprintf("typename %s", common.TypeDefinitionSyntax(node)))
+			}
 			return
 		case *dsl.NamedType:
 			self.Visit(node.DefinitionMeta)
@@ -450,17 +454,7 @@ func writeUnionConverters(w *formatting.IndentedWriter, unionType *dsl.Generaliz
 		}
 	})
 
-	if len(typeParameters) == 0 {
-		w.WriteStringln("template<>")
-	} else {
-		templateParameters := make([]string, 0, len(typeParameters))
-		for k := range typeParameters {
-			templateParameters = append(templateParameters, fmt.Sprintf("typename %s", k))
-		}
-
-		fmt.Fprintf(w, "template <%s>\n", strings.Join(templateParameters, ", "))
-	}
-
+	fmt.Fprintf(w, "template <%s>\n", strings.Join(templateParameters, ", "))
 	fmt.Fprintf(w, "struct adl_serializer<%s> {\n", unionTypeSyntax)
 	w.Indented(func() {
 
