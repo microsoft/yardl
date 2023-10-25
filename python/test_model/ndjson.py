@@ -1747,6 +1747,50 @@ class _RecordWithComputedFieldsConverter(_ndjson.JsonConverter[RecordWithCompute
         ) # type:ignore 
 
 
+class _RecordNotUsedInProtocolConverter(_ndjson.JsonConverter[RecordNotUsedInProtocol, np.void]):
+    def __init__(self) -> None:
+        self._u1_converter = _ndjson.UnionConverter(GenericUnion3, [(GenericUnion3.T, _ndjson.int32_converter, [int, float]), (GenericUnion3.U, _ndjson.float32_converter, [int, float]), (GenericUnion3.V, _ndjson.string_converter, [str])], False)
+        self._u2_converter = _ndjson.UnionConverter(GenericUnion3Alternate, [(GenericUnion3Alternate.U, _ndjson.int32_converter, [int, float]), (GenericUnion3Alternate.V, _ndjson.float32_converter, [int, float]), (GenericUnion3Alternate.W, _ndjson.string_converter, [str])], False)
+        super().__init__(np.dtype([
+            ("u1", self._u1_converter.overall_dtype()),
+            ("u2", self._u2_converter.overall_dtype()),
+        ]))
+
+    def to_json(self, value: RecordNotUsedInProtocol) -> object:
+        if not isinstance(value, RecordNotUsedInProtocol):
+            raise TypeError("Expected 'RecordNotUsedInProtocol' instance")
+        json_object = {}
+
+        json_object["u1"] = self._u1_converter.to_json(value.u1)
+        json_object["u2"] = self._u2_converter.to_json(value.u2)
+        return json_object
+
+    def numpy_to_json(self, value: np.void) -> object:
+        if not isinstance(value, np.void):
+            raise TypeError("Expected 'np.void' instance")
+        json_object = {}
+
+        json_object["u1"] = self._u1_converter.numpy_to_json(value["u1"])
+        json_object["u2"] = self._u2_converter.numpy_to_json(value["u2"])
+        return json_object
+
+    def from_json(self, json_object: object) -> RecordNotUsedInProtocol:
+        if not isinstance(json_object, dict):
+            raise TypeError("Expected 'dict' instance")
+        return RecordNotUsedInProtocol(
+            u1=self._u1_converter.from_json(json_object["u1"],),
+            u2=self._u2_converter.from_json(json_object["u2"],),
+        )
+
+    def from_json_to_numpy(self, json_object: object) -> np.void:
+        if not isinstance(json_object, dict):
+            raise TypeError("Expected 'dict' instance")
+        return (
+            self._u1_converter.from_json_to_numpy(json_object["u1"]),
+            self._u2_converter.from_json_to_numpy(json_object["u2"]),
+        ) # type:ignore 
+
+
 _enum_with_keyword_symbols_name_to_value_map = {
     "try": EnumWithKeywordSymbols.TRY,
     "catch": EnumWithKeywordSymbols.CATCH,

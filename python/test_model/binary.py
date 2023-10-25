@@ -1705,6 +1705,24 @@ class _RecordWithComputedFieldsSerializer(_binary.RecordSerializer[RecordWithCom
         return RecordWithComputedFields(array_field=field_values[0], array_field_map_dimensions=field_values[1], dynamic_array_field=field_values[2], fixed_array_field=field_values[3], int_field=field_values[4], string_field=field_values[5], tuple_field=field_values[6], vector_field=field_values[7], vector_of_vectors_field=field_values[8], fixed_vector_field=field_values[9], optional_named_array=field_values[10], int_float_union=field_values[11], nullable_int_float_union=field_values[12], union_with_nested_generic_union=field_values[13], map_field=field_values[14])
 
 
+class _RecordNotUsedInProtocolSerializer(_binary.RecordSerializer[RecordNotUsedInProtocol]):
+    def __init__(self) -> None:
+        super().__init__([("u1", _binary.UnionSerializer(GenericUnion3, [(GenericUnion3.T, _binary.int32_serializer), (GenericUnion3.U, _binary.float32_serializer), (GenericUnion3.V, _binary.string_serializer)])), ("u2", _binary.UnionSerializer(GenericUnion3Alternate, [(GenericUnion3Alternate.U, _binary.int32_serializer), (GenericUnion3Alternate.V, _binary.float32_serializer), (GenericUnion3Alternate.W, _binary.string_serializer)]))])
+
+    def write(self, stream: _binary.CodedOutputStream, value: RecordNotUsedInProtocol) -> None:
+        if isinstance(value, np.void):
+            self.write_numpy(stream, value)
+            return
+        self._write(stream, value.u1, value.u2)
+
+    def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
+        self._write(stream, value['u1'], value['u2'])
+
+    def read(self, stream: _binary.CodedInputStream) -> RecordNotUsedInProtocol:
+        field_values = self._read(stream)
+        return RecordNotUsedInProtocol(u1=field_values[0], u2=field_values[1])
+
+
 class _RecordWithKeywordFieldsSerializer(_binary.RecordSerializer[RecordWithKeywordFields]):
     def __init__(self) -> None:
         super().__init__([("int_", _binary.string_serializer), ("sizeof", _binary.NDArraySerializer(_binary.int32_serializer, 2)), ("if_", _binary.EnumSerializer(_binary.int32_serializer, EnumWithKeywordSymbols))])

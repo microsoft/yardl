@@ -394,6 +394,17 @@ struct IsTriviallySerializable<test_model::RecordWithComputedFields> {
 };
 
 template <>
+struct IsTriviallySerializable<test_model::RecordNotUsedInProtocol> {
+  using __T__ = test_model::RecordNotUsedInProtocol;
+  static constexpr bool value = 
+    std::is_standard_layout_v<__T__> &&
+    IsTriviallySerializable<decltype(__T__::u1)>::value &&
+    IsTriviallySerializable<decltype(__T__::u2)>::value &&
+    (sizeof(__T__) == (sizeof(__T__::u1) + sizeof(__T__::u2))) &&
+    offsetof(__T__, u1) < offsetof(__T__, u2);
+};
+
+template <>
 struct IsTriviallySerializable<test_model::RecordWithKeywordFields> {
   using __T__ = test_model::RecordWithKeywordFields;
   static constexpr bool value = 
@@ -1537,6 +1548,66 @@ template<typename T0, yardl::binary::Reader<T0> ReadT0, typename T1, yardl::bina
   ReadUnion<std::monostate, yardl::binary::ReadMonostate, int32_t, yardl::binary::ReadInteger, float, yardl::binary::ReadFloatingPoint>(stream, value.nullable_int_float_union);
   ReadUnion<int32_t, yardl::binary::ReadInteger, test_model::GenericRecordWithComputedFields<std::string, float>, test_model::binary::ReadGenericRecordWithComputedFields<std::string, yardl::binary::ReadString, float, yardl::binary::ReadFloatingPoint>>(stream, value.union_with_nested_generic_union);
   yardl::binary::ReadMap<std::string, std::string, yardl::binary::ReadString, yardl::binary::ReadString>(stream, value.map_field);
+}
+
+template<typename T, yardl::binary::Writer<T> WriteT, typename U, yardl::binary::Writer<U> WriteU, typename V, yardl::binary::Writer<V> WriteV>
+[[maybe_unused]] void WriteGenericUnion3(yardl::binary::CodedOutputStream& stream, test_model::GenericUnion3<T, U, V> const& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<test_model::GenericUnion3<T, U, V>>::value) {
+    yardl::binary::WriteTriviallySerializable(stream, value);
+    return;
+  }
+
+  WriteUnion<T, WriteT, U, WriteU, V, WriteV>(stream, value);
+}
+
+template<typename T, yardl::binary::Reader<T> ReadT, typename U, yardl::binary::Reader<U> ReadU, typename V, yardl::binary::Reader<V> ReadV>
+[[maybe_unused]] void ReadGenericUnion3(yardl::binary::CodedInputStream& stream, test_model::GenericUnion3<T, U, V>& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<test_model::GenericUnion3<T, U, V>>::value) {
+    yardl::binary::ReadTriviallySerializable(stream, value);
+    return;
+  }
+
+  ReadUnion<T, ReadT, U, ReadU, V, ReadV>(stream, value);
+}
+
+template<typename U, yardl::binary::Writer<U> WriteU, typename V, yardl::binary::Writer<V> WriteV, typename W, yardl::binary::Writer<W> WriteW>
+[[maybe_unused]] void WriteGenericUnion3Alternate(yardl::binary::CodedOutputStream& stream, test_model::GenericUnion3Alternate<U, V, W> const& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<test_model::GenericUnion3Alternate<U, V, W>>::value) {
+    yardl::binary::WriteTriviallySerializable(stream, value);
+    return;
+  }
+
+  WriteUnion<U, WriteU, V, WriteV, W, WriteW>(stream, value);
+}
+
+template<typename U, yardl::binary::Reader<U> ReadU, typename V, yardl::binary::Reader<V> ReadV, typename W, yardl::binary::Reader<W> ReadW>
+[[maybe_unused]] void ReadGenericUnion3Alternate(yardl::binary::CodedInputStream& stream, test_model::GenericUnion3Alternate<U, V, W>& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<test_model::GenericUnion3Alternate<U, V, W>>::value) {
+    yardl::binary::ReadTriviallySerializable(stream, value);
+    return;
+  }
+
+  ReadUnion<U, ReadU, V, ReadV, W, ReadW>(stream, value);
+}
+
+[[maybe_unused]] void WriteRecordNotUsedInProtocol(yardl::binary::CodedOutputStream& stream, test_model::RecordNotUsedInProtocol const& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<test_model::RecordNotUsedInProtocol>::value) {
+    yardl::binary::WriteTriviallySerializable(stream, value);
+    return;
+  }
+
+  test_model::binary::WriteGenericUnion3<int32_t, yardl::binary::WriteInteger, float, yardl::binary::WriteFloatingPoint, std::string, yardl::binary::WriteString>(stream, value.u1);
+  test_model::binary::WriteGenericUnion3Alternate<int32_t, yardl::binary::WriteInteger, float, yardl::binary::WriteFloatingPoint, std::string, yardl::binary::WriteString>(stream, value.u2);
+}
+
+[[maybe_unused]] void ReadRecordNotUsedInProtocol(yardl::binary::CodedInputStream& stream, test_model::RecordNotUsedInProtocol& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<test_model::RecordNotUsedInProtocol>::value) {
+    yardl::binary::ReadTriviallySerializable(stream, value);
+    return;
+  }
+
+  test_model::binary::ReadGenericUnion3<int32_t, yardl::binary::ReadInteger, float, yardl::binary::ReadFloatingPoint, std::string, yardl::binary::ReadString>(stream, value.u1);
+  test_model::binary::ReadGenericUnion3Alternate<int32_t, yardl::binary::ReadInteger, float, yardl::binary::ReadFloatingPoint, std::string, yardl::binary::ReadString>(stream, value.u2);
 }
 
 [[maybe_unused]] void WriteArrayWithKeywordDimensionNames(yardl::binary::CodedOutputStream& stream, test_model::ArrayWithKeywordDimensionNames const& value) {

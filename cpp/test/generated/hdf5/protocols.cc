@@ -106,6 +106,121 @@ H5::CompType InnerUnion2Ddl(bool nullable, H5::DataType const& t0, std::string c
   rtn.insertMember(tag1, HOFFSET(UnionType, value1_), t1);
   return rtn;
 }
+
+template <typename TInner0, typename TOuter0, typename TInner1, typename TOuter1, typename TInner2, typename TOuter2>
+class InnerUnion3 {
+  public:
+  InnerUnion3() : type_index_(-1) {} 
+  InnerUnion3(std::variant<TOuter0, TOuter1, TOuter2> const& v) : type_index_(static_cast<int8_t>(v.index())) {
+    Init(v);
+  }
+
+  InnerUnion3(std::variant<std::monostate, TOuter0, TOuter1, TOuter2> const& v) : type_index_(static_cast<int8_t>(v.index()) - 1) {
+    Init(v);
+  }
+
+  InnerUnion3(InnerUnion3 const& v) = delete;
+
+  InnerUnion3 operator=(InnerUnion3 const&) = delete;
+
+  ~InnerUnion3() {
+    switch (type_index_) {
+    case 0:
+      value0_.~TInner0();
+      break;
+    case 1:
+      value1_.~TInner1();
+      break;
+    case 2:
+      value2_.~TInner2();
+      break;
+    }
+  }
+
+  void ToOuter(std::variant<TOuter0, TOuter1, TOuter2>& o) const {
+    ToOuterImpl(o);
+  }
+
+  void ToOuter(std::variant<std::monostate, TOuter0, TOuter1, TOuter2>& o) const {
+    ToOuterImpl(o);
+  }
+
+  int8_t type_index_;
+  union {
+    char empty0_[sizeof(TInner0)]{};
+    TInner0 value0_;
+  };
+  union {
+    char empty1_[sizeof(TInner1)]{};
+    TInner1 value1_;
+  };
+  union {
+    char empty2_[sizeof(TInner2)]{};
+    TInner2 value2_;
+  };
+
+  private:
+  template <typename T>
+  void Init(T const& v) {
+    constexpr size_t offset = GetOuterVariantOffset<std::remove_const_t<std::remove_reference_t<decltype(v)>>>();
+    switch (type_index_) {
+    case 0:
+      new (&value0_) TInner0(std::get<0 + offset>(v));
+      return;
+    case 1:
+      new (&value1_) TInner1(std::get<1 + offset>(v));
+      return;
+    case 2:
+      new (&value2_) TInner2(std::get<2 + offset>(v));
+      return;
+    }
+  }
+
+  template <typename TVariant>
+  void ToOuterImpl(TVariant& o) const {
+    constexpr size_t offset = GetOuterVariantOffset<TVariant>();
+    switch (type_index_) {
+    case -1:
+      if constexpr (offset == 1) {
+        o.template emplace<0>(std::monostate{});
+        return;
+      }
+    case 0:
+      o.template emplace<0 + offset>();
+      yardl::hdf5::ToOuter(value0_, std::get<0 + offset>(o));
+      return;
+    case 1:
+      o.template emplace<1 + offset>();
+      yardl::hdf5::ToOuter(value1_, std::get<1 + offset>(o));
+      return;
+    case 2:
+      o.template emplace<2 + offset>();
+      yardl::hdf5::ToOuter(value2_, std::get<2 + offset>(o));
+      return;
+    }
+    throw std::runtime_error("unrecognized type variant type index " + std::to_string(type_index_));
+  }
+
+  template <typename TVariant>
+  static constexpr size_t GetOuterVariantOffset() {
+    constexpr bool has_monostate = std::is_same_v<std::monostate, std::variant_alternative_t<0, TVariant>>;
+    if constexpr (has_monostate) {
+      return 1;
+    }
+      return 0;
+  }
+};
+
+template <typename TInner0, typename TOuter0, typename TInner1, typename TOuter1, typename TInner2, typename TOuter2>
+H5::CompType InnerUnion3Ddl(bool nullable, H5::DataType const& t0, std::string const& tag0, H5::DataType const& t1, std::string const& tag1, H5::DataType const& t2, std::string const& tag2) {
+  using UnionType = ::InnerUnion3<TInner0, TOuter0, TInner1, TOuter1, TInner2, TOuter2>;
+  H5::CompType rtn(sizeof(UnionType));
+  rtn.insertMember("$type", HOFFSET(UnionType, type_index_), yardl::hdf5::UnionTypeEnumDdl(nullable, tag0, tag1, tag2));
+  rtn.insertMember(tag0, HOFFSET(UnionType, value0_), t0);
+  rtn.insertMember(tag1, HOFFSET(UnionType, value1_), t1);
+  rtn.insertMember(tag2, HOFFSET(UnionType, value2_), t2);
+  return rtn;
+}
 }
 
 namespace test_model::hdf5 {
@@ -624,6 +739,22 @@ struct _Inner_RecordWithComputedFields {
   yardl::hdf5::InnerMap<yardl::hdf5::InnerVlenString, std::string, yardl::hdf5::InnerVlenString, std::string> map_field;
 };
 
+struct _Inner_RecordNotUsedInProtocol {
+  _Inner_RecordNotUsedInProtocol() {} 
+  _Inner_RecordNotUsedInProtocol(test_model::RecordNotUsedInProtocol const& o) 
+      : u1(o.u1),
+      u2(o.u2) {
+  }
+
+  void ToOuter (test_model::RecordNotUsedInProtocol& o) const {
+    yardl::hdf5::ToOuter(u1, o.u1);
+    yardl::hdf5::ToOuter(u2, o.u2);
+  }
+
+  ::InnerUnion3<int32_t, int32_t, float, float, yardl::hdf5::InnerVlenString, std::string> u1;
+  ::InnerUnion3<int32_t, int32_t, float, float, yardl::hdf5::InnerVlenString, std::string> u2;
+};
+
 struct _Inner_RecordWithKeywordFields {
   _Inner_RecordWithKeywordFields() {} 
   _Inner_RecordWithKeywordFields(test_model::RecordWithKeywordFields const& o) 
@@ -938,6 +1069,14 @@ template <typename _T0_Inner, typename T0, typename _T1_Inner, typename T1>
   t.insertMember("nullableIntFloatUnion", HOFFSET(RecordType, nullable_int_float_union), ::InnerUnion2Ddl<int32_t, int32_t, float, float>(true, H5::PredType::NATIVE_INT32, "int32", H5::PredType::NATIVE_FLOAT, "float32"));
   t.insertMember("unionWithNestedGenericUnion", HOFFSET(RecordType, union_with_nested_generic_union), ::InnerUnion2Ddl<int32_t, int32_t, test_model::hdf5::_Inner_GenericRecordWithComputedFields<yardl::hdf5::InnerVlenString, std::string, float, float>, test_model::GenericRecordWithComputedFields<std::string, float>>(false, H5::PredType::NATIVE_INT32, "int", test_model::hdf5::GetGenericRecordWithComputedFieldsHdf5Ddl<yardl::hdf5::InnerVlenString, std::string, float, float>(yardl::hdf5::InnerVlenStringDdl(), H5::PredType::NATIVE_FLOAT), "genericRecordWithComputedFields"));
   t.insertMember("mapField", HOFFSET(RecordType, map_field), yardl::hdf5::InnerMapDdl<yardl::hdf5::InnerVlenString, yardl::hdf5::InnerVlenString>(yardl::hdf5::InnerVlenStringDdl(), yardl::hdf5::InnerVlenStringDdl()));
+  return t;
+}
+
+[[maybe_unused]] H5::CompType GetRecordNotUsedInProtocolHdf5Ddl() {
+  using RecordType = test_model::hdf5::_Inner_RecordNotUsedInProtocol;
+  H5::CompType t(sizeof(RecordType));
+  t.insertMember("u1", HOFFSET(RecordType, u1), ::InnerUnion3Ddl<int32_t, int32_t, float, float, yardl::hdf5::InnerVlenString, std::string>(false, H5::PredType::NATIVE_INT32, "T", H5::PredType::NATIVE_FLOAT, "U", yardl::hdf5::InnerVlenStringDdl(), "V"));
+  t.insertMember("u2", HOFFSET(RecordType, u2), ::InnerUnion3Ddl<int32_t, int32_t, float, float, yardl::hdf5::InnerVlenString, std::string>(false, H5::PredType::NATIVE_INT32, "U", H5::PredType::NATIVE_FLOAT, "V", yardl::hdf5::InnerVlenStringDdl(), "W"));
   return t;
 }
 

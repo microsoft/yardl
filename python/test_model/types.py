@@ -23,6 +23,10 @@ T2 = typing.TypeVar("T2")
 T2_NP = typing.TypeVar("T2_NP", bound=np.generic)
 T0 = typing.TypeVar("T0")
 T0_NP = typing.TypeVar("T0_NP", bound=np.generic)
+U = typing.TypeVar("U")
+U_NP = typing.TypeVar("U_NP", bound=np.generic)
+W = typing.TypeVar("W")
+W_NP = typing.TypeVar("W_NP", bound=np.generic)
 
 
 class SmallBenchmarkRecord:
@@ -1383,6 +1387,57 @@ class RecordWithComputedFields:
         return f"RecordWithComputedFields(arrayField={repr(self.array_field)}, arrayFieldMapDimensions={repr(self.array_field_map_dimensions)}, dynamicArrayField={repr(self.dynamic_array_field)}, fixedArrayField={repr(self.fixed_array_field)}, intField={repr(self.int_field)}, stringField={repr(self.string_field)}, tupleField={repr(self.tuple_field)}, vectorField={repr(self.vector_field)}, vectorOfVectorsField={repr(self.vector_of_vectors_field)}, fixedVectorField={repr(self.fixed_vector_field)}, optionalNamedArray={repr(self.optional_named_array)}, intFloatUnion={repr(self.int_float_union)}, nullableIntFloatUnion={repr(self.nullable_int_float_union)}, unionWithNestedGenericUnion={repr(self.union_with_nested_generic_union)}, mapField={repr(self.map_field)})"
 
 
+class GenericUnion3(typing.Generic[T, U, V]):
+    T: type["GenericUnion3UnionCase[T, U, V, T]"]
+    U: type["GenericUnion3UnionCase[T, U, V, U]"]
+    V: type["GenericUnion3UnionCase[T, U, V, V]"]
+
+class GenericUnion3UnionCase(GenericUnion3[T, U, V], yardl.UnionCase[_T]):
+    pass
+
+GenericUnion3.T = type("GenericUnion3.T", (GenericUnion3UnionCase,), {"_index": 0, "_tag": "T"})
+GenericUnion3.U = type("GenericUnion3.U", (GenericUnion3UnionCase,), {"_index": 1, "_tag": "U"})
+GenericUnion3.V = type("GenericUnion3.V", (GenericUnion3UnionCase,), {"_index": 2, "_tag": "V"})
+del GenericUnion3UnionCase
+
+class GenericUnion3Alternate(typing.Generic[U, V, W]):
+    U: type["GenericUnion3AlternateUnionCase[U, V, W, U]"]
+    V: type["GenericUnion3AlternateUnionCase[U, V, W, V]"]
+    W: type["GenericUnion3AlternateUnionCase[U, V, W, W]"]
+
+class GenericUnion3AlternateUnionCase(GenericUnion3Alternate[U, V, W], yardl.UnionCase[_T]):
+    pass
+
+GenericUnion3Alternate.U = type("GenericUnion3Alternate.U", (GenericUnion3AlternateUnionCase,), {"_index": 0, "_tag": "U"})
+GenericUnion3Alternate.V = type("GenericUnion3Alternate.V", (GenericUnion3AlternateUnionCase,), {"_index": 1, "_tag": "V"})
+GenericUnion3Alternate.W = type("GenericUnion3Alternate.W", (GenericUnion3AlternateUnionCase,), {"_index": 2, "_tag": "W"})
+del GenericUnion3AlternateUnionCase
+
+class RecordNotUsedInProtocol:
+    u1: GenericUnion3[yardl.Int32, yardl.Float32, str]
+    u2: GenericUnion3Alternate[yardl.Int32, yardl.Float32, str]
+
+    def __init__(self, *,
+        u1: GenericUnion3[yardl.Int32, yardl.Float32, str] = GenericUnion3[yardl.Int32, yardl.Float32, str].T(0),
+        u2: GenericUnion3Alternate[yardl.Int32, yardl.Float32, str] = GenericUnion3Alternate[yardl.Int32, yardl.Float32, str].U(0),
+    ):
+        self.u1 = u1
+        self.u2 = u2
+
+    def __eq__(self, other: object) -> bool:
+        return (
+            isinstance(other, RecordNotUsedInProtocol)
+            and self.u1 == other.u1
+            and self.u2 == other.u2
+        )
+
+    def __str__(self) -> str:
+        return f"RecordNotUsedInProtocol(u1={self.u1}, u2={self.u2})"
+
+    def __repr__(self) -> str:
+        return f"RecordNotUsedInProtocol(u1={repr(self.u1)}, u2={repr(self.u2)})"
+
+
 ArrayWithKeywordDimensionNames = npt.NDArray[np.int32]
 
 class EnumWithKeywordSymbols(yardl.OutOfRangeEnum):
@@ -1538,6 +1593,9 @@ def _mk_get_dtype():
     dtype_map.setdefault(typing.Optional[AliasedNullableIntSimpleRecord], np.dtype(np.object_))
     dtype_map.setdefault(GenericRecordWithComputedFields, lambda type_args: np.dtype([('f1', np.dtype(np.object_))], align=True))
     dtype_map.setdefault(RecordWithComputedFields, np.dtype([('array_field', np.dtype(np.object_)), ('array_field_map_dimensions', np.dtype(np.object_)), ('dynamic_array_field', np.dtype(np.object_)), ('fixed_array_field', np.dtype(np.int32), (3, 4,)), ('int_field', np.dtype(np.int32)), ('string_field', np.dtype(np.object_)), ('tuple_field', get_dtype(types.GenericAlias(MyTuple, (yardl.Int32, yardl.Int32,)))), ('vector_field', np.dtype(np.object_)), ('vector_of_vectors_field', np.dtype(np.object_)), ('fixed_vector_field', np.dtype(np.int32), (3,)), ('optional_named_array', np.dtype([('has_value', np.dtype(np.bool_)), ('value', get_dtype(NamedNDArray))], align=True)), ('int_float_union', np.dtype(np.object_)), ('nullable_int_float_union', np.dtype(np.object_)), ('union_with_nested_generic_union', np.dtype(np.object_)), ('map_field', np.dtype(np.object_))], align=True))
+    dtype_map.setdefault(GenericUnion3, lambda type_args: np.dtype(np.object_))
+    dtype_map.setdefault(GenericUnion3Alternate, lambda type_args: np.dtype(np.object_))
+    dtype_map.setdefault(RecordNotUsedInProtocol, np.dtype([('u1', get_dtype(types.GenericAlias(GenericUnion3, (yardl.Int32, yardl.Float32, str,)))), ('u2', get_dtype(types.GenericAlias(GenericUnion3Alternate, (yardl.Int32, yardl.Float32, str,))))], align=True))
     dtype_map.setdefault(ArrayWithKeywordDimensionNames, np.dtype(np.object_))
     dtype_map.setdefault(EnumWithKeywordSymbols, np.dtype(np.int32))
     dtype_map.setdefault(RecordWithKeywordFields, np.dtype([('int_', np.dtype(np.object_)), ('sizeof', get_dtype(ArrayWithKeywordDimensionNames)), ('if_', get_dtype(EnumWithKeywordSymbols))], align=True))

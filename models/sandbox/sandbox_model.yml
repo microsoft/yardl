@@ -5,3 +5,11 @@ HelloWorld: !protocol
         items: complexdouble
         dimensions:
           - 2
+
+GenericUnion3<T, U, V>: [T, U, V]
+GenericUnion3Alternate<U, V, W>: [U, V, W]
+
+RecordNotUsedInProtocol: !record
+  fields:
+    u1: GenericUnion3<int, float, string>
+    u2: GenericUnion3Alternate<int, float, string>
