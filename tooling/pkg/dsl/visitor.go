@@ -134,7 +134,15 @@ func (visitor VisitorWithContext[T]) VisitChildren(node Node, context T) {
 		break
 	case *ComputedField:
 		visitor.Visit(t.Expression, context)
+	case *UnaryExpression:
+		visitor.Visit(t.Expression, context)
+	case *BinaryExpression:
+		visitor.Visit(t.Left, context)
+		visitor.Visit(t.Right, context)
+
 	case *IntegerLiteralExpression:
+		break
+	case *FloatingPointLiteralExpression:
 		break
 	case *StringLiteralExpression:
 		break
@@ -142,7 +150,7 @@ func (visitor VisitorWithContext[T]) VisitChildren(node Node, context T) {
 		if t.Target != nil {
 			visitor.Visit(t.Target, context)
 		}
-	case *IndexExpression:
+	case *SubscriptExpression:
 		if t.Target != nil {
 			visitor.Visit(t.Target, context)
 		}
@@ -156,6 +164,7 @@ func (visitor VisitorWithContext[T]) VisitChildren(node Node, context T) {
 		}
 	case *TypeConversionExpression:
 		visitor.Visit(t.Expression, context)
+		visitor.Visit(t.Type, context)
 	case *SwitchExpression:
 		visitor.Visit(t.Target, context)
 		for _, c := range t.Cases {

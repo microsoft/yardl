@@ -1718,6 +1718,42 @@ void to_json(ordered_json& j, test_model::RecordWithComputedFields const& value)
   if (yardl::ndjson::ShouldSerializeFieldValue(value.int_field)) {
     j.push_back({"intField", value.int_field});
   }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.int8_field)) {
+    j.push_back({"int8Field", value.int8_field});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.uint8_field)) {
+    j.push_back({"uint8Field", value.uint8_field});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.int16_field)) {
+    j.push_back({"int16Field", value.int16_field});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.uint16_field)) {
+    j.push_back({"uint16Field", value.uint16_field});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.uint32_field)) {
+    j.push_back({"uint32Field", value.uint32_field});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.int64_field)) {
+    j.push_back({"int64Field", value.int64_field});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.uint64_field)) {
+    j.push_back({"uint64Field", value.uint64_field});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.size_field)) {
+    j.push_back({"sizeField", value.size_field});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.float32_field)) {
+    j.push_back({"float32Field", value.float32_field});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.float64_field)) {
+    j.push_back({"float64Field", value.float64_field});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.complexfloat32_field)) {
+    j.push_back({"complexfloat32Field", value.complexfloat32_field});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.complexfloat64_field)) {
+    j.push_back({"complexfloat64Field", value.complexfloat64_field});
+  }
   if (yardl::ndjson::ShouldSerializeFieldValue(value.string_field)) {
     j.push_back({"stringField", value.string_field});
   }
@@ -1765,6 +1801,42 @@ void from_json(ordered_json const& j, test_model::RecordWithComputedFields& valu
   }
   if (auto it = j.find("intField"); it != j.end()) {
     it->get_to(value.int_field);
+  }
+  if (auto it = j.find("int8Field"); it != j.end()) {
+    it->get_to(value.int8_field);
+  }
+  if (auto it = j.find("uint8Field"); it != j.end()) {
+    it->get_to(value.uint8_field);
+  }
+  if (auto it = j.find("int16Field"); it != j.end()) {
+    it->get_to(value.int16_field);
+  }
+  if (auto it = j.find("uint16Field"); it != j.end()) {
+    it->get_to(value.uint16_field);
+  }
+  if (auto it = j.find("uint32Field"); it != j.end()) {
+    it->get_to(value.uint32_field);
+  }
+  if (auto it = j.find("int64Field"); it != j.end()) {
+    it->get_to(value.int64_field);
+  }
+  if (auto it = j.find("uint64Field"); it != j.end()) {
+    it->get_to(value.uint64_field);
+  }
+  if (auto it = j.find("sizeField"); it != j.end()) {
+    it->get_to(value.size_field);
+  }
+  if (auto it = j.find("float32Field"); it != j.end()) {
+    it->get_to(value.float32_field);
+  }
+  if (auto it = j.find("float64Field"); it != j.end()) {
+    it->get_to(value.float64_field);
+  }
+  if (auto it = j.find("complexfloat32Field"); it != j.end()) {
+    it->get_to(value.complexfloat32_field);
+  }
+  if (auto it = j.find("complexfloat64Field"); it != j.end()) {
+    it->get_to(value.complexfloat64_field);
   }
   if (auto it = j.find("stringField"); it != j.end()) {
     it->get_to(value.string_field);

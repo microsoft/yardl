@@ -1628,6 +1628,18 @@ class _RecordWithComputedFieldsConverter(_ndjson.JsonConverter[RecordWithCompute
         self._dynamic_array_field_converter = _ndjson.DynamicNDArrayConverter(_ndjson.int32_converter)
         self._fixed_array_field_converter = _ndjson.FixedNDArrayConverter(_ndjson.int32_converter, (3, 4,))
         self._int_field_converter = _ndjson.int32_converter
+        self._int8_field_converter = _ndjson.int8_converter
+        self._uint8_field_converter = _ndjson.uint8_converter
+        self._int16_field_converter = _ndjson.int16_converter
+        self._uint16_field_converter = _ndjson.uint16_converter
+        self._uint32_field_converter = _ndjson.uint32_converter
+        self._int64_field_converter = _ndjson.int64_converter
+        self._uint64_field_converter = _ndjson.uint64_converter
+        self._size_field_converter = _ndjson.size_converter
+        self._float32_field_converter = _ndjson.float32_converter
+        self._float64_field_converter = _ndjson.float64_converter
+        self._complexfloat32_field_converter = _ndjson.complexfloat32_converter
+        self._complexfloat64_field_converter = _ndjson.complexfloat64_converter
         self._string_field_converter = _ndjson.string_converter
         self._tuple_field_converter = _MyTupleConverter(_ndjson.int32_converter, _ndjson.int32_converter)
         self._vector_field_converter = _ndjson.VectorConverter(_ndjson.int32_converter)
@@ -1644,6 +1656,18 @@ class _RecordWithComputedFieldsConverter(_ndjson.JsonConverter[RecordWithCompute
             ("dynamic_array_field", self._dynamic_array_field_converter.overall_dtype()),
             ("fixed_array_field", self._fixed_array_field_converter.overall_dtype()),
             ("int_field", self._int_field_converter.overall_dtype()),
+            ("int8_field", self._int8_field_converter.overall_dtype()),
+            ("uint8_field", self._uint8_field_converter.overall_dtype()),
+            ("int16_field", self._int16_field_converter.overall_dtype()),
+            ("uint16_field", self._uint16_field_converter.overall_dtype()),
+            ("uint32_field", self._uint32_field_converter.overall_dtype()),
+            ("int64_field", self._int64_field_converter.overall_dtype()),
+            ("uint64_field", self._uint64_field_converter.overall_dtype()),
+            ("size_field", self._size_field_converter.overall_dtype()),
+            ("float32_field", self._float32_field_converter.overall_dtype()),
+            ("float64_field", self._float64_field_converter.overall_dtype()),
+            ("complexfloat32_field", self._complexfloat32_field_converter.overall_dtype()),
+            ("complexfloat64_field", self._complexfloat64_field_converter.overall_dtype()),
             ("string_field", self._string_field_converter.overall_dtype()),
             ("tuple_field", self._tuple_field_converter.overall_dtype()),
             ("vector_field", self._vector_field_converter.overall_dtype()),
@@ -1666,6 +1690,18 @@ class _RecordWithComputedFieldsConverter(_ndjson.JsonConverter[RecordWithCompute
         json_object["dynamicArrayField"] = self._dynamic_array_field_converter.to_json(value.dynamic_array_field)
         json_object["fixedArrayField"] = self._fixed_array_field_converter.to_json(value.fixed_array_field)
         json_object["intField"] = self._int_field_converter.to_json(value.int_field)
+        json_object["int8Field"] = self._int8_field_converter.to_json(value.int8_field)
+        json_object["uint8Field"] = self._uint8_field_converter.to_json(value.uint8_field)
+        json_object["int16Field"] = self._int16_field_converter.to_json(value.int16_field)
+        json_object["uint16Field"] = self._uint16_field_converter.to_json(value.uint16_field)
+        json_object["uint32Field"] = self._uint32_field_converter.to_json(value.uint32_field)
+        json_object["int64Field"] = self._int64_field_converter.to_json(value.int64_field)
+        json_object["uint64Field"] = self._uint64_field_converter.to_json(value.uint64_field)
+        json_object["sizeField"] = self._size_field_converter.to_json(value.size_field)
+        json_object["float32Field"] = self._float32_field_converter.to_json(value.float32_field)
+        json_object["float64Field"] = self._float64_field_converter.to_json(value.float64_field)
+        json_object["complexfloat32Field"] = self._complexfloat32_field_converter.to_json(value.complexfloat32_field)
+        json_object["complexfloat64Field"] = self._complexfloat64_field_converter.to_json(value.complexfloat64_field)
         json_object["stringField"] = self._string_field_converter.to_json(value.string_field)
         json_object["tupleField"] = self._tuple_field_converter.to_json(value.tuple_field)
         json_object["vectorField"] = self._vector_field_converter.to_json(value.vector_field)
@@ -1690,6 +1726,18 @@ class _RecordWithComputedFieldsConverter(_ndjson.JsonConverter[RecordWithCompute
         json_object["dynamicArrayField"] = self._dynamic_array_field_converter.numpy_to_json(value["dynamic_array_field"])
         json_object["fixedArrayField"] = self._fixed_array_field_converter.numpy_to_json(value["fixed_array_field"])
         json_object["intField"] = self._int_field_converter.numpy_to_json(value["int_field"])
+        json_object["int8Field"] = self._int8_field_converter.numpy_to_json(value["int8_field"])
+        json_object["uint8Field"] = self._uint8_field_converter.numpy_to_json(value["uint8_field"])
+        json_object["int16Field"] = self._int16_field_converter.numpy_to_json(value["int16_field"])
+        json_object["uint16Field"] = self._uint16_field_converter.numpy_to_json(value["uint16_field"])
+        json_object["uint32Field"] = self._uint32_field_converter.numpy_to_json(value["uint32_field"])
+        json_object["int64Field"] = self._int64_field_converter.numpy_to_json(value["int64_field"])
+        json_object["uint64Field"] = self._uint64_field_converter.numpy_to_json(value["uint64_field"])
+        json_object["sizeField"] = self._size_field_converter.numpy_to_json(value["size_field"])
+        json_object["float32Field"] = self._float32_field_converter.numpy_to_json(value["float32_field"])
+        json_object["float64Field"] = self._float64_field_converter.numpy_to_json(value["float64_field"])
+        json_object["complexfloat32Field"] = self._complexfloat32_field_converter.numpy_to_json(value["complexfloat32_field"])
+        json_object["complexfloat64Field"] = self._complexfloat64_field_converter.numpy_to_json(value["complexfloat64_field"])
         json_object["stringField"] = self._string_field_converter.numpy_to_json(value["string_field"])
         json_object["tupleField"] = self._tuple_field_converter.numpy_to_json(value["tuple_field"])
         json_object["vectorField"] = self._vector_field_converter.numpy_to_json(value["vector_field"])
@@ -1713,6 +1761,18 @@ class _RecordWithComputedFieldsConverter(_ndjson.JsonConverter[RecordWithCompute
             dynamic_array_field=self._dynamic_array_field_converter.from_json(json_object["dynamicArrayField"],),
             fixed_array_field=self._fixed_array_field_converter.from_json(json_object["fixedArrayField"],),
             int_field=self._int_field_converter.from_json(json_object["intField"],),
+            int8_field=self._int8_field_converter.from_json(json_object["int8Field"],),
+            uint8_field=self._uint8_field_converter.from_json(json_object["uint8Field"],),
+            int16_field=self._int16_field_converter.from_json(json_object["int16Field"],),
+            uint16_field=self._uint16_field_converter.from_json(json_object["uint16Field"],),
+            uint32_field=self._uint32_field_converter.from_json(json_object["uint32Field"],),
+            int64_field=self._int64_field_converter.from_json(json_object["int64Field"],),
+            uint64_field=self._uint64_field_converter.from_json(json_object["uint64Field"],),
+            size_field=self._size_field_converter.from_json(json_object["sizeField"],),
+            float32_field=self._float32_field_converter.from_json(json_object["float32Field"],),
+            float64_field=self._float64_field_converter.from_json(json_object["float64Field"],),
+            complexfloat32_field=self._complexfloat32_field_converter.from_json(json_object["complexfloat32Field"],),
+            complexfloat64_field=self._complexfloat64_field_converter.from_json(json_object["complexfloat64Field"],),
             string_field=self._string_field_converter.from_json(json_object["stringField"],),
             tuple_field=self._tuple_field_converter.from_json(json_object["tupleField"],),
             vector_field=self._vector_field_converter.from_json(json_object["vectorField"],),
@@ -1734,6 +1794,18 @@ class _RecordWithComputedFieldsConverter(_ndjson.JsonConverter[RecordWithCompute
             self._dynamic_array_field_converter.from_json_to_numpy(json_object["dynamicArrayField"]),
             self._fixed_array_field_converter.from_json_to_numpy(json_object["fixedArrayField"]),
             self._int_field_converter.from_json_to_numpy(json_object["intField"]),
+            self._int8_field_converter.from_json_to_numpy(json_object["int8Field"]),
+            self._uint8_field_converter.from_json_to_numpy(json_object["uint8Field"]),
+            self._int16_field_converter.from_json_to_numpy(json_object["int16Field"]),
+            self._uint16_field_converter.from_json_to_numpy(json_object["uint16Field"]),
+            self._uint32_field_converter.from_json_to_numpy(json_object["uint32Field"]),
+            self._int64_field_converter.from_json_to_numpy(json_object["int64Field"]),
+            self._uint64_field_converter.from_json_to_numpy(json_object["uint64Field"]),
+            self._size_field_converter.from_json_to_numpy(json_object["sizeField"]),
+            self._float32_field_converter.from_json_to_numpy(json_object["float32Field"]),
+            self._float64_field_converter.from_json_to_numpy(json_object["float64Field"]),
+            self._complexfloat32_field_converter.from_json_to_numpy(json_object["complexfloat32Field"]),
+            self._complexfloat64_field_converter.from_json_to_numpy(json_object["complexfloat64Field"]),
             self._string_field_converter.from_json_to_numpy(json_object["stringField"]),
             self._tuple_field_converter.from_json_to_numpy(json_object["tupleField"]),
             self._vector_field_converter.from_json_to_numpy(json_object["vectorField"]),

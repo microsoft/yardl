@@ -140,11 +140,65 @@ func (tc *TypeDefinitions) MarshalJSON() ([]byte, error) {
 }
 
 func (e *IntegerLiteralExpression) MarshalJSON() ([]byte, error) {
-	return []byte(e.Value.String()), nil
+	type repr struct {
+		Value MarshaledBytes `json:"integer"`
+	}
+	return json.Marshal(repr{Value: MarshaledBytes(e.Value.String())})
+}
+
+type MarshaledBytes []byte
+
+func (b MarshaledBytes) MarshalJSON() ([]byte, error) {
+	return b, nil
+}
+
+func (e *FloatingPointLiteralExpression) MarshalJSON() ([]byte, error) {
+	type repr struct {
+		Value string `json:"floating"`
+	}
+	return json.Marshal(repr{Value: e.Value})
 }
 
 func (e *StringLiteralExpression) MarshalJSON() ([]byte, error) {
 	return json.Marshal(fmt.Sprintf("%q", e.Value))
+}
+
+func (op *BinaryOperator) MarshalJSON() ([]byte, error) {
+	switch *op {
+	case BinaryOpAdd:
+		return json.Marshal("add")
+	case BinaryOpSub:
+		return json.Marshal("sub")
+	case BinaryOpMul:
+		return json.Marshal("mul")
+	case BinaryOpDiv:
+		return json.Marshal("div")
+	case BinaryOpPow:
+		return json.Marshal("exp")
+	default:
+		panic(fmt.Sprintf("unexpected binary operator %d", *op))
+	}
+}
+
+func (e *BinaryExpression) MarshalJSON() ([]byte, error) {
+	type Alias BinaryExpression
+	return json.Marshal(struct {
+		Binary *Alias `json:"binary"`
+	}{
+		Binary: (*Alias)(e),
+	})
+}
+
+func (e *UnaryExpression) MarshalJSON() ([]byte, error) {
+	if e.Operator != UnaryOpNegate {
+		panic(fmt.Sprintf("unexpected unary operator %d", e.Operator))
+	}
+
+	return json.Marshal(struct {
+		Negate Expression `json:"negate"`
+	}{
+		Negate: e.Expression,
+	})
 }
 
 func (k *MemberAccessKind) MarshalJSON() ([]byte, error) {
@@ -171,10 +225,10 @@ func (e *MemberAccessExpression) MarshalJSON() ([]byte, error) {
 	})
 }
 
-func (e *IndexExpression) MarshalJSON() ([]byte, error) {
-	type Alias IndexExpression
+func (e *SubscriptExpression) MarshalJSON() ([]byte, error) {
+	type Alias SubscriptExpression
 	return json.Marshal(struct {
-		Index *Alias `json:"index"`
+		Index *Alias `json:"subscript"`
 	}{
 		Index: (*Alias)(e),
 	})

@@ -14,7 +14,6 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/alecthomas/participle/v2/lexer"
 	"github.com/microsoft/yardl/tooling/internal/validation"
 	"github.com/microsoft/yardl/tooling/pkg/dsl/parser"
 	"github.com/microsoft/yardl/tooling/pkg/packaging"
@@ -265,22 +264,7 @@ func UnmarshalExpression(value *yaml.Node) (Expression, error) {
 	case "!!null":
 		return nil, parseError(value, "An expression cannot be null")
 	case "!!str", "!!int", "!!float", "!!bool", "!switch":
-		exp, err := parser.ParseExpression(value.Value)
-		if err != nil {
-			if err, ok := err.(parser.ParseError); ok {
-				line := value.Line + err.Position().Line - 1
-				column := value.Column + err.Position().Column - 1
-				return nil, validation.ValidationError{
-					Message: errors.New(err.Message()),
-					Line:    &line,
-					Column:  &column,
-				}
-			}
-
-			panic("not parse error")
-		}
-
-		return ConvertExpression(*exp, value), nil
+		return ParseExpression(value.Value, value.Line, value.Column)
 	case "!!map":
 		if len(value.Content) == 2 {
 			key := value.Content[0]
@@ -447,85 +431,6 @@ func convertPattern(pat *parser.Pattern, node NodeMeta) Pattern {
 	}
 
 	panic("unreachable")
-}
-
-func ConvertExpression(expression parser.Expression, hostNode *yaml.Node) Expression {
-	createNodeMeta := func(pos lexer.Position) NodeMeta {
-		return NodeMeta{
-			Line:   hostNode.Line + pos.Line - 1,
-			Column: hostNode.Column + pos.Column - 1,
-		}
-	}
-
-	switch expression := expression.(type) {
-	case parser.IntegerLiteral:
-		exp := &IntegerLiteralExpression{
-			NodeMeta: createNodeMeta(expression.Pos),
-		}
-
-		exp.Value.UnmarshalText([]byte(expression.Value))
-		return exp
-
-	case parser.StringLiteral:
-		return &StringLiteralExpression{
-			NodeMeta: createNodeMeta(expression.Pos),
-			Value:    expression.Value,
-		}
-	case parser.PathExpr:
-		var target Expression
-		for i, part := range expression.Parts {
-			curr := &MemberAccessExpression{
-				NodeMeta: createNodeMeta(part.Pos),
-				Member:   part.Name,
-			}
-
-			if i > 0 {
-				curr.Target = target
-			}
-			target = curr
-
-			for _, indexAst := range part.Indexes {
-				index := &IndexExpression{
-					NodeMeta: createNodeMeta(part.Pos),
-					Target:   target,
-				}
-
-				for _, arg := range indexAst.IndexArgs {
-					convertedArg := &IndexArgument{
-						NodeMeta: createNodeMeta(arg.Pos),
-						Value:    ConvertExpression(arg.Value, hostNode),
-					}
-
-					if arg.Label != nil {
-						convertedArg.Label = arg.Label.Name
-						convertedArg.NodeMeta = createNodeMeta(arg.Label.Pos)
-					} else {
-						convertedArg.NodeMeta = *convertedArg.Value.GetNodeMeta()
-					}
-
-					index.Arguments = append(index.Arguments, convertedArg)
-				}
-
-				target = index
-			}
-		}
-
-		return target
-
-	case parser.FunctionCall:
-		args := make([]Expression, len(expression.Arguments))
-		for i, arg := range expression.Arguments {
-			args[i] = ConvertExpression(arg, hostNode)
-		}
-
-		return &FunctionCallExpression{
-			NodeMeta:     createNodeMeta(expression.Pos),
-			FunctionName: expression.FunctionName,
-			Arguments:    args,
-		}
-	default:
-		panic(fmt.Sprintf("unexpected expression type: %T", expression))
-	}
 }
 
 func (protocol *ProtocolDefinition) UnmarshalYAML(value *yaml.Node) error {

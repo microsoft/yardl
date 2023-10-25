@@ -163,3 +163,49 @@ def test_switch_expression():
     assert gr.type_index() == 0
     gr.f1 = tm.T0OrT1[tm.Int32, tm.Float32].T1(42.9)
     assert gr.type_index() == 1
+
+
+def test_arithmetic():
+    r = tm.RecordWithComputedFields()
+    assert r.arithmetic_1() == 3
+    assert r.arithmetic_2() == 11
+    assert r.arithmetic_3() == 13
+
+    r.array_field = np.array([[1, 2, 3], [4, 5, 6]], dtype=np.int32)
+    r.int_field = 1
+    assert r.arithmetic_4() == 5
+    assert r.arithmetic_5() == 3
+
+    assert r.arithmetic_6() == 3
+
+    assert r.arithmetic_7() == 49.0
+    assert isinstance(r.arithmetic_7(), float)
+
+    r.complexfloat32_field = 2.0 + 3.0j
+    assert r.arithmetic8() == 6.0 + 9.0j
+
+    assert r.arithmetic_9() == 2.2
+
+    assert r.arithmetic_10() == 1e10 + 9e9
+
+
+def test_casting():
+    r = tm.RecordWithComputedFields()
+    r.int_field = 42
+    assert r.cast_int_to_float() == 42.0
+    assert isinstance(r.cast_int_to_float(), float)
+
+    r.float32_field = 42.9
+    assert r.cast_float_to_int() == 42
+    assert isinstance(r.cast_float_to_int(), int)
+
+    assert r.cast_power() == 49
+    assert isinstance(r.cast_power(), int)
+
+    r.complexfloat32_field = 2.0 + 3.0j
+    r.complexfloat64_field = 2.0 + 3.0j
+    assert r.cast_complex32_to_complex64() == 2.0 + 3.0j
+    assert r.cast_complex64_to_complex32() == 2.0 + 3.0j
+
+    assert r.cast_float_to_complex() == 66.6 + 0.0j
+    assert isinstance(r.cast_float_to_complex(), complex)

@@ -161,4 +161,54 @@ TEST(ComputedFieldsTest, SwitchExpression) {
   ASSERT_EQ(gr.TypeIndex(), 1);
 }
 
+TEST(ComputedFieldsTest, Arithmetic) {
+  RecordWithComputedFields r;
+  ASSERT_EQ(r.Arithmetic1(), 3);
+  static_assert(std::is_same_v<decltype(r.Arithmetic1()), int32_t>);
+  ASSERT_EQ(r.Arithmetic2(), 11);
+  ASSERT_EQ(r.Arithmetic3(), 13);
+
+  r.array_field = {{1, 2, 3}, {4, 5, 6}};
+  r.int_field = 1;
+  ASSERT_EQ(r.Arithmetic4(), 5);
+  ASSERT_EQ(r.Arithmetic5(), 3);
+
+  ASSERT_EQ(r.Arithmetic6(), 3);
+
+  ASSERT_EQ(r.Arithmetic7(), 49.0);
+  static_assert(std::is_same_v<decltype(r.Arithmetic7()), double>);
+
+  r.complexfloat32_field = {2.0f, 3.0f};
+  ASSERT_EQ(r.Arithmetic8(), std::complex<float>(6.0f, 9.0f));
+
+  ASSERT_EQ(r.Arithmetic9(), 2.2);
+  static_assert(std::is_same_v<decltype(r.Arithmetic9()), double>);
+
+  ASSERT_EQ(r.Arithmetic10(), 1e10 + 9e9);
+
+  ASSERT_EQ(r.Arithmetic11(), -(5.3));
+}
+
+TEST(ComputedFieldsTest, Casting) {
+  RecordWithComputedFields r;
+  r.int_field = 42;
+  ASSERT_EQ(r.CastIntToFloat(), 42.0f);
+  static_assert(std::is_same_v<decltype(r.CastIntToFloat()), float>);
+
+  r.float32_field = 42.9f;
+  ASSERT_EQ(r.CastFloatToInt(), 42);
+  static_assert(std::is_same_v<decltype(r.CastFloatToInt()), int32_t>);
+
+  ASSERT_EQ(r.CastPower(), 49);
+  static_assert(std::is_same_v<decltype(r.CastPower()), int32_t>);
+
+  r.complexfloat32_field = {2.0f, 3.0f};
+  r.complexfloat64_field = {2.0, 3.0};
+  ASSERT_EQ(r.CastComplex32ToComplex64(), std::complex<double>(2.0, 3.0));
+  ASSERT_EQ(r.CastComplex64ToComplex32(), std::complex<float>(2.0f, 3.0f));
+
+  ASSERT_EQ(r.CastFloatToComplex(), std::complex<float>(66.6f, 0.0f));
+  static_assert(std::is_same_v<decltype(r.CastFloatToComplex()), std::complex<float>>);
+}
+
 }  // namespace

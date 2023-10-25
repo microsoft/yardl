@@ -60,6 +60,86 @@ func resolveComputedFields(env *Environment, errorSink *validation.ErrorSink) *E
 			rewritten := self.DefaultRewrite(node, &ComputedFieldScope{context.Record, context.RewrittenFields, append(context.CurrentFields, t), context.Variables})
 			context.RewrittenFields[t] = rewritten.(*ComputedField)
 			return rewritten
+		case *TypeConversionExpression:
+			t = self.DefaultRewrite(t, context).(*TypeConversionExpression)
+			innerType := t.Expression.GetResolvedType()
+			if innerType == nil {
+				return t
+			}
+
+			if TypesEqual(innerType, t.Type) {
+				return t
+			}
+
+			innerTypeKind, innerTypeIsPrimitive := GetKindIfPrimitive(innerType)
+			targetTypeKind, targetTypeIsPrimitive := GetKindIfPrimitive(t.Type)
+			if innerTypeIsPrimitive && targetTypeIsPrimitive {
+				if innerTypeKind == targetTypeKind {
+					return adjustConversion(t)
+				}
+
+				switch targetTypeKind {
+				case PrimitiveKindInteger:
+					switch innerTypeKind {
+					case PrimitiveKindFloatingPoint:
+						return adjustConversion(t)
+					}
+				case PrimitiveKindFloatingPoint:
+					switch innerTypeKind {
+					case PrimitiveKindInteger:
+						return adjustConversion(t)
+					}
+				case PrimitiveKindComplexFloatingPoint:
+					switch innerTypeKind {
+					case PrimitiveKindInteger, PrimitiveKindFloatingPoint:
+						return adjustConversion(t)
+					}
+				}
+			}
+
+			errorSink.Add(validationError(t, "cannot cast from from '%s' to '%s'", TypeToShortSyntax(innerType, true), TypeToShortSyntax(t.Type, true)))
+			return t
+		case *BinaryExpression:
+			t = self.DefaultRewrite(t, context).(*BinaryExpression)
+			t = shallowClone(t)
+			if t.Left.GetResolvedType() == nil || t.Right.GetResolvedType() == nil {
+				return t
+			}
+
+			lKind, lIsPrim := GetKindIfPrimitive(t.Left.GetResolvedType())
+			rKind, rIsPrim := GetKindIfPrimitive(t.Right.GetResolvedType())
+			commonType, err := GetCommonType(t.Left.GetResolvedType(), t.Right.GetResolvedType())
+
+			if err != nil || !lIsPrim || !rIsPrim ||
+				(lKind != PrimitiveKindInteger && lKind != PrimitiveKindFloatingPoint && lKind != PrimitiveKindComplexFloatingPoint) ||
+				(rKind != PrimitiveKindInteger && rKind != PrimitiveKindFloatingPoint && rKind != PrimitiveKindComplexFloatingPoint) {
+				lType := TypeToShortSyntax(t.Left.GetResolvedType(), true)
+				rtype := TypeToShortSyntax(t.Right.GetResolvedType(), true)
+				errorSink.Add(validationError(t, "operator not defined between operands with types '%s' and '%s'", lType, rtype))
+				return t
+			}
+
+			if t.Operator == BinaryOpPow {
+				commonKind, _ := GetKindIfPrimitive(commonType)
+				if commonKind == PrimitiveKindInteger {
+					commonType = Float64Type
+				}
+				t.Left = insertConversion(t.Left, commonType)
+				t.Right = insertConversion(t.Right, commonType)
+				t.ResolvedType = commonType
+				return t
+			}
+
+			primitiveCommonType, _ := GetPrimitiveType(commonType)
+			switch primitiveCommonType {
+			case Int8, Uint8, Int16, Uint16:
+				commonType = Int32Type
+			}
+
+			t.Left = insertConversion(t.Left, commonType)
+			t.Right = insertConversion(t.Right, commonType)
+			t.ResolvedType = commonType
+			return t
 		case *IntegerLiteralExpression:
 			if t.Value.Sign() >= 0 {
 				if t.Value.Cmp(MaxUint8) <= 0 {
@@ -108,6 +188,10 @@ func resolveComputedFields(env *Environment, errorSink *validation.ErrorSink) *E
 
 			errorSink.Add(validationError(t, "integer literal is too large"))
 			return t
+		case *FloatingPointLiteralExpression:
+			clone := *t
+			clone.ResolvedType = Float64Type
+			return &clone
 		case *StringLiteralExpression:
 			clone := *t
 			clone.ResolvedType = StringType
@@ -171,8 +255,8 @@ func resolveComputedFields(env *Environment, errorSink *validation.ErrorSink) *E
 
 			errorSink.Add(validationError(t, "there is no variable in scope with the name '%s' nor does the record '%s' does not have a field or computed field named '%s'", t.Member, target.Name, t.Member))
 			return t
-		case *IndexExpression:
-			t = self.DefaultRewrite(t, context).(*IndexExpression)
+		case *SubscriptExpression:
+			t = self.DefaultRewrite(t, context).(*SubscriptExpression)
 			t = shallowClone(t)
 			if t.Target.GetResolvedType() == nil {
 				return t
@@ -240,7 +324,7 @@ func resolveComputedFields(env *Environment, errorSink *validation.ErrorSink) *E
 					}
 
 					if labeledCount > 0 {
-						orderedArguments := make([]*IndexArgument, len(*d.Dimensions))
+						orderedArguments := make([]*SubscriptArgument, len(*d.Dimensions))
 						for argIndex, arg := range t.Arguments {
 							found := false
 							for dimIndex, dim := range *d.Dimensions {
@@ -429,14 +513,53 @@ func insertConversion(expression Expression, targetType Type) Expression {
 		return expression
 	}
 
-	if integerLiteral, ok := expression.(*IntegerLiteralExpression); ok && IsIntegralType(targetType) {
+	return adjustConversion(&TypeConversionExpression{
+		Expression: expression,
+		Type:       targetType,
+	})
+}
+
+func adjustConversion(conversionExpression *TypeConversionExpression) Expression {
+	sourceExpression := conversionExpression.Expression
+	sourceType := sourceExpression.GetResolvedType()
+	targetType := conversionExpression.Type
+
+	if TypesEqual(sourceType, targetType) {
+		return sourceExpression
+	}
+
+	targetPrimitiveKind, _ := GetKindIfPrimitive(targetType)
+
+	if integerLiteral, ok := sourceExpression.(*IntegerLiteralExpression); ok && targetPrimitiveKind == PrimitiveKindInteger {
 		updated := *integerLiteral
 		updated.ResolvedType = targetType
 		return &updated
 	}
+	if floatingPointLiteral, ok := sourceExpression.(*FloatingPointLiteralExpression); ok && targetPrimitiveKind == PrimitiveKindFloatingPoint {
+		updated := *floatingPointLiteral
+		updated.ResolvedType = targetType
+		return &updated
+	}
+
+	sourcePrimitiveKind, _ := GetKindIfPrimitive(sourceExpression.GetResolvedType())
+
+	if targetPrimitiveKind == PrimitiveKindComplexFloatingPoint &&
+		sourcePrimitiveKind == PrimitiveKindInteger || sourcePrimitiveKind == PrimitiveKindFloatingPoint {
+		complexType, _ := GetPrimitiveType(targetType)
+		switch complexType {
+		case ComplexFloat32:
+			sourceExpression = insertConversion(sourceExpression, Float32Type)
+		case ComplexFloat64:
+			sourceExpression = insertConversion(sourceExpression, Float64Type)
+		}
+	}
+
+	if sourceExpression == conversionExpression.Expression {
+		return conversionExpression
+	}
 
 	return &TypeConversionExpression{
-		Expression: expression,
+		Expression: sourceExpression,
 		Type:       targetType,
 	}
 }

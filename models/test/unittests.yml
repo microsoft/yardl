@@ -468,6 +468,18 @@ RecordWithComputedFields: !record
     dynamicArrayField: int[]
     fixedArrayField: int[x:3, y:4]
     intField: int
+    int8Field: int8
+    uint8Field: uint8
+    int16Field: int16
+    uint16Field: uint16
+    uint32Field: uint32
+    int64Field: int64
+    uint64Field: uint64
+    sizeField: size
+    float32Field: float32
+    float64Field: float64
+    complexfloat32Field: complexfloat32
+    complexfloat64Field: complexfloat64
     stringField: string
     tupleField: MyTuple<int, int>
     vectorField: int*
@@ -560,6 +572,25 @@ RecordWithComputedFields: !record
     switchOverSingleValue:
       !switch intField:
         int i: i
+
+    arithmetic1: 1 + 2
+    arithmetic2: 1 + 2 * 3 + 4
+    arithmetic3: (1 + 2) * 3 + 4
+    arithmetic4: arraySizeFromIntField + 2
+    arithmetic5: size(arrayField, 2 - 1)
+    arithmetic6: 7 / 2
+    arithmetic7: 7 ** 2
+    arithmetic8: complexfloat32Field * 3
+    arithmetic9: 1.2 + 1
+    arithmetic10: 1e10 + 9e9
+    arithmetic11: -(4.3 + 1)
+
+    castIntToFloat: intField as float
+    castFloatToInt: float32Field as int
+    castPower: (7 ** 2) as int
+    castComplex32ToComplex64: complexfloat32Field as complexfloat64
+    castComplex64ToComplex32: complexfloat64Field as complexfloat32
+    castFloatToComplex: 66.6 as complexfloat32
 
 GenericRecordWithComputedFields<T0, T1>: !record
   fields:

@@ -289,7 +289,29 @@ func defaultRewriteImpl[T any](rewriter *RewriterWithContext[T], node Node, cont
 		rewrittenField := *t
 		rewrittenField.Expression = rewrittenExpression.(Expression)
 		return &rewrittenField
+	case *UnaryExpression:
+		rewrittenInner := rewriter.Rewrite(t.Expression, context)
+		if rewrittenInner == t.Expression {
+			return t
+		}
+		rewrittenExpression := *t
+		rewrittenExpression.Expression = rewrittenInner.(Expression)
+		return &rewrittenExpression
+	case *BinaryExpression:
+		rewrittenLeft := rewriter.Rewrite(t.Left, context)
+		rewrittenRight := rewriter.Rewrite(t.Right, context)
+
+		if rewrittenLeft == t.Left && rewrittenRight == t.Right {
+			return t
+		}
+
+		rewrittenExpression := *t
+		rewrittenExpression.Left = rewrittenLeft.(Expression)
+		rewrittenExpression.Right = rewrittenRight.(Expression)
+		return &rewrittenExpression
 	case *IntegerLiteralExpression:
+		return t
+	case *FloatingPointLiteralExpression:
 		return t
 	case *StringLiteralExpression:
 		return t
@@ -306,7 +328,7 @@ func defaultRewriteImpl[T any](rewriter *RewriterWithContext[T], node Node, cont
 		rewrittenExpression := *t
 		rewrittenExpression.Target = rewrittenTarget.(Expression)
 		return &rewrittenExpression
-	case *IndexExpression:
+	case *SubscriptExpression:
 		var rewrittenTarget Expression
 		if t.Target != nil {
 			rewrittenTarget = rewriter.Rewrite(t.Target, context).(Expression)
@@ -324,7 +346,7 @@ func defaultRewriteImpl[T any](rewriter *RewriterWithContext[T], node Node, cont
 			rewrittenExpression.Arguments = rewrittenArguments
 		}
 		return &rewrittenExpression
-	case *IndexArgument:
+	case *SubscriptArgument:
 		rewrittenValue := rewriter.Rewrite(t.Value, context)
 		if rewrittenValue == t.Value {
 			return t
@@ -347,7 +369,9 @@ func defaultRewriteImpl[T any](rewriter *RewriterWithContext[T], node Node, cont
 
 	case *TypeConversionExpression:
 		rewrittenTarget := rewriter.Rewrite(t.Expression, context)
-		if rewrittenTarget == t.Expression {
+		rewrittenType := rewriter.Rewrite(t.Type, context)
+
+		if rewrittenTarget == t.Expression && rewrittenType == t.Type {
 			return t
 		}
 
