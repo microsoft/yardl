@@ -248,8 +248,8 @@ func writeComputedFieldExpression(w *formatting.IndentedWriter, expression dsl.E
 				w.WriteString("*")
 			case dsl.BinaryOpDiv:
 				w.WriteString("/")
-			case dsl.BinaryOpPow:
-				w.WriteString("**")
+			default:
+				panic(fmt.Sprintf("unexpected binary operator %d", t.Operator))
 			}
 
 			w.WriteString(" ")
