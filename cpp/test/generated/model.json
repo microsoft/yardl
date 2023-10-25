@@ -2912,6 +2912,83 @@
         },
         {
           "alias": {
+            "name": "GenericUnion3",
+            "typeParameters": [
+              "T",
+              "U",
+              "V"
+            ],
+            "type": [
+              {
+                "tag": "T",
+                "type": "T"
+              },
+              {
+                "tag": "U",
+                "type": "U"
+              },
+              {
+                "tag": "V",
+                "type": "V"
+              }
+            ]
+          }
+        },
+        {
+          "alias": {
+            "name": "GenericUnion3Alternate",
+            "typeParameters": [
+              "U",
+              "V",
+              "W"
+            ],
+            "type": [
+              {
+                "tag": "U",
+                "type": "U"
+              },
+              {
+                "tag": "V",
+                "type": "V"
+              },
+              {
+                "tag": "W",
+                "type": "W"
+              }
+            ]
+          }
+        },
+        {
+          "record": {
+            "name": "RecordNotUsedInProtocol",
+            "fields": [
+              {
+                "name": "u1",
+                "type": {
+                  "name": "TestModel.GenericUnion3",
+                  "typeArguments": [
+                    "int32",
+                    "float32",
+                    "string"
+                  ]
+                }
+              },
+              {
+                "name": "u2",
+                "type": {
+                  "name": "TestModel.GenericUnion3Alternate",
+                  "typeArguments": [
+                    "int32",
+                    "float32",
+                    "string"
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "alias": {
             "name": "ArrayWithKeywordDimensionNames",
             "type": {
               "array": {

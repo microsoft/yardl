@@ -88,7 +88,8 @@ validate-with-no-changes: validate
     set -euo pipefail
 
     if [[ `git status --porcelain` ]]; then
-      echo "there are changed files"
+      echo "there are changed files:"
+      git status --porcelain
       exit 1
     fi
 

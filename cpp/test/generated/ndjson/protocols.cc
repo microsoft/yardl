@@ -117,6 +117,9 @@ void from_json(ordered_json const& j, test_model::GenericRecordWithComputedField
 void to_json(ordered_json& j, test_model::RecordWithComputedFields const& value);
 void from_json(ordered_json const& j, test_model::RecordWithComputedFields& value);
 
+void to_json(ordered_json& j, test_model::RecordNotUsedInProtocol const& value);
+void from_json(ordered_json const& j, test_model::RecordNotUsedInProtocol& value);
+
 void to_json(ordered_json& j, test_model::EnumWithKeywordSymbols const& value);
 void from_json(ordered_json const& j, test_model::EnumWithKeywordSymbols& value);
 
@@ -127,116 +130,7 @@ void from_json(ordered_json const& j, test_model::RecordWithKeywordFields& value
 
 NLOHMANN_JSON_NAMESPACE_BEGIN
 
-template<>
-struct adl_serializer<std::variant<test_model::SimpleAcquisition, test_model::Image<float>>> {
-  static void to_json(ordered_json& j, std::variant<test_model::SimpleAcquisition, test_model::Image<float>> const& value) {
-    switch (value.index()) {
-      case 0:
-        j = ordered_json{ {"acquisition", std::get<test_model::SimpleAcquisition>(value)} };
-        break;
-      case 1:
-        j = ordered_json{ {"image", std::get<test_model::Image<float>>(value)} };
-        break;
-      default:
-        throw std::runtime_error("Invalid union value");
-    }
-  }
-
-  static void from_json(ordered_json const& j, std::variant<test_model::SimpleAcquisition, test_model::Image<float>>& value) {
-    auto it = j.begin();
-    std::string tag = it.key();
-    if (tag == "acquisition") {
-      value = it.value().get<test_model::SimpleAcquisition>();
-      return;
-    }
-    if (tag == "image") {
-      value = it.value().get<test_model::Image<float>>();
-      return;
-    }
-  }
-};
-
-template<>
-struct adl_serializer<std::variant<std::string, int32_t>> {
-  static void to_json(ordered_json& j, std::variant<std::string, int32_t> const& value) {
-    std::visit([&j](auto const& v) {j = v;}, value);
-  }
-
-  static void from_json(ordered_json const& j, std::variant<std::string, int32_t>& value) {
-    if ((j.is_string())) {
-      value = j.get<std::string>();
-      return;
-    }
-    if ((j.is_number())) {
-      value = j.get<int32_t>();
-      return;
-    }
-    throw std::runtime_error("Invalid union value");
-  }
-};
-
-template<>
-struct adl_serializer<std::variant<int32_t, test_model::SimpleRecord>> {
-  static void to_json(ordered_json& j, std::variant<int32_t, test_model::SimpleRecord> const& value) {
-    std::visit([&j](auto const& v) {j = v;}, value);
-  }
-
-  static void from_json(ordered_json const& j, std::variant<int32_t, test_model::SimpleRecord>& value) {
-    if ((j.is_number())) {
-      value = j.get<int32_t>();
-      return;
-    }
-    if ((j.is_object())) {
-      value = j.get<test_model::SimpleRecord>();
-      return;
-    }
-    throw std::runtime_error("Invalid union value");
-  }
-};
-
-template<>
-struct adl_serializer<std::variant<int32_t, test_model::RecordWithVlens>> {
-  static void to_json(ordered_json& j, std::variant<int32_t, test_model::RecordWithVlens> const& value) {
-    std::visit([&j](auto const& v) {j = v;}, value);
-  }
-
-  static void from_json(ordered_json const& j, std::variant<int32_t, test_model::RecordWithVlens>& value) {
-    if ((j.is_number())) {
-      value = j.get<int32_t>();
-      return;
-    }
-    if ((j.is_object())) {
-      value = j.get<test_model::RecordWithVlens>();
-      return;
-    }
-    throw std::runtime_error("Invalid union value");
-  }
-};
-
-template<>
-struct adl_serializer<std::variant<std::monostate, int32_t, test_model::SimpleRecord>> {
-  static void to_json(ordered_json& j, std::variant<std::monostate, int32_t, test_model::SimpleRecord> const& value) {
-    std::visit([&j](auto const& v) {j = v;}, value);
-  }
-
-  static void from_json(ordered_json const& j, std::variant<std::monostate, int32_t, test_model::SimpleRecord>& value) {
-    if ((j.is_null())) {
-      value = j.get<std::monostate>();
-      return;
-    }
-    if ((j.is_number())) {
-      value = j.get<int32_t>();
-      return;
-    }
-    if ((j.is_object())) {
-      value = j.get<test_model::SimpleRecord>();
-      return;
-    }
-    throw std::runtime_error("Invalid union value");
-  }
-};
-
-template<>
+template <>
 struct adl_serializer<std::variant<std::monostate, int32_t, std::string>> {
   static void to_json(ordered_json& j, std::variant<std::monostate, int32_t, std::string> const& value) {
     std::visit([&j](auto const& v) {j = v;}, value);
@@ -259,7 +153,7 @@ struct adl_serializer<std::variant<std::monostate, int32_t, std::string>> {
   }
 };
 
-template<>
+template <>
 struct adl_serializer<std::variant<yardl::Time, yardl::DateTime>> {
   static void to_json(ordered_json& j, std::variant<yardl::Time, yardl::DateTime> const& value) {
     switch (value.index()) {
@@ -288,65 +182,78 @@ struct adl_serializer<std::variant<yardl::Time, yardl::DateTime>> {
   }
 };
 
-template<>
-struct adl_serializer<std::variant<test_model::Image<float>, test_model::Image<double>>> {
-  static void to_json(ordered_json& j, std::variant<test_model::Image<float>, test_model::Image<double>> const& value) {
+template <typename T1, typename T2>
+struct adl_serializer<std::variant<T1, T2>> {
+  static void to_json(ordered_json& j, std::variant<T1, T2> const& value) {
     switch (value.index()) {
       case 0:
-        j = ordered_json{ {"imageFloat", std::get<test_model::Image<float>>(value)} };
+        j = ordered_json{ {"T1", std::get<T1>(value)} };
         break;
       case 1:
-        j = ordered_json{ {"imageDouble", std::get<test_model::Image<double>>(value)} };
+        j = ordered_json{ {"T2", std::get<T2>(value)} };
         break;
       default:
         throw std::runtime_error("Invalid union value");
     }
   }
 
-  static void from_json(ordered_json const& j, std::variant<test_model::Image<float>, test_model::Image<double>>& value) {
-    auto it = j.begin();
-    std::string tag = it.key();
-    if (tag == "imageFloat") {
-      value = it.value().get<test_model::Image<float>>();
-      return;
-    }
-    if (tag == "imageDouble") {
-      value = it.value().get<test_model::Image<double>>();
-      return;
-    }
-  }
-};
-
-template<>
-struct adl_serializer<std::variant<test_model::AliasedString, test_model::AliasedEnum>> {
-  static void to_json(ordered_json& j, std::variant<test_model::AliasedString, test_model::AliasedEnum> const& value) {
-    switch (value.index()) {
-      case 0:
-        j = ordered_json{ {"T1", std::get<test_model::AliasedString>(value)} };
-        break;
-      case 1:
-        j = ordered_json{ {"T2", std::get<test_model::AliasedEnum>(value)} };
-        break;
-      default:
-        throw std::runtime_error("Invalid union value");
-    }
-  }
-
-  static void from_json(ordered_json const& j, std::variant<test_model::AliasedString, test_model::AliasedEnum>& value) {
+  static void from_json(ordered_json const& j, std::variant<T1, T2>& value) {
     auto it = j.begin();
     std::string tag = it.key();
     if (tag == "T1") {
-      value = it.value().get<test_model::AliasedString>();
+      value = it.value().get<T1>();
       return;
     }
     if (tag == "T2") {
-      value = it.value().get<test_model::AliasedEnum>();
+      value = it.value().get<T2>();
       return;
     }
   }
 };
 
-template<>
+template <>
+struct adl_serializer<std::variant<int32_t, test_model::SimpleRecord>> {
+  static void to_json(ordered_json& j, std::variant<int32_t, test_model::SimpleRecord> const& value) {
+    std::visit([&j](auto const& v) {j = v;}, value);
+  }
+
+  static void from_json(ordered_json const& j, std::variant<int32_t, test_model::SimpleRecord>& value) {
+    if ((j.is_number())) {
+      value = j.get<int32_t>();
+      return;
+    }
+    if ((j.is_object())) {
+      value = j.get<test_model::SimpleRecord>();
+      return;
+    }
+    throw std::runtime_error("Invalid union value");
+  }
+};
+
+template <>
+struct adl_serializer<std::variant<std::monostate, int32_t, test_model::SimpleRecord>> {
+  static void to_json(ordered_json& j, std::variant<std::monostate, int32_t, test_model::SimpleRecord> const& value) {
+    std::visit([&j](auto const& v) {j = v;}, value);
+  }
+
+  static void from_json(ordered_json const& j, std::variant<std::monostate, int32_t, test_model::SimpleRecord>& value) {
+    if ((j.is_null())) {
+      value = j.get<std::monostate>();
+      return;
+    }
+    if ((j.is_number())) {
+      value = j.get<int32_t>();
+      return;
+    }
+    if ((j.is_object())) {
+      value = j.get<test_model::SimpleRecord>();
+      return;
+    }
+    throw std::runtime_error("Invalid union value");
+  }
+};
+
+template <>
 struct adl_serializer<std::variant<int32_t, float>> {
   static void to_json(ordered_json& j, std::variant<int32_t, float> const& value) {
     switch (value.index()) {
@@ -375,7 +282,7 @@ struct adl_serializer<std::variant<int32_t, float>> {
   }
 };
 
-template<>
+template <>
 struct adl_serializer<std::variant<std::monostate, int32_t, float>> {
   static void to_json(ordered_json& j, std::variant<std::monostate, int32_t, float> const& value) {
     switch (value.index()) {
@@ -411,7 +318,7 @@ struct adl_serializer<std::variant<std::monostate, int32_t, float>> {
   }
 };
 
-template<>
+template <>
 struct adl_serializer<std::variant<int32_t, test_model::GenericRecordWithComputedFields<std::string, float>>> {
   static void to_json(ordered_json& j, std::variant<int32_t, test_model::GenericRecordWithComputedFields<std::string, float>> const& value) {
     std::visit([&j](auto const& v) {j = v;}, value);
@@ -430,7 +337,7 @@ struct adl_serializer<std::variant<int32_t, test_model::GenericRecordWithCompute
   }
 };
 
-template<>
+template <>
 struct adl_serializer<std::variant<std::string, float>> {
   static void to_json(ordered_json& j, std::variant<std::string, float> const& value) {
     std::visit([&j](auto const& v) {j = v;}, value);
@@ -446,6 +353,203 @@ struct adl_serializer<std::variant<std::string, float>> {
       return;
     }
     throw std::runtime_error("Invalid union value");
+  }
+};
+
+template <typename T1, typename T2, typename T3>
+struct adl_serializer<std::variant<T1, T2, T3>> {
+  static void to_json(ordered_json& j, std::variant<T1, T2, T3> const& value) {
+    switch (value.index()) {
+      case 0:
+        j = ordered_json{ {"T", std::get<T1>(value)} };
+        break;
+      case 1:
+        j = ordered_json{ {"U", std::get<T2>(value)} };
+        break;
+      case 2:
+        j = ordered_json{ {"V", std::get<T3>(value)} };
+        break;
+      default:
+        throw std::runtime_error("Invalid union value");
+    }
+  }
+
+  static void from_json(ordered_json const& j, std::variant<T1, T2, T3>& value) {
+    auto it = j.begin();
+    std::string tag = it.key();
+    if (tag == "T") {
+      value = it.value().get<T1>();
+      return;
+    }
+    if (tag == "U") {
+      value = it.value().get<T2>();
+      return;
+    }
+    if (tag == "V") {
+      value = it.value().get<T3>();
+      return;
+    }
+  }
+};
+
+template <>
+struct adl_serializer<std::variant<int32_t, float, std::string>> {
+  static void to_json(ordered_json& j, std::variant<int32_t, float, std::string> const& value) {
+    switch (value.index()) {
+      case 0:
+        j = ordered_json{ {"T", std::get<int32_t>(value)} };
+        break;
+      case 1:
+        j = ordered_json{ {"U", std::get<float>(value)} };
+        break;
+      case 2:
+        j = ordered_json{ {"V", std::get<std::string>(value)} };
+        break;
+      default:
+        throw std::runtime_error("Invalid union value");
+    }
+  }
+
+  static void from_json(ordered_json const& j, std::variant<int32_t, float, std::string>& value) {
+    auto it = j.begin();
+    std::string tag = it.key();
+    if (tag == "T") {
+      value = it.value().get<int32_t>();
+      return;
+    }
+    if (tag == "U") {
+      value = it.value().get<float>();
+      return;
+    }
+    if (tag == "V") {
+      value = it.value().get<std::string>();
+      return;
+    }
+  }
+};
+
+template <>
+struct adl_serializer<std::variant<test_model::SimpleAcquisition, test_model::Image<float>>> {
+  static void to_json(ordered_json& j, std::variant<test_model::SimpleAcquisition, test_model::Image<float>> const& value) {
+    switch (value.index()) {
+      case 0:
+        j = ordered_json{ {"acquisition", std::get<test_model::SimpleAcquisition>(value)} };
+        break;
+      case 1:
+        j = ordered_json{ {"image", std::get<test_model::Image<float>>(value)} };
+        break;
+      default:
+        throw std::runtime_error("Invalid union value");
+    }
+  }
+
+  static void from_json(ordered_json const& j, std::variant<test_model::SimpleAcquisition, test_model::Image<float>>& value) {
+    auto it = j.begin();
+    std::string tag = it.key();
+    if (tag == "acquisition") {
+      value = it.value().get<test_model::SimpleAcquisition>();
+      return;
+    }
+    if (tag == "image") {
+      value = it.value().get<test_model::Image<float>>();
+      return;
+    }
+  }
+};
+
+template <>
+struct adl_serializer<std::variant<std::string, int32_t>> {
+  static void to_json(ordered_json& j, std::variant<std::string, int32_t> const& value) {
+    std::visit([&j](auto const& v) {j = v;}, value);
+  }
+
+  static void from_json(ordered_json const& j, std::variant<std::string, int32_t>& value) {
+    if ((j.is_string())) {
+      value = j.get<std::string>();
+      return;
+    }
+    if ((j.is_number())) {
+      value = j.get<int32_t>();
+      return;
+    }
+    throw std::runtime_error("Invalid union value");
+  }
+};
+
+template <>
+struct adl_serializer<std::variant<int32_t, test_model::RecordWithVlens>> {
+  static void to_json(ordered_json& j, std::variant<int32_t, test_model::RecordWithVlens> const& value) {
+    std::visit([&j](auto const& v) {j = v;}, value);
+  }
+
+  static void from_json(ordered_json const& j, std::variant<int32_t, test_model::RecordWithVlens>& value) {
+    if ((j.is_number())) {
+      value = j.get<int32_t>();
+      return;
+    }
+    if ((j.is_object())) {
+      value = j.get<test_model::RecordWithVlens>();
+      return;
+    }
+    throw std::runtime_error("Invalid union value");
+  }
+};
+
+template <>
+struct adl_serializer<std::variant<test_model::Image<float>, test_model::Image<double>>> {
+  static void to_json(ordered_json& j, std::variant<test_model::Image<float>, test_model::Image<double>> const& value) {
+    switch (value.index()) {
+      case 0:
+        j = ordered_json{ {"imageFloat", std::get<test_model::Image<float>>(value)} };
+        break;
+      case 1:
+        j = ordered_json{ {"imageDouble", std::get<test_model::Image<double>>(value)} };
+        break;
+      default:
+        throw std::runtime_error("Invalid union value");
+    }
+  }
+
+  static void from_json(ordered_json const& j, std::variant<test_model::Image<float>, test_model::Image<double>>& value) {
+    auto it = j.begin();
+    std::string tag = it.key();
+    if (tag == "imageFloat") {
+      value = it.value().get<test_model::Image<float>>();
+      return;
+    }
+    if (tag == "imageDouble") {
+      value = it.value().get<test_model::Image<double>>();
+      return;
+    }
+  }
+};
+
+template <>
+struct adl_serializer<std::variant<test_model::AliasedString, test_model::AliasedEnum>> {
+  static void to_json(ordered_json& j, std::variant<test_model::AliasedString, test_model::AliasedEnum> const& value) {
+    switch (value.index()) {
+      case 0:
+        j = ordered_json{ {"T1", std::get<test_model::AliasedString>(value)} };
+        break;
+      case 1:
+        j = ordered_json{ {"T2", std::get<test_model::AliasedEnum>(value)} };
+        break;
+      default:
+        throw std::runtime_error("Invalid union value");
+    }
+  }
+
+  static void from_json(ordered_json const& j, std::variant<test_model::AliasedString, test_model::AliasedEnum>& value) {
+    auto it = j.begin();
+    std::string tag = it.key();
+    if (tag == "T1") {
+      value = it.value().get<test_model::AliasedString>();
+      return;
+    }
+    if (tag == "T2") {
+      value = it.value().get<test_model::AliasedEnum>();
+      return;
+    }
   }
 };
 
@@ -1763,6 +1867,25 @@ void from_json(ordered_json const& j, test_model::RecordWithComputedFields& valu
   }
   if (auto it = j.find("mapField"); it != j.end()) {
     it->get_to(value.map_field);
+  }
+}
+
+void to_json(ordered_json& j, test_model::RecordNotUsedInProtocol const& value) {
+  j = ordered_json::object();
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.u1)) {
+    j.push_back({"u1", value.u1});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.u2)) {
+    j.push_back({"u2", value.u2});
+  }
+}
+
+void from_json(ordered_json const& j, test_model::RecordNotUsedInProtocol& value) {
+  if (auto it = j.find("u1"); it != j.end()) {
+    it->get_to(value.u1);
+  }
+  if (auto it = j.find("u2"); it != j.end()) {
+    it->get_to(value.u2);
   }
 }
 

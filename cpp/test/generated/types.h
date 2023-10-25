@@ -1074,6 +1074,26 @@ struct RecordWithComputedFields {
   }
 };
 
+template <typename T, typename U, typename V>
+using GenericUnion3 = std::variant<T, U, V>;
+
+template <typename U, typename V, typename W>
+using GenericUnion3Alternate = std::variant<U, V, W>;
+
+struct RecordNotUsedInProtocol {
+  test_model::GenericUnion3<int32_t, float, std::string> u1{};
+  test_model::GenericUnion3Alternate<int32_t, float, std::string> u2{};
+
+  bool operator==(const RecordNotUsedInProtocol& other) const {
+    return u1 == other.u1 &&
+      u2 == other.u2;
+  }
+
+  bool operator!=(const RecordNotUsedInProtocol& other) const {
+    return !(*this == other);
+  }
+};
+
 using ArrayWithKeywordDimensionNames = yardl::NDArray<int32_t, 2>;
 
 enum class EnumWithKeywordSymbols {

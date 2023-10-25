@@ -183,7 +183,7 @@ func writeRecord(w *formatting.IndentedWriter, rec *dsl.RecordDefinition, st dsl
 						// because they don't really exist at runtime
 						defaultExpressionKind = defaultValueKindNone
 					} else {
-						defaultExpression, defaultExpressionKind = typeDefault(f.Type, rec.Namespace, st)
+						defaultExpression, defaultExpressionKind = typeDefault(f.Type, rec.Namespace, "", st)
 					}
 					switch defaultExpressionKind {
 					case defaultValueKindNone:
@@ -206,7 +206,7 @@ func writeRecord(w *formatting.IndentedWriter, rec *dsl.RecordDefinition, st dsl
 					if dsl.ContainsGenericTypeParameter(f.Type) {
 						defaultExpressionKind = defaultValueKindNone
 					} else {
-						defaultExpression, defaultExpressionKind = typeDefault(f.Type, rec.Namespace, st)
+						defaultExpression, defaultExpressionKind = typeDefault(f.Type, rec.Namespace, "", st)
 					}
 
 					switch defaultExpressionKind {
@@ -776,7 +776,7 @@ const (
 	defaultValueKindMutable
 )
 
-func typeDefault(t dsl.Type, contextNamespace string, st dsl.SymbolTable) (string, defaultValueKind) {
+func typeDefault(t dsl.Type, contextNamespace string, namedType string, st dsl.SymbolTable) (string, defaultValueKind) {
 	switch t := t.(type) {
 	case nil:
 		return "None", defaultValueKindImmutable
@@ -785,12 +785,17 @@ func typeDefault(t dsl.Type, contextNamespace string, st dsl.SymbolTable) (strin
 	case *dsl.GeneralizedType:
 		switch td := t.Dimensionality.(type) {
 		case nil:
-			defaultExpression, defaultKind := typeDefault(t.Cases[0].Type, contextNamespace, st)
+			defaultExpression, defaultKind := typeDefault(t.Cases[0].Type, contextNamespace, "", st)
 			if t.Cases.IsSingle() || t.Cases.HasNullOption() {
 				return defaultExpression, defaultKind
 			}
 
-			unionClassName, _ := common.UnionClassName(t)
+			var unionClassName string
+			if namedType != "" {
+				unionClassName = namedType
+			} else {
+				unionClassName, _ = common.UnionClassName(t)
+			}
 
 			unionCaseConstructor := fmt.Sprintf("%s.%s", unionClassName, formatting.ToPascalCase(t.Cases[0].Tag))
 
@@ -809,7 +814,7 @@ func typeDefault(t dsl.Type, contextNamespace string, st dsl.SymbolTable) (strin
 				return "[]", defaultValueKindMutable
 			}
 
-			scalarDefault, scalarDefaultKind := typeDefault(t.Cases[0].Type, contextNamespace, st)
+			scalarDefault, scalarDefaultKind := typeDefault(t.Cases[0].Type, contextNamespace, "", st)
 
 			switch scalarDefaultKind {
 			case defaultValueKindNone:
@@ -888,7 +893,7 @@ func typeDefinitionDefault(t dsl.TypeDefinition, contextNamespace string, st dsl
 
 		return fmt.Sprintf("%s.%s", common.TypeSyntax(t, contextNamespace), common.EnumValueIdentifierName(zeroValue.Symbol)), defaultValueKindImmutable
 	case *dsl.NamedType:
-		return typeDefault(t.Type, contextNamespace, st)
+		return typeDefault(t.Type, contextNamespace, common.TypeSyntax(t, contextNamespace), st)
 
 	case *dsl.RecordDefinition:
 		if len(t.TypeArguments) == 0 {
@@ -897,7 +902,7 @@ func typeDefinitionDefault(t dsl.TypeDefinition, contextNamespace string, st dsl
 			}
 
 			for _, f := range t.Fields {
-				_, fieldDefaultKind := typeDefault(f.Type, contextNamespace, st)
+				_, fieldDefaultKind := typeDefault(f.Type, contextNamespace, "", st)
 				if fieldDefaultKind == defaultValueKindNone {
 					return "", defaultValueKindNone
 				}
@@ -913,12 +918,12 @@ func typeDefinitionDefault(t dsl.TypeDefinition, contextNamespace string, st dsl
 		args := make([]string, 0)
 
 		for i, f := range t.Fields {
-			fieldDefaultExpr, fieldDefaultKind := typeDefault(f.Type, contextNamespace, st)
+			fieldDefaultExpr, fieldDefaultKind := typeDefault(f.Type, contextNamespace, "", st)
 			if fieldDefaultKind == defaultValueKindNone {
 				return "", defaultValueKindNone
 			}
 
-			_, genDefaultKind := typeDefault(genericDef.Fields[i].Type, contextNamespace, st)
+			_, genDefaultKind := typeDefault(genericDef.Fields[i].Type, contextNamespace, "", st)
 			if genDefaultKind == defaultValueKindNone {
 				args = append(args, fmt.Sprintf("%s=%s", common.FieldIdentifierName(f.Name), fieldDefaultExpr))
 			}
