@@ -130,7 +130,7 @@ void from_json(ordered_json const& j, test_model::RecordWithKeywordFields& value
 
 NLOHMANN_JSON_NAMESPACE_BEGIN
 
-template<>
+template <>
 struct adl_serializer<std::variant<std::monostate, int32_t, std::string>> {
   static void to_json(ordered_json& j, std::variant<std::monostate, int32_t, std::string> const& value) {
     std::visit([&j](auto const& v) {j = v;}, value);
@@ -153,7 +153,7 @@ struct adl_serializer<std::variant<std::monostate, int32_t, std::string>> {
   }
 };
 
-template<>
+template <>
 struct adl_serializer<std::variant<yardl::Time, yardl::DateTime>> {
   static void to_json(ordered_json& j, std::variant<yardl::Time, yardl::DateTime> const& value) {
     switch (value.index()) {
@@ -211,7 +211,7 @@ struct adl_serializer<std::variant<T1, T2>> {
   }
 };
 
-template<>
+template <>
 struct adl_serializer<std::variant<int32_t, test_model::SimpleRecord>> {
   static void to_json(ordered_json& j, std::variant<int32_t, test_model::SimpleRecord> const& value) {
     std::visit([&j](auto const& v) {j = v;}, value);
@@ -230,7 +230,7 @@ struct adl_serializer<std::variant<int32_t, test_model::SimpleRecord>> {
   }
 };
 
-template<>
+template <>
 struct adl_serializer<std::variant<std::monostate, int32_t, test_model::SimpleRecord>> {
   static void to_json(ordered_json& j, std::variant<std::monostate, int32_t, test_model::SimpleRecord> const& value) {
     std::visit([&j](auto const& v) {j = v;}, value);
@@ -253,7 +253,7 @@ struct adl_serializer<std::variant<std::monostate, int32_t, test_model::SimpleRe
   }
 };
 
-template<>
+template <>
 struct adl_serializer<std::variant<int32_t, float>> {
   static void to_json(ordered_json& j, std::variant<int32_t, float> const& value) {
     switch (value.index()) {
@@ -282,7 +282,7 @@ struct adl_serializer<std::variant<int32_t, float>> {
   }
 };
 
-template<>
+template <>
 struct adl_serializer<std::variant<std::monostate, int32_t, float>> {
   static void to_json(ordered_json& j, std::variant<std::monostate, int32_t, float> const& value) {
     switch (value.index()) {
@@ -318,7 +318,7 @@ struct adl_serializer<std::variant<std::monostate, int32_t, float>> {
   }
 };
 
-template<>
+template <>
 struct adl_serializer<std::variant<int32_t, test_model::GenericRecordWithComputedFields<std::string, float>>> {
   static void to_json(ordered_json& j, std::variant<int32_t, test_model::GenericRecordWithComputedFields<std::string, float>> const& value) {
     std::visit([&j](auto const& v) {j = v;}, value);
@@ -337,7 +337,7 @@ struct adl_serializer<std::variant<int32_t, test_model::GenericRecordWithCompute
   }
 };
 
-template<>
+template <>
 struct adl_serializer<std::variant<std::string, float>> {
   static void to_json(ordered_json& j, std::variant<std::string, float> const& value) {
     std::visit([&j](auto const& v) {j = v;}, value);
@@ -392,7 +392,7 @@ struct adl_serializer<std::variant<T1, T2, T3>> {
   }
 };
 
-template<>
+template <>
 struct adl_serializer<std::variant<int32_t, float, std::string>> {
   static void to_json(ordered_json& j, std::variant<int32_t, float, std::string> const& value) {
     switch (value.index()) {
@@ -428,7 +428,7 @@ struct adl_serializer<std::variant<int32_t, float, std::string>> {
   }
 };
 
-template<>
+template <>
 struct adl_serializer<std::variant<test_model::SimpleAcquisition, test_model::Image<float>>> {
   static void to_json(ordered_json& j, std::variant<test_model::SimpleAcquisition, test_model::Image<float>> const& value) {
     switch (value.index()) {
@@ -457,7 +457,7 @@ struct adl_serializer<std::variant<test_model::SimpleAcquisition, test_model::Im
   }
 };
 
-template<>
+template <>
 struct adl_serializer<std::variant<std::string, int32_t>> {
   static void to_json(ordered_json& j, std::variant<std::string, int32_t> const& value) {
     std::visit([&j](auto const& v) {j = v;}, value);
@@ -476,7 +476,7 @@ struct adl_serializer<std::variant<std::string, int32_t>> {
   }
 };
 
-template<>
+template <>
 struct adl_serializer<std::variant<int32_t, test_model::RecordWithVlens>> {
   static void to_json(ordered_json& j, std::variant<int32_t, test_model::RecordWithVlens> const& value) {
     std::visit([&j](auto const& v) {j = v;}, value);
@@ -495,7 +495,7 @@ struct adl_serializer<std::variant<int32_t, test_model::RecordWithVlens>> {
   }
 };
 
-template<>
+template <>
 struct adl_serializer<std::variant<test_model::Image<float>, test_model::Image<double>>> {
   static void to_json(ordered_json& j, std::variant<test_model::Image<float>, test_model::Image<double>> const& value) {
     switch (value.index()) {
@@ -524,7 +524,7 @@ struct adl_serializer<std::variant<test_model::Image<float>, test_model::Image<d
   }
 };
 
-template<>
+template <>
 struct adl_serializer<std::variant<test_model::AliasedString, test_model::AliasedEnum>> {
   static void to_json(ordered_json& j, std::variant<test_model::AliasedString, test_model::AliasedEnum> const& value) {
     switch (value.index()) {
