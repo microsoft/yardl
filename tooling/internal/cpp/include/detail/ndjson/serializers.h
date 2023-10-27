@@ -10,8 +10,9 @@
 #include <utility>
 #include <variant>
 #include <vector>
-
+#pragma GCC diagnostic ignored "-Wstringop-overflow"
 #include <date/date.h>
+#pragma GCC diagnostic pop
 #include <nlohmann/json.hpp>
 
 #include "../../yardl.h"

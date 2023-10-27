@@ -8,13 +8,13 @@ dependencies:
   - clang-format=14.0.4 # local
   - cmake=3.21.3
   - fmt=8.1.1
-  - gcc_linux-64=11.2.0 # arch=x86_64
-  - gcc_linux-aarch64=11.2.0 # arch=aarch64
+  - gcc_linux-64=12.3.0 # arch=x86_64
+  - gcc_linux-aarch64=12.3.0 # arch=aarch64
   - gdb=11.2 # local
   - gmock=1.11.0
   - gtest=1.11.0
-  - gxx_linux-64=11.2.0 # arch=x86_64
-  - gxx_linux-aarch64=11.2.0 # arch=aarch64
+  - gxx_linux-64=12.3.0 # arch=x86_64
+  - gxx_linux-aarch64=12.3.0 # arch=aarch64
   - hdf5=1.12.1
   - howardhinnant_date=3.0.1
   - ipykernel=6.19.2 # local
@@ -28,4 +28,4 @@ dependencies:
   - rich=13.5.1
   - shellcheck=0.8.0 # local
   - valgrind=3.18.1 # local arch=x86_64
-  - xtensor=0.24.2
+  - xtensor=0.24.7
