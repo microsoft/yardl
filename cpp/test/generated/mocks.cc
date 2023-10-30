@@ -435,7 +435,7 @@ class TestBenchmarkSmallRecordWithOptionalsWriterBase : public BenchmarkSmallRec
 
 class MockBenchmarkSimpleMrdWriter : public BenchmarkSimpleMrdWriterBase {
   public:
-  void WriteDataImpl (std::variant<test_model::SimpleAcquisition, test_model::Image<float>> const& value) override {
+  void WriteDataImpl (std::variant<test_model::SimpleAcquisition, image::Image<float>> const& value) override {
     if (WriteDataImpl_expected_values_.empty()) {
       throw std::runtime_error("Unexpected call to WriteDataImpl");
     }
@@ -445,9 +445,9 @@ class MockBenchmarkSimpleMrdWriter : public BenchmarkSimpleMrdWriterBase {
     WriteDataImpl_expected_values_.pop();
   }
 
-  std::queue<std::variant<test_model::SimpleAcquisition, test_model::Image<float>>> WriteDataImpl_expected_values_;
+  std::queue<std::variant<test_model::SimpleAcquisition, image::Image<float>>> WriteDataImpl_expected_values_;
 
-  void ExpectWriteDataImpl (std::variant<test_model::SimpleAcquisition, test_model::Image<float>> const& value) {
+  void ExpectWriteDataImpl (std::variant<test_model::SimpleAcquisition, image::Image<float>> const& value) {
     WriteDataImpl_expected_values_.push(value);
   }
 
@@ -485,12 +485,12 @@ class TestBenchmarkSimpleMrdWriterBase : public BenchmarkSimpleMrdWriterBase {
   }
 
   protected:
-  void WriteDataImpl(std::variant<test_model::SimpleAcquisition, test_model::Image<float>> const& value) override {
+  void WriteDataImpl(std::variant<test_model::SimpleAcquisition, image::Image<float>> const& value) override {
     writer_->WriteData(value);
     mock_writer_.ExpectWriteDataImpl(value);
   }
 
-  void WriteDataImpl(std::vector<std::variant<test_model::SimpleAcquisition, test_model::Image<float>>> const& values) override {
+  void WriteDataImpl(std::vector<std::variant<test_model::SimpleAcquisition, image::Image<float>>> const& values) override {
     writer_->WriteData(values);
     for (auto const& v : values) {
       mock_writer_.ExpectWriteDataImpl(v);
@@ -2361,7 +2361,7 @@ class MockMapsWriter : public MapsWriterBase {
     WriteStringToUnionImpl_expected_values_.push(value);
   }
 
-  void WriteAliasedGenericImpl (test_model::AliasedMap<std::string, int32_t> const& value) override {
+  void WriteAliasedGenericImpl (basic_types::AliasedMap<std::string, int32_t> const& value) override {
     if (WriteAliasedGenericImpl_expected_values_.empty()) {
       throw std::runtime_error("Unexpected call to WriteAliasedGenericImpl");
     }
@@ -2371,9 +2371,9 @@ class MockMapsWriter : public MapsWriterBase {
     WriteAliasedGenericImpl_expected_values_.pop();
   }
 
-  std::queue<test_model::AliasedMap<std::string, int32_t>> WriteAliasedGenericImpl_expected_values_;
+  std::queue<basic_types::AliasedMap<std::string, int32_t>> WriteAliasedGenericImpl_expected_values_;
 
-  void ExpectWriteAliasedGenericImpl (test_model::AliasedMap<std::string, int32_t> const& value) {
+  void ExpectWriteAliasedGenericImpl (basic_types::AliasedMap<std::string, int32_t> const& value) {
     WriteAliasedGenericImpl_expected_values_.push(value);
   }
 
@@ -2420,7 +2420,7 @@ class TestMapsWriterBase : public MapsWriterBase {
     mock_writer_.ExpectWriteStringToUnionImpl(value);
   }
 
-  void WriteAliasedGenericImpl(test_model::AliasedMap<std::string, int32_t> const& value) override {
+  void WriteAliasedGenericImpl(basic_types::AliasedMap<std::string, int32_t> const& value) override {
     writer_->WriteAliasedGeneric(value);
     mock_writer_.ExpectWriteAliasedGenericImpl(value);
   }
@@ -2490,7 +2490,7 @@ class MockUnionsWriter : public UnionsWriterBase {
     WriteMonosotateOrIntOrSimpleRecordImpl_expected_values_.push(value);
   }
 
-  void WriteRecordWithUnionsImpl (test_model::RecordWithUnions const& value) override {
+  void WriteRecordWithUnionsImpl (basic_types::RecordWithUnions const& value) override {
     if (WriteRecordWithUnionsImpl_expected_values_.empty()) {
       throw std::runtime_error("Unexpected call to WriteRecordWithUnionsImpl");
     }
@@ -2500,9 +2500,9 @@ class MockUnionsWriter : public UnionsWriterBase {
     WriteRecordWithUnionsImpl_expected_values_.pop();
   }
 
-  std::queue<test_model::RecordWithUnions> WriteRecordWithUnionsImpl_expected_values_;
+  std::queue<basic_types::RecordWithUnions> WriteRecordWithUnionsImpl_expected_values_;
 
-  void ExpectWriteRecordWithUnionsImpl (test_model::RecordWithUnions const& value) {
+  void ExpectWriteRecordWithUnionsImpl (basic_types::RecordWithUnions const& value) {
     WriteRecordWithUnionsImpl_expected_values_.push(value);
   }
 
@@ -2549,7 +2549,7 @@ class TestUnionsWriterBase : public UnionsWriterBase {
     mock_writer_.ExpectWriteMonosotateOrIntOrSimpleRecordImpl(value);
   }
 
-  void WriteRecordWithUnionsImpl(test_model::RecordWithUnions const& value) override {
+  void WriteRecordWithUnionsImpl(basic_types::RecordWithUnions const& value) override {
     writer_->WriteRecordWithUnions(value);
     mock_writer_.ExpectWriteRecordWithUnionsImpl(value);
   }
@@ -3078,7 +3078,7 @@ class TestStateTestWriterBase : public StateTestWriterBase {
 
 class MockSimpleGenericsWriter : public SimpleGenericsWriterBase {
   public:
-  void WriteFloatImageImpl (test_model::Image<float> const& value) override {
+  void WriteFloatImageImpl (image::FloatImage const& value) override {
     if (WriteFloatImageImpl_expected_values_.empty()) {
       throw std::runtime_error("Unexpected call to WriteFloatImageImpl");
     }
@@ -3088,13 +3088,13 @@ class MockSimpleGenericsWriter : public SimpleGenericsWriterBase {
     WriteFloatImageImpl_expected_values_.pop();
   }
 
-  std::queue<test_model::Image<float>> WriteFloatImageImpl_expected_values_;
+  std::queue<image::FloatImage> WriteFloatImageImpl_expected_values_;
 
-  void ExpectWriteFloatImageImpl (test_model::Image<float> const& value) {
+  void ExpectWriteFloatImageImpl (image::FloatImage const& value) {
     WriteFloatImageImpl_expected_values_.push(value);
   }
 
-  void WriteIntImageImpl (test_model::Image<int32_t> const& value) override {
+  void WriteIntImageImpl (image::IntImage const& value) override {
     if (WriteIntImageImpl_expected_values_.empty()) {
       throw std::runtime_error("Unexpected call to WriteIntImageImpl");
     }
@@ -3104,9 +3104,9 @@ class MockSimpleGenericsWriter : public SimpleGenericsWriterBase {
     WriteIntImageImpl_expected_values_.pop();
   }
 
-  std::queue<test_model::Image<int32_t>> WriteIntImageImpl_expected_values_;
+  std::queue<image::IntImage> WriteIntImageImpl_expected_values_;
 
-  void ExpectWriteIntImageImpl (test_model::Image<int32_t> const& value) {
+  void ExpectWriteIntImageImpl (image::IntImage const& value) {
     WriteIntImageImpl_expected_values_.push(value);
   }
 
@@ -3142,7 +3142,7 @@ class MockSimpleGenericsWriter : public SimpleGenericsWriterBase {
     WriteStringImageImpl_expected_values_.push(value);
   }
 
-  void WriteIntFloatTupleImpl (test_model::MyTuple<int32_t, float> const& value) override {
+  void WriteIntFloatTupleImpl (tuples::Tuple<int32_t, float> const& value) override {
     if (WriteIntFloatTupleImpl_expected_values_.empty()) {
       throw std::runtime_error("Unexpected call to WriteIntFloatTupleImpl");
     }
@@ -3152,13 +3152,13 @@ class MockSimpleGenericsWriter : public SimpleGenericsWriterBase {
     WriteIntFloatTupleImpl_expected_values_.pop();
   }
 
-  std::queue<test_model::MyTuple<int32_t, float>> WriteIntFloatTupleImpl_expected_values_;
+  std::queue<tuples::Tuple<int32_t, float>> WriteIntFloatTupleImpl_expected_values_;
 
-  void ExpectWriteIntFloatTupleImpl (test_model::MyTuple<int32_t, float> const& value) {
+  void ExpectWriteIntFloatTupleImpl (tuples::Tuple<int32_t, float> const& value) {
     WriteIntFloatTupleImpl_expected_values_.push(value);
   }
 
-  void WriteFloatFloatTupleImpl (test_model::MyTuple<float, float> const& value) override {
+  void WriteFloatFloatTupleImpl (tuples::Tuple<float, float> const& value) override {
     if (WriteFloatFloatTupleImpl_expected_values_.empty()) {
       throw std::runtime_error("Unexpected call to WriteFloatFloatTupleImpl");
     }
@@ -3168,13 +3168,13 @@ class MockSimpleGenericsWriter : public SimpleGenericsWriterBase {
     WriteFloatFloatTupleImpl_expected_values_.pop();
   }
 
-  std::queue<test_model::MyTuple<float, float>> WriteFloatFloatTupleImpl_expected_values_;
+  std::queue<tuples::Tuple<float, float>> WriteFloatFloatTupleImpl_expected_values_;
 
-  void ExpectWriteFloatFloatTupleImpl (test_model::MyTuple<float, float> const& value) {
+  void ExpectWriteFloatFloatTupleImpl (tuples::Tuple<float, float> const& value) {
     WriteFloatFloatTupleImpl_expected_values_.push(value);
   }
 
-  void WriteIntFloatTupleAlternateSyntaxImpl (test_model::MyTuple<int32_t, float> const& value) override {
+  void WriteIntFloatTupleAlternateSyntaxImpl (tuples::Tuple<int32_t, float> const& value) override {
     if (WriteIntFloatTupleAlternateSyntaxImpl_expected_values_.empty()) {
       throw std::runtime_error("Unexpected call to WriteIntFloatTupleAlternateSyntaxImpl");
     }
@@ -3184,13 +3184,13 @@ class MockSimpleGenericsWriter : public SimpleGenericsWriterBase {
     WriteIntFloatTupleAlternateSyntaxImpl_expected_values_.pop();
   }
 
-  std::queue<test_model::MyTuple<int32_t, float>> WriteIntFloatTupleAlternateSyntaxImpl_expected_values_;
+  std::queue<tuples::Tuple<int32_t, float>> WriteIntFloatTupleAlternateSyntaxImpl_expected_values_;
 
-  void ExpectWriteIntFloatTupleAlternateSyntaxImpl (test_model::MyTuple<int32_t, float> const& value) {
+  void ExpectWriteIntFloatTupleAlternateSyntaxImpl (tuples::Tuple<int32_t, float> const& value) {
     WriteIntFloatTupleAlternateSyntaxImpl_expected_values_.push(value);
   }
 
-  void WriteIntStringTupleImpl (test_model::MyTuple<int32_t, std::string> const& value) override {
+  void WriteIntStringTupleImpl (tuples::Tuple<int32_t, std::string> const& value) override {
     if (WriteIntStringTupleImpl_expected_values_.empty()) {
       throw std::runtime_error("Unexpected call to WriteIntStringTupleImpl");
     }
@@ -3200,13 +3200,13 @@ class MockSimpleGenericsWriter : public SimpleGenericsWriterBase {
     WriteIntStringTupleImpl_expected_values_.pop();
   }
 
-  std::queue<test_model::MyTuple<int32_t, std::string>> WriteIntStringTupleImpl_expected_values_;
+  std::queue<tuples::Tuple<int32_t, std::string>> WriteIntStringTupleImpl_expected_values_;
 
-  void ExpectWriteIntStringTupleImpl (test_model::MyTuple<int32_t, std::string> const& value) {
+  void ExpectWriteIntStringTupleImpl (tuples::Tuple<int32_t, std::string> const& value) {
     WriteIntStringTupleImpl_expected_values_.push(value);
   }
 
-  void WriteStreamOfTypeVariantsImpl (std::variant<test_model::Image<float>, test_model::Image<double>> const& value) override {
+  void WriteStreamOfTypeVariantsImpl (std::variant<image::FloatImage, test_model::Image<double>> const& value) override {
     if (WriteStreamOfTypeVariantsImpl_expected_values_.empty()) {
       throw std::runtime_error("Unexpected call to WriteStreamOfTypeVariantsImpl");
     }
@@ -3216,9 +3216,9 @@ class MockSimpleGenericsWriter : public SimpleGenericsWriterBase {
     WriteStreamOfTypeVariantsImpl_expected_values_.pop();
   }
 
-  std::queue<std::variant<test_model::Image<float>, test_model::Image<double>>> WriteStreamOfTypeVariantsImpl_expected_values_;
+  std::queue<std::variant<image::FloatImage, test_model::Image<double>>> WriteStreamOfTypeVariantsImpl_expected_values_;
 
-  void ExpectWriteStreamOfTypeVariantsImpl (std::variant<test_model::Image<float>, test_model::Image<double>> const& value) {
+  void ExpectWriteStreamOfTypeVariantsImpl (std::variant<image::FloatImage, test_model::Image<double>> const& value) {
     WriteStreamOfTypeVariantsImpl_expected_values_.push(value);
   }
 
@@ -3280,12 +3280,12 @@ class TestSimpleGenericsWriterBase : public SimpleGenericsWriterBase {
   }
 
   protected:
-  void WriteFloatImageImpl(test_model::Image<float> const& value) override {
+  void WriteFloatImageImpl(image::FloatImage const& value) override {
     writer_->WriteFloatImage(value);
     mock_writer_.ExpectWriteFloatImageImpl(value);
   }
 
-  void WriteIntImageImpl(test_model::Image<int32_t> const& value) override {
+  void WriteIntImageImpl(image::IntImage const& value) override {
     writer_->WriteIntImage(value);
     mock_writer_.ExpectWriteIntImageImpl(value);
   }
@@ -3300,32 +3300,32 @@ class TestSimpleGenericsWriterBase : public SimpleGenericsWriterBase {
     mock_writer_.ExpectWriteStringImageImpl(value);
   }
 
-  void WriteIntFloatTupleImpl(test_model::MyTuple<int32_t, float> const& value) override {
+  void WriteIntFloatTupleImpl(tuples::Tuple<int32_t, float> const& value) override {
     writer_->WriteIntFloatTuple(value);
     mock_writer_.ExpectWriteIntFloatTupleImpl(value);
   }
 
-  void WriteFloatFloatTupleImpl(test_model::MyTuple<float, float> const& value) override {
+  void WriteFloatFloatTupleImpl(tuples::Tuple<float, float> const& value) override {
     writer_->WriteFloatFloatTuple(value);
     mock_writer_.ExpectWriteFloatFloatTupleImpl(value);
   }
 
-  void WriteIntFloatTupleAlternateSyntaxImpl(test_model::MyTuple<int32_t, float> const& value) override {
+  void WriteIntFloatTupleAlternateSyntaxImpl(tuples::Tuple<int32_t, float> const& value) override {
     writer_->WriteIntFloatTupleAlternateSyntax(value);
     mock_writer_.ExpectWriteIntFloatTupleAlternateSyntaxImpl(value);
   }
 
-  void WriteIntStringTupleImpl(test_model::MyTuple<int32_t, std::string> const& value) override {
+  void WriteIntStringTupleImpl(tuples::Tuple<int32_t, std::string> const& value) override {
     writer_->WriteIntStringTuple(value);
     mock_writer_.ExpectWriteIntStringTupleImpl(value);
   }
 
-  void WriteStreamOfTypeVariantsImpl(std::variant<test_model::Image<float>, test_model::Image<double>> const& value) override {
+  void WriteStreamOfTypeVariantsImpl(std::variant<image::FloatImage, test_model::Image<double>> const& value) override {
     writer_->WriteStreamOfTypeVariants(value);
     mock_writer_.ExpectWriteStreamOfTypeVariantsImpl(value);
   }
 
-  void WriteStreamOfTypeVariantsImpl(std::vector<std::variant<test_model::Image<float>, test_model::Image<double>>> const& values) override {
+  void WriteStreamOfTypeVariantsImpl(std::vector<std::variant<image::FloatImage, test_model::Image<double>>> const& values) override {
     writer_->WriteStreamOfTypeVariants(values);
     for (auto const& v : values) {
       mock_writer_.ExpectWriteStreamOfTypeVariantsImpl(v);

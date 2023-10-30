@@ -40,6 +40,7 @@ class BenchmarkFloat256x256Reader : public test_model::BenchmarkFloat256x256Read
   private:
   std::unique_ptr<yardl::hdf5::DatasetReader> float256x256_dataset_state_;
 };
+
 // HDF5 writer for the BenchmarkInt256x256 protocol.
 class BenchmarkInt256x256Writer : public test_model::BenchmarkInt256x256WriterBase, public yardl::hdf5::Hdf5Writer {
   public:
@@ -68,6 +69,7 @@ class BenchmarkInt256x256Reader : public test_model::BenchmarkInt256x256ReaderBa
   private:
   std::unique_ptr<yardl::hdf5::DatasetReader> int256x256_dataset_state_;
 };
+
 // HDF5 writer for the BenchmarkFloatVlen protocol.
 class BenchmarkFloatVlenWriter : public test_model::BenchmarkFloatVlenWriterBase, public yardl::hdf5::Hdf5Writer {
   public:
@@ -96,6 +98,7 @@ class BenchmarkFloatVlenReader : public test_model::BenchmarkFloatVlenReaderBase
   private:
   std::unique_ptr<yardl::hdf5::DatasetReader> floatArray_dataset_state_;
 };
+
 // HDF5 writer for the BenchmarkSmallRecord protocol.
 class BenchmarkSmallRecordWriter : public test_model::BenchmarkSmallRecordWriterBase, public yardl::hdf5::Hdf5Writer {
   public:
@@ -124,6 +127,7 @@ class BenchmarkSmallRecordReader : public test_model::BenchmarkSmallRecordReader
   private:
   std::unique_ptr<yardl::hdf5::DatasetReader> smallRecord_dataset_state_;
 };
+
 // HDF5 writer for the BenchmarkSmallRecordWithOptionals protocol.
 class BenchmarkSmallRecordWithOptionalsWriter : public test_model::BenchmarkSmallRecordWithOptionalsWriterBase, public yardl::hdf5::Hdf5Writer {
   public:
@@ -152,13 +156,14 @@ class BenchmarkSmallRecordWithOptionalsReader : public test_model::BenchmarkSmal
   private:
   std::unique_ptr<yardl::hdf5::DatasetReader> smallRecord_dataset_state_;
 };
+
 // HDF5 writer for the BenchmarkSimpleMrd protocol.
 class BenchmarkSimpleMrdWriter : public test_model::BenchmarkSimpleMrdWriterBase, public yardl::hdf5::Hdf5Writer {
   public:
   BenchmarkSimpleMrdWriter(std::string path);
 
   protected:
-  void WriteDataImpl(std::variant<test_model::SimpleAcquisition, test_model::Image<float>> const& value) override;
+  void WriteDataImpl(std::variant<test_model::SimpleAcquisition, image::Image<float>> const& value) override;
 
   void EndDataImpl() override;
 
@@ -174,11 +179,12 @@ class BenchmarkSimpleMrdReader : public test_model::BenchmarkSimpleMrdReaderBase
   public:
   BenchmarkSimpleMrdReader(std::string path);
 
-  bool ReadDataImpl(std::variant<test_model::SimpleAcquisition, test_model::Image<float>>& value) override;
+  bool ReadDataImpl(std::variant<test_model::SimpleAcquisition, image::Image<float>>& value) override;
 
   private:
   std::unique_ptr<yardl::hdf5::UnionDatasetReader<2>> data_dataset_state_;
 };
+
 // HDF5 writer for the Scalars protocol.
 class ScalarsWriter : public test_model::ScalarsWriterBase, public yardl::hdf5::Hdf5Writer {
   public:
@@ -203,6 +209,7 @@ class ScalarsReader : public test_model::ScalarsReaderBase, public yardl::hdf5::
 
   private:
 };
+
 // HDF5 writer for the ScalarOptionals protocol.
 class ScalarOptionalsWriter : public test_model::ScalarOptionalsWriterBase, public yardl::hdf5::Hdf5Writer {
   public:
@@ -235,6 +242,7 @@ class ScalarOptionalsReader : public test_model::ScalarOptionalsReaderBase, publ
 
   private:
 };
+
 // HDF5 writer for the NestedRecords protocol.
 class NestedRecordsWriter : public test_model::NestedRecordsWriterBase, public yardl::hdf5::Hdf5Writer {
   public:
@@ -255,6 +263,7 @@ class NestedRecordsReader : public test_model::NestedRecordsReaderBase, public y
 
   private:
 };
+
 // HDF5 writer for the Vlens protocol.
 class VlensWriter : public test_model::VlensWriterBase, public yardl::hdf5::Hdf5Writer {
   public:
@@ -287,6 +296,7 @@ class VlensReader : public test_model::VlensReaderBase, public yardl::hdf5::Hdf5
 
   private:
 };
+
 // HDF5 writer for the Strings protocol.
 class StringsWriter : public test_model::StringsWriterBase, public yardl::hdf5::Hdf5Writer {
   public:
@@ -311,6 +321,7 @@ class StringsReader : public test_model::StringsReaderBase, public yardl::hdf5::
 
   private:
 };
+
 // HDF5 writer for the OptionalVectors protocol.
 class OptionalVectorsWriter : public test_model::OptionalVectorsWriterBase, public yardl::hdf5::Hdf5Writer {
   public:
@@ -331,6 +342,7 @@ class OptionalVectorsReader : public test_model::OptionalVectorsReaderBase, publ
 
   private:
 };
+
 // HDF5 writer for the FixedVectors protocol.
 class FixedVectorsWriter : public test_model::FixedVectorsWriterBase, public yardl::hdf5::Hdf5Writer {
   public:
@@ -363,6 +375,7 @@ class FixedVectorsReader : public test_model::FixedVectorsReaderBase, public yar
 
   private:
 };
+
 // HDF5 writer for the Streams protocol.
 class StreamsWriter : public test_model::StreamsWriterBase, public yardl::hdf5::Hdf5Writer {
   public:
@@ -427,6 +440,7 @@ class StreamsReader : public test_model::StreamsReaderBase, public yardl::hdf5::
   std::unique_ptr<yardl::hdf5::DatasetReader> recordWithOptionalVectorData_dataset_state_;
   std::unique_ptr<yardl::hdf5::DatasetReader> fixedVector_dataset_state_;
 };
+
 // HDF5 writer for the FixedArrays protocol.
 class FixedArraysWriter : public test_model::FixedArraysWriterBase, public yardl::hdf5::Hdf5Writer {
   public:
@@ -463,6 +477,7 @@ class FixedArraysReader : public test_model::FixedArraysReaderBase, public yardl
 
   private:
 };
+
 // HDF5 writer for the Subarrays protocol.
 class SubarraysWriter : public test_model::SubarraysWriterBase, public yardl::hdf5::Hdf5Writer {
   public:
@@ -515,6 +530,7 @@ class SubarraysReader : public test_model::SubarraysReaderBase, public yardl::hd
 
   private:
 };
+
 // HDF5 writer for the SubarraysInRecords protocol.
 class SubarraysInRecordsWriter : public test_model::SubarraysInRecordsWriterBase, public yardl::hdf5::Hdf5Writer {
   public:
@@ -539,6 +555,7 @@ class SubarraysInRecordsReader : public test_model::SubarraysInRecordsReaderBase
 
   private:
 };
+
 // HDF5 writer for the NDArrays protocol.
 class NDArraysWriter : public test_model::NDArraysWriterBase, public yardl::hdf5::Hdf5Writer {
   public:
@@ -575,6 +592,7 @@ class NDArraysReader : public test_model::NDArraysReaderBase, public yardl::hdf5
 
   private:
 };
+
 // HDF5 writer for the NDArraysSingleDimension protocol.
 class NDArraysSingleDimensionWriter : public test_model::NDArraysSingleDimensionWriterBase, public yardl::hdf5::Hdf5Writer {
   public:
@@ -607,6 +625,7 @@ class NDArraysSingleDimensionReader : public test_model::NDArraysSingleDimension
 
   private:
 };
+
 // HDF5 writer for the DynamicNDArrays protocol.
 class DynamicNDArraysWriter : public test_model::DynamicNDArraysWriterBase, public yardl::hdf5::Hdf5Writer {
   public:
@@ -639,6 +658,7 @@ class DynamicNDArraysReader : public test_model::DynamicNDArraysReaderBase, publ
 
   private:
 };
+
 // HDF5 writer for the Maps protocol.
 class MapsWriter : public test_model::MapsWriterBase, public yardl::hdf5::Hdf5Writer {
   public:
@@ -651,7 +671,7 @@ class MapsWriter : public test_model::MapsWriterBase, public yardl::hdf5::Hdf5Wr
 
   void WriteStringToUnionImpl(std::unordered_map<std::string, std::variant<std::string, int32_t>> const& value) override;
 
-  void WriteAliasedGenericImpl(test_model::AliasedMap<std::string, int32_t> const& value) override;
+  void WriteAliasedGenericImpl(basic_types::AliasedMap<std::string, int32_t> const& value) override;
 
   private:
 };
@@ -667,10 +687,11 @@ class MapsReader : public test_model::MapsReaderBase, public yardl::hdf5::Hdf5Re
 
   void ReadStringToUnionImpl(std::unordered_map<std::string, std::variant<std::string, int32_t>>& value) override;
 
-  void ReadAliasedGenericImpl(test_model::AliasedMap<std::string, int32_t>& value) override;
+  void ReadAliasedGenericImpl(basic_types::AliasedMap<std::string, int32_t>& value) override;
 
   private:
 };
+
 // HDF5 writer for the Unions protocol.
 class UnionsWriter : public test_model::UnionsWriterBase, public yardl::hdf5::Hdf5Writer {
   public:
@@ -683,7 +704,7 @@ class UnionsWriter : public test_model::UnionsWriterBase, public yardl::hdf5::Hd
 
   void WriteMonosotateOrIntOrSimpleRecordImpl(std::variant<std::monostate, int32_t, test_model::SimpleRecord> const& value) override;
 
-  void WriteRecordWithUnionsImpl(test_model::RecordWithUnions const& value) override;
+  void WriteRecordWithUnionsImpl(basic_types::RecordWithUnions const& value) override;
 
   private:
 };
@@ -699,10 +720,11 @@ class UnionsReader : public test_model::UnionsReaderBase, public yardl::hdf5::Hd
 
   void ReadMonosotateOrIntOrSimpleRecordImpl(std::variant<std::monostate, int32_t, test_model::SimpleRecord>& value) override;
 
-  void ReadRecordWithUnionsImpl(test_model::RecordWithUnions& value) override;
+  void ReadRecordWithUnionsImpl(basic_types::RecordWithUnions& value) override;
 
   private:
 };
+
 // HDF5 writer for the StreamsOfUnions protocol.
 class StreamsOfUnionsWriter : public test_model::StreamsOfUnionsWriterBase, public yardl::hdf5::Hdf5Writer {
   public:
@@ -738,6 +760,7 @@ class StreamsOfUnionsReader : public test_model::StreamsOfUnionsReaderBase, publ
   std::unique_ptr<yardl::hdf5::UnionDatasetReader<2>> intOrSimpleRecord_dataset_state_;
   std::unique_ptr<yardl::hdf5::UnionDatasetReader<2>> nullableIntOrSimpleRecord_dataset_state_;
 };
+
 // HDF5 writer for the Enums protocol.
 class EnumsWriter : public test_model::EnumsWriterBase, public yardl::hdf5::Hdf5Writer {
   public:
@@ -766,6 +789,7 @@ class EnumsReader : public test_model::EnumsReaderBase, public yardl::hdf5::Hdf5
 
   private:
 };
+
 // HDF5 writer for the Flags protocol.
 class FlagsWriter : public test_model::FlagsWriterBase, public yardl::hdf5::Hdf5Writer {
   public:
@@ -806,6 +830,7 @@ class FlagsReader : public test_model::FlagsReaderBase, public yardl::hdf5::Hdf5
   std::unique_ptr<yardl::hdf5::DatasetReader> days_dataset_state_;
   std::unique_ptr<yardl::hdf5::DatasetReader> formats_dataset_state_;
 };
+
 // HDF5 writer for the StateTest protocol.
 class StateTestWriter : public test_model::StateTestWriterBase, public yardl::hdf5::Hdf5Writer {
   public:
@@ -842,29 +867,30 @@ class StateTestReader : public test_model::StateTestReaderBase, public yardl::hd
   private:
   std::unique_ptr<yardl::hdf5::DatasetReader> aStream_dataset_state_;
 };
+
 // HDF5 writer for the SimpleGenerics protocol.
 class SimpleGenericsWriter : public test_model::SimpleGenericsWriterBase, public yardl::hdf5::Hdf5Writer {
   public:
   SimpleGenericsWriter(std::string path);
 
   protected:
-  void WriteFloatImageImpl(test_model::Image<float> const& value) override;
+  void WriteFloatImageImpl(image::FloatImage const& value) override;
 
-  void WriteIntImageImpl(test_model::Image<int32_t> const& value) override;
+  void WriteIntImageImpl(image::IntImage const& value) override;
 
   void WriteIntImageAlternateSyntaxImpl(test_model::Image<int32_t> const& value) override;
 
   void WriteStringImageImpl(test_model::Image<std::string> const& value) override;
 
-  void WriteIntFloatTupleImpl(test_model::MyTuple<int32_t, float> const& value) override;
+  void WriteIntFloatTupleImpl(tuples::Tuple<int32_t, float> const& value) override;
 
-  void WriteFloatFloatTupleImpl(test_model::MyTuple<float, float> const& value) override;
+  void WriteFloatFloatTupleImpl(tuples::Tuple<float, float> const& value) override;
 
-  void WriteIntFloatTupleAlternateSyntaxImpl(test_model::MyTuple<int32_t, float> const& value) override;
+  void WriteIntFloatTupleAlternateSyntaxImpl(tuples::Tuple<int32_t, float> const& value) override;
 
-  void WriteIntStringTupleImpl(test_model::MyTuple<int32_t, std::string> const& value) override;
+  void WriteIntStringTupleImpl(tuples::Tuple<int32_t, std::string> const& value) override;
 
-  void WriteStreamOfTypeVariantsImpl(std::variant<test_model::Image<float>, test_model::Image<double>> const& value) override;
+  void WriteStreamOfTypeVariantsImpl(std::variant<image::FloatImage, test_model::Image<double>> const& value) override;
 
   void EndStreamOfTypeVariantsImpl() override;
 
@@ -880,27 +906,28 @@ class SimpleGenericsReader : public test_model::SimpleGenericsReaderBase, public
   public:
   SimpleGenericsReader(std::string path);
 
-  void ReadFloatImageImpl(test_model::Image<float>& value) override;
+  void ReadFloatImageImpl(image::FloatImage& value) override;
 
-  void ReadIntImageImpl(test_model::Image<int32_t>& value) override;
+  void ReadIntImageImpl(image::IntImage& value) override;
 
   void ReadIntImageAlternateSyntaxImpl(test_model::Image<int32_t>& value) override;
 
   void ReadStringImageImpl(test_model::Image<std::string>& value) override;
 
-  void ReadIntFloatTupleImpl(test_model::MyTuple<int32_t, float>& value) override;
+  void ReadIntFloatTupleImpl(tuples::Tuple<int32_t, float>& value) override;
 
-  void ReadFloatFloatTupleImpl(test_model::MyTuple<float, float>& value) override;
+  void ReadFloatFloatTupleImpl(tuples::Tuple<float, float>& value) override;
 
-  void ReadIntFloatTupleAlternateSyntaxImpl(test_model::MyTuple<int32_t, float>& value) override;
+  void ReadIntFloatTupleAlternateSyntaxImpl(tuples::Tuple<int32_t, float>& value) override;
 
-  void ReadIntStringTupleImpl(test_model::MyTuple<int32_t, std::string>& value) override;
+  void ReadIntStringTupleImpl(tuples::Tuple<int32_t, std::string>& value) override;
 
-  bool ReadStreamOfTypeVariantsImpl(std::variant<test_model::Image<float>, test_model::Image<double>>& value) override;
+  bool ReadStreamOfTypeVariantsImpl(std::variant<image::FloatImage, test_model::Image<double>>& value) override;
 
   private:
   std::unique_ptr<yardl::hdf5::UnionDatasetReader<2>> streamOfTypeVariants_dataset_state_;
 };
+
 // HDF5 writer for the AdvancedGenerics protocol.
 class AdvancedGenericsWriter : public test_model::AdvancedGenericsWriterBase, public yardl::hdf5::Hdf5Writer {
   public:
@@ -937,6 +964,7 @@ class AdvancedGenericsReader : public test_model::AdvancedGenericsReaderBase, pu
 
   private:
 };
+
 // HDF5 writer for the Aliases protocol.
 class AliasesWriter : public test_model::AliasesWriterBase, public yardl::hdf5::Hdf5Writer {
   public:
@@ -1000,6 +1028,7 @@ class AliasesReader : public test_model::AliasesReaderBase, public yardl::hdf5::
   private:
   std::unique_ptr<yardl::hdf5::UnionDatasetReader<2>> streamOfAliasedGenericUnion2_dataset_state_;
 };
+
 // HDF5 writer for the StreamsOfAliasedUnions protocol.
 class StreamsOfAliasedUnionsWriter : public test_model::StreamsOfAliasedUnionsWriterBase, public yardl::hdf5::Hdf5Writer {
   public:
@@ -1035,6 +1064,7 @@ class StreamsOfAliasedUnionsReader : public test_model::StreamsOfAliasedUnionsRe
   std::unique_ptr<yardl::hdf5::UnionDatasetReader<2>> intOrSimpleRecord_dataset_state_;
   std::unique_ptr<yardl::hdf5::UnionDatasetReader<2>> nullableIntOrSimpleRecord_dataset_state_;
 };
+
 // HDF5 writer for the ProtocolWithComputedFields protocol.
 class ProtocolWithComputedFieldsWriter : public test_model::ProtocolWithComputedFieldsWriterBase, public yardl::hdf5::Hdf5Writer {
   public:
@@ -1055,6 +1085,7 @@ class ProtocolWithComputedFieldsReader : public test_model::ProtocolWithComputed
 
   private:
 };
+
 // HDF5 writer for the ProtocolWithKeywordSteps protocol.
 class ProtocolWithKeywordStepsWriter : public test_model::ProtocolWithKeywordStepsWriterBase, public yardl::hdf5::Hdf5Writer {
   public:
@@ -1087,4 +1118,6 @@ class ProtocolWithKeywordStepsReader : public test_model::ProtocolWithKeywordSte
   private:
   std::unique_ptr<yardl::hdf5::DatasetReader> int_dataset_state_;
 };
-}
+
+} // namespace test_model
+

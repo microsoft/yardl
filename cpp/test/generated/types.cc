@@ -2,7 +2,10 @@
 
 #include "types.h"
 #include "yardl/yardl.h"
-namespace test_model {
+namespace tuples {
+} // namespace tuples
+
+namespace basic_types {
 const DaysOfWeek DaysOfWeek::kMonday = DaysOfWeek(1);
 const DaysOfWeek DaysOfWeek::kTuesday = DaysOfWeek(2);
 const DaysOfWeek DaysOfWeek::kWednesday = DaysOfWeek(4);
@@ -15,4 +18,11 @@ const TextFormat TextFormat::kBold = TextFormat(1ULL);
 const TextFormat TextFormat::kItalic = TextFormat(2ULL);
 const TextFormat TextFormat::kUnderline = TextFormat(4ULL);
 const TextFormat TextFormat::kStrikethrough = TextFormat(8ULL);
+} // namespace basic_types
+
+namespace image {
+} // namespace image
+
+namespace test_model {
 } // namespace test_model
+

@@ -202,7 +202,7 @@ class BenchmarkSimpleMrdWriter : public test_model::BenchmarkSimpleMrdWriterBase
   void Flush() override;
 
   protected:
-  void WriteDataImpl(std::variant<test_model::SimpleAcquisition, test_model::Image<float>> const& value) override;
+  void WriteDataImpl(std::variant<test_model::SimpleAcquisition, image::Image<float>> const& value) override;
   void EndDataImpl() override {}
   void CloseImpl() override;
 };
@@ -219,7 +219,7 @@ class BenchmarkSimpleMrdReader : public test_model::BenchmarkSimpleMrdReaderBase
   }
 
   protected:
-  bool ReadDataImpl(std::variant<test_model::SimpleAcquisition, test_model::Image<float>>& value) override;
+  bool ReadDataImpl(std::variant<test_model::SimpleAcquisition, image::Image<float>>& value) override;
   void CloseImpl() override;
 };
 
@@ -794,7 +794,7 @@ class MapsWriter : public test_model::MapsWriterBase, yardl::ndjson::NDJsonWrite
   void WriteStringToIntImpl(std::unordered_map<std::string, int32_t> const& value) override;
   void WriteIntToStringImpl(std::unordered_map<int32_t, std::string> const& value) override;
   void WriteStringToUnionImpl(std::unordered_map<std::string, std::variant<std::string, int32_t>> const& value) override;
-  void WriteAliasedGenericImpl(test_model::AliasedMap<std::string, int32_t> const& value) override;
+  void WriteAliasedGenericImpl(basic_types::AliasedMap<std::string, int32_t> const& value) override;
   void CloseImpl() override;
 };
 
@@ -813,7 +813,7 @@ class MapsReader : public test_model::MapsReaderBase, yardl::ndjson::NDJsonReade
   void ReadStringToIntImpl(std::unordered_map<std::string, int32_t>& value) override;
   void ReadIntToStringImpl(std::unordered_map<int32_t, std::string>& value) override;
   void ReadStringToUnionImpl(std::unordered_map<std::string, std::variant<std::string, int32_t>>& value) override;
-  void ReadAliasedGenericImpl(test_model::AliasedMap<std::string, int32_t>& value) override;
+  void ReadAliasedGenericImpl(basic_types::AliasedMap<std::string, int32_t>& value) override;
   void CloseImpl() override;
 };
 
@@ -834,7 +834,7 @@ class UnionsWriter : public test_model::UnionsWriterBase, yardl::ndjson::NDJsonW
   void WriteIntOrSimpleRecordImpl(std::variant<int32_t, test_model::SimpleRecord> const& value) override;
   void WriteIntOrRecordWithVlensImpl(std::variant<int32_t, test_model::RecordWithVlens> const& value) override;
   void WriteMonosotateOrIntOrSimpleRecordImpl(std::variant<std::monostate, int32_t, test_model::SimpleRecord> const& value) override;
-  void WriteRecordWithUnionsImpl(test_model::RecordWithUnions const& value) override;
+  void WriteRecordWithUnionsImpl(basic_types::RecordWithUnions const& value) override;
   void CloseImpl() override;
 };
 
@@ -853,7 +853,7 @@ class UnionsReader : public test_model::UnionsReaderBase, yardl::ndjson::NDJsonR
   void ReadIntOrSimpleRecordImpl(std::variant<int32_t, test_model::SimpleRecord>& value) override;
   void ReadIntOrRecordWithVlensImpl(std::variant<int32_t, test_model::RecordWithVlens>& value) override;
   void ReadMonosotateOrIntOrSimpleRecordImpl(std::variant<std::monostate, int32_t, test_model::SimpleRecord>& value) override;
-  void ReadRecordWithUnionsImpl(test_model::RecordWithUnions& value) override;
+  void ReadRecordWithUnionsImpl(basic_types::RecordWithUnions& value) override;
   void CloseImpl() override;
 };
 
@@ -1024,15 +1024,15 @@ class SimpleGenericsWriter : public test_model::SimpleGenericsWriterBase, yardl:
   void Flush() override;
 
   protected:
-  void WriteFloatImageImpl(test_model::Image<float> const& value) override;
-  void WriteIntImageImpl(test_model::Image<int32_t> const& value) override;
+  void WriteFloatImageImpl(image::FloatImage const& value) override;
+  void WriteIntImageImpl(image::IntImage const& value) override;
   void WriteIntImageAlternateSyntaxImpl(test_model::Image<int32_t> const& value) override;
   void WriteStringImageImpl(test_model::Image<std::string> const& value) override;
-  void WriteIntFloatTupleImpl(test_model::MyTuple<int32_t, float> const& value) override;
-  void WriteFloatFloatTupleImpl(test_model::MyTuple<float, float> const& value) override;
-  void WriteIntFloatTupleAlternateSyntaxImpl(test_model::MyTuple<int32_t, float> const& value) override;
-  void WriteIntStringTupleImpl(test_model::MyTuple<int32_t, std::string> const& value) override;
-  void WriteStreamOfTypeVariantsImpl(std::variant<test_model::Image<float>, test_model::Image<double>> const& value) override;
+  void WriteIntFloatTupleImpl(tuples::Tuple<int32_t, float> const& value) override;
+  void WriteFloatFloatTupleImpl(tuples::Tuple<float, float> const& value) override;
+  void WriteIntFloatTupleAlternateSyntaxImpl(tuples::Tuple<int32_t, float> const& value) override;
+  void WriteIntStringTupleImpl(tuples::Tuple<int32_t, std::string> const& value) override;
+  void WriteStreamOfTypeVariantsImpl(std::variant<image::FloatImage, test_model::Image<double>> const& value) override;
   void EndStreamOfTypeVariantsImpl() override {}
   void CloseImpl() override;
 };
@@ -1049,15 +1049,15 @@ class SimpleGenericsReader : public test_model::SimpleGenericsReaderBase, yardl:
   }
 
   protected:
-  void ReadFloatImageImpl(test_model::Image<float>& value) override;
-  void ReadIntImageImpl(test_model::Image<int32_t>& value) override;
+  void ReadFloatImageImpl(image::FloatImage& value) override;
+  void ReadIntImageImpl(image::IntImage& value) override;
   void ReadIntImageAlternateSyntaxImpl(test_model::Image<int32_t>& value) override;
   void ReadStringImageImpl(test_model::Image<std::string>& value) override;
-  void ReadIntFloatTupleImpl(test_model::MyTuple<int32_t, float>& value) override;
-  void ReadFloatFloatTupleImpl(test_model::MyTuple<float, float>& value) override;
-  void ReadIntFloatTupleAlternateSyntaxImpl(test_model::MyTuple<int32_t, float>& value) override;
-  void ReadIntStringTupleImpl(test_model::MyTuple<int32_t, std::string>& value) override;
-  bool ReadStreamOfTypeVariantsImpl(std::variant<test_model::Image<float>, test_model::Image<double>>& value) override;
+  void ReadIntFloatTupleImpl(tuples::Tuple<int32_t, float>& value) override;
+  void ReadFloatFloatTupleImpl(tuples::Tuple<float, float>& value) override;
+  void ReadIntFloatTupleAlternateSyntaxImpl(tuples::Tuple<int32_t, float>& value) override;
+  void ReadIntStringTupleImpl(tuples::Tuple<int32_t, std::string>& value) override;
+  bool ReadStreamOfTypeVariantsImpl(std::variant<image::FloatImage, test_model::Image<double>>& value) override;
   void CloseImpl() override;
 };
 
@@ -1265,4 +1265,4 @@ class ProtocolWithKeywordStepsReader : public test_model::ProtocolWithKeywordSte
   void CloseImpl() override;
 };
 
-}
+} // namespace test_model::ndjson

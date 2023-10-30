@@ -1,6 +1,340 @@
 {
   "namespaces": [
     {
+      "name": "Tuples",
+      "types": [
+        {
+          "record": {
+            "name": "Tuple",
+            "typeParameters": [
+              "T1",
+              "T2"
+            ],
+            "fields": [
+              {
+                "name": "v1",
+                "type": "T1"
+              },
+              {
+                "name": "v2",
+                "type": "T2"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "BasicTypes",
+      "types": [
+        {
+          "enum": {
+            "name": "Fruits",
+            "values": [
+              {
+                "symbol": "apple",
+                "value": 0
+              },
+              {
+                "symbol": "banana",
+                "value": 1
+              },
+              {
+                "symbol": "pear",
+                "value": 2
+              }
+            ]
+          }
+        },
+        {
+          "flags": {
+            "name": "DaysOfWeek",
+            "values": [
+              {
+                "symbol": "monday",
+                "value": 1
+              },
+              {
+                "symbol": "tuesday",
+                "value": 2
+              },
+              {
+                "symbol": "wednesday",
+                "value": 4
+              },
+              {
+                "symbol": "thursday",
+                "value": 8
+              },
+              {
+                "symbol": "friday",
+                "value": 16
+              },
+              {
+                "symbol": "saturday",
+                "value": 32
+              },
+              {
+                "symbol": "sunday",
+                "value": 64
+              }
+            ]
+          }
+        },
+        {
+          "flags": {
+            "name": "TextFormat",
+            "base": "uint64",
+            "values": [
+              {
+                "symbol": "regular",
+                "value": 0
+              },
+              {
+                "symbol": "bold",
+                "value": 1
+              },
+              {
+                "symbol": "italic",
+                "value": 2
+              },
+              {
+                "symbol": "underline",
+                "value": 4
+              },
+              {
+                "symbol": "strikethrough",
+                "value": 8
+              }
+            ]
+          }
+        },
+        {
+          "alias": {
+            "name": "AliasedMap",
+            "typeParameters": [
+              "K",
+              "V"
+            ],
+            "type": {
+              "map": {
+                "keys": "K",
+                "values": "V"
+              }
+            }
+          }
+        },
+        {
+          "alias": {
+            "name": "MyTuple",
+            "typeParameters": [
+              "T1",
+              "T2"
+            ],
+            "type": {
+              "name": "Tuples.Tuple",
+              "typeArguments": [
+                "T1",
+                "T2"
+              ]
+            }
+          }
+        },
+        {
+          "alias": {
+            "name": "GenericUnion2",
+            "typeParameters": [
+              "T1",
+              "T2"
+            ],
+            "type": [
+              {
+                "tag": "T1",
+                "type": "T1"
+              },
+              {
+                "tag": "T2",
+                "type": "T2"
+              }
+            ]
+          }
+        },
+        {
+          "alias": {
+            "name": "GenericVector",
+            "typeParameters": [
+              "T"
+            ],
+            "type": {
+              "vector": {
+                "items": "T"
+              }
+            }
+          }
+        },
+        {
+          "record": {
+            "name": "RecordWithUnions",
+            "fields": [
+              {
+                "name": "nullOrIntOrString",
+                "type": [
+                  null,
+                  {
+                    "tag": "int32",
+                    "type": "int32"
+                  },
+                  {
+                    "tag": "string",
+                    "type": "string"
+                  }
+                ]
+              },
+              {
+                "name": "dateOrDatetime",
+                "type": [
+                  {
+                    "tag": "time",
+                    "type": "time"
+                  },
+                  {
+                    "tag": "datetime",
+                    "type": "datetime"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "record": {
+            "name": "GenericRecordWithComputedFields",
+            "typeParameters": [
+              "T0",
+              "T1"
+            ],
+            "fields": [
+              {
+                "name": "f1",
+                "type": [
+                  {
+                    "tag": "T0",
+                    "type": "T0"
+                  },
+                  {
+                    "tag": "T1",
+                    "type": "T1"
+                  }
+                ]
+              }
+            ],
+            "computedFields": [
+              {
+                "name": "typeIndex",
+                "expression": {
+                  "switch": {
+                    "target": {
+                      "memberAccess": {
+                        "member": "f1",
+                        "kind": "field"
+                      }
+                    },
+                    "cases": [
+                      {
+                        "pattern": {
+                          "type": "T0"
+                        },
+                        "expression": {
+                          "integer": 0
+                        }
+                      },
+                      {
+                        "pattern": {
+                          "type": "T1"
+                        },
+                        "expression": {
+                          "integer": 1
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "protocols": [
+        {
+          "name": "UnusedProtocol",
+          "sequence": [
+            {
+              "name": "enum",
+              "type": "BasicTypes.Fruits"
+            },
+            {
+              "name": "tuple",
+              "type": {
+                "name": "BasicTypes.MyTuple",
+                "typeArguments": [
+                  "int32",
+                  "string"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Image",
+      "types": [
+        {
+          "alias": {
+            "name": "Image",
+            "typeParameters": [
+              "T"
+            ],
+            "type": {
+              "array": {
+                "items": "T",
+                "dimensions": [
+                  {
+                    "name": "x"
+                  },
+                  {
+                    "name": "y"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "alias": {
+            "name": "FloatImage",
+            "type": {
+              "name": "Image.Image",
+              "typeArguments": [
+                "float32"
+              ]
+            }
+          }
+        },
+        {
+          "alias": {
+            "name": "IntImage",
+            "type": {
+              "name": "Image.Image",
+              "typeArguments": [
+                "int32"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
       "name": "TestModel",
       "types": [
         {
@@ -896,70 +1230,8 @@
         },
         {
           "alias": {
-            "name": "AliasedMap",
-            "typeParameters": [
-              "K",
-              "V"
-            ],
-            "type": {
-              "map": {
-                "keys": "K",
-                "values": "V"
-              }
-            }
-          }
-        },
-        {
-          "record": {
-            "name": "RecordWithUnions",
-            "fields": [
-              {
-                "name": "nullOrIntOrString",
-                "type": [
-                  null,
-                  {
-                    "tag": "int32",
-                    "type": "int32"
-                  },
-                  {
-                    "tag": "string",
-                    "type": "string"
-                  }
-                ]
-              },
-              {
-                "name": "dateOrDatetime",
-                "type": [
-                  {
-                    "tag": "time",
-                    "type": "time"
-                  },
-                  {
-                    "tag": "datetime",
-                    "type": "datetime"
-                  }
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "enum": {
             "name": "Fruits",
-            "values": [
-              {
-                "symbol": "apple",
-                "value": 0
-              },
-              {
-                "symbol": "banana",
-                "value": 1
-              },
-              {
-                "symbol": "pear",
-                "value": 2
-              }
-            ]
+            "type": "BasicTypes.Fruits"
           }
         },
         {
@@ -1007,66 +1279,15 @@
           }
         },
         {
-          "flags": {
+          "alias": {
             "name": "DaysOfWeek",
-            "values": [
-              {
-                "symbol": "monday",
-                "value": 1
-              },
-              {
-                "symbol": "tuesday",
-                "value": 2
-              },
-              {
-                "symbol": "wednesday",
-                "value": 4
-              },
-              {
-                "symbol": "thursday",
-                "value": 8
-              },
-              {
-                "symbol": "friday",
-                "value": 16
-              },
-              {
-                "symbol": "saturday",
-                "value": 32
-              },
-              {
-                "symbol": "sunday",
-                "value": 64
-              }
-            ]
+            "type": "BasicTypes.DaysOfWeek"
           }
         },
         {
-          "flags": {
+          "alias": {
             "name": "TextFormat",
-            "base": "uint64",
-            "values": [
-              {
-                "symbol": "regular",
-                "value": 0
-              },
-              {
-                "symbol": "bold",
-                "value": 1
-              },
-              {
-                "symbol": "italic",
-                "value": 2
-              },
-              {
-                "symbol": "underline",
-                "value": 4
-              },
-              {
-                "symbol": "strikethrough",
-                "value": 8
-              }
-            ]
+            "type": "BasicTypes.TextFormat"
           }
         },
         {
@@ -1095,17 +1316,10 @@
               "T"
             ],
             "type": {
-              "array": {
-                "items": "T",
-                "dimensions": [
-                  {
-                    "name": "x"
-                  },
-                  {
-                    "name": "y"
-                  }
-                ]
-              }
+              "name": "Image.Image",
+              "typeArguments": [
+                "T"
+              ]
             }
           }
         },
@@ -1146,22 +1360,19 @@
           }
         },
         {
-          "record": {
+          "alias": {
             "name": "MyTuple",
             "typeParameters": [
               "T1",
               "T2"
             ],
-            "fields": [
-              {
-                "name": "v1",
-                "type": "T1"
-              },
-              {
-                "name": "v2",
-                "type": "T2"
-              }
-            ]
+            "type": {
+              "name": "BasicTypes.MyTuple",
+              "typeArguments": [
+                "T1",
+                "T2"
+              ]
+            }
           }
         },
         {
@@ -1203,25 +1414,6 @@
                     "string"
                   ]
                 }
-              }
-            ]
-          }
-        },
-        {
-          "alias": {
-            "name": "GenericUnion2",
-            "typeParameters": [
-              "T1",
-              "T2"
-            ],
-            "type": [
-              {
-                "tag": "T1",
-                "type": "T1"
-              },
-              {
-                "tag": "T2",
-                "type": "T2"
               }
             ]
           }
@@ -1295,7 +1487,7 @@
               "T2"
             ],
             "type": {
-              "name": "TestModel.GenericUnion2",
+              "name": "BasicTypes.GenericUnion2",
               "typeArguments": [
                 "T1",
                 "T2"
@@ -1310,9 +1502,10 @@
               "T"
             ],
             "type": {
-              "vector": {
-                "items": "T"
-              }
+              "name": "BasicTypes.GenericVector",
+              "typeArguments": [
+                "T"
+              ]
             }
           }
         },
@@ -1357,63 +1550,6 @@
               {
                 "tag": "SimpleRecord",
                 "type": "TestModel.SimpleRecord"
-              }
-            ]
-          }
-        },
-        {
-          "record": {
-            "name": "GenericRecordWithComputedFields",
-            "typeParameters": [
-              "T0",
-              "T1"
-            ],
-            "fields": [
-              {
-                "name": "f1",
-                "type": [
-                  {
-                    "tag": "T0",
-                    "type": "T0"
-                  },
-                  {
-                    "tag": "T1",
-                    "type": "T1"
-                  }
-                ]
-              }
-            ],
-            "computedFields": [
-              {
-                "name": "typeIndex",
-                "expression": {
-                  "switch": {
-                    "target": {
-                      "memberAccess": {
-                        "member": "f1",
-                        "kind": "field"
-                      }
-                    },
-                    "cases": [
-                      {
-                        "pattern": {
-                          "type": "T0"
-                        },
-                        "expression": {
-                          "integer": 0
-                        }
-                      },
-                      {
-                        "pattern": {
-                          "type": "T1"
-                        },
-                        "expression": {
-                          "integer": 1
-                        }
-                      }
-                    ]
-                  }
-                }
               }
             ]
           }
@@ -1621,7 +1757,7 @@
                     "tag": "genericRecordWithComputedFields",
                     "explicitTag": true,
                     "type": {
-                      "name": "TestModel.GenericRecordWithComputedFields",
+                      "name": "BasicTypes.GenericRecordWithComputedFields",
                       "typeArguments": [
                         "string",
                         "float32"
@@ -2443,7 +2579,7 @@
                       {
                         "pattern": {
                           "type": {
-                            "name": "TestModel.GenericRecordWithComputedFields",
+                            "name": "BasicTypes.GenericRecordWithComputedFields",
                             "typeArguments": [
                               "string",
                               "float32"
@@ -2517,7 +2653,7 @@
                       {
                         "pattern": {
                           "type": {
-                            "name": "TestModel.GenericRecordWithComputedFields",
+                            "name": "BasicTypes.GenericRecordWithComputedFields",
                             "typeArguments": [
                               "string",
                               "float32"
@@ -3199,7 +3335,7 @@
                       "tag": "image",
                       "explicitTag": true,
                       "type": {
-                        "name": "TestModel.Image",
+                        "name": "Image.Image",
                         "typeArguments": [
                           "float32"
                         ]
@@ -3808,7 +3944,7 @@
             {
               "name": "aliasedGeneric",
               "type": {
-                "name": "TestModel.AliasedMap",
+                "name": "BasicTypes.AliasedMap",
                 "typeArguments": [
                   "string",
                   "int32"
@@ -3862,7 +3998,7 @@
             },
             {
               "name": "recordWithUnions",
-              "type": "TestModel.RecordWithUnions"
+              "type": "BasicTypes.RecordWithUnions"
             }
           ]
         },
@@ -3974,21 +4110,11 @@
           "sequence": [
             {
               "name": "floatImage",
-              "type": {
-                "name": "TestModel.Image",
-                "typeArguments": [
-                  "float32"
-                ]
-              }
+              "type": "Image.FloatImage"
             },
             {
               "name": "intImage",
-              "type": {
-                "name": "TestModel.Image",
-                "typeArguments": [
-                  "int32"
-                ]
-              }
+              "type": "Image.IntImage"
             },
             {
               "name": "intImageAlternateSyntax",
@@ -4011,7 +4137,7 @@
             {
               "name": "intFloatTuple",
               "type": {
-                "name": "TestModel.MyTuple",
+                "name": "Tuples.Tuple",
                 "typeArguments": [
                   "int32",
                   "float32"
@@ -4021,7 +4147,7 @@
             {
               "name": "floatFloatTuple",
               "type": {
-                "name": "TestModel.MyTuple",
+                "name": "Tuples.Tuple",
                 "typeArguments": [
                   "float32",
                   "float32"
@@ -4031,7 +4157,7 @@
             {
               "name": "intFloatTupleAlternateSyntax",
               "type": {
-                "name": "TestModel.MyTuple",
+                "name": "Tuples.Tuple",
                 "typeArguments": [
                   "int32",
                   "float32"
@@ -4041,7 +4167,7 @@
             {
               "name": "intStringTuple",
               "type": {
-                "name": "TestModel.MyTuple",
+                "name": "Tuples.Tuple",
                 "typeArguments": [
                   "int32",
                   "string"
@@ -4056,12 +4182,7 @@
                     {
                       "tag": "imageFloat",
                       "explicitTag": true,
-                      "type": {
-                        "name": "TestModel.Image",
-                        "typeArguments": [
-                          "float32"
-                        ]
-                      }
+                      "type": "Image.FloatImage"
                     },
                     {
                       "tag": "imageDouble",

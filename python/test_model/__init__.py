@@ -18,6 +18,12 @@ if _parse_version(_np.__version__) < _MIN_NUMPY_VERSION:
     raise ImportError(f"Your installed numpy version is {_np.__version__}, but version >= {'.'.join(str(i) for i in _MIN_NUMPY_VERSION)} is required.")
 
 from .yardl_types import *
+from . import tuples
+from .tuples.types import *
+from . import basic_types
+from .basic_types.types import *
+from . import image
+from .image.types import *
 from .types import (
     AcquisitionOrImage,
     AliasedClosedGeneric,
@@ -27,7 +33,6 @@ from .types import (
     AliasedGenericUnion2,
     AliasedGenericVector,
     AliasedIntOrSimpleRecord,
-    AliasedMap,
     AliasedNullableIntSimpleRecord,
     AliasedOpenGeneric,
     AliasedOptional,
@@ -38,8 +43,6 @@ from .types import (
     EnumWithKeywordSymbols,
     Fruits,
     GenericRecord,
-    GenericRecordWithComputedFields,
-    GenericUnion2,
     GenericUnion3,
     GenericUnion3Alternate,
     Image,
@@ -47,7 +50,6 @@ from .types import (
     Int32OrFloat32,
     Int32OrRecordWithVlens,
     Int32OrSimpleRecord,
-    Int32OrString,
     Int64Enum,
     IntOrGenericRecordWithComputedFields,
     MyTuple,
@@ -71,7 +73,6 @@ from .types import (
     RecordWithPrimitiveAliases,
     RecordWithPrimitives,
     RecordWithStrings,
-    RecordWithUnions,
     RecordWithVectorOfTimes,
     RecordWithVectors,
     RecordWithVlenCollections,
@@ -82,9 +83,7 @@ from .types import (
     SizeBasedEnum,
     SmallBenchmarkRecord,
     StringOrInt32,
-    T0OrT1,
     TextFormat,
-    TimeOrDatetime,
     TupleWithRecords,
     UInt64Enum,
     get_dtype,

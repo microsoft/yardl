@@ -3,6 +3,43 @@
 #include "../yardl/detail/ndjson/serializers.h"
 #include "protocols.h"
 
+namespace tuples {
+using ordered_json = nlohmann::ordered_json;
+
+template <typename T1, typename T2>
+void to_json(ordered_json& j, tuples::Tuple<T1, T2> const& value);
+template <typename T1, typename T2>
+void from_json(ordered_json const& j, tuples::Tuple<T1, T2>& value);
+
+} // namespace tuples
+
+namespace basic_types {
+using ordered_json = nlohmann::ordered_json;
+
+void to_json(ordered_json& j, basic_types::Fruits const& value);
+void from_json(ordered_json const& j, basic_types::Fruits& value);
+
+void to_json(ordered_json& j, basic_types::DaysOfWeek const& value);
+void from_json(ordered_json const& j, basic_types::DaysOfWeek& value);
+
+void to_json(ordered_json& j, basic_types::TextFormat const& value);
+void from_json(ordered_json const& j, basic_types::TextFormat& value);
+
+void to_json(ordered_json& j, basic_types::RecordWithUnions const& value);
+void from_json(ordered_json const& j, basic_types::RecordWithUnions& value);
+
+template <typename T0, typename T1>
+void to_json(ordered_json& j, basic_types::GenericRecordWithComputedFields<T0, T1> const& value);
+template <typename T0, typename T1>
+void from_json(ordered_json const& j, basic_types::GenericRecordWithComputedFields<T0, T1>& value);
+
+} // namespace basic_types
+
+namespace image {
+using ordered_json = nlohmann::ordered_json;
+
+} // namespace image
+
 namespace test_model {
 using ordered_json = nlohmann::ordered_json;
 
@@ -72,12 +109,6 @@ void from_json(ordered_json const& j, test_model::RecordWithFixedCollections& va
 void to_json(ordered_json& j, test_model::RecordWithVlenCollections const& value);
 void from_json(ordered_json const& j, test_model::RecordWithVlenCollections& value);
 
-void to_json(ordered_json& j, test_model::RecordWithUnions const& value);
-void from_json(ordered_json const& j, test_model::RecordWithUnions& value);
-
-void to_json(ordered_json& j, test_model::Fruits const& value);
-void from_json(ordered_json const& j, test_model::Fruits& value);
-
 void to_json(ordered_json& j, test_model::UInt64Enum const& value);
 void from_json(ordered_json const& j, test_model::UInt64Enum& value);
 
@@ -87,12 +118,6 @@ void from_json(ordered_json const& j, test_model::Int64Enum& value);
 void to_json(ordered_json& j, test_model::SizeBasedEnum const& value);
 void from_json(ordered_json const& j, test_model::SizeBasedEnum& value);
 
-void to_json(ordered_json& j, test_model::DaysOfWeek const& value);
-void from_json(ordered_json const& j, test_model::DaysOfWeek& value);
-
-void to_json(ordered_json& j, test_model::TextFormat const& value);
-void from_json(ordered_json const& j, test_model::TextFormat& value);
-
 void to_json(ordered_json& j, test_model::RecordWithEnums const& value);
 void from_json(ordered_json const& j, test_model::RecordWithEnums& value);
 
@@ -101,18 +126,8 @@ void to_json(ordered_json& j, test_model::GenericRecord<T1, T2> const& value);
 template <typename T1, typename T2>
 void from_json(ordered_json const& j, test_model::GenericRecord<T1, T2>& value);
 
-template <typename T1, typename T2>
-void to_json(ordered_json& j, test_model::MyTuple<T1, T2> const& value);
-template <typename T1, typename T2>
-void from_json(ordered_json const& j, test_model::MyTuple<T1, T2>& value);
-
 void to_json(ordered_json& j, test_model::RecordWithAliasedGenerics const& value);
 void from_json(ordered_json const& j, test_model::RecordWithAliasedGenerics& value);
-
-template <typename T0, typename T1>
-void to_json(ordered_json& j, test_model::GenericRecordWithComputedFields<T0, T1> const& value);
-template <typename T0, typename T1>
-void from_json(ordered_json const& j, test_model::GenericRecordWithComputedFields<T0, T1>& value);
 
 void to_json(ordered_json& j, test_model::RecordWithComputedFields const& value);
 void from_json(ordered_json const& j, test_model::RecordWithComputedFields& value);
@@ -129,6 +144,35 @@ void from_json(ordered_json const& j, test_model::RecordWithKeywordFields& value
 } // namespace test_model
 
 NLOHMANN_JSON_NAMESPACE_BEGIN
+
+template <typename T1, typename T2>
+struct adl_serializer<std::variant<T1, T2>> {
+  static void to_json(ordered_json& j, std::variant<T1, T2> const& value) {
+    switch (value.index()) {
+      case 0:
+        j = ordered_json{ {"T1", std::get<T1>(value)} };
+        break;
+      case 1:
+        j = ordered_json{ {"T2", std::get<T2>(value)} };
+        break;
+      default:
+        throw std::runtime_error("Invalid union value");
+    }
+  }
+
+  static void from_json(ordered_json const& j, std::variant<T1, T2>& value) {
+    auto it = j.begin();
+    std::string tag = it.key();
+    if (tag == "T1") {
+      value = it.value().get<T1>();
+      return;
+    }
+    if (tag == "T2") {
+      value = it.value().get<T2>();
+      return;
+    }
+  }
+};
 
 template <>
 struct adl_serializer<std::variant<std::monostate, int32_t, std::string>> {
@@ -177,35 +221,6 @@ struct adl_serializer<std::variant<yardl::Time, yardl::DateTime>> {
     }
     if (tag == "datetime") {
       value = it.value().get<yardl::DateTime>();
-      return;
-    }
-  }
-};
-
-template <typename T1, typename T2>
-struct adl_serializer<std::variant<T1, T2>> {
-  static void to_json(ordered_json& j, std::variant<T1, T2> const& value) {
-    switch (value.index()) {
-      case 0:
-        j = ordered_json{ {"T1", std::get<T1>(value)} };
-        break;
-      case 1:
-        j = ordered_json{ {"T2", std::get<T2>(value)} };
-        break;
-      default:
-        throw std::runtime_error("Invalid union value");
-    }
-  }
-
-  static void from_json(ordered_json const& j, std::variant<T1, T2>& value) {
-    auto it = j.begin();
-    std::string tag = it.key();
-    if (tag == "T1") {
-      value = it.value().get<T1>();
-      return;
-    }
-    if (tag == "T2") {
-      value = it.value().get<T2>();
       return;
     }
   }
@@ -319,18 +334,18 @@ struct adl_serializer<std::variant<std::monostate, int32_t, float>> {
 };
 
 template <>
-struct adl_serializer<std::variant<int32_t, test_model::GenericRecordWithComputedFields<std::string, float>>> {
-  static void to_json(ordered_json& j, std::variant<int32_t, test_model::GenericRecordWithComputedFields<std::string, float>> const& value) {
+struct adl_serializer<std::variant<int32_t, basic_types::GenericRecordWithComputedFields<std::string, float>>> {
+  static void to_json(ordered_json& j, std::variant<int32_t, basic_types::GenericRecordWithComputedFields<std::string, float>> const& value) {
     std::visit([&j](auto const& v) {j = v;}, value);
   }
 
-  static void from_json(ordered_json const& j, std::variant<int32_t, test_model::GenericRecordWithComputedFields<std::string, float>>& value) {
+  static void from_json(ordered_json const& j, std::variant<int32_t, basic_types::GenericRecordWithComputedFields<std::string, float>>& value) {
     if ((j.is_number())) {
       value = j.get<int32_t>();
       return;
     }
     if ((j.is_object())) {
-      value = j.get<test_model::GenericRecordWithComputedFields<std::string, float>>();
+      value = j.get<basic_types::GenericRecordWithComputedFields<std::string, float>>();
       return;
     }
     throw std::runtime_error("Invalid union value");
@@ -429,21 +444,21 @@ struct adl_serializer<std::variant<int32_t, float, std::string>> {
 };
 
 template <>
-struct adl_serializer<std::variant<test_model::SimpleAcquisition, test_model::Image<float>>> {
-  static void to_json(ordered_json& j, std::variant<test_model::SimpleAcquisition, test_model::Image<float>> const& value) {
+struct adl_serializer<std::variant<test_model::SimpleAcquisition, image::Image<float>>> {
+  static void to_json(ordered_json& j, std::variant<test_model::SimpleAcquisition, image::Image<float>> const& value) {
     switch (value.index()) {
       case 0:
         j = ordered_json{ {"acquisition", std::get<test_model::SimpleAcquisition>(value)} };
         break;
       case 1:
-        j = ordered_json{ {"image", std::get<test_model::Image<float>>(value)} };
+        j = ordered_json{ {"image", std::get<image::Image<float>>(value)} };
         break;
       default:
         throw std::runtime_error("Invalid union value");
     }
   }
 
-  static void from_json(ordered_json const& j, std::variant<test_model::SimpleAcquisition, test_model::Image<float>>& value) {
+  static void from_json(ordered_json const& j, std::variant<test_model::SimpleAcquisition, image::Image<float>>& value) {
     auto it = j.begin();
     std::string tag = it.key();
     if (tag == "acquisition") {
@@ -451,7 +466,7 @@ struct adl_serializer<std::variant<test_model::SimpleAcquisition, test_model::Im
       return;
     }
     if (tag == "image") {
-      value = it.value().get<test_model::Image<float>>();
+      value = it.value().get<image::Image<float>>();
       return;
     }
   }
@@ -496,11 +511,11 @@ struct adl_serializer<std::variant<int32_t, test_model::RecordWithVlens>> {
 };
 
 template <>
-struct adl_serializer<std::variant<test_model::Image<float>, test_model::Image<double>>> {
-  static void to_json(ordered_json& j, std::variant<test_model::Image<float>, test_model::Image<double>> const& value) {
+struct adl_serializer<std::variant<image::FloatImage, test_model::Image<double>>> {
+  static void to_json(ordered_json& j, std::variant<image::FloatImage, test_model::Image<double>> const& value) {
     switch (value.index()) {
       case 0:
-        j = ordered_json{ {"imageFloat", std::get<test_model::Image<float>>(value)} };
+        j = ordered_json{ {"imageFloat", std::get<image::FloatImage>(value)} };
         break;
       case 1:
         j = ordered_json{ {"imageDouble", std::get<test_model::Image<double>>(value)} };
@@ -510,11 +525,11 @@ struct adl_serializer<std::variant<test_model::Image<float>, test_model::Image<d
     }
   }
 
-  static void from_json(ordered_json const& j, std::variant<test_model::Image<float>, test_model::Image<double>>& value) {
+  static void from_json(ordered_json const& j, std::variant<image::FloatImage, test_model::Image<double>>& value) {
     auto it = j.begin();
     std::string tag = it.key();
     if (tag == "imageFloat") {
-      value = it.value().get<test_model::Image<float>>();
+      value = it.value().get<image::FloatImage>();
       return;
     }
     if (tag == "imageDouble") {
@@ -554,6 +569,280 @@ struct adl_serializer<std::variant<test_model::AliasedString, test_model::Aliase
 };
 
 NLOHMANN_JSON_NAMESPACE_END
+
+namespace tuples {
+using ordered_json = nlohmann::ordered_json;
+
+template <typename T1, typename T2>
+void to_json(ordered_json& j, tuples::Tuple<T1, T2> const& value) {
+  j = ordered_json::object();
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.v1)) {
+    j.push_back({"v1", value.v1});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.v2)) {
+    j.push_back({"v2", value.v2});
+  }
+}
+
+template <typename T1, typename T2>
+void from_json(ordered_json const& j, tuples::Tuple<T1, T2>& value) {
+  if (auto it = j.find("v1"); it != j.end()) {
+    it->get_to(value.v1);
+  }
+  if (auto it = j.find("v2"); it != j.end()) {
+    it->get_to(value.v2);
+  }
+}
+
+} // namespace tuples
+
+namespace basic_types {
+using ordered_json = nlohmann::ordered_json;
+
+namespace {
+std::unordered_map<std::string, basic_types::Fruits> const __Fruits_values = {
+  {"apple", basic_types::Fruits::kApple},
+  {"banana", basic_types::Fruits::kBanana},
+  {"pear", basic_types::Fruits::kPear},
+};
+} //namespace
+
+void to_json(ordered_json& j, basic_types::Fruits const& value) {
+  switch (value) {
+    case basic_types::Fruits::kApple:
+      j = "apple";
+      break;
+    case basic_types::Fruits::kBanana:
+      j = "banana";
+      break;
+    case basic_types::Fruits::kPear:
+      j = "pear";
+      break;
+    default:
+      using underlying_type = typename std::underlying_type<basic_types::Fruits>::type;
+      j = static_cast<underlying_type>(value);
+      break;
+  }
+}
+
+void from_json(ordered_json const& j, basic_types::Fruits& value) {
+  if (j.is_string()) {
+    auto symbol = j.get<std::string>();
+    if (auto res = __Fruits_values.find(symbol); res != __Fruits_values.end()) {
+      value = res->second;
+      return;
+    }
+    throw std::runtime_error("Invalid enum value '" + symbol + "' for enum basic_types::Fruits");
+  }
+  using underlying_type = typename std::underlying_type<basic_types::Fruits>::type;
+  value = static_cast<basic_types::Fruits>(j.get<underlying_type>());
+}
+
+namespace {
+std::unordered_map<std::string, basic_types::DaysOfWeek> const __DaysOfWeek_values = {
+  {"monday", basic_types::DaysOfWeek::kMonday},
+  {"tuesday", basic_types::DaysOfWeek::kTuesday},
+  {"wednesday", basic_types::DaysOfWeek::kWednesday},
+  {"thursday", basic_types::DaysOfWeek::kThursday},
+  {"friday", basic_types::DaysOfWeek::kFriday},
+  {"saturday", basic_types::DaysOfWeek::kSaturday},
+  {"sunday", basic_types::DaysOfWeek::kSunday},
+};
+} //namespace
+
+void to_json(ordered_json& j, basic_types::DaysOfWeek const& value) {
+  auto arr = ordered_json::array();
+  if (value == 0) {
+    j = arr;
+    return;
+  }
+  auto remaining = value;
+  if (remaining.HasFlags(basic_types::DaysOfWeek::kMonday)) {
+    remaining.UnsetFlags(basic_types::DaysOfWeek::kMonday);
+    arr.push_back("monday");
+    if (remaining == 0) {
+      j = arr;
+      return;
+    }
+  }
+  if (remaining.HasFlags(basic_types::DaysOfWeek::kTuesday)) {
+    remaining.UnsetFlags(basic_types::DaysOfWeek::kTuesday);
+    arr.push_back("tuesday");
+    if (remaining == 0) {
+      j = arr;
+      return;
+    }
+  }
+  if (remaining.HasFlags(basic_types::DaysOfWeek::kWednesday)) {
+    remaining.UnsetFlags(basic_types::DaysOfWeek::kWednesday);
+    arr.push_back("wednesday");
+    if (remaining == 0) {
+      j = arr;
+      return;
+    }
+  }
+  if (remaining.HasFlags(basic_types::DaysOfWeek::kThursday)) {
+    remaining.UnsetFlags(basic_types::DaysOfWeek::kThursday);
+    arr.push_back("thursday");
+    if (remaining == 0) {
+      j = arr;
+      return;
+    }
+  }
+  if (remaining.HasFlags(basic_types::DaysOfWeek::kFriday)) {
+    remaining.UnsetFlags(basic_types::DaysOfWeek::kFriday);
+    arr.push_back("friday");
+    if (remaining == 0) {
+      j = arr;
+      return;
+    }
+  }
+  if (remaining.HasFlags(basic_types::DaysOfWeek::kSaturday)) {
+    remaining.UnsetFlags(basic_types::DaysOfWeek::kSaturday);
+    arr.push_back("saturday");
+    if (remaining == 0) {
+      j = arr;
+      return;
+    }
+  }
+  if (remaining.HasFlags(basic_types::DaysOfWeek::kSunday)) {
+    remaining.UnsetFlags(basic_types::DaysOfWeek::kSunday);
+    arr.push_back("sunday");
+    if (remaining == 0) {
+      j = arr;
+      return;
+    }
+  }
+  j = value.Value();
+}
+
+void from_json(ordered_json const& j, basic_types::DaysOfWeek& value) {
+  if (j.is_number()) {
+    using underlying_type = typename basic_types::DaysOfWeek::value_type;
+    value = j.get<underlying_type>();
+    return;
+  }
+  std::vector<std::string> arr = j;
+  value = {};
+  for (auto const& item : arr) {
+    if (auto res = __DaysOfWeek_values.find(item); res != __DaysOfWeek_values.end()) {
+      value |= res->second;
+      continue;
+    }
+    throw std::runtime_error("Invalid enum value '" + item + "' for enum basic_types::DaysOfWeek");
+  }
+}
+
+namespace {
+std::unordered_map<std::string, basic_types::TextFormat> const __TextFormat_values = {
+  {"regular", basic_types::TextFormat::kRegular},
+  {"bold", basic_types::TextFormat::kBold},
+  {"italic", basic_types::TextFormat::kItalic},
+  {"underline", basic_types::TextFormat::kUnderline},
+  {"strikethrough", basic_types::TextFormat::kStrikethrough},
+};
+} //namespace
+
+void to_json(ordered_json& j, basic_types::TextFormat const& value) {
+  auto arr = ordered_json::array();
+  if (value == 0) {
+    arr.push_back("regular");
+    j = arr;
+    return;
+  }
+  auto remaining = value;
+  if (remaining.HasFlags(basic_types::TextFormat::kBold)) {
+    remaining.UnsetFlags(basic_types::TextFormat::kBold);
+    arr.push_back("bold");
+    if (remaining == 0) {
+      j = arr;
+      return;
+    }
+  }
+  if (remaining.HasFlags(basic_types::TextFormat::kItalic)) {
+    remaining.UnsetFlags(basic_types::TextFormat::kItalic);
+    arr.push_back("italic");
+    if (remaining == 0) {
+      j = arr;
+      return;
+    }
+  }
+  if (remaining.HasFlags(basic_types::TextFormat::kUnderline)) {
+    remaining.UnsetFlags(basic_types::TextFormat::kUnderline);
+    arr.push_back("underline");
+    if (remaining == 0) {
+      j = arr;
+      return;
+    }
+  }
+  if (remaining.HasFlags(basic_types::TextFormat::kStrikethrough)) {
+    remaining.UnsetFlags(basic_types::TextFormat::kStrikethrough);
+    arr.push_back("strikethrough");
+    if (remaining == 0) {
+      j = arr;
+      return;
+    }
+  }
+  j = value.Value();
+}
+
+void from_json(ordered_json const& j, basic_types::TextFormat& value) {
+  if (j.is_number()) {
+    using underlying_type = typename basic_types::TextFormat::value_type;
+    value = j.get<underlying_type>();
+    return;
+  }
+  std::vector<std::string> arr = j;
+  value = {};
+  for (auto const& item : arr) {
+    if (auto res = __TextFormat_values.find(item); res != __TextFormat_values.end()) {
+      value |= res->second;
+      continue;
+    }
+    throw std::runtime_error("Invalid enum value '" + item + "' for enum basic_types::TextFormat");
+  }
+}
+
+void to_json(ordered_json& j, basic_types::RecordWithUnions const& value) {
+  j = ordered_json::object();
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.null_or_int_or_string)) {
+    j.push_back({"nullOrIntOrString", value.null_or_int_or_string});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.date_or_datetime)) {
+    j.push_back({"dateOrDatetime", value.date_or_datetime});
+  }
+}
+
+void from_json(ordered_json const& j, basic_types::RecordWithUnions& value) {
+  if (auto it = j.find("nullOrIntOrString"); it != j.end()) {
+    it->get_to(value.null_or_int_or_string);
+  }
+  if (auto it = j.find("dateOrDatetime"); it != j.end()) {
+    it->get_to(value.date_or_datetime);
+  }
+}
+
+template <typename T0, typename T1>
+void to_json(ordered_json& j, basic_types::GenericRecordWithComputedFields<T0, T1> const& value) {
+  j = ordered_json::object();
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.f1)) {
+    j.push_back({"f1", value.f1});
+  }
+}
+
+template <typename T0, typename T1>
+void from_json(ordered_json const& j, basic_types::GenericRecordWithComputedFields<T0, T1>& value) {
+  if (auto it = j.find("f1"); it != j.end()) {
+    it->get_to(value.f1);
+  }
+}
+
+} // namespace basic_types
+
+namespace image {
+using ordered_json = nlohmann::ordered_json;
+
+} // namespace image
 
 namespace test_model {
 using ordered_json = nlohmann::ordered_json;
@@ -1264,64 +1553,6 @@ void from_json(ordered_json const& j, test_model::RecordWithVlenCollections& val
   }
 }
 
-void to_json(ordered_json& j, test_model::RecordWithUnions const& value) {
-  j = ordered_json::object();
-  if (yardl::ndjson::ShouldSerializeFieldValue(value.null_or_int_or_string)) {
-    j.push_back({"nullOrIntOrString", value.null_or_int_or_string});
-  }
-  if (yardl::ndjson::ShouldSerializeFieldValue(value.date_or_datetime)) {
-    j.push_back({"dateOrDatetime", value.date_or_datetime});
-  }
-}
-
-void from_json(ordered_json const& j, test_model::RecordWithUnions& value) {
-  if (auto it = j.find("nullOrIntOrString"); it != j.end()) {
-    it->get_to(value.null_or_int_or_string);
-  }
-  if (auto it = j.find("dateOrDatetime"); it != j.end()) {
-    it->get_to(value.date_or_datetime);
-  }
-}
-
-namespace {
-std::unordered_map<std::string, test_model::Fruits> const __Fruits_values = {
-  {"apple", test_model::Fruits::kApple},
-  {"banana", test_model::Fruits::kBanana},
-  {"pear", test_model::Fruits::kPear},
-};
-} //namespace
-
-void to_json(ordered_json& j, test_model::Fruits const& value) {
-  switch (value) {
-    case test_model::Fruits::kApple:
-      j = "apple";
-      break;
-    case test_model::Fruits::kBanana:
-      j = "banana";
-      break;
-    case test_model::Fruits::kPear:
-      j = "pear";
-      break;
-    default:
-      using underlying_type = typename std::underlying_type<test_model::Fruits>::type;
-      j = static_cast<underlying_type>(value);
-      break;
-  }
-}
-
-void from_json(ordered_json const& j, test_model::Fruits& value) {
-  if (j.is_string()) {
-    auto symbol = j.get<std::string>();
-    if (auto res = __Fruits_values.find(symbol); res != __Fruits_values.end()) {
-      value = res->second;
-      return;
-    }
-    throw std::runtime_error("Invalid enum value '" + symbol + "' for enum test_model::Fruits");
-  }
-  using underlying_type = typename std::underlying_type<test_model::Fruits>::type;
-  value = static_cast<test_model::Fruits>(j.get<underlying_type>());
-}
-
 namespace {
 std::unordered_map<std::string, test_model::UInt64Enum> const __UInt64Enum_values = {
   {"a", test_model::UInt64Enum::kA},
@@ -1423,171 +1654,6 @@ void from_json(ordered_json const& j, test_model::SizeBasedEnum& value) {
   value = static_cast<test_model::SizeBasedEnum>(j.get<underlying_type>());
 }
 
-namespace {
-std::unordered_map<std::string, test_model::DaysOfWeek> const __DaysOfWeek_values = {
-  {"monday", test_model::DaysOfWeek::kMonday},
-  {"tuesday", test_model::DaysOfWeek::kTuesday},
-  {"wednesday", test_model::DaysOfWeek::kWednesday},
-  {"thursday", test_model::DaysOfWeek::kThursday},
-  {"friday", test_model::DaysOfWeek::kFriday},
-  {"saturday", test_model::DaysOfWeek::kSaturday},
-  {"sunday", test_model::DaysOfWeek::kSunday},
-};
-} //namespace
-
-void to_json(ordered_json& j, test_model::DaysOfWeek const& value) {
-  auto arr = ordered_json::array();
-  if (value == 0) {
-    j = arr;
-    return;
-  }
-  auto remaining = value;
-  if (remaining.HasFlags(test_model::DaysOfWeek::kMonday)) {
-    remaining.UnsetFlags(test_model::DaysOfWeek::kMonday);
-    arr.push_back("monday");
-    if (remaining == 0) {
-      j = arr;
-      return;
-    }
-  }
-  if (remaining.HasFlags(test_model::DaysOfWeek::kTuesday)) {
-    remaining.UnsetFlags(test_model::DaysOfWeek::kTuesday);
-    arr.push_back("tuesday");
-    if (remaining == 0) {
-      j = arr;
-      return;
-    }
-  }
-  if (remaining.HasFlags(test_model::DaysOfWeek::kWednesday)) {
-    remaining.UnsetFlags(test_model::DaysOfWeek::kWednesday);
-    arr.push_back("wednesday");
-    if (remaining == 0) {
-      j = arr;
-      return;
-    }
-  }
-  if (remaining.HasFlags(test_model::DaysOfWeek::kThursday)) {
-    remaining.UnsetFlags(test_model::DaysOfWeek::kThursday);
-    arr.push_back("thursday");
-    if (remaining == 0) {
-      j = arr;
-      return;
-    }
-  }
-  if (remaining.HasFlags(test_model::DaysOfWeek::kFriday)) {
-    remaining.UnsetFlags(test_model::DaysOfWeek::kFriday);
-    arr.push_back("friday");
-    if (remaining == 0) {
-      j = arr;
-      return;
-    }
-  }
-  if (remaining.HasFlags(test_model::DaysOfWeek::kSaturday)) {
-    remaining.UnsetFlags(test_model::DaysOfWeek::kSaturday);
-    arr.push_back("saturday");
-    if (remaining == 0) {
-      j = arr;
-      return;
-    }
-  }
-  if (remaining.HasFlags(test_model::DaysOfWeek::kSunday)) {
-    remaining.UnsetFlags(test_model::DaysOfWeek::kSunday);
-    arr.push_back("sunday");
-    if (remaining == 0) {
-      j = arr;
-      return;
-    }
-  }
-  j = value.Value();
-}
-
-void from_json(ordered_json const& j, test_model::DaysOfWeek& value) {
-  if (j.is_number()) {
-    using underlying_type = typename test_model::DaysOfWeek::value_type;
-    value = j.get<underlying_type>();
-    return;
-  }
-  std::vector<std::string> arr = j;
-  value = {};
-  for (auto const& item : arr) {
-    if (auto res = __DaysOfWeek_values.find(item); res != __DaysOfWeek_values.end()) {
-      value |= res->second;
-      continue;
-    }
-    throw std::runtime_error("Invalid enum value '" + item + "' for enum test_model::DaysOfWeek");
-  }
-}
-
-namespace {
-std::unordered_map<std::string, test_model::TextFormat> const __TextFormat_values = {
-  {"regular", test_model::TextFormat::kRegular},
-  {"bold", test_model::TextFormat::kBold},
-  {"italic", test_model::TextFormat::kItalic},
-  {"underline", test_model::TextFormat::kUnderline},
-  {"strikethrough", test_model::TextFormat::kStrikethrough},
-};
-} //namespace
-
-void to_json(ordered_json& j, test_model::TextFormat const& value) {
-  auto arr = ordered_json::array();
-  if (value == 0) {
-    arr.push_back("regular");
-    j = arr;
-    return;
-  }
-  auto remaining = value;
-  if (remaining.HasFlags(test_model::TextFormat::kBold)) {
-    remaining.UnsetFlags(test_model::TextFormat::kBold);
-    arr.push_back("bold");
-    if (remaining == 0) {
-      j = arr;
-      return;
-    }
-  }
-  if (remaining.HasFlags(test_model::TextFormat::kItalic)) {
-    remaining.UnsetFlags(test_model::TextFormat::kItalic);
-    arr.push_back("italic");
-    if (remaining == 0) {
-      j = arr;
-      return;
-    }
-  }
-  if (remaining.HasFlags(test_model::TextFormat::kUnderline)) {
-    remaining.UnsetFlags(test_model::TextFormat::kUnderline);
-    arr.push_back("underline");
-    if (remaining == 0) {
-      j = arr;
-      return;
-    }
-  }
-  if (remaining.HasFlags(test_model::TextFormat::kStrikethrough)) {
-    remaining.UnsetFlags(test_model::TextFormat::kStrikethrough);
-    arr.push_back("strikethrough");
-    if (remaining == 0) {
-      j = arr;
-      return;
-    }
-  }
-  j = value.Value();
-}
-
-void from_json(ordered_json const& j, test_model::TextFormat& value) {
-  if (j.is_number()) {
-    using underlying_type = typename test_model::TextFormat::value_type;
-    value = j.get<underlying_type>();
-    return;
-  }
-  std::vector<std::string> arr = j;
-  value = {};
-  for (auto const& item : arr) {
-    if (auto res = __TextFormat_values.find(item); res != __TextFormat_values.end()) {
-      value |= res->second;
-      continue;
-    }
-    throw std::runtime_error("Invalid enum value '" + item + "' for enum test_model::TextFormat");
-  }
-}
-
 void to_json(ordered_json& j, test_model::RecordWithEnums const& value) {
   j = ordered_json::object();
   if (yardl::ndjson::ShouldSerializeFieldValue(value.enum_field)) {
@@ -1646,27 +1712,6 @@ void from_json(ordered_json const& j, test_model::GenericRecord<T1, T2>& value) 
   }
 }
 
-template <typename T1, typename T2>
-void to_json(ordered_json& j, test_model::MyTuple<T1, T2> const& value) {
-  j = ordered_json::object();
-  if (yardl::ndjson::ShouldSerializeFieldValue(value.v1)) {
-    j.push_back({"v1", value.v1});
-  }
-  if (yardl::ndjson::ShouldSerializeFieldValue(value.v2)) {
-    j.push_back({"v2", value.v2});
-  }
-}
-
-template <typename T1, typename T2>
-void from_json(ordered_json const& j, test_model::MyTuple<T1, T2>& value) {
-  if (auto it = j.find("v1"); it != j.end()) {
-    it->get_to(value.v1);
-  }
-  if (auto it = j.find("v2"); it != j.end()) {
-    it->get_to(value.v2);
-  }
-}
-
 void to_json(ordered_json& j, test_model::RecordWithAliasedGenerics const& value) {
   j = ordered_json::object();
   if (yardl::ndjson::ShouldSerializeFieldValue(value.my_strings)) {
@@ -1683,21 +1728,6 @@ void from_json(ordered_json const& j, test_model::RecordWithAliasedGenerics& val
   }
   if (auto it = j.find("aliasedStrings"); it != j.end()) {
     it->get_to(value.aliased_strings);
-  }
-}
-
-template <typename T0, typename T1>
-void to_json(ordered_json& j, test_model::GenericRecordWithComputedFields<T0, T1> const& value) {
-  j = ordered_json::object();
-  if (yardl::ndjson::ShouldSerializeFieldValue(value.f1)) {
-    j.push_back({"f1", value.f1});
-  }
-}
-
-template <typename T0, typename T1>
-void from_json(ordered_json const& j, test_model::GenericRecordWithComputedFields<T0, T1>& value) {
-  if (auto it = j.find("f1"); it != j.end()) {
-    it->get_to(value.f1);
   }
 }
 
@@ -2052,7 +2082,7 @@ void BenchmarkSmallRecordWithOptionalsReader::CloseImpl() {
   VerifyFinished();
 }
 
-void BenchmarkSimpleMrdWriter::WriteDataImpl(std::variant<test_model::SimpleAcquisition, test_model::Image<float>> const& value) {
+void BenchmarkSimpleMrdWriter::WriteDataImpl(std::variant<test_model::SimpleAcquisition, image::Image<float>> const& value) {
   ordered_json json_value = value;
   yardl::ndjson::WriteProtocolValue(stream_, "data", json_value);}
 
@@ -2064,7 +2094,7 @@ void BenchmarkSimpleMrdWriter::CloseImpl() {
   stream_.flush();
 }
 
-bool BenchmarkSimpleMrdReader::ReadDataImpl(std::variant<test_model::SimpleAcquisition, test_model::Image<float>>& value) {
+bool BenchmarkSimpleMrdReader::ReadDataImpl(std::variant<test_model::SimpleAcquisition, image::Image<float>>& value) {
   return yardl::ndjson::ReadProtocolValue(stream_, line_, "data", false, unused_step_, value);
 }
 
@@ -2660,7 +2690,7 @@ void MapsWriter::WriteStringToUnionImpl(std::unordered_map<std::string, std::var
   ordered_json json_value = value;
   yardl::ndjson::WriteProtocolValue(stream_, "stringToUnion", json_value);}
 
-void MapsWriter::WriteAliasedGenericImpl(test_model::AliasedMap<std::string, int32_t> const& value) {
+void MapsWriter::WriteAliasedGenericImpl(basic_types::AliasedMap<std::string, int32_t> const& value) {
   ordered_json json_value = value;
   yardl::ndjson::WriteProtocolValue(stream_, "aliasedGeneric", json_value);}
 
@@ -2684,7 +2714,7 @@ void MapsReader::ReadStringToUnionImpl(std::unordered_map<std::string, std::vari
   yardl::ndjson::ReadProtocolValue(stream_, line_, "stringToUnion", true, unused_step_, value);
 }
 
-void MapsReader::ReadAliasedGenericImpl(test_model::AliasedMap<std::string, int32_t>& value) {
+void MapsReader::ReadAliasedGenericImpl(basic_types::AliasedMap<std::string, int32_t>& value) {
   yardl::ndjson::ReadProtocolValue(stream_, line_, "aliasedGeneric", true, unused_step_, value);
 }
 
@@ -2704,7 +2734,7 @@ void UnionsWriter::WriteMonosotateOrIntOrSimpleRecordImpl(std::variant<std::mono
   ordered_json json_value = value;
   yardl::ndjson::WriteProtocolValue(stream_, "monosotateOrIntOrSimpleRecord", json_value);}
 
-void UnionsWriter::WriteRecordWithUnionsImpl(test_model::RecordWithUnions const& value) {
+void UnionsWriter::WriteRecordWithUnionsImpl(basic_types::RecordWithUnions const& value) {
   ordered_json json_value = value;
   yardl::ndjson::WriteProtocolValue(stream_, "recordWithUnions", json_value);}
 
@@ -2728,7 +2758,7 @@ void UnionsReader::ReadMonosotateOrIntOrSimpleRecordImpl(std::variant<std::monos
   yardl::ndjson::ReadProtocolValue(stream_, line_, "monosotateOrIntOrSimpleRecord", true, unused_step_, value);
 }
 
-void UnionsReader::ReadRecordWithUnionsImpl(test_model::RecordWithUnions& value) {
+void UnionsReader::ReadRecordWithUnionsImpl(basic_types::RecordWithUnions& value) {
   yardl::ndjson::ReadProtocolValue(stream_, line_, "recordWithUnions", true, unused_step_, value);
 }
 
@@ -2864,11 +2894,11 @@ void StateTestReader::CloseImpl() {
   VerifyFinished();
 }
 
-void SimpleGenericsWriter::WriteFloatImageImpl(test_model::Image<float> const& value) {
+void SimpleGenericsWriter::WriteFloatImageImpl(image::FloatImage const& value) {
   ordered_json json_value = value;
   yardl::ndjson::WriteProtocolValue(stream_, "floatImage", json_value);}
 
-void SimpleGenericsWriter::WriteIntImageImpl(test_model::Image<int32_t> const& value) {
+void SimpleGenericsWriter::WriteIntImageImpl(image::IntImage const& value) {
   ordered_json json_value = value;
   yardl::ndjson::WriteProtocolValue(stream_, "intImage", json_value);}
 
@@ -2880,23 +2910,23 @@ void SimpleGenericsWriter::WriteStringImageImpl(test_model::Image<std::string> c
   ordered_json json_value = value;
   yardl::ndjson::WriteProtocolValue(stream_, "stringImage", json_value);}
 
-void SimpleGenericsWriter::WriteIntFloatTupleImpl(test_model::MyTuple<int32_t, float> const& value) {
+void SimpleGenericsWriter::WriteIntFloatTupleImpl(tuples::Tuple<int32_t, float> const& value) {
   ordered_json json_value = value;
   yardl::ndjson::WriteProtocolValue(stream_, "intFloatTuple", json_value);}
 
-void SimpleGenericsWriter::WriteFloatFloatTupleImpl(test_model::MyTuple<float, float> const& value) {
+void SimpleGenericsWriter::WriteFloatFloatTupleImpl(tuples::Tuple<float, float> const& value) {
   ordered_json json_value = value;
   yardl::ndjson::WriteProtocolValue(stream_, "floatFloatTuple", json_value);}
 
-void SimpleGenericsWriter::WriteIntFloatTupleAlternateSyntaxImpl(test_model::MyTuple<int32_t, float> const& value) {
+void SimpleGenericsWriter::WriteIntFloatTupleAlternateSyntaxImpl(tuples::Tuple<int32_t, float> const& value) {
   ordered_json json_value = value;
   yardl::ndjson::WriteProtocolValue(stream_, "intFloatTupleAlternateSyntax", json_value);}
 
-void SimpleGenericsWriter::WriteIntStringTupleImpl(test_model::MyTuple<int32_t, std::string> const& value) {
+void SimpleGenericsWriter::WriteIntStringTupleImpl(tuples::Tuple<int32_t, std::string> const& value) {
   ordered_json json_value = value;
   yardl::ndjson::WriteProtocolValue(stream_, "intStringTuple", json_value);}
 
-void SimpleGenericsWriter::WriteStreamOfTypeVariantsImpl(std::variant<test_model::Image<float>, test_model::Image<double>> const& value) {
+void SimpleGenericsWriter::WriteStreamOfTypeVariantsImpl(std::variant<image::FloatImage, test_model::Image<double>> const& value) {
   ordered_json json_value = value;
   yardl::ndjson::WriteProtocolValue(stream_, "streamOfTypeVariants", json_value);}
 
@@ -2908,11 +2938,11 @@ void SimpleGenericsWriter::CloseImpl() {
   stream_.flush();
 }
 
-void SimpleGenericsReader::ReadFloatImageImpl(test_model::Image<float>& value) {
+void SimpleGenericsReader::ReadFloatImageImpl(image::FloatImage& value) {
   yardl::ndjson::ReadProtocolValue(stream_, line_, "floatImage", true, unused_step_, value);
 }
 
-void SimpleGenericsReader::ReadIntImageImpl(test_model::Image<int32_t>& value) {
+void SimpleGenericsReader::ReadIntImageImpl(image::IntImage& value) {
   yardl::ndjson::ReadProtocolValue(stream_, line_, "intImage", true, unused_step_, value);
 }
 
@@ -2924,23 +2954,23 @@ void SimpleGenericsReader::ReadStringImageImpl(test_model::Image<std::string>& v
   yardl::ndjson::ReadProtocolValue(stream_, line_, "stringImage", true, unused_step_, value);
 }
 
-void SimpleGenericsReader::ReadIntFloatTupleImpl(test_model::MyTuple<int32_t, float>& value) {
+void SimpleGenericsReader::ReadIntFloatTupleImpl(tuples::Tuple<int32_t, float>& value) {
   yardl::ndjson::ReadProtocolValue(stream_, line_, "intFloatTuple", true, unused_step_, value);
 }
 
-void SimpleGenericsReader::ReadFloatFloatTupleImpl(test_model::MyTuple<float, float>& value) {
+void SimpleGenericsReader::ReadFloatFloatTupleImpl(tuples::Tuple<float, float>& value) {
   yardl::ndjson::ReadProtocolValue(stream_, line_, "floatFloatTuple", true, unused_step_, value);
 }
 
-void SimpleGenericsReader::ReadIntFloatTupleAlternateSyntaxImpl(test_model::MyTuple<int32_t, float>& value) {
+void SimpleGenericsReader::ReadIntFloatTupleAlternateSyntaxImpl(tuples::Tuple<int32_t, float>& value) {
   yardl::ndjson::ReadProtocolValue(stream_, line_, "intFloatTupleAlternateSyntax", true, unused_step_, value);
 }
 
-void SimpleGenericsReader::ReadIntStringTupleImpl(test_model::MyTuple<int32_t, std::string>& value) {
+void SimpleGenericsReader::ReadIntStringTupleImpl(tuples::Tuple<int32_t, std::string>& value) {
   yardl::ndjson::ReadProtocolValue(stream_, line_, "intStringTuple", true, unused_step_, value);
 }
 
-bool SimpleGenericsReader::ReadStreamOfTypeVariantsImpl(std::variant<test_model::Image<float>, test_model::Image<double>>& value) {
+bool SimpleGenericsReader::ReadStreamOfTypeVariantsImpl(std::variant<image::FloatImage, test_model::Image<double>>& value) {
   return yardl::ndjson::ReadProtocolValue(stream_, line_, "streamOfTypeVariants", false, unused_step_, value);
 }
 
@@ -3169,3 +3199,4 @@ void ProtocolWithKeywordStepsReader::CloseImpl() {
 }
 
 } // namespace test_model::ndjson
+

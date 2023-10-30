@@ -11,20 +11,23 @@ import numpy.typing as npt
 from . import yardl_types as yardl
 from . import _dtypes
 
-K = typing.TypeVar("K")
-K_NP = typing.TypeVar("K_NP", bound=np.generic)
-V = typing.TypeVar("V")
-V_NP = typing.TypeVar("V_NP", bound=np.generic)
+from . import tuples
+from .tuples.types import *
+from . import basic_types
+from .basic_types.types import *
+from . import image
+from .image.types import *
+
 T = typing.TypeVar("T")
 T_NP = typing.TypeVar("T_NP", bound=np.generic)
 T1 = typing.TypeVar("T1")
 T1_NP = typing.TypeVar("T1_NP", bound=np.generic)
 T2 = typing.TypeVar("T2")
 T2_NP = typing.TypeVar("T2_NP", bound=np.generic)
-T0 = typing.TypeVar("T0")
-T0_NP = typing.TypeVar("T0_NP", bound=np.generic)
 U = typing.TypeVar("U")
 U_NP = typing.TypeVar("U_NP", bound=np.generic)
+V = typing.TypeVar("V")
+V_NP = typing.TypeVar("V_NP", bound=np.generic)
 W = typing.TypeVar("W")
 W_NP = typing.TypeVar("W_NP", bound=np.generic)
 
@@ -775,61 +778,7 @@ class RecordWithVlenCollections:
 
 NamedNDArray = npt.NDArray[np.int32]
 
-AliasedMap = dict[K, V]
-
-_T = typing.TypeVar('_T')
-
-class Int32OrString:
-    Int32: typing.ClassVar[type["Int32OrStringUnionCase[yardl.Int32]"]]
-    String: typing.ClassVar[type["Int32OrStringUnionCase[str]"]]
-
-class Int32OrStringUnionCase(Int32OrString, yardl.UnionCase[_T]):
-    pass
-
-Int32OrString.Int32 = type("Int32OrString.Int32", (Int32OrStringUnionCase,), {"_index": 0, "_tag": "int32"})
-Int32OrString.String = type("Int32OrString.String", (Int32OrStringUnionCase,), {"_index": 1, "_tag": "string"})
-del Int32OrStringUnionCase
-
-class TimeOrDatetime:
-    Time: typing.ClassVar[type["TimeOrDatetimeUnionCase[yardl.Time]"]]
-    Datetime: typing.ClassVar[type["TimeOrDatetimeUnionCase[yardl.DateTime]"]]
-
-class TimeOrDatetimeUnionCase(TimeOrDatetime, yardl.UnionCase[_T]):
-    pass
-
-TimeOrDatetime.Time = type("TimeOrDatetime.Time", (TimeOrDatetimeUnionCase,), {"_index": 0, "_tag": "time"})
-TimeOrDatetime.Datetime = type("TimeOrDatetime.Datetime", (TimeOrDatetimeUnionCase,), {"_index": 1, "_tag": "datetime"})
-del TimeOrDatetimeUnionCase
-
-class RecordWithUnions:
-    null_or_int_or_string: typing.Optional[Int32OrString]
-    date_or_datetime: TimeOrDatetime
-
-    def __init__(self, *,
-        null_or_int_or_string: typing.Optional[Int32OrString] = None,
-        date_or_datetime: TimeOrDatetime = TimeOrDatetime.Time(yardl.Time()),
-    ):
-        self.null_or_int_or_string = null_or_int_or_string
-        self.date_or_datetime = date_or_datetime
-
-    def __eq__(self, other: object) -> bool:
-        return (
-            isinstance(other, RecordWithUnions)
-            and self.null_or_int_or_string == other.null_or_int_or_string
-            and self.date_or_datetime == other.date_or_datetime
-        )
-
-    def __str__(self) -> str:
-        return f"RecordWithUnions(nullOrIntOrString={self.null_or_int_or_string}, dateOrDatetime={self.date_or_datetime})"
-
-    def __repr__(self) -> str:
-        return f"RecordWithUnions(nullOrIntOrString={repr(self.null_or_int_or_string)}, dateOrDatetime={repr(self.date_or_datetime)})"
-
-
-class Fruits(yardl.OutOfRangeEnum):
-    APPLE = 0
-    BANANA = 1
-    PEAR = 2
+Fruits = basic_types.Fruits
 
 class UInt64Enum(yardl.OutOfRangeEnum):
     A = 9223372036854775808
@@ -842,37 +791,9 @@ class SizeBasedEnum(yardl.OutOfRangeEnum):
     B = 1
     C = 2
 
-class DaysOfWeek(enum.IntFlag):
-    MONDAY = 1
-    TUESDAY = 2
-    WEDNESDAY = 4
-    THURSDAY = 8
-    FRIDAY = 16
-    SATURDAY = 32
-    SUNDAY = 64
+DaysOfWeek = basic_types.DaysOfWeek
 
-    def __eq__(self, other: object) -> bool:
-        return isinstance(other, DaysOfWeek) and self.value == other.value
-
-    def __hash__(self) -> int:
-        return hash(self.value)
-
-    __str__ = enum.Flag.__str__ # type: ignore
-
-class TextFormat(enum.IntFlag):
-    REGULAR = 0
-    BOLD = 1
-    ITALIC = 2
-    UNDERLINE = 4
-    STRIKETHROUGH = 8
-
-    def __eq__(self, other: object) -> bool:
-        return isinstance(other, TextFormat) and self.value == other.value
-
-    def __hash__(self) -> int:
-        return hash(self.value)
-
-    __str__ = enum.Flag.__str__ # type: ignore
+TextFormat = basic_types.TextFormat
 
 class RecordWithEnums:
     enum: Fruits
@@ -880,9 +801,9 @@ class RecordWithEnums:
     flags_2: TextFormat
 
     def __init__(self, *,
-        enum: Fruits = Fruits.APPLE,
-        flags: DaysOfWeek = DaysOfWeek(0),
-        flags_2: TextFormat = TextFormat.REGULAR,
+        enum: Fruits = basic_types.Fruits.APPLE,
+        flags: DaysOfWeek = basic_types.DaysOfWeek(0),
+        flags_2: TextFormat = basic_types.TextFormat.REGULAR,
     ):
         self.enum = enum
         self.flags = flags
@@ -903,7 +824,7 @@ class RecordWithEnums:
         return f"RecordWithEnums(enum={repr(self.enum)}, flags={repr(self.flags)}, flags2={repr(self.flags_2)})"
 
 
-Image = npt.NDArray[T_NP]
+Image = image.Image[T_NP]
 
 class GenericRecord(typing.Generic[T1, T2, T2_NP]):
     scalar_1: T1
@@ -938,30 +859,7 @@ class GenericRecord(typing.Generic[T1, T2, T2_NP]):
         return f"GenericRecord(scalar1={repr(self.scalar_1)}, scalar2={repr(self.scalar_2)}, vector1={repr(self.vector_1)}, image2={repr(self.image_2)})"
 
 
-class MyTuple(typing.Generic[T1, T2]):
-    v1: T1
-    v2: T2
-
-    def __init__(self, *,
-        v1: T1,
-        v2: T2,
-    ):
-        self.v1 = v1
-        self.v2 = v2
-
-    def __eq__(self, other: object) -> bool:
-        return (
-            isinstance(other, MyTuple)
-            and yardl.structural_equal(self.v1, other.v1)
-            and yardl.structural_equal(self.v2, other.v2)
-        )
-
-    def __str__(self) -> str:
-        return f"MyTuple(v1={self.v1}, v2={self.v2})"
-
-    def __repr__(self) -> str:
-        return f"MyTuple(v1={repr(self.v1)}, v2={repr(self.v2)})"
-
+MyTuple = basic_types.MyTuple[T1, T2]
 
 AliasedTuple = MyTuple[T1, T2]
 
@@ -973,8 +871,8 @@ class RecordWithAliasedGenerics:
         my_strings: typing.Optional[MyTuple[str, str]] = None,
         aliased_strings: typing.Optional[AliasedTuple[str, str]] = None,
     ):
-        self.my_strings = my_strings if my_strings is not None else MyTuple(v1="", v2="")
-        self.aliased_strings = aliased_strings if aliased_strings is not None else MyTuple(v1="", v2="")
+        self.my_strings = my_strings if my_strings is not None else tuples.Tuple(v1="", v2="")
+        self.aliased_strings = aliased_strings if aliased_strings is not None else tuples.Tuple(v1="", v2="")
 
     def __eq__(self, other: object) -> bool:
         return (
@@ -990,17 +888,6 @@ class RecordWithAliasedGenerics:
         return f"RecordWithAliasedGenerics(myStrings={repr(self.my_strings)}, aliasedStrings={repr(self.aliased_strings)})"
 
 
-class GenericUnion2(typing.Generic[T1, T2]):
-    T1: type["GenericUnion2UnionCase[T1, T2, T1]"]
-    T2: type["GenericUnion2UnionCase[T1, T2, T2]"]
-
-class GenericUnion2UnionCase(GenericUnion2[T1, T2], yardl.UnionCase[_T]):
-    pass
-
-GenericUnion2.T1 = type("GenericUnion2.T1", (GenericUnion2UnionCase,), {"_index": 0, "_tag": "T1"})
-GenericUnion2.T2 = type("GenericUnion2.T2", (GenericUnion2UnionCase,), {"_index": 1, "_tag": "T2"})
-del GenericUnion2UnionCase
-
 AliasedString = str
 
 AliasedEnum = Fruits
@@ -1013,11 +900,13 @@ AliasedOptional = typing.Optional[yardl.Int32]
 
 AliasedGenericOptional = typing.Optional[T]
 
-AliasedGenericUnion2 = GenericUnion2[T1, T2]
+AliasedGenericUnion2 = basic_types.GenericUnion2[T1, T2]
 
-AliasedGenericVector = list[T]
+AliasedGenericVector = basic_types.GenericVector[T]
 
 AliasedGenericFixedVector = list[T]
+
+_T = typing.TypeVar('_T')
 
 class AliasedIntOrSimpleRecord:
     Int32: typing.ClassVar[type["AliasedIntOrSimpleRecordUnionCase[yardl.Int32]"]]
@@ -1041,46 +930,6 @@ AliasedNullableIntSimpleRecord.Int32 = type("AliasedNullableIntSimpleRecord.Int3
 AliasedNullableIntSimpleRecord.SimpleRecord = type("AliasedNullableIntSimpleRecord.SimpleRecord", (AliasedNullableIntSimpleRecordUnionCase,), {"_index": 1, "_tag": "SimpleRecord"})
 del AliasedNullableIntSimpleRecordUnionCase
 
-class T0OrT1(typing.Generic[T0, T1]):
-    T0: type["T0OrT1UnionCase[T0, T1, T0]"]
-    T1: type["T0OrT1UnionCase[T0, T1, T1]"]
-
-class T0OrT1UnionCase(T0OrT1[T0, T1], yardl.UnionCase[_T]):
-    pass
-
-T0OrT1.T0 = type("T0OrT1.T0", (T0OrT1UnionCase,), {"_index": 0, "_tag": "T0"})
-T0OrT1.T1 = type("T0OrT1.T1", (T0OrT1UnionCase,), {"_index": 1, "_tag": "T1"})
-del T0OrT1UnionCase
-
-class GenericRecordWithComputedFields(typing.Generic[T0, T1]):
-    f1: T0OrT1[T0, T1]
-
-    def __init__(self, *,
-        f1: T0OrT1[T0, T1],
-    ):
-        self.f1 = f1
-
-    def type_index(self) -> yardl.UInt8:
-        _var0 = self.f1
-        if isinstance(_var0, T0OrT1.T0):
-            return 0
-        if isinstance(_var0, T0OrT1.T1):
-            return 1
-        raise RuntimeError("Unexpected union case")
-
-    def __eq__(self, other: object) -> bool:
-        return (
-            isinstance(other, GenericRecordWithComputedFields)
-            and yardl.structural_equal(self.f1, other.f1)
-        )
-
-    def __str__(self) -> str:
-        return f"GenericRecordWithComputedFields(f1={self.f1})"
-
-    def __repr__(self) -> str:
-        return f"GenericRecordWithComputedFields(f1={repr(self.f1)})"
-
-
 class Int32OrFloat32:
     Int32: typing.ClassVar[type["Int32OrFloat32UnionCase[yardl.Int32]"]]
     Float32: typing.ClassVar[type["Int32OrFloat32UnionCase[yardl.Float32]"]]
@@ -1094,7 +943,7 @@ del Int32OrFloat32UnionCase
 
 class IntOrGenericRecordWithComputedFields:
     Int: typing.ClassVar[type["IntOrGenericRecordWithComputedFieldsUnionCase[yardl.Int32]"]]
-    GenericRecordWithComputedFields: typing.ClassVar[type["IntOrGenericRecordWithComputedFieldsUnionCase[GenericRecordWithComputedFields[str, yardl.Float32]]"]]
+    GenericRecordWithComputedFields: typing.ClassVar[type["IntOrGenericRecordWithComputedFieldsUnionCase[basic_types.GenericRecordWithComputedFields[str, yardl.Float32]]"]]
 
 class IntOrGenericRecordWithComputedFieldsUnionCase(IntOrGenericRecordWithComputedFields, yardl.UnionCase[_T]):
     pass
@@ -1179,7 +1028,7 @@ class RecordWithComputedFields:
         self.complexfloat32_field = complexfloat32_field
         self.complexfloat64_field = complexfloat64_field
         self.string_field = string_field
-        self.tuple_field = tuple_field if tuple_field is not None else MyTuple(v1=0, v2=0)
+        self.tuple_field = tuple_field if tuple_field is not None else tuples.Tuple(v1=0, v2=0)
         self.vector_field = vector_field if vector_field is not None else []
         self.vector_of_vectors_field = vector_of_vectors_field if vector_of_vectors_field is not None else []
         self.fixed_vector_field = fixed_vector_field if fixed_vector_field is not None else [0] * 3
@@ -1583,7 +1432,7 @@ class RecordWithKeywordFields:
 
 class AcquisitionOrImage:
     Acquisition: typing.ClassVar[type["AcquisitionOrImageUnionCase[SimpleAcquisition]"]]
-    Image: typing.ClassVar[type["AcquisitionOrImageUnionCase[Image[np.float32]]"]]
+    Image: typing.ClassVar[type["AcquisitionOrImageUnionCase[image.Image[np.float32]]"]]
 
 class AcquisitionOrImageUnionCase(AcquisitionOrImage, yardl.UnionCase[_T]):
     pass
@@ -1626,7 +1475,7 @@ Int32OrRecordWithVlens.RecordWithVlens = type("Int32OrRecordWithVlens.RecordWith
 del Int32OrRecordWithVlensUnionCase
 
 class ImageFloatOrImageDouble:
-    ImageFloat: typing.ClassVar[type["ImageFloatOrImageDoubleUnionCase[Image[np.float32]]"]]
+    ImageFloat: typing.ClassVar[type["ImageFloatOrImageDoubleUnionCase[image.FloatImage]"]]
     ImageDouble: typing.ClassVar[type["ImageFloatOrImageDoubleUnionCase[Image[np.float64]]"]]
 
 class ImageFloatOrImageDoubleUnionCase(ImageFloatOrImageDouble, yardl.UnionCase[_T]):
@@ -1640,6 +1489,19 @@ def _mk_get_dtype():
     dtype_map: dict[typing.Union[type, types.GenericAlias], typing.Union[np.dtype[typing.Any], typing.Callable[[tuple[type, ...]], np.dtype[typing.Any]]]] = {}
     get_dtype = _dtypes.make_get_dtype_func(dtype_map)
 
+    dtype_map.setdefault(tuples.Tuple, lambda type_args: np.dtype([('v1', get_dtype(type_args[0])), ('v2', get_dtype(type_args[1]))], align=True))
+    dtype_map.setdefault(basic_types.Fruits, np.dtype(np.int32))
+    dtype_map.setdefault(basic_types.DaysOfWeek, np.dtype(np.int32))
+    dtype_map.setdefault(basic_types.TextFormat, np.dtype(np.uint64))
+    dtype_map.setdefault(basic_types.AliasedMap, lambda type_args: np.dtype(np.object_))
+    dtype_map.setdefault(basic_types.MyTuple, lambda type_args: get_dtype(types.GenericAlias(tuples.Tuple, (type_args[0], type_args[1],))))
+    dtype_map.setdefault(basic_types.GenericUnion2, lambda type_args: np.dtype(np.object_))
+    dtype_map.setdefault(basic_types.GenericVector, lambda type_args: np.dtype(np.object_))
+    dtype_map.setdefault(basic_types.RecordWithUnions, np.dtype([('null_or_int_or_string', np.dtype(np.object_)), ('date_or_datetime', np.dtype(np.object_))], align=True))
+    dtype_map.setdefault(basic_types.GenericRecordWithComputedFields, lambda type_args: np.dtype([('f1', np.dtype(np.object_))], align=True))
+    dtype_map.setdefault(image.Image, lambda type_args: np.dtype(np.object_))
+    dtype_map.setdefault(image.FloatImage, get_dtype(types.GenericAlias(image.Image, (yardl.Float32,))))
+    dtype_map.setdefault(image.IntImage, get_dtype(types.GenericAlias(image.Image, (yardl.Int32,))))
     dtype_map.setdefault(SmallBenchmarkRecord, np.dtype([('a', np.dtype(np.float64)), ('b', np.dtype(np.float32)), ('c', np.dtype(np.float32))], align=True))
     dtype_map.setdefault(SimpleEncodingCounters, np.dtype([('e1', np.dtype([('has_value', np.dtype(np.bool_)), ('value', np.dtype(np.uint32))], align=True)), ('e2', np.dtype([('has_value', np.dtype(np.bool_)), ('value', np.dtype(np.uint32))], align=True)), ('slice', np.dtype([('has_value', np.dtype(np.bool_)), ('value', np.dtype(np.uint32))], align=True)), ('repetition', np.dtype([('has_value', np.dtype(np.bool_)), ('value', np.dtype(np.uint32))], align=True))], align=True))
     dtype_map.setdefault(SimpleAcquisition, np.dtype([('flags', np.dtype(np.uint64)), ('idx', get_dtype(SimpleEncodingCounters)), ('data', np.dtype(np.object_)), ('trajectory', np.dtype(np.object_))], align=True))
@@ -1664,33 +1526,29 @@ def _mk_get_dtype():
     dtype_map.setdefault(RecordWithFixedCollections, np.dtype([('fixed_vector', np.dtype(np.int32), (3,)), ('fixed_array', np.dtype(np.int32), (2, 3,))], align=True))
     dtype_map.setdefault(RecordWithVlenCollections, np.dtype([('vector', np.dtype(np.object_)), ('array', np.dtype(np.object_))], align=True))
     dtype_map.setdefault(NamedNDArray, np.dtype(np.object_))
-    dtype_map.setdefault(AliasedMap, lambda type_args: np.dtype(np.object_))
-    dtype_map.setdefault(RecordWithUnions, np.dtype([('null_or_int_or_string', np.dtype(np.object_)), ('date_or_datetime', np.dtype(np.object_))], align=True))
-    dtype_map.setdefault(Fruits, np.dtype(np.int32))
+    dtype_map.setdefault(Fruits, get_dtype(basic_types.Fruits))
     dtype_map.setdefault(UInt64Enum, np.dtype(np.uint64))
     dtype_map.setdefault(Int64Enum, np.dtype(np.int64))
     dtype_map.setdefault(SizeBasedEnum, np.dtype(np.uint64))
-    dtype_map.setdefault(DaysOfWeek, np.dtype(np.int32))
-    dtype_map.setdefault(TextFormat, np.dtype(np.uint64))
+    dtype_map.setdefault(DaysOfWeek, get_dtype(basic_types.DaysOfWeek))
+    dtype_map.setdefault(TextFormat, get_dtype(basic_types.TextFormat))
     dtype_map.setdefault(RecordWithEnums, np.dtype([('enum', get_dtype(Fruits)), ('flags', get_dtype(DaysOfWeek)), ('flags_2', get_dtype(TextFormat))], align=True))
-    dtype_map.setdefault(Image, lambda type_args: np.dtype(np.object_))
+    dtype_map.setdefault(Image, lambda type_args: get_dtype(types.GenericAlias(image.Image, (type_args[0],))))
     dtype_map.setdefault(GenericRecord, lambda type_args: np.dtype([('scalar_1', get_dtype(type_args[0])), ('scalar_2', get_dtype(type_args[1])), ('vector_1', np.dtype(np.object_)), ('image_2', get_dtype(types.GenericAlias(Image, (type_args[1],))))], align=True))
-    dtype_map.setdefault(MyTuple, lambda type_args: np.dtype([('v1', get_dtype(type_args[0])), ('v2', get_dtype(type_args[1]))], align=True))
+    dtype_map.setdefault(MyTuple, lambda type_args: get_dtype(types.GenericAlias(basic_types.MyTuple, (type_args[0], type_args[1],))))
     dtype_map.setdefault(AliasedTuple, lambda type_args: get_dtype(types.GenericAlias(MyTuple, (type_args[0], type_args[1],))))
     dtype_map.setdefault(RecordWithAliasedGenerics, np.dtype([('my_strings', get_dtype(types.GenericAlias(MyTuple, (str, str,)))), ('aliased_strings', get_dtype(types.GenericAlias(AliasedTuple, (str, str,))))], align=True))
-    dtype_map.setdefault(GenericUnion2, lambda type_args: np.dtype(np.object_))
     dtype_map.setdefault(AliasedString, np.dtype(np.object_))
     dtype_map.setdefault(AliasedEnum, get_dtype(Fruits))
     dtype_map.setdefault(AliasedOpenGeneric, lambda type_args: get_dtype(types.GenericAlias(AliasedTuple, (type_args[0], type_args[1],))))
     dtype_map.setdefault(AliasedClosedGeneric, get_dtype(types.GenericAlias(AliasedTuple, (AliasedString, AliasedEnum,))))
     dtype_map.setdefault(typing.Optional[AliasedOptional], np.dtype([('has_value', np.dtype(np.bool_)), ('value', np.dtype(np.int32))], align=True))
     dtype_map.setdefault(AliasedGenericOptional, lambda type_args: np.dtype([('has_value', np.dtype(np.bool_)), ('value', get_dtype(type_args[0]))], align=True))
-    dtype_map.setdefault(AliasedGenericUnion2, lambda type_args: get_dtype(types.GenericAlias(GenericUnion2, (type_args[0], type_args[1],))))
-    dtype_map.setdefault(AliasedGenericVector, lambda type_args: np.dtype(np.object_))
+    dtype_map.setdefault(AliasedGenericUnion2, lambda type_args: get_dtype(types.GenericAlias(basic_types.GenericUnion2, (type_args[0], type_args[1],))))
+    dtype_map.setdefault(AliasedGenericVector, lambda type_args: get_dtype(types.GenericAlias(basic_types.GenericVector, (type_args[0],))))
     dtype_map.setdefault(AliasedGenericFixedVector, lambda type_args: get_dtype(type_args[0]))
     dtype_map.setdefault(AliasedIntOrSimpleRecord, np.dtype(np.object_))
     dtype_map.setdefault(typing.Optional[AliasedNullableIntSimpleRecord], np.dtype(np.object_))
-    dtype_map.setdefault(GenericRecordWithComputedFields, lambda type_args: np.dtype([('f1', np.dtype(np.object_))], align=True))
     dtype_map.setdefault(RecordWithComputedFields, np.dtype([('array_field', np.dtype(np.object_)), ('array_field_map_dimensions', np.dtype(np.object_)), ('dynamic_array_field', np.dtype(np.object_)), ('fixed_array_field', np.dtype(np.int32), (3, 4,)), ('int_field', np.dtype(np.int32)), ('int8_field', np.dtype(np.int8)), ('uint8_field', np.dtype(np.uint8)), ('int16_field', np.dtype(np.int16)), ('uint16_field', np.dtype(np.uint16)), ('uint32_field', np.dtype(np.uint32)), ('int64_field', np.dtype(np.int64)), ('uint64_field', np.dtype(np.uint64)), ('size_field', np.dtype(np.uint64)), ('float32_field', np.dtype(np.float32)), ('float64_field', np.dtype(np.float64)), ('complexfloat32_field', np.dtype(np.complex64)), ('complexfloat64_field', np.dtype(np.complex128)), ('string_field', np.dtype(np.object_)), ('tuple_field', get_dtype(types.GenericAlias(MyTuple, (yardl.Int32, yardl.Int32,)))), ('vector_field', np.dtype(np.object_)), ('vector_of_vectors_field', np.dtype(np.object_)), ('fixed_vector_field', np.dtype(np.int32), (3,)), ('optional_named_array', np.dtype([('has_value', np.dtype(np.bool_)), ('value', get_dtype(NamedNDArray))], align=True)), ('int_float_union', np.dtype(np.object_)), ('nullable_int_float_union', np.dtype(np.object_)), ('union_with_nested_generic_union', np.dtype(np.object_)), ('map_field', np.dtype(np.object_))], align=True))
     dtype_map.setdefault(GenericUnion3, lambda type_args: np.dtype(np.object_))
     dtype_map.setdefault(GenericUnion3Alternate, lambda type_args: np.dtype(np.object_))

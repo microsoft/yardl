@@ -781,9 +781,9 @@ void BenchmarkSimpleMrdReaderBaseInvalidState(uint8_t attempted, uint8_t current
 
 } // namespace 
 
-std::string BenchmarkSimpleMrdWriterBase::schema_ = R"({"protocol":{"name":"BenchmarkSimpleMrd","sequence":[{"name":"data","type":{"stream":{"items":[{"tag":"acquisition","explicitTag":true,"type":"TestModel.SimpleAcquisition"},{"tag":"image","explicitTag":true,"type":{"name":"TestModel.Image","typeArguments":["float32"]}}]}}}]},"types":[{"name":"Image","typeParameters":["T"],"type":{"array":{"items":"T","dimensions":[{"name":"x"},{"name":"y"}]}}},{"name":"SimpleAcquisition","fields":[{"name":"flags","type":"uint64"},{"name":"idx","type":"TestModel.SimpleEncodingCounters"},{"name":"data","type":{"array":{"items":"complexfloat32","dimensions":2}}},{"name":"trajectory","type":{"array":{"items":"float32","dimensions":2}}}]},{"name":"SimpleEncodingCounters","fields":[{"name":"e1","type":[null,"uint32"]},{"name":"e2","type":[null,"uint32"]},{"name":"slice","type":[null,"uint32"]},{"name":"repetition","type":[null,"uint32"]}]}]})";
+std::string BenchmarkSimpleMrdWriterBase::schema_ = R"({"protocol":{"name":"BenchmarkSimpleMrd","sequence":[{"name":"data","type":{"stream":{"items":[{"tag":"acquisition","explicitTag":true,"type":"TestModel.SimpleAcquisition"},{"tag":"image","explicitTag":true,"type":{"name":"Image.Image","typeArguments":["float32"]}}]}}}]},"types":[{"name":"Image","typeParameters":["T"],"type":{"array":{"items":"T","dimensions":[{"name":"x"},{"name":"y"}]}}},{"name":"SimpleAcquisition","fields":[{"name":"flags","type":"uint64"},{"name":"idx","type":"TestModel.SimpleEncodingCounters"},{"name":"data","type":{"array":{"items":"complexfloat32","dimensions":2}}},{"name":"trajectory","type":{"array":{"items":"float32","dimensions":2}}}]},{"name":"SimpleEncodingCounters","fields":[{"name":"e1","type":[null,"uint32"]},{"name":"e2","type":[null,"uint32"]},{"name":"slice","type":[null,"uint32"]},{"name":"repetition","type":[null,"uint32"]}]}]})";
 
-void BenchmarkSimpleMrdWriterBase::WriteData(std::variant<test_model::SimpleAcquisition, test_model::Image<float>> const& value) {
+void BenchmarkSimpleMrdWriterBase::WriteData(std::variant<test_model::SimpleAcquisition, image::Image<float>> const& value) {
   if (unlikely(state_ != 0)) {
     BenchmarkSimpleMrdWriterBaseInvalidState(0, false, state_);
   }
@@ -791,7 +791,7 @@ void BenchmarkSimpleMrdWriterBase::WriteData(std::variant<test_model::SimpleAcqu
   WriteDataImpl(value);
 }
 
-void BenchmarkSimpleMrdWriterBase::WriteData(std::vector<std::variant<test_model::SimpleAcquisition, test_model::Image<float>>> const& values) {
+void BenchmarkSimpleMrdWriterBase::WriteData(std::vector<std::variant<test_model::SimpleAcquisition, image::Image<float>>> const& values) {
   if (unlikely(state_ != 0)) {
     BenchmarkSimpleMrdWriterBaseInvalidState(0, false, state_);
   }
@@ -809,7 +809,7 @@ void BenchmarkSimpleMrdWriterBase::EndData() {
 }
 
 // fallback implementation
-void BenchmarkSimpleMrdWriterBase::WriteDataImpl(std::vector<std::variant<test_model::SimpleAcquisition, test_model::Image<float>>> const& values) {
+void BenchmarkSimpleMrdWriterBase::WriteDataImpl(std::vector<std::variant<test_model::SimpleAcquisition, image::Image<float>>> const& values) {
   for (auto const& v : values) {
     WriteDataImpl(v);
   }
@@ -825,7 +825,7 @@ void BenchmarkSimpleMrdWriterBase::Close() {
 
 std::string BenchmarkSimpleMrdReaderBase::schema_ = BenchmarkSimpleMrdWriterBase::schema_;
 
-bool BenchmarkSimpleMrdReaderBase::ReadData(std::variant<test_model::SimpleAcquisition, test_model::Image<float>>& value) {
+bool BenchmarkSimpleMrdReaderBase::ReadData(std::variant<test_model::SimpleAcquisition, image::Image<float>>& value) {
   if (unlikely(state_ != 0)) {
     if (state_ == 1) {
       state_ = 2;
@@ -841,7 +841,7 @@ bool BenchmarkSimpleMrdReaderBase::ReadData(std::variant<test_model::SimpleAcqui
   return result;
 }
 
-bool BenchmarkSimpleMrdReaderBase::ReadData(std::vector<std::variant<test_model::SimpleAcquisition, test_model::Image<float>>>& values) {
+bool BenchmarkSimpleMrdReaderBase::ReadData(std::vector<std::variant<test_model::SimpleAcquisition, image::Image<float>>>& values) {
   if (values.capacity() == 0) {
     throw std::runtime_error("vector must have a nonzero capacity.");
   }
@@ -862,7 +862,7 @@ bool BenchmarkSimpleMrdReaderBase::ReadData(std::vector<std::variant<test_model:
 }
 
 // fallback implementation
-bool BenchmarkSimpleMrdReaderBase::ReadDataImpl(std::vector<std::variant<test_model::SimpleAcquisition, test_model::Image<float>>>& values) {
+bool BenchmarkSimpleMrdReaderBase::ReadDataImpl(std::vector<std::variant<test_model::SimpleAcquisition, image::Image<float>>>& values) {
   size_t i = 0;
   while (true) {
     if (i == values.size()) {
@@ -888,14 +888,14 @@ void BenchmarkSimpleMrdReaderBase::Close() {
 }
 void BenchmarkSimpleMrdReaderBase::CopyTo(BenchmarkSimpleMrdWriterBase& writer, size_t data_buffer_size) {
   if (data_buffer_size > 1) {
-    std::vector<std::variant<test_model::SimpleAcquisition, test_model::Image<float>>> values;
+    std::vector<std::variant<test_model::SimpleAcquisition, image::Image<float>>> values;
     values.reserve(data_buffer_size);
     while(ReadData(values)) {
       writer.WriteData(values);
     }
     writer.EndData();
   } else {
-    std::variant<test_model::SimpleAcquisition, test_model::Image<float>> value;
+    std::variant<test_model::SimpleAcquisition, image::Image<float>> value;
     while(ReadData(value)) {
       writer.WriteData(value);
     }
@@ -2402,7 +2402,7 @@ void SubarraysReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
 
 } // namespace 
 
-std::string SubarraysWriterBase::schema_ = R"({"protocol":{"name":"Subarrays","sequence":[{"name":"dynamicWithFixedIntSubarray","type":{"array":{"items":{"array":{"items":"int32","dimensions":[{"length":3}]}}}}},{"name":"dynamicWithFixedFloatSubarray","type":{"array":{"items":{"array":{"items":"float32","dimensions":[{"length":3}]}}}}},{"name":"knownDimCountWithFixedIntSubarray","type":{"array":{"items":{"array":{"items":"int32","dimensions":[{"length":3}]}},"dimensions":1}}},{"name":"knownDimCountWithFixedFloatSubarray","type":{"array":{"items":{"array":{"items":"float32","dimensions":[{"length":3}]}},"dimensions":1}}},{"name":"fixedWithFixedIntSubarray","type":{"array":{"items":{"array":{"items":"int32","dimensions":[{"length":3}]}},"dimensions":[{"length":2}]}}},{"name":"fixedWithFixedFloatSubarray","type":{"array":{"items":{"array":{"items":"float32","dimensions":[{"length":3}]}},"dimensions":[{"length":2}]}}},{"name":"nestedSubarray","type":{"array":{"items":{"array":{"items":{"array":{"items":"int32","dimensions":[{"length":3}]}},"dimensions":[{"length":2}]}}}}},{"name":"dynamicWithFixedVectorSubarray","type":{"array":{"items":{"vector":{"items":"int32","length":3}}}}},{"name":"genericSubarray","type":{"name":"TestModel.Image","typeArguments":[{"array":{"items":"int32","dimensions":[{"length":3}]}}]}}]},"types":[{"name":"Image","typeParameters":["T"],"type":{"array":{"items":"T","dimensions":[{"name":"x"},{"name":"y"}]}}}]})";
+std::string SubarraysWriterBase::schema_ = R"({"protocol":{"name":"Subarrays","sequence":[{"name":"dynamicWithFixedIntSubarray","type":{"array":{"items":{"array":{"items":"int32","dimensions":[{"length":3}]}}}}},{"name":"dynamicWithFixedFloatSubarray","type":{"array":{"items":{"array":{"items":"float32","dimensions":[{"length":3}]}}}}},{"name":"knownDimCountWithFixedIntSubarray","type":{"array":{"items":{"array":{"items":"int32","dimensions":[{"length":3}]}},"dimensions":1}}},{"name":"knownDimCountWithFixedFloatSubarray","type":{"array":{"items":{"array":{"items":"float32","dimensions":[{"length":3}]}},"dimensions":1}}},{"name":"fixedWithFixedIntSubarray","type":{"array":{"items":{"array":{"items":"int32","dimensions":[{"length":3}]}},"dimensions":[{"length":2}]}}},{"name":"fixedWithFixedFloatSubarray","type":{"array":{"items":{"array":{"items":"float32","dimensions":[{"length":3}]}},"dimensions":[{"length":2}]}}},{"name":"nestedSubarray","type":{"array":{"items":{"array":{"items":{"array":{"items":"int32","dimensions":[{"length":3}]}},"dimensions":[{"length":2}]}}}}},{"name":"dynamicWithFixedVectorSubarray","type":{"array":{"items":{"vector":{"items":"int32","length":3}}}}},{"name":"genericSubarray","type":{"name":"TestModel.Image","typeArguments":[{"array":{"items":"int32","dimensions":[{"length":3}]}}]}}]},"types":[{"name":"Image","typeParameters":["T"],"type":{"array":{"items":"T","dimensions":[{"name":"x"},{"name":"y"}]}}},{"name":"Image","typeParameters":["T"],"type":{"name":"Image.Image","typeArguments":["T"]}}]})";
 
 void SubarraysWriterBase::WriteDynamicWithFixedIntSubarray(yardl::DynamicNDArray<yardl::FixedNDArray<int32_t, 3>> const& value) {
   if (unlikely(state_ != 0)) {
@@ -3241,7 +3241,7 @@ void MapsReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
 
 } // namespace 
 
-std::string MapsWriterBase::schema_ = R"({"protocol":{"name":"Maps","sequence":[{"name":"stringToInt","type":{"map":{"keys":"string","values":"int32"}}},{"name":"intToString","type":{"map":{"keys":"int32","values":"string"}}},{"name":"stringToUnion","type":{"map":{"keys":"string","values":[{"tag":"string","type":"string"},{"tag":"int32","type":"int32"}]}}},{"name":"aliasedGeneric","type":{"name":"TestModel.AliasedMap","typeArguments":["string","int32"]}}]},"types":[{"name":"AliasedMap","typeParameters":["K","V"],"type":{"map":{"keys":"K","values":"V"}}}]})";
+std::string MapsWriterBase::schema_ = R"({"protocol":{"name":"Maps","sequence":[{"name":"stringToInt","type":{"map":{"keys":"string","values":"int32"}}},{"name":"intToString","type":{"map":{"keys":"int32","values":"string"}}},{"name":"stringToUnion","type":{"map":{"keys":"string","values":[{"tag":"string","type":"string"},{"tag":"int32","type":"int32"}]}}},{"name":"aliasedGeneric","type":{"name":"BasicTypes.AliasedMap","typeArguments":["string","int32"]}}]},"types":[{"name":"AliasedMap","typeParameters":["K","V"],"type":{"map":{"keys":"K","values":"V"}}}]})";
 
 void MapsWriterBase::WriteStringToInt(std::unordered_map<std::string, int32_t> const& value) {
   if (unlikely(state_ != 0)) {
@@ -3270,7 +3270,7 @@ void MapsWriterBase::WriteStringToUnion(std::unordered_map<std::string, std::var
   state_ = 3;
 }
 
-void MapsWriterBase::WriteAliasedGeneric(test_model::AliasedMap<std::string, int32_t> const& value) {
+void MapsWriterBase::WriteAliasedGeneric(basic_types::AliasedMap<std::string, int32_t> const& value) {
   if (unlikely(state_ != 3)) {
     MapsWriterBaseInvalidState(3, false, state_);
   }
@@ -3316,7 +3316,7 @@ void MapsReaderBase::ReadStringToUnion(std::unordered_map<std::string, std::vari
   state_ = 6;
 }
 
-void MapsReaderBase::ReadAliasedGeneric(test_model::AliasedMap<std::string, int32_t>& value) {
+void MapsReaderBase::ReadAliasedGeneric(basic_types::AliasedMap<std::string, int32_t>& value) {
   if (unlikely(state_ != 6)) {
     MapsReaderBaseInvalidState(6, state_);
   }
@@ -3349,7 +3349,7 @@ void MapsReaderBase::CopyTo(MapsWriterBase& writer) {
     writer.WriteStringToUnion(value);
   }
   {
-    test_model::AliasedMap<std::string, int32_t> value;
+    basic_types::AliasedMap<std::string, int32_t> value;
     ReadAliasedGeneric(value);
     writer.WriteAliasedGeneric(value);
   }
@@ -3391,7 +3391,7 @@ void UnionsReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
 
 } // namespace 
 
-std::string UnionsWriterBase::schema_ = R"({"protocol":{"name":"Unions","sequence":[{"name":"intOrSimpleRecord","type":[{"tag":"int32","type":"int32"},{"tag":"SimpleRecord","type":"TestModel.SimpleRecord"}]},{"name":"intOrRecordWithVlens","type":[{"tag":"int32","type":"int32"},{"tag":"RecordWithVlens","type":"TestModel.RecordWithVlens"}]},{"name":"monosotateOrIntOrSimpleRecord","type":[null,{"tag":"int32","type":"int32"},{"tag":"SimpleRecord","type":"TestModel.SimpleRecord"}]},{"name":"recordWithUnions","type":"TestModel.RecordWithUnions"}]},"types":[{"name":"RecordWithUnions","fields":[{"name":"nullOrIntOrString","type":[null,{"tag":"int32","type":"int32"},{"tag":"string","type":"string"}]},{"name":"dateOrDatetime","type":[{"tag":"time","type":"time"},{"tag":"datetime","type":"datetime"}]}]},{"name":"RecordWithVlens","fields":[{"name":"a","type":{"vector":{"items":"TestModel.SimpleRecord"}}},{"name":"b","type":"int32"},{"name":"c","type":"int32"}]},{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]}]})";
+std::string UnionsWriterBase::schema_ = R"({"protocol":{"name":"Unions","sequence":[{"name":"intOrSimpleRecord","type":[{"tag":"int32","type":"int32"},{"tag":"SimpleRecord","type":"TestModel.SimpleRecord"}]},{"name":"intOrRecordWithVlens","type":[{"tag":"int32","type":"int32"},{"tag":"RecordWithVlens","type":"TestModel.RecordWithVlens"}]},{"name":"monosotateOrIntOrSimpleRecord","type":[null,{"tag":"int32","type":"int32"},{"tag":"SimpleRecord","type":"TestModel.SimpleRecord"}]},{"name":"recordWithUnions","type":"BasicTypes.RecordWithUnions"}]},"types":[{"name":"RecordWithUnions","fields":[{"name":"nullOrIntOrString","type":[null,{"tag":"int32","type":"int32"},{"tag":"string","type":"string"}]},{"name":"dateOrDatetime","type":[{"tag":"time","type":"time"},{"tag":"datetime","type":"datetime"}]}]},{"name":"RecordWithVlens","fields":[{"name":"a","type":{"vector":{"items":"TestModel.SimpleRecord"}}},{"name":"b","type":"int32"},{"name":"c","type":"int32"}]},{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]}]})";
 
 void UnionsWriterBase::WriteIntOrSimpleRecord(std::variant<int32_t, test_model::SimpleRecord> const& value) {
   if (unlikely(state_ != 0)) {
@@ -3420,7 +3420,7 @@ void UnionsWriterBase::WriteMonosotateOrIntOrSimpleRecord(std::variant<std::mono
   state_ = 3;
 }
 
-void UnionsWriterBase::WriteRecordWithUnions(test_model::RecordWithUnions const& value) {
+void UnionsWriterBase::WriteRecordWithUnions(basic_types::RecordWithUnions const& value) {
   if (unlikely(state_ != 3)) {
     UnionsWriterBaseInvalidState(3, false, state_);
   }
@@ -3466,7 +3466,7 @@ void UnionsReaderBase::ReadMonosotateOrIntOrSimpleRecord(std::variant<std::monos
   state_ = 6;
 }
 
-void UnionsReaderBase::ReadRecordWithUnions(test_model::RecordWithUnions& value) {
+void UnionsReaderBase::ReadRecordWithUnions(basic_types::RecordWithUnions& value) {
   if (unlikely(state_ != 6)) {
     UnionsReaderBaseInvalidState(6, state_);
   }
@@ -3499,7 +3499,7 @@ void UnionsReaderBase::CopyTo(UnionsWriterBase& writer) {
     writer.WriteMonosotateOrIntOrSimpleRecord(value);
   }
   {
-    test_model::RecordWithUnions value;
+    basic_types::RecordWithUnions value;
     ReadRecordWithUnions(value);
     writer.WriteRecordWithUnions(value);
   }
@@ -3798,7 +3798,7 @@ void EnumsReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
 
 } // namespace 
 
-std::string EnumsWriterBase::schema_ = R"({"protocol":{"name":"Enums","sequence":[{"name":"single","type":"TestModel.Fruits"},{"name":"vec","type":{"vector":{"items":"TestModel.Fruits"}}},{"name":"size","type":"TestModel.SizeBasedEnum"}]},"types":[{"name":"Fruits","values":[{"symbol":"apple","value":0},{"symbol":"banana","value":1},{"symbol":"pear","value":2}]},{"name":"SizeBasedEnum","base":"size","values":[{"symbol":"a","value":0},{"symbol":"b","value":1},{"symbol":"c","value":2}]}]})";
+std::string EnumsWriterBase::schema_ = R"({"protocol":{"name":"Enums","sequence":[{"name":"single","type":"TestModel.Fruits"},{"name":"vec","type":{"vector":{"items":"TestModel.Fruits"}}},{"name":"size","type":"TestModel.SizeBasedEnum"}]},"types":[{"name":"Fruits","values":[{"symbol":"apple","value":0},{"symbol":"banana","value":1},{"symbol":"pear","value":2}]},{"name":"Fruits","type":"BasicTypes.Fruits"},{"name":"SizeBasedEnum","base":"size","values":[{"symbol":"a","value":0},{"symbol":"b","value":1},{"symbol":"c","value":2}]}]})";
 
 void EnumsWriterBase::WriteSingle(test_model::Fruits const& value) {
   if (unlikely(state_ != 0)) {
@@ -3919,7 +3919,7 @@ void FlagsReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
 
 } // namespace 
 
-std::string FlagsWriterBase::schema_ = R"({"protocol":{"name":"Flags","sequence":[{"name":"days","type":{"stream":{"items":"TestModel.DaysOfWeek"}}},{"name":"formats","type":{"stream":{"items":"TestModel.TextFormat"}}}]},"types":[{"name":"DaysOfWeek","values":[{"symbol":"monday","value":1},{"symbol":"tuesday","value":2},{"symbol":"wednesday","value":4},{"symbol":"thursday","value":8},{"symbol":"friday","value":16},{"symbol":"saturday","value":32},{"symbol":"sunday","value":64}]},{"name":"TextFormat","base":"uint64","values":[{"symbol":"regular","value":0},{"symbol":"bold","value":1},{"symbol":"italic","value":2},{"symbol":"underline","value":4},{"symbol":"strikethrough","value":8}]}]})";
+std::string FlagsWriterBase::schema_ = R"({"protocol":{"name":"Flags","sequence":[{"name":"days","type":{"stream":{"items":"TestModel.DaysOfWeek"}}},{"name":"formats","type":{"stream":{"items":"TestModel.TextFormat"}}}]},"types":[{"name":"DaysOfWeek","values":[{"symbol":"monday","value":1},{"symbol":"tuesday","value":2},{"symbol":"wednesday","value":4},{"symbol":"thursday","value":8},{"symbol":"friday","value":16},{"symbol":"saturday","value":32},{"symbol":"sunday","value":64}]},{"name":"TextFormat","base":"uint64","values":[{"symbol":"regular","value":0},{"symbol":"bold","value":1},{"symbol":"italic","value":2},{"symbol":"underline","value":4},{"symbol":"strikethrough","value":8}]},{"name":"DaysOfWeek","type":"BasicTypes.DaysOfWeek"},{"name":"TextFormat","type":"BasicTypes.TextFormat"}]})";
 
 void FlagsWriterBase::WriteDays(test_model::DaysOfWeek const& value) {
   if (unlikely(state_ != 0)) {
@@ -4405,9 +4405,9 @@ void SimpleGenericsReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
 
 } // namespace 
 
-std::string SimpleGenericsWriterBase::schema_ = R"({"protocol":{"name":"SimpleGenerics","sequence":[{"name":"floatImage","type":{"name":"TestModel.Image","typeArguments":["float32"]}},{"name":"intImage","type":{"name":"TestModel.Image","typeArguments":["int32"]}},{"name":"intImageAlternateSyntax","type":{"name":"TestModel.Image","typeArguments":["int32"]}},{"name":"stringImage","type":{"name":"TestModel.Image","typeArguments":["string"]}},{"name":"intFloatTuple","type":{"name":"TestModel.MyTuple","typeArguments":["int32","float32"]}},{"name":"floatFloatTuple","type":{"name":"TestModel.MyTuple","typeArguments":["float32","float32"]}},{"name":"intFloatTupleAlternateSyntax","type":{"name":"TestModel.MyTuple","typeArguments":["int32","float32"]}},{"name":"intStringTuple","type":{"name":"TestModel.MyTuple","typeArguments":["int32","string"]}},{"name":"streamOfTypeVariants","type":{"stream":{"items":[{"tag":"imageFloat","explicitTag":true,"type":{"name":"TestModel.Image","typeArguments":["float32"]}},{"tag":"imageDouble","explicitTag":true,"type":{"name":"TestModel.Image","typeArguments":["float64"]}}]}}}]},"types":[{"name":"Image","typeParameters":["T"],"type":{"array":{"items":"T","dimensions":[{"name":"x"},{"name":"y"}]}}},{"name":"MyTuple","typeParameters":["T1","T2"],"fields":[{"name":"v1","type":"T1"},{"name":"v2","type":"T2"}]}]})";
+std::string SimpleGenericsWriterBase::schema_ = R"({"protocol":{"name":"SimpleGenerics","sequence":[{"name":"floatImage","type":"Image.FloatImage"},{"name":"intImage","type":"Image.IntImage"},{"name":"intImageAlternateSyntax","type":{"name":"TestModel.Image","typeArguments":["int32"]}},{"name":"stringImage","type":{"name":"TestModel.Image","typeArguments":["string"]}},{"name":"intFloatTuple","type":{"name":"Tuples.Tuple","typeArguments":["int32","float32"]}},{"name":"floatFloatTuple","type":{"name":"Tuples.Tuple","typeArguments":["float32","float32"]}},{"name":"intFloatTupleAlternateSyntax","type":{"name":"Tuples.Tuple","typeArguments":["int32","float32"]}},{"name":"intStringTuple","type":{"name":"Tuples.Tuple","typeArguments":["int32","string"]}},{"name":"streamOfTypeVariants","type":{"stream":{"items":[{"tag":"imageFloat","explicitTag":true,"type":"Image.FloatImage"},{"tag":"imageDouble","explicitTag":true,"type":{"name":"TestModel.Image","typeArguments":["float64"]}}]}}}]},"types":[{"name":"FloatImage","type":{"name":"Image.Image","typeArguments":["float32"]}},{"name":"Image","typeParameters":["T"],"type":{"array":{"items":"T","dimensions":[{"name":"x"},{"name":"y"}]}}},{"name":"IntImage","type":{"name":"Image.Image","typeArguments":["int32"]}},{"name":"Image","typeParameters":["T"],"type":{"name":"Image.Image","typeArguments":["T"]}},{"name":"Tuple","typeParameters":["T1","T2"],"fields":[{"name":"v1","type":"T1"},{"name":"v2","type":"T2"}]}]})";
 
-void SimpleGenericsWriterBase::WriteFloatImage(test_model::Image<float> const& value) {
+void SimpleGenericsWriterBase::WriteFloatImage(image::FloatImage const& value) {
   if (unlikely(state_ != 0)) {
     SimpleGenericsWriterBaseInvalidState(0, false, state_);
   }
@@ -4416,7 +4416,7 @@ void SimpleGenericsWriterBase::WriteFloatImage(test_model::Image<float> const& v
   state_ = 1;
 }
 
-void SimpleGenericsWriterBase::WriteIntImage(test_model::Image<int32_t> const& value) {
+void SimpleGenericsWriterBase::WriteIntImage(image::IntImage const& value) {
   if (unlikely(state_ != 1)) {
     SimpleGenericsWriterBaseInvalidState(1, false, state_);
   }
@@ -4443,7 +4443,7 @@ void SimpleGenericsWriterBase::WriteStringImage(test_model::Image<std::string> c
   state_ = 4;
 }
 
-void SimpleGenericsWriterBase::WriteIntFloatTuple(test_model::MyTuple<int32_t, float> const& value) {
+void SimpleGenericsWriterBase::WriteIntFloatTuple(tuples::Tuple<int32_t, float> const& value) {
   if (unlikely(state_ != 4)) {
     SimpleGenericsWriterBaseInvalidState(4, false, state_);
   }
@@ -4452,7 +4452,7 @@ void SimpleGenericsWriterBase::WriteIntFloatTuple(test_model::MyTuple<int32_t, f
   state_ = 5;
 }
 
-void SimpleGenericsWriterBase::WriteFloatFloatTuple(test_model::MyTuple<float, float> const& value) {
+void SimpleGenericsWriterBase::WriteFloatFloatTuple(tuples::Tuple<float, float> const& value) {
   if (unlikely(state_ != 5)) {
     SimpleGenericsWriterBaseInvalidState(5, false, state_);
   }
@@ -4461,7 +4461,7 @@ void SimpleGenericsWriterBase::WriteFloatFloatTuple(test_model::MyTuple<float, f
   state_ = 6;
 }
 
-void SimpleGenericsWriterBase::WriteIntFloatTupleAlternateSyntax(test_model::MyTuple<int32_t, float> const& value) {
+void SimpleGenericsWriterBase::WriteIntFloatTupleAlternateSyntax(tuples::Tuple<int32_t, float> const& value) {
   if (unlikely(state_ != 6)) {
     SimpleGenericsWriterBaseInvalidState(6, false, state_);
   }
@@ -4470,7 +4470,7 @@ void SimpleGenericsWriterBase::WriteIntFloatTupleAlternateSyntax(test_model::MyT
   state_ = 7;
 }
 
-void SimpleGenericsWriterBase::WriteIntStringTuple(test_model::MyTuple<int32_t, std::string> const& value) {
+void SimpleGenericsWriterBase::WriteIntStringTuple(tuples::Tuple<int32_t, std::string> const& value) {
   if (unlikely(state_ != 7)) {
     SimpleGenericsWriterBaseInvalidState(7, false, state_);
   }
@@ -4479,7 +4479,7 @@ void SimpleGenericsWriterBase::WriteIntStringTuple(test_model::MyTuple<int32_t, 
   state_ = 8;
 }
 
-void SimpleGenericsWriterBase::WriteStreamOfTypeVariants(std::variant<test_model::Image<float>, test_model::Image<double>> const& value) {
+void SimpleGenericsWriterBase::WriteStreamOfTypeVariants(std::variant<image::FloatImage, test_model::Image<double>> const& value) {
   if (unlikely(state_ != 8)) {
     SimpleGenericsWriterBaseInvalidState(8, false, state_);
   }
@@ -4487,7 +4487,7 @@ void SimpleGenericsWriterBase::WriteStreamOfTypeVariants(std::variant<test_model
   WriteStreamOfTypeVariantsImpl(value);
 }
 
-void SimpleGenericsWriterBase::WriteStreamOfTypeVariants(std::vector<std::variant<test_model::Image<float>, test_model::Image<double>>> const& values) {
+void SimpleGenericsWriterBase::WriteStreamOfTypeVariants(std::vector<std::variant<image::FloatImage, test_model::Image<double>>> const& values) {
   if (unlikely(state_ != 8)) {
     SimpleGenericsWriterBaseInvalidState(8, false, state_);
   }
@@ -4505,7 +4505,7 @@ void SimpleGenericsWriterBase::EndStreamOfTypeVariants() {
 }
 
 // fallback implementation
-void SimpleGenericsWriterBase::WriteStreamOfTypeVariantsImpl(std::vector<std::variant<test_model::Image<float>, test_model::Image<double>>> const& values) {
+void SimpleGenericsWriterBase::WriteStreamOfTypeVariantsImpl(std::vector<std::variant<image::FloatImage, test_model::Image<double>>> const& values) {
   for (auto const& v : values) {
     WriteStreamOfTypeVariantsImpl(v);
   }
@@ -4521,7 +4521,7 @@ void SimpleGenericsWriterBase::Close() {
 
 std::string SimpleGenericsReaderBase::schema_ = SimpleGenericsWriterBase::schema_;
 
-void SimpleGenericsReaderBase::ReadFloatImage(test_model::Image<float>& value) {
+void SimpleGenericsReaderBase::ReadFloatImage(image::FloatImage& value) {
   if (unlikely(state_ != 0)) {
     SimpleGenericsReaderBaseInvalidState(0, state_);
   }
@@ -4530,7 +4530,7 @@ void SimpleGenericsReaderBase::ReadFloatImage(test_model::Image<float>& value) {
   state_ = 2;
 }
 
-void SimpleGenericsReaderBase::ReadIntImage(test_model::Image<int32_t>& value) {
+void SimpleGenericsReaderBase::ReadIntImage(image::IntImage& value) {
   if (unlikely(state_ != 2)) {
     SimpleGenericsReaderBaseInvalidState(2, state_);
   }
@@ -4557,7 +4557,7 @@ void SimpleGenericsReaderBase::ReadStringImage(test_model::Image<std::string>& v
   state_ = 8;
 }
 
-void SimpleGenericsReaderBase::ReadIntFloatTuple(test_model::MyTuple<int32_t, float>& value) {
+void SimpleGenericsReaderBase::ReadIntFloatTuple(tuples::Tuple<int32_t, float>& value) {
   if (unlikely(state_ != 8)) {
     SimpleGenericsReaderBaseInvalidState(8, state_);
   }
@@ -4566,7 +4566,7 @@ void SimpleGenericsReaderBase::ReadIntFloatTuple(test_model::MyTuple<int32_t, fl
   state_ = 10;
 }
 
-void SimpleGenericsReaderBase::ReadFloatFloatTuple(test_model::MyTuple<float, float>& value) {
+void SimpleGenericsReaderBase::ReadFloatFloatTuple(tuples::Tuple<float, float>& value) {
   if (unlikely(state_ != 10)) {
     SimpleGenericsReaderBaseInvalidState(10, state_);
   }
@@ -4575,7 +4575,7 @@ void SimpleGenericsReaderBase::ReadFloatFloatTuple(test_model::MyTuple<float, fl
   state_ = 12;
 }
 
-void SimpleGenericsReaderBase::ReadIntFloatTupleAlternateSyntax(test_model::MyTuple<int32_t, float>& value) {
+void SimpleGenericsReaderBase::ReadIntFloatTupleAlternateSyntax(tuples::Tuple<int32_t, float>& value) {
   if (unlikely(state_ != 12)) {
     SimpleGenericsReaderBaseInvalidState(12, state_);
   }
@@ -4584,7 +4584,7 @@ void SimpleGenericsReaderBase::ReadIntFloatTupleAlternateSyntax(test_model::MyTu
   state_ = 14;
 }
 
-void SimpleGenericsReaderBase::ReadIntStringTuple(test_model::MyTuple<int32_t, std::string>& value) {
+void SimpleGenericsReaderBase::ReadIntStringTuple(tuples::Tuple<int32_t, std::string>& value) {
   if (unlikely(state_ != 14)) {
     SimpleGenericsReaderBaseInvalidState(14, state_);
   }
@@ -4593,7 +4593,7 @@ void SimpleGenericsReaderBase::ReadIntStringTuple(test_model::MyTuple<int32_t, s
   state_ = 16;
 }
 
-bool SimpleGenericsReaderBase::ReadStreamOfTypeVariants(std::variant<test_model::Image<float>, test_model::Image<double>>& value) {
+bool SimpleGenericsReaderBase::ReadStreamOfTypeVariants(std::variant<image::FloatImage, test_model::Image<double>>& value) {
   if (unlikely(state_ != 16)) {
     if (state_ == 17) {
       state_ = 18;
@@ -4609,7 +4609,7 @@ bool SimpleGenericsReaderBase::ReadStreamOfTypeVariants(std::variant<test_model:
   return result;
 }
 
-bool SimpleGenericsReaderBase::ReadStreamOfTypeVariants(std::vector<std::variant<test_model::Image<float>, test_model::Image<double>>>& values) {
+bool SimpleGenericsReaderBase::ReadStreamOfTypeVariants(std::vector<std::variant<image::FloatImage, test_model::Image<double>>>& values) {
   if (values.capacity() == 0) {
     throw std::runtime_error("vector must have a nonzero capacity.");
   }
@@ -4630,7 +4630,7 @@ bool SimpleGenericsReaderBase::ReadStreamOfTypeVariants(std::vector<std::variant
 }
 
 // fallback implementation
-bool SimpleGenericsReaderBase::ReadStreamOfTypeVariantsImpl(std::vector<std::variant<test_model::Image<float>, test_model::Image<double>>>& values) {
+bool SimpleGenericsReaderBase::ReadStreamOfTypeVariantsImpl(std::vector<std::variant<image::FloatImage, test_model::Image<double>>>& values) {
   size_t i = 0;
   while (true) {
     if (i == values.size()) {
@@ -4656,12 +4656,12 @@ void SimpleGenericsReaderBase::Close() {
 }
 void SimpleGenericsReaderBase::CopyTo(SimpleGenericsWriterBase& writer, size_t stream_of_type_variants_buffer_size) {
   {
-    test_model::Image<float> value;
+    image::FloatImage value;
     ReadFloatImage(value);
     writer.WriteFloatImage(value);
   }
   {
-    test_model::Image<int32_t> value;
+    image::IntImage value;
     ReadIntImage(value);
     writer.WriteIntImage(value);
   }
@@ -4676,34 +4676,34 @@ void SimpleGenericsReaderBase::CopyTo(SimpleGenericsWriterBase& writer, size_t s
     writer.WriteStringImage(value);
   }
   {
-    test_model::MyTuple<int32_t, float> value;
+    tuples::Tuple<int32_t, float> value;
     ReadIntFloatTuple(value);
     writer.WriteIntFloatTuple(value);
   }
   {
-    test_model::MyTuple<float, float> value;
+    tuples::Tuple<float, float> value;
     ReadFloatFloatTuple(value);
     writer.WriteFloatFloatTuple(value);
   }
   {
-    test_model::MyTuple<int32_t, float> value;
+    tuples::Tuple<int32_t, float> value;
     ReadIntFloatTupleAlternateSyntax(value);
     writer.WriteIntFloatTupleAlternateSyntax(value);
   }
   {
-    test_model::MyTuple<int32_t, std::string> value;
+    tuples::Tuple<int32_t, std::string> value;
     ReadIntStringTuple(value);
     writer.WriteIntStringTuple(value);
   }
   if (stream_of_type_variants_buffer_size > 1) {
-    std::vector<std::variant<test_model::Image<float>, test_model::Image<double>>> values;
+    std::vector<std::variant<image::FloatImage, test_model::Image<double>>> values;
     values.reserve(stream_of_type_variants_buffer_size);
     while(ReadStreamOfTypeVariants(values)) {
       writer.WriteStreamOfTypeVariants(values);
     }
     writer.EndStreamOfTypeVariants();
   } else {
-    std::variant<test_model::Image<float>, test_model::Image<double>> value;
+    std::variant<image::FloatImage, test_model::Image<double>> value;
     while(ReadStreamOfTypeVariants(value)) {
       writer.WriteStreamOfTypeVariants(value);
     }
@@ -4750,7 +4750,7 @@ void AdvancedGenericsReaderBaseInvalidState(uint8_t attempted, uint8_t current) 
 
 } // namespace 
 
-std::string AdvancedGenericsWriterBase::schema_ = R"({"protocol":{"name":"AdvancedGenerics","sequence":[{"name":"floatImageImage","type":{"name":"TestModel.Image","typeArguments":[{"name":"TestModel.Image","typeArguments":["float32"]}]}},{"name":"genericRecord1","type":{"name":"TestModel.GenericRecord","typeArguments":["int32","string"]}},{"name":"tupleOfOptionals","type":{"name":"TestModel.MyTuple","typeArguments":[[null,"int32"],[null,"string"]]}},{"name":"tupleOfOptionalsAlternateSyntax","type":{"name":"TestModel.MyTuple","typeArguments":[[null,"int32"],[null,"string"]]}},{"name":"tupleOfVectors","type":{"name":"TestModel.MyTuple","typeArguments":[{"vector":{"items":"int32"}},{"vector":{"items":"float32"}}]}}]},"types":[{"name":"GenericRecord","typeParameters":["T1","T2"],"fields":[{"name":"scalar1","type":"T1"},{"name":"scalar2","type":"T2"},{"name":"vector1","type":{"vector":{"items":"T1"}}},{"name":"image2","type":{"name":"TestModel.Image","typeArguments":["T2"]}}]},{"name":"Image","typeParameters":["T"],"type":{"array":{"items":"T","dimensions":[{"name":"x"},{"name":"y"}]}}},{"name":"MyTuple","typeParameters":["T1","T2"],"fields":[{"name":"v1","type":"T1"},{"name":"v2","type":"T2"}]}]})";
+std::string AdvancedGenericsWriterBase::schema_ = R"({"protocol":{"name":"AdvancedGenerics","sequence":[{"name":"floatImageImage","type":{"name":"TestModel.Image","typeArguments":[{"name":"TestModel.Image","typeArguments":["float32"]}]}},{"name":"genericRecord1","type":{"name":"TestModel.GenericRecord","typeArguments":["int32","string"]}},{"name":"tupleOfOptionals","type":{"name":"TestModel.MyTuple","typeArguments":[[null,"int32"],[null,"string"]]}},{"name":"tupleOfOptionalsAlternateSyntax","type":{"name":"TestModel.MyTuple","typeArguments":[[null,"int32"],[null,"string"]]}},{"name":"tupleOfVectors","type":{"name":"TestModel.MyTuple","typeArguments":[{"vector":{"items":"int32"}},{"vector":{"items":"float32"}}]}}]},"types":[{"name":"MyTuple","typeParameters":["T1","T2"],"type":{"name":"Tuples.Tuple","typeArguments":["T1","T2"]}},{"name":"Image","typeParameters":["T"],"type":{"array":{"items":"T","dimensions":[{"name":"x"},{"name":"y"}]}}},{"name":"GenericRecord","typeParameters":["T1","T2"],"fields":[{"name":"scalar1","type":"T1"},{"name":"scalar2","type":"T2"},{"name":"vector1","type":{"vector":{"items":"T1"}}},{"name":"image2","type":{"name":"TestModel.Image","typeArguments":["T2"]}}]},{"name":"Image","typeParameters":["T"],"type":{"name":"Image.Image","typeArguments":["T"]}},{"name":"MyTuple","typeParameters":["T1","T2"],"type":{"name":"BasicTypes.MyTuple","typeArguments":["T1","T2"]}},{"name":"Tuple","typeParameters":["T1","T2"],"fields":[{"name":"v1","type":"T1"},{"name":"v2","type":"T2"}]}]})";
 
 void AdvancedGenericsWriterBase::WriteFloatImageImage(test_model::Image<test_model::Image<float>> const& value) {
   if (unlikely(state_ != 0)) {
@@ -4941,7 +4941,7 @@ void AliasesReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
 
 } // namespace 
 
-std::string AliasesWriterBase::schema_ = R"({"protocol":{"name":"Aliases","sequence":[{"name":"aliasedString","type":"TestModel.AliasedString"},{"name":"aliasedEnum","type":"TestModel.AliasedEnum"},{"name":"aliasedOpenGeneric","type":{"name":"TestModel.AliasedOpenGeneric","typeArguments":["TestModel.AliasedString","TestModel.AliasedEnum"]}},{"name":"aliasedClosedGeneric","type":"TestModel.AliasedClosedGeneric"},{"name":"aliasedOptional","type":"TestModel.AliasedOptional"},{"name":"aliasedGenericOptional","type":{"name":"TestModel.AliasedGenericOptional","typeArguments":["float32"]}},{"name":"aliasedGenericUnion2","type":{"name":"TestModel.AliasedGenericUnion2","typeArguments":["TestModel.AliasedString","TestModel.AliasedEnum"]}},{"name":"aliasedGenericVector","type":{"name":"TestModel.AliasedGenericVector","typeArguments":["float32"]}},{"name":"aliasedGenericFixedVector","type":{"name":"TestModel.AliasedGenericFixedVector","typeArguments":["float32"]}},{"name":"streamOfAliasedGenericUnion2","type":{"stream":{"items":{"name":"TestModel.AliasedGenericUnion2","typeArguments":["TestModel.AliasedString","TestModel.AliasedEnum"]}}}}]},"types":[{"name":"AliasedClosedGeneric","type":{"name":"TestModel.AliasedTuple","typeArguments":["TestModel.AliasedString","TestModel.AliasedEnum"]}},{"name":"AliasedEnum","type":"TestModel.Fruits"},{"name":"AliasedGenericFixedVector","typeParameters":["T"],"type":{"vector":{"items":"T","length":3}}},{"name":"AliasedGenericOptional","typeParameters":["T"],"type":[null,"T"]},{"name":"AliasedGenericUnion2","typeParameters":["T1","T2"],"type":{"name":"TestModel.GenericUnion2","typeArguments":["T1","T2"]}},{"name":"AliasedGenericVector","typeParameters":["T"],"type":{"vector":{"items":"T"}}},{"name":"AliasedOpenGeneric","typeParameters":["T1","T2"],"type":{"name":"TestModel.AliasedTuple","typeArguments":["T1","T2"]}},{"name":"AliasedOptional","type":[null,"int32"]},{"name":"AliasedString","type":"string"},{"name":"AliasedTuple","typeParameters":["T1","T2"],"type":{"name":"TestModel.MyTuple","typeArguments":["T1","T2"]}},{"name":"Fruits","values":[{"symbol":"apple","value":0},{"symbol":"banana","value":1},{"symbol":"pear","value":2}]},{"name":"GenericUnion2","typeParameters":["T1","T2"],"type":[{"tag":"T1","type":"T1"},{"tag":"T2","type":"T2"}]},{"name":"MyTuple","typeParameters":["T1","T2"],"fields":[{"name":"v1","type":"T1"},{"name":"v2","type":"T2"}]}]})";
+std::string AliasesWriterBase::schema_ = R"({"protocol":{"name":"Aliases","sequence":[{"name":"aliasedString","type":"TestModel.AliasedString"},{"name":"aliasedEnum","type":"TestModel.AliasedEnum"},{"name":"aliasedOpenGeneric","type":{"name":"TestModel.AliasedOpenGeneric","typeArguments":["TestModel.AliasedString","TestModel.AliasedEnum"]}},{"name":"aliasedClosedGeneric","type":"TestModel.AliasedClosedGeneric"},{"name":"aliasedOptional","type":"TestModel.AliasedOptional"},{"name":"aliasedGenericOptional","type":{"name":"TestModel.AliasedGenericOptional","typeArguments":["float32"]}},{"name":"aliasedGenericUnion2","type":{"name":"TestModel.AliasedGenericUnion2","typeArguments":["TestModel.AliasedString","TestModel.AliasedEnum"]}},{"name":"aliasedGenericVector","type":{"name":"TestModel.AliasedGenericVector","typeArguments":["float32"]}},{"name":"aliasedGenericFixedVector","type":{"name":"TestModel.AliasedGenericFixedVector","typeArguments":["float32"]}},{"name":"streamOfAliasedGenericUnion2","type":{"stream":{"items":{"name":"TestModel.AliasedGenericUnion2","typeArguments":["TestModel.AliasedString","TestModel.AliasedEnum"]}}}}]},"types":[{"name":"Fruits","values":[{"symbol":"apple","value":0},{"symbol":"banana","value":1},{"symbol":"pear","value":2}]},{"name":"GenericUnion2","typeParameters":["T1","T2"],"type":[{"tag":"T1","type":"T1"},{"tag":"T2","type":"T2"}]},{"name":"GenericVector","typeParameters":["T"],"type":{"vector":{"items":"T"}}},{"name":"MyTuple","typeParameters":["T1","T2"],"type":{"name":"Tuples.Tuple","typeArguments":["T1","T2"]}},{"name":"AliasedClosedGeneric","type":{"name":"TestModel.AliasedTuple","typeArguments":["TestModel.AliasedString","TestModel.AliasedEnum"]}},{"name":"AliasedEnum","type":"TestModel.Fruits"},{"name":"AliasedGenericFixedVector","typeParameters":["T"],"type":{"vector":{"items":"T","length":3}}},{"name":"AliasedGenericOptional","typeParameters":["T"],"type":[null,"T"]},{"name":"AliasedGenericUnion2","typeParameters":["T1","T2"],"type":{"name":"BasicTypes.GenericUnion2","typeArguments":["T1","T2"]}},{"name":"AliasedGenericVector","typeParameters":["T"],"type":{"name":"BasicTypes.GenericVector","typeArguments":["T"]}},{"name":"AliasedOpenGeneric","typeParameters":["T1","T2"],"type":{"name":"TestModel.AliasedTuple","typeArguments":["T1","T2"]}},{"name":"AliasedOptional","type":[null,"int32"]},{"name":"AliasedString","type":"string"},{"name":"AliasedTuple","typeParameters":["T1","T2"],"type":{"name":"TestModel.MyTuple","typeArguments":["T1","T2"]}},{"name":"Fruits","type":"BasicTypes.Fruits"},{"name":"MyTuple","typeParameters":["T1","T2"],"type":{"name":"BasicTypes.MyTuple","typeArguments":["T1","T2"]}},{"name":"Tuple","typeParameters":["T1","T2"],"fields":[{"name":"v1","type":"T1"},{"name":"v2","type":"T2"}]}]})";
 
 void AliasesWriterBase::WriteAliasedString(test_model::AliasedString const& value) {
   if (unlikely(state_ != 0)) {
@@ -5557,7 +5557,7 @@ void ProtocolWithComputedFieldsReaderBaseInvalidState(uint8_t attempted, uint8_t
 
 } // namespace 
 
-std::string ProtocolWithComputedFieldsWriterBase::schema_ = R"({"protocol":{"name":"ProtocolWithComputedFields","sequence":[{"name":"recordWithComputedFields","type":"TestModel.RecordWithComputedFields"}]},"types":[{"name":"GenericRecordWithComputedFields","typeParameters":["T0","T1"],"fields":[{"name":"f1","type":[{"tag":"T0","type":"T0"},{"tag":"T1","type":"T1"}]}]},{"name":"MyTuple","typeParameters":["T1","T2"],"fields":[{"name":"v1","type":"T1"},{"name":"v2","type":"T2"}]},{"name":"NamedNDArray","type":{"array":{"items":"int32","dimensions":[{"name":"dimA"},{"name":"dimB"}]}}},{"name":"RecordWithComputedFields","fields":[{"name":"arrayField","type":{"array":{"items":"int32","dimensions":[{"name":"x"},{"name":"y"}]}}},{"name":"arrayFieldMapDimensions","type":{"array":{"items":"int32","dimensions":[{"name":"x"},{"name":"y"}]}}},{"name":"dynamicArrayField","type":{"array":{"items":"int32"}}},{"name":"fixedArrayField","type":{"array":{"items":"int32","dimensions":[{"name":"x","length":3},{"name":"y","length":4}]}}},{"name":"intField","type":"int32"},{"name":"int8Field","type":"int8"},{"name":"uint8Field","type":"uint8"},{"name":"int16Field","type":"int16"},{"name":"uint16Field","type":"uint16"},{"name":"uint32Field","type":"uint32"},{"name":"int64Field","type":"int64"},{"name":"uint64Field","type":"uint64"},{"name":"sizeField","type":"size"},{"name":"float32Field","type":"float32"},{"name":"float64Field","type":"float64"},{"name":"complexfloat32Field","type":"complexfloat32"},{"name":"complexfloat64Field","type":"complexfloat64"},{"name":"stringField","type":"string"},{"name":"tupleField","type":{"name":"TestModel.MyTuple","typeArguments":["int32","int32"]}},{"name":"vectorField","type":{"vector":{"items":"int32"}}},{"name":"vectorOfVectorsField","type":{"vector":{"items":{"vector":{"items":"int32"}}}}},{"name":"fixedVectorField","type":{"vector":{"items":"int32","length":3}}},{"name":"optionalNamedArray","type":[null,"TestModel.NamedNDArray"]},{"name":"intFloatUnion","type":[{"tag":"int32","type":"int32"},{"tag":"float32","type":"float32"}]},{"name":"nullableIntFloatUnion","type":[null,{"tag":"int32","type":"int32"},{"tag":"float32","type":"float32"}]},{"name":"unionWithNestedGenericUnion","type":[{"tag":"int","explicitTag":true,"type":"int32"},{"tag":"genericRecordWithComputedFields","explicitTag":true,"type":{"name":"TestModel.GenericRecordWithComputedFields","typeArguments":["string","float32"]}}]},{"name":"mapField","type":{"map":{"keys":"string","values":"string"}}}]}]})";
+std::string ProtocolWithComputedFieldsWriterBase::schema_ = R"({"protocol":{"name":"ProtocolWithComputedFields","sequence":[{"name":"recordWithComputedFields","type":"TestModel.RecordWithComputedFields"}]},"types":[{"name":"GenericRecordWithComputedFields","typeParameters":["T0","T1"],"fields":[{"name":"f1","type":[{"tag":"T0","type":"T0"},{"tag":"T1","type":"T1"}]}]},{"name":"MyTuple","typeParameters":["T1","T2"],"type":{"name":"Tuples.Tuple","typeArguments":["T1","T2"]}},{"name":"MyTuple","typeParameters":["T1","T2"],"type":{"name":"BasicTypes.MyTuple","typeArguments":["T1","T2"]}},{"name":"NamedNDArray","type":{"array":{"items":"int32","dimensions":[{"name":"dimA"},{"name":"dimB"}]}}},{"name":"RecordWithComputedFields","fields":[{"name":"arrayField","type":{"array":{"items":"int32","dimensions":[{"name":"x"},{"name":"y"}]}}},{"name":"arrayFieldMapDimensions","type":{"array":{"items":"int32","dimensions":[{"name":"x"},{"name":"y"}]}}},{"name":"dynamicArrayField","type":{"array":{"items":"int32"}}},{"name":"fixedArrayField","type":{"array":{"items":"int32","dimensions":[{"name":"x","length":3},{"name":"y","length":4}]}}},{"name":"intField","type":"int32"},{"name":"int8Field","type":"int8"},{"name":"uint8Field","type":"uint8"},{"name":"int16Field","type":"int16"},{"name":"uint16Field","type":"uint16"},{"name":"uint32Field","type":"uint32"},{"name":"int64Field","type":"int64"},{"name":"uint64Field","type":"uint64"},{"name":"sizeField","type":"size"},{"name":"float32Field","type":"float32"},{"name":"float64Field","type":"float64"},{"name":"complexfloat32Field","type":"complexfloat32"},{"name":"complexfloat64Field","type":"complexfloat64"},{"name":"stringField","type":"string"},{"name":"tupleField","type":{"name":"TestModel.MyTuple","typeArguments":["int32","int32"]}},{"name":"vectorField","type":{"vector":{"items":"int32"}}},{"name":"vectorOfVectorsField","type":{"vector":{"items":{"vector":{"items":"int32"}}}}},{"name":"fixedVectorField","type":{"vector":{"items":"int32","length":3}}},{"name":"optionalNamedArray","type":[null,"TestModel.NamedNDArray"]},{"name":"intFloatUnion","type":[{"tag":"int32","type":"int32"},{"tag":"float32","type":"float32"}]},{"name":"nullableIntFloatUnion","type":[null,{"tag":"int32","type":"int32"},{"tag":"float32","type":"float32"}]},{"name":"unionWithNestedGenericUnion","type":[{"tag":"int","explicitTag":true,"type":"int32"},{"tag":"genericRecordWithComputedFields","explicitTag":true,"type":{"name":"BasicTypes.GenericRecordWithComputedFields","typeArguments":["string","float32"]}}]},{"name":"mapField","type":{"map":{"keys":"string","values":"string"}}}]},{"name":"Tuple","typeParameters":["T1","T2"],"fields":[{"name":"v1","type":"T1"},{"name":"v2","type":"T2"}]}]})";
 
 void ProtocolWithComputedFieldsWriterBase::WriteRecordWithComputedFields(test_model::RecordWithComputedFields const& value) {
   if (unlikely(state_ != 0)) {

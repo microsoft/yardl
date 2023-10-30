@@ -223,7 +223,39 @@ H5::CompType InnerUnion3Ddl(bool nullable, H5::DataType const& t0, std::string c
 }
 }
 
-namespace test_model::hdf5 {
+namespace tuples::hdf5 {
+namespace {
+template <typename _T1_Inner, typename T1, typename _T2_Inner, typename T2>
+struct _Inner_Tuple {
+  _Inner_Tuple() {} 
+  _Inner_Tuple(tuples::Tuple<T1, T2> const& o) 
+      : v1(o.v1),
+      v2(o.v2) {
+  }
+
+  void ToOuter (tuples::Tuple<T1, T2>& o) const {
+    yardl::hdf5::ToOuter(v1, o.v1);
+    yardl::hdf5::ToOuter(v2, o.v2);
+  }
+
+  _T1_Inner v1;
+  _T2_Inner v2;
+};
+
+template <typename _T1_Inner, typename T1, typename _T2_Inner, typename T2>
+[[maybe_unused]] H5::CompType GetTupleHdf5Ddl(H5::DataType const& T1_type, H5::DataType const& T2_type) {
+  using RecordType = tuples::hdf5::_Inner_Tuple<_T1_Inner, T1, _T2_Inner, T2>;
+  H5::CompType t(sizeof(RecordType));
+  t.insertMember("v1", HOFFSET(RecordType, v1), T1_type);
+  t.insertMember("v2", HOFFSET(RecordType, v2), T2_type);
+  return t;
+}
+
+} // namespace 
+
+} // namespace tuples::hdf5
+
+namespace basic_types::hdf5 {
 namespace {
 [[maybe_unused]] H5::EnumType GetFruitsHdf5Ddl() {
   H5::EnumType t(H5::PredType::NATIVE_INT32);
@@ -236,6 +268,64 @@ namespace {
   return t;
 }
 
+struct _Inner_RecordWithUnions {
+  _Inner_RecordWithUnions() {} 
+  _Inner_RecordWithUnions(basic_types::RecordWithUnions const& o) 
+      : null_or_int_or_string(o.null_or_int_or_string),
+      date_or_datetime(o.date_or_datetime) {
+  }
+
+  void ToOuter (basic_types::RecordWithUnions& o) const {
+    yardl::hdf5::ToOuter(null_or_int_or_string, o.null_or_int_or_string);
+    yardl::hdf5::ToOuter(date_or_datetime, o.date_or_datetime);
+  }
+
+  ::InnerUnion2<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string> null_or_int_or_string;
+  ::InnerUnion2<yardl::Time, yardl::Time, yardl::DateTime, yardl::DateTime> date_or_datetime;
+};
+
+template <typename _T0_Inner, typename T0, typename _T1_Inner, typename T1>
+struct _Inner_GenericRecordWithComputedFields {
+  _Inner_GenericRecordWithComputedFields() {} 
+  _Inner_GenericRecordWithComputedFields(basic_types::GenericRecordWithComputedFields<T0, T1> const& o) 
+      : f1(o.f1) {
+  }
+
+  void ToOuter (basic_types::GenericRecordWithComputedFields<T0, T1>& o) const {
+    yardl::hdf5::ToOuter(f1, o.f1);
+  }
+
+  ::InnerUnion2<_T0_Inner, T0, _T1_Inner, T1> f1;
+};
+
+[[maybe_unused]] H5::CompType GetRecordWithUnionsHdf5Ddl() {
+  using RecordType = basic_types::hdf5::_Inner_RecordWithUnions;
+  H5::CompType t(sizeof(RecordType));
+  t.insertMember("nullOrIntOrString", HOFFSET(RecordType, null_or_int_or_string), ::InnerUnion2Ddl<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string>(true, H5::PredType::NATIVE_INT32, "int32", yardl::hdf5::InnerVlenStringDdl(), "string"));
+  t.insertMember("dateOrDatetime", HOFFSET(RecordType, date_or_datetime), ::InnerUnion2Ddl<yardl::Time, yardl::Time, yardl::DateTime, yardl::DateTime>(false, yardl::hdf5::TimeTypeDdl(), "time", yardl::hdf5::DateTimeTypeDdl(), "datetime"));
+  return t;
+}
+
+template <typename _T0_Inner, typename T0, typename _T1_Inner, typename T1>
+[[maybe_unused]] H5::CompType GetGenericRecordWithComputedFieldsHdf5Ddl(H5::DataType const& T0_type, H5::DataType const& T1_type) {
+  using RecordType = basic_types::hdf5::_Inner_GenericRecordWithComputedFields<_T0_Inner, T0, _T1_Inner, T1>;
+  H5::CompType t(sizeof(RecordType));
+  t.insertMember("f1", HOFFSET(RecordType, f1), ::InnerUnion2Ddl<_T0_Inner, T0, _T1_Inner, T1>(false, T0_type, "T0", T1_type, "T1"));
+  return t;
+}
+
+} // namespace 
+
+} // namespace basic_types::hdf5
+
+namespace image::hdf5 {
+namespace {
+} // namespace 
+
+} // namespace image::hdf5
+
+namespace test_model::hdf5 {
+namespace {
 [[maybe_unused]] H5::EnumType GetUInt64EnumHdf5Ddl() {
   H5::EnumType t(H5::PredType::NATIVE_UINT64);
   uint64_t i = 9223372036854775808ULL;
@@ -598,22 +688,6 @@ struct _Inner_RecordWithVlenCollections {
   yardl::hdf5::InnerNdArray<int32_t, int32_t, 2> array;
 };
 
-struct _Inner_RecordWithUnions {
-  _Inner_RecordWithUnions() {} 
-  _Inner_RecordWithUnions(test_model::RecordWithUnions const& o) 
-      : null_or_int_or_string(o.null_or_int_or_string),
-      date_or_datetime(o.date_or_datetime) {
-  }
-
-  void ToOuter (test_model::RecordWithUnions& o) const {
-    yardl::hdf5::ToOuter(null_or_int_or_string, o.null_or_int_or_string);
-    yardl::hdf5::ToOuter(date_or_datetime, o.date_or_datetime);
-  }
-
-  ::InnerUnion2<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string> null_or_int_or_string;
-  ::InnerUnion2<yardl::Time, yardl::Time, yardl::DateTime, yardl::DateTime> date_or_datetime;
-};
-
 template <typename _T1_Inner, typename T1, typename _T2_Inner, typename T2>
 struct _Inner_GenericRecord {
   _Inner_GenericRecord() {} 
@@ -637,23 +711,6 @@ struct _Inner_GenericRecord {
   yardl::hdf5::InnerNdArray<_T2_Inner, T2, 2> image_2;
 };
 
-template <typename _T1_Inner, typename T1, typename _T2_Inner, typename T2>
-struct _Inner_MyTuple {
-  _Inner_MyTuple() {} 
-  _Inner_MyTuple(test_model::MyTuple<T1, T2> const& o) 
-      : v1(o.v1),
-      v2(o.v2) {
-  }
-
-  void ToOuter (test_model::MyTuple<T1, T2>& o) const {
-    yardl::hdf5::ToOuter(v1, o.v1);
-    yardl::hdf5::ToOuter(v2, o.v2);
-  }
-
-  _T1_Inner v1;
-  _T2_Inner v2;
-};
-
 struct _Inner_RecordWithAliasedGenerics {
   _Inner_RecordWithAliasedGenerics() {} 
   _Inner_RecordWithAliasedGenerics(test_model::RecordWithAliasedGenerics const& o) 
@@ -666,22 +723,8 @@ struct _Inner_RecordWithAliasedGenerics {
     yardl::hdf5::ToOuter(aliased_strings, o.aliased_strings);
   }
 
-  test_model::hdf5::_Inner_MyTuple<yardl::hdf5::InnerVlenString, std::string, yardl::hdf5::InnerVlenString, std::string> my_strings;
-  test_model::hdf5::_Inner_MyTuple<yardl::hdf5::InnerVlenString, std::string, yardl::hdf5::InnerVlenString, std::string> aliased_strings;
-};
-
-template <typename _T0_Inner, typename T0, typename _T1_Inner, typename T1>
-struct _Inner_GenericRecordWithComputedFields {
-  _Inner_GenericRecordWithComputedFields() {} 
-  _Inner_GenericRecordWithComputedFields(test_model::GenericRecordWithComputedFields<T0, T1> const& o) 
-      : f1(o.f1) {
-  }
-
-  void ToOuter (test_model::GenericRecordWithComputedFields<T0, T1>& o) const {
-    yardl::hdf5::ToOuter(f1, o.f1);
-  }
-
-  ::InnerUnion2<_T0_Inner, T0, _T1_Inner, T1> f1;
+  tuples::hdf5::_Inner_Tuple<yardl::hdf5::InnerVlenString, std::string, yardl::hdf5::InnerVlenString, std::string> my_strings;
+  tuples::hdf5::_Inner_Tuple<yardl::hdf5::InnerVlenString, std::string, yardl::hdf5::InnerVlenString, std::string> aliased_strings;
 };
 
 struct _Inner_RecordWithComputedFields {
@@ -764,14 +807,14 @@ struct _Inner_RecordWithComputedFields {
   std::complex<float> complexfloat32_field;
   std::complex<double> complexfloat64_field;
   yardl::hdf5::InnerVlenString string_field;
-  test_model::MyTuple<int32_t, int32_t> tuple_field;
+  tuples::Tuple<int32_t, int32_t> tuple_field;
   yardl::hdf5::InnerVlen<int32_t, int32_t> vector_field;
   yardl::hdf5::InnerVlen<yardl::hdf5::InnerVlen<int32_t, int32_t>, std::vector<int32_t>> vector_of_vectors_field;
   std::array<int32_t, 3> fixed_vector_field;
   yardl::hdf5::InnerOptional<yardl::hdf5::InnerNdArray<int32_t, int32_t, 2>, test_model::NamedNDArray> optional_named_array;
   ::InnerUnion2<int32_t, int32_t, float, float> int_float_union;
   ::InnerUnion2<int32_t, int32_t, float, float> nullable_int_float_union;
-  ::InnerUnion2<int32_t, int32_t, test_model::hdf5::_Inner_GenericRecordWithComputedFields<yardl::hdf5::InnerVlenString, std::string, float, float>, test_model::GenericRecordWithComputedFields<std::string, float>> union_with_nested_generic_union;
+  ::InnerUnion2<int32_t, int32_t, basic_types::hdf5::_Inner_GenericRecordWithComputedFields<yardl::hdf5::InnerVlenString, std::string, float, float>, basic_types::GenericRecordWithComputedFields<std::string, float>> union_with_nested_generic_union;
   yardl::hdf5::InnerMap<yardl::hdf5::InnerVlenString, std::string, yardl::hdf5::InnerVlenString, std::string> map_field;
 };
 
@@ -1034,18 +1077,10 @@ struct _Inner_RecordWithKeywordFields {
   return t;
 }
 
-[[maybe_unused]] H5::CompType GetRecordWithUnionsHdf5Ddl() {
-  using RecordType = test_model::hdf5::_Inner_RecordWithUnions;
-  H5::CompType t(sizeof(RecordType));
-  t.insertMember("nullOrIntOrString", HOFFSET(RecordType, null_or_int_or_string), ::InnerUnion2Ddl<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string>(true, H5::PredType::NATIVE_INT32, "int32", yardl::hdf5::InnerVlenStringDdl(), "string"));
-  t.insertMember("dateOrDatetime", HOFFSET(RecordType, date_or_datetime), ::InnerUnion2Ddl<yardl::Time, yardl::Time, yardl::DateTime, yardl::DateTime>(false, yardl::hdf5::TimeTypeDdl(), "time", yardl::hdf5::DateTimeTypeDdl(), "datetime"));
-  return t;
-}
-
 [[maybe_unused]] H5::CompType GetRecordWithEnumsHdf5Ddl() {
   using RecordType = test_model::RecordWithEnums;
   H5::CompType t(sizeof(RecordType));
-  t.insertMember("enum", HOFFSET(RecordType, enum_field), test_model::hdf5::GetFruitsHdf5Ddl());
+  t.insertMember("enum", HOFFSET(RecordType, enum_field), basic_types::hdf5::GetFruitsHdf5Ddl());
   t.insertMember("flags", HOFFSET(RecordType, flags), H5::PredType::NATIVE_INT32);
   t.insertMember("flags2", HOFFSET(RecordType, flags_2), H5::PredType::NATIVE_UINT64);
   return t;
@@ -1062,28 +1097,11 @@ template <typename _T1_Inner, typename T1, typename _T2_Inner, typename T2>
   return t;
 }
 
-template <typename _T1_Inner, typename T1, typename _T2_Inner, typename T2>
-[[maybe_unused]] H5::CompType GetMyTupleHdf5Ddl(H5::DataType const& T1_type, H5::DataType const& T2_type) {
-  using RecordType = test_model::hdf5::_Inner_MyTuple<_T1_Inner, T1, _T2_Inner, T2>;
-  H5::CompType t(sizeof(RecordType));
-  t.insertMember("v1", HOFFSET(RecordType, v1), T1_type);
-  t.insertMember("v2", HOFFSET(RecordType, v2), T2_type);
-  return t;
-}
-
 [[maybe_unused]] H5::CompType GetRecordWithAliasedGenericsHdf5Ddl() {
   using RecordType = test_model::hdf5::_Inner_RecordWithAliasedGenerics;
   H5::CompType t(sizeof(RecordType));
-  t.insertMember("myStrings", HOFFSET(RecordType, my_strings), test_model::hdf5::GetMyTupleHdf5Ddl<yardl::hdf5::InnerVlenString, std::string, yardl::hdf5::InnerVlenString, std::string>(yardl::hdf5::InnerVlenStringDdl(), yardl::hdf5::InnerVlenStringDdl()));
-  t.insertMember("aliasedStrings", HOFFSET(RecordType, aliased_strings), test_model::hdf5::GetMyTupleHdf5Ddl<yardl::hdf5::InnerVlenString, std::string, yardl::hdf5::InnerVlenString, std::string>(yardl::hdf5::InnerVlenStringDdl(), yardl::hdf5::InnerVlenStringDdl()));
-  return t;
-}
-
-template <typename _T0_Inner, typename T0, typename _T1_Inner, typename T1>
-[[maybe_unused]] H5::CompType GetGenericRecordWithComputedFieldsHdf5Ddl(H5::DataType const& T0_type, H5::DataType const& T1_type) {
-  using RecordType = test_model::hdf5::_Inner_GenericRecordWithComputedFields<_T0_Inner, T0, _T1_Inner, T1>;
-  H5::CompType t(sizeof(RecordType));
-  t.insertMember("f1", HOFFSET(RecordType, f1), ::InnerUnion2Ddl<_T0_Inner, T0, _T1_Inner, T1>(false, T0_type, "T0", T1_type, "T1"));
+  t.insertMember("myStrings", HOFFSET(RecordType, my_strings), tuples::hdf5::GetTupleHdf5Ddl<yardl::hdf5::InnerVlenString, std::string, yardl::hdf5::InnerVlenString, std::string>(yardl::hdf5::InnerVlenStringDdl(), yardl::hdf5::InnerVlenStringDdl()));
+  t.insertMember("aliasedStrings", HOFFSET(RecordType, aliased_strings), tuples::hdf5::GetTupleHdf5Ddl<yardl::hdf5::InnerVlenString, std::string, yardl::hdf5::InnerVlenString, std::string>(yardl::hdf5::InnerVlenStringDdl(), yardl::hdf5::InnerVlenStringDdl()));
   return t;
 }
 
@@ -1108,14 +1126,14 @@ template <typename _T0_Inner, typename T0, typename _T1_Inner, typename T1>
   t.insertMember("complexfloat32Field", HOFFSET(RecordType, complexfloat32_field), yardl::hdf5::ComplexTypeDdl<float>());
   t.insertMember("complexfloat64Field", HOFFSET(RecordType, complexfloat64_field), yardl::hdf5::ComplexTypeDdl<double>());
   t.insertMember("stringField", HOFFSET(RecordType, string_field), yardl::hdf5::InnerVlenStringDdl());
-  t.insertMember("tupleField", HOFFSET(RecordType, tuple_field), test_model::hdf5::GetMyTupleHdf5Ddl<int32_t, int32_t, int32_t, int32_t>(H5::PredType::NATIVE_INT32, H5::PredType::NATIVE_INT32));
+  t.insertMember("tupleField", HOFFSET(RecordType, tuple_field), tuples::hdf5::GetTupleHdf5Ddl<int32_t, int32_t, int32_t, int32_t>(H5::PredType::NATIVE_INT32, H5::PredType::NATIVE_INT32));
   t.insertMember("vectorField", HOFFSET(RecordType, vector_field), yardl::hdf5::InnerVlenDdl(H5::PredType::NATIVE_INT32));
   t.insertMember("vectorOfVectorsField", HOFFSET(RecordType, vector_of_vectors_field), yardl::hdf5::InnerVlenDdl(yardl::hdf5::InnerVlenDdl(H5::PredType::NATIVE_INT32)));
   t.insertMember("fixedVectorField", HOFFSET(RecordType, fixed_vector_field), yardl::hdf5::FixedVectorDdl(H5::PredType::NATIVE_INT32, 3));
   t.insertMember("optionalNamedArray", HOFFSET(RecordType, optional_named_array), yardl::hdf5::OptionalTypeDdl<yardl::hdf5::InnerNdArray<int32_t, int32_t, 2>, test_model::NamedNDArray>(yardl::hdf5::NDArrayDdl<int32_t, int32_t, 2>(H5::PredType::NATIVE_INT32)));
   t.insertMember("intFloatUnion", HOFFSET(RecordType, int_float_union), ::InnerUnion2Ddl<int32_t, int32_t, float, float>(false, H5::PredType::NATIVE_INT32, "int32", H5::PredType::NATIVE_FLOAT, "float32"));
   t.insertMember("nullableIntFloatUnion", HOFFSET(RecordType, nullable_int_float_union), ::InnerUnion2Ddl<int32_t, int32_t, float, float>(true, H5::PredType::NATIVE_INT32, "int32", H5::PredType::NATIVE_FLOAT, "float32"));
-  t.insertMember("unionWithNestedGenericUnion", HOFFSET(RecordType, union_with_nested_generic_union), ::InnerUnion2Ddl<int32_t, int32_t, test_model::hdf5::_Inner_GenericRecordWithComputedFields<yardl::hdf5::InnerVlenString, std::string, float, float>, test_model::GenericRecordWithComputedFields<std::string, float>>(false, H5::PredType::NATIVE_INT32, "int", test_model::hdf5::GetGenericRecordWithComputedFieldsHdf5Ddl<yardl::hdf5::InnerVlenString, std::string, float, float>(yardl::hdf5::InnerVlenStringDdl(), H5::PredType::NATIVE_FLOAT), "genericRecordWithComputedFields"));
+  t.insertMember("unionWithNestedGenericUnion", HOFFSET(RecordType, union_with_nested_generic_union), ::InnerUnion2Ddl<int32_t, int32_t, basic_types::hdf5::_Inner_GenericRecordWithComputedFields<yardl::hdf5::InnerVlenString, std::string, float, float>, basic_types::GenericRecordWithComputedFields<std::string, float>>(false, H5::PredType::NATIVE_INT32, "int", basic_types::hdf5::GetGenericRecordWithComputedFieldsHdf5Ddl<yardl::hdf5::InnerVlenString, std::string, float, float>(yardl::hdf5::InnerVlenStringDdl(), H5::PredType::NATIVE_FLOAT), "genericRecordWithComputedFields"));
   t.insertMember("mapField", HOFFSET(RecordType, map_field), yardl::hdf5::InnerMapDdl<yardl::hdf5::InnerVlenString, yardl::hdf5::InnerVlenString>(yardl::hdf5::InnerVlenStringDdl(), yardl::hdf5::InnerVlenStringDdl()));
   return t;
 }
@@ -1433,9 +1451,9 @@ BenchmarkSimpleMrdWriter::BenchmarkSimpleMrdWriter(std::string path)
     : yardl::hdf5::Hdf5Writer::Hdf5Writer(path, "BenchmarkSimpleMrd", schema_) {
 }
 
-void BenchmarkSimpleMrdWriter::WriteDataImpl(std::variant<test_model::SimpleAcquisition, test_model::Image<float>> const& value) {
+void BenchmarkSimpleMrdWriter::WriteDataImpl(std::variant<test_model::SimpleAcquisition, image::Image<float>> const& value) {
   if (!data_dataset_state_) {
-    data_dataset_state_ = std::make_unique<yardl::hdf5::UnionDatasetWriter<2>>(group_, "data", false, std::make_tuple(test_model::hdf5::GetSimpleAcquisitionHdf5Ddl(), "acquisition", static_cast<size_t>(std::max(sizeof(::InnerUnion2<test_model::hdf5::_Inner_SimpleAcquisition, test_model::SimpleAcquisition, yardl::hdf5::InnerNdArray<float, float, 2>, test_model::Image<float>>), sizeof(std::variant<test_model::SimpleAcquisition, test_model::Image<float>>)))), std::make_tuple(yardl::hdf5::NDArrayDdl<float, float, 2>(H5::PredType::NATIVE_FLOAT), "image", static_cast<size_t>(std::max(sizeof(::InnerUnion2<test_model::hdf5::_Inner_SimpleAcquisition, test_model::SimpleAcquisition, yardl::hdf5::InnerNdArray<float, float, 2>, test_model::Image<float>>), sizeof(std::variant<test_model::SimpleAcquisition, test_model::Image<float>>)))));
+    data_dataset_state_ = std::make_unique<yardl::hdf5::UnionDatasetWriter<2>>(group_, "data", false, std::make_tuple(test_model::hdf5::GetSimpleAcquisitionHdf5Ddl(), "acquisition", static_cast<size_t>(std::max(sizeof(::InnerUnion2<test_model::hdf5::_Inner_SimpleAcquisition, test_model::SimpleAcquisition, yardl::hdf5::InnerNdArray<float, float, 2>, image::Image<float>>), sizeof(std::variant<test_model::SimpleAcquisition, image::Image<float>>)))), std::make_tuple(yardl::hdf5::NDArrayDdl<float, float, 2>(H5::PredType::NATIVE_FLOAT), "image", static_cast<size_t>(std::max(sizeof(::InnerUnion2<test_model::hdf5::_Inner_SimpleAcquisition, test_model::SimpleAcquisition, yardl::hdf5::InnerNdArray<float, float, 2>, image::Image<float>>), sizeof(std::variant<test_model::SimpleAcquisition, image::Image<float>>)))));
   }
 
   std::visit(
@@ -1443,8 +1461,8 @@ void BenchmarkSimpleMrdWriter::WriteDataImpl(std::variant<test_model::SimpleAcqu
       using T = std::decay_t<decltype(arg)>;
       if constexpr (std::is_same_v<T, test_model::SimpleAcquisition>) {
         data_dataset_state_->Append<test_model::hdf5::_Inner_SimpleAcquisition, test_model::SimpleAcquisition>(static_cast<int8_t>(value.index()), arg);
-      } else if constexpr (std::is_same_v<T, test_model::Image<float>>) {
-        data_dataset_state_->Append<yardl::hdf5::InnerNdArray<float, float, 2>, test_model::Image<float>>(static_cast<int8_t>(value.index()), arg);
+      } else if constexpr (std::is_same_v<T, image::Image<float>>) {
+        data_dataset_state_->Append<yardl::hdf5::InnerNdArray<float, float, 2>, image::Image<float>>(static_cast<int8_t>(value.index()), arg);
       } else {
         static_assert(yardl::hdf5::always_false_v<T>, "non-exhaustive visitor!");
       }
@@ -1454,7 +1472,7 @@ void BenchmarkSimpleMrdWriter::WriteDataImpl(std::variant<test_model::SimpleAcqu
 
 void BenchmarkSimpleMrdWriter::EndDataImpl() {
   if (!data_dataset_state_) {
-    data_dataset_state_ = std::make_unique<yardl::hdf5::UnionDatasetWriter<2>>(group_, "data", false, std::make_tuple(test_model::hdf5::GetSimpleAcquisitionHdf5Ddl(), "acquisition", static_cast<size_t>(std::max(sizeof(::InnerUnion2<test_model::hdf5::_Inner_SimpleAcquisition, test_model::SimpleAcquisition, yardl::hdf5::InnerNdArray<float, float, 2>, test_model::Image<float>>), sizeof(std::variant<test_model::SimpleAcquisition, test_model::Image<float>>)))), std::make_tuple(yardl::hdf5::NDArrayDdl<float, float, 2>(H5::PredType::NATIVE_FLOAT), "image", static_cast<size_t>(std::max(sizeof(::InnerUnion2<test_model::hdf5::_Inner_SimpleAcquisition, test_model::SimpleAcquisition, yardl::hdf5::InnerNdArray<float, float, 2>, test_model::Image<float>>), sizeof(std::variant<test_model::SimpleAcquisition, test_model::Image<float>>)))));
+    data_dataset_state_ = std::make_unique<yardl::hdf5::UnionDatasetWriter<2>>(group_, "data", false, std::make_tuple(test_model::hdf5::GetSimpleAcquisitionHdf5Ddl(), "acquisition", static_cast<size_t>(std::max(sizeof(::InnerUnion2<test_model::hdf5::_Inner_SimpleAcquisition, test_model::SimpleAcquisition, yardl::hdf5::InnerNdArray<float, float, 2>, image::Image<float>>), sizeof(std::variant<test_model::SimpleAcquisition, image::Image<float>>)))), std::make_tuple(yardl::hdf5::NDArrayDdl<float, float, 2>(H5::PredType::NATIVE_FLOAT), "image", static_cast<size_t>(std::max(sizeof(::InnerUnion2<test_model::hdf5::_Inner_SimpleAcquisition, test_model::SimpleAcquisition, yardl::hdf5::InnerNdArray<float, float, 2>, image::Image<float>>), sizeof(std::variant<test_model::SimpleAcquisition, image::Image<float>>)))));
   }
 
   data_dataset_state_.reset();
@@ -1470,9 +1488,9 @@ BenchmarkSimpleMrdReader::BenchmarkSimpleMrdReader(std::string path)
     : yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "BenchmarkSimpleMrd", schema_) {
 }
 
-bool BenchmarkSimpleMrdReader::ReadDataImpl(std::variant<test_model::SimpleAcquisition, test_model::Image<float>>& value) {
+bool BenchmarkSimpleMrdReader::ReadDataImpl(std::variant<test_model::SimpleAcquisition, image::Image<float>>& value) {
   if (!data_dataset_state_) {
-    data_dataset_state_ = std::make_unique<yardl::hdf5::UnionDatasetReader<2>>(group_, "data", false, std::make_tuple(test_model::hdf5::GetSimpleAcquisitionHdf5Ddl(), "acquisition", static_cast<size_t>(std::max(sizeof(::InnerUnion2<test_model::hdf5::_Inner_SimpleAcquisition, test_model::SimpleAcquisition, yardl::hdf5::InnerNdArray<float, float, 2>, test_model::Image<float>>), sizeof(std::variant<test_model::SimpleAcquisition, test_model::Image<float>>)))), std::make_tuple(yardl::hdf5::NDArrayDdl<float, float, 2>(H5::PredType::NATIVE_FLOAT), "image", static_cast<size_t>(std::max(sizeof(::InnerUnion2<test_model::hdf5::_Inner_SimpleAcquisition, test_model::SimpleAcquisition, yardl::hdf5::InnerNdArray<float, float, 2>, test_model::Image<float>>), sizeof(std::variant<test_model::SimpleAcquisition, test_model::Image<float>>)))));
+    data_dataset_state_ = std::make_unique<yardl::hdf5::UnionDatasetReader<2>>(group_, "data", false, std::make_tuple(test_model::hdf5::GetSimpleAcquisitionHdf5Ddl(), "acquisition", static_cast<size_t>(std::max(sizeof(::InnerUnion2<test_model::hdf5::_Inner_SimpleAcquisition, test_model::SimpleAcquisition, yardl::hdf5::InnerNdArray<float, float, 2>, image::Image<float>>), sizeof(std::variant<test_model::SimpleAcquisition, image::Image<float>>)))), std::make_tuple(yardl::hdf5::NDArrayDdl<float, float, 2>(H5::PredType::NATIVE_FLOAT), "image", static_cast<size_t>(std::max(sizeof(::InnerUnion2<test_model::hdf5::_Inner_SimpleAcquisition, test_model::SimpleAcquisition, yardl::hdf5::InnerNdArray<float, float, 2>, image::Image<float>>), sizeof(std::variant<test_model::SimpleAcquisition, image::Image<float>>)))));
   }
 
   auto [has_result, type_index, reader] = data_dataset_state_->ReadIndex();
@@ -1488,8 +1506,8 @@ bool BenchmarkSimpleMrdReader::ReadDataImpl(std::variant<test_model::SimpleAcqui
     break;
   }
   case 1: {
-    test_model::Image<float>& ref = value.emplace<1>();
-    reader->Read<yardl::hdf5::InnerNdArray<float, float, 2>, test_model::Image<float>>(ref);
+    image::Image<float>& ref = value.emplace<1>();
+    reader->Read<yardl::hdf5::InnerNdArray<float, float, 2>, image::Image<float>>(ref);
     break;
   }
   }
@@ -2201,8 +2219,8 @@ void MapsWriter::WriteStringToUnionImpl(std::unordered_map<std::string, std::var
   yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerMap<yardl::hdf5::InnerVlenString, std::string, ::InnerUnion2<yardl::hdf5::InnerVlenString, std::string, int32_t, int32_t>, std::variant<std::string, int32_t>>, std::unordered_map<std::string, std::variant<std::string, int32_t>>>(group_, "stringToUnion", yardl::hdf5::InnerMapDdl<yardl::hdf5::InnerVlenString, ::InnerUnion2<yardl::hdf5::InnerVlenString, std::string, int32_t, int32_t>>(yardl::hdf5::InnerVlenStringDdl(), ::InnerUnion2Ddl<yardl::hdf5::InnerVlenString, std::string, int32_t, int32_t>(false, yardl::hdf5::InnerVlenStringDdl(), "string", H5::PredType::NATIVE_INT32, "int32")), value);
 }
 
-void MapsWriter::WriteAliasedGenericImpl(test_model::AliasedMap<std::string, int32_t> const& value) {
-  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerMap<yardl::hdf5::InnerVlenString, std::string, int32_t, int32_t>, test_model::AliasedMap<std::string, int32_t>>(group_, "aliasedGeneric", yardl::hdf5::InnerMapDdl<yardl::hdf5::InnerVlenString, int32_t>(yardl::hdf5::InnerVlenStringDdl(), H5::PredType::NATIVE_INT32), value);
+void MapsWriter::WriteAliasedGenericImpl(basic_types::AliasedMap<std::string, int32_t> const& value) {
+  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerMap<yardl::hdf5::InnerVlenString, std::string, int32_t, int32_t>, basic_types::AliasedMap<std::string, int32_t>>(group_, "aliasedGeneric", yardl::hdf5::InnerMapDdl<yardl::hdf5::InnerVlenString, int32_t>(yardl::hdf5::InnerVlenStringDdl(), H5::PredType::NATIVE_INT32), value);
 }
 
 MapsReader::MapsReader(std::string path)
@@ -2221,8 +2239,8 @@ void MapsReader::ReadStringToUnionImpl(std::unordered_map<std::string, std::vari
   yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerMap<yardl::hdf5::InnerVlenString, std::string, ::InnerUnion2<yardl::hdf5::InnerVlenString, std::string, int32_t, int32_t>, std::variant<std::string, int32_t>>, std::unordered_map<std::string, std::variant<std::string, int32_t>>>(group_, "stringToUnion", yardl::hdf5::InnerMapDdl<yardl::hdf5::InnerVlenString, ::InnerUnion2<yardl::hdf5::InnerVlenString, std::string, int32_t, int32_t>>(yardl::hdf5::InnerVlenStringDdl(), ::InnerUnion2Ddl<yardl::hdf5::InnerVlenString, std::string, int32_t, int32_t>(false, yardl::hdf5::InnerVlenStringDdl(), "string", H5::PredType::NATIVE_INT32, "int32")), value);
 }
 
-void MapsReader::ReadAliasedGenericImpl(test_model::AliasedMap<std::string, int32_t>& value) {
-  yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerMap<yardl::hdf5::InnerVlenString, std::string, int32_t, int32_t>, test_model::AliasedMap<std::string, int32_t>>(group_, "aliasedGeneric", yardl::hdf5::InnerMapDdl<yardl::hdf5::InnerVlenString, int32_t>(yardl::hdf5::InnerVlenStringDdl(), H5::PredType::NATIVE_INT32), value);
+void MapsReader::ReadAliasedGenericImpl(basic_types::AliasedMap<std::string, int32_t>& value) {
+  yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerMap<yardl::hdf5::InnerVlenString, std::string, int32_t, int32_t>, basic_types::AliasedMap<std::string, int32_t>>(group_, "aliasedGeneric", yardl::hdf5::InnerMapDdl<yardl::hdf5::InnerVlenString, int32_t>(yardl::hdf5::InnerVlenStringDdl(), H5::PredType::NATIVE_INT32), value);
 }
 
 UnionsWriter::UnionsWriter(std::string path)
@@ -2241,8 +2259,8 @@ void UnionsWriter::WriteMonosotateOrIntOrSimpleRecordImpl(std::variant<std::mono
   yardl::hdf5::WriteScalarDataset<::InnerUnion2<int32_t, int32_t, test_model::SimpleRecord, test_model::SimpleRecord>, std::variant<std::monostate, int32_t, test_model::SimpleRecord>>(group_, "monosotateOrIntOrSimpleRecord", ::InnerUnion2Ddl<int32_t, int32_t, test_model::SimpleRecord, test_model::SimpleRecord>(true, H5::PredType::NATIVE_INT32, "int32", test_model::hdf5::GetSimpleRecordHdf5Ddl(), "SimpleRecord"), value);
 }
 
-void UnionsWriter::WriteRecordWithUnionsImpl(test_model::RecordWithUnions const& value) {
-  yardl::hdf5::WriteScalarDataset<test_model::hdf5::_Inner_RecordWithUnions, test_model::RecordWithUnions>(group_, "recordWithUnions", test_model::hdf5::GetRecordWithUnionsHdf5Ddl(), value);
+void UnionsWriter::WriteRecordWithUnionsImpl(basic_types::RecordWithUnions const& value) {
+  yardl::hdf5::WriteScalarDataset<basic_types::hdf5::_Inner_RecordWithUnions, basic_types::RecordWithUnions>(group_, "recordWithUnions", basic_types::hdf5::GetRecordWithUnionsHdf5Ddl(), value);
 }
 
 UnionsReader::UnionsReader(std::string path)
@@ -2261,8 +2279,8 @@ void UnionsReader::ReadMonosotateOrIntOrSimpleRecordImpl(std::variant<std::monos
   yardl::hdf5::ReadScalarDataset<::InnerUnion2<int32_t, int32_t, test_model::SimpleRecord, test_model::SimpleRecord>, std::variant<std::monostate, int32_t, test_model::SimpleRecord>>(group_, "monosotateOrIntOrSimpleRecord", ::InnerUnion2Ddl<int32_t, int32_t, test_model::SimpleRecord, test_model::SimpleRecord>(true, H5::PredType::NATIVE_INT32, "int32", test_model::hdf5::GetSimpleRecordHdf5Ddl(), "SimpleRecord"), value);
 }
 
-void UnionsReader::ReadRecordWithUnionsImpl(test_model::RecordWithUnions& value) {
-  yardl::hdf5::ReadScalarDataset<test_model::hdf5::_Inner_RecordWithUnions, test_model::RecordWithUnions>(group_, "recordWithUnions", test_model::hdf5::GetRecordWithUnionsHdf5Ddl(), value);
+void UnionsReader::ReadRecordWithUnionsImpl(basic_types::RecordWithUnions& value) {
+  yardl::hdf5::ReadScalarDataset<basic_types::hdf5::_Inner_RecordWithUnions, basic_types::RecordWithUnions>(group_, "recordWithUnions", basic_types::hdf5::GetRecordWithUnionsHdf5Ddl(), value);
 }
 
 StreamsOfUnionsWriter::StreamsOfUnionsWriter(std::string path)
@@ -2400,11 +2418,11 @@ EnumsWriter::EnumsWriter(std::string path)
 }
 
 void EnumsWriter::WriteSingleImpl(test_model::Fruits const& value) {
-  yardl::hdf5::WriteScalarDataset<test_model::Fruits, test_model::Fruits>(group_, "single", test_model::hdf5::GetFruitsHdf5Ddl(), value);
+  yardl::hdf5::WriteScalarDataset<basic_types::Fruits, test_model::Fruits>(group_, "single", basic_types::hdf5::GetFruitsHdf5Ddl(), value);
 }
 
 void EnumsWriter::WriteVecImpl(std::vector<test_model::Fruits> const& value) {
-  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerVlen<test_model::Fruits, test_model::Fruits>, std::vector<test_model::Fruits>>(group_, "vec", yardl::hdf5::InnerVlenDdl(test_model::hdf5::GetFruitsHdf5Ddl()), value);
+  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerVlen<basic_types::Fruits, test_model::Fruits>, std::vector<test_model::Fruits>>(group_, "vec", yardl::hdf5::InnerVlenDdl(basic_types::hdf5::GetFruitsHdf5Ddl()), value);
 }
 
 void EnumsWriter::WriteSizeImpl(test_model::SizeBasedEnum const& value) {
@@ -2416,11 +2434,11 @@ EnumsReader::EnumsReader(std::string path)
 }
 
 void EnumsReader::ReadSingleImpl(test_model::Fruits& value) {
-  yardl::hdf5::ReadScalarDataset<test_model::Fruits, test_model::Fruits>(group_, "single", test_model::hdf5::GetFruitsHdf5Ddl(), value);
+  yardl::hdf5::ReadScalarDataset<basic_types::Fruits, test_model::Fruits>(group_, "single", basic_types::hdf5::GetFruitsHdf5Ddl(), value);
 }
 
 void EnumsReader::ReadVecImpl(std::vector<test_model::Fruits>& value) {
-  yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerVlen<test_model::Fruits, test_model::Fruits>, std::vector<test_model::Fruits>>(group_, "vec", yardl::hdf5::InnerVlenDdl(test_model::hdf5::GetFruitsHdf5Ddl()), value);
+  yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerVlen<basic_types::Fruits, test_model::Fruits>, std::vector<test_model::Fruits>>(group_, "vec", yardl::hdf5::InnerVlenDdl(basic_types::hdf5::GetFruitsHdf5Ddl()), value);
 }
 
 void EnumsReader::ReadSizeImpl(test_model::SizeBasedEnum& value) {
@@ -2436,7 +2454,7 @@ void FlagsWriter::WriteDaysImpl(test_model::DaysOfWeek const& value) {
     days_dataset_state_ = std::make_unique<yardl::hdf5::DatasetWriter>(group_, "days", H5::PredType::NATIVE_INT32, 0);
   }
 
-  days_dataset_state_->Append<test_model::DaysOfWeek, test_model::DaysOfWeek>(value);
+  days_dataset_state_->Append<basic_types::DaysOfWeek, test_model::DaysOfWeek>(value);
 }
 
 void FlagsWriter::WriteDaysImpl(std::vector<test_model::DaysOfWeek> const& values) {
@@ -2444,7 +2462,7 @@ void FlagsWriter::WriteDaysImpl(std::vector<test_model::DaysOfWeek> const& value
     days_dataset_state_ = std::make_unique<yardl::hdf5::DatasetWriter>(group_, "days", H5::PredType::NATIVE_INT32, 0);
   }
 
-  days_dataset_state_->AppendBatch<test_model::DaysOfWeek, test_model::DaysOfWeek>(values);
+  days_dataset_state_->AppendBatch<basic_types::DaysOfWeek, test_model::DaysOfWeek>(values);
 }
 
 void FlagsWriter::EndDaysImpl() {
@@ -2460,7 +2478,7 @@ void FlagsWriter::WriteFormatsImpl(test_model::TextFormat const& value) {
     formats_dataset_state_ = std::make_unique<yardl::hdf5::DatasetWriter>(group_, "formats", H5::PredType::NATIVE_UINT64, 0);
   }
 
-  formats_dataset_state_->Append<test_model::TextFormat, test_model::TextFormat>(value);
+  formats_dataset_state_->Append<basic_types::TextFormat, test_model::TextFormat>(value);
 }
 
 void FlagsWriter::WriteFormatsImpl(std::vector<test_model::TextFormat> const& values) {
@@ -2468,7 +2486,7 @@ void FlagsWriter::WriteFormatsImpl(std::vector<test_model::TextFormat> const& va
     formats_dataset_state_ = std::make_unique<yardl::hdf5::DatasetWriter>(group_, "formats", H5::PredType::NATIVE_UINT64, 0);
   }
 
-  formats_dataset_state_->AppendBatch<test_model::TextFormat, test_model::TextFormat>(values);
+  formats_dataset_state_->AppendBatch<basic_types::TextFormat, test_model::TextFormat>(values);
 }
 
 void FlagsWriter::EndFormatsImpl() {
@@ -2488,7 +2506,7 @@ bool FlagsReader::ReadDaysImpl(test_model::DaysOfWeek& value) {
     days_dataset_state_ = std::make_unique<yardl::hdf5::DatasetReader>(group_, "days", H5::PredType::NATIVE_INT32, 0);
   }
 
-  bool has_value = days_dataset_state_->Read<test_model::DaysOfWeek, test_model::DaysOfWeek>(value);
+  bool has_value = days_dataset_state_->Read<basic_types::DaysOfWeek, test_model::DaysOfWeek>(value);
   if (!has_value) {
     days_dataset_state_.reset();
   }
@@ -2501,7 +2519,7 @@ bool FlagsReader::ReadDaysImpl(std::vector<test_model::DaysOfWeek>& values) {
     days_dataset_state_ = std::make_unique<yardl::hdf5::DatasetReader>(group_, "days", H5::PredType::NATIVE_INT32);
   }
 
-  bool has_more = days_dataset_state_->ReadBatch<test_model::DaysOfWeek, test_model::DaysOfWeek>(values);
+  bool has_more = days_dataset_state_->ReadBatch<basic_types::DaysOfWeek, test_model::DaysOfWeek>(values);
   if (!has_more) {
     days_dataset_state_.reset();
   }
@@ -2514,7 +2532,7 @@ bool FlagsReader::ReadFormatsImpl(test_model::TextFormat& value) {
     formats_dataset_state_ = std::make_unique<yardl::hdf5::DatasetReader>(group_, "formats", H5::PredType::NATIVE_UINT64, 0);
   }
 
-  bool has_value = formats_dataset_state_->Read<test_model::TextFormat, test_model::TextFormat>(value);
+  bool has_value = formats_dataset_state_->Read<basic_types::TextFormat, test_model::TextFormat>(value);
   if (!has_value) {
     formats_dataset_state_.reset();
   }
@@ -2527,7 +2545,7 @@ bool FlagsReader::ReadFormatsImpl(std::vector<test_model::TextFormat>& values) {
     formats_dataset_state_ = std::make_unique<yardl::hdf5::DatasetReader>(group_, "formats", H5::PredType::NATIVE_UINT64);
   }
 
-  bool has_more = formats_dataset_state_->ReadBatch<test_model::TextFormat, test_model::TextFormat>(values);
+  bool has_more = formats_dataset_state_->ReadBatch<basic_types::TextFormat, test_model::TextFormat>(values);
   if (!has_more) {
     formats_dataset_state_.reset();
   }
@@ -2613,12 +2631,12 @@ SimpleGenericsWriter::SimpleGenericsWriter(std::string path)
     : yardl::hdf5::Hdf5Writer::Hdf5Writer(path, "SimpleGenerics", schema_) {
 }
 
-void SimpleGenericsWriter::WriteFloatImageImpl(test_model::Image<float> const& value) {
-  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerNdArray<float, float, 2>, test_model::Image<float>>(group_, "floatImage", yardl::hdf5::NDArrayDdl<float, float, 2>(H5::PredType::NATIVE_FLOAT), value);
+void SimpleGenericsWriter::WriteFloatImageImpl(image::FloatImage const& value) {
+  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerNdArray<float, float, 2>, image::FloatImage>(group_, "floatImage", yardl::hdf5::NDArrayDdl<float, float, 2>(H5::PredType::NATIVE_FLOAT), value);
 }
 
-void SimpleGenericsWriter::WriteIntImageImpl(test_model::Image<int32_t> const& value) {
-  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerNdArray<int32_t, int32_t, 2>, test_model::Image<int32_t>>(group_, "intImage", yardl::hdf5::NDArrayDdl<int32_t, int32_t, 2>(H5::PredType::NATIVE_INT32), value);
+void SimpleGenericsWriter::WriteIntImageImpl(image::IntImage const& value) {
+  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerNdArray<int32_t, int32_t, 2>, image::IntImage>(group_, "intImage", yardl::hdf5::NDArrayDdl<int32_t, int32_t, 2>(H5::PredType::NATIVE_INT32), value);
 }
 
 void SimpleGenericsWriter::WriteIntImageAlternateSyntaxImpl(test_model::Image<int32_t> const& value) {
@@ -2629,32 +2647,32 @@ void SimpleGenericsWriter::WriteStringImageImpl(test_model::Image<std::string> c
   yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerNdArray<yardl::hdf5::InnerVlenString, std::string, 2>, test_model::Image<std::string>>(group_, "stringImage", yardl::hdf5::NDArrayDdl<yardl::hdf5::InnerVlenString, std::string, 2>(yardl::hdf5::InnerVlenStringDdl()), value);
 }
 
-void SimpleGenericsWriter::WriteIntFloatTupleImpl(test_model::MyTuple<int32_t, float> const& value) {
-  yardl::hdf5::WriteScalarDataset<test_model::MyTuple<int32_t, float>, test_model::MyTuple<int32_t, float>>(group_, "intFloatTuple", test_model::hdf5::GetMyTupleHdf5Ddl<int32_t, int32_t, float, float>(H5::PredType::NATIVE_INT32, H5::PredType::NATIVE_FLOAT), value);
+void SimpleGenericsWriter::WriteIntFloatTupleImpl(tuples::Tuple<int32_t, float> const& value) {
+  yardl::hdf5::WriteScalarDataset<tuples::Tuple<int32_t, float>, tuples::Tuple<int32_t, float>>(group_, "intFloatTuple", tuples::hdf5::GetTupleHdf5Ddl<int32_t, int32_t, float, float>(H5::PredType::NATIVE_INT32, H5::PredType::NATIVE_FLOAT), value);
 }
 
-void SimpleGenericsWriter::WriteFloatFloatTupleImpl(test_model::MyTuple<float, float> const& value) {
-  yardl::hdf5::WriteScalarDataset<test_model::MyTuple<float, float>, test_model::MyTuple<float, float>>(group_, "floatFloatTuple", test_model::hdf5::GetMyTupleHdf5Ddl<float, float, float, float>(H5::PredType::NATIVE_FLOAT, H5::PredType::NATIVE_FLOAT), value);
+void SimpleGenericsWriter::WriteFloatFloatTupleImpl(tuples::Tuple<float, float> const& value) {
+  yardl::hdf5::WriteScalarDataset<tuples::Tuple<float, float>, tuples::Tuple<float, float>>(group_, "floatFloatTuple", tuples::hdf5::GetTupleHdf5Ddl<float, float, float, float>(H5::PredType::NATIVE_FLOAT, H5::PredType::NATIVE_FLOAT), value);
 }
 
-void SimpleGenericsWriter::WriteIntFloatTupleAlternateSyntaxImpl(test_model::MyTuple<int32_t, float> const& value) {
-  yardl::hdf5::WriteScalarDataset<test_model::MyTuple<int32_t, float>, test_model::MyTuple<int32_t, float>>(group_, "intFloatTupleAlternateSyntax", test_model::hdf5::GetMyTupleHdf5Ddl<int32_t, int32_t, float, float>(H5::PredType::NATIVE_INT32, H5::PredType::NATIVE_FLOAT), value);
+void SimpleGenericsWriter::WriteIntFloatTupleAlternateSyntaxImpl(tuples::Tuple<int32_t, float> const& value) {
+  yardl::hdf5::WriteScalarDataset<tuples::Tuple<int32_t, float>, tuples::Tuple<int32_t, float>>(group_, "intFloatTupleAlternateSyntax", tuples::hdf5::GetTupleHdf5Ddl<int32_t, int32_t, float, float>(H5::PredType::NATIVE_INT32, H5::PredType::NATIVE_FLOAT), value);
 }
 
-void SimpleGenericsWriter::WriteIntStringTupleImpl(test_model::MyTuple<int32_t, std::string> const& value) {
-  yardl::hdf5::WriteScalarDataset<test_model::hdf5::_Inner_MyTuple<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string>, test_model::MyTuple<int32_t, std::string>>(group_, "intStringTuple", test_model::hdf5::GetMyTupleHdf5Ddl<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string>(H5::PredType::NATIVE_INT32, yardl::hdf5::InnerVlenStringDdl()), value);
+void SimpleGenericsWriter::WriteIntStringTupleImpl(tuples::Tuple<int32_t, std::string> const& value) {
+  yardl::hdf5::WriteScalarDataset<tuples::hdf5::_Inner_Tuple<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string>, tuples::Tuple<int32_t, std::string>>(group_, "intStringTuple", tuples::hdf5::GetTupleHdf5Ddl<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string>(H5::PredType::NATIVE_INT32, yardl::hdf5::InnerVlenStringDdl()), value);
 }
 
-void SimpleGenericsWriter::WriteStreamOfTypeVariantsImpl(std::variant<test_model::Image<float>, test_model::Image<double>> const& value) {
+void SimpleGenericsWriter::WriteStreamOfTypeVariantsImpl(std::variant<image::FloatImage, test_model::Image<double>> const& value) {
   if (!streamOfTypeVariants_dataset_state_) {
-    streamOfTypeVariants_dataset_state_ = std::make_unique<yardl::hdf5::UnionDatasetWriter<2>>(group_, "streamOfTypeVariants", false, std::make_tuple(yardl::hdf5::NDArrayDdl<float, float, 2>(H5::PredType::NATIVE_FLOAT), "imageFloat", static_cast<size_t>(std::max(sizeof(::InnerUnion2<yardl::hdf5::InnerNdArray<float, float, 2>, test_model::Image<float>, yardl::hdf5::InnerNdArray<double, double, 2>, test_model::Image<double>>), sizeof(std::variant<test_model::Image<float>, test_model::Image<double>>)))), std::make_tuple(yardl::hdf5::NDArrayDdl<double, double, 2>(H5::PredType::NATIVE_DOUBLE), "imageDouble", static_cast<size_t>(std::max(sizeof(::InnerUnion2<yardl::hdf5::InnerNdArray<float, float, 2>, test_model::Image<float>, yardl::hdf5::InnerNdArray<double, double, 2>, test_model::Image<double>>), sizeof(std::variant<test_model::Image<float>, test_model::Image<double>>)))));
+    streamOfTypeVariants_dataset_state_ = std::make_unique<yardl::hdf5::UnionDatasetWriter<2>>(group_, "streamOfTypeVariants", false, std::make_tuple(yardl::hdf5::NDArrayDdl<float, float, 2>(H5::PredType::NATIVE_FLOAT), "imageFloat", static_cast<size_t>(std::max(sizeof(::InnerUnion2<yardl::hdf5::InnerNdArray<float, float, 2>, image::FloatImage, yardl::hdf5::InnerNdArray<double, double, 2>, test_model::Image<double>>), sizeof(std::variant<image::FloatImage, test_model::Image<double>>)))), std::make_tuple(yardl::hdf5::NDArrayDdl<double, double, 2>(H5::PredType::NATIVE_DOUBLE), "imageDouble", static_cast<size_t>(std::max(sizeof(::InnerUnion2<yardl::hdf5::InnerNdArray<float, float, 2>, image::FloatImage, yardl::hdf5::InnerNdArray<double, double, 2>, test_model::Image<double>>), sizeof(std::variant<image::FloatImage, test_model::Image<double>>)))));
   }
 
   std::visit(
     [&](auto const& arg) {
       using T = std::decay_t<decltype(arg)>;
-      if constexpr (std::is_same_v<T, test_model::Image<float>>) {
-        streamOfTypeVariants_dataset_state_->Append<yardl::hdf5::InnerNdArray<float, float, 2>, test_model::Image<float>>(static_cast<int8_t>(value.index()), arg);
+      if constexpr (std::is_same_v<T, image::FloatImage>) {
+        streamOfTypeVariants_dataset_state_->Append<yardl::hdf5::InnerNdArray<float, float, 2>, image::FloatImage>(static_cast<int8_t>(value.index()), arg);
       } else if constexpr (std::is_same_v<T, test_model::Image<double>>) {
         streamOfTypeVariants_dataset_state_->Append<yardl::hdf5::InnerNdArray<double, double, 2>, test_model::Image<double>>(static_cast<int8_t>(value.index()), arg);
       } else {
@@ -2666,7 +2684,7 @@ void SimpleGenericsWriter::WriteStreamOfTypeVariantsImpl(std::variant<test_model
 
 void SimpleGenericsWriter::EndStreamOfTypeVariantsImpl() {
   if (!streamOfTypeVariants_dataset_state_) {
-    streamOfTypeVariants_dataset_state_ = std::make_unique<yardl::hdf5::UnionDatasetWriter<2>>(group_, "streamOfTypeVariants", false, std::make_tuple(yardl::hdf5::NDArrayDdl<float, float, 2>(H5::PredType::NATIVE_FLOAT), "imageFloat", static_cast<size_t>(std::max(sizeof(::InnerUnion2<yardl::hdf5::InnerNdArray<float, float, 2>, test_model::Image<float>, yardl::hdf5::InnerNdArray<double, double, 2>, test_model::Image<double>>), sizeof(std::variant<test_model::Image<float>, test_model::Image<double>>)))), std::make_tuple(yardl::hdf5::NDArrayDdl<double, double, 2>(H5::PredType::NATIVE_DOUBLE), "imageDouble", static_cast<size_t>(std::max(sizeof(::InnerUnion2<yardl::hdf5::InnerNdArray<float, float, 2>, test_model::Image<float>, yardl::hdf5::InnerNdArray<double, double, 2>, test_model::Image<double>>), sizeof(std::variant<test_model::Image<float>, test_model::Image<double>>)))));
+    streamOfTypeVariants_dataset_state_ = std::make_unique<yardl::hdf5::UnionDatasetWriter<2>>(group_, "streamOfTypeVariants", false, std::make_tuple(yardl::hdf5::NDArrayDdl<float, float, 2>(H5::PredType::NATIVE_FLOAT), "imageFloat", static_cast<size_t>(std::max(sizeof(::InnerUnion2<yardl::hdf5::InnerNdArray<float, float, 2>, image::FloatImage, yardl::hdf5::InnerNdArray<double, double, 2>, test_model::Image<double>>), sizeof(std::variant<image::FloatImage, test_model::Image<double>>)))), std::make_tuple(yardl::hdf5::NDArrayDdl<double, double, 2>(H5::PredType::NATIVE_DOUBLE), "imageDouble", static_cast<size_t>(std::max(sizeof(::InnerUnion2<yardl::hdf5::InnerNdArray<float, float, 2>, image::FloatImage, yardl::hdf5::InnerNdArray<double, double, 2>, test_model::Image<double>>), sizeof(std::variant<image::FloatImage, test_model::Image<double>>)))));
   }
 
   streamOfTypeVariants_dataset_state_.reset();
@@ -2682,12 +2700,12 @@ SimpleGenericsReader::SimpleGenericsReader(std::string path)
     : yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "SimpleGenerics", schema_) {
 }
 
-void SimpleGenericsReader::ReadFloatImageImpl(test_model::Image<float>& value) {
-  yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerNdArray<float, float, 2>, test_model::Image<float>>(group_, "floatImage", yardl::hdf5::NDArrayDdl<float, float, 2>(H5::PredType::NATIVE_FLOAT), value);
+void SimpleGenericsReader::ReadFloatImageImpl(image::FloatImage& value) {
+  yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerNdArray<float, float, 2>, image::FloatImage>(group_, "floatImage", yardl::hdf5::NDArrayDdl<float, float, 2>(H5::PredType::NATIVE_FLOAT), value);
 }
 
-void SimpleGenericsReader::ReadIntImageImpl(test_model::Image<int32_t>& value) {
-  yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerNdArray<int32_t, int32_t, 2>, test_model::Image<int32_t>>(group_, "intImage", yardl::hdf5::NDArrayDdl<int32_t, int32_t, 2>(H5::PredType::NATIVE_INT32), value);
+void SimpleGenericsReader::ReadIntImageImpl(image::IntImage& value) {
+  yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerNdArray<int32_t, int32_t, 2>, image::IntImage>(group_, "intImage", yardl::hdf5::NDArrayDdl<int32_t, int32_t, 2>(H5::PredType::NATIVE_INT32), value);
 }
 
 void SimpleGenericsReader::ReadIntImageAlternateSyntaxImpl(test_model::Image<int32_t>& value) {
@@ -2698,25 +2716,25 @@ void SimpleGenericsReader::ReadStringImageImpl(test_model::Image<std::string>& v
   yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerNdArray<yardl::hdf5::InnerVlenString, std::string, 2>, test_model::Image<std::string>>(group_, "stringImage", yardl::hdf5::NDArrayDdl<yardl::hdf5::InnerVlenString, std::string, 2>(yardl::hdf5::InnerVlenStringDdl()), value);
 }
 
-void SimpleGenericsReader::ReadIntFloatTupleImpl(test_model::MyTuple<int32_t, float>& value) {
-  yardl::hdf5::ReadScalarDataset<test_model::MyTuple<int32_t, float>, test_model::MyTuple<int32_t, float>>(group_, "intFloatTuple", test_model::hdf5::GetMyTupleHdf5Ddl<int32_t, int32_t, float, float>(H5::PredType::NATIVE_INT32, H5::PredType::NATIVE_FLOAT), value);
+void SimpleGenericsReader::ReadIntFloatTupleImpl(tuples::Tuple<int32_t, float>& value) {
+  yardl::hdf5::ReadScalarDataset<tuples::Tuple<int32_t, float>, tuples::Tuple<int32_t, float>>(group_, "intFloatTuple", tuples::hdf5::GetTupleHdf5Ddl<int32_t, int32_t, float, float>(H5::PredType::NATIVE_INT32, H5::PredType::NATIVE_FLOAT), value);
 }
 
-void SimpleGenericsReader::ReadFloatFloatTupleImpl(test_model::MyTuple<float, float>& value) {
-  yardl::hdf5::ReadScalarDataset<test_model::MyTuple<float, float>, test_model::MyTuple<float, float>>(group_, "floatFloatTuple", test_model::hdf5::GetMyTupleHdf5Ddl<float, float, float, float>(H5::PredType::NATIVE_FLOAT, H5::PredType::NATIVE_FLOAT), value);
+void SimpleGenericsReader::ReadFloatFloatTupleImpl(tuples::Tuple<float, float>& value) {
+  yardl::hdf5::ReadScalarDataset<tuples::Tuple<float, float>, tuples::Tuple<float, float>>(group_, "floatFloatTuple", tuples::hdf5::GetTupleHdf5Ddl<float, float, float, float>(H5::PredType::NATIVE_FLOAT, H5::PredType::NATIVE_FLOAT), value);
 }
 
-void SimpleGenericsReader::ReadIntFloatTupleAlternateSyntaxImpl(test_model::MyTuple<int32_t, float>& value) {
-  yardl::hdf5::ReadScalarDataset<test_model::MyTuple<int32_t, float>, test_model::MyTuple<int32_t, float>>(group_, "intFloatTupleAlternateSyntax", test_model::hdf5::GetMyTupleHdf5Ddl<int32_t, int32_t, float, float>(H5::PredType::NATIVE_INT32, H5::PredType::NATIVE_FLOAT), value);
+void SimpleGenericsReader::ReadIntFloatTupleAlternateSyntaxImpl(tuples::Tuple<int32_t, float>& value) {
+  yardl::hdf5::ReadScalarDataset<tuples::Tuple<int32_t, float>, tuples::Tuple<int32_t, float>>(group_, "intFloatTupleAlternateSyntax", tuples::hdf5::GetTupleHdf5Ddl<int32_t, int32_t, float, float>(H5::PredType::NATIVE_INT32, H5::PredType::NATIVE_FLOAT), value);
 }
 
-void SimpleGenericsReader::ReadIntStringTupleImpl(test_model::MyTuple<int32_t, std::string>& value) {
-  yardl::hdf5::ReadScalarDataset<test_model::hdf5::_Inner_MyTuple<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string>, test_model::MyTuple<int32_t, std::string>>(group_, "intStringTuple", test_model::hdf5::GetMyTupleHdf5Ddl<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string>(H5::PredType::NATIVE_INT32, yardl::hdf5::InnerVlenStringDdl()), value);
+void SimpleGenericsReader::ReadIntStringTupleImpl(tuples::Tuple<int32_t, std::string>& value) {
+  yardl::hdf5::ReadScalarDataset<tuples::hdf5::_Inner_Tuple<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string>, tuples::Tuple<int32_t, std::string>>(group_, "intStringTuple", tuples::hdf5::GetTupleHdf5Ddl<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string>(H5::PredType::NATIVE_INT32, yardl::hdf5::InnerVlenStringDdl()), value);
 }
 
-bool SimpleGenericsReader::ReadStreamOfTypeVariantsImpl(std::variant<test_model::Image<float>, test_model::Image<double>>& value) {
+bool SimpleGenericsReader::ReadStreamOfTypeVariantsImpl(std::variant<image::FloatImage, test_model::Image<double>>& value) {
   if (!streamOfTypeVariants_dataset_state_) {
-    streamOfTypeVariants_dataset_state_ = std::make_unique<yardl::hdf5::UnionDatasetReader<2>>(group_, "streamOfTypeVariants", false, std::make_tuple(yardl::hdf5::NDArrayDdl<float, float, 2>(H5::PredType::NATIVE_FLOAT), "imageFloat", static_cast<size_t>(std::max(sizeof(::InnerUnion2<yardl::hdf5::InnerNdArray<float, float, 2>, test_model::Image<float>, yardl::hdf5::InnerNdArray<double, double, 2>, test_model::Image<double>>), sizeof(std::variant<test_model::Image<float>, test_model::Image<double>>)))), std::make_tuple(yardl::hdf5::NDArrayDdl<double, double, 2>(H5::PredType::NATIVE_DOUBLE), "imageDouble", static_cast<size_t>(std::max(sizeof(::InnerUnion2<yardl::hdf5::InnerNdArray<float, float, 2>, test_model::Image<float>, yardl::hdf5::InnerNdArray<double, double, 2>, test_model::Image<double>>), sizeof(std::variant<test_model::Image<float>, test_model::Image<double>>)))));
+    streamOfTypeVariants_dataset_state_ = std::make_unique<yardl::hdf5::UnionDatasetReader<2>>(group_, "streamOfTypeVariants", false, std::make_tuple(yardl::hdf5::NDArrayDdl<float, float, 2>(H5::PredType::NATIVE_FLOAT), "imageFloat", static_cast<size_t>(std::max(sizeof(::InnerUnion2<yardl::hdf5::InnerNdArray<float, float, 2>, image::FloatImage, yardl::hdf5::InnerNdArray<double, double, 2>, test_model::Image<double>>), sizeof(std::variant<image::FloatImage, test_model::Image<double>>)))), std::make_tuple(yardl::hdf5::NDArrayDdl<double, double, 2>(H5::PredType::NATIVE_DOUBLE), "imageDouble", static_cast<size_t>(std::max(sizeof(::InnerUnion2<yardl::hdf5::InnerNdArray<float, float, 2>, image::FloatImage, yardl::hdf5::InnerNdArray<double, double, 2>, test_model::Image<double>>), sizeof(std::variant<image::FloatImage, test_model::Image<double>>)))));
   }
 
   auto [has_result, type_index, reader] = streamOfTypeVariants_dataset_state_->ReadIndex();
@@ -2727,8 +2745,8 @@ bool SimpleGenericsReader::ReadStreamOfTypeVariantsImpl(std::variant<test_model:
 
   switch (type_index) {
   case 0: {
-    test_model::Image<float>& ref = value.emplace<0>();
-    reader->Read<yardl::hdf5::InnerNdArray<float, float, 2>, test_model::Image<float>>(ref);
+    image::FloatImage& ref = value.emplace<0>();
+    reader->Read<yardl::hdf5::InnerNdArray<float, float, 2>, image::FloatImage>(ref);
     break;
   }
   case 1: {
@@ -2754,15 +2772,15 @@ void AdvancedGenericsWriter::WriteGenericRecord1Impl(test_model::GenericRecord<i
 }
 
 void AdvancedGenericsWriter::WriteTupleOfOptionalsImpl(test_model::MyTuple<std::optional<int32_t>, std::optional<std::string>> const& value) {
-  yardl::hdf5::WriteScalarDataset<test_model::hdf5::_Inner_MyTuple<yardl::hdf5::InnerOptional<int32_t, int32_t>, std::optional<int32_t>, yardl::hdf5::InnerOptional<yardl::hdf5::InnerVlenString, std::string>, std::optional<std::string>>, test_model::MyTuple<std::optional<int32_t>, std::optional<std::string>>>(group_, "tupleOfOptionals", test_model::hdf5::GetMyTupleHdf5Ddl<yardl::hdf5::InnerOptional<int32_t, int32_t>, std::optional<int32_t>, yardl::hdf5::InnerOptional<yardl::hdf5::InnerVlenString, std::string>, std::optional<std::string>>(yardl::hdf5::OptionalTypeDdl<int32_t, int32_t>(H5::PredType::NATIVE_INT32), yardl::hdf5::OptionalTypeDdl<yardl::hdf5::InnerVlenString, std::string>(yardl::hdf5::InnerVlenStringDdl())), value);
+  yardl::hdf5::WriteScalarDataset<tuples::hdf5::_Inner_Tuple<yardl::hdf5::InnerOptional<int32_t, int32_t>, std::optional<int32_t>, yardl::hdf5::InnerOptional<yardl::hdf5::InnerVlenString, std::string>, std::optional<std::string>>, test_model::MyTuple<std::optional<int32_t>, std::optional<std::string>>>(group_, "tupleOfOptionals", tuples::hdf5::GetTupleHdf5Ddl<yardl::hdf5::InnerOptional<int32_t, int32_t>, std::optional<int32_t>, yardl::hdf5::InnerOptional<yardl::hdf5::InnerVlenString, std::string>, std::optional<std::string>>(yardl::hdf5::OptionalTypeDdl<int32_t, int32_t>(H5::PredType::NATIVE_INT32), yardl::hdf5::OptionalTypeDdl<yardl::hdf5::InnerVlenString, std::string>(yardl::hdf5::InnerVlenStringDdl())), value);
 }
 
 void AdvancedGenericsWriter::WriteTupleOfOptionalsAlternateSyntaxImpl(test_model::MyTuple<std::optional<int32_t>, std::optional<std::string>> const& value) {
-  yardl::hdf5::WriteScalarDataset<test_model::hdf5::_Inner_MyTuple<yardl::hdf5::InnerOptional<int32_t, int32_t>, std::optional<int32_t>, yardl::hdf5::InnerOptional<yardl::hdf5::InnerVlenString, std::string>, std::optional<std::string>>, test_model::MyTuple<std::optional<int32_t>, std::optional<std::string>>>(group_, "tupleOfOptionalsAlternateSyntax", test_model::hdf5::GetMyTupleHdf5Ddl<yardl::hdf5::InnerOptional<int32_t, int32_t>, std::optional<int32_t>, yardl::hdf5::InnerOptional<yardl::hdf5::InnerVlenString, std::string>, std::optional<std::string>>(yardl::hdf5::OptionalTypeDdl<int32_t, int32_t>(H5::PredType::NATIVE_INT32), yardl::hdf5::OptionalTypeDdl<yardl::hdf5::InnerVlenString, std::string>(yardl::hdf5::InnerVlenStringDdl())), value);
+  yardl::hdf5::WriteScalarDataset<tuples::hdf5::_Inner_Tuple<yardl::hdf5::InnerOptional<int32_t, int32_t>, std::optional<int32_t>, yardl::hdf5::InnerOptional<yardl::hdf5::InnerVlenString, std::string>, std::optional<std::string>>, test_model::MyTuple<std::optional<int32_t>, std::optional<std::string>>>(group_, "tupleOfOptionalsAlternateSyntax", tuples::hdf5::GetTupleHdf5Ddl<yardl::hdf5::InnerOptional<int32_t, int32_t>, std::optional<int32_t>, yardl::hdf5::InnerOptional<yardl::hdf5::InnerVlenString, std::string>, std::optional<std::string>>(yardl::hdf5::OptionalTypeDdl<int32_t, int32_t>(H5::PredType::NATIVE_INT32), yardl::hdf5::OptionalTypeDdl<yardl::hdf5::InnerVlenString, std::string>(yardl::hdf5::InnerVlenStringDdl())), value);
 }
 
 void AdvancedGenericsWriter::WriteTupleOfVectorsImpl(test_model::MyTuple<std::vector<int32_t>, std::vector<float>> const& value) {
-  yardl::hdf5::WriteScalarDataset<test_model::hdf5::_Inner_MyTuple<yardl::hdf5::InnerVlen<int32_t, int32_t>, std::vector<int32_t>, yardl::hdf5::InnerVlen<float, float>, std::vector<float>>, test_model::MyTuple<std::vector<int32_t>, std::vector<float>>>(group_, "tupleOfVectors", test_model::hdf5::GetMyTupleHdf5Ddl<yardl::hdf5::InnerVlen<int32_t, int32_t>, std::vector<int32_t>, yardl::hdf5::InnerVlen<float, float>, std::vector<float>>(yardl::hdf5::InnerVlenDdl(H5::PredType::NATIVE_INT32), yardl::hdf5::InnerVlenDdl(H5::PredType::NATIVE_FLOAT)), value);
+  yardl::hdf5::WriteScalarDataset<tuples::hdf5::_Inner_Tuple<yardl::hdf5::InnerVlen<int32_t, int32_t>, std::vector<int32_t>, yardl::hdf5::InnerVlen<float, float>, std::vector<float>>, test_model::MyTuple<std::vector<int32_t>, std::vector<float>>>(group_, "tupleOfVectors", tuples::hdf5::GetTupleHdf5Ddl<yardl::hdf5::InnerVlen<int32_t, int32_t>, std::vector<int32_t>, yardl::hdf5::InnerVlen<float, float>, std::vector<float>>(yardl::hdf5::InnerVlenDdl(H5::PredType::NATIVE_INT32), yardl::hdf5::InnerVlenDdl(H5::PredType::NATIVE_FLOAT)), value);
 }
 
 AdvancedGenericsReader::AdvancedGenericsReader(std::string path)
@@ -2778,15 +2796,15 @@ void AdvancedGenericsReader::ReadGenericRecord1Impl(test_model::GenericRecord<in
 }
 
 void AdvancedGenericsReader::ReadTupleOfOptionalsImpl(test_model::MyTuple<std::optional<int32_t>, std::optional<std::string>>& value) {
-  yardl::hdf5::ReadScalarDataset<test_model::hdf5::_Inner_MyTuple<yardl::hdf5::InnerOptional<int32_t, int32_t>, std::optional<int32_t>, yardl::hdf5::InnerOptional<yardl::hdf5::InnerVlenString, std::string>, std::optional<std::string>>, test_model::MyTuple<std::optional<int32_t>, std::optional<std::string>>>(group_, "tupleOfOptionals", test_model::hdf5::GetMyTupleHdf5Ddl<yardl::hdf5::InnerOptional<int32_t, int32_t>, std::optional<int32_t>, yardl::hdf5::InnerOptional<yardl::hdf5::InnerVlenString, std::string>, std::optional<std::string>>(yardl::hdf5::OptionalTypeDdl<int32_t, int32_t>(H5::PredType::NATIVE_INT32), yardl::hdf5::OptionalTypeDdl<yardl::hdf5::InnerVlenString, std::string>(yardl::hdf5::InnerVlenStringDdl())), value);
+  yardl::hdf5::ReadScalarDataset<tuples::hdf5::_Inner_Tuple<yardl::hdf5::InnerOptional<int32_t, int32_t>, std::optional<int32_t>, yardl::hdf5::InnerOptional<yardl::hdf5::InnerVlenString, std::string>, std::optional<std::string>>, test_model::MyTuple<std::optional<int32_t>, std::optional<std::string>>>(group_, "tupleOfOptionals", tuples::hdf5::GetTupleHdf5Ddl<yardl::hdf5::InnerOptional<int32_t, int32_t>, std::optional<int32_t>, yardl::hdf5::InnerOptional<yardl::hdf5::InnerVlenString, std::string>, std::optional<std::string>>(yardl::hdf5::OptionalTypeDdl<int32_t, int32_t>(H5::PredType::NATIVE_INT32), yardl::hdf5::OptionalTypeDdl<yardl::hdf5::InnerVlenString, std::string>(yardl::hdf5::InnerVlenStringDdl())), value);
 }
 
 void AdvancedGenericsReader::ReadTupleOfOptionalsAlternateSyntaxImpl(test_model::MyTuple<std::optional<int32_t>, std::optional<std::string>>& value) {
-  yardl::hdf5::ReadScalarDataset<test_model::hdf5::_Inner_MyTuple<yardl::hdf5::InnerOptional<int32_t, int32_t>, std::optional<int32_t>, yardl::hdf5::InnerOptional<yardl::hdf5::InnerVlenString, std::string>, std::optional<std::string>>, test_model::MyTuple<std::optional<int32_t>, std::optional<std::string>>>(group_, "tupleOfOptionalsAlternateSyntax", test_model::hdf5::GetMyTupleHdf5Ddl<yardl::hdf5::InnerOptional<int32_t, int32_t>, std::optional<int32_t>, yardl::hdf5::InnerOptional<yardl::hdf5::InnerVlenString, std::string>, std::optional<std::string>>(yardl::hdf5::OptionalTypeDdl<int32_t, int32_t>(H5::PredType::NATIVE_INT32), yardl::hdf5::OptionalTypeDdl<yardl::hdf5::InnerVlenString, std::string>(yardl::hdf5::InnerVlenStringDdl())), value);
+  yardl::hdf5::ReadScalarDataset<tuples::hdf5::_Inner_Tuple<yardl::hdf5::InnerOptional<int32_t, int32_t>, std::optional<int32_t>, yardl::hdf5::InnerOptional<yardl::hdf5::InnerVlenString, std::string>, std::optional<std::string>>, test_model::MyTuple<std::optional<int32_t>, std::optional<std::string>>>(group_, "tupleOfOptionalsAlternateSyntax", tuples::hdf5::GetTupleHdf5Ddl<yardl::hdf5::InnerOptional<int32_t, int32_t>, std::optional<int32_t>, yardl::hdf5::InnerOptional<yardl::hdf5::InnerVlenString, std::string>, std::optional<std::string>>(yardl::hdf5::OptionalTypeDdl<int32_t, int32_t>(H5::PredType::NATIVE_INT32), yardl::hdf5::OptionalTypeDdl<yardl::hdf5::InnerVlenString, std::string>(yardl::hdf5::InnerVlenStringDdl())), value);
 }
 
 void AdvancedGenericsReader::ReadTupleOfVectorsImpl(test_model::MyTuple<std::vector<int32_t>, std::vector<float>>& value) {
-  yardl::hdf5::ReadScalarDataset<test_model::hdf5::_Inner_MyTuple<yardl::hdf5::InnerVlen<int32_t, int32_t>, std::vector<int32_t>, yardl::hdf5::InnerVlen<float, float>, std::vector<float>>, test_model::MyTuple<std::vector<int32_t>, std::vector<float>>>(group_, "tupleOfVectors", test_model::hdf5::GetMyTupleHdf5Ddl<yardl::hdf5::InnerVlen<int32_t, int32_t>, std::vector<int32_t>, yardl::hdf5::InnerVlen<float, float>, std::vector<float>>(yardl::hdf5::InnerVlenDdl(H5::PredType::NATIVE_INT32), yardl::hdf5::InnerVlenDdl(H5::PredType::NATIVE_FLOAT)), value);
+  yardl::hdf5::ReadScalarDataset<tuples::hdf5::_Inner_Tuple<yardl::hdf5::InnerVlen<int32_t, int32_t>, std::vector<int32_t>, yardl::hdf5::InnerVlen<float, float>, std::vector<float>>, test_model::MyTuple<std::vector<int32_t>, std::vector<float>>>(group_, "tupleOfVectors", tuples::hdf5::GetTupleHdf5Ddl<yardl::hdf5::InnerVlen<int32_t, int32_t>, std::vector<int32_t>, yardl::hdf5::InnerVlen<float, float>, std::vector<float>>(yardl::hdf5::InnerVlenDdl(H5::PredType::NATIVE_INT32), yardl::hdf5::InnerVlenDdl(H5::PredType::NATIVE_FLOAT)), value);
 }
 
 AliasesWriter::AliasesWriter(std::string path)
@@ -2798,15 +2816,15 @@ void AliasesWriter::WriteAliasedStringImpl(test_model::AliasedString const& valu
 }
 
 void AliasesWriter::WriteAliasedEnumImpl(test_model::AliasedEnum const& value) {
-  yardl::hdf5::WriteScalarDataset<test_model::Fruits, test_model::AliasedEnum>(group_, "aliasedEnum", test_model::hdf5::GetFruitsHdf5Ddl(), value);
+  yardl::hdf5::WriteScalarDataset<basic_types::Fruits, test_model::AliasedEnum>(group_, "aliasedEnum", basic_types::hdf5::GetFruitsHdf5Ddl(), value);
 }
 
 void AliasesWriter::WriteAliasedOpenGenericImpl(test_model::AliasedOpenGeneric<test_model::AliasedString, test_model::AliasedEnum> const& value) {
-  yardl::hdf5::WriteScalarDataset<test_model::hdf5::_Inner_MyTuple<yardl::hdf5::InnerVlenString, test_model::AliasedString, test_model::Fruits, test_model::AliasedEnum>, test_model::AliasedOpenGeneric<test_model::AliasedString, test_model::AliasedEnum>>(group_, "aliasedOpenGeneric", test_model::hdf5::GetMyTupleHdf5Ddl<yardl::hdf5::InnerVlenString, test_model::AliasedString, test_model::Fruits, test_model::AliasedEnum>(yardl::hdf5::InnerVlenStringDdl(), test_model::hdf5::GetFruitsHdf5Ddl()), value);
+  yardl::hdf5::WriteScalarDataset<tuples::hdf5::_Inner_Tuple<yardl::hdf5::InnerVlenString, test_model::AliasedString, basic_types::Fruits, test_model::AliasedEnum>, test_model::AliasedOpenGeneric<test_model::AliasedString, test_model::AliasedEnum>>(group_, "aliasedOpenGeneric", tuples::hdf5::GetTupleHdf5Ddl<yardl::hdf5::InnerVlenString, test_model::AliasedString, basic_types::Fruits, test_model::AliasedEnum>(yardl::hdf5::InnerVlenStringDdl(), basic_types::hdf5::GetFruitsHdf5Ddl()), value);
 }
 
 void AliasesWriter::WriteAliasedClosedGenericImpl(test_model::AliasedClosedGeneric const& value) {
-  yardl::hdf5::WriteScalarDataset<test_model::hdf5::_Inner_MyTuple<yardl::hdf5::InnerVlenString, test_model::AliasedString, test_model::Fruits, test_model::AliasedEnum>, test_model::AliasedClosedGeneric>(group_, "aliasedClosedGeneric", test_model::hdf5::GetMyTupleHdf5Ddl<yardl::hdf5::InnerVlenString, test_model::AliasedString, test_model::Fruits, test_model::AliasedEnum>(yardl::hdf5::InnerVlenStringDdl(), test_model::hdf5::GetFruitsHdf5Ddl()), value);
+  yardl::hdf5::WriteScalarDataset<tuples::hdf5::_Inner_Tuple<yardl::hdf5::InnerVlenString, test_model::AliasedString, basic_types::Fruits, test_model::AliasedEnum>, test_model::AliasedClosedGeneric>(group_, "aliasedClosedGeneric", tuples::hdf5::GetTupleHdf5Ddl<yardl::hdf5::InnerVlenString, test_model::AliasedString, basic_types::Fruits, test_model::AliasedEnum>(yardl::hdf5::InnerVlenStringDdl(), basic_types::hdf5::GetFruitsHdf5Ddl()), value);
 }
 
 void AliasesWriter::WriteAliasedOptionalImpl(test_model::AliasedOptional const& value) {
@@ -2818,7 +2836,7 @@ void AliasesWriter::WriteAliasedGenericOptionalImpl(test_model::AliasedGenericOp
 }
 
 void AliasesWriter::WriteAliasedGenericUnion2Impl(test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum> const& value) {
-  yardl::hdf5::WriteScalarDataset<::InnerUnion2<yardl::hdf5::InnerVlenString, test_model::AliasedString, test_model::Fruits, test_model::AliasedEnum>, test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum>>(group_, "aliasedGenericUnion2", ::InnerUnion2Ddl<yardl::hdf5::InnerVlenString, test_model::AliasedString, test_model::Fruits, test_model::AliasedEnum>(false, yardl::hdf5::InnerVlenStringDdl(), "T1", test_model::hdf5::GetFruitsHdf5Ddl(), "T2"), value);
+  yardl::hdf5::WriteScalarDataset<::InnerUnion2<yardl::hdf5::InnerVlenString, test_model::AliasedString, basic_types::Fruits, test_model::AliasedEnum>, test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum>>(group_, "aliasedGenericUnion2", ::InnerUnion2Ddl<yardl::hdf5::InnerVlenString, test_model::AliasedString, basic_types::Fruits, test_model::AliasedEnum>(false, yardl::hdf5::InnerVlenStringDdl(), "T1", basic_types::hdf5::GetFruitsHdf5Ddl(), "T2"), value);
 }
 
 void AliasesWriter::WriteAliasedGenericVectorImpl(test_model::AliasedGenericVector<float> const& value) {
@@ -2831,7 +2849,7 @@ void AliasesWriter::WriteAliasedGenericFixedVectorImpl(test_model::AliasedGeneri
 
 void AliasesWriter::WriteStreamOfAliasedGenericUnion2Impl(test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum> const& value) {
   if (!streamOfAliasedGenericUnion2_dataset_state_) {
-    streamOfAliasedGenericUnion2_dataset_state_ = std::make_unique<yardl::hdf5::UnionDatasetWriter<2>>(group_, "streamOfAliasedGenericUnion2", false, std::make_tuple(yardl::hdf5::InnerVlenStringDdl(), "T1", static_cast<size_t>(std::max(sizeof(::InnerUnion2<yardl::hdf5::InnerVlenString, test_model::AliasedString, test_model::Fruits, test_model::AliasedEnum>), sizeof(std::variant<test_model::AliasedString, test_model::AliasedEnum>)))), std::make_tuple(test_model::hdf5::GetFruitsHdf5Ddl(), "T2", static_cast<size_t>(std::max(sizeof(::InnerUnion2<yardl::hdf5::InnerVlenString, test_model::AliasedString, test_model::Fruits, test_model::AliasedEnum>), sizeof(std::variant<test_model::AliasedString, test_model::AliasedEnum>)))));
+    streamOfAliasedGenericUnion2_dataset_state_ = std::make_unique<yardl::hdf5::UnionDatasetWriter<2>>(group_, "streamOfAliasedGenericUnion2", false, std::make_tuple(yardl::hdf5::InnerVlenStringDdl(), "T1", static_cast<size_t>(std::max(sizeof(::InnerUnion2<yardl::hdf5::InnerVlenString, test_model::AliasedString, basic_types::Fruits, test_model::AliasedEnum>), sizeof(std::variant<test_model::AliasedString, test_model::AliasedEnum>)))), std::make_tuple(basic_types::hdf5::GetFruitsHdf5Ddl(), "T2", static_cast<size_t>(std::max(sizeof(::InnerUnion2<yardl::hdf5::InnerVlenString, test_model::AliasedString, basic_types::Fruits, test_model::AliasedEnum>), sizeof(std::variant<test_model::AliasedString, test_model::AliasedEnum>)))));
   }
 
   std::visit(
@@ -2840,7 +2858,7 @@ void AliasesWriter::WriteStreamOfAliasedGenericUnion2Impl(test_model::AliasedGen
       if constexpr (std::is_same_v<T, test_model::AliasedString>) {
         streamOfAliasedGenericUnion2_dataset_state_->Append<yardl::hdf5::InnerVlenString, test_model::AliasedString>(static_cast<int8_t>(value.index()), arg);
       } else if constexpr (std::is_same_v<T, test_model::AliasedEnum>) {
-        streamOfAliasedGenericUnion2_dataset_state_->Append<test_model::Fruits, test_model::AliasedEnum>(static_cast<int8_t>(value.index()), arg);
+        streamOfAliasedGenericUnion2_dataset_state_->Append<basic_types::Fruits, test_model::AliasedEnum>(static_cast<int8_t>(value.index()), arg);
       } else {
         static_assert(yardl::hdf5::always_false_v<T>, "non-exhaustive visitor!");
       }
@@ -2850,7 +2868,7 @@ void AliasesWriter::WriteStreamOfAliasedGenericUnion2Impl(test_model::AliasedGen
 
 void AliasesWriter::EndStreamOfAliasedGenericUnion2Impl() {
   if (!streamOfAliasedGenericUnion2_dataset_state_) {
-    streamOfAliasedGenericUnion2_dataset_state_ = std::make_unique<yardl::hdf5::UnionDatasetWriter<2>>(group_, "streamOfAliasedGenericUnion2", false, std::make_tuple(yardl::hdf5::InnerVlenStringDdl(), "T1", static_cast<size_t>(std::max(sizeof(::InnerUnion2<yardl::hdf5::InnerVlenString, test_model::AliasedString, test_model::Fruits, test_model::AliasedEnum>), sizeof(std::variant<test_model::AliasedString, test_model::AliasedEnum>)))), std::make_tuple(test_model::hdf5::GetFruitsHdf5Ddl(), "T2", static_cast<size_t>(std::max(sizeof(::InnerUnion2<yardl::hdf5::InnerVlenString, test_model::AliasedString, test_model::Fruits, test_model::AliasedEnum>), sizeof(std::variant<test_model::AliasedString, test_model::AliasedEnum>)))));
+    streamOfAliasedGenericUnion2_dataset_state_ = std::make_unique<yardl::hdf5::UnionDatasetWriter<2>>(group_, "streamOfAliasedGenericUnion2", false, std::make_tuple(yardl::hdf5::InnerVlenStringDdl(), "T1", static_cast<size_t>(std::max(sizeof(::InnerUnion2<yardl::hdf5::InnerVlenString, test_model::AliasedString, basic_types::Fruits, test_model::AliasedEnum>), sizeof(std::variant<test_model::AliasedString, test_model::AliasedEnum>)))), std::make_tuple(basic_types::hdf5::GetFruitsHdf5Ddl(), "T2", static_cast<size_t>(std::max(sizeof(::InnerUnion2<yardl::hdf5::InnerVlenString, test_model::AliasedString, basic_types::Fruits, test_model::AliasedEnum>), sizeof(std::variant<test_model::AliasedString, test_model::AliasedEnum>)))));
   }
 
   streamOfAliasedGenericUnion2_dataset_state_.reset();
@@ -2871,15 +2889,15 @@ void AliasesReader::ReadAliasedStringImpl(test_model::AliasedString& value) {
 }
 
 void AliasesReader::ReadAliasedEnumImpl(test_model::AliasedEnum& value) {
-  yardl::hdf5::ReadScalarDataset<test_model::Fruits, test_model::AliasedEnum>(group_, "aliasedEnum", test_model::hdf5::GetFruitsHdf5Ddl(), value);
+  yardl::hdf5::ReadScalarDataset<basic_types::Fruits, test_model::AliasedEnum>(group_, "aliasedEnum", basic_types::hdf5::GetFruitsHdf5Ddl(), value);
 }
 
 void AliasesReader::ReadAliasedOpenGenericImpl(test_model::AliasedOpenGeneric<test_model::AliasedString, test_model::AliasedEnum>& value) {
-  yardl::hdf5::ReadScalarDataset<test_model::hdf5::_Inner_MyTuple<yardl::hdf5::InnerVlenString, test_model::AliasedString, test_model::Fruits, test_model::AliasedEnum>, test_model::AliasedOpenGeneric<test_model::AliasedString, test_model::AliasedEnum>>(group_, "aliasedOpenGeneric", test_model::hdf5::GetMyTupleHdf5Ddl<yardl::hdf5::InnerVlenString, test_model::AliasedString, test_model::Fruits, test_model::AliasedEnum>(yardl::hdf5::InnerVlenStringDdl(), test_model::hdf5::GetFruitsHdf5Ddl()), value);
+  yardl::hdf5::ReadScalarDataset<tuples::hdf5::_Inner_Tuple<yardl::hdf5::InnerVlenString, test_model::AliasedString, basic_types::Fruits, test_model::AliasedEnum>, test_model::AliasedOpenGeneric<test_model::AliasedString, test_model::AliasedEnum>>(group_, "aliasedOpenGeneric", tuples::hdf5::GetTupleHdf5Ddl<yardl::hdf5::InnerVlenString, test_model::AliasedString, basic_types::Fruits, test_model::AliasedEnum>(yardl::hdf5::InnerVlenStringDdl(), basic_types::hdf5::GetFruitsHdf5Ddl()), value);
 }
 
 void AliasesReader::ReadAliasedClosedGenericImpl(test_model::AliasedClosedGeneric& value) {
-  yardl::hdf5::ReadScalarDataset<test_model::hdf5::_Inner_MyTuple<yardl::hdf5::InnerVlenString, test_model::AliasedString, test_model::Fruits, test_model::AliasedEnum>, test_model::AliasedClosedGeneric>(group_, "aliasedClosedGeneric", test_model::hdf5::GetMyTupleHdf5Ddl<yardl::hdf5::InnerVlenString, test_model::AliasedString, test_model::Fruits, test_model::AliasedEnum>(yardl::hdf5::InnerVlenStringDdl(), test_model::hdf5::GetFruitsHdf5Ddl()), value);
+  yardl::hdf5::ReadScalarDataset<tuples::hdf5::_Inner_Tuple<yardl::hdf5::InnerVlenString, test_model::AliasedString, basic_types::Fruits, test_model::AliasedEnum>, test_model::AliasedClosedGeneric>(group_, "aliasedClosedGeneric", tuples::hdf5::GetTupleHdf5Ddl<yardl::hdf5::InnerVlenString, test_model::AliasedString, basic_types::Fruits, test_model::AliasedEnum>(yardl::hdf5::InnerVlenStringDdl(), basic_types::hdf5::GetFruitsHdf5Ddl()), value);
 }
 
 void AliasesReader::ReadAliasedOptionalImpl(test_model::AliasedOptional& value) {
@@ -2891,7 +2909,7 @@ void AliasesReader::ReadAliasedGenericOptionalImpl(test_model::AliasedGenericOpt
 }
 
 void AliasesReader::ReadAliasedGenericUnion2Impl(test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum>& value) {
-  yardl::hdf5::ReadScalarDataset<::InnerUnion2<yardl::hdf5::InnerVlenString, test_model::AliasedString, test_model::Fruits, test_model::AliasedEnum>, test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum>>(group_, "aliasedGenericUnion2", ::InnerUnion2Ddl<yardl::hdf5::InnerVlenString, test_model::AliasedString, test_model::Fruits, test_model::AliasedEnum>(false, yardl::hdf5::InnerVlenStringDdl(), "T1", test_model::hdf5::GetFruitsHdf5Ddl(), "T2"), value);
+  yardl::hdf5::ReadScalarDataset<::InnerUnion2<yardl::hdf5::InnerVlenString, test_model::AliasedString, basic_types::Fruits, test_model::AliasedEnum>, test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum>>(group_, "aliasedGenericUnion2", ::InnerUnion2Ddl<yardl::hdf5::InnerVlenString, test_model::AliasedString, basic_types::Fruits, test_model::AliasedEnum>(false, yardl::hdf5::InnerVlenStringDdl(), "T1", basic_types::hdf5::GetFruitsHdf5Ddl(), "T2"), value);
 }
 
 void AliasesReader::ReadAliasedGenericVectorImpl(test_model::AliasedGenericVector<float>& value) {
@@ -2904,7 +2922,7 @@ void AliasesReader::ReadAliasedGenericFixedVectorImpl(test_model::AliasedGeneric
 
 bool AliasesReader::ReadStreamOfAliasedGenericUnion2Impl(test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum>& value) {
   if (!streamOfAliasedGenericUnion2_dataset_state_) {
-    streamOfAliasedGenericUnion2_dataset_state_ = std::make_unique<yardl::hdf5::UnionDatasetReader<2>>(group_, "streamOfAliasedGenericUnion2", false, std::make_tuple(yardl::hdf5::InnerVlenStringDdl(), "T1", static_cast<size_t>(std::max(sizeof(::InnerUnion2<yardl::hdf5::InnerVlenString, test_model::AliasedString, test_model::Fruits, test_model::AliasedEnum>), sizeof(std::variant<test_model::AliasedString, test_model::AliasedEnum>)))), std::make_tuple(test_model::hdf5::GetFruitsHdf5Ddl(), "T2", static_cast<size_t>(std::max(sizeof(::InnerUnion2<yardl::hdf5::InnerVlenString, test_model::AliasedString, test_model::Fruits, test_model::AliasedEnum>), sizeof(std::variant<test_model::AliasedString, test_model::AliasedEnum>)))));
+    streamOfAliasedGenericUnion2_dataset_state_ = std::make_unique<yardl::hdf5::UnionDatasetReader<2>>(group_, "streamOfAliasedGenericUnion2", false, std::make_tuple(yardl::hdf5::InnerVlenStringDdl(), "T1", static_cast<size_t>(std::max(sizeof(::InnerUnion2<yardl::hdf5::InnerVlenString, test_model::AliasedString, basic_types::Fruits, test_model::AliasedEnum>), sizeof(std::variant<test_model::AliasedString, test_model::AliasedEnum>)))), std::make_tuple(basic_types::hdf5::GetFruitsHdf5Ddl(), "T2", static_cast<size_t>(std::max(sizeof(::InnerUnion2<yardl::hdf5::InnerVlenString, test_model::AliasedString, basic_types::Fruits, test_model::AliasedEnum>), sizeof(std::variant<test_model::AliasedString, test_model::AliasedEnum>)))));
   }
 
   auto [has_result, type_index, reader] = streamOfAliasedGenericUnion2_dataset_state_->ReadIndex();
@@ -2921,7 +2939,7 @@ bool AliasesReader::ReadStreamOfAliasedGenericUnion2Impl(test_model::AliasedGene
   }
   case 1: {
     test_model::AliasedEnum& ref = value.emplace<1>();
-    reader->Read<test_model::Fruits, test_model::AliasedEnum>(ref);
+    reader->Read<basic_types::Fruits, test_model::AliasedEnum>(ref);
     break;
   }
   }
@@ -3142,3 +3160,4 @@ void ProtocolWithKeywordStepsReader::ReadFloatImpl(test_model::EnumWithKeywordSy
 }
 
 } // namespace test_model::hdf5
+
