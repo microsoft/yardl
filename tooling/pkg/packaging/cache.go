@@ -11,7 +11,6 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
-	"time"
 
 	"github.com/hashicorp/go-getter/v2"
 )
@@ -58,19 +57,12 @@ func initGetterClient() {
 		},
 	}
 
-	httpGetter := &getter.HttpGetter{
-		Netrc:                 true,
-		XTerraformGetDisabled: true,
-		HeadFirstTimeout:      10 * time.Second,
-		ReadTimeout:           30 * time.Second,
-	}
-
 	fileGetter := new(NoOpFileGetter)
-	getters := []getter.Getter{gitGetter, httpGetter, fileGetter}
+	getters := []getter.Getter{gitGetter, fileGetter}
 
 	client = &getter.Client{
 		Getters:         getters,
-		Decompressors:   getter.Decompressors,
+		Decompressors:   nil,
 		DisableSymlinks: true,
 	}
 }

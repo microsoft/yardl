@@ -157,7 +157,16 @@ func logImports(p *PackageInfo, indent int) {
 }
 
 func readPackageInfo(directory string) (*PackageInfo, error) {
-	packageFilePath, _ := filepath.Abs(filepath.Join(directory, PackageFileName))
+	packageDir, err := filepath.Abs(directory)
+	if err != nil {
+		return nil, err
+	}
+	_, err = os.Stat(packageDir)
+	if os.IsNotExist(err) {
+		return nil, fmt.Errorf("package directory '%s' not found", packageDir)
+	}
+
+	packageFilePath := filepath.Join(packageDir, PackageFileName)
 	packageInfo := &PackageInfo{FilePath: packageFilePath}
 	f, err := os.Open(packageFilePath)
 	if err != nil {
