@@ -796,3 +796,21 @@ runtime error:
 with NDJsonMyProtocolWriter(sys.stdout) as w:
     w.write_rec(rec) # typing error and runtime error // [!code error]
 ```
+
+## Imported Types
+
+Types can be imported from other packages (see [Packages](packages)) and referenced
+through their respective yardl namespace:
+
+```yaml
+MyTuple: BasicTypes.Tuple<string, int>
+```
+
+Imported types are likewise namespaced in Python submodules:
+
+```python
+from my_package import basic_types
+myInfo: MyTuple = basic_types.Tuple(v1="John Smith", v2=42)
+```
+
+Note that yardl ignores protocols defined in imported packages.

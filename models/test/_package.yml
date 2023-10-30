@@ -2,8 +2,10 @@ namespace: TestModel
 
 imports:
   - ../basic-types
+  # The 2D image type
   - ../image
-  - ../tuples
+  # Simple generic tuple
+  - ../../models/tuples
 
 cpp:
   sourcesOutputDir: ../../cpp/test/generated

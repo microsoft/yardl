@@ -505,3 +505,21 @@ Note that protocols cannot be open generic types, but their steps may be made up
 closed generic types (e.g. `Image<float>`). Enums and Flags cannot be generic either.
 
 Generic types map to C++ template classes.
+
+## Imported Types
+
+Types can be imported from other packages (see [Packages](packages)) and referenced
+through their respective yardl namespace:
+
+```yaml
+MyTuple: BasicTypes.Tuple<string, int>
+```
+
+Imported types are likewise namespaced in C++:
+
+```C++
+basic_types::Tuple<std::string, int> info = {"John Smith", 42};
+MyTuple myInfo = info;
+```
+
+Note that yardl ignores protocols defined in imported packages.

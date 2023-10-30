@@ -10,6 +10,17 @@ Here is a commented `_package.yml` file:
 # The namespace of the package. Required.
 namespace: MyNamespace
 
+# Import types from external locations
+imports:
+  # From a relative local directory
+  - ../myCommonTypes
+  # From an absolute local directory
+  - /workspaces/yardl/models/basic-types
+  # From a directory inside a repo
+  - github.com/microsoft/yardl//models/header-types
+  # From a specific commit inside a repo
+  - github.com/microsoft/yardl//models/data_types?ref=923700
+
 # settings for C++ code generation (optional)
 cpp:
   # The directory where generated code will be written.
@@ -26,5 +37,5 @@ python:
   outputDir: ../path/relative/to/this/file
 ```
 
-In the future, this file will be able to reference other packages and specify
-options for other languages.
+In the future, this file will be able to reference previous versions of
+your packages and specify options for other languages.
