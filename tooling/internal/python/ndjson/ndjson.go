@@ -7,7 +7,6 @@ import (
 	"bytes"
 	"fmt"
 	"path"
-	"sort"
 	"strconv"
 	"strings"
 
@@ -220,7 +219,7 @@ func writeRecordConverter(td *dsl.RecordDefinition, w *formatting.IndentedWriter
 }
 
 func writeEnumMaps(t *dsl.EnumDefinition, w *formatting.IndentedWriter, ns *dsl.Namespace) {
-	name_to_value_map_name := enumNameToValueMapName(t)
+	name_to_value_map_name := enumNameToValueMapName(t, ns.Name)
 	fmt.Fprintf(w, "%s = {\n", name_to_value_map_name)
 	w.Indented(func() {
 		for _, v := range t.Values {
@@ -229,22 +228,30 @@ func writeEnumMaps(t *dsl.EnumDefinition, w *formatting.IndentedWriter, ns *dsl.
 	})
 	fmt.Fprintf(w, "}\n")
 
-	value_to_name_map_name := enumValueToNameMapName(t)
+	value_to_name_map_name := enumValueToNameMapName(t, ns.Name)
 	fmt.Fprintf(w, "%s = {v: n for n, v in %s.items()}\n\n", value_to_name_map_name, name_to_value_map_name)
 }
 
-func enumNameToValueMapName(t *dsl.EnumDefinition) string {
-	return fmt.Sprintf("_%s_name_to_value_map", formatting.ToSnakeCase(t.Name))
+func enumNameToValueMapName(t *dsl.EnumDefinition, contextNamespace string) string {
+	name := fmt.Sprintf("_%s_name_to_value_map", formatting.ToSnakeCase(t.Name))
+	if t.Namespace != contextNamespace {
+		name = fmt.Sprintf("%s.ndjson.%s", common.NamespaceIdentifierName(t.Namespace), name)
+	}
+	return name
 }
 
-func enumValueToNameMapName(t *dsl.EnumDefinition) string {
-	return fmt.Sprintf("_%s_value_to_name_map", formatting.ToSnakeCase(t.Name))
+func enumValueToNameMapName(t *dsl.EnumDefinition, contextNamespace string) string {
+	name := fmt.Sprintf("_%s_value_to_name_map", formatting.ToSnakeCase(t.Name))
+	if t.Namespace != contextNamespace {
+		name = fmt.Sprintf("%s.ndjson.%s", common.NamespaceIdentifierName(t.Namespace), name)
+	}
+	return name
 }
 
 func recordConverterClassName(record *dsl.RecordDefinition, contextNamespace string) string {
 	className := fmt.Sprintf("%sConverter", formatting.ToPascalCase(record.Name))
 	if record.Namespace != contextNamespace {
-		className = fmt.Sprintf("%s.%s", common.NamespaceIdentifierName(record.Namespace), className)
+		className = fmt.Sprintf("%s.ndjson.%s", common.NamespaceIdentifierName(record.Namespace), className)
 	}
 	return className
 }
@@ -351,7 +358,7 @@ func typeDefinitionConverter(t dsl.TypeDefinition, contextNamespace string) stri
 			className = "_ndjson.EnumConverter"
 		}
 
-		return fmt.Sprintf("%s(%s, %s, %s, %s)", className, common.TypeSyntax(t, contextNamespace), common.TypeDTypeSyntax(baseType), enumNameToValueMapName(t), enumValueToNameMapName(t))
+		return fmt.Sprintf("%s(%s, %s, %s, %s)", className, common.TypeSyntax(t, contextNamespace), common.TypeDTypeSyntax(baseType), enumNameToValueMapName(t, contextNamespace), enumValueToNameMapName(t, contextNamespace))
 	case *dsl.RecordDefinition:
 		converterName := recordConverterClassName(t, contextNamespace)
 		if len(t.TypeParameters) == 0 {
@@ -398,6 +405,9 @@ func typeConverter(t dsl.Type, contextNamespace string, namedType *dsl.NamedType
 			unionClassName, typeParameters := common.UnionClassName(t)
 			if namedType != nil {
 				unionClassName = namedType.Name
+				if namedType.Namespace != contextNamespace {
+					unionClassName = fmt.Sprintf("%s.%s", common.NamespaceIdentifierName(namedType.Namespace), unionClassName)
+				}
 			}
 
 			var classSyntax string
@@ -499,18 +509,4 @@ func isGenericParameterReference(t dsl.Type) bool {
 	}
 
 	return false
-}
-
-func RecordConverterNames(ns *dsl.Namespace) []string {
-	var classNames []string
-	for _, td := range ns.TypeDefinitions {
-		switch td := td.(type) {
-		case *dsl.RecordDefinition:
-			classNames = append(classNames, recordConverterClassName(td, ns.Name))
-		}
-	}
-	sort.Slice(classNames, func(i, j int) bool {
-		return classNames[i] < classNames[j]
-	})
-	return classNames
 }

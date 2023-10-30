@@ -958,6 +958,11 @@ func writeGetDTypeFunc(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 			root:      true,
 		}
 
+		for _, refNs := range ns.References {
+			for _, t := range refNs.TypeDefinitions {
+				fmt.Fprintf(w, "dtype_map.setdefault(%s, %s)\n", common.TypeSyntaxWithoutTypeParameters(t, ns.Name), typeDefinitionDTypeExpression(t, context))
+			}
+		}
 		for _, t := range ns.TypeDefinitions {
 			fmt.Fprintf(w, "dtype_map.setdefault(%s, %s)\n", common.TypeSyntaxWithoutTypeParameters(t, ns.Name), typeDefinitionDTypeExpression(t, context))
 		}

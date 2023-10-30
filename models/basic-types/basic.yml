@@ -1,0 +1,36 @@
+Fruits: !enum
+  values:
+    - apple
+    - banana
+    - pear
+
+DaysOfWeek: !flags
+  values:
+    - monday
+    - tuesday
+    - wednesday
+    - thursday
+    - friday
+    - saturday
+    - sunday
+
+TextFormat: !flags
+  base: uint64
+  values:
+    regular: 0
+    bold:
+    italic:
+    underline:
+    strikethrough:
+
+MyTuple<T1, T2>: !record
+  fields:
+    v1: T1
+    v2: T2
+
+GenericUnion2<T1, T2>: [T1, T2]
+
+RecordWithUnions: !record
+  fields:
+    nullOrIntOrString: [null, int, string]
+    dateOrDatetime: [time, datetime]

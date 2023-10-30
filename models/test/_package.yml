@@ -1,5 +1,9 @@
 namespace: TestModel
 
+imports:
+  - ../basic-types
+  - ../image
+
 cpp:
   sourcesOutputDir: ../../cpp/test/generated
   internalGenerateMocks: true

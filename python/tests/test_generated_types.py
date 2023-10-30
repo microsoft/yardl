@@ -71,6 +71,11 @@ def test_get_dtype():
     with pytest.raises(RuntimeError, match="Generic type arguments not provided"):
         tm.get_dtype(tm.AliasedGenericUnion2)
 
+    assert tm.get_dtype(tm.AliasedClosedGeneric) == np.dtype(
+        [("v1", tm.get_dtype(tm.AliasedString)), ("v2", tm.get_dtype(tm.AliasedEnum))],
+        align=True,
+    )
+
     assert tm.get_dtype(tm.RecordWithAliasedGenerics) == np.dtype(
         [
             ("my_strings", tm.get_dtype(tm.MyTuple[str, str])),

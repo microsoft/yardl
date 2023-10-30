@@ -194,7 +194,7 @@ if _parse_version(_np.__version__) < _MIN_NUMPY_VERSION:
 		ndjsonMembers = append(ndjsonMembers, protocolsMembers...)
 	}
 
-	binaryMembers = append(binaryMembers, binary.RecordSerializerNames(ns)...)
+	//binaryMembers = append(binaryMembers, binary.RecordSerializerNames(ns)...)
 	if len(binaryMembers) > 0 {
 		fmt.Fprintf(w, "from .binary import (\n")
 		w.Indented(func() {
@@ -203,9 +203,11 @@ if _parse_version(_np.__version__) < _MIN_NUMPY_VERSION:
 			}
 		})
 		fmt.Fprintf(w, ")\n")
+	} else {
+		w.WriteStringln("from . import binary")
 	}
 
-	ndjsonMembers = append(ndjsonMembers, ndjson.RecordConverterNames(ns)...)
+	//ndjsonMembers = append(ndjsonMembers, ndjson.RecordConverterNames(ns)...)
 	if len(ndjsonMembers) > 0 {
 		fmt.Fprintf(w, "from .ndjson import (\n")
 		w.Indented(func() {
@@ -214,6 +216,8 @@ if _parse_version(_np.__version__) < _MIN_NUMPY_VERSION:
 			}
 		})
 		fmt.Fprintf(w, ")\n")
+	} else {
+		w.WriteStringln("from . import ndjson")
 	}
 
 	for _, ref := range ns.GetAllChildReferences() {

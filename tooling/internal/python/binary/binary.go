@@ -7,7 +7,6 @@ import (
 	"bytes"
 	"fmt"
 	"path"
-	"sort"
 	"strconv"
 	"strings"
 
@@ -139,7 +138,7 @@ func writeRecordSerializers(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 func recordSerializerClassName(record *dsl.RecordDefinition, contextNamespace string) string {
 	className := fmt.Sprintf("%sSerializer", formatting.ToPascalCase(record.Name))
 	if record.Namespace != contextNamespace {
-		className = fmt.Sprintf("%s.%s", common.NamespaceIdentifierName(record.Namespace), className)
+		className = fmt.Sprintf("%s.binary.%s", common.NamespaceIdentifierName(record.Namespace), className)
 	}
 	return className
 }
@@ -266,6 +265,9 @@ func typeSerializer(t dsl.Type, contextNamespace string, namedType *dsl.NamedTyp
 			unionClassName, typeParameters := common.UnionClassName(t)
 			if namedType != nil {
 				unionClassName = namedType.Name
+				if namedType.Namespace != contextNamespace {
+					unionClassName = fmt.Sprintf("%s.%s", common.NamespaceIdentifierName(namedType.Namespace), unionClassName)
+				}
 			}
 
 			var classSyntax string
@@ -332,18 +334,4 @@ func BinaryWriterName(p *dsl.ProtocolDefinition) string {
 
 func BinaryReaderName(p *dsl.ProtocolDefinition) string {
 	return fmt.Sprintf("Binary%sReader", formatting.ToPascalCase(p.Name))
-}
-
-func RecordSerializerNames(ns *dsl.Namespace) []string {
-	var classNames []string
-	for _, td := range ns.TypeDefinitions {
-		switch td := td.(type) {
-		case *dsl.RecordDefinition:
-			classNames = append(classNames, recordSerializerClassName(td, ns.Name))
-		}
-	}
-	sort.Slice(classNames, func(i, j int) bool {
-		return classNames[i] < classNames[j]
-	})
-	return classNames
 }
