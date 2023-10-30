@@ -41,12 +41,15 @@ from %s import _dtypes
 
 	for _, ref := range ns.GetAllChildReferences() {
 		fmt.Fprintf(w, "from %s import %s\n", relativePath, common.NamespaceIdentifierName(ref.Name))
+		fmt.Fprintf(w, "from %s%s.types import *\n", relativePath, common.NamespaceIdentifierName(ref.Name))
 	}
 	w.WriteStringln("")
 
 	writeTypes(w, st, ns)
 
-	writeGetDTypeFunc(w, ns)
+	if ns.IsTopLevel {
+		writeGetDTypeFunc(w, ns)
+	}
 
 	definitionsPath := path.Join(packageDir, "types.py")
 	return iocommon.WriteFileIfNeeded(definitionsPath, b.Bytes(), 0644)
@@ -958,7 +961,7 @@ func writeGetDTypeFunc(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 			root:      true,
 		}
 
-		for _, refNs := range ns.References {
+		for _, refNs := range ns.GetAllChildReferences() {
 			for _, t := range refNs.TypeDefinitions {
 				fmt.Fprintf(w, "dtype_map.setdefault(%s, %s)\n", common.TypeSyntaxWithoutTypeParameters(t, ns.Name), typeDefinitionDTypeExpression(t, context))
 			}
@@ -1025,10 +1028,6 @@ func typeDefinitionDTypeExpression(t dsl.TypeDefinition, context dTypeExpression
 		} else {
 			dtypeExpression = fmt.Sprintf("get_dtype(%s)", common.TypeSyntaxWithoutTypeParameters(t, context.namespace))
 
-		}
-
-		if t.GetDefinitionMeta().Namespace != context.namespace {
-			dtypeExpression = fmt.Sprintf("%s.%s", common.NamespaceIdentifierName(t.GetDefinitionMeta().Namespace), dtypeExpression)
 		}
 
 		return dtypeExpression

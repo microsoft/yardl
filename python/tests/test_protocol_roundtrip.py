@@ -542,8 +542,8 @@ def test_unions(format: Format):
         w.write_monosotate_or_int_or_simple_record(tm.Int32OrSimpleRecord.Int32(6))
         w.write_record_with_unions(
             tm.RecordWithUnions(
-                null_or_int_or_string=tm.basic_types.Int32OrString.Int32(7),
-                date_or_datetime=tm.basic_types.TimeOrDatetime.Datetime(
+                null_or_int_or_string=tm.Int32OrString.Int32(7),
+                date_or_datetime=tm.TimeOrDatetime.Datetime(
                     tm.DateTime.from_components(2025, 3, 4),
                 ),
             )

@@ -113,8 +113,15 @@ if _parse_version(_np.__version__) < _MIN_NUMPY_VERSION:
 	}
 	fmt.Fprintf(w, "from %syardl_types import *\n", relativePath)
 
+	for _, ref := range ns.GetAllChildReferences() {
+		fmt.Fprintf(w, "from %s import %s\n", relativePath, common.NamespaceIdentifierName(ref.Name))
+		fmt.Fprintf(w, "from %s%s.types import *\n", relativePath, common.NamespaceIdentifierName(ref.Name))
+	}
+
 	typesMembers := make([]string, 0)
-	typesMembers = append(typesMembers, "get_dtype")
+	if ns.IsTopLevel {
+		typesMembers = append(typesMembers, "get_dtype")
+	}
 	for _, t := range ns.TypeDefinitions {
 		typesMembers = append(typesMembers, common.TypeIdentifierName(t.GetDefinitionMeta().Name))
 	}
@@ -152,8 +159,6 @@ if _parse_version(_np.__version__) < _MIN_NUMPY_VERSION:
 	})
 	fmt.Fprintf(w, ")\n")
 
-	var binaryMembers []string
-	var ndjsonMembers []string
 	var protocolsMembers []string
 	for _, p := range ns.Protocols {
 		protocolsMembers = append(protocolsMembers, common.AbstractWriterName(p), common.AbstractReaderName(p))
@@ -180,7 +185,13 @@ if _parse_version(_np.__version__) < _MIN_NUMPY_VERSION:
 			return protocolsMembers[i] < protocolsMembers[j]
 		})
 
-		binaryMembers = append(binaryMembers, protocolsMembers...)
+		fmt.Fprintf(w, "from .binary import (\n")
+		w.Indented(func() {
+			for _, p := range protocolsMembers {
+				fmt.Fprintf(w, "%s,\n", p)
+			}
+		})
+		fmt.Fprintf(w, ")\n")
 
 		for i, p := range ns.Protocols {
 			protocolsMembers[i*2] = ndjson.NDJsonWriterName(p)
@@ -191,37 +202,16 @@ if _parse_version(_np.__version__) < _MIN_NUMPY_VERSION:
 			return protocolsMembers[i] < protocolsMembers[j]
 		})
 
-		ndjsonMembers = append(ndjsonMembers, protocolsMembers...)
-	}
-
-	//binaryMembers = append(binaryMembers, binary.RecordSerializerNames(ns)...)
-	if len(binaryMembers) > 0 {
-		fmt.Fprintf(w, "from .binary import (\n")
+		fmt.Fprintf(w, "from .ndjson import (\n")
 		w.Indented(func() {
-			for _, p := range binaryMembers {
+			for _, p := range protocolsMembers {
 				fmt.Fprintf(w, "%s,\n", p)
 			}
 		})
 		fmt.Fprintf(w, ")\n")
 	} else {
 		w.WriteStringln("from . import binary")
-	}
-
-	//ndjsonMembers = append(ndjsonMembers, ndjson.RecordConverterNames(ns)...)
-	if len(ndjsonMembers) > 0 {
-		fmt.Fprintf(w, "from .ndjson import (\n")
-		w.Indented(func() {
-			for _, p := range ndjsonMembers {
-				fmt.Fprintf(w, "%s,\n", p)
-			}
-		})
-		fmt.Fprintf(w, ")\n")
-	} else {
 		w.WriteStringln("from . import ndjson")
-	}
-
-	for _, ref := range ns.GetAllChildReferences() {
-		fmt.Fprintf(w, "from %s import %s\n", relativePath, common.NamespaceIdentifierName(ref.Name))
 	}
 
 	return iocommon.WriteFileIfNeeded(path.Join(packageDir, "__init__.py"), b.Bytes(), 0644)

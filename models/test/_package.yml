@@ -3,6 +3,7 @@ namespace: TestModel
 imports:
   - ../basic-types
   - ../image
+  - ../tuples
 
 cpp:
   sourcesOutputDir: ../../cpp/test/generated

@@ -160,17 +160,13 @@ def test_simple_union_equality():
     b = tm.RecordWithUnions(null_or_int_or_string=None)
     assert a == b
 
-    c = tm.RecordWithUnions(null_or_int_or_string=tm.basic_types.Int32OrString.Int32(1))
-    d = tm.RecordWithUnions(null_or_int_or_string=tm.basic_types.Int32OrString.Int32(1))
+    c = tm.RecordWithUnions(null_or_int_or_string=tm.Int32OrString.Int32(1))
+    d = tm.RecordWithUnions(null_or_int_or_string=tm.Int32OrString.Int32(1))
     assert c == d
     assert a != c
 
-    e = tm.RecordWithUnions(
-        null_or_int_or_string=tm.basic_types.Int32OrString.String("hello")
-    )
-    f = tm.RecordWithUnions(
-        null_or_int_or_string=tm.basic_types.Int32OrString.String("hello")
-    )
+    e = tm.RecordWithUnions(null_or_int_or_string=tm.Int32OrString.String("hello"))
+    f = tm.RecordWithUnions(null_or_int_or_string=tm.Int32OrString.String("hello"))
     assert e == f
     assert a != e
     assert c != e
@@ -178,14 +174,10 @@ def test_simple_union_equality():
 
 def test_time_union_equality():
     a = tm.RecordWithUnions(
-        date_or_datetime=tm.basic_types.TimeOrDatetime.Time(
-            tm.Time.from_components(1, 1, 1, 1)
-        )
+        date_or_datetime=tm.TimeOrDatetime.Time(tm.Time.from_components(1, 1, 1, 1))
     )
     b = tm.RecordWithUnions(
-        date_or_datetime=tm.basic_types.TimeOrDatetime.Time(
-            tm.Time.from_components(1, 1, 1, 1)
-        )
+        date_or_datetime=tm.TimeOrDatetime.Time(tm.Time.from_components(1, 1, 1, 1))
     )
 
     assert a == b
@@ -204,5 +196,10 @@ def test_generic_equality():
         vector_1=[1, 2, 3],
         image_2=np.array([[1.1, 2.2], [3.3, 4.4]], np.float32),
     )
+
+    assert a == b
+
+    a = tm.MyTuple(v1=42.0, v2="hello, world")
+    b = tm.basic_types.tuples.Tuple(v1=42.0, v2="hello, world")
 
     assert a == b

@@ -147,14 +147,14 @@ TEST(ComputedFieldsTest, SwitchExpression) {
   r.union_with_nested_generic_union = 42;
   ASSERT_EQ(r.NestedSwitch(), -1);
   ASSERT_EQ(r.UseNestedComputedField(), -1);
-  r.union_with_nested_generic_union = GenericRecordWithComputedFields<std::string, float>{"hi"};
+  r.union_with_nested_generic_union = basic_types::GenericRecordWithComputedFields<std::string, float>{"hi"};
   ASSERT_EQ(r.NestedSwitch(), 10);
   ASSERT_EQ(r.UseNestedComputedField(), 0);
-  r.union_with_nested_generic_union = GenericRecordWithComputedFields<std::string, float>{42.0f};
+  r.union_with_nested_generic_union = basic_types::GenericRecordWithComputedFields<std::string, float>{42.0f};
   ASSERT_EQ(r.NestedSwitch(), 20);
   ASSERT_EQ(r.UseNestedComputedField(), 1);
 
-  GenericRecordWithComputedFields<int, double> gr;
+  basic_types::GenericRecordWithComputedFields<int, double> gr;
   gr.f1 = 42;
   ASSERT_EQ(gr.TypeIndex(), 0);
   gr.f1 = 42.0;

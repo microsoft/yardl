@@ -23,14 +23,29 @@ TextFormat: !flags
     underline:
     strikethrough:
 
-MyTuple<T1, T2>: !record
-  fields:
-    v1: T1
-    v2: T2
+AliasedMap<K,V>: K->V
+
+MyTuple<T1, T2>: Tuples.Tuple<T1, T2>
 
 GenericUnion2<T1, T2>: [T1, T2]
+
+GenericVector<T>: T*
 
 RecordWithUnions: !record
   fields:
     nullOrIntOrString: [null, int, string]
     dateOrDatetime: [time, datetime]
+
+GenericRecordWithComputedFields<T0, T1>: !record
+  fields:
+    f1: [T0, T1]
+  computedFields:
+    typeIndex:
+      !switch f1:
+        T0: 0
+        T1: 1
+
+UnusedProtocol: !protocol
+  sequence:
+    enum: Fruits
+    tuple: MyTuple<int, string>
