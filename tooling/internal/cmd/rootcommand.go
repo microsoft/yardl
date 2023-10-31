@@ -5,6 +5,8 @@ package cmd
 
 import (
 	"fmt"
+	"io"
+	"log"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -18,12 +20,20 @@ func newRootCommand(version, commit string) *cobra.Command {
 		version = fmt.Sprintf("%s commit %s", version, commit)
 	}
 
+	verbose := false
+	log.SetOutput(io.Discard)
+
 	cmd := &cobra.Command{
 		Use: "yardl",
 		Long: `yardl generates domain types and serialization code from a simple schema language.
 
 Read more at https://github.com/microsoft/yardl`,
 		Version: version,
+		PersistentPreRun: func(cmd *cobra.Command, args []string) {
+			if verbose {
+				log.SetOutput(os.Stderr)
+			}
+		},
 	}
 
 	// hide --help as a flag in the usage output
@@ -32,6 +42,7 @@ Read more at https://github.com/microsoft/yardl`,
 
 	cobra.EnableCommandSorting = false
 
+	cmd.PersistentFlags().BoolVarP(&verbose, "verbose", "", false, "verbose output")
 	cmd.AddCommand(newInitCommand())
 	cmd.AddCommand(newGenerateCommand())
 	cmd.AddCommand(newValidateCommand())
