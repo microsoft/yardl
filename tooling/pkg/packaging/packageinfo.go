@@ -41,6 +41,23 @@ func (p *PackageInfo) PackageDir() string {
 	return filepath.Dir(p.FilePath)
 }
 
+func (p *PackageInfo) GetAllImportedPackages() []*PackageInfo {
+	checked := make(map[string]bool)
+	var imports []*PackageInfo
+	var recurse func(*PackageInfo)
+	recurse = func(pInfo *PackageInfo) {
+		for _, ref := range pInfo.Imports {
+			if !checked[ref.FilePath] {
+				recurse(ref)
+				checked[ref.FilePath] = true
+				imports = append(imports, ref)
+			}
+		}
+	}
+	recurse(p)
+	return imports
+}
+
 func (p *PackageInfo) validate() error {
 	errorSink := &validation.ErrorSink{}
 

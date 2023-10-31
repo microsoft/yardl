@@ -36,17 +36,17 @@ func newGenerateCommand() *cobra.Command {
 		DisableFlagsInUseLine: true,
 		Args:                  cobra.NoArgs,
 		Run: func(*cobra.Command, []string) {
+			packageInfo, err := generateImpl()
+			if err != nil {
+				// avoiding returning the error here because
+				// cobra prefixes the error with "Error: "
+				fmt.Fprintln(os.Stderr, err)
+				os.Exit(1)
+			}
+
+			WriteSuccessfulSummary(packageInfo)
+
 			if !flags.watch {
-				packageInfo, err := generateImpl()
-				if err != nil {
-					// avoiding returning the error here because
-					// cobra prefixes the error with "Error: "
-					fmt.Fprintln(os.Stderr, err)
-					os.Exit(1)
-				}
-
-				WriteSuccessfulSummary(packageInfo)
-
 				return
 			}
 
@@ -60,9 +60,16 @@ func newGenerateCommand() *cobra.Command {
 			completedChannel := make(chan error)
 			go dedupLoop(watcher, completedChannel)
 
-			err = watcher.Add(".")
-			if err != nil {
-				log.Fatal(err)
+			toWatch := []string{"."}
+			for _, ref := range packageInfo.GetAllImportedPackages() {
+				toWatch = append(toWatch, ref.PackageDir())
+			}
+
+			for _, watched := range toWatch {
+				err = watcher.Add(watched)
+				if err != nil {
+					log.Fatal(err)
+				}
 			}
 
 			err = <-completedChannel
