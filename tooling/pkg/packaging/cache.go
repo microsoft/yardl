@@ -4,34 +4,21 @@
 package packaging
 
 import (
-	"context"
 	"crypto/md5"
 	"encoding/hex"
+	"fmt"
 	"log"
 	"net/url"
 	"os"
 	"path/filepath"
-
-	"github.com/hashicorp/go-getter/v2"
 )
 
-// Used to Detect file paths but not actually copy them to a new location.
-type NoOpFileGetter struct {
-	fg getter.FileGetter
-}
-
-const MaxImportRecursionDepth = 10
-
 var cacheDir string
-
-var client *getter.Client
 
 func init() {
 	if err := initCacheDir(); err != nil {
 		log.Fatalf("Failed to initialize cache: %v", err)
 	}
-
-	initGetterClient()
 }
 
 func initCacheDir() error {
@@ -47,30 +34,19 @@ func initCacheDir() error {
 	return nil
 }
 
-func initGetterClient() {
-	gitGetter := &getter.GitGetter{
-		Detectors: []getter.Detector{
-			new(getter.GitHubDetector),
-			new(getter.GitDetector),
-			new(getter.BitBucketDetector),
-			new(getter.GitLabDetector),
-		},
-	}
-
-	fileGetter := new(NoOpFileGetter)
-	getters := []getter.Getter{gitGetter, fileGetter}
-
-	client = &getter.Client{
-		Getters:         getters,
-		Decompressors:   nil,
-		DisableSymlinks: true,
-	}
-}
-
 func fetchAndCachePackages(pwd string, urls []string) ([]string, error) {
+	curLoc, err := os.Getwd()
+	if err != nil {
+		return nil, err
+	}
+	if err := os.Chdir(pwd); err != nil {
+		return nil, err
+	}
+	defer os.Chdir(curLoc)
+
 	var dirs []string
 	for _, src := range urls {
-		dst, err := fetchAndCachePackage(pwd, src)
+		dst, err := fetchAndCachePackage(src)
 		if err != nil {
 			return dirs, err
 		}
@@ -79,11 +55,24 @@ func fetchAndCachePackages(pwd string, urls []string) ([]string, error) {
 	return dirs, nil
 }
 
-// Fetches and caches a yardl schema package directory from url
-// pwd is the directory of the current schema package
-// src is the path to the dependency
-func fetchAndCachePackage(pwd string, src string) (string, error) {
-	hash := md5.Sum([]byte(src))
+// Fetches and caches a yardl package directory from src url
+// NOTE: Currently only supports local file paths
+func fetchAndCachePackage(src string) (string, error) {
+	u, err := preprocessUrl(src)
+	if err != nil {
+		return u.String(), err
+	}
+
+	log.Printf("Fetching %s (%s)", src, u.String())
+
+	switch u.Scheme {
+	case "file":
+		return u.Path, nil
+	default:
+		return u.Path, fmt.Errorf("scheme '%s' not yet supported", u.Scheme)
+	}
+
+	hash := md5.Sum([]byte(u.Path))
 	dst := filepath.Join(cacheDir, hex.EncodeToString(hash[:]))
 
 	if stat, err := os.Stat(dst); err == nil && stat.IsDir() {
@@ -91,48 +80,38 @@ func fetchAndCachePackage(pwd string, src string) (string, error) {
 		return dst, nil
 	}
 
-	req := &getter.Request{
-		Src:     src,
-		Dst:     dst,
-		Pwd:     pwd,
-		GetMode: getter.ModeDir,
-	}
-
-	log.Printf("Fetching %v", req.Src)
-	res, err := client.Get(context.Background(), req)
-	if err != nil {
+	log.Printf("Fetching %s", u.String())
+	if err := doFetch(u, dst); err != nil {
 		return "", err
 	}
-	if dst == res.Dst {
-		log.Printf("Cached in: %v", res.Dst)
-	}
-	return res.Dst, nil
+	log.Printf("Cached in: %v", dst)
+	return dst, nil
 }
 
-func (n *NoOpFileGetter) Get(context.Context, *getter.Request) error {
+func doFetch(src *url.URL, dst string) error {
+	panic("fetch not yet supported")
 	return nil
 }
 
-func (n *NoOpFileGetter) GetFile(context.Context, *getter.Request) error {
-	return nil
-}
-
-func (n *NoOpFileGetter) Mode(ctx context.Context, u *url.URL) (getter.Mode, error) {
-	return n.fg.Mode(ctx, u)
-}
-
-// Overwrites req.Dst, setting it to the absolute path of req.Src
-func (n *NoOpFileGetter) Detect(req *getter.Request) (bool, error) {
-	match, err := n.fg.Detect(req)
+func preprocessUrl(src string) (*url.URL, error) {
+	u, err := url.Parse(src)
 	if err != nil {
-		return match, err
+		return u, err
 	}
-	if match {
-		dst, err := filepath.Abs(req.Src)
-		if err != nil {
-			return match, err
-		}
-		req.Dst = dst
+
+	if u.Scheme == "" {
+		u.Scheme = "file"
 	}
-	return match, nil
+
+	if u.Path == "" {
+		return u, fmt.Errorf("invalid path '%s'", src)
+	}
+
+	abs, err := filepath.Abs(u.Path)
+	if err != nil {
+		return u, err
+	}
+	u.Path = abs
+
+	return u, nil
 }

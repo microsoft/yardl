@@ -18,6 +18,8 @@ import (
 
 const PackageFileName = "_package.yml"
 
+const MaxImportRecursionDepth = 10
+
 var namespaceNameRegex = regexp.MustCompile(`^[A-Z][a-zA-Z0-9]*$`)
 
 type PackageInfo struct {

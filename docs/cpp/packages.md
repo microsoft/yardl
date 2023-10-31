@@ -16,10 +16,6 @@ imports:
   - ../myCommonTypes
   # From an absolute local directory
   - /workspaces/yardl/models/basic-types
-  # From a directory inside a repo
-  - github.com/microsoft/yardl//models/header-types
-  # From a specific commit inside a repo
-  - github.com/microsoft/yardl//models/data_types?ref=923700
 
 # settings for C++ code generation (optional)
 cpp:
