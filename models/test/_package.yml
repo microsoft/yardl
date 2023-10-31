@@ -5,7 +5,7 @@ imports:
   # The 2D image type
   - ../image
   # Simple generic tuple
-  - ../../models/tuples
+  - ../tuples
 
 cpp:
   sourcesOutputDir: ../../cpp/test/generated
