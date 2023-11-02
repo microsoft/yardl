@@ -109,6 +109,34 @@ void from_json(ordered_json const& j, test_model::MyTuple<T1, T2>& value);
 void to_json(ordered_json& j, test_model::RecordWithAliasedGenerics const& value);
 void from_json(ordered_json const& j, test_model::RecordWithAliasedGenerics& value);
 
+template <typename T>
+void to_json(ordered_json& j, test_model::RecordWithOptionalGenericField<T> const& value);
+template <typename T>
+void from_json(ordered_json const& j, test_model::RecordWithOptionalGenericField<T>& value);
+
+template <typename T>
+void to_json(ordered_json& j, test_model::RecordWithAliasedOptionalGenericField<T> const& value);
+template <typename T>
+void from_json(ordered_json const& j, test_model::RecordWithAliasedOptionalGenericField<T>& value);
+
+template <typename U, typename V>
+void to_json(ordered_json& j, test_model::RecordWithOptionalGenericUnionField<U, V> const& value);
+template <typename U, typename V>
+void from_json(ordered_json const& j, test_model::RecordWithOptionalGenericUnionField<U, V>& value);
+
+template <typename U, typename V>
+void to_json(ordered_json& j, test_model::RecordWithAliasedOptionalGenericUnionField<U, V> const& value);
+template <typename U, typename V>
+void from_json(ordered_json const& j, test_model::RecordWithAliasedOptionalGenericUnionField<U, V>& value);
+
+template <typename A, typename B>
+void to_json(ordered_json& j, test_model::RecordContainingGenericRecords<A, B> const& value);
+template <typename A, typename B>
+void from_json(ordered_json const& j, test_model::RecordContainingGenericRecords<A, B>& value);
+
+void to_json(ordered_json& j, test_model::RecordContainingNestedGenericRecords const& value);
+void from_json(ordered_json const& j, test_model::RecordContainingNestedGenericRecords& value);
+
 template <typename T0, typename T1>
 void to_json(ordered_json& j, test_model::GenericRecordWithComputedFields<T0, T1> const& value);
 template <typename T0, typename T1>
@@ -208,6 +236,65 @@ struct adl_serializer<std::variant<T1, T2>> {
       value = it.value().get<T2>();
       return;
     }
+  }
+};
+
+template <typename T1, typename T2>
+struct adl_serializer<std::variant<std::monostate, T1, T2>> {
+  static void to_json(ordered_json& j, std::variant<std::monostate, T1, T2> const& value) {
+    switch (value.index()) {
+      case 0:
+        j = ordered_json{ {"null", std::get<std::monostate>(value)} };
+        break;
+      case 1:
+        j = ordered_json{ {"T", std::get<T1>(value)} };
+        break;
+      case 2:
+        j = ordered_json{ {"U", std::get<T2>(value)} };
+        break;
+      default:
+        throw std::runtime_error("Invalid union value");
+    }
+  }
+
+  static void from_json(ordered_json const& j, std::variant<std::monostate, T1, T2>& value) {
+    auto it = j.begin();
+    std::string tag = it.key();
+    if (tag == "null") {
+      value = it.value().get<std::monostate>();
+      return;
+    }
+    if (tag == "T") {
+      value = it.value().get<T1>();
+      return;
+    }
+    if (tag == "U") {
+      value = it.value().get<T2>();
+      return;
+    }
+  }
+};
+
+template <>
+struct adl_serializer<std::variant<std::monostate, std::string, int32_t>> {
+  static void to_json(ordered_json& j, std::variant<std::monostate, std::string, int32_t> const& value) {
+    std::visit([&j](auto const& v) {j = v;}, value);
+  }
+
+  static void from_json(ordered_json const& j, std::variant<std::monostate, std::string, int32_t>& value) {
+    if ((j.is_null())) {
+      value = j.get<std::monostate>();
+      return;
+    }
+    if ((j.is_string())) {
+      value = j.get<std::string>();
+      return;
+    }
+    if ((j.is_number())) {
+      value = j.get<int32_t>();
+      return;
+    }
+    throw std::runtime_error("Invalid union value");
   }
 };
 
@@ -1683,6 +1770,148 @@ void from_json(ordered_json const& j, test_model::RecordWithAliasedGenerics& val
   }
   if (auto it = j.find("aliasedStrings"); it != j.end()) {
     it->get_to(value.aliased_strings);
+  }
+}
+
+template <typename T>
+void to_json(ordered_json& j, test_model::RecordWithOptionalGenericField<T> const& value) {
+  j = ordered_json::object();
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.v)) {
+    j.push_back({"v", value.v});
+  }
+}
+
+template <typename T>
+void from_json(ordered_json const& j, test_model::RecordWithOptionalGenericField<T>& value) {
+  if (auto it = j.find("v"); it != j.end()) {
+    it->get_to(value.v);
+  }
+}
+
+template <typename T>
+void to_json(ordered_json& j, test_model::RecordWithAliasedOptionalGenericField<T> const& value) {
+  j = ordered_json::object();
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.v)) {
+    j.push_back({"v", value.v});
+  }
+}
+
+template <typename T>
+void from_json(ordered_json const& j, test_model::RecordWithAliasedOptionalGenericField<T>& value) {
+  if (auto it = j.find("v"); it != j.end()) {
+    it->get_to(value.v);
+  }
+}
+
+template <typename U, typename V>
+void to_json(ordered_json& j, test_model::RecordWithOptionalGenericUnionField<U, V> const& value) {
+  j = ordered_json::object();
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.v)) {
+    j.push_back({"v", value.v});
+  }
+}
+
+template <typename U, typename V>
+void from_json(ordered_json const& j, test_model::RecordWithOptionalGenericUnionField<U, V>& value) {
+  if (auto it = j.find("v"); it != j.end()) {
+    it->get_to(value.v);
+  }
+}
+
+template <typename U, typename V>
+void to_json(ordered_json& j, test_model::RecordWithAliasedOptionalGenericUnionField<U, V> const& value) {
+  j = ordered_json::object();
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.v)) {
+    j.push_back({"v", value.v});
+  }
+}
+
+template <typename U, typename V>
+void from_json(ordered_json const& j, test_model::RecordWithAliasedOptionalGenericUnionField<U, V>& value) {
+  if (auto it = j.find("v"); it != j.end()) {
+    it->get_to(value.v);
+  }
+}
+
+template <typename A, typename B>
+void to_json(ordered_json& j, test_model::RecordContainingGenericRecords<A, B> const& value) {
+  j = ordered_json::object();
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.g1)) {
+    j.push_back({"g1", value.g1});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.g1a)) {
+    j.push_back({"g1a", value.g1a});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.g2)) {
+    j.push_back({"g2", value.g2});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.g2a)) {
+    j.push_back({"g2a", value.g2a});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.g3)) {
+    j.push_back({"g3", value.g3});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.g3a)) {
+    j.push_back({"g3a", value.g3a});
+  }
+}
+
+template <typename A, typename B>
+void from_json(ordered_json const& j, test_model::RecordContainingGenericRecords<A, B>& value) {
+  if (auto it = j.find("g1"); it != j.end()) {
+    it->get_to(value.g1);
+  }
+  if (auto it = j.find("g1a"); it != j.end()) {
+    it->get_to(value.g1a);
+  }
+  if (auto it = j.find("g2"); it != j.end()) {
+    it->get_to(value.g2);
+  }
+  if (auto it = j.find("g2a"); it != j.end()) {
+    it->get_to(value.g2a);
+  }
+  if (auto it = j.find("g3"); it != j.end()) {
+    it->get_to(value.g3);
+  }
+  if (auto it = j.find("g3a"); it != j.end()) {
+    it->get_to(value.g3a);
+  }
+}
+
+void to_json(ordered_json& j, test_model::RecordContainingNestedGenericRecords const& value) {
+  j = ordered_json::object();
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.f1)) {
+    j.push_back({"f1", value.f1});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.f1a)) {
+    j.push_back({"f1a", value.f1a});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.f2)) {
+    j.push_back({"f2", value.f2});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.f2a)) {
+    j.push_back({"f2a", value.f2a});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.nested)) {
+    j.push_back({"nested", value.nested});
+  }
+}
+
+void from_json(ordered_json const& j, test_model::RecordContainingNestedGenericRecords& value) {
+  if (auto it = j.find("f1"); it != j.end()) {
+    it->get_to(value.f1);
+  }
+  if (auto it = j.find("f1a"); it != j.end()) {
+    it->get_to(value.f1a);
+  }
+  if (auto it = j.find("f2"); it != j.end()) {
+    it->get_to(value.f2);
+  }
+  if (auto it = j.find("f2a"); it != j.end()) {
+    it->get_to(value.f2a);
+  }
+  if (auto it = j.find("nested"); it != j.end()) {
+    it->get_to(value.nested);
   }
 }
 

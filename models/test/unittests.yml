@@ -433,9 +433,47 @@ AliasedOpenGeneric<T1,T2>: AliasedTuple<T1,T2>
 AliasedClosedGeneric: AliasedTuple<AliasedString, AliasedEnum>
 AliasedOptional: int?
 AliasedGenericOptional<T>: T?
+AliasedMultiGenericOptional<T, U>: [null, T, U]
 AliasedGenericUnion2<T1,T2>: GenericUnion2<T1, T2>
 AliasedGenericVector<T>: T*
 AliasedGenericFixedVector<T>: T*3
+
+# BEGIN nested generic records
+
+RecordWithOptionalGenericField<T>: !record
+  fields:
+    v: T?
+
+RecordWithAliasedOptionalGenericField<T>: !record
+  fields:
+    v: AliasedGenericOptional<T>
+
+RecordWithOptionalGenericUnionField<U, V>: !record
+  fields:
+    v: [null, U, V]
+
+RecordWithAliasedOptionalGenericUnionField<U, V>: !record
+  fields:
+    v: AliasedMultiGenericOptional<U, V>
+
+RecordContainingGenericRecords<A, B>: !record
+  fields:
+    g1: RecordWithOptionalGenericField<A>
+    g1a: RecordWithAliasedOptionalGenericField<A>
+    g2: RecordWithOptionalGenericUnionField<A, B>
+    g2a: RecordWithAliasedOptionalGenericUnionField<A, B>
+    g3: MyTuple<A, B>
+    g3a: AliasedTuple<A, B>
+
+RecordContainingNestedGenericRecords: !record
+  fields:
+    f1: RecordWithOptionalGenericField<string>
+    f1a: RecordWithAliasedOptionalGenericField<string>
+    f2: RecordWithOptionalGenericUnionField<string, int>
+    f2a: RecordWithAliasedOptionalGenericUnionField<string, int>
+    nested: RecordContainingGenericRecords<string, int>
+
+# END nested generic records
 
 Aliases: !protocol
   sequence:

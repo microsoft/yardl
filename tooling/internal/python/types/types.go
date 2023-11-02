@@ -178,13 +178,14 @@ func writeRecord(w *formatting.IndentedWriter, rec *dsl.RecordDefinition, st dsl
 
 					var defaultExpression string
 					var defaultExpressionKind defaultValueKind
-					if dsl.ContainsGenericTypeParameter(f.Type) {
+					if dsl.TypeContainsGenericTypeParameter(f.Type) && !dsl.TypeHasNullOption(f.Type) {
 						// cannot default generic type parameters
 						// because they don't really exist at runtime
 						defaultExpressionKind = defaultValueKindNone
 					} else {
 						defaultExpression, defaultExpressionKind = typeDefault(f.Type, rec.Namespace, "", st)
 					}
+
 					switch defaultExpressionKind {
 					case defaultValueKindNone:
 						w.WriteString(fieldTypeSyntax)
@@ -203,7 +204,7 @@ func writeRecord(w *formatting.IndentedWriter, rec *dsl.RecordDefinition, st dsl
 					fieldName := common.FieldIdentifierName(f.Name)
 					var defaultExpression string
 					var defaultExpressionKind defaultValueKind
-					if dsl.ContainsGenericTypeParameter(f.Type) {
+					if dsl.TypeContainsGenericTypeParameter(f.Type) && !dsl.TypeHasNullOption(f.Type) {
 						defaultExpressionKind = defaultValueKindNone
 					} else {
 						defaultExpression, defaultExpressionKind = typeDefault(f.Type, rec.Namespace, "", st)
@@ -912,21 +913,14 @@ func typeDefinitionDefault(t dsl.TypeDefinition, contextNamespace string, st dsl
 		}
 
 		// generic record with type arguments
-
-		genericDef := st[t.GetQualifiedName()].(*dsl.RecordDefinition)
-
 		args := make([]string, 0)
-
-		for i, f := range t.Fields {
+		for _, f := range t.Fields {
 			fieldDefaultExpr, fieldDefaultKind := typeDefault(f.Type, contextNamespace, "", st)
 			if fieldDefaultKind == defaultValueKindNone {
 				return "", defaultValueKindNone
 			}
 
-			_, genDefaultKind := typeDefault(genericDef.Fields[i].Type, contextNamespace, "", st)
-			if genDefaultKind == defaultValueKindNone {
-				args = append(args, fmt.Sprintf("%s=%s", common.FieldIdentifierName(f.Name), fieldDefaultExpr))
-			}
+			args = append(args, fmt.Sprintf("%s=%s", common.FieldIdentifierName(f.Name), fieldDefaultExpr))
 		}
 
 		return fmt.Sprintf("%s(%s)", common.TypeSyntaxWithoutTypeParameters(t, contextNamespace), strings.Join(args, ", ")), defaultValueKindMutable
