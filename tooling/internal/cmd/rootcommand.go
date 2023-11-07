@@ -5,9 +5,10 @@ package cmd
 
 import (
 	"fmt"
-	"io"
-	"log"
 	"os"
+
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 
 	"github.com/spf13/cobra"
 )
@@ -21,7 +22,8 @@ func newRootCommand(version, commit string) *cobra.Command {
 	}
 
 	verbose := false
-	log.SetOutput(io.Discard)
+	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
+	zerolog.SetGlobalLevel(zerolog.ErrorLevel)
 
 	cmd := &cobra.Command{
 		Use: "yardl",
@@ -31,7 +33,7 @@ Read more at https://github.com/microsoft/yardl`,
 		Version: version,
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			if verbose {
-				log.SetOutput(os.Stderr)
+				zerolog.SetGlobalLevel(zerolog.DebugLevel)
 			}
 		},
 	}

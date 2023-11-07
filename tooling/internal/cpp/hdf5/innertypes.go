@@ -5,13 +5,13 @@ package hdf5
 
 import (
 	"fmt"
-	"log"
 	"sort"
 	"strings"
 
 	"github.com/microsoft/yardl/tooling/internal/cpp/common"
 	"github.com/microsoft/yardl/tooling/internal/formatting"
 	"github.com/microsoft/yardl/tooling/pkg/dsl"
+	"github.com/rs/zerolog/log"
 )
 
 func collectUnionArities(env *dsl.Environment) []int {
@@ -611,7 +611,7 @@ func typeDefinitionDdlExpression(t dsl.TypeDefinition) string {
 		case dsl.DateTime:
 			return "yardl::hdf5::DateTimeTypeDdl()"
 		default:
-			log.Panicf("primitive '%v' not yet supported", t)
+			log.Panic().Msgf("primitive '%v' not yet supported", t)
 		}
 	case *dsl.NamedType:
 		return typeDdlExpression(t.Type)

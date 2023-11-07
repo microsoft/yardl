@@ -6,13 +6,13 @@ package packaging
 import (
 	"errors"
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
 
 	"github.com/microsoft/yardl/tooling/internal/validation"
+	"github.com/rs/zerolog/log"
 	"gopkg.in/yaml.v3"
 )
 
@@ -169,7 +169,7 @@ func loadPackageVersion(dir string) (*PackageInfo, error) {
 }
 
 func logImports(p *PackageInfo, indent int) {
-	log.Printf("%s- %s from %s (%p)", strings.Repeat("  ", indent), p.Namespace, p.PackageDir(), p)
+	log.Debug().Msgf("%s- %s from %s (%p)", strings.Repeat("  ", indent), p.Namespace, p.PackageDir(), p)
 	for _, imp := range p.Imports {
 		logImports(imp, indent+1)
 	}
@@ -203,7 +203,7 @@ func readPackageInfo(directory string) (*PackageInfo, error) {
 		return packageInfo, validation.NewValidationError(err, packageFilePath)
 	}
 
-	log.Printf("Parsed packageInfo with namespace: %v", packageInfo.Namespace)
+	log.Info().Msgf("Parsed packageInfo with namespace: %v", packageInfo.Namespace)
 	return packageInfo, packageInfo.validate()
 }
 
@@ -235,7 +235,7 @@ func collectPackages(parentDir string, alreadyCollected map[string]*PackageInfo,
 		return parentInfo, validation.NewValidationError(errors.New("reached maximum number of recursive imports"), parentInfo.FilePath)
 	}
 
-	log.Printf("Collecting imports for %v", parentInfo.PackageDir())
+	log.Info().Msgf("Collecting imports for %v", parentInfo.PackageDir())
 	dirs, err := fetchAndCachePackages(parentInfo.PackageDir(), parentInfo.ImportUrls)
 	if err != nil {
 		return parentInfo, validation.NewValidationError(err, parentInfo.FilePath)
@@ -261,7 +261,7 @@ func collectPredecessors(pkgInfo *PackageInfo) ([]string, error) {
 		return nil, nil
 	}
 
-	log.Printf("Collecting predecessors for %v", pkgInfo.PackageDir())
+	log.Info().Msgf("Collecting predecessors for %v", pkgInfo.PackageDir())
 	dirs, err := fetchAndCachePackages(pkgInfo.PackageDir(), pkgInfo.PredecessorUrls)
 	if err != nil {
 		err = validation.NewValidationError(err, pkgInfo.FilePath)

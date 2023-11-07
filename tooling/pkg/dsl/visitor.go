@@ -4,8 +4,9 @@
 package dsl
 
 import (
-	"log"
 	"reflect"
+
+	"github.com/rs/zerolog/log"
 )
 
 // Visits a Node tree from the given root.
@@ -183,6 +184,6 @@ func (visitor VisitorWithContext[T]) VisitChildren(node Node, context T) {
 		break
 
 	default:
-		log.Panicf("unhandled type %v", reflect.TypeOf(node))
+		log.Panic().Msgf("unhandled type %v", reflect.TypeOf(node))
 	}
 }

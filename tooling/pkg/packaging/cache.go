@@ -7,17 +7,18 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
-	"log"
 	"net/url"
 	"os"
 	"path/filepath"
+
+	"github.com/rs/zerolog/log"
 )
 
 var cacheDir string
 
 func init() {
 	if err := initCacheDir(); err != nil {
-		log.Fatalf("Failed to initialize cache: %v", err)
+		log.Fatal().Msgf("Failed to initialize cache: %v", err)
 	}
 }
 
@@ -63,7 +64,7 @@ func fetchAndCachePackage(src string) (string, error) {
 		return u.String(), err
 	}
 
-	log.Printf("Fetching %s (%s)", src, u.String())
+	log.Info().Msgf("Fetching %s (%s)", src, u.String())
 
 	switch u.Scheme {
 	case "file":
@@ -76,15 +77,15 @@ func fetchAndCachePackage(src string) (string, error) {
 	dst := filepath.Join(cacheDir, hex.EncodeToString(hash[:]))
 
 	if stat, err := os.Stat(dst); err == nil && stat.IsDir() {
-		log.Printf("Already cached: %v -> %v", src, dst)
+		log.Info().Msgf("Already cached: %v -> %v", src, dst)
 		return dst, nil
 	}
 
-	log.Printf("Fetching %s", u.String())
+	log.Info().Msgf("Fetching %s", u.String())
 	if err := doFetch(u, dst); err != nil {
 		return "", err
 	}
-	log.Printf("Cached in: %v", dst)
+	log.Info().Msgf("Cached in: %v", dst)
 	return dst, nil
 }
 

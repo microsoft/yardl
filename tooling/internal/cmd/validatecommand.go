@@ -4,8 +4,9 @@
 package cmd
 
 import (
-	"log"
 	"os"
+
+	"github.com/rs/zerolog/log"
 
 	"github.com/microsoft/yardl/tooling/pkg/dsl"
 	"github.com/microsoft/yardl/tooling/pkg/packaging"
@@ -22,7 +23,7 @@ func newValidateCommand() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			err := validateImpl()
 			if err != nil {
-				log.Fatalf("Error: %v\n", err)
+				log.Fatal().Msgf("%v", err)
 			}
 		},
 	}
@@ -87,7 +88,7 @@ func parseAndFlattenNamespaces(p *packaging.PackageInfo) ([]*dsl.Namespace, erro
 
 func parsePackageNamespaces(p *packaging.PackageInfo, alreadyParsed map[string]*dsl.Namespace) (*dsl.Namespace, error) {
 	if existing, found := alreadyParsed[p.Namespace]; found {
-		log.Printf("Already parsed namespace %s (%p)", existing.Name, existing)
+		log.Debug().Msgf("Already parsed namespace %s (%p)", existing.Name, existing)
 		return existing, nil
 	}
 
@@ -97,7 +98,7 @@ func parsePackageNamespaces(p *packaging.PackageInfo, alreadyParsed map[string]*
 	}
 
 	alreadyParsed[p.Namespace] = namespace
-	log.Printf("Parsed namespace %s (%p)", namespace.Name, namespace)
+	log.Debug().Msgf("Parsed namespace %s (%p)", namespace.Name, namespace)
 
 	for _, dep := range p.Imports {
 		ns, err := parsePackageNamespaces(dep, alreadyParsed)

@@ -6,12 +6,13 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"math"
 	"os"
 	"path"
 	"runtime/debug"
 	"time"
+
+	"github.com/rs/zerolog/log"
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/inancgumus/screen"
@@ -53,7 +54,7 @@ func newGenerateCommand() *cobra.Command {
 			// Enter watch mode
 			watcher, err := fsnotify.NewWatcher()
 			if err != nil {
-				log.Fatal(err)
+				log.Fatal().Err(err).Msg("")
 			}
 			defer watcher.Close()
 
@@ -68,13 +69,13 @@ func newGenerateCommand() *cobra.Command {
 			for _, watched := range toWatch {
 				err = watcher.Add(watched)
 				if err != nil {
-					log.Fatal(err)
+					log.Fatal().Err(err).Msg("")
 				}
 			}
 
 			err = <-completedChannel
 			if err != nil {
-				log.Fatal(err)
+				log.Fatal().Msgf("%s", err)
 			}
 		},
 	}
@@ -101,7 +102,7 @@ func dedupLoop(w *fsnotify.Watcher, completedChannel chan<- error) {
 				return
 			}
 
-			log.Printf("ERROR: %s\n", err)
+			log.Error().Err(err).Msg("")
 		case _, ok := <-w.Events:
 			if !ok {
 				// channel was closed
