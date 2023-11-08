@@ -38,6 +38,29 @@ def test_defaulting():
     assert ag.aliased_strings.v1 == ""
     assert ag.aliased_strings.v2 == ""
 
+    ## Test defaults for doubly nested generic records
+    g1 = tm.RecordWithOptionalGenericField()
+    assert g1.v == None
+    g1a = tm.RecordWithAliasedOptionalGenericField()
+    assert g1a.v == None
+    g2 = tm.RecordWithOptionalGenericUnionField()
+    assert g2.v == None
+    g2a = tm.RecordWithAliasedOptionalGenericUnionField()
+    assert g2a.v == None
+    c = tm.RecordContainingNestedGenericRecords()
+    assert c.f1 == g1
+    assert c.f1a == g1a
+    assert c.f2 == g2
+    assert c.f2a == g2a
+    assert c.nested.g1 == g1
+    assert c.nested.g1a == g1a
+    assert c.nested.g2 == g2
+    assert c.nested.g2a == g2a
+    assert c.nested.g3.v1 == ""
+    assert c.nested.g3.v2 == 0
+    assert c.nested.g3a.v1 == ""
+    assert c.nested.g3a.v2 == 0
+
     ## Need to provide default values for generic fields
     with pytest.raises(TypeError):
         eval("tm.MyTuple()")

@@ -1289,6 +1289,26 @@
         },
         {
           "alias": {
+            "name": "AliasedMultiGenericOptional",
+            "typeParameters": [
+              "T",
+              "U"
+            ],
+            "type": [
+              null,
+              {
+                "tag": "T",
+                "type": "T"
+              },
+              {
+                "tag": "U",
+                "type": "U"
+              }
+            ]
+          }
+        },
+        {
+          "alias": {
             "name": "AliasedGenericUnion2",
             "typeParameters": [
               "T1",
@@ -1328,6 +1348,212 @@
                 "length": 3
               }
             }
+          }
+        },
+        {
+          "record": {
+            "name": "RecordWithOptionalGenericField",
+            "typeParameters": [
+              "T"
+            ],
+            "fields": [
+              {
+                "name": "v",
+                "type": [
+                  null,
+                  "T"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "record": {
+            "name": "RecordWithAliasedOptionalGenericField",
+            "typeParameters": [
+              "T"
+            ],
+            "fields": [
+              {
+                "name": "v",
+                "type": {
+                  "name": "TestModel.AliasedGenericOptional",
+                  "typeArguments": [
+                    "T"
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "record": {
+            "name": "RecordWithOptionalGenericUnionField",
+            "typeParameters": [
+              "U",
+              "V"
+            ],
+            "fields": [
+              {
+                "name": "v",
+                "type": [
+                  null,
+                  {
+                    "tag": "U",
+                    "type": "U"
+                  },
+                  {
+                    "tag": "V",
+                    "type": "V"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "record": {
+            "name": "RecordWithAliasedOptionalGenericUnionField",
+            "typeParameters": [
+              "U",
+              "V"
+            ],
+            "fields": [
+              {
+                "name": "v",
+                "type": {
+                  "name": "TestModel.AliasedMultiGenericOptional",
+                  "typeArguments": [
+                    "U",
+                    "V"
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "record": {
+            "name": "RecordContainingGenericRecords",
+            "typeParameters": [
+              "A",
+              "B"
+            ],
+            "fields": [
+              {
+                "name": "g1",
+                "type": {
+                  "name": "TestModel.RecordWithOptionalGenericField",
+                  "typeArguments": [
+                    "A"
+                  ]
+                }
+              },
+              {
+                "name": "g1a",
+                "type": {
+                  "name": "TestModel.RecordWithAliasedOptionalGenericField",
+                  "typeArguments": [
+                    "A"
+                  ]
+                }
+              },
+              {
+                "name": "g2",
+                "type": {
+                  "name": "TestModel.RecordWithOptionalGenericUnionField",
+                  "typeArguments": [
+                    "A",
+                    "B"
+                  ]
+                }
+              },
+              {
+                "name": "g2a",
+                "type": {
+                  "name": "TestModel.RecordWithAliasedOptionalGenericUnionField",
+                  "typeArguments": [
+                    "A",
+                    "B"
+                  ]
+                }
+              },
+              {
+                "name": "g3",
+                "type": {
+                  "name": "TestModel.MyTuple",
+                  "typeArguments": [
+                    "A",
+                    "B"
+                  ]
+                }
+              },
+              {
+                "name": "g3a",
+                "type": {
+                  "name": "TestModel.AliasedTuple",
+                  "typeArguments": [
+                    "A",
+                    "B"
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "record": {
+            "name": "RecordContainingNestedGenericRecords",
+            "fields": [
+              {
+                "name": "f1",
+                "type": {
+                  "name": "TestModel.RecordWithOptionalGenericField",
+                  "typeArguments": [
+                    "string"
+                  ]
+                }
+              },
+              {
+                "name": "f1a",
+                "type": {
+                  "name": "TestModel.RecordWithAliasedOptionalGenericField",
+                  "typeArguments": [
+                    "string"
+                  ]
+                }
+              },
+              {
+                "name": "f2",
+                "type": {
+                  "name": "TestModel.RecordWithOptionalGenericUnionField",
+                  "typeArguments": [
+                    "string",
+                    "int32"
+                  ]
+                }
+              },
+              {
+                "name": "f2a",
+                "type": {
+                  "name": "TestModel.RecordWithAliasedOptionalGenericUnionField",
+                  "typeArguments": [
+                    "string",
+                    "int32"
+                  ]
+                }
+              },
+              {
+                "name": "nested",
+                "type": {
+                  "name": "TestModel.RecordContainingGenericRecords",
+                  "typeArguments": [
+                    "string",
+                    "int32"
+                  ]
+                }
+              }
+            ]
           }
         },
         {

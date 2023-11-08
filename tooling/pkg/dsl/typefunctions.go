@@ -747,7 +747,29 @@ func GetCommonType(a, b Type) (Type, error) {
 	return nil, ErrNoCommonType
 }
 
-func ContainsGenericTypeParameter(node Node) bool {
+// Returns true if the type is Optional
+func TypeHasNullOption(node Type) bool {
+	hasNull := false
+	Visit(node, func(self Visitor, node Node) {
+		switch node := node.(type) {
+		case *GeneralizedType:
+			if node.Cases.HasNullOption() {
+				hasNull = true
+			}
+			return
+		case *NamedType:
+			self.Visit(node.Type)
+		case *SimpleType:
+			self.Visit(node.ResolvedDefinition)
+		default:
+		}
+	})
+
+	return hasNull
+}
+
+// Returns true if the type is generic (not concrete)
+func TypeContainsGenericTypeParameter(node Type) bool {
 	contains := false
 	Visit(node, func(self Visitor, node Node) {
 		switch node := node.(type) {
@@ -755,9 +777,8 @@ func ContainsGenericTypeParameter(node Node) bool {
 			contains = true
 			return
 		case *NamedType:
-			self.Visit(node.DefinitionMeta)
+			self.Visit(node.Type)
 		case *SimpleType:
-			self.VisitChildren(node)
 			self.Visit(node.ResolvedDefinition)
 		default:
 			self.VisitChildren(node)

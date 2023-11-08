@@ -563,6 +563,9 @@ using AliasedOptional = std::optional<int32_t>;
 template <typename T>
 using AliasedGenericOptional = std::optional<T>;
 
+template <typename T, typename U>
+using AliasedMultiGenericOptional = std::variant<std::monostate, T, U>;
+
 template <typename T1, typename T2>
 using AliasedGenericUnion2 = test_model::GenericUnion2<T1, T2>;
 
@@ -571,6 +574,101 @@ using AliasedGenericVector = std::vector<T>;
 
 template <typename T>
 using AliasedGenericFixedVector = std::array<T, 3>;
+
+template <typename T>
+struct RecordWithOptionalGenericField {
+  std::optional<T> v{};
+
+  bool operator==(const RecordWithOptionalGenericField& other) const {
+    return v == other.v;
+  }
+
+  bool operator!=(const RecordWithOptionalGenericField& other) const {
+    return !(*this == other);
+  }
+};
+
+template <typename T>
+struct RecordWithAliasedOptionalGenericField {
+  test_model::AliasedGenericOptional<T> v{};
+
+  bool operator==(const RecordWithAliasedOptionalGenericField& other) const {
+    return v == other.v;
+  }
+
+  bool operator!=(const RecordWithAliasedOptionalGenericField& other) const {
+    return !(*this == other);
+  }
+};
+
+template <typename U, typename V>
+struct RecordWithOptionalGenericUnionField {
+  std::variant<std::monostate, U, V> v{};
+
+  bool operator==(const RecordWithOptionalGenericUnionField& other) const {
+    return v == other.v;
+  }
+
+  bool operator!=(const RecordWithOptionalGenericUnionField& other) const {
+    return !(*this == other);
+  }
+};
+
+template <typename U, typename V>
+struct RecordWithAliasedOptionalGenericUnionField {
+  test_model::AliasedMultiGenericOptional<U, V> v{};
+
+  bool operator==(const RecordWithAliasedOptionalGenericUnionField& other) const {
+    return v == other.v;
+  }
+
+  bool operator!=(const RecordWithAliasedOptionalGenericUnionField& other) const {
+    return !(*this == other);
+  }
+};
+
+template <typename A, typename B>
+struct RecordContainingGenericRecords {
+  test_model::RecordWithOptionalGenericField<A> g1{};
+  test_model::RecordWithAliasedOptionalGenericField<A> g1a{};
+  test_model::RecordWithOptionalGenericUnionField<A, B> g2{};
+  test_model::RecordWithAliasedOptionalGenericUnionField<A, B> g2a{};
+  test_model::MyTuple<A, B> g3{};
+  test_model::AliasedTuple<A, B> g3a{};
+
+  bool operator==(const RecordContainingGenericRecords& other) const {
+    return g1 == other.g1 &&
+      g1a == other.g1a &&
+      g2 == other.g2 &&
+      g2a == other.g2a &&
+      g3 == other.g3 &&
+      g3a == other.g3a;
+  }
+
+  bool operator!=(const RecordContainingGenericRecords& other) const {
+    return !(*this == other);
+  }
+};
+
+struct RecordContainingNestedGenericRecords {
+  test_model::RecordWithOptionalGenericField<std::string> f1{};
+  test_model::RecordWithAliasedOptionalGenericField<std::string> f1a{};
+  test_model::RecordWithOptionalGenericUnionField<std::string, int32_t> f2{};
+  test_model::RecordWithAliasedOptionalGenericUnionField<std::string, int32_t> f2a{};
+  test_model::RecordContainingGenericRecords<std::string, int32_t> nested{};
+
+  bool operator==(const RecordContainingNestedGenericRecords& other) const {
+    return f1 == other.f1 &&
+      f1a == other.f1a &&
+      f2 == other.f2 &&
+      f2a == other.f2a &&
+      nested == other.nested;
+  }
+
+  bool operator!=(const RecordContainingNestedGenericRecords& other) const {
+    return !(*this == other);
+  }
+};
 
 using AliasedIntOrSimpleRecord = std::variant<int32_t, test_model::SimpleRecord>;
 

@@ -360,6 +360,71 @@ struct IsTriviallySerializable<test_model::RecordWithAliasedGenerics> {
     offsetof(__T__, my_strings) < offsetof(__T__, aliased_strings);
 };
 
+template <typename T>
+struct IsTriviallySerializable<test_model::RecordWithOptionalGenericField<T>> {
+  using __T__ = test_model::RecordWithOptionalGenericField<T>;
+  static constexpr bool value = 
+    std::is_standard_layout_v<__T__> &&
+    IsTriviallySerializable<decltype(__T__::v)>::value &&
+    (sizeof(__T__) == (sizeof(__T__::v)));
+};
+
+template <typename T>
+struct IsTriviallySerializable<test_model::RecordWithAliasedOptionalGenericField<T>> {
+  using __T__ = test_model::RecordWithAliasedOptionalGenericField<T>;
+  static constexpr bool value = 
+    std::is_standard_layout_v<__T__> &&
+    IsTriviallySerializable<decltype(__T__::v)>::value &&
+    (sizeof(__T__) == (sizeof(__T__::v)));
+};
+
+template <typename U, typename V>
+struct IsTriviallySerializable<test_model::RecordWithOptionalGenericUnionField<U, V>> {
+  using __T__ = test_model::RecordWithOptionalGenericUnionField<U, V>;
+  static constexpr bool value = 
+    std::is_standard_layout_v<__T__> &&
+    IsTriviallySerializable<decltype(__T__::v)>::value &&
+    (sizeof(__T__) == (sizeof(__T__::v)));
+};
+
+template <typename U, typename V>
+struct IsTriviallySerializable<test_model::RecordWithAliasedOptionalGenericUnionField<U, V>> {
+  using __T__ = test_model::RecordWithAliasedOptionalGenericUnionField<U, V>;
+  static constexpr bool value = 
+    std::is_standard_layout_v<__T__> &&
+    IsTriviallySerializable<decltype(__T__::v)>::value &&
+    (sizeof(__T__) == (sizeof(__T__::v)));
+};
+
+template <typename A, typename B>
+struct IsTriviallySerializable<test_model::RecordContainingGenericRecords<A, B>> {
+  using __T__ = test_model::RecordContainingGenericRecords<A, B>;
+  static constexpr bool value = 
+    std::is_standard_layout_v<__T__> &&
+    IsTriviallySerializable<decltype(__T__::g1)>::value &&
+    IsTriviallySerializable<decltype(__T__::g1a)>::value &&
+    IsTriviallySerializable<decltype(__T__::g2)>::value &&
+    IsTriviallySerializable<decltype(__T__::g2a)>::value &&
+    IsTriviallySerializable<decltype(__T__::g3)>::value &&
+    IsTriviallySerializable<decltype(__T__::g3a)>::value &&
+    (sizeof(__T__) == (sizeof(__T__::g1) + sizeof(__T__::g1a) + sizeof(__T__::g2) + sizeof(__T__::g2a) + sizeof(__T__::g3) + sizeof(__T__::g3a))) &&
+    offsetof(__T__, g1) < offsetof(__T__, g1a) && offsetof(__T__, g1a) < offsetof(__T__, g2) && offsetof(__T__, g2) < offsetof(__T__, g2a) && offsetof(__T__, g2a) < offsetof(__T__, g3) && offsetof(__T__, g3) < offsetof(__T__, g3a);
+};
+
+template <>
+struct IsTriviallySerializable<test_model::RecordContainingNestedGenericRecords> {
+  using __T__ = test_model::RecordContainingNestedGenericRecords;
+  static constexpr bool value = 
+    std::is_standard_layout_v<__T__> &&
+    IsTriviallySerializable<decltype(__T__::f1)>::value &&
+    IsTriviallySerializable<decltype(__T__::f1a)>::value &&
+    IsTriviallySerializable<decltype(__T__::f2)>::value &&
+    IsTriviallySerializable<decltype(__T__::f2a)>::value &&
+    IsTriviallySerializable<decltype(__T__::nested)>::value &&
+    (sizeof(__T__) == (sizeof(__T__::f1) + sizeof(__T__::f1a) + sizeof(__T__::f2) + sizeof(__T__::f2a) + sizeof(__T__::nested))) &&
+    offsetof(__T__, f1) < offsetof(__T__, f1a) && offsetof(__T__, f1a) < offsetof(__T__, f2) && offsetof(__T__, f2) < offsetof(__T__, f2a) && offsetof(__T__, f2a) < offsetof(__T__, nested);
+};
+
 template <typename T0, typename T1>
 struct IsTriviallySerializable<test_model::GenericRecordWithComputedFields<T0, T1>> {
   using __T__ = test_model::GenericRecordWithComputedFields<T0, T1>;
@@ -1400,6 +1465,26 @@ template<typename T, yardl::binary::Reader<T> ReadT>
   yardl::binary::ReadOptional<T, ReadT>(stream, value);
 }
 
+template<typename T, yardl::binary::Writer<T> WriteT, typename U, yardl::binary::Writer<U> WriteU>
+[[maybe_unused]] void WriteAliasedMultiGenericOptional(yardl::binary::CodedOutputStream& stream, test_model::AliasedMultiGenericOptional<T, U> const& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<test_model::AliasedMultiGenericOptional<T, U>>::value) {
+    yardl::binary::WriteTriviallySerializable(stream, value);
+    return;
+  }
+
+  WriteUnion<std::monostate, yardl::binary::WriteMonostate, T, WriteT, U, WriteU>(stream, value);
+}
+
+template<typename T, yardl::binary::Reader<T> ReadT, typename U, yardl::binary::Reader<U> ReadU>
+[[maybe_unused]] void ReadAliasedMultiGenericOptional(yardl::binary::CodedInputStream& stream, test_model::AliasedMultiGenericOptional<T, U>& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<test_model::AliasedMultiGenericOptional<T, U>>::value) {
+    yardl::binary::ReadTriviallySerializable(stream, value);
+    return;
+  }
+
+  ReadUnion<std::monostate, yardl::binary::ReadMonostate, T, ReadT, U, ReadU>(stream, value);
+}
+
 template<typename T1, yardl::binary::Writer<T1> WriteT1, typename T2, yardl::binary::Writer<T2> WriteT2>
 [[maybe_unused]] void WriteAliasedGenericUnion2(yardl::binary::CodedOutputStream& stream, test_model::AliasedGenericUnion2<T1, T2> const& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<test_model::AliasedGenericUnion2<T1, T2>>::value) {
@@ -1458,6 +1543,142 @@ template<typename T, yardl::binary::Reader<T> ReadT>
   }
 
   yardl::binary::ReadArray<T, ReadT, 3>(stream, value);
+}
+
+template<typename T, yardl::binary::Writer<T> WriteT>
+[[maybe_unused]] void WriteRecordWithOptionalGenericField(yardl::binary::CodedOutputStream& stream, test_model::RecordWithOptionalGenericField<T> const& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<test_model::RecordWithOptionalGenericField<T>>::value) {
+    yardl::binary::WriteTriviallySerializable(stream, value);
+    return;
+  }
+
+  yardl::binary::WriteOptional<T, WriteT>(stream, value.v);
+}
+
+template<typename T, yardl::binary::Reader<T> ReadT>
+[[maybe_unused]] void ReadRecordWithOptionalGenericField(yardl::binary::CodedInputStream& stream, test_model::RecordWithOptionalGenericField<T>& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<test_model::RecordWithOptionalGenericField<T>>::value) {
+    yardl::binary::ReadTriviallySerializable(stream, value);
+    return;
+  }
+
+  yardl::binary::ReadOptional<T, ReadT>(stream, value.v);
+}
+
+template<typename T, yardl::binary::Writer<T> WriteT>
+[[maybe_unused]] void WriteRecordWithAliasedOptionalGenericField(yardl::binary::CodedOutputStream& stream, test_model::RecordWithAliasedOptionalGenericField<T> const& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<test_model::RecordWithAliasedOptionalGenericField<T>>::value) {
+    yardl::binary::WriteTriviallySerializable(stream, value);
+    return;
+  }
+
+  test_model::binary::WriteAliasedGenericOptional<T, WriteT>(stream, value.v);
+}
+
+template<typename T, yardl::binary::Reader<T> ReadT>
+[[maybe_unused]] void ReadRecordWithAliasedOptionalGenericField(yardl::binary::CodedInputStream& stream, test_model::RecordWithAliasedOptionalGenericField<T>& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<test_model::RecordWithAliasedOptionalGenericField<T>>::value) {
+    yardl::binary::ReadTriviallySerializable(stream, value);
+    return;
+  }
+
+  test_model::binary::ReadAliasedGenericOptional<T, ReadT>(stream, value.v);
+}
+
+template<typename U, yardl::binary::Writer<U> WriteU, typename V, yardl::binary::Writer<V> WriteV>
+[[maybe_unused]] void WriteRecordWithOptionalGenericUnionField(yardl::binary::CodedOutputStream& stream, test_model::RecordWithOptionalGenericUnionField<U, V> const& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<test_model::RecordWithOptionalGenericUnionField<U, V>>::value) {
+    yardl::binary::WriteTriviallySerializable(stream, value);
+    return;
+  }
+
+  WriteUnion<std::monostate, yardl::binary::WriteMonostate, U, WriteU, V, WriteV>(stream, value.v);
+}
+
+template<typename U, yardl::binary::Reader<U> ReadU, typename V, yardl::binary::Reader<V> ReadV>
+[[maybe_unused]] void ReadRecordWithOptionalGenericUnionField(yardl::binary::CodedInputStream& stream, test_model::RecordWithOptionalGenericUnionField<U, V>& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<test_model::RecordWithOptionalGenericUnionField<U, V>>::value) {
+    yardl::binary::ReadTriviallySerializable(stream, value);
+    return;
+  }
+
+  ReadUnion<std::monostate, yardl::binary::ReadMonostate, U, ReadU, V, ReadV>(stream, value.v);
+}
+
+template<typename U, yardl::binary::Writer<U> WriteU, typename V, yardl::binary::Writer<V> WriteV>
+[[maybe_unused]] void WriteRecordWithAliasedOptionalGenericUnionField(yardl::binary::CodedOutputStream& stream, test_model::RecordWithAliasedOptionalGenericUnionField<U, V> const& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<test_model::RecordWithAliasedOptionalGenericUnionField<U, V>>::value) {
+    yardl::binary::WriteTriviallySerializable(stream, value);
+    return;
+  }
+
+  test_model::binary::WriteAliasedMultiGenericOptional<U, WriteU, V, WriteV>(stream, value.v);
+}
+
+template<typename U, yardl::binary::Reader<U> ReadU, typename V, yardl::binary::Reader<V> ReadV>
+[[maybe_unused]] void ReadRecordWithAliasedOptionalGenericUnionField(yardl::binary::CodedInputStream& stream, test_model::RecordWithAliasedOptionalGenericUnionField<U, V>& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<test_model::RecordWithAliasedOptionalGenericUnionField<U, V>>::value) {
+    yardl::binary::ReadTriviallySerializable(stream, value);
+    return;
+  }
+
+  test_model::binary::ReadAliasedMultiGenericOptional<U, ReadU, V, ReadV>(stream, value.v);
+}
+
+template<typename A, yardl::binary::Writer<A> WriteA, typename B, yardl::binary::Writer<B> WriteB>
+[[maybe_unused]] void WriteRecordContainingGenericRecords(yardl::binary::CodedOutputStream& stream, test_model::RecordContainingGenericRecords<A, B> const& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<test_model::RecordContainingGenericRecords<A, B>>::value) {
+    yardl::binary::WriteTriviallySerializable(stream, value);
+    return;
+  }
+
+  test_model::binary::WriteRecordWithOptionalGenericField<A, WriteA>(stream, value.g1);
+  test_model::binary::WriteRecordWithAliasedOptionalGenericField<A, WriteA>(stream, value.g1a);
+  test_model::binary::WriteRecordWithOptionalGenericUnionField<A, WriteA, B, WriteB>(stream, value.g2);
+  test_model::binary::WriteRecordWithAliasedOptionalGenericUnionField<A, WriteA, B, WriteB>(stream, value.g2a);
+  test_model::binary::WriteMyTuple<A, WriteA, B, WriteB>(stream, value.g3);
+  test_model::binary::WriteAliasedTuple<A, WriteA, B, WriteB>(stream, value.g3a);
+}
+
+template<typename A, yardl::binary::Reader<A> ReadA, typename B, yardl::binary::Reader<B> ReadB>
+[[maybe_unused]] void ReadRecordContainingGenericRecords(yardl::binary::CodedInputStream& stream, test_model::RecordContainingGenericRecords<A, B>& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<test_model::RecordContainingGenericRecords<A, B>>::value) {
+    yardl::binary::ReadTriviallySerializable(stream, value);
+    return;
+  }
+
+  test_model::binary::ReadRecordWithOptionalGenericField<A, ReadA>(stream, value.g1);
+  test_model::binary::ReadRecordWithAliasedOptionalGenericField<A, ReadA>(stream, value.g1a);
+  test_model::binary::ReadRecordWithOptionalGenericUnionField<A, ReadA, B, ReadB>(stream, value.g2);
+  test_model::binary::ReadRecordWithAliasedOptionalGenericUnionField<A, ReadA, B, ReadB>(stream, value.g2a);
+  test_model::binary::ReadMyTuple<A, ReadA, B, ReadB>(stream, value.g3);
+  test_model::binary::ReadAliasedTuple<A, ReadA, B, ReadB>(stream, value.g3a);
+}
+
+[[maybe_unused]] void WriteRecordContainingNestedGenericRecords(yardl::binary::CodedOutputStream& stream, test_model::RecordContainingNestedGenericRecords const& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<test_model::RecordContainingNestedGenericRecords>::value) {
+    yardl::binary::WriteTriviallySerializable(stream, value);
+    return;
+  }
+
+  test_model::binary::WriteRecordWithOptionalGenericField<std::string, yardl::binary::WriteString>(stream, value.f1);
+  test_model::binary::WriteRecordWithAliasedOptionalGenericField<std::string, yardl::binary::WriteString>(stream, value.f1a);
+  test_model::binary::WriteRecordWithOptionalGenericUnionField<std::string, yardl::binary::WriteString, int32_t, yardl::binary::WriteInteger>(stream, value.f2);
+  test_model::binary::WriteRecordWithAliasedOptionalGenericUnionField<std::string, yardl::binary::WriteString, int32_t, yardl::binary::WriteInteger>(stream, value.f2a);
+  test_model::binary::WriteRecordContainingGenericRecords<std::string, yardl::binary::WriteString, int32_t, yardl::binary::WriteInteger>(stream, value.nested);
+}
+
+[[maybe_unused]] void ReadRecordContainingNestedGenericRecords(yardl::binary::CodedInputStream& stream, test_model::RecordContainingNestedGenericRecords& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<test_model::RecordContainingNestedGenericRecords>::value) {
+    yardl::binary::ReadTriviallySerializable(stream, value);
+    return;
+  }
+
+  test_model::binary::ReadRecordWithOptionalGenericField<std::string, yardl::binary::ReadString>(stream, value.f1);
+  test_model::binary::ReadRecordWithAliasedOptionalGenericField<std::string, yardl::binary::ReadString>(stream, value.f1a);
+  test_model::binary::ReadRecordWithOptionalGenericUnionField<std::string, yardl::binary::ReadString, int32_t, yardl::binary::ReadInteger>(stream, value.f2);
+  test_model::binary::ReadRecordWithAliasedOptionalGenericUnionField<std::string, yardl::binary::ReadString, int32_t, yardl::binary::ReadInteger>(stream, value.f2a);
+  test_model::binary::ReadRecordContainingGenericRecords<std::string, yardl::binary::ReadString, int32_t, yardl::binary::ReadInteger>(stream, value.nested);
 }
 
 [[maybe_unused]] void WriteAliasedIntOrSimpleRecord(yardl::binary::CodedOutputStream& stream, test_model::AliasedIntOrSimpleRecord const& value) {
