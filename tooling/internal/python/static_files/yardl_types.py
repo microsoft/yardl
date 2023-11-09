@@ -284,7 +284,7 @@ _T = TypeVar("_T")
 
 class UnionCase(ABC, Generic[_T]):
     index: int
-    _ag: str
+    tag: str
 
     def __init__(self, value: _T) -> None:
         self.value = value

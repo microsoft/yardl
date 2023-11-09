@@ -77,7 +77,7 @@ class BinaryProtocolReader(ABC):
     ) -> None:
         self._stream = CodedInputStream(stream)
         magic_bytes = self._stream.read_view(len(MAGIC_BYTES))
-        if magic_bytes != MAGIC_BYTES:  # type: ignore
+        if magic_bytes != MAGIC_BYTES: # pyright: ignore [reportUnnecessaryComparison]
             raise RuntimeError("Invalid magic bytes")
 
         version = read_fixed_int32(self._stream)
