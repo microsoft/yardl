@@ -82,6 +82,8 @@ func writePackageInitFile(packageDir string, ns *dsl.Namespace) error {
 	w := formatting.NewIndentedWriter(&b, "    ")
 	common.WriteGeneratedFileHeader(w)
 
+	w.WriteStringln(`# pyright: reportUnusedImport=false`)
+
 	w.WriteStringln(`from typing import Tuple as _Tuple
 import re as _re
 import numpy as _np

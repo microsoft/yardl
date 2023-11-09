@@ -1,10 +1,22 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 
+# pyright: reportUnnecessaryIsInstance=false
+
 import datetime
 from enum import Enum
 from io import BufferedIOBase, BufferedReader, BytesIO
-from typing import BinaryIO, Iterable, TypeVar, Generic, Any, Optional, Tuple, cast
+from typing import (
+    BinaryIO,
+    Iterable,
+    Protocol,
+    TypeVar,
+    Generic,
+    Any,
+    Optional,
+    Tuple,
+    cast,
+)
 from abc import ABC, abstractmethod
 import struct
 import sys
@@ -65,7 +77,7 @@ class BinaryProtocolReader(ABC):
     ) -> None:
         self._stream = CodedInputStream(stream)
         magic_bytes = self._stream.read_view(len(MAGIC_BYTES))
-        if magic_bytes != MAGIC_BYTES: # type: ignore
+        if magic_bytes != MAGIC_BYTES:  # type: ignore
             raise RuntimeError("Invalid magic bytes")
 
         version = read_fixed_int32(self._stream)
@@ -883,6 +895,11 @@ class OptionalSerializer(Generic[T, T_NP], TypeSerializer[Optional[T], np.void])
         return super().is_trivially_serializable()
 
 
+class UnionCaseProtocol(Protocol):
+    index: int
+    value: Any
+
+
 class UnionSerializer(TypeSerializer[T, np.object_]):
     def __init__(
         self,
@@ -907,10 +924,14 @@ class UnionSerializer(TypeSerializer[T, np.object_]):
                 f"Expected union value of type {self._union_type} but got {type(value)}"
             )
 
-        tag_index = value._index + self._offset  # type: ignore
+        union_value = cast(UnionCaseProtocol, value)
+
+        tag_index = union_value.index + self._offset
         stream.ensure_capacity(1)
         stream.write_byte_no_check(tag_index)
-        self._cases[tag_index][1].write(stream, value.value)  # type: ignore
+        type_case = self._cases[tag_index]
+        assert type_case is not None
+        type_case[1].write(stream, union_value.value)
 
     def write_numpy(self, stream: CodedOutputStream, value: np.object_) -> None:
         self.write(stream, cast(T, value))
@@ -1065,7 +1086,9 @@ class NDArraySerializerBase(
             self._array_dtype,
             self._subarray_shape,
         ) = NDArraySerializerBase._get_dtype_and_subarray_shape(
-            dtype if isinstance(dtype, np.dtype) else np.dtype(dtype)
+            dtype
+            if isinstance(dtype, np.dtype)
+            else np.dtype(dtype)  # pyright: ignore [reportUnknownArgumentType]
         )
         if self._subarray_shape == ():
             self._subarray_shape = None
@@ -1073,7 +1096,10 @@ class NDArraySerializerBase(
             if isinstance(element_serializer, FixedNDArraySerializer) or isinstance(
                 element_serializer, FixedVectorSerializer
             ):
-                self.element_serializer = element_serializer.element_serializer
+                self.element_serializer = cast(
+                    TypeSerializer[T, T_NP],
+                    element_serializer.element_serializer,  # pyright: ignore [reportUnknownMemberType]
+                )
 
     @staticmethod
     def _get_dtype_and_subarray_shape(
@@ -1112,7 +1138,7 @@ class NDArraySerializerBase(
             byte_array = stream.read_bytearray(flat_byte_length)
             return np.frombuffer(byte_array, dtype=self._array_dtype).reshape(shape)
 
-        result = np.ndarray((flat_length,), dtype=self._array_dtype)
+        result: npt.NDArray[T_NP] = np.ndarray((flat_length,), dtype=self._array_dtype)
         for i in range(flat_length):
             result[i] = self.element_serializer.read_numpy(stream)
 

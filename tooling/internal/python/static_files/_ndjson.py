@@ -1,6 +1,10 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 
+# pyright: reportUnnecessaryIsInstance=false
+# pyright: reportUnknownArgumentType=false
+# pyright: reportUnknownVariableType=false
+
 from abc import ABC, abstractmethod
 import datetime
 from enum import IntFlag
@@ -107,10 +111,15 @@ class NDJsonProtocolReader:
                 "Data in the stream is not in the expected Yardl NDJSON format."
             )
 
-        if header_json.get("version") != CURRENT_NDJSON_FORMAT_VERSION:
+        if (
+            header_json.get("version")  # pyright: ignore [reportUnknownMemberType]
+            != CURRENT_NDJSON_FORMAT_VERSION
+        ):
             raise ValueError("Unsupported yardl version.")
 
-        if header_json.get("schema") != json.loads(schema):
+        if header_json.get(  # pyright: ignore [reportUnknownMemberType]
+            "schema"
+        ) != json.loads(schema):
             raise ValueError(
                 "The schema of the data to be read is not compatible with the current protocol."
             )
@@ -699,7 +708,7 @@ class FlagsConverter(Generic[TFlag, T_NP], JsonConverter[TFlag, T_NP]):
             return self._zero_json
 
         remaining_int_value = value.value
-        result = []
+        result: list[str] = []
         for enum_value in self._value_to_name:
             if enum_value.value == 0:
                 continue
@@ -787,8 +796,8 @@ class UnionConverter(JsonConverter[T, np.object_]):
                 for json_type in case[2]
             }
         else:
-            self._tag_to_case_index = {
-                case[0]._tag: case_index  # type: ignore
+            self.tag_to_case_index: dict[str, int] = {
+                case[0].tag: case_index  # type: ignore
                 for (case_index, case) in enumerate(cases)
                 if case is not None
             }
@@ -803,13 +812,13 @@ class UnionConverter(JsonConverter[T, np.object_]):
         if not isinstance(value, self._union_type):
             raise ValueError(f"Value in not a union or not the right type: {value}")
 
-        tag_index = value._index + self._offset  # type: ignore
+        tag_index = value.index + self._offset  # type: ignore
         inner_json_value = self._cases[tag_index][1].to_json(value.value)  # type: ignore
 
         if self._simple:
             return inner_json_value
         else:
-            return {value._tag: inner_json_value}  # type: ignore
+            return {value.tag: inner_json_value}  # type: ignore
 
     def numpy_to_json(self, value: np.object_) -> object:
         return self.to_json(cast(T, value))
@@ -828,7 +837,7 @@ class UnionConverter(JsonConverter[T, np.object_]):
         else:
             assert isinstance(json_object, dict)
             tag, inner_json_object = next(iter(json_object.items()))
-            case = self._cases[self._tag_to_case_index[tag]]
+            case = self._cases[self.tag_to_case_index[tag]]
             return case[0](case[1].from_json(inner_json_object))  # type: ignore
 
     def from_json_to_numpy(self, json_object: object) -> np.object_:
@@ -1019,7 +1028,7 @@ class NDArrayConverterBase(
             () if self._subarray_shape is None else self._subarray_shape
         )
 
-        partially_flattened_shape = (np.prod(shape),) + subarray_shape_not_none # type: ignore
+        partially_flattened_shape = (np.prod(shape),) + subarray_shape_not_none  # type: ignore
         result = np.ndarray(partially_flattened_shape, dtype=self._array_dtype)
         for i in range(partially_flattened_shape[0]):
             result[i] = self._element_converter.from_json_to_numpy(json_object[i])

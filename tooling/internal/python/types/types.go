@@ -20,7 +20,14 @@ func WriteTypes(ns *dsl.Namespace, st dsl.SymbolTable, packageDir string) error 
 	b := bytes.Buffer{}
 	w := formatting.NewIndentedWriter(&b, "    ")
 	common.WriteGeneratedFileHeader(w)
-	w.WriteStringln(`import datetime
+
+	common.WriteComment(w, "pyright: reportUnusedImport=false")
+	common.WriteComment(w, "pyright: reportUnknownArgumentType=false")
+	common.WriteComment(w, "pyright: reportUnknownMemberType=false")
+	common.WriteComment(w, "pyright: reportUnknownVariableType=false")
+
+	w.WriteStringln(`
+import datetime
 import enum
 import types
 import typing
@@ -144,7 +151,7 @@ func writeUnionClass(w *formatting.IndentedWriter, className string, typeParamet
 			continue
 		}
 		pascalTag := formatting.ToPascalCase(tc.Tag)
-		fmt.Fprintf(w, "%s.%s = type(\"%s.%s\", (%s,), {\"_index\": %d, \"_tag\": \"%s\"})\n", className, pascalTag, className, pascalTag, unionCaseType, i, tc.Tag)
+		fmt.Fprintf(w, "%s.%s = type(\"%s.%s\", (%s,), {\"index\": %d, \"tag\": \"%s\"})\n", className, pascalTag, className, pascalTag, unionCaseType, i, tc.Tag)
 		i++
 	}
 	fmt.Fprintf(w, "del %s\n", unionCaseType)

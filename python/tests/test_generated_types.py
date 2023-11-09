@@ -6,6 +6,8 @@ import numpy as np
 import pytest
 import test_model as tm
 
+# pyright: basic
+
 
 def test_defaulting():
     p = tm.RecordWithPrimitives()

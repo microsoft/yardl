@@ -1,14 +1,5 @@
 {
   "typeCheckingMode": "strict",
-  "ignore": ["smoketest/**"],
-
-  "extraPaths": ["python/"],
-
-  "reportUnknownArgumentType": "none",
-  "reportUnknownLambdaType": "none",
-  "reportUnknownMemberType": "none",
-  "reportUnknownParameterType": "none",
-  "reportUnknownVariableType": "none",
-  "reportUnnecessaryIsInstance": "none",
-  "reportUnusedImport": "none"
+  "exclude": ["smoketest/**", "python/sandbox/**", "tooling/**"],
+  "extraPaths": ["python/"]
 }
