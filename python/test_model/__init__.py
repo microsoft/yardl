@@ -68,6 +68,8 @@ from .types import (
     RecordWithFixedArrays,
     RecordWithFixedCollections,
     RecordWithFixedVectors,
+    RecordWithGenericFixedVectors,
+    RecordWithGenericVectors,
     RecordWithKeywordFields,
     RecordWithNDArrays,
     RecordWithNDArraysSingleDimension,

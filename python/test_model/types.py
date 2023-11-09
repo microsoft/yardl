@@ -918,12 +918,12 @@ class GenericRecord(typing.Generic[T1, T2, T2_NP]):
     def __init__(self, *,
         scalar_1: T1,
         scalar_2: T2,
-        vector_1: list[T1],
+        vector_1: typing.Optional[list[T1]] = None,
         image_2: Image[T2_NP],
     ):
         self.scalar_1 = scalar_1
         self.scalar_2 = scalar_2
-        self.vector_1 = vector_1
+        self.vector_1 = vector_1 if vector_1 is not None else []
         self.image_2 = image_2
 
     def __eq__(self, other: object) -> bool:
@@ -1129,6 +1129,56 @@ class RecordWithAliasedOptionalGenericUnionField(typing.Generic[U, V]):
         return f"RecordWithAliasedOptionalGenericUnionField(v={repr(self.v)})"
 
 
+class RecordWithGenericVectors(typing.Generic[T]):
+    v: list[T]
+    av: AliasedGenericVector[T]
+
+    def __init__(self, *,
+        v: typing.Optional[list[T]] = None,
+        av: typing.Optional[AliasedGenericVector[T]] = None,
+    ):
+        self.v = v if v is not None else []
+        self.av = av if av is not None else []
+
+    def __eq__(self, other: object) -> bool:
+        return (
+            isinstance(other, RecordWithGenericVectors)
+            and len(self.v) == len(other.v) and all(yardl.structural_equal(a, b) for a, b in zip(self.v, other.v))
+            and len(self.av) == len(other.av) and all(yardl.structural_equal(a, b) for a, b in zip(self.av, other.av))
+        )
+
+    def __str__(self) -> str:
+        return f"RecordWithGenericVectors(v={self.v}, av={self.av})"
+
+    def __repr__(self) -> str:
+        return f"RecordWithGenericVectors(v={repr(self.v)}, av={repr(self.av)})"
+
+
+class RecordWithGenericFixedVectors(typing.Generic[T]):
+    fv: list[T]
+    afv: AliasedGenericFixedVector[T]
+
+    def __init__(self, *,
+        fv: list[T],
+        afv: AliasedGenericFixedVector[T],
+    ):
+        self.fv = fv
+        self.afv = afv
+
+    def __eq__(self, other: object) -> bool:
+        return (
+            isinstance(other, RecordWithGenericFixedVectors)
+            and len(self.fv) == len(other.fv) and all(yardl.structural_equal(a, b) for a, b in zip(self.fv, other.fv))
+            and len(self.afv) == len(other.afv) and all(yardl.structural_equal(a, b) for a, b in zip(self.afv, other.afv))
+        )
+
+    def __str__(self) -> str:
+        return f"RecordWithGenericFixedVectors(fv={self.fv}, afv={self.afv})"
+
+    def __repr__(self) -> str:
+        return f"RecordWithGenericFixedVectors(fv={repr(self.fv)}, afv={repr(self.afv)})"
+
+
 class RecordContainingGenericRecords(typing.Generic[A, B]):
     g1: RecordWithOptionalGenericField[A]
     g1a: RecordWithAliasedOptionalGenericField[A]
@@ -1136,21 +1186,27 @@ class RecordContainingGenericRecords(typing.Generic[A, B]):
     g2a: RecordWithAliasedOptionalGenericUnionField[A, B]
     g3: MyTuple[A, B]
     g3a: AliasedTuple[A, B]
+    g4: RecordWithGenericVectors[B]
+    g5: RecordWithGenericFixedVectors[B]
 
     def __init__(self, *,
-        g1: RecordWithOptionalGenericField[A],
-        g1a: RecordWithAliasedOptionalGenericField[A],
-        g2: RecordWithOptionalGenericUnionField[A, B],
-        g2a: RecordWithAliasedOptionalGenericUnionField[A, B],
+        g1: typing.Optional[RecordWithOptionalGenericField[A]] = None,
+        g1a: typing.Optional[RecordWithAliasedOptionalGenericField[A]] = None,
+        g2: typing.Optional[RecordWithOptionalGenericUnionField[A, B]] = None,
+        g2a: typing.Optional[RecordWithAliasedOptionalGenericUnionField[A, B]] = None,
         g3: MyTuple[A, B],
         g3a: AliasedTuple[A, B],
+        g4: typing.Optional[RecordWithGenericVectors[B]] = None,
+        g5: RecordWithGenericFixedVectors[B],
     ):
-        self.g1 = g1
-        self.g1a = g1a
-        self.g2 = g2
-        self.g2a = g2a
+        self.g1 = g1 if g1 is not None else RecordWithOptionalGenericField(v=None)
+        self.g1a = g1a if g1a is not None else RecordWithAliasedOptionalGenericField(v=None)
+        self.g2 = g2 if g2 is not None else RecordWithOptionalGenericUnionField(v=None)
+        self.g2a = g2a if g2a is not None else RecordWithAliasedOptionalGenericUnionField(v=None)
         self.g3 = g3
         self.g3a = g3a
+        self.g4 = g4 if g4 is not None else RecordWithGenericVectors(v=[], av=[])
+        self.g5 = g5
 
     def __eq__(self, other: object) -> bool:
         return (
@@ -1161,13 +1217,15 @@ class RecordContainingGenericRecords(typing.Generic[A, B]):
             and self.g2a == other.g2a
             and self.g3 == other.g3
             and self.g3a == other.g3a
+            and self.g4 == other.g4
+            and self.g5 == other.g5
         )
 
     def __str__(self) -> str:
-        return f"RecordContainingGenericRecords(g1={self.g1}, g1a={self.g1a}, g2={self.g2}, g2a={self.g2a}, g3={self.g3}, g3a={self.g3a})"
+        return f"RecordContainingGenericRecords(g1={self.g1}, g1a={self.g1a}, g2={self.g2}, g2a={self.g2a}, g3={self.g3}, g3a={self.g3a}, g4={self.g4}, g5={self.g5})"
 
     def __repr__(self) -> str:
-        return f"RecordContainingGenericRecords(g1={repr(self.g1)}, g1a={repr(self.g1a)}, g2={repr(self.g2)}, g2a={repr(self.g2a)}, g3={repr(self.g3)}, g3a={repr(self.g3a)})"
+        return f"RecordContainingGenericRecords(g1={repr(self.g1)}, g1a={repr(self.g1a)}, g2={repr(self.g2)}, g2a={repr(self.g2a)}, g3={repr(self.g3)}, g3a={repr(self.g3a)}, g4={repr(self.g4)}, g5={repr(self.g5)})"
 
 
 class RecordContainingNestedGenericRecords:
@@ -1188,7 +1246,7 @@ class RecordContainingNestedGenericRecords:
         self.f1a = f1a if f1a is not None else RecordWithAliasedOptionalGenericField(v=None)
         self.f2 = f2 if f2 is not None else RecordWithOptionalGenericUnionField(v=None)
         self.f2a = f2a if f2a is not None else RecordWithAliasedOptionalGenericUnionField(v=None)
-        self.nested = nested if nested is not None else RecordContainingGenericRecords(g1=RecordWithOptionalGenericField(v=None), g1a=RecordWithAliasedOptionalGenericField(v=None), g2=RecordWithOptionalGenericUnionField(v=None), g2a=RecordWithAliasedOptionalGenericUnionField(v=None), g3=MyTuple(v1="", v2=0), g3a=MyTuple(v1="", v2=0))
+        self.nested = nested if nested is not None else RecordContainingGenericRecords(g1=RecordWithOptionalGenericField(v=None), g1a=RecordWithAliasedOptionalGenericField(v=None), g2=RecordWithOptionalGenericUnionField(v=None), g2a=RecordWithAliasedOptionalGenericUnionField(v=None), g3=MyTuple(v1="", v2=0), g3a=MyTuple(v1="", v2=0), g4=RecordWithGenericVectors(v=[], av=[]), g5=RecordWithGenericFixedVectors(fv=[0] * 3, afv=[0] * 3))
 
     def __eq__(self, other: object) -> bool:
         return (
@@ -1881,7 +1939,9 @@ def _mk_get_dtype():
     dtype_map.setdefault(RecordWithAliasedOptionalGenericField, lambda type_args: np.dtype([('v', get_dtype(types.GenericAlias(AliasedGenericOptional, (type_args[0],))))], align=True))
     dtype_map.setdefault(RecordWithOptionalGenericUnionField, lambda type_args: np.dtype([('v', np.dtype(np.object_))], align=True))
     dtype_map.setdefault(RecordWithAliasedOptionalGenericUnionField, lambda type_args: np.dtype([('v', get_dtype(types.GenericAlias(AliasedMultiGenericOptional, (type_args[0], type_args[1],))))], align=True))
-    dtype_map.setdefault(RecordContainingGenericRecords, lambda type_args: np.dtype([('g1', get_dtype(types.GenericAlias(RecordWithOptionalGenericField, (type_args[0],)))), ('g1a', get_dtype(types.GenericAlias(RecordWithAliasedOptionalGenericField, (type_args[0],)))), ('g2', get_dtype(types.GenericAlias(RecordWithOptionalGenericUnionField, (type_args[0], type_args[1],)))), ('g2a', get_dtype(types.GenericAlias(RecordWithAliasedOptionalGenericUnionField, (type_args[0], type_args[1],)))), ('g3', get_dtype(types.GenericAlias(MyTuple, (type_args[0], type_args[1],)))), ('g3a', get_dtype(types.GenericAlias(AliasedTuple, (type_args[0], type_args[1],))))], align=True))
+    dtype_map.setdefault(RecordWithGenericVectors, lambda type_args: np.dtype([('v', np.dtype(np.object_)), ('av', get_dtype(types.GenericAlias(AliasedGenericVector, (type_args[0],))))], align=True))
+    dtype_map.setdefault(RecordWithGenericFixedVectors, lambda type_args: np.dtype([('fv', get_dtype(type_args[0]), (3,)), ('afv', get_dtype(types.GenericAlias(AliasedGenericFixedVector, (type_args[0],))), (3,))], align=True))
+    dtype_map.setdefault(RecordContainingGenericRecords, lambda type_args: np.dtype([('g1', get_dtype(types.GenericAlias(RecordWithOptionalGenericField, (type_args[0],)))), ('g1a', get_dtype(types.GenericAlias(RecordWithAliasedOptionalGenericField, (type_args[0],)))), ('g2', get_dtype(types.GenericAlias(RecordWithOptionalGenericUnionField, (type_args[0], type_args[1],)))), ('g2a', get_dtype(types.GenericAlias(RecordWithAliasedOptionalGenericUnionField, (type_args[0], type_args[1],)))), ('g3', get_dtype(types.GenericAlias(MyTuple, (type_args[0], type_args[1],)))), ('g3a', get_dtype(types.GenericAlias(AliasedTuple, (type_args[0], type_args[1],)))), ('g4', get_dtype(types.GenericAlias(RecordWithGenericVectors, (type_args[1],)))), ('g5', get_dtype(types.GenericAlias(RecordWithGenericFixedVectors, (type_args[1],))))], align=True))
     dtype_map.setdefault(RecordContainingNestedGenericRecords, np.dtype([('f1', get_dtype(types.GenericAlias(RecordWithOptionalGenericField, (str,)))), ('f1a', get_dtype(types.GenericAlias(RecordWithAliasedOptionalGenericField, (str,)))), ('f2', get_dtype(types.GenericAlias(RecordWithOptionalGenericUnionField, (str, yardl.Int32,)))), ('f2a', get_dtype(types.GenericAlias(RecordWithAliasedOptionalGenericUnionField, (str, yardl.Int32,)))), ('nested', get_dtype(types.GenericAlias(RecordContainingGenericRecords, (str, yardl.Int32,))))], align=True))
     dtype_map.setdefault(AliasedIntOrSimpleRecord, np.dtype(np.object_))
     dtype_map.setdefault(typing.Optional[AliasedNullableIntSimpleRecord], np.dtype(np.object_))

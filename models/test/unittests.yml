@@ -456,6 +456,16 @@ RecordWithAliasedOptionalGenericUnionField<U, V>: !record
   fields:
     v: AliasedMultiGenericOptional<U, V>
 
+RecordWithGenericVectors<T>: !record
+  fields:
+    v: T*
+    av: AliasedGenericVector<T>
+
+RecordWithGenericFixedVectors<T>: !record
+  fields:
+    fv: T*3
+    afv: AliasedGenericFixedVector<T>
+
 RecordContainingGenericRecords<A, B>: !record
   fields:
     g1: RecordWithOptionalGenericField<A>
@@ -464,6 +474,8 @@ RecordContainingGenericRecords<A, B>: !record
     g2a: RecordWithAliasedOptionalGenericUnionField<A, B>
     g3: MyTuple<A, B>
     g3a: AliasedTuple<A, B>
+    g4: RecordWithGenericVectors<B>
+    g5: RecordWithGenericFixedVectors<B>
 
 RecordContainingNestedGenericRecords: !record
   fields:

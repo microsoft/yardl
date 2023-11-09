@@ -42,11 +42,18 @@ def test_defaulting():
     g1 = tm.RecordWithOptionalGenericField()
     assert g1.v == None
     g1a = tm.RecordWithAliasedOptionalGenericField()
-    assert g1a.v == None
+    assert g1a.v == g1.v
     g2 = tm.RecordWithOptionalGenericUnionField()
     assert g2.v == None
     g2a = tm.RecordWithAliasedOptionalGenericUnionField()
-    assert g2a.v == None
+    assert g2a.v == g2.v
+
+    g4 = tm.RecordWithGenericVectors()
+    assert g4.v == []
+    assert g4.av == g4.v
+    with pytest.raises(TypeError, match="missing 2 required keyword-only arguments"):
+        g5 = tm.RecordWithGenericFixedVectors()
+
     c = tm.RecordContainingNestedGenericRecords()
     assert c.f1 == g1
     assert c.f1a == g1a
@@ -60,6 +67,12 @@ def test_defaulting():
     assert c.nested.g3.v2 == 0
     assert c.nested.g3a.v1 == ""
     assert c.nested.g3a.v2 == 0
+    assert c.nested.g4.v == []
+    assert c.nested.g4.av == []
+    assert type(c.nested.g5.fv) == list
+    assert len(c.nested.g5.fv) == 3
+    assert type(c.nested.g5.afv) == list
+    assert len(c.nested.g5.afv) == 3
 
     ## Need to provide default values for generic fields
     with pytest.raises(TypeError):

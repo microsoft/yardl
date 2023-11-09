@@ -1434,6 +1434,61 @@
         },
         {
           "record": {
+            "name": "RecordWithGenericVectors",
+            "typeParameters": [
+              "T"
+            ],
+            "fields": [
+              {
+                "name": "v",
+                "type": {
+                  "vector": {
+                    "items": "T"
+                  }
+                }
+              },
+              {
+                "name": "av",
+                "type": {
+                  "name": "TestModel.AliasedGenericVector",
+                  "typeArguments": [
+                    "T"
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "record": {
+            "name": "RecordWithGenericFixedVectors",
+            "typeParameters": [
+              "T"
+            ],
+            "fields": [
+              {
+                "name": "fv",
+                "type": {
+                  "vector": {
+                    "items": "T",
+                    "length": 3
+                  }
+                }
+              },
+              {
+                "name": "afv",
+                "type": {
+                  "name": "TestModel.AliasedGenericFixedVector",
+                  "typeArguments": [
+                    "T"
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "record": {
             "name": "RecordContainingGenericRecords",
             "typeParameters": [
               "A",
@@ -1494,6 +1549,24 @@
                   "name": "TestModel.AliasedTuple",
                   "typeArguments": [
                     "A",
+                    "B"
+                  ]
+                }
+              },
+              {
+                "name": "g4",
+                "type": {
+                  "name": "TestModel.RecordWithGenericVectors",
+                  "typeArguments": [
+                    "B"
+                  ]
+                }
+              },
+              {
+                "name": "g5",
+                "type": {
+                  "name": "TestModel.RecordWithGenericFixedVectors",
+                  "typeArguments": [
                     "B"
                   ]
                 }

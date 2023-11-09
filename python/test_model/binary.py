@@ -1741,22 +1741,58 @@ class _RecordWithAliasedOptionalGenericUnionFieldSerializer(typing.Generic[U, U_
         return RecordWithAliasedOptionalGenericUnionField[U, V](v=field_values[0])
 
 
+class _RecordWithGenericVectorsSerializer(typing.Generic[T, T_NP], _binary.RecordSerializer[RecordWithGenericVectors[T]]):
+    def __init__(self, t_serializer: _binary.TypeSerializer[T, T_NP]) -> None:
+        super().__init__([("v", _binary.VectorSerializer(t_serializer)), ("av", _binary.VectorSerializer(t_serializer))])
+
+    def write(self, stream: _binary.CodedOutputStream, value: RecordWithGenericVectors[T]) -> None:
+        if isinstance(value, np.void):
+            self.write_numpy(stream, value)
+            return
+        self._write(stream, value.v, value.av)
+
+    def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
+        self._write(stream, value['v'], value['av'])
+
+    def read(self, stream: _binary.CodedInputStream) -> RecordWithGenericVectors[T]:
+        field_values = self._read(stream)
+        return RecordWithGenericVectors[T](v=field_values[0], av=field_values[1])
+
+
+class _RecordWithGenericFixedVectorsSerializer(typing.Generic[T, T_NP], _binary.RecordSerializer[RecordWithGenericFixedVectors[T]]):
+    def __init__(self, t_serializer: _binary.TypeSerializer[T, T_NP]) -> None:
+        super().__init__([("fv", _binary.FixedVectorSerializer(t_serializer, 3)), ("afv", _binary.FixedVectorSerializer(t_serializer, 3))])
+
+    def write(self, stream: _binary.CodedOutputStream, value: RecordWithGenericFixedVectors[T]) -> None:
+        if isinstance(value, np.void):
+            self.write_numpy(stream, value)
+            return
+        self._write(stream, value.fv, value.afv)
+
+    def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
+        self._write(stream, value['fv'], value['afv'])
+
+    def read(self, stream: _binary.CodedInputStream) -> RecordWithGenericFixedVectors[T]:
+        field_values = self._read(stream)
+        return RecordWithGenericFixedVectors[T](fv=field_values[0], afv=field_values[1])
+
+
 class _RecordContainingGenericRecordsSerializer(typing.Generic[A, A_NP, B, B_NP], _binary.RecordSerializer[RecordContainingGenericRecords[A, B]]):
     def __init__(self, a_serializer: _binary.TypeSerializer[A, A_NP], b_serializer: _binary.TypeSerializer[B, B_NP]) -> None:
-        super().__init__([("g1", _RecordWithOptionalGenericFieldSerializer(a_serializer)), ("g1a", _RecordWithAliasedOptionalGenericFieldSerializer(a_serializer)), ("g2", _RecordWithOptionalGenericUnionFieldSerializer(a_serializer, b_serializer)), ("g2a", _RecordWithAliasedOptionalGenericUnionFieldSerializer(a_serializer, b_serializer)), ("g3", _MyTupleSerializer(a_serializer, b_serializer)), ("g3a", _MyTupleSerializer(a_serializer, b_serializer))])
+        super().__init__([("g1", _RecordWithOptionalGenericFieldSerializer(a_serializer)), ("g1a", _RecordWithAliasedOptionalGenericFieldSerializer(a_serializer)), ("g2", _RecordWithOptionalGenericUnionFieldSerializer(a_serializer, b_serializer)), ("g2a", _RecordWithAliasedOptionalGenericUnionFieldSerializer(a_serializer, b_serializer)), ("g3", _MyTupleSerializer(a_serializer, b_serializer)), ("g3a", _MyTupleSerializer(a_serializer, b_serializer)), ("g4", _RecordWithGenericVectorsSerializer(b_serializer)), ("g5", _RecordWithGenericFixedVectorsSerializer(b_serializer))])
 
     def write(self, stream: _binary.CodedOutputStream, value: RecordContainingGenericRecords[A, B]) -> None:
         if isinstance(value, np.void):
             self.write_numpy(stream, value)
             return
-        self._write(stream, value.g1, value.g1a, value.g2, value.g2a, value.g3, value.g3a)
+        self._write(stream, value.g1, value.g1a, value.g2, value.g2a, value.g3, value.g3a, value.g4, value.g5)
 
     def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
-        self._write(stream, value['g1'], value['g1a'], value['g2'], value['g2a'], value['g3'], value['g3a'])
+        self._write(stream, value['g1'], value['g1a'], value['g2'], value['g2a'], value['g3'], value['g3a'], value['g4'], value['g5'])
 
     def read(self, stream: _binary.CodedInputStream) -> RecordContainingGenericRecords[A, B]:
         field_values = self._read(stream)
-        return RecordContainingGenericRecords[A, B](g1=field_values[0], g1a=field_values[1], g2=field_values[2], g2a=field_values[3], g3=field_values[4], g3a=field_values[5])
+        return RecordContainingGenericRecords[A, B](g1=field_values[0], g1a=field_values[1], g2=field_values[2], g2a=field_values[3], g3=field_values[4], g3a=field_values[5], g4=field_values[6], g5=field_values[7])
 
 
 class _RecordContainingNestedGenericRecordsSerializer(_binary.RecordSerializer[RecordContainingNestedGenericRecords]):

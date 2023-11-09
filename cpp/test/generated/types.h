@@ -627,6 +627,36 @@ struct RecordWithAliasedOptionalGenericUnionField {
   }
 };
 
+template <typename T>
+struct RecordWithGenericVectors {
+  std::vector<T> v{};
+  test_model::AliasedGenericVector<T> av{};
+
+  bool operator==(const RecordWithGenericVectors& other) const {
+    return v == other.v &&
+      av == other.av;
+  }
+
+  bool operator!=(const RecordWithGenericVectors& other) const {
+    return !(*this == other);
+  }
+};
+
+template <typename T>
+struct RecordWithGenericFixedVectors {
+  std::array<T, 3> fv{};
+  test_model::AliasedGenericFixedVector<T> afv{};
+
+  bool operator==(const RecordWithGenericFixedVectors& other) const {
+    return fv == other.fv &&
+      afv == other.afv;
+  }
+
+  bool operator!=(const RecordWithGenericFixedVectors& other) const {
+    return !(*this == other);
+  }
+};
+
 template <typename A, typename B>
 struct RecordContainingGenericRecords {
   test_model::RecordWithOptionalGenericField<A> g1{};
@@ -635,6 +665,8 @@ struct RecordContainingGenericRecords {
   test_model::RecordWithAliasedOptionalGenericUnionField<A, B> g2a{};
   test_model::MyTuple<A, B> g3{};
   test_model::AliasedTuple<A, B> g3a{};
+  test_model::RecordWithGenericVectors<B> g4{};
+  test_model::RecordWithGenericFixedVectors<B> g5{};
 
   bool operator==(const RecordContainingGenericRecords& other) const {
     return g1 == other.g1 &&
@@ -642,7 +674,9 @@ struct RecordContainingGenericRecords {
       g2 == other.g2 &&
       g2a == other.g2a &&
       g3 == other.g3 &&
-      g3a == other.g3a;
+      g3a == other.g3a &&
+      g4 == other.g4 &&
+      g5 == other.g5;
   }
 
   bool operator!=(const RecordContainingGenericRecords& other) const {

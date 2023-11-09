@@ -726,6 +726,40 @@ struct _Inner_RecordWithAliasedOptionalGenericUnionField {
   ::InnerUnion2<_U_Inner, U, _V_Inner, V> v;
 };
 
+template <typename _T_Inner, typename T>
+struct _Inner_RecordWithGenericVectors {
+  _Inner_RecordWithGenericVectors() {} 
+  _Inner_RecordWithGenericVectors(test_model::RecordWithGenericVectors<T> const& o) 
+      : v(o.v),
+      av(o.av) {
+  }
+
+  void ToOuter (test_model::RecordWithGenericVectors<T>& o) const {
+    yardl::hdf5::ToOuter(v, o.v);
+    yardl::hdf5::ToOuter(av, o.av);
+  }
+
+  yardl::hdf5::InnerVlen<_T_Inner, T> v;
+  yardl::hdf5::InnerVlen<_T_Inner, T> av;
+};
+
+template <typename _T_Inner, typename T>
+struct _Inner_RecordWithGenericFixedVectors {
+  _Inner_RecordWithGenericFixedVectors() {} 
+  _Inner_RecordWithGenericFixedVectors(test_model::RecordWithGenericFixedVectors<T> const& o) 
+      : fv(o.fv),
+      afv(o.afv) {
+  }
+
+  void ToOuter (test_model::RecordWithGenericFixedVectors<T>& o) const {
+    yardl::hdf5::ToOuter(fv, o.fv);
+    yardl::hdf5::ToOuter(afv, o.afv);
+  }
+
+  yardl::hdf5::InnerFixedVector<_T_Inner, T, 3> fv;
+  yardl::hdf5::InnerFixedVector<_T_Inner, T, 3> afv;
+};
+
 template <typename _A_Inner, typename A, typename _B_Inner, typename B>
 struct _Inner_RecordContainingGenericRecords {
   _Inner_RecordContainingGenericRecords() {} 
@@ -735,7 +769,9 @@ struct _Inner_RecordContainingGenericRecords {
       g2(o.g2),
       g2a(o.g2a),
       g3(o.g3),
-      g3a(o.g3a) {
+      g3a(o.g3a),
+      g4(o.g4),
+      g5(o.g5) {
   }
 
   void ToOuter (test_model::RecordContainingGenericRecords<A, B>& o) const {
@@ -745,6 +781,8 @@ struct _Inner_RecordContainingGenericRecords {
     yardl::hdf5::ToOuter(g2a, o.g2a);
     yardl::hdf5::ToOuter(g3, o.g3);
     yardl::hdf5::ToOuter(g3a, o.g3a);
+    yardl::hdf5::ToOuter(g4, o.g4);
+    yardl::hdf5::ToOuter(g5, o.g5);
   }
 
   test_model::hdf5::_Inner_RecordWithOptionalGenericField<_A_Inner, A> g1;
@@ -753,6 +791,8 @@ struct _Inner_RecordContainingGenericRecords {
   test_model::hdf5::_Inner_RecordWithAliasedOptionalGenericUnionField<_A_Inner, A, _B_Inner, B> g2a;
   test_model::hdf5::_Inner_MyTuple<_A_Inner, A, _B_Inner, B> g3;
   test_model::hdf5::_Inner_MyTuple<_A_Inner, A, _B_Inner, B> g3a;
+  test_model::hdf5::_Inner_RecordWithGenericVectors<_B_Inner, B> g4;
+  test_model::hdf5::_Inner_RecordWithGenericFixedVectors<_B_Inner, B> g5;
 };
 
 struct _Inner_RecordContainingNestedGenericRecords {
@@ -1221,6 +1261,24 @@ template <typename _U_Inner, typename U, typename _V_Inner, typename V>
   return t;
 }
 
+template <typename _T_Inner, typename T>
+[[maybe_unused]] H5::CompType GetRecordWithGenericVectorsHdf5Ddl(H5::DataType const& T_type) {
+  using RecordType = test_model::hdf5::_Inner_RecordWithGenericVectors<_T_Inner, T>;
+  H5::CompType t(sizeof(RecordType));
+  t.insertMember("v", HOFFSET(RecordType, v), yardl::hdf5::InnerVlenDdl(T_type));
+  t.insertMember("av", HOFFSET(RecordType, av), yardl::hdf5::InnerVlenDdl(T_type));
+  return t;
+}
+
+template <typename _T_Inner, typename T>
+[[maybe_unused]] H5::CompType GetRecordWithGenericFixedVectorsHdf5Ddl(H5::DataType const& T_type) {
+  using RecordType = test_model::hdf5::_Inner_RecordWithGenericFixedVectors<_T_Inner, T>;
+  H5::CompType t(sizeof(RecordType));
+  t.insertMember("fv", HOFFSET(RecordType, fv), yardl::hdf5::FixedVectorDdl(T_type, 3));
+  t.insertMember("afv", HOFFSET(RecordType, afv), yardl::hdf5::FixedVectorDdl(T_type, 3));
+  return t;
+}
+
 template <typename _A_Inner, typename A, typename _B_Inner, typename B>
 [[maybe_unused]] H5::CompType GetRecordContainingGenericRecordsHdf5Ddl(H5::DataType const& A_type, H5::DataType const& B_type) {
   using RecordType = test_model::hdf5::_Inner_RecordContainingGenericRecords<_A_Inner, A, _B_Inner, B>;
@@ -1231,6 +1289,8 @@ template <typename _A_Inner, typename A, typename _B_Inner, typename B>
   t.insertMember("g2a", HOFFSET(RecordType, g2a), test_model::hdf5::GetRecordWithAliasedOptionalGenericUnionFieldHdf5Ddl<_A_Inner, A, _B_Inner, B>(A_type, B_type));
   t.insertMember("g3", HOFFSET(RecordType, g3), test_model::hdf5::GetMyTupleHdf5Ddl<_A_Inner, A, _B_Inner, B>(A_type, B_type));
   t.insertMember("g3a", HOFFSET(RecordType, g3a), test_model::hdf5::GetMyTupleHdf5Ddl<_A_Inner, A, _B_Inner, B>(A_type, B_type));
+  t.insertMember("g4", HOFFSET(RecordType, g4), test_model::hdf5::GetRecordWithGenericVectorsHdf5Ddl<_B_Inner, B>(B_type));
+  t.insertMember("g5", HOFFSET(RecordType, g5), test_model::hdf5::GetRecordWithGenericFixedVectorsHdf5Ddl<_B_Inner, B>(B_type));
   return t;
 }
 

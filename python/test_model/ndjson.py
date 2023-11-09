@@ -1739,6 +1739,94 @@ class _RecordWithAliasedOptionalGenericUnionFieldConverter(typing.Generic[U, U_N
         ) # type:ignore 
 
 
+class _RecordWithGenericVectorsConverter(typing.Generic[T, T_NP], _ndjson.JsonConverter[RecordWithGenericVectors[T], np.void]):
+    def __init__(self, t_converter: _ndjson.JsonConverter[T, T_NP]) -> None:
+        self._v_converter = _ndjson.VectorConverter(t_converter)
+        self._av_converter = _ndjson.VectorConverter(t_converter)
+        super().__init__(np.dtype([
+            ("v", self._v_converter.overall_dtype()),
+            ("av", self._av_converter.overall_dtype()),
+        ]))
+
+    def to_json(self, value: RecordWithGenericVectors[T]) -> object:
+        if not isinstance(value, RecordWithGenericVectors):
+            raise TypeError("Expected 'RecordWithGenericVectors[T]' instance")
+        json_object = {}
+
+        json_object["v"] = self._v_converter.to_json(value.v)
+        json_object["av"] = self._av_converter.to_json(value.av)
+        return json_object
+
+    def numpy_to_json(self, value: np.void) -> object:
+        if not isinstance(value, np.void):
+            raise TypeError("Expected 'np.void' instance")
+        json_object = {}
+
+        json_object["v"] = self._v_converter.numpy_to_json(value["v"])
+        json_object["av"] = self._av_converter.numpy_to_json(value["av"])
+        return json_object
+
+    def from_json(self, json_object: object) -> RecordWithGenericVectors[T]:
+        if not isinstance(json_object, dict):
+            raise TypeError("Expected 'dict' instance")
+        return RecordWithGenericVectors[T](
+            v=self._v_converter.from_json(json_object["v"],),
+            av=self._av_converter.from_json(json_object["av"],),
+        )
+
+    def from_json_to_numpy(self, json_object: object) -> np.void:
+        if not isinstance(json_object, dict):
+            raise TypeError("Expected 'dict' instance")
+        return (
+            self._v_converter.from_json_to_numpy(json_object["v"]),
+            self._av_converter.from_json_to_numpy(json_object["av"]),
+        ) # type:ignore 
+
+
+class _RecordWithGenericFixedVectorsConverter(typing.Generic[T, T_NP], _ndjson.JsonConverter[RecordWithGenericFixedVectors[T], np.void]):
+    def __init__(self, t_converter: _ndjson.JsonConverter[T, T_NP]) -> None:
+        self._fv_converter = _ndjson.FixedVectorConverter(t_converter, 3)
+        self._afv_converter = _ndjson.FixedVectorConverter(t_converter, 3)
+        super().__init__(np.dtype([
+            ("fv", self._fv_converter.overall_dtype()),
+            ("afv", self._afv_converter.overall_dtype()),
+        ]))
+
+    def to_json(self, value: RecordWithGenericFixedVectors[T]) -> object:
+        if not isinstance(value, RecordWithGenericFixedVectors):
+            raise TypeError("Expected 'RecordWithGenericFixedVectors[T]' instance")
+        json_object = {}
+
+        json_object["fv"] = self._fv_converter.to_json(value.fv)
+        json_object["afv"] = self._afv_converter.to_json(value.afv)
+        return json_object
+
+    def numpy_to_json(self, value: np.void) -> object:
+        if not isinstance(value, np.void):
+            raise TypeError("Expected 'np.void' instance")
+        json_object = {}
+
+        json_object["fv"] = self._fv_converter.numpy_to_json(value["fv"])
+        json_object["afv"] = self._afv_converter.numpy_to_json(value["afv"])
+        return json_object
+
+    def from_json(self, json_object: object) -> RecordWithGenericFixedVectors[T]:
+        if not isinstance(json_object, dict):
+            raise TypeError("Expected 'dict' instance")
+        return RecordWithGenericFixedVectors[T](
+            fv=self._fv_converter.from_json(json_object["fv"],),
+            afv=self._afv_converter.from_json(json_object["afv"],),
+        )
+
+    def from_json_to_numpy(self, json_object: object) -> np.void:
+        if not isinstance(json_object, dict):
+            raise TypeError("Expected 'dict' instance")
+        return (
+            self._fv_converter.from_json_to_numpy(json_object["fv"]),
+            self._afv_converter.from_json_to_numpy(json_object["afv"]),
+        ) # type:ignore 
+
+
 class _RecordContainingGenericRecordsConverter(typing.Generic[A, A_NP, B, B_NP], _ndjson.JsonConverter[RecordContainingGenericRecords[A, B], np.void]):
     def __init__(self, a_converter: _ndjson.JsonConverter[A, A_NP], b_converter: _ndjson.JsonConverter[B, B_NP]) -> None:
         self._g1_converter = _RecordWithOptionalGenericFieldConverter(a_converter)
@@ -1747,6 +1835,8 @@ class _RecordContainingGenericRecordsConverter(typing.Generic[A, A_NP, B, B_NP],
         self._g2a_converter = _RecordWithAliasedOptionalGenericUnionFieldConverter(a_converter, b_converter)
         self._g3_converter = _MyTupleConverter(a_converter, b_converter)
         self._g3a_converter = _MyTupleConverter(a_converter, b_converter)
+        self._g4_converter = _RecordWithGenericVectorsConverter(b_converter)
+        self._g5_converter = _RecordWithGenericFixedVectorsConverter(b_converter)
         super().__init__(np.dtype([
             ("g1", self._g1_converter.overall_dtype()),
             ("g1a", self._g1a_converter.overall_dtype()),
@@ -1754,6 +1844,8 @@ class _RecordContainingGenericRecordsConverter(typing.Generic[A, A_NP, B, B_NP],
             ("g2a", self._g2a_converter.overall_dtype()),
             ("g3", self._g3_converter.overall_dtype()),
             ("g3a", self._g3a_converter.overall_dtype()),
+            ("g4", self._g4_converter.overall_dtype()),
+            ("g5", self._g5_converter.overall_dtype()),
         ]))
 
     def to_json(self, value: RecordContainingGenericRecords[A, B]) -> object:
@@ -1767,6 +1859,8 @@ class _RecordContainingGenericRecordsConverter(typing.Generic[A, A_NP, B, B_NP],
         json_object["g2a"] = self._g2a_converter.to_json(value.g2a)
         json_object["g3"] = self._g3_converter.to_json(value.g3)
         json_object["g3a"] = self._g3a_converter.to_json(value.g3a)
+        json_object["g4"] = self._g4_converter.to_json(value.g4)
+        json_object["g5"] = self._g5_converter.to_json(value.g5)
         return json_object
 
     def numpy_to_json(self, value: np.void) -> object:
@@ -1780,6 +1874,8 @@ class _RecordContainingGenericRecordsConverter(typing.Generic[A, A_NP, B, B_NP],
         json_object["g2a"] = self._g2a_converter.numpy_to_json(value["g2a"])
         json_object["g3"] = self._g3_converter.numpy_to_json(value["g3"])
         json_object["g3a"] = self._g3a_converter.numpy_to_json(value["g3a"])
+        json_object["g4"] = self._g4_converter.numpy_to_json(value["g4"])
+        json_object["g5"] = self._g5_converter.numpy_to_json(value["g5"])
         return json_object
 
     def from_json(self, json_object: object) -> RecordContainingGenericRecords[A, B]:
@@ -1792,6 +1888,8 @@ class _RecordContainingGenericRecordsConverter(typing.Generic[A, A_NP, B, B_NP],
             g2a=self._g2a_converter.from_json(json_object["g2a"],),
             g3=self._g3_converter.from_json(json_object["g3"],),
             g3a=self._g3a_converter.from_json(json_object["g3a"],),
+            g4=self._g4_converter.from_json(json_object["g4"],),
+            g5=self._g5_converter.from_json(json_object["g5"],),
         )
 
     def from_json_to_numpy(self, json_object: object) -> np.void:
@@ -1804,6 +1902,8 @@ class _RecordContainingGenericRecordsConverter(typing.Generic[A, A_NP, B, B_NP],
             self._g2a_converter.from_json_to_numpy(json_object["g2a"]),
             self._g3_converter.from_json_to_numpy(json_object["g3"]),
             self._g3a_converter.from_json_to_numpy(json_object["g3a"]),
+            self._g4_converter.from_json_to_numpy(json_object["g4"]),
+            self._g5_converter.from_json_to_numpy(json_object["g5"]),
         ) # type:ignore 
 
 
