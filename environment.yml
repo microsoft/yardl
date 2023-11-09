@@ -19,7 +19,6 @@ dependencies:
   - howardhinnant_date=3.0.1
   - ipykernel=6.19.2 # local
   - just=1.5.0
-  - mypy=1.6.1
   - ninja=1.11.0
   - nlohmann_json=3.11.2
   - nodejs=20.5.1 # local
