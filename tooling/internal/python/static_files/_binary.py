@@ -65,7 +65,7 @@ class BinaryProtocolReader(ABC):
     ) -> None:
         self._stream = CodedInputStream(stream)
         magic_bytes = self._stream.read_view(len(MAGIC_BYTES))
-        if magic_bytes != MAGIC_BYTES:
+        if magic_bytes != MAGIC_BYTES: # type: ignore
             raise RuntimeError("Invalid magic bytes")
 
         version = read_fixed_int32(self._stream)
@@ -960,7 +960,7 @@ class FixedVectorSerializer(Generic[T, T_NP], TypeSerializer[list[T], np.object_
         self, element_serializer: TypeSerializer[T, T_NP], length: int
     ) -> None:
         super().__init__(np.dtype((element_serializer.overall_dtype(), length)))
-        self._element_serializer = element_serializer
+        self.element_serializer = element_serializer
         self._length = length
 
     def write(self, stream: CodedOutputStream, value: list[T]) -> None:
@@ -969,19 +969,19 @@ class FixedVectorSerializer(Generic[T, T_NP], TypeSerializer[list[T], np.object_
                 f"Expected a list of length {self._length}, got {len(value)}"
             )
         for element in value:
-            self._element_serializer.write(stream, element)
+            self.element_serializer.write(stream, element)
 
     def write_numpy(self, stream: CodedOutputStream, value: np.object_) -> None:
         raise NotImplementedError("Internal error: expected this to be a subarray")
 
     def read(self, stream: CodedInputStream) -> list[T]:
-        return [self._element_serializer.read(stream) for _ in range(self._length)]
+        return [self.element_serializer.read(stream) for _ in range(self._length)]
 
     def read_numpy(self, stream: CodedInputStream) -> np.object_:
         raise NotImplementedError("Internal error: expected this to be a subarray")
 
     def is_trivially_serializable(self) -> bool:
-        return self._element_serializer.is_trivially_serializable()
+        return self.element_serializer.is_trivially_serializable()
 
 
 class VectorSerializer(Generic[T, T_NP], TypeSerializer[list[T], np.object_]):
@@ -1059,7 +1059,7 @@ class NDArraySerializerBase(
         dtype: npt.DTypeLike,
     ) -> None:
         super().__init__(overall_dtype)
-        self._element_serializer = element_serializer
+        self.element_serializer = element_serializer
 
         (
             self._array_dtype,
@@ -1073,7 +1073,7 @@ class NDArraySerializerBase(
             if isinstance(element_serializer, FixedNDArraySerializer) or isinstance(
                 element_serializer, FixedVectorSerializer
             ):
-                self._element_serializer = element_serializer._element_serializer
+                self.element_serializer = element_serializer.element_serializer
 
     @staticmethod
     def _get_dtype_and_subarray_shape(
@@ -1100,27 +1100,27 @@ class NDArraySerializerBase(
             stream.write_bytes_directly(value.data)
         else:
             for element in value.flat:
-                self._element_serializer.write_numpy(stream, element)
+                self.element_serializer.write_numpy(stream, element)
 
     def _read_data(
         self, stream: CodedInputStream, shape: tuple[int, ...]
     ) -> npt.NDArray[Any]:
         flat_length = int(np.prod(shape))  # type: ignore
 
-        if self._element_serializer.is_trivially_serializable():
+        if self.element_serializer.is_trivially_serializable():
             flat_byte_length = flat_length * self._array_dtype.itemsize
             byte_array = stream.read_bytearray(flat_byte_length)
             return np.frombuffer(byte_array, dtype=self._array_dtype).reshape(shape)
 
         result = np.ndarray((flat_length,), dtype=self._array_dtype)
         for i in range(flat_length):
-            result[i] = self._element_serializer.read_numpy(stream)
+            result[i] = self.element_serializer.read_numpy(stream)
 
         return result.reshape(shape)
 
     def _is_current_array_trivially_serializable(self, value: npt.NDArray[Any]) -> bool:
         return (
-            self._element_serializer.is_trivially_serializable()
+            self.element_serializer.is_trivially_serializable()
             and value.flags.c_contiguous
             and (
                 self._array_dtype.fields is None
@@ -1258,7 +1258,7 @@ class FixedNDArraySerializer(Generic[T, T_NP], NDArraySerializerBase[T, T_NP]):
         return cast(np.object_, self.read(stream))
 
     def is_trivially_serializable(self) -> bool:
-        return self._element_serializer.is_trivially_serializable()
+        return self.element_serializer.is_trivially_serializable()
 
 
 class RecordSerializer(TypeSerializer[T, np.void]):

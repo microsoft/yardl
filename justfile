@@ -81,7 +81,11 @@ cpp_version := "17"
 @watch-exec-sandbox-python:
     watchexec -c -w models/sandbox/ -w python/run_sandbox.py -w tooling/ -- "just generate-sandbox && echo "" && python python/run_sandbox.py"
 
-@validate: build-all test run-sandbox-quiet run-sandbox-python-quiet benchmark
+@type-check: generate generate-sandbox
+    cd python; \
+    pyright .
+
+@validate: build-all test type-check run-sandbox-quiet run-sandbox-python-quiet benchmark
 
 validate-with-no-changes: validate
     #!/usr/bin/env bash

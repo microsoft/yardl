@@ -937,8 +937,7 @@ class MapConverter(
 
         if isinstance(self._key_converter, StringConverter):
             return {
-                self._key_converter.to_json(k): self._value_converter.to_json(v)
-                for k, v in value.items()
+                cast(str, k): self._value_converter.to_json(v) for k, v in value.items()
             }
 
         return [
@@ -955,7 +954,7 @@ class MapConverter(
                 raise ValueError(f"Value in not a dict: {json_object}")
 
             return {
-                self._key_converter.from_json(k): self._value_converter.from_json(v)
+                cast(TKey, k): self._value_converter.from_json(v)
                 for k, v in json_object.items()
             }
 
@@ -1020,7 +1019,7 @@ class NDArrayConverterBase(
             () if self._subarray_shape is None else self._subarray_shape
         )
 
-        partially_flattened_shape = (np.prod(shape),) + subarray_shape_not_none
+        partially_flattened_shape = (np.prod(shape),) + subarray_shape_not_none # type: ignore
         result = np.ndarray(partially_flattened_shape, dtype=self._array_dtype)
         for i in range(partially_flattened_shape[0]):
             result[i] = self._element_converter.from_json_to_numpy(json_object[i])
