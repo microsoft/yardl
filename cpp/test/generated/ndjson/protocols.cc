@@ -139,6 +139,16 @@ void to_json(ordered_json& j, test_model::RecordWithGenericFixedVectors<T> const
 template <typename T>
 void from_json(ordered_json const& j, test_model::RecordWithGenericFixedVectors<T>& value);
 
+template <typename T>
+void to_json(ordered_json& j, test_model::RecordWithGenericArrays<T> const& value);
+template <typename T>
+void from_json(ordered_json const& j, test_model::RecordWithGenericArrays<T>& value);
+
+template <typename T, typename U>
+void to_json(ordered_json& j, test_model::RecordWithGenericMaps<T, U> const& value);
+template <typename T, typename U>
+void from_json(ordered_json const& j, test_model::RecordWithGenericMaps<T, U>& value);
+
 template <typename A, typename B>
 void to_json(ordered_json& j, test_model::RecordContainingGenericRecords<A, B> const& value);
 template <typename A, typename B>
@@ -1885,6 +1895,72 @@ void from_json(ordered_json const& j, test_model::RecordWithGenericFixedVectors<
   }
 }
 
+template <typename T>
+void to_json(ordered_json& j, test_model::RecordWithGenericArrays<T> const& value) {
+  j = ordered_json::object();
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.nd)) {
+    j.push_back({"nd", value.nd});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.fixed_nd)) {
+    j.push_back({"fixedNd", value.fixed_nd});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.dynamic_nd)) {
+    j.push_back({"dynamicNd", value.dynamic_nd});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.aliased_nd)) {
+    j.push_back({"aliasedNd", value.aliased_nd});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.aliased_fixed_nd)) {
+    j.push_back({"aliasedFixedNd", value.aliased_fixed_nd});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.aliased_dynamic_nd)) {
+    j.push_back({"aliasedDynamicNd", value.aliased_dynamic_nd});
+  }
+}
+
+template <typename T>
+void from_json(ordered_json const& j, test_model::RecordWithGenericArrays<T>& value) {
+  if (auto it = j.find("nd"); it != j.end()) {
+    it->get_to(value.nd);
+  }
+  if (auto it = j.find("fixedNd"); it != j.end()) {
+    it->get_to(value.fixed_nd);
+  }
+  if (auto it = j.find("dynamicNd"); it != j.end()) {
+    it->get_to(value.dynamic_nd);
+  }
+  if (auto it = j.find("aliasedNd"); it != j.end()) {
+    it->get_to(value.aliased_nd);
+  }
+  if (auto it = j.find("aliasedFixedNd"); it != j.end()) {
+    it->get_to(value.aliased_fixed_nd);
+  }
+  if (auto it = j.find("aliasedDynamicNd"); it != j.end()) {
+    it->get_to(value.aliased_dynamic_nd);
+  }
+}
+
+template <typename T, typename U>
+void to_json(ordered_json& j, test_model::RecordWithGenericMaps<T, U> const& value) {
+  j = ordered_json::object();
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.m)) {
+    j.push_back({"m", value.m});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.am)) {
+    j.push_back({"am", value.am});
+  }
+}
+
+template <typename T, typename U>
+void from_json(ordered_json const& j, test_model::RecordWithGenericMaps<T, U>& value) {
+  if (auto it = j.find("m"); it != j.end()) {
+    it->get_to(value.m);
+  }
+  if (auto it = j.find("am"); it != j.end()) {
+    it->get_to(value.am);
+  }
+}
+
 template <typename A, typename B>
 void to_json(ordered_json& j, test_model::RecordContainingGenericRecords<A, B> const& value) {
   j = ordered_json::object();
@@ -1911,6 +1987,12 @@ void to_json(ordered_json& j, test_model::RecordContainingGenericRecords<A, B> c
   }
   if (yardl::ndjson::ShouldSerializeFieldValue(value.g5)) {
     j.push_back({"g5", value.g5});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.g6)) {
+    j.push_back({"g6", value.g6});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.g7)) {
+    j.push_back({"g7", value.g7});
   }
 }
 
@@ -1939,6 +2021,12 @@ void from_json(ordered_json const& j, test_model::RecordContainingGenericRecords
   }
   if (auto it = j.find("g5"); it != j.end()) {
     it->get_to(value.g5);
+  }
+  if (auto it = j.find("g6"); it != j.end()) {
+    it->get_to(value.g6);
+  }
+  if (auto it = j.find("g7"); it != j.end()) {
+    it->get_to(value.g7);
   }
 }
 

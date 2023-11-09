@@ -576,6 +576,15 @@ template <typename T>
 using AliasedGenericFixedVector = std::array<T, 3>;
 
 template <typename T>
+using AliasedGenericRank2Array = yardl::NDArray<T, 2>;
+
+template <typename T>
+using AliasedGenericFixedArray = yardl::FixedNDArray<T, 16, 8>;
+
+template <typename T>
+using AliasedGenericDynamicArray = yardl::DynamicNDArray<T>;
+
+template <typename T>
 struct RecordWithOptionalGenericField {
   std::optional<T> v{};
 
@@ -657,6 +666,44 @@ struct RecordWithGenericFixedVectors {
   }
 };
 
+template <typename T>
+struct RecordWithGenericArrays {
+  yardl::NDArray<T, 2> nd{};
+  yardl::FixedNDArray<T, 16, 8> fixed_nd{};
+  yardl::DynamicNDArray<T> dynamic_nd{};
+  test_model::AliasedGenericRank2Array<T> aliased_nd{};
+  test_model::AliasedGenericFixedArray<T> aliased_fixed_nd{};
+  test_model::AliasedGenericDynamicArray<T> aliased_dynamic_nd{};
+
+  bool operator==(const RecordWithGenericArrays& other) const {
+    return nd == other.nd &&
+      fixed_nd == other.fixed_nd &&
+      dynamic_nd == other.dynamic_nd &&
+      aliased_nd == other.aliased_nd &&
+      aliased_fixed_nd == other.aliased_fixed_nd &&
+      aliased_dynamic_nd == other.aliased_dynamic_nd;
+  }
+
+  bool operator!=(const RecordWithGenericArrays& other) const {
+    return !(*this == other);
+  }
+};
+
+template <typename T, typename U>
+struct RecordWithGenericMaps {
+  std::unordered_map<T, U> m{};
+  test_model::AliasedMap<T, U> am{};
+
+  bool operator==(const RecordWithGenericMaps& other) const {
+    return m == other.m &&
+      am == other.am;
+  }
+
+  bool operator!=(const RecordWithGenericMaps& other) const {
+    return !(*this == other);
+  }
+};
+
 template <typename A, typename B>
 struct RecordContainingGenericRecords {
   test_model::RecordWithOptionalGenericField<A> g1{};
@@ -667,6 +714,8 @@ struct RecordContainingGenericRecords {
   test_model::AliasedTuple<A, B> g3a{};
   test_model::RecordWithGenericVectors<B> g4{};
   test_model::RecordWithGenericFixedVectors<B> g5{};
+  test_model::RecordWithGenericArrays<B> g6{};
+  test_model::RecordWithGenericMaps<A, B> g7{};
 
   bool operator==(const RecordContainingGenericRecords& other) const {
     return g1 == other.g1 &&
@@ -676,7 +725,9 @@ struct RecordContainingGenericRecords {
       g3 == other.g3 &&
       g3a == other.g3a &&
       g4 == other.g4 &&
-      g5 == other.g5;
+      g5 == other.g5 &&
+      g6 == other.g6 &&
+      g7 == other.g7;
   }
 
   bool operator!=(const RecordContainingGenericRecords& other) const {

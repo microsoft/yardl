@@ -760,6 +760,52 @@ struct _Inner_RecordWithGenericFixedVectors {
   yardl::hdf5::InnerFixedVector<_T_Inner, T, 3> afv;
 };
 
+template <typename _T_Inner, typename T>
+struct _Inner_RecordWithGenericArrays {
+  _Inner_RecordWithGenericArrays() {} 
+  _Inner_RecordWithGenericArrays(test_model::RecordWithGenericArrays<T> const& o) 
+      : nd(o.nd),
+      fixed_nd(o.fixed_nd),
+      dynamic_nd(o.dynamic_nd),
+      aliased_nd(o.aliased_nd),
+      aliased_fixed_nd(o.aliased_fixed_nd),
+      aliased_dynamic_nd(o.aliased_dynamic_nd) {
+  }
+
+  void ToOuter (test_model::RecordWithGenericArrays<T>& o) const {
+    yardl::hdf5::ToOuter(nd, o.nd);
+    yardl::hdf5::ToOuter(fixed_nd, o.fixed_nd);
+    yardl::hdf5::ToOuter(dynamic_nd, o.dynamic_nd);
+    yardl::hdf5::ToOuter(aliased_nd, o.aliased_nd);
+    yardl::hdf5::ToOuter(aliased_fixed_nd, o.aliased_fixed_nd);
+    yardl::hdf5::ToOuter(aliased_dynamic_nd, o.aliased_dynamic_nd);
+  }
+
+  yardl::hdf5::InnerNdArray<_T_Inner, T, 2> nd;
+  yardl::hdf5::InnerFixedNdArray<_T_Inner, T, 16, 8> fixed_nd;
+  yardl::hdf5::InnerDynamicNdArray<_T_Inner, T> dynamic_nd;
+  yardl::hdf5::InnerNdArray<_T_Inner, T, 2> aliased_nd;
+  yardl::hdf5::InnerFixedNdArray<_T_Inner, T, 16, 8> aliased_fixed_nd;
+  yardl::hdf5::InnerDynamicNdArray<_T_Inner, T> aliased_dynamic_nd;
+};
+
+template <typename _T_Inner, typename T, typename _U_Inner, typename U>
+struct _Inner_RecordWithGenericMaps {
+  _Inner_RecordWithGenericMaps() {} 
+  _Inner_RecordWithGenericMaps(test_model::RecordWithGenericMaps<T, U> const& o) 
+      : m(o.m),
+      am(o.am) {
+  }
+
+  void ToOuter (test_model::RecordWithGenericMaps<T, U>& o) const {
+    yardl::hdf5::ToOuter(m, o.m);
+    yardl::hdf5::ToOuter(am, o.am);
+  }
+
+  yardl::hdf5::InnerMap<_T_Inner, T, _U_Inner, U> m;
+  yardl::hdf5::InnerMap<_T_Inner, T, _U_Inner, U> am;
+};
+
 template <typename _A_Inner, typename A, typename _B_Inner, typename B>
 struct _Inner_RecordContainingGenericRecords {
   _Inner_RecordContainingGenericRecords() {} 
@@ -771,7 +817,9 @@ struct _Inner_RecordContainingGenericRecords {
       g3(o.g3),
       g3a(o.g3a),
       g4(o.g4),
-      g5(o.g5) {
+      g5(o.g5),
+      g6(o.g6),
+      g7(o.g7) {
   }
 
   void ToOuter (test_model::RecordContainingGenericRecords<A, B>& o) const {
@@ -783,6 +831,8 @@ struct _Inner_RecordContainingGenericRecords {
     yardl::hdf5::ToOuter(g3a, o.g3a);
     yardl::hdf5::ToOuter(g4, o.g4);
     yardl::hdf5::ToOuter(g5, o.g5);
+    yardl::hdf5::ToOuter(g6, o.g6);
+    yardl::hdf5::ToOuter(g7, o.g7);
   }
 
   test_model::hdf5::_Inner_RecordWithOptionalGenericField<_A_Inner, A> g1;
@@ -793,6 +843,8 @@ struct _Inner_RecordContainingGenericRecords {
   test_model::hdf5::_Inner_MyTuple<_A_Inner, A, _B_Inner, B> g3a;
   test_model::hdf5::_Inner_RecordWithGenericVectors<_B_Inner, B> g4;
   test_model::hdf5::_Inner_RecordWithGenericFixedVectors<_B_Inner, B> g5;
+  test_model::hdf5::_Inner_RecordWithGenericArrays<_B_Inner, B> g6;
+  test_model::hdf5::_Inner_RecordWithGenericMaps<_A_Inner, A, _B_Inner, B> g7;
 };
 
 struct _Inner_RecordContainingNestedGenericRecords {
@@ -1279,6 +1331,28 @@ template <typename _T_Inner, typename T>
   return t;
 }
 
+template <typename _T_Inner, typename T>
+[[maybe_unused]] H5::CompType GetRecordWithGenericArraysHdf5Ddl(H5::DataType const& T_type) {
+  using RecordType = test_model::hdf5::_Inner_RecordWithGenericArrays<_T_Inner, T>;
+  H5::CompType t(sizeof(RecordType));
+  t.insertMember("nd", HOFFSET(RecordType, nd), yardl::hdf5::NDArrayDdl<_T_Inner, T, 2>(T_type));
+  t.insertMember("fixedNd", HOFFSET(RecordType, fixed_nd), yardl::hdf5::FixedNDArrayDdl(T_type, {16, 8}));
+  t.insertMember("dynamicNd", HOFFSET(RecordType, dynamic_nd), yardl::hdf5::DynamicNDArrayDdl<_T_Inner, T>(T_type));
+  t.insertMember("aliasedNd", HOFFSET(RecordType, aliased_nd), yardl::hdf5::NDArrayDdl<_T_Inner, T, 2>(T_type));
+  t.insertMember("aliasedFixedNd", HOFFSET(RecordType, aliased_fixed_nd), yardl::hdf5::FixedNDArrayDdl(T_type, {16, 8}));
+  t.insertMember("aliasedDynamicNd", HOFFSET(RecordType, aliased_dynamic_nd), yardl::hdf5::DynamicNDArrayDdl<_T_Inner, T>(T_type));
+  return t;
+}
+
+template <typename _T_Inner, typename T, typename _U_Inner, typename U>
+[[maybe_unused]] H5::CompType GetRecordWithGenericMapsHdf5Ddl(H5::DataType const& T_type, H5::DataType const& U_type) {
+  using RecordType = test_model::hdf5::_Inner_RecordWithGenericMaps<_T_Inner, T, _U_Inner, U>;
+  H5::CompType t(sizeof(RecordType));
+  t.insertMember("m", HOFFSET(RecordType, m), yardl::hdf5::InnerMapDdl<_T_Inner, _U_Inner>(T_type, U_type));
+  t.insertMember("am", HOFFSET(RecordType, am), yardl::hdf5::InnerMapDdl<_T_Inner, _U_Inner>(T_type, U_type));
+  return t;
+}
+
 template <typename _A_Inner, typename A, typename _B_Inner, typename B>
 [[maybe_unused]] H5::CompType GetRecordContainingGenericRecordsHdf5Ddl(H5::DataType const& A_type, H5::DataType const& B_type) {
   using RecordType = test_model::hdf5::_Inner_RecordContainingGenericRecords<_A_Inner, A, _B_Inner, B>;
@@ -1291,6 +1365,8 @@ template <typename _A_Inner, typename A, typename _B_Inner, typename B>
   t.insertMember("g3a", HOFFSET(RecordType, g3a), test_model::hdf5::GetMyTupleHdf5Ddl<_A_Inner, A, _B_Inner, B>(A_type, B_type));
   t.insertMember("g4", HOFFSET(RecordType, g4), test_model::hdf5::GetRecordWithGenericVectorsHdf5Ddl<_B_Inner, B>(B_type));
   t.insertMember("g5", HOFFSET(RecordType, g5), test_model::hdf5::GetRecordWithGenericFixedVectorsHdf5Ddl<_B_Inner, B>(B_type));
+  t.insertMember("g6", HOFFSET(RecordType, g6), test_model::hdf5::GetRecordWithGenericArraysHdf5Ddl<_B_Inner, B>(B_type));
+  t.insertMember("g7", HOFFSET(RecordType, g7), test_model::hdf5::GetRecordWithGenericMapsHdf5Ddl<_A_Inner, A, _B_Inner, B>(A_type, B_type));
   return t;
 }
 

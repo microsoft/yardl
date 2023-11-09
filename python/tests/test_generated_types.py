@@ -54,6 +54,13 @@ def test_defaulting():
     with pytest.raises(TypeError, match="missing 2 required keyword-only arguments"):
         g5 = tm.RecordWithGenericFixedVectors()
 
+    with pytest.raises(TypeError, match="missing 6 required keyword-only arguments"):
+        g6 = tm.RecordWithGenericArrays()
+
+    g7 = tm.RecordWithGenericMaps()
+    assert g7.m == {}
+    assert g7.am == g7.m
+
     c = tm.RecordContainingNestedGenericRecords()
     assert c.f1 == g1
     assert c.f1a == g1a
@@ -73,6 +80,18 @@ def test_defaulting():
     assert len(c.nested.g5.fv) == 3
     assert type(c.nested.g5.afv) == list
     assert len(c.nested.g5.afv) == 3
+
+    assert np.array_equal(c.nested.g6.nd, np.zeros((0, 0)))
+    assert c.nested.g6.nd.dtype == np.int32
+    assert np.array_equal(c.nested.g6.fixed_nd, np.zeros((16, 8)))
+    assert c.nested.g6.fixed_nd.dtype == np.int32
+    assert np.array_equal(c.nested.g6.dynamic_nd, np.zeros(()))
+    assert c.nested.g6.dynamic_nd.dtype == np.int32
+    assert np.array_equal(c.nested.g6.nd, c.nested.g6.aliased_nd)
+    assert np.array_equal(c.nested.g6.fixed_nd, c.nested.g6.aliased_fixed_nd)
+    assert np.array_equal(c.nested.g6.dynamic_nd, c.nested.g6.aliased_dynamic_nd)
+
+    assert c.nested.g7 == g7
 
     ## Need to provide default values for generic fields
     with pytest.raises(TypeError):

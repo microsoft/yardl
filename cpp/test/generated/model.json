@@ -1351,6 +1351,54 @@
           }
         },
         {
+          "alias": {
+            "name": "AliasedGenericRank2Array",
+            "typeParameters": [
+              "T"
+            ],
+            "type": {
+              "array": {
+                "items": "T",
+                "dimensions": 2
+              }
+            }
+          }
+        },
+        {
+          "alias": {
+            "name": "AliasedGenericFixedArray",
+            "typeParameters": [
+              "T"
+            ],
+            "type": {
+              "array": {
+                "items": "T",
+                "dimensions": [
+                  {
+                    "length": 16
+                  },
+                  {
+                    "length": 8
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "alias": {
+            "name": "AliasedGenericDynamicArray",
+            "typeParameters": [
+              "T"
+            ],
+            "type": {
+              "array": {
+                "items": "T"
+              }
+            }
+          }
+        },
+        {
           "record": {
             "name": "RecordWithOptionalGenericField",
             "typeParameters": [
@@ -1489,6 +1537,106 @@
         },
         {
           "record": {
+            "name": "RecordWithGenericArrays",
+            "typeParameters": [
+              "T"
+            ],
+            "fields": [
+              {
+                "name": "nd",
+                "type": {
+                  "array": {
+                    "items": "T",
+                    "dimensions": 2
+                  }
+                }
+              },
+              {
+                "name": "fixedNd",
+                "type": {
+                  "array": {
+                    "items": "T",
+                    "dimensions": [
+                      {
+                        "length": 16
+                      },
+                      {
+                        "length": 8
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "name": "dynamicNd",
+                "type": {
+                  "array": {
+                    "items": "T"
+                  }
+                }
+              },
+              {
+                "name": "aliasedNd",
+                "type": {
+                  "name": "TestModel.AliasedGenericRank2Array",
+                  "typeArguments": [
+                    "T"
+                  ]
+                }
+              },
+              {
+                "name": "aliasedFixedNd",
+                "type": {
+                  "name": "TestModel.AliasedGenericFixedArray",
+                  "typeArguments": [
+                    "T"
+                  ]
+                }
+              },
+              {
+                "name": "aliasedDynamicNd",
+                "type": {
+                  "name": "TestModel.AliasedGenericDynamicArray",
+                  "typeArguments": [
+                    "T"
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "record": {
+            "name": "RecordWithGenericMaps",
+            "typeParameters": [
+              "T",
+              "U"
+            ],
+            "fields": [
+              {
+                "name": "m",
+                "type": {
+                  "map": {
+                    "keys": "T",
+                    "values": "U"
+                  }
+                }
+              },
+              {
+                "name": "am",
+                "type": {
+                  "name": "TestModel.AliasedMap",
+                  "typeArguments": [
+                    "T",
+                    "U"
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "record": {
             "name": "RecordContainingGenericRecords",
             "typeParameters": [
               "A",
@@ -1567,6 +1715,25 @@
                 "type": {
                   "name": "TestModel.RecordWithGenericFixedVectors",
                   "typeArguments": [
+                    "B"
+                  ]
+                }
+              },
+              {
+                "name": "g6",
+                "type": {
+                  "name": "TestModel.RecordWithGenericArrays",
+                  "typeArguments": [
+                    "B"
+                  ]
+                }
+              },
+              {
+                "name": "g7",
+                "type": {
+                  "name": "TestModel.RecordWithGenericMaps",
+                  "typeArguments": [
+                    "A",
                     "B"
                   ]
                 }
