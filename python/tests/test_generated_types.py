@@ -44,11 +44,25 @@ def test_defaulting():
     g1 = tm.RecordWithOptionalGenericField()
     assert g1.v == None
     g1a = tm.RecordWithAliasedOptionalGenericField()
-    assert g1a.v == None
+    assert g1a.v == g1.v
     g2 = tm.RecordWithOptionalGenericUnionField()
     assert g2.v == None
     g2a = tm.RecordWithAliasedOptionalGenericUnionField()
-    assert g2a.v == None
+    assert g2a.v == g2.v
+
+    g4 = tm.RecordWithGenericVectors()
+    assert g4.v == []
+    assert g4.av == g4.v
+    with pytest.raises(TypeError, match="missing 2 required keyword-only arguments"):
+        g5 = tm.RecordWithGenericFixedVectors()  # type: ignore
+
+    with pytest.raises(TypeError, match="missing 6 required keyword-only arguments"):
+        g6 = tm.RecordWithGenericArrays()  # type: ignore
+
+    g7 = tm.RecordWithGenericMaps()
+    assert g7.m == {}
+    assert g7.am == g7.m
+
     c = tm.RecordContainingNestedGenericRecords()
     assert c.f1 == g1
     assert c.f1a == g1a
@@ -62,6 +76,24 @@ def test_defaulting():
     assert c.nested.g3.v2 == 0
     assert c.nested.g3a.v1 == ""
     assert c.nested.g3a.v2 == 0
+    assert c.nested.g4.v == []
+    assert c.nested.g4.av == []
+    assert type(c.nested.g5.fv) == list
+    assert len(c.nested.g5.fv) == 3
+    assert type(c.nested.g5.afv) == list
+    assert len(c.nested.g5.afv) == 3
+
+    assert np.array_equal(c.nested.g6.nd, np.zeros((0, 0)))
+    assert c.nested.g6.nd.dtype == np.int32
+    assert np.array_equal(c.nested.g6.fixed_nd, np.zeros((16, 8)))
+    assert c.nested.g6.fixed_nd.dtype == np.int32
+    assert np.array_equal(c.nested.g6.dynamic_nd, np.zeros(()))
+    assert c.nested.g6.dynamic_nd.dtype == np.int32
+    assert np.array_equal(c.nested.g6.nd, c.nested.g6.aliased_nd)
+    assert np.array_equal(c.nested.g6.fixed_nd, c.nested.g6.aliased_fixed_nd)
+    assert np.array_equal(c.nested.g6.dynamic_nd, c.nested.g6.aliased_dynamic_nd)
+
+    assert c.nested.g7 == g7
 
     ## Need to provide default values for generic fields
     with pytest.raises(TypeError):
