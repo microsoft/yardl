@@ -437,6 +437,9 @@ AliasedMultiGenericOptional<T, U>: [null, T, U]
 AliasedGenericUnion2<T1,T2>: GenericUnion2<T1, T2>
 AliasedGenericVector<T>: T*
 AliasedGenericFixedVector<T>: T*3
+AliasedGenericRank2Array<T>: T[,]
+AliasedGenericFixedArray<T>: T[16, 8]
+AliasedGenericDynamicArray<T>: T[]
 
 # BEGIN nested generic records
 
@@ -456,6 +459,30 @@ RecordWithAliasedOptionalGenericUnionField<U, V>: !record
   fields:
     v: AliasedMultiGenericOptional<U, V>
 
+RecordWithGenericVectors<T>: !record
+  fields:
+    v: T*
+    av: AliasedGenericVector<T>
+
+RecordWithGenericFixedVectors<T>: !record
+  fields:
+    fv: T*3
+    afv: AliasedGenericFixedVector<T>
+
+RecordWithGenericArrays<T>: !record
+  fields:
+    nd: T[,]
+    fixedNd: T[16, 8]
+    dynamicNd: T[]
+    aliasedNd: AliasedGenericRank2Array<T>
+    aliasedFixedNd: AliasedGenericFixedArray<T>
+    aliasedDynamicNd: AliasedGenericDynamicArray<T>
+
+RecordWithGenericMaps<T, U>: !record
+  fields:
+    m: T->U
+    am: AliasedMap<T, U>
+
 RecordContainingGenericRecords<A, B>: !record
   fields:
     g1: RecordWithOptionalGenericField<A>
@@ -464,6 +491,10 @@ RecordContainingGenericRecords<A, B>: !record
     g2a: RecordWithAliasedOptionalGenericUnionField<A, B>
     g3: MyTuple<A, B>
     g3a: AliasedTuple<A, B>
+    g4: RecordWithGenericVectors<B>
+    g5: RecordWithGenericFixedVectors<B>
+    g6: RecordWithGenericArrays<B>
+    g7: RecordWithGenericMaps<A, B>
 
 RecordContainingNestedGenericRecords: !record
   fields:
