@@ -52,10 +52,10 @@ def test_defaulting():
     assert g4.v == []
     assert g4.av == g4.v
     with pytest.raises(TypeError, match="missing 2 required keyword-only arguments"):
-        g5 = tm.RecordWithGenericFixedVectors()
+        g5 = tm.RecordWithGenericFixedVectors()  # type: ignore
 
     with pytest.raises(TypeError, match="missing 6 required keyword-only arguments"):
-        g6 = tm.RecordWithGenericArrays()
+        g6 = tm.RecordWithGenericArrays()  # type: ignore
 
     g7 = tm.RecordWithGenericMaps()
     assert g7.m == {}

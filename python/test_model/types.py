@@ -1275,16 +1275,16 @@ class RecordContainingGenericRecords(typing.Generic[A, B, B_NP]):
         g6: RecordWithGenericArrays[B_NP],
         g7: typing.Optional[RecordWithGenericMaps[A, B]] = None,
     ):
-        self.g1 = g1 if g1 is not None else RecordWithOptionalGenericField(v=None)
-        self.g1a = g1a if g1a is not None else RecordWithAliasedOptionalGenericField(v=None)
-        self.g2 = g2 if g2 is not None else RecordWithOptionalGenericUnionField(v=None)
-        self.g2a = g2a if g2a is not None else RecordWithAliasedOptionalGenericUnionField(v=None)
+        self.g1 = g1 if g1 is not None else RecordWithOptionalGenericField()
+        self.g1a = g1a if g1a is not None else RecordWithAliasedOptionalGenericField()
+        self.g2 = g2 if g2 is not None else RecordWithOptionalGenericUnionField()
+        self.g2a = g2a if g2a is not None else RecordWithAliasedOptionalGenericUnionField()
         self.g3 = g3
         self.g3a = g3a
-        self.g4 = g4 if g4 is not None else RecordWithGenericVectors(v=[], av=[])
+        self.g4 = g4 if g4 is not None else RecordWithGenericVectors()
         self.g5 = g5
         self.g6 = g6
-        self.g7 = g7 if g7 is not None else RecordWithGenericMaps(m={}, am={})
+        self.g7 = g7 if g7 is not None else RecordWithGenericMaps()
 
     def __eq__(self, other: object) -> bool:
         return (
@@ -1322,11 +1322,11 @@ class RecordContainingNestedGenericRecords:
         f2a: typing.Optional[RecordWithAliasedOptionalGenericUnionField[str, yardl.Int32]] = None,
         nested: typing.Optional[RecordContainingGenericRecords[str, yardl.Int32, np.int32]] = None,
     ):
-        self.f1 = f1 if f1 is not None else RecordWithOptionalGenericField(v=None)
-        self.f1a = f1a if f1a is not None else RecordWithAliasedOptionalGenericField(v=None)
-        self.f2 = f2 if f2 is not None else RecordWithOptionalGenericUnionField(v=None)
-        self.f2a = f2a if f2a is not None else RecordWithAliasedOptionalGenericUnionField(v=None)
-        self.nested = nested if nested is not None else RecordContainingGenericRecords(g1=RecordWithOptionalGenericField(v=None), g1a=RecordWithAliasedOptionalGenericField(v=None), g2=RecordWithOptionalGenericUnionField(v=None), g2a=RecordWithAliasedOptionalGenericUnionField(v=None), g3=MyTuple(v1="", v2=0), g3a=MyTuple(v1="", v2=0), g4=RecordWithGenericVectors(v=[], av=[]), g5=RecordWithGenericFixedVectors(fv=[0] * 3, afv=[0] * 3), g6=RecordWithGenericArrays(nd=np.zeros((0, 0), dtype=np.dtype(np.int32)), fixed_nd=np.zeros((16, 8,), dtype=np.dtype(np.int32)), dynamic_nd=np.zeros((), dtype=np.dtype(np.int32)), aliased_nd=np.zeros((0, 0), dtype=np.dtype(np.int32)), aliased_fixed_nd=np.zeros((16, 8,), dtype=np.dtype(np.int32)), aliased_dynamic_nd=np.zeros((), dtype=np.dtype(np.int32))), g7=RecordWithGenericMaps(m={}, am={}))
+        self.f1 = f1 if f1 is not None else RecordWithOptionalGenericField()
+        self.f1a = f1a if f1a is not None else RecordWithAliasedOptionalGenericField()
+        self.f2 = f2 if f2 is not None else RecordWithOptionalGenericUnionField()
+        self.f2a = f2a if f2a is not None else RecordWithAliasedOptionalGenericUnionField()
+        self.nested = nested if nested is not None else RecordContainingGenericRecords(g3=MyTuple(v1="", v2=0), g3a=MyTuple(v1="", v2=0), g5=RecordWithGenericFixedVectors(fv=[0] * 3, afv=[0] * 3), g6=RecordWithGenericArrays(nd=np.zeros((0, 0), dtype=np.dtype(np.int32)), fixed_nd=np.zeros((16, 8,), dtype=np.dtype(np.int32)), dynamic_nd=np.zeros((), dtype=np.dtype(np.int32)), aliased_nd=np.zeros((0, 0), dtype=np.dtype(np.int32)), aliased_fixed_nd=np.zeros((16, 8,), dtype=np.dtype(np.int32)), aliased_dynamic_nd=np.zeros((), dtype=np.dtype(np.int32))))
 
     def __eq__(self, other: object) -> bool:
         return (

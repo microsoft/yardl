@@ -907,15 +907,21 @@ func typeDefinitionDefault(t dsl.TypeDefinition, contextNamespace string, st dsl
 			return fmt.Sprintf("%s()", common.TypeSyntaxWithoutTypeParameters(t, contextNamespace)), defaultValueKindMutable
 		}
 
-		// Closed Generic record type
+		// t is a *closed* generic record type
+		// genericDef is its original generic type definition
+		genericDef := st[t.GetQualifiedName()].(*dsl.RecordDefinition)
 		args := make([]string, 0)
-		for _, f := range t.Fields {
+		for i, f := range t.Fields {
 			fieldDefaultExpr, fieldDefaultKind := typeDefault(f.Type, contextNamespace, "", st)
 			if fieldDefaultKind == defaultValueKindNone {
 				return "", defaultValueKindNone
 			}
 
-			args = append(args, fmt.Sprintf("%s=%s", common.FieldIdentifierName(f.Name), fieldDefaultExpr))
+			// Only write a constructor argument if it is needed, e.g. the record definition's field is generic and doesn't have a default value
+			_, genDefaultKind := typeDefault(genericDef.Fields[i].Type, contextNamespace, "", st)
+			if genDefaultKind == defaultValueKindNone {
+				args = append(args, fmt.Sprintf("%s=%s", common.FieldIdentifierName(f.Name), fieldDefaultExpr))
+			}
 		}
 
 		return fmt.Sprintf("%s(%s)", common.TypeSyntaxWithoutTypeParameters(t, contextNamespace), strings.Join(args, ", ")), defaultValueKindMutable
