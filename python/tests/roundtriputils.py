@@ -20,7 +20,6 @@ def invoke_translator(
     input: Union[bytes, str], input_format: Format, output_format: Format
 ) -> Union[bytes, str]:
     if isinstance(input, str):
-        print(input)
         input = input.encode("utf-8")
 
     with subprocess.Popen(
@@ -28,7 +27,7 @@ def invoke_translator(
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
     ) as proc:
-        cpp_output = proc.communicate(input=input)[0]
+        cpp_output = proc.communicate(input=bytes(input))[0]
         assert proc.wait() == 0, "translator failed"
         if output_format == Format.NDJSON:
             cpp_output = cpp_output.decode("utf-8")

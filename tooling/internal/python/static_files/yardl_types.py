@@ -1,6 +1,9 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 
+# pyright: reportUnknownArgumentType=false
+# pyright: reportUnknownVariableType=false
+
 from abc import ABC
 from enum import Enum
 from typing import Annotated, Generic, TypeVar, Union
@@ -254,9 +257,9 @@ def structural_equal(a: object, b: object) -> bool:
                     structural_equal(x, y) for x, y in zip(a, b)
                 )
             return False
-        if a.dtype.hasobject:
+        if a.dtype.hasobject:  # pyright: ignore [reportUnknownMemberType]
             return (
-                a.dtype == b.dtype
+                a.dtype == b.dtype  # pyright: ignore [reportUnknownMemberType]
                 and a.shape == b.shape
                 and all(structural_equal(x, y) for x, y in zip(a, b))
             )
@@ -280,8 +283,8 @@ _T = TypeVar("_T")
 
 
 class UnionCase(ABC, Generic[_T]):
-    _index: int
-    _tag: str
+    index: int
+    tag: str
 
     def __init__(self, value: _T) -> None:
         self.value = value
@@ -296,5 +299,5 @@ class UnionCase(ABC, Generic[_T]):
         # Note we could codegen a more efficient version of this that does not
         # (always) call structural_equal
         return type(self) == type(other) and structural_equal(
-            self.value, other.value  # pyright: ignore [reportGeneralTypeIssues]
+            self.value, other.value  # pyright: ignore
         )

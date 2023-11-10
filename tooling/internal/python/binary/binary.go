@@ -20,10 +20,15 @@ func WriteBinary(ns *dsl.Namespace, packageDir string) error {
 	b := bytes.Buffer{}
 	w := formatting.NewIndentedWriter(&b, "    ")
 	common.WriteGeneratedFileHeader(w)
-	w.WriteStringln(`# pyright: reportUnusedClass=false
 
+	common.WriteComment(w, "pyright: reportUnusedClass=false")
+	common.WriteComment(w, "pyright: reportUnusedImport=false")
+	common.WriteComment(w, "pyright: reportUnknownArgumentType=false")
+	common.WriteComment(w, "pyright: reportUnknownMemberType=false")
+	common.WriteComment(w, "pyright: reportUnknownVariableType=false")
+
+	w.WriteStringln(`
 import collections.abc
-import datetime
 import io
 import typing
 

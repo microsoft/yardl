@@ -1,9 +1,7 @@
-import collections.abc
 from typing import Iterable
 
 import pytest
 import test_model as tm
-from test_model import yardl_types as yardl
 
 
 class _TestStateTestWriter(tm.StateTestWriterBase):
