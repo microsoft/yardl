@@ -1067,10 +1067,10 @@ class RecordWithOptionalGenericField(typing.Generic[T]):
 
 
 class RecordWithAliasedOptionalGenericField(typing.Generic[T]):
-    v: typing.Optional[AliasedGenericOptional[T]]
+    v: AliasedGenericOptional[T]
 
     def __init__(self, *,
-        v: typing.Optional[AliasedGenericOptional[T]] = None,
+        v: AliasedGenericOptional[T] = None,
     ):
         self.v = v
 
@@ -1996,6 +1996,8 @@ def _mk_get_dtype():
     dtype_map.setdefault(RecordWithVlenCollections, np.dtype([('vector', np.dtype(np.object_)), ('array', np.dtype(np.object_))], align=True))
     dtype_map.setdefault(NamedNDArray, np.dtype(np.object_))
     dtype_map.setdefault(AliasedMap, lambda type_args: np.dtype(np.object_))
+    dtype_map.setdefault(Int32OrString, np.dtype(np.object_))
+    dtype_map.setdefault(TimeOrDatetime, np.dtype(np.object_))
     dtype_map.setdefault(RecordWithUnions, np.dtype([('null_or_int_or_string', np.dtype(np.object_)), ('date_or_datetime', np.dtype(np.object_))], align=True))
     dtype_map.setdefault(Fruits, np.dtype(np.int32))
     dtype_map.setdefault(UInt64Enum, np.dtype(np.uint64))
@@ -2014,8 +2016,9 @@ def _mk_get_dtype():
     dtype_map.setdefault(AliasedEnum, get_dtype(Fruits))
     dtype_map.setdefault(AliasedOpenGeneric, lambda type_args: get_dtype(types.GenericAlias(AliasedTuple, (type_args[0], type_args[1],))))
     dtype_map.setdefault(AliasedClosedGeneric, get_dtype(types.GenericAlias(AliasedTuple, (AliasedString, AliasedEnum,))))
-    dtype_map.setdefault(typing.Optional[AliasedOptional], np.dtype([('has_value', np.dtype(np.bool_)), ('value', np.dtype(np.int32))], align=True))
+    dtype_map.setdefault(AliasedOptional, np.dtype([('has_value', np.dtype(np.bool_)), ('value', np.dtype(np.int32))], align=True))
     dtype_map.setdefault(AliasedGenericOptional, lambda type_args: np.dtype([('has_value', np.dtype(np.bool_)), ('value', get_dtype(type_args[0]))], align=True))
+    dtype_map.setdefault(AliasedMultiGenericOptional, lambda type_args: np.dtype(np.object_))
     dtype_map.setdefault(AliasedMultiGenericOptional, lambda type_args: np.dtype(np.object_))
     dtype_map.setdefault(AliasedGenericUnion2, lambda type_args: get_dtype(types.GenericAlias(GenericUnion2, (type_args[0], type_args[1],))))
     dtype_map.setdefault(AliasedGenericVector, lambda type_args: np.dtype(np.object_))
@@ -2025,6 +2028,7 @@ def _mk_get_dtype():
     dtype_map.setdefault(AliasedGenericDynamicArray, lambda type_args: np.dtype(np.object_))
     dtype_map.setdefault(RecordWithOptionalGenericField, lambda type_args: np.dtype([('v', np.dtype([('has_value', np.dtype(np.bool_)), ('value', get_dtype(type_args[0]))], align=True))], align=True))
     dtype_map.setdefault(RecordWithAliasedOptionalGenericField, lambda type_args: np.dtype([('v', get_dtype(types.GenericAlias(AliasedGenericOptional, (type_args[0],))))], align=True))
+    dtype_map.setdefault(UOrV, np.dtype(np.object_))
     dtype_map.setdefault(RecordWithOptionalGenericUnionField, lambda type_args: np.dtype([('v', np.dtype(np.object_))], align=True))
     dtype_map.setdefault(RecordWithAliasedOptionalGenericUnionField, lambda type_args: np.dtype([('v', get_dtype(types.GenericAlias(AliasedMultiGenericOptional, (type_args[0], type_args[1],))))], align=True))
     dtype_map.setdefault(RecordWithGenericVectors, lambda type_args: np.dtype([('v', np.dtype(np.object_)), ('av', get_dtype(types.GenericAlias(AliasedGenericVector, (type_args[0],))))], align=True))
@@ -2034,8 +2038,12 @@ def _mk_get_dtype():
     dtype_map.setdefault(RecordContainingGenericRecords, lambda type_args: np.dtype([('g1', get_dtype(types.GenericAlias(RecordWithOptionalGenericField, (type_args[0],)))), ('g1a', get_dtype(types.GenericAlias(RecordWithAliasedOptionalGenericField, (type_args[0],)))), ('g2', get_dtype(types.GenericAlias(RecordWithOptionalGenericUnionField, (type_args[0], type_args[1],)))), ('g2a', get_dtype(types.GenericAlias(RecordWithAliasedOptionalGenericUnionField, (type_args[0], type_args[1],)))), ('g3', get_dtype(types.GenericAlias(MyTuple, (type_args[0], type_args[1],)))), ('g3a', get_dtype(types.GenericAlias(AliasedTuple, (type_args[0], type_args[1],)))), ('g4', get_dtype(types.GenericAlias(RecordWithGenericVectors, (type_args[1],)))), ('g5', get_dtype(types.GenericAlias(RecordWithGenericFixedVectors, (type_args[1],)))), ('g6', get_dtype(types.GenericAlias(RecordWithGenericArrays, (type_args[1],)))), ('g7', get_dtype(types.GenericAlias(RecordWithGenericMaps, (type_args[0], type_args[1],))))], align=True))
     dtype_map.setdefault(RecordContainingNestedGenericRecords, np.dtype([('f1', get_dtype(types.GenericAlias(RecordWithOptionalGenericField, (str,)))), ('f1a', get_dtype(types.GenericAlias(RecordWithAliasedOptionalGenericField, (str,)))), ('f2', get_dtype(types.GenericAlias(RecordWithOptionalGenericUnionField, (str, yardl.Int32,)))), ('f2a', get_dtype(types.GenericAlias(RecordWithAliasedOptionalGenericUnionField, (str, yardl.Int32,)))), ('nested', get_dtype(types.GenericAlias(RecordContainingGenericRecords, (str, yardl.Int32,))))], align=True))
     dtype_map.setdefault(AliasedIntOrSimpleRecord, np.dtype(np.object_))
+    dtype_map.setdefault(AliasedNullableIntSimpleRecord, np.dtype(np.object_))
     dtype_map.setdefault(typing.Optional[AliasedNullableIntSimpleRecord], np.dtype(np.object_))
+    dtype_map.setdefault(T0OrT1, np.dtype(np.object_))
     dtype_map.setdefault(GenericRecordWithComputedFields, lambda type_args: np.dtype([('f1', np.dtype(np.object_))], align=True))
+    dtype_map.setdefault(Int32OrFloat32, np.dtype(np.object_))
+    dtype_map.setdefault(IntOrGenericRecordWithComputedFields, np.dtype(np.object_))
     dtype_map.setdefault(RecordWithComputedFields, np.dtype([('array_field', np.dtype(np.object_)), ('array_field_map_dimensions', np.dtype(np.object_)), ('dynamic_array_field', np.dtype(np.object_)), ('fixed_array_field', np.dtype(np.int32), (3, 4,)), ('int_field', np.dtype(np.int32)), ('int8_field', np.dtype(np.int8)), ('uint8_field', np.dtype(np.uint8)), ('int16_field', np.dtype(np.int16)), ('uint16_field', np.dtype(np.uint16)), ('uint32_field', np.dtype(np.uint32)), ('int64_field', np.dtype(np.int64)), ('uint64_field', np.dtype(np.uint64)), ('size_field', np.dtype(np.uint64)), ('float32_field', np.dtype(np.float32)), ('float64_field', np.dtype(np.float64)), ('complexfloat32_field', np.dtype(np.complex64)), ('complexfloat64_field', np.dtype(np.complex128)), ('string_field', np.dtype(np.object_)), ('tuple_field', get_dtype(types.GenericAlias(MyTuple, (yardl.Int32, yardl.Int32,)))), ('vector_field', np.dtype(np.object_)), ('vector_of_vectors_field', np.dtype(np.object_)), ('fixed_vector_field', np.dtype(np.int32), (3,)), ('optional_named_array', np.dtype([('has_value', np.dtype(np.bool_)), ('value', get_dtype(NamedNDArray))], align=True)), ('int_float_union', np.dtype(np.object_)), ('nullable_int_float_union', np.dtype(np.object_)), ('union_with_nested_generic_union', np.dtype(np.object_)), ('map_field', np.dtype(np.object_))], align=True))
     dtype_map.setdefault(GenericUnion3, lambda type_args: np.dtype(np.object_))
     dtype_map.setdefault(GenericUnion3Alternate, lambda type_args: np.dtype(np.object_))
@@ -2043,6 +2051,11 @@ def _mk_get_dtype():
     dtype_map.setdefault(ArrayWithKeywordDimensionNames, np.dtype(np.object_))
     dtype_map.setdefault(EnumWithKeywordSymbols, np.dtype(np.int32))
     dtype_map.setdefault(RecordWithKeywordFields, np.dtype([('int_', np.dtype(np.object_)), ('sizeof', get_dtype(ArrayWithKeywordDimensionNames)), ('if_', get_dtype(EnumWithKeywordSymbols))], align=True))
+    dtype_map.setdefault(AcquisitionOrImage, np.dtype(np.object_))
+    dtype_map.setdefault(StringOrInt32, np.dtype(np.object_))
+    dtype_map.setdefault(Int32OrSimpleRecord, np.dtype(np.object_))
+    dtype_map.setdefault(Int32OrRecordWithVlens, np.dtype(np.object_))
+    dtype_map.setdefault(ImageFloatOrImageDouble, np.dtype(np.object_))
 
     return get_dtype
 

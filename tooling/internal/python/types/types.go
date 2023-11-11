@@ -948,8 +948,52 @@ func writeGetDTypeFunc(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 			root:      true,
 		}
 
-		for _, t := range ns.TypeDefinitions {
-			fmt.Fprintf(w, "dtype_map.setdefault(%s, %s)\n", common.TypeSyntaxWithoutTypeParameters(t, ns.Name), typeDefinitionDTypeExpression(t, context))
+		unions := make(map[string]any)
+
+		writeUnionDtypeIfNeeded := func(td dsl.Node) {
+			dsl.Visit(td, func(self dsl.Visitor, node dsl.Node) {
+				switch node := node.(type) {
+				case *dsl.NamedType:
+					if gt, ok := node.Type.(*dsl.GeneralizedType); ok {
+						if gt.Cases.IsUnion() {
+							// Special handling for dtype entry of nullable aliased unions
+							if gt.Cases.HasNullOption() {
+								// This an aliased union, where null is one of the options, e.g. X = [null, int, float]
+								// register X: ... instead of typing.Optional[X]: ...
+								// by stripping away the null option
+								gtClone := *gt
+								gtClone.Cases = gtClone.Cases[1:]
+								ntClone := *node
+								ntClone.Type = &gtClone
+								td := &ntClone
+								fmt.Fprintf(w, "dtype_map.setdefault(%s, %s)\n", common.TypeSyntaxWithoutTypeParameters(td, ns.Name), typeDefinitionDTypeExpression(td, context))
+
+							}
+							// Return early - we use the alias name for this union type over the yardl-generate UnionClassName
+							return
+						}
+					}
+				case *dsl.GeneralizedType:
+					if node.Cases.IsUnion() {
+						unionClassName, _ := common.UnionClassName(node)
+						if _, ok := unions[unionClassName]; !ok {
+							unions[unionClassName] = nil
+							fmt.Fprintf(w, "dtype_map.setdefault(%s, %s)\n", unionClassName, typeDTypeExpression(node, context))
+						}
+					}
+
+				}
+				self.VisitChildren(node)
+			})
+		}
+
+		for _, td := range ns.TypeDefinitions {
+			writeUnionDtypeIfNeeded(td)
+			fmt.Fprintf(w, "dtype_map.setdefault(%s, %s)\n", common.TypeSyntaxWithoutTypeParameters(td, ns.Name), typeDefinitionDTypeExpression(td, context))
+		}
+
+		for _, td := range ns.Protocols {
+			writeUnionDtypeIfNeeded(td)
 		}
 
 		w.WriteStringln("\nreturn get_dtype")

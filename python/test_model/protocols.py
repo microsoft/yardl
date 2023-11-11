@@ -5240,7 +5240,7 @@ class AliasesWriterBase(abc.ABC):
         self._write_aliased_closed_generic(value)
         self._state = 8
 
-    def write_aliased_optional(self, value: typing.Optional[AliasedOptional]) -> None:
+    def write_aliased_optional(self, value: AliasedOptional) -> None:
         """Ordinal 4"""
 
         if self._state != 8:
@@ -5249,7 +5249,7 @@ class AliasesWriterBase(abc.ABC):
         self._write_aliased_optional(value)
         self._state = 10
 
-    def write_aliased_generic_optional(self, value: typing.Optional[AliasedGenericOptional[yardl.Float32]]) -> None:
+    def write_aliased_generic_optional(self, value: AliasedGenericOptional[yardl.Float32]) -> None:
         """Ordinal 5"""
 
         if self._state != 10:
@@ -5311,11 +5311,11 @@ class AliasesWriterBase(abc.ABC):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def _write_aliased_optional(self, value: typing.Optional[AliasedOptional]) -> None:
+    def _write_aliased_optional(self, value: AliasedOptional) -> None:
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def _write_aliased_generic_optional(self, value: typing.Optional[AliasedGenericOptional[yardl.Float32]]) -> None:
+    def _write_aliased_generic_optional(self, value: AliasedGenericOptional[yardl.Float32]) -> None:
         raise NotImplementedError()
 
     @abc.abstractmethod
@@ -5437,7 +5437,7 @@ class AliasesReaderBase(abc.ABC):
         self._state = 8
         return value
 
-    def read_aliased_optional(self) -> typing.Optional[AliasedOptional]:
+    def read_aliased_optional(self) -> AliasedOptional:
         """Ordinal 4"""
 
         if self._state != 8:
@@ -5447,7 +5447,7 @@ class AliasesReaderBase(abc.ABC):
         self._state = 10
         return value
 
-    def read_aliased_generic_optional(self) -> typing.Optional[AliasedGenericOptional[yardl.Float32]]:
+    def read_aliased_generic_optional(self) -> AliasedGenericOptional[yardl.Float32]:
         """Ordinal 5"""
 
         if self._state != 10:
@@ -5526,11 +5526,11 @@ class AliasesReaderBase(abc.ABC):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def _read_aliased_optional(self) -> typing.Optional[AliasedOptional]:
+    def _read_aliased_optional(self) -> AliasedOptional:
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def _read_aliased_generic_optional(self) -> typing.Optional[AliasedGenericOptional[yardl.Float32]]:
+    def _read_aliased_generic_optional(self) -> AliasedGenericOptional[yardl.Float32]:
         raise NotImplementedError()
 
     @abc.abstractmethod
