@@ -8,7 +8,7 @@ import sys
 if sys.version_info >= (3, 10):
     from types import UnionType
 
-from typing import Any, Callable, Union, cast, get_args, get_origin, TypeVar
+from typing import Any, Callable, Union, cast, get_args, get_origin
 import numpy as np
 from . import yardl_types as yardl
 
@@ -51,21 +51,19 @@ def make_get_dtype_func(
         ],
         t: Union[type, GenericAlias],
     ) -> np.dtype[Any]:
-        # type_args = list(filter(lambda t: type(t) != TypeVar, get_args(t)))
+        # Check dtype map for this type first
+        if (res := dtype_map.get(t, None)) is not None:
+            if callable(res):
+                raise RuntimeError(f"Generic type arguments not provided for {t}")
+            else:
+                return res
+
         origin = get_origin(t)
 
         if origin == Union or (
             sys.version_info >= (3, 10) and isinstance(t, UnionType)
         ):
             return _get_union_dtype(get_args(t))
-
-        # If t is found in dtype_map here, t is either a Python type
-        # or t is a types.GenericAlias with missing type arguments
-        if (res := dtype_map.get(t, None)) is not None:
-            if callable(res):
-                raise RuntimeError(f"Generic type arguments not provided for {t}")
-            else:
-                return res
 
         # Here, t is either invalid (no dtype registered)
         # or t is a types.GenericAlias with type arguments specified
@@ -76,7 +74,7 @@ def make_get_dtype_func(
         raise RuntimeError(f"Cannot find dtype for {t}")
 
     def _get_union_dtype(args: tuple[type, ...]) -> np.dtype[Any]:
-        if len(args) == 2 and args[1] == type(None):  # type: ignore
+        if len(args) == 2 and args[1] == cast(type, type(None)):
             # This is an optional type
             inner_type = get_dtype_impl(dtype_map, args[0])
             return np.dtype(

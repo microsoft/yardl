@@ -129,6 +129,54 @@ void from_json(ordered_json const& j, test_model::GenericRecord<T1, T2>& value);
 void to_json(ordered_json& j, test_model::RecordWithAliasedGenerics const& value);
 void from_json(ordered_json const& j, test_model::RecordWithAliasedGenerics& value);
 
+template <typename T>
+void to_json(ordered_json& j, test_model::RecordWithOptionalGenericField<T> const& value);
+template <typename T>
+void from_json(ordered_json const& j, test_model::RecordWithOptionalGenericField<T>& value);
+
+template <typename T>
+void to_json(ordered_json& j, test_model::RecordWithAliasedOptionalGenericField<T> const& value);
+template <typename T>
+void from_json(ordered_json const& j, test_model::RecordWithAliasedOptionalGenericField<T>& value);
+
+template <typename U, typename V>
+void to_json(ordered_json& j, test_model::RecordWithOptionalGenericUnionField<U, V> const& value);
+template <typename U, typename V>
+void from_json(ordered_json const& j, test_model::RecordWithOptionalGenericUnionField<U, V>& value);
+
+template <typename U, typename V>
+void to_json(ordered_json& j, test_model::RecordWithAliasedOptionalGenericUnionField<U, V> const& value);
+template <typename U, typename V>
+void from_json(ordered_json const& j, test_model::RecordWithAliasedOptionalGenericUnionField<U, V>& value);
+
+template <typename T>
+void to_json(ordered_json& j, test_model::RecordWithGenericVectors<T> const& value);
+template <typename T>
+void from_json(ordered_json const& j, test_model::RecordWithGenericVectors<T>& value);
+
+template <typename T>
+void to_json(ordered_json& j, test_model::RecordWithGenericFixedVectors<T> const& value);
+template <typename T>
+void from_json(ordered_json const& j, test_model::RecordWithGenericFixedVectors<T>& value);
+
+template <typename T>
+void to_json(ordered_json& j, test_model::RecordWithGenericArrays<T> const& value);
+template <typename T>
+void from_json(ordered_json const& j, test_model::RecordWithGenericArrays<T>& value);
+
+template <typename T, typename U>
+void to_json(ordered_json& j, test_model::RecordWithGenericMaps<T, U> const& value);
+template <typename T, typename U>
+void from_json(ordered_json const& j, test_model::RecordWithGenericMaps<T, U>& value);
+
+template <typename A, typename B>
+void to_json(ordered_json& j, test_model::RecordContainingGenericRecords<A, B> const& value);
+template <typename A, typename B>
+void from_json(ordered_json const& j, test_model::RecordContainingGenericRecords<A, B>& value);
+
+void to_json(ordered_json& j, test_model::RecordContainingNestedGenericRecords const& value);
+void from_json(ordered_json const& j, test_model::RecordContainingNestedGenericRecords& value);
+
 void to_json(ordered_json& j, test_model::RecordWithComputedFields const& value);
 void from_json(ordered_json const& j, test_model::RecordWithComputedFields& value);
 
@@ -223,6 +271,65 @@ struct adl_serializer<std::variant<yardl::Time, yardl::DateTime>> {
       value = it.value().get<yardl::DateTime>();
       return;
     }
+  }
+};
+
+template <typename T1, typename T2>
+struct adl_serializer<std::variant<std::monostate, T1, T2>> {
+  static void to_json(ordered_json& j, std::variant<std::monostate, T1, T2> const& value) {
+    switch (value.index()) {
+      case 0:
+        j = ordered_json{ {"null", std::get<std::monostate>(value)} };
+        break;
+      case 1:
+        j = ordered_json{ {"T", std::get<T1>(value)} };
+        break;
+      case 2:
+        j = ordered_json{ {"U", std::get<T2>(value)} };
+        break;
+      default:
+        throw std::runtime_error("Invalid union value");
+    }
+  }
+
+  static void from_json(ordered_json const& j, std::variant<std::monostate, T1, T2>& value) {
+    auto it = j.begin();
+    std::string tag = it.key();
+    if (tag == "null") {
+      value = it.value().get<std::monostate>();
+      return;
+    }
+    if (tag == "T") {
+      value = it.value().get<T1>();
+      return;
+    }
+    if (tag == "U") {
+      value = it.value().get<T2>();
+      return;
+    }
+  }
+};
+
+template <>
+struct adl_serializer<std::variant<std::monostate, std::string, int32_t>> {
+  static void to_json(ordered_json& j, std::variant<std::monostate, std::string, int32_t> const& value) {
+    std::visit([&j](auto const& v) {j = v;}, value);
+  }
+
+  static void from_json(ordered_json const& j, std::variant<std::monostate, std::string, int32_t>& value) {
+    if ((j.is_null())) {
+      value = j.get<std::monostate>();
+      return;
+    }
+    if ((j.is_string())) {
+      value = j.get<std::string>();
+      return;
+    }
+    if ((j.is_number())) {
+      value = j.get<int32_t>();
+      return;
+    }
+    throw std::runtime_error("Invalid union value");
   }
 };
 
@@ -1728,6 +1835,280 @@ void from_json(ordered_json const& j, test_model::RecordWithAliasedGenerics& val
   }
   if (auto it = j.find("aliasedStrings"); it != j.end()) {
     it->get_to(value.aliased_strings);
+  }
+}
+
+template <typename T>
+void to_json(ordered_json& j, test_model::RecordWithOptionalGenericField<T> const& value) {
+  j = ordered_json::object();
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.v)) {
+    j.push_back({"v", value.v});
+  }
+}
+
+template <typename T>
+void from_json(ordered_json const& j, test_model::RecordWithOptionalGenericField<T>& value) {
+  if (auto it = j.find("v"); it != j.end()) {
+    it->get_to(value.v);
+  }
+}
+
+template <typename T>
+void to_json(ordered_json& j, test_model::RecordWithAliasedOptionalGenericField<T> const& value) {
+  j = ordered_json::object();
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.v)) {
+    j.push_back({"v", value.v});
+  }
+}
+
+template <typename T>
+void from_json(ordered_json const& j, test_model::RecordWithAliasedOptionalGenericField<T>& value) {
+  if (auto it = j.find("v"); it != j.end()) {
+    it->get_to(value.v);
+  }
+}
+
+template <typename U, typename V>
+void to_json(ordered_json& j, test_model::RecordWithOptionalGenericUnionField<U, V> const& value) {
+  j = ordered_json::object();
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.v)) {
+    j.push_back({"v", value.v});
+  }
+}
+
+template <typename U, typename V>
+void from_json(ordered_json const& j, test_model::RecordWithOptionalGenericUnionField<U, V>& value) {
+  if (auto it = j.find("v"); it != j.end()) {
+    it->get_to(value.v);
+  }
+}
+
+template <typename U, typename V>
+void to_json(ordered_json& j, test_model::RecordWithAliasedOptionalGenericUnionField<U, V> const& value) {
+  j = ordered_json::object();
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.v)) {
+    j.push_back({"v", value.v});
+  }
+}
+
+template <typename U, typename V>
+void from_json(ordered_json const& j, test_model::RecordWithAliasedOptionalGenericUnionField<U, V>& value) {
+  if (auto it = j.find("v"); it != j.end()) {
+    it->get_to(value.v);
+  }
+}
+
+template <typename T>
+void to_json(ordered_json& j, test_model::RecordWithGenericVectors<T> const& value) {
+  j = ordered_json::object();
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.v)) {
+    j.push_back({"v", value.v});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.av)) {
+    j.push_back({"av", value.av});
+  }
+}
+
+template <typename T>
+void from_json(ordered_json const& j, test_model::RecordWithGenericVectors<T>& value) {
+  if (auto it = j.find("v"); it != j.end()) {
+    it->get_to(value.v);
+  }
+  if (auto it = j.find("av"); it != j.end()) {
+    it->get_to(value.av);
+  }
+}
+
+template <typename T>
+void to_json(ordered_json& j, test_model::RecordWithGenericFixedVectors<T> const& value) {
+  j = ordered_json::object();
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.fv)) {
+    j.push_back({"fv", value.fv});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.afv)) {
+    j.push_back({"afv", value.afv});
+  }
+}
+
+template <typename T>
+void from_json(ordered_json const& j, test_model::RecordWithGenericFixedVectors<T>& value) {
+  if (auto it = j.find("fv"); it != j.end()) {
+    it->get_to(value.fv);
+  }
+  if (auto it = j.find("afv"); it != j.end()) {
+    it->get_to(value.afv);
+  }
+}
+
+template <typename T>
+void to_json(ordered_json& j, test_model::RecordWithGenericArrays<T> const& value) {
+  j = ordered_json::object();
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.nd)) {
+    j.push_back({"nd", value.nd});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.fixed_nd)) {
+    j.push_back({"fixedNd", value.fixed_nd});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.dynamic_nd)) {
+    j.push_back({"dynamicNd", value.dynamic_nd});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.aliased_nd)) {
+    j.push_back({"aliasedNd", value.aliased_nd});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.aliased_fixed_nd)) {
+    j.push_back({"aliasedFixedNd", value.aliased_fixed_nd});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.aliased_dynamic_nd)) {
+    j.push_back({"aliasedDynamicNd", value.aliased_dynamic_nd});
+  }
+}
+
+template <typename T>
+void from_json(ordered_json const& j, test_model::RecordWithGenericArrays<T>& value) {
+  if (auto it = j.find("nd"); it != j.end()) {
+    it->get_to(value.nd);
+  }
+  if (auto it = j.find("fixedNd"); it != j.end()) {
+    it->get_to(value.fixed_nd);
+  }
+  if (auto it = j.find("dynamicNd"); it != j.end()) {
+    it->get_to(value.dynamic_nd);
+  }
+  if (auto it = j.find("aliasedNd"); it != j.end()) {
+    it->get_to(value.aliased_nd);
+  }
+  if (auto it = j.find("aliasedFixedNd"); it != j.end()) {
+    it->get_to(value.aliased_fixed_nd);
+  }
+  if (auto it = j.find("aliasedDynamicNd"); it != j.end()) {
+    it->get_to(value.aliased_dynamic_nd);
+  }
+}
+
+template <typename T, typename U>
+void to_json(ordered_json& j, test_model::RecordWithGenericMaps<T, U> const& value) {
+  j = ordered_json::object();
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.m)) {
+    j.push_back({"m", value.m});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.am)) {
+    j.push_back({"am", value.am});
+  }
+}
+
+template <typename T, typename U>
+void from_json(ordered_json const& j, test_model::RecordWithGenericMaps<T, U>& value) {
+  if (auto it = j.find("m"); it != j.end()) {
+    it->get_to(value.m);
+  }
+  if (auto it = j.find("am"); it != j.end()) {
+    it->get_to(value.am);
+  }
+}
+
+template <typename A, typename B>
+void to_json(ordered_json& j, test_model::RecordContainingGenericRecords<A, B> const& value) {
+  j = ordered_json::object();
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.g1)) {
+    j.push_back({"g1", value.g1});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.g1a)) {
+    j.push_back({"g1a", value.g1a});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.g2)) {
+    j.push_back({"g2", value.g2});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.g2a)) {
+    j.push_back({"g2a", value.g2a});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.g3)) {
+    j.push_back({"g3", value.g3});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.g3a)) {
+    j.push_back({"g3a", value.g3a});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.g4)) {
+    j.push_back({"g4", value.g4});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.g5)) {
+    j.push_back({"g5", value.g5});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.g6)) {
+    j.push_back({"g6", value.g6});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.g7)) {
+    j.push_back({"g7", value.g7});
+  }
+}
+
+template <typename A, typename B>
+void from_json(ordered_json const& j, test_model::RecordContainingGenericRecords<A, B>& value) {
+  if (auto it = j.find("g1"); it != j.end()) {
+    it->get_to(value.g1);
+  }
+  if (auto it = j.find("g1a"); it != j.end()) {
+    it->get_to(value.g1a);
+  }
+  if (auto it = j.find("g2"); it != j.end()) {
+    it->get_to(value.g2);
+  }
+  if (auto it = j.find("g2a"); it != j.end()) {
+    it->get_to(value.g2a);
+  }
+  if (auto it = j.find("g3"); it != j.end()) {
+    it->get_to(value.g3);
+  }
+  if (auto it = j.find("g3a"); it != j.end()) {
+    it->get_to(value.g3a);
+  }
+  if (auto it = j.find("g4"); it != j.end()) {
+    it->get_to(value.g4);
+  }
+  if (auto it = j.find("g5"); it != j.end()) {
+    it->get_to(value.g5);
+  }
+  if (auto it = j.find("g6"); it != j.end()) {
+    it->get_to(value.g6);
+  }
+  if (auto it = j.find("g7"); it != j.end()) {
+    it->get_to(value.g7);
+  }
+}
+
+void to_json(ordered_json& j, test_model::RecordContainingNestedGenericRecords const& value) {
+  j = ordered_json::object();
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.f1)) {
+    j.push_back({"f1", value.f1});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.f1a)) {
+    j.push_back({"f1a", value.f1a});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.f2)) {
+    j.push_back({"f2", value.f2});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.f2a)) {
+    j.push_back({"f2a", value.f2a});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.nested)) {
+    j.push_back({"nested", value.nested});
+  }
+}
+
+void from_json(ordered_json const& j, test_model::RecordContainingNestedGenericRecords& value) {
+  if (auto it = j.find("f1"); it != j.end()) {
+    it->get_to(value.f1);
+  }
+  if (auto it = j.find("f1a"); it != j.end()) {
+    it->get_to(value.f1a);
+  }
+  if (auto it = j.find("f2"); it != j.end()) {
+    it->get_to(value.f2);
+  }
+  if (auto it = j.find("f2a"); it != j.end()) {
+    it->get_to(value.f2a);
+  }
+  if (auto it = j.find("nested"); it != j.end()) {
+    it->get_to(value.nested);
   }
 }
 

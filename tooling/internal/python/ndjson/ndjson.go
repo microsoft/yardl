@@ -21,10 +21,15 @@ func WriteNDJson(ns *dsl.Namespace, packageDir string) error {
 	b := bytes.Buffer{}
 	w := formatting.NewIndentedWriter(&b, "    ")
 	common.WriteGeneratedFileHeader(w)
-	w.WriteStringln(`# pyright: reportUnusedClass=false
 
+	common.WriteComment(w, "pyright: reportUnusedClass=false")
+	common.WriteComment(w, "pyright: reportUnusedImport=false")
+	common.WriteComment(w, "pyright: reportUnknownArgumentType=false")
+	common.WriteComment(w, "pyright: reportUnknownMemberType=false")
+	common.WriteComment(w, "pyright: reportUnknownVariableType=false")
+
+	w.WriteStringln(`
 import collections.abc
-import datetime
 import io
 import typing
 
@@ -114,7 +119,7 @@ func writeRecordConverter(td *dsl.RecordDefinition, w *formatting.IndentedWriter
 
 		fmt.Fprintf(w, "def to_json(self, value: %s) -> object:\n", typeSyntax)
 		w.Indented(func() {
-			fmt.Fprintf(w, "if not isinstance(value, %s):\n", common.TypeSyntaxWithoutTypeParameters(td, ns.Name))
+			fmt.Fprintf(w, "if not isinstance(value, %s): # pyright: ignore [reportUnnecessaryIsInstance]\n", common.TypeSyntaxWithoutTypeParameters(td, ns.Name))
 			w.Indented(func() {
 				fmt.Fprintf(w, "raise TypeError(\"Expected '%s' instance\")\n", typeSyntax)
 			})
@@ -142,7 +147,7 @@ func writeRecordConverter(td *dsl.RecordDefinition, w *formatting.IndentedWriter
 
 		fmt.Fprintf(w, "def numpy_to_json(self, value: np.void) -> object:\n")
 		w.Indented(func() {
-			fmt.Fprintf(w, "if not isinstance(value, np.void):\n")
+			fmt.Fprintf(w, "if not isinstance(value, np.void): # pyright: ignore [reportUnnecessaryIsInstance]\n")
 			w.Indented(func() {
 				fmt.Fprintf(w, "raise TypeError(\"Expected 'np.void' instance\")\n")
 			})

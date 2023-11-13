@@ -208,3 +208,10 @@ with NDJsonMyProtocolReader(path) as r: // [!code ++]
         print(sample)
 
 ```
+
+## Static Type Checking
+
+The generated Python code that Yardl generates uses [type
+hints](https://docs.python.org/3/library/typing.html) extensively. If you would
+like to use a static type checker with your project that uses the generated
+code, we recommend [Pyright](https://microsoft.github.io/pyright).

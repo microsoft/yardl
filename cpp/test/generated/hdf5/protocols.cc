@@ -727,6 +727,208 @@ struct _Inner_RecordWithAliasedGenerics {
   tuples::hdf5::_Inner_Tuple<yardl::hdf5::InnerVlenString, std::string, yardl::hdf5::InnerVlenString, std::string> aliased_strings;
 };
 
+template <typename _T_Inner, typename T>
+struct _Inner_RecordWithOptionalGenericField {
+  _Inner_RecordWithOptionalGenericField() {} 
+  _Inner_RecordWithOptionalGenericField(test_model::RecordWithOptionalGenericField<T> const& o) 
+      : v(o.v) {
+  }
+
+  void ToOuter (test_model::RecordWithOptionalGenericField<T>& o) const {
+    yardl::hdf5::ToOuter(v, o.v);
+  }
+
+  yardl::hdf5::InnerOptional<_T_Inner, T> v;
+};
+
+template <typename _T_Inner, typename T>
+struct _Inner_RecordWithAliasedOptionalGenericField {
+  _Inner_RecordWithAliasedOptionalGenericField() {} 
+  _Inner_RecordWithAliasedOptionalGenericField(test_model::RecordWithAliasedOptionalGenericField<T> const& o) 
+      : v(o.v) {
+  }
+
+  void ToOuter (test_model::RecordWithAliasedOptionalGenericField<T>& o) const {
+    yardl::hdf5::ToOuter(v, o.v);
+  }
+
+  yardl::hdf5::InnerOptional<_T_Inner, T> v;
+};
+
+template <typename _U_Inner, typename U, typename _V_Inner, typename V>
+struct _Inner_RecordWithOptionalGenericUnionField {
+  _Inner_RecordWithOptionalGenericUnionField() {} 
+  _Inner_RecordWithOptionalGenericUnionField(test_model::RecordWithOptionalGenericUnionField<U, V> const& o) 
+      : v(o.v) {
+  }
+
+  void ToOuter (test_model::RecordWithOptionalGenericUnionField<U, V>& o) const {
+    yardl::hdf5::ToOuter(v, o.v);
+  }
+
+  ::InnerUnion2<_U_Inner, U, _V_Inner, V> v;
+};
+
+template <typename _U_Inner, typename U, typename _V_Inner, typename V>
+struct _Inner_RecordWithAliasedOptionalGenericUnionField {
+  _Inner_RecordWithAliasedOptionalGenericUnionField() {} 
+  _Inner_RecordWithAliasedOptionalGenericUnionField(test_model::RecordWithAliasedOptionalGenericUnionField<U, V> const& o) 
+      : v(o.v) {
+  }
+
+  void ToOuter (test_model::RecordWithAliasedOptionalGenericUnionField<U, V>& o) const {
+    yardl::hdf5::ToOuter(v, o.v);
+  }
+
+  ::InnerUnion2<_U_Inner, U, _V_Inner, V> v;
+};
+
+template <typename _T_Inner, typename T>
+struct _Inner_RecordWithGenericVectors {
+  _Inner_RecordWithGenericVectors() {} 
+  _Inner_RecordWithGenericVectors(test_model::RecordWithGenericVectors<T> const& o) 
+      : v(o.v),
+      av(o.av) {
+  }
+
+  void ToOuter (test_model::RecordWithGenericVectors<T>& o) const {
+    yardl::hdf5::ToOuter(v, o.v);
+    yardl::hdf5::ToOuter(av, o.av);
+  }
+
+  yardl::hdf5::InnerVlen<_T_Inner, T> v;
+  yardl::hdf5::InnerVlen<_T_Inner, T> av;
+};
+
+template <typename _T_Inner, typename T>
+struct _Inner_RecordWithGenericFixedVectors {
+  _Inner_RecordWithGenericFixedVectors() {} 
+  _Inner_RecordWithGenericFixedVectors(test_model::RecordWithGenericFixedVectors<T> const& o) 
+      : fv(o.fv),
+      afv(o.afv) {
+  }
+
+  void ToOuter (test_model::RecordWithGenericFixedVectors<T>& o) const {
+    yardl::hdf5::ToOuter(fv, o.fv);
+    yardl::hdf5::ToOuter(afv, o.afv);
+  }
+
+  yardl::hdf5::InnerFixedVector<_T_Inner, T, 3> fv;
+  yardl::hdf5::InnerFixedVector<_T_Inner, T, 3> afv;
+};
+
+template <typename _T_Inner, typename T>
+struct _Inner_RecordWithGenericArrays {
+  _Inner_RecordWithGenericArrays() {} 
+  _Inner_RecordWithGenericArrays(test_model::RecordWithGenericArrays<T> const& o) 
+      : nd(o.nd),
+      fixed_nd(o.fixed_nd),
+      dynamic_nd(o.dynamic_nd),
+      aliased_nd(o.aliased_nd),
+      aliased_fixed_nd(o.aliased_fixed_nd),
+      aliased_dynamic_nd(o.aliased_dynamic_nd) {
+  }
+
+  void ToOuter (test_model::RecordWithGenericArrays<T>& o) const {
+    yardl::hdf5::ToOuter(nd, o.nd);
+    yardl::hdf5::ToOuter(fixed_nd, o.fixed_nd);
+    yardl::hdf5::ToOuter(dynamic_nd, o.dynamic_nd);
+    yardl::hdf5::ToOuter(aliased_nd, o.aliased_nd);
+    yardl::hdf5::ToOuter(aliased_fixed_nd, o.aliased_fixed_nd);
+    yardl::hdf5::ToOuter(aliased_dynamic_nd, o.aliased_dynamic_nd);
+  }
+
+  yardl::hdf5::InnerNdArray<_T_Inner, T, 2> nd;
+  yardl::hdf5::InnerFixedNdArray<_T_Inner, T, 16, 8> fixed_nd;
+  yardl::hdf5::InnerDynamicNdArray<_T_Inner, T> dynamic_nd;
+  yardl::hdf5::InnerNdArray<_T_Inner, T, 2> aliased_nd;
+  yardl::hdf5::InnerFixedNdArray<_T_Inner, T, 16, 8> aliased_fixed_nd;
+  yardl::hdf5::InnerDynamicNdArray<_T_Inner, T> aliased_dynamic_nd;
+};
+
+template <typename _T_Inner, typename T, typename _U_Inner, typename U>
+struct _Inner_RecordWithGenericMaps {
+  _Inner_RecordWithGenericMaps() {} 
+  _Inner_RecordWithGenericMaps(test_model::RecordWithGenericMaps<T, U> const& o) 
+      : m(o.m),
+      am(o.am) {
+  }
+
+  void ToOuter (test_model::RecordWithGenericMaps<T, U>& o) const {
+    yardl::hdf5::ToOuter(m, o.m);
+    yardl::hdf5::ToOuter(am, o.am);
+  }
+
+  yardl::hdf5::InnerMap<_T_Inner, T, _U_Inner, U> m;
+  yardl::hdf5::InnerMap<_T_Inner, T, _U_Inner, U> am;
+};
+
+template <typename _A_Inner, typename A, typename _B_Inner, typename B>
+struct _Inner_RecordContainingGenericRecords {
+  _Inner_RecordContainingGenericRecords() {} 
+  _Inner_RecordContainingGenericRecords(test_model::RecordContainingGenericRecords<A, B> const& o) 
+      : g1(o.g1),
+      g1a(o.g1a),
+      g2(o.g2),
+      g2a(o.g2a),
+      g3(o.g3),
+      g3a(o.g3a),
+      g4(o.g4),
+      g5(o.g5),
+      g6(o.g6),
+      g7(o.g7) {
+  }
+
+  void ToOuter (test_model::RecordContainingGenericRecords<A, B>& o) const {
+    yardl::hdf5::ToOuter(g1, o.g1);
+    yardl::hdf5::ToOuter(g1a, o.g1a);
+    yardl::hdf5::ToOuter(g2, o.g2);
+    yardl::hdf5::ToOuter(g2a, o.g2a);
+    yardl::hdf5::ToOuter(g3, o.g3);
+    yardl::hdf5::ToOuter(g3a, o.g3a);
+    yardl::hdf5::ToOuter(g4, o.g4);
+    yardl::hdf5::ToOuter(g5, o.g5);
+    yardl::hdf5::ToOuter(g6, o.g6);
+    yardl::hdf5::ToOuter(g7, o.g7);
+  }
+
+  test_model::hdf5::_Inner_RecordWithOptionalGenericField<_A_Inner, A> g1;
+  test_model::hdf5::_Inner_RecordWithAliasedOptionalGenericField<_A_Inner, A> g1a;
+  test_model::hdf5::_Inner_RecordWithOptionalGenericUnionField<_A_Inner, A, _B_Inner, B> g2;
+  test_model::hdf5::_Inner_RecordWithAliasedOptionalGenericUnionField<_A_Inner, A, _B_Inner, B> g2a;
+  tuples::hdf5::_Inner_Tuple<_A_Inner, A, _B_Inner, B> g3;
+  tuples::hdf5::_Inner_Tuple<_A_Inner, A, _B_Inner, B> g3a;
+  test_model::hdf5::_Inner_RecordWithGenericVectors<_B_Inner, B> g4;
+  test_model::hdf5::_Inner_RecordWithGenericFixedVectors<_B_Inner, B> g5;
+  test_model::hdf5::_Inner_RecordWithGenericArrays<_B_Inner, B> g6;
+  test_model::hdf5::_Inner_RecordWithGenericMaps<_A_Inner, A, _B_Inner, B> g7;
+};
+
+struct _Inner_RecordContainingNestedGenericRecords {
+  _Inner_RecordContainingNestedGenericRecords() {} 
+  _Inner_RecordContainingNestedGenericRecords(test_model::RecordContainingNestedGenericRecords const& o) 
+      : f1(o.f1),
+      f1a(o.f1a),
+      f2(o.f2),
+      f2a(o.f2a),
+      nested(o.nested) {
+  }
+
+  void ToOuter (test_model::RecordContainingNestedGenericRecords& o) const {
+    yardl::hdf5::ToOuter(f1, o.f1);
+    yardl::hdf5::ToOuter(f1a, o.f1a);
+    yardl::hdf5::ToOuter(f2, o.f2);
+    yardl::hdf5::ToOuter(f2a, o.f2a);
+    yardl::hdf5::ToOuter(nested, o.nested);
+  }
+
+  test_model::hdf5::_Inner_RecordWithOptionalGenericField<yardl::hdf5::InnerVlenString, std::string> f1;
+  test_model::hdf5::_Inner_RecordWithAliasedOptionalGenericField<yardl::hdf5::InnerVlenString, std::string> f1a;
+  test_model::hdf5::_Inner_RecordWithOptionalGenericUnionField<yardl::hdf5::InnerVlenString, std::string, int32_t, int32_t> f2;
+  test_model::hdf5::_Inner_RecordWithAliasedOptionalGenericUnionField<yardl::hdf5::InnerVlenString, std::string, int32_t, int32_t> f2a;
+  test_model::hdf5::_Inner_RecordContainingGenericRecords<yardl::hdf5::InnerVlenString, std::string, int32_t, int32_t> nested;
+};
+
 struct _Inner_RecordWithComputedFields {
   _Inner_RecordWithComputedFields() {} 
   _Inner_RecordWithComputedFields(test_model::RecordWithComputedFields const& o) 
@@ -1102,6 +1304,106 @@ template <typename _T1_Inner, typename T1, typename _T2_Inner, typename T2>
   H5::CompType t(sizeof(RecordType));
   t.insertMember("myStrings", HOFFSET(RecordType, my_strings), tuples::hdf5::GetTupleHdf5Ddl<yardl::hdf5::InnerVlenString, std::string, yardl::hdf5::InnerVlenString, std::string>(yardl::hdf5::InnerVlenStringDdl(), yardl::hdf5::InnerVlenStringDdl()));
   t.insertMember("aliasedStrings", HOFFSET(RecordType, aliased_strings), tuples::hdf5::GetTupleHdf5Ddl<yardl::hdf5::InnerVlenString, std::string, yardl::hdf5::InnerVlenString, std::string>(yardl::hdf5::InnerVlenStringDdl(), yardl::hdf5::InnerVlenStringDdl()));
+  return t;
+}
+
+template <typename _T_Inner, typename T>
+[[maybe_unused]] H5::CompType GetRecordWithOptionalGenericFieldHdf5Ddl(H5::DataType const& T_type) {
+  using RecordType = test_model::hdf5::_Inner_RecordWithOptionalGenericField<_T_Inner, T>;
+  H5::CompType t(sizeof(RecordType));
+  t.insertMember("v", HOFFSET(RecordType, v), yardl::hdf5::OptionalTypeDdl<_T_Inner, T>(T_type));
+  return t;
+}
+
+template <typename _T_Inner, typename T>
+[[maybe_unused]] H5::CompType GetRecordWithAliasedOptionalGenericFieldHdf5Ddl(H5::DataType const& T_type) {
+  using RecordType = test_model::hdf5::_Inner_RecordWithAliasedOptionalGenericField<_T_Inner, T>;
+  H5::CompType t(sizeof(RecordType));
+  t.insertMember("v", HOFFSET(RecordType, v), yardl::hdf5::OptionalTypeDdl<_T_Inner, T>(T_type));
+  return t;
+}
+
+template <typename _U_Inner, typename U, typename _V_Inner, typename V>
+[[maybe_unused]] H5::CompType GetRecordWithOptionalGenericUnionFieldHdf5Ddl(H5::DataType const& U_type, H5::DataType const& V_type) {
+  using RecordType = test_model::hdf5::_Inner_RecordWithOptionalGenericUnionField<_U_Inner, U, _V_Inner, V>;
+  H5::CompType t(sizeof(RecordType));
+  t.insertMember("v", HOFFSET(RecordType, v), ::InnerUnion2Ddl<_U_Inner, U, _V_Inner, V>(true, U_type, "U", V_type, "V"));
+  return t;
+}
+
+template <typename _U_Inner, typename U, typename _V_Inner, typename V>
+[[maybe_unused]] H5::CompType GetRecordWithAliasedOptionalGenericUnionFieldHdf5Ddl(H5::DataType const& U_type, H5::DataType const& V_type) {
+  using RecordType = test_model::hdf5::_Inner_RecordWithAliasedOptionalGenericUnionField<_U_Inner, U, _V_Inner, V>;
+  H5::CompType t(sizeof(RecordType));
+  t.insertMember("v", HOFFSET(RecordType, v), ::InnerUnion2Ddl<_U_Inner, U, _V_Inner, V>(true, U_type, "T", V_type, "U"));
+  return t;
+}
+
+template <typename _T_Inner, typename T>
+[[maybe_unused]] H5::CompType GetRecordWithGenericVectorsHdf5Ddl(H5::DataType const& T_type) {
+  using RecordType = test_model::hdf5::_Inner_RecordWithGenericVectors<_T_Inner, T>;
+  H5::CompType t(sizeof(RecordType));
+  t.insertMember("v", HOFFSET(RecordType, v), yardl::hdf5::InnerVlenDdl(T_type));
+  t.insertMember("av", HOFFSET(RecordType, av), yardl::hdf5::InnerVlenDdl(T_type));
+  return t;
+}
+
+template <typename _T_Inner, typename T>
+[[maybe_unused]] H5::CompType GetRecordWithGenericFixedVectorsHdf5Ddl(H5::DataType const& T_type) {
+  using RecordType = test_model::hdf5::_Inner_RecordWithGenericFixedVectors<_T_Inner, T>;
+  H5::CompType t(sizeof(RecordType));
+  t.insertMember("fv", HOFFSET(RecordType, fv), yardl::hdf5::FixedVectorDdl(T_type, 3));
+  t.insertMember("afv", HOFFSET(RecordType, afv), yardl::hdf5::FixedVectorDdl(T_type, 3));
+  return t;
+}
+
+template <typename _T_Inner, typename T>
+[[maybe_unused]] H5::CompType GetRecordWithGenericArraysHdf5Ddl(H5::DataType const& T_type) {
+  using RecordType = test_model::hdf5::_Inner_RecordWithGenericArrays<_T_Inner, T>;
+  H5::CompType t(sizeof(RecordType));
+  t.insertMember("nd", HOFFSET(RecordType, nd), yardl::hdf5::NDArrayDdl<_T_Inner, T, 2>(T_type));
+  t.insertMember("fixedNd", HOFFSET(RecordType, fixed_nd), yardl::hdf5::FixedNDArrayDdl(T_type, {16, 8}));
+  t.insertMember("dynamicNd", HOFFSET(RecordType, dynamic_nd), yardl::hdf5::DynamicNDArrayDdl<_T_Inner, T>(T_type));
+  t.insertMember("aliasedNd", HOFFSET(RecordType, aliased_nd), yardl::hdf5::NDArrayDdl<_T_Inner, T, 2>(T_type));
+  t.insertMember("aliasedFixedNd", HOFFSET(RecordType, aliased_fixed_nd), yardl::hdf5::FixedNDArrayDdl(T_type, {16, 8}));
+  t.insertMember("aliasedDynamicNd", HOFFSET(RecordType, aliased_dynamic_nd), yardl::hdf5::DynamicNDArrayDdl<_T_Inner, T>(T_type));
+  return t;
+}
+
+template <typename _T_Inner, typename T, typename _U_Inner, typename U>
+[[maybe_unused]] H5::CompType GetRecordWithGenericMapsHdf5Ddl(H5::DataType const& T_type, H5::DataType const& U_type) {
+  using RecordType = test_model::hdf5::_Inner_RecordWithGenericMaps<_T_Inner, T, _U_Inner, U>;
+  H5::CompType t(sizeof(RecordType));
+  t.insertMember("m", HOFFSET(RecordType, m), yardl::hdf5::InnerMapDdl<_T_Inner, _U_Inner>(T_type, U_type));
+  t.insertMember("am", HOFFSET(RecordType, am), yardl::hdf5::InnerMapDdl<_T_Inner, _U_Inner>(T_type, U_type));
+  return t;
+}
+
+template <typename _A_Inner, typename A, typename _B_Inner, typename B>
+[[maybe_unused]] H5::CompType GetRecordContainingGenericRecordsHdf5Ddl(H5::DataType const& A_type, H5::DataType const& B_type) {
+  using RecordType = test_model::hdf5::_Inner_RecordContainingGenericRecords<_A_Inner, A, _B_Inner, B>;
+  H5::CompType t(sizeof(RecordType));
+  t.insertMember("g1", HOFFSET(RecordType, g1), test_model::hdf5::GetRecordWithOptionalGenericFieldHdf5Ddl<_A_Inner, A>(A_type));
+  t.insertMember("g1a", HOFFSET(RecordType, g1a), test_model::hdf5::GetRecordWithAliasedOptionalGenericFieldHdf5Ddl<_A_Inner, A>(A_type));
+  t.insertMember("g2", HOFFSET(RecordType, g2), test_model::hdf5::GetRecordWithOptionalGenericUnionFieldHdf5Ddl<_A_Inner, A, _B_Inner, B>(A_type, B_type));
+  t.insertMember("g2a", HOFFSET(RecordType, g2a), test_model::hdf5::GetRecordWithAliasedOptionalGenericUnionFieldHdf5Ddl<_A_Inner, A, _B_Inner, B>(A_type, B_type));
+  t.insertMember("g3", HOFFSET(RecordType, g3), tuples::hdf5::GetTupleHdf5Ddl<_A_Inner, A, _B_Inner, B>(A_type, B_type));
+  t.insertMember("g3a", HOFFSET(RecordType, g3a), tuples::hdf5::GetTupleHdf5Ddl<_A_Inner, A, _B_Inner, B>(A_type, B_type));
+  t.insertMember("g4", HOFFSET(RecordType, g4), test_model::hdf5::GetRecordWithGenericVectorsHdf5Ddl<_B_Inner, B>(B_type));
+  t.insertMember("g5", HOFFSET(RecordType, g5), test_model::hdf5::GetRecordWithGenericFixedVectorsHdf5Ddl<_B_Inner, B>(B_type));
+  t.insertMember("g6", HOFFSET(RecordType, g6), test_model::hdf5::GetRecordWithGenericArraysHdf5Ddl<_B_Inner, B>(B_type));
+  t.insertMember("g7", HOFFSET(RecordType, g7), test_model::hdf5::GetRecordWithGenericMapsHdf5Ddl<_A_Inner, A, _B_Inner, B>(A_type, B_type));
+  return t;
+}
+
+[[maybe_unused]] H5::CompType GetRecordContainingNestedGenericRecordsHdf5Ddl() {
+  using RecordType = test_model::hdf5::_Inner_RecordContainingNestedGenericRecords;
+  H5::CompType t(sizeof(RecordType));
+  t.insertMember("f1", HOFFSET(RecordType, f1), test_model::hdf5::GetRecordWithOptionalGenericFieldHdf5Ddl<yardl::hdf5::InnerVlenString, std::string>(yardl::hdf5::InnerVlenStringDdl()));
+  t.insertMember("f1a", HOFFSET(RecordType, f1a), test_model::hdf5::GetRecordWithAliasedOptionalGenericFieldHdf5Ddl<yardl::hdf5::InnerVlenString, std::string>(yardl::hdf5::InnerVlenStringDdl()));
+  t.insertMember("f2", HOFFSET(RecordType, f2), test_model::hdf5::GetRecordWithOptionalGenericUnionFieldHdf5Ddl<yardl::hdf5::InnerVlenString, std::string, int32_t, int32_t>(yardl::hdf5::InnerVlenStringDdl(), H5::PredType::NATIVE_INT32));
+  t.insertMember("f2a", HOFFSET(RecordType, f2a), test_model::hdf5::GetRecordWithAliasedOptionalGenericUnionFieldHdf5Ddl<yardl::hdf5::InnerVlenString, std::string, int32_t, int32_t>(yardl::hdf5::InnerVlenStringDdl(), H5::PredType::NATIVE_INT32));
+  t.insertMember("nested", HOFFSET(RecordType, nested), test_model::hdf5::GetRecordContainingGenericRecordsHdf5Ddl<yardl::hdf5::InnerVlenString, std::string, int32_t, int32_t>(yardl::hdf5::InnerVlenStringDdl(), H5::PredType::NATIVE_INT32));
   return t;
 }
 

@@ -1,8 +1,9 @@
 import datetime
 import re
-from typing import Callable, TypeVar
+from typing import TypeVar
 
 import numpy as np
+import numpy.typing as npt
 import pytest
 
 import test_model as tm
@@ -692,7 +693,7 @@ def test_advanced_generics(format: Format):
             [[3000, 4000, 5000], [6000, 7000, 8000]], dtype=np.float32
         )
 
-        img_img_array = np.ndarray((2, 2), dtype=np.object_)
+        img_img_array: npt.NDArray[np.object_] = np.ndarray((2, 2), dtype=np.object_)
         img_img_array[:] = [[i1, i2], [i3, i4]]
 
         w.write_float_image_image(img_img_array)

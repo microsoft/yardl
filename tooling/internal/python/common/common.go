@@ -142,8 +142,7 @@ var TypeSyntaxWriter dsl.TypeSyntaxWriter[string] = func(self dsl.TypeSyntaxWrit
 		}
 
 		if nt, ok := t.(*dsl.NamedType); ok {
-			underlyingType := dsl.GetUnderlyingType(nt.Type)
-			if gt, ok := underlyingType.(*dsl.GeneralizedType); ok && gt.Cases.HasNullOption() {
+			if gt, ok := nt.Type.(*dsl.GeneralizedType); ok && gt.Cases.HasNullOption() && !gt.Cases.IsOptional() {
 				typeSyntax = fmt.Sprintf("typing.Optional[%s]", typeSyntax)
 			}
 		}

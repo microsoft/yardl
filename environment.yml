@@ -23,6 +23,7 @@ dependencies:
   - nlohmann_json=3.11.2
   - nodejs=20.5.1 # local
   - numpy=1.24.3
+  - pyright=1.1.335
   - pytest=7.3.2
   - python=3.11.3
   - rich=13.5.1

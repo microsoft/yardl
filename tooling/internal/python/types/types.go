@@ -21,12 +21,18 @@ func WriteTypes(ns *dsl.Namespace, st dsl.SymbolTable, packageDir string) error 
 	w := formatting.NewIndentedWriter(&b, "    ")
 	common.WriteGeneratedFileHeader(w)
 
+	common.WriteComment(w, "pyright: reportUnusedImport=false")
+	common.WriteComment(w, "pyright: reportUnknownArgumentType=false")
+	common.WriteComment(w, "pyright: reportUnknownMemberType=false")
+	common.WriteComment(w, "pyright: reportUnknownVariableType=false")
+
 	relativePath := ".."
 	if ns.IsTopLevel {
 		relativePath = "."
 	}
 
-	fmt.Fprintf(w, `import datetime
+	fmt.Fprintf(w, `
+import datetime
 import enum
 import types
 import typing
@@ -156,7 +162,7 @@ func writeUnionClass(w *formatting.IndentedWriter, className string, typeParamet
 			continue
 		}
 		pascalTag := formatting.ToPascalCase(tc.Tag)
-		fmt.Fprintf(w, "%s.%s = type(\"%s.%s\", (%s,), {\"_index\": %d, \"_tag\": \"%s\"})\n", className, pascalTag, className, pascalTag, unionCaseType, i, tc.Tag)
+		fmt.Fprintf(w, "%s.%s = type(\"%s.%s\", (%s,), {\"index\": %d, \"tag\": \"%s\"})\n", className, pascalTag, className, pascalTag, unionCaseType, i, tc.Tag)
 		i++
 	}
 	fmt.Fprintf(w, "del %s\n", unionCaseType)
@@ -188,15 +194,7 @@ func writeRecord(w *formatting.IndentedWriter, rec *dsl.RecordDefinition, st dsl
 					fieldTypeSyntax := common.TypeSyntax(f.Type, rec.Namespace)
 					fmt.Fprintf(w, "%s: ", fieldName)
 
-					var defaultExpression string
-					var defaultExpressionKind defaultValueKind
-					if dsl.ContainsGenericTypeParameter(f.Type) {
-						// cannot default generic type parameters
-						// because they don't really exist at runtime
-						defaultExpressionKind = defaultValueKindNone
-					} else {
-						defaultExpression, defaultExpressionKind = typeDefault(f.Type, rec.Namespace, "", st)
-					}
+					defaultExpression, defaultExpressionKind := typeDefault(f.Type, rec.Namespace, "", st)
 					switch defaultExpressionKind {
 					case defaultValueKindNone:
 						w.WriteString(fieldTypeSyntax)
@@ -213,14 +211,7 @@ func writeRecord(w *formatting.IndentedWriter, rec *dsl.RecordDefinition, st dsl
 			w.Indented(func() {
 				for _, f := range rec.Fields {
 					fieldName := common.FieldIdentifierName(f.Name)
-					var defaultExpression string
-					var defaultExpressionKind defaultValueKind
-					if dsl.ContainsGenericTypeParameter(f.Type) {
-						defaultExpressionKind = defaultValueKindNone
-					} else {
-						defaultExpression, defaultExpressionKind = typeDefault(f.Type, rec.Namespace, "", st)
-					}
-
+					defaultExpression, defaultExpressionKind := typeDefault(f.Type, rec.Namespace, "", st)
 					switch defaultExpressionKind {
 					case defaultValueKindNone, defaultValueKindImmutable:
 						fmt.Fprintf(w, "self.%s = %s\n", fieldName, fieldName)
@@ -842,7 +833,13 @@ func typeDefault(t dsl.Type, contextNamespace string, namedType string, st dsl.S
 				namespace: contextNamespace,
 				root:      false,
 			}
-			dtype := typeDTypeExpression(t.ToScalar(), context)
+
+			scalar := t.ToScalar()
+			if dsl.TypeContainsGenericTypeParameter(scalar) {
+				return "", defaultValueKindNone
+			}
+
+			dtype := typeDTypeExpression(scalar, context)
 
 			if td.IsFixed() {
 				dims := make([]string, len(*td.Dimensions))
@@ -910,31 +907,35 @@ func typeDefinitionDefault(t dsl.TypeDefinition, contextNamespace string, st dsl
 	case *dsl.RecordDefinition:
 		if len(t.TypeArguments) == 0 {
 			if len(t.TypeParameters) > 0 {
-				return "", defaultValueKindNone
+				// *Open* Generic Record type
+				// Should never get here - typeDefault is only called on Fields, which must be closed if generic
+				panic(fmt.Sprintf("No typeDefault for open generic record %s", t.Name))
 			}
 
 			for _, f := range t.Fields {
 				_, fieldDefaultKind := typeDefault(f.Type, contextNamespace, "", st)
 				if fieldDefaultKind == defaultValueKindNone {
-					return "", defaultValueKindNone
+					// Basic, closed record type
+					// Should never get here - a Field in a closed record should always have a default type
+					panic(fmt.Sprintf("No typeDefault for record field %s.%s", t.Name, f.Name))
 				}
 			}
 
+			// Basic record type
 			return fmt.Sprintf("%s()", common.TypeSyntaxWithoutTypeParameters(t, contextNamespace)), defaultValueKindMutable
 		}
 
-		// generic record with type arguments
-
+		// t is a *closed* generic record type
+		// genericDef is its original generic type definition
 		genericDef := st[t.GetQualifiedName()].(*dsl.RecordDefinition)
-
 		args := make([]string, 0)
-
 		for i, f := range t.Fields {
 			fieldDefaultExpr, fieldDefaultKind := typeDefault(f.Type, contextNamespace, "", st)
 			if fieldDefaultKind == defaultValueKindNone {
 				return "", defaultValueKindNone
 			}
 
+			// Only write a constructor argument if it is needed, e.g. the record definition's field is generic and doesn't have a default value
 			_, genDefaultKind := typeDefault(genericDef.Fields[i].Type, contextNamespace, "", st)
 			if genDefaultKind == defaultValueKindNone {
 				args = append(args, fmt.Sprintf("%s=%s", common.FieldIdentifierName(f.Name), fieldDefaultExpr))
@@ -958,13 +959,69 @@ func writeGetDTypeFunc(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 			root:      true,
 		}
 
+		writeUnionDtypeIfNeeded := func(td dsl.Node, unions map[string]any, callingNamespace string) {
+			dsl.VisitWithContext[string](td, "", func(self dsl.VisitorWithContext[string], node dsl.Node, currentNamespace string) {
+				switch node := node.(type) {
+				case dsl.TypeDefinition:
+					currentNamespace = node.GetDefinitionMeta().Namespace
+				}
+				switch node := node.(type) {
+				case *dsl.NamedType:
+					if gt, ok := node.Type.(*dsl.GeneralizedType); ok {
+						if gt.Cases.IsUnion() {
+							// Special handling for dtype entry of nullable aliased unions
+							if gt.Cases.HasNullOption() {
+								// This an aliased union, where null is one of the options, e.g. X = [null, int, float]
+								// register X: ... instead of typing.Optional[X]: ...
+								// by stripping away the null option
+								gtClone := *gt
+								gtClone.Cases = gtClone.Cases[1:]
+								ntClone := *node
+								ntClone.Type = &gtClone
+								td := &ntClone
+								fmt.Fprintf(w, "dtype_map.setdefault(%s, %s)\n", common.TypeSyntaxWithoutTypeParameters(td, callingNamespace), typeDefinitionDTypeExpression(td, context))
+
+							}
+							// Return early - we use the alias name for this union type over the yardl-generate UnionClassName
+							return
+						}
+					}
+				case *dsl.GeneralizedType:
+					if node.Cases.IsUnion() {
+						unionClassName, _ := common.UnionClassName(node)
+						if currentNamespace != callingNamespace {
+							unionClassName = fmt.Sprintf("%s.%s", common.NamespaceIdentifierName(currentNamespace), unionClassName)
+						}
+						if _, ok := unions[unionClassName]; !ok {
+							unions[unionClassName] = nil
+							fmt.Fprintf(w, "dtype_map.setdefault(%s, %s)\n", unionClassName, typeDTypeExpression(node, context))
+						}
+					}
+
+				}
+				self.VisitChildren(node, currentNamespace)
+			})
+		}
+
 		for _, refNs := range ns.GetAllChildReferences() {
-			for _, t := range refNs.TypeDefinitions {
-				fmt.Fprintf(w, "dtype_map.setdefault(%s, %s)\n", common.TypeSyntaxWithoutTypeParameters(t, ns.Name), typeDefinitionDTypeExpression(t, context))
+			unions := make(map[string]any)
+			for _, td := range refNs.TypeDefinitions {
+				writeUnionDtypeIfNeeded(td, unions, ns.Name)
+				fmt.Fprintf(w, "dtype_map.setdefault(%s, %s)\n", common.TypeSyntaxWithoutTypeParameters(td, ns.Name), typeDefinitionDTypeExpression(td, context))
+			}
+			for _, td := range refNs.Protocols {
+				writeUnionDtypeIfNeeded(td, unions, ns.Name)
 			}
 		}
-		for _, t := range ns.TypeDefinitions {
-			fmt.Fprintf(w, "dtype_map.setdefault(%s, %s)\n", common.TypeSyntaxWithoutTypeParameters(t, ns.Name), typeDefinitionDTypeExpression(t, context))
+
+		unions := make(map[string]any)
+		for _, td := range ns.TypeDefinitions {
+			writeUnionDtypeIfNeeded(td, unions, ns.Name)
+			fmt.Fprintf(w, "dtype_map.setdefault(%s, %s)\n", common.TypeSyntaxWithoutTypeParameters(td, ns.Name), typeDefinitionDTypeExpression(td, context))
+		}
+
+		for _, td := range ns.Protocols {
+			writeUnionDtypeIfNeeded(td, unions, ns.Name)
 		}
 
 		w.WriteStringln("\nreturn get_dtype")

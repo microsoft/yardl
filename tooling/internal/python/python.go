@@ -89,6 +89,8 @@ func writePackageInitFile(ns *dsl.Namespace, packageDir string) error {
 	w := formatting.NewIndentedWriter(&b, "    ")
 	common.WriteGeneratedFileHeader(w)
 
+	w.WriteStringln(`# pyright: reportUnusedImport=false`)
+
 	w.WriteStringln(`from typing import Tuple as _Tuple
 import re as _re
 import numpy as _np
@@ -118,9 +120,7 @@ if _parse_version(_np.__version__) < _MIN_NUMPY_VERSION:
 	}
 
 	typesMembers := make([]string, 0)
-	if ns.IsTopLevel {
-		typesMembers = append(typesMembers, "get_dtype")
-	}
+	typesMembers = append(typesMembers, "get_dtype")
 	for _, t := range ns.TypeDefinitions {
 		typesMembers = append(typesMembers, common.TypeIdentifierName(t.GetDefinitionMeta().Name))
 	}

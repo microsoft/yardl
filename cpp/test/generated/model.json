@@ -1481,6 +1481,26 @@
         },
         {
           "alias": {
+            "name": "AliasedMultiGenericOptional",
+            "typeParameters": [
+              "T",
+              "U"
+            ],
+            "type": [
+              null,
+              {
+                "tag": "T",
+                "type": "T"
+              },
+              {
+                "tag": "U",
+                "type": "U"
+              }
+            ]
+          }
+        },
+        {
+          "alias": {
             "name": "AliasedGenericUnion2",
             "typeParameters": [
               "T1",
@@ -1521,6 +1541,452 @@
                 "length": 3
               }
             }
+          }
+        },
+        {
+          "alias": {
+            "name": "AliasedGenericRank2Array",
+            "typeParameters": [
+              "T"
+            ],
+            "type": {
+              "array": {
+                "items": "T",
+                "dimensions": 2
+              }
+            }
+          }
+        },
+        {
+          "alias": {
+            "name": "AliasedGenericFixedArray",
+            "typeParameters": [
+              "T"
+            ],
+            "type": {
+              "array": {
+                "items": "T",
+                "dimensions": [
+                  {
+                    "length": 16
+                  },
+                  {
+                    "length": 8
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "alias": {
+            "name": "AliasedGenericDynamicArray",
+            "typeParameters": [
+              "T"
+            ],
+            "type": {
+              "array": {
+                "items": "T"
+              }
+            }
+          }
+        },
+        {
+          "record": {
+            "name": "RecordWithOptionalGenericField",
+            "typeParameters": [
+              "T"
+            ],
+            "fields": [
+              {
+                "name": "v",
+                "type": [
+                  null,
+                  "T"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "record": {
+            "name": "RecordWithAliasedOptionalGenericField",
+            "typeParameters": [
+              "T"
+            ],
+            "fields": [
+              {
+                "name": "v",
+                "type": {
+                  "name": "TestModel.AliasedGenericOptional",
+                  "typeArguments": [
+                    "T"
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "record": {
+            "name": "RecordWithOptionalGenericUnionField",
+            "typeParameters": [
+              "U",
+              "V"
+            ],
+            "fields": [
+              {
+                "name": "v",
+                "type": [
+                  null,
+                  {
+                    "tag": "U",
+                    "type": "U"
+                  },
+                  {
+                    "tag": "V",
+                    "type": "V"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "record": {
+            "name": "RecordWithAliasedOptionalGenericUnionField",
+            "typeParameters": [
+              "U",
+              "V"
+            ],
+            "fields": [
+              {
+                "name": "v",
+                "type": {
+                  "name": "TestModel.AliasedMultiGenericOptional",
+                  "typeArguments": [
+                    "U",
+                    "V"
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "record": {
+            "name": "RecordWithGenericVectors",
+            "typeParameters": [
+              "T"
+            ],
+            "fields": [
+              {
+                "name": "v",
+                "type": {
+                  "vector": {
+                    "items": "T"
+                  }
+                }
+              },
+              {
+                "name": "av",
+                "type": {
+                  "name": "TestModel.AliasedGenericVector",
+                  "typeArguments": [
+                    "T"
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "record": {
+            "name": "RecordWithGenericFixedVectors",
+            "typeParameters": [
+              "T"
+            ],
+            "fields": [
+              {
+                "name": "fv",
+                "type": {
+                  "vector": {
+                    "items": "T",
+                    "length": 3
+                  }
+                }
+              },
+              {
+                "name": "afv",
+                "type": {
+                  "name": "TestModel.AliasedGenericFixedVector",
+                  "typeArguments": [
+                    "T"
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "record": {
+            "name": "RecordWithGenericArrays",
+            "typeParameters": [
+              "T"
+            ],
+            "fields": [
+              {
+                "name": "nd",
+                "type": {
+                  "array": {
+                    "items": "T",
+                    "dimensions": 2
+                  }
+                }
+              },
+              {
+                "name": "fixedNd",
+                "type": {
+                  "array": {
+                    "items": "T",
+                    "dimensions": [
+                      {
+                        "length": 16
+                      },
+                      {
+                        "length": 8
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "name": "dynamicNd",
+                "type": {
+                  "array": {
+                    "items": "T"
+                  }
+                }
+              },
+              {
+                "name": "aliasedNd",
+                "type": {
+                  "name": "TestModel.AliasedGenericRank2Array",
+                  "typeArguments": [
+                    "T"
+                  ]
+                }
+              },
+              {
+                "name": "aliasedFixedNd",
+                "type": {
+                  "name": "TestModel.AliasedGenericFixedArray",
+                  "typeArguments": [
+                    "T"
+                  ]
+                }
+              },
+              {
+                "name": "aliasedDynamicNd",
+                "type": {
+                  "name": "TestModel.AliasedGenericDynamicArray",
+                  "typeArguments": [
+                    "T"
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "record": {
+            "name": "RecordWithGenericMaps",
+            "typeParameters": [
+              "T",
+              "U"
+            ],
+            "fields": [
+              {
+                "name": "m",
+                "type": {
+                  "map": {
+                    "keys": "T",
+                    "values": "U"
+                  }
+                }
+              },
+              {
+                "name": "am",
+                "type": {
+                  "name": "BasicTypes.AliasedMap",
+                  "typeArguments": [
+                    "T",
+                    "U"
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "record": {
+            "name": "RecordContainingGenericRecords",
+            "typeParameters": [
+              "A",
+              "B"
+            ],
+            "fields": [
+              {
+                "name": "g1",
+                "type": {
+                  "name": "TestModel.RecordWithOptionalGenericField",
+                  "typeArguments": [
+                    "A"
+                  ]
+                }
+              },
+              {
+                "name": "g1a",
+                "type": {
+                  "name": "TestModel.RecordWithAliasedOptionalGenericField",
+                  "typeArguments": [
+                    "A"
+                  ]
+                }
+              },
+              {
+                "name": "g2",
+                "type": {
+                  "name": "TestModel.RecordWithOptionalGenericUnionField",
+                  "typeArguments": [
+                    "A",
+                    "B"
+                  ]
+                }
+              },
+              {
+                "name": "g2a",
+                "type": {
+                  "name": "TestModel.RecordWithAliasedOptionalGenericUnionField",
+                  "typeArguments": [
+                    "A",
+                    "B"
+                  ]
+                }
+              },
+              {
+                "name": "g3",
+                "type": {
+                  "name": "TestModel.MyTuple",
+                  "typeArguments": [
+                    "A",
+                    "B"
+                  ]
+                }
+              },
+              {
+                "name": "g3a",
+                "type": {
+                  "name": "TestModel.AliasedTuple",
+                  "typeArguments": [
+                    "A",
+                    "B"
+                  ]
+                }
+              },
+              {
+                "name": "g4",
+                "type": {
+                  "name": "TestModel.RecordWithGenericVectors",
+                  "typeArguments": [
+                    "B"
+                  ]
+                }
+              },
+              {
+                "name": "g5",
+                "type": {
+                  "name": "TestModel.RecordWithGenericFixedVectors",
+                  "typeArguments": [
+                    "B"
+                  ]
+                }
+              },
+              {
+                "name": "g6",
+                "type": {
+                  "name": "TestModel.RecordWithGenericArrays",
+                  "typeArguments": [
+                    "B"
+                  ]
+                }
+              },
+              {
+                "name": "g7",
+                "type": {
+                  "name": "TestModel.RecordWithGenericMaps",
+                  "typeArguments": [
+                    "A",
+                    "B"
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "record": {
+            "name": "RecordContainingNestedGenericRecords",
+            "fields": [
+              {
+                "name": "f1",
+                "type": {
+                  "name": "TestModel.RecordWithOptionalGenericField",
+                  "typeArguments": [
+                    "string"
+                  ]
+                }
+              },
+              {
+                "name": "f1a",
+                "type": {
+                  "name": "TestModel.RecordWithAliasedOptionalGenericField",
+                  "typeArguments": [
+                    "string"
+                  ]
+                }
+              },
+              {
+                "name": "f2",
+                "type": {
+                  "name": "TestModel.RecordWithOptionalGenericUnionField",
+                  "typeArguments": [
+                    "string",
+                    "int32"
+                  ]
+                }
+              },
+              {
+                "name": "f2a",
+                "type": {
+                  "name": "TestModel.RecordWithAliasedOptionalGenericUnionField",
+                  "typeArguments": [
+                    "string",
+                    "int32"
+                  ]
+                }
+              },
+              {
+                "name": "nested",
+                "type": {
+                  "name": "TestModel.RecordContainingGenericRecords",
+                  "typeArguments": [
+                    "string",
+                    "int32"
+                  ]
+                }
+              }
+            ]
           }
         },
         {
