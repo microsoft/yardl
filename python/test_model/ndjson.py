@@ -3842,12 +3842,12 @@ class NDJsonAliasesWriter(_ndjson.NDJsonProtocolWriter, AliasesWriterBase):
         json_value = converter.to_json(value)
         self._write_json_line({"aliasedClosedGeneric": json_value})
 
-    def _write_aliased_optional(self, value: typing.Optional[AliasedOptional]) -> None:
+    def _write_aliased_optional(self, value: AliasedOptional) -> None:
         converter = _ndjson.OptionalConverter(_ndjson.int32_converter)
         json_value = converter.to_json(value)
         self._write_json_line({"aliasedOptional": json_value})
 
-    def _write_aliased_generic_optional(self, value: typing.Optional[AliasedGenericOptional[yardl.Float32]]) -> None:
+    def _write_aliased_generic_optional(self, value: AliasedGenericOptional[yardl.Float32]) -> None:
         converter = _ndjson.OptionalConverter(_ndjson.float32_converter)
         json_value = converter.to_json(value)
         self._write_json_line({"aliasedGenericOptional": json_value})
@@ -3902,12 +3902,12 @@ class NDJsonAliasesReader(_ndjson.NDJsonProtocolReader, AliasesReaderBase):
         converter = _MyTupleConverter(_ndjson.string_converter, _ndjson.EnumConverter(Fruits, np.int32, _fruits_name_to_value_map, _fruits_value_to_name_map))
         return converter.from_json(json_object)
 
-    def _read_aliased_optional(self) -> typing.Optional[AliasedOptional]:
+    def _read_aliased_optional(self) -> AliasedOptional:
         json_object = self._read_json_line("aliasedOptional", True)
         converter = _ndjson.OptionalConverter(_ndjson.int32_converter)
         return converter.from_json(json_object)
 
-    def _read_aliased_generic_optional(self) -> typing.Optional[AliasedGenericOptional[yardl.Float32]]:
+    def _read_aliased_generic_optional(self) -> AliasedGenericOptional[yardl.Float32]:
         json_object = self._read_json_line("aliasedGenericOptional", True)
         converter = _ndjson.OptionalConverter(_ndjson.float32_converter)
         return converter.from_json(json_object)

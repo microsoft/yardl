@@ -51,21 +51,19 @@ def make_get_dtype_func(
         ],
         t: Union[type, GenericAlias],
     ) -> np.dtype[Any]:
-        # type_args = list(filter(lambda t: type(t) != TypeVar, get_args(t)))
+        # Check dtype map for this type first
+        if (res := dtype_map.get(t, None)) is not None:
+            if callable(res):
+                raise RuntimeError(f"Generic type arguments not provided for {t}")
+            else:
+                return res
+
         origin = get_origin(t)
 
         if origin == Union or (
             sys.version_info >= (3, 10) and isinstance(t, UnionType)
         ):
             return _get_union_dtype(get_args(t))
-
-        # If t is found in dtype_map here, t is either a Python type
-        # or t is a types.GenericAlias with missing type arguments
-        if (res := dtype_map.get(t, None)) is not None:
-            if callable(res):
-                raise RuntimeError(f"Generic type arguments not provided for {t}")
-            else:
-                return res
 
         # Here, t is either invalid (no dtype registered)
         # or t is a types.GenericAlias with type arguments specified

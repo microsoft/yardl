@@ -168,3 +168,30 @@ def test_get_dtype():
     )
 
     assert tm.get_dtype(typing.Union[tm.Int32, tm.Float32]) == np.object_
+
+    assert tm.get_dtype(tm.Int32OrString) == np.object_
+
+    assert tm.get_dtype(tm.TimeOrDatetime) == np.object_
+    assert tm.get_dtype(tm.Int32OrSimpleRecord) == np.object_
+
+    assert tm.get_dtype(tm.AliasedOptional) == np.dtype(
+        [("has_value", "?"), ("value", np.int32)], align=True
+    )
+
+    assert tm.get_dtype(tm.AliasedMultiGenericOptional[str, int]) == np.object_
+    assert tm.get_dtype(
+        tm.RecordWithAliasedOptionalGenericUnionField[str, int]
+    ) == np.dtype(
+        [
+            (
+                "v",
+                np.object_,
+            )
+        ],
+        align=True,
+    )
+
+    assert tm.get_dtype(tm.AliasedNullableIntSimpleRecord) == np.object_
+    assert (
+        tm.get_dtype(typing.Optional[tm.AliasedNullableIntSimpleRecord]) == np.object_
+    )

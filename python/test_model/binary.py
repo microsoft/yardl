@@ -1048,10 +1048,10 @@ class BinaryAliasesWriter(_binary.BinaryProtocolWriter, AliasesWriterBase):
     def _write_aliased_closed_generic(self, value: AliasedClosedGeneric) -> None:
         _MyTupleSerializer(_binary.string_serializer, _binary.EnumSerializer(_binary.int32_serializer, Fruits)).write(self._stream, value)
 
-    def _write_aliased_optional(self, value: typing.Optional[AliasedOptional]) -> None:
+    def _write_aliased_optional(self, value: AliasedOptional) -> None:
         _binary.OptionalSerializer(_binary.int32_serializer).write(self._stream, value)
 
-    def _write_aliased_generic_optional(self, value: typing.Optional[AliasedGenericOptional[yardl.Float32]]) -> None:
+    def _write_aliased_generic_optional(self, value: AliasedGenericOptional[yardl.Float32]) -> None:
         _binary.OptionalSerializer(_binary.float32_serializer).write(self._stream, value)
 
     def _write_aliased_generic_union_2(self, value: AliasedGenericUnion2[AliasedString, AliasedEnum]) -> None:
@@ -1087,10 +1087,10 @@ class BinaryAliasesReader(_binary.BinaryProtocolReader, AliasesReaderBase):
     def _read_aliased_closed_generic(self) -> AliasedClosedGeneric:
         return _MyTupleSerializer(_binary.string_serializer, _binary.EnumSerializer(_binary.int32_serializer, Fruits)).read(self._stream)
 
-    def _read_aliased_optional(self) -> typing.Optional[AliasedOptional]:
+    def _read_aliased_optional(self) -> AliasedOptional:
         return _binary.OptionalSerializer(_binary.int32_serializer).read(self._stream)
 
-    def _read_aliased_generic_optional(self) -> typing.Optional[AliasedGenericOptional[yardl.Float32]]:
+    def _read_aliased_generic_optional(self) -> AliasedGenericOptional[yardl.Float32]:
         return _binary.OptionalSerializer(_binary.float32_serializer).read(self._stream)
 
     def _read_aliased_generic_union_2(self) -> AliasedGenericUnion2[AliasedString, AliasedEnum]:
