@@ -41,15 +41,12 @@ from %s import _dtypes
 
 	for _, ref := range ns.GetAllChildReferences() {
 		fmt.Fprintf(w, "from %s import %s\n", relativePath, common.NamespaceIdentifierName(ref.Name))
-		fmt.Fprintf(w, "from %s%s.types import *\n", relativePath, common.NamespaceIdentifierName(ref.Name))
 	}
 	w.WriteStringln("")
 
 	writeTypes(w, st, ns)
 
-	if ns.IsTopLevel {
-		writeGetDTypeFunc(w, ns)
-	}
+	writeGetDTypeFunc(w, ns)
 
 	definitionsPath := path.Join(packageDir, "types.py")
 	return iocommon.WriteFileIfNeeded(definitionsPath, b.Bytes(), 0644)

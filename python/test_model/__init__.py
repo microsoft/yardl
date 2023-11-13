@@ -19,11 +19,8 @@ if _parse_version(_np.__version__) < _MIN_NUMPY_VERSION:
 
 from .yardl_types import *
 from . import tuples
-from .tuples.types import *
 from . import basic_types
-from .basic_types.types import *
 from . import image
-from .image.types import *
 from .types import (
     AcquisitionOrImage,
     AliasedClosedGeneric,

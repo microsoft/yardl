@@ -115,7 +115,6 @@ if _parse_version(_np.__version__) < _MIN_NUMPY_VERSION:
 
 	for _, ref := range ns.GetAllChildReferences() {
 		fmt.Fprintf(w, "from %s import %s\n", relativePath, common.NamespaceIdentifierName(ref.Name))
-		fmt.Fprintf(w, "from %s%s.types import *\n", relativePath, common.NamespaceIdentifierName(ref.Name))
 	}
 
 	typesMembers := make([]string, 0)

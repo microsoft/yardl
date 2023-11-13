@@ -19,7 +19,6 @@ if _parse_version(_np.__version__) < _MIN_NUMPY_VERSION:
 
 from ..yardl_types import *
 from .. import tuples
-from ..tuples.types import *
 from .types import (
     AliasedMap,
     DaysOfWeek,

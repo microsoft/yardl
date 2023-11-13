@@ -12,7 +12,6 @@ from .. import yardl_types as yardl
 from .. import _dtypes
 
 from .. import tuples
-from ..tuples.types import *
 
 K = typing.TypeVar("K")
 K_NP = typing.TypeVar("K_NP", bound=np.generic)
@@ -170,4 +169,23 @@ class GenericRecordWithComputedFields(typing.Generic[T0, T1]):
     def __repr__(self) -> str:
         return f"GenericRecordWithComputedFields(f1={repr(self.f1)})"
 
+
+def _mk_get_dtype():
+    dtype_map: dict[typing.Union[type, types.GenericAlias], typing.Union[np.dtype[typing.Any], typing.Callable[[tuple[type, ...]], np.dtype[typing.Any]]]] = {}
+    get_dtype = _dtypes.make_get_dtype_func(dtype_map)
+
+    dtype_map.setdefault(tuples.Tuple, lambda type_args: np.dtype([('v1', get_dtype(type_args[0])), ('v2', get_dtype(type_args[1]))], align=True))
+    dtype_map.setdefault(Fruits, np.dtype(np.int32))
+    dtype_map.setdefault(DaysOfWeek, np.dtype(np.int32))
+    dtype_map.setdefault(TextFormat, np.dtype(np.uint64))
+    dtype_map.setdefault(AliasedMap, lambda type_args: np.dtype(np.object_))
+    dtype_map.setdefault(MyTuple, lambda type_args: get_dtype(types.GenericAlias(tuples.Tuple, (type_args[0], type_args[1],))))
+    dtype_map.setdefault(GenericUnion2, lambda type_args: np.dtype(np.object_))
+    dtype_map.setdefault(GenericVector, lambda type_args: np.dtype(np.object_))
+    dtype_map.setdefault(RecordWithUnions, np.dtype([('null_or_int_or_string', np.dtype(np.object_)), ('date_or_datetime', np.dtype(np.object_))], align=True))
+    dtype_map.setdefault(GenericRecordWithComputedFields, lambda type_args: np.dtype([('f1', np.dtype(np.object_))], align=True))
+
+    return get_dtype
+
+get_dtype = _mk_get_dtype()
 
