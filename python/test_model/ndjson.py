@@ -1291,28 +1291,28 @@ class RecordWithVlenCollectionsConverter(_ndjson.JsonConverter[RecordWithVlenCol
         ) # type:ignore 
 
 
-_u_int64_enum_name_to_value_map = {
+u_int64_enum_name_to_value_map = {
     "a": UInt64Enum.A,
 }
-_u_int64_enum_value_to_name_map = {v: n for n, v in _u_int64_enum_name_to_value_map.items()}
+u_int64_enum_value_to_name_map = {v: n for n, v in u_int64_enum_name_to_value_map.items()}
 
-_int64_enum_name_to_value_map = {
+int64_enum_name_to_value_map = {
     "b": Int64Enum.B,
 }
-_int64_enum_value_to_name_map = {v: n for n, v in _int64_enum_name_to_value_map.items()}
+int64_enum_value_to_name_map = {v: n for n, v in int64_enum_name_to_value_map.items()}
 
-_size_based_enum_name_to_value_map = {
+size_based_enum_name_to_value_map = {
     "a": SizeBasedEnum.A,
     "b": SizeBasedEnum.B,
     "c": SizeBasedEnum.C,
 }
-_size_based_enum_value_to_name_map = {v: n for n, v in _size_based_enum_name_to_value_map.items()}
+size_based_enum_value_to_name_map = {v: n for n, v in size_based_enum_name_to_value_map.items()}
 
 class RecordWithEnumsConverter(_ndjson.JsonConverter[RecordWithEnums, np.void]):
     def __init__(self) -> None:
-        self._enum_converter = _ndjson.EnumConverter(basic_types.Fruits, np.int32, basic_types.ndjson._fruits_name_to_value_map, basic_types.ndjson._fruits_value_to_name_map)
-        self._flags_converter = _ndjson.FlagsConverter(basic_types.DaysOfWeek, np.int32, basic_types.ndjson._days_of_week_name_to_value_map, basic_types.ndjson._days_of_week_value_to_name_map)
-        self._flags_2_converter = _ndjson.FlagsConverter(basic_types.TextFormat, np.uint64, basic_types.ndjson._text_format_name_to_value_map, basic_types.ndjson._text_format_value_to_name_map)
+        self._enum_converter = _ndjson.EnumConverter(basic_types.Fruits, np.int32, basic_types.ndjson.fruits_name_to_value_map, basic_types.ndjson.fruits_value_to_name_map)
+        self._flags_converter = _ndjson.FlagsConverter(basic_types.DaysOfWeek, np.int32, basic_types.ndjson.days_of_week_name_to_value_map, basic_types.ndjson.days_of_week_value_to_name_map)
+        self._flags_2_converter = _ndjson.FlagsConverter(basic_types.TextFormat, np.uint64, basic_types.ndjson.text_format_name_to_value_map, basic_types.ndjson.text_format_value_to_name_map)
         super().__init__(np.dtype([
             ("enum", self._enum_converter.overall_dtype()),
             ("flags", self._flags_converter.overall_dtype()),
@@ -2216,17 +2216,17 @@ class RecordNotUsedInProtocolConverter(_ndjson.JsonConverter[RecordNotUsedInProt
         ) # type:ignore 
 
 
-_enum_with_keyword_symbols_name_to_value_map = {
+enum_with_keyword_symbols_name_to_value_map = {
     "try": EnumWithKeywordSymbols.TRY,
     "catch": EnumWithKeywordSymbols.CATCH,
 }
-_enum_with_keyword_symbols_value_to_name_map = {v: n for n, v in _enum_with_keyword_symbols_name_to_value_map.items()}
+enum_with_keyword_symbols_value_to_name_map = {v: n for n, v in enum_with_keyword_symbols_name_to_value_map.items()}
 
 class RecordWithKeywordFieldsConverter(_ndjson.JsonConverter[RecordWithKeywordFields, np.void]):
     def __init__(self) -> None:
         self._int__converter = _ndjson.string_converter
         self._sizeof_converter = _ndjson.NDArrayConverter(_ndjson.int32_converter, 2)
-        self._if__converter = _ndjson.EnumConverter(EnumWithKeywordSymbols, np.int32, _enum_with_keyword_symbols_name_to_value_map, _enum_with_keyword_symbols_value_to_name_map)
+        self._if__converter = _ndjson.EnumConverter(EnumWithKeywordSymbols, np.int32, enum_with_keyword_symbols_name_to_value_map, enum_with_keyword_symbols_value_to_name_map)
         super().__init__(np.dtype([
             ("int_", self._int__converter.overall_dtype()),
             ("sizeof", self._sizeof_converter.overall_dtype()),
@@ -3354,17 +3354,17 @@ class NDJsonEnumsWriter(_ndjson.NDJsonProtocolWriter, EnumsWriterBase):
         _ndjson.NDJsonProtocolWriter.__init__(self, stream, EnumsWriterBase.schema)
 
     def _write_single(self, value: Fruits) -> None:
-        converter = _ndjson.EnumConverter(basic_types.Fruits, np.int32, basic_types.ndjson._fruits_name_to_value_map, basic_types.ndjson._fruits_value_to_name_map)
+        converter = _ndjson.EnumConverter(basic_types.Fruits, np.int32, basic_types.ndjson.fruits_name_to_value_map, basic_types.ndjson.fruits_value_to_name_map)
         json_value = converter.to_json(value)
         self._write_json_line({"single": json_value})
 
     def _write_vec(self, value: list[Fruits]) -> None:
-        converter = _ndjson.VectorConverter(_ndjson.EnumConverter(basic_types.Fruits, np.int32, basic_types.ndjson._fruits_name_to_value_map, basic_types.ndjson._fruits_value_to_name_map))
+        converter = _ndjson.VectorConverter(_ndjson.EnumConverter(basic_types.Fruits, np.int32, basic_types.ndjson.fruits_name_to_value_map, basic_types.ndjson.fruits_value_to_name_map))
         json_value = converter.to_json(value)
         self._write_json_line({"vec": json_value})
 
     def _write_size(self, value: SizeBasedEnum) -> None:
-        converter = _ndjson.EnumConverter(SizeBasedEnum, np.uint64, _size_based_enum_name_to_value_map, _size_based_enum_value_to_name_map)
+        converter = _ndjson.EnumConverter(SizeBasedEnum, np.uint64, size_based_enum_name_to_value_map, size_based_enum_value_to_name_map)
         json_value = converter.to_json(value)
         self._write_json_line({"size": json_value})
 
@@ -3379,17 +3379,17 @@ class NDJsonEnumsReader(_ndjson.NDJsonProtocolReader, EnumsReaderBase):
 
     def _read_single(self) -> Fruits:
         json_object = self._read_json_line("single", True)
-        converter = _ndjson.EnumConverter(basic_types.Fruits, np.int32, basic_types.ndjson._fruits_name_to_value_map, basic_types.ndjson._fruits_value_to_name_map)
+        converter = _ndjson.EnumConverter(basic_types.Fruits, np.int32, basic_types.ndjson.fruits_name_to_value_map, basic_types.ndjson.fruits_value_to_name_map)
         return converter.from_json(json_object)
 
     def _read_vec(self) -> list[Fruits]:
         json_object = self._read_json_line("vec", True)
-        converter = _ndjson.VectorConverter(_ndjson.EnumConverter(basic_types.Fruits, np.int32, basic_types.ndjson._fruits_name_to_value_map, basic_types.ndjson._fruits_value_to_name_map))
+        converter = _ndjson.VectorConverter(_ndjson.EnumConverter(basic_types.Fruits, np.int32, basic_types.ndjson.fruits_name_to_value_map, basic_types.ndjson.fruits_value_to_name_map))
         return converter.from_json(json_object)
 
     def _read_size(self) -> SizeBasedEnum:
         json_object = self._read_json_line("size", True)
-        converter = _ndjson.EnumConverter(SizeBasedEnum, np.uint64, _size_based_enum_name_to_value_map, _size_based_enum_value_to_name_map)
+        converter = _ndjson.EnumConverter(SizeBasedEnum, np.uint64, size_based_enum_name_to_value_map, size_based_enum_value_to_name_map)
         return converter.from_json(json_object)
 
 class NDJsonFlagsWriter(_ndjson.NDJsonProtocolWriter, FlagsWriterBase):
@@ -3401,13 +3401,13 @@ class NDJsonFlagsWriter(_ndjson.NDJsonProtocolWriter, FlagsWriterBase):
         _ndjson.NDJsonProtocolWriter.__init__(self, stream, FlagsWriterBase.schema)
 
     def _write_days(self, value: collections.abc.Iterable[DaysOfWeek]) -> None:
-        converter = _ndjson.FlagsConverter(basic_types.DaysOfWeek, np.int32, basic_types.ndjson._days_of_week_name_to_value_map, basic_types.ndjson._days_of_week_value_to_name_map)
+        converter = _ndjson.FlagsConverter(basic_types.DaysOfWeek, np.int32, basic_types.ndjson.days_of_week_name_to_value_map, basic_types.ndjson.days_of_week_value_to_name_map)
         for item in value:
             json_item = converter.to_json(item)
             self._write_json_line({"days": json_item})
 
     def _write_formats(self, value: collections.abc.Iterable[TextFormat]) -> None:
-        converter = _ndjson.FlagsConverter(basic_types.TextFormat, np.uint64, basic_types.ndjson._text_format_name_to_value_map, basic_types.ndjson._text_format_value_to_name_map)
+        converter = _ndjson.FlagsConverter(basic_types.TextFormat, np.uint64, basic_types.ndjson.text_format_name_to_value_map, basic_types.ndjson.text_format_value_to_name_map)
         for item in value:
             json_item = converter.to_json(item)
             self._write_json_line({"formats": json_item})
@@ -3422,12 +3422,12 @@ class NDJsonFlagsReader(_ndjson.NDJsonProtocolReader, FlagsReaderBase):
         _ndjson.NDJsonProtocolReader.__init__(self, stream, FlagsReaderBase.schema)
 
     def _read_days(self) -> collections.abc.Iterable[DaysOfWeek]:
-        converter = _ndjson.FlagsConverter(basic_types.DaysOfWeek, np.int32, basic_types.ndjson._days_of_week_name_to_value_map, basic_types.ndjson._days_of_week_value_to_name_map)
+        converter = _ndjson.FlagsConverter(basic_types.DaysOfWeek, np.int32, basic_types.ndjson.days_of_week_name_to_value_map, basic_types.ndjson.days_of_week_value_to_name_map)
         while (json_object := self._read_json_line("days", False)) is not _ndjson.MISSING_SENTINEL:
             yield converter.from_json(json_object)
 
     def _read_formats(self) -> collections.abc.Iterable[TextFormat]:
-        converter = _ndjson.FlagsConverter(basic_types.TextFormat, np.uint64, basic_types.ndjson._text_format_name_to_value_map, basic_types.ndjson._text_format_value_to_name_map)
+        converter = _ndjson.FlagsConverter(basic_types.TextFormat, np.uint64, basic_types.ndjson.text_format_name_to_value_map, basic_types.ndjson.text_format_value_to_name_map)
         while (json_object := self._read_json_line("formats", False)) is not _ndjson.MISSING_SENTINEL:
             yield converter.from_json(json_object)
 
@@ -3668,17 +3668,17 @@ class NDJsonAliasesWriter(_ndjson.NDJsonProtocolWriter, AliasesWriterBase):
         self._write_json_line({"aliasedString": json_value})
 
     def _write_aliased_enum(self, value: AliasedEnum) -> None:
-        converter = _ndjson.EnumConverter(basic_types.Fruits, np.int32, basic_types.ndjson._fruits_name_to_value_map, basic_types.ndjson._fruits_value_to_name_map)
+        converter = _ndjson.EnumConverter(basic_types.Fruits, np.int32, basic_types.ndjson.fruits_name_to_value_map, basic_types.ndjson.fruits_value_to_name_map)
         json_value = converter.to_json(value)
         self._write_json_line({"aliasedEnum": json_value})
 
     def _write_aliased_open_generic(self, value: AliasedOpenGeneric[AliasedString, AliasedEnum]) -> None:
-        converter = tuples.ndjson.TupleConverter(_ndjson.string_converter, _ndjson.EnumConverter(basic_types.Fruits, np.int32, basic_types.ndjson._fruits_name_to_value_map, basic_types.ndjson._fruits_value_to_name_map))
+        converter = tuples.ndjson.TupleConverter(_ndjson.string_converter, _ndjson.EnumConverter(basic_types.Fruits, np.int32, basic_types.ndjson.fruits_name_to_value_map, basic_types.ndjson.fruits_value_to_name_map))
         json_value = converter.to_json(value)
         self._write_json_line({"aliasedOpenGeneric": json_value})
 
     def _write_aliased_closed_generic(self, value: AliasedClosedGeneric) -> None:
-        converter = tuples.ndjson.TupleConverter(_ndjson.string_converter, _ndjson.EnumConverter(basic_types.Fruits, np.int32, basic_types.ndjson._fruits_name_to_value_map, basic_types.ndjson._fruits_value_to_name_map))
+        converter = tuples.ndjson.TupleConverter(_ndjson.string_converter, _ndjson.EnumConverter(basic_types.Fruits, np.int32, basic_types.ndjson.fruits_name_to_value_map, basic_types.ndjson.fruits_value_to_name_map))
         json_value = converter.to_json(value)
         self._write_json_line({"aliasedClosedGeneric": json_value})
 
@@ -3693,7 +3693,7 @@ class NDJsonAliasesWriter(_ndjson.NDJsonProtocolWriter, AliasesWriterBase):
         self._write_json_line({"aliasedGenericOptional": json_value})
 
     def _write_aliased_generic_union_2(self, value: AliasedGenericUnion2[AliasedString, AliasedEnum]) -> None:
-        converter = _ndjson.UnionConverter(basic_types.GenericUnion2, [(basic_types.GenericUnion2.T1, _ndjson.string_converter, [str]), (basic_types.GenericUnion2.T2, _ndjson.EnumConverter(basic_types.Fruits, np.int32, basic_types.ndjson._fruits_name_to_value_map, basic_types.ndjson._fruits_value_to_name_map), [int, float, str])], False)
+        converter = _ndjson.UnionConverter(basic_types.GenericUnion2, [(basic_types.GenericUnion2.T1, _ndjson.string_converter, [str]), (basic_types.GenericUnion2.T2, _ndjson.EnumConverter(basic_types.Fruits, np.int32, basic_types.ndjson.fruits_name_to_value_map, basic_types.ndjson.fruits_value_to_name_map), [int, float, str])], False)
         json_value = converter.to_json(value)
         self._write_json_line({"aliasedGenericUnion2": json_value})
 
@@ -3708,7 +3708,7 @@ class NDJsonAliasesWriter(_ndjson.NDJsonProtocolWriter, AliasesWriterBase):
         self._write_json_line({"aliasedGenericFixedVector": json_value})
 
     def _write_stream_of_aliased_generic_union_2(self, value: collections.abc.Iterable[AliasedGenericUnion2[AliasedString, AliasedEnum]]) -> None:
-        converter = _ndjson.UnionConverter(basic_types.GenericUnion2, [(basic_types.GenericUnion2.T1, _ndjson.string_converter, [str]), (basic_types.GenericUnion2.T2, _ndjson.EnumConverter(basic_types.Fruits, np.int32, basic_types.ndjson._fruits_name_to_value_map, basic_types.ndjson._fruits_value_to_name_map), [int, float, str])], False)
+        converter = _ndjson.UnionConverter(basic_types.GenericUnion2, [(basic_types.GenericUnion2.T1, _ndjson.string_converter, [str]), (basic_types.GenericUnion2.T2, _ndjson.EnumConverter(basic_types.Fruits, np.int32, basic_types.ndjson.fruits_name_to_value_map, basic_types.ndjson.fruits_value_to_name_map), [int, float, str])], False)
         for item in value:
             json_item = converter.to_json(item)
             self._write_json_line({"streamOfAliasedGenericUnion2": json_item})
@@ -3729,17 +3729,17 @@ class NDJsonAliasesReader(_ndjson.NDJsonProtocolReader, AliasesReaderBase):
 
     def _read_aliased_enum(self) -> AliasedEnum:
         json_object = self._read_json_line("aliasedEnum", True)
-        converter = _ndjson.EnumConverter(basic_types.Fruits, np.int32, basic_types.ndjson._fruits_name_to_value_map, basic_types.ndjson._fruits_value_to_name_map)
+        converter = _ndjson.EnumConverter(basic_types.Fruits, np.int32, basic_types.ndjson.fruits_name_to_value_map, basic_types.ndjson.fruits_value_to_name_map)
         return converter.from_json(json_object)
 
     def _read_aliased_open_generic(self) -> AliasedOpenGeneric[AliasedString, AliasedEnum]:
         json_object = self._read_json_line("aliasedOpenGeneric", True)
-        converter = tuples.ndjson.TupleConverter(_ndjson.string_converter, _ndjson.EnumConverter(basic_types.Fruits, np.int32, basic_types.ndjson._fruits_name_to_value_map, basic_types.ndjson._fruits_value_to_name_map))
+        converter = tuples.ndjson.TupleConverter(_ndjson.string_converter, _ndjson.EnumConverter(basic_types.Fruits, np.int32, basic_types.ndjson.fruits_name_to_value_map, basic_types.ndjson.fruits_value_to_name_map))
         return converter.from_json(json_object)
 
     def _read_aliased_closed_generic(self) -> AliasedClosedGeneric:
         json_object = self._read_json_line("aliasedClosedGeneric", True)
-        converter = tuples.ndjson.TupleConverter(_ndjson.string_converter, _ndjson.EnumConverter(basic_types.Fruits, np.int32, basic_types.ndjson._fruits_name_to_value_map, basic_types.ndjson._fruits_value_to_name_map))
+        converter = tuples.ndjson.TupleConverter(_ndjson.string_converter, _ndjson.EnumConverter(basic_types.Fruits, np.int32, basic_types.ndjson.fruits_name_to_value_map, basic_types.ndjson.fruits_value_to_name_map))
         return converter.from_json(json_object)
 
     def _read_aliased_optional(self) -> AliasedOptional:
@@ -3754,7 +3754,7 @@ class NDJsonAliasesReader(_ndjson.NDJsonProtocolReader, AliasesReaderBase):
 
     def _read_aliased_generic_union_2(self) -> AliasedGenericUnion2[AliasedString, AliasedEnum]:
         json_object = self._read_json_line("aliasedGenericUnion2", True)
-        converter = _ndjson.UnionConverter(basic_types.GenericUnion2, [(basic_types.GenericUnion2.T1, _ndjson.string_converter, [str]), (basic_types.GenericUnion2.T2, _ndjson.EnumConverter(basic_types.Fruits, np.int32, basic_types.ndjson._fruits_name_to_value_map, basic_types.ndjson._fruits_value_to_name_map), [int, float, str])], False)
+        converter = _ndjson.UnionConverter(basic_types.GenericUnion2, [(basic_types.GenericUnion2.T1, _ndjson.string_converter, [str]), (basic_types.GenericUnion2.T2, _ndjson.EnumConverter(basic_types.Fruits, np.int32, basic_types.ndjson.fruits_name_to_value_map, basic_types.ndjson.fruits_value_to_name_map), [int, float, str])], False)
         return converter.from_json(json_object)
 
     def _read_aliased_generic_vector(self) -> AliasedGenericVector[yardl.Float32]:
@@ -3768,7 +3768,7 @@ class NDJsonAliasesReader(_ndjson.NDJsonProtocolReader, AliasesReaderBase):
         return converter.from_json(json_object)
 
     def _read_stream_of_aliased_generic_union_2(self) -> collections.abc.Iterable[AliasedGenericUnion2[AliasedString, AliasedEnum]]:
-        converter = _ndjson.UnionConverter(basic_types.GenericUnion2, [(basic_types.GenericUnion2.T1, _ndjson.string_converter, [str]), (basic_types.GenericUnion2.T2, _ndjson.EnumConverter(basic_types.Fruits, np.int32, basic_types.ndjson._fruits_name_to_value_map, basic_types.ndjson._fruits_value_to_name_map), [int, float, str])], False)
+        converter = _ndjson.UnionConverter(basic_types.GenericUnion2, [(basic_types.GenericUnion2.T1, _ndjson.string_converter, [str]), (basic_types.GenericUnion2.T2, _ndjson.EnumConverter(basic_types.Fruits, np.int32, basic_types.ndjson.fruits_name_to_value_map, basic_types.ndjson.fruits_value_to_name_map), [int, float, str])], False)
         while (json_object := self._read_json_line("streamOfAliasedGenericUnion2", False)) is not _ndjson.MISSING_SENTINEL:
             yield converter.from_json(json_object)
 
@@ -3853,7 +3853,7 @@ class NDJsonProtocolWithKeywordStepsWriter(_ndjson.NDJsonProtocolWriter, Protoco
             self._write_json_line({"int": json_item})
 
     def _write_float(self, value: EnumWithKeywordSymbols) -> None:
-        converter = _ndjson.EnumConverter(EnumWithKeywordSymbols, np.int32, _enum_with_keyword_symbols_name_to_value_map, _enum_with_keyword_symbols_value_to_name_map)
+        converter = _ndjson.EnumConverter(EnumWithKeywordSymbols, np.int32, enum_with_keyword_symbols_name_to_value_map, enum_with_keyword_symbols_value_to_name_map)
         json_value = converter.to_json(value)
         self._write_json_line({"float": json_value})
 
@@ -3873,6 +3873,6 @@ class NDJsonProtocolWithKeywordStepsReader(_ndjson.NDJsonProtocolReader, Protoco
 
     def _read_float(self) -> EnumWithKeywordSymbols:
         json_object = self._read_json_line("float", True)
-        converter = _ndjson.EnumConverter(EnumWithKeywordSymbols, np.int32, _enum_with_keyword_symbols_name_to_value_map, _enum_with_keyword_symbols_value_to_name_map)
+        converter = _ndjson.EnumConverter(EnumWithKeywordSymbols, np.int32, enum_with_keyword_symbols_name_to_value_map, enum_with_keyword_symbols_value_to_name_map)
         return converter.from_json(json_object)
 

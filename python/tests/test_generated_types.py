@@ -103,7 +103,7 @@ def test_defaulting():
         eval("tm.MyTuple[tm.Int32, tm.Float32]()")
 
     # The error goes away when you provide values for the fields.
-    tm.MyTuple(v1=1, v2=2.0)
+    tm.MyTuple[tm.Int32, tm.Float32](v1=1, v2=2.0)
 
 
 def test_get_dtype():

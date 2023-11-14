@@ -1552,9 +1552,9 @@ class RecordWithComputedFields:
         if isinstance(_var0, IntOrGenericRecordWithComputedFields.GenericRecordWithComputedFields):
             rec = _var0.value
             _var1 = rec.f1
-            if isinstance(_var1, T0OrT1.T1):
+            if isinstance(_var1, basic_types.T0OrT1.T1):
                 return int(20)
-            if isinstance(_var1, T0OrT1.T0):
+            if isinstance(_var1, basic_types.T0OrT1.T0):
                 return int(10)
             raise RuntimeError("Unexpected union case")
         raise RuntimeError("Unexpected union case")

@@ -6,6 +6,7 @@ package types
 import (
 	"bytes"
 	"fmt"
+	"log"
 	"path"
 	"strconv"
 	"strings"
@@ -569,8 +570,41 @@ func writeComputedFieldExpression(w *formatting.IndentedWriter, expression dsl.E
 			}
 
 			if targetType.Cases.IsUnion() {
+
+				// Special handling for SwitchExpression over a Union from an imported namespace
+				targetTypeNamespace := ""
+				dsl.Visit(t.Target, func(self dsl.Visitor, node dsl.Node) {
+					switch node := node.(type) {
+					case *dsl.SimpleType:
+						self.Visit(node.ResolvedDefinition)
+					case *dsl.RecordDefinition:
+						for _, field := range node.Fields {
+							u := dsl.GetUnderlyingType(field.Type)
+							if u == t.Target.GetResolvedType() {
+								log.Printf("Found MATCHING union type so this IS the namespace")
+								if targetTypeNamespace == "" {
+									meta := node.GetDefinitionMeta()
+									targetTypeNamespace = meta.Namespace
+								}
+								return
+							}
+						}
+					case dsl.Expression:
+						t := node.GetResolvedType()
+						if t != nil {
+							self.Visit(t)
+						}
+					}
+					self.VisitChildren(node)
+				})
+
+				unionClassName, _ := common.UnionClassName(targetType)
+				if targetTypeNamespace != "" && targetTypeNamespace != contextNamespace {
+					unionClassName = fmt.Sprintf("%s.%s", common.NamespaceIdentifierName(targetTypeNamespace), unionClassName)
+				}
+
 				for _, switchCase := range t.Cases {
-					writeSwitchCaseOverUnion(w, targetType, switchCase, unionVariableName, self, tail)
+					writeSwitchCaseOverUnion(w, targetType, unionClassName, switchCase, unionVariableName, self, tail)
 				}
 
 				fmt.Fprintf(w, "raise RuntimeError(\"Unexpected union case\")\n")
@@ -643,8 +677,7 @@ func writeSwitchCaseOverOptional(w *formatting.IndentedWriter, switchCase *dsl.S
 	}
 }
 
-func writeSwitchCaseOverUnion(w *formatting.IndentedWriter, unionType *dsl.GeneralizedType, switchCase *dsl.SwitchCase, variableName string, visitor dsl.VisitorWithContext[tailWrapper], tail tailWrapper) {
-	unionClassName, _ := common.UnionClassName(unionType)
+func writeSwitchCaseOverUnion(w *formatting.IndentedWriter, unionType *dsl.GeneralizedType, unionClassName string, switchCase *dsl.SwitchCase, variableName string, visitor dsl.VisitorWithContext[tailWrapper], tail tailWrapper) {
 	writeTypeCase := func(typePattern *dsl.TypePattern, declarationIdentifier string) {
 		for _, typeCase := range unionType.Cases {
 			if dsl.TypesEqual(typePattern.Type, typeCase.Type) {

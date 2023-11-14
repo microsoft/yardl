@@ -18,14 +18,14 @@ from .types import *
 from .. import _ndjson
 from .. import yardl_types as yardl
 
-_fruits_name_to_value_map = {
+fruits_name_to_value_map = {
     "apple": Fruits.APPLE,
     "banana": Fruits.BANANA,
     "pear": Fruits.PEAR,
 }
-_fruits_value_to_name_map = {v: n for n, v in _fruits_name_to_value_map.items()}
+fruits_value_to_name_map = {v: n for n, v in fruits_name_to_value_map.items()}
 
-_days_of_week_name_to_value_map = {
+days_of_week_name_to_value_map = {
     "monday": DaysOfWeek.MONDAY,
     "tuesday": DaysOfWeek.TUESDAY,
     "wednesday": DaysOfWeek.WEDNESDAY,
@@ -34,16 +34,16 @@ _days_of_week_name_to_value_map = {
     "saturday": DaysOfWeek.SATURDAY,
     "sunday": DaysOfWeek.SUNDAY,
 }
-_days_of_week_value_to_name_map = {v: n for n, v in _days_of_week_name_to_value_map.items()}
+days_of_week_value_to_name_map = {v: n for n, v in days_of_week_name_to_value_map.items()}
 
-_text_format_name_to_value_map = {
+text_format_name_to_value_map = {
     "regular": TextFormat.REGULAR,
     "bold": TextFormat.BOLD,
     "italic": TextFormat.ITALIC,
     "underline": TextFormat.UNDERLINE,
     "strikethrough": TextFormat.STRIKETHROUGH,
 }
-_text_format_value_to_name_map = {v: n for n, v in _text_format_name_to_value_map.items()}
+text_format_value_to_name_map = {v: n for n, v in text_format_name_to_value_map.items()}
 
 class RecordWithUnionsConverter(_ndjson.JsonConverter[RecordWithUnions, np.void]):
     def __init__(self) -> None:

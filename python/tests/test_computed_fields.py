@@ -12,7 +12,7 @@ def test_field_access():
     r.string_field = "hello"
     assert r.access_string_field() == "hello"
 
-    r.tuple_field = tm.MyTuple(v1=1, v2=2)
+    r.tuple_field = tm.MyTuple[int, int](v1=1, v2=2)
     assert r.access_tuple_field() == r.tuple_field
     assert r.access_nested_tuple_field() == r.tuple_field.v2
 

@@ -1,6 +1,6 @@
 import datetime
 import re
-from typing import TypeVar
+from typing import TypeVar, Optional
 
 import numpy as np
 import numpy.typing as npt
@@ -660,13 +660,13 @@ def test_simple_generics(format: Format):
         w.write_int_image_alternate_syntax(np.array([[1, 2], [3, 4]], dtype=np.int32))
         w.write_string_image(np.array([["a", "b"], ["c", "d"]], dtype=np.object_))
 
-        w.write_int_float_tuple(tm.MyTuple(v1=1, v2=2.0))
-        w.write_float_float_tuple(tm.MyTuple(v1=1.0, v2=2.0))
+        w.write_int_float_tuple(tm.MyTuple[int, float](v1=1, v2=2.0))
+        w.write_float_float_tuple(tm.MyTuple[float, float](v1=1.0, v2=2.0))
 
-        t = tm.MyTuple(v1=1, v2=2.0)
+        t = tm.MyTuple[int, float](v1=1, v2=2.0)
         w.write_int_float_tuple_alternate_syntax(t)
 
-        w.write_int_string_tuple(tm.MyTuple(v1=1, v2="2"))
+        w.write_int_string_tuple(tm.MyTuple[int, str](v1=1, v2="2"))
 
         w.write_stream_of_type_variants(
             [
@@ -706,10 +706,17 @@ def test_advanced_generics(format: Format):
                 image_2=np.array([["abc", "def"], ["a", "b"]], tm.get_dtype(str)),
             )
         )
-
-        w.write_tuple_of_optionals(tm.MyTuple(v1=None, v2="hello"))
-        w.write_tuple_of_optionals_alternate_syntax(tm.MyTuple(v1=34, v2=None))
-        w.write_tuple_of_vectors(tm.MyTuple(v1=[1, 2, 3], v2=[4.0, 5.0, 6.0]))
+        w.write_tuple_of_optionals(
+            tm.MyTuple[Optional[tm.Int32], Optional[str]](v1=None, v2="hello")
+        )
+        w.write_tuple_of_optionals_alternate_syntax(
+            tm.MyTuple[Optional[tm.Int32], Optional[str]](v1=34, v2=None)
+        )
+        w.write_tuple_of_vectors(
+            tm.MyTuple[list[tm.Int32], list[tm.Float32]](
+                v1=[1, 2, 3], v2=[4.0, 5.0, 6.0]
+            )
+        )
 
 
 def test_aliases(format: Format):

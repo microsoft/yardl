@@ -238,7 +238,7 @@ func writeEnumMaps(t *dsl.EnumDefinition, w *formatting.IndentedWriter, ns *dsl.
 }
 
 func enumNameToValueMapName(t *dsl.EnumDefinition, contextNamespace string) string {
-	name := fmt.Sprintf("_%s_name_to_value_map", formatting.ToSnakeCase(t.Name))
+	name := fmt.Sprintf("%s_name_to_value_map", formatting.ToSnakeCase(t.Name))
 	if t.Namespace != contextNamespace {
 		name = fmt.Sprintf("%s.ndjson.%s", common.NamespaceIdentifierName(t.Namespace), name)
 	}
@@ -246,7 +246,7 @@ func enumNameToValueMapName(t *dsl.EnumDefinition, contextNamespace string) stri
 }
 
 func enumValueToNameMapName(t *dsl.EnumDefinition, contextNamespace string) string {
-	name := fmt.Sprintf("_%s_value_to_name_map", formatting.ToSnakeCase(t.Name))
+	name := fmt.Sprintf("%s_value_to_name_map", formatting.ToSnakeCase(t.Name))
 	if t.Namespace != contextNamespace {
 		name = fmt.Sprintf("%s.ndjson.%s", common.NamespaceIdentifierName(t.Namespace), name)
 	}
