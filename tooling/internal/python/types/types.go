@@ -6,7 +6,6 @@ package types
 import (
 	"bytes"
 	"fmt"
-	"log"
 	"path"
 	"strconv"
 	"strings"
@@ -581,7 +580,6 @@ func writeComputedFieldExpression(w *formatting.IndentedWriter, expression dsl.E
 						for _, field := range node.Fields {
 							u := dsl.GetUnderlyingType(field.Type)
 							if u == t.Target.GetResolvedType() {
-								log.Printf("Found MATCHING union type so this IS the namespace")
 								if targetTypeNamespace == "" {
 									meta := node.GetDefinitionMeta()
 									targetTypeNamespace = meta.Namespace

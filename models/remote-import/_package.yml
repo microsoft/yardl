@@ -1,0 +1,4 @@
+namespace: RemoteImportTest
+
+imports:
+  - https://github.com/microsoft/yardl?ref=31a6e29&dir=models/test

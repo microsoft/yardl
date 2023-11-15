@@ -4,14 +4,20 @@
 package packaging
 
 import (
-	"crypto/md5"
-	"encoding/hex"
 	"fmt"
 	"net/url"
 	"os"
+	"os/exec"
+	"path"
 	"path/filepath"
+	"strings"
 
 	"github.com/rs/zerolog/log"
+)
+
+const (
+	ParamRef = "ref"
+	ParamDir = "dir"
 )
 
 var cacheDir string
@@ -57,47 +63,11 @@ func fetchAndCachePackages(pwd string, urls []string) ([]string, error) {
 }
 
 // Fetches and caches a yardl package directory from src url
-// NOTE: Currently only supports local file paths
+// src can be a local file path for URL to a git repository
 func fetchAndCachePackage(src string) (string, error) {
-	u, err := preprocessUrl(src)
-	if err != nil {
-		return u.String(), err
-	}
-
-	log.Info().Msgf("Fetching %s (%s)", src, u.String())
-
-	switch u.Scheme {
-	case "file":
-		return u.Path, nil
-	default:
-		return u.Path, fmt.Errorf("scheme '%s' not yet supported", u.Scheme)
-	}
-
-	hash := md5.Sum([]byte(u.Path))
-	dst := filepath.Join(cacheDir, hex.EncodeToString(hash[:]))
-
-	if stat, err := os.Stat(dst); err == nil && stat.IsDir() {
-		log.Info().Msgf("Already cached: %v -> %v", src, dst)
-		return dst, nil
-	}
-
-	log.Info().Msgf("Fetching %s", u.String())
-	if err := doFetch(u, dst); err != nil {
-		return "", err
-	}
-	log.Info().Msgf("Cached in: %v", dst)
-	return dst, nil
-}
-
-func doFetch(src *url.URL, dst string) error {
-	panic("fetch not yet supported")
-	return nil
-}
-
-func preprocessUrl(src string) (*url.URL, error) {
 	u, err := url.Parse(src)
 	if err != nil {
-		return u, err
+		return "", err
 	}
 
 	if u.Scheme == "" {
@@ -105,14 +75,97 @@ func preprocessUrl(src string) (*url.URL, error) {
 	}
 
 	if u.Path == "" {
-		return u, fmt.Errorf("invalid path '%s'", src)
+		return u.String(), fmt.Errorf("invalid path '%s'", src)
 	}
 
-	abs, err := filepath.Abs(u.Path)
-	if err != nil {
-		return u, err
-	}
-	u.Path = abs
+	log.Info().Msgf("Fetching %s ", u.String())
 
-	return u, nil
+	switch u.Scheme {
+	case "file":
+		abs, err := filepath.Abs(u.Path)
+		if err != nil {
+			return u.Path, err
+		}
+		return abs, nil
+	case "git", "https":
+		return fetchGit(u)
+	default:
+		return u.Path, fmt.Errorf("scheme '%s' not yet supported", u.Scheme)
+	}
+}
+
+func fetchGit(url *url.URL) (string, error) {
+	q := url.Query()
+
+	ref := ""
+	dir := ""
+	if q.Has(ParamRef) {
+		ref = q.Get(ParamRef)
+		q.Del(ParamRef)
+		url.RawQuery = q.Encode()
+	}
+	if q.Has(ParamDir) {
+		dir = q.Get(ParamDir)
+		q.Del(ParamDir)
+		url.RawQuery = q.Encode()
+	}
+
+	dst := filepath.Join(cacheDir, path.Join(url.Hostname(), url.EscapedPath()))
+
+	if ref == "" {
+		ref = "remotes/origin/HEAD"
+		dst = filepath.Join(dst, "HEAD")
+	} else {
+		dst = filepath.Join(dst, ref)
+	}
+
+	if stat, err := os.Stat(dst); err == nil {
+		if !stat.IsDir() {
+			return dst, fmt.Errorf("cache target '%s' is not a directory", dst)
+		}
+
+		log.Info().Msgf("Updating cached repo %v in %v", url, dst)
+		if err := runGit("-C", dst, "fetch", "--all"); err != nil {
+			return dst, err
+		}
+	} else if os.IsNotExist(err) {
+		log.Info().Msgf("Cloning %s into %s", url, dst)
+		if err := runGit("clone", url.String(), dst); err != nil {
+			return dst, err
+		}
+	} else {
+		return dst, err
+	}
+
+	log.Info().Msgf("Checking out ref %s", ref)
+	if err := runGit("-C", dst, "checkout", ref); err != nil {
+		return dst, err
+	}
+
+	if dir != "" {
+		dst = filepath.Join(dst, dir)
+		stat, err := os.Stat(dst)
+		if (err != nil && os.IsNotExist(err)) || !stat.IsDir() {
+			return dst, fmt.Errorf("git repository '%s' does not contain a dir named '%s'", url, dir)
+		}
+		if err != nil {
+			return dst, err
+		}
+	}
+
+	log.Info().Msgf("Cached %s", dst)
+	return dst, nil
+}
+
+func runGit(args ...string) error {
+	cmd := exec.Command("git", args...)
+	var capture strings.Builder
+	cmd.Stdout = &capture
+	cmd.Stderr = &capture
+
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("command failed with error: %w\n\tcommand: %s\n\toutput: %s", err, cmd, capture.String())
+	}
+
+	return nil
 }
