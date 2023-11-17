@@ -170,7 +170,26 @@ func writeUnionClass(w *formatting.IndentedWriter, className string, typeParamet
 }
 
 func writeNamedType(w *formatting.IndentedWriter, td *dsl.NamedType) {
-	fmt.Fprintf(w, "%s = %s\n", common.TypeIdentifierName(td.Name), common.TypeSyntax(td.Type, td.Namespace))
+	// Does this NamedType resolve to a RecordDefinition?
+	resolvesToRecord := false
+	dsl.Visit(td, func(self dsl.Visitor, node dsl.Node) {
+		switch t := node.(type) {
+		case *dsl.SimpleType:
+			self.Visit(t.ResolvedDefinition)
+		case *dsl.RecordDefinition:
+			resolvesToRecord = true
+			return
+		default:
+			self.VisitChildren(node)
+		}
+	})
+
+	// If the NamedType is Generic and resolves to a RecordDefinition, we can drop the type parameters in the alias declaration
+	if dsl.IsGeneric(td) && resolvesToRecord {
+		fmt.Fprintf(w, "%s = %s\n", common.TypeIdentifierName(td.Name), common.TypeSyntaxWithoutTypeParameters(td.Type, td.Namespace))
+	} else {
+		fmt.Fprintf(w, "%s = %s\n", common.TypeIdentifierName(td.Name), common.TypeSyntax(td.Type, td.Namespace))
+	}
 	common.WriteDocstring(w, td.Comment)
 	w.Indent().WriteStringln("")
 }
@@ -1011,7 +1030,6 @@ func writeGetDTypeFunc(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 								ntClone.Type = &gtClone
 								td := &ntClone
 								fmt.Fprintf(w, "dtype_map.setdefault(%s, %s)\n", common.TypeSyntaxWithoutTypeParameters(td, callingNamespace), typeDefinitionDTypeExpression(td, context))
-
 							}
 							// Return early - we use the alias name for this union type over the yardl-generate UnionClassName
 							return

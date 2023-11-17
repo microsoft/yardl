@@ -71,7 +71,7 @@ class TextFormat(enum.IntFlag):
 
 AliasedMap = dict[K, V]
 
-MyTuple = tuples.Tuple[T1, T2]
+MyTuple = tuples.Tuple
 
 _T = typing.TypeVar('_T')
 

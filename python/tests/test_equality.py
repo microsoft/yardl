@@ -211,7 +211,10 @@ def test_generic_equality():
 
     assert a == b
 
-    a = tm.MyTuple[float, str](v1=42.0, v2="hello, world")
+    a = tm.MyTuple(v1=42.0, v2="hello, world")
     b = tm.basic_types.tuples.Tuple(v1=42.0, v2="hello, world")
 
     assert a == b
+
+    a = tm.MyTuple(v1=42.0, v2="hello, world")
+    b = tm.AliasedTuple(v1=42.0, v2="hello, world")

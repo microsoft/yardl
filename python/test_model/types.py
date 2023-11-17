@@ -865,9 +865,9 @@ class GenericRecord(typing.Generic[T1, T2, T2_NP]):
         return f"GenericRecord(scalar1={repr(self.scalar_1)}, scalar2={repr(self.scalar_2)}, vector1={repr(self.vector_1)}, image2={repr(self.image_2)})"
 
 
-MyTuple = basic_types.MyTuple[T1, T2]
+MyTuple = basic_types.MyTuple
 
-AliasedTuple = MyTuple[T1, T2]
+AliasedTuple = MyTuple
 
 class RecordWithAliasedGenerics:
     my_strings: MyTuple[str, str]
@@ -898,7 +898,7 @@ AliasedString = str
 
 AliasedEnum = Fruits
 
-AliasedOpenGeneric = AliasedTuple[T1, T2]
+AliasedOpenGeneric = AliasedTuple
 
 AliasedClosedGeneric = AliasedTuple[AliasedString, AliasedEnum]
 
