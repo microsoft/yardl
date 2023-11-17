@@ -74,6 +74,7 @@ from .types import (
     RecordWithGenericArrays,
     RecordWithGenericFixedVectors,
     RecordWithGenericMaps,
+    RecordWithGenericVectorOfRecords,
     RecordWithGenericVectors,
     RecordWithKeywordFields,
     RecordWithNDArrays,
@@ -99,6 +100,7 @@ from .types import (
     TupleWithRecords,
     UInt64Enum,
     UOrV,
+    VectorOfGenericRecords,
     get_dtype,
 )
 from .protocols import (

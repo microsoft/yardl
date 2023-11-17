@@ -409,6 +409,12 @@ AliasedGenericRank2Array<T>: T[,]
 AliasedGenericFixedArray<T>: T[16, 8]
 AliasedGenericDynamicArray<T>: T[]
 
+VectorOfGenericRecords<T1, T2>: GenericRecord<T1, T2>*
+
+RecordWithGenericVectorOfRecords<T, U>: !record
+  fields:
+    v: VectorOfGenericRecords<T, U>*
+
 # BEGIN nested generic records
 
 RecordWithOptionalGenericField<T>: !record

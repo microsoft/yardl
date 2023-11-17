@@ -1464,6 +1464,44 @@ class RecordWithAliasedGenericsConverter(_ndjson.JsonConverter[RecordWithAliased
         ) # type:ignore 
 
 
+class RecordWithGenericVectorOfRecordsConverter(typing.Generic[T, T_NP, U, U_NP], _ndjson.JsonConverter[RecordWithGenericVectorOfRecords[T, U, U_NP], np.void]):
+    def __init__(self, t_converter: _ndjson.JsonConverter[T, T_NP], u_converter: _ndjson.JsonConverter[U, U_NP]) -> None:
+        self._v_converter = _ndjson.VectorConverter(_ndjson.VectorConverter(GenericRecordConverter(t_converter, u_converter)))
+        super().__init__(np.dtype([
+            ("v", self._v_converter.overall_dtype()),
+        ]))
+
+    def to_json(self, value: RecordWithGenericVectorOfRecords[T, U, U_NP]) -> object:
+        if not isinstance(value, RecordWithGenericVectorOfRecords): # pyright: ignore [reportUnnecessaryIsInstance]
+            raise TypeError("Expected 'RecordWithGenericVectorOfRecords[T, U, U_NP]' instance")
+        json_object = {}
+
+        json_object["v"] = self._v_converter.to_json(value.v)
+        return json_object
+
+    def numpy_to_json(self, value: np.void) -> object:
+        if not isinstance(value, np.void): # pyright: ignore [reportUnnecessaryIsInstance]
+            raise TypeError("Expected 'np.void' instance")
+        json_object = {}
+
+        json_object["v"] = self._v_converter.numpy_to_json(value["v"])
+        return json_object
+
+    def from_json(self, json_object: object) -> RecordWithGenericVectorOfRecords[T, U, U_NP]:
+        if not isinstance(json_object, dict):
+            raise TypeError("Expected 'dict' instance")
+        return RecordWithGenericVectorOfRecords[T, U, U_NP](
+            v=self._v_converter.from_json(json_object["v"],),
+        )
+
+    def from_json_to_numpy(self, json_object: object) -> np.void:
+        if not isinstance(json_object, dict):
+            raise TypeError("Expected 'dict' instance")
+        return (
+            self._v_converter.from_json_to_numpy(json_object["v"]),
+        ) # type:ignore 
+
+
 class RecordWithOptionalGenericFieldConverter(typing.Generic[T, T_NP], _ndjson.JsonConverter[RecordWithOptionalGenericField[T], np.void]):
     def __init__(self, t_converter: _ndjson.JsonConverter[T, T_NP]) -> None:
         self._v_converter = _ndjson.OptionalConverter(t_converter)

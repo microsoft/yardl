@@ -931,6 +931,29 @@ AliasedGenericFixedArray = npt.NDArray[T_NP]
 
 AliasedGenericDynamicArray = npt.NDArray[T_NP]
 
+VectorOfGenericRecords = list[GenericRecord[T1, T2, T2_NP]]
+
+class RecordWithGenericVectorOfRecords(typing.Generic[T, U, U_NP]):
+    v: list[VectorOfGenericRecords[T, U, U_NP]]
+
+    def __init__(self, *,
+        v: typing.Optional[list[VectorOfGenericRecords[T, U, U_NP]]] = None,
+    ):
+        self.v = v if v is not None else []
+
+    def __eq__(self, other: object) -> bool:
+        return (
+            isinstance(other, RecordWithGenericVectorOfRecords)
+            and len(self.v) == len(other.v) and all(len(a) == len(b) and all(a == b for a, b in zip(a, b)) for a, b in zip(self.v, other.v))
+        )
+
+    def __str__(self) -> str:
+        return f"RecordWithGenericVectorOfRecords(v={self.v})"
+
+    def __repr__(self) -> str:
+        return f"RecordWithGenericVectorOfRecords(v={repr(self.v)})"
+
+
 class RecordWithOptionalGenericField(typing.Generic[T]):
     v: typing.Optional[T]
 
@@ -1883,6 +1906,8 @@ def _mk_get_dtype():
     dtype_map.setdefault(AliasedGenericRank2Array, lambda type_args: np.dtype(np.object_))
     dtype_map.setdefault(AliasedGenericFixedArray, lambda type_args: get_dtype(type_args[0]))
     dtype_map.setdefault(AliasedGenericDynamicArray, lambda type_args: np.dtype(np.object_))
+    dtype_map.setdefault(VectorOfGenericRecords, lambda type_args: np.dtype(np.object_))
+    dtype_map.setdefault(RecordWithGenericVectorOfRecords, lambda type_args: np.dtype([('v', np.dtype(np.object_))], align=True))
     dtype_map.setdefault(RecordWithOptionalGenericField, lambda type_args: np.dtype([('v', np.dtype([('has_value', np.dtype(np.bool_)), ('value', get_dtype(type_args[0]))], align=True))], align=True))
     dtype_map.setdefault(RecordWithAliasedOptionalGenericField, lambda type_args: np.dtype([('v', get_dtype(types.GenericAlias(AliasedGenericOptional, (type_args[0],))))], align=True))
     dtype_map.setdefault(UOrV, np.dtype(np.object_))

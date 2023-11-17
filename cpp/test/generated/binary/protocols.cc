@@ -369,6 +369,15 @@ struct IsTriviallySerializable<test_model::RecordWithAliasedGenerics> {
     offsetof(__T__, my_strings) < offsetof(__T__, aliased_strings);
 };
 
+template <typename T, typename U>
+struct IsTriviallySerializable<test_model::RecordWithGenericVectorOfRecords<T, U>> {
+  using __T__ = test_model::RecordWithGenericVectorOfRecords<T, U>;
+  static constexpr bool value = 
+    std::is_standard_layout_v<__T__> &&
+    IsTriviallySerializable<decltype(__T__::v)>::value &&
+    (sizeof(__T__) == (sizeof(__T__::v)));
+};
+
 template <typename T>
 struct IsTriviallySerializable<test_model::RecordWithOptionalGenericField<T>> {
   using __T__ = test_model::RecordWithOptionalGenericField<T>;
@@ -1863,6 +1872,46 @@ template<typename T, yardl::binary::Reader<T> ReadT>
   }
 
   yardl::binary::ReadDynamicNDArray<T, ReadT>(stream, value);
+}
+
+template<typename T1, yardl::binary::Writer<T1> WriteT1, typename T2, yardl::binary::Writer<T2> WriteT2>
+[[maybe_unused]] void WriteVectorOfGenericRecords(yardl::binary::CodedOutputStream& stream, test_model::VectorOfGenericRecords<T1, T2> const& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<test_model::VectorOfGenericRecords<T1, T2>>::value) {
+    yardl::binary::WriteTriviallySerializable(stream, value);
+    return;
+  }
+
+  yardl::binary::WriteVector<test_model::GenericRecord<T1, T2>, test_model::binary::WriteGenericRecord<T1, WriteT1, T2, WriteT2>>(stream, value);
+}
+
+template<typename T1, yardl::binary::Reader<T1> ReadT1, typename T2, yardl::binary::Reader<T2> ReadT2>
+[[maybe_unused]] void ReadVectorOfGenericRecords(yardl::binary::CodedInputStream& stream, test_model::VectorOfGenericRecords<T1, T2>& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<test_model::VectorOfGenericRecords<T1, T2>>::value) {
+    yardl::binary::ReadTriviallySerializable(stream, value);
+    return;
+  }
+
+  yardl::binary::ReadVector<test_model::GenericRecord<T1, T2>, test_model::binary::ReadGenericRecord<T1, ReadT1, T2, ReadT2>>(stream, value);
+}
+
+template<typename T, yardl::binary::Writer<T> WriteT, typename U, yardl::binary::Writer<U> WriteU>
+[[maybe_unused]] void WriteRecordWithGenericVectorOfRecords(yardl::binary::CodedOutputStream& stream, test_model::RecordWithGenericVectorOfRecords<T, U> const& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<test_model::RecordWithGenericVectorOfRecords<T, U>>::value) {
+    yardl::binary::WriteTriviallySerializable(stream, value);
+    return;
+  }
+
+  yardl::binary::WriteVector<test_model::VectorOfGenericRecords<T, U>, test_model::binary::WriteVectorOfGenericRecords<T, WriteT, U, WriteU>>(stream, value.v);
+}
+
+template<typename T, yardl::binary::Reader<T> ReadT, typename U, yardl::binary::Reader<U> ReadU>
+[[maybe_unused]] void ReadRecordWithGenericVectorOfRecords(yardl::binary::CodedInputStream& stream, test_model::RecordWithGenericVectorOfRecords<T, U>& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<test_model::RecordWithGenericVectorOfRecords<T, U>>::value) {
+    yardl::binary::ReadTriviallySerializable(stream, value);
+    return;
+  }
+
+  yardl::binary::ReadVector<test_model::VectorOfGenericRecords<T, U>, test_model::binary::ReadVectorOfGenericRecords<T, ReadT, U, ReadU>>(stream, value.v);
 }
 
 template<typename T, yardl::binary::Writer<T> WriteT>

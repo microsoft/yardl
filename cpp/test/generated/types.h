@@ -641,6 +641,22 @@ using AliasedGenericFixedArray = yardl::FixedNDArray<T, 16, 8>;
 template <typename T>
 using AliasedGenericDynamicArray = yardl::DynamicNDArray<T>;
 
+template <typename T1, typename T2>
+using VectorOfGenericRecords = std::vector<test_model::GenericRecord<T1, T2>>;
+
+template <typename T, typename U>
+struct RecordWithGenericVectorOfRecords {
+  std::vector<test_model::VectorOfGenericRecords<T, U>> v{};
+
+  bool operator==(const RecordWithGenericVectorOfRecords& other) const {
+    return v == other.v;
+  }
+
+  bool operator!=(const RecordWithGenericVectorOfRecords& other) const {
+    return !(*this == other);
+  }
+};
+
 template <typename T>
 struct RecordWithOptionalGenericField {
   std::optional<T> v{};

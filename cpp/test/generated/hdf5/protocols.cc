@@ -727,6 +727,20 @@ struct _Inner_RecordWithAliasedGenerics {
   tuples::hdf5::_Inner_Tuple<yardl::hdf5::InnerVlenString, std::string, yardl::hdf5::InnerVlenString, std::string> aliased_strings;
 };
 
+template <typename _T_Inner, typename T, typename _U_Inner, typename U>
+struct _Inner_RecordWithGenericVectorOfRecords {
+  _Inner_RecordWithGenericVectorOfRecords() {} 
+  _Inner_RecordWithGenericVectorOfRecords(test_model::RecordWithGenericVectorOfRecords<T, U> const& o) 
+      : v(o.v) {
+  }
+
+  void ToOuter (test_model::RecordWithGenericVectorOfRecords<T, U>& o) const {
+    yardl::hdf5::ToOuter(v, o.v);
+  }
+
+  yardl::hdf5::InnerVlen<yardl::hdf5::InnerVlen<test_model::hdf5::_Inner_GenericRecord<_T_Inner, T, _U_Inner, U>, test_model::GenericRecord<T, U>>, test_model::VectorOfGenericRecords<T, U>> v;
+};
+
 template <typename _T_Inner, typename T>
 struct _Inner_RecordWithOptionalGenericField {
   _Inner_RecordWithOptionalGenericField() {} 
@@ -1304,6 +1318,14 @@ template <typename _T1_Inner, typename T1, typename _T2_Inner, typename T2>
   H5::CompType t(sizeof(RecordType));
   t.insertMember("myStrings", HOFFSET(RecordType, my_strings), tuples::hdf5::GetTupleHdf5Ddl<yardl::hdf5::InnerVlenString, std::string, yardl::hdf5::InnerVlenString, std::string>(yardl::hdf5::InnerVlenStringDdl(), yardl::hdf5::InnerVlenStringDdl()));
   t.insertMember("aliasedStrings", HOFFSET(RecordType, aliased_strings), tuples::hdf5::GetTupleHdf5Ddl<yardl::hdf5::InnerVlenString, std::string, yardl::hdf5::InnerVlenString, std::string>(yardl::hdf5::InnerVlenStringDdl(), yardl::hdf5::InnerVlenStringDdl()));
+  return t;
+}
+
+template <typename _T_Inner, typename T, typename _U_Inner, typename U>
+[[maybe_unused]] H5::CompType GetRecordWithGenericVectorOfRecordsHdf5Ddl(H5::DataType const& T_type, H5::DataType const& U_type) {
+  using RecordType = test_model::hdf5::_Inner_RecordWithGenericVectorOfRecords<_T_Inner, T, _U_Inner, U>;
+  H5::CompType t(sizeof(RecordType));
+  t.insertMember("v", HOFFSET(RecordType, v), yardl::hdf5::InnerVlenDdl(yardl::hdf5::InnerVlenDdl(test_model::hdf5::GetGenericRecordHdf5Ddl<_T_Inner, T, _U_Inner, U>(T_type, U_type))));
   return t;
 }
 

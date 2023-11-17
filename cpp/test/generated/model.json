@@ -1592,6 +1592,51 @@
           }
         },
         {
+          "alias": {
+            "name": "VectorOfGenericRecords",
+            "typeParameters": [
+              "T1",
+              "T2"
+            ],
+            "type": {
+              "vector": {
+                "items": {
+                  "name": "TestModel.GenericRecord",
+                  "typeArguments": [
+                    "T1",
+                    "T2"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        {
+          "record": {
+            "name": "RecordWithGenericVectorOfRecords",
+            "typeParameters": [
+              "T",
+              "U"
+            ],
+            "fields": [
+              {
+                "name": "v",
+                "type": {
+                  "vector": {
+                    "items": {
+                      "name": "TestModel.VectorOfGenericRecords",
+                      "typeArguments": [
+                        "T",
+                        "U"
+                      ]
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
           "record": {
             "name": "RecordWithOptionalGenericField",
             "typeParameters": [

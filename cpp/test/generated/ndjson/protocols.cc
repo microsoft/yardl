@@ -129,6 +129,11 @@ void from_json(ordered_json const& j, test_model::GenericRecord<T1, T2>& value);
 void to_json(ordered_json& j, test_model::RecordWithAliasedGenerics const& value);
 void from_json(ordered_json const& j, test_model::RecordWithAliasedGenerics& value);
 
+template <typename T, typename U>
+void to_json(ordered_json& j, test_model::RecordWithGenericVectorOfRecords<T, U> const& value);
+template <typename T, typename U>
+void from_json(ordered_json const& j, test_model::RecordWithGenericVectorOfRecords<T, U>& value);
+
 template <typename T>
 void to_json(ordered_json& j, test_model::RecordWithOptionalGenericField<T> const& value);
 template <typename T>
@@ -1835,6 +1840,21 @@ void from_json(ordered_json const& j, test_model::RecordWithAliasedGenerics& val
   }
   if (auto it = j.find("aliasedStrings"); it != j.end()) {
     it->get_to(value.aliased_strings);
+  }
+}
+
+template <typename T, typename U>
+void to_json(ordered_json& j, test_model::RecordWithGenericVectorOfRecords<T, U> const& value) {
+  j = ordered_json::object();
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.v)) {
+    j.push_back({"v", value.v});
+  }
+}
+
+template <typename T, typename U>
+void from_json(ordered_json const& j, test_model::RecordWithGenericVectorOfRecords<T, U>& value) {
+  if (auto it = j.find("v"); it != j.end()) {
+    it->get_to(value.v);
   }
 }
 

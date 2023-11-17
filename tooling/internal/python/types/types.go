@@ -172,19 +172,13 @@ func writeUnionClass(w *formatting.IndentedWriter, className string, typeParamet
 func writeNamedType(w *formatting.IndentedWriter, td *dsl.NamedType) {
 	// Does this NamedType resolve to a RecordDefinition?
 	resolvesToRecord := false
-	dsl.Visit(td, func(self dsl.Visitor, node dsl.Node) {
-		switch t := node.(type) {
-		case *dsl.SimpleType:
-			self.Visit(t.ResolvedDefinition)
-		case *dsl.RecordDefinition:
+	if t, ok := dsl.GetUnderlyingType(td.Type).(*dsl.SimpleType); ok {
+		if _, ok := t.ResolvedDefinition.(*dsl.RecordDefinition); ok {
 			resolvesToRecord = true
-			return
-		default:
-			self.VisitChildren(node)
 		}
-	})
+	}
 
-	// If the NamedType is Generic and resolves to a RecordDefinition, we can drop the type parameters in the alias declaration
+	// // If the NamedType is Generic and resolves to a RecordDefinition, we can drop the type parameters in the alias declaration
 	if dsl.IsGeneric(td) && resolvesToRecord {
 		fmt.Fprintf(w, "%s = %s\n", common.TypeIdentifierName(td.Name), common.TypeSyntaxWithoutTypeParameters(td.Type, td.Namespace))
 	} else {

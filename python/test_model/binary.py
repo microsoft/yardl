@@ -1637,6 +1637,24 @@ class RecordWithAliasedGenericsSerializer(_binary.RecordSerializer[RecordWithAli
         return RecordWithAliasedGenerics(my_strings=field_values[0], aliased_strings=field_values[1])
 
 
+class RecordWithGenericVectorOfRecordsSerializer(typing.Generic[T, T_NP, U, U_NP], _binary.RecordSerializer[RecordWithGenericVectorOfRecords[T, U, U_NP]]):
+    def __init__(self, t_serializer: _binary.TypeSerializer[T, T_NP], u_serializer: _binary.TypeSerializer[U, U_NP]) -> None:
+        super().__init__([("v", _binary.VectorSerializer(_binary.VectorSerializer(GenericRecordSerializer(t_serializer, u_serializer))))])
+
+    def write(self, stream: _binary.CodedOutputStream, value: RecordWithGenericVectorOfRecords[T, U, U_NP]) -> None:
+        if isinstance(value, np.void):
+            self.write_numpy(stream, value)
+            return
+        self._write(stream, value.v)
+
+    def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
+        self._write(stream, value['v'])
+
+    def read(self, stream: _binary.CodedInputStream) -> RecordWithGenericVectorOfRecords[T, U, U_NP]:
+        field_values = self._read(stream)
+        return RecordWithGenericVectorOfRecords[T, U, U_NP](v=field_values[0])
+
+
 class RecordWithOptionalGenericFieldSerializer(typing.Generic[T, T_NP], _binary.RecordSerializer[RecordWithOptionalGenericField[T]]):
     def __init__(self, t_serializer: _binary.TypeSerializer[T, T_NP]) -> None:
         super().__init__([("v", _binary.OptionalSerializer(t_serializer))])
