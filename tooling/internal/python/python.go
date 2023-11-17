@@ -91,8 +91,10 @@ func writePackageInitFile(ns *dsl.Namespace, packageDir string) error {
 
 	w.WriteStringln(`# pyright: reportUnusedImport=false`)
 
-	w.WriteStringln(`from typing import Tuple as _Tuple
-import re as _re
+	w.WriteStringln("from typing import Tuple as _Tuple")
+
+	if ns.IsTopLevel {
+		w.WriteStringln(`import re as _re
 import numpy as _np
 
 _MIN_NUMPY_VERSION = (1, 22, 0)
@@ -108,6 +110,7 @@ def _parse_version(version: str) -> _Tuple[int, ...]:
 if _parse_version(_np.__version__) < _MIN_NUMPY_VERSION:
     raise ImportError(f"Your installed numpy version is {_np.__version__}, but version >= {'.'.join(str(i) for i in _MIN_NUMPY_VERSION)} is required.")
 `)
+	}
 
 	relativePath := ".."
 	if ns.IsTopLevel {
