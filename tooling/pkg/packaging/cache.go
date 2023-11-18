@@ -119,29 +119,64 @@ func fetchGit(url *url.URL) (string, error) {
 		dst = filepath.Join(dst, ref)
 	}
 
+	newCache := false
 	if stat, err := os.Stat(dst); err == nil {
 		if !stat.IsDir() {
 			return dst, fmt.Errorf("cache target '%s' is not a directory", dst)
 		}
-
-		log.Info().Msgf("Updating cached repo %v in %v", url, dst)
-		if err := runGit("-C", dst, "fetch", "--all"); err != nil {
-			return dst, err
-		}
 	} else if os.IsNotExist(err) {
 		log.Info().Msgf("Cloning %s into %s", url, dst)
-		if err := runGit("clone", url.String(), dst); err != nil {
+		if _, err := runGit("clone", url.String(), dst); err != nil {
 			return dst, err
 		}
+		newCache = true
 	} else {
 		return dst, err
 	}
 
-	log.Info().Msgf("Checking out ref %s", ref)
-	if err := runGit("-C", dst, "checkout", ref); err != nil {
+	needFetch := false
+
+	parseRev := func(rev string) (string, error) {
+		parsed, err := runGit("-C", dst, "rev-parse", rev)
+		if err != nil {
+			if newCache {
+				// We just cloned, so ref must be invalid
+				return "", err
+			}
+			needFetch = true
+		}
+		return parsed, nil
+
+	}
+
+	parsedHead, err := parseRev("HEAD")
+	if err != nil {
 		return dst, err
 	}
 
+	parsedRef, err := parseRev(ref)
+	if err != nil {
+		return dst, err
+	}
+
+	// Checkout if we need to fetch or if we don't have ref checked out
+	needCheckout := needFetch || parsedHead != parsedRef
+
+	if needFetch {
+		log.Info().Msgf("Updating cached repo %v in %v", url, dst)
+		if _, err := runGit("-C", dst, "fetch", "--all"); err != nil {
+			return dst, err
+		}
+	}
+
+	if needCheckout {
+		log.Info().Msgf("Checking out ref %s", ref)
+		if _, err := runGit("-C", dst, "checkout", ref); err != nil {
+			return dst, err
+		}
+	}
+
+	// Append dir if provided by user
 	if dir != "" {
 		dst = filepath.Join(dst, dir)
 		stat, err := os.Stat(dst)
@@ -157,15 +192,17 @@ func fetchGit(url *url.URL) (string, error) {
 	return dst, nil
 }
 
-func runGit(args ...string) error {
+func runGit(args ...string) (string, error) {
 	cmd := exec.Command("git", args...)
-	var capture strings.Builder
-	cmd.Stdout = &capture
-	cmd.Stderr = &capture
+	var stdout strings.Builder
+	var stderr strings.Builder
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
 
+	log.Debug().Msgf("Running %s", cmd)
 	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("command failed with error: %w\n\tcommand: %s\n\toutput: %s", err, cmd, capture.String())
+		return stdout.String(), fmt.Errorf("command failed with error: %w\n\tcommand: %s\n\toutput: %s", err, cmd, stderr.String())
 	}
 
-	return nil
+	return stdout.String(), nil
 }
