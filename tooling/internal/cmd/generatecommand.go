@@ -6,12 +6,13 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"math"
 	"os"
 	"path"
 	"runtime/debug"
 	"time"
+
+	"github.com/rs/zerolog/log"
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/inancgumus/screen"
@@ -36,38 +37,45 @@ func newGenerateCommand() *cobra.Command {
 		DisableFlagsInUseLine: true,
 		Args:                  cobra.NoArgs,
 		Run: func(*cobra.Command, []string) {
+			packageInfo, err := generateImpl()
+			if err != nil {
+				// avoiding returning the error here because
+				// cobra prefixes the error with "Error: "
+				fmt.Fprintln(os.Stderr, err)
+				os.Exit(1)
+			}
+
+			WriteSuccessfulSummary(packageInfo)
+
 			if !flags.watch {
-				packageInfo, err := generateCore()
-				if err != nil {
-					// avoiding returning the error here because
-					// cobra prefixes the error with "Error: "
-					fmt.Fprintln(os.Stderr, err)
-					os.Exit(1)
-				}
-
-				WriteSuccessfulSummary(packageInfo)
-
 				return
 			}
 
 			// Enter watch mode
 			watcher, err := fsnotify.NewWatcher()
 			if err != nil {
-				log.Fatal(err)
+				log.Fatal().Err(err).Msg("")
 			}
 			defer watcher.Close()
 
 			completedChannel := make(chan error)
 			go dedupLoop(watcher, completedChannel)
 
-			err = watcher.Add(".")
-			if err != nil {
-				log.Fatal(err)
+			toWatch := []string{"."}
+			for _, ref := range packageInfo.GetAllImportedPackages() {
+				toWatch = append(toWatch, ref.PackageDir())
+			}
+
+			for _, watched := range toWatch {
+				err = watcher.Add(watched)
+				if err != nil {
+					log.Fatal().Err(err).Msg("")
+				}
 			}
 
 			err = <-completedChannel
 			if err != nil {
-				log.Fatal(err)
+				log.Fatal().Msgf("%s", err)
 			}
 		},
 	}
@@ -94,7 +102,7 @@ func dedupLoop(w *fsnotify.Watcher, completedChannel chan<- error) {
 				return
 			}
 
-			log.Printf("ERROR: %s\n", err)
+			log.Error().Err(err).Msg("")
 		case _, ok := <-w.Events:
 			if !ok {
 				// channel was closed
@@ -116,7 +124,7 @@ func generateInWatchMode() {
 		}
 	}()
 
-	packageInfo, err := generateCore()
+	packageInfo, err := generateImpl()
 	screen.Clear()
 	screen.MoveTopLeft()
 
@@ -129,7 +137,7 @@ func generateInWatchMode() {
 	}
 }
 
-func WriteSuccessfulSummary(packageInfo packaging.PackageInfo) {
+func WriteSuccessfulSummary(packageInfo *packaging.PackageInfo) {
 	if packageInfo.Cpp != nil {
 		fmt.Printf("✅ Wrote C++ to %s.\n", packageInfo.Cpp.SourcesOutputDir)
 	}
@@ -141,19 +149,18 @@ func WriteSuccessfulSummary(packageInfo packaging.PackageInfo) {
 	}
 }
 
-func generateCore() (packaging.PackageInfo, error) {
-	inputDir, _ := os.Getwd()
-	packageInfo, err := packaging.ReadPackageInfo(inputDir)
+func generateImpl() (*packaging.PackageInfo, error) {
+	inputDir, err := os.Getwd()
+	if err != nil {
+		return nil, err
+	}
+
+	packageInfo, err := packaging.LoadPackage(inputDir)
 	if err != nil {
 		return packageInfo, err
 	}
 
-	namespace, err := dsl.ParseYamlInDir(inputDir, packageInfo.Namespace)
-	if err != nil {
-		return packageInfo, err
-	}
-
-	env, err := dsl.Validate([]*dsl.Namespace{namespace})
+	env, err := validatePackage(packageInfo)
 	if err != nil {
 		return packageInfo, err
 	}

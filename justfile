@@ -22,6 +22,9 @@ cpp_version := "17"
 @generate-sandbox: install
     cd models/sandbox && yardl generate
 
+@generate-remote-import: install
+    cd models/remote-import && yardl generate
+
 @build-sandbox: generate-sandbox ensure-build-dir
     cd cpp/build && ninja sandbox_exec
 
@@ -37,7 +40,7 @@ cpp_version := "17"
 @run-sandbox-python-quiet: build-sandbox
     python python/run_sandbox.py > /dev/null
 
-@build-all: generate generate-sandbox configure
+@build-all: generate generate-sandbox generate-remote-import configure
     cd cpp/build && ninja
 
 @tooling-test:

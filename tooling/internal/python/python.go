@@ -33,8 +33,18 @@ func Generate(env *dsl.Environment, options packaging.PythonCodegenOptions) erro
 		return err
 	}
 
+	topNamespace := env.GetTopLevelNamespace()
+	topPackageDir := path.Join(options.OutputDir, formatting.ToSnakeCase(topNamespace.Name))
+	if err := iocommon.CopyEmbeddedStaticFiles(topPackageDir, options.InternalSymlinkStaticFiles, staticFiles); err != nil {
+		return err
+	}
+
 	for _, ns := range env.Namespaces {
-		err = writeNamespace(ns, env.SymbolTable, options)
+		packageDir := topPackageDir
+		if !ns.IsTopLevel {
+			packageDir = path.Join(packageDir, formatting.ToSnakeCase(ns.Name))
+		}
+		err = writeNamespace(ns, env.SymbolTable, packageDir)
 		if err != nil {
 			return err
 		}
@@ -43,18 +53,13 @@ func Generate(env *dsl.Environment, options packaging.PythonCodegenOptions) erro
 	return nil
 }
 
-func writeNamespace(ns *dsl.Namespace, st dsl.SymbolTable, options packaging.PythonCodegenOptions) error {
-	packageDir := path.Join(options.OutputDir, formatting.ToSnakeCase(ns.Name))
+func writeNamespace(ns *dsl.Namespace, st dsl.SymbolTable, packageDir string) error {
 	if err := os.MkdirAll(packageDir, 0775); err != nil {
 		return err
 	}
 
 	// Write __init__.py
-	if err := writePackageInitFile(packageDir, ns); err != nil {
-		return err
-	}
-
-	if err := iocommon.CopyEmbeddedStaticFiles(packageDir, options.InternalSymlinkStaticFiles, staticFiles); err != nil {
+	if err := writePackageInitFile(ns, packageDir); err != nil {
 		return err
 	}
 
@@ -62,8 +67,10 @@ func writeNamespace(ns *dsl.Namespace, st dsl.SymbolTable, options packaging.Pyt
 		return err
 	}
 
-	if err := protocols.WriteProtocols(ns, st, packageDir); err != nil {
-		return err
+	if ns.IsTopLevel {
+		if err := protocols.WriteProtocols(ns, st, packageDir); err != nil {
+			return err
+		}
 	}
 
 	if err := binary.WriteBinary(ns, packageDir); err != nil {
@@ -77,15 +84,17 @@ func writeNamespace(ns *dsl.Namespace, st dsl.SymbolTable, options packaging.Pyt
 	return nil
 }
 
-func writePackageInitFile(packageDir string, ns *dsl.Namespace) error {
+func writePackageInitFile(ns *dsl.Namespace, packageDir string) error {
 	b := bytes.Buffer{}
 	w := formatting.NewIndentedWriter(&b, "    ")
 	common.WriteGeneratedFileHeader(w)
 
 	w.WriteStringln(`# pyright: reportUnusedImport=false`)
 
-	w.WriteStringln(`from typing import Tuple as _Tuple
-import re as _re
+	w.WriteStringln("from typing import Tuple as _Tuple")
+
+	if ns.IsTopLevel {
+		w.WriteStringln(`import re as _re
 import numpy as _np
 
 _MIN_NUMPY_VERSION = (1, 22, 0)
@@ -101,8 +110,17 @@ def _parse_version(version: str) -> _Tuple[int, ...]:
 if _parse_version(_np.__version__) < _MIN_NUMPY_VERSION:
     raise ImportError(f"Your installed numpy version is {_np.__version__}, but version >= {'.'.join(str(i) for i in _MIN_NUMPY_VERSION)} is required.")
 `)
+	}
 
-	fmt.Fprintf(w, "from .yardl_types import *\n")
+	relativePath := ".."
+	if ns.IsTopLevel {
+		relativePath = "."
+	}
+	fmt.Fprintf(w, "from %syardl_types import *\n", relativePath)
+
+	for _, ref := range ns.GetAllChildReferences() {
+		fmt.Fprintf(w, "from %s import %s\n", relativePath, common.NamespaceIdentifierName(ref.Name))
+	}
 
 	typesMembers := make([]string, 0)
 	typesMembers = append(typesMembers, "get_dtype")
@@ -143,12 +161,11 @@ if _parse_version(_np.__version__) < _MIN_NUMPY_VERSION:
 	})
 	fmt.Fprintf(w, ")\n")
 
-	protocolsMembers := make([]string, 0)
+	var protocolsMembers []string
 	for _, p := range ns.Protocols {
 		protocolsMembers = append(protocolsMembers, common.AbstractWriterName(p), common.AbstractReaderName(p))
 	}
-
-	if len(protocolsMembers) > 0 {
+	if ns.IsTopLevel && len(protocolsMembers) > 0 {
 		sort.Slice(protocolsMembers, func(i, j int) bool {
 			return protocolsMembers[i] < protocolsMembers[j]
 		})
@@ -194,6 +211,9 @@ if _parse_version(_np.__version__) < _MIN_NUMPY_VERSION:
 			}
 		})
 		fmt.Fprintf(w, ")\n")
+	} else {
+		w.WriteStringln("from . import binary")
+		w.WriteStringln("from . import ndjson")
 	}
 
 	return iocommon.WriteFileIfNeeded(path.Join(packageDir, "__init__.py"), b.Bytes(), 0644)

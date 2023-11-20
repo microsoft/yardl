@@ -59,6 +59,8 @@ try
     echo "Adding unit test types to the model"
     cd ../..
     cp ../models/test/unittests.yml model/
+    cp -r ../models/* ./
+    cp _package.yml model/
     cd model
     yardl generate
     cd ../cpp/build

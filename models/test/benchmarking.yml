@@ -41,7 +41,7 @@ BenchmarkSimpleMrd: !protocol
     data: !stream
       items: !union
         acquisition: SimpleAcquisition
-        image: Image<float>
+        image: Image.Image<float>
 
 SimpleEncodingCounters: !record
   fields:

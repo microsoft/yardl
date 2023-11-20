@@ -10,7 +10,21 @@ Here is a commented `_package.yml` file:
 # The namespace of the package. Required.
 namespace: MyNamespace
 
-# settings for C++ code generation (optional)
+# Import model types from external locations (URLs)
+# URLs may be one of the following:
+#   1. Path to local directory, either
+#     - Relative to the `_package.yml` manifest, or
+#     - Absolute path
+#   2. Remote git repository. Options (provided as query parameters):
+#     - ref=<git commit hash>
+#     - dir=<relative path to model>
+# NOTE: Yardl caches git repositories in `$HOME/.yardl/cache`
+imports:
+  - ../myCommonTypes
+  - /workspaces/yardl/models/more-common-types
+  - https://github.com/microsoft/yardl?ref=31a6e29&dir=models/test
+
+# Settings for C++ code generation (optional)
 cpp:
   # The directory where generated code will be written.
   # The directory will be created if it does not exist.
@@ -20,11 +34,11 @@ cpp:
   # Default true
   generateCMakeLists: true
 
-# settings for Python code generation (optional)
+# Settings for Python code generation (optional)
 python:
   # The directory where the generated Python package will be written
   outputDir: ../path/relative/to/this/file
 ```
 
-In the future, this file will be able to reference other packages and specify
-options for other languages.
+In the future, this file will be able to reference previous versions of
+your packages and specify options for other languages.

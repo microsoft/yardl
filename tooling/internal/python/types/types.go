@@ -26,7 +26,12 @@ func WriteTypes(ns *dsl.Namespace, st dsl.SymbolTable, packageDir string) error 
 	common.WriteComment(w, "pyright: reportUnknownMemberType=false")
 	common.WriteComment(w, "pyright: reportUnknownVariableType=false")
 
-	w.WriteStringln(`
+	relativePath := ".."
+	if ns.IsTopLevel {
+		relativePath = "."
+	}
+
+	fmt.Fprintf(w, `
 import datetime
 import enum
 import types
@@ -35,9 +40,15 @@ import typing
 import numpy as np
 import numpy.typing as npt
 
-from . import yardl_types as yardl
-from . import _dtypes
-`)
+from %s import yardl_types as yardl
+from %s import _dtypes
+
+`, relativePath, relativePath)
+
+	for _, ref := range ns.GetAllChildReferences() {
+		fmt.Fprintf(w, "from %s import %s\n", relativePath, common.NamespaceIdentifierName(ref.Name))
+	}
+	w.WriteStringln("")
 
 	writeTypes(w, st, ns)
 
@@ -159,7 +170,20 @@ func writeUnionClass(w *formatting.IndentedWriter, className string, typeParamet
 }
 
 func writeNamedType(w *formatting.IndentedWriter, td *dsl.NamedType) {
-	fmt.Fprintf(w, "%s = %s\n", common.TypeIdentifierName(td.Name), common.TypeSyntax(td.Type, td.Namespace))
+	// Does this NamedType resolve to a RecordDefinition?
+	resolvesToRecord := false
+	if t, ok := dsl.GetUnderlyingType(td.Type).(*dsl.SimpleType); ok {
+		if _, ok := t.ResolvedDefinition.(*dsl.RecordDefinition); ok {
+			resolvesToRecord = true
+		}
+	}
+
+	// // If the NamedType is Generic and resolves to a RecordDefinition, we can drop the type parameters in the alias declaration
+	if dsl.IsGeneric(td) && resolvesToRecord {
+		fmt.Fprintf(w, "%s = %s\n", common.TypeIdentifierName(td.Name), common.TypeSyntaxWithoutTypeParameters(td.Type, td.Namespace))
+	} else {
+		fmt.Fprintf(w, "%s = %s\n", common.TypeIdentifierName(td.Name), common.TypeSyntax(td.Type, td.Namespace))
+	}
 	common.WriteDocstring(w, td.Comment)
 	w.Indent().WriteStringln("")
 }
@@ -558,8 +582,40 @@ func writeComputedFieldExpression(w *formatting.IndentedWriter, expression dsl.E
 			}
 
 			if targetType.Cases.IsUnion() {
+
+				// Special handling for SwitchExpression over a Union from an imported namespace
+				targetTypeNamespace := ""
+				dsl.Visit(t.Target, func(self dsl.Visitor, node dsl.Node) {
+					switch node := node.(type) {
+					case *dsl.SimpleType:
+						self.Visit(node.ResolvedDefinition)
+					case *dsl.RecordDefinition:
+						for _, field := range node.Fields {
+							u := dsl.GetUnderlyingType(field.Type)
+							if u == t.Target.GetResolvedType() {
+								if targetTypeNamespace == "" {
+									meta := node.GetDefinitionMeta()
+									targetTypeNamespace = meta.Namespace
+								}
+								return
+							}
+						}
+					case dsl.Expression:
+						t := node.GetResolvedType()
+						if t != nil {
+							self.Visit(t)
+						}
+					}
+					self.VisitChildren(node)
+				})
+
+				unionClassName, _ := common.UnionClassName(targetType)
+				if targetTypeNamespace != "" && targetTypeNamespace != contextNamespace {
+					unionClassName = fmt.Sprintf("%s.%s", common.NamespaceIdentifierName(targetTypeNamespace), unionClassName)
+				}
+
 				for _, switchCase := range t.Cases {
-					writeSwitchCaseOverUnion(w, targetType, switchCase, unionVariableName, self, tail)
+					writeSwitchCaseOverUnion(w, targetType, unionClassName, switchCase, unionVariableName, self, tail)
 				}
 
 				fmt.Fprintf(w, "raise RuntimeError(\"Unexpected union case\")\n")
@@ -632,8 +688,7 @@ func writeSwitchCaseOverOptional(w *formatting.IndentedWriter, switchCase *dsl.S
 	}
 }
 
-func writeSwitchCaseOverUnion(w *formatting.IndentedWriter, unionType *dsl.GeneralizedType, switchCase *dsl.SwitchCase, variableName string, visitor dsl.VisitorWithContext[tailWrapper], tail tailWrapper) {
-	unionClassName, _ := common.UnionClassName(unionType)
+func writeSwitchCaseOverUnion(w *formatting.IndentedWriter, unionType *dsl.GeneralizedType, unionClassName string, switchCase *dsl.SwitchCase, variableName string, visitor dsl.VisitorWithContext[tailWrapper], tail tailWrapper) {
 	writeTypeCase := func(typePattern *dsl.TypePattern, declarationIdentifier string) {
 		for _, typeCase := range unionType.Cases {
 			if dsl.TypesEqual(typePattern.Type, typeCase.Type) {
@@ -948,10 +1003,12 @@ func writeGetDTypeFunc(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 			root:      true,
 		}
 
-		unions := make(map[string]any)
-
-		writeUnionDtypeIfNeeded := func(td dsl.Node) {
-			dsl.Visit(td, func(self dsl.Visitor, node dsl.Node) {
+		writeUnionDtypeIfNeeded := func(td dsl.Node, unions map[string]any, callingNamespace string) {
+			dsl.VisitWithContext[string](td, "", func(self dsl.VisitorWithContext[string], node dsl.Node, currentNamespace string) {
+				switch node := node.(type) {
+				case dsl.TypeDefinition:
+					currentNamespace = node.GetDefinitionMeta().Namespace
+				}
 				switch node := node.(type) {
 				case *dsl.NamedType:
 					if gt, ok := node.Type.(*dsl.GeneralizedType); ok {
@@ -966,8 +1023,7 @@ func writeGetDTypeFunc(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 								ntClone := *node
 								ntClone.Type = &gtClone
 								td := &ntClone
-								fmt.Fprintf(w, "dtype_map.setdefault(%s, %s)\n", common.TypeSyntaxWithoutTypeParameters(td, ns.Name), typeDefinitionDTypeExpression(td, context))
-
+								fmt.Fprintf(w, "dtype_map.setdefault(%s, %s)\n", common.TypeSyntaxWithoutTypeParameters(td, callingNamespace), typeDefinitionDTypeExpression(td, context))
 							}
 							// Return early - we use the alias name for this union type over the yardl-generate UnionClassName
 							return
@@ -976,6 +1032,9 @@ func writeGetDTypeFunc(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 				case *dsl.GeneralizedType:
 					if node.Cases.IsUnion() {
 						unionClassName, _ := common.UnionClassName(node)
+						if currentNamespace != callingNamespace {
+							unionClassName = fmt.Sprintf("%s.%s", common.NamespaceIdentifierName(currentNamespace), unionClassName)
+						}
 						if _, ok := unions[unionClassName]; !ok {
 							unions[unionClassName] = nil
 							fmt.Fprintf(w, "dtype_map.setdefault(%s, %s)\n", unionClassName, typeDTypeExpression(node, context))
@@ -983,17 +1042,29 @@ func writeGetDTypeFunc(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 					}
 
 				}
-				self.VisitChildren(node)
+				self.VisitChildren(node, currentNamespace)
 			})
 		}
 
+		for _, refNs := range ns.GetAllChildReferences() {
+			unions := make(map[string]any)
+			for _, td := range refNs.TypeDefinitions {
+				writeUnionDtypeIfNeeded(td, unions, ns.Name)
+				fmt.Fprintf(w, "dtype_map.setdefault(%s, %s)\n", common.TypeSyntaxWithoutTypeParameters(td, ns.Name), typeDefinitionDTypeExpression(td, context))
+			}
+			for _, td := range refNs.Protocols {
+				writeUnionDtypeIfNeeded(td, unions, ns.Name)
+			}
+		}
+
+		unions := make(map[string]any)
 		for _, td := range ns.TypeDefinitions {
-			writeUnionDtypeIfNeeded(td)
+			writeUnionDtypeIfNeeded(td, unions, ns.Name)
 			fmt.Fprintf(w, "dtype_map.setdefault(%s, %s)\n", common.TypeSyntaxWithoutTypeParameters(td, ns.Name), typeDefinitionDTypeExpression(td, context))
 		}
 
 		for _, td := range ns.Protocols {
-			writeUnionDtypeIfNeeded(td)
+			writeUnionDtypeIfNeeded(td, unions, ns.Name)
 		}
 
 		w.WriteStringln("\nreturn get_dtype")
@@ -1011,6 +1082,7 @@ type dTypeExpressionContext struct {
 
 func typeDefinitionDTypeExpression(t dsl.TypeDefinition, context dTypeExpressionContext) string {
 	if !context.root {
+		var dtypeExpression string
 		switch t := t.(type) {
 		case dsl.PrimitiveDefinition:
 			switch t {
@@ -1049,10 +1121,13 @@ func typeDefinitionDTypeExpression(t dsl.TypeDefinition, context dTypeExpression
 				typeArgs = append(typeArgs, getTypeSyntaxWithGenricArgsReadFromTupleArgs(ta, context))
 			}
 
-			return fmt.Sprintf("get_dtype(types.GenericAlias(%s, (%s,)))", common.TypeSyntaxWithoutTypeParameters(t, context.namespace), strings.Join(typeArgs, ", "))
+			dtypeExpression = fmt.Sprintf("get_dtype(types.GenericAlias(%s, (%s,)))", common.TypeSyntaxWithoutTypeParameters(t, context.namespace), strings.Join(typeArgs, ", "))
+		} else {
+			dtypeExpression = fmt.Sprintf("get_dtype(%s)", common.TypeSyntaxWithoutTypeParameters(t, context.namespace))
+
 		}
 
-		return fmt.Sprintf("get_dtype(%s)", common.TypeSyntaxWithoutTypeParameters(t, context.namespace))
+		return dtypeExpression
 	}
 
 	meta := t.GetDefinitionMeta()

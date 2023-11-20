@@ -1,0 +1,14 @@
+namespace: Smoketest
+
+imports:
+  - ../basic-types
+  # The 2D image type
+  - ../image
+  # Simple generic tuple
+  - ../tuples
+
+cpp:
+  sourcesOutputDir: ../cpp/generated
+
+python:
+  outputDir: ../

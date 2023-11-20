@@ -13,7 +13,7 @@ import (
 
 func TestMissingPackageFile(t *testing.T) {
 	d := t.TempDir()
-	_, err := ReadPackageInfo(d)
+	_, err := readPackageInfo(d)
 	require.ErrorContains(t, err, "a '_package.yml' file is missing from the directory")
 }
 
@@ -68,9 +68,9 @@ namespace: 123
 	require.ErrorContains(t, err, "the 'namespace' field must be PascalCased and match the format")
 }
 
-func writeAndReadPackageFile(t *testing.T, packageFileContents string) (PackageInfo, error) {
+func writeAndReadPackageFile(t *testing.T, packageFileContents string) (*PackageInfo, error) {
 	d := t.TempDir()
 	os.WriteFile(path.Join(d, PackageFileName), []byte(packageFileContents), 0644)
-	packageInfo, err := ReadPackageInfo(d)
+	packageInfo, err := readPackageInfo(d)
 	return packageInfo, err
 }

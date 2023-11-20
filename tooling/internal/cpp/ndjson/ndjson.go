@@ -134,16 +134,17 @@ func WriteNdJson(env *dsl.Environment, options packaging.CppCodegenOptions) erro
 
 		fmt.Fprintf(w, "} // namespace %s\n\n", common.NamespaceIdentifierName(ns.Name))
 
-		fmt.Fprintf(w, "namespace %s::ndjson {\n", common.NamespaceIdentifierName(ns.Name))
-		for _, protocol := range ns.Protocols {
-			writeProtocolMethods(w, protocol)
+		if ns.IsTopLevel {
+			fmt.Fprintf(w, "namespace %s::ndjson {\n", common.NamespaceIdentifierName(ns.Name))
+			for _, protocol := range ns.Protocols {
+				writeProtocolMethods(w, protocol)
+			}
+			fmt.Fprintf(w, "} // namespace %s::ndjson\n\n", common.NamespaceIdentifierName(ns.Name))
 		}
-		fmt.Fprintf(w, "} // namespace %s::ndjson", common.NamespaceIdentifierName(ns.Name))
 	}
 
 	filePath := path.Join(options.SourcesOutputDir, "protocols.cc")
 	return iocommon.WriteFileIfNeeded(filePath, b.Bytes(), 0644)
-
 }
 
 func writeEnumValuesMap(w *formatting.IndentedWriter, t *dsl.EnumDefinition) {
@@ -180,6 +181,9 @@ func writeHeaderFile(env *dsl.Environment, options packaging.CppCodegenOptions) 
 `)
 
 	for _, ns := range env.Namespaces {
+		if !ns.IsTopLevel {
+			continue
+		}
 		fmt.Fprintf(w, "namespace %s::ndjson {\n", common.NamespaceIdentifierName(ns.Name))
 		for _, protocol := range ns.Protocols {
 			common.WriteComment(w, fmt.Sprintf("NDJSON writer for the %s protocol.", protocol.Name))
@@ -257,7 +261,7 @@ func writeHeaderFile(env *dsl.Environment, options packaging.CppCodegenOptions) 
 			})
 			fmt.Fprint(w, "};\n\n")
 		}
-		w.WriteStringln("}")
+		fmt.Fprintf(w, "} // namespace %s::ndjson\n", common.NamespaceIdentifierName(ns.Name))
 	}
 
 	filePath := path.Join(options.SourcesOutputDir, "protocols.h")

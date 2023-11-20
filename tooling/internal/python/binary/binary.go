@@ -36,12 +36,20 @@ import numpy as np
 import numpy.typing as npt
 
 from .types import *
-from .protocols import *
-from . import _binary
-from . import yardl_types as yardl
 `)
 
-	writeProtocols(w, ns)
+	relativePath := ".."
+	if ns.IsTopLevel {
+		relativePath = "."
+		w.WriteStringln("from .protocols import *")
+	}
+
+	fmt.Fprintf(w, "from %s import _binary\n", relativePath)
+	fmt.Fprintf(w, "from %s import yardl_types as yardl\n\n", relativePath)
+
+	if ns.IsTopLevel {
+		writeProtocols(w, ns)
+	}
 	writeRecordSerializers(w, ns)
 
 	binaryPath := path.Join(packageDir, "binary.py")
@@ -65,7 +73,7 @@ func writeRecordSerializers(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 				genericSpec = ""
 			}
 
-			fmt.Fprintf(w, "class %s(%s_binary.RecordSerializer[%s]):\n", recordSerializerClassName(td), genericSpec, typeSyntax)
+			fmt.Fprintf(w, "class %s(%s_binary.RecordSerializer[%s]):\n", recordSerializerClassName(td, ns.Name), genericSpec, typeSyntax)
 			w.Indented(func() {
 				if len(td.TypeParameters) > 0 {
 					typeParamSerializers := make([]string, 0, len(td.TypeParameters))
@@ -132,8 +140,12 @@ func writeRecordSerializers(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 	}
 }
 
-func recordSerializerClassName(record *dsl.RecordDefinition) string {
-	return fmt.Sprintf("_%sSerializer", formatting.ToPascalCase(record.Name))
+func recordSerializerClassName(record *dsl.RecordDefinition, contextNamespace string) string {
+	className := fmt.Sprintf("%sSerializer", formatting.ToPascalCase(record.Name))
+	if record.Namespace != contextNamespace {
+		className = fmt.Sprintf("%s.binary.%s", common.NamespaceIdentifierName(record.Namespace), className)
+	}
+	return className
 }
 
 func writeProtocols(w *formatting.IndentedWriter, ns *dsl.Namespace) {
@@ -213,7 +225,7 @@ func typeDefinitionSerializer(t dsl.TypeDefinition, contextNamespace string) str
 		elementSerializer := typeSerializer(baseType, contextNamespace, nil)
 		return fmt.Sprintf("_binary.EnumSerializer(%s, %s)", elementSerializer, common.TypeSyntax(t, contextNamespace))
 	case *dsl.RecordDefinition:
-		serializerName := recordSerializerClassName(t)
+		serializerName := recordSerializerClassName(t, contextNamespace)
 		if len(t.TypeParameters) == 0 {
 			return fmt.Sprintf("%s()", serializerName)
 		}
@@ -258,6 +270,9 @@ func typeSerializer(t dsl.Type, contextNamespace string, namedType *dsl.NamedTyp
 			unionClassName, typeParameters := common.UnionClassName(t)
 			if namedType != nil {
 				unionClassName = namedType.Name
+				if namedType.Namespace != contextNamespace {
+					unionClassName = fmt.Sprintf("%s.%s", common.NamespaceIdentifierName(namedType.Namespace), unionClassName)
+				}
 			}
 
 			var classSyntax string

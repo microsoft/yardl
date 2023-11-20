@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"math/big"
 	"os"
 	"path/filepath"
@@ -17,9 +16,16 @@ import (
 	"github.com/microsoft/yardl/tooling/internal/validation"
 	"github.com/microsoft/yardl/tooling/pkg/dsl/parser"
 	"github.com/microsoft/yardl/tooling/pkg/packaging"
+	"github.com/rs/zerolog/log"
 	"gopkg.in/yaml.v3"
 )
 
+func ParsePackageContents(pkgInfo *packaging.PackageInfo) (*Namespace, error) {
+	return ParseYamlInDir(pkgInfo.PackageDir(), pkgInfo.Namespace)
+}
+
+// Parses all model YAML files, combining them into a single Namespace
+// path can be a single YAML file or a directory containing YAML files
 func ParseYamlInDir(path string, namespaceName string) (*Namespace, error) {
 	errorSink := validation.ErrorSink{}
 
@@ -44,7 +50,7 @@ func ParseYamlInDir(path string, namespaceName string) (*Namespace, error) {
 				return nil
 			})
 		if err != nil {
-			log.Println(err)
+			log.Error().Err(err).Msg("")
 		}
 
 		sort.Slice(paths, func(i, j int) bool { return paths[i] < paths[j] })
@@ -90,7 +96,7 @@ func ParseYamlInDir(path string, namespaceName string) (*Namespace, error) {
 					nodeMeta := node.GetNodeMeta()
 					nodeMeta.File = path
 					if nodeMeta.Line == 0 || nodeMeta.Column == 0 {
-						log.Panicf("node %T is missing line/column information. Line: %d, Column: %d", node, nodeMeta.Line, nodeMeta.Column)
+						log.Panic().Msgf("node %T is missing line/column information. Line: %d, Column: %d", node, nodeMeta.Line, nodeMeta.Column)
 					}
 				}
 

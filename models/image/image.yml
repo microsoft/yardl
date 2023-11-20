@@ -1,0 +1,4 @@
+Image<T>: T[x, y]
+
+FloatImage: Image<float>
+IntImage: Image<int>

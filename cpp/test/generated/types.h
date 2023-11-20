@@ -10,6 +10,115 @@
 
 #include "yardl/yardl.h"
 
+namespace tuples {
+template <typename T1, typename T2>
+struct Tuple {
+  T1 v1{};
+  T2 v2{};
+
+  bool operator==(const Tuple& other) const {
+    return v1 == other.v1 &&
+      v2 == other.v2;
+  }
+
+  bool operator!=(const Tuple& other) const {
+    return !(*this == other);
+  }
+};
+
+} // namespace tuples
+
+namespace basic_types {
+enum class Fruits {
+  kApple = 0,
+  kBanana = 1,
+  kPear = 2,
+};
+
+struct DaysOfWeek : yardl::BaseFlags<int32_t, DaysOfWeek> {
+  using BaseFlags::BaseFlags;
+  static const DaysOfWeek kMonday;
+  static const DaysOfWeek kTuesday;
+  static const DaysOfWeek kWednesday;
+  static const DaysOfWeek kThursday;
+  static const DaysOfWeek kFriday;
+  static const DaysOfWeek kSaturday;
+  static const DaysOfWeek kSunday;
+};
+
+struct TextFormat : yardl::BaseFlags<uint64_t, TextFormat> {
+  using BaseFlags::BaseFlags;
+  static const TextFormat kRegular;
+  static const TextFormat kBold;
+  static const TextFormat kItalic;
+  static const TextFormat kUnderline;
+  static const TextFormat kStrikethrough;
+};
+
+template <typename K, typename V>
+using AliasedMap = std::unordered_map<K, V>;
+
+template <typename T1, typename T2>
+using MyTuple = tuples::Tuple<T1, T2>;
+
+template <typename T1, typename T2>
+using GenericUnion2 = std::variant<T1, T2>;
+
+template <typename T>
+using GenericVector = std::vector<T>;
+
+struct RecordWithUnions {
+  std::variant<std::monostate, int32_t, std::string> null_or_int_or_string{};
+  std::variant<yardl::Time, yardl::DateTime> date_or_datetime{};
+
+  bool operator==(const RecordWithUnions& other) const {
+    return null_or_int_or_string == other.null_or_int_or_string &&
+      date_or_datetime == other.date_or_datetime;
+  }
+
+  bool operator!=(const RecordWithUnions& other) const {
+    return !(*this == other);
+  }
+};
+
+template <typename T0, typename T1>
+struct GenericRecordWithComputedFields {
+  std::variant<T0, T1> f1{};
+
+  uint8_t TypeIndex() const {
+    return std::visit(
+      [&](auto&& __case_arg__) -> uint8_t {
+        if constexpr (std::is_same_v<std::decay_t<decltype(__case_arg__)>, T0>) {
+          return 0;
+        }
+        if constexpr (std::is_same_v<std::decay_t<decltype(__case_arg__)>, T1>) {
+          return 1;
+        }
+      },
+      f1);
+  }
+
+  bool operator==(const GenericRecordWithComputedFields& other) const {
+    return f1 == other.f1;
+  }
+
+  bool operator!=(const GenericRecordWithComputedFields& other) const {
+    return !(*this == other);
+  }
+};
+
+} // namespace basic_types
+
+namespace image {
+template <typename T>
+using Image = yardl::NDArray<T, 2>;
+
+using FloatImage = image::Image<float>;
+
+using IntImage = image::Image<int32_t>;
+
+} // namespace image
+
 namespace test_model {
 struct SmallBenchmarkRecord {
   double a{};
@@ -419,28 +528,7 @@ struct RecordWithVlenCollections {
 
 using NamedNDArray = yardl::NDArray<int32_t, 2>;
 
-template <typename K, typename V>
-using AliasedMap = std::unordered_map<K, V>;
-
-struct RecordWithUnions {
-  std::variant<std::monostate, int32_t, std::string> null_or_int_or_string{};
-  std::variant<yardl::Time, yardl::DateTime> date_or_datetime{};
-
-  bool operator==(const RecordWithUnions& other) const {
-    return null_or_int_or_string == other.null_or_int_or_string &&
-      date_or_datetime == other.date_or_datetime;
-  }
-
-  bool operator!=(const RecordWithUnions& other) const {
-    return !(*this == other);
-  }
-};
-
-enum class Fruits {
-  kApple = 0,
-  kBanana = 1,
-  kPear = 2,
-};
+using Fruits = basic_types::Fruits;
 
 enum class UInt64Enum : uint64_t {
   kA = 9223372036854775808ULL,
@@ -456,25 +544,9 @@ enum class SizeBasedEnum : yardl::Size {
   kC = 2ULL,
 };
 
-struct DaysOfWeek : yardl::BaseFlags<int32_t, DaysOfWeek> {
-  using BaseFlags::BaseFlags;
-  static const DaysOfWeek kMonday;
-  static const DaysOfWeek kTuesday;
-  static const DaysOfWeek kWednesday;
-  static const DaysOfWeek kThursday;
-  static const DaysOfWeek kFriday;
-  static const DaysOfWeek kSaturday;
-  static const DaysOfWeek kSunday;
-};
+using DaysOfWeek = basic_types::DaysOfWeek;
 
-struct TextFormat : yardl::BaseFlags<uint64_t, TextFormat> {
-  using BaseFlags::BaseFlags;
-  static const TextFormat kRegular;
-  static const TextFormat kBold;
-  static const TextFormat kItalic;
-  static const TextFormat kUnderline;
-  static const TextFormat kStrikethrough;
-};
+using TextFormat = basic_types::TextFormat;
 
 struct RecordWithEnums {
   test_model::Fruits enum_field{};
@@ -493,7 +565,7 @@ struct RecordWithEnums {
 };
 
 template <typename T>
-using Image = yardl::NDArray<T, 2>;
+using Image = image::Image<T>;
 
 template <typename T1, typename T2>
 struct GenericRecord {
@@ -515,19 +587,7 @@ struct GenericRecord {
 };
 
 template <typename T1, typename T2>
-struct MyTuple {
-  T1 v1{};
-  T2 v2{};
-
-  bool operator==(const MyTuple& other) const {
-    return v1 == other.v1 &&
-      v2 == other.v2;
-  }
-
-  bool operator!=(const MyTuple& other) const {
-    return !(*this == other);
-  }
-};
+using MyTuple = basic_types::MyTuple<T1, T2>;
 
 template <typename T1, typename T2>
 using AliasedTuple = test_model::MyTuple<T1, T2>;
@@ -545,9 +605,6 @@ struct RecordWithAliasedGenerics {
     return !(*this == other);
   }
 };
-
-template <typename T1, typename T2>
-using GenericUnion2 = std::variant<T1, T2>;
 
 using AliasedString = std::string;
 
@@ -567,10 +624,10 @@ template <typename T, typename U>
 using AliasedMultiGenericOptional = std::variant<std::monostate, T, U>;
 
 template <typename T1, typename T2>
-using AliasedGenericUnion2 = test_model::GenericUnion2<T1, T2>;
+using AliasedGenericUnion2 = basic_types::GenericUnion2<T1, T2>;
 
 template <typename T>
-using AliasedGenericVector = std::vector<T>;
+using AliasedGenericVector = basic_types::GenericVector<T>;
 
 template <typename T>
 using AliasedGenericFixedVector = std::array<T, 3>;
@@ -583,6 +640,22 @@ using AliasedGenericFixedArray = yardl::FixedNDArray<T, 16, 8>;
 
 template <typename T>
 using AliasedGenericDynamicArray = yardl::DynamicNDArray<T>;
+
+template <typename T1, typename T2>
+using VectorOfGenericRecords = std::vector<test_model::GenericRecord<T1, T2>>;
+
+template <typename T, typename U>
+struct RecordWithGenericVectorOfRecords {
+  std::vector<test_model::VectorOfGenericRecords<T, U>> v{};
+
+  bool operator==(const RecordWithGenericVectorOfRecords& other) const {
+    return v == other.v;
+  }
+
+  bool operator!=(const RecordWithGenericVectorOfRecords& other) const {
+    return !(*this == other);
+  }
+};
 
 template <typename T>
 struct RecordWithOptionalGenericField {
@@ -692,7 +765,7 @@ struct RecordWithGenericArrays {
 template <typename T, typename U>
 struct RecordWithGenericMaps {
   std::unordered_map<T, U> m{};
-  test_model::AliasedMap<T, U> am{};
+  basic_types::AliasedMap<T, U> am{};
 
   bool operator==(const RecordWithGenericMaps& other) const {
     return m == other.m &&
@@ -759,32 +832,6 @@ using AliasedIntOrSimpleRecord = std::variant<int32_t, test_model::SimpleRecord>
 
 using AliasedNullableIntSimpleRecord = std::variant<std::monostate, int32_t, test_model::SimpleRecord>;
 
-template <typename T0, typename T1>
-struct GenericRecordWithComputedFields {
-  std::variant<T0, T1> f1{};
-
-  uint8_t TypeIndex() const {
-    return std::visit(
-      [&](auto&& __case_arg__) -> uint8_t {
-        if constexpr (std::is_same_v<std::decay_t<decltype(__case_arg__)>, T0>) {
-          return 0;
-        }
-        if constexpr (std::is_same_v<std::decay_t<decltype(__case_arg__)>, T1>) {
-          return 1;
-        }
-      },
-      f1);
-  }
-
-  bool operator==(const GenericRecordWithComputedFields& other) const {
-    return f1 == other.f1;
-  }
-
-  bool operator!=(const GenericRecordWithComputedFields& other) const {
-    return !(*this == other);
-  }
-};
-
 struct RecordWithComputedFields {
   yardl::NDArray<int32_t, 2> array_field{};
   yardl::NDArray<int32_t, 2> array_field_map_dimensions{};
@@ -811,7 +858,7 @@ struct RecordWithComputedFields {
   std::optional<test_model::NamedNDArray> optional_named_array{};
   std::variant<int32_t, float> int_float_union{};
   std::variant<std::monostate, int32_t, float> nullable_int_float_union{};
-  std::variant<int32_t, test_model::GenericRecordWithComputedFields<std::string, float>> union_with_nested_generic_union{};
+  std::variant<int32_t, basic_types::GenericRecordWithComputedFields<std::string, float>> union_with_nested_generic_union{};
   std::unordered_map<std::string, std::string> map_field{};
 
   uint8_t IntLiteral() const {
@@ -1117,8 +1164,8 @@ struct RecordWithComputedFields {
         if constexpr (std::is_same_v<std::decay_t<decltype(__case_arg__)>, int32_t>) {
           return -1;
         }
-        if constexpr (std::is_same_v<std::decay_t<decltype(__case_arg__)>, test_model::GenericRecordWithComputedFields<std::string, float>>) {
-          test_model::GenericRecordWithComputedFields<std::string, float> const& rec = __case_arg__;
+        if constexpr (std::is_same_v<std::decay_t<decltype(__case_arg__)>, basic_types::GenericRecordWithComputedFields<std::string, float>>) {
+          basic_types::GenericRecordWithComputedFields<std::string, float> const& rec = __case_arg__;
           return static_cast<int16_t>(std::visit(
             [&](auto&& __case_arg__) -> uint8_t {
               if constexpr (std::is_same_v<std::decay_t<decltype(__case_arg__)>, float>) {
@@ -1140,8 +1187,8 @@ struct RecordWithComputedFields {
         if constexpr (std::is_same_v<std::decay_t<decltype(__case_arg__)>, int32_t>) {
           return -1;
         }
-        if constexpr (std::is_same_v<std::decay_t<decltype(__case_arg__)>, test_model::GenericRecordWithComputedFields<std::string, float>>) {
-          test_model::GenericRecordWithComputedFields<std::string, float> const& rec = __case_arg__;
+        if constexpr (std::is_same_v<std::decay_t<decltype(__case_arg__)>, basic_types::GenericRecordWithComputedFields<std::string, float>>) {
+          basic_types::GenericRecordWithComputedFields<std::string, float> const& rec = __case_arg__;
           return static_cast<int16_t>(rec.TypeIndex());
         }
       },
@@ -1325,3 +1372,4 @@ struct RecordWithKeywordFields {
 };
 
 } // namespace test_model
+

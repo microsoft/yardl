@@ -273,8 +273,6 @@ DynamicNDArrays: !protocol
     recordWithVlensArray: RecordWithVlens[]
     recordWithDynamicNDArrays: RecordWithDynamicNDArrays
 
-AliasedMap<K,V>: K->V
-
 Maps: !protocol
   sequence:
     stringToInt: string->int
@@ -282,19 +280,14 @@ Maps: !protocol
     stringToUnion: !map
       keys: string
       values: [string, int]
-    aliasedGeneric: AliasedMap<string, int>
-
-RecordWithUnions: !record
-  fields:
-    nullOrIntOrString: [null, int, string]
-    dateOrDatetime: [time, datetime]
+    aliasedGeneric: BasicTypes.AliasedMap<string, int>
 
 Unions: !protocol
   sequence:
     intOrSimpleRecord: [int, SimpleRecord]
     intOrRecordWithVlens: [int, RecordWithVlens]
     monosotateOrIntOrSimpleRecord: [null, int, SimpleRecord]
-    recordWithUnions: RecordWithUnions
+    recordWithUnions: BasicTypes.RecordWithUnions
 
 StreamsOfUnions: !protocol
   sequence:
@@ -303,11 +296,7 @@ StreamsOfUnions: !protocol
     nullableIntOrSimpleRecord: !stream
       items: [null, int, SimpleRecord]
 
-Fruits: !enum
-  values:
-    - apple
-    - banana
-    - pear
+Fruits: BasicTypes.Fruits
 
 UInt64Enum: !enum
   base: uint64
@@ -329,31 +318,15 @@ Enums: !protocol
     vec: Fruits*
     size: SizeBasedEnum
 
-DaysOfWeek: !flags
-  values:
-    - monday
-    - tuesday
-    - wednesday
-    - thursday
-    - friday
-    - saturday
-    - sunday
+DaysOfWeek: BasicTypes.DaysOfWeek
 
-TextFormat: !flags
-  base: uint64
-  values:
-    regular: 0
-    bold:
-    italic:
-    underline:
-    strikethrough:
+TextFormat: BasicTypes.TextFormat
 
 RecordWithEnums: !record
   fields:
     enum: Fruits
     flags: DaysOfWeek
     flags2: TextFormat
-
 
 Flags: !protocol
   sequence:
@@ -369,7 +342,7 @@ StateTest: !protocol
       items: int
     anotherInt: int
 
-Image<T>: T[x, y]
+Image<T>: Image.Image<T>
 
 GenericRecord<T1, T2>: !record
   fields:
@@ -378,10 +351,7 @@ GenericRecord<T1, T2>: !record
     vector1: T1*
     image2: Image<T2>
 
-MyTuple<T1, T2>: !record
-  fields:
-    v1: T1
-    v2: T2
+MyTuple<T1, T2>: BasicTypes.MyTuple<T1, T2>
 
 AliasedTuple<T1, T2>: MyTuple<T1, T2>
 
@@ -392,21 +362,21 @@ RecordWithAliasedGenerics: !record
 
 SimpleGenerics: !protocol
   sequence:
-    floatImage: Image<float>
-    intImage: Image<int>
+    floatImage: Image.FloatImage
+    intImage: Image.IntImage
     intImageAlternateSyntax: !generic
       name: Image
       args: int
     stringImage: Image<string>
-    intFloatTuple: MyTuple<int,float>
-    floatFloatTuple: MyTuple<float, float>
+    intFloatTuple: Tuples.Tuple<int,float>
+    floatFloatTuple: Tuples.Tuple<float, float>
     intFloatTupleAlternateSyntax: !generic
-      name: MyTuple
+      name: Tuples.Tuple
       args: [int, float]
-    intStringTuple: MyTuple<int,string>
+    intStringTuple: Tuples.Tuple<int,string>
     streamOfTypeVariants: !stream
       items: !union
-        imageFloat: Image<float>
+        imageFloat: Image.FloatImage
         imageDouble: Image<double>
 
 AdvancedGenerics: !protocol
@@ -425,8 +395,6 @@ AdvancedGenerics: !protocol
         - int*
         - float*
 
-GenericUnion2<T1, T2>: [T1, T2]
-
 AliasedString: string
 AliasedEnum: Fruits
 AliasedOpenGeneric<T1,T2>: AliasedTuple<T1,T2>
@@ -434,12 +402,18 @@ AliasedClosedGeneric: AliasedTuple<AliasedString, AliasedEnum>
 AliasedOptional: int?
 AliasedGenericOptional<T>: T?
 AliasedMultiGenericOptional<T, U>: [null, T, U]
-AliasedGenericUnion2<T1,T2>: GenericUnion2<T1, T2>
-AliasedGenericVector<T>: T*
+AliasedGenericUnion2<T1,T2>: BasicTypes.GenericUnion2<T1, T2>
+AliasedGenericVector<T>: BasicTypes.GenericVector<T>
 AliasedGenericFixedVector<T>: T*3
 AliasedGenericRank2Array<T>: T[,]
 AliasedGenericFixedArray<T>: T[16, 8]
 AliasedGenericDynamicArray<T>: T[]
+
+VectorOfGenericRecords<T1, T2>: GenericRecord<T1, T2>*
+
+RecordWithGenericVectorOfRecords<T, U>: !record
+  fields:
+    v: VectorOfGenericRecords<T, U>*
 
 # BEGIN nested generic records
 
@@ -481,7 +455,7 @@ RecordWithGenericArrays<T>: !record
 RecordWithGenericMaps<T, U>: !record
   fields:
     m: T->U
-    am: AliasedMap<T, U>
+    am: BasicTypes.AliasedMap<T, U>
 
 RecordContainingGenericRecords<A, B>: !record
   fields:
@@ -559,7 +533,7 @@ RecordWithComputedFields: !record
     nullableIntFloatUnion: [null, int, float]
     unionWithNestedGenericUnion: !union
       int: int
-      genericRecordWithComputedFields: GenericRecordWithComputedFields<string, float>
+      genericRecordWithComputedFields: BasicTypes.GenericRecordWithComputedFields<string, float>
     mapField: string->string
   computedFields:
     intLiteral: 42 # this comment is ignored
@@ -629,14 +603,14 @@ RecordWithComputedFields: !record
     nestedSwitch:
       !switch unionWithNestedGenericUnion:
         int: -1
-        GenericRecordWithComputedFields<string, float> rec:
+        BasicTypes.GenericRecordWithComputedFields<string, float> rec:
           !switch rec.f1:
             float f: 20
             string s: 10
     useNestedComputedField:
       !switch unionWithNestedGenericUnion:
         int: -1
-        GenericRecordWithComputedFields<string, float> rec: rec.typeIndex
+        BasicTypes.GenericRecordWithComputedFields<string, float> rec: rec.typeIndex
 
     switchOverSingleValue:
       !switch intField:
@@ -660,15 +634,6 @@ RecordWithComputedFields: !record
     castComplex32ToComplex64: complexfloat32Field as complexfloat64
     castComplex64ToComplex32: complexfloat64Field as complexfloat32
     castFloatToComplex: 66.6 as complexfloat32
-
-GenericRecordWithComputedFields<T0, T1>: !record
-  fields:
-    f1: [T0, T1]
-  computedFields:
-    typeIndex:
-      !switch f1:
-        T0: 0
-        T1: 1
 
 ProtocolWithComputedFields: !protocol
   sequence:

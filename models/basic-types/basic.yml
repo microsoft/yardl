@@ -1,0 +1,51 @@
+Fruits: !enum
+  values:
+    - apple
+    - banana
+    - pear
+
+DaysOfWeek: !flags
+  values:
+    - monday
+    - tuesday
+    - wednesday
+    - thursday
+    - friday
+    - saturday
+    - sunday
+
+TextFormat: !flags
+  base: uint64
+  values:
+    regular: 0
+    bold:
+    italic:
+    underline:
+    strikethrough:
+
+AliasedMap<K,V>: K->V
+
+MyTuple<T1, T2>: Tuples.Tuple<T1, T2>
+
+GenericUnion2<T1, T2>: [T1, T2]
+
+GenericVector<T>: T*
+
+RecordWithUnions: !record
+  fields:
+    nullOrIntOrString: [null, int, string]
+    dateOrDatetime: [time, datetime]
+
+GenericRecordWithComputedFields<T0, T1>: !record
+  fields:
+    f1: [T0, T1]
+  computedFields:
+    typeIndex:
+      !switch f1:
+        T0: 0
+        T1: 1
+
+UnusedProtocol: !protocol
+  sequence:
+    enum: Fruits
+    tuple: MyTuple<int, string>

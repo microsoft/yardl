@@ -142,7 +142,9 @@ def test_switch_expression():
 
     r.union_with_nested_generic_union = (
         tm.IntOrGenericRecordWithComputedFields.GenericRecordWithComputedFields(
-            tm.GenericRecordWithComputedFields(f1=tm.T0OrT1[str, tm.Float32].T0("hi"))
+            tm.basic_types.GenericRecordWithComputedFields(
+                f1=tm.basic_types.T0OrT1[str, tm.Float32].T0("hi")
+            )
         )
     )
 
@@ -150,7 +152,9 @@ def test_switch_expression():
     assert r.use_nested_computed_field() == 0
     r.union_with_nested_generic_union = (
         tm.IntOrGenericRecordWithComputedFields.GenericRecordWithComputedFields(
-            tm.GenericRecordWithComputedFields(f1=tm.T0OrT1[str, tm.Float32].T1(42.9))
+            tm.basic_types.GenericRecordWithComputedFields(
+                f1=tm.basic_types.T0OrT1[str, tm.Float32].T1(42.9)
+            )
         )
     )
     assert r.nested_switch() == 20
@@ -159,9 +163,11 @@ def test_switch_expression():
     r.int_field = 10
     assert r.switch_over_single_value() == 10
 
-    gr = tm.GenericRecordWithComputedFields(f1=tm.T0OrT1[tm.Int32, tm.Float32].T0(42))
+    gr = tm.basic_types.GenericRecordWithComputedFields(
+        f1=tm.basic_types.T0OrT1[tm.Int32, tm.Float32].T0(42)
+    )
     assert gr.type_index() == 0
-    gr.f1 = tm.T0OrT1[tm.Int32, tm.Float32].T1(42.9)
+    gr.f1 = tm.basic_types.T0OrT1[tm.Int32, tm.Float32].T1(42.9)
     assert gr.type_index() == 1
 
 

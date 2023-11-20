@@ -46,7 +46,7 @@ func WriteBinary(env *dsl.Environment, options packaging.CppCodegenOptions) erro
 	for _, ns := range env.Namespaces {
 		fmt.Fprintf(w, "namespace %s::binary {\n", common.NamespaceIdentifierName(ns.Name))
 		writeNamespaceDefinitions(w, ns)
-		fmt.Fprintf(w, "} // namespace %s::binary", common.NamespaceIdentifierName(ns.Name))
+		fmt.Fprintf(w, "} // namespace %s::binary\n\n", common.NamespaceIdentifierName(ns.Name))
 	}
 
 	filePath := path.Join(options.SourcesOutputDir, "protocols.cc")
@@ -73,6 +73,9 @@ func writeHeaderFile(env *dsl.Environment, options packaging.CppCodegenOptions) 
 `)
 
 	for _, ns := range env.Namespaces {
+		if !ns.IsTopLevel {
+			continue
+		}
 		fmt.Fprintf(w, "namespace %s::binary {\n", common.NamespaceIdentifierName(ns.Name))
 		for _, protocol := range ns.Protocols {
 			common.WriteComment(w, fmt.Sprintf("Binary writer for the %s protocol.", protocol.Name))
@@ -163,7 +166,7 @@ func writeHeaderFile(env *dsl.Environment, options packaging.CppCodegenOptions) 
 			})
 			fmt.Fprint(w, "};\n\n")
 		}
-		w.WriteStringln("}")
+		fmt.Fprintf(w, "} // namespace %s::binary\n", common.NamespaceIdentifierName(ns.Name))
 	}
 
 	filePath := path.Join(options.SourcesOutputDir, "protocols.h")
@@ -365,8 +368,10 @@ func writeNamespaceDefinitions(w *formatting.IndentedWriter, ns *dsl.Namespace) 
 		w.WriteString("} // namespace\n\n")
 	}
 
-	for _, protocol := range ns.Protocols {
-		writeProtocolMethods(w, protocol)
+	if ns.IsTopLevel {
+		for _, protocol := range ns.Protocols {
+			writeProtocolMethods(w, protocol)
+		}
 	}
 }
 

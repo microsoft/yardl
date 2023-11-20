@@ -319,11 +319,11 @@ class BenchmarkSimpleMrdWriterBase {
   public:
   // Ordinal 0.
   // Call this method for each element of the `data` stream, then call `EndData() when done.`
-  void WriteData(std::variant<test_model::SimpleAcquisition, test_model::Image<float>> const& value);
+  void WriteData(std::variant<test_model::SimpleAcquisition, image::Image<float>> const& value);
 
   // Ordinal 0.
   // Call this method to write many values to the `data` stream, then call `EndData()` when done.
-  void WriteData(std::vector<std::variant<test_model::SimpleAcquisition, test_model::Image<float>>> const& values);
+  void WriteData(std::vector<std::variant<test_model::SimpleAcquisition, image::Image<float>>> const& values);
 
   // Marks the end of the `data` stream.
   void EndData();
@@ -337,8 +337,8 @@ class BenchmarkSimpleMrdWriterBase {
   virtual void Flush() {}
 
   protected:
-  virtual void WriteDataImpl(std::variant<test_model::SimpleAcquisition, test_model::Image<float>> const& value) = 0;
-  virtual void WriteDataImpl(std::vector<std::variant<test_model::SimpleAcquisition, test_model::Image<float>>> const& value);
+  virtual void WriteDataImpl(std::variant<test_model::SimpleAcquisition, image::Image<float>> const& value) = 0;
+  virtual void WriteDataImpl(std::vector<std::variant<test_model::SimpleAcquisition, image::Image<float>>> const& value);
   virtual void EndDataImpl() = 0;
   virtual void CloseImpl() {}
 
@@ -354,10 +354,10 @@ class BenchmarkSimpleMrdWriterBase {
 class BenchmarkSimpleMrdReaderBase {
   public:
   // Ordinal 0.
-  [[nodiscard]] bool ReadData(std::variant<test_model::SimpleAcquisition, test_model::Image<float>>& value);
+  [[nodiscard]] bool ReadData(std::variant<test_model::SimpleAcquisition, image::Image<float>>& value);
 
   // Ordinal 0.
-  [[nodiscard]] bool ReadData(std::vector<std::variant<test_model::SimpleAcquisition, test_model::Image<float>>>& values);
+  [[nodiscard]] bool ReadData(std::vector<std::variant<test_model::SimpleAcquisition, image::Image<float>>>& values);
 
   // Optionaly close this writer before destructing. Validates that all steps were completely read.
   void Close();
@@ -367,8 +367,8 @@ class BenchmarkSimpleMrdReaderBase {
   virtual ~BenchmarkSimpleMrdReaderBase() = default;
 
   protected:
-  virtual bool ReadDataImpl(std::variant<test_model::SimpleAcquisition, test_model::Image<float>>& value) = 0;
-  virtual bool ReadDataImpl(std::vector<std::variant<test_model::SimpleAcquisition, test_model::Image<float>>>& values);
+  virtual bool ReadDataImpl(std::variant<test_model::SimpleAcquisition, image::Image<float>>& value) = 0;
+  virtual bool ReadDataImpl(std::vector<std::variant<test_model::SimpleAcquisition, image::Image<float>>>& values);
   virtual void CloseImpl() {}
   static std::string schema_;
 
@@ -1413,7 +1413,7 @@ class MapsWriterBase {
   void WriteStringToUnion(std::unordered_map<std::string, std::variant<std::string, int32_t>> const& value);
 
   // Ordinal 3.
-  void WriteAliasedGeneric(test_model::AliasedMap<std::string, int32_t> const& value);
+  void WriteAliasedGeneric(basic_types::AliasedMap<std::string, int32_t> const& value);
 
   // Optionaly close this writer before destructing. Validates that all steps were completed.
   void Close();
@@ -1427,7 +1427,7 @@ class MapsWriterBase {
   virtual void WriteStringToIntImpl(std::unordered_map<std::string, int32_t> const& value) = 0;
   virtual void WriteIntToStringImpl(std::unordered_map<int32_t, std::string> const& value) = 0;
   virtual void WriteStringToUnionImpl(std::unordered_map<std::string, std::variant<std::string, int32_t>> const& value) = 0;
-  virtual void WriteAliasedGenericImpl(test_model::AliasedMap<std::string, int32_t> const& value) = 0;
+  virtual void WriteAliasedGenericImpl(basic_types::AliasedMap<std::string, int32_t> const& value) = 0;
   virtual void CloseImpl() {}
 
   static std::string schema_;
@@ -1451,7 +1451,7 @@ class MapsReaderBase {
   void ReadStringToUnion(std::unordered_map<std::string, std::variant<std::string, int32_t>>& value);
 
   // Ordinal 3.
-  void ReadAliasedGeneric(test_model::AliasedMap<std::string, int32_t>& value);
+  void ReadAliasedGeneric(basic_types::AliasedMap<std::string, int32_t>& value);
 
   // Optionaly close this writer before destructing. Validates that all steps were completely read.
   void Close();
@@ -1464,7 +1464,7 @@ class MapsReaderBase {
   virtual void ReadStringToIntImpl(std::unordered_map<std::string, int32_t>& value) = 0;
   virtual void ReadIntToStringImpl(std::unordered_map<int32_t, std::string>& value) = 0;
   virtual void ReadStringToUnionImpl(std::unordered_map<std::string, std::variant<std::string, int32_t>>& value) = 0;
-  virtual void ReadAliasedGenericImpl(test_model::AliasedMap<std::string, int32_t>& value) = 0;
+  virtual void ReadAliasedGenericImpl(basic_types::AliasedMap<std::string, int32_t>& value) = 0;
   virtual void CloseImpl() {}
   static std::string schema_;
 
@@ -1485,7 +1485,7 @@ class UnionsWriterBase {
   void WriteMonosotateOrIntOrSimpleRecord(std::variant<std::monostate, int32_t, test_model::SimpleRecord> const& value);
 
   // Ordinal 3.
-  void WriteRecordWithUnions(test_model::RecordWithUnions const& value);
+  void WriteRecordWithUnions(basic_types::RecordWithUnions const& value);
 
   // Optionaly close this writer before destructing. Validates that all steps were completed.
   void Close();
@@ -1499,7 +1499,7 @@ class UnionsWriterBase {
   virtual void WriteIntOrSimpleRecordImpl(std::variant<int32_t, test_model::SimpleRecord> const& value) = 0;
   virtual void WriteIntOrRecordWithVlensImpl(std::variant<int32_t, test_model::RecordWithVlens> const& value) = 0;
   virtual void WriteMonosotateOrIntOrSimpleRecordImpl(std::variant<std::monostate, int32_t, test_model::SimpleRecord> const& value) = 0;
-  virtual void WriteRecordWithUnionsImpl(test_model::RecordWithUnions const& value) = 0;
+  virtual void WriteRecordWithUnionsImpl(basic_types::RecordWithUnions const& value) = 0;
   virtual void CloseImpl() {}
 
   static std::string schema_;
@@ -1523,7 +1523,7 @@ class UnionsReaderBase {
   void ReadMonosotateOrIntOrSimpleRecord(std::variant<std::monostate, int32_t, test_model::SimpleRecord>& value);
 
   // Ordinal 3.
-  void ReadRecordWithUnions(test_model::RecordWithUnions& value);
+  void ReadRecordWithUnions(basic_types::RecordWithUnions& value);
 
   // Optionaly close this writer before destructing. Validates that all steps were completely read.
   void Close();
@@ -1536,7 +1536,7 @@ class UnionsReaderBase {
   virtual void ReadIntOrSimpleRecordImpl(std::variant<int32_t, test_model::SimpleRecord>& value) = 0;
   virtual void ReadIntOrRecordWithVlensImpl(std::variant<int32_t, test_model::RecordWithVlens>& value) = 0;
   virtual void ReadMonosotateOrIntOrSimpleRecordImpl(std::variant<std::monostate, int32_t, test_model::SimpleRecord>& value) = 0;
-  virtual void ReadRecordWithUnionsImpl(test_model::RecordWithUnions& value) = 0;
+  virtual void ReadRecordWithUnionsImpl(basic_types::RecordWithUnions& value) = 0;
   virtual void CloseImpl() {}
   static std::string schema_;
 
@@ -1858,10 +1858,10 @@ class StateTestReaderBase {
 class SimpleGenericsWriterBase {
   public:
   // Ordinal 0.
-  void WriteFloatImage(test_model::Image<float> const& value);
+  void WriteFloatImage(image::FloatImage const& value);
 
   // Ordinal 1.
-  void WriteIntImage(test_model::Image<int32_t> const& value);
+  void WriteIntImage(image::IntImage const& value);
 
   // Ordinal 2.
   void WriteIntImageAlternateSyntax(test_model::Image<int32_t> const& value);
@@ -1870,24 +1870,24 @@ class SimpleGenericsWriterBase {
   void WriteStringImage(test_model::Image<std::string> const& value);
 
   // Ordinal 4.
-  void WriteIntFloatTuple(test_model::MyTuple<int32_t, float> const& value);
+  void WriteIntFloatTuple(tuples::Tuple<int32_t, float> const& value);
 
   // Ordinal 5.
-  void WriteFloatFloatTuple(test_model::MyTuple<float, float> const& value);
+  void WriteFloatFloatTuple(tuples::Tuple<float, float> const& value);
 
   // Ordinal 6.
-  void WriteIntFloatTupleAlternateSyntax(test_model::MyTuple<int32_t, float> const& value);
+  void WriteIntFloatTupleAlternateSyntax(tuples::Tuple<int32_t, float> const& value);
 
   // Ordinal 7.
-  void WriteIntStringTuple(test_model::MyTuple<int32_t, std::string> const& value);
+  void WriteIntStringTuple(tuples::Tuple<int32_t, std::string> const& value);
 
   // Ordinal 8.
   // Call this method for each element of the `streamOfTypeVariants` stream, then call `EndStreamOfTypeVariants() when done.`
-  void WriteStreamOfTypeVariants(std::variant<test_model::Image<float>, test_model::Image<double>> const& value);
+  void WriteStreamOfTypeVariants(std::variant<image::FloatImage, test_model::Image<double>> const& value);
 
   // Ordinal 8.
   // Call this method to write many values to the `streamOfTypeVariants` stream, then call `EndStreamOfTypeVariants()` when done.
-  void WriteStreamOfTypeVariants(std::vector<std::variant<test_model::Image<float>, test_model::Image<double>>> const& values);
+  void WriteStreamOfTypeVariants(std::vector<std::variant<image::FloatImage, test_model::Image<double>>> const& values);
 
   // Marks the end of the `streamOfTypeVariants` stream.
   void EndStreamOfTypeVariants();
@@ -1901,16 +1901,16 @@ class SimpleGenericsWriterBase {
   virtual void Flush() {}
 
   protected:
-  virtual void WriteFloatImageImpl(test_model::Image<float> const& value) = 0;
-  virtual void WriteIntImageImpl(test_model::Image<int32_t> const& value) = 0;
+  virtual void WriteFloatImageImpl(image::FloatImage const& value) = 0;
+  virtual void WriteIntImageImpl(image::IntImage const& value) = 0;
   virtual void WriteIntImageAlternateSyntaxImpl(test_model::Image<int32_t> const& value) = 0;
   virtual void WriteStringImageImpl(test_model::Image<std::string> const& value) = 0;
-  virtual void WriteIntFloatTupleImpl(test_model::MyTuple<int32_t, float> const& value) = 0;
-  virtual void WriteFloatFloatTupleImpl(test_model::MyTuple<float, float> const& value) = 0;
-  virtual void WriteIntFloatTupleAlternateSyntaxImpl(test_model::MyTuple<int32_t, float> const& value) = 0;
-  virtual void WriteIntStringTupleImpl(test_model::MyTuple<int32_t, std::string> const& value) = 0;
-  virtual void WriteStreamOfTypeVariantsImpl(std::variant<test_model::Image<float>, test_model::Image<double>> const& value) = 0;
-  virtual void WriteStreamOfTypeVariantsImpl(std::vector<std::variant<test_model::Image<float>, test_model::Image<double>>> const& value);
+  virtual void WriteIntFloatTupleImpl(tuples::Tuple<int32_t, float> const& value) = 0;
+  virtual void WriteFloatFloatTupleImpl(tuples::Tuple<float, float> const& value) = 0;
+  virtual void WriteIntFloatTupleAlternateSyntaxImpl(tuples::Tuple<int32_t, float> const& value) = 0;
+  virtual void WriteIntStringTupleImpl(tuples::Tuple<int32_t, std::string> const& value) = 0;
+  virtual void WriteStreamOfTypeVariantsImpl(std::variant<image::FloatImage, test_model::Image<double>> const& value) = 0;
+  virtual void WriteStreamOfTypeVariantsImpl(std::vector<std::variant<image::FloatImage, test_model::Image<double>>> const& value);
   virtual void EndStreamOfTypeVariantsImpl() = 0;
   virtual void CloseImpl() {}
 
@@ -1926,10 +1926,10 @@ class SimpleGenericsWriterBase {
 class SimpleGenericsReaderBase {
   public:
   // Ordinal 0.
-  void ReadFloatImage(test_model::Image<float>& value);
+  void ReadFloatImage(image::FloatImage& value);
 
   // Ordinal 1.
-  void ReadIntImage(test_model::Image<int32_t>& value);
+  void ReadIntImage(image::IntImage& value);
 
   // Ordinal 2.
   void ReadIntImageAlternateSyntax(test_model::Image<int32_t>& value);
@@ -1938,22 +1938,22 @@ class SimpleGenericsReaderBase {
   void ReadStringImage(test_model::Image<std::string>& value);
 
   // Ordinal 4.
-  void ReadIntFloatTuple(test_model::MyTuple<int32_t, float>& value);
+  void ReadIntFloatTuple(tuples::Tuple<int32_t, float>& value);
 
   // Ordinal 5.
-  void ReadFloatFloatTuple(test_model::MyTuple<float, float>& value);
+  void ReadFloatFloatTuple(tuples::Tuple<float, float>& value);
 
   // Ordinal 6.
-  void ReadIntFloatTupleAlternateSyntax(test_model::MyTuple<int32_t, float>& value);
+  void ReadIntFloatTupleAlternateSyntax(tuples::Tuple<int32_t, float>& value);
 
   // Ordinal 7.
-  void ReadIntStringTuple(test_model::MyTuple<int32_t, std::string>& value);
+  void ReadIntStringTuple(tuples::Tuple<int32_t, std::string>& value);
 
   // Ordinal 8.
-  [[nodiscard]] bool ReadStreamOfTypeVariants(std::variant<test_model::Image<float>, test_model::Image<double>>& value);
+  [[nodiscard]] bool ReadStreamOfTypeVariants(std::variant<image::FloatImage, test_model::Image<double>>& value);
 
   // Ordinal 8.
-  [[nodiscard]] bool ReadStreamOfTypeVariants(std::vector<std::variant<test_model::Image<float>, test_model::Image<double>>>& values);
+  [[nodiscard]] bool ReadStreamOfTypeVariants(std::vector<std::variant<image::FloatImage, test_model::Image<double>>>& values);
 
   // Optionaly close this writer before destructing. Validates that all steps were completely read.
   void Close();
@@ -1963,16 +1963,16 @@ class SimpleGenericsReaderBase {
   virtual ~SimpleGenericsReaderBase() = default;
 
   protected:
-  virtual void ReadFloatImageImpl(test_model::Image<float>& value) = 0;
-  virtual void ReadIntImageImpl(test_model::Image<int32_t>& value) = 0;
+  virtual void ReadFloatImageImpl(image::FloatImage& value) = 0;
+  virtual void ReadIntImageImpl(image::IntImage& value) = 0;
   virtual void ReadIntImageAlternateSyntaxImpl(test_model::Image<int32_t>& value) = 0;
   virtual void ReadStringImageImpl(test_model::Image<std::string>& value) = 0;
-  virtual void ReadIntFloatTupleImpl(test_model::MyTuple<int32_t, float>& value) = 0;
-  virtual void ReadFloatFloatTupleImpl(test_model::MyTuple<float, float>& value) = 0;
-  virtual void ReadIntFloatTupleAlternateSyntaxImpl(test_model::MyTuple<int32_t, float>& value) = 0;
-  virtual void ReadIntStringTupleImpl(test_model::MyTuple<int32_t, std::string>& value) = 0;
-  virtual bool ReadStreamOfTypeVariantsImpl(std::variant<test_model::Image<float>, test_model::Image<double>>& value) = 0;
-  virtual bool ReadStreamOfTypeVariantsImpl(std::vector<std::variant<test_model::Image<float>, test_model::Image<double>>>& values);
+  virtual void ReadIntFloatTupleImpl(tuples::Tuple<int32_t, float>& value) = 0;
+  virtual void ReadFloatFloatTupleImpl(tuples::Tuple<float, float>& value) = 0;
+  virtual void ReadIntFloatTupleAlternateSyntaxImpl(tuples::Tuple<int32_t, float>& value) = 0;
+  virtual void ReadIntStringTupleImpl(tuples::Tuple<int32_t, std::string>& value) = 0;
+  virtual bool ReadStreamOfTypeVariantsImpl(std::variant<image::FloatImage, test_model::Image<double>>& value) = 0;
+  virtual bool ReadStreamOfTypeVariantsImpl(std::vector<std::variant<image::FloatImage, test_model::Image<double>>>& values);
   virtual void CloseImpl() {}
   static std::string schema_;
 

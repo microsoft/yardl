@@ -41,6 +41,9 @@ func WriteMocks(env *dsl.Environment, options packaging.CppCodegenOptions) error
 `)
 
 	for _, ns := range env.Namespaces {
+		if !ns.IsTopLevel {
+			continue
+		}
 		fmt.Fprintf(w, "namespace %s {\n", common.NamespaceIdentifierName(ns.Name))
 		w.WriteStringln("namespace {")
 		formatting.Delimited(w, "\n", ns.Protocols, func(w *formatting.IndentedWriter, i int, p *dsl.ProtocolDefinition) {
@@ -52,6 +55,9 @@ func WriteMocks(env *dsl.Environment, options packaging.CppCodegenOptions) error
 
 	w.WriteStringln("namespace yardl::testing {")
 	for _, ns := range env.Namespaces {
+		if !ns.IsTopLevel {
+			continue
+		}
 		for _, protocol := range ns.Protocols {
 			w.WriteStringln("template<>")
 			fmt.Fprintf(w, "std::unique_ptr<%s> CreateValidatingWriter<%s>(Format format, std::string const& filename) {\n", common.QualifiedAbstractWriterName(protocol), common.QualifiedAbstractWriterName(protocol))
@@ -253,6 +259,9 @@ func writeFactories(env *dsl.Environment, options packaging.CppCodegenOptions) e
 
 	w.WriteStringln("namespace yardl::testing {")
 	for _, ns := range env.Namespaces {
+		if !ns.IsTopLevel {
+			continue
+		}
 		for _, protocol := range ns.Protocols {
 			w.WriteStringln("template<>")
 			fmt.Fprintf(w, "std::unique_ptr<%s> CreateWriter<%s>(Format format, std::string const& filename) {\n", common.QualifiedAbstractWriterName(protocol), common.QualifiedAbstractWriterName(protocol))

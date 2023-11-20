@@ -33,9 +33,11 @@ func WriteProtocols(env *dsl.Environment, options packaging.CppCodegenOptions) e
 	w.WriteString("#endif\n\n")
 
 	for _, ns := range env.Namespaces {
-		fmt.Fprintf(w, "namespace %s {\n", common.NamespaceIdentifierName(ns.Name))
-		writeDefinitions(w, ns, env.SymbolTable)
-		fmt.Fprintf(w, "} // namespace %s\n", common.NamespaceIdentifierName(ns.Name))
+		if ns.IsTopLevel {
+			fmt.Fprintf(w, "namespace %s {\n", common.NamespaceIdentifierName(ns.Name))
+			writeDefinitions(w, ns, env.SymbolTable)
+			fmt.Fprintf(w, "} // namespace %s\n", common.NamespaceIdentifierName(ns.Name))
+		}
 	}
 
 	definitionsPath := path.Join(options.SourcesOutputDir, "protocols.cc")
@@ -52,9 +54,11 @@ func writeHeader(env *dsl.Environment, options packaging.CppCodegenOptions) erro
 `)
 
 	for _, ns := range env.Namespaces {
-		fmt.Fprintf(w, "namespace %s {\n", common.NamespaceIdentifierName(ns.Name))
-		writeDeclarations(w, ns)
-		fmt.Fprintf(w, "} // namespace %s\n", common.NamespaceIdentifierName(ns.Name))
+		if ns.IsTopLevel {
+			fmt.Fprintf(w, "namespace %s {\n", common.NamespaceIdentifierName(ns.Name))
+			writeDeclarations(w, ns)
+			fmt.Fprintf(w, "} // namespace %s\n", common.NamespaceIdentifierName(ns.Name))
+		}
 	}
 
 	definitionsPath := path.Join(options.SourcesOutputDir, "protocols.h")

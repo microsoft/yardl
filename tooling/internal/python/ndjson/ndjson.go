@@ -37,13 +37,21 @@ import numpy as np
 import numpy.typing as npt
 
 from .types import *
-from .protocols import *
-from . import _ndjson
-from . import yardl_types as yardl
 `)
 
+	relativePath := ".."
+	if ns.IsTopLevel {
+		relativePath = "."
+		w.WriteStringln("from .protocols import *")
+	}
+
+	fmt.Fprintf(w, "from %s import _ndjson\n", relativePath)
+	fmt.Fprintf(w, "from %s import yardl_types as yardl\n\n", relativePath)
+
 	writeConverters(w, ns)
-	writeProtocols(w, ns)
+	if ns.IsTopLevel {
+		writeProtocols(w, ns)
+	}
 
 	ndjsonPath := path.Join(packageDir, "ndjson.py")
 	return iocommon.WriteFileIfNeeded(ndjsonPath, b.Bytes(), 0644)
@@ -75,7 +83,7 @@ func writeRecordConverter(td *dsl.RecordDefinition, w *formatting.IndentedWriter
 		genericSpec = ""
 	}
 
-	fmt.Fprintf(w, "class %s(%s_ndjson.JsonConverter[%s, np.void]):\n", recordConverterClassName(td), genericSpec, typeSyntax)
+	fmt.Fprintf(w, "class %s(%s_ndjson.JsonConverter[%s, np.void]):\n", recordConverterClassName(td, ns.Name), genericSpec, typeSyntax)
 	w.Indented(func() {
 		if len(td.TypeParameters) > 0 {
 			typeParamSerializers := make([]string, 0, len(td.TypeParameters))
@@ -216,7 +224,7 @@ func writeRecordConverter(td *dsl.RecordDefinition, w *formatting.IndentedWriter
 }
 
 func writeEnumMaps(t *dsl.EnumDefinition, w *formatting.IndentedWriter, ns *dsl.Namespace) {
-	name_to_value_map_name := enumNameToValueMapName(t)
+	name_to_value_map_name := enumNameToValueMapName(t, ns.Name)
 	fmt.Fprintf(w, "%s = {\n", name_to_value_map_name)
 	w.Indented(func() {
 		for _, v := range t.Values {
@@ -225,20 +233,32 @@ func writeEnumMaps(t *dsl.EnumDefinition, w *formatting.IndentedWriter, ns *dsl.
 	})
 	fmt.Fprintf(w, "}\n")
 
-	value_to_name_map_name := enumValueToNameMapName(t)
+	value_to_name_map_name := enumValueToNameMapName(t, ns.Name)
 	fmt.Fprintf(w, "%s = {v: n for n, v in %s.items()}\n\n", value_to_name_map_name, name_to_value_map_name)
 }
 
-func enumNameToValueMapName(t *dsl.EnumDefinition) string {
-	return fmt.Sprintf("_%s_name_to_value_map", formatting.ToSnakeCase(t.Name))
+func enumNameToValueMapName(t *dsl.EnumDefinition, contextNamespace string) string {
+	name := fmt.Sprintf("%s_name_to_value_map", formatting.ToSnakeCase(t.Name))
+	if t.Namespace != contextNamespace {
+		name = fmt.Sprintf("%s.ndjson.%s", common.NamespaceIdentifierName(t.Namespace), name)
+	}
+	return name
 }
 
-func enumValueToNameMapName(t *dsl.EnumDefinition) string {
-	return fmt.Sprintf("_%s_value_to_name_map", formatting.ToSnakeCase(t.Name))
+func enumValueToNameMapName(t *dsl.EnumDefinition, contextNamespace string) string {
+	name := fmt.Sprintf("%s_value_to_name_map", formatting.ToSnakeCase(t.Name))
+	if t.Namespace != contextNamespace {
+		name = fmt.Sprintf("%s.ndjson.%s", common.NamespaceIdentifierName(t.Namespace), name)
+	}
+	return name
 }
 
-func recordConverterClassName(record *dsl.RecordDefinition) string {
-	return fmt.Sprintf("_%sConverter", formatting.ToPascalCase(record.Name))
+func recordConverterClassName(record *dsl.RecordDefinition, contextNamespace string) string {
+	className := fmt.Sprintf("%sConverter", formatting.ToPascalCase(record.Name))
+	if record.Namespace != contextNamespace {
+		className = fmt.Sprintf("%s.ndjson.%s", common.NamespaceIdentifierName(record.Namespace), className)
+	}
+	return className
 }
 
 func writeProtocols(w *formatting.IndentedWriter, ns *dsl.Namespace) {
@@ -343,9 +363,9 @@ func typeDefinitionConverter(t dsl.TypeDefinition, contextNamespace string) stri
 			className = "_ndjson.EnumConverter"
 		}
 
-		return fmt.Sprintf("%s(%s, %s, %s, %s)", className, common.TypeSyntax(t, contextNamespace), common.TypeDTypeSyntax(baseType), enumNameToValueMapName(t), enumValueToNameMapName(t))
+		return fmt.Sprintf("%s(%s, %s, %s, %s)", className, common.TypeSyntax(t, contextNamespace), common.TypeDTypeSyntax(baseType), enumNameToValueMapName(t, contextNamespace), enumValueToNameMapName(t, contextNamespace))
 	case *dsl.RecordDefinition:
-		converterName := recordConverterClassName(t)
+		converterName := recordConverterClassName(t, contextNamespace)
 		if len(t.TypeParameters) == 0 {
 			return fmt.Sprintf("%s()", converterName)
 		}
@@ -390,6 +410,9 @@ func typeConverter(t dsl.Type, contextNamespace string, namedType *dsl.NamedType
 			unionClassName, typeParameters := common.UnionClassName(t)
 			if namedType != nil {
 				unionClassName = namedType.Name
+				if namedType.Namespace != contextNamespace {
+					unionClassName = fmt.Sprintf("%s.%s", common.NamespaceIdentifierName(namedType.Namespace), unionClassName)
+				}
 			}
 
 			var classSyntax string
