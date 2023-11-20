@@ -94,6 +94,10 @@ func fetchAndCachePackage(src string) (string, error) {
 	}
 }
 
+func cacheLocation(url *url.URL) string {
+	return filepath.Join(cacheDir, path.Join(url.Hostname(), url.EscapedPath()))
+}
+
 func fetchGit(url *url.URL) (string, error) {
 	q := url.Query()
 
@@ -110,7 +114,7 @@ func fetchGit(url *url.URL) (string, error) {
 		url.RawQuery = q.Encode()
 	}
 
-	dst := filepath.Join(cacheDir, path.Join(url.Hostname(), url.EscapedPath()))
+	dst := cacheLocation(url)
 
 	if ref == "" {
 		ref = "remotes/origin/HEAD"
@@ -119,7 +123,7 @@ func fetchGit(url *url.URL) (string, error) {
 		dst = filepath.Join(dst, ref)
 	}
 
-	newCache := false
+	justCloned := false
 	if stat, err := os.Stat(dst); err == nil {
 		if !stat.IsDir() {
 			return dst, fmt.Errorf("cache target '%s' is not a directory", dst)
@@ -129,38 +133,39 @@ func fetchGit(url *url.URL) (string, error) {
 		if _, err := runGit("clone", url.String(), dst); err != nil {
 			return dst, err
 		}
-		newCache = true
+		justCloned = true
 	} else {
 		return dst, err
 	}
 
 	needFetch := false
 
-	parseRev := func(rev string) (string, error) {
-		parsed, err := runGit("-C", dst, "rev-parse", rev)
-		if err != nil {
-			if newCache {
-				// We just cloned, so ref must be invalid
-				return "", err
-			}
-			needFetch = true
+	headHash, err := runGit("-C", dst, "rev-parse", "HEAD")
+	if err != nil {
+		if justCloned {
+			// We just cloned, so HEAD should be valid
+			return "", err
 		}
-		return parsed, nil
-
+		// May need to fetch before HEAD is valid
+		needFetch = true
 	}
 
-	parsedHead, err := parseRev("HEAD")
+	refHash, err := runGit("-C", dst, "rev-parse", ref)
 	if err != nil {
-		return dst, err
+		// ref is either valid on remotes and needs to be fetched, or invalid and we'll catch it on `checkout`
+		needFetch = true
 	}
 
-	parsedRef, err := parseRev(ref)
-	if err != nil {
-		return dst, err
+	if !strings.HasPrefix(refHash, ref) {
+		// ref is mutable (e.g. a branch or tag) and should be updated with fetch
+		needFetch = true
 	}
 
-	// Checkout if we need to fetch or if we don't have ref checked out
-	needCheckout := needFetch || parsedHead != parsedRef
+	// Checkout if fetching, or ref != HEAD, or is just invalid and we don't know yet
+	needCheckout := needFetch
+	if refHash != headHash {
+		needCheckout = true
+	}
 
 	if needFetch {
 		log.Info().Msgf("Updating cached repo %v in %v", url, dst)
@@ -171,6 +176,10 @@ func fetchGit(url *url.URL) (string, error) {
 
 	if needCheckout {
 		log.Info().Msgf("Checking out ref %s", ref)
+		// Clean up working directory before checkout
+		if _, err := runGit("-C", dst, "reset", "--hard"); err != nil {
+			return dst, err
+		}
 		if _, err := runGit("-C", dst, "checkout", ref); err != nil {
 			return dst, err
 		}
