@@ -18,31 +18,30 @@ runs:
       with:
         miniforge-variant: Mambaforge
         miniforge-version: latest
+        # Do not specify environment file - see Cache step below
         activate-environment: yardl
-        # environment-file: ci-environment.yml
         use-mamba: true
 
     - name: Get Date
       id: get-date
       shell: bash
-      run: echo "::set-output name=today::$(/bin/date -u '+%Y%m%d')"
+      run: echo "DATE=$(date -u +'%Y%m%d')" >> $GITHUB_ENV
 
     - name: Cache Conda Env
+      id: cache-conda
       uses: actions/cache@v2
       with:
         path: ${{ env.CONDA }}/envs
         key:
             conda-${{ runner.os }}--${{ runner.arch }}--${{
-            steps.get-date.outputs.today }}-${{
             hashFiles('ci-environment.yml') }}-${{
+            env.DATE }}-${{
             env.CONDA_CACHE_NUMBER }}
-        # key: ${{ runner.os }}-conda-${{ hashFiles('ci-environment.yml') }}
-        id: cache
 
     - name: Update Environment
       shell: bash
       run: mamba env update -n yardl -f ci-environment.yml
-      if: steps.cache.outputs.cache-hit != 'true'
+      if: steps.cache-conda.outputs.cache-hit != 'true'
 
 
     - uses: actions/setup-go@v4
