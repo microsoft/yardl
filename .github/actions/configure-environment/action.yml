@@ -40,6 +40,7 @@ runs:
         id: cache
 
     - name: Update Environment
+      shell: bash
       run: mamba env update -n yardl -f ci-environment.yml
       if: steps.cache.outputs.cache-hit != 'true'
 
