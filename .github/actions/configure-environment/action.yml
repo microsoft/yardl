@@ -29,7 +29,7 @@ runs:
 
     - name: Cache Conda Env
       id: cache-conda
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: ${{ env.CONDA }}/envs
         key:

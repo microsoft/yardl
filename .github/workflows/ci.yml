@@ -16,7 +16,7 @@ defaults:
     shell: bash -el {0}
 
 env:
-  # Increase this to reset cache manually
+  # Increase this to manually reset the conda environment cache
   CONDA_CACHE_NUMBER: 0
 
 jobs:
