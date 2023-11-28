@@ -548,7 +548,7 @@ def test_unions(format: Format):
                     tm.DateTime.from_components(2025, 3, 4),
                 ),
                 null_or_fruits_or_days_of_week=tm.basic_types.GenericNullableUnion2.T1(
-                    tm.basic_types.Fruits.APPLE
+                    tm.basic_types.Fruits.APPLE  # type: ignore
                 ),
             )
         )
