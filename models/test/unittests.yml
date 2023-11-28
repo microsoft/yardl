@@ -640,6 +640,11 @@ ProtocolWithComputedFields: !protocol
     recordWithComputedFields: RecordWithComputedFields
 
 
+GenericUnionWithRepeatedTypeParameters<T>: !union
+  t: T
+  tv: T*
+  ta: T[]
+
 GenericUnion3<T, U, V>: [T, U, V]
 GenericUnion3Alternate<U, V, W>: [U, V, W]
 

@@ -3559,6 +3559,39 @@
         },
         {
           "alias": {
+            "name": "GenericUnionWithRepeatedTypeParameters",
+            "typeParameters": [
+              "T"
+            ],
+            "type": [
+              {
+                "tag": "t",
+                "explicitTag": true,
+                "type": "T"
+              },
+              {
+                "tag": "tv",
+                "explicitTag": true,
+                "type": {
+                  "vector": {
+                    "items": "T"
+                  }
+                }
+              },
+              {
+                "tag": "ta",
+                "explicitTag": true,
+                "type": {
+                  "array": {
+                    "items": "T"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "alias": {
             "name": "GenericUnion3",
             "typeParameters": [
               "T",

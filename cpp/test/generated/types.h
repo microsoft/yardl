@@ -1304,6 +1304,9 @@ struct RecordWithComputedFields {
   }
 };
 
+template <typename T>
+using GenericUnionWithRepeatedTypeParameters = std::variant<T, std::vector<T>, yardl::DynamicNDArray<T>>;
+
 template <typename T, typename U, typename V>
 using GenericUnion3 = std::variant<T, U, V>;
 

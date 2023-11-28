@@ -47,6 +47,7 @@ from .types import (
     GenericRecord,
     GenericUnion3,
     GenericUnion3Alternate,
+    GenericUnionWithRepeatedTypeParameters,
     Image,
     ImageFloatOrImageDouble,
     Int32OrFloat32,

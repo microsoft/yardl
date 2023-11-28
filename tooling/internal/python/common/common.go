@@ -432,6 +432,7 @@ func GetOpenGenericTypeParameters(node dsl.Node) string {
 					return
 				}
 			}
+			res = append(res, t)
 			paramStrings = appendGenericTypeParameterUses(paramStrings, t)
 		case *dsl.SimpleType:
 			if gtp, ok := t.ResolvedDefinition.(*dsl.GenericTypeParameter); ok {
@@ -442,6 +443,7 @@ func GetOpenGenericTypeParameters(node dsl.Node) string {
 					}
 				}
 				if !found {
+					res = append(res, gtp)
 					paramStrings = appendGenericTypeParameterUses(paramStrings, gtp)
 				}
 			}
