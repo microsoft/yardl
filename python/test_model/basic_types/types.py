@@ -86,6 +86,17 @@ GenericUnion2.T1 = type("GenericUnion2.T1", (GenericUnion2UnionCase,), {"index":
 GenericUnion2.T2 = type("GenericUnion2.T2", (GenericUnion2UnionCase,), {"index": 1, "tag": "T2"})
 del GenericUnion2UnionCase
 
+class GenericNullableUnion2(typing.Generic[T1, T2]):
+    T1: type["GenericNullableUnion2UnionCase[T1, T2, T1]"]
+    T2: type["GenericNullableUnion2UnionCase[T1, T2, T2]"]
+
+class GenericNullableUnion2UnionCase(GenericNullableUnion2[T1, T2], yardl.UnionCase[_T]):
+    pass
+
+GenericNullableUnion2.T1 = type("GenericNullableUnion2.T1", (GenericNullableUnion2UnionCase,), {"index": 0, "tag": "T1"})
+GenericNullableUnion2.T2 = type("GenericNullableUnion2.T2", (GenericNullableUnion2UnionCase,), {"index": 1, "tag": "T2"})
+del GenericNullableUnion2UnionCase
+
 GenericVector = list[T]
 
 class Int32OrString:
@@ -113,26 +124,30 @@ del TimeOrDatetimeUnionCase
 class RecordWithUnions:
     null_or_int_or_string: typing.Optional[Int32OrString]
     date_or_datetime: TimeOrDatetime
+    null_or_fruits_or_days_of_week: typing.Optional[GenericNullableUnion2[Fruits, DaysOfWeek]]
 
     def __init__(self, *,
         null_or_int_or_string: typing.Optional[Int32OrString] = None,
         date_or_datetime: TimeOrDatetime = TimeOrDatetime.Time(yardl.Time()),
+        null_or_fruits_or_days_of_week: typing.Optional[GenericNullableUnion2[Fruits, DaysOfWeek]] = None,
     ):
         self.null_or_int_or_string = null_or_int_or_string
         self.date_or_datetime = date_or_datetime
+        self.null_or_fruits_or_days_of_week = null_or_fruits_or_days_of_week
 
     def __eq__(self, other: object) -> bool:
         return (
             isinstance(other, RecordWithUnions)
             and self.null_or_int_or_string == other.null_or_int_or_string
             and self.date_or_datetime == other.date_or_datetime
+            and self.null_or_fruits_or_days_of_week == other.null_or_fruits_or_days_of_week
         )
 
     def __str__(self) -> str:
-        return f"RecordWithUnions(nullOrIntOrString={self.null_or_int_or_string}, dateOrDatetime={self.date_or_datetime})"
+        return f"RecordWithUnions(nullOrIntOrString={self.null_or_int_or_string}, dateOrDatetime={self.date_or_datetime}, nullOrFruitsOrDaysOfWeek={self.null_or_fruits_or_days_of_week})"
 
     def __repr__(self) -> str:
-        return f"RecordWithUnions(nullOrIntOrString={repr(self.null_or_int_or_string)}, dateOrDatetime={repr(self.date_or_datetime)})"
+        return f"RecordWithUnions(nullOrIntOrString={repr(self.null_or_int_or_string)}, dateOrDatetime={repr(self.date_or_datetime)}, nullOrFruitsOrDaysOfWeek={repr(self.null_or_fruits_or_days_of_week)})"
 
 
 class T0OrT1(typing.Generic[T0, T1]):
@@ -186,10 +201,12 @@ def _mk_get_dtype():
     dtype_map.setdefault(AliasedMap, lambda type_args: np.dtype(np.object_))
     dtype_map.setdefault(MyTuple, lambda type_args: get_dtype(types.GenericAlias(tuples.Tuple, (type_args[0], type_args[1],))))
     dtype_map.setdefault(GenericUnion2, lambda type_args: np.dtype(np.object_))
+    dtype_map.setdefault(GenericNullableUnion2, lambda type_args: np.dtype(np.object_))
+    dtype_map.setdefault(GenericNullableUnion2, lambda type_args: np.dtype(np.object_))
     dtype_map.setdefault(GenericVector, lambda type_args: np.dtype(np.object_))
     dtype_map.setdefault(Int32OrString, np.dtype(np.object_))
     dtype_map.setdefault(TimeOrDatetime, np.dtype(np.object_))
-    dtype_map.setdefault(RecordWithUnions, np.dtype([('null_or_int_or_string', np.dtype(np.object_)), ('date_or_datetime', np.dtype(np.object_))], align=True))
+    dtype_map.setdefault(RecordWithUnions, np.dtype([('null_or_int_or_string', np.dtype(np.object_)), ('date_or_datetime', np.dtype(np.object_)), ('null_or_fruits_or_days_of_week', get_dtype(types.GenericAlias(GenericNullableUnion2, (Fruits, DaysOfWeek,))))], align=True))
     dtype_map.setdefault(T0OrT1, np.dtype(np.object_))
     dtype_map.setdefault(GenericRecordWithComputedFields, lambda type_args: np.dtype([('f1', np.dtype(np.object_))], align=True))
 

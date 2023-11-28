@@ -1554,7 +1554,8 @@ class RecordWithAliasedOptionalGenericFieldConverter(typing.Generic[T, T_NP], _n
             raise TypeError("Expected 'RecordWithAliasedOptionalGenericField[T]' instance")
         json_object = {}
 
-        json_object["v"] = self._v_converter.to_json(value.v)
+        if value.v is not None:
+            json_object["v"] = self._v_converter.to_json(value.v)
         return json_object
 
     def numpy_to_json(self, value: np.void) -> object:
@@ -1562,21 +1563,22 @@ class RecordWithAliasedOptionalGenericFieldConverter(typing.Generic[T, T_NP], _n
             raise TypeError("Expected 'np.void' instance")
         json_object = {}
 
-        json_object["v"] = self._v_converter.numpy_to_json(value["v"])
+        if (field_val := value["v"]) is not None:
+            json_object["v"] = self._v_converter.numpy_to_json(field_val)
         return json_object
 
     def from_json(self, json_object: object) -> RecordWithAliasedOptionalGenericField[T]:
         if not isinstance(json_object, dict):
             raise TypeError("Expected 'dict' instance")
         return RecordWithAliasedOptionalGenericField[T](
-            v=self._v_converter.from_json(json_object["v"],),
+            v=self._v_converter.from_json(json_object.get("v")),
         )
 
     def from_json_to_numpy(self, json_object: object) -> np.void:
         if not isinstance(json_object, dict):
             raise TypeError("Expected 'dict' instance")
         return (
-            self._v_converter.from_json_to_numpy(json_object["v"]),
+            self._v_converter.from_json_to_numpy(json_object.get("v")),
         ) # type:ignore 
 
 
@@ -1632,7 +1634,8 @@ class RecordWithAliasedOptionalGenericUnionFieldConverter(typing.Generic[U, U_NP
             raise TypeError("Expected 'RecordWithAliasedOptionalGenericUnionField[U, V]' instance")
         json_object = {}
 
-        json_object["v"] = self._v_converter.to_json(value.v)
+        if value.v is not None:
+            json_object["v"] = self._v_converter.to_json(value.v)
         return json_object
 
     def numpy_to_json(self, value: np.void) -> object:
@@ -1640,21 +1643,22 @@ class RecordWithAliasedOptionalGenericUnionFieldConverter(typing.Generic[U, U_NP
             raise TypeError("Expected 'np.void' instance")
         json_object = {}
 
-        json_object["v"] = self._v_converter.numpy_to_json(value["v"])
+        if (field_val := value["v"]) is not None:
+            json_object["v"] = self._v_converter.numpy_to_json(field_val)
         return json_object
 
     def from_json(self, json_object: object) -> RecordWithAliasedOptionalGenericUnionField[U, V]:
         if not isinstance(json_object, dict):
             raise TypeError("Expected 'dict' instance")
         return RecordWithAliasedOptionalGenericUnionField[U, V](
-            v=self._v_converter.from_json(json_object["v"],),
+            v=self._v_converter.from_json(json_object.get("v")),
         )
 
     def from_json_to_numpy(self, json_object: object) -> np.void:
         if not isinstance(json_object, dict):
             raise TypeError("Expected 'dict' instance")
         return (
-            self._v_converter.from_json_to_numpy(json_object["v"]),
+            self._v_converter.from_json_to_numpy(json_object.get("v")),
         ) # type:ignore 
 
 

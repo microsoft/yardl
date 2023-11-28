@@ -32,8 +32,9 @@ struct IsTriviallySerializable<basic_types::RecordWithUnions> {
     std::is_standard_layout_v<__T__> &&
     IsTriviallySerializable<decltype(__T__::null_or_int_or_string)>::value &&
     IsTriviallySerializable<decltype(__T__::date_or_datetime)>::value &&
-    (sizeof(__T__) == (sizeof(__T__::null_or_int_or_string) + sizeof(__T__::date_or_datetime))) &&
-    offsetof(__T__, null_or_int_or_string) < offsetof(__T__, date_or_datetime);
+    IsTriviallySerializable<decltype(__T__::null_or_fruits_or_days_of_week)>::value &&
+    (sizeof(__T__) == (sizeof(__T__::null_or_int_or_string) + sizeof(__T__::date_or_datetime) + sizeof(__T__::null_or_fruits_or_days_of_week))) &&
+    offsetof(__T__, null_or_int_or_string) < offsetof(__T__, date_or_datetime) && offsetof(__T__, date_or_datetime) < offsetof(__T__, null_or_fruits_or_days_of_week);
 };
 
 template <typename T0, typename T1>
@@ -740,6 +741,26 @@ template<typename T1, yardl::binary::Reader<T1> ReadT1, typename T2, yardl::bina
   ReadUnion<T1, ReadT1, T2, ReadT2>(stream, value);
 }
 
+template<typename T1, yardl::binary::Writer<T1> WriteT1, typename T2, yardl::binary::Writer<T2> WriteT2>
+[[maybe_unused]] void WriteGenericNullableUnion2(yardl::binary::CodedOutputStream& stream, basic_types::GenericNullableUnion2<T1, T2> const& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<basic_types::GenericNullableUnion2<T1, T2>>::value) {
+    yardl::binary::WriteTriviallySerializable(stream, value);
+    return;
+  }
+
+  WriteUnion<std::monostate, yardl::binary::WriteMonostate, T1, WriteT1, T2, WriteT2>(stream, value);
+}
+
+template<typename T1, yardl::binary::Reader<T1> ReadT1, typename T2, yardl::binary::Reader<T2> ReadT2>
+[[maybe_unused]] void ReadGenericNullableUnion2(yardl::binary::CodedInputStream& stream, basic_types::GenericNullableUnion2<T1, T2>& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<basic_types::GenericNullableUnion2<T1, T2>>::value) {
+    yardl::binary::ReadTriviallySerializable(stream, value);
+    return;
+  }
+
+  ReadUnion<std::monostate, yardl::binary::ReadMonostate, T1, ReadT1, T2, ReadT2>(stream, value);
+}
+
 template<typename T, yardl::binary::Writer<T> WriteT>
 [[maybe_unused]] void WriteGenericVector(yardl::binary::CodedOutputStream& stream, basic_types::GenericVector<T> const& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<basic_types::GenericVector<T>>::value) {
@@ -768,6 +789,7 @@ template<typename T, yardl::binary::Reader<T> ReadT>
 
   WriteUnion<std::monostate, yardl::binary::WriteMonostate, int32_t, yardl::binary::WriteInteger, std::string, yardl::binary::WriteString>(stream, value.null_or_int_or_string);
   WriteUnion<yardl::Time, yardl::binary::WriteTime, yardl::DateTime, yardl::binary::WriteDateTime>(stream, value.date_or_datetime);
+  basic_types::binary::WriteGenericNullableUnion2<basic_types::Fruits, yardl::binary::WriteEnum<basic_types::Fruits>, basic_types::DaysOfWeek, yardl::binary::WriteFlags<basic_types::DaysOfWeek>>(stream, value.null_or_fruits_or_days_of_week);
 }
 
 [[maybe_unused]] void ReadRecordWithUnions(yardl::binary::CodedInputStream& stream, basic_types::RecordWithUnions& value) {
@@ -778,6 +800,7 @@ template<typename T, yardl::binary::Reader<T> ReadT>
 
   ReadUnion<std::monostate, yardl::binary::ReadMonostate, int32_t, yardl::binary::ReadInteger, std::string, yardl::binary::ReadString>(stream, value.null_or_int_or_string);
   ReadUnion<yardl::Time, yardl::binary::ReadTime, yardl::DateTime, yardl::binary::ReadDateTime>(stream, value.date_or_datetime);
+  basic_types::binary::ReadGenericNullableUnion2<basic_types::Fruits, yardl::binary::ReadEnum<basic_types::Fruits>, basic_types::DaysOfWeek, yardl::binary::ReadFlags<basic_types::DaysOfWeek>>(stream, value.null_or_fruits_or_days_of_week);
 }
 
 template<typename T0, yardl::binary::Writer<T0> WriteT0, typename T1, yardl::binary::Writer<T1> WriteT1>

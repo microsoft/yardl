@@ -8,6 +8,7 @@ from .types import (
     AliasedMap,
     DaysOfWeek,
     Fruits,
+    GenericNullableUnion2,
     GenericRecordWithComputedFields,
     GenericUnion2,
     GenericVector,

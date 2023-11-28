@@ -227,6 +227,42 @@ struct adl_serializer<std::variant<T1, T2>> {
   }
 };
 
+template <typename T1, typename T2>
+struct adl_serializer<std::variant<std::monostate, T1, T2>> {
+  static void to_json(ordered_json& j, std::variant<std::monostate, T1, T2> const& value) {
+    switch (value.index()) {
+      case 0:
+        j = ordered_json{ {"null", std::get<std::monostate>(value)} };
+        break;
+      case 1:
+        j = ordered_json{ {"T1", std::get<T1>(value)} };
+        break;
+      case 2:
+        j = ordered_json{ {"T2", std::get<T2>(value)} };
+        break;
+      default:
+        throw std::runtime_error("Invalid union value");
+    }
+  }
+
+  static void from_json(ordered_json const& j, std::variant<std::monostate, T1, T2>& value) {
+    auto it = j.begin();
+    std::string tag = it.key();
+    if (tag == "null") {
+      value = it.value().get<std::monostate>();
+      return;
+    }
+    if (tag == "T1") {
+      value = it.value().get<T1>();
+      return;
+    }
+    if (tag == "T2") {
+      value = it.value().get<T2>();
+      return;
+    }
+  }
+};
+
 template <>
 struct adl_serializer<std::variant<std::monostate, int32_t, std::string>> {
   static void to_json(ordered_json& j, std::variant<std::monostate, int32_t, std::string> const& value) {
@@ -279,39 +315,26 @@ struct adl_serializer<std::variant<yardl::Time, yardl::DateTime>> {
   }
 };
 
-template <typename T1, typename T2>
-struct adl_serializer<std::variant<std::monostate, T1, T2>> {
-  static void to_json(ordered_json& j, std::variant<std::monostate, T1, T2> const& value) {
-    switch (value.index()) {
-      case 0:
-        j = ordered_json{ {"null", std::get<std::monostate>(value)} };
-        break;
-      case 1:
-        j = ordered_json{ {"T", std::get<T1>(value)} };
-        break;
-      case 2:
-        j = ordered_json{ {"U", std::get<T2>(value)} };
-        break;
-      default:
-        throw std::runtime_error("Invalid union value");
-    }
+template <>
+struct adl_serializer<std::variant<std::monostate, basic_types::Fruits, basic_types::DaysOfWeek>> {
+  static void to_json(ordered_json& j, std::variant<std::monostate, basic_types::Fruits, basic_types::DaysOfWeek> const& value) {
+    std::visit([&j](auto const& v) {j = v;}, value);
   }
 
-  static void from_json(ordered_json const& j, std::variant<std::monostate, T1, T2>& value) {
-    auto it = j.begin();
-    std::string tag = it.key();
-    if (tag == "null") {
-      value = it.value().get<std::monostate>();
+  static void from_json(ordered_json const& j, std::variant<std::monostate, basic_types::Fruits, basic_types::DaysOfWeek>& value) {
+    if ((j.is_null())) {
+      value = j.get<std::monostate>();
       return;
     }
-    if (tag == "T") {
-      value = it.value().get<T1>();
+    if ((j.is_number() || j.is_string())) {
+      value = j.get<basic_types::Fruits>();
       return;
     }
-    if (tag == "U") {
-      value = it.value().get<T2>();
+    if ((j.is_array())) {
+      value = j.get<basic_types::DaysOfWeek>();
       return;
     }
+    throw std::runtime_error("Invalid union value");
   }
 };
 
@@ -959,6 +982,9 @@ void to_json(ordered_json& j, basic_types::RecordWithUnions const& value) {
   if (yardl::ndjson::ShouldSerializeFieldValue(value.date_or_datetime)) {
     j.push_back({"dateOrDatetime", value.date_or_datetime});
   }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.null_or_fruits_or_days_of_week)) {
+    j.push_back({"nullOrFruitsOrDaysOfWeek", value.null_or_fruits_or_days_of_week});
+  }
 }
 
 void from_json(ordered_json const& j, basic_types::RecordWithUnions& value) {
@@ -967,6 +993,9 @@ void from_json(ordered_json const& j, basic_types::RecordWithUnions& value) {
   }
   if (auto it = j.find("dateOrDatetime"); it != j.end()) {
     it->get_to(value.date_or_datetime);
+  }
+  if (auto it = j.find("nullOrFruitsOrDaysOfWeek"); it != j.end()) {
+    it->get_to(value.null_or_fruits_or_days_of_week);
   }
 }
 

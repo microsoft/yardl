@@ -64,16 +64,21 @@ using MyTuple = tuples::Tuple<T1, T2>;
 template <typename T1, typename T2>
 using GenericUnion2 = std::variant<T1, T2>;
 
+template <typename T1, typename T2>
+using GenericNullableUnion2 = std::variant<std::monostate, T1, T2>;
+
 template <typename T>
 using GenericVector = std::vector<T>;
 
 struct RecordWithUnions {
   std::variant<std::monostate, int32_t, std::string> null_or_int_or_string{};
   std::variant<yardl::Time, yardl::DateTime> date_or_datetime{};
+  basic_types::GenericNullableUnion2<basic_types::Fruits, basic_types::DaysOfWeek> null_or_fruits_or_days_of_week{};
 
   bool operator==(const RecordWithUnions& other) const {
     return null_or_int_or_string == other.null_or_int_or_string &&
-      date_or_datetime == other.date_or_datetime;
+      date_or_datetime == other.date_or_datetime &&
+      null_or_fruits_or_days_of_week == other.null_or_fruits_or_days_of_week;
   }
 
   bool operator!=(const RecordWithUnions& other) const {

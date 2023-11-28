@@ -161,6 +161,26 @@
         },
         {
           "alias": {
+            "name": "GenericNullableUnion2",
+            "typeParameters": [
+              "T1",
+              "T2"
+            ],
+            "type": [
+              null,
+              {
+                "tag": "T1",
+                "type": "T1"
+              },
+              {
+                "tag": "T2",
+                "type": "T2"
+              }
+            ]
+          }
+        },
+        {
+          "alias": {
             "name": "GenericVector",
             "typeParameters": [
               "T"
@@ -202,6 +222,16 @@
                     "type": "datetime"
                   }
                 ]
+              },
+              {
+                "name": "nullOrFruitsOrDaysOfWeek",
+                "type": {
+                  "name": "BasicTypes.GenericNullableUnion2",
+                  "typeArguments": [
+                    "BasicTypes.Fruits",
+                    "BasicTypes.DaysOfWeek"
+                  ]
+                }
               }
             ]
           }
