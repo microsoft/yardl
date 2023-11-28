@@ -483,6 +483,42 @@ struct adl_serializer<std::variant<std::string, float>> {
   }
 };
 
+template <typename T1>
+struct adl_serializer<std::variant<T1, std::vector<T1>, yardl::DynamicNDArray<T1>>> {
+  static void to_json(ordered_json& j, std::variant<T1, std::vector<T1>, yardl::DynamicNDArray<T1>> const& value) {
+    switch (value.index()) {
+      case 0:
+        j = ordered_json{ {"t", std::get<T1>(value)} };
+        break;
+      case 1:
+        j = ordered_json{ {"tv", std::get<std::vector<T1>>(value)} };
+        break;
+      case 2:
+        j = ordered_json{ {"ta", std::get<yardl::DynamicNDArray<T1>>(value)} };
+        break;
+      default:
+        throw std::runtime_error("Invalid union value");
+    }
+  }
+
+  static void from_json(ordered_json const& j, std::variant<T1, std::vector<T1>, yardl::DynamicNDArray<T1>>& value) {
+    auto it = j.begin();
+    std::string tag = it.key();
+    if (tag == "t") {
+      value = it.value().get<T1>();
+      return;
+    }
+    if (tag == "tv") {
+      value = it.value().get<std::vector<T1>>();
+      return;
+    }
+    if (tag == "ta") {
+      value = it.value().get<yardl::DynamicNDArray<T1>>();
+      return;
+    }
+  }
+};
+
 template <typename T1, typename T2, typename T3>
 struct adl_serializer<std::variant<T1, T2, T3>> {
   static void to_json(ordered_json& j, std::variant<T1, T2, T3> const& value) {

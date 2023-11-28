@@ -2260,6 +2260,26 @@ template<typename A, yardl::binary::Reader<A> ReadA, typename B, yardl::binary::
   yardl::binary::ReadMap<std::string, std::string, yardl::binary::ReadString, yardl::binary::ReadString>(stream, value.map_field);
 }
 
+template<typename T, yardl::binary::Writer<T> WriteT>
+[[maybe_unused]] void WriteGenericUnionWithRepeatedTypeParameters(yardl::binary::CodedOutputStream& stream, test_model::GenericUnionWithRepeatedTypeParameters<T> const& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<test_model::GenericUnionWithRepeatedTypeParameters<T>>::value) {
+    yardl::binary::WriteTriviallySerializable(stream, value);
+    return;
+  }
+
+  WriteUnion<T, WriteT, std::vector<T>, yardl::binary::WriteVector<T, WriteT>, yardl::DynamicNDArray<T>, yardl::binary::WriteDynamicNDArray<T, WriteT>>(stream, value);
+}
+
+template<typename T, yardl::binary::Reader<T> ReadT>
+[[maybe_unused]] void ReadGenericUnionWithRepeatedTypeParameters(yardl::binary::CodedInputStream& stream, test_model::GenericUnionWithRepeatedTypeParameters<T>& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<test_model::GenericUnionWithRepeatedTypeParameters<T>>::value) {
+    yardl::binary::ReadTriviallySerializable(stream, value);
+    return;
+  }
+
+  ReadUnion<T, ReadT, std::vector<T>, yardl::binary::ReadVector<T, ReadT>, yardl::DynamicNDArray<T>, yardl::binary::ReadDynamicNDArray<T, ReadT>>(stream, value);
+}
+
 template<typename T, yardl::binary::Writer<T> WriteT, typename U, yardl::binary::Writer<U> WriteU, typename V, yardl::binary::Writer<V> WriteV>
 [[maybe_unused]] void WriteGenericUnion3(yardl::binary::CodedOutputStream& stream, test_model::GenericUnion3<T, U, V> const& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<test_model::GenericUnion3<T, U, V>>::value) {

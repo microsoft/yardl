@@ -1686,6 +1686,19 @@ class RecordWithComputedFields:
         return f"RecordWithComputedFields(arrayField={repr(self.array_field)}, arrayFieldMapDimensions={repr(self.array_field_map_dimensions)}, dynamicArrayField={repr(self.dynamic_array_field)}, fixedArrayField={repr(self.fixed_array_field)}, intField={repr(self.int_field)}, int8Field={repr(self.int8_field)}, uint8Field={repr(self.uint8_field)}, int16Field={repr(self.int16_field)}, uint16Field={repr(self.uint16_field)}, uint32Field={repr(self.uint32_field)}, int64Field={repr(self.int64_field)}, uint64Field={repr(self.uint64_field)}, sizeField={repr(self.size_field)}, float32Field={repr(self.float32_field)}, float64Field={repr(self.float64_field)}, complexfloat32Field={repr(self.complexfloat32_field)}, complexfloat64Field={repr(self.complexfloat64_field)}, stringField={repr(self.string_field)}, tupleField={repr(self.tuple_field)}, vectorField={repr(self.vector_field)}, vectorOfVectorsField={repr(self.vector_of_vectors_field)}, fixedVectorField={repr(self.fixed_vector_field)}, optionalNamedArray={repr(self.optional_named_array)}, intFloatUnion={repr(self.int_float_union)}, nullableIntFloatUnion={repr(self.nullable_int_float_union)}, unionWithNestedGenericUnion={repr(self.union_with_nested_generic_union)}, mapField={repr(self.map_field)})"
 
 
+class GenericUnionWithRepeatedTypeParameters(typing.Generic[T, T_NP]):
+    T: type["GenericUnionWithRepeatedTypeParametersUnionCase[T, T_NP, T]"]
+    Tv: type["GenericUnionWithRepeatedTypeParametersUnionCase[T, T_NP, list[T]]"]
+    Ta: type["GenericUnionWithRepeatedTypeParametersUnionCase[T, T_NP, npt.NDArray[T_NP]]"]
+
+class GenericUnionWithRepeatedTypeParametersUnionCase(GenericUnionWithRepeatedTypeParameters[T, T_NP], yardl.UnionCase[_T]):
+    pass
+
+GenericUnionWithRepeatedTypeParameters.T = type("GenericUnionWithRepeatedTypeParameters.T", (GenericUnionWithRepeatedTypeParametersUnionCase,), {"index": 0, "tag": "t"})
+GenericUnionWithRepeatedTypeParameters.Tv = type("GenericUnionWithRepeatedTypeParameters.Tv", (GenericUnionWithRepeatedTypeParametersUnionCase,), {"index": 1, "tag": "tv"})
+GenericUnionWithRepeatedTypeParameters.Ta = type("GenericUnionWithRepeatedTypeParameters.Ta", (GenericUnionWithRepeatedTypeParametersUnionCase,), {"index": 2, "tag": "ta"})
+del GenericUnionWithRepeatedTypeParametersUnionCase
+
 class GenericUnion3(typing.Generic[T, U, V]):
     T: type["GenericUnion3UnionCase[T, U, V, T]"]
     U: type["GenericUnion3UnionCase[T, U, V, U]"]
@@ -1925,6 +1938,7 @@ def _mk_get_dtype():
     dtype_map.setdefault(Int32OrFloat32, np.dtype(np.object_))
     dtype_map.setdefault(IntOrGenericRecordWithComputedFields, np.dtype(np.object_))
     dtype_map.setdefault(RecordWithComputedFields, np.dtype([('array_field', np.dtype(np.object_)), ('array_field_map_dimensions', np.dtype(np.object_)), ('dynamic_array_field', np.dtype(np.object_)), ('fixed_array_field', np.dtype(np.int32), (3, 4,)), ('int_field', np.dtype(np.int32)), ('int8_field', np.dtype(np.int8)), ('uint8_field', np.dtype(np.uint8)), ('int16_field', np.dtype(np.int16)), ('uint16_field', np.dtype(np.uint16)), ('uint32_field', np.dtype(np.uint32)), ('int64_field', np.dtype(np.int64)), ('uint64_field', np.dtype(np.uint64)), ('size_field', np.dtype(np.uint64)), ('float32_field', np.dtype(np.float32)), ('float64_field', np.dtype(np.float64)), ('complexfloat32_field', np.dtype(np.complex64)), ('complexfloat64_field', np.dtype(np.complex128)), ('string_field', np.dtype(np.object_)), ('tuple_field', get_dtype(types.GenericAlias(MyTuple, (yardl.Int32, yardl.Int32,)))), ('vector_field', np.dtype(np.object_)), ('vector_of_vectors_field', np.dtype(np.object_)), ('fixed_vector_field', np.dtype(np.int32), (3,)), ('optional_named_array', np.dtype([('has_value', np.dtype(np.bool_)), ('value', get_dtype(NamedNDArray))], align=True)), ('int_float_union', np.dtype(np.object_)), ('nullable_int_float_union', np.dtype(np.object_)), ('union_with_nested_generic_union', np.dtype(np.object_)), ('map_field', np.dtype(np.object_))], align=True))
+    dtype_map.setdefault(GenericUnionWithRepeatedTypeParameters, lambda type_args: np.dtype(np.object_))
     dtype_map.setdefault(GenericUnion3, lambda type_args: np.dtype(np.object_))
     dtype_map.setdefault(GenericUnion3Alternate, lambda type_args: np.dtype(np.object_))
     dtype_map.setdefault(RecordNotUsedInProtocol, np.dtype([('u1', get_dtype(types.GenericAlias(GenericUnion3, (yardl.Int32, yardl.Float32, str,)))), ('u2', get_dtype(types.GenericAlias(GenericUnion3Alternate, (yardl.Int32, yardl.Float32, str,))))], align=True))
