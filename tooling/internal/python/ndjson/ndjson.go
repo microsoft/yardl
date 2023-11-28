@@ -127,7 +127,7 @@ func writeRecordConverter(td *dsl.RecordDefinition, w *formatting.IndentedWriter
 
 			for _, f := range td.Fields {
 				fieldId := common.FieldIdentifierName(f.Name)
-				if g, ok := f.Type.(*dsl.GeneralizedType); ok && g.Cases.HasNullOption() && g.Dimensionality == nil {
+				if g, ok := dsl.GetUnderlyingType(f.Type).(*dsl.GeneralizedType); ok && g.Cases.HasNullOption() && g.Dimensionality == nil {
 					fmt.Fprintf(w, "if value.%s is not None:\n", fieldId)
 					w.Indented(func() {
 						fmt.Fprintf(w, "json_object[\"%s\"] = self._%s_converter.to_json(value.%s)\n", f.Name, fieldId, fieldId)
@@ -155,7 +155,7 @@ func writeRecordConverter(td *dsl.RecordDefinition, w *formatting.IndentedWriter
 
 			for _, f := range td.Fields {
 				fieldId := common.FieldIdentifierName(f.Name)
-				if g, ok := f.Type.(*dsl.GeneralizedType); ok && g.Cases.HasNullOption() && g.Dimensionality == nil {
+				if g, ok := dsl.GetUnderlyingType(f.Type).(*dsl.GeneralizedType); ok && g.Cases.HasNullOption() && g.Dimensionality == nil {
 					fmt.Fprintf(w, "if (field_val := value[\"%s\"]) is not None:\n", fieldId)
 					w.Indented(func() {
 						fmt.Fprintf(w, "json_object[\"%s\"] = self._%s_converter.numpy_to_json(field_val)\n", f.Name, fieldId)
@@ -183,7 +183,7 @@ func writeRecordConverter(td *dsl.RecordDefinition, w *formatting.IndentedWriter
 			w.Indented(func() {
 				for _, f := range td.Fields {
 					fieldId := common.FieldIdentifierName(f.Name)
-					if g, ok := f.Type.(*dsl.GeneralizedType); ok && g.Cases.HasNullOption() && g.Dimensionality == nil {
+					if g, ok := dsl.GetUnderlyingType(f.Type).(*dsl.GeneralizedType); ok && g.Cases.HasNullOption() && g.Dimensionality == nil {
 						fmt.Fprintf(w, "%s=self._%s_converter.from_json(json_object.get(\"%s\")),\n", fieldId, fieldId, f.Name)
 					} else if isGenericParameterReference(f.Type) {
 						fmt.Fprintf(w, "%s=self._%s_converter.from_json(json_object.get(\"%s\") if self._%s_supports_none else json_object[\"%s\"]),\n", fieldId, fieldId, f.Name, fieldId, f.Name)
@@ -206,7 +206,7 @@ func writeRecordConverter(td *dsl.RecordDefinition, w *formatting.IndentedWriter
 			w.Indented(func() {
 				for _, f := range td.Fields {
 					fieldId := common.FieldIdentifierName(f.Name)
-					if g, ok := f.Type.(*dsl.GeneralizedType); ok && g.Cases.HasNullOption() && g.Dimensionality == nil {
+					if g, ok := dsl.GetUnderlyingType(f.Type).(*dsl.GeneralizedType); ok && g.Cases.HasNullOption() && g.Dimensionality == nil {
 						fmt.Fprintf(w, "self._%s_converter.from_json_to_numpy(json_object.get(\"%s\")),\n", fieldId, f.Name)
 					} else if isGenericParameterReference(f.Type) {
 						fmt.Fprintf(w, "self._%s_converter.from_json_to_numpy(json_object.get(\"%s\") if self._%s_supports_none else json_object[\"%s\"]),\n", fieldId, f.Name, fieldId, f.Name)

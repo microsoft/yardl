@@ -29,12 +29,15 @@ MyTuple<T1, T2>: Tuples.Tuple<T1, T2>
 
 GenericUnion2<T1, T2>: [T1, T2]
 
+GenericNullableUnion2<T1, T2>: [null, T1, T2]
+
 GenericVector<T>: T*
 
 RecordWithUnions: !record
   fields:
     nullOrIntOrString: [null, int, string]
     dateOrDatetime: [time, datetime]
+    nullOrFruitsOrDaysOfWeek: GenericNullableUnion2<Fruits, DaysOfWeek>
 
 GenericRecordWithComputedFields<T0, T1>: !record
   fields:
