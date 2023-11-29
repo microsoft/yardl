@@ -335,6 +335,18 @@ struct IsTriviallySerializable<test_model::RecordWithVlenCollections> {
 };
 
 template <>
+struct IsTriviallySerializable<test_model::RecordWithUnionsOfContainers> {
+  using __T__ = test_model::RecordWithUnionsOfContainers;
+  static constexpr bool value = 
+    std::is_standard_layout_v<__T__> &&
+    IsTriviallySerializable<decltype(__T__::map_or_scalar)>::value &&
+    IsTriviallySerializable<decltype(__T__::vector_or_scalar)>::value &&
+    IsTriviallySerializable<decltype(__T__::array_or_scalar)>::value &&
+    (sizeof(__T__) == (sizeof(__T__::map_or_scalar) + sizeof(__T__::vector_or_scalar) + sizeof(__T__::array_or_scalar))) &&
+    offsetof(__T__, map_or_scalar) < offsetof(__T__, vector_or_scalar) && offsetof(__T__, vector_or_scalar) < offsetof(__T__, array_or_scalar);
+};
+
+template <>
 struct IsTriviallySerializable<test_model::RecordWithEnums> {
   using __T__ = test_model::RecordWithEnums;
   static constexpr bool value = 
@@ -1443,6 +1455,28 @@ namespace {
 
   yardl::binary::ReadVector<int32_t, yardl::binary::ReadInteger>(stream, value.vector);
   yardl::binary::ReadNDArray<int32_t, yardl::binary::ReadInteger, 2>(stream, value.array);
+}
+
+[[maybe_unused]] void WriteRecordWithUnionsOfContainers(yardl::binary::CodedOutputStream& stream, test_model::RecordWithUnionsOfContainers const& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<test_model::RecordWithUnionsOfContainers>::value) {
+    yardl::binary::WriteTriviallySerializable(stream, value);
+    return;
+  }
+
+  WriteUnion<std::unordered_map<std::string, int32_t>, yardl::binary::WriteMap<std::string, int32_t, yardl::binary::WriteString, yardl::binary::WriteInteger>, int32_t, yardl::binary::WriteInteger>(stream, value.map_or_scalar);
+  WriteUnion<std::vector<int32_t>, yardl::binary::WriteVector<int32_t, yardl::binary::WriteInteger>, int32_t, yardl::binary::WriteInteger>(stream, value.vector_or_scalar);
+  WriteUnion<yardl::DynamicNDArray<int32_t>, yardl::binary::WriteDynamicNDArray<int32_t, yardl::binary::WriteInteger>, int32_t, yardl::binary::WriteInteger>(stream, value.array_or_scalar);
+}
+
+[[maybe_unused]] void ReadRecordWithUnionsOfContainers(yardl::binary::CodedInputStream& stream, test_model::RecordWithUnionsOfContainers& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<test_model::RecordWithUnionsOfContainers>::value) {
+    yardl::binary::ReadTriviallySerializable(stream, value);
+    return;
+  }
+
+  ReadUnion<std::unordered_map<std::string, int32_t>, yardl::binary::ReadMap<std::string, int32_t, yardl::binary::ReadString, yardl::binary::ReadInteger>, int32_t, yardl::binary::ReadInteger>(stream, value.map_or_scalar);
+  ReadUnion<std::vector<int32_t>, yardl::binary::ReadVector<int32_t, yardl::binary::ReadInteger>, int32_t, yardl::binary::ReadInteger>(stream, value.vector_or_scalar);
+  ReadUnion<yardl::DynamicNDArray<int32_t>, yardl::binary::ReadDynamicNDArray<int32_t, yardl::binary::ReadInteger>, int32_t, yardl::binary::ReadInteger>(stream, value.array_or_scalar);
 }
 
 [[maybe_unused]] void WriteNamedNDArray(yardl::binary::CodedOutputStream& stream, test_model::NamedNDArray const& value) {

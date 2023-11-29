@@ -1291,6 +1291,56 @@ class RecordWithVlenCollectionsConverter(_ndjson.JsonConverter[RecordWithVlenCol
         ) # type:ignore 
 
 
+class RecordWithUnionsOfContainersConverter(_ndjson.JsonConverter[RecordWithUnionsOfContainers, np.void]):
+    def __init__(self) -> None:
+        self._map_or_scalar_converter = _ndjson.UnionConverter(MapOrScalar, [(MapOrScalar.Map, _ndjson.MapConverter(_ndjson.string_converter, _ndjson.int32_converter), [dict]), (MapOrScalar.Scalar, _ndjson.int32_converter, [int, float])], True)
+        self._vector_or_scalar_converter = _ndjson.UnionConverter(VectorOrScalar, [(VectorOrScalar.Vector, _ndjson.VectorConverter(_ndjson.int32_converter), [list]), (VectorOrScalar.Scalar, _ndjson.int32_converter, [int, float])], True)
+        self._array_or_scalar_converter = _ndjson.UnionConverter(ArrayOrScalar, [(ArrayOrScalar.Array, _ndjson.DynamicNDArrayConverter(_ndjson.int32_converter), [dict]), (ArrayOrScalar.Scalar, _ndjson.int32_converter, [int, float])], True)
+        super().__init__(np.dtype([
+            ("map_or_scalar", self._map_or_scalar_converter.overall_dtype()),
+            ("vector_or_scalar", self._vector_or_scalar_converter.overall_dtype()),
+            ("array_or_scalar", self._array_or_scalar_converter.overall_dtype()),
+        ]))
+
+    def to_json(self, value: RecordWithUnionsOfContainers) -> object:
+        if not isinstance(value, RecordWithUnionsOfContainers): # pyright: ignore [reportUnnecessaryIsInstance]
+            raise TypeError("Expected 'RecordWithUnionsOfContainers' instance")
+        json_object = {}
+
+        json_object["mapOrScalar"] = self._map_or_scalar_converter.to_json(value.map_or_scalar)
+        json_object["vectorOrScalar"] = self._vector_or_scalar_converter.to_json(value.vector_or_scalar)
+        json_object["arrayOrScalar"] = self._array_or_scalar_converter.to_json(value.array_or_scalar)
+        return json_object
+
+    def numpy_to_json(self, value: np.void) -> object:
+        if not isinstance(value, np.void): # pyright: ignore [reportUnnecessaryIsInstance]
+            raise TypeError("Expected 'np.void' instance")
+        json_object = {}
+
+        json_object["mapOrScalar"] = self._map_or_scalar_converter.numpy_to_json(value["map_or_scalar"])
+        json_object["vectorOrScalar"] = self._vector_or_scalar_converter.numpy_to_json(value["vector_or_scalar"])
+        json_object["arrayOrScalar"] = self._array_or_scalar_converter.numpy_to_json(value["array_or_scalar"])
+        return json_object
+
+    def from_json(self, json_object: object) -> RecordWithUnionsOfContainers:
+        if not isinstance(json_object, dict):
+            raise TypeError("Expected 'dict' instance")
+        return RecordWithUnionsOfContainers(
+            map_or_scalar=self._map_or_scalar_converter.from_json(json_object["mapOrScalar"],),
+            vector_or_scalar=self._vector_or_scalar_converter.from_json(json_object["vectorOrScalar"],),
+            array_or_scalar=self._array_or_scalar_converter.from_json(json_object["arrayOrScalar"],),
+        )
+
+    def from_json_to_numpy(self, json_object: object) -> np.void:
+        if not isinstance(json_object, dict):
+            raise TypeError("Expected 'dict' instance")
+        return (
+            self._map_or_scalar_converter.from_json_to_numpy(json_object["mapOrScalar"]),
+            self._vector_or_scalar_converter.from_json_to_numpy(json_object["vectorOrScalar"]),
+            self._array_or_scalar_converter.from_json_to_numpy(json_object["arrayOrScalar"]),
+        ) # type:ignore 
+
+
 u_int64_enum_name_to_value_map = {
     "a": UInt64Enum.A,
 }

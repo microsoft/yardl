@@ -226,6 +226,18 @@ RecordWithVlenCollections: !record
     vector: int*
     array: int[,]
 
+RecordWithUnionsOfContainers: !record
+  fields:
+    mapOrScalar: !union
+      map: string->int
+      scalar: int
+    vectorOrScalar: !union
+      vector: int*
+      scalar: int
+    arrayOrScalar: !union
+      array: int[]
+      scalar: int
+
 Subarrays: !protocol
   sequence:
     dynamicWithFixedIntSubarray: int[3][]

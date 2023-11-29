@@ -34,6 +34,11 @@ def test_defaulting():
     o = tm.RecordWithOptionalFields()
     assert o.optional_int == None
 
+    c = tm.RecordWithUnionsOfContainers()
+    assert c.map_or_scalar == tm.MapOrScalar.Map({})
+    assert c.vector_or_scalar == tm.VectorOrScalar.Vector([])
+    assert c.array_or_scalar == tm.ArrayOrScalar.Array(np.zeros((), dtype=np.int32))
+
     ag = tm.RecordWithAliasedGenerics()
     assert ag.my_strings.v1 == ""
     assert ag.my_strings.v2 == ""

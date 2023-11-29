@@ -531,6 +531,22 @@ struct RecordWithVlenCollections {
   }
 };
 
+struct RecordWithUnionsOfContainers {
+  std::variant<std::unordered_map<std::string, int32_t>, int32_t> map_or_scalar{};
+  std::variant<std::vector<int32_t>, int32_t> vector_or_scalar{};
+  std::variant<yardl::DynamicNDArray<int32_t>, int32_t> array_or_scalar{};
+
+  bool operator==(const RecordWithUnionsOfContainers& other) const {
+    return map_or_scalar == other.map_or_scalar &&
+      vector_or_scalar == other.vector_or_scalar &&
+      array_or_scalar == other.array_or_scalar;
+  }
+
+  bool operator!=(const RecordWithUnionsOfContainers& other) const {
+    return !(*this == other);
+  }
+};
+
 using NamedNDArray = yardl::NDArray<int32_t, 2>;
 
 using Fruits = basic_types::Fruits;

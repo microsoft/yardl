@@ -692,6 +692,25 @@ struct _Inner_RecordWithVlenCollections {
   yardl::hdf5::InnerNdArray<int32_t, int32_t, 2> array;
 };
 
+struct _Inner_RecordWithUnionsOfContainers {
+  _Inner_RecordWithUnionsOfContainers() {} 
+  _Inner_RecordWithUnionsOfContainers(test_model::RecordWithUnionsOfContainers const& o) 
+      : map_or_scalar(o.map_or_scalar),
+      vector_or_scalar(o.vector_or_scalar),
+      array_or_scalar(o.array_or_scalar) {
+  }
+
+  void ToOuter (test_model::RecordWithUnionsOfContainers& o) const {
+    yardl::hdf5::ToOuter(map_or_scalar, o.map_or_scalar);
+    yardl::hdf5::ToOuter(vector_or_scalar, o.vector_or_scalar);
+    yardl::hdf5::ToOuter(array_or_scalar, o.array_or_scalar);
+  }
+
+  ::InnerUnion2<yardl::hdf5::InnerMap<yardl::hdf5::InnerVlenString, std::string, int32_t, int32_t>, std::unordered_map<std::string, int32_t>, int32_t, int32_t> map_or_scalar;
+  ::InnerUnion2<yardl::hdf5::InnerVlen<int32_t, int32_t>, std::vector<int32_t>, int32_t, int32_t> vector_or_scalar;
+  ::InnerUnion2<yardl::hdf5::InnerDynamicNdArray<int32_t, int32_t>, yardl::DynamicNDArray<int32_t>, int32_t, int32_t> array_or_scalar;
+};
+
 template <typename _T1_Inner, typename T1, typename _T2_Inner, typename T2>
 struct _Inner_GenericRecord {
   _Inner_GenericRecord() {} 
@@ -1294,6 +1313,15 @@ struct _Inner_RecordWithKeywordFields {
   H5::CompType t(sizeof(RecordType));
   t.insertMember("vector", HOFFSET(RecordType, vector), yardl::hdf5::InnerVlenDdl(H5::PredType::NATIVE_INT32));
   t.insertMember("array", HOFFSET(RecordType, array), yardl::hdf5::NDArrayDdl<int32_t, int32_t, 2>(H5::PredType::NATIVE_INT32));
+  return t;
+}
+
+[[maybe_unused]] H5::CompType GetRecordWithUnionsOfContainersHdf5Ddl() {
+  using RecordType = test_model::hdf5::_Inner_RecordWithUnionsOfContainers;
+  H5::CompType t(sizeof(RecordType));
+  t.insertMember("mapOrScalar", HOFFSET(RecordType, map_or_scalar), ::InnerUnion2Ddl<yardl::hdf5::InnerMap<yardl::hdf5::InnerVlenString, std::string, int32_t, int32_t>, std::unordered_map<std::string, int32_t>, int32_t, int32_t>(false, yardl::hdf5::InnerMapDdl<yardl::hdf5::InnerVlenString, int32_t>(yardl::hdf5::InnerVlenStringDdl(), H5::PredType::NATIVE_INT32), "map", H5::PredType::NATIVE_INT32, "scalar"));
+  t.insertMember("vectorOrScalar", HOFFSET(RecordType, vector_or_scalar), ::InnerUnion2Ddl<yardl::hdf5::InnerVlen<int32_t, int32_t>, std::vector<int32_t>, int32_t, int32_t>(false, yardl::hdf5::InnerVlenDdl(H5::PredType::NATIVE_INT32), "vector", H5::PredType::NATIVE_INT32, "scalar"));
+  t.insertMember("arrayOrScalar", HOFFSET(RecordType, array_or_scalar), ::InnerUnion2Ddl<yardl::hdf5::InnerDynamicNdArray<int32_t, int32_t>, yardl::DynamicNDArray<int32_t>, int32_t, int32_t>(false, yardl::hdf5::DynamicNDArrayDdl<int32_t, int32_t>(H5::PredType::NATIVE_INT32), "array", H5::PredType::NATIVE_INT32, "scalar"));
   return t;
 }
 
