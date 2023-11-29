@@ -782,6 +782,70 @@ class RecordWithVlenCollections:
         return f"RecordWithVlenCollections(vector={repr(self.vector)}, array={repr(self.array)})"
 
 
+_T = typing.TypeVar('_T')
+
+class MapOrScalar:
+    Map: typing.ClassVar[type["MapOrScalarUnionCase[dict[str, yardl.Int32]]"]]
+    Scalar: typing.ClassVar[type["MapOrScalarUnionCase[yardl.Int32]"]]
+
+class MapOrScalarUnionCase(MapOrScalar, yardl.UnionCase[_T]):
+    pass
+
+MapOrScalar.Map = type("MapOrScalar.Map", (MapOrScalarUnionCase,), {"index": 0, "tag": "map"})
+MapOrScalar.Scalar = type("MapOrScalar.Scalar", (MapOrScalarUnionCase,), {"index": 1, "tag": "scalar"})
+del MapOrScalarUnionCase
+
+class VectorOrScalar:
+    Vector: typing.ClassVar[type["VectorOrScalarUnionCase[list[yardl.Int32]]"]]
+    Scalar: typing.ClassVar[type["VectorOrScalarUnionCase[yardl.Int32]"]]
+
+class VectorOrScalarUnionCase(VectorOrScalar, yardl.UnionCase[_T]):
+    pass
+
+VectorOrScalar.Vector = type("VectorOrScalar.Vector", (VectorOrScalarUnionCase,), {"index": 0, "tag": "vector"})
+VectorOrScalar.Scalar = type("VectorOrScalar.Scalar", (VectorOrScalarUnionCase,), {"index": 1, "tag": "scalar"})
+del VectorOrScalarUnionCase
+
+class ArrayOrScalar:
+    Array: typing.ClassVar[type["ArrayOrScalarUnionCase[npt.NDArray[np.int32]]"]]
+    Scalar: typing.ClassVar[type["ArrayOrScalarUnionCase[yardl.Int32]"]]
+
+class ArrayOrScalarUnionCase(ArrayOrScalar, yardl.UnionCase[_T]):
+    pass
+
+ArrayOrScalar.Array = type("ArrayOrScalar.Array", (ArrayOrScalarUnionCase,), {"index": 0, "tag": "array"})
+ArrayOrScalar.Scalar = type("ArrayOrScalar.Scalar", (ArrayOrScalarUnionCase,), {"index": 1, "tag": "scalar"})
+del ArrayOrScalarUnionCase
+
+class RecordWithUnionsOfContainers:
+    map_or_scalar: MapOrScalar
+    vector_or_scalar: VectorOrScalar
+    array_or_scalar: ArrayOrScalar
+
+    def __init__(self, *,
+        map_or_scalar: typing.Optional[MapOrScalar] = None,
+        vector_or_scalar: typing.Optional[VectorOrScalar] = None,
+        array_or_scalar: typing.Optional[ArrayOrScalar] = None,
+    ):
+        self.map_or_scalar = map_or_scalar if map_or_scalar is not None else MapOrScalar.Map({})
+        self.vector_or_scalar = vector_or_scalar if vector_or_scalar is not None else VectorOrScalar.Vector([])
+        self.array_or_scalar = array_or_scalar if array_or_scalar is not None else ArrayOrScalar.Array(np.zeros((), dtype=np.dtype(np.int32)))
+
+    def __eq__(self, other: object) -> bool:
+        return (
+            isinstance(other, RecordWithUnionsOfContainers)
+            and self.map_or_scalar == other.map_or_scalar
+            and self.vector_or_scalar == other.vector_or_scalar
+            and yardl.structural_equal(self.array_or_scalar, other.array_or_scalar)
+        )
+
+    def __str__(self) -> str:
+        return f"RecordWithUnionsOfContainers(mapOrScalar={self.map_or_scalar}, vectorOrScalar={self.vector_or_scalar}, arrayOrScalar={self.array_or_scalar})"
+
+    def __repr__(self) -> str:
+        return f"RecordWithUnionsOfContainers(mapOrScalar={repr(self.map_or_scalar)}, vectorOrScalar={repr(self.vector_or_scalar)}, arrayOrScalar={repr(self.array_or_scalar)})"
+
+
 NamedNDArray = npt.NDArray[np.int32]
 
 Fruits = basic_types.Fruits
@@ -905,8 +969,6 @@ AliasedClosedGeneric = AliasedTuple[AliasedString, AliasedEnum]
 AliasedOptional = typing.Optional[yardl.Int32]
 
 AliasedGenericOptional = typing.Optional[T]
-
-_T = typing.TypeVar('_T')
 
 class AliasedMultiGenericOptional(typing.Generic[T, U]):
     T: type["AliasedMultiGenericOptionalUnionCase[T, U, T]"]
@@ -1894,6 +1956,10 @@ def _mk_get_dtype():
     dtype_map.setdefault(NamedFixedNDArray, np.dtype(np.int32))
     dtype_map.setdefault(RecordWithFixedCollections, np.dtype([('fixed_vector', np.dtype(np.int32), (3,)), ('fixed_array', np.dtype(np.int32), (2, 3,))], align=True))
     dtype_map.setdefault(RecordWithVlenCollections, np.dtype([('vector', np.dtype(np.object_)), ('array', np.dtype(np.object_))], align=True))
+    dtype_map.setdefault(MapOrScalar, np.dtype(np.object_))
+    dtype_map.setdefault(VectorOrScalar, np.dtype(np.object_))
+    dtype_map.setdefault(ArrayOrScalar, np.dtype(np.object_))
+    dtype_map.setdefault(RecordWithUnionsOfContainers, np.dtype([('map_or_scalar', np.dtype(np.object_)), ('vector_or_scalar', np.dtype(np.object_)), ('array_or_scalar', np.dtype(np.object_))], align=True))
     dtype_map.setdefault(NamedNDArray, np.dtype(np.object_))
     dtype_map.setdefault(Fruits, get_dtype(basic_types.Fruits))
     dtype_map.setdefault(UInt64Enum, np.dtype(np.uint64))

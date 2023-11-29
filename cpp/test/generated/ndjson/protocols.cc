@@ -109,6 +109,9 @@ void from_json(ordered_json const& j, test_model::RecordWithFixedCollections& va
 void to_json(ordered_json& j, test_model::RecordWithVlenCollections const& value);
 void from_json(ordered_json const& j, test_model::RecordWithVlenCollections& value);
 
+void to_json(ordered_json& j, test_model::RecordWithUnionsOfContainers const& value);
+void from_json(ordered_json const& j, test_model::RecordWithUnionsOfContainers& value);
+
 void to_json(ordered_json& j, test_model::UInt64Enum const& value);
 void from_json(ordered_json const& j, test_model::UInt64Enum& value);
 
@@ -332,6 +335,63 @@ struct adl_serializer<std::variant<std::monostate, basic_types::Fruits, basic_ty
     }
     if ((j.is_array())) {
       value = j.get<basic_types::DaysOfWeek>();
+      return;
+    }
+    throw std::runtime_error("Invalid union value");
+  }
+};
+
+template <>
+struct adl_serializer<std::variant<std::unordered_map<std::string, int32_t>, int32_t>> {
+  static void to_json(ordered_json& j, std::variant<std::unordered_map<std::string, int32_t>, int32_t> const& value) {
+    std::visit([&j](auto const& v) {j = v;}, value);
+  }
+
+  static void from_json(ordered_json const& j, std::variant<std::unordered_map<std::string, int32_t>, int32_t>& value) {
+    if ((j.is_object())) {
+      value = j.get<std::unordered_map<std::string, int32_t>>();
+      return;
+    }
+    if ((j.is_number())) {
+      value = j.get<int32_t>();
+      return;
+    }
+    throw std::runtime_error("Invalid union value");
+  }
+};
+
+template <>
+struct adl_serializer<std::variant<std::vector<int32_t>, int32_t>> {
+  static void to_json(ordered_json& j, std::variant<std::vector<int32_t>, int32_t> const& value) {
+    std::visit([&j](auto const& v) {j = v;}, value);
+  }
+
+  static void from_json(ordered_json const& j, std::variant<std::vector<int32_t>, int32_t>& value) {
+    if ((j.is_array())) {
+      value = j.get<std::vector<int32_t>>();
+      return;
+    }
+    if ((j.is_number())) {
+      value = j.get<int32_t>();
+      return;
+    }
+    throw std::runtime_error("Invalid union value");
+  }
+};
+
+template <>
+struct adl_serializer<std::variant<yardl::DynamicNDArray<int32_t>, int32_t>> {
+  static void to_json(ordered_json& j, std::variant<yardl::DynamicNDArray<int32_t>, int32_t> const& value) {
+    std::visit([&j](auto const& v) {j = v;}, value);
+  }
+
+  static void from_json(ordered_json const& j, std::variant<yardl::DynamicNDArray<int32_t>, int32_t>& value) {
+    if ((j.is_object())) {
+      value = j.get<yardl::DynamicNDArray<int32_t>>();
+      return;
+    }
+    if ((j.is_number())) {
+      value = j.get<int32_t>();
       return;
     }
     throw std::runtime_error("Invalid union value");
@@ -1727,6 +1787,31 @@ void from_json(ordered_json const& j, test_model::RecordWithVlenCollections& val
   }
   if (auto it = j.find("array"); it != j.end()) {
     it->get_to(value.array);
+  }
+}
+
+void to_json(ordered_json& j, test_model::RecordWithUnionsOfContainers const& value) {
+  j = ordered_json::object();
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.map_or_scalar)) {
+    j.push_back({"mapOrScalar", value.map_or_scalar});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.vector_or_scalar)) {
+    j.push_back({"vectorOrScalar", value.vector_or_scalar});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.array_or_scalar)) {
+    j.push_back({"arrayOrScalar", value.array_or_scalar});
+  }
+}
+
+void from_json(ordered_json const& j, test_model::RecordWithUnionsOfContainers& value) {
+  if (auto it = j.find("mapOrScalar"); it != j.end()) {
+    it->get_to(value.map_or_scalar);
+  }
+  if (auto it = j.find("vectorOrScalar"); it != j.end()) {
+    it->get_to(value.vector_or_scalar);
+  }
+  if (auto it = j.find("arrayOrScalar"); it != j.end()) {
+    it->get_to(value.array_or_scalar);
   }
 }
 

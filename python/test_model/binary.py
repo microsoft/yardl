@@ -1583,6 +1583,24 @@ class RecordWithVlenCollectionsSerializer(_binary.RecordSerializer[RecordWithVle
         return RecordWithVlenCollections(vector=field_values[0], array=field_values[1])
 
 
+class RecordWithUnionsOfContainersSerializer(_binary.RecordSerializer[RecordWithUnionsOfContainers]):
+    def __init__(self) -> None:
+        super().__init__([("map_or_scalar", _binary.UnionSerializer(MapOrScalar, [(MapOrScalar.Map, _binary.MapSerializer(_binary.string_serializer, _binary.int32_serializer)), (MapOrScalar.Scalar, _binary.int32_serializer)])), ("vector_or_scalar", _binary.UnionSerializer(VectorOrScalar, [(VectorOrScalar.Vector, _binary.VectorSerializer(_binary.int32_serializer)), (VectorOrScalar.Scalar, _binary.int32_serializer)])), ("array_or_scalar", _binary.UnionSerializer(ArrayOrScalar, [(ArrayOrScalar.Array, _binary.DynamicNDArraySerializer(_binary.int32_serializer)), (ArrayOrScalar.Scalar, _binary.int32_serializer)]))])
+
+    def write(self, stream: _binary.CodedOutputStream, value: RecordWithUnionsOfContainers) -> None:
+        if isinstance(value, np.void):
+            self.write_numpy(stream, value)
+            return
+        self._write(stream, value.map_or_scalar, value.vector_or_scalar, value.array_or_scalar)
+
+    def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
+        self._write(stream, value['map_or_scalar'], value['vector_or_scalar'], value['array_or_scalar'])
+
+    def read(self, stream: _binary.CodedInputStream) -> RecordWithUnionsOfContainers:
+        field_values = self._read(stream)
+        return RecordWithUnionsOfContainers(map_or_scalar=field_values[0], vector_or_scalar=field_values[1], array_or_scalar=field_values[2])
+
+
 class RecordWithEnumsSerializer(_binary.RecordSerializer[RecordWithEnums]):
     def __init__(self) -> None:
         super().__init__([("enum", _binary.EnumSerializer(_binary.int32_serializer, basic_types.Fruits)), ("flags", _binary.EnumSerializer(_binary.int32_serializer, basic_types.DaysOfWeek)), ("flags_2", _binary.EnumSerializer(_binary.uint64_serializer, basic_types.TextFormat))])

@@ -40,6 +40,7 @@ from .types import (
     AliasedOptional,
     AliasedString,
     AliasedTuple,
+    ArrayOrScalar,
     ArrayWithKeywordDimensionNames,
     DaysOfWeek,
     EnumWithKeywordSymbols,
@@ -55,6 +56,7 @@ from .types import (
     Int32OrSimpleRecord,
     Int64Enum,
     IntOrGenericRecordWithComputedFields,
+    MapOrScalar,
     MyTuple,
     NamedFixedNDArray,
     NamedNDArray,
@@ -87,6 +89,7 @@ from .types import (
     RecordWithPrimitiveAliases,
     RecordWithPrimitives,
     RecordWithStrings,
+    RecordWithUnionsOfContainers,
     RecordWithVectorOfTimes,
     RecordWithVectors,
     RecordWithVlenCollections,
@@ -102,6 +105,7 @@ from .types import (
     UInt64Enum,
     UOrV,
     VectorOfGenericRecords,
+    VectorOrScalar,
     get_dtype,
 )
 from .protocols import (

@@ -1241,6 +1241,71 @@
           }
         },
         {
+          "record": {
+            "name": "RecordWithUnionsOfContainers",
+            "fields": [
+              {
+                "name": "mapOrScalar",
+                "type": [
+                  {
+                    "tag": "map",
+                    "explicitTag": true,
+                    "type": {
+                      "map": {
+                        "keys": "string",
+                        "values": "int32"
+                      }
+                    }
+                  },
+                  {
+                    "tag": "scalar",
+                    "explicitTag": true,
+                    "type": "int32"
+                  }
+                ]
+              },
+              {
+                "name": "vectorOrScalar",
+                "type": [
+                  {
+                    "tag": "vector",
+                    "explicitTag": true,
+                    "type": {
+                      "vector": {
+                        "items": "int32"
+                      }
+                    }
+                  },
+                  {
+                    "tag": "scalar",
+                    "explicitTag": true,
+                    "type": "int32"
+                  }
+                ]
+              },
+              {
+                "name": "arrayOrScalar",
+                "type": [
+                  {
+                    "tag": "array",
+                    "explicitTag": true,
+                    "type": {
+                      "array": {
+                        "items": "int32"
+                      }
+                    }
+                  },
+                  {
+                    "tag": "scalar",
+                    "explicitTag": true,
+                    "type": "int32"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
           "alias": {
             "name": "NamedNDArray",
             "type": {
