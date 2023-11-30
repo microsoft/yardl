@@ -31,9 +31,6 @@ def _mk_get_dtype():
     dtype_map: dict[typing.Union[type, types.GenericAlias], typing.Union[np.dtype[typing.Any], typing.Callable[[tuple[type, ...]], np.dtype[typing.Any]]]] = {}
     get_dtype = _dtypes.make_get_dtype_func(dtype_map)
 
-    dtype_map.setdefault(Image, lambda type_args: np.dtype(np.object_))
-    dtype_map.setdefault(FloatImage, get_dtype(types.GenericAlias(Image, (yardl.Float32,))))
-    dtype_map.setdefault(IntImage, get_dtype(types.GenericAlias(Image, (yardl.Int32,))))
 
     return get_dtype
 

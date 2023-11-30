@@ -29,7 +29,8 @@ def test_defaulting():
     assert a.rank_2_array_with_named_dimensions.shape == (0, 0)
     assert a.rank_2_fixed_array.shape == (3, 4)
     assert a.rank_2_fixed_array_with_named_dimensions.shape == (3, 4)
-    assert a.array_of_vectors.shape == (5,) and a.array_of_vectors.dtype == np.object_
+    # array_of_vectors is a fixed vector within a record, so it becomes a subarray of its inner dtype
+    assert a.array_of_vectors.shape == (5,) and a.array_of_vectors.dtype == np.int32
 
     o = tm.RecordWithOptionalFields()
     assert o.optional_int == None
@@ -161,6 +162,13 @@ def test_get_dtype():
         align=True,
     )
 
+    assert tm.get_dtype(tm.IntFixedArray) == np.object_
+    assert tm.get_dtype(tm.SimpleRecordFixedArray) == np.object_
+    assert tm.get_dtype(tm.RecordWithVlensFixedArray) == np.object_
+    assert tm.get_dtype(tm.RecordWithNamedFixedArrays) == tm.get_dtype(
+        tm.RecordWithFixedArrays
+    )
+
     assert tm.get_dtype(tm.MyTuple[tm.Int32, tm.Float32]) == np.dtype(
         [("v1", "<i4"), ("v2", "<f4")], align=True
     )
@@ -210,4 +218,16 @@ def test_get_dtype():
     assert tm.get_dtype(tm.AliasedNullableIntSimpleRecord) == np.object_
     assert (
         tm.get_dtype(typing.Optional[tm.AliasedNullableIntSimpleRecord]) == np.object_
+    )
+
+    # Standalone vectors, arrays, and maps all have dtype np.object_
+    assert tm.get_dtype(tm.AliasedGenericVector[int]) == np.object_
+    assert tm.get_dtype(tm.AliasedGenericFixedVector[int]) == np.object_
+    assert tm.get_dtype(tm.AliasedGenericFixedArray[np.int32]) == np.object_
+    assert tm.get_dtype(tm.AliasedGenericRank2Array[np.int32]) == np.object_
+    assert tm.get_dtype(tm.AliasedGenericDynamicArray[np.int32]) == np.object_
+    assert tm.get_dtype(tm.AliasedMap[str, int]) == np.object_
+    assert (
+        tm.get_dtype(tm.AliasedVectorOfGenericRecords[int, float, np.float32])
+        == np.object_
     )

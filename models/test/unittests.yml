@@ -188,6 +188,18 @@ RecordWithFixedArrays: !record
     fixedSimpleRecordArray: SimpleRecord[3, 2]
     fixedRecordWithVlensArray: RecordWithVlens[2, 2]
 
+IntArray: int[]
+IntRank2Array: int[,]
+IntFixedArray: int[2, 3]
+SimpleRecordFixedArray: SimpleRecord[3, 2]
+RecordWithVlensFixedArray: RecordWithVlens[2, 2]
+
+RecordWithNamedFixedArrays: !record
+  fields:
+    ints: IntFixedArray
+    fixedSimpleRecordArray: SimpleRecordFixedArray
+    fixedRecordWithVlensArray: RecordWithVlensFixedArray
+
 RecordWithNDArrays: !record
   fields:
     ints: int[,]
@@ -202,7 +214,7 @@ RecordWithNDArraysSingleDimension: !record
 
 RecordWithDynamicNDArrays: !record
   fields:
-    ints: int[]
+    ints: IntArray
     simpleRecordArray: SimpleRecord[]
     recordWithVlensArray: RecordWithVlens[]
 
@@ -420,8 +432,10 @@ AliasedGenericFixedVector<T>: T*3
 AliasedGenericRank2Array<T>: T[,]
 AliasedGenericFixedArray<T>: T[16, 8]
 AliasedGenericDynamicArray<T>: T[]
+AliasedMap<K, V>: BasicTypes.AliasedMap<K, V>
 
 VectorOfGenericRecords<T1, T2>: GenericRecord<T1, T2>*
+AliasedVectorOfGenericRecords<T1, T2>: AliasedGenericVector<GenericRecord<T1, T2>>
 
 RecordWithGenericVectorOfRecords<T, U>: !record
   fields:

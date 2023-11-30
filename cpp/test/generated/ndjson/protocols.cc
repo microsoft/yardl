@@ -94,6 +94,9 @@ void from_json(ordered_json const& j, test_model::RecordWithFixedVectors& value)
 void to_json(ordered_json& j, test_model::RecordWithFixedArrays const& value);
 void from_json(ordered_json const& j, test_model::RecordWithFixedArrays& value);
 
+void to_json(ordered_json& j, test_model::RecordWithNamedFixedArrays const& value);
+void from_json(ordered_json const& j, test_model::RecordWithNamedFixedArrays& value);
+
 void to_json(ordered_json& j, test_model::RecordWithNDArrays const& value);
 void from_json(ordered_json const& j, test_model::RecordWithNDArrays& value);
 
@@ -1666,6 +1669,31 @@ void to_json(ordered_json& j, test_model::RecordWithFixedArrays const& value) {
 }
 
 void from_json(ordered_json const& j, test_model::RecordWithFixedArrays& value) {
+  if (auto it = j.find("ints"); it != j.end()) {
+    it->get_to(value.ints);
+  }
+  if (auto it = j.find("fixedSimpleRecordArray"); it != j.end()) {
+    it->get_to(value.fixed_simple_record_array);
+  }
+  if (auto it = j.find("fixedRecordWithVlensArray"); it != j.end()) {
+    it->get_to(value.fixed_record_with_vlens_array);
+  }
+}
+
+void to_json(ordered_json& j, test_model::RecordWithNamedFixedArrays const& value) {
+  j = ordered_json::object();
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.ints)) {
+    j.push_back({"ints", value.ints});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.fixed_simple_record_array)) {
+    j.push_back({"fixedSimpleRecordArray", value.fixed_simple_record_array});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.fixed_record_with_vlens_array)) {
+    j.push_back({"fixedRecordWithVlensArray", value.fixed_record_with_vlens_array});
+  }
+}
+
+void from_json(ordered_json const& j, test_model::RecordWithNamedFixedArrays& value) {
   if (auto it = j.find("ints"); it != j.end()) {
     it->get_to(value.ints);
   }

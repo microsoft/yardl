@@ -1066,6 +1066,100 @@
           }
         },
         {
+          "alias": {
+            "name": "IntArray",
+            "type": {
+              "array": {
+                "items": "int32"
+              }
+            }
+          }
+        },
+        {
+          "alias": {
+            "name": "IntRank2Array",
+            "type": {
+              "array": {
+                "items": "int32",
+                "dimensions": 2
+              }
+            }
+          }
+        },
+        {
+          "alias": {
+            "name": "IntFixedArray",
+            "type": {
+              "array": {
+                "items": "int32",
+                "dimensions": [
+                  {
+                    "length": 2
+                  },
+                  {
+                    "length": 3
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "alias": {
+            "name": "SimpleRecordFixedArray",
+            "type": {
+              "array": {
+                "items": "TestModel.SimpleRecord",
+                "dimensions": [
+                  {
+                    "length": 3
+                  },
+                  {
+                    "length": 2
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "alias": {
+            "name": "RecordWithVlensFixedArray",
+            "type": {
+              "array": {
+                "items": "TestModel.RecordWithVlens",
+                "dimensions": [
+                  {
+                    "length": 2
+                  },
+                  {
+                    "length": 2
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "record": {
+            "name": "RecordWithNamedFixedArrays",
+            "fields": [
+              {
+                "name": "ints",
+                "type": "TestModel.IntFixedArray"
+              },
+              {
+                "name": "fixedSimpleRecordArray",
+                "type": "TestModel.SimpleRecordFixedArray"
+              },
+              {
+                "name": "fixedRecordWithVlensArray",
+                "type": "TestModel.RecordWithVlensFixedArray"
+              }
+            ]
+          }
+        },
+        {
           "record": {
             "name": "RecordWithNDArrays",
             "fields": [
@@ -1139,11 +1233,7 @@
             "fields": [
               {
                 "name": "ints",
-                "type": {
-                  "array": {
-                    "items": "int32"
-                  }
-                }
+                "type": "TestModel.IntArray"
               },
               {
                 "name": "simpleRecordArray",
@@ -1688,6 +1778,22 @@
         },
         {
           "alias": {
+            "name": "AliasedMap",
+            "typeParameters": [
+              "K",
+              "V"
+            ],
+            "type": {
+              "name": "BasicTypes.AliasedMap",
+              "typeArguments": [
+                "K",
+                "V"
+              ]
+            }
+          }
+        },
+        {
+          "alias": {
             "name": "VectorOfGenericRecords",
             "typeParameters": [
               "T1",
@@ -1703,6 +1809,27 @@
                   ]
                 }
               }
+            }
+          }
+        },
+        {
+          "alias": {
+            "name": "AliasedVectorOfGenericRecords",
+            "typeParameters": [
+              "T1",
+              "T2"
+            ],
+            "type": {
+              "name": "TestModel.AliasedGenericVector",
+              "typeArguments": [
+                {
+                  "name": "TestModel.GenericRecord",
+                  "typeArguments": [
+                    "T1",
+                    "T2"
+                  ]
+                }
+              ]
             }
           }
         },

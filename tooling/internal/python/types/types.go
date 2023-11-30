@@ -1051,26 +1051,33 @@ func writeGetDTypeFunc(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 			})
 		}
 
-		for _, refNs := range ns.GetAllChildReferences() {
+		writeDefaults := func(ns *dsl.Namespace, contextNamespace string) {
 			unions := make(map[string]any)
-			for _, td := range refNs.TypeDefinitions {
-				writeUnionDtypeIfNeeded(td, unions, ns.Name)
-				fmt.Fprintf(w, "dtype_map.setdefault(%s, %s)\n", common.TypeSyntaxWithoutTypeParameters(td, ns.Name), typeDefinitionDTypeExpression(td, context))
+			for _, td := range ns.TypeDefinitions {
+				writeUnionDtypeIfNeeded(td, unions, contextNamespace)
+
+				// Skip Named arrays, vectors, and maps because they resolve to Python built-in types having dtype=np.object_
+				if td, ok := td.(*dsl.NamedType); ok {
+					if gt, ok := dsl.GetUnderlyingType(td.Type).(*dsl.GeneralizedType); ok {
+						switch gt.Dimensionality.(type) {
+						case *dsl.Array, *dsl.Vector, *dsl.Map:
+							continue
+						}
+					}
+				}
+
+				fmt.Fprintf(w, "dtype_map.setdefault(%s, %s)\n", common.TypeSyntaxWithoutTypeParameters(td, contextNamespace), typeDefinitionDTypeExpression(td, context))
 			}
-			for _, td := range refNs.Protocols {
-				writeUnionDtypeIfNeeded(td, unions, ns.Name)
+			for _, td := range ns.Protocols {
+				writeUnionDtypeIfNeeded(td, unions, contextNamespace)
 			}
 		}
 
-		unions := make(map[string]any)
-		for _, td := range ns.TypeDefinitions {
-			writeUnionDtypeIfNeeded(td, unions, ns.Name)
-			fmt.Fprintf(w, "dtype_map.setdefault(%s, %s)\n", common.TypeSyntaxWithoutTypeParameters(td, ns.Name), typeDefinitionDTypeExpression(td, context))
+		for _, refNs := range ns.GetAllChildReferences() {
+			writeDefaults(refNs, ns.Name)
 		}
 
-		for _, td := range ns.Protocols {
-			writeUnionDtypeIfNeeded(td, unions, ns.Name)
-		}
+		writeDefaults(ns, ns.Name)
 
 		w.WriteStringln("\nreturn get_dtype")
 	})
@@ -1188,7 +1195,7 @@ func typeDefinitionDTypeExpression(t dsl.TypeDefinition, context dTypeExpression
 }
 
 func typeDTypeExpression(t dsl.Type, context dTypeExpressionContext) string {
-	switch t := t.(type) {
+	switch t := dsl.GetUnderlyingType(t).(type) {
 	case *dsl.SimpleType:
 		context.root = false
 		return typeDefinitionDTypeExpression(t.ResolvedDefinition, context)
