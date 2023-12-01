@@ -453,6 +453,32 @@ struct RecordWithFixedArrays {
   }
 };
 
+using IntArray = yardl::DynamicNDArray<int32_t>;
+
+using IntRank2Array = yardl::NDArray<int32_t, 2>;
+
+using IntFixedArray = yardl::FixedNDArray<int32_t, 2, 3>;
+
+using SimpleRecordFixedArray = yardl::FixedNDArray<test_model::SimpleRecord, 3, 2>;
+
+using RecordWithVlensFixedArray = yardl::FixedNDArray<test_model::RecordWithVlens, 2, 2>;
+
+struct RecordWithNamedFixedArrays {
+  test_model::IntFixedArray ints{};
+  test_model::SimpleRecordFixedArray fixed_simple_record_array{};
+  test_model::RecordWithVlensFixedArray fixed_record_with_vlens_array{};
+
+  bool operator==(const RecordWithNamedFixedArrays& other) const {
+    return ints == other.ints &&
+      fixed_simple_record_array == other.fixed_simple_record_array &&
+      fixed_record_with_vlens_array == other.fixed_record_with_vlens_array;
+  }
+
+  bool operator!=(const RecordWithNamedFixedArrays& other) const {
+    return !(*this == other);
+  }
+};
+
 struct RecordWithNDArrays {
   yardl::NDArray<int32_t, 2> ints{};
   yardl::NDArray<test_model::SimpleRecord, 2> fixed_simple_record_array{};
@@ -486,7 +512,7 @@ struct RecordWithNDArraysSingleDimension {
 };
 
 struct RecordWithDynamicNDArrays {
-  yardl::DynamicNDArray<int32_t> ints{};
+  test_model::IntArray ints{};
   yardl::DynamicNDArray<test_model::SimpleRecord> simple_record_array{};
   yardl::DynamicNDArray<test_model::RecordWithVlens> record_with_vlens_array{};
 
@@ -662,8 +688,14 @@ using AliasedGenericFixedArray = yardl::FixedNDArray<T, 16, 8>;
 template <typename T>
 using AliasedGenericDynamicArray = yardl::DynamicNDArray<T>;
 
+template <typename K, typename V>
+using AliasedMap = basic_types::AliasedMap<K, V>;
+
 template <typename T1, typename T2>
 using VectorOfGenericRecords = std::vector<test_model::GenericRecord<T1, T2>>;
+
+template <typename T1, typename T2>
+using AliasedVectorOfGenericRecords = test_model::AliasedGenericVector<test_model::GenericRecord<T1, T2>>;
 
 template <typename T, typename U>
 struct RecordWithGenericVectorOfRecords {

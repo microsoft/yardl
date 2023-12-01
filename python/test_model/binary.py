@@ -1493,6 +1493,24 @@ class RecordWithFixedArraysSerializer(_binary.RecordSerializer[RecordWithFixedAr
         return RecordWithFixedArrays(ints=field_values[0], fixed_simple_record_array=field_values[1], fixed_record_with_vlens_array=field_values[2])
 
 
+class RecordWithNamedFixedArraysSerializer(_binary.RecordSerializer[RecordWithNamedFixedArrays]):
+    def __init__(self) -> None:
+        super().__init__([("ints", _binary.FixedNDArraySerializer(_binary.int32_serializer, (2, 3,))), ("fixed_simple_record_array", _binary.FixedNDArraySerializer(SimpleRecordSerializer(), (3, 2,))), ("fixed_record_with_vlens_array", _binary.FixedNDArraySerializer(RecordWithVlensSerializer(), (2, 2,)))])
+
+    def write(self, stream: _binary.CodedOutputStream, value: RecordWithNamedFixedArrays) -> None:
+        if isinstance(value, np.void):
+            self.write_numpy(stream, value)
+            return
+        self._write(stream, value.ints, value.fixed_simple_record_array, value.fixed_record_with_vlens_array)
+
+    def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
+        self._write(stream, value['ints'], value['fixed_simple_record_array'], value['fixed_record_with_vlens_array'])
+
+    def read(self, stream: _binary.CodedInputStream) -> RecordWithNamedFixedArrays:
+        field_values = self._read(stream)
+        return RecordWithNamedFixedArrays(ints=field_values[0], fixed_simple_record_array=field_values[1], fixed_record_with_vlens_array=field_values[2])
+
+
 class RecordWithNDArraysSerializer(_binary.RecordSerializer[RecordWithNDArrays]):
     def __init__(self) -> None:
         super().__init__([("ints", _binary.NDArraySerializer(_binary.int32_serializer, 2)), ("fixed_simple_record_array", _binary.NDArraySerializer(SimpleRecordSerializer(), 2)), ("fixed_record_with_vlens_array", _binary.NDArraySerializer(RecordWithVlensSerializer(), 2))])

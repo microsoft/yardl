@@ -619,6 +619,25 @@ struct _Inner_RecordWithFixedArrays {
   yardl::hdf5::InnerFixedNdArray<test_model::hdf5::_Inner_RecordWithVlens, test_model::RecordWithVlens, 2, 2> fixed_record_with_vlens_array;
 };
 
+struct _Inner_RecordWithNamedFixedArrays {
+  _Inner_RecordWithNamedFixedArrays() {} 
+  _Inner_RecordWithNamedFixedArrays(test_model::RecordWithNamedFixedArrays const& o) 
+      : ints(o.ints),
+      fixed_simple_record_array(o.fixed_simple_record_array),
+      fixed_record_with_vlens_array(o.fixed_record_with_vlens_array) {
+  }
+
+  void ToOuter (test_model::RecordWithNamedFixedArrays& o) const {
+    yardl::hdf5::ToOuter(ints, o.ints);
+    yardl::hdf5::ToOuter(fixed_simple_record_array, o.fixed_simple_record_array);
+    yardl::hdf5::ToOuter(fixed_record_with_vlens_array, o.fixed_record_with_vlens_array);
+  }
+
+  yardl::FixedNDArray<int32_t, 2, 3> ints;
+  yardl::FixedNDArray<test_model::SimpleRecord, 3, 2> fixed_simple_record_array;
+  yardl::hdf5::InnerFixedNdArray<test_model::hdf5::_Inner_RecordWithVlens, test_model::RecordWithVlens, 2, 2> fixed_record_with_vlens_array;
+};
+
 struct _Inner_RecordWithNDArrays {
   _Inner_RecordWithNDArrays() {} 
   _Inner_RecordWithNDArrays(test_model::RecordWithNDArrays const& o) 
@@ -1266,6 +1285,15 @@ struct _Inner_RecordWithKeywordFields {
 
 [[maybe_unused]] H5::CompType GetRecordWithFixedArraysHdf5Ddl() {
   using RecordType = test_model::hdf5::_Inner_RecordWithFixedArrays;
+  H5::CompType t(sizeof(RecordType));
+  t.insertMember("ints", HOFFSET(RecordType, ints), yardl::hdf5::FixedNDArrayDdl(H5::PredType::NATIVE_INT32, {2, 3}));
+  t.insertMember("fixedSimpleRecordArray", HOFFSET(RecordType, fixed_simple_record_array), yardl::hdf5::FixedNDArrayDdl(test_model::hdf5::GetSimpleRecordHdf5Ddl(), {3, 2}));
+  t.insertMember("fixedRecordWithVlensArray", HOFFSET(RecordType, fixed_record_with_vlens_array), yardl::hdf5::FixedNDArrayDdl(test_model::hdf5::GetRecordWithVlensHdf5Ddl(), {2, 2}));
+  return t;
+}
+
+[[maybe_unused]] H5::CompType GetRecordWithNamedFixedArraysHdf5Ddl() {
+  using RecordType = test_model::hdf5::_Inner_RecordWithNamedFixedArrays;
   H5::CompType t(sizeof(RecordType));
   t.insertMember("ints", HOFFSET(RecordType, ints), yardl::hdf5::FixedNDArrayDdl(H5::PredType::NATIVE_INT32, {2, 3}));
   t.insertMember("fixedSimpleRecordArray", HOFFSET(RecordType, fixed_simple_record_array), yardl::hdf5::FixedNDArrayDdl(test_model::hdf5::GetSimpleRecordHdf5Ddl(), {3, 2}));

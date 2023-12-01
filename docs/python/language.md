@@ -565,11 +565,11 @@ The following table summarizes how different Yardl types are represented in
 | `date`           | `datetime.date`             | `np.datetime64[D]`                |
 | `time`           | `yardl.Time`                | `np.timedelta64[ns]`              | `np.timedelta64[ns]` stores the integer nanoseconds since midnight.                                                                                                                        |
 | `datetime`       | `yardl.DateTime`            | `np.datetime64[ns]`               |
-| optional         | `Optional[python_type]`     | structured record                 | This becomes a [structured record](https://np.org/doc/stable/user/basics.rec.html) with the following fields: `{"has_value": np.bool_, "value": inner_numpy_type }`                        |
+| optional         | `Optional[python_type]`     | structured record                 | This becomes a [structured record](https://numpy.org/doc/stable/user/basics.rec.html) with the following fields: `{"has_value": np.bool_, "value": inner_numpy_type }`                        |
 | union            | Tagged union class          | `np.object_` (`python_type`)      | Array values the tagged unions of Python types. NumPy types are not used.                                                                                                                  |
-| fixed vector     | `list[python_type]`         | subarray                          | An array of fixed vectors becomes a single NumPy array with increased dimensionality. Fixed vectors in records become [subarrays](https://np.org/doc/stable/glossary.html#term-subarray).  |
+| fixed vector     | `list[python_type]`         | subarray                          | An array of fixed vectors becomes a single NumPy array with increased dimensionality. Fixed vectors in records become [subarrays](https://numpy.org/doc/stable/glossary.html#term-subarray).  |
 | dynamic vector   | `list[python_type]`         | `np.object` (`list[python_type]`) | Because the size is not fixed, these vectors are stored as lists of the normal Python type.                                                                                                |
-| fixed array      | `np.ndarray`                | subarray                          | An array of fixed arrays results in a single NumPy array with increased dimensionality. Fixed arrays in records become [subarrays](https://np.org/doc/stable/glossary.html#term-subarray). |
+| fixed array      | `np.ndarray`                | subarray                          | An array of fixed arrays results in a single NumPy array with increased dimensionality. Fixed arrays in records become [subarrays](https://numpy.org/doc/stable/glossary.html#term-subarray). |
 | dynamic array    | `np.ndarray`                | `np.object_` (np.ndarray)         | Because the shape is not fixed, these are stored as nested `np.ndarray`s.                                                                                                                  |
 | map              | dictionary                  | `np.object` (dictionary)          | In an array, dictionaries are represented in the same way as they are outside of an array.                                                                                                 |
 | record           | class                       | structured record                 | See [note below](#structured-arrays).                                                                                                                                                                            |
@@ -579,7 +579,7 @@ The following table summarizes how different Yardl types are represented in
 
 Records have a very different representation in a NumPy array compared to
 outside an array. Normally represented as a class, a record becomes a fixed-size [structured
-record](https://np.org/doc/stable/user/basics.rec.html) within a NumPy array.
+record](https://numpy.org/doc/stable/user/basics.rec.html) within a NumPy array.
 
 Suppose we have the following Yardl:
 
@@ -613,7 +613,7 @@ arr[0] = (7, 10)
 When passing a NumPy array to a protocol writer, the writer checks that array
 has the correct dtype. For structured arrays, the dtype can either be [aligned
 or
-unaligned](https://np.org/doc/stable/user/basics.rec.html#automatic-byte-offsets-and-alignment).
+unaligned](https://numpy.org/doc/stable/user/basics.rec.html#automatic-byte-offsets-and-alignment).
 In can be cumbersome to write out the dtype definition by hand, so the generated
 Python module contains a `get_dtype()` function to help convert a Python type to
 a NumPy dtype.

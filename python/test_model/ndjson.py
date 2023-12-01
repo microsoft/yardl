@@ -1053,6 +1053,56 @@ class RecordWithFixedArraysConverter(_ndjson.JsonConverter[RecordWithFixedArrays
         ) # type:ignore 
 
 
+class RecordWithNamedFixedArraysConverter(_ndjson.JsonConverter[RecordWithNamedFixedArrays, np.void]):
+    def __init__(self) -> None:
+        self._ints_converter = _ndjson.FixedNDArrayConverter(_ndjson.int32_converter, (2, 3,))
+        self._fixed_simple_record_array_converter = _ndjson.FixedNDArrayConverter(SimpleRecordConverter(), (3, 2,))
+        self._fixed_record_with_vlens_array_converter = _ndjson.FixedNDArrayConverter(RecordWithVlensConverter(), (2, 2,))
+        super().__init__(np.dtype([
+            ("ints", self._ints_converter.overall_dtype()),
+            ("fixed_simple_record_array", self._fixed_simple_record_array_converter.overall_dtype()),
+            ("fixed_record_with_vlens_array", self._fixed_record_with_vlens_array_converter.overall_dtype()),
+        ]))
+
+    def to_json(self, value: RecordWithNamedFixedArrays) -> object:
+        if not isinstance(value, RecordWithNamedFixedArrays): # pyright: ignore [reportUnnecessaryIsInstance]
+            raise TypeError("Expected 'RecordWithNamedFixedArrays' instance")
+        json_object = {}
+
+        json_object["ints"] = self._ints_converter.to_json(value.ints)
+        json_object["fixedSimpleRecordArray"] = self._fixed_simple_record_array_converter.to_json(value.fixed_simple_record_array)
+        json_object["fixedRecordWithVlensArray"] = self._fixed_record_with_vlens_array_converter.to_json(value.fixed_record_with_vlens_array)
+        return json_object
+
+    def numpy_to_json(self, value: np.void) -> object:
+        if not isinstance(value, np.void): # pyright: ignore [reportUnnecessaryIsInstance]
+            raise TypeError("Expected 'np.void' instance")
+        json_object = {}
+
+        json_object["ints"] = self._ints_converter.numpy_to_json(value["ints"])
+        json_object["fixedSimpleRecordArray"] = self._fixed_simple_record_array_converter.numpy_to_json(value["fixed_simple_record_array"])
+        json_object["fixedRecordWithVlensArray"] = self._fixed_record_with_vlens_array_converter.numpy_to_json(value["fixed_record_with_vlens_array"])
+        return json_object
+
+    def from_json(self, json_object: object) -> RecordWithNamedFixedArrays:
+        if not isinstance(json_object, dict):
+            raise TypeError("Expected 'dict' instance")
+        return RecordWithNamedFixedArrays(
+            ints=self._ints_converter.from_json(json_object["ints"],),
+            fixed_simple_record_array=self._fixed_simple_record_array_converter.from_json(json_object["fixedSimpleRecordArray"],),
+            fixed_record_with_vlens_array=self._fixed_record_with_vlens_array_converter.from_json(json_object["fixedRecordWithVlensArray"],),
+        )
+
+    def from_json_to_numpy(self, json_object: object) -> np.void:
+        if not isinstance(json_object, dict):
+            raise TypeError("Expected 'dict' instance")
+        return (
+            self._ints_converter.from_json_to_numpy(json_object["ints"]),
+            self._fixed_simple_record_array_converter.from_json_to_numpy(json_object["fixedSimpleRecordArray"]),
+            self._fixed_record_with_vlens_array_converter.from_json_to_numpy(json_object["fixedRecordWithVlensArray"]),
+        ) # type:ignore 
+
+
 class RecordWithNDArraysConverter(_ndjson.JsonConverter[RecordWithNDArrays, np.void]):
     def __init__(self) -> None:
         self._ints_converter = _ndjson.NDArrayConverter(_ndjson.int32_converter, 2)

@@ -44,6 +44,10 @@ def make_get_dtype_func(
     dtype_map[float] = np.dtype(np.float64)
     dtype_map[complex] = np.dtype(np.complex128)
 
+    dtype_map[list] = lambda type_args: np.dtype(np.object_)
+    dtype_map[dict] = lambda type_args: np.dtype(np.object_)
+    dtype_map[np.ndarray] = lambda type_args: np.dtype(np.object_)  # type: ignore
+
     def get_dtype_impl(
         dtype_map: dict[
             Union[type, GenericAlias],
