@@ -10,6 +10,8 @@ if (NOT CMAKE_BUILD_TYPE)
             FORCE)
 endif ()
 
+message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
+
 if(NOT CMAKE_CXX_STANDARD)
     set(CMAKE_CXX_STANDARD 17)
 endif()

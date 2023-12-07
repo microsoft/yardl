@@ -205,7 +205,9 @@ func (cv CompareVisitor[T]) StrictCompare(newRoot, oldRoot Node, context T) erro
 			return validationError(newRoot, "cannot change type %s to %s", oldNode.Name, newNode.Name)
 		}
 
-		return cv.Compare(newNode.ResolvedDefinition, oldNode.ResolvedDefinition, context)
+		// Don't compare ResolveDefinition. This is handled by comparing Namespace.TypeDefinitions
+		// return cv.Compare(newNode.ResolvedDefinition, oldNode.ResolvedDefinition, context)
+		return nil
 
 	case *GeneralizedType:
 		newNode, ok := newRoot.(*GeneralizedType)

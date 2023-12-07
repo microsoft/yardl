@@ -84,18 +84,18 @@ func writeHeaderFile(env *dsl.Environment, options packaging.CppCodegenOptions) 
 			fmt.Fprintf(w, "class %s : public %s, yardl::binary::BinaryWriter {\n", writerClassName, common.QualifiedAbstractWriterName(protocol))
 			w.Indented(func() {
 				w.WriteStringln("public:")
-				fmt.Fprintf(w, "%s(std::ostream& stream)\n", writerClassName)
+				fmt.Fprintf(w, "%s(std::ostream& stream, const std::string& schema=schema_)\n", writerClassName)
 				w.Indented(func() {
 					w.Indented(func() {
-						w.WriteStringln(": yardl::binary::BinaryWriter(stream, schema_) {")
+						w.WriteStringln(": yardl::binary::BinaryWriter(stream, schema, schema_, previous_schemas_) {")
 					})
 				})
 				w.WriteStringln("}\n")
 
-				fmt.Fprintf(w, "%s(std::string file_name)\n", writerClassName)
+				fmt.Fprintf(w, "%s(std::string file_name, const std::string& schema=schema_)\n", writerClassName)
 				w.Indented(func() {
 					w.Indented(func() {
-						w.WriteStringln(": yardl::binary::BinaryWriter(file_name, schema_) {")
+						w.WriteStringln(": yardl::binary::BinaryWriter(file_name, schema, schema_, previous_schemas_) {")
 					})
 				})
 				w.WriteStringln("}\n")
@@ -128,7 +128,7 @@ func writeHeaderFile(env *dsl.Environment, options packaging.CppCodegenOptions) 
 				fmt.Fprintf(w, "%s(std::istream& stream)\n", readerClassName)
 				w.Indented(func() {
 					w.Indented(func() {
-						w.WriteStringln(": yardl::binary::BinaryReader(stream, schema_) {")
+						w.WriteStringln(": yardl::binary::BinaryReader(stream, schema_, previous_schemas_) {")
 					})
 				})
 				w.WriteStringln("}\n")
@@ -136,10 +136,12 @@ func writeHeaderFile(env *dsl.Environment, options packaging.CppCodegenOptions) 
 				fmt.Fprintf(w, "%s(std::string file_name)\n", readerClassName)
 				w.Indented(func() {
 					w.Indented(func() {
-						w.WriteStringln(": yardl::binary::BinaryReader(file_name, schema_) {")
+						w.WriteStringln(": yardl::binary::BinaryReader(file_name, schema_, previous_schemas_) {")
 					})
 				})
 				w.WriteStringln("}\n")
+
+				fmt.Fprintf(w, "std::string GetSchema() { if (schema_index_ < 0) { return schema_; } else { return previous_schemas_[schema_index_]; } }\n\n")
 
 				w.WriteStringln("protected:")
 				hasStream := false
@@ -364,6 +366,15 @@ func writeNamespaceDefinitions(w *formatting.IndentedWriter, ns *dsl.Namespace) 
 		w.WriteStringln("namespace {")
 		for _, typeDef := range ns.TypeDefinitions {
 			writeSerializers(w, typeDef)
+
+			if changes, ok := typeDef.GetDefinitionMeta().Annotations["changes"]; ok {
+				for i, changedTypeDef := range changes.([]dsl.TypeDefinition) {
+					if changedTypeDef != nil {
+						fmt.Printf("Writing previous version of TypeDefinition %s\n", changedTypeDef)
+						writeCompatibilitySerializers(w, typeDef, changedTypeDef, i)
+					}
+				}
+			}
 		}
 		w.WriteString("} // namespace\n\n")
 	}
@@ -372,6 +383,48 @@ func writeNamespaceDefinitions(w *formatting.IndentedWriter, ns *dsl.Namespace) 
 		for _, protocol := range ns.Protocols {
 			writeProtocolMethods(w, protocol)
 		}
+	}
+}
+
+// TODO: Currently, this could be moved *inside* the existing `writeSerializers`, i.e. after writing the new ones we write compatibility ones.
+func writeCompatibilitySerializers(w *formatting.IndentedWriter, t dsl.TypeDefinition, prev dsl.TypeDefinition, version_index int) {
+	switch t.(type) {
+	case *dsl.EnumDefinition:
+		return
+	}
+
+	writeFallbackBody := func(write bool) {
+		switch p := prev.(type) {
+		case *dsl.RecordDefinition:
+			for _, field := range p.Fields {
+				fmt.Fprintf(w, "%s(stream, value.%s);\n", typeRwFunction(field.Type, write), common.FieldIdentifierName(field.Name))
+			}
+		case *dsl.NamedType:
+			fmt.Fprintf(w, "%s(stream, value);\n", typeRwFunction(p.Type, write))
+		default:
+			panic(fmt.Sprintf("Unexpected type %T", p))
+		}
+	}
+
+	writeCompatibilityRwFunctionSignature(t, version_index, w, true)
+	w.Indented(func() {
+		writeFallbackBody(true)
+	})
+	w.WriteString("}\n\n")
+
+	writeCompatibilityRwFunctionSignature(t, version_index, w, false)
+	w.Indented(func() {
+		writeFallbackBody(false)
+	})
+	w.WriteString("}\n\n")
+}
+
+func writeCompatibilityRwFunctionSignature(t dsl.TypeDefinition, version int, w *formatting.IndentedWriter, write bool) {
+	writeRwFunctionTemplateDeclaration(t, w, write)
+	if write {
+		fmt.Fprintf(w, "[[maybe_unused]] static void Write%s_v%d(yardl::binary::CodedOutputStream& stream, %s const& value) {\n", t.GetDefinitionMeta().Name, version, common.TypeDefinitionSyntax(t))
+	} else {
+		fmt.Fprintf(w, "[[maybe_unused]] static void Read%s_v%d(yardl::binary::CodedInputStream& stream, %s& value) {\n", t.GetDefinitionMeta().Name, version, common.TypeDefinitionSyntax(t))
 	}
 }
 
@@ -429,9 +482,9 @@ func verb(write bool) string {
 func writeRwFunctionSignature(t dsl.TypeDefinition, w *formatting.IndentedWriter, write bool) {
 	writeRwFunctionTemplateDeclaration(t, w, write)
 	if write {
-		fmt.Fprintf(w, "[[maybe_unused]] void Write%s(yardl::binary::CodedOutputStream& stream, %s const& value) {\n", t.GetDefinitionMeta().Name, common.TypeDefinitionSyntax(t))
+		fmt.Fprintf(w, "[[maybe_unused]] static void Write%s(yardl::binary::CodedOutputStream& stream, %s const& value) {\n", t.GetDefinitionMeta().Name, common.TypeDefinitionSyntax(t))
 	} else {
-		fmt.Fprintf(w, "[[maybe_unused]] void Read%s(yardl::binary::CodedInputStream& stream, %s& value) {\n", t.GetDefinitionMeta().Name, common.TypeDefinitionSyntax(t))
+		fmt.Fprintf(w, "[[maybe_unused]] static void Read%s(yardl::binary::CodedInputStream& stream, %s& value) {\n", t.GetDefinitionMeta().Name, common.TypeDefinitionSyntax(t))
 	}
 }
 
@@ -459,7 +512,31 @@ func writeProtocolMethods(w *formatting.IndentedWriter, p *dsl.ProtocolDefinitio
 			if step.IsStream() {
 				w.WriteString("yardl::binary::WriteInteger(stream_, 1U);\n")
 			}
-			fmt.Fprintf(w, "%s(stream_, value);\n", typeRwFunction(step.Type, true))
+
+			// Handle schema changes to Protocol Steps
+			if changes, ok := step.Annotations["changes"]; ok {
+				fmt.Fprintf(w, "switch (schema_index_) {\n")
+				for i, change := range changes.([]*dsl.ProtocolStep) {
+					if change == nil {
+						continue
+					}
+
+					fmt.Fprintf(w, "case %d:\n", i)
+					w.Indented(func() {
+						fmt.Fprintf(w, "%s_v%d(stream_, value);\n", typeRwFunction(step.Type, true), i)
+						fmt.Fprintln(w, "break;")
+					})
+				}
+				fmt.Fprintln(w, "default:")
+				w.Indented(func() {
+					fmt.Fprintf(w, "%s(stream_, value);\n", typeRwFunction(step.Type, true))
+					fmt.Fprintln(w, "break;")
+				})
+				fmt.Fprintln(w, "}")
+			} else {
+				// No schema version changes
+				fmt.Fprintf(w, "%s(stream_, value);\n", typeRwFunction(step.Type, true))
+			}
 		})
 		w.WriteString("}\n\n")
 
@@ -518,7 +595,31 @@ func writeProtocolMethods(w *formatting.IndentedWriter, p *dsl.ProtocolDefinitio
 				w.WriteStringln("}")
 			}
 
-			fmt.Fprintf(w, "%s(stream_, value);\n", typeRwFunction(step.Type, false))
+			// Handle schema changes to Protocol Steps
+			if changes, ok := step.Annotations["changes"]; ok {
+				fmt.Fprintf(w, "switch (schema_index_) {\n")
+				for i, change := range changes.([]*dsl.ProtocolStep) {
+					if change == nil {
+						continue
+					}
+
+					fmt.Fprintf(w, "case %d:\n", i)
+					w.Indented(func() {
+						fmt.Fprintf(w, "%s_v%d(stream_, value);\n", typeRwFunction(step.Type, false), i)
+						fmt.Fprintln(w, "break;")
+					})
+				}
+				fmt.Fprintln(w, "default:")
+				w.Indented(func() {
+					fmt.Fprintf(w, "%s(stream_, value);\n", typeRwFunction(step.Type, false))
+					fmt.Fprintln(w, "break;")
+				})
+				fmt.Fprintln(w, "}")
+			} else {
+				// No schema version changes
+				fmt.Fprintf(w, "%s(stream_, value);\n", typeRwFunction(step.Type, false))
+			}
+
 			if step.IsStream() {
 				w.WriteStringln("current_block_remaining_--;")
 				w.WriteStringln("return true;")
