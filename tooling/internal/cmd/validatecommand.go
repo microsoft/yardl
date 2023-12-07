@@ -4,6 +4,7 @@
 package cmd
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/rs/zerolog/log"
@@ -23,7 +24,8 @@ func newValidateCommand() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			err := validateImpl()
 			if err != nil {
-				log.Fatal().Msgf("%v", err)
+				fmt.Fprintln(os.Stderr, err)
+				os.Exit(1)
 			}
 		},
 	}
@@ -58,13 +60,18 @@ func validatePackage(packageInfo *packaging.PackageInfo) (*dsl.Environment, erro
 		return nil, err
 	}
 
-	for _, packageInfo := range packageInfo.Predecessors {
+	for versionId, packageInfo := range packageInfo.Predecessors {
 		namespaces, err := parseAndFlattenNamespaces(packageInfo)
 		if err != nil {
 			return nil, err
 		}
 
-		_, err = dsl.Validate(namespaces)
+		predecessor, err := dsl.Validate(namespaces)
+		if err != nil {
+			return nil, err
+		}
+
+		env, err = dsl.ValidateEvolution(env, predecessor, versionId)
 		if err != nil {
 			return nil, err
 		}

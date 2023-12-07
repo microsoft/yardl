@@ -117,6 +117,7 @@ func writeDeclarations(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 			w.WriteString("virtual void CloseImpl() {}\n\n")
 
 			w.WriteString("static std::string schema_;\n\n")
+			w.WriteString("static std::vector<std::string> previous_schemas_;\n\n")
 
 			w.WriteStringln("private:")
 			w.WriteString("uint8_t state_ = 0;\n\n")
@@ -177,6 +178,7 @@ func writeDeclarations(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 			w.WriteString("virtual void CloseImpl() {}\n")
 
 			w.WriteString("static std::string schema_;\n\n")
+			w.WriteString("static std::vector<std::string> previous_schemas_;\n\n")
 
 			w.WriteStringln("private:")
 			w.WriteStringln("uint8_t state_ = 0;")
@@ -196,6 +198,16 @@ func writeDefinitions(w *formatting.IndentedWriter, ns *dsl.Namespace, symbolTab
 		// Writers
 
 		fmt.Fprintf(w, "std::string %s::schema_ = R\"(%s)\";\n\n", common.AbstractWriterName(p), dsl.GetProtocolSchemaString(p, symbolTable))
+		fmt.Fprintf(w, "std::vector<std::string> %s::previous_schemas_ = {\n", common.AbstractWriterName(p))
+		w.Indented(func() {
+			if schemas, ok := p.Annotations["schemas"]; ok {
+				for _, schema := range schemas.([]string) {
+					fmt.Fprintf(w, "R\"(%s)\",\n", schema)
+				}
+			}
+		})
+
+		fmt.Fprintf(w, "};\n\n")
 
 		for i, step := range p.Sequence {
 			writeWriteMethod := func(signature string, variableName string) {
@@ -261,6 +273,7 @@ func writeDefinitions(w *formatting.IndentedWriter, ns *dsl.Namespace, symbolTab
 		// Readers
 
 		fmt.Fprintf(w, "std::string %s::schema_ = %s::schema_;\n\n", common.AbstractReaderName(p), common.AbstractWriterName(p))
+		fmt.Fprintf(w, "std::vector<std::string> %s::previous_schemas_ = %s::previous_schemas_;\n\n", common.AbstractReaderName(p), common.AbstractWriterName(p))
 
 		for i, step := range p.Sequence {
 			returnType := "void"
