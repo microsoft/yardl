@@ -909,6 +909,9 @@ func TypeToShortSyntax(t Type, qualified bool) string {
 			}
 			return fmt.Sprintf("%s->%s", key, baseSyntax)
 
+		case *Stream:
+			return fmt.Sprintf("stream<%s>", baseSyntax)
+
 		default:
 			panic(fmt.Sprintf("unknown dimensionality type: %T", t.Dimensionality))
 		}
