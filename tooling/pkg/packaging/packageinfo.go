@@ -26,11 +26,8 @@ type PackageInfo struct {
 	FilePath  string `yaml:"-"`
 	Namespace string `yaml:"namespace"`
 
-	PredecessorUrls []string `yaml:"predecessors,omitempty"`
-	ImportUrls      []string `yaml:"imports,omitempty"`
-
-	Predecessors []*PackageInfo `yaml:"-"`
-	Imports      []*PackageInfo `yaml:"-"`
+	Predecessors Predecessors `yaml:"predecessors,omitempty"`
+	Imports      Imports      `yaml:"imports,omitempty"`
 
 	Json   *JsonCodegenOptions   `yaml:"json,omitempty"`
 	Cpp    *CppCodegenOptions    `yaml:"cpp,omitempty"`
@@ -46,11 +43,11 @@ func (p *PackageInfo) GetAllImportedPackages() []*PackageInfo {
 	var imports []*PackageInfo
 	var recurse func(*PackageInfo)
 	recurse = func(pInfo *PackageInfo) {
-		for _, ref := range pInfo.Imports {
-			if !checked[ref.FilePath] {
-				recurse(ref)
-				checked[ref.FilePath] = true
-				imports = append(imports, ref)
+		for _, imp := range pInfo.Imports {
+			if !checked[imp.Package.FilePath] {
+				recurse(imp.Package)
+				checked[imp.Package.FilePath] = true
+				imports = append(imports, imp.Package)
 			}
 		}
 	}
@@ -95,6 +92,63 @@ func (p *PackageInfo) validate() error {
 	}
 
 	return errorSink.AsError()
+}
+
+type Import struct {
+	Url     string
+	Package *PackageInfo
+}
+type Imports []*Import
+
+func (imports *Imports) UnmarshalYAML(value *yaml.Node) error {
+	unpacked := []*Import(*imports)
+
+	if value.Tag != "!!seq" {
+		return fmt.Errorf("expected import sequence")
+	}
+
+	for _, item := range value.Content {
+		if item.Tag != "!!str" {
+			return fmt.Errorf("expected import url to be a string")
+		}
+
+		unpacked = append(unpacked, &Import{Url: item.Value})
+	}
+
+	*imports = Imports(unpacked)
+	return nil
+}
+
+type Predecessor struct {
+	Label   string
+	Url     string
+	Package *PackageInfo
+}
+
+type Predecessors []*Predecessor
+
+func (preds *Predecessors) UnmarshalYAML(value *yaml.Node) error {
+	unpacked := []*Predecessor(*preds)
+
+	if value.Tag != "!!map" {
+		return fmt.Errorf("expected predecessor map")
+	}
+
+	for i := 0; i < len(value.Content); i += 2 {
+		predKey := value.Content[i]
+		predValue := value.Content[i+1]
+		if predKey.Tag != "!!str" {
+			return fmt.Errorf("expected predecessor label to be a string")
+		}
+		if predValue.Tag != "!!str" {
+			return fmt.Errorf("expected predecessor url to be a string")
+		}
+
+		unpacked = append(unpacked, &Predecessor{Label: predKey.Value, Url: predValue.Value})
+	}
+
+	*preds = Predecessors(unpacked)
+	return nil
 }
 
 type CppCodegenOptions struct {
@@ -143,13 +197,13 @@ func LoadPackage(dir string) (*PackageInfo, error) {
 		return packageInfo, err
 	}
 
-	for _, dir := range dirs {
+	for i, dir := range dirs {
 		predecessorInfo, err := loadPackageVersion(dir)
 		if err != nil {
 			return packageInfo, err
 		}
 
-		packageInfo.Predecessors = append(packageInfo.Predecessors, predecessorInfo)
+		packageInfo.Predecessors[i].Package = predecessorInfo
 	}
 
 	return packageInfo, nil
@@ -171,7 +225,7 @@ func loadPackageVersion(dir string) (*PackageInfo, error) {
 func logImports(p *PackageInfo, indent int) {
 	log.Debug().Msgf("%s- %s from %s (%p)", strings.Repeat("  ", indent), p.Namespace, p.PackageDir(), p)
 	for _, imp := range p.Imports {
-		logImports(imp, indent+1)
+		logImports(imp.Package, indent+1)
 	}
 }
 
@@ -236,12 +290,16 @@ func collectPackages(parentDir string, alreadyCollected map[string]*PackageInfo,
 	}
 
 	log.Info().Msgf("Collecting imports for %v", parentInfo.PackageDir())
-	dirs, err := fetchAndCachePackages(parentInfo.PackageDir(), parentInfo.ImportUrls)
+	var importUrls []string
+	for _, imp := range parentInfo.Imports {
+		importUrls = append(importUrls, imp.Url)
+	}
+	dirs, err := fetchAndCachePackages(parentInfo.PackageDir(), importUrls)
 	if err != nil {
 		return parentInfo, validation.NewValidationError(err, parentInfo.FilePath)
 	}
 
-	for _, dir := range dirs {
+	for i, dir := range dirs {
 		importChain[parentInfo.Namespace] = true
 		childInfo, err := collectPackages(dir, alreadyCollected, importChain, depthRemaining-1)
 		if err != nil {
@@ -250,19 +308,24 @@ func collectPackages(parentDir string, alreadyCollected map[string]*PackageInfo,
 		importChain[parentInfo.Namespace] = false
 
 		// Build the Import tree
-		parentInfo.Imports = append(parentInfo.Imports, childInfo)
+		parentInfo.Imports[i].Package = childInfo
 	}
 
 	return parentInfo, nil
 }
 
+// Fetch and cache each predecessor package in pkgInfo.Predecessors
 func collectPredecessors(pkgInfo *PackageInfo) ([]string, error) {
-	if len(pkgInfo.PredecessorUrls) <= 0 {
+	if len(pkgInfo.Predecessors) <= 0 {
 		return nil, nil
 	}
 
 	log.Info().Msgf("Collecting predecessors for %v", pkgInfo.PackageDir())
-	dirs, err := fetchAndCachePackages(pkgInfo.PackageDir(), pkgInfo.PredecessorUrls)
+	var predecessorUrls []string
+	for _, pred := range pkgInfo.Predecessors {
+		predecessorUrls = append(predecessorUrls, pred.Url)
+	}
+	dirs, err := fetchAndCachePackages(pkgInfo.PackageDir(), predecessorUrls)
 	if err != nil {
 		err = validation.NewValidationError(err, pkgInfo.FilePath)
 	}

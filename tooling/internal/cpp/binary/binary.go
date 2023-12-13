@@ -17,6 +17,7 @@ import (
 	"github.com/microsoft/yardl/tooling/internal/iocommon"
 	"github.com/microsoft/yardl/tooling/pkg/dsl"
 	"github.com/microsoft/yardl/tooling/pkg/packaging"
+	"github.com/rs/zerolog/log"
 )
 
 func WriteBinary(env *dsl.Environment, options packaging.CppCodegenOptions) error {
@@ -370,7 +371,7 @@ func writeNamespaceDefinitions(w *formatting.IndentedWriter, ns *dsl.Namespace) 
 			if changes, ok := typeDef.GetDefinitionMeta().Annotations["changes"]; ok {
 				for i, changedTypeDef := range changes.([]dsl.TypeDefinition) {
 					if changedTypeDef != nil {
-						fmt.Printf("Writing previous version of TypeDefinition %s\n", changedTypeDef)
+						log.Debug().Msgf("Writing version %d serializers for %s", i, changedTypeDef.GetDefinitionMeta().Name)
 						writeCompatibilitySerializers(w, typeDef, changedTypeDef, i)
 					}
 				}
@@ -386,6 +387,68 @@ func writeNamespaceDefinitions(w *formatting.IndentedWriter, ns *dsl.Namespace) 
 	}
 }
 
+func typeConversionExpression(typeChange *dsl.TypeChange, varName string, write bool) string {
+	switch typeChange.Kind {
+
+	case dsl.TypeChangeNumberToNumber:
+		return fmt.Sprintf("(%s)(%s)", common.TypeSyntax(typeChange.New), varName)
+
+	case dsl.TypeChangeNumberToString:
+		if write {
+			def := typeChange.Old.(*dsl.SimpleType).ResolvedDefinition
+			switch def.(dsl.PrimitiveDefinition) {
+			case dsl.PrimitiveInt8, dsl.PrimitiveInt16, dsl.PrimitiveInt32:
+				return fmt.Sprintf("std::stoi(%s)", varName)
+			case dsl.PrimitiveInt64:
+				return fmt.Sprintf("std::stol(%s)", varName)
+			case dsl.PrimitiveUint8, dsl.PrimitiveUint16, dsl.PrimitiveUint32, dsl.PrimitiveUint64:
+				return fmt.Sprintf("std::stoul(%s)", varName)
+			case dsl.PrimitiveFloat32:
+				return fmt.Sprintf("std::stof(%s)", varName)
+			case dsl.PrimitiveFloat64:
+				return fmt.Sprintf("std::stod(%s)", varName)
+			default:
+				return varName
+			}
+		} else {
+			return fmt.Sprintf("std::to_string(%s)", varName)
+		}
+
+	case dsl.TypeChangeStringToNumber:
+		if write {
+			def := typeChange.New.(*dsl.SimpleType).ResolvedDefinition
+			switch def.(dsl.PrimitiveDefinition) {
+			case dsl.PrimitiveInt8, dsl.PrimitiveInt16, dsl.PrimitiveInt32:
+				return fmt.Sprintf("std::stoi(%s)", varName)
+			case dsl.PrimitiveInt64:
+				return fmt.Sprintf("std::stol(%s)", varName)
+			case dsl.PrimitiveUint8, dsl.PrimitiveUint16, dsl.PrimitiveUint32, dsl.PrimitiveUint64:
+				return fmt.Sprintf("std::stoul(%s)", varName)
+			case dsl.PrimitiveFloat32:
+				return fmt.Sprintf("std::stof(%s)", varName)
+			case dsl.PrimitiveFloat64:
+				return fmt.Sprintf("std::stod(%s)", varName)
+			default:
+				return varName
+			}
+		} else {
+			return fmt.Sprintf("std::to_string(%s)", varName)
+		}
+
+	case dsl.TypeChangeScalarToUnion:
+		if write {
+			return fmt.Sprintf("std::get<0>(%s)", varName)
+		} else {
+			// return fmt.Sprintf("%s(%s)", common.TypeSyntax(typeChange.New), varName)
+			return varName
+		}
+
+	// case dsl.OtherTypeChange:
+	default:
+		return varName
+	}
+}
+
 // TODO: Currently, this could be moved *inside* the existing `writeSerializers`, i.e. after writing the new ones we write compatibility ones.
 func writeCompatibilitySerializers(w *formatting.IndentedWriter, t dsl.TypeDefinition, prev dsl.TypeDefinition, version_index int) {
 	switch t.(type) {
@@ -396,8 +459,43 @@ func writeCompatibilitySerializers(w *formatting.IndentedWriter, t dsl.TypeDefin
 	writeFallbackBody := func(write bool) {
 		switch p := prev.(type) {
 		case *dsl.RecordDefinition:
+
+			// If field removed
+			// 	Read it and discard
+			// 	Write "default" value (empty optional, uninitialized primitive, etc.)
+
+			// If field added
+			// 	Don't read, but set new field to "default" value
+			// 	Don't write it
+
+			// If field type changed...
+			// 	TODO ...
+
 			for _, field := range p.Fields {
-				fmt.Fprintf(w, "%s(stream, value.%s);\n", typeRwFunction(field.Type, write), common.FieldIdentifierName(field.Name))
+				varType := common.TypeSyntax(field.Type)
+				varName := common.FieldIdentifierName(field.Name)
+
+				if field.Annotations["removed"] != nil {
+					// Field was removed: Read it and discard, or Write "default" value
+					fmt.Fprintf(w, "%s %s;\n", varType, varName)
+					fmt.Fprintf(w, "%s(stream, %s);\n", typeRwFunction(field.Type, write), varName)
+				} else if field.Annotations["changed"] != nil {
+					// Field type change: Handle type conversions
+					typeChange := field.Annotations["changed"].(*dsl.TypeChange)
+					if write {
+						fmt.Fprintf(w, "%s %s;\n", varType, varName)
+						fmt.Fprintf(w, "%s = %s;\n", varName, typeConversionExpression(typeChange, fmt.Sprintf("value.%s", varName), write))
+						// fmt.Fprint(w, typeConversionStatements(varName, field.Type, fmt.Sprintf("value.%s", varName), typeChange.New))
+						fmt.Fprintf(w, "%s(stream, %s);\n", typeRwFunction(field.Type, write), varName)
+					} else {
+						fmt.Fprintf(w, "%s %s;\n", varType, varName)
+						fmt.Fprintf(w, "%s(stream, %s);\n", typeRwFunction(field.Type, write), varName)
+						fmt.Fprintf(w, "value.%s = %s;\n", varName, typeConversionExpression(typeChange, varName, write))
+						// fmt.Fprint(w, typeConversionStatements(fmt.Sprintf("value.%s", varName), typeChange.New, varName, field.Type))
+					}
+				} else {
+					fmt.Fprintf(w, "%s(stream, value.%s);\n", typeRwFunction(field.Type, write), varName)
+				}
 			}
 		case *dsl.NamedType:
 			fmt.Fprintf(w, "%s(stream, value);\n", typeRwFunction(p.Type, write))
@@ -516,14 +614,14 @@ func writeProtocolMethods(w *formatting.IndentedWriter, p *dsl.ProtocolDefinitio
 			// Handle schema changes to Protocol Steps
 			if changes, ok := step.Annotations["changes"]; ok {
 				fmt.Fprintf(w, "switch (schema_index_) {\n")
-				for i, change := range changes.([]*dsl.ProtocolStep) {
+				for i, change := range changes.([]*dsl.TypeChange) {
 					if change == nil {
 						continue
 					}
 
 					fmt.Fprintf(w, "case %d:\n", i)
 					w.Indented(func() {
-						fmt.Fprintf(w, "%s_v%d(stream_, value);\n", typeRwFunction(step.Type, true), i)
+						fmt.Fprintf(w, "%s(stream_, value);\n", typeRwFunction(change.Old, true))
 						fmt.Fprintln(w, "break;")
 					})
 				}
@@ -545,9 +643,35 @@ func writeProtocolMethods(w *formatting.IndentedWriter, p *dsl.ProtocolDefinitio
 			w.Indented(func() {
 				w.WriteStringln("if (!values.empty()) {")
 				w.Indented(func() {
-					vectorType := *step.Type.(*dsl.GeneralizedType)
-					vectorType.Dimensionality = &dsl.Vector{}
-					fmt.Fprintf(w, "%s(stream_, values);\n", typeRwFunction(&vectorType, true))
+					if changes, ok := step.Annotations["changes"]; ok {
+						fmt.Fprintf(w, "switch (schema_index_) {\n")
+						for i, change := range changes.([]*dsl.TypeChange) {
+							if change == nil {
+								continue
+							}
+
+							fmt.Fprintf(w, "case %d:\n", i)
+							w.Indented(func() {
+								vectorType := *change.Old.(*dsl.GeneralizedType)
+								vectorType.Dimensionality = &dsl.Vector{}
+								fmt.Fprintf(w, "%s(stream_, values);\n", typeRwFunction(&vectorType, true))
+								fmt.Fprintln(w, "break;")
+							})
+						}
+						fmt.Fprintln(w, "default:")
+						w.Indented(func() {
+							vectorType := *step.Type.(*dsl.GeneralizedType)
+							vectorType.Dimensionality = &dsl.Vector{}
+							fmt.Fprintf(w, "%s(stream_, values);\n", typeRwFunction(&vectorType, true))
+							fmt.Fprintln(w, "break;")
+						})
+						fmt.Fprintln(w, "}")
+					} else {
+						// No schema version changes
+						vectorType := *step.Type.(*dsl.GeneralizedType)
+						vectorType.Dimensionality = &dsl.Vector{}
+						fmt.Fprintf(w, "%s(stream_, values);\n", typeRwFunction(&vectorType, true))
+					}
 				})
 				w.WriteStringln("}")
 			})
@@ -598,14 +722,14 @@ func writeProtocolMethods(w *formatting.IndentedWriter, p *dsl.ProtocolDefinitio
 			// Handle schema changes to Protocol Steps
 			if changes, ok := step.Annotations["changes"]; ok {
 				fmt.Fprintf(w, "switch (schema_index_) {\n")
-				for i, change := range changes.([]*dsl.ProtocolStep) {
+				for i, change := range changes.([]*dsl.TypeChange) {
 					if change == nil {
 						continue
 					}
 
 					fmt.Fprintf(w, "case %d:\n", i)
 					w.Indented(func() {
-						fmt.Fprintf(w, "%s_v%d(stream_, value);\n", typeRwFunction(step.Type, false), i)
+						fmt.Fprintf(w, "%s(stream_, value);\n", typeRwFunction(change.Old, false))
 						fmt.Fprintln(w, "break;")
 					})
 				}
@@ -630,9 +754,32 @@ func writeProtocolMethods(w *formatting.IndentedWriter, p *dsl.ProtocolDefinitio
 		if step.IsStream() {
 			fmt.Fprintf(w, "%s %s::%s(std::vector<%s>& values) {\n", returnType, readerClassName, common.ProtocolReadImplMethodName(step), common.TypeSyntax(step.Type))
 			w.Indented(func() {
-				scalarType := step.Type.(*dsl.GeneralizedType).ToScalar()
+				if changes, ok := step.Annotations["changes"]; ok {
+					fmt.Fprintf(w, "switch (schema_index_) {\n")
+					for i, change := range changes.([]*dsl.TypeChange) {
+						if change == nil {
+							continue
+						}
 
-				fmt.Fprintf(w, "yardl::binary::ReadBlocksIntoVector<%s, %s>(stream_, current_block_remaining_, values);\n", common.TypeSyntax(scalarType), typeRwFunction(scalarType, false))
+						fmt.Fprintf(w, "case %d:\n", i)
+						w.Indented(func() {
+							scalarType := change.Old.(*dsl.GeneralizedType).ToScalar()
+							fmt.Fprintf(w, "yardl::binary::ReadBlocksIntoVector<%s, %s>(stream_, current_block_remaining_, values);\n", common.TypeSyntax(scalarType), typeRwFunction(scalarType, false))
+							fmt.Fprintln(w, "break;")
+						})
+					}
+					fmt.Fprintln(w, "default:")
+					w.Indented(func() {
+						scalarType := step.Type.(*dsl.GeneralizedType).ToScalar()
+						fmt.Fprintf(w, "yardl::binary::ReadBlocksIntoVector<%s, %s>(stream_, current_block_remaining_, values);\n", common.TypeSyntax(scalarType), typeRwFunction(scalarType, false))
+						fmt.Fprintln(w, "break;")
+					})
+					fmt.Fprintln(w, "}")
+				} else {
+					// No schema version changes
+					scalarType := step.Type.(*dsl.GeneralizedType).ToScalar()
+					fmt.Fprintf(w, "yardl::binary::ReadBlocksIntoVector<%s, %s>(stream_, current_block_remaining_, values);\n", common.TypeSyntax(scalarType), typeRwFunction(scalarType, false))
+				}
 				w.WriteStringln("return current_block_remaining_ != 0;")
 			})
 			w.WriteString("}\n\n")
@@ -681,6 +828,12 @@ func typeDefinitionRwFunction(t dsl.TypeDefinition, write bool) string {
 		return fmt.Sprintf("%s%s", verb(write), common.TypeDefinitionSyntax(t))
 	default:
 		meta := t.GetDefinitionMeta()
+
+		suffix := meta.Name
+		if ver, ok := meta.Annotations["version"]; ok {
+			suffix += fmt.Sprintf("_v%d", ver.(int))
+		}
+
 		verb := verb(write)
 		typeArgumentsString := ""
 		if len(meta.TypeParameters) > 0 {
@@ -698,7 +851,7 @@ func typeDefinitionRwFunction(t dsl.TypeDefinition, write bool) string {
 			}
 			typeArgumentsString = fmt.Sprintf("<%s>", strings.Join(typeArguments, ", "))
 		}
-		return fmt.Sprintf("%s::binary::%s%s%s", common.NamespaceIdentifierName(meta.Namespace), verb, meta.Name, typeArgumentsString)
+		return fmt.Sprintf("%s::binary::%s%s%s", common.NamespaceIdentifierName(meta.Namespace), verb, suffix, typeArgumentsString)
 	}
 }
 

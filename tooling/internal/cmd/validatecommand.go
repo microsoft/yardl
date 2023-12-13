@@ -60,18 +60,19 @@ func validatePackage(packageInfo *packaging.PackageInfo) (*dsl.Environment, erro
 		return nil, err
 	}
 
-	for versionId, packageInfo := range packageInfo.Predecessors {
-		namespaces, err := parseAndFlattenNamespaces(packageInfo)
+	for versionId, predecessor := range packageInfo.Predecessors {
+		namespaces, err := parseAndFlattenNamespaces(predecessor.Package)
 		if err != nil {
 			return nil, err
 		}
 
-		predecessor, err := dsl.Validate(namespaces)
+		oldEnv, err := dsl.Validate(namespaces)
 		if err != nil {
 			return nil, err
 		}
 
-		env, err = dsl.ValidateEvolution(env, predecessor, versionId)
+		log.Info().Msgf("Resolving changes from predecessor '%s'", predecessor.Label)
+		env, err = dsl.ValidateEvolution(env, oldEnv, versionId)
 		if err != nil {
 			return nil, err
 		}
@@ -107,8 +108,8 @@ func parsePackageNamespaces(p *packaging.PackageInfo, alreadyParsed map[string]*
 	alreadyParsed[p.Namespace] = namespace
 	log.Debug().Msgf("Parsed namespace %s (%p)", namespace.Name, namespace)
 
-	for _, dep := range p.Imports {
-		ns, err := parsePackageNamespaces(dep, alreadyParsed)
+	for _, imp := range p.Imports {
+		ns, err := parsePackageNamespaces(imp.Package, alreadyParsed)
 		if err != nil {
 			return namespace, nil
 		}
