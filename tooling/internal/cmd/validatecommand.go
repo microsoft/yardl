@@ -96,7 +96,7 @@ func parseAndFlattenNamespaces(p *packaging.PackageInfo) ([]*dsl.Namespace, erro
 
 func parsePackageNamespaces(p *packaging.PackageInfo, alreadyParsed map[string]*dsl.Namespace) (*dsl.Namespace, error) {
 	if existing, found := alreadyParsed[p.Namespace]; found {
-		log.Debug().Msgf("Already parsed namespace %s (%p)", existing.Name, existing)
+		log.Debug().Msgf("Already parsed namespace %s", existing.Name)
 		return existing, nil
 	}
 
@@ -106,7 +106,7 @@ func parsePackageNamespaces(p *packaging.PackageInfo, alreadyParsed map[string]*
 	}
 
 	alreadyParsed[p.Namespace] = namespace
-	log.Debug().Msgf("Parsed namespace %s (%p)", namespace.Name, namespace)
+	log.Debug().Msgf("Parsed namespace %s", namespace.Name)
 
 	for _, imp := range p.Imports {
 		ns, err := parsePackageNamespaces(imp.Package, alreadyParsed)
