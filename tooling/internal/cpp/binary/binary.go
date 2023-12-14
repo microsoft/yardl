@@ -17,7 +17,6 @@ import (
 	"github.com/microsoft/yardl/tooling/internal/iocommon"
 	"github.com/microsoft/yardl/tooling/pkg/dsl"
 	"github.com/microsoft/yardl/tooling/pkg/packaging"
-	"github.com/rs/zerolog/log"
 )
 
 func WriteBinary(env *dsl.Environment, options packaging.CppCodegenOptions) error {
@@ -371,7 +370,6 @@ func writeNamespaceDefinitions(w *formatting.IndentedWriter, ns *dsl.Namespace) 
 			if changes, ok := typeDef.GetDefinitionMeta().Annotations["changes"]; ok {
 				for i, changedTypeDef := range changes.([]dsl.TypeDefinition) {
 					if changedTypeDef != nil {
-						log.Debug().Msgf("Writing version %d serializers for %s", i, changedTypeDef.GetDefinitionMeta().Name)
 						writeCompatibilitySerializers(w, typeDef, changedTypeDef, i)
 					}
 				}

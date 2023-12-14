@@ -223,7 +223,7 @@ func loadPackageVersion(dir string) (*PackageInfo, error) {
 }
 
 func logImports(p *PackageInfo, indent int) {
-	log.Debug().Msgf("%s- %s from %s (%p)", strings.Repeat("  ", indent), p.Namespace, p.PackageDir(), p)
+	log.Debug().Msgf("%s- %s from %s", strings.Repeat("  ", indent), p.Namespace, p.PackageDir())
 	for _, imp := range p.Imports {
 		logImports(imp.Package, indent+1)
 	}

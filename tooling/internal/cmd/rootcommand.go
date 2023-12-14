@@ -23,7 +23,7 @@ func newRootCommand(version, commit string) *cobra.Command {
 
 	verbose := false
 	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
-	zerolog.SetGlobalLevel(zerolog.ErrorLevel)
+	zerolog.SetGlobalLevel(zerolog.WarnLevel)
 
 	cmd := &cobra.Command{
 		Use: "yardl",
