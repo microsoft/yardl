@@ -25,6 +25,11 @@ cpp_version := "17"
 @generate-remote-import: install
     cd models/remote-import && yardl generate
 
+@generate-evolution: install
+    cd models/evolution/model_v0 && yardl generate 2>&1
+    cd models/evolution/model_v1 && yardl generate 2>&1
+    cd models/evolution/model_v2 && yardl generate 2>&1
+
 @build-sandbox: generate-sandbox ensure-build-dir
     cd cpp/build && ninja sandbox_exec
 
@@ -40,7 +45,7 @@ cpp_version := "17"
 @run-sandbox-python-quiet: build-sandbox
     python python/run_sandbox.py > /dev/null
 
-@build-all: generate generate-sandbox generate-remote-import configure
+@build-all: generate generate-sandbox generate-remote-import generate-evolution configure
     cd cpp/build && ninja
 
 @tooling-test:
@@ -64,7 +69,21 @@ cpp_version := "17"
     ninja tests; \
     ./tests --gtest_brief=1
 
-@test: tooling-test cpp-test python-test
+@evolution-test: generate-evolution ensure-build-dir
+    # Check for regressions (write, copy, read same version)
+    cd cpp/build && ./v0_write | ./v0_copy | ./v0_validate
+    cd cpp/build && ./v1_write | ./v1_copy | ./v1_validate
+    cd cpp/build && ./v2_write | ./v2_copy | ./v2_validate
+
+    # Check version compatibility
+    cd cpp/build && ./v0_write | ./v1_validate
+    cd cpp/build && ./v0_write | ./v2_validate
+    cd cpp/build && ./v1_write | ./v2_validate
+    cd cpp/build && ./v0_write | ./v1_copy | ./v0_validate
+    cd cpp/build && ./v0_write | ./v2_copy | ./v0_validate
+    cd cpp/build && ./v1_write | ./v2_copy | ./v1_validate
+
+@test: tooling-test cpp-test python-test evolution-test
 
 @benchmark: generate ensure-build-dir
     cd cpp/build; \

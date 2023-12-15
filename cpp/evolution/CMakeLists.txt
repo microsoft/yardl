@@ -3,7 +3,7 @@ project(yardl)
 
 SET(CMAKE_CXX_FLAGS_DEBUG "-O0 -ggdb")
 
-#Set the build type to Release if not specified
+# Set the build type to Release if not specified
 if (NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release CACHE STRING
             "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel."
@@ -39,6 +39,6 @@ else()
 endif()
 
 
-add_subdirectory(test)
-add_subdirectory(sandbox)
-add_subdirectory(evolution)
+add_subdirectory(v0)
+add_subdirectory(v1)
+add_subdirectory(v2)

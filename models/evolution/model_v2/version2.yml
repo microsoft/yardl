@@ -1,0 +1,38 @@
+MyProtocol: !protocol
+  sequence:
+    header: Header
+    id: string
+    samples: !stream
+      items: Sample
+    footer: Footer?
+
+Header: !record
+  fields:
+    subject: [string, long]
+    meta: string->string*
+    weight: double
+
+Sample: !record
+  fields:
+    timestamp: datetime
+    data: int*
+
+Footer: !record
+  fields:
+    signature: Signature
+
+Signature: !record
+  fields:
+    name: string
+    email: string
+    number: string
+
+NewRecord: !record
+  fields:
+    stuff: double[]
+
+NewProtocol: !protocol
+  sequence:
+    calibration: double*
+    data: !stream
+      items: NewRecord
