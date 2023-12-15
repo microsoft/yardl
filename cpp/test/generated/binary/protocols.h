@@ -16,12 +16,12 @@ namespace test_model::binary {
 // Binary writer for the BenchmarkFloat256x256 protocol.
 class BenchmarkFloat256x256Writer : public test_model::BenchmarkFloat256x256WriterBase, yardl::binary::BinaryWriter {
   public:
-  BenchmarkFloat256x256Writer(std::ostream& stream)
-      : yardl::binary::BinaryWriter(stream, schema_) {
+  BenchmarkFloat256x256Writer(std::ostream& stream, const std::string& schema=schema_)
+      : yardl::binary::BinaryWriter(stream, schema, schema_, previous_schemas_) {
   }
 
-  BenchmarkFloat256x256Writer(std::string file_name)
-      : yardl::binary::BinaryWriter(file_name, schema_) {
+  BenchmarkFloat256x256Writer(std::string file_name, const std::string& schema=schema_)
+      : yardl::binary::BinaryWriter(file_name, schema, schema_, previous_schemas_) {
   }
 
   void Flush() override;
@@ -37,12 +37,14 @@ class BenchmarkFloat256x256Writer : public test_model::BenchmarkFloat256x256Writ
 class BenchmarkFloat256x256Reader : public test_model::BenchmarkFloat256x256ReaderBase, yardl::binary::BinaryReader {
   public:
   BenchmarkFloat256x256Reader(std::istream& stream)
-      : yardl::binary::BinaryReader(stream, schema_) {
+      : yardl::binary::BinaryReader(stream, schema_, previous_schemas_) {
   }
 
   BenchmarkFloat256x256Reader(std::string file_name)
-      : yardl::binary::BinaryReader(file_name, schema_) {
+      : yardl::binary::BinaryReader(file_name, schema_, previous_schemas_) {
   }
+
+  std::string GetSchema() { if (schema_index_ < 0) { return schema_; } else { return previous_schemas_[schema_index_]; } }
 
   protected:
   bool ReadFloat256x256Impl(yardl::FixedNDArray<float, 256, 256>& value) override;
@@ -56,12 +58,12 @@ class BenchmarkFloat256x256Reader : public test_model::BenchmarkFloat256x256Read
 // Binary writer for the BenchmarkInt256x256 protocol.
 class BenchmarkInt256x256Writer : public test_model::BenchmarkInt256x256WriterBase, yardl::binary::BinaryWriter {
   public:
-  BenchmarkInt256x256Writer(std::ostream& stream)
-      : yardl::binary::BinaryWriter(stream, schema_) {
+  BenchmarkInt256x256Writer(std::ostream& stream, const std::string& schema=schema_)
+      : yardl::binary::BinaryWriter(stream, schema, schema_, previous_schemas_) {
   }
 
-  BenchmarkInt256x256Writer(std::string file_name)
-      : yardl::binary::BinaryWriter(file_name, schema_) {
+  BenchmarkInt256x256Writer(std::string file_name, const std::string& schema=schema_)
+      : yardl::binary::BinaryWriter(file_name, schema, schema_, previous_schemas_) {
   }
 
   void Flush() override;
@@ -77,12 +79,14 @@ class BenchmarkInt256x256Writer : public test_model::BenchmarkInt256x256WriterBa
 class BenchmarkInt256x256Reader : public test_model::BenchmarkInt256x256ReaderBase, yardl::binary::BinaryReader {
   public:
   BenchmarkInt256x256Reader(std::istream& stream)
-      : yardl::binary::BinaryReader(stream, schema_) {
+      : yardl::binary::BinaryReader(stream, schema_, previous_schemas_) {
   }
 
   BenchmarkInt256x256Reader(std::string file_name)
-      : yardl::binary::BinaryReader(file_name, schema_) {
+      : yardl::binary::BinaryReader(file_name, schema_, previous_schemas_) {
   }
+
+  std::string GetSchema() { if (schema_index_ < 0) { return schema_; } else { return previous_schemas_[schema_index_]; } }
 
   protected:
   bool ReadInt256x256Impl(yardl::FixedNDArray<int32_t, 256, 256>& value) override;
@@ -96,12 +100,12 @@ class BenchmarkInt256x256Reader : public test_model::BenchmarkInt256x256ReaderBa
 // Binary writer for the BenchmarkFloatVlen protocol.
 class BenchmarkFloatVlenWriter : public test_model::BenchmarkFloatVlenWriterBase, yardl::binary::BinaryWriter {
   public:
-  BenchmarkFloatVlenWriter(std::ostream& stream)
-      : yardl::binary::BinaryWriter(stream, schema_) {
+  BenchmarkFloatVlenWriter(std::ostream& stream, const std::string& schema=schema_)
+      : yardl::binary::BinaryWriter(stream, schema, schema_, previous_schemas_) {
   }
 
-  BenchmarkFloatVlenWriter(std::string file_name)
-      : yardl::binary::BinaryWriter(file_name, schema_) {
+  BenchmarkFloatVlenWriter(std::string file_name, const std::string& schema=schema_)
+      : yardl::binary::BinaryWriter(file_name, schema, schema_, previous_schemas_) {
   }
 
   void Flush() override;
@@ -117,12 +121,14 @@ class BenchmarkFloatVlenWriter : public test_model::BenchmarkFloatVlenWriterBase
 class BenchmarkFloatVlenReader : public test_model::BenchmarkFloatVlenReaderBase, yardl::binary::BinaryReader {
   public:
   BenchmarkFloatVlenReader(std::istream& stream)
-      : yardl::binary::BinaryReader(stream, schema_) {
+      : yardl::binary::BinaryReader(stream, schema_, previous_schemas_) {
   }
 
   BenchmarkFloatVlenReader(std::string file_name)
-      : yardl::binary::BinaryReader(file_name, schema_) {
+      : yardl::binary::BinaryReader(file_name, schema_, previous_schemas_) {
   }
+
+  std::string GetSchema() { if (schema_index_ < 0) { return schema_; } else { return previous_schemas_[schema_index_]; } }
 
   protected:
   bool ReadFloatArrayImpl(yardl::NDArray<float, 2>& value) override;
@@ -136,12 +142,12 @@ class BenchmarkFloatVlenReader : public test_model::BenchmarkFloatVlenReaderBase
 // Binary writer for the BenchmarkSmallRecord protocol.
 class BenchmarkSmallRecordWriter : public test_model::BenchmarkSmallRecordWriterBase, yardl::binary::BinaryWriter {
   public:
-  BenchmarkSmallRecordWriter(std::ostream& stream)
-      : yardl::binary::BinaryWriter(stream, schema_) {
+  BenchmarkSmallRecordWriter(std::ostream& stream, const std::string& schema=schema_)
+      : yardl::binary::BinaryWriter(stream, schema, schema_, previous_schemas_) {
   }
 
-  BenchmarkSmallRecordWriter(std::string file_name)
-      : yardl::binary::BinaryWriter(file_name, schema_) {
+  BenchmarkSmallRecordWriter(std::string file_name, const std::string& schema=schema_)
+      : yardl::binary::BinaryWriter(file_name, schema, schema_, previous_schemas_) {
   }
 
   void Flush() override;
@@ -157,12 +163,14 @@ class BenchmarkSmallRecordWriter : public test_model::BenchmarkSmallRecordWriter
 class BenchmarkSmallRecordReader : public test_model::BenchmarkSmallRecordReaderBase, yardl::binary::BinaryReader {
   public:
   BenchmarkSmallRecordReader(std::istream& stream)
-      : yardl::binary::BinaryReader(stream, schema_) {
+      : yardl::binary::BinaryReader(stream, schema_, previous_schemas_) {
   }
 
   BenchmarkSmallRecordReader(std::string file_name)
-      : yardl::binary::BinaryReader(file_name, schema_) {
+      : yardl::binary::BinaryReader(file_name, schema_, previous_schemas_) {
   }
+
+  std::string GetSchema() { if (schema_index_ < 0) { return schema_; } else { return previous_schemas_[schema_index_]; } }
 
   protected:
   bool ReadSmallRecordImpl(test_model::SmallBenchmarkRecord& value) override;
@@ -176,12 +184,12 @@ class BenchmarkSmallRecordReader : public test_model::BenchmarkSmallRecordReader
 // Binary writer for the BenchmarkSmallRecordWithOptionals protocol.
 class BenchmarkSmallRecordWithOptionalsWriter : public test_model::BenchmarkSmallRecordWithOptionalsWriterBase, yardl::binary::BinaryWriter {
   public:
-  BenchmarkSmallRecordWithOptionalsWriter(std::ostream& stream)
-      : yardl::binary::BinaryWriter(stream, schema_) {
+  BenchmarkSmallRecordWithOptionalsWriter(std::ostream& stream, const std::string& schema=schema_)
+      : yardl::binary::BinaryWriter(stream, schema, schema_, previous_schemas_) {
   }
 
-  BenchmarkSmallRecordWithOptionalsWriter(std::string file_name)
-      : yardl::binary::BinaryWriter(file_name, schema_) {
+  BenchmarkSmallRecordWithOptionalsWriter(std::string file_name, const std::string& schema=schema_)
+      : yardl::binary::BinaryWriter(file_name, schema, schema_, previous_schemas_) {
   }
 
   void Flush() override;
@@ -197,12 +205,14 @@ class BenchmarkSmallRecordWithOptionalsWriter : public test_model::BenchmarkSmal
 class BenchmarkSmallRecordWithOptionalsReader : public test_model::BenchmarkSmallRecordWithOptionalsReaderBase, yardl::binary::BinaryReader {
   public:
   BenchmarkSmallRecordWithOptionalsReader(std::istream& stream)
-      : yardl::binary::BinaryReader(stream, schema_) {
+      : yardl::binary::BinaryReader(stream, schema_, previous_schemas_) {
   }
 
   BenchmarkSmallRecordWithOptionalsReader(std::string file_name)
-      : yardl::binary::BinaryReader(file_name, schema_) {
+      : yardl::binary::BinaryReader(file_name, schema_, previous_schemas_) {
   }
+
+  std::string GetSchema() { if (schema_index_ < 0) { return schema_; } else { return previous_schemas_[schema_index_]; } }
 
   protected:
   bool ReadSmallRecordImpl(test_model::SimpleEncodingCounters& value) override;
@@ -216,12 +226,12 @@ class BenchmarkSmallRecordWithOptionalsReader : public test_model::BenchmarkSmal
 // Binary writer for the BenchmarkSimpleMrd protocol.
 class BenchmarkSimpleMrdWriter : public test_model::BenchmarkSimpleMrdWriterBase, yardl::binary::BinaryWriter {
   public:
-  BenchmarkSimpleMrdWriter(std::ostream& stream)
-      : yardl::binary::BinaryWriter(stream, schema_) {
+  BenchmarkSimpleMrdWriter(std::ostream& stream, const std::string& schema=schema_)
+      : yardl::binary::BinaryWriter(stream, schema, schema_, previous_schemas_) {
   }
 
-  BenchmarkSimpleMrdWriter(std::string file_name)
-      : yardl::binary::BinaryWriter(file_name, schema_) {
+  BenchmarkSimpleMrdWriter(std::string file_name, const std::string& schema=schema_)
+      : yardl::binary::BinaryWriter(file_name, schema, schema_, previous_schemas_) {
   }
 
   void Flush() override;
@@ -237,12 +247,14 @@ class BenchmarkSimpleMrdWriter : public test_model::BenchmarkSimpleMrdWriterBase
 class BenchmarkSimpleMrdReader : public test_model::BenchmarkSimpleMrdReaderBase, yardl::binary::BinaryReader {
   public:
   BenchmarkSimpleMrdReader(std::istream& stream)
-      : yardl::binary::BinaryReader(stream, schema_) {
+      : yardl::binary::BinaryReader(stream, schema_, previous_schemas_) {
   }
 
   BenchmarkSimpleMrdReader(std::string file_name)
-      : yardl::binary::BinaryReader(file_name, schema_) {
+      : yardl::binary::BinaryReader(file_name, schema_, previous_schemas_) {
   }
+
+  std::string GetSchema() { if (schema_index_ < 0) { return schema_; } else { return previous_schemas_[schema_index_]; } }
 
   protected:
   bool ReadDataImpl(std::variant<test_model::SimpleAcquisition, image::Image<float>>& value) override;
@@ -256,12 +268,12 @@ class BenchmarkSimpleMrdReader : public test_model::BenchmarkSimpleMrdReaderBase
 // Binary writer for the Scalars protocol.
 class ScalarsWriter : public test_model::ScalarsWriterBase, yardl::binary::BinaryWriter {
   public:
-  ScalarsWriter(std::ostream& stream)
-      : yardl::binary::BinaryWriter(stream, schema_) {
+  ScalarsWriter(std::ostream& stream, const std::string& schema=schema_)
+      : yardl::binary::BinaryWriter(stream, schema, schema_, previous_schemas_) {
   }
 
-  ScalarsWriter(std::string file_name)
-      : yardl::binary::BinaryWriter(file_name, schema_) {
+  ScalarsWriter(std::string file_name, const std::string& schema=schema_)
+      : yardl::binary::BinaryWriter(file_name, schema, schema_, previous_schemas_) {
   }
 
   void Flush() override;
@@ -276,12 +288,14 @@ class ScalarsWriter : public test_model::ScalarsWriterBase, yardl::binary::Binar
 class ScalarsReader : public test_model::ScalarsReaderBase, yardl::binary::BinaryReader {
   public:
   ScalarsReader(std::istream& stream)
-      : yardl::binary::BinaryReader(stream, schema_) {
+      : yardl::binary::BinaryReader(stream, schema_, previous_schemas_) {
   }
 
   ScalarsReader(std::string file_name)
-      : yardl::binary::BinaryReader(file_name, schema_) {
+      : yardl::binary::BinaryReader(file_name, schema_, previous_schemas_) {
   }
+
+  std::string GetSchema() { if (schema_index_ < 0) { return schema_; } else { return previous_schemas_[schema_index_]; } }
 
   protected:
   void ReadInt32Impl(int32_t& value) override;
@@ -292,12 +306,12 @@ class ScalarsReader : public test_model::ScalarsReaderBase, yardl::binary::Binar
 // Binary writer for the ScalarOptionals protocol.
 class ScalarOptionalsWriter : public test_model::ScalarOptionalsWriterBase, yardl::binary::BinaryWriter {
   public:
-  ScalarOptionalsWriter(std::ostream& stream)
-      : yardl::binary::BinaryWriter(stream, schema_) {
+  ScalarOptionalsWriter(std::ostream& stream, const std::string& schema=schema_)
+      : yardl::binary::BinaryWriter(stream, schema, schema_, previous_schemas_) {
   }
 
-  ScalarOptionalsWriter(std::string file_name)
-      : yardl::binary::BinaryWriter(file_name, schema_) {
+  ScalarOptionalsWriter(std::string file_name, const std::string& schema=schema_)
+      : yardl::binary::BinaryWriter(file_name, schema, schema_, previous_schemas_) {
   }
 
   void Flush() override;
@@ -314,12 +328,14 @@ class ScalarOptionalsWriter : public test_model::ScalarOptionalsWriterBase, yard
 class ScalarOptionalsReader : public test_model::ScalarOptionalsReaderBase, yardl::binary::BinaryReader {
   public:
   ScalarOptionalsReader(std::istream& stream)
-      : yardl::binary::BinaryReader(stream, schema_) {
+      : yardl::binary::BinaryReader(stream, schema_, previous_schemas_) {
   }
 
   ScalarOptionalsReader(std::string file_name)
-      : yardl::binary::BinaryReader(file_name, schema_) {
+      : yardl::binary::BinaryReader(file_name, schema_, previous_schemas_) {
   }
+
+  std::string GetSchema() { if (schema_index_ < 0) { return schema_; } else { return previous_schemas_[schema_index_]; } }
 
   protected:
   void ReadOptionalIntImpl(std::optional<int32_t>& value) override;
@@ -332,12 +348,12 @@ class ScalarOptionalsReader : public test_model::ScalarOptionalsReaderBase, yard
 // Binary writer for the NestedRecords protocol.
 class NestedRecordsWriter : public test_model::NestedRecordsWriterBase, yardl::binary::BinaryWriter {
   public:
-  NestedRecordsWriter(std::ostream& stream)
-      : yardl::binary::BinaryWriter(stream, schema_) {
+  NestedRecordsWriter(std::ostream& stream, const std::string& schema=schema_)
+      : yardl::binary::BinaryWriter(stream, schema, schema_, previous_schemas_) {
   }
 
-  NestedRecordsWriter(std::string file_name)
-      : yardl::binary::BinaryWriter(file_name, schema_) {
+  NestedRecordsWriter(std::string file_name, const std::string& schema=schema_)
+      : yardl::binary::BinaryWriter(file_name, schema, schema_, previous_schemas_) {
   }
 
   void Flush() override;
@@ -351,12 +367,14 @@ class NestedRecordsWriter : public test_model::NestedRecordsWriterBase, yardl::b
 class NestedRecordsReader : public test_model::NestedRecordsReaderBase, yardl::binary::BinaryReader {
   public:
   NestedRecordsReader(std::istream& stream)
-      : yardl::binary::BinaryReader(stream, schema_) {
+      : yardl::binary::BinaryReader(stream, schema_, previous_schemas_) {
   }
 
   NestedRecordsReader(std::string file_name)
-      : yardl::binary::BinaryReader(file_name, schema_) {
+      : yardl::binary::BinaryReader(file_name, schema_, previous_schemas_) {
   }
+
+  std::string GetSchema() { if (schema_index_ < 0) { return schema_; } else { return previous_schemas_[schema_index_]; } }
 
   protected:
   void ReadTupleWithRecordsImpl(test_model::TupleWithRecords& value) override;
@@ -366,12 +384,12 @@ class NestedRecordsReader : public test_model::NestedRecordsReaderBase, yardl::b
 // Binary writer for the Vlens protocol.
 class VlensWriter : public test_model::VlensWriterBase, yardl::binary::BinaryWriter {
   public:
-  VlensWriter(std::ostream& stream)
-      : yardl::binary::BinaryWriter(stream, schema_) {
+  VlensWriter(std::ostream& stream, const std::string& schema=schema_)
+      : yardl::binary::BinaryWriter(stream, schema, schema_, previous_schemas_) {
   }
 
-  VlensWriter(std::string file_name)
-      : yardl::binary::BinaryWriter(file_name, schema_) {
+  VlensWriter(std::string file_name, const std::string& schema=schema_)
+      : yardl::binary::BinaryWriter(file_name, schema, schema_, previous_schemas_) {
   }
 
   void Flush() override;
@@ -388,12 +406,14 @@ class VlensWriter : public test_model::VlensWriterBase, yardl::binary::BinaryWri
 class VlensReader : public test_model::VlensReaderBase, yardl::binary::BinaryReader {
   public:
   VlensReader(std::istream& stream)
-      : yardl::binary::BinaryReader(stream, schema_) {
+      : yardl::binary::BinaryReader(stream, schema_, previous_schemas_) {
   }
 
   VlensReader(std::string file_name)
-      : yardl::binary::BinaryReader(file_name, schema_) {
+      : yardl::binary::BinaryReader(file_name, schema_, previous_schemas_) {
   }
+
+  std::string GetSchema() { if (schema_index_ < 0) { return schema_; } else { return previous_schemas_[schema_index_]; } }
 
   protected:
   void ReadIntVectorImpl(std::vector<int32_t>& value) override;
@@ -406,12 +426,12 @@ class VlensReader : public test_model::VlensReaderBase, yardl::binary::BinaryRea
 // Binary writer for the Strings protocol.
 class StringsWriter : public test_model::StringsWriterBase, yardl::binary::BinaryWriter {
   public:
-  StringsWriter(std::ostream& stream)
-      : yardl::binary::BinaryWriter(stream, schema_) {
+  StringsWriter(std::ostream& stream, const std::string& schema=schema_)
+      : yardl::binary::BinaryWriter(stream, schema, schema_, previous_schemas_) {
   }
 
-  StringsWriter(std::string file_name)
-      : yardl::binary::BinaryWriter(file_name, schema_) {
+  StringsWriter(std::string file_name, const std::string& schema=schema_)
+      : yardl::binary::BinaryWriter(file_name, schema, schema_, previous_schemas_) {
   }
 
   void Flush() override;
@@ -426,12 +446,14 @@ class StringsWriter : public test_model::StringsWriterBase, yardl::binary::Binar
 class StringsReader : public test_model::StringsReaderBase, yardl::binary::BinaryReader {
   public:
   StringsReader(std::istream& stream)
-      : yardl::binary::BinaryReader(stream, schema_) {
+      : yardl::binary::BinaryReader(stream, schema_, previous_schemas_) {
   }
 
   StringsReader(std::string file_name)
-      : yardl::binary::BinaryReader(file_name, schema_) {
+      : yardl::binary::BinaryReader(file_name, schema_, previous_schemas_) {
   }
+
+  std::string GetSchema() { if (schema_index_ < 0) { return schema_; } else { return previous_schemas_[schema_index_]; } }
 
   protected:
   void ReadSingleStringImpl(std::string& value) override;
@@ -442,12 +464,12 @@ class StringsReader : public test_model::StringsReaderBase, yardl::binary::Binar
 // Binary writer for the OptionalVectors protocol.
 class OptionalVectorsWriter : public test_model::OptionalVectorsWriterBase, yardl::binary::BinaryWriter {
   public:
-  OptionalVectorsWriter(std::ostream& stream)
-      : yardl::binary::BinaryWriter(stream, schema_) {
+  OptionalVectorsWriter(std::ostream& stream, const std::string& schema=schema_)
+      : yardl::binary::BinaryWriter(stream, schema, schema_, previous_schemas_) {
   }
 
-  OptionalVectorsWriter(std::string file_name)
-      : yardl::binary::BinaryWriter(file_name, schema_) {
+  OptionalVectorsWriter(std::string file_name, const std::string& schema=schema_)
+      : yardl::binary::BinaryWriter(file_name, schema, schema_, previous_schemas_) {
   }
 
   void Flush() override;
@@ -461,12 +483,14 @@ class OptionalVectorsWriter : public test_model::OptionalVectorsWriterBase, yard
 class OptionalVectorsReader : public test_model::OptionalVectorsReaderBase, yardl::binary::BinaryReader {
   public:
   OptionalVectorsReader(std::istream& stream)
-      : yardl::binary::BinaryReader(stream, schema_) {
+      : yardl::binary::BinaryReader(stream, schema_, previous_schemas_) {
   }
 
   OptionalVectorsReader(std::string file_name)
-      : yardl::binary::BinaryReader(file_name, schema_) {
+      : yardl::binary::BinaryReader(file_name, schema_, previous_schemas_) {
   }
+
+  std::string GetSchema() { if (schema_index_ < 0) { return schema_; } else { return previous_schemas_[schema_index_]; } }
 
   protected:
   void ReadRecordWithOptionalVectorImpl(test_model::RecordWithOptionalVector& value) override;
@@ -476,12 +500,12 @@ class OptionalVectorsReader : public test_model::OptionalVectorsReaderBase, yard
 // Binary writer for the FixedVectors protocol.
 class FixedVectorsWriter : public test_model::FixedVectorsWriterBase, yardl::binary::BinaryWriter {
   public:
-  FixedVectorsWriter(std::ostream& stream)
-      : yardl::binary::BinaryWriter(stream, schema_) {
+  FixedVectorsWriter(std::ostream& stream, const std::string& schema=schema_)
+      : yardl::binary::BinaryWriter(stream, schema, schema_, previous_schemas_) {
   }
 
-  FixedVectorsWriter(std::string file_name)
-      : yardl::binary::BinaryWriter(file_name, schema_) {
+  FixedVectorsWriter(std::string file_name, const std::string& schema=schema_)
+      : yardl::binary::BinaryWriter(file_name, schema, schema_, previous_schemas_) {
   }
 
   void Flush() override;
@@ -498,12 +522,14 @@ class FixedVectorsWriter : public test_model::FixedVectorsWriterBase, yardl::bin
 class FixedVectorsReader : public test_model::FixedVectorsReaderBase, yardl::binary::BinaryReader {
   public:
   FixedVectorsReader(std::istream& stream)
-      : yardl::binary::BinaryReader(stream, schema_) {
+      : yardl::binary::BinaryReader(stream, schema_, previous_schemas_) {
   }
 
   FixedVectorsReader(std::string file_name)
-      : yardl::binary::BinaryReader(file_name, schema_) {
+      : yardl::binary::BinaryReader(file_name, schema_, previous_schemas_) {
   }
+
+  std::string GetSchema() { if (schema_index_ < 0) { return schema_; } else { return previous_schemas_[schema_index_]; } }
 
   protected:
   void ReadFixedIntVectorImpl(std::array<int32_t, 5>& value) override;
@@ -516,12 +542,12 @@ class FixedVectorsReader : public test_model::FixedVectorsReaderBase, yardl::bin
 // Binary writer for the Streams protocol.
 class StreamsWriter : public test_model::StreamsWriterBase, yardl::binary::BinaryWriter {
   public:
-  StreamsWriter(std::ostream& stream)
-      : yardl::binary::BinaryWriter(stream, schema_) {
+  StreamsWriter(std::ostream& stream, const std::string& schema=schema_)
+      : yardl::binary::BinaryWriter(stream, schema, schema_, previous_schemas_) {
   }
 
-  StreamsWriter(std::string file_name)
-      : yardl::binary::BinaryWriter(file_name, schema_) {
+  StreamsWriter(std::string file_name, const std::string& schema=schema_)
+      : yardl::binary::BinaryWriter(file_name, schema, schema_, previous_schemas_) {
   }
 
   void Flush() override;
@@ -546,12 +572,14 @@ class StreamsWriter : public test_model::StreamsWriterBase, yardl::binary::Binar
 class StreamsReader : public test_model::StreamsReaderBase, yardl::binary::BinaryReader {
   public:
   StreamsReader(std::istream& stream)
-      : yardl::binary::BinaryReader(stream, schema_) {
+      : yardl::binary::BinaryReader(stream, schema_, previous_schemas_) {
   }
 
   StreamsReader(std::string file_name)
-      : yardl::binary::BinaryReader(file_name, schema_) {
+      : yardl::binary::BinaryReader(file_name, schema_, previous_schemas_) {
   }
+
+  std::string GetSchema() { if (schema_index_ < 0) { return schema_; } else { return previous_schemas_[schema_index_]; } }
 
   protected:
   bool ReadIntDataImpl(int32_t& value) override;
@@ -571,12 +599,12 @@ class StreamsReader : public test_model::StreamsReaderBase, yardl::binary::Binar
 // Binary writer for the FixedArrays protocol.
 class FixedArraysWriter : public test_model::FixedArraysWriterBase, yardl::binary::BinaryWriter {
   public:
-  FixedArraysWriter(std::ostream& stream)
-      : yardl::binary::BinaryWriter(stream, schema_) {
+  FixedArraysWriter(std::ostream& stream, const std::string& schema=schema_)
+      : yardl::binary::BinaryWriter(stream, schema, schema_, previous_schemas_) {
   }
 
-  FixedArraysWriter(std::string file_name)
-      : yardl::binary::BinaryWriter(file_name, schema_) {
+  FixedArraysWriter(std::string file_name, const std::string& schema=schema_)
+      : yardl::binary::BinaryWriter(file_name, schema, schema_, previous_schemas_) {
   }
 
   void Flush() override;
@@ -594,12 +622,14 @@ class FixedArraysWriter : public test_model::FixedArraysWriterBase, yardl::binar
 class FixedArraysReader : public test_model::FixedArraysReaderBase, yardl::binary::BinaryReader {
   public:
   FixedArraysReader(std::istream& stream)
-      : yardl::binary::BinaryReader(stream, schema_) {
+      : yardl::binary::BinaryReader(stream, schema_, previous_schemas_) {
   }
 
   FixedArraysReader(std::string file_name)
-      : yardl::binary::BinaryReader(file_name, schema_) {
+      : yardl::binary::BinaryReader(file_name, schema_, previous_schemas_) {
   }
+
+  std::string GetSchema() { if (schema_index_ < 0) { return schema_; } else { return previous_schemas_[schema_index_]; } }
 
   protected:
   void ReadIntsImpl(yardl::FixedNDArray<int32_t, 2, 3>& value) override;
@@ -613,12 +643,12 @@ class FixedArraysReader : public test_model::FixedArraysReaderBase, yardl::binar
 // Binary writer for the Subarrays protocol.
 class SubarraysWriter : public test_model::SubarraysWriterBase, yardl::binary::BinaryWriter {
   public:
-  SubarraysWriter(std::ostream& stream)
-      : yardl::binary::BinaryWriter(stream, schema_) {
+  SubarraysWriter(std::ostream& stream, const std::string& schema=schema_)
+      : yardl::binary::BinaryWriter(stream, schema, schema_, previous_schemas_) {
   }
 
-  SubarraysWriter(std::string file_name)
-      : yardl::binary::BinaryWriter(file_name, schema_) {
+  SubarraysWriter(std::string file_name, const std::string& schema=schema_)
+      : yardl::binary::BinaryWriter(file_name, schema, schema_, previous_schemas_) {
   }
 
   void Flush() override;
@@ -640,12 +670,14 @@ class SubarraysWriter : public test_model::SubarraysWriterBase, yardl::binary::B
 class SubarraysReader : public test_model::SubarraysReaderBase, yardl::binary::BinaryReader {
   public:
   SubarraysReader(std::istream& stream)
-      : yardl::binary::BinaryReader(stream, schema_) {
+      : yardl::binary::BinaryReader(stream, schema_, previous_schemas_) {
   }
 
   SubarraysReader(std::string file_name)
-      : yardl::binary::BinaryReader(file_name, schema_) {
+      : yardl::binary::BinaryReader(file_name, schema_, previous_schemas_) {
   }
+
+  std::string GetSchema() { if (schema_index_ < 0) { return schema_; } else { return previous_schemas_[schema_index_]; } }
 
   protected:
   void ReadDynamicWithFixedIntSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<int32_t, 3>>& value) override;
@@ -663,12 +695,12 @@ class SubarraysReader : public test_model::SubarraysReaderBase, yardl::binary::B
 // Binary writer for the SubarraysInRecords protocol.
 class SubarraysInRecordsWriter : public test_model::SubarraysInRecordsWriterBase, yardl::binary::BinaryWriter {
   public:
-  SubarraysInRecordsWriter(std::ostream& stream)
-      : yardl::binary::BinaryWriter(stream, schema_) {
+  SubarraysInRecordsWriter(std::ostream& stream, const std::string& schema=schema_)
+      : yardl::binary::BinaryWriter(stream, schema, schema_, previous_schemas_) {
   }
 
-  SubarraysInRecordsWriter(std::string file_name)
-      : yardl::binary::BinaryWriter(file_name, schema_) {
+  SubarraysInRecordsWriter(std::string file_name, const std::string& schema=schema_)
+      : yardl::binary::BinaryWriter(file_name, schema, schema_, previous_schemas_) {
   }
 
   void Flush() override;
@@ -683,12 +715,14 @@ class SubarraysInRecordsWriter : public test_model::SubarraysInRecordsWriterBase
 class SubarraysInRecordsReader : public test_model::SubarraysInRecordsReaderBase, yardl::binary::BinaryReader {
   public:
   SubarraysInRecordsReader(std::istream& stream)
-      : yardl::binary::BinaryReader(stream, schema_) {
+      : yardl::binary::BinaryReader(stream, schema_, previous_schemas_) {
   }
 
   SubarraysInRecordsReader(std::string file_name)
-      : yardl::binary::BinaryReader(file_name, schema_) {
+      : yardl::binary::BinaryReader(file_name, schema_, previous_schemas_) {
   }
+
+  std::string GetSchema() { if (schema_index_ < 0) { return schema_; } else { return previous_schemas_[schema_index_]; } }
 
   protected:
   void ReadWithFixedSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithFixedCollections>& value) override;
@@ -699,12 +733,12 @@ class SubarraysInRecordsReader : public test_model::SubarraysInRecordsReaderBase
 // Binary writer for the NDArrays protocol.
 class NDArraysWriter : public test_model::NDArraysWriterBase, yardl::binary::BinaryWriter {
   public:
-  NDArraysWriter(std::ostream& stream)
-      : yardl::binary::BinaryWriter(stream, schema_) {
+  NDArraysWriter(std::ostream& stream, const std::string& schema=schema_)
+      : yardl::binary::BinaryWriter(stream, schema, schema_, previous_schemas_) {
   }
 
-  NDArraysWriter(std::string file_name)
-      : yardl::binary::BinaryWriter(file_name, schema_) {
+  NDArraysWriter(std::string file_name, const std::string& schema=schema_)
+      : yardl::binary::BinaryWriter(file_name, schema, schema_, previous_schemas_) {
   }
 
   void Flush() override;
@@ -722,12 +756,14 @@ class NDArraysWriter : public test_model::NDArraysWriterBase, yardl::binary::Bin
 class NDArraysReader : public test_model::NDArraysReaderBase, yardl::binary::BinaryReader {
   public:
   NDArraysReader(std::istream& stream)
-      : yardl::binary::BinaryReader(stream, schema_) {
+      : yardl::binary::BinaryReader(stream, schema_, previous_schemas_) {
   }
 
   NDArraysReader(std::string file_name)
-      : yardl::binary::BinaryReader(file_name, schema_) {
+      : yardl::binary::BinaryReader(file_name, schema_, previous_schemas_) {
   }
+
+  std::string GetSchema() { if (schema_index_ < 0) { return schema_; } else { return previous_schemas_[schema_index_]; } }
 
   protected:
   void ReadIntsImpl(yardl::NDArray<int32_t, 2>& value) override;
@@ -741,12 +777,12 @@ class NDArraysReader : public test_model::NDArraysReaderBase, yardl::binary::Bin
 // Binary writer for the NDArraysSingleDimension protocol.
 class NDArraysSingleDimensionWriter : public test_model::NDArraysSingleDimensionWriterBase, yardl::binary::BinaryWriter {
   public:
-  NDArraysSingleDimensionWriter(std::ostream& stream)
-      : yardl::binary::BinaryWriter(stream, schema_) {
+  NDArraysSingleDimensionWriter(std::ostream& stream, const std::string& schema=schema_)
+      : yardl::binary::BinaryWriter(stream, schema, schema_, previous_schemas_) {
   }
 
-  NDArraysSingleDimensionWriter(std::string file_name)
-      : yardl::binary::BinaryWriter(file_name, schema_) {
+  NDArraysSingleDimensionWriter(std::string file_name, const std::string& schema=schema_)
+      : yardl::binary::BinaryWriter(file_name, schema, schema_, previous_schemas_) {
   }
 
   void Flush() override;
@@ -763,12 +799,14 @@ class NDArraysSingleDimensionWriter : public test_model::NDArraysSingleDimension
 class NDArraysSingleDimensionReader : public test_model::NDArraysSingleDimensionReaderBase, yardl::binary::BinaryReader {
   public:
   NDArraysSingleDimensionReader(std::istream& stream)
-      : yardl::binary::BinaryReader(stream, schema_) {
+      : yardl::binary::BinaryReader(stream, schema_, previous_schemas_) {
   }
 
   NDArraysSingleDimensionReader(std::string file_name)
-      : yardl::binary::BinaryReader(file_name, schema_) {
+      : yardl::binary::BinaryReader(file_name, schema_, previous_schemas_) {
   }
+
+  std::string GetSchema() { if (schema_index_ < 0) { return schema_; } else { return previous_schemas_[schema_index_]; } }
 
   protected:
   void ReadIntsImpl(yardl::NDArray<int32_t, 1>& value) override;
@@ -781,12 +819,12 @@ class NDArraysSingleDimensionReader : public test_model::NDArraysSingleDimension
 // Binary writer for the DynamicNDArrays protocol.
 class DynamicNDArraysWriter : public test_model::DynamicNDArraysWriterBase, yardl::binary::BinaryWriter {
   public:
-  DynamicNDArraysWriter(std::ostream& stream)
-      : yardl::binary::BinaryWriter(stream, schema_) {
+  DynamicNDArraysWriter(std::ostream& stream, const std::string& schema=schema_)
+      : yardl::binary::BinaryWriter(stream, schema, schema_, previous_schemas_) {
   }
 
-  DynamicNDArraysWriter(std::string file_name)
-      : yardl::binary::BinaryWriter(file_name, schema_) {
+  DynamicNDArraysWriter(std::string file_name, const std::string& schema=schema_)
+      : yardl::binary::BinaryWriter(file_name, schema, schema_, previous_schemas_) {
   }
 
   void Flush() override;
@@ -803,12 +841,14 @@ class DynamicNDArraysWriter : public test_model::DynamicNDArraysWriterBase, yard
 class DynamicNDArraysReader : public test_model::DynamicNDArraysReaderBase, yardl::binary::BinaryReader {
   public:
   DynamicNDArraysReader(std::istream& stream)
-      : yardl::binary::BinaryReader(stream, schema_) {
+      : yardl::binary::BinaryReader(stream, schema_, previous_schemas_) {
   }
 
   DynamicNDArraysReader(std::string file_name)
-      : yardl::binary::BinaryReader(file_name, schema_) {
+      : yardl::binary::BinaryReader(file_name, schema_, previous_schemas_) {
   }
+
+  std::string GetSchema() { if (schema_index_ < 0) { return schema_; } else { return previous_schemas_[schema_index_]; } }
 
   protected:
   void ReadIntsImpl(yardl::DynamicNDArray<int32_t>& value) override;
@@ -821,12 +861,12 @@ class DynamicNDArraysReader : public test_model::DynamicNDArraysReaderBase, yard
 // Binary writer for the Maps protocol.
 class MapsWriter : public test_model::MapsWriterBase, yardl::binary::BinaryWriter {
   public:
-  MapsWriter(std::ostream& stream)
-      : yardl::binary::BinaryWriter(stream, schema_) {
+  MapsWriter(std::ostream& stream, const std::string& schema=schema_)
+      : yardl::binary::BinaryWriter(stream, schema, schema_, previous_schemas_) {
   }
 
-  MapsWriter(std::string file_name)
-      : yardl::binary::BinaryWriter(file_name, schema_) {
+  MapsWriter(std::string file_name, const std::string& schema=schema_)
+      : yardl::binary::BinaryWriter(file_name, schema, schema_, previous_schemas_) {
   }
 
   void Flush() override;
@@ -843,12 +883,14 @@ class MapsWriter : public test_model::MapsWriterBase, yardl::binary::BinaryWrite
 class MapsReader : public test_model::MapsReaderBase, yardl::binary::BinaryReader {
   public:
   MapsReader(std::istream& stream)
-      : yardl::binary::BinaryReader(stream, schema_) {
+      : yardl::binary::BinaryReader(stream, schema_, previous_schemas_) {
   }
 
   MapsReader(std::string file_name)
-      : yardl::binary::BinaryReader(file_name, schema_) {
+      : yardl::binary::BinaryReader(file_name, schema_, previous_schemas_) {
   }
+
+  std::string GetSchema() { if (schema_index_ < 0) { return schema_; } else { return previous_schemas_[schema_index_]; } }
 
   protected:
   void ReadStringToIntImpl(std::unordered_map<std::string, int32_t>& value) override;
@@ -861,12 +903,12 @@ class MapsReader : public test_model::MapsReaderBase, yardl::binary::BinaryReade
 // Binary writer for the Unions protocol.
 class UnionsWriter : public test_model::UnionsWriterBase, yardl::binary::BinaryWriter {
   public:
-  UnionsWriter(std::ostream& stream)
-      : yardl::binary::BinaryWriter(stream, schema_) {
+  UnionsWriter(std::ostream& stream, const std::string& schema=schema_)
+      : yardl::binary::BinaryWriter(stream, schema, schema_, previous_schemas_) {
   }
 
-  UnionsWriter(std::string file_name)
-      : yardl::binary::BinaryWriter(file_name, schema_) {
+  UnionsWriter(std::string file_name, const std::string& schema=schema_)
+      : yardl::binary::BinaryWriter(file_name, schema, schema_, previous_schemas_) {
   }
 
   void Flush() override;
@@ -883,12 +925,14 @@ class UnionsWriter : public test_model::UnionsWriterBase, yardl::binary::BinaryW
 class UnionsReader : public test_model::UnionsReaderBase, yardl::binary::BinaryReader {
   public:
   UnionsReader(std::istream& stream)
-      : yardl::binary::BinaryReader(stream, schema_) {
+      : yardl::binary::BinaryReader(stream, schema_, previous_schemas_) {
   }
 
   UnionsReader(std::string file_name)
-      : yardl::binary::BinaryReader(file_name, schema_) {
+      : yardl::binary::BinaryReader(file_name, schema_, previous_schemas_) {
   }
+
+  std::string GetSchema() { if (schema_index_ < 0) { return schema_; } else { return previous_schemas_[schema_index_]; } }
 
   protected:
   void ReadIntOrSimpleRecordImpl(std::variant<int32_t, test_model::SimpleRecord>& value) override;
@@ -901,12 +945,12 @@ class UnionsReader : public test_model::UnionsReaderBase, yardl::binary::BinaryR
 // Binary writer for the StreamsOfUnions protocol.
 class StreamsOfUnionsWriter : public test_model::StreamsOfUnionsWriterBase, yardl::binary::BinaryWriter {
   public:
-  StreamsOfUnionsWriter(std::ostream& stream)
-      : yardl::binary::BinaryWriter(stream, schema_) {
+  StreamsOfUnionsWriter(std::ostream& stream, const std::string& schema=schema_)
+      : yardl::binary::BinaryWriter(stream, schema, schema_, previous_schemas_) {
   }
 
-  StreamsOfUnionsWriter(std::string file_name)
-      : yardl::binary::BinaryWriter(file_name, schema_) {
+  StreamsOfUnionsWriter(std::string file_name, const std::string& schema=schema_)
+      : yardl::binary::BinaryWriter(file_name, schema, schema_, previous_schemas_) {
   }
 
   void Flush() override;
@@ -925,12 +969,14 @@ class StreamsOfUnionsWriter : public test_model::StreamsOfUnionsWriterBase, yard
 class StreamsOfUnionsReader : public test_model::StreamsOfUnionsReaderBase, yardl::binary::BinaryReader {
   public:
   StreamsOfUnionsReader(std::istream& stream)
-      : yardl::binary::BinaryReader(stream, schema_) {
+      : yardl::binary::BinaryReader(stream, schema_, previous_schemas_) {
   }
 
   StreamsOfUnionsReader(std::string file_name)
-      : yardl::binary::BinaryReader(file_name, schema_) {
+      : yardl::binary::BinaryReader(file_name, schema_, previous_schemas_) {
   }
+
+  std::string GetSchema() { if (schema_index_ < 0) { return schema_; } else { return previous_schemas_[schema_index_]; } }
 
   protected:
   bool ReadIntOrSimpleRecordImpl(std::variant<int32_t, test_model::SimpleRecord>& value) override;
@@ -946,12 +992,12 @@ class StreamsOfUnionsReader : public test_model::StreamsOfUnionsReaderBase, yard
 // Binary writer for the Enums protocol.
 class EnumsWriter : public test_model::EnumsWriterBase, yardl::binary::BinaryWriter {
   public:
-  EnumsWriter(std::ostream& stream)
-      : yardl::binary::BinaryWriter(stream, schema_) {
+  EnumsWriter(std::ostream& stream, const std::string& schema=schema_)
+      : yardl::binary::BinaryWriter(stream, schema, schema_, previous_schemas_) {
   }
 
-  EnumsWriter(std::string file_name)
-      : yardl::binary::BinaryWriter(file_name, schema_) {
+  EnumsWriter(std::string file_name, const std::string& schema=schema_)
+      : yardl::binary::BinaryWriter(file_name, schema, schema_, previous_schemas_) {
   }
 
   void Flush() override;
@@ -967,12 +1013,14 @@ class EnumsWriter : public test_model::EnumsWriterBase, yardl::binary::BinaryWri
 class EnumsReader : public test_model::EnumsReaderBase, yardl::binary::BinaryReader {
   public:
   EnumsReader(std::istream& stream)
-      : yardl::binary::BinaryReader(stream, schema_) {
+      : yardl::binary::BinaryReader(stream, schema_, previous_schemas_) {
   }
 
   EnumsReader(std::string file_name)
-      : yardl::binary::BinaryReader(file_name, schema_) {
+      : yardl::binary::BinaryReader(file_name, schema_, previous_schemas_) {
   }
+
+  std::string GetSchema() { if (schema_index_ < 0) { return schema_; } else { return previous_schemas_[schema_index_]; } }
 
   protected:
   void ReadSingleImpl(test_model::Fruits& value) override;
@@ -984,12 +1032,12 @@ class EnumsReader : public test_model::EnumsReaderBase, yardl::binary::BinaryRea
 // Binary writer for the Flags protocol.
 class FlagsWriter : public test_model::FlagsWriterBase, yardl::binary::BinaryWriter {
   public:
-  FlagsWriter(std::ostream& stream)
-      : yardl::binary::BinaryWriter(stream, schema_) {
+  FlagsWriter(std::ostream& stream, const std::string& schema=schema_)
+      : yardl::binary::BinaryWriter(stream, schema, schema_, previous_schemas_) {
   }
 
-  FlagsWriter(std::string file_name)
-      : yardl::binary::BinaryWriter(file_name, schema_) {
+  FlagsWriter(std::string file_name, const std::string& schema=schema_)
+      : yardl::binary::BinaryWriter(file_name, schema, schema_, previous_schemas_) {
   }
 
   void Flush() override;
@@ -1008,12 +1056,14 @@ class FlagsWriter : public test_model::FlagsWriterBase, yardl::binary::BinaryWri
 class FlagsReader : public test_model::FlagsReaderBase, yardl::binary::BinaryReader {
   public:
   FlagsReader(std::istream& stream)
-      : yardl::binary::BinaryReader(stream, schema_) {
+      : yardl::binary::BinaryReader(stream, schema_, previous_schemas_) {
   }
 
   FlagsReader(std::string file_name)
-      : yardl::binary::BinaryReader(file_name, schema_) {
+      : yardl::binary::BinaryReader(file_name, schema_, previous_schemas_) {
   }
+
+  std::string GetSchema() { if (schema_index_ < 0) { return schema_; } else { return previous_schemas_[schema_index_]; } }
 
   protected:
   bool ReadDaysImpl(test_model::DaysOfWeek& value) override;
@@ -1029,12 +1079,12 @@ class FlagsReader : public test_model::FlagsReaderBase, yardl::binary::BinaryRea
 // Binary writer for the StateTest protocol.
 class StateTestWriter : public test_model::StateTestWriterBase, yardl::binary::BinaryWriter {
   public:
-  StateTestWriter(std::ostream& stream)
-      : yardl::binary::BinaryWriter(stream, schema_) {
+  StateTestWriter(std::ostream& stream, const std::string& schema=schema_)
+      : yardl::binary::BinaryWriter(stream, schema, schema_, previous_schemas_) {
   }
 
-  StateTestWriter(std::string file_name)
-      : yardl::binary::BinaryWriter(file_name, schema_) {
+  StateTestWriter(std::string file_name, const std::string& schema=schema_)
+      : yardl::binary::BinaryWriter(file_name, schema, schema_, previous_schemas_) {
   }
 
   void Flush() override;
@@ -1052,12 +1102,14 @@ class StateTestWriter : public test_model::StateTestWriterBase, yardl::binary::B
 class StateTestReader : public test_model::StateTestReaderBase, yardl::binary::BinaryReader {
   public:
   StateTestReader(std::istream& stream)
-      : yardl::binary::BinaryReader(stream, schema_) {
+      : yardl::binary::BinaryReader(stream, schema_, previous_schemas_) {
   }
 
   StateTestReader(std::string file_name)
-      : yardl::binary::BinaryReader(file_name, schema_) {
+      : yardl::binary::BinaryReader(file_name, schema_, previous_schemas_) {
   }
+
+  std::string GetSchema() { if (schema_index_ < 0) { return schema_; } else { return previous_schemas_[schema_index_]; } }
 
   protected:
   void ReadAnIntImpl(int32_t& value) override;
@@ -1073,12 +1125,12 @@ class StateTestReader : public test_model::StateTestReaderBase, yardl::binary::B
 // Binary writer for the SimpleGenerics protocol.
 class SimpleGenericsWriter : public test_model::SimpleGenericsWriterBase, yardl::binary::BinaryWriter {
   public:
-  SimpleGenericsWriter(std::ostream& stream)
-      : yardl::binary::BinaryWriter(stream, schema_) {
+  SimpleGenericsWriter(std::ostream& stream, const std::string& schema=schema_)
+      : yardl::binary::BinaryWriter(stream, schema, schema_, previous_schemas_) {
   }
 
-  SimpleGenericsWriter(std::string file_name)
-      : yardl::binary::BinaryWriter(file_name, schema_) {
+  SimpleGenericsWriter(std::string file_name, const std::string& schema=schema_)
+      : yardl::binary::BinaryWriter(file_name, schema, schema_, previous_schemas_) {
   }
 
   void Flush() override;
@@ -1102,12 +1154,14 @@ class SimpleGenericsWriter : public test_model::SimpleGenericsWriterBase, yardl:
 class SimpleGenericsReader : public test_model::SimpleGenericsReaderBase, yardl::binary::BinaryReader {
   public:
   SimpleGenericsReader(std::istream& stream)
-      : yardl::binary::BinaryReader(stream, schema_) {
+      : yardl::binary::BinaryReader(stream, schema_, previous_schemas_) {
   }
 
   SimpleGenericsReader(std::string file_name)
-      : yardl::binary::BinaryReader(file_name, schema_) {
+      : yardl::binary::BinaryReader(file_name, schema_, previous_schemas_) {
   }
+
+  std::string GetSchema() { if (schema_index_ < 0) { return schema_; } else { return previous_schemas_[schema_index_]; } }
 
   protected:
   void ReadFloatImageImpl(image::FloatImage& value) override;
@@ -1129,12 +1183,12 @@ class SimpleGenericsReader : public test_model::SimpleGenericsReaderBase, yardl:
 // Binary writer for the AdvancedGenerics protocol.
 class AdvancedGenericsWriter : public test_model::AdvancedGenericsWriterBase, yardl::binary::BinaryWriter {
   public:
-  AdvancedGenericsWriter(std::ostream& stream)
-      : yardl::binary::BinaryWriter(stream, schema_) {
+  AdvancedGenericsWriter(std::ostream& stream, const std::string& schema=schema_)
+      : yardl::binary::BinaryWriter(stream, schema, schema_, previous_schemas_) {
   }
 
-  AdvancedGenericsWriter(std::string file_name)
-      : yardl::binary::BinaryWriter(file_name, schema_) {
+  AdvancedGenericsWriter(std::string file_name, const std::string& schema=schema_)
+      : yardl::binary::BinaryWriter(file_name, schema, schema_, previous_schemas_) {
   }
 
   void Flush() override;
@@ -1152,12 +1206,14 @@ class AdvancedGenericsWriter : public test_model::AdvancedGenericsWriterBase, ya
 class AdvancedGenericsReader : public test_model::AdvancedGenericsReaderBase, yardl::binary::BinaryReader {
   public:
   AdvancedGenericsReader(std::istream& stream)
-      : yardl::binary::BinaryReader(stream, schema_) {
+      : yardl::binary::BinaryReader(stream, schema_, previous_schemas_) {
   }
 
   AdvancedGenericsReader(std::string file_name)
-      : yardl::binary::BinaryReader(file_name, schema_) {
+      : yardl::binary::BinaryReader(file_name, schema_, previous_schemas_) {
   }
+
+  std::string GetSchema() { if (schema_index_ < 0) { return schema_; } else { return previous_schemas_[schema_index_]; } }
 
   protected:
   void ReadFloatImageImageImpl(test_model::Image<test_model::Image<float>>& value) override;
@@ -1171,12 +1227,12 @@ class AdvancedGenericsReader : public test_model::AdvancedGenericsReaderBase, ya
 // Binary writer for the Aliases protocol.
 class AliasesWriter : public test_model::AliasesWriterBase, yardl::binary::BinaryWriter {
   public:
-  AliasesWriter(std::ostream& stream)
-      : yardl::binary::BinaryWriter(stream, schema_) {
+  AliasesWriter(std::ostream& stream, const std::string& schema=schema_)
+      : yardl::binary::BinaryWriter(stream, schema, schema_, previous_schemas_) {
   }
 
-  AliasesWriter(std::string file_name)
-      : yardl::binary::BinaryWriter(file_name, schema_) {
+  AliasesWriter(std::string file_name, const std::string& schema=schema_)
+      : yardl::binary::BinaryWriter(file_name, schema, schema_, previous_schemas_) {
   }
 
   void Flush() override;
@@ -1201,12 +1257,14 @@ class AliasesWriter : public test_model::AliasesWriterBase, yardl::binary::Binar
 class AliasesReader : public test_model::AliasesReaderBase, yardl::binary::BinaryReader {
   public:
   AliasesReader(std::istream& stream)
-      : yardl::binary::BinaryReader(stream, schema_) {
+      : yardl::binary::BinaryReader(stream, schema_, previous_schemas_) {
   }
 
   AliasesReader(std::string file_name)
-      : yardl::binary::BinaryReader(file_name, schema_) {
+      : yardl::binary::BinaryReader(file_name, schema_, previous_schemas_) {
   }
+
+  std::string GetSchema() { if (schema_index_ < 0) { return schema_; } else { return previous_schemas_[schema_index_]; } }
 
   protected:
   void ReadAliasedStringImpl(test_model::AliasedString& value) override;
@@ -1229,12 +1287,12 @@ class AliasesReader : public test_model::AliasesReaderBase, yardl::binary::Binar
 // Binary writer for the StreamsOfAliasedUnions protocol.
 class StreamsOfAliasedUnionsWriter : public test_model::StreamsOfAliasedUnionsWriterBase, yardl::binary::BinaryWriter {
   public:
-  StreamsOfAliasedUnionsWriter(std::ostream& stream)
-      : yardl::binary::BinaryWriter(stream, schema_) {
+  StreamsOfAliasedUnionsWriter(std::ostream& stream, const std::string& schema=schema_)
+      : yardl::binary::BinaryWriter(stream, schema, schema_, previous_schemas_) {
   }
 
-  StreamsOfAliasedUnionsWriter(std::string file_name)
-      : yardl::binary::BinaryWriter(file_name, schema_) {
+  StreamsOfAliasedUnionsWriter(std::string file_name, const std::string& schema=schema_)
+      : yardl::binary::BinaryWriter(file_name, schema, schema_, previous_schemas_) {
   }
 
   void Flush() override;
@@ -1253,12 +1311,14 @@ class StreamsOfAliasedUnionsWriter : public test_model::StreamsOfAliasedUnionsWr
 class StreamsOfAliasedUnionsReader : public test_model::StreamsOfAliasedUnionsReaderBase, yardl::binary::BinaryReader {
   public:
   StreamsOfAliasedUnionsReader(std::istream& stream)
-      : yardl::binary::BinaryReader(stream, schema_) {
+      : yardl::binary::BinaryReader(stream, schema_, previous_schemas_) {
   }
 
   StreamsOfAliasedUnionsReader(std::string file_name)
-      : yardl::binary::BinaryReader(file_name, schema_) {
+      : yardl::binary::BinaryReader(file_name, schema_, previous_schemas_) {
   }
+
+  std::string GetSchema() { if (schema_index_ < 0) { return schema_; } else { return previous_schemas_[schema_index_]; } }
 
   protected:
   bool ReadIntOrSimpleRecordImpl(test_model::AliasedIntOrSimpleRecord& value) override;
@@ -1274,12 +1334,12 @@ class StreamsOfAliasedUnionsReader : public test_model::StreamsOfAliasedUnionsRe
 // Binary writer for the ProtocolWithComputedFields protocol.
 class ProtocolWithComputedFieldsWriter : public test_model::ProtocolWithComputedFieldsWriterBase, yardl::binary::BinaryWriter {
   public:
-  ProtocolWithComputedFieldsWriter(std::ostream& stream)
-      : yardl::binary::BinaryWriter(stream, schema_) {
+  ProtocolWithComputedFieldsWriter(std::ostream& stream, const std::string& schema=schema_)
+      : yardl::binary::BinaryWriter(stream, schema, schema_, previous_schemas_) {
   }
 
-  ProtocolWithComputedFieldsWriter(std::string file_name)
-      : yardl::binary::BinaryWriter(file_name, schema_) {
+  ProtocolWithComputedFieldsWriter(std::string file_name, const std::string& schema=schema_)
+      : yardl::binary::BinaryWriter(file_name, schema, schema_, previous_schemas_) {
   }
 
   void Flush() override;
@@ -1293,12 +1353,14 @@ class ProtocolWithComputedFieldsWriter : public test_model::ProtocolWithComputed
 class ProtocolWithComputedFieldsReader : public test_model::ProtocolWithComputedFieldsReaderBase, yardl::binary::BinaryReader {
   public:
   ProtocolWithComputedFieldsReader(std::istream& stream)
-      : yardl::binary::BinaryReader(stream, schema_) {
+      : yardl::binary::BinaryReader(stream, schema_, previous_schemas_) {
   }
 
   ProtocolWithComputedFieldsReader(std::string file_name)
-      : yardl::binary::BinaryReader(file_name, schema_) {
+      : yardl::binary::BinaryReader(file_name, schema_, previous_schemas_) {
   }
+
+  std::string GetSchema() { if (schema_index_ < 0) { return schema_; } else { return previous_schemas_[schema_index_]; } }
 
   protected:
   void ReadRecordWithComputedFieldsImpl(test_model::RecordWithComputedFields& value) override;
@@ -1308,12 +1370,12 @@ class ProtocolWithComputedFieldsReader : public test_model::ProtocolWithComputed
 // Binary writer for the ProtocolWithKeywordSteps protocol.
 class ProtocolWithKeywordStepsWriter : public test_model::ProtocolWithKeywordStepsWriterBase, yardl::binary::BinaryWriter {
   public:
-  ProtocolWithKeywordStepsWriter(std::ostream& stream)
-      : yardl::binary::BinaryWriter(stream, schema_) {
+  ProtocolWithKeywordStepsWriter(std::ostream& stream, const std::string& schema=schema_)
+      : yardl::binary::BinaryWriter(stream, schema, schema_, previous_schemas_) {
   }
 
-  ProtocolWithKeywordStepsWriter(std::string file_name)
-      : yardl::binary::BinaryWriter(file_name, schema_) {
+  ProtocolWithKeywordStepsWriter(std::string file_name, const std::string& schema=schema_)
+      : yardl::binary::BinaryWriter(file_name, schema, schema_, previous_schemas_) {
   }
 
   void Flush() override;
@@ -1330,12 +1392,14 @@ class ProtocolWithKeywordStepsWriter : public test_model::ProtocolWithKeywordSte
 class ProtocolWithKeywordStepsReader : public test_model::ProtocolWithKeywordStepsReaderBase, yardl::binary::BinaryReader {
   public:
   ProtocolWithKeywordStepsReader(std::istream& stream)
-      : yardl::binary::BinaryReader(stream, schema_) {
+      : yardl::binary::BinaryReader(stream, schema_, previous_schemas_) {
   }
 
   ProtocolWithKeywordStepsReader(std::string file_name)
-      : yardl::binary::BinaryReader(file_name, schema_) {
+      : yardl::binary::BinaryReader(file_name, schema_, previous_schemas_) {
   }
+
+  std::string GetSchema() { if (schema_index_ < 0) { return schema_; } else { return previous_schemas_[schema_index_]; } }
 
   protected:
   bool ReadIntImpl(test_model::RecordWithKeywordFields& value) override;
