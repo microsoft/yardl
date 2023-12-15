@@ -34,6 +34,8 @@ class BenchmarkFloat256x256WriterBase {
 
   static std::string schema_;
 
+  static std::vector<std::string> previous_schemas_;
+
   private:
   uint8_t state_ = 0;
 
@@ -61,6 +63,8 @@ class BenchmarkFloat256x256ReaderBase {
   virtual bool ReadFloat256x256Impl(std::vector<yardl::FixedNDArray<float, 256, 256>>& values);
   virtual void CloseImpl() {}
   static std::string schema_;
+
+  static std::vector<std::string> previous_schemas_;
 
   private:
   uint8_t state_ = 0;
@@ -96,6 +100,8 @@ class BenchmarkInt256x256WriterBase {
 
   static std::string schema_;
 
+  static std::vector<std::string> previous_schemas_;
+
   private:
   uint8_t state_ = 0;
 
@@ -123,6 +129,8 @@ class BenchmarkInt256x256ReaderBase {
   virtual bool ReadInt256x256Impl(std::vector<yardl::FixedNDArray<int32_t, 256, 256>>& values);
   virtual void CloseImpl() {}
   static std::string schema_;
+
+  static std::vector<std::string> previous_schemas_;
 
   private:
   uint8_t state_ = 0;
@@ -158,6 +166,8 @@ class BenchmarkFloatVlenWriterBase {
 
   static std::string schema_;
 
+  static std::vector<std::string> previous_schemas_;
+
   private:
   uint8_t state_ = 0;
 
@@ -185,6 +195,8 @@ class BenchmarkFloatVlenReaderBase {
   virtual bool ReadFloatArrayImpl(std::vector<yardl::NDArray<float, 2>>& values);
   virtual void CloseImpl() {}
   static std::string schema_;
+
+  static std::vector<std::string> previous_schemas_;
 
   private:
   uint8_t state_ = 0;
@@ -220,6 +232,8 @@ class BenchmarkSmallRecordWriterBase {
 
   static std::string schema_;
 
+  static std::vector<std::string> previous_schemas_;
+
   private:
   uint8_t state_ = 0;
 
@@ -247,6 +261,8 @@ class BenchmarkSmallRecordReaderBase {
   virtual bool ReadSmallRecordImpl(std::vector<test_model::SmallBenchmarkRecord>& values);
   virtual void CloseImpl() {}
   static std::string schema_;
+
+  static std::vector<std::string> previous_schemas_;
 
   private:
   uint8_t state_ = 0;
@@ -282,6 +298,8 @@ class BenchmarkSmallRecordWithOptionalsWriterBase {
 
   static std::string schema_;
 
+  static std::vector<std::string> previous_schemas_;
+
   private:
   uint8_t state_ = 0;
 
@@ -309,6 +327,8 @@ class BenchmarkSmallRecordWithOptionalsReaderBase {
   virtual bool ReadSmallRecordImpl(std::vector<test_model::SimpleEncodingCounters>& values);
   virtual void CloseImpl() {}
   static std::string schema_;
+
+  static std::vector<std::string> previous_schemas_;
 
   private:
   uint8_t state_ = 0;
@@ -344,6 +364,8 @@ class BenchmarkSimpleMrdWriterBase {
 
   static std::string schema_;
 
+  static std::vector<std::string> previous_schemas_;
+
   private:
   uint8_t state_ = 0;
 
@@ -371,6 +393,8 @@ class BenchmarkSimpleMrdReaderBase {
   virtual bool ReadDataImpl(std::vector<std::variant<test_model::SimpleAcquisition, image::Image<float>>>& values);
   virtual void CloseImpl() {}
   static std::string schema_;
+
+  static std::vector<std::string> previous_schemas_;
 
   private:
   uint8_t state_ = 0;
@@ -400,6 +424,8 @@ class ScalarsWriterBase {
 
   static std::string schema_;
 
+  static std::vector<std::string> previous_schemas_;
+
   private:
   uint8_t state_ = 0;
 
@@ -427,6 +453,8 @@ class ScalarsReaderBase {
   virtual void ReadRecordImpl(test_model::RecordWithPrimitives& value) = 0;
   virtual void CloseImpl() {}
   static std::string schema_;
+
+  static std::vector<std::string> previous_schemas_;
 
   private:
   uint8_t state_ = 0;
@@ -464,6 +492,8 @@ class ScalarOptionalsWriterBase {
 
   static std::string schema_;
 
+  static std::vector<std::string> previous_schemas_;
+
   private:
   uint8_t state_ = 0;
 
@@ -500,6 +530,8 @@ class ScalarOptionalsReaderBase {
   virtual void CloseImpl() {}
   static std::string schema_;
 
+  static std::vector<std::string> previous_schemas_;
+
   private:
   uint8_t state_ = 0;
 };
@@ -524,6 +556,8 @@ class NestedRecordsWriterBase {
 
   static std::string schema_;
 
+  static std::vector<std::string> previous_schemas_;
+
   private:
   uint8_t state_ = 0;
 
@@ -547,6 +581,8 @@ class NestedRecordsReaderBase {
   virtual void ReadTupleWithRecordsImpl(test_model::TupleWithRecords& value) = 0;
   virtual void CloseImpl() {}
   static std::string schema_;
+
+  static std::vector<std::string> previous_schemas_;
 
   private:
   uint8_t state_ = 0;
@@ -584,6 +620,8 @@ class VlensWriterBase {
 
   static std::string schema_;
 
+  static std::vector<std::string> previous_schemas_;
+
   private:
   uint8_t state_ = 0;
 
@@ -620,6 +658,8 @@ class VlensReaderBase {
   virtual void CloseImpl() {}
   static std::string schema_;
 
+  static std::vector<std::string> previous_schemas_;
+
   private:
   uint8_t state_ = 0;
 };
@@ -647,6 +687,8 @@ class StringsWriterBase {
   virtual void CloseImpl() {}
 
   static std::string schema_;
+
+  static std::vector<std::string> previous_schemas_;
 
   private:
   uint8_t state_ = 0;
@@ -676,6 +718,8 @@ class StringsReaderBase {
   virtual void CloseImpl() {}
   static std::string schema_;
 
+  static std::vector<std::string> previous_schemas_;
+
   private:
   uint8_t state_ = 0;
 };
@@ -700,6 +744,8 @@ class OptionalVectorsWriterBase {
 
   static std::string schema_;
 
+  static std::vector<std::string> previous_schemas_;
+
   private:
   uint8_t state_ = 0;
 
@@ -723,6 +769,8 @@ class OptionalVectorsReaderBase {
   virtual void ReadRecordWithOptionalVectorImpl(test_model::RecordWithOptionalVector& value) = 0;
   virtual void CloseImpl() {}
   static std::string schema_;
+
+  static std::vector<std::string> previous_schemas_;
 
   private:
   uint8_t state_ = 0;
@@ -760,6 +808,8 @@ class FixedVectorsWriterBase {
 
   static std::string schema_;
 
+  static std::vector<std::string> previous_schemas_;
+
   private:
   uint8_t state_ = 0;
 
@@ -795,6 +845,8 @@ class FixedVectorsReaderBase {
   virtual void ReadRecordWithFixedVectorsImpl(test_model::RecordWithFixedVectors& value) = 0;
   virtual void CloseImpl() {}
   static std::string schema_;
+
+  static std::vector<std::string> previous_schemas_;
 
   private:
   uint8_t state_ = 0;
@@ -872,6 +924,8 @@ class StreamsWriterBase {
 
   static std::string schema_;
 
+  static std::vector<std::string> previous_schemas_;
+
   private:
   uint8_t state_ = 0;
 
@@ -924,6 +978,8 @@ class StreamsReaderBase {
   virtual void CloseImpl() {}
   static std::string schema_;
 
+  static std::vector<std::string> previous_schemas_;
+
   private:
   uint8_t state_ = 0;
 };
@@ -964,6 +1020,8 @@ class FixedArraysWriterBase {
 
   static std::string schema_;
 
+  static std::vector<std::string> previous_schemas_;
+
   private:
   uint8_t state_ = 0;
 
@@ -1003,6 +1061,8 @@ class FixedArraysReaderBase {
   virtual void ReadNamedArrayImpl(test_model::NamedFixedNDArray& value) = 0;
   virtual void CloseImpl() {}
   static std::string schema_;
+
+  static std::vector<std::string> previous_schemas_;
 
   private:
   uint8_t state_ = 0;
@@ -1060,6 +1120,8 @@ class SubarraysWriterBase {
 
   static std::string schema_;
 
+  static std::vector<std::string> previous_schemas_;
+
   private:
   uint8_t state_ = 0;
 
@@ -1116,6 +1178,8 @@ class SubarraysReaderBase {
   virtual void CloseImpl() {}
   static std::string schema_;
 
+  static std::vector<std::string> previous_schemas_;
+
   private:
   uint8_t state_ = 0;
 };
@@ -1144,6 +1208,8 @@ class SubarraysInRecordsWriterBase {
 
   static std::string schema_;
 
+  static std::vector<std::string> previous_schemas_;
+
   private:
   uint8_t state_ = 0;
 
@@ -1171,6 +1237,8 @@ class SubarraysInRecordsReaderBase {
   virtual void ReadWithVlenSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithVlenCollections>& value) = 0;
   virtual void CloseImpl() {}
   static std::string schema_;
+
+  static std::vector<std::string> previous_schemas_;
 
   private:
   uint8_t state_ = 0;
@@ -1212,6 +1280,8 @@ class NDArraysWriterBase {
 
   static std::string schema_;
 
+  static std::vector<std::string> previous_schemas_;
+
   private:
   uint8_t state_ = 0;
 
@@ -1252,6 +1322,8 @@ class NDArraysReaderBase {
   virtual void CloseImpl() {}
   static std::string schema_;
 
+  static std::vector<std::string> previous_schemas_;
+
   private:
   uint8_t state_ = 0;
 };
@@ -1287,6 +1359,8 @@ class NDArraysSingleDimensionWriterBase {
   virtual void CloseImpl() {}
 
   static std::string schema_;
+
+  static std::vector<std::string> previous_schemas_;
 
   private:
   uint8_t state_ = 0;
@@ -1324,6 +1398,8 @@ class NDArraysSingleDimensionReaderBase {
   virtual void CloseImpl() {}
   static std::string schema_;
 
+  static std::vector<std::string> previous_schemas_;
+
   private:
   uint8_t state_ = 0;
 };
@@ -1359,6 +1435,8 @@ class DynamicNDArraysWriterBase {
   virtual void CloseImpl() {}
 
   static std::string schema_;
+
+  static std::vector<std::string> previous_schemas_;
 
   private:
   uint8_t state_ = 0;
@@ -1396,6 +1474,8 @@ class DynamicNDArraysReaderBase {
   virtual void CloseImpl() {}
   static std::string schema_;
 
+  static std::vector<std::string> previous_schemas_;
+
   private:
   uint8_t state_ = 0;
 };
@@ -1431,6 +1511,8 @@ class MapsWriterBase {
   virtual void CloseImpl() {}
 
   static std::string schema_;
+
+  static std::vector<std::string> previous_schemas_;
 
   private:
   uint8_t state_ = 0;
@@ -1468,6 +1550,8 @@ class MapsReaderBase {
   virtual void CloseImpl() {}
   static std::string schema_;
 
+  static std::vector<std::string> previous_schemas_;
+
   private:
   uint8_t state_ = 0;
 };
@@ -1504,6 +1588,8 @@ class UnionsWriterBase {
 
   static std::string schema_;
 
+  static std::vector<std::string> previous_schemas_;
+
   private:
   uint8_t state_ = 0;
 
@@ -1539,6 +1625,8 @@ class UnionsReaderBase {
   virtual void ReadRecordWithUnionsImpl(basic_types::RecordWithUnions& value) = 0;
   virtual void CloseImpl() {}
   static std::string schema_;
+
+  static std::vector<std::string> previous_schemas_;
 
   private:
   uint8_t state_ = 0;
@@ -1588,6 +1676,8 @@ class StreamsOfUnionsWriterBase {
 
   static std::string schema_;
 
+  static std::vector<std::string> previous_schemas_;
+
   private:
   uint8_t state_ = 0;
 
@@ -1624,6 +1714,8 @@ class StreamsOfUnionsReaderBase {
   virtual void CloseImpl() {}
   static std::string schema_;
 
+  static std::vector<std::string> previous_schemas_;
+
   private:
   uint8_t state_ = 0;
 };
@@ -1656,6 +1748,8 @@ class EnumsWriterBase {
 
   static std::string schema_;
 
+  static std::vector<std::string> previous_schemas_;
+
   private:
   uint8_t state_ = 0;
 
@@ -1687,6 +1781,8 @@ class EnumsReaderBase {
   virtual void ReadSizeImpl(test_model::SizeBasedEnum& value) = 0;
   virtual void CloseImpl() {}
   static std::string schema_;
+
+  static std::vector<std::string> previous_schemas_;
 
   private:
   uint8_t state_ = 0;
@@ -1736,6 +1832,8 @@ class FlagsWriterBase {
 
   static std::string schema_;
 
+  static std::vector<std::string> previous_schemas_;
+
   private:
   uint8_t state_ = 0;
 
@@ -1771,6 +1869,8 @@ class FlagsReaderBase {
   virtual bool ReadFormatsImpl(std::vector<test_model::TextFormat>& values);
   virtual void CloseImpl() {}
   static std::string schema_;
+
+  static std::vector<std::string> previous_schemas_;
 
   private:
   uint8_t state_ = 0;
@@ -1814,6 +1914,8 @@ class StateTestWriterBase {
 
   static std::string schema_;
 
+  static std::vector<std::string> previous_schemas_;
+
   private:
   uint8_t state_ = 0;
 
@@ -1849,6 +1951,8 @@ class StateTestReaderBase {
   virtual void ReadAnotherIntImpl(int32_t& value) = 0;
   virtual void CloseImpl() {}
   static std::string schema_;
+
+  static std::vector<std::string> previous_schemas_;
 
   private:
   uint8_t state_ = 0;
@@ -1916,6 +2020,8 @@ class SimpleGenericsWriterBase {
 
   static std::string schema_;
 
+  static std::vector<std::string> previous_schemas_;
+
   private:
   uint8_t state_ = 0;
 
@@ -1976,6 +2082,8 @@ class SimpleGenericsReaderBase {
   virtual void CloseImpl() {}
   static std::string schema_;
 
+  static std::vector<std::string> previous_schemas_;
+
   private:
   uint8_t state_ = 0;
 };
@@ -2016,6 +2124,8 @@ class AdvancedGenericsWriterBase {
 
   static std::string schema_;
 
+  static std::vector<std::string> previous_schemas_;
+
   private:
   uint8_t state_ = 0;
 
@@ -2055,6 +2165,8 @@ class AdvancedGenericsReaderBase {
   virtual void ReadTupleOfVectorsImpl(test_model::MyTuple<std::vector<int32_t>, std::vector<float>>& value) = 0;
   virtual void CloseImpl() {}
   static std::string schema_;
+
+  static std::vector<std::string> previous_schemas_;
 
   private:
   uint8_t state_ = 0;
@@ -2126,6 +2238,8 @@ class AliasesWriterBase {
 
   static std::string schema_;
 
+  static std::vector<std::string> previous_schemas_;
+
   private:
   uint8_t state_ = 0;
 
@@ -2190,6 +2304,8 @@ class AliasesReaderBase {
   virtual void CloseImpl() {}
   static std::string schema_;
 
+  static std::vector<std::string> previous_schemas_;
+
   private:
   uint8_t state_ = 0;
 };
@@ -2238,6 +2354,8 @@ class StreamsOfAliasedUnionsWriterBase {
 
   static std::string schema_;
 
+  static std::vector<std::string> previous_schemas_;
+
   private:
   uint8_t state_ = 0;
 
@@ -2274,6 +2392,8 @@ class StreamsOfAliasedUnionsReaderBase {
   virtual void CloseImpl() {}
   static std::string schema_;
 
+  static std::vector<std::string> previous_schemas_;
+
   private:
   uint8_t state_ = 0;
 };
@@ -2298,6 +2418,8 @@ class ProtocolWithComputedFieldsWriterBase {
 
   static std::string schema_;
 
+  static std::vector<std::string> previous_schemas_;
+
   private:
   uint8_t state_ = 0;
 
@@ -2321,6 +2443,8 @@ class ProtocolWithComputedFieldsReaderBase {
   virtual void ReadRecordWithComputedFieldsImpl(test_model::RecordWithComputedFields& value) = 0;
   virtual void CloseImpl() {}
   static std::string schema_;
+
+  static std::vector<std::string> previous_schemas_;
 
   private:
   uint8_t state_ = 0;
@@ -2360,6 +2484,8 @@ class ProtocolWithKeywordStepsWriterBase {
 
   static std::string schema_;
 
+  static std::vector<std::string> previous_schemas_;
+
   private:
   uint8_t state_ = 0;
 
@@ -2391,6 +2517,8 @@ class ProtocolWithKeywordStepsReaderBase {
   virtual void ReadFloatImpl(test_model::EnumWithKeywordSymbols& value) = 0;
   virtual void CloseImpl() {}
   static std::string schema_;
+
+  static std::vector<std::string> previous_schemas_;
 
   private:
   uint8_t state_ = 0;
