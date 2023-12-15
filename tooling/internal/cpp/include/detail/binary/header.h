@@ -42,7 +42,7 @@ inline void MatchSchema(std::string actual_schema, std::string const& current_sc
 
   for (size_t i = 0; i < previous_schemas.size(); ++i) {
     if (actual_schema == previous_schemas[i]) {
-      schema_index = i;
+      schema_index = static_cast<int>(i);
       return;
     }
   }

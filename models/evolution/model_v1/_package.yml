@@ -4,7 +4,7 @@ predecessors:
   v0: ../model_v0
 
 cpp:
-  sourcesOutputDir: ../cpp/v1/lib
+  sourcesOutputDir: ../../../cpp/evolution/v1/lib
   generateCMakeLists: false
 
 # python:

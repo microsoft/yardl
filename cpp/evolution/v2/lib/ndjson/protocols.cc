@@ -3,16 +3,6 @@
 #include "../yardl/detail/ndjson/serializers.h"
 #include "protocols.h"
 
-namespace tuples {
-using ordered_json = nlohmann::ordered_json;
-
-template <typename T1, typename T2>
-[[maybe_unused]] static void to_json(ordered_json& j, tuples::Tuple<T1, T2> const& value);
-template <typename T1, typename T2>
-[[maybe_unused]] static void from_json(ordered_json const& j, tuples::Tuple<T1, T2>& value);
-
-} // namespace tuples
-
 namespace evo_test {
 using ordered_json = nlohmann::ordered_json;
 
@@ -55,32 +45,6 @@ struct adl_serializer<std::variant<std::string, int64_t>> {
 };
 
 NLOHMANN_JSON_NAMESPACE_END
-
-namespace tuples {
-using ordered_json = nlohmann::ordered_json;
-
-template <typename T1, typename T2>
-[[maybe_unused]] static void to_json(ordered_json& j, tuples::Tuple<T1, T2> const& value) {
-  j = ordered_json::object();
-  if (yardl::ndjson::ShouldSerializeFieldValue(value.v1)) {
-    j.push_back({"v1", value.v1});
-  }
-  if (yardl::ndjson::ShouldSerializeFieldValue(value.v2)) {
-    j.push_back({"v2", value.v2});
-  }
-}
-
-template <typename T1, typename T2>
-[[maybe_unused]] static void from_json(ordered_json const& j, tuples::Tuple<T1, T2>& value) {
-  if (auto it = j.find("v1"); it != j.end()) {
-    it->get_to(value.v1);
-  }
-  if (auto it = j.find("v2"); it != j.end()) {
-    it->get_to(value.v2);
-  }
-}
-
-} // namespace tuples
 
 namespace evo_test {
 using ordered_json = nlohmann::ordered_json;

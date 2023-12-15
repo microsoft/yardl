@@ -1,7 +1,7 @@
 namespace: EvoTest
 
 cpp:
-  sourcesOutputDir: ../cpp/v0/lib
+  sourcesOutputDir: ../../../cpp/evolution/v0/lib
   generateCMakeLists: false
 
 # python:

@@ -108,38 +108,6 @@ H5::CompType InnerUnion2Ddl(bool nullable, H5::DataType const& t0, std::string c
 }
 }
 
-namespace tuples::hdf5 {
-namespace {
-template <typename _T1_Inner, typename T1, typename _T2_Inner, typename T2>
-struct _Inner_Tuple {
-  _Inner_Tuple() {} 
-  _Inner_Tuple(tuples::Tuple<T1, T2> const& o) 
-      : v1(o.v1),
-      v2(o.v2) {
-  }
-
-  void ToOuter (tuples::Tuple<T1, T2>& o) const {
-    yardl::hdf5::ToOuter(v1, o.v1);
-    yardl::hdf5::ToOuter(v2, o.v2);
-  }
-
-  _T1_Inner v1;
-  _T2_Inner v2;
-};
-
-template <typename _T1_Inner, typename T1, typename _T2_Inner, typename T2>
-[[maybe_unused]] H5::CompType GetTupleHdf5Ddl(H5::DataType const& T1_type, H5::DataType const& T2_type) {
-  using RecordType = tuples::hdf5::_Inner_Tuple<_T1_Inner, T1, _T2_Inner, T2>;
-  H5::CompType t(sizeof(RecordType));
-  t.insertMember("v1", HOFFSET(RecordType, v1), T1_type);
-  t.insertMember("v2", HOFFSET(RecordType, v2), T2_type);
-  return t;
-}
-
-} // namespace 
-
-} // namespace tuples::hdf5
-
 namespace evo_test::hdf5 {
 namespace {
 struct _Inner_Header {

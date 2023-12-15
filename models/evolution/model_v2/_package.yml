@@ -5,7 +5,7 @@ predecessors:
   v1: ../model_v1
 
 cpp:
-  sourcesOutputDir: ../cpp/v2/lib
+  sourcesOutputDir: ../../../cpp/evolution/v2/lib
 
 # python:
 #   outputDir: ../python/v2
