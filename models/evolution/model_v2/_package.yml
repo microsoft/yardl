@@ -1,0 +1,11 @@
+namespace: EvoTest
+
+predecessors:
+  v0: ../model_v0
+  v1: ../model_v1
+
+cpp:
+  sourcesOutputDir: ../cpp/v2/lib
+
+# python:
+#   outputDir: ../python/v2
