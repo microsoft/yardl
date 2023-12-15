@@ -385,145 +385,6 @@ func writeNamespaceDefinitions(w *formatting.IndentedWriter, ns *dsl.Namespace) 
 	}
 }
 
-func typeConversionExpression(typeChange *dsl.TypeChange, varName string, write bool) string {
-	switch typeChange.Kind {
-
-	case dsl.TypeChangeNumberToNumber:
-		return fmt.Sprintf("(%s)(%s)", common.TypeSyntax(typeChange.New), varName)
-
-	case dsl.TypeChangeNumberToString:
-		if write {
-			def := typeChange.Old.(*dsl.SimpleType).ResolvedDefinition
-			switch def.(dsl.PrimitiveDefinition) {
-			case dsl.PrimitiveInt8, dsl.PrimitiveInt16, dsl.PrimitiveInt32:
-				return fmt.Sprintf("std::stoi(%s)", varName)
-			case dsl.PrimitiveInt64:
-				return fmt.Sprintf("std::stol(%s)", varName)
-			case dsl.PrimitiveUint8, dsl.PrimitiveUint16, dsl.PrimitiveUint32, dsl.PrimitiveUint64:
-				return fmt.Sprintf("std::stoul(%s)", varName)
-			case dsl.PrimitiveFloat32:
-				return fmt.Sprintf("std::stof(%s)", varName)
-			case dsl.PrimitiveFloat64:
-				return fmt.Sprintf("std::stod(%s)", varName)
-			default:
-				return varName
-			}
-		} else {
-			return fmt.Sprintf("std::to_string(%s)", varName)
-		}
-
-	case dsl.TypeChangeStringToNumber:
-		if write {
-			def := typeChange.New.(*dsl.SimpleType).ResolvedDefinition
-			switch def.(dsl.PrimitiveDefinition) {
-			case dsl.PrimitiveInt8, dsl.PrimitiveInt16, dsl.PrimitiveInt32:
-				return fmt.Sprintf("std::stoi(%s)", varName)
-			case dsl.PrimitiveInt64:
-				return fmt.Sprintf("std::stol(%s)", varName)
-			case dsl.PrimitiveUint8, dsl.PrimitiveUint16, dsl.PrimitiveUint32, dsl.PrimitiveUint64:
-				return fmt.Sprintf("std::stoul(%s)", varName)
-			case dsl.PrimitiveFloat32:
-				return fmt.Sprintf("std::stof(%s)", varName)
-			case dsl.PrimitiveFloat64:
-				return fmt.Sprintf("std::stod(%s)", varName)
-			default:
-				return varName
-			}
-		} else {
-			return fmt.Sprintf("std::to_string(%s)", varName)
-		}
-
-	case dsl.TypeChangeScalarToUnion:
-		if write {
-			return fmt.Sprintf("std::get<0>(%s)", varName)
-		} else {
-			// return fmt.Sprintf("%s(%s)", common.TypeSyntax(typeChange.New), varName)
-			return varName
-		}
-
-	// case dsl.OtherTypeChange:
-	default:
-		return varName
-	}
-}
-
-// TODO: Currently, this could be moved *inside* the existing `writeSerializers`, i.e. after writing the new ones we write compatibility ones.
-func writeCompatibilitySerializers(w *formatting.IndentedWriter, t dsl.TypeDefinition, prev dsl.TypeDefinition, version_index int) {
-	switch t.(type) {
-	case *dsl.EnumDefinition:
-		return
-	}
-
-	writeFallbackBody := func(write bool) {
-		switch p := prev.(type) {
-		case *dsl.RecordDefinition:
-
-			// If field removed
-			// 	Read it and discard
-			// 	Write "default" value (empty optional, uninitialized primitive, etc.)
-
-			// If field added
-			// 	Don't read, but set new field to "default" value
-			// 	Don't write it
-
-			// If field type changed...
-			// 	TODO ...
-
-			for _, field := range p.Fields {
-				varType := common.TypeSyntax(field.Type)
-				varName := common.FieldIdentifierName(field.Name)
-
-				if field.Annotations["removed"] != nil {
-					// Field was removed: Read it and discard, or Write "default" value
-					fmt.Fprintf(w, "%s %s;\n", varType, varName)
-					fmt.Fprintf(w, "%s(stream, %s);\n", typeRwFunction(field.Type, write), varName)
-				} else if field.Annotations["changed"] != nil {
-					// Field type change: Handle type conversions
-					typeChange := field.Annotations["changed"].(*dsl.TypeChange)
-					if write {
-						fmt.Fprintf(w, "%s %s;\n", varType, varName)
-						fmt.Fprintf(w, "%s = %s;\n", varName, typeConversionExpression(typeChange, fmt.Sprintf("value.%s", varName), write))
-						// fmt.Fprint(w, typeConversionStatements(varName, field.Type, fmt.Sprintf("value.%s", varName), typeChange.New))
-						fmt.Fprintf(w, "%s(stream, %s);\n", typeRwFunction(field.Type, write), varName)
-					} else {
-						fmt.Fprintf(w, "%s %s;\n", varType, varName)
-						fmt.Fprintf(w, "%s(stream, %s);\n", typeRwFunction(field.Type, write), varName)
-						fmt.Fprintf(w, "value.%s = %s;\n", varName, typeConversionExpression(typeChange, varName, write))
-						// fmt.Fprint(w, typeConversionStatements(fmt.Sprintf("value.%s", varName), typeChange.New, varName, field.Type))
-					}
-				} else {
-					fmt.Fprintf(w, "%s(stream, value.%s);\n", typeRwFunction(field.Type, write), varName)
-				}
-			}
-		case *dsl.NamedType:
-			fmt.Fprintf(w, "%s(stream, value);\n", typeRwFunction(p.Type, write))
-		default:
-			panic(fmt.Sprintf("Unexpected type %T", p))
-		}
-	}
-
-	writeCompatibilityRwFunctionSignature(t, version_index, w, true)
-	w.Indented(func() {
-		writeFallbackBody(true)
-	})
-	w.WriteString("}\n\n")
-
-	writeCompatibilityRwFunctionSignature(t, version_index, w, false)
-	w.Indented(func() {
-		writeFallbackBody(false)
-	})
-	w.WriteString("}\n\n")
-}
-
-func writeCompatibilityRwFunctionSignature(t dsl.TypeDefinition, version int, w *formatting.IndentedWriter, write bool) {
-	writeRwFunctionTemplateDeclaration(t, w, write)
-	if write {
-		fmt.Fprintf(w, "[[maybe_unused]] static void Write%s_v%d(yardl::binary::CodedOutputStream& stream, %s const& value) {\n", t.GetDefinitionMeta().Name, version, common.TypeDefinitionSyntax(t))
-	} else {
-		fmt.Fprintf(w, "[[maybe_unused]] static void Read%s_v%d(yardl::binary::CodedInputStream& stream, %s& value) {\n", t.GetDefinitionMeta().Name, version, common.TypeDefinitionSyntax(t))
-	}
-}
-
 func writeSerializers(w *formatting.IndentedWriter, t dsl.TypeDefinition) {
 	switch t.(type) {
 	case *dsl.EnumDefinition:
@@ -600,6 +461,148 @@ func writeRwFunctionTemplateDeclaration(t dsl.TypeDefinition, w *formatting.Inde
 	}
 }
 
+func typeConversionExpression(typeChange *dsl.TypeChange, varName string, write bool) string {
+	switch typeChange.Kind {
+
+	case dsl.TypeChangeNumberToNumber:
+		return fmt.Sprintf("(%s)(%s)", common.TypeSyntax(typeChange.New), varName)
+
+	case dsl.TypeChangeNumberToString:
+		if write {
+			def := typeChange.Old.(*dsl.SimpleType).ResolvedDefinition
+			switch def.(dsl.PrimitiveDefinition) {
+			case dsl.PrimitiveInt8, dsl.PrimitiveInt16, dsl.PrimitiveInt32:
+				return fmt.Sprintf("std::stoi(%s)", varName)
+			case dsl.PrimitiveInt64:
+				return fmt.Sprintf("std::stol(%s)", varName)
+			case dsl.PrimitiveUint8, dsl.PrimitiveUint16, dsl.PrimitiveUint32, dsl.PrimitiveUint64:
+				return fmt.Sprintf("std::stoul(%s)", varName)
+			case dsl.PrimitiveFloat32:
+				return fmt.Sprintf("std::stof(%s)", varName)
+			case dsl.PrimitiveFloat64:
+				return fmt.Sprintf("std::stod(%s)", varName)
+			default:
+				return varName
+			}
+		} else {
+			return fmt.Sprintf("std::to_string(%s)", varName)
+		}
+
+	case dsl.TypeChangeStringToNumber:
+		if write {
+			def := typeChange.New.(*dsl.SimpleType).ResolvedDefinition
+			switch def.(dsl.PrimitiveDefinition) {
+			case dsl.PrimitiveInt8, dsl.PrimitiveInt16, dsl.PrimitiveInt32:
+				return fmt.Sprintf("std::stoi(%s)", varName)
+			case dsl.PrimitiveInt64:
+				return fmt.Sprintf("std::stol(%s)", varName)
+			case dsl.PrimitiveUint8, dsl.PrimitiveUint16, dsl.PrimitiveUint32, dsl.PrimitiveUint64:
+				return fmt.Sprintf("std::stoul(%s)", varName)
+			case dsl.PrimitiveFloat32:
+				return fmt.Sprintf("std::stof(%s)", varName)
+			case dsl.PrimitiveFloat64:
+				return fmt.Sprintf("std::stod(%s)", varName)
+			default:
+				return varName
+			}
+		} else {
+			return fmt.Sprintf("std::to_string(%s)", varName)
+		}
+
+	case dsl.TypeChangeScalarToUnion:
+		if write {
+			return fmt.Sprintf("std::get<0>(%s)", varName)
+		} else {
+			return varName
+		}
+
+	// case dsl.OtherTypeChange:
+	default:
+		return varName
+	}
+}
+
+func writeCompatibilitySerializers(w *formatting.IndentedWriter, t dsl.TypeDefinition, prev dsl.TypeDefinition, version_index int) {
+	switch t.(type) {
+	case *dsl.EnumDefinition:
+		return
+	}
+
+	writeFallbackBody := func(write bool) {
+		switch p := prev.(type) {
+		case *dsl.RecordDefinition:
+			for _, field := range p.Fields {
+				varType := common.TypeSyntax(field.Type)
+				varName := common.FieldIdentifierName(field.Name)
+
+				if field.Annotations["removed"] != nil {
+					// Field was removed: Read it and discard, or Write "default" value
+					fmt.Fprintf(w, "%s %s;\n", varType, varName)
+					fmt.Fprintf(w, "%s(stream, %s);\n", typeRwFunction(field.Type, write), varName)
+				} else if field.Annotations["changed"] != nil {
+					// Field type change: Handle type conversions
+					typeChange := field.Annotations["changed"].(*dsl.TypeChange)
+					if typeChange.Kind == dsl.TypeChangeDefinitionChanged {
+						fmt.Fprintf(w, "%s(stream, value.%s);\n", typeRwFunction(field.Type, write), varName)
+					} else if write {
+						fmt.Fprintf(w, "%s %s;\n", varType, varName)
+						fmt.Fprintf(w, "%s = %s;\n", varName, typeConversionExpression(typeChange, fmt.Sprintf("value.%s", varName), write))
+						fmt.Fprintf(w, "%s(stream, %s);\n", typeRwFunction(field.Type, write), varName)
+					} else {
+						fmt.Fprintf(w, "%s %s;\n", varType, varName)
+						fmt.Fprintf(w, "%s(stream, %s);\n", typeRwFunction(field.Type, write), varName)
+						fmt.Fprintf(w, "value.%s = %s;\n", varName, typeConversionExpression(typeChange, varName, write))
+					}
+				} else {
+					fmt.Fprintf(w, "%s(stream, value.%s);\n", typeRwFunction(field.Type, write), varName)
+				}
+			}
+		case *dsl.NamedType:
+			if ch, ok := p.Annotations["changed"]; ok {
+				varType := common.TypeSyntax(p.Type)
+				varName := common.FieldIdentifierName(p.Name)
+				typeChange := ch.(*dsl.TypeChange)
+				if typeChange.Kind == dsl.TypeChangeDefinitionChanged {
+					fmt.Fprintf(w, "%s(stream, value);\n", typeRwFunction(p.Type, write))
+				} else if write {
+					fmt.Fprintf(w, "%s %s;\n", varType, varName)
+					fmt.Fprintf(w, "%s = %s;\n", varName, typeConversionExpression(typeChange, varName, write))
+					fmt.Fprintf(w, "%s(stream, %s);\n", typeRwFunction(p.Type, write), varName)
+				} else {
+					fmt.Fprintf(w, "%s %s;\n", varType, varName)
+					fmt.Fprintf(w, "%s(stream, %s);\n", typeRwFunction(p.Type, write), varName)
+					fmt.Fprintf(w, "%s = %s;\n", varName, typeConversionExpression(typeChange, varName, write))
+				}
+			} else {
+				fmt.Fprintf(w, "%s(stream, value);\n", typeRwFunction(p.Type, write))
+			}
+		default:
+			panic(fmt.Sprintf("Unexpected type %T", p))
+		}
+	}
+
+	writeCompatibilityRwFunctionSignature(t, version_index, w, true)
+	w.Indented(func() {
+		writeFallbackBody(true)
+	})
+	w.WriteString("}\n\n")
+
+	writeCompatibilityRwFunctionSignature(t, version_index, w, false)
+	w.Indented(func() {
+		writeFallbackBody(false)
+	})
+	w.WriteString("}\n\n")
+}
+
+func writeCompatibilityRwFunctionSignature(t dsl.TypeDefinition, version int, w *formatting.IndentedWriter, write bool) {
+	writeRwFunctionTemplateDeclaration(t, w, write)
+	if write {
+		fmt.Fprintf(w, "[[maybe_unused]] static void Write%s_v%d(yardl::binary::CodedOutputStream& stream, %s const& value) {\n", t.GetDefinitionMeta().Name, version, common.TypeDefinitionSyntax(t))
+	} else {
+		fmt.Fprintf(w, "[[maybe_unused]] static void Read%s_v%d(yardl::binary::CodedInputStream& stream, %s& value) {\n", t.GetDefinitionMeta().Name, version, common.TypeDefinitionSyntax(t))
+	}
+}
+
 func writeProtocolMethods(w *formatting.IndentedWriter, p *dsl.ProtocolDefinition) {
 	writerClassName := BinaryWriterClassName(p)
 	for _, step := range p.Sequence {
@@ -609,30 +612,7 @@ func writeProtocolMethods(w *formatting.IndentedWriter, p *dsl.ProtocolDefinitio
 				w.WriteString("yardl::binary::WriteInteger(stream_, 1U);\n")
 			}
 
-			// Handle schema changes to Protocol Steps
-			if changes, ok := step.Annotations["changes"]; ok {
-				fmt.Fprintf(w, "switch (schema_index_) {\n")
-				for i, change := range changes.([]*dsl.TypeChange) {
-					if change == nil {
-						continue
-					}
-
-					fmt.Fprintf(w, "case %d:\n", i)
-					w.Indented(func() {
-						fmt.Fprintf(w, "%s(stream_, value);\n", typeRwFunction(change.Old, true))
-						fmt.Fprintln(w, "break;")
-					})
-				}
-				fmt.Fprintln(w, "default:")
-				w.Indented(func() {
-					fmt.Fprintf(w, "%s(stream_, value);\n", typeRwFunction(step.Type, true))
-					fmt.Fprintln(w, "break;")
-				})
-				fmt.Fprintln(w, "}")
-			} else {
-				// No schema version changes
-				fmt.Fprintf(w, "%s(stream_, value);\n", typeRwFunction(step.Type, true))
-			}
+			writeProtocolStep(w, step, false, true)
 		})
 		w.WriteString("}\n\n")
 
@@ -641,35 +621,7 @@ func writeProtocolMethods(w *formatting.IndentedWriter, p *dsl.ProtocolDefinitio
 			w.Indented(func() {
 				w.WriteStringln("if (!values.empty()) {")
 				w.Indented(func() {
-					if changes, ok := step.Annotations["changes"]; ok {
-						fmt.Fprintf(w, "switch (schema_index_) {\n")
-						for i, change := range changes.([]*dsl.TypeChange) {
-							if change == nil {
-								continue
-							}
-
-							fmt.Fprintf(w, "case %d:\n", i)
-							w.Indented(func() {
-								vectorType := *change.Old.(*dsl.GeneralizedType)
-								vectorType.Dimensionality = &dsl.Vector{}
-								fmt.Fprintf(w, "%s(stream_, values);\n", typeRwFunction(&vectorType, true))
-								fmt.Fprintln(w, "break;")
-							})
-						}
-						fmt.Fprintln(w, "default:")
-						w.Indented(func() {
-							vectorType := *step.Type.(*dsl.GeneralizedType)
-							vectorType.Dimensionality = &dsl.Vector{}
-							fmt.Fprintf(w, "%s(stream_, values);\n", typeRwFunction(&vectorType, true))
-							fmt.Fprintln(w, "break;")
-						})
-						fmt.Fprintln(w, "}")
-					} else {
-						// No schema version changes
-						vectorType := *step.Type.(*dsl.GeneralizedType)
-						vectorType.Dimensionality = &dsl.Vector{}
-						fmt.Fprintf(w, "%s(stream_, values);\n", typeRwFunction(&vectorType, true))
-					}
+					writeProtocolStep(w, step, true, true)
 				})
 				w.WriteStringln("}")
 			})
@@ -717,30 +669,7 @@ func writeProtocolMethods(w *formatting.IndentedWriter, p *dsl.ProtocolDefinitio
 				w.WriteStringln("}")
 			}
 
-			// Handle schema changes to Protocol Steps
-			if changes, ok := step.Annotations["changes"]; ok {
-				fmt.Fprintf(w, "switch (schema_index_) {\n")
-				for i, change := range changes.([]*dsl.TypeChange) {
-					if change == nil {
-						continue
-					}
-
-					fmt.Fprintf(w, "case %d:\n", i)
-					w.Indented(func() {
-						fmt.Fprintf(w, "%s(stream_, value);\n", typeRwFunction(change.Old, false))
-						fmt.Fprintln(w, "break;")
-					})
-				}
-				fmt.Fprintln(w, "default:")
-				w.Indented(func() {
-					fmt.Fprintf(w, "%s(stream_, value);\n", typeRwFunction(step.Type, false))
-					fmt.Fprintln(w, "break;")
-				})
-				fmt.Fprintln(w, "}")
-			} else {
-				// No schema version changes
-				fmt.Fprintf(w, "%s(stream_, value);\n", typeRwFunction(step.Type, false))
-			}
+			writeProtocolStep(w, step, false, false)
 
 			if step.IsStream() {
 				w.WriteStringln("current_block_remaining_--;")
@@ -752,32 +681,7 @@ func writeProtocolMethods(w *formatting.IndentedWriter, p *dsl.ProtocolDefinitio
 		if step.IsStream() {
 			fmt.Fprintf(w, "%s %s::%s(std::vector<%s>& values) {\n", returnType, readerClassName, common.ProtocolReadImplMethodName(step), common.TypeSyntax(step.Type))
 			w.Indented(func() {
-				if changes, ok := step.Annotations["changes"]; ok {
-					fmt.Fprintf(w, "switch (schema_index_) {\n")
-					for i, change := range changes.([]*dsl.TypeChange) {
-						if change == nil {
-							continue
-						}
-
-						fmt.Fprintf(w, "case %d:\n", i)
-						w.Indented(func() {
-							scalarType := change.Old.(*dsl.GeneralizedType).ToScalar()
-							fmt.Fprintf(w, "yardl::binary::ReadBlocksIntoVector<%s, %s>(stream_, current_block_remaining_, values);\n", common.TypeSyntax(scalarType), typeRwFunction(scalarType, false))
-							fmt.Fprintln(w, "break;")
-						})
-					}
-					fmt.Fprintln(w, "default:")
-					w.Indented(func() {
-						scalarType := step.Type.(*dsl.GeneralizedType).ToScalar()
-						fmt.Fprintf(w, "yardl::binary::ReadBlocksIntoVector<%s, %s>(stream_, current_block_remaining_, values);\n", common.TypeSyntax(scalarType), typeRwFunction(scalarType, false))
-						fmt.Fprintln(w, "break;")
-					})
-					fmt.Fprintln(w, "}")
-				} else {
-					// No schema version changes
-					scalarType := step.Type.(*dsl.GeneralizedType).ToScalar()
-					fmt.Fprintf(w, "yardl::binary::ReadBlocksIntoVector<%s, %s>(stream_, current_block_remaining_, values);\n", common.TypeSyntax(scalarType), typeRwFunction(scalarType, false))
-				}
+				writeProtocolStep(w, step, true, false)
 				w.WriteStringln("return current_block_remaining_ != 0;")
 			})
 			w.WriteString("}\n\n")
@@ -790,6 +694,85 @@ func writeProtocolMethods(w *formatting.IndentedWriter, p *dsl.ProtocolDefinitio
 		w.WriteString("stream_.VerifyFinished();\n")
 	})
 	w.WriteString("}\n\n")
+}
+
+func writeProtocolStep(w *formatting.IndentedWriter, step *dsl.ProtocolStep, stream bool, write bool) {
+	stepType := step.Type
+	if stream {
+		if write {
+			vectorType := *stepType.(*dsl.GeneralizedType)
+			vectorType.Dimensionality = &dsl.Vector{}
+			stepType = &vectorType
+		} else {
+			stepType = stepType.(*dsl.GeneralizedType).ToScalar()
+		}
+	}
+
+	writeStepRw := func(t dsl.Type) {
+		if stream {
+			if write {
+				fmt.Fprintf(w, "%s(stream_, values);\n", typeRwFunction(t, write))
+			} else {
+				fmt.Fprintf(w, "yardl::binary::ReadBlocksIntoVector<%s, %s>(stream_, current_block_remaining_, values);\n", common.TypeSyntax(t), typeRwFunction(t, write))
+			}
+		} else {
+			fmt.Fprintf(w, "%s(stream_, value);\n", typeRwFunction(t, write))
+		}
+	}
+
+	changes, ok := step.Annotations["changes"].([]*dsl.TypeChange)
+	if !ok || len(changes) == 0 {
+		// No schema version changes
+		writeStepRw(stepType)
+		return
+	}
+
+	fmt.Fprintf(w, "switch (schema_index_) {\n")
+	for i, change := range changes {
+		if change == nil {
+			continue
+		}
+
+		fmt.Fprintf(w, "case %d:\n", i)
+		w.Indented(func() {
+			changedType := change.Old
+
+			if stream {
+				if write {
+					vectorType := *changedType.(*dsl.GeneralizedType)
+					vectorType.Dimensionality = &dsl.Vector{}
+					changedType = &vectorType
+				} else {
+					changedType = changedType.(*dsl.GeneralizedType).ToScalar()
+				}
+				writeStepRw(changedType)
+			} else {
+				if change.Kind == dsl.TypeChangeDefinitionChanged {
+					// Type conversions for this ProtocolStep are handled by TypeDef Serializers
+					writeStepRw(changedType)
+				} else {
+					// Handle conversions for ProtocolStep type changes
+					varName := fmt.Sprintf("%s_%d", common.FieldIdentifierName(step.Name), i)
+					fmt.Fprintf(w, "%s %s;\n", common.TypeSyntax(changedType), varName)
+					if write {
+						fmt.Fprintf(w, "%s = %s;\n", varName, typeConversionExpression(change, "value", write))
+						fmt.Fprintf(w, "%s(stream_, %s);\n", typeRwFunction(changedType, write), varName)
+					} else {
+						fmt.Fprintf(w, "%s(stream_, %s);\n", typeRwFunction(changedType, write), varName)
+						fmt.Fprintf(w, "value = %s;\n", typeConversionExpression(change, varName, write))
+					}
+				}
+			}
+
+			fmt.Fprintln(w, "break;")
+		})
+	}
+	fmt.Fprintln(w, "default:")
+	w.Indented(func() {
+		writeStepRw(stepType)
+		fmt.Fprintln(w, "break;")
+	})
+	fmt.Fprintln(w, "}")
 }
 
 func typeDefinitionRwFunction(t dsl.TypeDefinition, write bool) string {
