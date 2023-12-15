@@ -2,9 +2,6 @@
 
 #include "types.h"
 #include "yardl/yardl.h"
-namespace tuples {
-} // namespace tuples
-
 namespace evo_test {
 } // namespace evo_test
 

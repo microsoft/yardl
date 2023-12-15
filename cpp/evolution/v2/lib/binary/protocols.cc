@@ -14,17 +14,6 @@ namespace yardl::binary {
 #pragma GCC diagnostic ignored "-Winvalid-offsetof"
 #endif
 
-template <typename T1, typename T2>
-struct IsTriviallySerializable<tuples::Tuple<T1, T2>> {
-  using __T__ = tuples::Tuple<T1, T2>;
-  static constexpr bool value = 
-    std::is_standard_layout_v<__T__> &&
-    IsTriviallySerializable<decltype(__T__::v1)>::value &&
-    IsTriviallySerializable<decltype(__T__::v2)>::value &&
-    (sizeof(__T__) == (sizeof(__T__::v1) + sizeof(__T__::v2))) &&
-    offsetof(__T__, v1) < offsetof(__T__, v2);
-};
-
 template <>
 struct IsTriviallySerializable<evo_test::Header> {
   using __T__ = evo_test::Header;
@@ -123,34 +112,6 @@ void ReadUnion(yardl::binary::CodedInputStream& stream, std::variant<T0, T1>& va
   }
 }
 } // namespace
-
-namespace tuples::binary {
-namespace {
-template<typename T1, yardl::binary::Writer<T1> WriteT1, typename T2, yardl::binary::Writer<T2> WriteT2>
-[[maybe_unused]] static void WriteTuple(yardl::binary::CodedOutputStream& stream, tuples::Tuple<T1, T2> const& value) {
-  if constexpr (yardl::binary::IsTriviallySerializable<tuples::Tuple<T1, T2>>::value) {
-    yardl::binary::WriteTriviallySerializable(stream, value);
-    return;
-  }
-
-  WriteT1(stream, value.v1);
-  WriteT2(stream, value.v2);
-}
-
-template<typename T1, yardl::binary::Reader<T1> ReadT1, typename T2, yardl::binary::Reader<T2> ReadT2>
-[[maybe_unused]] static void ReadTuple(yardl::binary::CodedInputStream& stream, tuples::Tuple<T1, T2>& value) {
-  if constexpr (yardl::binary::IsTriviallySerializable<tuples::Tuple<T1, T2>>::value) {
-    yardl::binary::ReadTriviallySerializable(stream, value);
-    return;
-  }
-
-  ReadT1(stream, value.v1);
-  ReadT2(stream, value.v2);
-}
-
-} // namespace
-
-} // namespace tuples::binary
 
 namespace evo_test::binary {
 namespace {

@@ -10,28 +10,9 @@
 
 #include "yardl/yardl.h"
 
-namespace tuples {
-template <typename T1, typename T2>
-struct Tuple {
-  T1 v1{};
-  T2 v2{};
-
-  bool operator==(const Tuple& other) const {
-    return v1 == other.v1 &&
-      v2 == other.v2;
-  }
-
-  bool operator!=(const Tuple& other) const {
-    return !(*this == other);
-  }
-};
-
-} // namespace tuples
-
 namespace evo_test {
 struct Header {
   std::variant<std::string, int64_t> subject{};
-  // subject: string
   std::unordered_map<std::string, std::vector<std::string>> meta{};
   double weight{};
 
