@@ -60,7 +60,14 @@ func validatePackage(packageInfo *packaging.PackageInfo) (*dsl.Environment, erro
 		return nil, err
 	}
 
-	for versionId, predecessor := range packageInfo.Predecessors {
+	predecessorLabels := make(map[string]bool)
+	var predecessors []*dsl.Environment
+	for _, predecessor := range packageInfo.Predecessors {
+		if predecessorLabels[predecessor.Label] {
+			return env, fmt.Errorf("duplicate predecessor %s", predecessor.Label)
+		}
+		predecessorLabels[predecessor.Label] = true
+
 		namespaces, err := parseAndFlattenNamespaces(predecessor.Package)
 		if err != nil {
 			return nil, err
@@ -71,8 +78,11 @@ func validatePackage(packageInfo *packaging.PackageInfo) (*dsl.Environment, erro
 			return nil, err
 		}
 
-		log.Info().Msgf("Resolving changes from predecessor '%s'", predecessor.Label)
-		env, err = dsl.ValidateEvolution(env, oldEnv, versionId)
+		predecessors = append(predecessors, oldEnv)
+	}
+
+	if len(predecessors) > 0 {
+		env, err = dsl.ValidateEvolution(env, predecessors)
 		if err != nil {
 			return nil, err
 		}

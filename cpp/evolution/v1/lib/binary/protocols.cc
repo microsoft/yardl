@@ -162,6 +162,24 @@ namespace {
   evo_test::binary::ReadSignature(stream, value.signature);
 }
 
+[[maybe_unused]] static void WriteAliasedPrimitive(yardl::binary::CodedOutputStream& stream, evo_test::AliasedPrimitive const& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<evo_test::AliasedPrimitive>::value) {
+    yardl::binary::WriteTriviallySerializable(stream, value);
+    return;
+  }
+
+  yardl::binary::WriteString(stream, value);
+}
+
+[[maybe_unused]] static void ReadAliasedPrimitive(yardl::binary::CodedInputStream& stream, evo_test::AliasedPrimitive& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<evo_test::AliasedPrimitive>::value) {
+    yardl::binary::ReadTriviallySerializable(stream, value);
+    return;
+  }
+
+  yardl::binary::ReadString(stream, value);
+}
+
 } // namespace
 
 void MyProtocolWriter::WriteHeaderImpl(evo_test::Header const& value) {

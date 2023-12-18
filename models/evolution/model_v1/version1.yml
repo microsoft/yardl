@@ -28,6 +28,10 @@ Signature: !record
     email: string
     number: long
 
+# AliasedRecord: Header
+
+AliasedPrimitive: string
+
 UnusedProtocol: !protocol
   sequence:
     samples: !stream

@@ -71,5 +71,7 @@ struct Footer {
   }
 };
 
+using AliasedPrimitive = std::string;
+
 } // namespace evo_test
 

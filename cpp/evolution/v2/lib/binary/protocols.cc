@@ -309,6 +309,36 @@ namespace {
   evo_test::binary::ReadSignature_v1(stream, value.signature);
 }
 
+[[maybe_unused]] static void WriteAliasedPrimitive(yardl::binary::CodedOutputStream& stream, evo_test::AliasedPrimitive const& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<evo_test::AliasedPrimitive>::value) {
+    yardl::binary::WriteTriviallySerializable(stream, value);
+    return;
+  }
+
+  yardl::binary::WriteFloatingPoint(stream, value);
+}
+
+[[maybe_unused]] static void ReadAliasedPrimitive(yardl::binary::CodedInputStream& stream, evo_test::AliasedPrimitive& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<evo_test::AliasedPrimitive>::value) {
+    yardl::binary::ReadTriviallySerializable(stream, value);
+    return;
+  }
+
+  yardl::binary::ReadFloatingPoint(stream, value);
+}
+
+[[maybe_unused]] static void WriteAliasedPrimitive_v0(yardl::binary::CodedOutputStream& stream, evo_test::AliasedPrimitive const& value) {
+  std::string aliased_primitive;
+  aliased_primitive = std::to_string(value);
+  yardl::binary::WriteString(stream, aliased_primitive);
+}
+
+[[maybe_unused]] static void ReadAliasedPrimitive_v0(yardl::binary::CodedInputStream& stream, evo_test::AliasedPrimitive& value) {
+  std::string aliased_primitive;
+  yardl::binary::ReadString(stream, aliased_primitive);
+  value = std::stod(aliased_primitive);
+}
+
 [[maybe_unused]] static void WriteNewRecord(yardl::binary::CodedOutputStream& stream, evo_test::NewRecord const& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::NewRecord>::value) {
     yardl::binary::WriteTriviallySerializable(stream, value);
