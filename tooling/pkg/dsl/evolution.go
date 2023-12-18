@@ -44,24 +44,39 @@ const (
 	TypeChangeIncompatible
 )
 
-func ValidateEvolution(env *Environment, predecessor *Environment, versionId int) (*Environment, error) {
+type ProtocolChange struct {
+	PreviousDefinition *ProtocolDefinition
+	Added              []*ProtocolStep
+	Removed            []*ProtocolStep
+}
 
-	preprocessPredecessor(predecessor)
+type RecordChange struct {
+	PreviousDefinition *RecordDefinition
+	Added              []*Field
+	Removed            []*Field
+}
+
+func ValidateEvolution(env *Environment, predecessors []*Environment) (*Environment, error) {
+
 	preprocessCurrent(env)
 
-	oldNamespaces := make(map[string]*Namespace)
-	for _, oldNs := range predecessor.Namespaces {
-		oldNamespaces[oldNs.Name] = oldNs
-	}
+	for versionId, predecessor := range predecessors {
+		// log.Info().Msgf("Resolving changes from predecessor '%s'", predecessor.Label)
+		preprocessPredecessor(predecessor)
 
-	for _, newNs := range env.Namespaces {
-		if oldNs, ok := oldNamespaces[newNs.Name]; ok {
-			if err := annotateNamespaceChanges(newNs, oldNs, versionId); err != nil {
-				return env, err
-			}
+		if err := annotateAllChanges(env, predecessor, versionId); err != nil {
+			return nil, err
+		}
+
+		if err := validateChanges(env, versionId); err != nil {
+			return nil, err
 		}
 	}
 
+	return env, nil
+}
+
+func validateChanges(env *Environment, versionId int) error {
 	// Emit User Warnings and aggregate Errors
 	errorSink := &validation.ErrorSink{}
 	for _, ns := range env.Namespaces {
@@ -88,6 +103,7 @@ func ValidateEvolution(env *Environment, predecessor *Environment, versionId int
 					}
 
 				case *NamedType:
+					log.Debug().Msgf("NamedType '%s' changed", td.GetDefinitionMeta().Name)
 					if tc, ok := prevDef.Annotations["changed"].(*TypeChange); ok {
 						if typeChangeIsError(tc) {
 							errorSink.Add(validationError(td, "Changing type '%s' from %s", td.GetDefinitionMeta().Name, typeChangeToWarning(tc)))
@@ -130,7 +146,7 @@ func ValidateEvolution(env *Environment, predecessor *Environment, versionId int
 		}
 	}
 
-	return env, errorSink.AsError()
+	return errorSink.AsError()
 }
 
 func typeChangeIsError(tc *TypeChange) bool {
@@ -230,6 +246,23 @@ func preprocessCurrent(env *Environment) {
 	})
 }
 
+func annotateAllChanges(newNode, oldNode *Environment, versionId int) error {
+	oldNamespaces := make(map[string]*Namespace)
+	for _, oldNs := range oldNode.Namespaces {
+		oldNamespaces[oldNs.Name] = oldNs
+	}
+
+	for _, newNs := range newNode.Namespaces {
+		if oldNs, ok := oldNamespaces[newNs.Name]; ok {
+			if err := annotateNamespaceChanges(newNs, oldNs, versionId); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
 func annotateNamespaceChanges(newNode, oldNode *Namespace, version_index int) error {
 	if newNode.Name != oldNode.Name {
 		return validationError(newNode, "changing namespaces between versions is not yet supported")
@@ -305,8 +338,6 @@ func annotateChangedTypeDefinition(newNode, oldNode TypeDefinition, version_inde
 		oldNode, ok := oldNode.(*RecordDefinition)
 		if !ok {
 			return oldNode, fmt.Errorf("changing '%s' to a Record is not backward compatible", newNode.Name)
-			// log.Warn().Msgf("Changing '%s' to a Record is not backward compatible", newNode.Name)
-			// return oldNode
 		}
 		res, err := annotateChangedRecordDefinition(newNode, oldNode, version_index)
 		if err != nil {
@@ -321,8 +352,6 @@ func annotateChangedTypeDefinition(newNode, oldNode TypeDefinition, version_inde
 		oldNode, ok := oldNode.(*NamedType)
 		if !ok {
 			return oldNode, fmt.Errorf("changing '%s' to a named type is not backward compatible", newNode.Name)
-			// log.Warn().Msgf("Changing '%s' to a named type is not backward compatible", newNode.Name)
-			// return oldNode
 		}
 
 		if ch := detectChangedTypes(newNode.Type, oldNode.Type, version_index); ch != nil {
@@ -339,8 +368,6 @@ func annotateChangedTypeDefinition(newNode, oldNode TypeDefinition, version_inde
 		oldNode, ok := oldNode.(*EnumDefinition)
 		if !ok {
 			return oldNode, fmt.Errorf("changing '%s' to an Enum is not backward compatible", newNode.Name)
-			// log.Warn().Msgf("Changing '%s' to an Enum is not backward compatible", newNode.Name)
-			// return oldNode
 		}
 		res, err := annotateChangedEnumDefinitions(newNode, oldNode, version_index)
 		if err != nil {

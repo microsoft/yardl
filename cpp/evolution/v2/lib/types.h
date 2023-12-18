@@ -69,6 +69,8 @@ struct Footer {
   }
 };
 
+using AliasedPrimitive = double;
+
 struct NewRecord {
   yardl::DynamicNDArray<double> stuff{};
 

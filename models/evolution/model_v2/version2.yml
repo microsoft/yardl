@@ -27,6 +27,10 @@ Signature: !record
     email: string
     number: string
 
+# AliasedRecord: Signature
+
+AliasedPrimitive: double
+
 NewRecord: !record
   fields:
     stuff: double[]
