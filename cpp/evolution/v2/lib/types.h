@@ -12,7 +12,7 @@
 
 namespace evo_test {
 struct Header {
-  std::variant<std::string, int64_t> subject{};
+  std::variant<int64_t, std::string> subject{};
   std::unordered_map<std::string, std::vector<std::string>> meta{};
   double weight{};
 

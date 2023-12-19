@@ -10,38 +10,153 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-/*
-	TODO: It might be better to use an interface here for a few reasons:
-
-1. Primitive type changes only need to store the PrimitiveDefinition (not the entire Type)
-
-2. There are various kinds of Type Changes:
-  - Fully compatible (e.g. casting numbers)
-  - Partially compatible (e.g. converting between scalars and unions)
-  - Incompatible (e.g. converting between primitives and records)
-
-3. Convenient to GetInverseChange (e.g. Num->String vs String->Num are both needed for Read/Write)
-*/
-type TypeChange struct {
-	Old  Type
-	New  Type
-	Kind TypeChangeKind
+type TypeChange interface {
+	OldType() Type
+	NewType() Type
+	Inverse() TypeChange
 }
 
-type TypeChangeKind int
+type TypePair struct {
+	Old Type
+	New Type
+}
 
-const (
-	TypeChangeNoChange TypeChangeKind = iota
-	TypeChangeNumberToNumber
-	TypeChangeNumberToString
-	TypeChangeStringToNumber
-	TypeChangeScalarToOptional
-	TypeChangeOptionalToScalar
-	TypeChangeScalarToUnion
-	TypeChangeUnionToScalar
-	// UnionToUnion
-	TypeChangeDefinitionChanged
-	TypeChangeIncompatible
+func (tc TypePair) Swap() TypePair {
+	return TypePair{tc.New, tc.Old}
+}
+
+func (tc *TypePair) OldType() Type {
+	return tc.Old
+}
+func (tc *TypePair) NewType() Type {
+	return tc.New
+}
+
+type TypeChangeNumberToNumber struct{ TypePair }
+
+func (tc *TypeChangeNumberToNumber) Inverse() TypeChange {
+	return &TypeChangeNumberToNumber{tc.Swap()}
+}
+
+// TODO: Unit test this
+func (tc *TypeChangeNumberToNumber) IsDemotion() bool {
+	newPrim := tc.Old.(*SimpleType).ResolvedDefinition.(PrimitiveDefinition)
+	oldPrim := tc.New.(*SimpleType).ResolvedDefinition.(PrimitiveDefinition)
+
+	if newPrim == oldPrim {
+		return false
+	}
+
+	width := func(prim PrimitiveDefinition) int {
+		switch prim {
+		case PrimitiveInt8, PrimitiveUint8:
+			return 1
+		case PrimitiveInt16, PrimitiveUint16:
+			return 2
+		case PrimitiveInt32, PrimitiveUint32, PrimitiveFloat32:
+			return 4
+		case PrimitiveInt64, PrimitiveUint64, PrimitiveFloat64:
+			return 8
+		default:
+			panic("Shouldn't get here")
+		}
+	}
+
+	isPromotion := func(a, b PrimitiveDefinition) bool {
+		if GetPrimitiveKind(a) == PrimitiveKindInteger && GetPrimitiveKind(b) == PrimitiveKindFloatingPoint {
+			return true
+		} else if width(b) > width(a) {
+			return true
+		}
+		return false
+	}
+	return !isPromotion(oldPrim, newPrim)
+}
+
+type TypeChangeNumberToString struct{ TypePair }
+
+func (tc *TypeChangeNumberToString) Inverse() TypeChange {
+	return &TypeChangeStringToNumber{tc.Swap()}
+}
+
+type TypeChangeStringToNumber struct{ TypePair }
+
+func (tc *TypeChangeStringToNumber) Inverse() TypeChange {
+	return &TypeChangeNumberToString{tc.Swap()}
+}
+
+type TypeChangeScalarToOptional struct{ TypePair }
+
+func (tc *TypeChangeScalarToOptional) Inverse() TypeChange {
+	return &TypeChangeOptionalToScalar{tc.Swap()}
+}
+
+type TypeChangeOptionalToScalar struct{ TypePair }
+
+func (tc *TypeChangeOptionalToScalar) Inverse() TypeChange {
+	return &TypeChangeScalarToOptional{tc.Swap()}
+}
+
+type TypeChangeScalarToUnion struct {
+	TypePair
+	TypeIndex int
+}
+
+func (tc *TypeChangeScalarToUnion) Inverse() TypeChange {
+	return &TypeChangeUnionToScalar{tc.Swap(), tc.TypeIndex}
+}
+
+type TypeChangeUnionToScalar struct {
+	TypePair
+	TypeIndex int
+}
+
+func (tc *TypeChangeUnionToScalar) Inverse() TypeChange {
+	return &TypeChangeScalarToUnion{tc.Swap(), tc.TypeIndex}
+}
+
+type TypeChangeUnionShrink struct {
+	TypePair
+	TypeIndex int
+}
+
+func (tc *TypeChangeUnionShrink) Inverse() TypeChange {
+	return &TypeChangeUnionGrow{tc.Swap(), tc.TypeIndex}
+}
+
+type TypeChangeUnionGrow struct {
+	TypePair
+	TypeIndex int
+}
+
+func (tc *TypeChangeUnionGrow) Inverse() TypeChange {
+	return &TypeChangeUnionShrink{tc.Swap(), tc.TypeIndex}
+}
+
+type TypeChangeDefinitionChanged struct{ TypePair }
+
+func (tc *TypeChangeDefinitionChanged) Inverse() TypeChange {
+	return &TypeChangeDefinitionChanged{tc.Swap()}
+}
+
+type TypeChangeIncompatible struct{ TypePair }
+
+func (tc *TypeChangeIncompatible) Inverse() TypeChange {
+	return &TypeChangeIncompatible{tc.Swap()}
+}
+
+var (
+	_ TypeChange = (*TypeChangeNumberToNumber)(nil)
+	_ TypeChange = (*TypeChangeNumberToString)(nil)
+	_ TypeChange = (*TypeChangeStringToNumber)(nil)
+	_ TypeChange = (*TypeChangeScalarToOptional)(nil)
+	_ TypeChange = (*TypeChangeOptionalToScalar)(nil)
+	_ TypeChange = (*TypeChangeScalarToUnion)(nil)
+	_ TypeChange = (*TypeChangeUnionToScalar)(nil)
+	_ TypeChange = (*TypeChangeUnionShrink)(nil)
+	_ TypeChange = (*TypeChangeUnionGrow)(nil)
+	_ TypeChange = (*TypeChangeDefinitionChanged)(nil)
+	_ TypeChange = (*TypeChangeIncompatible)(nil)
 )
 
 type ProtocolChange struct {
@@ -103,7 +218,7 @@ func validateChanges(env *Environment) error {
 				switch prevDef := prevDef.(type) {
 				case *RecordDefinition:
 					for _, field := range prevDef.Fields {
-						if tc, ok := field.Annotations[ChangeAnnotationKey].(*TypeChange); ok {
+						if tc, ok := field.Annotations[ChangeAnnotationKey].(TypeChange); ok {
 							if typeChangeIsError(tc) {
 								errorSink.Add(validationError(td, "Changing field '%s' from %s", field.Name, typeChangeToError(tc)))
 							}
@@ -116,7 +231,7 @@ func validateChanges(env *Environment) error {
 
 				case *NamedType:
 					log.Debug().Msgf("NamedType '%s' changed", td.GetDefinitionMeta().Name)
-					if tc, ok := prevDef.Annotations[ChangeAnnotationKey].(*TypeChange); ok {
+					if tc, ok := prevDef.Annotations[ChangeAnnotationKey].(TypeChange); ok {
 						if typeChangeIsError(tc) {
 							errorSink.Add(validationError(td, "Changing type '%s' from %s", td.GetDefinitionMeta().Name, typeChangeToWarning(tc)))
 						}
@@ -136,18 +251,13 @@ func validateChanges(env *Environment) error {
 		}
 
 		for _, pd := range ns.Protocols {
-			ch, ok := pd.GetDefinitionMeta().Annotations[ChangeAnnotationKey].(*ProtocolDefinition)
-			if ok && ch != nil {
-				// prevDef := ch
-				for _, step := range pd.Sequence {
-					tc := step.Annotations[ChangeAnnotationKey].(*TypeChange)
-					if tc != nil {
-						if typeChangeIsError(tc) {
-							errorSink.Add(validationError(step, "Changing step '%s' from %s", step.Name, typeChangeToError(tc)))
-						}
-						if warn := typeChangeToWarning(tc); warn != "" {
-							log.Warn().Msgf("Changing step '%s' from %s", step.Name, warn)
-						}
+			for _, step := range pd.Sequence {
+				if tc, ok := step.Annotations[ChangeAnnotationKey].(TypeChange); ok {
+					if typeChangeIsError(tc) {
+						errorSink.Add(validationError(step, "Changing step '%s' from %s", step.Name, typeChangeToError(tc)))
+					}
+					if warn := typeChangeToWarning(tc); warn != "" {
+						log.Warn().Msgf("Changing step '%s' from %s", step.Name, warn)
 					}
 				}
 			}
@@ -157,27 +267,35 @@ func validateChanges(env *Environment) error {
 	return errorSink.AsError()
 }
 
-func typeChangeIsError(tc *TypeChange) bool {
-	return tc.Kind == TypeChangeIncompatible
+func typeChangeIsError(tc TypeChange) bool {
+	switch tc.(type) {
+	case *TypeChangeIncompatible:
+		return true
+	}
+	return false
 }
 
-func typeChangeToError(tc *TypeChange) string {
-	return fmt.Sprintf("'%s' to '%s' is not backward compatible", TypeToShortSyntax(tc.Old, true), TypeToShortSyntax(tc.New, true))
+func typeChangeToError(tc TypeChange) string {
+	return fmt.Sprintf("'%s' to '%s' is not backward compatible", TypeToShortSyntax(tc.OldType(), true), TypeToShortSyntax(tc.NewType(), true))
 }
 
-func typeChangeToWarning(tc *TypeChange) string {
-	message := fmt.Sprintf("'%s' to '%s' ", TypeToShortSyntax(tc.Old, true), TypeToShortSyntax(tc.New, true))
-	switch tc.Kind {
-	case TypeChangeNumberToNumber:
-		// TODO: Warn only for numeric demotion (not promotion)
+func typeChangeToWarning(tc TypeChange) string {
+	message := fmt.Sprintf("'%s' to '%s' ", TypeToShortSyntax(tc.OldType(), true), TypeToShortSyntax(tc.NewType(), true))
+	switch tc := tc.(type) {
+	case *TypeChangeNumberToNumber:
+		if tc.IsDemotion() {
+			return message + "may result in loss of precision"
+		} else {
+			return ""
+		}
+	case *TypeChangeNumberToString, *TypeChangeStringToNumber:
 		return message + "may result in loss of precision"
-	case TypeChangeNumberToString, TypeChangeStringToNumber:
-		return message + "may result in loss of precision"
-	case TypeChangeScalarToOptional, TypeChangeOptionalToScalar:
+	case *TypeChangeScalarToOptional, *TypeChangeOptionalToScalar:
 		return message + "may result in undefined behavior"
-	case TypeChangeScalarToUnion, TypeChangeUnionToScalar:
+	case *TypeChangeScalarToUnion, *TypeChangeUnionToScalar:
 		return message + "may result in undefined behavior"
-	// case UnionToUnion
+	case *TypeChangeUnionGrow, *TypeChangeUnionShrink:
+		return message + "may result in undefined behavior"
 	default:
 		return ""
 	}
@@ -191,7 +309,6 @@ func initializePredecessorAnnotations(predecessor *Environment) {
 			if node.GetDefinitionMeta().Annotations == nil {
 				node.GetDefinitionMeta().Annotations = make(map[string]any)
 			}
-			// node.Annotations[ChangeAnnotationKey] = nil
 			node.GetDefinitionMeta().Annotations[SchemaAnnotationKey] = GetProtocolSchemaString(node, predecessor.SymbolTable)
 			self.VisitChildren(node)
 
@@ -199,7 +316,6 @@ func initializePredecessorAnnotations(predecessor *Environment) {
 			if node.GetDefinitionMeta().Annotations == nil {
 				node.GetDefinitionMeta().Annotations = make(map[string]any)
 			}
-			// node.GetDefinitionMeta().Annotations[ChangeAnnotationKey] = nil
 			self.VisitChildren(node)
 
 		case *Field:
@@ -251,7 +367,7 @@ func initializeChangeAnnotations(env *Environment) {
 				node.Annotations = make(map[string]any)
 			}
 			if node.Annotations[AllVersionChangesAnnotationKey] == nil {
-				node.Annotations[AllVersionChangesAnnotationKey] = make([]*TypeChange, 0)
+				node.Annotations[AllVersionChangesAnnotationKey] = make([]TypeChange, 0)
 			}
 			node.Annotations[ChangeAnnotationKey] = nil
 
@@ -269,24 +385,20 @@ func saveChangeAnnotations(env *Environment, versionId int) {
 			var schema string
 			if ch, ok := node.GetDefinitionMeta().Annotations[ChangeAnnotationKey].(*ProtocolDefinition); ok {
 				changed = ch
-
 				if s, ok := changed.GetDefinitionMeta().Annotations[SchemaAnnotationKey].(string); ok {
 					schema = s
 				}
 			}
-
 			node.GetDefinitionMeta().Annotations[AllVersionChangesAnnotationKey] = append(node.GetDefinitionMeta().Annotations[AllVersionChangesAnnotationKey].([]*ProtocolDefinition), changed)
-
 			node.GetDefinitionMeta().Annotations[AllVersionSchemasAnnotationKey] = append(node.GetDefinitionMeta().Annotations[AllVersionSchemasAnnotationKey].([]string), schema)
-
 			node.GetDefinitionMeta().Annotations[ChangeAnnotationKey] = nil
 
 			for _, step := range node.Sequence {
-				var changed *TypeChange
-				if ch, ok := step.Annotations[ChangeAnnotationKey].(*TypeChange); ok {
+				var changed TypeChange
+				if ch, ok := step.Annotations[ChangeAnnotationKey].(TypeChange); ok {
 					changed = ch
 				}
-				step.Annotations[AllVersionChangesAnnotationKey] = append(step.Annotations[AllVersionChangesAnnotationKey].([]*TypeChange), changed)
+				step.Annotations[AllVersionChangesAnnotationKey] = append(step.Annotations[AllVersionChangesAnnotationKey].([]TypeChange), changed)
 				step.Annotations[ChangeAnnotationKey] = nil
 			}
 
@@ -294,12 +406,9 @@ func saveChangeAnnotations(env *Environment, versionId int) {
 			var changed TypeDefinition
 			if ch, ok := node.GetDefinitionMeta().Annotations[ChangeAnnotationKey].(TypeDefinition); ok {
 				changed = ch
-
 				changed.GetDefinitionMeta().Annotations[VersionAnnotationKey] = versionId
 			}
-
 			node.GetDefinitionMeta().Annotations[AllVersionChangesAnnotationKey] = append(node.GetDefinitionMeta().Annotations[AllVersionChangesAnnotationKey].([]TypeDefinition), changed)
-
 			node.GetDefinitionMeta().Annotations[ChangeAnnotationKey] = nil
 
 		default:
@@ -408,13 +517,9 @@ func annotateChangedTypeDefinition(newNode, oldNode TypeDefinition) (TypeDefinit
 		if !ok {
 			return oldNode, fmt.Errorf("changing '%s' to a named type is not backward compatible", newNode.Name)
 		}
-
-		if ch := detectChangedTypes(newNode.Type, oldNode.Type); ch != nil {
-			// CHANGE: Changed NamedType type
-			// if ch.Kind == TypeChangeIncompatible {
-			// 	log.Warn().Msgf("Changing '%s' from '%s' to '%s' is not backward compatible", newNode.Name, TypeToShortSyntax(oldNode.Type, true), TypeToShortSyntax(newNode.Type, true))
-			// }
-			oldNode.Annotations[ChangeAnnotationKey] = ch
+		typeChange := detectChangedTypes(newNode.Type, oldNode.Type)
+		oldNode.Annotations[ChangeAnnotationKey] = typeChange
+		if typeChange != nil {
 			return oldNode, nil
 		}
 		return nil, nil
@@ -453,24 +558,15 @@ func annotateChangedProtocolDefinition(newProtocol, oldProtocol *ProtocolDefinit
 		if _, ok := oldSequence[newStep.Name]; !ok {
 			// CHANGE: New ProtocolStep
 			return oldProtocol, fmt.Errorf("adding new Protocol steps is not backward compatible")
-			// log.Warn().Msg("Adding new Protocol steps is not backward compatible")
-			// changed = true
-			// continue
 		}
 
 		if i > len(oldProtocol.Sequence) {
 			// CHANGE: Reordered ProtocolSteps
 			return oldProtocol, fmt.Errorf("reordering Protocol steps is not backward compatible")
-			// log.Warn().Msg("Reordering Protocol steps is not backward compatible")
-			// changed = true
-			// continue
 		}
 		if newStep.Name != oldProtocol.Sequence[i].Name {
 			// CHANGE: Reordered/Renamed ProtocolSteps
 			return oldProtocol, fmt.Errorf("reordering or renaming Protocol steps is not backward compatible")
-			// log.Warn().Msg("Renaming Protocol steps is not backward compatible")
-			// changed = true
-			// continue
 		}
 	}
 
@@ -479,19 +575,11 @@ func annotateChangedProtocolDefinition(newProtocol, oldProtocol *ProtocolDefinit
 		if !ok {
 			oldStep.Annotations[FieldOrStepRemovedAnnotationKey] = true
 			return oldProtocol, fmt.Errorf("removing Protocol steps is not backward compatible")
-			// log.Warn().Msgf("Removing a step from a Protocol is not backward compatible")
-			// changed = true
-			// continue
 		}
 
 		typeChange := detectChangedTypes(newStep.Type, oldStep.Type)
 		if typeChange != nil {
 			changed = true
-
-			// log.Debug().Msgf("Protocol %s step %s changed from %s to %s", newProtocol.Name, newStep.Name, TypeToShortSyntax(oldStep.Type, true), TypeToShortSyntax(newStep.Type, true))
-			// if typeChange.Kind == TypeChangeIncompatible {
-			// 	log.Warn().Msgf("Changing step '%s' from '%s' to '%s' is not backward compatible", oldStep.Name, TypeToShortSyntax(oldStep.Type, true), TypeToShortSyntax(newStep.Type, true))
-			// }
 		}
 
 		// Annotate the change to ProtocolStep so we can handle compatibility later in Protocol Reader/Writer
@@ -506,11 +594,6 @@ func annotateChangedProtocolDefinition(newProtocol, oldProtocol *ProtocolDefinit
 
 // Compares two RecordDefinitions with matching names
 func annotateChangedRecordDefinition(newRecord, oldRecord *RecordDefinition) (*RecordDefinition, error) {
-	if newRecord.Name != oldRecord.Name {
-		panic("Records name should match at this point")
-		// CHANGE: Renamed Record
-	}
-
 	changed := false
 
 	// Fields may be reordered
@@ -557,23 +640,17 @@ func annotateChangedRecordDefinition(newRecord, oldRecord *RecordDefinition) (*R
 			continue
 		}
 
-		// log.Debug().Msgf("Comparing fields %s and %s", newField.Name, oldField.Name)
-		if typeChange := detectChangedTypes(newField.Type, oldField.Type); typeChange != nil {
-			// CHANGE: Changed field type
+		log.Debug().Msgf("Comparing fields %s and %s", newField.Name, oldField.Name)
+		typeChange := detectChangedTypes(newField.Type, oldField.Type)
+		if typeChange != nil {
 			changed = true
-			oldRecord.Fields[i].Annotations[ChangeAnnotationKey] = typeChange
-			// if typeChange.Kind == TypeChangeIncompatible {
-			// 	log.Warn().Msgf("Changing field '%s' from '%s' to '%s' is not backward compatible", oldField.Name, TypeToShortSyntax(oldField.Type, true), TypeToShortSyntax(newField.Type, true))
-			// }
-			continue
 		}
+		oldRecord.Fields[i].Annotations[ChangeAnnotationKey] = typeChange
 	}
 
 	if changed {
-		// log.Debug().Msgf("Record '%s' changed", newRecord.Name)
 		return oldRecord, nil
 	}
-	// log.Debug().Msgf("Record '%s' did NOT change", newRecord.Name)
 	return nil, nil
 }
 
@@ -596,8 +673,6 @@ func annotateChangedEnumDefinitions(newNode, oldNode *EnumDefinition) (*EnumDefi
 		}
 		if ch := detectChangedTypes(newNode.BaseType, oldNode.BaseType); ch != nil {
 			// CHANGE: Changed Enum base type
-			// log.Warn().Msgf("Changing '%s' base type is not backward compatible", newNode.Name)
-			// changed = true
 			return oldNode, fmt.Errorf("changing '%s' base type is not backward compatible", newNode.Name)
 		}
 	} else {
@@ -627,14 +702,8 @@ func annotateChangedEnumDefinitions(newNode, oldNode *EnumDefinition) (*EnumDefi
 	return nil, nil
 }
 
-// Compares two Types to determine what changed
-// NOTE: We can't just use the `TypesEqual` function because we need to know *how* a Type changed.
-func detectChangedTypes(newType, oldType Type) *TypeChange {
-	// TODO: This is a good example of where it would be nice to bubble up Type Change User Warnings
-	// so they are reported in the context of the `Field` or `ProtocolStep` that changed.
-	//
-	// UPDATE: The caller can just check if the TypeChange.Kind is TypeChangeIncompatible
-
+// Compares two Types to determine if and how they changed
+func detectChangedTypes(newType, oldType Type) TypeChange {
 	switch newType := newType.(type) {
 
 	case *SimpleType:
@@ -662,12 +731,12 @@ func detectChangedTypes(newType, oldType Type) *TypeChange {
 	}
 }
 
-func detectSimpleTypeChanges(newType, oldType *SimpleType) *TypeChange {
+func detectSimpleTypeChanges(newType, oldType *SimpleType) TypeChange {
 	// TODO: Compare TypeArguments
 	// This comparison depends on whether the ResolvedDefinition changed!
 	if len(newType.TypeArguments) != len(oldType.TypeArguments) {
 		// CHANGE: Changed number of TypeArguments
-
+		return &TypeChangeIncompatible{TypePair{oldType, newType}}
 	} else {
 		for i := range newType.TypeArguments {
 			if ch := detectChangedTypes(newType.TypeArguments[i], oldType.TypeArguments[i]); ch != nil {
@@ -684,7 +753,6 @@ func detectSimpleTypeChanges(newType, oldType *SimpleType) *TypeChange {
 	//  - Primitive to TypeDefinition
 	//  - TypeDefinition to Primitive
 	//  - TypeDefinition to TypeDefinition
-
 	newDef := newType.ResolvedDefinition
 	oldDef := oldType.ResolvedDefinition
 
@@ -692,38 +760,29 @@ func detectSimpleTypeChanges(newType, oldType *SimpleType) *TypeChange {
 		if _, ok := oldDef.(PrimitiveDefinition); ok {
 			return detectPrimitiveTypeChange(newType, oldType)
 		}
-		return &TypeChange{oldType, newType, TypeChangeIncompatible}
+		return &TypeChangeIncompatible{TypePair{oldType, newType}}
 	}
 
 	if _, ok := oldDef.(PrimitiveDefinition); ok {
-		return &TypeChange{oldType, newType, TypeChangeIncompatible}
+		return &TypeChangeIncompatible{TypePair{oldType, newType}}
 	}
 
 	// At this point, both Types should be TypeDefinitions
 	if newDef.GetDefinitionMeta().Name != oldDef.GetDefinitionMeta().Name {
 		// CHANGE: Type changed to a different TypeDefinition
-		return &TypeChange{oldType, newType, TypeChangeIncompatible}
+		return &TypeChangeIncompatible{TypePair{oldType, newType}}
 	}
 
 	// At this point, only the underlying TypeDefinition with matching name could have changed
 	// And it would have been annotated earlier when comparing Namespace TypeDefinitions
 	if ch, ok := newDef.GetDefinitionMeta().Annotations[ChangeAnnotationKey]; ok && ch != nil {
-		return &TypeChange{oldType, newType, TypeChangeDefinitionChanged}
+		return &TypeChangeDefinitionChanged{TypePair{oldType, newType}}
 	}
 
 	return nil
 }
 
-/*
-	TODO: Leverage the type functions:
-
-- func GetPrimitiveType(t Type) (primitive PrimitiveDefinition, ok bool)
-- func GetPrimitiveKind(t PrimitiveDefinition) PrimitiveKind
-- func GetKindIfPrimitive(t Type) (primitiveKind PrimitiveKind, ok bool)
-- func IsIntegralPrimitive(prim PrimitiveDefinition)
-- func IsIntegralType(t Type) bool
-*/
-func detectPrimitiveTypeChange(newType, oldType *SimpleType) *TypeChange {
+func detectPrimitiveTypeChange(newType, oldType *SimpleType) TypeChange {
 	newPrimitive := newType.ResolvedDefinition.(PrimitiveDefinition)
 	oldPrimitive := oldType.ResolvedDefinition.(PrimitiveDefinition)
 
@@ -734,38 +793,39 @@ func detectPrimitiveTypeChange(newType, oldType *SimpleType) *TypeChange {
 	// CHANGE: Changed Primitive type
 	if oldPrimitive == PrimitiveString {
 		if GetPrimitiveKind(newPrimitive) == PrimitiveKindInteger || GetPrimitiveKind(newPrimitive) == PrimitiveKindFloatingPoint {
-			return &TypeChange{oldType, newType, TypeChangeStringToNumber}
+			return &TypeChangeStringToNumber{TypePair{oldType, newType}}
 		}
 	}
 
 	if GetPrimitiveKind(oldPrimitive) == PrimitiveKindInteger || GetPrimitiveKind(oldPrimitive) == PrimitiveKindFloatingPoint {
 		if newPrimitive == PrimitiveString {
-			return &TypeChange{oldType, newType, TypeChangeNumberToString}
+			return &TypeChangeNumberToString{TypePair{oldType, newType}}
 		}
 
 		if GetPrimitiveKind(newPrimitive) == PrimitiveKindInteger || GetPrimitiveKind(newPrimitive) == PrimitiveKindFloatingPoint {
-			return &TypeChange{oldType, newType, TypeChangeNumberToNumber}
+			return &TypeChangeNumberToNumber{TypePair{oldType, newType}}
 		}
 	}
 
-	return &TypeChange{oldType, newType, TypeChangeIncompatible}
+	return &TypeChangeIncompatible{TypePair{oldType, newType}}
 }
 
-func detectGeneralizedTypeChanges(newType, oldType *GeneralizedType) *TypeChange {
+func detectGeneralizedTypeChanges(newType, oldType *GeneralizedType) TypeChange {
 	// A GeneralizedType can change in many ways...
-	changeKind := TypeChangeNoChange
+	var change TypeChange
 
 	// Compare Dimensonality
-	if ch := detectChangedDimensionality(newType.Dimensionality, oldType.Dimensionality); ch != nil {
+	if err := detectChangedDimensionality(newType.Dimensionality, oldType.Dimensionality); err != nil {
 		// CHANGE: Dimensionality changed
-		return &TypeChange{oldType, newType, TypeChangeIncompatible}
+		return &TypeChangeIncompatible{TypePair{oldType, newType}}
 	}
 
+	// TODO: Handle changing between Optional and Union
+	// TODO: Handle changing the order of Union types
+	// TODO: Handle adding types to a Union
+	// TODO: Handle removing types from a Union
 	if len(newType.Cases) != len(oldType.Cases) {
-		// TODO: Handle adding types to a Union/Optional
-		// TODO: Handle removing types from a Union/Optional
-
-		return &TypeChange{oldType, newType, TypeChangeIncompatible}
+		return &TypeChangeIncompatible{TypePair{oldType, newType}}
 	}
 
 	// Compare the Type of each TypeCase
@@ -774,78 +834,88 @@ func detectGeneralizedTypeChanges(newType, oldType *GeneralizedType) *TypeChange
 
 		if (newCase.Type == nil) != (oldCase.Type == nil) {
 			// CHANGE: Added or removed a type case
-			return &TypeChange{oldType, newType, TypeChangeIncompatible}
+			return &TypeChangeIncompatible{TypePair{oldType, newType}}
 		}
 
 		if newCase.Type == nil {
 			continue
 		}
 
-		if ch := detectChangedTypes(newCase.Type, oldCase.Type); ch != nil {
+		ch := detectChangedTypes(newCase.Type, oldCase.Type)
+		if ch != nil {
 			// CHANGE: Changed a type case
-			changeKind = ch.Kind
-			if ch.Kind == TypeChangeIncompatible {
-				break
+
+			// TODO: This is wrong, we should be comparing based on the kind of GeneralizedType
+			switch ch := ch.(type) {
+			case *TypeChangeNumberToNumber:
+				change = &TypeChangeNumberToNumber{TypePair{oldType, newType}}
+			case *TypeChangeNumberToString:
+				change = &TypeChangeNumberToString{TypePair{oldType, newType}}
+			case *TypeChangeStringToNumber:
+				change = &TypeChangeStringToNumber{TypePair{oldType, newType}}
+			case *TypeChangeScalarToOptional:
+				change = &TypeChangeScalarToOptional{TypePair{oldType, newType}}
+			case *TypeChangeOptionalToScalar:
+				change = &TypeChangeOptionalToScalar{TypePair{oldType, newType}}
+			case *TypeChangeScalarToUnion:
+				change = &TypeChangeScalarToUnion{TypePair{oldType, newType}, ch.TypeIndex}
+			case *TypeChangeUnionToScalar:
+				change = &TypeChangeUnionToScalar{TypePair{oldType, newType}, ch.TypeIndex}
+			case *TypeChangeUnionShrink:
+				change = &TypeChangeUnionShrink{TypePair{oldType, newType}, ch.TypeIndex}
+			case *TypeChangeUnionGrow:
+				change = &TypeChangeUnionGrow{TypePair{oldType, newType}, ch.TypeIndex}
+			case *TypeChangeDefinitionChanged:
+				change = &TypeChangeDefinitionChanged{TypePair{oldType, newType}}
+			case *TypeChangeIncompatible:
+				return &TypeChangeIncompatible{TypePair{oldType, newType}}
 			}
 		}
 	}
 
-	if changeKind != TypeChangeNoChange {
-		return &TypeChange{oldType, newType, changeKind}
-	}
-	return nil
+	return change
 }
 
-func detectGeneralizedToSimpleTypeChanges(newType *SimpleType, oldType *GeneralizedType) *TypeChange {
+func detectGeneralizedToSimpleTypeChanges(newType *SimpleType, oldType *GeneralizedType) TypeChange {
 	// Is it a change from Optional<T> to T (partially compatible)
 	if oldType.Cases.IsOptional() {
 		if TypesEqual(newType, oldType.Cases[1].Type) {
-			return &TypeChange{oldType, newType, TypeChangeOptionalToScalar}
+			return &TypeChangeOptionalToScalar{TypePair{oldType, newType}}
 		}
 	}
 
 	// Is it a change from Union<T, ...> to T (partially compatible)
 	if oldType.Cases.IsUnion() {
-		compatible := false
-		for _, tc := range oldType.Cases {
+		for i, tc := range oldType.Cases {
 			if TypesEqual(newType, tc.Type) {
-				compatible = true
+				return &TypeChangeUnionToScalar{TypePair{oldType, newType}, i}
 			}
-		}
-		// TODO: Need to capture the index of the matching type in the old Union's Cases
-		if compatible {
-			return &TypeChange{oldType, newType, TypeChangeUnionToScalar}
 		}
 	}
 
 	// CHANGE: Incompatible change from Generalized to Simple
-	return &TypeChange{oldType, newType, TypeChangeIncompatible}
+	return &TypeChangeIncompatible{TypePair{oldType, newType}}
 }
 
-func detectSimpleToGeneralizedTypeChanges(newType *GeneralizedType, oldType *SimpleType) *TypeChange {
+func detectSimpleToGeneralizedTypeChanges(newType *GeneralizedType, oldType *SimpleType) TypeChange {
 	// Is it a change from T to Optional<T> (partially compatible)
 	if newType.Cases.IsOptional() {
 		if TypesEqual(newType.Cases[1].Type, oldType) {
-			return &TypeChange{oldType, newType, TypeChangeScalarToOptional}
+			return &TypeChangeScalarToOptional{TypePair{oldType, newType}}
 		}
 	}
 
 	// Is it a change from T to Union<T, ...> (partially compatible)
 	if newType.Cases.IsUnion() {
-		compatible := false
-		for _, tc := range newType.Cases {
+		for i, tc := range newType.Cases {
 			if TypesEqual(tc.Type, oldType) {
-				compatible = true
+				return &TypeChangeScalarToUnion{TypePair{oldType, newType}, i}
 			}
-		}
-		// TODO: Need to capture the index of the matching type in the new Union's Cases
-		if compatible {
-			return &TypeChange{oldType, newType, TypeChangeScalarToUnion}
 		}
 	}
 
 	// CHANGE: Incompatible change from Simple to Generalized
-	return &TypeChange{oldType, newType, TypeChangeIncompatible}
+	return &TypeChangeIncompatible{TypePair{oldType, newType}}
 }
 
 func detectChangedDimensionality(newNode, oldNode Dimensionality) error {

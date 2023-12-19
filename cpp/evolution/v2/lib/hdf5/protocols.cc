@@ -124,7 +124,7 @@ struct _Inner_Header {
     yardl::hdf5::ToOuter(weight, o.weight);
   }
 
-  ::InnerUnion2<yardl::hdf5::InnerVlenString, std::string, int64_t, int64_t> subject;
+  ::InnerUnion2<int64_t, int64_t, yardl::hdf5::InnerVlenString, std::string> subject;
   yardl::hdf5::InnerMap<yardl::hdf5::InnerVlenString, std::string, yardl::hdf5::InnerVlen<yardl::hdf5::InnerVlenString, std::string>, std::vector<std::string>> meta;
   double weight;
 };
@@ -193,7 +193,7 @@ struct _Inner_NewRecord {
 [[maybe_unused]] H5::CompType GetHeaderHdf5Ddl() {
   using RecordType = evo_test::hdf5::_Inner_Header;
   H5::CompType t(sizeof(RecordType));
-  t.insertMember("subject", HOFFSET(RecordType, subject), ::InnerUnion2Ddl<yardl::hdf5::InnerVlenString, std::string, int64_t, int64_t>(false, yardl::hdf5::InnerVlenStringDdl(), "string", H5::PredType::NATIVE_INT64, "int64"));
+  t.insertMember("subject", HOFFSET(RecordType, subject), ::InnerUnion2Ddl<int64_t, int64_t, yardl::hdf5::InnerVlenString, std::string>(false, H5::PredType::NATIVE_INT64, "int64", yardl::hdf5::InnerVlenStringDdl(), "string"));
   t.insertMember("meta", HOFFSET(RecordType, meta), yardl::hdf5::InnerMapDdl<yardl::hdf5::InnerVlenString, yardl::hdf5::InnerVlen<yardl::hdf5::InnerVlenString, std::string>>(yardl::hdf5::InnerVlenStringDdl(), yardl::hdf5::InnerVlenDdl(yardl::hdf5::InnerVlenStringDdl())));
   t.insertMember("weight", HOFFSET(RecordType, weight), H5::PredType::NATIVE_DOUBLE);
   return t;
