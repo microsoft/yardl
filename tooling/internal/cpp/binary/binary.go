@@ -367,7 +367,7 @@ func writeNamespaceDefinitions(w *formatting.IndentedWriter, ns *dsl.Namespace) 
 		for _, typeDef := range ns.TypeDefinitions {
 			writeSerializers(w, typeDef)
 
-			if changes, ok := typeDef.GetDefinitionMeta().Annotations["changes"]; ok {
+			if changes, ok := typeDef.GetDefinitionMeta().Annotations[dsl.AllVersionChangesAnnotationKey]; ok {
 				for i, changedTypeDef := range changes.([]dsl.TypeDefinition) {
 					if changedTypeDef != nil {
 						writeCompatibilitySerializers(w, typeDef, changedTypeDef, i)
@@ -552,20 +552,20 @@ func writeCompatibilitySerializers(w *formatting.IndentedWriter, t dsl.TypeDefin
 				varType := common.TypeSyntax(field.Type)
 				varName := common.FieldIdentifierName(field.Name)
 
-				if field.Annotations["removed"] != nil {
+				if field.Annotations[dsl.FieldOrStepRemovedAnnotationKey] != nil {
 					// Field was removed: Read it and discard, or Write "default" value
 					fmt.Fprintf(w, "%s %s;\n", varType, varName)
 					fmt.Fprintf(w, "%s(stream, %s);\n", typeRwFunction(field.Type, write), varName)
-				} else if field.Annotations["changed"] != nil {
+				} else if field.Annotations[dsl.ChangeAnnotationKey] != nil {
 					// Field type change: Handle type conversions
-					typeChange := field.Annotations["changed"].(*dsl.TypeChange)
+					typeChange := field.Annotations[dsl.ChangeAnnotationKey].(*dsl.TypeChange)
 					writeTypeConversion(w, typeChange, "stream", varName, fmt.Sprintf("value.%s", varName), write)
 				} else {
 					fmt.Fprintf(w, "%s(stream, value.%s);\n", typeRwFunction(field.Type, write), varName)
 				}
 			}
 		case *dsl.NamedType:
-			if ch, ok := p.Annotations["changed"]; ok {
+			if ch, ok := p.Annotations[dsl.ChangeAnnotationKey]; ok {
 				varName := common.FieldIdentifierName(p.Name)
 				typeChange := ch.(*dsl.TypeChange)
 				writeTypeConversion(w, typeChange, "stream", varName, "value", write)
@@ -709,8 +709,17 @@ func writeProtocolStep(w *formatting.IndentedWriter, step *dsl.ProtocolStep, str
 		}
 	}
 
-	changes, ok := step.Annotations["changes"].([]*dsl.TypeChange)
-	if !ok || len(changes) == 0 {
+	allNil := func(vs []*dsl.TypeChange) bool {
+		for _, v := range vs {
+			if v != nil {
+				return false
+			}
+		}
+		return true
+	}
+
+	changes, ok := step.Annotations[dsl.AllVersionChangesAnnotationKey].([]*dsl.TypeChange)
+	if !ok || allNil(changes) {
 		// No schema version changes
 		writeStepRw(step.Type)
 		return
@@ -790,7 +799,7 @@ func typeDefinitionRwFunction(t dsl.TypeDefinition, write bool) string {
 		meta := t.GetDefinitionMeta()
 
 		suffix := meta.Name
-		if ver, ok := meta.Annotations["version"]; ok {
+		if ver, ok := meta.Annotations[dsl.VersionAnnotationKey]; ok {
 			suffix += fmt.Sprintf("_v%d", ver.(int))
 		}
 

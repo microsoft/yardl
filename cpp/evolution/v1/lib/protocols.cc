@@ -276,6 +276,7 @@ void UnusedProtocolReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
 std::string UnusedProtocolWriterBase::schema_ = R"({"protocol":{"name":"UnusedProtocol","sequence":[{"name":"samples","type":{"stream":{"items":"EvoTest.Sample"}}}]},"types":[{"name":"Sample","fields":[{"name":"data","type":{"vector":{"items":"int32"}}},{"name":"timestamp","type":"datetime"}]}]})";
 
 std::vector<std::string> UnusedProtocolWriterBase::previous_schemas_ = {
+  R"()",
 };
 
 void UnusedProtocolWriterBase::WriteSamples(evo_test::Sample const& value) {

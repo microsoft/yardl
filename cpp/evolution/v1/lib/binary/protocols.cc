@@ -194,29 +194,17 @@ void MyProtocolWriter::WriteHeaderImpl(evo_test::Header const& value) {
 }
 
 void MyProtocolWriter::WriteIdImpl(int64_t const& value) {
-  switch (schema_index_) {
-  default:
-    yardl::binary::WriteInteger(stream_, value);
-    break;
-  }
+  yardl::binary::WriteInteger(stream_, value);
 }
 
 void MyProtocolWriter::WriteSamplesImpl(evo_test::Sample const& value) {
   yardl::binary::WriteInteger(stream_, 1U);
-  switch (schema_index_) {
-  default:
-    evo_test::binary::WriteSample(stream_, value);
-    break;
-  }
+  evo_test::binary::WriteSample(stream_, value);
 }
 
 void MyProtocolWriter::WriteSamplesImpl(std::vector<evo_test::Sample> const& values) {
   if (!values.empty()) {
-    switch (schema_index_) {
-    default:
-      yardl::binary::WriteVector<evo_test::Sample, evo_test::binary::WriteSample>(stream_, values);
-      break;
-    }
+    yardl::binary::WriteVector<evo_test::Sample, evo_test::binary::WriteSample>(stream_, values);
   }
 }
 
@@ -225,11 +213,7 @@ void MyProtocolWriter::EndSamplesImpl() {
 }
 
 void MyProtocolWriter::WriteFooterImpl(std::optional<evo_test::Footer> const& value) {
-  switch (schema_index_) {
-  default:
-    yardl::binary::WriteOptional<evo_test::Footer, evo_test::binary::WriteFooter>(stream_, value);
-    break;
-  }
+  yardl::binary::WriteOptional<evo_test::Footer, evo_test::binary::WriteFooter>(stream_, value);
 }
 
 void MyProtocolWriter::Flush() {
@@ -252,11 +236,7 @@ void MyProtocolReader::ReadHeaderImpl(evo_test::Header& value) {
 }
 
 void MyProtocolReader::ReadIdImpl(int64_t& value) {
-  switch (schema_index_) {
-  default:
-    yardl::binary::ReadInteger(stream_, value);
-    break;
-  }
+  yardl::binary::ReadInteger(stream_, value);
 }
 
 bool MyProtocolReader::ReadSamplesImpl(evo_test::Sample& value) {
@@ -266,30 +246,18 @@ bool MyProtocolReader::ReadSamplesImpl(evo_test::Sample& value) {
       return false;
     }
   }
-  switch (schema_index_) {
-  default:
-    evo_test::binary::ReadSample(stream_, value);
-    break;
-  }
+  evo_test::binary::ReadSample(stream_, value);
   current_block_remaining_--;
   return true;
 }
 
 bool MyProtocolReader::ReadSamplesImpl(std::vector<evo_test::Sample>& values) {
-  switch (schema_index_) {
-  default:
-    yardl::binary::ReadBlocksIntoVector<evo_test::Sample, evo_test::binary::ReadSample>(stream_, current_block_remaining_, values);
-    break;
-  }
+  yardl::binary::ReadBlocksIntoVector<evo_test::Sample, evo_test::binary::ReadSample>(stream_, current_block_remaining_, values);
   return current_block_remaining_ != 0;
 }
 
 void MyProtocolReader::ReadFooterImpl(std::optional<evo_test::Footer>& value) {
-  switch (schema_index_) {
-  default:
-    yardl::binary::ReadOptional<evo_test::Footer, evo_test::binary::ReadFooter>(stream_, value);
-    break;
-  }
+  yardl::binary::ReadOptional<evo_test::Footer, evo_test::binary::ReadFooter>(stream_, value);
 }
 
 void MyProtocolReader::CloseImpl() {
