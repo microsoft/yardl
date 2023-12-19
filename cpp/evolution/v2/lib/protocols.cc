@@ -280,6 +280,8 @@ void NewProtocolReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
 std::string NewProtocolWriterBase::schema_ = R"({"protocol":{"name":"NewProtocol","sequence":[{"name":"calibration","type":{"vector":{"items":"float64"}}},{"name":"data","type":{"stream":{"items":"EvoTest.NewRecord"}}}]},"types":[{"name":"NewRecord","fields":[{"name":"stuff","type":{"array":{"items":"float64"}}}]}]})";
 
 std::vector<std::string> NewProtocolWriterBase::previous_schemas_ = {
+  R"()",
+  R"()",
 };
 
 void NewProtocolWriterBase::WriteCalibration(std::vector<double> const& value) {

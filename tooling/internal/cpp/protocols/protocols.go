@@ -200,7 +200,7 @@ func writeDefinitions(w *formatting.IndentedWriter, ns *dsl.Namespace, symbolTab
 		fmt.Fprintf(w, "std::string %s::schema_ = R\"(%s)\";\n\n", common.AbstractWriterName(p), dsl.GetProtocolSchemaString(p, symbolTable))
 		fmt.Fprintf(w, "std::vector<std::string> %s::previous_schemas_ = {\n", common.AbstractWriterName(p))
 		w.Indented(func() {
-			if schemas, ok := p.Annotations["schemas"]; ok {
+			if schemas, ok := p.Annotations[dsl.AllVersionSchemasAnnotationKey]; ok {
 				for _, schema := range schemas.([]string) {
 					fmt.Fprintf(w, "R\"(%s)\",\n", schema)
 				}
