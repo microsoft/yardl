@@ -8,7 +8,7 @@ int main(void) {
   Header h;
   r.ReadHeader(h);
 
-  assert(h.subject.index() == 0 && std::get<0>(h.subject) == "Anonymous Human");
+  assert(h.subject.index() == 1 && std::get<1>(h.subject) == "Anonymous Human");
   assert(h.meta["age"][0] == "42");
   assert(h.weight == 75.0f);
 

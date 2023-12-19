@@ -8,7 +8,7 @@ MyProtocol: !protocol
 
 Header: !record
   fields:
-    subject: [string, long]
+    subject: [long, string]
     meta: string->string*
     weight: double
 
@@ -26,8 +26,6 @@ Signature: !record
     name: string
     email: string
     number: string
-
-# AliasedRecord: Signature
 
 AliasedPrimitive: double
 

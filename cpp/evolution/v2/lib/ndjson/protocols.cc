@@ -26,18 +26,18 @@ using ordered_json = nlohmann::ordered_json;
 NLOHMANN_JSON_NAMESPACE_BEGIN
 
 template <>
-struct adl_serializer<std::variant<std::string, int64_t>> {
-  [[maybe_unused]] static void to_json(ordered_json& j, std::variant<std::string, int64_t> const& value) {
+struct adl_serializer<std::variant<int64_t, std::string>> {
+  [[maybe_unused]] static void to_json(ordered_json& j, std::variant<int64_t, std::string> const& value) {
     std::visit([&j](auto const& v) {j = v;}, value);
   }
 
-  [[maybe_unused]] static void from_json(ordered_json const& j, std::variant<std::string, int64_t>& value) {
-    if ((j.is_string())) {
-      value = j.get<std::string>();
-      return;
-    }
+  [[maybe_unused]] static void from_json(ordered_json const& j, std::variant<int64_t, std::string>& value) {
     if ((j.is_number())) {
       value = j.get<int64_t>();
+      return;
+    }
+    if ((j.is_string())) {
+      value = j.get<std::string>();
       return;
     }
     throw std::runtime_error("Invalid union value");

@@ -121,7 +121,7 @@ namespace {
     return;
   }
 
-  WriteUnion<std::string, yardl::binary::WriteString, int64_t, yardl::binary::WriteInteger>(stream, value.subject);
+  WriteUnion<int64_t, yardl::binary::WriteInteger, std::string, yardl::binary::WriteString>(stream, value.subject);
   yardl::binary::WriteMap<std::string, std::vector<std::string>, yardl::binary::WriteString, yardl::binary::WriteVector<std::string, yardl::binary::WriteString>>(stream, value.meta);
   yardl::binary::WriteFloatingPoint(stream, value.weight);
 }
@@ -132,17 +132,17 @@ namespace {
     return;
   }
 
-  ReadUnion<std::string, yardl::binary::ReadString, int64_t, yardl::binary::ReadInteger>(stream, value.subject);
+  ReadUnion<int64_t, yardl::binary::ReadInteger, std::string, yardl::binary::ReadString>(stream, value.subject);
   yardl::binary::ReadMap<std::string, std::vector<std::string>, yardl::binary::ReadString, yardl::binary::ReadVector<std::string, yardl::binary::ReadString>>(stream, value.meta);
   yardl::binary::ReadFloatingPoint(stream, value.weight);
 }
 
 [[maybe_unused]] static void WriteHeader_v0(yardl::binary::CodedOutputStream& stream, evo_test::Header const& value) {
   std::string subject;
-  subject = std::get<0>(value.subject);
+  subject = std::get<1>(value.subject);
   yardl::binary::WriteString(stream, subject);
   int64_t weight;
-  weight = (double)(value.weight);
+  weight = (int64_t)(value.weight);
   yardl::binary::WriteInteger(stream, weight);
   yardl::binary::WriteMap<std::string, std::vector<std::string>, yardl::binary::WriteString, yardl::binary::WriteVector<std::string, yardl::binary::WriteString>>(stream, value.meta);
 }
@@ -160,10 +160,10 @@ namespace {
 [[maybe_unused]] static void WriteHeader_v1(yardl::binary::CodedOutputStream& stream, evo_test::Header const& value) {
   yardl::binary::WriteMap<std::string, std::vector<std::string>, yardl::binary::WriteString, yardl::binary::WriteVector<std::string, yardl::binary::WriteString>>(stream, value.meta);
   std::string subject;
-  subject = std::get<0>(value.subject);
+  subject = std::get<1>(value.subject);
   yardl::binary::WriteString(stream, subject);
   int64_t weight;
-  weight = (double)(value.weight);
+  weight = (int64_t)(value.weight);
   yardl::binary::WriteInteger(stream, weight);
   std::optional<std::string> added;
   yardl::binary::WriteOptional<std::string, yardl::binary::WriteString>(stream, added);
