@@ -31,6 +31,7 @@ class MyProtocolWriter : public evo_test::MyProtocolWriterBase, yardl::ndjson::N
   void WriteIdImpl(int64_t const& value) override;
   void WriteSamplesImpl(evo_test::Sample const& value) override;
   void EndSamplesImpl() override {}
+  void WriteMaybeImpl(std::optional<int32_t> const& value) override;
   void WriteFooterImpl(std::optional<evo_test::Footer> const& value) override;
   void CloseImpl() override;
 };
@@ -50,6 +51,7 @@ class MyProtocolReader : public evo_test::MyProtocolReaderBase, yardl::ndjson::N
   void ReadHeaderImpl(evo_test::Header& value) override;
   void ReadIdImpl(int64_t& value) override;
   bool ReadSamplesImpl(evo_test::Sample& value) override;
+  void ReadMaybeImpl(std::optional<int32_t>& value) override;
   void ReadFooterImpl(std::optional<evo_test::Footer>& value) override;
   void CloseImpl() override;
 };

@@ -185,7 +185,9 @@ namespace {
 void MyProtocolWriter::WriteHeaderImpl(evo_test::Header const& value) {
   switch (schema_index_) {
   case 0:
+    {
     evo_test::binary::WriteHeader_v0(stream_, value);
+    }
     break;
   default:
     evo_test::binary::WriteHeader(stream_, value);
@@ -212,6 +214,10 @@ void MyProtocolWriter::EndSamplesImpl() {
   yardl::binary::WriteInteger(stream_, 0U);
 }
 
+void MyProtocolWriter::WriteMaybeImpl(std::optional<int32_t> const& value) {
+  yardl::binary::WriteOptional<int32_t, yardl::binary::WriteInteger>(stream_, value);
+}
+
 void MyProtocolWriter::WriteFooterImpl(std::optional<evo_test::Footer> const& value) {
   yardl::binary::WriteOptional<evo_test::Footer, evo_test::binary::WriteFooter>(stream_, value);
 }
@@ -227,7 +233,9 @@ void MyProtocolWriter::CloseImpl() {
 void MyProtocolReader::ReadHeaderImpl(evo_test::Header& value) {
   switch (schema_index_) {
   case 0:
+    {
     evo_test::binary::ReadHeader_v0(stream_, value);
+    }
     break;
   default:
     evo_test::binary::ReadHeader(stream_, value);
@@ -254,6 +262,10 @@ bool MyProtocolReader::ReadSamplesImpl(evo_test::Sample& value) {
 bool MyProtocolReader::ReadSamplesImpl(std::vector<evo_test::Sample>& values) {
   yardl::binary::ReadBlocksIntoVector<evo_test::Sample, evo_test::binary::ReadSample>(stream_, current_block_remaining_, values);
   return current_block_remaining_ != 0;
+}
+
+void MyProtocolReader::ReadMaybeImpl(std::optional<int32_t>& value) {
+  yardl::binary::ReadOptional<int32_t, yardl::binary::ReadInteger>(stream_, value);
 }
 
 void MyProtocolReader::ReadFooterImpl(std::optional<evo_test::Footer>& value) {

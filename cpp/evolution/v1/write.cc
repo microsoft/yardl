@@ -27,6 +27,8 @@ int main(void) {
 
   w.EndSamples();
 
+  w.WriteMaybe(42);
+
   w.WriteFooter(std::nullopt);
 
   w.Close();

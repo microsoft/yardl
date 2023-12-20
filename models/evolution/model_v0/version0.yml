@@ -4,6 +4,7 @@ MyProtocol: !protocol
     id: long
     samples: !stream
       items: Sample
+    maybe: int?
     footer: Footer?
 
 Header: !record

@@ -4,6 +4,7 @@ MyProtocol: !protocol
     id: string
     samples: !stream
       items: Sample
+    maybe: string?
     footer: Footer?
 
 Header: !record

@@ -166,6 +166,10 @@ void MyProtocolWriter::EndSamplesImpl() {
   samples_dataset_state_.reset();
 }
 
+void MyProtocolWriter::WriteMaybeImpl(std::optional<int32_t> const& value) {
+  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerOptional<int32_t, int32_t>, std::optional<int32_t>>(group_, "maybe", yardl::hdf5::OptionalTypeDdl<int32_t, int32_t>(H5::PredType::NATIVE_INT32), value);
+}
+
 void MyProtocolWriter::WriteFooterImpl(std::optional<evo_test::Footer> const& value) {
   yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerOptional<evo_test::hdf5::_Inner_Footer, evo_test::Footer>, std::optional<evo_test::Footer>>(group_, "footer", yardl::hdf5::OptionalTypeDdl<evo_test::hdf5::_Inner_Footer, evo_test::Footer>(evo_test::hdf5::GetFooterHdf5Ddl()), value);
 }
@@ -206,6 +210,10 @@ bool MyProtocolReader::ReadSamplesImpl(std::vector<evo_test::Sample>& values) {
   }
 
   return has_more;
+}
+
+void MyProtocolReader::ReadMaybeImpl(std::optional<int32_t>& value) {
+  yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerOptional<int32_t, int32_t>, std::optional<int32_t>>(group_, "maybe", yardl::hdf5::OptionalTypeDdl<int32_t, int32_t>(H5::PredType::NATIVE_INT32), value);
 }
 
 void MyProtocolReader::ReadFooterImpl(std::optional<evo_test::Footer>& value) {

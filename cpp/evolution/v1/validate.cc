@@ -31,6 +31,10 @@ int main(void) {
     // std::cout << s.timestamp.time_since_epoch << std::endl;
   };
 
+  std::optional<int> maybe;
+  r.ReadMaybe(maybe);
+  assert(maybe == 42);
+
   std::optional<Footer> footer;
   r.ReadFooter(footer);
 

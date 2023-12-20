@@ -461,6 +461,7 @@ func writeRwFunctionTemplateDeclaration(t dsl.TypeDefinition, w *formatting.Inde
 	}
 }
 
+// Returns the expression used to convert varName from typeChange.Old() to typeChange.New() on read, or vice-versa on write
 func typeConversionExpression(typeChange dsl.TypeChange, varName string, write bool) string {
 	if write {
 		return typeConversionExpression(typeChange.Inverse(), varName, false)
@@ -501,20 +502,56 @@ func typeConversionExpression(typeChange dsl.TypeChange, varName string, write b
 	}
 }
 
-func writeTypeConversion(w *formatting.IndentedWriter, tc dsl.TypeChange, streamName, tmpName, targetName string, write bool) {
+// Writes code needed to convert sourceName: typeChange.Old() into targetName: typeChange.New() on read, or vice-versa on write
+func writeTypeConversion(w *formatting.IndentedWriter, typeChange dsl.TypeChange, sourceName, targetName string, write bool) {
+	if typeChange, ok := typeChange.(dsl.WrappedTypeChange); ok {
+		switch tc := typeChange.(type) {
+		case *dsl.TypeChangeOptionalTypeChanged:
+			if write {
+				fmt.Fprintf(w, "if (%s.has_value()) {\n", sourceName)
+				w.Indented(func() {
+					writeTypeConversion(w, tc.Inner(), sourceName+".value()", targetName, write)
+				})
+				fmt.Fprintf(w, "}\n")
+			} else {
+				tmpName := "tmp"
+				fmt.Fprintf(w, "%s %s;\n", common.TypeSyntax(tc.NewType()), tmpName)
+				fmt.Fprintf(w, "if (%s.has_value()) {\n", sourceName)
+				w.Indented(func() {
+					writeTypeConversion(w, tc.Inner(), sourceName+".value()", tmpName, write)
+				})
+				fmt.Fprintf(w, "}\n")
+				fmt.Fprintf(w, "%s = %s;\n", targetName, tmpName)
+			}
+		}
+		return
+	}
+
+	fmt.Fprintf(w, "%s = %s;\n", targetName, typeConversionExpression(typeChange, sourceName, write))
+}
+
+func writeConversionRw(w *formatting.IndentedWriter, tc dsl.TypeChange, streamName, tmpName, targetName string, write bool) {
+	// If the TypeChange is due to a changed TypeDefinition, no conversion is needed
+	// because it will be handled by the TypeDefinition-specific Read/Write functions
 	if _, ok := tc.(*dsl.TypeChangeDefinitionChanged); ok {
 		fmt.Fprintf(w, "%s(%s, %s);\n", typeRwFunction(tc.OldType(), write), streamName, targetName)
 		return
+	}
+	if wrapped, ok := tc.(dsl.WrappedTypeChange); ok {
+		if _, ok := wrapped.Inner().(*dsl.TypeChangeDefinitionChanged); ok {
+			fmt.Fprintf(w, "%s(%s, %s);\n", typeRwFunction(tc.OldType(), write), streamName, targetName)
+			return
+		}
 	}
 
 	varType := common.TypeSyntax(tc.OldType())
 	fmt.Fprintf(w, "%s %s;\n", varType, tmpName)
 	if write {
-		fmt.Fprintf(w, "%s = %s;\n", tmpName, typeConversionExpression(tc, targetName, write))
+		writeTypeConversion(w, tc, targetName, tmpName, write)
 		fmt.Fprintf(w, "%s(%s, %s);\n", typeRwFunction(tc.OldType(), write), streamName, tmpName)
 	} else {
 		fmt.Fprintf(w, "%s(%s, %s);\n", typeRwFunction(tc.OldType(), write), streamName, tmpName)
-		fmt.Fprintf(w, "%s = %s;\n", targetName, typeConversionExpression(tc, tmpName, write))
+		writeTypeConversion(w, tc, tmpName, targetName, write)
 	}
 }
 
@@ -538,7 +575,7 @@ func writeCompatibilitySerializers(w *formatting.IndentedWriter, t dsl.TypeDefin
 				} else if field.Annotations[dsl.ChangeAnnotationKey] != nil {
 					// Field type change: Handle type conversions
 					typeChange := field.Annotations[dsl.ChangeAnnotationKey].(dsl.TypeChange)
-					writeTypeConversion(w, typeChange, "stream", varName, fmt.Sprintf("value.%s", varName), write)
+					writeConversionRw(w, typeChange, "stream", varName, fmt.Sprintf("value.%s", varName), write)
 				} else {
 					fmt.Fprintf(w, "%s(stream, value.%s);\n", typeRwFunction(field.Type, write), varName)
 				}
@@ -547,7 +584,7 @@ func writeCompatibilitySerializers(w *formatting.IndentedWriter, t dsl.TypeDefin
 			if ch, ok := p.Annotations[dsl.ChangeAnnotationKey]; ok {
 				varName := common.FieldIdentifierName(p.Name)
 				typeChange := ch.(dsl.TypeChange)
-				writeTypeConversion(w, typeChange, "stream", varName, "value", write)
+				writeConversionRw(w, typeChange, "stream", varName, "value", write)
 			} else {
 				fmt.Fprintf(w, "%s(stream, value);\n", typeRwFunction(p.Type, write))
 			}
@@ -712,26 +749,23 @@ func writeProtocolStep(w *formatting.IndentedWriter, step *dsl.ProtocolStep, str
 
 		fmt.Fprintf(w, "case %d:\n", i)
 		w.Indented(func() {
+			fmt.Fprintln(w, "{")
 			defer func() {
+				fmt.Fprintln(w, "}")
 				fmt.Fprintln(w, "break;")
 			}()
 
 			changedType := change.OldType()
 
 			if stream {
-				writeStepRw(changedType)
-				return
-			}
-
-			if _, ok := change.(*dsl.TypeChangeDefinitionChanged); ok {
-				// Type conversions for this ProtocolStep are handled by TypeDef Serializers
+				// TODO: Refactor - This assumes that Stream changes can only be TypeDefinition changes
 				writeStepRw(changedType)
 				return
 			}
 
 			// Handle conversions for ProtocolStep type changes
 			varName := fmt.Sprintf("%s_%d", common.FieldIdentifierName(step.Name), i)
-			writeTypeConversion(w, change, "stream_", varName, "value", write)
+			writeConversionRw(w, change, "stream_", varName, "value", write)
 		})
 	}
 	fmt.Fprintln(w, "default:")
