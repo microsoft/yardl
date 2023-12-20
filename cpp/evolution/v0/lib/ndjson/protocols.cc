@@ -136,6 +136,10 @@ void MyProtocolWriter::WriteSamplesImpl(evo_test::Sample const& value) {
   ordered_json json_value = value;
   yardl::ndjson::WriteProtocolValue(stream_, "samples", json_value);}
 
+void MyProtocolWriter::WriteMaybeImpl(std::optional<int32_t> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "maybe", json_value);}
+
 void MyProtocolWriter::WriteFooterImpl(std::optional<evo_test::Footer> const& value) {
   ordered_json json_value = value;
   yardl::ndjson::WriteProtocolValue(stream_, "footer", json_value);}
@@ -158,6 +162,10 @@ void MyProtocolReader::ReadIdImpl(int64_t& value) {
 
 bool MyProtocolReader::ReadSamplesImpl(evo_test::Sample& value) {
   return yardl::ndjson::ReadProtocolValue(stream_, line_, "samples", false, unused_step_, value);
+}
+
+void MyProtocolReader::ReadMaybeImpl(std::optional<int32_t>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "maybe", true, unused_step_, value);
 }
 
 void MyProtocolReader::ReadFooterImpl(std::optional<evo_test::Footer>& value) {

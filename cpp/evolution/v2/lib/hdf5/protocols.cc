@@ -268,6 +268,10 @@ void MyProtocolWriter::EndSamplesImpl() {
   samples_dataset_state_.reset();
 }
 
+void MyProtocolWriter::WriteMaybeImpl(std::optional<std::string> const& value) {
+  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerOptional<yardl::hdf5::InnerVlenString, std::string>, std::optional<std::string>>(group_, "maybe", yardl::hdf5::OptionalTypeDdl<yardl::hdf5::InnerVlenString, std::string>(yardl::hdf5::InnerVlenStringDdl()), value);
+}
+
 void MyProtocolWriter::WriteFooterImpl(std::optional<evo_test::Footer> const& value) {
   yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerOptional<evo_test::hdf5::_Inner_Footer, evo_test::Footer>, std::optional<evo_test::Footer>>(group_, "footer", yardl::hdf5::OptionalTypeDdl<evo_test::hdf5::_Inner_Footer, evo_test::Footer>(evo_test::hdf5::GetFooterHdf5Ddl()), value);
 }
@@ -308,6 +312,10 @@ bool MyProtocolReader::ReadSamplesImpl(std::vector<evo_test::Sample>& values) {
   }
 
   return has_more;
+}
+
+void MyProtocolReader::ReadMaybeImpl(std::optional<std::string>& value) {
+  yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerOptional<yardl::hdf5::InnerVlenString, std::string>, std::optional<std::string>>(group_, "maybe", yardl::hdf5::OptionalTypeDdl<yardl::hdf5::InnerVlenString, std::string>(yardl::hdf5::InnerVlenStringDdl()), value);
 }
 
 void MyProtocolReader::ReadFooterImpl(std::optional<evo_test::Footer>& value) {

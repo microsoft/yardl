@@ -16,15 +16,17 @@ void MyProtocolWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool e
   case 0: expected_method = "WriteHeader()"; break;
   case 1: expected_method = "WriteId()"; break;
   case 2: expected_method = "WriteSamples() or EndSamples()"; break;
-  case 3: expected_method = "WriteFooter()"; break;
+  case 3: expected_method = "WriteMaybe()"; break;
+  case 4: expected_method = "WriteFooter()"; break;
   }
   std::string attempted_method;
   switch (attempted) {
   case 0: attempted_method = "WriteHeader()"; break;
   case 1: attempted_method = "WriteId()"; break;
   case 2: attempted_method = end ? "EndSamples()" : "WriteSamples()"; break;
-  case 3: attempted_method = "WriteFooter()"; break;
-  case 4: attempted_method = "Close()"; break;
+  case 3: attempted_method = "WriteMaybe()"; break;
+  case 4: attempted_method = "WriteFooter()"; break;
+  case 5: attempted_method = "Close()"; break;
   }
   throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
 }
@@ -35,8 +37,9 @@ void MyProtocolReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
     case 0: return "ReadHeader()";
     case 1: return "ReadId()";
     case 2: return "ReadSamples()";
-    case 3: return "ReadFooter()";
-    case 4: return "Close()";
+    case 3: return "ReadMaybe()";
+    case 4: return "ReadFooter()";
+    case 5: return "Close()";
     default: return "<unknown>";
     }
   };
@@ -45,11 +48,11 @@ void MyProtocolReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
 
 } // namespace 
 
-std::string MyProtocolWriterBase::schema_ = R"({"protocol":{"name":"MyProtocol","sequence":[{"name":"header","type":"EvoTest.Header"},{"name":"id","type":"string"},{"name":"samples","type":{"stream":{"items":"EvoTest.Sample"}}},{"name":"footer","type":[null,"EvoTest.Footer"]}]},"types":[{"name":"Footer","fields":[{"name":"signature","type":"EvoTest.Signature"}]},{"name":"Header","fields":[{"name":"subject","type":[{"tag":"int64","type":"int64"},{"tag":"string","type":"string"}]},{"name":"meta","type":{"map":{"keys":"string","values":{"vector":{"items":"string"}}}}},{"name":"weight","type":"float64"}]},{"name":"Sample","fields":[{"name":"timestamp","type":"datetime"},{"name":"data","type":{"vector":{"items":"int32"}}}]},{"name":"Signature","fields":[{"name":"name","type":"string"},{"name":"email","type":"string"},{"name":"number","type":"string"}]}]})";
+std::string MyProtocolWriterBase::schema_ = R"({"protocol":{"name":"MyProtocol","sequence":[{"name":"header","type":"EvoTest.Header"},{"name":"id","type":"string"},{"name":"samples","type":{"stream":{"items":"EvoTest.Sample"}}},{"name":"maybe","type":[null,"string"]},{"name":"footer","type":[null,"EvoTest.Footer"]}]},"types":[{"name":"Footer","fields":[{"name":"signature","type":"EvoTest.Signature"}]},{"name":"Header","fields":[{"name":"subject","type":[{"tag":"int64","type":"int64"},{"tag":"string","type":"string"}]},{"name":"meta","type":{"map":{"keys":"string","values":{"vector":{"items":"string"}}}}},{"name":"weight","type":"float64"}]},{"name":"Sample","fields":[{"name":"timestamp","type":"datetime"},{"name":"data","type":{"vector":{"items":"int32"}}}]},{"name":"Signature","fields":[{"name":"name","type":"string"},{"name":"email","type":"string"},{"name":"number","type":"string"}]}]})";
 
 std::vector<std::string> MyProtocolWriterBase::previous_schemas_ = {
-  R"({"protocol":{"name":"MyProtocol","sequence":[{"name":"header","type":"EvoTest.Header"},{"name":"id","type":"int64"},{"name":"samples","type":{"stream":{"items":"EvoTest.Sample"}}},{"name":"footer","type":[null,"EvoTest.Footer"]}]},"types":[{"name":"Footer","fields":[{"name":"signature","type":"EvoTest.Signature"}]},{"name":"Header","fields":[{"name":"subject","type":"string"},{"name":"weight","type":"int64"},{"name":"meta","type":{"map":{"keys":"string","values":{"vector":{"items":"string"}}}}}]},{"name":"Sample","fields":[{"name":"data","type":{"vector":{"items":"int32"}}},{"name":"timestamp","type":"datetime"}]},{"name":"Signature","fields":[{"name":"name","type":"string"},{"name":"email","type":"string"},{"name":"number","type":"int64"}]}]})",
-  R"({"protocol":{"name":"MyProtocol","sequence":[{"name":"header","type":"EvoTest.Header"},{"name":"id","type":"int64"},{"name":"samples","type":{"stream":{"items":"EvoTest.Sample"}}},{"name":"footer","type":[null,"EvoTest.Footer"]}]},"types":[{"name":"Footer","fields":[{"name":"signature","type":"EvoTest.Signature"}]},{"name":"Header","fields":[{"name":"meta","type":{"map":{"keys":"string","values":{"vector":{"items":"string"}}}}},{"name":"subject","type":"string"},{"name":"weight","type":"int64"},{"name":"added","type":[null,"string"]}]},{"name":"Sample","fields":[{"name":"data","type":{"vector":{"items":"int32"}}},{"name":"timestamp","type":"datetime"}]},{"name":"Signature","fields":[{"name":"name","type":"string"},{"name":"email","type":"string"},{"name":"number","type":"int64"}]}]})",
+  R"({"protocol":{"name":"MyProtocol","sequence":[{"name":"header","type":"EvoTest.Header"},{"name":"id","type":"int64"},{"name":"samples","type":{"stream":{"items":"EvoTest.Sample"}}},{"name":"maybe","type":[null,"int32"]},{"name":"footer","type":[null,"EvoTest.Footer"]}]},"types":[{"name":"Footer","fields":[{"name":"signature","type":"EvoTest.Signature"}]},{"name":"Header","fields":[{"name":"subject","type":"string"},{"name":"weight","type":"int64"},{"name":"meta","type":{"map":{"keys":"string","values":{"vector":{"items":"string"}}}}}]},{"name":"Sample","fields":[{"name":"data","type":{"vector":{"items":"int32"}}},{"name":"timestamp","type":"datetime"}]},{"name":"Signature","fields":[{"name":"name","type":"string"},{"name":"email","type":"string"},{"name":"number","type":"int64"}]}]})",
+  R"({"protocol":{"name":"MyProtocol","sequence":[{"name":"header","type":"EvoTest.Header"},{"name":"id","type":"int64"},{"name":"samples","type":{"stream":{"items":"EvoTest.Sample"}}},{"name":"maybe","type":[null,"int32"]},{"name":"footer","type":[null,"EvoTest.Footer"]}]},"types":[{"name":"Footer","fields":[{"name":"signature","type":"EvoTest.Signature"}]},{"name":"Header","fields":[{"name":"meta","type":{"map":{"keys":"string","values":{"vector":{"items":"string"}}}}},{"name":"subject","type":"string"},{"name":"weight","type":"int64"},{"name":"added","type":[null,"string"]}]},{"name":"Sample","fields":[{"name":"data","type":{"vector":{"items":"int32"}}},{"name":"timestamp","type":"datetime"}]},{"name":"Signature","fields":[{"name":"name","type":"string"},{"name":"email","type":"string"},{"name":"number","type":"int64"}]}]})",
 };
 
 void MyProtocolWriterBase::WriteHeader(evo_test::Header const& value) {
@@ -102,18 +105,27 @@ void MyProtocolWriterBase::WriteSamplesImpl(std::vector<evo_test::Sample> const&
   }
 }
 
-void MyProtocolWriterBase::WriteFooter(std::optional<evo_test::Footer> const& value) {
+void MyProtocolWriterBase::WriteMaybe(std::optional<std::string> const& value) {
   if (unlikely(state_ != 3)) {
     MyProtocolWriterBaseInvalidState(3, false, state_);
   }
 
-  WriteFooterImpl(value);
+  WriteMaybeImpl(value);
   state_ = 4;
 }
 
-void MyProtocolWriterBase::Close() {
+void MyProtocolWriterBase::WriteFooter(std::optional<evo_test::Footer> const& value) {
   if (unlikely(state_ != 4)) {
     MyProtocolWriterBaseInvalidState(4, false, state_);
+  }
+
+  WriteFooterImpl(value);
+  state_ = 5;
+}
+
+void MyProtocolWriterBase::Close() {
+  if (unlikely(state_ != 5)) {
+    MyProtocolWriterBaseInvalidState(5, false, state_);
   }
 
   CloseImpl();
@@ -195,7 +207,7 @@ bool MyProtocolReaderBase::ReadSamplesImpl(std::vector<evo_test::Sample>& values
   }
 }
 
-void MyProtocolReaderBase::ReadFooter(std::optional<evo_test::Footer>& value) {
+void MyProtocolReaderBase::ReadMaybe(std::optional<std::string>& value) {
   if (unlikely(state_ != 6)) {
     if (state_ == 5) {
       state_ = 6;
@@ -204,13 +216,22 @@ void MyProtocolReaderBase::ReadFooter(std::optional<evo_test::Footer>& value) {
     }
   }
 
-  ReadFooterImpl(value);
+  ReadMaybeImpl(value);
   state_ = 8;
 }
 
-void MyProtocolReaderBase::Close() {
+void MyProtocolReaderBase::ReadFooter(std::optional<evo_test::Footer>& value) {
   if (unlikely(state_ != 8)) {
     MyProtocolReaderBaseInvalidState(8, state_);
+  }
+
+  ReadFooterImpl(value);
+  state_ = 10;
+}
+
+void MyProtocolReaderBase::Close() {
+  if (unlikely(state_ != 10)) {
+    MyProtocolReaderBaseInvalidState(10, state_);
   }
 
   CloseImpl();
@@ -239,6 +260,11 @@ void MyProtocolReaderBase::CopyTo(MyProtocolWriterBase& writer, size_t samples_b
       writer.WriteSamples(value);
     }
     writer.EndSamples();
+  }
+  {
+    std::optional<std::string> value;
+    ReadMaybe(value);
+    writer.WriteMaybe(value);
   }
   {
     std::optional<evo_test::Footer> value;

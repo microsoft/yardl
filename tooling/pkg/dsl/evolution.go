@@ -16,6 +16,11 @@ type TypeChange interface {
 	Inverse() TypeChange
 }
 
+type WrappedTypeChange interface {
+	TypeChange
+	Inner() TypeChange
+}
+
 type TypePair struct {
 	Old Type
 	New Type
@@ -133,6 +138,45 @@ func (tc *TypeChangeUnionGrow) Inverse() TypeChange {
 	return &TypeChangeUnionShrink{tc.Swap(), tc.TypeIndex}
 }
 
+type TypeChangeOptionalTypeChanged struct {
+	TypePair
+	Change TypeChange
+}
+
+func (tc *TypeChangeOptionalTypeChanged) Inverse() TypeChange {
+	return &TypeChangeOptionalTypeChanged{tc.Swap(), tc.Change.Inverse()}
+}
+
+func (tc *TypeChangeOptionalTypeChanged) Inner() TypeChange {
+	return tc.Change
+}
+
+type TypeChangeStreamTypeChanged struct {
+	TypePair
+	Change TypeChange
+}
+
+func (tc *TypeChangeStreamTypeChanged) Inverse() TypeChange {
+	return &TypeChangeStreamTypeChanged{tc.Swap(), tc.Change.Inverse()}
+}
+
+func (tc *TypeChangeStreamTypeChanged) Inner() TypeChange {
+	return tc.Change
+}
+
+type TypeChangeVectorTypeChanged struct {
+	TypePair
+	Change TypeChange
+}
+
+func (tc *TypeChangeVectorTypeChanged) Inverse() TypeChange {
+	return &TypeChangeVectorTypeChanged{tc.Swap(), tc.Change.Inverse()}
+}
+
+func (tc *TypeChangeVectorTypeChanged) Inner() TypeChange {
+	return tc.Change
+}
+
 type TypeChangeDefinitionChanged struct{ TypePair }
 
 func (tc *TypeChangeDefinitionChanged) Inverse() TypeChange {
@@ -155,8 +199,15 @@ var (
 	_ TypeChange = (*TypeChangeUnionToScalar)(nil)
 	_ TypeChange = (*TypeChangeUnionShrink)(nil)
 	_ TypeChange = (*TypeChangeUnionGrow)(nil)
+	_ TypeChange = (*TypeChangeOptionalTypeChanged)(nil)
+	_ TypeChange = (*TypeChangeStreamTypeChanged)(nil)
+	_ TypeChange = (*TypeChangeVectorTypeChanged)(nil)
 	_ TypeChange = (*TypeChangeDefinitionChanged)(nil)
 	_ TypeChange = (*TypeChangeIncompatible)(nil)
+
+	_ WrappedTypeChange = (*TypeChangeOptionalTypeChanged)(nil)
+	_ WrappedTypeChange = (*TypeChangeStreamTypeChanged)(nil)
+	_ WrappedTypeChange = (*TypeChangeVectorTypeChanged)(nil)
 )
 
 type ProtocolChange struct {
@@ -186,6 +237,7 @@ func ValidateEvolution(env *Environment, predecessors []*Environment) (*Environm
 
 	for versionId, predecessor := range predecessors {
 		// log.Info().Msgf("Resolving changes from predecessor '%s'", predecessor.Label)
+		log.Info().Msgf("Resolving changes from predecessor %d", versionId)
 		initializePredecessorAnnotations(predecessor)
 
 		if err := annotateAllChanges(env, predecessor); err != nil {
@@ -268,7 +320,24 @@ func validateChanges(env *Environment) error {
 }
 
 func typeChangeIsError(tc TypeChange) bool {
-	switch tc.(type) {
+	switch tc := tc.(type) {
+	case WrappedTypeChange:
+		switch tc := tc.(type) {
+		case *TypeChangeStreamTypeChanged:
+			// A Stream's Type can only change if it is a changed TypeDefinition
+			if _, ok := tc.Inner().(*TypeChangeDefinitionChanged); !ok {
+				return true
+			}
+		case *TypeChangeVectorTypeChanged:
+			// A Vector's Type can only change if it is a changed TypeDefinition
+			if _, ok := tc.Inner().(*TypeChangeDefinitionChanged); !ok {
+				return true
+			}
+		}
+
+		// Otherwise, is the inner type change an error?
+		return typeChangeIsError(tc.Inner())
+
 	case *TypeChangeIncompatible:
 		return true
 	}
@@ -279,26 +348,45 @@ func typeChangeToError(tc TypeChange) string {
 	return fmt.Sprintf("'%s' to '%s' is not backward compatible", TypeToShortSyntax(tc.OldType(), true), TypeToShortSyntax(tc.NewType(), true))
 }
 
-func typeChangeToWarning(tc TypeChange) string {
-	message := fmt.Sprintf("'%s' to '%s' ", TypeToShortSyntax(tc.OldType(), true), TypeToShortSyntax(tc.NewType(), true))
+func typeChangeWarningReason(tc TypeChange) string {
 	switch tc := tc.(type) {
+	case WrappedTypeChange:
+		return typeChangeWarningReason(tc.Inner())
+
 	case *TypeChangeNumberToNumber:
 		if tc.IsDemotion() {
-			return message + "may result in loss of precision"
-		} else {
-			return ""
+			return "may result in loss of precision"
 		}
 	case *TypeChangeNumberToString, *TypeChangeStringToNumber:
-		return message + "may result in loss of precision"
+		return "may result in loss of precision"
 	case *TypeChangeScalarToOptional, *TypeChangeOptionalToScalar:
-		return message + "may result in undefined behavior"
+		return "may result in undefined behavior"
 	case *TypeChangeScalarToUnion, *TypeChangeUnionToScalar:
-		return message + "may result in undefined behavior"
+		return "may result in undefined behavior"
 	case *TypeChangeUnionGrow, *TypeChangeUnionShrink:
-		return message + "may result in undefined behavior"
-	default:
-		return ""
+		return "may result in undefined behavior"
+		// case *TypeChangeOptionalTypeChanged:
+		// 	if reason := typeChangeWarningReason(tc.Change); reason != "" {
+		// 		return reason
+		// 	}
+		// case *TypeChangeStreamTypeChanged:
+		// 	if reason := typeChangeWarningReason(tc.Change); reason != "" {
+		// 		return reason
+		// 	}
+		// case *TypeChangeVectorTypeChanged:
+		// 	if reason := typeChangeWarningReason(tc.Change); reason != "" {
+		// 		return reason
+		// 	}
 	}
+	return ""
+}
+
+func typeChangeToWarning(tc TypeChange) string {
+	message := fmt.Sprintf("'%s' to '%s' ", TypeToShortSyntax(tc.OldType(), true), TypeToShortSyntax(tc.NewType(), true))
+	if reason := typeChangeWarningReason(tc); reason != "" {
+		return message + reason
+	}
+	return ""
 }
 
 // Prepare Annotations on the old model
@@ -640,7 +728,6 @@ func annotateChangedRecordDefinition(newRecord, oldRecord *RecordDefinition) (*R
 			continue
 		}
 
-		log.Debug().Msgf("Comparing fields %s and %s", newField.Name, oldField.Name)
 		typeChange := detectChangedTypes(newField.Type, oldField.Type)
 		if typeChange != nil {
 			changed = true
@@ -810,72 +897,6 @@ func detectPrimitiveTypeChange(newType, oldType *SimpleType) TypeChange {
 	return &TypeChangeIncompatible{TypePair{oldType, newType}}
 }
 
-func detectGeneralizedTypeChanges(newType, oldType *GeneralizedType) TypeChange {
-	// A GeneralizedType can change in many ways...
-	var change TypeChange
-
-	// Compare Dimensonality
-	if err := detectChangedDimensionality(newType.Dimensionality, oldType.Dimensionality); err != nil {
-		// CHANGE: Dimensionality changed
-		return &TypeChangeIncompatible{TypePair{oldType, newType}}
-	}
-
-	// TODO: Handle changing between Optional and Union
-	// TODO: Handle changing the order of Union types
-	// TODO: Handle adding types to a Union
-	// TODO: Handle removing types from a Union
-	if len(newType.Cases) != len(oldType.Cases) {
-		return &TypeChangeIncompatible{TypePair{oldType, newType}}
-	}
-
-	// Compare the Type of each TypeCase
-	for i, newCase := range newType.Cases {
-		oldCase := oldType.Cases[i]
-
-		if (newCase.Type == nil) != (oldCase.Type == nil) {
-			// CHANGE: Added or removed a type case
-			return &TypeChangeIncompatible{TypePair{oldType, newType}}
-		}
-
-		if newCase.Type == nil {
-			continue
-		}
-
-		ch := detectChangedTypes(newCase.Type, oldCase.Type)
-		if ch != nil {
-			// CHANGE: Changed a type case
-
-			// TODO: This is wrong, we should be comparing based on the kind of GeneralizedType
-			switch ch := ch.(type) {
-			case *TypeChangeNumberToNumber:
-				change = &TypeChangeNumberToNumber{TypePair{oldType, newType}}
-			case *TypeChangeNumberToString:
-				change = &TypeChangeNumberToString{TypePair{oldType, newType}}
-			case *TypeChangeStringToNumber:
-				change = &TypeChangeStringToNumber{TypePair{oldType, newType}}
-			case *TypeChangeScalarToOptional:
-				change = &TypeChangeScalarToOptional{TypePair{oldType, newType}}
-			case *TypeChangeOptionalToScalar:
-				change = &TypeChangeOptionalToScalar{TypePair{oldType, newType}}
-			case *TypeChangeScalarToUnion:
-				change = &TypeChangeScalarToUnion{TypePair{oldType, newType}, ch.TypeIndex}
-			case *TypeChangeUnionToScalar:
-				change = &TypeChangeUnionToScalar{TypePair{oldType, newType}, ch.TypeIndex}
-			case *TypeChangeUnionShrink:
-				change = &TypeChangeUnionShrink{TypePair{oldType, newType}, ch.TypeIndex}
-			case *TypeChangeUnionGrow:
-				change = &TypeChangeUnionGrow{TypePair{oldType, newType}, ch.TypeIndex}
-			case *TypeChangeDefinitionChanged:
-				change = &TypeChangeDefinitionChanged{TypePair{oldType, newType}}
-			case *TypeChangeIncompatible:
-				return &TypeChangeIncompatible{TypePair{oldType, newType}}
-			}
-		}
-	}
-
-	return change
-}
-
 func detectGeneralizedToSimpleTypeChanges(newType *SimpleType, oldType *GeneralizedType) TypeChange {
 	// Is it a change from Optional<T> to T (partially compatible)
 	if oldType.Cases.IsOptional() {
@@ -918,86 +939,161 @@ func detectSimpleToGeneralizedTypeChanges(newType *GeneralizedType, oldType *Sim
 	return &TypeChangeIncompatible{TypePair{oldType, newType}}
 }
 
-func detectChangedDimensionality(newNode, oldNode Dimensionality) error {
-	switch newDim := newNode.(type) {
-	case nil:
-		if oldNode != nil {
-			// CHANGE: Removed dimensionality
-			return fmt.Errorf("removing dimensionality is not backward compatible")
+func detectGeneralizedTypeChanges(newType, oldType *GeneralizedType) TypeChange {
+	// A GeneralizedType can change in many ways...
+	if newType.Cases.IsOptional() {
+		return detectOptionalChanges(newType, oldType)
+	} else if newType.Cases.IsUnion() {
+		return detectUnionChanges(newType, oldType)
+	} else {
+		switch newType.Dimensionality.(type) {
+		case nil:
+			// TODO: Not an Optional, Union, Stream, Vector, Array, Map...
+		case *Stream:
+			return detectStreamChanges(newType, oldType)
+		case *Vector:
+			return detectVectorChanges(newType, oldType)
+		case *Array:
+			return detectArrayChanges(newType, oldType)
+		case *Map:
+			return detectMapChanges(newType, oldType)
+		default:
+			panic("Shouldn't get here")
 		}
-		return nil
-
-	case *Stream:
-		_, ok := oldNode.(*Stream)
-		if !ok {
-			return fmt.Errorf("expected a stream")
-		}
-		return nil
-
-	case *Vector:
-		oldDim, ok := oldNode.(*Vector)
-		if !ok {
-			return fmt.Errorf("expected a vector")
-		}
-		if (oldDim.Length == nil) != (newDim.Length == nil) {
-			// CHANGE: Added or removed vector length
-			return fmt.Errorf("changing vector length is not backward compatible")
-		}
-		if newDim.Length != nil && *newDim.Length != *oldDim.Length {
-			// CHANGE: Changed vector length
-			return fmt.Errorf("changing vector length is not backward compatible")
-		}
-		return nil
-
-	case *Array:
-		oldDim, ok := oldNode.(*Array)
-		if !ok {
-			return fmt.Errorf("expected an array")
-		}
-		if (newDim.Dimensions == nil) != (oldDim.Dimensions == nil) {
-			// CHANGE: Added or removed array dimensions
-			return fmt.Errorf("changing array dimensions is not backward compatible")
-		}
-
-		if newDim.Dimensions != nil {
-			newDimensions := *newDim.Dimensions
-			oldDimensions := *oldDim.Dimensions
-
-			if len(newDimensions) != len(oldDimensions) {
-				// CHANGE: Mismatch in number of array dimensions
-				return fmt.Errorf("changing array dimensions is not backward compatible")
-			}
-
-			for i, newDimension := range newDimensions {
-				oldDimension := oldDimensions[i]
-
-				if (newDimension.Length == nil) != (oldDimension.Length == nil) {
-					// CHANGE: Added or removed array dimension length
-					return fmt.Errorf("changing array dimensions is not backward compatible")
-				}
-
-				if newDimension.Length != nil && newDimension.Length != oldDimension.Length {
-					// CHANGE: Changed array dimension length
-					return fmt.Errorf("changing array dimensions is not backward compatible")
-				}
-			}
-		}
-
-		return nil
-
-	case *Map:
-		oldDim, ok := oldNode.(*Map)
-		if !ok {
-			return fmt.Errorf("expected a map")
-		}
-		if ch := detectChangedTypes(newDim.KeyType, oldDim.KeyType); ch != nil {
-			return fmt.Errorf("changing map key type is not backward compatible")
-		}
-		return nil
-
-	default:
-		log.Panic().Msgf("unhandled type %T", newNode)
 	}
 
+	return nil
+}
+
+// TODO: Handle Union to Optional
+func detectOptionalChanges(newType, oldType *GeneralizedType) TypeChange {
+	if !oldType.Cases.IsOptional() {
+		// CHANGE: Changed a non-Optional to an Optional
+		return &TypeChangeIncompatible{TypePair{oldType, newType}}
+	}
+	if ch := detectChangedTypes(newType.Cases[1].Type, oldType.Cases[1].Type); ch != nil {
+		// CHANGE: Changed Optional type
+		return &TypeChangeOptionalTypeChanged{TypePair{oldType, newType}, ch}
+	}
+	return nil
+}
+
+// TODO: Handle Optional to Union
+func detectUnionChanges(newType, oldType *GeneralizedType) TypeChange {
+	if !oldType.Cases.IsUnion() {
+		// CHANGE: Changed a non-Union to a Union
+		return &TypeChangeIncompatible{TypePair{oldType, newType}}
+	}
+	if len(newType.Cases) == len(oldType.Cases) {
+		// TODO: Determine if newType and oldType Union types are an equal set
+		// TODO: Account for reordering the Union types
+		// return &TypeChangeUnionTypesChange{TypePair{oldType, newType}, mappings}
+	} else if len(newType.Cases) > len(oldType.Cases) {
+		// TODO: Determine if the oldType Union types are a subset of the newType Union types
+		// TODO: Account for reordering the Union type
+		// return &TypeChangeUnionGrow{TypePair{oldType, newType}, indexes}
+	} else if len(newType.Cases) < len(oldType.Cases) {
+		// TODO: Determine if the newType Union types are a subset of the oldType Union types
+		// TODO: Account for reordering the Union type
+		// return &TypeChangeUnionShrink{TypePair{oldType, newType}, indexes}
+	}
+	return &TypeChangeIncompatible{TypePair{oldType, newType}}
+}
+
+func detectStreamChanges(newType, oldType *GeneralizedType) TypeChange {
+	if _, ok := oldType.Dimensionality.(*Stream); !ok {
+		// CHANGE: Changed a non-Stream to a Stream
+		return &TypeChangeIncompatible{TypePair{oldType, newType}}
+	}
+
+	if ch := detectChangedTypes(newType.Cases[0].Type, oldType.Cases[0].Type); ch != nil {
+		// CHANGE: Changed Stream type
+		return &TypeChangeStreamTypeChanged{TypePair{oldType, newType}, ch}
+	}
+	return nil
+}
+
+func detectVectorChanges(newType, oldType *GeneralizedType) TypeChange {
+	newDim := newType.Dimensionality.(*Vector)
+	oldDim, ok := oldType.Dimensionality.(*Vector)
+	if !ok {
+		// CHANGE: Changed a non-Vector to a Vector
+		return &TypeChangeIncompatible{TypePair{oldType, newType}}
+	}
+
+	if ch := detectChangedTypes(newType.Cases[0].Type, oldType.Cases[0].Type); ch != nil {
+		// CHANGE: Changed Vector type
+		return &TypeChangeVectorTypeChanged{TypePair{oldType, newType}, ch}
+	}
+
+	if (oldDim.Length == nil) != (newDim.Length == nil) {
+		// CHANGE: Changed from a fixed-length Vector to a variable-length Vector or vice versa
+		return &TypeChangeIncompatible{TypePair{oldType, newType}}
+	}
+	if newDim.Length != nil && *newDim.Length != *oldDim.Length {
+		// CHANGE: Changed vector length
+		return &TypeChangeIncompatible{TypePair{oldType, newType}}
+	}
+	return nil
+}
+
+func detectArrayChanges(newType, oldType *GeneralizedType) TypeChange {
+	newDim := newType.Dimensionality.(*Array)
+	oldDim, ok := oldType.Dimensionality.(*Array)
+	if !ok {
+		return &TypeChangeIncompatible{TypePair{oldType, newType}}
+	}
+
+	if ch := detectChangedTypes(newType.Cases[0].Type, oldType.Cases[0].Type); ch != nil {
+		// CHANGE: Changed Array type
+		return &TypeChangeIncompatible{TypePair{oldType, newType}}
+	}
+
+	if (newDim.Dimensions == nil) != (oldDim.Dimensions == nil) {
+		// CHANGE: Added or removed array dimensions
+		return &TypeChangeIncompatible{TypePair{oldType, newType}}
+	}
+
+	if newDim.Dimensions != nil {
+		newDimensions := *newDim.Dimensions
+		oldDimensions := *oldDim.Dimensions
+
+		if len(newDimensions) != len(oldDimensions) {
+			// CHANGE: Mismatch in number of array dimensions
+			return &TypeChangeIncompatible{TypePair{oldType, newType}}
+		}
+
+		for i, newDimension := range newDimensions {
+			oldDimension := oldDimensions[i]
+
+			if (newDimension.Length == nil) != (oldDimension.Length == nil) {
+				// CHANGE: Added or removed array dimension length
+				return &TypeChangeIncompatible{TypePair{oldType, newType}}
+			}
+
+			if newDimension.Length != nil && newDimension.Length != oldDimension.Length {
+				// CHANGE: Changed array dimension length
+				return &TypeChangeIncompatible{TypePair{oldType, newType}}
+			}
+		}
+	}
+	return nil
+}
+
+func detectMapChanges(newType, oldType *GeneralizedType) TypeChange {
+	newDim := newType.Dimensionality.(*Map)
+	oldDim, ok := oldType.Dimensionality.(*Map)
+	if !ok {
+		return &TypeChangeIncompatible{TypePair{oldType, newType}}
+	}
+
+	if ch := detectChangedTypes(newDim.KeyType, oldDim.KeyType); ch != nil {
+		// CHANGE: Changed Map key type
+		return &TypeChangeIncompatible{TypePair{oldType, newType}}
+	}
+	if ch := detectChangedTypes(newType.Cases[0].Type, oldType.Cases[0].Type); ch != nil {
+		// CHANGE: Changed Map value type
+		return &TypeChangeIncompatible{TypePair{oldType, newType}}
+	}
 	return nil
 }

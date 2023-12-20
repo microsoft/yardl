@@ -25,6 +25,9 @@ class MyProtocolWriterBase {
   void EndSamples();
 
   // Ordinal 3.
+  void WriteMaybe(std::optional<int32_t> const& value);
+
+  // Ordinal 4.
   void WriteFooter(std::optional<evo_test::Footer> const& value);
 
   // Optionaly close this writer before destructing. Validates that all steps were completed.
@@ -41,6 +44,7 @@ class MyProtocolWriterBase {
   virtual void WriteSamplesImpl(evo_test::Sample const& value) = 0;
   virtual void WriteSamplesImpl(std::vector<evo_test::Sample> const& value);
   virtual void EndSamplesImpl() = 0;
+  virtual void WriteMaybeImpl(std::optional<int32_t> const& value) = 0;
   virtual void WriteFooterImpl(std::optional<evo_test::Footer> const& value) = 0;
   virtual void CloseImpl() {}
 
@@ -70,6 +74,9 @@ class MyProtocolReaderBase {
   [[nodiscard]] bool ReadSamples(std::vector<evo_test::Sample>& values);
 
   // Ordinal 3.
+  void ReadMaybe(std::optional<int32_t>& value);
+
+  // Ordinal 4.
   void ReadFooter(std::optional<evo_test::Footer>& value);
 
   // Optionaly close this writer before destructing. Validates that all steps were completely read.
@@ -84,6 +91,7 @@ class MyProtocolReaderBase {
   virtual void ReadIdImpl(int64_t& value) = 0;
   virtual bool ReadSamplesImpl(evo_test::Sample& value) = 0;
   virtual bool ReadSamplesImpl(std::vector<evo_test::Sample>& values);
+  virtual void ReadMaybeImpl(std::optional<int32_t>& value) = 0;
   virtual void ReadFooterImpl(std::optional<evo_test::Footer>& value) = 0;
   virtual void CloseImpl() {}
   static std::string schema_;

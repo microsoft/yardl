@@ -28,6 +28,8 @@ class MyProtocolWriter : public evo_test::MyProtocolWriterBase, public yardl::hd
 
   void EndSamplesImpl() override;
 
+  void WriteMaybeImpl(std::optional<int32_t> const& value) override;
+
   void WriteFooterImpl(std::optional<evo_test::Footer> const& value) override;
 
   private:
@@ -46,6 +48,8 @@ class MyProtocolReader : public evo_test::MyProtocolReaderBase, public yardl::hd
   bool ReadSamplesImpl(evo_test::Sample& value) override;
 
   bool ReadSamplesImpl(std::vector<evo_test::Sample>& values) override;
+
+  void ReadMaybeImpl(std::optional<int32_t>& value) override;
 
   void ReadFooterImpl(std::optional<evo_test::Footer>& value) override;
 
