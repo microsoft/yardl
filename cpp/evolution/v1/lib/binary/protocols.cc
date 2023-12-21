@@ -59,6 +59,15 @@ struct IsTriviallySerializable<evo_test::Footer> {
     (sizeof(__T__) == (sizeof(__T__::signature)));
 };
 
+template <>
+struct IsTriviallySerializable<evo_test::UnusedRecord> {
+  using __T__ = evo_test::UnusedRecord;
+  static constexpr bool value = 
+    std::is_standard_layout_v<__T__> &&
+    IsTriviallySerializable<decltype(__T__::subject)>::value &&
+    (sizeof(__T__) == (sizeof(__T__::subject)));
+};
+
 #ifndef _MSC_VER
 #pragma GCC diagnostic pop // #pragma GCC diagnostic ignored "-Winvalid-offsetof" 
 #endif
@@ -178,6 +187,24 @@ namespace {
   }
 
   yardl::binary::ReadString(stream, value);
+}
+
+[[maybe_unused]] static void WriteUnusedRecord(yardl::binary::CodedOutputStream& stream, evo_test::UnusedRecord const& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<evo_test::UnusedRecord>::value) {
+    yardl::binary::WriteTriviallySerializable(stream, value);
+    return;
+  }
+
+  yardl::binary::WriteMap<std::string, std::string, yardl::binary::WriteString, yardl::binary::WriteString>(stream, value.subject);
+}
+
+[[maybe_unused]] static void ReadUnusedRecord(yardl::binary::CodedInputStream& stream, evo_test::UnusedRecord& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<evo_test::UnusedRecord>::value) {
+    yardl::binary::ReadTriviallySerializable(stream, value);
+    return;
+  }
+
+  yardl::binary::ReadMap<std::string, std::string, yardl::binary::ReadString, yardl::binary::ReadString>(stream, value.subject);
 }
 
 } // namespace

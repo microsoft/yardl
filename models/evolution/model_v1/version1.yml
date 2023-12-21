@@ -31,6 +31,10 @@ Signature: !record
 
 AliasedPrimitive: string
 
+UnusedRecord: !record
+  fields:
+    subject: string->string
+
 UnusedProtocol: !protocol
   sequence:
     samples: !stream

@@ -18,6 +18,9 @@ using ordered_json = nlohmann::ordered_json;
 [[maybe_unused]] static void to_json(ordered_json& j, evo_test::Footer const& value);
 [[maybe_unused]] static void from_json(ordered_json const& j, evo_test::Footer& value);
 
+[[maybe_unused]] static void to_json(ordered_json& j, evo_test::UnusedRecord const& value);
+[[maybe_unused]] static void from_json(ordered_json const& j, evo_test::UnusedRecord& value);
+
 } // namespace evo_test
 
 namespace evo_test {
@@ -108,6 +111,19 @@ using ordered_json = nlohmann::ordered_json;
 [[maybe_unused]] static void from_json(ordered_json const& j, evo_test::Footer& value) {
   if (auto it = j.find("signature"); it != j.end()) {
     it->get_to(value.signature);
+  }
+}
+
+[[maybe_unused]] static void to_json(ordered_json& j, evo_test::UnusedRecord const& value) {
+  j = ordered_json::object();
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.subject)) {
+    j.push_back({"subject", value.subject});
+  }
+}
+
+[[maybe_unused]] static void from_json(ordered_json const& j, evo_test::UnusedRecord& value) {
+  if (auto it = j.find("subject"); it != j.end()) {
+    it->get_to(value.subject);
   }
 }
 

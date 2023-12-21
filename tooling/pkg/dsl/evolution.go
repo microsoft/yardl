@@ -365,18 +365,6 @@ func typeChangeWarningReason(tc TypeChange) string {
 		return "may result in undefined behavior"
 	case *TypeChangeUnionGrow, *TypeChangeUnionShrink:
 		return "may result in undefined behavior"
-		// case *TypeChangeOptionalTypeChanged:
-		// 	if reason := typeChangeWarningReason(tc.Change); reason != "" {
-		// 		return reason
-		// 	}
-		// case *TypeChangeStreamTypeChanged:
-		// 	if reason := typeChangeWarningReason(tc.Change); reason != "" {
-		// 		return reason
-		// 	}
-		// case *TypeChangeVectorTypeChanged:
-		// 	if reason := typeChangeWarningReason(tc.Change); reason != "" {
-		// 		return reason
-		// 	}
 	}
 	return ""
 }
@@ -522,23 +510,45 @@ func annotateAllChanges(newNode, oldNode *Environment) error {
 	return nil
 }
 
-func annotateNamespaceChanges(newNode, oldNode *Namespace) error {
-	if newNode.Name != oldNode.Name {
-		return validationError(newNode, "changing namespaces between versions is not yet supported")
+func annotateNamespaceChanges(newNs, oldNs *Namespace) error {
+	if newNs.Name != oldNs.Name {
+		return validationError(newNs, "changing namespaces between versions is not yet supported")
 	}
 
-	// TypeDefinitions may be reordered, added, or removed
-	// We only care about pre-existing TypeDefinitions that CHANGED
+	// TypeDefinitions may be reordered, added, or removed, so we compare them by name
 	oldTds := make(map[string]TypeDefinition)
-	for _, oldTd := range oldNode.TypeDefinitions {
+	for _, oldTd := range oldNs.TypeDefinitions {
 		oldTds[oldTd.GetDefinitionMeta().Name] = oldTd
 	}
+
 	newTds := make(map[string]TypeDefinition)
-	for _, newTd := range newNode.TypeDefinitions {
+	for _, newTd := range newNs.TypeDefinitions {
 		newTds[newTd.GetDefinitionMeta().Name] = newTd
 	}
 
-	for _, newTd := range newNode.TypeDefinitions {
+	// Collect only pre-existing TypeDefinitions that are used within a Protocol
+	// Keeping them in definition order!
+	var newUsedTds []TypeDefinition
+	for _, protocol := range newNs.Protocols {
+		Visit(protocol, func(self Visitor, node Node) {
+			switch node := node.(type) {
+			case *ProtocolDefinition:
+				self.VisitChildren(node)
+			case TypeDefinition:
+				self.VisitChildren(node)
+				if td, ok := newTds[node.GetDefinitionMeta().Name]; ok {
+					newUsedTds = append(newUsedTds, td)
+				}
+			case *SimpleType:
+				self.VisitChildren(node)
+				self.Visit(node.ResolvedDefinition)
+			default:
+				self.VisitChildren(node)
+			}
+		})
+	}
+
+	for _, newTd := range newUsedTds {
 		oldTd, ok := oldTds[newTd.GetDefinitionMeta().Name]
 		if !ok {
 			// Skip new TypeDefinition
@@ -556,15 +566,11 @@ func annotateNamespaceChanges(newNode, oldNode *Namespace) error {
 	// Protocols may be reordered, added, or removed
 	// We only care about pre-existing Protocols that CHANGED
 	oldProts := make(map[string]*ProtocolDefinition)
-	for _, oldProt := range oldNode.Protocols {
+	for _, oldProt := range oldNs.Protocols {
 		oldProts[oldProt.Name] = oldProt
 	}
-	newProts := make(map[string]*ProtocolDefinition)
-	for _, newProt := range newNode.Protocols {
-		newProts[newProt.GetDefinitionMeta().Name] = newProt
-	}
 
-	for _, newProt := range newNode.Protocols {
+	for _, newProt := range newNs.Protocols {
 		oldProt, ok := oldProts[newProt.GetDefinitionMeta().Name]
 		if !ok {
 			// Skip new ProtocolDefinition
@@ -584,14 +590,14 @@ func annotateNamespaceChanges(newNode, oldNode *Namespace) error {
 }
 
 // Compares two TypeDefinitions with matching names
-func annotateChangedTypeDefinition(newNode, oldNode TypeDefinition) (TypeDefinition, error) {
-	switch newNode := newNode.(type) {
+func annotateChangedTypeDefinition(newTd, oldTd TypeDefinition) (TypeDefinition, error) {
+	switch newNode := newTd.(type) {
 	case *RecordDefinition:
-		oldNode, ok := oldNode.(*RecordDefinition)
+		oldTd, ok := oldTd.(*RecordDefinition)
 		if !ok {
-			return oldNode, fmt.Errorf("changing '%s' to a Record is not backward compatible", newNode.Name)
+			return oldTd, fmt.Errorf("changing '%s' to a Record is not backward compatible", newNode.Name)
 		}
-		res, err := annotateChangedRecordDefinition(newNode, oldNode)
+		res, err := annotateChangedRecordDefinition(newNode, oldTd)
 		if err != nil {
 			return res, err
 		}
@@ -601,23 +607,23 @@ func annotateChangedTypeDefinition(newNode, oldNode TypeDefinition) (TypeDefinit
 		return nil, nil
 
 	case *NamedType:
-		oldNode, ok := oldNode.(*NamedType)
+		oldTd, ok := oldTd.(*NamedType)
 		if !ok {
-			return oldNode, fmt.Errorf("changing '%s' to a named type is not backward compatible", newNode.Name)
+			return oldTd, fmt.Errorf("changing '%s' to a named type is not backward compatible", newNode.Name)
 		}
-		typeChange := detectChangedTypes(newNode.Type, oldNode.Type)
-		oldNode.Annotations[ChangeAnnotationKey] = typeChange
+		typeChange := detectChangedTypes(newNode.Type, oldTd.Type)
+		oldTd.Annotations[ChangeAnnotationKey] = typeChange
 		if typeChange != nil {
-			return oldNode, nil
+			return oldTd, nil
 		}
 		return nil, nil
 
 	case *EnumDefinition:
-		oldNode, ok := oldNode.(*EnumDefinition)
+		oldTd, ok := oldTd.(*EnumDefinition)
 		if !ok {
-			return oldNode, fmt.Errorf("changing '%s' to an Enum is not backward compatible", newNode.Name)
+			return oldTd, fmt.Errorf("changing '%s' to an Enum is not backward compatible", newNode.Name)
 		}
-		res, err := annotateChangedEnumDefinitions(newNode, oldNode)
+		res, err := annotateChangedEnumDefinitions(newNode, oldTd)
 		if err != nil {
 			return res, err
 		}
@@ -741,26 +747,26 @@ func annotateChangedRecordDefinition(newRecord, oldRecord *RecordDefinition) (*R
 	return nil, nil
 }
 
-func annotateChangedEnumDefinitions(newNode, oldNode *EnumDefinition) (*EnumDefinition, error) {
+func annotateChangedEnumDefinitions(newNode, oldEnum *EnumDefinition) (*EnumDefinition, error) {
 	changed := false
 
-	if newNode.Name != oldNode.Name {
+	if newNode.Name != oldEnum.Name {
 		// CHANGE: Renamed Enum
 		changed = true
 	}
-	if newNode.IsFlags != oldNode.IsFlags {
+	if newNode.IsFlags != oldEnum.IsFlags {
 		// CHANGE: Changed Enum to Flags or vice versa
 		changed = true
 	}
 
-	if oldNode.BaseType != nil {
+	if oldEnum.BaseType != nil {
 		if newNode.BaseType == nil {
 			// CHANGE: Removed enum base type?
 			changed = true
 		}
-		if ch := detectChangedTypes(newNode.BaseType, oldNode.BaseType); ch != nil {
+		if ch := detectChangedTypes(newNode.BaseType, oldEnum.BaseType); ch != nil {
 			// CHANGE: Changed Enum base type
-			return oldNode, fmt.Errorf("changing '%s' base type is not backward compatible", newNode.Name)
+			return oldEnum, fmt.Errorf("changing '%s' base type is not backward compatible", newNode.Name)
 		}
 	} else {
 		if newNode.BaseType != nil {
@@ -770,7 +776,7 @@ func annotateChangedEnumDefinitions(newNode, oldNode *EnumDefinition) (*EnumDefi
 	}
 
 	for i, newEnumValue := range newNode.Values {
-		oldEnumValue := oldNode.Values[i]
+		oldEnumValue := oldEnum.Values[i]
 
 		if newEnumValue.Symbol != oldEnumValue.Symbol {
 			// CHANGE: Renamed enum value
@@ -783,7 +789,7 @@ func annotateChangedEnumDefinitions(newNode, oldNode *EnumDefinition) (*EnumDefi
 	}
 
 	if changed {
-		return oldNode, nil
+		return oldEnum, nil
 	}
 
 	return nil, nil
