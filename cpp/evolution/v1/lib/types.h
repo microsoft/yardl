@@ -73,5 +73,17 @@ struct Footer {
 
 using AliasedPrimitive = std::string;
 
+struct UnusedRecord {
+  std::unordered_map<std::string, std::string> subject{};
+
+  bool operator==(const UnusedRecord& other) const {
+    return subject == other.subject;
+  }
+
+  bool operator!=(const UnusedRecord& other) const {
+    return !(*this == other);
+  }
+};
+
 } // namespace evo_test
 

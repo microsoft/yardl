@@ -327,18 +327,6 @@ namespace {
   yardl::binary::ReadFloatingPoint(stream, value);
 }
 
-[[maybe_unused]] static void WriteAliasedPrimitive_v1(yardl::binary::CodedOutputStream& stream, evo_test::AliasedPrimitive const& value) {
-  std::string aliased_primitive;
-  aliased_primitive = std::to_string(value);
-  yardl::binary::WriteString(stream, aliased_primitive);
-}
-
-[[maybe_unused]] static void ReadAliasedPrimitive_v1(yardl::binary::CodedInputStream& stream, evo_test::AliasedPrimitive& value) {
-  std::string aliased_primitive;
-  yardl::binary::ReadString(stream, aliased_primitive);
-  value = std::stod(aliased_primitive);
-}
-
 [[maybe_unused]] static void WriteNewRecord(yardl::binary::CodedOutputStream& stream, evo_test::NewRecord const& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::NewRecord>::value) {
     yardl::binary::WriteTriviallySerializable(stream, value);

@@ -78,6 +78,19 @@ struct _Inner_Footer {
   evo_test::hdf5::_Inner_Signature signature;
 };
 
+struct _Inner_UnusedRecord {
+  _Inner_UnusedRecord() {} 
+  _Inner_UnusedRecord(evo_test::UnusedRecord const& o) 
+      : subject(o.subject) {
+  }
+
+  void ToOuter (evo_test::UnusedRecord& o) const {
+    yardl::hdf5::ToOuter(subject, o.subject);
+  }
+
+  yardl::hdf5::InnerMap<yardl::hdf5::InnerVlenString, std::string, yardl::hdf5::InnerVlenString, std::string> subject;
+};
+
 [[maybe_unused]] H5::CompType GetHeaderHdf5Ddl() {
   using RecordType = evo_test::hdf5::_Inner_Header;
   H5::CompType t(sizeof(RecordType));
@@ -109,6 +122,13 @@ struct _Inner_Footer {
   using RecordType = evo_test::hdf5::_Inner_Footer;
   H5::CompType t(sizeof(RecordType));
   t.insertMember("signature", HOFFSET(RecordType, signature), evo_test::hdf5::GetSignatureHdf5Ddl());
+  return t;
+}
+
+[[maybe_unused]] H5::CompType GetUnusedRecordHdf5Ddl() {
+  using RecordType = evo_test::hdf5::_Inner_UnusedRecord;
+  H5::CompType t(sizeof(RecordType));
+  t.insertMember("subject", HOFFSET(RecordType, subject), yardl::hdf5::InnerMapDdl<yardl::hdf5::InnerVlenString, yardl::hdf5::InnerVlenString>(yardl::hdf5::InnerVlenStringDdl(), yardl::hdf5::InnerVlenStringDdl()));
   return t;
 }
 
