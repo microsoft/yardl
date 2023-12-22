@@ -53,6 +53,13 @@ std::string MyProtocolWriterBase::schema_ = R"({"protocol":{"name":"MyProtocol",
 std::vector<std::string> MyProtocolWriterBase::previous_schemas_ = {
 };
 
+std::string MyProtocolWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Latest: return MyProtocolWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol MyProtocol.");
+  }
+
+}
 void MyProtocolWriterBase::WriteHeader(evo_test::Header const& value) {
   if (unlikely(state_ != 0)) {
     MyProtocolWriterBaseInvalidState(0, false, state_);
@@ -133,6 +140,12 @@ std::string MyProtocolReaderBase::schema_ = MyProtocolWriterBase::schema_;
 
 std::vector<std::string> MyProtocolReaderBase::previous_schemas_ = MyProtocolWriterBase::previous_schemas_;
 
+Version MyProtocolReaderBase::VersionFromSchema(std::string const& schema) {
+  if (schema == MyProtocolWriterBase::schema_) {
+    return Version::Latest;
+  }
+  throw std::runtime_error("The schema does not match any version supported by protocol MyProtocol.");
+}
 void MyProtocolReaderBase::ReadHeader(evo_test::Header& value) {
   if (unlikely(state_ != 0)) {
     MyProtocolReaderBaseInvalidState(0, state_);

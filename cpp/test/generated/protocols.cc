@@ -41,6 +41,13 @@ std::string BenchmarkFloat256x256WriterBase::schema_ = R"({"protocol":{"name":"B
 std::vector<std::string> BenchmarkFloat256x256WriterBase::previous_schemas_ = {
 };
 
+std::string BenchmarkFloat256x256WriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Latest: return BenchmarkFloat256x256WriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol BenchmarkFloat256x256.");
+  }
+
+}
 void BenchmarkFloat256x256WriterBase::WriteFloat256x256(yardl::FixedNDArray<float, 256, 256> const& value) {
   if (unlikely(state_ != 0)) {
     BenchmarkFloat256x256WriterBaseInvalidState(0, false, state_);
@@ -85,6 +92,12 @@ std::string BenchmarkFloat256x256ReaderBase::schema_ = BenchmarkFloat256x256Writ
 
 std::vector<std::string> BenchmarkFloat256x256ReaderBase::previous_schemas_ = BenchmarkFloat256x256WriterBase::previous_schemas_;
 
+Version BenchmarkFloat256x256ReaderBase::VersionFromSchema(std::string const& schema) {
+  if (schema == BenchmarkFloat256x256WriterBase::schema_) {
+    return Version::Latest;
+  }
+  throw std::runtime_error("The schema does not match any version supported by protocol BenchmarkFloat256x256.");
+}
 bool BenchmarkFloat256x256ReaderBase::ReadFloat256x256(yardl::FixedNDArray<float, 256, 256>& value) {
   if (unlikely(state_ != 0)) {
     if (state_ == 1) {
@@ -195,6 +208,13 @@ std::string BenchmarkInt256x256WriterBase::schema_ = R"({"protocol":{"name":"Ben
 std::vector<std::string> BenchmarkInt256x256WriterBase::previous_schemas_ = {
 };
 
+std::string BenchmarkInt256x256WriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Latest: return BenchmarkInt256x256WriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol BenchmarkInt256x256.");
+  }
+
+}
 void BenchmarkInt256x256WriterBase::WriteInt256x256(yardl::FixedNDArray<int32_t, 256, 256> const& value) {
   if (unlikely(state_ != 0)) {
     BenchmarkInt256x256WriterBaseInvalidState(0, false, state_);
@@ -239,6 +259,12 @@ std::string BenchmarkInt256x256ReaderBase::schema_ = BenchmarkInt256x256WriterBa
 
 std::vector<std::string> BenchmarkInt256x256ReaderBase::previous_schemas_ = BenchmarkInt256x256WriterBase::previous_schemas_;
 
+Version BenchmarkInt256x256ReaderBase::VersionFromSchema(std::string const& schema) {
+  if (schema == BenchmarkInt256x256WriterBase::schema_) {
+    return Version::Latest;
+  }
+  throw std::runtime_error("The schema does not match any version supported by protocol BenchmarkInt256x256.");
+}
 bool BenchmarkInt256x256ReaderBase::ReadInt256x256(yardl::FixedNDArray<int32_t, 256, 256>& value) {
   if (unlikely(state_ != 0)) {
     if (state_ == 1) {
@@ -349,6 +375,13 @@ std::string BenchmarkFloatVlenWriterBase::schema_ = R"({"protocol":{"name":"Benc
 std::vector<std::string> BenchmarkFloatVlenWriterBase::previous_schemas_ = {
 };
 
+std::string BenchmarkFloatVlenWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Latest: return BenchmarkFloatVlenWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol BenchmarkFloatVlen.");
+  }
+
+}
 void BenchmarkFloatVlenWriterBase::WriteFloatArray(yardl::NDArray<float, 2> const& value) {
   if (unlikely(state_ != 0)) {
     BenchmarkFloatVlenWriterBaseInvalidState(0, false, state_);
@@ -393,6 +426,12 @@ std::string BenchmarkFloatVlenReaderBase::schema_ = BenchmarkFloatVlenWriterBase
 
 std::vector<std::string> BenchmarkFloatVlenReaderBase::previous_schemas_ = BenchmarkFloatVlenWriterBase::previous_schemas_;
 
+Version BenchmarkFloatVlenReaderBase::VersionFromSchema(std::string const& schema) {
+  if (schema == BenchmarkFloatVlenWriterBase::schema_) {
+    return Version::Latest;
+  }
+  throw std::runtime_error("The schema does not match any version supported by protocol BenchmarkFloatVlen.");
+}
 bool BenchmarkFloatVlenReaderBase::ReadFloatArray(yardl::NDArray<float, 2>& value) {
   if (unlikely(state_ != 0)) {
     if (state_ == 1) {
@@ -503,6 +542,13 @@ std::string BenchmarkSmallRecordWriterBase::schema_ = R"({"protocol":{"name":"Be
 std::vector<std::string> BenchmarkSmallRecordWriterBase::previous_schemas_ = {
 };
 
+std::string BenchmarkSmallRecordWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Latest: return BenchmarkSmallRecordWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol BenchmarkSmallRecord.");
+  }
+
+}
 void BenchmarkSmallRecordWriterBase::WriteSmallRecord(test_model::SmallBenchmarkRecord const& value) {
   if (unlikely(state_ != 0)) {
     BenchmarkSmallRecordWriterBaseInvalidState(0, false, state_);
@@ -547,6 +593,12 @@ std::string BenchmarkSmallRecordReaderBase::schema_ = BenchmarkSmallRecordWriter
 
 std::vector<std::string> BenchmarkSmallRecordReaderBase::previous_schemas_ = BenchmarkSmallRecordWriterBase::previous_schemas_;
 
+Version BenchmarkSmallRecordReaderBase::VersionFromSchema(std::string const& schema) {
+  if (schema == BenchmarkSmallRecordWriterBase::schema_) {
+    return Version::Latest;
+  }
+  throw std::runtime_error("The schema does not match any version supported by protocol BenchmarkSmallRecord.");
+}
 bool BenchmarkSmallRecordReaderBase::ReadSmallRecord(test_model::SmallBenchmarkRecord& value) {
   if (unlikely(state_ != 0)) {
     if (state_ == 1) {
@@ -657,6 +709,13 @@ std::string BenchmarkSmallRecordWithOptionalsWriterBase::schema_ = R"({"protocol
 std::vector<std::string> BenchmarkSmallRecordWithOptionalsWriterBase::previous_schemas_ = {
 };
 
+std::string BenchmarkSmallRecordWithOptionalsWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Latest: return BenchmarkSmallRecordWithOptionalsWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol BenchmarkSmallRecordWithOptionals.");
+  }
+
+}
 void BenchmarkSmallRecordWithOptionalsWriterBase::WriteSmallRecord(test_model::SimpleEncodingCounters const& value) {
   if (unlikely(state_ != 0)) {
     BenchmarkSmallRecordWithOptionalsWriterBaseInvalidState(0, false, state_);
@@ -701,6 +760,12 @@ std::string BenchmarkSmallRecordWithOptionalsReaderBase::schema_ = BenchmarkSmal
 
 std::vector<std::string> BenchmarkSmallRecordWithOptionalsReaderBase::previous_schemas_ = BenchmarkSmallRecordWithOptionalsWriterBase::previous_schemas_;
 
+Version BenchmarkSmallRecordWithOptionalsReaderBase::VersionFromSchema(std::string const& schema) {
+  if (schema == BenchmarkSmallRecordWithOptionalsWriterBase::schema_) {
+    return Version::Latest;
+  }
+  throw std::runtime_error("The schema does not match any version supported by protocol BenchmarkSmallRecordWithOptionals.");
+}
 bool BenchmarkSmallRecordWithOptionalsReaderBase::ReadSmallRecord(test_model::SimpleEncodingCounters& value) {
   if (unlikely(state_ != 0)) {
     if (state_ == 1) {
@@ -811,6 +876,13 @@ std::string BenchmarkSimpleMrdWriterBase::schema_ = R"({"protocol":{"name":"Benc
 std::vector<std::string> BenchmarkSimpleMrdWriterBase::previous_schemas_ = {
 };
 
+std::string BenchmarkSimpleMrdWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Latest: return BenchmarkSimpleMrdWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol BenchmarkSimpleMrd.");
+  }
+
+}
 void BenchmarkSimpleMrdWriterBase::WriteData(std::variant<test_model::SimpleAcquisition, image::Image<float>> const& value) {
   if (unlikely(state_ != 0)) {
     BenchmarkSimpleMrdWriterBaseInvalidState(0, false, state_);
@@ -855,6 +927,12 @@ std::string BenchmarkSimpleMrdReaderBase::schema_ = BenchmarkSimpleMrdWriterBase
 
 std::vector<std::string> BenchmarkSimpleMrdReaderBase::previous_schemas_ = BenchmarkSimpleMrdWriterBase::previous_schemas_;
 
+Version BenchmarkSimpleMrdReaderBase::VersionFromSchema(std::string const& schema) {
+  if (schema == BenchmarkSimpleMrdWriterBase::schema_) {
+    return Version::Latest;
+  }
+  throw std::runtime_error("The schema does not match any version supported by protocol BenchmarkSimpleMrd.");
+}
 bool BenchmarkSimpleMrdReaderBase::ReadData(std::variant<test_model::SimpleAcquisition, image::Image<float>>& value) {
   if (unlikely(state_ != 0)) {
     if (state_ == 1) {
@@ -968,6 +1046,13 @@ std::string ScalarsWriterBase::schema_ = R"({"protocol":{"name":"Scalars","seque
 std::vector<std::string> ScalarsWriterBase::previous_schemas_ = {
 };
 
+std::string ScalarsWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Latest: return ScalarsWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol Scalars.");
+  }
+
+}
 void ScalarsWriterBase::WriteInt32(int32_t const& value) {
   if (unlikely(state_ != 0)) {
     ScalarsWriterBaseInvalidState(0, false, state_);
@@ -998,6 +1083,12 @@ std::string ScalarsReaderBase::schema_ = ScalarsWriterBase::schema_;
 
 std::vector<std::string> ScalarsReaderBase::previous_schemas_ = ScalarsWriterBase::previous_schemas_;
 
+Version ScalarsReaderBase::VersionFromSchema(std::string const& schema) {
+  if (schema == ScalarsWriterBase::schema_) {
+    return Version::Latest;
+  }
+  throw std::runtime_error("The schema does not match any version supported by protocol Scalars.");
+}
 void ScalarsReaderBase::ReadInt32(int32_t& value) {
   if (unlikely(state_ != 0)) {
     ScalarsReaderBaseInvalidState(0, state_);
@@ -1077,6 +1168,13 @@ std::string ScalarOptionalsWriterBase::schema_ = R"({"protocol":{"name":"ScalarO
 std::vector<std::string> ScalarOptionalsWriterBase::previous_schemas_ = {
 };
 
+std::string ScalarOptionalsWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Latest: return ScalarOptionalsWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol ScalarOptionals.");
+  }
+
+}
 void ScalarOptionalsWriterBase::WriteOptionalInt(std::optional<int32_t> const& value) {
   if (unlikely(state_ != 0)) {
     ScalarOptionalsWriterBaseInvalidState(0, false, state_);
@@ -1125,6 +1223,12 @@ std::string ScalarOptionalsReaderBase::schema_ = ScalarOptionalsWriterBase::sche
 
 std::vector<std::string> ScalarOptionalsReaderBase::previous_schemas_ = ScalarOptionalsWriterBase::previous_schemas_;
 
+Version ScalarOptionalsReaderBase::VersionFromSchema(std::string const& schema) {
+  if (schema == ScalarOptionalsWriterBase::schema_) {
+    return Version::Latest;
+  }
+  throw std::runtime_error("The schema does not match any version supported by protocol ScalarOptionals.");
+}
 void ScalarOptionalsReaderBase::ReadOptionalInt(std::optional<int32_t>& value) {
   if (unlikely(state_ != 0)) {
     ScalarOptionalsReaderBaseInvalidState(0, state_);
@@ -1223,6 +1327,13 @@ std::string NestedRecordsWriterBase::schema_ = R"({"protocol":{"name":"NestedRec
 std::vector<std::string> NestedRecordsWriterBase::previous_schemas_ = {
 };
 
+std::string NestedRecordsWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Latest: return NestedRecordsWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol NestedRecords.");
+  }
+
+}
 void NestedRecordsWriterBase::WriteTupleWithRecords(test_model::TupleWithRecords const& value) {
   if (unlikely(state_ != 0)) {
     NestedRecordsWriterBaseInvalidState(0, false, state_);
@@ -1244,6 +1355,12 @@ std::string NestedRecordsReaderBase::schema_ = NestedRecordsWriterBase::schema_;
 
 std::vector<std::string> NestedRecordsReaderBase::previous_schemas_ = NestedRecordsWriterBase::previous_schemas_;
 
+Version NestedRecordsReaderBase::VersionFromSchema(std::string const& schema) {
+  if (schema == NestedRecordsWriterBase::schema_) {
+    return Version::Latest;
+  }
+  throw std::runtime_error("The schema does not match any version supported by protocol NestedRecords.");
+}
 void NestedRecordsReaderBase::ReadTupleWithRecords(test_model::TupleWithRecords& value) {
   if (unlikely(state_ != 0)) {
     NestedRecordsReaderBaseInvalidState(0, state_);
@@ -1309,6 +1426,13 @@ std::string VlensWriterBase::schema_ = R"({"protocol":{"name":"Vlens","sequence"
 std::vector<std::string> VlensWriterBase::previous_schemas_ = {
 };
 
+std::string VlensWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Latest: return VlensWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol Vlens.");
+  }
+
+}
 void VlensWriterBase::WriteIntVector(std::vector<int32_t> const& value) {
   if (unlikely(state_ != 0)) {
     VlensWriterBaseInvalidState(0, false, state_);
@@ -1357,6 +1481,12 @@ std::string VlensReaderBase::schema_ = VlensWriterBase::schema_;
 
 std::vector<std::string> VlensReaderBase::previous_schemas_ = VlensWriterBase::previous_schemas_;
 
+Version VlensReaderBase::VersionFromSchema(std::string const& schema) {
+  if (schema == VlensWriterBase::schema_) {
+    return Version::Latest;
+  }
+  throw std::runtime_error("The schema does not match any version supported by protocol Vlens.");
+}
 void VlensReaderBase::ReadIntVector(std::vector<int32_t>& value) {
   if (unlikely(state_ != 0)) {
     VlensReaderBaseInvalidState(0, state_);
@@ -1458,6 +1588,13 @@ std::string StringsWriterBase::schema_ = R"({"protocol":{"name":"Strings","seque
 std::vector<std::string> StringsWriterBase::previous_schemas_ = {
 };
 
+std::string StringsWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Latest: return StringsWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol Strings.");
+  }
+
+}
 void StringsWriterBase::WriteSingleString(std::string const& value) {
   if (unlikely(state_ != 0)) {
     StringsWriterBaseInvalidState(0, false, state_);
@@ -1488,6 +1625,12 @@ std::string StringsReaderBase::schema_ = StringsWriterBase::schema_;
 
 std::vector<std::string> StringsReaderBase::previous_schemas_ = StringsWriterBase::previous_schemas_;
 
+Version StringsReaderBase::VersionFromSchema(std::string const& schema) {
+  if (schema == StringsWriterBase::schema_) {
+    return Version::Latest;
+  }
+  throw std::runtime_error("The schema does not match any version supported by protocol Strings.");
+}
 void StringsReaderBase::ReadSingleString(std::string& value) {
   if (unlikely(state_ != 0)) {
     StringsReaderBaseInvalidState(0, state_);
@@ -1558,6 +1701,13 @@ std::string OptionalVectorsWriterBase::schema_ = R"({"protocol":{"name":"Optiona
 std::vector<std::string> OptionalVectorsWriterBase::previous_schemas_ = {
 };
 
+std::string OptionalVectorsWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Latest: return OptionalVectorsWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol OptionalVectors.");
+  }
+
+}
 void OptionalVectorsWriterBase::WriteRecordWithOptionalVector(test_model::RecordWithOptionalVector const& value) {
   if (unlikely(state_ != 0)) {
     OptionalVectorsWriterBaseInvalidState(0, false, state_);
@@ -1579,6 +1729,12 @@ std::string OptionalVectorsReaderBase::schema_ = OptionalVectorsWriterBase::sche
 
 std::vector<std::string> OptionalVectorsReaderBase::previous_schemas_ = OptionalVectorsWriterBase::previous_schemas_;
 
+Version OptionalVectorsReaderBase::VersionFromSchema(std::string const& schema) {
+  if (schema == OptionalVectorsWriterBase::schema_) {
+    return Version::Latest;
+  }
+  throw std::runtime_error("The schema does not match any version supported by protocol OptionalVectors.");
+}
 void OptionalVectorsReaderBase::ReadRecordWithOptionalVector(test_model::RecordWithOptionalVector& value) {
   if (unlikely(state_ != 0)) {
     OptionalVectorsReaderBaseInvalidState(0, state_);
@@ -1644,6 +1800,13 @@ std::string FixedVectorsWriterBase::schema_ = R"({"protocol":{"name":"FixedVecto
 std::vector<std::string> FixedVectorsWriterBase::previous_schemas_ = {
 };
 
+std::string FixedVectorsWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Latest: return FixedVectorsWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol FixedVectors.");
+  }
+
+}
 void FixedVectorsWriterBase::WriteFixedIntVector(std::array<int32_t, 5> const& value) {
   if (unlikely(state_ != 0)) {
     FixedVectorsWriterBaseInvalidState(0, false, state_);
@@ -1692,6 +1855,12 @@ std::string FixedVectorsReaderBase::schema_ = FixedVectorsWriterBase::schema_;
 
 std::vector<std::string> FixedVectorsReaderBase::previous_schemas_ = FixedVectorsWriterBase::previous_schemas_;
 
+Version FixedVectorsReaderBase::VersionFromSchema(std::string const& schema) {
+  if (schema == FixedVectorsWriterBase::schema_) {
+    return Version::Latest;
+  }
+  throw std::runtime_error("The schema does not match any version supported by protocol FixedVectors.");
+}
 void FixedVectorsReaderBase::ReadFixedIntVector(std::array<int32_t, 5>& value) {
   if (unlikely(state_ != 0)) {
     FixedVectorsReaderBaseInvalidState(0, state_);
@@ -1799,6 +1968,13 @@ std::string StreamsWriterBase::schema_ = R"({"protocol":{"name":"Streams","seque
 std::vector<std::string> StreamsWriterBase::previous_schemas_ = {
 };
 
+std::string StreamsWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Latest: return StreamsWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol Streams.");
+  }
+
+}
 void StreamsWriterBase::WriteIntData(int32_t const& value) {
   if (unlikely(state_ != 0)) {
     StreamsWriterBaseInvalidState(0, false, state_);
@@ -1939,6 +2115,12 @@ std::string StreamsReaderBase::schema_ = StreamsWriterBase::schema_;
 
 std::vector<std::string> StreamsReaderBase::previous_schemas_ = StreamsWriterBase::previous_schemas_;
 
+Version StreamsReaderBase::VersionFromSchema(std::string const& schema) {
+  if (schema == StreamsWriterBase::schema_) {
+    return Version::Latest;
+  }
+  throw std::runtime_error("The schema does not match any version supported by protocol Streams.");
+}
 bool StreamsReaderBase::ReadIntData(int32_t& value) {
   if (unlikely(state_ != 0)) {
     if (state_ == 1) {
@@ -2289,6 +2471,13 @@ std::string FixedArraysWriterBase::schema_ = R"({"protocol":{"name":"FixedArrays
 std::vector<std::string> FixedArraysWriterBase::previous_schemas_ = {
 };
 
+std::string FixedArraysWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Latest: return FixedArraysWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol FixedArrays.");
+  }
+
+}
 void FixedArraysWriterBase::WriteInts(yardl::FixedNDArray<int32_t, 2, 3> const& value) {
   if (unlikely(state_ != 0)) {
     FixedArraysWriterBaseInvalidState(0, false, state_);
@@ -2346,6 +2535,12 @@ std::string FixedArraysReaderBase::schema_ = FixedArraysWriterBase::schema_;
 
 std::vector<std::string> FixedArraysReaderBase::previous_schemas_ = FixedArraysWriterBase::previous_schemas_;
 
+Version FixedArraysReaderBase::VersionFromSchema(std::string const& schema) {
+  if (schema == FixedArraysWriterBase::schema_) {
+    return Version::Latest;
+  }
+  throw std::runtime_error("The schema does not match any version supported by protocol FixedArrays.");
+}
 void FixedArraysReaderBase::ReadInts(yardl::FixedNDArray<int32_t, 2, 3>& value) {
   if (unlikely(state_ != 0)) {
     FixedArraysReaderBaseInvalidState(0, state_);
@@ -2482,6 +2677,13 @@ std::string SubarraysWriterBase::schema_ = R"({"protocol":{"name":"Subarrays","s
 std::vector<std::string> SubarraysWriterBase::previous_schemas_ = {
 };
 
+std::string SubarraysWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Latest: return SubarraysWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol Subarrays.");
+  }
+
+}
 void SubarraysWriterBase::WriteDynamicWithFixedIntSubarray(yardl::DynamicNDArray<yardl::FixedNDArray<int32_t, 3>> const& value) {
   if (unlikely(state_ != 0)) {
     SubarraysWriterBaseInvalidState(0, false, state_);
@@ -2575,6 +2777,12 @@ std::string SubarraysReaderBase::schema_ = SubarraysWriterBase::schema_;
 
 std::vector<std::string> SubarraysReaderBase::previous_schemas_ = SubarraysWriterBase::previous_schemas_;
 
+Version SubarraysReaderBase::VersionFromSchema(std::string const& schema) {
+  if (schema == SubarraysWriterBase::schema_) {
+    return Version::Latest;
+  }
+  throw std::runtime_error("The schema does not match any version supported by protocol Subarrays.");
+}
 void SubarraysReaderBase::ReadDynamicWithFixedIntSubarray(yardl::DynamicNDArray<yardl::FixedNDArray<int32_t, 3>>& value) {
   if (unlikely(state_ != 0)) {
     SubarraysReaderBaseInvalidState(0, state_);
@@ -2746,6 +2954,13 @@ std::string SubarraysInRecordsWriterBase::schema_ = R"({"protocol":{"name":"Suba
 std::vector<std::string> SubarraysInRecordsWriterBase::previous_schemas_ = {
 };
 
+std::string SubarraysInRecordsWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Latest: return SubarraysInRecordsWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol SubarraysInRecords.");
+  }
+
+}
 void SubarraysInRecordsWriterBase::WriteWithFixedSubarrays(yardl::DynamicNDArray<test_model::RecordWithFixedCollections> const& value) {
   if (unlikely(state_ != 0)) {
     SubarraysInRecordsWriterBaseInvalidState(0, false, state_);
@@ -2776,6 +2991,12 @@ std::string SubarraysInRecordsReaderBase::schema_ = SubarraysInRecordsWriterBase
 
 std::vector<std::string> SubarraysInRecordsReaderBase::previous_schemas_ = SubarraysInRecordsWriterBase::previous_schemas_;
 
+Version SubarraysInRecordsReaderBase::VersionFromSchema(std::string const& schema) {
+  if (schema == SubarraysInRecordsWriterBase::schema_) {
+    return Version::Latest;
+  }
+  throw std::runtime_error("The schema does not match any version supported by protocol SubarraysInRecords.");
+}
 void SubarraysInRecordsReaderBase::ReadWithFixedSubarrays(yardl::DynamicNDArray<test_model::RecordWithFixedCollections>& value) {
   if (unlikely(state_ != 0)) {
     SubarraysInRecordsReaderBaseInvalidState(0, state_);
@@ -2858,6 +3079,13 @@ std::string NDArraysWriterBase::schema_ = R"({"protocol":{"name":"NDArrays","seq
 std::vector<std::string> NDArraysWriterBase::previous_schemas_ = {
 };
 
+std::string NDArraysWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Latest: return NDArraysWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol NDArrays.");
+  }
+
+}
 void NDArraysWriterBase::WriteInts(yardl::NDArray<int32_t, 2> const& value) {
   if (unlikely(state_ != 0)) {
     NDArraysWriterBaseInvalidState(0, false, state_);
@@ -2915,6 +3143,12 @@ std::string NDArraysReaderBase::schema_ = NDArraysWriterBase::schema_;
 
 std::vector<std::string> NDArraysReaderBase::previous_schemas_ = NDArraysWriterBase::previous_schemas_;
 
+Version NDArraysReaderBase::VersionFromSchema(std::string const& schema) {
+  if (schema == NDArraysWriterBase::schema_) {
+    return Version::Latest;
+  }
+  throw std::runtime_error("The schema does not match any version supported by protocol NDArrays.");
+}
 void NDArraysReaderBase::ReadInts(yardl::NDArray<int32_t, 2>& value) {
   if (unlikely(state_ != 0)) {
     NDArraysReaderBaseInvalidState(0, state_);
@@ -3036,6 +3270,13 @@ std::string NDArraysSingleDimensionWriterBase::schema_ = R"({"protocol":{"name":
 std::vector<std::string> NDArraysSingleDimensionWriterBase::previous_schemas_ = {
 };
 
+std::string NDArraysSingleDimensionWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Latest: return NDArraysSingleDimensionWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol NDArraysSingleDimension.");
+  }
+
+}
 void NDArraysSingleDimensionWriterBase::WriteInts(yardl::NDArray<int32_t, 1> const& value) {
   if (unlikely(state_ != 0)) {
     NDArraysSingleDimensionWriterBaseInvalidState(0, false, state_);
@@ -3084,6 +3325,12 @@ std::string NDArraysSingleDimensionReaderBase::schema_ = NDArraysSingleDimension
 
 std::vector<std::string> NDArraysSingleDimensionReaderBase::previous_schemas_ = NDArraysSingleDimensionWriterBase::previous_schemas_;
 
+Version NDArraysSingleDimensionReaderBase::VersionFromSchema(std::string const& schema) {
+  if (schema == NDArraysSingleDimensionWriterBase::schema_) {
+    return Version::Latest;
+  }
+  throw std::runtime_error("The schema does not match any version supported by protocol NDArraysSingleDimension.");
+}
 void NDArraysSingleDimensionReaderBase::ReadInts(yardl::NDArray<int32_t, 1>& value) {
   if (unlikely(state_ != 0)) {
     NDArraysSingleDimensionReaderBaseInvalidState(0, state_);
@@ -3191,6 +3438,13 @@ std::string DynamicNDArraysWriterBase::schema_ = R"({"protocol":{"name":"Dynamic
 std::vector<std::string> DynamicNDArraysWriterBase::previous_schemas_ = {
 };
 
+std::string DynamicNDArraysWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Latest: return DynamicNDArraysWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol DynamicNDArrays.");
+  }
+
+}
 void DynamicNDArraysWriterBase::WriteInts(yardl::DynamicNDArray<int32_t> const& value) {
   if (unlikely(state_ != 0)) {
     DynamicNDArraysWriterBaseInvalidState(0, false, state_);
@@ -3239,6 +3493,12 @@ std::string DynamicNDArraysReaderBase::schema_ = DynamicNDArraysWriterBase::sche
 
 std::vector<std::string> DynamicNDArraysReaderBase::previous_schemas_ = DynamicNDArraysWriterBase::previous_schemas_;
 
+Version DynamicNDArraysReaderBase::VersionFromSchema(std::string const& schema) {
+  if (schema == DynamicNDArraysWriterBase::schema_) {
+    return Version::Latest;
+  }
+  throw std::runtime_error("The schema does not match any version supported by protocol DynamicNDArrays.");
+}
 void DynamicNDArraysReaderBase::ReadInts(yardl::DynamicNDArray<int32_t>& value) {
   if (unlikely(state_ != 0)) {
     DynamicNDArraysReaderBaseInvalidState(0, state_);
@@ -3346,6 +3606,13 @@ std::string MapsWriterBase::schema_ = R"({"protocol":{"name":"Maps","sequence":[
 std::vector<std::string> MapsWriterBase::previous_schemas_ = {
 };
 
+std::string MapsWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Latest: return MapsWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol Maps.");
+  }
+
+}
 void MapsWriterBase::WriteStringToInt(std::unordered_map<std::string, int32_t> const& value) {
   if (unlikely(state_ != 0)) {
     MapsWriterBaseInvalidState(0, false, state_);
@@ -3394,6 +3661,12 @@ std::string MapsReaderBase::schema_ = MapsWriterBase::schema_;
 
 std::vector<std::string> MapsReaderBase::previous_schemas_ = MapsWriterBase::previous_schemas_;
 
+Version MapsReaderBase::VersionFromSchema(std::string const& schema) {
+  if (schema == MapsWriterBase::schema_) {
+    return Version::Latest;
+  }
+  throw std::runtime_error("The schema does not match any version supported by protocol Maps.");
+}
 void MapsReaderBase::ReadStringToInt(std::unordered_map<std::string, int32_t>& value) {
   if (unlikely(state_ != 0)) {
     MapsReaderBaseInvalidState(0, state_);
@@ -3501,6 +3774,13 @@ std::string UnionsWriterBase::schema_ = R"({"protocol":{"name":"Unions","sequenc
 std::vector<std::string> UnionsWriterBase::previous_schemas_ = {
 };
 
+std::string UnionsWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Latest: return UnionsWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol Unions.");
+  }
+
+}
 void UnionsWriterBase::WriteIntOrSimpleRecord(std::variant<int32_t, test_model::SimpleRecord> const& value) {
   if (unlikely(state_ != 0)) {
     UnionsWriterBaseInvalidState(0, false, state_);
@@ -3549,6 +3829,12 @@ std::string UnionsReaderBase::schema_ = UnionsWriterBase::schema_;
 
 std::vector<std::string> UnionsReaderBase::previous_schemas_ = UnionsWriterBase::previous_schemas_;
 
+Version UnionsReaderBase::VersionFromSchema(std::string const& schema) {
+  if (schema == UnionsWriterBase::schema_) {
+    return Version::Latest;
+  }
+  throw std::runtime_error("The schema does not match any version supported by protocol Unions.");
+}
 void UnionsReaderBase::ReadIntOrSimpleRecord(std::variant<int32_t, test_model::SimpleRecord>& value) {
   if (unlikely(state_ != 0)) {
     UnionsReaderBaseInvalidState(0, state_);
@@ -3650,6 +3936,13 @@ std::string StreamsOfUnionsWriterBase::schema_ = R"({"protocol":{"name":"Streams
 std::vector<std::string> StreamsOfUnionsWriterBase::previous_schemas_ = {
 };
 
+std::string StreamsOfUnionsWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Latest: return StreamsOfUnionsWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol StreamsOfUnions.");
+  }
+
+}
 void StreamsOfUnionsWriterBase::WriteIntOrSimpleRecord(std::variant<int32_t, test_model::SimpleRecord> const& value) {
   if (unlikely(state_ != 0)) {
     StreamsOfUnionsWriterBaseInvalidState(0, false, state_);
@@ -3726,6 +4019,12 @@ std::string StreamsOfUnionsReaderBase::schema_ = StreamsOfUnionsWriterBase::sche
 
 std::vector<std::string> StreamsOfUnionsReaderBase::previous_schemas_ = StreamsOfUnionsWriterBase::previous_schemas_;
 
+Version StreamsOfUnionsReaderBase::VersionFromSchema(std::string const& schema) {
+  if (schema == StreamsOfUnionsWriterBase::schema_) {
+    return Version::Latest;
+  }
+  throw std::runtime_error("The schema does not match any version supported by protocol StreamsOfUnions.");
+}
 bool StreamsOfUnionsReaderBase::ReadIntOrSimpleRecord(std::variant<int32_t, test_model::SimpleRecord>& value) {
   if (unlikely(state_ != 0)) {
     if (state_ == 1) {
@@ -3918,6 +4217,13 @@ std::string EnumsWriterBase::schema_ = R"({"protocol":{"name":"Enums","sequence"
 std::vector<std::string> EnumsWriterBase::previous_schemas_ = {
 };
 
+std::string EnumsWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Latest: return EnumsWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol Enums.");
+  }
+
+}
 void EnumsWriterBase::WriteSingle(test_model::Fruits const& value) {
   if (unlikely(state_ != 0)) {
     EnumsWriterBaseInvalidState(0, false, state_);
@@ -3957,6 +4263,12 @@ std::string EnumsReaderBase::schema_ = EnumsWriterBase::schema_;
 
 std::vector<std::string> EnumsReaderBase::previous_schemas_ = EnumsWriterBase::previous_schemas_;
 
+Version EnumsReaderBase::VersionFromSchema(std::string const& schema) {
+  if (schema == EnumsWriterBase::schema_) {
+    return Version::Latest;
+  }
+  throw std::runtime_error("The schema does not match any version supported by protocol Enums.");
+}
 void EnumsReaderBase::ReadSingle(test_model::Fruits& value) {
   if (unlikely(state_ != 0)) {
     EnumsReaderBaseInvalidState(0, state_);
@@ -4044,6 +4356,13 @@ std::string FlagsWriterBase::schema_ = R"({"protocol":{"name":"Flags","sequence"
 std::vector<std::string> FlagsWriterBase::previous_schemas_ = {
 };
 
+std::string FlagsWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Latest: return FlagsWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol Flags.");
+  }
+
+}
 void FlagsWriterBase::WriteDays(test_model::DaysOfWeek const& value) {
   if (unlikely(state_ != 0)) {
     FlagsWriterBaseInvalidState(0, false, state_);
@@ -4120,6 +4439,12 @@ std::string FlagsReaderBase::schema_ = FlagsWriterBase::schema_;
 
 std::vector<std::string> FlagsReaderBase::previous_schemas_ = FlagsWriterBase::previous_schemas_;
 
+Version FlagsReaderBase::VersionFromSchema(std::string const& schema) {
+  if (schema == FlagsWriterBase::schema_) {
+    return Version::Latest;
+  }
+  throw std::runtime_error("The schema does not match any version supported by protocol Flags.");
+}
 bool FlagsReaderBase::ReadDays(test_model::DaysOfWeek& value) {
   if (unlikely(state_ != 0)) {
     if (state_ == 1) {
@@ -4312,6 +4637,13 @@ std::string StateTestWriterBase::schema_ = R"({"protocol":{"name":"StateTest","s
 std::vector<std::string> StateTestWriterBase::previous_schemas_ = {
 };
 
+std::string StateTestWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Latest: return StateTestWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol StateTest.");
+  }
+
+}
 void StateTestWriterBase::WriteAnInt(int32_t const& value) {
   if (unlikely(state_ != 0)) {
     StateTestWriterBaseInvalidState(0, false, state_);
@@ -4374,6 +4706,12 @@ std::string StateTestReaderBase::schema_ = StateTestWriterBase::schema_;
 
 std::vector<std::string> StateTestReaderBase::previous_schemas_ = StateTestWriterBase::previous_schemas_;
 
+Version StateTestReaderBase::VersionFromSchema(std::string const& schema) {
+  if (schema == StateTestWriterBase::schema_) {
+    return Version::Latest;
+  }
+  throw std::runtime_error("The schema does not match any version supported by protocol StateTest.");
+}
 void StateTestReaderBase::ReadAnInt(int32_t& value) {
   if (unlikely(state_ != 0)) {
     StateTestReaderBaseInvalidState(0, state_);
@@ -4540,6 +4878,13 @@ std::string SimpleGenericsWriterBase::schema_ = R"({"protocol":{"name":"SimpleGe
 std::vector<std::string> SimpleGenericsWriterBase::previous_schemas_ = {
 };
 
+std::string SimpleGenericsWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Latest: return SimpleGenericsWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol SimpleGenerics.");
+  }
+
+}
 void SimpleGenericsWriterBase::WriteFloatImage(image::FloatImage const& value) {
   if (unlikely(state_ != 0)) {
     SimpleGenericsWriterBaseInvalidState(0, false, state_);
@@ -4656,6 +5001,12 @@ std::string SimpleGenericsReaderBase::schema_ = SimpleGenericsWriterBase::schema
 
 std::vector<std::string> SimpleGenericsReaderBase::previous_schemas_ = SimpleGenericsWriterBase::previous_schemas_;
 
+Version SimpleGenericsReaderBase::VersionFromSchema(std::string const& schema) {
+  if (schema == SimpleGenericsWriterBase::schema_) {
+    return Version::Latest;
+  }
+  throw std::runtime_error("The schema does not match any version supported by protocol SimpleGenerics.");
+}
 void SimpleGenericsReaderBase::ReadFloatImage(image::FloatImage& value) {
   if (unlikely(state_ != 0)) {
     SimpleGenericsReaderBaseInvalidState(0, state_);
@@ -4890,6 +5241,13 @@ std::string AdvancedGenericsWriterBase::schema_ = R"({"protocol":{"name":"Advanc
 std::vector<std::string> AdvancedGenericsWriterBase::previous_schemas_ = {
 };
 
+std::string AdvancedGenericsWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Latest: return AdvancedGenericsWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol AdvancedGenerics.");
+  }
+
+}
 void AdvancedGenericsWriterBase::WriteFloatImageImage(test_model::Image<test_model::Image<float>> const& value) {
   if (unlikely(state_ != 0)) {
     AdvancedGenericsWriterBaseInvalidState(0, false, state_);
@@ -4947,6 +5305,12 @@ std::string AdvancedGenericsReaderBase::schema_ = AdvancedGenericsWriterBase::sc
 
 std::vector<std::string> AdvancedGenericsReaderBase::previous_schemas_ = AdvancedGenericsWriterBase::previous_schemas_;
 
+Version AdvancedGenericsReaderBase::VersionFromSchema(std::string const& schema) {
+  if (schema == AdvancedGenericsWriterBase::schema_) {
+    return Version::Latest;
+  }
+  throw std::runtime_error("The schema does not match any version supported by protocol AdvancedGenerics.");
+}
 void AdvancedGenericsReaderBase::ReadFloatImageImage(test_model::Image<test_model::Image<float>>& value) {
   if (unlikely(state_ != 0)) {
     AdvancedGenericsReaderBaseInvalidState(0, state_);
@@ -5086,6 +5450,13 @@ std::string AliasesWriterBase::schema_ = R"({"protocol":{"name":"Aliases","seque
 std::vector<std::string> AliasesWriterBase::previous_schemas_ = {
 };
 
+std::string AliasesWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Latest: return AliasesWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol Aliases.");
+  }
+
+}
 void AliasesWriterBase::WriteAliasedString(test_model::AliasedString const& value) {
   if (unlikely(state_ != 0)) {
     AliasesWriterBaseInvalidState(0, false, state_);
@@ -5211,6 +5582,12 @@ std::string AliasesReaderBase::schema_ = AliasesWriterBase::schema_;
 
 std::vector<std::string> AliasesReaderBase::previous_schemas_ = AliasesWriterBase::previous_schemas_;
 
+Version AliasesReaderBase::VersionFromSchema(std::string const& schema) {
+  if (schema == AliasesWriterBase::schema_) {
+    return Version::Latest;
+  }
+  throw std::runtime_error("The schema does not match any version supported by protocol Aliases.");
+}
 void AliasesReaderBase::ReadAliasedString(test_model::AliasedString& value) {
   if (unlikely(state_ != 0)) {
     AliasesReaderBaseInvalidState(0, state_);
@@ -5450,6 +5827,13 @@ std::string StreamsOfAliasedUnionsWriterBase::schema_ = R"({"protocol":{"name":"
 std::vector<std::string> StreamsOfAliasedUnionsWriterBase::previous_schemas_ = {
 };
 
+std::string StreamsOfAliasedUnionsWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Latest: return StreamsOfAliasedUnionsWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol StreamsOfAliasedUnions.");
+  }
+
+}
 void StreamsOfAliasedUnionsWriterBase::WriteIntOrSimpleRecord(test_model::AliasedIntOrSimpleRecord const& value) {
   if (unlikely(state_ != 0)) {
     StreamsOfAliasedUnionsWriterBaseInvalidState(0, false, state_);
@@ -5526,6 +5910,12 @@ std::string StreamsOfAliasedUnionsReaderBase::schema_ = StreamsOfAliasedUnionsWr
 
 std::vector<std::string> StreamsOfAliasedUnionsReaderBase::previous_schemas_ = StreamsOfAliasedUnionsWriterBase::previous_schemas_;
 
+Version StreamsOfAliasedUnionsReaderBase::VersionFromSchema(std::string const& schema) {
+  if (schema == StreamsOfAliasedUnionsWriterBase::schema_) {
+    return Version::Latest;
+  }
+  throw std::runtime_error("The schema does not match any version supported by protocol StreamsOfAliasedUnions.");
+}
 bool StreamsOfAliasedUnionsReaderBase::ReadIntOrSimpleRecord(test_model::AliasedIntOrSimpleRecord& value) {
   if (unlikely(state_ != 0)) {
     if (state_ == 1) {
@@ -5712,6 +6102,13 @@ std::string ProtocolWithComputedFieldsWriterBase::schema_ = R"({"protocol":{"nam
 std::vector<std::string> ProtocolWithComputedFieldsWriterBase::previous_schemas_ = {
 };
 
+std::string ProtocolWithComputedFieldsWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Latest: return ProtocolWithComputedFieldsWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol ProtocolWithComputedFields.");
+  }
+
+}
 void ProtocolWithComputedFieldsWriterBase::WriteRecordWithComputedFields(test_model::RecordWithComputedFields const& value) {
   if (unlikely(state_ != 0)) {
     ProtocolWithComputedFieldsWriterBaseInvalidState(0, false, state_);
@@ -5733,6 +6130,12 @@ std::string ProtocolWithComputedFieldsReaderBase::schema_ = ProtocolWithComputed
 
 std::vector<std::string> ProtocolWithComputedFieldsReaderBase::previous_schemas_ = ProtocolWithComputedFieldsWriterBase::previous_schemas_;
 
+Version ProtocolWithComputedFieldsReaderBase::VersionFromSchema(std::string const& schema) {
+  if (schema == ProtocolWithComputedFieldsWriterBase::schema_) {
+    return Version::Latest;
+  }
+  throw std::runtime_error("The schema does not match any version supported by protocol ProtocolWithComputedFields.");
+}
 void ProtocolWithComputedFieldsReaderBase::ReadRecordWithComputedFields(test_model::RecordWithComputedFields& value) {
   if (unlikely(state_ != 0)) {
     ProtocolWithComputedFieldsReaderBaseInvalidState(0, state_);
@@ -5792,6 +6195,13 @@ std::string ProtocolWithKeywordStepsWriterBase::schema_ = R"({"protocol":{"name"
 std::vector<std::string> ProtocolWithKeywordStepsWriterBase::previous_schemas_ = {
 };
 
+std::string ProtocolWithKeywordStepsWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Latest: return ProtocolWithKeywordStepsWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol ProtocolWithKeywordSteps.");
+  }
+
+}
 void ProtocolWithKeywordStepsWriterBase::WriteInt(test_model::RecordWithKeywordFields const& value) {
   if (unlikely(state_ != 0)) {
     ProtocolWithKeywordStepsWriterBaseInvalidState(0, false, state_);
@@ -5845,6 +6255,12 @@ std::string ProtocolWithKeywordStepsReaderBase::schema_ = ProtocolWithKeywordSte
 
 std::vector<std::string> ProtocolWithKeywordStepsReaderBase::previous_schemas_ = ProtocolWithKeywordStepsWriterBase::previous_schemas_;
 
+Version ProtocolWithKeywordStepsReaderBase::VersionFromSchema(std::string const& schema) {
+  if (schema == ProtocolWithKeywordStepsWriterBase::schema_) {
+    return Version::Latest;
+  }
+  throw std::runtime_error("The schema does not match any version supported by protocol ProtocolWithKeywordSteps.");
+}
 bool ProtocolWithKeywordStepsReaderBase::ReadInt(test_model::RecordWithKeywordFields& value) {
   if (unlikely(state_ != 0)) {
     if (state_ == 1) {

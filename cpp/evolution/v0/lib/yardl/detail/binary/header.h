@@ -34,21 +34,4 @@ inline std::string ReadHeader(CodedInputStream& r) {
   return actual_schema;
 }
 
-inline void MatchSchema(std::string actual_schema, std::string const& current_schema, std::vector<std::string> const& previous_schemas, int& schema_index) {
-  if (actual_schema == current_schema) {
-    schema_index = -1;
-    return;
-  }
-
-  for (size_t i = 0; i < previous_schemas.size(); ++i) {
-    if (actual_schema == previous_schemas[i]) {
-      schema_index = static_cast<int>(i);
-      return;
-    }
-  }
-
-  throw std::runtime_error(
-      "The schema of the data to be read is not compatible with the current protocol.");
-}
-
 }  // namespace yardl::binary

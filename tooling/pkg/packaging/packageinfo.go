@@ -21,6 +21,7 @@ const PackageFileName = "_package.yml"
 const MaxImportRecursionDepth = 10
 
 var namespaceNameRegex = regexp.MustCompile(`^[A-Z][a-zA-Z0-9]*$`)
+var versionLabelRegex = regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9]*(_[a-zA-Z0-9]+)*$`)
 
 type PackageInfo struct {
 	FilePath  string `yaml:"-"`
@@ -62,6 +63,14 @@ func (p *PackageInfo) validate() error {
 		errorSink.Add(validation.NewValidationError(errors.New("the 'namespace' field is missing"), p.FilePath))
 	} else if !namespaceNameRegex.MatchString(p.Namespace) {
 		errorSink.Add(validation.NewValidationError(fmt.Errorf("the 'namespace' field must be PascalCased and match the format %s", namespaceNameRegex.String()), p.FilePath))
+	}
+
+	for _, pred := range p.Predecessors {
+		if pred.Label == "" {
+			errorSink.Add(validation.NewValidationError(errors.New("the predecessor label is missing"), p.FilePath))
+		} else if !versionLabelRegex.MatchString(pred.Label) {
+			errorSink.Add(validation.NewValidationError(fmt.Errorf("the predecessor label '%s' must match the format %s", pred.Label, versionLabelRegex.String()), p.FilePath))
+		}
 	}
 
 	if p.Json != nil {

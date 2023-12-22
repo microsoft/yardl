@@ -16,13 +16,11 @@ namespace evo_test::binary {
 // Binary writer for the MyProtocol protocol.
 class MyProtocolWriter : public evo_test::MyProtocolWriterBase, yardl::binary::BinaryWriter {
   public:
-  MyProtocolWriter(std::ostream& stream, const std::string& schema=schema_)
-      : yardl::binary::BinaryWriter(stream, schema, schema_, previous_schemas_) {
-  }
+  MyProtocolWriter(std::ostream& stream, Version version = Version::Latest)
+      : yardl::binary::BinaryWriter(stream, evo_test::MyProtocolWriterBase::SchemaFromVersion(version)), version_(version) {}
 
-  MyProtocolWriter(std::string file_name, const std::string& schema=schema_)
-      : yardl::binary::BinaryWriter(file_name, schema, schema_, previous_schemas_) {
-  }
+  MyProtocolWriter(std::string file_name, Version version = Version::Latest)
+      : yardl::binary::BinaryWriter(file_name, evo_test::MyProtocolWriterBase::SchemaFromVersion(version)), version_(version) {}
 
   void Flush() override;
 
@@ -35,20 +33,20 @@ class MyProtocolWriter : public evo_test::MyProtocolWriterBase, yardl::binary::B
   void WriteMaybeImpl(std::optional<int32_t> const& value) override;
   void WriteFooterImpl(std::optional<evo_test::Footer> const& value) override;
   void CloseImpl() override;
+
+  Version version_;
 };
 
 // Binary reader for the MyProtocol protocol.
 class MyProtocolReader : public evo_test::MyProtocolReaderBase, yardl::binary::BinaryReader {
   public:
   MyProtocolReader(std::istream& stream)
-      : yardl::binary::BinaryReader(stream, schema_, previous_schemas_) {
-  }
+      : yardl::binary::BinaryReader(stream), version_(evo_test::MyProtocolReaderBase::VersionFromSchema(schema_read_)) {}
 
   MyProtocolReader(std::string file_name)
-      : yardl::binary::BinaryReader(file_name, schema_, previous_schemas_) {
-  }
+      : yardl::binary::BinaryReader(file_name), version_(evo_test::MyProtocolReaderBase::VersionFromSchema(schema_read_)) {}
 
-  std::string GetSchema() { if (schema_index_ < 0) { return schema_; } else { return previous_schemas_[schema_index_]; } }
+  Version GetVersion() { return version_; }
 
   protected:
   void ReadHeaderImpl(evo_test::Header& value) override;
@@ -59,6 +57,8 @@ class MyProtocolReader : public evo_test::MyProtocolReaderBase, yardl::binary::B
   void ReadFooterImpl(std::optional<evo_test::Footer>& value) override;
   void CloseImpl() override;
 
+  Version version_;
+
   private:
   size_t current_block_remaining_ = 0;
 };
@@ -66,13 +66,11 @@ class MyProtocolReader : public evo_test::MyProtocolReaderBase, yardl::binary::B
 // Binary writer for the UnusedProtocol protocol.
 class UnusedProtocolWriter : public evo_test::UnusedProtocolWriterBase, yardl::binary::BinaryWriter {
   public:
-  UnusedProtocolWriter(std::ostream& stream, const std::string& schema=schema_)
-      : yardl::binary::BinaryWriter(stream, schema, schema_, previous_schemas_) {
-  }
+  UnusedProtocolWriter(std::ostream& stream, Version version = Version::Latest)
+      : yardl::binary::BinaryWriter(stream, evo_test::UnusedProtocolWriterBase::SchemaFromVersion(version)), version_(version) {}
 
-  UnusedProtocolWriter(std::string file_name, const std::string& schema=schema_)
-      : yardl::binary::BinaryWriter(file_name, schema, schema_, previous_schemas_) {
-  }
+  UnusedProtocolWriter(std::string file_name, Version version = Version::Latest)
+      : yardl::binary::BinaryWriter(file_name, evo_test::UnusedProtocolWriterBase::SchemaFromVersion(version)), version_(version) {}
 
   void Flush() override;
 
@@ -81,25 +79,27 @@ class UnusedProtocolWriter : public evo_test::UnusedProtocolWriterBase, yardl::b
   void WriteSamplesImpl(std::vector<evo_test::Sample> const& values) override;
   void EndSamplesImpl() override;
   void CloseImpl() override;
+
+  Version version_;
 };
 
 // Binary reader for the UnusedProtocol protocol.
 class UnusedProtocolReader : public evo_test::UnusedProtocolReaderBase, yardl::binary::BinaryReader {
   public:
   UnusedProtocolReader(std::istream& stream)
-      : yardl::binary::BinaryReader(stream, schema_, previous_schemas_) {
-  }
+      : yardl::binary::BinaryReader(stream), version_(evo_test::UnusedProtocolReaderBase::VersionFromSchema(schema_read_)) {}
 
   UnusedProtocolReader(std::string file_name)
-      : yardl::binary::BinaryReader(file_name, schema_, previous_schemas_) {
-  }
+      : yardl::binary::BinaryReader(file_name), version_(evo_test::UnusedProtocolReaderBase::VersionFromSchema(schema_read_)) {}
 
-  std::string GetSchema() { if (schema_index_ < 0) { return schema_; } else { return previous_schemas_[schema_index_]; } }
+  Version GetVersion() { return version_; }
 
   protected:
   bool ReadSamplesImpl(evo_test::Sample& value) override;
   bool ReadSamplesImpl(std::vector<evo_test::Sample>& values) override;
   void CloseImpl() override;
+
+  Version version_;
 
   private:
   size_t current_block_remaining_ = 0;

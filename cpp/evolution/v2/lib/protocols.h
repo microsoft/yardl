@@ -4,6 +4,11 @@
 #include "types.h"
 
 namespace evo_test {
+enum class Version {
+  v0,
+  v1,
+  Latest
+};
 // Abstract writer for the MyProtocol protocol.
 class MyProtocolWriterBase {
   public:
@@ -52,6 +57,8 @@ class MyProtocolWriterBase {
 
   static std::vector<std::string> previous_schemas_;
 
+  static std::string SchemaFromVersion(Version version);
+
   private:
   uint8_t state_ = 0;
 
@@ -98,6 +105,8 @@ class MyProtocolReaderBase {
 
   static std::vector<std::string> previous_schemas_;
 
+  static Version VersionFromSchema(const std::string& schema);
+
   private:
   uint8_t state_ = 0;
 };
@@ -138,6 +147,8 @@ class NewProtocolWriterBase {
 
   static std::vector<std::string> previous_schemas_;
 
+  static std::string SchemaFromVersion(Version version);
+
   private:
   uint8_t state_ = 0;
 
@@ -171,6 +182,8 @@ class NewProtocolReaderBase {
   static std::string schema_;
 
   static std::vector<std::string> previous_schemas_;
+
+  static Version VersionFromSchema(const std::string& schema);
 
   private:
   uint8_t state_ = 0;

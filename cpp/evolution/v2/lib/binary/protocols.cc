@@ -348,17 +348,15 @@ namespace {
 } // namespace
 
 void MyProtocolWriter::WriteHeaderImpl(evo_test::Header const& value) {
-  switch (schema_index_) {
-  case 0:
-    {
-    evo_test::binary::WriteHeader_v0(stream_, value);
-    }
-    break;
-  case 1:
-    {
+  switch (version_) {
+  case Version::v1: {
     evo_test::binary::WriteHeader_v1(stream_, value);
-    }
     break;
+  }
+  case Version::v0: {
+    evo_test::binary::WriteHeader_v0(stream_, value);
+    break;
+  }
   default:
     evo_test::binary::WriteHeader(stream_, value);
     break;
@@ -366,21 +364,19 @@ void MyProtocolWriter::WriteHeaderImpl(evo_test::Header const& value) {
 }
 
 void MyProtocolWriter::WriteIdImpl(std::string const& value) {
-  switch (schema_index_) {
-  case 0:
-    {
-    int64_t id_0;
-    id_0 = std::stol(value);
-    yardl::binary::WriteInteger(stream_, id_0);
-    }
+  switch (version_) {
+  case Version::v0: {
+    int64_t id_v0;
+    id_v0 = std::stol(value);
+    yardl::binary::WriteInteger(stream_, id_v0);
     break;
-  case 1:
-    {
-    int64_t id_1;
-    id_1 = std::stol(value);
-    yardl::binary::WriteInteger(stream_, id_1);
-    }
+  }
+  case Version::v1: {
+    int64_t id_v1;
+    id_v1 = std::stol(value);
+    yardl::binary::WriteInteger(stream_, id_v1);
     break;
+  }
   default:
     yardl::binary::WriteString(stream_, value);
     break;
@@ -389,17 +385,15 @@ void MyProtocolWriter::WriteIdImpl(std::string const& value) {
 
 void MyProtocolWriter::WriteSamplesImpl(evo_test::Sample const& value) {
   yardl::binary::WriteInteger(stream_, 1U);
-  switch (schema_index_) {
-  case 0:
-    {
-    evo_test::binary::WriteSample_v0(stream_, value);
-    }
-    break;
-  case 1:
-    {
+  switch (version_) {
+  case Version::v1: {
     evo_test::binary::WriteSample_v1(stream_, value);
-    }
     break;
+  }
+  case Version::v0: {
+    evo_test::binary::WriteSample_v0(stream_, value);
+    break;
+  }
   default:
     evo_test::binary::WriteSample(stream_, value);
     break;
@@ -408,17 +402,15 @@ void MyProtocolWriter::WriteSamplesImpl(evo_test::Sample const& value) {
 
 void MyProtocolWriter::WriteSamplesImpl(std::vector<evo_test::Sample> const& values) {
   if (!values.empty()) {
-    switch (schema_index_) {
-    case 0:
-      {
+    switch (version_) {
+    case Version::v0: {
       yardl::binary::WriteVector<evo_test::Sample, evo_test::binary::WriteSample_v0>(stream_, values);
-      }
       break;
-    case 1:
-      {
+    }
+    case Version::v1: {
       yardl::binary::WriteVector<evo_test::Sample, evo_test::binary::WriteSample_v1>(stream_, values);
-      }
       break;
+    }
     default:
       yardl::binary::WriteVector<evo_test::Sample, evo_test::binary::WriteSample>(stream_, values);
       break;
@@ -431,25 +423,23 @@ void MyProtocolWriter::EndSamplesImpl() {
 }
 
 void MyProtocolWriter::WriteMaybeImpl(std::optional<std::string> const& value) {
-  switch (schema_index_) {
-  case 0:
-    {
-    std::optional<int32_t> maybe_0;
+  switch (version_) {
+  case Version::v0: {
+    std::optional<int32_t> maybe_v0;
     if (value.has_value()) {
-      maybe_0 = std::stoi(value.value());
+      maybe_v0 = std::stoi(value.value());
     }
-    yardl::binary::WriteOptional<int32_t, yardl::binary::WriteInteger>(stream_, maybe_0);
-    }
+    yardl::binary::WriteOptional<int32_t, yardl::binary::WriteInteger>(stream_, maybe_v0);
     break;
-  case 1:
-    {
-    std::optional<int32_t> maybe_1;
+  }
+  case Version::v1: {
+    std::optional<int32_t> maybe_v1;
     if (value.has_value()) {
-      maybe_1 = std::stoi(value.value());
+      maybe_v1 = std::stoi(value.value());
     }
-    yardl::binary::WriteOptional<int32_t, yardl::binary::WriteInteger>(stream_, maybe_1);
-    }
+    yardl::binary::WriteOptional<int32_t, yardl::binary::WriteInteger>(stream_, maybe_v1);
     break;
+  }
   default:
     yardl::binary::WriteOptional<std::string, yardl::binary::WriteString>(stream_, value);
     break;
@@ -457,17 +447,15 @@ void MyProtocolWriter::WriteMaybeImpl(std::optional<std::string> const& value) {
 }
 
 void MyProtocolWriter::WriteFooterImpl(std::optional<evo_test::Footer> const& value) {
-  switch (schema_index_) {
-  case 0:
-    {
+  switch (version_) {
+  case Version::v0: {
     yardl::binary::WriteOptional<evo_test::Footer, evo_test::binary::WriteFooter_v0>(stream_, value);
-    }
     break;
-  case 1:
-    {
+  }
+  case Version::v1: {
     yardl::binary::WriteOptional<evo_test::Footer, evo_test::binary::WriteFooter_v1>(stream_, value);
-    }
     break;
+  }
   default:
     yardl::binary::WriteOptional<evo_test::Footer, evo_test::binary::WriteFooter>(stream_, value);
     break;
@@ -483,17 +471,15 @@ void MyProtocolWriter::CloseImpl() {
 }
 
 void MyProtocolReader::ReadHeaderImpl(evo_test::Header& value) {
-  switch (schema_index_) {
-  case 0:
-    {
-    evo_test::binary::ReadHeader_v0(stream_, value);
-    }
-    break;
-  case 1:
-    {
+  switch (version_) {
+  case Version::v1: {
     evo_test::binary::ReadHeader_v1(stream_, value);
-    }
     break;
+  }
+  case Version::v0: {
+    evo_test::binary::ReadHeader_v0(stream_, value);
+    break;
+  }
   default:
     evo_test::binary::ReadHeader(stream_, value);
     break;
@@ -501,21 +487,19 @@ void MyProtocolReader::ReadHeaderImpl(evo_test::Header& value) {
 }
 
 void MyProtocolReader::ReadIdImpl(std::string& value) {
-  switch (schema_index_) {
-  case 0:
-    {
-    int64_t id_0;
-    yardl::binary::ReadInteger(stream_, id_0);
-    value = std::to_string(id_0);
-    }
+  switch (version_) {
+  case Version::v1: {
+    int64_t id_v1;
+    yardl::binary::ReadInteger(stream_, id_v1);
+    value = std::to_string(id_v1);
     break;
-  case 1:
-    {
-    int64_t id_1;
-    yardl::binary::ReadInteger(stream_, id_1);
-    value = std::to_string(id_1);
-    }
+  }
+  case Version::v0: {
+    int64_t id_v0;
+    yardl::binary::ReadInteger(stream_, id_v0);
+    value = std::to_string(id_v0);
     break;
+  }
   default:
     yardl::binary::ReadString(stream_, value);
     break;
@@ -529,17 +513,15 @@ bool MyProtocolReader::ReadSamplesImpl(evo_test::Sample& value) {
       return false;
     }
   }
-  switch (schema_index_) {
-  case 0:
-    {
+  switch (version_) {
+  case Version::v0: {
     evo_test::binary::ReadSample_v0(stream_, value);
-    }
     break;
-  case 1:
-    {
+  }
+  case Version::v1: {
     evo_test::binary::ReadSample_v1(stream_, value);
-    }
     break;
+  }
   default:
     evo_test::binary::ReadSample(stream_, value);
     break;
@@ -549,17 +531,15 @@ bool MyProtocolReader::ReadSamplesImpl(evo_test::Sample& value) {
 }
 
 bool MyProtocolReader::ReadSamplesImpl(std::vector<evo_test::Sample>& values) {
-  switch (schema_index_) {
-  case 0:
-    {
+  switch (version_) {
+  case Version::v0: {
     yardl::binary::ReadBlocksIntoVector<evo_test::Sample, evo_test::binary::ReadSample_v0>(stream_, current_block_remaining_, values);
-    }
     break;
-  case 1:
-    {
+  }
+  case Version::v1: {
     yardl::binary::ReadBlocksIntoVector<evo_test::Sample, evo_test::binary::ReadSample_v1>(stream_, current_block_remaining_, values);
-    }
     break;
+  }
   default:
     yardl::binary::ReadBlocksIntoVector<evo_test::Sample, evo_test::binary::ReadSample>(stream_, current_block_remaining_, values);
     break;
@@ -568,29 +548,27 @@ bool MyProtocolReader::ReadSamplesImpl(std::vector<evo_test::Sample>& values) {
 }
 
 void MyProtocolReader::ReadMaybeImpl(std::optional<std::string>& value) {
-  switch (schema_index_) {
-  case 0:
-    {
-    std::optional<int32_t> maybe_0;
-    yardl::binary::ReadOptional<int32_t, yardl::binary::ReadInteger>(stream_, maybe_0);
+  switch (version_) {
+  case Version::v0: {
+    std::optional<int32_t> maybe_v0;
+    yardl::binary::ReadOptional<int32_t, yardl::binary::ReadInteger>(stream_, maybe_v0);
     std::optional<std::string> tmp;
-    if (maybe_0.has_value()) {
-      tmp = std::to_string(maybe_0.value());
+    if (maybe_v0.has_value()) {
+      tmp = std::to_string(maybe_v0.value());
     }
     value = tmp;
-    }
     break;
-  case 1:
-    {
-    std::optional<int32_t> maybe_1;
-    yardl::binary::ReadOptional<int32_t, yardl::binary::ReadInteger>(stream_, maybe_1);
+  }
+  case Version::v1: {
+    std::optional<int32_t> maybe_v1;
+    yardl::binary::ReadOptional<int32_t, yardl::binary::ReadInteger>(stream_, maybe_v1);
     std::optional<std::string> tmp;
-    if (maybe_1.has_value()) {
-      tmp = std::to_string(maybe_1.value());
+    if (maybe_v1.has_value()) {
+      tmp = std::to_string(maybe_v1.value());
     }
     value = tmp;
-    }
     break;
+  }
   default:
     yardl::binary::ReadOptional<std::string, yardl::binary::ReadString>(stream_, value);
     break;
@@ -598,17 +576,15 @@ void MyProtocolReader::ReadMaybeImpl(std::optional<std::string>& value) {
 }
 
 void MyProtocolReader::ReadFooterImpl(std::optional<evo_test::Footer>& value) {
-  switch (schema_index_) {
-  case 0:
-    {
+  switch (version_) {
+  case Version::v0: {
     yardl::binary::ReadOptional<evo_test::Footer, evo_test::binary::ReadFooter_v0>(stream_, value);
-    }
     break;
-  case 1:
-    {
+  }
+  case Version::v1: {
     yardl::binary::ReadOptional<evo_test::Footer, evo_test::binary::ReadFooter_v1>(stream_, value);
-    }
     break;
+  }
   default:
     yardl::binary::ReadOptional<evo_test::Footer, evo_test::binary::ReadFooter>(stream_, value);
     break;

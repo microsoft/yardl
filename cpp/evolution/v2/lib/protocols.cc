@@ -55,6 +55,15 @@ std::vector<std::string> MyProtocolWriterBase::previous_schemas_ = {
   R"({"protocol":{"name":"MyProtocol","sequence":[{"name":"header","type":"EvoTest.Header"},{"name":"id","type":"int64"},{"name":"samples","type":{"stream":{"items":"EvoTest.Sample"}}},{"name":"maybe","type":[null,"int32"]},{"name":"footer","type":[null,"EvoTest.Footer"]}]},"types":[{"name":"Footer","fields":[{"name":"signature","type":"EvoTest.Signature"}]},{"name":"Header","fields":[{"name":"meta","type":{"map":{"keys":"string","values":{"vector":{"items":"string"}}}}},{"name":"subject","type":"string"},{"name":"weight","type":"int64"},{"name":"added","type":[null,"string"]}]},{"name":"Sample","fields":[{"name":"data","type":{"vector":{"items":"int32"}}},{"name":"timestamp","type":"datetime"}]},{"name":"Signature","fields":[{"name":"name","type":"string"},{"name":"email","type":"string"},{"name":"number","type":"int64"}]}]})",
 };
 
+std::string MyProtocolWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::v0: return previous_schemas_[0]; break;
+  case Version::v1: return previous_schemas_[1]; break;
+  case Version::Latest: return MyProtocolWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol MyProtocol.");
+  }
+
+}
 void MyProtocolWriterBase::WriteHeader(evo_test::Header const& value) {
   if (unlikely(state_ != 0)) {
     MyProtocolWriterBaseInvalidState(0, false, state_);
@@ -135,6 +144,18 @@ std::string MyProtocolReaderBase::schema_ = MyProtocolWriterBase::schema_;
 
 std::vector<std::string> MyProtocolReaderBase::previous_schemas_ = MyProtocolWriterBase::previous_schemas_;
 
+Version MyProtocolReaderBase::VersionFromSchema(std::string const& schema) {
+  if (schema == MyProtocolWriterBase::schema_) {
+    return Version::Latest;
+  }
+  else if (schema == previous_schemas_[0]) {
+    return Version::v0;
+  }
+  else if (schema == previous_schemas_[1]) {
+    return Version::v1;
+  }
+  throw std::runtime_error("The schema does not match any version supported by protocol MyProtocol.");
+}
 void MyProtocolReaderBase::ReadHeader(evo_test::Header& value) {
   if (unlikely(state_ != 0)) {
     MyProtocolReaderBaseInvalidState(0, state_);
@@ -306,10 +327,19 @@ void NewProtocolReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
 std::string NewProtocolWriterBase::schema_ = R"({"protocol":{"name":"NewProtocol","sequence":[{"name":"calibration","type":{"vector":{"items":"float64"}}},{"name":"data","type":{"stream":{"items":"EvoTest.NewRecord"}}}]},"types":[{"name":"NewRecord","fields":[{"name":"stuff","type":{"array":{"items":"float64"}}}]}]})";
 
 std::vector<std::string> NewProtocolWriterBase::previous_schemas_ = {
-  R"()",
-  R"()",
+  NewProtocolWriterBase::schema_,
+  NewProtocolWriterBase::schema_,
 };
 
+std::string NewProtocolWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::v0: return previous_schemas_[0]; break;
+  case Version::v1: return previous_schemas_[1]; break;
+  case Version::Latest: return NewProtocolWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol NewProtocol.");
+  }
+
+}
 void NewProtocolWriterBase::WriteCalibration(std::vector<double> const& value) {
   if (unlikely(state_ != 0)) {
     NewProtocolWriterBaseInvalidState(0, false, state_);
@@ -363,6 +393,18 @@ std::string NewProtocolReaderBase::schema_ = NewProtocolWriterBase::schema_;
 
 std::vector<std::string> NewProtocolReaderBase::previous_schemas_ = NewProtocolWriterBase::previous_schemas_;
 
+Version NewProtocolReaderBase::VersionFromSchema(std::string const& schema) {
+  if (schema == NewProtocolWriterBase::schema_) {
+    return Version::Latest;
+  }
+  else if (schema == previous_schemas_[0]) {
+    return Version::v0;
+  }
+  else if (schema == previous_schemas_[1]) {
+    return Version::v1;
+  }
+  throw std::runtime_error("The schema does not match any version supported by protocol NewProtocol.");
+}
 void NewProtocolReaderBase::ReadCalibration(std::vector<double>& value) {
   if (unlikely(state_ != 0)) {
     NewProtocolReaderBaseInvalidState(0, state_);

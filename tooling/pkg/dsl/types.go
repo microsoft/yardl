@@ -82,6 +82,7 @@ type Namespace struct {
 	Name            string                `json:"name"`
 	TypeDefinitions TypeDefinitions       `json:"types,omitempty"`
 	Protocols       []*ProtocolDefinition `json:"protocols,omitempty"`
+	Versions        []string              `json:"-"`
 	References      []*Namespace          `json:"-"`
 	IsTopLevel      bool                  `json:"-"`
 }
