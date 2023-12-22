@@ -349,12 +349,12 @@ namespace {
 
 void MyProtocolWriter::WriteHeaderImpl(evo_test::Header const& value) {
   switch (version_) {
-  case Version::v1: {
-    evo_test::binary::WriteHeader_v1(stream_, value);
-    break;
-  }
   case Version::v0: {
     evo_test::binary::WriteHeader_v0(stream_, value);
+    break;
+  }
+  case Version::v1: {
+    evo_test::binary::WriteHeader_v1(stream_, value);
     break;
   }
   default:
@@ -386,12 +386,12 @@ void MyProtocolWriter::WriteIdImpl(std::string const& value) {
 void MyProtocolWriter::WriteSamplesImpl(evo_test::Sample const& value) {
   yardl::binary::WriteInteger(stream_, 1U);
   switch (version_) {
-  case Version::v1: {
-    evo_test::binary::WriteSample_v1(stream_, value);
-    break;
-  }
   case Version::v0: {
     evo_test::binary::WriteSample_v0(stream_, value);
+    break;
+  }
+  case Version::v1: {
+    evo_test::binary::WriteSample_v1(stream_, value);
     break;
   }
   default:
@@ -472,12 +472,12 @@ void MyProtocolWriter::CloseImpl() {
 
 void MyProtocolReader::ReadHeaderImpl(evo_test::Header& value) {
   switch (version_) {
-  case Version::v1: {
-    evo_test::binary::ReadHeader_v1(stream_, value);
-    break;
-  }
   case Version::v0: {
     evo_test::binary::ReadHeader_v0(stream_, value);
+    break;
+  }
+  case Version::v1: {
+    evo_test::binary::ReadHeader_v1(stream_, value);
     break;
   }
   default:
@@ -488,16 +488,16 @@ void MyProtocolReader::ReadHeaderImpl(evo_test::Header& value) {
 
 void MyProtocolReader::ReadIdImpl(std::string& value) {
   switch (version_) {
-  case Version::v1: {
-    int64_t id_v1;
-    yardl::binary::ReadInteger(stream_, id_v1);
-    value = std::to_string(id_v1);
-    break;
-  }
   case Version::v0: {
     int64_t id_v0;
     yardl::binary::ReadInteger(stream_, id_v0);
     value = std::to_string(id_v0);
+    break;
+  }
+  case Version::v1: {
+    int64_t id_v1;
+    yardl::binary::ReadInteger(stream_, id_v1);
+    value = std::to_string(id_v1);
     break;
   }
   default:

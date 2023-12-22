@@ -372,8 +372,15 @@ func writeNamespaceDefinitions(w *formatting.IndentedWriter, ns *dsl.Namespace) 
 		for _, typeDef := range ns.TypeDefinitions {
 			writeSerializers(w, typeDef)
 
-			if changes, ok := typeDef.GetDefinitionMeta().Annotations[dsl.AllVersionChangesAnnotationKey]; ok {
-				for versionLabel, changedTypeDef := range changes.(map[string]dsl.TypeDefinition) {
+			if changes, ok := typeDef.GetDefinitionMeta().Annotations[dsl.AllVersionChangesAnnotationKey].(map[string]dsl.TypeDefinition); ok {
+				// Sort Version Labels so TypeDefinitions are generated in a deterministic order
+				var versionLabels []string
+				for versionLabel := range changes {
+					versionLabels = append(versionLabels, versionLabel)
+				}
+				sort.Strings(versionLabels)
+				for _, versionLabel := range versionLabels {
+					changedTypeDef := changes[versionLabel]
 					if changedTypeDef != nil {
 						writeCompatibilitySerializers(w, typeDef, changedTypeDef, versionLabel)
 					}
@@ -747,8 +754,16 @@ func writeProtocolStep(w *formatting.IndentedWriter, step *dsl.ProtocolStep, str
 		return
 	}
 
+	// Sort the version labels so the generated switch statement is deterministic
+	var versionLabels []string
+	for versionLabel := range changes {
+		versionLabels = append(versionLabels, versionLabel)
+	}
+	sort.Strings(versionLabels)
+
 	fmt.Fprintf(w, "switch (version_) {\n")
-	for versionLabel, change := range changes {
+	for _, versionLabel := range versionLabels {
+		change := changes[versionLabel]
 		if change == nil {
 			continue
 		}
