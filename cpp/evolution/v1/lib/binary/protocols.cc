@@ -210,12 +210,11 @@ namespace {
 } // namespace
 
 void MyProtocolWriter::WriteHeaderImpl(evo_test::Header const& value) {
-  switch (schema_index_) {
-  case 0:
-    {
+  switch (version_) {
+  case Version::v0: {
     evo_test::binary::WriteHeader_v0(stream_, value);
-    }
     break;
+  }
   default:
     evo_test::binary::WriteHeader(stream_, value);
     break;
@@ -258,12 +257,11 @@ void MyProtocolWriter::CloseImpl() {
 }
 
 void MyProtocolReader::ReadHeaderImpl(evo_test::Header& value) {
-  switch (schema_index_) {
-  case 0:
-    {
+  switch (version_) {
+  case Version::v0: {
     evo_test::binary::ReadHeader_v0(stream_, value);
-    }
     break;
+  }
   default:
     evo_test::binary::ReadHeader(stream_, value);
     break;

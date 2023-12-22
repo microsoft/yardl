@@ -11,15 +11,14 @@
 namespace yardl::binary {
 class BinaryWriter {
  protected:
-  BinaryWriter(std::ostream& stream, std::string const& desired_schema, std::string const& current_schema, std::vector<std::string> const& previous_schemas)
+  BinaryWriter(std::ostream& stream, std::string const& schema)
       : stream_(stream) {
-    MatchSchema(desired_schema, current_schema, previous_schemas, schema_index_);
-    WriteHeader(stream_, desired_schema);
+    WriteHeader(stream_, schema);
   }
 
-  BinaryWriter(std::string file_name, std::string const& desired_schema, std::string const& current_schema, std::vector<std::string> const& previous_schemas) : owned_file_stream_(open_file(file_name)), stream_(*owned_file_stream_) {
-    MatchSchema(desired_schema, current_schema, previous_schemas, schema_index_);
-    WriteHeader(stream_, desired_schema);
+  BinaryWriter(std::string file_name, std::string const& schema)
+      : owned_file_stream_(open_file(file_name)), stream_(*owned_file_stream_) {
+    WriteHeader(stream_, schema);
   }
 
  private:
@@ -37,22 +36,18 @@ class BinaryWriter {
 
  protected:
   yardl::binary::CodedOutputStream stream_;
-  int schema_index_;
 };
 
 class BinaryReader {
  protected:
-  BinaryReader(std::istream& stream, std::string const& schema, std::vector<std::string> const& previous_schemas)
+  BinaryReader(std::istream& stream)
       : stream_(stream) {
-    std::string actual_schema = ReadHeader(stream_);
-    MatchSchema(actual_schema, schema, previous_schemas, schema_index_);
-    // ReadAndValidateHeader(stream_, schema, previous_schemas, schema_index_);
+    schema_read_ = ReadHeader(stream_);
   }
 
-  BinaryReader(std::string file_name, std::string const& schema, std::vector<std::string> const& previous_schemas) : owned_file_stream_(open_file(file_name)), stream_(*owned_file_stream_) {
-    std::string actual_schema = ReadHeader(stream_);
-    MatchSchema(actual_schema, schema, previous_schemas, schema_index_);
-    // ReadAndValidateHeader(stream_, schema, previous_schemas, schema_index_);
+  BinaryReader(std::string file_name)
+      : owned_file_stream_(open_file(file_name)), stream_(*owned_file_stream_) {
+    schema_read_ = ReadHeader(stream_);
   }
 
  private:
@@ -70,7 +65,7 @@ class BinaryReader {
 
  protected:
   yardl::binary::CodedInputStream stream_;
-  int schema_index_;
+  std::string schema_read_;
 };
 
 }  // namespace yardl::binary

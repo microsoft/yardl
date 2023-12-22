@@ -4,6 +4,9 @@
 #include "types.h"
 
 namespace test_model {
+enum class Version {
+  Latest
+};
 // Abstract writer for the BenchmarkFloat256x256 protocol.
 class BenchmarkFloat256x256WriterBase {
   public:
@@ -36,6 +39,8 @@ class BenchmarkFloat256x256WriterBase {
 
   static std::vector<std::string> previous_schemas_;
 
+  static std::string SchemaFromVersion(Version version);
+
   private:
   uint8_t state_ = 0;
 
@@ -65,6 +70,8 @@ class BenchmarkFloat256x256ReaderBase {
   static std::string schema_;
 
   static std::vector<std::string> previous_schemas_;
+
+  static Version VersionFromSchema(const std::string& schema);
 
   private:
   uint8_t state_ = 0;
@@ -102,6 +109,8 @@ class BenchmarkInt256x256WriterBase {
 
   static std::vector<std::string> previous_schemas_;
 
+  static std::string SchemaFromVersion(Version version);
+
   private:
   uint8_t state_ = 0;
 
@@ -131,6 +140,8 @@ class BenchmarkInt256x256ReaderBase {
   static std::string schema_;
 
   static std::vector<std::string> previous_schemas_;
+
+  static Version VersionFromSchema(const std::string& schema);
 
   private:
   uint8_t state_ = 0;
@@ -168,6 +179,8 @@ class BenchmarkFloatVlenWriterBase {
 
   static std::vector<std::string> previous_schemas_;
 
+  static std::string SchemaFromVersion(Version version);
+
   private:
   uint8_t state_ = 0;
 
@@ -197,6 +210,8 @@ class BenchmarkFloatVlenReaderBase {
   static std::string schema_;
 
   static std::vector<std::string> previous_schemas_;
+
+  static Version VersionFromSchema(const std::string& schema);
 
   private:
   uint8_t state_ = 0;
@@ -234,6 +249,8 @@ class BenchmarkSmallRecordWriterBase {
 
   static std::vector<std::string> previous_schemas_;
 
+  static std::string SchemaFromVersion(Version version);
+
   private:
   uint8_t state_ = 0;
 
@@ -263,6 +280,8 @@ class BenchmarkSmallRecordReaderBase {
   static std::string schema_;
 
   static std::vector<std::string> previous_schemas_;
+
+  static Version VersionFromSchema(const std::string& schema);
 
   private:
   uint8_t state_ = 0;
@@ -300,6 +319,8 @@ class BenchmarkSmallRecordWithOptionalsWriterBase {
 
   static std::vector<std::string> previous_schemas_;
 
+  static std::string SchemaFromVersion(Version version);
+
   private:
   uint8_t state_ = 0;
 
@@ -329,6 +350,8 @@ class BenchmarkSmallRecordWithOptionalsReaderBase {
   static std::string schema_;
 
   static std::vector<std::string> previous_schemas_;
+
+  static Version VersionFromSchema(const std::string& schema);
 
   private:
   uint8_t state_ = 0;
@@ -366,6 +389,8 @@ class BenchmarkSimpleMrdWriterBase {
 
   static std::vector<std::string> previous_schemas_;
 
+  static std::string SchemaFromVersion(Version version);
+
   private:
   uint8_t state_ = 0;
 
@@ -395,6 +420,8 @@ class BenchmarkSimpleMrdReaderBase {
   static std::string schema_;
 
   static std::vector<std::string> previous_schemas_;
+
+  static Version VersionFromSchema(const std::string& schema);
 
   private:
   uint8_t state_ = 0;
@@ -426,6 +453,8 @@ class ScalarsWriterBase {
 
   static std::vector<std::string> previous_schemas_;
 
+  static std::string SchemaFromVersion(Version version);
+
   private:
   uint8_t state_ = 0;
 
@@ -455,6 +484,8 @@ class ScalarsReaderBase {
   static std::string schema_;
 
   static std::vector<std::string> previous_schemas_;
+
+  static Version VersionFromSchema(const std::string& schema);
 
   private:
   uint8_t state_ = 0;
@@ -494,6 +525,8 @@ class ScalarOptionalsWriterBase {
 
   static std::vector<std::string> previous_schemas_;
 
+  static std::string SchemaFromVersion(Version version);
+
   private:
   uint8_t state_ = 0;
 
@@ -532,6 +565,8 @@ class ScalarOptionalsReaderBase {
 
   static std::vector<std::string> previous_schemas_;
 
+  static Version VersionFromSchema(const std::string& schema);
+
   private:
   uint8_t state_ = 0;
 };
@@ -558,6 +593,8 @@ class NestedRecordsWriterBase {
 
   static std::vector<std::string> previous_schemas_;
 
+  static std::string SchemaFromVersion(Version version);
+
   private:
   uint8_t state_ = 0;
 
@@ -583,6 +620,8 @@ class NestedRecordsReaderBase {
   static std::string schema_;
 
   static std::vector<std::string> previous_schemas_;
+
+  static Version VersionFromSchema(const std::string& schema);
 
   private:
   uint8_t state_ = 0;
@@ -622,6 +661,8 @@ class VlensWriterBase {
 
   static std::vector<std::string> previous_schemas_;
 
+  static std::string SchemaFromVersion(Version version);
+
   private:
   uint8_t state_ = 0;
 
@@ -660,6 +701,8 @@ class VlensReaderBase {
 
   static std::vector<std::string> previous_schemas_;
 
+  static Version VersionFromSchema(const std::string& schema);
+
   private:
   uint8_t state_ = 0;
 };
@@ -689,6 +732,8 @@ class StringsWriterBase {
   static std::string schema_;
 
   static std::vector<std::string> previous_schemas_;
+
+  static std::string SchemaFromVersion(Version version);
 
   private:
   uint8_t state_ = 0;
@@ -720,6 +765,8 @@ class StringsReaderBase {
 
   static std::vector<std::string> previous_schemas_;
 
+  static Version VersionFromSchema(const std::string& schema);
+
   private:
   uint8_t state_ = 0;
 };
@@ -746,6 +793,8 @@ class OptionalVectorsWriterBase {
 
   static std::vector<std::string> previous_schemas_;
 
+  static std::string SchemaFromVersion(Version version);
+
   private:
   uint8_t state_ = 0;
 
@@ -771,6 +820,8 @@ class OptionalVectorsReaderBase {
   static std::string schema_;
 
   static std::vector<std::string> previous_schemas_;
+
+  static Version VersionFromSchema(const std::string& schema);
 
   private:
   uint8_t state_ = 0;
@@ -810,6 +861,8 @@ class FixedVectorsWriterBase {
 
   static std::vector<std::string> previous_schemas_;
 
+  static std::string SchemaFromVersion(Version version);
+
   private:
   uint8_t state_ = 0;
 
@@ -847,6 +900,8 @@ class FixedVectorsReaderBase {
   static std::string schema_;
 
   static std::vector<std::string> previous_schemas_;
+
+  static Version VersionFromSchema(const std::string& schema);
 
   private:
   uint8_t state_ = 0;
@@ -926,6 +981,8 @@ class StreamsWriterBase {
 
   static std::vector<std::string> previous_schemas_;
 
+  static std::string SchemaFromVersion(Version version);
+
   private:
   uint8_t state_ = 0;
 
@@ -980,6 +1037,8 @@ class StreamsReaderBase {
 
   static std::vector<std::string> previous_schemas_;
 
+  static Version VersionFromSchema(const std::string& schema);
+
   private:
   uint8_t state_ = 0;
 };
@@ -1022,6 +1081,8 @@ class FixedArraysWriterBase {
 
   static std::vector<std::string> previous_schemas_;
 
+  static std::string SchemaFromVersion(Version version);
+
   private:
   uint8_t state_ = 0;
 
@@ -1063,6 +1124,8 @@ class FixedArraysReaderBase {
   static std::string schema_;
 
   static std::vector<std::string> previous_schemas_;
+
+  static Version VersionFromSchema(const std::string& schema);
 
   private:
   uint8_t state_ = 0;
@@ -1122,6 +1185,8 @@ class SubarraysWriterBase {
 
   static std::vector<std::string> previous_schemas_;
 
+  static std::string SchemaFromVersion(Version version);
+
   private:
   uint8_t state_ = 0;
 
@@ -1180,6 +1245,8 @@ class SubarraysReaderBase {
 
   static std::vector<std::string> previous_schemas_;
 
+  static Version VersionFromSchema(const std::string& schema);
+
   private:
   uint8_t state_ = 0;
 };
@@ -1210,6 +1277,8 @@ class SubarraysInRecordsWriterBase {
 
   static std::vector<std::string> previous_schemas_;
 
+  static std::string SchemaFromVersion(Version version);
+
   private:
   uint8_t state_ = 0;
 
@@ -1239,6 +1308,8 @@ class SubarraysInRecordsReaderBase {
   static std::string schema_;
 
   static std::vector<std::string> previous_schemas_;
+
+  static Version VersionFromSchema(const std::string& schema);
 
   private:
   uint8_t state_ = 0;
@@ -1282,6 +1353,8 @@ class NDArraysWriterBase {
 
   static std::vector<std::string> previous_schemas_;
 
+  static std::string SchemaFromVersion(Version version);
+
   private:
   uint8_t state_ = 0;
 
@@ -1324,6 +1397,8 @@ class NDArraysReaderBase {
 
   static std::vector<std::string> previous_schemas_;
 
+  static Version VersionFromSchema(const std::string& schema);
+
   private:
   uint8_t state_ = 0;
 };
@@ -1361,6 +1436,8 @@ class NDArraysSingleDimensionWriterBase {
   static std::string schema_;
 
   static std::vector<std::string> previous_schemas_;
+
+  static std::string SchemaFromVersion(Version version);
 
   private:
   uint8_t state_ = 0;
@@ -1400,6 +1477,8 @@ class NDArraysSingleDimensionReaderBase {
 
   static std::vector<std::string> previous_schemas_;
 
+  static Version VersionFromSchema(const std::string& schema);
+
   private:
   uint8_t state_ = 0;
 };
@@ -1437,6 +1516,8 @@ class DynamicNDArraysWriterBase {
   static std::string schema_;
 
   static std::vector<std::string> previous_schemas_;
+
+  static std::string SchemaFromVersion(Version version);
 
   private:
   uint8_t state_ = 0;
@@ -1476,6 +1557,8 @@ class DynamicNDArraysReaderBase {
 
   static std::vector<std::string> previous_schemas_;
 
+  static Version VersionFromSchema(const std::string& schema);
+
   private:
   uint8_t state_ = 0;
 };
@@ -1513,6 +1596,8 @@ class MapsWriterBase {
   static std::string schema_;
 
   static std::vector<std::string> previous_schemas_;
+
+  static std::string SchemaFromVersion(Version version);
 
   private:
   uint8_t state_ = 0;
@@ -1552,6 +1637,8 @@ class MapsReaderBase {
 
   static std::vector<std::string> previous_schemas_;
 
+  static Version VersionFromSchema(const std::string& schema);
+
   private:
   uint8_t state_ = 0;
 };
@@ -1590,6 +1677,8 @@ class UnionsWriterBase {
 
   static std::vector<std::string> previous_schemas_;
 
+  static std::string SchemaFromVersion(Version version);
+
   private:
   uint8_t state_ = 0;
 
@@ -1627,6 +1716,8 @@ class UnionsReaderBase {
   static std::string schema_;
 
   static std::vector<std::string> previous_schemas_;
+
+  static Version VersionFromSchema(const std::string& schema);
 
   private:
   uint8_t state_ = 0;
@@ -1678,6 +1769,8 @@ class StreamsOfUnionsWriterBase {
 
   static std::vector<std::string> previous_schemas_;
 
+  static std::string SchemaFromVersion(Version version);
+
   private:
   uint8_t state_ = 0;
 
@@ -1716,6 +1809,8 @@ class StreamsOfUnionsReaderBase {
 
   static std::vector<std::string> previous_schemas_;
 
+  static Version VersionFromSchema(const std::string& schema);
+
   private:
   uint8_t state_ = 0;
 };
@@ -1750,6 +1845,8 @@ class EnumsWriterBase {
 
   static std::vector<std::string> previous_schemas_;
 
+  static std::string SchemaFromVersion(Version version);
+
   private:
   uint8_t state_ = 0;
 
@@ -1783,6 +1880,8 @@ class EnumsReaderBase {
   static std::string schema_;
 
   static std::vector<std::string> previous_schemas_;
+
+  static Version VersionFromSchema(const std::string& schema);
 
   private:
   uint8_t state_ = 0;
@@ -1834,6 +1933,8 @@ class FlagsWriterBase {
 
   static std::vector<std::string> previous_schemas_;
 
+  static std::string SchemaFromVersion(Version version);
+
   private:
   uint8_t state_ = 0;
 
@@ -1871,6 +1972,8 @@ class FlagsReaderBase {
   static std::string schema_;
 
   static std::vector<std::string> previous_schemas_;
+
+  static Version VersionFromSchema(const std::string& schema);
 
   private:
   uint8_t state_ = 0;
@@ -1916,6 +2019,8 @@ class StateTestWriterBase {
 
   static std::vector<std::string> previous_schemas_;
 
+  static std::string SchemaFromVersion(Version version);
+
   private:
   uint8_t state_ = 0;
 
@@ -1953,6 +2058,8 @@ class StateTestReaderBase {
   static std::string schema_;
 
   static std::vector<std::string> previous_schemas_;
+
+  static Version VersionFromSchema(const std::string& schema);
 
   private:
   uint8_t state_ = 0;
@@ -2022,6 +2129,8 @@ class SimpleGenericsWriterBase {
 
   static std::vector<std::string> previous_schemas_;
 
+  static std::string SchemaFromVersion(Version version);
+
   private:
   uint8_t state_ = 0;
 
@@ -2084,6 +2193,8 @@ class SimpleGenericsReaderBase {
 
   static std::vector<std::string> previous_schemas_;
 
+  static Version VersionFromSchema(const std::string& schema);
+
   private:
   uint8_t state_ = 0;
 };
@@ -2126,6 +2237,8 @@ class AdvancedGenericsWriterBase {
 
   static std::vector<std::string> previous_schemas_;
 
+  static std::string SchemaFromVersion(Version version);
+
   private:
   uint8_t state_ = 0;
 
@@ -2167,6 +2280,8 @@ class AdvancedGenericsReaderBase {
   static std::string schema_;
 
   static std::vector<std::string> previous_schemas_;
+
+  static Version VersionFromSchema(const std::string& schema);
 
   private:
   uint8_t state_ = 0;
@@ -2240,6 +2355,8 @@ class AliasesWriterBase {
 
   static std::vector<std::string> previous_schemas_;
 
+  static std::string SchemaFromVersion(Version version);
+
   private:
   uint8_t state_ = 0;
 
@@ -2306,6 +2423,8 @@ class AliasesReaderBase {
 
   static std::vector<std::string> previous_schemas_;
 
+  static Version VersionFromSchema(const std::string& schema);
+
   private:
   uint8_t state_ = 0;
 };
@@ -2356,6 +2475,8 @@ class StreamsOfAliasedUnionsWriterBase {
 
   static std::vector<std::string> previous_schemas_;
 
+  static std::string SchemaFromVersion(Version version);
+
   private:
   uint8_t state_ = 0;
 
@@ -2394,6 +2515,8 @@ class StreamsOfAliasedUnionsReaderBase {
 
   static std::vector<std::string> previous_schemas_;
 
+  static Version VersionFromSchema(const std::string& schema);
+
   private:
   uint8_t state_ = 0;
 };
@@ -2420,6 +2543,8 @@ class ProtocolWithComputedFieldsWriterBase {
 
   static std::vector<std::string> previous_schemas_;
 
+  static std::string SchemaFromVersion(Version version);
+
   private:
   uint8_t state_ = 0;
 
@@ -2445,6 +2570,8 @@ class ProtocolWithComputedFieldsReaderBase {
   static std::string schema_;
 
   static std::vector<std::string> previous_schemas_;
+
+  static Version VersionFromSchema(const std::string& schema);
 
   private:
   uint8_t state_ = 0;
@@ -2486,6 +2613,8 @@ class ProtocolWithKeywordStepsWriterBase {
 
   static std::vector<std::string> previous_schemas_;
 
+  static std::string SchemaFromVersion(Version version);
+
   private:
   uint8_t state_ = 0;
 
@@ -2519,6 +2648,8 @@ class ProtocolWithKeywordStepsReaderBase {
   static std::string schema_;
 
   static std::vector<std::string> previous_schemas_;
+
+  static Version VersionFromSchema(const std::string& schema);
 
   private:
   uint8_t state_ = 0;

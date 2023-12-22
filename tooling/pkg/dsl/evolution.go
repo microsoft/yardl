@@ -226,18 +226,17 @@ const (
 	ChangeAnnotationKey             = "changed"
 	AllVersionChangesAnnotationKey  = "all-changes"
 	SchemaAnnotationKey             = "schema"
-	AllVersionSchemasAnnotationKey  = "all-schemas"
 	FieldOrStepRemovedAnnotationKey = "removed"
 	VersionAnnotationKey            = "version"
+	AllVersionsAnnotationKey        = "all-versions"
 )
 
-func ValidateEvolution(env *Environment, predecessors []*Environment) (*Environment, error) {
+func ValidateEvolution(env *Environment, predecessors []*Environment, versionLabels []string) (*Environment, error) {
 
 	initializeChangeAnnotations(env)
 
-	for versionId, predecessor := range predecessors {
-		// log.Info().Msgf("Resolving changes from predecessor '%s'", predecessor.Label)
-		log.Info().Msgf("Resolving changes from predecessor %d", versionId)
+	for i, predecessor := range predecessors {
+		log.Info().Msgf("Resolving changes from predecessor %s", versionLabels[i])
 		initializePredecessorAnnotations(predecessor)
 
 		if err := annotateAllChanges(env, predecessor); err != nil {
@@ -248,7 +247,7 @@ func ValidateEvolution(env *Environment, predecessors []*Environment) (*Environm
 			return nil, err
 		}
 
-		saveChangeAnnotations(env, versionId)
+		saveChangeAnnotations(env, versionLabels[i])
 	}
 
 	return env, nil
@@ -421,10 +420,7 @@ func initializeChangeAnnotations(env *Environment) {
 				node.GetDefinitionMeta().Annotations = make(map[string]any)
 			}
 			if node.GetDefinitionMeta().Annotations[AllVersionChangesAnnotationKey] == nil {
-				node.GetDefinitionMeta().Annotations[AllVersionChangesAnnotationKey] = make([]*ProtocolDefinition, 0)
-			}
-			if node.GetDefinitionMeta().Annotations[AllVersionSchemasAnnotationKey] == nil {
-				node.GetDefinitionMeta().Annotations[AllVersionSchemasAnnotationKey] = make([]string, 0)
+				node.GetDefinitionMeta().Annotations[AllVersionChangesAnnotationKey] = make(map[string]*ProtocolDefinition)
 			}
 			node.GetDefinitionMeta().Annotations[ChangeAnnotationKey] = nil
 			self.VisitChildren(node)
@@ -434,7 +430,7 @@ func initializeChangeAnnotations(env *Environment) {
 				node.GetDefinitionMeta().Annotations = make(map[string]any)
 			}
 			if node.GetDefinitionMeta().Annotations[AllVersionChangesAnnotationKey] == nil {
-				node.GetDefinitionMeta().Annotations[AllVersionChangesAnnotationKey] = make([]TypeDefinition, 0)
+				node.GetDefinitionMeta().Annotations[AllVersionChangesAnnotationKey] = make(map[string]TypeDefinition)
 			}
 			node.GetDefinitionMeta().Annotations[ChangeAnnotationKey] = nil
 
@@ -443,7 +439,7 @@ func initializeChangeAnnotations(env *Environment) {
 				node.Annotations = make(map[string]any)
 			}
 			if node.Annotations[AllVersionChangesAnnotationKey] == nil {
-				node.Annotations[AllVersionChangesAnnotationKey] = make([]TypeChange, 0)
+				node.Annotations[AllVersionChangesAnnotationKey] = make(map[string]TypeChange)
 			}
 			node.Annotations[ChangeAnnotationKey] = nil
 
@@ -453,38 +449,37 @@ func initializeChangeAnnotations(env *Environment) {
 	})
 }
 
-func saveChangeAnnotations(env *Environment, versionId int) {
+func saveChangeAnnotations(env *Environment, versionLabel string) {
 	Visit(env, func(self Visitor, node Node) {
 		switch node := node.(type) {
+		case *Namespace:
+			node.Versions = append(node.Versions, versionLabel)
+			self.VisitChildren(node)
+
 		case *ProtocolDefinition:
 			var changed *ProtocolDefinition
-			var schema string
 			if ch, ok := node.GetDefinitionMeta().Annotations[ChangeAnnotationKey].(*ProtocolDefinition); ok {
 				changed = ch
-				if s, ok := changed.GetDefinitionMeta().Annotations[SchemaAnnotationKey].(string); ok {
-					schema = s
-				}
 			}
-			node.GetDefinitionMeta().Annotations[AllVersionChangesAnnotationKey] = append(node.GetDefinitionMeta().Annotations[AllVersionChangesAnnotationKey].([]*ProtocolDefinition), changed)
-			node.GetDefinitionMeta().Annotations[AllVersionSchemasAnnotationKey] = append(node.GetDefinitionMeta().Annotations[AllVersionSchemasAnnotationKey].([]string), schema)
+			node.GetDefinitionMeta().Annotations[AllVersionChangesAnnotationKey].(map[string]*ProtocolDefinition)[versionLabel] = changed
 			node.GetDefinitionMeta().Annotations[ChangeAnnotationKey] = nil
+			self.VisitChildren(node)
 
-			for _, step := range node.Sequence {
-				var changed TypeChange
-				if ch, ok := step.Annotations[ChangeAnnotationKey].(TypeChange); ok {
-					changed = ch
-				}
-				step.Annotations[AllVersionChangesAnnotationKey] = append(step.Annotations[AllVersionChangesAnnotationKey].([]TypeChange), changed)
-				step.Annotations[ChangeAnnotationKey] = nil
+		case *ProtocolStep:
+			var changed TypeChange
+			if ch, ok := node.Annotations[ChangeAnnotationKey].(TypeChange); ok {
+				changed = ch
 			}
+			node.Annotations[AllVersionChangesAnnotationKey].(map[string]TypeChange)[versionLabel] = changed
+			node.Annotations[ChangeAnnotationKey] = nil
 
 		case TypeDefinition:
 			var changed TypeDefinition
 			if ch, ok := node.GetDefinitionMeta().Annotations[ChangeAnnotationKey].(TypeDefinition); ok {
 				changed = ch
-				changed.GetDefinitionMeta().Annotations[VersionAnnotationKey] = versionId
+				changed.GetDefinitionMeta().Annotations[VersionAnnotationKey] = versionLabel
 			}
-			node.GetDefinitionMeta().Annotations[AllVersionChangesAnnotationKey] = append(node.GetDefinitionMeta().Annotations[AllVersionChangesAnnotationKey].([]TypeDefinition), changed)
+			node.GetDefinitionMeta().Annotations[AllVersionChangesAnnotationKey].(map[string]TypeDefinition)[versionLabel] = changed
 			node.GetDefinitionMeta().Annotations[ChangeAnnotationKey] = nil
 
 		default:

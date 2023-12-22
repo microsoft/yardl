@@ -84,18 +84,18 @@ func writeHeaderFile(env *dsl.Environment, options packaging.CppCodegenOptions) 
 			fmt.Fprintf(w, "class %s : public %s, yardl::binary::BinaryWriter {\n", writerClassName, common.QualifiedAbstractWriterName(protocol))
 			w.Indented(func() {
 				w.WriteStringln("public:")
-				fmt.Fprintf(w, "%s(std::ostream& stream, const std::string& schema=schema_)\n", writerClassName)
+				fmt.Fprintf(w, "%s(std::ostream& stream, Version version = Version::Latest)\n", writerClassName)
 				w.Indented(func() {
 					w.Indented(func() {
-						w.WriteStringln(": yardl::binary::BinaryWriter(stream, schema, schema_, previous_schemas_) {")
+						fmt.Fprintf(w, ": yardl::binary::BinaryWriter(stream, %s::SchemaFromVersion(version)), version_(version) {", common.QualifiedAbstractWriterName(protocol))
 					})
 				})
 				w.WriteStringln("}\n")
 
-				fmt.Fprintf(w, "%s(std::string file_name, const std::string& schema=schema_)\n", writerClassName)
+				fmt.Fprintf(w, "%s(std::string file_name, Version version = Version::Latest)\n", writerClassName)
 				w.Indented(func() {
 					w.Indented(func() {
-						w.WriteStringln(": yardl::binary::BinaryWriter(file_name, schema, schema_, previous_schemas_) {")
+						fmt.Fprintf(w, ": yardl::binary::BinaryWriter(file_name, %s::SchemaFromVersion(version)), version_(version) {", common.QualifiedAbstractWriterName(protocol))
 					})
 				})
 				w.WriteStringln("}\n")
@@ -116,6 +116,8 @@ func writeHeaderFile(env *dsl.Environment, options packaging.CppCodegenOptions) 
 				}
 
 				w.WriteString("void CloseImpl() override;\n")
+				w.WriteStringln("")
+				w.WriteStringln("Version version_;")
 			})
 			fmt.Fprint(w, "};\n\n")
 
@@ -128,7 +130,7 @@ func writeHeaderFile(env *dsl.Environment, options packaging.CppCodegenOptions) 
 				fmt.Fprintf(w, "%s(std::istream& stream)\n", readerClassName)
 				w.Indented(func() {
 					w.Indented(func() {
-						w.WriteStringln(": yardl::binary::BinaryReader(stream, schema_, previous_schemas_) {")
+						fmt.Fprintf(w, ": yardl::binary::BinaryReader(stream), version_(%s::VersionFromSchema(schema_read_)) {", common.QualifiedAbstractReaderName(protocol))
 					})
 				})
 				w.WriteStringln("}\n")
@@ -136,12 +138,12 @@ func writeHeaderFile(env *dsl.Environment, options packaging.CppCodegenOptions) 
 				fmt.Fprintf(w, "%s(std::string file_name)\n", readerClassName)
 				w.Indented(func() {
 					w.Indented(func() {
-						w.WriteStringln(": yardl::binary::BinaryReader(file_name, schema_, previous_schemas_) {")
+						fmt.Fprintf(w, ": yardl::binary::BinaryReader(file_name), version_(%s::VersionFromSchema(schema_read_)) {", common.QualifiedAbstractReaderName(protocol))
 					})
 				})
 				w.WriteStringln("}\n")
 
-				fmt.Fprintf(w, "std::string GetSchema() { if (schema_index_ < 0) { return schema_; } else { return previous_schemas_[schema_index_]; } }\n\n")
+				fmt.Fprintf(w, "Version GetVersion() { return version_; }\n\n")
 
 				w.WriteStringln("protected:")
 				hasStream := false
@@ -161,6 +163,9 @@ func writeHeaderFile(env *dsl.Environment, options packaging.CppCodegenOptions) 
 				}
 
 				w.WriteString("void CloseImpl() override;\n")
+				w.WriteStringln("")
+				w.WriteStringln("Version version_;")
+
 				if hasStream {
 					w.WriteStringln("\nprivate:")
 					w.WriteStringln("size_t current_block_remaining_ = 0;")
@@ -368,9 +373,9 @@ func writeNamespaceDefinitions(w *formatting.IndentedWriter, ns *dsl.Namespace) 
 			writeSerializers(w, typeDef)
 
 			if changes, ok := typeDef.GetDefinitionMeta().Annotations[dsl.AllVersionChangesAnnotationKey]; ok {
-				for i, changedTypeDef := range changes.([]dsl.TypeDefinition) {
+				for versionLabel, changedTypeDef := range changes.(map[string]dsl.TypeDefinition) {
 					if changedTypeDef != nil {
-						writeCompatibilitySerializers(w, typeDef, changedTypeDef, i)
+						writeCompatibilitySerializers(w, typeDef, changedTypeDef, versionLabel)
 					}
 				}
 			}
@@ -555,7 +560,7 @@ func writeConversionRw(w *formatting.IndentedWriter, tc dsl.TypeChange, streamNa
 	}
 }
 
-func writeCompatibilitySerializers(w *formatting.IndentedWriter, t dsl.TypeDefinition, prev dsl.TypeDefinition, version_index int) {
+func writeCompatibilitySerializers(w *formatting.IndentedWriter, t dsl.TypeDefinition, prev dsl.TypeDefinition, versionLabel string) {
 	switch t.(type) {
 	case *dsl.EnumDefinition:
 		return
@@ -593,25 +598,26 @@ func writeCompatibilitySerializers(w *formatting.IndentedWriter, t dsl.TypeDefin
 		}
 	}
 
-	writeCompatibilityRwFunctionSignature(t, version_index, w, true)
+	writeCompatibilityRwFunctionSignature(t, versionLabel, w, true)
 	w.Indented(func() {
 		writeFallbackBody(true)
 	})
 	w.WriteString("}\n\n")
 
-	writeCompatibilityRwFunctionSignature(t, version_index, w, false)
+	writeCompatibilityRwFunctionSignature(t, versionLabel, w, false)
 	w.Indented(func() {
 		writeFallbackBody(false)
 	})
 	w.WriteString("}\n\n")
 }
 
-func writeCompatibilityRwFunctionSignature(t dsl.TypeDefinition, version int, w *formatting.IndentedWriter, write bool) {
+func writeCompatibilityRwFunctionSignature(t dsl.TypeDefinition, versionLabel string, w *formatting.IndentedWriter, write bool) {
 	writeRwFunctionTemplateDeclaration(t, w, write)
+	suffix := fmt.Sprintf("_%s", versionLabel)
 	if write {
-		fmt.Fprintf(w, "[[maybe_unused]] static void Write%s_v%d(yardl::binary::CodedOutputStream& stream, %s const& value) {\n", t.GetDefinitionMeta().Name, version, common.TypeDefinitionSyntax(t))
+		fmt.Fprintf(w, "[[maybe_unused]] static void Write%s%s(yardl::binary::CodedOutputStream& stream, %s const& value) {\n", t.GetDefinitionMeta().Name, suffix, common.TypeDefinitionSyntax(t))
 	} else {
-		fmt.Fprintf(w, "[[maybe_unused]] static void Read%s_v%d(yardl::binary::CodedInputStream& stream, %s& value) {\n", t.GetDefinitionMeta().Name, version, common.TypeDefinitionSyntax(t))
+		fmt.Fprintf(w, "[[maybe_unused]] static void Read%s%s(yardl::binary::CodedInputStream& stream, %s& value) {\n", t.GetDefinitionMeta().Name, suffix, common.TypeDefinitionSyntax(t))
 	}
 }
 
@@ -725,7 +731,7 @@ func writeProtocolStep(w *formatting.IndentedWriter, step *dsl.ProtocolStep, str
 		}
 	}
 
-	allNil := func(vs []dsl.TypeChange) bool {
+	allNil := func(vs map[string]dsl.TypeChange) bool {
 		for _, v := range vs {
 			if v != nil {
 				return false
@@ -734,25 +740,23 @@ func writeProtocolStep(w *formatting.IndentedWriter, step *dsl.ProtocolStep, str
 		return true
 	}
 
-	changes, ok := step.Annotations[dsl.AllVersionChangesAnnotationKey].([]dsl.TypeChange)
+	changes, ok := step.Annotations[dsl.AllVersionChangesAnnotationKey].(map[string]dsl.TypeChange)
 	if !ok || allNil(changes) {
 		// No schema version changes
 		writeStepRw(step.Type)
 		return
 	}
 
-	fmt.Fprintf(w, "switch (schema_index_) {\n")
-	for i, change := range changes {
+	fmt.Fprintf(w, "switch (version_) {\n")
+	for versionLabel, change := range changes {
 		if change == nil {
 			continue
 		}
 
-		fmt.Fprintf(w, "case %d:\n", i)
+		fmt.Fprintf(w, "case Version::%s: {\n", versionLabel)
 		w.Indented(func() {
-			fmt.Fprintln(w, "{")
 			defer func() {
-				fmt.Fprintln(w, "}")
-				fmt.Fprintln(w, "break;")
+				w.WriteStringln("break;")
 			}()
 
 			changedType := change.OldType()
@@ -764,9 +768,10 @@ func writeProtocolStep(w *formatting.IndentedWriter, step *dsl.ProtocolStep, str
 			}
 
 			// Handle conversions for ProtocolStep type changes
-			varName := fmt.Sprintf("%s_%d", common.FieldIdentifierName(step.Name), i)
+			varName := fmt.Sprintf("%s_%s", common.FieldIdentifierName(step.Name), versionLabel)
 			writeConversionRw(w, change, "stream_", varName, "value", write)
 		})
+		w.WriteStringln("}")
 	}
 	fmt.Fprintln(w, "default:")
 	w.Indented(func() {
@@ -812,8 +817,8 @@ func typeDefinitionRwFunction(t dsl.TypeDefinition, write bool) string {
 		meta := t.GetDefinitionMeta()
 
 		suffix := meta.Name
-		if ver, ok := meta.Annotations[dsl.VersionAnnotationKey]; ok {
-			suffix += fmt.Sprintf("_v%d", ver.(int))
+		if versionLabel, ok := meta.Annotations[dsl.VersionAnnotationKey].(string); ok {
+			suffix = fmt.Sprintf("%s_%s", suffix, versionLabel)
 		}
 
 		verb := verb(write)
