@@ -372,7 +372,7 @@ func writeNamespaceDefinitions(w *formatting.IndentedWriter, ns *dsl.Namespace) 
 		for _, typeDef := range ns.TypeDefinitions {
 			writeSerializers(w, typeDef)
 
-			if changes, ok := typeDef.GetDefinitionMeta().Annotations[dsl.AllVersionChangesAnnotationKey].(map[string]dsl.TypeDefinition); ok {
+			if changes, ok := typeDef.GetDefinitionMeta().Annotations[dsl.AllVersionChangesAnnotationKey].(map[string]dsl.DefinitionChange); ok {
 				// Sort Version Labels so TypeDefinitions are generated in a deterministic order
 				var versionLabels []string
 				for versionLabel := range changes {
@@ -380,9 +380,9 @@ func writeNamespaceDefinitions(w *formatting.IndentedWriter, ns *dsl.Namespace) 
 				}
 				sort.Strings(versionLabels)
 				for _, versionLabel := range versionLabels {
-					changedTypeDef := changes[versionLabel]
-					if changedTypeDef != nil {
-						writeCompatibilitySerializers(w, typeDef, changedTypeDef, versionLabel)
+					change := changes[versionLabel]
+					if change != nil {
+						writeCompatibilitySerializers(w, typeDef, change, versionLabel)
 					}
 				}
 			}
@@ -567,41 +567,41 @@ func writeConversionRw(w *formatting.IndentedWriter, tc dsl.TypeChange, streamNa
 	}
 }
 
-func writeCompatibilitySerializers(w *formatting.IndentedWriter, t dsl.TypeDefinition, prev dsl.TypeDefinition, versionLabel string) {
+func writeCompatibilitySerializers(w *formatting.IndentedWriter, t dsl.TypeDefinition, change dsl.DefinitionChange, versionLabel string) {
 	switch t.(type) {
 	case *dsl.EnumDefinition:
 		return
 	}
 
 	writeFallbackBody := func(write bool) {
-		switch p := prev.(type) {
-		case *dsl.RecordDefinition:
-			for _, field := range p.Fields {
+		switch change := change.(type) {
+		case *dsl.RecordChange:
+			p := change.PreviousDefinition
+			for i, field := range p.Fields {
 				varType := common.TypeSyntax(field.Type)
 				varName := common.FieldIdentifierName(field.Name)
 
-				if field.Annotations[dsl.FieldOrStepRemovedAnnotationKey] != nil {
+				if change.Removed[i] {
 					// Field was removed: Read it and discard, or Write "default" value
 					fmt.Fprintf(w, "%s %s;\n", varType, varName)
 					fmt.Fprintf(w, "%s(stream, %s);\n", typeRwFunction(field.Type, write), varName)
-				} else if field.Annotations[dsl.ChangeAnnotationKey] != nil {
+				} else if typeChange := change.Changes[i]; typeChange != nil {
 					// Field type change: Handle type conversions
-					typeChange := field.Annotations[dsl.ChangeAnnotationKey].(dsl.TypeChange)
 					writeConversionRw(w, typeChange, "stream", varName, fmt.Sprintf("value.%s", varName), write)
 				} else {
 					fmt.Fprintf(w, "%s(stream, value.%s);\n", typeRwFunction(field.Type, write), varName)
 				}
 			}
-		case *dsl.NamedType:
-			if ch, ok := p.Annotations[dsl.ChangeAnnotationKey]; ok {
+		case *dsl.NamedTypeChange:
+			p := change.PreviousDefinition
+			if typeChange := change.TypeChange; typeChange != nil {
 				varName := common.FieldIdentifierName(p.Name)
-				typeChange := ch.(dsl.TypeChange)
 				writeConversionRw(w, typeChange, "stream", varName, "value", write)
 			} else {
 				fmt.Fprintf(w, "%s(stream, value);\n", typeRwFunction(p.Type, write))
 			}
 		default:
-			panic(fmt.Sprintf("Unexpected type %T", p))
+			panic(fmt.Sprintf("Unexpected type %T", change.PreviousVersion()))
 		}
 	}
 
