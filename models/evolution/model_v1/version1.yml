@@ -1,41 +1,72 @@
-MyProtocol: !protocol
+ProtocolWithChanges: !protocol
   sequence:
-    header: Header
-    id: long
-    samples: !stream
-      items: Sample
-    maybe: int?
-    footer: Footer?
+    int8ToInt: int
+    int8ToLong: long
+    int8ToUint: uint
+    int8ToUlong: ulong
+    int8ToFloat: float
+    int8ToDouble: double
 
-Header: !record
+    intToUint: uint
+    intToLong: long
+    intToFloat: float
+    intToDouble: double
+    uintToUlong: ulong
+    uintToFloat: float
+    uintToDouble: double
+
+    floatToDouble: double
+
+    intToString: string
+    uintToString: string
+    longToString: string
+    ulongToString: string
+    floatToString: string
+    doubleToString: string
+
+    intToOptional: int?
+    floatToOptional: float?
+    stringToOptional: string?
+
+    intToUnion: [int, bool]
+    floatToUnion: [float, bool]
+    stringToUnion: [string, bool]
+
+    optionalIntToFloat: float?
+    optionalFloatToString: string?
+
+    aliasedLongToString: AliasedLongToString
+
+    recordWithChanges: RecordWithChanges
+    aliasedRecordWithChanges: AliasedRecordWithChanges
+
+    optionalRecordWithChanges: RecordWithChanges?
+    aliasedOptionalRecordWithChanges: AliasedRecordWithChanges?
+
+    # streamedIntToString: !stream
+    #   items: string
+
+    streamedRecordWithChanges: !stream
+      items: RecordWithChanges
+
+
+AliasedLongToString: string
+AliasedRecordWithChanges: RecordWithChanges
+
+RecordWithChanges: !record
   fields:
-    meta: string->string*
-    subject: string
-    weight: long
-    added: string?
+    floatToDouble: double
+    unchangedRecord: UnchangedRecord
+    intToLong: long
+    optionalLongToString: string?
 
-Sample: !record
-  fields:
-    data: int*
-    timestamp: datetime
-
-Footer: !record
-  fields:
-    signature: Signature
-
-Signature: !record
+UnchangedRecord: !record
   fields:
     name: string
-    email: string
-    number: long
-
-AliasedPrimitive: string
-
-UnusedRecord: !record
-  fields:
-    subject: string->string
+    age: int
+    meta: string->double
 
 UnusedProtocol: !protocol
   sequence:
     samples: !stream
-      items: Sample
+      items: UnchangedRecord

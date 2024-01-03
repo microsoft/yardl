@@ -6,247 +6,517 @@
 #include "../yardl/detail/hdf5/ddl.h"
 #include "../yardl/detail/hdf5/inner_types.h"
 
+namespace {
+template <typename TInner0, typename TOuter0, typename TInner1, typename TOuter1>
+class InnerUnion2 {
+  public:
+  InnerUnion2() : type_index_(-1) {} 
+  InnerUnion2(std::variant<TOuter0, TOuter1> const& v) : type_index_(static_cast<int8_t>(v.index())) {
+    Init(v);
+  }
+
+  InnerUnion2(std::variant<std::monostate, TOuter0, TOuter1> const& v) : type_index_(static_cast<int8_t>(v.index()) - 1) {
+    Init(v);
+  }
+
+  InnerUnion2(InnerUnion2 const& v) = delete;
+
+  InnerUnion2 operator=(InnerUnion2 const&) = delete;
+
+  ~InnerUnion2() {
+    switch (type_index_) {
+    case 0:
+      value0_.~TInner0();
+      break;
+    case 1:
+      value1_.~TInner1();
+      break;
+    }
+  }
+
+  void ToOuter(std::variant<TOuter0, TOuter1>& o) const {
+    ToOuterImpl(o);
+  }
+
+  void ToOuter(std::variant<std::monostate, TOuter0, TOuter1>& o) const {
+    ToOuterImpl(o);
+  }
+
+  int8_t type_index_;
+  union {
+    char empty0_[sizeof(TInner0)]{};
+    TInner0 value0_;
+  };
+  union {
+    char empty1_[sizeof(TInner1)]{};
+    TInner1 value1_;
+  };
+
+  private:
+  template <typename T>
+  void Init(T const& v) {
+    constexpr size_t offset = GetOuterVariantOffset<std::remove_const_t<std::remove_reference_t<decltype(v)>>>();
+    switch (type_index_) {
+    case 0:
+      new (&value0_) TInner0(std::get<0 + offset>(v));
+      return;
+    case 1:
+      new (&value1_) TInner1(std::get<1 + offset>(v));
+      return;
+    }
+  }
+
+  template <typename TVariant>
+  void ToOuterImpl(TVariant& o) const {
+    constexpr size_t offset = GetOuterVariantOffset<TVariant>();
+    switch (type_index_) {
+    case -1:
+      if constexpr (offset == 1) {
+        o.template emplace<0>(std::monostate{});
+        return;
+      }
+    case 0:
+      o.template emplace<0 + offset>();
+      yardl::hdf5::ToOuter(value0_, std::get<0 + offset>(o));
+      return;
+    case 1:
+      o.template emplace<1 + offset>();
+      yardl::hdf5::ToOuter(value1_, std::get<1 + offset>(o));
+      return;
+    }
+    throw std::runtime_error("unrecognized type variant type index " + std::to_string(type_index_));
+  }
+
+  template <typename TVariant>
+  static constexpr size_t GetOuterVariantOffset() {
+    constexpr bool has_monostate = std::is_same_v<std::monostate, std::variant_alternative_t<0, TVariant>>;
+    if constexpr (has_monostate) {
+      return 1;
+    }
+      return 0;
+  }
+};
+
+template <typename TInner0, typename TOuter0, typename TInner1, typename TOuter1>
+H5::CompType InnerUnion2Ddl(bool nullable, H5::DataType const& t0, std::string const& tag0, H5::DataType const& t1, std::string const& tag1) {
+  using UnionType = ::InnerUnion2<TInner0, TOuter0, TInner1, TOuter1>;
+  H5::CompType rtn(sizeof(UnionType));
+  rtn.insertMember("$type", HOFFSET(UnionType, type_index_), yardl::hdf5::UnionTypeEnumDdl(nullable, tag0, tag1));
+  rtn.insertMember(tag0, HOFFSET(UnionType, value0_), t0);
+  rtn.insertMember(tag1, HOFFSET(UnionType, value1_), t1);
+  return rtn;
+}
+}
+
 namespace evo_test::hdf5 {
 namespace {
-struct _Inner_Header {
-  _Inner_Header() {} 
-  _Inner_Header(evo_test::Header const& o) 
-      : meta(o.meta),
-      subject(o.subject),
-      weight(o.weight),
-      added(o.added) {
-  }
-
-  void ToOuter (evo_test::Header& o) const {
-    yardl::hdf5::ToOuter(meta, o.meta);
-    yardl::hdf5::ToOuter(subject, o.subject);
-    yardl::hdf5::ToOuter(weight, o.weight);
-    yardl::hdf5::ToOuter(added, o.added);
-  }
-
-  yardl::hdf5::InnerMap<yardl::hdf5::InnerVlenString, std::string, yardl::hdf5::InnerVlen<yardl::hdf5::InnerVlenString, std::string>, std::vector<std::string>> meta;
-  yardl::hdf5::InnerVlenString subject;
-  int64_t weight;
-  yardl::hdf5::InnerOptional<yardl::hdf5::InnerVlenString, std::string> added;
-};
-
-struct _Inner_Sample {
-  _Inner_Sample() {} 
-  _Inner_Sample(evo_test::Sample const& o) 
-      : data(o.data),
-      timestamp(o.timestamp) {
-  }
-
-  void ToOuter (evo_test::Sample& o) const {
-    yardl::hdf5::ToOuter(data, o.data);
-    yardl::hdf5::ToOuter(timestamp, o.timestamp);
-  }
-
-  yardl::hdf5::InnerVlen<int32_t, int32_t> data;
-  yardl::DateTime timestamp;
-};
-
-struct _Inner_Signature {
-  _Inner_Signature() {} 
-  _Inner_Signature(evo_test::Signature const& o) 
+struct _Inner_UnchangedRecord {
+  _Inner_UnchangedRecord() {} 
+  _Inner_UnchangedRecord(evo_test::UnchangedRecord const& o) 
       : name(o.name),
-      email(o.email),
-      number(o.number) {
+      age(o.age),
+      meta(o.meta) {
   }
 
-  void ToOuter (evo_test::Signature& o) const {
+  void ToOuter (evo_test::UnchangedRecord& o) const {
     yardl::hdf5::ToOuter(name, o.name);
-    yardl::hdf5::ToOuter(email, o.email);
-    yardl::hdf5::ToOuter(number, o.number);
+    yardl::hdf5::ToOuter(age, o.age);
+    yardl::hdf5::ToOuter(meta, o.meta);
   }
 
   yardl::hdf5::InnerVlenString name;
-  yardl::hdf5::InnerVlenString email;
-  int64_t number;
+  int32_t age;
+  yardl::hdf5::InnerMap<yardl::hdf5::InnerVlenString, std::string, double, double> meta;
 };
 
-struct _Inner_Footer {
-  _Inner_Footer() {} 
-  _Inner_Footer(evo_test::Footer const& o) 
-      : signature(o.signature) {
+struct _Inner_RecordWithChanges {
+  _Inner_RecordWithChanges() {} 
+  _Inner_RecordWithChanges(evo_test::RecordWithChanges const& o) 
+      : float_to_double(o.float_to_double),
+      unchanged_record(o.unchanged_record),
+      int_to_long(o.int_to_long),
+      optional_long_to_string(o.optional_long_to_string) {
   }
 
-  void ToOuter (evo_test::Footer& o) const {
-    yardl::hdf5::ToOuter(signature, o.signature);
+  void ToOuter (evo_test::RecordWithChanges& o) const {
+    yardl::hdf5::ToOuter(float_to_double, o.float_to_double);
+    yardl::hdf5::ToOuter(unchanged_record, o.unchanged_record);
+    yardl::hdf5::ToOuter(int_to_long, o.int_to_long);
+    yardl::hdf5::ToOuter(optional_long_to_string, o.optional_long_to_string);
   }
 
-  evo_test::hdf5::_Inner_Signature signature;
+  double float_to_double;
+  evo_test::hdf5::_Inner_UnchangedRecord unchanged_record;
+  int64_t int_to_long;
+  yardl::hdf5::InnerOptional<yardl::hdf5::InnerVlenString, std::string> optional_long_to_string;
 };
 
-struct _Inner_UnusedRecord {
-  _Inner_UnusedRecord() {} 
-  _Inner_UnusedRecord(evo_test::UnusedRecord const& o) 
-      : subject(o.subject) {
-  }
-
-  void ToOuter (evo_test::UnusedRecord& o) const {
-    yardl::hdf5::ToOuter(subject, o.subject);
-  }
-
-  yardl::hdf5::InnerMap<yardl::hdf5::InnerVlenString, std::string, yardl::hdf5::InnerVlenString, std::string> subject;
-};
-
-[[maybe_unused]] H5::CompType GetHeaderHdf5Ddl() {
-  using RecordType = evo_test::hdf5::_Inner_Header;
-  H5::CompType t(sizeof(RecordType));
-  t.insertMember("meta", HOFFSET(RecordType, meta), yardl::hdf5::InnerMapDdl<yardl::hdf5::InnerVlenString, yardl::hdf5::InnerVlen<yardl::hdf5::InnerVlenString, std::string>>(yardl::hdf5::InnerVlenStringDdl(), yardl::hdf5::InnerVlenDdl(yardl::hdf5::InnerVlenStringDdl())));
-  t.insertMember("subject", HOFFSET(RecordType, subject), yardl::hdf5::InnerVlenStringDdl());
-  t.insertMember("weight", HOFFSET(RecordType, weight), H5::PredType::NATIVE_INT64);
-  t.insertMember("added", HOFFSET(RecordType, added), yardl::hdf5::OptionalTypeDdl<yardl::hdf5::InnerVlenString, std::string>(yardl::hdf5::InnerVlenStringDdl()));
-  return t;
-}
-
-[[maybe_unused]] H5::CompType GetSampleHdf5Ddl() {
-  using RecordType = evo_test::hdf5::_Inner_Sample;
-  H5::CompType t(sizeof(RecordType));
-  t.insertMember("data", HOFFSET(RecordType, data), yardl::hdf5::InnerVlenDdl(H5::PredType::NATIVE_INT32));
-  t.insertMember("timestamp", HOFFSET(RecordType, timestamp), yardl::hdf5::DateTimeTypeDdl());
-  return t;
-}
-
-[[maybe_unused]] H5::CompType GetSignatureHdf5Ddl() {
-  using RecordType = evo_test::hdf5::_Inner_Signature;
+[[maybe_unused]] H5::CompType GetUnchangedRecordHdf5Ddl() {
+  using RecordType = evo_test::hdf5::_Inner_UnchangedRecord;
   H5::CompType t(sizeof(RecordType));
   t.insertMember("name", HOFFSET(RecordType, name), yardl::hdf5::InnerVlenStringDdl());
-  t.insertMember("email", HOFFSET(RecordType, email), yardl::hdf5::InnerVlenStringDdl());
-  t.insertMember("number", HOFFSET(RecordType, number), H5::PredType::NATIVE_INT64);
+  t.insertMember("age", HOFFSET(RecordType, age), H5::PredType::NATIVE_INT32);
+  t.insertMember("meta", HOFFSET(RecordType, meta), yardl::hdf5::InnerMapDdl<yardl::hdf5::InnerVlenString, double>(yardl::hdf5::InnerVlenStringDdl(), H5::PredType::NATIVE_DOUBLE));
   return t;
 }
 
-[[maybe_unused]] H5::CompType GetFooterHdf5Ddl() {
-  using RecordType = evo_test::hdf5::_Inner_Footer;
+[[maybe_unused]] H5::CompType GetRecordWithChangesHdf5Ddl() {
+  using RecordType = evo_test::hdf5::_Inner_RecordWithChanges;
   H5::CompType t(sizeof(RecordType));
-  t.insertMember("signature", HOFFSET(RecordType, signature), evo_test::hdf5::GetSignatureHdf5Ddl());
-  return t;
-}
-
-[[maybe_unused]] H5::CompType GetUnusedRecordHdf5Ddl() {
-  using RecordType = evo_test::hdf5::_Inner_UnusedRecord;
-  H5::CompType t(sizeof(RecordType));
-  t.insertMember("subject", HOFFSET(RecordType, subject), yardl::hdf5::InnerMapDdl<yardl::hdf5::InnerVlenString, yardl::hdf5::InnerVlenString>(yardl::hdf5::InnerVlenStringDdl(), yardl::hdf5::InnerVlenStringDdl()));
+  t.insertMember("floatToDouble", HOFFSET(RecordType, float_to_double), H5::PredType::NATIVE_DOUBLE);
+  t.insertMember("unchangedRecord", HOFFSET(RecordType, unchanged_record), evo_test::hdf5::GetUnchangedRecordHdf5Ddl());
+  t.insertMember("intToLong", HOFFSET(RecordType, int_to_long), H5::PredType::NATIVE_INT64);
+  t.insertMember("optionalLongToString", HOFFSET(RecordType, optional_long_to_string), yardl::hdf5::OptionalTypeDdl<yardl::hdf5::InnerVlenString, std::string>(yardl::hdf5::InnerVlenStringDdl()));
   return t;
 }
 
 } // namespace 
 
-MyProtocolWriter::MyProtocolWriter(std::string path)
-    : yardl::hdf5::Hdf5Writer::Hdf5Writer(path, "MyProtocol", schema_) {
+ProtocolWithChangesWriter::ProtocolWithChangesWriter(std::string path)
+    : yardl::hdf5::Hdf5Writer::Hdf5Writer(path, "ProtocolWithChanges", schema_) {
 }
 
-void MyProtocolWriter::WriteHeaderImpl(evo_test::Header const& value) {
-  yardl::hdf5::WriteScalarDataset<evo_test::hdf5::_Inner_Header, evo_test::Header>(group_, "header", evo_test::hdf5::GetHeaderHdf5Ddl(), value);
+void ProtocolWithChangesWriter::WriteInt8ToIntImpl(int32_t const& value) {
+  yardl::hdf5::WriteScalarDataset<int32_t, int32_t>(group_, "int8ToInt", H5::PredType::NATIVE_INT32, value);
 }
 
-void MyProtocolWriter::WriteIdImpl(int64_t const& value) {
-  yardl::hdf5::WriteScalarDataset<int64_t, int64_t>(group_, "id", H5::PredType::NATIVE_INT64, value);
+void ProtocolWithChangesWriter::WriteInt8ToLongImpl(int64_t const& value) {
+  yardl::hdf5::WriteScalarDataset<int64_t, int64_t>(group_, "int8ToLong", H5::PredType::NATIVE_INT64, value);
 }
 
-void MyProtocolWriter::WriteSamplesImpl(evo_test::Sample const& value) {
-  if (!samples_dataset_state_) {
-    samples_dataset_state_ = std::make_unique<yardl::hdf5::DatasetWriter>(group_, "samples", evo_test::hdf5::GetSampleHdf5Ddl(), std::max(sizeof(evo_test::hdf5::_Inner_Sample), sizeof(evo_test::Sample)));
+void ProtocolWithChangesWriter::WriteInt8ToUintImpl(uint32_t const& value) {
+  yardl::hdf5::WriteScalarDataset<uint32_t, uint32_t>(group_, "int8ToUint", H5::PredType::NATIVE_UINT32, value);
+}
+
+void ProtocolWithChangesWriter::WriteInt8ToUlongImpl(uint64_t const& value) {
+  yardl::hdf5::WriteScalarDataset<uint64_t, uint64_t>(group_, "int8ToUlong", H5::PredType::NATIVE_UINT64, value);
+}
+
+void ProtocolWithChangesWriter::WriteInt8ToFloatImpl(float const& value) {
+  yardl::hdf5::WriteScalarDataset<float, float>(group_, "int8ToFloat", H5::PredType::NATIVE_FLOAT, value);
+}
+
+void ProtocolWithChangesWriter::WriteInt8ToDoubleImpl(double const& value) {
+  yardl::hdf5::WriteScalarDataset<double, double>(group_, "int8ToDouble", H5::PredType::NATIVE_DOUBLE, value);
+}
+
+void ProtocolWithChangesWriter::WriteIntToUintImpl(uint32_t const& value) {
+  yardl::hdf5::WriteScalarDataset<uint32_t, uint32_t>(group_, "intToUint", H5::PredType::NATIVE_UINT32, value);
+}
+
+void ProtocolWithChangesWriter::WriteIntToLongImpl(int64_t const& value) {
+  yardl::hdf5::WriteScalarDataset<int64_t, int64_t>(group_, "intToLong", H5::PredType::NATIVE_INT64, value);
+}
+
+void ProtocolWithChangesWriter::WriteIntToFloatImpl(float const& value) {
+  yardl::hdf5::WriteScalarDataset<float, float>(group_, "intToFloat", H5::PredType::NATIVE_FLOAT, value);
+}
+
+void ProtocolWithChangesWriter::WriteIntToDoubleImpl(double const& value) {
+  yardl::hdf5::WriteScalarDataset<double, double>(group_, "intToDouble", H5::PredType::NATIVE_DOUBLE, value);
+}
+
+void ProtocolWithChangesWriter::WriteUintToUlongImpl(uint64_t const& value) {
+  yardl::hdf5::WriteScalarDataset<uint64_t, uint64_t>(group_, "uintToUlong", H5::PredType::NATIVE_UINT64, value);
+}
+
+void ProtocolWithChangesWriter::WriteUintToFloatImpl(float const& value) {
+  yardl::hdf5::WriteScalarDataset<float, float>(group_, "uintToFloat", H5::PredType::NATIVE_FLOAT, value);
+}
+
+void ProtocolWithChangesWriter::WriteUintToDoubleImpl(double const& value) {
+  yardl::hdf5::WriteScalarDataset<double, double>(group_, "uintToDouble", H5::PredType::NATIVE_DOUBLE, value);
+}
+
+void ProtocolWithChangesWriter::WriteFloatToDoubleImpl(double const& value) {
+  yardl::hdf5::WriteScalarDataset<double, double>(group_, "floatToDouble", H5::PredType::NATIVE_DOUBLE, value);
+}
+
+void ProtocolWithChangesWriter::WriteIntToStringImpl(std::string const& value) {
+  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerVlenString, std::string>(group_, "intToString", yardl::hdf5::InnerVlenStringDdl(), value);
+}
+
+void ProtocolWithChangesWriter::WriteUintToStringImpl(std::string const& value) {
+  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerVlenString, std::string>(group_, "uintToString", yardl::hdf5::InnerVlenStringDdl(), value);
+}
+
+void ProtocolWithChangesWriter::WriteLongToStringImpl(std::string const& value) {
+  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerVlenString, std::string>(group_, "longToString", yardl::hdf5::InnerVlenStringDdl(), value);
+}
+
+void ProtocolWithChangesWriter::WriteUlongToStringImpl(std::string const& value) {
+  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerVlenString, std::string>(group_, "ulongToString", yardl::hdf5::InnerVlenStringDdl(), value);
+}
+
+void ProtocolWithChangesWriter::WriteFloatToStringImpl(std::string const& value) {
+  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerVlenString, std::string>(group_, "floatToString", yardl::hdf5::InnerVlenStringDdl(), value);
+}
+
+void ProtocolWithChangesWriter::WriteDoubleToStringImpl(std::string const& value) {
+  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerVlenString, std::string>(group_, "doubleToString", yardl::hdf5::InnerVlenStringDdl(), value);
+}
+
+void ProtocolWithChangesWriter::WriteIntToOptionalImpl(std::optional<int32_t> const& value) {
+  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerOptional<int32_t, int32_t>, std::optional<int32_t>>(group_, "intToOptional", yardl::hdf5::OptionalTypeDdl<int32_t, int32_t>(H5::PredType::NATIVE_INT32), value);
+}
+
+void ProtocolWithChangesWriter::WriteFloatToOptionalImpl(std::optional<float> const& value) {
+  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerOptional<float, float>, std::optional<float>>(group_, "floatToOptional", yardl::hdf5::OptionalTypeDdl<float, float>(H5::PredType::NATIVE_FLOAT), value);
+}
+
+void ProtocolWithChangesWriter::WriteStringToOptionalImpl(std::optional<std::string> const& value) {
+  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerOptional<yardl::hdf5::InnerVlenString, std::string>, std::optional<std::string>>(group_, "stringToOptional", yardl::hdf5::OptionalTypeDdl<yardl::hdf5::InnerVlenString, std::string>(yardl::hdf5::InnerVlenStringDdl()), value);
+}
+
+void ProtocolWithChangesWriter::WriteIntToUnionImpl(std::variant<int32_t, bool> const& value) {
+  yardl::hdf5::WriteScalarDataset<::InnerUnion2<int32_t, int32_t, bool, bool>, std::variant<int32_t, bool>>(group_, "intToUnion", ::InnerUnion2Ddl<int32_t, int32_t, bool, bool>(false, H5::PredType::NATIVE_INT32, "int32", H5::PredType::NATIVE_HBOOL, "bool"), value);
+}
+
+void ProtocolWithChangesWriter::WriteFloatToUnionImpl(std::variant<float, bool> const& value) {
+  yardl::hdf5::WriteScalarDataset<::InnerUnion2<float, float, bool, bool>, std::variant<float, bool>>(group_, "floatToUnion", ::InnerUnion2Ddl<float, float, bool, bool>(false, H5::PredType::NATIVE_FLOAT, "float32", H5::PredType::NATIVE_HBOOL, "bool"), value);
+}
+
+void ProtocolWithChangesWriter::WriteStringToUnionImpl(std::variant<std::string, bool> const& value) {
+  yardl::hdf5::WriteScalarDataset<::InnerUnion2<yardl::hdf5::InnerVlenString, std::string, bool, bool>, std::variant<std::string, bool>>(group_, "stringToUnion", ::InnerUnion2Ddl<yardl::hdf5::InnerVlenString, std::string, bool, bool>(false, yardl::hdf5::InnerVlenStringDdl(), "string", H5::PredType::NATIVE_HBOOL, "bool"), value);
+}
+
+void ProtocolWithChangesWriter::WriteOptionalIntToFloatImpl(std::optional<float> const& value) {
+  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerOptional<float, float>, std::optional<float>>(group_, "optionalIntToFloat", yardl::hdf5::OptionalTypeDdl<float, float>(H5::PredType::NATIVE_FLOAT), value);
+}
+
+void ProtocolWithChangesWriter::WriteOptionalFloatToStringImpl(std::optional<std::string> const& value) {
+  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerOptional<yardl::hdf5::InnerVlenString, std::string>, std::optional<std::string>>(group_, "optionalFloatToString", yardl::hdf5::OptionalTypeDdl<yardl::hdf5::InnerVlenString, std::string>(yardl::hdf5::InnerVlenStringDdl()), value);
+}
+
+void ProtocolWithChangesWriter::WriteAliasedLongToStringImpl(evo_test::AliasedLongToString const& value) {
+  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerVlenString, evo_test::AliasedLongToString>(group_, "aliasedLongToString", yardl::hdf5::InnerVlenStringDdl(), value);
+}
+
+void ProtocolWithChangesWriter::WriteRecordWithChangesImpl(evo_test::RecordWithChanges const& value) {
+  yardl::hdf5::WriteScalarDataset<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges>(group_, "recordWithChanges", evo_test::hdf5::GetRecordWithChangesHdf5Ddl(), value);
+}
+
+void ProtocolWithChangesWriter::WriteAliasedRecordWithChangesImpl(evo_test::AliasedRecordWithChanges const& value) {
+  yardl::hdf5::WriteScalarDataset<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::AliasedRecordWithChanges>(group_, "aliasedRecordWithChanges", evo_test::hdf5::GetRecordWithChangesHdf5Ddl(), value);
+}
+
+void ProtocolWithChangesWriter::WriteOptionalRecordWithChangesImpl(std::optional<evo_test::RecordWithChanges> const& value) {
+  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerOptional<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges>, std::optional<evo_test::RecordWithChanges>>(group_, "optionalRecordWithChanges", yardl::hdf5::OptionalTypeDdl<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges>(evo_test::hdf5::GetRecordWithChangesHdf5Ddl()), value);
+}
+
+void ProtocolWithChangesWriter::WriteAliasedOptionalRecordWithChangesImpl(std::optional<evo_test::AliasedRecordWithChanges> const& value) {
+  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerOptional<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::AliasedRecordWithChanges>, std::optional<evo_test::AliasedRecordWithChanges>>(group_, "aliasedOptionalRecordWithChanges", yardl::hdf5::OptionalTypeDdl<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::AliasedRecordWithChanges>(evo_test::hdf5::GetRecordWithChangesHdf5Ddl()), value);
+}
+
+void ProtocolWithChangesWriter::WriteStreamedRecordWithChangesImpl(evo_test::RecordWithChanges const& value) {
+  if (!streamedRecordWithChanges_dataset_state_) {
+    streamedRecordWithChanges_dataset_state_ = std::make_unique<yardl::hdf5::DatasetWriter>(group_, "streamedRecordWithChanges", evo_test::hdf5::GetRecordWithChangesHdf5Ddl(), std::max(sizeof(evo_test::hdf5::_Inner_RecordWithChanges), sizeof(evo_test::RecordWithChanges)));
   }
 
-  samples_dataset_state_->Append<evo_test::hdf5::_Inner_Sample, evo_test::Sample>(value);
+  streamedRecordWithChanges_dataset_state_->Append<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges>(value);
 }
 
-void MyProtocolWriter::WriteSamplesImpl(std::vector<evo_test::Sample> const& values) {
-  if (!samples_dataset_state_) {
-    samples_dataset_state_ = std::make_unique<yardl::hdf5::DatasetWriter>(group_, "samples", evo_test::hdf5::GetSampleHdf5Ddl(), std::max(sizeof(evo_test::hdf5::_Inner_Sample), sizeof(evo_test::Sample)));
+void ProtocolWithChangesWriter::WriteStreamedRecordWithChangesImpl(std::vector<evo_test::RecordWithChanges> const& values) {
+  if (!streamedRecordWithChanges_dataset_state_) {
+    streamedRecordWithChanges_dataset_state_ = std::make_unique<yardl::hdf5::DatasetWriter>(group_, "streamedRecordWithChanges", evo_test::hdf5::GetRecordWithChangesHdf5Ddl(), std::max(sizeof(evo_test::hdf5::_Inner_RecordWithChanges), sizeof(evo_test::RecordWithChanges)));
   }
 
-  samples_dataset_state_->AppendBatch<evo_test::hdf5::_Inner_Sample, evo_test::Sample>(values);
+  streamedRecordWithChanges_dataset_state_->AppendBatch<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges>(values);
 }
 
-void MyProtocolWriter::EndSamplesImpl() {
-  if (!samples_dataset_state_) {
-    samples_dataset_state_ = std::make_unique<yardl::hdf5::DatasetWriter>(group_, "samples", evo_test::hdf5::GetSampleHdf5Ddl(), std::max(sizeof(evo_test::hdf5::_Inner_Sample), sizeof(evo_test::Sample)));
+void ProtocolWithChangesWriter::EndStreamedRecordWithChangesImpl() {
+  if (!streamedRecordWithChanges_dataset_state_) {
+    streamedRecordWithChanges_dataset_state_ = std::make_unique<yardl::hdf5::DatasetWriter>(group_, "streamedRecordWithChanges", evo_test::hdf5::GetRecordWithChangesHdf5Ddl(), std::max(sizeof(evo_test::hdf5::_Inner_RecordWithChanges), sizeof(evo_test::RecordWithChanges)));
   }
 
-  samples_dataset_state_.reset();
+  streamedRecordWithChanges_dataset_state_.reset();
 }
 
-void MyProtocolWriter::WriteMaybeImpl(std::optional<int32_t> const& value) {
-  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerOptional<int32_t, int32_t>, std::optional<int32_t>>(group_, "maybe", yardl::hdf5::OptionalTypeDdl<int32_t, int32_t>(H5::PredType::NATIVE_INT32), value);
+ProtocolWithChangesReader::ProtocolWithChangesReader(std::string path)
+    : yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "ProtocolWithChanges", schema_) {
 }
 
-void MyProtocolWriter::WriteFooterImpl(std::optional<evo_test::Footer> const& value) {
-  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerOptional<evo_test::hdf5::_Inner_Footer, evo_test::Footer>, std::optional<evo_test::Footer>>(group_, "footer", yardl::hdf5::OptionalTypeDdl<evo_test::hdf5::_Inner_Footer, evo_test::Footer>(evo_test::hdf5::GetFooterHdf5Ddl()), value);
+void ProtocolWithChangesReader::ReadInt8ToIntImpl(int32_t& value) {
+  yardl::hdf5::ReadScalarDataset<int32_t, int32_t>(group_, "int8ToInt", H5::PredType::NATIVE_INT32, value);
 }
 
-MyProtocolReader::MyProtocolReader(std::string path)
-    : yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "MyProtocol", schema_) {
+void ProtocolWithChangesReader::ReadInt8ToLongImpl(int64_t& value) {
+  yardl::hdf5::ReadScalarDataset<int64_t, int64_t>(group_, "int8ToLong", H5::PredType::NATIVE_INT64, value);
 }
 
-void MyProtocolReader::ReadHeaderImpl(evo_test::Header& value) {
-  yardl::hdf5::ReadScalarDataset<evo_test::hdf5::_Inner_Header, evo_test::Header>(group_, "header", evo_test::hdf5::GetHeaderHdf5Ddl(), value);
+void ProtocolWithChangesReader::ReadInt8ToUintImpl(uint32_t& value) {
+  yardl::hdf5::ReadScalarDataset<uint32_t, uint32_t>(group_, "int8ToUint", H5::PredType::NATIVE_UINT32, value);
 }
 
-void MyProtocolReader::ReadIdImpl(int64_t& value) {
-  yardl::hdf5::ReadScalarDataset<int64_t, int64_t>(group_, "id", H5::PredType::NATIVE_INT64, value);
+void ProtocolWithChangesReader::ReadInt8ToUlongImpl(uint64_t& value) {
+  yardl::hdf5::ReadScalarDataset<uint64_t, uint64_t>(group_, "int8ToUlong", H5::PredType::NATIVE_UINT64, value);
 }
 
-bool MyProtocolReader::ReadSamplesImpl(evo_test::Sample& value) {
-  if (!samples_dataset_state_) {
-    samples_dataset_state_ = std::make_unique<yardl::hdf5::DatasetReader>(group_, "samples", evo_test::hdf5::GetSampleHdf5Ddl(), std::max(sizeof(evo_test::hdf5::_Inner_Sample), sizeof(evo_test::Sample)));
+void ProtocolWithChangesReader::ReadInt8ToFloatImpl(float& value) {
+  yardl::hdf5::ReadScalarDataset<float, float>(group_, "int8ToFloat", H5::PredType::NATIVE_FLOAT, value);
+}
+
+void ProtocolWithChangesReader::ReadInt8ToDoubleImpl(double& value) {
+  yardl::hdf5::ReadScalarDataset<double, double>(group_, "int8ToDouble", H5::PredType::NATIVE_DOUBLE, value);
+}
+
+void ProtocolWithChangesReader::ReadIntToUintImpl(uint32_t& value) {
+  yardl::hdf5::ReadScalarDataset<uint32_t, uint32_t>(group_, "intToUint", H5::PredType::NATIVE_UINT32, value);
+}
+
+void ProtocolWithChangesReader::ReadIntToLongImpl(int64_t& value) {
+  yardl::hdf5::ReadScalarDataset<int64_t, int64_t>(group_, "intToLong", H5::PredType::NATIVE_INT64, value);
+}
+
+void ProtocolWithChangesReader::ReadIntToFloatImpl(float& value) {
+  yardl::hdf5::ReadScalarDataset<float, float>(group_, "intToFloat", H5::PredType::NATIVE_FLOAT, value);
+}
+
+void ProtocolWithChangesReader::ReadIntToDoubleImpl(double& value) {
+  yardl::hdf5::ReadScalarDataset<double, double>(group_, "intToDouble", H5::PredType::NATIVE_DOUBLE, value);
+}
+
+void ProtocolWithChangesReader::ReadUintToUlongImpl(uint64_t& value) {
+  yardl::hdf5::ReadScalarDataset<uint64_t, uint64_t>(group_, "uintToUlong", H5::PredType::NATIVE_UINT64, value);
+}
+
+void ProtocolWithChangesReader::ReadUintToFloatImpl(float& value) {
+  yardl::hdf5::ReadScalarDataset<float, float>(group_, "uintToFloat", H5::PredType::NATIVE_FLOAT, value);
+}
+
+void ProtocolWithChangesReader::ReadUintToDoubleImpl(double& value) {
+  yardl::hdf5::ReadScalarDataset<double, double>(group_, "uintToDouble", H5::PredType::NATIVE_DOUBLE, value);
+}
+
+void ProtocolWithChangesReader::ReadFloatToDoubleImpl(double& value) {
+  yardl::hdf5::ReadScalarDataset<double, double>(group_, "floatToDouble", H5::PredType::NATIVE_DOUBLE, value);
+}
+
+void ProtocolWithChangesReader::ReadIntToStringImpl(std::string& value) {
+  yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerVlenString, std::string>(group_, "intToString", yardl::hdf5::InnerVlenStringDdl(), value);
+}
+
+void ProtocolWithChangesReader::ReadUintToStringImpl(std::string& value) {
+  yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerVlenString, std::string>(group_, "uintToString", yardl::hdf5::InnerVlenStringDdl(), value);
+}
+
+void ProtocolWithChangesReader::ReadLongToStringImpl(std::string& value) {
+  yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerVlenString, std::string>(group_, "longToString", yardl::hdf5::InnerVlenStringDdl(), value);
+}
+
+void ProtocolWithChangesReader::ReadUlongToStringImpl(std::string& value) {
+  yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerVlenString, std::string>(group_, "ulongToString", yardl::hdf5::InnerVlenStringDdl(), value);
+}
+
+void ProtocolWithChangesReader::ReadFloatToStringImpl(std::string& value) {
+  yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerVlenString, std::string>(group_, "floatToString", yardl::hdf5::InnerVlenStringDdl(), value);
+}
+
+void ProtocolWithChangesReader::ReadDoubleToStringImpl(std::string& value) {
+  yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerVlenString, std::string>(group_, "doubleToString", yardl::hdf5::InnerVlenStringDdl(), value);
+}
+
+void ProtocolWithChangesReader::ReadIntToOptionalImpl(std::optional<int32_t>& value) {
+  yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerOptional<int32_t, int32_t>, std::optional<int32_t>>(group_, "intToOptional", yardl::hdf5::OptionalTypeDdl<int32_t, int32_t>(H5::PredType::NATIVE_INT32), value);
+}
+
+void ProtocolWithChangesReader::ReadFloatToOptionalImpl(std::optional<float>& value) {
+  yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerOptional<float, float>, std::optional<float>>(group_, "floatToOptional", yardl::hdf5::OptionalTypeDdl<float, float>(H5::PredType::NATIVE_FLOAT), value);
+}
+
+void ProtocolWithChangesReader::ReadStringToOptionalImpl(std::optional<std::string>& value) {
+  yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerOptional<yardl::hdf5::InnerVlenString, std::string>, std::optional<std::string>>(group_, "stringToOptional", yardl::hdf5::OptionalTypeDdl<yardl::hdf5::InnerVlenString, std::string>(yardl::hdf5::InnerVlenStringDdl()), value);
+}
+
+void ProtocolWithChangesReader::ReadIntToUnionImpl(std::variant<int32_t, bool>& value) {
+  yardl::hdf5::ReadScalarDataset<::InnerUnion2<int32_t, int32_t, bool, bool>, std::variant<int32_t, bool>>(group_, "intToUnion", ::InnerUnion2Ddl<int32_t, int32_t, bool, bool>(false, H5::PredType::NATIVE_INT32, "int32", H5::PredType::NATIVE_HBOOL, "bool"), value);
+}
+
+void ProtocolWithChangesReader::ReadFloatToUnionImpl(std::variant<float, bool>& value) {
+  yardl::hdf5::ReadScalarDataset<::InnerUnion2<float, float, bool, bool>, std::variant<float, bool>>(group_, "floatToUnion", ::InnerUnion2Ddl<float, float, bool, bool>(false, H5::PredType::NATIVE_FLOAT, "float32", H5::PredType::NATIVE_HBOOL, "bool"), value);
+}
+
+void ProtocolWithChangesReader::ReadStringToUnionImpl(std::variant<std::string, bool>& value) {
+  yardl::hdf5::ReadScalarDataset<::InnerUnion2<yardl::hdf5::InnerVlenString, std::string, bool, bool>, std::variant<std::string, bool>>(group_, "stringToUnion", ::InnerUnion2Ddl<yardl::hdf5::InnerVlenString, std::string, bool, bool>(false, yardl::hdf5::InnerVlenStringDdl(), "string", H5::PredType::NATIVE_HBOOL, "bool"), value);
+}
+
+void ProtocolWithChangesReader::ReadOptionalIntToFloatImpl(std::optional<float>& value) {
+  yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerOptional<float, float>, std::optional<float>>(group_, "optionalIntToFloat", yardl::hdf5::OptionalTypeDdl<float, float>(H5::PredType::NATIVE_FLOAT), value);
+}
+
+void ProtocolWithChangesReader::ReadOptionalFloatToStringImpl(std::optional<std::string>& value) {
+  yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerOptional<yardl::hdf5::InnerVlenString, std::string>, std::optional<std::string>>(group_, "optionalFloatToString", yardl::hdf5::OptionalTypeDdl<yardl::hdf5::InnerVlenString, std::string>(yardl::hdf5::InnerVlenStringDdl()), value);
+}
+
+void ProtocolWithChangesReader::ReadAliasedLongToStringImpl(evo_test::AliasedLongToString& value) {
+  yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerVlenString, evo_test::AliasedLongToString>(group_, "aliasedLongToString", yardl::hdf5::InnerVlenStringDdl(), value);
+}
+
+void ProtocolWithChangesReader::ReadRecordWithChangesImpl(evo_test::RecordWithChanges& value) {
+  yardl::hdf5::ReadScalarDataset<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges>(group_, "recordWithChanges", evo_test::hdf5::GetRecordWithChangesHdf5Ddl(), value);
+}
+
+void ProtocolWithChangesReader::ReadAliasedRecordWithChangesImpl(evo_test::AliasedRecordWithChanges& value) {
+  yardl::hdf5::ReadScalarDataset<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::AliasedRecordWithChanges>(group_, "aliasedRecordWithChanges", evo_test::hdf5::GetRecordWithChangesHdf5Ddl(), value);
+}
+
+void ProtocolWithChangesReader::ReadOptionalRecordWithChangesImpl(std::optional<evo_test::RecordWithChanges>& value) {
+  yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerOptional<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges>, std::optional<evo_test::RecordWithChanges>>(group_, "optionalRecordWithChanges", yardl::hdf5::OptionalTypeDdl<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges>(evo_test::hdf5::GetRecordWithChangesHdf5Ddl()), value);
+}
+
+void ProtocolWithChangesReader::ReadAliasedOptionalRecordWithChangesImpl(std::optional<evo_test::AliasedRecordWithChanges>& value) {
+  yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerOptional<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::AliasedRecordWithChanges>, std::optional<evo_test::AliasedRecordWithChanges>>(group_, "aliasedOptionalRecordWithChanges", yardl::hdf5::OptionalTypeDdl<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::AliasedRecordWithChanges>(evo_test::hdf5::GetRecordWithChangesHdf5Ddl()), value);
+}
+
+bool ProtocolWithChangesReader::ReadStreamedRecordWithChangesImpl(evo_test::RecordWithChanges& value) {
+  if (!streamedRecordWithChanges_dataset_state_) {
+    streamedRecordWithChanges_dataset_state_ = std::make_unique<yardl::hdf5::DatasetReader>(group_, "streamedRecordWithChanges", evo_test::hdf5::GetRecordWithChangesHdf5Ddl(), std::max(sizeof(evo_test::hdf5::_Inner_RecordWithChanges), sizeof(evo_test::RecordWithChanges)));
   }
 
-  bool has_value = samples_dataset_state_->Read<evo_test::hdf5::_Inner_Sample, evo_test::Sample>(value);
+  bool has_value = streamedRecordWithChanges_dataset_state_->Read<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges>(value);
   if (!has_value) {
-    samples_dataset_state_.reset();
+    streamedRecordWithChanges_dataset_state_.reset();
   }
 
   return has_value;
 }
 
-bool MyProtocolReader::ReadSamplesImpl(std::vector<evo_test::Sample>& values) {
-  if (!samples_dataset_state_) {
-    samples_dataset_state_ = std::make_unique<yardl::hdf5::DatasetReader>(group_, "samples", evo_test::hdf5::GetSampleHdf5Ddl());
+bool ProtocolWithChangesReader::ReadStreamedRecordWithChangesImpl(std::vector<evo_test::RecordWithChanges>& values) {
+  if (!streamedRecordWithChanges_dataset_state_) {
+    streamedRecordWithChanges_dataset_state_ = std::make_unique<yardl::hdf5::DatasetReader>(group_, "streamedRecordWithChanges", evo_test::hdf5::GetRecordWithChangesHdf5Ddl());
   }
 
-  bool has_more = samples_dataset_state_->ReadBatch<evo_test::hdf5::_Inner_Sample, evo_test::Sample>(values);
+  bool has_more = streamedRecordWithChanges_dataset_state_->ReadBatch<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges>(values);
   if (!has_more) {
-    samples_dataset_state_.reset();
+    streamedRecordWithChanges_dataset_state_.reset();
   }
 
   return has_more;
-}
-
-void MyProtocolReader::ReadMaybeImpl(std::optional<int32_t>& value) {
-  yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerOptional<int32_t, int32_t>, std::optional<int32_t>>(group_, "maybe", yardl::hdf5::OptionalTypeDdl<int32_t, int32_t>(H5::PredType::NATIVE_INT32), value);
-}
-
-void MyProtocolReader::ReadFooterImpl(std::optional<evo_test::Footer>& value) {
-  yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerOptional<evo_test::hdf5::_Inner_Footer, evo_test::Footer>, std::optional<evo_test::Footer>>(group_, "footer", yardl::hdf5::OptionalTypeDdl<evo_test::hdf5::_Inner_Footer, evo_test::Footer>(evo_test::hdf5::GetFooterHdf5Ddl()), value);
 }
 
 UnusedProtocolWriter::UnusedProtocolWriter(std::string path)
     : yardl::hdf5::Hdf5Writer::Hdf5Writer(path, "UnusedProtocol", schema_) {
 }
 
-void UnusedProtocolWriter::WriteSamplesImpl(evo_test::Sample const& value) {
+void UnusedProtocolWriter::WriteSamplesImpl(evo_test::UnchangedRecord const& value) {
   if (!samples_dataset_state_) {
-    samples_dataset_state_ = std::make_unique<yardl::hdf5::DatasetWriter>(group_, "samples", evo_test::hdf5::GetSampleHdf5Ddl(), std::max(sizeof(evo_test::hdf5::_Inner_Sample), sizeof(evo_test::Sample)));
+    samples_dataset_state_ = std::make_unique<yardl::hdf5::DatasetWriter>(group_, "samples", evo_test::hdf5::GetUnchangedRecordHdf5Ddl(), std::max(sizeof(evo_test::hdf5::_Inner_UnchangedRecord), sizeof(evo_test::UnchangedRecord)));
   }
 
-  samples_dataset_state_->Append<evo_test::hdf5::_Inner_Sample, evo_test::Sample>(value);
+  samples_dataset_state_->Append<evo_test::hdf5::_Inner_UnchangedRecord, evo_test::UnchangedRecord>(value);
 }
 
-void UnusedProtocolWriter::WriteSamplesImpl(std::vector<evo_test::Sample> const& values) {
+void UnusedProtocolWriter::WriteSamplesImpl(std::vector<evo_test::UnchangedRecord> const& values) {
   if (!samples_dataset_state_) {
-    samples_dataset_state_ = std::make_unique<yardl::hdf5::DatasetWriter>(group_, "samples", evo_test::hdf5::GetSampleHdf5Ddl(), std::max(sizeof(evo_test::hdf5::_Inner_Sample), sizeof(evo_test::Sample)));
+    samples_dataset_state_ = std::make_unique<yardl::hdf5::DatasetWriter>(group_, "samples", evo_test::hdf5::GetUnchangedRecordHdf5Ddl(), std::max(sizeof(evo_test::hdf5::_Inner_UnchangedRecord), sizeof(evo_test::UnchangedRecord)));
   }
 
-  samples_dataset_state_->AppendBatch<evo_test::hdf5::_Inner_Sample, evo_test::Sample>(values);
+  samples_dataset_state_->AppendBatch<evo_test::hdf5::_Inner_UnchangedRecord, evo_test::UnchangedRecord>(values);
 }
 
 void UnusedProtocolWriter::EndSamplesImpl() {
   if (!samples_dataset_state_) {
-    samples_dataset_state_ = std::make_unique<yardl::hdf5::DatasetWriter>(group_, "samples", evo_test::hdf5::GetSampleHdf5Ddl(), std::max(sizeof(evo_test::hdf5::_Inner_Sample), sizeof(evo_test::Sample)));
+    samples_dataset_state_ = std::make_unique<yardl::hdf5::DatasetWriter>(group_, "samples", evo_test::hdf5::GetUnchangedRecordHdf5Ddl(), std::max(sizeof(evo_test::hdf5::_Inner_UnchangedRecord), sizeof(evo_test::UnchangedRecord)));
   }
 
   samples_dataset_state_.reset();
@@ -256,12 +526,12 @@ UnusedProtocolReader::UnusedProtocolReader(std::string path)
     : yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "UnusedProtocol", schema_) {
 }
 
-bool UnusedProtocolReader::ReadSamplesImpl(evo_test::Sample& value) {
+bool UnusedProtocolReader::ReadSamplesImpl(evo_test::UnchangedRecord& value) {
   if (!samples_dataset_state_) {
-    samples_dataset_state_ = std::make_unique<yardl::hdf5::DatasetReader>(group_, "samples", evo_test::hdf5::GetSampleHdf5Ddl(), std::max(sizeof(evo_test::hdf5::_Inner_Sample), sizeof(evo_test::Sample)));
+    samples_dataset_state_ = std::make_unique<yardl::hdf5::DatasetReader>(group_, "samples", evo_test::hdf5::GetUnchangedRecordHdf5Ddl(), std::max(sizeof(evo_test::hdf5::_Inner_UnchangedRecord), sizeof(evo_test::UnchangedRecord)));
   }
 
-  bool has_value = samples_dataset_state_->Read<evo_test::hdf5::_Inner_Sample, evo_test::Sample>(value);
+  bool has_value = samples_dataset_state_->Read<evo_test::hdf5::_Inner_UnchangedRecord, evo_test::UnchangedRecord>(value);
   if (!has_value) {
     samples_dataset_state_.reset();
   }
@@ -269,12 +539,12 @@ bool UnusedProtocolReader::ReadSamplesImpl(evo_test::Sample& value) {
   return has_value;
 }
 
-bool UnusedProtocolReader::ReadSamplesImpl(std::vector<evo_test::Sample>& values) {
+bool UnusedProtocolReader::ReadSamplesImpl(std::vector<evo_test::UnchangedRecord>& values) {
   if (!samples_dataset_state_) {
-    samples_dataset_state_ = std::make_unique<yardl::hdf5::DatasetReader>(group_, "samples", evo_test::hdf5::GetSampleHdf5Ddl());
+    samples_dataset_state_ = std::make_unique<yardl::hdf5::DatasetReader>(group_, "samples", evo_test::hdf5::GetUnchangedRecordHdf5Ddl());
   }
 
-  bool has_more = samples_dataset_state_->ReadBatch<evo_test::hdf5::_Inner_Sample, evo_test::Sample>(values);
+  bool has_more = samples_dataset_state_->ReadBatch<evo_test::hdf5::_Inner_UnchangedRecord, evo_test::UnchangedRecord>(values);
   if (!has_more) {
     samples_dataset_state_.reset();
   }

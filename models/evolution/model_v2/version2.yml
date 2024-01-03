@@ -1,34 +1,78 @@
-MyProtocol: !protocol
+ProtocolWithChanges: !protocol
   sequence:
-    header: Header
-    id: string
-    samples: !stream
-      items: Sample
-    maybe: string?
-    footer: Footer?
+    int8ToInt: int8
+    int8ToLong: int8
+    int8ToUint: int8
+    int8ToUlong: int8
+    int8ToFloat: int8
+    int8ToDouble: int8
 
-Header: !record
+    intToUint: int
+    intToLong: int
+    intToFloat: int
+    intToDouble: int
+    uintToUlong: uint
+    uintToFloat: uint
+    uintToDouble: uint
+
+    floatToDouble: float
+
+    intToString: int
+    uintToString: uint
+    longToString: long
+    ulongToString: ulong
+    floatToString: float
+    doubleToString: double
+
+    intToOptional: int
+    floatToOptional: float
+    stringToOptional: string
+
+    intToUnion: int
+    floatToUnion: float
+    stringToUnion: string
+
+    optionalIntToFloat: int?
+    optionalFloatToString: float?
+
+    aliasedLongToString: AliasedLongToString
+
+    recordWithChanges: RecordWithChanges
+    aliasedRecordWithChanges: AliasedRecordWithChanges
+
+    optionalRecordWithChanges: RecordWithChanges?
+    aliasedOptionalRecordWithChanges: AliasedRecordWithChanges?
+
+    # streamedIntToString: !stream
+    #   items: int
+
+    streamedRecordWithChanges: !stream
+      items: RecordWithChanges
+
+
+AliasedLongToString: long
+AliasedRecordWithChanges: RecordWithChanges
+
+RecordWithChanges: !record
   fields:
-    subject: [long, string]
-    meta: string->string*
-    weight: double
+    intToLong: int
+    deprecatedVector: int*
+    floatToDouble: float
+    deprecatedArray: byte[7]
+    optionalLongToString: long?
+    deprecatedMap: string->int*
+    unchangedRecord: UnchangedRecord
 
-Sample: !record
-  fields:
-    timestamp: datetime
-    data: int*
-
-Footer: !record
-  fields:
-    signature: Signature
-
-Signature: !record
+UnchangedRecord: !record
   fields:
     name: string
-    email: string
-    number: string
+    age: int
+    meta: string->double
 
-AliasedPrimitive: double
+UnusedProtocol: !protocol
+  sequence:
+    samples: !stream
+      items: UnchangedRecord
 
 NewRecord: !record
   fields:
