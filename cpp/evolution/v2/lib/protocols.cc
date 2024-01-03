@@ -10,36 +10,123 @@
 
 namespace evo_test {
 namespace {
-void MyProtocolWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end, uint8_t current) {
+void ProtocolWithChangesWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end, uint8_t current) {
   std::string expected_method;
   switch (current) {
-  case 0: expected_method = "WriteHeader()"; break;
-  case 1: expected_method = "WriteId()"; break;
-  case 2: expected_method = "WriteSamples() or EndSamples()"; break;
-  case 3: expected_method = "WriteMaybe()"; break;
-  case 4: expected_method = "WriteFooter()"; break;
+  case 0: expected_method = "WriteInt8ToInt()"; break;
+  case 1: expected_method = "WriteInt8ToLong()"; break;
+  case 2: expected_method = "WriteInt8ToUint()"; break;
+  case 3: expected_method = "WriteInt8ToUlong()"; break;
+  case 4: expected_method = "WriteInt8ToFloat()"; break;
+  case 5: expected_method = "WriteInt8ToDouble()"; break;
+  case 6: expected_method = "WriteIntToUint()"; break;
+  case 7: expected_method = "WriteIntToLong()"; break;
+  case 8: expected_method = "WriteIntToFloat()"; break;
+  case 9: expected_method = "WriteIntToDouble()"; break;
+  case 10: expected_method = "WriteUintToUlong()"; break;
+  case 11: expected_method = "WriteUintToFloat()"; break;
+  case 12: expected_method = "WriteUintToDouble()"; break;
+  case 13: expected_method = "WriteFloatToDouble()"; break;
+  case 14: expected_method = "WriteIntToString()"; break;
+  case 15: expected_method = "WriteUintToString()"; break;
+  case 16: expected_method = "WriteLongToString()"; break;
+  case 17: expected_method = "WriteUlongToString()"; break;
+  case 18: expected_method = "WriteFloatToString()"; break;
+  case 19: expected_method = "WriteDoubleToString()"; break;
+  case 20: expected_method = "WriteIntToOptional()"; break;
+  case 21: expected_method = "WriteFloatToOptional()"; break;
+  case 22: expected_method = "WriteStringToOptional()"; break;
+  case 23: expected_method = "WriteIntToUnion()"; break;
+  case 24: expected_method = "WriteFloatToUnion()"; break;
+  case 25: expected_method = "WriteStringToUnion()"; break;
+  case 26: expected_method = "WriteOptionalIntToFloat()"; break;
+  case 27: expected_method = "WriteOptionalFloatToString()"; break;
+  case 28: expected_method = "WriteAliasedLongToString()"; break;
+  case 29: expected_method = "WriteRecordWithChanges()"; break;
+  case 30: expected_method = "WriteAliasedRecordWithChanges()"; break;
+  case 31: expected_method = "WriteOptionalRecordWithChanges()"; break;
+  case 32: expected_method = "WriteAliasedOptionalRecordWithChanges()"; break;
+  case 33: expected_method = "WriteStreamedRecordWithChanges() or EndStreamedRecordWithChanges()"; break;
   }
   std::string attempted_method;
   switch (attempted) {
-  case 0: attempted_method = "WriteHeader()"; break;
-  case 1: attempted_method = "WriteId()"; break;
-  case 2: attempted_method = end ? "EndSamples()" : "WriteSamples()"; break;
-  case 3: attempted_method = "WriteMaybe()"; break;
-  case 4: attempted_method = "WriteFooter()"; break;
-  case 5: attempted_method = "Close()"; break;
+  case 0: attempted_method = "WriteInt8ToInt()"; break;
+  case 1: attempted_method = "WriteInt8ToLong()"; break;
+  case 2: attempted_method = "WriteInt8ToUint()"; break;
+  case 3: attempted_method = "WriteInt8ToUlong()"; break;
+  case 4: attempted_method = "WriteInt8ToFloat()"; break;
+  case 5: attempted_method = "WriteInt8ToDouble()"; break;
+  case 6: attempted_method = "WriteIntToUint()"; break;
+  case 7: attempted_method = "WriteIntToLong()"; break;
+  case 8: attempted_method = "WriteIntToFloat()"; break;
+  case 9: attempted_method = "WriteIntToDouble()"; break;
+  case 10: attempted_method = "WriteUintToUlong()"; break;
+  case 11: attempted_method = "WriteUintToFloat()"; break;
+  case 12: attempted_method = "WriteUintToDouble()"; break;
+  case 13: attempted_method = "WriteFloatToDouble()"; break;
+  case 14: attempted_method = "WriteIntToString()"; break;
+  case 15: attempted_method = "WriteUintToString()"; break;
+  case 16: attempted_method = "WriteLongToString()"; break;
+  case 17: attempted_method = "WriteUlongToString()"; break;
+  case 18: attempted_method = "WriteFloatToString()"; break;
+  case 19: attempted_method = "WriteDoubleToString()"; break;
+  case 20: attempted_method = "WriteIntToOptional()"; break;
+  case 21: attempted_method = "WriteFloatToOptional()"; break;
+  case 22: attempted_method = "WriteStringToOptional()"; break;
+  case 23: attempted_method = "WriteIntToUnion()"; break;
+  case 24: attempted_method = "WriteFloatToUnion()"; break;
+  case 25: attempted_method = "WriteStringToUnion()"; break;
+  case 26: attempted_method = "WriteOptionalIntToFloat()"; break;
+  case 27: attempted_method = "WriteOptionalFloatToString()"; break;
+  case 28: attempted_method = "WriteAliasedLongToString()"; break;
+  case 29: attempted_method = "WriteRecordWithChanges()"; break;
+  case 30: attempted_method = "WriteAliasedRecordWithChanges()"; break;
+  case 31: attempted_method = "WriteOptionalRecordWithChanges()"; break;
+  case 32: attempted_method = "WriteAliasedOptionalRecordWithChanges()"; break;
+  case 33: attempted_method = end ? "EndStreamedRecordWithChanges()" : "WriteStreamedRecordWithChanges()"; break;
+  case 34: attempted_method = "Close()"; break;
   }
   throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
 }
 
-void MyProtocolReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
+void ProtocolWithChangesReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
   auto f = [](uint8_t i) -> std::string {
     switch (i/2) {
-    case 0: return "ReadHeader()";
-    case 1: return "ReadId()";
-    case 2: return "ReadSamples()";
-    case 3: return "ReadMaybe()";
-    case 4: return "ReadFooter()";
-    case 5: return "Close()";
+    case 0: return "ReadInt8ToInt()";
+    case 1: return "ReadInt8ToLong()";
+    case 2: return "ReadInt8ToUint()";
+    case 3: return "ReadInt8ToUlong()";
+    case 4: return "ReadInt8ToFloat()";
+    case 5: return "ReadInt8ToDouble()";
+    case 6: return "ReadIntToUint()";
+    case 7: return "ReadIntToLong()";
+    case 8: return "ReadIntToFloat()";
+    case 9: return "ReadIntToDouble()";
+    case 10: return "ReadUintToUlong()";
+    case 11: return "ReadUintToFloat()";
+    case 12: return "ReadUintToDouble()";
+    case 13: return "ReadFloatToDouble()";
+    case 14: return "ReadIntToString()";
+    case 15: return "ReadUintToString()";
+    case 16: return "ReadLongToString()";
+    case 17: return "ReadUlongToString()";
+    case 18: return "ReadFloatToString()";
+    case 19: return "ReadDoubleToString()";
+    case 20: return "ReadIntToOptional()";
+    case 21: return "ReadFloatToOptional()";
+    case 22: return "ReadStringToOptional()";
+    case 23: return "ReadIntToUnion()";
+    case 24: return "ReadFloatToUnion()";
+    case 25: return "ReadStringToUnion()";
+    case 26: return "ReadOptionalIntToFloat()";
+    case 27: return "ReadOptionalFloatToString()";
+    case 28: return "ReadAliasedLongToString()";
+    case 29: return "ReadRecordWithChanges()";
+    case 30: return "ReadAliasedRecordWithChanges()";
+    case 31: return "ReadOptionalRecordWithChanges()";
+    case 32: return "ReadAliasedOptionalRecordWithChanges()";
+    case 33: return "ReadStreamedRecordWithChanges()";
+    case 34: return "Close()";
     default: return "<unknown>";
     }
   };
@@ -48,104 +135,365 @@ void MyProtocolReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
 
 } // namespace 
 
-std::string MyProtocolWriterBase::schema_ = R"({"protocol":{"name":"MyProtocol","sequence":[{"name":"header","type":"EvoTest.Header"},{"name":"id","type":"string"},{"name":"samples","type":{"stream":{"items":"EvoTest.Sample"}}},{"name":"maybe","type":[null,"string"]},{"name":"footer","type":[null,"EvoTest.Footer"]}]},"types":[{"name":"Footer","fields":[{"name":"signature","type":"EvoTest.Signature"}]},{"name":"Header","fields":[{"name":"subject","type":[{"tag":"int64","type":"int64"},{"tag":"string","type":"string"}]},{"name":"meta","type":{"map":{"keys":"string","values":{"vector":{"items":"string"}}}}},{"name":"weight","type":"float64"}]},{"name":"Sample","fields":[{"name":"timestamp","type":"datetime"},{"name":"data","type":{"vector":{"items":"int32"}}}]},{"name":"Signature","fields":[{"name":"name","type":"string"},{"name":"email","type":"string"},{"name":"number","type":"string"}]}]})";
+std::string ProtocolWithChangesWriterBase::schema_ = R"({"protocol":{"name":"ProtocolWithChanges","sequence":[{"name":"int8ToInt","type":"int8"},{"name":"int8ToLong","type":"int8"},{"name":"int8ToUint","type":"int8"},{"name":"int8ToUlong","type":"int8"},{"name":"int8ToFloat","type":"int8"},{"name":"int8ToDouble","type":"int8"},{"name":"intToUint","type":"int32"},{"name":"intToLong","type":"int32"},{"name":"intToFloat","type":"int32"},{"name":"intToDouble","type":"int32"},{"name":"uintToUlong","type":"uint32"},{"name":"uintToFloat","type":"uint32"},{"name":"uintToDouble","type":"uint32"},{"name":"floatToDouble","type":"float32"},{"name":"intToString","type":"int32"},{"name":"uintToString","type":"uint32"},{"name":"longToString","type":"int64"},{"name":"ulongToString","type":"uint64"},{"name":"floatToString","type":"float32"},{"name":"doubleToString","type":"float64"},{"name":"intToOptional","type":"int32"},{"name":"floatToOptional","type":"float32"},{"name":"stringToOptional","type":"string"},{"name":"intToUnion","type":"int32"},{"name":"floatToUnion","type":"float32"},{"name":"stringToUnion","type":"string"},{"name":"optionalIntToFloat","type":[null,"int32"]},{"name":"optionalFloatToString","type":[null,"float32"]},{"name":"aliasedLongToString","type":"EvoTest.AliasedLongToString"},{"name":"recordWithChanges","type":"EvoTest.RecordWithChanges"},{"name":"aliasedRecordWithChanges","type":"EvoTest.AliasedRecordWithChanges"},{"name":"optionalRecordWithChanges","type":[null,"EvoTest.RecordWithChanges"]},{"name":"aliasedOptionalRecordWithChanges","type":[null,"EvoTest.AliasedRecordWithChanges"]},{"name":"streamedRecordWithChanges","type":{"stream":{"items":"EvoTest.RecordWithChanges"}}}]},"types":[{"name":"AliasedLongToString","type":"int64"},{"name":"AliasedRecordWithChanges","type":"EvoTest.RecordWithChanges"},{"name":"RecordWithChanges","fields":[{"name":"intToLong","type":"int32"},{"name":"deprecatedVector","type":{"vector":{"items":"int32"}}},{"name":"floatToDouble","type":"float32"},{"name":"deprecatedArray","type":{"array":{"items":"uint8","dimensions":[{"length":7}]}}},{"name":"optionalLongToString","type":[null,"int64"]},{"name":"deprecatedMap","type":{"map":{"keys":"string","values":{"vector":{"items":"int32"}}}}},{"name":"unchangedRecord","type":"EvoTest.UnchangedRecord"}]},{"name":"UnchangedRecord","fields":[{"name":"name","type":"string"},{"name":"age","type":"int32"},{"name":"meta","type":{"map":{"keys":"string","values":"float64"}}}]}]})";
 
-std::vector<std::string> MyProtocolWriterBase::previous_schemas_ = {
-  R"({"protocol":{"name":"MyProtocol","sequence":[{"name":"header","type":"EvoTest.Header"},{"name":"id","type":"int64"},{"name":"samples","type":{"stream":{"items":"EvoTest.Sample"}}},{"name":"maybe","type":[null,"int32"]},{"name":"footer","type":[null,"EvoTest.Footer"]}]},"types":[{"name":"Footer","fields":[{"name":"signature","type":"EvoTest.Signature"}]},{"name":"Header","fields":[{"name":"subject","type":"string"},{"name":"weight","type":"int64"},{"name":"meta","type":{"map":{"keys":"string","values":{"vector":{"items":"string"}}}}}]},{"name":"Sample","fields":[{"name":"data","type":{"vector":{"items":"int32"}}},{"name":"timestamp","type":"datetime"}]},{"name":"Signature","fields":[{"name":"name","type":"string"},{"name":"email","type":"string"},{"name":"number","type":"int64"}]}]})",
-  R"({"protocol":{"name":"MyProtocol","sequence":[{"name":"header","type":"EvoTest.Header"},{"name":"id","type":"int64"},{"name":"samples","type":{"stream":{"items":"EvoTest.Sample"}}},{"name":"maybe","type":[null,"int32"]},{"name":"footer","type":[null,"EvoTest.Footer"]}]},"types":[{"name":"Footer","fields":[{"name":"signature","type":"EvoTest.Signature"}]},{"name":"Header","fields":[{"name":"meta","type":{"map":{"keys":"string","values":{"vector":{"items":"string"}}}}},{"name":"subject","type":"string"},{"name":"weight","type":"int64"},{"name":"added","type":[null,"string"]}]},{"name":"Sample","fields":[{"name":"data","type":{"vector":{"items":"int32"}}},{"name":"timestamp","type":"datetime"}]},{"name":"Signature","fields":[{"name":"name","type":"string"},{"name":"email","type":"string"},{"name":"number","type":"int64"}]}]})",
+std::vector<std::string> ProtocolWithChangesWriterBase::previous_schemas_ = {
+  ProtocolWithChangesWriterBase::schema_,
+  R"({"protocol":{"name":"ProtocolWithChanges","sequence":[{"name":"int8ToInt","type":"int32"},{"name":"int8ToLong","type":"int64"},{"name":"int8ToUint","type":"uint32"},{"name":"int8ToUlong","type":"uint64"},{"name":"int8ToFloat","type":"float32"},{"name":"int8ToDouble","type":"float64"},{"name":"intToUint","type":"uint32"},{"name":"intToLong","type":"int64"},{"name":"intToFloat","type":"float32"},{"name":"intToDouble","type":"float64"},{"name":"uintToUlong","type":"uint64"},{"name":"uintToFloat","type":"float32"},{"name":"uintToDouble","type":"float64"},{"name":"floatToDouble","type":"float64"},{"name":"intToString","type":"string"},{"name":"uintToString","type":"string"},{"name":"longToString","type":"string"},{"name":"ulongToString","type":"string"},{"name":"floatToString","type":"string"},{"name":"doubleToString","type":"string"},{"name":"intToOptional","type":[null,"int32"]},{"name":"floatToOptional","type":[null,"float32"]},{"name":"stringToOptional","type":[null,"string"]},{"name":"intToUnion","type":[{"tag":"int32","type":"int32"},{"tag":"bool","type":"bool"}]},{"name":"floatToUnion","type":[{"tag":"float32","type":"float32"},{"tag":"bool","type":"bool"}]},{"name":"stringToUnion","type":[{"tag":"string","type":"string"},{"tag":"bool","type":"bool"}]},{"name":"optionalIntToFloat","type":[null,"float32"]},{"name":"optionalFloatToString","type":[null,"string"]},{"name":"aliasedLongToString","type":"EvoTest.AliasedLongToString"},{"name":"recordWithChanges","type":"EvoTest.RecordWithChanges"},{"name":"aliasedRecordWithChanges","type":"EvoTest.AliasedRecordWithChanges"},{"name":"optionalRecordWithChanges","type":[null,"EvoTest.RecordWithChanges"]},{"name":"aliasedOptionalRecordWithChanges","type":[null,"EvoTest.AliasedRecordWithChanges"]},{"name":"streamedRecordWithChanges","type":{"stream":{"items":"EvoTest.RecordWithChanges"}}}]},"types":[{"name":"AliasedLongToString","type":"string"},{"name":"AliasedRecordWithChanges","type":"EvoTest.RecordWithChanges"},{"name":"RecordWithChanges","fields":[{"name":"floatToDouble","type":"float64"},{"name":"unchangedRecord","type":"EvoTest.UnchangedRecord"},{"name":"intToLong","type":"int64"},{"name":"optionalLongToString","type":[null,"string"]}]},{"name":"UnchangedRecord","fields":[{"name":"name","type":"string"},{"name":"age","type":"int32"},{"name":"meta","type":{"map":{"keys":"string","values":"float64"}}}]}]})",
 };
 
-std::string MyProtocolWriterBase::SchemaFromVersion(Version version) {
+std::string ProtocolWithChangesWriterBase::SchemaFromVersion(Version version) {
   switch (version) {
   case Version::v0: return previous_schemas_[0]; break;
   case Version::v1: return previous_schemas_[1]; break;
-  case Version::Latest: return MyProtocolWriterBase::schema_; break;
-  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol MyProtocol.");
+  case Version::Latest: return ProtocolWithChangesWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol ProtocolWithChanges.");
   }
 
 }
-void MyProtocolWriterBase::WriteHeader(evo_test::Header const& value) {
+void ProtocolWithChangesWriterBase::WriteInt8ToInt(int8_t const& value) {
   if (unlikely(state_ != 0)) {
-    MyProtocolWriterBaseInvalidState(0, false, state_);
+    ProtocolWithChangesWriterBaseInvalidState(0, false, state_);
   }
 
-  WriteHeaderImpl(value);
+  WriteInt8ToIntImpl(value);
   state_ = 1;
 }
 
-void MyProtocolWriterBase::WriteId(std::string const& value) {
+void ProtocolWithChangesWriterBase::WriteInt8ToLong(int8_t const& value) {
   if (unlikely(state_ != 1)) {
-    MyProtocolWriterBaseInvalidState(1, false, state_);
+    ProtocolWithChangesWriterBaseInvalidState(1, false, state_);
   }
 
-  WriteIdImpl(value);
+  WriteInt8ToLongImpl(value);
   state_ = 2;
 }
 
-void MyProtocolWriterBase::WriteSamples(evo_test::Sample const& value) {
+void ProtocolWithChangesWriterBase::WriteInt8ToUint(int8_t const& value) {
   if (unlikely(state_ != 2)) {
-    MyProtocolWriterBaseInvalidState(2, false, state_);
+    ProtocolWithChangesWriterBaseInvalidState(2, false, state_);
   }
 
-  WriteSamplesImpl(value);
-}
-
-void MyProtocolWriterBase::WriteSamples(std::vector<evo_test::Sample> const& values) {
-  if (unlikely(state_ != 2)) {
-    MyProtocolWriterBaseInvalidState(2, false, state_);
-  }
-
-  WriteSamplesImpl(values);
-}
-
-void MyProtocolWriterBase::EndSamples() {
-  if (unlikely(state_ != 2)) {
-    MyProtocolWriterBaseInvalidState(2, true, state_);
-  }
-
-  EndSamplesImpl();
+  WriteInt8ToUintImpl(value);
   state_ = 3;
 }
 
-// fallback implementation
-void MyProtocolWriterBase::WriteSamplesImpl(std::vector<evo_test::Sample> const& values) {
-  for (auto const& v : values) {
-    WriteSamplesImpl(v);
-  }
-}
-
-void MyProtocolWriterBase::WriteMaybe(std::optional<std::string> const& value) {
+void ProtocolWithChangesWriterBase::WriteInt8ToUlong(int8_t const& value) {
   if (unlikely(state_ != 3)) {
-    MyProtocolWriterBaseInvalidState(3, false, state_);
+    ProtocolWithChangesWriterBaseInvalidState(3, false, state_);
   }
 
-  WriteMaybeImpl(value);
+  WriteInt8ToUlongImpl(value);
   state_ = 4;
 }
 
-void MyProtocolWriterBase::WriteFooter(std::optional<evo_test::Footer> const& value) {
+void ProtocolWithChangesWriterBase::WriteInt8ToFloat(int8_t const& value) {
   if (unlikely(state_ != 4)) {
-    MyProtocolWriterBaseInvalidState(4, false, state_);
+    ProtocolWithChangesWriterBaseInvalidState(4, false, state_);
   }
 
-  WriteFooterImpl(value);
+  WriteInt8ToFloatImpl(value);
   state_ = 5;
 }
 
-void MyProtocolWriterBase::Close() {
+void ProtocolWithChangesWriterBase::WriteInt8ToDouble(int8_t const& value) {
   if (unlikely(state_ != 5)) {
-    MyProtocolWriterBaseInvalidState(5, false, state_);
+    ProtocolWithChangesWriterBaseInvalidState(5, false, state_);
+  }
+
+  WriteInt8ToDoubleImpl(value);
+  state_ = 6;
+}
+
+void ProtocolWithChangesWriterBase::WriteIntToUint(int32_t const& value) {
+  if (unlikely(state_ != 6)) {
+    ProtocolWithChangesWriterBaseInvalidState(6, false, state_);
+  }
+
+  WriteIntToUintImpl(value);
+  state_ = 7;
+}
+
+void ProtocolWithChangesWriterBase::WriteIntToLong(int32_t const& value) {
+  if (unlikely(state_ != 7)) {
+    ProtocolWithChangesWriterBaseInvalidState(7, false, state_);
+  }
+
+  WriteIntToLongImpl(value);
+  state_ = 8;
+}
+
+void ProtocolWithChangesWriterBase::WriteIntToFloat(int32_t const& value) {
+  if (unlikely(state_ != 8)) {
+    ProtocolWithChangesWriterBaseInvalidState(8, false, state_);
+  }
+
+  WriteIntToFloatImpl(value);
+  state_ = 9;
+}
+
+void ProtocolWithChangesWriterBase::WriteIntToDouble(int32_t const& value) {
+  if (unlikely(state_ != 9)) {
+    ProtocolWithChangesWriterBaseInvalidState(9, false, state_);
+  }
+
+  WriteIntToDoubleImpl(value);
+  state_ = 10;
+}
+
+void ProtocolWithChangesWriterBase::WriteUintToUlong(uint32_t const& value) {
+  if (unlikely(state_ != 10)) {
+    ProtocolWithChangesWriterBaseInvalidState(10, false, state_);
+  }
+
+  WriteUintToUlongImpl(value);
+  state_ = 11;
+}
+
+void ProtocolWithChangesWriterBase::WriteUintToFloat(uint32_t const& value) {
+  if (unlikely(state_ != 11)) {
+    ProtocolWithChangesWriterBaseInvalidState(11, false, state_);
+  }
+
+  WriteUintToFloatImpl(value);
+  state_ = 12;
+}
+
+void ProtocolWithChangesWriterBase::WriteUintToDouble(uint32_t const& value) {
+  if (unlikely(state_ != 12)) {
+    ProtocolWithChangesWriterBaseInvalidState(12, false, state_);
+  }
+
+  WriteUintToDoubleImpl(value);
+  state_ = 13;
+}
+
+void ProtocolWithChangesWriterBase::WriteFloatToDouble(float const& value) {
+  if (unlikely(state_ != 13)) {
+    ProtocolWithChangesWriterBaseInvalidState(13, false, state_);
+  }
+
+  WriteFloatToDoubleImpl(value);
+  state_ = 14;
+}
+
+void ProtocolWithChangesWriterBase::WriteIntToString(int32_t const& value) {
+  if (unlikely(state_ != 14)) {
+    ProtocolWithChangesWriterBaseInvalidState(14, false, state_);
+  }
+
+  WriteIntToStringImpl(value);
+  state_ = 15;
+}
+
+void ProtocolWithChangesWriterBase::WriteUintToString(uint32_t const& value) {
+  if (unlikely(state_ != 15)) {
+    ProtocolWithChangesWriterBaseInvalidState(15, false, state_);
+  }
+
+  WriteUintToStringImpl(value);
+  state_ = 16;
+}
+
+void ProtocolWithChangesWriterBase::WriteLongToString(int64_t const& value) {
+  if (unlikely(state_ != 16)) {
+    ProtocolWithChangesWriterBaseInvalidState(16, false, state_);
+  }
+
+  WriteLongToStringImpl(value);
+  state_ = 17;
+}
+
+void ProtocolWithChangesWriterBase::WriteUlongToString(uint64_t const& value) {
+  if (unlikely(state_ != 17)) {
+    ProtocolWithChangesWriterBaseInvalidState(17, false, state_);
+  }
+
+  WriteUlongToStringImpl(value);
+  state_ = 18;
+}
+
+void ProtocolWithChangesWriterBase::WriteFloatToString(float const& value) {
+  if (unlikely(state_ != 18)) {
+    ProtocolWithChangesWriterBaseInvalidState(18, false, state_);
+  }
+
+  WriteFloatToStringImpl(value);
+  state_ = 19;
+}
+
+void ProtocolWithChangesWriterBase::WriteDoubleToString(double const& value) {
+  if (unlikely(state_ != 19)) {
+    ProtocolWithChangesWriterBaseInvalidState(19, false, state_);
+  }
+
+  WriteDoubleToStringImpl(value);
+  state_ = 20;
+}
+
+void ProtocolWithChangesWriterBase::WriteIntToOptional(int32_t const& value) {
+  if (unlikely(state_ != 20)) {
+    ProtocolWithChangesWriterBaseInvalidState(20, false, state_);
+  }
+
+  WriteIntToOptionalImpl(value);
+  state_ = 21;
+}
+
+void ProtocolWithChangesWriterBase::WriteFloatToOptional(float const& value) {
+  if (unlikely(state_ != 21)) {
+    ProtocolWithChangesWriterBaseInvalidState(21, false, state_);
+  }
+
+  WriteFloatToOptionalImpl(value);
+  state_ = 22;
+}
+
+void ProtocolWithChangesWriterBase::WriteStringToOptional(std::string const& value) {
+  if (unlikely(state_ != 22)) {
+    ProtocolWithChangesWriterBaseInvalidState(22, false, state_);
+  }
+
+  WriteStringToOptionalImpl(value);
+  state_ = 23;
+}
+
+void ProtocolWithChangesWriterBase::WriteIntToUnion(int32_t const& value) {
+  if (unlikely(state_ != 23)) {
+    ProtocolWithChangesWriterBaseInvalidState(23, false, state_);
+  }
+
+  WriteIntToUnionImpl(value);
+  state_ = 24;
+}
+
+void ProtocolWithChangesWriterBase::WriteFloatToUnion(float const& value) {
+  if (unlikely(state_ != 24)) {
+    ProtocolWithChangesWriterBaseInvalidState(24, false, state_);
+  }
+
+  WriteFloatToUnionImpl(value);
+  state_ = 25;
+}
+
+void ProtocolWithChangesWriterBase::WriteStringToUnion(std::string const& value) {
+  if (unlikely(state_ != 25)) {
+    ProtocolWithChangesWriterBaseInvalidState(25, false, state_);
+  }
+
+  WriteStringToUnionImpl(value);
+  state_ = 26;
+}
+
+void ProtocolWithChangesWriterBase::WriteOptionalIntToFloat(std::optional<int32_t> const& value) {
+  if (unlikely(state_ != 26)) {
+    ProtocolWithChangesWriterBaseInvalidState(26, false, state_);
+  }
+
+  WriteOptionalIntToFloatImpl(value);
+  state_ = 27;
+}
+
+void ProtocolWithChangesWriterBase::WriteOptionalFloatToString(std::optional<float> const& value) {
+  if (unlikely(state_ != 27)) {
+    ProtocolWithChangesWriterBaseInvalidState(27, false, state_);
+  }
+
+  WriteOptionalFloatToStringImpl(value);
+  state_ = 28;
+}
+
+void ProtocolWithChangesWriterBase::WriteAliasedLongToString(evo_test::AliasedLongToString const& value) {
+  if (unlikely(state_ != 28)) {
+    ProtocolWithChangesWriterBaseInvalidState(28, false, state_);
+  }
+
+  WriteAliasedLongToStringImpl(value);
+  state_ = 29;
+}
+
+void ProtocolWithChangesWriterBase::WriteRecordWithChanges(evo_test::RecordWithChanges const& value) {
+  if (unlikely(state_ != 29)) {
+    ProtocolWithChangesWriterBaseInvalidState(29, false, state_);
+  }
+
+  WriteRecordWithChangesImpl(value);
+  state_ = 30;
+}
+
+void ProtocolWithChangesWriterBase::WriteAliasedRecordWithChanges(evo_test::AliasedRecordWithChanges const& value) {
+  if (unlikely(state_ != 30)) {
+    ProtocolWithChangesWriterBaseInvalidState(30, false, state_);
+  }
+
+  WriteAliasedRecordWithChangesImpl(value);
+  state_ = 31;
+}
+
+void ProtocolWithChangesWriterBase::WriteOptionalRecordWithChanges(std::optional<evo_test::RecordWithChanges> const& value) {
+  if (unlikely(state_ != 31)) {
+    ProtocolWithChangesWriterBaseInvalidState(31, false, state_);
+  }
+
+  WriteOptionalRecordWithChangesImpl(value);
+  state_ = 32;
+}
+
+void ProtocolWithChangesWriterBase::WriteAliasedOptionalRecordWithChanges(std::optional<evo_test::AliasedRecordWithChanges> const& value) {
+  if (unlikely(state_ != 32)) {
+    ProtocolWithChangesWriterBaseInvalidState(32, false, state_);
+  }
+
+  WriteAliasedOptionalRecordWithChangesImpl(value);
+  state_ = 33;
+}
+
+void ProtocolWithChangesWriterBase::WriteStreamedRecordWithChanges(evo_test::RecordWithChanges const& value) {
+  if (unlikely(state_ != 33)) {
+    ProtocolWithChangesWriterBaseInvalidState(33, false, state_);
+  }
+
+  WriteStreamedRecordWithChangesImpl(value);
+}
+
+void ProtocolWithChangesWriterBase::WriteStreamedRecordWithChanges(std::vector<evo_test::RecordWithChanges> const& values) {
+  if (unlikely(state_ != 33)) {
+    ProtocolWithChangesWriterBaseInvalidState(33, false, state_);
+  }
+
+  WriteStreamedRecordWithChangesImpl(values);
+}
+
+void ProtocolWithChangesWriterBase::EndStreamedRecordWithChanges() {
+  if (unlikely(state_ != 33)) {
+    ProtocolWithChangesWriterBaseInvalidState(33, true, state_);
+  }
+
+  EndStreamedRecordWithChangesImpl();
+  state_ = 34;
+}
+
+// fallback implementation
+void ProtocolWithChangesWriterBase::WriteStreamedRecordWithChangesImpl(std::vector<evo_test::RecordWithChanges> const& values) {
+  for (auto const& v : values) {
+    WriteStreamedRecordWithChangesImpl(v);
+  }
+}
+
+void ProtocolWithChangesWriterBase::Close() {
+  if (unlikely(state_ != 34)) {
+    ProtocolWithChangesWriterBaseInvalidState(34, false, state_);
   }
 
   CloseImpl();
 }
 
-std::string MyProtocolReaderBase::schema_ = MyProtocolWriterBase::schema_;
+std::string ProtocolWithChangesReaderBase::schema_ = ProtocolWithChangesWriterBase::schema_;
 
-std::vector<std::string> MyProtocolReaderBase::previous_schemas_ = MyProtocolWriterBase::previous_schemas_;
+std::vector<std::string> ProtocolWithChangesReaderBase::previous_schemas_ = ProtocolWithChangesWriterBase::previous_schemas_;
 
-Version MyProtocolReaderBase::VersionFromSchema(std::string const& schema) {
-  if (schema == MyProtocolWriterBase::schema_) {
+Version ProtocolWithChangesReaderBase::VersionFromSchema(std::string const& schema) {
+  if (schema == ProtocolWithChangesWriterBase::schema_) {
     return Version::Latest;
   }
   else if (schema == previous_schemas_[0]) {
@@ -154,64 +502,685 @@ Version MyProtocolReaderBase::VersionFromSchema(std::string const& schema) {
   else if (schema == previous_schemas_[1]) {
     return Version::v1;
   }
-  throw std::runtime_error("The schema does not match any version supported by protocol MyProtocol.");
+  throw std::runtime_error("The schema does not match any version supported by protocol ProtocolWithChanges.");
 }
-void MyProtocolReaderBase::ReadHeader(evo_test::Header& value) {
+void ProtocolWithChangesReaderBase::ReadInt8ToInt(int8_t& value) {
   if (unlikely(state_ != 0)) {
-    MyProtocolReaderBaseInvalidState(0, state_);
+    ProtocolWithChangesReaderBaseInvalidState(0, state_);
   }
 
-  ReadHeaderImpl(value);
+  ReadInt8ToIntImpl(value);
   state_ = 2;
 }
 
-void MyProtocolReaderBase::ReadId(std::string& value) {
+void ProtocolWithChangesReaderBase::ReadInt8ToLong(int8_t& value) {
   if (unlikely(state_ != 2)) {
-    MyProtocolReaderBaseInvalidState(2, state_);
+    ProtocolWithChangesReaderBaseInvalidState(2, state_);
   }
 
-  ReadIdImpl(value);
+  ReadInt8ToLongImpl(value);
   state_ = 4;
 }
 
-bool MyProtocolReaderBase::ReadSamples(evo_test::Sample& value) {
+void ProtocolWithChangesReaderBase::ReadInt8ToUint(int8_t& value) {
   if (unlikely(state_ != 4)) {
-    if (state_ == 5) {
-      state_ = 6;
-      return false;
-    }
-    MyProtocolReaderBaseInvalidState(4, state_);
+    ProtocolWithChangesReaderBaseInvalidState(4, state_);
   }
 
-  bool result = ReadSamplesImpl(value);
+  ReadInt8ToUintImpl(value);
+  state_ = 6;
+}
+
+void ProtocolWithChangesReaderBase::ReadInt8ToUlong(int8_t& value) {
+  if (unlikely(state_ != 6)) {
+    ProtocolWithChangesReaderBaseInvalidState(6, state_);
+  }
+
+  ReadInt8ToUlongImpl(value);
+  state_ = 8;
+}
+
+void ProtocolWithChangesReaderBase::ReadInt8ToFloat(int8_t& value) {
+  if (unlikely(state_ != 8)) {
+    ProtocolWithChangesReaderBaseInvalidState(8, state_);
+  }
+
+  ReadInt8ToFloatImpl(value);
+  state_ = 10;
+}
+
+void ProtocolWithChangesReaderBase::ReadInt8ToDouble(int8_t& value) {
+  if (unlikely(state_ != 10)) {
+    ProtocolWithChangesReaderBaseInvalidState(10, state_);
+  }
+
+  ReadInt8ToDoubleImpl(value);
+  state_ = 12;
+}
+
+void ProtocolWithChangesReaderBase::ReadIntToUint(int32_t& value) {
+  if (unlikely(state_ != 12)) {
+    ProtocolWithChangesReaderBaseInvalidState(12, state_);
+  }
+
+  ReadIntToUintImpl(value);
+  state_ = 14;
+}
+
+void ProtocolWithChangesReaderBase::ReadIntToLong(int32_t& value) {
+  if (unlikely(state_ != 14)) {
+    ProtocolWithChangesReaderBaseInvalidState(14, state_);
+  }
+
+  ReadIntToLongImpl(value);
+  state_ = 16;
+}
+
+void ProtocolWithChangesReaderBase::ReadIntToFloat(int32_t& value) {
+  if (unlikely(state_ != 16)) {
+    ProtocolWithChangesReaderBaseInvalidState(16, state_);
+  }
+
+  ReadIntToFloatImpl(value);
+  state_ = 18;
+}
+
+void ProtocolWithChangesReaderBase::ReadIntToDouble(int32_t& value) {
+  if (unlikely(state_ != 18)) {
+    ProtocolWithChangesReaderBaseInvalidState(18, state_);
+  }
+
+  ReadIntToDoubleImpl(value);
+  state_ = 20;
+}
+
+void ProtocolWithChangesReaderBase::ReadUintToUlong(uint32_t& value) {
+  if (unlikely(state_ != 20)) {
+    ProtocolWithChangesReaderBaseInvalidState(20, state_);
+  }
+
+  ReadUintToUlongImpl(value);
+  state_ = 22;
+}
+
+void ProtocolWithChangesReaderBase::ReadUintToFloat(uint32_t& value) {
+  if (unlikely(state_ != 22)) {
+    ProtocolWithChangesReaderBaseInvalidState(22, state_);
+  }
+
+  ReadUintToFloatImpl(value);
+  state_ = 24;
+}
+
+void ProtocolWithChangesReaderBase::ReadUintToDouble(uint32_t& value) {
+  if (unlikely(state_ != 24)) {
+    ProtocolWithChangesReaderBaseInvalidState(24, state_);
+  }
+
+  ReadUintToDoubleImpl(value);
+  state_ = 26;
+}
+
+void ProtocolWithChangesReaderBase::ReadFloatToDouble(float& value) {
+  if (unlikely(state_ != 26)) {
+    ProtocolWithChangesReaderBaseInvalidState(26, state_);
+  }
+
+  ReadFloatToDoubleImpl(value);
+  state_ = 28;
+}
+
+void ProtocolWithChangesReaderBase::ReadIntToString(int32_t& value) {
+  if (unlikely(state_ != 28)) {
+    ProtocolWithChangesReaderBaseInvalidState(28, state_);
+  }
+
+  ReadIntToStringImpl(value);
+  state_ = 30;
+}
+
+void ProtocolWithChangesReaderBase::ReadUintToString(uint32_t& value) {
+  if (unlikely(state_ != 30)) {
+    ProtocolWithChangesReaderBaseInvalidState(30, state_);
+  }
+
+  ReadUintToStringImpl(value);
+  state_ = 32;
+}
+
+void ProtocolWithChangesReaderBase::ReadLongToString(int64_t& value) {
+  if (unlikely(state_ != 32)) {
+    ProtocolWithChangesReaderBaseInvalidState(32, state_);
+  }
+
+  ReadLongToStringImpl(value);
+  state_ = 34;
+}
+
+void ProtocolWithChangesReaderBase::ReadUlongToString(uint64_t& value) {
+  if (unlikely(state_ != 34)) {
+    ProtocolWithChangesReaderBaseInvalidState(34, state_);
+  }
+
+  ReadUlongToStringImpl(value);
+  state_ = 36;
+}
+
+void ProtocolWithChangesReaderBase::ReadFloatToString(float& value) {
+  if (unlikely(state_ != 36)) {
+    ProtocolWithChangesReaderBaseInvalidState(36, state_);
+  }
+
+  ReadFloatToStringImpl(value);
+  state_ = 38;
+}
+
+void ProtocolWithChangesReaderBase::ReadDoubleToString(double& value) {
+  if (unlikely(state_ != 38)) {
+    ProtocolWithChangesReaderBaseInvalidState(38, state_);
+  }
+
+  ReadDoubleToStringImpl(value);
+  state_ = 40;
+}
+
+void ProtocolWithChangesReaderBase::ReadIntToOptional(int32_t& value) {
+  if (unlikely(state_ != 40)) {
+    ProtocolWithChangesReaderBaseInvalidState(40, state_);
+  }
+
+  ReadIntToOptionalImpl(value);
+  state_ = 42;
+}
+
+void ProtocolWithChangesReaderBase::ReadFloatToOptional(float& value) {
+  if (unlikely(state_ != 42)) {
+    ProtocolWithChangesReaderBaseInvalidState(42, state_);
+  }
+
+  ReadFloatToOptionalImpl(value);
+  state_ = 44;
+}
+
+void ProtocolWithChangesReaderBase::ReadStringToOptional(std::string& value) {
+  if (unlikely(state_ != 44)) {
+    ProtocolWithChangesReaderBaseInvalidState(44, state_);
+  }
+
+  ReadStringToOptionalImpl(value);
+  state_ = 46;
+}
+
+void ProtocolWithChangesReaderBase::ReadIntToUnion(int32_t& value) {
+  if (unlikely(state_ != 46)) {
+    ProtocolWithChangesReaderBaseInvalidState(46, state_);
+  }
+
+  ReadIntToUnionImpl(value);
+  state_ = 48;
+}
+
+void ProtocolWithChangesReaderBase::ReadFloatToUnion(float& value) {
+  if (unlikely(state_ != 48)) {
+    ProtocolWithChangesReaderBaseInvalidState(48, state_);
+  }
+
+  ReadFloatToUnionImpl(value);
+  state_ = 50;
+}
+
+void ProtocolWithChangesReaderBase::ReadStringToUnion(std::string& value) {
+  if (unlikely(state_ != 50)) {
+    ProtocolWithChangesReaderBaseInvalidState(50, state_);
+  }
+
+  ReadStringToUnionImpl(value);
+  state_ = 52;
+}
+
+void ProtocolWithChangesReaderBase::ReadOptionalIntToFloat(std::optional<int32_t>& value) {
+  if (unlikely(state_ != 52)) {
+    ProtocolWithChangesReaderBaseInvalidState(52, state_);
+  }
+
+  ReadOptionalIntToFloatImpl(value);
+  state_ = 54;
+}
+
+void ProtocolWithChangesReaderBase::ReadOptionalFloatToString(std::optional<float>& value) {
+  if (unlikely(state_ != 54)) {
+    ProtocolWithChangesReaderBaseInvalidState(54, state_);
+  }
+
+  ReadOptionalFloatToStringImpl(value);
+  state_ = 56;
+}
+
+void ProtocolWithChangesReaderBase::ReadAliasedLongToString(evo_test::AliasedLongToString& value) {
+  if (unlikely(state_ != 56)) {
+    ProtocolWithChangesReaderBaseInvalidState(56, state_);
+  }
+
+  ReadAliasedLongToStringImpl(value);
+  state_ = 58;
+}
+
+void ProtocolWithChangesReaderBase::ReadRecordWithChanges(evo_test::RecordWithChanges& value) {
+  if (unlikely(state_ != 58)) {
+    ProtocolWithChangesReaderBaseInvalidState(58, state_);
+  }
+
+  ReadRecordWithChangesImpl(value);
+  state_ = 60;
+}
+
+void ProtocolWithChangesReaderBase::ReadAliasedRecordWithChanges(evo_test::AliasedRecordWithChanges& value) {
+  if (unlikely(state_ != 60)) {
+    ProtocolWithChangesReaderBaseInvalidState(60, state_);
+  }
+
+  ReadAliasedRecordWithChangesImpl(value);
+  state_ = 62;
+}
+
+void ProtocolWithChangesReaderBase::ReadOptionalRecordWithChanges(std::optional<evo_test::RecordWithChanges>& value) {
+  if (unlikely(state_ != 62)) {
+    ProtocolWithChangesReaderBaseInvalidState(62, state_);
+  }
+
+  ReadOptionalRecordWithChangesImpl(value);
+  state_ = 64;
+}
+
+void ProtocolWithChangesReaderBase::ReadAliasedOptionalRecordWithChanges(std::optional<evo_test::AliasedRecordWithChanges>& value) {
+  if (unlikely(state_ != 64)) {
+    ProtocolWithChangesReaderBaseInvalidState(64, state_);
+  }
+
+  ReadAliasedOptionalRecordWithChangesImpl(value);
+  state_ = 66;
+}
+
+bool ProtocolWithChangesReaderBase::ReadStreamedRecordWithChanges(evo_test::RecordWithChanges& value) {
+  if (unlikely(state_ != 66)) {
+    if (state_ == 67) {
+      state_ = 68;
+      return false;
+    }
+    ProtocolWithChangesReaderBaseInvalidState(66, state_);
+  }
+
+  bool result = ReadStreamedRecordWithChangesImpl(value);
   if (!result) {
-    state_ = 6;
+    state_ = 68;
   }
   return result;
 }
 
-bool MyProtocolReaderBase::ReadSamples(std::vector<evo_test::Sample>& values) {
+bool ProtocolWithChangesReaderBase::ReadStreamedRecordWithChanges(std::vector<evo_test::RecordWithChanges>& values) {
   if (values.capacity() == 0) {
     throw std::runtime_error("vector must have a nonzero capacity.");
   }
-  if (unlikely(state_ != 4)) {
-    if (state_ == 5) {
-      state_ = 6;
+  if (unlikely(state_ != 66)) {
+    if (state_ == 67) {
+      state_ = 68;
       values.clear();
       return false;
     }
-    MyProtocolReaderBaseInvalidState(4, state_);
+    ProtocolWithChangesReaderBaseInvalidState(66, state_);
   }
 
-  if (!ReadSamplesImpl(values)) {
-    state_ = 5;
+  if (!ReadStreamedRecordWithChangesImpl(values)) {
+    state_ = 67;
     return values.size() > 0;
   }
   return true;
 }
 
 // fallback implementation
-bool MyProtocolReaderBase::ReadSamplesImpl(std::vector<evo_test::Sample>& values) {
+bool ProtocolWithChangesReaderBase::ReadStreamedRecordWithChangesImpl(std::vector<evo_test::RecordWithChanges>& values) {
+  size_t i = 0;
+  while (true) {
+    if (i == values.size()) {
+      values.resize(i + 1);
+    }
+    if (!ReadStreamedRecordWithChangesImpl(values[i])) {
+      values.resize(i);
+      return false;
+    }
+    i++;
+    if (i == values.capacity()) {
+      return true;
+    }
+  }
+}
+
+void ProtocolWithChangesReaderBase::Close() {
+  if (unlikely(state_ != 68)) {
+    ProtocolWithChangesReaderBaseInvalidState(68, state_);
+  }
+
+  CloseImpl();
+}
+void ProtocolWithChangesReaderBase::CopyTo(ProtocolWithChangesWriterBase& writer, size_t streamed_record_with_changes_buffer_size) {
+  {
+    int8_t value;
+    ReadInt8ToInt(value);
+    writer.WriteInt8ToInt(value);
+  }
+  {
+    int8_t value;
+    ReadInt8ToLong(value);
+    writer.WriteInt8ToLong(value);
+  }
+  {
+    int8_t value;
+    ReadInt8ToUint(value);
+    writer.WriteInt8ToUint(value);
+  }
+  {
+    int8_t value;
+    ReadInt8ToUlong(value);
+    writer.WriteInt8ToUlong(value);
+  }
+  {
+    int8_t value;
+    ReadInt8ToFloat(value);
+    writer.WriteInt8ToFloat(value);
+  }
+  {
+    int8_t value;
+    ReadInt8ToDouble(value);
+    writer.WriteInt8ToDouble(value);
+  }
+  {
+    int32_t value;
+    ReadIntToUint(value);
+    writer.WriteIntToUint(value);
+  }
+  {
+    int32_t value;
+    ReadIntToLong(value);
+    writer.WriteIntToLong(value);
+  }
+  {
+    int32_t value;
+    ReadIntToFloat(value);
+    writer.WriteIntToFloat(value);
+  }
+  {
+    int32_t value;
+    ReadIntToDouble(value);
+    writer.WriteIntToDouble(value);
+  }
+  {
+    uint32_t value;
+    ReadUintToUlong(value);
+    writer.WriteUintToUlong(value);
+  }
+  {
+    uint32_t value;
+    ReadUintToFloat(value);
+    writer.WriteUintToFloat(value);
+  }
+  {
+    uint32_t value;
+    ReadUintToDouble(value);
+    writer.WriteUintToDouble(value);
+  }
+  {
+    float value;
+    ReadFloatToDouble(value);
+    writer.WriteFloatToDouble(value);
+  }
+  {
+    int32_t value;
+    ReadIntToString(value);
+    writer.WriteIntToString(value);
+  }
+  {
+    uint32_t value;
+    ReadUintToString(value);
+    writer.WriteUintToString(value);
+  }
+  {
+    int64_t value;
+    ReadLongToString(value);
+    writer.WriteLongToString(value);
+  }
+  {
+    uint64_t value;
+    ReadUlongToString(value);
+    writer.WriteUlongToString(value);
+  }
+  {
+    float value;
+    ReadFloatToString(value);
+    writer.WriteFloatToString(value);
+  }
+  {
+    double value;
+    ReadDoubleToString(value);
+    writer.WriteDoubleToString(value);
+  }
+  {
+    int32_t value;
+    ReadIntToOptional(value);
+    writer.WriteIntToOptional(value);
+  }
+  {
+    float value;
+    ReadFloatToOptional(value);
+    writer.WriteFloatToOptional(value);
+  }
+  {
+    std::string value;
+    ReadStringToOptional(value);
+    writer.WriteStringToOptional(value);
+  }
+  {
+    int32_t value;
+    ReadIntToUnion(value);
+    writer.WriteIntToUnion(value);
+  }
+  {
+    float value;
+    ReadFloatToUnion(value);
+    writer.WriteFloatToUnion(value);
+  }
+  {
+    std::string value;
+    ReadStringToUnion(value);
+    writer.WriteStringToUnion(value);
+  }
+  {
+    std::optional<int32_t> value;
+    ReadOptionalIntToFloat(value);
+    writer.WriteOptionalIntToFloat(value);
+  }
+  {
+    std::optional<float> value;
+    ReadOptionalFloatToString(value);
+    writer.WriteOptionalFloatToString(value);
+  }
+  {
+    evo_test::AliasedLongToString value;
+    ReadAliasedLongToString(value);
+    writer.WriteAliasedLongToString(value);
+  }
+  {
+    evo_test::RecordWithChanges value;
+    ReadRecordWithChanges(value);
+    writer.WriteRecordWithChanges(value);
+  }
+  {
+    evo_test::AliasedRecordWithChanges value;
+    ReadAliasedRecordWithChanges(value);
+    writer.WriteAliasedRecordWithChanges(value);
+  }
+  {
+    std::optional<evo_test::RecordWithChanges> value;
+    ReadOptionalRecordWithChanges(value);
+    writer.WriteOptionalRecordWithChanges(value);
+  }
+  {
+    std::optional<evo_test::AliasedRecordWithChanges> value;
+    ReadAliasedOptionalRecordWithChanges(value);
+    writer.WriteAliasedOptionalRecordWithChanges(value);
+  }
+  if (streamed_record_with_changes_buffer_size > 1) {
+    std::vector<evo_test::RecordWithChanges> values;
+    values.reserve(streamed_record_with_changes_buffer_size);
+    while(ReadStreamedRecordWithChanges(values)) {
+      writer.WriteStreamedRecordWithChanges(values);
+    }
+    writer.EndStreamedRecordWithChanges();
+  } else {
+    evo_test::RecordWithChanges value;
+    while(ReadStreamedRecordWithChanges(value)) {
+      writer.WriteStreamedRecordWithChanges(value);
+    }
+    writer.EndStreamedRecordWithChanges();
+  }
+}
+
+namespace {
+void UnusedProtocolWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end, uint8_t current) {
+  std::string expected_method;
+  switch (current) {
+  case 0: expected_method = "WriteSamples() or EndSamples()"; break;
+  }
+  std::string attempted_method;
+  switch (attempted) {
+  case 0: attempted_method = end ? "EndSamples()" : "WriteSamples()"; break;
+  case 1: attempted_method = "Close()"; break;
+  }
+  throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
+}
+
+void UnusedProtocolReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
+  auto f = [](uint8_t i) -> std::string {
+    switch (i/2) {
+    case 0: return "ReadSamples()";
+    case 1: return "Close()";
+    default: return "<unknown>";
+    }
+  };
+  throw std::runtime_error("Expected call to " + f(current) + " but received call to " + f(attempted) + " instead.");
+}
+
+} // namespace 
+
+std::string UnusedProtocolWriterBase::schema_ = R"({"protocol":{"name":"UnusedProtocol","sequence":[{"name":"samples","type":{"stream":{"items":"EvoTest.UnchangedRecord"}}}]},"types":[{"name":"UnchangedRecord","fields":[{"name":"name","type":"string"},{"name":"age","type":"int32"},{"name":"meta","type":{"map":{"keys":"string","values":"float64"}}}]}]})";
+
+std::vector<std::string> UnusedProtocolWriterBase::previous_schemas_ = {
+  UnusedProtocolWriterBase::schema_,
+  UnusedProtocolWriterBase::schema_,
+};
+
+std::string UnusedProtocolWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::v0: return previous_schemas_[0]; break;
+  case Version::v1: return previous_schemas_[1]; break;
+  case Version::Latest: return UnusedProtocolWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol UnusedProtocol.");
+  }
+
+}
+void UnusedProtocolWriterBase::WriteSamples(evo_test::UnchangedRecord const& value) {
+  if (unlikely(state_ != 0)) {
+    UnusedProtocolWriterBaseInvalidState(0, false, state_);
+  }
+
+  WriteSamplesImpl(value);
+}
+
+void UnusedProtocolWriterBase::WriteSamples(std::vector<evo_test::UnchangedRecord> const& values) {
+  if (unlikely(state_ != 0)) {
+    UnusedProtocolWriterBaseInvalidState(0, false, state_);
+  }
+
+  WriteSamplesImpl(values);
+}
+
+void UnusedProtocolWriterBase::EndSamples() {
+  if (unlikely(state_ != 0)) {
+    UnusedProtocolWriterBaseInvalidState(0, true, state_);
+  }
+
+  EndSamplesImpl();
+  state_ = 1;
+}
+
+// fallback implementation
+void UnusedProtocolWriterBase::WriteSamplesImpl(std::vector<evo_test::UnchangedRecord> const& values) {
+  for (auto const& v : values) {
+    WriteSamplesImpl(v);
+  }
+}
+
+void UnusedProtocolWriterBase::Close() {
+  if (unlikely(state_ != 1)) {
+    UnusedProtocolWriterBaseInvalidState(1, false, state_);
+  }
+
+  CloseImpl();
+}
+
+std::string UnusedProtocolReaderBase::schema_ = UnusedProtocolWriterBase::schema_;
+
+std::vector<std::string> UnusedProtocolReaderBase::previous_schemas_ = UnusedProtocolWriterBase::previous_schemas_;
+
+Version UnusedProtocolReaderBase::VersionFromSchema(std::string const& schema) {
+  if (schema == UnusedProtocolWriterBase::schema_) {
+    return Version::Latest;
+  }
+  else if (schema == previous_schemas_[0]) {
+    return Version::v0;
+  }
+  else if (schema == previous_schemas_[1]) {
+    return Version::v1;
+  }
+  throw std::runtime_error("The schema does not match any version supported by protocol UnusedProtocol.");
+}
+bool UnusedProtocolReaderBase::ReadSamples(evo_test::UnchangedRecord& value) {
+  if (unlikely(state_ != 0)) {
+    if (state_ == 1) {
+      state_ = 2;
+      return false;
+    }
+    UnusedProtocolReaderBaseInvalidState(0, state_);
+  }
+
+  bool result = ReadSamplesImpl(value);
+  if (!result) {
+    state_ = 2;
+  }
+  return result;
+}
+
+bool UnusedProtocolReaderBase::ReadSamples(std::vector<evo_test::UnchangedRecord>& values) {
+  if (values.capacity() == 0) {
+    throw std::runtime_error("vector must have a nonzero capacity.");
+  }
+  if (unlikely(state_ != 0)) {
+    if (state_ == 1) {
+      state_ = 2;
+      values.clear();
+      return false;
+    }
+    UnusedProtocolReaderBaseInvalidState(0, state_);
+  }
+
+  if (!ReadSamplesImpl(values)) {
+    state_ = 1;
+    return values.size() > 0;
+  }
+  return true;
+}
+
+// fallback implementation
+bool UnusedProtocolReaderBase::ReadSamplesImpl(std::vector<evo_test::UnchangedRecord>& values) {
   size_t i = 0;
   while (true) {
     if (i == values.size()) {
@@ -228,69 +1197,27 @@ bool MyProtocolReaderBase::ReadSamplesImpl(std::vector<evo_test::Sample>& values
   }
 }
 
-void MyProtocolReaderBase::ReadMaybe(std::optional<std::string>& value) {
-  if (unlikely(state_ != 6)) {
-    if (state_ == 5) {
-      state_ = 6;
-    } else {
-      MyProtocolReaderBaseInvalidState(6, state_);
-    }
-  }
-
-  ReadMaybeImpl(value);
-  state_ = 8;
-}
-
-void MyProtocolReaderBase::ReadFooter(std::optional<evo_test::Footer>& value) {
-  if (unlikely(state_ != 8)) {
-    MyProtocolReaderBaseInvalidState(8, state_);
-  }
-
-  ReadFooterImpl(value);
-  state_ = 10;
-}
-
-void MyProtocolReaderBase::Close() {
-  if (unlikely(state_ != 10)) {
-    MyProtocolReaderBaseInvalidState(10, state_);
+void UnusedProtocolReaderBase::Close() {
+  if (unlikely(state_ != 2)) {
+    UnusedProtocolReaderBaseInvalidState(2, state_);
   }
 
   CloseImpl();
 }
-void MyProtocolReaderBase::CopyTo(MyProtocolWriterBase& writer, size_t samples_buffer_size) {
-  {
-    evo_test::Header value;
-    ReadHeader(value);
-    writer.WriteHeader(value);
-  }
-  {
-    std::string value;
-    ReadId(value);
-    writer.WriteId(value);
-  }
+void UnusedProtocolReaderBase::CopyTo(UnusedProtocolWriterBase& writer, size_t samples_buffer_size) {
   if (samples_buffer_size > 1) {
-    std::vector<evo_test::Sample> values;
+    std::vector<evo_test::UnchangedRecord> values;
     values.reserve(samples_buffer_size);
     while(ReadSamples(values)) {
       writer.WriteSamples(values);
     }
     writer.EndSamples();
   } else {
-    evo_test::Sample value;
+    evo_test::UnchangedRecord value;
     while(ReadSamples(value)) {
       writer.WriteSamples(value);
     }
     writer.EndSamples();
-  }
-  {
-    std::optional<std::string> value;
-    ReadMaybe(value);
-    writer.WriteMaybe(value);
-  }
-  {
-    std::optional<evo_test::Footer> value;
-    ReadFooter(value);
-    writer.WriteFooter(value);
   }
 }
 

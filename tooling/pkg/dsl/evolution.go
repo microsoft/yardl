@@ -43,41 +43,6 @@ func (tc *TypeChangeNumberToNumber) Inverse() TypeChange {
 	return &TypeChangeNumberToNumber{tc.Swap()}
 }
 
-// TODO: Unit test this
-func (tc *TypeChangeNumberToNumber) IsDemotion() bool {
-	newPrim := tc.Old.(*SimpleType).ResolvedDefinition.(PrimitiveDefinition)
-	oldPrim := tc.New.(*SimpleType).ResolvedDefinition.(PrimitiveDefinition)
-
-	if newPrim == oldPrim {
-		return false
-	}
-
-	width := func(prim PrimitiveDefinition) int {
-		switch prim {
-		case PrimitiveInt8, PrimitiveUint8:
-			return 1
-		case PrimitiveInt16, PrimitiveUint16:
-			return 2
-		case PrimitiveInt32, PrimitiveUint32, PrimitiveFloat32:
-			return 4
-		case PrimitiveInt64, PrimitiveUint64, PrimitiveFloat64:
-			return 8
-		default:
-			panic("Shouldn't get here")
-		}
-	}
-
-	isPromotion := func(a, b PrimitiveDefinition) bool {
-		if GetPrimitiveKind(a) == PrimitiveKindInteger && GetPrimitiveKind(b) == PrimitiveKindFloatingPoint {
-			return true
-		} else if width(b) > width(a) {
-			return true
-		}
-		return false
-	}
-	return !isPromotion(oldPrim, newPrim)
-}
-
 type TypeChangeNumberToString struct{ TypePair }
 
 func (tc *TypeChangeNumberToString) Inverse() TypeChange {
@@ -286,10 +251,10 @@ func (ntc *NamedTypeChange) PreviousVersion() TypeDefinition {
 type ProtocolChange struct {
 	PreviousDefinition *ProtocolDefinition
 	PreviousSchema     string
-	Added              []*ProtocolStep
-	Removed            []bool
-	Changes            []TypeChange
-	Reordered          bool
+	StepsAdded         []*ProtocolStep
+	StepRemoved        []bool
+	StepChanges        []TypeChange
+	StepsReordered     bool
 }
 
 func (pc *ProtocolChange) PreviousVersion() TypeDefinition {
@@ -298,10 +263,10 @@ func (pc *ProtocolChange) PreviousVersion() TypeDefinition {
 
 type RecordChange struct {
 	PreviousDefinition *RecordDefinition
-	Added              []*Field
-	Removed            []bool
-	Changes            []TypeChange
-	Reordered          bool
+	FieldsAdded        []*Field
+	FieldRemoved       []bool
+	FieldChanges       []TypeChange
+	FieldsReordered    bool
 }
 
 func (rc *RecordChange) PreviousVersion() TypeDefinition {
@@ -353,8 +318,8 @@ func validateChanges(env *Environment) error {
 	// Emit User Warnings and aggregate Errors
 	errorSink := &validation.ErrorSink{}
 	for _, ns := range env.Namespaces {
-		for _, td := range ns.TypeDefinitions {
 
+		for _, td := range ns.TypeDefinitions {
 			defChange, ok := td.GetDefinitionMeta().Annotations[changeAnnotationKey].(DefinitionChange)
 			if !ok || defChange == nil {
 				continue
@@ -363,28 +328,28 @@ func validateChanges(env *Environment) error {
 			switch defChange := defChange.(type) {
 
 			case *DefinitionChangeIncompatible:
-				errorSink.Add(validationError(td, "Changing '%s' is not backward compatible", td.GetDefinitionMeta().Name))
+				errorSink.Add(validationError(td, "changing '%s' is not backward compatible", td.GetDefinitionMeta().Name))
 
 			case *RecordChange:
 				oldRec := defChange.PreviousDefinition
 
-				for _, added := range defChange.Added {
+				for _, added := range defChange.FieldsAdded {
 					if !TypeHasNullOption(added.Type) {
 						log.Warn().Msgf("Adding a non-Optional record field may result in undefined behavior")
 					}
 				}
 
 				for i, field := range oldRec.Fields {
-					if defChange.Removed[i] {
+					if defChange.FieldRemoved[i] {
 						if !TypeHasNullOption(oldRec.Fields[i].Type) {
 							log.Warn().Msgf("Removing a non-Optional record field may result in undefined behavior")
 						}
 						continue
 					}
 
-					if tc := defChange.Changes[i]; tc != nil {
+					if tc := defChange.FieldChanges[i]; tc != nil {
 						if typeChangeIsError(tc) {
-							errorSink.Add(validationError(td, "Changing field '%s' from %s", field.Name, typeChangeToError(tc)))
+							errorSink.Add(validationError(td, "changing field '%s' from %s", field.Name, typeChangeToError(tc)))
 						}
 
 						if warn := typeChangeToWarning(tc); warn != "" {
@@ -396,7 +361,7 @@ func validateChanges(env *Environment) error {
 			case *NamedTypeChange:
 				if tc := defChange.TypeChange; tc != nil {
 					if typeChangeIsError(tc) {
-						errorSink.Add(validationError(td, "Changing type '%s' from %s", td.GetDefinitionMeta().Name, typeChangeToWarning(tc)))
+						errorSink.Add(validationError(td, "changing type '%s' from %s", td.GetDefinitionMeta().Name, typeChangeToWarning(tc)))
 					}
 					if warn := typeChangeToWarning(tc); warn != "" {
 						log.Warn().Msgf("Changing type '%s' from %s", td.GetDefinitionMeta().Name, warn)
@@ -405,7 +370,7 @@ func validateChanges(env *Environment) error {
 
 			case *EnumChange:
 				if tc := defChange.BaseTypeChange; tc != nil {
-					errorSink.Add(validationError(td, "Changing base type of '%s' is not backward compatible", td.GetDefinitionMeta().Name))
+					errorSink.Add(validationError(td, "changing base type of '%s' is not backward compatible", td.GetDefinitionMeta().Name))
 				}
 
 			default:
@@ -419,20 +384,24 @@ func validateChanges(env *Environment) error {
 				continue
 			}
 
+			if protChange.StepsReordered {
+				errorSink.Add(validationError(pd, "reordering steps in a Protocol is not backward compatible"))
+			}
+
 			oldProt := protChange.PreviousDefinition
-			for _, added := range protChange.Added {
-				errorSink.Add(validationError(added, "Adding new Protocol steps is not backward compatible"))
+			for _, added := range protChange.StepsAdded {
+				errorSink.Add(validationError(added, "adding steps to a Protocol is not backward compatible"))
 			}
 
 			for i, step := range oldProt.Sequence {
-				if protChange.Removed[i] {
-					errorSink.Add(validationError(step, "Removing Protocol steps is not backward compatible"))
+				if protChange.StepRemoved[i] {
+					errorSink.Add(validationError(step, "removing steps from a Protocol is not backward compatible"))
 					continue
 				}
 
-				if tc := protChange.Changes[i]; tc != nil {
+				if tc := protChange.StepChanges[i]; tc != nil {
 					if typeChangeIsError(tc) {
-						errorSink.Add(validationError(pd, "Changing step '%s' from %s", step.Name, typeChangeToError(tc)))
+						errorSink.Add(validationError(pd, "changing step '%s' from %s", step.Name, typeChangeToError(tc)))
 					}
 
 					if warn := typeChangeToWarning(tc); warn != "" {
@@ -481,9 +450,7 @@ func typeChangeWarningReason(tc TypeChange) string {
 		return typeChangeWarningReason(tc.Inner())
 
 	case *TypeChangeNumberToNumber:
-		if tc.IsDemotion() {
-			return "may result in loss of precision"
-		}
+		return "may result in numeric overflow or loss of precision"
 	case *TypeChangeNumberToString, *TypeChangeStringToNumber:
 		return "may result in loss of precision"
 	case *TypeChangeScalarToOptional, *TypeChangeOptionalToScalar:
@@ -574,8 +541,8 @@ func saveChangeAnnotations(env *Environment, versionLabel string) {
 				}
 
 				var stepChange TypeChange
-				if changed != nil && i < len(changed.Changes) {
-					stepChange = changed.Changes[i]
+				if changed != nil && i < len(changed.StepChanges) {
+					stepChange = changed.StepChanges[i]
 				}
 
 				step.Annotations[AllVersionChangesAnnotationKey].(map[string]TypeChange)[versionLabel] = stepChange
@@ -729,8 +696,8 @@ func detectProtocolDefinitionChanges(newProtocol, oldProtocol *ProtocolDefinitio
 	change := &ProtocolChange{
 		PreviousDefinition: oldProtocol,
 		PreviousSchema:     oldProtocol.GetDefinitionMeta().Annotations[schemaAnnotationKey].(string),
-		Removed:            make([]bool, len(oldProtocol.Sequence)),
-		Changes:            make([]TypeChange, len(oldProtocol.Sequence)),
+		StepRemoved:        make([]bool, len(oldProtocol.Sequence)),
+		StepChanges:        make([]TypeChange, len(oldProtocol.Sequence)),
 	}
 
 	oldSequence := make(map[string]*ProtocolStep)
@@ -743,12 +710,12 @@ func detectProtocolDefinitionChanges(newProtocol, oldProtocol *ProtocolDefinitio
 
 		if i >= len(oldProtocol.Sequence) || newStep.Name != oldProtocol.Sequence[i].Name {
 			// CHANGE: Reordered or renamed steps
-			change.Reordered = true
+			change.StepsReordered = true
 		}
 
 		if _, ok := oldSequence[newStep.Name]; !ok {
 			// CHANGE: New ProtocolStep
-			change.Added = append(change.Added, newStep)
+			change.StepsAdded = append(change.StepsAdded, newStep)
 		}
 	}
 
@@ -758,17 +725,18 @@ func detectProtocolDefinitionChanges(newProtocol, oldProtocol *ProtocolDefinitio
 		if !ok {
 			// CHANGE: Removed ProtocolStep
 			anyStepChanged = true
-			change.Removed[i] = true
+			change.StepRemoved[i] = true
+			continue
 		}
 
 		if typeChange := detectChangedTypes(newStep.Type, oldStep.Type); typeChange != nil {
 			// CHANGE: ProtocolStep type changed
 			anyStepChanged = true
-			change.Changes[i] = typeChange
+			change.StepChanges[i] = typeChange
 		}
 	}
 
-	if anyStepChanged || change.Reordered || len(change.Added) > 0 {
+	if anyStepChanged || change.StepsReordered || len(change.StepsAdded) > 0 {
 		return change
 	}
 	return nil
@@ -778,8 +746,8 @@ func detectProtocolDefinitionChanges(newProtocol, oldProtocol *ProtocolDefinitio
 func detectRecordDefinitionChanges(newRecord, oldRecord *RecordDefinition) *RecordChange {
 	change := &RecordChange{
 		PreviousDefinition: oldRecord,
-		Removed:            make([]bool, len(oldRecord.Fields)),
-		Changes:            make([]TypeChange, len(oldRecord.Fields)),
+		FieldRemoved:       make([]bool, len(oldRecord.Fields)),
+		FieldChanges:       make([]TypeChange, len(oldRecord.Fields)),
 	}
 
 	// Fields may be reordered
@@ -795,12 +763,12 @@ func detectRecordDefinitionChanges(newRecord, oldRecord *RecordDefinition) *Reco
 
 		if i >= len(oldRecord.Fields) || newField.Name != oldRecord.Fields[i].Name {
 			// CHANGE: Reordered or renamed fields
-			change.Reordered = true
+			change.FieldsReordered = true
 		}
 
 		if _, ok := oldFields[newField.Name]; !ok {
 			// CHANGE: New field
-			change.Added = append(change.Added, newField)
+			change.FieldsAdded = append(change.FieldsAdded, newField)
 		}
 	}
 
@@ -810,18 +778,18 @@ func detectRecordDefinitionChanges(newRecord, oldRecord *RecordDefinition) *Reco
 		if !ok {
 			// CHANGE: Removed field
 			anyFieldChanged = true
-			change.Removed[i] = true
+			change.FieldRemoved[i] = true
 			continue
 		}
 
 		if typeChange := detectChangedTypes(newField.Type, oldField.Type); typeChange != nil {
 			// CHANGE: Field type changed
 			anyFieldChanged = true
-			change.Changes[i] = typeChange
+			change.FieldChanges[i] = typeChange
 		}
 	}
 
-	if anyFieldChanged || change.Reordered || len(change.Added) > 0 {
+	if anyFieldChanged || change.FieldsReordered || len(change.FieldsAdded) > 0 {
 		return change
 	}
 	return nil
@@ -1030,13 +998,13 @@ func detectGeneralizedTypeChanges(newType, oldType *GeneralizedType) TypeChange 
 // TODO: Handle Union to Optional
 func detectOptionalChanges(newType, oldType *GeneralizedType) TypeChange {
 	if !oldType.Cases.IsOptional() {
-		if oldType.Cases.IsUnion() {
+		if oldType.Cases.IsUnion() && oldType.Cases.HasNullOption() {
 			// We want to find a matching type in the old Union
 			// Should first look for identical type, but what if the user
 			// changed the "matching" inner type in a compatible fashion
 			// e.g. Union<string, Header_v1> to Optional<Header_v2>??
 
-			for i, c := range oldType.Cases {
+			for i, c := range oldType.Cases[1:] {
 				// if c.IsNullType() {
 				// 	continue
 				// }
@@ -1076,8 +1044,8 @@ func detectOptionalChanges(newType, oldType *GeneralizedType) TypeChange {
 // TODO: Handle Optional to Union
 func detectUnionChanges(newType, oldType *GeneralizedType) TypeChange {
 	if !oldType.Cases.IsUnion() {
-		if oldType.Cases.IsOptional() {
-			for i, c := range newType.Cases {
+		if oldType.Cases.IsOptional() && newType.Cases.HasNullOption() {
+			for i, c := range newType.Cases[1:] {
 				// if c.IsNullType() {
 				// 	continue
 				// }
@@ -1246,7 +1214,7 @@ func detectArrayChanges(newType, oldType *GeneralizedType) TypeChange {
 				return &TypeChangeIncompatible{TypePair{oldType, newType}}
 			}
 
-			if newDimension.Length != nil && newDimension.Length != oldDimension.Length {
+			if newDimension.Length != nil && *newDimension.Length != *oldDimension.Length {
 				// CHANGE: Changed array dimension length
 				return &TypeChangeIncompatible{TypePair{oldType, newType}}
 			}

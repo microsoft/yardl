@@ -265,6 +265,45 @@ func collectUnionArities(env *dsl.Environment) []int {
 
 	dsl.Visit(env, func(self dsl.Visitor, node dsl.Node) {
 		switch t := node.(type) {
+		case *dsl.ProtocolDefinition:
+			if ch, ok := t.Annotations[dsl.AllVersionChangesAnnotationKey].(map[string]*dsl.ProtocolChange); ok {
+				for _, change := range ch {
+					if change == nil {
+						continue
+					}
+
+					for _, tc := range change.StepChanges {
+						if tc == nil {
+							continue
+						}
+						self.Visit(tc.OldType())
+					}
+				}
+			}
+			self.VisitChildren(node)
+
+		case dsl.TypeDefinition:
+			if ch, ok := t.GetDefinitionMeta().Annotations[dsl.AllVersionChangesAnnotationKey].(map[string]dsl.DefinitionChange); ok {
+				for _, change := range ch {
+					if change == nil {
+						continue
+					}
+
+					switch change := change.(type) {
+					case *dsl.RecordChange:
+						for _, tc := range change.FieldChanges {
+							if tc == nil {
+								continue
+							}
+							self.Visit(tc.OldType())
+						}
+					case *dsl.NamedTypeChange:
+						self.Visit(change.TypeChange.OldType())
+					}
+				}
+			}
+			self.VisitChildren(node)
+
 		case *dsl.GeneralizedType:
 			if t.Cases.IsUnion() {
 				arities[len(t.Cases)] = nil
@@ -481,7 +520,12 @@ func typeConversionExpression(typeChange dsl.TypeChange, varName string, write b
 
 	switch tc := typeChange.(type) {
 	case *dsl.TypeChangeNumberToNumber:
-		return fmt.Sprintf("(%s)(%s)", common.TypeSyntax(tc.NewType()), varName)
+		oldPrim := tc.OldType().(*dsl.SimpleType).ResolvedDefinition.(dsl.PrimitiveDefinition)
+		newPrim := tc.NewType().(*dsl.SimpleType).ResolvedDefinition.(dsl.PrimitiveDefinition)
+		if dsl.GetPrimitiveKind(oldPrim) == dsl.PrimitiveKindFloatingPoint && dsl.GetPrimitiveKind(newPrim) == dsl.PrimitiveKindInteger {
+			varName = fmt.Sprintf("std::round(%s)", varName)
+		}
+		return fmt.Sprintf("static_cast<%s>(%s)", common.TypeSyntax(tc.NewType()), varName)
 
 	case *dsl.TypeChangeNumberToString:
 		return fmt.Sprintf("std::to_string(%s)", varName)
@@ -503,8 +547,8 @@ func typeConversionExpression(typeChange dsl.TypeChange, varName string, write b
 			return varName
 		}
 
-	case *dsl.TypeChangeScalarToUnion:
-		return varName
+	case *dsl.TypeChangeOptionalToScalar:
+		return fmt.Sprintf("%s.value()", varName)
 
 	case *dsl.TypeChangeUnionToScalar:
 		return fmt.Sprintf("std::get<%d>(%s)", tc.TypeIndex, varName)
@@ -581,11 +625,11 @@ func writeCompatibilitySerializers(w *formatting.IndentedWriter, t dsl.TypeDefin
 				varType := common.TypeSyntax(field.Type)
 				varName := common.FieldIdentifierName(field.Name)
 
-				if change.Removed[i] {
+				if change.FieldRemoved[i] {
 					// Field was removed: Read it and discard, or Write "default" value
 					fmt.Fprintf(w, "%s %s;\n", varType, varName)
 					fmt.Fprintf(w, "%s(stream, %s);\n", typeRwFunction(field.Type, write), varName)
-				} else if typeChange := change.Changes[i]; typeChange != nil {
+				} else if typeChange := change.FieldChanges[i]; typeChange != nil {
 					// Field type change: Handle type conversions
 					writeConversionRw(w, typeChange, "stream", varName, fmt.Sprintf("value.%s", varName), write)
 				} else {

@@ -8,48 +8,164 @@ enum class Version {
   v0,
   Latest
 };
-// Abstract writer for the MyProtocol protocol.
-class MyProtocolWriterBase {
+// Abstract writer for the ProtocolWithChanges protocol.
+class ProtocolWithChangesWriterBase {
   public:
   // Ordinal 0.
-  void WriteHeader(evo_test::Header const& value);
+  void WriteInt8ToInt(int32_t const& value);
 
   // Ordinal 1.
-  void WriteId(int64_t const& value);
+  void WriteInt8ToLong(int64_t const& value);
 
   // Ordinal 2.
-  // Call this method for each element of the `samples` stream, then call `EndSamples() when done.`
-  void WriteSamples(evo_test::Sample const& value);
-
-  // Ordinal 2.
-  // Call this method to write many values to the `samples` stream, then call `EndSamples()` when done.
-  void WriteSamples(std::vector<evo_test::Sample> const& values);
-
-  // Marks the end of the `samples` stream.
-  void EndSamples();
+  void WriteInt8ToUint(uint32_t const& value);
 
   // Ordinal 3.
-  void WriteMaybe(std::optional<int32_t> const& value);
+  void WriteInt8ToUlong(uint64_t const& value);
 
   // Ordinal 4.
-  void WriteFooter(std::optional<evo_test::Footer> const& value);
+  void WriteInt8ToFloat(float const& value);
+
+  // Ordinal 5.
+  void WriteInt8ToDouble(double const& value);
+
+  // Ordinal 6.
+  void WriteIntToUint(uint32_t const& value);
+
+  // Ordinal 7.
+  void WriteIntToLong(int64_t const& value);
+
+  // Ordinal 8.
+  void WriteIntToFloat(float const& value);
+
+  // Ordinal 9.
+  void WriteIntToDouble(double const& value);
+
+  // Ordinal 10.
+  void WriteUintToUlong(uint64_t const& value);
+
+  // Ordinal 11.
+  void WriteUintToFloat(float const& value);
+
+  // Ordinal 12.
+  void WriteUintToDouble(double const& value);
+
+  // Ordinal 13.
+  void WriteFloatToDouble(double const& value);
+
+  // Ordinal 14.
+  void WriteIntToString(std::string const& value);
+
+  // Ordinal 15.
+  void WriteUintToString(std::string const& value);
+
+  // Ordinal 16.
+  void WriteLongToString(std::string const& value);
+
+  // Ordinal 17.
+  void WriteUlongToString(std::string const& value);
+
+  // Ordinal 18.
+  void WriteFloatToString(std::string const& value);
+
+  // Ordinal 19.
+  void WriteDoubleToString(std::string const& value);
+
+  // Ordinal 20.
+  void WriteIntToOptional(std::optional<int32_t> const& value);
+
+  // Ordinal 21.
+  void WriteFloatToOptional(std::optional<float> const& value);
+
+  // Ordinal 22.
+  void WriteStringToOptional(std::optional<std::string> const& value);
+
+  // Ordinal 23.
+  void WriteIntToUnion(std::variant<int32_t, bool> const& value);
+
+  // Ordinal 24.
+  void WriteFloatToUnion(std::variant<float, bool> const& value);
+
+  // Ordinal 25.
+  void WriteStringToUnion(std::variant<std::string, bool> const& value);
+
+  // Ordinal 26.
+  void WriteOptionalIntToFloat(std::optional<float> const& value);
+
+  // Ordinal 27.
+  void WriteOptionalFloatToString(std::optional<std::string> const& value);
+
+  // Ordinal 28.
+  void WriteAliasedLongToString(evo_test::AliasedLongToString const& value);
+
+  // Ordinal 29.
+  void WriteRecordWithChanges(evo_test::RecordWithChanges const& value);
+
+  // Ordinal 30.
+  void WriteAliasedRecordWithChanges(evo_test::AliasedRecordWithChanges const& value);
+
+  // Ordinal 31.
+  void WriteOptionalRecordWithChanges(std::optional<evo_test::RecordWithChanges> const& value);
+
+  // Ordinal 32.
+  void WriteAliasedOptionalRecordWithChanges(std::optional<evo_test::AliasedRecordWithChanges> const& value);
+
+  // Ordinal 33.
+  // Call this method for each element of the `streamedRecordWithChanges` stream, then call `EndStreamedRecordWithChanges() when done.`
+  void WriteStreamedRecordWithChanges(evo_test::RecordWithChanges const& value);
+
+  // Ordinal 33.
+  // Call this method to write many values to the `streamedRecordWithChanges` stream, then call `EndStreamedRecordWithChanges()` when done.
+  void WriteStreamedRecordWithChanges(std::vector<evo_test::RecordWithChanges> const& values);
+
+  // Marks the end of the `streamedRecordWithChanges` stream.
+  void EndStreamedRecordWithChanges();
 
   // Optionaly close this writer before destructing. Validates that all steps were completed.
   void Close();
 
-  virtual ~MyProtocolWriterBase() = default;
+  virtual ~ProtocolWithChangesWriterBase() = default;
 
   // Flushes all buffered data.
   virtual void Flush() {}
 
   protected:
-  virtual void WriteHeaderImpl(evo_test::Header const& value) = 0;
-  virtual void WriteIdImpl(int64_t const& value) = 0;
-  virtual void WriteSamplesImpl(evo_test::Sample const& value) = 0;
-  virtual void WriteSamplesImpl(std::vector<evo_test::Sample> const& value);
-  virtual void EndSamplesImpl() = 0;
-  virtual void WriteMaybeImpl(std::optional<int32_t> const& value) = 0;
-  virtual void WriteFooterImpl(std::optional<evo_test::Footer> const& value) = 0;
+  virtual void WriteInt8ToIntImpl(int32_t const& value) = 0;
+  virtual void WriteInt8ToLongImpl(int64_t const& value) = 0;
+  virtual void WriteInt8ToUintImpl(uint32_t const& value) = 0;
+  virtual void WriteInt8ToUlongImpl(uint64_t const& value) = 0;
+  virtual void WriteInt8ToFloatImpl(float const& value) = 0;
+  virtual void WriteInt8ToDoubleImpl(double const& value) = 0;
+  virtual void WriteIntToUintImpl(uint32_t const& value) = 0;
+  virtual void WriteIntToLongImpl(int64_t const& value) = 0;
+  virtual void WriteIntToFloatImpl(float const& value) = 0;
+  virtual void WriteIntToDoubleImpl(double const& value) = 0;
+  virtual void WriteUintToUlongImpl(uint64_t const& value) = 0;
+  virtual void WriteUintToFloatImpl(float const& value) = 0;
+  virtual void WriteUintToDoubleImpl(double const& value) = 0;
+  virtual void WriteFloatToDoubleImpl(double const& value) = 0;
+  virtual void WriteIntToStringImpl(std::string const& value) = 0;
+  virtual void WriteUintToStringImpl(std::string const& value) = 0;
+  virtual void WriteLongToStringImpl(std::string const& value) = 0;
+  virtual void WriteUlongToStringImpl(std::string const& value) = 0;
+  virtual void WriteFloatToStringImpl(std::string const& value) = 0;
+  virtual void WriteDoubleToStringImpl(std::string const& value) = 0;
+  virtual void WriteIntToOptionalImpl(std::optional<int32_t> const& value) = 0;
+  virtual void WriteFloatToOptionalImpl(std::optional<float> const& value) = 0;
+  virtual void WriteStringToOptionalImpl(std::optional<std::string> const& value) = 0;
+  virtual void WriteIntToUnionImpl(std::variant<int32_t, bool> const& value) = 0;
+  virtual void WriteFloatToUnionImpl(std::variant<float, bool> const& value) = 0;
+  virtual void WriteStringToUnionImpl(std::variant<std::string, bool> const& value) = 0;
+  virtual void WriteOptionalIntToFloatImpl(std::optional<float> const& value) = 0;
+  virtual void WriteOptionalFloatToStringImpl(std::optional<std::string> const& value) = 0;
+  virtual void WriteAliasedLongToStringImpl(evo_test::AliasedLongToString const& value) = 0;
+  virtual void WriteRecordWithChangesImpl(evo_test::RecordWithChanges const& value) = 0;
+  virtual void WriteAliasedRecordWithChangesImpl(evo_test::AliasedRecordWithChanges const& value) = 0;
+  virtual void WriteOptionalRecordWithChangesImpl(std::optional<evo_test::RecordWithChanges> const& value) = 0;
+  virtual void WriteAliasedOptionalRecordWithChangesImpl(std::optional<evo_test::AliasedRecordWithChanges> const& value) = 0;
+  virtual void WriteStreamedRecordWithChangesImpl(evo_test::RecordWithChanges const& value) = 0;
+  virtual void WriteStreamedRecordWithChangesImpl(std::vector<evo_test::RecordWithChanges> const& value);
+  virtual void EndStreamedRecordWithChangesImpl() = 0;
   virtual void CloseImpl() {}
 
   static std::string schema_;
@@ -61,44 +177,160 @@ class MyProtocolWriterBase {
   private:
   uint8_t state_ = 0;
 
-  friend class MyProtocolReaderBase;
+  friend class ProtocolWithChangesReaderBase;
 };
 
-// Abstract reader for the MyProtocol protocol.
-class MyProtocolReaderBase {
+// Abstract reader for the ProtocolWithChanges protocol.
+class ProtocolWithChangesReaderBase {
   public:
   // Ordinal 0.
-  void ReadHeader(evo_test::Header& value);
+  void ReadInt8ToInt(int32_t& value);
 
   // Ordinal 1.
-  void ReadId(int64_t& value);
+  void ReadInt8ToLong(int64_t& value);
 
   // Ordinal 2.
-  [[nodiscard]] bool ReadSamples(evo_test::Sample& value);
-
-  // Ordinal 2.
-  [[nodiscard]] bool ReadSamples(std::vector<evo_test::Sample>& values);
+  void ReadInt8ToUint(uint32_t& value);
 
   // Ordinal 3.
-  void ReadMaybe(std::optional<int32_t>& value);
+  void ReadInt8ToUlong(uint64_t& value);
 
   // Ordinal 4.
-  void ReadFooter(std::optional<evo_test::Footer>& value);
+  void ReadInt8ToFloat(float& value);
+
+  // Ordinal 5.
+  void ReadInt8ToDouble(double& value);
+
+  // Ordinal 6.
+  void ReadIntToUint(uint32_t& value);
+
+  // Ordinal 7.
+  void ReadIntToLong(int64_t& value);
+
+  // Ordinal 8.
+  void ReadIntToFloat(float& value);
+
+  // Ordinal 9.
+  void ReadIntToDouble(double& value);
+
+  // Ordinal 10.
+  void ReadUintToUlong(uint64_t& value);
+
+  // Ordinal 11.
+  void ReadUintToFloat(float& value);
+
+  // Ordinal 12.
+  void ReadUintToDouble(double& value);
+
+  // Ordinal 13.
+  void ReadFloatToDouble(double& value);
+
+  // Ordinal 14.
+  void ReadIntToString(std::string& value);
+
+  // Ordinal 15.
+  void ReadUintToString(std::string& value);
+
+  // Ordinal 16.
+  void ReadLongToString(std::string& value);
+
+  // Ordinal 17.
+  void ReadUlongToString(std::string& value);
+
+  // Ordinal 18.
+  void ReadFloatToString(std::string& value);
+
+  // Ordinal 19.
+  void ReadDoubleToString(std::string& value);
+
+  // Ordinal 20.
+  void ReadIntToOptional(std::optional<int32_t>& value);
+
+  // Ordinal 21.
+  void ReadFloatToOptional(std::optional<float>& value);
+
+  // Ordinal 22.
+  void ReadStringToOptional(std::optional<std::string>& value);
+
+  // Ordinal 23.
+  void ReadIntToUnion(std::variant<int32_t, bool>& value);
+
+  // Ordinal 24.
+  void ReadFloatToUnion(std::variant<float, bool>& value);
+
+  // Ordinal 25.
+  void ReadStringToUnion(std::variant<std::string, bool>& value);
+
+  // Ordinal 26.
+  void ReadOptionalIntToFloat(std::optional<float>& value);
+
+  // Ordinal 27.
+  void ReadOptionalFloatToString(std::optional<std::string>& value);
+
+  // Ordinal 28.
+  void ReadAliasedLongToString(evo_test::AliasedLongToString& value);
+
+  // Ordinal 29.
+  void ReadRecordWithChanges(evo_test::RecordWithChanges& value);
+
+  // Ordinal 30.
+  void ReadAliasedRecordWithChanges(evo_test::AliasedRecordWithChanges& value);
+
+  // Ordinal 31.
+  void ReadOptionalRecordWithChanges(std::optional<evo_test::RecordWithChanges>& value);
+
+  // Ordinal 32.
+  void ReadAliasedOptionalRecordWithChanges(std::optional<evo_test::AliasedRecordWithChanges>& value);
+
+  // Ordinal 33.
+  [[nodiscard]] bool ReadStreamedRecordWithChanges(evo_test::RecordWithChanges& value);
+
+  // Ordinal 33.
+  [[nodiscard]] bool ReadStreamedRecordWithChanges(std::vector<evo_test::RecordWithChanges>& values);
 
   // Optionaly close this writer before destructing. Validates that all steps were completely read.
   void Close();
 
-  void CopyTo(MyProtocolWriterBase& writer, size_t samples_buffer_size = 1);
+  void CopyTo(ProtocolWithChangesWriterBase& writer, size_t streamed_record_with_changes_buffer_size = 1);
 
-  virtual ~MyProtocolReaderBase() = default;
+  virtual ~ProtocolWithChangesReaderBase() = default;
 
   protected:
-  virtual void ReadHeaderImpl(evo_test::Header& value) = 0;
-  virtual void ReadIdImpl(int64_t& value) = 0;
-  virtual bool ReadSamplesImpl(evo_test::Sample& value) = 0;
-  virtual bool ReadSamplesImpl(std::vector<evo_test::Sample>& values);
-  virtual void ReadMaybeImpl(std::optional<int32_t>& value) = 0;
-  virtual void ReadFooterImpl(std::optional<evo_test::Footer>& value) = 0;
+  virtual void ReadInt8ToIntImpl(int32_t& value) = 0;
+  virtual void ReadInt8ToLongImpl(int64_t& value) = 0;
+  virtual void ReadInt8ToUintImpl(uint32_t& value) = 0;
+  virtual void ReadInt8ToUlongImpl(uint64_t& value) = 0;
+  virtual void ReadInt8ToFloatImpl(float& value) = 0;
+  virtual void ReadInt8ToDoubleImpl(double& value) = 0;
+  virtual void ReadIntToUintImpl(uint32_t& value) = 0;
+  virtual void ReadIntToLongImpl(int64_t& value) = 0;
+  virtual void ReadIntToFloatImpl(float& value) = 0;
+  virtual void ReadIntToDoubleImpl(double& value) = 0;
+  virtual void ReadUintToUlongImpl(uint64_t& value) = 0;
+  virtual void ReadUintToFloatImpl(float& value) = 0;
+  virtual void ReadUintToDoubleImpl(double& value) = 0;
+  virtual void ReadFloatToDoubleImpl(double& value) = 0;
+  virtual void ReadIntToStringImpl(std::string& value) = 0;
+  virtual void ReadUintToStringImpl(std::string& value) = 0;
+  virtual void ReadLongToStringImpl(std::string& value) = 0;
+  virtual void ReadUlongToStringImpl(std::string& value) = 0;
+  virtual void ReadFloatToStringImpl(std::string& value) = 0;
+  virtual void ReadDoubleToStringImpl(std::string& value) = 0;
+  virtual void ReadIntToOptionalImpl(std::optional<int32_t>& value) = 0;
+  virtual void ReadFloatToOptionalImpl(std::optional<float>& value) = 0;
+  virtual void ReadStringToOptionalImpl(std::optional<std::string>& value) = 0;
+  virtual void ReadIntToUnionImpl(std::variant<int32_t, bool>& value) = 0;
+  virtual void ReadFloatToUnionImpl(std::variant<float, bool>& value) = 0;
+  virtual void ReadStringToUnionImpl(std::variant<std::string, bool>& value) = 0;
+  virtual void ReadOptionalIntToFloatImpl(std::optional<float>& value) = 0;
+  virtual void ReadOptionalFloatToStringImpl(std::optional<std::string>& value) = 0;
+  virtual void ReadAliasedLongToStringImpl(evo_test::AliasedLongToString& value) = 0;
+  virtual void ReadRecordWithChangesImpl(evo_test::RecordWithChanges& value) = 0;
+  virtual void ReadAliasedRecordWithChangesImpl(evo_test::AliasedRecordWithChanges& value) = 0;
+  virtual void ReadOptionalRecordWithChangesImpl(std::optional<evo_test::RecordWithChanges>& value) = 0;
+  virtual void ReadAliasedOptionalRecordWithChangesImpl(std::optional<evo_test::AliasedRecordWithChanges>& value) = 0;
+  virtual bool ReadStreamedRecordWithChangesImpl(evo_test::RecordWithChanges& value) = 0;
+  virtual bool ReadStreamedRecordWithChangesImpl(std::vector<evo_test::RecordWithChanges>& values);
   virtual void CloseImpl() {}
   static std::string schema_;
 
@@ -115,11 +347,11 @@ class UnusedProtocolWriterBase {
   public:
   // Ordinal 0.
   // Call this method for each element of the `samples` stream, then call `EndSamples() when done.`
-  void WriteSamples(evo_test::Sample const& value);
+  void WriteSamples(evo_test::UnchangedRecord const& value);
 
   // Ordinal 0.
   // Call this method to write many values to the `samples` stream, then call `EndSamples()` when done.
-  void WriteSamples(std::vector<evo_test::Sample> const& values);
+  void WriteSamples(std::vector<evo_test::UnchangedRecord> const& values);
 
   // Marks the end of the `samples` stream.
   void EndSamples();
@@ -133,8 +365,8 @@ class UnusedProtocolWriterBase {
   virtual void Flush() {}
 
   protected:
-  virtual void WriteSamplesImpl(evo_test::Sample const& value) = 0;
-  virtual void WriteSamplesImpl(std::vector<evo_test::Sample> const& value);
+  virtual void WriteSamplesImpl(evo_test::UnchangedRecord const& value) = 0;
+  virtual void WriteSamplesImpl(std::vector<evo_test::UnchangedRecord> const& value);
   virtual void EndSamplesImpl() = 0;
   virtual void CloseImpl() {}
 
@@ -154,10 +386,10 @@ class UnusedProtocolWriterBase {
 class UnusedProtocolReaderBase {
   public:
   // Ordinal 0.
-  [[nodiscard]] bool ReadSamples(evo_test::Sample& value);
+  [[nodiscard]] bool ReadSamples(evo_test::UnchangedRecord& value);
 
   // Ordinal 0.
-  [[nodiscard]] bool ReadSamples(std::vector<evo_test::Sample>& values);
+  [[nodiscard]] bool ReadSamples(std::vector<evo_test::UnchangedRecord>& values);
 
   // Optionaly close this writer before destructing. Validates that all steps were completely read.
   void Close();
@@ -167,8 +399,8 @@ class UnusedProtocolReaderBase {
   virtual ~UnusedProtocolReaderBase() = default;
 
   protected:
-  virtual bool ReadSamplesImpl(evo_test::Sample& value) = 0;
-  virtual bool ReadSamplesImpl(std::vector<evo_test::Sample>& values);
+  virtual bool ReadSamplesImpl(evo_test::UnchangedRecord& value) = 0;
+  virtual bool ReadSamplesImpl(std::vector<evo_test::UnchangedRecord>& values);
   virtual void CloseImpl() {}
   static std::string schema_;
 

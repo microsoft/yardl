@@ -11,79 +11,43 @@
 #include "yardl/yardl.h"
 
 namespace evo_test {
-struct Header {
-  std::unordered_map<std::string, std::vector<std::string>> meta{};
-  std::string subject{};
-  int64_t weight{};
-  std::optional<std::string> added{};
+using AliasedLongToString = std::string;
 
-  bool operator==(const Header& other) const {
-    return meta == other.meta &&
-      subject == other.subject &&
-      weight == other.weight &&
-      added == other.added;
-  }
-
-  bool operator!=(const Header& other) const {
-    return !(*this == other);
-  }
-};
-
-struct Sample {
-  std::vector<int32_t> data{};
-  yardl::DateTime timestamp{};
-
-  bool operator==(const Sample& other) const {
-    return data == other.data &&
-      timestamp == other.timestamp;
-  }
-
-  bool operator!=(const Sample& other) const {
-    return !(*this == other);
-  }
-};
-
-struct Signature {
+struct UnchangedRecord {
   std::string name{};
-  std::string email{};
-  int64_t number{};
+  int32_t age{};
+  std::unordered_map<std::string, double> meta{};
 
-  bool operator==(const Signature& other) const {
+  bool operator==(const UnchangedRecord& other) const {
     return name == other.name &&
-      email == other.email &&
-      number == other.number;
+      age == other.age &&
+      meta == other.meta;
   }
 
-  bool operator!=(const Signature& other) const {
+  bool operator!=(const UnchangedRecord& other) const {
     return !(*this == other);
   }
 };
 
-struct Footer {
-  evo_test::Signature signature{};
+struct RecordWithChanges {
+  double float_to_double{};
+  evo_test::UnchangedRecord unchanged_record{};
+  int64_t int_to_long{};
+  std::optional<std::string> optional_long_to_string{};
 
-  bool operator==(const Footer& other) const {
-    return signature == other.signature;
+  bool operator==(const RecordWithChanges& other) const {
+    return float_to_double == other.float_to_double &&
+      unchanged_record == other.unchanged_record &&
+      int_to_long == other.int_to_long &&
+      optional_long_to_string == other.optional_long_to_string;
   }
 
-  bool operator!=(const Footer& other) const {
+  bool operator!=(const RecordWithChanges& other) const {
     return !(*this == other);
   }
 };
 
-using AliasedPrimitive = std::string;
-
-struct UnusedRecord {
-  std::unordered_map<std::string, std::string> subject{};
-
-  bool operator==(const UnusedRecord& other) const {
-    return subject == other.subject;
-  }
-
-  bool operator!=(const UnusedRecord& other) const {
-    return !(*this == other);
-  }
-};
+using AliasedRecordWithChanges = evo_test::RecordWithChanges;
 
 } // namespace evo_test
 

@@ -6,173 +6,395 @@
 namespace evo_test {
 using ordered_json = nlohmann::ordered_json;
 
-[[maybe_unused]] static void to_json(ordered_json& j, evo_test::Header const& value);
-[[maybe_unused]] static void from_json(ordered_json const& j, evo_test::Header& value);
+[[maybe_unused]] static void to_json(ordered_json& j, evo_test::UnchangedRecord const& value);
+[[maybe_unused]] static void from_json(ordered_json const& j, evo_test::UnchangedRecord& value);
 
-[[maybe_unused]] static void to_json(ordered_json& j, evo_test::Sample const& value);
-[[maybe_unused]] static void from_json(ordered_json const& j, evo_test::Sample& value);
-
-[[maybe_unused]] static void to_json(ordered_json& j, evo_test::Signature const& value);
-[[maybe_unused]] static void from_json(ordered_json const& j, evo_test::Signature& value);
-
-[[maybe_unused]] static void to_json(ordered_json& j, evo_test::Footer const& value);
-[[maybe_unused]] static void from_json(ordered_json const& j, evo_test::Footer& value);
-
-[[maybe_unused]] static void to_json(ordered_json& j, evo_test::UnusedRecord const& value);
-[[maybe_unused]] static void from_json(ordered_json const& j, evo_test::UnusedRecord& value);
+[[maybe_unused]] static void to_json(ordered_json& j, evo_test::RecordWithChanges const& value);
+[[maybe_unused]] static void from_json(ordered_json const& j, evo_test::RecordWithChanges& value);
 
 } // namespace evo_test
 
 namespace evo_test {
 using ordered_json = nlohmann::ordered_json;
 
-[[maybe_unused]] static void to_json(ordered_json& j, evo_test::Header const& value) {
+[[maybe_unused]] static void to_json(ordered_json& j, evo_test::UnchangedRecord const& value) {
   j = ordered_json::object();
-  if (yardl::ndjson::ShouldSerializeFieldValue(value.subject)) {
-    j.push_back({"subject", value.subject});
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.name)) {
+    j.push_back({"name", value.name});
   }
-  if (yardl::ndjson::ShouldSerializeFieldValue(value.weight)) {
-    j.push_back({"weight", value.weight});
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.age)) {
+    j.push_back({"age", value.age});
   }
   if (yardl::ndjson::ShouldSerializeFieldValue(value.meta)) {
     j.push_back({"meta", value.meta});
   }
 }
 
-[[maybe_unused]] static void from_json(ordered_json const& j, evo_test::Header& value) {
-  if (auto it = j.find("subject"); it != j.end()) {
-    it->get_to(value.subject);
+[[maybe_unused]] static void from_json(ordered_json const& j, evo_test::UnchangedRecord& value) {
+  if (auto it = j.find("name"); it != j.end()) {
+    it->get_to(value.name);
   }
-  if (auto it = j.find("weight"); it != j.end()) {
-    it->get_to(value.weight);
+  if (auto it = j.find("age"); it != j.end()) {
+    it->get_to(value.age);
   }
   if (auto it = j.find("meta"); it != j.end()) {
     it->get_to(value.meta);
   }
 }
 
-[[maybe_unused]] static void to_json(ordered_json& j, evo_test::Sample const& value) {
+[[maybe_unused]] static void to_json(ordered_json& j, evo_test::RecordWithChanges const& value) {
   j = ordered_json::object();
-  if (yardl::ndjson::ShouldSerializeFieldValue(value.data)) {
-    j.push_back({"data", value.data});
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.int_to_long)) {
+    j.push_back({"intToLong", value.int_to_long});
   }
-  if (yardl::ndjson::ShouldSerializeFieldValue(value.timestamp)) {
-    j.push_back({"timestamp", value.timestamp});
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.deprecated_vector)) {
+    j.push_back({"deprecatedVector", value.deprecated_vector});
   }
-}
-
-[[maybe_unused]] static void from_json(ordered_json const& j, evo_test::Sample& value) {
-  if (auto it = j.find("data"); it != j.end()) {
-    it->get_to(value.data);
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.float_to_double)) {
+    j.push_back({"floatToDouble", value.float_to_double});
   }
-  if (auto it = j.find("timestamp"); it != j.end()) {
-    it->get_to(value.timestamp);
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.deprecated_array)) {
+    j.push_back({"deprecatedArray", value.deprecated_array});
   }
-}
-
-[[maybe_unused]] static void to_json(ordered_json& j, evo_test::Signature const& value) {
-  j = ordered_json::object();
-  if (yardl::ndjson::ShouldSerializeFieldValue(value.name)) {
-    j.push_back({"name", value.name});
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.optional_long_to_string)) {
+    j.push_back({"optionalLongToString", value.optional_long_to_string});
   }
-  if (yardl::ndjson::ShouldSerializeFieldValue(value.email)) {
-    j.push_back({"email", value.email});
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.deprecated_map)) {
+    j.push_back({"deprecatedMap", value.deprecated_map});
   }
-  if (yardl::ndjson::ShouldSerializeFieldValue(value.number)) {
-    j.push_back({"number", value.number});
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.unchanged_record)) {
+    j.push_back({"unchangedRecord", value.unchanged_record});
   }
 }
 
-[[maybe_unused]] static void from_json(ordered_json const& j, evo_test::Signature& value) {
-  if (auto it = j.find("name"); it != j.end()) {
-    it->get_to(value.name);
+[[maybe_unused]] static void from_json(ordered_json const& j, evo_test::RecordWithChanges& value) {
+  if (auto it = j.find("intToLong"); it != j.end()) {
+    it->get_to(value.int_to_long);
   }
-  if (auto it = j.find("email"); it != j.end()) {
-    it->get_to(value.email);
+  if (auto it = j.find("deprecatedVector"); it != j.end()) {
+    it->get_to(value.deprecated_vector);
   }
-  if (auto it = j.find("number"); it != j.end()) {
-    it->get_to(value.number);
+  if (auto it = j.find("floatToDouble"); it != j.end()) {
+    it->get_to(value.float_to_double);
   }
-}
-
-[[maybe_unused]] static void to_json(ordered_json& j, evo_test::Footer const& value) {
-  j = ordered_json::object();
-  if (yardl::ndjson::ShouldSerializeFieldValue(value.signature)) {
-    j.push_back({"signature", value.signature});
+  if (auto it = j.find("deprecatedArray"); it != j.end()) {
+    it->get_to(value.deprecated_array);
   }
-}
-
-[[maybe_unused]] static void from_json(ordered_json const& j, evo_test::Footer& value) {
-  if (auto it = j.find("signature"); it != j.end()) {
-    it->get_to(value.signature);
+  if (auto it = j.find("optionalLongToString"); it != j.end()) {
+    it->get_to(value.optional_long_to_string);
   }
-}
-
-[[maybe_unused]] static void to_json(ordered_json& j, evo_test::UnusedRecord const& value) {
-  j = ordered_json::object();
-  if (yardl::ndjson::ShouldSerializeFieldValue(value.subject)) {
-    j.push_back({"subject", value.subject});
+  if (auto it = j.find("deprecatedMap"); it != j.end()) {
+    it->get_to(value.deprecated_map);
   }
-}
-
-[[maybe_unused]] static void from_json(ordered_json const& j, evo_test::UnusedRecord& value) {
-  if (auto it = j.find("subject"); it != j.end()) {
-    it->get_to(value.subject);
+  if (auto it = j.find("unchangedRecord"); it != j.end()) {
+    it->get_to(value.unchanged_record);
   }
 }
 
 } // namespace evo_test
 
 namespace evo_test::ndjson {
-void MyProtocolWriter::WriteHeaderImpl(evo_test::Header const& value) {
+void ProtocolWithChangesWriter::WriteInt8ToIntImpl(int8_t const& value) {
   ordered_json json_value = value;
-  yardl::ndjson::WriteProtocolValue(stream_, "header", json_value);}
+  yardl::ndjson::WriteProtocolValue(stream_, "int8ToInt", json_value);}
 
-void MyProtocolWriter::WriteIdImpl(int64_t const& value) {
+void ProtocolWithChangesWriter::WriteInt8ToLongImpl(int8_t const& value) {
   ordered_json json_value = value;
-  yardl::ndjson::WriteProtocolValue(stream_, "id", json_value);}
+  yardl::ndjson::WriteProtocolValue(stream_, "int8ToLong", json_value);}
 
-void MyProtocolWriter::WriteSamplesImpl(evo_test::Sample const& value) {
+void ProtocolWithChangesWriter::WriteInt8ToUintImpl(int8_t const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "int8ToUint", json_value);}
+
+void ProtocolWithChangesWriter::WriteInt8ToUlongImpl(int8_t const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "int8ToUlong", json_value);}
+
+void ProtocolWithChangesWriter::WriteInt8ToFloatImpl(int8_t const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "int8ToFloat", json_value);}
+
+void ProtocolWithChangesWriter::WriteInt8ToDoubleImpl(int8_t const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "int8ToDouble", json_value);}
+
+void ProtocolWithChangesWriter::WriteIntToUintImpl(int32_t const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "intToUint", json_value);}
+
+void ProtocolWithChangesWriter::WriteIntToLongImpl(int32_t const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "intToLong", json_value);}
+
+void ProtocolWithChangesWriter::WriteIntToFloatImpl(int32_t const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "intToFloat", json_value);}
+
+void ProtocolWithChangesWriter::WriteIntToDoubleImpl(int32_t const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "intToDouble", json_value);}
+
+void ProtocolWithChangesWriter::WriteUintToUlongImpl(uint32_t const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "uintToUlong", json_value);}
+
+void ProtocolWithChangesWriter::WriteUintToFloatImpl(uint32_t const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "uintToFloat", json_value);}
+
+void ProtocolWithChangesWriter::WriteUintToDoubleImpl(uint32_t const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "uintToDouble", json_value);}
+
+void ProtocolWithChangesWriter::WriteFloatToDoubleImpl(float const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "floatToDouble", json_value);}
+
+void ProtocolWithChangesWriter::WriteIntToStringImpl(int32_t const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "intToString", json_value);}
+
+void ProtocolWithChangesWriter::WriteUintToStringImpl(uint32_t const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "uintToString", json_value);}
+
+void ProtocolWithChangesWriter::WriteLongToStringImpl(int64_t const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "longToString", json_value);}
+
+void ProtocolWithChangesWriter::WriteUlongToStringImpl(uint64_t const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "ulongToString", json_value);}
+
+void ProtocolWithChangesWriter::WriteFloatToStringImpl(float const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "floatToString", json_value);}
+
+void ProtocolWithChangesWriter::WriteDoubleToStringImpl(double const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "doubleToString", json_value);}
+
+void ProtocolWithChangesWriter::WriteIntToOptionalImpl(int32_t const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "intToOptional", json_value);}
+
+void ProtocolWithChangesWriter::WriteFloatToOptionalImpl(float const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "floatToOptional", json_value);}
+
+void ProtocolWithChangesWriter::WriteStringToOptionalImpl(std::string const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "stringToOptional", json_value);}
+
+void ProtocolWithChangesWriter::WriteIntToUnionImpl(int32_t const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "intToUnion", json_value);}
+
+void ProtocolWithChangesWriter::WriteFloatToUnionImpl(float const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "floatToUnion", json_value);}
+
+void ProtocolWithChangesWriter::WriteStringToUnionImpl(std::string const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "stringToUnion", json_value);}
+
+void ProtocolWithChangesWriter::WriteOptionalIntToFloatImpl(std::optional<int32_t> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "optionalIntToFloat", json_value);}
+
+void ProtocolWithChangesWriter::WriteOptionalFloatToStringImpl(std::optional<float> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "optionalFloatToString", json_value);}
+
+void ProtocolWithChangesWriter::WriteAliasedLongToStringImpl(evo_test::AliasedLongToString const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "aliasedLongToString", json_value);}
+
+void ProtocolWithChangesWriter::WriteRecordWithChangesImpl(evo_test::RecordWithChanges const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "recordWithChanges", json_value);}
+
+void ProtocolWithChangesWriter::WriteAliasedRecordWithChangesImpl(evo_test::AliasedRecordWithChanges const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "aliasedRecordWithChanges", json_value);}
+
+void ProtocolWithChangesWriter::WriteOptionalRecordWithChangesImpl(std::optional<evo_test::RecordWithChanges> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "optionalRecordWithChanges", json_value);}
+
+void ProtocolWithChangesWriter::WriteAliasedOptionalRecordWithChangesImpl(std::optional<evo_test::AliasedRecordWithChanges> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "aliasedOptionalRecordWithChanges", json_value);}
+
+void ProtocolWithChangesWriter::WriteStreamedRecordWithChangesImpl(evo_test::RecordWithChanges const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "streamedRecordWithChanges", json_value);}
+
+void ProtocolWithChangesWriter::Flush() {
+  stream_.flush();
+}
+
+void ProtocolWithChangesWriter::CloseImpl() {
+  stream_.flush();
+}
+
+void ProtocolWithChangesReader::ReadInt8ToIntImpl(int8_t& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "int8ToInt", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadInt8ToLongImpl(int8_t& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "int8ToLong", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadInt8ToUintImpl(int8_t& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "int8ToUint", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadInt8ToUlongImpl(int8_t& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "int8ToUlong", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadInt8ToFloatImpl(int8_t& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "int8ToFloat", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadInt8ToDoubleImpl(int8_t& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "int8ToDouble", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadIntToUintImpl(int32_t& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "intToUint", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadIntToLongImpl(int32_t& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "intToLong", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadIntToFloatImpl(int32_t& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "intToFloat", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadIntToDoubleImpl(int32_t& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "intToDouble", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadUintToUlongImpl(uint32_t& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "uintToUlong", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadUintToFloatImpl(uint32_t& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "uintToFloat", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadUintToDoubleImpl(uint32_t& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "uintToDouble", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadFloatToDoubleImpl(float& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "floatToDouble", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadIntToStringImpl(int32_t& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "intToString", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadUintToStringImpl(uint32_t& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "uintToString", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadLongToStringImpl(int64_t& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "longToString", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadUlongToStringImpl(uint64_t& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "ulongToString", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadFloatToStringImpl(float& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "floatToString", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadDoubleToStringImpl(double& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "doubleToString", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadIntToOptionalImpl(int32_t& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "intToOptional", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadFloatToOptionalImpl(float& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "floatToOptional", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadStringToOptionalImpl(std::string& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "stringToOptional", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadIntToUnionImpl(int32_t& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "intToUnion", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadFloatToUnionImpl(float& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "floatToUnion", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadStringToUnionImpl(std::string& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "stringToUnion", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadOptionalIntToFloatImpl(std::optional<int32_t>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "optionalIntToFloat", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadOptionalFloatToStringImpl(std::optional<float>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "optionalFloatToString", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadAliasedLongToStringImpl(evo_test::AliasedLongToString& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "aliasedLongToString", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadRecordWithChangesImpl(evo_test::RecordWithChanges& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "recordWithChanges", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadAliasedRecordWithChangesImpl(evo_test::AliasedRecordWithChanges& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "aliasedRecordWithChanges", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadOptionalRecordWithChangesImpl(std::optional<evo_test::RecordWithChanges>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "optionalRecordWithChanges", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadAliasedOptionalRecordWithChangesImpl(std::optional<evo_test::AliasedRecordWithChanges>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "aliasedOptionalRecordWithChanges", true, unused_step_, value);
+}
+
+bool ProtocolWithChangesReader::ReadStreamedRecordWithChangesImpl(evo_test::RecordWithChanges& value) {
+  return yardl::ndjson::ReadProtocolValue(stream_, line_, "streamedRecordWithChanges", false, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::CloseImpl() {
+  VerifyFinished();
+}
+
+void UnusedProtocolWriter::WriteSamplesImpl(evo_test::UnchangedRecord const& value) {
   ordered_json json_value = value;
   yardl::ndjson::WriteProtocolValue(stream_, "samples", json_value);}
 
-void MyProtocolWriter::WriteMaybeImpl(std::optional<int32_t> const& value) {
-  ordered_json json_value = value;
-  yardl::ndjson::WriteProtocolValue(stream_, "maybe", json_value);}
-
-void MyProtocolWriter::WriteFooterImpl(std::optional<evo_test::Footer> const& value) {
-  ordered_json json_value = value;
-  yardl::ndjson::WriteProtocolValue(stream_, "footer", json_value);}
-
-void MyProtocolWriter::Flush() {
+void UnusedProtocolWriter::Flush() {
   stream_.flush();
 }
 
-void MyProtocolWriter::CloseImpl() {
+void UnusedProtocolWriter::CloseImpl() {
   stream_.flush();
 }
 
-void MyProtocolReader::ReadHeaderImpl(evo_test::Header& value) {
-  yardl::ndjson::ReadProtocolValue(stream_, line_, "header", true, unused_step_, value);
-}
-
-void MyProtocolReader::ReadIdImpl(int64_t& value) {
-  yardl::ndjson::ReadProtocolValue(stream_, line_, "id", true, unused_step_, value);
-}
-
-bool MyProtocolReader::ReadSamplesImpl(evo_test::Sample& value) {
+bool UnusedProtocolReader::ReadSamplesImpl(evo_test::UnchangedRecord& value) {
   return yardl::ndjson::ReadProtocolValue(stream_, line_, "samples", false, unused_step_, value);
 }
 
-void MyProtocolReader::ReadMaybeImpl(std::optional<int32_t>& value) {
-  yardl::ndjson::ReadProtocolValue(stream_, line_, "maybe", true, unused_step_, value);
-}
-
-void MyProtocolReader::ReadFooterImpl(std::optional<evo_test::Footer>& value) {
-  yardl::ndjson::ReadProtocolValue(stream_, line_, "footer", true, unused_step_, value);
-}
-
-void MyProtocolReader::CloseImpl() {
+void UnusedProtocolReader::CloseImpl() {
   VerifyFinished();
 }
 

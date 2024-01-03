@@ -1,33 +1,75 @@
-MyProtocol: !protocol
+ProtocolWithChanges: !protocol
   sequence:
-    header: Header
-    id: long
-    samples: !stream
-      items: Sample
-    maybe: int?
-    footer: Footer?
+    int8ToInt: int8
+    int8ToLong: int8
+    int8ToUint: int8
+    int8ToUlong: int8
+    int8ToFloat: int8
+    int8ToDouble: int8
 
-Header: !record
+    intToUint: int
+    intToLong: int
+    intToFloat: int
+    intToDouble: int
+    uintToUlong: uint
+    uintToFloat: uint
+    uintToDouble: uint
+
+    floatToDouble: float
+
+    intToString: int
+    uintToString: uint
+    longToString: long
+    ulongToString: ulong
+    floatToString: float
+    doubleToString: double
+
+    intToOptional: int
+    floatToOptional: float
+    stringToOptional: string
+
+    intToUnion: int
+    floatToUnion: float
+    stringToUnion: string
+
+    optionalIntToFloat: int?
+    optionalFloatToString: float?
+
+    aliasedLongToString: AliasedLongToString
+
+    recordWithChanges: RecordWithChanges
+    aliasedRecordWithChanges: AliasedRecordWithChanges
+
+    optionalRecordWithChanges: RecordWithChanges?
+    aliasedOptionalRecordWithChanges: AliasedRecordWithChanges?
+
+    # streamedIntToString: !stream
+    #   items: int
+
+    streamedRecordWithChanges: !stream
+      items: RecordWithChanges
+
+
+AliasedLongToString: long
+AliasedRecordWithChanges: RecordWithChanges
+
+RecordWithChanges: !record
   fields:
-    subject: string
-    weight: long
-    meta: string->string*
+    intToLong: int
+    deprecatedVector: int*
+    floatToDouble: float
+    deprecatedArray: byte[7]
+    optionalLongToString: long?
+    deprecatedMap: string->int*
+    unchangedRecord: UnchangedRecord
 
-Sample: !record
-  fields:
-    data: int*
-    timestamp: datetime
-
-Footer: !record
-  fields:
-    signature: Signature
-
-Signature: !record
+UnchangedRecord: !record
   fields:
     name: string
-    email: string
-    number: long
+    age: int
+    meta: string->double
 
-UnusedRecord: !record
-  fields:
-    subject: string
+UnusedProtocol: !protocol
+  sequence:
+    samples: !stream
+      items: UnchangedRecord

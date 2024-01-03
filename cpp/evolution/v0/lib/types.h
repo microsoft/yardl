@@ -11,75 +11,49 @@
 #include "yardl/yardl.h"
 
 namespace evo_test {
-struct Header {
-  std::string subject{};
-  int64_t weight{};
-  std::unordered_map<std::string, std::vector<std::string>> meta{};
+using AliasedLongToString = int64_t;
 
-  bool operator==(const Header& other) const {
-    return subject == other.subject &&
-      weight == other.weight &&
+struct UnchangedRecord {
+  std::string name{};
+  int32_t age{};
+  std::unordered_map<std::string, double> meta{};
+
+  bool operator==(const UnchangedRecord& other) const {
+    return name == other.name &&
+      age == other.age &&
       meta == other.meta;
   }
 
-  bool operator!=(const Header& other) const {
+  bool operator!=(const UnchangedRecord& other) const {
     return !(*this == other);
   }
 };
 
-struct Sample {
-  std::vector<int32_t> data{};
-  yardl::DateTime timestamp{};
+struct RecordWithChanges {
+  int32_t int_to_long{};
+  std::vector<int32_t> deprecated_vector{};
+  float float_to_double{};
+  yardl::FixedNDArray<uint8_t, 7> deprecated_array{};
+  std::optional<int64_t> optional_long_to_string{};
+  std::unordered_map<std::string, std::vector<int32_t>> deprecated_map{};
+  evo_test::UnchangedRecord unchanged_record{};
 
-  bool operator==(const Sample& other) const {
-    return data == other.data &&
-      timestamp == other.timestamp;
+  bool operator==(const RecordWithChanges& other) const {
+    return int_to_long == other.int_to_long &&
+      deprecated_vector == other.deprecated_vector &&
+      float_to_double == other.float_to_double &&
+      deprecated_array == other.deprecated_array &&
+      optional_long_to_string == other.optional_long_to_string &&
+      deprecated_map == other.deprecated_map &&
+      unchanged_record == other.unchanged_record;
   }
 
-  bool operator!=(const Sample& other) const {
+  bool operator!=(const RecordWithChanges& other) const {
     return !(*this == other);
   }
 };
 
-struct Signature {
-  std::string name{};
-  std::string email{};
-  int64_t number{};
-
-  bool operator==(const Signature& other) const {
-    return name == other.name &&
-      email == other.email &&
-      number == other.number;
-  }
-
-  bool operator!=(const Signature& other) const {
-    return !(*this == other);
-  }
-};
-
-struct Footer {
-  evo_test::Signature signature{};
-
-  bool operator==(const Footer& other) const {
-    return signature == other.signature;
-  }
-
-  bool operator!=(const Footer& other) const {
-    return !(*this == other);
-  }
-};
-
-struct UnusedRecord {
-  std::string subject{};
-
-  bool operator==(const UnusedRecord& other) const {
-    return subject == other.subject;
-  }
-
-  bool operator!=(const UnusedRecord& other) const {
-    return !(*this == other);
-  }
-};
+using AliasedRecordWithChanges = evo_test::RecordWithChanges;
 
 } // namespace evo_test
 
