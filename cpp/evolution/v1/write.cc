@@ -55,11 +55,23 @@ int main(void) {
   rec.optional_long_to_string = std::to_string(LONG_MIN);
   rec.unchanged_record = unchanged;
 
+  w.WriteOptionalIntToUnion(std::variant<std::monostate, int, std::string>(INT_MIN));
+  w.WriteOptionalRecordToUnion(std::variant<std::monostate, RecordWithChanges, std::string>(rec));
+
   w.WriteRecordWithChanges(rec);
   w.WriteAliasedRecordWithChanges(rec);
 
   w.WriteOptionalRecordWithChanges(rec);
   w.WriteAliasedOptionalRecordWithChanges(rec);
+
+  w.WriteUnionRecordWithChanges(rec);
+  // w.WriteAliasedUnionRecordWithChanges(rec);
+  w.WriteUnionWithSameTypeset(rec);
+  w.WriteUnionWithTypesAdded(rec);
+  w.WriteUnionWithTypesRemoved(rec);
+
+  // Write a vector of size 7 records
+  w.WriteVectorRecordWithChanges(std::vector<RecordWithChanges>(7, rec));
 
   // Stream a total of 7 records
   w.WriteStreamedRecordWithChanges(rec);

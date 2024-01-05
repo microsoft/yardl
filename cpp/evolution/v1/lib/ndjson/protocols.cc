@@ -73,6 +73,176 @@ struct adl_serializer<std::variant<std::string, bool>> {
   }
 };
 
+template <>
+struct adl_serializer<std::variant<std::monostate, int32_t, std::string>> {
+  [[maybe_unused]] static void to_json(ordered_json& j, std::variant<std::monostate, int32_t, std::string> const& value) {
+    std::visit([&j](auto const& v) {j = v;}, value);
+  }
+
+  [[maybe_unused]] static void from_json(ordered_json const& j, std::variant<std::monostate, int32_t, std::string>& value) {
+    if ((j.is_null())) {
+      value = j.get<std::monostate>();
+      return;
+    }
+    if ((j.is_number())) {
+      value = j.get<int32_t>();
+      return;
+    }
+    if ((j.is_string())) {
+      value = j.get<std::string>();
+      return;
+    }
+    throw std::runtime_error("Invalid union value");
+  }
+};
+
+template <>
+struct adl_serializer<std::variant<std::monostate, evo_test::RecordWithChanges, std::string>> {
+  [[maybe_unused]] static void to_json(ordered_json& j, std::variant<std::monostate, evo_test::RecordWithChanges, std::string> const& value) {
+    std::visit([&j](auto const& v) {j = v;}, value);
+  }
+
+  [[maybe_unused]] static void from_json(ordered_json const& j, std::variant<std::monostate, evo_test::RecordWithChanges, std::string>& value) {
+    if ((j.is_null())) {
+      value = j.get<std::monostate>();
+      return;
+    }
+    if ((j.is_object())) {
+      value = j.get<evo_test::RecordWithChanges>();
+      return;
+    }
+    if ((j.is_string())) {
+      value = j.get<std::string>();
+      return;
+    }
+    throw std::runtime_error("Invalid union value");
+  }
+};
+
+template <>
+struct adl_serializer<std::variant<evo_test::RecordWithChanges, int32_t>> {
+  [[maybe_unused]] static void to_json(ordered_json& j, std::variant<evo_test::RecordWithChanges, int32_t> const& value) {
+    std::visit([&j](auto const& v) {j = v;}, value);
+  }
+
+  [[maybe_unused]] static void from_json(ordered_json const& j, std::variant<evo_test::RecordWithChanges, int32_t>& value) {
+    if ((j.is_object())) {
+      value = j.get<evo_test::RecordWithChanges>();
+      return;
+    }
+    if ((j.is_number())) {
+      value = j.get<int32_t>();
+      return;
+    }
+    throw std::runtime_error("Invalid union value");
+  }
+};
+
+template <>
+struct adl_serializer<std::variant<float, evo_test::RecordWithChanges, std::string, int32_t>> {
+  [[maybe_unused]] static void to_json(ordered_json& j, std::variant<float, evo_test::RecordWithChanges, std::string, int32_t> const& value) {
+    switch (value.index()) {
+      case 0:
+        j = ordered_json{ {"float32", std::get<float>(value)} };
+        break;
+      case 1:
+        j = ordered_json{ {"RecordWithChanges", std::get<evo_test::RecordWithChanges>(value)} };
+        break;
+      case 2:
+        j = ordered_json{ {"string", std::get<std::string>(value)} };
+        break;
+      case 3:
+        j = ordered_json{ {"int32", std::get<int32_t>(value)} };
+        break;
+      default:
+        throw std::runtime_error("Invalid union value");
+    }
+  }
+
+  [[maybe_unused]] static void from_json(ordered_json const& j, std::variant<float, evo_test::RecordWithChanges, std::string, int32_t>& value) {
+    auto it = j.begin();
+    std::string tag = it.key();
+    if (tag == "float32") {
+      value = it.value().get<float>();
+      return;
+    }
+    if (tag == "RecordWithChanges") {
+      value = it.value().get<evo_test::RecordWithChanges>();
+      return;
+    }
+    if (tag == "string") {
+      value = it.value().get<std::string>();
+      return;
+    }
+    if (tag == "int32") {
+      value = it.value().get<int32_t>();
+      return;
+    }
+  }
+};
+
+template <>
+struct adl_serializer<std::variant<evo_test::RecordWithChanges, int32_t, float, std::string>> {
+  [[maybe_unused]] static void to_json(ordered_json& j, std::variant<evo_test::RecordWithChanges, int32_t, float, std::string> const& value) {
+    switch (value.index()) {
+      case 0:
+        j = ordered_json{ {"RecordWithChanges", std::get<evo_test::RecordWithChanges>(value)} };
+        break;
+      case 1:
+        j = ordered_json{ {"int32", std::get<int32_t>(value)} };
+        break;
+      case 2:
+        j = ordered_json{ {"float32", std::get<float>(value)} };
+        break;
+      case 3:
+        j = ordered_json{ {"string", std::get<std::string>(value)} };
+        break;
+      default:
+        throw std::runtime_error("Invalid union value");
+    }
+  }
+
+  [[maybe_unused]] static void from_json(ordered_json const& j, std::variant<evo_test::RecordWithChanges, int32_t, float, std::string>& value) {
+    auto it = j.begin();
+    std::string tag = it.key();
+    if (tag == "RecordWithChanges") {
+      value = it.value().get<evo_test::RecordWithChanges>();
+      return;
+    }
+    if (tag == "int32") {
+      value = it.value().get<int32_t>();
+      return;
+    }
+    if (tag == "float32") {
+      value = it.value().get<float>();
+      return;
+    }
+    if (tag == "string") {
+      value = it.value().get<std::string>();
+      return;
+    }
+  }
+};
+
+template <>
+struct adl_serializer<std::variant<evo_test::RecordWithChanges, std::string>> {
+  [[maybe_unused]] static void to_json(ordered_json& j, std::variant<evo_test::RecordWithChanges, std::string> const& value) {
+    std::visit([&j](auto const& v) {j = v;}, value);
+  }
+
+  [[maybe_unused]] static void from_json(ordered_json const& j, std::variant<evo_test::RecordWithChanges, std::string>& value) {
+    if ((j.is_object())) {
+      value = j.get<evo_test::RecordWithChanges>();
+      return;
+    }
+    if ((j.is_string())) {
+      value = j.get<std::string>();
+      return;
+    }
+    throw std::runtime_error("Invalid union value");
+  }
+};
+
 NLOHMANN_JSON_NAMESPACE_END
 
 namespace evo_test {
@@ -253,6 +423,14 @@ void ProtocolWithChangesWriter::WriteAliasedLongToStringImpl(evo_test::AliasedLo
   ordered_json json_value = value;
   yardl::ndjson::WriteProtocolValue(stream_, "aliasedLongToString", json_value);}
 
+void ProtocolWithChangesWriter::WriteOptionalIntToUnionImpl(std::variant<std::monostate, int32_t, std::string> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "optionalIntToUnion", json_value);}
+
+void ProtocolWithChangesWriter::WriteOptionalRecordToUnionImpl(std::variant<std::monostate, evo_test::RecordWithChanges, std::string> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "optionalRecordToUnion", json_value);}
+
 void ProtocolWithChangesWriter::WriteRecordWithChangesImpl(evo_test::RecordWithChanges const& value) {
   ordered_json json_value = value;
   yardl::ndjson::WriteProtocolValue(stream_, "recordWithChanges", json_value);}
@@ -268,6 +446,26 @@ void ProtocolWithChangesWriter::WriteOptionalRecordWithChangesImpl(std::optional
 void ProtocolWithChangesWriter::WriteAliasedOptionalRecordWithChangesImpl(std::optional<evo_test::AliasedRecordWithChanges> const& value) {
   ordered_json json_value = value;
   yardl::ndjson::WriteProtocolValue(stream_, "aliasedOptionalRecordWithChanges", json_value);}
+
+void ProtocolWithChangesWriter::WriteUnionRecordWithChangesImpl(std::variant<evo_test::RecordWithChanges, int32_t> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "unionRecordWithChanges", json_value);}
+
+void ProtocolWithChangesWriter::WriteUnionWithSameTypesetImpl(std::variant<float, evo_test::RecordWithChanges, std::string, int32_t> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "unionWithSameTypeset", json_value);}
+
+void ProtocolWithChangesWriter::WriteUnionWithTypesAddedImpl(std::variant<evo_test::RecordWithChanges, int32_t, float, std::string> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "unionWithTypesAdded", json_value);}
+
+void ProtocolWithChangesWriter::WriteUnionWithTypesRemovedImpl(std::variant<evo_test::RecordWithChanges, std::string> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "unionWithTypesRemoved", json_value);}
+
+void ProtocolWithChangesWriter::WriteVectorRecordWithChangesImpl(std::vector<evo_test::RecordWithChanges> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "vectorRecordWithChanges", json_value);}
 
 void ProtocolWithChangesWriter::WriteStreamedRecordWithChangesImpl(evo_test::RecordWithChanges const& value) {
   ordered_json json_value = value;
@@ -397,6 +595,14 @@ void ProtocolWithChangesReader::ReadAliasedLongToStringImpl(evo_test::AliasedLon
   yardl::ndjson::ReadProtocolValue(stream_, line_, "aliasedLongToString", true, unused_step_, value);
 }
 
+void ProtocolWithChangesReader::ReadOptionalIntToUnionImpl(std::variant<std::monostate, int32_t, std::string>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "optionalIntToUnion", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadOptionalRecordToUnionImpl(std::variant<std::monostate, evo_test::RecordWithChanges, std::string>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "optionalRecordToUnion", true, unused_step_, value);
+}
+
 void ProtocolWithChangesReader::ReadRecordWithChangesImpl(evo_test::RecordWithChanges& value) {
   yardl::ndjson::ReadProtocolValue(stream_, line_, "recordWithChanges", true, unused_step_, value);
 }
@@ -411,6 +617,26 @@ void ProtocolWithChangesReader::ReadOptionalRecordWithChangesImpl(std::optional<
 
 void ProtocolWithChangesReader::ReadAliasedOptionalRecordWithChangesImpl(std::optional<evo_test::AliasedRecordWithChanges>& value) {
   yardl::ndjson::ReadProtocolValue(stream_, line_, "aliasedOptionalRecordWithChanges", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadUnionRecordWithChangesImpl(std::variant<evo_test::RecordWithChanges, int32_t>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "unionRecordWithChanges", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadUnionWithSameTypesetImpl(std::variant<float, evo_test::RecordWithChanges, std::string, int32_t>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "unionWithSameTypeset", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadUnionWithTypesAddedImpl(std::variant<evo_test::RecordWithChanges, int32_t, float, std::string>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "unionWithTypesAdded", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadUnionWithTypesRemovedImpl(std::variant<evo_test::RecordWithChanges, std::string>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "unionWithTypesRemoved", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadVectorRecordWithChangesImpl(std::vector<evo_test::RecordWithChanges>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "vectorRecordWithChanges", true, unused_step_, value);
 }
 
 bool ProtocolWithChangesReader::ReadStreamedRecordWithChangesImpl(evo_test::RecordWithChanges& value) {

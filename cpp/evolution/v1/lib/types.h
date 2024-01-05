@@ -49,5 +49,7 @@ struct RecordWithChanges {
 
 using AliasedRecordWithChanges = evo_test::RecordWithChanges;
 
+using AliasOfAliasedRecordWithChanges = evo_test::AliasedRecordWithChanges;
+
 } // namespace evo_test
 

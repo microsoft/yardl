@@ -37,14 +37,25 @@ ProtocolWithChanges: !protocol
 
     aliasedLongToString: AliasedLongToString
 
+    # recordToAlias: AliasOfAliasedRecordWithChanges
+
+    optionalIntToUnion: [null, int, string]
+    optionalRecordToUnion: [null, RecordWithChanges, string]
+
     recordWithChanges: RecordWithChanges
     aliasedRecordWithChanges: AliasedRecordWithChanges
 
     optionalRecordWithChanges: RecordWithChanges?
     aliasedOptionalRecordWithChanges: AliasedRecordWithChanges?
 
-    # streamedIntToString: !stream
-    #   items: string
+    unionRecordWithChanges: [RecordWithChanges, int]
+    # aliasedUnionRecordWithChanges: [AliasedRecordWithChanges, int]
+
+    unionWithSameTypeset: [float, RecordWithChanges, string, int]
+    unionWithTypesAdded: [RecordWithChanges, int, float, string]
+    unionWithTypesRemoved: [RecordWithChanges, string]
+
+    vectorRecordWithChanges: RecordWithChanges*
 
     streamedRecordWithChanges: !stream
       items: RecordWithChanges
@@ -52,6 +63,7 @@ ProtocolWithChanges: !protocol
 
 AliasedLongToString: string
 AliasedRecordWithChanges: RecordWithChanges
+AliasOfAliasedRecordWithChanges: AliasedRecordWithChanges
 
 RecordWithChanges: !record
   fields:

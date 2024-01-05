@@ -100,69 +100,30 @@ func (tc *TypeChangeOptionalTypeChanged) Inner() TypeChange {
 
 type TypeChangeUnionToOptional struct {
 	TypePair
-	InnerChange TypeChange
-	TypeIndex   int
+	TypeIndex int
 }
 
 func (tc *TypeChangeUnionToOptional) Inverse() TypeChange {
-	return &TypeChangeOptionalToUnion{tc.Swap(), tc.InnerChange.Inverse(), tc.TypeIndex}
-}
-
-func (tc *TypeChangeUnionToOptional) Inner() TypeChange {
-	return tc.InnerChange
+	return &TypeChangeOptionalToUnion{tc.Swap(), tc.TypeIndex}
 }
 
 type TypeChangeOptionalToUnion struct {
 	TypePair
-	InnerChange TypeChange
-	TypeIndex   int
+	TypeIndex int
 }
 
 func (tc *TypeChangeOptionalToUnion) Inverse() TypeChange {
-	return &TypeChangeUnionToOptional{tc.Swap(), tc.InnerChange.Inverse(), tc.TypeIndex}
+	return &TypeChangeUnionToOptional{tc.Swap(), tc.TypeIndex}
 }
 
-func (tc *TypeChangeOptionalToUnion) Inner() TypeChange {
-	return tc.InnerChange
-}
-
-type TypeChangeUnionTypesChange struct {
+type TypeChangeUnionTypesetChanged struct {
 	TypePair
-	InnerChanges []TypeChange
+	OldMatches []bool
+	NewMatches []bool
 }
 
-func (tc *TypeChangeUnionTypesChange) Inverse() TypeChange {
-	innerChanges := make([]TypeChange, len(tc.InnerChanges))
-	for i, ch := range tc.InnerChanges {
-		innerChanges[i] = ch.Inverse()
-	}
-	return &TypeChangeUnionTypesChange{tc.Swap(), innerChanges}
-}
-
-type TypeChangeUnionShrink struct {
-	TypePair
-	InnerChanges []TypeChange
-}
-
-func (tc *TypeChangeUnionShrink) Inverse() TypeChange {
-	innerChanges := make([]TypeChange, len(tc.InnerChanges))
-	for i, ch := range tc.InnerChanges {
-		innerChanges[i] = ch.Inverse()
-	}
-	return &TypeChangeUnionGrow{tc.Swap(), innerChanges}
-}
-
-type TypeChangeUnionGrow struct {
-	TypePair
-	InnerChanges []TypeChange
-}
-
-func (tc *TypeChangeUnionGrow) Inverse() TypeChange {
-	innerChanges := make([]TypeChange, len(tc.InnerChanges))
-	for i, ch := range tc.InnerChanges {
-		innerChanges[i] = ch.Inverse()
-	}
-	return &TypeChangeUnionShrink{tc.Swap(), innerChanges}
+func (tc *TypeChangeUnionTypesetChanged) Inverse() TypeChange {
+	return &TypeChangeUnionTypesetChanged{TypePair: tc.Swap(), OldMatches: tc.NewMatches, NewMatches: tc.OldMatches}
 }
 
 type TypeChangeStreamTypeChanged struct {
@@ -214,9 +175,7 @@ var (
 	_ TypeChange = (*TypeChangeOptionalTypeChanged)(nil)
 	_ TypeChange = (*TypeChangeOptionalToUnion)(nil)
 	_ TypeChange = (*TypeChangeUnionToOptional)(nil)
-	_ TypeChange = (*TypeChangeUnionTypesChange)(nil)
-	_ TypeChange = (*TypeChangeUnionShrink)(nil)
-	_ TypeChange = (*TypeChangeUnionGrow)(nil)
+	_ TypeChange = (*TypeChangeUnionTypesetChanged)(nil)
 	_ TypeChange = (*TypeChangeStreamTypeChanged)(nil)
 	_ TypeChange = (*TypeChangeVectorTypeChanged)(nil)
 	_ TypeChange = (*TypeChangeDefinitionChanged)(nil)
@@ -457,8 +416,8 @@ func typeChangeWarningReason(tc TypeChange) string {
 		return "may result in undefined behavior"
 	case *TypeChangeScalarToUnion, *TypeChangeUnionToScalar:
 		return "may result in undefined behavior"
-	case *TypeChangeUnionGrow, *TypeChangeUnionShrink:
-		return "may result in undefined behavior"
+	case *TypeChangeUnionTypesetChanged:
+		return "may produce runtime errors"
 	}
 	return ""
 }
@@ -995,37 +954,19 @@ func detectGeneralizedTypeChanges(newType, oldType *GeneralizedType) TypeChange 
 	return nil
 }
 
-// TODO: Handle Union to Optional
 func detectOptionalChanges(newType, oldType *GeneralizedType) TypeChange {
 	if !oldType.Cases.IsOptional() {
 		if oldType.Cases.IsUnion() && oldType.Cases.HasNullOption() {
-			// We want to find a matching type in the old Union
-			// Should first look for identical type, but what if the user
-			// changed the "matching" inner type in a compatible fashion
-			// e.g. Union<string, Header_v1> to Optional<Header_v2>??
+			// An Optional<T> can become a Union<null, T, ...> ONLY if
+			// 	1. type T does not change, or
+			// 	2. type T's TypeDefinition changed
 
+			// Look for a matching type in the old Union
 			for i, c := range oldType.Cases[1:] {
-				// if c.IsNullType() {
-				// 	continue
-				// }
-				if TypesEqual(newType.Cases[1].Type, c.Type) {
-					return &TypeChangeUnionToOptional{TypePair{oldType, newType}, nil, i}
-				}
-			}
-
-			for i, c := range oldType.Cases {
 				ch := detectChangedTypes(newType.Cases[1].Type, c.Type)
-				if ch == nil {
-					// I think we shouldn't get here because we already checked above if TypesEqual...
-					return &TypeChangeUnionToOptional{TypePair{oldType, newType}, nil, i}
-				}
-
-				switch ch.(type) {
-				case *TypeChangeIncompatible:
-					// Not a match
-				default:
-					// Match, but the inner type changed in a compatible way
-					return &TypeChangeUnionToOptional{TypePair{oldType, newType}, ch, i}
+				_, ok := ch.(*TypeChangeDefinitionChanged)
+				if ch == nil || ok {
+					return &TypeChangeUnionToOptional{TypePair{oldType, newType}, i + 1}
 				}
 			}
 		}
@@ -1041,103 +982,71 @@ func detectOptionalChanges(newType, oldType *GeneralizedType) TypeChange {
 	return nil
 }
 
-// TODO: Handle Optional to Union
 func detectUnionChanges(newType, oldType *GeneralizedType) TypeChange {
 	if !oldType.Cases.IsUnion() {
 		if oldType.Cases.IsOptional() && newType.Cases.HasNullOption() {
 			for i, c := range newType.Cases[1:] {
-				// if c.IsNullType() {
-				// 	continue
-				// }
-				if TypesEqual(c.Type, oldType.Cases[1].Type) {
-					return &TypeChangeOptionalToUnion{TypePair{oldType, newType}, nil, i}
-				}
-			}
-
-			for i, c := range newType.Cases {
 				ch := detectChangedTypes(c.Type, oldType.Cases[1].Type)
-				if ch == nil {
-					// I think we shouldn't get here because we already checked above if TypesEqual...
-					return &TypeChangeOptionalToUnion{TypePair{oldType, newType}, nil, i}
-				}
-
-				switch ch.(type) {
-				case *TypeChangeIncompatible:
-					// Not a match
-				default:
-					// Match, but the inner type changed in a compatible way
-					return &TypeChangeOptionalToUnion{TypePair{oldType, newType}, ch, i}
+				_, ok := ch.(*TypeChangeDefinitionChanged)
+				if ch == nil || ok {
+					return &TypeChangeOptionalToUnion{TypePair{oldType, newType}, i + 1}
 				}
 			}
-
 		}
 		// CHANGE: Changed a non-Union/Optional to a Union
 		return &TypeChangeIncompatible{TypePair{oldType, newType}}
 	}
 
-	// NOTE: Reordering Union types is currently NOT SUPPORTED
-	if len(newType.Cases) == len(oldType.Cases) {
-		innerChanges := make([]TypeChange, len(newType.Cases))
-		for i, newCase := range newType.Cases {
-			// Determine if newType and oldType Union types are an equal set
-			oldCase := oldType.Cases[i]
-			if ch := detectChangedTypes(newCase.Type, oldCase.Type); ch != nil {
-				// CHANGE: Changed Union type
-				if typeChangeIsError(ch) {
-					return &TypeChangeIncompatible{TypePair{oldType, newType}}
-				}
-				innerChanges[i] = ch
-			}
-		}
+	oldMatches := make([]bool, len(oldType.Cases))
+	newMatches := make([]bool, len(newType.Cases))
 
-		for _, ch := range innerChanges {
-			if ch != nil {
-				return &TypeChangeUnionTypesChange{TypePair{oldType, newType}, innerChanges}
+	innerTypeDefsChanged := false
+	// Search for a match for each Type in the new Union
+	for i, newCase := range newType.Cases {
+		for j, oldCase := range oldType.Cases {
+			if oldMatches[j] {
+				continue
 			}
-		}
 
-	} else if len(newType.Cases) > len(oldType.Cases) {
-		// Determine if the oldType Union types are a subset of the newType Union types
-		// NOTE: Because type reordering is not yet supported, users can only add a type to the "end" of the Union
-		innerChanges := make([]TypeChange, len(newType.Cases))
-		for i, oldCase := range oldType.Cases {
-			// Determine if newType and oldType Union types are an equal set
-			newCase := newType.Cases[i]
-			if ch := detectChangedTypes(newCase.Type, oldCase.Type); ch != nil {
-				// CHANGE: Changed Union type
-				if typeChangeIsError(ch) {
-					return &TypeChangeIncompatible{TypePair{oldType, newType}}
-				}
-				innerChanges[i] = ch
+			ch := detectChangedTypes(newCase.Type, oldCase.Type)
+			_, ok := ch.(*TypeChangeDefinitionChanged)
+			if ch == nil || ok {
+				// Found matching type
+				newMatches[i] = true
+				oldMatches[j] = true
 			}
-		}
 
-		for _, ch := range innerChanges {
-			if ch != nil {
-				return &TypeChangeUnionGrow{TypePair{oldType, newType}, innerChanges}
+			if ok {
+				innerTypeDefsChanged = true
 			}
 		}
+	}
 
-	} else if len(newType.Cases) < len(oldType.Cases) {
-		// Determine if the newType Union types are a subset of the oldType Union types
-		innerChanges := make([]TypeChange, len(newType.Cases))
-		for i, newCase := range newType.Cases {
-			// Determine if newType and oldType Union types are an equal set
-			oldCase := oldType.Cases[i]
-			if ch := detectChangedTypes(newCase.Type, oldCase.Type); ch != nil {
-				// CHANGE: Changed Union type
-				if typeChangeIsError(ch) {
-					return &TypeChangeIncompatible{TypePair{oldType, newType}}
-				}
-				innerChanges[i] = ch
-			}
+	// If newMatches is all False, then this isn't a valid Union type change
+	// If newMatches is not all True, then type(s) were added to the Union
+	// If oldMatches is not all True, then type(s) were removed from the Union
+	// If newMatches and oldMatches are all true, then the Union types are the same, but possibly reordered
+	anyMatch := false
+	allMatch := true
+	for _, m := range newMatches {
+		if !m {
+			allMatch = false
+		} else {
+			anyMatch = true
 		}
+	}
+	for _, m := range oldMatches {
+		if !m {
+			allMatch = false
+		}
+	}
 
-		for _, ch := range innerChanges {
-			if ch != nil {
-				return &TypeChangeUnionShrink{TypePair{oldType, newType}, innerChanges}
-			}
-		}
+	if !anyMatch {
+		return &TypeChangeIncompatible{TypePair{oldType, newType}}
+	}
+
+	if innerTypeDefsChanged || !allMatch {
+		return &TypeChangeUnionTypesetChanged{TypePair{oldType, newType}, oldMatches, newMatches}
 	}
 
 	return nil
@@ -1164,11 +1073,6 @@ func detectVectorChanges(newType, oldType *GeneralizedType) TypeChange {
 		return &TypeChangeIncompatible{TypePair{oldType, newType}}
 	}
 
-	if ch := detectChangedTypes(newType.Cases[0].Type, oldType.Cases[0].Type); ch != nil {
-		// CHANGE: Changed Vector type
-		return &TypeChangeVectorTypeChanged{TypePair{oldType, newType}, ch}
-	}
-
 	if (oldDim.Length == nil) != (newDim.Length == nil) {
 		// CHANGE: Changed from a fixed-length Vector to a variable-length Vector or vice versa
 		return &TypeChangeIncompatible{TypePair{oldType, newType}}
@@ -1177,6 +1081,12 @@ func detectVectorChanges(newType, oldType *GeneralizedType) TypeChange {
 		// CHANGE: Changed vector length
 		return &TypeChangeIncompatible{TypePair{oldType, newType}}
 	}
+
+	if ch := detectChangedTypes(newType.Cases[0].Type, oldType.Cases[0].Type); ch != nil {
+		// CHANGE: Changed Vector type
+		return &TypeChangeVectorTypeChanged{TypePair{oldType, newType}, ch}
+	}
+
 	return nil
 }
 

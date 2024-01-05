@@ -58,11 +58,23 @@ int main(void) {
   rec.deprecated_map = {{"a", {1, 4, 7}}, {"b", {2, 5, 8}}, {"c", {3, 6, 9}}};
   rec.unchanged_record = unchanged;
 
+  w.WriteOptionalIntToUnion(INT_MIN);
+  w.WriteOptionalRecordToUnion(rec);
+
   w.WriteRecordWithChanges(rec);
   w.WriteAliasedRecordWithChanges(rec);
 
   w.WriteOptionalRecordWithChanges(rec);
   w.WriteAliasedOptionalRecordWithChanges(rec);
+
+  w.WriteUnionRecordWithChanges(rec);
+  // w.WriteAliasedUnionRecordWithChanges(rec);
+  w.WriteUnionWithSameTypeset(rec);
+  w.WriteUnionWithTypesAdded(rec);
+  w.WriteUnionWithTypesRemoved(rec);
+
+  // Write a vector of size 7 records
+  w.WriteVectorRecordWithChanges(std::vector<RecordWithChanges>(7, rec));
 
   // Stream a total of 7 records
   w.WriteStreamedRecordWithChanges(rec);

@@ -82,7 +82,7 @@ P: !protocol
 
 func TestRecordChanges(t *testing.T) {
 	// All RecordDefinition changes are "valid" but some may produce Warnings
-	// TOOD: Mechanism for capturing warnings (i.e. return them and log at top-level instead of logging them within evolution.go)
+	// TOOD: Mechanism for testing warnings (i.e. return them and log at top-level instead of logging them within evolution.go)
 }
 
 func TestEnumChanges(t *testing.T) {
@@ -145,7 +145,6 @@ P: !protocol
 	tests := []struct {
 		typeA string
 		typeB string
-		// errorContains string
 	}{
 		{"bool", "complexfloat"},
 		{"int", "complexfloat"},
@@ -213,23 +212,92 @@ P: !protocol
 		{"bool?", "int?"},
 
 		{"int?", "[int, float]"},
-
-		{"[bool, int]", "[int, bool]"},
-		// {"[bool, int]", "[bool, float]"},
-		// {"[bool, int]", "[bool, int, float]"},
-
 	}
 
 	for _, tt := range tests {
 		latest, previous, labels := parseVersions(t, []string{fmt.Sprintf(model, tt.typeA), fmt.Sprintf(model, tt.typeB)})
 		_, err := ValidateEvolution(latest, previous, labels)
-		assert.NotNil(t, err, fmt.Sprintf("typeA: %s, typeB: %s", tt.typeA, tt.typeB))
+		assert.NotNil(t, err, "typeA: %s, typeB: %s", tt.typeA, tt.typeB)
+
+		latest, previous, labels = parseVersions(t, []string{fmt.Sprintf(model, tt.typeB), fmt.Sprintf(model, tt.typeA)})
+		_, err = ValidateEvolution(latest, previous, labels)
+		assert.NotNil(t, err, "typeA: %s, typeB: %s", tt.typeB, tt.typeA)
+	}
+}
+
+func TestUnionChanges(t *testing.T) {
+	model := `
+R: !record
+  fields:
+    x: %s
+
+Header: !record
+  fields:
+    name: string
+    age: Number
+
+Number: int
+
+P: !protocol
+  sequence:
+    x: %s
+    r: R
+`
+	formatModel := func(yardlType string) string {
+		return fmt.Sprintf(model, yardlType, yardlType)
 	}
 
-	for _, tt := range tests {
-		latest, previous, labels := parseVersions(t, []string{fmt.Sprintf(model, tt.typeB), fmt.Sprintf(model, tt.typeA)})
+	valid := []struct {
+		typeA string
+		typeB string
+	}{
+		// Optional to Union with null alternative
+		{"int?", "[null, int, float]"},
+		{"Header?", "[null, Header]"},
+
+		// Union with type reordered
+		{"[int, float]", "[float, int]"},
+		{"[Header, Number]", "[Number, Header]"},
+
+		// Union with types added
+		{"[int, float]", "[float, int, string]"},
+		{"[Header, string]", "[string, Number, Header]"},
+
+		// Union with types removed
+		{"[int, float, string]", "[float, int]"},
+		{"[Header, string, Number]", "[Number, string]"},
+	}
+
+	for _, tt := range valid {
+		latest, previous, labels := parseVersions(t, []string{formatModel(tt.typeA), formatModel(tt.typeB)})
 		_, err := ValidateEvolution(latest, previous, labels)
-		assert.NotNil(t, err, fmt.Sprintf("typeA: %s, typeB: %s", tt.typeA, tt.typeB))
+		assert.Nil(t, err, "typeA: %s, typeB: %s", tt.typeA, tt.typeB)
+
+		latest, previous, labels = parseVersions(t, []string{formatModel(tt.typeB), formatModel(tt.typeA)})
+		_, err = ValidateEvolution(latest, previous, labels)
+		assert.Nil(t, err, "typeA: %s, typeB: %s", tt.typeB, tt.typeA)
 	}
 
+	invalid := []struct {
+		typeA string
+		typeB string
+	}{
+		// Optional to Union without null alternative
+		{"int?", "[int, float]"},
+		{"Header?", "[Header, Number]"},
+
+		// Union of completely different types
+		{"[bool, int]", "[float, string]"},
+		{"[Header, Number]", "[string, bool]"},
+	}
+
+	for _, tt := range invalid {
+		latest, previous, labels := parseVersions(t, []string{formatModel(tt.typeA), formatModel(tt.typeB)})
+		_, err := ValidateEvolution(latest, previous, labels)
+		assert.NotNil(t, err, "typeA: %s, typeB: %s", tt.typeA, tt.typeB)
+
+		latest, previous, labels = parseVersions(t, []string{formatModel(tt.typeB), formatModel(tt.typeA)})
+		_, err = ValidateEvolution(latest, previous, labels)
+		assert.NotNil(t, err, "typeA: %s, typeB: %s", tt.typeB, tt.typeA)
+	}
 }

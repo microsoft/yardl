@@ -50,7 +50,7 @@ cpp_version := "17"
 
 @tooling-test:
     cd tooling; \
-    go test ./... | { grep -v "\\[[no test files\\]" || true; }
+    go test ./... | { grep -v "\\[no test files\\]" || true; }
 
 @watch-tooling-test:
     cd tooling; \

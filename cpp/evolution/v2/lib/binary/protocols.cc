@@ -95,6 +95,117 @@ void ReadUnion(yardl::binary::CodedInputStream& stream, std::variant<T0, T1>& va
     default: throw std::runtime_error("Invalid union index.");
   }
 }
+
+template<typename T0, yardl::binary::Writer<T0> WriteT0, typename T1, yardl::binary::Writer<T1> WriteT1, typename T2, yardl::binary::Writer<T2> WriteT2>
+void WriteUnion(yardl::binary::CodedOutputStream& stream, std::variant<T0, T1, T2> const& value) {
+  yardl::binary::WriteInteger(stream, value.index());
+  switch (value.index()) {
+  case 0: {
+    T0 const& v = std::get<0>(value);
+    WriteT0(stream, v);
+    break;
+  }
+  case 1: {
+    T1 const& v = std::get<1>(value);
+    WriteT1(stream, v);
+    break;
+  }
+  case 2: {
+    T2 const& v = std::get<2>(value);
+    WriteT2(stream, v);
+    break;
+  }
+  default: throw std::runtime_error("Invalid union index.");
+  }
+}
+
+template<typename T0, yardl::binary::Reader<T0> ReadT0, typename T1, yardl::binary::Reader<T1> ReadT1, typename T2, yardl::binary::Reader<T2> ReadT2>
+void ReadUnion(yardl::binary::CodedInputStream& stream, std::variant<T0, T1, T2>& value) {
+  size_t index;
+  yardl::binary::ReadInteger(stream, index);
+  switch (index) {
+    case 0: {
+      T0 v;
+      ReadT0(stream, v);
+      value = std::move(v);
+      break;
+    }
+    case 1: {
+      T1 v;
+      ReadT1(stream, v);
+      value = std::move(v);
+      break;
+    }
+    case 2: {
+      T2 v;
+      ReadT2(stream, v);
+      value = std::move(v);
+      break;
+    }
+    default: throw std::runtime_error("Invalid union index.");
+  }
+}
+
+template<typename T0, yardl::binary::Writer<T0> WriteT0, typename T1, yardl::binary::Writer<T1> WriteT1, typename T2, yardl::binary::Writer<T2> WriteT2, typename T3, yardl::binary::Writer<T3> WriteT3>
+void WriteUnion(yardl::binary::CodedOutputStream& stream, std::variant<T0, T1, T2, T3> const& value) {
+  yardl::binary::WriteInteger(stream, value.index());
+  switch (value.index()) {
+  case 0: {
+    T0 const& v = std::get<0>(value);
+    WriteT0(stream, v);
+    break;
+  }
+  case 1: {
+    T1 const& v = std::get<1>(value);
+    WriteT1(stream, v);
+    break;
+  }
+  case 2: {
+    T2 const& v = std::get<2>(value);
+    WriteT2(stream, v);
+    break;
+  }
+  case 3: {
+    T3 const& v = std::get<3>(value);
+    WriteT3(stream, v);
+    break;
+  }
+  default: throw std::runtime_error("Invalid union index.");
+  }
+}
+
+template<typename T0, yardl::binary::Reader<T0> ReadT0, typename T1, yardl::binary::Reader<T1> ReadT1, typename T2, yardl::binary::Reader<T2> ReadT2, typename T3, yardl::binary::Reader<T3> ReadT3>
+void ReadUnion(yardl::binary::CodedInputStream& stream, std::variant<T0, T1, T2, T3>& value) {
+  size_t index;
+  yardl::binary::ReadInteger(stream, index);
+  switch (index) {
+    case 0: {
+      T0 v;
+      ReadT0(stream, v);
+      value = std::move(v);
+      break;
+    }
+    case 1: {
+      T1 v;
+      ReadT1(stream, v);
+      value = std::move(v);
+      break;
+    }
+    case 2: {
+      T2 v;
+      ReadT2(stream, v);
+      value = std::move(v);
+      break;
+    }
+    case 3: {
+      T3 v;
+      ReadT3(stream, v);
+      value = std::move(v);
+      break;
+    }
+    default: throw std::runtime_error("Invalid union index.");
+  }
+}
 } // namespace
 
 namespace evo_test::binary {
@@ -667,6 +778,42 @@ void ProtocolWithChangesWriter::WriteAliasedLongToStringImpl(evo_test::AliasedLo
   }
 }
 
+void ProtocolWithChangesWriter::WriteOptionalIntToUnionImpl(std::optional<int32_t> const& value) {
+  switch (version_) {
+  case Version::v1: {
+    std::variant<std::monostate, int32_t, std::string> optional_int_to_union_v1;
+    if (value.has_value()) {
+      optional_int_to_union_v1 = value.value();
+    } else {
+      optional_int_to_union_v1 = std::monostate{};
+    }
+    WriteUnion<std::monostate, yardl::binary::WriteMonostate, int32_t, yardl::binary::WriteInteger, std::string, yardl::binary::WriteString>(stream_, optional_int_to_union_v1);
+    break;
+  }
+  default:
+    yardl::binary::WriteOptional<int32_t, yardl::binary::WriteInteger>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesWriter::WriteOptionalRecordToUnionImpl(std::optional<evo_test::RecordWithChanges> const& value) {
+  switch (version_) {
+  case Version::v1: {
+    std::variant<std::monostate, evo_test::RecordWithChanges, std::string> optional_record_to_union_v1;
+    if (value.has_value()) {
+      optional_record_to_union_v1 = value.value();
+    } else {
+      optional_record_to_union_v1 = std::monostate{};
+    }
+    WriteUnion<std::monostate, yardl::binary::WriteMonostate, evo_test::RecordWithChanges, evo_test::binary::WriteRecordWithChanges_v1, std::string, yardl::binary::WriteString>(stream_, optional_record_to_union_v1);
+    break;
+  }
+  default:
+    yardl::binary::WriteOptional<evo_test::RecordWithChanges, evo_test::binary::WriteRecordWithChanges>(stream_, value);
+    break;
+  }
+}
+
 void ProtocolWithChangesWriter::WriteRecordWithChangesImpl(evo_test::RecordWithChanges const& value) {
   switch (version_) {
   case Version::v1: {
@@ -711,6 +858,130 @@ void ProtocolWithChangesWriter::WriteAliasedOptionalRecordWithChangesImpl(std::o
   }
   default:
     yardl::binary::WriteOptional<evo_test::AliasedRecordWithChanges, evo_test::binary::WriteAliasedRecordWithChanges>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesWriter::WriteUnionRecordWithChangesImpl(std::variant<evo_test::RecordWithChanges, int32_t> const& value) {
+  switch (version_) {
+  case Version::v1: {
+    std::variant<evo_test::RecordWithChanges, int32_t> union_record_with_changes_v1;
+    switch (value.index()) {
+      case 0: {
+        union_record_with_changes_v1 = std::get<0>(value);
+        break;
+      }
+      case 1: {
+        union_record_with_changes_v1 = std::get<1>(value);
+        break;
+      }
+      default: throw new std::runtime_error("Invalid union index.");
+    }
+    WriteUnion<evo_test::RecordWithChanges, evo_test::binary::WriteRecordWithChanges_v1, int32_t, yardl::binary::WriteInteger>(stream_, union_record_with_changes_v1);
+    break;
+  }
+  default:
+    WriteUnion<evo_test::RecordWithChanges, evo_test::binary::WriteRecordWithChanges, int32_t, yardl::binary::WriteInteger>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesWriter::WriteUnionWithSameTypesetImpl(std::variant<evo_test::RecordWithChanges, int32_t, float, std::string> const& value) {
+  switch (version_) {
+  case Version::v1: {
+    std::variant<float, evo_test::RecordWithChanges, std::string, int32_t> union_with_same_typeset_v1;
+    switch (value.index()) {
+      case 0: {
+        union_with_same_typeset_v1 = std::get<0>(value);
+        break;
+      }
+      case 1: {
+        union_with_same_typeset_v1 = std::get<1>(value);
+        break;
+      }
+      case 2: {
+        union_with_same_typeset_v1 = std::get<2>(value);
+        break;
+      }
+      case 3: {
+        union_with_same_typeset_v1 = std::get<3>(value);
+        break;
+      }
+      default: throw new std::runtime_error("Invalid union index.");
+    }
+    WriteUnion<float, yardl::binary::WriteFloatingPoint, evo_test::RecordWithChanges, evo_test::binary::WriteRecordWithChanges_v1, std::string, yardl::binary::WriteString, int32_t, yardl::binary::WriteInteger>(stream_, union_with_same_typeset_v1);
+    break;
+  }
+  default:
+    WriteUnion<evo_test::RecordWithChanges, evo_test::binary::WriteRecordWithChanges, int32_t, yardl::binary::WriteInteger, float, yardl::binary::WriteFloatingPoint, std::string, yardl::binary::WriteString>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesWriter::WriteUnionWithTypesAddedImpl(std::variant<evo_test::RecordWithChanges, float> const& value) {
+  switch (version_) {
+  case Version::v1: {
+    std::variant<evo_test::RecordWithChanges, int32_t, float, std::string> union_with_types_added_v1;
+    switch (value.index()) {
+      case 0: {
+        union_with_types_added_v1 = std::get<0>(value);
+        break;
+      }
+      case 1: {
+        union_with_types_added_v1 = std::get<1>(value);
+        break;
+      }
+      default: throw new std::runtime_error("Invalid union index.");
+    }
+    WriteUnion<evo_test::RecordWithChanges, evo_test::binary::WriteRecordWithChanges_v1, int32_t, yardl::binary::WriteInteger, float, yardl::binary::WriteFloatingPoint, std::string, yardl::binary::WriteString>(stream_, union_with_types_added_v1);
+    break;
+  }
+  default:
+    WriteUnion<evo_test::RecordWithChanges, evo_test::binary::WriteRecordWithChanges, float, yardl::binary::WriteFloatingPoint>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesWriter::WriteUnionWithTypesRemovedImpl(std::variant<evo_test::RecordWithChanges, int32_t, float, std::string> const& value) {
+  switch (version_) {
+  case Version::v1: {
+    std::variant<evo_test::RecordWithChanges, std::string> union_with_types_removed_v1;
+    switch (value.index()) {
+      case 0: {
+        union_with_types_removed_v1 = std::get<0>(value);
+        break;
+      }
+      case 1: {
+        throw new std::runtime_error("Union type incompatible with previous version of model");
+        break;
+      }
+      case 2: {
+        throw new std::runtime_error("Union type incompatible with previous version of model");
+        break;
+      }
+      case 3: {
+        union_with_types_removed_v1 = std::get<3>(value);
+        break;
+      }
+      default: throw new std::runtime_error("Invalid union index.");
+    }
+    WriteUnion<evo_test::RecordWithChanges, evo_test::binary::WriteRecordWithChanges_v1, std::string, yardl::binary::WriteString>(stream_, union_with_types_removed_v1);
+    break;
+  }
+  default:
+    WriteUnion<evo_test::RecordWithChanges, evo_test::binary::WriteRecordWithChanges, int32_t, yardl::binary::WriteInteger, float, yardl::binary::WriteFloatingPoint, std::string, yardl::binary::WriteString>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesWriter::WriteVectorRecordWithChangesImpl(std::vector<evo_test::RecordWithChanges> const& value) {
+  switch (version_) {
+  case Version::v1: {
+    yardl::binary::WriteVector<evo_test::RecordWithChanges, evo_test::binary::WriteRecordWithChanges_v1>(stream_, value);
+    break;
+  }
+  default:
+    yardl::binary::WriteVector<evo_test::RecordWithChanges, evo_test::binary::WriteRecordWithChanges>(stream_, value);
     break;
   }
 }
@@ -1166,6 +1437,38 @@ void ProtocolWithChangesReader::ReadAliasedLongToStringImpl(evo_test::AliasedLon
   }
 }
 
+void ProtocolWithChangesReader::ReadOptionalIntToUnionImpl(std::optional<int32_t>& value) {
+  switch (version_) {
+  case Version::v1: {
+    std::variant<std::monostate, int32_t, std::string> optional_int_to_union_v1;
+    ReadUnion<std::monostate, yardl::binary::ReadMonostate, int32_t, yardl::binary::ReadInteger, std::string, yardl::binary::ReadString>(stream_, optional_int_to_union_v1);
+    if (optional_int_to_union_v1.index() == 1) {
+      value = std::get<1>(optional_int_to_union_v1);
+    }
+    break;
+  }
+  default:
+    yardl::binary::ReadOptional<int32_t, yardl::binary::ReadInteger>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesReader::ReadOptionalRecordToUnionImpl(std::optional<evo_test::RecordWithChanges>& value) {
+  switch (version_) {
+  case Version::v1: {
+    std::variant<std::monostate, evo_test::RecordWithChanges, std::string> optional_record_to_union_v1;
+    ReadUnion<std::monostate, yardl::binary::ReadMonostate, evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges_v1, std::string, yardl::binary::ReadString>(stream_, optional_record_to_union_v1);
+    if (optional_record_to_union_v1.index() == 1) {
+      value = std::get<1>(optional_record_to_union_v1);
+    }
+    break;
+  }
+  default:
+    yardl::binary::ReadOptional<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges>(stream_, value);
+    break;
+  }
+}
+
 void ProtocolWithChangesReader::ReadRecordWithChangesImpl(evo_test::RecordWithChanges& value) {
   switch (version_) {
   case Version::v1: {
@@ -1210,6 +1513,130 @@ void ProtocolWithChangesReader::ReadAliasedOptionalRecordWithChangesImpl(std::op
   }
   default:
     yardl::binary::ReadOptional<evo_test::AliasedRecordWithChanges, evo_test::binary::ReadAliasedRecordWithChanges>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesReader::ReadUnionRecordWithChangesImpl(std::variant<evo_test::RecordWithChanges, int32_t>& value) {
+  switch (version_) {
+  case Version::v1: {
+    std::variant<evo_test::RecordWithChanges, int32_t> union_record_with_changes_v1;
+    ReadUnion<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges_v1, int32_t, yardl::binary::ReadInteger>(stream_, union_record_with_changes_v1);
+    switch (union_record_with_changes_v1.index()) {
+      case 0: {
+        value = std::get<0>(union_record_with_changes_v1);
+        break;
+      }
+      case 1: {
+        value = std::get<1>(union_record_with_changes_v1);
+        break;
+      }
+      default: throw new std::runtime_error("Invalid union index.");
+    }
+    break;
+  }
+  default:
+    ReadUnion<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges, int32_t, yardl::binary::ReadInteger>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesReader::ReadUnionWithSameTypesetImpl(std::variant<evo_test::RecordWithChanges, int32_t, float, std::string>& value) {
+  switch (version_) {
+  case Version::v1: {
+    std::variant<float, evo_test::RecordWithChanges, std::string, int32_t> union_with_same_typeset_v1;
+    ReadUnion<float, yardl::binary::ReadFloatingPoint, evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges_v1, std::string, yardl::binary::ReadString, int32_t, yardl::binary::ReadInteger>(stream_, union_with_same_typeset_v1);
+    switch (union_with_same_typeset_v1.index()) {
+      case 0: {
+        value = std::get<0>(union_with_same_typeset_v1);
+        break;
+      }
+      case 1: {
+        value = std::get<1>(union_with_same_typeset_v1);
+        break;
+      }
+      case 2: {
+        value = std::get<2>(union_with_same_typeset_v1);
+        break;
+      }
+      case 3: {
+        value = std::get<3>(union_with_same_typeset_v1);
+        break;
+      }
+      default: throw new std::runtime_error("Invalid union index.");
+    }
+    break;
+  }
+  default:
+    ReadUnion<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges, int32_t, yardl::binary::ReadInteger, float, yardl::binary::ReadFloatingPoint, std::string, yardl::binary::ReadString>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesReader::ReadUnionWithTypesAddedImpl(std::variant<evo_test::RecordWithChanges, float>& value) {
+  switch (version_) {
+  case Version::v1: {
+    std::variant<evo_test::RecordWithChanges, int32_t, float, std::string> union_with_types_added_v1;
+    ReadUnion<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges_v1, int32_t, yardl::binary::ReadInteger, float, yardl::binary::ReadFloatingPoint, std::string, yardl::binary::ReadString>(stream_, union_with_types_added_v1);
+    switch (union_with_types_added_v1.index()) {
+      case 0: {
+        value = std::get<0>(union_with_types_added_v1);
+        break;
+      }
+      case 1: {
+        throw new std::runtime_error("Union type incompatible with previous version of model");
+        break;
+      }
+      case 2: {
+        value = std::get<2>(union_with_types_added_v1);
+        break;
+      }
+      case 3: {
+        throw new std::runtime_error("Union type incompatible with previous version of model");
+        break;
+      }
+      default: throw new std::runtime_error("Invalid union index.");
+    }
+    break;
+  }
+  default:
+    ReadUnion<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges, float, yardl::binary::ReadFloatingPoint>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesReader::ReadUnionWithTypesRemovedImpl(std::variant<evo_test::RecordWithChanges, int32_t, float, std::string>& value) {
+  switch (version_) {
+  case Version::v1: {
+    std::variant<evo_test::RecordWithChanges, std::string> union_with_types_removed_v1;
+    ReadUnion<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges_v1, std::string, yardl::binary::ReadString>(stream_, union_with_types_removed_v1);
+    switch (union_with_types_removed_v1.index()) {
+      case 0: {
+        value = std::get<0>(union_with_types_removed_v1);
+        break;
+      }
+      case 1: {
+        value = std::get<1>(union_with_types_removed_v1);
+        break;
+      }
+      default: throw new std::runtime_error("Invalid union index.");
+    }
+    break;
+  }
+  default:
+    ReadUnion<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges, int32_t, yardl::binary::ReadInteger, float, yardl::binary::ReadFloatingPoint, std::string, yardl::binary::ReadString>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesReader::ReadVectorRecordWithChangesImpl(std::vector<evo_test::RecordWithChanges>& value) {
+  switch (version_) {
+  case Version::v1: {
+    yardl::binary::ReadVector<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges_v1>(stream_, value);
+    break;
+  }
+  default:
+    yardl::binary::ReadVector<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges>(stream_, value);
     break;
   }
 }

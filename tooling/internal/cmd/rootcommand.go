@@ -22,6 +22,7 @@ func newRootCommand(version, commit string) *cobra.Command {
 	}
 
 	verbose := false
+	quiet := false
 	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
 	zerolog.SetGlobalLevel(zerolog.WarnLevel)
 
@@ -35,6 +36,9 @@ Read more at https://github.com/microsoft/yardl`,
 			if verbose {
 				zerolog.SetGlobalLevel(zerolog.DebugLevel)
 			}
+			if quiet {
+				zerolog.SetGlobalLevel(zerolog.ErrorLevel)
+			}
 		},
 	}
 
@@ -44,7 +48,10 @@ Read more at https://github.com/microsoft/yardl`,
 
 	cobra.EnableCommandSorting = false
 
-	cmd.PersistentFlags().BoolVarP(&verbose, "verbose", "", false, "verbose output")
+	cmd.PersistentFlags().BoolVarP(&verbose, "verbose", "", false, "show debug output")
+	cmd.PersistentFlags().BoolVarP(&quiet, "quiet", "", false, "hide warnings")
+	cmd.MarkFlagsMutuallyExclusive("verbose", "quiet")
+
 	cmd.AddCommand(newInitCommand())
 	cmd.AddCommand(newGenerateCommand())
 	cmd.AddCommand(newValidateCommand())

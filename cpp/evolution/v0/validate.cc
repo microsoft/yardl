@@ -7,6 +7,8 @@ static std::string HelloWorld = "Hello, World!";
 #define assertCloseEnough(a, b) assert(std::abs(a - b) < 0.0001)
 
 void validateRecordWithChanges(RecordWithChanges const& rec) {
+  (void)(rec);
+
   assert(rec.int_to_long == INT_MIN);
   assertCloseEnough(rec.float_to_double, M_PI);
   assert(rec.optional_long_to_string.has_value());
@@ -104,13 +106,22 @@ int main(void) {
   assert(int64 == LONG_MIN);
 
   RecordWithChanges rec;
+  std::optional<RecordWithChanges> maybe_rec;
+
+  r.ReadOptionalIntToUnion(maybe_int32);
+  assert(maybe_int32.has_value());
+  assert(maybe_int32 == INT_MIN);
+
+  r.ReadOptionalRecordToUnion(maybe_rec);
+  assert(maybe_rec.has_value());
+  validateRecordWithChanges(maybe_rec.value());
+
   r.ReadRecordWithChanges(rec);
   validateRecordWithChanges(rec);
 
   r.ReadAliasedRecordWithChanges(rec);
   validateRecordWithChanges(rec);
 
-  std::optional<RecordWithChanges> maybe_rec;
   r.ReadOptionalRecordWithChanges(maybe_rec);
   assert(maybe_rec.has_value());
   validateRecordWithChanges(maybe_rec.value());
@@ -118,6 +129,36 @@ int main(void) {
   r.ReadAliasedOptionalRecordWithChanges(maybe_rec);
   assert(maybe_rec.has_value());
   validateRecordWithChanges(maybe_rec.value());
+
+  std::variant<RecordWithChanges, int> rec_or_int;
+  r.ReadUnionRecordWithChanges(rec_or_int);
+  assert(rec_or_int.index() == 0);
+  validateRecordWithChanges(std::get<0>(rec_or_int));
+
+  // r.ReadAliasedUnionRecordWithChanges(rec_or_int);
+  // assert(rec_or_int.index() == 0);
+  // validateRecordWithChanges(std::get<0>(rec_or_int));
+
+  std::variant<RecordWithChanges, int, float, std::string> rec_or_int_or_flt_or_str;
+  r.ReadUnionWithSameTypeset(rec_or_int_or_flt_or_str);
+  assert(rec_or_int_or_flt_or_str.index() == 0);
+  validateRecordWithChanges(std::get<0>(rec_or_int_or_flt_or_str));
+
+  std::variant<RecordWithChanges, float> rec_or_flt;
+  r.ReadUnionWithTypesAdded(rec_or_flt);
+  assert(rec_or_flt.index() == 0);
+  validateRecordWithChanges(std::get<0>(rec_or_flt));
+
+  r.ReadUnionWithTypesRemoved(rec_or_int_or_flt_or_str);
+  assert(rec_or_int_or_flt_or_str.index() == 0);
+  validateRecordWithChanges(std::get<0>(rec_or_int_or_flt_or_str));
+
+  std::vector<RecordWithChanges> vec;
+  r.ReadVectorRecordWithChanges(vec);
+  assert(vec.size() == 7);
+  for (auto const& rec : vec) {
+    validateRecordWithChanges(rec);
+  }
 
   int count = 0;
   while (r.ReadStreamedRecordWithChanges(rec)) {

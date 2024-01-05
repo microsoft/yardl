@@ -560,30 +560,78 @@ func typeConversionExpression(typeChange dsl.TypeChange, varName string, write b
 
 // Writes code needed to convert sourceName: typeChange.Old() into targetName: typeChange.New() on read, or vice-versa on write
 func writeTypeConversion(w *formatting.IndentedWriter, typeChange dsl.TypeChange, sourceName, targetName string, write bool) {
-	if typeChange, ok := typeChange.(dsl.WrappedTypeChange); ok {
-		switch tc := typeChange.(type) {
-		case *dsl.TypeChangeOptionalTypeChanged:
-			if write {
-				fmt.Fprintf(w, "if (%s.has_value()) {\n", sourceName)
-				w.Indented(func() {
-					writeTypeConversion(w, tc.Inner(), sourceName+".value()", targetName, write)
-				})
-				fmt.Fprintf(w, "}\n")
-			} else {
-				tmpName := "tmp"
-				fmt.Fprintf(w, "%s %s;\n", common.TypeSyntax(tc.NewType()), tmpName)
-				fmt.Fprintf(w, "if (%s.has_value()) {\n", sourceName)
-				w.Indented(func() {
-					writeTypeConversion(w, tc.Inner(), sourceName+".value()", tmpName, write)
-				})
-				fmt.Fprintf(w, "}\n")
-				fmt.Fprintf(w, "%s = %s;\n", targetName, tmpName)
-			}
+	switch tc := typeChange.(type) {
+	case *dsl.TypeChangeOptionalTypeChanged:
+		if write {
+			fmt.Fprintf(w, "if (%s.has_value()) {\n", sourceName)
+			w.Indented(func() {
+				writeTypeConversion(w, tc.Inner(), sourceName+".value()", targetName, write)
+			})
+			fmt.Fprintf(w, "}\n")
+		} else {
+			tmpName := "tmp"
+			fmt.Fprintf(w, "%s %s;\n", common.TypeSyntax(tc.NewType()), tmpName)
+			fmt.Fprintf(w, "if (%s.has_value()) {\n", sourceName)
+			w.Indented(func() {
+				writeTypeConversion(w, tc.Inner(), sourceName+".value()", tmpName, write)
+			})
+			fmt.Fprintf(w, "}\n")
+			fmt.Fprintf(w, "%s = %s;\n", targetName, tmpName)
 		}
-		return
-	}
 
-	fmt.Fprintf(w, "%s = %s;\n", targetName, typeConversionExpression(typeChange, sourceName, write))
+	case *dsl.TypeChangeUnionToOptional:
+		writeTypeConversion(w, typeChange.Inverse(), sourceName, targetName, !write)
+
+	case *dsl.TypeChangeOptionalToUnion:
+		if write {
+			// Writing a Union as an Optional
+			fmt.Fprintf(w, "if (%s.index() == %d) {\n", sourceName, tc.TypeIndex)
+			w.Indented(func() {
+				fmt.Fprintf(w, "%s = std::get<%d>(%s);\n", targetName, tc.TypeIndex, sourceName)
+			})
+			fmt.Fprintf(w, "}\n")
+		} else {
+			// Reading an Optional into a Union
+			fmt.Fprintf(w, "if (%s.has_value()) {\n", sourceName)
+			w.Indented(func() {
+				fmt.Fprintf(w, "%s = %s.value();\n", targetName, sourceName)
+			})
+			fmt.Fprintf(w, "} else {\n")
+			w.Indented(func() {
+				fmt.Fprintf(w, "%s = std::monostate{};\n", targetName)
+			})
+			fmt.Fprintf(w, "}\n")
+		}
+
+	case *dsl.TypeChangeUnionTypesetChanged:
+		if write {
+			writeTypeConversion(w, typeChange.Inverse(), sourceName, targetName, !write)
+			return
+		}
+
+		fmt.Fprintf(w, "switch (%s.index()) {\n", sourceName)
+		w.Indented(func() {
+			for i, _ := range tc.OldType().(*dsl.GeneralizedType).Cases {
+				fmt.Fprintf(w, "case %d: {\n", i)
+				w.Indented(func() {
+					if tc.OldMatches[i] {
+						fmt.Fprintf(w, "%s = std::get<%d>(%s);\n", targetName, i, sourceName)
+					} else {
+						fmt.Fprintf(w, "throw new std::runtime_error(\"Union type incompatible with previous version of model\");\n")
+					}
+					fmt.Fprintf(w, "break;\n")
+
+				})
+				fmt.Fprintf(w, "}\n")
+			}
+			fmt.Fprintf(w, "default: throw new std::runtime_error(\"Invalid union index.\");\n")
+		})
+		fmt.Fprintf(w, "}\n")
+
+	default:
+		// Basic one-line type conversion
+		fmt.Fprintf(w, "%s = %s;\n", targetName, typeConversionExpression(typeChange, sourceName, write))
+	}
 }
 
 func writeConversionRw(w *formatting.IndentedWriter, tc dsl.TypeChange, streamName, tmpName, targetName string, write bool) {

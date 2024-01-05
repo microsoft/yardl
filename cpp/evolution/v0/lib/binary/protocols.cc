@@ -47,6 +47,108 @@ struct IsTriviallySerializable<evo_test::RecordWithChanges> {
 #endif
 } //namespace yardl::binary 
 
+namespace {
+template<typename T0, yardl::binary::Writer<T0> WriteT0, typename T1, yardl::binary::Writer<T1> WriteT1>
+void WriteUnion(yardl::binary::CodedOutputStream& stream, std::variant<T0, T1> const& value) {
+  yardl::binary::WriteInteger(stream, value.index());
+  switch (value.index()) {
+  case 0: {
+    T0 const& v = std::get<0>(value);
+    WriteT0(stream, v);
+    break;
+  }
+  case 1: {
+    T1 const& v = std::get<1>(value);
+    WriteT1(stream, v);
+    break;
+  }
+  default: throw std::runtime_error("Invalid union index.");
+  }
+}
+
+template<typename T0, yardl::binary::Reader<T0> ReadT0, typename T1, yardl::binary::Reader<T1> ReadT1>
+void ReadUnion(yardl::binary::CodedInputStream& stream, std::variant<T0, T1>& value) {
+  size_t index;
+  yardl::binary::ReadInteger(stream, index);
+  switch (index) {
+    case 0: {
+      T0 v;
+      ReadT0(stream, v);
+      value = std::move(v);
+      break;
+    }
+    case 1: {
+      T1 v;
+      ReadT1(stream, v);
+      value = std::move(v);
+      break;
+    }
+    default: throw std::runtime_error("Invalid union index.");
+  }
+}
+
+template<typename T0, yardl::binary::Writer<T0> WriteT0, typename T1, yardl::binary::Writer<T1> WriteT1, typename T2, yardl::binary::Writer<T2> WriteT2, typename T3, yardl::binary::Writer<T3> WriteT3>
+void WriteUnion(yardl::binary::CodedOutputStream& stream, std::variant<T0, T1, T2, T3> const& value) {
+  yardl::binary::WriteInteger(stream, value.index());
+  switch (value.index()) {
+  case 0: {
+    T0 const& v = std::get<0>(value);
+    WriteT0(stream, v);
+    break;
+  }
+  case 1: {
+    T1 const& v = std::get<1>(value);
+    WriteT1(stream, v);
+    break;
+  }
+  case 2: {
+    T2 const& v = std::get<2>(value);
+    WriteT2(stream, v);
+    break;
+  }
+  case 3: {
+    T3 const& v = std::get<3>(value);
+    WriteT3(stream, v);
+    break;
+  }
+  default: throw std::runtime_error("Invalid union index.");
+  }
+}
+
+template<typename T0, yardl::binary::Reader<T0> ReadT0, typename T1, yardl::binary::Reader<T1> ReadT1, typename T2, yardl::binary::Reader<T2> ReadT2, typename T3, yardl::binary::Reader<T3> ReadT3>
+void ReadUnion(yardl::binary::CodedInputStream& stream, std::variant<T0, T1, T2, T3>& value) {
+  size_t index;
+  yardl::binary::ReadInteger(stream, index);
+  switch (index) {
+    case 0: {
+      T0 v;
+      ReadT0(stream, v);
+      value = std::move(v);
+      break;
+    }
+    case 1: {
+      T1 v;
+      ReadT1(stream, v);
+      value = std::move(v);
+      break;
+    }
+    case 2: {
+      T2 v;
+      ReadT2(stream, v);
+      value = std::move(v);
+      break;
+    }
+    case 3: {
+      T3 v;
+      ReadT3(stream, v);
+      value = std::move(v);
+      break;
+    }
+    default: throw std::runtime_error("Invalid union index.");
+  }
+}
+} // namespace
+
 namespace evo_test::binary {
 namespace {
 [[maybe_unused]] static void WriteAliasedLongToString(yardl::binary::CodedOutputStream& stream, evo_test::AliasedLongToString const& value) {
@@ -255,6 +357,14 @@ void ProtocolWithChangesWriter::WriteAliasedLongToStringImpl(evo_test::AliasedLo
   evo_test::binary::WriteAliasedLongToString(stream_, value);
 }
 
+void ProtocolWithChangesWriter::WriteOptionalIntToUnionImpl(std::optional<int32_t> const& value) {
+  yardl::binary::WriteOptional<int32_t, yardl::binary::WriteInteger>(stream_, value);
+}
+
+void ProtocolWithChangesWriter::WriteOptionalRecordToUnionImpl(std::optional<evo_test::RecordWithChanges> const& value) {
+  yardl::binary::WriteOptional<evo_test::RecordWithChanges, evo_test::binary::WriteRecordWithChanges>(stream_, value);
+}
+
 void ProtocolWithChangesWriter::WriteRecordWithChangesImpl(evo_test::RecordWithChanges const& value) {
   evo_test::binary::WriteRecordWithChanges(stream_, value);
 }
@@ -269,6 +379,26 @@ void ProtocolWithChangesWriter::WriteOptionalRecordWithChangesImpl(std::optional
 
 void ProtocolWithChangesWriter::WriteAliasedOptionalRecordWithChangesImpl(std::optional<evo_test::AliasedRecordWithChanges> const& value) {
   yardl::binary::WriteOptional<evo_test::AliasedRecordWithChanges, evo_test::binary::WriteAliasedRecordWithChanges>(stream_, value);
+}
+
+void ProtocolWithChangesWriter::WriteUnionRecordWithChangesImpl(std::variant<evo_test::RecordWithChanges, int32_t> const& value) {
+  WriteUnion<evo_test::RecordWithChanges, evo_test::binary::WriteRecordWithChanges, int32_t, yardl::binary::WriteInteger>(stream_, value);
+}
+
+void ProtocolWithChangesWriter::WriteUnionWithSameTypesetImpl(std::variant<evo_test::RecordWithChanges, int32_t, float, std::string> const& value) {
+  WriteUnion<evo_test::RecordWithChanges, evo_test::binary::WriteRecordWithChanges, int32_t, yardl::binary::WriteInteger, float, yardl::binary::WriteFloatingPoint, std::string, yardl::binary::WriteString>(stream_, value);
+}
+
+void ProtocolWithChangesWriter::WriteUnionWithTypesAddedImpl(std::variant<evo_test::RecordWithChanges, float> const& value) {
+  WriteUnion<evo_test::RecordWithChanges, evo_test::binary::WriteRecordWithChanges, float, yardl::binary::WriteFloatingPoint>(stream_, value);
+}
+
+void ProtocolWithChangesWriter::WriteUnionWithTypesRemovedImpl(std::variant<evo_test::RecordWithChanges, int32_t, float, std::string> const& value) {
+  WriteUnion<evo_test::RecordWithChanges, evo_test::binary::WriteRecordWithChanges, int32_t, yardl::binary::WriteInteger, float, yardl::binary::WriteFloatingPoint, std::string, yardl::binary::WriteString>(stream_, value);
+}
+
+void ProtocolWithChangesWriter::WriteVectorRecordWithChangesImpl(std::vector<evo_test::RecordWithChanges> const& value) {
+  yardl::binary::WriteVector<evo_test::RecordWithChanges, evo_test::binary::WriteRecordWithChanges>(stream_, value);
 }
 
 void ProtocolWithChangesWriter::WriteStreamedRecordWithChangesImpl(evo_test::RecordWithChanges const& value) {
@@ -410,6 +540,14 @@ void ProtocolWithChangesReader::ReadAliasedLongToStringImpl(evo_test::AliasedLon
   evo_test::binary::ReadAliasedLongToString(stream_, value);
 }
 
+void ProtocolWithChangesReader::ReadOptionalIntToUnionImpl(std::optional<int32_t>& value) {
+  yardl::binary::ReadOptional<int32_t, yardl::binary::ReadInteger>(stream_, value);
+}
+
+void ProtocolWithChangesReader::ReadOptionalRecordToUnionImpl(std::optional<evo_test::RecordWithChanges>& value) {
+  yardl::binary::ReadOptional<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges>(stream_, value);
+}
+
 void ProtocolWithChangesReader::ReadRecordWithChangesImpl(evo_test::RecordWithChanges& value) {
   evo_test::binary::ReadRecordWithChanges(stream_, value);
 }
@@ -424,6 +562,26 @@ void ProtocolWithChangesReader::ReadOptionalRecordWithChangesImpl(std::optional<
 
 void ProtocolWithChangesReader::ReadAliasedOptionalRecordWithChangesImpl(std::optional<evo_test::AliasedRecordWithChanges>& value) {
   yardl::binary::ReadOptional<evo_test::AliasedRecordWithChanges, evo_test::binary::ReadAliasedRecordWithChanges>(stream_, value);
+}
+
+void ProtocolWithChangesReader::ReadUnionRecordWithChangesImpl(std::variant<evo_test::RecordWithChanges, int32_t>& value) {
+  ReadUnion<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges, int32_t, yardl::binary::ReadInteger>(stream_, value);
+}
+
+void ProtocolWithChangesReader::ReadUnionWithSameTypesetImpl(std::variant<evo_test::RecordWithChanges, int32_t, float, std::string>& value) {
+  ReadUnion<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges, int32_t, yardl::binary::ReadInteger, float, yardl::binary::ReadFloatingPoint, std::string, yardl::binary::ReadString>(stream_, value);
+}
+
+void ProtocolWithChangesReader::ReadUnionWithTypesAddedImpl(std::variant<evo_test::RecordWithChanges, float>& value) {
+  ReadUnion<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges, float, yardl::binary::ReadFloatingPoint>(stream_, value);
+}
+
+void ProtocolWithChangesReader::ReadUnionWithTypesRemovedImpl(std::variant<evo_test::RecordWithChanges, int32_t, float, std::string>& value) {
+  ReadUnion<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges, int32_t, yardl::binary::ReadInteger, float, yardl::binary::ReadFloatingPoint, std::string, yardl::binary::ReadString>(stream_, value);
+}
+
+void ProtocolWithChangesReader::ReadVectorRecordWithChangesImpl(std::vector<evo_test::RecordWithChanges>& value) {
+  yardl::binary::ReadVector<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges>(stream_, value);
 }
 
 bool ProtocolWithChangesReader::ReadStreamedRecordWithChangesImpl(evo_test::RecordWithChanges& value) {

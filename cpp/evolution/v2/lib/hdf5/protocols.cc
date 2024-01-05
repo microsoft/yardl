@@ -6,6 +6,238 @@
 #include "../yardl/detail/hdf5/ddl.h"
 #include "../yardl/detail/hdf5/inner_types.h"
 
+namespace {
+template <typename TInner0, typename TOuter0, typename TInner1, typename TOuter1>
+class InnerUnion2 {
+  public:
+  InnerUnion2() : type_index_(-1) {} 
+  InnerUnion2(std::variant<TOuter0, TOuter1> const& v) : type_index_(static_cast<int8_t>(v.index())) {
+    Init(v);
+  }
+
+  InnerUnion2(std::variant<std::monostate, TOuter0, TOuter1> const& v) : type_index_(static_cast<int8_t>(v.index()) - 1) {
+    Init(v);
+  }
+
+  InnerUnion2(InnerUnion2 const& v) = delete;
+
+  InnerUnion2 operator=(InnerUnion2 const&) = delete;
+
+  ~InnerUnion2() {
+    switch (type_index_) {
+    case 0:
+      value0_.~TInner0();
+      break;
+    case 1:
+      value1_.~TInner1();
+      break;
+    }
+  }
+
+  void ToOuter(std::variant<TOuter0, TOuter1>& o) const {
+    ToOuterImpl(o);
+  }
+
+  void ToOuter(std::variant<std::monostate, TOuter0, TOuter1>& o) const {
+    ToOuterImpl(o);
+  }
+
+  int8_t type_index_;
+  union {
+    char empty0_[sizeof(TInner0)]{};
+    TInner0 value0_;
+  };
+  union {
+    char empty1_[sizeof(TInner1)]{};
+    TInner1 value1_;
+  };
+
+  private:
+  template <typename T>
+  void Init(T const& v) {
+    constexpr size_t offset = GetOuterVariantOffset<std::remove_const_t<std::remove_reference_t<decltype(v)>>>();
+    switch (type_index_) {
+    case 0:
+      new (&value0_) TInner0(std::get<0 + offset>(v));
+      return;
+    case 1:
+      new (&value1_) TInner1(std::get<1 + offset>(v));
+      return;
+    }
+  }
+
+  template <typename TVariant>
+  void ToOuterImpl(TVariant& o) const {
+    constexpr size_t offset = GetOuterVariantOffset<TVariant>();
+    switch (type_index_) {
+    case -1:
+      if constexpr (offset == 1) {
+        o.template emplace<0>(std::monostate{});
+        return;
+      }
+    case 0:
+      o.template emplace<0 + offset>();
+      yardl::hdf5::ToOuter(value0_, std::get<0 + offset>(o));
+      return;
+    case 1:
+      o.template emplace<1 + offset>();
+      yardl::hdf5::ToOuter(value1_, std::get<1 + offset>(o));
+      return;
+    }
+    throw std::runtime_error("unrecognized type variant type index " + std::to_string(type_index_));
+  }
+
+  template <typename TVariant>
+  static constexpr size_t GetOuterVariantOffset() {
+    constexpr bool has_monostate = std::is_same_v<std::monostate, std::variant_alternative_t<0, TVariant>>;
+    if constexpr (has_monostate) {
+      return 1;
+    }
+      return 0;
+  }
+};
+
+template <typename TInner0, typename TOuter0, typename TInner1, typename TOuter1>
+H5::CompType InnerUnion2Ddl(bool nullable, H5::DataType const& t0, std::string const& tag0, H5::DataType const& t1, std::string const& tag1) {
+  using UnionType = ::InnerUnion2<TInner0, TOuter0, TInner1, TOuter1>;
+  H5::CompType rtn(sizeof(UnionType));
+  rtn.insertMember("$type", HOFFSET(UnionType, type_index_), yardl::hdf5::UnionTypeEnumDdl(nullable, tag0, tag1));
+  rtn.insertMember(tag0, HOFFSET(UnionType, value0_), t0);
+  rtn.insertMember(tag1, HOFFSET(UnionType, value1_), t1);
+  return rtn;
+}
+
+template <typename TInner0, typename TOuter0, typename TInner1, typename TOuter1, typename TInner2, typename TOuter2, typename TInner3, typename TOuter3>
+class InnerUnion4 {
+  public:
+  InnerUnion4() : type_index_(-1) {} 
+  InnerUnion4(std::variant<TOuter0, TOuter1, TOuter2, TOuter3> const& v) : type_index_(static_cast<int8_t>(v.index())) {
+    Init(v);
+  }
+
+  InnerUnion4(std::variant<std::monostate, TOuter0, TOuter1, TOuter2, TOuter3> const& v) : type_index_(static_cast<int8_t>(v.index()) - 1) {
+    Init(v);
+  }
+
+  InnerUnion4(InnerUnion4 const& v) = delete;
+
+  InnerUnion4 operator=(InnerUnion4 const&) = delete;
+
+  ~InnerUnion4() {
+    switch (type_index_) {
+    case 0:
+      value0_.~TInner0();
+      break;
+    case 1:
+      value1_.~TInner1();
+      break;
+    case 2:
+      value2_.~TInner2();
+      break;
+    case 3:
+      value3_.~TInner3();
+      break;
+    }
+  }
+
+  void ToOuter(std::variant<TOuter0, TOuter1, TOuter2, TOuter3>& o) const {
+    ToOuterImpl(o);
+  }
+
+  void ToOuter(std::variant<std::monostate, TOuter0, TOuter1, TOuter2, TOuter3>& o) const {
+    ToOuterImpl(o);
+  }
+
+  int8_t type_index_;
+  union {
+    char empty0_[sizeof(TInner0)]{};
+    TInner0 value0_;
+  };
+  union {
+    char empty1_[sizeof(TInner1)]{};
+    TInner1 value1_;
+  };
+  union {
+    char empty2_[sizeof(TInner2)]{};
+    TInner2 value2_;
+  };
+  union {
+    char empty3_[sizeof(TInner3)]{};
+    TInner3 value3_;
+  };
+
+  private:
+  template <typename T>
+  void Init(T const& v) {
+    constexpr size_t offset = GetOuterVariantOffset<std::remove_const_t<std::remove_reference_t<decltype(v)>>>();
+    switch (type_index_) {
+    case 0:
+      new (&value0_) TInner0(std::get<0 + offset>(v));
+      return;
+    case 1:
+      new (&value1_) TInner1(std::get<1 + offset>(v));
+      return;
+    case 2:
+      new (&value2_) TInner2(std::get<2 + offset>(v));
+      return;
+    case 3:
+      new (&value3_) TInner3(std::get<3 + offset>(v));
+      return;
+    }
+  }
+
+  template <typename TVariant>
+  void ToOuterImpl(TVariant& o) const {
+    constexpr size_t offset = GetOuterVariantOffset<TVariant>();
+    switch (type_index_) {
+    case -1:
+      if constexpr (offset == 1) {
+        o.template emplace<0>(std::monostate{});
+        return;
+      }
+    case 0:
+      o.template emplace<0 + offset>();
+      yardl::hdf5::ToOuter(value0_, std::get<0 + offset>(o));
+      return;
+    case 1:
+      o.template emplace<1 + offset>();
+      yardl::hdf5::ToOuter(value1_, std::get<1 + offset>(o));
+      return;
+    case 2:
+      o.template emplace<2 + offset>();
+      yardl::hdf5::ToOuter(value2_, std::get<2 + offset>(o));
+      return;
+    case 3:
+      o.template emplace<3 + offset>();
+      yardl::hdf5::ToOuter(value3_, std::get<3 + offset>(o));
+      return;
+    }
+    throw std::runtime_error("unrecognized type variant type index " + std::to_string(type_index_));
+  }
+
+  template <typename TVariant>
+  static constexpr size_t GetOuterVariantOffset() {
+    constexpr bool has_monostate = std::is_same_v<std::monostate, std::variant_alternative_t<0, TVariant>>;
+    if constexpr (has_monostate) {
+      return 1;
+    }
+      return 0;
+  }
+};
+
+template <typename TInner0, typename TOuter0, typename TInner1, typename TOuter1, typename TInner2, typename TOuter2, typename TInner3, typename TOuter3>
+H5::CompType InnerUnion4Ddl(bool nullable, H5::DataType const& t0, std::string const& tag0, H5::DataType const& t1, std::string const& tag1, H5::DataType const& t2, std::string const& tag2, H5::DataType const& t3, std::string const& tag3) {
+  using UnionType = ::InnerUnion4<TInner0, TOuter0, TInner1, TOuter1, TInner2, TOuter2, TInner3, TOuter3>;
+  H5::CompType rtn(sizeof(UnionType));
+  rtn.insertMember("$type", HOFFSET(UnionType, type_index_), yardl::hdf5::UnionTypeEnumDdl(nullable, tag0, tag1, tag2, tag3));
+  rtn.insertMember(tag0, HOFFSET(UnionType, value0_), t0);
+  rtn.insertMember(tag1, HOFFSET(UnionType, value1_), t1);
+  rtn.insertMember(tag2, HOFFSET(UnionType, value2_), t2);
+  rtn.insertMember(tag3, HOFFSET(UnionType, value3_), t3);
+  return rtn;
+}
+}
+
 namespace evo_test::hdf5 {
 namespace {
 struct _Inner_UnchangedRecord {
@@ -222,6 +454,14 @@ void ProtocolWithChangesWriter::WriteAliasedLongToStringImpl(evo_test::AliasedLo
   yardl::hdf5::WriteScalarDataset<int64_t, evo_test::AliasedLongToString>(group_, "aliasedLongToString", H5::PredType::NATIVE_INT64, value);
 }
 
+void ProtocolWithChangesWriter::WriteOptionalIntToUnionImpl(std::optional<int32_t> const& value) {
+  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerOptional<int32_t, int32_t>, std::optional<int32_t>>(group_, "optionalIntToUnion", yardl::hdf5::OptionalTypeDdl<int32_t, int32_t>(H5::PredType::NATIVE_INT32), value);
+}
+
+void ProtocolWithChangesWriter::WriteOptionalRecordToUnionImpl(std::optional<evo_test::RecordWithChanges> const& value) {
+  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerOptional<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges>, std::optional<evo_test::RecordWithChanges>>(group_, "optionalRecordToUnion", yardl::hdf5::OptionalTypeDdl<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges>(evo_test::hdf5::GetRecordWithChangesHdf5Ddl()), value);
+}
+
 void ProtocolWithChangesWriter::WriteRecordWithChangesImpl(evo_test::RecordWithChanges const& value) {
   yardl::hdf5::WriteScalarDataset<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges>(group_, "recordWithChanges", evo_test::hdf5::GetRecordWithChangesHdf5Ddl(), value);
 }
@@ -236,6 +476,26 @@ void ProtocolWithChangesWriter::WriteOptionalRecordWithChangesImpl(std::optional
 
 void ProtocolWithChangesWriter::WriteAliasedOptionalRecordWithChangesImpl(std::optional<evo_test::AliasedRecordWithChanges> const& value) {
   yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerOptional<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::AliasedRecordWithChanges>, std::optional<evo_test::AliasedRecordWithChanges>>(group_, "aliasedOptionalRecordWithChanges", yardl::hdf5::OptionalTypeDdl<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::AliasedRecordWithChanges>(evo_test::hdf5::GetRecordWithChangesHdf5Ddl()), value);
+}
+
+void ProtocolWithChangesWriter::WriteUnionRecordWithChangesImpl(std::variant<evo_test::RecordWithChanges, int32_t> const& value) {
+  yardl::hdf5::WriteScalarDataset<::InnerUnion2<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges, int32_t, int32_t>, std::variant<evo_test::RecordWithChanges, int32_t>>(group_, "unionRecordWithChanges", ::InnerUnion2Ddl<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges, int32_t, int32_t>(false, evo_test::hdf5::GetRecordWithChangesHdf5Ddl(), "RecordWithChanges", H5::PredType::NATIVE_INT32, "int32"), value);
+}
+
+void ProtocolWithChangesWriter::WriteUnionWithSameTypesetImpl(std::variant<evo_test::RecordWithChanges, int32_t, float, std::string> const& value) {
+  yardl::hdf5::WriteScalarDataset<::InnerUnion4<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges, int32_t, int32_t, float, float, yardl::hdf5::InnerVlenString, std::string>, std::variant<evo_test::RecordWithChanges, int32_t, float, std::string>>(group_, "unionWithSameTypeset", ::InnerUnion4Ddl<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges, int32_t, int32_t, float, float, yardl::hdf5::InnerVlenString, std::string>(false, evo_test::hdf5::GetRecordWithChangesHdf5Ddl(), "RecordWithChanges", H5::PredType::NATIVE_INT32, "int32", H5::PredType::NATIVE_FLOAT, "float32", yardl::hdf5::InnerVlenStringDdl(), "string"), value);
+}
+
+void ProtocolWithChangesWriter::WriteUnionWithTypesAddedImpl(std::variant<evo_test::RecordWithChanges, float> const& value) {
+  yardl::hdf5::WriteScalarDataset<::InnerUnion2<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges, float, float>, std::variant<evo_test::RecordWithChanges, float>>(group_, "unionWithTypesAdded", ::InnerUnion2Ddl<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges, float, float>(false, evo_test::hdf5::GetRecordWithChangesHdf5Ddl(), "RecordWithChanges", H5::PredType::NATIVE_FLOAT, "float32"), value);
+}
+
+void ProtocolWithChangesWriter::WriteUnionWithTypesRemovedImpl(std::variant<evo_test::RecordWithChanges, int32_t, float, std::string> const& value) {
+  yardl::hdf5::WriteScalarDataset<::InnerUnion4<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges, int32_t, int32_t, float, float, yardl::hdf5::InnerVlenString, std::string>, std::variant<evo_test::RecordWithChanges, int32_t, float, std::string>>(group_, "unionWithTypesRemoved", ::InnerUnion4Ddl<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges, int32_t, int32_t, float, float, yardl::hdf5::InnerVlenString, std::string>(false, evo_test::hdf5::GetRecordWithChangesHdf5Ddl(), "RecordWithChanges", H5::PredType::NATIVE_INT32, "int32", H5::PredType::NATIVE_FLOAT, "float32", yardl::hdf5::InnerVlenStringDdl(), "string"), value);
+}
+
+void ProtocolWithChangesWriter::WriteVectorRecordWithChangesImpl(std::vector<evo_test::RecordWithChanges> const& value) {
+  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerVlen<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges>, std::vector<evo_test::RecordWithChanges>>(group_, "vectorRecordWithChanges", yardl::hdf5::InnerVlenDdl(evo_test::hdf5::GetRecordWithChangesHdf5Ddl()), value);
 }
 
 void ProtocolWithChangesWriter::WriteStreamedRecordWithChangesImpl(evo_test::RecordWithChanges const& value) {
@@ -382,6 +642,14 @@ void ProtocolWithChangesReader::ReadAliasedLongToStringImpl(evo_test::AliasedLon
   yardl::hdf5::ReadScalarDataset<int64_t, evo_test::AliasedLongToString>(group_, "aliasedLongToString", H5::PredType::NATIVE_INT64, value);
 }
 
+void ProtocolWithChangesReader::ReadOptionalIntToUnionImpl(std::optional<int32_t>& value) {
+  yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerOptional<int32_t, int32_t>, std::optional<int32_t>>(group_, "optionalIntToUnion", yardl::hdf5::OptionalTypeDdl<int32_t, int32_t>(H5::PredType::NATIVE_INT32), value);
+}
+
+void ProtocolWithChangesReader::ReadOptionalRecordToUnionImpl(std::optional<evo_test::RecordWithChanges>& value) {
+  yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerOptional<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges>, std::optional<evo_test::RecordWithChanges>>(group_, "optionalRecordToUnion", yardl::hdf5::OptionalTypeDdl<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges>(evo_test::hdf5::GetRecordWithChangesHdf5Ddl()), value);
+}
+
 void ProtocolWithChangesReader::ReadRecordWithChangesImpl(evo_test::RecordWithChanges& value) {
   yardl::hdf5::ReadScalarDataset<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges>(group_, "recordWithChanges", evo_test::hdf5::GetRecordWithChangesHdf5Ddl(), value);
 }
@@ -396,6 +664,26 @@ void ProtocolWithChangesReader::ReadOptionalRecordWithChangesImpl(std::optional<
 
 void ProtocolWithChangesReader::ReadAliasedOptionalRecordWithChangesImpl(std::optional<evo_test::AliasedRecordWithChanges>& value) {
   yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerOptional<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::AliasedRecordWithChanges>, std::optional<evo_test::AliasedRecordWithChanges>>(group_, "aliasedOptionalRecordWithChanges", yardl::hdf5::OptionalTypeDdl<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::AliasedRecordWithChanges>(evo_test::hdf5::GetRecordWithChangesHdf5Ddl()), value);
+}
+
+void ProtocolWithChangesReader::ReadUnionRecordWithChangesImpl(std::variant<evo_test::RecordWithChanges, int32_t>& value) {
+  yardl::hdf5::ReadScalarDataset<::InnerUnion2<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges, int32_t, int32_t>, std::variant<evo_test::RecordWithChanges, int32_t>>(group_, "unionRecordWithChanges", ::InnerUnion2Ddl<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges, int32_t, int32_t>(false, evo_test::hdf5::GetRecordWithChangesHdf5Ddl(), "RecordWithChanges", H5::PredType::NATIVE_INT32, "int32"), value);
+}
+
+void ProtocolWithChangesReader::ReadUnionWithSameTypesetImpl(std::variant<evo_test::RecordWithChanges, int32_t, float, std::string>& value) {
+  yardl::hdf5::ReadScalarDataset<::InnerUnion4<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges, int32_t, int32_t, float, float, yardl::hdf5::InnerVlenString, std::string>, std::variant<evo_test::RecordWithChanges, int32_t, float, std::string>>(group_, "unionWithSameTypeset", ::InnerUnion4Ddl<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges, int32_t, int32_t, float, float, yardl::hdf5::InnerVlenString, std::string>(false, evo_test::hdf5::GetRecordWithChangesHdf5Ddl(), "RecordWithChanges", H5::PredType::NATIVE_INT32, "int32", H5::PredType::NATIVE_FLOAT, "float32", yardl::hdf5::InnerVlenStringDdl(), "string"), value);
+}
+
+void ProtocolWithChangesReader::ReadUnionWithTypesAddedImpl(std::variant<evo_test::RecordWithChanges, float>& value) {
+  yardl::hdf5::ReadScalarDataset<::InnerUnion2<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges, float, float>, std::variant<evo_test::RecordWithChanges, float>>(group_, "unionWithTypesAdded", ::InnerUnion2Ddl<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges, float, float>(false, evo_test::hdf5::GetRecordWithChangesHdf5Ddl(), "RecordWithChanges", H5::PredType::NATIVE_FLOAT, "float32"), value);
+}
+
+void ProtocolWithChangesReader::ReadUnionWithTypesRemovedImpl(std::variant<evo_test::RecordWithChanges, int32_t, float, std::string>& value) {
+  yardl::hdf5::ReadScalarDataset<::InnerUnion4<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges, int32_t, int32_t, float, float, yardl::hdf5::InnerVlenString, std::string>, std::variant<evo_test::RecordWithChanges, int32_t, float, std::string>>(group_, "unionWithTypesRemoved", ::InnerUnion4Ddl<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges, int32_t, int32_t, float, float, yardl::hdf5::InnerVlenString, std::string>(false, evo_test::hdf5::GetRecordWithChangesHdf5Ddl(), "RecordWithChanges", H5::PredType::NATIVE_INT32, "int32", H5::PredType::NATIVE_FLOAT, "float32", yardl::hdf5::InnerVlenStringDdl(), "string"), value);
+}
+
+void ProtocolWithChangesReader::ReadVectorRecordWithChangesImpl(std::vector<evo_test::RecordWithChanges>& value) {
+  yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerVlen<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges>, std::vector<evo_test::RecordWithChanges>>(group_, "vectorRecordWithChanges", yardl::hdf5::InnerVlenDdl(evo_test::hdf5::GetRecordWithChangesHdf5Ddl()), value);
 }
 
 bool ProtocolWithChangesReader::ReadStreamedRecordWithChangesImpl(evo_test::RecordWithChanges& value) {
