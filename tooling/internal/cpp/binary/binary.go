@@ -282,9 +282,9 @@ func collectUnionArities(env *dsl.Environment) []int {
 			}
 			self.VisitChildren(node)
 
-		case dsl.TypeDefinition:
-			if ch, ok := t.GetDefinitionMeta().Annotations[dsl.AllVersionChangesAnnotationKey].(map[string]dsl.DefinitionChange); ok {
-				for _, change := range ch {
+		case *dsl.Namespace:
+			for _, v := range t.Versions {
+				for _, change := range t.TypeDefChanges[v] {
 					if change == nil {
 						continue
 					}
@@ -298,7 +298,9 @@ func collectUnionArities(env *dsl.Environment) []int {
 							self.Visit(tc.OldType())
 						}
 					case *dsl.NamedTypeChange:
-						self.Visit(change.TypeChange.OldType())
+						if tc := change.TypeChange; tc != nil {
+							self.Visit(tc.OldType())
+						}
 					}
 				}
 			}
@@ -410,20 +412,11 @@ func writeNamespaceDefinitions(w *formatting.IndentedWriter, ns *dsl.Namespace) 
 		w.WriteStringln("namespace {")
 		for _, typeDef := range ns.TypeDefinitions {
 			writeSerializers(w, typeDef)
+		}
 
-			if changes, ok := typeDef.GetDefinitionMeta().Annotations[dsl.AllVersionChangesAnnotationKey].(map[string]dsl.DefinitionChange); ok {
-				// Sort Version Labels so TypeDefinitions are generated in a deterministic order
-				var versionLabels []string
-				for versionLabel := range changes {
-					versionLabels = append(versionLabels, versionLabel)
-				}
-				sort.Strings(versionLabels)
-				for _, versionLabel := range versionLabels {
-					change := changes[versionLabel]
-					if change != nil {
-						writeCompatibilitySerializers(w, typeDef, change, versionLabel)
-					}
-				}
+		for _, versionLabel := range ns.Versions {
+			for _, change := range ns.TypeDefChanges[versionLabel] {
+				writeCompatibilitySerializers(w, change, versionLabel)
 			}
 		}
 		w.WriteString("} // namespace\n\n")
@@ -659,8 +652,8 @@ func writeConversionRw(w *formatting.IndentedWriter, tc dsl.TypeChange, streamNa
 	}
 }
 
-func writeCompatibilitySerializers(w *formatting.IndentedWriter, t dsl.TypeDefinition, change dsl.DefinitionChange, versionLabel string) {
-	switch t.(type) {
+func writeCompatibilitySerializers(w *formatting.IndentedWriter, change dsl.DefinitionChange, versionLabel string) {
+	switch change.LatestDefinition().(type) {
 	case *dsl.EnumDefinition:
 		return
 	}
@@ -668,7 +661,7 @@ func writeCompatibilitySerializers(w *formatting.IndentedWriter, t dsl.TypeDefin
 	writeFallbackBody := func(write bool) {
 		switch change := change.(type) {
 		case *dsl.RecordChange:
-			p := change.PreviousDefinition
+			p := change.PreviousDefinition().(*dsl.RecordDefinition)
 			for i, field := range p.Fields {
 				varType := common.TypeSyntax(field.Type)
 				varName := common.FieldIdentifierName(field.Name)
@@ -685,38 +678,39 @@ func writeCompatibilitySerializers(w *formatting.IndentedWriter, t dsl.TypeDefin
 				}
 			}
 		case *dsl.NamedTypeChange:
-			p := change.PreviousDefinition
+			p := change.PreviousDefinition().(*dsl.NamedType)
 			if typeChange := change.TypeChange; typeChange != nil {
 				varName := common.FieldIdentifierName(p.Name)
 				writeConversionRw(w, typeChange, "stream", varName, "value", write)
 			} else {
 				fmt.Fprintf(w, "%s(stream, value);\n", typeRwFunction(p.Type, write))
 			}
+
 		default:
-			panic(fmt.Sprintf("Unexpected type %T", change.PreviousVersion()))
+			panic(fmt.Sprintf("Unexpected type %T", change.PreviousDefinition()))
 		}
 	}
 
-	writeCompatibilityRwFunctionSignature(t, versionLabel, w, true)
+	writeCompatibilityRwFunctionSignature(change.PreviousDefinition(), change.LatestDefinition(), versionLabel, w, true)
 	w.Indented(func() {
 		writeFallbackBody(true)
 	})
 	w.WriteString("}\n\n")
 
-	writeCompatibilityRwFunctionSignature(t, versionLabel, w, false)
+	writeCompatibilityRwFunctionSignature(change.PreviousDefinition(), change.LatestDefinition(), versionLabel, w, false)
 	w.Indented(func() {
 		writeFallbackBody(false)
 	})
 	w.WriteString("}\n\n")
 }
 
-func writeCompatibilityRwFunctionSignature(t dsl.TypeDefinition, versionLabel string, w *formatting.IndentedWriter, write bool) {
-	writeRwFunctionTemplateDeclaration(t, w, write)
+func writeCompatibilityRwFunctionSignature(old dsl.TypeDefinition, new dsl.TypeDefinition, versionLabel string, w *formatting.IndentedWriter, write bool) {
+	writeRwFunctionTemplateDeclaration(old, w, write)
 	suffix := fmt.Sprintf("_%s", versionLabel)
 	if write {
-		fmt.Fprintf(w, "[[maybe_unused]] static void Write%s%s(yardl::binary::CodedOutputStream& stream, %s const& value) {\n", t.GetDefinitionMeta().Name, suffix, common.TypeDefinitionSyntax(t))
+		fmt.Fprintf(w, "[[maybe_unused]] static void Write%s%s(yardl::binary::CodedOutputStream& stream, %s const& value) {\n", old.GetDefinitionMeta().Name, suffix, common.TypeDefinitionSyntax(new))
 	} else {
-		fmt.Fprintf(w, "[[maybe_unused]] static void Read%s%s(yardl::binary::CodedInputStream& stream, %s& value) {\n", t.GetDefinitionMeta().Name, suffix, common.TypeDefinitionSyntax(t))
+		fmt.Fprintf(w, "[[maybe_unused]] static void Read%s%s(yardl::binary::CodedInputStream& stream, %s& value) {\n", old.GetDefinitionMeta().Name, suffix, common.TypeDefinitionSyntax(new))
 	}
 }
 

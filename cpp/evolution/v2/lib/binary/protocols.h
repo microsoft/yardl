@@ -54,16 +54,25 @@ class ProtocolWithChangesWriter : public evo_test::ProtocolWithChangesWriterBase
   void WriteOptionalIntToFloatImpl(std::optional<int32_t> const& value) override;
   void WriteOptionalFloatToStringImpl(std::optional<float> const& value) override;
   void WriteAliasedLongToStringImpl(evo_test::AliasedLongToString const& value) override;
+  void WriteStringToAliasedStringImpl(std::string const& value) override;
+  void WriteStringToAliasedIntImpl(std::string const& value) override;
   void WriteOptionalIntToUnionImpl(std::optional<int32_t> const& value) override;
   void WriteOptionalRecordToUnionImpl(std::optional<evo_test::RecordWithChanges> const& value) override;
   void WriteRecordWithChangesImpl(evo_test::RecordWithChanges const& value) override;
   void WriteAliasedRecordWithChangesImpl(evo_test::AliasedRecordWithChanges const& value) override;
+  void WriteRecordToRenamedRecordImpl(evo_test::RenamedRecord const& value) override;
+  void WriteRecordToAliasedRecordImpl(evo_test::RecordWithChanges const& value) override;
+  void WriteRecordToAliasedAliasImpl(evo_test::RecordWithChanges const& value) override;
   void WriteOptionalRecordWithChangesImpl(std::optional<evo_test::RecordWithChanges> const& value) override;
   void WriteAliasedOptionalRecordWithChangesImpl(std::optional<evo_test::AliasedRecordWithChanges> const& value) override;
   void WriteUnionRecordWithChangesImpl(std::variant<evo_test::RecordWithChanges, int32_t> const& value) override;
   void WriteUnionWithSameTypesetImpl(std::variant<evo_test::RecordWithChanges, int32_t, float, std::string> const& value) override;
   void WriteUnionWithTypesAddedImpl(std::variant<evo_test::RecordWithChanges, float> const& value) override;
   void WriteUnionWithTypesRemovedImpl(std::variant<evo_test::RecordWithChanges, int32_t, float, std::string> const& value) override;
+  void WriteRecordToOptionalImpl(evo_test::RecordWithChanges const& value) override;
+  void WriteRecordToAliasedOptionalImpl(evo_test::RecordWithChanges const& value) override;
+  void WriteRecordToUnionImpl(evo_test::RecordWithChanges const& value) override;
+  void WriteRecordToAliasedUnionImpl(evo_test::RecordWithChanges const& value) override;
   void WriteVectorRecordWithChangesImpl(std::vector<evo_test::RecordWithChanges> const& value) override;
   void WriteStreamedRecordWithChangesImpl(evo_test::RecordWithChanges const& value) override;
   void WriteStreamedRecordWithChangesImpl(std::vector<evo_test::RecordWithChanges> const& values) override;
@@ -114,16 +123,25 @@ class ProtocolWithChangesReader : public evo_test::ProtocolWithChangesReaderBase
   void ReadOptionalIntToFloatImpl(std::optional<int32_t>& value) override;
   void ReadOptionalFloatToStringImpl(std::optional<float>& value) override;
   void ReadAliasedLongToStringImpl(evo_test::AliasedLongToString& value) override;
+  void ReadStringToAliasedStringImpl(std::string& value) override;
+  void ReadStringToAliasedIntImpl(std::string& value) override;
   void ReadOptionalIntToUnionImpl(std::optional<int32_t>& value) override;
   void ReadOptionalRecordToUnionImpl(std::optional<evo_test::RecordWithChanges>& value) override;
   void ReadRecordWithChangesImpl(evo_test::RecordWithChanges& value) override;
   void ReadAliasedRecordWithChangesImpl(evo_test::AliasedRecordWithChanges& value) override;
+  void ReadRecordToRenamedRecordImpl(evo_test::RenamedRecord& value) override;
+  void ReadRecordToAliasedRecordImpl(evo_test::RecordWithChanges& value) override;
+  void ReadRecordToAliasedAliasImpl(evo_test::RecordWithChanges& value) override;
   void ReadOptionalRecordWithChangesImpl(std::optional<evo_test::RecordWithChanges>& value) override;
   void ReadAliasedOptionalRecordWithChangesImpl(std::optional<evo_test::AliasedRecordWithChanges>& value) override;
   void ReadUnionRecordWithChangesImpl(std::variant<evo_test::RecordWithChanges, int32_t>& value) override;
   void ReadUnionWithSameTypesetImpl(std::variant<evo_test::RecordWithChanges, int32_t, float, std::string>& value) override;
   void ReadUnionWithTypesAddedImpl(std::variant<evo_test::RecordWithChanges, float>& value) override;
   void ReadUnionWithTypesRemovedImpl(std::variant<evo_test::RecordWithChanges, int32_t, float, std::string>& value) override;
+  void ReadRecordToOptionalImpl(evo_test::RecordWithChanges& value) override;
+  void ReadRecordToAliasedOptionalImpl(evo_test::RecordWithChanges& value) override;
+  void ReadRecordToUnionImpl(evo_test::RecordWithChanges& value) override;
+  void ReadRecordToAliasedUnionImpl(evo_test::RecordWithChanges& value) override;
   void ReadVectorRecordWithChangesImpl(std::vector<evo_test::RecordWithChanges>& value) override;
   bool ReadStreamedRecordWithChangesImpl(evo_test::RecordWithChanges& value) override;
   bool ReadStreamedRecordWithChangesImpl(std::vector<evo_test::RecordWithChanges>& values) override;
@@ -169,50 +187,6 @@ class UnusedProtocolReader : public evo_test::UnusedProtocolReaderBase, yardl::b
   protected:
   bool ReadSamplesImpl(evo_test::UnchangedRecord& value) override;
   bool ReadSamplesImpl(std::vector<evo_test::UnchangedRecord>& values) override;
-  void CloseImpl() override;
-
-  Version version_;
-
-  private:
-  size_t current_block_remaining_ = 0;
-};
-
-// Binary writer for the NewProtocol protocol.
-class NewProtocolWriter : public evo_test::NewProtocolWriterBase, yardl::binary::BinaryWriter {
-  public:
-  NewProtocolWriter(std::ostream& stream, Version version = Version::Latest)
-      : yardl::binary::BinaryWriter(stream, evo_test::NewProtocolWriterBase::SchemaFromVersion(version)), version_(version) {}
-
-  NewProtocolWriter(std::string file_name, Version version = Version::Latest)
-      : yardl::binary::BinaryWriter(file_name, evo_test::NewProtocolWriterBase::SchemaFromVersion(version)), version_(version) {}
-
-  void Flush() override;
-
-  protected:
-  void WriteCalibrationImpl(std::vector<double> const& value) override;
-  void WriteDataImpl(evo_test::NewRecord const& value) override;
-  void WriteDataImpl(std::vector<evo_test::NewRecord> const& values) override;
-  void EndDataImpl() override;
-  void CloseImpl() override;
-
-  Version version_;
-};
-
-// Binary reader for the NewProtocol protocol.
-class NewProtocolReader : public evo_test::NewProtocolReaderBase, yardl::binary::BinaryReader {
-  public:
-  NewProtocolReader(std::istream& stream)
-      : yardl::binary::BinaryReader(stream), version_(evo_test::NewProtocolReaderBase::VersionFromSchema(schema_read_)) {}
-
-  NewProtocolReader(std::string file_name)
-      : yardl::binary::BinaryReader(file_name), version_(evo_test::NewProtocolReaderBase::VersionFromSchema(schema_read_)) {}
-
-  Version GetVersion() { return version_; }
-
-  protected:
-  void ReadCalibrationImpl(std::vector<double>& value) override;
-  bool ReadDataImpl(evo_test::NewRecord& value) override;
-  bool ReadDataImpl(std::vector<evo_test::NewRecord>& values) override;
   void CloseImpl() override;
 
   Version version_;

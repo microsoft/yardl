@@ -36,14 +36,17 @@ ProtocolWithChanges: !protocol
     optionalFloatToString: float?
 
     aliasedLongToString: AliasedLongToString
-
-    # recordToAlias: RecordWithChanges
+    stringToAliasedString: string
+    stringToAliasedInt: string
 
     optionalIntToUnion: int?
     optionalRecordToUnion: RecordWithChanges?
 
     recordWithChanges: RecordWithChanges
     aliasedRecordWithChanges: AliasedRecordWithChanges
+    recordToRenamedRecord: RenamedRecord
+    recordToAliasedRecord: RecordWithChanges
+    recordToAliasedAlias: RecordWithChanges
 
     optionalRecordWithChanges: RecordWithChanges?
     aliasedOptionalRecordWithChanges: AliasedRecordWithChanges?
@@ -54,6 +57,11 @@ ProtocolWithChanges: !protocol
     unionWithSameTypeset: [RecordWithChanges, int, float, string]
     unionWithTypesAdded: [RecordWithChanges, float]
     unionWithTypesRemoved: [RecordWithChanges, int, float, string]
+
+    recordToOptional: RecordWithChanges
+    recordToAliasedOptional: RecordWithChanges
+    recordToUnion: RecordWithChanges
+    recordToAliasedUnion: RecordWithChanges
 
     vectorRecordWithChanges: RecordWithChanges*
 
@@ -79,6 +87,11 @@ UnchangedRecord: !record
     name: string
     age: int
     meta: string->double
+
+RenamedRecord: !record
+  fields:
+    i: int
+    s: string
 
 UnusedProtocol: !protocol
   sequence:

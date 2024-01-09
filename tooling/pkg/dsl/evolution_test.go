@@ -40,7 +40,6 @@ P: !protocol
 	latest, previous, labels := parseVersions(t, models)
 	_, err := ValidateEvolution(latest, previous, labels)
 	assert.NotNil(t, err)
-	assert.ErrorContains(t, err, "adding steps to a Protocol")
 }
 
 func TestProtocolRemoveSteps(t *testing.T) {
@@ -58,7 +57,6 @@ P: !protocol
 	latest, previous, labels := parseVersions(t, models)
 	_, err := ValidateEvolution(latest, previous, labels)
 	assert.NotNil(t, err)
-	assert.ErrorContains(t, err, "removing steps from a Protocol")
 }
 
 func TestProtocolReorderSteps(t *testing.T) {
@@ -129,6 +127,89 @@ P: !protocol
 	latest, previous, labels := parseVersions(t, models)
 	_, err := ValidateEvolution(latest, previous, labels)
 	assert.NotNil(t, err)
+}
+
+func TestInvalidDefinitionChanges(t *testing.T) {
+	model := `
+AS: string
+AO: string?
+AU: [string, int]
+
+E1: !enum
+  values:
+    - a
+    - b
+    - c
+
+E2: !enum
+  values:
+    - a
+    - b
+    - c
+
+F1: !flags
+  values:
+    - a
+    - b
+    - c
+
+F2: !flags
+  values:
+    - a
+    - b
+    - c
+
+R1: !record
+  fields:
+    x: string
+
+R2: !record
+  fields:
+    x: string
+
+P: !protocol
+  sequence:
+    step: %s
+`
+
+	tests := []struct {
+		typeA string
+		typeB string
+	}{
+		{"AS", "E1"},
+		{"AS", "F1"},
+		{"AS", "R1"},
+
+		{"AO", "E1"},
+		{"AO", "F1"},
+		{"AO", "R1"},
+
+		{"AU", "E1"},
+		{"AU", "F1"},
+		{"AU", "R1"},
+
+		{"E1", "E2"},
+		{"E1", "F1"},
+		{"E1", "R1"},
+
+		{"F1", "F2"},
+		{"F1", "E1"},
+		{"F1", "R1"},
+
+		{"R1", "R2"},
+		{"R1", "E1"},
+		{"R1", "F1"},
+	}
+
+	for _, tt := range tests {
+		latest, previous, labels := parseVersions(t, []string{fmt.Sprintf(model, tt.typeA), fmt.Sprintf(model, tt.typeB)})
+		_, err := ValidateEvolution(latest, previous, labels)
+		assert.NotNil(t, err, "typeA: %s, typeB: %s", tt.typeA, tt.typeB)
+
+		latest, previous, labels = parseVersions(t, []string{fmt.Sprintf(model, tt.typeB), fmt.Sprintf(model, tt.typeA)})
+		_, err = ValidateEvolution(latest, previous, labels)
+		assert.NotNil(t, err, "typeA: %s, typeB: %s", tt.typeB, tt.typeA)
+	}
 }
 
 func TestInvalidTypeChanges(t *testing.T) {

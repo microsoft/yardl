@@ -104,6 +104,10 @@ int main(void) {
 
   r.ReadAliasedLongToString(int64);
   assert(int64 == LONG_MIN);
+  r.ReadStringToAliasedString(str);
+  assert(str == HelloWorld);
+  r.ReadStringToAliasedInt(str);
+  assert(str == std::to_string(INT_MIN));
 
   RecordWithChanges rec;
   std::optional<RecordWithChanges> maybe_rec;
@@ -120,6 +124,17 @@ int main(void) {
   validateRecordWithChanges(rec);
 
   r.ReadAliasedRecordWithChanges(rec);
+  validateRecordWithChanges(rec);
+
+  RenamedRecord renamed;
+  r.ReadRecordToRenamedRecord(renamed);
+  assert(renamed.i == INT_MIN);
+  assert(renamed.s == HelloWorld);
+
+  r.ReadRecordToAliasedRecord(rec);
+  validateRecordWithChanges(rec);
+
+  r.ReadRecordToAliasedAlias(rec);
   validateRecordWithChanges(rec);
 
   r.ReadOptionalRecordWithChanges(maybe_rec);
@@ -152,6 +167,15 @@ int main(void) {
   r.ReadUnionWithTypesRemoved(rec_or_int_or_flt_or_str);
   assert(rec_or_int_or_flt_or_str.index() == 0);
   validateRecordWithChanges(std::get<0>(rec_or_int_or_flt_or_str));
+
+  r.ReadRecordToOptional(rec);
+  validateRecordWithChanges(rec);
+  r.ReadRecordToAliasedOptional(rec);
+  validateRecordWithChanges(rec);
+  r.ReadRecordToUnion(rec);
+  validateRecordWithChanges(rec);
+  r.ReadRecordToAliasedUnion(rec);
+  validateRecordWithChanges(rec);
 
   std::vector<RecordWithChanges> vec;
   r.ReadVectorRecordWithChanges(vec);

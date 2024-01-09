@@ -43,11 +43,17 @@ int main(void) {
   w.WriteOptionalFloatToString(std::to_string(M_PI));
 
   w.WriteAliasedLongToString(std::to_string(LONG_MIN));
+  w.WriteStringToAliasedString(HelloWorld);
+  w.WriteStringToAliasedInt(INT_MIN);
 
   UnchangedRecord unchanged;
   unchanged.name = "Jane Doe";
   unchanged.age = 42;
   unchanged.meta = {{"height", 161.3}, {"weight", 75.0f}};
+
+  RenamedRecord renamed;
+  renamed.s = HelloWorld;
+  renamed.i = INT_MIN;
 
   RecordWithChanges rec;
   rec.int_to_long = static_cast<long>(INT_MIN);
@@ -60,15 +66,24 @@ int main(void) {
 
   w.WriteRecordWithChanges(rec);
   w.WriteAliasedRecordWithChanges(rec);
+  w.WriteRecordToRenamedRecord(renamed);
+  w.WriteRecordToAliasedRecord(rec);
+  w.WriteRecordToAliasedAlias(rec);
 
   w.WriteOptionalRecordWithChanges(rec);
   w.WriteAliasedOptionalRecordWithChanges(rec);
 
   w.WriteUnionRecordWithChanges(rec);
   // w.WriteAliasedUnionRecordWithChanges(rec);
+
   w.WriteUnionWithSameTypeset(rec);
   w.WriteUnionWithTypesAdded(rec);
   w.WriteUnionWithTypesRemoved(rec);
+
+  w.WriteRecordToOptional(rec);
+  w.WriteRecordToAliasedOptional(rec);
+  w.WriteRecordToUnion(rec);
+  w.WriteRecordToAliasedUnion(rec);
 
   // Write a vector of size 7 records
   w.WriteVectorRecordWithChanges(std::vector<RecordWithChanges>(7, rec));

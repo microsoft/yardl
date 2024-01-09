@@ -100,43 +100,70 @@ class ProtocolWithChangesWriterBase {
   void WriteAliasedLongToString(evo_test::AliasedLongToString const& value);
 
   // Ordinal 29.
-  void WriteOptionalIntToUnion(std::optional<int32_t> const& value);
+  void WriteStringToAliasedString(std::string const& value);
 
   // Ordinal 30.
-  void WriteOptionalRecordToUnion(std::optional<evo_test::RecordWithChanges> const& value);
+  void WriteStringToAliasedInt(std::string const& value);
 
   // Ordinal 31.
-  void WriteRecordWithChanges(evo_test::RecordWithChanges const& value);
+  void WriteOptionalIntToUnion(std::optional<int32_t> const& value);
 
   // Ordinal 32.
-  void WriteAliasedRecordWithChanges(evo_test::AliasedRecordWithChanges const& value);
+  void WriteOptionalRecordToUnion(std::optional<evo_test::RecordWithChanges> const& value);
 
   // Ordinal 33.
-  void WriteOptionalRecordWithChanges(std::optional<evo_test::RecordWithChanges> const& value);
+  void WriteRecordWithChanges(evo_test::RecordWithChanges const& value);
 
   // Ordinal 34.
-  void WriteAliasedOptionalRecordWithChanges(std::optional<evo_test::AliasedRecordWithChanges> const& value);
+  void WriteAliasedRecordWithChanges(evo_test::AliasedRecordWithChanges const& value);
 
   // Ordinal 35.
-  void WriteUnionRecordWithChanges(std::variant<evo_test::RecordWithChanges, int32_t> const& value);
+  void WriteRecordToRenamedRecord(evo_test::RenamedRecord const& value);
 
   // Ordinal 36.
-  void WriteUnionWithSameTypeset(std::variant<evo_test::RecordWithChanges, int32_t, float, std::string> const& value);
+  void WriteRecordToAliasedRecord(evo_test::RecordWithChanges const& value);
 
   // Ordinal 37.
-  void WriteUnionWithTypesAdded(std::variant<evo_test::RecordWithChanges, float> const& value);
+  void WriteRecordToAliasedAlias(evo_test::RecordWithChanges const& value);
 
   // Ordinal 38.
-  void WriteUnionWithTypesRemoved(std::variant<evo_test::RecordWithChanges, int32_t, float, std::string> const& value);
+  void WriteOptionalRecordWithChanges(std::optional<evo_test::RecordWithChanges> const& value);
 
   // Ordinal 39.
-  void WriteVectorRecordWithChanges(std::vector<evo_test::RecordWithChanges> const& value);
+  void WriteAliasedOptionalRecordWithChanges(std::optional<evo_test::AliasedRecordWithChanges> const& value);
 
   // Ordinal 40.
+  void WriteUnionRecordWithChanges(std::variant<evo_test::RecordWithChanges, int32_t> const& value);
+
+  // Ordinal 41.
+  void WriteUnionWithSameTypeset(std::variant<evo_test::RecordWithChanges, int32_t, float, std::string> const& value);
+
+  // Ordinal 42.
+  void WriteUnionWithTypesAdded(std::variant<evo_test::RecordWithChanges, float> const& value);
+
+  // Ordinal 43.
+  void WriteUnionWithTypesRemoved(std::variant<evo_test::RecordWithChanges, int32_t, float, std::string> const& value);
+
+  // Ordinal 44.
+  void WriteRecordToOptional(evo_test::RecordWithChanges const& value);
+
+  // Ordinal 45.
+  void WriteRecordToAliasedOptional(evo_test::RecordWithChanges const& value);
+
+  // Ordinal 46.
+  void WriteRecordToUnion(evo_test::RecordWithChanges const& value);
+
+  // Ordinal 47.
+  void WriteRecordToAliasedUnion(evo_test::RecordWithChanges const& value);
+
+  // Ordinal 48.
+  void WriteVectorRecordWithChanges(std::vector<evo_test::RecordWithChanges> const& value);
+
+  // Ordinal 49.
   // Call this method for each element of the `streamedRecordWithChanges` stream, then call `EndStreamedRecordWithChanges() when done.`
   void WriteStreamedRecordWithChanges(evo_test::RecordWithChanges const& value);
 
-  // Ordinal 40.
+  // Ordinal 49.
   // Call this method to write many values to the `streamedRecordWithChanges` stream, then call `EndStreamedRecordWithChanges()` when done.
   void WriteStreamedRecordWithChanges(std::vector<evo_test::RecordWithChanges> const& values);
 
@@ -181,16 +208,25 @@ class ProtocolWithChangesWriterBase {
   virtual void WriteOptionalIntToFloatImpl(std::optional<int32_t> const& value) = 0;
   virtual void WriteOptionalFloatToStringImpl(std::optional<float> const& value) = 0;
   virtual void WriteAliasedLongToStringImpl(evo_test::AliasedLongToString const& value) = 0;
+  virtual void WriteStringToAliasedStringImpl(std::string const& value) = 0;
+  virtual void WriteStringToAliasedIntImpl(std::string const& value) = 0;
   virtual void WriteOptionalIntToUnionImpl(std::optional<int32_t> const& value) = 0;
   virtual void WriteOptionalRecordToUnionImpl(std::optional<evo_test::RecordWithChanges> const& value) = 0;
   virtual void WriteRecordWithChangesImpl(evo_test::RecordWithChanges const& value) = 0;
   virtual void WriteAliasedRecordWithChangesImpl(evo_test::AliasedRecordWithChanges const& value) = 0;
+  virtual void WriteRecordToRenamedRecordImpl(evo_test::RenamedRecord const& value) = 0;
+  virtual void WriteRecordToAliasedRecordImpl(evo_test::RecordWithChanges const& value) = 0;
+  virtual void WriteRecordToAliasedAliasImpl(evo_test::RecordWithChanges const& value) = 0;
   virtual void WriteOptionalRecordWithChangesImpl(std::optional<evo_test::RecordWithChanges> const& value) = 0;
   virtual void WriteAliasedOptionalRecordWithChangesImpl(std::optional<evo_test::AliasedRecordWithChanges> const& value) = 0;
   virtual void WriteUnionRecordWithChangesImpl(std::variant<evo_test::RecordWithChanges, int32_t> const& value) = 0;
   virtual void WriteUnionWithSameTypesetImpl(std::variant<evo_test::RecordWithChanges, int32_t, float, std::string> const& value) = 0;
   virtual void WriteUnionWithTypesAddedImpl(std::variant<evo_test::RecordWithChanges, float> const& value) = 0;
   virtual void WriteUnionWithTypesRemovedImpl(std::variant<evo_test::RecordWithChanges, int32_t, float, std::string> const& value) = 0;
+  virtual void WriteRecordToOptionalImpl(evo_test::RecordWithChanges const& value) = 0;
+  virtual void WriteRecordToAliasedOptionalImpl(evo_test::RecordWithChanges const& value) = 0;
+  virtual void WriteRecordToUnionImpl(evo_test::RecordWithChanges const& value) = 0;
+  virtual void WriteRecordToAliasedUnionImpl(evo_test::RecordWithChanges const& value) = 0;
   virtual void WriteVectorRecordWithChangesImpl(std::vector<evo_test::RecordWithChanges> const& value) = 0;
   virtual void WriteStreamedRecordWithChangesImpl(evo_test::RecordWithChanges const& value) = 0;
   virtual void WriteStreamedRecordWithChangesImpl(std::vector<evo_test::RecordWithChanges> const& value);
@@ -300,42 +336,69 @@ class ProtocolWithChangesReaderBase {
   void ReadAliasedLongToString(evo_test::AliasedLongToString& value);
 
   // Ordinal 29.
-  void ReadOptionalIntToUnion(std::optional<int32_t>& value);
+  void ReadStringToAliasedString(std::string& value);
 
   // Ordinal 30.
-  void ReadOptionalRecordToUnion(std::optional<evo_test::RecordWithChanges>& value);
+  void ReadStringToAliasedInt(std::string& value);
 
   // Ordinal 31.
-  void ReadRecordWithChanges(evo_test::RecordWithChanges& value);
+  void ReadOptionalIntToUnion(std::optional<int32_t>& value);
 
   // Ordinal 32.
-  void ReadAliasedRecordWithChanges(evo_test::AliasedRecordWithChanges& value);
+  void ReadOptionalRecordToUnion(std::optional<evo_test::RecordWithChanges>& value);
 
   // Ordinal 33.
-  void ReadOptionalRecordWithChanges(std::optional<evo_test::RecordWithChanges>& value);
+  void ReadRecordWithChanges(evo_test::RecordWithChanges& value);
 
   // Ordinal 34.
-  void ReadAliasedOptionalRecordWithChanges(std::optional<evo_test::AliasedRecordWithChanges>& value);
+  void ReadAliasedRecordWithChanges(evo_test::AliasedRecordWithChanges& value);
 
   // Ordinal 35.
-  void ReadUnionRecordWithChanges(std::variant<evo_test::RecordWithChanges, int32_t>& value);
+  void ReadRecordToRenamedRecord(evo_test::RenamedRecord& value);
 
   // Ordinal 36.
-  void ReadUnionWithSameTypeset(std::variant<evo_test::RecordWithChanges, int32_t, float, std::string>& value);
+  void ReadRecordToAliasedRecord(evo_test::RecordWithChanges& value);
 
   // Ordinal 37.
-  void ReadUnionWithTypesAdded(std::variant<evo_test::RecordWithChanges, float>& value);
+  void ReadRecordToAliasedAlias(evo_test::RecordWithChanges& value);
 
   // Ordinal 38.
-  void ReadUnionWithTypesRemoved(std::variant<evo_test::RecordWithChanges, int32_t, float, std::string>& value);
+  void ReadOptionalRecordWithChanges(std::optional<evo_test::RecordWithChanges>& value);
 
   // Ordinal 39.
+  void ReadAliasedOptionalRecordWithChanges(std::optional<evo_test::AliasedRecordWithChanges>& value);
+
+  // Ordinal 40.
+  void ReadUnionRecordWithChanges(std::variant<evo_test::RecordWithChanges, int32_t>& value);
+
+  // Ordinal 41.
+  void ReadUnionWithSameTypeset(std::variant<evo_test::RecordWithChanges, int32_t, float, std::string>& value);
+
+  // Ordinal 42.
+  void ReadUnionWithTypesAdded(std::variant<evo_test::RecordWithChanges, float>& value);
+
+  // Ordinal 43.
+  void ReadUnionWithTypesRemoved(std::variant<evo_test::RecordWithChanges, int32_t, float, std::string>& value);
+
+  // Ordinal 44.
+  void ReadRecordToOptional(evo_test::RecordWithChanges& value);
+
+  // Ordinal 45.
+  void ReadRecordToAliasedOptional(evo_test::RecordWithChanges& value);
+
+  // Ordinal 46.
+  void ReadRecordToUnion(evo_test::RecordWithChanges& value);
+
+  // Ordinal 47.
+  void ReadRecordToAliasedUnion(evo_test::RecordWithChanges& value);
+
+  // Ordinal 48.
   void ReadVectorRecordWithChanges(std::vector<evo_test::RecordWithChanges>& value);
 
-  // Ordinal 40.
+  // Ordinal 49.
   [[nodiscard]] bool ReadStreamedRecordWithChanges(evo_test::RecordWithChanges& value);
 
-  // Ordinal 40.
+  // Ordinal 49.
   [[nodiscard]] bool ReadStreamedRecordWithChanges(std::vector<evo_test::RecordWithChanges>& values);
 
   // Optionaly close this writer before destructing. Validates that all steps were completely read.
@@ -375,16 +438,25 @@ class ProtocolWithChangesReaderBase {
   virtual void ReadOptionalIntToFloatImpl(std::optional<int32_t>& value) = 0;
   virtual void ReadOptionalFloatToStringImpl(std::optional<float>& value) = 0;
   virtual void ReadAliasedLongToStringImpl(evo_test::AliasedLongToString& value) = 0;
+  virtual void ReadStringToAliasedStringImpl(std::string& value) = 0;
+  virtual void ReadStringToAliasedIntImpl(std::string& value) = 0;
   virtual void ReadOptionalIntToUnionImpl(std::optional<int32_t>& value) = 0;
   virtual void ReadOptionalRecordToUnionImpl(std::optional<evo_test::RecordWithChanges>& value) = 0;
   virtual void ReadRecordWithChangesImpl(evo_test::RecordWithChanges& value) = 0;
   virtual void ReadAliasedRecordWithChangesImpl(evo_test::AliasedRecordWithChanges& value) = 0;
+  virtual void ReadRecordToRenamedRecordImpl(evo_test::RenamedRecord& value) = 0;
+  virtual void ReadRecordToAliasedRecordImpl(evo_test::RecordWithChanges& value) = 0;
+  virtual void ReadRecordToAliasedAliasImpl(evo_test::RecordWithChanges& value) = 0;
   virtual void ReadOptionalRecordWithChangesImpl(std::optional<evo_test::RecordWithChanges>& value) = 0;
   virtual void ReadAliasedOptionalRecordWithChangesImpl(std::optional<evo_test::AliasedRecordWithChanges>& value) = 0;
   virtual void ReadUnionRecordWithChangesImpl(std::variant<evo_test::RecordWithChanges, int32_t>& value) = 0;
   virtual void ReadUnionWithSameTypesetImpl(std::variant<evo_test::RecordWithChanges, int32_t, float, std::string>& value) = 0;
   virtual void ReadUnionWithTypesAddedImpl(std::variant<evo_test::RecordWithChanges, float>& value) = 0;
   virtual void ReadUnionWithTypesRemovedImpl(std::variant<evo_test::RecordWithChanges, int32_t, float, std::string>& value) = 0;
+  virtual void ReadRecordToOptionalImpl(evo_test::RecordWithChanges& value) = 0;
+  virtual void ReadRecordToAliasedOptionalImpl(evo_test::RecordWithChanges& value) = 0;
+  virtual void ReadRecordToUnionImpl(evo_test::RecordWithChanges& value) = 0;
+  virtual void ReadRecordToAliasedUnionImpl(evo_test::RecordWithChanges& value) = 0;
   virtual void ReadVectorRecordWithChangesImpl(std::vector<evo_test::RecordWithChanges>& value) = 0;
   virtual bool ReadStreamedRecordWithChangesImpl(evo_test::RecordWithChanges& value) = 0;
   virtual bool ReadStreamedRecordWithChangesImpl(std::vector<evo_test::RecordWithChanges>& values);
@@ -458,84 +530,6 @@ class UnusedProtocolReaderBase {
   protected:
   virtual bool ReadSamplesImpl(evo_test::UnchangedRecord& value) = 0;
   virtual bool ReadSamplesImpl(std::vector<evo_test::UnchangedRecord>& values);
-  virtual void CloseImpl() {}
-  static std::string schema_;
-
-  static std::vector<std::string> previous_schemas_;
-
-  static Version VersionFromSchema(const std::string& schema);
-
-  private:
-  uint8_t state_ = 0;
-};
-
-// Abstract writer for the NewProtocol protocol.
-class NewProtocolWriterBase {
-  public:
-  // Ordinal 0.
-  void WriteCalibration(std::vector<double> const& value);
-
-  // Ordinal 1.
-  // Call this method for each element of the `data` stream, then call `EndData() when done.`
-  void WriteData(evo_test::NewRecord const& value);
-
-  // Ordinal 1.
-  // Call this method to write many values to the `data` stream, then call `EndData()` when done.
-  void WriteData(std::vector<evo_test::NewRecord> const& values);
-
-  // Marks the end of the `data` stream.
-  void EndData();
-
-  // Optionaly close this writer before destructing. Validates that all steps were completed.
-  void Close();
-
-  virtual ~NewProtocolWriterBase() = default;
-
-  // Flushes all buffered data.
-  virtual void Flush() {}
-
-  protected:
-  virtual void WriteCalibrationImpl(std::vector<double> const& value) = 0;
-  virtual void WriteDataImpl(evo_test::NewRecord const& value) = 0;
-  virtual void WriteDataImpl(std::vector<evo_test::NewRecord> const& value);
-  virtual void EndDataImpl() = 0;
-  virtual void CloseImpl() {}
-
-  static std::string schema_;
-
-  static std::vector<std::string> previous_schemas_;
-
-  static std::string SchemaFromVersion(Version version);
-
-  private:
-  uint8_t state_ = 0;
-
-  friend class NewProtocolReaderBase;
-};
-
-// Abstract reader for the NewProtocol protocol.
-class NewProtocolReaderBase {
-  public:
-  // Ordinal 0.
-  void ReadCalibration(std::vector<double>& value);
-
-  // Ordinal 1.
-  [[nodiscard]] bool ReadData(evo_test::NewRecord& value);
-
-  // Ordinal 1.
-  [[nodiscard]] bool ReadData(std::vector<evo_test::NewRecord>& values);
-
-  // Optionaly close this writer before destructing. Validates that all steps were completely read.
-  void Close();
-
-  void CopyTo(NewProtocolWriterBase& writer, size_t data_buffer_size = 1);
-
-  virtual ~NewProtocolReaderBase() = default;
-
-  protected:
-  virtual void ReadCalibrationImpl(std::vector<double>& value) = 0;
-  virtual bool ReadDataImpl(evo_test::NewRecord& value) = 0;
-  virtual bool ReadDataImpl(std::vector<evo_test::NewRecord>& values);
   virtual void CloseImpl() {}
   static std::string schema_;
 

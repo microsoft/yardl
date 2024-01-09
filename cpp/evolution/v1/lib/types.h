@@ -11,6 +11,10 @@
 #include "yardl/yardl.h"
 
 namespace evo_test {
+using AliasedInt = int32_t;
+
+using AliasedString = std::string;
+
 using AliasedLongToString = std::string;
 
 struct UnchangedRecord {
@@ -50,6 +54,26 @@ struct RecordWithChanges {
 using AliasedRecordWithChanges = evo_test::RecordWithChanges;
 
 using AliasOfAliasedRecordWithChanges = evo_test::AliasedRecordWithChanges;
+
+using AliasedOptionalRecord = std::optional<evo_test::RecordWithChanges>;
+
+using AliasedRecordOrString = std::variant<evo_test::RecordWithChanges, std::string>;
+
+struct DeprecatedRecord {
+  std::string s{};
+  int32_t i{};
+
+  bool operator==(const DeprecatedRecord& other) const {
+    return s == other.s &&
+      i == other.i;
+  }
+
+  bool operator!=(const DeprecatedRecord& other) const {
+    return !(*this == other);
+  }
+};
+
+using RenamedRecord = evo_test::DeprecatedRecord;
 
 } // namespace evo_test
 

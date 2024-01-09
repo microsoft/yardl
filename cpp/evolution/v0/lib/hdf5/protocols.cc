@@ -290,6 +290,22 @@ struct _Inner_RecordWithChanges {
   evo_test::hdf5::_Inner_UnchangedRecord unchanged_record;
 };
 
+struct _Inner_RenamedRecord {
+  _Inner_RenamedRecord() {} 
+  _Inner_RenamedRecord(evo_test::RenamedRecord const& o) 
+      : i(o.i),
+      s(o.s) {
+  }
+
+  void ToOuter (evo_test::RenamedRecord& o) const {
+    yardl::hdf5::ToOuter(i, o.i);
+    yardl::hdf5::ToOuter(s, o.s);
+  }
+
+  int32_t i;
+  yardl::hdf5::InnerVlenString s;
+};
+
 [[maybe_unused]] H5::CompType GetUnchangedRecordHdf5Ddl() {
   using RecordType = evo_test::hdf5::_Inner_UnchangedRecord;
   H5::CompType t(sizeof(RecordType));
@@ -309,6 +325,14 @@ struct _Inner_RecordWithChanges {
   t.insertMember("optionalLongToString", HOFFSET(RecordType, optional_long_to_string), yardl::hdf5::OptionalTypeDdl<int64_t, int64_t>(H5::PredType::NATIVE_INT64));
   t.insertMember("deprecatedMap", HOFFSET(RecordType, deprecated_map), yardl::hdf5::InnerMapDdl<yardl::hdf5::InnerVlenString, yardl::hdf5::InnerVlen<int32_t, int32_t>>(yardl::hdf5::InnerVlenStringDdl(), yardl::hdf5::InnerVlenDdl(H5::PredType::NATIVE_INT32)));
   t.insertMember("unchangedRecord", HOFFSET(RecordType, unchanged_record), evo_test::hdf5::GetUnchangedRecordHdf5Ddl());
+  return t;
+}
+
+[[maybe_unused]] H5::CompType GetRenamedRecordHdf5Ddl() {
+  using RecordType = evo_test::hdf5::_Inner_RenamedRecord;
+  H5::CompType t(sizeof(RecordType));
+  t.insertMember("i", HOFFSET(RecordType, i), H5::PredType::NATIVE_INT32);
+  t.insertMember("s", HOFFSET(RecordType, s), yardl::hdf5::InnerVlenStringDdl());
   return t;
 }
 
@@ -434,6 +458,14 @@ void ProtocolWithChangesWriter::WriteAliasedLongToStringImpl(evo_test::AliasedLo
   yardl::hdf5::WriteScalarDataset<int64_t, evo_test::AliasedLongToString>(group_, "aliasedLongToString", H5::PredType::NATIVE_INT64, value);
 }
 
+void ProtocolWithChangesWriter::WriteStringToAliasedStringImpl(std::string const& value) {
+  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerVlenString, std::string>(group_, "stringToAliasedString", yardl::hdf5::InnerVlenStringDdl(), value);
+}
+
+void ProtocolWithChangesWriter::WriteStringToAliasedIntImpl(std::string const& value) {
+  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerVlenString, std::string>(group_, "stringToAliasedInt", yardl::hdf5::InnerVlenStringDdl(), value);
+}
+
 void ProtocolWithChangesWriter::WriteOptionalIntToUnionImpl(std::optional<int32_t> const& value) {
   yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerOptional<int32_t, int32_t>, std::optional<int32_t>>(group_, "optionalIntToUnion", yardl::hdf5::OptionalTypeDdl<int32_t, int32_t>(H5::PredType::NATIVE_INT32), value);
 }
@@ -448,6 +480,18 @@ void ProtocolWithChangesWriter::WriteRecordWithChangesImpl(evo_test::RecordWithC
 
 void ProtocolWithChangesWriter::WriteAliasedRecordWithChangesImpl(evo_test::AliasedRecordWithChanges const& value) {
   yardl::hdf5::WriteScalarDataset<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::AliasedRecordWithChanges>(group_, "aliasedRecordWithChanges", evo_test::hdf5::GetRecordWithChangesHdf5Ddl(), value);
+}
+
+void ProtocolWithChangesWriter::WriteRecordToRenamedRecordImpl(evo_test::RenamedRecord const& value) {
+  yardl::hdf5::WriteScalarDataset<evo_test::hdf5::_Inner_RenamedRecord, evo_test::RenamedRecord>(group_, "recordToRenamedRecord", evo_test::hdf5::GetRenamedRecordHdf5Ddl(), value);
+}
+
+void ProtocolWithChangesWriter::WriteRecordToAliasedRecordImpl(evo_test::RecordWithChanges const& value) {
+  yardl::hdf5::WriteScalarDataset<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges>(group_, "recordToAliasedRecord", evo_test::hdf5::GetRecordWithChangesHdf5Ddl(), value);
+}
+
+void ProtocolWithChangesWriter::WriteRecordToAliasedAliasImpl(evo_test::RecordWithChanges const& value) {
+  yardl::hdf5::WriteScalarDataset<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges>(group_, "recordToAliasedAlias", evo_test::hdf5::GetRecordWithChangesHdf5Ddl(), value);
 }
 
 void ProtocolWithChangesWriter::WriteOptionalRecordWithChangesImpl(std::optional<evo_test::RecordWithChanges> const& value) {
@@ -472,6 +516,22 @@ void ProtocolWithChangesWriter::WriteUnionWithTypesAddedImpl(std::variant<evo_te
 
 void ProtocolWithChangesWriter::WriteUnionWithTypesRemovedImpl(std::variant<evo_test::RecordWithChanges, int32_t, float, std::string> const& value) {
   yardl::hdf5::WriteScalarDataset<::InnerUnion4<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges, int32_t, int32_t, float, float, yardl::hdf5::InnerVlenString, std::string>, std::variant<evo_test::RecordWithChanges, int32_t, float, std::string>>(group_, "unionWithTypesRemoved", ::InnerUnion4Ddl<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges, int32_t, int32_t, float, float, yardl::hdf5::InnerVlenString, std::string>(false, evo_test::hdf5::GetRecordWithChangesHdf5Ddl(), "RecordWithChanges", H5::PredType::NATIVE_INT32, "int32", H5::PredType::NATIVE_FLOAT, "float32", yardl::hdf5::InnerVlenStringDdl(), "string"), value);
+}
+
+void ProtocolWithChangesWriter::WriteRecordToOptionalImpl(evo_test::RecordWithChanges const& value) {
+  yardl::hdf5::WriteScalarDataset<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges>(group_, "recordToOptional", evo_test::hdf5::GetRecordWithChangesHdf5Ddl(), value);
+}
+
+void ProtocolWithChangesWriter::WriteRecordToAliasedOptionalImpl(evo_test::RecordWithChanges const& value) {
+  yardl::hdf5::WriteScalarDataset<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges>(group_, "recordToAliasedOptional", evo_test::hdf5::GetRecordWithChangesHdf5Ddl(), value);
+}
+
+void ProtocolWithChangesWriter::WriteRecordToUnionImpl(evo_test::RecordWithChanges const& value) {
+  yardl::hdf5::WriteScalarDataset<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges>(group_, "recordToUnion", evo_test::hdf5::GetRecordWithChangesHdf5Ddl(), value);
+}
+
+void ProtocolWithChangesWriter::WriteRecordToAliasedUnionImpl(evo_test::RecordWithChanges const& value) {
+  yardl::hdf5::WriteScalarDataset<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges>(group_, "recordToAliasedUnion", evo_test::hdf5::GetRecordWithChangesHdf5Ddl(), value);
 }
 
 void ProtocolWithChangesWriter::WriteVectorRecordWithChangesImpl(std::vector<evo_test::RecordWithChanges> const& value) {
@@ -622,6 +682,14 @@ void ProtocolWithChangesReader::ReadAliasedLongToStringImpl(evo_test::AliasedLon
   yardl::hdf5::ReadScalarDataset<int64_t, evo_test::AliasedLongToString>(group_, "aliasedLongToString", H5::PredType::NATIVE_INT64, value);
 }
 
+void ProtocolWithChangesReader::ReadStringToAliasedStringImpl(std::string& value) {
+  yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerVlenString, std::string>(group_, "stringToAliasedString", yardl::hdf5::InnerVlenStringDdl(), value);
+}
+
+void ProtocolWithChangesReader::ReadStringToAliasedIntImpl(std::string& value) {
+  yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerVlenString, std::string>(group_, "stringToAliasedInt", yardl::hdf5::InnerVlenStringDdl(), value);
+}
+
 void ProtocolWithChangesReader::ReadOptionalIntToUnionImpl(std::optional<int32_t>& value) {
   yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerOptional<int32_t, int32_t>, std::optional<int32_t>>(group_, "optionalIntToUnion", yardl::hdf5::OptionalTypeDdl<int32_t, int32_t>(H5::PredType::NATIVE_INT32), value);
 }
@@ -636,6 +704,18 @@ void ProtocolWithChangesReader::ReadRecordWithChangesImpl(evo_test::RecordWithCh
 
 void ProtocolWithChangesReader::ReadAliasedRecordWithChangesImpl(evo_test::AliasedRecordWithChanges& value) {
   yardl::hdf5::ReadScalarDataset<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::AliasedRecordWithChanges>(group_, "aliasedRecordWithChanges", evo_test::hdf5::GetRecordWithChangesHdf5Ddl(), value);
+}
+
+void ProtocolWithChangesReader::ReadRecordToRenamedRecordImpl(evo_test::RenamedRecord& value) {
+  yardl::hdf5::ReadScalarDataset<evo_test::hdf5::_Inner_RenamedRecord, evo_test::RenamedRecord>(group_, "recordToRenamedRecord", evo_test::hdf5::GetRenamedRecordHdf5Ddl(), value);
+}
+
+void ProtocolWithChangesReader::ReadRecordToAliasedRecordImpl(evo_test::RecordWithChanges& value) {
+  yardl::hdf5::ReadScalarDataset<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges>(group_, "recordToAliasedRecord", evo_test::hdf5::GetRecordWithChangesHdf5Ddl(), value);
+}
+
+void ProtocolWithChangesReader::ReadRecordToAliasedAliasImpl(evo_test::RecordWithChanges& value) {
+  yardl::hdf5::ReadScalarDataset<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges>(group_, "recordToAliasedAlias", evo_test::hdf5::GetRecordWithChangesHdf5Ddl(), value);
 }
 
 void ProtocolWithChangesReader::ReadOptionalRecordWithChangesImpl(std::optional<evo_test::RecordWithChanges>& value) {
@@ -660,6 +740,22 @@ void ProtocolWithChangesReader::ReadUnionWithTypesAddedImpl(std::variant<evo_tes
 
 void ProtocolWithChangesReader::ReadUnionWithTypesRemovedImpl(std::variant<evo_test::RecordWithChanges, int32_t, float, std::string>& value) {
   yardl::hdf5::ReadScalarDataset<::InnerUnion4<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges, int32_t, int32_t, float, float, yardl::hdf5::InnerVlenString, std::string>, std::variant<evo_test::RecordWithChanges, int32_t, float, std::string>>(group_, "unionWithTypesRemoved", ::InnerUnion4Ddl<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges, int32_t, int32_t, float, float, yardl::hdf5::InnerVlenString, std::string>(false, evo_test::hdf5::GetRecordWithChangesHdf5Ddl(), "RecordWithChanges", H5::PredType::NATIVE_INT32, "int32", H5::PredType::NATIVE_FLOAT, "float32", yardl::hdf5::InnerVlenStringDdl(), "string"), value);
+}
+
+void ProtocolWithChangesReader::ReadRecordToOptionalImpl(evo_test::RecordWithChanges& value) {
+  yardl::hdf5::ReadScalarDataset<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges>(group_, "recordToOptional", evo_test::hdf5::GetRecordWithChangesHdf5Ddl(), value);
+}
+
+void ProtocolWithChangesReader::ReadRecordToAliasedOptionalImpl(evo_test::RecordWithChanges& value) {
+  yardl::hdf5::ReadScalarDataset<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges>(group_, "recordToAliasedOptional", evo_test::hdf5::GetRecordWithChangesHdf5Ddl(), value);
+}
+
+void ProtocolWithChangesReader::ReadRecordToUnionImpl(evo_test::RecordWithChanges& value) {
+  yardl::hdf5::ReadScalarDataset<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges>(group_, "recordToUnion", evo_test::hdf5::GetRecordWithChangesHdf5Ddl(), value);
+}
+
+void ProtocolWithChangesReader::ReadRecordToAliasedUnionImpl(evo_test::RecordWithChanges& value) {
+  yardl::hdf5::ReadScalarDataset<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges>(group_, "recordToAliasedUnion", evo_test::hdf5::GetRecordWithChangesHdf5Ddl(), value);
 }
 
 void ProtocolWithChangesReader::ReadVectorRecordWithChangesImpl(std::vector<evo_test::RecordWithChanges>& value) {

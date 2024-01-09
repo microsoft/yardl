@@ -12,8 +12,8 @@ using ordered_json = nlohmann::ordered_json;
 [[maybe_unused]] static void to_json(ordered_json& j, evo_test::RecordWithChanges const& value);
 [[maybe_unused]] static void from_json(ordered_json const& j, evo_test::RecordWithChanges& value);
 
-[[maybe_unused]] static void to_json(ordered_json& j, evo_test::NewRecord const& value);
-[[maybe_unused]] static void from_json(ordered_json const& j, evo_test::NewRecord& value);
+[[maybe_unused]] static void to_json(ordered_json& j, evo_test::RenamedRecord const& value);
+[[maybe_unused]] static void from_json(ordered_json const& j, evo_test::RenamedRecord& value);
 
 } // namespace evo_test
 
@@ -179,16 +179,22 @@ using ordered_json = nlohmann::ordered_json;
   }
 }
 
-[[maybe_unused]] static void to_json(ordered_json& j, evo_test::NewRecord const& value) {
+[[maybe_unused]] static void to_json(ordered_json& j, evo_test::RenamedRecord const& value) {
   j = ordered_json::object();
-  if (yardl::ndjson::ShouldSerializeFieldValue(value.stuff)) {
-    j.push_back({"stuff", value.stuff});
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.i)) {
+    j.push_back({"i", value.i});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.s)) {
+    j.push_back({"s", value.s});
   }
 }
 
-[[maybe_unused]] static void from_json(ordered_json const& j, evo_test::NewRecord& value) {
-  if (auto it = j.find("stuff"); it != j.end()) {
-    it->get_to(value.stuff);
+[[maybe_unused]] static void from_json(ordered_json const& j, evo_test::RenamedRecord& value) {
+  if (auto it = j.find("i"); it != j.end()) {
+    it->get_to(value.i);
+  }
+  if (auto it = j.find("s"); it != j.end()) {
+    it->get_to(value.s);
   }
 }
 
@@ -311,6 +317,14 @@ void ProtocolWithChangesWriter::WriteAliasedLongToStringImpl(evo_test::AliasedLo
   ordered_json json_value = value;
   yardl::ndjson::WriteProtocolValue(stream_, "aliasedLongToString", json_value);}
 
+void ProtocolWithChangesWriter::WriteStringToAliasedStringImpl(std::string const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "stringToAliasedString", json_value);}
+
+void ProtocolWithChangesWriter::WriteStringToAliasedIntImpl(std::string const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "stringToAliasedInt", json_value);}
+
 void ProtocolWithChangesWriter::WriteOptionalIntToUnionImpl(std::optional<int32_t> const& value) {
   ordered_json json_value = value;
   yardl::ndjson::WriteProtocolValue(stream_, "optionalIntToUnion", json_value);}
@@ -326,6 +340,18 @@ void ProtocolWithChangesWriter::WriteRecordWithChangesImpl(evo_test::RecordWithC
 void ProtocolWithChangesWriter::WriteAliasedRecordWithChangesImpl(evo_test::AliasedRecordWithChanges const& value) {
   ordered_json json_value = value;
   yardl::ndjson::WriteProtocolValue(stream_, "aliasedRecordWithChanges", json_value);}
+
+void ProtocolWithChangesWriter::WriteRecordToRenamedRecordImpl(evo_test::RenamedRecord const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "recordToRenamedRecord", json_value);}
+
+void ProtocolWithChangesWriter::WriteRecordToAliasedRecordImpl(evo_test::RecordWithChanges const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "recordToAliasedRecord", json_value);}
+
+void ProtocolWithChangesWriter::WriteRecordToAliasedAliasImpl(evo_test::RecordWithChanges const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "recordToAliasedAlias", json_value);}
 
 void ProtocolWithChangesWriter::WriteOptionalRecordWithChangesImpl(std::optional<evo_test::RecordWithChanges> const& value) {
   ordered_json json_value = value;
@@ -350,6 +376,22 @@ void ProtocolWithChangesWriter::WriteUnionWithTypesAddedImpl(std::variant<evo_te
 void ProtocolWithChangesWriter::WriteUnionWithTypesRemovedImpl(std::variant<evo_test::RecordWithChanges, int32_t, float, std::string> const& value) {
   ordered_json json_value = value;
   yardl::ndjson::WriteProtocolValue(stream_, "unionWithTypesRemoved", json_value);}
+
+void ProtocolWithChangesWriter::WriteRecordToOptionalImpl(evo_test::RecordWithChanges const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "recordToOptional", json_value);}
+
+void ProtocolWithChangesWriter::WriteRecordToAliasedOptionalImpl(evo_test::RecordWithChanges const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "recordToAliasedOptional", json_value);}
+
+void ProtocolWithChangesWriter::WriteRecordToUnionImpl(evo_test::RecordWithChanges const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "recordToUnion", json_value);}
+
+void ProtocolWithChangesWriter::WriteRecordToAliasedUnionImpl(evo_test::RecordWithChanges const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "recordToAliasedUnion", json_value);}
 
 void ProtocolWithChangesWriter::WriteVectorRecordWithChangesImpl(std::vector<evo_test::RecordWithChanges> const& value) {
   ordered_json json_value = value;
@@ -483,6 +525,14 @@ void ProtocolWithChangesReader::ReadAliasedLongToStringImpl(evo_test::AliasedLon
   yardl::ndjson::ReadProtocolValue(stream_, line_, "aliasedLongToString", true, unused_step_, value);
 }
 
+void ProtocolWithChangesReader::ReadStringToAliasedStringImpl(std::string& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "stringToAliasedString", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadStringToAliasedIntImpl(std::string& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "stringToAliasedInt", true, unused_step_, value);
+}
+
 void ProtocolWithChangesReader::ReadOptionalIntToUnionImpl(std::optional<int32_t>& value) {
   yardl::ndjson::ReadProtocolValue(stream_, line_, "optionalIntToUnion", true, unused_step_, value);
 }
@@ -497,6 +547,18 @@ void ProtocolWithChangesReader::ReadRecordWithChangesImpl(evo_test::RecordWithCh
 
 void ProtocolWithChangesReader::ReadAliasedRecordWithChangesImpl(evo_test::AliasedRecordWithChanges& value) {
   yardl::ndjson::ReadProtocolValue(stream_, line_, "aliasedRecordWithChanges", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadRecordToRenamedRecordImpl(evo_test::RenamedRecord& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "recordToRenamedRecord", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadRecordToAliasedRecordImpl(evo_test::RecordWithChanges& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "recordToAliasedRecord", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadRecordToAliasedAliasImpl(evo_test::RecordWithChanges& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "recordToAliasedAlias", true, unused_step_, value);
 }
 
 void ProtocolWithChangesReader::ReadOptionalRecordWithChangesImpl(std::optional<evo_test::RecordWithChanges>& value) {
@@ -521,6 +583,22 @@ void ProtocolWithChangesReader::ReadUnionWithTypesAddedImpl(std::variant<evo_tes
 
 void ProtocolWithChangesReader::ReadUnionWithTypesRemovedImpl(std::variant<evo_test::RecordWithChanges, int32_t, float, std::string>& value) {
   yardl::ndjson::ReadProtocolValue(stream_, line_, "unionWithTypesRemoved", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadRecordToOptionalImpl(evo_test::RecordWithChanges& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "recordToOptional", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadRecordToAliasedOptionalImpl(evo_test::RecordWithChanges& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "recordToAliasedOptional", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadRecordToUnionImpl(evo_test::RecordWithChanges& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "recordToUnion", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadRecordToAliasedUnionImpl(evo_test::RecordWithChanges& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "recordToAliasedUnion", true, unused_step_, value);
 }
 
 void ProtocolWithChangesReader::ReadVectorRecordWithChangesImpl(std::vector<evo_test::RecordWithChanges>& value) {
@@ -552,34 +630,6 @@ bool UnusedProtocolReader::ReadSamplesImpl(evo_test::UnchangedRecord& value) {
 }
 
 void UnusedProtocolReader::CloseImpl() {
-  VerifyFinished();
-}
-
-void NewProtocolWriter::WriteCalibrationImpl(std::vector<double> const& value) {
-  ordered_json json_value = value;
-  yardl::ndjson::WriteProtocolValue(stream_, "calibration", json_value);}
-
-void NewProtocolWriter::WriteDataImpl(evo_test::NewRecord const& value) {
-  ordered_json json_value = value;
-  yardl::ndjson::WriteProtocolValue(stream_, "data", json_value);}
-
-void NewProtocolWriter::Flush() {
-  stream_.flush();
-}
-
-void NewProtocolWriter::CloseImpl() {
-  stream_.flush();
-}
-
-void NewProtocolReader::ReadCalibrationImpl(std::vector<double>& value) {
-  yardl::ndjson::ReadProtocolValue(stream_, line_, "calibration", true, unused_step_, value);
-}
-
-bool NewProtocolReader::ReadDataImpl(evo_test::NewRecord& value) {
-  return yardl::ndjson::ReadProtocolValue(stream_, line_, "data", false, unused_step_, value);
-}
-
-void NewProtocolReader::CloseImpl() {
   VerifyFinished();
 }
 

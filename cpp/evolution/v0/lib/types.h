@@ -55,5 +55,19 @@ struct RecordWithChanges {
 
 using AliasedRecordWithChanges = evo_test::RecordWithChanges;
 
+struct RenamedRecord {
+  int32_t i{};
+  std::string s{};
+
+  bool operator==(const RenamedRecord& other) const {
+    return i == other.i &&
+      s == other.s;
+  }
+
+  bool operator!=(const RenamedRecord& other) const {
+    return !(*this == other);
+  }
+};
+
 } // namespace evo_test
 

@@ -76,6 +76,10 @@ class ProtocolWithChangesWriter : public evo_test::ProtocolWithChangesWriterBase
 
   void WriteAliasedLongToStringImpl(evo_test::AliasedLongToString const& value) override;
 
+  void WriteStringToAliasedStringImpl(std::string const& value) override;
+
+  void WriteStringToAliasedIntImpl(std::string const& value) override;
+
   void WriteOptionalIntToUnionImpl(std::optional<int32_t> const& value) override;
 
   void WriteOptionalRecordToUnionImpl(std::optional<evo_test::RecordWithChanges> const& value) override;
@@ -83,6 +87,12 @@ class ProtocolWithChangesWriter : public evo_test::ProtocolWithChangesWriterBase
   void WriteRecordWithChangesImpl(evo_test::RecordWithChanges const& value) override;
 
   void WriteAliasedRecordWithChangesImpl(evo_test::AliasedRecordWithChanges const& value) override;
+
+  void WriteRecordToRenamedRecordImpl(evo_test::RenamedRecord const& value) override;
+
+  void WriteRecordToAliasedRecordImpl(evo_test::RecordWithChanges const& value) override;
+
+  void WriteRecordToAliasedAliasImpl(evo_test::RecordWithChanges const& value) override;
 
   void WriteOptionalRecordWithChangesImpl(std::optional<evo_test::RecordWithChanges> const& value) override;
 
@@ -95,6 +105,14 @@ class ProtocolWithChangesWriter : public evo_test::ProtocolWithChangesWriterBase
   void WriteUnionWithTypesAddedImpl(std::variant<evo_test::RecordWithChanges, float> const& value) override;
 
   void WriteUnionWithTypesRemovedImpl(std::variant<evo_test::RecordWithChanges, int32_t, float, std::string> const& value) override;
+
+  void WriteRecordToOptionalImpl(evo_test::RecordWithChanges const& value) override;
+
+  void WriteRecordToAliasedOptionalImpl(evo_test::RecordWithChanges const& value) override;
+
+  void WriteRecordToUnionImpl(evo_test::RecordWithChanges const& value) override;
+
+  void WriteRecordToAliasedUnionImpl(evo_test::RecordWithChanges const& value) override;
 
   void WriteVectorRecordWithChangesImpl(std::vector<evo_test::RecordWithChanges> const& value) override;
 
@@ -171,6 +189,10 @@ class ProtocolWithChangesReader : public evo_test::ProtocolWithChangesReaderBase
 
   void ReadAliasedLongToStringImpl(evo_test::AliasedLongToString& value) override;
 
+  void ReadStringToAliasedStringImpl(std::string& value) override;
+
+  void ReadStringToAliasedIntImpl(std::string& value) override;
+
   void ReadOptionalIntToUnionImpl(std::optional<int32_t>& value) override;
 
   void ReadOptionalRecordToUnionImpl(std::optional<evo_test::RecordWithChanges>& value) override;
@@ -178,6 +200,12 @@ class ProtocolWithChangesReader : public evo_test::ProtocolWithChangesReaderBase
   void ReadRecordWithChangesImpl(evo_test::RecordWithChanges& value) override;
 
   void ReadAliasedRecordWithChangesImpl(evo_test::AliasedRecordWithChanges& value) override;
+
+  void ReadRecordToRenamedRecordImpl(evo_test::RenamedRecord& value) override;
+
+  void ReadRecordToAliasedRecordImpl(evo_test::RecordWithChanges& value) override;
+
+  void ReadRecordToAliasedAliasImpl(evo_test::RecordWithChanges& value) override;
 
   void ReadOptionalRecordWithChangesImpl(std::optional<evo_test::RecordWithChanges>& value) override;
 
@@ -190,6 +218,14 @@ class ProtocolWithChangesReader : public evo_test::ProtocolWithChangesReaderBase
   void ReadUnionWithTypesAddedImpl(std::variant<evo_test::RecordWithChanges, float>& value) override;
 
   void ReadUnionWithTypesRemovedImpl(std::variant<evo_test::RecordWithChanges, int32_t, float, std::string>& value) override;
+
+  void ReadRecordToOptionalImpl(evo_test::RecordWithChanges& value) override;
+
+  void ReadRecordToAliasedOptionalImpl(evo_test::RecordWithChanges& value) override;
+
+  void ReadRecordToUnionImpl(evo_test::RecordWithChanges& value) override;
+
+  void ReadRecordToAliasedUnionImpl(evo_test::RecordWithChanges& value) override;
 
   void ReadVectorRecordWithChangesImpl(std::vector<evo_test::RecordWithChanges>& value) override;
 
@@ -228,39 +264,6 @@ class UnusedProtocolReader : public evo_test::UnusedProtocolReaderBase, public y
 
   private:
   std::unique_ptr<yardl::hdf5::DatasetReader> samples_dataset_state_;
-};
-
-// HDF5 writer for the NewProtocol protocol.
-class NewProtocolWriter : public evo_test::NewProtocolWriterBase, public yardl::hdf5::Hdf5Writer {
-  public:
-  NewProtocolWriter(std::string path);
-
-  protected:
-  void WriteCalibrationImpl(std::vector<double> const& value) override;
-
-  void WriteDataImpl(evo_test::NewRecord const& value) override;
-
-  void WriteDataImpl(std::vector<evo_test::NewRecord> const& values) override;
-
-  void EndDataImpl() override;
-
-  private:
-  std::unique_ptr<yardl::hdf5::DatasetWriter> data_dataset_state_;
-};
-
-// HDF5 reader for the NewProtocol protocol.
-class NewProtocolReader : public evo_test::NewProtocolReaderBase, public yardl::hdf5::Hdf5Reader {
-  public:
-  NewProtocolReader(std::string path);
-
-  void ReadCalibrationImpl(std::vector<double>& value) override;
-
-  bool ReadDataImpl(evo_test::NewRecord& value) override;
-
-  bool ReadDataImpl(std::vector<evo_test::NewRecord>& values) override;
-
-  private:
-  std::unique_ptr<yardl::hdf5::DatasetReader> data_dataset_state_;
 };
 
 } // namespace evo_test

@@ -76,6 +76,10 @@ class ProtocolWithChangesWriter : public evo_test::ProtocolWithChangesWriterBase
 
   void WriteAliasedLongToStringImpl(evo_test::AliasedLongToString const& value) override;
 
+  void WriteStringToAliasedStringImpl(evo_test::AliasedString const& value) override;
+
+  void WriteStringToAliasedIntImpl(evo_test::AliasedInt const& value) override;
+
   void WriteOptionalIntToUnionImpl(std::variant<std::monostate, int32_t, std::string> const& value) override;
 
   void WriteOptionalRecordToUnionImpl(std::variant<std::monostate, evo_test::RecordWithChanges, std::string> const& value) override;
@@ -83,6 +87,12 @@ class ProtocolWithChangesWriter : public evo_test::ProtocolWithChangesWriterBase
   void WriteRecordWithChangesImpl(evo_test::RecordWithChanges const& value) override;
 
   void WriteAliasedRecordWithChangesImpl(evo_test::AliasedRecordWithChanges const& value) override;
+
+  void WriteRecordToRenamedRecordImpl(evo_test::RenamedRecord const& value) override;
+
+  void WriteRecordToAliasedRecordImpl(evo_test::AliasedRecordWithChanges const& value) override;
+
+  void WriteRecordToAliasedAliasImpl(evo_test::AliasOfAliasedRecordWithChanges const& value) override;
 
   void WriteOptionalRecordWithChangesImpl(std::optional<evo_test::RecordWithChanges> const& value) override;
 
@@ -95,6 +105,14 @@ class ProtocolWithChangesWriter : public evo_test::ProtocolWithChangesWriterBase
   void WriteUnionWithTypesAddedImpl(std::variant<evo_test::RecordWithChanges, int32_t, float, std::string> const& value) override;
 
   void WriteUnionWithTypesRemovedImpl(std::variant<evo_test::RecordWithChanges, std::string> const& value) override;
+
+  void WriteRecordToOptionalImpl(std::optional<evo_test::RecordWithChanges> const& value) override;
+
+  void WriteRecordToAliasedOptionalImpl(evo_test::AliasedOptionalRecord const& value) override;
+
+  void WriteRecordToUnionImpl(std::variant<evo_test::RecordWithChanges, std::string> const& value) override;
+
+  void WriteRecordToAliasedUnionImpl(evo_test::AliasedRecordOrString const& value) override;
 
   void WriteVectorRecordWithChangesImpl(std::vector<evo_test::RecordWithChanges> const& value) override;
 
@@ -171,6 +189,10 @@ class ProtocolWithChangesReader : public evo_test::ProtocolWithChangesReaderBase
 
   void ReadAliasedLongToStringImpl(evo_test::AliasedLongToString& value) override;
 
+  void ReadStringToAliasedStringImpl(evo_test::AliasedString& value) override;
+
+  void ReadStringToAliasedIntImpl(evo_test::AliasedInt& value) override;
+
   void ReadOptionalIntToUnionImpl(std::variant<std::monostate, int32_t, std::string>& value) override;
 
   void ReadOptionalRecordToUnionImpl(std::variant<std::monostate, evo_test::RecordWithChanges, std::string>& value) override;
@@ -178,6 +200,12 @@ class ProtocolWithChangesReader : public evo_test::ProtocolWithChangesReaderBase
   void ReadRecordWithChangesImpl(evo_test::RecordWithChanges& value) override;
 
   void ReadAliasedRecordWithChangesImpl(evo_test::AliasedRecordWithChanges& value) override;
+
+  void ReadRecordToRenamedRecordImpl(evo_test::RenamedRecord& value) override;
+
+  void ReadRecordToAliasedRecordImpl(evo_test::AliasedRecordWithChanges& value) override;
+
+  void ReadRecordToAliasedAliasImpl(evo_test::AliasOfAliasedRecordWithChanges& value) override;
 
   void ReadOptionalRecordWithChangesImpl(std::optional<evo_test::RecordWithChanges>& value) override;
 
@@ -190,6 +218,14 @@ class ProtocolWithChangesReader : public evo_test::ProtocolWithChangesReaderBase
   void ReadUnionWithTypesAddedImpl(std::variant<evo_test::RecordWithChanges, int32_t, float, std::string>& value) override;
 
   void ReadUnionWithTypesRemovedImpl(std::variant<evo_test::RecordWithChanges, std::string>& value) override;
+
+  void ReadRecordToOptionalImpl(std::optional<evo_test::RecordWithChanges>& value) override;
+
+  void ReadRecordToAliasedOptionalImpl(evo_test::AliasedOptionalRecord& value) override;
+
+  void ReadRecordToUnionImpl(std::variant<evo_test::RecordWithChanges, std::string>& value) override;
+
+  void ReadRecordToAliasedUnionImpl(evo_test::AliasedRecordOrString& value) override;
 
   void ReadVectorRecordWithChangesImpl(std::vector<evo_test::RecordWithChanges>& value) override;
 

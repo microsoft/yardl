@@ -55,14 +55,16 @@ struct RecordWithChanges {
 
 using AliasedRecordWithChanges = evo_test::RecordWithChanges;
 
-struct NewRecord {
-  yardl::DynamicNDArray<double> stuff{};
+struct RenamedRecord {
+  int32_t i{};
+  std::string s{};
 
-  bool operator==(const NewRecord& other) const {
-    return stuff == other.stuff;
+  bool operator==(const RenamedRecord& other) const {
+    return i == other.i &&
+      s == other.s;
   }
 
-  bool operator!=(const NewRecord& other) const {
+  bool operator!=(const RenamedRecord& other) const {
     return !(*this == other);
   }
 };

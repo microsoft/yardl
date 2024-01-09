@@ -36,14 +36,17 @@ ProtocolWithChanges: !protocol
     optionalFloatToString: string?
 
     aliasedLongToString: AliasedLongToString
-
-    # recordToAlias: AliasOfAliasedRecordWithChanges
+    stringToAliasedString: AliasedString
+    stringToAliasedInt: AliasedInt
 
     optionalIntToUnion: [null, int, string]
     optionalRecordToUnion: [null, RecordWithChanges, string]
 
     recordWithChanges: RecordWithChanges
     aliasedRecordWithChanges: AliasedRecordWithChanges
+    recordToRenamedRecord: RenamedRecord
+    recordToAliasedRecord: AliasedRecordWithChanges
+    recordToAliasedAlias: AliasOfAliasedRecordWithChanges
 
     optionalRecordWithChanges: RecordWithChanges?
     aliasedOptionalRecordWithChanges: AliasedRecordWithChanges?
@@ -55,15 +58,24 @@ ProtocolWithChanges: !protocol
     unionWithTypesAdded: [RecordWithChanges, int, float, string]
     unionWithTypesRemoved: [RecordWithChanges, string]
 
+    recordToOptional: RecordWithChanges?
+    recordToAliasedOptional: AliasedOptionalRecord
+    recordToUnion: [RecordWithChanges, string]
+    recordToAliasedUnion: AliasedRecordOrString
+
     vectorRecordWithChanges: RecordWithChanges*
 
     streamedRecordWithChanges: !stream
       items: RecordWithChanges
 
 
+AliasedInt: int
+AliasedString: string
 AliasedLongToString: string
 AliasedRecordWithChanges: RecordWithChanges
 AliasOfAliasedRecordWithChanges: AliasedRecordWithChanges
+AliasedOptionalRecord: RecordWithChanges?
+AliasedRecordOrString: [RecordWithChanges, string]
 
 RecordWithChanges: !record
   fields:
@@ -77,6 +89,13 @@ UnchangedRecord: !record
     name: string
     age: int
     meta: string->double
+
+RenamedRecord: DeprecatedRecord
+DeprecatedRecord: !record
+  fields:
+    s: string
+    i: int
+
 
 UnusedProtocol: !protocol
   sequence:
