@@ -59,6 +59,7 @@ func validateChanges(env *Environment) error {
 
 			case *RecordChange:
 				oldRec := defChange.PreviousDefinition().(*RecordDefinition)
+				newRec := defChange.LatestDefinition().(*RecordDefinition)
 
 				for _, added := range defChange.FieldsAdded {
 					if !TypeHasNullOption(added.Type) {
@@ -76,7 +77,8 @@ func validateChanges(env *Environment) error {
 
 					if tc := defChange.FieldChanges[i]; tc != nil {
 						if typeChangeIsError(tc) {
-							errorSink.Add(validationError(tc.NewType(), "changing field '%s' from %s", field.Name, typeChangeToError(tc)))
+							newField := newRec.Fields[defChange.FieldMapping[i]]
+							errorSink.Add(validationError(newField, "changing field '%s' from %s", newField.Name, typeChangeToError(tc)))
 						}
 
 						if warn := typeChangeToWarning(tc); warn != "" {
@@ -111,24 +113,41 @@ func validateChanges(env *Environment) error {
 				continue
 			}
 
-			if protChange.StepsReordered {
-				errorSink.Add(validationError(pd, "reordering steps in a Protocol is not backward compatible"))
+			if protChange.HasReorderedSteps() {
+				var relevantNode Node = pd
+				for i, index := range protChange.StepMapping {
+					if index != i && index >= 0 {
+						relevantNode = pd.Sequence[index]
+						break
+					}
+				}
+				errorSink.Add(validationError(relevantNode, "reordering steps in a Protocol is not backward compatible"))
 			}
 
-			oldProt := protChange.PreviousDefinition().(*ProtocolDefinition)
 			for _, added := range protChange.StepsAdded {
 				errorSink.Add(validationError(added, "adding steps to a Protocol is not backward compatible"))
 			}
 
+			oldProt := protChange.PreviousDefinition().(*ProtocolDefinition)
 			for i, step := range oldProt.Sequence {
-				if protChange.StepRemoved[i] {
-					errorSink.Add(validationError(pd, "removing step '%s' from a Protocol is not backward compatible", step.Name))
+
+				if protChange.StepMapping[i] < 0 {
+					// Step was removed
+					var relevantNode Node = pd
+					for j := i; j >= 0; j-- {
+						if protChange.StepMapping[j] >= 0 {
+							relevantNode = pd.Sequence[protChange.StepMapping[j]]
+							break
+						}
+					}
+					errorSink.Add(validationError(relevantNode, "removing step '%s' from a Protocol is not backward compatible", step.Name))
 					continue
 				}
 
 				if tc := protChange.StepChanges[i]; tc != nil {
 					if typeChangeIsError(tc) {
-						errorSink.Add(validationError(tc.NewType(), "changing step '%s' from %s", step.Name, typeChangeToError(tc)))
+						newStep := pd.Sequence[protChange.StepMapping[i]]
+						errorSink.Add(validationError(newStep.Type, "changing step '%s' from %s", newStep.Name, typeChangeToError(tc)))
 					}
 
 					if warn := typeChangeToWarning(tc); warn != "" {
@@ -404,38 +423,37 @@ func detectProtocolDefinitionChanges(newProtocol, oldProtocol *ProtocolDefinitio
 	change := &ProtocolChange{
 		DefinitionPair: DefinitionPair{oldProtocol, newProtocol},
 		PreviousSchema: oldProtocol.GetDefinitionMeta().Annotations[schemaAnnotationKey].(string),
-		StepRemoved:    make([]bool, len(oldProtocol.Sequence)),
 		StepChanges:    make([]TypeChange, len(oldProtocol.Sequence)),
+		StepMapping:    make([]int, len(oldProtocol.Sequence)),
 	}
 
-	oldSequence := make(map[string]*ProtocolStep)
+	oldSteps := make(map[string]*ProtocolStep)
 	for _, f := range oldProtocol.Sequence {
-		oldSequence[f.Name] = f
+		oldSteps[f.Name] = f
 	}
-	newSequence := make(map[string]*ProtocolStep)
+	newSteps := make(map[string]*ProtocolStep)
+	newStepIndices := make(map[string]int)
 	for i, newStep := range newProtocol.Sequence {
-		newSequence[newStep.Name] = newStep
+		newSteps[newStep.Name] = newStep
+		newStepIndices[newStep.Name] = i
 
-		if i >= len(oldProtocol.Sequence) || newStep.Name != oldProtocol.Sequence[i].Name {
-			// CHANGE: Reordered or renamed steps
-			change.StepsReordered = true
-		}
-
-		if _, ok := oldSequence[newStep.Name]; !ok {
-			// CHANGE: New ProtocolStep
+		if _, ok := oldSteps[newStep.Name]; !ok {
+			// CHANGE: Added this ProtocolStep
 			change.StepsAdded = append(change.StepsAdded, newStep)
 		}
 	}
 
 	anyStepChanged := false
 	for i, oldStep := range oldProtocol.Sequence {
-		newStep, ok := newSequence[oldStep.Name]
+		newStep, ok := newSteps[oldStep.Name]
 		if !ok {
-			// CHANGE: Removed ProtocolStep
+			// CHANGE: Removed this ProtocolStep
 			anyStepChanged = true
-			change.StepRemoved[i] = true
+			change.StepMapping[i] = -1
 			continue
 		}
+
+		change.StepMapping[i] = newStepIndices[oldStep.Name]
 
 		if typeChange := detectTypeChanges(newStep.Type, oldStep.Type); typeChange != nil {
 			// CHANGE: ProtocolStep type changed
@@ -444,7 +462,7 @@ func detectProtocolDefinitionChanges(newProtocol, oldProtocol *ProtocolDefinitio
 		}
 	}
 
-	if anyStepChanged || change.StepsReordered || len(change.StepsAdded) > 0 {
+	if anyStepChanged || change.HasReorderedSteps() || len(change.StepsAdded) > 0 {
 		return change
 	}
 	return nil
@@ -456,6 +474,7 @@ func detectRecordDefinitionChanges(newRecord, oldRecord *RecordDefinition) *Reco
 		DefinitionPair: DefinitionPair{oldRecord, newRecord},
 		FieldRemoved:   make([]bool, len(oldRecord.Fields)),
 		FieldChanges:   make([]TypeChange, len(oldRecord.Fields)),
+		FieldMapping:   make([]int, len(oldRecord.Fields)),
 	}
 
 	// Fields may be reordered
@@ -466,13 +485,10 @@ func detectRecordDefinitionChanges(newRecord, oldRecord *RecordDefinition) *Reco
 	}
 
 	newFields := make(map[string]*Field)
+	newFieldIndices := make(map[string]int)
 	for i, newField := range newRecord.Fields {
 		newFields[newField.Name] = newField
-
-		if i >= len(oldRecord.Fields) || newField.Name != oldRecord.Fields[i].Name {
-			// CHANGE: Reordered or renamed fields
-			change.FieldsReordered = true
-		}
+		newFieldIndices[newField.Name] = i
 
 		if _, ok := oldFields[newField.Name]; !ok {
 			// CHANGE: New field
@@ -487,8 +503,11 @@ func detectRecordDefinitionChanges(newRecord, oldRecord *RecordDefinition) *Reco
 			// CHANGE: Removed field
 			anyFieldChanged = true
 			change.FieldRemoved[i] = true
+			change.FieldMapping[i] = -1
 			continue
 		}
+
+		change.FieldMapping[i] = newFieldIndices[oldField.Name]
 
 		if typeChange := detectTypeChanges(newField.Type, oldField.Type); typeChange != nil {
 			// CHANGE: Field type changed
@@ -497,7 +516,7 @@ func detectRecordDefinitionChanges(newRecord, oldRecord *RecordDefinition) *Reco
 		}
 	}
 
-	if anyFieldChanged || change.FieldsReordered || len(change.FieldsAdded) > 0 {
+	if anyFieldChanged || change.HasReorderedFields() || len(change.FieldsAdded) > 0 {
 		return change
 	}
 	return nil

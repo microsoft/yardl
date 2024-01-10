@@ -214,17 +214,34 @@ type ProtocolChange struct {
 	DefinitionPair
 	PreviousSchema string
 	StepsAdded     []*ProtocolStep
-	StepRemoved    []bool
 	StepChanges    []TypeChange
-	StepsReordered bool
+	StepMapping    []int
+}
+
+func (pc *ProtocolChange) HasReorderedSteps() bool {
+	for i, index := range pc.StepMapping {
+		if index >= 0 && index != i {
+			return true
+		}
+	}
+	return false
 }
 
 type RecordChange struct {
 	DefinitionPair
-	FieldsAdded     []*Field
-	FieldRemoved    []bool
-	FieldChanges    []TypeChange
-	FieldsReordered bool
+	FieldsAdded  []*Field
+	FieldRemoved []bool
+	FieldChanges []TypeChange
+	FieldMapping []int
+}
+
+func (rc *RecordChange) HasReorderedFields() bool {
+	for i, index := range rc.FieldMapping {
+		if index != i {
+			return true
+		}
+	}
+	return false
 }
 
 type EnumChange struct {
