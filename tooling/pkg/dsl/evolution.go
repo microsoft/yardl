@@ -10,236 +10,6 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-type TypeChange interface {
-	OldType() Type
-	NewType() Type
-	Inverse() TypeChange
-}
-
-type WrappedTypeChange interface {
-	TypeChange
-	Inner() TypeChange
-}
-
-type TypePair struct {
-	Old Type
-	New Type
-}
-
-func (tc TypePair) Swap() TypePair {
-	return TypePair{tc.New, tc.Old}
-}
-
-func (tc *TypePair) OldType() Type {
-	return tc.Old
-}
-func (tc *TypePair) NewType() Type {
-	return tc.New
-}
-
-type TypeChangeNumberToNumber struct{ TypePair }
-
-func (tc *TypeChangeNumberToNumber) Inverse() TypeChange {
-	return &TypeChangeNumberToNumber{tc.Swap()}
-}
-
-type TypeChangeNumberToString struct{ TypePair }
-
-func (tc *TypeChangeNumberToString) Inverse() TypeChange {
-	return &TypeChangeStringToNumber{tc.Swap()}
-}
-
-type TypeChangeStringToNumber struct{ TypePair }
-
-func (tc *TypeChangeStringToNumber) Inverse() TypeChange {
-	return &TypeChangeNumberToString{tc.Swap()}
-}
-
-type TypeChangeScalarToOptional struct{ TypePair }
-
-func (tc *TypeChangeScalarToOptional) Inverse() TypeChange {
-	return &TypeChangeOptionalToScalar{tc.Swap()}
-}
-
-type TypeChangeOptionalToScalar struct{ TypePair }
-
-func (tc *TypeChangeOptionalToScalar) Inverse() TypeChange {
-	return &TypeChangeScalarToOptional{tc.Swap()}
-}
-
-type TypeChangeScalarToUnion struct {
-	TypePair
-	TypeIndex int
-}
-
-func (tc *TypeChangeScalarToUnion) Inverse() TypeChange {
-	return &TypeChangeUnionToScalar{tc.Swap(), tc.TypeIndex}
-}
-
-type TypeChangeUnionToScalar struct {
-	TypePair
-	TypeIndex int
-}
-
-func (tc *TypeChangeUnionToScalar) Inverse() TypeChange {
-	return &TypeChangeScalarToUnion{tc.Swap(), tc.TypeIndex}
-}
-
-type TypeChangeOptionalTypeChanged struct {
-	TypePair
-	InnerChange TypeChange
-}
-
-func (tc *TypeChangeOptionalTypeChanged) Inverse() TypeChange {
-	return &TypeChangeOptionalTypeChanged{tc.Swap(), tc.InnerChange.Inverse()}
-}
-
-func (tc *TypeChangeOptionalTypeChanged) Inner() TypeChange {
-	return tc.InnerChange
-}
-
-type TypeChangeUnionToOptional struct {
-	TypePair
-	TypeIndex int
-}
-
-func (tc *TypeChangeUnionToOptional) Inverse() TypeChange {
-	return &TypeChangeOptionalToUnion{tc.Swap(), tc.TypeIndex}
-}
-
-type TypeChangeOptionalToUnion struct {
-	TypePair
-	TypeIndex int
-}
-
-func (tc *TypeChangeOptionalToUnion) Inverse() TypeChange {
-	return &TypeChangeUnionToOptional{tc.Swap(), tc.TypeIndex}
-}
-
-type TypeChangeUnionTypesetChanged struct {
-	TypePair
-	OldMatches []bool
-	NewMatches []bool
-}
-
-func (tc *TypeChangeUnionTypesetChanged) Inverse() TypeChange {
-	return &TypeChangeUnionTypesetChanged{TypePair: tc.Swap(), OldMatches: tc.NewMatches, NewMatches: tc.OldMatches}
-}
-
-type TypeChangeStreamTypeChanged struct {
-	TypePair
-	InnerChange TypeChange
-}
-
-func (tc *TypeChangeStreamTypeChanged) Inverse() TypeChange {
-	return &TypeChangeStreamTypeChanged{tc.Swap(), tc.InnerChange.Inverse()}
-}
-
-func (tc *TypeChangeStreamTypeChanged) Inner() TypeChange {
-	return tc.InnerChange
-}
-
-type TypeChangeVectorTypeChanged struct {
-	TypePair
-	InnerChange TypeChange
-}
-
-func (tc *TypeChangeVectorTypeChanged) Inverse() TypeChange {
-	return &TypeChangeVectorTypeChanged{tc.Swap(), tc.InnerChange.Inverse()}
-}
-
-func (tc *TypeChangeVectorTypeChanged) Inner() TypeChange {
-	return tc.InnerChange
-}
-
-type TypeChangeDefinitionChanged struct{ TypePair }
-
-func (tc *TypeChangeDefinitionChanged) Inverse() TypeChange {
-	return &TypeChangeDefinitionChanged{tc.Swap()}
-}
-
-type TypeChangeIncompatible struct{ TypePair }
-
-func (tc *TypeChangeIncompatible) Inverse() TypeChange {
-	return &TypeChangeIncompatible{tc.Swap()}
-}
-
-var (
-	_ TypeChange = (*TypeChangeNumberToNumber)(nil)
-	_ TypeChange = (*TypeChangeNumberToString)(nil)
-	_ TypeChange = (*TypeChangeStringToNumber)(nil)
-	_ TypeChange = (*TypeChangeScalarToOptional)(nil)
-	_ TypeChange = (*TypeChangeOptionalToScalar)(nil)
-	_ TypeChange = (*TypeChangeScalarToUnion)(nil)
-	_ TypeChange = (*TypeChangeUnionToScalar)(nil)
-	_ TypeChange = (*TypeChangeOptionalTypeChanged)(nil)
-	_ TypeChange = (*TypeChangeOptionalToUnion)(nil)
-	_ TypeChange = (*TypeChangeUnionToOptional)(nil)
-	_ TypeChange = (*TypeChangeUnionTypesetChanged)(nil)
-	_ TypeChange = (*TypeChangeStreamTypeChanged)(nil)
-	_ TypeChange = (*TypeChangeVectorTypeChanged)(nil)
-	_ TypeChange = (*TypeChangeDefinitionChanged)(nil)
-	_ TypeChange = (*TypeChangeIncompatible)(nil)
-
-	_ WrappedTypeChange = (*TypeChangeOptionalTypeChanged)(nil)
-	_ WrappedTypeChange = (*TypeChangeStreamTypeChanged)(nil)
-	_ WrappedTypeChange = (*TypeChangeVectorTypeChanged)(nil)
-
-	_ DefinitionChange = (*DefinitionChangeIncompatible)(nil)
-	_ DefinitionChange = (*NamedTypeChange)(nil)
-	_ DefinitionChange = (*RecordChange)(nil)
-	_ DefinitionChange = (*EnumChange)(nil)
-	_ DefinitionChange = (*ProtocolChange)(nil)
-)
-
-type DefinitionChange interface {
-	PreviousDefinition() TypeDefinition
-	LatestDefinition() TypeDefinition
-}
-
-type DefinitionPair struct {
-	Old TypeDefinition
-	New TypeDefinition
-}
-
-func (tc *DefinitionPair) PreviousDefinition() TypeDefinition {
-	return tc.Old
-}
-func (tc *DefinitionPair) LatestDefinition() TypeDefinition {
-	return tc.New
-}
-
-type DefinitionChangeIncompatible struct {
-	DefinitionPair
-}
-
-type NamedTypeChange struct {
-	DefinitionPair
-	TypeChange TypeChange
-}
-
-type ProtocolChange struct {
-	DefinitionPair
-	PreviousSchema string
-	StepsAdded     []*ProtocolStep
-	StepRemoved    []bool
-	StepChanges    []TypeChange
-	StepsReordered bool
-}
-
-type RecordChange struct {
-	DefinitionPair
-	FieldsAdded     []*Field
-	FieldRemoved    []bool
-	FieldChanges    []TypeChange
-	FieldsReordered bool
-}
-
-type EnumChange struct {
-	DefinitionPair
-	BaseTypeChange TypeChange
-}
-
 const (
 	// Annotations referenced in serialization codegen
 	VersionAnnotationKey = "version"
@@ -265,7 +35,7 @@ func ValidateEvolution(env *Environment, predecessors []*Environment, versionLab
 			return nil, err
 		}
 
-		saveChangeAnnotations(env, versionLabels[i])
+		saveChangedDefinitions(env, versionLabels[i])
 	}
 
 	return env, nil
@@ -292,14 +62,14 @@ func validateChanges(env *Environment) error {
 
 				for _, added := range defChange.FieldsAdded {
 					if !TypeHasNullOption(added.Type) {
-						log.Warn().Msgf("Adding a non-Optional record field may result in undefined behavior")
+						log.Warn().Msgf("Adding non-Optional field '%s' may result in undefined behavior with previous versions", added.Name)
 					}
 				}
 
 				for i, field := range oldRec.Fields {
 					if defChange.FieldRemoved[i] {
 						if !TypeHasNullOption(oldRec.Fields[i].Type) {
-							log.Warn().Msgf("Removing non-Optional field '%s' may result in undefined behavior", field.Name)
+							log.Warn().Msgf("Removing non-Optional field '%s' may result in undefined behavior with previous versions", field.Name)
 						}
 						continue
 					}
@@ -372,62 +142,6 @@ func validateChanges(env *Environment) error {
 	return errorSink.AsError()
 }
 
-func typeChangeIsError(tc TypeChange) bool {
-	switch tc := tc.(type) {
-	case WrappedTypeChange:
-		switch tc := tc.(type) {
-		case *TypeChangeStreamTypeChanged:
-			// A Stream's Type can only change if it is a changed TypeDefinition
-			if _, ok := tc.Inner().(*TypeChangeDefinitionChanged); !ok {
-				return true
-			}
-		case *TypeChangeVectorTypeChanged:
-			// A Vector's Type can only change if it is a changed TypeDefinition
-			if _, ok := tc.Inner().(*TypeChangeDefinitionChanged); !ok {
-				return true
-			}
-		}
-
-		// Otherwise, is the inner type change an error?
-		return typeChangeIsError(tc.Inner())
-
-	case *TypeChangeIncompatible:
-		return true
-	}
-	return false
-}
-
-func typeChangeToError(tc TypeChange) string {
-	return fmt.Sprintf("'%s' to '%s' is not backward compatible", TypeToShortSyntax(tc.OldType(), true), TypeToShortSyntax(tc.NewType(), true))
-}
-
-func typeChangeWarningReason(tc TypeChange) string {
-	switch tc := tc.(type) {
-	case WrappedTypeChange:
-		return typeChangeWarningReason(tc.Inner())
-
-	case *TypeChangeNumberToNumber:
-		return "may result in numeric overflow or loss of precision"
-	case *TypeChangeNumberToString, *TypeChangeStringToNumber:
-		return "may result in loss of precision"
-	case *TypeChangeScalarToOptional, *TypeChangeOptionalToScalar:
-		return "may result in undefined behavior"
-	case *TypeChangeScalarToUnion, *TypeChangeUnionToScalar:
-		return "may result in undefined behavior"
-	case *TypeChangeUnionTypesetChanged:
-		return "may produce runtime errors"
-	}
-	return ""
-}
-
-func typeChangeToWarning(tc TypeChange) string {
-	message := fmt.Sprintf("'%s' to '%s' ", TypeToShortSyntax(tc.OldType(), true), TypeToShortSyntax(tc.NewType(), true))
-	if reason := typeChangeWarningReason(tc); reason != "" {
-		return message + reason
-	}
-	return ""
-}
-
 // Annotate the previous model with Protocol Schema strings for later
 func annotatePredecessorSchemas(predecessor *Environment) {
 	Visit(predecessor, func(self Visitor, node Node) {
@@ -471,7 +185,7 @@ func initializeChangeAnnotations(env *Environment) {
 	})
 }
 
-func saveChangeAnnotations(env *Environment, versionLabel string) {
+func saveChangedDefinitions(env *Environment, versionLabel string) {
 	Visit(env, func(self Visitor, node Node) {
 		switch node := node.(type) {
 		case *Namespace:

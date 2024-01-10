@@ -556,7 +556,7 @@ func writeTypeConversion(w *formatting.IndentedWriter, typeChange dsl.TypeChange
 		if write {
 			fmt.Fprintf(w, "if (%s.has_value()) {\n", sourceName)
 			w.Indented(func() {
-				writeTypeConversion(w, tc.Inner(), sourceName+".value()", targetName, write)
+				writeTypeConversion(w, tc.InnerChange, sourceName+".value()", targetName, write)
 			})
 			fmt.Fprintf(w, "}\n")
 		} else {
@@ -564,7 +564,7 @@ func writeTypeConversion(w *formatting.IndentedWriter, typeChange dsl.TypeChange
 			fmt.Fprintf(w, "%s %s;\n", common.TypeSyntax(tc.NewType()), tmpName)
 			fmt.Fprintf(w, "if (%s.has_value()) {\n", sourceName)
 			w.Indented(func() {
-				writeTypeConversion(w, tc.Inner(), sourceName+".value()", tmpName, write)
+				writeTypeConversion(w, tc.InnerChange, sourceName+".value()", tmpName, write)
 			})
 			fmt.Fprintf(w, "}\n")
 			fmt.Fprintf(w, "%s = %s;\n", targetName, tmpName)
@@ -626,17 +626,26 @@ func writeTypeConversion(w *formatting.IndentedWriter, typeChange dsl.TypeChange
 }
 
 func writeConversionRw(w *formatting.IndentedWriter, tc dsl.TypeChange, streamName, tmpName, targetName string, write bool) {
+	var onlyDefinitionChanged func(tc dsl.TypeChange) bool
+	onlyDefinitionChanged = func(tc dsl.TypeChange) bool {
+		switch tc := tc.(type) {
+		case *dsl.TypeChangeDefinitionChanged:
+			return true
+		case *dsl.TypeChangeOptionalTypeChanged:
+			return onlyDefinitionChanged(tc.InnerChange)
+		case *dsl.TypeChangeStreamTypeChanged:
+			return onlyDefinitionChanged(tc.InnerChange)
+		case *dsl.TypeChangeVectorTypeChanged:
+			return onlyDefinitionChanged(tc.InnerChange)
+		}
+		return false
+	}
+
 	// If the TypeChange is due to a changed TypeDefinition, no conversion is needed
 	// because it will be handled by the TypeDefinition-specific Read/Write functions
-	if _, ok := tc.(*dsl.TypeChangeDefinitionChanged); ok {
+	if onlyDefinitionChanged(tc) {
 		fmt.Fprintf(w, "%s(%s, %s);\n", typeRwFunction(tc.OldType(), write), streamName, targetName)
 		return
-	}
-	if wrapped, ok := tc.(dsl.WrappedTypeChange); ok {
-		if _, ok := wrapped.Inner().(*dsl.TypeChangeDefinitionChanged); ok {
-			fmt.Fprintf(w, "%s(%s, %s);\n", typeRwFunction(tc.OldType(), write), streamName, targetName)
-			return
-		}
 	}
 
 	varType := common.TypeSyntax(tc.OldType())
@@ -850,7 +859,7 @@ func writeProtocolStep(w *formatting.IndentedWriter, step *dsl.ProtocolStep, cha
 	}
 
 	if allNil(changes) {
-		// No schema version changes
+		// No version changes to this ProtocolStep
 		writeStepRw(step.Type)
 		return
 	}
@@ -875,11 +884,9 @@ func writeProtocolStep(w *formatting.IndentedWriter, step *dsl.ProtocolStep, cha
 				w.WriteStringln("break;")
 			}()
 
-			changedType := change.OldType()
-
 			if stream {
 				// TODO: Refactor - This assumes that Stream changes can only be TypeDefinition changes
-				writeStepRw(changedType)
+				writeStepRw(change.OldType())
 				return
 			}
 
