@@ -211,14 +211,12 @@ func writeDefinitions(w *formatting.IndentedWriter, ns *dsl.Namespace, symbolTab
 		fmt.Fprintf(w, "std::string %s::schema_ = R\"(%s)\";\n\n", common.AbstractWriterName(p), dsl.GetProtocolSchemaString(p, symbolTable))
 		fmt.Fprintf(w, "std::vector<std::string> %s::previous_schemas_ = {\n", common.AbstractWriterName(p))
 		w.Indented(func() {
-			if changes, ok := p.Annotations[dsl.AllVersionChangesAnnotationKey].(map[string]*dsl.ProtocolChange); ok {
-				for _, versionLabel := range ns.Versions {
-					change := changes[versionLabel]
-					if change != nil {
-						fmt.Fprintf(w, "R\"(%s)\",\n", change.PreviousSchema)
-					} else {
-						fmt.Fprintf(w, "%s::schema_,\n", common.AbstractWriterName(p))
-					}
+			for _, versionLabel := range ns.Versions {
+				change := p.Versions[versionLabel]
+				if change != nil {
+					fmt.Fprintf(w, "R\"(%s)\",\n", change.PreviousSchema)
+				} else {
+					fmt.Fprintf(w, "%s::schema_,\n", common.AbstractWriterName(p))
 				}
 			}
 		})

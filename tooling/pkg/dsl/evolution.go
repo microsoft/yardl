@@ -242,8 +242,7 @@ type EnumChange struct {
 
 const (
 	// Annotations referenced in serialization codegen
-	AllVersionChangesAnnotationKey = "all-changes"
-	VersionAnnotationKey           = "version"
+	VersionAnnotationKey = "version"
 
 	// Annotations used only for validation model evolution (local to this file)
 	changeAnnotationKey = "changed"
@@ -454,11 +453,9 @@ func initializeChangeAnnotations(env *Environment) {
 			self.VisitChildren(node)
 
 		case *ProtocolDefinition:
+			node.Versions = make(map[string]*ProtocolChange)
 			if node.GetDefinitionMeta().Annotations == nil {
 				node.GetDefinitionMeta().Annotations = make(map[string]any)
-			}
-			if node.GetDefinitionMeta().Annotations[AllVersionChangesAnnotationKey] == nil {
-				node.GetDefinitionMeta().Annotations[AllVersionChangesAnnotationKey] = make(map[string]*ProtocolChange)
 			}
 			node.GetDefinitionMeta().Annotations[changeAnnotationKey] = nil
 
@@ -494,26 +491,8 @@ func saveChangeAnnotations(env *Environment, versionLabel string) {
 			if ch, ok := node.GetDefinitionMeta().Annotations[changeAnnotationKey].(*ProtocolChange); ok {
 				changed = ch
 			}
-			node.GetDefinitionMeta().Annotations[AllVersionChangesAnnotationKey].(map[string]*ProtocolChange)[versionLabel] = changed
+			node.Versions[versionLabel] = changed
 			node.GetDefinitionMeta().Annotations[changeAnnotationKey] = nil
-
-			// Annotate *each* ProtocolStep with any changes from previous versions.
-			// NOTE: This assumes ProtocolStep are NOT REORDERED between versions
-			for i, step := range node.Sequence {
-				if step.Annotations == nil {
-					step.Annotations = make(map[string]any)
-				}
-				if step.Annotations[AllVersionChangesAnnotationKey] == nil {
-					step.Annotations[AllVersionChangesAnnotationKey] = make(map[string]TypeChange)
-				}
-
-				var stepChange TypeChange
-				if changed != nil && i < len(changed.StepChanges) {
-					stepChange = changed.StepChanges[i]
-				}
-
-				step.Annotations[AllVersionChangesAnnotationKey].(map[string]TypeChange)[versionLabel] = stepChange
-			}
 
 		default:
 			self.VisitChildren(node)
@@ -621,7 +600,7 @@ func annotateNamespaceChanges(newNs, oldNs *Namespace, versionLabel string) {
 		newTd = unwindNewAlias(newTd)
 
 		if alreadyCompared[newTd.GetDefinitionMeta().Name] {
-			// TODO: Remove this check if not needed
+			// TODO: Remove this check if not needed, once integration tests are "complete"
 			panic(fmt.Sprintf("Already Compared %s", newTd.GetDefinitionMeta().Name))
 			continue
 		}

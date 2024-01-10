@@ -452,7 +452,8 @@ type EnumValue struct {
 // Protocols
 type ProtocolDefinition struct {
 	*DefinitionMeta
-	Sequence ProtocolSteps `json:"sequence"`
+	Sequence ProtocolSteps              `json:"sequence"`
+	Versions map[string]*ProtocolChange `json:"-"`
 }
 
 func (p *ProtocolDefinition) GetDefinitionMeta() *DefinitionMeta {

@@ -266,18 +266,16 @@ func collectUnionArities(env *dsl.Environment) []int {
 	dsl.Visit(env, func(self dsl.Visitor, node dsl.Node) {
 		switch t := node.(type) {
 		case *dsl.ProtocolDefinition:
-			if ch, ok := t.Annotations[dsl.AllVersionChangesAnnotationKey].(map[string]*dsl.ProtocolChange); ok {
-				for _, change := range ch {
-					if change == nil {
+			for _, change := range t.Versions {
+				if change == nil {
+					continue
+				}
+
+				for _, tc := range change.StepChanges {
+					if tc == nil {
 						continue
 					}
-
-					for _, tc := range change.StepChanges {
-						if tc == nil {
-							continue
-						}
-						self.Visit(tc.OldType())
-					}
+					self.Visit(tc.OldType())
 				}
 			}
 			self.VisitChildren(node)
@@ -716,14 +714,23 @@ func writeCompatibilityRwFunctionSignature(old dsl.TypeDefinition, new dsl.TypeD
 
 func writeProtocolMethods(w *formatting.IndentedWriter, p *dsl.ProtocolDefinition) {
 	writerClassName := BinaryWriterClassName(p)
-	for _, step := range p.Sequence {
+	for i, step := range p.Sequence {
+
+		stepChanges := make(map[string]dsl.TypeChange)
+		for label, protocolChange := range p.Versions {
+			if protocolChange == nil {
+				continue
+			}
+			stepChanges[label] = protocolChange.StepChanges[i]
+		}
+
 		fmt.Fprintf(w, "void %s::%s(%s const& value) {\n", writerClassName, common.ProtocolWriteImplMethodName(step), common.TypeSyntax(step.Type))
 		w.Indented(func() {
 			if step.IsStream() {
 				w.WriteString("yardl::binary::WriteInteger(stream_, 1U);\n")
 			}
 
-			writeProtocolStep(w, step, false, true)
+			writeProtocolStep(w, step, stepChanges, false, true)
 		})
 		w.WriteString("}\n\n")
 
@@ -732,7 +739,7 @@ func writeProtocolMethods(w *formatting.IndentedWriter, p *dsl.ProtocolDefinitio
 			w.Indented(func() {
 				w.WriteStringln("if (!values.empty()) {")
 				w.Indented(func() {
-					writeProtocolStep(w, step, true, true)
+					writeProtocolStep(w, step, stepChanges, true, true)
 				})
 				w.WriteStringln("}")
 			})
@@ -759,7 +766,16 @@ func writeProtocolMethods(w *formatting.IndentedWriter, p *dsl.ProtocolDefinitio
 	w.WriteString("}\n\n")
 
 	readerClassName := BinaryReaderClassName(p)
-	for _, step := range p.Sequence {
+	for i, step := range p.Sequence {
+
+		stepChanges := make(map[string]dsl.TypeChange)
+		for label, protocolChange := range p.Versions {
+			if protocolChange == nil {
+				continue
+			}
+			stepChanges[label] = protocolChange.StepChanges[i]
+		}
+
 		returnType := "void"
 		if step.IsStream() {
 			returnType = "bool"
@@ -780,7 +796,7 @@ func writeProtocolMethods(w *formatting.IndentedWriter, p *dsl.ProtocolDefinitio
 				w.WriteStringln("}")
 			}
 
-			writeProtocolStep(w, step, false, false)
+			writeProtocolStep(w, step, stepChanges, false, false)
 
 			if step.IsStream() {
 				w.WriteStringln("current_block_remaining_--;")
@@ -792,7 +808,7 @@ func writeProtocolMethods(w *formatting.IndentedWriter, p *dsl.ProtocolDefinitio
 		if step.IsStream() {
 			fmt.Fprintf(w, "%s %s::%s(std::vector<%s>& values) {\n", returnType, readerClassName, common.ProtocolReadImplMethodName(step), common.TypeSyntax(step.Type))
 			w.Indented(func() {
-				writeProtocolStep(w, step, true, false)
+				writeProtocolStep(w, step, stepChanges, true, false)
 				w.WriteStringln("return current_block_remaining_ != 0;")
 			})
 			w.WriteString("}\n\n")
@@ -807,7 +823,7 @@ func writeProtocolMethods(w *formatting.IndentedWriter, p *dsl.ProtocolDefinitio
 	w.WriteString("}\n\n")
 }
 
-func writeProtocolStep(w *formatting.IndentedWriter, step *dsl.ProtocolStep, stream bool, write bool) {
+func writeProtocolStep(w *formatting.IndentedWriter, step *dsl.ProtocolStep, changes map[string]dsl.TypeChange, stream bool, write bool) {
 	writeStepRw := func(stepType dsl.Type) {
 		if stream {
 			if write {
@@ -833,8 +849,7 @@ func writeProtocolStep(w *formatting.IndentedWriter, step *dsl.ProtocolStep, str
 		return true
 	}
 
-	changes, ok := step.Annotations[dsl.AllVersionChangesAnnotationKey].(map[string]dsl.TypeChange)
-	if !ok || allNil(changes) {
+	if allNil(changes) {
 		// No schema version changes
 		writeStepRw(step.Type)
 		return
