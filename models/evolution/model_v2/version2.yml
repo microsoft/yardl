@@ -68,7 +68,17 @@ ProtocolWithChanges: !protocol
     streamedRecordWithChanges: !stream
       items: RecordWithChanges
 
+    addedStringVector: AliasedString*
+    addedOptional: RecordWithChanges?
+    addedMap: string->string
+    addedUnion: [null, RecordWithChanges, string]
+    addedRecordStream: !stream
+      items: RecordWithChanges
+    addedUnionStream: !stream
+      items: [RecordWithChanges, RenamedRecord]
 
+
+AliasedString: string
 AliasedLongToString: long
 AliasedRecordWithChanges: RecordWithChanges
 
@@ -92,8 +102,3 @@ RenamedRecord: !record
   fields:
     i: int
     s: string
-
-UnusedProtocol: !protocol
-  sequence:
-    samples: !stream
-      items: UnchangedRecord

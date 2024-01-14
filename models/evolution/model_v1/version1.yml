@@ -68,6 +68,11 @@ ProtocolWithChanges: !protocol
     streamedRecordWithChanges: !stream
       items: RecordWithChanges
 
+    addedOptional: RecordWithChanges?
+    addedMap: string->string
+    addedRecordStream: !stream
+      items: RecordWithChanges
+
 
 AliasedInt: int
 AliasedString: string
@@ -96,8 +101,7 @@ DeprecatedRecord: !record
     s: string
     i: int
 
-
 UnusedProtocol: !protocol
   sequence:
-    samples: !stream
+    records: !stream
       items: UnchangedRecord

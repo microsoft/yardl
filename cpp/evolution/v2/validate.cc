@@ -192,6 +192,90 @@ int main(void) {
 
   assert(count == 7);
 
+  std::vector<std::string> strings;
+  r.ReadAddedStringVector(strings);
+  switch (r.GetVersion()) {
+    case Version::v0:
+    case Version::v1:
+      assert(strings.empty());
+      break;
+
+    default:
+      assert(strings.size() == 7);
+      for (auto const& str : strings) {
+        assert(str == HelloWorld);
+      }
+  }
+
+  r.ReadAddedOptional(maybe_rec);
+  switch (r.GetVersion()) {
+    case Version::v0:
+      assert(!maybe_rec.has_value());
+      break;
+
+    default:
+      assert(maybe_rec.has_value());
+      validateRecordWithChanges(maybe_rec.value());
+  }
+
+  std::unordered_map<std::string, std::string> map;
+  r.ReadAddedMap(map);
+  switch (r.GetVersion()) {
+    case Version::v0:
+      assert(map.empty());
+      break;
+
+    default:
+      assert(map.size() == 1);
+      assert(map["hello"] == "world");
+  }
+
+  std::variant<std::monostate, RecordWithChanges, std::string> nil_or_rec_or_str;
+  r.ReadAddedUnion(nil_or_rec_or_str);
+  switch (r.GetVersion()) {
+    case Version::v0:
+    case Version::v1:
+      assert(nil_or_rec_or_str.index() == 0);
+      break;
+
+    default:
+      assert(nil_or_rec_or_str.index() == 1);
+      validateRecordWithChanges(std::get<1>(nil_or_rec_or_str));
+  }
+
+  std::vector<RecordWithChanges> records(10);
+  switch (r.GetVersion()) {
+    case Version::v0:
+      assert(r.ReadAddedRecordStream(records) == false);
+      assert(records.empty());
+      break;
+
+    default:
+      assert(r.ReadAddedRecordStream(records) == true);
+      assert(records.size() == 7);
+      for (auto const& rec : records) {
+        validateRecordWithChanges(rec);
+      }
+      assert(r.ReadAddedRecordStream(records) == false);
+  }
+
+  std::variant<RecordWithChanges, RenamedRecord> rec_or_renamed;
+  count = 0;
+  while (r.ReadAddedUnionStream(rec_or_renamed)) {
+    assert(rec_or_renamed.index() == 0);
+    validateRecordWithChanges(std::get<0>(rec_or_renamed));
+    count += 1;
+  }
+  switch (r.GetVersion()) {
+    case Version::v0:
+    case Version::v1:
+      assert(count == 0);
+      break;
+
+    default:
+      assert(count == 7);
+  }
+
   r.Close();
 
   return 0;

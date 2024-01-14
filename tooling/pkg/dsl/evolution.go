@@ -46,108 +46,113 @@ func validateChanges(env *Environment) error {
 	errorSink := &validation.ErrorSink{}
 	for _, ns := range env.Namespaces {
 
-		for _, td := range ns.TypeDefinitions {
-			defChange, ok := td.GetDefinitionMeta().Annotations[changeAnnotationKey].(DefinitionChange)
-			if !ok || defChange == nil {
-				continue
-			}
+		validateTypeDefinitionChanges(ns.TypeDefinitions, errorSink)
+		validateProtocolChanges(ns.Protocols, errorSink)
+	}
+	return errorSink.AsError()
+}
 
-			switch defChange := defChange.(type) {
-
-			case *DefinitionChangeIncompatible:
-				errorSink.Add(validationError(td, "changing '%s' is not backward compatible", td.GetDefinitionMeta().Name))
-
-			case *RecordChange:
-				oldRec := defChange.PreviousDefinition().(*RecordDefinition)
-				newRec := defChange.LatestDefinition().(*RecordDefinition)
-
-				for _, added := range defChange.FieldsAdded {
-					if !TypeHasNullOption(added.Type) {
-						log.Warn().Msgf("Adding non-Optional field '%s' may result in undefined behavior with previous versions", added.Name)
-					}
-				}
-
-				for i, field := range oldRec.Fields {
-					if defChange.FieldRemoved[i] {
-						if !TypeHasNullOption(oldRec.Fields[i].Type) {
-							log.Warn().Msgf("Removing non-Optional field '%s' may result in undefined behavior with previous versions", field.Name)
-						}
-						continue
-					}
-
-					if tc := defChange.FieldChanges[i]; tc != nil {
-						if typeChangeIsError(tc) {
-							newField := newRec.Fields[defChange.FieldMapping[i]]
-							errorSink.Add(validationError(newField, "changing field '%s' from %s", newField.Name, typeChangeToError(tc)))
-						}
-
-						if warn := typeChangeToWarning(tc); warn != "" {
-							log.Warn().Msgf("Changing field '%s' from %s", field.Name, warn)
-						}
-					}
-				}
-
-			case *NamedTypeChange:
-				if tc := defChange.TypeChange; tc != nil {
-					if typeChangeIsError(tc) {
-						errorSink.Add(validationError(td, "changing type '%s' from %s", td.GetDefinitionMeta().Name, typeChangeToWarning(tc)))
-					}
-					if warn := typeChangeToWarning(tc); warn != "" {
-						log.Warn().Msgf("Changing type '%s' from %s", td.GetDefinitionMeta().Name, warn)
-					}
-				}
-
-			case *EnumChange:
-				if tc := defChange.BaseTypeChange; tc != nil {
-					errorSink.Add(validationError(td, "changing base type of '%s' is not backward compatible", td.GetDefinitionMeta().Name))
-				}
-
-			default:
-				panic("Shouldn't get here")
-			}
+func validateTypeDefinitionChanges(typeDefs []TypeDefinition, errorSink *validation.ErrorSink) {
+	for _, td := range typeDefs {
+		defChange, ok := td.GetDefinitionMeta().Annotations[changeAnnotationKey].(DefinitionChange)
+		if !ok || defChange == nil {
+			continue
 		}
 
-		for _, pd := range ns.Protocols {
-			protChange, ok := pd.GetDefinitionMeta().Annotations[changeAnnotationKey].(*ProtocolChange)
-			if !ok || protChange == nil {
-				continue
-			}
+		switch defChange := defChange.(type) {
 
-			if protChange.HasReorderedSteps() {
-				var relevantNode Node = pd
-				for i, index := range protChange.StepMapping {
-					if index != i && index >= 0 {
-						relevantNode = pd.Sequence[index]
-						break
-					}
+		case *DefinitionChangeIncompatible:
+			errorSink.Add(validationError(td, "changing '%s' is not backward compatible", td.GetDefinitionMeta().Name))
+
+		case *RecordChange:
+			oldRec := defChange.PreviousDefinition().(*RecordDefinition)
+			newRec := defChange.LatestDefinition().(*RecordDefinition)
+
+			for _, added := range defChange.FieldsAdded {
+				if !TypeHasNullOption(added.Type) {
+					log.Warn().Msgf("Adding non-Optional field '%s' may result in undefined behavior with previous versions", added.Name)
 				}
-				errorSink.Add(validationError(relevantNode, "reordering steps in a Protocol is not backward compatible"))
 			}
 
-			for _, added := range protChange.StepsAdded {
-				errorSink.Add(validationError(added, "adding steps to a Protocol is not backward compatible"))
-			}
-
-			oldProt := protChange.PreviousDefinition().(*ProtocolDefinition)
-			for i, step := range oldProt.Sequence {
-
-				if protChange.StepMapping[i] < 0 {
-					// Step was removed
-					var relevantNode Node = pd
-					for j := i; j >= 0; j-- {
-						if protChange.StepMapping[j] >= 0 {
-							relevantNode = pd.Sequence[protChange.StepMapping[j]]
-							break
-						}
+			for i, field := range oldRec.Fields {
+				if defChange.FieldRemoved[i] {
+					if !TypeHasNullOption(oldRec.Fields[i].Type) {
+						log.Warn().Msgf("Removing non-Optional field '%s' may result in undefined behavior with previous versions", field.Name)
 					}
-					errorSink.Add(validationError(relevantNode, "removing step '%s' from a Protocol is not backward compatible", step.Name))
 					continue
 				}
 
-				if tc := protChange.StepChanges[i]; tc != nil {
+				if tc := defChange.FieldChanges[i]; tc != nil {
 					if typeChangeIsError(tc) {
-						newStep := pd.Sequence[protChange.StepMapping[i]]
-						errorSink.Add(validationError(newStep.Type, "changing step '%s' from %s", newStep.Name, typeChangeToError(tc)))
+						newField := newRec.Fields[defChange.NewFieldIndex[i]]
+						errorSink.Add(validationError(newField, "changing field '%s' from %s", newField.Name, typeChangeToError(tc)))
+					}
+
+					if warn := typeChangeToWarning(tc); warn != "" {
+						log.Warn().Msgf("Changing field '%s' from %s", field.Name, warn)
+					}
+				}
+			}
+
+		case *NamedTypeChange:
+			if tc := defChange.TypeChange; tc != nil {
+				if typeChangeIsError(tc) {
+					errorSink.Add(validationError(td, "changing type '%s' from %s", td.GetDefinitionMeta().Name, typeChangeToWarning(tc)))
+				}
+				if warn := typeChangeToWarning(tc); warn != "" {
+					log.Warn().Msgf("Changing type '%s' from %s", td.GetDefinitionMeta().Name, warn)
+				}
+			}
+
+		case *EnumChange:
+			if tc := defChange.BaseTypeChange; tc != nil {
+				errorSink.Add(validationError(td, "changing base type of '%s' is not backward compatible", td.GetDefinitionMeta().Name))
+			}
+
+		default:
+			panic("Shouldn't get here")
+		}
+	}
+}
+
+func validateProtocolChanges(protocols []*ProtocolDefinition, errorSink *validation.ErrorSink) {
+	for _, pd := range protocols {
+		protChange, ok := pd.GetDefinitionMeta().Annotations[changeAnnotationKey].(*ProtocolChange)
+		if !ok || protChange == nil {
+			continue
+		}
+
+		for _, reordered := range protChange.StepsReordered {
+			errorSink.Add(validationError(reordered, "reordering step '%s' is not backward compatible", reordered.Name))
+		}
+
+		for _, removed := range protChange.StepsRemoved {
+			errorSink.Add(validationError(pd, "removing step '%s' is not backward compatible", removed.Name))
+		}
+
+		for i, step := range pd.Sequence {
+			if tc := protChange.StepChanges[i]; tc != nil {
+				switch tc := tc.(type) {
+				case *TypeChangeStepAdded:
+					// A Step can be added to a Protocol if its Type can have an "empty" state
+					typeCanBeEmpty := false
+					switch t := GetUnderlyingType(step.Type).(type) {
+					case *GeneralizedType:
+						if t.Cases.HasNullOption() {
+							typeCanBeEmpty = true
+						} else if t.Dimensionality != nil {
+							switch t.Dimensionality.(type) {
+							case *Stream, *Vector, *Map:
+								typeCanBeEmpty = true
+							}
+						}
+					}
+					if !typeCanBeEmpty {
+						errorSink.Add(validationError(step, "adding step '%s' is not backward compatible", step.Name))
+					}
+				default:
+					if typeChangeIsError(tc) {
+						errorSink.Add(validationError(step.Type, "changing step '%s' from %s", step.Name, typeChangeToError(tc)))
 					}
 
 					if warn := typeChangeToWarning(tc); warn != "" {
@@ -157,8 +162,6 @@ func validateChanges(env *Environment) error {
 			}
 		}
 	}
-
-	return errorSink.AsError()
 }
 
 // Annotate the previous model with Protocol Schema strings for later
@@ -423,48 +426,57 @@ func detectProtocolDefinitionChanges(newProtocol, oldProtocol *ProtocolDefinitio
 	change := &ProtocolChange{
 		DefinitionPair: DefinitionPair{oldProtocol, newProtocol},
 		PreviousSchema: oldProtocol.GetDefinitionMeta().Annotations[schemaAnnotationKey].(string),
-		StepChanges:    make([]TypeChange, len(oldProtocol.Sequence)),
-		StepMapping:    make([]int, len(oldProtocol.Sequence)),
+		StepChanges:    make([]TypeChange, len(newProtocol.Sequence)),
+		// OldStepIndex:   make([]int, len(newProtocol.Sequence)),
+	}
+
+	newSteps := make(map[string]*ProtocolStep)
+	for _, newStep := range newProtocol.Sequence {
+		newSteps[newStep.Name] = newStep
 	}
 
 	oldSteps := make(map[string]*ProtocolStep)
-	for _, f := range oldProtocol.Sequence {
-		oldSteps[f.Name] = f
-	}
-	newSteps := make(map[string]*ProtocolStep)
-	newStepIndices := make(map[string]int)
-	for i, newStep := range newProtocol.Sequence {
-		newSteps[newStep.Name] = newStep
-		newStepIndices[newStep.Name] = i
+	oldStepIndices := make(map[string]int)
+	for i, oldStep := range oldProtocol.Sequence {
+		oldSteps[oldStep.Name] = oldStep
+		oldStepIndices[oldStep.Name] = i
 
-		if _, ok := oldSteps[newStep.Name]; !ok {
-			// CHANGE: Added this ProtocolStep
-			change.StepsAdded = append(change.StepsAdded, newStep)
+		if _, ok := newSteps[oldStep.Name]; !ok {
+			// CHANGE: Removed this ProtocolStep
+			change.StepsRemoved = append(change.StepsRemoved, oldStep)
 		}
 	}
 
-	anyStepChanged := false
-	for i, oldStep := range oldProtocol.Sequence {
-		newStep, ok := newSteps[oldStep.Name]
+	expectedIndex := 0
+	for i, newStep := range newProtocol.Sequence {
+		oldStep, ok := oldSteps[newStep.Name]
 		if !ok {
-			// CHANGE: Removed this ProtocolStep
-			anyStepChanged = true
-			change.StepMapping[i] = -1
+			// CHANGE: Added this ProtocolStep
+			change.StepChanges[i] = &TypeChangeStepAdded{TypePair{nil, newStep.Type}}
 			continue
 		}
 
-		change.StepMapping[i] = newStepIndices[oldStep.Name]
+		if oldStepIndices[newStep.Name] != expectedIndex {
+			// CHANGE: Reordered this ProtocolStep
+			change.StepsReordered = append(change.StepsReordered, newStep)
+		}
+		expectedIndex++
 
 		if typeChange := detectTypeChanges(newStep.Type, oldStep.Type); typeChange != nil {
 			// CHANGE: ProtocolStep type changed
-			anyStepChanged = true
 			change.StepChanges[i] = typeChange
 		}
 	}
 
-	if anyStepChanged || change.HasReorderedSteps() || len(change.StepsAdded) > 0 {
+	if len(change.StepsReordered) > 0 || len(change.StepsRemoved) > 0 {
 		return change
 	}
+	for _, ch := range change.StepChanges {
+		if ch != nil {
+			return change
+		}
+	}
+
 	return nil
 }
 
@@ -474,7 +486,7 @@ func detectRecordDefinitionChanges(newRecord, oldRecord *RecordDefinition) *Reco
 		DefinitionPair: DefinitionPair{oldRecord, newRecord},
 		FieldRemoved:   make([]bool, len(oldRecord.Fields)),
 		FieldChanges:   make([]TypeChange, len(oldRecord.Fields)),
-		FieldMapping:   make([]int, len(oldRecord.Fields)),
+		NewFieldIndex:  make([]int, len(oldRecord.Fields)),
 	}
 
 	// Fields may be reordered
@@ -496,28 +508,34 @@ func detectRecordDefinitionChanges(newRecord, oldRecord *RecordDefinition) *Reco
 		}
 	}
 
-	anyFieldChanged := false
+	fieldsReordered := false
 	for i, oldField := range oldRecord.Fields {
 		newField, ok := newFields[oldField.Name]
 		if !ok {
 			// CHANGE: Removed field
-			anyFieldChanged = true
 			change.FieldRemoved[i] = true
-			change.FieldMapping[i] = -1
+			change.NewFieldIndex[i] = -1
 			continue
 		}
 
-		change.FieldMapping[i] = newFieldIndices[oldField.Name]
+		change.NewFieldIndex[i] = newFieldIndices[oldField.Name]
+		if change.NewFieldIndex[i] != i {
+			fieldsReordered = true
+		}
 
 		if typeChange := detectTypeChanges(newField.Type, oldField.Type); typeChange != nil {
 			// CHANGE: Field type changed
-			anyFieldChanged = true
 			change.FieldChanges[i] = typeChange
 		}
 	}
 
-	if anyFieldChanged || change.HasReorderedFields() || len(change.FieldsAdded) > 0 {
+	if fieldsReordered || len(change.FieldsAdded) > 0 {
 		return change
+	}
+	for i := range oldRecord.Fields {
+		if change.FieldRemoved[i] || change.FieldChanges[i] != nil {
+			return change
+		}
 	}
 	return nil
 }

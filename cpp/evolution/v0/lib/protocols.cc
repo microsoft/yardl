@@ -1454,11 +1454,11 @@ namespace {
 void UnusedProtocolWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end, uint8_t current) {
   std::string expected_method;
   switch (current) {
-  case 0: expected_method = "WriteSamples() or EndSamples()"; break;
+  case 0: expected_method = "WriteRecords() or EndRecords()"; break;
   }
   std::string attempted_method;
   switch (attempted) {
-  case 0: attempted_method = end ? "EndSamples()" : "WriteSamples()"; break;
+  case 0: attempted_method = end ? "EndRecords()" : "WriteRecords()"; break;
   case 1: attempted_method = "Close()"; break;
   }
   throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
@@ -1467,7 +1467,7 @@ void UnusedProtocolWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bo
 void UnusedProtocolReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
   auto f = [](uint8_t i) -> std::string {
     switch (i/2) {
-    case 0: return "ReadSamples()";
+    case 0: return "ReadRecords()";
     case 1: return "Close()";
     default: return "<unknown>";
     }
@@ -1477,7 +1477,7 @@ void UnusedProtocolReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
 
 } // namespace 
 
-std::string UnusedProtocolWriterBase::schema_ = R"({"protocol":{"name":"UnusedProtocol","sequence":[{"name":"samples","type":{"stream":{"items":"EvoTest.UnchangedRecord"}}}]},"types":[{"name":"UnchangedRecord","fields":[{"name":"name","type":"string"},{"name":"age","type":"int32"},{"name":"meta","type":{"map":{"keys":"string","values":"float64"}}}]}]})";
+std::string UnusedProtocolWriterBase::schema_ = R"({"protocol":{"name":"UnusedProtocol","sequence":[{"name":"records","type":{"stream":{"items":"EvoTest.UnchangedRecord"}}}]},"types":[{"name":"UnchangedRecord","fields":[{"name":"name","type":"string"},{"name":"age","type":"int32"},{"name":"meta","type":{"map":{"keys":"string","values":"float64"}}}]}]})";
 
 std::vector<std::string> UnusedProtocolWriterBase::previous_schemas_ = {
 };
@@ -1489,35 +1489,35 @@ std::string UnusedProtocolWriterBase::SchemaFromVersion(Version version) {
   }
 
 }
-void UnusedProtocolWriterBase::WriteSamples(evo_test::UnchangedRecord const& value) {
+void UnusedProtocolWriterBase::WriteRecords(evo_test::UnchangedRecord const& value) {
   if (unlikely(state_ != 0)) {
     UnusedProtocolWriterBaseInvalidState(0, false, state_);
   }
 
-  WriteSamplesImpl(value);
+  WriteRecordsImpl(value);
 }
 
-void UnusedProtocolWriterBase::WriteSamples(std::vector<evo_test::UnchangedRecord> const& values) {
+void UnusedProtocolWriterBase::WriteRecords(std::vector<evo_test::UnchangedRecord> const& values) {
   if (unlikely(state_ != 0)) {
     UnusedProtocolWriterBaseInvalidState(0, false, state_);
   }
 
-  WriteSamplesImpl(values);
+  WriteRecordsImpl(values);
 }
 
-void UnusedProtocolWriterBase::EndSamples() {
+void UnusedProtocolWriterBase::EndRecords() {
   if (unlikely(state_ != 0)) {
     UnusedProtocolWriterBaseInvalidState(0, true, state_);
   }
 
-  EndSamplesImpl();
+  EndRecordsImpl();
   state_ = 1;
 }
 
 // fallback implementation
-void UnusedProtocolWriterBase::WriteSamplesImpl(std::vector<evo_test::UnchangedRecord> const& values) {
+void UnusedProtocolWriterBase::WriteRecordsImpl(std::vector<evo_test::UnchangedRecord> const& values) {
   for (auto const& v : values) {
-    WriteSamplesImpl(v);
+    WriteRecordsImpl(v);
   }
 }
 
@@ -1539,7 +1539,7 @@ Version UnusedProtocolReaderBase::VersionFromSchema(std::string const& schema) {
   }
   throw std::runtime_error("The schema does not match any version supported by protocol UnusedProtocol.");
 }
-bool UnusedProtocolReaderBase::ReadSamples(evo_test::UnchangedRecord& value) {
+bool UnusedProtocolReaderBase::ReadRecords(evo_test::UnchangedRecord& value) {
   if (unlikely(state_ != 0)) {
     if (state_ == 1) {
       state_ = 2;
@@ -1548,14 +1548,14 @@ bool UnusedProtocolReaderBase::ReadSamples(evo_test::UnchangedRecord& value) {
     UnusedProtocolReaderBaseInvalidState(0, state_);
   }
 
-  bool result = ReadSamplesImpl(value);
+  bool result = ReadRecordsImpl(value);
   if (!result) {
     state_ = 2;
   }
   return result;
 }
 
-bool UnusedProtocolReaderBase::ReadSamples(std::vector<evo_test::UnchangedRecord>& values) {
+bool UnusedProtocolReaderBase::ReadRecords(std::vector<evo_test::UnchangedRecord>& values) {
   if (values.capacity() == 0) {
     throw std::runtime_error("vector must have a nonzero capacity.");
   }
@@ -1568,7 +1568,7 @@ bool UnusedProtocolReaderBase::ReadSamples(std::vector<evo_test::UnchangedRecord
     UnusedProtocolReaderBaseInvalidState(0, state_);
   }
 
-  if (!ReadSamplesImpl(values)) {
+  if (!ReadRecordsImpl(values)) {
     state_ = 1;
     return values.size() > 0;
   }
@@ -1576,13 +1576,13 @@ bool UnusedProtocolReaderBase::ReadSamples(std::vector<evo_test::UnchangedRecord
 }
 
 // fallback implementation
-bool UnusedProtocolReaderBase::ReadSamplesImpl(std::vector<evo_test::UnchangedRecord>& values) {
+bool UnusedProtocolReaderBase::ReadRecordsImpl(std::vector<evo_test::UnchangedRecord>& values) {
   size_t i = 0;
   while (true) {
     if (i == values.size()) {
       values.resize(i + 1);
     }
-    if (!ReadSamplesImpl(values[i])) {
+    if (!ReadRecordsImpl(values[i])) {
       values.resize(i);
       return false;
     }
@@ -1600,20 +1600,20 @@ void UnusedProtocolReaderBase::Close() {
 
   CloseImpl();
 }
-void UnusedProtocolReaderBase::CopyTo(UnusedProtocolWriterBase& writer, size_t samples_buffer_size) {
-  if (samples_buffer_size > 1) {
+void UnusedProtocolReaderBase::CopyTo(UnusedProtocolWriterBase& writer, size_t records_buffer_size) {
+  if (records_buffer_size > 1) {
     std::vector<evo_test::UnchangedRecord> values;
-    values.reserve(samples_buffer_size);
-    while(ReadSamples(values)) {
-      writer.WriteSamples(values);
+    values.reserve(records_buffer_size);
+    while(ReadRecords(values)) {
+      writer.WriteRecords(values);
     }
-    writer.EndSamples();
+    writer.EndRecords();
   } else {
     evo_test::UnchangedRecord value;
-    while(ReadSamples(value)) {
-      writer.WriteSamples(value);
+    while(ReadRecords(value)) {
+      writer.WriteRecords(value);
     }
-    writer.EndSamples();
+    writer.EndRecords();
   }
 }
 } // namespace evo_test

@@ -89,15 +89,28 @@ int main(void) {
   w.WriteRecordToAliasedUnion(rec);
 
   // Write a vector of size 7 records
-  w.WriteVectorRecordWithChanges(std::vector<RecordWithChanges>(7, rec));
+  std::vector<RecordWithChanges> recs(7, rec);
+  w.WriteVectorRecordWithChanges(recs);
 
   // Stream a total of 7 records
   w.WriteStreamedRecordWithChanges(rec);
   w.WriteStreamedRecordWithChanges(rec);
-  std::vector<RecordWithChanges> recs(4, rec);
-  w.WriteStreamedRecordWithChanges(recs);
+  std::vector<RecordWithChanges> more_recs(4, rec);
+  w.WriteStreamedRecordWithChanges(more_recs);
   w.WriteStreamedRecordWithChanges(rec);
   w.EndStreamedRecordWithChanges();
+
+  w.WriteAddedStringVector(std::vector<std::string>(7, HelloWorld));
+  w.WriteAddedOptional(rec);
+  w.WriteAddedMap({{"hello", "world"}});
+  w.WriteAddedUnion(rec);
+  w.WriteAddedRecordStream(recs);
+  w.EndAddedRecordStream();
+
+  for (int i = 0; i < 7; ++i) {
+    w.WriteAddedUnionStream(rec);
+  }
+  w.EndAddedUnionStream();
 
   w.Close();
 

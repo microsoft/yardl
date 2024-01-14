@@ -122,8 +122,19 @@ class ProtocolWithChangesWriter : public evo_test::ProtocolWithChangesWriterBase
 
   void EndStreamedRecordWithChangesImpl() override;
 
+  void WriteAddedOptionalImpl(std::optional<evo_test::RecordWithChanges> const& value) override;
+
+  void WriteAddedMapImpl(std::unordered_map<std::string, std::string> const& value) override;
+
+  void WriteAddedRecordStreamImpl(evo_test::RecordWithChanges const& value) override;
+
+  void WriteAddedRecordStreamImpl(std::vector<evo_test::RecordWithChanges> const& values) override;
+
+  void EndAddedRecordStreamImpl() override;
+
   private:
   std::unique_ptr<yardl::hdf5::DatasetWriter> streamedRecordWithChanges_dataset_state_;
+  std::unique_ptr<yardl::hdf5::DatasetWriter> addedRecordStream_dataset_state_;
 };
 
 // HDF5 reader for the ProtocolWithChanges protocol.
@@ -233,8 +244,17 @@ class ProtocolWithChangesReader : public evo_test::ProtocolWithChangesReaderBase
 
   bool ReadStreamedRecordWithChangesImpl(std::vector<evo_test::RecordWithChanges>& values) override;
 
+  void ReadAddedOptionalImpl(std::optional<evo_test::RecordWithChanges>& value) override;
+
+  void ReadAddedMapImpl(std::unordered_map<std::string, std::string>& value) override;
+
+  bool ReadAddedRecordStreamImpl(evo_test::RecordWithChanges& value) override;
+
+  bool ReadAddedRecordStreamImpl(std::vector<evo_test::RecordWithChanges>& values) override;
+
   private:
   std::unique_ptr<yardl::hdf5::DatasetReader> streamedRecordWithChanges_dataset_state_;
+  std::unique_ptr<yardl::hdf5::DatasetReader> addedRecordStream_dataset_state_;
 };
 
 // HDF5 writer for the UnusedProtocol protocol.
@@ -243,14 +263,14 @@ class UnusedProtocolWriter : public evo_test::UnusedProtocolWriterBase, public y
   UnusedProtocolWriter(std::string path);
 
   protected:
-  void WriteSamplesImpl(evo_test::UnchangedRecord const& value) override;
+  void WriteRecordsImpl(evo_test::UnchangedRecord const& value) override;
 
-  void WriteSamplesImpl(std::vector<evo_test::UnchangedRecord> const& values) override;
+  void WriteRecordsImpl(std::vector<evo_test::UnchangedRecord> const& values) override;
 
-  void EndSamplesImpl() override;
+  void EndRecordsImpl() override;
 
   private:
-  std::unique_ptr<yardl::hdf5::DatasetWriter> samples_dataset_state_;
+  std::unique_ptr<yardl::hdf5::DatasetWriter> records_dataset_state_;
 };
 
 // HDF5 reader for the UnusedProtocol protocol.
@@ -258,12 +278,12 @@ class UnusedProtocolReader : public evo_test::UnusedProtocolReaderBase, public y
   public:
   UnusedProtocolReader(std::string path);
 
-  bool ReadSamplesImpl(evo_test::UnchangedRecord& value) override;
+  bool ReadRecordsImpl(evo_test::UnchangedRecord& value) override;
 
-  bool ReadSamplesImpl(std::vector<evo_test::UnchangedRecord>& values) override;
+  bool ReadRecordsImpl(std::vector<evo_test::UnchangedRecord>& values) override;
 
   private:
-  std::unique_ptr<yardl::hdf5::DatasetReader> samples_dataset_state_;
+  std::unique_ptr<yardl::hdf5::DatasetReader> records_dataset_state_;
 };
 
 } // namespace evo_test

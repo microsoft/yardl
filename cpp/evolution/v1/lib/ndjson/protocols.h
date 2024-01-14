@@ -78,6 +78,10 @@ class ProtocolWithChangesWriter : public evo_test::ProtocolWithChangesWriterBase
   void WriteVectorRecordWithChangesImpl(std::vector<evo_test::RecordWithChanges> const& value) override;
   void WriteStreamedRecordWithChangesImpl(evo_test::RecordWithChanges const& value) override;
   void EndStreamedRecordWithChangesImpl() override {}
+  void WriteAddedOptionalImpl(std::optional<evo_test::RecordWithChanges> const& value) override;
+  void WriteAddedMapImpl(std::unordered_map<std::string, std::string> const& value) override;
+  void WriteAddedRecordStreamImpl(evo_test::RecordWithChanges const& value) override;
+  void EndAddedRecordStreamImpl() override {}
   void CloseImpl() override;
 };
 
@@ -143,6 +147,9 @@ class ProtocolWithChangesReader : public evo_test::ProtocolWithChangesReaderBase
   void ReadRecordToAliasedUnionImpl(evo_test::AliasedRecordOrString& value) override;
   void ReadVectorRecordWithChangesImpl(std::vector<evo_test::RecordWithChanges>& value) override;
   bool ReadStreamedRecordWithChangesImpl(evo_test::RecordWithChanges& value) override;
+  void ReadAddedOptionalImpl(std::optional<evo_test::RecordWithChanges>& value) override;
+  void ReadAddedMapImpl(std::unordered_map<std::string, std::string>& value) override;
+  bool ReadAddedRecordStreamImpl(evo_test::RecordWithChanges& value) override;
   void CloseImpl() override;
 };
 
@@ -160,8 +167,8 @@ class UnusedProtocolWriter : public evo_test::UnusedProtocolWriterBase, yardl::n
   void Flush() override;
 
   protected:
-  void WriteSamplesImpl(evo_test::UnchangedRecord const& value) override;
-  void EndSamplesImpl() override {}
+  void WriteRecordsImpl(evo_test::UnchangedRecord const& value) override;
+  void EndRecordsImpl() override {}
   void CloseImpl() override;
 };
 
@@ -177,7 +184,7 @@ class UnusedProtocolReader : public evo_test::UnusedProtocolReaderBase, yardl::n
   }
 
   protected:
-  bool ReadSamplesImpl(evo_test::UnchangedRecord& value) override;
+  bool ReadRecordsImpl(evo_test::UnchangedRecord& value) override;
   void CloseImpl() override;
 };
 

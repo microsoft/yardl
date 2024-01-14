@@ -170,6 +170,40 @@ class ProtocolWithChangesWriterBase {
   // Marks the end of the `streamedRecordWithChanges` stream.
   void EndStreamedRecordWithChanges();
 
+  // Ordinal 50.
+  void WriteAddedStringVector(std::vector<evo_test::AliasedString> const& value);
+
+  // Ordinal 51.
+  void WriteAddedOptional(std::optional<evo_test::RecordWithChanges> const& value);
+
+  // Ordinal 52.
+  void WriteAddedMap(std::unordered_map<std::string, std::string> const& value);
+
+  // Ordinal 53.
+  void WriteAddedUnion(std::variant<std::monostate, evo_test::RecordWithChanges, std::string> const& value);
+
+  // Ordinal 54.
+  // Call this method for each element of the `addedRecordStream` stream, then call `EndAddedRecordStream() when done.`
+  void WriteAddedRecordStream(evo_test::RecordWithChanges const& value);
+
+  // Ordinal 54.
+  // Call this method to write many values to the `addedRecordStream` stream, then call `EndAddedRecordStream()` when done.
+  void WriteAddedRecordStream(std::vector<evo_test::RecordWithChanges> const& values);
+
+  // Marks the end of the `addedRecordStream` stream.
+  void EndAddedRecordStream();
+
+  // Ordinal 55.
+  // Call this method for each element of the `addedUnionStream` stream, then call `EndAddedUnionStream() when done.`
+  void WriteAddedUnionStream(std::variant<evo_test::RecordWithChanges, evo_test::RenamedRecord> const& value);
+
+  // Ordinal 55.
+  // Call this method to write many values to the `addedUnionStream` stream, then call `EndAddedUnionStream()` when done.
+  void WriteAddedUnionStream(std::vector<std::variant<evo_test::RecordWithChanges, evo_test::RenamedRecord>> const& values);
+
+  // Marks the end of the `addedUnionStream` stream.
+  void EndAddedUnionStream();
+
   // Optionaly close this writer before destructing. Validates that all steps were completed.
   void Close();
 
@@ -231,6 +265,16 @@ class ProtocolWithChangesWriterBase {
   virtual void WriteStreamedRecordWithChangesImpl(evo_test::RecordWithChanges const& value) = 0;
   virtual void WriteStreamedRecordWithChangesImpl(std::vector<evo_test::RecordWithChanges> const& value);
   virtual void EndStreamedRecordWithChangesImpl() = 0;
+  virtual void WriteAddedStringVectorImpl(std::vector<evo_test::AliasedString> const& value) = 0;
+  virtual void WriteAddedOptionalImpl(std::optional<evo_test::RecordWithChanges> const& value) = 0;
+  virtual void WriteAddedMapImpl(std::unordered_map<std::string, std::string> const& value) = 0;
+  virtual void WriteAddedUnionImpl(std::variant<std::monostate, evo_test::RecordWithChanges, std::string> const& value) = 0;
+  virtual void WriteAddedRecordStreamImpl(evo_test::RecordWithChanges const& value) = 0;
+  virtual void WriteAddedRecordStreamImpl(std::vector<evo_test::RecordWithChanges> const& value);
+  virtual void EndAddedRecordStreamImpl() = 0;
+  virtual void WriteAddedUnionStreamImpl(std::variant<evo_test::RecordWithChanges, evo_test::RenamedRecord> const& value) = 0;
+  virtual void WriteAddedUnionStreamImpl(std::vector<std::variant<evo_test::RecordWithChanges, evo_test::RenamedRecord>> const& value);
+  virtual void EndAddedUnionStreamImpl() = 0;
   virtual void CloseImpl() {}
 
   static std::string schema_;
@@ -401,10 +445,34 @@ class ProtocolWithChangesReaderBase {
   // Ordinal 49.
   [[nodiscard]] bool ReadStreamedRecordWithChanges(std::vector<evo_test::RecordWithChanges>& values);
 
+  // Ordinal 50.
+  void ReadAddedStringVector(std::vector<evo_test::AliasedString>& value);
+
+  // Ordinal 51.
+  void ReadAddedOptional(std::optional<evo_test::RecordWithChanges>& value);
+
+  // Ordinal 52.
+  void ReadAddedMap(std::unordered_map<std::string, std::string>& value);
+
+  // Ordinal 53.
+  void ReadAddedUnion(std::variant<std::monostate, evo_test::RecordWithChanges, std::string>& value);
+
+  // Ordinal 54.
+  [[nodiscard]] bool ReadAddedRecordStream(evo_test::RecordWithChanges& value);
+
+  // Ordinal 54.
+  [[nodiscard]] bool ReadAddedRecordStream(std::vector<evo_test::RecordWithChanges>& values);
+
+  // Ordinal 55.
+  [[nodiscard]] bool ReadAddedUnionStream(std::variant<evo_test::RecordWithChanges, evo_test::RenamedRecord>& value);
+
+  // Ordinal 55.
+  [[nodiscard]] bool ReadAddedUnionStream(std::vector<std::variant<evo_test::RecordWithChanges, evo_test::RenamedRecord>>& values);
+
   // Optionaly close this writer before destructing. Validates that all steps were completely read.
   void Close();
 
-  void CopyTo(ProtocolWithChangesWriterBase& writer, size_t streamed_record_with_changes_buffer_size = 1);
+  void CopyTo(ProtocolWithChangesWriterBase& writer, size_t streamed_record_with_changes_buffer_size = 1, size_t added_record_stream_buffer_size = 1, size_t added_union_stream_buffer_size = 1);
 
   virtual ~ProtocolWithChangesReaderBase() = default;
 
@@ -460,76 +528,14 @@ class ProtocolWithChangesReaderBase {
   virtual void ReadVectorRecordWithChangesImpl(std::vector<evo_test::RecordWithChanges>& value) = 0;
   virtual bool ReadStreamedRecordWithChangesImpl(evo_test::RecordWithChanges& value) = 0;
   virtual bool ReadStreamedRecordWithChangesImpl(std::vector<evo_test::RecordWithChanges>& values);
-  virtual void CloseImpl() {}
-  static std::string schema_;
-
-  static std::vector<std::string> previous_schemas_;
-
-  static Version VersionFromSchema(const std::string& schema);
-
-  private:
-  uint8_t state_ = 0;
-};
-
-// Abstract writer for the UnusedProtocol protocol.
-class UnusedProtocolWriterBase {
-  public:
-  // Ordinal 0.
-  // Call this method for each element of the `samples` stream, then call `EndSamples() when done.`
-  void WriteSamples(evo_test::UnchangedRecord const& value);
-
-  // Ordinal 0.
-  // Call this method to write many values to the `samples` stream, then call `EndSamples()` when done.
-  void WriteSamples(std::vector<evo_test::UnchangedRecord> const& values);
-
-  // Marks the end of the `samples` stream.
-  void EndSamples();
-
-  // Optionaly close this writer before destructing. Validates that all steps were completed.
-  void Close();
-
-  virtual ~UnusedProtocolWriterBase() = default;
-
-  // Flushes all buffered data.
-  virtual void Flush() {}
-
-  protected:
-  virtual void WriteSamplesImpl(evo_test::UnchangedRecord const& value) = 0;
-  virtual void WriteSamplesImpl(std::vector<evo_test::UnchangedRecord> const& value);
-  virtual void EndSamplesImpl() = 0;
-  virtual void CloseImpl() {}
-
-  static std::string schema_;
-
-  static std::vector<std::string> previous_schemas_;
-
-  static std::string SchemaFromVersion(Version version);
-
-  private:
-  uint8_t state_ = 0;
-
-  friend class UnusedProtocolReaderBase;
-};
-
-// Abstract reader for the UnusedProtocol protocol.
-class UnusedProtocolReaderBase {
-  public:
-  // Ordinal 0.
-  [[nodiscard]] bool ReadSamples(evo_test::UnchangedRecord& value);
-
-  // Ordinal 0.
-  [[nodiscard]] bool ReadSamples(std::vector<evo_test::UnchangedRecord>& values);
-
-  // Optionaly close this writer before destructing. Validates that all steps were completely read.
-  void Close();
-
-  void CopyTo(UnusedProtocolWriterBase& writer, size_t samples_buffer_size = 1);
-
-  virtual ~UnusedProtocolReaderBase() = default;
-
-  protected:
-  virtual bool ReadSamplesImpl(evo_test::UnchangedRecord& value) = 0;
-  virtual bool ReadSamplesImpl(std::vector<evo_test::UnchangedRecord>& values);
+  virtual void ReadAddedStringVectorImpl(std::vector<evo_test::AliasedString>& value) = 0;
+  virtual void ReadAddedOptionalImpl(std::optional<evo_test::RecordWithChanges>& value) = 0;
+  virtual void ReadAddedMapImpl(std::unordered_map<std::string, std::string>& value) = 0;
+  virtual void ReadAddedUnionImpl(std::variant<std::monostate, evo_test::RecordWithChanges, std::string>& value) = 0;
+  virtual bool ReadAddedRecordStreamImpl(evo_test::RecordWithChanges& value) = 0;
+  virtual bool ReadAddedRecordStreamImpl(std::vector<evo_test::RecordWithChanges>& values);
+  virtual bool ReadAddedUnionStreamImpl(std::variant<evo_test::RecordWithChanges, evo_test::RenamedRecord>& value) = 0;
+  virtual bool ReadAddedUnionStreamImpl(std::vector<std::variant<evo_test::RecordWithChanges, evo_test::RenamedRecord>>& values);
   virtual void CloseImpl() {}
   static std::string schema_;
 

@@ -11,6 +11,8 @@
 #include "yardl/yardl.h"
 
 namespace evo_test {
+using AliasedString = std::string;
+
 using AliasedLongToString = int64_t;
 
 struct UnchangedRecord {

@@ -95,5 +95,5 @@ RenamedRecord: !record
 
 UnusedProtocol: !protocol
   sequence:
-    samples: !stream
+    records: !stream
       items: UnchangedRecord

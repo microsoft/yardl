@@ -63,6 +63,9 @@ void ProtocolWithChangesWriterBaseInvalidState(uint8_t attempted, [[maybe_unused
   case 47: expected_method = "WriteRecordToAliasedUnion()"; break;
   case 48: expected_method = "WriteVectorRecordWithChanges()"; break;
   case 49: expected_method = "WriteStreamedRecordWithChanges() or EndStreamedRecordWithChanges()"; break;
+  case 50: expected_method = "WriteAddedOptional()"; break;
+  case 51: expected_method = "WriteAddedMap()"; break;
+  case 52: expected_method = "WriteAddedRecordStream() or EndAddedRecordStream()"; break;
   }
   std::string attempted_method;
   switch (attempted) {
@@ -116,7 +119,10 @@ void ProtocolWithChangesWriterBaseInvalidState(uint8_t attempted, [[maybe_unused
   case 47: attempted_method = "WriteRecordToAliasedUnion()"; break;
   case 48: attempted_method = "WriteVectorRecordWithChanges()"; break;
   case 49: attempted_method = end ? "EndStreamedRecordWithChanges()" : "WriteStreamedRecordWithChanges()"; break;
-  case 50: attempted_method = "Close()"; break;
+  case 50: attempted_method = "WriteAddedOptional()"; break;
+  case 51: attempted_method = "WriteAddedMap()"; break;
+  case 52: attempted_method = end ? "EndAddedRecordStream()" : "WriteAddedRecordStream()"; break;
+  case 53: attempted_method = "Close()"; break;
   }
   throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
 }
@@ -174,7 +180,10 @@ void ProtocolWithChangesReaderBaseInvalidState(uint8_t attempted, uint8_t curren
     case 47: return "ReadRecordToAliasedUnion()";
     case 48: return "ReadVectorRecordWithChanges()";
     case 49: return "ReadStreamedRecordWithChanges()";
-    case 50: return "Close()";
+    case 50: return "ReadAddedOptional()";
+    case 51: return "ReadAddedMap()";
+    case 52: return "ReadAddedRecordStream()";
+    case 53: return "Close()";
     default: return "<unknown>";
     }
   };
@@ -183,7 +192,7 @@ void ProtocolWithChangesReaderBaseInvalidState(uint8_t attempted, uint8_t curren
 
 } // namespace 
 
-std::string ProtocolWithChangesWriterBase::schema_ = R"({"protocol":{"name":"ProtocolWithChanges","sequence":[{"name":"int8ToInt","type":"int32"},{"name":"int8ToLong","type":"int64"},{"name":"int8ToUint","type":"uint32"},{"name":"int8ToUlong","type":"uint64"},{"name":"int8ToFloat","type":"float32"},{"name":"int8ToDouble","type":"float64"},{"name":"intToUint","type":"uint32"},{"name":"intToLong","type":"int64"},{"name":"intToFloat","type":"float32"},{"name":"intToDouble","type":"float64"},{"name":"uintToUlong","type":"uint64"},{"name":"uintToFloat","type":"float32"},{"name":"uintToDouble","type":"float64"},{"name":"floatToDouble","type":"float64"},{"name":"intToString","type":"string"},{"name":"uintToString","type":"string"},{"name":"longToString","type":"string"},{"name":"ulongToString","type":"string"},{"name":"floatToString","type":"string"},{"name":"doubleToString","type":"string"},{"name":"intToOptional","type":[null,"int32"]},{"name":"floatToOptional","type":[null,"float32"]},{"name":"stringToOptional","type":[null,"string"]},{"name":"intToUnion","type":[{"tag":"int32","type":"int32"},{"tag":"bool","type":"bool"}]},{"name":"floatToUnion","type":[{"tag":"float32","type":"float32"},{"tag":"bool","type":"bool"}]},{"name":"stringToUnion","type":[{"tag":"string","type":"string"},{"tag":"bool","type":"bool"}]},{"name":"optionalIntToFloat","type":[null,"float32"]},{"name":"optionalFloatToString","type":[null,"string"]},{"name":"aliasedLongToString","type":"EvoTest.AliasedLongToString"},{"name":"stringToAliasedString","type":"EvoTest.AliasedString"},{"name":"stringToAliasedInt","type":"EvoTest.AliasedInt"},{"name":"optionalIntToUnion","type":[null,{"tag":"int32","type":"int32"},{"tag":"string","type":"string"}]},{"name":"optionalRecordToUnion","type":[null,{"tag":"RecordWithChanges","type":"EvoTest.RecordWithChanges"},{"tag":"string","type":"string"}]},{"name":"recordWithChanges","type":"EvoTest.RecordWithChanges"},{"name":"aliasedRecordWithChanges","type":"EvoTest.AliasedRecordWithChanges"},{"name":"recordToRenamedRecord","type":"EvoTest.RenamedRecord"},{"name":"recordToAliasedRecord","type":"EvoTest.AliasedRecordWithChanges"},{"name":"recordToAliasedAlias","type":"EvoTest.AliasOfAliasedRecordWithChanges"},{"name":"optionalRecordWithChanges","type":[null,"EvoTest.RecordWithChanges"]},{"name":"aliasedOptionalRecordWithChanges","type":[null,"EvoTest.AliasedRecordWithChanges"]},{"name":"unionRecordWithChanges","type":[{"tag":"RecordWithChanges","type":"EvoTest.RecordWithChanges"},{"tag":"int32","type":"int32"}]},{"name":"unionWithSameTypeset","type":[{"tag":"float32","type":"float32"},{"tag":"RecordWithChanges","type":"EvoTest.RecordWithChanges"},{"tag":"string","type":"string"},{"tag":"int32","type":"int32"}]},{"name":"unionWithTypesAdded","type":[{"tag":"RecordWithChanges","type":"EvoTest.RecordWithChanges"},{"tag":"int32","type":"int32"},{"tag":"float32","type":"float32"},{"tag":"string","type":"string"}]},{"name":"unionWithTypesRemoved","type":[{"tag":"RecordWithChanges","type":"EvoTest.RecordWithChanges"},{"tag":"string","type":"string"}]},{"name":"recordToOptional","type":[null,"EvoTest.RecordWithChanges"]},{"name":"recordToAliasedOptional","type":"EvoTest.AliasedOptionalRecord"},{"name":"recordToUnion","type":[{"tag":"RecordWithChanges","type":"EvoTest.RecordWithChanges"},{"tag":"string","type":"string"}]},{"name":"recordToAliasedUnion","type":"EvoTest.AliasedRecordOrString"},{"name":"vectorRecordWithChanges","type":{"vector":{"items":"EvoTest.RecordWithChanges"}}},{"name":"streamedRecordWithChanges","type":{"stream":{"items":"EvoTest.RecordWithChanges"}}}]},"types":[{"name":"AliasOfAliasedRecordWithChanges","type":"EvoTest.AliasedRecordWithChanges"},{"name":"AliasedInt","type":"int32"},{"name":"AliasedLongToString","type":"string"},{"name":"AliasedOptionalRecord","type":[null,"EvoTest.RecordWithChanges"]},{"name":"AliasedRecordOrString","type":[{"tag":"RecordWithChanges","type":"EvoTest.RecordWithChanges"},{"tag":"string","type":"string"}]},{"name":"AliasedRecordWithChanges","type":"EvoTest.RecordWithChanges"},{"name":"AliasedString","type":"string"},{"name":"DeprecatedRecord","fields":[{"name":"s","type":"string"},{"name":"i","type":"int32"}]},{"name":"RecordWithChanges","fields":[{"name":"floatToDouble","type":"float64"},{"name":"unchangedRecord","type":"EvoTest.UnchangedRecord"},{"name":"intToLong","type":"int64"},{"name":"optionalLongToString","type":[null,"string"]}]},{"name":"RenamedRecord","type":"EvoTest.DeprecatedRecord"},{"name":"UnchangedRecord","fields":[{"name":"name","type":"string"},{"name":"age","type":"int32"},{"name":"meta","type":{"map":{"keys":"string","values":"float64"}}}]}]})";
+std::string ProtocolWithChangesWriterBase::schema_ = R"({"protocol":{"name":"ProtocolWithChanges","sequence":[{"name":"int8ToInt","type":"int32"},{"name":"int8ToLong","type":"int64"},{"name":"int8ToUint","type":"uint32"},{"name":"int8ToUlong","type":"uint64"},{"name":"int8ToFloat","type":"float32"},{"name":"int8ToDouble","type":"float64"},{"name":"intToUint","type":"uint32"},{"name":"intToLong","type":"int64"},{"name":"intToFloat","type":"float32"},{"name":"intToDouble","type":"float64"},{"name":"uintToUlong","type":"uint64"},{"name":"uintToFloat","type":"float32"},{"name":"uintToDouble","type":"float64"},{"name":"floatToDouble","type":"float64"},{"name":"intToString","type":"string"},{"name":"uintToString","type":"string"},{"name":"longToString","type":"string"},{"name":"ulongToString","type":"string"},{"name":"floatToString","type":"string"},{"name":"doubleToString","type":"string"},{"name":"intToOptional","type":[null,"int32"]},{"name":"floatToOptional","type":[null,"float32"]},{"name":"stringToOptional","type":[null,"string"]},{"name":"intToUnion","type":[{"tag":"int32","type":"int32"},{"tag":"bool","type":"bool"}]},{"name":"floatToUnion","type":[{"tag":"float32","type":"float32"},{"tag":"bool","type":"bool"}]},{"name":"stringToUnion","type":[{"tag":"string","type":"string"},{"tag":"bool","type":"bool"}]},{"name":"optionalIntToFloat","type":[null,"float32"]},{"name":"optionalFloatToString","type":[null,"string"]},{"name":"aliasedLongToString","type":"EvoTest.AliasedLongToString"},{"name":"stringToAliasedString","type":"EvoTest.AliasedString"},{"name":"stringToAliasedInt","type":"EvoTest.AliasedInt"},{"name":"optionalIntToUnion","type":[null,{"tag":"int32","type":"int32"},{"tag":"string","type":"string"}]},{"name":"optionalRecordToUnion","type":[null,{"tag":"RecordWithChanges","type":"EvoTest.RecordWithChanges"},{"tag":"string","type":"string"}]},{"name":"recordWithChanges","type":"EvoTest.RecordWithChanges"},{"name":"aliasedRecordWithChanges","type":"EvoTest.AliasedRecordWithChanges"},{"name":"recordToRenamedRecord","type":"EvoTest.RenamedRecord"},{"name":"recordToAliasedRecord","type":"EvoTest.AliasedRecordWithChanges"},{"name":"recordToAliasedAlias","type":"EvoTest.AliasOfAliasedRecordWithChanges"},{"name":"optionalRecordWithChanges","type":[null,"EvoTest.RecordWithChanges"]},{"name":"aliasedOptionalRecordWithChanges","type":[null,"EvoTest.AliasedRecordWithChanges"]},{"name":"unionRecordWithChanges","type":[{"tag":"RecordWithChanges","type":"EvoTest.RecordWithChanges"},{"tag":"int32","type":"int32"}]},{"name":"unionWithSameTypeset","type":[{"tag":"float32","type":"float32"},{"tag":"RecordWithChanges","type":"EvoTest.RecordWithChanges"},{"tag":"string","type":"string"},{"tag":"int32","type":"int32"}]},{"name":"unionWithTypesAdded","type":[{"tag":"RecordWithChanges","type":"EvoTest.RecordWithChanges"},{"tag":"int32","type":"int32"},{"tag":"float32","type":"float32"},{"tag":"string","type":"string"}]},{"name":"unionWithTypesRemoved","type":[{"tag":"RecordWithChanges","type":"EvoTest.RecordWithChanges"},{"tag":"string","type":"string"}]},{"name":"recordToOptional","type":[null,"EvoTest.RecordWithChanges"]},{"name":"recordToAliasedOptional","type":"EvoTest.AliasedOptionalRecord"},{"name":"recordToUnion","type":[{"tag":"RecordWithChanges","type":"EvoTest.RecordWithChanges"},{"tag":"string","type":"string"}]},{"name":"recordToAliasedUnion","type":"EvoTest.AliasedRecordOrString"},{"name":"vectorRecordWithChanges","type":{"vector":{"items":"EvoTest.RecordWithChanges"}}},{"name":"streamedRecordWithChanges","type":{"stream":{"items":"EvoTest.RecordWithChanges"}}},{"name":"addedOptional","type":[null,"EvoTest.RecordWithChanges"]},{"name":"addedMap","type":{"map":{"keys":"string","values":"string"}}},{"name":"addedRecordStream","type":{"stream":{"items":"EvoTest.RecordWithChanges"}}}]},"types":[{"name":"AliasOfAliasedRecordWithChanges","type":"EvoTest.AliasedRecordWithChanges"},{"name":"AliasedInt","type":"int32"},{"name":"AliasedLongToString","type":"string"},{"name":"AliasedOptionalRecord","type":[null,"EvoTest.RecordWithChanges"]},{"name":"AliasedRecordOrString","type":[{"tag":"RecordWithChanges","type":"EvoTest.RecordWithChanges"},{"tag":"string","type":"string"}]},{"name":"AliasedRecordWithChanges","type":"EvoTest.RecordWithChanges"},{"name":"AliasedString","type":"string"},{"name":"DeprecatedRecord","fields":[{"name":"s","type":"string"},{"name":"i","type":"int32"}]},{"name":"RecordWithChanges","fields":[{"name":"floatToDouble","type":"float64"},{"name":"unchangedRecord","type":"EvoTest.UnchangedRecord"},{"name":"intToLong","type":"int64"},{"name":"optionalLongToString","type":[null,"string"]}]},{"name":"RenamedRecord","type":"EvoTest.DeprecatedRecord"},{"name":"UnchangedRecord","fields":[{"name":"name","type":"string"},{"name":"age","type":"int32"},{"name":"meta","type":{"map":{"keys":"string","values":"float64"}}}]}]})";
 
 std::vector<std::string> ProtocolWithChangesWriterBase::previous_schemas_ = {
   R"({"protocol":{"name":"ProtocolWithChanges","sequence":[{"name":"int8ToInt","type":"int8"},{"name":"int8ToLong","type":"int8"},{"name":"int8ToUint","type":"int8"},{"name":"int8ToUlong","type":"int8"},{"name":"int8ToFloat","type":"int8"},{"name":"int8ToDouble","type":"int8"},{"name":"intToUint","type":"int32"},{"name":"intToLong","type":"int32"},{"name":"intToFloat","type":"int32"},{"name":"intToDouble","type":"int32"},{"name":"uintToUlong","type":"uint32"},{"name":"uintToFloat","type":"uint32"},{"name":"uintToDouble","type":"uint32"},{"name":"floatToDouble","type":"float32"},{"name":"intToString","type":"int32"},{"name":"uintToString","type":"uint32"},{"name":"longToString","type":"int64"},{"name":"ulongToString","type":"uint64"},{"name":"floatToString","type":"float32"},{"name":"doubleToString","type":"float64"},{"name":"intToOptional","type":"int32"},{"name":"floatToOptional","type":"float32"},{"name":"stringToOptional","type":"string"},{"name":"intToUnion","type":"int32"},{"name":"floatToUnion","type":"float32"},{"name":"stringToUnion","type":"string"},{"name":"optionalIntToFloat","type":[null,"int32"]},{"name":"optionalFloatToString","type":[null,"float32"]},{"name":"aliasedLongToString","type":"EvoTest.AliasedLongToString"},{"name":"stringToAliasedString","type":"string"},{"name":"stringToAliasedInt","type":"string"},{"name":"optionalIntToUnion","type":[null,"int32"]},{"name":"optionalRecordToUnion","type":[null,"EvoTest.RecordWithChanges"]},{"name":"recordWithChanges","type":"EvoTest.RecordWithChanges"},{"name":"aliasedRecordWithChanges","type":"EvoTest.AliasedRecordWithChanges"},{"name":"recordToRenamedRecord","type":"EvoTest.RenamedRecord"},{"name":"recordToAliasedRecord","type":"EvoTest.RecordWithChanges"},{"name":"recordToAliasedAlias","type":"EvoTest.RecordWithChanges"},{"name":"optionalRecordWithChanges","type":[null,"EvoTest.RecordWithChanges"]},{"name":"aliasedOptionalRecordWithChanges","type":[null,"EvoTest.AliasedRecordWithChanges"]},{"name":"unionRecordWithChanges","type":[{"tag":"RecordWithChanges","type":"EvoTest.RecordWithChanges"},{"tag":"int32","type":"int32"}]},{"name":"unionWithSameTypeset","type":[{"tag":"RecordWithChanges","type":"EvoTest.RecordWithChanges"},{"tag":"int32","type":"int32"},{"tag":"float32","type":"float32"},{"tag":"string","type":"string"}]},{"name":"unionWithTypesAdded","type":[{"tag":"RecordWithChanges","type":"EvoTest.RecordWithChanges"},{"tag":"float32","type":"float32"}]},{"name":"unionWithTypesRemoved","type":[{"tag":"RecordWithChanges","type":"EvoTest.RecordWithChanges"},{"tag":"int32","type":"int32"},{"tag":"float32","type":"float32"},{"tag":"string","type":"string"}]},{"name":"recordToOptional","type":"EvoTest.RecordWithChanges"},{"name":"recordToAliasedOptional","type":"EvoTest.RecordWithChanges"},{"name":"recordToUnion","type":"EvoTest.RecordWithChanges"},{"name":"recordToAliasedUnion","type":"EvoTest.RecordWithChanges"},{"name":"vectorRecordWithChanges","type":{"vector":{"items":"EvoTest.RecordWithChanges"}}},{"name":"streamedRecordWithChanges","type":{"stream":{"items":"EvoTest.RecordWithChanges"}}}]},"types":[{"name":"AliasedLongToString","type":"int64"},{"name":"AliasedRecordWithChanges","type":"EvoTest.RecordWithChanges"},{"name":"RecordWithChanges","fields":[{"name":"intToLong","type":"int32"},{"name":"deprecatedVector","type":{"vector":{"items":"int32"}}},{"name":"floatToDouble","type":"float32"},{"name":"deprecatedArray","type":{"array":{"items":"uint8","dimensions":[{"length":7}]}}},{"name":"optionalLongToString","type":[null,"int64"]},{"name":"deprecatedMap","type":{"map":{"keys":"string","values":{"vector":{"items":"int32"}}}}},{"name":"unchangedRecord","type":"EvoTest.UnchangedRecord"}]},{"name":"RenamedRecord","fields":[{"name":"i","type":"int32"},{"name":"s","type":"string"}]},{"name":"UnchangedRecord","fields":[{"name":"name","type":"string"},{"name":"age","type":"int32"},{"name":"meta","type":{"map":{"keys":"string","values":"float64"}}}]}]})",
@@ -670,9 +679,59 @@ void ProtocolWithChangesWriterBase::WriteStreamedRecordWithChangesImpl(std::vect
   }
 }
 
-void ProtocolWithChangesWriterBase::Close() {
+void ProtocolWithChangesWriterBase::WriteAddedOptional(std::optional<evo_test::RecordWithChanges> const& value) {
   if (unlikely(state_ != 50)) {
     ProtocolWithChangesWriterBaseInvalidState(50, false, state_);
+  }
+
+  WriteAddedOptionalImpl(value);
+  state_ = 51;
+}
+
+void ProtocolWithChangesWriterBase::WriteAddedMap(std::unordered_map<std::string, std::string> const& value) {
+  if (unlikely(state_ != 51)) {
+    ProtocolWithChangesWriterBaseInvalidState(51, false, state_);
+  }
+
+  WriteAddedMapImpl(value);
+  state_ = 52;
+}
+
+void ProtocolWithChangesWriterBase::WriteAddedRecordStream(evo_test::RecordWithChanges const& value) {
+  if (unlikely(state_ != 52)) {
+    ProtocolWithChangesWriterBaseInvalidState(52, false, state_);
+  }
+
+  WriteAddedRecordStreamImpl(value);
+}
+
+void ProtocolWithChangesWriterBase::WriteAddedRecordStream(std::vector<evo_test::RecordWithChanges> const& values) {
+  if (unlikely(state_ != 52)) {
+    ProtocolWithChangesWriterBaseInvalidState(52, false, state_);
+  }
+
+  WriteAddedRecordStreamImpl(values);
+}
+
+void ProtocolWithChangesWriterBase::EndAddedRecordStream() {
+  if (unlikely(state_ != 52)) {
+    ProtocolWithChangesWriterBaseInvalidState(52, true, state_);
+  }
+
+  EndAddedRecordStreamImpl();
+  state_ = 53;
+}
+
+// fallback implementation
+void ProtocolWithChangesWriterBase::WriteAddedRecordStreamImpl(std::vector<evo_test::RecordWithChanges> const& values) {
+  for (auto const& v : values) {
+    WriteAddedRecordStreamImpl(v);
+  }
+}
+
+void ProtocolWithChangesWriterBase::Close() {
+  if (unlikely(state_ != 53)) {
+    ProtocolWithChangesWriterBaseInvalidState(53, false, state_);
   }
 
   CloseImpl();
@@ -1186,14 +1245,90 @@ bool ProtocolWithChangesReaderBase::ReadStreamedRecordWithChangesImpl(std::vecto
   }
 }
 
-void ProtocolWithChangesReaderBase::Close() {
+void ProtocolWithChangesReaderBase::ReadAddedOptional(std::optional<evo_test::RecordWithChanges>& value) {
   if (unlikely(state_ != 100)) {
-    ProtocolWithChangesReaderBaseInvalidState(100, state_);
+    if (state_ == 99) {
+      state_ = 100;
+    } else {
+      ProtocolWithChangesReaderBaseInvalidState(100, state_);
+    }
+  }
+
+  ReadAddedOptionalImpl(value);
+  state_ = 102;
+}
+
+void ProtocolWithChangesReaderBase::ReadAddedMap(std::unordered_map<std::string, std::string>& value) {
+  if (unlikely(state_ != 102)) {
+    ProtocolWithChangesReaderBaseInvalidState(102, state_);
+  }
+
+  ReadAddedMapImpl(value);
+  state_ = 104;
+}
+
+bool ProtocolWithChangesReaderBase::ReadAddedRecordStream(evo_test::RecordWithChanges& value) {
+  if (unlikely(state_ != 104)) {
+    if (state_ == 105) {
+      state_ = 106;
+      return false;
+    }
+    ProtocolWithChangesReaderBaseInvalidState(104, state_);
+  }
+
+  bool result = ReadAddedRecordStreamImpl(value);
+  if (!result) {
+    state_ = 106;
+  }
+  return result;
+}
+
+bool ProtocolWithChangesReaderBase::ReadAddedRecordStream(std::vector<evo_test::RecordWithChanges>& values) {
+  if (values.capacity() == 0) {
+    throw std::runtime_error("vector must have a nonzero capacity.");
+  }
+  if (unlikely(state_ != 104)) {
+    if (state_ == 105) {
+      state_ = 106;
+      values.clear();
+      return false;
+    }
+    ProtocolWithChangesReaderBaseInvalidState(104, state_);
+  }
+
+  if (!ReadAddedRecordStreamImpl(values)) {
+    state_ = 105;
+    return values.size() > 0;
+  }
+  return true;
+}
+
+// fallback implementation
+bool ProtocolWithChangesReaderBase::ReadAddedRecordStreamImpl(std::vector<evo_test::RecordWithChanges>& values) {
+  size_t i = 0;
+  while (true) {
+    if (i == values.size()) {
+      values.resize(i + 1);
+    }
+    if (!ReadAddedRecordStreamImpl(values[i])) {
+      values.resize(i);
+      return false;
+    }
+    i++;
+    if (i == values.capacity()) {
+      return true;
+    }
+  }
+}
+
+void ProtocolWithChangesReaderBase::Close() {
+  if (unlikely(state_ != 106)) {
+    ProtocolWithChangesReaderBaseInvalidState(106, state_);
   }
 
   CloseImpl();
 }
-void ProtocolWithChangesReaderBase::CopyTo(ProtocolWithChangesWriterBase& writer, size_t streamed_record_with_changes_buffer_size) {
+void ProtocolWithChangesReaderBase::CopyTo(ProtocolWithChangesWriterBase& writer, size_t streamed_record_with_changes_buffer_size, size_t added_record_stream_buffer_size) {
   {
     int32_t value;
     ReadInt8ToInt(value);
@@ -1453,17 +1588,41 @@ void ProtocolWithChangesReaderBase::CopyTo(ProtocolWithChangesWriterBase& writer
     }
     writer.EndStreamedRecordWithChanges();
   }
+  {
+    std::optional<evo_test::RecordWithChanges> value;
+    ReadAddedOptional(value);
+    writer.WriteAddedOptional(value);
+  }
+  {
+    std::unordered_map<std::string, std::string> value;
+    ReadAddedMap(value);
+    writer.WriteAddedMap(value);
+  }
+  if (added_record_stream_buffer_size > 1) {
+    std::vector<evo_test::RecordWithChanges> values;
+    values.reserve(added_record_stream_buffer_size);
+    while(ReadAddedRecordStream(values)) {
+      writer.WriteAddedRecordStream(values);
+    }
+    writer.EndAddedRecordStream();
+  } else {
+    evo_test::RecordWithChanges value;
+    while(ReadAddedRecordStream(value)) {
+      writer.WriteAddedRecordStream(value);
+    }
+    writer.EndAddedRecordStream();
+  }
 }
 
 namespace {
 void UnusedProtocolWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end, uint8_t current) {
   std::string expected_method;
   switch (current) {
-  case 0: expected_method = "WriteSamples() or EndSamples()"; break;
+  case 0: expected_method = "WriteRecords() or EndRecords()"; break;
   }
   std::string attempted_method;
   switch (attempted) {
-  case 0: attempted_method = end ? "EndSamples()" : "WriteSamples()"; break;
+  case 0: attempted_method = end ? "EndRecords()" : "WriteRecords()"; break;
   case 1: attempted_method = "Close()"; break;
   }
   throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
@@ -1472,7 +1631,7 @@ void UnusedProtocolWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bo
 void UnusedProtocolReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
   auto f = [](uint8_t i) -> std::string {
     switch (i/2) {
-    case 0: return "ReadSamples()";
+    case 0: return "ReadRecords()";
     case 1: return "Close()";
     default: return "<unknown>";
     }
@@ -1482,7 +1641,7 @@ void UnusedProtocolReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
 
 } // namespace 
 
-std::string UnusedProtocolWriterBase::schema_ = R"({"protocol":{"name":"UnusedProtocol","sequence":[{"name":"samples","type":{"stream":{"items":"EvoTest.UnchangedRecord"}}}]},"types":[{"name":"UnchangedRecord","fields":[{"name":"name","type":"string"},{"name":"age","type":"int32"},{"name":"meta","type":{"map":{"keys":"string","values":"float64"}}}]}]})";
+std::string UnusedProtocolWriterBase::schema_ = R"({"protocol":{"name":"UnusedProtocol","sequence":[{"name":"records","type":{"stream":{"items":"EvoTest.UnchangedRecord"}}}]},"types":[{"name":"UnchangedRecord","fields":[{"name":"name","type":"string"},{"name":"age","type":"int32"},{"name":"meta","type":{"map":{"keys":"string","values":"float64"}}}]}]})";
 
 std::vector<std::string> UnusedProtocolWriterBase::previous_schemas_ = {
   UnusedProtocolWriterBase::schema_,
@@ -1496,35 +1655,35 @@ std::string UnusedProtocolWriterBase::SchemaFromVersion(Version version) {
   }
 
 }
-void UnusedProtocolWriterBase::WriteSamples(evo_test::UnchangedRecord const& value) {
+void UnusedProtocolWriterBase::WriteRecords(evo_test::UnchangedRecord const& value) {
   if (unlikely(state_ != 0)) {
     UnusedProtocolWriterBaseInvalidState(0, false, state_);
   }
 
-  WriteSamplesImpl(value);
+  WriteRecordsImpl(value);
 }
 
-void UnusedProtocolWriterBase::WriteSamples(std::vector<evo_test::UnchangedRecord> const& values) {
+void UnusedProtocolWriterBase::WriteRecords(std::vector<evo_test::UnchangedRecord> const& values) {
   if (unlikely(state_ != 0)) {
     UnusedProtocolWriterBaseInvalidState(0, false, state_);
   }
 
-  WriteSamplesImpl(values);
+  WriteRecordsImpl(values);
 }
 
-void UnusedProtocolWriterBase::EndSamples() {
+void UnusedProtocolWriterBase::EndRecords() {
   if (unlikely(state_ != 0)) {
     UnusedProtocolWriterBaseInvalidState(0, true, state_);
   }
 
-  EndSamplesImpl();
+  EndRecordsImpl();
   state_ = 1;
 }
 
 // fallback implementation
-void UnusedProtocolWriterBase::WriteSamplesImpl(std::vector<evo_test::UnchangedRecord> const& values) {
+void UnusedProtocolWriterBase::WriteRecordsImpl(std::vector<evo_test::UnchangedRecord> const& values) {
   for (auto const& v : values) {
-    WriteSamplesImpl(v);
+    WriteRecordsImpl(v);
   }
 }
 
@@ -1549,7 +1708,7 @@ Version UnusedProtocolReaderBase::VersionFromSchema(std::string const& schema) {
   }
   throw std::runtime_error("The schema does not match any version supported by protocol UnusedProtocol.");
 }
-bool UnusedProtocolReaderBase::ReadSamples(evo_test::UnchangedRecord& value) {
+bool UnusedProtocolReaderBase::ReadRecords(evo_test::UnchangedRecord& value) {
   if (unlikely(state_ != 0)) {
     if (state_ == 1) {
       state_ = 2;
@@ -1558,14 +1717,14 @@ bool UnusedProtocolReaderBase::ReadSamples(evo_test::UnchangedRecord& value) {
     UnusedProtocolReaderBaseInvalidState(0, state_);
   }
 
-  bool result = ReadSamplesImpl(value);
+  bool result = ReadRecordsImpl(value);
   if (!result) {
     state_ = 2;
   }
   return result;
 }
 
-bool UnusedProtocolReaderBase::ReadSamples(std::vector<evo_test::UnchangedRecord>& values) {
+bool UnusedProtocolReaderBase::ReadRecords(std::vector<evo_test::UnchangedRecord>& values) {
   if (values.capacity() == 0) {
     throw std::runtime_error("vector must have a nonzero capacity.");
   }
@@ -1578,7 +1737,7 @@ bool UnusedProtocolReaderBase::ReadSamples(std::vector<evo_test::UnchangedRecord
     UnusedProtocolReaderBaseInvalidState(0, state_);
   }
 
-  if (!ReadSamplesImpl(values)) {
+  if (!ReadRecordsImpl(values)) {
     state_ = 1;
     return values.size() > 0;
   }
@@ -1586,13 +1745,13 @@ bool UnusedProtocolReaderBase::ReadSamples(std::vector<evo_test::UnchangedRecord
 }
 
 // fallback implementation
-bool UnusedProtocolReaderBase::ReadSamplesImpl(std::vector<evo_test::UnchangedRecord>& values) {
+bool UnusedProtocolReaderBase::ReadRecordsImpl(std::vector<evo_test::UnchangedRecord>& values) {
   size_t i = 0;
   while (true) {
     if (i == values.size()) {
       values.resize(i + 1);
     }
-    if (!ReadSamplesImpl(values[i])) {
+    if (!ReadRecordsImpl(values[i])) {
       values.resize(i);
       return false;
     }
@@ -1610,20 +1769,20 @@ void UnusedProtocolReaderBase::Close() {
 
   CloseImpl();
 }
-void UnusedProtocolReaderBase::CopyTo(UnusedProtocolWriterBase& writer, size_t samples_buffer_size) {
-  if (samples_buffer_size > 1) {
+void UnusedProtocolReaderBase::CopyTo(UnusedProtocolWriterBase& writer, size_t records_buffer_size) {
+  if (records_buffer_size > 1) {
     std::vector<evo_test::UnchangedRecord> values;
-    values.reserve(samples_buffer_size);
-    while(ReadSamples(values)) {
-      writer.WriteSamples(values);
+    values.reserve(records_buffer_size);
+    while(ReadRecords(values)) {
+      writer.WriteRecords(values);
     }
-    writer.EndSamples();
+    writer.EndRecords();
   } else {
     evo_test::UnchangedRecord value;
-    while(ReadSamples(value)) {
-      writer.WriteSamples(value);
+    while(ReadRecords(value)) {
+      writer.WriteRecords(value);
     }
-    writer.EndSamples();
+    writer.EndRecords();
   }
 }
 } // namespace evo_test

@@ -550,6 +550,38 @@ void ProtocolWithChangesWriter::EndStreamedRecordWithChangesImpl() {
   streamedRecordWithChanges_dataset_state_.reset();
 }
 
+void ProtocolWithChangesWriter::WriteAddedOptionalImpl(std::optional<evo_test::RecordWithChanges> const& value) {
+  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerOptional<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges>, std::optional<evo_test::RecordWithChanges>>(group_, "addedOptional", yardl::hdf5::OptionalTypeDdl<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges>(evo_test::hdf5::GetRecordWithChangesHdf5Ddl()), value);
+}
+
+void ProtocolWithChangesWriter::WriteAddedMapImpl(std::unordered_map<std::string, std::string> const& value) {
+  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerMap<yardl::hdf5::InnerVlenString, std::string, yardl::hdf5::InnerVlenString, std::string>, std::unordered_map<std::string, std::string>>(group_, "addedMap", yardl::hdf5::InnerMapDdl<yardl::hdf5::InnerVlenString, yardl::hdf5::InnerVlenString>(yardl::hdf5::InnerVlenStringDdl(), yardl::hdf5::InnerVlenStringDdl()), value);
+}
+
+void ProtocolWithChangesWriter::WriteAddedRecordStreamImpl(evo_test::RecordWithChanges const& value) {
+  if (!addedRecordStream_dataset_state_) {
+    addedRecordStream_dataset_state_ = std::make_unique<yardl::hdf5::DatasetWriter>(group_, "addedRecordStream", evo_test::hdf5::GetRecordWithChangesHdf5Ddl(), std::max(sizeof(evo_test::hdf5::_Inner_RecordWithChanges), sizeof(evo_test::RecordWithChanges)));
+  }
+
+  addedRecordStream_dataset_state_->Append<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges>(value);
+}
+
+void ProtocolWithChangesWriter::WriteAddedRecordStreamImpl(std::vector<evo_test::RecordWithChanges> const& values) {
+  if (!addedRecordStream_dataset_state_) {
+    addedRecordStream_dataset_state_ = std::make_unique<yardl::hdf5::DatasetWriter>(group_, "addedRecordStream", evo_test::hdf5::GetRecordWithChangesHdf5Ddl(), std::max(sizeof(evo_test::hdf5::_Inner_RecordWithChanges), sizeof(evo_test::RecordWithChanges)));
+  }
+
+  addedRecordStream_dataset_state_->AppendBatch<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges>(values);
+}
+
+void ProtocolWithChangesWriter::EndAddedRecordStreamImpl() {
+  if (!addedRecordStream_dataset_state_) {
+    addedRecordStream_dataset_state_ = std::make_unique<yardl::hdf5::DatasetWriter>(group_, "addedRecordStream", evo_test::hdf5::GetRecordWithChangesHdf5Ddl(), std::max(sizeof(evo_test::hdf5::_Inner_RecordWithChanges), sizeof(evo_test::RecordWithChanges)));
+  }
+
+  addedRecordStream_dataset_state_.reset();
+}
+
 ProtocolWithChangesReader::ProtocolWithChangesReader(std::string path)
     : yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "ProtocolWithChanges", schema_) {
 }
@@ -776,59 +808,93 @@ bool ProtocolWithChangesReader::ReadStreamedRecordWithChangesImpl(std::vector<ev
   return has_more;
 }
 
+void ProtocolWithChangesReader::ReadAddedOptionalImpl(std::optional<evo_test::RecordWithChanges>& value) {
+  yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerOptional<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges>, std::optional<evo_test::RecordWithChanges>>(group_, "addedOptional", yardl::hdf5::OptionalTypeDdl<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges>(evo_test::hdf5::GetRecordWithChangesHdf5Ddl()), value);
+}
+
+void ProtocolWithChangesReader::ReadAddedMapImpl(std::unordered_map<std::string, std::string>& value) {
+  yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerMap<yardl::hdf5::InnerVlenString, std::string, yardl::hdf5::InnerVlenString, std::string>, std::unordered_map<std::string, std::string>>(group_, "addedMap", yardl::hdf5::InnerMapDdl<yardl::hdf5::InnerVlenString, yardl::hdf5::InnerVlenString>(yardl::hdf5::InnerVlenStringDdl(), yardl::hdf5::InnerVlenStringDdl()), value);
+}
+
+bool ProtocolWithChangesReader::ReadAddedRecordStreamImpl(evo_test::RecordWithChanges& value) {
+  if (!addedRecordStream_dataset_state_) {
+    addedRecordStream_dataset_state_ = std::make_unique<yardl::hdf5::DatasetReader>(group_, "addedRecordStream", evo_test::hdf5::GetRecordWithChangesHdf5Ddl(), std::max(sizeof(evo_test::hdf5::_Inner_RecordWithChanges), sizeof(evo_test::RecordWithChanges)));
+  }
+
+  bool has_value = addedRecordStream_dataset_state_->Read<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges>(value);
+  if (!has_value) {
+    addedRecordStream_dataset_state_.reset();
+  }
+
+  return has_value;
+}
+
+bool ProtocolWithChangesReader::ReadAddedRecordStreamImpl(std::vector<evo_test::RecordWithChanges>& values) {
+  if (!addedRecordStream_dataset_state_) {
+    addedRecordStream_dataset_state_ = std::make_unique<yardl::hdf5::DatasetReader>(group_, "addedRecordStream", evo_test::hdf5::GetRecordWithChangesHdf5Ddl());
+  }
+
+  bool has_more = addedRecordStream_dataset_state_->ReadBatch<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges>(values);
+  if (!has_more) {
+    addedRecordStream_dataset_state_.reset();
+  }
+
+  return has_more;
+}
+
 UnusedProtocolWriter::UnusedProtocolWriter(std::string path)
     : yardl::hdf5::Hdf5Writer::Hdf5Writer(path, "UnusedProtocol", schema_) {
 }
 
-void UnusedProtocolWriter::WriteSamplesImpl(evo_test::UnchangedRecord const& value) {
-  if (!samples_dataset_state_) {
-    samples_dataset_state_ = std::make_unique<yardl::hdf5::DatasetWriter>(group_, "samples", evo_test::hdf5::GetUnchangedRecordHdf5Ddl(), std::max(sizeof(evo_test::hdf5::_Inner_UnchangedRecord), sizeof(evo_test::UnchangedRecord)));
+void UnusedProtocolWriter::WriteRecordsImpl(evo_test::UnchangedRecord const& value) {
+  if (!records_dataset_state_) {
+    records_dataset_state_ = std::make_unique<yardl::hdf5::DatasetWriter>(group_, "records", evo_test::hdf5::GetUnchangedRecordHdf5Ddl(), std::max(sizeof(evo_test::hdf5::_Inner_UnchangedRecord), sizeof(evo_test::UnchangedRecord)));
   }
 
-  samples_dataset_state_->Append<evo_test::hdf5::_Inner_UnchangedRecord, evo_test::UnchangedRecord>(value);
+  records_dataset_state_->Append<evo_test::hdf5::_Inner_UnchangedRecord, evo_test::UnchangedRecord>(value);
 }
 
-void UnusedProtocolWriter::WriteSamplesImpl(std::vector<evo_test::UnchangedRecord> const& values) {
-  if (!samples_dataset_state_) {
-    samples_dataset_state_ = std::make_unique<yardl::hdf5::DatasetWriter>(group_, "samples", evo_test::hdf5::GetUnchangedRecordHdf5Ddl(), std::max(sizeof(evo_test::hdf5::_Inner_UnchangedRecord), sizeof(evo_test::UnchangedRecord)));
+void UnusedProtocolWriter::WriteRecordsImpl(std::vector<evo_test::UnchangedRecord> const& values) {
+  if (!records_dataset_state_) {
+    records_dataset_state_ = std::make_unique<yardl::hdf5::DatasetWriter>(group_, "records", evo_test::hdf5::GetUnchangedRecordHdf5Ddl(), std::max(sizeof(evo_test::hdf5::_Inner_UnchangedRecord), sizeof(evo_test::UnchangedRecord)));
   }
 
-  samples_dataset_state_->AppendBatch<evo_test::hdf5::_Inner_UnchangedRecord, evo_test::UnchangedRecord>(values);
+  records_dataset_state_->AppendBatch<evo_test::hdf5::_Inner_UnchangedRecord, evo_test::UnchangedRecord>(values);
 }
 
-void UnusedProtocolWriter::EndSamplesImpl() {
-  if (!samples_dataset_state_) {
-    samples_dataset_state_ = std::make_unique<yardl::hdf5::DatasetWriter>(group_, "samples", evo_test::hdf5::GetUnchangedRecordHdf5Ddl(), std::max(sizeof(evo_test::hdf5::_Inner_UnchangedRecord), sizeof(evo_test::UnchangedRecord)));
+void UnusedProtocolWriter::EndRecordsImpl() {
+  if (!records_dataset_state_) {
+    records_dataset_state_ = std::make_unique<yardl::hdf5::DatasetWriter>(group_, "records", evo_test::hdf5::GetUnchangedRecordHdf5Ddl(), std::max(sizeof(evo_test::hdf5::_Inner_UnchangedRecord), sizeof(evo_test::UnchangedRecord)));
   }
 
-  samples_dataset_state_.reset();
+  records_dataset_state_.reset();
 }
 
 UnusedProtocolReader::UnusedProtocolReader(std::string path)
     : yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "UnusedProtocol", schema_) {
 }
 
-bool UnusedProtocolReader::ReadSamplesImpl(evo_test::UnchangedRecord& value) {
-  if (!samples_dataset_state_) {
-    samples_dataset_state_ = std::make_unique<yardl::hdf5::DatasetReader>(group_, "samples", evo_test::hdf5::GetUnchangedRecordHdf5Ddl(), std::max(sizeof(evo_test::hdf5::_Inner_UnchangedRecord), sizeof(evo_test::UnchangedRecord)));
+bool UnusedProtocolReader::ReadRecordsImpl(evo_test::UnchangedRecord& value) {
+  if (!records_dataset_state_) {
+    records_dataset_state_ = std::make_unique<yardl::hdf5::DatasetReader>(group_, "records", evo_test::hdf5::GetUnchangedRecordHdf5Ddl(), std::max(sizeof(evo_test::hdf5::_Inner_UnchangedRecord), sizeof(evo_test::UnchangedRecord)));
   }
 
-  bool has_value = samples_dataset_state_->Read<evo_test::hdf5::_Inner_UnchangedRecord, evo_test::UnchangedRecord>(value);
+  bool has_value = records_dataset_state_->Read<evo_test::hdf5::_Inner_UnchangedRecord, evo_test::UnchangedRecord>(value);
   if (!has_value) {
-    samples_dataset_state_.reset();
+    records_dataset_state_.reset();
   }
 
   return has_value;
 }
 
-bool UnusedProtocolReader::ReadSamplesImpl(std::vector<evo_test::UnchangedRecord>& values) {
-  if (!samples_dataset_state_) {
-    samples_dataset_state_ = std::make_unique<yardl::hdf5::DatasetReader>(group_, "samples", evo_test::hdf5::GetUnchangedRecordHdf5Ddl());
+bool UnusedProtocolReader::ReadRecordsImpl(std::vector<evo_test::UnchangedRecord>& values) {
+  if (!records_dataset_state_) {
+    records_dataset_state_ = std::make_unique<yardl::hdf5::DatasetReader>(group_, "records", evo_test::hdf5::GetUnchangedRecordHdf5Ddl());
   }
 
-  bool has_more = samples_dataset_state_->ReadBatch<evo_test::hdf5::_Inner_UnchangedRecord, evo_test::UnchangedRecord>(values);
+  bool has_more = records_dataset_state_->ReadBatch<evo_test::hdf5::_Inner_UnchangedRecord, evo_test::UnchangedRecord>(values);
   if (!has_more) {
-    samples_dataset_state_.reset();
+    records_dataset_state_.reset();
   }
 
   return has_more;

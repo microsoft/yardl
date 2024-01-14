@@ -265,6 +265,8 @@ func collectUnionArities(env *dsl.Environment) []int {
 
 	dsl.Visit(env, func(self dsl.Visitor, node dsl.Node) {
 		switch t := node.(type) {
+		case nil:
+			return
 		case *dsl.ProtocolDefinition:
 			for _, change := range t.Versions {
 				if change == nil {
@@ -602,7 +604,7 @@ func writeTypeConversion(w *formatting.IndentedWriter, typeChange dsl.TypeChange
 
 		fmt.Fprintf(w, "switch (%s.index()) {\n", sourceName)
 		w.Indented(func() {
-			for i, _ := range tc.OldType().(*dsl.GeneralizedType).Cases {
+			for i := range tc.OldType().(*dsl.GeneralizedType).Cases {
 				fmt.Fprintf(w, "case %d: {\n", i)
 				w.Indented(func() {
 					if tc.OldMatches[i] {
@@ -625,38 +627,20 @@ func writeTypeConversion(w *formatting.IndentedWriter, typeChange dsl.TypeChange
 	}
 }
 
-func writeConversionRw(w *formatting.IndentedWriter, tc dsl.TypeChange, streamName, tmpName, targetName string, write bool) {
-	var onlyDefinitionChanged func(tc dsl.TypeChange) bool
-	onlyDefinitionChanged = func(tc dsl.TypeChange) bool {
-		switch tc := tc.(type) {
-		case *dsl.TypeChangeDefinitionChanged:
-			return true
-		case *dsl.TypeChangeOptionalTypeChanged:
-			return onlyDefinitionChanged(tc.InnerChange)
-		case *dsl.TypeChangeStreamTypeChanged:
-			return onlyDefinitionChanged(tc.InnerChange)
-		case *dsl.TypeChangeVectorTypeChanged:
-			return onlyDefinitionChanged(tc.InnerChange)
-		}
+// If a TypeChange is the result of an underlying TypeDefinition change, we don't need to perform
+// explicit conversion - we only need to call the corresponding "compatibility" serializer functions
+func requiresExplicitConversion(tc dsl.TypeChange) bool {
+	switch tc := tc.(type) {
+	case *dsl.TypeChangeDefinitionChanged:
 		return false
+	case *dsl.TypeChangeOptionalTypeChanged:
+		return requiresExplicitConversion(tc.InnerChange)
+	case *dsl.TypeChangeStreamTypeChanged:
+		return requiresExplicitConversion(tc.InnerChange)
+	case *dsl.TypeChangeVectorTypeChanged:
+		return requiresExplicitConversion(tc.InnerChange)
 	}
-
-	// If the TypeChange is due to a changed TypeDefinition, no conversion is needed
-	// because it will be handled by the TypeDefinition-specific Read/Write functions
-	if onlyDefinitionChanged(tc) {
-		fmt.Fprintf(w, "%s(%s, %s);\n", typeRwFunction(tc.OldType(), write), streamName, targetName)
-		return
-	}
-
-	varType := common.TypeSyntax(tc.OldType())
-	fmt.Fprintf(w, "%s %s;\n", varType, tmpName)
-	if write {
-		writeTypeConversion(w, tc, targetName, tmpName, write)
-		fmt.Fprintf(w, "%s(%s, %s);\n", typeRwFunction(tc.OldType(), write), streamName, tmpName)
-	} else {
-		fmt.Fprintf(w, "%s(%s, %s);\n", typeRwFunction(tc.OldType(), write), streamName, tmpName)
-		writeTypeConversion(w, tc, tmpName, targetName, write)
-	}
+	return true
 }
 
 func writeCompatibilitySerializers(w *formatting.IndentedWriter, change dsl.DefinitionChange, versionLabel string) {
@@ -670,25 +654,49 @@ func writeCompatibilitySerializers(w *formatting.IndentedWriter, change dsl.Defi
 		case *dsl.RecordChange:
 			p := change.PreviousDefinition().(*dsl.RecordDefinition)
 			for i, field := range p.Fields {
-				varType := common.TypeSyntax(field.Type)
-				varName := common.FieldIdentifierName(field.Name)
-
+				tmpVarName := common.FieldIdentifierName(field.Name)
 				if change.FieldRemoved[i] {
 					// Field was removed: Read it and discard, or Write "default" value
-					fmt.Fprintf(w, "%s %s;\n", varType, varName)
-					fmt.Fprintf(w, "%s(stream, %s);\n", typeRwFunction(field.Type, write), varName)
-				} else if typeChange := change.FieldChanges[i]; typeChange != nil {
+					tmpVarType := common.TypeSyntax(field.Type)
+					fmt.Fprintf(w, "%s %s;\n", tmpVarType, tmpVarName)
+					fmt.Fprintf(w, "%s(stream, %s);\n", typeRwFunction(field.Type, write), tmpVarName)
+				} else if tc := change.FieldChanges[i]; tc != nil {
 					// Field type change: Handle type conversions
-					writeConversionRw(w, typeChange, "stream", varName, fmt.Sprintf("value.%s", varName), write)
+					if requiresExplicitConversion(tc) {
+						tmpVarType := common.TypeSyntax(tc.OldType())
+						fmt.Fprintf(w, "%s %s;\n", tmpVarType, tmpVarName)
+
+						if write {
+							writeTypeConversion(w, tc, fmt.Sprintf("value.%s", tmpVarName), tmpVarName, write)
+							fmt.Fprintf(w, "%s(stream, %s);\n", typeRwFunction(tc.OldType(), write), tmpVarName)
+						} else {
+							fmt.Fprintf(w, "%s(stream, %s);\n", typeRwFunction(tc.OldType(), write), tmpVarName)
+							writeTypeConversion(w, tc, tmpVarName, fmt.Sprintf("value.%s", tmpVarName), write)
+						}
+					} else {
+						fmt.Fprintf(w, "%s(stream, value.%s);\n", typeRwFunction(tc.OldType(), write), tmpVarName)
+					}
 				} else {
-					fmt.Fprintf(w, "%s(stream, value.%s);\n", typeRwFunction(field.Type, write), varName)
+					fmt.Fprintf(w, "%s(stream, value.%s);\n", typeRwFunction(field.Type, write), tmpVarName)
 				}
 			}
 		case *dsl.NamedTypeChange:
 			p := change.PreviousDefinition().(*dsl.NamedType)
-			if typeChange := change.TypeChange; typeChange != nil {
-				varName := common.FieldIdentifierName(p.Name)
-				writeConversionRw(w, typeChange, "stream", varName, "value", write)
+			if tc := change.TypeChange; tc != nil {
+				tmpVarName := common.FieldIdentifierName(p.Name)
+				if requiresExplicitConversion(tc) {
+					varType := common.TypeSyntax(tc.OldType())
+					fmt.Fprintf(w, "%s %s;\n", varType, tmpVarName)
+					if write {
+						writeTypeConversion(w, tc, "value", tmpVarName, write)
+						fmt.Fprintf(w, "%s(stream, %s);\n", typeRwFunction(tc.OldType(), write), tmpVarName)
+					} else {
+						fmt.Fprintf(w, "%s(stream, %s);\n", typeRwFunction(tc.OldType(), write), tmpVarName)
+						writeTypeConversion(w, tc, tmpVarName, "value", write)
+					}
+				} else {
+					fmt.Fprintf(w, "%s(stream, value);\n", typeRwFunction(tc.OldType(), write))
+				}
 			} else {
 				fmt.Fprintf(w, "%s(stream, value);\n", typeRwFunction(p.Type, write))
 			}
@@ -722,23 +730,24 @@ func writeCompatibilityRwFunctionSignature(old dsl.TypeDefinition, new dsl.TypeD
 }
 
 func writeProtocolMethods(w *formatting.IndentedWriter, p *dsl.ProtocolDefinition) {
-	writerClassName := BinaryWriterClassName(p)
-	for i, step := range p.Sequence {
 
+	extractStepChanges := func(stepIndex int) map[string]dsl.TypeChange {
 		stepChanges := make(map[string]dsl.TypeChange)
 		for label, protocolChange := range p.Versions {
 			if protocolChange == nil {
 				continue
 			}
-			stepChanges[label] = protocolChange.StepChanges[i]
+			stepChanges[label] = protocolChange.StepChanges[stepIndex]
 		}
+		return stepChanges
+	}
+
+	writerClassName := BinaryWriterClassName(p)
+	for i, step := range p.Sequence {
+		stepChanges := extractStepChanges(i)
 
 		fmt.Fprintf(w, "void %s::%s(%s const& value) {\n", writerClassName, common.ProtocolWriteImplMethodName(step), common.TypeSyntax(step.Type))
 		w.Indented(func() {
-			if step.IsStream() {
-				w.WriteString("yardl::binary::WriteInteger(stream_, 1U);\n")
-			}
-
 			writeProtocolStep(w, step, stepChanges, false, true)
 		})
 		w.WriteString("}\n\n")
@@ -756,7 +765,7 @@ func writeProtocolMethods(w *formatting.IndentedWriter, p *dsl.ProtocolDefinitio
 
 			fmt.Fprintf(w, "void %s::%s() {\n", writerClassName, common.ProtocolWriteEndImplMethodName(step))
 			w.Indented(func() {
-				w.WriteString("yardl::binary::WriteInteger(stream_, 0U);\n")
+				writeEndStream(w, stepChanges)
 			})
 			w.WriteString("}\n\n")
 		}
@@ -776,14 +785,7 @@ func writeProtocolMethods(w *formatting.IndentedWriter, p *dsl.ProtocolDefinitio
 
 	readerClassName := BinaryReaderClassName(p)
 	for i, step := range p.Sequence {
-
-		stepChanges := make(map[string]dsl.TypeChange)
-		for label, protocolChange := range p.Versions {
-			if protocolChange == nil {
-				continue
-			}
-			stepChanges[label] = protocolChange.StepChanges[i]
-		}
+		stepChanges := extractStepChanges(i)
 
 		returnType := "void"
 		if step.IsStream() {
@@ -792,25 +794,7 @@ func writeProtocolMethods(w *formatting.IndentedWriter, p *dsl.ProtocolDefinitio
 
 		fmt.Fprintf(w, "%s %s::%s(%s& value) {\n", returnType, readerClassName, common.ProtocolReadImplMethodName(step), common.TypeSyntax(step.Type))
 		w.Indented(func() {
-			if step.IsStream() {
-				w.WriteStringln("if (current_block_remaining_ == 0) {")
-				w.Indented(func() {
-					w.WriteStringln("yardl::binary::ReadInteger(stream_, current_block_remaining_);")
-					w.WriteStringln("if (current_block_remaining_ == 0) {")
-					w.Indented(func() {
-						w.WriteStringln("return false;")
-					})
-					w.WriteStringln("}")
-				})
-				w.WriteStringln("}")
-			}
-
 			writeProtocolStep(w, step, stepChanges, false, false)
-
-			if step.IsStream() {
-				w.WriteStringln("current_block_remaining_--;")
-				w.WriteStringln("return true;")
-			}
 		})
 		w.WriteString("}\n\n")
 
@@ -821,7 +805,6 @@ func writeProtocolMethods(w *formatting.IndentedWriter, p *dsl.ProtocolDefinitio
 				w.WriteStringln("return current_block_remaining_ != 0;")
 			})
 			w.WriteString("}\n\n")
-
 		}
 	}
 
@@ -832,22 +815,11 @@ func writeProtocolMethods(w *formatting.IndentedWriter, p *dsl.ProtocolDefinitio
 	w.WriteString("}\n\n")
 }
 
-func writeProtocolStep(w *formatting.IndentedWriter, step *dsl.ProtocolStep, changes map[string]dsl.TypeChange, stream bool, write bool) {
-	writeStepRw := func(stepType dsl.Type) {
-		if stream {
-			if write {
-				vectorType := *stepType.(*dsl.GeneralizedType)
-				vectorType.Dimensionality = &dsl.Vector{}
-				stepType = &vectorType
-				fmt.Fprintf(w, "%s(stream_, values);\n", typeRwFunction(stepType, write))
-			} else {
-				stepType = stepType.(*dsl.GeneralizedType).ToScalar()
-				fmt.Fprintf(w, "yardl::binary::ReadBlocksIntoVector<%s, %s>(stream_, current_block_remaining_, values);\n", common.TypeSyntax(stepType), typeRwFunction(stepType, write))
-			}
-		} else {
-			fmt.Fprintf(w, "%s(stream_, value);\n", typeRwFunction(stepType, write))
-		}
-	}
+// Writes a switch statement with cases for each version of a ProtocolStep
+// Only if there are version changes or the ProtocolStep was added
+func writeChangeSwitchCase(w *formatting.IndentedWriter, changes map[string]dsl.TypeChange,
+	writeDefault, writeAdded func(*formatting.IndentedWriter),
+	writeConversion func(*formatting.IndentedWriter, dsl.TypeChange)) {
 
 	allNil := func(vs map[string]dsl.TypeChange) bool {
 		for _, v := range vs {
@@ -859,12 +831,12 @@ func writeProtocolStep(w *formatting.IndentedWriter, step *dsl.ProtocolStep, cha
 	}
 
 	if allNil(changes) {
-		// No version changes to this ProtocolStep
-		writeStepRw(step.Type)
+		// Skip switch statement - this ProtocolStep has never changed
+		writeDefault(w)
 		return
 	}
 
-	// Sort the version labels so the generated switch statement is deterministic
+	// Sort the case labels for deterministic ordering
 	var versionLabels []string
 	for versionLabel := range changes {
 		versionLabels = append(versionLabels, versionLabel)
@@ -878,30 +850,118 @@ func writeProtocolStep(w *formatting.IndentedWriter, step *dsl.ProtocolStep, cha
 			continue
 		}
 
+		_, stepAdded := change.(*dsl.TypeChangeStepAdded)
+		if writeConversion == nil && !stepAdded {
+			continue
+		}
+
 		fmt.Fprintf(w, "case Version::%s: {\n", versionLabel)
 		w.Indented(func() {
 			defer func() {
 				w.WriteStringln("break;")
 			}()
 
-			if stream {
-				// TODO: Refactor - This assumes that Stream changes can only be TypeDefinition changes
-				writeStepRw(change.OldType())
-				return
+			if stepAdded {
+				if writeAdded != nil {
+					writeAdded(w)
+				}
+			} else {
+				if writeConversion != nil {
+					writeConversion(w, change)
+				}
 			}
-
-			// Handle conversions for ProtocolStep type changes
-			varName := fmt.Sprintf("%s_%s", common.FieldIdentifierName(step.Name), versionLabel)
-			writeConversionRw(w, change, "stream_", varName, "value", write)
 		})
 		w.WriteStringln("}")
 	}
 	fmt.Fprintln(w, "default:")
 	w.Indented(func() {
-		writeStepRw(step.Type)
+		writeDefault(w)
 		fmt.Fprintln(w, "break;")
 	})
 	fmt.Fprintln(w, "}")
+}
+
+func writeStepRw(w *formatting.IndentedWriter, stepType dsl.Type, target string, isStream, isPlural, write bool) {
+	if !isStream {
+		fmt.Fprintf(w, "%s(stream_, %s);\n", typeRwFunction(stepType, write), target)
+		return
+	}
+
+	if write {
+		if isPlural {
+			vectorType := *stepType.(*dsl.GeneralizedType)
+			vectorType.Dimensionality = &dsl.Vector{}
+			stepType = &vectorType
+			fmt.Fprintf(w, "%s(stream_, values);\n", typeRwFunction(stepType, write))
+		} else {
+			fmt.Fprintf(w, "yardl::binary::WriteBlock<%s, %s>(stream_, value);\n", common.TypeSyntax(stepType), typeRwFunction(stepType, write))
+		}
+	} else {
+		if isPlural {
+			stepType = stepType.(*dsl.GeneralizedType).ToScalar()
+			fmt.Fprintf(w, "yardl::binary::ReadBlocksIntoVector<%s, %s>(stream_, current_block_remaining_, values);\n", common.TypeSyntax(stepType), typeRwFunction(stepType, write))
+		} else {
+			fmt.Fprintf(w, "return yardl::binary::ReadBlock<%s, %s>(stream_, current_block_remaining_, value);\n", common.TypeSyntax(stepType), typeRwFunction(stepType, write))
+		}
+	}
+}
+
+func writeProtocolStep(w *formatting.IndentedWriter, step *dsl.ProtocolStep, changes map[string]dsl.TypeChange, isPlural bool, write bool) {
+
+	writeChangeSwitchCase(w, changes,
+		func(w *formatting.IndentedWriter) {
+			writeStepRw(w, step.Type, "value", step.IsStream(), isPlural, write)
+		},
+		func(w *formatting.IndentedWriter) {
+			// Handle "added" ProtocolSteps
+			if !write {
+				if isPlural {
+					fmt.Fprintln(w, "values.clear();")
+					fmt.Fprintln(w, "assert(current_block_remaining_ == 0);")
+				} else {
+					tmpVarType := common.TypeSyntax(step.Type)
+					tmpVarName := common.FieldIdentifierName(step.Name)
+					fmt.Fprintf(w, "%s %s;\n", tmpVarType, tmpVarName)
+					fmt.Fprintf(w, "value = std::move(%s);\n", tmpVarName)
+					if step.IsStream() {
+						fmt.Fprintf(w, "return false;\n")
+					}
+				}
+			}
+
+		},
+		func(w *formatting.IndentedWriter, change dsl.TypeChange) {
+			// Handle conversions for ProtocolStep type changes
+			if requiresExplicitConversion(change) {
+				tmpVarName := common.FieldIdentifierName(step.Name)
+				tmpVarType := common.TypeSyntax(change.OldType())
+				fmt.Fprintf(w, "%s %s;\n", tmpVarType, tmpVarName)
+
+				if write {
+					writeTypeConversion(w, change, "value", tmpVarName, write)
+					writeStepRw(w, change.OldType(), tmpVarName, step.IsStream(), isPlural, write)
+				} else {
+					writeStepRw(w, change.OldType(), tmpVarName, step.IsStream(), isPlural, write)
+					writeTypeConversion(w, change, tmpVarName, "value", write)
+				}
+			} else {
+				writeStepRw(w, change.OldType(), "value", step.IsStream(), isPlural, write)
+			}
+
+		},
+	)
+}
+
+func writeEndStream(w *formatting.IndentedWriter, stepChanges map[string]dsl.TypeChange) {
+
+	writeChangeSwitchCase(w, stepChanges,
+		func(w *formatting.IndentedWriter) {
+			w.WriteString("yardl::binary::WriteInteger(stream_, 0U);\n")
+		},
+		func(w *formatting.IndentedWriter) {
+			// No-op: Don't write stream end for added ProtocolSteps
+		},
+		nil)
 }
 
 func typeDefinitionRwFunction(t dsl.TypeDefinition, write bool) string {

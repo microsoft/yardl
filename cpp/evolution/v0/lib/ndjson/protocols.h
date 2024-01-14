@@ -160,8 +160,8 @@ class UnusedProtocolWriter : public evo_test::UnusedProtocolWriterBase, yardl::n
   void Flush() override;
 
   protected:
-  void WriteSamplesImpl(evo_test::UnchangedRecord const& value) override;
-  void EndSamplesImpl() override {}
+  void WriteRecordsImpl(evo_test::UnchangedRecord const& value) override;
+  void EndRecordsImpl() override {}
   void CloseImpl() override;
 };
 
@@ -177,7 +177,7 @@ class UnusedProtocolReader : public evo_test::UnusedProtocolReaderBase, yardl::n
   }
 
   protected:
-  bool ReadSamplesImpl(evo_test::UnchangedRecord& value) override;
+  bool ReadRecordsImpl(evo_test::UnchangedRecord& value) override;
   void CloseImpl() override;
 };
 

@@ -436,6 +436,26 @@ inline void ReadFlags(CodedInputStream& stream, T& value) {
   value = underlying_value;
 }
 
+template <typename T, Writer<T> WriteElement>
+inline void WriteBlock(CodedOutputStream& stream, T const& source) {
+  WriteInteger(stream, 1U);
+  WriteElement(stream, source);
+}
+
+template <typename T, Reader<T> ReadElement>
+inline bool ReadBlock(CodedInputStream& stream, size_t& current_block_remaining, T& destination) {
+  if (current_block_remaining == 0) {
+    ReadInteger(stream, current_block_remaining);
+    if (current_block_remaining == 0) {
+      return false;
+    }
+  }
+
+  ReadElement(stream, destination);
+  current_block_remaining--;
+  return true;
+}
+
 template <typename T, Reader<T> ReadElement>
 inline void ReadBlocksIntoVector(CodedInputStream& stream, size_t& current_block_remaining, std::vector<T>& destination) {
   if (current_block_remaining == 0) {

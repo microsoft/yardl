@@ -469,8 +469,7 @@ void ProtocolWithChangesWriter::WriteVectorRecordWithChangesImpl(std::vector<evo
 }
 
 void ProtocolWithChangesWriter::WriteStreamedRecordWithChangesImpl(evo_test::RecordWithChanges const& value) {
-  yardl::binary::WriteInteger(stream_, 1U);
-  evo_test::binary::WriteRecordWithChanges(stream_, value);
+  yardl::binary::WriteBlock<evo_test::RecordWithChanges, evo_test::binary::WriteRecordWithChanges>(stream_, value);
 }
 
 void ProtocolWithChangesWriter::WriteStreamedRecordWithChangesImpl(std::vector<evo_test::RecordWithChanges> const& values) {
@@ -688,15 +687,7 @@ void ProtocolWithChangesReader::ReadVectorRecordWithChangesImpl(std::vector<evo_
 }
 
 bool ProtocolWithChangesReader::ReadStreamedRecordWithChangesImpl(evo_test::RecordWithChanges& value) {
-  if (current_block_remaining_ == 0) {
-    yardl::binary::ReadInteger(stream_, current_block_remaining_);
-    if (current_block_remaining_ == 0) {
-      return false;
-    }
-  }
-  evo_test::binary::ReadRecordWithChanges(stream_, value);
-  current_block_remaining_--;
-  return true;
+  return yardl::binary::ReadBlock<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges>(stream_, current_block_remaining_, value);
 }
 
 bool ProtocolWithChangesReader::ReadStreamedRecordWithChangesImpl(std::vector<evo_test::RecordWithChanges>& values) {
@@ -708,18 +699,17 @@ void ProtocolWithChangesReader::CloseImpl() {
   stream_.VerifyFinished();
 }
 
-void UnusedProtocolWriter::WriteSamplesImpl(evo_test::UnchangedRecord const& value) {
-  yardl::binary::WriteInteger(stream_, 1U);
-  evo_test::binary::WriteUnchangedRecord(stream_, value);
+void UnusedProtocolWriter::WriteRecordsImpl(evo_test::UnchangedRecord const& value) {
+  yardl::binary::WriteBlock<evo_test::UnchangedRecord, evo_test::binary::WriteUnchangedRecord>(stream_, value);
 }
 
-void UnusedProtocolWriter::WriteSamplesImpl(std::vector<evo_test::UnchangedRecord> const& values) {
+void UnusedProtocolWriter::WriteRecordsImpl(std::vector<evo_test::UnchangedRecord> const& values) {
   if (!values.empty()) {
     yardl::binary::WriteVector<evo_test::UnchangedRecord, evo_test::binary::WriteUnchangedRecord>(stream_, values);
   }
 }
 
-void UnusedProtocolWriter::EndSamplesImpl() {
+void UnusedProtocolWriter::EndRecordsImpl() {
   yardl::binary::WriteInteger(stream_, 0U);
 }
 
@@ -731,19 +721,11 @@ void UnusedProtocolWriter::CloseImpl() {
   stream_.Flush();
 }
 
-bool UnusedProtocolReader::ReadSamplesImpl(evo_test::UnchangedRecord& value) {
-  if (current_block_remaining_ == 0) {
-    yardl::binary::ReadInteger(stream_, current_block_remaining_);
-    if (current_block_remaining_ == 0) {
-      return false;
-    }
-  }
-  evo_test::binary::ReadUnchangedRecord(stream_, value);
-  current_block_remaining_--;
-  return true;
+bool UnusedProtocolReader::ReadRecordsImpl(evo_test::UnchangedRecord& value) {
+  return yardl::binary::ReadBlock<evo_test::UnchangedRecord, evo_test::binary::ReadUnchangedRecord>(stream_, current_block_remaining_, value);
 }
 
-bool UnusedProtocolReader::ReadSamplesImpl(std::vector<evo_test::UnchangedRecord>& values) {
+bool UnusedProtocolReader::ReadRecordsImpl(std::vector<evo_test::UnchangedRecord>& values) {
   yardl::binary::ReadBlocksIntoVector<evo_test::UnchangedRecord, evo_test::binary::ReadUnchangedRecord>(stream_, current_block_remaining_, values);
   return current_block_remaining_ != 0;
 }

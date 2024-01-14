@@ -498,9 +498,9 @@ namespace {
 void ProtocolWithChangesWriter::WriteInt8ToIntImpl(int32_t const& value) {
   switch (version_) {
   case Version::v0: {
-    int8_t int8_to_int_v0;
-    int8_to_int_v0 = static_cast<int8_t>(value);
-    yardl::binary::WriteInteger(stream_, int8_to_int_v0);
+    int8_t int8_to_int;
+    int8_to_int = static_cast<int8_t>(value);
+    yardl::binary::WriteInteger(stream_, int8_to_int);
     break;
   }
   default:
@@ -512,9 +512,9 @@ void ProtocolWithChangesWriter::WriteInt8ToIntImpl(int32_t const& value) {
 void ProtocolWithChangesWriter::WriteInt8ToLongImpl(int64_t const& value) {
   switch (version_) {
   case Version::v0: {
-    int8_t int8_to_long_v0;
-    int8_to_long_v0 = static_cast<int8_t>(value);
-    yardl::binary::WriteInteger(stream_, int8_to_long_v0);
+    int8_t int8_to_long;
+    int8_to_long = static_cast<int8_t>(value);
+    yardl::binary::WriteInteger(stream_, int8_to_long);
     break;
   }
   default:
@@ -526,9 +526,9 @@ void ProtocolWithChangesWriter::WriteInt8ToLongImpl(int64_t const& value) {
 void ProtocolWithChangesWriter::WriteInt8ToUintImpl(uint32_t const& value) {
   switch (version_) {
   case Version::v0: {
-    int8_t int8_to_uint_v0;
-    int8_to_uint_v0 = static_cast<int8_t>(value);
-    yardl::binary::WriteInteger(stream_, int8_to_uint_v0);
+    int8_t int8_to_uint;
+    int8_to_uint = static_cast<int8_t>(value);
+    yardl::binary::WriteInteger(stream_, int8_to_uint);
     break;
   }
   default:
@@ -540,9 +540,9 @@ void ProtocolWithChangesWriter::WriteInt8ToUintImpl(uint32_t const& value) {
 void ProtocolWithChangesWriter::WriteInt8ToUlongImpl(uint64_t const& value) {
   switch (version_) {
   case Version::v0: {
-    int8_t int8_to_ulong_v0;
-    int8_to_ulong_v0 = static_cast<int8_t>(value);
-    yardl::binary::WriteInteger(stream_, int8_to_ulong_v0);
+    int8_t int8_to_ulong;
+    int8_to_ulong = static_cast<int8_t>(value);
+    yardl::binary::WriteInteger(stream_, int8_to_ulong);
     break;
   }
   default:
@@ -554,9 +554,9 @@ void ProtocolWithChangesWriter::WriteInt8ToUlongImpl(uint64_t const& value) {
 void ProtocolWithChangesWriter::WriteInt8ToFloatImpl(float const& value) {
   switch (version_) {
   case Version::v0: {
-    int8_t int8_to_float_v0;
-    int8_to_float_v0 = static_cast<int8_t>(std::round(value));
-    yardl::binary::WriteInteger(stream_, int8_to_float_v0);
+    int8_t int8_to_float;
+    int8_to_float = static_cast<int8_t>(std::round(value));
+    yardl::binary::WriteInteger(stream_, int8_to_float);
     break;
   }
   default:
@@ -568,9 +568,9 @@ void ProtocolWithChangesWriter::WriteInt8ToFloatImpl(float const& value) {
 void ProtocolWithChangesWriter::WriteInt8ToDoubleImpl(double const& value) {
   switch (version_) {
   case Version::v0: {
-    int8_t int8_to_double_v0;
-    int8_to_double_v0 = static_cast<int8_t>(std::round(value));
-    yardl::binary::WriteInteger(stream_, int8_to_double_v0);
+    int8_t int8_to_double;
+    int8_to_double = static_cast<int8_t>(std::round(value));
+    yardl::binary::WriteInteger(stream_, int8_to_double);
     break;
   }
   default:
@@ -582,9 +582,9 @@ void ProtocolWithChangesWriter::WriteInt8ToDoubleImpl(double const& value) {
 void ProtocolWithChangesWriter::WriteIntToUintImpl(uint32_t const& value) {
   switch (version_) {
   case Version::v0: {
-    int32_t int_to_uint_v0;
-    int_to_uint_v0 = static_cast<int32_t>(value);
-    yardl::binary::WriteInteger(stream_, int_to_uint_v0);
+    int32_t int_to_uint;
+    int_to_uint = static_cast<int32_t>(value);
+    yardl::binary::WriteInteger(stream_, int_to_uint);
     break;
   }
   default:
@@ -596,9 +596,9 @@ void ProtocolWithChangesWriter::WriteIntToUintImpl(uint32_t const& value) {
 void ProtocolWithChangesWriter::WriteIntToLongImpl(int64_t const& value) {
   switch (version_) {
   case Version::v0: {
-    int32_t int_to_long_v0;
-    int_to_long_v0 = static_cast<int32_t>(value);
-    yardl::binary::WriteInteger(stream_, int_to_long_v0);
+    int32_t int_to_long;
+    int_to_long = static_cast<int32_t>(value);
+    yardl::binary::WriteInteger(stream_, int_to_long);
     break;
   }
   default:
@@ -610,9 +610,9 @@ void ProtocolWithChangesWriter::WriteIntToLongImpl(int64_t const& value) {
 void ProtocolWithChangesWriter::WriteIntToFloatImpl(float const& value) {
   switch (version_) {
   case Version::v0: {
-    int32_t int_to_float_v0;
-    int_to_float_v0 = static_cast<int32_t>(std::round(value));
-    yardl::binary::WriteInteger(stream_, int_to_float_v0);
+    int32_t int_to_float;
+    int_to_float = static_cast<int32_t>(std::round(value));
+    yardl::binary::WriteInteger(stream_, int_to_float);
     break;
   }
   default:
@@ -624,9 +624,9 @@ void ProtocolWithChangesWriter::WriteIntToFloatImpl(float const& value) {
 void ProtocolWithChangesWriter::WriteIntToDoubleImpl(double const& value) {
   switch (version_) {
   case Version::v0: {
-    int32_t int_to_double_v0;
-    int_to_double_v0 = static_cast<int32_t>(std::round(value));
-    yardl::binary::WriteInteger(stream_, int_to_double_v0);
+    int32_t int_to_double;
+    int_to_double = static_cast<int32_t>(std::round(value));
+    yardl::binary::WriteInteger(stream_, int_to_double);
     break;
   }
   default:
@@ -638,9 +638,9 @@ void ProtocolWithChangesWriter::WriteIntToDoubleImpl(double const& value) {
 void ProtocolWithChangesWriter::WriteUintToUlongImpl(uint64_t const& value) {
   switch (version_) {
   case Version::v0: {
-    uint32_t uint_to_ulong_v0;
-    uint_to_ulong_v0 = static_cast<uint32_t>(value);
-    yardl::binary::WriteInteger(stream_, uint_to_ulong_v0);
+    uint32_t uint_to_ulong;
+    uint_to_ulong = static_cast<uint32_t>(value);
+    yardl::binary::WriteInteger(stream_, uint_to_ulong);
     break;
   }
   default:
@@ -652,9 +652,9 @@ void ProtocolWithChangesWriter::WriteUintToUlongImpl(uint64_t const& value) {
 void ProtocolWithChangesWriter::WriteUintToFloatImpl(float const& value) {
   switch (version_) {
   case Version::v0: {
-    uint32_t uint_to_float_v0;
-    uint_to_float_v0 = static_cast<uint32_t>(std::round(value));
-    yardl::binary::WriteInteger(stream_, uint_to_float_v0);
+    uint32_t uint_to_float;
+    uint_to_float = static_cast<uint32_t>(std::round(value));
+    yardl::binary::WriteInteger(stream_, uint_to_float);
     break;
   }
   default:
@@ -666,9 +666,9 @@ void ProtocolWithChangesWriter::WriteUintToFloatImpl(float const& value) {
 void ProtocolWithChangesWriter::WriteUintToDoubleImpl(double const& value) {
   switch (version_) {
   case Version::v0: {
-    uint32_t uint_to_double_v0;
-    uint_to_double_v0 = static_cast<uint32_t>(std::round(value));
-    yardl::binary::WriteInteger(stream_, uint_to_double_v0);
+    uint32_t uint_to_double;
+    uint_to_double = static_cast<uint32_t>(std::round(value));
+    yardl::binary::WriteInteger(stream_, uint_to_double);
     break;
   }
   default:
@@ -680,9 +680,9 @@ void ProtocolWithChangesWriter::WriteUintToDoubleImpl(double const& value) {
 void ProtocolWithChangesWriter::WriteFloatToDoubleImpl(double const& value) {
   switch (version_) {
   case Version::v0: {
-    float float_to_double_v0;
-    float_to_double_v0 = static_cast<float>(value);
-    yardl::binary::WriteFloatingPoint(stream_, float_to_double_v0);
+    float float_to_double;
+    float_to_double = static_cast<float>(value);
+    yardl::binary::WriteFloatingPoint(stream_, float_to_double);
     break;
   }
   default:
@@ -694,9 +694,9 @@ void ProtocolWithChangesWriter::WriteFloatToDoubleImpl(double const& value) {
 void ProtocolWithChangesWriter::WriteIntToStringImpl(std::string const& value) {
   switch (version_) {
   case Version::v0: {
-    int32_t int_to_string_v0;
-    int_to_string_v0 = std::stoi(value);
-    yardl::binary::WriteInteger(stream_, int_to_string_v0);
+    int32_t int_to_string;
+    int_to_string = std::stoi(value);
+    yardl::binary::WriteInteger(stream_, int_to_string);
     break;
   }
   default:
@@ -708,9 +708,9 @@ void ProtocolWithChangesWriter::WriteIntToStringImpl(std::string const& value) {
 void ProtocolWithChangesWriter::WriteUintToStringImpl(std::string const& value) {
   switch (version_) {
   case Version::v0: {
-    uint32_t uint_to_string_v0;
-    uint_to_string_v0 = std::stoul(value);
-    yardl::binary::WriteInteger(stream_, uint_to_string_v0);
+    uint32_t uint_to_string;
+    uint_to_string = std::stoul(value);
+    yardl::binary::WriteInteger(stream_, uint_to_string);
     break;
   }
   default:
@@ -722,9 +722,9 @@ void ProtocolWithChangesWriter::WriteUintToStringImpl(std::string const& value) 
 void ProtocolWithChangesWriter::WriteLongToStringImpl(std::string const& value) {
   switch (version_) {
   case Version::v0: {
-    int64_t long_to_string_v0;
-    long_to_string_v0 = std::stol(value);
-    yardl::binary::WriteInteger(stream_, long_to_string_v0);
+    int64_t long_to_string;
+    long_to_string = std::stol(value);
+    yardl::binary::WriteInteger(stream_, long_to_string);
     break;
   }
   default:
@@ -736,9 +736,9 @@ void ProtocolWithChangesWriter::WriteLongToStringImpl(std::string const& value) 
 void ProtocolWithChangesWriter::WriteUlongToStringImpl(std::string const& value) {
   switch (version_) {
   case Version::v0: {
-    uint64_t ulong_to_string_v0;
-    ulong_to_string_v0 = std::stoul(value);
-    yardl::binary::WriteInteger(stream_, ulong_to_string_v0);
+    uint64_t ulong_to_string;
+    ulong_to_string = std::stoul(value);
+    yardl::binary::WriteInteger(stream_, ulong_to_string);
     break;
   }
   default:
@@ -750,9 +750,9 @@ void ProtocolWithChangesWriter::WriteUlongToStringImpl(std::string const& value)
 void ProtocolWithChangesWriter::WriteFloatToStringImpl(std::string const& value) {
   switch (version_) {
   case Version::v0: {
-    float float_to_string_v0;
-    float_to_string_v0 = std::stof(value);
-    yardl::binary::WriteFloatingPoint(stream_, float_to_string_v0);
+    float float_to_string;
+    float_to_string = std::stof(value);
+    yardl::binary::WriteFloatingPoint(stream_, float_to_string);
     break;
   }
   default:
@@ -764,9 +764,9 @@ void ProtocolWithChangesWriter::WriteFloatToStringImpl(std::string const& value)
 void ProtocolWithChangesWriter::WriteDoubleToStringImpl(std::string const& value) {
   switch (version_) {
   case Version::v0: {
-    double double_to_string_v0;
-    double_to_string_v0 = std::stod(value);
-    yardl::binary::WriteFloatingPoint(stream_, double_to_string_v0);
+    double double_to_string;
+    double_to_string = std::stod(value);
+    yardl::binary::WriteFloatingPoint(stream_, double_to_string);
     break;
   }
   default:
@@ -778,9 +778,9 @@ void ProtocolWithChangesWriter::WriteDoubleToStringImpl(std::string const& value
 void ProtocolWithChangesWriter::WriteIntToOptionalImpl(std::optional<int32_t> const& value) {
   switch (version_) {
   case Version::v0: {
-    int32_t int_to_optional_v0;
-    int_to_optional_v0 = value.value();
-    yardl::binary::WriteInteger(stream_, int_to_optional_v0);
+    int32_t int_to_optional;
+    int_to_optional = value.value();
+    yardl::binary::WriteInteger(stream_, int_to_optional);
     break;
   }
   default:
@@ -792,9 +792,9 @@ void ProtocolWithChangesWriter::WriteIntToOptionalImpl(std::optional<int32_t> co
 void ProtocolWithChangesWriter::WriteFloatToOptionalImpl(std::optional<float> const& value) {
   switch (version_) {
   case Version::v0: {
-    float float_to_optional_v0;
-    float_to_optional_v0 = value.value();
-    yardl::binary::WriteFloatingPoint(stream_, float_to_optional_v0);
+    float float_to_optional;
+    float_to_optional = value.value();
+    yardl::binary::WriteFloatingPoint(stream_, float_to_optional);
     break;
   }
   default:
@@ -806,9 +806,9 @@ void ProtocolWithChangesWriter::WriteFloatToOptionalImpl(std::optional<float> co
 void ProtocolWithChangesWriter::WriteStringToOptionalImpl(std::optional<std::string> const& value) {
   switch (version_) {
   case Version::v0: {
-    std::string string_to_optional_v0;
-    string_to_optional_v0 = value.value();
-    yardl::binary::WriteString(stream_, string_to_optional_v0);
+    std::string string_to_optional;
+    string_to_optional = value.value();
+    yardl::binary::WriteString(stream_, string_to_optional);
     break;
   }
   default:
@@ -820,9 +820,9 @@ void ProtocolWithChangesWriter::WriteStringToOptionalImpl(std::optional<std::str
 void ProtocolWithChangesWriter::WriteIntToUnionImpl(std::variant<int32_t, bool> const& value) {
   switch (version_) {
   case Version::v0: {
-    int32_t int_to_union_v0;
-    int_to_union_v0 = std::get<0>(value);
-    yardl::binary::WriteInteger(stream_, int_to_union_v0);
+    int32_t int_to_union;
+    int_to_union = std::get<0>(value);
+    yardl::binary::WriteInteger(stream_, int_to_union);
     break;
   }
   default:
@@ -834,9 +834,9 @@ void ProtocolWithChangesWriter::WriteIntToUnionImpl(std::variant<int32_t, bool> 
 void ProtocolWithChangesWriter::WriteFloatToUnionImpl(std::variant<float, bool> const& value) {
   switch (version_) {
   case Version::v0: {
-    float float_to_union_v0;
-    float_to_union_v0 = std::get<0>(value);
-    yardl::binary::WriteFloatingPoint(stream_, float_to_union_v0);
+    float float_to_union;
+    float_to_union = std::get<0>(value);
+    yardl::binary::WriteFloatingPoint(stream_, float_to_union);
     break;
   }
   default:
@@ -848,9 +848,9 @@ void ProtocolWithChangesWriter::WriteFloatToUnionImpl(std::variant<float, bool> 
 void ProtocolWithChangesWriter::WriteStringToUnionImpl(std::variant<std::string, bool> const& value) {
   switch (version_) {
   case Version::v0: {
-    std::string string_to_union_v0;
-    string_to_union_v0 = std::get<0>(value);
-    yardl::binary::WriteString(stream_, string_to_union_v0);
+    std::string string_to_union;
+    string_to_union = std::get<0>(value);
+    yardl::binary::WriteString(stream_, string_to_union);
     break;
   }
   default:
@@ -862,11 +862,11 @@ void ProtocolWithChangesWriter::WriteStringToUnionImpl(std::variant<std::string,
 void ProtocolWithChangesWriter::WriteOptionalIntToFloatImpl(std::optional<float> const& value) {
   switch (version_) {
   case Version::v0: {
-    std::optional<int32_t> optional_int_to_float_v0;
+    std::optional<int32_t> optional_int_to_float;
     if (value.has_value()) {
-      optional_int_to_float_v0 = static_cast<int32_t>(std::round(value.value()));
+      optional_int_to_float = static_cast<int32_t>(std::round(value.value()));
     }
-    yardl::binary::WriteOptional<int32_t, yardl::binary::WriteInteger>(stream_, optional_int_to_float_v0);
+    yardl::binary::WriteOptional<int32_t, yardl::binary::WriteInteger>(stream_, optional_int_to_float);
     break;
   }
   default:
@@ -878,11 +878,11 @@ void ProtocolWithChangesWriter::WriteOptionalIntToFloatImpl(std::optional<float>
 void ProtocolWithChangesWriter::WriteOptionalFloatToStringImpl(std::optional<std::string> const& value) {
   switch (version_) {
   case Version::v0: {
-    std::optional<float> optional_float_to_string_v0;
+    std::optional<float> optional_float_to_string;
     if (value.has_value()) {
-      optional_float_to_string_v0 = std::stof(value.value());
+      optional_float_to_string = std::stof(value.value());
     }
-    yardl::binary::WriteOptional<float, yardl::binary::WriteFloatingPoint>(stream_, optional_float_to_string_v0);
+    yardl::binary::WriteOptional<float, yardl::binary::WriteFloatingPoint>(stream_, optional_float_to_string);
     break;
   }
   default:
@@ -894,9 +894,9 @@ void ProtocolWithChangesWriter::WriteOptionalFloatToStringImpl(std::optional<std
 void ProtocolWithChangesWriter::WriteAliasedLongToStringImpl(evo_test::AliasedLongToString const& value) {
   switch (version_) {
   case Version::v0: {
-    int64_t aliased_long_to_string_v0;
-    aliased_long_to_string_v0 = std::stol(value);
-    yardl::binary::WriteInteger(stream_, aliased_long_to_string_v0);
+    int64_t aliased_long_to_string;
+    aliased_long_to_string = std::stol(value);
+    yardl::binary::WriteInteger(stream_, aliased_long_to_string);
     break;
   }
   default:
@@ -912,9 +912,9 @@ void ProtocolWithChangesWriter::WriteStringToAliasedStringImpl(evo_test::Aliased
 void ProtocolWithChangesWriter::WriteStringToAliasedIntImpl(evo_test::AliasedInt const& value) {
   switch (version_) {
   case Version::v0: {
-    std::string string_to_aliased_int_v0;
-    string_to_aliased_int_v0 = std::to_string(value);
-    yardl::binary::WriteString(stream_, string_to_aliased_int_v0);
+    std::string string_to_aliased_int;
+    string_to_aliased_int = std::to_string(value);
+    yardl::binary::WriteString(stream_, string_to_aliased_int);
     break;
   }
   default:
@@ -926,11 +926,11 @@ void ProtocolWithChangesWriter::WriteStringToAliasedIntImpl(evo_test::AliasedInt
 void ProtocolWithChangesWriter::WriteOptionalIntToUnionImpl(std::variant<std::monostate, int32_t, std::string> const& value) {
   switch (version_) {
   case Version::v0: {
-    std::optional<int32_t> optional_int_to_union_v0;
+    std::optional<int32_t> optional_int_to_union;
     if (value.index() == 1) {
-      optional_int_to_union_v0 = std::get<1>(value);
+      optional_int_to_union = std::get<1>(value);
     }
-    yardl::binary::WriteOptional<int32_t, yardl::binary::WriteInteger>(stream_, optional_int_to_union_v0);
+    yardl::binary::WriteOptional<int32_t, yardl::binary::WriteInteger>(stream_, optional_int_to_union);
     break;
   }
   default:
@@ -942,11 +942,11 @@ void ProtocolWithChangesWriter::WriteOptionalIntToUnionImpl(std::variant<std::mo
 void ProtocolWithChangesWriter::WriteOptionalRecordToUnionImpl(std::variant<std::monostate, evo_test::RecordWithChanges, std::string> const& value) {
   switch (version_) {
   case Version::v0: {
-    std::optional<evo_test::RecordWithChanges> optional_record_to_union_v0;
+    std::optional<evo_test::RecordWithChanges> optional_record_to_union;
     if (value.index() == 1) {
-      optional_record_to_union_v0 = std::get<1>(value);
+      optional_record_to_union = std::get<1>(value);
     }
-    yardl::binary::WriteOptional<evo_test::RecordWithChanges, evo_test::binary::WriteRecordWithChanges_v0>(stream_, optional_record_to_union_v0);
+    yardl::binary::WriteOptional<evo_test::RecordWithChanges, evo_test::binary::WriteRecordWithChanges_v0>(stream_, optional_record_to_union);
     break;
   }
   default:
@@ -1042,19 +1042,19 @@ void ProtocolWithChangesWriter::WriteAliasedOptionalRecordWithChangesImpl(std::o
 void ProtocolWithChangesWriter::WriteUnionRecordWithChangesImpl(std::variant<evo_test::RecordWithChanges, int32_t> const& value) {
   switch (version_) {
   case Version::v0: {
-    std::variant<evo_test::RecordWithChanges, int32_t> union_record_with_changes_v0;
+    std::variant<evo_test::RecordWithChanges, int32_t> union_record_with_changes;
     switch (value.index()) {
       case 0: {
-        union_record_with_changes_v0 = std::get<0>(value);
+        union_record_with_changes = std::get<0>(value);
         break;
       }
       case 1: {
-        union_record_with_changes_v0 = std::get<1>(value);
+        union_record_with_changes = std::get<1>(value);
         break;
       }
       default: throw new std::runtime_error("Invalid union index.");
     }
-    WriteUnion<evo_test::RecordWithChanges, evo_test::binary::WriteRecordWithChanges_v0, int32_t, yardl::binary::WriteInteger>(stream_, union_record_with_changes_v0);
+    WriteUnion<evo_test::RecordWithChanges, evo_test::binary::WriteRecordWithChanges_v0, int32_t, yardl::binary::WriteInteger>(stream_, union_record_with_changes);
     break;
   }
   default:
@@ -1066,27 +1066,27 @@ void ProtocolWithChangesWriter::WriteUnionRecordWithChangesImpl(std::variant<evo
 void ProtocolWithChangesWriter::WriteUnionWithSameTypesetImpl(std::variant<float, evo_test::RecordWithChanges, std::string, int32_t> const& value) {
   switch (version_) {
   case Version::v0: {
-    std::variant<evo_test::RecordWithChanges, int32_t, float, std::string> union_with_same_typeset_v0;
+    std::variant<evo_test::RecordWithChanges, int32_t, float, std::string> union_with_same_typeset;
     switch (value.index()) {
       case 0: {
-        union_with_same_typeset_v0 = std::get<0>(value);
+        union_with_same_typeset = std::get<0>(value);
         break;
       }
       case 1: {
-        union_with_same_typeset_v0 = std::get<1>(value);
+        union_with_same_typeset = std::get<1>(value);
         break;
       }
       case 2: {
-        union_with_same_typeset_v0 = std::get<2>(value);
+        union_with_same_typeset = std::get<2>(value);
         break;
       }
       case 3: {
-        union_with_same_typeset_v0 = std::get<3>(value);
+        union_with_same_typeset = std::get<3>(value);
         break;
       }
       default: throw new std::runtime_error("Invalid union index.");
     }
-    WriteUnion<evo_test::RecordWithChanges, evo_test::binary::WriteRecordWithChanges_v0, int32_t, yardl::binary::WriteInteger, float, yardl::binary::WriteFloatingPoint, std::string, yardl::binary::WriteString>(stream_, union_with_same_typeset_v0);
+    WriteUnion<evo_test::RecordWithChanges, evo_test::binary::WriteRecordWithChanges_v0, int32_t, yardl::binary::WriteInteger, float, yardl::binary::WriteFloatingPoint, std::string, yardl::binary::WriteString>(stream_, union_with_same_typeset);
     break;
   }
   default:
@@ -1098,10 +1098,10 @@ void ProtocolWithChangesWriter::WriteUnionWithSameTypesetImpl(std::variant<float
 void ProtocolWithChangesWriter::WriteUnionWithTypesAddedImpl(std::variant<evo_test::RecordWithChanges, int32_t, float, std::string> const& value) {
   switch (version_) {
   case Version::v0: {
-    std::variant<evo_test::RecordWithChanges, float> union_with_types_added_v0;
+    std::variant<evo_test::RecordWithChanges, float> union_with_types_added;
     switch (value.index()) {
       case 0: {
-        union_with_types_added_v0 = std::get<0>(value);
+        union_with_types_added = std::get<0>(value);
         break;
       }
       case 1: {
@@ -1109,7 +1109,7 @@ void ProtocolWithChangesWriter::WriteUnionWithTypesAddedImpl(std::variant<evo_te
         break;
       }
       case 2: {
-        union_with_types_added_v0 = std::get<2>(value);
+        union_with_types_added = std::get<2>(value);
         break;
       }
       case 3: {
@@ -1118,7 +1118,7 @@ void ProtocolWithChangesWriter::WriteUnionWithTypesAddedImpl(std::variant<evo_te
       }
       default: throw new std::runtime_error("Invalid union index.");
     }
-    WriteUnion<evo_test::RecordWithChanges, evo_test::binary::WriteRecordWithChanges_v0, float, yardl::binary::WriteFloatingPoint>(stream_, union_with_types_added_v0);
+    WriteUnion<evo_test::RecordWithChanges, evo_test::binary::WriteRecordWithChanges_v0, float, yardl::binary::WriteFloatingPoint>(stream_, union_with_types_added);
     break;
   }
   default:
@@ -1130,19 +1130,19 @@ void ProtocolWithChangesWriter::WriteUnionWithTypesAddedImpl(std::variant<evo_te
 void ProtocolWithChangesWriter::WriteUnionWithTypesRemovedImpl(std::variant<evo_test::RecordWithChanges, std::string> const& value) {
   switch (version_) {
   case Version::v0: {
-    std::variant<evo_test::RecordWithChanges, int32_t, float, std::string> union_with_types_removed_v0;
+    std::variant<evo_test::RecordWithChanges, int32_t, float, std::string> union_with_types_removed;
     switch (value.index()) {
       case 0: {
-        union_with_types_removed_v0 = std::get<0>(value);
+        union_with_types_removed = std::get<0>(value);
         break;
       }
       case 1: {
-        union_with_types_removed_v0 = std::get<1>(value);
+        union_with_types_removed = std::get<1>(value);
         break;
       }
       default: throw new std::runtime_error("Invalid union index.");
     }
-    WriteUnion<evo_test::RecordWithChanges, evo_test::binary::WriteRecordWithChanges_v0, int32_t, yardl::binary::WriteInteger, float, yardl::binary::WriteFloatingPoint, std::string, yardl::binary::WriteString>(stream_, union_with_types_removed_v0);
+    WriteUnion<evo_test::RecordWithChanges, evo_test::binary::WriteRecordWithChanges_v0, int32_t, yardl::binary::WriteInteger, float, yardl::binary::WriteFloatingPoint, std::string, yardl::binary::WriteString>(stream_, union_with_types_removed);
     break;
   }
   default:
@@ -1154,9 +1154,9 @@ void ProtocolWithChangesWriter::WriteUnionWithTypesRemovedImpl(std::variant<evo_
 void ProtocolWithChangesWriter::WriteRecordToOptionalImpl(std::optional<evo_test::RecordWithChanges> const& value) {
   switch (version_) {
   case Version::v0: {
-    evo_test::RecordWithChanges record_to_optional_v0;
-    record_to_optional_v0 = value.value();
-    evo_test::binary::WriteRecordWithChanges_v0(stream_, record_to_optional_v0);
+    evo_test::RecordWithChanges record_to_optional;
+    record_to_optional = value.value();
+    evo_test::binary::WriteRecordWithChanges_v0(stream_, record_to_optional);
     break;
   }
   default:
@@ -1168,9 +1168,9 @@ void ProtocolWithChangesWriter::WriteRecordToOptionalImpl(std::optional<evo_test
 void ProtocolWithChangesWriter::WriteRecordToAliasedOptionalImpl(evo_test::AliasedOptionalRecord const& value) {
   switch (version_) {
   case Version::v0: {
-    evo_test::RecordWithChanges record_to_aliased_optional_v0;
-    record_to_aliased_optional_v0 = value.value();
-    evo_test::binary::WriteRecordWithChanges_v0(stream_, record_to_aliased_optional_v0);
+    evo_test::RecordWithChanges record_to_aliased_optional;
+    record_to_aliased_optional = value.value();
+    evo_test::binary::WriteRecordWithChanges_v0(stream_, record_to_aliased_optional);
     break;
   }
   default:
@@ -1182,9 +1182,9 @@ void ProtocolWithChangesWriter::WriteRecordToAliasedOptionalImpl(evo_test::Alias
 void ProtocolWithChangesWriter::WriteRecordToUnionImpl(std::variant<evo_test::RecordWithChanges, std::string> const& value) {
   switch (version_) {
   case Version::v0: {
-    evo_test::RecordWithChanges record_to_union_v0;
-    record_to_union_v0 = std::get<0>(value);
-    evo_test::binary::WriteRecordWithChanges_v0(stream_, record_to_union_v0);
+    evo_test::RecordWithChanges record_to_union;
+    record_to_union = std::get<0>(value);
+    evo_test::binary::WriteRecordWithChanges_v0(stream_, record_to_union);
     break;
   }
   default:
@@ -1196,9 +1196,9 @@ void ProtocolWithChangesWriter::WriteRecordToUnionImpl(std::variant<evo_test::Re
 void ProtocolWithChangesWriter::WriteRecordToAliasedUnionImpl(evo_test::AliasedRecordOrString const& value) {
   switch (version_) {
   case Version::v0: {
-    evo_test::RecordWithChanges record_to_aliased_union_v0;
-    record_to_aliased_union_v0 = std::get<0>(value);
-    evo_test::binary::WriteRecordWithChanges_v0(stream_, record_to_aliased_union_v0);
+    evo_test::RecordWithChanges record_to_aliased_union;
+    record_to_aliased_union = std::get<0>(value);
+    evo_test::binary::WriteRecordWithChanges_v0(stream_, record_to_aliased_union);
     break;
   }
   default:
@@ -1220,14 +1220,13 @@ void ProtocolWithChangesWriter::WriteVectorRecordWithChangesImpl(std::vector<evo
 }
 
 void ProtocolWithChangesWriter::WriteStreamedRecordWithChangesImpl(evo_test::RecordWithChanges const& value) {
-  yardl::binary::WriteInteger(stream_, 1U);
   switch (version_) {
   case Version::v0: {
-    evo_test::binary::WriteRecordWithChanges_v0(stream_, value);
+    yardl::binary::WriteBlock<evo_test::RecordWithChanges, evo_test::binary::WriteRecordWithChanges_v0>(stream_, value);
     break;
   }
   default:
-    evo_test::binary::WriteRecordWithChanges(stream_, value);
+    yardl::binary::WriteBlock<evo_test::RecordWithChanges, evo_test::binary::WriteRecordWithChanges>(stream_, value);
     break;
   }
 }
@@ -1247,7 +1246,68 @@ void ProtocolWithChangesWriter::WriteStreamedRecordWithChangesImpl(std::vector<e
 }
 
 void ProtocolWithChangesWriter::EndStreamedRecordWithChangesImpl() {
-  yardl::binary::WriteInteger(stream_, 0U);
+  switch (version_) {
+  default:
+    yardl::binary::WriteInteger(stream_, 0U);
+    break;
+  }
+}
+
+void ProtocolWithChangesWriter::WriteAddedOptionalImpl(std::optional<evo_test::RecordWithChanges> const& value) {
+  switch (version_) {
+  case Version::v0: {
+    break;
+  }
+  default:
+    yardl::binary::WriteOptional<evo_test::RecordWithChanges, evo_test::binary::WriteRecordWithChanges>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesWriter::WriteAddedMapImpl(std::unordered_map<std::string, std::string> const& value) {
+  switch (version_) {
+  case Version::v0: {
+    break;
+  }
+  default:
+    yardl::binary::WriteMap<std::string, std::string, yardl::binary::WriteString, yardl::binary::WriteString>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesWriter::WriteAddedRecordStreamImpl(evo_test::RecordWithChanges const& value) {
+  switch (version_) {
+  case Version::v0: {
+    break;
+  }
+  default:
+    yardl::binary::WriteBlock<evo_test::RecordWithChanges, evo_test::binary::WriteRecordWithChanges>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesWriter::WriteAddedRecordStreamImpl(std::vector<evo_test::RecordWithChanges> const& values) {
+  if (!values.empty()) {
+    switch (version_) {
+    case Version::v0: {
+      break;
+    }
+    default:
+      yardl::binary::WriteVector<evo_test::RecordWithChanges, evo_test::binary::WriteRecordWithChanges>(stream_, values);
+      break;
+    }
+  }
+}
+
+void ProtocolWithChangesWriter::EndAddedRecordStreamImpl() {
+  switch (version_) {
+  case Version::v0: {
+    break;
+  }
+  default:
+    yardl::binary::WriteInteger(stream_, 0U);
+    break;
+  }
 }
 
 void ProtocolWithChangesWriter::Flush() {
@@ -1261,9 +1321,9 @@ void ProtocolWithChangesWriter::CloseImpl() {
 void ProtocolWithChangesReader::ReadInt8ToIntImpl(int32_t& value) {
   switch (version_) {
   case Version::v0: {
-    int8_t int8_to_int_v0;
-    yardl::binary::ReadInteger(stream_, int8_to_int_v0);
-    value = static_cast<int32_t>(int8_to_int_v0);
+    int8_t int8_to_int;
+    yardl::binary::ReadInteger(stream_, int8_to_int);
+    value = static_cast<int32_t>(int8_to_int);
     break;
   }
   default:
@@ -1275,9 +1335,9 @@ void ProtocolWithChangesReader::ReadInt8ToIntImpl(int32_t& value) {
 void ProtocolWithChangesReader::ReadInt8ToLongImpl(int64_t& value) {
   switch (version_) {
   case Version::v0: {
-    int8_t int8_to_long_v0;
-    yardl::binary::ReadInteger(stream_, int8_to_long_v0);
-    value = static_cast<int64_t>(int8_to_long_v0);
+    int8_t int8_to_long;
+    yardl::binary::ReadInteger(stream_, int8_to_long);
+    value = static_cast<int64_t>(int8_to_long);
     break;
   }
   default:
@@ -1289,9 +1349,9 @@ void ProtocolWithChangesReader::ReadInt8ToLongImpl(int64_t& value) {
 void ProtocolWithChangesReader::ReadInt8ToUintImpl(uint32_t& value) {
   switch (version_) {
   case Version::v0: {
-    int8_t int8_to_uint_v0;
-    yardl::binary::ReadInteger(stream_, int8_to_uint_v0);
-    value = static_cast<uint32_t>(int8_to_uint_v0);
+    int8_t int8_to_uint;
+    yardl::binary::ReadInteger(stream_, int8_to_uint);
+    value = static_cast<uint32_t>(int8_to_uint);
     break;
   }
   default:
@@ -1303,9 +1363,9 @@ void ProtocolWithChangesReader::ReadInt8ToUintImpl(uint32_t& value) {
 void ProtocolWithChangesReader::ReadInt8ToUlongImpl(uint64_t& value) {
   switch (version_) {
   case Version::v0: {
-    int8_t int8_to_ulong_v0;
-    yardl::binary::ReadInteger(stream_, int8_to_ulong_v0);
-    value = static_cast<uint64_t>(int8_to_ulong_v0);
+    int8_t int8_to_ulong;
+    yardl::binary::ReadInteger(stream_, int8_to_ulong);
+    value = static_cast<uint64_t>(int8_to_ulong);
     break;
   }
   default:
@@ -1317,9 +1377,9 @@ void ProtocolWithChangesReader::ReadInt8ToUlongImpl(uint64_t& value) {
 void ProtocolWithChangesReader::ReadInt8ToFloatImpl(float& value) {
   switch (version_) {
   case Version::v0: {
-    int8_t int8_to_float_v0;
-    yardl::binary::ReadInteger(stream_, int8_to_float_v0);
-    value = static_cast<float>(int8_to_float_v0);
+    int8_t int8_to_float;
+    yardl::binary::ReadInteger(stream_, int8_to_float);
+    value = static_cast<float>(int8_to_float);
     break;
   }
   default:
@@ -1331,9 +1391,9 @@ void ProtocolWithChangesReader::ReadInt8ToFloatImpl(float& value) {
 void ProtocolWithChangesReader::ReadInt8ToDoubleImpl(double& value) {
   switch (version_) {
   case Version::v0: {
-    int8_t int8_to_double_v0;
-    yardl::binary::ReadInteger(stream_, int8_to_double_v0);
-    value = static_cast<double>(int8_to_double_v0);
+    int8_t int8_to_double;
+    yardl::binary::ReadInteger(stream_, int8_to_double);
+    value = static_cast<double>(int8_to_double);
     break;
   }
   default:
@@ -1345,9 +1405,9 @@ void ProtocolWithChangesReader::ReadInt8ToDoubleImpl(double& value) {
 void ProtocolWithChangesReader::ReadIntToUintImpl(uint32_t& value) {
   switch (version_) {
   case Version::v0: {
-    int32_t int_to_uint_v0;
-    yardl::binary::ReadInteger(stream_, int_to_uint_v0);
-    value = static_cast<uint32_t>(int_to_uint_v0);
+    int32_t int_to_uint;
+    yardl::binary::ReadInteger(stream_, int_to_uint);
+    value = static_cast<uint32_t>(int_to_uint);
     break;
   }
   default:
@@ -1359,9 +1419,9 @@ void ProtocolWithChangesReader::ReadIntToUintImpl(uint32_t& value) {
 void ProtocolWithChangesReader::ReadIntToLongImpl(int64_t& value) {
   switch (version_) {
   case Version::v0: {
-    int32_t int_to_long_v0;
-    yardl::binary::ReadInteger(stream_, int_to_long_v0);
-    value = static_cast<int64_t>(int_to_long_v0);
+    int32_t int_to_long;
+    yardl::binary::ReadInteger(stream_, int_to_long);
+    value = static_cast<int64_t>(int_to_long);
     break;
   }
   default:
@@ -1373,9 +1433,9 @@ void ProtocolWithChangesReader::ReadIntToLongImpl(int64_t& value) {
 void ProtocolWithChangesReader::ReadIntToFloatImpl(float& value) {
   switch (version_) {
   case Version::v0: {
-    int32_t int_to_float_v0;
-    yardl::binary::ReadInteger(stream_, int_to_float_v0);
-    value = static_cast<float>(int_to_float_v0);
+    int32_t int_to_float;
+    yardl::binary::ReadInteger(stream_, int_to_float);
+    value = static_cast<float>(int_to_float);
     break;
   }
   default:
@@ -1387,9 +1447,9 @@ void ProtocolWithChangesReader::ReadIntToFloatImpl(float& value) {
 void ProtocolWithChangesReader::ReadIntToDoubleImpl(double& value) {
   switch (version_) {
   case Version::v0: {
-    int32_t int_to_double_v0;
-    yardl::binary::ReadInteger(stream_, int_to_double_v0);
-    value = static_cast<double>(int_to_double_v0);
+    int32_t int_to_double;
+    yardl::binary::ReadInteger(stream_, int_to_double);
+    value = static_cast<double>(int_to_double);
     break;
   }
   default:
@@ -1401,9 +1461,9 @@ void ProtocolWithChangesReader::ReadIntToDoubleImpl(double& value) {
 void ProtocolWithChangesReader::ReadUintToUlongImpl(uint64_t& value) {
   switch (version_) {
   case Version::v0: {
-    uint32_t uint_to_ulong_v0;
-    yardl::binary::ReadInteger(stream_, uint_to_ulong_v0);
-    value = static_cast<uint64_t>(uint_to_ulong_v0);
+    uint32_t uint_to_ulong;
+    yardl::binary::ReadInteger(stream_, uint_to_ulong);
+    value = static_cast<uint64_t>(uint_to_ulong);
     break;
   }
   default:
@@ -1415,9 +1475,9 @@ void ProtocolWithChangesReader::ReadUintToUlongImpl(uint64_t& value) {
 void ProtocolWithChangesReader::ReadUintToFloatImpl(float& value) {
   switch (version_) {
   case Version::v0: {
-    uint32_t uint_to_float_v0;
-    yardl::binary::ReadInteger(stream_, uint_to_float_v0);
-    value = static_cast<float>(uint_to_float_v0);
+    uint32_t uint_to_float;
+    yardl::binary::ReadInteger(stream_, uint_to_float);
+    value = static_cast<float>(uint_to_float);
     break;
   }
   default:
@@ -1429,9 +1489,9 @@ void ProtocolWithChangesReader::ReadUintToFloatImpl(float& value) {
 void ProtocolWithChangesReader::ReadUintToDoubleImpl(double& value) {
   switch (version_) {
   case Version::v0: {
-    uint32_t uint_to_double_v0;
-    yardl::binary::ReadInteger(stream_, uint_to_double_v0);
-    value = static_cast<double>(uint_to_double_v0);
+    uint32_t uint_to_double;
+    yardl::binary::ReadInteger(stream_, uint_to_double);
+    value = static_cast<double>(uint_to_double);
     break;
   }
   default:
@@ -1443,9 +1503,9 @@ void ProtocolWithChangesReader::ReadUintToDoubleImpl(double& value) {
 void ProtocolWithChangesReader::ReadFloatToDoubleImpl(double& value) {
   switch (version_) {
   case Version::v0: {
-    float float_to_double_v0;
-    yardl::binary::ReadFloatingPoint(stream_, float_to_double_v0);
-    value = static_cast<double>(float_to_double_v0);
+    float float_to_double;
+    yardl::binary::ReadFloatingPoint(stream_, float_to_double);
+    value = static_cast<double>(float_to_double);
     break;
   }
   default:
@@ -1457,9 +1517,9 @@ void ProtocolWithChangesReader::ReadFloatToDoubleImpl(double& value) {
 void ProtocolWithChangesReader::ReadIntToStringImpl(std::string& value) {
   switch (version_) {
   case Version::v0: {
-    int32_t int_to_string_v0;
-    yardl::binary::ReadInteger(stream_, int_to_string_v0);
-    value = std::to_string(int_to_string_v0);
+    int32_t int_to_string;
+    yardl::binary::ReadInteger(stream_, int_to_string);
+    value = std::to_string(int_to_string);
     break;
   }
   default:
@@ -1471,9 +1531,9 @@ void ProtocolWithChangesReader::ReadIntToStringImpl(std::string& value) {
 void ProtocolWithChangesReader::ReadUintToStringImpl(std::string& value) {
   switch (version_) {
   case Version::v0: {
-    uint32_t uint_to_string_v0;
-    yardl::binary::ReadInteger(stream_, uint_to_string_v0);
-    value = std::to_string(uint_to_string_v0);
+    uint32_t uint_to_string;
+    yardl::binary::ReadInteger(stream_, uint_to_string);
+    value = std::to_string(uint_to_string);
     break;
   }
   default:
@@ -1485,9 +1545,9 @@ void ProtocolWithChangesReader::ReadUintToStringImpl(std::string& value) {
 void ProtocolWithChangesReader::ReadLongToStringImpl(std::string& value) {
   switch (version_) {
   case Version::v0: {
-    int64_t long_to_string_v0;
-    yardl::binary::ReadInteger(stream_, long_to_string_v0);
-    value = std::to_string(long_to_string_v0);
+    int64_t long_to_string;
+    yardl::binary::ReadInteger(stream_, long_to_string);
+    value = std::to_string(long_to_string);
     break;
   }
   default:
@@ -1499,9 +1559,9 @@ void ProtocolWithChangesReader::ReadLongToStringImpl(std::string& value) {
 void ProtocolWithChangesReader::ReadUlongToStringImpl(std::string& value) {
   switch (version_) {
   case Version::v0: {
-    uint64_t ulong_to_string_v0;
-    yardl::binary::ReadInteger(stream_, ulong_to_string_v0);
-    value = std::to_string(ulong_to_string_v0);
+    uint64_t ulong_to_string;
+    yardl::binary::ReadInteger(stream_, ulong_to_string);
+    value = std::to_string(ulong_to_string);
     break;
   }
   default:
@@ -1513,9 +1573,9 @@ void ProtocolWithChangesReader::ReadUlongToStringImpl(std::string& value) {
 void ProtocolWithChangesReader::ReadFloatToStringImpl(std::string& value) {
   switch (version_) {
   case Version::v0: {
-    float float_to_string_v0;
-    yardl::binary::ReadFloatingPoint(stream_, float_to_string_v0);
-    value = std::to_string(float_to_string_v0);
+    float float_to_string;
+    yardl::binary::ReadFloatingPoint(stream_, float_to_string);
+    value = std::to_string(float_to_string);
     break;
   }
   default:
@@ -1527,9 +1587,9 @@ void ProtocolWithChangesReader::ReadFloatToStringImpl(std::string& value) {
 void ProtocolWithChangesReader::ReadDoubleToStringImpl(std::string& value) {
   switch (version_) {
   case Version::v0: {
-    double double_to_string_v0;
-    yardl::binary::ReadFloatingPoint(stream_, double_to_string_v0);
-    value = std::to_string(double_to_string_v0);
+    double double_to_string;
+    yardl::binary::ReadFloatingPoint(stream_, double_to_string);
+    value = std::to_string(double_to_string);
     break;
   }
   default:
@@ -1541,9 +1601,9 @@ void ProtocolWithChangesReader::ReadDoubleToStringImpl(std::string& value) {
 void ProtocolWithChangesReader::ReadIntToOptionalImpl(std::optional<int32_t>& value) {
   switch (version_) {
   case Version::v0: {
-    int32_t int_to_optional_v0;
-    yardl::binary::ReadInteger(stream_, int_to_optional_v0);
-    value = int_to_optional_v0;
+    int32_t int_to_optional;
+    yardl::binary::ReadInteger(stream_, int_to_optional);
+    value = int_to_optional;
     break;
   }
   default:
@@ -1555,9 +1615,9 @@ void ProtocolWithChangesReader::ReadIntToOptionalImpl(std::optional<int32_t>& va
 void ProtocolWithChangesReader::ReadFloatToOptionalImpl(std::optional<float>& value) {
   switch (version_) {
   case Version::v0: {
-    float float_to_optional_v0;
-    yardl::binary::ReadFloatingPoint(stream_, float_to_optional_v0);
-    value = float_to_optional_v0;
+    float float_to_optional;
+    yardl::binary::ReadFloatingPoint(stream_, float_to_optional);
+    value = float_to_optional;
     break;
   }
   default:
@@ -1569,9 +1629,9 @@ void ProtocolWithChangesReader::ReadFloatToOptionalImpl(std::optional<float>& va
 void ProtocolWithChangesReader::ReadStringToOptionalImpl(std::optional<std::string>& value) {
   switch (version_) {
   case Version::v0: {
-    std::string string_to_optional_v0;
-    yardl::binary::ReadString(stream_, string_to_optional_v0);
-    value = string_to_optional_v0;
+    std::string string_to_optional;
+    yardl::binary::ReadString(stream_, string_to_optional);
+    value = string_to_optional;
     break;
   }
   default:
@@ -1583,9 +1643,9 @@ void ProtocolWithChangesReader::ReadStringToOptionalImpl(std::optional<std::stri
 void ProtocolWithChangesReader::ReadIntToUnionImpl(std::variant<int32_t, bool>& value) {
   switch (version_) {
   case Version::v0: {
-    int32_t int_to_union_v0;
-    yardl::binary::ReadInteger(stream_, int_to_union_v0);
-    value = int_to_union_v0;
+    int32_t int_to_union;
+    yardl::binary::ReadInteger(stream_, int_to_union);
+    value = int_to_union;
     break;
   }
   default:
@@ -1597,9 +1657,9 @@ void ProtocolWithChangesReader::ReadIntToUnionImpl(std::variant<int32_t, bool>& 
 void ProtocolWithChangesReader::ReadFloatToUnionImpl(std::variant<float, bool>& value) {
   switch (version_) {
   case Version::v0: {
-    float float_to_union_v0;
-    yardl::binary::ReadFloatingPoint(stream_, float_to_union_v0);
-    value = float_to_union_v0;
+    float float_to_union;
+    yardl::binary::ReadFloatingPoint(stream_, float_to_union);
+    value = float_to_union;
     break;
   }
   default:
@@ -1611,9 +1671,9 @@ void ProtocolWithChangesReader::ReadFloatToUnionImpl(std::variant<float, bool>& 
 void ProtocolWithChangesReader::ReadStringToUnionImpl(std::variant<std::string, bool>& value) {
   switch (version_) {
   case Version::v0: {
-    std::string string_to_union_v0;
-    yardl::binary::ReadString(stream_, string_to_union_v0);
-    value = string_to_union_v0;
+    std::string string_to_union;
+    yardl::binary::ReadString(stream_, string_to_union);
+    value = string_to_union;
     break;
   }
   default:
@@ -1625,11 +1685,11 @@ void ProtocolWithChangesReader::ReadStringToUnionImpl(std::variant<std::string, 
 void ProtocolWithChangesReader::ReadOptionalIntToFloatImpl(std::optional<float>& value) {
   switch (version_) {
   case Version::v0: {
-    std::optional<int32_t> optional_int_to_float_v0;
-    yardl::binary::ReadOptional<int32_t, yardl::binary::ReadInteger>(stream_, optional_int_to_float_v0);
+    std::optional<int32_t> optional_int_to_float;
+    yardl::binary::ReadOptional<int32_t, yardl::binary::ReadInteger>(stream_, optional_int_to_float);
     std::optional<float> tmp;
-    if (optional_int_to_float_v0.has_value()) {
-      tmp = static_cast<float>(optional_int_to_float_v0.value());
+    if (optional_int_to_float.has_value()) {
+      tmp = static_cast<float>(optional_int_to_float.value());
     }
     value = tmp;
     break;
@@ -1643,11 +1703,11 @@ void ProtocolWithChangesReader::ReadOptionalIntToFloatImpl(std::optional<float>&
 void ProtocolWithChangesReader::ReadOptionalFloatToStringImpl(std::optional<std::string>& value) {
   switch (version_) {
   case Version::v0: {
-    std::optional<float> optional_float_to_string_v0;
-    yardl::binary::ReadOptional<float, yardl::binary::ReadFloatingPoint>(stream_, optional_float_to_string_v0);
+    std::optional<float> optional_float_to_string;
+    yardl::binary::ReadOptional<float, yardl::binary::ReadFloatingPoint>(stream_, optional_float_to_string);
     std::optional<std::string> tmp;
-    if (optional_float_to_string_v0.has_value()) {
-      tmp = std::to_string(optional_float_to_string_v0.value());
+    if (optional_float_to_string.has_value()) {
+      tmp = std::to_string(optional_float_to_string.value());
     }
     value = tmp;
     break;
@@ -1661,9 +1721,9 @@ void ProtocolWithChangesReader::ReadOptionalFloatToStringImpl(std::optional<std:
 void ProtocolWithChangesReader::ReadAliasedLongToStringImpl(evo_test::AliasedLongToString& value) {
   switch (version_) {
   case Version::v0: {
-    int64_t aliased_long_to_string_v0;
-    yardl::binary::ReadInteger(stream_, aliased_long_to_string_v0);
-    value = std::to_string(aliased_long_to_string_v0);
+    int64_t aliased_long_to_string;
+    yardl::binary::ReadInteger(stream_, aliased_long_to_string);
+    value = std::to_string(aliased_long_to_string);
     break;
   }
   default:
@@ -1679,9 +1739,9 @@ void ProtocolWithChangesReader::ReadStringToAliasedStringImpl(evo_test::AliasedS
 void ProtocolWithChangesReader::ReadStringToAliasedIntImpl(evo_test::AliasedInt& value) {
   switch (version_) {
   case Version::v0: {
-    std::string string_to_aliased_int_v0;
-    yardl::binary::ReadString(stream_, string_to_aliased_int_v0);
-    value = std::stoi(string_to_aliased_int_v0);
+    std::string string_to_aliased_int;
+    yardl::binary::ReadString(stream_, string_to_aliased_int);
+    value = std::stoi(string_to_aliased_int);
     break;
   }
   default:
@@ -1693,10 +1753,10 @@ void ProtocolWithChangesReader::ReadStringToAliasedIntImpl(evo_test::AliasedInt&
 void ProtocolWithChangesReader::ReadOptionalIntToUnionImpl(std::variant<std::monostate, int32_t, std::string>& value) {
   switch (version_) {
   case Version::v0: {
-    std::optional<int32_t> optional_int_to_union_v0;
-    yardl::binary::ReadOptional<int32_t, yardl::binary::ReadInteger>(stream_, optional_int_to_union_v0);
-    if (optional_int_to_union_v0.has_value()) {
-      value = optional_int_to_union_v0.value();
+    std::optional<int32_t> optional_int_to_union;
+    yardl::binary::ReadOptional<int32_t, yardl::binary::ReadInteger>(stream_, optional_int_to_union);
+    if (optional_int_to_union.has_value()) {
+      value = optional_int_to_union.value();
     } else {
       value = std::monostate{};
     }
@@ -1711,10 +1771,10 @@ void ProtocolWithChangesReader::ReadOptionalIntToUnionImpl(std::variant<std::mon
 void ProtocolWithChangesReader::ReadOptionalRecordToUnionImpl(std::variant<std::monostate, evo_test::RecordWithChanges, std::string>& value) {
   switch (version_) {
   case Version::v0: {
-    std::optional<evo_test::RecordWithChanges> optional_record_to_union_v0;
-    yardl::binary::ReadOptional<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges_v0>(stream_, optional_record_to_union_v0);
-    if (optional_record_to_union_v0.has_value()) {
-      value = optional_record_to_union_v0.value();
+    std::optional<evo_test::RecordWithChanges> optional_record_to_union;
+    yardl::binary::ReadOptional<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges_v0>(stream_, optional_record_to_union);
+    if (optional_record_to_union.has_value()) {
+      value = optional_record_to_union.value();
     } else {
       value = std::monostate{};
     }
@@ -1813,15 +1873,15 @@ void ProtocolWithChangesReader::ReadAliasedOptionalRecordWithChangesImpl(std::op
 void ProtocolWithChangesReader::ReadUnionRecordWithChangesImpl(std::variant<evo_test::RecordWithChanges, int32_t>& value) {
   switch (version_) {
   case Version::v0: {
-    std::variant<evo_test::RecordWithChanges, int32_t> union_record_with_changes_v0;
-    ReadUnion<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges_v0, int32_t, yardl::binary::ReadInteger>(stream_, union_record_with_changes_v0);
-    switch (union_record_with_changes_v0.index()) {
+    std::variant<evo_test::RecordWithChanges, int32_t> union_record_with_changes;
+    ReadUnion<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges_v0, int32_t, yardl::binary::ReadInteger>(stream_, union_record_with_changes);
+    switch (union_record_with_changes.index()) {
       case 0: {
-        value = std::get<0>(union_record_with_changes_v0);
+        value = std::get<0>(union_record_with_changes);
         break;
       }
       case 1: {
-        value = std::get<1>(union_record_with_changes_v0);
+        value = std::get<1>(union_record_with_changes);
         break;
       }
       default: throw new std::runtime_error("Invalid union index.");
@@ -1837,23 +1897,23 @@ void ProtocolWithChangesReader::ReadUnionRecordWithChangesImpl(std::variant<evo_
 void ProtocolWithChangesReader::ReadUnionWithSameTypesetImpl(std::variant<float, evo_test::RecordWithChanges, std::string, int32_t>& value) {
   switch (version_) {
   case Version::v0: {
-    std::variant<evo_test::RecordWithChanges, int32_t, float, std::string> union_with_same_typeset_v0;
-    ReadUnion<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges_v0, int32_t, yardl::binary::ReadInteger, float, yardl::binary::ReadFloatingPoint, std::string, yardl::binary::ReadString>(stream_, union_with_same_typeset_v0);
-    switch (union_with_same_typeset_v0.index()) {
+    std::variant<evo_test::RecordWithChanges, int32_t, float, std::string> union_with_same_typeset;
+    ReadUnion<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges_v0, int32_t, yardl::binary::ReadInteger, float, yardl::binary::ReadFloatingPoint, std::string, yardl::binary::ReadString>(stream_, union_with_same_typeset);
+    switch (union_with_same_typeset.index()) {
       case 0: {
-        value = std::get<0>(union_with_same_typeset_v0);
+        value = std::get<0>(union_with_same_typeset);
         break;
       }
       case 1: {
-        value = std::get<1>(union_with_same_typeset_v0);
+        value = std::get<1>(union_with_same_typeset);
         break;
       }
       case 2: {
-        value = std::get<2>(union_with_same_typeset_v0);
+        value = std::get<2>(union_with_same_typeset);
         break;
       }
       case 3: {
-        value = std::get<3>(union_with_same_typeset_v0);
+        value = std::get<3>(union_with_same_typeset);
         break;
       }
       default: throw new std::runtime_error("Invalid union index.");
@@ -1869,15 +1929,15 @@ void ProtocolWithChangesReader::ReadUnionWithSameTypesetImpl(std::variant<float,
 void ProtocolWithChangesReader::ReadUnionWithTypesAddedImpl(std::variant<evo_test::RecordWithChanges, int32_t, float, std::string>& value) {
   switch (version_) {
   case Version::v0: {
-    std::variant<evo_test::RecordWithChanges, float> union_with_types_added_v0;
-    ReadUnion<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges_v0, float, yardl::binary::ReadFloatingPoint>(stream_, union_with_types_added_v0);
-    switch (union_with_types_added_v0.index()) {
+    std::variant<evo_test::RecordWithChanges, float> union_with_types_added;
+    ReadUnion<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges_v0, float, yardl::binary::ReadFloatingPoint>(stream_, union_with_types_added);
+    switch (union_with_types_added.index()) {
       case 0: {
-        value = std::get<0>(union_with_types_added_v0);
+        value = std::get<0>(union_with_types_added);
         break;
       }
       case 1: {
-        value = std::get<1>(union_with_types_added_v0);
+        value = std::get<1>(union_with_types_added);
         break;
       }
       default: throw new std::runtime_error("Invalid union index.");
@@ -1893,11 +1953,11 @@ void ProtocolWithChangesReader::ReadUnionWithTypesAddedImpl(std::variant<evo_tes
 void ProtocolWithChangesReader::ReadUnionWithTypesRemovedImpl(std::variant<evo_test::RecordWithChanges, std::string>& value) {
   switch (version_) {
   case Version::v0: {
-    std::variant<evo_test::RecordWithChanges, int32_t, float, std::string> union_with_types_removed_v0;
-    ReadUnion<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges_v0, int32_t, yardl::binary::ReadInteger, float, yardl::binary::ReadFloatingPoint, std::string, yardl::binary::ReadString>(stream_, union_with_types_removed_v0);
-    switch (union_with_types_removed_v0.index()) {
+    std::variant<evo_test::RecordWithChanges, int32_t, float, std::string> union_with_types_removed;
+    ReadUnion<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges_v0, int32_t, yardl::binary::ReadInteger, float, yardl::binary::ReadFloatingPoint, std::string, yardl::binary::ReadString>(stream_, union_with_types_removed);
+    switch (union_with_types_removed.index()) {
       case 0: {
-        value = std::get<0>(union_with_types_removed_v0);
+        value = std::get<0>(union_with_types_removed);
         break;
       }
       case 1: {
@@ -1909,7 +1969,7 @@ void ProtocolWithChangesReader::ReadUnionWithTypesRemovedImpl(std::variant<evo_t
         break;
       }
       case 3: {
-        value = std::get<3>(union_with_types_removed_v0);
+        value = std::get<3>(union_with_types_removed);
         break;
       }
       default: throw new std::runtime_error("Invalid union index.");
@@ -1925,9 +1985,9 @@ void ProtocolWithChangesReader::ReadUnionWithTypesRemovedImpl(std::variant<evo_t
 void ProtocolWithChangesReader::ReadRecordToOptionalImpl(std::optional<evo_test::RecordWithChanges>& value) {
   switch (version_) {
   case Version::v0: {
-    evo_test::RecordWithChanges record_to_optional_v0;
-    evo_test::binary::ReadRecordWithChanges_v0(stream_, record_to_optional_v0);
-    value = record_to_optional_v0;
+    evo_test::RecordWithChanges record_to_optional;
+    evo_test::binary::ReadRecordWithChanges_v0(stream_, record_to_optional);
+    value = record_to_optional;
     break;
   }
   default:
@@ -1939,9 +1999,9 @@ void ProtocolWithChangesReader::ReadRecordToOptionalImpl(std::optional<evo_test:
 void ProtocolWithChangesReader::ReadRecordToAliasedOptionalImpl(evo_test::AliasedOptionalRecord& value) {
   switch (version_) {
   case Version::v0: {
-    evo_test::RecordWithChanges record_to_aliased_optional_v0;
-    evo_test::binary::ReadRecordWithChanges_v0(stream_, record_to_aliased_optional_v0);
-    value = record_to_aliased_optional_v0;
+    evo_test::RecordWithChanges record_to_aliased_optional;
+    evo_test::binary::ReadRecordWithChanges_v0(stream_, record_to_aliased_optional);
+    value = record_to_aliased_optional;
     break;
   }
   default:
@@ -1953,9 +2013,9 @@ void ProtocolWithChangesReader::ReadRecordToAliasedOptionalImpl(evo_test::Aliase
 void ProtocolWithChangesReader::ReadRecordToUnionImpl(std::variant<evo_test::RecordWithChanges, std::string>& value) {
   switch (version_) {
   case Version::v0: {
-    evo_test::RecordWithChanges record_to_union_v0;
-    evo_test::binary::ReadRecordWithChanges_v0(stream_, record_to_union_v0);
-    value = record_to_union_v0;
+    evo_test::RecordWithChanges record_to_union;
+    evo_test::binary::ReadRecordWithChanges_v0(stream_, record_to_union);
+    value = record_to_union;
     break;
   }
   default:
@@ -1967,9 +2027,9 @@ void ProtocolWithChangesReader::ReadRecordToUnionImpl(std::variant<evo_test::Rec
 void ProtocolWithChangesReader::ReadRecordToAliasedUnionImpl(evo_test::AliasedRecordOrString& value) {
   switch (version_) {
   case Version::v0: {
-    evo_test::RecordWithChanges record_to_aliased_union_v0;
-    evo_test::binary::ReadRecordWithChanges_v0(stream_, record_to_aliased_union_v0);
-    value = record_to_aliased_union_v0;
+    evo_test::RecordWithChanges record_to_aliased_union;
+    evo_test::binary::ReadRecordWithChanges_v0(stream_, record_to_aliased_union);
+    value = record_to_aliased_union;
     break;
   }
   default:
@@ -1991,23 +2051,15 @@ void ProtocolWithChangesReader::ReadVectorRecordWithChangesImpl(std::vector<evo_
 }
 
 bool ProtocolWithChangesReader::ReadStreamedRecordWithChangesImpl(evo_test::RecordWithChanges& value) {
-  if (current_block_remaining_ == 0) {
-    yardl::binary::ReadInteger(stream_, current_block_remaining_);
-    if (current_block_remaining_ == 0) {
-      return false;
-    }
-  }
   switch (version_) {
   case Version::v0: {
-    evo_test::binary::ReadRecordWithChanges_v0(stream_, value);
+    return yardl::binary::ReadBlock<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges_v0>(stream_, current_block_remaining_, value);
     break;
   }
   default:
-    evo_test::binary::ReadRecordWithChanges(stream_, value);
+    return yardl::binary::ReadBlock<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges>(stream_, current_block_remaining_, value);
     break;
   }
-  current_block_remaining_--;
-  return true;
 }
 
 bool ProtocolWithChangesReader::ReadStreamedRecordWithChangesImpl(std::vector<evo_test::RecordWithChanges>& values) {
@@ -2023,22 +2075,75 @@ bool ProtocolWithChangesReader::ReadStreamedRecordWithChangesImpl(std::vector<ev
   return current_block_remaining_ != 0;
 }
 
+void ProtocolWithChangesReader::ReadAddedOptionalImpl(std::optional<evo_test::RecordWithChanges>& value) {
+  switch (version_) {
+  case Version::v0: {
+    std::optional<evo_test::RecordWithChanges> added_optional;
+    value = std::move(added_optional);
+    break;
+  }
+  default:
+    yardl::binary::ReadOptional<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesReader::ReadAddedMapImpl(std::unordered_map<std::string, std::string>& value) {
+  switch (version_) {
+  case Version::v0: {
+    std::unordered_map<std::string, std::string> added_map;
+    value = std::move(added_map);
+    break;
+  }
+  default:
+    yardl::binary::ReadMap<std::string, std::string, yardl::binary::ReadString, yardl::binary::ReadString>(stream_, value);
+    break;
+  }
+}
+
+bool ProtocolWithChangesReader::ReadAddedRecordStreamImpl(evo_test::RecordWithChanges& value) {
+  switch (version_) {
+  case Version::v0: {
+    evo_test::RecordWithChanges added_record_stream;
+    value = std::move(added_record_stream);
+    return false;
+    break;
+  }
+  default:
+    return yardl::binary::ReadBlock<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges>(stream_, current_block_remaining_, value);
+    break;
+  }
+}
+
+bool ProtocolWithChangesReader::ReadAddedRecordStreamImpl(std::vector<evo_test::RecordWithChanges>& values) {
+  switch (version_) {
+  case Version::v0: {
+    values.clear();
+    assert(current_block_remaining_ == 0);
+    break;
+  }
+  default:
+    yardl::binary::ReadBlocksIntoVector<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges>(stream_, current_block_remaining_, values);
+    break;
+  }
+  return current_block_remaining_ != 0;
+}
+
 void ProtocolWithChangesReader::CloseImpl() {
   stream_.VerifyFinished();
 }
 
-void UnusedProtocolWriter::WriteSamplesImpl(evo_test::UnchangedRecord const& value) {
-  yardl::binary::WriteInteger(stream_, 1U);
-  evo_test::binary::WriteUnchangedRecord(stream_, value);
+void UnusedProtocolWriter::WriteRecordsImpl(evo_test::UnchangedRecord const& value) {
+  yardl::binary::WriteBlock<evo_test::UnchangedRecord, evo_test::binary::WriteUnchangedRecord>(stream_, value);
 }
 
-void UnusedProtocolWriter::WriteSamplesImpl(std::vector<evo_test::UnchangedRecord> const& values) {
+void UnusedProtocolWriter::WriteRecordsImpl(std::vector<evo_test::UnchangedRecord> const& values) {
   if (!values.empty()) {
     yardl::binary::WriteVector<evo_test::UnchangedRecord, evo_test::binary::WriteUnchangedRecord>(stream_, values);
   }
 }
 
-void UnusedProtocolWriter::EndSamplesImpl() {
+void UnusedProtocolWriter::EndRecordsImpl() {
   yardl::binary::WriteInteger(stream_, 0U);
 }
 
@@ -2050,19 +2155,11 @@ void UnusedProtocolWriter::CloseImpl() {
   stream_.Flush();
 }
 
-bool UnusedProtocolReader::ReadSamplesImpl(evo_test::UnchangedRecord& value) {
-  if (current_block_remaining_ == 0) {
-    yardl::binary::ReadInteger(stream_, current_block_remaining_);
-    if (current_block_remaining_ == 0) {
-      return false;
-    }
-  }
-  evo_test::binary::ReadUnchangedRecord(stream_, value);
-  current_block_remaining_--;
-  return true;
+bool UnusedProtocolReader::ReadRecordsImpl(evo_test::UnchangedRecord& value) {
+  return yardl::binary::ReadBlock<evo_test::UnchangedRecord, evo_test::binary::ReadUnchangedRecord>(stream_, current_block_remaining_, value);
 }
 
-bool UnusedProtocolReader::ReadSamplesImpl(std::vector<evo_test::UnchangedRecord>& values) {
+bool UnusedProtocolReader::ReadRecordsImpl(std::vector<evo_test::UnchangedRecord>& values) {
   yardl::binary::ReadBlocksIntoVector<evo_test::UnchangedRecord, evo_test::binary::ReadUnchangedRecord>(stream_, current_block_remaining_, values);
   return current_block_remaining_ != 0;
 }

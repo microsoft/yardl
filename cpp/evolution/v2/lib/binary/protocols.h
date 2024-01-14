@@ -77,6 +77,16 @@ class ProtocolWithChangesWriter : public evo_test::ProtocolWithChangesWriterBase
   void WriteStreamedRecordWithChangesImpl(evo_test::RecordWithChanges const& value) override;
   void WriteStreamedRecordWithChangesImpl(std::vector<evo_test::RecordWithChanges> const& values) override;
   void EndStreamedRecordWithChangesImpl() override;
+  void WriteAddedStringVectorImpl(std::vector<evo_test::AliasedString> const& value) override;
+  void WriteAddedOptionalImpl(std::optional<evo_test::RecordWithChanges> const& value) override;
+  void WriteAddedMapImpl(std::unordered_map<std::string, std::string> const& value) override;
+  void WriteAddedUnionImpl(std::variant<std::monostate, evo_test::RecordWithChanges, std::string> const& value) override;
+  void WriteAddedRecordStreamImpl(evo_test::RecordWithChanges const& value) override;
+  void WriteAddedRecordStreamImpl(std::vector<evo_test::RecordWithChanges> const& values) override;
+  void EndAddedRecordStreamImpl() override;
+  void WriteAddedUnionStreamImpl(std::variant<evo_test::RecordWithChanges, evo_test::RenamedRecord> const& value) override;
+  void WriteAddedUnionStreamImpl(std::vector<std::variant<evo_test::RecordWithChanges, evo_test::RenamedRecord>> const& values) override;
+  void EndAddedUnionStreamImpl() override;
   void CloseImpl() override;
 
   Version version_;
@@ -145,48 +155,14 @@ class ProtocolWithChangesReader : public evo_test::ProtocolWithChangesReaderBase
   void ReadVectorRecordWithChangesImpl(std::vector<evo_test::RecordWithChanges>& value) override;
   bool ReadStreamedRecordWithChangesImpl(evo_test::RecordWithChanges& value) override;
   bool ReadStreamedRecordWithChangesImpl(std::vector<evo_test::RecordWithChanges>& values) override;
-  void CloseImpl() override;
-
-  Version version_;
-
-  private:
-  size_t current_block_remaining_ = 0;
-};
-
-// Binary writer for the UnusedProtocol protocol.
-class UnusedProtocolWriter : public evo_test::UnusedProtocolWriterBase, yardl::binary::BinaryWriter {
-  public:
-  UnusedProtocolWriter(std::ostream& stream, Version version = Version::Latest)
-      : yardl::binary::BinaryWriter(stream, evo_test::UnusedProtocolWriterBase::SchemaFromVersion(version)), version_(version) {}
-
-  UnusedProtocolWriter(std::string file_name, Version version = Version::Latest)
-      : yardl::binary::BinaryWriter(file_name, evo_test::UnusedProtocolWriterBase::SchemaFromVersion(version)), version_(version) {}
-
-  void Flush() override;
-
-  protected:
-  void WriteSamplesImpl(evo_test::UnchangedRecord const& value) override;
-  void WriteSamplesImpl(std::vector<evo_test::UnchangedRecord> const& values) override;
-  void EndSamplesImpl() override;
-  void CloseImpl() override;
-
-  Version version_;
-};
-
-// Binary reader for the UnusedProtocol protocol.
-class UnusedProtocolReader : public evo_test::UnusedProtocolReaderBase, yardl::binary::BinaryReader {
-  public:
-  UnusedProtocolReader(std::istream& stream)
-      : yardl::binary::BinaryReader(stream), version_(evo_test::UnusedProtocolReaderBase::VersionFromSchema(schema_read_)) {}
-
-  UnusedProtocolReader(std::string file_name)
-      : yardl::binary::BinaryReader(file_name), version_(evo_test::UnusedProtocolReaderBase::VersionFromSchema(schema_read_)) {}
-
-  Version GetVersion() { return version_; }
-
-  protected:
-  bool ReadSamplesImpl(evo_test::UnchangedRecord& value) override;
-  bool ReadSamplesImpl(std::vector<evo_test::UnchangedRecord>& values) override;
+  void ReadAddedStringVectorImpl(std::vector<evo_test::AliasedString>& value) override;
+  void ReadAddedOptionalImpl(std::optional<evo_test::RecordWithChanges>& value) override;
+  void ReadAddedMapImpl(std::unordered_map<std::string, std::string>& value) override;
+  void ReadAddedUnionImpl(std::variant<std::monostate, evo_test::RecordWithChanges, std::string>& value) override;
+  bool ReadAddedRecordStreamImpl(evo_test::RecordWithChanges& value) override;
+  bool ReadAddedRecordStreamImpl(std::vector<evo_test::RecordWithChanges>& values) override;
+  bool ReadAddedUnionStreamImpl(std::variant<evo_test::RecordWithChanges, evo_test::RenamedRecord>& value) override;
+  bool ReadAddedUnionStreamImpl(std::vector<std::variant<evo_test::RecordWithChanges, evo_test::RenamedRecord>>& values) override;
   void CloseImpl() override;
 
   Version version_;

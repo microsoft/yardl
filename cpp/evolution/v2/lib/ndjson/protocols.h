@@ -78,6 +78,14 @@ class ProtocolWithChangesWriter : public evo_test::ProtocolWithChangesWriterBase
   void WriteVectorRecordWithChangesImpl(std::vector<evo_test::RecordWithChanges> const& value) override;
   void WriteStreamedRecordWithChangesImpl(evo_test::RecordWithChanges const& value) override;
   void EndStreamedRecordWithChangesImpl() override {}
+  void WriteAddedStringVectorImpl(std::vector<evo_test::AliasedString> const& value) override;
+  void WriteAddedOptionalImpl(std::optional<evo_test::RecordWithChanges> const& value) override;
+  void WriteAddedMapImpl(std::unordered_map<std::string, std::string> const& value) override;
+  void WriteAddedUnionImpl(std::variant<std::monostate, evo_test::RecordWithChanges, std::string> const& value) override;
+  void WriteAddedRecordStreamImpl(evo_test::RecordWithChanges const& value) override;
+  void EndAddedRecordStreamImpl() override {}
+  void WriteAddedUnionStreamImpl(std::variant<evo_test::RecordWithChanges, evo_test::RenamedRecord> const& value) override;
+  void EndAddedUnionStreamImpl() override {}
   void CloseImpl() override;
 };
 
@@ -143,41 +151,12 @@ class ProtocolWithChangesReader : public evo_test::ProtocolWithChangesReaderBase
   void ReadRecordToAliasedUnionImpl(evo_test::RecordWithChanges& value) override;
   void ReadVectorRecordWithChangesImpl(std::vector<evo_test::RecordWithChanges>& value) override;
   bool ReadStreamedRecordWithChangesImpl(evo_test::RecordWithChanges& value) override;
-  void CloseImpl() override;
-};
-
-// NDJSON writer for the UnusedProtocol protocol.
-class UnusedProtocolWriter : public evo_test::UnusedProtocolWriterBase, yardl::ndjson::NDJsonWriter {
-  public:
-  UnusedProtocolWriter(std::ostream& stream)
-      : yardl::ndjson::NDJsonWriter(stream, schema_) {
-  }
-
-  UnusedProtocolWriter(std::string file_name)
-      : yardl::ndjson::NDJsonWriter(file_name, schema_) {
-  }
-
-  void Flush() override;
-
-  protected:
-  void WriteSamplesImpl(evo_test::UnchangedRecord const& value) override;
-  void EndSamplesImpl() override {}
-  void CloseImpl() override;
-};
-
-// NDJSON reader for the UnusedProtocol protocol.
-class UnusedProtocolReader : public evo_test::UnusedProtocolReaderBase, yardl::ndjson::NDJsonReader {
-  public:
-  UnusedProtocolReader(std::istream& stream)
-      : yardl::ndjson::NDJsonReader(stream, schema_) {
-  }
-
-  UnusedProtocolReader(std::string file_name)
-      : yardl::ndjson::NDJsonReader(file_name, schema_) {
-  }
-
-  protected:
-  bool ReadSamplesImpl(evo_test::UnchangedRecord& value) override;
+  void ReadAddedStringVectorImpl(std::vector<evo_test::AliasedString>& value) override;
+  void ReadAddedOptionalImpl(std::optional<evo_test::RecordWithChanges>& value) override;
+  void ReadAddedMapImpl(std::unordered_map<std::string, std::string>& value) override;
+  void ReadAddedUnionImpl(std::variant<std::monostate, evo_test::RecordWithChanges, std::string>& value) override;
+  bool ReadAddedRecordStreamImpl(evo_test::RecordWithChanges& value) override;
+  bool ReadAddedUnionStreamImpl(std::variant<evo_test::RecordWithChanges, evo_test::RenamedRecord>& value) override;
   void CloseImpl() override;
 };
 

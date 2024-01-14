@@ -165,9 +165,9 @@ class UnusedProtocolWriter : public evo_test::UnusedProtocolWriterBase, yardl::b
   void Flush() override;
 
   protected:
-  void WriteSamplesImpl(evo_test::UnchangedRecord const& value) override;
-  void WriteSamplesImpl(std::vector<evo_test::UnchangedRecord> const& values) override;
-  void EndSamplesImpl() override;
+  void WriteRecordsImpl(evo_test::UnchangedRecord const& value) override;
+  void WriteRecordsImpl(std::vector<evo_test::UnchangedRecord> const& values) override;
+  void EndRecordsImpl() override;
   void CloseImpl() override;
 
   Version version_;
@@ -185,8 +185,8 @@ class UnusedProtocolReader : public evo_test::UnusedProtocolReaderBase, yardl::b
   Version GetVersion() { return version_; }
 
   protected:
-  bool ReadSamplesImpl(evo_test::UnchangedRecord& value) override;
-  bool ReadSamplesImpl(std::vector<evo_test::UnchangedRecord>& values) override;
+  bool ReadRecordsImpl(evo_test::UnchangedRecord& value) override;
+  bool ReadRecordsImpl(std::vector<evo_test::UnchangedRecord>& values) override;
   void CloseImpl() override;
 
   Version version_;

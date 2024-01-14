@@ -473,15 +473,15 @@ class ProtocolWithChangesReaderBase {
 class UnusedProtocolWriterBase {
   public:
   // Ordinal 0.
-  // Call this method for each element of the `samples` stream, then call `EndSamples() when done.`
-  void WriteSamples(evo_test::UnchangedRecord const& value);
+  // Call this method for each element of the `records` stream, then call `EndRecords() when done.`
+  void WriteRecords(evo_test::UnchangedRecord const& value);
 
   // Ordinal 0.
-  // Call this method to write many values to the `samples` stream, then call `EndSamples()` when done.
-  void WriteSamples(std::vector<evo_test::UnchangedRecord> const& values);
+  // Call this method to write many values to the `records` stream, then call `EndRecords()` when done.
+  void WriteRecords(std::vector<evo_test::UnchangedRecord> const& values);
 
-  // Marks the end of the `samples` stream.
-  void EndSamples();
+  // Marks the end of the `records` stream.
+  void EndRecords();
 
   // Optionaly close this writer before destructing. Validates that all steps were completed.
   void Close();
@@ -492,9 +492,9 @@ class UnusedProtocolWriterBase {
   virtual void Flush() {}
 
   protected:
-  virtual void WriteSamplesImpl(evo_test::UnchangedRecord const& value) = 0;
-  virtual void WriteSamplesImpl(std::vector<evo_test::UnchangedRecord> const& value);
-  virtual void EndSamplesImpl() = 0;
+  virtual void WriteRecordsImpl(evo_test::UnchangedRecord const& value) = 0;
+  virtual void WriteRecordsImpl(std::vector<evo_test::UnchangedRecord> const& value);
+  virtual void EndRecordsImpl() = 0;
   virtual void CloseImpl() {}
 
   static std::string schema_;
@@ -513,21 +513,21 @@ class UnusedProtocolWriterBase {
 class UnusedProtocolReaderBase {
   public:
   // Ordinal 0.
-  [[nodiscard]] bool ReadSamples(evo_test::UnchangedRecord& value);
+  [[nodiscard]] bool ReadRecords(evo_test::UnchangedRecord& value);
 
   // Ordinal 0.
-  [[nodiscard]] bool ReadSamples(std::vector<evo_test::UnchangedRecord>& values);
+  [[nodiscard]] bool ReadRecords(std::vector<evo_test::UnchangedRecord>& values);
 
   // Optionaly close this writer before destructing. Validates that all steps were completely read.
   void Close();
 
-  void CopyTo(UnusedProtocolWriterBase& writer, size_t samples_buffer_size = 1);
+  void CopyTo(UnusedProtocolWriterBase& writer, size_t records_buffer_size = 1);
 
   virtual ~UnusedProtocolReaderBase() = default;
 
   protected:
-  virtual bool ReadSamplesImpl(evo_test::UnchangedRecord& value) = 0;
-  virtual bool ReadSamplesImpl(std::vector<evo_test::UnchangedRecord>& values);
+  virtual bool ReadRecordsImpl(evo_test::UnchangedRecord& value) = 0;
+  virtual bool ReadRecordsImpl(std::vector<evo_test::UnchangedRecord>& values);
   virtual void CloseImpl() {}
   static std::string schema_;
 

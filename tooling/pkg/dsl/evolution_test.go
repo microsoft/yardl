@@ -25,24 +25,44 @@ func parseVersions(t *testing.T, models []string) (*Environment, []*Environment,
 	return versions[len(versions)-1], versions[:len(versions)-1], labels[:len(labels)-1]
 }
 
-func TestProtocolAddSteps(t *testing.T) {
-	models := []string{`
+func TestAddProtocolSteps(t *testing.T) {
+	oldModel := `
 P: !protocol
   sequence:
     x: int
-`, `
+`
+	newModel := `
 P: !protocol
   sequence:
     x: int
-    y: int
-`}
+    y: %s
+`
+	tests := []string{
+		"bool",
+		"int",
+		"uint",
+		"float",
+		"double",
+		"string",
+		"complexfloat",
+		"complexdouble",
+		"date",
+		"time",
+		"datetime",
+		"int[]",
+		"float[,]",
+		"double[4, 5]",
+		"[int, float, string]",
+	}
 
-	latest, previous, labels := parseVersions(t, models)
-	_, err := ValidateEvolution(latest, previous, labels)
-	assert.NotNil(t, err)
+	for _, ts := range tests {
+		latest, previous, labels := parseVersions(t, []string{oldModel, fmt.Sprintf(newModel, ts)})
+		_, err := ValidateEvolution(latest, previous, labels)
+		assert.NotNil(t, err, "type: %s", ts)
+	}
 }
 
-func TestProtocolRemoveSteps(t *testing.T) {
+func TestRemoveProtocolSteps(t *testing.T) {
 	models := []string{`
 P: !protocol
   sequence:
@@ -75,7 +95,6 @@ P: !protocol
 	latest, previous, labels := parseVersions(t, models)
 	_, err := ValidateEvolution(latest, previous, labels)
 	assert.NotNil(t, err)
-	assert.ErrorContains(t, err, "reordering steps in a Protocol")
 }
 
 func TestRecordChanges(t *testing.T) {
@@ -108,7 +127,6 @@ P: !protocol
 
 	_, err := ValidateEvolution(latest, previous, labels)
 	assert.NotNil(t, err)
-	assert.ErrorContains(t, err, "base type")
 }
 
 func TestStreamTypeChanges(t *testing.T) {

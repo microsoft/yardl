@@ -613,9 +613,9 @@ void ProtocolWithChangesReader::CloseImpl() {
   VerifyFinished();
 }
 
-void UnusedProtocolWriter::WriteSamplesImpl(evo_test::UnchangedRecord const& value) {
+void UnusedProtocolWriter::WriteRecordsImpl(evo_test::UnchangedRecord const& value) {
   ordered_json json_value = value;
-  yardl::ndjson::WriteProtocolValue(stream_, "samples", json_value);}
+  yardl::ndjson::WriteProtocolValue(stream_, "records", json_value);}
 
 void UnusedProtocolWriter::Flush() {
   stream_.flush();
@@ -625,8 +625,8 @@ void UnusedProtocolWriter::CloseImpl() {
   stream_.flush();
 }
 
-bool UnusedProtocolReader::ReadSamplesImpl(evo_test::UnchangedRecord& value) {
-  return yardl::ndjson::ReadProtocolValue(stream_, line_, "samples", false, unused_step_, value);
+bool UnusedProtocolReader::ReadRecordsImpl(evo_test::UnchangedRecord& value) {
+  return yardl::ndjson::ReadProtocolValue(stream_, line_, "records", false, unused_step_, value);
 }
 
 void UnusedProtocolReader::CloseImpl() {

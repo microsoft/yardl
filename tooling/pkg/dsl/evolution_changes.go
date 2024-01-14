@@ -160,6 +160,12 @@ func (tc *TypeChangeIncompatible) Inverse() TypeChange {
 	return &TypeChangeIncompatible{tc.Swap()}
 }
 
+type TypeChangeStepAdded struct{ TypePair }
+
+func (tc *TypeChangeStepAdded) Inverse() TypeChange {
+	return nil
+}
+
 var (
 	_ TypeChange = (*TypeChangeNumberToNumber)(nil)
 	_ TypeChange = (*TypeChangeNumberToString)(nil)
@@ -176,6 +182,7 @@ var (
 	_ TypeChange = (*TypeChangeVectorTypeChanged)(nil)
 	_ TypeChange = (*TypeChangeDefinitionChanged)(nil)
 	_ TypeChange = (*TypeChangeIncompatible)(nil)
+	_ TypeChange = (*TypeChangeStepAdded)(nil)
 
 	_ DefinitionChange = (*DefinitionChangeIncompatible)(nil)
 	_ DefinitionChange = (*NamedTypeChange)(nil)
@@ -213,35 +220,17 @@ type NamedTypeChange struct {
 type ProtocolChange struct {
 	DefinitionPair
 	PreviousSchema string
-	StepsAdded     []*ProtocolStep
+	StepsRemoved   []*ProtocolStep
 	StepChanges    []TypeChange
-	StepMapping    []int
-}
-
-func (pc *ProtocolChange) HasReorderedSteps() bool {
-	for i, index := range pc.StepMapping {
-		if index >= 0 && index != i {
-			return true
-		}
-	}
-	return false
+	StepsReordered []*ProtocolStep
 }
 
 type RecordChange struct {
 	DefinitionPair
-	FieldsAdded  []*Field
-	FieldRemoved []bool
-	FieldChanges []TypeChange
-	FieldMapping []int
-}
-
-func (rc *RecordChange) HasReorderedFields() bool {
-	for i, index := range rc.FieldMapping {
-		if index != i {
-			return true
-		}
-	}
-	return false
+	FieldsAdded   []*Field
+	FieldRemoved  []bool
+	FieldChanges  []TypeChange
+	NewFieldIndex []int
 }
 
 type EnumChange struct {

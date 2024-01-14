@@ -217,8 +217,46 @@ int main(void) {
     validateRecordWithChanges(rec);
     count += 1;
   }
-
   assert(count == 7);
+
+  r.ReadAddedOptional(maybe_rec);
+  switch (r.GetVersion()) {
+    case Version::v0:
+      assert(!maybe_rec.has_value());
+      break;
+
+    default:
+      assert(maybe_rec.has_value());
+      validateRecordWithChanges(maybe_rec.value());
+  }
+
+  std::unordered_map<std::string, std::string> map;
+  r.ReadAddedMap(map);
+  switch (r.GetVersion()) {
+    case Version::v0:
+      assert(map.empty());
+      break;
+
+    default:
+      assert(map.size() == 1);
+      assert(map["hello"] == "world");
+  }
+
+  std::vector<RecordWithChanges> records(10);
+  switch (r.GetVersion()) {
+    case Version::v0:
+      assert(r.ReadAddedRecordStream(records) == false);
+      assert(records.empty());
+      break;
+
+    default:
+      assert(r.ReadAddedRecordStream(records) == true);
+      assert(records.size() == 7);
+      for (auto const& rec : records) {
+        validateRecordWithChanges(rec);
+      }
+      assert(r.ReadAddedRecordStream(records) == false);
+  }
 
   r.Close();
 
