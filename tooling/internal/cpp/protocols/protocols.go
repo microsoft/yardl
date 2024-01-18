@@ -340,9 +340,11 @@ func writeDefinitions(w *formatting.IndentedWriter, ns *dsl.Namespace, symbolTab
 
 		fmt.Fprintf(w, "void %s::Close() {\n", common.AbstractReaderName(p))
 		w.Indented(func() {
-			fmt.Fprintf(w, "if (unlikely(state_ != %d)) {\n", len(p.Sequence)*2)
+			expectedState := len(p.Sequence) * 2
+			fmt.Fprintf(w, "if (unlikely(state_ != %d)) {\n", expectedState)
+
 			w.Indented(func() {
-				fmt.Fprintf(w, "%s(%d, state_);\n", invalidReaderStateMethodName(p), len(p.Sequence)*2)
+				writeReaderStateUnobservedCompletionCheck(w, p, len(p.Sequence)-1, expectedState)
 			})
 			w.WriteString("}\n\n")
 			fmt.Fprintf(w, "CloseImpl();\n")
@@ -353,12 +355,28 @@ func writeDefinitions(w *formatting.IndentedWriter, ns *dsl.Namespace, symbolTab
 	})
 }
 
+func writeReaderStateUnobservedCompletionCheck(w *formatting.IndentedWriter, p *dsl.ProtocolDefinition, prevStepIndex, expectedState int) {
+	if prevStepIndex >= 0 && p.Sequence[prevStepIndex].IsStream() {
+		previousUnobservedcompletionState := expectedState - 1
+		fmt.Fprintf(w, "if (state_ == %d) {\n", previousUnobservedcompletionState)
+		w.Indented(func() {
+			fmt.Fprintf(w, "state_ = %d;\n", expectedState)
+		})
+		w.WriteStringln("} else {")
+		w.Indented(func() {
+			fmt.Fprintf(w, "%s(%d, state_);\n", invalidReaderStateMethodName(p), expectedState)
+		})
+		w.WriteStringln("}")
+	} else {
+		fmt.Fprintf(w, "%s(%d, state_);\n", invalidReaderStateMethodName(p), expectedState)
+	}
+}
+
 func writeReaderStateCheckIfStatement(w *formatting.IndentedWriter, protocol *dsl.ProtocolDefinition, stepIndex int, isBatchOverload bool) {
 	step := protocol.Sequence[stepIndex]
 	expectedState := 2 * stepIndex
 	unobservedCompletionState := expectedState + 1
 	nextState := expectedState + 2
-	previousUnobservedcompletionState := expectedState - 1
 
 	fmt.Fprintf(w, "if (unlikely(state_ != %d)) {\n", expectedState)
 	w.Indented(func() {
@@ -373,19 +391,8 @@ func writeReaderStateCheckIfStatement(w *formatting.IndentedWriter, protocol *ds
 			})
 			w.WriteStringln("}")
 		}
-		if stepIndex > 0 && protocol.Sequence[stepIndex-1].IsStream() {
-			fmt.Fprintf(w, "if (state_ == %d) {\n", previousUnobservedcompletionState)
-			w.Indented(func() {
-				fmt.Fprintf(w, "state_ = %d;\n", expectedState)
-			})
-			w.WriteStringln("} else {")
-			w.Indented(func() {
-				fmt.Fprintf(w, "%s(%d, state_);\n", invalidReaderStateMethodName(protocol), expectedState)
-			})
-			w.WriteStringln("}")
-		} else {
-			fmt.Fprintf(w, "%s(%d, state_);\n", invalidReaderStateMethodName(protocol), expectedState)
-		}
+
+		writeReaderStateUnobservedCompletionCheck(w, protocol, stepIndex-1, expectedState)
 	})
 	w.WriteString("}\n\n")
 }

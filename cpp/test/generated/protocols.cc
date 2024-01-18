@@ -136,7 +136,11 @@ bool BenchmarkFloat256x256ReaderBase::ReadFloat256x256Impl(std::vector<yardl::Fi
 
 void BenchmarkFloat256x256ReaderBase::Close() {
   if (unlikely(state_ != 2)) {
-    BenchmarkFloat256x256ReaderBaseInvalidState(2, state_);
+    if (state_ == 1) {
+      state_ = 2;
+    } else {
+      BenchmarkFloat256x256ReaderBaseInvalidState(2, state_);
+    }
   }
 
   CloseImpl();
@@ -285,7 +289,11 @@ bool BenchmarkInt256x256ReaderBase::ReadInt256x256Impl(std::vector<yardl::FixedN
 
 void BenchmarkInt256x256ReaderBase::Close() {
   if (unlikely(state_ != 2)) {
-    BenchmarkInt256x256ReaderBaseInvalidState(2, state_);
+    if (state_ == 1) {
+      state_ = 2;
+    } else {
+      BenchmarkInt256x256ReaderBaseInvalidState(2, state_);
+    }
   }
 
   CloseImpl();
@@ -434,7 +442,11 @@ bool BenchmarkFloatVlenReaderBase::ReadFloatArrayImpl(std::vector<yardl::NDArray
 
 void BenchmarkFloatVlenReaderBase::Close() {
   if (unlikely(state_ != 2)) {
-    BenchmarkFloatVlenReaderBaseInvalidState(2, state_);
+    if (state_ == 1) {
+      state_ = 2;
+    } else {
+      BenchmarkFloatVlenReaderBaseInvalidState(2, state_);
+    }
   }
 
   CloseImpl();
@@ -583,7 +595,11 @@ bool BenchmarkSmallRecordReaderBase::ReadSmallRecordImpl(std::vector<test_model:
 
 void BenchmarkSmallRecordReaderBase::Close() {
   if (unlikely(state_ != 2)) {
-    BenchmarkSmallRecordReaderBaseInvalidState(2, state_);
+    if (state_ == 1) {
+      state_ = 2;
+    } else {
+      BenchmarkSmallRecordReaderBaseInvalidState(2, state_);
+    }
   }
 
   CloseImpl();
@@ -732,7 +748,11 @@ bool BenchmarkSmallRecordWithOptionalsReaderBase::ReadSmallRecordImpl(std::vecto
 
 void BenchmarkSmallRecordWithOptionalsReaderBase::Close() {
   if (unlikely(state_ != 2)) {
-    BenchmarkSmallRecordWithOptionalsReaderBaseInvalidState(2, state_);
+    if (state_ == 1) {
+      state_ = 2;
+    } else {
+      BenchmarkSmallRecordWithOptionalsReaderBaseInvalidState(2, state_);
+    }
   }
 
   CloseImpl();
@@ -881,7 +901,11 @@ bool BenchmarkSimpleMrdReaderBase::ReadDataImpl(std::vector<std::variant<test_mo
 
 void BenchmarkSimpleMrdReaderBase::Close() {
   if (unlikely(state_ != 2)) {
-    BenchmarkSimpleMrdReaderBaseInvalidState(2, state_);
+    if (state_ == 1) {
+      state_ = 2;
+    } else {
+      BenchmarkSimpleMrdReaderBaseInvalidState(2, state_);
+    }
   }
 
   CloseImpl();
@@ -2111,7 +2135,11 @@ bool StreamsReaderBase::ReadFixedVectorImpl(std::vector<std::array<int32_t, 3>>&
 
 void StreamsReaderBase::Close() {
   if (unlikely(state_ != 8)) {
-    StreamsReaderBaseInvalidState(8, state_);
+    if (state_ == 7) {
+      state_ = 8;
+    } else {
+      StreamsReaderBaseInvalidState(8, state_);
+    }
   }
 
   CloseImpl();
@@ -3729,7 +3757,11 @@ bool StreamsOfUnionsReaderBase::ReadNullableIntOrSimpleRecordImpl(std::vector<st
 
 void StreamsOfUnionsReaderBase::Close() {
   if (unlikely(state_ != 4)) {
-    StreamsOfUnionsReaderBaseInvalidState(4, state_);
+    if (state_ == 3) {
+      state_ = 4;
+    } else {
+      StreamsOfUnionsReaderBaseInvalidState(4, state_);
+    }
   }
 
   CloseImpl();
@@ -4113,7 +4145,11 @@ bool FlagsReaderBase::ReadFormatsImpl(std::vector<test_model::TextFormat>& value
 
 void FlagsReaderBase::Close() {
   if (unlikely(state_ != 4)) {
-    FlagsReaderBaseInvalidState(4, state_);
+    if (state_ == 3) {
+      state_ = 4;
+    } else {
+      FlagsReaderBaseInvalidState(4, state_);
+    }
   }
 
   CloseImpl();
@@ -4649,7 +4685,11 @@ bool SimpleGenericsReaderBase::ReadStreamOfTypeVariantsImpl(std::vector<std::var
 
 void SimpleGenericsReaderBase::Close() {
   if (unlikely(state_ != 18)) {
-    SimpleGenericsReaderBaseInvalidState(18, state_);
+    if (state_ == 17) {
+      state_ = 18;
+    } else {
+      SimpleGenericsReaderBaseInvalidState(18, state_);
+    }
   }
 
   CloseImpl();
@@ -5203,7 +5243,11 @@ bool AliasesReaderBase::ReadStreamOfAliasedGenericUnion2Impl(std::vector<test_mo
 
 void AliasesReaderBase::Close() {
   if (unlikely(state_ != 20)) {
-    AliasesReaderBaseInvalidState(20, state_);
+    if (state_ == 19) {
+      state_ = 20;
+    } else {
+      AliasesReaderBaseInvalidState(20, state_);
+    }
   }
 
   CloseImpl();
@@ -5494,7 +5538,11 @@ bool StreamsOfAliasedUnionsReaderBase::ReadNullableIntOrSimpleRecordImpl(std::ve
 
 void StreamsOfAliasedUnionsReaderBase::Close() {
   if (unlikely(state_ != 4)) {
-    StreamsOfAliasedUnionsReaderBaseInvalidState(4, state_);
+    if (state_ == 3) {
+      state_ = 4;
+    } else {
+      StreamsOfAliasedUnionsReaderBaseInvalidState(4, state_);
+    }
   }
 
   CloseImpl();
