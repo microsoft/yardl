@@ -71,20 +71,8 @@ cpp_version := "17"
 
 @evolution-test: generate-evolution ensure-build-dir
     cd cpp/build; \
-    ninja v0_write v0_copy v0_validate v1_write v1_copy v1_validate v2_write v2_copy v2_validate
-
-    # Check for regressions (write, copy, read same version)
-    cd cpp/build && ./v0_write | ./v0_copy | ./v0_validate
-    cd cpp/build && ./v1_write | ./v1_copy | ./v1_validate
-    cd cpp/build && ./v2_write | ./v2_copy | ./v2_validate
-
-    # Check version compatibility
-    cd cpp/build && ./v0_write | ./v1_validate
-    cd cpp/build && ./v0_write | ./v2_validate
-    cd cpp/build && ./v1_write | ./v2_validate
-    cd cpp/build && ./v0_write | ./v1_copy | ./v0_validate
-    cd cpp/build && ./v0_write | ./v2_copy | ./v0_validate
-    cd cpp/build && ./v1_write | ./v2_copy | ./v1_validate
+    ninja evolution/all; \
+    python ../evolution/test-evolution.py
 
 @test: tooling-test cpp-test python-test evolution-test
 

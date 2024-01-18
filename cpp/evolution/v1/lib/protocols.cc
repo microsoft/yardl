@@ -1323,7 +1323,11 @@ bool ProtocolWithChangesReaderBase::ReadAddedRecordStreamImpl(std::vector<evo_te
 
 void ProtocolWithChangesReaderBase::Close() {
   if (unlikely(state_ != 106)) {
-    ProtocolWithChangesReaderBaseInvalidState(106, state_);
+    if (state_ == 105) {
+      state_ = 106;
+    } else {
+      ProtocolWithChangesReaderBaseInvalidState(106, state_);
+    }
   }
 
   CloseImpl();
@@ -1764,7 +1768,11 @@ bool UnusedProtocolReaderBase::ReadRecordsImpl(std::vector<evo_test::UnchangedRe
 
 void UnusedProtocolReaderBase::Close() {
   if (unlikely(state_ != 2)) {
-    UnusedProtocolReaderBaseInvalidState(2, state_);
+    if (state_ == 1) {
+      state_ = 2;
+    } else {
+      UnusedProtocolReaderBaseInvalidState(2, state_);
+    }
   }
 
   CloseImpl();
