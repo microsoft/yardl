@@ -75,5 +75,57 @@ struct DeprecatedRecord {
 
 using RenamedRecord = evo_test::DeprecatedRecord;
 
+struct RZ {
+  int32_t subject{};
+
+  bool operator==(const RZ& other) const {
+    return subject == other.subject;
+  }
+
+  bool operator!=(const RZ& other) const {
+    return !(*this == other);
+  }
+};
+
+using RY = evo_test::RZ;
+
+using RNew = evo_test::RY;
+
+using RLink = evo_test::RNew;
+
+using RX = evo_test::RLink;
+
+using RUnion = std::variant<evo_test::RX, std::string>;
+
+struct UnusedButChangedRecord {
+  float age{};
+  std::string name{};
+
+  bool operator==(const UnusedButChangedRecord& other) const {
+    return age == other.age &&
+      name == other.name;
+  }
+
+  bool operator!=(const UnusedButChangedRecord& other) const {
+    return !(*this == other);
+  }
+};
+
+using AliasedLongToString_v0 = evo_test::AliasedLongToString;
+
+using RecordWithChanges_v0 = evo_test::RecordWithChanges;
+
+using AliasedRecordWithChanges_v0 = evo_test::RecordWithChanges;
+
+using RenamedRecord_v0 = evo_test::DeprecatedRecord;
+
+using RC_v0 = evo_test::RZ;
+
+using RB_v0 = evo_test::RZ;
+
+using RA_v0 = evo_test::RZ;
+
+using RLink_v0 = evo_test::RZ;
+
 } // namespace evo_test
 

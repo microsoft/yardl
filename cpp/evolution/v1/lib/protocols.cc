@@ -51,21 +51,45 @@ void ProtocolWithChangesWriterBaseInvalidState(uint8_t attempted, [[maybe_unused
   case 35: expected_method = "WriteRecordToRenamedRecord()"; break;
   case 36: expected_method = "WriteRecordToAliasedRecord()"; break;
   case 37: expected_method = "WriteRecordToAliasedAlias()"; break;
-  case 38: expected_method = "WriteOptionalRecordWithChanges()"; break;
-  case 39: expected_method = "WriteAliasedOptionalRecordWithChanges()"; break;
-  case 40: expected_method = "WriteUnionRecordWithChanges()"; break;
-  case 41: expected_method = "WriteUnionWithSameTypeset()"; break;
-  case 42: expected_method = "WriteUnionWithTypesAdded()"; break;
-  case 43: expected_method = "WriteUnionWithTypesRemoved()"; break;
-  case 44: expected_method = "WriteRecordToOptional()"; break;
-  case 45: expected_method = "WriteRecordToAliasedOptional()"; break;
-  case 46: expected_method = "WriteRecordToUnion()"; break;
-  case 47: expected_method = "WriteRecordToAliasedUnion()"; break;
-  case 48: expected_method = "WriteVectorRecordWithChanges()"; break;
-  case 49: expected_method = "WriteStreamedRecordWithChanges() or EndStreamedRecordWithChanges()"; break;
-  case 50: expected_method = "WriteAddedOptional()"; break;
-  case 51: expected_method = "WriteAddedMap()"; break;
-  case 52: expected_method = "WriteAddedRecordStream() or EndAddedRecordStream()"; break;
+  case 38: expected_method = "WriteRlink()"; break;
+  case 39: expected_method = "WriteRlinkRX()"; break;
+  case 40: expected_method = "WriteRlinkRY()"; break;
+  case 41: expected_method = "WriteRlinkRZ()"; break;
+  case 42: expected_method = "WriteRaRLink()"; break;
+  case 43: expected_method = "WriteRaRX()"; break;
+  case 44: expected_method = "WriteRaRY()"; break;
+  case 45: expected_method = "WriteRaRZ()"; break;
+  case 46: expected_method = "WriteRbRLink()"; break;
+  case 47: expected_method = "WriteRbRX()"; break;
+  case 48: expected_method = "WriteRbRY()"; break;
+  case 49: expected_method = "WriteRbRZ()"; break;
+  case 50: expected_method = "WriteRcRLink()"; break;
+  case 51: expected_method = "WriteRcRX()"; break;
+  case 52: expected_method = "WriteRcRY()"; break;
+  case 53: expected_method = "WriteRcRZ()"; break;
+  case 54: expected_method = "WriteRlinkRNew()"; break;
+  case 55: expected_method = "WriteRaRNew()"; break;
+  case 56: expected_method = "WriteRbRNew()"; break;
+  case 57: expected_method = "WriteRcRNew()"; break;
+  case 58: expected_method = "WriteRlinkRUnion()"; break;
+  case 59: expected_method = "WriteRaRUnion()"; break;
+  case 60: expected_method = "WriteRbRUnion()"; break;
+  case 61: expected_method = "WriteRcRUnion()"; break;
+  case 62: expected_method = "WriteOptionalRecordWithChanges()"; break;
+  case 63: expected_method = "WriteAliasedOptionalRecordWithChanges()"; break;
+  case 64: expected_method = "WriteUnionRecordWithChanges()"; break;
+  case 65: expected_method = "WriteUnionWithSameTypeset()"; break;
+  case 66: expected_method = "WriteUnionWithTypesAdded()"; break;
+  case 67: expected_method = "WriteUnionWithTypesRemoved()"; break;
+  case 68: expected_method = "WriteRecordToOptional()"; break;
+  case 69: expected_method = "WriteRecordToAliasedOptional()"; break;
+  case 70: expected_method = "WriteRecordToUnion()"; break;
+  case 71: expected_method = "WriteRecordToAliasedUnion()"; break;
+  case 72: expected_method = "WriteVectorRecordWithChanges()"; break;
+  case 73: expected_method = "WriteStreamedRecordWithChanges() or EndStreamedRecordWithChanges()"; break;
+  case 74: expected_method = "WriteAddedOptional()"; break;
+  case 75: expected_method = "WriteAddedMap()"; break;
+  case 76: expected_method = "WriteAddedRecordStream() or EndAddedRecordStream()"; break;
   }
   std::string attempted_method;
   switch (attempted) {
@@ -107,22 +131,46 @@ void ProtocolWithChangesWriterBaseInvalidState(uint8_t attempted, [[maybe_unused
   case 35: attempted_method = "WriteRecordToRenamedRecord()"; break;
   case 36: attempted_method = "WriteRecordToAliasedRecord()"; break;
   case 37: attempted_method = "WriteRecordToAliasedAlias()"; break;
-  case 38: attempted_method = "WriteOptionalRecordWithChanges()"; break;
-  case 39: attempted_method = "WriteAliasedOptionalRecordWithChanges()"; break;
-  case 40: attempted_method = "WriteUnionRecordWithChanges()"; break;
-  case 41: attempted_method = "WriteUnionWithSameTypeset()"; break;
-  case 42: attempted_method = "WriteUnionWithTypesAdded()"; break;
-  case 43: attempted_method = "WriteUnionWithTypesRemoved()"; break;
-  case 44: attempted_method = "WriteRecordToOptional()"; break;
-  case 45: attempted_method = "WriteRecordToAliasedOptional()"; break;
-  case 46: attempted_method = "WriteRecordToUnion()"; break;
-  case 47: attempted_method = "WriteRecordToAliasedUnion()"; break;
-  case 48: attempted_method = "WriteVectorRecordWithChanges()"; break;
-  case 49: attempted_method = end ? "EndStreamedRecordWithChanges()" : "WriteStreamedRecordWithChanges()"; break;
-  case 50: attempted_method = "WriteAddedOptional()"; break;
-  case 51: attempted_method = "WriteAddedMap()"; break;
-  case 52: attempted_method = end ? "EndAddedRecordStream()" : "WriteAddedRecordStream()"; break;
-  case 53: attempted_method = "Close()"; break;
+  case 38: attempted_method = "WriteRlink()"; break;
+  case 39: attempted_method = "WriteRlinkRX()"; break;
+  case 40: attempted_method = "WriteRlinkRY()"; break;
+  case 41: attempted_method = "WriteRlinkRZ()"; break;
+  case 42: attempted_method = "WriteRaRLink()"; break;
+  case 43: attempted_method = "WriteRaRX()"; break;
+  case 44: attempted_method = "WriteRaRY()"; break;
+  case 45: attempted_method = "WriteRaRZ()"; break;
+  case 46: attempted_method = "WriteRbRLink()"; break;
+  case 47: attempted_method = "WriteRbRX()"; break;
+  case 48: attempted_method = "WriteRbRY()"; break;
+  case 49: attempted_method = "WriteRbRZ()"; break;
+  case 50: attempted_method = "WriteRcRLink()"; break;
+  case 51: attempted_method = "WriteRcRX()"; break;
+  case 52: attempted_method = "WriteRcRY()"; break;
+  case 53: attempted_method = "WriteRcRZ()"; break;
+  case 54: attempted_method = "WriteRlinkRNew()"; break;
+  case 55: attempted_method = "WriteRaRNew()"; break;
+  case 56: attempted_method = "WriteRbRNew()"; break;
+  case 57: attempted_method = "WriteRcRNew()"; break;
+  case 58: attempted_method = "WriteRlinkRUnion()"; break;
+  case 59: attempted_method = "WriteRaRUnion()"; break;
+  case 60: attempted_method = "WriteRbRUnion()"; break;
+  case 61: attempted_method = "WriteRcRUnion()"; break;
+  case 62: attempted_method = "WriteOptionalRecordWithChanges()"; break;
+  case 63: attempted_method = "WriteAliasedOptionalRecordWithChanges()"; break;
+  case 64: attempted_method = "WriteUnionRecordWithChanges()"; break;
+  case 65: attempted_method = "WriteUnionWithSameTypeset()"; break;
+  case 66: attempted_method = "WriteUnionWithTypesAdded()"; break;
+  case 67: attempted_method = "WriteUnionWithTypesRemoved()"; break;
+  case 68: attempted_method = "WriteRecordToOptional()"; break;
+  case 69: attempted_method = "WriteRecordToAliasedOptional()"; break;
+  case 70: attempted_method = "WriteRecordToUnion()"; break;
+  case 71: attempted_method = "WriteRecordToAliasedUnion()"; break;
+  case 72: attempted_method = "WriteVectorRecordWithChanges()"; break;
+  case 73: attempted_method = end ? "EndStreamedRecordWithChanges()" : "WriteStreamedRecordWithChanges()"; break;
+  case 74: attempted_method = "WriteAddedOptional()"; break;
+  case 75: attempted_method = "WriteAddedMap()"; break;
+  case 76: attempted_method = end ? "EndAddedRecordStream()" : "WriteAddedRecordStream()"; break;
+  case 77: attempted_method = "Close()"; break;
   }
   throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
 }
@@ -168,22 +216,46 @@ void ProtocolWithChangesReaderBaseInvalidState(uint8_t attempted, uint8_t curren
     case 35: return "ReadRecordToRenamedRecord()";
     case 36: return "ReadRecordToAliasedRecord()";
     case 37: return "ReadRecordToAliasedAlias()";
-    case 38: return "ReadOptionalRecordWithChanges()";
-    case 39: return "ReadAliasedOptionalRecordWithChanges()";
-    case 40: return "ReadUnionRecordWithChanges()";
-    case 41: return "ReadUnionWithSameTypeset()";
-    case 42: return "ReadUnionWithTypesAdded()";
-    case 43: return "ReadUnionWithTypesRemoved()";
-    case 44: return "ReadRecordToOptional()";
-    case 45: return "ReadRecordToAliasedOptional()";
-    case 46: return "ReadRecordToUnion()";
-    case 47: return "ReadRecordToAliasedUnion()";
-    case 48: return "ReadVectorRecordWithChanges()";
-    case 49: return "ReadStreamedRecordWithChanges()";
-    case 50: return "ReadAddedOptional()";
-    case 51: return "ReadAddedMap()";
-    case 52: return "ReadAddedRecordStream()";
-    case 53: return "Close()";
+    case 38: return "ReadRlink()";
+    case 39: return "ReadRlinkRX()";
+    case 40: return "ReadRlinkRY()";
+    case 41: return "ReadRlinkRZ()";
+    case 42: return "ReadRaRLink()";
+    case 43: return "ReadRaRX()";
+    case 44: return "ReadRaRY()";
+    case 45: return "ReadRaRZ()";
+    case 46: return "ReadRbRLink()";
+    case 47: return "ReadRbRX()";
+    case 48: return "ReadRbRY()";
+    case 49: return "ReadRbRZ()";
+    case 50: return "ReadRcRLink()";
+    case 51: return "ReadRcRX()";
+    case 52: return "ReadRcRY()";
+    case 53: return "ReadRcRZ()";
+    case 54: return "ReadRlinkRNew()";
+    case 55: return "ReadRaRNew()";
+    case 56: return "ReadRbRNew()";
+    case 57: return "ReadRcRNew()";
+    case 58: return "ReadRlinkRUnion()";
+    case 59: return "ReadRaRUnion()";
+    case 60: return "ReadRbRUnion()";
+    case 61: return "ReadRcRUnion()";
+    case 62: return "ReadOptionalRecordWithChanges()";
+    case 63: return "ReadAliasedOptionalRecordWithChanges()";
+    case 64: return "ReadUnionRecordWithChanges()";
+    case 65: return "ReadUnionWithSameTypeset()";
+    case 66: return "ReadUnionWithTypesAdded()";
+    case 67: return "ReadUnionWithTypesRemoved()";
+    case 68: return "ReadRecordToOptional()";
+    case 69: return "ReadRecordToAliasedOptional()";
+    case 70: return "ReadRecordToUnion()";
+    case 71: return "ReadRecordToAliasedUnion()";
+    case 72: return "ReadVectorRecordWithChanges()";
+    case 73: return "ReadStreamedRecordWithChanges()";
+    case 74: return "ReadAddedOptional()";
+    case 75: return "ReadAddedMap()";
+    case 76: return "ReadAddedRecordStream()";
+    case 77: return "Close()";
     default: return "<unknown>";
     }
   };
@@ -192,10 +264,10 @@ void ProtocolWithChangesReaderBaseInvalidState(uint8_t attempted, uint8_t curren
 
 } // namespace 
 
-std::string ProtocolWithChangesWriterBase::schema_ = R"({"protocol":{"name":"ProtocolWithChanges","sequence":[{"name":"int8ToInt","type":"int32"},{"name":"int8ToLong","type":"int64"},{"name":"int8ToUint","type":"uint32"},{"name":"int8ToUlong","type":"uint64"},{"name":"int8ToFloat","type":"float32"},{"name":"int8ToDouble","type":"float64"},{"name":"intToUint","type":"uint32"},{"name":"intToLong","type":"int64"},{"name":"intToFloat","type":"float32"},{"name":"intToDouble","type":"float64"},{"name":"uintToUlong","type":"uint64"},{"name":"uintToFloat","type":"float32"},{"name":"uintToDouble","type":"float64"},{"name":"floatToDouble","type":"float64"},{"name":"intToString","type":"string"},{"name":"uintToString","type":"string"},{"name":"longToString","type":"string"},{"name":"ulongToString","type":"string"},{"name":"floatToString","type":"string"},{"name":"doubleToString","type":"string"},{"name":"intToOptional","type":[null,"int32"]},{"name":"floatToOptional","type":[null,"float32"]},{"name":"stringToOptional","type":[null,"string"]},{"name":"intToUnion","type":[{"tag":"int32","type":"int32"},{"tag":"bool","type":"bool"}]},{"name":"floatToUnion","type":[{"tag":"float32","type":"float32"},{"tag":"bool","type":"bool"}]},{"name":"stringToUnion","type":[{"tag":"string","type":"string"},{"tag":"bool","type":"bool"}]},{"name":"optionalIntToFloat","type":[null,"float32"]},{"name":"optionalFloatToString","type":[null,"string"]},{"name":"aliasedLongToString","type":"EvoTest.AliasedLongToString"},{"name":"stringToAliasedString","type":"EvoTest.AliasedString"},{"name":"stringToAliasedInt","type":"EvoTest.AliasedInt"},{"name":"optionalIntToUnion","type":[null,{"tag":"int32","type":"int32"},{"tag":"string","type":"string"}]},{"name":"optionalRecordToUnion","type":[null,{"tag":"RecordWithChanges","type":"EvoTest.RecordWithChanges"},{"tag":"string","type":"string"}]},{"name":"recordWithChanges","type":"EvoTest.RecordWithChanges"},{"name":"aliasedRecordWithChanges","type":"EvoTest.AliasedRecordWithChanges"},{"name":"recordToRenamedRecord","type":"EvoTest.RenamedRecord"},{"name":"recordToAliasedRecord","type":"EvoTest.AliasedRecordWithChanges"},{"name":"recordToAliasedAlias","type":"EvoTest.AliasOfAliasedRecordWithChanges"},{"name":"optionalRecordWithChanges","type":[null,"EvoTest.RecordWithChanges"]},{"name":"aliasedOptionalRecordWithChanges","type":[null,"EvoTest.AliasedRecordWithChanges"]},{"name":"unionRecordWithChanges","type":[{"tag":"RecordWithChanges","type":"EvoTest.RecordWithChanges"},{"tag":"int32","type":"int32"}]},{"name":"unionWithSameTypeset","type":[{"tag":"float32","type":"float32"},{"tag":"RecordWithChanges","type":"EvoTest.RecordWithChanges"},{"tag":"string","type":"string"},{"tag":"int32","type":"int32"}]},{"name":"unionWithTypesAdded","type":[{"tag":"RecordWithChanges","type":"EvoTest.RecordWithChanges"},{"tag":"int32","type":"int32"},{"tag":"float32","type":"float32"},{"tag":"string","type":"string"}]},{"name":"unionWithTypesRemoved","type":[{"tag":"RecordWithChanges","type":"EvoTest.RecordWithChanges"},{"tag":"string","type":"string"}]},{"name":"recordToOptional","type":[null,"EvoTest.RecordWithChanges"]},{"name":"recordToAliasedOptional","type":"EvoTest.AliasedOptionalRecord"},{"name":"recordToUnion","type":[{"tag":"RecordWithChanges","type":"EvoTest.RecordWithChanges"},{"tag":"string","type":"string"}]},{"name":"recordToAliasedUnion","type":"EvoTest.AliasedRecordOrString"},{"name":"vectorRecordWithChanges","type":{"vector":{"items":"EvoTest.RecordWithChanges"}}},{"name":"streamedRecordWithChanges","type":{"stream":{"items":"EvoTest.RecordWithChanges"}}},{"name":"addedOptional","type":[null,"EvoTest.RecordWithChanges"]},{"name":"addedMap","type":{"map":{"keys":"string","values":"string"}}},{"name":"addedRecordStream","type":{"stream":{"items":"EvoTest.RecordWithChanges"}}}]},"types":[{"name":"AliasOfAliasedRecordWithChanges","type":"EvoTest.AliasedRecordWithChanges"},{"name":"AliasedInt","type":"int32"},{"name":"AliasedLongToString","type":"string"},{"name":"AliasedOptionalRecord","type":[null,"EvoTest.RecordWithChanges"]},{"name":"AliasedRecordOrString","type":[{"tag":"RecordWithChanges","type":"EvoTest.RecordWithChanges"},{"tag":"string","type":"string"}]},{"name":"AliasedRecordWithChanges","type":"EvoTest.RecordWithChanges"},{"name":"AliasedString","type":"string"},{"name":"DeprecatedRecord","fields":[{"name":"s","type":"string"},{"name":"i","type":"int32"}]},{"name":"RecordWithChanges","fields":[{"name":"floatToDouble","type":"float64"},{"name":"unchangedRecord","type":"EvoTest.UnchangedRecord"},{"name":"intToLong","type":"int64"},{"name":"optionalLongToString","type":[null,"string"]}]},{"name":"RenamedRecord","type":"EvoTest.DeprecatedRecord"},{"name":"UnchangedRecord","fields":[{"name":"name","type":"string"},{"name":"age","type":"int32"},{"name":"meta","type":{"map":{"keys":"string","values":"float64"}}}]}]})";
+std::string ProtocolWithChangesWriterBase::schema_ = R"({"protocol":{"name":"ProtocolWithChanges","sequence":[{"name":"int8ToInt","type":"int32"},{"name":"int8ToLong","type":"int64"},{"name":"int8ToUint","type":"uint32"},{"name":"int8ToUlong","type":"uint64"},{"name":"int8ToFloat","type":"float32"},{"name":"int8ToDouble","type":"float64"},{"name":"intToUint","type":"uint32"},{"name":"intToLong","type":"int64"},{"name":"intToFloat","type":"float32"},{"name":"intToDouble","type":"float64"},{"name":"uintToUlong","type":"uint64"},{"name":"uintToFloat","type":"float32"},{"name":"uintToDouble","type":"float64"},{"name":"floatToDouble","type":"float64"},{"name":"intToString","type":"string"},{"name":"uintToString","type":"string"},{"name":"longToString","type":"string"},{"name":"ulongToString","type":"string"},{"name":"floatToString","type":"string"},{"name":"doubleToString","type":"string"},{"name":"intToOptional","type":[null,"int32"]},{"name":"floatToOptional","type":[null,"float32"]},{"name":"stringToOptional","type":[null,"string"]},{"name":"intToUnion","type":[{"tag":"int32","type":"int32"},{"tag":"bool","type":"bool"}]},{"name":"floatToUnion","type":[{"tag":"float32","type":"float32"},{"tag":"bool","type":"bool"}]},{"name":"stringToUnion","type":[{"tag":"string","type":"string"},{"tag":"bool","type":"bool"}]},{"name":"optionalIntToFloat","type":[null,"float32"]},{"name":"optionalFloatToString","type":[null,"string"]},{"name":"aliasedLongToString","type":"EvoTest.AliasedLongToString"},{"name":"stringToAliasedString","type":"EvoTest.AliasedString"},{"name":"stringToAliasedInt","type":"EvoTest.AliasedInt"},{"name":"optionalIntToUnion","type":[null,{"tag":"int32","type":"int32"},{"tag":"string","type":"string"}]},{"name":"optionalRecordToUnion","type":[null,{"tag":"RecordWithChanges","type":"EvoTest.RecordWithChanges"},{"tag":"string","type":"string"}]},{"name":"recordWithChanges","type":"EvoTest.RecordWithChanges"},{"name":"aliasedRecordWithChanges","type":"EvoTest.AliasedRecordWithChanges"},{"name":"recordToRenamedRecord","type":"EvoTest.RenamedRecord"},{"name":"recordToAliasedRecord","type":"EvoTest.AliasedRecordWithChanges"},{"name":"recordToAliasedAlias","type":"EvoTest.AliasOfAliasedRecordWithChanges"},{"name":"rlink","type":"EvoTest.RLink"},{"name":"rlinkRX","type":"EvoTest.RX"},{"name":"rlinkRY","type":"EvoTest.RY"},{"name":"rlinkRZ","type":"EvoTest.RZ"},{"name":"raRLink","type":"EvoTest.RLink"},{"name":"raRX","type":"EvoTest.RX"},{"name":"raRY","type":"EvoTest.RY"},{"name":"raRZ","type":"EvoTest.RZ"},{"name":"rbRLink","type":"EvoTest.RLink"},{"name":"rbRX","type":"EvoTest.RX"},{"name":"rbRY","type":"EvoTest.RY"},{"name":"rbRZ","type":"EvoTest.RZ"},{"name":"rcRLink","type":"EvoTest.RLink"},{"name":"rcRX","type":"EvoTest.RX"},{"name":"rcRY","type":"EvoTest.RY"},{"name":"rcRZ","type":"EvoTest.RZ"},{"name":"rlinkRNew","type":"EvoTest.RNew"},{"name":"raRNew","type":"EvoTest.RNew"},{"name":"rbRNew","type":"EvoTest.RNew"},{"name":"rcRNew","type":"EvoTest.RNew"},{"name":"rlinkRUnion","type":"EvoTest.RUnion"},{"name":"raRUnion","type":"EvoTest.RUnion"},{"name":"rbRUnion","type":"EvoTest.RUnion"},{"name":"rcRUnion","type":"EvoTest.RUnion"},{"name":"optionalRecordWithChanges","type":[null,"EvoTest.RecordWithChanges"]},{"name":"aliasedOptionalRecordWithChanges","type":[null,"EvoTest.AliasedRecordWithChanges"]},{"name":"unionRecordWithChanges","type":[{"tag":"RecordWithChanges","type":"EvoTest.RecordWithChanges"},{"tag":"int32","type":"int32"}]},{"name":"unionWithSameTypeset","type":[{"tag":"float32","type":"float32"},{"tag":"RecordWithChanges","type":"EvoTest.RecordWithChanges"},{"tag":"string","type":"string"},{"tag":"int32","type":"int32"}]},{"name":"unionWithTypesAdded","type":[{"tag":"RecordWithChanges","type":"EvoTest.RecordWithChanges"},{"tag":"int32","type":"int32"},{"tag":"float32","type":"float32"},{"tag":"string","type":"string"}]},{"name":"unionWithTypesRemoved","type":[{"tag":"RecordWithChanges","type":"EvoTest.RecordWithChanges"},{"tag":"string","type":"string"}]},{"name":"recordToOptional","type":[null,"EvoTest.RecordWithChanges"]},{"name":"recordToAliasedOptional","type":"EvoTest.AliasedOptionalRecord"},{"name":"recordToUnion","type":[{"tag":"RecordWithChanges","type":"EvoTest.RecordWithChanges"},{"tag":"string","type":"string"}]},{"name":"recordToAliasedUnion","type":"EvoTest.AliasedRecordOrString"},{"name":"vectorRecordWithChanges","type":{"vector":{"items":"EvoTest.RecordWithChanges"}}},{"name":"streamedRecordWithChanges","type":{"stream":{"items":"EvoTest.RecordWithChanges"}}},{"name":"addedOptional","type":[null,"EvoTest.RecordWithChanges"]},{"name":"addedMap","type":{"map":{"keys":"string","values":"string"}}},{"name":"addedRecordStream","type":{"stream":{"items":"EvoTest.RecordWithChanges"}}}]},"types":[{"name":"AliasOfAliasedRecordWithChanges","type":"EvoTest.AliasedRecordWithChanges"},{"name":"AliasedInt","type":"int32"},{"name":"AliasedLongToString","type":"string"},{"name":"AliasedOptionalRecord","type":[null,"EvoTest.RecordWithChanges"]},{"name":"AliasedRecordOrString","type":[{"tag":"RecordWithChanges","type":"EvoTest.RecordWithChanges"},{"tag":"string","type":"string"}]},{"name":"AliasedRecordWithChanges","type":"EvoTest.RecordWithChanges"},{"name":"AliasedString","type":"string"},{"name":"DeprecatedRecord","fields":[{"name":"s","type":"string"},{"name":"i","type":"int32"}]},{"name":"RLink","type":"EvoTest.RNew"},{"name":"RNew","type":"EvoTest.RY"},{"name":"RUnion","type":[{"tag":"RX","type":"EvoTest.RX"},{"tag":"string","type":"string"}]},{"name":"RX","type":"EvoTest.RLink"},{"name":"RY","type":"EvoTest.RZ"},{"name":"RZ","fields":[{"name":"subject","type":"int32"}]},{"name":"RecordWithChanges","fields":[{"name":"floatToDouble","type":"float64"},{"name":"unchangedRecord","type":"EvoTest.UnchangedRecord"},{"name":"intToLong","type":"int64"},{"name":"optionalLongToString","type":[null,"string"]}]},{"name":"RenamedRecord","type":"EvoTest.DeprecatedRecord"},{"name":"UnchangedRecord","fields":[{"name":"name","type":"string"},{"name":"age","type":"int32"},{"name":"meta","type":{"map":{"keys":"string","values":"float64"}}}]}]})";
 
 std::vector<std::string> ProtocolWithChangesWriterBase::previous_schemas_ = {
-  R"({"protocol":{"name":"ProtocolWithChanges","sequence":[{"name":"int8ToInt","type":"int8"},{"name":"int8ToLong","type":"int8"},{"name":"int8ToUint","type":"int8"},{"name":"int8ToUlong","type":"int8"},{"name":"int8ToFloat","type":"int8"},{"name":"int8ToDouble","type":"int8"},{"name":"intToUint","type":"int32"},{"name":"intToLong","type":"int32"},{"name":"intToFloat","type":"int32"},{"name":"intToDouble","type":"int32"},{"name":"uintToUlong","type":"uint32"},{"name":"uintToFloat","type":"uint32"},{"name":"uintToDouble","type":"uint32"},{"name":"floatToDouble","type":"float32"},{"name":"intToString","type":"int32"},{"name":"uintToString","type":"uint32"},{"name":"longToString","type":"int64"},{"name":"ulongToString","type":"uint64"},{"name":"floatToString","type":"float32"},{"name":"doubleToString","type":"float64"},{"name":"intToOptional","type":"int32"},{"name":"floatToOptional","type":"float32"},{"name":"stringToOptional","type":"string"},{"name":"intToUnion","type":"int32"},{"name":"floatToUnion","type":"float32"},{"name":"stringToUnion","type":"string"},{"name":"optionalIntToFloat","type":[null,"int32"]},{"name":"optionalFloatToString","type":[null,"float32"]},{"name":"aliasedLongToString","type":"EvoTest.AliasedLongToString"},{"name":"stringToAliasedString","type":"string"},{"name":"stringToAliasedInt","type":"string"},{"name":"optionalIntToUnion","type":[null,"int32"]},{"name":"optionalRecordToUnion","type":[null,"EvoTest.RecordWithChanges"]},{"name":"recordWithChanges","type":"EvoTest.RecordWithChanges"},{"name":"aliasedRecordWithChanges","type":"EvoTest.AliasedRecordWithChanges"},{"name":"recordToRenamedRecord","type":"EvoTest.RenamedRecord"},{"name":"recordToAliasedRecord","type":"EvoTest.RecordWithChanges"},{"name":"recordToAliasedAlias","type":"EvoTest.RecordWithChanges"},{"name":"optionalRecordWithChanges","type":[null,"EvoTest.RecordWithChanges"]},{"name":"aliasedOptionalRecordWithChanges","type":[null,"EvoTest.AliasedRecordWithChanges"]},{"name":"unionRecordWithChanges","type":[{"tag":"RecordWithChanges","type":"EvoTest.RecordWithChanges"},{"tag":"int32","type":"int32"}]},{"name":"unionWithSameTypeset","type":[{"tag":"RecordWithChanges","type":"EvoTest.RecordWithChanges"},{"tag":"int32","type":"int32"},{"tag":"float32","type":"float32"},{"tag":"string","type":"string"}]},{"name":"unionWithTypesAdded","type":[{"tag":"RecordWithChanges","type":"EvoTest.RecordWithChanges"},{"tag":"float32","type":"float32"}]},{"name":"unionWithTypesRemoved","type":[{"tag":"RecordWithChanges","type":"EvoTest.RecordWithChanges"},{"tag":"int32","type":"int32"},{"tag":"float32","type":"float32"},{"tag":"string","type":"string"}]},{"name":"recordToOptional","type":"EvoTest.RecordWithChanges"},{"name":"recordToAliasedOptional","type":"EvoTest.RecordWithChanges"},{"name":"recordToUnion","type":"EvoTest.RecordWithChanges"},{"name":"recordToAliasedUnion","type":"EvoTest.RecordWithChanges"},{"name":"vectorRecordWithChanges","type":{"vector":{"items":"EvoTest.RecordWithChanges"}}},{"name":"streamedRecordWithChanges","type":{"stream":{"items":"EvoTest.RecordWithChanges"}}}]},"types":[{"name":"AliasedLongToString","type":"int64"},{"name":"AliasedRecordWithChanges","type":"EvoTest.RecordWithChanges"},{"name":"RecordWithChanges","fields":[{"name":"intToLong","type":"int32"},{"name":"deprecatedVector","type":{"vector":{"items":"int32"}}},{"name":"floatToDouble","type":"float32"},{"name":"deprecatedArray","type":{"array":{"items":"uint8","dimensions":[{"length":7}]}}},{"name":"optionalLongToString","type":[null,"int64"]},{"name":"deprecatedMap","type":{"map":{"keys":"string","values":{"vector":{"items":"int32"}}}}},{"name":"unchangedRecord","type":"EvoTest.UnchangedRecord"}]},{"name":"RenamedRecord","fields":[{"name":"i","type":"int32"},{"name":"s","type":"string"}]},{"name":"UnchangedRecord","fields":[{"name":"name","type":"string"},{"name":"age","type":"int32"},{"name":"meta","type":{"map":{"keys":"string","values":"float64"}}}]}]})",
+  R"({"protocol":{"name":"ProtocolWithChanges","sequence":[{"name":"int8ToInt","type":"int8"},{"name":"int8ToLong","type":"int8"},{"name":"int8ToUint","type":"int8"},{"name":"int8ToUlong","type":"int8"},{"name":"int8ToFloat","type":"int8"},{"name":"int8ToDouble","type":"int8"},{"name":"intToUint","type":"int32"},{"name":"intToLong","type":"int32"},{"name":"intToFloat","type":"int32"},{"name":"intToDouble","type":"int32"},{"name":"uintToUlong","type":"uint32"},{"name":"uintToFloat","type":"uint32"},{"name":"uintToDouble","type":"uint32"},{"name":"floatToDouble","type":"float32"},{"name":"intToString","type":"int32"},{"name":"uintToString","type":"uint32"},{"name":"longToString","type":"int64"},{"name":"ulongToString","type":"uint64"},{"name":"floatToString","type":"float32"},{"name":"doubleToString","type":"float64"},{"name":"intToOptional","type":"int32"},{"name":"floatToOptional","type":"float32"},{"name":"stringToOptional","type":"string"},{"name":"intToUnion","type":"int32"},{"name":"floatToUnion","type":"float32"},{"name":"stringToUnion","type":"string"},{"name":"optionalIntToFloat","type":[null,"int32"]},{"name":"optionalFloatToString","type":[null,"float32"]},{"name":"aliasedLongToString","type":"EvoTest.AliasedLongToString"},{"name":"stringToAliasedString","type":"string"},{"name":"stringToAliasedInt","type":"string"},{"name":"optionalIntToUnion","type":[null,"int32"]},{"name":"optionalRecordToUnion","type":[null,"EvoTest.RecordWithChanges"]},{"name":"recordWithChanges","type":"EvoTest.RecordWithChanges"},{"name":"aliasedRecordWithChanges","type":"EvoTest.AliasedRecordWithChanges"},{"name":"recordToRenamedRecord","type":"EvoTest.RenamedRecord"},{"name":"recordToAliasedRecord","type":"EvoTest.RecordWithChanges"},{"name":"recordToAliasedAlias","type":"EvoTest.RecordWithChanges"},{"name":"rlink","type":"EvoTest.RLink"},{"name":"rlinkRX","type":"EvoTest.RLink"},{"name":"rlinkRY","type":"EvoTest.RLink"},{"name":"rlinkRZ","type":"EvoTest.RLink"},{"name":"raRLink","type":"EvoTest.RA"},{"name":"raRX","type":"EvoTest.RA"},{"name":"raRY","type":"EvoTest.RA"},{"name":"raRZ","type":"EvoTest.RA"},{"name":"rbRLink","type":"EvoTest.RB"},{"name":"rbRX","type":"EvoTest.RB"},{"name":"rbRY","type":"EvoTest.RB"},{"name":"rbRZ","type":"EvoTest.RB"},{"name":"rcRLink","type":"EvoTest.RC"},{"name":"rcRX","type":"EvoTest.RC"},{"name":"rcRY","type":"EvoTest.RC"},{"name":"rcRZ","type":"EvoTest.RC"},{"name":"rlinkRNew","type":"EvoTest.RLink"},{"name":"raRNew","type":"EvoTest.RA"},{"name":"rbRNew","type":"EvoTest.RB"},{"name":"rcRNew","type":"EvoTest.RC"},{"name":"rlinkRUnion","type":"EvoTest.RLink"},{"name":"raRUnion","type":"EvoTest.RA"},{"name":"rbRUnion","type":"EvoTest.RB"},{"name":"rcRUnion","type":"EvoTest.RC"},{"name":"optionalRecordWithChanges","type":[null,"EvoTest.RecordWithChanges"]},{"name":"aliasedOptionalRecordWithChanges","type":[null,"EvoTest.AliasedRecordWithChanges"]},{"name":"unionRecordWithChanges","type":[{"tag":"RecordWithChanges","type":"EvoTest.RecordWithChanges"},{"tag":"int32","type":"int32"}]},{"name":"unionWithSameTypeset","type":[{"tag":"RecordWithChanges","type":"EvoTest.RecordWithChanges"},{"tag":"int32","type":"int32"},{"tag":"float32","type":"float32"},{"tag":"string","type":"string"}]},{"name":"unionWithTypesAdded","type":[{"tag":"RecordWithChanges","type":"EvoTest.RecordWithChanges"},{"tag":"float32","type":"float32"}]},{"name":"unionWithTypesRemoved","type":[{"tag":"RecordWithChanges","type":"EvoTest.RecordWithChanges"},{"tag":"int32","type":"int32"},{"tag":"float32","type":"float32"},{"tag":"string","type":"string"}]},{"name":"recordToOptional","type":"EvoTest.RecordWithChanges"},{"name":"recordToAliasedOptional","type":"EvoTest.RecordWithChanges"},{"name":"recordToUnion","type":"EvoTest.RecordWithChanges"},{"name":"recordToAliasedUnion","type":"EvoTest.RecordWithChanges"},{"name":"vectorRecordWithChanges","type":{"vector":{"items":"EvoTest.RecordWithChanges"}}},{"name":"streamedRecordWithChanges","type":{"stream":{"items":"EvoTest.RecordWithChanges"}}}]},"types":[{"name":"AliasedLongToString","type":"int64"},{"name":"AliasedRecordWithChanges","type":"EvoTest.RecordWithChanges"},{"name":"RA","type":"EvoTest.RB"},{"name":"RB","type":"EvoTest.RC"},{"name":"RC","fields":[{"name":"subject","type":"string"}]},{"name":"RLink","type":"EvoTest.RA"},{"name":"RecordWithChanges","fields":[{"name":"intToLong","type":"int32"},{"name":"deprecatedVector","type":{"vector":{"items":"int32"}}},{"name":"floatToDouble","type":"float32"},{"name":"deprecatedArray","type":{"array":{"items":"uint8","dimensions":[{"length":7}]}}},{"name":"optionalLongToString","type":[null,"int64"]},{"name":"deprecatedMap","type":{"map":{"keys":"string","values":{"vector":{"items":"int32"}}}}},{"name":"unchangedRecord","type":"EvoTest.UnchangedRecord"}]},{"name":"RenamedRecord","fields":[{"name":"i","type":"int32"},{"name":"s","type":"string"}]},{"name":"UnchangedRecord","fields":[{"name":"name","type":"string"},{"name":"age","type":"int32"},{"name":"meta","type":{"map":{"keys":"string","values":"float64"}}}]}]})",
 };
 
 std::string ProtocolWithChangesWriterBase::SchemaFromVersion(Version version) {
@@ -548,128 +620,344 @@ void ProtocolWithChangesWriterBase::WriteRecordToAliasedAlias(evo_test::AliasOfA
   state_ = 38;
 }
 
-void ProtocolWithChangesWriterBase::WriteOptionalRecordWithChanges(std::optional<evo_test::RecordWithChanges> const& value) {
+void ProtocolWithChangesWriterBase::WriteRlink(evo_test::RLink const& value) {
   if (unlikely(state_ != 38)) {
     ProtocolWithChangesWriterBaseInvalidState(38, false, state_);
   }
 
-  WriteOptionalRecordWithChangesImpl(value);
+  WriteRlinkImpl(value);
   state_ = 39;
 }
 
-void ProtocolWithChangesWriterBase::WriteAliasedOptionalRecordWithChanges(std::optional<evo_test::AliasedRecordWithChanges> const& value) {
+void ProtocolWithChangesWriterBase::WriteRlinkRX(evo_test::RX const& value) {
   if (unlikely(state_ != 39)) {
     ProtocolWithChangesWriterBaseInvalidState(39, false, state_);
   }
 
-  WriteAliasedOptionalRecordWithChangesImpl(value);
+  WriteRlinkRXImpl(value);
   state_ = 40;
 }
 
-void ProtocolWithChangesWriterBase::WriteUnionRecordWithChanges(std::variant<evo_test::RecordWithChanges, int32_t> const& value) {
+void ProtocolWithChangesWriterBase::WriteRlinkRY(evo_test::RY const& value) {
   if (unlikely(state_ != 40)) {
     ProtocolWithChangesWriterBaseInvalidState(40, false, state_);
   }
 
-  WriteUnionRecordWithChangesImpl(value);
+  WriteRlinkRYImpl(value);
   state_ = 41;
 }
 
-void ProtocolWithChangesWriterBase::WriteUnionWithSameTypeset(std::variant<float, evo_test::RecordWithChanges, std::string, int32_t> const& value) {
+void ProtocolWithChangesWriterBase::WriteRlinkRZ(evo_test::RZ const& value) {
   if (unlikely(state_ != 41)) {
     ProtocolWithChangesWriterBaseInvalidState(41, false, state_);
   }
 
-  WriteUnionWithSameTypesetImpl(value);
+  WriteRlinkRZImpl(value);
   state_ = 42;
 }
 
-void ProtocolWithChangesWriterBase::WriteUnionWithTypesAdded(std::variant<evo_test::RecordWithChanges, int32_t, float, std::string> const& value) {
+void ProtocolWithChangesWriterBase::WriteRaRLink(evo_test::RLink const& value) {
   if (unlikely(state_ != 42)) {
     ProtocolWithChangesWriterBaseInvalidState(42, false, state_);
   }
 
-  WriteUnionWithTypesAddedImpl(value);
+  WriteRaRLinkImpl(value);
   state_ = 43;
 }
 
-void ProtocolWithChangesWriterBase::WriteUnionWithTypesRemoved(std::variant<evo_test::RecordWithChanges, std::string> const& value) {
+void ProtocolWithChangesWriterBase::WriteRaRX(evo_test::RX const& value) {
   if (unlikely(state_ != 43)) {
     ProtocolWithChangesWriterBaseInvalidState(43, false, state_);
   }
 
-  WriteUnionWithTypesRemovedImpl(value);
+  WriteRaRXImpl(value);
   state_ = 44;
 }
 
-void ProtocolWithChangesWriterBase::WriteRecordToOptional(std::optional<evo_test::RecordWithChanges> const& value) {
+void ProtocolWithChangesWriterBase::WriteRaRY(evo_test::RY const& value) {
   if (unlikely(state_ != 44)) {
     ProtocolWithChangesWriterBaseInvalidState(44, false, state_);
   }
 
-  WriteRecordToOptionalImpl(value);
+  WriteRaRYImpl(value);
   state_ = 45;
 }
 
-void ProtocolWithChangesWriterBase::WriteRecordToAliasedOptional(evo_test::AliasedOptionalRecord const& value) {
+void ProtocolWithChangesWriterBase::WriteRaRZ(evo_test::RZ const& value) {
   if (unlikely(state_ != 45)) {
     ProtocolWithChangesWriterBaseInvalidState(45, false, state_);
   }
 
-  WriteRecordToAliasedOptionalImpl(value);
+  WriteRaRZImpl(value);
   state_ = 46;
 }
 
-void ProtocolWithChangesWriterBase::WriteRecordToUnion(std::variant<evo_test::RecordWithChanges, std::string> const& value) {
+void ProtocolWithChangesWriterBase::WriteRbRLink(evo_test::RLink const& value) {
   if (unlikely(state_ != 46)) {
     ProtocolWithChangesWriterBaseInvalidState(46, false, state_);
   }
 
-  WriteRecordToUnionImpl(value);
+  WriteRbRLinkImpl(value);
   state_ = 47;
 }
 
-void ProtocolWithChangesWriterBase::WriteRecordToAliasedUnion(evo_test::AliasedRecordOrString const& value) {
+void ProtocolWithChangesWriterBase::WriteRbRX(evo_test::RX const& value) {
   if (unlikely(state_ != 47)) {
     ProtocolWithChangesWriterBaseInvalidState(47, false, state_);
   }
 
-  WriteRecordToAliasedUnionImpl(value);
+  WriteRbRXImpl(value);
   state_ = 48;
 }
 
-void ProtocolWithChangesWriterBase::WriteVectorRecordWithChanges(std::vector<evo_test::RecordWithChanges> const& value) {
+void ProtocolWithChangesWriterBase::WriteRbRY(evo_test::RY const& value) {
   if (unlikely(state_ != 48)) {
     ProtocolWithChangesWriterBaseInvalidState(48, false, state_);
   }
 
-  WriteVectorRecordWithChangesImpl(value);
+  WriteRbRYImpl(value);
   state_ = 49;
 }
 
-void ProtocolWithChangesWriterBase::WriteStreamedRecordWithChanges(evo_test::RecordWithChanges const& value) {
+void ProtocolWithChangesWriterBase::WriteRbRZ(evo_test::RZ const& value) {
   if (unlikely(state_ != 49)) {
     ProtocolWithChangesWriterBaseInvalidState(49, false, state_);
+  }
+
+  WriteRbRZImpl(value);
+  state_ = 50;
+}
+
+void ProtocolWithChangesWriterBase::WriteRcRLink(evo_test::RLink const& value) {
+  if (unlikely(state_ != 50)) {
+    ProtocolWithChangesWriterBaseInvalidState(50, false, state_);
+  }
+
+  WriteRcRLinkImpl(value);
+  state_ = 51;
+}
+
+void ProtocolWithChangesWriterBase::WriteRcRX(evo_test::RX const& value) {
+  if (unlikely(state_ != 51)) {
+    ProtocolWithChangesWriterBaseInvalidState(51, false, state_);
+  }
+
+  WriteRcRXImpl(value);
+  state_ = 52;
+}
+
+void ProtocolWithChangesWriterBase::WriteRcRY(evo_test::RY const& value) {
+  if (unlikely(state_ != 52)) {
+    ProtocolWithChangesWriterBaseInvalidState(52, false, state_);
+  }
+
+  WriteRcRYImpl(value);
+  state_ = 53;
+}
+
+void ProtocolWithChangesWriterBase::WriteRcRZ(evo_test::RZ const& value) {
+  if (unlikely(state_ != 53)) {
+    ProtocolWithChangesWriterBaseInvalidState(53, false, state_);
+  }
+
+  WriteRcRZImpl(value);
+  state_ = 54;
+}
+
+void ProtocolWithChangesWriterBase::WriteRlinkRNew(evo_test::RNew const& value) {
+  if (unlikely(state_ != 54)) {
+    ProtocolWithChangesWriterBaseInvalidState(54, false, state_);
+  }
+
+  WriteRlinkRNewImpl(value);
+  state_ = 55;
+}
+
+void ProtocolWithChangesWriterBase::WriteRaRNew(evo_test::RNew const& value) {
+  if (unlikely(state_ != 55)) {
+    ProtocolWithChangesWriterBaseInvalidState(55, false, state_);
+  }
+
+  WriteRaRNewImpl(value);
+  state_ = 56;
+}
+
+void ProtocolWithChangesWriterBase::WriteRbRNew(evo_test::RNew const& value) {
+  if (unlikely(state_ != 56)) {
+    ProtocolWithChangesWriterBaseInvalidState(56, false, state_);
+  }
+
+  WriteRbRNewImpl(value);
+  state_ = 57;
+}
+
+void ProtocolWithChangesWriterBase::WriteRcRNew(evo_test::RNew const& value) {
+  if (unlikely(state_ != 57)) {
+    ProtocolWithChangesWriterBaseInvalidState(57, false, state_);
+  }
+
+  WriteRcRNewImpl(value);
+  state_ = 58;
+}
+
+void ProtocolWithChangesWriterBase::WriteRlinkRUnion(evo_test::RUnion const& value) {
+  if (unlikely(state_ != 58)) {
+    ProtocolWithChangesWriterBaseInvalidState(58, false, state_);
+  }
+
+  WriteRlinkRUnionImpl(value);
+  state_ = 59;
+}
+
+void ProtocolWithChangesWriterBase::WriteRaRUnion(evo_test::RUnion const& value) {
+  if (unlikely(state_ != 59)) {
+    ProtocolWithChangesWriterBaseInvalidState(59, false, state_);
+  }
+
+  WriteRaRUnionImpl(value);
+  state_ = 60;
+}
+
+void ProtocolWithChangesWriterBase::WriteRbRUnion(evo_test::RUnion const& value) {
+  if (unlikely(state_ != 60)) {
+    ProtocolWithChangesWriterBaseInvalidState(60, false, state_);
+  }
+
+  WriteRbRUnionImpl(value);
+  state_ = 61;
+}
+
+void ProtocolWithChangesWriterBase::WriteRcRUnion(evo_test::RUnion const& value) {
+  if (unlikely(state_ != 61)) {
+    ProtocolWithChangesWriterBaseInvalidState(61, false, state_);
+  }
+
+  WriteRcRUnionImpl(value);
+  state_ = 62;
+}
+
+void ProtocolWithChangesWriterBase::WriteOptionalRecordWithChanges(std::optional<evo_test::RecordWithChanges> const& value) {
+  if (unlikely(state_ != 62)) {
+    ProtocolWithChangesWriterBaseInvalidState(62, false, state_);
+  }
+
+  WriteOptionalRecordWithChangesImpl(value);
+  state_ = 63;
+}
+
+void ProtocolWithChangesWriterBase::WriteAliasedOptionalRecordWithChanges(std::optional<evo_test::AliasedRecordWithChanges> const& value) {
+  if (unlikely(state_ != 63)) {
+    ProtocolWithChangesWriterBaseInvalidState(63, false, state_);
+  }
+
+  WriteAliasedOptionalRecordWithChangesImpl(value);
+  state_ = 64;
+}
+
+void ProtocolWithChangesWriterBase::WriteUnionRecordWithChanges(std::variant<evo_test::RecordWithChanges, int32_t> const& value) {
+  if (unlikely(state_ != 64)) {
+    ProtocolWithChangesWriterBaseInvalidState(64, false, state_);
+  }
+
+  WriteUnionRecordWithChangesImpl(value);
+  state_ = 65;
+}
+
+void ProtocolWithChangesWriterBase::WriteUnionWithSameTypeset(std::variant<float, evo_test::RecordWithChanges, std::string, int32_t> const& value) {
+  if (unlikely(state_ != 65)) {
+    ProtocolWithChangesWriterBaseInvalidState(65, false, state_);
+  }
+
+  WriteUnionWithSameTypesetImpl(value);
+  state_ = 66;
+}
+
+void ProtocolWithChangesWriterBase::WriteUnionWithTypesAdded(std::variant<evo_test::RecordWithChanges, int32_t, float, std::string> const& value) {
+  if (unlikely(state_ != 66)) {
+    ProtocolWithChangesWriterBaseInvalidState(66, false, state_);
+  }
+
+  WriteUnionWithTypesAddedImpl(value);
+  state_ = 67;
+}
+
+void ProtocolWithChangesWriterBase::WriteUnionWithTypesRemoved(std::variant<evo_test::RecordWithChanges, std::string> const& value) {
+  if (unlikely(state_ != 67)) {
+    ProtocolWithChangesWriterBaseInvalidState(67, false, state_);
+  }
+
+  WriteUnionWithTypesRemovedImpl(value);
+  state_ = 68;
+}
+
+void ProtocolWithChangesWriterBase::WriteRecordToOptional(std::optional<evo_test::RecordWithChanges> const& value) {
+  if (unlikely(state_ != 68)) {
+    ProtocolWithChangesWriterBaseInvalidState(68, false, state_);
+  }
+
+  WriteRecordToOptionalImpl(value);
+  state_ = 69;
+}
+
+void ProtocolWithChangesWriterBase::WriteRecordToAliasedOptional(evo_test::AliasedOptionalRecord const& value) {
+  if (unlikely(state_ != 69)) {
+    ProtocolWithChangesWriterBaseInvalidState(69, false, state_);
+  }
+
+  WriteRecordToAliasedOptionalImpl(value);
+  state_ = 70;
+}
+
+void ProtocolWithChangesWriterBase::WriteRecordToUnion(std::variant<evo_test::RecordWithChanges, std::string> const& value) {
+  if (unlikely(state_ != 70)) {
+    ProtocolWithChangesWriterBaseInvalidState(70, false, state_);
+  }
+
+  WriteRecordToUnionImpl(value);
+  state_ = 71;
+}
+
+void ProtocolWithChangesWriterBase::WriteRecordToAliasedUnion(evo_test::AliasedRecordOrString const& value) {
+  if (unlikely(state_ != 71)) {
+    ProtocolWithChangesWriterBaseInvalidState(71, false, state_);
+  }
+
+  WriteRecordToAliasedUnionImpl(value);
+  state_ = 72;
+}
+
+void ProtocolWithChangesWriterBase::WriteVectorRecordWithChanges(std::vector<evo_test::RecordWithChanges> const& value) {
+  if (unlikely(state_ != 72)) {
+    ProtocolWithChangesWriterBaseInvalidState(72, false, state_);
+  }
+
+  WriteVectorRecordWithChangesImpl(value);
+  state_ = 73;
+}
+
+void ProtocolWithChangesWriterBase::WriteStreamedRecordWithChanges(evo_test::RecordWithChanges const& value) {
+  if (unlikely(state_ != 73)) {
+    ProtocolWithChangesWriterBaseInvalidState(73, false, state_);
   }
 
   WriteStreamedRecordWithChangesImpl(value);
 }
 
 void ProtocolWithChangesWriterBase::WriteStreamedRecordWithChanges(std::vector<evo_test::RecordWithChanges> const& values) {
-  if (unlikely(state_ != 49)) {
-    ProtocolWithChangesWriterBaseInvalidState(49, false, state_);
+  if (unlikely(state_ != 73)) {
+    ProtocolWithChangesWriterBaseInvalidState(73, false, state_);
   }
 
   WriteStreamedRecordWithChangesImpl(values);
 }
 
 void ProtocolWithChangesWriterBase::EndStreamedRecordWithChanges() {
-  if (unlikely(state_ != 49)) {
-    ProtocolWithChangesWriterBaseInvalidState(49, true, state_);
+  if (unlikely(state_ != 73)) {
+    ProtocolWithChangesWriterBaseInvalidState(73, true, state_);
   }
 
   EndStreamedRecordWithChangesImpl();
-  state_ = 50;
+  state_ = 74;
 }
 
 // fallback implementation
@@ -680,46 +968,46 @@ void ProtocolWithChangesWriterBase::WriteStreamedRecordWithChangesImpl(std::vect
 }
 
 void ProtocolWithChangesWriterBase::WriteAddedOptional(std::optional<evo_test::RecordWithChanges> const& value) {
-  if (unlikely(state_ != 50)) {
-    ProtocolWithChangesWriterBaseInvalidState(50, false, state_);
+  if (unlikely(state_ != 74)) {
+    ProtocolWithChangesWriterBaseInvalidState(74, false, state_);
   }
 
   WriteAddedOptionalImpl(value);
-  state_ = 51;
+  state_ = 75;
 }
 
 void ProtocolWithChangesWriterBase::WriteAddedMap(std::unordered_map<std::string, std::string> const& value) {
-  if (unlikely(state_ != 51)) {
-    ProtocolWithChangesWriterBaseInvalidState(51, false, state_);
+  if (unlikely(state_ != 75)) {
+    ProtocolWithChangesWriterBaseInvalidState(75, false, state_);
   }
 
   WriteAddedMapImpl(value);
-  state_ = 52;
+  state_ = 76;
 }
 
 void ProtocolWithChangesWriterBase::WriteAddedRecordStream(evo_test::RecordWithChanges const& value) {
-  if (unlikely(state_ != 52)) {
-    ProtocolWithChangesWriterBaseInvalidState(52, false, state_);
+  if (unlikely(state_ != 76)) {
+    ProtocolWithChangesWriterBaseInvalidState(76, false, state_);
   }
 
   WriteAddedRecordStreamImpl(value);
 }
 
 void ProtocolWithChangesWriterBase::WriteAddedRecordStream(std::vector<evo_test::RecordWithChanges> const& values) {
-  if (unlikely(state_ != 52)) {
-    ProtocolWithChangesWriterBaseInvalidState(52, false, state_);
+  if (unlikely(state_ != 76)) {
+    ProtocolWithChangesWriterBaseInvalidState(76, false, state_);
   }
 
   WriteAddedRecordStreamImpl(values);
 }
 
 void ProtocolWithChangesWriterBase::EndAddedRecordStream() {
-  if (unlikely(state_ != 52)) {
-    ProtocolWithChangesWriterBaseInvalidState(52, true, state_);
+  if (unlikely(state_ != 76)) {
+    ProtocolWithChangesWriterBaseInvalidState(76, true, state_);
   }
 
   EndAddedRecordStreamImpl();
-  state_ = 53;
+  state_ = 77;
 }
 
 // fallback implementation
@@ -730,8 +1018,8 @@ void ProtocolWithChangesWriterBase::WriteAddedRecordStreamImpl(std::vector<evo_t
 }
 
 void ProtocolWithChangesWriterBase::Close() {
-  if (unlikely(state_ != 53)) {
-    ProtocolWithChangesWriterBaseInvalidState(53, false, state_);
+  if (unlikely(state_ != 77)) {
+    ProtocolWithChangesWriterBaseInvalidState(77, false, state_);
   }
 
   CloseImpl();
@@ -1092,117 +1380,333 @@ void ProtocolWithChangesReaderBase::ReadRecordToAliasedAlias(evo_test::AliasOfAl
   state_ = 76;
 }
 
-void ProtocolWithChangesReaderBase::ReadOptionalRecordWithChanges(std::optional<evo_test::RecordWithChanges>& value) {
+void ProtocolWithChangesReaderBase::ReadRlink(evo_test::RLink& value) {
   if (unlikely(state_ != 76)) {
     ProtocolWithChangesReaderBaseInvalidState(76, state_);
   }
 
-  ReadOptionalRecordWithChangesImpl(value);
+  ReadRlinkImpl(value);
   state_ = 78;
 }
 
-void ProtocolWithChangesReaderBase::ReadAliasedOptionalRecordWithChanges(std::optional<evo_test::AliasedRecordWithChanges>& value) {
+void ProtocolWithChangesReaderBase::ReadRlinkRX(evo_test::RX& value) {
   if (unlikely(state_ != 78)) {
     ProtocolWithChangesReaderBaseInvalidState(78, state_);
   }
 
-  ReadAliasedOptionalRecordWithChangesImpl(value);
+  ReadRlinkRXImpl(value);
   state_ = 80;
 }
 
-void ProtocolWithChangesReaderBase::ReadUnionRecordWithChanges(std::variant<evo_test::RecordWithChanges, int32_t>& value) {
+void ProtocolWithChangesReaderBase::ReadRlinkRY(evo_test::RY& value) {
   if (unlikely(state_ != 80)) {
     ProtocolWithChangesReaderBaseInvalidState(80, state_);
   }
 
-  ReadUnionRecordWithChangesImpl(value);
+  ReadRlinkRYImpl(value);
   state_ = 82;
 }
 
-void ProtocolWithChangesReaderBase::ReadUnionWithSameTypeset(std::variant<float, evo_test::RecordWithChanges, std::string, int32_t>& value) {
+void ProtocolWithChangesReaderBase::ReadRlinkRZ(evo_test::RZ& value) {
   if (unlikely(state_ != 82)) {
     ProtocolWithChangesReaderBaseInvalidState(82, state_);
   }
 
-  ReadUnionWithSameTypesetImpl(value);
+  ReadRlinkRZImpl(value);
   state_ = 84;
 }
 
-void ProtocolWithChangesReaderBase::ReadUnionWithTypesAdded(std::variant<evo_test::RecordWithChanges, int32_t, float, std::string>& value) {
+void ProtocolWithChangesReaderBase::ReadRaRLink(evo_test::RLink& value) {
   if (unlikely(state_ != 84)) {
     ProtocolWithChangesReaderBaseInvalidState(84, state_);
   }
 
-  ReadUnionWithTypesAddedImpl(value);
+  ReadRaRLinkImpl(value);
   state_ = 86;
 }
 
-void ProtocolWithChangesReaderBase::ReadUnionWithTypesRemoved(std::variant<evo_test::RecordWithChanges, std::string>& value) {
+void ProtocolWithChangesReaderBase::ReadRaRX(evo_test::RX& value) {
   if (unlikely(state_ != 86)) {
     ProtocolWithChangesReaderBaseInvalidState(86, state_);
   }
 
-  ReadUnionWithTypesRemovedImpl(value);
+  ReadRaRXImpl(value);
   state_ = 88;
 }
 
-void ProtocolWithChangesReaderBase::ReadRecordToOptional(std::optional<evo_test::RecordWithChanges>& value) {
+void ProtocolWithChangesReaderBase::ReadRaRY(evo_test::RY& value) {
   if (unlikely(state_ != 88)) {
     ProtocolWithChangesReaderBaseInvalidState(88, state_);
   }
 
-  ReadRecordToOptionalImpl(value);
+  ReadRaRYImpl(value);
   state_ = 90;
 }
 
-void ProtocolWithChangesReaderBase::ReadRecordToAliasedOptional(evo_test::AliasedOptionalRecord& value) {
+void ProtocolWithChangesReaderBase::ReadRaRZ(evo_test::RZ& value) {
   if (unlikely(state_ != 90)) {
     ProtocolWithChangesReaderBaseInvalidState(90, state_);
   }
 
-  ReadRecordToAliasedOptionalImpl(value);
+  ReadRaRZImpl(value);
   state_ = 92;
 }
 
-void ProtocolWithChangesReaderBase::ReadRecordToUnion(std::variant<evo_test::RecordWithChanges, std::string>& value) {
+void ProtocolWithChangesReaderBase::ReadRbRLink(evo_test::RLink& value) {
   if (unlikely(state_ != 92)) {
     ProtocolWithChangesReaderBaseInvalidState(92, state_);
   }
 
-  ReadRecordToUnionImpl(value);
+  ReadRbRLinkImpl(value);
   state_ = 94;
 }
 
-void ProtocolWithChangesReaderBase::ReadRecordToAliasedUnion(evo_test::AliasedRecordOrString& value) {
+void ProtocolWithChangesReaderBase::ReadRbRX(evo_test::RX& value) {
   if (unlikely(state_ != 94)) {
     ProtocolWithChangesReaderBaseInvalidState(94, state_);
   }
 
-  ReadRecordToAliasedUnionImpl(value);
+  ReadRbRXImpl(value);
   state_ = 96;
 }
 
-void ProtocolWithChangesReaderBase::ReadVectorRecordWithChanges(std::vector<evo_test::RecordWithChanges>& value) {
+void ProtocolWithChangesReaderBase::ReadRbRY(evo_test::RY& value) {
   if (unlikely(state_ != 96)) {
     ProtocolWithChangesReaderBaseInvalidState(96, state_);
   }
 
-  ReadVectorRecordWithChangesImpl(value);
+  ReadRbRYImpl(value);
   state_ = 98;
 }
 
-bool ProtocolWithChangesReaderBase::ReadStreamedRecordWithChanges(evo_test::RecordWithChanges& value) {
+void ProtocolWithChangesReaderBase::ReadRbRZ(evo_test::RZ& value) {
   if (unlikely(state_ != 98)) {
-    if (state_ == 99) {
-      state_ = 100;
+    ProtocolWithChangesReaderBaseInvalidState(98, state_);
+  }
+
+  ReadRbRZImpl(value);
+  state_ = 100;
+}
+
+void ProtocolWithChangesReaderBase::ReadRcRLink(evo_test::RLink& value) {
+  if (unlikely(state_ != 100)) {
+    ProtocolWithChangesReaderBaseInvalidState(100, state_);
+  }
+
+  ReadRcRLinkImpl(value);
+  state_ = 102;
+}
+
+void ProtocolWithChangesReaderBase::ReadRcRX(evo_test::RX& value) {
+  if (unlikely(state_ != 102)) {
+    ProtocolWithChangesReaderBaseInvalidState(102, state_);
+  }
+
+  ReadRcRXImpl(value);
+  state_ = 104;
+}
+
+void ProtocolWithChangesReaderBase::ReadRcRY(evo_test::RY& value) {
+  if (unlikely(state_ != 104)) {
+    ProtocolWithChangesReaderBaseInvalidState(104, state_);
+  }
+
+  ReadRcRYImpl(value);
+  state_ = 106;
+}
+
+void ProtocolWithChangesReaderBase::ReadRcRZ(evo_test::RZ& value) {
+  if (unlikely(state_ != 106)) {
+    ProtocolWithChangesReaderBaseInvalidState(106, state_);
+  }
+
+  ReadRcRZImpl(value);
+  state_ = 108;
+}
+
+void ProtocolWithChangesReaderBase::ReadRlinkRNew(evo_test::RNew& value) {
+  if (unlikely(state_ != 108)) {
+    ProtocolWithChangesReaderBaseInvalidState(108, state_);
+  }
+
+  ReadRlinkRNewImpl(value);
+  state_ = 110;
+}
+
+void ProtocolWithChangesReaderBase::ReadRaRNew(evo_test::RNew& value) {
+  if (unlikely(state_ != 110)) {
+    ProtocolWithChangesReaderBaseInvalidState(110, state_);
+  }
+
+  ReadRaRNewImpl(value);
+  state_ = 112;
+}
+
+void ProtocolWithChangesReaderBase::ReadRbRNew(evo_test::RNew& value) {
+  if (unlikely(state_ != 112)) {
+    ProtocolWithChangesReaderBaseInvalidState(112, state_);
+  }
+
+  ReadRbRNewImpl(value);
+  state_ = 114;
+}
+
+void ProtocolWithChangesReaderBase::ReadRcRNew(evo_test::RNew& value) {
+  if (unlikely(state_ != 114)) {
+    ProtocolWithChangesReaderBaseInvalidState(114, state_);
+  }
+
+  ReadRcRNewImpl(value);
+  state_ = 116;
+}
+
+void ProtocolWithChangesReaderBase::ReadRlinkRUnion(evo_test::RUnion& value) {
+  if (unlikely(state_ != 116)) {
+    ProtocolWithChangesReaderBaseInvalidState(116, state_);
+  }
+
+  ReadRlinkRUnionImpl(value);
+  state_ = 118;
+}
+
+void ProtocolWithChangesReaderBase::ReadRaRUnion(evo_test::RUnion& value) {
+  if (unlikely(state_ != 118)) {
+    ProtocolWithChangesReaderBaseInvalidState(118, state_);
+  }
+
+  ReadRaRUnionImpl(value);
+  state_ = 120;
+}
+
+void ProtocolWithChangesReaderBase::ReadRbRUnion(evo_test::RUnion& value) {
+  if (unlikely(state_ != 120)) {
+    ProtocolWithChangesReaderBaseInvalidState(120, state_);
+  }
+
+  ReadRbRUnionImpl(value);
+  state_ = 122;
+}
+
+void ProtocolWithChangesReaderBase::ReadRcRUnion(evo_test::RUnion& value) {
+  if (unlikely(state_ != 122)) {
+    ProtocolWithChangesReaderBaseInvalidState(122, state_);
+  }
+
+  ReadRcRUnionImpl(value);
+  state_ = 124;
+}
+
+void ProtocolWithChangesReaderBase::ReadOptionalRecordWithChanges(std::optional<evo_test::RecordWithChanges>& value) {
+  if (unlikely(state_ != 124)) {
+    ProtocolWithChangesReaderBaseInvalidState(124, state_);
+  }
+
+  ReadOptionalRecordWithChangesImpl(value);
+  state_ = 126;
+}
+
+void ProtocolWithChangesReaderBase::ReadAliasedOptionalRecordWithChanges(std::optional<evo_test::AliasedRecordWithChanges>& value) {
+  if (unlikely(state_ != 126)) {
+    ProtocolWithChangesReaderBaseInvalidState(126, state_);
+  }
+
+  ReadAliasedOptionalRecordWithChangesImpl(value);
+  state_ = 128;
+}
+
+void ProtocolWithChangesReaderBase::ReadUnionRecordWithChanges(std::variant<evo_test::RecordWithChanges, int32_t>& value) {
+  if (unlikely(state_ != 128)) {
+    ProtocolWithChangesReaderBaseInvalidState(128, state_);
+  }
+
+  ReadUnionRecordWithChangesImpl(value);
+  state_ = 130;
+}
+
+void ProtocolWithChangesReaderBase::ReadUnionWithSameTypeset(std::variant<float, evo_test::RecordWithChanges, std::string, int32_t>& value) {
+  if (unlikely(state_ != 130)) {
+    ProtocolWithChangesReaderBaseInvalidState(130, state_);
+  }
+
+  ReadUnionWithSameTypesetImpl(value);
+  state_ = 132;
+}
+
+void ProtocolWithChangesReaderBase::ReadUnionWithTypesAdded(std::variant<evo_test::RecordWithChanges, int32_t, float, std::string>& value) {
+  if (unlikely(state_ != 132)) {
+    ProtocolWithChangesReaderBaseInvalidState(132, state_);
+  }
+
+  ReadUnionWithTypesAddedImpl(value);
+  state_ = 134;
+}
+
+void ProtocolWithChangesReaderBase::ReadUnionWithTypesRemoved(std::variant<evo_test::RecordWithChanges, std::string>& value) {
+  if (unlikely(state_ != 134)) {
+    ProtocolWithChangesReaderBaseInvalidState(134, state_);
+  }
+
+  ReadUnionWithTypesRemovedImpl(value);
+  state_ = 136;
+}
+
+void ProtocolWithChangesReaderBase::ReadRecordToOptional(std::optional<evo_test::RecordWithChanges>& value) {
+  if (unlikely(state_ != 136)) {
+    ProtocolWithChangesReaderBaseInvalidState(136, state_);
+  }
+
+  ReadRecordToOptionalImpl(value);
+  state_ = 138;
+}
+
+void ProtocolWithChangesReaderBase::ReadRecordToAliasedOptional(evo_test::AliasedOptionalRecord& value) {
+  if (unlikely(state_ != 138)) {
+    ProtocolWithChangesReaderBaseInvalidState(138, state_);
+  }
+
+  ReadRecordToAliasedOptionalImpl(value);
+  state_ = 140;
+}
+
+void ProtocolWithChangesReaderBase::ReadRecordToUnion(std::variant<evo_test::RecordWithChanges, std::string>& value) {
+  if (unlikely(state_ != 140)) {
+    ProtocolWithChangesReaderBaseInvalidState(140, state_);
+  }
+
+  ReadRecordToUnionImpl(value);
+  state_ = 142;
+}
+
+void ProtocolWithChangesReaderBase::ReadRecordToAliasedUnion(evo_test::AliasedRecordOrString& value) {
+  if (unlikely(state_ != 142)) {
+    ProtocolWithChangesReaderBaseInvalidState(142, state_);
+  }
+
+  ReadRecordToAliasedUnionImpl(value);
+  state_ = 144;
+}
+
+void ProtocolWithChangesReaderBase::ReadVectorRecordWithChanges(std::vector<evo_test::RecordWithChanges>& value) {
+  if (unlikely(state_ != 144)) {
+    ProtocolWithChangesReaderBaseInvalidState(144, state_);
+  }
+
+  ReadVectorRecordWithChangesImpl(value);
+  state_ = 146;
+}
+
+bool ProtocolWithChangesReaderBase::ReadStreamedRecordWithChanges(evo_test::RecordWithChanges& value) {
+  if (unlikely(state_ != 146)) {
+    if (state_ == 147) {
+      state_ = 148;
       return false;
     }
-    ProtocolWithChangesReaderBaseInvalidState(98, state_);
+    ProtocolWithChangesReaderBaseInvalidState(146, state_);
   }
 
   bool result = ReadStreamedRecordWithChangesImpl(value);
   if (!result) {
-    state_ = 100;
+    state_ = 148;
   }
   return result;
 }
@@ -1211,17 +1715,17 @@ bool ProtocolWithChangesReaderBase::ReadStreamedRecordWithChanges(std::vector<ev
   if (values.capacity() == 0) {
     throw std::runtime_error("vector must have a nonzero capacity.");
   }
-  if (unlikely(state_ != 98)) {
-    if (state_ == 99) {
-      state_ = 100;
+  if (unlikely(state_ != 146)) {
+    if (state_ == 147) {
+      state_ = 148;
       values.clear();
       return false;
     }
-    ProtocolWithChangesReaderBaseInvalidState(98, state_);
+    ProtocolWithChangesReaderBaseInvalidState(146, state_);
   }
 
   if (!ReadStreamedRecordWithChangesImpl(values)) {
-    state_ = 99;
+    state_ = 147;
     return values.size() > 0;
   }
   return true;
@@ -1246,39 +1750,39 @@ bool ProtocolWithChangesReaderBase::ReadStreamedRecordWithChangesImpl(std::vecto
 }
 
 void ProtocolWithChangesReaderBase::ReadAddedOptional(std::optional<evo_test::RecordWithChanges>& value) {
-  if (unlikely(state_ != 100)) {
-    if (state_ == 99) {
-      state_ = 100;
+  if (unlikely(state_ != 148)) {
+    if (state_ == 147) {
+      state_ = 148;
     } else {
-      ProtocolWithChangesReaderBaseInvalidState(100, state_);
+      ProtocolWithChangesReaderBaseInvalidState(148, state_);
     }
   }
 
   ReadAddedOptionalImpl(value);
-  state_ = 102;
+  state_ = 150;
 }
 
 void ProtocolWithChangesReaderBase::ReadAddedMap(std::unordered_map<std::string, std::string>& value) {
-  if (unlikely(state_ != 102)) {
-    ProtocolWithChangesReaderBaseInvalidState(102, state_);
+  if (unlikely(state_ != 150)) {
+    ProtocolWithChangesReaderBaseInvalidState(150, state_);
   }
 
   ReadAddedMapImpl(value);
-  state_ = 104;
+  state_ = 152;
 }
 
 bool ProtocolWithChangesReaderBase::ReadAddedRecordStream(evo_test::RecordWithChanges& value) {
-  if (unlikely(state_ != 104)) {
-    if (state_ == 105) {
-      state_ = 106;
+  if (unlikely(state_ != 152)) {
+    if (state_ == 153) {
+      state_ = 154;
       return false;
     }
-    ProtocolWithChangesReaderBaseInvalidState(104, state_);
+    ProtocolWithChangesReaderBaseInvalidState(152, state_);
   }
 
   bool result = ReadAddedRecordStreamImpl(value);
   if (!result) {
-    state_ = 106;
+    state_ = 154;
   }
   return result;
 }
@@ -1287,17 +1791,17 @@ bool ProtocolWithChangesReaderBase::ReadAddedRecordStream(std::vector<evo_test::
   if (values.capacity() == 0) {
     throw std::runtime_error("vector must have a nonzero capacity.");
   }
-  if (unlikely(state_ != 104)) {
-    if (state_ == 105) {
-      state_ = 106;
+  if (unlikely(state_ != 152)) {
+    if (state_ == 153) {
+      state_ = 154;
       values.clear();
       return false;
     }
-    ProtocolWithChangesReaderBaseInvalidState(104, state_);
+    ProtocolWithChangesReaderBaseInvalidState(152, state_);
   }
 
   if (!ReadAddedRecordStreamImpl(values)) {
-    state_ = 105;
+    state_ = 153;
     return values.size() > 0;
   }
   return true;
@@ -1322,11 +1826,11 @@ bool ProtocolWithChangesReaderBase::ReadAddedRecordStreamImpl(std::vector<evo_te
 }
 
 void ProtocolWithChangesReaderBase::Close() {
-  if (unlikely(state_ != 106)) {
-    if (state_ == 105) {
-      state_ = 106;
+  if (unlikely(state_ != 154)) {
+    if (state_ == 153) {
+      state_ = 154;
     } else {
-      ProtocolWithChangesReaderBaseInvalidState(106, state_);
+      ProtocolWithChangesReaderBaseInvalidState(154, state_);
     }
   }
 
@@ -1522,6 +2026,126 @@ void ProtocolWithChangesReaderBase::CopyTo(ProtocolWithChangesWriterBase& writer
     evo_test::AliasOfAliasedRecordWithChanges value;
     ReadRecordToAliasedAlias(value);
     writer.WriteRecordToAliasedAlias(value);
+  }
+  {
+    evo_test::RLink value;
+    ReadRlink(value);
+    writer.WriteRlink(value);
+  }
+  {
+    evo_test::RX value;
+    ReadRlinkRX(value);
+    writer.WriteRlinkRX(value);
+  }
+  {
+    evo_test::RY value;
+    ReadRlinkRY(value);
+    writer.WriteRlinkRY(value);
+  }
+  {
+    evo_test::RZ value;
+    ReadRlinkRZ(value);
+    writer.WriteRlinkRZ(value);
+  }
+  {
+    evo_test::RLink value;
+    ReadRaRLink(value);
+    writer.WriteRaRLink(value);
+  }
+  {
+    evo_test::RX value;
+    ReadRaRX(value);
+    writer.WriteRaRX(value);
+  }
+  {
+    evo_test::RY value;
+    ReadRaRY(value);
+    writer.WriteRaRY(value);
+  }
+  {
+    evo_test::RZ value;
+    ReadRaRZ(value);
+    writer.WriteRaRZ(value);
+  }
+  {
+    evo_test::RLink value;
+    ReadRbRLink(value);
+    writer.WriteRbRLink(value);
+  }
+  {
+    evo_test::RX value;
+    ReadRbRX(value);
+    writer.WriteRbRX(value);
+  }
+  {
+    evo_test::RY value;
+    ReadRbRY(value);
+    writer.WriteRbRY(value);
+  }
+  {
+    evo_test::RZ value;
+    ReadRbRZ(value);
+    writer.WriteRbRZ(value);
+  }
+  {
+    evo_test::RLink value;
+    ReadRcRLink(value);
+    writer.WriteRcRLink(value);
+  }
+  {
+    evo_test::RX value;
+    ReadRcRX(value);
+    writer.WriteRcRX(value);
+  }
+  {
+    evo_test::RY value;
+    ReadRcRY(value);
+    writer.WriteRcRY(value);
+  }
+  {
+    evo_test::RZ value;
+    ReadRcRZ(value);
+    writer.WriteRcRZ(value);
+  }
+  {
+    evo_test::RNew value;
+    ReadRlinkRNew(value);
+    writer.WriteRlinkRNew(value);
+  }
+  {
+    evo_test::RNew value;
+    ReadRaRNew(value);
+    writer.WriteRaRNew(value);
+  }
+  {
+    evo_test::RNew value;
+    ReadRbRNew(value);
+    writer.WriteRbRNew(value);
+  }
+  {
+    evo_test::RNew value;
+    ReadRcRNew(value);
+    writer.WriteRcRNew(value);
+  }
+  {
+    evo_test::RUnion value;
+    ReadRlinkRUnion(value);
+    writer.WriteRlinkRUnion(value);
+  }
+  {
+    evo_test::RUnion value;
+    ReadRaRUnion(value);
+    writer.WriteRaRUnion(value);
+  }
+  {
+    evo_test::RUnion value;
+    ReadRbRUnion(value);
+    writer.WriteRbRUnion(value);
+  }
+  {
+    evo_test::RUnion value;
+    ReadRcRUnion(value);
+    writer.WriteRcRUnion(value);
   }
   {
     std::optional<evo_test::RecordWithChanges> value;

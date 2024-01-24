@@ -663,7 +663,7 @@ func writeCompatibilitySerializers(w *formatting.IndentedWriter, change dsl.Defi
 				} else if tc := change.FieldChanges[i]; tc != nil {
 					// Field type change: Handle type conversions
 					if requiresExplicitConversion(tc) {
-						tmpVarType := common.EvolutionChangeTypeSyntax(tc)
+						tmpVarType := common.TypeSyntax(tc.OldType())
 						fmt.Fprintf(w, "%s %s;\n", tmpVarType, tmpVarName)
 
 						if write {
@@ -687,7 +687,7 @@ func writeCompatibilitySerializers(w *formatting.IndentedWriter, change dsl.Defi
 				if tc := change.TypeChange; tc != nil {
 					tmpVarName := common.FieldIdentifierName(prev.Name)
 					if requiresExplicitConversion(tc) {
-						varType := common.EvolutionChangeTypeSyntax(tc)
+						varType := common.TypeSyntax(tc.OldType())
 						fmt.Fprintf(w, "%s %s;\n", varType, tmpVarName)
 						if write {
 							writeTypeConversion(w, tc, "value", tmpVarName, write)
@@ -727,11 +727,10 @@ func writeCompatibilitySerializers(w *formatting.IndentedWriter, change dsl.Defi
 
 func writeCompatibilityRwFunctionSignature(old dsl.TypeDefinition, new dsl.TypeDefinition, versionLabel string, w *formatting.IndentedWriter, write bool) {
 	writeRwFunctionTemplateDeclaration(old, w, write)
-	suffix := fmt.Sprintf("_%s", versionLabel)
 	if write {
-		fmt.Fprintf(w, "[[maybe_unused]] static void Write%s%s(yardl::binary::CodedOutputStream& stream, %s const& value) {\n", old.GetDefinitionMeta().Name, suffix, common.TypeDefinitionSyntax(new))
+		fmt.Fprintf(w, "[[maybe_unused]] static void Write%s(yardl::binary::CodedOutputStream& stream, %s const& value) {\n", old.GetDefinitionMeta().Name, common.TypeDefinitionSyntax(new))
 	} else {
-		fmt.Fprintf(w, "[[maybe_unused]] static void Read%s%s(yardl::binary::CodedInputStream& stream, %s& value) {\n", old.GetDefinitionMeta().Name, suffix, common.TypeDefinitionSyntax(new))
+		fmt.Fprintf(w, "[[maybe_unused]] static void Read%s(yardl::binary::CodedInputStream& stream, %s& value) {\n", old.GetDefinitionMeta().Name, common.TypeDefinitionSyntax(new))
 	}
 }
 
@@ -940,7 +939,7 @@ func writeProtocolStep(w *formatting.IndentedWriter, step *dsl.ProtocolStep, cha
 			// Handle conversions for ProtocolStep type changes
 			if requiresExplicitConversion(change) {
 				tmpVarName := common.FieldIdentifierName(step.Name)
-				tmpVarType := common.EvolutionChangeTypeSyntax(change)
+				tmpVarType := common.TypeSyntax(change.OldType())
 				fmt.Fprintf(w, "%s %s;\n", tmpVarType, tmpVarName)
 
 				if write {
@@ -1004,12 +1003,7 @@ func typeDefinitionRwFunction(t dsl.TypeDefinition, write bool) string {
 		return fmt.Sprintf("%s%s", verb(write), common.TypeDefinitionSyntax(t))
 	default:
 		meta := t.GetDefinitionMeta()
-
 		suffix := meta.Name
-		if versionLabel, ok := meta.Annotations[dsl.VersionAnnotationKey].(string); ok {
-			suffix = fmt.Sprintf("%s_%s", suffix, versionLabel)
-		}
-
 		verb := verb(write)
 		typeArgumentsString := ""
 		if len(meta.TypeParameters) > 0 {

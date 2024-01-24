@@ -69,5 +69,37 @@ struct RenamedRecord {
   }
 };
 
+struct RC {
+  std::string subject{};
+
+  bool operator==(const RC& other) const {
+    return subject == other.subject;
+  }
+
+  bool operator!=(const RC& other) const {
+    return !(*this == other);
+  }
+};
+
+using RB = evo_test::RC;
+
+using RA = evo_test::RB;
+
+using RLink = evo_test::RA;
+
+struct UnusedButChangedRecord {
+  std::string name{};
+  int32_t age{};
+
+  bool operator==(const UnusedButChangedRecord& other) const {
+    return name == other.name &&
+      age == other.age;
+  }
+
+  bool operator!=(const UnusedButChangedRecord& other) const {
+    return !(*this == other);
+  }
+};
+
 } // namespace evo_test
 

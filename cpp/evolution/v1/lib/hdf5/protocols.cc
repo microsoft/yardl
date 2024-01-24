@@ -297,6 +297,22 @@ struct _Inner_DeprecatedRecord {
   int32_t i;
 };
 
+struct _Inner_UnusedButChangedRecord {
+  _Inner_UnusedButChangedRecord() {} 
+  _Inner_UnusedButChangedRecord(evo_test::UnusedButChangedRecord const& o) 
+      : age(o.age),
+      name(o.name) {
+  }
+
+  void ToOuter (evo_test::UnusedButChangedRecord& o) const {
+    yardl::hdf5::ToOuter(age, o.age);
+    yardl::hdf5::ToOuter(name, o.name);
+  }
+
+  float age;
+  yardl::hdf5::InnerVlenString name;
+};
+
 [[maybe_unused]] H5::CompType GetUnchangedRecordHdf5Ddl() {
   using RecordType = evo_test::hdf5::_Inner_UnchangedRecord;
   H5::CompType t(sizeof(RecordType));
@@ -321,6 +337,21 @@ struct _Inner_DeprecatedRecord {
   H5::CompType t(sizeof(RecordType));
   t.insertMember("s", HOFFSET(RecordType, s), yardl::hdf5::InnerVlenStringDdl());
   t.insertMember("i", HOFFSET(RecordType, i), H5::PredType::NATIVE_INT32);
+  return t;
+}
+
+[[maybe_unused]] H5::CompType GetRZHdf5Ddl() {
+  using RecordType = evo_test::RZ;
+  H5::CompType t(sizeof(RecordType));
+  t.insertMember("subject", HOFFSET(RecordType, subject), H5::PredType::NATIVE_INT32);
+  return t;
+}
+
+[[maybe_unused]] H5::CompType GetUnusedButChangedRecordHdf5Ddl() {
+  using RecordType = evo_test::hdf5::_Inner_UnusedButChangedRecord;
+  H5::CompType t(sizeof(RecordType));
+  t.insertMember("age", HOFFSET(RecordType, age), H5::PredType::NATIVE_FLOAT);
+  t.insertMember("name", HOFFSET(RecordType, name), yardl::hdf5::InnerVlenStringDdl());
   return t;
 }
 
@@ -480,6 +511,102 @@ void ProtocolWithChangesWriter::WriteRecordToAliasedRecordImpl(evo_test::Aliased
 
 void ProtocolWithChangesWriter::WriteRecordToAliasedAliasImpl(evo_test::AliasOfAliasedRecordWithChanges const& value) {
   yardl::hdf5::WriteScalarDataset<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::AliasOfAliasedRecordWithChanges>(group_, "recordToAliasedAlias", evo_test::hdf5::GetRecordWithChangesHdf5Ddl(), value);
+}
+
+void ProtocolWithChangesWriter::WriteRlinkImpl(evo_test::RLink const& value) {
+  yardl::hdf5::WriteScalarDataset<evo_test::RZ, evo_test::RLink>(group_, "rlink", evo_test::hdf5::GetRZHdf5Ddl(), value);
+}
+
+void ProtocolWithChangesWriter::WriteRlinkRXImpl(evo_test::RX const& value) {
+  yardl::hdf5::WriteScalarDataset<evo_test::RZ, evo_test::RX>(group_, "rlinkRX", evo_test::hdf5::GetRZHdf5Ddl(), value);
+}
+
+void ProtocolWithChangesWriter::WriteRlinkRYImpl(evo_test::RY const& value) {
+  yardl::hdf5::WriteScalarDataset<evo_test::RZ, evo_test::RY>(group_, "rlinkRY", evo_test::hdf5::GetRZHdf5Ddl(), value);
+}
+
+void ProtocolWithChangesWriter::WriteRlinkRZImpl(evo_test::RZ const& value) {
+  yardl::hdf5::WriteScalarDataset<evo_test::RZ, evo_test::RZ>(group_, "rlinkRZ", evo_test::hdf5::GetRZHdf5Ddl(), value);
+}
+
+void ProtocolWithChangesWriter::WriteRaRLinkImpl(evo_test::RLink const& value) {
+  yardl::hdf5::WriteScalarDataset<evo_test::RZ, evo_test::RLink>(group_, "raRLink", evo_test::hdf5::GetRZHdf5Ddl(), value);
+}
+
+void ProtocolWithChangesWriter::WriteRaRXImpl(evo_test::RX const& value) {
+  yardl::hdf5::WriteScalarDataset<evo_test::RZ, evo_test::RX>(group_, "raRX", evo_test::hdf5::GetRZHdf5Ddl(), value);
+}
+
+void ProtocolWithChangesWriter::WriteRaRYImpl(evo_test::RY const& value) {
+  yardl::hdf5::WriteScalarDataset<evo_test::RZ, evo_test::RY>(group_, "raRY", evo_test::hdf5::GetRZHdf5Ddl(), value);
+}
+
+void ProtocolWithChangesWriter::WriteRaRZImpl(evo_test::RZ const& value) {
+  yardl::hdf5::WriteScalarDataset<evo_test::RZ, evo_test::RZ>(group_, "raRZ", evo_test::hdf5::GetRZHdf5Ddl(), value);
+}
+
+void ProtocolWithChangesWriter::WriteRbRLinkImpl(evo_test::RLink const& value) {
+  yardl::hdf5::WriteScalarDataset<evo_test::RZ, evo_test::RLink>(group_, "rbRLink", evo_test::hdf5::GetRZHdf5Ddl(), value);
+}
+
+void ProtocolWithChangesWriter::WriteRbRXImpl(evo_test::RX const& value) {
+  yardl::hdf5::WriteScalarDataset<evo_test::RZ, evo_test::RX>(group_, "rbRX", evo_test::hdf5::GetRZHdf5Ddl(), value);
+}
+
+void ProtocolWithChangesWriter::WriteRbRYImpl(evo_test::RY const& value) {
+  yardl::hdf5::WriteScalarDataset<evo_test::RZ, evo_test::RY>(group_, "rbRY", evo_test::hdf5::GetRZHdf5Ddl(), value);
+}
+
+void ProtocolWithChangesWriter::WriteRbRZImpl(evo_test::RZ const& value) {
+  yardl::hdf5::WriteScalarDataset<evo_test::RZ, evo_test::RZ>(group_, "rbRZ", evo_test::hdf5::GetRZHdf5Ddl(), value);
+}
+
+void ProtocolWithChangesWriter::WriteRcRLinkImpl(evo_test::RLink const& value) {
+  yardl::hdf5::WriteScalarDataset<evo_test::RZ, evo_test::RLink>(group_, "rcRLink", evo_test::hdf5::GetRZHdf5Ddl(), value);
+}
+
+void ProtocolWithChangesWriter::WriteRcRXImpl(evo_test::RX const& value) {
+  yardl::hdf5::WriteScalarDataset<evo_test::RZ, evo_test::RX>(group_, "rcRX", evo_test::hdf5::GetRZHdf5Ddl(), value);
+}
+
+void ProtocolWithChangesWriter::WriteRcRYImpl(evo_test::RY const& value) {
+  yardl::hdf5::WriteScalarDataset<evo_test::RZ, evo_test::RY>(group_, "rcRY", evo_test::hdf5::GetRZHdf5Ddl(), value);
+}
+
+void ProtocolWithChangesWriter::WriteRcRZImpl(evo_test::RZ const& value) {
+  yardl::hdf5::WriteScalarDataset<evo_test::RZ, evo_test::RZ>(group_, "rcRZ", evo_test::hdf5::GetRZHdf5Ddl(), value);
+}
+
+void ProtocolWithChangesWriter::WriteRlinkRNewImpl(evo_test::RNew const& value) {
+  yardl::hdf5::WriteScalarDataset<evo_test::RZ, evo_test::RNew>(group_, "rlinkRNew", evo_test::hdf5::GetRZHdf5Ddl(), value);
+}
+
+void ProtocolWithChangesWriter::WriteRaRNewImpl(evo_test::RNew const& value) {
+  yardl::hdf5::WriteScalarDataset<evo_test::RZ, evo_test::RNew>(group_, "raRNew", evo_test::hdf5::GetRZHdf5Ddl(), value);
+}
+
+void ProtocolWithChangesWriter::WriteRbRNewImpl(evo_test::RNew const& value) {
+  yardl::hdf5::WriteScalarDataset<evo_test::RZ, evo_test::RNew>(group_, "rbRNew", evo_test::hdf5::GetRZHdf5Ddl(), value);
+}
+
+void ProtocolWithChangesWriter::WriteRcRNewImpl(evo_test::RNew const& value) {
+  yardl::hdf5::WriteScalarDataset<evo_test::RZ, evo_test::RNew>(group_, "rcRNew", evo_test::hdf5::GetRZHdf5Ddl(), value);
+}
+
+void ProtocolWithChangesWriter::WriteRlinkRUnionImpl(evo_test::RUnion const& value) {
+  yardl::hdf5::WriteScalarDataset<::InnerUnion2<evo_test::RZ, evo_test::RX, yardl::hdf5::InnerVlenString, std::string>, evo_test::RUnion>(group_, "rlinkRUnion", ::InnerUnion2Ddl<evo_test::RZ, evo_test::RX, yardl::hdf5::InnerVlenString, std::string>(false, evo_test::hdf5::GetRZHdf5Ddl(), "RX", yardl::hdf5::InnerVlenStringDdl(), "string"), value);
+}
+
+void ProtocolWithChangesWriter::WriteRaRUnionImpl(evo_test::RUnion const& value) {
+  yardl::hdf5::WriteScalarDataset<::InnerUnion2<evo_test::RZ, evo_test::RX, yardl::hdf5::InnerVlenString, std::string>, evo_test::RUnion>(group_, "raRUnion", ::InnerUnion2Ddl<evo_test::RZ, evo_test::RX, yardl::hdf5::InnerVlenString, std::string>(false, evo_test::hdf5::GetRZHdf5Ddl(), "RX", yardl::hdf5::InnerVlenStringDdl(), "string"), value);
+}
+
+void ProtocolWithChangesWriter::WriteRbRUnionImpl(evo_test::RUnion const& value) {
+  yardl::hdf5::WriteScalarDataset<::InnerUnion2<evo_test::RZ, evo_test::RX, yardl::hdf5::InnerVlenString, std::string>, evo_test::RUnion>(group_, "rbRUnion", ::InnerUnion2Ddl<evo_test::RZ, evo_test::RX, yardl::hdf5::InnerVlenString, std::string>(false, evo_test::hdf5::GetRZHdf5Ddl(), "RX", yardl::hdf5::InnerVlenStringDdl(), "string"), value);
+}
+
+void ProtocolWithChangesWriter::WriteRcRUnionImpl(evo_test::RUnion const& value) {
+  yardl::hdf5::WriteScalarDataset<::InnerUnion2<evo_test::RZ, evo_test::RX, yardl::hdf5::InnerVlenString, std::string>, evo_test::RUnion>(group_, "rcRUnion", ::InnerUnion2Ddl<evo_test::RZ, evo_test::RX, yardl::hdf5::InnerVlenString, std::string>(false, evo_test::hdf5::GetRZHdf5Ddl(), "RX", yardl::hdf5::InnerVlenStringDdl(), "string"), value);
 }
 
 void ProtocolWithChangesWriter::WriteOptionalRecordWithChangesImpl(std::optional<evo_test::RecordWithChanges> const& value) {
@@ -736,6 +863,102 @@ void ProtocolWithChangesReader::ReadRecordToAliasedRecordImpl(evo_test::AliasedR
 
 void ProtocolWithChangesReader::ReadRecordToAliasedAliasImpl(evo_test::AliasOfAliasedRecordWithChanges& value) {
   yardl::hdf5::ReadScalarDataset<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::AliasOfAliasedRecordWithChanges>(group_, "recordToAliasedAlias", evo_test::hdf5::GetRecordWithChangesHdf5Ddl(), value);
+}
+
+void ProtocolWithChangesReader::ReadRlinkImpl(evo_test::RLink& value) {
+  yardl::hdf5::ReadScalarDataset<evo_test::RZ, evo_test::RLink>(group_, "rlink", evo_test::hdf5::GetRZHdf5Ddl(), value);
+}
+
+void ProtocolWithChangesReader::ReadRlinkRXImpl(evo_test::RX& value) {
+  yardl::hdf5::ReadScalarDataset<evo_test::RZ, evo_test::RX>(group_, "rlinkRX", evo_test::hdf5::GetRZHdf5Ddl(), value);
+}
+
+void ProtocolWithChangesReader::ReadRlinkRYImpl(evo_test::RY& value) {
+  yardl::hdf5::ReadScalarDataset<evo_test::RZ, evo_test::RY>(group_, "rlinkRY", evo_test::hdf5::GetRZHdf5Ddl(), value);
+}
+
+void ProtocolWithChangesReader::ReadRlinkRZImpl(evo_test::RZ& value) {
+  yardl::hdf5::ReadScalarDataset<evo_test::RZ, evo_test::RZ>(group_, "rlinkRZ", evo_test::hdf5::GetRZHdf5Ddl(), value);
+}
+
+void ProtocolWithChangesReader::ReadRaRLinkImpl(evo_test::RLink& value) {
+  yardl::hdf5::ReadScalarDataset<evo_test::RZ, evo_test::RLink>(group_, "raRLink", evo_test::hdf5::GetRZHdf5Ddl(), value);
+}
+
+void ProtocolWithChangesReader::ReadRaRXImpl(evo_test::RX& value) {
+  yardl::hdf5::ReadScalarDataset<evo_test::RZ, evo_test::RX>(group_, "raRX", evo_test::hdf5::GetRZHdf5Ddl(), value);
+}
+
+void ProtocolWithChangesReader::ReadRaRYImpl(evo_test::RY& value) {
+  yardl::hdf5::ReadScalarDataset<evo_test::RZ, evo_test::RY>(group_, "raRY", evo_test::hdf5::GetRZHdf5Ddl(), value);
+}
+
+void ProtocolWithChangesReader::ReadRaRZImpl(evo_test::RZ& value) {
+  yardl::hdf5::ReadScalarDataset<evo_test::RZ, evo_test::RZ>(group_, "raRZ", evo_test::hdf5::GetRZHdf5Ddl(), value);
+}
+
+void ProtocolWithChangesReader::ReadRbRLinkImpl(evo_test::RLink& value) {
+  yardl::hdf5::ReadScalarDataset<evo_test::RZ, evo_test::RLink>(group_, "rbRLink", evo_test::hdf5::GetRZHdf5Ddl(), value);
+}
+
+void ProtocolWithChangesReader::ReadRbRXImpl(evo_test::RX& value) {
+  yardl::hdf5::ReadScalarDataset<evo_test::RZ, evo_test::RX>(group_, "rbRX", evo_test::hdf5::GetRZHdf5Ddl(), value);
+}
+
+void ProtocolWithChangesReader::ReadRbRYImpl(evo_test::RY& value) {
+  yardl::hdf5::ReadScalarDataset<evo_test::RZ, evo_test::RY>(group_, "rbRY", evo_test::hdf5::GetRZHdf5Ddl(), value);
+}
+
+void ProtocolWithChangesReader::ReadRbRZImpl(evo_test::RZ& value) {
+  yardl::hdf5::ReadScalarDataset<evo_test::RZ, evo_test::RZ>(group_, "rbRZ", evo_test::hdf5::GetRZHdf5Ddl(), value);
+}
+
+void ProtocolWithChangesReader::ReadRcRLinkImpl(evo_test::RLink& value) {
+  yardl::hdf5::ReadScalarDataset<evo_test::RZ, evo_test::RLink>(group_, "rcRLink", evo_test::hdf5::GetRZHdf5Ddl(), value);
+}
+
+void ProtocolWithChangesReader::ReadRcRXImpl(evo_test::RX& value) {
+  yardl::hdf5::ReadScalarDataset<evo_test::RZ, evo_test::RX>(group_, "rcRX", evo_test::hdf5::GetRZHdf5Ddl(), value);
+}
+
+void ProtocolWithChangesReader::ReadRcRYImpl(evo_test::RY& value) {
+  yardl::hdf5::ReadScalarDataset<evo_test::RZ, evo_test::RY>(group_, "rcRY", evo_test::hdf5::GetRZHdf5Ddl(), value);
+}
+
+void ProtocolWithChangesReader::ReadRcRZImpl(evo_test::RZ& value) {
+  yardl::hdf5::ReadScalarDataset<evo_test::RZ, evo_test::RZ>(group_, "rcRZ", evo_test::hdf5::GetRZHdf5Ddl(), value);
+}
+
+void ProtocolWithChangesReader::ReadRlinkRNewImpl(evo_test::RNew& value) {
+  yardl::hdf5::ReadScalarDataset<evo_test::RZ, evo_test::RNew>(group_, "rlinkRNew", evo_test::hdf5::GetRZHdf5Ddl(), value);
+}
+
+void ProtocolWithChangesReader::ReadRaRNewImpl(evo_test::RNew& value) {
+  yardl::hdf5::ReadScalarDataset<evo_test::RZ, evo_test::RNew>(group_, "raRNew", evo_test::hdf5::GetRZHdf5Ddl(), value);
+}
+
+void ProtocolWithChangesReader::ReadRbRNewImpl(evo_test::RNew& value) {
+  yardl::hdf5::ReadScalarDataset<evo_test::RZ, evo_test::RNew>(group_, "rbRNew", evo_test::hdf5::GetRZHdf5Ddl(), value);
+}
+
+void ProtocolWithChangesReader::ReadRcRNewImpl(evo_test::RNew& value) {
+  yardl::hdf5::ReadScalarDataset<evo_test::RZ, evo_test::RNew>(group_, "rcRNew", evo_test::hdf5::GetRZHdf5Ddl(), value);
+}
+
+void ProtocolWithChangesReader::ReadRlinkRUnionImpl(evo_test::RUnion& value) {
+  yardl::hdf5::ReadScalarDataset<::InnerUnion2<evo_test::RZ, evo_test::RX, yardl::hdf5::InnerVlenString, std::string>, evo_test::RUnion>(group_, "rlinkRUnion", ::InnerUnion2Ddl<evo_test::RZ, evo_test::RX, yardl::hdf5::InnerVlenString, std::string>(false, evo_test::hdf5::GetRZHdf5Ddl(), "RX", yardl::hdf5::InnerVlenStringDdl(), "string"), value);
+}
+
+void ProtocolWithChangesReader::ReadRaRUnionImpl(evo_test::RUnion& value) {
+  yardl::hdf5::ReadScalarDataset<::InnerUnion2<evo_test::RZ, evo_test::RX, yardl::hdf5::InnerVlenString, std::string>, evo_test::RUnion>(group_, "raRUnion", ::InnerUnion2Ddl<evo_test::RZ, evo_test::RX, yardl::hdf5::InnerVlenString, std::string>(false, evo_test::hdf5::GetRZHdf5Ddl(), "RX", yardl::hdf5::InnerVlenStringDdl(), "string"), value);
+}
+
+void ProtocolWithChangesReader::ReadRbRUnionImpl(evo_test::RUnion& value) {
+  yardl::hdf5::ReadScalarDataset<::InnerUnion2<evo_test::RZ, evo_test::RX, yardl::hdf5::InnerVlenString, std::string>, evo_test::RUnion>(group_, "rbRUnion", ::InnerUnion2Ddl<evo_test::RZ, evo_test::RX, yardl::hdf5::InnerVlenString, std::string>(false, evo_test::hdf5::GetRZHdf5Ddl(), "RX", yardl::hdf5::InnerVlenStringDdl(), "string"), value);
+}
+
+void ProtocolWithChangesReader::ReadRcRUnionImpl(evo_test::RUnion& value) {
+  yardl::hdf5::ReadScalarDataset<::InnerUnion2<evo_test::RZ, evo_test::RX, yardl::hdf5::InnerVlenString, std::string>, evo_test::RUnion>(group_, "rcRUnion", ::InnerUnion2Ddl<evo_test::RZ, evo_test::RX, yardl::hdf5::InnerVlenString, std::string>(false, evo_test::hdf5::GetRZHdf5Ddl(), "RX", yardl::hdf5::InnerVlenStringDdl(), "string"), value);
 }
 
 void ProtocolWithChangesReader::ReadOptionalRecordWithChangesImpl(std::optional<evo_test::RecordWithChanges>& value) {

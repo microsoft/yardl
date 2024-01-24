@@ -48,6 +48,37 @@ ProtocolWithChanges: !protocol
     recordToAliasedRecord: AliasedRecordWithChanges
     recordToAliasedAlias: AliasOfAliasedRecordWithChanges
 
+    # Comprehensive NamedType changes
+    rlink: RLink
+    rlinkRX: RX
+    rlinkRY: RY
+    rlinkRZ: RZ
+
+    raRLink: RLink
+    raRX: RX
+    raRY: RY
+    raRZ: RZ
+
+    rbRLink: RLink
+    rbRX: RX
+    rbRY: RY
+    rbRZ: RZ
+
+    rcRLink: RLink
+    rcRX: RX
+    rcRY: RY
+    rcRZ: RZ
+
+    rlinkRNew: RNew
+    raRNew: RNew
+    rbRNew: RNew
+    rcRNew: RNew
+
+    rlinkRUnion: RUnion
+    raRUnion: RUnion
+    rbRUnion: RUnion
+    rcRUnion: RUnion
+
     optionalRecordWithChanges: RecordWithChanges?
     aliasedOptionalRecordWithChanges: AliasedRecordWithChanges?
 
@@ -101,7 +132,22 @@ DeprecatedRecord: !record
     s: string
     i: int
 
+RX: RLink
+RLink: RNew
+RNew: RY
+RY: RZ
+RZ: !record
+  fields:
+    subject: int
+
+RUnion: [RX, string]
+
 UnusedProtocol: !protocol
   sequence:
     records: !stream
       items: UnchangedRecord
+
+UnusedButChangedRecord: !record
+  fields:
+    age: float
+    name: string

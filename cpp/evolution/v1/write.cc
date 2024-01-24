@@ -70,6 +70,41 @@ int main(void) {
   w.WriteRecordToAliasedRecord(rec);
   w.WriteRecordToAliasedAlias(rec);
 
+  RZ record;
+  record.subject = 42;
+
+  w.WriteRlink(record);
+  w.WriteRlinkRX(record);
+  w.WriteRlinkRY(record);
+  w.WriteRlinkRZ(record);
+
+  w.WriteRaRLink(record);
+  w.WriteRaRX(record);
+  w.WriteRaRY(record);
+  w.WriteRaRZ(record);
+
+  w.WriteRbRLink(record);
+  w.WriteRbRX(record);
+  w.WriteRbRY(record);
+  w.WriteRbRZ(record);
+
+  w.WriteRcRLink(record);
+  w.WriteRcRX(record);
+  w.WriteRcRY(record);
+  w.WriteRcRZ(record);
+
+  RNew rnew = record;
+  w.WriteRlinkRNew(rnew);
+  w.WriteRaRNew(rnew);
+  w.WriteRbRNew(rnew);
+  w.WriteRcRNew(rnew);
+
+  RUnion runion = record;
+  w.WriteRlinkRUnion(runion);
+  w.WriteRaRUnion(runion);
+  w.WriteRbRUnion(runion);
+  w.WriteRcRUnion(runion);
+
   w.WriteOptionalRecordWithChanges(rec);
   w.WriteAliasedOptionalRecordWithChanges(rec);
 

@@ -15,6 +15,12 @@ using ordered_json = nlohmann::ordered_json;
 [[maybe_unused]] static void to_json(ordered_json& j, evo_test::RenamedRecord const& value);
 [[maybe_unused]] static void from_json(ordered_json const& j, evo_test::RenamedRecord& value);
 
+[[maybe_unused]] static void to_json(ordered_json& j, evo_test::RC const& value);
+[[maybe_unused]] static void from_json(ordered_json const& j, evo_test::RC& value);
+
+[[maybe_unused]] static void to_json(ordered_json& j, evo_test::UnusedButChangedRecord const& value);
+[[maybe_unused]] static void from_json(ordered_json const& j, evo_test::UnusedButChangedRecord& value);
+
 } // namespace evo_test
 
 NLOHMANN_JSON_NAMESPACE_BEGIN
@@ -250,6 +256,38 @@ using ordered_json = nlohmann::ordered_json;
   }
 }
 
+[[maybe_unused]] static void to_json(ordered_json& j, evo_test::RC const& value) {
+  j = ordered_json::object();
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.subject)) {
+    j.push_back({"subject", value.subject});
+  }
+}
+
+[[maybe_unused]] static void from_json(ordered_json const& j, evo_test::RC& value) {
+  if (auto it = j.find("subject"); it != j.end()) {
+    it->get_to(value.subject);
+  }
+}
+
+[[maybe_unused]] static void to_json(ordered_json& j, evo_test::UnusedButChangedRecord const& value) {
+  j = ordered_json::object();
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.name)) {
+    j.push_back({"name", value.name});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.age)) {
+    j.push_back({"age", value.age});
+  }
+}
+
+[[maybe_unused]] static void from_json(ordered_json const& j, evo_test::UnusedButChangedRecord& value) {
+  if (auto it = j.find("name"); it != j.end()) {
+    it->get_to(value.name);
+  }
+  if (auto it = j.find("age"); it != j.end()) {
+    it->get_to(value.age);
+  }
+}
+
 } // namespace evo_test
 
 namespace evo_test::ndjson {
@@ -404,6 +442,102 @@ void ProtocolWithChangesWriter::WriteRecordToAliasedRecordImpl(evo_test::RecordW
 void ProtocolWithChangesWriter::WriteRecordToAliasedAliasImpl(evo_test::RecordWithChanges const& value) {
   ordered_json json_value = value;
   yardl::ndjson::WriteProtocolValue(stream_, "recordToAliasedAlias", json_value);}
+
+void ProtocolWithChangesWriter::WriteRlinkImpl(evo_test::RLink const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "rlink", json_value);}
+
+void ProtocolWithChangesWriter::WriteRlinkRXImpl(evo_test::RLink const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "rlinkRX", json_value);}
+
+void ProtocolWithChangesWriter::WriteRlinkRYImpl(evo_test::RLink const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "rlinkRY", json_value);}
+
+void ProtocolWithChangesWriter::WriteRlinkRZImpl(evo_test::RLink const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "rlinkRZ", json_value);}
+
+void ProtocolWithChangesWriter::WriteRaRLinkImpl(evo_test::RA const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "raRLink", json_value);}
+
+void ProtocolWithChangesWriter::WriteRaRXImpl(evo_test::RA const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "raRX", json_value);}
+
+void ProtocolWithChangesWriter::WriteRaRYImpl(evo_test::RA const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "raRY", json_value);}
+
+void ProtocolWithChangesWriter::WriteRaRZImpl(evo_test::RA const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "raRZ", json_value);}
+
+void ProtocolWithChangesWriter::WriteRbRLinkImpl(evo_test::RB const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "rbRLink", json_value);}
+
+void ProtocolWithChangesWriter::WriteRbRXImpl(evo_test::RB const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "rbRX", json_value);}
+
+void ProtocolWithChangesWriter::WriteRbRYImpl(evo_test::RB const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "rbRY", json_value);}
+
+void ProtocolWithChangesWriter::WriteRbRZImpl(evo_test::RB const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "rbRZ", json_value);}
+
+void ProtocolWithChangesWriter::WriteRcRLinkImpl(evo_test::RC const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "rcRLink", json_value);}
+
+void ProtocolWithChangesWriter::WriteRcRXImpl(evo_test::RC const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "rcRX", json_value);}
+
+void ProtocolWithChangesWriter::WriteRcRYImpl(evo_test::RC const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "rcRY", json_value);}
+
+void ProtocolWithChangesWriter::WriteRcRZImpl(evo_test::RC const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "rcRZ", json_value);}
+
+void ProtocolWithChangesWriter::WriteRlinkRNewImpl(evo_test::RLink const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "rlinkRNew", json_value);}
+
+void ProtocolWithChangesWriter::WriteRaRNewImpl(evo_test::RA const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "raRNew", json_value);}
+
+void ProtocolWithChangesWriter::WriteRbRNewImpl(evo_test::RB const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "rbRNew", json_value);}
+
+void ProtocolWithChangesWriter::WriteRcRNewImpl(evo_test::RC const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "rcRNew", json_value);}
+
+void ProtocolWithChangesWriter::WriteRlinkRUnionImpl(evo_test::RLink const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "rlinkRUnion", json_value);}
+
+void ProtocolWithChangesWriter::WriteRaRUnionImpl(evo_test::RA const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "raRUnion", json_value);}
+
+void ProtocolWithChangesWriter::WriteRbRUnionImpl(evo_test::RB const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "rbRUnion", json_value);}
+
+void ProtocolWithChangesWriter::WriteRcRUnionImpl(evo_test::RC const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "rcRUnion", json_value);}
 
 void ProtocolWithChangesWriter::WriteOptionalRecordWithChangesImpl(std::optional<evo_test::RecordWithChanges> const& value) {
   ordered_json json_value = value;
@@ -635,6 +769,102 @@ void ProtocolWithChangesReader::ReadRecordToAliasedRecordImpl(evo_test::RecordWi
 
 void ProtocolWithChangesReader::ReadRecordToAliasedAliasImpl(evo_test::RecordWithChanges& value) {
   yardl::ndjson::ReadProtocolValue(stream_, line_, "recordToAliasedAlias", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadRlinkImpl(evo_test::RLink& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "rlink", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadRlinkRXImpl(evo_test::RLink& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "rlinkRX", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadRlinkRYImpl(evo_test::RLink& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "rlinkRY", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadRlinkRZImpl(evo_test::RLink& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "rlinkRZ", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadRaRLinkImpl(evo_test::RA& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "raRLink", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadRaRXImpl(evo_test::RA& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "raRX", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadRaRYImpl(evo_test::RA& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "raRY", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadRaRZImpl(evo_test::RA& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "raRZ", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadRbRLinkImpl(evo_test::RB& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "rbRLink", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadRbRXImpl(evo_test::RB& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "rbRX", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadRbRYImpl(evo_test::RB& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "rbRY", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadRbRZImpl(evo_test::RB& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "rbRZ", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadRcRLinkImpl(evo_test::RC& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "rcRLink", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadRcRXImpl(evo_test::RC& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "rcRX", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadRcRYImpl(evo_test::RC& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "rcRY", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadRcRZImpl(evo_test::RC& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "rcRZ", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadRlinkRNewImpl(evo_test::RLink& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "rlinkRNew", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadRaRNewImpl(evo_test::RA& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "raRNew", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadRbRNewImpl(evo_test::RB& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "rbRNew", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadRcRNewImpl(evo_test::RC& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "rcRNew", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadRlinkRUnionImpl(evo_test::RLink& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "rlinkRUnion", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadRaRUnionImpl(evo_test::RA& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "raRUnion", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadRbRUnionImpl(evo_test::RB& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "rbRUnion", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadRcRUnionImpl(evo_test::RC& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "rcRUnion", true, unused_step_, value);
 }
 
 void ProtocolWithChangesReader::ReadOptionalRecordWithChangesImpl(std::optional<evo_test::RecordWithChanges>& value) {

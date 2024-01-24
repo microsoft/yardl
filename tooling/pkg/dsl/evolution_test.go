@@ -5,6 +5,7 @@ package dsl
 
 import (
 	"fmt"
+	"slices"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -401,21 +402,8 @@ P: !protocol
 	}
 }
 
-// NamedType tests:
-//
-// NamedType primitive changes
-// Add level of indirection
-// Remove level of indirection
-// NamedType to underlying DIFFERENT records
-
-func TestNamedTypeChanges(t *testing.T) {
-	//
-	// TODO: This is a "successful" evolution, so move it to the integration test
-	//
-	// I think also I should add the example from evolution/aliases (commented out)
-	// where the only migration path is through an alias whose type changes from Record to Union[Record, ...]
-	// 		I think this should demonstrate that the "migration path" concept works, including top-level changes to NamedTypes (oooh spooky!)
-	//
+func TestNamedTypeChangesInvalidMigrationPath(t *testing.T) {
+	// The change to AliasedType is valid, but there isn't a path from A to B, so ProtocolStep x's TypeChange is not valid
 	models := []string{`
 P: !protocol
   sequence:
@@ -428,7 +416,7 @@ A: !record
 P: !protocol
   sequence:
     x: AliasedType
-AliasedType: B
+AliasedType: [B, string]
 B: !record
   fields:
     i: int
@@ -436,18 +424,130 @@ B: !record
 
 	latest, previous, labels := parseVersions(t, models)
 	_, err := ValidateEvolution(latest, previous, labels)
-	assert.Nil(t, err)
+	assert.NotNil(t, err)
 
-	// TODO: Test the following things that can't be tested by a "successful" evolution integration test
-	//
-	// 1. Can't change a step type from a "duplicate" record (i.e. R1 = R2 in old model) to a "different" record (i.e. R1 != R2 in new model, accounting for named type resolution)
-	// 		This example is in the evolution/aliases demo in my folder
-	// 1. And vice versa?
-	// 1. Can't use the exact same definitions but with all different names (i.e. there has to be a migration "path" between the old and new model definitions)
-	// 		This example is also in the evolution/aliases demo in my folder, but commented out
-	// 1. Can't add levels of indirection to different definition types (foreach pair of {record, enum, primitive, union[different_types], vector, etc.)
-	// 		I think any reasonable combination of these should cover it for now
-	//		Weellll I already have a function that tests combinations of invalid type changes
-	// 		I could add to that, or just make a new one here to simultaneously test NamedType resolution...
+	slices.Reverse(models)
+	latest, previous, labels = parseVersions(t, models)
+	_, err = ValidateEvolution(latest, previous, labels)
+	assert.NotNil(t, err)
+}
 
+func TestNamedTypeChangesNotSemanticallyEqual(t *testing.T) {
+	// Can't use NamedTypes to add/remove a "duplicate" (structurally equal but not semantically equal) type definition
+	models := []string{`
+P: !protocol
+  sequence:
+    x: A
+    y: C
+A: B
+B: !record
+  fields:
+    i: int
+C: !record
+  fields:
+    i: int
+`, `
+P: !protocol
+  sequence:
+    x: A
+    y: A
+A: B
+B: !record
+  fields:
+    i: int
+`}
+
+	latest, previous, labels := parseVersions(t, models)
+	_, err := ValidateEvolution(latest, previous, labels)
+	assert.NotNil(t, err)
+
+	slices.Reverse(models)
+	latest, previous, labels = parseVersions(t, models)
+	_, err = ValidateEvolution(latest, previous, labels)
+	assert.NotNil(t, err)
+}
+
+func TestNamedTypeChangesNoMigrationPath(t *testing.T) {
+	// Can't use the exact same definitions but with all different names (i.e. there has to be a migration "path" between the old and new model definitions)
+	//	i.e. doesn't matter if they are structurally equal! There must be a named path between versions!
+	models := []string{`
+P: !protocol
+  sequence:
+    x: A
+A: B
+B: C
+C: !record
+  fields:
+    i: int
+`, `
+P: !protocol
+  sequence:
+    x: X
+X: Y
+Y: Z
+Z: !record
+  fields:
+    i: int
+`}
+
+	latest, previous, labels := parseVersions(t, models)
+	_, err := ValidateEvolution(latest, previous, labels)
+	assert.NotNil(t, err)
+
+	slices.Reverse(models)
+	latest, previous, labels = parseVersions(t, models)
+	_, err = ValidateEvolution(latest, previous, labels)
+	assert.NotNil(t, err)
+}
+
+func TestNamedTypeInvalidTypeChanges(t *testing.T) {
+	// Can't change NamedTypes if underlying type change is invalid
+	// NOTE: Could add/remove levels of indirection in these tests too
+	model := `
+P: !protocol
+  sequence:
+    x: AliasedType
+
+AliasedType: %s
+
+R: !record
+  fields:
+    i: int
+
+E: !enum
+  values:
+    - a
+
+Z: !record
+  fields:
+    i: int
+
+U: [Z, string]
+
+V: float*
+
+M: string->R
+`
+	typeNames := []string{
+		"R",
+		"E",
+		"int",
+		"U",
+		"V",
+		"M",
+	}
+
+	for _, tOld := range typeNames {
+		for _, tNew := range typeNames {
+			if tOld != tNew {
+				latest, previous, labels := parseVersions(t, []string{fmt.Sprintf(model, tOld), fmt.Sprintf(model, tNew)})
+				_, err := ValidateEvolution(latest, previous, labels)
+				assert.NotNil(t, err, "typeOld: %s, typeNew: %s", tOld, tNew)
+
+				latest, previous, labels = parseVersions(t, []string{fmt.Sprintf(model, tNew), fmt.Sprintf(model, tOld)})
+				_, err = ValidateEvolution(latest, previous, labels)
+				assert.NotNil(t, err, "typeOld: %s, typeNew: %s", tNew, tOld)
+			}
+		}
+	}
 }

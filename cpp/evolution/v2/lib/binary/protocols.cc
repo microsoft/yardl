@@ -53,6 +53,26 @@ struct IsTriviallySerializable<evo_test::RenamedRecord> {
     offsetof(__T__, i) < offsetof(__T__, s);
 };
 
+template <>
+struct IsTriviallySerializable<evo_test::RC> {
+  using __T__ = evo_test::RC;
+  static constexpr bool value = 
+    std::is_standard_layout_v<__T__> &&
+    IsTriviallySerializable<decltype(__T__::subject)>::value &&
+    (sizeof(__T__) == (sizeof(__T__::subject)));
+};
+
+template <>
+struct IsTriviallySerializable<evo_test::UnusedButChangedRecord> {
+  using __T__ = evo_test::UnusedButChangedRecord;
+  static constexpr bool value = 
+    std::is_standard_layout_v<__T__> &&
+    IsTriviallySerializable<decltype(__T__::name)>::value &&
+    IsTriviallySerializable<decltype(__T__::age)>::value &&
+    (sizeof(__T__) == (sizeof(__T__::name) + sizeof(__T__::age))) &&
+    offsetof(__T__, name) < offsetof(__T__, age);
+};
+
 #ifndef _MSC_VER
 #pragma GCC diagnostic pop // #pragma GCC diagnostic ignored "-Winvalid-offsetof" 
 #endif
@@ -338,16 +358,108 @@ namespace {
   yardl::binary::ReadString(stream, value.s);
 }
 
+[[maybe_unused]] static void WriteRC(yardl::binary::CodedOutputStream& stream, evo_test::RC const& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<evo_test::RC>::value) {
+    yardl::binary::WriteTriviallySerializable(stream, value);
+    return;
+  }
+
+  yardl::binary::WriteString(stream, value.subject);
+}
+
+[[maybe_unused]] static void ReadRC(yardl::binary::CodedInputStream& stream, evo_test::RC& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<evo_test::RC>::value) {
+    yardl::binary::ReadTriviallySerializable(stream, value);
+    return;
+  }
+
+  yardl::binary::ReadString(stream, value.subject);
+}
+
+[[maybe_unused]] static void WriteRB(yardl::binary::CodedOutputStream& stream, evo_test::RB const& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<evo_test::RB>::value) {
+    yardl::binary::WriteTriviallySerializable(stream, value);
+    return;
+  }
+
+  evo_test::binary::WriteRC(stream, value);
+}
+
+[[maybe_unused]] static void ReadRB(yardl::binary::CodedInputStream& stream, evo_test::RB& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<evo_test::RB>::value) {
+    yardl::binary::ReadTriviallySerializable(stream, value);
+    return;
+  }
+
+  evo_test::binary::ReadRC(stream, value);
+}
+
+[[maybe_unused]] static void WriteRA(yardl::binary::CodedOutputStream& stream, evo_test::RA const& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<evo_test::RA>::value) {
+    yardl::binary::WriteTriviallySerializable(stream, value);
+    return;
+  }
+
+  evo_test::binary::WriteRB(stream, value);
+}
+
+[[maybe_unused]] static void ReadRA(yardl::binary::CodedInputStream& stream, evo_test::RA& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<evo_test::RA>::value) {
+    yardl::binary::ReadTriviallySerializable(stream, value);
+    return;
+  }
+
+  evo_test::binary::ReadRB(stream, value);
+}
+
+[[maybe_unused]] static void WriteRLink(yardl::binary::CodedOutputStream& stream, evo_test::RLink const& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<evo_test::RLink>::value) {
+    yardl::binary::WriteTriviallySerializable(stream, value);
+    return;
+  }
+
+  evo_test::binary::WriteRA(stream, value);
+}
+
+[[maybe_unused]] static void ReadRLink(yardl::binary::CodedInputStream& stream, evo_test::RLink& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<evo_test::RLink>::value) {
+    yardl::binary::ReadTriviallySerializable(stream, value);
+    return;
+  }
+
+  evo_test::binary::ReadRA(stream, value);
+}
+
+[[maybe_unused]] static void WriteUnusedButChangedRecord(yardl::binary::CodedOutputStream& stream, evo_test::UnusedButChangedRecord const& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<evo_test::UnusedButChangedRecord>::value) {
+    yardl::binary::WriteTriviallySerializable(stream, value);
+    return;
+  }
+
+  yardl::binary::WriteString(stream, value.name);
+  yardl::binary::WriteInteger(stream, value.age);
+}
+
+[[maybe_unused]] static void ReadUnusedButChangedRecord(yardl::binary::CodedInputStream& stream, evo_test::UnusedButChangedRecord& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<evo_test::UnusedButChangedRecord>::value) {
+    yardl::binary::ReadTriviallySerializable(stream, value);
+    return;
+  }
+
+  yardl::binary::ReadString(stream, value.name);
+  yardl::binary::ReadInteger(stream, value.age);
+}
+
 [[maybe_unused]] static void WriteAliasedLongToString_v1(yardl::binary::CodedOutputStream& stream, evo_test::AliasedLongToString const& value) {
-  std::string aliased_long_to_string;
-  aliased_long_to_string = std::to_string(value);
-  yardl::binary::WriteString(stream, aliased_long_to_string);
+  std::string aliased_long_to_string_v1;
+  aliased_long_to_string_v1 = std::to_string(value);
+  yardl::binary::WriteString(stream, aliased_long_to_string_v1);
 }
 
 [[maybe_unused]] static void ReadAliasedLongToString_v1(yardl::binary::CodedInputStream& stream, evo_test::AliasedLongToString& value) {
-  std::string aliased_long_to_string;
-  yardl::binary::ReadString(stream, aliased_long_to_string);
-  value = std::stol(aliased_long_to_string);
+  std::string aliased_long_to_string_v1;
+  yardl::binary::ReadString(stream, aliased_long_to_string_v1);
+  value = std::stol(aliased_long_to_string_v1);
 }
 
 [[maybe_unused]] static void WriteRecordWithChanges_v1(yardl::binary::CodedOutputStream& stream, evo_test::RecordWithChanges const& value) {
@@ -382,12 +494,20 @@ namespace {
   value.optional_long_to_string = tmp;
 }
 
-[[maybe_unused]] static void WriteAliasedRecordWithChanges_v1(yardl::binary::CodedOutputStream& stream, evo_test::AliasedRecordWithChanges const& value) {
+[[maybe_unused]] static void WriteAliasedRecordWithChanges_v1(yardl::binary::CodedOutputStream& stream, evo_test::RecordWithChanges const& value) {
   evo_test::binary::WriteRecordWithChanges_v1(stream, value);
 }
 
-[[maybe_unused]] static void ReadAliasedRecordWithChanges_v1(yardl::binary::CodedInputStream& stream, evo_test::AliasedRecordWithChanges& value) {
+[[maybe_unused]] static void ReadAliasedRecordWithChanges_v1(yardl::binary::CodedInputStream& stream, evo_test::RecordWithChanges& value) {
   evo_test::binary::ReadRecordWithChanges_v1(stream, value);
+}
+
+[[maybe_unused]] static void WriteAliasOfAliasedRecordWithChanges_v1(yardl::binary::CodedOutputStream& stream, evo_test::RecordWithChanges const& value) {
+  evo_test::binary::WriteAliasedRecordWithChanges_v1(stream, value);
+}
+
+[[maybe_unused]] static void ReadAliasOfAliasedRecordWithChanges_v1(yardl::binary::CodedInputStream& stream, evo_test::RecordWithChanges& value) {
+  evo_test::binary::ReadAliasedRecordWithChanges_v1(stream, value);
 }
 
 [[maybe_unused]] static void WriteDeprecatedRecord_v1(yardl::binary::CodedOutputStream& stream, evo_test::RenamedRecord const& value) {
@@ -406,6 +526,98 @@ namespace {
 
 [[maybe_unused]] static void ReadRenamedRecord_v1(yardl::binary::CodedInputStream& stream, evo_test::RenamedRecord& value) {
   evo_test::binary::ReadDeprecatedRecord_v1(stream, value);
+}
+
+[[maybe_unused]] static void WriteRZ_v1(yardl::binary::CodedOutputStream& stream, evo_test::RC const& value) {
+  int32_t subject;
+  subject = std::stoi(value.subject);
+  yardl::binary::WriteInteger(stream, subject);
+}
+
+[[maybe_unused]] static void ReadRZ_v1(yardl::binary::CodedInputStream& stream, evo_test::RC& value) {
+  int32_t subject;
+  yardl::binary::ReadInteger(stream, subject);
+  value.subject = std::to_string(subject);
+}
+
+[[maybe_unused]] static void WriteRY_v1(yardl::binary::CodedOutputStream& stream, evo_test::RC const& value) {
+  evo_test::binary::WriteRZ_v1(stream, value);
+}
+
+[[maybe_unused]] static void ReadRY_v1(yardl::binary::CodedInputStream& stream, evo_test::RC& value) {
+  evo_test::binary::ReadRZ_v1(stream, value);
+}
+
+[[maybe_unused]] static void WriteRNew_v1(yardl::binary::CodedOutputStream& stream, evo_test::RC const& value) {
+  evo_test::binary::WriteRY_v1(stream, value);
+}
+
+[[maybe_unused]] static void ReadRNew_v1(yardl::binary::CodedInputStream& stream, evo_test::RC& value) {
+  evo_test::binary::ReadRY_v1(stream, value);
+}
+
+[[maybe_unused]] static void WriteRLink_v1(yardl::binary::CodedOutputStream& stream, evo_test::RC const& value) {
+  evo_test::binary::WriteRNew_v1(stream, value);
+}
+
+[[maybe_unused]] static void ReadRLink_v1(yardl::binary::CodedInputStream& stream, evo_test::RC& value) {
+  evo_test::binary::ReadRNew_v1(stream, value);
+}
+
+[[maybe_unused]] static void WriteRX_v1(yardl::binary::CodedOutputStream& stream, evo_test::RC const& value) {
+  evo_test::binary::WriteRLink_v1(stream, value);
+}
+
+[[maybe_unused]] static void ReadRX_v1(yardl::binary::CodedInputStream& stream, evo_test::RC& value) {
+  evo_test::binary::ReadRLink_v1(stream, value);
+}
+
+[[maybe_unused]] static void WriteAliasedInt_v1(yardl::binary::CodedOutputStream& stream, std::string const& value) {
+  int32_t aliased_int_v1;
+  aliased_int_v1 = std::stoi(value);
+  yardl::binary::WriteInteger(stream, aliased_int_v1);
+}
+
+[[maybe_unused]] static void ReadAliasedInt_v1(yardl::binary::CodedInputStream& stream, std::string& value) {
+  int32_t aliased_int_v1;
+  yardl::binary::ReadInteger(stream, aliased_int_v1);
+  value = std::to_string(aliased_int_v1);
+}
+
+[[maybe_unused]] static void WriteRUnion_v1(yardl::binary::CodedOutputStream& stream, evo_test::RLink const& value) {
+  std::variant<evo_test::RX_v1, std::string> r_union_v1;
+  r_union_v1 = value;
+  WriteUnion<evo_test::RX_v1, evo_test::binary::WriteRX_v1, std::string, yardl::binary::WriteString>(stream, r_union_v1);
+}
+
+[[maybe_unused]] static void ReadRUnion_v1(yardl::binary::CodedInputStream& stream, evo_test::RLink& value) {
+  std::variant<evo_test::RX_v1, std::string> r_union_v1;
+  ReadUnion<evo_test::RX_v1, evo_test::binary::ReadRX_v1, std::string, yardl::binary::ReadString>(stream, r_union_v1);
+  value = std::get<0>(r_union_v1);
+}
+
+[[maybe_unused]] static void WriteAliasedOptionalRecord_v1(yardl::binary::CodedOutputStream& stream, evo_test::RecordWithChanges const& value) {
+  std::optional<evo_test::RecordWithChanges_v1> aliased_optional_record_v1;
+  aliased_optional_record_v1 = value;
+  yardl::binary::WriteOptional<evo_test::RecordWithChanges_v1, evo_test::binary::WriteRecordWithChanges_v1>(stream, aliased_optional_record_v1);
+}
+
+[[maybe_unused]] static void ReadAliasedOptionalRecord_v1(yardl::binary::CodedInputStream& stream, evo_test::RecordWithChanges& value) {
+  std::optional<evo_test::RecordWithChanges_v1> aliased_optional_record_v1;
+  yardl::binary::ReadOptional<evo_test::RecordWithChanges_v1, evo_test::binary::ReadRecordWithChanges_v1>(stream, aliased_optional_record_v1);
+  value = aliased_optional_record_v1.value();
+}
+
+[[maybe_unused]] static void WriteAliasedRecordOrString_v1(yardl::binary::CodedOutputStream& stream, evo_test::RecordWithChanges const& value) {
+  std::variant<evo_test::RecordWithChanges_v1, std::string> aliased_record_or_string_v1;
+  aliased_record_or_string_v1 = value;
+  WriteUnion<evo_test::RecordWithChanges_v1, evo_test::binary::WriteRecordWithChanges_v1, std::string, yardl::binary::WriteString>(stream, aliased_record_or_string_v1);
+}
+
+[[maybe_unused]] static void ReadAliasedRecordOrString_v1(yardl::binary::CodedInputStream& stream, evo_test::RecordWithChanges& value) {
+  std::variant<evo_test::RecordWithChanges_v1, std::string> aliased_record_or_string_v1;
+  ReadUnion<evo_test::RecordWithChanges_v1, evo_test::binary::ReadRecordWithChanges_v1, std::string, yardl::binary::ReadString>(stream, aliased_record_or_string_v1);
+  value = std::get<0>(aliased_record_or_string_v1);
 }
 
 } // namespace
@@ -809,9 +1021,7 @@ void ProtocolWithChangesWriter::WriteOptionalFloatToStringImpl(std::optional<flo
 void ProtocolWithChangesWriter::WriteAliasedLongToStringImpl(evo_test::AliasedLongToString const& value) {
   switch (version_) {
   case Version::v1: {
-    std::string aliased_long_to_string;
-    aliased_long_to_string = std::to_string(value);
-    yardl::binary::WriteString(stream_, aliased_long_to_string);
+    evo_test::binary::WriteAliasedLongToString_v1(stream_, value);
     break;
   }
   default:
@@ -859,13 +1069,13 @@ void ProtocolWithChangesWriter::WriteOptionalIntToUnionImpl(std::optional<int32_
 void ProtocolWithChangesWriter::WriteOptionalRecordToUnionImpl(std::optional<evo_test::RecordWithChanges> const& value) {
   switch (version_) {
   case Version::v1: {
-    std::variant<std::monostate, evo_test::RecordWithChanges, std::string> optional_record_to_union;
+    std::variant<std::monostate, evo_test::RecordWithChanges_v1, std::string> optional_record_to_union;
     if (value.has_value()) {
       optional_record_to_union = value.value();
     } else {
       optional_record_to_union = std::monostate{};
     }
-    WriteUnion<std::monostate, yardl::binary::WriteMonostate, evo_test::RecordWithChanges, evo_test::binary::WriteRecordWithChanges_v1, std::string, yardl::binary::WriteString>(stream_, optional_record_to_union);
+    WriteUnion<std::monostate, yardl::binary::WriteMonostate, evo_test::RecordWithChanges_v1, evo_test::binary::WriteRecordWithChanges_v1, std::string, yardl::binary::WriteString>(stream_, optional_record_to_union);
     break;
   }
   default:
@@ -889,7 +1099,7 @@ void ProtocolWithChangesWriter::WriteRecordWithChangesImpl(evo_test::RecordWithC
 void ProtocolWithChangesWriter::WriteAliasedRecordWithChangesImpl(evo_test::AliasedRecordWithChanges const& value) {
   switch (version_) {
   case Version::v1: {
-    evo_test::binary::WriteRecordWithChanges_v1(stream_, value);
+    evo_test::binary::WriteAliasedRecordWithChanges_v1(stream_, value);
     break;
   }
   default:
@@ -901,7 +1111,7 @@ void ProtocolWithChangesWriter::WriteAliasedRecordWithChangesImpl(evo_test::Alia
 void ProtocolWithChangesWriter::WriteRecordToRenamedRecordImpl(evo_test::RenamedRecord const& value) {
   switch (version_) {
   case Version::v1: {
-    evo_test::binary::WriteDeprecatedRecord_v1(stream_, value);
+    evo_test::binary::WriteRenamedRecord_v1(stream_, value);
     break;
   }
   default:
@@ -913,7 +1123,7 @@ void ProtocolWithChangesWriter::WriteRecordToRenamedRecordImpl(evo_test::Renamed
 void ProtocolWithChangesWriter::WriteRecordToAliasedRecordImpl(evo_test::RecordWithChanges const& value) {
   switch (version_) {
   case Version::v1: {
-    evo_test::binary::WriteRecordWithChanges_v1(stream_, value);
+    evo_test::binary::WriteAliasedRecordWithChanges_v1(stream_, value);
     break;
   }
   default:
@@ -925,7 +1135,7 @@ void ProtocolWithChangesWriter::WriteRecordToAliasedRecordImpl(evo_test::RecordW
 void ProtocolWithChangesWriter::WriteRecordToAliasedAliasImpl(evo_test::RecordWithChanges const& value) {
   switch (version_) {
   case Version::v1: {
-    evo_test::binary::WriteRecordWithChanges_v1(stream_, value);
+    evo_test::binary::WriteAliasOfAliasedRecordWithChanges_v1(stream_, value);
     break;
   }
   default:
@@ -934,10 +1144,306 @@ void ProtocolWithChangesWriter::WriteRecordToAliasedAliasImpl(evo_test::RecordWi
   }
 }
 
+void ProtocolWithChangesWriter::WriteRlinkImpl(evo_test::RLink const& value) {
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::WriteRLink_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::WriteRLink(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesWriter::WriteRlinkRXImpl(evo_test::RLink const& value) {
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::WriteRX_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::WriteRLink(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesWriter::WriteRlinkRYImpl(evo_test::RLink const& value) {
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::WriteRY_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::WriteRLink(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesWriter::WriteRlinkRZImpl(evo_test::RLink const& value) {
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::WriteRZ_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::WriteRLink(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesWriter::WriteRaRLinkImpl(evo_test::RA const& value) {
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::WriteRLink_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::WriteRA(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesWriter::WriteRaRXImpl(evo_test::RA const& value) {
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::WriteRX_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::WriteRA(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesWriter::WriteRaRYImpl(evo_test::RA const& value) {
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::WriteRY_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::WriteRA(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesWriter::WriteRaRZImpl(evo_test::RA const& value) {
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::WriteRZ_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::WriteRA(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesWriter::WriteRbRLinkImpl(evo_test::RB const& value) {
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::WriteRLink_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::WriteRB(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesWriter::WriteRbRXImpl(evo_test::RB const& value) {
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::WriteRX_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::WriteRB(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesWriter::WriteRbRYImpl(evo_test::RB const& value) {
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::WriteRY_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::WriteRB(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesWriter::WriteRbRZImpl(evo_test::RB const& value) {
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::WriteRZ_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::WriteRB(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesWriter::WriteRcRLinkImpl(evo_test::RC const& value) {
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::WriteRLink_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::WriteRC(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesWriter::WriteRcRXImpl(evo_test::RC const& value) {
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::WriteRX_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::WriteRC(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesWriter::WriteRcRYImpl(evo_test::RC const& value) {
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::WriteRY_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::WriteRC(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesWriter::WriteRcRZImpl(evo_test::RC const& value) {
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::WriteRZ_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::WriteRC(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesWriter::WriteRlinkRNewImpl(evo_test::RLink const& value) {
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::WriteRNew_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::WriteRLink(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesWriter::WriteRaRNewImpl(evo_test::RA const& value) {
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::WriteRNew_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::WriteRA(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesWriter::WriteRbRNewImpl(evo_test::RB const& value) {
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::WriteRNew_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::WriteRB(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesWriter::WriteRcRNewImpl(evo_test::RC const& value) {
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::WriteRNew_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::WriteRC(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesWriter::WriteRlinkRUnionImpl(evo_test::RLink const& value) {
+  switch (version_) {
+  case Version::v1: {
+    std::variant<evo_test::RX_v1, std::string> rlink_r_union;
+    rlink_r_union = value;
+    WriteUnion<evo_test::RX_v1, evo_test::binary::WriteRX_v1, std::string, yardl::binary::WriteString>(stream_, rlink_r_union);
+    break;
+  }
+  default:
+    evo_test::binary::WriteRLink(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesWriter::WriteRaRUnionImpl(evo_test::RA const& value) {
+  switch (version_) {
+  case Version::v1: {
+    std::variant<evo_test::RX_v1, std::string> ra_r_union;
+    ra_r_union = value;
+    WriteUnion<evo_test::RX_v1, evo_test::binary::WriteRX_v1, std::string, yardl::binary::WriteString>(stream_, ra_r_union);
+    break;
+  }
+  default:
+    evo_test::binary::WriteRA(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesWriter::WriteRbRUnionImpl(evo_test::RB const& value) {
+  switch (version_) {
+  case Version::v1: {
+    std::variant<evo_test::RX_v1, std::string> rb_r_union;
+    rb_r_union = value;
+    WriteUnion<evo_test::RX_v1, evo_test::binary::WriteRX_v1, std::string, yardl::binary::WriteString>(stream_, rb_r_union);
+    break;
+  }
+  default:
+    evo_test::binary::WriteRB(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesWriter::WriteRcRUnionImpl(evo_test::RC const& value) {
+  switch (version_) {
+  case Version::v1: {
+    std::variant<evo_test::RX_v1, std::string> rc_r_union;
+    rc_r_union = value;
+    WriteUnion<evo_test::RX_v1, evo_test::binary::WriteRX_v1, std::string, yardl::binary::WriteString>(stream_, rc_r_union);
+    break;
+  }
+  default:
+    evo_test::binary::WriteRC(stream_, value);
+    break;
+  }
+}
+
 void ProtocolWithChangesWriter::WriteOptionalRecordWithChangesImpl(std::optional<evo_test::RecordWithChanges> const& value) {
   switch (version_) {
   case Version::v1: {
-    yardl::binary::WriteOptional<evo_test::RecordWithChanges, evo_test::binary::WriteRecordWithChanges_v1>(stream_, value);
+    yardl::binary::WriteOptional<evo_test::RecordWithChanges_v1, evo_test::binary::WriteRecordWithChanges_v1>(stream_, value);
     break;
   }
   default:
@@ -949,7 +1455,7 @@ void ProtocolWithChangesWriter::WriteOptionalRecordWithChangesImpl(std::optional
 void ProtocolWithChangesWriter::WriteAliasedOptionalRecordWithChangesImpl(std::optional<evo_test::AliasedRecordWithChanges> const& value) {
   switch (version_) {
   case Version::v1: {
-    yardl::binary::WriteOptional<evo_test::AliasedRecordWithChanges, evo_test::binary::WriteAliasedRecordWithChanges_v1>(stream_, value);
+    yardl::binary::WriteOptional<evo_test::AliasedRecordWithChanges_v1, evo_test::binary::WriteAliasedRecordWithChanges_v1>(stream_, value);
     break;
   }
   default:
@@ -961,7 +1467,7 @@ void ProtocolWithChangesWriter::WriteAliasedOptionalRecordWithChangesImpl(std::o
 void ProtocolWithChangesWriter::WriteUnionRecordWithChangesImpl(std::variant<evo_test::RecordWithChanges, int32_t> const& value) {
   switch (version_) {
   case Version::v1: {
-    std::variant<evo_test::RecordWithChanges, int32_t> union_record_with_changes;
+    std::variant<evo_test::RecordWithChanges_v1, int32_t> union_record_with_changes;
     switch (value.index()) {
       case 0: {
         union_record_with_changes = std::get<0>(value);
@@ -973,7 +1479,7 @@ void ProtocolWithChangesWriter::WriteUnionRecordWithChangesImpl(std::variant<evo
       }
       default: throw new std::runtime_error("Invalid union index.");
     }
-    WriteUnion<evo_test::RecordWithChanges, evo_test::binary::WriteRecordWithChanges_v1, int32_t, yardl::binary::WriteInteger>(stream_, union_record_with_changes);
+    WriteUnion<evo_test::RecordWithChanges_v1, evo_test::binary::WriteRecordWithChanges_v1, int32_t, yardl::binary::WriteInteger>(stream_, union_record_with_changes);
     break;
   }
   default:
@@ -985,7 +1491,7 @@ void ProtocolWithChangesWriter::WriteUnionRecordWithChangesImpl(std::variant<evo
 void ProtocolWithChangesWriter::WriteUnionWithSameTypesetImpl(std::variant<evo_test::RecordWithChanges, int32_t, float, std::string> const& value) {
   switch (version_) {
   case Version::v1: {
-    std::variant<float, evo_test::RecordWithChanges, std::string, int32_t> union_with_same_typeset;
+    std::variant<float, evo_test::RecordWithChanges_v1, std::string, int32_t> union_with_same_typeset;
     switch (value.index()) {
       case 0: {
         union_with_same_typeset = std::get<0>(value);
@@ -1005,7 +1511,7 @@ void ProtocolWithChangesWriter::WriteUnionWithSameTypesetImpl(std::variant<evo_t
       }
       default: throw new std::runtime_error("Invalid union index.");
     }
-    WriteUnion<float, yardl::binary::WriteFloatingPoint, evo_test::RecordWithChanges, evo_test::binary::WriteRecordWithChanges_v1, std::string, yardl::binary::WriteString, int32_t, yardl::binary::WriteInteger>(stream_, union_with_same_typeset);
+    WriteUnion<float, yardl::binary::WriteFloatingPoint, evo_test::RecordWithChanges_v1, evo_test::binary::WriteRecordWithChanges_v1, std::string, yardl::binary::WriteString, int32_t, yardl::binary::WriteInteger>(stream_, union_with_same_typeset);
     break;
   }
   default:
@@ -1017,7 +1523,7 @@ void ProtocolWithChangesWriter::WriteUnionWithSameTypesetImpl(std::variant<evo_t
 void ProtocolWithChangesWriter::WriteUnionWithTypesAddedImpl(std::variant<evo_test::RecordWithChanges, float> const& value) {
   switch (version_) {
   case Version::v1: {
-    std::variant<evo_test::RecordWithChanges, int32_t, float, std::string> union_with_types_added;
+    std::variant<evo_test::RecordWithChanges_v1, int32_t, float, std::string> union_with_types_added;
     switch (value.index()) {
       case 0: {
         union_with_types_added = std::get<0>(value);
@@ -1029,7 +1535,7 @@ void ProtocolWithChangesWriter::WriteUnionWithTypesAddedImpl(std::variant<evo_te
       }
       default: throw new std::runtime_error("Invalid union index.");
     }
-    WriteUnion<evo_test::RecordWithChanges, evo_test::binary::WriteRecordWithChanges_v1, int32_t, yardl::binary::WriteInteger, float, yardl::binary::WriteFloatingPoint, std::string, yardl::binary::WriteString>(stream_, union_with_types_added);
+    WriteUnion<evo_test::RecordWithChanges_v1, evo_test::binary::WriteRecordWithChanges_v1, int32_t, yardl::binary::WriteInteger, float, yardl::binary::WriteFloatingPoint, std::string, yardl::binary::WriteString>(stream_, union_with_types_added);
     break;
   }
   default:
@@ -1041,7 +1547,7 @@ void ProtocolWithChangesWriter::WriteUnionWithTypesAddedImpl(std::variant<evo_te
 void ProtocolWithChangesWriter::WriteUnionWithTypesRemovedImpl(std::variant<evo_test::RecordWithChanges, int32_t, float, std::string> const& value) {
   switch (version_) {
   case Version::v1: {
-    std::variant<evo_test::RecordWithChanges, std::string> union_with_types_removed;
+    std::variant<evo_test::RecordWithChanges_v1, std::string> union_with_types_removed;
     switch (value.index()) {
       case 0: {
         union_with_types_removed = std::get<0>(value);
@@ -1061,7 +1567,7 @@ void ProtocolWithChangesWriter::WriteUnionWithTypesRemovedImpl(std::variant<evo_
       }
       default: throw new std::runtime_error("Invalid union index.");
     }
-    WriteUnion<evo_test::RecordWithChanges, evo_test::binary::WriteRecordWithChanges_v1, std::string, yardl::binary::WriteString>(stream_, union_with_types_removed);
+    WriteUnion<evo_test::RecordWithChanges_v1, evo_test::binary::WriteRecordWithChanges_v1, std::string, yardl::binary::WriteString>(stream_, union_with_types_removed);
     break;
   }
   default:
@@ -1073,9 +1579,9 @@ void ProtocolWithChangesWriter::WriteUnionWithTypesRemovedImpl(std::variant<evo_
 void ProtocolWithChangesWriter::WriteRecordToOptionalImpl(evo_test::RecordWithChanges const& value) {
   switch (version_) {
   case Version::v1: {
-    std::optional<evo_test::RecordWithChanges> record_to_optional;
+    std::optional<evo_test::RecordWithChanges_v1> record_to_optional;
     record_to_optional = value;
-    yardl::binary::WriteOptional<evo_test::RecordWithChanges, evo_test::binary::WriteRecordWithChanges_v1>(stream_, record_to_optional);
+    yardl::binary::WriteOptional<evo_test::RecordWithChanges_v1, evo_test::binary::WriteRecordWithChanges_v1>(stream_, record_to_optional);
     break;
   }
   default:
@@ -1087,9 +1593,9 @@ void ProtocolWithChangesWriter::WriteRecordToOptionalImpl(evo_test::RecordWithCh
 void ProtocolWithChangesWriter::WriteRecordToAliasedOptionalImpl(evo_test::RecordWithChanges const& value) {
   switch (version_) {
   case Version::v1: {
-    std::optional<evo_test::RecordWithChanges> record_to_aliased_optional;
+    std::optional<evo_test::RecordWithChanges_v1> record_to_aliased_optional;
     record_to_aliased_optional = value;
-    yardl::binary::WriteOptional<evo_test::RecordWithChanges, evo_test::binary::WriteRecordWithChanges_v1>(stream_, record_to_aliased_optional);
+    yardl::binary::WriteOptional<evo_test::RecordWithChanges_v1, evo_test::binary::WriteRecordWithChanges_v1>(stream_, record_to_aliased_optional);
     break;
   }
   default:
@@ -1101,9 +1607,9 @@ void ProtocolWithChangesWriter::WriteRecordToAliasedOptionalImpl(evo_test::Recor
 void ProtocolWithChangesWriter::WriteRecordToUnionImpl(evo_test::RecordWithChanges const& value) {
   switch (version_) {
   case Version::v1: {
-    std::variant<evo_test::RecordWithChanges, std::string> record_to_union;
+    std::variant<evo_test::RecordWithChanges_v1, std::string> record_to_union;
     record_to_union = value;
-    WriteUnion<evo_test::RecordWithChanges, evo_test::binary::WriteRecordWithChanges_v1, std::string, yardl::binary::WriteString>(stream_, record_to_union);
+    WriteUnion<evo_test::RecordWithChanges_v1, evo_test::binary::WriteRecordWithChanges_v1, std::string, yardl::binary::WriteString>(stream_, record_to_union);
     break;
   }
   default:
@@ -1115,9 +1621,9 @@ void ProtocolWithChangesWriter::WriteRecordToUnionImpl(evo_test::RecordWithChang
 void ProtocolWithChangesWriter::WriteRecordToAliasedUnionImpl(evo_test::RecordWithChanges const& value) {
   switch (version_) {
   case Version::v1: {
-    std::variant<evo_test::RecordWithChanges, std::string> record_to_aliased_union;
+    std::variant<evo_test::RecordWithChanges_v1, std::string> record_to_aliased_union;
     record_to_aliased_union = value;
-    WriteUnion<evo_test::RecordWithChanges, evo_test::binary::WriteRecordWithChanges_v1, std::string, yardl::binary::WriteString>(stream_, record_to_aliased_union);
+    WriteUnion<evo_test::RecordWithChanges_v1, evo_test::binary::WriteRecordWithChanges_v1, std::string, yardl::binary::WriteString>(stream_, record_to_aliased_union);
     break;
   }
   default:
@@ -1129,7 +1635,7 @@ void ProtocolWithChangesWriter::WriteRecordToAliasedUnionImpl(evo_test::RecordWi
 void ProtocolWithChangesWriter::WriteVectorRecordWithChangesImpl(std::vector<evo_test::RecordWithChanges> const& value) {
   switch (version_) {
   case Version::v1: {
-    yardl::binary::WriteVector<evo_test::RecordWithChanges, evo_test::binary::WriteRecordWithChanges_v1>(stream_, value);
+    yardl::binary::WriteVector<evo_test::RecordWithChanges_v1, evo_test::binary::WriteRecordWithChanges_v1>(stream_, value);
     break;
   }
   default:
@@ -1141,7 +1647,7 @@ void ProtocolWithChangesWriter::WriteVectorRecordWithChangesImpl(std::vector<evo
 void ProtocolWithChangesWriter::WriteStreamedRecordWithChangesImpl(evo_test::RecordWithChanges const& value) {
   switch (version_) {
   case Version::v1: {
-    yardl::binary::WriteBlock<evo_test::RecordWithChanges, evo_test::binary::WriteRecordWithChanges_v1>(stream_, value);
+    yardl::binary::WriteBlock<evo_test::RecordWithChanges_v1, evo_test::binary::WriteRecordWithChanges_v1>(stream_, value);
     break;
   }
   default:
@@ -1154,7 +1660,7 @@ void ProtocolWithChangesWriter::WriteStreamedRecordWithChangesImpl(std::vector<e
   if (!values.empty()) {
     switch (version_) {
     case Version::v1: {
-      yardl::binary::WriteVector<evo_test::RecordWithChanges, evo_test::binary::WriteRecordWithChanges_v1>(stream_, values);
+      yardl::binary::WriteVector<evo_test::RecordWithChanges_v1, evo_test::binary::WriteRecordWithChanges_v1>(stream_, values);
       break;
     }
     default:
@@ -1192,7 +1698,7 @@ void ProtocolWithChangesWriter::WriteAddedOptionalImpl(std::optional<evo_test::R
     break;
   }
   case Version::v1: {
-    yardl::binary::WriteOptional<evo_test::RecordWithChanges, evo_test::binary::WriteRecordWithChanges_v1>(stream_, value);
+    yardl::binary::WriteOptional<evo_test::RecordWithChanges_v1, evo_test::binary::WriteRecordWithChanges_v1>(stream_, value);
     break;
   }
   default:
@@ -1232,7 +1738,7 @@ void ProtocolWithChangesWriter::WriteAddedRecordStreamImpl(evo_test::RecordWithC
     break;
   }
   case Version::v1: {
-    yardl::binary::WriteBlock<evo_test::RecordWithChanges, evo_test::binary::WriteRecordWithChanges_v1>(stream_, value);
+    yardl::binary::WriteBlock<evo_test::RecordWithChanges_v1, evo_test::binary::WriteRecordWithChanges_v1>(stream_, value);
     break;
   }
   default:
@@ -1248,7 +1754,7 @@ void ProtocolWithChangesWriter::WriteAddedRecordStreamImpl(std::vector<evo_test:
       break;
     }
     case Version::v1: {
-      yardl::binary::WriteVector<evo_test::RecordWithChanges, evo_test::binary::WriteRecordWithChanges_v1>(stream_, values);
+      yardl::binary::WriteVector<evo_test::RecordWithChanges_v1, evo_test::binary::WriteRecordWithChanges_v1>(stream_, values);
       break;
     }
     default:
@@ -1724,9 +2230,7 @@ void ProtocolWithChangesReader::ReadOptionalFloatToStringImpl(std::optional<floa
 void ProtocolWithChangesReader::ReadAliasedLongToStringImpl(evo_test::AliasedLongToString& value) {
   switch (version_) {
   case Version::v1: {
-    std::string aliased_long_to_string;
-    yardl::binary::ReadString(stream_, aliased_long_to_string);
-    value = std::stol(aliased_long_to_string);
+    evo_test::binary::ReadAliasedLongToString_v1(stream_, value);
     break;
   }
   default:
@@ -1772,8 +2276,8 @@ void ProtocolWithChangesReader::ReadOptionalIntToUnionImpl(std::optional<int32_t
 void ProtocolWithChangesReader::ReadOptionalRecordToUnionImpl(std::optional<evo_test::RecordWithChanges>& value) {
   switch (version_) {
   case Version::v1: {
-    std::variant<std::monostate, evo_test::RecordWithChanges, std::string> optional_record_to_union;
-    ReadUnion<std::monostate, yardl::binary::ReadMonostate, evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges_v1, std::string, yardl::binary::ReadString>(stream_, optional_record_to_union);
+    std::variant<std::monostate, evo_test::RecordWithChanges_v1, std::string> optional_record_to_union;
+    ReadUnion<std::monostate, yardl::binary::ReadMonostate, evo_test::RecordWithChanges_v1, evo_test::binary::ReadRecordWithChanges_v1, std::string, yardl::binary::ReadString>(stream_, optional_record_to_union);
     if (optional_record_to_union.index() == 1) {
       value = std::get<1>(optional_record_to_union);
     }
@@ -1800,7 +2304,7 @@ void ProtocolWithChangesReader::ReadRecordWithChangesImpl(evo_test::RecordWithCh
 void ProtocolWithChangesReader::ReadAliasedRecordWithChangesImpl(evo_test::AliasedRecordWithChanges& value) {
   switch (version_) {
   case Version::v1: {
-    evo_test::binary::ReadRecordWithChanges_v1(stream_, value);
+    evo_test::binary::ReadAliasedRecordWithChanges_v1(stream_, value);
     break;
   }
   default:
@@ -1812,7 +2316,7 @@ void ProtocolWithChangesReader::ReadAliasedRecordWithChangesImpl(evo_test::Alias
 void ProtocolWithChangesReader::ReadRecordToRenamedRecordImpl(evo_test::RenamedRecord& value) {
   switch (version_) {
   case Version::v1: {
-    evo_test::binary::ReadDeprecatedRecord_v1(stream_, value);
+    evo_test::binary::ReadRenamedRecord_v1(stream_, value);
     break;
   }
   default:
@@ -1824,7 +2328,7 @@ void ProtocolWithChangesReader::ReadRecordToRenamedRecordImpl(evo_test::RenamedR
 void ProtocolWithChangesReader::ReadRecordToAliasedRecordImpl(evo_test::RecordWithChanges& value) {
   switch (version_) {
   case Version::v1: {
-    evo_test::binary::ReadRecordWithChanges_v1(stream_, value);
+    evo_test::binary::ReadAliasedRecordWithChanges_v1(stream_, value);
     break;
   }
   default:
@@ -1836,7 +2340,7 @@ void ProtocolWithChangesReader::ReadRecordToAliasedRecordImpl(evo_test::RecordWi
 void ProtocolWithChangesReader::ReadRecordToAliasedAliasImpl(evo_test::RecordWithChanges& value) {
   switch (version_) {
   case Version::v1: {
-    evo_test::binary::ReadRecordWithChanges_v1(stream_, value);
+    evo_test::binary::ReadAliasOfAliasedRecordWithChanges_v1(stream_, value);
     break;
   }
   default:
@@ -1845,10 +2349,306 @@ void ProtocolWithChangesReader::ReadRecordToAliasedAliasImpl(evo_test::RecordWit
   }
 }
 
+void ProtocolWithChangesReader::ReadRlinkImpl(evo_test::RLink& value) {
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::ReadRLink_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::ReadRLink(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesReader::ReadRlinkRXImpl(evo_test::RLink& value) {
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::ReadRX_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::ReadRLink(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesReader::ReadRlinkRYImpl(evo_test::RLink& value) {
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::ReadRY_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::ReadRLink(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesReader::ReadRlinkRZImpl(evo_test::RLink& value) {
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::ReadRZ_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::ReadRLink(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesReader::ReadRaRLinkImpl(evo_test::RA& value) {
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::ReadRLink_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::ReadRA(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesReader::ReadRaRXImpl(evo_test::RA& value) {
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::ReadRX_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::ReadRA(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesReader::ReadRaRYImpl(evo_test::RA& value) {
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::ReadRY_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::ReadRA(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesReader::ReadRaRZImpl(evo_test::RA& value) {
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::ReadRZ_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::ReadRA(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesReader::ReadRbRLinkImpl(evo_test::RB& value) {
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::ReadRLink_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::ReadRB(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesReader::ReadRbRXImpl(evo_test::RB& value) {
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::ReadRX_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::ReadRB(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesReader::ReadRbRYImpl(evo_test::RB& value) {
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::ReadRY_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::ReadRB(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesReader::ReadRbRZImpl(evo_test::RB& value) {
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::ReadRZ_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::ReadRB(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesReader::ReadRcRLinkImpl(evo_test::RC& value) {
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::ReadRLink_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::ReadRC(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesReader::ReadRcRXImpl(evo_test::RC& value) {
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::ReadRX_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::ReadRC(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesReader::ReadRcRYImpl(evo_test::RC& value) {
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::ReadRY_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::ReadRC(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesReader::ReadRcRZImpl(evo_test::RC& value) {
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::ReadRZ_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::ReadRC(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesReader::ReadRlinkRNewImpl(evo_test::RLink& value) {
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::ReadRNew_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::ReadRLink(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesReader::ReadRaRNewImpl(evo_test::RA& value) {
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::ReadRNew_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::ReadRA(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesReader::ReadRbRNewImpl(evo_test::RB& value) {
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::ReadRNew_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::ReadRB(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesReader::ReadRcRNewImpl(evo_test::RC& value) {
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::ReadRNew_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::ReadRC(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesReader::ReadRlinkRUnionImpl(evo_test::RLink& value) {
+  switch (version_) {
+  case Version::v1: {
+    std::variant<evo_test::RX_v1, std::string> rlink_r_union;
+    ReadUnion<evo_test::RX_v1, evo_test::binary::ReadRX_v1, std::string, yardl::binary::ReadString>(stream_, rlink_r_union);
+    value = std::get<0>(rlink_r_union);
+    break;
+  }
+  default:
+    evo_test::binary::ReadRLink(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesReader::ReadRaRUnionImpl(evo_test::RA& value) {
+  switch (version_) {
+  case Version::v1: {
+    std::variant<evo_test::RX_v1, std::string> ra_r_union;
+    ReadUnion<evo_test::RX_v1, evo_test::binary::ReadRX_v1, std::string, yardl::binary::ReadString>(stream_, ra_r_union);
+    value = std::get<0>(ra_r_union);
+    break;
+  }
+  default:
+    evo_test::binary::ReadRA(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesReader::ReadRbRUnionImpl(evo_test::RB& value) {
+  switch (version_) {
+  case Version::v1: {
+    std::variant<evo_test::RX_v1, std::string> rb_r_union;
+    ReadUnion<evo_test::RX_v1, evo_test::binary::ReadRX_v1, std::string, yardl::binary::ReadString>(stream_, rb_r_union);
+    value = std::get<0>(rb_r_union);
+    break;
+  }
+  default:
+    evo_test::binary::ReadRB(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesReader::ReadRcRUnionImpl(evo_test::RC& value) {
+  switch (version_) {
+  case Version::v1: {
+    std::variant<evo_test::RX_v1, std::string> rc_r_union;
+    ReadUnion<evo_test::RX_v1, evo_test::binary::ReadRX_v1, std::string, yardl::binary::ReadString>(stream_, rc_r_union);
+    value = std::get<0>(rc_r_union);
+    break;
+  }
+  default:
+    evo_test::binary::ReadRC(stream_, value);
+    break;
+  }
+}
+
 void ProtocolWithChangesReader::ReadOptionalRecordWithChangesImpl(std::optional<evo_test::RecordWithChanges>& value) {
   switch (version_) {
   case Version::v1: {
-    yardl::binary::ReadOptional<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges_v1>(stream_, value);
+    yardl::binary::ReadOptional<evo_test::RecordWithChanges_v1, evo_test::binary::ReadRecordWithChanges_v1>(stream_, value);
     break;
   }
   default:
@@ -1860,7 +2660,7 @@ void ProtocolWithChangesReader::ReadOptionalRecordWithChangesImpl(std::optional<
 void ProtocolWithChangesReader::ReadAliasedOptionalRecordWithChangesImpl(std::optional<evo_test::AliasedRecordWithChanges>& value) {
   switch (version_) {
   case Version::v1: {
-    yardl::binary::ReadOptional<evo_test::AliasedRecordWithChanges, evo_test::binary::ReadAliasedRecordWithChanges_v1>(stream_, value);
+    yardl::binary::ReadOptional<evo_test::AliasedRecordWithChanges_v1, evo_test::binary::ReadAliasedRecordWithChanges_v1>(stream_, value);
     break;
   }
   default:
@@ -1872,8 +2672,8 @@ void ProtocolWithChangesReader::ReadAliasedOptionalRecordWithChangesImpl(std::op
 void ProtocolWithChangesReader::ReadUnionRecordWithChangesImpl(std::variant<evo_test::RecordWithChanges, int32_t>& value) {
   switch (version_) {
   case Version::v1: {
-    std::variant<evo_test::RecordWithChanges, int32_t> union_record_with_changes;
-    ReadUnion<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges_v1, int32_t, yardl::binary::ReadInteger>(stream_, union_record_with_changes);
+    std::variant<evo_test::RecordWithChanges_v1, int32_t> union_record_with_changes;
+    ReadUnion<evo_test::RecordWithChanges_v1, evo_test::binary::ReadRecordWithChanges_v1, int32_t, yardl::binary::ReadInteger>(stream_, union_record_with_changes);
     switch (union_record_with_changes.index()) {
       case 0: {
         value = std::get<0>(union_record_with_changes);
@@ -1896,8 +2696,8 @@ void ProtocolWithChangesReader::ReadUnionRecordWithChangesImpl(std::variant<evo_
 void ProtocolWithChangesReader::ReadUnionWithSameTypesetImpl(std::variant<evo_test::RecordWithChanges, int32_t, float, std::string>& value) {
   switch (version_) {
   case Version::v1: {
-    std::variant<float, evo_test::RecordWithChanges, std::string, int32_t> union_with_same_typeset;
-    ReadUnion<float, yardl::binary::ReadFloatingPoint, evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges_v1, std::string, yardl::binary::ReadString, int32_t, yardl::binary::ReadInteger>(stream_, union_with_same_typeset);
+    std::variant<float, evo_test::RecordWithChanges_v1, std::string, int32_t> union_with_same_typeset;
+    ReadUnion<float, yardl::binary::ReadFloatingPoint, evo_test::RecordWithChanges_v1, evo_test::binary::ReadRecordWithChanges_v1, std::string, yardl::binary::ReadString, int32_t, yardl::binary::ReadInteger>(stream_, union_with_same_typeset);
     switch (union_with_same_typeset.index()) {
       case 0: {
         value = std::get<0>(union_with_same_typeset);
@@ -1928,8 +2728,8 @@ void ProtocolWithChangesReader::ReadUnionWithSameTypesetImpl(std::variant<evo_te
 void ProtocolWithChangesReader::ReadUnionWithTypesAddedImpl(std::variant<evo_test::RecordWithChanges, float>& value) {
   switch (version_) {
   case Version::v1: {
-    std::variant<evo_test::RecordWithChanges, int32_t, float, std::string> union_with_types_added;
-    ReadUnion<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges_v1, int32_t, yardl::binary::ReadInteger, float, yardl::binary::ReadFloatingPoint, std::string, yardl::binary::ReadString>(stream_, union_with_types_added);
+    std::variant<evo_test::RecordWithChanges_v1, int32_t, float, std::string> union_with_types_added;
+    ReadUnion<evo_test::RecordWithChanges_v1, evo_test::binary::ReadRecordWithChanges_v1, int32_t, yardl::binary::ReadInteger, float, yardl::binary::ReadFloatingPoint, std::string, yardl::binary::ReadString>(stream_, union_with_types_added);
     switch (union_with_types_added.index()) {
       case 0: {
         value = std::get<0>(union_with_types_added);
@@ -1960,8 +2760,8 @@ void ProtocolWithChangesReader::ReadUnionWithTypesAddedImpl(std::variant<evo_tes
 void ProtocolWithChangesReader::ReadUnionWithTypesRemovedImpl(std::variant<evo_test::RecordWithChanges, int32_t, float, std::string>& value) {
   switch (version_) {
   case Version::v1: {
-    std::variant<evo_test::RecordWithChanges, std::string> union_with_types_removed;
-    ReadUnion<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges_v1, std::string, yardl::binary::ReadString>(stream_, union_with_types_removed);
+    std::variant<evo_test::RecordWithChanges_v1, std::string> union_with_types_removed;
+    ReadUnion<evo_test::RecordWithChanges_v1, evo_test::binary::ReadRecordWithChanges_v1, std::string, yardl::binary::ReadString>(stream_, union_with_types_removed);
     switch (union_with_types_removed.index()) {
       case 0: {
         value = std::get<0>(union_with_types_removed);
@@ -1984,8 +2784,8 @@ void ProtocolWithChangesReader::ReadUnionWithTypesRemovedImpl(std::variant<evo_t
 void ProtocolWithChangesReader::ReadRecordToOptionalImpl(evo_test::RecordWithChanges& value) {
   switch (version_) {
   case Version::v1: {
-    std::optional<evo_test::RecordWithChanges> record_to_optional;
-    yardl::binary::ReadOptional<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges_v1>(stream_, record_to_optional);
+    std::optional<evo_test::RecordWithChanges_v1> record_to_optional;
+    yardl::binary::ReadOptional<evo_test::RecordWithChanges_v1, evo_test::binary::ReadRecordWithChanges_v1>(stream_, record_to_optional);
     value = record_to_optional.value();
     break;
   }
@@ -1998,8 +2798,8 @@ void ProtocolWithChangesReader::ReadRecordToOptionalImpl(evo_test::RecordWithCha
 void ProtocolWithChangesReader::ReadRecordToAliasedOptionalImpl(evo_test::RecordWithChanges& value) {
   switch (version_) {
   case Version::v1: {
-    std::optional<evo_test::RecordWithChanges> record_to_aliased_optional;
-    yardl::binary::ReadOptional<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges_v1>(stream_, record_to_aliased_optional);
+    std::optional<evo_test::RecordWithChanges_v1> record_to_aliased_optional;
+    yardl::binary::ReadOptional<evo_test::RecordWithChanges_v1, evo_test::binary::ReadRecordWithChanges_v1>(stream_, record_to_aliased_optional);
     value = record_to_aliased_optional.value();
     break;
   }
@@ -2012,8 +2812,8 @@ void ProtocolWithChangesReader::ReadRecordToAliasedOptionalImpl(evo_test::Record
 void ProtocolWithChangesReader::ReadRecordToUnionImpl(evo_test::RecordWithChanges& value) {
   switch (version_) {
   case Version::v1: {
-    std::variant<evo_test::RecordWithChanges, std::string> record_to_union;
-    ReadUnion<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges_v1, std::string, yardl::binary::ReadString>(stream_, record_to_union);
+    std::variant<evo_test::RecordWithChanges_v1, std::string> record_to_union;
+    ReadUnion<evo_test::RecordWithChanges_v1, evo_test::binary::ReadRecordWithChanges_v1, std::string, yardl::binary::ReadString>(stream_, record_to_union);
     value = std::get<0>(record_to_union);
     break;
   }
@@ -2026,8 +2826,8 @@ void ProtocolWithChangesReader::ReadRecordToUnionImpl(evo_test::RecordWithChange
 void ProtocolWithChangesReader::ReadRecordToAliasedUnionImpl(evo_test::RecordWithChanges& value) {
   switch (version_) {
   case Version::v1: {
-    std::variant<evo_test::RecordWithChanges, std::string> record_to_aliased_union;
-    ReadUnion<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges_v1, std::string, yardl::binary::ReadString>(stream_, record_to_aliased_union);
+    std::variant<evo_test::RecordWithChanges_v1, std::string> record_to_aliased_union;
+    ReadUnion<evo_test::RecordWithChanges_v1, evo_test::binary::ReadRecordWithChanges_v1, std::string, yardl::binary::ReadString>(stream_, record_to_aliased_union);
     value = std::get<0>(record_to_aliased_union);
     break;
   }
@@ -2040,7 +2840,7 @@ void ProtocolWithChangesReader::ReadRecordToAliasedUnionImpl(evo_test::RecordWit
 void ProtocolWithChangesReader::ReadVectorRecordWithChangesImpl(std::vector<evo_test::RecordWithChanges>& value) {
   switch (version_) {
   case Version::v1: {
-    yardl::binary::ReadVector<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges_v1>(stream_, value);
+    yardl::binary::ReadVector<evo_test::RecordWithChanges_v1, evo_test::binary::ReadRecordWithChanges_v1>(stream_, value);
     break;
   }
   default:
@@ -2052,7 +2852,7 @@ void ProtocolWithChangesReader::ReadVectorRecordWithChangesImpl(std::vector<evo_
 bool ProtocolWithChangesReader::ReadStreamedRecordWithChangesImpl(evo_test::RecordWithChanges& value) {
   switch (version_) {
   case Version::v1: {
-    return yardl::binary::ReadBlock<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges_v1>(stream_, current_block_remaining_, value);
+    return yardl::binary::ReadBlock<evo_test::RecordWithChanges_v1, evo_test::binary::ReadRecordWithChanges_v1>(stream_, current_block_remaining_, value);
     break;
   }
   default:
@@ -2064,7 +2864,7 @@ bool ProtocolWithChangesReader::ReadStreamedRecordWithChangesImpl(evo_test::Reco
 bool ProtocolWithChangesReader::ReadStreamedRecordWithChangesImpl(std::vector<evo_test::RecordWithChanges>& values) {
   switch (version_) {
   case Version::v1: {
-    yardl::binary::ReadBlocksIntoVector<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges_v1>(stream_, current_block_remaining_, values);
+    yardl::binary::ReadBlocksIntoVector<evo_test::RecordWithChanges_v1, evo_test::binary::ReadRecordWithChanges_v1>(stream_, current_block_remaining_, values);
     break;
   }
   default:
@@ -2100,7 +2900,7 @@ void ProtocolWithChangesReader::ReadAddedOptionalImpl(std::optional<evo_test::Re
     break;
   }
   case Version::v1: {
-    yardl::binary::ReadOptional<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges_v1>(stream_, value);
+    yardl::binary::ReadOptional<evo_test::RecordWithChanges_v1, evo_test::binary::ReadRecordWithChanges_v1>(stream_, value);
     break;
   }
   default:
@@ -2149,7 +2949,7 @@ bool ProtocolWithChangesReader::ReadAddedRecordStreamImpl(evo_test::RecordWithCh
     break;
   }
   case Version::v1: {
-    return yardl::binary::ReadBlock<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges_v1>(stream_, current_block_remaining_, value);
+    return yardl::binary::ReadBlock<evo_test::RecordWithChanges_v1, evo_test::binary::ReadRecordWithChanges_v1>(stream_, current_block_remaining_, value);
     break;
   }
   default:
@@ -2166,7 +2966,7 @@ bool ProtocolWithChangesReader::ReadAddedRecordStreamImpl(std::vector<evo_test::
     break;
   }
   case Version::v1: {
-    yardl::binary::ReadBlocksIntoVector<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges_v1>(stream_, current_block_remaining_, values);
+    yardl::binary::ReadBlocksIntoVector<evo_test::RecordWithChanges_v1, evo_test::binary::ReadRecordWithChanges_v1>(stream_, current_block_remaining_, values);
     break;
   }
   default:

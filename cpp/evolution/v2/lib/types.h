@@ -71,5 +71,67 @@ struct RenamedRecord {
   }
 };
 
+struct RC {
+  std::string subject{};
+
+  bool operator==(const RC& other) const {
+    return subject == other.subject;
+  }
+
+  bool operator!=(const RC& other) const {
+    return !(*this == other);
+  }
+};
+
+using RB = evo_test::RC;
+
+using RA = evo_test::RB;
+
+using RLink = evo_test::RA;
+
+struct UnusedButChangedRecord {
+  std::string name{};
+  int32_t age{};
+
+  bool operator==(const UnusedButChangedRecord& other) const {
+    return name == other.name &&
+      age == other.age;
+  }
+
+  bool operator!=(const UnusedButChangedRecord& other) const {
+    return !(*this == other);
+  }
+};
+
+using AliasedLongToString_v1 = evo_test::AliasedLongToString;
+
+using RecordWithChanges_v1 = evo_test::RecordWithChanges;
+
+using AliasedRecordWithChanges_v1 = evo_test::RecordWithChanges;
+
+using AliasOfAliasedRecordWithChanges_v1 = evo_test::RecordWithChanges;
+
+using DeprecatedRecord_v1 = evo_test::RenamedRecord;
+
+using RenamedRecord_v1 = evo_test::RenamedRecord;
+
+using RZ_v1 = evo_test::RC;
+
+using RY_v1 = evo_test::RC;
+
+using RNew_v1 = evo_test::RC;
+
+using RLink_v1 = evo_test::RC;
+
+using RX_v1 = evo_test::RC;
+
+using AliasedInt_v1 = std::string;
+
+using RUnion_v1 = evo_test::RLink;
+
+using AliasedOptionalRecord_v1 = evo_test::RecordWithChanges;
+
+using AliasedRecordOrString_v1 = evo_test::RecordWithChanges;
+
 } // namespace evo_test
 

@@ -127,77 +127,150 @@ class ProtocolWithChangesWriterBase {
   void WriteRecordToAliasedAlias(evo_test::RecordWithChanges const& value);
 
   // Ordinal 38.
-  void WriteOptionalRecordWithChanges(std::optional<evo_test::RecordWithChanges> const& value);
+  // Comprehensive NamedType changes
+  void WriteRlink(evo_test::RLink const& value);
 
   // Ordinal 39.
-  void WriteAliasedOptionalRecordWithChanges(std::optional<evo_test::AliasedRecordWithChanges> const& value);
+  void WriteRlinkRX(evo_test::RLink const& value);
 
   // Ordinal 40.
-  void WriteUnionRecordWithChanges(std::variant<evo_test::RecordWithChanges, int32_t> const& value);
+  void WriteRlinkRY(evo_test::RLink const& value);
 
   // Ordinal 41.
-  void WriteUnionWithSameTypeset(std::variant<evo_test::RecordWithChanges, int32_t, float, std::string> const& value);
+  void WriteRlinkRZ(evo_test::RLink const& value);
 
   // Ordinal 42.
-  void WriteUnionWithTypesAdded(std::variant<evo_test::RecordWithChanges, float> const& value);
+  void WriteRaRLink(evo_test::RA const& value);
 
   // Ordinal 43.
-  void WriteUnionWithTypesRemoved(std::variant<evo_test::RecordWithChanges, int32_t, float, std::string> const& value);
+  void WriteRaRX(evo_test::RA const& value);
 
   // Ordinal 44.
-  void WriteRecordToOptional(evo_test::RecordWithChanges const& value);
+  void WriteRaRY(evo_test::RA const& value);
 
   // Ordinal 45.
-  void WriteRecordToAliasedOptional(evo_test::RecordWithChanges const& value);
+  void WriteRaRZ(evo_test::RA const& value);
 
   // Ordinal 46.
-  void WriteRecordToUnion(evo_test::RecordWithChanges const& value);
+  void WriteRbRLink(evo_test::RB const& value);
 
   // Ordinal 47.
-  void WriteRecordToAliasedUnion(evo_test::RecordWithChanges const& value);
+  void WriteRbRX(evo_test::RB const& value);
 
   // Ordinal 48.
-  void WriteVectorRecordWithChanges(std::vector<evo_test::RecordWithChanges> const& value);
+  void WriteRbRY(evo_test::RB const& value);
 
   // Ordinal 49.
+  void WriteRbRZ(evo_test::RB const& value);
+
+  // Ordinal 50.
+  void WriteRcRLink(evo_test::RC const& value);
+
+  // Ordinal 51.
+  void WriteRcRX(evo_test::RC const& value);
+
+  // Ordinal 52.
+  void WriteRcRY(evo_test::RC const& value);
+
+  // Ordinal 53.
+  void WriteRcRZ(evo_test::RC const& value);
+
+  // Ordinal 54.
+  void WriteRlinkRNew(evo_test::RLink const& value);
+
+  // Ordinal 55.
+  void WriteRaRNew(evo_test::RA const& value);
+
+  // Ordinal 56.
+  void WriteRbRNew(evo_test::RB const& value);
+
+  // Ordinal 57.
+  void WriteRcRNew(evo_test::RC const& value);
+
+  // Ordinal 58.
+  void WriteRlinkRUnion(evo_test::RLink const& value);
+
+  // Ordinal 59.
+  void WriteRaRUnion(evo_test::RA const& value);
+
+  // Ordinal 60.
+  void WriteRbRUnion(evo_test::RB const& value);
+
+  // Ordinal 61.
+  void WriteRcRUnion(evo_test::RC const& value);
+
+  // Ordinal 62.
+  void WriteOptionalRecordWithChanges(std::optional<evo_test::RecordWithChanges> const& value);
+
+  // Ordinal 63.
+  void WriteAliasedOptionalRecordWithChanges(std::optional<evo_test::AliasedRecordWithChanges> const& value);
+
+  // Ordinal 64.
+  void WriteUnionRecordWithChanges(std::variant<evo_test::RecordWithChanges, int32_t> const& value);
+
+  // Ordinal 65.
+  void WriteUnionWithSameTypeset(std::variant<evo_test::RecordWithChanges, int32_t, float, std::string> const& value);
+
+  // Ordinal 66.
+  void WriteUnionWithTypesAdded(std::variant<evo_test::RecordWithChanges, float> const& value);
+
+  // Ordinal 67.
+  void WriteUnionWithTypesRemoved(std::variant<evo_test::RecordWithChanges, int32_t, float, std::string> const& value);
+
+  // Ordinal 68.
+  void WriteRecordToOptional(evo_test::RecordWithChanges const& value);
+
+  // Ordinal 69.
+  void WriteRecordToAliasedOptional(evo_test::RecordWithChanges const& value);
+
+  // Ordinal 70.
+  void WriteRecordToUnion(evo_test::RecordWithChanges const& value);
+
+  // Ordinal 71.
+  void WriteRecordToAliasedUnion(evo_test::RecordWithChanges const& value);
+
+  // Ordinal 72.
+  void WriteVectorRecordWithChanges(std::vector<evo_test::RecordWithChanges> const& value);
+
+  // Ordinal 73.
   // Call this method for each element of the `streamedRecordWithChanges` stream, then call `EndStreamedRecordWithChanges() when done.`
   void WriteStreamedRecordWithChanges(evo_test::RecordWithChanges const& value);
 
-  // Ordinal 49.
+  // Ordinal 73.
   // Call this method to write many values to the `streamedRecordWithChanges` stream, then call `EndStreamedRecordWithChanges()` when done.
   void WriteStreamedRecordWithChanges(std::vector<evo_test::RecordWithChanges> const& values);
 
   // Marks the end of the `streamedRecordWithChanges` stream.
   void EndStreamedRecordWithChanges();
 
-  // Ordinal 50.
+  // Ordinal 74.
   void WriteAddedStringVector(std::vector<evo_test::AliasedString> const& value);
 
-  // Ordinal 51.
+  // Ordinal 75.
   void WriteAddedOptional(std::optional<evo_test::RecordWithChanges> const& value);
 
-  // Ordinal 52.
+  // Ordinal 76.
   void WriteAddedMap(std::unordered_map<std::string, std::string> const& value);
 
-  // Ordinal 53.
+  // Ordinal 77.
   void WriteAddedUnion(std::variant<std::monostate, evo_test::RecordWithChanges, std::string> const& value);
 
-  // Ordinal 54.
+  // Ordinal 78.
   // Call this method for each element of the `addedRecordStream` stream, then call `EndAddedRecordStream() when done.`
   void WriteAddedRecordStream(evo_test::RecordWithChanges const& value);
 
-  // Ordinal 54.
+  // Ordinal 78.
   // Call this method to write many values to the `addedRecordStream` stream, then call `EndAddedRecordStream()` when done.
   void WriteAddedRecordStream(std::vector<evo_test::RecordWithChanges> const& values);
 
   // Marks the end of the `addedRecordStream` stream.
   void EndAddedRecordStream();
 
-  // Ordinal 55.
+  // Ordinal 79.
   // Call this method for each element of the `addedUnionStream` stream, then call `EndAddedUnionStream() when done.`
   void WriteAddedUnionStream(std::variant<evo_test::RecordWithChanges, evo_test::RenamedRecord> const& value);
 
-  // Ordinal 55.
+  // Ordinal 79.
   // Call this method to write many values to the `addedUnionStream` stream, then call `EndAddedUnionStream()` when done.
   void WriteAddedUnionStream(std::vector<std::variant<evo_test::RecordWithChanges, evo_test::RenamedRecord>> const& values);
 
@@ -251,6 +324,30 @@ class ProtocolWithChangesWriterBase {
   virtual void WriteRecordToRenamedRecordImpl(evo_test::RenamedRecord const& value) = 0;
   virtual void WriteRecordToAliasedRecordImpl(evo_test::RecordWithChanges const& value) = 0;
   virtual void WriteRecordToAliasedAliasImpl(evo_test::RecordWithChanges const& value) = 0;
+  virtual void WriteRlinkImpl(evo_test::RLink const& value) = 0;
+  virtual void WriteRlinkRXImpl(evo_test::RLink const& value) = 0;
+  virtual void WriteRlinkRYImpl(evo_test::RLink const& value) = 0;
+  virtual void WriteRlinkRZImpl(evo_test::RLink const& value) = 0;
+  virtual void WriteRaRLinkImpl(evo_test::RA const& value) = 0;
+  virtual void WriteRaRXImpl(evo_test::RA const& value) = 0;
+  virtual void WriteRaRYImpl(evo_test::RA const& value) = 0;
+  virtual void WriteRaRZImpl(evo_test::RA const& value) = 0;
+  virtual void WriteRbRLinkImpl(evo_test::RB const& value) = 0;
+  virtual void WriteRbRXImpl(evo_test::RB const& value) = 0;
+  virtual void WriteRbRYImpl(evo_test::RB const& value) = 0;
+  virtual void WriteRbRZImpl(evo_test::RB const& value) = 0;
+  virtual void WriteRcRLinkImpl(evo_test::RC const& value) = 0;
+  virtual void WriteRcRXImpl(evo_test::RC const& value) = 0;
+  virtual void WriteRcRYImpl(evo_test::RC const& value) = 0;
+  virtual void WriteRcRZImpl(evo_test::RC const& value) = 0;
+  virtual void WriteRlinkRNewImpl(evo_test::RLink const& value) = 0;
+  virtual void WriteRaRNewImpl(evo_test::RA const& value) = 0;
+  virtual void WriteRbRNewImpl(evo_test::RB const& value) = 0;
+  virtual void WriteRcRNewImpl(evo_test::RC const& value) = 0;
+  virtual void WriteRlinkRUnionImpl(evo_test::RLink const& value) = 0;
+  virtual void WriteRaRUnionImpl(evo_test::RA const& value) = 0;
+  virtual void WriteRbRUnionImpl(evo_test::RB const& value) = 0;
+  virtual void WriteRcRUnionImpl(evo_test::RC const& value) = 0;
   virtual void WriteOptionalRecordWithChangesImpl(std::optional<evo_test::RecordWithChanges> const& value) = 0;
   virtual void WriteAliasedOptionalRecordWithChangesImpl(std::optional<evo_test::AliasedRecordWithChanges> const& value) = 0;
   virtual void WriteUnionRecordWithChangesImpl(std::variant<evo_test::RecordWithChanges, int32_t> const& value) = 0;
@@ -407,66 +504,139 @@ class ProtocolWithChangesReaderBase {
   void ReadRecordToAliasedAlias(evo_test::RecordWithChanges& value);
 
   // Ordinal 38.
-  void ReadOptionalRecordWithChanges(std::optional<evo_test::RecordWithChanges>& value);
+  // Comprehensive NamedType changes
+  void ReadRlink(evo_test::RLink& value);
 
   // Ordinal 39.
-  void ReadAliasedOptionalRecordWithChanges(std::optional<evo_test::AliasedRecordWithChanges>& value);
+  void ReadRlinkRX(evo_test::RLink& value);
 
   // Ordinal 40.
-  void ReadUnionRecordWithChanges(std::variant<evo_test::RecordWithChanges, int32_t>& value);
+  void ReadRlinkRY(evo_test::RLink& value);
 
   // Ordinal 41.
-  void ReadUnionWithSameTypeset(std::variant<evo_test::RecordWithChanges, int32_t, float, std::string>& value);
+  void ReadRlinkRZ(evo_test::RLink& value);
 
   // Ordinal 42.
-  void ReadUnionWithTypesAdded(std::variant<evo_test::RecordWithChanges, float>& value);
+  void ReadRaRLink(evo_test::RA& value);
 
   // Ordinal 43.
-  void ReadUnionWithTypesRemoved(std::variant<evo_test::RecordWithChanges, int32_t, float, std::string>& value);
+  void ReadRaRX(evo_test::RA& value);
 
   // Ordinal 44.
-  void ReadRecordToOptional(evo_test::RecordWithChanges& value);
+  void ReadRaRY(evo_test::RA& value);
 
   // Ordinal 45.
-  void ReadRecordToAliasedOptional(evo_test::RecordWithChanges& value);
+  void ReadRaRZ(evo_test::RA& value);
 
   // Ordinal 46.
-  void ReadRecordToUnion(evo_test::RecordWithChanges& value);
+  void ReadRbRLink(evo_test::RB& value);
 
   // Ordinal 47.
-  void ReadRecordToAliasedUnion(evo_test::RecordWithChanges& value);
+  void ReadRbRX(evo_test::RB& value);
 
   // Ordinal 48.
-  void ReadVectorRecordWithChanges(std::vector<evo_test::RecordWithChanges>& value);
+  void ReadRbRY(evo_test::RB& value);
 
   // Ordinal 49.
-  [[nodiscard]] bool ReadStreamedRecordWithChanges(evo_test::RecordWithChanges& value);
-
-  // Ordinal 49.
-  [[nodiscard]] bool ReadStreamedRecordWithChanges(std::vector<evo_test::RecordWithChanges>& values);
+  void ReadRbRZ(evo_test::RB& value);
 
   // Ordinal 50.
-  void ReadAddedStringVector(std::vector<evo_test::AliasedString>& value);
+  void ReadRcRLink(evo_test::RC& value);
 
   // Ordinal 51.
-  void ReadAddedOptional(std::optional<evo_test::RecordWithChanges>& value);
+  void ReadRcRX(evo_test::RC& value);
 
   // Ordinal 52.
-  void ReadAddedMap(std::unordered_map<std::string, std::string>& value);
+  void ReadRcRY(evo_test::RC& value);
 
   // Ordinal 53.
+  void ReadRcRZ(evo_test::RC& value);
+
+  // Ordinal 54.
+  void ReadRlinkRNew(evo_test::RLink& value);
+
+  // Ordinal 55.
+  void ReadRaRNew(evo_test::RA& value);
+
+  // Ordinal 56.
+  void ReadRbRNew(evo_test::RB& value);
+
+  // Ordinal 57.
+  void ReadRcRNew(evo_test::RC& value);
+
+  // Ordinal 58.
+  void ReadRlinkRUnion(evo_test::RLink& value);
+
+  // Ordinal 59.
+  void ReadRaRUnion(evo_test::RA& value);
+
+  // Ordinal 60.
+  void ReadRbRUnion(evo_test::RB& value);
+
+  // Ordinal 61.
+  void ReadRcRUnion(evo_test::RC& value);
+
+  // Ordinal 62.
+  void ReadOptionalRecordWithChanges(std::optional<evo_test::RecordWithChanges>& value);
+
+  // Ordinal 63.
+  void ReadAliasedOptionalRecordWithChanges(std::optional<evo_test::AliasedRecordWithChanges>& value);
+
+  // Ordinal 64.
+  void ReadUnionRecordWithChanges(std::variant<evo_test::RecordWithChanges, int32_t>& value);
+
+  // Ordinal 65.
+  void ReadUnionWithSameTypeset(std::variant<evo_test::RecordWithChanges, int32_t, float, std::string>& value);
+
+  // Ordinal 66.
+  void ReadUnionWithTypesAdded(std::variant<evo_test::RecordWithChanges, float>& value);
+
+  // Ordinal 67.
+  void ReadUnionWithTypesRemoved(std::variant<evo_test::RecordWithChanges, int32_t, float, std::string>& value);
+
+  // Ordinal 68.
+  void ReadRecordToOptional(evo_test::RecordWithChanges& value);
+
+  // Ordinal 69.
+  void ReadRecordToAliasedOptional(evo_test::RecordWithChanges& value);
+
+  // Ordinal 70.
+  void ReadRecordToUnion(evo_test::RecordWithChanges& value);
+
+  // Ordinal 71.
+  void ReadRecordToAliasedUnion(evo_test::RecordWithChanges& value);
+
+  // Ordinal 72.
+  void ReadVectorRecordWithChanges(std::vector<evo_test::RecordWithChanges>& value);
+
+  // Ordinal 73.
+  [[nodiscard]] bool ReadStreamedRecordWithChanges(evo_test::RecordWithChanges& value);
+
+  // Ordinal 73.
+  [[nodiscard]] bool ReadStreamedRecordWithChanges(std::vector<evo_test::RecordWithChanges>& values);
+
+  // Ordinal 74.
+  void ReadAddedStringVector(std::vector<evo_test::AliasedString>& value);
+
+  // Ordinal 75.
+  void ReadAddedOptional(std::optional<evo_test::RecordWithChanges>& value);
+
+  // Ordinal 76.
+  void ReadAddedMap(std::unordered_map<std::string, std::string>& value);
+
+  // Ordinal 77.
   void ReadAddedUnion(std::variant<std::monostate, evo_test::RecordWithChanges, std::string>& value);
 
-  // Ordinal 54.
+  // Ordinal 78.
   [[nodiscard]] bool ReadAddedRecordStream(evo_test::RecordWithChanges& value);
 
-  // Ordinal 54.
+  // Ordinal 78.
   [[nodiscard]] bool ReadAddedRecordStream(std::vector<evo_test::RecordWithChanges>& values);
 
-  // Ordinal 55.
+  // Ordinal 79.
   [[nodiscard]] bool ReadAddedUnionStream(std::variant<evo_test::RecordWithChanges, evo_test::RenamedRecord>& value);
 
-  // Ordinal 55.
+  // Ordinal 79.
   [[nodiscard]] bool ReadAddedUnionStream(std::vector<std::variant<evo_test::RecordWithChanges, evo_test::RenamedRecord>>& values);
 
   // Optionaly close this writer before destructing. Validates that all steps were completely read.
@@ -515,6 +685,30 @@ class ProtocolWithChangesReaderBase {
   virtual void ReadRecordToRenamedRecordImpl(evo_test::RenamedRecord& value) = 0;
   virtual void ReadRecordToAliasedRecordImpl(evo_test::RecordWithChanges& value) = 0;
   virtual void ReadRecordToAliasedAliasImpl(evo_test::RecordWithChanges& value) = 0;
+  virtual void ReadRlinkImpl(evo_test::RLink& value) = 0;
+  virtual void ReadRlinkRXImpl(evo_test::RLink& value) = 0;
+  virtual void ReadRlinkRYImpl(evo_test::RLink& value) = 0;
+  virtual void ReadRlinkRZImpl(evo_test::RLink& value) = 0;
+  virtual void ReadRaRLinkImpl(evo_test::RA& value) = 0;
+  virtual void ReadRaRXImpl(evo_test::RA& value) = 0;
+  virtual void ReadRaRYImpl(evo_test::RA& value) = 0;
+  virtual void ReadRaRZImpl(evo_test::RA& value) = 0;
+  virtual void ReadRbRLinkImpl(evo_test::RB& value) = 0;
+  virtual void ReadRbRXImpl(evo_test::RB& value) = 0;
+  virtual void ReadRbRYImpl(evo_test::RB& value) = 0;
+  virtual void ReadRbRZImpl(evo_test::RB& value) = 0;
+  virtual void ReadRcRLinkImpl(evo_test::RC& value) = 0;
+  virtual void ReadRcRXImpl(evo_test::RC& value) = 0;
+  virtual void ReadRcRYImpl(evo_test::RC& value) = 0;
+  virtual void ReadRcRZImpl(evo_test::RC& value) = 0;
+  virtual void ReadRlinkRNewImpl(evo_test::RLink& value) = 0;
+  virtual void ReadRaRNewImpl(evo_test::RA& value) = 0;
+  virtual void ReadRbRNewImpl(evo_test::RB& value) = 0;
+  virtual void ReadRcRNewImpl(evo_test::RC& value) = 0;
+  virtual void ReadRlinkRUnionImpl(evo_test::RLink& value) = 0;
+  virtual void ReadRaRUnionImpl(evo_test::RA& value) = 0;
+  virtual void ReadRbRUnionImpl(evo_test::RB& value) = 0;
+  virtual void ReadRcRUnionImpl(evo_test::RC& value) = 0;
   virtual void ReadOptionalRecordWithChangesImpl(std::optional<evo_test::RecordWithChanges>& value) = 0;
   virtual void ReadAliasedOptionalRecordWithChangesImpl(std::optional<evo_test::AliasedRecordWithChanges>& value) = 0;
   virtual void ReadUnionRecordWithChangesImpl(std::variant<evo_test::RecordWithChanges, int32_t>& value) = 0;

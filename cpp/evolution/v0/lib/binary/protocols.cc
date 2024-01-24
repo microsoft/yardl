@@ -53,6 +53,26 @@ struct IsTriviallySerializable<evo_test::RenamedRecord> {
     offsetof(__T__, i) < offsetof(__T__, s);
 };
 
+template <>
+struct IsTriviallySerializable<evo_test::RC> {
+  using __T__ = evo_test::RC;
+  static constexpr bool value = 
+    std::is_standard_layout_v<__T__> &&
+    IsTriviallySerializable<decltype(__T__::subject)>::value &&
+    (sizeof(__T__) == (sizeof(__T__::subject)));
+};
+
+template <>
+struct IsTriviallySerializable<evo_test::UnusedButChangedRecord> {
+  using __T__ = evo_test::UnusedButChangedRecord;
+  static constexpr bool value = 
+    std::is_standard_layout_v<__T__> &&
+    IsTriviallySerializable<decltype(__T__::name)>::value &&
+    IsTriviallySerializable<decltype(__T__::age)>::value &&
+    (sizeof(__T__) == (sizeof(__T__::name) + sizeof(__T__::age))) &&
+    offsetof(__T__, name) < offsetof(__T__, age);
+};
+
 #ifndef _MSC_VER
 #pragma GCC diagnostic pop // #pragma GCC diagnostic ignored "-Winvalid-offsetof" 
 #endif
@@ -270,6 +290,98 @@ namespace {
   yardl::binary::ReadString(stream, value.s);
 }
 
+[[maybe_unused]] static void WriteRC(yardl::binary::CodedOutputStream& stream, evo_test::RC const& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<evo_test::RC>::value) {
+    yardl::binary::WriteTriviallySerializable(stream, value);
+    return;
+  }
+
+  yardl::binary::WriteString(stream, value.subject);
+}
+
+[[maybe_unused]] static void ReadRC(yardl::binary::CodedInputStream& stream, evo_test::RC& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<evo_test::RC>::value) {
+    yardl::binary::ReadTriviallySerializable(stream, value);
+    return;
+  }
+
+  yardl::binary::ReadString(stream, value.subject);
+}
+
+[[maybe_unused]] static void WriteRB(yardl::binary::CodedOutputStream& stream, evo_test::RB const& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<evo_test::RB>::value) {
+    yardl::binary::WriteTriviallySerializable(stream, value);
+    return;
+  }
+
+  evo_test::binary::WriteRC(stream, value);
+}
+
+[[maybe_unused]] static void ReadRB(yardl::binary::CodedInputStream& stream, evo_test::RB& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<evo_test::RB>::value) {
+    yardl::binary::ReadTriviallySerializable(stream, value);
+    return;
+  }
+
+  evo_test::binary::ReadRC(stream, value);
+}
+
+[[maybe_unused]] static void WriteRA(yardl::binary::CodedOutputStream& stream, evo_test::RA const& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<evo_test::RA>::value) {
+    yardl::binary::WriteTriviallySerializable(stream, value);
+    return;
+  }
+
+  evo_test::binary::WriteRB(stream, value);
+}
+
+[[maybe_unused]] static void ReadRA(yardl::binary::CodedInputStream& stream, evo_test::RA& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<evo_test::RA>::value) {
+    yardl::binary::ReadTriviallySerializable(stream, value);
+    return;
+  }
+
+  evo_test::binary::ReadRB(stream, value);
+}
+
+[[maybe_unused]] static void WriteRLink(yardl::binary::CodedOutputStream& stream, evo_test::RLink const& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<evo_test::RLink>::value) {
+    yardl::binary::WriteTriviallySerializable(stream, value);
+    return;
+  }
+
+  evo_test::binary::WriteRA(stream, value);
+}
+
+[[maybe_unused]] static void ReadRLink(yardl::binary::CodedInputStream& stream, evo_test::RLink& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<evo_test::RLink>::value) {
+    yardl::binary::ReadTriviallySerializable(stream, value);
+    return;
+  }
+
+  evo_test::binary::ReadRA(stream, value);
+}
+
+[[maybe_unused]] static void WriteUnusedButChangedRecord(yardl::binary::CodedOutputStream& stream, evo_test::UnusedButChangedRecord const& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<evo_test::UnusedButChangedRecord>::value) {
+    yardl::binary::WriteTriviallySerializable(stream, value);
+    return;
+  }
+
+  yardl::binary::WriteString(stream, value.name);
+  yardl::binary::WriteInteger(stream, value.age);
+}
+
+[[maybe_unused]] static void ReadUnusedButChangedRecord(yardl::binary::CodedInputStream& stream, evo_test::UnusedButChangedRecord& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<evo_test::UnusedButChangedRecord>::value) {
+    yardl::binary::ReadTriviallySerializable(stream, value);
+    return;
+  }
+
+  yardl::binary::ReadString(stream, value.name);
+  yardl::binary::ReadInteger(stream, value.age);
+}
+
 } // namespace
 
 void ProtocolWithChangesWriter::WriteInt8ToIntImpl(int8_t const& value) {
@@ -422,6 +534,102 @@ void ProtocolWithChangesWriter::WriteRecordToAliasedRecordImpl(evo_test::RecordW
 
 void ProtocolWithChangesWriter::WriteRecordToAliasedAliasImpl(evo_test::RecordWithChanges const& value) {
   evo_test::binary::WriteRecordWithChanges(stream_, value);
+}
+
+void ProtocolWithChangesWriter::WriteRlinkImpl(evo_test::RLink const& value) {
+  evo_test::binary::WriteRLink(stream_, value);
+}
+
+void ProtocolWithChangesWriter::WriteRlinkRXImpl(evo_test::RLink const& value) {
+  evo_test::binary::WriteRLink(stream_, value);
+}
+
+void ProtocolWithChangesWriter::WriteRlinkRYImpl(evo_test::RLink const& value) {
+  evo_test::binary::WriteRLink(stream_, value);
+}
+
+void ProtocolWithChangesWriter::WriteRlinkRZImpl(evo_test::RLink const& value) {
+  evo_test::binary::WriteRLink(stream_, value);
+}
+
+void ProtocolWithChangesWriter::WriteRaRLinkImpl(evo_test::RA const& value) {
+  evo_test::binary::WriteRA(stream_, value);
+}
+
+void ProtocolWithChangesWriter::WriteRaRXImpl(evo_test::RA const& value) {
+  evo_test::binary::WriteRA(stream_, value);
+}
+
+void ProtocolWithChangesWriter::WriteRaRYImpl(evo_test::RA const& value) {
+  evo_test::binary::WriteRA(stream_, value);
+}
+
+void ProtocolWithChangesWriter::WriteRaRZImpl(evo_test::RA const& value) {
+  evo_test::binary::WriteRA(stream_, value);
+}
+
+void ProtocolWithChangesWriter::WriteRbRLinkImpl(evo_test::RB const& value) {
+  evo_test::binary::WriteRB(stream_, value);
+}
+
+void ProtocolWithChangesWriter::WriteRbRXImpl(evo_test::RB const& value) {
+  evo_test::binary::WriteRB(stream_, value);
+}
+
+void ProtocolWithChangesWriter::WriteRbRYImpl(evo_test::RB const& value) {
+  evo_test::binary::WriteRB(stream_, value);
+}
+
+void ProtocolWithChangesWriter::WriteRbRZImpl(evo_test::RB const& value) {
+  evo_test::binary::WriteRB(stream_, value);
+}
+
+void ProtocolWithChangesWriter::WriteRcRLinkImpl(evo_test::RC const& value) {
+  evo_test::binary::WriteRC(stream_, value);
+}
+
+void ProtocolWithChangesWriter::WriteRcRXImpl(evo_test::RC const& value) {
+  evo_test::binary::WriteRC(stream_, value);
+}
+
+void ProtocolWithChangesWriter::WriteRcRYImpl(evo_test::RC const& value) {
+  evo_test::binary::WriteRC(stream_, value);
+}
+
+void ProtocolWithChangesWriter::WriteRcRZImpl(evo_test::RC const& value) {
+  evo_test::binary::WriteRC(stream_, value);
+}
+
+void ProtocolWithChangesWriter::WriteRlinkRNewImpl(evo_test::RLink const& value) {
+  evo_test::binary::WriteRLink(stream_, value);
+}
+
+void ProtocolWithChangesWriter::WriteRaRNewImpl(evo_test::RA const& value) {
+  evo_test::binary::WriteRA(stream_, value);
+}
+
+void ProtocolWithChangesWriter::WriteRbRNewImpl(evo_test::RB const& value) {
+  evo_test::binary::WriteRB(stream_, value);
+}
+
+void ProtocolWithChangesWriter::WriteRcRNewImpl(evo_test::RC const& value) {
+  evo_test::binary::WriteRC(stream_, value);
+}
+
+void ProtocolWithChangesWriter::WriteRlinkRUnionImpl(evo_test::RLink const& value) {
+  evo_test::binary::WriteRLink(stream_, value);
+}
+
+void ProtocolWithChangesWriter::WriteRaRUnionImpl(evo_test::RA const& value) {
+  evo_test::binary::WriteRA(stream_, value);
+}
+
+void ProtocolWithChangesWriter::WriteRbRUnionImpl(evo_test::RB const& value) {
+  evo_test::binary::WriteRB(stream_, value);
+}
+
+void ProtocolWithChangesWriter::WriteRcRUnionImpl(evo_test::RC const& value) {
+  evo_test::binary::WriteRC(stream_, value);
 }
 
 void ProtocolWithChangesWriter::WriteOptionalRecordWithChangesImpl(std::optional<evo_test::RecordWithChanges> const& value) {
@@ -640,6 +848,102 @@ void ProtocolWithChangesReader::ReadRecordToAliasedRecordImpl(evo_test::RecordWi
 
 void ProtocolWithChangesReader::ReadRecordToAliasedAliasImpl(evo_test::RecordWithChanges& value) {
   evo_test::binary::ReadRecordWithChanges(stream_, value);
+}
+
+void ProtocolWithChangesReader::ReadRlinkImpl(evo_test::RLink& value) {
+  evo_test::binary::ReadRLink(stream_, value);
+}
+
+void ProtocolWithChangesReader::ReadRlinkRXImpl(evo_test::RLink& value) {
+  evo_test::binary::ReadRLink(stream_, value);
+}
+
+void ProtocolWithChangesReader::ReadRlinkRYImpl(evo_test::RLink& value) {
+  evo_test::binary::ReadRLink(stream_, value);
+}
+
+void ProtocolWithChangesReader::ReadRlinkRZImpl(evo_test::RLink& value) {
+  evo_test::binary::ReadRLink(stream_, value);
+}
+
+void ProtocolWithChangesReader::ReadRaRLinkImpl(evo_test::RA& value) {
+  evo_test::binary::ReadRA(stream_, value);
+}
+
+void ProtocolWithChangesReader::ReadRaRXImpl(evo_test::RA& value) {
+  evo_test::binary::ReadRA(stream_, value);
+}
+
+void ProtocolWithChangesReader::ReadRaRYImpl(evo_test::RA& value) {
+  evo_test::binary::ReadRA(stream_, value);
+}
+
+void ProtocolWithChangesReader::ReadRaRZImpl(evo_test::RA& value) {
+  evo_test::binary::ReadRA(stream_, value);
+}
+
+void ProtocolWithChangesReader::ReadRbRLinkImpl(evo_test::RB& value) {
+  evo_test::binary::ReadRB(stream_, value);
+}
+
+void ProtocolWithChangesReader::ReadRbRXImpl(evo_test::RB& value) {
+  evo_test::binary::ReadRB(stream_, value);
+}
+
+void ProtocolWithChangesReader::ReadRbRYImpl(evo_test::RB& value) {
+  evo_test::binary::ReadRB(stream_, value);
+}
+
+void ProtocolWithChangesReader::ReadRbRZImpl(evo_test::RB& value) {
+  evo_test::binary::ReadRB(stream_, value);
+}
+
+void ProtocolWithChangesReader::ReadRcRLinkImpl(evo_test::RC& value) {
+  evo_test::binary::ReadRC(stream_, value);
+}
+
+void ProtocolWithChangesReader::ReadRcRXImpl(evo_test::RC& value) {
+  evo_test::binary::ReadRC(stream_, value);
+}
+
+void ProtocolWithChangesReader::ReadRcRYImpl(evo_test::RC& value) {
+  evo_test::binary::ReadRC(stream_, value);
+}
+
+void ProtocolWithChangesReader::ReadRcRZImpl(evo_test::RC& value) {
+  evo_test::binary::ReadRC(stream_, value);
+}
+
+void ProtocolWithChangesReader::ReadRlinkRNewImpl(evo_test::RLink& value) {
+  evo_test::binary::ReadRLink(stream_, value);
+}
+
+void ProtocolWithChangesReader::ReadRaRNewImpl(evo_test::RA& value) {
+  evo_test::binary::ReadRA(stream_, value);
+}
+
+void ProtocolWithChangesReader::ReadRbRNewImpl(evo_test::RB& value) {
+  evo_test::binary::ReadRB(stream_, value);
+}
+
+void ProtocolWithChangesReader::ReadRcRNewImpl(evo_test::RC& value) {
+  evo_test::binary::ReadRC(stream_, value);
+}
+
+void ProtocolWithChangesReader::ReadRlinkRUnionImpl(evo_test::RLink& value) {
+  evo_test::binary::ReadRLink(stream_, value);
+}
+
+void ProtocolWithChangesReader::ReadRaRUnionImpl(evo_test::RA& value) {
+  evo_test::binary::ReadRA(stream_, value);
+}
+
+void ProtocolWithChangesReader::ReadRbRUnionImpl(evo_test::RB& value) {
+  evo_test::binary::ReadRB(stream_, value);
+}
+
+void ProtocolWithChangesReader::ReadRcRUnionImpl(evo_test::RC& value) {
+  evo_test::binary::ReadRC(stream_, value);
 }
 
 void ProtocolWithChangesReader::ReadOptionalRecordWithChangesImpl(std::optional<evo_test::RecordWithChanges>& value) {

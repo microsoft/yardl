@@ -151,6 +151,66 @@ int main(void) {
   r.ReadRecordToAliasedAlias(rec);
   validateRecordWithChanges(rec);
 
+  RZ record;
+  r.ReadRlink(record);
+  assert(record.subject == 42);
+  r.ReadRlinkRX(record);
+  assert(record.subject == 42);
+  r.ReadRlinkRY(record);
+  assert(record.subject == 42);
+  r.ReadRlinkRZ(record);
+  assert(record.subject == 42);
+
+  r.ReadRaRLink(record);
+  assert(record.subject == 42);
+  r.ReadRaRX(record);
+  assert(record.subject == 42);
+  r.ReadRaRY(record);
+  assert(record.subject == 42);
+  r.ReadRaRZ(record);
+  assert(record.subject == 42);
+
+  r.ReadRbRLink(record);
+  assert(record.subject == 42);
+  r.ReadRbRX(record);
+  assert(record.subject == 42);
+  r.ReadRbRY(record);
+  assert(record.subject == 42);
+  r.ReadRbRZ(record);
+  assert(record.subject == 42);
+
+  r.ReadRcRLink(record);
+  assert(record.subject == 42);
+  r.ReadRcRX(record);
+  assert(record.subject == 42);
+  r.ReadRcRY(record);
+  assert(record.subject == 42);
+  r.ReadRcRZ(record);
+  assert(record.subject == 42);
+
+  r.ReadRlinkRNew(record);
+  assert(record.subject == 42);
+  r.ReadRaRNew(record);
+  assert(record.subject == 42);
+  r.ReadRbRNew(record);
+  assert(record.subject == 42);
+  r.ReadRcRNew(record);
+  assert(record.subject == 42);
+
+  RUnion runion;
+  r.ReadRlinkRUnion(runion);
+  assert(runion.index() == 0);
+  assert(std::get<0>(runion).subject == 42);
+  r.ReadRaRUnion(runion);
+  assert(runion.index() == 0);
+  assert(std::get<0>(runion).subject == 42);
+  r.ReadRbRUnion(runion);
+  assert(runion.index() == 0);
+  assert(std::get<0>(runion).subject == 42);
+  r.ReadRcRUnion(runion);
+  assert(runion.index() == 0);
+  assert(std::get<0>(runion).subject == 42);
+
   std::optional<RecordWithChanges> maybe_rec;
   r.ReadOptionalRecordWithChanges(maybe_rec);
   EVO_ASSERT(maybe_rec.has_value());
