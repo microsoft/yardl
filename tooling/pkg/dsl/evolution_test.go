@@ -400,3 +400,54 @@ P: !protocol
 		assert.NotNil(t, err, "typeA: %s, typeB: %s", tt.typeB, tt.typeA)
 	}
 }
+
+// NamedType tests:
+//
+// NamedType primitive changes
+// Add level of indirection
+// Remove level of indirection
+// NamedType to underlying DIFFERENT records
+
+func TestNamedTypeChanges(t *testing.T) {
+	//
+	// TODO: This is a "successful" evolution, so move it to the integration test
+	//
+	// I think also I should add the example from evolution/aliases (commented out)
+	// where the only migration path is through an alias whose type changes from Record to Union[Record, ...]
+	// 		I think this should demonstrate that the "migration path" concept works, including top-level changes to NamedTypes (oooh spooky!)
+	//
+	models := []string{`
+P: !protocol
+  sequence:
+    x: AliasedType
+AliasedType: A
+A: !record
+  fields:
+    i: int
+`, `
+P: !protocol
+  sequence:
+    x: AliasedType
+AliasedType: B
+B: !record
+  fields:
+    i: int
+`}
+
+	latest, previous, labels := parseVersions(t, models)
+	_, err := ValidateEvolution(latest, previous, labels)
+	assert.Nil(t, err)
+
+	// TODO: Test the following things that can't be tested by a "successful" evolution integration test
+	//
+	// 1. Can't change a step type from a "duplicate" record (i.e. R1 = R2 in old model) to a "different" record (i.e. R1 != R2 in new model, accounting for named type resolution)
+	// 		This example is in the evolution/aliases demo in my folder
+	// 1. And vice versa?
+	// 1. Can't use the exact same definitions but with all different names (i.e. there has to be a migration "path" between the old and new model definitions)
+	// 		This example is also in the evolution/aliases demo in my folder, but commented out
+	// 1. Can't add levels of indirection to different definition types (foreach pair of {record, enum, primitive, union[different_types], vector, etc.)
+	// 		I think any reasonable combination of these should cover it for now
+	//		Weellll I already have a function that tests combinations of invalid type changes
+	// 		I could add to that, or just make a new one here to simultaneously test NamedType resolution...
+
+}

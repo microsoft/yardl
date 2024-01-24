@@ -148,10 +148,13 @@ func (tc *TypeChangeVectorTypeChanged) Inverse() TypeChange {
 	return &TypeChangeVectorTypeChanged{tc.Swap(), tc.InnerChange.Inverse()}
 }
 
-type TypeChangeDefinitionChanged struct{ TypePair }
+type TypeChangeDefinitionChanged struct {
+	TypePair
+	DefinitionChange
+}
 
 func (tc *TypeChangeDefinitionChanged) Inverse() TypeChange {
-	return &TypeChangeDefinitionChanged{tc.Swap()}
+	return &TypeChangeDefinitionChanged{tc.Swap(), tc.DefinitionChange}
 }
 
 type TypeChangeIncompatible struct{ TypePair }
@@ -189,6 +192,10 @@ var (
 	_ DefinitionChange = (*RecordChange)(nil)
 	_ DefinitionChange = (*EnumChange)(nil)
 	_ DefinitionChange = (*ProtocolChange)(nil)
+
+	_ DefinitionChange = (*PrimitiveChangeNumberToNumber)(nil)
+	_ DefinitionChange = (*PrimitiveChangeNumberToString)(nil)
+	_ DefinitionChange = (*PrimitiveChangeStringToNumber)(nil)
 )
 
 type DefinitionChange interface {
@@ -237,6 +244,10 @@ type EnumChange struct {
 	DefinitionPair
 	BaseTypeChange TypeChange
 }
+
+type PrimitiveChangeNumberToNumber struct{ DefinitionPair }
+type PrimitiveChangeNumberToString struct{ DefinitionPair }
+type PrimitiveChangeStringToNumber struct{ DefinitionPair }
 
 func typeChangeIsError(tc TypeChange) bool {
 	switch tc := tc.(type) {
