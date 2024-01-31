@@ -25,6 +25,8 @@ def main():
     write_copy_validate(V0, V2, V0)
     write_copy_validate(V1, V2, V1)
 
+    print("Evolution tests passed.", flush=True)
+
 
 def write_copy_validate(w: str, c: str, v: str) -> None:
     try:

@@ -192,6 +192,7 @@ var (
 	_ DefinitionChange = (*RecordChange)(nil)
 	_ DefinitionChange = (*EnumChange)(nil)
 	_ DefinitionChange = (*ProtocolChange)(nil)
+	_ DefinitionChange = (*CompatibilityChange)(nil)
 
 	_ DefinitionChange = (*PrimitiveChangeNumberToNumber)(nil)
 	_ DefinitionChange = (*PrimitiveChangeNumberToString)(nil)
@@ -243,6 +244,10 @@ type RecordChange struct {
 type EnumChange struct {
 	DefinitionPair
 	BaseTypeChange TypeChange
+}
+
+type CompatibilityChange struct {
+	DefinitionPair
 }
 
 type PrimitiveChangeNumberToNumber struct{ DefinitionPair }

@@ -551,3 +551,358 @@ M: string->R
 		}
 	}
 }
+
+// This is also tested in the evolution integration tests, but keeping it here for now as well
+// The point is to test that we can add/remove levels of indirection (NamedTypes) to a GeneralizedType (e.g. Union, Optional, etc.)
+// Most (if not all) of the other tests check with only SimpleTypes (e.g. Primitives, Records)
+func TestGeneralizedNamedTypeChanges(t *testing.T) {
+	models := []string{`
+P: !protocol
+  sequence:
+    u: AliasedUnion
+    uc: [int, string, float]
+    o: string?
+    oc: AliasedOptionalWithChange
+
+AliasedUnion: [int, string]
+AliasedOptionalWithChange: string?
+`,
+		`
+P: !protocol
+  sequence:
+    u: [int, string]
+    uc: AliasedUnionWithChange
+    o: AliasedOptional
+    oc: int?
+
+AliasedOptional: string?
+AliasedUnionWithChange: [float, string]
+`,
+	}
+
+	latest, previous, labels := parseVersions(t, models)
+	_, err := ValidateEvolution(latest, previous, labels)
+	assert.Nil(t, err)
+
+	slices.Reverse(models)
+	latest, previous, labels = parseVersions(t, models)
+	_, err = ValidateEvolution(latest, previous, labels)
+	assert.Nil(t, err)
+}
+
+// yardl is currently strict with Generic changes.
+// The following are currently invalid:
+// 1. Changing the number of TypeParameters on a Generic TypeDefinition
+// 1. Renaming the TypeParameters on a Generic TypeDefinition
+func TestGenericDefinitionParameterChanges(t *testing.T) {
+	pairs := []struct {
+		previous string
+		latest   string
+	}{
+		// Rename Generic Record TypeParameters
+		{`
+P: !protocol
+  sequence:
+    x: GenericRecord<int, string>
+GenericRecord<T1, T2>: !record
+  fields:
+    x: T1
+    y: T2
+`, `
+P: !protocol
+  sequence:
+    x: GenericRecord<int, string>
+GenericRecord<A, B>: !record
+  fields:
+    x: A
+    y: B
+`},
+
+		// Add TypeParameter to Generic Record
+		{`
+P: !protocol
+  sequence:
+    x: GenericRecord<int, string>
+GenericRecord<T1, T2>: !record
+  fields:
+    x: T1
+    y: T2
+    z: bool
+`, `
+P: !protocol
+  sequence:
+    x: GenericRecord<int, string, bool>
+GenericRecord<T1, T2, T3>: !record
+  fields:
+    x: T1
+    y: T2
+    z: T3
+`},
+
+		// Add/Remove TypeParameter from Generic Record
+		{`
+P: !protocol
+  sequence:
+    x: GenericRecord<int, string>
+GenericRecord<T1, T2>: !record
+  fields:
+    x: T1
+    y: T2
+`, `
+P: !protocol
+  sequence:
+    x: GenericRecord<int>
+GenericRecord<T1>: !record
+  fields:
+    x: T1
+    y: string
+`},
+
+		// Rename Generic Union TypeParameters
+		{`
+P: !protocol
+  sequence:
+    x: GenericUnion<int, string>
+GenericUnion<T1, T2>: [T1, T2]
+`, `
+P: !protocol
+  sequence:
+    x: GenericUnion<int, string>
+GenericUnion<A, B>: [A, B]
+`},
+
+		// Add TypeParameter to Generic Union
+		{`
+P: !protocol
+  sequence:
+    x: GenericUnion<int, string>
+GenericUnion<T1, T2>: [T1, T2, bool]
+`, `
+P: !protocol
+  sequence:
+    x: GenericUnion<int, string, bool>
+GenericUnion<T1, T2, T3>: [T1, T2, T3]
+`},
+
+		// Remove TypeParameter from Generic Union
+		{`
+P: !protocol
+  sequence:
+    x: GenericUnion<int, string>
+GenericUnion<T1, T2>: [T1, T2]
+`, `
+P: !protocol
+  sequence:
+    x: GenericUnion<int>
+GenericUnion<T1>: [T1, string]
+`},
+	}
+
+	for _, pair := range pairs {
+		latest, previous, labels := parseVersions(t, []string{pair.previous, pair.latest})
+		_, err := ValidateEvolution(latest, previous, labels)
+		assert.NotNil(t, err, "previous: %s, latest: %s", pair.previous, pair.latest)
+
+		latest, previous, labels = parseVersions(t, []string{pair.latest, pair.previous})
+		_, err = ValidateEvolution(latest, previous, labels)
+		assert.NotNil(t, err, "previous: %s, latest: %s", pair.latest, pair.previous)
+	}
+}
+
+func TestValidGenericArgChanges(t *testing.T) {
+	modelA := `
+P: !protocol
+  sequence:
+    x: %s
+
+AliasedType<T>: T
+
+GU2<T1, T2>: [T1, T2]
+`
+
+	modelB := `
+P: !protocol
+  sequence:
+    x: %s
+
+AliasedType<T>: T
+
+GU2<T1, T2>: [T1, T2]
+AU2<A, B>: GU2<A, B>
+
+TU1<X>: [X, string]
+GU1<T>: GU2<T, string>
+AU1<U>: AU2<U, string>
+
+UIS: [int, string]
+GUIS: GU2<int, string>
+AUIS: AU2<int, string>
+TUIS: TU1<int>
+GUI: GU1<int>
+AUI: AU1<int>
+
+
+AliasedOptional<T>: T?
+MaybeString: AliasedOptional<string>
+AliasedUnionWithMaybeString<T>: [T, MaybeString]
+`
+
+	tests := []struct {
+		typeA string
+		typeB string
+	}{
+		// Basic Type -> Aliased Generic Type
+		{"bool", "AliasedType<bool>"},
+		{"float", "AliasedType<float>"},
+		{"string", "AliasedType<string>"},
+		{"complexdouble", "AliasedType<complexdouble>"},
+		{"string->int", "AliasedType<string->int>"},
+		{"int*", "AliasedType<int*>"},
+		{"int[]", "AliasedType<int[]>"},
+
+		{"int?", "AliasedType<int?>"},
+		{"int?", "AliasedType<AliasedOptional<int>>"},
+
+		{"[int, float]", "AliasedType<AU2<int, float>>"},
+
+		// Basic Type -> Aliased Generic Type CHANGE
+		{"int", "AliasedType<float>"},
+		{"string", "AliasedType<int>"},
+		{"string", "AliasedType<string>"},
+		{"int?", "AliasedType<float?>"},
+		{"int?", "AliasedType<AliasedOptional<float>>"},
+		{"[int, float]", "AliasedType<AU2<float, int>>"},
+		{"[int, string]", "AliasedType<AU2<string, float>>"},
+
+		{"[int, string]", "AliasedType<AliasedUnionWithMaybeString<int>>"},
+
+		// Generalized Type -> Aliased Generic Named Type
+		{"[int, string]", "GU2<int, string>"},
+		{"[int, string]", "AU2<int, string>"},
+		{"[int, string]", "TU1<int>"},
+		{"[int, string]", "GU1<int>"},
+		{"[int, string]", "AU1<int>"},
+
+		{"[int, string]", "UIS"},
+		{"[int, string]", "GUIS"},
+		{"[int, string]", "AUIS"},
+		{"[int, string]", "TUIS"},
+		{"[int, string]", "GUI"},
+		{"[int, string]", "AUI"},
+
+		// Generic Generalized Type -> Aliased Generic Named Type
+		{"GU2<int, string>", "GU2<int, string>"},
+		{"GU2<int, string>", "AU2<int, string>"},
+		{"GU2<int, string>", "TU1<int>"},
+		{"GU2<int, string>", "GU1<int>"},
+		{"GU2<int, string>", "AU1<int>"},
+		{"GU2<int, string>", "UIS"},
+		{"GU2<int, string>", "GUIS"},
+		{"GU2<int, string>", "AUIS"},
+		{"GU2<int, string>", "TUIS"},
+		{"GU2<int, string>", "GUI"},
+		{"GU2<int, string>", "AUI"},
+	}
+
+	for _, tt := range tests {
+		latest, previous, labels := parseVersions(t, []string{fmt.Sprintf(modelA, tt.typeA), fmt.Sprintf(modelB, tt.typeB)})
+		_, err := ValidateEvolution(latest, previous, labels)
+		assert.Nil(t, err, "typeA: %s, typeB: %s", tt.typeA, tt.typeB)
+
+		latest, previous, labels = parseVersions(t, []string{fmt.Sprintf(modelB, tt.typeB), fmt.Sprintf(modelA, tt.typeA)})
+		_, err = ValidateEvolution(latest, previous, labels)
+		assert.Nil(t, err, "typeA: %s, typeB: %s", tt.typeB, tt.typeA)
+	}
+}
+
+func TestInvalidGenericArgChanges(t *testing.T) {
+	modelA := `
+P: !protocol
+  sequence:
+    x: %s
+
+AliasedType<T>: T
+
+UnchangedGenericRecord<T1, T2>: !record
+  fields:
+    x: T1
+    y: T2
+
+ChangedGenericRecord<A, B>: !record
+  fields:
+    a: A
+    b: B
+    x: bool
+`
+
+	modelB := `
+P: !protocol
+  sequence:
+    x: %s
+
+AliasedType<T>: T
+AliasedOptional<T>: T?
+
+UnchangedGenericRecord<T1, T2>: !record
+  fields:
+    x: T1
+    y: T2
+
+ChangedGenericRecord<A, B>: !record
+  fields:
+    y: datetime
+    b: B
+    a: A
+`
+
+	tests := []struct {
+		typeA string
+		typeB string
+	}{
+		// Basic Type -> Aliased Generic Type CHANGE invalid
+		{"bool", "AliasedType<datetime>"},
+		{"float", "AliasedType<float*>"},
+		{"string", "AliasedType<string[]>"},
+		{"string->int", "AliasedType<string->float>"},
+		{"int*", "AliasedType<string*>"},
+
+		{"int?", "AliasedType<complexdouble?>"},
+		{"int?", "AliasedType<AliasedOptional<datetime>>"},
+
+		{"UnchangedGenericRecord<int, string>", "ChangedGenericRecord<int, string>"},
+
+		{"UnchangedGenericRecord<int, string>", "UnchangedGenericRecord<float, string>"},
+		{"ChangedGenericRecord<int, string>", "ChangedGenericRecord<float, string>"},
+		{"UnchangedGenericRecord<int, string>", "UnchangedGenericRecord<int, float>"},
+		{"ChangedGenericRecord<int, string>", "ChangedGenericRecord<int, float>"},
+	}
+
+	for _, tt := range tests {
+		latest, previous, labels := parseVersions(t, []string{fmt.Sprintf(modelA, tt.typeA), fmt.Sprintf(modelB, tt.typeB)})
+		_, err := ValidateEvolution(latest, previous, labels)
+		assert.NotNil(t, err, "typeA: %s, typeB: %s", tt.typeA, tt.typeB)
+
+		latest, previous, labels = parseVersions(t, []string{fmt.Sprintf(modelB, tt.typeB), fmt.Sprintf(modelA, tt.typeA)})
+		_, err = ValidateEvolution(latest, previous, labels)
+		assert.NotNil(t, err, "typeA: %s, typeB: %s", tt.typeB, tt.typeA)
+	}
+}
+
+func TestUnchangedGenericAliases(t *testing.T) {
+	model := `
+P: !protocol
+  sequence:
+    x: AliasedClosedGeneric
+
+
+AliasedClosedGeneric: AliasedOpenGeneric<int>
+AliasedOpenGeneric<T>: GenericRecord<T>
+GenericRecord<T>: !record
+  fields:
+    x: T
+`
+
+	latest, previous, labels := parseVersions(t, []string{model, model})
+	_, err := ValidateEvolution(latest, previous, labels)
+	assert.Nil(t, err)
+}

@@ -94,6 +94,27 @@ ProtocolWithChanges: !protocol
     recordToUnion: [RecordWithChanges, string]
     recordToAliasedUnion: AliasedRecordOrString
 
+    unionToAliasedUnion: AliasedRecordOrInt
+    unionToAliasedUnionWithChanges: AliasedRecordOrString
+    optionalToAliasedOptional: AliasedOptionalRecord
+    optionalToAliasedOptionalWithChanges: AliasedOptionalString
+
+    genericRecord: GenericRecord<int, string>
+    genericRecordToOpenAlias: AliasedOpenGenericRecord<int, string>
+    genericRecordToClosedAlias: AliasedClosedGenericRecord
+    genericRecordToHalfClosedAlias: AliasedHalfClosedGenericRecord<int>
+
+    genericRecordToUnion: !union
+        r: GenericRecord<int, string>
+        s: string
+    genericRecordToAliasedUnion: AliasedGenericRecordOrString
+
+    genericUnionOfChangedRecord: GenericUnion<GenericRecord<int, string>, float>
+
+    genericParentRecord: GenericParentRecord<int>
+
+    genericNestedRecords: GenericRecord<Unchanged, Changed>
+
     vectorRecordWithChanges: RecordWithChanges*
 
     streamedRecordWithChanges: !stream
@@ -111,6 +132,8 @@ AliasedLongToString: string
 AliasedRecordWithChanges: RecordWithChanges
 AliasOfAliasedRecordWithChanges: AliasedRecordWithChanges
 AliasedOptionalRecord: RecordWithChanges?
+AliasedOptionalString: string?
+AliasedRecordOrInt: [RecordWithChanges, int]
 AliasedRecordOrString: [RecordWithChanges, string]
 
 RecordWithChanges: !record
@@ -151,3 +174,41 @@ UnusedButChangedRecord: !record
   fields:
     age: float
     name: string
+
+GenericParentRecord<T>: !record
+  fields:
+    record: AliasedHalfClosedGenericRecord<T>
+    recordOfUnion: AliasedOpenGenericRecord<AliasedOpenGenericUnion<T, float>, string>
+    unionOfRecord: AliasedClosedGenericUnion
+
+GenericUnion<T1, T2>: [T1, T2]
+AliasedOpenGenericUnion<A, B>: GenericUnion<A, B>
+AliasedHalfClosedGenericUnion<YYY>: AliasedOpenGenericUnion<YYY, float>
+AliasedClosedGenericUnion: AliasedHalfClosedGenericUnion<GenericRecord<int, string>>
+
+GenericRecord<T1, T2>: !record
+  fields:
+    field2: T2
+    field1: T1
+    added: bool?
+
+AliasedOpenGenericRecord<A, B>: GenericRecord<A, B>
+AliasedHalfClosedGenericRecord<XXX>: AliasedOpenGenericRecord<XXX, string>
+AliasedClosedGenericRecord: AliasedHalfClosedGenericRecord<int>
+
+AliasedGenericRecordOrString: !union
+  r: GenericRecord<int, string>
+  s: string
+
+Unchanged: UnchangedGeneric<int>
+UnchangedGeneric<A>: OldUnchangedGeneric<A>
+OldUnchangedGeneric<T2>: !record
+  fields:
+    field: T2
+
+Changed: ChangedGeneric<string, int>
+ChangedGeneric<I, J>: OldChangedGeneric<I, J>
+OldChangedGeneric<Y, Z>: !record
+  fields:
+    y: Y?
+    z: OldUnchangedGeneric<Z>?

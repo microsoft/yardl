@@ -94,6 +94,25 @@ ProtocolWithChanges: !protocol
     recordToUnion: RecordWithChanges
     recordToAliasedUnion: RecordWithChanges
 
+    unionToAliasedUnion: [RecordWithChanges, int]
+    unionToAliasedUnionWithChanges: [RecordWithChanges, int]
+    optionalToAliasedOptional: RecordWithChanges?
+    optionalToAliasedOptionalWithChanges: int?
+
+    genericRecord: GenericRecord<int, string>
+    genericRecordToOpenAlias: GenericRecord<int, string>
+    genericRecordToClosedAlias: GenericRecord<int, string>
+    genericRecordToHalfClosedAlias: GenericRecord<int, string>
+
+    genericRecordToUnion: GenericRecord<int, string>
+    genericRecordToAliasedUnion: GenericRecord<int, string>
+
+    genericUnionOfChangedRecord: GenericUnion<GenericRecord<int, string>, float>
+
+    genericParentRecord: GenericParentRecord<int>
+
+    genericNestedRecords: GenericRecord<UnchangedGeneric<int>, ChangedGeneric<string, int>>
+
     vectorRecordWithChanges: RecordWithChanges*
 
     streamedRecordWithChanges: !stream
@@ -140,3 +159,26 @@ UnusedButChangedRecord: !record
   fields:
     name: string
     age: int
+
+GenericParentRecord<T>: !record
+  fields:
+    record: GenericRecord<T, string>
+    recordOfUnion: GenericRecord<GenericUnion<T, float>, string>
+    unionOfRecord: GenericUnion<GenericRecord<int, string>, float>
+
+GenericUnion<T1, T2>: [T1, T2]
+
+GenericRecord<T1, T2>: !record
+  fields:
+    removed: bool?
+    field1: T1
+    field2: T2
+
+UnchangedGeneric<T2>: !record
+  fields:
+    field: T2
+
+ChangedGeneric<Y, Z>: !record
+  fields:
+    y: Y
+    z: UnchangedGeneric<Z>

@@ -707,25 +707,28 @@ func writeCompatibilitySerializers(w *formatting.IndentedWriter, change dsl.Defi
 				fmt.Fprintf(w, "%s(stream, value);\n", typeDefinitionRwFunction(prev, write))
 			}
 
+		case *dsl.CompatibilityChange:
+			fmt.Fprintf(w, "%s(stream, value);\n", typeDefinitionRwFunction(change.LatestDefinition(), write))
+
 		default:
 			panic(fmt.Sprintf("Unexpected type %T", change.PreviousDefinition()))
 		}
 	}
 
-	writeCompatibilityRwFunctionSignature(change.PreviousDefinition(), change.LatestDefinition(), versionLabel, w, true)
+	writeCompatibilityRwFunctionSignature(change.PreviousDefinition(), change.LatestDefinition(), w, true)
 	w.Indented(func() {
 		writeFallbackBody(true)
 	})
 	w.WriteString("}\n\n")
 
-	writeCompatibilityRwFunctionSignature(change.PreviousDefinition(), change.LatestDefinition(), versionLabel, w, false)
+	writeCompatibilityRwFunctionSignature(change.PreviousDefinition(), change.LatestDefinition(), w, false)
 	w.Indented(func() {
 		writeFallbackBody(false)
 	})
 	w.WriteString("}\n\n")
 }
 
-func writeCompatibilityRwFunctionSignature(old dsl.TypeDefinition, new dsl.TypeDefinition, versionLabel string, w *formatting.IndentedWriter, write bool) {
+func writeCompatibilityRwFunctionSignature(old dsl.TypeDefinition, new dsl.TypeDefinition, w *formatting.IndentedWriter, write bool) {
 	writeRwFunctionTemplateDeclaration(old, w, write)
 	if write {
 		fmt.Fprintf(w, "[[maybe_unused]] static void Write%s(yardl::binary::CodedOutputStream& stream, %s const& value) {\n", old.GetDefinitionMeta().Name, common.TypeDefinitionSyntax(new))
@@ -922,7 +925,6 @@ func writeProtocolStep(w *formatting.IndentedWriter, step *dsl.ProtocolStep, cha
 			if !write {
 				if isPlural {
 					fmt.Fprintln(w, "values.clear();")
-					fmt.Fprintln(w, "assert(current_block_remaining_ == 0);")
 				} else {
 					tmpVarType := common.TypeSyntax(step.Type)
 					tmpVarName := common.FieldIdentifierName(step.Name)

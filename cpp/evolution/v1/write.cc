@@ -120,6 +120,44 @@ int main(void) {
   w.WriteRecordToUnion(rec);
   w.WriteRecordToAliasedUnion(rec);
 
+  w.WriteUnionToAliasedUnion(rec);
+  w.WriteUnionToAliasedUnionWithChanges(rec);
+  w.WriteOptionalToAliasedOptional(rec);
+  w.WriteOptionalToAliasedOptionalWithChanges(std::to_string(INT_MIN));
+
+  GenericRecord<int, std::string> generic_record;
+  generic_record.field_2 = "42";
+  generic_record.field_1 = 42;
+  generic_record.added = true;
+
+  w.WriteGenericRecord(generic_record);
+  w.WriteGenericRecordToOpenAlias(generic_record);
+  w.WriteGenericRecordToClosedAlias(generic_record);
+  w.WriteGenericRecordToHalfClosedAlias(generic_record);
+
+  w.WriteGenericRecordToUnion(generic_record);
+  w.WriteGenericRecordToAliasedUnion(generic_record);
+
+  w.WriteGenericUnionOfChangedRecord(generic_record);
+
+  GenericParentRecord<int> generic_parent;
+  generic_parent.record = generic_record;
+
+  GenericRecord<GenericUnion<int, float>, std::string> generic_record_of_union;
+  generic_record_of_union.field_1 = 42;
+  generic_record_of_union.field_2 = "Hello, World";
+  generic_parent.record_of_union = generic_record_of_union;
+
+  generic_parent.union_of_record = generic_record;
+
+  w.WriteGenericParentRecord(generic_parent);
+
+  GenericRecord<Unchanged, Changed> generic_nested;
+  generic_nested.field_1.field = 42;
+  generic_nested.field_2.y = "42";
+  generic_nested.field_2.z = Unchanged{42};
+  w.WriteGenericNestedRecords(generic_nested);
+
   // Write a vector of size 7 records
   std::vector<RecordWithChanges> recs(7, rec);
   w.WriteVectorRecordWithChanges(recs);

@@ -17,6 +17,14 @@ void validateRecordWithChanges(RecordWithChanges const& rec) {
   EVO_ASSERT(rec.unchanged_record.meta.at("weight") == 75.0f);
 }
 
+void validateGenericRecord(GenericRecord<int, std::string> record) {
+  if (record.removed.has_value()) {
+    assert(record.removed.value() == true);
+  }
+  assert(record.field_1 == 42);
+  assert(record.field_2 == "42");
+}
+
 int main(void) {
   ::binary::ProtocolWithChangesReader r(std::cin);
 
@@ -136,58 +144,58 @@ int main(void) {
 
   RC record;
   r.ReadRlink(record);
-  assert(record.subject == "42");
+  EVO_ASSERT(record.subject == "42");
   r.ReadRlinkRX(record);
-  assert(record.subject == "42");
+  EVO_ASSERT(record.subject == "42");
   r.ReadRlinkRY(record);
-  assert(record.subject == "42");
+  EVO_ASSERT(record.subject == "42");
   r.ReadRlinkRZ(record);
-  assert(record.subject == "42");
+  EVO_ASSERT(record.subject == "42");
 
   r.ReadRaRLink(record);
-  assert(record.subject == "42");
+  EVO_ASSERT(record.subject == "42");
   r.ReadRaRX(record);
-  assert(record.subject == "42");
+  EVO_ASSERT(record.subject == "42");
   r.ReadRaRY(record);
-  assert(record.subject == "42");
+  EVO_ASSERT(record.subject == "42");
   r.ReadRaRZ(record);
-  assert(record.subject == "42");
+  EVO_ASSERT(record.subject == "42");
 
   r.ReadRbRLink(record);
-  assert(record.subject == "42");
+  EVO_ASSERT(record.subject == "42");
   r.ReadRbRX(record);
-  assert(record.subject == "42");
+  EVO_ASSERT(record.subject == "42");
   r.ReadRbRY(record);
-  assert(record.subject == "42");
+  EVO_ASSERT(record.subject == "42");
   r.ReadRbRZ(record);
-  assert(record.subject == "42");
+  EVO_ASSERT(record.subject == "42");
 
   r.ReadRcRLink(record);
-  assert(record.subject == "42");
+  EVO_ASSERT(record.subject == "42");
   r.ReadRcRX(record);
-  assert(record.subject == "42");
+  EVO_ASSERT(record.subject == "42");
   r.ReadRcRY(record);
-  assert(record.subject == "42");
+  EVO_ASSERT(record.subject == "42");
   r.ReadRcRZ(record);
-  assert(record.subject == "42");
+  EVO_ASSERT(record.subject == "42");
 
   r.ReadRlinkRNew(record);
-  assert(record.subject == "42");
+  EVO_ASSERT(record.subject == "42");
   r.ReadRaRNew(record);
-  assert(record.subject == "42");
+  EVO_ASSERT(record.subject == "42");
   r.ReadRbRNew(record);
-  assert(record.subject == "42");
+  EVO_ASSERT(record.subject == "42");
   r.ReadRcRNew(record);
-  assert(record.subject == "42");
+  EVO_ASSERT(record.subject == "42");
 
   r.ReadRlinkRUnion(record);
-  assert(record.subject == "42");
+  EVO_ASSERT(record.subject == "42");
   r.ReadRaRUnion(record);
-  assert(record.subject == "42");
+  EVO_ASSERT(record.subject == "42");
   r.ReadRbRUnion(record);
-  assert(record.subject == "42");
+  EVO_ASSERT(record.subject == "42");
   r.ReadRcRUnion(record);
-  assert(record.subject == "42");
+  EVO_ASSERT(record.subject == "42");
 
   r.ReadOptionalRecordWithChanges(maybe_rec);
   EVO_ASSERT(maybe_rec.has_value());
@@ -228,6 +236,59 @@ int main(void) {
   validateRecordWithChanges(rec);
   r.ReadRecordToAliasedUnion(rec);
   validateRecordWithChanges(rec);
+
+  r.ReadUnionToAliasedUnion(rec_or_int);
+  EVO_ASSERT(rec_or_int.index() == 0);
+  validateRecordWithChanges(std::get<0>(rec_or_int));
+  r.ReadUnionToAliasedUnionWithChanges(rec_or_int);
+  EVO_ASSERT(rec_or_int.index() == 0);
+  validateRecordWithChanges(std::get<0>(rec_or_int));
+  r.ReadOptionalToAliasedOptional(maybe_rec);
+  EVO_ASSERT(maybe_rec.has_value());
+  validateRecordWithChanges(maybe_rec.value());
+  std::optional<int> maybe_int;
+  r.ReadOptionalToAliasedOptionalWithChanges(maybe_int);
+  EVO_ASSERT(maybe_int.has_value());
+  EVO_ASSERT(maybe_int == INT_MIN);
+
+  GenericRecord<int, std::string> generic_record;
+
+  r.ReadGenericRecord(generic_record);
+  validateGenericRecord(generic_record);
+  r.ReadGenericRecordToOpenAlias(generic_record);
+  validateGenericRecord(generic_record);
+  r.ReadGenericRecordToClosedAlias(generic_record);
+  validateGenericRecord(generic_record);
+  r.ReadGenericRecordToHalfClosedAlias(generic_record);
+  validateGenericRecord(generic_record);
+
+  r.ReadGenericRecordToUnion(generic_record);
+  validateGenericRecord(generic_record);
+  r.ReadGenericRecordToAliasedUnion(generic_record);
+  validateGenericRecord(generic_record);
+
+  GenericUnion<GenericRecord<int, std::string>, float> generic_union_record;
+  r.ReadGenericUnionOfChangedRecord(generic_union_record);
+  assert(generic_union_record.index() == 0);
+  validateGenericRecord(std::get<0>(generic_union_record));
+
+  GenericParentRecord<int> generic_parent;
+  r.ReadGenericParentRecord(generic_parent);
+
+  validateGenericRecord(generic_parent.record);
+
+  assert(generic_parent.record_of_union.field_1.index() == 0);
+  assert(std::get<0>(generic_parent.record_of_union.field_1) == 42);
+  assert(generic_parent.record_of_union.field_2 == "Hello, World");
+
+  assert(generic_parent.union_of_record.index() == 0);
+  validateGenericRecord(std::get<0>(generic_parent.union_of_record));
+
+  GenericRecord<UnchangedGeneric<int>, ChangedGeneric<std::string, int>> generic_nested;
+  r.ReadGenericNestedRecords(generic_nested);
+  assert(generic_nested.field_1.field == 42);
+  assert(generic_nested.field_2.y == "42");
+  assert(generic_nested.field_2.z.field == 42);
 
   std::vector<RecordWithChanges> vec;
   r.ReadVectorRecordWithChanges(vec);
