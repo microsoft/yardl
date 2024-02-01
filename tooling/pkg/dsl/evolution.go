@@ -58,11 +58,11 @@ func ValidateEvolution(latest *Environment, predecessors []*Environment, version
 func renameOldTypeDefinitions(env *Environment, changes []DefinitionChange, versionLabel string) {
 	oldNames := make(map[string]bool)
 	for _, ch := range changes {
-		// for _, ns := range env.Namespaces {
-		// for _, td := range ns.TypeDefinitions {
 		td := ch.PreviousDefinition()
 		oldNames[td.GetDefinitionMeta().GetQualifiedName()] = true
-		// }
+
+		log.Info().Msgf("Renaming OLD %s", td.GetDefinitionMeta().GetQualifiedName())
+		td.GetDefinitionMeta().Name = td.GetDefinitionMeta().Name + "_" + versionLabel
 	}
 
 	Visit(env, func(self Visitor, node Node) {
@@ -72,7 +72,12 @@ func renameOldTypeDefinitions(env *Environment, changes []DefinitionChange, vers
 			if oldNames[oldName] {
 				node.GetDefinitionMeta().Name = node.GetDefinitionMeta().Name + "_" + versionLabel
 			}
+			self.VisitChildren(node)
+			// if nt, ok := node.(*NamedType); ok {
+			// 	self.Visit(nt.Type)
+			// }
 		case *SimpleType:
+			self.VisitChildren(node)
 			self.Visit(node.ResolvedDefinition)
 		}
 		self.VisitChildren(node)
@@ -242,30 +247,6 @@ func collectUserTypeDefsUsedInProtocols(env *Environment) []TypeDefinition {
 // Returns the last name in the chain of resolved names
 // i.e. the resolved Record, Enum, or NamedType name
 func getResolvedName(td TypeDefinition) string {
-	// collectNames := func(td TypeDefinition) []string {
-	// 	names := make([]string, 0)
-	// 	Visit(td, func(self Visitor, node Node) {
-	// 		switch node := node.(type) {
-	// 		case PrimitiveDefinition:
-	// 			return
-
-	// 		case *NamedType:
-	// 			names = append(names, node.GetDefinitionMeta().GetQualifiedName())
-	// 			self.Visit(node.Type)
-
-	// 		case TypeDefinition:
-	// 			names = append(names, node.GetDefinitionMeta().GetQualifiedName())
-
-	// 		case *SimpleType:
-	// 			self.Visit(node.ResolvedDefinition)
-	// 		}
-	// 	})
-	// 	return names
-	// }
-
-	// names := collectNames(td)
-	// return names[len(names)-1]
-
 	return getBaseDefinition(td).GetDefinitionMeta().GetQualifiedName()
 }
 
@@ -304,6 +285,7 @@ func getParentDefinitions(td TypeDefinition, allTypeDefs []TypeDefinition) []Typ
 	return parents
 }
 
+// Only used for debugging
 func defWithArgs(td TypeDefinition) string {
 	// baseName := td.GetDefinitionMeta().GetQualifiedName()
 	baseName := td.GetDefinitionMeta().Name
@@ -323,6 +305,7 @@ func defWithArgs(td TypeDefinition) string {
 	return fmt.Sprintf("%s%s", baseName, argString)
 }
 
+// Returns the base definition for a NamedType
 func getBaseDefinition(td TypeDefinition) TypeDefinition {
 	tds := make([]TypeDefinition, 0)
 	Visit(td, func(self Visitor, node Node) {
@@ -345,463 +328,54 @@ func getBaseDefinition(td TypeDefinition) TypeDefinition {
 	return tds[len(tds)-1]
 }
 
-func getResolvedGenericDefinition(newTd, oldTd TypeDefinition, allResolved map[string]map[string]*DefinitionPair) *DefinitionPair {
-	newBase := getBaseDefinition(newTd)
-	oldBase := getBaseDefinition(oldTd)
+func getResolvedGenericDefinition(newTd, oldTd TypeDefinition) *DefinitionPair {
+	// newBase := getBaseDefinition(newTd)
+	// oldBase := getBaseDefinition(oldTd)
+	// return &DefinitionPair{oldBase, newBase}
 
-	// log.Debug().Msgf("Resolved %s <= %s", defWithArgs(newBase), defWithArgs(oldBase))
+	// log.Debug().Msgf("Resolving %s <= %s", defWithArgs(newTd), defWithArgs(oldTd))
 
-	// if len(newBase.GetDefinitionMeta().TypeArguments) < len(oldBase.GetDefinitionMeta().TypeArguments) {
-	// 	var err error
-	// 	newBase, err = MakeGenericType(newBase, oldBase.GetDefinitionMeta().TypeArguments, false)
-	// 	if err != nil {
-	// 		log.Err(err).Msgf("NOPE")
-	// 		panic("HUH")
-	// 	}
-	// }
-
-	// if len(oldBase.GetDefinitionMeta().TypeArguments) < len(newBase.GetDefinitionMeta().TypeArguments) {
-	// 	var err error
-	// 	oldBase, err = MakeGenericType(oldBase, newBase.GetDefinitionMeta().TypeArguments, false)
-	// 	if err != nil {
-	// 		log.Err(err).Msgf("NOPE")
-	// 		panic("HUH")
-	// 	}
-	// }
-
-	return &DefinitionPair{oldBase, newBase}
-}
-
-func NOPE_getResolvedGenericDefinition(newTd, oldTd TypeDefinition, allResolved map[string]map[string]*DefinitionPair) *DefinitionPair {
-	// assert(both are semantically equal)
-	// assert(both have TypeParameters)
-
-	// How do I get to successfully call MakeGenericType for both definitions?
-	// Walk through it because it's tricky for NamedTypes
-
-	// 1. I can ignore invalid TypeDefinition pairs. We'll catch those later
-
-	if pair, ok := allResolved[newTd.GetDefinitionMeta().GetQualifiedName()][oldTd.GetDefinitionMeta().GetQualifiedName()]; ok {
-		return pair
-	}
-
-	switch newTd := newTd.(type) {
-	case *NamedType:
-		switch oldTd := oldTd.(type) {
-		case *NamedType:
-			// TODO
-			log.Info().Msgf("  NamedTypes %s <= %s", defWithArgs(newTd), defWithArgs(oldTd))
-
-			var newDef TypeDefinition = newTd
-			var oldDef TypeDefinition = oldTd
-
-			if len(newTd.TypeParameters) < len(oldTd.TypeParameters) {
-				var typeArgs []Type
-				if st, ok := newTd.Type.(*SimpleType); ok {
-					typeArgs = st.TypeArguments
-					newDef = st.ResolvedDefinition
-
-					if len(typeArgs) < len(oldTd.TypeParameters) {
-						resolved := getResolvedGenericDefinition(newDef, oldTd, allResolved)
-						newDef = resolved.LatestDefinition()
-						typeArgs = newDef.GetDefinitionMeta().TypeArguments
-					}
-
-					log.Info().Msgf("  |_  %s <= %s", defWithArgs(newDef), defWithArgs(oldTd))
-				}
-
-				oldDef, err := MakeGenericType(oldTd, typeArgs, false)
-				if err != nil {
-					log.Err(err).Msgf("NOPE")
-					panic("HUH")
-				}
-
-				return &DefinitionPair{oldDef, newDef}
-
-			} else if len(oldTd.TypeParameters) < len(newTd.TypeParameters) {
-
-				var typeArgs []Type
-				if st, ok := oldTd.Type.(*SimpleType); ok {
-					typeArgs = st.TypeArguments
-					oldDef = st.ResolvedDefinition
-
-					if len(typeArgs) < len(newTd.TypeParameters) {
-						resolved := getResolvedGenericDefinition(newTd, oldDef, allResolved)
-						// log.Info().Msgf(" -- Already: %s <= %s", defWithArgs(resolved.LatestDefinition()), defWithArgs(resolved.PreviousDefinition()))
-						oldDef = resolved.PreviousDefinition()
-						typeArgs = oldDef.GetDefinitionMeta().TypeArguments
-					}
-
-					log.Info().Msgf("  |_  %s <= %s", defWithArgs(newTd), defWithArgs(oldDef))
-				}
-
-				newDef, err := MakeGenericType(newTd, typeArgs, false)
-				if err != nil {
-					panic("HUH")
-				}
-				return &DefinitionPair{oldDef, newDef}
-
-			} else {
-				log.Info().Msgf("    These have compatible TypeParameters")
-
-				var newTypeArgs []Type
-				var oldTypeArgs []Type
-
-				if st, ok := newTd.Type.(*SimpleType); ok {
-					// newDef = st.ResolvedDefinition
-					resolved := getResolvedGenericDefinition(st.ResolvedDefinition, oldTd, allResolved)
-					newDef = resolved.LatestDefinition()
-					// oldTypeArgs = st.TypeArguments
-					oldTypeArgs = newDef.GetDefinitionMeta().TypeArguments
-
-					// var err error
-					// oldDef, err = MakeGenericType(newTd, oldTypeArgs, false)
-					// if err != nil {
-					// 	log.Err(err).Msgf("NOPE")
-					// 	return nil
-					// }
-				}
-
-				if st, ok := oldTd.Type.(*SimpleType); ok {
-					resolved := getResolvedGenericDefinition(newTd, st.ResolvedDefinition, allResolved)
-					oldDef = resolved.PreviousDefinition()
-					// newTypeArgs = st.TypeArguments
-					newTypeArgs = oldDef.GetDefinitionMeta().TypeArguments
-
-					// oldDef, err := MakeGenericType(oldTd, newTypeArgs, false)
-					// if err != nil {
-					// 	log.Err(err).Msgf("NOPE")
-					// 	return nil
-					// }
-				}
-
-				log.Debug().Msgf("Trying to MakeGeneric with %s <= %s", defWithArgs(newDef), defWithArgs(oldDef))
-				_, err := MakeGenericType(newDef, oldTypeArgs, false)
-				if err != nil {
-					log.Err(err).Msgf("NOPE")
-				}
-
-				_, err = MakeGenericType(oldDef, newTypeArgs, false)
-				if err != nil {
-					log.Err(err).Msgf("NOPE")
-				}
-
-				return &DefinitionPair{oldDef, newDef}
-			}
-
-			return &DefinitionPair{oldDef, newDef}
-
-		case *RecordDefinition:
-			// TODO
-			log.Info().Msgf("  Rec->Type %s <= %s", defWithArgs(newTd), defWithArgs(oldTd))
-
-			var newDef TypeDefinition = newTd
-			var typeArgs []Type
-			if st, ok := newTd.Type.(*SimpleType); ok {
-				typeArgs = st.TypeArguments
-				newDef = st.ResolvedDefinition
-
-				for len(typeArgs) < len(oldTd.TypeParameters) {
-					resolved := getResolvedGenericDefinition(newDef, oldTd, allResolved)
-					newDef = resolved.LatestDefinition()
-					typeArgs = newDef.GetDefinitionMeta().TypeArguments
-				}
-				log.Info().Msgf("  |_  %s <= %s", defWithArgs(newDef), defWithArgs(oldTd))
-			}
-			oldDef, err := MakeGenericType(oldTd, typeArgs, false)
-			if err != nil {
-				log.Err(err).Msgf("NOPE")
-				panic("HUH")
-			}
-			return &DefinitionPair{oldDef, newDef}
-
-		default:
-			return &DefinitionPair{oldTd, newTd}
-		}
-
-	case *RecordDefinition:
-		switch oldTd := oldTd.(type) {
-		case *NamedType:
-			// TODO
-			log.Info().Msgf("  Type->Rec %s <= %s", defWithArgs(newTd), defWithArgs(oldTd))
-
-			var oldDef TypeDefinition = oldTd
-			var typeArgs []Type
-			if st, ok := oldTd.Type.(*SimpleType); ok {
-				typeArgs = st.TypeArguments
-				oldDef = st.ResolvedDefinition
-
-				for len(typeArgs) < len(newTd.TypeParameters) {
-					resolved := getResolvedGenericDefinition(newTd, oldDef, allResolved)
-					// log.Info().Msgf(" -- Already: %s <= %s", defWithArgs(resolved.LatestDefinition()), defWithArgs(resolved.PreviousDefinition()))
-					oldDef = resolved.PreviousDefinition()
-					typeArgs = oldDef.GetDefinitionMeta().TypeArguments
-				}
-
-				log.Info().Msgf("  |_  %s <= %s", defWithArgs(newTd), defWithArgs(oldDef))
-			}
-			newDef, err := MakeGenericType(newTd, typeArgs, false)
-			if err != nil {
-				log.Err(err).Msgf("NOPE")
-				return nil
-			}
-			log.Info().Msgf("  |_  %s <= %s", defWithArgs(newDef), defWithArgs(oldDef))
-			return &DefinitionPair{oldDef, newDef}
-
-		default:
-			return &DefinitionPair{oldTd, newTd}
-		}
-
-	case *EnumDefinition:
-		return &DefinitionPair{oldTd, newTd}
-
-	default:
-		panic("Not allowed")
-	}
-
-	panic("Not allowed")
-	return nil
-
-}
-
-func OLD_getResolvedGenericDefinition(newTd, oldTd TypeDefinition, allResolved map[string]map[string]*DefinitionPair) *DefinitionPair {
-	// assert(both are semantically equal)
-	// assert(both have TypeParameters)
-
-	// How do I get to successfully call MakeGenericType for both definitions?
-	// Walk through it because it's tricky for NamedTypes
-
-	// 1. I can ignore invalid TypeDefinition pairs. We'll catch those later
-
-	switch newTd := newTd.(type) {
-	case *NamedType:
-		switch oldTd := oldTd.(type) {
-		case *NamedType:
-			// TODO
-			log.Info().Msgf("  NamedTypes %s <= %s", defWithArgs(newTd), defWithArgs(oldTd))
-
-			var newDef TypeDefinition = newTd
-			var oldDef TypeDefinition = oldTd
-
-			if len(newTd.TypeParameters) < len(oldTd.TypeParameters) {
-				var typeArgs []Type
-				if st, ok := newTd.Type.(*SimpleType); ok {
-					typeArgs = st.TypeArguments
-					newDef = st.ResolvedDefinition
-					log.Info().Msgf("  |_  %s <= %s", defWithArgs(newDef), defWithArgs(oldTd))
-					for len(typeArgs) < len(oldTd.TypeParameters) {
-						if nt, ok := newDef.(*NamedType); ok {
-							if st, ok := nt.Type.(*SimpleType); ok {
-								if len(st.TypeArguments) > 0 {
-									typeArgs = st.TypeArguments
-									newDef = st.ResolvedDefinition
-									log.Info().Msgf("    %s <= %s", defWithArgs(newDef), defWithArgs(oldTd))
-									continue
-								} else {
-									panic("HUH")
-								}
-							}
-						}
-						break
-					}
-				}
-
-				// for len(newDef.GetDefinitionMeta().TypeParameters) < len(oldTd.TypeParameters) {
-				// 	if nt, ok := newDef.(*NamedType); ok {
-				// 		if st, ok := nt.Type.(*SimpleType); ok {
-				// 			if len(st.TypeArguments) > 0 {
-				// 				typeArgs = st.TypeArguments
-				// 				newDef = st.ResolvedDefinition
-				// 				log.Info().Msgf("  |_  %s <= %s", defWithArgs(newDef), defWithArgs(oldTd))
-				// 				continue
-				// 			} else {
-				// 				panic("HUH")
-				// 			}
-				// 		}
-				// 	}
-				// 	break
+	resolveGenericDefinitions := func(out TypeDefinition, in TypeDefinition) TypeDefinition {
+		typeArgs := make([]Type, 0)
+		Visit(in, func(self Visitor, node Node) {
+			switch node := node.(type) {
+			case *SimpleType:
+				// if len(node.TypeArguments) == len(out.GetDefinitionMeta().TypeParameters) {
+				// 	typeArgs = node.TypeArguments
+				// 	return
 				// }
-				oldDef, err := MakeGenericType(oldTd, typeArgs, false)
-				if err != nil {
-					panic("HUH")
+				self.Visit(node.ResolvedDefinition)
+
+			case TypeDefinition:
+				in = node
+				if len(node.GetDefinitionMeta().TypeArguments) == len(out.GetDefinitionMeta().TypeParameters) {
+					typeArgs = node.GetDefinitionMeta().TypeArguments
+					// return
 				}
-				return &DefinitionPair{oldDef, newDef}
-
-			} else if len(oldTd.TypeParameters) < len(newTd.TypeParameters) {
-				var typeArgs []Type
-				if st, ok := oldTd.Type.(*SimpleType); ok {
-					typeArgs = st.TypeArguments
-					oldDef = st.ResolvedDefinition
-
-					log.Info().Msgf("  |_  %s <= %s", defWithArgs(newTd), defWithArgs(oldDef))
-
-					for len(typeArgs) < len(newTd.TypeParameters) {
-						if nt, ok := oldDef.(*NamedType); ok {
-							if st, ok := nt.Type.(*SimpleType); ok {
-								if len(st.TypeArguments) > 0 {
-									typeArgs = st.TypeArguments
-									oldDef = st.ResolvedDefinition
-									log.Info().Msgf("    %s <= %s", defWithArgs(newTd), defWithArgs(oldDef))
-									continue
-								} else {
-									panic("HUH")
-								}
-							}
-						}
-						break
-					}
-
-				}
-
-				// for len(oldDef.GetDefinitionMeta().TypeParameters) < len(newTd.TypeParameters) {
-				// 	if nt, ok := oldDef.(*NamedType); ok {
-				// 		if st, ok := nt.Type.(*SimpleType); ok {
-				// 			if len(st.TypeArguments) > 0 {
-				// 				oldDef = st.ResolvedDefinition
-				// 				log.Info().Msgf("  |_  %s <= %s", defWithArgs(newTd), defWithArgs(oldDef))
-				// 				continue
-				// 			} else {
-				// 				panic("HUH")
-				// 			}
-				// 		}
-				// 	}
-				// 	break
-				// }
-
-				newDef, err := MakeGenericType(newTd, typeArgs, false)
-				if err != nil {
-					panic("HUH")
-				}
-				return &DefinitionPair{oldDef, newDef}
-
-			} else {
-				log.Info().Msgf("    These have compatible TypeParameters")
-			}
-
-			return &DefinitionPair{oldDef, newDef}
-
-		case *RecordDefinition:
-			// TODO
-			log.Info().Msgf("  Rec->Type %s <= %s", defWithArgs(newTd), defWithArgs(oldTd))
-
-			var newDef TypeDefinition = newTd
-			var typeArgs []Type
-			if st, ok := newTd.Type.(*SimpleType); ok {
-				typeArgs = st.TypeArguments
-				newDef = st.ResolvedDefinition
-				log.Info().Msgf("  |_  %s <= %s", defWithArgs(newDef), defWithArgs(oldTd))
-				for len(typeArgs) < len(oldTd.TypeParameters) {
-					if nt, ok := newDef.(*NamedType); ok {
-						if st, ok := nt.Type.(*SimpleType); ok {
-							if len(st.TypeArguments) > 0 {
-								typeArgs = st.TypeArguments
-								newDef = st.ResolvedDefinition
-								log.Info().Msgf("    %s <= %s", defWithArgs(newDef), defWithArgs(oldTd))
-								continue
-							} else {
-								panic("HUH")
-							}
-						}
-					}
-					break
+				if nt, ok := node.(*NamedType); ok {
+					self.Visit(nt.Type)
 				}
 			}
+		})
 
-			// for len(newDef.GetDefinitionMeta().TypeParameters) < len(oldTd.TypeParameters) {
-			// 	if nt, ok := newDef.(*NamedType); ok {
-			// 		if st, ok := nt.Type.(*SimpleType); ok {
-			// 			if len(st.TypeArguments) > 0 {
-			// 				newDef = st.ResolvedDefinition
-			// 				log.Info().Msgf("    %s <= %s", defWithArgs(newDef), defWithArgs(oldTd))
-			// 				continue
-			// 			} else {
-			// 				panic("HUH")
-			// 			}
-			// 		}
-			// 	}
-			// 	break
-			// }
-			oldDef, err := MakeGenericType(oldTd, typeArgs, false)
+		if len(typeArgs) > 0 {
+			var err error
+			out, err = MakeGenericType(out, typeArgs, false)
 			if err != nil {
 				log.Err(err).Msgf("NOPE")
 				panic("HUH")
 			}
-			return &DefinitionPair{oldDef, newDef}
-
-		default:
-			return &DefinitionPair{oldTd, newTd}
 		}
 
-	case *RecordDefinition:
-		switch oldTd := oldTd.(type) {
-		case *NamedType:
-			// TODO
-			log.Info().Msgf("  Type->Rec %s <= %s", defWithArgs(newTd), defWithArgs(oldTd))
-
-			var oldDef TypeDefinition = oldTd
-			var typeArgs []Type
-			if st, ok := oldTd.Type.(*SimpleType); ok {
-				typeArgs = st.TypeArguments
-				oldDef = st.ResolvedDefinition
-
-				resolved := getResolvedGenericDefinition(newTd, oldDef, allResolved)
-				log.Info().Msgf(" -- Already: %s <= %s", defWithArgs(resolved.LatestDefinition()), defWithArgs(resolved.PreviousDefinition()))
-
-				log.Info().Msgf("  |_  %s <= %s", defWithArgs(newTd), defWithArgs(oldDef))
-
-				for len(typeArgs) < len(newTd.TypeParameters) {
-					if nt, ok := oldDef.(*NamedType); ok {
-						if st, ok := nt.Type.(*SimpleType); ok {
-							if len(st.TypeArguments) > 0 {
-								typeArgs = st.TypeArguments
-								oldDef = st.ResolvedDefinition
-								log.Info().Msgf("    %s <= %s", defWithArgs(newTd), defWithArgs(oldDef))
-								continue
-							} else {
-								panic("HUH")
-							}
-						}
-					}
-					break
-				}
-
-			}
-
-			// for len(oldDef.GetDefinitionMeta().TypeParameters) < len(newTd.TypeParameters) {
-			// 	if nt, ok := oldDef.(*NamedType); ok {
-			// 		if st, ok := nt.Type.(*SimpleType); ok {
-			// 			if len(st.TypeArguments) > 0 {
-			// 				typeArgs = st.TypeArguments
-			// 				oldDef = st.ResolvedDefinition
-			// 				log.Info().Msgf("    %s <= %s", defWithArgs(newTd), defWithArgs(oldDef))
-			// 				continue
-			// 			} else {
-			// 				panic("HUH")
-			// 			}
-			// 		}
-			// 	}
-			// 	break
-			// }
-			newDef, err := MakeGenericType(newTd, typeArgs, false)
-			if err != nil {
-				log.Err(err).Msgf("NOPE")
-				panic("HUH")
-			}
-			return &DefinitionPair{oldDef, newDef}
-
-		default:
-			return &DefinitionPair{oldTd, newTd}
-		}
-
-	case *EnumDefinition:
-		return &DefinitionPair{oldTd, newTd}
-
-	default:
-		panic("Not allowed")
+		return out
 	}
 
-	panic("Not allowed")
-	return nil
+	newDef := resolveGenericDefinitions(newTd, oldTd)
+	oldDef := resolveGenericDefinitions(oldTd, newTd)
+
+	// log.Debug().Msgf(" Resolved %s <= %s", defWithArgs(newDef), defWithArgs(oldDef))
+
+	return &DefinitionPair{oldDef, newDef}
 }
 
 func resolveAllChanges(newEnv, oldEnv *Environment) ([]DefinitionChange, map[string]*ProtocolChange) {
@@ -834,28 +408,10 @@ func resolveAllChanges(newEnv, oldEnv *Environment) ([]DefinitionChange, map[str
 	// allNewTypeDefs := collectUserTypeDefsUsedInProtocols(newEnv)
 	allNewTypeDefs := getAllTypeDefs(newEnv)
 	newNameMapping := getNameMappingWithinModel(allNewTypeDefs)
-	// for _, newA := range allNewTypeDefs {
-	// 	newAName := newA.GetDefinitionMeta().GetQualifiedName()
-	// 	for _, newB := range allNewTypeDefs {
-	// 		newBName := newB.GetDefinitionMeta().GetQualifiedName()
-	// 		if newNameMapping[newAName][newBName] {
-	// 			log.Debug().Msgf("New %s === New %s", newAName, newBName)
-	// 		}
-	// 	}
-	// }
 
 	// But we need to examine all old TypeDefinitions for semantic equivalence
 	allOldTypeDefs := getAllTypeDefs(oldEnv)
 	oldNameMapping := getNameMappingWithinModel(allOldTypeDefs)
-	// for _, oldA := range allOldTypeDefs {
-	// 	oldAName := oldA.GetDefinitionMeta().GetQualifiedName()
-	// 	for _, oldB := range allOldTypeDefs {
-	// 		oldBName := oldB.GetDefinitionMeta().GetQualifiedName()
-	// 		if oldNameMapping[oldAName][oldBName] {
-	// 			log.Debug().Msgf("Old %s === Old %s", oldAName, oldBName)
-	// 		}
-	// 	}
-	// }
 
 	semanticallyEqual := make(map[string]map[string]bool)
 	for _, newTd := range allNewTypeDefs {
@@ -881,8 +437,7 @@ func resolveAllChanges(newEnv, oldEnv *Environment) ([]DefinitionChange, map[str
 		}
 	}
 
-	///////// Trying something
-
+	// Resolve all Generic TypeDefinitions across versions
 	resolvedGenericDefinitions := make(map[string]map[string]*DefinitionPair)
 	for _, newTd := range allNewTypeDefs {
 		newName := newTd.GetDefinitionMeta().GetQualifiedName()
@@ -893,54 +448,20 @@ func resolveAllChanges(newEnv, oldEnv *Environment) ([]DefinitionChange, map[str
 			if semanticallyEqual[newName][oldName] {
 				// log.Info().Msgf("Semantically Equal %s <= %s", newName, oldName)
 
-				if len(newTd.GetDefinitionMeta().TypeParameters) > 0 || len(oldTd.GetDefinitionMeta().TypeParameters) > 0 {
-					// One of these definitions is a Generic TypeDefinition
+				// if len(newTd.GetDefinitionMeta().TypeParameters) > 0 || len(oldTd.GetDefinitionMeta().TypeParameters) > 0 {
+				// One of these definitions is a Generic TypeDefinition
 
-					resolved := getResolvedGenericDefinition(newTd, oldTd, resolvedGenericDefinitions)
-					resolvedGenericDefinitions[newName][oldName] = resolved
-					// log.Info().Msgf("Resolved %s <= %s: %s <= %s", newName, oldName, defWithArgs(resolved.LatestDefinition()), defWithArgs(resolved.PreviousDefinition()))
-				}
+				resolved := getResolvedGenericDefinition(newTd, oldTd)
+				resolvedGenericDefinitions[newName][oldName] = resolved
+				// log.Info().Msgf("Resolved %s <= %s: %s <= %s", defWithArgs(newTd), defWithArgs(oldTd), defWithArgs(resolved.LatestDefinition()), defWithArgs(resolved.PreviousDefinition()))
+				// }
 			}
 
 		}
 	}
 
-	for _, newTd := range allNewTypeDefs {
-		newName := newTd.GetDefinitionMeta().GetQualifiedName()
-
-		for _, oldTd := range allOldTypeDefs {
-			oldName := oldTd.GetDefinitionMeta().GetQualifiedName()
-
-			if pair, ok := resolvedGenericDefinitions[newName][oldName]; ok {
-				log.Info().Msgf("Resolved %s <= %s: %s <= %s", defWithArgs(newTd), defWithArgs(oldTd), defWithArgs(pair.LatestDefinition()), defWithArgs(pair.PreviousDefinition()))
-
-				// Let's test this by verifying TypeArguments
-
-				// typeArgsSupplied := make(map[string]bool)
-				// for _, tp := range newTd.GetDefinitionMeta().TypeParameters {
-				// 	typeArgsSupplied[tp.Name] = true
-				// }
-
-				// for _, ta := range pair.LatestDefinition().GetDefinitionMeta().TypeArguments {
-				// 	if st, ok := ta.(*SimpleType); ok {
-				// 		if _, ok := st.ResolvedDefinition.(*GenericTypeParameter); ok {
-				// 			if _, ok := typeArgsSupplied[st.Name]; !ok {
-				// 				log.Error().Msgf("Missing TypeArgument %s in %s <= %s", st.Name, defWithArgs(pair.LatestDefinition()), defWithArgs(pair.PreviousDefinition()))
-				// 			} else {
-				// 				log.Debug().Msgf("Found TypeArgument %s", st.Name)
-
-				// 			}
-				// 		}
-				// 	}
-				// }
-			}
-		}
-	}
-
-	/////////
-
-	/// Something else:
-
+	// Filter all semantically equivalent TypeDefinition pairs to only include "base" TypeDefinitions
+	// These the TypeDefinitions that will be directly compared
 	bases := make(map[string]map[string]bool)
 	for _, newTd := range allNewTypeDefs {
 		newName := newTd.GetDefinitionMeta().GetQualifiedName()
@@ -959,22 +480,21 @@ func resolveAllChanges(newEnv, oldEnv *Environment) ([]DefinitionChange, map[str
 		}
 	}
 
-	for _, newTd := range allNewTypeDefs {
-		newName := newTd.GetDefinitionMeta().GetQualifiedName()
-		for _, oldTd := range allOldTypeDefs {
-			oldName := oldTd.GetDefinitionMeta().GetQualifiedName()
+	// For Debugging:
+	// for _, newTd := range allNewTypeDefs {
+	// 	newName := newTd.GetDefinitionMeta().GetQualifiedName()
+	// 	for _, oldTd := range allOldTypeDefs {
+	// 		oldName := oldTd.GetDefinitionMeta().GetQualifiedName()
 
-			if bases[newName][oldName] {
-				log.Info().Msgf("Base %s <= %s", defWithArgs(newTd), defWithArgs(oldTd))
+	// 		if bases[newName][oldName] {
+	// 			log.Info().Msgf("Base %s <= %s", defWithArgs(newTd), defWithArgs(oldTd))
 
-				if resolved, ok := resolvedGenericDefinitions[newName][oldName]; ok {
-					log.Info().Msgf("  Resolved %s <= %s", defWithArgs(resolved.LatestDefinition()), defWithArgs(resolved.PreviousDefinition()))
-				}
-			}
-		}
-	}
-
-	/////////
+	// 			if resolved, ok := resolvedGenericDefinitions[newName][oldName]; ok {
+	// 				log.Info().Msgf("  Resolved %s <= %s", defWithArgs(resolved.LatestDefinition()), defWithArgs(resolved.PreviousDefinition()))
+	// 			}
+	// 		}
+	// 	}
+	// }
 
 	compared := make(map[string]map[string]bool)
 	changes := make(map[string]map[string]DefinitionChange)
@@ -1005,7 +525,12 @@ func resolveAllChanges(newEnv, oldEnv *Environment) ([]DefinitionChange, map[str
 				// 	continue
 				// }
 
-				if ch := compareTypeDefinitions(newTd, oldTd, context); ch != nil {
+				resolved := context.ResolvedGenerics[newName][oldName]
+				newDef := resolved.LatestDefinition()
+				oldDef := resolved.PreviousDefinition()
+
+				if ch := compareTypeDefinitions(newDef, oldDef, context); ch != nil {
+					// if ch := compareTypeDefinitions(newTd, oldTd, context); ch != nil {
 					if _, ok := ch.(*DefinitionChangeIncompatible); ok {
 						log.Error().Msgf("New %s is incompatible with Old %s", newName, oldName)
 					} else {
@@ -1032,18 +557,6 @@ func resolveAllChanges(newEnv, oldEnv *Environment) ([]DefinitionChange, map[str
 					// Found a compatible DefinitionChange between two "base" types
 					// Now we want to ensure all NamedTypes that REFERENCE this changed Definition are also marked as "changed"
 
-					// for _, newTd := range allNewTypeDefs {
-					// 	nn := newTd.GetDefinitionMeta().GetQualifiedName()
-					// 	if nn != newName && newNameMapping[newName][nn] {
-					// 		for _, oldTd := range allOldTypeDefs {
-					// 			on := oldTd.GetDefinitionMeta().GetQualifiedName()
-					// 			if on != oldName && oldNameMapping[oldName][on] {
-					// 				log.Debug().Msgf("Need Compatibility for %s <= %s", nn, on)
-					// 			}
-					// 		}
-					// 	}
-					// }
-
 					// log.Debug().Msgf("Finding compatibility for %s <= %s", newName, oldName)
 					for _, newParent := range getParentDefinitions(newTd, allNewTypeDefs) {
 						newParentName := newParent.GetDefinitionMeta().GetQualifiedName()
@@ -1059,7 +572,10 @@ func resolveAllChanges(newEnv, oldEnv *Environment) ([]DefinitionChange, map[str
 							}
 							if semanticallyEqual[newParentName][oldParentName] {
 								// log.Debug().Msgf("Need Compatibility for %s <= %s", newParentName, oldParentName)
-								compatibility[newParentName][oldParentName] = &CompatibilityChange{DefinitionPair{oldParent, newParent}}
+								// compatibility[newParentName][oldParentName] = &CompatibilityChange{DefinitionPair{oldParent, newParent}}
+								// resolved := getResolvedGenericDefinition(newParent, oldParent, resolvedGenericDefinitions)
+								resolved := context.ResolvedGenerics[newParentName][oldParentName]
+								compatibility[newParentName][oldParentName] = &CompatibilityChange{*resolved}
 							} else {
 								panic("UH OH")
 							}
@@ -1072,58 +588,6 @@ func resolveAllChanges(newEnv, oldEnv *Environment) ([]DefinitionChange, map[str
 	}
 
 	allProtocolChanges := resolveAllProtocolChanges(newEnv, oldEnv, context)
-
-	// OK, but instead of doing the above, how about just collecting all the OldDefinition names from changes first
-	// by visiting each DefinitionChange.PreviousDefinition and collecting all TypeDefinition Names
-	// Then, loop through each SemanticallyEqual[NewDefNames], and if the OldDefName isn't in the list, then we just need a TypeDefChange for each
-	// newDefsChanged := make(map[string]TypeDefinition)
-	// newDefsReferenced := make(map[string]TypeDefinition)
-	// oldDefsChanged := make(map[string]TypeDefinition)
-	// oldDefsReferenced := make(map[string]TypeDefinition)
-	// for _, newTd := range allNewTypeDefs {
-	// 	newName := newTd.GetDefinitionMeta().GetQualifiedName()
-	// 	for _, oldTd := range allOldTypeDefs {
-	// 		oldName := oldTd.GetDefinitionMeta().GetQualifiedName()
-
-	// 		if ch, ok := changes[newName][oldName]; ok {
-	// 			// Could check the DefChange here
-
-	// 			oldDef := ch.PreviousDefinition()
-	// 			if oldName != oldDef.GetDefinitionMeta().GetQualifiedName() {
-	// 				panic("HUH")
-	// 			}
-	// 			oldDefsChanged[oldName] = oldDef
-
-	// 			newDef := ch.LatestDefinition()
-	// 			if newName != newDef.GetDefinitionMeta().GetQualifiedName() {
-	// 				panic("HUH")
-	// 			}
-	// 			newDefsChanged[newName] = newDef
-
-	// 			getReferencedDefs := func(def TypeDefinition, defs map[string]TypeDefinition) {
-	// 				Visit(def, func(self Visitor, node Node) {
-	// 					switch node := node.(type) {
-	// 					case PrimitiveDefinition:
-	// 						return
-
-	// 					case *NamedType:
-	// 						defs[node.GetDefinitionMeta().GetQualifiedName()] = node
-	// 						self.Visit(node.Type)
-
-	// 					case TypeDefinition:
-	// 						defs[node.GetDefinitionMeta().GetQualifiedName()] = node
-
-	// 					case *SimpleType:
-	// 						self.Visit(node.ResolvedDefinition)
-	// 					}
-	// 				})
-	// 			}
-
-	// 			getReferencedDefs(newDef, newDefsReferenced)
-	// 			getReferencedDefs(oldDef, oldDefsReferenced)
-	// 		}
-	// 	}
-	// }
 
 	allDefinitionChanges := make([]DefinitionChange, 0)
 	for _, newTd := range allNewTypeDefs {
@@ -1167,13 +631,12 @@ func resolveAllChanges(newEnv, oldEnv *Environment) ([]DefinitionChange, map[str
 					}
 
 					// This old TypeDefinition was removed in the new model
-					// resolvedPair := context.ResolvedGenerics[newName][oldName]
+					resolvedPair := context.ResolvedGenerics[newName][oldName]
 					// newDef := resolvedPair.LatestDefinition()
-					newDef := newTd
-					oldDef := oldTd
 
-					alias = &CompatibilityChange{DefinitionPair{oldDef, newDef}}
-					log.Debug().Msgf("Alias Removed: %s = %s", defWithArgs(oldDef), defWithArgs(newDef))
+					// alias = &CompatibilityChange{DefinitionPair{oldDef, newDef}}
+					alias = &CompatibilityChange{*resolvedPair}
+					log.Debug().Msgf("Alias Removed: %s = %s", defWithArgs(alias.PreviousDefinition()), defWithArgs(alias.LatestDefinition()))
 					allDefinitionChanges = append(allDefinitionChanges, alias)
 				}
 
@@ -1183,9 +646,6 @@ func resolveAllChanges(newEnv, oldEnv *Environment) ([]DefinitionChange, map[str
 	}
 
 	log.Debug().Msgf("Finished comparing TypeDefinitions")
-
-	// Also save all "added aliases" for later codegen
-	// allDefinitionChanges = append(allDefinitionChanges, context.AliasesRemoved...)
 
 	// Finally, filter out changes with duplicate "old" TypeDefinitions because we only need the first one for codegen
 	neededDefinitionChanges := make([]DefinitionChange, 0)
@@ -1205,15 +665,6 @@ func resolveAllChanges(newEnv, oldEnv *Environment) ([]DefinitionChange, map[str
 
 		// newName := change.LatestDefinition().GetDefinitionMeta().GetQualifiedName()
 		// log.Debug().Msgf("Change for %s <= %s", newName, oldName)
-	}
-
-	for _, ch := range neededDefinitionChanges {
-		newDef := ch.LatestDefinition()
-		oldDef := ch.PreviousDefinition()
-
-		if len(newDef.GetDefinitionMeta().TypeParameters) > 0 || len(oldDef.GetDefinitionMeta().TypeParameters) > 0 {
-			log.Info().Msgf("Need Generic Resolution: %s <= %s", defWithArgs(newDef), defWithArgs(oldDef))
-		}
 	}
 
 	return neededDefinitionChanges, allProtocolChanges
