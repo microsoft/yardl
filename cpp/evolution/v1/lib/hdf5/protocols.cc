@@ -313,6 +313,77 @@ struct _Inner_UnusedButChangedRecord {
   yardl::hdf5::InnerVlenString name;
 };
 
+template <typename _T1_Inner, typename T1, typename _T2_Inner, typename T2>
+struct _Inner_GenericRecord {
+  _Inner_GenericRecord() {} 
+  _Inner_GenericRecord(evo_test::GenericRecord<T1, T2> const& o) 
+      : field_2(o.field_2),
+      field_1(o.field_1),
+      added(o.added) {
+  }
+
+  void ToOuter (evo_test::GenericRecord<T1, T2>& o) const {
+    yardl::hdf5::ToOuter(field_2, o.field_2);
+    yardl::hdf5::ToOuter(field_1, o.field_1);
+    yardl::hdf5::ToOuter(added, o.added);
+  }
+
+  _T2_Inner field_2;
+  _T1_Inner field_1;
+  yardl::hdf5::InnerOptional<bool, bool> added;
+};
+
+template <typename _T_Inner, typename T>
+struct _Inner_GenericParentRecord {
+  _Inner_GenericParentRecord() {} 
+  _Inner_GenericParentRecord(evo_test::GenericParentRecord<T> const& o) 
+      : record(o.record),
+      record_of_union(o.record_of_union),
+      union_of_record(o.union_of_record) {
+  }
+
+  void ToOuter (evo_test::GenericParentRecord<T>& o) const {
+    yardl::hdf5::ToOuter(record, o.record);
+    yardl::hdf5::ToOuter(record_of_union, o.record_of_union);
+    yardl::hdf5::ToOuter(union_of_record, o.union_of_record);
+  }
+
+  evo_test::hdf5::_Inner_GenericRecord<_T_Inner, T, yardl::hdf5::InnerVlenString, std::string> record;
+  evo_test::hdf5::_Inner_GenericRecord<::InnerUnion2<_T_Inner, T, float, float>, evo_test::AliasedOpenGenericUnion<T, float>, yardl::hdf5::InnerVlenString, std::string> record_of_union;
+  ::InnerUnion2<evo_test::hdf5::_Inner_GenericRecord<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string>, evo_test::GenericRecord<int32_t, std::string>, float, float> union_of_record;
+};
+
+template <typename _T2_Inner, typename T2>
+struct _Inner_OldUnchangedGeneric {
+  _Inner_OldUnchangedGeneric() {} 
+  _Inner_OldUnchangedGeneric(evo_test::OldUnchangedGeneric<T2> const& o) 
+      : field(o.field) {
+  }
+
+  void ToOuter (evo_test::OldUnchangedGeneric<T2>& o) const {
+    yardl::hdf5::ToOuter(field, o.field);
+  }
+
+  _T2_Inner field;
+};
+
+template <typename _Y_Inner, typename Y, typename _Z_Inner, typename Z>
+struct _Inner_OldChangedGeneric {
+  _Inner_OldChangedGeneric() {} 
+  _Inner_OldChangedGeneric(evo_test::OldChangedGeneric<Y, Z> const& o) 
+      : y(o.y),
+      z(o.z) {
+  }
+
+  void ToOuter (evo_test::OldChangedGeneric<Y, Z>& o) const {
+    yardl::hdf5::ToOuter(y, o.y);
+    yardl::hdf5::ToOuter(z, o.z);
+  }
+
+  yardl::hdf5::InnerOptional<_Y_Inner, Y> y;
+  yardl::hdf5::InnerOptional<evo_test::hdf5::_Inner_OldUnchangedGeneric<_Z_Inner, Z>, evo_test::OldUnchangedGeneric<Z>> z;
+};
+
 [[maybe_unused]] H5::CompType GetUnchangedRecordHdf5Ddl() {
   using RecordType = evo_test::hdf5::_Inner_UnchangedRecord;
   H5::CompType t(sizeof(RecordType));
@@ -352,6 +423,43 @@ struct _Inner_UnusedButChangedRecord {
   H5::CompType t(sizeof(RecordType));
   t.insertMember("age", HOFFSET(RecordType, age), H5::PredType::NATIVE_FLOAT);
   t.insertMember("name", HOFFSET(RecordType, name), yardl::hdf5::InnerVlenStringDdl());
+  return t;
+}
+
+template <typename _T1_Inner, typename T1, typename _T2_Inner, typename T2>
+[[maybe_unused]] H5::CompType GetGenericRecordHdf5Ddl(H5::DataType const& T1_type, H5::DataType const& T2_type) {
+  using RecordType = evo_test::hdf5::_Inner_GenericRecord<_T1_Inner, T1, _T2_Inner, T2>;
+  H5::CompType t(sizeof(RecordType));
+  t.insertMember("field2", HOFFSET(RecordType, field_2), T2_type);
+  t.insertMember("field1", HOFFSET(RecordType, field_1), T1_type);
+  t.insertMember("added", HOFFSET(RecordType, added), yardl::hdf5::OptionalTypeDdl<bool, bool>(H5::PredType::NATIVE_HBOOL));
+  return t;
+}
+
+template <typename _T_Inner, typename T>
+[[maybe_unused]] H5::CompType GetGenericParentRecordHdf5Ddl(H5::DataType const& T_type) {
+  using RecordType = evo_test::hdf5::_Inner_GenericParentRecord<_T_Inner, T>;
+  H5::CompType t(sizeof(RecordType));
+  t.insertMember("record", HOFFSET(RecordType, record), evo_test::hdf5::GetGenericRecordHdf5Ddl<_T_Inner, T, yardl::hdf5::InnerVlenString, std::string>(T_type, yardl::hdf5::InnerVlenStringDdl()));
+  t.insertMember("recordOfUnion", HOFFSET(RecordType, record_of_union), evo_test::hdf5::GetGenericRecordHdf5Ddl<::InnerUnion2<_T_Inner, T, float, float>, evo_test::AliasedOpenGenericUnion<T, float>, yardl::hdf5::InnerVlenString, std::string>(::InnerUnion2Ddl<_T_Inner, T, float, float>(false, T_type, "T1", H5::PredType::NATIVE_FLOAT, "T2"), yardl::hdf5::InnerVlenStringDdl()));
+  t.insertMember("unionOfRecord", HOFFSET(RecordType, union_of_record), ::InnerUnion2Ddl<evo_test::hdf5::_Inner_GenericRecord<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string>, evo_test::GenericRecord<int32_t, std::string>, float, float>(false, evo_test::hdf5::GetGenericRecordHdf5Ddl<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string>(H5::PredType::NATIVE_INT32, yardl::hdf5::InnerVlenStringDdl()), "T1", H5::PredType::NATIVE_FLOAT, "T2"));
+  return t;
+}
+
+template <typename _T2_Inner, typename T2>
+[[maybe_unused]] H5::CompType GetOldUnchangedGenericHdf5Ddl(H5::DataType const& T2_type) {
+  using RecordType = evo_test::hdf5::_Inner_OldUnchangedGeneric<_T2_Inner, T2>;
+  H5::CompType t(sizeof(RecordType));
+  t.insertMember("field", HOFFSET(RecordType, field), T2_type);
+  return t;
+}
+
+template <typename _Y_Inner, typename Y, typename _Z_Inner, typename Z>
+[[maybe_unused]] H5::CompType GetOldChangedGenericHdf5Ddl(H5::DataType const& Y_type, H5::DataType const& Z_type) {
+  using RecordType = evo_test::hdf5::_Inner_OldChangedGeneric<_Y_Inner, Y, _Z_Inner, Z>;
+  H5::CompType t(sizeof(RecordType));
+  t.insertMember("y", HOFFSET(RecordType, y), yardl::hdf5::OptionalTypeDdl<_Y_Inner, Y>(Y_type));
+  t.insertMember("z", HOFFSET(RecordType, z), yardl::hdf5::OptionalTypeDdl<evo_test::hdf5::_Inner_OldUnchangedGeneric<_Z_Inner, Z>, evo_test::OldUnchangedGeneric<Z>>(evo_test::hdf5::GetOldUnchangedGenericHdf5Ddl<_Z_Inner, Z>(Z_type)));
   return t;
 }
 
@@ -647,6 +755,110 @@ void ProtocolWithChangesWriter::WriteRecordToUnionImpl(std::variant<evo_test::Re
 
 void ProtocolWithChangesWriter::WriteRecordToAliasedUnionImpl(evo_test::AliasedRecordOrString const& value) {
   yardl::hdf5::WriteScalarDataset<::InnerUnion2<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges, yardl::hdf5::InnerVlenString, std::string>, evo_test::AliasedRecordOrString>(group_, "recordToAliasedUnion", ::InnerUnion2Ddl<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges, yardl::hdf5::InnerVlenString, std::string>(false, evo_test::hdf5::GetRecordWithChangesHdf5Ddl(), "RecordWithChanges", yardl::hdf5::InnerVlenStringDdl(), "string"), value);
+}
+
+void ProtocolWithChangesWriter::WriteUnionToAliasedUnionImpl(evo_test::AliasedRecordOrInt const& value) {
+  yardl::hdf5::WriteScalarDataset<::InnerUnion2<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges, int32_t, int32_t>, evo_test::AliasedRecordOrInt>(group_, "unionToAliasedUnion", ::InnerUnion2Ddl<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges, int32_t, int32_t>(false, evo_test::hdf5::GetRecordWithChangesHdf5Ddl(), "RecordWithChanges", H5::PredType::NATIVE_INT32, "int32"), value);
+}
+
+void ProtocolWithChangesWriter::WriteUnionToAliasedUnionWithChangesImpl(evo_test::AliasedRecordOrString const& value) {
+  yardl::hdf5::WriteScalarDataset<::InnerUnion2<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges, yardl::hdf5::InnerVlenString, std::string>, evo_test::AliasedRecordOrString>(group_, "unionToAliasedUnionWithChanges", ::InnerUnion2Ddl<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges, yardl::hdf5::InnerVlenString, std::string>(false, evo_test::hdf5::GetRecordWithChangesHdf5Ddl(), "RecordWithChanges", yardl::hdf5::InnerVlenStringDdl(), "string"), value);
+}
+
+void ProtocolWithChangesWriter::WriteOptionalToAliasedOptionalImpl(evo_test::AliasedOptionalRecord const& value) {
+  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerOptional<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges>, evo_test::AliasedOptionalRecord>(group_, "optionalToAliasedOptional", yardl::hdf5::OptionalTypeDdl<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges>(evo_test::hdf5::GetRecordWithChangesHdf5Ddl()), value);
+}
+
+void ProtocolWithChangesWriter::WriteOptionalToAliasedOptionalWithChangesImpl(evo_test::AliasedOptionalString const& value) {
+  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerOptional<yardl::hdf5::InnerVlenString, std::string>, evo_test::AliasedOptionalString>(group_, "optionalToAliasedOptionalWithChanges", yardl::hdf5::OptionalTypeDdl<yardl::hdf5::InnerVlenString, std::string>(yardl::hdf5::InnerVlenStringDdl()), value);
+}
+
+void ProtocolWithChangesWriter::WriteGenericRecordImpl(evo_test::GenericRecord<int32_t, std::string> const& value) {
+  yardl::hdf5::WriteScalarDataset<evo_test::hdf5::_Inner_GenericRecord<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string>, evo_test::GenericRecord<int32_t, std::string>>(group_, "genericRecord", evo_test::hdf5::GetGenericRecordHdf5Ddl<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string>(H5::PredType::NATIVE_INT32, yardl::hdf5::InnerVlenStringDdl()), value);
+}
+
+void ProtocolWithChangesWriter::WriteGenericRecordToOpenAliasImpl(evo_test::AliasedOpenGenericRecord<int32_t, std::string> const& value) {
+  yardl::hdf5::WriteScalarDataset<evo_test::hdf5::_Inner_GenericRecord<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string>, evo_test::AliasedOpenGenericRecord<int32_t, std::string>>(group_, "genericRecordToOpenAlias", evo_test::hdf5::GetGenericRecordHdf5Ddl<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string>(H5::PredType::NATIVE_INT32, yardl::hdf5::InnerVlenStringDdl()), value);
+}
+
+void ProtocolWithChangesWriter::WriteGenericRecordToClosedAliasImpl(evo_test::AliasedClosedGenericRecord const& value) {
+  yardl::hdf5::WriteScalarDataset<evo_test::hdf5::_Inner_GenericRecord<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string>, evo_test::AliasedClosedGenericRecord>(group_, "genericRecordToClosedAlias", evo_test::hdf5::GetGenericRecordHdf5Ddl<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string>(H5::PredType::NATIVE_INT32, yardl::hdf5::InnerVlenStringDdl()), value);
+}
+
+void ProtocolWithChangesWriter::WriteGenericRecordToHalfClosedAliasImpl(evo_test::AliasedHalfClosedGenericRecord<int32_t> const& value) {
+  yardl::hdf5::WriteScalarDataset<evo_test::hdf5::_Inner_GenericRecord<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string>, evo_test::AliasedHalfClosedGenericRecord<int32_t>>(group_, "genericRecordToHalfClosedAlias", evo_test::hdf5::GetGenericRecordHdf5Ddl<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string>(H5::PredType::NATIVE_INT32, yardl::hdf5::InnerVlenStringDdl()), value);
+}
+
+void ProtocolWithChangesWriter::WriteAliasedGenericRecordToAliasImpl(evo_test::AliasedOpenGenericRecord<int32_t, std::string> const& value) {
+  yardl::hdf5::WriteScalarDataset<evo_test::hdf5::_Inner_GenericRecord<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string>, evo_test::AliasedOpenGenericRecord<int32_t, std::string>>(group_, "aliasedGenericRecordToAlias", evo_test::hdf5::GetGenericRecordHdf5Ddl<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string>(H5::PredType::NATIVE_INT32, yardl::hdf5::InnerVlenStringDdl()), value);
+}
+
+void ProtocolWithChangesWriter::WriteClosedGenericRecordToUnionImpl(std::variant<evo_test::GenericRecord<int32_t, std::string>, std::string> const& value) {
+  yardl::hdf5::WriteScalarDataset<::InnerUnion2<evo_test::hdf5::_Inner_GenericRecord<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string>, evo_test::GenericRecord<int32_t, std::string>, yardl::hdf5::InnerVlenString, std::string>, std::variant<evo_test::GenericRecord<int32_t, std::string>, std::string>>(group_, "closedGenericRecordToUnion", ::InnerUnion2Ddl<evo_test::hdf5::_Inner_GenericRecord<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string>, evo_test::GenericRecord<int32_t, std::string>, yardl::hdf5::InnerVlenString, std::string>(false, evo_test::hdf5::GetGenericRecordHdf5Ddl<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string>(H5::PredType::NATIVE_INT32, yardl::hdf5::InnerVlenStringDdl()), "r", yardl::hdf5::InnerVlenStringDdl(), "s"), value);
+}
+
+void ProtocolWithChangesWriter::WriteGenericRecordToAliasedUnionImpl(evo_test::AliasedGenericRecordOrString const& value) {
+  yardl::hdf5::WriteScalarDataset<::InnerUnion2<evo_test::hdf5::_Inner_GenericRecord<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string>, evo_test::GenericRecord<int32_t, std::string>, yardl::hdf5::InnerVlenString, std::string>, evo_test::AliasedGenericRecordOrString>(group_, "genericRecordToAliasedUnion", ::InnerUnion2Ddl<evo_test::hdf5::_Inner_GenericRecord<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string>, evo_test::GenericRecord<int32_t, std::string>, yardl::hdf5::InnerVlenString, std::string>(false, evo_test::hdf5::GetGenericRecordHdf5Ddl<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string>(H5::PredType::NATIVE_INT32, yardl::hdf5::InnerVlenStringDdl()), "r", yardl::hdf5::InnerVlenStringDdl(), "s"), value);
+}
+
+void ProtocolWithChangesWriter::WriteGenericUnionOfChangedRecordImpl(evo_test::GenericUnion<evo_test::GenericRecord<int32_t, std::string>, float> const& value) {
+  yardl::hdf5::WriteScalarDataset<::InnerUnion2<evo_test::hdf5::_Inner_GenericRecord<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string>, evo_test::GenericRecord<int32_t, std::string>, float, float>, evo_test::GenericUnion<evo_test::GenericRecord<int32_t, std::string>, float>>(group_, "genericUnionOfChangedRecord", ::InnerUnion2Ddl<evo_test::hdf5::_Inner_GenericRecord<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string>, evo_test::GenericRecord<int32_t, std::string>, float, float>(false, evo_test::hdf5::GetGenericRecordHdf5Ddl<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string>(H5::PredType::NATIVE_INT32, yardl::hdf5::InnerVlenStringDdl()), "T1", H5::PredType::NATIVE_FLOAT, "T2"), value);
+}
+
+void ProtocolWithChangesWriter::WriteGenericParentRecordImpl(evo_test::GenericParentRecord<int32_t> const& value) {
+  yardl::hdf5::WriteScalarDataset<evo_test::hdf5::_Inner_GenericParentRecord<int32_t, int32_t>, evo_test::GenericParentRecord<int32_t>>(group_, "genericParentRecord", evo_test::hdf5::GetGenericParentRecordHdf5Ddl<int32_t, int32_t>(H5::PredType::NATIVE_INT32), value);
+}
+
+void ProtocolWithChangesWriter::WriteGenericNestedRecordsImpl(evo_test::GenericRecord<evo_test::Unchanged, evo_test::Changed> const& value) {
+  yardl::hdf5::WriteScalarDataset<evo_test::hdf5::_Inner_GenericRecord<evo_test::OldUnchangedGeneric<int32_t>, evo_test::Unchanged, evo_test::hdf5::_Inner_OldChangedGeneric<yardl::hdf5::InnerVlenString, std::string, int32_t, int32_t>, evo_test::Changed>, evo_test::GenericRecord<evo_test::Unchanged, evo_test::Changed>>(group_, "genericNestedRecords", evo_test::hdf5::GetGenericRecordHdf5Ddl<evo_test::OldUnchangedGeneric<int32_t>, evo_test::Unchanged, evo_test::hdf5::_Inner_OldChangedGeneric<yardl::hdf5::InnerVlenString, std::string, int32_t, int32_t>, evo_test::Changed>(evo_test::hdf5::GetOldUnchangedGenericHdf5Ddl<int32_t, int32_t>(H5::PredType::NATIVE_INT32), evo_test::hdf5::GetOldChangedGenericHdf5Ddl<yardl::hdf5::InnerVlenString, std::string, int32_t, int32_t>(yardl::hdf5::InnerVlenStringDdl(), H5::PredType::NATIVE_INT32)), value);
+}
+
+void ProtocolWithChangesWriter::WriteGenericRecordStreamImpl(evo_test::AliasedClosedGenericRecord const& value) {
+  if (!genericRecordStream_dataset_state_) {
+    genericRecordStream_dataset_state_ = std::make_unique<yardl::hdf5::DatasetWriter>(group_, "genericRecordStream", evo_test::hdf5::GetGenericRecordHdf5Ddl<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string>(H5::PredType::NATIVE_INT32, yardl::hdf5::InnerVlenStringDdl()), std::max(sizeof(evo_test::hdf5::_Inner_GenericRecord<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string>), sizeof(evo_test::GenericRecord<int32_t, std::string>)));
+  }
+
+  genericRecordStream_dataset_state_->Append<evo_test::hdf5::_Inner_GenericRecord<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string>, evo_test::AliasedClosedGenericRecord>(value);
+}
+
+void ProtocolWithChangesWriter::WriteGenericRecordStreamImpl(std::vector<evo_test::AliasedClosedGenericRecord> const& values) {
+  if (!genericRecordStream_dataset_state_) {
+    genericRecordStream_dataset_state_ = std::make_unique<yardl::hdf5::DatasetWriter>(group_, "genericRecordStream", evo_test::hdf5::GetGenericRecordHdf5Ddl<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string>(H5::PredType::NATIVE_INT32, yardl::hdf5::InnerVlenStringDdl()), std::max(sizeof(evo_test::hdf5::_Inner_GenericRecord<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string>), sizeof(evo_test::GenericRecord<int32_t, std::string>)));
+  }
+
+  genericRecordStream_dataset_state_->AppendBatch<evo_test::hdf5::_Inner_GenericRecord<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string>, evo_test::AliasedClosedGenericRecord>(values);
+}
+
+void ProtocolWithChangesWriter::EndGenericRecordStreamImpl() {
+  if (!genericRecordStream_dataset_state_) {
+    genericRecordStream_dataset_state_ = std::make_unique<yardl::hdf5::DatasetWriter>(group_, "genericRecordStream", evo_test::hdf5::GetGenericRecordHdf5Ddl<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string>(H5::PredType::NATIVE_INT32, yardl::hdf5::InnerVlenStringDdl()), std::max(sizeof(evo_test::hdf5::_Inner_GenericRecord<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string>), sizeof(evo_test::GenericRecord<int32_t, std::string>)));
+  }
+
+  genericRecordStream_dataset_state_.reset();
+}
+
+void ProtocolWithChangesWriter::WriteGenericParentRecordStreamImpl(evo_test::GenericParentRecord<int32_t> const& value) {
+  if (!genericParentRecordStream_dataset_state_) {
+    genericParentRecordStream_dataset_state_ = std::make_unique<yardl::hdf5::DatasetWriter>(group_, "genericParentRecordStream", evo_test::hdf5::GetGenericParentRecordHdf5Ddl<int32_t, int32_t>(H5::PredType::NATIVE_INT32), std::max(sizeof(evo_test::hdf5::_Inner_GenericParentRecord<int32_t, int32_t>), sizeof(evo_test::GenericParentRecord<int32_t>)));
+  }
+
+  genericParentRecordStream_dataset_state_->Append<evo_test::hdf5::_Inner_GenericParentRecord<int32_t, int32_t>, evo_test::GenericParentRecord<int32_t>>(value);
+}
+
+void ProtocolWithChangesWriter::WriteGenericParentRecordStreamImpl(std::vector<evo_test::GenericParentRecord<int32_t>> const& values) {
+  if (!genericParentRecordStream_dataset_state_) {
+    genericParentRecordStream_dataset_state_ = std::make_unique<yardl::hdf5::DatasetWriter>(group_, "genericParentRecordStream", evo_test::hdf5::GetGenericParentRecordHdf5Ddl<int32_t, int32_t>(H5::PredType::NATIVE_INT32), std::max(sizeof(evo_test::hdf5::_Inner_GenericParentRecord<int32_t, int32_t>), sizeof(evo_test::GenericParentRecord<int32_t>)));
+  }
+
+  genericParentRecordStream_dataset_state_->AppendBatch<evo_test::hdf5::_Inner_GenericParentRecord<int32_t, int32_t>, evo_test::GenericParentRecord<int32_t>>(values);
+}
+
+void ProtocolWithChangesWriter::EndGenericParentRecordStreamImpl() {
+  if (!genericParentRecordStream_dataset_state_) {
+    genericParentRecordStream_dataset_state_ = std::make_unique<yardl::hdf5::DatasetWriter>(group_, "genericParentRecordStream", evo_test::hdf5::GetGenericParentRecordHdf5Ddl<int32_t, int32_t>(H5::PredType::NATIVE_INT32), std::max(sizeof(evo_test::hdf5::_Inner_GenericParentRecord<int32_t, int32_t>), sizeof(evo_test::GenericParentRecord<int32_t>)));
+  }
+
+  genericParentRecordStream_dataset_state_.reset();
 }
 
 void ProtocolWithChangesWriter::WriteVectorRecordWithChangesImpl(std::vector<evo_test::RecordWithChanges> const& value) {
@@ -999,6 +1211,114 @@ void ProtocolWithChangesReader::ReadRecordToUnionImpl(std::variant<evo_test::Rec
 
 void ProtocolWithChangesReader::ReadRecordToAliasedUnionImpl(evo_test::AliasedRecordOrString& value) {
   yardl::hdf5::ReadScalarDataset<::InnerUnion2<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges, yardl::hdf5::InnerVlenString, std::string>, evo_test::AliasedRecordOrString>(group_, "recordToAliasedUnion", ::InnerUnion2Ddl<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges, yardl::hdf5::InnerVlenString, std::string>(false, evo_test::hdf5::GetRecordWithChangesHdf5Ddl(), "RecordWithChanges", yardl::hdf5::InnerVlenStringDdl(), "string"), value);
+}
+
+void ProtocolWithChangesReader::ReadUnionToAliasedUnionImpl(evo_test::AliasedRecordOrInt& value) {
+  yardl::hdf5::ReadScalarDataset<::InnerUnion2<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges, int32_t, int32_t>, evo_test::AliasedRecordOrInt>(group_, "unionToAliasedUnion", ::InnerUnion2Ddl<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges, int32_t, int32_t>(false, evo_test::hdf5::GetRecordWithChangesHdf5Ddl(), "RecordWithChanges", H5::PredType::NATIVE_INT32, "int32"), value);
+}
+
+void ProtocolWithChangesReader::ReadUnionToAliasedUnionWithChangesImpl(evo_test::AliasedRecordOrString& value) {
+  yardl::hdf5::ReadScalarDataset<::InnerUnion2<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges, yardl::hdf5::InnerVlenString, std::string>, evo_test::AliasedRecordOrString>(group_, "unionToAliasedUnionWithChanges", ::InnerUnion2Ddl<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges, yardl::hdf5::InnerVlenString, std::string>(false, evo_test::hdf5::GetRecordWithChangesHdf5Ddl(), "RecordWithChanges", yardl::hdf5::InnerVlenStringDdl(), "string"), value);
+}
+
+void ProtocolWithChangesReader::ReadOptionalToAliasedOptionalImpl(evo_test::AliasedOptionalRecord& value) {
+  yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerOptional<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges>, evo_test::AliasedOptionalRecord>(group_, "optionalToAliasedOptional", yardl::hdf5::OptionalTypeDdl<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges>(evo_test::hdf5::GetRecordWithChangesHdf5Ddl()), value);
+}
+
+void ProtocolWithChangesReader::ReadOptionalToAliasedOptionalWithChangesImpl(evo_test::AliasedOptionalString& value) {
+  yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerOptional<yardl::hdf5::InnerVlenString, std::string>, evo_test::AliasedOptionalString>(group_, "optionalToAliasedOptionalWithChanges", yardl::hdf5::OptionalTypeDdl<yardl::hdf5::InnerVlenString, std::string>(yardl::hdf5::InnerVlenStringDdl()), value);
+}
+
+void ProtocolWithChangesReader::ReadGenericRecordImpl(evo_test::GenericRecord<int32_t, std::string>& value) {
+  yardl::hdf5::ReadScalarDataset<evo_test::hdf5::_Inner_GenericRecord<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string>, evo_test::GenericRecord<int32_t, std::string>>(group_, "genericRecord", evo_test::hdf5::GetGenericRecordHdf5Ddl<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string>(H5::PredType::NATIVE_INT32, yardl::hdf5::InnerVlenStringDdl()), value);
+}
+
+void ProtocolWithChangesReader::ReadGenericRecordToOpenAliasImpl(evo_test::AliasedOpenGenericRecord<int32_t, std::string>& value) {
+  yardl::hdf5::ReadScalarDataset<evo_test::hdf5::_Inner_GenericRecord<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string>, evo_test::AliasedOpenGenericRecord<int32_t, std::string>>(group_, "genericRecordToOpenAlias", evo_test::hdf5::GetGenericRecordHdf5Ddl<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string>(H5::PredType::NATIVE_INT32, yardl::hdf5::InnerVlenStringDdl()), value);
+}
+
+void ProtocolWithChangesReader::ReadGenericRecordToClosedAliasImpl(evo_test::AliasedClosedGenericRecord& value) {
+  yardl::hdf5::ReadScalarDataset<evo_test::hdf5::_Inner_GenericRecord<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string>, evo_test::AliasedClosedGenericRecord>(group_, "genericRecordToClosedAlias", evo_test::hdf5::GetGenericRecordHdf5Ddl<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string>(H5::PredType::NATIVE_INT32, yardl::hdf5::InnerVlenStringDdl()), value);
+}
+
+void ProtocolWithChangesReader::ReadGenericRecordToHalfClosedAliasImpl(evo_test::AliasedHalfClosedGenericRecord<int32_t>& value) {
+  yardl::hdf5::ReadScalarDataset<evo_test::hdf5::_Inner_GenericRecord<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string>, evo_test::AliasedHalfClosedGenericRecord<int32_t>>(group_, "genericRecordToHalfClosedAlias", evo_test::hdf5::GetGenericRecordHdf5Ddl<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string>(H5::PredType::NATIVE_INT32, yardl::hdf5::InnerVlenStringDdl()), value);
+}
+
+void ProtocolWithChangesReader::ReadAliasedGenericRecordToAliasImpl(evo_test::AliasedOpenGenericRecord<int32_t, std::string>& value) {
+  yardl::hdf5::ReadScalarDataset<evo_test::hdf5::_Inner_GenericRecord<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string>, evo_test::AliasedOpenGenericRecord<int32_t, std::string>>(group_, "aliasedGenericRecordToAlias", evo_test::hdf5::GetGenericRecordHdf5Ddl<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string>(H5::PredType::NATIVE_INT32, yardl::hdf5::InnerVlenStringDdl()), value);
+}
+
+void ProtocolWithChangesReader::ReadClosedGenericRecordToUnionImpl(std::variant<evo_test::GenericRecord<int32_t, std::string>, std::string>& value) {
+  yardl::hdf5::ReadScalarDataset<::InnerUnion2<evo_test::hdf5::_Inner_GenericRecord<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string>, evo_test::GenericRecord<int32_t, std::string>, yardl::hdf5::InnerVlenString, std::string>, std::variant<evo_test::GenericRecord<int32_t, std::string>, std::string>>(group_, "closedGenericRecordToUnion", ::InnerUnion2Ddl<evo_test::hdf5::_Inner_GenericRecord<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string>, evo_test::GenericRecord<int32_t, std::string>, yardl::hdf5::InnerVlenString, std::string>(false, evo_test::hdf5::GetGenericRecordHdf5Ddl<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string>(H5::PredType::NATIVE_INT32, yardl::hdf5::InnerVlenStringDdl()), "r", yardl::hdf5::InnerVlenStringDdl(), "s"), value);
+}
+
+void ProtocolWithChangesReader::ReadGenericRecordToAliasedUnionImpl(evo_test::AliasedGenericRecordOrString& value) {
+  yardl::hdf5::ReadScalarDataset<::InnerUnion2<evo_test::hdf5::_Inner_GenericRecord<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string>, evo_test::GenericRecord<int32_t, std::string>, yardl::hdf5::InnerVlenString, std::string>, evo_test::AliasedGenericRecordOrString>(group_, "genericRecordToAliasedUnion", ::InnerUnion2Ddl<evo_test::hdf5::_Inner_GenericRecord<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string>, evo_test::GenericRecord<int32_t, std::string>, yardl::hdf5::InnerVlenString, std::string>(false, evo_test::hdf5::GetGenericRecordHdf5Ddl<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string>(H5::PredType::NATIVE_INT32, yardl::hdf5::InnerVlenStringDdl()), "r", yardl::hdf5::InnerVlenStringDdl(), "s"), value);
+}
+
+void ProtocolWithChangesReader::ReadGenericUnionOfChangedRecordImpl(evo_test::GenericUnion<evo_test::GenericRecord<int32_t, std::string>, float>& value) {
+  yardl::hdf5::ReadScalarDataset<::InnerUnion2<evo_test::hdf5::_Inner_GenericRecord<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string>, evo_test::GenericRecord<int32_t, std::string>, float, float>, evo_test::GenericUnion<evo_test::GenericRecord<int32_t, std::string>, float>>(group_, "genericUnionOfChangedRecord", ::InnerUnion2Ddl<evo_test::hdf5::_Inner_GenericRecord<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string>, evo_test::GenericRecord<int32_t, std::string>, float, float>(false, evo_test::hdf5::GetGenericRecordHdf5Ddl<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string>(H5::PredType::NATIVE_INT32, yardl::hdf5::InnerVlenStringDdl()), "T1", H5::PredType::NATIVE_FLOAT, "T2"), value);
+}
+
+void ProtocolWithChangesReader::ReadGenericParentRecordImpl(evo_test::GenericParentRecord<int32_t>& value) {
+  yardl::hdf5::ReadScalarDataset<evo_test::hdf5::_Inner_GenericParentRecord<int32_t, int32_t>, evo_test::GenericParentRecord<int32_t>>(group_, "genericParentRecord", evo_test::hdf5::GetGenericParentRecordHdf5Ddl<int32_t, int32_t>(H5::PredType::NATIVE_INT32), value);
+}
+
+void ProtocolWithChangesReader::ReadGenericNestedRecordsImpl(evo_test::GenericRecord<evo_test::Unchanged, evo_test::Changed>& value) {
+  yardl::hdf5::ReadScalarDataset<evo_test::hdf5::_Inner_GenericRecord<evo_test::OldUnchangedGeneric<int32_t>, evo_test::Unchanged, evo_test::hdf5::_Inner_OldChangedGeneric<yardl::hdf5::InnerVlenString, std::string, int32_t, int32_t>, evo_test::Changed>, evo_test::GenericRecord<evo_test::Unchanged, evo_test::Changed>>(group_, "genericNestedRecords", evo_test::hdf5::GetGenericRecordHdf5Ddl<evo_test::OldUnchangedGeneric<int32_t>, evo_test::Unchanged, evo_test::hdf5::_Inner_OldChangedGeneric<yardl::hdf5::InnerVlenString, std::string, int32_t, int32_t>, evo_test::Changed>(evo_test::hdf5::GetOldUnchangedGenericHdf5Ddl<int32_t, int32_t>(H5::PredType::NATIVE_INT32), evo_test::hdf5::GetOldChangedGenericHdf5Ddl<yardl::hdf5::InnerVlenString, std::string, int32_t, int32_t>(yardl::hdf5::InnerVlenStringDdl(), H5::PredType::NATIVE_INT32)), value);
+}
+
+bool ProtocolWithChangesReader::ReadGenericRecordStreamImpl(evo_test::AliasedClosedGenericRecord& value) {
+  if (!genericRecordStream_dataset_state_) {
+    genericRecordStream_dataset_state_ = std::make_unique<yardl::hdf5::DatasetReader>(group_, "genericRecordStream", evo_test::hdf5::GetGenericRecordHdf5Ddl<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string>(H5::PredType::NATIVE_INT32, yardl::hdf5::InnerVlenStringDdl()), std::max(sizeof(evo_test::hdf5::_Inner_GenericRecord<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string>), sizeof(evo_test::GenericRecord<int32_t, std::string>)));
+  }
+
+  bool has_value = genericRecordStream_dataset_state_->Read<evo_test::hdf5::_Inner_GenericRecord<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string>, evo_test::AliasedClosedGenericRecord>(value);
+  if (!has_value) {
+    genericRecordStream_dataset_state_.reset();
+  }
+
+  return has_value;
+}
+
+bool ProtocolWithChangesReader::ReadGenericRecordStreamImpl(std::vector<evo_test::AliasedClosedGenericRecord>& values) {
+  if (!genericRecordStream_dataset_state_) {
+    genericRecordStream_dataset_state_ = std::make_unique<yardl::hdf5::DatasetReader>(group_, "genericRecordStream", evo_test::hdf5::GetGenericRecordHdf5Ddl<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string>(H5::PredType::NATIVE_INT32, yardl::hdf5::InnerVlenStringDdl()));
+  }
+
+  bool has_more = genericRecordStream_dataset_state_->ReadBatch<evo_test::hdf5::_Inner_GenericRecord<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string>, evo_test::AliasedClosedGenericRecord>(values);
+  if (!has_more) {
+    genericRecordStream_dataset_state_.reset();
+  }
+
+  return has_more;
+}
+
+bool ProtocolWithChangesReader::ReadGenericParentRecordStreamImpl(evo_test::GenericParentRecord<int32_t>& value) {
+  if (!genericParentRecordStream_dataset_state_) {
+    genericParentRecordStream_dataset_state_ = std::make_unique<yardl::hdf5::DatasetReader>(group_, "genericParentRecordStream", evo_test::hdf5::GetGenericParentRecordHdf5Ddl<int32_t, int32_t>(H5::PredType::NATIVE_INT32), std::max(sizeof(evo_test::hdf5::_Inner_GenericParentRecord<int32_t, int32_t>), sizeof(evo_test::GenericParentRecord<int32_t>)));
+  }
+
+  bool has_value = genericParentRecordStream_dataset_state_->Read<evo_test::hdf5::_Inner_GenericParentRecord<int32_t, int32_t>, evo_test::GenericParentRecord<int32_t>>(value);
+  if (!has_value) {
+    genericParentRecordStream_dataset_state_.reset();
+  }
+
+  return has_value;
+}
+
+bool ProtocolWithChangesReader::ReadGenericParentRecordStreamImpl(std::vector<evo_test::GenericParentRecord<int32_t>>& values) {
+  if (!genericParentRecordStream_dataset_state_) {
+    genericParentRecordStream_dataset_state_ = std::make_unique<yardl::hdf5::DatasetReader>(group_, "genericParentRecordStream", evo_test::hdf5::GetGenericParentRecordHdf5Ddl<int32_t, int32_t>(H5::PredType::NATIVE_INT32));
+  }
+
+  bool has_more = genericParentRecordStream_dataset_state_->ReadBatch<evo_test::hdf5::_Inner_GenericParentRecord<int32_t, int32_t>, evo_test::GenericParentRecord<int32_t>>(values);
+  if (!has_more) {
+    genericParentRecordStream_dataset_state_.reset();
+  }
+
+  return has_more;
 }
 
 void ProtocolWithChangesReader::ReadVectorRecordWithChangesImpl(std::vector<evo_test::RecordWithChanges>& value) {

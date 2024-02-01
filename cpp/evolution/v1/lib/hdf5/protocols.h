@@ -162,6 +162,46 @@ class ProtocolWithChangesWriter : public evo_test::ProtocolWithChangesWriterBase
 
   void WriteRecordToAliasedUnionImpl(evo_test::AliasedRecordOrString const& value) override;
 
+  void WriteUnionToAliasedUnionImpl(evo_test::AliasedRecordOrInt const& value) override;
+
+  void WriteUnionToAliasedUnionWithChangesImpl(evo_test::AliasedRecordOrString const& value) override;
+
+  void WriteOptionalToAliasedOptionalImpl(evo_test::AliasedOptionalRecord const& value) override;
+
+  void WriteOptionalToAliasedOptionalWithChangesImpl(evo_test::AliasedOptionalString const& value) override;
+
+  void WriteGenericRecordImpl(evo_test::GenericRecord<int32_t, std::string> const& value) override;
+
+  void WriteGenericRecordToOpenAliasImpl(evo_test::AliasedOpenGenericRecord<int32_t, std::string> const& value) override;
+
+  void WriteGenericRecordToClosedAliasImpl(evo_test::AliasedClosedGenericRecord const& value) override;
+
+  void WriteGenericRecordToHalfClosedAliasImpl(evo_test::AliasedHalfClosedGenericRecord<int32_t> const& value) override;
+
+  void WriteAliasedGenericRecordToAliasImpl(evo_test::AliasedOpenGenericRecord<int32_t, std::string> const& value) override;
+
+  void WriteClosedGenericRecordToUnionImpl(std::variant<evo_test::GenericRecord<int32_t, std::string>, std::string> const& value) override;
+
+  void WriteGenericRecordToAliasedUnionImpl(evo_test::AliasedGenericRecordOrString const& value) override;
+
+  void WriteGenericUnionOfChangedRecordImpl(evo_test::GenericUnion<evo_test::GenericRecord<int32_t, std::string>, float> const& value) override;
+
+  void WriteGenericParentRecordImpl(evo_test::GenericParentRecord<int32_t> const& value) override;
+
+  void WriteGenericNestedRecordsImpl(evo_test::GenericRecord<evo_test::Unchanged, evo_test::Changed> const& value) override;
+
+  void WriteGenericRecordStreamImpl(evo_test::AliasedClosedGenericRecord const& value) override;
+
+  void WriteGenericRecordStreamImpl(std::vector<evo_test::AliasedClosedGenericRecord> const& values) override;
+
+  void EndGenericRecordStreamImpl() override;
+
+  void WriteGenericParentRecordStreamImpl(evo_test::GenericParentRecord<int32_t> const& value) override;
+
+  void WriteGenericParentRecordStreamImpl(std::vector<evo_test::GenericParentRecord<int32_t>> const& values) override;
+
+  void EndGenericParentRecordStreamImpl() override;
+
   void WriteVectorRecordWithChangesImpl(std::vector<evo_test::RecordWithChanges> const& value) override;
 
   void WriteStreamedRecordWithChangesImpl(evo_test::RecordWithChanges const& value) override;
@@ -181,6 +221,8 @@ class ProtocolWithChangesWriter : public evo_test::ProtocolWithChangesWriterBase
   void EndAddedRecordStreamImpl() override;
 
   private:
+  std::unique_ptr<yardl::hdf5::DatasetWriter> genericRecordStream_dataset_state_;
+  std::unique_ptr<yardl::hdf5::DatasetWriter> genericParentRecordStream_dataset_state_;
   std::unique_ptr<yardl::hdf5::DatasetWriter> streamedRecordWithChanges_dataset_state_;
   std::unique_ptr<yardl::hdf5::DatasetWriter> addedRecordStream_dataset_state_;
 };
@@ -334,6 +376,42 @@ class ProtocolWithChangesReader : public evo_test::ProtocolWithChangesReaderBase
 
   void ReadRecordToAliasedUnionImpl(evo_test::AliasedRecordOrString& value) override;
 
+  void ReadUnionToAliasedUnionImpl(evo_test::AliasedRecordOrInt& value) override;
+
+  void ReadUnionToAliasedUnionWithChangesImpl(evo_test::AliasedRecordOrString& value) override;
+
+  void ReadOptionalToAliasedOptionalImpl(evo_test::AliasedOptionalRecord& value) override;
+
+  void ReadOptionalToAliasedOptionalWithChangesImpl(evo_test::AliasedOptionalString& value) override;
+
+  void ReadGenericRecordImpl(evo_test::GenericRecord<int32_t, std::string>& value) override;
+
+  void ReadGenericRecordToOpenAliasImpl(evo_test::AliasedOpenGenericRecord<int32_t, std::string>& value) override;
+
+  void ReadGenericRecordToClosedAliasImpl(evo_test::AliasedClosedGenericRecord& value) override;
+
+  void ReadGenericRecordToHalfClosedAliasImpl(evo_test::AliasedHalfClosedGenericRecord<int32_t>& value) override;
+
+  void ReadAliasedGenericRecordToAliasImpl(evo_test::AliasedOpenGenericRecord<int32_t, std::string>& value) override;
+
+  void ReadClosedGenericRecordToUnionImpl(std::variant<evo_test::GenericRecord<int32_t, std::string>, std::string>& value) override;
+
+  void ReadGenericRecordToAliasedUnionImpl(evo_test::AliasedGenericRecordOrString& value) override;
+
+  void ReadGenericUnionOfChangedRecordImpl(evo_test::GenericUnion<evo_test::GenericRecord<int32_t, std::string>, float>& value) override;
+
+  void ReadGenericParentRecordImpl(evo_test::GenericParentRecord<int32_t>& value) override;
+
+  void ReadGenericNestedRecordsImpl(evo_test::GenericRecord<evo_test::Unchanged, evo_test::Changed>& value) override;
+
+  bool ReadGenericRecordStreamImpl(evo_test::AliasedClosedGenericRecord& value) override;
+
+  bool ReadGenericRecordStreamImpl(std::vector<evo_test::AliasedClosedGenericRecord>& values) override;
+
+  bool ReadGenericParentRecordStreamImpl(evo_test::GenericParentRecord<int32_t>& value) override;
+
+  bool ReadGenericParentRecordStreamImpl(std::vector<evo_test::GenericParentRecord<int32_t>>& values) override;
+
   void ReadVectorRecordWithChangesImpl(std::vector<evo_test::RecordWithChanges>& value) override;
 
   bool ReadStreamedRecordWithChangesImpl(evo_test::RecordWithChanges& value) override;
@@ -349,6 +427,8 @@ class ProtocolWithChangesReader : public evo_test::ProtocolWithChangesReaderBase
   bool ReadAddedRecordStreamImpl(std::vector<evo_test::RecordWithChanges>& values) override;
 
   private:
+  std::unique_ptr<yardl::hdf5::DatasetReader> genericRecordStream_dataset_state_;
+  std::unique_ptr<yardl::hdf5::DatasetReader> genericParentRecordStream_dataset_state_;
   std::unique_ptr<yardl::hdf5::DatasetReader> streamedRecordWithChanges_dataset_state_;
   std::unique_ptr<yardl::hdf5::DatasetReader> addedRecordStream_dataset_state_;
 };

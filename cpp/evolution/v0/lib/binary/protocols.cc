@@ -73,6 +73,50 @@ struct IsTriviallySerializable<evo_test::UnusedButChangedRecord> {
     offsetof(__T__, name) < offsetof(__T__, age);
 };
 
+template <typename T1, typename T2>
+struct IsTriviallySerializable<evo_test::GenericRecord<T1, T2>> {
+  using __T__ = evo_test::GenericRecord<T1, T2>;
+  static constexpr bool value = 
+    std::is_standard_layout_v<__T__> &&
+    IsTriviallySerializable<decltype(__T__::removed)>::value &&
+    IsTriviallySerializable<decltype(__T__::field_1)>::value &&
+    IsTriviallySerializable<decltype(__T__::field_2)>::value &&
+    (sizeof(__T__) == (sizeof(__T__::removed) + sizeof(__T__::field_1) + sizeof(__T__::field_2))) &&
+    offsetof(__T__, removed) < offsetof(__T__, field_1) && offsetof(__T__, field_1) < offsetof(__T__, field_2);
+};
+
+template <typename T>
+struct IsTriviallySerializable<evo_test::GenericParentRecord<T>> {
+  using __T__ = evo_test::GenericParentRecord<T>;
+  static constexpr bool value = 
+    std::is_standard_layout_v<__T__> &&
+    IsTriviallySerializable<decltype(__T__::record)>::value &&
+    IsTriviallySerializable<decltype(__T__::record_of_union)>::value &&
+    IsTriviallySerializable<decltype(__T__::union_of_record)>::value &&
+    (sizeof(__T__) == (sizeof(__T__::record) + sizeof(__T__::record_of_union) + sizeof(__T__::union_of_record))) &&
+    offsetof(__T__, record) < offsetof(__T__, record_of_union) && offsetof(__T__, record_of_union) < offsetof(__T__, union_of_record);
+};
+
+template <typename T2>
+struct IsTriviallySerializable<evo_test::UnchangedGeneric<T2>> {
+  using __T__ = evo_test::UnchangedGeneric<T2>;
+  static constexpr bool value = 
+    std::is_standard_layout_v<__T__> &&
+    IsTriviallySerializable<decltype(__T__::field)>::value &&
+    (sizeof(__T__) == (sizeof(__T__::field)));
+};
+
+template <typename Y, typename Z>
+struct IsTriviallySerializable<evo_test::ChangedGeneric<Y, Z>> {
+  using __T__ = evo_test::ChangedGeneric<Y, Z>;
+  static constexpr bool value = 
+    std::is_standard_layout_v<__T__> &&
+    IsTriviallySerializable<decltype(__T__::y)>::value &&
+    IsTriviallySerializable<decltype(__T__::z)>::value &&
+    (sizeof(__T__) == (sizeof(__T__::y) + sizeof(__T__::z))) &&
+    offsetof(__T__, y) < offsetof(__T__, z);
+};
+
 #ifndef _MSC_VER
 #pragma GCC diagnostic pop // #pragma GCC diagnostic ignored "-Winvalid-offsetof" 
 #endif
@@ -382,6 +426,192 @@ namespace {
   yardl::binary::ReadInteger(stream, value.age);
 }
 
+template<typename T1, yardl::binary::Writer<T1> WriteT1, typename T2, yardl::binary::Writer<T2> WriteT2>
+[[maybe_unused]] static void WriteGenericRecord(yardl::binary::CodedOutputStream& stream, evo_test::GenericRecord<T1, T2> const& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<evo_test::GenericRecord<T1, T2>>::value) {
+    yardl::binary::WriteTriviallySerializable(stream, value);
+    return;
+  }
+
+  yardl::binary::WriteOptional<bool, yardl::binary::WriteInteger>(stream, value.removed);
+  WriteT1(stream, value.field_1);
+  WriteT2(stream, value.field_2);
+}
+
+template<typename T1, yardl::binary::Reader<T1> ReadT1, typename T2, yardl::binary::Reader<T2> ReadT2>
+[[maybe_unused]] static void ReadGenericRecord(yardl::binary::CodedInputStream& stream, evo_test::GenericRecord<T1, T2>& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<evo_test::GenericRecord<T1, T2>>::value) {
+    yardl::binary::ReadTriviallySerializable(stream, value);
+    return;
+  }
+
+  yardl::binary::ReadOptional<bool, yardl::binary::ReadInteger>(stream, value.removed);
+  ReadT1(stream, value.field_1);
+  ReadT2(stream, value.field_2);
+}
+
+template<typename T1, yardl::binary::Writer<T1> WriteT1, typename T2, yardl::binary::Writer<T2> WriteT2>
+[[maybe_unused]] static void WriteGenericUnion(yardl::binary::CodedOutputStream& stream, evo_test::GenericUnion<T1, T2> const& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<evo_test::GenericUnion<T1, T2>>::value) {
+    yardl::binary::WriteTriviallySerializable(stream, value);
+    return;
+  }
+
+  WriteUnion<T1, WriteT1, T2, WriteT2>(stream, value);
+}
+
+template<typename T1, yardl::binary::Reader<T1> ReadT1, typename T2, yardl::binary::Reader<T2> ReadT2>
+[[maybe_unused]] static void ReadGenericUnion(yardl::binary::CodedInputStream& stream, evo_test::GenericUnion<T1, T2>& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<evo_test::GenericUnion<T1, T2>>::value) {
+    yardl::binary::ReadTriviallySerializable(stream, value);
+    return;
+  }
+
+  ReadUnion<T1, ReadT1, T2, ReadT2>(stream, value);
+}
+
+template<typename T, yardl::binary::Writer<T> WriteT>
+[[maybe_unused]] static void WriteGenericParentRecord(yardl::binary::CodedOutputStream& stream, evo_test::GenericParentRecord<T> const& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<evo_test::GenericParentRecord<T>>::value) {
+    yardl::binary::WriteTriviallySerializable(stream, value);
+    return;
+  }
+
+  evo_test::binary::WriteGenericRecord<T, WriteT, std::string, yardl::binary::WriteString>(stream, value.record);
+  evo_test::binary::WriteGenericRecord<evo_test::GenericUnion<T, float>, evo_test::binary::WriteGenericUnion<T, WriteT, float, yardl::binary::WriteFloatingPoint>, std::string, yardl::binary::WriteString>(stream, value.record_of_union);
+  evo_test::binary::WriteGenericUnion<evo_test::GenericRecord<int32_t, std::string>, evo_test::binary::WriteGenericRecord<int32_t, yardl::binary::WriteInteger, std::string, yardl::binary::WriteString>, float, yardl::binary::WriteFloatingPoint>(stream, value.union_of_record);
+}
+
+template<typename T, yardl::binary::Reader<T> ReadT>
+[[maybe_unused]] static void ReadGenericParentRecord(yardl::binary::CodedInputStream& stream, evo_test::GenericParentRecord<T>& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<evo_test::GenericParentRecord<T>>::value) {
+    yardl::binary::ReadTriviallySerializable(stream, value);
+    return;
+  }
+
+  evo_test::binary::ReadGenericRecord<T, ReadT, std::string, yardl::binary::ReadString>(stream, value.record);
+  evo_test::binary::ReadGenericRecord<evo_test::GenericUnion<T, float>, evo_test::binary::ReadGenericUnion<T, ReadT, float, yardl::binary::ReadFloatingPoint>, std::string, yardl::binary::ReadString>(stream, value.record_of_union);
+  evo_test::binary::ReadGenericUnion<evo_test::GenericRecord<int32_t, std::string>, evo_test::binary::ReadGenericRecord<int32_t, yardl::binary::ReadInteger, std::string, yardl::binary::ReadString>, float, yardl::binary::ReadFloatingPoint>(stream, value.union_of_record);
+}
+
+template<typename T, yardl::binary::Writer<T> WriteT>
+[[maybe_unused]] static void WriteAliasedHalfClosedGenericUnion(yardl::binary::CodedOutputStream& stream, evo_test::AliasedHalfClosedGenericUnion<T> const& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<evo_test::AliasedHalfClosedGenericUnion<T>>::value) {
+    yardl::binary::WriteTriviallySerializable(stream, value);
+    return;
+  }
+
+  evo_test::binary::WriteGenericUnion<T, WriteT, float, yardl::binary::WriteFloatingPoint>(stream, value);
+}
+
+template<typename T, yardl::binary::Reader<T> ReadT>
+[[maybe_unused]] static void ReadAliasedHalfClosedGenericUnion(yardl::binary::CodedInputStream& stream, evo_test::AliasedHalfClosedGenericUnion<T>& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<evo_test::AliasedHalfClosedGenericUnion<T>>::value) {
+    yardl::binary::ReadTriviallySerializable(stream, value);
+    return;
+  }
+
+  evo_test::binary::ReadGenericUnion<T, ReadT, float, yardl::binary::ReadFloatingPoint>(stream, value);
+}
+
+[[maybe_unused]] static void WriteAliasedClosedGenericUnion(yardl::binary::CodedOutputStream& stream, evo_test::AliasedClosedGenericUnion const& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<evo_test::AliasedClosedGenericUnion>::value) {
+    yardl::binary::WriteTriviallySerializable(stream, value);
+    return;
+  }
+
+  evo_test::binary::WriteAliasedHalfClosedGenericUnion<evo_test::GenericRecord<int32_t, std::string>, evo_test::binary::WriteGenericRecord<int32_t, yardl::binary::WriteInteger, std::string, yardl::binary::WriteString>>(stream, value);
+}
+
+[[maybe_unused]] static void ReadAliasedClosedGenericUnion(yardl::binary::CodedInputStream& stream, evo_test::AliasedClosedGenericUnion& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<evo_test::AliasedClosedGenericUnion>::value) {
+    yardl::binary::ReadTriviallySerializable(stream, value);
+    return;
+  }
+
+  evo_test::binary::ReadAliasedHalfClosedGenericUnion<evo_test::GenericRecord<int32_t, std::string>, evo_test::binary::ReadGenericRecord<int32_t, yardl::binary::ReadInteger, std::string, yardl::binary::ReadString>>(stream, value);
+}
+
+template<typename T, yardl::binary::Writer<T> WriteT>
+[[maybe_unused]] static void WriteAliasedHalfClosedGenericRecord(yardl::binary::CodedOutputStream& stream, evo_test::AliasedHalfClosedGenericRecord<T> const& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<evo_test::AliasedHalfClosedGenericRecord<T>>::value) {
+    yardl::binary::WriteTriviallySerializable(stream, value);
+    return;
+  }
+
+  evo_test::binary::WriteGenericRecord<T, WriteT, std::string, yardl::binary::WriteString>(stream, value);
+}
+
+template<typename T, yardl::binary::Reader<T> ReadT>
+[[maybe_unused]] static void ReadAliasedHalfClosedGenericRecord(yardl::binary::CodedInputStream& stream, evo_test::AliasedHalfClosedGenericRecord<T>& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<evo_test::AliasedHalfClosedGenericRecord<T>>::value) {
+    yardl::binary::ReadTriviallySerializable(stream, value);
+    return;
+  }
+
+  evo_test::binary::ReadGenericRecord<T, ReadT, std::string, yardl::binary::ReadString>(stream, value);
+}
+
+[[maybe_unused]] static void WriteAliasedClosedGenericRecord(yardl::binary::CodedOutputStream& stream, evo_test::AliasedClosedGenericRecord const& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<evo_test::AliasedClosedGenericRecord>::value) {
+    yardl::binary::WriteTriviallySerializable(stream, value);
+    return;
+  }
+
+  evo_test::binary::WriteAliasedHalfClosedGenericRecord<int32_t, yardl::binary::WriteInteger>(stream, value);
+}
+
+[[maybe_unused]] static void ReadAliasedClosedGenericRecord(yardl::binary::CodedInputStream& stream, evo_test::AliasedClosedGenericRecord& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<evo_test::AliasedClosedGenericRecord>::value) {
+    yardl::binary::ReadTriviallySerializable(stream, value);
+    return;
+  }
+
+  evo_test::binary::ReadAliasedHalfClosedGenericRecord<int32_t, yardl::binary::ReadInteger>(stream, value);
+}
+
+template<typename T2, yardl::binary::Writer<T2> WriteT2>
+[[maybe_unused]] static void WriteUnchangedGeneric(yardl::binary::CodedOutputStream& stream, evo_test::UnchangedGeneric<T2> const& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<evo_test::UnchangedGeneric<T2>>::value) {
+    yardl::binary::WriteTriviallySerializable(stream, value);
+    return;
+  }
+
+  WriteT2(stream, value.field);
+}
+
+template<typename T2, yardl::binary::Reader<T2> ReadT2>
+[[maybe_unused]] static void ReadUnchangedGeneric(yardl::binary::CodedInputStream& stream, evo_test::UnchangedGeneric<T2>& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<evo_test::UnchangedGeneric<T2>>::value) {
+    yardl::binary::ReadTriviallySerializable(stream, value);
+    return;
+  }
+
+  ReadT2(stream, value.field);
+}
+
+template<typename Y, yardl::binary::Writer<Y> WriteY, typename Z, yardl::binary::Writer<Z> WriteZ>
+[[maybe_unused]] static void WriteChangedGeneric(yardl::binary::CodedOutputStream& stream, evo_test::ChangedGeneric<Y, Z> const& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<evo_test::ChangedGeneric<Y, Z>>::value) {
+    yardl::binary::WriteTriviallySerializable(stream, value);
+    return;
+  }
+
+  WriteY(stream, value.y);
+  evo_test::binary::WriteUnchangedGeneric<Z, WriteZ>(stream, value.z);
+}
+
+template<typename Y, yardl::binary::Reader<Y> ReadY, typename Z, yardl::binary::Reader<Z> ReadZ>
+[[maybe_unused]] static void ReadChangedGeneric(yardl::binary::CodedInputStream& stream, evo_test::ChangedGeneric<Y, Z>& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<evo_test::ChangedGeneric<Y, Z>>::value) {
+    yardl::binary::ReadTriviallySerializable(stream, value);
+    return;
+  }
+
+  ReadY(stream, value.y);
+  evo_test::binary::ReadUnchangedGeneric<Z, ReadZ>(stream, value.z);
+}
+
 } // namespace
 
 void ProtocolWithChangesWriter::WriteInt8ToIntImpl(int8_t const& value) {
@@ -670,6 +900,90 @@ void ProtocolWithChangesWriter::WriteRecordToUnionImpl(evo_test::RecordWithChang
 
 void ProtocolWithChangesWriter::WriteRecordToAliasedUnionImpl(evo_test::RecordWithChanges const& value) {
   evo_test::binary::WriteRecordWithChanges(stream_, value);
+}
+
+void ProtocolWithChangesWriter::WriteUnionToAliasedUnionImpl(std::variant<evo_test::RecordWithChanges, int32_t> const& value) {
+  WriteUnion<evo_test::RecordWithChanges, evo_test::binary::WriteRecordWithChanges, int32_t, yardl::binary::WriteInteger>(stream_, value);
+}
+
+void ProtocolWithChangesWriter::WriteUnionToAliasedUnionWithChangesImpl(std::variant<evo_test::RecordWithChanges, int32_t> const& value) {
+  WriteUnion<evo_test::RecordWithChanges, evo_test::binary::WriteRecordWithChanges, int32_t, yardl::binary::WriteInteger>(stream_, value);
+}
+
+void ProtocolWithChangesWriter::WriteOptionalToAliasedOptionalImpl(std::optional<evo_test::RecordWithChanges> const& value) {
+  yardl::binary::WriteOptional<evo_test::RecordWithChanges, evo_test::binary::WriteRecordWithChanges>(stream_, value);
+}
+
+void ProtocolWithChangesWriter::WriteOptionalToAliasedOptionalWithChangesImpl(std::optional<int32_t> const& value) {
+  yardl::binary::WriteOptional<int32_t, yardl::binary::WriteInteger>(stream_, value);
+}
+
+void ProtocolWithChangesWriter::WriteGenericRecordImpl(evo_test::GenericRecord<int32_t, std::string> const& value) {
+  evo_test::binary::WriteGenericRecord<int32_t, yardl::binary::WriteInteger, std::string, yardl::binary::WriteString>(stream_, value);
+}
+
+void ProtocolWithChangesWriter::WriteGenericRecordToOpenAliasImpl(evo_test::GenericRecord<int32_t, std::string> const& value) {
+  evo_test::binary::WriteGenericRecord<int32_t, yardl::binary::WriteInteger, std::string, yardl::binary::WriteString>(stream_, value);
+}
+
+void ProtocolWithChangesWriter::WriteGenericRecordToClosedAliasImpl(evo_test::GenericRecord<int32_t, std::string> const& value) {
+  evo_test::binary::WriteGenericRecord<int32_t, yardl::binary::WriteInteger, std::string, yardl::binary::WriteString>(stream_, value);
+}
+
+void ProtocolWithChangesWriter::WriteGenericRecordToHalfClosedAliasImpl(evo_test::GenericRecord<int32_t, std::string> const& value) {
+  evo_test::binary::WriteGenericRecord<int32_t, yardl::binary::WriteInteger, std::string, yardl::binary::WriteString>(stream_, value);
+}
+
+void ProtocolWithChangesWriter::WriteAliasedGenericRecordToAliasImpl(evo_test::AliasedHalfClosedGenericRecord<int32_t> const& value) {
+  evo_test::binary::WriteAliasedHalfClosedGenericRecord<int32_t, yardl::binary::WriteInteger>(stream_, value);
+}
+
+void ProtocolWithChangesWriter::WriteClosedGenericRecordToUnionImpl(evo_test::AliasedClosedGenericRecord const& value) {
+  evo_test::binary::WriteAliasedClosedGenericRecord(stream_, value);
+}
+
+void ProtocolWithChangesWriter::WriteGenericRecordToAliasedUnionImpl(evo_test::GenericRecord<int32_t, std::string> const& value) {
+  evo_test::binary::WriteGenericRecord<int32_t, yardl::binary::WriteInteger, std::string, yardl::binary::WriteString>(stream_, value);
+}
+
+void ProtocolWithChangesWriter::WriteGenericUnionOfChangedRecordImpl(evo_test::AliasedClosedGenericUnion const& value) {
+  evo_test::binary::WriteAliasedClosedGenericUnion(stream_, value);
+}
+
+void ProtocolWithChangesWriter::WriteGenericParentRecordImpl(evo_test::GenericParentRecord<int32_t> const& value) {
+  evo_test::binary::WriteGenericParentRecord<int32_t, yardl::binary::WriteInteger>(stream_, value);
+}
+
+void ProtocolWithChangesWriter::WriteGenericNestedRecordsImpl(evo_test::GenericRecord<evo_test::UnchangedGeneric<int32_t>, evo_test::ChangedGeneric<std::string, int32_t>> const& value) {
+  evo_test::binary::WriteGenericRecord<evo_test::UnchangedGeneric<int32_t>, evo_test::binary::WriteUnchangedGeneric<int32_t, yardl::binary::WriteInteger>, evo_test::ChangedGeneric<std::string, int32_t>, evo_test::binary::WriteChangedGeneric<std::string, yardl::binary::WriteString, int32_t, yardl::binary::WriteInteger>>(stream_, value);
+}
+
+void ProtocolWithChangesWriter::WriteGenericRecordStreamImpl(evo_test::GenericRecord<int32_t, std::string> const& value) {
+  yardl::binary::WriteBlock<evo_test::GenericRecord<int32_t, std::string>, evo_test::binary::WriteGenericRecord<int32_t, yardl::binary::WriteInteger, std::string, yardl::binary::WriteString>>(stream_, value);
+}
+
+void ProtocolWithChangesWriter::WriteGenericRecordStreamImpl(std::vector<evo_test::GenericRecord<int32_t, std::string>> const& values) {
+  if (!values.empty()) {
+    yardl::binary::WriteVector<evo_test::GenericRecord<int32_t, std::string>, evo_test::binary::WriteGenericRecord<int32_t, yardl::binary::WriteInteger, std::string, yardl::binary::WriteString>>(stream_, values);
+  }
+}
+
+void ProtocolWithChangesWriter::EndGenericRecordStreamImpl() {
+  yardl::binary::WriteInteger(stream_, 0U);
+}
+
+void ProtocolWithChangesWriter::WriteGenericParentRecordStreamImpl(evo_test::GenericParentRecord<int32_t> const& value) {
+  yardl::binary::WriteBlock<evo_test::GenericParentRecord<int32_t>, evo_test::binary::WriteGenericParentRecord<int32_t, yardl::binary::WriteInteger>>(stream_, value);
+}
+
+void ProtocolWithChangesWriter::WriteGenericParentRecordStreamImpl(std::vector<evo_test::GenericParentRecord<int32_t>> const& values) {
+  if (!values.empty()) {
+    yardl::binary::WriteVector<evo_test::GenericParentRecord<int32_t>, evo_test::binary::WriteGenericParentRecord<int32_t, yardl::binary::WriteInteger>>(stream_, values);
+  }
+}
+
+void ProtocolWithChangesWriter::EndGenericParentRecordStreamImpl() {
+  yardl::binary::WriteInteger(stream_, 0U);
 }
 
 void ProtocolWithChangesWriter::WriteVectorRecordWithChangesImpl(std::vector<evo_test::RecordWithChanges> const& value) {
@@ -984,6 +1298,80 @@ void ProtocolWithChangesReader::ReadRecordToUnionImpl(evo_test::RecordWithChange
 
 void ProtocolWithChangesReader::ReadRecordToAliasedUnionImpl(evo_test::RecordWithChanges& value) {
   evo_test::binary::ReadRecordWithChanges(stream_, value);
+}
+
+void ProtocolWithChangesReader::ReadUnionToAliasedUnionImpl(std::variant<evo_test::RecordWithChanges, int32_t>& value) {
+  ReadUnion<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges, int32_t, yardl::binary::ReadInteger>(stream_, value);
+}
+
+void ProtocolWithChangesReader::ReadUnionToAliasedUnionWithChangesImpl(std::variant<evo_test::RecordWithChanges, int32_t>& value) {
+  ReadUnion<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges, int32_t, yardl::binary::ReadInteger>(stream_, value);
+}
+
+void ProtocolWithChangesReader::ReadOptionalToAliasedOptionalImpl(std::optional<evo_test::RecordWithChanges>& value) {
+  yardl::binary::ReadOptional<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges>(stream_, value);
+}
+
+void ProtocolWithChangesReader::ReadOptionalToAliasedOptionalWithChangesImpl(std::optional<int32_t>& value) {
+  yardl::binary::ReadOptional<int32_t, yardl::binary::ReadInteger>(stream_, value);
+}
+
+void ProtocolWithChangesReader::ReadGenericRecordImpl(evo_test::GenericRecord<int32_t, std::string>& value) {
+  evo_test::binary::ReadGenericRecord<int32_t, yardl::binary::ReadInteger, std::string, yardl::binary::ReadString>(stream_, value);
+}
+
+void ProtocolWithChangesReader::ReadGenericRecordToOpenAliasImpl(evo_test::GenericRecord<int32_t, std::string>& value) {
+  evo_test::binary::ReadGenericRecord<int32_t, yardl::binary::ReadInteger, std::string, yardl::binary::ReadString>(stream_, value);
+}
+
+void ProtocolWithChangesReader::ReadGenericRecordToClosedAliasImpl(evo_test::GenericRecord<int32_t, std::string>& value) {
+  evo_test::binary::ReadGenericRecord<int32_t, yardl::binary::ReadInteger, std::string, yardl::binary::ReadString>(stream_, value);
+}
+
+void ProtocolWithChangesReader::ReadGenericRecordToHalfClosedAliasImpl(evo_test::GenericRecord<int32_t, std::string>& value) {
+  evo_test::binary::ReadGenericRecord<int32_t, yardl::binary::ReadInteger, std::string, yardl::binary::ReadString>(stream_, value);
+}
+
+void ProtocolWithChangesReader::ReadAliasedGenericRecordToAliasImpl(evo_test::AliasedHalfClosedGenericRecord<int32_t>& value) {
+  evo_test::binary::ReadAliasedHalfClosedGenericRecord<int32_t, yardl::binary::ReadInteger>(stream_, value);
+}
+
+void ProtocolWithChangesReader::ReadClosedGenericRecordToUnionImpl(evo_test::AliasedClosedGenericRecord& value) {
+  evo_test::binary::ReadAliasedClosedGenericRecord(stream_, value);
+}
+
+void ProtocolWithChangesReader::ReadGenericRecordToAliasedUnionImpl(evo_test::GenericRecord<int32_t, std::string>& value) {
+  evo_test::binary::ReadGenericRecord<int32_t, yardl::binary::ReadInteger, std::string, yardl::binary::ReadString>(stream_, value);
+}
+
+void ProtocolWithChangesReader::ReadGenericUnionOfChangedRecordImpl(evo_test::AliasedClosedGenericUnion& value) {
+  evo_test::binary::ReadAliasedClosedGenericUnion(stream_, value);
+}
+
+void ProtocolWithChangesReader::ReadGenericParentRecordImpl(evo_test::GenericParentRecord<int32_t>& value) {
+  evo_test::binary::ReadGenericParentRecord<int32_t, yardl::binary::ReadInteger>(stream_, value);
+}
+
+void ProtocolWithChangesReader::ReadGenericNestedRecordsImpl(evo_test::GenericRecord<evo_test::UnchangedGeneric<int32_t>, evo_test::ChangedGeneric<std::string, int32_t>>& value) {
+  evo_test::binary::ReadGenericRecord<evo_test::UnchangedGeneric<int32_t>, evo_test::binary::ReadUnchangedGeneric<int32_t, yardl::binary::ReadInteger>, evo_test::ChangedGeneric<std::string, int32_t>, evo_test::binary::ReadChangedGeneric<std::string, yardl::binary::ReadString, int32_t, yardl::binary::ReadInteger>>(stream_, value);
+}
+
+bool ProtocolWithChangesReader::ReadGenericRecordStreamImpl(evo_test::GenericRecord<int32_t, std::string>& value) {
+  return yardl::binary::ReadBlock<evo_test::GenericRecord<int32_t, std::string>, evo_test::binary::ReadGenericRecord<int32_t, yardl::binary::ReadInteger, std::string, yardl::binary::ReadString>>(stream_, current_block_remaining_, value);
+}
+
+bool ProtocolWithChangesReader::ReadGenericRecordStreamImpl(std::vector<evo_test::GenericRecord<int32_t, std::string>>& values) {
+  yardl::binary::ReadBlocksIntoVector<evo_test::GenericRecord<int32_t, std::string>, evo_test::binary::ReadGenericRecord<int32_t, yardl::binary::ReadInteger, std::string, yardl::binary::ReadString>>(stream_, current_block_remaining_, values);
+  return current_block_remaining_ != 0;
+}
+
+bool ProtocolWithChangesReader::ReadGenericParentRecordStreamImpl(evo_test::GenericParentRecord<int32_t>& value) {
+  return yardl::binary::ReadBlock<evo_test::GenericParentRecord<int32_t>, evo_test::binary::ReadGenericParentRecord<int32_t, yardl::binary::ReadInteger>>(stream_, current_block_remaining_, value);
+}
+
+bool ProtocolWithChangesReader::ReadGenericParentRecordStreamImpl(std::vector<evo_test::GenericParentRecord<int32_t>>& values) {
+  yardl::binary::ReadBlocksIntoVector<evo_test::GenericParentRecord<int32_t>, evo_test::binary::ReadGenericParentRecord<int32_t, yardl::binary::ReadInteger>>(stream_, current_block_remaining_, values);
+  return current_block_remaining_ != 0;
 }
 
 void ProtocolWithChangesReader::ReadVectorRecordWithChangesImpl(std::vector<evo_test::RecordWithChanges>& value) {

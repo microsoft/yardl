@@ -57,6 +57,10 @@ using AliasOfAliasedRecordWithChanges = evo_test::AliasedRecordWithChanges;
 
 using AliasedOptionalRecord = std::optional<evo_test::RecordWithChanges>;
 
+using AliasedOptionalString = std::optional<std::string>;
+
+using AliasedRecordOrInt = std::variant<evo_test::RecordWithChanges, int32_t>;
+
 using AliasedRecordOrString = std::variant<evo_test::RecordWithChanges, std::string>;
 
 struct DeprecatedRecord {
@@ -111,6 +115,101 @@ struct UnusedButChangedRecord {
   }
 };
 
+template <typename T1, typename T2>
+struct GenericRecord {
+  T2 field_2{};
+  T1 field_1{};
+  std::optional<bool> added{};
+
+  bool operator==(const GenericRecord& other) const {
+    return field_2 == other.field_2 &&
+      field_1 == other.field_1 &&
+      added == other.added;
+  }
+
+  bool operator!=(const GenericRecord& other) const {
+    return !(*this == other);
+  }
+};
+
+template <typename A, typename B>
+using AliasedOpenGenericRecord = evo_test::GenericRecord<A, B>;
+
+template <typename T>
+using AliasedHalfClosedGenericRecord = evo_test::AliasedOpenGenericRecord<T, std::string>;
+
+template <typename T1, typename T2>
+using GenericUnion = std::variant<T1, T2>;
+
+template <typename A, typename B>
+using AliasedOpenGenericUnion = evo_test::GenericUnion<A, B>;
+
+template <typename T>
+using AliasedHalfClosedGenericUnion = evo_test::AliasedOpenGenericUnion<T, float>;
+
+using AliasedClosedGenericUnion = evo_test::AliasedHalfClosedGenericUnion<evo_test::GenericRecord<int32_t, std::string>>;
+
+template <typename T>
+struct GenericParentRecord {
+  evo_test::AliasedHalfClosedGenericRecord<T> record{};
+  evo_test::AliasedOpenGenericRecord<evo_test::AliasedOpenGenericUnion<T, float>, std::string> record_of_union{};
+  evo_test::AliasedClosedGenericUnion union_of_record{};
+
+  bool operator==(const GenericParentRecord& other) const {
+    return record == other.record &&
+      record_of_union == other.record_of_union &&
+      union_of_record == other.union_of_record;
+  }
+
+  bool operator!=(const GenericParentRecord& other) const {
+    return !(*this == other);
+  }
+};
+
+using AliasedClosedGenericRecord = evo_test::AliasedHalfClosedGenericRecord<int32_t>;
+
+using AliasedGenericRecordOrString = std::variant<evo_test::GenericRecord<int32_t, std::string>, std::string>;
+
+template <typename T2>
+struct OldUnchangedGeneric {
+  T2 field{};
+
+  bool operator==(const OldUnchangedGeneric& other) const {
+    return field == other.field;
+  }
+
+  bool operator!=(const OldUnchangedGeneric& other) const {
+    return !(*this == other);
+  }
+};
+
+template <typename A>
+using UnchangedGeneric = evo_test::OldUnchangedGeneric<A>;
+
+using Unchanged = evo_test::UnchangedGeneric<int32_t>;
+
+template <typename Y, typename Z>
+struct OldChangedGeneric {
+  std::optional<Y> y{};
+  std::optional<evo_test::OldUnchangedGeneric<Z>> z{};
+
+  bool operator==(const OldChangedGeneric& other) const {
+    return y == other.y &&
+      z == other.z;
+  }
+
+  bool operator!=(const OldChangedGeneric& other) const {
+    return !(*this == other);
+  }
+};
+
+template <typename I, typename J>
+using ChangedGeneric = evo_test::OldChangedGeneric<I, J>;
+
+using Changed = evo_test::ChangedGeneric<std::string, int32_t>;
+
+// Compatibility aliases for version v0.
+
 using AliasedLongToString_v0 = evo_test::AliasedLongToString;
 
 using RecordWithChanges_v0 = evo_test::RecordWithChanges;
@@ -126,6 +225,24 @@ using RB_v0 = evo_test::RZ;
 using RA_v0 = evo_test::RZ;
 
 using RLink_v0 = evo_test::RZ;
+
+using UnusedButChangedRecord_v0 = evo_test::UnusedButChangedRecord;
+
+template <typename T1, typename T2>
+using GenericRecord_v0 = evo_test::GenericRecord<T1, T2>;
+
+template <typename T>
+using GenericParentRecord_v0 = evo_test::GenericParentRecord<T>;
+
+using AliasedClosedGenericUnion_v0 = evo_test::AliasedClosedGenericUnion;
+
+template <typename T>
+using AliasedHalfClosedGenericRecord_v0 = evo_test::GenericRecord<T, std::string>;
+
+using AliasedClosedGenericRecord_v0 = evo_test::GenericRecord<int32_t, std::string>;
+
+template <typename Y, typename Z>
+using ChangedGeneric_v0 = evo_test::OldChangedGeneric<Y, Z>;
 
 } // namespace evo_test
 

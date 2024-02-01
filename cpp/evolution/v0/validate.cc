@@ -19,10 +19,19 @@ void validateRecordWithChanges(RecordWithChanges const& rec) {
 
 void validateGenericRecord(GenericRecord<int, std::string> record) {
   if (record.removed.has_value()) {
-    assert(record.removed.value() == true);
+    EVO_ASSERT(record.removed.value() == true);
   }
-  assert(record.field_1 == 42);
-  assert(record.field_2 == "42");
+  EVO_ASSERT(record.field_1 == 42);
+  EVO_ASSERT(record.field_2 == "42");
+}
+
+void validateGenericParentRecord(GenericParentRecord<int> parent) {
+  validateGenericRecord(parent.record);
+  EVO_ASSERT(parent.record_of_union.field_1.index() == 0);
+  EVO_ASSERT(std::get<0>(parent.record_of_union.field_1) == 42);
+  EVO_ASSERT(parent.record_of_union.field_2 == "Hello, World");
+  EVO_ASSERT(parent.union_of_record.index() == 0);
+  validateGenericRecord(std::get<0>(parent.union_of_record));
 }
 
 int main(void) {
@@ -261,8 +270,10 @@ int main(void) {
   validateGenericRecord(generic_record);
   r.ReadGenericRecordToHalfClosedAlias(generic_record);
   validateGenericRecord(generic_record);
+  r.ReadAliasedGenericRecordToAlias(generic_record);
+  validateGenericRecord(generic_record);
 
-  r.ReadGenericRecordToUnion(generic_record);
+  r.ReadClosedGenericRecordToUnion(generic_record);
   validateGenericRecord(generic_record);
   r.ReadGenericRecordToAliasedUnion(generic_record);
   validateGenericRecord(generic_record);
@@ -289,6 +300,22 @@ int main(void) {
   assert(generic_nested.field_1.field == 42);
   assert(generic_nested.field_2.y == "42");
   assert(generic_nested.field_2.z.field == 42);
+
+  std::vector<AliasedClosedGenericRecord> generic_records(10);
+  while (r.ReadGenericRecordStream(generic_records)) {
+    EVO_ASSERT(generic_records.size() == 7);
+    for (auto const& rec : generic_records) {
+      validateGenericRecord(rec);
+    }
+  }
+
+  std::vector<GenericParentRecord<int>> generic_parents(10);
+  while (r.ReadGenericParentRecordStream(generic_parents)) {
+    EVO_ASSERT(generic_parents.size() == 7);
+    for (auto const& parent : generic_parents) {
+      validateGenericParentRecord(parent);
+    }
+  }
 
   std::vector<RecordWithChanges> vec;
   r.ReadVectorRecordWithChanges(vec);

@@ -103,8 +103,9 @@ ProtocolWithChanges: !protocol
     genericRecordToOpenAlias: AliasedOpenGenericRecord<int, string>
     genericRecordToClosedAlias: AliasedClosedGenericRecord
     genericRecordToHalfClosedAlias: AliasedHalfClosedGenericRecord<int>
+    aliasedGenericRecordToAlias: AliasedOpenGenericRecord<int, string>
 
-    genericRecordToUnion: !union
+    closedGenericRecordToUnion: !union
         r: GenericRecord<int, string>
         s: string
     genericRecordToAliasedUnion: AliasedGenericRecordOrString
@@ -114,6 +115,12 @@ ProtocolWithChanges: !protocol
     genericParentRecord: GenericParentRecord<int>
 
     genericNestedRecords: GenericRecord<Unchanged, Changed>
+
+    genericRecordStream: !stream
+      items: AliasedClosedGenericRecord
+
+    genericParentRecordStream: !stream
+      items: GenericParentRecord<int>
 
     vectorRecordWithChanges: RecordWithChanges*
 
@@ -183,7 +190,7 @@ GenericParentRecord<T>: !record
 
 GenericUnion<T1, T2>: [T1, T2]
 AliasedOpenGenericUnion<A, B>: GenericUnion<A, B>
-AliasedHalfClosedGenericUnion<YYY>: AliasedOpenGenericUnion<YYY, float>
+AliasedHalfClosedGenericUnion<T>: AliasedOpenGenericUnion<T, float>
 AliasedClosedGenericUnion: AliasedHalfClosedGenericUnion<GenericRecord<int, string>>
 
 GenericRecord<T1, T2>: !record
@@ -193,7 +200,7 @@ GenericRecord<T1, T2>: !record
     added: bool?
 
 AliasedOpenGenericRecord<A, B>: GenericRecord<A, B>
-AliasedHalfClosedGenericRecord<XXX>: AliasedOpenGenericRecord<XXX, string>
+AliasedHalfClosedGenericRecord<T>: AliasedOpenGenericRecord<T, string>
 AliasedClosedGenericRecord: AliasedHalfClosedGenericRecord<int>
 
 AliasedGenericRecordOrString: !union

@@ -103,6 +103,83 @@ struct UnusedButChangedRecord {
   }
 };
 
+template <typename T1, typename T2>
+struct GenericRecord {
+  std::optional<bool> removed{};
+  T1 field_1{};
+  T2 field_2{};
+
+  bool operator==(const GenericRecord& other) const {
+    return removed == other.removed &&
+      field_1 == other.field_1 &&
+      field_2 == other.field_2;
+  }
+
+  bool operator!=(const GenericRecord& other) const {
+    return !(*this == other);
+  }
+};
+
+template <typename T1, typename T2>
+using GenericUnion = std::variant<T1, T2>;
+
+template <typename T>
+struct GenericParentRecord {
+  evo_test::GenericRecord<T, std::string> record{};
+  evo_test::GenericRecord<evo_test::GenericUnion<T, float>, std::string> record_of_union{};
+  evo_test::GenericUnion<evo_test::GenericRecord<int32_t, std::string>, float> union_of_record{};
+
+  bool operator==(const GenericParentRecord& other) const {
+    return record == other.record &&
+      record_of_union == other.record_of_union &&
+      union_of_record == other.union_of_record;
+  }
+
+  bool operator!=(const GenericParentRecord& other) const {
+    return !(*this == other);
+  }
+};
+
+template <typename T>
+using AliasedHalfClosedGenericUnion = evo_test::GenericUnion<T, float>;
+
+using AliasedClosedGenericUnion = evo_test::AliasedHalfClosedGenericUnion<evo_test::GenericRecord<int32_t, std::string>>;
+
+template <typename T>
+using AliasedHalfClosedGenericRecord = evo_test::GenericRecord<T, std::string>;
+
+using AliasedClosedGenericRecord = evo_test::AliasedHalfClosedGenericRecord<int32_t>;
+
+template <typename T2>
+struct UnchangedGeneric {
+  T2 field{};
+
+  bool operator==(const UnchangedGeneric& other) const {
+    return field == other.field;
+  }
+
+  bool operator!=(const UnchangedGeneric& other) const {
+    return !(*this == other);
+  }
+};
+
+template <typename Y, typename Z>
+struct ChangedGeneric {
+  Y y{};
+  evo_test::UnchangedGeneric<Z> z{};
+
+  bool operator==(const ChangedGeneric& other) const {
+    return y == other.y &&
+      z == other.z;
+  }
+
+  bool operator!=(const ChangedGeneric& other) const {
+    return !(*this == other);
+  }
+};
+
+// Compatibility aliases for version v1.
+
 using AliasedLongToString_v1 = evo_test::AliasedLongToString;
 
 using RecordWithChanges_v1 = evo_test::RecordWithChanges;
@@ -125,13 +202,39 @@ using RLink_v1 = evo_test::RC;
 
 using RX_v1 = evo_test::RC;
 
-using AliasedInt_v1 = std::string;
+using UnusedButChangedRecord_v1 = evo_test::UnusedButChangedRecord;
 
-using RUnion_v1 = evo_test::RLink;
+template <typename T1, typename T2>
+using GenericRecord_v1 = evo_test::GenericRecord<T1, T2>;
 
-using AliasedOptionalRecord_v1 = evo_test::RecordWithChanges;
+template <typename A, typename B>
+using AliasedOpenGenericRecord_v1 = evo_test::GenericRecord<A, B>;
 
-using AliasedRecordOrString_v1 = evo_test::RecordWithChanges;
+template <typename T>
+using AliasedHalfClosedGenericRecord_v1 = evo_test::GenericRecord<T, std::string>;
+
+template <typename A, typename B>
+using AliasedOpenGenericUnion_v1 = evo_test::GenericUnion<A, B>;
+
+using AliasedClosedGenericUnion_v1 = evo_test::AliasedClosedGenericUnion;
+
+template <typename T>
+using GenericParentRecord_v1 = evo_test::GenericParentRecord<T>;
+
+using AliasedClosedGenericRecord_v1 = evo_test::GenericRecord<int32_t, std::string>;
+
+template <typename T2>
+using OldUnchangedGeneric_v1 = evo_test::UnchangedGeneric<T2>;
+
+using Unchanged_v1 = evo_test::UnchangedGeneric<int32_t>;
+
+template <typename Y, typename Z>
+using OldChangedGeneric_v1 = evo_test::ChangedGeneric<Y, Z>;
+
+template <typename I, typename J>
+using ChangedGeneric_v1 = evo_test::ChangedGeneric<I, J>;
+
+using Changed_v1 = evo_test::ChangedGeneric<std::string, int32_t>;
 
 } // namespace evo_test
 

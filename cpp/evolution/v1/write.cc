@@ -134,8 +134,9 @@ int main(void) {
   w.WriteGenericRecordToOpenAlias(generic_record);
   w.WriteGenericRecordToClosedAlias(generic_record);
   w.WriteGenericRecordToHalfClosedAlias(generic_record);
+  w.WriteAliasedGenericRecordToAlias(generic_record);
 
-  w.WriteGenericRecordToUnion(generic_record);
+  w.WriteClosedGenericRecordToUnion(generic_record);
   w.WriteGenericRecordToAliasedUnion(generic_record);
 
   w.WriteGenericUnionOfChangedRecord(generic_record);
@@ -157,6 +158,11 @@ int main(void) {
   generic_nested.field_2.y = "42";
   generic_nested.field_2.z = Unchanged{42};
   w.WriteGenericNestedRecords(generic_nested);
+
+  w.WriteGenericRecordStream(std::vector<AliasedClosedGenericRecord>(7, generic_record));
+  w.EndGenericRecordStream();
+  w.WriteGenericParentRecordStream(std::vector<GenericParentRecord<int>>(7, generic_parent));
+  w.EndGenericParentRecordStream();
 
   // Write a vector of size 7 records
   std::vector<RecordWithChanges> recs(7, rec);

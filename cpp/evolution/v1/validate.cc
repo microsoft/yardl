@@ -17,21 +17,23 @@ void validateRecordWithChanges(RecordWithChanges const& rec) {
   EVO_ASSERT(rec.unchanged_record.meta.at("weight") == 75.0f);
 }
 
-// void validateGenericRecord(GenericRecord<int, std::string> record) {
-//   assert(record.field_2 == "42");
-//   assert(record.field_1 == 42);
-//   if (record.added.has_value()) {
-//     assert(record.added.value() == true);
-//   }
-// }
+#define validateGenericRecord(record)           \
+  do {                                          \
+    EVO_ASSERT(record.field_2 == "42");         \
+    EVO_ASSERT(record.field_1 == 42);           \
+    if (record.added.has_value()) {             \
+      EVO_ASSERT(record.added.value() == true); \
+    }                                           \
+  } while (0)
 
-#define validateGenericRecord(record)       \
-  do {                                      \
-    assert(record.field_2 == "42");         \
-    assert(record.field_1 == 42);           \
-    if (record.added.has_value()) {         \
-      assert(record.added.value() == true); \
-    }                                       \
+#define validateGenericParentRecord(parent)                        \
+  do {                                                             \
+    validateGenericRecord(parent.record);                          \
+    EVO_ASSERT(parent.record_of_union.field_1.index() == 0);       \
+    EVO_ASSERT(std::get<0>(parent.record_of_union.field_1) == 42); \
+    EVO_ASSERT(parent.record_of_union.field_2 == "Hello, World");  \
+    EVO_ASSERT(parent.union_of_record.index() == 0);               \
+    validateGenericRecord(std::get<0>(parent.union_of_record));    \
   } while (0)
 
 int main(void) {
@@ -303,9 +305,11 @@ int main(void) {
   validateGenericRecord(generic_record);
   r.ReadGenericRecordToHalfClosedAlias(generic_record);
   validateGenericRecord(generic_record);
+  r.ReadAliasedGenericRecordToAlias(generic_record);
+  validateGenericRecord(generic_record);
 
   std::variant<GenericRecord<int, std::string>, std::string> generic_record_or_string;
-  r.ReadGenericRecordToUnion(generic_record_or_string);
+  r.ReadClosedGenericRecordToUnion(generic_record_or_string);
   assert(generic_record_or_string.index() == 0);
   validateGenericRecord(std::get<0>(generic_record_or_string));
   r.ReadGenericRecordToAliasedUnion(generic_record_or_string);
@@ -336,6 +340,22 @@ int main(void) {
   assert(generic_nested.field_2.y.value() == "42");
   assert(generic_nested.field_2.z.has_value());
   assert(generic_nested.field_2.z.value().field == 42);
+
+  std::vector<AliasedClosedGenericRecord> generic_records(10);
+  while (r.ReadGenericRecordStream(generic_records)) {
+    EVO_ASSERT(generic_records.size() == 7);
+    for (auto const& rec : generic_records) {
+      validateGenericRecord(rec);
+    }
+  }
+
+  std::vector<GenericParentRecord<int>> generic_parents(10);
+  while (r.ReadGenericParentRecordStream(generic_parents)) {
+    EVO_ASSERT(generic_parents.size() == 7);
+    for (auto const& parent : generic_parents) {
+      validateGenericParentRecord(parent);
+    }
+  }
 
   std::vector<RecordWithChanges> vec;
   r.ReadVectorRecordWithChanges(vec);

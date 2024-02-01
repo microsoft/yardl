@@ -101,5 +101,80 @@ struct UnusedButChangedRecord {
   }
 };
 
+template <typename T1, typename T2>
+struct GenericRecord {
+  std::optional<bool> removed{};
+  T1 field_1{};
+  T2 field_2{};
+
+  bool operator==(const GenericRecord& other) const {
+    return removed == other.removed &&
+      field_1 == other.field_1 &&
+      field_2 == other.field_2;
+  }
+
+  bool operator!=(const GenericRecord& other) const {
+    return !(*this == other);
+  }
+};
+
+template <typename T1, typename T2>
+using GenericUnion = std::variant<T1, T2>;
+
+template <typename T>
+struct GenericParentRecord {
+  evo_test::GenericRecord<T, std::string> record{};
+  evo_test::GenericRecord<evo_test::GenericUnion<T, float>, std::string> record_of_union{};
+  evo_test::GenericUnion<evo_test::GenericRecord<int32_t, std::string>, float> union_of_record{};
+
+  bool operator==(const GenericParentRecord& other) const {
+    return record == other.record &&
+      record_of_union == other.record_of_union &&
+      union_of_record == other.union_of_record;
+  }
+
+  bool operator!=(const GenericParentRecord& other) const {
+    return !(*this == other);
+  }
+};
+
+template <typename T>
+using AliasedHalfClosedGenericUnion = evo_test::GenericUnion<T, float>;
+
+using AliasedClosedGenericUnion = evo_test::AliasedHalfClosedGenericUnion<evo_test::GenericRecord<int32_t, std::string>>;
+
+template <typename T>
+using AliasedHalfClosedGenericRecord = evo_test::GenericRecord<T, std::string>;
+
+using AliasedClosedGenericRecord = evo_test::AliasedHalfClosedGenericRecord<int32_t>;
+
+template <typename T2>
+struct UnchangedGeneric {
+  T2 field{};
+
+  bool operator==(const UnchangedGeneric& other) const {
+    return field == other.field;
+  }
+
+  bool operator!=(const UnchangedGeneric& other) const {
+    return !(*this == other);
+  }
+};
+
+template <typename Y, typename Z>
+struct ChangedGeneric {
+  Y y{};
+  evo_test::UnchangedGeneric<Z> z{};
+
+  bool operator==(const ChangedGeneric& other) const {
+    return y == other.y &&
+      z == other.z;
+  }
+
+  bool operator!=(const ChangedGeneric& other) const {
+    return !(*this == other);
+  }
+};
+
 } // namespace evo_test
 

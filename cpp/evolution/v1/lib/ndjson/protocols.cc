@@ -21,9 +21,48 @@ using ordered_json = nlohmann::ordered_json;
 [[maybe_unused]] static void to_json(ordered_json& j, evo_test::UnusedButChangedRecord const& value);
 [[maybe_unused]] static void from_json(ordered_json const& j, evo_test::UnusedButChangedRecord& value);
 
+template <typename T1, typename T2>
+[[maybe_unused]] static void to_json(ordered_json& j, evo_test::GenericRecord<T1, T2> const& value);
+template <typename T1, typename T2>
+[[maybe_unused]] static void from_json(ordered_json const& j, evo_test::GenericRecord<T1, T2>& value);
+
+template <typename T>
+[[maybe_unused]] static void to_json(ordered_json& j, evo_test::GenericParentRecord<T> const& value);
+template <typename T>
+[[maybe_unused]] static void from_json(ordered_json const& j, evo_test::GenericParentRecord<T>& value);
+
+template <typename T2>
+[[maybe_unused]] static void to_json(ordered_json& j, evo_test::OldUnchangedGeneric<T2> const& value);
+template <typename T2>
+[[maybe_unused]] static void from_json(ordered_json const& j, evo_test::OldUnchangedGeneric<T2>& value);
+
+template <typename Y, typename Z>
+[[maybe_unused]] static void to_json(ordered_json& j, evo_test::OldChangedGeneric<Y, Z> const& value);
+template <typename Y, typename Z>
+[[maybe_unused]] static void from_json(ordered_json const& j, evo_test::OldChangedGeneric<Y, Z>& value);
+
 } // namespace evo_test
 
 NLOHMANN_JSON_NAMESPACE_BEGIN
+
+template <>
+struct adl_serializer<std::variant<evo_test::RecordWithChanges, int32_t>> {
+  [[maybe_unused]] static void to_json(ordered_json& j, std::variant<evo_test::RecordWithChanges, int32_t> const& value) {
+    std::visit([&j](auto const& v) {j = v;}, value);
+  }
+
+  [[maybe_unused]] static void from_json(ordered_json const& j, std::variant<evo_test::RecordWithChanges, int32_t>& value) {
+    if ((j.is_object())) {
+      value = j.get<evo_test::RecordWithChanges>();
+      return;
+    }
+    if ((j.is_number())) {
+      value = j.get<int32_t>();
+      return;
+    }
+    throw std::runtime_error("Invalid union value");
+  }
+};
 
 template <>
 struct adl_serializer<std::variant<evo_test::RecordWithChanges, std::string>> {
@@ -53,6 +92,92 @@ struct adl_serializer<std::variant<evo_test::RX, std::string>> {
   [[maybe_unused]] static void from_json(ordered_json const& j, std::variant<evo_test::RX, std::string>& value) {
     if ((j.is_object())) {
       value = j.get<evo_test::RX>();
+      return;
+    }
+    if ((j.is_string())) {
+      value = j.get<std::string>();
+      return;
+    }
+    throw std::runtime_error("Invalid union value");
+  }
+};
+
+template <typename T1, typename T2>
+struct adl_serializer<std::variant<T1, T2>> {
+  [[maybe_unused]] static void to_json(ordered_json& j, std::variant<T1, T2> const& value) {
+    switch (value.index()) {
+      case 0:
+        j = ordered_json{ {"T1", std::get<T1>(value)} };
+        break;
+      case 1:
+        j = ordered_json{ {"T2", std::get<T2>(value)} };
+        break;
+      default:
+        throw std::runtime_error("Invalid union value");
+    }
+  }
+
+  [[maybe_unused]] static void from_json(ordered_json const& j, std::variant<T1, T2>& value) {
+    auto it = j.begin();
+    std::string tag = it.key();
+    if (tag == "T1") {
+      value = it.value().get<T1>();
+      return;
+    }
+    if (tag == "T2") {
+      value = it.value().get<T2>();
+      return;
+    }
+  }
+};
+
+template <typename T1>
+struct adl_serializer<std::variant<T1, float>> {
+  [[maybe_unused]] static void to_json(ordered_json& j, std::variant<T1, float> const& value) {
+    std::visit([&j](auto const& v) {j = v;}, value);
+  }
+
+  [[maybe_unused]] static void from_json(ordered_json const& j, std::variant<T1, float>& value) {
+    if ((j.is_object())) {
+      value = j.get<T1>();
+      return;
+    }
+    if ((j.is_number())) {
+      value = j.get<float>();
+      return;
+    }
+    throw std::runtime_error("Invalid union value");
+  }
+};
+
+template <>
+struct adl_serializer<std::variant<evo_test::GenericRecord<int32_t, std::string>, float>> {
+  [[maybe_unused]] static void to_json(ordered_json& j, std::variant<evo_test::GenericRecord<int32_t, std::string>, float> const& value) {
+    std::visit([&j](auto const& v) {j = v;}, value);
+  }
+
+  [[maybe_unused]] static void from_json(ordered_json const& j, std::variant<evo_test::GenericRecord<int32_t, std::string>, float>& value) {
+    if ((j.is_object())) {
+      value = j.get<evo_test::GenericRecord<int32_t, std::string>>();
+      return;
+    }
+    if ((j.is_number())) {
+      value = j.get<float>();
+      return;
+    }
+    throw std::runtime_error("Invalid union value");
+  }
+};
+
+template <>
+struct adl_serializer<std::variant<evo_test::GenericRecord<int32_t, std::string>, std::string>> {
+  [[maybe_unused]] static void to_json(ordered_json& j, std::variant<evo_test::GenericRecord<int32_t, std::string>, std::string> const& value) {
+    std::visit([&j](auto const& v) {j = v;}, value);
+  }
+
+  [[maybe_unused]] static void from_json(ordered_json const& j, std::variant<evo_test::GenericRecord<int32_t, std::string>, std::string>& value) {
+    if ((j.is_object())) {
+      value = j.get<evo_test::GenericRecord<int32_t, std::string>>();
       return;
     }
     if ((j.is_string())) {
@@ -167,25 +292,6 @@ struct adl_serializer<std::variant<std::monostate, evo_test::RecordWithChanges, 
 };
 
 template <>
-struct adl_serializer<std::variant<evo_test::RecordWithChanges, int32_t>> {
-  [[maybe_unused]] static void to_json(ordered_json& j, std::variant<evo_test::RecordWithChanges, int32_t> const& value) {
-    std::visit([&j](auto const& v) {j = v;}, value);
-  }
-
-  [[maybe_unused]] static void from_json(ordered_json const& j, std::variant<evo_test::RecordWithChanges, int32_t>& value) {
-    if ((j.is_object())) {
-      value = j.get<evo_test::RecordWithChanges>();
-      return;
-    }
-    if ((j.is_number())) {
-      value = j.get<int32_t>();
-      return;
-    }
-    throw std::runtime_error("Invalid union value");
-  }
-};
-
-template <>
 struct adl_serializer<std::variant<float, evo_test::RecordWithChanges, std::string, int32_t>> {
   [[maybe_unused]] static void to_json(ordered_json& j, std::variant<float, evo_test::RecordWithChanges, std::string, int32_t> const& value) {
     switch (value.index()) {
@@ -266,6 +372,35 @@ struct adl_serializer<std::variant<evo_test::RecordWithChanges, int32_t, float, 
     }
     if (tag == "string") {
       value = it.value().get<std::string>();
+      return;
+    }
+  }
+};
+
+template <>
+struct adl_serializer<std::variant<int32_t, float>> {
+  [[maybe_unused]] static void to_json(ordered_json& j, std::variant<int32_t, float> const& value) {
+    switch (value.index()) {
+      case 0:
+        j = ordered_json{ {"T1", std::get<int32_t>(value)} };
+        break;
+      case 1:
+        j = ordered_json{ {"T2", std::get<float>(value)} };
+        break;
+      default:
+        throw std::runtime_error("Invalid union value");
+    }
+  }
+
+  [[maybe_unused]] static void from_json(ordered_json const& j, std::variant<int32_t, float>& value) {
+    auto it = j.begin();
+    std::string tag = it.key();
+    if (tag == "T1") {
+      value = it.value().get<int32_t>();
+      return;
+    }
+    if (tag == "T2") {
+      value = it.value().get<float>();
       return;
     }
   }
@@ -380,6 +515,96 @@ using ordered_json = nlohmann::ordered_json;
   }
   if (auto it = j.find("name"); it != j.end()) {
     it->get_to(value.name);
+  }
+}
+
+template <typename T1, typename T2>
+[[maybe_unused]] static void to_json(ordered_json& j, evo_test::GenericRecord<T1, T2> const& value) {
+  j = ordered_json::object();
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.field_2)) {
+    j.push_back({"field2", value.field_2});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.field_1)) {
+    j.push_back({"field1", value.field_1});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.added)) {
+    j.push_back({"added", value.added});
+  }
+}
+
+template <typename T1, typename T2>
+[[maybe_unused]] static void from_json(ordered_json const& j, evo_test::GenericRecord<T1, T2>& value) {
+  if (auto it = j.find("field2"); it != j.end()) {
+    it->get_to(value.field_2);
+  }
+  if (auto it = j.find("field1"); it != j.end()) {
+    it->get_to(value.field_1);
+  }
+  if (auto it = j.find("added"); it != j.end()) {
+    it->get_to(value.added);
+  }
+}
+
+template <typename T>
+[[maybe_unused]] static void to_json(ordered_json& j, evo_test::GenericParentRecord<T> const& value) {
+  j = ordered_json::object();
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.record)) {
+    j.push_back({"record", value.record});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.record_of_union)) {
+    j.push_back({"recordOfUnion", value.record_of_union});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.union_of_record)) {
+    j.push_back({"unionOfRecord", value.union_of_record});
+  }
+}
+
+template <typename T>
+[[maybe_unused]] static void from_json(ordered_json const& j, evo_test::GenericParentRecord<T>& value) {
+  if (auto it = j.find("record"); it != j.end()) {
+    it->get_to(value.record);
+  }
+  if (auto it = j.find("recordOfUnion"); it != j.end()) {
+    it->get_to(value.record_of_union);
+  }
+  if (auto it = j.find("unionOfRecord"); it != j.end()) {
+    it->get_to(value.union_of_record);
+  }
+}
+
+template <typename T2>
+[[maybe_unused]] static void to_json(ordered_json& j, evo_test::OldUnchangedGeneric<T2> const& value) {
+  j = ordered_json::object();
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.field)) {
+    j.push_back({"field", value.field});
+  }
+}
+
+template <typename T2>
+[[maybe_unused]] static void from_json(ordered_json const& j, evo_test::OldUnchangedGeneric<T2>& value) {
+  if (auto it = j.find("field"); it != j.end()) {
+    it->get_to(value.field);
+  }
+}
+
+template <typename Y, typename Z>
+[[maybe_unused]] static void to_json(ordered_json& j, evo_test::OldChangedGeneric<Y, Z> const& value) {
+  j = ordered_json::object();
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.y)) {
+    j.push_back({"y", value.y});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.z)) {
+    j.push_back({"z", value.z});
+  }
+}
+
+template <typename Y, typename Z>
+[[maybe_unused]] static void from_json(ordered_json const& j, evo_test::OldChangedGeneric<Y, Z>& value) {
+  if (auto it = j.find("y"); it != j.end()) {
+    it->get_to(value.y);
+  }
+  if (auto it = j.find("z"); it != j.end()) {
+    it->get_to(value.z);
   }
 }
 
@@ -673,6 +898,70 @@ void ProtocolWithChangesWriter::WriteRecordToUnionImpl(std::variant<evo_test::Re
 void ProtocolWithChangesWriter::WriteRecordToAliasedUnionImpl(evo_test::AliasedRecordOrString const& value) {
   ordered_json json_value = value;
   yardl::ndjson::WriteProtocolValue(stream_, "recordToAliasedUnion", json_value);}
+
+void ProtocolWithChangesWriter::WriteUnionToAliasedUnionImpl(evo_test::AliasedRecordOrInt const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "unionToAliasedUnion", json_value);}
+
+void ProtocolWithChangesWriter::WriteUnionToAliasedUnionWithChangesImpl(evo_test::AliasedRecordOrString const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "unionToAliasedUnionWithChanges", json_value);}
+
+void ProtocolWithChangesWriter::WriteOptionalToAliasedOptionalImpl(evo_test::AliasedOptionalRecord const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "optionalToAliasedOptional", json_value);}
+
+void ProtocolWithChangesWriter::WriteOptionalToAliasedOptionalWithChangesImpl(evo_test::AliasedOptionalString const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "optionalToAliasedOptionalWithChanges", json_value);}
+
+void ProtocolWithChangesWriter::WriteGenericRecordImpl(evo_test::GenericRecord<int32_t, std::string> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "genericRecord", json_value);}
+
+void ProtocolWithChangesWriter::WriteGenericRecordToOpenAliasImpl(evo_test::AliasedOpenGenericRecord<int32_t, std::string> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "genericRecordToOpenAlias", json_value);}
+
+void ProtocolWithChangesWriter::WriteGenericRecordToClosedAliasImpl(evo_test::AliasedClosedGenericRecord const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "genericRecordToClosedAlias", json_value);}
+
+void ProtocolWithChangesWriter::WriteGenericRecordToHalfClosedAliasImpl(evo_test::AliasedHalfClosedGenericRecord<int32_t> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "genericRecordToHalfClosedAlias", json_value);}
+
+void ProtocolWithChangesWriter::WriteAliasedGenericRecordToAliasImpl(evo_test::AliasedOpenGenericRecord<int32_t, std::string> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "aliasedGenericRecordToAlias", json_value);}
+
+void ProtocolWithChangesWriter::WriteClosedGenericRecordToUnionImpl(std::variant<evo_test::GenericRecord<int32_t, std::string>, std::string> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "closedGenericRecordToUnion", json_value);}
+
+void ProtocolWithChangesWriter::WriteGenericRecordToAliasedUnionImpl(evo_test::AliasedGenericRecordOrString const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "genericRecordToAliasedUnion", json_value);}
+
+void ProtocolWithChangesWriter::WriteGenericUnionOfChangedRecordImpl(evo_test::GenericUnion<evo_test::GenericRecord<int32_t, std::string>, float> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "genericUnionOfChangedRecord", json_value);}
+
+void ProtocolWithChangesWriter::WriteGenericParentRecordImpl(evo_test::GenericParentRecord<int32_t> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "genericParentRecord", json_value);}
+
+void ProtocolWithChangesWriter::WriteGenericNestedRecordsImpl(evo_test::GenericRecord<evo_test::Unchanged, evo_test::Changed> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "genericNestedRecords", json_value);}
+
+void ProtocolWithChangesWriter::WriteGenericRecordStreamImpl(evo_test::AliasedClosedGenericRecord const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "genericRecordStream", json_value);}
+
+void ProtocolWithChangesWriter::WriteGenericParentRecordStreamImpl(evo_test::GenericParentRecord<int32_t> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "genericParentRecordStream", json_value);}
 
 void ProtocolWithChangesWriter::WriteVectorRecordWithChangesImpl(std::vector<evo_test::RecordWithChanges> const& value) {
   ordered_json json_value = value;
@@ -988,6 +1277,70 @@ void ProtocolWithChangesReader::ReadRecordToUnionImpl(std::variant<evo_test::Rec
 
 void ProtocolWithChangesReader::ReadRecordToAliasedUnionImpl(evo_test::AliasedRecordOrString& value) {
   yardl::ndjson::ReadProtocolValue(stream_, line_, "recordToAliasedUnion", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadUnionToAliasedUnionImpl(evo_test::AliasedRecordOrInt& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "unionToAliasedUnion", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadUnionToAliasedUnionWithChangesImpl(evo_test::AliasedRecordOrString& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "unionToAliasedUnionWithChanges", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadOptionalToAliasedOptionalImpl(evo_test::AliasedOptionalRecord& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "optionalToAliasedOptional", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadOptionalToAliasedOptionalWithChangesImpl(evo_test::AliasedOptionalString& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "optionalToAliasedOptionalWithChanges", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadGenericRecordImpl(evo_test::GenericRecord<int32_t, std::string>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "genericRecord", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadGenericRecordToOpenAliasImpl(evo_test::AliasedOpenGenericRecord<int32_t, std::string>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "genericRecordToOpenAlias", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadGenericRecordToClosedAliasImpl(evo_test::AliasedClosedGenericRecord& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "genericRecordToClosedAlias", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadGenericRecordToHalfClosedAliasImpl(evo_test::AliasedHalfClosedGenericRecord<int32_t>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "genericRecordToHalfClosedAlias", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadAliasedGenericRecordToAliasImpl(evo_test::AliasedOpenGenericRecord<int32_t, std::string>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "aliasedGenericRecordToAlias", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadClosedGenericRecordToUnionImpl(std::variant<evo_test::GenericRecord<int32_t, std::string>, std::string>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "closedGenericRecordToUnion", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadGenericRecordToAliasedUnionImpl(evo_test::AliasedGenericRecordOrString& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "genericRecordToAliasedUnion", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadGenericUnionOfChangedRecordImpl(evo_test::GenericUnion<evo_test::GenericRecord<int32_t, std::string>, float>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "genericUnionOfChangedRecord", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadGenericParentRecordImpl(evo_test::GenericParentRecord<int32_t>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "genericParentRecord", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadGenericNestedRecordsImpl(evo_test::GenericRecord<evo_test::Unchanged, evo_test::Changed>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "genericNestedRecords", true, unused_step_, value);
+}
+
+bool ProtocolWithChangesReader::ReadGenericRecordStreamImpl(evo_test::AliasedClosedGenericRecord& value) {
+  return yardl::ndjson::ReadProtocolValue(stream_, line_, "genericRecordStream", false, unused_step_, value);
+}
+
+bool ProtocolWithChangesReader::ReadGenericParentRecordStreamImpl(evo_test::GenericParentRecord<int32_t>& value) {
+  return yardl::ndjson::ReadProtocolValue(stream_, line_, "genericParentRecordStream", false, unused_step_, value);
 }
 
 void ProtocolWithChangesReader::ReadVectorRecordWithChangesImpl(std::vector<evo_test::RecordWithChanges>& value) {
