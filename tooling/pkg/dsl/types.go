@@ -79,13 +79,13 @@ func (st SymbolTable) Clone() SymbolTable {
 }
 
 type Namespace struct {
-	Name            string                        `json:"name"`
-	TypeDefinitions TypeDefinitions               `json:"types,omitempty"`
-	Protocols       []*ProtocolDefinition         `json:"protocols,omitempty"`
-	Versions        []string                      `json:"-"`
-	TypeDefChanges  map[string][]DefinitionChange `json:"-"`
-	References      []*Namespace                  `json:"-"`
-	IsTopLevel      bool                          `json:"-"`
+	Name              string                        `json:"name"`
+	TypeDefinitions   TypeDefinitions               `json:"types,omitempty"`
+	Protocols         []*ProtocolDefinition         `json:"protocols,omitempty"`
+	Versions          []string                      `json:"-"`
+	DefinitionChanges map[string][]DefinitionChange `json:"-"`
+	References        []*Namespace                  `json:"-"`
+	IsTopLevel        bool                          `json:"-"`
 }
 
 func (n *Namespace) GetNodeMeta() *NodeMeta {

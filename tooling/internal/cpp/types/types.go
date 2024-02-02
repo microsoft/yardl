@@ -199,9 +199,9 @@ func writeNamespaceMembers(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 
 	// Write "compatibility" aliases for TypeDefinitions with changed names
 	for _, versionLabel := range ns.Versions {
-		if len(ns.TypeDefChanges[versionLabel]) > 0 {
+		if len(ns.DefinitionChanges[versionLabel]) > 0 {
 			fmt.Fprintf(w, "// Compatibility aliases for version %s.\n\n", versionLabel)
-			for _, ch := range ns.TypeDefChanges[versionLabel] {
+			for _, ch := range ns.DefinitionChanges[versionLabel] {
 				writeCompatibilityAliasDefinition(w, ch)
 			}
 		}

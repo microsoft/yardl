@@ -284,7 +284,7 @@ func collectUnionArities(env *dsl.Environment) []int {
 
 		case *dsl.Namespace:
 			for _, v := range t.Versions {
-				for _, change := range t.TypeDefChanges[v] {
+				for _, change := range t.DefinitionChanges[v] {
 					if change == nil {
 						continue
 					}
@@ -415,7 +415,7 @@ func writeNamespaceDefinitions(w *formatting.IndentedWriter, ns *dsl.Namespace) 
 		}
 
 		for _, versionLabel := range ns.Versions {
-			for _, change := range ns.TypeDefChanges[versionLabel] {
+			for _, change := range ns.DefinitionChanges[versionLabel] {
 				writeCompatibilitySerializers(w, change, versionLabel)
 			}
 		}
