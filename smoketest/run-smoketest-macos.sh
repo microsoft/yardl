@@ -25,7 +25,7 @@ pip3 install numpy
 python3 python/run_smoketest.py
 
 # Verify C++
-brew install hdf5@1.10 xtensor howard-hinnant-date nlohmann-json --verbose
+brew install hdf5 xtensor howard-hinnant-date nlohmann-json cmake --verbose
 
 cd cpp
 rm -rf build
