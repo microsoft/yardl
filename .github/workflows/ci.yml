@@ -82,6 +82,7 @@ jobs:
 
   smoketestMac:
     name: Run smoke test on macOS
+    if: false # Disabling until this is fixed: https://github.com/Homebrew/homebrew-core/issues/159691
     runs-on: macos-latest
     needs: buildBinaries
     steps:
