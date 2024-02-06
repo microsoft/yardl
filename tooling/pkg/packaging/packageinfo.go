@@ -27,8 +27,8 @@ type PackageInfo struct {
 	FilePath  string `yaml:"-"`
 	Namespace string `yaml:"namespace"`
 
-	Predecessors Predecessors `yaml:"predecessors,omitempty"`
-	Imports      Imports      `yaml:"imports,omitempty"`
+	Versions Predecessors `yaml:"versions,omitempty"`
+	Imports  Imports      `yaml:"imports,omitempty"`
 
 	Json   *JsonCodegenOptions   `yaml:"json,omitempty"`
 	Cpp    *CppCodegenOptions    `yaml:"cpp,omitempty"`
@@ -65,11 +65,11 @@ func (p *PackageInfo) validate() error {
 		errorSink.Add(validation.NewValidationError(fmt.Errorf("the 'namespace' field must be PascalCased and match the format %s", namespaceNameRegex.String()), p.FilePath))
 	}
 
-	for _, pred := range p.Predecessors {
+	for _, pred := range p.Versions {
 		if pred.Label == "" {
-			errorSink.Add(validation.NewValidationError(errors.New("the predecessor label is missing"), p.FilePath))
+			errorSink.Add(validation.NewValidationError(errors.New("the version label is missing"), p.FilePath))
 		} else if !versionLabelRegex.MatchString(pred.Label) {
-			errorSink.Add(validation.NewValidationError(fmt.Errorf("the predecessor label '%s' must match the format %s", pred.Label, versionLabelRegex.String()), p.FilePath))
+			errorSink.Add(validation.NewValidationError(fmt.Errorf("the version label '%s' must match the format %s", pred.Label, versionLabelRegex.String()), p.FilePath))
 		}
 	}
 
@@ -140,17 +140,17 @@ func (preds *Predecessors) UnmarshalYAML(value *yaml.Node) error {
 	unpacked := []*Predecessor(*preds)
 
 	if value.Tag != "!!map" {
-		return fmt.Errorf("expected predecessor map")
+		return fmt.Errorf("expected versions map")
 	}
 
 	for i := 0; i < len(value.Content); i += 2 {
 		predKey := value.Content[i]
 		predValue := value.Content[i+1]
 		if predKey.Tag != "!!str" {
-			return fmt.Errorf("expected predecessor label to be a string")
+			return fmt.Errorf("expected version label to be a string")
 		}
 		if predValue.Tag != "!!str" {
-			return fmt.Errorf("expected predecessor url to be a string")
+			return fmt.Errorf("expected version url to be a string")
 		}
 
 		unpacked = append(unpacked, &Predecessor{Label: predKey.Value, Url: predValue.Value})
@@ -212,7 +212,7 @@ func LoadPackage(dir string) (*PackageInfo, error) {
 			return packageInfo, err
 		}
 
-		packageInfo.Predecessors[i].Package = predecessorInfo
+		packageInfo.Versions[i].Package = predecessorInfo
 	}
 
 	return packageInfo, nil
@@ -325,13 +325,13 @@ func collectPackages(parentDir string, alreadyCollected map[string]*PackageInfo,
 
 // Fetch and cache each predecessor package in pkgInfo.Predecessors
 func collectPredecessors(pkgInfo *PackageInfo) ([]string, error) {
-	if len(pkgInfo.Predecessors) <= 0 {
+	if len(pkgInfo.Versions) <= 0 {
 		return nil, nil
 	}
 
-	log.Info().Msgf("Collecting predecessors for %v", pkgInfo.PackageDir())
+	log.Info().Msgf("Collecting previous versions for %v", pkgInfo.PackageDir())
 	var predecessorUrls []string
-	for _, pred := range pkgInfo.Predecessors {
+	for _, pred := range pkgInfo.Versions {
 		predecessorUrls = append(predecessorUrls, pred.Url)
 	}
 	dirs, err := fetchAndCachePackages(pkgInfo.PackageDir(), predecessorUrls)

@@ -98,11 +98,6 @@ P: !protocol
 	assert.NotNil(t, err)
 }
 
-func TestRecordChanges(t *testing.T) {
-	// All RecordDefinition changes are "valid" but some may produce Warnings
-	// TOOD: Mechanism for testing warnings (i.e. return them and log at top-level instead of logging them within evolution.go)
-}
-
 func TestEnumChanges(t *testing.T) {
 	models := []string{`
 X: !enum

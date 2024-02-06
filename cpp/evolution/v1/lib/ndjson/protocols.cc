@@ -84,6 +84,35 @@ struct adl_serializer<std::variant<evo_test::RecordWithChanges, std::string>> {
 };
 
 template <>
+struct adl_serializer<std::variant<evo_test::RecordWithChanges, evo_test::RenamedRecord>> {
+  [[maybe_unused]] static void to_json(ordered_json& j, std::variant<evo_test::RecordWithChanges, evo_test::RenamedRecord> const& value) {
+    switch (value.index()) {
+      case 0:
+        j = ordered_json{ {"RecordWithChanges", std::get<evo_test::RecordWithChanges>(value)} };
+        break;
+      case 1:
+        j = ordered_json{ {"RenamedRecord", std::get<evo_test::RenamedRecord>(value)} };
+        break;
+      default:
+        throw std::runtime_error("Invalid union value");
+    }
+  }
+
+  [[maybe_unused]] static void from_json(ordered_json const& j, std::variant<evo_test::RecordWithChanges, evo_test::RenamedRecord>& value) {
+    auto it = j.begin();
+    std::string tag = it.key();
+    if (tag == "RecordWithChanges") {
+      value = it.value().get<evo_test::RecordWithChanges>();
+      return;
+    }
+    if (tag == "RenamedRecord") {
+      value = it.value().get<evo_test::RenamedRecord>();
+      return;
+    }
+  }
+};
+
+template <>
 struct adl_serializer<std::variant<evo_test::RX, std::string>> {
   [[maybe_unused]] static void to_json(ordered_json& j, std::variant<evo_test::RX, std::string> const& value) {
     std::visit([&j](auto const& v) {j = v;}, value);
@@ -763,6 +792,10 @@ void ProtocolWithChangesWriter::WriteRecordToAliasedAliasImpl(evo_test::AliasOfA
   ordered_json json_value = value;
   yardl::ndjson::WriteProtocolValue(stream_, "recordToAliasedAlias", json_value);}
 
+void ProtocolWithChangesWriter::WriteStreamOfAliasTypeChangeImpl(evo_test::StreamItem const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "streamOfAliasTypeChange", json_value);}
+
 void ProtocolWithChangesWriter::WriteRlinkImpl(evo_test::RLink const& value) {
   ordered_json json_value = value;
   yardl::ndjson::WriteProtocolValue(stream_, "rlink", json_value);}
@@ -1141,6 +1174,10 @@ void ProtocolWithChangesReader::ReadRecordToAliasedRecordImpl(evo_test::AliasedR
 
 void ProtocolWithChangesReader::ReadRecordToAliasedAliasImpl(evo_test::AliasOfAliasedRecordWithChanges& value) {
   yardl::ndjson::ReadProtocolValue(stream_, line_, "recordToAliasedAlias", true, unused_step_, value);
+}
+
+bool ProtocolWithChangesReader::ReadStreamOfAliasTypeChangeImpl(evo_test::StreamItem& value) {
+  return yardl::ndjson::ReadProtocolValue(stream_, line_, "streamOfAliasTypeChange", false, unused_step_, value);
 }
 
 void ProtocolWithChangesReader::ReadRlinkImpl(evo_test::RLink& value) {

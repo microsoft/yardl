@@ -649,6 +649,10 @@ void ProtocolWithChangesWriter::WriteRecordToAliasedAliasImpl(evo_test::RecordWi
   ordered_json json_value = value;
   yardl::ndjson::WriteProtocolValue(stream_, "recordToAliasedAlias", json_value);}
 
+void ProtocolWithChangesWriter::WriteStreamOfAliasTypeChangeImpl(evo_test::StreamItem const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "streamOfAliasTypeChange", json_value);}
+
 void ProtocolWithChangesWriter::WriteRlinkImpl(evo_test::RLink const& value) {
   ordered_json json_value = value;
   yardl::ndjson::WriteProtocolValue(stream_, "rlink", json_value);}
@@ -1039,6 +1043,10 @@ void ProtocolWithChangesReader::ReadRecordToAliasedRecordImpl(evo_test::RecordWi
 
 void ProtocolWithChangesReader::ReadRecordToAliasedAliasImpl(evo_test::RecordWithChanges& value) {
   yardl::ndjson::ReadProtocolValue(stream_, line_, "recordToAliasedAlias", true, unused_step_, value);
+}
+
+bool ProtocolWithChangesReader::ReadStreamOfAliasTypeChangeImpl(evo_test::StreamItem& value) {
+  return yardl::ndjson::ReadProtocolValue(stream_, line_, "streamOfAliasTypeChange", false, unused_step_, value);
 }
 
 void ProtocolWithChangesReader::ReadRlinkImpl(evo_test::RLink& value) {

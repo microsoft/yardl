@@ -79,6 +79,8 @@ struct DeprecatedRecord {
 
 using RenamedRecord = evo_test::DeprecatedRecord;
 
+using StreamItem = std::variant<evo_test::RecordWithChanges, evo_test::RenamedRecord>;
+
 struct RZ {
   int32_t subject{};
 
@@ -214,9 +216,11 @@ using AliasedLongToString_v0 = evo_test::AliasedLongToString;
 
 using RecordWithChanges_v0 = evo_test::RecordWithChanges;
 
-using AliasedRecordWithChanges_v0 = evo_test::RecordWithChanges;
+using AliasedRecordWithChanges_v0 = evo_test::AliasedRecordWithChanges;
 
 using RenamedRecord_v0 = evo_test::DeprecatedRecord;
+
+using StreamItem_v0 = evo_test::StreamItem;
 
 using RC_v0 = evo_test::RZ;
 
@@ -224,7 +228,7 @@ using RB_v0 = evo_test::RZ;
 
 using RA_v0 = evo_test::RZ;
 
-using RLink_v0 = evo_test::RZ;
+using RLink_v0 = evo_test::RLink;
 
 using UnusedButChangedRecord_v0 = evo_test::UnusedButChangedRecord;
 
@@ -237,9 +241,9 @@ using GenericParentRecord_v0 = evo_test::GenericParentRecord<T>;
 using AliasedClosedGenericUnion_v0 = evo_test::AliasedClosedGenericUnion;
 
 template <typename T>
-using AliasedHalfClosedGenericRecord_v0 = evo_test::GenericRecord<T, std::string>;
+using AliasedHalfClosedGenericRecord_v0 = evo_test::AliasedHalfClosedGenericRecord<T>;
 
-using AliasedClosedGenericRecord_v0 = evo_test::GenericRecord<int32_t, std::string>;
+using AliasedClosedGenericRecord_v0 = evo_test::AliasedClosedGenericRecord;
 
 template <typename Y, typename Z>
 using ChangedGeneric_v0 = evo_test::OldChangedGeneric<Y, Z>;

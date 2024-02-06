@@ -69,6 +69,8 @@ struct RenamedRecord {
   }
 };
 
+using StreamItem = evo_test::RecordWithChanges;
+
 struct RC {
   std::string subject{};
 

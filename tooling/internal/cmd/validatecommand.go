@@ -62,7 +62,7 @@ func validatePackage(packageInfo *packaging.PackageInfo) (*dsl.Environment, erro
 
 	var predecessors []*dsl.Environment
 	var labels []string
-	for _, predecessor := range packageInfo.Predecessors {
+	for _, predecessor := range packageInfo.Versions {
 		for _, label := range labels {
 			if label == predecessor.Label {
 				return env, fmt.Errorf("duplicate predecessor label %s", predecessor.Label)

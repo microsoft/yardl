@@ -94,6 +94,10 @@ class ProtocolWithChangesWriter : public evo_test::ProtocolWithChangesWriterBase
 
   void WriteRecordToAliasedAliasImpl(evo_test::AliasOfAliasedRecordWithChanges const& value) override;
 
+  void WriteStreamOfAliasTypeChangeImpl(evo_test::StreamItem const& value) override;
+
+  void EndStreamOfAliasTypeChangeImpl() override;
+
   void WriteRlinkImpl(evo_test::RLink const& value) override;
 
   void WriteRlinkRXImpl(evo_test::RX const& value) override;
@@ -220,7 +224,11 @@ class ProtocolWithChangesWriter : public evo_test::ProtocolWithChangesWriterBase
 
   void EndAddedRecordStreamImpl() override;
 
+  public:
+  void Flush() override;
+
   private:
+  std::unique_ptr<yardl::hdf5::UnionDatasetWriter<2>> streamOfAliasTypeChange_dataset_state_;
   std::unique_ptr<yardl::hdf5::DatasetWriter> genericRecordStream_dataset_state_;
   std::unique_ptr<yardl::hdf5::DatasetWriter> genericParentRecordStream_dataset_state_;
   std::unique_ptr<yardl::hdf5::DatasetWriter> streamedRecordWithChanges_dataset_state_;
@@ -307,6 +315,8 @@ class ProtocolWithChangesReader : public evo_test::ProtocolWithChangesReaderBase
   void ReadRecordToAliasedRecordImpl(evo_test::AliasedRecordWithChanges& value) override;
 
   void ReadRecordToAliasedAliasImpl(evo_test::AliasOfAliasedRecordWithChanges& value) override;
+
+  bool ReadStreamOfAliasTypeChangeImpl(evo_test::StreamItem& value) override;
 
   void ReadRlinkImpl(evo_test::RLink& value) override;
 
@@ -427,6 +437,7 @@ class ProtocolWithChangesReader : public evo_test::ProtocolWithChangesReaderBase
   bool ReadAddedRecordStreamImpl(std::vector<evo_test::RecordWithChanges>& values) override;
 
   private:
+  std::unique_ptr<yardl::hdf5::UnionDatasetReader<2>> streamOfAliasTypeChange_dataset_state_;
   std::unique_ptr<yardl::hdf5::DatasetReader> genericRecordStream_dataset_state_;
   std::unique_ptr<yardl::hdf5::DatasetReader> genericParentRecordStream_dataset_state_;
   std::unique_ptr<yardl::hdf5::DatasetReader> streamedRecordWithChanges_dataset_state_;

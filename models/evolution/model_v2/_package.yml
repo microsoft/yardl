@@ -1,6 +1,6 @@
 namespace: EvoTest
 
-predecessors:
+versions:
   v0: ../model_v0
   v1: ../model_v1
 

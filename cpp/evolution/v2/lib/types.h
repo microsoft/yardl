@@ -71,6 +71,8 @@ struct RenamedRecord {
   }
 };
 
+using StreamItem = evo_test::RecordWithChanges;
+
 struct RC {
   std::string subject{};
 
@@ -184,7 +186,7 @@ using AliasedLongToString_v1 = evo_test::AliasedLongToString;
 
 using RecordWithChanges_v1 = evo_test::RecordWithChanges;
 
-using AliasedRecordWithChanges_v1 = evo_test::RecordWithChanges;
+using AliasedRecordWithChanges_v1 = evo_test::AliasedRecordWithChanges;
 
 using AliasOfAliasedRecordWithChanges_v1 = evo_test::RecordWithChanges;
 
@@ -192,13 +194,15 @@ using DeprecatedRecord_v1 = evo_test::RenamedRecord;
 
 using RenamedRecord_v1 = evo_test::RenamedRecord;
 
+using StreamItem_v1 = evo_test::StreamItem;
+
 using RZ_v1 = evo_test::RC;
 
 using RY_v1 = evo_test::RC;
 
 using RNew_v1 = evo_test::RC;
 
-using RLink_v1 = evo_test::RC;
+using RLink_v1 = evo_test::RLink;
 
 using RX_v1 = evo_test::RC;
 
@@ -211,7 +215,7 @@ template <typename A, typename B>
 using AliasedOpenGenericRecord_v1 = evo_test::GenericRecord<A, B>;
 
 template <typename T>
-using AliasedHalfClosedGenericRecord_v1 = evo_test::GenericRecord<T, std::string>;
+using AliasedHalfClosedGenericRecord_v1 = evo_test::AliasedHalfClosedGenericRecord<T>;
 
 template <typename A, typename B>
 using AliasedOpenGenericUnion_v1 = evo_test::GenericUnion<A, B>;
@@ -221,7 +225,7 @@ using AliasedClosedGenericUnion_v1 = evo_test::AliasedClosedGenericUnion;
 template <typename T>
 using GenericParentRecord_v1 = evo_test::GenericParentRecord<T>;
 
-using AliasedClosedGenericRecord_v1 = evo_test::GenericRecord<int32_t, std::string>;
+using AliasedClosedGenericRecord_v1 = evo_test::AliasedClosedGenericRecord;
 
 template <typename T2>
 using OldUnchangedGeneric_v1 = evo_test::UnchangedGeneric<T2>;

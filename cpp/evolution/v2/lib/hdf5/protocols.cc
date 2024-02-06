@@ -646,6 +646,30 @@ void ProtocolWithChangesWriter::WriteRecordToAliasedAliasImpl(evo_test::RecordWi
   yardl::hdf5::WriteScalarDataset<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges>(group_, "recordToAliasedAlias", evo_test::hdf5::GetRecordWithChangesHdf5Ddl(), value);
 }
 
+void ProtocolWithChangesWriter::WriteStreamOfAliasTypeChangeImpl(evo_test::StreamItem const& value) {
+  if (!streamOfAliasTypeChange_dataset_state_) {
+    streamOfAliasTypeChange_dataset_state_ = std::make_unique<yardl::hdf5::DatasetWriter>(group_, "streamOfAliasTypeChange", evo_test::hdf5::GetRecordWithChangesHdf5Ddl(), std::max(sizeof(evo_test::hdf5::_Inner_RecordWithChanges), sizeof(evo_test::RecordWithChanges)));
+  }
+
+  streamOfAliasTypeChange_dataset_state_->Append<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::StreamItem>(value);
+}
+
+void ProtocolWithChangesWriter::WriteStreamOfAliasTypeChangeImpl(std::vector<evo_test::StreamItem> const& values) {
+  if (!streamOfAliasTypeChange_dataset_state_) {
+    streamOfAliasTypeChange_dataset_state_ = std::make_unique<yardl::hdf5::DatasetWriter>(group_, "streamOfAliasTypeChange", evo_test::hdf5::GetRecordWithChangesHdf5Ddl(), std::max(sizeof(evo_test::hdf5::_Inner_RecordWithChanges), sizeof(evo_test::RecordWithChanges)));
+  }
+
+  streamOfAliasTypeChange_dataset_state_->AppendBatch<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::StreamItem>(values);
+}
+
+void ProtocolWithChangesWriter::EndStreamOfAliasTypeChangeImpl() {
+  if (!streamOfAliasTypeChange_dataset_state_) {
+    streamOfAliasTypeChange_dataset_state_ = std::make_unique<yardl::hdf5::DatasetWriter>(group_, "streamOfAliasTypeChange", evo_test::hdf5::GetRecordWithChangesHdf5Ddl(), std::max(sizeof(evo_test::hdf5::_Inner_RecordWithChanges), sizeof(evo_test::RecordWithChanges)));
+  }
+
+  streamOfAliasTypeChange_dataset_state_.reset();
+}
+
 void ProtocolWithChangesWriter::WriteRlinkImpl(evo_test::RLink const& value) {
   yardl::hdf5::WriteScalarDataset<evo_test::hdf5::_Inner_RC, evo_test::RLink>(group_, "rlink", evo_test::hdf5::GetRCHdf5Ddl(), value);
 }
@@ -1141,6 +1165,32 @@ void ProtocolWithChangesReader::ReadRecordToAliasedRecordImpl(evo_test::RecordWi
 
 void ProtocolWithChangesReader::ReadRecordToAliasedAliasImpl(evo_test::RecordWithChanges& value) {
   yardl::hdf5::ReadScalarDataset<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges>(group_, "recordToAliasedAlias", evo_test::hdf5::GetRecordWithChangesHdf5Ddl(), value);
+}
+
+bool ProtocolWithChangesReader::ReadStreamOfAliasTypeChangeImpl(evo_test::StreamItem& value) {
+  if (!streamOfAliasTypeChange_dataset_state_) {
+    streamOfAliasTypeChange_dataset_state_ = std::make_unique<yardl::hdf5::DatasetReader>(group_, "streamOfAliasTypeChange", evo_test::hdf5::GetRecordWithChangesHdf5Ddl(), std::max(sizeof(evo_test::hdf5::_Inner_RecordWithChanges), sizeof(evo_test::RecordWithChanges)));
+  }
+
+  bool has_value = streamOfAliasTypeChange_dataset_state_->Read<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::StreamItem>(value);
+  if (!has_value) {
+    streamOfAliasTypeChange_dataset_state_.reset();
+  }
+
+  return has_value;
+}
+
+bool ProtocolWithChangesReader::ReadStreamOfAliasTypeChangeImpl(std::vector<evo_test::StreamItem>& values) {
+  if (!streamOfAliasTypeChange_dataset_state_) {
+    streamOfAliasTypeChange_dataset_state_ = std::make_unique<yardl::hdf5::DatasetReader>(group_, "streamOfAliasTypeChange", evo_test::hdf5::GetRecordWithChangesHdf5Ddl());
+  }
+
+  bool has_more = streamOfAliasTypeChange_dataset_state_->ReadBatch<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::StreamItem>(values);
+  if (!has_more) {
+    streamOfAliasTypeChange_dataset_state_.reset();
+  }
+
+  return has_more;
 }
 
 void ProtocolWithChangesReader::ReadRlinkImpl(evo_test::RLink& value) {

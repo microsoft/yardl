@@ -151,6 +151,14 @@ int main(void) {
   r.ReadRecordToAliasedAlias(rec);
   validateRecordWithChanges(rec);
 
+  std::vector<StreamItem> stream_items(10);
+  while (r.ReadStreamOfAliasTypeChange(stream_items)) {
+    EVO_ASSERT(stream_items.size() == 7);
+    for (auto const& item : stream_items) {
+      validateRecordWithChanges(item);
+    }
+  }
+
   RC record;
   r.ReadRlink(record);
   EVO_ASSERT(record.subject == "42");

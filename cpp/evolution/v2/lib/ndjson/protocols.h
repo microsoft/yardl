@@ -65,6 +65,8 @@ class ProtocolWithChangesWriter : public evo_test::ProtocolWithChangesWriterBase
   void WriteRecordToRenamedRecordImpl(evo_test::RenamedRecord const& value) override;
   void WriteRecordToAliasedRecordImpl(evo_test::RecordWithChanges const& value) override;
   void WriteRecordToAliasedAliasImpl(evo_test::RecordWithChanges const& value) override;
+  void WriteStreamOfAliasTypeChangeImpl(evo_test::StreamItem const& value) override;
+  void EndStreamOfAliasTypeChangeImpl() override {}
   // Comprehensive NamedType changes
   void WriteRlinkImpl(evo_test::RLink const& value) override;
   void WriteRlinkRXImpl(evo_test::RLink const& value) override;
@@ -182,6 +184,7 @@ class ProtocolWithChangesReader : public evo_test::ProtocolWithChangesReaderBase
   void ReadRecordToRenamedRecordImpl(evo_test::RenamedRecord& value) override;
   void ReadRecordToAliasedRecordImpl(evo_test::RecordWithChanges& value) override;
   void ReadRecordToAliasedAliasImpl(evo_test::RecordWithChanges& value) override;
+  bool ReadStreamOfAliasTypeChangeImpl(evo_test::StreamItem& value) override;
   void ReadRlinkImpl(evo_test::RLink& value) override;
   void ReadRlinkRXImpl(evo_test::RLink& value) override;
   void ReadRlinkRYImpl(evo_test::RLink& value) override;

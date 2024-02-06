@@ -73,6 +73,9 @@ int main(void) {
   w.WriteRecordToAliasedRecord(rec);
   w.WriteRecordToAliasedAlias(rec);
 
+  w.WriteStreamOfAliasTypeChange(std::vector<StreamItem>(7, rec));
+  w.EndStreamOfAliasTypeChange();
+
   RC record;
   record.subject = "42";
 

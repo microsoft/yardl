@@ -94,6 +94,12 @@ class ProtocolWithChangesWriter : public evo_test::ProtocolWithChangesWriterBase
 
   void WriteRecordToAliasedAliasImpl(evo_test::RecordWithChanges const& value) override;
 
+  void WriteStreamOfAliasTypeChangeImpl(evo_test::StreamItem const& value) override;
+
+  void WriteStreamOfAliasTypeChangeImpl(std::vector<evo_test::StreamItem> const& values) override;
+
+  void EndStreamOfAliasTypeChangeImpl() override;
+
   void WriteRlinkImpl(evo_test::RLink const& value) override;
 
   void WriteRlinkRXImpl(evo_test::RLink const& value) override;
@@ -211,6 +217,7 @@ class ProtocolWithChangesWriter : public evo_test::ProtocolWithChangesWriterBase
   void EndStreamedRecordWithChangesImpl() override;
 
   private:
+  std::unique_ptr<yardl::hdf5::DatasetWriter> streamOfAliasTypeChange_dataset_state_;
   std::unique_ptr<yardl::hdf5::DatasetWriter> genericRecordStream_dataset_state_;
   std::unique_ptr<yardl::hdf5::DatasetWriter> genericParentRecordStream_dataset_state_;
   std::unique_ptr<yardl::hdf5::DatasetWriter> streamedRecordWithChanges_dataset_state_;
@@ -296,6 +303,10 @@ class ProtocolWithChangesReader : public evo_test::ProtocolWithChangesReaderBase
   void ReadRecordToAliasedRecordImpl(evo_test::RecordWithChanges& value) override;
 
   void ReadRecordToAliasedAliasImpl(evo_test::RecordWithChanges& value) override;
+
+  bool ReadStreamOfAliasTypeChangeImpl(evo_test::StreamItem& value) override;
+
+  bool ReadStreamOfAliasTypeChangeImpl(std::vector<evo_test::StreamItem>& values) override;
 
   void ReadRlinkImpl(evo_test::RLink& value) override;
 
@@ -408,6 +419,7 @@ class ProtocolWithChangesReader : public evo_test::ProtocolWithChangesReaderBase
   bool ReadStreamedRecordWithChangesImpl(std::vector<evo_test::RecordWithChanges>& values) override;
 
   private:
+  std::unique_ptr<yardl::hdf5::DatasetReader> streamOfAliasTypeChange_dataset_state_;
   std::unique_ptr<yardl::hdf5::DatasetReader> genericRecordStream_dataset_state_;
   std::unique_ptr<yardl::hdf5::DatasetReader> genericParentRecordStream_dataset_state_;
   std::unique_ptr<yardl::hdf5::DatasetReader> streamedRecordWithChanges_dataset_state_;

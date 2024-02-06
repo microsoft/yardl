@@ -621,6 +621,33 @@ void ProtocolWithChangesWriter::WriteRecordToAliasedAliasImpl(evo_test::AliasOfA
   yardl::hdf5::WriteScalarDataset<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::AliasOfAliasedRecordWithChanges>(group_, "recordToAliasedAlias", evo_test::hdf5::GetRecordWithChangesHdf5Ddl(), value);
 }
 
+void ProtocolWithChangesWriter::WriteStreamOfAliasTypeChangeImpl(evo_test::StreamItem const& value) {
+  if (!streamOfAliasTypeChange_dataset_state_) {
+    streamOfAliasTypeChange_dataset_state_ = std::make_unique<yardl::hdf5::UnionDatasetWriter<2>>(group_, "streamOfAliasTypeChange", false, std::make_tuple(evo_test::hdf5::GetRecordWithChangesHdf5Ddl(), "RecordWithChanges", static_cast<size_t>(std::max(sizeof(::InnerUnion2<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges, evo_test::hdf5::_Inner_DeprecatedRecord, evo_test::RenamedRecord>), sizeof(std::variant<evo_test::RecordWithChanges, evo_test::RenamedRecord>)))), std::make_tuple(evo_test::hdf5::GetDeprecatedRecordHdf5Ddl(), "RenamedRecord", static_cast<size_t>(std::max(sizeof(::InnerUnion2<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges, evo_test::hdf5::_Inner_DeprecatedRecord, evo_test::RenamedRecord>), sizeof(std::variant<evo_test::RecordWithChanges, evo_test::RenamedRecord>)))));
+  }
+
+  std::visit(
+    [&](auto const& arg) {
+      using T = std::decay_t<decltype(arg)>;
+      if constexpr (std::is_same_v<T, evo_test::RecordWithChanges>) {
+        streamOfAliasTypeChange_dataset_state_->Append<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges>(static_cast<int8_t>(value.index()), arg);
+      } else if constexpr (std::is_same_v<T, evo_test::RenamedRecord>) {
+        streamOfAliasTypeChange_dataset_state_->Append<evo_test::hdf5::_Inner_DeprecatedRecord, evo_test::RenamedRecord>(static_cast<int8_t>(value.index()), arg);
+      } else {
+        static_assert(yardl::hdf5::always_false_v<T>, "non-exhaustive visitor!");
+      }
+    },
+    value);
+}
+
+void ProtocolWithChangesWriter::EndStreamOfAliasTypeChangeImpl() {
+  if (!streamOfAliasTypeChange_dataset_state_) {
+    streamOfAliasTypeChange_dataset_state_ = std::make_unique<yardl::hdf5::UnionDatasetWriter<2>>(group_, "streamOfAliasTypeChange", false, std::make_tuple(evo_test::hdf5::GetRecordWithChangesHdf5Ddl(), "RecordWithChanges", static_cast<size_t>(std::max(sizeof(::InnerUnion2<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges, evo_test::hdf5::_Inner_DeprecatedRecord, evo_test::RenamedRecord>), sizeof(std::variant<evo_test::RecordWithChanges, evo_test::RenamedRecord>)))), std::make_tuple(evo_test::hdf5::GetDeprecatedRecordHdf5Ddl(), "RenamedRecord", static_cast<size_t>(std::max(sizeof(::InnerUnion2<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges, evo_test::hdf5::_Inner_DeprecatedRecord, evo_test::RenamedRecord>), sizeof(std::variant<evo_test::RecordWithChanges, evo_test::RenamedRecord>)))));
+  }
+
+  streamOfAliasTypeChange_dataset_state_.reset();
+}
+
 void ProtocolWithChangesWriter::WriteRlinkImpl(evo_test::RLink const& value) {
   yardl::hdf5::WriteScalarDataset<evo_test::RZ, evo_test::RLink>(group_, "rlink", evo_test::hdf5::GetRZHdf5Ddl(), value);
 }
@@ -921,6 +948,12 @@ void ProtocolWithChangesWriter::EndAddedRecordStreamImpl() {
   addedRecordStream_dataset_state_.reset();
 }
 
+void ProtocolWithChangesWriter::Flush() {
+  if (streamOfAliasTypeChange_dataset_state_) {
+    streamOfAliasTypeChange_dataset_state_->Flush();
+  }
+}
+
 ProtocolWithChangesReader::ProtocolWithChangesReader(std::string path)
     : yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "ProtocolWithChanges", schema_) {
 }
@@ -1075,6 +1108,33 @@ void ProtocolWithChangesReader::ReadRecordToAliasedRecordImpl(evo_test::AliasedR
 
 void ProtocolWithChangesReader::ReadRecordToAliasedAliasImpl(evo_test::AliasOfAliasedRecordWithChanges& value) {
   yardl::hdf5::ReadScalarDataset<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::AliasOfAliasedRecordWithChanges>(group_, "recordToAliasedAlias", evo_test::hdf5::GetRecordWithChangesHdf5Ddl(), value);
+}
+
+bool ProtocolWithChangesReader::ReadStreamOfAliasTypeChangeImpl(evo_test::StreamItem& value) {
+  if (!streamOfAliasTypeChange_dataset_state_) {
+    streamOfAliasTypeChange_dataset_state_ = std::make_unique<yardl::hdf5::UnionDatasetReader<2>>(group_, "streamOfAliasTypeChange", false, std::make_tuple(evo_test::hdf5::GetRecordWithChangesHdf5Ddl(), "RecordWithChanges", static_cast<size_t>(std::max(sizeof(::InnerUnion2<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges, evo_test::hdf5::_Inner_DeprecatedRecord, evo_test::RenamedRecord>), sizeof(std::variant<evo_test::RecordWithChanges, evo_test::RenamedRecord>)))), std::make_tuple(evo_test::hdf5::GetDeprecatedRecordHdf5Ddl(), "RenamedRecord", static_cast<size_t>(std::max(sizeof(::InnerUnion2<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges, evo_test::hdf5::_Inner_DeprecatedRecord, evo_test::RenamedRecord>), sizeof(std::variant<evo_test::RecordWithChanges, evo_test::RenamedRecord>)))));
+  }
+
+  auto [has_result, type_index, reader] = streamOfAliasTypeChange_dataset_state_->ReadIndex();
+  if (!has_result) {
+    streamOfAliasTypeChange_dataset_state_.reset();
+    return false;
+  }
+
+  switch (type_index) {
+  case 0: {
+    evo_test::RecordWithChanges& ref = value.emplace<0>();
+    reader->Read<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges>(ref);
+    break;
+  }
+  case 1: {
+    evo_test::RenamedRecord& ref = value.emplace<1>();
+    reader->Read<evo_test::hdf5::_Inner_DeprecatedRecord, evo_test::RenamedRecord>(ref);
+    break;
+  }
+  }
+
+  return true;
 }
 
 void ProtocolWithChangesReader::ReadRlinkImpl(evo_test::RLink& value) {

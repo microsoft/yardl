@@ -48,6 +48,9 @@ ProtocolWithChanges: !protocol
     recordToAliasedRecord: RecordWithChanges
     recordToAliasedAlias: RecordWithChanges
 
+    streamOfAliasTypeChange: !stream
+      items: StreamItem
+
     # Comprehensive NamedType changes
     rlink: RLink
     rlinkRX: RLink
@@ -149,6 +152,8 @@ RenamedRecord: !record
   fields:
     i: int
     s: string
+
+StreamItem: RecordWithChanges
 
 RLink: RA
 RA: RB

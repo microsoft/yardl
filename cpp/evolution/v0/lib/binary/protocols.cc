@@ -334,6 +334,24 @@ namespace {
   yardl::binary::ReadString(stream, value.s);
 }
 
+[[maybe_unused]] static void WriteStreamItem(yardl::binary::CodedOutputStream& stream, evo_test::StreamItem const& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<evo_test::StreamItem>::value) {
+    yardl::binary::WriteTriviallySerializable(stream, value);
+    return;
+  }
+
+  evo_test::binary::WriteRecordWithChanges(stream, value);
+}
+
+[[maybe_unused]] static void ReadStreamItem(yardl::binary::CodedInputStream& stream, evo_test::StreamItem& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<evo_test::StreamItem>::value) {
+    yardl::binary::ReadTriviallySerializable(stream, value);
+    return;
+  }
+
+  evo_test::binary::ReadRecordWithChanges(stream, value);
+}
+
 [[maybe_unused]] static void WriteRC(yardl::binary::CodedOutputStream& stream, evo_test::RC const& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::RC>::value) {
     yardl::binary::WriteTriviallySerializable(stream, value);
@@ -766,6 +784,20 @@ void ProtocolWithChangesWriter::WriteRecordToAliasedAliasImpl(evo_test::RecordWi
   evo_test::binary::WriteRecordWithChanges(stream_, value);
 }
 
+void ProtocolWithChangesWriter::WriteStreamOfAliasTypeChangeImpl(evo_test::StreamItem const& value) {
+  yardl::binary::WriteBlock<evo_test::StreamItem, evo_test::binary::WriteStreamItem>(stream_, value);
+}
+
+void ProtocolWithChangesWriter::WriteStreamOfAliasTypeChangeImpl(std::vector<evo_test::StreamItem> const& values) {
+  if (!values.empty()) {
+    yardl::binary::WriteVector<evo_test::StreamItem, evo_test::binary::WriteStreamItem>(stream_, values);
+  }
+}
+
+void ProtocolWithChangesWriter::EndStreamOfAliasTypeChangeImpl() {
+  yardl::binary::WriteInteger(stream_, 0U);
+}
+
 void ProtocolWithChangesWriter::WriteRlinkImpl(evo_test::RLink const& value) {
   evo_test::binary::WriteRLink(stream_, value);
 }
@@ -1162,6 +1194,15 @@ void ProtocolWithChangesReader::ReadRecordToAliasedRecordImpl(evo_test::RecordWi
 
 void ProtocolWithChangesReader::ReadRecordToAliasedAliasImpl(evo_test::RecordWithChanges& value) {
   evo_test::binary::ReadRecordWithChanges(stream_, value);
+}
+
+bool ProtocolWithChangesReader::ReadStreamOfAliasTypeChangeImpl(evo_test::StreamItem& value) {
+  return yardl::binary::ReadBlock<evo_test::StreamItem, evo_test::binary::ReadStreamItem>(stream_, current_block_remaining_, value);
+}
+
+bool ProtocolWithChangesReader::ReadStreamOfAliasTypeChangeImpl(std::vector<evo_test::StreamItem>& values) {
+  yardl::binary::ReadBlocksIntoVector<evo_test::StreamItem, evo_test::binary::ReadStreamItem>(stream_, current_block_remaining_, values);
+  return current_block_remaining_ != 0;
 }
 
 void ProtocolWithChangesReader::ReadRlinkImpl(evo_test::RLink& value) {
