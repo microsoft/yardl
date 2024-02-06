@@ -5,6 +5,7 @@ package dsl
 
 import (
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/microsoft/yardl/tooling/internal/validation"
@@ -24,7 +25,7 @@ func ValidateEvolution(latest *Environment, predecessors []*Environment, version
 
 	// Compare each previous version with latest version
 	for i, predecessor := range predecessors {
-		log.Info().Msgf("Resolving changes from predecessor %s", versionLabels[i])
+		log.Info().Msgf("Resolving changes from version %s", versionLabels[i])
 
 		definitionChanges, protocolChanges := resolveAllChanges(latest, predecessor)
 
@@ -69,14 +70,13 @@ func renameOldTypeDefinitions(env *Environment, changes []DefinitionChange, vers
 				node.GetDefinitionMeta().Name = node.GetDefinitionMeta().Name + "_" + versionLabel
 			}
 			self.VisitChildren(node)
-			// if nt, ok := node.(*NamedType); ok {
-			// 	self.Visit(nt.Type)
-			// }
+
 		case *SimpleType:
 			self.VisitChildren(node)
 			self.Visit(node.ResolvedDefinition)
+		default:
+			self.VisitChildren(node)
 		}
-		self.VisitChildren(node)
 	})
 }
 
@@ -84,8 +84,33 @@ func renameOldTypeDefinitions(env *Environment, changes []DefinitionChange, vers
 func validateChanges(definitionChanges []DefinitionChange, protocolChanges map[string]*ProtocolChange) error {
 	errorSink := &validation.ErrorSink{}
 	validateTypeDefinitionChanges(definitionChanges, errorSink)
+	if len(errorSink.Errors) > 0 {
+		return errorSink.AsError()
+	}
+
 	validateProtocolChanges(protocolChanges, errorSink)
 	return errorSink.AsError()
+}
+
+func Warn(node Node, message string, args ...any) {
+	fmt.Fprintln(os.Stderr, validationWarning(node, message, args...))
+}
+
+func validationWarning(node Node, message string, args ...any) string {
+	message = fmt.Sprintf(message, args...)
+	file := node.GetNodeMeta().File
+	line := &node.GetNodeMeta().Line
+	column := &node.GetNodeMeta().Column
+
+	prefix := fmt.Sprintf("⚠️  %s:", file)
+	if line != nil {
+		prefix = fmt.Sprintf("%s%d:", prefix, *line)
+	}
+	if column != nil {
+		prefix = fmt.Sprintf("%s%d:", prefix, *column)
+	}
+
+	return fmt.Sprintf("%s %v", prefix, message)
 }
 
 func validateTypeDefinitionChanges(changes []DefinitionChange, errorSink *validation.ErrorSink) {
@@ -96,7 +121,11 @@ func validateTypeDefinitionChanges(changes []DefinitionChange, errorSink *valida
 		case *CompatibilityChange:
 
 		case *DefinitionChangeIncompatible:
-			errorSink.Add(validationError(td, "changing '%s' is not backward compatible", td.GetDefinitionMeta().Name))
+			explanation := ""
+			if defChange.Reason != "" {
+				explanation = fmt.Sprintf(": %s", defChange.Reason)
+			}
+			errorSink.Add(validationError(td, "this change to '%s' is not backward compatible%s", td.GetDefinitionMeta().Name, explanation))
 
 		case *RecordChange:
 			oldRec := defChange.PreviousDefinition().(*RecordDefinition)
@@ -104,26 +133,24 @@ func validateTypeDefinitionChanges(changes []DefinitionChange, errorSink *valida
 
 			for _, added := range defChange.FieldsAdded {
 				if !TypeHasNullOption(added.Type) {
-					log.Warn().Msgf("Adding non-Optional field '%s' may result in undefined behavior with previous versions", added.Name)
+					Warn(added, "Adding non-Optional field '%s' may result in undefined behavior with previous versions", added.Name)
 				}
 			}
 
 			for i, field := range oldRec.Fields {
 				if defChange.FieldRemoved[i] {
 					if !TypeHasNullOption(oldRec.Fields[i].Type) {
-						log.Warn().Msgf("Removing non-Optional field '%s' may result in undefined behavior with previous versions", field.Name)
+						Warn(newRec.Fields[0], "Removing non-Optional field '%s' may result in undefined behavior with previous versions", field.Name)
 					}
 					continue
 				}
 
 				if tc := defChange.FieldChanges[i]; tc != nil {
+					newField := newRec.Fields[defChange.NewFieldIndex[i]]
 					if typeChangeIsError(tc) {
-						newField := newRec.Fields[defChange.NewFieldIndex[i]]
 						errorSink.Add(validationError(newField, "changing field '%s' from %s", newField.Name, typeChangeToError(tc)))
-					}
-
-					if warn := typeChangeToWarning(tc); warn != "" {
-						log.Warn().Msgf("Changing field '%s' from %s", field.Name, warn)
+					} else if warn := typeChangeToWarning(tc); warn != "" {
+						Warn(newField, "Changing field '%s' from %s", field.Name, warn)
 					}
 				}
 			}
@@ -131,10 +158,9 @@ func validateTypeDefinitionChanges(changes []DefinitionChange, errorSink *valida
 		case *NamedTypeChange:
 			if tc := defChange.TypeChange; tc != nil {
 				if typeChangeIsError(tc) {
-					errorSink.Add(validationError(td, "changing type '%s' from %s", td.GetDefinitionMeta().Name, typeChangeToWarning(tc)))
-				}
-				if warn := typeChangeToWarning(tc); warn != "" {
-					log.Warn().Msgf("Changing type '%s' from %s", td.GetDefinitionMeta().Name, warn)
+					errorSink.Add(validationError(td, "changing type '%s' from %s", td.GetDefinitionMeta().Name, typeChangeToError(tc)))
+				} else if warn := typeChangeToWarning(tc); warn != "" {
+					Warn(td, "Changing type '%s' from %s", td.GetDefinitionMeta().Name, warn)
 				}
 			}
 
@@ -185,10 +211,8 @@ func validateProtocolChanges(changes map[string]*ProtocolChange, errorSink *vali
 				default:
 					if typeChangeIsError(tc) {
 						errorSink.Add(validationError(step.Type, "changing step '%s' from %s", step.Name, typeChangeToError(tc)))
-					}
-
-					if warn := typeChangeToWarning(tc); warn != "" {
-						log.Warn().Msgf("Changing step '%s' from %s", step.Name, warn)
+					} else if warn := typeChangeToWarning(tc); warn != "" {
+						Warn(step, "Changing step '%s' from %s", step.Name, warn)
 					}
 				}
 			}
@@ -338,7 +362,6 @@ func getBaseDefinition(td TypeDefinition) TypeDefinition {
 }
 
 func getResolvedGenericDefinition(newTd, oldTd TypeDefinition) *DefinitionPair {
-	// log.Debug().Msgf("Resolving %s <= %s", defWithArgs(newTd), defWithArgs(oldTd))
 	resolveGenericDefinitions := func(out TypeDefinition, in TypeDefinition) TypeDefinition {
 		typeArgs := make([]Type, 0)
 		Visit(in, func(self Visitor, node Node) {
@@ -370,8 +393,6 @@ func getResolvedGenericDefinition(newTd, oldTd TypeDefinition) *DefinitionPair {
 
 	newDef := resolveGenericDefinitions(newTd, oldTd)
 	oldDef := resolveGenericDefinitions(oldTd, newTd)
-	// log.Debug().Msgf(" Resolved %s <= %s", defWithArgs(newDef), defWithArgs(oldDef))
-
 	return &DefinitionPair{oldDef, newDef}
 }
 
@@ -417,24 +438,12 @@ func getCrossModelSemanticEquivalence(newTds, oldTds []TypeDefinition) map[strin
 		}
 	}
 
-	// For debugging:
-	// for _, newTd := range newTds {
-	// 	newName := newTd.GetDefinitionMeta().GetQualifiedName()
-	// 	for _, oldTd := range oldTds {
-	// 		oldName := oldTd.GetDefinitionMeta().GetQualifiedName()
-	// 		if semanticallyEqual[newName][oldName] {
-	// 			log.Debug().Msgf("New %s === Old %s", newName, oldName)
-	// 		}
-	// 	}
-	// }
-
 	return semanticallyEqual
 }
 
 func resolveAllChanges(newEnv, oldEnv *Environment) ([]DefinitionChange, map[string]*ProtocolChange) {
 	allNewTypeDefs := getAllTypeDefinitions(newEnv)
 	allOldTypeDefs := getAllTypeDefinitions(oldEnv)
-	// semanticallyEqual := getCrossModelSemanticEquivalence(allNewTypeDefs, allOldTypeDefs)
 
 	// Find all "base" TypeDefinitions that are semantically equivalent.
 	oldDefToCompareWith := make(map[string]string)
@@ -452,33 +461,19 @@ func resolveAllChanges(newEnv, oldEnv *Environment) ([]DefinitionChange, map[str
 				_, haveNewDef := newDefToCompareWith[oldName]
 
 				if !haveOldDef && !haveNewDef {
-					log.Debug().Msgf("Base Pair %s <= %s", defWithArgs(newTd), defWithArgs(oldTd))
+					// log.Debug().Msgf("Base Pair %s <= %s", defWithArgs(newTd), defWithArgs(oldTd))
 					oldDefToCompareWith[newName] = oldName
 					newDefToCompareWith[oldName] = newName
 				}
 
 			}
 
-			// First match by Definition Name
+			// First match across versions by Definition Name
 			if newName == oldName {
 				// We want to compare their "base" TypeDefinitions
 				savePairIfBothUnique(getBaseDefinition(newTd), getBaseDefinition(oldTd))
 				// We also want to compare them if they are the same NamedType
 				savePairIfBothUnique(newTd, oldTd)
-			}
-		}
-	}
-
-	// SANITY check
-	for _, newTd := range allNewTypeDefs {
-		newName := newTd.GetDefinitionMeta().GetQualifiedName()
-		for _, oldTd := range allOldTypeDefs {
-			oldName := oldTd.GetDefinitionMeta().GetQualifiedName()
-
-			if oldDefToCompareWith[newName] == oldName {
-				if newDefToCompareWith[oldName] != newName {
-					log.Panic().Msgf("Mismatched mapping %s <= %s", newName, oldName)
-				}
 			}
 		}
 	}
@@ -507,8 +502,7 @@ func resolveAllChanges(newEnv, oldEnv *Environment) ([]DefinitionChange, map[str
 						if _, ok := semanticDefinitionPairs[newParentName][oldParentName]; !ok {
 							resolved := getResolvedGenericDefinition(newParent, oldParent)
 							semanticDefinitionPairs[newParentName][oldParentName] = resolved
-
-							log.Debug().Msgf("Resolved %s <= %s", defWithArgs(resolved.LatestDefinition()), defWithArgs(resolved.PreviousDefinition()))
+							// log.Debug().Msgf("Resolved %s <= %s", defWithArgs(resolved.LatestDefinition()), defWithArgs(resolved.PreviousDefinition()))
 						}
 					}
 				}
@@ -543,7 +537,7 @@ func resolveAllChanges(newEnv, oldEnv *Environment) ([]DefinitionChange, map[str
 				oldDef := resolvedPair.PreviousDefinition()
 
 				ch := compareTypeDefinitions(newDef, oldDef, context)
-				log.Info().Msgf("Saving %T for %s <= %s", ch, newName, oldName)
+				// log.Info().Msgf("Saving %T for %s <= %s", ch, newName, oldName)
 				changes[newName][oldName] = ch
 
 				// Now we want to ensure all NamedTypes that REFERENCE this changed Definition are also marked as "changed"
@@ -575,7 +569,7 @@ func resolveAllChanges(newEnv, oldEnv *Environment) ([]DefinitionChange, map[str
 							changes[newParentName][oldParentName] = nil
 						case *DefinitionChangeIncompatible:
 							// log.Debug().Msgf("Saving Incompatible Change for %s <= %s", newParentName, oldParentName)
-							changes[newParentName][oldParentName] = &DefinitionChangeIncompatible{*resolvedPair}
+							changes[newParentName][oldParentName] = &DefinitionChangeIncompatible{*resolvedPair, IncompatibleBaseDefinitions}
 						default:
 							// log.Debug().Msgf("Saving NamedType Change for %s <= %s", newParentName, oldParentName)
 							changes[newParentName][oldParentName] = &NamedTypeChange{*resolvedPair, nil}
@@ -613,7 +607,7 @@ func resolveAllChanges(newEnv, oldEnv *Environment) ([]DefinitionChange, map[str
 					continue
 				}
 
-				log.Debug().Msgf("Emitting %T for %s <= %s", change, defWithArgs(change.LatestDefinition()), defWithArgs(change.PreviousDefinition()))
+				// log.Debug().Msgf("Emitting %T for %s <= %s", change, defWithArgs(change.LatestDefinition()), defWithArgs(change.PreviousDefinition()))
 				finalDefinitionChanges = append(finalDefinitionChanges, change)
 				uniqueOldNames[oldName] = true
 
@@ -643,7 +637,7 @@ func resolveAllChanges(newEnv, oldEnv *Environment) ([]DefinitionChange, map[str
 					}
 				}
 
-				log.Debug().Msgf("Emitting %T for %s <= %s", change, defWithArgs(change.LatestDefinition()), defWithArgs(change.PreviousDefinition()))
+				// log.Debug().Msgf("Emitting %T for %s <= %s", change, defWithArgs(change.LatestDefinition()), defWithArgs(change.PreviousDefinition()))
 				finalDefinitionChanges = append(finalDefinitionChanges, change)
 				uniqueOldNames[oldName] = true
 			}
@@ -675,7 +669,6 @@ func resolveAllProtocolChanges(newEnv, oldEnv *Environment, context *EvolutionCo
 				continue
 			}
 
-			// Annotate this ProtocolDefinition with any changes from previous version.
 			if protocolChange := compareProtocolDefinitions(newProt, oldProt, context); protocolChange != nil {
 				// Annotate the ProtocolChange with the Old ProtocolDefinition schema string
 				protocolChange.PreviousSchema = GetProtocolSchemaString(oldProt, oldEnv.SymbolTable)
@@ -701,7 +694,7 @@ func compareTypeDefinitions(newTd, oldTd TypeDefinition, context *EvolutionConte
 	oldName := oldTd.GetDefinitionMeta().GetQualifiedName()
 
 	if _, valid := context.SemanticPairs[newName][oldName]; !valid {
-		return &DefinitionChangeIncompatible{DefinitionPair{oldTd, newTd}}
+		return &DefinitionChangeIncompatible{DefinitionPair{oldTd, newTd}, IncompatibleDefinitions}
 	}
 
 	// If we already compared these definitions, return early
@@ -709,10 +702,16 @@ func compareTypeDefinitions(newTd, oldTd TypeDefinition, context *EvolutionConte
 		return ch
 	}
 
-	// TypeParameters must effectively be identical.
-	// Any TypeDefinitions with mismatched TypeParameters should be NamedTypes handled in the calling function.
+	// Enforce that TypeParameters must be IDENTICAL (for now)
+	// Any TypeDefinitions with mismatched TypeParameters should be NamedTypes handled in the *calling* function.
 	if len(newTd.GetDefinitionMeta().TypeParameters) != len(oldTd.GetDefinitionMeta().TypeParameters) {
-		return &DefinitionChangeIncompatible{DefinitionPair{oldTd, newTd}}
+		return &DefinitionChangeIncompatible{DefinitionPair{oldTd, newTd}, IncompatibleTypeParameters}
+	}
+	for i, newTypeParam := range newTd.GetDefinitionMeta().TypeParameters {
+		oldTypeParam := oldTd.GetDefinitionMeta().TypeParameters[i]
+		if newTypeParam.Name != oldTypeParam.Name {
+			return &DefinitionChangeIncompatible{DefinitionPair{oldTd, newTd}, IncompatibleTypeParameters}
+		}
 	}
 
 	switch newTd := newTd.(type) {
@@ -724,7 +723,7 @@ func compareTypeDefinitions(newTd, oldTd TypeDefinition, context *EvolutionConte
 			case nil:
 				return nil
 			case *TypeChangeIncompatible:
-				return &DefinitionChangeIncompatible{DefinitionPair{oldTd, newTd}}
+				return &DefinitionChangeIncompatible{DefinitionPair{oldTd, newTd}, IncompatibleBaseDefinitions}
 			}
 			return &NamedTypeChange{DefinitionPair{oldTd, newTd}, ch}
 
@@ -732,15 +731,12 @@ func compareTypeDefinitions(newTd, oldTd TypeDefinition, context *EvolutionConte
 			newType, ok := newTd.Type.(*SimpleType)
 			if !ok {
 				// Old TypeDefinition is a RecordDefinition, but new TypeDefinition is not a SimpleType
-				return &DefinitionChangeIncompatible{DefinitionPair{oldTd, newTd}}
+				return &DefinitionChangeIncompatible{DefinitionPair{oldTd, newTd}, IncompatibleDefinitions}
 			}
 
 			ch := compareTypeDefinitions(newType.ResolvedDefinition, oldTd, context)
-			if ch == nil {
-				return nil
-			}
 			switch ch := ch.(type) {
-			case *DefinitionChangeIncompatible:
+			case nil, *DefinitionChangeIncompatible:
 				return ch
 			default:
 				// Alias Added
@@ -751,15 +747,12 @@ func compareTypeDefinitions(newTd, oldTd TypeDefinition, context *EvolutionConte
 			newType, ok := newTd.Type.(*SimpleType)
 			if !ok {
 				// Old TypeDefinition is an EnumDefinition, but new TypeDefinition is not a SimpleType
-				return &DefinitionChangeIncompatible{DefinitionPair{oldTd, newTd}}
+				return &DefinitionChangeIncompatible{DefinitionPair{oldTd, newTd}, IncompatibleDefinitions}
 			}
 
 			ch := compareTypeDefinitions(newType.ResolvedDefinition, oldTd, context)
-			if ch == nil {
-				return nil
-			}
 			switch ch := ch.(type) {
-			case *DefinitionChangeIncompatible:
+			case nil, *DefinitionChangeIncompatible:
 				return ch
 			default:
 				// Alias Added
@@ -767,67 +760,19 @@ func compareTypeDefinitions(newTd, oldTd TypeDefinition, context *EvolutionConte
 			}
 
 		default:
-			return &DefinitionChangeIncompatible{DefinitionPair{oldTd, newTd}}
+			return &DefinitionChangeIncompatible{DefinitionPair{oldTd, newTd}, IncompatibleDefinitions}
 		}
 
 	case *RecordDefinition:
 		switch oldTd := oldTd.(type) {
 		case *RecordDefinition:
-
-			// Enforce that TypeParameters must be IDENTICAL (for now)
-			if len(newTd.GetDefinitionMeta().TypeParameters) != len(oldTd.GetDefinitionMeta().TypeParameters) {
-				return &DefinitionChangeIncompatible{DefinitionPair{oldTd, newTd}}
-			}
-			for i, newTypeParam := range newTd.GetDefinitionMeta().TypeParameters {
-				oldTypeParam := oldTd.GetDefinitionMeta().TypeParameters[i]
-				if newTypeParam.Name != oldTypeParam.Name {
-					return &DefinitionChangeIncompatible{DefinitionPair{oldTd, newTd}}
-				}
-			}
-
-			ch := compareRecordDefinitions(newTd, oldTd, context)
-			if ch == nil {
-				return nil
-			}
-			return ch
+			return compareRecordDefinitions(newTd, oldTd, context)
 
 		case *NamedType:
 			oldType, ok := oldTd.Type.(*SimpleType)
 			if !ok {
 				// New TypeDefinition is a RecordDefinition, but old TypeDefinition is not a SimpleType
-				return &DefinitionChangeIncompatible{DefinitionPair{oldTd, newTd}}
-			}
-
-			ch := compareTypeDefinitions(newTd, oldType.ResolvedDefinition, context)
-			if ch == nil {
-				return nil
-			}
-			switch ch := ch.(type) {
-			case *DefinitionChangeIncompatible:
-				return ch
-			default:
-				// Alias Removed
-				return &NamedTypeChange{DefinitionPair{oldTd, newTd}, nil}
-			}
-
-		default:
-			return &DefinitionChangeIncompatible{DefinitionPair{oldTd, newTd}}
-		}
-
-	case *EnumDefinition:
-		switch oldTd := oldTd.(type) {
-		case *EnumDefinition:
-			ch := compareEnumDefinitions(newTd, oldTd, context)
-			if ch == nil {
-				return nil
-			}
-			return ch
-
-		case *NamedType:
-			oldType, ok := oldTd.Type.(*SimpleType)
-			if !ok {
-				// New TypeDefinition is an EnumDefinition, but old TypeDefinition is not a SimpleType
-				return &DefinitionChangeIncompatible{DefinitionPair{oldTd, newTd}}
+				return &DefinitionChangeIncompatible{DefinitionPair{oldTd, newTd}, IncompatibleDefinitions}
 			}
 
 			ch := compareTypeDefinitions(newTd, oldType.ResolvedDefinition, context)
@@ -842,14 +787,41 @@ func compareTypeDefinitions(newTd, oldTd TypeDefinition, context *EvolutionConte
 			}
 
 		default:
-			return &DefinitionChangeIncompatible{DefinitionPair{oldTd, newTd}}
+			return &DefinitionChangeIncompatible{DefinitionPair{oldTd, newTd}, IncompatibleDefinitions}
+		}
+
+	case *EnumDefinition:
+		switch oldTd := oldTd.(type) {
+		case *EnumDefinition:
+			return compareEnumDefinitions(newTd, oldTd, context)
+
+		case *NamedType:
+			oldType, ok := oldTd.Type.(*SimpleType)
+			if !ok {
+				// New TypeDefinition is an EnumDefinition, but old TypeDefinition is not a SimpleType
+				return &DefinitionChangeIncompatible{DefinitionPair{oldTd, newTd}, IncompatibleDefinitions}
+			}
+
+			ch := compareTypeDefinitions(newTd, oldType.ResolvedDefinition, context)
+			switch ch := ch.(type) {
+			case nil:
+				return nil
+			case *DefinitionChangeIncompatible:
+				return ch
+			default:
+				// Alias Removed
+				return &NamedTypeChange{DefinitionPair{oldTd, newTd}, nil}
+			}
+
+		default:
+			return &DefinitionChangeIncompatible{DefinitionPair{oldTd, newTd}, IncompatibleDefinitions}
 		}
 
 	default:
 		log.Panic().Msgf("Expected a TypeDefinition... Not a %T", newTd)
 	}
 
-	return &DefinitionChangeIncompatible{DefinitionPair{oldTd, newTd}}
+	return &DefinitionChangeIncompatible{DefinitionPair{oldTd, newTd}, IncompatibleDefinitions}
 }
 
 func compareProtocolDefinitions(newProtocol, oldProtocol *ProtocolDefinition, context *EvolutionContext) *ProtocolChange {
@@ -908,7 +880,7 @@ func compareProtocolDefinitions(newProtocol, oldProtocol *ProtocolDefinition, co
 	return nil
 }
 
-func compareRecordDefinitions(newRecord, oldRecord *RecordDefinition, context *EvolutionContext) *RecordChange {
+func compareRecordDefinitions(newRecord, oldRecord *RecordDefinition, context *EvolutionContext) DefinitionChange {
 	change := &RecordChange{
 		DefinitionPair: DefinitionPair{oldRecord, newRecord},
 		FieldRemoved:   make([]bool, len(oldRecord.Fields)),
@@ -969,7 +941,7 @@ func compareRecordDefinitions(newRecord, oldRecord *RecordDefinition, context *E
 func compareEnumDefinitions(newNode, oldEnum *EnumDefinition, context *EvolutionContext) DefinitionChange {
 	if newNode.IsFlags != oldEnum.IsFlags {
 		// CHANGE: Changed Enum to Flags or vice versa
-		return &DefinitionChangeIncompatible{DefinitionPair{oldEnum, newNode}}
+		return &DefinitionChangeIncompatible{DefinitionPair{oldEnum, newNode}, IncompatibleDefinitions}
 	}
 
 	oldBaseType := oldEnum.BaseType
@@ -1144,13 +1116,6 @@ func compareSemanticallyEquivalentTypes(newType, oldType *SimpleType, context *E
 				}
 			}
 
-			// for n, t := range newRefTypeArgs {
-			// 	log.Debug().Msgf("  New Ref TypeArg %s: %s", n, TypeToShortSyntax(t, true))
-			// }
-			// for n, t := range oldRefTypeArgs {
-			// 	log.Debug().Msgf("  Old Ref TypeArg %s: %s", n, TypeToShortSyntax(t, true))
-			// }
-
 			for _, tp := range newDefReference.GetDefinitionMeta().TypeParameters {
 				expectedTypeArg := newRefTypeArgs[tp.Name]
 				actualTypeArg := newTypeArgsByName[tp.Name]
@@ -1158,7 +1123,6 @@ func compareSemanticallyEquivalentTypes(newType, oldType *SimpleType, context *E
 				if ch := compareTypes(expectedTypeArg, actualTypeArg, context); ch != nil {
 					switch ch.(type) {
 					case *TypeChangeIncompatible:
-						// log.Error().Msgf("TypeArgs aren't compatible %s <= %s", TypeToShortSyntax(expectedTypeArg, true), TypeToShortSyntax(actualTypeArg, true))
 						return &TypeChangeIncompatible{TypePair{oldType, newType}}
 					case *TypeChangeDefinitionChanged:
 						typeArgDefinitionChanged = true
@@ -1173,7 +1137,6 @@ func compareSemanticallyEquivalentTypes(newType, oldType *SimpleType, context *E
 				if ch := compareTypes(expectedTypeArg, actualTypeArg, context); ch != nil {
 					switch ch.(type) {
 					case *TypeChangeIncompatible:
-						// log.Error().Msgf("TypeArgs aren't compatible %s <= %s", TypeToShortSyntax(expectedTypeArg, true), TypeToShortSyntax(actualTypeArg, true))
 						return &TypeChangeIncompatible{TypePair{oldType, newType}}
 					case *TypeChangeDefinitionChanged:
 						typeArgDefinitionChanged = true
@@ -1187,7 +1150,6 @@ func compareSemanticallyEquivalentTypes(newType, oldType *SimpleType, context *E
 	if ch != nil || typeArgDefinitionChanged {
 		return &TypeChangeDefinitionChanged{TypePair{oldType, newType}, ch}
 	}
-	// log.Debug().Msgf("These types are the same: %s <= %s", defWithArgs(newDef), defWithArgs(oldDef))
 	return nil
 }
 
@@ -1202,19 +1164,6 @@ func compareOtherSimpleTypes(newType, oldType *SimpleType, context *EvolutionCon
 		if ch == nil {
 			return nil
 		}
-
-		// TODO: I think I can test this with a change between two generalized types:
-		// 	- OLD: contains a NamedType: Primitive
-		// 	- NEW: contains a different Primitive?
-		// Then, what happens if I need to "reference" the old parent type? Do I need that missing Alias?
-
-		// switch ch := ch.(type) {
-		// case *TypeChangeIncompatible:
-		// default:
-		// 	tdChange := &NamedTypeChange{DefinitionPair{oldDef, newDef}, ch}
-		// 	context.AliasesRemoved = append(context.AliasesRemoved, tdChange)
-		// 	// return &TypeChangeDefinitionChanged{TypePair{oldType, newType}, tdChange}
-		// }
 		return ch
 	}
 
@@ -1293,13 +1242,10 @@ func compareSimpleToGeneralizedTypes(newType *GeneralizedType, oldType *SimpleTy
 		for i, tc := range newType.Cases {
 			switch compareTypes(tc.Type, oldType, context).(type) {
 			case nil, *TypeChangeDefinitionChanged:
-				log.Info().Msgf("all good")
 				return &TypeChangeScalarToUnion{TypePair{oldType, newType}, i}
 			}
 		}
 	}
-
-	log.Error().Msgf("Can't do that!")
 
 	// CHANGE: Incompatible change from Simple to Generalized
 	return &TypeChangeIncompatible{TypePair{oldType, newType}}

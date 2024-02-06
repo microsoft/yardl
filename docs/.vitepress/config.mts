@@ -43,6 +43,7 @@ export default defineConfig({
           items: [
             { text: "Packages", link: "/python/packages" },
             { text: "The Yardl Language", link: "/python/language" },
+            // { text: "Schema Evolution", link: "/python/evolution" },
           ],
         },
         { text: "Reference", link: "/reference/binary" },
@@ -64,6 +65,7 @@ export default defineConfig({
             { text: "Packages", link: "/cpp/packages" },
             { text: "The Yardl Language", link: "/cpp/language" },
             { text: "Performance Tips", link: "/cpp/performance" },
+            { text: "Schema Evolution", link: "/cpp/evolution" },
           ],
         },
         { text: "Reference", link: "/reference/binary" },

@@ -218,7 +218,14 @@ func (tc *DefinitionPair) LatestDefinition() TypeDefinition {
 
 type DefinitionChangeIncompatible struct {
 	DefinitionPair
+	Reason string
 }
+
+const (
+	IncompatibleDefinitions     = "Definitions are incompatible"
+	IncompatibleTypeParameters  = "Type parameters do not match"
+	IncompatibleBaseDefinitions = "Base definitions are incompatible"
+)
 
 type NamedTypeChange struct {
 	DefinitionPair

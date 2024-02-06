@@ -143,7 +143,7 @@ P: !protocol
 	assert.NotNil(t, err)
 }
 
-func TestInvalidDefinitionChanges(t *testing.T) {
+func TestInvalidProtocolStepDefinitionChanges(t *testing.T) {
 	model := `
 AS: string
 AO: string?
