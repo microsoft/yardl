@@ -6,40 +6,40 @@
 namespace evo_test {
 using ordered_json = nlohmann::ordered_json;
 
-[[maybe_unused]] static void to_json(ordered_json& j, evo_test::UnchangedRecord const& value);
-[[maybe_unused]] static void from_json(ordered_json const& j, evo_test::UnchangedRecord& value);
+void to_json(ordered_json& j, evo_test::UnchangedRecord const& value);
+void from_json(ordered_json const& j, evo_test::UnchangedRecord& value);
 
-[[maybe_unused]] static void to_json(ordered_json& j, evo_test::RecordWithChanges const& value);
-[[maybe_unused]] static void from_json(ordered_json const& j, evo_test::RecordWithChanges& value);
+void to_json(ordered_json& j, evo_test::RecordWithChanges const& value);
+void from_json(ordered_json const& j, evo_test::RecordWithChanges& value);
 
-[[maybe_unused]] static void to_json(ordered_json& j, evo_test::RenamedRecord const& value);
-[[maybe_unused]] static void from_json(ordered_json const& j, evo_test::RenamedRecord& value);
+void to_json(ordered_json& j, evo_test::RenamedRecord const& value);
+void from_json(ordered_json const& j, evo_test::RenamedRecord& value);
 
-[[maybe_unused]] static void to_json(ordered_json& j, evo_test::RC const& value);
-[[maybe_unused]] static void from_json(ordered_json const& j, evo_test::RC& value);
+void to_json(ordered_json& j, evo_test::RC const& value);
+void from_json(ordered_json const& j, evo_test::RC& value);
 
-[[maybe_unused]] static void to_json(ordered_json& j, evo_test::UnusedButChangedRecord const& value);
-[[maybe_unused]] static void from_json(ordered_json const& j, evo_test::UnusedButChangedRecord& value);
+void to_json(ordered_json& j, evo_test::UnusedButChangedRecord const& value);
+void from_json(ordered_json const& j, evo_test::UnusedButChangedRecord& value);
 
 template <typename T1, typename T2>
-[[maybe_unused]] static void to_json(ordered_json& j, evo_test::GenericRecord<T1, T2> const& value);
+void to_json(ordered_json& j, evo_test::GenericRecord<T1, T2> const& value);
 template <typename T1, typename T2>
-[[maybe_unused]] static void from_json(ordered_json const& j, evo_test::GenericRecord<T1, T2>& value);
+void from_json(ordered_json const& j, evo_test::GenericRecord<T1, T2>& value);
 
 template <typename T>
-[[maybe_unused]] static void to_json(ordered_json& j, evo_test::GenericParentRecord<T> const& value);
+void to_json(ordered_json& j, evo_test::GenericParentRecord<T> const& value);
 template <typename T>
-[[maybe_unused]] static void from_json(ordered_json const& j, evo_test::GenericParentRecord<T>& value);
+void from_json(ordered_json const& j, evo_test::GenericParentRecord<T>& value);
 
 template <typename T2>
-[[maybe_unused]] static void to_json(ordered_json& j, evo_test::UnchangedGeneric<T2> const& value);
+void to_json(ordered_json& j, evo_test::UnchangedGeneric<T2> const& value);
 template <typename T2>
-[[maybe_unused]] static void from_json(ordered_json const& j, evo_test::UnchangedGeneric<T2>& value);
+void from_json(ordered_json const& j, evo_test::UnchangedGeneric<T2>& value);
 
 template <typename Y, typename Z>
-[[maybe_unused]] static void to_json(ordered_json& j, evo_test::ChangedGeneric<Y, Z> const& value);
+void to_json(ordered_json& j, evo_test::ChangedGeneric<Y, Z> const& value);
 template <typename Y, typename Z>
-[[maybe_unused]] static void from_json(ordered_json const& j, evo_test::ChangedGeneric<Y, Z>& value);
+void from_json(ordered_json const& j, evo_test::ChangedGeneric<Y, Z>& value);
 
 } // namespace evo_test
 
@@ -47,7 +47,7 @@ NLOHMANN_JSON_NAMESPACE_BEGIN
 
 template <typename T1, typename T2>
 struct adl_serializer<std::variant<T1, T2>> {
-  [[maybe_unused]] static void to_json(ordered_json& j, std::variant<T1, T2> const& value) {
+  static void to_json(ordered_json& j, std::variant<T1, T2> const& value) {
     switch (value.index()) {
       case 0:
         j = ordered_json{ {"T1", std::get<T1>(value)} };
@@ -60,7 +60,7 @@ struct adl_serializer<std::variant<T1, T2>> {
     }
   }
 
-  [[maybe_unused]] static void from_json(ordered_json const& j, std::variant<T1, T2>& value) {
+  static void from_json(ordered_json const& j, std::variant<T1, T2>& value) {
     auto it = j.begin();
     std::string tag = it.key();
     if (tag == "T1") {
@@ -76,11 +76,11 @@ struct adl_serializer<std::variant<T1, T2>> {
 
 template <typename T1>
 struct adl_serializer<std::variant<T1, float>> {
-  [[maybe_unused]] static void to_json(ordered_json& j, std::variant<T1, float> const& value) {
+  static void to_json(ordered_json& j, std::variant<T1, float> const& value) {
     std::visit([&j](auto const& v) {j = v;}, value);
   }
 
-  [[maybe_unused]] static void from_json(ordered_json const& j, std::variant<T1, float>& value) {
+  static void from_json(ordered_json const& j, std::variant<T1, float>& value) {
     if ((j.is_object())) {
       value = j.get<T1>();
       return;
@@ -95,11 +95,11 @@ struct adl_serializer<std::variant<T1, float>> {
 
 template <>
 struct adl_serializer<std::variant<evo_test::GenericRecord<int32_t, std::string>, float>> {
-  [[maybe_unused]] static void to_json(ordered_json& j, std::variant<evo_test::GenericRecord<int32_t, std::string>, float> const& value) {
+  static void to_json(ordered_json& j, std::variant<evo_test::GenericRecord<int32_t, std::string>, float> const& value) {
     std::visit([&j](auto const& v) {j = v;}, value);
   }
 
-  [[maybe_unused]] static void from_json(ordered_json const& j, std::variant<evo_test::GenericRecord<int32_t, std::string>, float>& value) {
+  static void from_json(ordered_json const& j, std::variant<evo_test::GenericRecord<int32_t, std::string>, float>& value) {
     if ((j.is_object())) {
       value = j.get<evo_test::GenericRecord<int32_t, std::string>>();
       return;
@@ -114,11 +114,11 @@ struct adl_serializer<std::variant<evo_test::GenericRecord<int32_t, std::string>
 
 template <>
 struct adl_serializer<std::variant<evo_test::RecordWithChanges, int32_t>> {
-  [[maybe_unused]] static void to_json(ordered_json& j, std::variant<evo_test::RecordWithChanges, int32_t> const& value) {
+  static void to_json(ordered_json& j, std::variant<evo_test::RecordWithChanges, int32_t> const& value) {
     std::visit([&j](auto const& v) {j = v;}, value);
   }
 
-  [[maybe_unused]] static void from_json(ordered_json const& j, std::variant<evo_test::RecordWithChanges, int32_t>& value) {
+  static void from_json(ordered_json const& j, std::variant<evo_test::RecordWithChanges, int32_t>& value) {
     if ((j.is_object())) {
       value = j.get<evo_test::RecordWithChanges>();
       return;
@@ -133,7 +133,7 @@ struct adl_serializer<std::variant<evo_test::RecordWithChanges, int32_t>> {
 
 template <>
 struct adl_serializer<std::variant<evo_test::RecordWithChanges, int32_t, float, std::string>> {
-  [[maybe_unused]] static void to_json(ordered_json& j, std::variant<evo_test::RecordWithChanges, int32_t, float, std::string> const& value) {
+  static void to_json(ordered_json& j, std::variant<evo_test::RecordWithChanges, int32_t, float, std::string> const& value) {
     switch (value.index()) {
       case 0:
         j = ordered_json{ {"RecordWithChanges", std::get<evo_test::RecordWithChanges>(value)} };
@@ -152,7 +152,7 @@ struct adl_serializer<std::variant<evo_test::RecordWithChanges, int32_t, float, 
     }
   }
 
-  [[maybe_unused]] static void from_json(ordered_json const& j, std::variant<evo_test::RecordWithChanges, int32_t, float, std::string>& value) {
+  static void from_json(ordered_json const& j, std::variant<evo_test::RecordWithChanges, int32_t, float, std::string>& value) {
     auto it = j.begin();
     std::string tag = it.key();
     if (tag == "RecordWithChanges") {
@@ -176,11 +176,11 @@ struct adl_serializer<std::variant<evo_test::RecordWithChanges, int32_t, float, 
 
 template <>
 struct adl_serializer<std::variant<evo_test::RecordWithChanges, float>> {
-  [[maybe_unused]] static void to_json(ordered_json& j, std::variant<evo_test::RecordWithChanges, float> const& value) {
+  static void to_json(ordered_json& j, std::variant<evo_test::RecordWithChanges, float> const& value) {
     std::visit([&j](auto const& v) {j = v;}, value);
   }
 
-  [[maybe_unused]] static void from_json(ordered_json const& j, std::variant<evo_test::RecordWithChanges, float>& value) {
+  static void from_json(ordered_json const& j, std::variant<evo_test::RecordWithChanges, float>& value) {
     if ((j.is_object())) {
       value = j.get<evo_test::RecordWithChanges>();
       return;
@@ -195,7 +195,7 @@ struct adl_serializer<std::variant<evo_test::RecordWithChanges, float>> {
 
 template <>
 struct adl_serializer<std::variant<int32_t, float>> {
-  [[maybe_unused]] static void to_json(ordered_json& j, std::variant<int32_t, float> const& value) {
+  static void to_json(ordered_json& j, std::variant<int32_t, float> const& value) {
     switch (value.index()) {
       case 0:
         j = ordered_json{ {"T1", std::get<int32_t>(value)} };
@@ -208,7 +208,7 @@ struct adl_serializer<std::variant<int32_t, float>> {
     }
   }
 
-  [[maybe_unused]] static void from_json(ordered_json const& j, std::variant<int32_t, float>& value) {
+  static void from_json(ordered_json const& j, std::variant<int32_t, float>& value) {
     auto it = j.begin();
     std::string tag = it.key();
     if (tag == "T1") {
@@ -224,11 +224,11 @@ struct adl_serializer<std::variant<int32_t, float>> {
 
 template <>
 struct adl_serializer<std::variant<std::monostate, evo_test::RecordWithChanges, std::string>> {
-  [[maybe_unused]] static void to_json(ordered_json& j, std::variant<std::monostate, evo_test::RecordWithChanges, std::string> const& value) {
+  static void to_json(ordered_json& j, std::variant<std::monostate, evo_test::RecordWithChanges, std::string> const& value) {
     std::visit([&j](auto const& v) {j = v;}, value);
   }
 
-  [[maybe_unused]] static void from_json(ordered_json const& j, std::variant<std::monostate, evo_test::RecordWithChanges, std::string>& value) {
+  static void from_json(ordered_json const& j, std::variant<std::monostate, evo_test::RecordWithChanges, std::string>& value) {
     if ((j.is_null())) {
       value = j.get<std::monostate>();
       return;
@@ -247,7 +247,7 @@ struct adl_serializer<std::variant<std::monostate, evo_test::RecordWithChanges, 
 
 template <>
 struct adl_serializer<std::variant<evo_test::RecordWithChanges, evo_test::RenamedRecord>> {
-  [[maybe_unused]] static void to_json(ordered_json& j, std::variant<evo_test::RecordWithChanges, evo_test::RenamedRecord> const& value) {
+  static void to_json(ordered_json& j, std::variant<evo_test::RecordWithChanges, evo_test::RenamedRecord> const& value) {
     switch (value.index()) {
       case 0:
         j = ordered_json{ {"RecordWithChanges", std::get<evo_test::RecordWithChanges>(value)} };
@@ -260,7 +260,7 @@ struct adl_serializer<std::variant<evo_test::RecordWithChanges, evo_test::Rename
     }
   }
 
-  [[maybe_unused]] static void from_json(ordered_json const& j, std::variant<evo_test::RecordWithChanges, evo_test::RenamedRecord>& value) {
+  static void from_json(ordered_json const& j, std::variant<evo_test::RecordWithChanges, evo_test::RenamedRecord>& value) {
     auto it = j.begin();
     std::string tag = it.key();
     if (tag == "RecordWithChanges") {
@@ -279,7 +279,7 @@ NLOHMANN_JSON_NAMESPACE_END
 namespace evo_test {
 using ordered_json = nlohmann::ordered_json;
 
-[[maybe_unused]] static void to_json(ordered_json& j, evo_test::UnchangedRecord const& value) {
+void to_json(ordered_json& j, evo_test::UnchangedRecord const& value) {
   j = ordered_json::object();
   if (yardl::ndjson::ShouldSerializeFieldValue(value.name)) {
     j.push_back({"name", value.name});
@@ -292,7 +292,7 @@ using ordered_json = nlohmann::ordered_json;
   }
 }
 
-[[maybe_unused]] static void from_json(ordered_json const& j, evo_test::UnchangedRecord& value) {
+void from_json(ordered_json const& j, evo_test::UnchangedRecord& value) {
   if (auto it = j.find("name"); it != j.end()) {
     it->get_to(value.name);
   }
@@ -304,7 +304,7 @@ using ordered_json = nlohmann::ordered_json;
   }
 }
 
-[[maybe_unused]] static void to_json(ordered_json& j, evo_test::RecordWithChanges const& value) {
+void to_json(ordered_json& j, evo_test::RecordWithChanges const& value) {
   j = ordered_json::object();
   if (yardl::ndjson::ShouldSerializeFieldValue(value.int_to_long)) {
     j.push_back({"intToLong", value.int_to_long});
@@ -329,7 +329,7 @@ using ordered_json = nlohmann::ordered_json;
   }
 }
 
-[[maybe_unused]] static void from_json(ordered_json const& j, evo_test::RecordWithChanges& value) {
+void from_json(ordered_json const& j, evo_test::RecordWithChanges& value) {
   if (auto it = j.find("intToLong"); it != j.end()) {
     it->get_to(value.int_to_long);
   }
@@ -353,7 +353,7 @@ using ordered_json = nlohmann::ordered_json;
   }
 }
 
-[[maybe_unused]] static void to_json(ordered_json& j, evo_test::RenamedRecord const& value) {
+void to_json(ordered_json& j, evo_test::RenamedRecord const& value) {
   j = ordered_json::object();
   if (yardl::ndjson::ShouldSerializeFieldValue(value.i)) {
     j.push_back({"i", value.i});
@@ -363,7 +363,7 @@ using ordered_json = nlohmann::ordered_json;
   }
 }
 
-[[maybe_unused]] static void from_json(ordered_json const& j, evo_test::RenamedRecord& value) {
+void from_json(ordered_json const& j, evo_test::RenamedRecord& value) {
   if (auto it = j.find("i"); it != j.end()) {
     it->get_to(value.i);
   }
@@ -372,20 +372,20 @@ using ordered_json = nlohmann::ordered_json;
   }
 }
 
-[[maybe_unused]] static void to_json(ordered_json& j, evo_test::RC const& value) {
+void to_json(ordered_json& j, evo_test::RC const& value) {
   j = ordered_json::object();
   if (yardl::ndjson::ShouldSerializeFieldValue(value.subject)) {
     j.push_back({"subject", value.subject});
   }
 }
 
-[[maybe_unused]] static void from_json(ordered_json const& j, evo_test::RC& value) {
+void from_json(ordered_json const& j, evo_test::RC& value) {
   if (auto it = j.find("subject"); it != j.end()) {
     it->get_to(value.subject);
   }
 }
 
-[[maybe_unused]] static void to_json(ordered_json& j, evo_test::UnusedButChangedRecord const& value) {
+void to_json(ordered_json& j, evo_test::UnusedButChangedRecord const& value) {
   j = ordered_json::object();
   if (yardl::ndjson::ShouldSerializeFieldValue(value.name)) {
     j.push_back({"name", value.name});
@@ -395,7 +395,7 @@ using ordered_json = nlohmann::ordered_json;
   }
 }
 
-[[maybe_unused]] static void from_json(ordered_json const& j, evo_test::UnusedButChangedRecord& value) {
+void from_json(ordered_json const& j, evo_test::UnusedButChangedRecord& value) {
   if (auto it = j.find("name"); it != j.end()) {
     it->get_to(value.name);
   }
@@ -405,7 +405,7 @@ using ordered_json = nlohmann::ordered_json;
 }
 
 template <typename T1, typename T2>
-[[maybe_unused]] static void to_json(ordered_json& j, evo_test::GenericRecord<T1, T2> const& value) {
+void to_json(ordered_json& j, evo_test::GenericRecord<T1, T2> const& value) {
   j = ordered_json::object();
   if (yardl::ndjson::ShouldSerializeFieldValue(value.removed)) {
     j.push_back({"removed", value.removed});
@@ -419,7 +419,7 @@ template <typename T1, typename T2>
 }
 
 template <typename T1, typename T2>
-[[maybe_unused]] static void from_json(ordered_json const& j, evo_test::GenericRecord<T1, T2>& value) {
+void from_json(ordered_json const& j, evo_test::GenericRecord<T1, T2>& value) {
   if (auto it = j.find("removed"); it != j.end()) {
     it->get_to(value.removed);
   }
@@ -432,7 +432,7 @@ template <typename T1, typename T2>
 }
 
 template <typename T>
-[[maybe_unused]] static void to_json(ordered_json& j, evo_test::GenericParentRecord<T> const& value) {
+void to_json(ordered_json& j, evo_test::GenericParentRecord<T> const& value) {
   j = ordered_json::object();
   if (yardl::ndjson::ShouldSerializeFieldValue(value.record)) {
     j.push_back({"record", value.record});
@@ -446,7 +446,7 @@ template <typename T>
 }
 
 template <typename T>
-[[maybe_unused]] static void from_json(ordered_json const& j, evo_test::GenericParentRecord<T>& value) {
+void from_json(ordered_json const& j, evo_test::GenericParentRecord<T>& value) {
   if (auto it = j.find("record"); it != j.end()) {
     it->get_to(value.record);
   }
@@ -459,7 +459,7 @@ template <typename T>
 }
 
 template <typename T2>
-[[maybe_unused]] static void to_json(ordered_json& j, evo_test::UnchangedGeneric<T2> const& value) {
+void to_json(ordered_json& j, evo_test::UnchangedGeneric<T2> const& value) {
   j = ordered_json::object();
   if (yardl::ndjson::ShouldSerializeFieldValue(value.field)) {
     j.push_back({"field", value.field});
@@ -467,14 +467,14 @@ template <typename T2>
 }
 
 template <typename T2>
-[[maybe_unused]] static void from_json(ordered_json const& j, evo_test::UnchangedGeneric<T2>& value) {
+void from_json(ordered_json const& j, evo_test::UnchangedGeneric<T2>& value) {
   if (auto it = j.find("field"); it != j.end()) {
     it->get_to(value.field);
   }
 }
 
 template <typename Y, typename Z>
-[[maybe_unused]] static void to_json(ordered_json& j, evo_test::ChangedGeneric<Y, Z> const& value) {
+void to_json(ordered_json& j, evo_test::ChangedGeneric<Y, Z> const& value) {
   j = ordered_json::object();
   if (yardl::ndjson::ShouldSerializeFieldValue(value.y)) {
     j.push_back({"y", value.y});
@@ -485,7 +485,7 @@ template <typename Y, typename Z>
 }
 
 template <typename Y, typename Z>
-[[maybe_unused]] static void from_json(ordered_json const& j, evo_test::ChangedGeneric<Y, Z>& value) {
+void from_json(ordered_json const& j, evo_test::ChangedGeneric<Y, Z>& value) {
   if (auto it = j.find("y"); it != j.end()) {
     it->get_to(value.y);
   }

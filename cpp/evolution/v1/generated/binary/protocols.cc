@@ -273,7 +273,7 @@ void ReadUnion(yardl::binary::CodedInputStream& stream, std::variant<T0, T1, T2,
 
 namespace evo_test::binary {
 namespace {
-[[maybe_unused]] static void WriteAliasedInt(yardl::binary::CodedOutputStream& stream, evo_test::AliasedInt const& value) {
+[[maybe_unused]] void WriteAliasedInt(yardl::binary::CodedOutputStream& stream, evo_test::AliasedInt const& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::AliasedInt>::value) {
     yardl::binary::WriteTriviallySerializable(stream, value);
     return;
@@ -282,7 +282,7 @@ namespace {
   yardl::binary::WriteInteger(stream, value);
 }
 
-[[maybe_unused]] static void ReadAliasedInt(yardl::binary::CodedInputStream& stream, evo_test::AliasedInt& value) {
+[[maybe_unused]] void ReadAliasedInt(yardl::binary::CodedInputStream& stream, evo_test::AliasedInt& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::AliasedInt>::value) {
     yardl::binary::ReadTriviallySerializable(stream, value);
     return;
@@ -291,7 +291,7 @@ namespace {
   yardl::binary::ReadInteger(stream, value);
 }
 
-[[maybe_unused]] static void WriteAliasedString(yardl::binary::CodedOutputStream& stream, evo_test::AliasedString const& value) {
+[[maybe_unused]] void WriteAliasedString(yardl::binary::CodedOutputStream& stream, evo_test::AliasedString const& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::AliasedString>::value) {
     yardl::binary::WriteTriviallySerializable(stream, value);
     return;
@@ -300,7 +300,7 @@ namespace {
   yardl::binary::WriteString(stream, value);
 }
 
-[[maybe_unused]] static void ReadAliasedString(yardl::binary::CodedInputStream& stream, evo_test::AliasedString& value) {
+[[maybe_unused]] void ReadAliasedString(yardl::binary::CodedInputStream& stream, evo_test::AliasedString& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::AliasedString>::value) {
     yardl::binary::ReadTriviallySerializable(stream, value);
     return;
@@ -309,7 +309,7 @@ namespace {
   yardl::binary::ReadString(stream, value);
 }
 
-[[maybe_unused]] static void WriteAliasedLongToString(yardl::binary::CodedOutputStream& stream, evo_test::AliasedLongToString const& value) {
+[[maybe_unused]] void WriteAliasedLongToString(yardl::binary::CodedOutputStream& stream, evo_test::AliasedLongToString const& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::AliasedLongToString>::value) {
     yardl::binary::WriteTriviallySerializable(stream, value);
     return;
@@ -318,7 +318,7 @@ namespace {
   yardl::binary::WriteString(stream, value);
 }
 
-[[maybe_unused]] static void ReadAliasedLongToString(yardl::binary::CodedInputStream& stream, evo_test::AliasedLongToString& value) {
+[[maybe_unused]] void ReadAliasedLongToString(yardl::binary::CodedInputStream& stream, evo_test::AliasedLongToString& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::AliasedLongToString>::value) {
     yardl::binary::ReadTriviallySerializable(stream, value);
     return;
@@ -327,7 +327,7 @@ namespace {
   yardl::binary::ReadString(stream, value);
 }
 
-[[maybe_unused]] static void WriteUnchangedRecord(yardl::binary::CodedOutputStream& stream, evo_test::UnchangedRecord const& value) {
+[[maybe_unused]] void WriteUnchangedRecord(yardl::binary::CodedOutputStream& stream, evo_test::UnchangedRecord const& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::UnchangedRecord>::value) {
     yardl::binary::WriteTriviallySerializable(stream, value);
     return;
@@ -338,7 +338,7 @@ namespace {
   yardl::binary::WriteMap<std::string, double, yardl::binary::WriteString, yardl::binary::WriteFloatingPoint>(stream, value.meta);
 }
 
-[[maybe_unused]] static void ReadUnchangedRecord(yardl::binary::CodedInputStream& stream, evo_test::UnchangedRecord& value) {
+[[maybe_unused]] void ReadUnchangedRecord(yardl::binary::CodedInputStream& stream, evo_test::UnchangedRecord& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::UnchangedRecord>::value) {
     yardl::binary::ReadTriviallySerializable(stream, value);
     return;
@@ -349,7 +349,7 @@ namespace {
   yardl::binary::ReadMap<std::string, double, yardl::binary::ReadString, yardl::binary::ReadFloatingPoint>(stream, value.meta);
 }
 
-[[maybe_unused]] static void WriteRecordWithChanges(yardl::binary::CodedOutputStream& stream, evo_test::RecordWithChanges const& value) {
+[[maybe_unused]] void WriteRecordWithChanges(yardl::binary::CodedOutputStream& stream, evo_test::RecordWithChanges const& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::RecordWithChanges>::value) {
     yardl::binary::WriteTriviallySerializable(stream, value);
     return;
@@ -361,7 +361,7 @@ namespace {
   yardl::binary::WriteOptional<std::string, yardl::binary::WriteString>(stream, value.optional_long_to_string);
 }
 
-[[maybe_unused]] static void ReadRecordWithChanges(yardl::binary::CodedInputStream& stream, evo_test::RecordWithChanges& value) {
+[[maybe_unused]] void ReadRecordWithChanges(yardl::binary::CodedInputStream& stream, evo_test::RecordWithChanges& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::RecordWithChanges>::value) {
     yardl::binary::ReadTriviallySerializable(stream, value);
     return;
@@ -373,7 +373,7 @@ namespace {
   yardl::binary::ReadOptional<std::string, yardl::binary::ReadString>(stream, value.optional_long_to_string);
 }
 
-[[maybe_unused]] static void WriteAliasedRecordWithChanges(yardl::binary::CodedOutputStream& stream, evo_test::AliasedRecordWithChanges const& value) {
+[[maybe_unused]] void WriteAliasedRecordWithChanges(yardl::binary::CodedOutputStream& stream, evo_test::AliasedRecordWithChanges const& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::AliasedRecordWithChanges>::value) {
     yardl::binary::WriteTriviallySerializable(stream, value);
     return;
@@ -382,7 +382,7 @@ namespace {
   evo_test::binary::WriteRecordWithChanges(stream, value);
 }
 
-[[maybe_unused]] static void ReadAliasedRecordWithChanges(yardl::binary::CodedInputStream& stream, evo_test::AliasedRecordWithChanges& value) {
+[[maybe_unused]] void ReadAliasedRecordWithChanges(yardl::binary::CodedInputStream& stream, evo_test::AliasedRecordWithChanges& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::AliasedRecordWithChanges>::value) {
     yardl::binary::ReadTriviallySerializable(stream, value);
     return;
@@ -391,7 +391,7 @@ namespace {
   evo_test::binary::ReadRecordWithChanges(stream, value);
 }
 
-[[maybe_unused]] static void WriteAliasOfAliasedRecordWithChanges(yardl::binary::CodedOutputStream& stream, evo_test::AliasOfAliasedRecordWithChanges const& value) {
+[[maybe_unused]] void WriteAliasOfAliasedRecordWithChanges(yardl::binary::CodedOutputStream& stream, evo_test::AliasOfAliasedRecordWithChanges const& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::AliasOfAliasedRecordWithChanges>::value) {
     yardl::binary::WriteTriviallySerializable(stream, value);
     return;
@@ -400,7 +400,7 @@ namespace {
   evo_test::binary::WriteAliasedRecordWithChanges(stream, value);
 }
 
-[[maybe_unused]] static void ReadAliasOfAliasedRecordWithChanges(yardl::binary::CodedInputStream& stream, evo_test::AliasOfAliasedRecordWithChanges& value) {
+[[maybe_unused]] void ReadAliasOfAliasedRecordWithChanges(yardl::binary::CodedInputStream& stream, evo_test::AliasOfAliasedRecordWithChanges& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::AliasOfAliasedRecordWithChanges>::value) {
     yardl::binary::ReadTriviallySerializable(stream, value);
     return;
@@ -409,7 +409,7 @@ namespace {
   evo_test::binary::ReadAliasedRecordWithChanges(stream, value);
 }
 
-[[maybe_unused]] static void WriteAliasedOptionalRecord(yardl::binary::CodedOutputStream& stream, evo_test::AliasedOptionalRecord const& value) {
+[[maybe_unused]] void WriteAliasedOptionalRecord(yardl::binary::CodedOutputStream& stream, evo_test::AliasedOptionalRecord const& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::AliasedOptionalRecord>::value) {
     yardl::binary::WriteTriviallySerializable(stream, value);
     return;
@@ -418,7 +418,7 @@ namespace {
   yardl::binary::WriteOptional<evo_test::RecordWithChanges, evo_test::binary::WriteRecordWithChanges>(stream, value);
 }
 
-[[maybe_unused]] static void ReadAliasedOptionalRecord(yardl::binary::CodedInputStream& stream, evo_test::AliasedOptionalRecord& value) {
+[[maybe_unused]] void ReadAliasedOptionalRecord(yardl::binary::CodedInputStream& stream, evo_test::AliasedOptionalRecord& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::AliasedOptionalRecord>::value) {
     yardl::binary::ReadTriviallySerializable(stream, value);
     return;
@@ -427,7 +427,7 @@ namespace {
   yardl::binary::ReadOptional<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges>(stream, value);
 }
 
-[[maybe_unused]] static void WriteAliasedOptionalString(yardl::binary::CodedOutputStream& stream, evo_test::AliasedOptionalString const& value) {
+[[maybe_unused]] void WriteAliasedOptionalString(yardl::binary::CodedOutputStream& stream, evo_test::AliasedOptionalString const& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::AliasedOptionalString>::value) {
     yardl::binary::WriteTriviallySerializable(stream, value);
     return;
@@ -436,7 +436,7 @@ namespace {
   yardl::binary::WriteOptional<std::string, yardl::binary::WriteString>(stream, value);
 }
 
-[[maybe_unused]] static void ReadAliasedOptionalString(yardl::binary::CodedInputStream& stream, evo_test::AliasedOptionalString& value) {
+[[maybe_unused]] void ReadAliasedOptionalString(yardl::binary::CodedInputStream& stream, evo_test::AliasedOptionalString& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::AliasedOptionalString>::value) {
     yardl::binary::ReadTriviallySerializable(stream, value);
     return;
@@ -445,7 +445,7 @@ namespace {
   yardl::binary::ReadOptional<std::string, yardl::binary::ReadString>(stream, value);
 }
 
-[[maybe_unused]] static void WriteAliasedRecordOrInt(yardl::binary::CodedOutputStream& stream, evo_test::AliasedRecordOrInt const& value) {
+[[maybe_unused]] void WriteAliasedRecordOrInt(yardl::binary::CodedOutputStream& stream, evo_test::AliasedRecordOrInt const& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::AliasedRecordOrInt>::value) {
     yardl::binary::WriteTriviallySerializable(stream, value);
     return;
@@ -454,7 +454,7 @@ namespace {
   WriteUnion<evo_test::RecordWithChanges, evo_test::binary::WriteRecordWithChanges, int32_t, yardl::binary::WriteInteger>(stream, value);
 }
 
-[[maybe_unused]] static void ReadAliasedRecordOrInt(yardl::binary::CodedInputStream& stream, evo_test::AliasedRecordOrInt& value) {
+[[maybe_unused]] void ReadAliasedRecordOrInt(yardl::binary::CodedInputStream& stream, evo_test::AliasedRecordOrInt& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::AliasedRecordOrInt>::value) {
     yardl::binary::ReadTriviallySerializable(stream, value);
     return;
@@ -463,7 +463,7 @@ namespace {
   ReadUnion<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges, int32_t, yardl::binary::ReadInteger>(stream, value);
 }
 
-[[maybe_unused]] static void WriteAliasedRecordOrString(yardl::binary::CodedOutputStream& stream, evo_test::AliasedRecordOrString const& value) {
+[[maybe_unused]] void WriteAliasedRecordOrString(yardl::binary::CodedOutputStream& stream, evo_test::AliasedRecordOrString const& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::AliasedRecordOrString>::value) {
     yardl::binary::WriteTriviallySerializable(stream, value);
     return;
@@ -472,7 +472,7 @@ namespace {
   WriteUnion<evo_test::RecordWithChanges, evo_test::binary::WriteRecordWithChanges, std::string, yardl::binary::WriteString>(stream, value);
 }
 
-[[maybe_unused]] static void ReadAliasedRecordOrString(yardl::binary::CodedInputStream& stream, evo_test::AliasedRecordOrString& value) {
+[[maybe_unused]] void ReadAliasedRecordOrString(yardl::binary::CodedInputStream& stream, evo_test::AliasedRecordOrString& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::AliasedRecordOrString>::value) {
     yardl::binary::ReadTriviallySerializable(stream, value);
     return;
@@ -481,7 +481,7 @@ namespace {
   ReadUnion<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges, std::string, yardl::binary::ReadString>(stream, value);
 }
 
-[[maybe_unused]] static void WriteDeprecatedRecord(yardl::binary::CodedOutputStream& stream, evo_test::DeprecatedRecord const& value) {
+[[maybe_unused]] void WriteDeprecatedRecord(yardl::binary::CodedOutputStream& stream, evo_test::DeprecatedRecord const& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::DeprecatedRecord>::value) {
     yardl::binary::WriteTriviallySerializable(stream, value);
     return;
@@ -491,7 +491,7 @@ namespace {
   yardl::binary::WriteInteger(stream, value.i);
 }
 
-[[maybe_unused]] static void ReadDeprecatedRecord(yardl::binary::CodedInputStream& stream, evo_test::DeprecatedRecord& value) {
+[[maybe_unused]] void ReadDeprecatedRecord(yardl::binary::CodedInputStream& stream, evo_test::DeprecatedRecord& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::DeprecatedRecord>::value) {
     yardl::binary::ReadTriviallySerializable(stream, value);
     return;
@@ -501,7 +501,7 @@ namespace {
   yardl::binary::ReadInteger(stream, value.i);
 }
 
-[[maybe_unused]] static void WriteRenamedRecord(yardl::binary::CodedOutputStream& stream, evo_test::RenamedRecord const& value) {
+[[maybe_unused]] void WriteRenamedRecord(yardl::binary::CodedOutputStream& stream, evo_test::RenamedRecord const& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::RenamedRecord>::value) {
     yardl::binary::WriteTriviallySerializable(stream, value);
     return;
@@ -510,7 +510,7 @@ namespace {
   evo_test::binary::WriteDeprecatedRecord(stream, value);
 }
 
-[[maybe_unused]] static void ReadRenamedRecord(yardl::binary::CodedInputStream& stream, evo_test::RenamedRecord& value) {
+[[maybe_unused]] void ReadRenamedRecord(yardl::binary::CodedInputStream& stream, evo_test::RenamedRecord& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::RenamedRecord>::value) {
     yardl::binary::ReadTriviallySerializable(stream, value);
     return;
@@ -519,7 +519,7 @@ namespace {
   evo_test::binary::ReadDeprecatedRecord(stream, value);
 }
 
-[[maybe_unused]] static void WriteStreamItem(yardl::binary::CodedOutputStream& stream, evo_test::StreamItem const& value) {
+[[maybe_unused]] void WriteStreamItem(yardl::binary::CodedOutputStream& stream, evo_test::StreamItem const& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::StreamItem>::value) {
     yardl::binary::WriteTriviallySerializable(stream, value);
     return;
@@ -528,7 +528,7 @@ namespace {
   WriteUnion<evo_test::RecordWithChanges, evo_test::binary::WriteRecordWithChanges, evo_test::RenamedRecord, evo_test::binary::WriteRenamedRecord>(stream, value);
 }
 
-[[maybe_unused]] static void ReadStreamItem(yardl::binary::CodedInputStream& stream, evo_test::StreamItem& value) {
+[[maybe_unused]] void ReadStreamItem(yardl::binary::CodedInputStream& stream, evo_test::StreamItem& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::StreamItem>::value) {
     yardl::binary::ReadTriviallySerializable(stream, value);
     return;
@@ -537,7 +537,7 @@ namespace {
   ReadUnion<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges, evo_test::RenamedRecord, evo_test::binary::ReadRenamedRecord>(stream, value);
 }
 
-[[maybe_unused]] static void WriteRZ(yardl::binary::CodedOutputStream& stream, evo_test::RZ const& value) {
+[[maybe_unused]] void WriteRZ(yardl::binary::CodedOutputStream& stream, evo_test::RZ const& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::RZ>::value) {
     yardl::binary::WriteTriviallySerializable(stream, value);
     return;
@@ -546,7 +546,7 @@ namespace {
   yardl::binary::WriteInteger(stream, value.subject);
 }
 
-[[maybe_unused]] static void ReadRZ(yardl::binary::CodedInputStream& stream, evo_test::RZ& value) {
+[[maybe_unused]] void ReadRZ(yardl::binary::CodedInputStream& stream, evo_test::RZ& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::RZ>::value) {
     yardl::binary::ReadTriviallySerializable(stream, value);
     return;
@@ -555,7 +555,7 @@ namespace {
   yardl::binary::ReadInteger(stream, value.subject);
 }
 
-[[maybe_unused]] static void WriteRY(yardl::binary::CodedOutputStream& stream, evo_test::RY const& value) {
+[[maybe_unused]] void WriteRY(yardl::binary::CodedOutputStream& stream, evo_test::RY const& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::RY>::value) {
     yardl::binary::WriteTriviallySerializable(stream, value);
     return;
@@ -564,7 +564,7 @@ namespace {
   evo_test::binary::WriteRZ(stream, value);
 }
 
-[[maybe_unused]] static void ReadRY(yardl::binary::CodedInputStream& stream, evo_test::RY& value) {
+[[maybe_unused]] void ReadRY(yardl::binary::CodedInputStream& stream, evo_test::RY& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::RY>::value) {
     yardl::binary::ReadTriviallySerializable(stream, value);
     return;
@@ -573,7 +573,7 @@ namespace {
   evo_test::binary::ReadRZ(stream, value);
 }
 
-[[maybe_unused]] static void WriteRNew(yardl::binary::CodedOutputStream& stream, evo_test::RNew const& value) {
+[[maybe_unused]] void WriteRNew(yardl::binary::CodedOutputStream& stream, evo_test::RNew const& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::RNew>::value) {
     yardl::binary::WriteTriviallySerializable(stream, value);
     return;
@@ -582,7 +582,7 @@ namespace {
   evo_test::binary::WriteRY(stream, value);
 }
 
-[[maybe_unused]] static void ReadRNew(yardl::binary::CodedInputStream& stream, evo_test::RNew& value) {
+[[maybe_unused]] void ReadRNew(yardl::binary::CodedInputStream& stream, evo_test::RNew& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::RNew>::value) {
     yardl::binary::ReadTriviallySerializable(stream, value);
     return;
@@ -591,7 +591,7 @@ namespace {
   evo_test::binary::ReadRY(stream, value);
 }
 
-[[maybe_unused]] static void WriteRLink(yardl::binary::CodedOutputStream& stream, evo_test::RLink const& value) {
+[[maybe_unused]] void WriteRLink(yardl::binary::CodedOutputStream& stream, evo_test::RLink const& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::RLink>::value) {
     yardl::binary::WriteTriviallySerializable(stream, value);
     return;
@@ -600,7 +600,7 @@ namespace {
   evo_test::binary::WriteRNew(stream, value);
 }
 
-[[maybe_unused]] static void ReadRLink(yardl::binary::CodedInputStream& stream, evo_test::RLink& value) {
+[[maybe_unused]] void ReadRLink(yardl::binary::CodedInputStream& stream, evo_test::RLink& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::RLink>::value) {
     yardl::binary::ReadTriviallySerializable(stream, value);
     return;
@@ -609,7 +609,7 @@ namespace {
   evo_test::binary::ReadRNew(stream, value);
 }
 
-[[maybe_unused]] static void WriteRX(yardl::binary::CodedOutputStream& stream, evo_test::RX const& value) {
+[[maybe_unused]] void WriteRX(yardl::binary::CodedOutputStream& stream, evo_test::RX const& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::RX>::value) {
     yardl::binary::WriteTriviallySerializable(stream, value);
     return;
@@ -618,7 +618,7 @@ namespace {
   evo_test::binary::WriteRLink(stream, value);
 }
 
-[[maybe_unused]] static void ReadRX(yardl::binary::CodedInputStream& stream, evo_test::RX& value) {
+[[maybe_unused]] void ReadRX(yardl::binary::CodedInputStream& stream, evo_test::RX& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::RX>::value) {
     yardl::binary::ReadTriviallySerializable(stream, value);
     return;
@@ -627,7 +627,7 @@ namespace {
   evo_test::binary::ReadRLink(stream, value);
 }
 
-[[maybe_unused]] static void WriteRUnion(yardl::binary::CodedOutputStream& stream, evo_test::RUnion const& value) {
+[[maybe_unused]] void WriteRUnion(yardl::binary::CodedOutputStream& stream, evo_test::RUnion const& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::RUnion>::value) {
     yardl::binary::WriteTriviallySerializable(stream, value);
     return;
@@ -636,7 +636,7 @@ namespace {
   WriteUnion<evo_test::RX, evo_test::binary::WriteRX, std::string, yardl::binary::WriteString>(stream, value);
 }
 
-[[maybe_unused]] static void ReadRUnion(yardl::binary::CodedInputStream& stream, evo_test::RUnion& value) {
+[[maybe_unused]] void ReadRUnion(yardl::binary::CodedInputStream& stream, evo_test::RUnion& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::RUnion>::value) {
     yardl::binary::ReadTriviallySerializable(stream, value);
     return;
@@ -645,7 +645,7 @@ namespace {
   ReadUnion<evo_test::RX, evo_test::binary::ReadRX, std::string, yardl::binary::ReadString>(stream, value);
 }
 
-[[maybe_unused]] static void WriteUnusedButChangedRecord(yardl::binary::CodedOutputStream& stream, evo_test::UnusedButChangedRecord const& value) {
+[[maybe_unused]] void WriteUnusedButChangedRecord(yardl::binary::CodedOutputStream& stream, evo_test::UnusedButChangedRecord const& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::UnusedButChangedRecord>::value) {
     yardl::binary::WriteTriviallySerializable(stream, value);
     return;
@@ -655,7 +655,7 @@ namespace {
   yardl::binary::WriteString(stream, value.name);
 }
 
-[[maybe_unused]] static void ReadUnusedButChangedRecord(yardl::binary::CodedInputStream& stream, evo_test::UnusedButChangedRecord& value) {
+[[maybe_unused]] void ReadUnusedButChangedRecord(yardl::binary::CodedInputStream& stream, evo_test::UnusedButChangedRecord& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::UnusedButChangedRecord>::value) {
     yardl::binary::ReadTriviallySerializable(stream, value);
     return;
@@ -666,7 +666,7 @@ namespace {
 }
 
 template<typename T1, yardl::binary::Writer<T1> WriteT1, typename T2, yardl::binary::Writer<T2> WriteT2>
-[[maybe_unused]] static void WriteGenericRecord(yardl::binary::CodedOutputStream& stream, evo_test::GenericRecord<T1, T2> const& value) {
+[[maybe_unused]] void WriteGenericRecord(yardl::binary::CodedOutputStream& stream, evo_test::GenericRecord<T1, T2> const& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::GenericRecord<T1, T2>>::value) {
     yardl::binary::WriteTriviallySerializable(stream, value);
     return;
@@ -678,7 +678,7 @@ template<typename T1, yardl::binary::Writer<T1> WriteT1, typename T2, yardl::bin
 }
 
 template<typename T1, yardl::binary::Reader<T1> ReadT1, typename T2, yardl::binary::Reader<T2> ReadT2>
-[[maybe_unused]] static void ReadGenericRecord(yardl::binary::CodedInputStream& stream, evo_test::GenericRecord<T1, T2>& value) {
+[[maybe_unused]] void ReadGenericRecord(yardl::binary::CodedInputStream& stream, evo_test::GenericRecord<T1, T2>& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::GenericRecord<T1, T2>>::value) {
     yardl::binary::ReadTriviallySerializable(stream, value);
     return;
@@ -690,7 +690,7 @@ template<typename T1, yardl::binary::Reader<T1> ReadT1, typename T2, yardl::bina
 }
 
 template<typename A, yardl::binary::Writer<A> WriteA, typename B, yardl::binary::Writer<B> WriteB>
-[[maybe_unused]] static void WriteAliasedOpenGenericRecord(yardl::binary::CodedOutputStream& stream, evo_test::AliasedOpenGenericRecord<A, B> const& value) {
+[[maybe_unused]] void WriteAliasedOpenGenericRecord(yardl::binary::CodedOutputStream& stream, evo_test::AliasedOpenGenericRecord<A, B> const& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::AliasedOpenGenericRecord<A, B>>::value) {
     yardl::binary::WriteTriviallySerializable(stream, value);
     return;
@@ -700,7 +700,7 @@ template<typename A, yardl::binary::Writer<A> WriteA, typename B, yardl::binary:
 }
 
 template<typename A, yardl::binary::Reader<A> ReadA, typename B, yardl::binary::Reader<B> ReadB>
-[[maybe_unused]] static void ReadAliasedOpenGenericRecord(yardl::binary::CodedInputStream& stream, evo_test::AliasedOpenGenericRecord<A, B>& value) {
+[[maybe_unused]] void ReadAliasedOpenGenericRecord(yardl::binary::CodedInputStream& stream, evo_test::AliasedOpenGenericRecord<A, B>& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::AliasedOpenGenericRecord<A, B>>::value) {
     yardl::binary::ReadTriviallySerializable(stream, value);
     return;
@@ -710,7 +710,7 @@ template<typename A, yardl::binary::Reader<A> ReadA, typename B, yardl::binary::
 }
 
 template<typename T, yardl::binary::Writer<T> WriteT>
-[[maybe_unused]] static void WriteAliasedHalfClosedGenericRecord(yardl::binary::CodedOutputStream& stream, evo_test::AliasedHalfClosedGenericRecord<T> const& value) {
+[[maybe_unused]] void WriteAliasedHalfClosedGenericRecord(yardl::binary::CodedOutputStream& stream, evo_test::AliasedHalfClosedGenericRecord<T> const& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::AliasedHalfClosedGenericRecord<T>>::value) {
     yardl::binary::WriteTriviallySerializable(stream, value);
     return;
@@ -720,7 +720,7 @@ template<typename T, yardl::binary::Writer<T> WriteT>
 }
 
 template<typename T, yardl::binary::Reader<T> ReadT>
-[[maybe_unused]] static void ReadAliasedHalfClosedGenericRecord(yardl::binary::CodedInputStream& stream, evo_test::AliasedHalfClosedGenericRecord<T>& value) {
+[[maybe_unused]] void ReadAliasedHalfClosedGenericRecord(yardl::binary::CodedInputStream& stream, evo_test::AliasedHalfClosedGenericRecord<T>& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::AliasedHalfClosedGenericRecord<T>>::value) {
     yardl::binary::ReadTriviallySerializable(stream, value);
     return;
@@ -730,7 +730,7 @@ template<typename T, yardl::binary::Reader<T> ReadT>
 }
 
 template<typename T1, yardl::binary::Writer<T1> WriteT1, typename T2, yardl::binary::Writer<T2> WriteT2>
-[[maybe_unused]] static void WriteGenericUnion(yardl::binary::CodedOutputStream& stream, evo_test::GenericUnion<T1, T2> const& value) {
+[[maybe_unused]] void WriteGenericUnion(yardl::binary::CodedOutputStream& stream, evo_test::GenericUnion<T1, T2> const& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::GenericUnion<T1, T2>>::value) {
     yardl::binary::WriteTriviallySerializable(stream, value);
     return;
@@ -740,7 +740,7 @@ template<typename T1, yardl::binary::Writer<T1> WriteT1, typename T2, yardl::bin
 }
 
 template<typename T1, yardl::binary::Reader<T1> ReadT1, typename T2, yardl::binary::Reader<T2> ReadT2>
-[[maybe_unused]] static void ReadGenericUnion(yardl::binary::CodedInputStream& stream, evo_test::GenericUnion<T1, T2>& value) {
+[[maybe_unused]] void ReadGenericUnion(yardl::binary::CodedInputStream& stream, evo_test::GenericUnion<T1, T2>& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::GenericUnion<T1, T2>>::value) {
     yardl::binary::ReadTriviallySerializable(stream, value);
     return;
@@ -750,7 +750,7 @@ template<typename T1, yardl::binary::Reader<T1> ReadT1, typename T2, yardl::bina
 }
 
 template<typename A, yardl::binary::Writer<A> WriteA, typename B, yardl::binary::Writer<B> WriteB>
-[[maybe_unused]] static void WriteAliasedOpenGenericUnion(yardl::binary::CodedOutputStream& stream, evo_test::AliasedOpenGenericUnion<A, B> const& value) {
+[[maybe_unused]] void WriteAliasedOpenGenericUnion(yardl::binary::CodedOutputStream& stream, evo_test::AliasedOpenGenericUnion<A, B> const& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::AliasedOpenGenericUnion<A, B>>::value) {
     yardl::binary::WriteTriviallySerializable(stream, value);
     return;
@@ -760,7 +760,7 @@ template<typename A, yardl::binary::Writer<A> WriteA, typename B, yardl::binary:
 }
 
 template<typename A, yardl::binary::Reader<A> ReadA, typename B, yardl::binary::Reader<B> ReadB>
-[[maybe_unused]] static void ReadAliasedOpenGenericUnion(yardl::binary::CodedInputStream& stream, evo_test::AliasedOpenGenericUnion<A, B>& value) {
+[[maybe_unused]] void ReadAliasedOpenGenericUnion(yardl::binary::CodedInputStream& stream, evo_test::AliasedOpenGenericUnion<A, B>& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::AliasedOpenGenericUnion<A, B>>::value) {
     yardl::binary::ReadTriviallySerializable(stream, value);
     return;
@@ -770,7 +770,7 @@ template<typename A, yardl::binary::Reader<A> ReadA, typename B, yardl::binary::
 }
 
 template<typename T, yardl::binary::Writer<T> WriteT>
-[[maybe_unused]] static void WriteAliasedHalfClosedGenericUnion(yardl::binary::CodedOutputStream& stream, evo_test::AliasedHalfClosedGenericUnion<T> const& value) {
+[[maybe_unused]] void WriteAliasedHalfClosedGenericUnion(yardl::binary::CodedOutputStream& stream, evo_test::AliasedHalfClosedGenericUnion<T> const& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::AliasedHalfClosedGenericUnion<T>>::value) {
     yardl::binary::WriteTriviallySerializable(stream, value);
     return;
@@ -780,7 +780,7 @@ template<typename T, yardl::binary::Writer<T> WriteT>
 }
 
 template<typename T, yardl::binary::Reader<T> ReadT>
-[[maybe_unused]] static void ReadAliasedHalfClosedGenericUnion(yardl::binary::CodedInputStream& stream, evo_test::AliasedHalfClosedGenericUnion<T>& value) {
+[[maybe_unused]] void ReadAliasedHalfClosedGenericUnion(yardl::binary::CodedInputStream& stream, evo_test::AliasedHalfClosedGenericUnion<T>& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::AliasedHalfClosedGenericUnion<T>>::value) {
     yardl::binary::ReadTriviallySerializable(stream, value);
     return;
@@ -789,7 +789,7 @@ template<typename T, yardl::binary::Reader<T> ReadT>
   evo_test::binary::ReadAliasedOpenGenericUnion<T, ReadT, float, yardl::binary::ReadFloatingPoint>(stream, value);
 }
 
-[[maybe_unused]] static void WriteAliasedClosedGenericUnion(yardl::binary::CodedOutputStream& stream, evo_test::AliasedClosedGenericUnion const& value) {
+[[maybe_unused]] void WriteAliasedClosedGenericUnion(yardl::binary::CodedOutputStream& stream, evo_test::AliasedClosedGenericUnion const& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::AliasedClosedGenericUnion>::value) {
     yardl::binary::WriteTriviallySerializable(stream, value);
     return;
@@ -798,7 +798,7 @@ template<typename T, yardl::binary::Reader<T> ReadT>
   evo_test::binary::WriteAliasedHalfClosedGenericUnion<evo_test::GenericRecord<int32_t, std::string>, evo_test::binary::WriteGenericRecord<int32_t, yardl::binary::WriteInteger, std::string, yardl::binary::WriteString>>(stream, value);
 }
 
-[[maybe_unused]] static void ReadAliasedClosedGenericUnion(yardl::binary::CodedInputStream& stream, evo_test::AliasedClosedGenericUnion& value) {
+[[maybe_unused]] void ReadAliasedClosedGenericUnion(yardl::binary::CodedInputStream& stream, evo_test::AliasedClosedGenericUnion& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::AliasedClosedGenericUnion>::value) {
     yardl::binary::ReadTriviallySerializable(stream, value);
     return;
@@ -808,7 +808,7 @@ template<typename T, yardl::binary::Reader<T> ReadT>
 }
 
 template<typename T, yardl::binary::Writer<T> WriteT>
-[[maybe_unused]] static void WriteGenericParentRecord(yardl::binary::CodedOutputStream& stream, evo_test::GenericParentRecord<T> const& value) {
+[[maybe_unused]] void WriteGenericParentRecord(yardl::binary::CodedOutputStream& stream, evo_test::GenericParentRecord<T> const& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::GenericParentRecord<T>>::value) {
     yardl::binary::WriteTriviallySerializable(stream, value);
     return;
@@ -820,7 +820,7 @@ template<typename T, yardl::binary::Writer<T> WriteT>
 }
 
 template<typename T, yardl::binary::Reader<T> ReadT>
-[[maybe_unused]] static void ReadGenericParentRecord(yardl::binary::CodedInputStream& stream, evo_test::GenericParentRecord<T>& value) {
+[[maybe_unused]] void ReadGenericParentRecord(yardl::binary::CodedInputStream& stream, evo_test::GenericParentRecord<T>& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::GenericParentRecord<T>>::value) {
     yardl::binary::ReadTriviallySerializable(stream, value);
     return;
@@ -831,7 +831,7 @@ template<typename T, yardl::binary::Reader<T> ReadT>
   evo_test::binary::ReadAliasedClosedGenericUnion(stream, value.union_of_record);
 }
 
-[[maybe_unused]] static void WriteAliasedClosedGenericRecord(yardl::binary::CodedOutputStream& stream, evo_test::AliasedClosedGenericRecord const& value) {
+[[maybe_unused]] void WriteAliasedClosedGenericRecord(yardl::binary::CodedOutputStream& stream, evo_test::AliasedClosedGenericRecord const& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::AliasedClosedGenericRecord>::value) {
     yardl::binary::WriteTriviallySerializable(stream, value);
     return;
@@ -840,7 +840,7 @@ template<typename T, yardl::binary::Reader<T> ReadT>
   evo_test::binary::WriteAliasedHalfClosedGenericRecord<int32_t, yardl::binary::WriteInteger>(stream, value);
 }
 
-[[maybe_unused]] static void ReadAliasedClosedGenericRecord(yardl::binary::CodedInputStream& stream, evo_test::AliasedClosedGenericRecord& value) {
+[[maybe_unused]] void ReadAliasedClosedGenericRecord(yardl::binary::CodedInputStream& stream, evo_test::AliasedClosedGenericRecord& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::AliasedClosedGenericRecord>::value) {
     yardl::binary::ReadTriviallySerializable(stream, value);
     return;
@@ -849,7 +849,7 @@ template<typename T, yardl::binary::Reader<T> ReadT>
   evo_test::binary::ReadAliasedHalfClosedGenericRecord<int32_t, yardl::binary::ReadInteger>(stream, value);
 }
 
-[[maybe_unused]] static void WriteAliasedGenericRecordOrString(yardl::binary::CodedOutputStream& stream, evo_test::AliasedGenericRecordOrString const& value) {
+[[maybe_unused]] void WriteAliasedGenericRecordOrString(yardl::binary::CodedOutputStream& stream, evo_test::AliasedGenericRecordOrString const& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::AliasedGenericRecordOrString>::value) {
     yardl::binary::WriteTriviallySerializable(stream, value);
     return;
@@ -858,7 +858,7 @@ template<typename T, yardl::binary::Reader<T> ReadT>
   WriteUnion<evo_test::GenericRecord<int32_t, std::string>, evo_test::binary::WriteGenericRecord<int32_t, yardl::binary::WriteInteger, std::string, yardl::binary::WriteString>, std::string, yardl::binary::WriteString>(stream, value);
 }
 
-[[maybe_unused]] static void ReadAliasedGenericRecordOrString(yardl::binary::CodedInputStream& stream, evo_test::AliasedGenericRecordOrString& value) {
+[[maybe_unused]] void ReadAliasedGenericRecordOrString(yardl::binary::CodedInputStream& stream, evo_test::AliasedGenericRecordOrString& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::AliasedGenericRecordOrString>::value) {
     yardl::binary::ReadTriviallySerializable(stream, value);
     return;
@@ -868,7 +868,7 @@ template<typename T, yardl::binary::Reader<T> ReadT>
 }
 
 template<typename T2, yardl::binary::Writer<T2> WriteT2>
-[[maybe_unused]] static void WriteOldUnchangedGeneric(yardl::binary::CodedOutputStream& stream, evo_test::OldUnchangedGeneric<T2> const& value) {
+[[maybe_unused]] void WriteOldUnchangedGeneric(yardl::binary::CodedOutputStream& stream, evo_test::OldUnchangedGeneric<T2> const& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::OldUnchangedGeneric<T2>>::value) {
     yardl::binary::WriteTriviallySerializable(stream, value);
     return;
@@ -878,7 +878,7 @@ template<typename T2, yardl::binary::Writer<T2> WriteT2>
 }
 
 template<typename T2, yardl::binary::Reader<T2> ReadT2>
-[[maybe_unused]] static void ReadOldUnchangedGeneric(yardl::binary::CodedInputStream& stream, evo_test::OldUnchangedGeneric<T2>& value) {
+[[maybe_unused]] void ReadOldUnchangedGeneric(yardl::binary::CodedInputStream& stream, evo_test::OldUnchangedGeneric<T2>& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::OldUnchangedGeneric<T2>>::value) {
     yardl::binary::ReadTriviallySerializable(stream, value);
     return;
@@ -888,7 +888,7 @@ template<typename T2, yardl::binary::Reader<T2> ReadT2>
 }
 
 template<typename A, yardl::binary::Writer<A> WriteA>
-[[maybe_unused]] static void WriteUnchangedGeneric(yardl::binary::CodedOutputStream& stream, evo_test::UnchangedGeneric<A> const& value) {
+[[maybe_unused]] void WriteUnchangedGeneric(yardl::binary::CodedOutputStream& stream, evo_test::UnchangedGeneric<A> const& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::UnchangedGeneric<A>>::value) {
     yardl::binary::WriteTriviallySerializable(stream, value);
     return;
@@ -898,7 +898,7 @@ template<typename A, yardl::binary::Writer<A> WriteA>
 }
 
 template<typename A, yardl::binary::Reader<A> ReadA>
-[[maybe_unused]] static void ReadUnchangedGeneric(yardl::binary::CodedInputStream& stream, evo_test::UnchangedGeneric<A>& value) {
+[[maybe_unused]] void ReadUnchangedGeneric(yardl::binary::CodedInputStream& stream, evo_test::UnchangedGeneric<A>& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::UnchangedGeneric<A>>::value) {
     yardl::binary::ReadTriviallySerializable(stream, value);
     return;
@@ -907,7 +907,7 @@ template<typename A, yardl::binary::Reader<A> ReadA>
   evo_test::binary::ReadOldUnchangedGeneric<A, ReadA>(stream, value);
 }
 
-[[maybe_unused]] static void WriteUnchanged(yardl::binary::CodedOutputStream& stream, evo_test::Unchanged const& value) {
+[[maybe_unused]] void WriteUnchanged(yardl::binary::CodedOutputStream& stream, evo_test::Unchanged const& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::Unchanged>::value) {
     yardl::binary::WriteTriviallySerializable(stream, value);
     return;
@@ -916,7 +916,7 @@ template<typename A, yardl::binary::Reader<A> ReadA>
   evo_test::binary::WriteUnchangedGeneric<int32_t, yardl::binary::WriteInteger>(stream, value);
 }
 
-[[maybe_unused]] static void ReadUnchanged(yardl::binary::CodedInputStream& stream, evo_test::Unchanged& value) {
+[[maybe_unused]] void ReadUnchanged(yardl::binary::CodedInputStream& stream, evo_test::Unchanged& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::Unchanged>::value) {
     yardl::binary::ReadTriviallySerializable(stream, value);
     return;
@@ -926,7 +926,7 @@ template<typename A, yardl::binary::Reader<A> ReadA>
 }
 
 template<typename Y, yardl::binary::Writer<Y> WriteY, typename Z, yardl::binary::Writer<Z> WriteZ>
-[[maybe_unused]] static void WriteOldChangedGeneric(yardl::binary::CodedOutputStream& stream, evo_test::OldChangedGeneric<Y, Z> const& value) {
+[[maybe_unused]] void WriteOldChangedGeneric(yardl::binary::CodedOutputStream& stream, evo_test::OldChangedGeneric<Y, Z> const& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::OldChangedGeneric<Y, Z>>::value) {
     yardl::binary::WriteTriviallySerializable(stream, value);
     return;
@@ -937,7 +937,7 @@ template<typename Y, yardl::binary::Writer<Y> WriteY, typename Z, yardl::binary:
 }
 
 template<typename Y, yardl::binary::Reader<Y> ReadY, typename Z, yardl::binary::Reader<Z> ReadZ>
-[[maybe_unused]] static void ReadOldChangedGeneric(yardl::binary::CodedInputStream& stream, evo_test::OldChangedGeneric<Y, Z>& value) {
+[[maybe_unused]] void ReadOldChangedGeneric(yardl::binary::CodedInputStream& stream, evo_test::OldChangedGeneric<Y, Z>& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::OldChangedGeneric<Y, Z>>::value) {
     yardl::binary::ReadTriviallySerializable(stream, value);
     return;
@@ -948,7 +948,7 @@ template<typename Y, yardl::binary::Reader<Y> ReadY, typename Z, yardl::binary::
 }
 
 template<typename I, yardl::binary::Writer<I> WriteI, typename J, yardl::binary::Writer<J> WriteJ>
-[[maybe_unused]] static void WriteChangedGeneric(yardl::binary::CodedOutputStream& stream, evo_test::ChangedGeneric<I, J> const& value) {
+[[maybe_unused]] void WriteChangedGeneric(yardl::binary::CodedOutputStream& stream, evo_test::ChangedGeneric<I, J> const& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::ChangedGeneric<I, J>>::value) {
     yardl::binary::WriteTriviallySerializable(stream, value);
     return;
@@ -958,7 +958,7 @@ template<typename I, yardl::binary::Writer<I> WriteI, typename J, yardl::binary:
 }
 
 template<typename I, yardl::binary::Reader<I> ReadI, typename J, yardl::binary::Reader<J> ReadJ>
-[[maybe_unused]] static void ReadChangedGeneric(yardl::binary::CodedInputStream& stream, evo_test::ChangedGeneric<I, J>& value) {
+[[maybe_unused]] void ReadChangedGeneric(yardl::binary::CodedInputStream& stream, evo_test::ChangedGeneric<I, J>& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::ChangedGeneric<I, J>>::value) {
     yardl::binary::ReadTriviallySerializable(stream, value);
     return;
@@ -967,7 +967,7 @@ template<typename I, yardl::binary::Reader<I> ReadI, typename J, yardl::binary::
   evo_test::binary::ReadOldChangedGeneric<I, ReadI, J, ReadJ>(stream, value);
 }
 
-[[maybe_unused]] static void WriteChanged(yardl::binary::CodedOutputStream& stream, evo_test::Changed const& value) {
+[[maybe_unused]] void WriteChanged(yardl::binary::CodedOutputStream& stream, evo_test::Changed const& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::Changed>::value) {
     yardl::binary::WriteTriviallySerializable(stream, value);
     return;
@@ -976,7 +976,7 @@ template<typename I, yardl::binary::Reader<I> ReadI, typename J, yardl::binary::
   evo_test::binary::WriteChangedGeneric<std::string, yardl::binary::WriteString, int32_t, yardl::binary::WriteInteger>(stream, value);
 }
 
-[[maybe_unused]] static void ReadChanged(yardl::binary::CodedInputStream& stream, evo_test::Changed& value) {
+[[maybe_unused]] void ReadChanged(yardl::binary::CodedInputStream& stream, evo_test::Changed& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<evo_test::Changed>::value) {
     yardl::binary::ReadTriviallySerializable(stream, value);
     return;
@@ -985,214 +985,234 @@ template<typename I, yardl::binary::Reader<I> ReadI, typename J, yardl::binary::
   evo_test::binary::ReadChangedGeneric<std::string, yardl::binary::ReadString, int32_t, yardl::binary::ReadInteger>(stream, value);
 }
 
-[[maybe_unused]] static void WriteAliasedLongToString_v0(yardl::binary::CodedOutputStream& stream, evo_test::AliasedLongToString const& value) {
-  int64_t aliased_long_to_string_v0;
-  aliased_long_to_string_v0 = std::stol(value);
+[[maybe_unused]] void WriteAliasedLongToString_v0(yardl::binary::CodedOutputStream& stream, evo_test::AliasedLongToString const& value) {
+  int64_t aliased_long_to_string_v0 = {};
+  try {
+    aliased_long_to_string_v0 = std::stol(value);
+  } catch (...) {
+    throw new std::runtime_error("Unable to convert string \"" + value + "\" to number");
+  }
   yardl::binary::WriteInteger(stream, aliased_long_to_string_v0);
 }
 
-[[maybe_unused]] static void ReadAliasedLongToString_v0(yardl::binary::CodedInputStream& stream, evo_test::AliasedLongToString& value) {
-  int64_t aliased_long_to_string_v0;
+[[maybe_unused]] void ReadAliasedLongToString_v0(yardl::binary::CodedInputStream& stream, evo_test::AliasedLongToString& value) {
+  int64_t aliased_long_to_string_v0 = {};
   yardl::binary::ReadInteger(stream, aliased_long_to_string_v0);
   value = std::to_string(aliased_long_to_string_v0);
 }
 
-[[maybe_unused]] static void WriteRecordWithChanges_v0(yardl::binary::CodedOutputStream& stream, evo_test::RecordWithChanges const& value) {
-  int32_t int_to_long;
+[[maybe_unused]] void WriteRecordWithChanges_v0(yardl::binary::CodedOutputStream& stream, evo_test::RecordWithChanges const& value) {
+  float deprecated_float = {};
+  yardl::binary::WriteFloatingPoint(stream, deprecated_float);
+  int32_t int_to_long = {};
   int_to_long = static_cast<int32_t>(value.int_to_long);
   yardl::binary::WriteInteger(stream, int_to_long);
-  std::vector<int32_t> deprecated_vector;
+  std::vector<int32_t> deprecated_vector = {};
   yardl::binary::WriteVector<int32_t, yardl::binary::WriteInteger>(stream, deprecated_vector);
-  float float_to_double;
+  float float_to_double = {};
   float_to_double = static_cast<float>(value.float_to_double);
   yardl::binary::WriteFloatingPoint(stream, float_to_double);
-  yardl::FixedNDArray<uint8_t, 7> deprecated_array;
+  yardl::FixedNDArray<uint8_t, 7> deprecated_array = {};
   yardl::binary::WriteFixedNDArray<uint8_t, yardl::binary::WriteInteger, 7>(stream, deprecated_array);
-  std::optional<int64_t> optional_long_to_string;
+  std::optional<int64_t> optional_long_to_string = {};
   if (value.optional_long_to_string.has_value()) {
-    optional_long_to_string = std::stol(value.optional_long_to_string.value());
+    try {
+      optional_long_to_string = std::stol(value.optional_long_to_string.value());
+    } catch (...) {
+      throw new std::runtime_error("Unable to convert string \"" + value.optional_long_to_string.value() + "\" to number");
+    }
   }
   yardl::binary::WriteOptional<int64_t, yardl::binary::WriteInteger>(stream, optional_long_to_string);
-  std::unordered_map<std::string, std::vector<int32_t>> deprecated_map;
+  std::unordered_map<std::string, std::vector<int32_t>> deprecated_map = {};
   yardl::binary::WriteMap<std::string, std::vector<int32_t>, yardl::binary::WriteString, yardl::binary::WriteVector<int32_t, yardl::binary::WriteInteger>>(stream, deprecated_map);
   evo_test::binary::WriteUnchangedRecord(stream, value.unchanged_record);
 }
 
-[[maybe_unused]] static void ReadRecordWithChanges_v0(yardl::binary::CodedInputStream& stream, evo_test::RecordWithChanges& value) {
-  int32_t int_to_long;
+[[maybe_unused]] void ReadRecordWithChanges_v0(yardl::binary::CodedInputStream& stream, evo_test::RecordWithChanges& value) {
+  float deprecated_float = {};
+  yardl::binary::ReadFloatingPoint(stream, deprecated_float);
+  int32_t int_to_long = {};
   yardl::binary::ReadInteger(stream, int_to_long);
   value.int_to_long = static_cast<int64_t>(int_to_long);
-  std::vector<int32_t> deprecated_vector;
+  std::vector<int32_t> deprecated_vector = {};
   yardl::binary::ReadVector<int32_t, yardl::binary::ReadInteger>(stream, deprecated_vector);
-  float float_to_double;
+  float float_to_double = {};
   yardl::binary::ReadFloatingPoint(stream, float_to_double);
   value.float_to_double = static_cast<double>(float_to_double);
-  yardl::FixedNDArray<uint8_t, 7> deprecated_array;
+  yardl::FixedNDArray<uint8_t, 7> deprecated_array = {};
   yardl::binary::ReadFixedNDArray<uint8_t, yardl::binary::ReadInteger, 7>(stream, deprecated_array);
-  std::optional<int64_t> optional_long_to_string;
+  std::optional<int64_t> optional_long_to_string = {};
   yardl::binary::ReadOptional<int64_t, yardl::binary::ReadInteger>(stream, optional_long_to_string);
-  std::optional<std::string> tmp;
   if (optional_long_to_string.has_value()) {
-    tmp = std::to_string(optional_long_to_string.value());
+    value.optional_long_to_string = std::to_string(optional_long_to_string.value());
   }
-  value.optional_long_to_string = tmp;
-  std::unordered_map<std::string, std::vector<int32_t>> deprecated_map;
+  std::unordered_map<std::string, std::vector<int32_t>> deprecated_map = {};
   yardl::binary::ReadMap<std::string, std::vector<int32_t>, yardl::binary::ReadString, yardl::binary::ReadVector<int32_t, yardl::binary::ReadInteger>>(stream, deprecated_map);
   evo_test::binary::ReadUnchangedRecord(stream, value.unchanged_record);
 }
 
-[[maybe_unused]] static void WriteAliasedRecordWithChanges_v0(yardl::binary::CodedOutputStream& stream, evo_test::AliasedRecordWithChanges const& value) {
+[[maybe_unused]] void WriteAliasedRecordWithChanges_v0(yardl::binary::CodedOutputStream& stream, evo_test::AliasedRecordWithChanges const& value) {
   evo_test::binary::WriteRecordWithChanges_v0(stream, value);
 }
 
-[[maybe_unused]] static void ReadAliasedRecordWithChanges_v0(yardl::binary::CodedInputStream& stream, evo_test::AliasedRecordWithChanges& value) {
+[[maybe_unused]] void ReadAliasedRecordWithChanges_v0(yardl::binary::CodedInputStream& stream, evo_test::AliasedRecordWithChanges& value) {
   evo_test::binary::ReadRecordWithChanges_v0(stream, value);
 }
 
-[[maybe_unused]] static void WriteRenamedRecord_v0(yardl::binary::CodedOutputStream& stream, evo_test::DeprecatedRecord const& value) {
+[[maybe_unused]] void WriteRenamedRecord_v0(yardl::binary::CodedOutputStream& stream, evo_test::DeprecatedRecord const& value) {
   yardl::binary::WriteInteger(stream, value.i);
   yardl::binary::WriteString(stream, value.s);
 }
 
-[[maybe_unused]] static void ReadRenamedRecord_v0(yardl::binary::CodedInputStream& stream, evo_test::DeprecatedRecord& value) {
+[[maybe_unused]] void ReadRenamedRecord_v0(yardl::binary::CodedInputStream& stream, evo_test::DeprecatedRecord& value) {
   yardl::binary::ReadInteger(stream, value.i);
   yardl::binary::ReadString(stream, value.s);
 }
 
-[[maybe_unused]] static void WriteStreamItem_v0(yardl::binary::CodedOutputStream& stream, evo_test::StreamItem const& value) {
-  evo_test::RecordWithChanges_v0 stream_item_v0;
-  stream_item_v0 = std::get<0>(value);
+[[maybe_unused]] void WriteStreamItem_v0(yardl::binary::CodedOutputStream& stream, evo_test::StreamItem const& value) {
+  evo_test::RecordWithChanges_v0 stream_item_v0 = {};
+  if (value.index() == 0) {
+    stream_item_v0 = std::get<0>(value);
+  }
   evo_test::binary::WriteRecordWithChanges_v0(stream, stream_item_v0);
 }
 
-[[maybe_unused]] static void ReadStreamItem_v0(yardl::binary::CodedInputStream& stream, evo_test::StreamItem& value) {
-  evo_test::RecordWithChanges_v0 stream_item_v0;
+[[maybe_unused]] void ReadStreamItem_v0(yardl::binary::CodedInputStream& stream, evo_test::StreamItem& value) {
+  evo_test::RecordWithChanges_v0 stream_item_v0 = {};
   evo_test::binary::ReadRecordWithChanges_v0(stream, stream_item_v0);
   value = stream_item_v0;
 }
 
-[[maybe_unused]] static void WriteRC_v0(yardl::binary::CodedOutputStream& stream, evo_test::RZ const& value) {
-  std::string subject;
+[[maybe_unused]] void WriteRC_v0(yardl::binary::CodedOutputStream& stream, evo_test::RZ const& value) {
+  std::string subject = {};
   subject = std::to_string(value.subject);
   yardl::binary::WriteString(stream, subject);
 }
 
-[[maybe_unused]] static void ReadRC_v0(yardl::binary::CodedInputStream& stream, evo_test::RZ& value) {
-  std::string subject;
+[[maybe_unused]] void ReadRC_v0(yardl::binary::CodedInputStream& stream, evo_test::RZ& value) {
+  std::string subject = {};
   yardl::binary::ReadString(stream, subject);
-  value.subject = std::stoi(subject);
+  try {
+    value.subject = std::stoi(subject);
+  } catch (...) {
+    throw new std::runtime_error("Unable to convert string \"" + subject + "\" to number");
+  }
 }
 
-[[maybe_unused]] static void WriteRB_v0(yardl::binary::CodedOutputStream& stream, evo_test::RZ const& value) {
+[[maybe_unused]] void WriteRB_v0(yardl::binary::CodedOutputStream& stream, evo_test::RZ const& value) {
   evo_test::binary::WriteRC_v0(stream, value);
 }
 
-[[maybe_unused]] static void ReadRB_v0(yardl::binary::CodedInputStream& stream, evo_test::RZ& value) {
+[[maybe_unused]] void ReadRB_v0(yardl::binary::CodedInputStream& stream, evo_test::RZ& value) {
   evo_test::binary::ReadRC_v0(stream, value);
 }
 
-[[maybe_unused]] static void WriteRA_v0(yardl::binary::CodedOutputStream& stream, evo_test::RZ const& value) {
+[[maybe_unused]] void WriteRA_v0(yardl::binary::CodedOutputStream& stream, evo_test::RZ const& value) {
   evo_test::binary::WriteRB_v0(stream, value);
 }
 
-[[maybe_unused]] static void ReadRA_v0(yardl::binary::CodedInputStream& stream, evo_test::RZ& value) {
+[[maybe_unused]] void ReadRA_v0(yardl::binary::CodedInputStream& stream, evo_test::RZ& value) {
   evo_test::binary::ReadRB_v0(stream, value);
 }
 
-[[maybe_unused]] static void WriteRLink_v0(yardl::binary::CodedOutputStream& stream, evo_test::RLink const& value) {
+[[maybe_unused]] void WriteRLink_v0(yardl::binary::CodedOutputStream& stream, evo_test::RLink const& value) {
   evo_test::binary::WriteRA_v0(stream, value);
 }
 
-[[maybe_unused]] static void ReadRLink_v0(yardl::binary::CodedInputStream& stream, evo_test::RLink& value) {
+[[maybe_unused]] void ReadRLink_v0(yardl::binary::CodedInputStream& stream, evo_test::RLink& value) {
   evo_test::binary::ReadRA_v0(stream, value);
 }
 
-[[maybe_unused]] static void WriteUnusedButChangedRecord_v0(yardl::binary::CodedOutputStream& stream, evo_test::UnusedButChangedRecord const& value) {
+[[maybe_unused]] void WriteUnusedButChangedRecord_v0(yardl::binary::CodedOutputStream& stream, evo_test::UnusedButChangedRecord const& value) {
   yardl::binary::WriteString(stream, value.name);
-  int32_t age;
+  int32_t age = {};
   age = static_cast<int32_t>(std::round(value.age));
   yardl::binary::WriteInteger(stream, age);
 }
 
-[[maybe_unused]] static void ReadUnusedButChangedRecord_v0(yardl::binary::CodedInputStream& stream, evo_test::UnusedButChangedRecord& value) {
+[[maybe_unused]] void ReadUnusedButChangedRecord_v0(yardl::binary::CodedInputStream& stream, evo_test::UnusedButChangedRecord& value) {
   yardl::binary::ReadString(stream, value.name);
-  int32_t age;
+  int32_t age = {};
   yardl::binary::ReadInteger(stream, age);
   value.age = static_cast<float>(age);
 }
 
 template<typename T1, yardl::binary::Writer<T1> WriteT1, typename T2, yardl::binary::Writer<T2> WriteT2>
-[[maybe_unused]] static void WriteGenericRecord_v0(yardl::binary::CodedOutputStream& stream, evo_test::GenericRecord<T1, T2> const& value) {
-  std::optional<bool> removed;
+[[maybe_unused]] void WriteGenericRecord_v0(yardl::binary::CodedOutputStream& stream, evo_test::GenericRecord<T1, T2> const& value) {
+  std::optional<bool> removed = {};
   yardl::binary::WriteOptional<bool, yardl::binary::WriteInteger>(stream, removed);
   WriteT1(stream, value.field_1);
   WriteT2(stream, value.field_2);
 }
 
 template<typename T1, yardl::binary::Reader<T1> ReadT1, typename T2, yardl::binary::Reader<T2> ReadT2>
-[[maybe_unused]] static void ReadGenericRecord_v0(yardl::binary::CodedInputStream& stream, evo_test::GenericRecord<T1, T2>& value) {
-  std::optional<bool> removed;
+[[maybe_unused]] void ReadGenericRecord_v0(yardl::binary::CodedInputStream& stream, evo_test::GenericRecord<T1, T2>& value) {
+  std::optional<bool> removed = {};
   yardl::binary::ReadOptional<bool, yardl::binary::ReadInteger>(stream, removed);
   ReadT1(stream, value.field_1);
   ReadT2(stream, value.field_2);
 }
 
 template<typename T, yardl::binary::Writer<T> WriteT>
-[[maybe_unused]] static void WriteGenericParentRecord_v0(yardl::binary::CodedOutputStream& stream, evo_test::GenericParentRecord<T> const& value) {
+[[maybe_unused]] void WriteGenericParentRecord_v0(yardl::binary::CodedOutputStream& stream, evo_test::GenericParentRecord<T> const& value) {
   evo_test::binary::WriteGenericRecord_v0<T, WriteT, std::string, yardl::binary::WriteString>(stream, value.record);
   evo_test::binary::WriteGenericRecord_v0<evo_test::GenericUnion<T, float>, evo_test::binary::WriteGenericUnion<T, WriteT, float, yardl::binary::WriteFloatingPoint>, std::string, yardl::binary::WriteString>(stream, value.record_of_union);
   evo_test::binary::WriteGenericUnion<evo_test::GenericRecord_v0<int32_t, std::string>, evo_test::binary::WriteGenericRecord_v0<int32_t, yardl::binary::WriteInteger, std::string, yardl::binary::WriteString>, float, yardl::binary::WriteFloatingPoint>(stream, value.union_of_record);
 }
 
 template<typename T, yardl::binary::Reader<T> ReadT>
-[[maybe_unused]] static void ReadGenericParentRecord_v0(yardl::binary::CodedInputStream& stream, evo_test::GenericParentRecord<T>& value) {
+[[maybe_unused]] void ReadGenericParentRecord_v0(yardl::binary::CodedInputStream& stream, evo_test::GenericParentRecord<T>& value) {
   evo_test::binary::ReadGenericRecord_v0<T, ReadT, std::string, yardl::binary::ReadString>(stream, value.record);
   evo_test::binary::ReadGenericRecord_v0<evo_test::GenericUnion<T, float>, evo_test::binary::ReadGenericUnion<T, ReadT, float, yardl::binary::ReadFloatingPoint>, std::string, yardl::binary::ReadString>(stream, value.record_of_union);
   evo_test::binary::ReadGenericUnion<evo_test::GenericRecord_v0<int32_t, std::string>, evo_test::binary::ReadGenericRecord_v0<int32_t, yardl::binary::ReadInteger, std::string, yardl::binary::ReadString>, float, yardl::binary::ReadFloatingPoint>(stream, value.union_of_record);
 }
 
-[[maybe_unused]] static void WriteAliasedClosedGenericUnion_v0(yardl::binary::CodedOutputStream& stream, evo_test::AliasedClosedGenericUnion const& value) {
+[[maybe_unused]] void WriteAliasedClosedGenericUnion_v0(yardl::binary::CodedOutputStream& stream, evo_test::AliasedClosedGenericUnion const& value) {
   evo_test::binary::WriteAliasedHalfClosedGenericUnion<evo_test::GenericRecord_v0<int32_t, std::string>, evo_test::binary::WriteGenericRecord_v0<int32_t, yardl::binary::WriteInteger, std::string, yardl::binary::WriteString>>(stream, value);
 }
 
-[[maybe_unused]] static void ReadAliasedClosedGenericUnion_v0(yardl::binary::CodedInputStream& stream, evo_test::AliasedClosedGenericUnion& value) {
+[[maybe_unused]] void ReadAliasedClosedGenericUnion_v0(yardl::binary::CodedInputStream& stream, evo_test::AliasedClosedGenericUnion& value) {
   evo_test::binary::ReadAliasedHalfClosedGenericUnion<evo_test::GenericRecord_v0<int32_t, std::string>, evo_test::binary::ReadGenericRecord_v0<int32_t, yardl::binary::ReadInteger, std::string, yardl::binary::ReadString>>(stream, value);
 }
 
 template<typename T, yardl::binary::Writer<T> WriteT>
-[[maybe_unused]] static void WriteAliasedHalfClosedGenericRecord_v0(yardl::binary::CodedOutputStream& stream, evo_test::AliasedHalfClosedGenericRecord<T> const& value) {
+[[maybe_unused]] void WriteAliasedHalfClosedGenericRecord_v0(yardl::binary::CodedOutputStream& stream, evo_test::AliasedHalfClosedGenericRecord<T> const& value) {
   evo_test::binary::WriteGenericRecord_v0<T, WriteT, std::string, yardl::binary::WriteString>(stream, value);
 }
 
 template<typename T, yardl::binary::Reader<T> ReadT>
-[[maybe_unused]] static void ReadAliasedHalfClosedGenericRecord_v0(yardl::binary::CodedInputStream& stream, evo_test::AliasedHalfClosedGenericRecord<T>& value) {
+[[maybe_unused]] void ReadAliasedHalfClosedGenericRecord_v0(yardl::binary::CodedInputStream& stream, evo_test::AliasedHalfClosedGenericRecord<T>& value) {
   evo_test::binary::ReadGenericRecord_v0<T, ReadT, std::string, yardl::binary::ReadString>(stream, value);
 }
 
-[[maybe_unused]] static void WriteAliasedClosedGenericRecord_v0(yardl::binary::CodedOutputStream& stream, evo_test::AliasedClosedGenericRecord const& value) {
+[[maybe_unused]] void WriteAliasedClosedGenericRecord_v0(yardl::binary::CodedOutputStream& stream, evo_test::AliasedClosedGenericRecord const& value) {
   evo_test::binary::WriteAliasedHalfClosedGenericRecord_v0<int32_t, yardl::binary::WriteInteger>(stream, value);
 }
 
-[[maybe_unused]] static void ReadAliasedClosedGenericRecord_v0(yardl::binary::CodedInputStream& stream, evo_test::AliasedClosedGenericRecord& value) {
+[[maybe_unused]] void ReadAliasedClosedGenericRecord_v0(yardl::binary::CodedInputStream& stream, evo_test::AliasedClosedGenericRecord& value) {
   evo_test::binary::ReadAliasedHalfClosedGenericRecord_v0<int32_t, yardl::binary::ReadInteger>(stream, value);
 }
 
 template<typename Y, yardl::binary::Writer<Y> WriteY, typename Z, yardl::binary::Writer<Z> WriteZ>
-[[maybe_unused]] static void WriteChangedGeneric_v0(yardl::binary::CodedOutputStream& stream, evo_test::OldChangedGeneric<Y, Z> const& value) {
-  Y y;
-  y = value.y.value();
+[[maybe_unused]] void WriteChangedGeneric_v0(yardl::binary::CodedOutputStream& stream, evo_test::OldChangedGeneric<Y, Z> const& value) {
+  Y y = {};
+  if (value.y.has_value()) {
+    y = value.y.value();
+  }
   WriteY(stream, y);
-  evo_test::UnchangedGeneric<Z> z;
-  z = value.z.value();
+  evo_test::UnchangedGeneric<Z> z = {};
+  if (value.z.has_value()) {
+    z = value.z.value();
+  }
   evo_test::binary::WriteUnchangedGeneric<Z, WriteZ>(stream, z);
 }
 
 template<typename Y, yardl::binary::Reader<Y> ReadY, typename Z, yardl::binary::Reader<Z> ReadZ>
-[[maybe_unused]] static void ReadChangedGeneric_v0(yardl::binary::CodedInputStream& stream, evo_test::OldChangedGeneric<Y, Z>& value) {
-  Y y;
+[[maybe_unused]] void ReadChangedGeneric_v0(yardl::binary::CodedInputStream& stream, evo_test::OldChangedGeneric<Y, Z>& value) {
+  Y y = {};
   ReadY(stream, y);
   value.y = y;
-  evo_test::UnchangedGeneric<Z> z;
+  evo_test::UnchangedGeneric<Z> z = {};
   evo_test::binary::ReadUnchangedGeneric<Z, ReadZ>(stream, z);
   value.z = z;
 }
@@ -1202,7 +1222,7 @@ template<typename Y, yardl::binary::Reader<Y> ReadY, typename Z, yardl::binary::
 void ProtocolWithChangesWriter::WriteInt8ToIntImpl(int32_t const& value) {
   switch (version_) {
   case Version::v0: {
-    int8_t int8_to_int;
+    int8_t int8_to_int = {};
     int8_to_int = static_cast<int8_t>(value);
     yardl::binary::WriteInteger(stream_, int8_to_int);
     break;
@@ -1216,7 +1236,7 @@ void ProtocolWithChangesWriter::WriteInt8ToIntImpl(int32_t const& value) {
 void ProtocolWithChangesWriter::WriteInt8ToLongImpl(int64_t const& value) {
   switch (version_) {
   case Version::v0: {
-    int8_t int8_to_long;
+    int8_t int8_to_long = {};
     int8_to_long = static_cast<int8_t>(value);
     yardl::binary::WriteInteger(stream_, int8_to_long);
     break;
@@ -1230,7 +1250,7 @@ void ProtocolWithChangesWriter::WriteInt8ToLongImpl(int64_t const& value) {
 void ProtocolWithChangesWriter::WriteInt8ToUintImpl(uint32_t const& value) {
   switch (version_) {
   case Version::v0: {
-    int8_t int8_to_uint;
+    int8_t int8_to_uint = {};
     int8_to_uint = static_cast<int8_t>(value);
     yardl::binary::WriteInteger(stream_, int8_to_uint);
     break;
@@ -1244,7 +1264,7 @@ void ProtocolWithChangesWriter::WriteInt8ToUintImpl(uint32_t const& value) {
 void ProtocolWithChangesWriter::WriteInt8ToUlongImpl(uint64_t const& value) {
   switch (version_) {
   case Version::v0: {
-    int8_t int8_to_ulong;
+    int8_t int8_to_ulong = {};
     int8_to_ulong = static_cast<int8_t>(value);
     yardl::binary::WriteInteger(stream_, int8_to_ulong);
     break;
@@ -1258,7 +1278,7 @@ void ProtocolWithChangesWriter::WriteInt8ToUlongImpl(uint64_t const& value) {
 void ProtocolWithChangesWriter::WriteInt8ToFloatImpl(float const& value) {
   switch (version_) {
   case Version::v0: {
-    int8_t int8_to_float;
+    int8_t int8_to_float = {};
     int8_to_float = static_cast<int8_t>(std::round(value));
     yardl::binary::WriteInteger(stream_, int8_to_float);
     break;
@@ -1272,7 +1292,7 @@ void ProtocolWithChangesWriter::WriteInt8ToFloatImpl(float const& value) {
 void ProtocolWithChangesWriter::WriteInt8ToDoubleImpl(double const& value) {
   switch (version_) {
   case Version::v0: {
-    int8_t int8_to_double;
+    int8_t int8_to_double = {};
     int8_to_double = static_cast<int8_t>(std::round(value));
     yardl::binary::WriteInteger(stream_, int8_to_double);
     break;
@@ -1286,7 +1306,7 @@ void ProtocolWithChangesWriter::WriteInt8ToDoubleImpl(double const& value) {
 void ProtocolWithChangesWriter::WriteIntToUintImpl(uint32_t const& value) {
   switch (version_) {
   case Version::v0: {
-    int32_t int_to_uint;
+    int32_t int_to_uint = {};
     int_to_uint = static_cast<int32_t>(value);
     yardl::binary::WriteInteger(stream_, int_to_uint);
     break;
@@ -1300,7 +1320,7 @@ void ProtocolWithChangesWriter::WriteIntToUintImpl(uint32_t const& value) {
 void ProtocolWithChangesWriter::WriteIntToLongImpl(int64_t const& value) {
   switch (version_) {
   case Version::v0: {
-    int32_t int_to_long;
+    int32_t int_to_long = {};
     int_to_long = static_cast<int32_t>(value);
     yardl::binary::WriteInteger(stream_, int_to_long);
     break;
@@ -1314,7 +1334,7 @@ void ProtocolWithChangesWriter::WriteIntToLongImpl(int64_t const& value) {
 void ProtocolWithChangesWriter::WriteIntToFloatImpl(float const& value) {
   switch (version_) {
   case Version::v0: {
-    int32_t int_to_float;
+    int32_t int_to_float = {};
     int_to_float = static_cast<int32_t>(std::round(value));
     yardl::binary::WriteInteger(stream_, int_to_float);
     break;
@@ -1328,7 +1348,7 @@ void ProtocolWithChangesWriter::WriteIntToFloatImpl(float const& value) {
 void ProtocolWithChangesWriter::WriteIntToDoubleImpl(double const& value) {
   switch (version_) {
   case Version::v0: {
-    int32_t int_to_double;
+    int32_t int_to_double = {};
     int_to_double = static_cast<int32_t>(std::round(value));
     yardl::binary::WriteInteger(stream_, int_to_double);
     break;
@@ -1342,7 +1362,7 @@ void ProtocolWithChangesWriter::WriteIntToDoubleImpl(double const& value) {
 void ProtocolWithChangesWriter::WriteUintToUlongImpl(uint64_t const& value) {
   switch (version_) {
   case Version::v0: {
-    uint32_t uint_to_ulong;
+    uint32_t uint_to_ulong = {};
     uint_to_ulong = static_cast<uint32_t>(value);
     yardl::binary::WriteInteger(stream_, uint_to_ulong);
     break;
@@ -1356,7 +1376,7 @@ void ProtocolWithChangesWriter::WriteUintToUlongImpl(uint64_t const& value) {
 void ProtocolWithChangesWriter::WriteUintToFloatImpl(float const& value) {
   switch (version_) {
   case Version::v0: {
-    uint32_t uint_to_float;
+    uint32_t uint_to_float = {};
     uint_to_float = static_cast<uint32_t>(std::round(value));
     yardl::binary::WriteInteger(stream_, uint_to_float);
     break;
@@ -1370,7 +1390,7 @@ void ProtocolWithChangesWriter::WriteUintToFloatImpl(float const& value) {
 void ProtocolWithChangesWriter::WriteUintToDoubleImpl(double const& value) {
   switch (version_) {
   case Version::v0: {
-    uint32_t uint_to_double;
+    uint32_t uint_to_double = {};
     uint_to_double = static_cast<uint32_t>(std::round(value));
     yardl::binary::WriteInteger(stream_, uint_to_double);
     break;
@@ -1384,7 +1404,7 @@ void ProtocolWithChangesWriter::WriteUintToDoubleImpl(double const& value) {
 void ProtocolWithChangesWriter::WriteFloatToDoubleImpl(double const& value) {
   switch (version_) {
   case Version::v0: {
-    float float_to_double;
+    float float_to_double = {};
     float_to_double = static_cast<float>(value);
     yardl::binary::WriteFloatingPoint(stream_, float_to_double);
     break;
@@ -1398,8 +1418,12 @@ void ProtocolWithChangesWriter::WriteFloatToDoubleImpl(double const& value) {
 void ProtocolWithChangesWriter::WriteIntToStringImpl(std::string const& value) {
   switch (version_) {
   case Version::v0: {
-    int32_t int_to_string;
-    int_to_string = std::stoi(value);
+    int32_t int_to_string = {};
+    try {
+      int_to_string = std::stoi(value);
+    } catch (...) {
+      throw new std::runtime_error("Unable to convert string \"" + value + "\" to number");
+    }
     yardl::binary::WriteInteger(stream_, int_to_string);
     break;
   }
@@ -1412,8 +1436,12 @@ void ProtocolWithChangesWriter::WriteIntToStringImpl(std::string const& value) {
 void ProtocolWithChangesWriter::WriteUintToStringImpl(std::string const& value) {
   switch (version_) {
   case Version::v0: {
-    uint32_t uint_to_string;
-    uint_to_string = std::stoul(value);
+    uint32_t uint_to_string = {};
+    try {
+      uint_to_string = std::stoul(value);
+    } catch (...) {
+      throw new std::runtime_error("Unable to convert string \"" + value + "\" to number");
+    }
     yardl::binary::WriteInteger(stream_, uint_to_string);
     break;
   }
@@ -1426,8 +1454,12 @@ void ProtocolWithChangesWriter::WriteUintToStringImpl(std::string const& value) 
 void ProtocolWithChangesWriter::WriteLongToStringImpl(std::string const& value) {
   switch (version_) {
   case Version::v0: {
-    int64_t long_to_string;
-    long_to_string = std::stol(value);
+    int64_t long_to_string = {};
+    try {
+      long_to_string = std::stol(value);
+    } catch (...) {
+      throw new std::runtime_error("Unable to convert string \"" + value + "\" to number");
+    }
     yardl::binary::WriteInteger(stream_, long_to_string);
     break;
   }
@@ -1440,8 +1472,12 @@ void ProtocolWithChangesWriter::WriteLongToStringImpl(std::string const& value) 
 void ProtocolWithChangesWriter::WriteUlongToStringImpl(std::string const& value) {
   switch (version_) {
   case Version::v0: {
-    uint64_t ulong_to_string;
-    ulong_to_string = std::stoul(value);
+    uint64_t ulong_to_string = {};
+    try {
+      ulong_to_string = std::stoul(value);
+    } catch (...) {
+      throw new std::runtime_error("Unable to convert string \"" + value + "\" to number");
+    }
     yardl::binary::WriteInteger(stream_, ulong_to_string);
     break;
   }
@@ -1454,8 +1490,12 @@ void ProtocolWithChangesWriter::WriteUlongToStringImpl(std::string const& value)
 void ProtocolWithChangesWriter::WriteFloatToStringImpl(std::string const& value) {
   switch (version_) {
   case Version::v0: {
-    float float_to_string;
-    float_to_string = std::stof(value);
+    float float_to_string = {};
+    try {
+      float_to_string = std::stof(value);
+    } catch (...) {
+      throw new std::runtime_error("Unable to convert string \"" + value + "\" to number");
+    }
     yardl::binary::WriteFloatingPoint(stream_, float_to_string);
     break;
   }
@@ -1468,8 +1508,12 @@ void ProtocolWithChangesWriter::WriteFloatToStringImpl(std::string const& value)
 void ProtocolWithChangesWriter::WriteDoubleToStringImpl(std::string const& value) {
   switch (version_) {
   case Version::v0: {
-    double double_to_string;
-    double_to_string = std::stod(value);
+    double double_to_string = {};
+    try {
+      double_to_string = std::stod(value);
+    } catch (...) {
+      throw new std::runtime_error("Unable to convert string \"" + value + "\" to number");
+    }
     yardl::binary::WriteFloatingPoint(stream_, double_to_string);
     break;
   }
@@ -1482,8 +1526,10 @@ void ProtocolWithChangesWriter::WriteDoubleToStringImpl(std::string const& value
 void ProtocolWithChangesWriter::WriteIntToOptionalImpl(std::optional<int32_t> const& value) {
   switch (version_) {
   case Version::v0: {
-    int32_t int_to_optional;
-    int_to_optional = value.value();
+    int32_t int_to_optional = {};
+    if (value.has_value()) {
+      int_to_optional = value.value();
+    }
     yardl::binary::WriteInteger(stream_, int_to_optional);
     break;
   }
@@ -1496,8 +1542,10 @@ void ProtocolWithChangesWriter::WriteIntToOptionalImpl(std::optional<int32_t> co
 void ProtocolWithChangesWriter::WriteFloatToOptionalImpl(std::optional<float> const& value) {
   switch (version_) {
   case Version::v0: {
-    float float_to_optional;
-    float_to_optional = value.value();
+    float float_to_optional = {};
+    if (value.has_value()) {
+      float_to_optional = value.value();
+    }
     yardl::binary::WriteFloatingPoint(stream_, float_to_optional);
     break;
   }
@@ -1510,8 +1558,10 @@ void ProtocolWithChangesWriter::WriteFloatToOptionalImpl(std::optional<float> co
 void ProtocolWithChangesWriter::WriteStringToOptionalImpl(std::optional<std::string> const& value) {
   switch (version_) {
   case Version::v0: {
-    std::string string_to_optional;
-    string_to_optional = value.value();
+    std::string string_to_optional = {};
+    if (value.has_value()) {
+      string_to_optional = value.value();
+    }
     yardl::binary::WriteString(stream_, string_to_optional);
     break;
   }
@@ -1524,8 +1574,10 @@ void ProtocolWithChangesWriter::WriteStringToOptionalImpl(std::optional<std::str
 void ProtocolWithChangesWriter::WriteIntToUnionImpl(std::variant<int32_t, bool> const& value) {
   switch (version_) {
   case Version::v0: {
-    int32_t int_to_union;
-    int_to_union = std::get<0>(value);
+    int32_t int_to_union = {};
+    if (value.index() == 0) {
+      int_to_union = std::get<0>(value);
+    }
     yardl::binary::WriteInteger(stream_, int_to_union);
     break;
   }
@@ -1538,8 +1590,10 @@ void ProtocolWithChangesWriter::WriteIntToUnionImpl(std::variant<int32_t, bool> 
 void ProtocolWithChangesWriter::WriteFloatToUnionImpl(std::variant<float, bool> const& value) {
   switch (version_) {
   case Version::v0: {
-    float float_to_union;
-    float_to_union = std::get<0>(value);
+    float float_to_union = {};
+    if (value.index() == 0) {
+      float_to_union = std::get<0>(value);
+    }
     yardl::binary::WriteFloatingPoint(stream_, float_to_union);
     break;
   }
@@ -1552,8 +1606,10 @@ void ProtocolWithChangesWriter::WriteFloatToUnionImpl(std::variant<float, bool> 
 void ProtocolWithChangesWriter::WriteStringToUnionImpl(std::variant<std::string, bool> const& value) {
   switch (version_) {
   case Version::v0: {
-    std::string string_to_union;
-    string_to_union = std::get<0>(value);
+    std::string string_to_union = {};
+    if (value.index() == 0) {
+      string_to_union = std::get<0>(value);
+    }
     yardl::binary::WriteString(stream_, string_to_union);
     break;
   }
@@ -1566,7 +1622,7 @@ void ProtocolWithChangesWriter::WriteStringToUnionImpl(std::variant<std::string,
 void ProtocolWithChangesWriter::WriteOptionalIntToFloatImpl(std::optional<float> const& value) {
   switch (version_) {
   case Version::v0: {
-    std::optional<int32_t> optional_int_to_float;
+    std::optional<int32_t> optional_int_to_float = {};
     if (value.has_value()) {
       optional_int_to_float = static_cast<int32_t>(std::round(value.value()));
     }
@@ -1582,9 +1638,13 @@ void ProtocolWithChangesWriter::WriteOptionalIntToFloatImpl(std::optional<float>
 void ProtocolWithChangesWriter::WriteOptionalFloatToStringImpl(std::optional<std::string> const& value) {
   switch (version_) {
   case Version::v0: {
-    std::optional<float> optional_float_to_string;
+    std::optional<float> optional_float_to_string = {};
     if (value.has_value()) {
-      optional_float_to_string = std::stof(value.value());
+      try {
+        optional_float_to_string = std::stof(value.value());
+      } catch (...) {
+        throw new std::runtime_error("Unable to convert string \"" + value.value() + "\" to number");
+      }
     }
     yardl::binary::WriteOptional<float, yardl::binary::WriteFloatingPoint>(stream_, optional_float_to_string);
     break;
@@ -1614,7 +1674,7 @@ void ProtocolWithChangesWriter::WriteStringToAliasedStringImpl(evo_test::Aliased
 void ProtocolWithChangesWriter::WriteStringToAliasedIntImpl(evo_test::AliasedInt const& value) {
   switch (version_) {
   case Version::v0: {
-    std::string string_to_aliased_int;
+    std::string string_to_aliased_int = {};
     string_to_aliased_int = std::to_string(value);
     yardl::binary::WriteString(stream_, string_to_aliased_int);
     break;
@@ -1628,7 +1688,7 @@ void ProtocolWithChangesWriter::WriteStringToAliasedIntImpl(evo_test::AliasedInt
 void ProtocolWithChangesWriter::WriteOptionalIntToUnionImpl(std::variant<std::monostate, int32_t, std::string> const& value) {
   switch (version_) {
   case Version::v0: {
-    std::optional<int32_t> optional_int_to_union;
+    std::optional<int32_t> optional_int_to_union = {};
     if (value.index() == 1) {
       optional_int_to_union = std::get<1>(value);
     }
@@ -1644,7 +1704,7 @@ void ProtocolWithChangesWriter::WriteOptionalIntToUnionImpl(std::variant<std::mo
 void ProtocolWithChangesWriter::WriteOptionalRecordToUnionImpl(std::variant<std::monostate, evo_test::RecordWithChanges, std::string> const& value) {
   switch (version_) {
   case Version::v0: {
-    std::optional<evo_test::RecordWithChanges_v0> optional_record_to_union;
+    std::optional<evo_test::RecordWithChanges_v0> optional_record_to_union = {};
     if (value.index() == 1) {
       optional_record_to_union = std::get<1>(value);
     }
@@ -1994,8 +2054,10 @@ void ProtocolWithChangesWriter::WriteRcRNewImpl(evo_test::RNew const& value) {
 void ProtocolWithChangesWriter::WriteRlinkRUnionImpl(evo_test::RUnion const& value) {
   switch (version_) {
   case Version::v0: {
-    evo_test::RC_v0 rlink_r_union;
-    rlink_r_union = std::get<0>(value);
+    evo_test::RC_v0 rlink_r_union = {};
+    if (value.index() == 0) {
+      rlink_r_union = std::get<0>(value);
+    }
     evo_test::binary::WriteRC_v0(stream_, rlink_r_union);
     break;
   }
@@ -2008,8 +2070,10 @@ void ProtocolWithChangesWriter::WriteRlinkRUnionImpl(evo_test::RUnion const& val
 void ProtocolWithChangesWriter::WriteRaRUnionImpl(evo_test::RUnion const& value) {
   switch (version_) {
   case Version::v0: {
-    evo_test::RC_v0 ra_r_union;
-    ra_r_union = std::get<0>(value);
+    evo_test::RC_v0 ra_r_union = {};
+    if (value.index() == 0) {
+      ra_r_union = std::get<0>(value);
+    }
     evo_test::binary::WriteRC_v0(stream_, ra_r_union);
     break;
   }
@@ -2022,8 +2086,10 @@ void ProtocolWithChangesWriter::WriteRaRUnionImpl(evo_test::RUnion const& value)
 void ProtocolWithChangesWriter::WriteRbRUnionImpl(evo_test::RUnion const& value) {
   switch (version_) {
   case Version::v0: {
-    evo_test::RC_v0 rb_r_union;
-    rb_r_union = std::get<0>(value);
+    evo_test::RC_v0 rb_r_union = {};
+    if (value.index() == 0) {
+      rb_r_union = std::get<0>(value);
+    }
     evo_test::binary::WriteRC_v0(stream_, rb_r_union);
     break;
   }
@@ -2036,8 +2102,10 @@ void ProtocolWithChangesWriter::WriteRbRUnionImpl(evo_test::RUnion const& value)
 void ProtocolWithChangesWriter::WriteRcRUnionImpl(evo_test::RUnion const& value) {
   switch (version_) {
   case Version::v0: {
-    evo_test::RC_v0 rc_r_union;
-    rc_r_union = std::get<0>(value);
+    evo_test::RC_v0 rc_r_union = {};
+    if (value.index() == 0) {
+      rc_r_union = std::get<0>(value);
+    }
     evo_test::binary::WriteRC_v0(stream_, rc_r_union);
     break;
   }
@@ -2074,7 +2142,7 @@ void ProtocolWithChangesWriter::WriteAliasedOptionalRecordWithChangesImpl(std::o
 void ProtocolWithChangesWriter::WriteUnionRecordWithChangesImpl(std::variant<evo_test::RecordWithChanges, int32_t> const& value) {
   switch (version_) {
   case Version::v0: {
-    std::variant<evo_test::RecordWithChanges_v0, int32_t> union_record_with_changes;
+    std::variant<evo_test::RecordWithChanges_v0, int32_t> union_record_with_changes = {};
     switch (value.index()) {
       case 0: {
         union_record_with_changes = std::get<0>(value);
@@ -2098,7 +2166,7 @@ void ProtocolWithChangesWriter::WriteUnionRecordWithChangesImpl(std::variant<evo
 void ProtocolWithChangesWriter::WriteUnionWithSameTypesetImpl(std::variant<float, evo_test::RecordWithChanges, std::string, int32_t> const& value) {
   switch (version_) {
   case Version::v0: {
-    std::variant<evo_test::RecordWithChanges_v0, int32_t, float, std::string> union_with_same_typeset;
+    std::variant<evo_test::RecordWithChanges_v0, int32_t, float, std::string> union_with_same_typeset = {};
     switch (value.index()) {
       case 0: {
         union_with_same_typeset = std::get<0>(value);
@@ -2130,7 +2198,7 @@ void ProtocolWithChangesWriter::WriteUnionWithSameTypesetImpl(std::variant<float
 void ProtocolWithChangesWriter::WriteUnionWithTypesAddedImpl(std::variant<evo_test::RecordWithChanges, int32_t, float, std::string> const& value) {
   switch (version_) {
   case Version::v0: {
-    std::variant<evo_test::RecordWithChanges_v0, float> union_with_types_added;
+    std::variant<evo_test::RecordWithChanges_v0, float> union_with_types_added = {};
     switch (value.index()) {
       case 0: {
         union_with_types_added = std::get<0>(value);
@@ -2162,7 +2230,7 @@ void ProtocolWithChangesWriter::WriteUnionWithTypesAddedImpl(std::variant<evo_te
 void ProtocolWithChangesWriter::WriteUnionWithTypesRemovedImpl(std::variant<evo_test::RecordWithChanges, std::string> const& value) {
   switch (version_) {
   case Version::v0: {
-    std::variant<evo_test::RecordWithChanges_v0, int32_t, float, std::string> union_with_types_removed;
+    std::variant<evo_test::RecordWithChanges_v0, int32_t, float, std::string> union_with_types_removed = {};
     switch (value.index()) {
       case 0: {
         union_with_types_removed = std::get<0>(value);
@@ -2186,8 +2254,10 @@ void ProtocolWithChangesWriter::WriteUnionWithTypesRemovedImpl(std::variant<evo_
 void ProtocolWithChangesWriter::WriteRecordToOptionalImpl(std::optional<evo_test::RecordWithChanges> const& value) {
   switch (version_) {
   case Version::v0: {
-    evo_test::RecordWithChanges_v0 record_to_optional;
-    record_to_optional = value.value();
+    evo_test::RecordWithChanges_v0 record_to_optional = {};
+    if (value.has_value()) {
+      record_to_optional = value.value();
+    }
     evo_test::binary::WriteRecordWithChanges_v0(stream_, record_to_optional);
     break;
   }
@@ -2200,8 +2270,10 @@ void ProtocolWithChangesWriter::WriteRecordToOptionalImpl(std::optional<evo_test
 void ProtocolWithChangesWriter::WriteRecordToAliasedOptionalImpl(evo_test::AliasedOptionalRecord const& value) {
   switch (version_) {
   case Version::v0: {
-    evo_test::RecordWithChanges_v0 record_to_aliased_optional;
-    record_to_aliased_optional = value.value();
+    evo_test::RecordWithChanges_v0 record_to_aliased_optional = {};
+    if (value.has_value()) {
+      record_to_aliased_optional = value.value();
+    }
     evo_test::binary::WriteRecordWithChanges_v0(stream_, record_to_aliased_optional);
     break;
   }
@@ -2214,8 +2286,10 @@ void ProtocolWithChangesWriter::WriteRecordToAliasedOptionalImpl(evo_test::Alias
 void ProtocolWithChangesWriter::WriteRecordToUnionImpl(std::variant<evo_test::RecordWithChanges, std::string> const& value) {
   switch (version_) {
   case Version::v0: {
-    evo_test::RecordWithChanges_v0 record_to_union;
-    record_to_union = std::get<0>(value);
+    evo_test::RecordWithChanges_v0 record_to_union = {};
+    if (value.index() == 0) {
+      record_to_union = std::get<0>(value);
+    }
     evo_test::binary::WriteRecordWithChanges_v0(stream_, record_to_union);
     break;
   }
@@ -2228,8 +2302,10 @@ void ProtocolWithChangesWriter::WriteRecordToUnionImpl(std::variant<evo_test::Re
 void ProtocolWithChangesWriter::WriteRecordToAliasedUnionImpl(evo_test::AliasedRecordOrString const& value) {
   switch (version_) {
   case Version::v0: {
-    evo_test::RecordWithChanges_v0 record_to_aliased_union;
-    record_to_aliased_union = std::get<0>(value);
+    evo_test::RecordWithChanges_v0 record_to_aliased_union = {};
+    if (value.index() == 0) {
+      record_to_aliased_union = std::get<0>(value);
+    }
     evo_test::binary::WriteRecordWithChanges_v0(stream_, record_to_aliased_union);
     break;
   }
@@ -2242,7 +2318,7 @@ void ProtocolWithChangesWriter::WriteRecordToAliasedUnionImpl(evo_test::AliasedR
 void ProtocolWithChangesWriter::WriteUnionToAliasedUnionImpl(evo_test::AliasedRecordOrInt const& value) {
   switch (version_) {
   case Version::v0: {
-    std::variant<evo_test::RecordWithChanges_v0, int32_t> union_to_aliased_union;
+    std::variant<evo_test::RecordWithChanges_v0, int32_t> union_to_aliased_union = {};
     switch (value.index()) {
       case 0: {
         union_to_aliased_union = std::get<0>(value);
@@ -2266,7 +2342,7 @@ void ProtocolWithChangesWriter::WriteUnionToAliasedUnionImpl(evo_test::AliasedRe
 void ProtocolWithChangesWriter::WriteUnionToAliasedUnionWithChangesImpl(evo_test::AliasedRecordOrString const& value) {
   switch (version_) {
   case Version::v0: {
-    std::variant<evo_test::RecordWithChanges_v0, int32_t> union_to_aliased_union_with_changes;
+    std::variant<evo_test::RecordWithChanges_v0, int32_t> union_to_aliased_union_with_changes = {};
     switch (value.index()) {
       case 0: {
         union_to_aliased_union_with_changes = std::get<0>(value);
@@ -2302,9 +2378,13 @@ void ProtocolWithChangesWriter::WriteOptionalToAliasedOptionalImpl(evo_test::Ali
 void ProtocolWithChangesWriter::WriteOptionalToAliasedOptionalWithChangesImpl(evo_test::AliasedOptionalString const& value) {
   switch (version_) {
   case Version::v0: {
-    std::optional<int32_t> optional_to_aliased_optional_with_changes;
+    std::optional<int32_t> optional_to_aliased_optional_with_changes = {};
     if (value.has_value()) {
-      optional_to_aliased_optional_with_changes = std::stoi(value.value());
+      try {
+        optional_to_aliased_optional_with_changes = std::stoi(value.value());
+      } catch (...) {
+        throw new std::runtime_error("Unable to convert string \"" + value.value() + "\" to number");
+      }
     }
     yardl::binary::WriteOptional<int32_t, yardl::binary::WriteInteger>(stream_, optional_to_aliased_optional_with_changes);
     break;
@@ -2378,8 +2458,10 @@ void ProtocolWithChangesWriter::WriteAliasedGenericRecordToAliasImpl(evo_test::A
 void ProtocolWithChangesWriter::WriteClosedGenericRecordToUnionImpl(std::variant<evo_test::GenericRecord<int32_t, std::string>, std::string> const& value) {
   switch (version_) {
   case Version::v0: {
-    evo_test::GenericRecord_v0<int32_t, std::string> closed_generic_record_to_union;
-    closed_generic_record_to_union = std::get<0>(value);
+    evo_test::GenericRecord_v0<int32_t, std::string> closed_generic_record_to_union = {};
+    if (value.index() == 0) {
+      closed_generic_record_to_union = std::get<0>(value);
+    }
     evo_test::binary::WriteGenericRecord_v0<int32_t, yardl::binary::WriteInteger, std::string, yardl::binary::WriteString>(stream_, closed_generic_record_to_union);
     break;
   }
@@ -2392,8 +2474,10 @@ void ProtocolWithChangesWriter::WriteClosedGenericRecordToUnionImpl(std::variant
 void ProtocolWithChangesWriter::WriteGenericRecordToAliasedUnionImpl(evo_test::AliasedGenericRecordOrString const& value) {
   switch (version_) {
   case Version::v0: {
-    evo_test::GenericRecord_v0<int32_t, std::string> generic_record_to_aliased_union;
-    generic_record_to_aliased_union = std::get<0>(value);
+    evo_test::GenericRecord_v0<int32_t, std::string> generic_record_to_aliased_union = {};
+    if (value.index() == 0) {
+      generic_record_to_aliased_union = std::get<0>(value);
+    }
     evo_test::binary::WriteGenericRecord_v0<int32_t, yardl::binary::WriteInteger, std::string, yardl::binary::WriteString>(stream_, generic_record_to_aliased_union);
     break;
   }
@@ -2621,7 +2705,7 @@ void ProtocolWithChangesWriter::CloseImpl() {
 void ProtocolWithChangesReader::ReadInt8ToIntImpl(int32_t& value) {
   switch (version_) {
   case Version::v0: {
-    int8_t int8_to_int;
+    int8_t int8_to_int = {};
     yardl::binary::ReadInteger(stream_, int8_to_int);
     value = static_cast<int32_t>(int8_to_int);
     break;
@@ -2635,7 +2719,7 @@ void ProtocolWithChangesReader::ReadInt8ToIntImpl(int32_t& value) {
 void ProtocolWithChangesReader::ReadInt8ToLongImpl(int64_t& value) {
   switch (version_) {
   case Version::v0: {
-    int8_t int8_to_long;
+    int8_t int8_to_long = {};
     yardl::binary::ReadInteger(stream_, int8_to_long);
     value = static_cast<int64_t>(int8_to_long);
     break;
@@ -2649,7 +2733,7 @@ void ProtocolWithChangesReader::ReadInt8ToLongImpl(int64_t& value) {
 void ProtocolWithChangesReader::ReadInt8ToUintImpl(uint32_t& value) {
   switch (version_) {
   case Version::v0: {
-    int8_t int8_to_uint;
+    int8_t int8_to_uint = {};
     yardl::binary::ReadInteger(stream_, int8_to_uint);
     value = static_cast<uint32_t>(int8_to_uint);
     break;
@@ -2663,7 +2747,7 @@ void ProtocolWithChangesReader::ReadInt8ToUintImpl(uint32_t& value) {
 void ProtocolWithChangesReader::ReadInt8ToUlongImpl(uint64_t& value) {
   switch (version_) {
   case Version::v0: {
-    int8_t int8_to_ulong;
+    int8_t int8_to_ulong = {};
     yardl::binary::ReadInteger(stream_, int8_to_ulong);
     value = static_cast<uint64_t>(int8_to_ulong);
     break;
@@ -2677,7 +2761,7 @@ void ProtocolWithChangesReader::ReadInt8ToUlongImpl(uint64_t& value) {
 void ProtocolWithChangesReader::ReadInt8ToFloatImpl(float& value) {
   switch (version_) {
   case Version::v0: {
-    int8_t int8_to_float;
+    int8_t int8_to_float = {};
     yardl::binary::ReadInteger(stream_, int8_to_float);
     value = static_cast<float>(int8_to_float);
     break;
@@ -2691,7 +2775,7 @@ void ProtocolWithChangesReader::ReadInt8ToFloatImpl(float& value) {
 void ProtocolWithChangesReader::ReadInt8ToDoubleImpl(double& value) {
   switch (version_) {
   case Version::v0: {
-    int8_t int8_to_double;
+    int8_t int8_to_double = {};
     yardl::binary::ReadInteger(stream_, int8_to_double);
     value = static_cast<double>(int8_to_double);
     break;
@@ -2705,7 +2789,7 @@ void ProtocolWithChangesReader::ReadInt8ToDoubleImpl(double& value) {
 void ProtocolWithChangesReader::ReadIntToUintImpl(uint32_t& value) {
   switch (version_) {
   case Version::v0: {
-    int32_t int_to_uint;
+    int32_t int_to_uint = {};
     yardl::binary::ReadInteger(stream_, int_to_uint);
     value = static_cast<uint32_t>(int_to_uint);
     break;
@@ -2719,7 +2803,7 @@ void ProtocolWithChangesReader::ReadIntToUintImpl(uint32_t& value) {
 void ProtocolWithChangesReader::ReadIntToLongImpl(int64_t& value) {
   switch (version_) {
   case Version::v0: {
-    int32_t int_to_long;
+    int32_t int_to_long = {};
     yardl::binary::ReadInteger(stream_, int_to_long);
     value = static_cast<int64_t>(int_to_long);
     break;
@@ -2733,7 +2817,7 @@ void ProtocolWithChangesReader::ReadIntToLongImpl(int64_t& value) {
 void ProtocolWithChangesReader::ReadIntToFloatImpl(float& value) {
   switch (version_) {
   case Version::v0: {
-    int32_t int_to_float;
+    int32_t int_to_float = {};
     yardl::binary::ReadInteger(stream_, int_to_float);
     value = static_cast<float>(int_to_float);
     break;
@@ -2747,7 +2831,7 @@ void ProtocolWithChangesReader::ReadIntToFloatImpl(float& value) {
 void ProtocolWithChangesReader::ReadIntToDoubleImpl(double& value) {
   switch (version_) {
   case Version::v0: {
-    int32_t int_to_double;
+    int32_t int_to_double = {};
     yardl::binary::ReadInteger(stream_, int_to_double);
     value = static_cast<double>(int_to_double);
     break;
@@ -2761,7 +2845,7 @@ void ProtocolWithChangesReader::ReadIntToDoubleImpl(double& value) {
 void ProtocolWithChangesReader::ReadUintToUlongImpl(uint64_t& value) {
   switch (version_) {
   case Version::v0: {
-    uint32_t uint_to_ulong;
+    uint32_t uint_to_ulong = {};
     yardl::binary::ReadInteger(stream_, uint_to_ulong);
     value = static_cast<uint64_t>(uint_to_ulong);
     break;
@@ -2775,7 +2859,7 @@ void ProtocolWithChangesReader::ReadUintToUlongImpl(uint64_t& value) {
 void ProtocolWithChangesReader::ReadUintToFloatImpl(float& value) {
   switch (version_) {
   case Version::v0: {
-    uint32_t uint_to_float;
+    uint32_t uint_to_float = {};
     yardl::binary::ReadInteger(stream_, uint_to_float);
     value = static_cast<float>(uint_to_float);
     break;
@@ -2789,7 +2873,7 @@ void ProtocolWithChangesReader::ReadUintToFloatImpl(float& value) {
 void ProtocolWithChangesReader::ReadUintToDoubleImpl(double& value) {
   switch (version_) {
   case Version::v0: {
-    uint32_t uint_to_double;
+    uint32_t uint_to_double = {};
     yardl::binary::ReadInteger(stream_, uint_to_double);
     value = static_cast<double>(uint_to_double);
     break;
@@ -2803,7 +2887,7 @@ void ProtocolWithChangesReader::ReadUintToDoubleImpl(double& value) {
 void ProtocolWithChangesReader::ReadFloatToDoubleImpl(double& value) {
   switch (version_) {
   case Version::v0: {
-    float float_to_double;
+    float float_to_double = {};
     yardl::binary::ReadFloatingPoint(stream_, float_to_double);
     value = static_cast<double>(float_to_double);
     break;
@@ -2817,7 +2901,7 @@ void ProtocolWithChangesReader::ReadFloatToDoubleImpl(double& value) {
 void ProtocolWithChangesReader::ReadIntToStringImpl(std::string& value) {
   switch (version_) {
   case Version::v0: {
-    int32_t int_to_string;
+    int32_t int_to_string = {};
     yardl::binary::ReadInteger(stream_, int_to_string);
     value = std::to_string(int_to_string);
     break;
@@ -2831,7 +2915,7 @@ void ProtocolWithChangesReader::ReadIntToStringImpl(std::string& value) {
 void ProtocolWithChangesReader::ReadUintToStringImpl(std::string& value) {
   switch (version_) {
   case Version::v0: {
-    uint32_t uint_to_string;
+    uint32_t uint_to_string = {};
     yardl::binary::ReadInteger(stream_, uint_to_string);
     value = std::to_string(uint_to_string);
     break;
@@ -2845,7 +2929,7 @@ void ProtocolWithChangesReader::ReadUintToStringImpl(std::string& value) {
 void ProtocolWithChangesReader::ReadLongToStringImpl(std::string& value) {
   switch (version_) {
   case Version::v0: {
-    int64_t long_to_string;
+    int64_t long_to_string = {};
     yardl::binary::ReadInteger(stream_, long_to_string);
     value = std::to_string(long_to_string);
     break;
@@ -2859,7 +2943,7 @@ void ProtocolWithChangesReader::ReadLongToStringImpl(std::string& value) {
 void ProtocolWithChangesReader::ReadUlongToStringImpl(std::string& value) {
   switch (version_) {
   case Version::v0: {
-    uint64_t ulong_to_string;
+    uint64_t ulong_to_string = {};
     yardl::binary::ReadInteger(stream_, ulong_to_string);
     value = std::to_string(ulong_to_string);
     break;
@@ -2873,7 +2957,7 @@ void ProtocolWithChangesReader::ReadUlongToStringImpl(std::string& value) {
 void ProtocolWithChangesReader::ReadFloatToStringImpl(std::string& value) {
   switch (version_) {
   case Version::v0: {
-    float float_to_string;
+    float float_to_string = {};
     yardl::binary::ReadFloatingPoint(stream_, float_to_string);
     value = std::to_string(float_to_string);
     break;
@@ -2887,7 +2971,7 @@ void ProtocolWithChangesReader::ReadFloatToStringImpl(std::string& value) {
 void ProtocolWithChangesReader::ReadDoubleToStringImpl(std::string& value) {
   switch (version_) {
   case Version::v0: {
-    double double_to_string;
+    double double_to_string = {};
     yardl::binary::ReadFloatingPoint(stream_, double_to_string);
     value = std::to_string(double_to_string);
     break;
@@ -2901,7 +2985,7 @@ void ProtocolWithChangesReader::ReadDoubleToStringImpl(std::string& value) {
 void ProtocolWithChangesReader::ReadIntToOptionalImpl(std::optional<int32_t>& value) {
   switch (version_) {
   case Version::v0: {
-    int32_t int_to_optional;
+    int32_t int_to_optional = {};
     yardl::binary::ReadInteger(stream_, int_to_optional);
     value = int_to_optional;
     break;
@@ -2915,7 +2999,7 @@ void ProtocolWithChangesReader::ReadIntToOptionalImpl(std::optional<int32_t>& va
 void ProtocolWithChangesReader::ReadFloatToOptionalImpl(std::optional<float>& value) {
   switch (version_) {
   case Version::v0: {
-    float float_to_optional;
+    float float_to_optional = {};
     yardl::binary::ReadFloatingPoint(stream_, float_to_optional);
     value = float_to_optional;
     break;
@@ -2929,7 +3013,7 @@ void ProtocolWithChangesReader::ReadFloatToOptionalImpl(std::optional<float>& va
 void ProtocolWithChangesReader::ReadStringToOptionalImpl(std::optional<std::string>& value) {
   switch (version_) {
   case Version::v0: {
-    std::string string_to_optional;
+    std::string string_to_optional = {};
     yardl::binary::ReadString(stream_, string_to_optional);
     value = string_to_optional;
     break;
@@ -2943,7 +3027,7 @@ void ProtocolWithChangesReader::ReadStringToOptionalImpl(std::optional<std::stri
 void ProtocolWithChangesReader::ReadIntToUnionImpl(std::variant<int32_t, bool>& value) {
   switch (version_) {
   case Version::v0: {
-    int32_t int_to_union;
+    int32_t int_to_union = {};
     yardl::binary::ReadInteger(stream_, int_to_union);
     value = int_to_union;
     break;
@@ -2957,7 +3041,7 @@ void ProtocolWithChangesReader::ReadIntToUnionImpl(std::variant<int32_t, bool>& 
 void ProtocolWithChangesReader::ReadFloatToUnionImpl(std::variant<float, bool>& value) {
   switch (version_) {
   case Version::v0: {
-    float float_to_union;
+    float float_to_union = {};
     yardl::binary::ReadFloatingPoint(stream_, float_to_union);
     value = float_to_union;
     break;
@@ -2971,7 +3055,7 @@ void ProtocolWithChangesReader::ReadFloatToUnionImpl(std::variant<float, bool>& 
 void ProtocolWithChangesReader::ReadStringToUnionImpl(std::variant<std::string, bool>& value) {
   switch (version_) {
   case Version::v0: {
-    std::string string_to_union;
+    std::string string_to_union = {};
     yardl::binary::ReadString(stream_, string_to_union);
     value = string_to_union;
     break;
@@ -2985,13 +3069,11 @@ void ProtocolWithChangesReader::ReadStringToUnionImpl(std::variant<std::string, 
 void ProtocolWithChangesReader::ReadOptionalIntToFloatImpl(std::optional<float>& value) {
   switch (version_) {
   case Version::v0: {
-    std::optional<int32_t> optional_int_to_float;
+    std::optional<int32_t> optional_int_to_float = {};
     yardl::binary::ReadOptional<int32_t, yardl::binary::ReadInteger>(stream_, optional_int_to_float);
-    std::optional<float> tmp;
     if (optional_int_to_float.has_value()) {
-      tmp = static_cast<float>(optional_int_to_float.value());
+      value = static_cast<float>(optional_int_to_float.value());
     }
-    value = tmp;
     break;
   }
   default:
@@ -3003,13 +3085,11 @@ void ProtocolWithChangesReader::ReadOptionalIntToFloatImpl(std::optional<float>&
 void ProtocolWithChangesReader::ReadOptionalFloatToStringImpl(std::optional<std::string>& value) {
   switch (version_) {
   case Version::v0: {
-    std::optional<float> optional_float_to_string;
+    std::optional<float> optional_float_to_string = {};
     yardl::binary::ReadOptional<float, yardl::binary::ReadFloatingPoint>(stream_, optional_float_to_string);
-    std::optional<std::string> tmp;
     if (optional_float_to_string.has_value()) {
-      tmp = std::to_string(optional_float_to_string.value());
+      value = std::to_string(optional_float_to_string.value());
     }
-    value = tmp;
     break;
   }
   default:
@@ -3037,9 +3117,13 @@ void ProtocolWithChangesReader::ReadStringToAliasedStringImpl(evo_test::AliasedS
 void ProtocolWithChangesReader::ReadStringToAliasedIntImpl(evo_test::AliasedInt& value) {
   switch (version_) {
   case Version::v0: {
-    std::string string_to_aliased_int;
+    std::string string_to_aliased_int = {};
     yardl::binary::ReadString(stream_, string_to_aliased_int);
-    value = std::stoi(string_to_aliased_int);
+    try {
+      value = std::stoi(string_to_aliased_int);
+    } catch (...) {
+      throw new std::runtime_error("Unable to convert string \"" + string_to_aliased_int + "\" to number");
+    }
     break;
   }
   default:
@@ -3051,7 +3135,7 @@ void ProtocolWithChangesReader::ReadStringToAliasedIntImpl(evo_test::AliasedInt&
 void ProtocolWithChangesReader::ReadOptionalIntToUnionImpl(std::variant<std::monostate, int32_t, std::string>& value) {
   switch (version_) {
   case Version::v0: {
-    std::optional<int32_t> optional_int_to_union;
+    std::optional<int32_t> optional_int_to_union = {};
     yardl::binary::ReadOptional<int32_t, yardl::binary::ReadInteger>(stream_, optional_int_to_union);
     if (optional_int_to_union.has_value()) {
       value = optional_int_to_union.value();
@@ -3069,7 +3153,7 @@ void ProtocolWithChangesReader::ReadOptionalIntToUnionImpl(std::variant<std::mon
 void ProtocolWithChangesReader::ReadOptionalRecordToUnionImpl(std::variant<std::monostate, evo_test::RecordWithChanges, std::string>& value) {
   switch (version_) {
   case Version::v0: {
-    std::optional<evo_test::RecordWithChanges_v0> optional_record_to_union;
+    std::optional<evo_test::RecordWithChanges_v0> optional_record_to_union = {};
     yardl::binary::ReadOptional<evo_test::RecordWithChanges_v0, evo_test::binary::ReadRecordWithChanges_v0>(stream_, optional_record_to_union);
     if (optional_record_to_union.has_value()) {
       value = optional_record_to_union.value();
@@ -3412,7 +3496,7 @@ void ProtocolWithChangesReader::ReadRcRNewImpl(evo_test::RNew& value) {
 void ProtocolWithChangesReader::ReadRlinkRUnionImpl(evo_test::RUnion& value) {
   switch (version_) {
   case Version::v0: {
-    evo_test::RC_v0 rlink_r_union;
+    evo_test::RC_v0 rlink_r_union = {};
     evo_test::binary::ReadRC_v0(stream_, rlink_r_union);
     value = rlink_r_union;
     break;
@@ -3426,7 +3510,7 @@ void ProtocolWithChangesReader::ReadRlinkRUnionImpl(evo_test::RUnion& value) {
 void ProtocolWithChangesReader::ReadRaRUnionImpl(evo_test::RUnion& value) {
   switch (version_) {
   case Version::v0: {
-    evo_test::RC_v0 ra_r_union;
+    evo_test::RC_v0 ra_r_union = {};
     evo_test::binary::ReadRC_v0(stream_, ra_r_union);
     value = ra_r_union;
     break;
@@ -3440,7 +3524,7 @@ void ProtocolWithChangesReader::ReadRaRUnionImpl(evo_test::RUnion& value) {
 void ProtocolWithChangesReader::ReadRbRUnionImpl(evo_test::RUnion& value) {
   switch (version_) {
   case Version::v0: {
-    evo_test::RC_v0 rb_r_union;
+    evo_test::RC_v0 rb_r_union = {};
     evo_test::binary::ReadRC_v0(stream_, rb_r_union);
     value = rb_r_union;
     break;
@@ -3454,7 +3538,7 @@ void ProtocolWithChangesReader::ReadRbRUnionImpl(evo_test::RUnion& value) {
 void ProtocolWithChangesReader::ReadRcRUnionImpl(evo_test::RUnion& value) {
   switch (version_) {
   case Version::v0: {
-    evo_test::RC_v0 rc_r_union;
+    evo_test::RC_v0 rc_r_union = {};
     evo_test::binary::ReadRC_v0(stream_, rc_r_union);
     value = rc_r_union;
     break;
@@ -3492,7 +3576,7 @@ void ProtocolWithChangesReader::ReadAliasedOptionalRecordWithChangesImpl(std::op
 void ProtocolWithChangesReader::ReadUnionRecordWithChangesImpl(std::variant<evo_test::RecordWithChanges, int32_t>& value) {
   switch (version_) {
   case Version::v0: {
-    std::variant<evo_test::RecordWithChanges_v0, int32_t> union_record_with_changes;
+    std::variant<evo_test::RecordWithChanges_v0, int32_t> union_record_with_changes = {};
     ReadUnion<evo_test::RecordWithChanges_v0, evo_test::binary::ReadRecordWithChanges_v0, int32_t, yardl::binary::ReadInteger>(stream_, union_record_with_changes);
     switch (union_record_with_changes.index()) {
       case 0: {
@@ -3516,7 +3600,7 @@ void ProtocolWithChangesReader::ReadUnionRecordWithChangesImpl(std::variant<evo_
 void ProtocolWithChangesReader::ReadUnionWithSameTypesetImpl(std::variant<float, evo_test::RecordWithChanges, std::string, int32_t>& value) {
   switch (version_) {
   case Version::v0: {
-    std::variant<evo_test::RecordWithChanges_v0, int32_t, float, std::string> union_with_same_typeset;
+    std::variant<evo_test::RecordWithChanges_v0, int32_t, float, std::string> union_with_same_typeset = {};
     ReadUnion<evo_test::RecordWithChanges_v0, evo_test::binary::ReadRecordWithChanges_v0, int32_t, yardl::binary::ReadInteger, float, yardl::binary::ReadFloatingPoint, std::string, yardl::binary::ReadString>(stream_, union_with_same_typeset);
     switch (union_with_same_typeset.index()) {
       case 0: {
@@ -3548,7 +3632,7 @@ void ProtocolWithChangesReader::ReadUnionWithSameTypesetImpl(std::variant<float,
 void ProtocolWithChangesReader::ReadUnionWithTypesAddedImpl(std::variant<evo_test::RecordWithChanges, int32_t, float, std::string>& value) {
   switch (version_) {
   case Version::v0: {
-    std::variant<evo_test::RecordWithChanges_v0, float> union_with_types_added;
+    std::variant<evo_test::RecordWithChanges_v0, float> union_with_types_added = {};
     ReadUnion<evo_test::RecordWithChanges_v0, evo_test::binary::ReadRecordWithChanges_v0, float, yardl::binary::ReadFloatingPoint>(stream_, union_with_types_added);
     switch (union_with_types_added.index()) {
       case 0: {
@@ -3572,7 +3656,7 @@ void ProtocolWithChangesReader::ReadUnionWithTypesAddedImpl(std::variant<evo_tes
 void ProtocolWithChangesReader::ReadUnionWithTypesRemovedImpl(std::variant<evo_test::RecordWithChanges, std::string>& value) {
   switch (version_) {
   case Version::v0: {
-    std::variant<evo_test::RecordWithChanges_v0, int32_t, float, std::string> union_with_types_removed;
+    std::variant<evo_test::RecordWithChanges_v0, int32_t, float, std::string> union_with_types_removed = {};
     ReadUnion<evo_test::RecordWithChanges_v0, evo_test::binary::ReadRecordWithChanges_v0, int32_t, yardl::binary::ReadInteger, float, yardl::binary::ReadFloatingPoint, std::string, yardl::binary::ReadString>(stream_, union_with_types_removed);
     switch (union_with_types_removed.index()) {
       case 0: {
@@ -3604,7 +3688,7 @@ void ProtocolWithChangesReader::ReadUnionWithTypesRemovedImpl(std::variant<evo_t
 void ProtocolWithChangesReader::ReadRecordToOptionalImpl(std::optional<evo_test::RecordWithChanges>& value) {
   switch (version_) {
   case Version::v0: {
-    evo_test::RecordWithChanges_v0 record_to_optional;
+    evo_test::RecordWithChanges_v0 record_to_optional = {};
     evo_test::binary::ReadRecordWithChanges_v0(stream_, record_to_optional);
     value = record_to_optional;
     break;
@@ -3618,7 +3702,7 @@ void ProtocolWithChangesReader::ReadRecordToOptionalImpl(std::optional<evo_test:
 void ProtocolWithChangesReader::ReadRecordToAliasedOptionalImpl(evo_test::AliasedOptionalRecord& value) {
   switch (version_) {
   case Version::v0: {
-    evo_test::RecordWithChanges_v0 record_to_aliased_optional;
+    evo_test::RecordWithChanges_v0 record_to_aliased_optional = {};
     evo_test::binary::ReadRecordWithChanges_v0(stream_, record_to_aliased_optional);
     value = record_to_aliased_optional;
     break;
@@ -3632,7 +3716,7 @@ void ProtocolWithChangesReader::ReadRecordToAliasedOptionalImpl(evo_test::Aliase
 void ProtocolWithChangesReader::ReadRecordToUnionImpl(std::variant<evo_test::RecordWithChanges, std::string>& value) {
   switch (version_) {
   case Version::v0: {
-    evo_test::RecordWithChanges_v0 record_to_union;
+    evo_test::RecordWithChanges_v0 record_to_union = {};
     evo_test::binary::ReadRecordWithChanges_v0(stream_, record_to_union);
     value = record_to_union;
     break;
@@ -3646,7 +3730,7 @@ void ProtocolWithChangesReader::ReadRecordToUnionImpl(std::variant<evo_test::Rec
 void ProtocolWithChangesReader::ReadRecordToAliasedUnionImpl(evo_test::AliasedRecordOrString& value) {
   switch (version_) {
   case Version::v0: {
-    evo_test::RecordWithChanges_v0 record_to_aliased_union;
+    evo_test::RecordWithChanges_v0 record_to_aliased_union = {};
     evo_test::binary::ReadRecordWithChanges_v0(stream_, record_to_aliased_union);
     value = record_to_aliased_union;
     break;
@@ -3660,7 +3744,7 @@ void ProtocolWithChangesReader::ReadRecordToAliasedUnionImpl(evo_test::AliasedRe
 void ProtocolWithChangesReader::ReadUnionToAliasedUnionImpl(evo_test::AliasedRecordOrInt& value) {
   switch (version_) {
   case Version::v0: {
-    std::variant<evo_test::RecordWithChanges_v0, int32_t> union_to_aliased_union;
+    std::variant<evo_test::RecordWithChanges_v0, int32_t> union_to_aliased_union = {};
     ReadUnion<evo_test::RecordWithChanges_v0, evo_test::binary::ReadRecordWithChanges_v0, int32_t, yardl::binary::ReadInteger>(stream_, union_to_aliased_union);
     switch (union_to_aliased_union.index()) {
       case 0: {
@@ -3684,7 +3768,7 @@ void ProtocolWithChangesReader::ReadUnionToAliasedUnionImpl(evo_test::AliasedRec
 void ProtocolWithChangesReader::ReadUnionToAliasedUnionWithChangesImpl(evo_test::AliasedRecordOrString& value) {
   switch (version_) {
   case Version::v0: {
-    std::variant<evo_test::RecordWithChanges_v0, int32_t> union_to_aliased_union_with_changes;
+    std::variant<evo_test::RecordWithChanges_v0, int32_t> union_to_aliased_union_with_changes = {};
     ReadUnion<evo_test::RecordWithChanges_v0, evo_test::binary::ReadRecordWithChanges_v0, int32_t, yardl::binary::ReadInteger>(stream_, union_to_aliased_union_with_changes);
     switch (union_to_aliased_union_with_changes.index()) {
       case 0: {
@@ -3720,13 +3804,11 @@ void ProtocolWithChangesReader::ReadOptionalToAliasedOptionalImpl(evo_test::Alia
 void ProtocolWithChangesReader::ReadOptionalToAliasedOptionalWithChangesImpl(evo_test::AliasedOptionalString& value) {
   switch (version_) {
   case Version::v0: {
-    std::optional<int32_t> optional_to_aliased_optional_with_changes;
+    std::optional<int32_t> optional_to_aliased_optional_with_changes = {};
     yardl::binary::ReadOptional<int32_t, yardl::binary::ReadInteger>(stream_, optional_to_aliased_optional_with_changes);
-    std::optional<std::string> tmp;
     if (optional_to_aliased_optional_with_changes.has_value()) {
-      tmp = std::to_string(optional_to_aliased_optional_with_changes.value());
+      value = std::to_string(optional_to_aliased_optional_with_changes.value());
     }
-    value = tmp;
     break;
   }
   default:
@@ -3798,7 +3880,7 @@ void ProtocolWithChangesReader::ReadAliasedGenericRecordToAliasImpl(evo_test::Al
 void ProtocolWithChangesReader::ReadClosedGenericRecordToUnionImpl(std::variant<evo_test::GenericRecord<int32_t, std::string>, std::string>& value) {
   switch (version_) {
   case Version::v0: {
-    evo_test::GenericRecord_v0<int32_t, std::string> closed_generic_record_to_union;
+    evo_test::GenericRecord_v0<int32_t, std::string> closed_generic_record_to_union = {};
     evo_test::binary::ReadGenericRecord_v0<int32_t, yardl::binary::ReadInteger, std::string, yardl::binary::ReadString>(stream_, closed_generic_record_to_union);
     value = closed_generic_record_to_union;
     break;
@@ -3812,7 +3894,7 @@ void ProtocolWithChangesReader::ReadClosedGenericRecordToUnionImpl(std::variant<
 void ProtocolWithChangesReader::ReadGenericRecordToAliasedUnionImpl(evo_test::AliasedGenericRecordOrString& value) {
   switch (version_) {
   case Version::v0: {
-    evo_test::GenericRecord_v0<int32_t, std::string> generic_record_to_aliased_union;
+    evo_test::GenericRecord_v0<int32_t, std::string> generic_record_to_aliased_union = {};
     evo_test::binary::ReadGenericRecord_v0<int32_t, yardl::binary::ReadInteger, std::string, yardl::binary::ReadString>(stream_, generic_record_to_aliased_union);
     value = generic_record_to_aliased_union;
     break;
@@ -3949,7 +4031,7 @@ bool ProtocolWithChangesReader::ReadStreamedRecordWithChangesImpl(std::vector<ev
 void ProtocolWithChangesReader::ReadAddedOptionalImpl(std::optional<evo_test::RecordWithChanges>& value) {
   switch (version_) {
   case Version::v0: {
-    std::optional<evo_test::RecordWithChanges> added_optional;
+    std::optional<evo_test::RecordWithChanges> added_optional = {};
     value = std::move(added_optional);
     break;
   }
@@ -3962,7 +4044,7 @@ void ProtocolWithChangesReader::ReadAddedOptionalImpl(std::optional<evo_test::Re
 void ProtocolWithChangesReader::ReadAddedMapImpl(std::unordered_map<std::string, std::string>& value) {
   switch (version_) {
   case Version::v0: {
-    std::unordered_map<std::string, std::string> added_map;
+    std::unordered_map<std::string, std::string> added_map = {};
     value = std::move(added_map);
     break;
   }
@@ -3975,7 +4057,7 @@ void ProtocolWithChangesReader::ReadAddedMapImpl(std::unordered_map<std::string,
 bool ProtocolWithChangesReader::ReadAddedRecordStreamImpl(evo_test::RecordWithChanges& value) {
   switch (version_) {
   case Version::v0: {
-    evo_test::RecordWithChanges added_record_stream;
+    evo_test::RecordWithChanges added_record_stream = {};
     value = std::move(added_record_stream);
     return false;
     break;

@@ -7,31 +7,31 @@ namespace tuples {
 using ordered_json = nlohmann::ordered_json;
 
 template <typename T1, typename T2>
-[[maybe_unused]] static void to_json(ordered_json& j, tuples::Tuple<T1, T2> const& value);
+void to_json(ordered_json& j, tuples::Tuple<T1, T2> const& value);
 template <typename T1, typename T2>
-[[maybe_unused]] static void from_json(ordered_json const& j, tuples::Tuple<T1, T2>& value);
+void from_json(ordered_json const& j, tuples::Tuple<T1, T2>& value);
 
 } // namespace tuples
 
 namespace basic_types {
 using ordered_json = nlohmann::ordered_json;
 
-[[maybe_unused]] static void to_json(ordered_json& j, basic_types::Fruits const& value);
-[[maybe_unused]] static void from_json(ordered_json const& j, basic_types::Fruits& value);
+void to_json(ordered_json& j, basic_types::Fruits const& value);
+void from_json(ordered_json const& j, basic_types::Fruits& value);
 
-[[maybe_unused]] static void to_json(ordered_json& j, basic_types::DaysOfWeek const& value);
-[[maybe_unused]] static void from_json(ordered_json const& j, basic_types::DaysOfWeek& value);
+void to_json(ordered_json& j, basic_types::DaysOfWeek const& value);
+void from_json(ordered_json const& j, basic_types::DaysOfWeek& value);
 
-[[maybe_unused]] static void to_json(ordered_json& j, basic_types::TextFormat const& value);
-[[maybe_unused]] static void from_json(ordered_json const& j, basic_types::TextFormat& value);
+void to_json(ordered_json& j, basic_types::TextFormat const& value);
+void from_json(ordered_json const& j, basic_types::TextFormat& value);
 
-[[maybe_unused]] static void to_json(ordered_json& j, basic_types::RecordWithUnions const& value);
-[[maybe_unused]] static void from_json(ordered_json const& j, basic_types::RecordWithUnions& value);
+void to_json(ordered_json& j, basic_types::RecordWithUnions const& value);
+void from_json(ordered_json const& j, basic_types::RecordWithUnions& value);
 
 template <typename T0, typename T1>
-[[maybe_unused]] static void to_json(ordered_json& j, basic_types::GenericRecordWithComputedFields<T0, T1> const& value);
+void to_json(ordered_json& j, basic_types::GenericRecordWithComputedFields<T0, T1> const& value);
 template <typename T0, typename T1>
-[[maybe_unused]] static void from_json(ordered_json const& j, basic_types::GenericRecordWithComputedFields<T0, T1>& value);
+void from_json(ordered_json const& j, basic_types::GenericRecordWithComputedFields<T0, T1>& value);
 
 } // namespace basic_types
 
@@ -43,162 +43,162 @@ using ordered_json = nlohmann::ordered_json;
 namespace test_model {
 using ordered_json = nlohmann::ordered_json;
 
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::SmallBenchmarkRecord const& value);
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::SmallBenchmarkRecord& value);
+void to_json(ordered_json& j, test_model::SmallBenchmarkRecord const& value);
+void from_json(ordered_json const& j, test_model::SmallBenchmarkRecord& value);
 
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::SimpleEncodingCounters const& value);
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::SimpleEncodingCounters& value);
+void to_json(ordered_json& j, test_model::SimpleEncodingCounters const& value);
+void from_json(ordered_json const& j, test_model::SimpleEncodingCounters& value);
 
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::SimpleAcquisition const& value);
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::SimpleAcquisition& value);
+void to_json(ordered_json& j, test_model::SimpleAcquisition const& value);
+void from_json(ordered_json const& j, test_model::SimpleAcquisition& value);
 
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::SimpleRecord const& value);
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::SimpleRecord& value);
+void to_json(ordered_json& j, test_model::SimpleRecord const& value);
+void from_json(ordered_json const& j, test_model::SimpleRecord& value);
 
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::RecordWithPrimitives const& value);
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::RecordWithPrimitives& value);
+void to_json(ordered_json& j, test_model::RecordWithPrimitives const& value);
+void from_json(ordered_json const& j, test_model::RecordWithPrimitives& value);
 
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::RecordWithPrimitiveAliases const& value);
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::RecordWithPrimitiveAliases& value);
+void to_json(ordered_json& j, test_model::RecordWithPrimitiveAliases const& value);
+void from_json(ordered_json const& j, test_model::RecordWithPrimitiveAliases& value);
 
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::TupleWithRecords const& value);
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::TupleWithRecords& value);
+void to_json(ordered_json& j, test_model::TupleWithRecords const& value);
+void from_json(ordered_json const& j, test_model::TupleWithRecords& value);
 
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::RecordWithVectors const& value);
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::RecordWithVectors& value);
+void to_json(ordered_json& j, test_model::RecordWithVectors const& value);
+void from_json(ordered_json const& j, test_model::RecordWithVectors& value);
 
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::RecordWithVectorOfTimes const& value);
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::RecordWithVectorOfTimes& value);
+void to_json(ordered_json& j, test_model::RecordWithVectorOfTimes const& value);
+void from_json(ordered_json const& j, test_model::RecordWithVectorOfTimes& value);
 
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::RecordWithArrays const& value);
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::RecordWithArrays& value);
+void to_json(ordered_json& j, test_model::RecordWithArrays const& value);
+void from_json(ordered_json const& j, test_model::RecordWithArrays& value);
 
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::RecordWithArraysSimpleSyntax const& value);
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::RecordWithArraysSimpleSyntax& value);
+void to_json(ordered_json& j, test_model::RecordWithArraysSimpleSyntax const& value);
+void from_json(ordered_json const& j, test_model::RecordWithArraysSimpleSyntax& value);
 
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::RecordWithOptionalFields const& value);
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::RecordWithOptionalFields& value);
+void to_json(ordered_json& j, test_model::RecordWithOptionalFields const& value);
+void from_json(ordered_json const& j, test_model::RecordWithOptionalFields& value);
 
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::RecordWithVlens const& value);
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::RecordWithVlens& value);
+void to_json(ordered_json& j, test_model::RecordWithVlens const& value);
+void from_json(ordered_json const& j, test_model::RecordWithVlens& value);
 
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::RecordWithStrings const& value);
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::RecordWithStrings& value);
+void to_json(ordered_json& j, test_model::RecordWithStrings const& value);
+void from_json(ordered_json const& j, test_model::RecordWithStrings& value);
 
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::RecordWithOptionalVector const& value);
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::RecordWithOptionalVector& value);
+void to_json(ordered_json& j, test_model::RecordWithOptionalVector const& value);
+void from_json(ordered_json const& j, test_model::RecordWithOptionalVector& value);
 
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::RecordWithFixedVectors const& value);
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::RecordWithFixedVectors& value);
+void to_json(ordered_json& j, test_model::RecordWithFixedVectors const& value);
+void from_json(ordered_json const& j, test_model::RecordWithFixedVectors& value);
 
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::RecordWithFixedArrays const& value);
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::RecordWithFixedArrays& value);
+void to_json(ordered_json& j, test_model::RecordWithFixedArrays const& value);
+void from_json(ordered_json const& j, test_model::RecordWithFixedArrays& value);
 
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::RecordWithNamedFixedArrays const& value);
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::RecordWithNamedFixedArrays& value);
+void to_json(ordered_json& j, test_model::RecordWithNamedFixedArrays const& value);
+void from_json(ordered_json const& j, test_model::RecordWithNamedFixedArrays& value);
 
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::RecordWithNDArrays const& value);
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::RecordWithNDArrays& value);
+void to_json(ordered_json& j, test_model::RecordWithNDArrays const& value);
+void from_json(ordered_json const& j, test_model::RecordWithNDArrays& value);
 
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::RecordWithNDArraysSingleDimension const& value);
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::RecordWithNDArraysSingleDimension& value);
+void to_json(ordered_json& j, test_model::RecordWithNDArraysSingleDimension const& value);
+void from_json(ordered_json const& j, test_model::RecordWithNDArraysSingleDimension& value);
 
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::RecordWithDynamicNDArrays const& value);
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::RecordWithDynamicNDArrays& value);
+void to_json(ordered_json& j, test_model::RecordWithDynamicNDArrays const& value);
+void from_json(ordered_json const& j, test_model::RecordWithDynamicNDArrays& value);
 
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::RecordWithFixedCollections const& value);
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::RecordWithFixedCollections& value);
+void to_json(ordered_json& j, test_model::RecordWithFixedCollections const& value);
+void from_json(ordered_json const& j, test_model::RecordWithFixedCollections& value);
 
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::RecordWithVlenCollections const& value);
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::RecordWithVlenCollections& value);
+void to_json(ordered_json& j, test_model::RecordWithVlenCollections const& value);
+void from_json(ordered_json const& j, test_model::RecordWithVlenCollections& value);
 
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::RecordWithUnionsOfContainers const& value);
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::RecordWithUnionsOfContainers& value);
+void to_json(ordered_json& j, test_model::RecordWithUnionsOfContainers const& value);
+void from_json(ordered_json const& j, test_model::RecordWithUnionsOfContainers& value);
 
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::UInt64Enum const& value);
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::UInt64Enum& value);
+void to_json(ordered_json& j, test_model::UInt64Enum const& value);
+void from_json(ordered_json const& j, test_model::UInt64Enum& value);
 
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::Int64Enum const& value);
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::Int64Enum& value);
+void to_json(ordered_json& j, test_model::Int64Enum const& value);
+void from_json(ordered_json const& j, test_model::Int64Enum& value);
 
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::SizeBasedEnum const& value);
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::SizeBasedEnum& value);
+void to_json(ordered_json& j, test_model::SizeBasedEnum const& value);
+void from_json(ordered_json const& j, test_model::SizeBasedEnum& value);
 
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::RecordWithEnums const& value);
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::RecordWithEnums& value);
+void to_json(ordered_json& j, test_model::RecordWithEnums const& value);
+void from_json(ordered_json const& j, test_model::RecordWithEnums& value);
 
 template <typename T1, typename T2>
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::GenericRecord<T1, T2> const& value);
+void to_json(ordered_json& j, test_model::GenericRecord<T1, T2> const& value);
 template <typename T1, typename T2>
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::GenericRecord<T1, T2>& value);
+void from_json(ordered_json const& j, test_model::GenericRecord<T1, T2>& value);
 
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::RecordWithAliasedGenerics const& value);
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::RecordWithAliasedGenerics& value);
-
-template <typename T, typename U>
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::RecordWithGenericVectorOfRecords<T, U> const& value);
-template <typename T, typename U>
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::RecordWithGenericVectorOfRecords<T, U>& value);
-
-template <typename T>
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::RecordWithOptionalGenericField<T> const& value);
-template <typename T>
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::RecordWithOptionalGenericField<T>& value);
-
-template <typename T>
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::RecordWithAliasedOptionalGenericField<T> const& value);
-template <typename T>
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::RecordWithAliasedOptionalGenericField<T>& value);
-
-template <typename U, typename V>
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::RecordWithOptionalGenericUnionField<U, V> const& value);
-template <typename U, typename V>
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::RecordWithOptionalGenericUnionField<U, V>& value);
-
-template <typename U, typename V>
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::RecordWithAliasedOptionalGenericUnionField<U, V> const& value);
-template <typename U, typename V>
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::RecordWithAliasedOptionalGenericUnionField<U, V>& value);
-
-template <typename T>
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::RecordWithGenericVectors<T> const& value);
-template <typename T>
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::RecordWithGenericVectors<T>& value);
-
-template <typename T>
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::RecordWithGenericFixedVectors<T> const& value);
-template <typename T>
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::RecordWithGenericFixedVectors<T>& value);
-
-template <typename T>
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::RecordWithGenericArrays<T> const& value);
-template <typename T>
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::RecordWithGenericArrays<T>& value);
+void to_json(ordered_json& j, test_model::RecordWithAliasedGenerics const& value);
+void from_json(ordered_json const& j, test_model::RecordWithAliasedGenerics& value);
 
 template <typename T, typename U>
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::RecordWithGenericMaps<T, U> const& value);
+void to_json(ordered_json& j, test_model::RecordWithGenericVectorOfRecords<T, U> const& value);
 template <typename T, typename U>
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::RecordWithGenericMaps<T, U>& value);
+void from_json(ordered_json const& j, test_model::RecordWithGenericVectorOfRecords<T, U>& value);
+
+template <typename T>
+void to_json(ordered_json& j, test_model::RecordWithOptionalGenericField<T> const& value);
+template <typename T>
+void from_json(ordered_json const& j, test_model::RecordWithOptionalGenericField<T>& value);
+
+template <typename T>
+void to_json(ordered_json& j, test_model::RecordWithAliasedOptionalGenericField<T> const& value);
+template <typename T>
+void from_json(ordered_json const& j, test_model::RecordWithAliasedOptionalGenericField<T>& value);
+
+template <typename U, typename V>
+void to_json(ordered_json& j, test_model::RecordWithOptionalGenericUnionField<U, V> const& value);
+template <typename U, typename V>
+void from_json(ordered_json const& j, test_model::RecordWithOptionalGenericUnionField<U, V>& value);
+
+template <typename U, typename V>
+void to_json(ordered_json& j, test_model::RecordWithAliasedOptionalGenericUnionField<U, V> const& value);
+template <typename U, typename V>
+void from_json(ordered_json const& j, test_model::RecordWithAliasedOptionalGenericUnionField<U, V>& value);
+
+template <typename T>
+void to_json(ordered_json& j, test_model::RecordWithGenericVectors<T> const& value);
+template <typename T>
+void from_json(ordered_json const& j, test_model::RecordWithGenericVectors<T>& value);
+
+template <typename T>
+void to_json(ordered_json& j, test_model::RecordWithGenericFixedVectors<T> const& value);
+template <typename T>
+void from_json(ordered_json const& j, test_model::RecordWithGenericFixedVectors<T>& value);
+
+template <typename T>
+void to_json(ordered_json& j, test_model::RecordWithGenericArrays<T> const& value);
+template <typename T>
+void from_json(ordered_json const& j, test_model::RecordWithGenericArrays<T>& value);
+
+template <typename T, typename U>
+void to_json(ordered_json& j, test_model::RecordWithGenericMaps<T, U> const& value);
+template <typename T, typename U>
+void from_json(ordered_json const& j, test_model::RecordWithGenericMaps<T, U>& value);
 
 template <typename A, typename B>
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::RecordContainingGenericRecords<A, B> const& value);
+void to_json(ordered_json& j, test_model::RecordContainingGenericRecords<A, B> const& value);
 template <typename A, typename B>
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::RecordContainingGenericRecords<A, B>& value);
+void from_json(ordered_json const& j, test_model::RecordContainingGenericRecords<A, B>& value);
 
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::RecordContainingNestedGenericRecords const& value);
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::RecordContainingNestedGenericRecords& value);
+void to_json(ordered_json& j, test_model::RecordContainingNestedGenericRecords const& value);
+void from_json(ordered_json const& j, test_model::RecordContainingNestedGenericRecords& value);
 
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::RecordWithComputedFields const& value);
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::RecordWithComputedFields& value);
+void to_json(ordered_json& j, test_model::RecordWithComputedFields const& value);
+void from_json(ordered_json const& j, test_model::RecordWithComputedFields& value);
 
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::RecordNotUsedInProtocol const& value);
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::RecordNotUsedInProtocol& value);
+void to_json(ordered_json& j, test_model::RecordNotUsedInProtocol const& value);
+void from_json(ordered_json const& j, test_model::RecordNotUsedInProtocol& value);
 
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::EnumWithKeywordSymbols const& value);
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::EnumWithKeywordSymbols& value);
+void to_json(ordered_json& j, test_model::EnumWithKeywordSymbols const& value);
+void from_json(ordered_json const& j, test_model::EnumWithKeywordSymbols& value);
 
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::RecordWithKeywordFields const& value);
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::RecordWithKeywordFields& value);
+void to_json(ordered_json& j, test_model::RecordWithKeywordFields const& value);
+void from_json(ordered_json const& j, test_model::RecordWithKeywordFields& value);
 
 } // namespace test_model
 
@@ -206,7 +206,7 @@ NLOHMANN_JSON_NAMESPACE_BEGIN
 
 template <typename T1, typename T2>
 struct adl_serializer<std::variant<T1, T2>> {
-  [[maybe_unused]] static void to_json(ordered_json& j, std::variant<T1, T2> const& value) {
+  static void to_json(ordered_json& j, std::variant<T1, T2> const& value) {
     switch (value.index()) {
       case 0:
         j = ordered_json{ {"T1", std::get<T1>(value)} };
@@ -219,7 +219,7 @@ struct adl_serializer<std::variant<T1, T2>> {
     }
   }
 
-  [[maybe_unused]] static void from_json(ordered_json const& j, std::variant<T1, T2>& value) {
+  static void from_json(ordered_json const& j, std::variant<T1, T2>& value) {
     auto it = j.begin();
     std::string tag = it.key();
     if (tag == "T1") {
@@ -235,7 +235,7 @@ struct adl_serializer<std::variant<T1, T2>> {
 
 template <typename T1, typename T2>
 struct adl_serializer<std::variant<std::monostate, T1, T2>> {
-  [[maybe_unused]] static void to_json(ordered_json& j, std::variant<std::monostate, T1, T2> const& value) {
+  static void to_json(ordered_json& j, std::variant<std::monostate, T1, T2> const& value) {
     switch (value.index()) {
       case 0:
         j = ordered_json{ {"null", std::get<std::monostate>(value)} };
@@ -251,7 +251,7 @@ struct adl_serializer<std::variant<std::monostate, T1, T2>> {
     }
   }
 
-  [[maybe_unused]] static void from_json(ordered_json const& j, std::variant<std::monostate, T1, T2>& value) {
+  static void from_json(ordered_json const& j, std::variant<std::monostate, T1, T2>& value) {
     auto it = j.begin();
     std::string tag = it.key();
     if (tag == "null") {
@@ -271,11 +271,11 @@ struct adl_serializer<std::variant<std::monostate, T1, T2>> {
 
 template <>
 struct adl_serializer<std::variant<std::monostate, int32_t, std::string>> {
-  [[maybe_unused]] static void to_json(ordered_json& j, std::variant<std::monostate, int32_t, std::string> const& value) {
+  static void to_json(ordered_json& j, std::variant<std::monostate, int32_t, std::string> const& value) {
     std::visit([&j](auto const& v) {j = v;}, value);
   }
 
-  [[maybe_unused]] static void from_json(ordered_json const& j, std::variant<std::monostate, int32_t, std::string>& value) {
+  static void from_json(ordered_json const& j, std::variant<std::monostate, int32_t, std::string>& value) {
     if ((j.is_null())) {
       value = j.get<std::monostate>();
       return;
@@ -294,7 +294,7 @@ struct adl_serializer<std::variant<std::monostate, int32_t, std::string>> {
 
 template <>
 struct adl_serializer<std::variant<yardl::Time, yardl::DateTime>> {
-  [[maybe_unused]] static void to_json(ordered_json& j, std::variant<yardl::Time, yardl::DateTime> const& value) {
+  static void to_json(ordered_json& j, std::variant<yardl::Time, yardl::DateTime> const& value) {
     switch (value.index()) {
       case 0:
         j = ordered_json{ {"time", std::get<yardl::Time>(value)} };
@@ -307,7 +307,7 @@ struct adl_serializer<std::variant<yardl::Time, yardl::DateTime>> {
     }
   }
 
-  [[maybe_unused]] static void from_json(ordered_json const& j, std::variant<yardl::Time, yardl::DateTime>& value) {
+  static void from_json(ordered_json const& j, std::variant<yardl::Time, yardl::DateTime>& value) {
     auto it = j.begin();
     std::string tag = it.key();
     if (tag == "time") {
@@ -323,11 +323,11 @@ struct adl_serializer<std::variant<yardl::Time, yardl::DateTime>> {
 
 template <>
 struct adl_serializer<std::variant<std::monostate, basic_types::Fruits, basic_types::DaysOfWeek>> {
-  [[maybe_unused]] static void to_json(ordered_json& j, std::variant<std::monostate, basic_types::Fruits, basic_types::DaysOfWeek> const& value) {
+  static void to_json(ordered_json& j, std::variant<std::monostate, basic_types::Fruits, basic_types::DaysOfWeek> const& value) {
     std::visit([&j](auto const& v) {j = v;}, value);
   }
 
-  [[maybe_unused]] static void from_json(ordered_json const& j, std::variant<std::monostate, basic_types::Fruits, basic_types::DaysOfWeek>& value) {
+  static void from_json(ordered_json const& j, std::variant<std::monostate, basic_types::Fruits, basic_types::DaysOfWeek>& value) {
     if ((j.is_null())) {
       value = j.get<std::monostate>();
       return;
@@ -346,11 +346,11 @@ struct adl_serializer<std::variant<std::monostate, basic_types::Fruits, basic_ty
 
 template <>
 struct adl_serializer<std::variant<std::unordered_map<std::string, int32_t>, int32_t>> {
-  [[maybe_unused]] static void to_json(ordered_json& j, std::variant<std::unordered_map<std::string, int32_t>, int32_t> const& value) {
+  static void to_json(ordered_json& j, std::variant<std::unordered_map<std::string, int32_t>, int32_t> const& value) {
     std::visit([&j](auto const& v) {j = v;}, value);
   }
 
-  [[maybe_unused]] static void from_json(ordered_json const& j, std::variant<std::unordered_map<std::string, int32_t>, int32_t>& value) {
+  static void from_json(ordered_json const& j, std::variant<std::unordered_map<std::string, int32_t>, int32_t>& value) {
     if ((j.is_object())) {
       value = j.get<std::unordered_map<std::string, int32_t>>();
       return;
@@ -365,11 +365,11 @@ struct adl_serializer<std::variant<std::unordered_map<std::string, int32_t>, int
 
 template <>
 struct adl_serializer<std::variant<std::vector<int32_t>, int32_t>> {
-  [[maybe_unused]] static void to_json(ordered_json& j, std::variant<std::vector<int32_t>, int32_t> const& value) {
+  static void to_json(ordered_json& j, std::variant<std::vector<int32_t>, int32_t> const& value) {
     std::visit([&j](auto const& v) {j = v;}, value);
   }
 
-  [[maybe_unused]] static void from_json(ordered_json const& j, std::variant<std::vector<int32_t>, int32_t>& value) {
+  static void from_json(ordered_json const& j, std::variant<std::vector<int32_t>, int32_t>& value) {
     if ((j.is_array())) {
       value = j.get<std::vector<int32_t>>();
       return;
@@ -384,11 +384,11 @@ struct adl_serializer<std::variant<std::vector<int32_t>, int32_t>> {
 
 template <>
 struct adl_serializer<std::variant<yardl::DynamicNDArray<int32_t>, int32_t>> {
-  [[maybe_unused]] static void to_json(ordered_json& j, std::variant<yardl::DynamicNDArray<int32_t>, int32_t> const& value) {
+  static void to_json(ordered_json& j, std::variant<yardl::DynamicNDArray<int32_t>, int32_t> const& value) {
     std::visit([&j](auto const& v) {j = v;}, value);
   }
 
-  [[maybe_unused]] static void from_json(ordered_json const& j, std::variant<yardl::DynamicNDArray<int32_t>, int32_t>& value) {
+  static void from_json(ordered_json const& j, std::variant<yardl::DynamicNDArray<int32_t>, int32_t>& value) {
     if ((j.is_object())) {
       value = j.get<yardl::DynamicNDArray<int32_t>>();
       return;
@@ -403,11 +403,11 @@ struct adl_serializer<std::variant<yardl::DynamicNDArray<int32_t>, int32_t>> {
 
 template <>
 struct adl_serializer<std::variant<std::monostate, std::string, int32_t>> {
-  [[maybe_unused]] static void to_json(ordered_json& j, std::variant<std::monostate, std::string, int32_t> const& value) {
+  static void to_json(ordered_json& j, std::variant<std::monostate, std::string, int32_t> const& value) {
     std::visit([&j](auto const& v) {j = v;}, value);
   }
 
-  [[maybe_unused]] static void from_json(ordered_json const& j, std::variant<std::monostate, std::string, int32_t>& value) {
+  static void from_json(ordered_json const& j, std::variant<std::monostate, std::string, int32_t>& value) {
     if ((j.is_null())) {
       value = j.get<std::monostate>();
       return;
@@ -426,11 +426,11 @@ struct adl_serializer<std::variant<std::monostate, std::string, int32_t>> {
 
 template <>
 struct adl_serializer<std::variant<int32_t, test_model::SimpleRecord>> {
-  [[maybe_unused]] static void to_json(ordered_json& j, std::variant<int32_t, test_model::SimpleRecord> const& value) {
+  static void to_json(ordered_json& j, std::variant<int32_t, test_model::SimpleRecord> const& value) {
     std::visit([&j](auto const& v) {j = v;}, value);
   }
 
-  [[maybe_unused]] static void from_json(ordered_json const& j, std::variant<int32_t, test_model::SimpleRecord>& value) {
+  static void from_json(ordered_json const& j, std::variant<int32_t, test_model::SimpleRecord>& value) {
     if ((j.is_number())) {
       value = j.get<int32_t>();
       return;
@@ -445,11 +445,11 @@ struct adl_serializer<std::variant<int32_t, test_model::SimpleRecord>> {
 
 template <>
 struct adl_serializer<std::variant<std::monostate, int32_t, test_model::SimpleRecord>> {
-  [[maybe_unused]] static void to_json(ordered_json& j, std::variant<std::monostate, int32_t, test_model::SimpleRecord> const& value) {
+  static void to_json(ordered_json& j, std::variant<std::monostate, int32_t, test_model::SimpleRecord> const& value) {
     std::visit([&j](auto const& v) {j = v;}, value);
   }
 
-  [[maybe_unused]] static void from_json(ordered_json const& j, std::variant<std::monostate, int32_t, test_model::SimpleRecord>& value) {
+  static void from_json(ordered_json const& j, std::variant<std::monostate, int32_t, test_model::SimpleRecord>& value) {
     if ((j.is_null())) {
       value = j.get<std::monostate>();
       return;
@@ -468,7 +468,7 @@ struct adl_serializer<std::variant<std::monostate, int32_t, test_model::SimpleRe
 
 template <>
 struct adl_serializer<std::variant<int32_t, float>> {
-  [[maybe_unused]] static void to_json(ordered_json& j, std::variant<int32_t, float> const& value) {
+  static void to_json(ordered_json& j, std::variant<int32_t, float> const& value) {
     switch (value.index()) {
       case 0:
         j = ordered_json{ {"int32", std::get<int32_t>(value)} };
@@ -481,7 +481,7 @@ struct adl_serializer<std::variant<int32_t, float>> {
     }
   }
 
-  [[maybe_unused]] static void from_json(ordered_json const& j, std::variant<int32_t, float>& value) {
+  static void from_json(ordered_json const& j, std::variant<int32_t, float>& value) {
     auto it = j.begin();
     std::string tag = it.key();
     if (tag == "int32") {
@@ -497,7 +497,7 @@ struct adl_serializer<std::variant<int32_t, float>> {
 
 template <>
 struct adl_serializer<std::variant<std::monostate, int32_t, float>> {
-  [[maybe_unused]] static void to_json(ordered_json& j, std::variant<std::monostate, int32_t, float> const& value) {
+  static void to_json(ordered_json& j, std::variant<std::monostate, int32_t, float> const& value) {
     switch (value.index()) {
       case 0:
         j = ordered_json{ {"null", std::get<std::monostate>(value)} };
@@ -513,7 +513,7 @@ struct adl_serializer<std::variant<std::monostate, int32_t, float>> {
     }
   }
 
-  [[maybe_unused]] static void from_json(ordered_json const& j, std::variant<std::monostate, int32_t, float>& value) {
+  static void from_json(ordered_json const& j, std::variant<std::monostate, int32_t, float>& value) {
     auto it = j.begin();
     std::string tag = it.key();
     if (tag == "null") {
@@ -533,11 +533,11 @@ struct adl_serializer<std::variant<std::monostate, int32_t, float>> {
 
 template <>
 struct adl_serializer<std::variant<int32_t, basic_types::GenericRecordWithComputedFields<std::string, float>>> {
-  [[maybe_unused]] static void to_json(ordered_json& j, std::variant<int32_t, basic_types::GenericRecordWithComputedFields<std::string, float>> const& value) {
+  static void to_json(ordered_json& j, std::variant<int32_t, basic_types::GenericRecordWithComputedFields<std::string, float>> const& value) {
     std::visit([&j](auto const& v) {j = v;}, value);
   }
 
-  [[maybe_unused]] static void from_json(ordered_json const& j, std::variant<int32_t, basic_types::GenericRecordWithComputedFields<std::string, float>>& value) {
+  static void from_json(ordered_json const& j, std::variant<int32_t, basic_types::GenericRecordWithComputedFields<std::string, float>>& value) {
     if ((j.is_number())) {
       value = j.get<int32_t>();
       return;
@@ -552,11 +552,11 @@ struct adl_serializer<std::variant<int32_t, basic_types::GenericRecordWithComput
 
 template <>
 struct adl_serializer<std::variant<std::string, float>> {
-  [[maybe_unused]] static void to_json(ordered_json& j, std::variant<std::string, float> const& value) {
+  static void to_json(ordered_json& j, std::variant<std::string, float> const& value) {
     std::visit([&j](auto const& v) {j = v;}, value);
   }
 
-  [[maybe_unused]] static void from_json(ordered_json const& j, std::variant<std::string, float>& value) {
+  static void from_json(ordered_json const& j, std::variant<std::string, float>& value) {
     if ((j.is_string())) {
       value = j.get<std::string>();
       return;
@@ -571,7 +571,7 @@ struct adl_serializer<std::variant<std::string, float>> {
 
 template <typename T1>
 struct adl_serializer<std::variant<T1, std::vector<T1>, yardl::DynamicNDArray<T1>>> {
-  [[maybe_unused]] static void to_json(ordered_json& j, std::variant<T1, std::vector<T1>, yardl::DynamicNDArray<T1>> const& value) {
+  static void to_json(ordered_json& j, std::variant<T1, std::vector<T1>, yardl::DynamicNDArray<T1>> const& value) {
     switch (value.index()) {
       case 0:
         j = ordered_json{ {"t", std::get<T1>(value)} };
@@ -587,7 +587,7 @@ struct adl_serializer<std::variant<T1, std::vector<T1>, yardl::DynamicNDArray<T1
     }
   }
 
-  [[maybe_unused]] static void from_json(ordered_json const& j, std::variant<T1, std::vector<T1>, yardl::DynamicNDArray<T1>>& value) {
+  static void from_json(ordered_json const& j, std::variant<T1, std::vector<T1>, yardl::DynamicNDArray<T1>>& value) {
     auto it = j.begin();
     std::string tag = it.key();
     if (tag == "t") {
@@ -607,7 +607,7 @@ struct adl_serializer<std::variant<T1, std::vector<T1>, yardl::DynamicNDArray<T1
 
 template <typename T1, typename T2, typename T3>
 struct adl_serializer<std::variant<T1, T2, T3>> {
-  [[maybe_unused]] static void to_json(ordered_json& j, std::variant<T1, T2, T3> const& value) {
+  static void to_json(ordered_json& j, std::variant<T1, T2, T3> const& value) {
     switch (value.index()) {
       case 0:
         j = ordered_json{ {"T", std::get<T1>(value)} };
@@ -623,7 +623,7 @@ struct adl_serializer<std::variant<T1, T2, T3>> {
     }
   }
 
-  [[maybe_unused]] static void from_json(ordered_json const& j, std::variant<T1, T2, T3>& value) {
+  static void from_json(ordered_json const& j, std::variant<T1, T2, T3>& value) {
     auto it = j.begin();
     std::string tag = it.key();
     if (tag == "T") {
@@ -643,7 +643,7 @@ struct adl_serializer<std::variant<T1, T2, T3>> {
 
 template <>
 struct adl_serializer<std::variant<int32_t, float, std::string>> {
-  [[maybe_unused]] static void to_json(ordered_json& j, std::variant<int32_t, float, std::string> const& value) {
+  static void to_json(ordered_json& j, std::variant<int32_t, float, std::string> const& value) {
     switch (value.index()) {
       case 0:
         j = ordered_json{ {"T", std::get<int32_t>(value)} };
@@ -659,7 +659,7 @@ struct adl_serializer<std::variant<int32_t, float, std::string>> {
     }
   }
 
-  [[maybe_unused]] static void from_json(ordered_json const& j, std::variant<int32_t, float, std::string>& value) {
+  static void from_json(ordered_json const& j, std::variant<int32_t, float, std::string>& value) {
     auto it = j.begin();
     std::string tag = it.key();
     if (tag == "T") {
@@ -679,7 +679,7 @@ struct adl_serializer<std::variant<int32_t, float, std::string>> {
 
 template <>
 struct adl_serializer<std::variant<test_model::SimpleAcquisition, image::Image<float>>> {
-  [[maybe_unused]] static void to_json(ordered_json& j, std::variant<test_model::SimpleAcquisition, image::Image<float>> const& value) {
+  static void to_json(ordered_json& j, std::variant<test_model::SimpleAcquisition, image::Image<float>> const& value) {
     switch (value.index()) {
       case 0:
         j = ordered_json{ {"acquisition", std::get<test_model::SimpleAcquisition>(value)} };
@@ -692,7 +692,7 @@ struct adl_serializer<std::variant<test_model::SimpleAcquisition, image::Image<f
     }
   }
 
-  [[maybe_unused]] static void from_json(ordered_json const& j, std::variant<test_model::SimpleAcquisition, image::Image<float>>& value) {
+  static void from_json(ordered_json const& j, std::variant<test_model::SimpleAcquisition, image::Image<float>>& value) {
     auto it = j.begin();
     std::string tag = it.key();
     if (tag == "acquisition") {
@@ -708,11 +708,11 @@ struct adl_serializer<std::variant<test_model::SimpleAcquisition, image::Image<f
 
 template <>
 struct adl_serializer<std::variant<std::string, int32_t>> {
-  [[maybe_unused]] static void to_json(ordered_json& j, std::variant<std::string, int32_t> const& value) {
+  static void to_json(ordered_json& j, std::variant<std::string, int32_t> const& value) {
     std::visit([&j](auto const& v) {j = v;}, value);
   }
 
-  [[maybe_unused]] static void from_json(ordered_json const& j, std::variant<std::string, int32_t>& value) {
+  static void from_json(ordered_json const& j, std::variant<std::string, int32_t>& value) {
     if ((j.is_string())) {
       value = j.get<std::string>();
       return;
@@ -727,11 +727,11 @@ struct adl_serializer<std::variant<std::string, int32_t>> {
 
 template <>
 struct adl_serializer<std::variant<int32_t, test_model::RecordWithVlens>> {
-  [[maybe_unused]] static void to_json(ordered_json& j, std::variant<int32_t, test_model::RecordWithVlens> const& value) {
+  static void to_json(ordered_json& j, std::variant<int32_t, test_model::RecordWithVlens> const& value) {
     std::visit([&j](auto const& v) {j = v;}, value);
   }
 
-  [[maybe_unused]] static void from_json(ordered_json const& j, std::variant<int32_t, test_model::RecordWithVlens>& value) {
+  static void from_json(ordered_json const& j, std::variant<int32_t, test_model::RecordWithVlens>& value) {
     if ((j.is_number())) {
       value = j.get<int32_t>();
       return;
@@ -746,7 +746,7 @@ struct adl_serializer<std::variant<int32_t, test_model::RecordWithVlens>> {
 
 template <>
 struct adl_serializer<std::variant<image::FloatImage, test_model::Image<double>>> {
-  [[maybe_unused]] static void to_json(ordered_json& j, std::variant<image::FloatImage, test_model::Image<double>> const& value) {
+  static void to_json(ordered_json& j, std::variant<image::FloatImage, test_model::Image<double>> const& value) {
     switch (value.index()) {
       case 0:
         j = ordered_json{ {"imageFloat", std::get<image::FloatImage>(value)} };
@@ -759,7 +759,7 @@ struct adl_serializer<std::variant<image::FloatImage, test_model::Image<double>>
     }
   }
 
-  [[maybe_unused]] static void from_json(ordered_json const& j, std::variant<image::FloatImage, test_model::Image<double>>& value) {
+  static void from_json(ordered_json const& j, std::variant<image::FloatImage, test_model::Image<double>>& value) {
     auto it = j.begin();
     std::string tag = it.key();
     if (tag == "imageFloat") {
@@ -775,7 +775,7 @@ struct adl_serializer<std::variant<image::FloatImage, test_model::Image<double>>
 
 template <>
 struct adl_serializer<std::variant<test_model::AliasedString, test_model::AliasedEnum>> {
-  [[maybe_unused]] static void to_json(ordered_json& j, std::variant<test_model::AliasedString, test_model::AliasedEnum> const& value) {
+  static void to_json(ordered_json& j, std::variant<test_model::AliasedString, test_model::AliasedEnum> const& value) {
     switch (value.index()) {
       case 0:
         j = ordered_json{ {"T1", std::get<test_model::AliasedString>(value)} };
@@ -788,7 +788,7 @@ struct adl_serializer<std::variant<test_model::AliasedString, test_model::Aliase
     }
   }
 
-  [[maybe_unused]] static void from_json(ordered_json const& j, std::variant<test_model::AliasedString, test_model::AliasedEnum>& value) {
+  static void from_json(ordered_json const& j, std::variant<test_model::AliasedString, test_model::AliasedEnum>& value) {
     auto it = j.begin();
     std::string tag = it.key();
     if (tag == "T1") {
@@ -808,7 +808,7 @@ namespace tuples {
 using ordered_json = nlohmann::ordered_json;
 
 template <typename T1, typename T2>
-[[maybe_unused]] static void to_json(ordered_json& j, tuples::Tuple<T1, T2> const& value) {
+void to_json(ordered_json& j, tuples::Tuple<T1, T2> const& value) {
   j = ordered_json::object();
   if (yardl::ndjson::ShouldSerializeFieldValue(value.v1)) {
     j.push_back({"v1", value.v1});
@@ -819,7 +819,7 @@ template <typename T1, typename T2>
 }
 
 template <typename T1, typename T2>
-[[maybe_unused]] static void from_json(ordered_json const& j, tuples::Tuple<T1, T2>& value) {
+void from_json(ordered_json const& j, tuples::Tuple<T1, T2>& value) {
   if (auto it = j.find("v1"); it != j.end()) {
     it->get_to(value.v1);
   }
@@ -841,7 +841,7 @@ std::unordered_map<std::string, basic_types::Fruits> const __Fruits_values = {
 };
 } //namespace
 
-[[maybe_unused]] static void to_json(ordered_json& j, basic_types::Fruits const& value) {
+void to_json(ordered_json& j, basic_types::Fruits const& value) {
   switch (value) {
     case basic_types::Fruits::kApple:
       j = "apple";
@@ -859,7 +859,7 @@ std::unordered_map<std::string, basic_types::Fruits> const __Fruits_values = {
   }
 }
 
-[[maybe_unused]] static void from_json(ordered_json const& j, basic_types::Fruits& value) {
+void from_json(ordered_json const& j, basic_types::Fruits& value) {
   if (j.is_string()) {
     auto symbol = j.get<std::string>();
     if (auto res = __Fruits_values.find(symbol); res != __Fruits_values.end()) {
@@ -884,7 +884,7 @@ std::unordered_map<std::string, basic_types::DaysOfWeek> const __DaysOfWeek_valu
 };
 } //namespace
 
-[[maybe_unused]] static void to_json(ordered_json& j, basic_types::DaysOfWeek const& value) {
+void to_json(ordered_json& j, basic_types::DaysOfWeek const& value) {
   auto arr = ordered_json::array();
   if (value == 0) {
     j = arr;
@@ -950,7 +950,7 @@ std::unordered_map<std::string, basic_types::DaysOfWeek> const __DaysOfWeek_valu
   j = value.Value();
 }
 
-[[maybe_unused]] static void from_json(ordered_json const& j, basic_types::DaysOfWeek& value) {
+void from_json(ordered_json const& j, basic_types::DaysOfWeek& value) {
   if (j.is_number()) {
     using underlying_type = typename basic_types::DaysOfWeek::value_type;
     value = j.get<underlying_type>();
@@ -977,7 +977,7 @@ std::unordered_map<std::string, basic_types::TextFormat> const __TextFormat_valu
 };
 } //namespace
 
-[[maybe_unused]] static void to_json(ordered_json& j, basic_types::TextFormat const& value) {
+void to_json(ordered_json& j, basic_types::TextFormat const& value) {
   auto arr = ordered_json::array();
   if (value == 0) {
     arr.push_back("regular");
@@ -1020,7 +1020,7 @@ std::unordered_map<std::string, basic_types::TextFormat> const __TextFormat_valu
   j = value.Value();
 }
 
-[[maybe_unused]] static void from_json(ordered_json const& j, basic_types::TextFormat& value) {
+void from_json(ordered_json const& j, basic_types::TextFormat& value) {
   if (j.is_number()) {
     using underlying_type = typename basic_types::TextFormat::value_type;
     value = j.get<underlying_type>();
@@ -1037,7 +1037,7 @@ std::unordered_map<std::string, basic_types::TextFormat> const __TextFormat_valu
   }
 }
 
-[[maybe_unused]] static void to_json(ordered_json& j, basic_types::RecordWithUnions const& value) {
+void to_json(ordered_json& j, basic_types::RecordWithUnions const& value) {
   j = ordered_json::object();
   if (yardl::ndjson::ShouldSerializeFieldValue(value.null_or_int_or_string)) {
     j.push_back({"nullOrIntOrString", value.null_or_int_or_string});
@@ -1050,7 +1050,7 @@ std::unordered_map<std::string, basic_types::TextFormat> const __TextFormat_valu
   }
 }
 
-[[maybe_unused]] static void from_json(ordered_json const& j, basic_types::RecordWithUnions& value) {
+void from_json(ordered_json const& j, basic_types::RecordWithUnions& value) {
   if (auto it = j.find("nullOrIntOrString"); it != j.end()) {
     it->get_to(value.null_or_int_or_string);
   }
@@ -1063,7 +1063,7 @@ std::unordered_map<std::string, basic_types::TextFormat> const __TextFormat_valu
 }
 
 template <typename T0, typename T1>
-[[maybe_unused]] static void to_json(ordered_json& j, basic_types::GenericRecordWithComputedFields<T0, T1> const& value) {
+void to_json(ordered_json& j, basic_types::GenericRecordWithComputedFields<T0, T1> const& value) {
   j = ordered_json::object();
   if (yardl::ndjson::ShouldSerializeFieldValue(value.f1)) {
     j.push_back({"f1", value.f1});
@@ -1071,7 +1071,7 @@ template <typename T0, typename T1>
 }
 
 template <typename T0, typename T1>
-[[maybe_unused]] static void from_json(ordered_json const& j, basic_types::GenericRecordWithComputedFields<T0, T1>& value) {
+void from_json(ordered_json const& j, basic_types::GenericRecordWithComputedFields<T0, T1>& value) {
   if (auto it = j.find("f1"); it != j.end()) {
     it->get_to(value.f1);
   }
@@ -1087,7 +1087,7 @@ using ordered_json = nlohmann::ordered_json;
 namespace test_model {
 using ordered_json = nlohmann::ordered_json;
 
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::SmallBenchmarkRecord const& value) {
+void to_json(ordered_json& j, test_model::SmallBenchmarkRecord const& value) {
   j = ordered_json::object();
   if (yardl::ndjson::ShouldSerializeFieldValue(value.a)) {
     j.push_back({"a", value.a});
@@ -1100,7 +1100,7 @@ using ordered_json = nlohmann::ordered_json;
   }
 }
 
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::SmallBenchmarkRecord& value) {
+void from_json(ordered_json const& j, test_model::SmallBenchmarkRecord& value) {
   if (auto it = j.find("a"); it != j.end()) {
     it->get_to(value.a);
   }
@@ -1112,7 +1112,7 @@ using ordered_json = nlohmann::ordered_json;
   }
 }
 
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::SimpleEncodingCounters const& value) {
+void to_json(ordered_json& j, test_model::SimpleEncodingCounters const& value) {
   j = ordered_json::object();
   if (yardl::ndjson::ShouldSerializeFieldValue(value.e1)) {
     j.push_back({"e1", value.e1});
@@ -1128,7 +1128,7 @@ using ordered_json = nlohmann::ordered_json;
   }
 }
 
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::SimpleEncodingCounters& value) {
+void from_json(ordered_json const& j, test_model::SimpleEncodingCounters& value) {
   if (auto it = j.find("e1"); it != j.end()) {
     it->get_to(value.e1);
   }
@@ -1143,7 +1143,7 @@ using ordered_json = nlohmann::ordered_json;
   }
 }
 
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::SimpleAcquisition const& value) {
+void to_json(ordered_json& j, test_model::SimpleAcquisition const& value) {
   j = ordered_json::object();
   if (yardl::ndjson::ShouldSerializeFieldValue(value.flags)) {
     j.push_back({"flags", value.flags});
@@ -1159,7 +1159,7 @@ using ordered_json = nlohmann::ordered_json;
   }
 }
 
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::SimpleAcquisition& value) {
+void from_json(ordered_json const& j, test_model::SimpleAcquisition& value) {
   if (auto it = j.find("flags"); it != j.end()) {
     it->get_to(value.flags);
   }
@@ -1174,7 +1174,7 @@ using ordered_json = nlohmann::ordered_json;
   }
 }
 
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::SimpleRecord const& value) {
+void to_json(ordered_json& j, test_model::SimpleRecord const& value) {
   j = ordered_json::object();
   if (yardl::ndjson::ShouldSerializeFieldValue(value.x)) {
     j.push_back({"x", value.x});
@@ -1187,7 +1187,7 @@ using ordered_json = nlohmann::ordered_json;
   }
 }
 
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::SimpleRecord& value) {
+void from_json(ordered_json const& j, test_model::SimpleRecord& value) {
   if (auto it = j.find("x"); it != j.end()) {
     it->get_to(value.x);
   }
@@ -1199,7 +1199,7 @@ using ordered_json = nlohmann::ordered_json;
   }
 }
 
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::RecordWithPrimitives const& value) {
+void to_json(ordered_json& j, test_model::RecordWithPrimitives const& value) {
   j = ordered_json::object();
   if (yardl::ndjson::ShouldSerializeFieldValue(value.bool_field)) {
     j.push_back({"boolField", value.bool_field});
@@ -1254,7 +1254,7 @@ using ordered_json = nlohmann::ordered_json;
   }
 }
 
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::RecordWithPrimitives& value) {
+void from_json(ordered_json const& j, test_model::RecordWithPrimitives& value) {
   if (auto it = j.find("boolField"); it != j.end()) {
     it->get_to(value.bool_field);
   }
@@ -1308,7 +1308,7 @@ using ordered_json = nlohmann::ordered_json;
   }
 }
 
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::RecordWithPrimitiveAliases const& value) {
+void to_json(ordered_json& j, test_model::RecordWithPrimitiveAliases const& value) {
   j = ordered_json::object();
   if (yardl::ndjson::ShouldSerializeFieldValue(value.byte_field)) {
     j.push_back({"byteField", value.byte_field});
@@ -1339,7 +1339,7 @@ using ordered_json = nlohmann::ordered_json;
   }
 }
 
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::RecordWithPrimitiveAliases& value) {
+void from_json(ordered_json const& j, test_model::RecordWithPrimitiveAliases& value) {
   if (auto it = j.find("byteField"); it != j.end()) {
     it->get_to(value.byte_field);
   }
@@ -1369,7 +1369,7 @@ using ordered_json = nlohmann::ordered_json;
   }
 }
 
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::TupleWithRecords const& value) {
+void to_json(ordered_json& j, test_model::TupleWithRecords const& value) {
   j = ordered_json::object();
   if (yardl::ndjson::ShouldSerializeFieldValue(value.a)) {
     j.push_back({"a", value.a});
@@ -1379,7 +1379,7 @@ using ordered_json = nlohmann::ordered_json;
   }
 }
 
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::TupleWithRecords& value) {
+void from_json(ordered_json const& j, test_model::TupleWithRecords& value) {
   if (auto it = j.find("a"); it != j.end()) {
     it->get_to(value.a);
   }
@@ -1388,7 +1388,7 @@ using ordered_json = nlohmann::ordered_json;
   }
 }
 
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::RecordWithVectors const& value) {
+void to_json(ordered_json& j, test_model::RecordWithVectors const& value) {
   j = ordered_json::object();
   if (yardl::ndjson::ShouldSerializeFieldValue(value.default_vector)) {
     j.push_back({"defaultVector", value.default_vector});
@@ -1401,7 +1401,7 @@ using ordered_json = nlohmann::ordered_json;
   }
 }
 
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::RecordWithVectors& value) {
+void from_json(ordered_json const& j, test_model::RecordWithVectors& value) {
   if (auto it = j.find("defaultVector"); it != j.end()) {
     it->get_to(value.default_vector);
   }
@@ -1413,20 +1413,20 @@ using ordered_json = nlohmann::ordered_json;
   }
 }
 
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::RecordWithVectorOfTimes const& value) {
+void to_json(ordered_json& j, test_model::RecordWithVectorOfTimes const& value) {
   j = ordered_json::object();
   if (yardl::ndjson::ShouldSerializeFieldValue(value.times)) {
     j.push_back({"times", value.times});
   }
 }
 
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::RecordWithVectorOfTimes& value) {
+void from_json(ordered_json const& j, test_model::RecordWithVectorOfTimes& value) {
   if (auto it = j.find("times"); it != j.end()) {
     it->get_to(value.times);
   }
 }
 
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::RecordWithArrays const& value) {
+void to_json(ordered_json& j, test_model::RecordWithArrays const& value) {
   j = ordered_json::object();
   if (yardl::ndjson::ShouldSerializeFieldValue(value.default_array)) {
     j.push_back({"defaultArray", value.default_array});
@@ -1457,7 +1457,7 @@ using ordered_json = nlohmann::ordered_json;
   }
 }
 
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::RecordWithArrays& value) {
+void from_json(ordered_json const& j, test_model::RecordWithArrays& value) {
   if (auto it = j.find("defaultArray"); it != j.end()) {
     it->get_to(value.default_array);
   }
@@ -1487,7 +1487,7 @@ using ordered_json = nlohmann::ordered_json;
   }
 }
 
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::RecordWithArraysSimpleSyntax const& value) {
+void to_json(ordered_json& j, test_model::RecordWithArraysSimpleSyntax const& value) {
   j = ordered_json::object();
   if (yardl::ndjson::ShouldSerializeFieldValue(value.default_array)) {
     j.push_back({"defaultArray", value.default_array});
@@ -1518,7 +1518,7 @@ using ordered_json = nlohmann::ordered_json;
   }
 }
 
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::RecordWithArraysSimpleSyntax& value) {
+void from_json(ordered_json const& j, test_model::RecordWithArraysSimpleSyntax& value) {
   if (auto it = j.find("defaultArray"); it != j.end()) {
     it->get_to(value.default_array);
   }
@@ -1548,7 +1548,7 @@ using ordered_json = nlohmann::ordered_json;
   }
 }
 
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::RecordWithOptionalFields const& value) {
+void to_json(ordered_json& j, test_model::RecordWithOptionalFields const& value) {
   j = ordered_json::object();
   if (yardl::ndjson::ShouldSerializeFieldValue(value.optional_int)) {
     j.push_back({"optionalInt", value.optional_int});
@@ -1561,7 +1561,7 @@ using ordered_json = nlohmann::ordered_json;
   }
 }
 
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::RecordWithOptionalFields& value) {
+void from_json(ordered_json const& j, test_model::RecordWithOptionalFields& value) {
   if (auto it = j.find("optionalInt"); it != j.end()) {
     it->get_to(value.optional_int);
   }
@@ -1573,7 +1573,7 @@ using ordered_json = nlohmann::ordered_json;
   }
 }
 
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::RecordWithVlens const& value) {
+void to_json(ordered_json& j, test_model::RecordWithVlens const& value) {
   j = ordered_json::object();
   if (yardl::ndjson::ShouldSerializeFieldValue(value.a)) {
     j.push_back({"a", value.a});
@@ -1586,7 +1586,7 @@ using ordered_json = nlohmann::ordered_json;
   }
 }
 
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::RecordWithVlens& value) {
+void from_json(ordered_json const& j, test_model::RecordWithVlens& value) {
   if (auto it = j.find("a"); it != j.end()) {
     it->get_to(value.a);
   }
@@ -1598,7 +1598,7 @@ using ordered_json = nlohmann::ordered_json;
   }
 }
 
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::RecordWithStrings const& value) {
+void to_json(ordered_json& j, test_model::RecordWithStrings const& value) {
   j = ordered_json::object();
   if (yardl::ndjson::ShouldSerializeFieldValue(value.a)) {
     j.push_back({"a", value.a});
@@ -1608,7 +1608,7 @@ using ordered_json = nlohmann::ordered_json;
   }
 }
 
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::RecordWithStrings& value) {
+void from_json(ordered_json const& j, test_model::RecordWithStrings& value) {
   if (auto it = j.find("a"); it != j.end()) {
     it->get_to(value.a);
   }
@@ -1617,20 +1617,20 @@ using ordered_json = nlohmann::ordered_json;
   }
 }
 
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::RecordWithOptionalVector const& value) {
+void to_json(ordered_json& j, test_model::RecordWithOptionalVector const& value) {
   j = ordered_json::object();
   if (yardl::ndjson::ShouldSerializeFieldValue(value.optional_vector)) {
     j.push_back({"optionalVector", value.optional_vector});
   }
 }
 
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::RecordWithOptionalVector& value) {
+void from_json(ordered_json const& j, test_model::RecordWithOptionalVector& value) {
   if (auto it = j.find("optionalVector"); it != j.end()) {
     it->get_to(value.optional_vector);
   }
 }
 
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::RecordWithFixedVectors const& value) {
+void to_json(ordered_json& j, test_model::RecordWithFixedVectors const& value) {
   j = ordered_json::object();
   if (yardl::ndjson::ShouldSerializeFieldValue(value.fixed_int_vector)) {
     j.push_back({"fixedIntVector", value.fixed_int_vector});
@@ -1643,7 +1643,7 @@ using ordered_json = nlohmann::ordered_json;
   }
 }
 
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::RecordWithFixedVectors& value) {
+void from_json(ordered_json const& j, test_model::RecordWithFixedVectors& value) {
   if (auto it = j.find("fixedIntVector"); it != j.end()) {
     it->get_to(value.fixed_int_vector);
   }
@@ -1655,7 +1655,7 @@ using ordered_json = nlohmann::ordered_json;
   }
 }
 
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::RecordWithFixedArrays const& value) {
+void to_json(ordered_json& j, test_model::RecordWithFixedArrays const& value) {
   j = ordered_json::object();
   if (yardl::ndjson::ShouldSerializeFieldValue(value.ints)) {
     j.push_back({"ints", value.ints});
@@ -1668,7 +1668,7 @@ using ordered_json = nlohmann::ordered_json;
   }
 }
 
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::RecordWithFixedArrays& value) {
+void from_json(ordered_json const& j, test_model::RecordWithFixedArrays& value) {
   if (auto it = j.find("ints"); it != j.end()) {
     it->get_to(value.ints);
   }
@@ -1680,7 +1680,7 @@ using ordered_json = nlohmann::ordered_json;
   }
 }
 
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::RecordWithNamedFixedArrays const& value) {
+void to_json(ordered_json& j, test_model::RecordWithNamedFixedArrays const& value) {
   j = ordered_json::object();
   if (yardl::ndjson::ShouldSerializeFieldValue(value.ints)) {
     j.push_back({"ints", value.ints});
@@ -1693,7 +1693,7 @@ using ordered_json = nlohmann::ordered_json;
   }
 }
 
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::RecordWithNamedFixedArrays& value) {
+void from_json(ordered_json const& j, test_model::RecordWithNamedFixedArrays& value) {
   if (auto it = j.find("ints"); it != j.end()) {
     it->get_to(value.ints);
   }
@@ -1705,7 +1705,7 @@ using ordered_json = nlohmann::ordered_json;
   }
 }
 
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::RecordWithNDArrays const& value) {
+void to_json(ordered_json& j, test_model::RecordWithNDArrays const& value) {
   j = ordered_json::object();
   if (yardl::ndjson::ShouldSerializeFieldValue(value.ints)) {
     j.push_back({"ints", value.ints});
@@ -1718,7 +1718,7 @@ using ordered_json = nlohmann::ordered_json;
   }
 }
 
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::RecordWithNDArrays& value) {
+void from_json(ordered_json const& j, test_model::RecordWithNDArrays& value) {
   if (auto it = j.find("ints"); it != j.end()) {
     it->get_to(value.ints);
   }
@@ -1730,7 +1730,7 @@ using ordered_json = nlohmann::ordered_json;
   }
 }
 
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::RecordWithNDArraysSingleDimension const& value) {
+void to_json(ordered_json& j, test_model::RecordWithNDArraysSingleDimension const& value) {
   j = ordered_json::object();
   if (yardl::ndjson::ShouldSerializeFieldValue(value.ints)) {
     j.push_back({"ints", value.ints});
@@ -1743,7 +1743,7 @@ using ordered_json = nlohmann::ordered_json;
   }
 }
 
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::RecordWithNDArraysSingleDimension& value) {
+void from_json(ordered_json const& j, test_model::RecordWithNDArraysSingleDimension& value) {
   if (auto it = j.find("ints"); it != j.end()) {
     it->get_to(value.ints);
   }
@@ -1755,7 +1755,7 @@ using ordered_json = nlohmann::ordered_json;
   }
 }
 
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::RecordWithDynamicNDArrays const& value) {
+void to_json(ordered_json& j, test_model::RecordWithDynamicNDArrays const& value) {
   j = ordered_json::object();
   if (yardl::ndjson::ShouldSerializeFieldValue(value.ints)) {
     j.push_back({"ints", value.ints});
@@ -1768,7 +1768,7 @@ using ordered_json = nlohmann::ordered_json;
   }
 }
 
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::RecordWithDynamicNDArrays& value) {
+void from_json(ordered_json const& j, test_model::RecordWithDynamicNDArrays& value) {
   if (auto it = j.find("ints"); it != j.end()) {
     it->get_to(value.ints);
   }
@@ -1780,7 +1780,7 @@ using ordered_json = nlohmann::ordered_json;
   }
 }
 
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::RecordWithFixedCollections const& value) {
+void to_json(ordered_json& j, test_model::RecordWithFixedCollections const& value) {
   j = ordered_json::object();
   if (yardl::ndjson::ShouldSerializeFieldValue(value.fixed_vector)) {
     j.push_back({"fixedVector", value.fixed_vector});
@@ -1790,7 +1790,7 @@ using ordered_json = nlohmann::ordered_json;
   }
 }
 
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::RecordWithFixedCollections& value) {
+void from_json(ordered_json const& j, test_model::RecordWithFixedCollections& value) {
   if (auto it = j.find("fixedVector"); it != j.end()) {
     it->get_to(value.fixed_vector);
   }
@@ -1799,7 +1799,7 @@ using ordered_json = nlohmann::ordered_json;
   }
 }
 
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::RecordWithVlenCollections const& value) {
+void to_json(ordered_json& j, test_model::RecordWithVlenCollections const& value) {
   j = ordered_json::object();
   if (yardl::ndjson::ShouldSerializeFieldValue(value.vector)) {
     j.push_back({"vector", value.vector});
@@ -1809,7 +1809,7 @@ using ordered_json = nlohmann::ordered_json;
   }
 }
 
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::RecordWithVlenCollections& value) {
+void from_json(ordered_json const& j, test_model::RecordWithVlenCollections& value) {
   if (auto it = j.find("vector"); it != j.end()) {
     it->get_to(value.vector);
   }
@@ -1818,7 +1818,7 @@ using ordered_json = nlohmann::ordered_json;
   }
 }
 
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::RecordWithUnionsOfContainers const& value) {
+void to_json(ordered_json& j, test_model::RecordWithUnionsOfContainers const& value) {
   j = ordered_json::object();
   if (yardl::ndjson::ShouldSerializeFieldValue(value.map_or_scalar)) {
     j.push_back({"mapOrScalar", value.map_or_scalar});
@@ -1831,7 +1831,7 @@ using ordered_json = nlohmann::ordered_json;
   }
 }
 
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::RecordWithUnionsOfContainers& value) {
+void from_json(ordered_json const& j, test_model::RecordWithUnionsOfContainers& value) {
   if (auto it = j.find("mapOrScalar"); it != j.end()) {
     it->get_to(value.map_or_scalar);
   }
@@ -1849,7 +1849,7 @@ std::unordered_map<std::string, test_model::UInt64Enum> const __UInt64Enum_value
 };
 } //namespace
 
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::UInt64Enum const& value) {
+void to_json(ordered_json& j, test_model::UInt64Enum const& value) {
   switch (value) {
     case test_model::UInt64Enum::kA:
       j = "a";
@@ -1861,7 +1861,7 @@ std::unordered_map<std::string, test_model::UInt64Enum> const __UInt64Enum_value
   }
 }
 
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::UInt64Enum& value) {
+void from_json(ordered_json const& j, test_model::UInt64Enum& value) {
   if (j.is_string()) {
     auto symbol = j.get<std::string>();
     if (auto res = __UInt64Enum_values.find(symbol); res != __UInt64Enum_values.end()) {
@@ -1880,7 +1880,7 @@ std::unordered_map<std::string, test_model::Int64Enum> const __Int64Enum_values 
 };
 } //namespace
 
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::Int64Enum const& value) {
+void to_json(ordered_json& j, test_model::Int64Enum const& value) {
   switch (value) {
     case test_model::Int64Enum::kB:
       j = "b";
@@ -1892,7 +1892,7 @@ std::unordered_map<std::string, test_model::Int64Enum> const __Int64Enum_values 
   }
 }
 
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::Int64Enum& value) {
+void from_json(ordered_json const& j, test_model::Int64Enum& value) {
   if (j.is_string()) {
     auto symbol = j.get<std::string>();
     if (auto res = __Int64Enum_values.find(symbol); res != __Int64Enum_values.end()) {
@@ -1913,7 +1913,7 @@ std::unordered_map<std::string, test_model::SizeBasedEnum> const __SizeBasedEnum
 };
 } //namespace
 
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::SizeBasedEnum const& value) {
+void to_json(ordered_json& j, test_model::SizeBasedEnum const& value) {
   switch (value) {
     case test_model::SizeBasedEnum::kA:
       j = "a";
@@ -1931,7 +1931,7 @@ std::unordered_map<std::string, test_model::SizeBasedEnum> const __SizeBasedEnum
   }
 }
 
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::SizeBasedEnum& value) {
+void from_json(ordered_json const& j, test_model::SizeBasedEnum& value) {
   if (j.is_string()) {
     auto symbol = j.get<std::string>();
     if (auto res = __SizeBasedEnum_values.find(symbol); res != __SizeBasedEnum_values.end()) {
@@ -1944,7 +1944,7 @@ std::unordered_map<std::string, test_model::SizeBasedEnum> const __SizeBasedEnum
   value = static_cast<test_model::SizeBasedEnum>(j.get<underlying_type>());
 }
 
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::RecordWithEnums const& value) {
+void to_json(ordered_json& j, test_model::RecordWithEnums const& value) {
   j = ordered_json::object();
   if (yardl::ndjson::ShouldSerializeFieldValue(value.enum_field)) {
     j.push_back({"enum", value.enum_field});
@@ -1957,7 +1957,7 @@ std::unordered_map<std::string, test_model::SizeBasedEnum> const __SizeBasedEnum
   }
 }
 
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::RecordWithEnums& value) {
+void from_json(ordered_json const& j, test_model::RecordWithEnums& value) {
   if (auto it = j.find("enum"); it != j.end()) {
     it->get_to(value.enum_field);
   }
@@ -1970,7 +1970,7 @@ std::unordered_map<std::string, test_model::SizeBasedEnum> const __SizeBasedEnum
 }
 
 template <typename T1, typename T2>
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::GenericRecord<T1, T2> const& value) {
+void to_json(ordered_json& j, test_model::GenericRecord<T1, T2> const& value) {
   j = ordered_json::object();
   if (yardl::ndjson::ShouldSerializeFieldValue(value.scalar_1)) {
     j.push_back({"scalar1", value.scalar_1});
@@ -1987,7 +1987,7 @@ template <typename T1, typename T2>
 }
 
 template <typename T1, typename T2>
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::GenericRecord<T1, T2>& value) {
+void from_json(ordered_json const& j, test_model::GenericRecord<T1, T2>& value) {
   if (auto it = j.find("scalar1"); it != j.end()) {
     it->get_to(value.scalar_1);
   }
@@ -2002,7 +2002,7 @@ template <typename T1, typename T2>
   }
 }
 
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::RecordWithAliasedGenerics const& value) {
+void to_json(ordered_json& j, test_model::RecordWithAliasedGenerics const& value) {
   j = ordered_json::object();
   if (yardl::ndjson::ShouldSerializeFieldValue(value.my_strings)) {
     j.push_back({"myStrings", value.my_strings});
@@ -2012,7 +2012,7 @@ template <typename T1, typename T2>
   }
 }
 
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::RecordWithAliasedGenerics& value) {
+void from_json(ordered_json const& j, test_model::RecordWithAliasedGenerics& value) {
   if (auto it = j.find("myStrings"); it != j.end()) {
     it->get_to(value.my_strings);
   }
@@ -2022,7 +2022,7 @@ template <typename T1, typename T2>
 }
 
 template <typename T, typename U>
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::RecordWithGenericVectorOfRecords<T, U> const& value) {
+void to_json(ordered_json& j, test_model::RecordWithGenericVectorOfRecords<T, U> const& value) {
   j = ordered_json::object();
   if (yardl::ndjson::ShouldSerializeFieldValue(value.v)) {
     j.push_back({"v", value.v});
@@ -2030,14 +2030,14 @@ template <typename T, typename U>
 }
 
 template <typename T, typename U>
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::RecordWithGenericVectorOfRecords<T, U>& value) {
+void from_json(ordered_json const& j, test_model::RecordWithGenericVectorOfRecords<T, U>& value) {
   if (auto it = j.find("v"); it != j.end()) {
     it->get_to(value.v);
   }
 }
 
 template <typename T>
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::RecordWithOptionalGenericField<T> const& value) {
+void to_json(ordered_json& j, test_model::RecordWithOptionalGenericField<T> const& value) {
   j = ordered_json::object();
   if (yardl::ndjson::ShouldSerializeFieldValue(value.v)) {
     j.push_back({"v", value.v});
@@ -2045,14 +2045,14 @@ template <typename T>
 }
 
 template <typename T>
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::RecordWithOptionalGenericField<T>& value) {
+void from_json(ordered_json const& j, test_model::RecordWithOptionalGenericField<T>& value) {
   if (auto it = j.find("v"); it != j.end()) {
     it->get_to(value.v);
   }
 }
 
 template <typename T>
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::RecordWithAliasedOptionalGenericField<T> const& value) {
+void to_json(ordered_json& j, test_model::RecordWithAliasedOptionalGenericField<T> const& value) {
   j = ordered_json::object();
   if (yardl::ndjson::ShouldSerializeFieldValue(value.v)) {
     j.push_back({"v", value.v});
@@ -2060,14 +2060,14 @@ template <typename T>
 }
 
 template <typename T>
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::RecordWithAliasedOptionalGenericField<T>& value) {
+void from_json(ordered_json const& j, test_model::RecordWithAliasedOptionalGenericField<T>& value) {
   if (auto it = j.find("v"); it != j.end()) {
     it->get_to(value.v);
   }
 }
 
 template <typename U, typename V>
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::RecordWithOptionalGenericUnionField<U, V> const& value) {
+void to_json(ordered_json& j, test_model::RecordWithOptionalGenericUnionField<U, V> const& value) {
   j = ordered_json::object();
   if (yardl::ndjson::ShouldSerializeFieldValue(value.v)) {
     j.push_back({"v", value.v});
@@ -2075,14 +2075,14 @@ template <typename U, typename V>
 }
 
 template <typename U, typename V>
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::RecordWithOptionalGenericUnionField<U, V>& value) {
+void from_json(ordered_json const& j, test_model::RecordWithOptionalGenericUnionField<U, V>& value) {
   if (auto it = j.find("v"); it != j.end()) {
     it->get_to(value.v);
   }
 }
 
 template <typename U, typename V>
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::RecordWithAliasedOptionalGenericUnionField<U, V> const& value) {
+void to_json(ordered_json& j, test_model::RecordWithAliasedOptionalGenericUnionField<U, V> const& value) {
   j = ordered_json::object();
   if (yardl::ndjson::ShouldSerializeFieldValue(value.v)) {
     j.push_back({"v", value.v});
@@ -2090,14 +2090,14 @@ template <typename U, typename V>
 }
 
 template <typename U, typename V>
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::RecordWithAliasedOptionalGenericUnionField<U, V>& value) {
+void from_json(ordered_json const& j, test_model::RecordWithAliasedOptionalGenericUnionField<U, V>& value) {
   if (auto it = j.find("v"); it != j.end()) {
     it->get_to(value.v);
   }
 }
 
 template <typename T>
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::RecordWithGenericVectors<T> const& value) {
+void to_json(ordered_json& j, test_model::RecordWithGenericVectors<T> const& value) {
   j = ordered_json::object();
   if (yardl::ndjson::ShouldSerializeFieldValue(value.v)) {
     j.push_back({"v", value.v});
@@ -2108,7 +2108,7 @@ template <typename T>
 }
 
 template <typename T>
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::RecordWithGenericVectors<T>& value) {
+void from_json(ordered_json const& j, test_model::RecordWithGenericVectors<T>& value) {
   if (auto it = j.find("v"); it != j.end()) {
     it->get_to(value.v);
   }
@@ -2118,7 +2118,7 @@ template <typename T>
 }
 
 template <typename T>
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::RecordWithGenericFixedVectors<T> const& value) {
+void to_json(ordered_json& j, test_model::RecordWithGenericFixedVectors<T> const& value) {
   j = ordered_json::object();
   if (yardl::ndjson::ShouldSerializeFieldValue(value.fv)) {
     j.push_back({"fv", value.fv});
@@ -2129,7 +2129,7 @@ template <typename T>
 }
 
 template <typename T>
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::RecordWithGenericFixedVectors<T>& value) {
+void from_json(ordered_json const& j, test_model::RecordWithGenericFixedVectors<T>& value) {
   if (auto it = j.find("fv"); it != j.end()) {
     it->get_to(value.fv);
   }
@@ -2139,7 +2139,7 @@ template <typename T>
 }
 
 template <typename T>
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::RecordWithGenericArrays<T> const& value) {
+void to_json(ordered_json& j, test_model::RecordWithGenericArrays<T> const& value) {
   j = ordered_json::object();
   if (yardl::ndjson::ShouldSerializeFieldValue(value.nd)) {
     j.push_back({"nd", value.nd});
@@ -2162,7 +2162,7 @@ template <typename T>
 }
 
 template <typename T>
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::RecordWithGenericArrays<T>& value) {
+void from_json(ordered_json const& j, test_model::RecordWithGenericArrays<T>& value) {
   if (auto it = j.find("nd"); it != j.end()) {
     it->get_to(value.nd);
   }
@@ -2184,7 +2184,7 @@ template <typename T>
 }
 
 template <typename T, typename U>
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::RecordWithGenericMaps<T, U> const& value) {
+void to_json(ordered_json& j, test_model::RecordWithGenericMaps<T, U> const& value) {
   j = ordered_json::object();
   if (yardl::ndjson::ShouldSerializeFieldValue(value.m)) {
     j.push_back({"m", value.m});
@@ -2195,7 +2195,7 @@ template <typename T, typename U>
 }
 
 template <typename T, typename U>
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::RecordWithGenericMaps<T, U>& value) {
+void from_json(ordered_json const& j, test_model::RecordWithGenericMaps<T, U>& value) {
   if (auto it = j.find("m"); it != j.end()) {
     it->get_to(value.m);
   }
@@ -2205,7 +2205,7 @@ template <typename T, typename U>
 }
 
 template <typename A, typename B>
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::RecordContainingGenericRecords<A, B> const& value) {
+void to_json(ordered_json& j, test_model::RecordContainingGenericRecords<A, B> const& value) {
   j = ordered_json::object();
   if (yardl::ndjson::ShouldSerializeFieldValue(value.g1)) {
     j.push_back({"g1", value.g1});
@@ -2240,7 +2240,7 @@ template <typename A, typename B>
 }
 
 template <typename A, typename B>
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::RecordContainingGenericRecords<A, B>& value) {
+void from_json(ordered_json const& j, test_model::RecordContainingGenericRecords<A, B>& value) {
   if (auto it = j.find("g1"); it != j.end()) {
     it->get_to(value.g1);
   }
@@ -2273,7 +2273,7 @@ template <typename A, typename B>
   }
 }
 
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::RecordContainingNestedGenericRecords const& value) {
+void to_json(ordered_json& j, test_model::RecordContainingNestedGenericRecords const& value) {
   j = ordered_json::object();
   if (yardl::ndjson::ShouldSerializeFieldValue(value.f1)) {
     j.push_back({"f1", value.f1});
@@ -2292,7 +2292,7 @@ template <typename A, typename B>
   }
 }
 
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::RecordContainingNestedGenericRecords& value) {
+void from_json(ordered_json const& j, test_model::RecordContainingNestedGenericRecords& value) {
   if (auto it = j.find("f1"); it != j.end()) {
     it->get_to(value.f1);
   }
@@ -2310,7 +2310,7 @@ template <typename A, typename B>
   }
 }
 
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::RecordWithComputedFields const& value) {
+void to_json(ordered_json& j, test_model::RecordWithComputedFields const& value) {
   j = ordered_json::object();
   if (yardl::ndjson::ShouldSerializeFieldValue(value.array_field)) {
     j.push_back({"arrayField", value.array_field});
@@ -2395,7 +2395,7 @@ template <typename A, typename B>
   }
 }
 
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::RecordWithComputedFields& value) {
+void from_json(ordered_json const& j, test_model::RecordWithComputedFields& value) {
   if (auto it = j.find("arrayField"); it != j.end()) {
     it->get_to(value.array_field);
   }
@@ -2479,7 +2479,7 @@ template <typename A, typename B>
   }
 }
 
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::RecordNotUsedInProtocol const& value) {
+void to_json(ordered_json& j, test_model::RecordNotUsedInProtocol const& value) {
   j = ordered_json::object();
   if (yardl::ndjson::ShouldSerializeFieldValue(value.u1)) {
     j.push_back({"u1", value.u1});
@@ -2489,7 +2489,7 @@ template <typename A, typename B>
   }
 }
 
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::RecordNotUsedInProtocol& value) {
+void from_json(ordered_json const& j, test_model::RecordNotUsedInProtocol& value) {
   if (auto it = j.find("u1"); it != j.end()) {
     it->get_to(value.u1);
   }
@@ -2505,7 +2505,7 @@ std::unordered_map<std::string, test_model::EnumWithKeywordSymbols> const __Enum
 };
 } //namespace
 
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::EnumWithKeywordSymbols const& value) {
+void to_json(ordered_json& j, test_model::EnumWithKeywordSymbols const& value) {
   switch (value) {
     case test_model::EnumWithKeywordSymbols::kTry:
       j = "try";
@@ -2520,7 +2520,7 @@ std::unordered_map<std::string, test_model::EnumWithKeywordSymbols> const __Enum
   }
 }
 
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::EnumWithKeywordSymbols& value) {
+void from_json(ordered_json const& j, test_model::EnumWithKeywordSymbols& value) {
   if (j.is_string()) {
     auto symbol = j.get<std::string>();
     if (auto res = __EnumWithKeywordSymbols_values.find(symbol); res != __EnumWithKeywordSymbols_values.end()) {
@@ -2533,7 +2533,7 @@ std::unordered_map<std::string, test_model::EnumWithKeywordSymbols> const __Enum
   value = static_cast<test_model::EnumWithKeywordSymbols>(j.get<underlying_type>());
 }
 
-[[maybe_unused]] static void to_json(ordered_json& j, test_model::RecordWithKeywordFields const& value) {
+void to_json(ordered_json& j, test_model::RecordWithKeywordFields const& value) {
   j = ordered_json::object();
   if (yardl::ndjson::ShouldSerializeFieldValue(value.int_field)) {
     j.push_back({"int", value.int_field});
@@ -2546,7 +2546,7 @@ std::unordered_map<std::string, test_model::EnumWithKeywordSymbols> const __Enum
   }
 }
 
-[[maybe_unused]] static void from_json(ordered_json const& j, test_model::RecordWithKeywordFields& value) {
+void from_json(ordered_json const& j, test_model::RecordWithKeywordFields& value) {
   if (auto it = j.find("int"); it != j.end()) {
     it->get_to(value.int_field);
   }

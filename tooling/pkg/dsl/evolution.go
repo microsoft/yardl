@@ -44,7 +44,7 @@ func ValidateEvolution(latest *Environment, predecessors []*Environment, version
 		// Save all Protocol changes for codegen
 		for _, p := range latest.GetTopLevelNamespace().Protocols {
 			if protChange, ok := protocolChanges[p.GetQualifiedName()]; ok {
-				p.Versions[versionLabels[i]] = protChange
+				p.Versions[versionLabels[i]] = protChange.(*ProtocolChange)
 			}
 		}
 	}
@@ -81,7 +81,7 @@ func renameOldTypeDefinitions(env *Environment, changes []DefinitionChange, vers
 }
 
 // Emit User Warnings and aggregate Errors
-func validateChanges(definitionChanges []DefinitionChange, protocolChanges map[string]*ProtocolChange) error {
+func validateChanges(definitionChanges []DefinitionChange, protocolChanges map[string]DefinitionChange) error {
 	errorSink := &validation.ErrorSink{}
 	validateTypeDefinitionChanges(definitionChanges, errorSink)
 	if len(errorSink.Errors) > 0 {
@@ -133,14 +133,14 @@ func validateTypeDefinitionChanges(changes []DefinitionChange, errorSink *valida
 
 			for _, added := range defChange.FieldsAdded {
 				if !TypeHasNullOption(added.Type) {
-					Warn(added, "Adding non-Optional field '%s' may result in undefined behavior with previous versions", added.Name)
+					Warn(added, "Added non-Optional field '%s' will have default zero value when reading from previous versions", added.Name)
 				}
 			}
 
 			for i, field := range oldRec.Fields {
 				if defChange.FieldRemoved[i] {
 					if !TypeHasNullOption(oldRec.Fields[i].Type) {
-						Warn(newRec.Fields[0], "Removing non-Optional field '%s' may result in undefined behavior with previous versions", field.Name)
+						Warn(newRec.Fields[0], "Removed non-Optional field '%s' will have default zero value when writing to previous versions", field.Name)
 					}
 					continue
 				}
@@ -165,7 +165,6 @@ func validateTypeDefinitionChanges(changes []DefinitionChange, errorSink *valida
 			}
 
 		case *EnumChange:
-			log.Warn().Msgf("EnumChange: %s", td.GetDefinitionMeta().Name)
 			if tc := defChange.BaseTypeChange; tc != nil {
 				errorSink.Add(validationError(td, "changing base type of '%s' is not backward compatible", td.GetDefinitionMeta().Name))
 			}
@@ -176,8 +175,23 @@ func validateTypeDefinitionChanges(changes []DefinitionChange, errorSink *valida
 	}
 }
 
-func validateProtocolChanges(changes map[string]*ProtocolChange, errorSink *validation.ErrorSink) {
+func validateProtocolChanges(changes map[string]DefinitionChange, errorSink *validation.ErrorSink) {
+	// First warn about removed Protocols
 	for _, protChange := range changes {
+		switch protChange := protChange.(type) {
+		case *ProtocolRemoved:
+			Warn(protChange.LatestDefinition(), "Removed protocol '%s'", protChange.PreviousDefinition().GetDefinitionMeta().Name)
+		}
+	}
+
+	// Then validate the changes to Protocols
+	for _, protChange := range changes {
+		switch protChange.(type) {
+		case *ProtocolRemoved:
+			continue
+		}
+
+		protChange := protChange.(*ProtocolChange)
 		pd := protChange.LatestDefinition().(*ProtocolDefinition)
 
 		for _, reordered := range protChange.StepsReordered {
@@ -228,41 +242,6 @@ func getAllTypeDefinitions(env *Environment) []TypeDefinition {
 		}
 	}
 	return allTypeDefs
-}
-
-func collectUserTypeDefsUsedInProtocols(env *Environment) []TypeDefinition {
-	allTypeDefs := make(map[string]TypeDefinition)
-	for _, ns := range env.Namespaces {
-		for _, newTd := range ns.TypeDefinitions {
-			allTypeDefs[newTd.GetDefinitionMeta().GetQualifiedName()] = newTd
-		}
-	}
-
-	typeDefCollected := make(map[string]bool)
-	var usedTypeDefs []TypeDefinition
-	for _, ns := range env.Namespaces {
-		for _, protocol := range ns.Protocols {
-			Visit(protocol, func(self Visitor, node Node) {
-				switch node := node.(type) {
-				case TypeDefinition:
-					self.VisitChildren(node)
-					name := node.GetDefinitionMeta().GetQualifiedName()
-					if !typeDefCollected[name] {
-						if td, ok := allTypeDefs[name]; ok {
-							typeDefCollected[name] = true
-							usedTypeDefs = append(usedTypeDefs, td)
-						}
-					}
-				case *SimpleType:
-					self.VisitChildren(node)
-					self.Visit(node.ResolvedDefinition)
-				default:
-					self.VisitChildren(node)
-				}
-			})
-		}
-	}
-	return usedTypeDefs
 }
 
 // Returns the last name in the chain of resolved names
@@ -338,7 +317,7 @@ func defWithArgs(td TypeDefinition) string {
 	return fmt.Sprintf("%s%s", baseName, argString)
 }
 
-// Returns the base definition for a NamedType
+// Returns the base RecordDefinition or NamedType for the given NamedType
 func getBaseDefinition(td TypeDefinition) TypeDefinition {
 	tds := make([]TypeDefinition, 0)
 	Visit(td, func(self Visitor, node Node) {
@@ -396,52 +375,7 @@ func getResolvedGenericDefinition(newTd, oldTd TypeDefinition) *DefinitionPair {
 	return &DefinitionPair{oldDef, newDef}
 }
 
-// Determine semantic equivalence between Old and New TypeDefinitions
-func getCrossModelSemanticEquivalence(newTds, oldTds []TypeDefinition) map[string]map[string]bool {
-	newNameMapping := getIntraModelSemanticEquivalence(newTds)
-	oldNameMapping := getIntraModelSemanticEquivalence(oldTds)
-
-	semanticallyEqual := make(map[string]map[string]bool)
-	for _, newTd := range newTds {
-		newName := newTd.GetDefinitionMeta().GetQualifiedName()
-		semanticallyEqual[newName] = make(map[string]bool)
-	}
-
-	for _, newTd := range newTds {
-		newName := newTd.GetDefinitionMeta().GetQualifiedName()
-		for _, oldTd := range oldTds {
-			oldName := oldTd.GetDefinitionMeta().GetQualifiedName()
-			if newName == oldName {
-				// We found a mapping between versions...
-				for n := range newNameMapping[newName] {
-					for o := range oldNameMapping[oldName] {
-						// n and o are semantically equal iff
-						// 1. n is not in the old model, OR
-						if _, found := oldNameMapping[n]; !found {
-							semanticallyEqual[n][o] = true
-							continue
-						}
-						// 2. o is not in the new model, OR
-						if _, found := newNameMapping[o]; !found {
-							semanticallyEqual[n][o] = true
-							continue
-						}
-
-						// 3. o and n are equivalent names in both versions
-						if oldNameMapping[n][o] && newNameMapping[o][n] {
-							semanticallyEqual[n][o] = true
-							continue
-						}
-					}
-				}
-			}
-		}
-	}
-
-	return semanticallyEqual
-}
-
-func resolveAllChanges(newEnv, oldEnv *Environment) ([]DefinitionChange, map[string]*ProtocolChange) {
+func resolveAllChanges(newEnv, oldEnv *Environment) ([]DefinitionChange, map[string]DefinitionChange) {
 	allNewTypeDefs := getAllTypeDefinitions(newEnv)
 	allOldTypeDefs := getAllTypeDefinitions(oldEnv)
 
@@ -650,22 +584,33 @@ func resolveAllChanges(newEnv, oldEnv *Environment) ([]DefinitionChange, map[str
 	return finalDefinitionChanges, allProtocolChanges
 }
 
-func resolveAllProtocolChanges(newEnv, oldEnv *Environment, context *EvolutionContext) map[string]*ProtocolChange {
-	// Protocols may be reordered, added, or removed
-	// We only care about pre-existing Protocols that CHANGED
-	oldProts := make(map[string]*ProtocolDefinition)
-	for _, ns := range oldEnv.Namespaces {
-		for _, oldProt := range ns.Protocols {
-			oldProts[oldProt.GetQualifiedName()] = oldProt
+func resolveAllProtocolChanges(newEnv, oldEnv *Environment, context *EvolutionContext) map[string]DefinitionChange {
+	// Used for warning about a Protocol that was removed
+	var dummyDef TypeDefinition
+
+	newProts := make(map[string]*ProtocolDefinition)
+	for _, ns := range newEnv.Namespaces {
+		for _, newProt := range ns.Protocols {
+			if dummyDef == nil {
+				dummyDef = newProt
+			}
+			newProts[newProt.GetQualifiedName()] = newProt
+		}
+
+		for _, td := range ns.TypeDefinitions {
+			if dummyDef == nil {
+				dummyDef = td
+			}
 		}
 	}
 
-	allProtocolChanges := make(map[string]*ProtocolChange)
-	for _, ns := range newEnv.Namespaces {
-		for _, newProt := range ns.Protocols {
-			oldProt, ok := oldProts[newProt.GetDefinitionMeta().GetQualifiedName()]
+	allProtocolChanges := make(map[string]DefinitionChange)
+	for _, ns := range oldEnv.Namespaces {
+		for _, oldProt := range ns.Protocols {
+			newProt, ok := newProts[oldProt.GetQualifiedName()]
 			if !ok {
-				// Skip new ProtocolDefinition
+				// Protocol was removed
+				allProtocolChanges[oldProt.GetQualifiedName()] = &ProtocolRemoved{DefinitionPair{oldProt, dummyDef}}
 				continue
 			}
 
@@ -673,7 +618,7 @@ func resolveAllProtocolChanges(newEnv, oldEnv *Environment, context *EvolutionCo
 				// Annotate the ProtocolChange with the Old ProtocolDefinition schema string
 				protocolChange.PreviousSchema = GetProtocolSchemaString(oldProt, oldEnv.SymbolTable)
 				// log.Debug().Msgf("Protocol %s changed", newProt.GetQualifiedName())
-				allProtocolChanges[newProt.GetQualifiedName()] = protocolChange
+				allProtocolChanges[oldProt.GetQualifiedName()] = protocolChange
 			}
 		}
 	}

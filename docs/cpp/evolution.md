@@ -1,8 +1,19 @@
 # Schema Evolution
 
-Yardl supports schema evolution over time, including backward compatibility with previous schema versions.
+Yardl supports schema evolution over time by *statically* generating conversions to/from other versions of your schema.
 
-See [Packages](packages) for details on specifying previous schema versions.
+See [Packages](packages) for details on specifying the location(s) of other versions of your schema in your package file.
+
+
+## Statically-Generated Compatibility
+
+Yardl generates static conversion code for reading/writing data under different versions of your schema.
+To generate support for a different version, you must reference that version in your package file.
+
+Yardl does NOT support dynamic conversions between *unknown* schema versions.
+This means the code yardl generates for your model is only compatible with the versions explicitly referenced in your package file.
+
+If you need an *existing* reader/writer to handle *new* data, you will need to regenerate and recompile your code with the newer schema definition.
 
 
 ## Automated Change Detection
@@ -43,7 +54,7 @@ Backward compatible changes are fully supported by yardl. Examples include:
 
 ### Partially-Compatible Changes
 
-Partially-compatible changes are valid, but may result in errors at runtime, depending on the data you serialize for older versions of your Protocol.
+Partially-compatible changes are valid, but may result in errors at runtime, depending on the data you serialize for older versions of your Protocol. Examples include:
 
 1. Changing between primitive types, including integers, floating point values, and strings
 2. Making a field optional
@@ -64,7 +75,7 @@ Some partially-compatible changes use default type conversions, for example:
 In the future, yardl will parse user-defined type conversions for each schema version.
 
 
-#### Default values
+#### Default zero values
 
 In instances where partially-compatible change may result in invalid values at runtime, yardl defaults to the "zero" value for a type, e.g. `0` for numbers, `""` for string, empty vectors, null Optional/Union, etc.
 

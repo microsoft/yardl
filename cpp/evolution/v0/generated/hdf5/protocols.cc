@@ -262,7 +262,8 @@ struct _Inner_UnchangedRecord {
 struct _Inner_RecordWithChanges {
   _Inner_RecordWithChanges() {} 
   _Inner_RecordWithChanges(evo_test::RecordWithChanges const& o) 
-      : int_to_long(o.int_to_long),
+      : deprecated_float(o.deprecated_float),
+      int_to_long(o.int_to_long),
       deprecated_vector(o.deprecated_vector),
       float_to_double(o.float_to_double),
       deprecated_array(o.deprecated_array),
@@ -272,6 +273,7 @@ struct _Inner_RecordWithChanges {
   }
 
   void ToOuter (evo_test::RecordWithChanges& o) const {
+    yardl::hdf5::ToOuter(deprecated_float, o.deprecated_float);
     yardl::hdf5::ToOuter(int_to_long, o.int_to_long);
     yardl::hdf5::ToOuter(deprecated_vector, o.deprecated_vector);
     yardl::hdf5::ToOuter(float_to_double, o.float_to_double);
@@ -281,6 +283,7 @@ struct _Inner_RecordWithChanges {
     yardl::hdf5::ToOuter(unchanged_record, o.unchanged_record);
   }
 
+  float deprecated_float;
   int32_t int_to_long;
   yardl::hdf5::InnerVlen<int32_t, int32_t> deprecated_vector;
   float float_to_double;
@@ -418,6 +421,7 @@ struct _Inner_ChangedGeneric {
 [[maybe_unused]] H5::CompType GetRecordWithChangesHdf5Ddl() {
   using RecordType = evo_test::hdf5::_Inner_RecordWithChanges;
   H5::CompType t(sizeof(RecordType));
+  t.insertMember("deprecatedFloat", HOFFSET(RecordType, deprecated_float), H5::PredType::NATIVE_FLOAT);
   t.insertMember("intToLong", HOFFSET(RecordType, int_to_long), H5::PredType::NATIVE_INT32);
   t.insertMember("deprecatedVector", HOFFSET(RecordType, deprecated_vector), yardl::hdf5::InnerVlenDdl(H5::PredType::NATIVE_INT32));
   t.insertMember("floatToDouble", HOFFSET(RecordType, float_to_double), H5::PredType::NATIVE_FLOAT);

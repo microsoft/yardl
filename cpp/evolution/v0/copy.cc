@@ -1,4 +1,4 @@
-#include "lib/binary/protocols.h"
+#include "generated/binary/protocols.h"
 
 using namespace evo_test;
 

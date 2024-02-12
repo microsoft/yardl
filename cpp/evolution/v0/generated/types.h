@@ -11,8 +11,6 @@
 #include "yardl/yardl.h"
 
 namespace evo_test {
-using AliasedString = std::string;
-
 using AliasedLongToString = int64_t;
 
 struct UnchangedRecord {
@@ -32,6 +30,7 @@ struct UnchangedRecord {
 };
 
 struct RecordWithChanges {
+  float deprecated_float{};
   int32_t int_to_long{};
   std::vector<int32_t> deprecated_vector{};
   float float_to_double{};
@@ -41,7 +40,8 @@ struct RecordWithChanges {
   evo_test::UnchangedRecord unchanged_record{};
 
   bool operator==(const RecordWithChanges& other) const {
-    return int_to_long == other.int_to_long &&
+    return deprecated_float == other.deprecated_float &&
+      int_to_long == other.int_to_long &&
       deprecated_vector == other.deprecated_vector &&
       float_to_double == other.float_to_double &&
       deprecated_array == other.deprecated_array &&
@@ -179,66 +179,6 @@ struct ChangedGeneric {
     return !(*this == other);
   }
 };
-
-// Compatibility aliases for version v1.
-
-using AliasedLongToString_v1 = evo_test::AliasedLongToString;
-
-using RecordWithChanges_v1 = evo_test::RecordWithChanges;
-
-using AliasedRecordWithChanges_v1 = evo_test::AliasedRecordWithChanges;
-
-using AliasOfAliasedRecordWithChanges_v1 = evo_test::RecordWithChanges;
-
-using DeprecatedRecord_v1 = evo_test::RenamedRecord;
-
-using RenamedRecord_v1 = evo_test::RenamedRecord;
-
-using StreamItem_v1 = evo_test::StreamItem;
-
-using RZ_v1 = evo_test::RC;
-
-using RY_v1 = evo_test::RC;
-
-using RNew_v1 = evo_test::RC;
-
-using RLink_v1 = evo_test::RLink;
-
-using RX_v1 = evo_test::RC;
-
-using UnusedButChangedRecord_v1 = evo_test::UnusedButChangedRecord;
-
-template <typename T1, typename T2>
-using GenericRecord_v1 = evo_test::GenericRecord<T1, T2>;
-
-template <typename A, typename B>
-using AliasedOpenGenericRecord_v1 = evo_test::GenericRecord<A, B>;
-
-template <typename T>
-using AliasedHalfClosedGenericRecord_v1 = evo_test::AliasedHalfClosedGenericRecord<T>;
-
-template <typename A, typename B>
-using AliasedOpenGenericUnion_v1 = evo_test::GenericUnion<A, B>;
-
-using AliasedClosedGenericUnion_v1 = evo_test::AliasedClosedGenericUnion;
-
-template <typename T>
-using GenericParentRecord_v1 = evo_test::GenericParentRecord<T>;
-
-using AliasedClosedGenericRecord_v1 = evo_test::AliasedClosedGenericRecord;
-
-template <typename T2>
-using OldUnchangedGeneric_v1 = evo_test::UnchangedGeneric<T2>;
-
-using Unchanged_v1 = evo_test::UnchangedGeneric<int32_t>;
-
-template <typename Y, typename Z>
-using OldChangedGeneric_v1 = evo_test::ChangedGeneric<Y, Z>;
-
-template <typename I, typename J>
-using ChangedGeneric_v1 = evo_test::ChangedGeneric<I, J>;
-
-using Changed_v1 = evo_test::ChangedGeneric<std::string, int32_t>;
 
 } // namespace evo_test
 

@@ -134,6 +134,7 @@ AliasedRecordWithChanges: RecordWithChanges
 
 RecordWithChanges: !record
   fields:
+    deprecatedFloat: float
     intToLong: int
     deprecatedVector: int*
     floatToDouble: float

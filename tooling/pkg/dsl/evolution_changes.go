@@ -3,7 +3,10 @@
 
 package dsl
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 type TypeChange interface {
 	OldType() Type
@@ -112,24 +115,6 @@ func (tc *TypeChangeUnionTypesetChanged) Inverse() TypeChange {
 	return &TypeChangeUnionTypesetChanged{TypePair: tc.Swap(), OldMatches: tc.NewMatches, NewMatches: tc.OldMatches}
 }
 
-func (tc *TypeChangeUnionTypesetChanged) HasTypesAdded() bool {
-	for _, match := range tc.NewMatches {
-		if !match {
-			return true
-		}
-	}
-	return false
-}
-
-func (tc *TypeChangeUnionTypesetChanged) HasTypesRemoved() bool {
-	for _, match := range tc.OldMatches {
-		if !match {
-			return true
-		}
-	}
-	return false
-}
-
 type TypeChangeStreamTypeChanged struct {
 	TypePair
 	InnerChange TypeChange
@@ -232,6 +217,10 @@ type NamedTypeChange struct {
 	TypeChange TypeChange
 }
 
+type ProtocolRemoved struct {
+	DefinitionPair
+}
+
 type ProtocolChange struct {
 	DefinitionPair
 	PreviousSchema string
@@ -290,16 +279,49 @@ func typeChangeWarningReason(tc TypeChange) string {
 	switch tc := tc.(type) {
 	case *TypeChangeNumberToNumber:
 		return "may result in numeric overflow or loss of precision"
-	case *TypeChangeNumberToString, *TypeChangeScalarToOptional, *TypeChangeScalarToUnion, *TypeChangeOptionalToUnion:
-		return "may produce runtime errors when serializing previous versions"
-	case *TypeChangeStringToNumber, *TypeChangeOptionalToScalar, *TypeChangeUnionToScalar, *TypeChangeUnionToOptional:
-		return "may produce runtime errors when deserializing previous versions"
+	case *TypeChangeNumberToString:
+		return fmt.Sprintf("will result in a write error if its value cannot be converted to type '%s' at runtime", TypeToShortSyntax(tc.OldType(), true))
+	case *TypeChangeStringToNumber:
+		return fmt.Sprintf("will result in a read error if its value cannot be converted to type '%s' at runtime", TypeToShortSyntax(tc.NewType(), true))
+
+	case *TypeChangeScalarToOptional:
+		return fmt.Sprintf("will result in writing the default zero value for '%s' if it does not have a value at runtime", TypeToShortSyntax(tc.OldType(), true))
+	case *TypeChangeOptionalToScalar:
+		return fmt.Sprintf("will result in reading the default zero value for '%s' if it does not have a value at runtime", TypeToShortSyntax(tc.NewType(), true))
+
+	case *TypeChangeScalarToUnion:
+		return fmt.Sprintf("will result in a write error if its value is not of type '%s' at runtime", TypeToShortSyntax(tc.OldType(), true))
+	case *TypeChangeUnionToScalar:
+		return fmt.Sprintf("will result in a read error if its value is not of type '%s' at runtime", TypeToShortSyntax(tc.NewType(), true))
+
+	case *TypeChangeOptionalToUnion:
+		oldInnerType := tc.OldType().(*GeneralizedType).Cases[1].Type
+		return fmt.Sprintf("will result in a write error if its value is not of type '%s' at runtime", TypeToShortSyntax(oldInnerType, true))
+	case *TypeChangeUnionToOptional:
+		newInnerType := tc.NewType().(*GeneralizedType).Cases[1].Type
+		return fmt.Sprintf("will result in a read error if its value is not of type '%s' at runtime", TypeToShortSyntax(newInnerType, true))
+
 	case *TypeChangeUnionTypesetChanged:
-		if tc.HasTypesRemoved() {
-			return "may produce runtime errors when deserializing previous versions"
+		var removed []string
+		for i, match := range tc.OldMatches {
+			if !match {
+				syntax := TypeToShortSyntax(tc.OldType().(*GeneralizedType).Cases[i].Type, true)
+				removed = append(removed, fmt.Sprintf("'%s'", syntax))
+			}
 		}
-		if tc.HasTypesAdded() {
-			return "may produce runtime errors when serializing previous versions"
+		if len(removed) > 0 {
+			return fmt.Sprintf("may result in a read error if its value at runtime is of type %s", strings.Join(removed, " or "))
+		}
+
+		var added []string
+		for i, match := range tc.NewMatches {
+			if !match {
+				syntax := TypeToShortSyntax(tc.NewType().(*GeneralizedType).Cases[i].Type, true)
+				added = append(added, fmt.Sprintf("'%s'", syntax))
+			}
+		}
+		if len(added) > 0 {
+			return fmt.Sprintf("may result in a write error if its value at runtime is of type %s", strings.Join(added, " or "))
 		}
 	case *TypeChangeStreamTypeChanged:
 		return typeChangeWarningReason(tc.InnerChange)

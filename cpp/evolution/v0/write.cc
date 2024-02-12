@@ -1,4 +1,4 @@
-#include "lib/binary/protocols.h"
+#include "generated/binary/protocols.h"
 
 using namespace evo_test;
 
@@ -56,6 +56,7 @@ int main(void) {
   renamed.s = HelloWorld;
 
   RecordWithChanges rec;
+  rec.deprecated_float = M_PI;
   rec.int_to_long = INT_MIN;
   rec.deprecated_vector = {1, 2, 3};
   rec.float_to_double = M_PI;

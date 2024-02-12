@@ -1,4 +1,4 @@
-add_subdirectory(lib)
+add_subdirectory(generated)
 
 add_executable(v1_write
   write.cc

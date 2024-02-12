@@ -78,9 +78,9 @@ func WriteNdJson(env *dsl.Environment, options packaging.CppCodegenOptions) erro
 					templateDeclarationBuilder.WriteString(">\n")
 				}
 				w.WriteString(templateDeclarationBuilder.String())
-				fmt.Fprintf(w, "[[maybe_unused]] static void to_json(ordered_json& j, %s const& value);\n", typeName)
+				fmt.Fprintf(w, "void to_json(ordered_json& j, %s const& value);\n", typeName)
 				w.WriteString(templateDeclarationBuilder.String())
-				fmt.Fprintf(w, "[[maybe_unused]] static void from_json(ordered_json const& j, %s& value);\n\n", typeName)
+				fmt.Fprintf(w, "void from_json(ordered_json const& j, %s& value);\n\n", typeName)
 			}
 		}
 
@@ -284,7 +284,7 @@ func writeRecordConverters(w *formatting.IndentedWriter, t *dsl.RecordDefinition
 	}
 
 	w.WriteString(templateDeclarationBuilder.String())
-	fmt.Fprintf(w, "[[maybe_unused]] static void to_json(ordered_json& j, %s const& value) {\n", typeName)
+	fmt.Fprintf(w, "void to_json(ordered_json& j, %s const& value) {\n", typeName)
 	w.Indented(func() {
 		w.WriteStringln("j = ordered_json::object();")
 		for _, field := range t.Fields {
@@ -298,7 +298,7 @@ func writeRecordConverters(w *formatting.IndentedWriter, t *dsl.RecordDefinition
 	w.WriteStringln("}\n")
 
 	w.WriteString(templateDeclarationBuilder.String())
-	fmt.Fprintf(w, "[[maybe_unused]] static void from_json(ordered_json const& j, %s& value) {\n", typeName)
+	fmt.Fprintf(w, "void from_json(ordered_json const& j, %s& value) {\n", typeName)
 	w.Indented(func() {
 		for _, field := range t.Fields {
 			fmt.Fprintf(w, "if (auto it = j.find(\"%s\"); it != j.end()) {\n", field.Name)
@@ -313,7 +313,7 @@ func writeRecordConverters(w *formatting.IndentedWriter, t *dsl.RecordDefinition
 
 func writeEnumConverters(w *formatting.IndentedWriter, t *dsl.EnumDefinition) {
 	typeName := common.TypeDefinitionSyntax(t)
-	fmt.Fprintf(w, "[[maybe_unused]] static void to_json(ordered_json& j, %s const& value) {\n", typeName)
+	fmt.Fprintf(w, "void to_json(ordered_json& j, %s const& value) {\n", typeName)
 	w.Indented(func() {
 		w.WriteStringln("switch (value) {")
 		w.Indented(func() {
@@ -335,7 +335,7 @@ func writeEnumConverters(w *formatting.IndentedWriter, t *dsl.EnumDefinition) {
 	})
 	w.WriteStringln("}\n")
 
-	fmt.Fprintf(w, "[[maybe_unused]] static void from_json(ordered_json const& j, %s& value) {\n", common.TypeDefinitionSyntax(t))
+	fmt.Fprintf(w, "void from_json(ordered_json const& j, %s& value) {\n", common.TypeDefinitionSyntax(t))
 	w.Indented(func() {
 		w.WriteStringln("if (j.is_string()) {")
 		w.Indented(func() {
@@ -363,7 +363,7 @@ func writeFlagsConverters(w *formatting.IndentedWriter, t *dsl.EnumDefinition) {
 
 	typeName := common.TypeDefinitionSyntax(t)
 	zero := t.GetZeroValue()
-	fmt.Fprintf(w, "[[maybe_unused]] static void to_json(ordered_json& j, %s const& value) {\n", typeName)
+	fmt.Fprintf(w, "void to_json(ordered_json& j, %s const& value) {\n", typeName)
 	w.Indented(func() {
 		w.WriteStringln("auto arr = ordered_json::array();")
 		w.WriteStringln("if (value == 0) {")
@@ -399,7 +399,7 @@ func writeFlagsConverters(w *formatting.IndentedWriter, t *dsl.EnumDefinition) {
 	})
 	w.WriteStringln("}\n")
 
-	fmt.Fprintf(w, "[[maybe_unused]] static void from_json(ordered_json const& j, %s& value) {\n", common.TypeDefinitionSyntax(t))
+	fmt.Fprintf(w, "void from_json(ordered_json const& j, %s& value) {\n", common.TypeDefinitionSyntax(t))
 	w.Indented(func() {
 		w.WriteStringln("if (j.is_number()) {")
 		w.Indented(func() {
@@ -462,7 +462,7 @@ func writeUnionConverters(w *formatting.IndentedWriter, unionType *dsl.Generaliz
 	fmt.Fprintf(w, "struct adl_serializer<%s> {\n", unionTypeSyntax)
 	w.Indented(func() {
 
-		fmt.Fprintf(w, "[[maybe_unused]] static void to_json(ordered_json& j, %s const& value) {\n", unionTypeSyntax)
+		fmt.Fprintf(w, "static void to_json(ordered_json& j, %s const& value) {\n", unionTypeSyntax)
 		w.Indented(func() {
 			if simplfied {
 				w.WriteStringln("std::visit([&j](auto const& v) {j = v;}, value);")
@@ -487,7 +487,7 @@ func writeUnionConverters(w *formatting.IndentedWriter, unionType *dsl.Generaliz
 		})
 		w.WriteStringln("}\n")
 
-		fmt.Fprintf(w, "[[maybe_unused]] static void from_json(ordered_json const& j, %s& value) {\n", unionTypeSyntax)
+		fmt.Fprintf(w, "static void from_json(ordered_json const& j, %s& value) {\n", unionTypeSyntax)
 		w.Indented(func() {
 			if simplfied {
 				for _, c := range unionType.Cases {
