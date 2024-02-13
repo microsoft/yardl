@@ -23,7 +23,8 @@ func newRootCommand(version, commit string) *cobra.Command {
 
 	verbose := false
 	quiet := false
-	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
+	writer := zerolog.ConsoleWriter{Out: os.Stderr, PartsExclude: []string{"time", "caller"}}
+	log.Logger = log.Output(writer)
 	zerolog.SetGlobalLevel(zerolog.WarnLevel)
 
 	cmd := &cobra.Command{

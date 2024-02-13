@@ -61,6 +61,15 @@ func validationError(node Node, message string, args ...any) validation.Validati
 	}
 }
 
+func validationWarning(node Node, message string, args ...any) validation.ValidationWarning {
+	return validation.ValidationWarning{
+		Message: fmt.Sprintf(message, args...),
+		File:    node.GetNodeMeta().File,
+		Line:    &node.GetNodeMeta().Line,
+		Column:  &node.GetNodeMeta().Column,
+	}
+}
+
 func validateTypeDefinitionNames(env *Environment, errorSink *validation.ErrorSink) *Environment {
 	Visit(env, func(self Visitor, node Node) {
 		switch t := node.(type) {

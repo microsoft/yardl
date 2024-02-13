@@ -27,8 +27,8 @@ type PackageInfo struct {
 	FilePath  string `yaml:"-"`
 	Namespace string `yaml:"namespace"`
 
-	Versions Predecessors `yaml:"versions,omitempty"`
-	Imports  Imports      `yaml:"imports,omitempty"`
+	Versions Versions `yaml:"versions,omitempty"`
+	Imports  Imports  `yaml:"imports,omitempty"`
 
 	Json   *JsonCodegenOptions   `yaml:"json,omitempty"`
 	Cpp    *CppCodegenOptions    `yaml:"cpp,omitempty"`
@@ -39,21 +39,33 @@ func (p *PackageInfo) PackageDir() string {
 	return filepath.Dir(p.FilePath)
 }
 
-func (p *PackageInfo) GetAllImportedPackages() []*PackageInfo {
+func (p *PackageInfo) GetAllReferencedPackages() []*PackageInfo {
 	checked := make(map[string]bool)
-	var imports []*PackageInfo
+	var refs []*PackageInfo
+
 	var recurse func(*PackageInfo)
 	recurse = func(pInfo *PackageInfo) {
 		for _, imp := range pInfo.Imports {
 			if !checked[imp.Package.FilePath] {
 				recurse(imp.Package)
 				checked[imp.Package.FilePath] = true
-				imports = append(imports, imp.Package)
+				refs = append(refs, imp.Package)
 			}
 		}
 	}
+
+	// Get all imported packages
 	recurse(p)
-	return imports
+
+	// Get all other versions, and their respective imported packages
+	for _, ver := range p.Versions {
+		if !checked[ver.Package.FilePath] {
+			recurse(ver.Package)
+			checked[ver.Package.FilePath] = true
+			refs = append(refs, ver.Package)
+		}
+	}
+	return refs
 }
 
 func (p *PackageInfo) validate() error {
@@ -65,11 +77,11 @@ func (p *PackageInfo) validate() error {
 		errorSink.Add(validation.NewValidationError(fmt.Errorf("the 'namespace' field must be PascalCased and match the format %s", namespaceNameRegex.String()), p.FilePath))
 	}
 
-	for _, pred := range p.Versions {
-		if pred.Label == "" {
+	for _, ver := range p.Versions {
+		if ver.Label == "" {
 			errorSink.Add(validation.NewValidationError(errors.New("the version label is missing"), p.FilePath))
-		} else if !versionLabelRegex.MatchString(pred.Label) {
-			errorSink.Add(validation.NewValidationError(fmt.Errorf("the version label '%s' must match the format %s", pred.Label, versionLabelRegex.String()), p.FilePath))
+		} else if !versionLabelRegex.MatchString(ver.Label) {
+			errorSink.Add(validation.NewValidationError(fmt.Errorf("the version label '%s' must match the format %s", ver.Label, versionLabelRegex.String()), p.FilePath))
 		}
 	}
 
@@ -128,35 +140,35 @@ func (imports *Imports) UnmarshalYAML(value *yaml.Node) error {
 	return nil
 }
 
-type Predecessor struct {
+type Version struct {
 	Label   string
 	Url     string
 	Package *PackageInfo
 }
 
-type Predecessors []*Predecessor
+type Versions []*Version
 
-func (preds *Predecessors) UnmarshalYAML(value *yaml.Node) error {
-	unpacked := []*Predecessor(*preds)
+func (versions *Versions) UnmarshalYAML(value *yaml.Node) error {
+	unpacked := []*Version(*versions)
 
 	if value.Tag != "!!map" {
 		return fmt.Errorf("expected versions map")
 	}
 
 	for i := 0; i < len(value.Content); i += 2 {
-		predKey := value.Content[i]
-		predValue := value.Content[i+1]
-		if predKey.Tag != "!!str" {
+		verKey := value.Content[i]
+		verValue := value.Content[i+1]
+		if verKey.Tag != "!!str" {
 			return fmt.Errorf("expected version label to be a string")
 		}
-		if predValue.Tag != "!!str" {
+		if verValue.Tag != "!!str" {
 			return fmt.Errorf("expected version url to be a string")
 		}
 
-		unpacked = append(unpacked, &Predecessor{Label: predKey.Value, Url: predValue.Value})
+		unpacked = append(unpacked, &Version{Label: verKey.Value, Url: verValue.Value})
 	}
 
-	*preds = Predecessors(unpacked)
+	*versions = Versions(unpacked)
 	return nil
 }
 
@@ -194,25 +206,25 @@ type PythonCodegenOptions struct {
 	InternalSymlinkStaticFiles bool         `yaml:"internalSymlinkStaticFiles"`
 }
 
-// Parses PackageInfo in dir then loads all package Imports and Predecessors
+// Parses PackageInfo in dir then loads all package Imports and Versions
 func LoadPackage(dir string) (*PackageInfo, error) {
 	packageInfo, err := loadPackageVersion(dir)
 	if err != nil {
 		return nil, err
 	}
 
-	dirs, err := collectPredecessors(packageInfo)
+	dirs, err := collectVersions(packageInfo)
 	if err != nil {
 		return packageInfo, err
 	}
 
 	for i, dir := range dirs {
-		predecessorInfo, err := loadPackageVersion(dir)
+		versionInfo, err := loadPackageVersion(dir)
 		if err != nil {
 			return packageInfo, err
 		}
 
-		packageInfo.Versions[i].Package = predecessorInfo
+		packageInfo.Versions[i].Package = versionInfo
 	}
 
 	return packageInfo, nil
@@ -323,18 +335,18 @@ func collectPackages(parentDir string, alreadyCollected map[string]*PackageInfo,
 	return parentInfo, nil
 }
 
-// Fetch and cache each predecessor package in pkgInfo.Predecessors
-func collectPredecessors(pkgInfo *PackageInfo) ([]string, error) {
+// Fetch and cache each package version in pkgInfo.Versions
+func collectVersions(pkgInfo *PackageInfo) ([]string, error) {
 	if len(pkgInfo.Versions) <= 0 {
 		return nil, nil
 	}
 
-	log.Info().Msgf("Collecting previous versions for %v", pkgInfo.PackageDir())
-	var predecessorUrls []string
-	for _, pred := range pkgInfo.Versions {
-		predecessorUrls = append(predecessorUrls, pred.Url)
+	log.Info().Msgf("Collecting referenced versions for %v", pkgInfo.PackageDir())
+	var versionUrls []string
+	for _, ver := range pkgInfo.Versions {
+		versionUrls = append(versionUrls, ver.Url)
 	}
-	dirs, err := fetchAndCachePackages(pkgInfo.PackageDir(), predecessorUrls)
+	dirs, err := fetchAndCachePackages(pkgInfo.PackageDir(), versionUrls)
 	if err != nil {
 		err = validation.NewValidationError(err, pkgInfo.FilePath)
 	}

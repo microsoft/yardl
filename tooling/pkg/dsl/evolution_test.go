@@ -58,7 +58,7 @@ P: !protocol
 
 	for _, ts := range tests {
 		latest, previous, labels := parseVersions(t, []string{oldModel, fmt.Sprintf(newModel, ts)})
-		_, err := ValidateEvolution(latest, previous, labels)
+		_, _, err := ValidateEvolution(latest, previous, labels)
 		assert.NotNil(t, err, "type: %s", ts)
 	}
 }
@@ -76,7 +76,7 @@ P: !protocol
 `}
 
 	latest, previous, labels := parseVersions(t, models)
-	_, err := ValidateEvolution(latest, previous, labels)
+	_, _, err := ValidateEvolution(latest, previous, labels)
 	assert.NotNil(t, err)
 }
 
@@ -94,7 +94,7 @@ P: !protocol
 `}
 
 	latest, previous, labels := parseVersions(t, models)
-	_, err := ValidateEvolution(latest, previous, labels)
+	_, _, err := ValidateEvolution(latest, previous, labels)
 	assert.NotNil(t, err)
 }
 
@@ -121,7 +121,7 @@ P: !protocol
 	assert.Len(t, previous, 1)
 	assert.Len(t, labels, 1)
 
-	_, err := ValidateEvolution(latest, previous, labels)
+	_, _, err := ValidateEvolution(latest, previous, labels)
 	assert.NotNil(t, err)
 }
 
@@ -139,7 +139,7 @@ P: !protocol
 `}
 
 	latest, previous, labels := parseVersions(t, models)
-	_, err := ValidateEvolution(latest, previous, labels)
+	_, _, err := ValidateEvolution(latest, previous, labels)
 	assert.NotNil(t, err)
 }
 
@@ -217,11 +217,11 @@ P: !protocol
 
 	for _, tt := range tests {
 		latest, previous, labels := parseVersions(t, []string{fmt.Sprintf(model, tt.typeA), fmt.Sprintf(model, tt.typeB)})
-		_, err := ValidateEvolution(latest, previous, labels)
+		_, _, err := ValidateEvolution(latest, previous, labels)
 		assert.NotNil(t, err, "typeA: %s, typeB: %s", tt.typeA, tt.typeB)
 
 		latest, previous, labels = parseVersions(t, []string{fmt.Sprintf(model, tt.typeB), fmt.Sprintf(model, tt.typeA)})
-		_, err = ValidateEvolution(latest, previous, labels)
+		_, _, err = ValidateEvolution(latest, previous, labels)
 		assert.NotNil(t, err, "typeA: %s, typeB: %s", tt.typeB, tt.typeA)
 	}
 }
@@ -311,11 +311,11 @@ P: !protocol
 
 	for _, tt := range tests {
 		latest, previous, labels := parseVersions(t, []string{fmt.Sprintf(model, tt.typeA), fmt.Sprintf(model, tt.typeB)})
-		_, err := ValidateEvolution(latest, previous, labels)
+		_, _, err := ValidateEvolution(latest, previous, labels)
 		assert.NotNil(t, err, "typeA: %s, typeB: %s", tt.typeA, tt.typeB)
 
 		latest, previous, labels = parseVersions(t, []string{fmt.Sprintf(model, tt.typeB), fmt.Sprintf(model, tt.typeA)})
-		_, err = ValidateEvolution(latest, previous, labels)
+		_, _, err = ValidateEvolution(latest, previous, labels)
 		assert.NotNil(t, err, "typeA: %s, typeB: %s", tt.typeB, tt.typeA)
 	}
 }
@@ -365,11 +365,11 @@ P: !protocol
 
 	for _, tt := range valid {
 		latest, previous, labels := parseVersions(t, []string{formatModel(tt.typeA), formatModel(tt.typeB)})
-		_, err := ValidateEvolution(latest, previous, labels)
+		_, _, err := ValidateEvolution(latest, previous, labels)
 		assert.Nil(t, err, "typeA: %s, typeB: %s", tt.typeA, tt.typeB)
 
 		latest, previous, labels = parseVersions(t, []string{formatModel(tt.typeB), formatModel(tt.typeA)})
-		_, err = ValidateEvolution(latest, previous, labels)
+		_, _, err = ValidateEvolution(latest, previous, labels)
 		assert.Nil(t, err, "typeA: %s, typeB: %s", tt.typeB, tt.typeA)
 	}
 
@@ -388,11 +388,11 @@ P: !protocol
 
 	for _, tt := range invalid {
 		latest, previous, labels := parseVersions(t, []string{formatModel(tt.typeA), formatModel(tt.typeB)})
-		_, err := ValidateEvolution(latest, previous, labels)
+		_, _, err := ValidateEvolution(latest, previous, labels)
 		assert.NotNil(t, err, "typeA: %s, typeB: %s", tt.typeA, tt.typeB)
 
 		latest, previous, labels = parseVersions(t, []string{formatModel(tt.typeB), formatModel(tt.typeA)})
-		_, err = ValidateEvolution(latest, previous, labels)
+		_, _, err = ValidateEvolution(latest, previous, labels)
 		assert.NotNil(t, err, "typeA: %s, typeB: %s", tt.typeB, tt.typeA)
 	}
 }
@@ -418,12 +418,12 @@ B: !record
 `}
 
 	latest, previous, labels := parseVersions(t, models)
-	_, err := ValidateEvolution(latest, previous, labels)
+	_, _, err := ValidateEvolution(latest, previous, labels)
 	assert.NotNil(t, err)
 
 	slices.Reverse(models)
 	latest, previous, labels = parseVersions(t, models)
-	_, err = ValidateEvolution(latest, previous, labels)
+	_, _, err = ValidateEvolution(latest, previous, labels)
 	assert.NotNil(t, err)
 }
 
@@ -453,12 +453,12 @@ B: !record
 `}
 
 	latest, previous, labels := parseVersions(t, models)
-	_, err := ValidateEvolution(latest, previous, labels)
+	_, _, err := ValidateEvolution(latest, previous, labels)
 	assert.NotNil(t, err)
 
 	slices.Reverse(models)
 	latest, previous, labels = parseVersions(t, models)
-	_, err = ValidateEvolution(latest, previous, labels)
+	_, _, err = ValidateEvolution(latest, previous, labels)
 	assert.NotNil(t, err)
 }
 
@@ -486,12 +486,12 @@ Z: !record
 `}
 
 	latest, previous, labels := parseVersions(t, models)
-	_, err := ValidateEvolution(latest, previous, labels)
+	_, _, err := ValidateEvolution(latest, previous, labels)
 	assert.NotNil(t, err)
 
 	slices.Reverse(models)
 	latest, previous, labels = parseVersions(t, models)
-	_, err = ValidateEvolution(latest, previous, labels)
+	_, _, err = ValidateEvolution(latest, previous, labels)
 	assert.NotNil(t, err)
 }
 
@@ -536,11 +536,11 @@ M: string->R
 		for _, tNew := range typeNames {
 			if tOld != tNew {
 				latest, previous, labels := parseVersions(t, []string{fmt.Sprintf(model, tOld), fmt.Sprintf(model, tNew)})
-				_, err := ValidateEvolution(latest, previous, labels)
+				_, _, err := ValidateEvolution(latest, previous, labels)
 				assert.NotNil(t, err, "typeOld: %s, typeNew: %s", tOld, tNew)
 
 				latest, previous, labels = parseVersions(t, []string{fmt.Sprintf(model, tNew), fmt.Sprintf(model, tOld)})
-				_, err = ValidateEvolution(latest, previous, labels)
+				_, _, err = ValidateEvolution(latest, previous, labels)
 				assert.NotNil(t, err, "typeOld: %s, typeNew: %s", tNew, tOld)
 			}
 		}
@@ -576,12 +576,12 @@ AliasedUnionWithChange: [float, string]
 	}
 
 	latest, previous, labels := parseVersions(t, models)
-	_, err := ValidateEvolution(latest, previous, labels)
+	_, _, err := ValidateEvolution(latest, previous, labels)
 	assert.Nil(t, err)
 
 	slices.Reverse(models)
 	latest, previous, labels = parseVersions(t, models)
-	_, err = ValidateEvolution(latest, previous, labels)
+	_, _, err = ValidateEvolution(latest, previous, labels)
 	assert.Nil(t, err)
 }
 
@@ -695,11 +695,11 @@ GenericUnion<T1>: [T1, string]
 
 	for _, pair := range pairs {
 		latest, previous, labels := parseVersions(t, []string{pair.previous, pair.latest})
-		_, err := ValidateEvolution(latest, previous, labels)
+		_, _, err := ValidateEvolution(latest, previous, labels)
 		assert.NotNil(t, err, "previous: %s, latest: %s", pair.previous, pair.latest)
 
 		latest, previous, labels = parseVersions(t, []string{pair.latest, pair.previous})
-		_, err = ValidateEvolution(latest, previous, labels)
+		_, _, err = ValidateEvolution(latest, previous, labels)
 		assert.NotNil(t, err, "previous: %s, latest: %s", pair.latest, pair.previous)
 	}
 }
@@ -801,11 +801,11 @@ AliasedUnionWithMaybeString<T>: [T, MaybeString]
 
 	for _, tt := range tests {
 		latest, previous, labels := parseVersions(t, []string{fmt.Sprintf(modelA, tt.typeA), fmt.Sprintf(modelB, tt.typeB)})
-		_, err := ValidateEvolution(latest, previous, labels)
+		_, _, err := ValidateEvolution(latest, previous, labels)
 		assert.Nil(t, err, "typeA: %s, typeB: %s", tt.typeA, tt.typeB)
 
 		latest, previous, labels = parseVersions(t, []string{fmt.Sprintf(modelB, tt.typeB), fmt.Sprintf(modelA, tt.typeA)})
-		_, err = ValidateEvolution(latest, previous, labels)
+		_, _, err = ValidateEvolution(latest, previous, labels)
 		assert.Nil(t, err, "typeA: %s, typeB: %s", tt.typeB, tt.typeA)
 	}
 }
@@ -874,11 +874,11 @@ ChangedGenericRecord<A, B>: !record
 
 	for _, tt := range tests {
 		latest, previous, labels := parseVersions(t, []string{fmt.Sprintf(modelA, tt.typeA), fmt.Sprintf(modelB, tt.typeB)})
-		_, err := ValidateEvolution(latest, previous, labels)
+		_, _, err := ValidateEvolution(latest, previous, labels)
 		assert.NotNil(t, err, "typeA: %s, typeB: %s", tt.typeA, tt.typeB)
 
 		latest, previous, labels = parseVersions(t, []string{fmt.Sprintf(modelB, tt.typeB), fmt.Sprintf(modelA, tt.typeA)})
-		_, err = ValidateEvolution(latest, previous, labels)
+		_, _, err = ValidateEvolution(latest, previous, labels)
 		assert.NotNil(t, err, "typeA: %s, typeB: %s", tt.typeB, tt.typeA)
 	}
 }
@@ -898,6 +898,6 @@ GenericRecord<T>: !record
 `
 
 	latest, previous, labels := parseVersions(t, []string{model, model})
-	_, err := ValidateEvolution(latest, previous, labels)
+	_, _, err := ValidateEvolution(latest, previous, labels)
 	assert.Nil(t, err)
 }

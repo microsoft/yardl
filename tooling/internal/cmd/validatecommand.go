@@ -22,10 +22,13 @@ func newValidateCommand() *cobra.Command {
 		DisableFlagsInUseLine: true,
 		Args:                  cobra.NoArgs,
 		Run: func(cmd *cobra.Command, args []string) {
-			err := validateImpl()
+			warnings, err := validateImpl()
 			if err != nil {
 				fmt.Fprintln(os.Stderr, err)
 				os.Exit(1)
+			}
+			for _, warning := range warnings {
+				log.Warn().Msg(warning)
 			}
 		},
 	}
@@ -33,31 +36,31 @@ func newValidateCommand() *cobra.Command {
 	return cmd
 }
 
-func validateImpl() error {
+func validateImpl() ([]string, error) {
 	inputDir, err := os.Getwd()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	packageInfo, err := packaging.LoadPackage(inputDir)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	_, err = validatePackage(packageInfo)
+	_, warnings, err := validatePackage(packageInfo)
 
-	return err
+	return warnings, err
 }
 
-func validatePackage(packageInfo *packaging.PackageInfo) (*dsl.Environment, error) {
+func validatePackage(packageInfo *packaging.PackageInfo) (*dsl.Environment, []string, error) {
 	namespaces, err := parseAndFlattenNamespaces(packageInfo)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	env, err := dsl.Validate(namespaces)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	var predecessors []*dsl.Environment
@@ -65,32 +68,33 @@ func validatePackage(packageInfo *packaging.PackageInfo) (*dsl.Environment, erro
 	for _, predecessor := range packageInfo.Versions {
 		for _, label := range labels {
 			if label == predecessor.Label {
-				return env, fmt.Errorf("duplicate predecessor label %s", predecessor.Label)
+				return env, nil, fmt.Errorf("duplicate predecessor label %s", predecessor.Label)
 			}
 		}
 		labels = append(labels, predecessor.Label)
 
 		namespaces, err := parseAndFlattenNamespaces(predecessor.Package)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 
 		oldEnv, err := dsl.Validate(namespaces)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 
 		predecessors = append(predecessors, oldEnv)
 	}
 
+	var warnings []string
 	if len(predecessors) > 0 {
-		env, err = dsl.ValidateEvolution(env, predecessors, labels)
+		env, warnings, err = dsl.ValidateEvolution(env, predecessors, labels)
 		if err != nil {
-			return nil, err
+			return nil, warnings, err
 		}
 	}
 
-	return env, nil
+	return env, warnings, nil
 }
 
 func parseAndFlattenNamespaces(p *packaging.PackageInfo) ([]*dsl.Namespace, error) {

@@ -5,14 +5,13 @@ package dsl
 
 import (
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/microsoft/yardl/tooling/internal/validation"
 	"github.com/rs/zerolog/log"
 )
 
-func ValidateEvolution(latest *Environment, predecessors []*Environment, versionLabels []string) (*Environment, error) {
+func ValidateEvolution(latest *Environment, predecessors []*Environment, versionLabels []string) (*Environment, []string, error) {
 
 	// Initialize structures needed later for serialization codegen
 	for _, ns := range latest.Namespaces {
@@ -24,19 +23,20 @@ func ValidateEvolution(latest *Environment, predecessors []*Environment, version
 	}
 
 	// Compare each previous version with latest version
+	var allWarnings []string
 	for i, predecessor := range predecessors {
 		log.Info().Msgf("Resolving changes from version %s", versionLabels[i])
 
 		definitionChanges, protocolChanges := resolveAllChanges(latest, predecessor)
 
-		if err := validateChanges(definitionChanges, protocolChanges); err != nil {
-			return nil, err
+		warnings, err := validateChanges(definitionChanges, protocolChanges, versionLabels[i])
+		allWarnings = append(allWarnings, warnings...)
+		if err != nil {
+			return nil, allWarnings, err
 		}
 
+		// Rename all former TypeDefinition Nodes to avoid name conflicts in codegen
 		renameOldTypeDefinitions(predecessor, definitionChanges, versionLabels[i])
-		// for _, ch := range definitionChanges {
-		// 	log.Debug().Msgf("DefinitionChange OLD %s = NEW %s", defWithArgs(ch.PreviousDefinition()), defWithArgs(ch.LatestDefinition()))
-		// }
 
 		// Save all TypeDefinition changes for codegen
 		latest.GetTopLevelNamespace().DefinitionChanges[versionLabels[i]] = definitionChanges
@@ -49,7 +49,7 @@ func ValidateEvolution(latest *Environment, predecessors []*Environment, version
 		}
 	}
 
-	return latest, nil
+	return latest, allWarnings, nil
 }
 
 func renameOldTypeDefinitions(env *Environment, changes []DefinitionChange, versionLabel string) {
@@ -80,40 +80,32 @@ func renameOldTypeDefinitions(env *Environment, changes []DefinitionChange, vers
 	})
 }
 
+type SinkWarningOrError func(node Node, format string, args ...interface{})
+
 // Emit User Warnings and aggregate Errors
-func validateChanges(definitionChanges []DefinitionChange, protocolChanges map[string]DefinitionChange) error {
+func validateChanges(definitionChanges []DefinitionChange, protocolChanges map[string]DefinitionChange, versionLabel string) ([]string, error) {
+	prefix := fmt.Sprintf("[%s] ", versionLabel)
+
+	warningSink := &validation.WarningSink{}
+	saveWarning := func(node Node, format string, args ...interface{}) {
+		warningSink.Add(validationWarning(node, prefix+format, args...))
+	}
+
 	errorSink := &validation.ErrorSink{}
-	validateTypeDefinitionChanges(definitionChanges, errorSink)
+	saveError := func(node Node, format string, args ...interface{}) {
+		errorSink.Add(validationError(node, prefix+format, args...))
+	}
+
+	validateTypeDefinitionChanges(definitionChanges, saveWarning, saveError)
 	if len(errorSink.Errors) > 0 {
-		return errorSink.AsError()
+		return warningSink.AsStrings(), errorSink.AsError()
 	}
 
-	validateProtocolChanges(protocolChanges, errorSink)
-	return errorSink.AsError()
+	validateProtocolChanges(protocolChanges, saveWarning, saveError)
+	return warningSink.AsStrings(), errorSink.AsError()
 }
 
-func Warn(node Node, message string, args ...any) {
-	fmt.Fprintln(os.Stderr, validationWarning(node, message, args...))
-}
-
-func validationWarning(node Node, message string, args ...any) string {
-	message = fmt.Sprintf(message, args...)
-	file := node.GetNodeMeta().File
-	line := &node.GetNodeMeta().Line
-	column := &node.GetNodeMeta().Column
-
-	prefix := fmt.Sprintf("⚠️  %s:", file)
-	if line != nil {
-		prefix = fmt.Sprintf("%s%d:", prefix, *line)
-	}
-	if column != nil {
-		prefix = fmt.Sprintf("%s%d:", prefix, *column)
-	}
-
-	return fmt.Sprintf("%s %v", prefix, message)
-}
-
-func validateTypeDefinitionChanges(changes []DefinitionChange, errorSink *validation.ErrorSink) {
+func validateTypeDefinitionChanges(changes []DefinitionChange, saveWarning, saveError SinkWarningOrError) {
 	for _, ch := range changes {
 		td := ch.LatestDefinition()
 		switch defChange := ch.(type) {
@@ -125,7 +117,7 @@ func validateTypeDefinitionChanges(changes []DefinitionChange, errorSink *valida
 			if defChange.Reason != "" {
 				explanation = fmt.Sprintf(": %s", defChange.Reason)
 			}
-			errorSink.Add(validationError(td, "this change to '%s' is not backward compatible%s", td.GetDefinitionMeta().Name, explanation))
+			saveError(td, "this change to '%s' is not backward compatible%s", td.GetDefinitionMeta().Name, explanation)
 
 		case *RecordChange:
 			oldRec := defChange.PreviousDefinition().(*RecordDefinition)
@@ -133,14 +125,14 @@ func validateTypeDefinitionChanges(changes []DefinitionChange, errorSink *valida
 
 			for _, added := range defChange.FieldsAdded {
 				if !TypeHasNullOption(added.Type) {
-					Warn(added, "Added non-Optional field '%s' will have default zero value when reading from previous versions", added.Name)
+					saveWarning(added, "Added non-Optional field '%s' will have default zero value when reading from referenced version", added.Name)
 				}
 			}
 
 			for i, field := range oldRec.Fields {
 				if defChange.FieldRemoved[i] {
 					if !TypeHasNullOption(oldRec.Fields[i].Type) {
-						Warn(newRec.Fields[0], "Removed non-Optional field '%s' will have default zero value when writing to previous versions", field.Name)
+						saveWarning(newRec.Fields[0], "Removed non-Optional field '%s' will have default zero value when writing to referenced version", field.Name)
 					}
 					continue
 				}
@@ -148,9 +140,9 @@ func validateTypeDefinitionChanges(changes []DefinitionChange, errorSink *valida
 				if tc := defChange.FieldChanges[i]; tc != nil {
 					newField := newRec.Fields[defChange.NewFieldIndex[i]]
 					if typeChangeIsError(tc) {
-						errorSink.Add(validationError(newField, "changing field '%s' from %s", newField.Name, typeChangeToError(tc)))
+						saveError(newField, "changing field '%s' from %s", newField.Name, typeChangeToError(tc))
 					} else if warn := typeChangeToWarning(tc); warn != "" {
-						Warn(newField, "Changing field '%s' from %s", field.Name, warn)
+						saveWarning(newField, "Changing field '%s' from %s", field.Name, warn)
 					}
 				}
 			}
@@ -158,15 +150,15 @@ func validateTypeDefinitionChanges(changes []DefinitionChange, errorSink *valida
 		case *NamedTypeChange:
 			if tc := defChange.TypeChange; tc != nil {
 				if typeChangeIsError(tc) {
-					errorSink.Add(validationError(td, "changing type '%s' from %s", td.GetDefinitionMeta().Name, typeChangeToError(tc)))
+					saveError(td, "changing type '%s' from %s", td.GetDefinitionMeta().Name, typeChangeToError(tc))
 				} else if warn := typeChangeToWarning(tc); warn != "" {
-					Warn(td, "Changing type '%s' from %s", td.GetDefinitionMeta().Name, warn)
+					saveWarning(td, "Changing type '%s' from %s", td.GetDefinitionMeta().Name, warn)
 				}
 			}
 
 		case *EnumChange:
 			if tc := defChange.BaseTypeChange; tc != nil {
-				errorSink.Add(validationError(td, "changing base type of '%s' is not backward compatible", td.GetDefinitionMeta().Name))
+				saveError(td, "changing base type of '%s' is not backward compatible", td.GetDefinitionMeta().Name)
 			}
 
 		default:
@@ -175,12 +167,12 @@ func validateTypeDefinitionChanges(changes []DefinitionChange, errorSink *valida
 	}
 }
 
-func validateProtocolChanges(changes map[string]DefinitionChange, errorSink *validation.ErrorSink) {
+func validateProtocolChanges(changes map[string]DefinitionChange, saveWarning, saveError SinkWarningOrError) {
 	// First warn about removed Protocols
 	for _, protChange := range changes {
 		switch protChange := protChange.(type) {
 		case *ProtocolRemoved:
-			Warn(protChange.LatestDefinition(), "Removed protocol '%s'", protChange.PreviousDefinition().GetDefinitionMeta().Name)
+			saveWarning(protChange.LatestDefinition(), "Removed protocol '%s'", protChange.PreviousDefinition().GetDefinitionMeta().Name)
 		}
 	}
 
@@ -195,11 +187,11 @@ func validateProtocolChanges(changes map[string]DefinitionChange, errorSink *val
 		pd := protChange.LatestDefinition().(*ProtocolDefinition)
 
 		for _, reordered := range protChange.StepsReordered {
-			errorSink.Add(validationError(reordered, "reordering step '%s' is not backward compatible", reordered.Name))
+			saveError(reordered, "reordering step '%s' is not backward compatible", reordered.Name)
 		}
 
 		for _, removed := range protChange.StepsRemoved {
-			errorSink.Add(validationError(pd, "removing step '%s' is not backward compatible", removed.Name))
+			saveError(pd, "removing step '%s' is not backward compatible", removed.Name)
 		}
 
 		for i, step := range pd.Sequence {
@@ -220,13 +212,13 @@ func validateProtocolChanges(changes map[string]DefinitionChange, errorSink *val
 						}
 					}
 					if !typeCanBeEmpty {
-						errorSink.Add(validationError(step, "adding step '%s' is not backward compatible", step.Name))
+						saveError(step, "adding step '%s' is not backward compatible", step.Name)
 					}
 				default:
 					if typeChangeIsError(tc) {
-						errorSink.Add(validationError(step.Type, "changing step '%s' from %s", step.Name, typeChangeToError(tc)))
+						saveError(step.Type, "changing step '%s' from %s", step.Name, typeChangeToError(tc))
 					} else if warn := typeChangeToWarning(tc); warn != "" {
-						Warn(step, "Changing step '%s' from %s", step.Name, warn)
+						saveWarning(step, "Changing step '%s' from %s", step.Name, warn)
 					}
 				}
 			}

@@ -207,9 +207,9 @@ type DefinitionChangeIncompatible struct {
 }
 
 const (
-	IncompatibleDefinitions     = "Definitions are incompatible"
-	IncompatibleTypeParameters  = "Type parameters do not match"
-	IncompatibleBaseDefinitions = "Base definitions are incompatible"
+	IncompatibleDefinitions     = "definitions are incompatible"
+	IncompatibleTypeParameters  = "type parameters do not match"
+	IncompatibleBaseDefinitions = "base definitions are incompatible"
 )
 
 type NamedTypeChange struct {

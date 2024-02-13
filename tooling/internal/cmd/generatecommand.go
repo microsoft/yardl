@@ -37,7 +37,7 @@ func newGenerateCommand() *cobra.Command {
 		DisableFlagsInUseLine: true,
 		Args:                  cobra.NoArgs,
 		Run: func(*cobra.Command, []string) {
-			packageInfo, err := generateImpl()
+			packageInfo, warnings, err := generateImpl()
 			if err != nil {
 				// avoiding returning the error here because
 				// cobra prefixes the error with "Error: "
@@ -45,6 +45,9 @@ func newGenerateCommand() *cobra.Command {
 				os.Exit(1)
 			}
 
+			for _, warning := range warnings {
+				log.Warn().Msg(warning)
+			}
 			WriteSuccessfulSummary(packageInfo)
 
 			if !flags.watch {
@@ -62,7 +65,7 @@ func newGenerateCommand() *cobra.Command {
 			go dedupLoop(watcher, completedChannel)
 
 			toWatch := []string{"."}
-			for _, ref := range packageInfo.GetAllImportedPackages() {
+			for _, ref := range packageInfo.GetAllReferencedPackages() {
 				toWatch = append(toWatch, ref.PackageDir())
 			}
 
@@ -124,7 +127,7 @@ func generateInWatchMode() {
 		}
 	}()
 
-	packageInfo, err := generateImpl()
+	packageInfo, warnings, err := generateImpl()
 	screen.Clear()
 	screen.MoveTopLeft()
 
@@ -133,6 +136,9 @@ func generateInWatchMode() {
 	if err != nil {
 		fmt.Println(err)
 	} else {
+		for _, warning := range warnings {
+			log.Warn().Msg(warning)
+		}
 		WriteSuccessfulSummary(packageInfo)
 	}
 }
@@ -149,44 +155,44 @@ func WriteSuccessfulSummary(packageInfo *packaging.PackageInfo) {
 	}
 }
 
-func generateImpl() (*packaging.PackageInfo, error) {
+func generateImpl() (*packaging.PackageInfo, []string, error) {
 	inputDir, err := os.Getwd()
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	packageInfo, err := packaging.LoadPackage(inputDir)
 	if err != nil {
-		return packageInfo, err
+		return packageInfo, nil, err
 	}
 
-	env, err := validatePackage(packageInfo)
+	env, warnings, err := validatePackage(packageInfo)
 	if err != nil {
-		return packageInfo, err
+		return packageInfo, warnings, err
 	}
 
 	if packageInfo.Cpp != nil {
 		err = cpp.Generate(env, *packageInfo.Cpp)
 		if err != nil {
-			return packageInfo, err
+			return packageInfo, warnings, err
 		}
 	}
 
 	if packageInfo.Python != nil {
 		err = python.Generate(env, *packageInfo.Python)
 		if err != nil {
-			return packageInfo, err
+			return packageInfo, warnings, err
 		}
 	}
 
 	if packageInfo.Json != nil {
 		err = outputJson(env, packageInfo.Json)
 		if err != nil {
-			return packageInfo, err
+			return packageInfo, warnings, err
 		}
 	}
 
-	return packageInfo, err
+	return packageInfo, warnings, err
 }
 
 func outputJson(env *dsl.Environment, options *packaging.JsonCodegenOptions) error {
