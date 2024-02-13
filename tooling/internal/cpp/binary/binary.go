@@ -84,7 +84,7 @@ func writeHeaderFile(env *dsl.Environment, options packaging.CppCodegenOptions) 
 			fmt.Fprintf(w, "class %s : public %s, yardl::binary::BinaryWriter {\n", writerClassName, common.QualifiedAbstractWriterName(protocol))
 			w.Indented(func() {
 				w.WriteStringln("public:")
-				fmt.Fprintf(w, "%s(std::ostream& stream, Version version = Version::Latest)\n", writerClassName)
+				fmt.Fprintf(w, "%s(std::ostream& stream, Version version = Version::Current)\n", writerClassName)
 				w.Indented(func() {
 					w.Indented(func() {
 						fmt.Fprintf(w, ": yardl::binary::BinaryWriter(stream, %s::SchemaFromVersion(version)), version_(version) {", common.QualifiedAbstractWriterName(protocol))
@@ -92,7 +92,7 @@ func writeHeaderFile(env *dsl.Environment, options packaging.CppCodegenOptions) 
 				})
 				w.WriteStringln("}\n")
 
-				fmt.Fprintf(w, "%s(std::string file_name, Version version = Version::Latest)\n", writerClassName)
+				fmt.Fprintf(w, "%s(std::string file_name, Version version = Version::Current)\n", writerClassName)
 				w.Indented(func() {
 					w.Indented(func() {
 						fmt.Fprintf(w, ": yardl::binary::BinaryWriter(file_name, %s::SchemaFromVersion(version)), version_(version) {", common.QualifiedAbstractWriterName(protocol))

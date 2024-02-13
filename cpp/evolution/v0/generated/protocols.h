@@ -5,7 +5,7 @@
 
 namespace evo_test {
 enum class Version {
-  Latest
+  Current
 };
 // Abstract writer for the ProtocolWithChanges protocol.
 class ProtocolWithChangesWriterBase {

@@ -335,7 +335,7 @@ std::string ProtocolWithChangesWriterBase::SchemaFromVersion(Version version) {
   switch (version) {
   case Version::v0: return previous_schemas_[0]; break;
   case Version::v1: return previous_schemas_[1]; break;
-  case Version::Latest: return ProtocolWithChangesWriterBase::schema_; break;
+  case Version::Current: return ProtocolWithChangesWriterBase::schema_; break;
   default: throw std::runtime_error("The version does not correspond to any schema supported by protocol ProtocolWithChanges.");
   }
 
@@ -1365,7 +1365,7 @@ std::vector<std::string> ProtocolWithChangesReaderBase::previous_schemas_ = Prot
 
 Version ProtocolWithChangesReaderBase::VersionFromSchema(std::string const& schema) {
   if (schema == ProtocolWithChangesWriterBase::schema_) {
-    return Version::Latest;
+    return Version::Current;
   }
   else if (schema == previous_schemas_[0]) {
     return Version::v0;

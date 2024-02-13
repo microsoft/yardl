@@ -16,10 +16,10 @@ namespace evo_test::binary {
 // Binary writer for the ProtocolWithChanges protocol.
 class ProtocolWithChangesWriter : public evo_test::ProtocolWithChangesWriterBase, yardl::binary::BinaryWriter {
   public:
-  ProtocolWithChangesWriter(std::ostream& stream, Version version = Version::Latest)
+  ProtocolWithChangesWriter(std::ostream& stream, Version version = Version::Current)
       : yardl::binary::BinaryWriter(stream, evo_test::ProtocolWithChangesWriterBase::SchemaFromVersion(version)), version_(version) {}
 
-  ProtocolWithChangesWriter(std::string file_name, Version version = Version::Latest)
+  ProtocolWithChangesWriter(std::string file_name, Version version = Version::Current)
       : yardl::binary::BinaryWriter(file_name, evo_test::ProtocolWithChangesWriterBase::SchemaFromVersion(version)), version_(version) {}
 
   void Flush() override;
@@ -257,10 +257,10 @@ class ProtocolWithChangesReader : public evo_test::ProtocolWithChangesReaderBase
 // Binary writer for the UnusedProtocol protocol.
 class UnusedProtocolWriter : public evo_test::UnusedProtocolWriterBase, yardl::binary::BinaryWriter {
   public:
-  UnusedProtocolWriter(std::ostream& stream, Version version = Version::Latest)
+  UnusedProtocolWriter(std::ostream& stream, Version version = Version::Current)
       : yardl::binary::BinaryWriter(stream, evo_test::UnusedProtocolWriterBase::SchemaFromVersion(version)), version_(version) {}
 
-  UnusedProtocolWriter(std::string file_name, Version version = Version::Latest)
+  UnusedProtocolWriter(std::string file_name, Version version = Version::Current)
       : yardl::binary::BinaryWriter(file_name, evo_test::UnusedProtocolWriterBase::SchemaFromVersion(version)), version_(version) {}
 
   void Flush() override;

@@ -43,7 +43,7 @@ std::vector<std::string> BenchmarkFloat256x256WriterBase::previous_schemas_ = {
 
 std::string BenchmarkFloat256x256WriterBase::SchemaFromVersion(Version version) {
   switch (version) {
-  case Version::Latest: return BenchmarkFloat256x256WriterBase::schema_; break;
+  case Version::Current: return BenchmarkFloat256x256WriterBase::schema_; break;
   default: throw std::runtime_error("The version does not correspond to any schema supported by protocol BenchmarkFloat256x256.");
   }
 
@@ -94,7 +94,7 @@ std::vector<std::string> BenchmarkFloat256x256ReaderBase::previous_schemas_ = Be
 
 Version BenchmarkFloat256x256ReaderBase::VersionFromSchema(std::string const& schema) {
   if (schema == BenchmarkFloat256x256WriterBase::schema_) {
-    return Version::Latest;
+    return Version::Current;
   }
   throw std::runtime_error("The schema does not match any version supported by protocol BenchmarkFloat256x256.");
 }
@@ -214,7 +214,7 @@ std::vector<std::string> BenchmarkInt256x256WriterBase::previous_schemas_ = {
 
 std::string BenchmarkInt256x256WriterBase::SchemaFromVersion(Version version) {
   switch (version) {
-  case Version::Latest: return BenchmarkInt256x256WriterBase::schema_; break;
+  case Version::Current: return BenchmarkInt256x256WriterBase::schema_; break;
   default: throw std::runtime_error("The version does not correspond to any schema supported by protocol BenchmarkInt256x256.");
   }
 
@@ -265,7 +265,7 @@ std::vector<std::string> BenchmarkInt256x256ReaderBase::previous_schemas_ = Benc
 
 Version BenchmarkInt256x256ReaderBase::VersionFromSchema(std::string const& schema) {
   if (schema == BenchmarkInt256x256WriterBase::schema_) {
-    return Version::Latest;
+    return Version::Current;
   }
   throw std::runtime_error("The schema does not match any version supported by protocol BenchmarkInt256x256.");
 }
@@ -385,7 +385,7 @@ std::vector<std::string> BenchmarkFloatVlenWriterBase::previous_schemas_ = {
 
 std::string BenchmarkFloatVlenWriterBase::SchemaFromVersion(Version version) {
   switch (version) {
-  case Version::Latest: return BenchmarkFloatVlenWriterBase::schema_; break;
+  case Version::Current: return BenchmarkFloatVlenWriterBase::schema_; break;
   default: throw std::runtime_error("The version does not correspond to any schema supported by protocol BenchmarkFloatVlen.");
   }
 
@@ -436,7 +436,7 @@ std::vector<std::string> BenchmarkFloatVlenReaderBase::previous_schemas_ = Bench
 
 Version BenchmarkFloatVlenReaderBase::VersionFromSchema(std::string const& schema) {
   if (schema == BenchmarkFloatVlenWriterBase::schema_) {
-    return Version::Latest;
+    return Version::Current;
   }
   throw std::runtime_error("The schema does not match any version supported by protocol BenchmarkFloatVlen.");
 }
@@ -556,7 +556,7 @@ std::vector<std::string> BenchmarkSmallRecordWriterBase::previous_schemas_ = {
 
 std::string BenchmarkSmallRecordWriterBase::SchemaFromVersion(Version version) {
   switch (version) {
-  case Version::Latest: return BenchmarkSmallRecordWriterBase::schema_; break;
+  case Version::Current: return BenchmarkSmallRecordWriterBase::schema_; break;
   default: throw std::runtime_error("The version does not correspond to any schema supported by protocol BenchmarkSmallRecord.");
   }
 
@@ -607,7 +607,7 @@ std::vector<std::string> BenchmarkSmallRecordReaderBase::previous_schemas_ = Ben
 
 Version BenchmarkSmallRecordReaderBase::VersionFromSchema(std::string const& schema) {
   if (schema == BenchmarkSmallRecordWriterBase::schema_) {
-    return Version::Latest;
+    return Version::Current;
   }
   throw std::runtime_error("The schema does not match any version supported by protocol BenchmarkSmallRecord.");
 }
@@ -727,7 +727,7 @@ std::vector<std::string> BenchmarkSmallRecordWithOptionalsWriterBase::previous_s
 
 std::string BenchmarkSmallRecordWithOptionalsWriterBase::SchemaFromVersion(Version version) {
   switch (version) {
-  case Version::Latest: return BenchmarkSmallRecordWithOptionalsWriterBase::schema_; break;
+  case Version::Current: return BenchmarkSmallRecordWithOptionalsWriterBase::schema_; break;
   default: throw std::runtime_error("The version does not correspond to any schema supported by protocol BenchmarkSmallRecordWithOptionals.");
   }
 
@@ -778,7 +778,7 @@ std::vector<std::string> BenchmarkSmallRecordWithOptionalsReaderBase::previous_s
 
 Version BenchmarkSmallRecordWithOptionalsReaderBase::VersionFromSchema(std::string const& schema) {
   if (schema == BenchmarkSmallRecordWithOptionalsWriterBase::schema_) {
-    return Version::Latest;
+    return Version::Current;
   }
   throw std::runtime_error("The schema does not match any version supported by protocol BenchmarkSmallRecordWithOptionals.");
 }
@@ -898,7 +898,7 @@ std::vector<std::string> BenchmarkSimpleMrdWriterBase::previous_schemas_ = {
 
 std::string BenchmarkSimpleMrdWriterBase::SchemaFromVersion(Version version) {
   switch (version) {
-  case Version::Latest: return BenchmarkSimpleMrdWriterBase::schema_; break;
+  case Version::Current: return BenchmarkSimpleMrdWriterBase::schema_; break;
   default: throw std::runtime_error("The version does not correspond to any schema supported by protocol BenchmarkSimpleMrd.");
   }
 
@@ -949,7 +949,7 @@ std::vector<std::string> BenchmarkSimpleMrdReaderBase::previous_schemas_ = Bench
 
 Version BenchmarkSimpleMrdReaderBase::VersionFromSchema(std::string const& schema) {
   if (schema == BenchmarkSimpleMrdWriterBase::schema_) {
-    return Version::Latest;
+    return Version::Current;
   }
   throw std::runtime_error("The schema does not match any version supported by protocol BenchmarkSimpleMrd.");
 }
@@ -1072,7 +1072,7 @@ std::vector<std::string> ScalarsWriterBase::previous_schemas_ = {
 
 std::string ScalarsWriterBase::SchemaFromVersion(Version version) {
   switch (version) {
-  case Version::Latest: return ScalarsWriterBase::schema_; break;
+  case Version::Current: return ScalarsWriterBase::schema_; break;
   default: throw std::runtime_error("The version does not correspond to any schema supported by protocol Scalars.");
   }
 
@@ -1109,7 +1109,7 @@ std::vector<std::string> ScalarsReaderBase::previous_schemas_ = ScalarsWriterBas
 
 Version ScalarsReaderBase::VersionFromSchema(std::string const& schema) {
   if (schema == ScalarsWriterBase::schema_) {
-    return Version::Latest;
+    return Version::Current;
   }
   throw std::runtime_error("The schema does not match any version supported by protocol Scalars.");
 }
@@ -1194,7 +1194,7 @@ std::vector<std::string> ScalarOptionalsWriterBase::previous_schemas_ = {
 
 std::string ScalarOptionalsWriterBase::SchemaFromVersion(Version version) {
   switch (version) {
-  case Version::Latest: return ScalarOptionalsWriterBase::schema_; break;
+  case Version::Current: return ScalarOptionalsWriterBase::schema_; break;
   default: throw std::runtime_error("The version does not correspond to any schema supported by protocol ScalarOptionals.");
   }
 
@@ -1249,7 +1249,7 @@ std::vector<std::string> ScalarOptionalsReaderBase::previous_schemas_ = ScalarOp
 
 Version ScalarOptionalsReaderBase::VersionFromSchema(std::string const& schema) {
   if (schema == ScalarOptionalsWriterBase::schema_) {
-    return Version::Latest;
+    return Version::Current;
   }
   throw std::runtime_error("The schema does not match any version supported by protocol ScalarOptionals.");
 }
@@ -1353,7 +1353,7 @@ std::vector<std::string> NestedRecordsWriterBase::previous_schemas_ = {
 
 std::string NestedRecordsWriterBase::SchemaFromVersion(Version version) {
   switch (version) {
-  case Version::Latest: return NestedRecordsWriterBase::schema_; break;
+  case Version::Current: return NestedRecordsWriterBase::schema_; break;
   default: throw std::runtime_error("The version does not correspond to any schema supported by protocol NestedRecords.");
   }
 
@@ -1381,7 +1381,7 @@ std::vector<std::string> NestedRecordsReaderBase::previous_schemas_ = NestedReco
 
 Version NestedRecordsReaderBase::VersionFromSchema(std::string const& schema) {
   if (schema == NestedRecordsWriterBase::schema_) {
-    return Version::Latest;
+    return Version::Current;
   }
   throw std::runtime_error("The schema does not match any version supported by protocol NestedRecords.");
 }
@@ -1452,7 +1452,7 @@ std::vector<std::string> VlensWriterBase::previous_schemas_ = {
 
 std::string VlensWriterBase::SchemaFromVersion(Version version) {
   switch (version) {
-  case Version::Latest: return VlensWriterBase::schema_; break;
+  case Version::Current: return VlensWriterBase::schema_; break;
   default: throw std::runtime_error("The version does not correspond to any schema supported by protocol Vlens.");
   }
 
@@ -1507,7 +1507,7 @@ std::vector<std::string> VlensReaderBase::previous_schemas_ = VlensWriterBase::p
 
 Version VlensReaderBase::VersionFromSchema(std::string const& schema) {
   if (schema == VlensWriterBase::schema_) {
-    return Version::Latest;
+    return Version::Current;
   }
   throw std::runtime_error("The schema does not match any version supported by protocol Vlens.");
 }
@@ -1614,7 +1614,7 @@ std::vector<std::string> StringsWriterBase::previous_schemas_ = {
 
 std::string StringsWriterBase::SchemaFromVersion(Version version) {
   switch (version) {
-  case Version::Latest: return StringsWriterBase::schema_; break;
+  case Version::Current: return StringsWriterBase::schema_; break;
   default: throw std::runtime_error("The version does not correspond to any schema supported by protocol Strings.");
   }
 
@@ -1651,7 +1651,7 @@ std::vector<std::string> StringsReaderBase::previous_schemas_ = StringsWriterBas
 
 Version StringsReaderBase::VersionFromSchema(std::string const& schema) {
   if (schema == StringsWriterBase::schema_) {
-    return Version::Latest;
+    return Version::Current;
   }
   throw std::runtime_error("The schema does not match any version supported by protocol Strings.");
 }
@@ -1727,7 +1727,7 @@ std::vector<std::string> OptionalVectorsWriterBase::previous_schemas_ = {
 
 std::string OptionalVectorsWriterBase::SchemaFromVersion(Version version) {
   switch (version) {
-  case Version::Latest: return OptionalVectorsWriterBase::schema_; break;
+  case Version::Current: return OptionalVectorsWriterBase::schema_; break;
   default: throw std::runtime_error("The version does not correspond to any schema supported by protocol OptionalVectors.");
   }
 
@@ -1755,7 +1755,7 @@ std::vector<std::string> OptionalVectorsReaderBase::previous_schemas_ = Optional
 
 Version OptionalVectorsReaderBase::VersionFromSchema(std::string const& schema) {
   if (schema == OptionalVectorsWriterBase::schema_) {
-    return Version::Latest;
+    return Version::Current;
   }
   throw std::runtime_error("The schema does not match any version supported by protocol OptionalVectors.");
 }
@@ -1826,7 +1826,7 @@ std::vector<std::string> FixedVectorsWriterBase::previous_schemas_ = {
 
 std::string FixedVectorsWriterBase::SchemaFromVersion(Version version) {
   switch (version) {
-  case Version::Latest: return FixedVectorsWriterBase::schema_; break;
+  case Version::Current: return FixedVectorsWriterBase::schema_; break;
   default: throw std::runtime_error("The version does not correspond to any schema supported by protocol FixedVectors.");
   }
 
@@ -1881,7 +1881,7 @@ std::vector<std::string> FixedVectorsReaderBase::previous_schemas_ = FixedVector
 
 Version FixedVectorsReaderBase::VersionFromSchema(std::string const& schema) {
   if (schema == FixedVectorsWriterBase::schema_) {
-    return Version::Latest;
+    return Version::Current;
   }
   throw std::runtime_error("The schema does not match any version supported by protocol FixedVectors.");
 }
@@ -1994,7 +1994,7 @@ std::vector<std::string> StreamsWriterBase::previous_schemas_ = {
 
 std::string StreamsWriterBase::SchemaFromVersion(Version version) {
   switch (version) {
-  case Version::Latest: return StreamsWriterBase::schema_; break;
+  case Version::Current: return StreamsWriterBase::schema_; break;
   default: throw std::runtime_error("The version does not correspond to any schema supported by protocol Streams.");
   }
 
@@ -2141,7 +2141,7 @@ std::vector<std::string> StreamsReaderBase::previous_schemas_ = StreamsWriterBas
 
 Version StreamsReaderBase::VersionFromSchema(std::string const& schema) {
   if (schema == StreamsWriterBase::schema_) {
-    return Version::Latest;
+    return Version::Current;
   }
   throw std::runtime_error("The schema does not match any version supported by protocol Streams.");
 }
@@ -2501,7 +2501,7 @@ std::vector<std::string> FixedArraysWriterBase::previous_schemas_ = {
 
 std::string FixedArraysWriterBase::SchemaFromVersion(Version version) {
   switch (version) {
-  case Version::Latest: return FixedArraysWriterBase::schema_; break;
+  case Version::Current: return FixedArraysWriterBase::schema_; break;
   default: throw std::runtime_error("The version does not correspond to any schema supported by protocol FixedArrays.");
   }
 
@@ -2565,7 +2565,7 @@ std::vector<std::string> FixedArraysReaderBase::previous_schemas_ = FixedArraysW
 
 Version FixedArraysReaderBase::VersionFromSchema(std::string const& schema) {
   if (schema == FixedArraysWriterBase::schema_) {
-    return Version::Latest;
+    return Version::Current;
   }
   throw std::runtime_error("The schema does not match any version supported by protocol FixedArrays.");
 }
@@ -2707,7 +2707,7 @@ std::vector<std::string> SubarraysWriterBase::previous_schemas_ = {
 
 std::string SubarraysWriterBase::SchemaFromVersion(Version version) {
   switch (version) {
-  case Version::Latest: return SubarraysWriterBase::schema_; break;
+  case Version::Current: return SubarraysWriterBase::schema_; break;
   default: throw std::runtime_error("The version does not correspond to any schema supported by protocol Subarrays.");
   }
 
@@ -2807,7 +2807,7 @@ std::vector<std::string> SubarraysReaderBase::previous_schemas_ = SubarraysWrite
 
 Version SubarraysReaderBase::VersionFromSchema(std::string const& schema) {
   if (schema == SubarraysWriterBase::schema_) {
-    return Version::Latest;
+    return Version::Current;
   }
   throw std::runtime_error("The schema does not match any version supported by protocol Subarrays.");
 }
@@ -2984,7 +2984,7 @@ std::vector<std::string> SubarraysInRecordsWriterBase::previous_schemas_ = {
 
 std::string SubarraysInRecordsWriterBase::SchemaFromVersion(Version version) {
   switch (version) {
-  case Version::Latest: return SubarraysInRecordsWriterBase::schema_; break;
+  case Version::Current: return SubarraysInRecordsWriterBase::schema_; break;
   default: throw std::runtime_error("The version does not correspond to any schema supported by protocol SubarraysInRecords.");
   }
 
@@ -3021,7 +3021,7 @@ std::vector<std::string> SubarraysInRecordsReaderBase::previous_schemas_ = Subar
 
 Version SubarraysInRecordsReaderBase::VersionFromSchema(std::string const& schema) {
   if (schema == SubarraysInRecordsWriterBase::schema_) {
-    return Version::Latest;
+    return Version::Current;
   }
   throw std::runtime_error("The schema does not match any version supported by protocol SubarraysInRecords.");
 }
@@ -3109,7 +3109,7 @@ std::vector<std::string> NDArraysWriterBase::previous_schemas_ = {
 
 std::string NDArraysWriterBase::SchemaFromVersion(Version version) {
   switch (version) {
-  case Version::Latest: return NDArraysWriterBase::schema_; break;
+  case Version::Current: return NDArraysWriterBase::schema_; break;
   default: throw std::runtime_error("The version does not correspond to any schema supported by protocol NDArrays.");
   }
 
@@ -3173,7 +3173,7 @@ std::vector<std::string> NDArraysReaderBase::previous_schemas_ = NDArraysWriterB
 
 Version NDArraysReaderBase::VersionFromSchema(std::string const& schema) {
   if (schema == NDArraysWriterBase::schema_) {
-    return Version::Latest;
+    return Version::Current;
   }
   throw std::runtime_error("The schema does not match any version supported by protocol NDArrays.");
 }
@@ -3300,7 +3300,7 @@ std::vector<std::string> NDArraysSingleDimensionWriterBase::previous_schemas_ = 
 
 std::string NDArraysSingleDimensionWriterBase::SchemaFromVersion(Version version) {
   switch (version) {
-  case Version::Latest: return NDArraysSingleDimensionWriterBase::schema_; break;
+  case Version::Current: return NDArraysSingleDimensionWriterBase::schema_; break;
   default: throw std::runtime_error("The version does not correspond to any schema supported by protocol NDArraysSingleDimension.");
   }
 
@@ -3355,7 +3355,7 @@ std::vector<std::string> NDArraysSingleDimensionReaderBase::previous_schemas_ = 
 
 Version NDArraysSingleDimensionReaderBase::VersionFromSchema(std::string const& schema) {
   if (schema == NDArraysSingleDimensionWriterBase::schema_) {
-    return Version::Latest;
+    return Version::Current;
   }
   throw std::runtime_error("The schema does not match any version supported by protocol NDArraysSingleDimension.");
 }
@@ -3468,7 +3468,7 @@ std::vector<std::string> DynamicNDArraysWriterBase::previous_schemas_ = {
 
 std::string DynamicNDArraysWriterBase::SchemaFromVersion(Version version) {
   switch (version) {
-  case Version::Latest: return DynamicNDArraysWriterBase::schema_; break;
+  case Version::Current: return DynamicNDArraysWriterBase::schema_; break;
   default: throw std::runtime_error("The version does not correspond to any schema supported by protocol DynamicNDArrays.");
   }
 
@@ -3523,7 +3523,7 @@ std::vector<std::string> DynamicNDArraysReaderBase::previous_schemas_ = DynamicN
 
 Version DynamicNDArraysReaderBase::VersionFromSchema(std::string const& schema) {
   if (schema == DynamicNDArraysWriterBase::schema_) {
-    return Version::Latest;
+    return Version::Current;
   }
   throw std::runtime_error("The schema does not match any version supported by protocol DynamicNDArrays.");
 }
@@ -3636,7 +3636,7 @@ std::vector<std::string> MapsWriterBase::previous_schemas_ = {
 
 std::string MapsWriterBase::SchemaFromVersion(Version version) {
   switch (version) {
-  case Version::Latest: return MapsWriterBase::schema_; break;
+  case Version::Current: return MapsWriterBase::schema_; break;
   default: throw std::runtime_error("The version does not correspond to any schema supported by protocol Maps.");
   }
 
@@ -3691,7 +3691,7 @@ std::vector<std::string> MapsReaderBase::previous_schemas_ = MapsWriterBase::pre
 
 Version MapsReaderBase::VersionFromSchema(std::string const& schema) {
   if (schema == MapsWriterBase::schema_) {
-    return Version::Latest;
+    return Version::Current;
   }
   throw std::runtime_error("The schema does not match any version supported by protocol Maps.");
 }
@@ -3804,7 +3804,7 @@ std::vector<std::string> UnionsWriterBase::previous_schemas_ = {
 
 std::string UnionsWriterBase::SchemaFromVersion(Version version) {
   switch (version) {
-  case Version::Latest: return UnionsWriterBase::schema_; break;
+  case Version::Current: return UnionsWriterBase::schema_; break;
   default: throw std::runtime_error("The version does not correspond to any schema supported by protocol Unions.");
   }
 
@@ -3859,7 +3859,7 @@ std::vector<std::string> UnionsReaderBase::previous_schemas_ = UnionsWriterBase:
 
 Version UnionsReaderBase::VersionFromSchema(std::string const& schema) {
   if (schema == UnionsWriterBase::schema_) {
-    return Version::Latest;
+    return Version::Current;
   }
   throw std::runtime_error("The schema does not match any version supported by protocol Unions.");
 }
@@ -3966,7 +3966,7 @@ std::vector<std::string> StreamsOfUnionsWriterBase::previous_schemas_ = {
 
 std::string StreamsOfUnionsWriterBase::SchemaFromVersion(Version version) {
   switch (version) {
-  case Version::Latest: return StreamsOfUnionsWriterBase::schema_; break;
+  case Version::Current: return StreamsOfUnionsWriterBase::schema_; break;
   default: throw std::runtime_error("The version does not correspond to any schema supported by protocol StreamsOfUnions.");
   }
 
@@ -4049,7 +4049,7 @@ std::vector<std::string> StreamsOfUnionsReaderBase::previous_schemas_ = StreamsO
 
 Version StreamsOfUnionsReaderBase::VersionFromSchema(std::string const& schema) {
   if (schema == StreamsOfUnionsWriterBase::schema_) {
-    return Version::Latest;
+    return Version::Current;
   }
   throw std::runtime_error("The schema does not match any version supported by protocol StreamsOfUnions.");
 }
@@ -4251,7 +4251,7 @@ std::vector<std::string> EnumsWriterBase::previous_schemas_ = {
 
 std::string EnumsWriterBase::SchemaFromVersion(Version version) {
   switch (version) {
-  case Version::Latest: return EnumsWriterBase::schema_; break;
+  case Version::Current: return EnumsWriterBase::schema_; break;
   default: throw std::runtime_error("The version does not correspond to any schema supported by protocol Enums.");
   }
 
@@ -4297,7 +4297,7 @@ std::vector<std::string> EnumsReaderBase::previous_schemas_ = EnumsWriterBase::p
 
 Version EnumsReaderBase::VersionFromSchema(std::string const& schema) {
   if (schema == EnumsWriterBase::schema_) {
-    return Version::Latest;
+    return Version::Current;
   }
   throw std::runtime_error("The schema does not match any version supported by protocol Enums.");
 }
@@ -4390,7 +4390,7 @@ std::vector<std::string> FlagsWriterBase::previous_schemas_ = {
 
 std::string FlagsWriterBase::SchemaFromVersion(Version version) {
   switch (version) {
-  case Version::Latest: return FlagsWriterBase::schema_; break;
+  case Version::Current: return FlagsWriterBase::schema_; break;
   default: throw std::runtime_error("The version does not correspond to any schema supported by protocol Flags.");
   }
 
@@ -4473,7 +4473,7 @@ std::vector<std::string> FlagsReaderBase::previous_schemas_ = FlagsWriterBase::p
 
 Version FlagsReaderBase::VersionFromSchema(std::string const& schema) {
   if (schema == FlagsWriterBase::schema_) {
-    return Version::Latest;
+    return Version::Current;
   }
   throw std::runtime_error("The schema does not match any version supported by protocol Flags.");
 }
@@ -4675,7 +4675,7 @@ std::vector<std::string> StateTestWriterBase::previous_schemas_ = {
 
 std::string StateTestWriterBase::SchemaFromVersion(Version version) {
   switch (version) {
-  case Version::Latest: return StateTestWriterBase::schema_; break;
+  case Version::Current: return StateTestWriterBase::schema_; break;
   default: throw std::runtime_error("The version does not correspond to any schema supported by protocol StateTest.");
   }
 
@@ -4744,7 +4744,7 @@ std::vector<std::string> StateTestReaderBase::previous_schemas_ = StateTestWrite
 
 Version StateTestReaderBase::VersionFromSchema(std::string const& schema) {
   if (schema == StateTestWriterBase::schema_) {
-    return Version::Latest;
+    return Version::Current;
   }
   throw std::runtime_error("The schema does not match any version supported by protocol StateTest.");
 }
@@ -4916,7 +4916,7 @@ std::vector<std::string> SimpleGenericsWriterBase::previous_schemas_ = {
 
 std::string SimpleGenericsWriterBase::SchemaFromVersion(Version version) {
   switch (version) {
-  case Version::Latest: return SimpleGenericsWriterBase::schema_; break;
+  case Version::Current: return SimpleGenericsWriterBase::schema_; break;
   default: throw std::runtime_error("The version does not correspond to any schema supported by protocol SimpleGenerics.");
   }
 
@@ -5039,7 +5039,7 @@ std::vector<std::string> SimpleGenericsReaderBase::previous_schemas_ = SimpleGen
 
 Version SimpleGenericsReaderBase::VersionFromSchema(std::string const& schema) {
   if (schema == SimpleGenericsWriterBase::schema_) {
-    return Version::Latest;
+    return Version::Current;
   }
   throw std::runtime_error("The schema does not match any version supported by protocol SimpleGenerics.");
 }
@@ -5283,7 +5283,7 @@ std::vector<std::string> AdvancedGenericsWriterBase::previous_schemas_ = {
 
 std::string AdvancedGenericsWriterBase::SchemaFromVersion(Version version) {
   switch (version) {
-  case Version::Latest: return AdvancedGenericsWriterBase::schema_; break;
+  case Version::Current: return AdvancedGenericsWriterBase::schema_; break;
   default: throw std::runtime_error("The version does not correspond to any schema supported by protocol AdvancedGenerics.");
   }
 
@@ -5347,7 +5347,7 @@ std::vector<std::string> AdvancedGenericsReaderBase::previous_schemas_ = Advance
 
 Version AdvancedGenericsReaderBase::VersionFromSchema(std::string const& schema) {
   if (schema == AdvancedGenericsWriterBase::schema_) {
-    return Version::Latest;
+    return Version::Current;
   }
   throw std::runtime_error("The schema does not match any version supported by protocol AdvancedGenerics.");
 }
@@ -5492,7 +5492,7 @@ std::vector<std::string> AliasesWriterBase::previous_schemas_ = {
 
 std::string AliasesWriterBase::SchemaFromVersion(Version version) {
   switch (version) {
-  case Version::Latest: return AliasesWriterBase::schema_; break;
+  case Version::Current: return AliasesWriterBase::schema_; break;
   default: throw std::runtime_error("The version does not correspond to any schema supported by protocol Aliases.");
   }
 
@@ -5624,7 +5624,7 @@ std::vector<std::string> AliasesReaderBase::previous_schemas_ = AliasesWriterBas
 
 Version AliasesReaderBase::VersionFromSchema(std::string const& schema) {
   if (schema == AliasesWriterBase::schema_) {
-    return Version::Latest;
+    return Version::Current;
   }
   throw std::runtime_error("The schema does not match any version supported by protocol Aliases.");
 }
@@ -5873,7 +5873,7 @@ std::vector<std::string> StreamsOfAliasedUnionsWriterBase::previous_schemas_ = {
 
 std::string StreamsOfAliasedUnionsWriterBase::SchemaFromVersion(Version version) {
   switch (version) {
-  case Version::Latest: return StreamsOfAliasedUnionsWriterBase::schema_; break;
+  case Version::Current: return StreamsOfAliasedUnionsWriterBase::schema_; break;
   default: throw std::runtime_error("The version does not correspond to any schema supported by protocol StreamsOfAliasedUnions.");
   }
 
@@ -5956,7 +5956,7 @@ std::vector<std::string> StreamsOfAliasedUnionsReaderBase::previous_schemas_ = S
 
 Version StreamsOfAliasedUnionsReaderBase::VersionFromSchema(std::string const& schema) {
   if (schema == StreamsOfAliasedUnionsWriterBase::schema_) {
-    return Version::Latest;
+    return Version::Current;
   }
   throw std::runtime_error("The schema does not match any version supported by protocol StreamsOfAliasedUnions.");
 }
@@ -6152,7 +6152,7 @@ std::vector<std::string> ProtocolWithComputedFieldsWriterBase::previous_schemas_
 
 std::string ProtocolWithComputedFieldsWriterBase::SchemaFromVersion(Version version) {
   switch (version) {
-  case Version::Latest: return ProtocolWithComputedFieldsWriterBase::schema_; break;
+  case Version::Current: return ProtocolWithComputedFieldsWriterBase::schema_; break;
   default: throw std::runtime_error("The version does not correspond to any schema supported by protocol ProtocolWithComputedFields.");
   }
 
@@ -6180,7 +6180,7 @@ std::vector<std::string> ProtocolWithComputedFieldsReaderBase::previous_schemas_
 
 Version ProtocolWithComputedFieldsReaderBase::VersionFromSchema(std::string const& schema) {
   if (schema == ProtocolWithComputedFieldsWriterBase::schema_) {
-    return Version::Latest;
+    return Version::Current;
   }
   throw std::runtime_error("The schema does not match any version supported by protocol ProtocolWithComputedFields.");
 }
@@ -6245,7 +6245,7 @@ std::vector<std::string> ProtocolWithKeywordStepsWriterBase::previous_schemas_ =
 
 std::string ProtocolWithKeywordStepsWriterBase::SchemaFromVersion(Version version) {
   switch (version) {
-  case Version::Latest: return ProtocolWithKeywordStepsWriterBase::schema_; break;
+  case Version::Current: return ProtocolWithKeywordStepsWriterBase::schema_; break;
   default: throw std::runtime_error("The version does not correspond to any schema supported by protocol ProtocolWithKeywordSteps.");
   }
 
@@ -6305,7 +6305,7 @@ std::vector<std::string> ProtocolWithKeywordStepsReaderBase::previous_schemas_ =
 
 Version ProtocolWithKeywordStepsReaderBase::VersionFromSchema(std::string const& schema) {
   if (schema == ProtocolWithKeywordStepsWriterBase::schema_) {
-    return Version::Latest;
+    return Version::Current;
   }
   throw std::runtime_error("The schema does not match any version supported by protocol ProtocolWithKeywordSteps.");
 }

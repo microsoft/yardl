@@ -5,7 +5,7 @@
 
 namespace test_model {
 enum class Version {
-  Latest
+  Current
 };
 // Abstract writer for the BenchmarkFloat256x256 protocol.
 class BenchmarkFloat256x256WriterBase {

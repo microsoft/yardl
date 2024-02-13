@@ -213,13 +213,19 @@ func LoadPackage(dir string) (*PackageInfo, error) {
 		return nil, err
 	}
 
-	dirs, err := collectVersions(packageInfo)
+	vdirs, err := collectVersions(packageInfo)
 	if err != nil {
 		return packageInfo, err
 	}
 
-	for i, dir := range dirs {
-		versionInfo, err := loadPackageVersion(dir)
+	for i, vdir := range vdirs {
+		if vdir == dir {
+			// The main package has a version label
+			packageInfo.Versions[i].Package = packageInfo
+			continue
+		}
+
+		versionInfo, err := loadPackageVersion(vdir)
 		if err != nil {
 			return packageInfo, err
 		}

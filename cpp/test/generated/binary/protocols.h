@@ -16,10 +16,10 @@ namespace test_model::binary {
 // Binary writer for the BenchmarkFloat256x256 protocol.
 class BenchmarkFloat256x256Writer : public test_model::BenchmarkFloat256x256WriterBase, yardl::binary::BinaryWriter {
   public:
-  BenchmarkFloat256x256Writer(std::ostream& stream, Version version = Version::Latest)
+  BenchmarkFloat256x256Writer(std::ostream& stream, Version version = Version::Current)
       : yardl::binary::BinaryWriter(stream, test_model::BenchmarkFloat256x256WriterBase::SchemaFromVersion(version)), version_(version) {}
 
-  BenchmarkFloat256x256Writer(std::string file_name, Version version = Version::Latest)
+  BenchmarkFloat256x256Writer(std::string file_name, Version version = Version::Current)
       : yardl::binary::BinaryWriter(file_name, test_model::BenchmarkFloat256x256WriterBase::SchemaFromVersion(version)), version_(version) {}
 
   void Flush() override;
@@ -58,10 +58,10 @@ class BenchmarkFloat256x256Reader : public test_model::BenchmarkFloat256x256Read
 // Binary writer for the BenchmarkInt256x256 protocol.
 class BenchmarkInt256x256Writer : public test_model::BenchmarkInt256x256WriterBase, yardl::binary::BinaryWriter {
   public:
-  BenchmarkInt256x256Writer(std::ostream& stream, Version version = Version::Latest)
+  BenchmarkInt256x256Writer(std::ostream& stream, Version version = Version::Current)
       : yardl::binary::BinaryWriter(stream, test_model::BenchmarkInt256x256WriterBase::SchemaFromVersion(version)), version_(version) {}
 
-  BenchmarkInt256x256Writer(std::string file_name, Version version = Version::Latest)
+  BenchmarkInt256x256Writer(std::string file_name, Version version = Version::Current)
       : yardl::binary::BinaryWriter(file_name, test_model::BenchmarkInt256x256WriterBase::SchemaFromVersion(version)), version_(version) {}
 
   void Flush() override;
@@ -100,10 +100,10 @@ class BenchmarkInt256x256Reader : public test_model::BenchmarkInt256x256ReaderBa
 // Binary writer for the BenchmarkFloatVlen protocol.
 class BenchmarkFloatVlenWriter : public test_model::BenchmarkFloatVlenWriterBase, yardl::binary::BinaryWriter {
   public:
-  BenchmarkFloatVlenWriter(std::ostream& stream, Version version = Version::Latest)
+  BenchmarkFloatVlenWriter(std::ostream& stream, Version version = Version::Current)
       : yardl::binary::BinaryWriter(stream, test_model::BenchmarkFloatVlenWriterBase::SchemaFromVersion(version)), version_(version) {}
 
-  BenchmarkFloatVlenWriter(std::string file_name, Version version = Version::Latest)
+  BenchmarkFloatVlenWriter(std::string file_name, Version version = Version::Current)
       : yardl::binary::BinaryWriter(file_name, test_model::BenchmarkFloatVlenWriterBase::SchemaFromVersion(version)), version_(version) {}
 
   void Flush() override;
@@ -142,10 +142,10 @@ class BenchmarkFloatVlenReader : public test_model::BenchmarkFloatVlenReaderBase
 // Binary writer for the BenchmarkSmallRecord protocol.
 class BenchmarkSmallRecordWriter : public test_model::BenchmarkSmallRecordWriterBase, yardl::binary::BinaryWriter {
   public:
-  BenchmarkSmallRecordWriter(std::ostream& stream, Version version = Version::Latest)
+  BenchmarkSmallRecordWriter(std::ostream& stream, Version version = Version::Current)
       : yardl::binary::BinaryWriter(stream, test_model::BenchmarkSmallRecordWriterBase::SchemaFromVersion(version)), version_(version) {}
 
-  BenchmarkSmallRecordWriter(std::string file_name, Version version = Version::Latest)
+  BenchmarkSmallRecordWriter(std::string file_name, Version version = Version::Current)
       : yardl::binary::BinaryWriter(file_name, test_model::BenchmarkSmallRecordWriterBase::SchemaFromVersion(version)), version_(version) {}
 
   void Flush() override;
@@ -184,10 +184,10 @@ class BenchmarkSmallRecordReader : public test_model::BenchmarkSmallRecordReader
 // Binary writer for the BenchmarkSmallRecordWithOptionals protocol.
 class BenchmarkSmallRecordWithOptionalsWriter : public test_model::BenchmarkSmallRecordWithOptionalsWriterBase, yardl::binary::BinaryWriter {
   public:
-  BenchmarkSmallRecordWithOptionalsWriter(std::ostream& stream, Version version = Version::Latest)
+  BenchmarkSmallRecordWithOptionalsWriter(std::ostream& stream, Version version = Version::Current)
       : yardl::binary::BinaryWriter(stream, test_model::BenchmarkSmallRecordWithOptionalsWriterBase::SchemaFromVersion(version)), version_(version) {}
 
-  BenchmarkSmallRecordWithOptionalsWriter(std::string file_name, Version version = Version::Latest)
+  BenchmarkSmallRecordWithOptionalsWriter(std::string file_name, Version version = Version::Current)
       : yardl::binary::BinaryWriter(file_name, test_model::BenchmarkSmallRecordWithOptionalsWriterBase::SchemaFromVersion(version)), version_(version) {}
 
   void Flush() override;
@@ -226,10 +226,10 @@ class BenchmarkSmallRecordWithOptionalsReader : public test_model::BenchmarkSmal
 // Binary writer for the BenchmarkSimpleMrd protocol.
 class BenchmarkSimpleMrdWriter : public test_model::BenchmarkSimpleMrdWriterBase, yardl::binary::BinaryWriter {
   public:
-  BenchmarkSimpleMrdWriter(std::ostream& stream, Version version = Version::Latest)
+  BenchmarkSimpleMrdWriter(std::ostream& stream, Version version = Version::Current)
       : yardl::binary::BinaryWriter(stream, test_model::BenchmarkSimpleMrdWriterBase::SchemaFromVersion(version)), version_(version) {}
 
-  BenchmarkSimpleMrdWriter(std::string file_name, Version version = Version::Latest)
+  BenchmarkSimpleMrdWriter(std::string file_name, Version version = Version::Current)
       : yardl::binary::BinaryWriter(file_name, test_model::BenchmarkSimpleMrdWriterBase::SchemaFromVersion(version)), version_(version) {}
 
   void Flush() override;
@@ -268,10 +268,10 @@ class BenchmarkSimpleMrdReader : public test_model::BenchmarkSimpleMrdReaderBase
 // Binary writer for the Scalars protocol.
 class ScalarsWriter : public test_model::ScalarsWriterBase, yardl::binary::BinaryWriter {
   public:
-  ScalarsWriter(std::ostream& stream, Version version = Version::Latest)
+  ScalarsWriter(std::ostream& stream, Version version = Version::Current)
       : yardl::binary::BinaryWriter(stream, test_model::ScalarsWriterBase::SchemaFromVersion(version)), version_(version) {}
 
-  ScalarsWriter(std::string file_name, Version version = Version::Latest)
+  ScalarsWriter(std::string file_name, Version version = Version::Current)
       : yardl::binary::BinaryWriter(file_name, test_model::ScalarsWriterBase::SchemaFromVersion(version)), version_(version) {}
 
   void Flush() override;
@@ -306,10 +306,10 @@ class ScalarsReader : public test_model::ScalarsReaderBase, yardl::binary::Binar
 // Binary writer for the ScalarOptionals protocol.
 class ScalarOptionalsWriter : public test_model::ScalarOptionalsWriterBase, yardl::binary::BinaryWriter {
   public:
-  ScalarOptionalsWriter(std::ostream& stream, Version version = Version::Latest)
+  ScalarOptionalsWriter(std::ostream& stream, Version version = Version::Current)
       : yardl::binary::BinaryWriter(stream, test_model::ScalarOptionalsWriterBase::SchemaFromVersion(version)), version_(version) {}
 
-  ScalarOptionalsWriter(std::string file_name, Version version = Version::Latest)
+  ScalarOptionalsWriter(std::string file_name, Version version = Version::Current)
       : yardl::binary::BinaryWriter(file_name, test_model::ScalarOptionalsWriterBase::SchemaFromVersion(version)), version_(version) {}
 
   void Flush() override;
@@ -348,10 +348,10 @@ class ScalarOptionalsReader : public test_model::ScalarOptionalsReaderBase, yard
 // Binary writer for the NestedRecords protocol.
 class NestedRecordsWriter : public test_model::NestedRecordsWriterBase, yardl::binary::BinaryWriter {
   public:
-  NestedRecordsWriter(std::ostream& stream, Version version = Version::Latest)
+  NestedRecordsWriter(std::ostream& stream, Version version = Version::Current)
       : yardl::binary::BinaryWriter(stream, test_model::NestedRecordsWriterBase::SchemaFromVersion(version)), version_(version) {}
 
-  NestedRecordsWriter(std::string file_name, Version version = Version::Latest)
+  NestedRecordsWriter(std::string file_name, Version version = Version::Current)
       : yardl::binary::BinaryWriter(file_name, test_model::NestedRecordsWriterBase::SchemaFromVersion(version)), version_(version) {}
 
   void Flush() override;
@@ -384,10 +384,10 @@ class NestedRecordsReader : public test_model::NestedRecordsReaderBase, yardl::b
 // Binary writer for the Vlens protocol.
 class VlensWriter : public test_model::VlensWriterBase, yardl::binary::BinaryWriter {
   public:
-  VlensWriter(std::ostream& stream, Version version = Version::Latest)
+  VlensWriter(std::ostream& stream, Version version = Version::Current)
       : yardl::binary::BinaryWriter(stream, test_model::VlensWriterBase::SchemaFromVersion(version)), version_(version) {}
 
-  VlensWriter(std::string file_name, Version version = Version::Latest)
+  VlensWriter(std::string file_name, Version version = Version::Current)
       : yardl::binary::BinaryWriter(file_name, test_model::VlensWriterBase::SchemaFromVersion(version)), version_(version) {}
 
   void Flush() override;
@@ -426,10 +426,10 @@ class VlensReader : public test_model::VlensReaderBase, yardl::binary::BinaryRea
 // Binary writer for the Strings protocol.
 class StringsWriter : public test_model::StringsWriterBase, yardl::binary::BinaryWriter {
   public:
-  StringsWriter(std::ostream& stream, Version version = Version::Latest)
+  StringsWriter(std::ostream& stream, Version version = Version::Current)
       : yardl::binary::BinaryWriter(stream, test_model::StringsWriterBase::SchemaFromVersion(version)), version_(version) {}
 
-  StringsWriter(std::string file_name, Version version = Version::Latest)
+  StringsWriter(std::string file_name, Version version = Version::Current)
       : yardl::binary::BinaryWriter(file_name, test_model::StringsWriterBase::SchemaFromVersion(version)), version_(version) {}
 
   void Flush() override;
@@ -464,10 +464,10 @@ class StringsReader : public test_model::StringsReaderBase, yardl::binary::Binar
 // Binary writer for the OptionalVectors protocol.
 class OptionalVectorsWriter : public test_model::OptionalVectorsWriterBase, yardl::binary::BinaryWriter {
   public:
-  OptionalVectorsWriter(std::ostream& stream, Version version = Version::Latest)
+  OptionalVectorsWriter(std::ostream& stream, Version version = Version::Current)
       : yardl::binary::BinaryWriter(stream, test_model::OptionalVectorsWriterBase::SchemaFromVersion(version)), version_(version) {}
 
-  OptionalVectorsWriter(std::string file_name, Version version = Version::Latest)
+  OptionalVectorsWriter(std::string file_name, Version version = Version::Current)
       : yardl::binary::BinaryWriter(file_name, test_model::OptionalVectorsWriterBase::SchemaFromVersion(version)), version_(version) {}
 
   void Flush() override;
@@ -500,10 +500,10 @@ class OptionalVectorsReader : public test_model::OptionalVectorsReaderBase, yard
 // Binary writer for the FixedVectors protocol.
 class FixedVectorsWriter : public test_model::FixedVectorsWriterBase, yardl::binary::BinaryWriter {
   public:
-  FixedVectorsWriter(std::ostream& stream, Version version = Version::Latest)
+  FixedVectorsWriter(std::ostream& stream, Version version = Version::Current)
       : yardl::binary::BinaryWriter(stream, test_model::FixedVectorsWriterBase::SchemaFromVersion(version)), version_(version) {}
 
-  FixedVectorsWriter(std::string file_name, Version version = Version::Latest)
+  FixedVectorsWriter(std::string file_name, Version version = Version::Current)
       : yardl::binary::BinaryWriter(file_name, test_model::FixedVectorsWriterBase::SchemaFromVersion(version)), version_(version) {}
 
   void Flush() override;
@@ -542,10 +542,10 @@ class FixedVectorsReader : public test_model::FixedVectorsReaderBase, yardl::bin
 // Binary writer for the Streams protocol.
 class StreamsWriter : public test_model::StreamsWriterBase, yardl::binary::BinaryWriter {
   public:
-  StreamsWriter(std::ostream& stream, Version version = Version::Latest)
+  StreamsWriter(std::ostream& stream, Version version = Version::Current)
       : yardl::binary::BinaryWriter(stream, test_model::StreamsWriterBase::SchemaFromVersion(version)), version_(version) {}
 
-  StreamsWriter(std::string file_name, Version version = Version::Latest)
+  StreamsWriter(std::string file_name, Version version = Version::Current)
       : yardl::binary::BinaryWriter(file_name, test_model::StreamsWriterBase::SchemaFromVersion(version)), version_(version) {}
 
   void Flush() override;
@@ -599,10 +599,10 @@ class StreamsReader : public test_model::StreamsReaderBase, yardl::binary::Binar
 // Binary writer for the FixedArrays protocol.
 class FixedArraysWriter : public test_model::FixedArraysWriterBase, yardl::binary::BinaryWriter {
   public:
-  FixedArraysWriter(std::ostream& stream, Version version = Version::Latest)
+  FixedArraysWriter(std::ostream& stream, Version version = Version::Current)
       : yardl::binary::BinaryWriter(stream, test_model::FixedArraysWriterBase::SchemaFromVersion(version)), version_(version) {}
 
-  FixedArraysWriter(std::string file_name, Version version = Version::Latest)
+  FixedArraysWriter(std::string file_name, Version version = Version::Current)
       : yardl::binary::BinaryWriter(file_name, test_model::FixedArraysWriterBase::SchemaFromVersion(version)), version_(version) {}
 
   void Flush() override;
@@ -643,10 +643,10 @@ class FixedArraysReader : public test_model::FixedArraysReaderBase, yardl::binar
 // Binary writer for the Subarrays protocol.
 class SubarraysWriter : public test_model::SubarraysWriterBase, yardl::binary::BinaryWriter {
   public:
-  SubarraysWriter(std::ostream& stream, Version version = Version::Latest)
+  SubarraysWriter(std::ostream& stream, Version version = Version::Current)
       : yardl::binary::BinaryWriter(stream, test_model::SubarraysWriterBase::SchemaFromVersion(version)), version_(version) {}
 
-  SubarraysWriter(std::string file_name, Version version = Version::Latest)
+  SubarraysWriter(std::string file_name, Version version = Version::Current)
       : yardl::binary::BinaryWriter(file_name, test_model::SubarraysWriterBase::SchemaFromVersion(version)), version_(version) {}
 
   void Flush() override;
@@ -695,10 +695,10 @@ class SubarraysReader : public test_model::SubarraysReaderBase, yardl::binary::B
 // Binary writer for the SubarraysInRecords protocol.
 class SubarraysInRecordsWriter : public test_model::SubarraysInRecordsWriterBase, yardl::binary::BinaryWriter {
   public:
-  SubarraysInRecordsWriter(std::ostream& stream, Version version = Version::Latest)
+  SubarraysInRecordsWriter(std::ostream& stream, Version version = Version::Current)
       : yardl::binary::BinaryWriter(stream, test_model::SubarraysInRecordsWriterBase::SchemaFromVersion(version)), version_(version) {}
 
-  SubarraysInRecordsWriter(std::string file_name, Version version = Version::Latest)
+  SubarraysInRecordsWriter(std::string file_name, Version version = Version::Current)
       : yardl::binary::BinaryWriter(file_name, test_model::SubarraysInRecordsWriterBase::SchemaFromVersion(version)), version_(version) {}
 
   void Flush() override;
@@ -733,10 +733,10 @@ class SubarraysInRecordsReader : public test_model::SubarraysInRecordsReaderBase
 // Binary writer for the NDArrays protocol.
 class NDArraysWriter : public test_model::NDArraysWriterBase, yardl::binary::BinaryWriter {
   public:
-  NDArraysWriter(std::ostream& stream, Version version = Version::Latest)
+  NDArraysWriter(std::ostream& stream, Version version = Version::Current)
       : yardl::binary::BinaryWriter(stream, test_model::NDArraysWriterBase::SchemaFromVersion(version)), version_(version) {}
 
-  NDArraysWriter(std::string file_name, Version version = Version::Latest)
+  NDArraysWriter(std::string file_name, Version version = Version::Current)
       : yardl::binary::BinaryWriter(file_name, test_model::NDArraysWriterBase::SchemaFromVersion(version)), version_(version) {}
 
   void Flush() override;
@@ -777,10 +777,10 @@ class NDArraysReader : public test_model::NDArraysReaderBase, yardl::binary::Bin
 // Binary writer for the NDArraysSingleDimension protocol.
 class NDArraysSingleDimensionWriter : public test_model::NDArraysSingleDimensionWriterBase, yardl::binary::BinaryWriter {
   public:
-  NDArraysSingleDimensionWriter(std::ostream& stream, Version version = Version::Latest)
+  NDArraysSingleDimensionWriter(std::ostream& stream, Version version = Version::Current)
       : yardl::binary::BinaryWriter(stream, test_model::NDArraysSingleDimensionWriterBase::SchemaFromVersion(version)), version_(version) {}
 
-  NDArraysSingleDimensionWriter(std::string file_name, Version version = Version::Latest)
+  NDArraysSingleDimensionWriter(std::string file_name, Version version = Version::Current)
       : yardl::binary::BinaryWriter(file_name, test_model::NDArraysSingleDimensionWriterBase::SchemaFromVersion(version)), version_(version) {}
 
   void Flush() override;
@@ -819,10 +819,10 @@ class NDArraysSingleDimensionReader : public test_model::NDArraysSingleDimension
 // Binary writer for the DynamicNDArrays protocol.
 class DynamicNDArraysWriter : public test_model::DynamicNDArraysWriterBase, yardl::binary::BinaryWriter {
   public:
-  DynamicNDArraysWriter(std::ostream& stream, Version version = Version::Latest)
+  DynamicNDArraysWriter(std::ostream& stream, Version version = Version::Current)
       : yardl::binary::BinaryWriter(stream, test_model::DynamicNDArraysWriterBase::SchemaFromVersion(version)), version_(version) {}
 
-  DynamicNDArraysWriter(std::string file_name, Version version = Version::Latest)
+  DynamicNDArraysWriter(std::string file_name, Version version = Version::Current)
       : yardl::binary::BinaryWriter(file_name, test_model::DynamicNDArraysWriterBase::SchemaFromVersion(version)), version_(version) {}
 
   void Flush() override;
@@ -861,10 +861,10 @@ class DynamicNDArraysReader : public test_model::DynamicNDArraysReaderBase, yard
 // Binary writer for the Maps protocol.
 class MapsWriter : public test_model::MapsWriterBase, yardl::binary::BinaryWriter {
   public:
-  MapsWriter(std::ostream& stream, Version version = Version::Latest)
+  MapsWriter(std::ostream& stream, Version version = Version::Current)
       : yardl::binary::BinaryWriter(stream, test_model::MapsWriterBase::SchemaFromVersion(version)), version_(version) {}
 
-  MapsWriter(std::string file_name, Version version = Version::Latest)
+  MapsWriter(std::string file_name, Version version = Version::Current)
       : yardl::binary::BinaryWriter(file_name, test_model::MapsWriterBase::SchemaFromVersion(version)), version_(version) {}
 
   void Flush() override;
@@ -903,10 +903,10 @@ class MapsReader : public test_model::MapsReaderBase, yardl::binary::BinaryReade
 // Binary writer for the Unions protocol.
 class UnionsWriter : public test_model::UnionsWriterBase, yardl::binary::BinaryWriter {
   public:
-  UnionsWriter(std::ostream& stream, Version version = Version::Latest)
+  UnionsWriter(std::ostream& stream, Version version = Version::Current)
       : yardl::binary::BinaryWriter(stream, test_model::UnionsWriterBase::SchemaFromVersion(version)), version_(version) {}
 
-  UnionsWriter(std::string file_name, Version version = Version::Latest)
+  UnionsWriter(std::string file_name, Version version = Version::Current)
       : yardl::binary::BinaryWriter(file_name, test_model::UnionsWriterBase::SchemaFromVersion(version)), version_(version) {}
 
   void Flush() override;
@@ -945,10 +945,10 @@ class UnionsReader : public test_model::UnionsReaderBase, yardl::binary::BinaryR
 // Binary writer for the StreamsOfUnions protocol.
 class StreamsOfUnionsWriter : public test_model::StreamsOfUnionsWriterBase, yardl::binary::BinaryWriter {
   public:
-  StreamsOfUnionsWriter(std::ostream& stream, Version version = Version::Latest)
+  StreamsOfUnionsWriter(std::ostream& stream, Version version = Version::Current)
       : yardl::binary::BinaryWriter(stream, test_model::StreamsOfUnionsWriterBase::SchemaFromVersion(version)), version_(version) {}
 
-  StreamsOfUnionsWriter(std::string file_name, Version version = Version::Latest)
+  StreamsOfUnionsWriter(std::string file_name, Version version = Version::Current)
       : yardl::binary::BinaryWriter(file_name, test_model::StreamsOfUnionsWriterBase::SchemaFromVersion(version)), version_(version) {}
 
   void Flush() override;
@@ -992,10 +992,10 @@ class StreamsOfUnionsReader : public test_model::StreamsOfUnionsReaderBase, yard
 // Binary writer for the Enums protocol.
 class EnumsWriter : public test_model::EnumsWriterBase, yardl::binary::BinaryWriter {
   public:
-  EnumsWriter(std::ostream& stream, Version version = Version::Latest)
+  EnumsWriter(std::ostream& stream, Version version = Version::Current)
       : yardl::binary::BinaryWriter(stream, test_model::EnumsWriterBase::SchemaFromVersion(version)), version_(version) {}
 
-  EnumsWriter(std::string file_name, Version version = Version::Latest)
+  EnumsWriter(std::string file_name, Version version = Version::Current)
       : yardl::binary::BinaryWriter(file_name, test_model::EnumsWriterBase::SchemaFromVersion(version)), version_(version) {}
 
   void Flush() override;
@@ -1032,10 +1032,10 @@ class EnumsReader : public test_model::EnumsReaderBase, yardl::binary::BinaryRea
 // Binary writer for the Flags protocol.
 class FlagsWriter : public test_model::FlagsWriterBase, yardl::binary::BinaryWriter {
   public:
-  FlagsWriter(std::ostream& stream, Version version = Version::Latest)
+  FlagsWriter(std::ostream& stream, Version version = Version::Current)
       : yardl::binary::BinaryWriter(stream, test_model::FlagsWriterBase::SchemaFromVersion(version)), version_(version) {}
 
-  FlagsWriter(std::string file_name, Version version = Version::Latest)
+  FlagsWriter(std::string file_name, Version version = Version::Current)
       : yardl::binary::BinaryWriter(file_name, test_model::FlagsWriterBase::SchemaFromVersion(version)), version_(version) {}
 
   void Flush() override;
@@ -1079,10 +1079,10 @@ class FlagsReader : public test_model::FlagsReaderBase, yardl::binary::BinaryRea
 // Binary writer for the StateTest protocol.
 class StateTestWriter : public test_model::StateTestWriterBase, yardl::binary::BinaryWriter {
   public:
-  StateTestWriter(std::ostream& stream, Version version = Version::Latest)
+  StateTestWriter(std::ostream& stream, Version version = Version::Current)
       : yardl::binary::BinaryWriter(stream, test_model::StateTestWriterBase::SchemaFromVersion(version)), version_(version) {}
 
-  StateTestWriter(std::string file_name, Version version = Version::Latest)
+  StateTestWriter(std::string file_name, Version version = Version::Current)
       : yardl::binary::BinaryWriter(file_name, test_model::StateTestWriterBase::SchemaFromVersion(version)), version_(version) {}
 
   void Flush() override;
@@ -1125,10 +1125,10 @@ class StateTestReader : public test_model::StateTestReaderBase, yardl::binary::B
 // Binary writer for the SimpleGenerics protocol.
 class SimpleGenericsWriter : public test_model::SimpleGenericsWriterBase, yardl::binary::BinaryWriter {
   public:
-  SimpleGenericsWriter(std::ostream& stream, Version version = Version::Latest)
+  SimpleGenericsWriter(std::ostream& stream, Version version = Version::Current)
       : yardl::binary::BinaryWriter(stream, test_model::SimpleGenericsWriterBase::SchemaFromVersion(version)), version_(version) {}
 
-  SimpleGenericsWriter(std::string file_name, Version version = Version::Latest)
+  SimpleGenericsWriter(std::string file_name, Version version = Version::Current)
       : yardl::binary::BinaryWriter(file_name, test_model::SimpleGenericsWriterBase::SchemaFromVersion(version)), version_(version) {}
 
   void Flush() override;
@@ -1183,10 +1183,10 @@ class SimpleGenericsReader : public test_model::SimpleGenericsReaderBase, yardl:
 // Binary writer for the AdvancedGenerics protocol.
 class AdvancedGenericsWriter : public test_model::AdvancedGenericsWriterBase, yardl::binary::BinaryWriter {
   public:
-  AdvancedGenericsWriter(std::ostream& stream, Version version = Version::Latest)
+  AdvancedGenericsWriter(std::ostream& stream, Version version = Version::Current)
       : yardl::binary::BinaryWriter(stream, test_model::AdvancedGenericsWriterBase::SchemaFromVersion(version)), version_(version) {}
 
-  AdvancedGenericsWriter(std::string file_name, Version version = Version::Latest)
+  AdvancedGenericsWriter(std::string file_name, Version version = Version::Current)
       : yardl::binary::BinaryWriter(file_name, test_model::AdvancedGenericsWriterBase::SchemaFromVersion(version)), version_(version) {}
 
   void Flush() override;
@@ -1227,10 +1227,10 @@ class AdvancedGenericsReader : public test_model::AdvancedGenericsReaderBase, ya
 // Binary writer for the Aliases protocol.
 class AliasesWriter : public test_model::AliasesWriterBase, yardl::binary::BinaryWriter {
   public:
-  AliasesWriter(std::ostream& stream, Version version = Version::Latest)
+  AliasesWriter(std::ostream& stream, Version version = Version::Current)
       : yardl::binary::BinaryWriter(stream, test_model::AliasesWriterBase::SchemaFromVersion(version)), version_(version) {}
 
-  AliasesWriter(std::string file_name, Version version = Version::Latest)
+  AliasesWriter(std::string file_name, Version version = Version::Current)
       : yardl::binary::BinaryWriter(file_name, test_model::AliasesWriterBase::SchemaFromVersion(version)), version_(version) {}
 
   void Flush() override;
@@ -1287,10 +1287,10 @@ class AliasesReader : public test_model::AliasesReaderBase, yardl::binary::Binar
 // Binary writer for the StreamsOfAliasedUnions protocol.
 class StreamsOfAliasedUnionsWriter : public test_model::StreamsOfAliasedUnionsWriterBase, yardl::binary::BinaryWriter {
   public:
-  StreamsOfAliasedUnionsWriter(std::ostream& stream, Version version = Version::Latest)
+  StreamsOfAliasedUnionsWriter(std::ostream& stream, Version version = Version::Current)
       : yardl::binary::BinaryWriter(stream, test_model::StreamsOfAliasedUnionsWriterBase::SchemaFromVersion(version)), version_(version) {}
 
-  StreamsOfAliasedUnionsWriter(std::string file_name, Version version = Version::Latest)
+  StreamsOfAliasedUnionsWriter(std::string file_name, Version version = Version::Current)
       : yardl::binary::BinaryWriter(file_name, test_model::StreamsOfAliasedUnionsWriterBase::SchemaFromVersion(version)), version_(version) {}
 
   void Flush() override;
@@ -1334,10 +1334,10 @@ class StreamsOfAliasedUnionsReader : public test_model::StreamsOfAliasedUnionsRe
 // Binary writer for the ProtocolWithComputedFields protocol.
 class ProtocolWithComputedFieldsWriter : public test_model::ProtocolWithComputedFieldsWriterBase, yardl::binary::BinaryWriter {
   public:
-  ProtocolWithComputedFieldsWriter(std::ostream& stream, Version version = Version::Latest)
+  ProtocolWithComputedFieldsWriter(std::ostream& stream, Version version = Version::Current)
       : yardl::binary::BinaryWriter(stream, test_model::ProtocolWithComputedFieldsWriterBase::SchemaFromVersion(version)), version_(version) {}
 
-  ProtocolWithComputedFieldsWriter(std::string file_name, Version version = Version::Latest)
+  ProtocolWithComputedFieldsWriter(std::string file_name, Version version = Version::Current)
       : yardl::binary::BinaryWriter(file_name, test_model::ProtocolWithComputedFieldsWriterBase::SchemaFromVersion(version)), version_(version) {}
 
   void Flush() override;
@@ -1370,10 +1370,10 @@ class ProtocolWithComputedFieldsReader : public test_model::ProtocolWithComputed
 // Binary writer for the ProtocolWithKeywordSteps protocol.
 class ProtocolWithKeywordStepsWriter : public test_model::ProtocolWithKeywordStepsWriterBase, yardl::binary::BinaryWriter {
   public:
-  ProtocolWithKeywordStepsWriter(std::ostream& stream, Version version = Version::Latest)
+  ProtocolWithKeywordStepsWriter(std::ostream& stream, Version version = Version::Current)
       : yardl::binary::BinaryWriter(stream, test_model::ProtocolWithKeywordStepsWriterBase::SchemaFromVersion(version)), version_(version) {}
 
-  ProtocolWithKeywordStepsWriter(std::string file_name, Version version = Version::Latest)
+  ProtocolWithKeywordStepsWriter(std::string file_name, Version version = Version::Current)
       : yardl::binary::BinaryWriter(file_name, test_model::ProtocolWithKeywordStepsWriterBase::SchemaFromVersion(version)), version_(version) {}
 
   void Flush() override;

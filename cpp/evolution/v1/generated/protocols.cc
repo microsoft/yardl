@@ -324,7 +324,7 @@ std::vector<std::string> ProtocolWithChangesWriterBase::previous_schemas_ = {
 std::string ProtocolWithChangesWriterBase::SchemaFromVersion(Version version) {
   switch (version) {
   case Version::v0: return previous_schemas_[0]; break;
-  case Version::Latest: return ProtocolWithChangesWriterBase::schema_; break;
+  case Version::Current: return ProtocolWithChangesWriterBase::schema_; break;
   default: throw std::runtime_error("The version does not correspond to any schema supported by protocol ProtocolWithChanges.");
   }
 
@@ -1304,7 +1304,7 @@ std::vector<std::string> ProtocolWithChangesReaderBase::previous_schemas_ = Prot
 
 Version ProtocolWithChangesReaderBase::VersionFromSchema(std::string const& schema) {
   if (schema == ProtocolWithChangesWriterBase::schema_) {
-    return Version::Latest;
+    return Version::Current;
   }
   else if (schema == previous_schemas_[0]) {
     return Version::v0;
@@ -2967,7 +2967,7 @@ std::vector<std::string> UnusedProtocolWriterBase::previous_schemas_ = {
 std::string UnusedProtocolWriterBase::SchemaFromVersion(Version version) {
   switch (version) {
   case Version::v0: return previous_schemas_[0]; break;
-  case Version::Latest: return UnusedProtocolWriterBase::schema_; break;
+  case Version::Current: return UnusedProtocolWriterBase::schema_; break;
   default: throw std::runtime_error("The version does not correspond to any schema supported by protocol UnusedProtocol.");
   }
 
@@ -3018,7 +3018,7 @@ std::vector<std::string> UnusedProtocolReaderBase::previous_schemas_ = UnusedPro
 
 Version UnusedProtocolReaderBase::VersionFromSchema(std::string const& schema) {
   if (schema == UnusedProtocolWriterBase::schema_) {
-    return Version::Latest;
+    return Version::Current;
   }
   else if (schema == previous_schemas_[0]) {
     return Version::v0;

@@ -71,7 +71,7 @@ func writeDeclarations(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 		for _, v := range ns.Versions {
 			fmt.Fprintf(w, "%s,\n", v)
 		}
-		fmt.Fprintln(w, "Latest")
+		fmt.Fprintln(w, "Current")
 	})
 	fmt.Fprintln(w, "};")
 
@@ -228,7 +228,7 @@ func writeDefinitions(w *formatting.IndentedWriter, ns *dsl.Namespace, symbolTab
 			for i, versionLabel := range ns.Versions {
 				fmt.Fprintf(w, "case Version::%s: return previous_schemas_[%d]; break;\n", versionLabel, i)
 			}
-			fmt.Fprintf(w, "case Version::Latest: return %s::schema_; break;\n", common.AbstractWriterName(p))
+			fmt.Fprintf(w, "case Version::Current: return %s::schema_; break;\n", common.AbstractWriterName(p))
 			fmt.Fprintf(w, "default: throw std::runtime_error(\"The version does not correspond to any schema supported by protocol %s.\");\n", p.Name)
 			w.WriteStringln("}")
 			w.WriteStringln("")
@@ -305,7 +305,7 @@ func writeDefinitions(w *formatting.IndentedWriter, ns *dsl.Namespace, symbolTab
 		w.Indented(func() {
 			fmt.Fprintf(w, "if (schema == %s::schema_) {\n", common.AbstractWriterName(p))
 			w.Indented(func() {
-				w.WriteStringln("return Version::Latest;")
+				w.WriteStringln("return Version::Current;")
 			})
 			w.WriteStringln("}")
 			for i, versionLabel := range ns.Versions {
