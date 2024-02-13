@@ -180,5 +180,11 @@ struct ChangedGeneric {
   }
 };
 
+enum class GrowingEnum : uint16_t {
+  kA = 0,
+  kB = 1,
+  kC = 2,
+};
+
 } // namespace evo_test
 

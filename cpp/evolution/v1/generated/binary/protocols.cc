@@ -985,6 +985,24 @@ template<typename I, yardl::binary::Reader<I> ReadI, typename J, yardl::binary::
   evo_test::binary::ReadChangedGeneric<std::string, yardl::binary::ReadString, int32_t, yardl::binary::ReadInteger>(stream, value);
 }
 
+[[maybe_unused]] void WriteAliasedEnum(yardl::binary::CodedOutputStream& stream, evo_test::AliasedEnum const& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<evo_test::AliasedEnum>::value) {
+    yardl::binary::WriteTriviallySerializable(stream, value);
+    return;
+  }
+
+  yardl::binary::WriteEnum<evo_test::GrowingEnum>(stream, value);
+}
+
+[[maybe_unused]] void ReadAliasedEnum(yardl::binary::CodedInputStream& stream, evo_test::AliasedEnum& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<evo_test::AliasedEnum>::value) {
+    yardl::binary::ReadTriviallySerializable(stream, value);
+    return;
+  }
+
+  yardl::binary::ReadEnum<evo_test::GrowingEnum>(stream, value);
+}
+
 [[maybe_unused]] void WriteAliasedLongToString_v0(yardl::binary::CodedOutputStream& stream, evo_test::AliasedLongToString const& value) {
   int64_t aliased_long_to_string_v0 = {};
   try {
@@ -1681,6 +1699,18 @@ void ProtocolWithChangesWriter::WriteStringToAliasedIntImpl(evo_test::AliasedInt
   }
   default:
     evo_test::binary::WriteAliasedInt(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesWriter::WriteEnumToAliasedEnumImpl(evo_test::AliasedEnum const& value) {
+  switch (version_) {
+  case Version::v0: {
+    yardl::binary::WriteEnum<evo_test::GrowingEnum_v0>(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::WriteAliasedEnum(stream_, value);
     break;
   }
 }
@@ -3128,6 +3158,18 @@ void ProtocolWithChangesReader::ReadStringToAliasedIntImpl(evo_test::AliasedInt&
   }
   default:
     evo_test::binary::ReadAliasedInt(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesReader::ReadEnumToAliasedEnumImpl(evo_test::AliasedEnum& value) {
+  switch (version_) {
+  case Version::v0: {
+    yardl::binary::ReadEnum<evo_test::GrowingEnum_v0>(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::ReadAliasedEnum(stream_, value);
     break;
   }
 }

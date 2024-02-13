@@ -41,6 +41,9 @@ void to_json(ordered_json& j, evo_test::ChangedGeneric<Y, Z> const& value);
 template <typename Y, typename Z>
 void from_json(ordered_json const& j, evo_test::ChangedGeneric<Y, Z>& value);
 
+void to_json(ordered_json& j, evo_test::GrowingEnum const& value);
+void from_json(ordered_json const& j, evo_test::GrowingEnum& value);
+
 } // namespace evo_test
 
 NLOHMANN_JSON_NAMESPACE_BEGIN
@@ -494,6 +497,53 @@ void from_json(ordered_json const& j, evo_test::ChangedGeneric<Y, Z>& value) {
   }
 }
 
+namespace {
+std::unordered_map<std::string, evo_test::GrowingEnum> const __GrowingEnum_values = {
+  {"a", evo_test::GrowingEnum::kA},
+  {"b", evo_test::GrowingEnum::kB},
+  {"c", evo_test::GrowingEnum::kC},
+  {"d", evo_test::GrowingEnum::kD},
+  {"e", evo_test::GrowingEnum::kE},
+};
+} //namespace
+
+void to_json(ordered_json& j, evo_test::GrowingEnum const& value) {
+  switch (value) {
+    case evo_test::GrowingEnum::kA:
+      j = "a";
+      break;
+    case evo_test::GrowingEnum::kB:
+      j = "b";
+      break;
+    case evo_test::GrowingEnum::kC:
+      j = "c";
+      break;
+    case evo_test::GrowingEnum::kD:
+      j = "d";
+      break;
+    case evo_test::GrowingEnum::kE:
+      j = "e";
+      break;
+    default:
+      using underlying_type = typename std::underlying_type<evo_test::GrowingEnum>::type;
+      j = static_cast<underlying_type>(value);
+      break;
+  }
+}
+
+void from_json(ordered_json const& j, evo_test::GrowingEnum& value) {
+  if (j.is_string()) {
+    auto symbol = j.get<std::string>();
+    if (auto res = __GrowingEnum_values.find(symbol); res != __GrowingEnum_values.end()) {
+      value = res->second;
+      return;
+    }
+    throw std::runtime_error("Invalid enum value '" + symbol + "' for enum evo_test::GrowingEnum");
+  }
+  using underlying_type = typename std::underlying_type<evo_test::GrowingEnum>::type;
+  value = static_cast<evo_test::GrowingEnum>(j.get<underlying_type>());
+}
+
 } // namespace evo_test
 
 namespace evo_test::ndjson {
@@ -620,6 +670,10 @@ void ProtocolWithChangesWriter::WriteStringToAliasedStringImpl(std::string const
 void ProtocolWithChangesWriter::WriteStringToAliasedIntImpl(std::string const& value) {
   ordered_json json_value = value;
   yardl::ndjson::WriteProtocolValue(stream_, "stringToAliasedInt", json_value);}
+
+void ProtocolWithChangesWriter::WriteEnumToAliasedEnumImpl(evo_test::GrowingEnum const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "enumToAliasedEnum", json_value);}
 
 void ProtocolWithChangesWriter::WriteOptionalIntToUnionImpl(std::optional<int32_t> const& value) {
   ordered_json json_value = value;
@@ -1015,6 +1069,10 @@ void ProtocolWithChangesReader::ReadStringToAliasedStringImpl(std::string& value
 
 void ProtocolWithChangesReader::ReadStringToAliasedIntImpl(std::string& value) {
   yardl::ndjson::ReadProtocolValue(stream_, line_, "stringToAliasedInt", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadEnumToAliasedEnumImpl(evo_test::GrowingEnum& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "enumToAliasedEnum", true, unused_step_, value);
 }
 
 void ProtocolWithChangesReader::ReadOptionalIntToUnionImpl(std::optional<int32_t>& value) {

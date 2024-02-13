@@ -80,6 +80,8 @@ class ProtocolWithChangesWriter : public evo_test::ProtocolWithChangesWriterBase
 
   void WriteStringToAliasedIntImpl(std::string const& value) override;
 
+  void WriteEnumToAliasedEnumImpl(evo_test::GrowingEnum const& value) override;
+
   void WriteOptionalIntToUnionImpl(std::optional<int32_t> const& value) override;
 
   void WriteOptionalRecordToUnionImpl(std::optional<evo_test::RecordWithChanges> const& value) override;
@@ -289,6 +291,8 @@ class ProtocolWithChangesReader : public evo_test::ProtocolWithChangesReaderBase
   void ReadStringToAliasedStringImpl(std::string& value) override;
 
   void ReadStringToAliasedIntImpl(std::string& value) override;
+
+  void ReadEnumToAliasedEnumImpl(evo_test::GrowingEnum& value) override;
 
   void ReadOptionalIntToUnionImpl(std::optional<int32_t>& value) override;
 

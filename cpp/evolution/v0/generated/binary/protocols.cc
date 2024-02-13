@@ -759,6 +759,10 @@ void ProtocolWithChangesWriter::WriteStringToAliasedIntImpl(std::string const& v
   yardl::binary::WriteString(stream_, value);
 }
 
+void ProtocolWithChangesWriter::WriteEnumToAliasedEnumImpl(evo_test::GrowingEnum const& value) {
+  yardl::binary::WriteEnum<evo_test::GrowingEnum>(stream_, value);
+}
+
 void ProtocolWithChangesWriter::WriteOptionalIntToUnionImpl(std::optional<int32_t> const& value) {
   yardl::binary::WriteOptional<int32_t, yardl::binary::WriteInteger>(stream_, value);
 }
@@ -1169,6 +1173,10 @@ void ProtocolWithChangesReader::ReadStringToAliasedStringImpl(std::string& value
 
 void ProtocolWithChangesReader::ReadStringToAliasedIntImpl(std::string& value) {
   yardl::binary::ReadString(stream_, value);
+}
+
+void ProtocolWithChangesReader::ReadEnumToAliasedEnumImpl(evo_test::GrowingEnum& value) {
+  yardl::binary::ReadEnum<evo_test::GrowingEnum>(stream_, value);
 }
 
 void ProtocolWithChangesReader::ReadOptionalIntToUnionImpl(std::optional<int32_t>& value) {

@@ -58,6 +58,7 @@ class ProtocolWithChangesWriter : public evo_test::ProtocolWithChangesWriterBase
   void WriteAliasedLongToStringImpl(evo_test::AliasedLongToString const& value) override;
   void WriteStringToAliasedStringImpl(evo_test::AliasedString const& value) override;
   void WriteStringToAliasedIntImpl(evo_test::AliasedInt const& value) override;
+  void WriteEnumToAliasedEnumImpl(evo_test::AliasedEnum const& value) override;
   void WriteOptionalIntToUnionImpl(std::variant<std::monostate, int32_t, std::string> const& value) override;
   void WriteOptionalRecordToUnionImpl(std::variant<std::monostate, evo_test::RecordWithChanges, std::string> const& value) override;
   void WriteRecordWithChangesImpl(evo_test::RecordWithChanges const& value) override;
@@ -173,6 +174,7 @@ class ProtocolWithChangesReader : public evo_test::ProtocolWithChangesReaderBase
   void ReadAliasedLongToStringImpl(evo_test::AliasedLongToString& value) override;
   void ReadStringToAliasedStringImpl(evo_test::AliasedString& value) override;
   void ReadStringToAliasedIntImpl(evo_test::AliasedInt& value) override;
+  void ReadEnumToAliasedEnumImpl(evo_test::AliasedEnum& value) override;
   void ReadOptionalIntToUnionImpl(std::variant<std::monostate, int32_t, std::string>& value) override;
   void ReadOptionalRecordToUnionImpl(std::variant<std::monostate, evo_test::RecordWithChanges, std::string>& value) override;
   void ReadRecordWithChangesImpl(evo_test::RecordWithChanges& value) override;

@@ -180,6 +180,14 @@ struct ChangedGeneric {
   }
 };
 
+enum class GrowingEnum : uint16_t {
+  kA = 0,
+  kB = 1,
+  kC = 2,
+  kD = 3,
+  kE = 42,
+};
+
 // Compatibility aliases for version v0.
 
 using RecordWithChanges_v0 = evo_test::RecordWithChanges;
@@ -187,6 +195,8 @@ using RecordWithChanges_v0 = evo_test::RecordWithChanges;
 using AliasedRecordWithChanges_v0 = evo_test::AliasedRecordWithChanges;
 
 using StreamItem_v0 = evo_test::StreamItem;
+
+using GrowingEnum_v0 = evo_test::GrowingEnum;
 
 // Compatibility aliases for version v1.
 
@@ -247,6 +257,10 @@ template <typename I, typename J>
 using ChangedGeneric_v1 = evo_test::ChangedGeneric<I, J>;
 
 using Changed_v1 = evo_test::ChangedGeneric<std::string, int32_t>;
+
+using GrowingEnum_v1 = evo_test::GrowingEnum;
+
+using AliasedEnum_v1 = evo_test::GrowingEnum;
 
 } // namespace evo_test
 

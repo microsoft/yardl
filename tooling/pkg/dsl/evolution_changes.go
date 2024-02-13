@@ -240,6 +240,9 @@ type RecordChange struct {
 type EnumChange struct {
 	DefinitionPair
 	BaseTypeChange TypeChange
+	ValuesAdded    []string
+	ValuesRemoved  []string
+	ValuesChanged  []string
 }
 
 type CompatibilityChange struct {

@@ -39,6 +39,8 @@ ProtocolWithChanges: !protocol
     stringToAliasedString: string
     stringToAliasedInt: string
 
+    enumToAliasedEnum: GrowingEnum
+
     optionalIntToUnion: int?
     optionalRecordToUnion: RecordWithChanges?
 
@@ -200,3 +202,7 @@ ChangedGeneric<Y, Z>: !record
   fields:
     y: Y
     z: UnchangedGeneric<Z>
+
+GrowingEnum: !enum
+  base: uint16
+  values: [a, b, c]

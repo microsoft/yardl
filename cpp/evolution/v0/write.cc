@@ -46,6 +46,8 @@ int main(void) {
   w.WriteStringToAliasedString(HelloWorld);
   w.WriteStringToAliasedInt(std::to_string(INT_MIN));
 
+  w.WriteEnumToAliasedEnum(GrowingEnum::kC);
+
   UnchangedRecord unchanged;
   unchanged.name = "Jane Doe";
   unchanged.age = 42;

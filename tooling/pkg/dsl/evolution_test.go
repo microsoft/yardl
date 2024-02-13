@@ -99,30 +99,48 @@ P: !protocol
 }
 
 func TestEnumChanges(t *testing.T) {
-	models := []string{`
+	base := `
+X: !enum
+  base: int
+  values: [a, b, c]
+`
+
+	versions := []string{`
+# Enum base type changed
+X: !enum
+  base: uint64
+  values: [a, b, c]
+`, `
+# Enum value removed
 X: !enum
   base: int
   values:
     - a
+    - b
 `, `
+# Enum values changed due to "placement" of new value
 X: !enum
-  base: uint64
+  base: int
   values:
+    - x
     - a
-
-P: !protocol
-  sequence:
-    x: X
+    - b
+    - c
+`, `
+# Enum value explicitly changed
+X: !enum
+  base: int
+  values:
+    a: 3
+    b: 1
+    c: 2
 `}
 
-	latest, previous, labels := parseVersions(t, models)
-
-	assert.NotNil(t, latest)
-	assert.Len(t, previous, 1)
-	assert.Len(t, labels, 1)
-
-	_, _, err := ValidateEvolution(latest, previous, labels)
-	assert.NotNil(t, err)
+	for _, version := range versions {
+		latest, previous, labels := parseVersions(t, []string{base, version})
+		_, _, err := ValidateEvolution(latest, previous, labels)
+		assert.NotNil(t, err)
+	}
 }
 
 func TestStreamTypeChanges(t *testing.T) {

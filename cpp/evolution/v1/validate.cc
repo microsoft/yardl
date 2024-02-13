@@ -140,6 +140,10 @@ int main(void) {
   r.ReadStringToAliasedInt(int32);
   EVO_ASSERT(int32 == INT_MIN);
 
+  AliasedEnum e;
+  r.ReadEnumToAliasedEnum(e);
+  EVO_ASSERT(e == GrowingEnum::kC);
+
   RecordWithChanges rec;
 
   std::variant<std::monostate, int, std::string> nullOrIntOrString;

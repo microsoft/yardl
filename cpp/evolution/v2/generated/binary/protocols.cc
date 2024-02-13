@@ -1034,6 +1034,14 @@ template<typename I, yardl::binary::Reader<I> ReadI, typename J, yardl::binary::
   evo_test::binary::ReadChangedGeneric_v1<std::string, yardl::binary::ReadString, int32_t, yardl::binary::ReadInteger>(stream, value);
 }
 
+[[maybe_unused]] void WriteAliasedEnum_v1(yardl::binary::CodedOutputStream& stream, evo_test::GrowingEnum const& value) {
+  yardl::binary::WriteEnum<evo_test::GrowingEnum_v1>(stream, value);
+}
+
+[[maybe_unused]] void ReadAliasedEnum_v1(yardl::binary::CodedInputStream& stream, evo_test::GrowingEnum& value) {
+  yardl::binary::ReadEnum<evo_test::GrowingEnum_v1>(stream, value);
+}
+
 } // namespace
 
 void ProtocolWithChangesWriter::WriteInt8ToIntImpl(int8_t const& value) {
@@ -1462,6 +1470,22 @@ void ProtocolWithChangesWriter::WriteStringToAliasedIntImpl(std::string const& v
   }
   default:
     yardl::binary::WriteString(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesWriter::WriteEnumToAliasedEnumImpl(evo_test::GrowingEnum const& value) {
+  switch (version_) {
+  case Version::v0: {
+    yardl::binary::WriteEnum<evo_test::GrowingEnum_v0>(stream_, value);
+    break;
+  }
+  case Version::v1: {
+    evo_test::binary::WriteAliasedEnum_v1(stream_, value);
+    break;
+  }
+  default:
+    yardl::binary::WriteEnum<evo_test::GrowingEnum>(stream_, value);
     break;
   }
 }
@@ -3189,6 +3213,22 @@ void ProtocolWithChangesReader::ReadStringToAliasedIntImpl(std::string& value) {
   }
   default:
     yardl::binary::ReadString(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesReader::ReadEnumToAliasedEnumImpl(evo_test::GrowingEnum& value) {
+  switch (version_) {
+  case Version::v0: {
+    yardl::binary::ReadEnum<evo_test::GrowingEnum_v0>(stream_, value);
+    break;
+  }
+  case Version::v1: {
+    evo_test::binary::ReadAliasedEnum_v1(stream_, value);
+    break;
+  }
+  default:
+    yardl::binary::ReadEnum<evo_test::GrowingEnum>(stream_, value);
     break;
   }
 }

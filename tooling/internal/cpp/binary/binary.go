@@ -663,8 +663,9 @@ func requiresExplicitConversion(tc dsl.TypeChange) bool {
 }
 
 func writeCompatibilitySerializers(w *formatting.IndentedWriter, change dsl.DefinitionChange, versionLabel string) {
-	switch change.LatestDefinition().(type) {
-	case *dsl.EnumDefinition:
+	switch change.(type) {
+	case *dsl.EnumChange:
+		// Enums are trivially serializable, and EnumChanges do not require conversion
 		return
 	}
 

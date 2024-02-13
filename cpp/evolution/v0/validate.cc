@@ -123,6 +123,10 @@ int main(void) {
   r.ReadStringToAliasedInt(str);
   EVO_ASSERT(str == std::to_string(INT_MIN));
 
+  GrowingEnum e;
+  r.ReadEnumToAliasedEnum(e);
+  EVO_ASSERT(e == GrowingEnum::kC);
+
   RecordWithChanges rec;
   std::optional<RecordWithChanges> maybe_rec;
 

@@ -5,6 +5,7 @@ package dsl
 
 import (
 	"fmt"
+	"math/big"
 	"strings"
 
 	"github.com/microsoft/yardl/tooling/internal/validation"
@@ -159,6 +160,12 @@ func validateTypeDefinitionChanges(changes []DefinitionChange, saveWarning, save
 		case *EnumChange:
 			if tc := defChange.BaseTypeChange; tc != nil {
 				saveError(td, "changing base type of '%s' is not backward compatible", td.GetDefinitionMeta().Name)
+			}
+			if len(defChange.ValuesRemoved) > 0 {
+				saveError(td, "removing enum value(s) '%s' is not backward compatible", strings.Join(defChange.ValuesRemoved, ", "))
+			}
+			if len(defChange.ValuesChanged) > 0 {
+				saveError(td, "changing enum value(s) '%s' is not backward compatible", strings.Join(defChange.ValuesChanged, ", "))
 			}
 
 		default:
@@ -875,10 +882,10 @@ func compareRecordDefinitions(newRecord, oldRecord *RecordDefinition, context *E
 	return nil
 }
 
-func compareEnumDefinitions(newNode, oldEnum *EnumDefinition, context *EvolutionContext) DefinitionChange {
-	if newNode.IsFlags != oldEnum.IsFlags {
+func compareEnumDefinitions(newEnum, oldEnum *EnumDefinition, context *EvolutionContext) DefinitionChange {
+	if newEnum.IsFlags != oldEnum.IsFlags {
 		// CHANGE: Changed Enum to Flags or vice versa
-		return &DefinitionChangeIncompatible{DefinitionPair{oldEnum, newNode}, IncompatibleDefinitions}
+		return &DefinitionChangeIncompatible{DefinitionPair{oldEnum, newEnum}, IncompatibleDefinitions}
 	}
 
 	oldBaseType := oldEnum.BaseType
@@ -886,14 +893,54 @@ func compareEnumDefinitions(newNode, oldEnum *EnumDefinition, context *Evolution
 		oldBaseType = &SimpleType{ResolvedDefinition: PrimitiveInt32}
 	}
 
-	newBaseType := newNode.BaseType
+	newBaseType := newEnum.BaseType
 	if newBaseType == nil {
 		newBaseType = &SimpleType{ResolvedDefinition: PrimitiveInt32}
 	}
 
-	if ch := compareTypes(newBaseType, oldBaseType, context); ch != nil {
-		// CHANGE: Changed Enum base type
-		return &EnumChange{DefinitionPair{oldEnum, newNode}, ch}
+	// Possible CHANGE: Base type changed
+	baseTypeChange := compareTypes(newBaseType, oldBaseType, context)
+
+	// Now compare the Enum values
+	oldValues := make(map[string]big.Int)
+	for _, v := range oldEnum.Values {
+		oldValues[v.Symbol] = v.IntegerValue
+	}
+
+	var valuesAdded []string
+	newValues := make(map[string]big.Int)
+	for _, v := range newEnum.Values {
+		newValues[v.Symbol] = v.IntegerValue
+		if _, ok := oldValues[v.Symbol]; !ok {
+			// CHANGE: Added value
+			valuesAdded = append(valuesAdded, v.Symbol)
+		}
+	}
+
+	var valuesRemoved []string
+	var valuesChanged []string
+	for _, v := range oldEnum.Values {
+		newValue, ok := newValues[v.Symbol]
+		if !ok {
+			// CHANGE: Removed value
+			valuesRemoved = append(valuesRemoved, v.Symbol)
+			continue
+		}
+
+		if newValue.Cmp(&v.IntegerValue) != 0 {
+			// CHANGE: Changed value
+			valuesChanged = append(valuesChanged, v.Symbol)
+		}
+	}
+
+	if baseTypeChange != nil || len(valuesAdded) > 0 || len(valuesRemoved) > 0 || len(valuesChanged) > 0 {
+		return &EnumChange{
+			DefinitionPair: DefinitionPair{oldEnum, newEnum},
+			BaseTypeChange: baseTypeChange,
+			ValuesAdded:    valuesAdded,
+			ValuesRemoved:  valuesRemoved,
+			ValuesChanged:  valuesChanged,
+		}
 	}
 
 	return nil

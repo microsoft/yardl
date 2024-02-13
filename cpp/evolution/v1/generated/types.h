@@ -210,6 +210,15 @@ using ChangedGeneric = evo_test::OldChangedGeneric<I, J>;
 
 using Changed = evo_test::ChangedGeneric<std::string, int32_t>;
 
+enum class GrowingEnum : uint16_t {
+  kA = 0,
+  kB = 1,
+  kC = 2,
+  kD = 3,
+};
+
+using AliasedEnum = evo_test::GrowingEnum;
+
 // Compatibility aliases for version v0.
 
 using AliasedLongToString_v0 = evo_test::AliasedLongToString;
@@ -247,6 +256,8 @@ using AliasedClosedGenericRecord_v0 = evo_test::AliasedClosedGenericRecord;
 
 template <typename Y, typename Z>
 using ChangedGeneric_v0 = evo_test::OldChangedGeneric<Y, Z>;
+
+using GrowingEnum_v0 = evo_test::GrowingEnum;
 
 } // namespace evo_test
 

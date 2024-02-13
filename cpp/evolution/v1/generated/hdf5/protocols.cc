@@ -240,6 +240,19 @@ H5::CompType InnerUnion4Ddl(bool nullable, H5::DataType const& t0, std::string c
 
 namespace evo_test::hdf5 {
 namespace {
+[[maybe_unused]] H5::EnumType GetGrowingEnumHdf5Ddl() {
+  H5::EnumType t(H5::PredType::NATIVE_UINT16);
+  uint16_t i = 0;
+  t.insert("a", &i);
+  i = 1;
+  t.insert("b", &i);
+  i = 2;
+  t.insert("c", &i);
+  i = 3;
+  t.insert("d", &i);
+  return t;
+}
+
 struct _Inner_UnchangedRecord {
   _Inner_UnchangedRecord() {} 
   _Inner_UnchangedRecord(evo_test::UnchangedRecord const& o) 
@@ -591,6 +604,10 @@ void ProtocolWithChangesWriter::WriteStringToAliasedStringImpl(evo_test::Aliased
 
 void ProtocolWithChangesWriter::WriteStringToAliasedIntImpl(evo_test::AliasedInt const& value) {
   yardl::hdf5::WriteScalarDataset<int32_t, evo_test::AliasedInt>(group_, "stringToAliasedInt", H5::PredType::NATIVE_INT32, value);
+}
+
+void ProtocolWithChangesWriter::WriteEnumToAliasedEnumImpl(evo_test::AliasedEnum const& value) {
+  yardl::hdf5::WriteScalarDataset<evo_test::GrowingEnum, evo_test::AliasedEnum>(group_, "enumToAliasedEnum", evo_test::hdf5::GetGrowingEnumHdf5Ddl(), value);
 }
 
 void ProtocolWithChangesWriter::WriteOptionalIntToUnionImpl(std::variant<std::monostate, int32_t, std::string> const& value) {
@@ -1080,6 +1097,10 @@ void ProtocolWithChangesReader::ReadStringToAliasedStringImpl(evo_test::AliasedS
 
 void ProtocolWithChangesReader::ReadStringToAliasedIntImpl(evo_test::AliasedInt& value) {
   yardl::hdf5::ReadScalarDataset<int32_t, evo_test::AliasedInt>(group_, "stringToAliasedInt", H5::PredType::NATIVE_INT32, value);
+}
+
+void ProtocolWithChangesReader::ReadEnumToAliasedEnumImpl(evo_test::AliasedEnum& value) {
+  yardl::hdf5::ReadScalarDataset<evo_test::GrowingEnum, evo_test::AliasedEnum>(group_, "enumToAliasedEnum", evo_test::hdf5::GetGrowingEnumHdf5Ddl(), value);
 }
 
 void ProtocolWithChangesReader::ReadOptionalIntToUnionImpl(std::variant<std::monostate, int32_t, std::string>& value) {
