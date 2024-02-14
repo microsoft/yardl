@@ -1832,13 +1832,13 @@ void ProtocolWithChangesWriter::WriteStreamIntToStringToFloatImpl(std::vector<st
       std::vector<int32_t> stream_int_to_string_to_float = {};
       stream_int_to_string_to_float.resize(values.size());
       for (size_t i = 0; i < values.size(); i++) {
-        int32_t values_item = {};
+        int32_t item = {};
         try {
-          values_item = std::stoi(values[i]);
+          item = std::stoi(values[i]);
         } catch (...) {
           throw std::runtime_error("Unable to convert string \"" + values[i] + "\" to number");
         }
-        stream_int_to_string_to_float[i] = values_item;
+        stream_int_to_string_to_float[i] = item;
       }
       yardl::binary::WriteVector<int32_t, yardl::binary::WriteInteger>(stream_, stream_int_to_string_to_float);
       break;
@@ -1864,13 +1864,13 @@ void ProtocolWithChangesWriter::WriteVectorIntToStringToFloatImpl(std::vector<st
     std::vector<int32_t> vector_int_to_string_to_float = {};
     vector_int_to_string_to_float.resize(value.size());
     for (size_t i = 0; i < value.size(); i++) {
-      int32_t value_item = {};
+      int32_t item = {};
       try {
-        value_item = std::stoi(value[i]);
+        item = std::stoi(value[i]);
       } catch (...) {
         throw std::runtime_error("Unable to convert string \"" + value[i] + "\" to number");
       }
-      vector_int_to_string_to_float[i] = value_item;
+      vector_int_to_string_to_float[i] = item;
     }
     yardl::binary::WriteVector<int32_t, yardl::binary::WriteInteger>(stream_, vector_int_to_string_to_float);
     break;
@@ -1911,19 +1911,19 @@ void ProtocolWithChangesWriter::WriteVectorUnionReorderedImpl(std::vector<std::v
     std::vector<std::variant<int32_t, float>> vector_union_reordered = {};
     vector_union_reordered.resize(value.size());
     for (size_t i = 0; i < value.size(); i++) {
-      std::variant<int32_t, float> value_item = {};
+      std::variant<int32_t, float> item = {};
       switch (value[i].index()) {
         case 0: {
-          value_item = std::get<0>(value[i]);
+          item = std::get<0>(value[i]);
           break;
         }
         case 1: {
-          value_item = std::get<1>(value[i]);
+          item = std::get<1>(value[i]);
           break;
         }
         default: throw std::runtime_error("Invalid union index.");
       }
-      vector_union_reordered[i] = value_item;
+      vector_union_reordered[i] = item;
     }
     yardl::binary::WriteVector<std::variant<int32_t, float>, WriteUnion<int32_t, yardl::binary::WriteInteger, float, yardl::binary::WriteFloatingPoint>>(stream_, vector_union_reordered);
     break;
@@ -1965,19 +1965,19 @@ void ProtocolWithChangesWriter::WriteStreamUnionReorderedImpl(std::vector<std::v
       std::vector<std::variant<int32_t, std::string>> stream_union_reordered = {};
       stream_union_reordered.resize(values.size());
       for (size_t i = 0; i < values.size(); i++) {
-        std::variant<int32_t, std::string> values_item = {};
+        std::variant<int32_t, std::string> item = {};
         switch (values[i].index()) {
           case 0: {
-            values_item = std::get<0>(values[i]);
+            item = std::get<0>(values[i]);
             break;
           }
           case 1: {
-            values_item = std::get<1>(values[i]);
+            item = std::get<1>(values[i]);
             break;
           }
           default: throw std::runtime_error("Invalid union index.");
         }
-        stream_union_reordered[i] = values_item;
+        stream_union_reordered[i] = item;
       }
       yardl::binary::WriteVector<std::variant<int32_t, std::string>, WriteUnion<int32_t, yardl::binary::WriteInteger, std::string, yardl::binary::WriteString>>(stream_, stream_union_reordered);
       break;
@@ -2495,7 +2495,8 @@ void ProtocolWithChangesWriter::WriteUnionWithTypesAddedImpl(std::variant<evo_te
         break;
       }
       case 1: {
-        throw std::runtime_error("Union type incompatible with previous version of model");
+        std::vector<std::string> source_types = {"EvoTest.RecordWithChanges", "int32", "float32", "string"};
+        throw std::runtime_error("Source type '" + source_types[1] + "' incompatible with target union type 'RecordWithChanges: RecordWithChanges_v0 | float32'");
         break;
       }
       case 2: {
@@ -2503,7 +2504,8 @@ void ProtocolWithChangesWriter::WriteUnionWithTypesAddedImpl(std::variant<evo_te
         break;
       }
       case 3: {
-        throw std::runtime_error("Union type incompatible with previous version of model");
+        std::vector<std::string> source_types = {"EvoTest.RecordWithChanges", "int32", "float32", "string"};
+        throw std::runtime_error("Source type '" + source_types[3] + "' incompatible with target union type 'RecordWithChanges: RecordWithChanges_v0 | float32'");
         break;
       }
       default: throw std::runtime_error("Invalid union index.");
@@ -2639,7 +2641,8 @@ void ProtocolWithChangesWriter::WriteUnionToAliasedUnionWithChangesImpl(evo_test
         break;
       }
       case 1: {
-        throw std::runtime_error("Union type incompatible with previous version of model");
+        std::vector<std::string> source_types = {"EvoTest.RecordWithChanges", "string"};
+        throw std::runtime_error("Source type '" + source_types[1] + "' incompatible with target union type 'RecordWithChanges: RecordWithChanges_v0 | int32'");
         break;
       }
       default: throw std::runtime_error("Invalid union index.");
@@ -3556,9 +3559,9 @@ bool ProtocolWithChangesReader::ReadStreamIntToStringToFloatImpl(std::vector<std
     yardl::binary::ReadBlocksIntoVector<int32_t, yardl::binary::ReadInteger>(stream_, current_block_remaining_, stream_int_to_string_to_float);
     values.resize(stream_int_to_string_to_float.size());
     for (size_t i = 0; i < stream_int_to_string_to_float.size(); i++) {
-      std::string stream_int_to_string_to_float_item = {};
-      stream_int_to_string_to_float_item = std::to_string(stream_int_to_string_to_float[i]);
-      values[i] = stream_int_to_string_to_float_item;
+      std::string item = {};
+      item = std::to_string(stream_int_to_string_to_float[i]);
+      values[i] = item;
     }
     break;
   }
@@ -3576,9 +3579,9 @@ void ProtocolWithChangesReader::ReadVectorIntToStringToFloatImpl(std::vector<std
     yardl::binary::ReadVector<int32_t, yardl::binary::ReadInteger>(stream_, vector_int_to_string_to_float);
     value.resize(vector_int_to_string_to_float.size());
     for (size_t i = 0; i < vector_int_to_string_to_float.size(); i++) {
-      std::string vector_int_to_string_to_float_item = {};
-      vector_int_to_string_to_float_item = std::to_string(vector_int_to_string_to_float[i]);
-      value[i] = vector_int_to_string_to_float_item;
+      std::string item = {};
+      item = std::to_string(vector_int_to_string_to_float[i]);
+      value[i] = item;
     }
     break;
   }
@@ -3619,19 +3622,19 @@ void ProtocolWithChangesReader::ReadVectorUnionReorderedImpl(std::vector<std::va
     yardl::binary::ReadVector<std::variant<int32_t, float>, ReadUnion<int32_t, yardl::binary::ReadInteger, float, yardl::binary::ReadFloatingPoint>>(stream_, vector_union_reordered);
     value.resize(vector_union_reordered.size());
     for (size_t i = 0; i < vector_union_reordered.size(); i++) {
-      std::variant<float, int32_t> vector_union_reordered_item = {};
+      std::variant<float, int32_t> item = {};
       switch (vector_union_reordered[i].index()) {
         case 0: {
-          vector_union_reordered_item = std::get<0>(vector_union_reordered[i]);
+          item = std::get<0>(vector_union_reordered[i]);
           break;
         }
         case 1: {
-          vector_union_reordered_item = std::get<1>(vector_union_reordered[i]);
+          item = std::get<1>(vector_union_reordered[i]);
           break;
         }
         default: throw std::runtime_error("Invalid union index.");
       }
-      value[i] = vector_union_reordered_item;
+      value[i] = item;
     }
     break;
   }
@@ -3677,19 +3680,19 @@ bool ProtocolWithChangesReader::ReadStreamUnionReorderedImpl(std::vector<std::va
     yardl::binary::ReadBlocksIntoVector<std::variant<int32_t, std::string>, ReadUnion<int32_t, yardl::binary::ReadInteger, std::string, yardl::binary::ReadString>>(stream_, current_block_remaining_, stream_union_reordered);
     values.resize(stream_union_reordered.size());
     for (size_t i = 0; i < stream_union_reordered.size(); i++) {
-      std::variant<std::string, int32_t> stream_union_reordered_item = {};
+      std::variant<std::string, int32_t> item = {};
       switch (stream_union_reordered[i].index()) {
         case 0: {
-          stream_union_reordered_item = std::get<0>(stream_union_reordered[i]);
+          item = std::get<0>(stream_union_reordered[i]);
           break;
         }
         case 1: {
-          stream_union_reordered_item = std::get<1>(stream_union_reordered[i]);
+          item = std::get<1>(stream_union_reordered[i]);
           break;
         }
         default: throw std::runtime_error("Invalid union index.");
       }
-      values[i] = stream_union_reordered_item;
+      values[i] = item;
     }
     break;
   }
@@ -4196,11 +4199,13 @@ void ProtocolWithChangesReader::ReadUnionWithTypesRemovedImpl(std::variant<evo_t
         break;
       }
       case 1: {
-        throw std::runtime_error("Union type incompatible with previous version of model");
+        std::vector<std::string> source_types = {"EvoTest.RecordWithChanges", "int32", "float32", "string"};
+        throw std::runtime_error("Source type '" + source_types[1] + "' incompatible with target union type 'RecordWithChanges | string'");
         break;
       }
       case 2: {
-        throw std::runtime_error("Union type incompatible with previous version of model");
+        std::vector<std::string> source_types = {"EvoTest.RecordWithChanges", "int32", "float32", "string"};
+        throw std::runtime_error("Source type '" + source_types[2] + "' incompatible with target union type 'RecordWithChanges | string'");
         break;
       }
       case 3: {
@@ -4308,7 +4313,8 @@ void ProtocolWithChangesReader::ReadUnionToAliasedUnionWithChangesImpl(evo_test:
         break;
       }
       case 1: {
-        throw std::runtime_error("Union type incompatible with previous version of model");
+        std::vector<std::string> source_types = {"EvoTest.RecordWithChanges", "int32"};
+        throw std::runtime_error("Source type '" + source_types[1] + "' incompatible with target union type 'RecordWithChanges | string'");
         break;
       }
       default: throw std::runtime_error("Invalid union index.");

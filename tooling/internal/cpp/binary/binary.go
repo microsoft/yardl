@@ -630,7 +630,12 @@ func writeTypeConversion(w *formatting.IndentedWriter, typeChange dsl.TypeChange
 					if tc.OldMatches[i] {
 						fmt.Fprintf(w, "%s = std::get<%d>(%s);\n", targetName, i, sourceName)
 					} else {
-						fmt.Fprintf(w, "throw std::runtime_error(\"Union type incompatible with previous version of model\");\n")
+						var expectedTypes []string
+						for _, c := range tc.OldType().(*dsl.GeneralizedType).Cases {
+							expectedTypes = append(expectedTypes, fmt.Sprintf(`"%s"`, dsl.TypeToShortSyntax(c.Type, true)))
+						}
+						fmt.Fprintf(w, "std::vector<std::string> source_types = {%s};\n", strings.Join(expectedTypes, ", "))
+						fmt.Fprintf(w, "throw std::runtime_error(\"Source type '\" + source_types[%d] + \"' incompatible with target union type '%s'\");\n", i, dsl.TypeToShortSyntax(tc.NewType(), false))
 					}
 					fmt.Fprintf(w, "break;\n")
 
@@ -650,7 +655,7 @@ func writeTypeConversion(w *formatting.IndentedWriter, typeChange dsl.TypeChange
 		fmt.Fprintf(w, "%s.resize(%s.size());\n", targetName, sourceName)
 		fmt.Fprintf(w, "for (size_t i = 0; i < %s.size(); i++) {\n", sourceName)
 		w.Indented(func() {
-			tmpItemName := sourceName + "_item"
+			tmpItemName := "item"
 			tmpItemType := common.TypeSyntax(tc.InnerChange.NewType())
 			fmt.Fprintf(w, "%s %s = {};\n", tmpItemType, tmpItemName)
 			writeTypeConversion(w, tc.InnerChange, fmt.Sprintf("%s[i]", sourceName), tmpItemName, write)
@@ -661,22 +666,6 @@ func writeTypeConversion(w *formatting.IndentedWriter, typeChange dsl.TypeChange
 	case *dsl.TypeChangeStreamTypeChanged:
 		change := &dsl.TypeChangeVectorTypeChanged{TypePair: tc.TypePair, InnerChange: tc.InnerChange}
 		writeTypeConversion(w, change, sourceName, targetName, write)
-		// NOTE: This is the same as Vector TypeChange
-		// if write {
-		// 	writeTypeConversion(w, tc.Inverse(), sourceName, targetName, !write)
-		// 	return
-		// }
-
-		// fmt.Fprintf(w, "%s.resize(%s.size());\n", targetName, sourceName)
-		// fmt.Fprintf(w, "for (size_t i = 0; i < %s.size(); i++) {\n", sourceName)
-		// w.Indented(func() {
-		// 	tmpItemName := sourceName + "_item"
-		// 	tmpItemType := common.TypeSyntax(tc.InnerChange.NewType())
-		// 	fmt.Fprintf(w, "%s %s = {};\n", tmpItemType, tmpItemName)
-		// 	writeTypeConversion(w, tc.InnerChange, fmt.Sprintf("%s[i]", sourceName), tmpItemName, write)
-		// 	fmt.Fprintf(w, "%s[i] = %s;\n", targetName, tmpItemName)
-		// })
-		// fmt.Fprintf(w, "}\n")
 
 	default:
 		panic("Expected a TypeChange")
