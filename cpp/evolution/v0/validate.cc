@@ -155,6 +155,39 @@ int main(void) {
   r.ReadRecordToAliasedAlias(rec);
   validateRecordWithChanges(rec);
 
+  std::vector<int> int_vec(10);
+  while (r.ReadStreamIntToStringToFloat(int_vec)) {
+    for (auto& i : int_vec) {
+      EVO_ASSERT(i == 42);
+    }
+  }
+
+  int_vec.clear();
+  r.ReadVectorIntToStringToFloat(int_vec);
+  for (auto& i : int_vec) {
+    EVO_ASSERT(i == 42);
+  }
+
+  std::variant<int, float> int_float;
+  r.ReadIntFloatUnionReordered(int_float);
+  EVO_ASSERT(int_float.index() == 1);
+  EVO_ASSERT(std::get<1>(int_float) == static_cast<float>(M_PI));
+
+  std::vector<std::variant<int, float>> int_float_vec;
+  r.ReadVectorUnionReordered(int_float_vec);
+  for (auto& v : int_float_vec) {
+    EVO_ASSERT(v.index() == 1);
+    EVO_ASSERT(std::get<1>(v) == static_cast<float>(M_PI));
+  }
+
+  std::vector<std::variant<int, std::string>> int_string_vec(10);
+  while (r.ReadStreamUnionReordered(int_string_vec)) {
+    for (auto& v : int_string_vec) {
+      EVO_ASSERT(v.index() == 1);
+      EVO_ASSERT(std::get<1>(v) == HelloWorld);
+    }
+  }
+
   std::vector<StreamItem> stream_items(10);
   while (r.ReadStreamOfAliasTypeChange(stream_items)) {
     EVO_ASSERT(stream_items.size() == 7);

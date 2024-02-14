@@ -638,6 +638,120 @@ void ProtocolWithChangesWriter::WriteRecordToAliasedAliasImpl(evo_test::AliasOfA
   yardl::hdf5::WriteScalarDataset<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::AliasOfAliasedRecordWithChanges>(group_, "recordToAliasedAlias", evo_test::hdf5::GetRecordWithChangesHdf5Ddl(), value);
 }
 
+void ProtocolWithChangesWriter::WriteStreamIntToStringToFloatImpl(std::string const& value) {
+  if (!streamIntToStringToFloat_dataset_state_) {
+    streamIntToStringToFloat_dataset_state_ = std::make_unique<yardl::hdf5::DatasetWriter>(group_, "streamIntToStringToFloat", yardl::hdf5::InnerVlenStringDdl(), std::max(sizeof(yardl::hdf5::InnerVlenString), sizeof(std::string)));
+  }
+
+  streamIntToStringToFloat_dataset_state_->Append<yardl::hdf5::InnerVlenString, std::string>(value);
+}
+
+void ProtocolWithChangesWriter::WriteStreamIntToStringToFloatImpl(std::vector<std::string> const& values) {
+  if (!streamIntToStringToFloat_dataset_state_) {
+    streamIntToStringToFloat_dataset_state_ = std::make_unique<yardl::hdf5::DatasetWriter>(group_, "streamIntToStringToFloat", yardl::hdf5::InnerVlenStringDdl(), std::max(sizeof(yardl::hdf5::InnerVlenString), sizeof(std::string)));
+  }
+
+  streamIntToStringToFloat_dataset_state_->AppendBatch<yardl::hdf5::InnerVlenString, std::string>(values);
+}
+
+void ProtocolWithChangesWriter::EndStreamIntToStringToFloatImpl() {
+  if (!streamIntToStringToFloat_dataset_state_) {
+    streamIntToStringToFloat_dataset_state_ = std::make_unique<yardl::hdf5::DatasetWriter>(group_, "streamIntToStringToFloat", yardl::hdf5::InnerVlenStringDdl(), std::max(sizeof(yardl::hdf5::InnerVlenString), sizeof(std::string)));
+  }
+
+  streamIntToStringToFloat_dataset_state_.reset();
+}
+
+void ProtocolWithChangesWriter::WriteVectorIntToStringToFloatImpl(std::vector<std::string> const& value) {
+  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerVlen<yardl::hdf5::InnerVlenString, std::string>, std::vector<std::string>>(group_, "vectorIntToStringToFloat", yardl::hdf5::InnerVlenDdl(yardl::hdf5::InnerVlenStringDdl()), value);
+}
+
+void ProtocolWithChangesWriter::WriteIntFloatUnionReorderedImpl(std::variant<float, int32_t> const& value) {
+  yardl::hdf5::WriteScalarDataset<::InnerUnion2<float, float, int32_t, int32_t>, std::variant<float, int32_t>>(group_, "intFloatUnionReordered", ::InnerUnion2Ddl<float, float, int32_t, int32_t>(false, H5::PredType::NATIVE_FLOAT, "float32", H5::PredType::NATIVE_INT32, "int32"), value);
+}
+
+void ProtocolWithChangesWriter::WriteVectorUnionReorderedImpl(std::vector<std::variant<float, int32_t>> const& value) {
+  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerVlen<::InnerUnion2<float, float, int32_t, int32_t>, std::variant<float, int32_t>>, std::vector<std::variant<float, int32_t>>>(group_, "vectorUnionReordered", yardl::hdf5::InnerVlenDdl(::InnerUnion2Ddl<float, float, int32_t, int32_t>(false, H5::PredType::NATIVE_FLOAT, "float32", H5::PredType::NATIVE_INT32, "int32")), value);
+}
+
+void ProtocolWithChangesWriter::WriteStreamUnionReorderedImpl(std::variant<std::string, int32_t> const& value) {
+  if (!streamUnionReordered_dataset_state_) {
+    streamUnionReordered_dataset_state_ = std::make_unique<yardl::hdf5::UnionDatasetWriter<2>>(group_, "streamUnionReordered", false, std::make_tuple(yardl::hdf5::InnerVlenStringDdl(), "string", static_cast<size_t>(std::max(sizeof(::InnerUnion2<yardl::hdf5::InnerVlenString, std::string, int32_t, int32_t>), sizeof(std::variant<std::string, int32_t>)))), std::make_tuple(H5::PredType::NATIVE_INT32, "int32", static_cast<size_t>(std::max(sizeof(::InnerUnion2<yardl::hdf5::InnerVlenString, std::string, int32_t, int32_t>), sizeof(std::variant<std::string, int32_t>)))));
+  }
+
+  std::visit(
+    [&](auto const& arg) {
+      using T = std::decay_t<decltype(arg)>;
+      if constexpr (std::is_same_v<T, std::string>) {
+        streamUnionReordered_dataset_state_->Append<yardl::hdf5::InnerVlenString, std::string>(static_cast<int8_t>(value.index()), arg);
+      } else if constexpr (std::is_same_v<T, int32_t>) {
+        streamUnionReordered_dataset_state_->Append<int32_t, int32_t>(static_cast<int8_t>(value.index()), arg);
+      } else {
+        static_assert(yardl::hdf5::always_false_v<T>, "non-exhaustive visitor!");
+      }
+    },
+    value);
+}
+
+void ProtocolWithChangesWriter::EndStreamUnionReorderedImpl() {
+  if (!streamUnionReordered_dataset_state_) {
+    streamUnionReordered_dataset_state_ = std::make_unique<yardl::hdf5::UnionDatasetWriter<2>>(group_, "streamUnionReordered", false, std::make_tuple(yardl::hdf5::InnerVlenStringDdl(), "string", static_cast<size_t>(std::max(sizeof(::InnerUnion2<yardl::hdf5::InnerVlenString, std::string, int32_t, int32_t>), sizeof(std::variant<std::string, int32_t>)))), std::make_tuple(H5::PredType::NATIVE_INT32, "int32", static_cast<size_t>(std::max(sizeof(::InnerUnion2<yardl::hdf5::InnerVlenString, std::string, int32_t, int32_t>), sizeof(std::variant<std::string, int32_t>)))));
+  }
+
+  streamUnionReordered_dataset_state_.reset();
+}
+
+void ProtocolWithChangesWriter::WriteIntToUnionStreamImpl(int32_t const& value) {
+  if (!intToUnionStream_dataset_state_) {
+    intToUnionStream_dataset_state_ = std::make_unique<yardl::hdf5::DatasetWriter>(group_, "intToUnionStream", H5::PredType::NATIVE_INT32, 0);
+  }
+
+  intToUnionStream_dataset_state_->Append<int32_t, int32_t>(value);
+}
+
+void ProtocolWithChangesWriter::WriteIntToUnionStreamImpl(std::vector<int32_t> const& values) {
+  if (!intToUnionStream_dataset_state_) {
+    intToUnionStream_dataset_state_ = std::make_unique<yardl::hdf5::DatasetWriter>(group_, "intToUnionStream", H5::PredType::NATIVE_INT32, 0);
+  }
+
+  intToUnionStream_dataset_state_->AppendBatch<int32_t, int32_t>(values);
+}
+
+void ProtocolWithChangesWriter::EndIntToUnionStreamImpl() {
+  if (!intToUnionStream_dataset_state_) {
+    intToUnionStream_dataset_state_ = std::make_unique<yardl::hdf5::DatasetWriter>(group_, "intToUnionStream", H5::PredType::NATIVE_INT32, 0);
+  }
+
+  intToUnionStream_dataset_state_.reset();
+}
+
+void ProtocolWithChangesWriter::WriteUnionStreamTypeChangeImpl(std::variant<int32_t, bool> const& value) {
+  if (!unionStreamTypeChange_dataset_state_) {
+    unionStreamTypeChange_dataset_state_ = std::make_unique<yardl::hdf5::UnionDatasetWriter<2>>(group_, "unionStreamTypeChange", false, std::make_tuple(H5::PredType::NATIVE_INT32, "int32", static_cast<size_t>(0)), std::make_tuple(H5::PredType::NATIVE_HBOOL, "bool", static_cast<size_t>(0)));
+  }
+
+  std::visit(
+    [&](auto const& arg) {
+      using T = std::decay_t<decltype(arg)>;
+      if constexpr (std::is_same_v<T, int32_t>) {
+        unionStreamTypeChange_dataset_state_->Append<int32_t, int32_t>(static_cast<int8_t>(value.index()), arg);
+      } else if constexpr (std::is_same_v<T, bool>) {
+        unionStreamTypeChange_dataset_state_->Append<bool, bool>(static_cast<int8_t>(value.index()), arg);
+      } else {
+        static_assert(yardl::hdf5::always_false_v<T>, "non-exhaustive visitor!");
+      }
+    },
+    value);
+}
+
+void ProtocolWithChangesWriter::EndUnionStreamTypeChangeImpl() {
+  if (!unionStreamTypeChange_dataset_state_) {
+    unionStreamTypeChange_dataset_state_ = std::make_unique<yardl::hdf5::UnionDatasetWriter<2>>(group_, "unionStreamTypeChange", false, std::make_tuple(H5::PredType::NATIVE_INT32, "int32", static_cast<size_t>(0)), std::make_tuple(H5::PredType::NATIVE_HBOOL, "bool", static_cast<size_t>(0)));
+  }
+
+  unionStreamTypeChange_dataset_state_.reset();
+}
+
 void ProtocolWithChangesWriter::WriteStreamOfAliasTypeChangeImpl(evo_test::StreamItem const& value) {
   if (!streamOfAliasTypeChange_dataset_state_) {
     streamOfAliasTypeChange_dataset_state_ = std::make_unique<yardl::hdf5::UnionDatasetWriter<2>>(group_, "streamOfAliasTypeChange", false, std::make_tuple(evo_test::hdf5::GetRecordWithChangesHdf5Ddl(), "RecordWithChanges", static_cast<size_t>(std::max(sizeof(::InnerUnion2<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges, evo_test::hdf5::_Inner_DeprecatedRecord, evo_test::RenamedRecord>), sizeof(std::variant<evo_test::RecordWithChanges, evo_test::RenamedRecord>)))), std::make_tuple(evo_test::hdf5::GetDeprecatedRecordHdf5Ddl(), "RenamedRecord", static_cast<size_t>(std::max(sizeof(::InnerUnion2<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::RecordWithChanges, evo_test::hdf5::_Inner_DeprecatedRecord, evo_test::RenamedRecord>), sizeof(std::variant<evo_test::RecordWithChanges, evo_test::RenamedRecord>)))));
@@ -966,6 +1080,12 @@ void ProtocolWithChangesWriter::EndAddedRecordStreamImpl() {
 }
 
 void ProtocolWithChangesWriter::Flush() {
+  if (streamUnionReordered_dataset_state_) {
+    streamUnionReordered_dataset_state_->Flush();
+  }
+  if (unionStreamTypeChange_dataset_state_) {
+    unionStreamTypeChange_dataset_state_->Flush();
+  }
   if (streamOfAliasTypeChange_dataset_state_) {
     streamOfAliasTypeChange_dataset_state_->Flush();
   }
@@ -1129,6 +1249,124 @@ void ProtocolWithChangesReader::ReadRecordToAliasedRecordImpl(evo_test::AliasedR
 
 void ProtocolWithChangesReader::ReadRecordToAliasedAliasImpl(evo_test::AliasOfAliasedRecordWithChanges& value) {
   yardl::hdf5::ReadScalarDataset<evo_test::hdf5::_Inner_RecordWithChanges, evo_test::AliasOfAliasedRecordWithChanges>(group_, "recordToAliasedAlias", evo_test::hdf5::GetRecordWithChangesHdf5Ddl(), value);
+}
+
+bool ProtocolWithChangesReader::ReadStreamIntToStringToFloatImpl(std::string& value) {
+  if (!streamIntToStringToFloat_dataset_state_) {
+    streamIntToStringToFloat_dataset_state_ = std::make_unique<yardl::hdf5::DatasetReader>(group_, "streamIntToStringToFloat", yardl::hdf5::InnerVlenStringDdl(), std::max(sizeof(yardl::hdf5::InnerVlenString), sizeof(std::string)));
+  }
+
+  bool has_value = streamIntToStringToFloat_dataset_state_->Read<yardl::hdf5::InnerVlenString, std::string>(value);
+  if (!has_value) {
+    streamIntToStringToFloat_dataset_state_.reset();
+  }
+
+  return has_value;
+}
+
+bool ProtocolWithChangesReader::ReadStreamIntToStringToFloatImpl(std::vector<std::string>& values) {
+  if (!streamIntToStringToFloat_dataset_state_) {
+    streamIntToStringToFloat_dataset_state_ = std::make_unique<yardl::hdf5::DatasetReader>(group_, "streamIntToStringToFloat", yardl::hdf5::InnerVlenStringDdl());
+  }
+
+  bool has_more = streamIntToStringToFloat_dataset_state_->ReadBatch<yardl::hdf5::InnerVlenString, std::string>(values);
+  if (!has_more) {
+    streamIntToStringToFloat_dataset_state_.reset();
+  }
+
+  return has_more;
+}
+
+void ProtocolWithChangesReader::ReadVectorIntToStringToFloatImpl(std::vector<std::string>& value) {
+  yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerVlen<yardl::hdf5::InnerVlenString, std::string>, std::vector<std::string>>(group_, "vectorIntToStringToFloat", yardl::hdf5::InnerVlenDdl(yardl::hdf5::InnerVlenStringDdl()), value);
+}
+
+void ProtocolWithChangesReader::ReadIntFloatUnionReorderedImpl(std::variant<float, int32_t>& value) {
+  yardl::hdf5::ReadScalarDataset<::InnerUnion2<float, float, int32_t, int32_t>, std::variant<float, int32_t>>(group_, "intFloatUnionReordered", ::InnerUnion2Ddl<float, float, int32_t, int32_t>(false, H5::PredType::NATIVE_FLOAT, "float32", H5::PredType::NATIVE_INT32, "int32"), value);
+}
+
+void ProtocolWithChangesReader::ReadVectorUnionReorderedImpl(std::vector<std::variant<float, int32_t>>& value) {
+  yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerVlen<::InnerUnion2<float, float, int32_t, int32_t>, std::variant<float, int32_t>>, std::vector<std::variant<float, int32_t>>>(group_, "vectorUnionReordered", yardl::hdf5::InnerVlenDdl(::InnerUnion2Ddl<float, float, int32_t, int32_t>(false, H5::PredType::NATIVE_FLOAT, "float32", H5::PredType::NATIVE_INT32, "int32")), value);
+}
+
+bool ProtocolWithChangesReader::ReadStreamUnionReorderedImpl(std::variant<std::string, int32_t>& value) {
+  if (!streamUnionReordered_dataset_state_) {
+    streamUnionReordered_dataset_state_ = std::make_unique<yardl::hdf5::UnionDatasetReader<2>>(group_, "streamUnionReordered", false, std::make_tuple(yardl::hdf5::InnerVlenStringDdl(), "string", static_cast<size_t>(std::max(sizeof(::InnerUnion2<yardl::hdf5::InnerVlenString, std::string, int32_t, int32_t>), sizeof(std::variant<std::string, int32_t>)))), std::make_tuple(H5::PredType::NATIVE_INT32, "int32", static_cast<size_t>(std::max(sizeof(::InnerUnion2<yardl::hdf5::InnerVlenString, std::string, int32_t, int32_t>), sizeof(std::variant<std::string, int32_t>)))));
+  }
+
+  auto [has_result, type_index, reader] = streamUnionReordered_dataset_state_->ReadIndex();
+  if (!has_result) {
+    streamUnionReordered_dataset_state_.reset();
+    return false;
+  }
+
+  switch (type_index) {
+  case 0: {
+    std::string& ref = value.emplace<0>();
+    reader->Read<yardl::hdf5::InnerVlenString, std::string>(ref);
+    break;
+  }
+  case 1: {
+    int32_t& ref = value.emplace<1>();
+    reader->Read<int32_t, int32_t>(ref);
+    break;
+  }
+  }
+
+  return true;
+}
+
+bool ProtocolWithChangesReader::ReadIntToUnionStreamImpl(int32_t& value) {
+  if (!intToUnionStream_dataset_state_) {
+    intToUnionStream_dataset_state_ = std::make_unique<yardl::hdf5::DatasetReader>(group_, "intToUnionStream", H5::PredType::NATIVE_INT32, 0);
+  }
+
+  bool has_value = intToUnionStream_dataset_state_->Read<int32_t, int32_t>(value);
+  if (!has_value) {
+    intToUnionStream_dataset_state_.reset();
+  }
+
+  return has_value;
+}
+
+bool ProtocolWithChangesReader::ReadIntToUnionStreamImpl(std::vector<int32_t>& values) {
+  if (!intToUnionStream_dataset_state_) {
+    intToUnionStream_dataset_state_ = std::make_unique<yardl::hdf5::DatasetReader>(group_, "intToUnionStream", H5::PredType::NATIVE_INT32);
+  }
+
+  bool has_more = intToUnionStream_dataset_state_->ReadBatch<int32_t, int32_t>(values);
+  if (!has_more) {
+    intToUnionStream_dataset_state_.reset();
+  }
+
+  return has_more;
+}
+
+bool ProtocolWithChangesReader::ReadUnionStreamTypeChangeImpl(std::variant<int32_t, bool>& value) {
+  if (!unionStreamTypeChange_dataset_state_) {
+    unionStreamTypeChange_dataset_state_ = std::make_unique<yardl::hdf5::UnionDatasetReader<2>>(group_, "unionStreamTypeChange", false, std::make_tuple(H5::PredType::NATIVE_INT32, "int32", static_cast<size_t>(0)), std::make_tuple(H5::PredType::NATIVE_HBOOL, "bool", static_cast<size_t>(0)));
+  }
+
+  auto [has_result, type_index, reader] = unionStreamTypeChange_dataset_state_->ReadIndex();
+  if (!has_result) {
+    unionStreamTypeChange_dataset_state_.reset();
+    return false;
+  }
+
+  switch (type_index) {
+  case 0: {
+    int32_t& ref = value.emplace<0>();
+    reader->Read<int32_t, int32_t>(ref);
+    break;
+  }
+  case 1: {
+    bool& ref = value.emplace<1>();
+    reader->Read<bool, bool>(ref);
+    break;
+  }
+  }
+
+  return true;
 }
 
 bool ProtocolWithChangesReader::ReadStreamOfAliasTypeChangeImpl(evo_test::StreamItem& value) {

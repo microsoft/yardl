@@ -143,24 +143,6 @@ X: !enum
 	}
 }
 
-func TestStreamTypeChanges(t *testing.T) {
-	models := []string{`
-P: !protocol
-  sequence:
-    s: !stream
-      items: int
-`, `
-P: !protocol
-  sequence:
-    s: !stream
-      items: string
-`}
-
-	latest, previous, labels := parseVersions(t, models)
-	_, _, err := ValidateEvolution(latest, previous, labels)
-	assert.NotNil(t, err)
-}
-
 func TestInvalidProtocolStepDefinitionChanges(t *testing.T) {
 	model := `
 AS: string
@@ -303,8 +285,6 @@ P: !protocol
 		{"int->int", "float->int"},
 		{"int->int", "int->float"},
 
-		{"int*", "float*"},
-		{"int*3", "float*3"},
 		{"int*3", "int*4"},
 
 		{"int[]", "float[]"},
@@ -877,7 +857,6 @@ ChangedGenericRecord<A, B>: !record
 		{"float", "AliasedType<float*>"},
 		{"string", "AliasedType<string[]>"},
 		{"string->int", "AliasedType<string->float>"},
-		{"int*", "AliasedType<string*>"},
 
 		{"int?", "AliasedType<complexdouble?>"},
 		{"int?", "AliasedType<AliasedOptional<datetime>>"},

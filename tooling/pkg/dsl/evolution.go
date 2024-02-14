@@ -948,7 +948,6 @@ func compareEnumDefinitions(newEnum, oldEnum *EnumDefinition, context *Evolution
 
 func compareTypes(newType, oldType Type, context *EvolutionContext) TypeChange {
 	switch newType := newType.(type) {
-
 	case *SimpleType:
 		switch oldType := oldType.(type) {
 		case *SimpleType:
@@ -958,6 +957,10 @@ func compareTypes(newType, oldType Type, context *EvolutionContext) TypeChange {
 			if nt, ok := newDef.(*NamedType); ok {
 				return compareTypes(nt.Type, oldType, context)
 			}
+			if oldType.Dimensionality != nil {
+				// NOTE: This is where we will add support for changing a scalar SimpleType to a non-scalar Type
+				return &TypeChangeIncompatible{TypePair{oldType, newType}}
+			}
 			return compareGeneralizedToSimpleTypes(newType, oldType, context)
 		default:
 			return &TypeChangeIncompatible{TypePair{oldType, newType}}
@@ -966,11 +969,42 @@ func compareTypes(newType, oldType Type, context *EvolutionContext) TypeChange {
 	case *GeneralizedType:
 		switch oldType := oldType.(type) {
 		case *GeneralizedType:
-			return compareGeneralizedTypes(newType, oldType, context)
+			if newType.Dimensionality != nil && oldType.Dimensionality != nil {
+				// Both types have dimensionality...
+				// Compare the inner scalar types, then compare Dimensionality
+				innerChange := compareTypes(newType.ToScalar(), oldType.ToScalar(), context)
+				if _, incompatible := innerChange.(*TypeChangeIncompatible); incompatible {
+					return &TypeChangeIncompatible{TypePair{oldType, newType}}
+				}
+
+				switch newType.Dimensionality.(type) {
+				case *Stream:
+					return detectStreamChanges(newType, oldType, innerChange, context)
+				case *Vector:
+					return detectVectorChanges(newType, oldType, innerChange, context)
+				case *Array:
+					return detectArrayChanges(newType, oldType, innerChange, context)
+				case *Map:
+					return detectMapChanges(newType, oldType, innerChange, context)
+				default:
+					panic("Expected a Dimensionality")
+				}
+
+			} else if newType.Dimensionality == nil && oldType.Dimensionality == nil {
+				// Both types are already scalar
+				return compareGeneralizedTypes(newType, oldType, context)
+			} else {
+				// NOTE: This is where we will add support for changing between scalar/non-scalar GeneralizedTypes
+				return &TypeChangeIncompatible{TypePair{oldType, newType}}
+			}
 		case *SimpleType:
 			oldDef := oldType.ResolvedDefinition
 			if nt, ok := oldDef.(*NamedType); ok {
 				return compareTypes(newType, nt.Type, context)
+			}
+			if newType.Dimensionality != nil {
+				// NOTE: This is where we will add support for changing from non-scalar Type to a scalar SimpleType
+				return &TypeChangeIncompatible{TypePair{oldType, newType}}
 			}
 			return compareSimpleToGeneralizedTypes(newType, oldType, context)
 		default:
@@ -1190,6 +1224,10 @@ func compareOtherSimpleTypes(newType, oldType *SimpleType, context *EvolutionCon
 }
 
 func compareGeneralizedToSimpleTypes(newType *SimpleType, oldType *GeneralizedType, context *EvolutionContext) TypeChange {
+	if oldType.Dimensionality != nil {
+		panic("newType should not have Dimensionality here")
+	}
+
 	// Is it a change from Optional<T> to T (partially compatible)
 	if oldType.Cases.IsOptional() {
 		switch compareTypes(newType, oldType.Cases[1].Type, context).(type) {
@@ -1213,6 +1251,10 @@ func compareGeneralizedToSimpleTypes(newType *SimpleType, oldType *GeneralizedTy
 }
 
 func compareSimpleToGeneralizedTypes(newType *GeneralizedType, oldType *SimpleType, context *EvolutionContext) TypeChange {
+	if newType.Dimensionality != nil {
+		panic("oldType should not have Dimensionality here")
+	}
+
 	// Is it a change from T to Optional<T> (partially compatible)
 	if newType.Cases.IsOptional() {
 		switch compareTypes(newType.Cases[1].Type, oldType, context).(type) {
@@ -1236,29 +1278,26 @@ func compareSimpleToGeneralizedTypes(newType *GeneralizedType, oldType *SimpleTy
 }
 
 func compareGeneralizedTypes(newType, oldType *GeneralizedType, context *EvolutionContext) TypeChange {
-	// A GeneralizedType can change in many ways...
-	if newType.Cases.IsOptional() {
+	if newType.Dimensionality != nil {
+		panic("newType should not have Dimensionality here")
+	}
+	if oldType.Dimensionality != nil {
+		panic("oldType should not have Dimensionality here")
+	}
+
+	// These are already "scalar" types so we're really just comparing TypeCases
+	if newType.Cases.IsSingle() {
+		if oldType.Cases.IsSingle() {
+			return compareTypes(newType.Cases[0].Type, oldType.Cases[0].Type, context)
+		}
+		return &TypeChangeIncompatible{TypePair{oldType, newType}}
+	} else if newType.Cases.IsOptional() {
 		return detectOptionalChanges(newType, oldType, context)
 	} else if newType.Cases.IsUnion() {
 		return detectUnionChanges(newType, oldType, context)
 	} else {
-		switch newType.Dimensionality.(type) {
-		case nil:
-			// Not an Optional, Union, Stream, Vector, Array, Map...
-		case *Stream:
-			return detectStreamChanges(newType, oldType, context)
-		case *Vector:
-			return detectVectorChanges(newType, oldType, context)
-		case *Array:
-			return detectArrayChanges(newType, oldType, context)
-		case *Map:
-			return detectMapChanges(newType, oldType, context)
-		default:
-			panic("Shouldn't get here")
-		}
+		panic("Expected a scalar GeneralizedType")
 	}
-
-	return nil
 }
 
 func detectPrimitiveTypeChange(newType, oldType *SimpleType) TypeChange {
@@ -1333,28 +1372,31 @@ func detectUnionChanges(newType, oldType *GeneralizedType, context *EvolutionCon
 	oldMatches := make([]bool, len(oldType.Cases))
 	newMatches := make([]bool, len(newType.Cases))
 
+	typesReordered := false
 	innerTypeDefsChanged := false
-	// Search for a match for each Type in the new Union
+	// Search for an "old" match for each Type in the new Union
 	for i, newCase := range newType.Cases {
 		for j, oldCase := range oldType.Cases {
+			if newMatches[i] {
+				break
+			}
 			if oldMatches[j] {
 				continue
 			}
 
-			switch compareTypes(newCase.Type, oldCase.Type, context).(type) {
-			case nil:
+			switch ch := compareTypes(newCase.Type, oldCase.Type, context).(type) {
+			case nil, *TypeChangeDefinitionChanged:
 				// Found matching type
 				newMatches[i] = true
 				oldMatches[j] = true
-			case *TypeChangeDefinitionChanged:
-				// Found matching type with underlying definition changed
-				newMatches[i] = true
-				oldMatches[j] = true
-				innerTypeDefsChanged = true
-			}
+				if i != j {
+					typesReordered = true
+				}
 
-			if newMatches[i] {
-				break
+				if _, ok := ch.(*TypeChangeDefinitionChanged); ok {
+					// They underling definition for the matching type changed
+					innerTypeDefsChanged = true
+				}
 			}
 		}
 	}
@@ -1382,27 +1424,24 @@ func detectUnionChanges(newType, oldType *GeneralizedType, context *EvolutionCon
 		return &TypeChangeIncompatible{TypePair{oldType, newType}}
 	}
 
-	if innerTypeDefsChanged || !allMatch {
+	if typesReordered || innerTypeDefsChanged || !allMatch {
 		return &TypeChangeUnionTypesetChanged{TypePair{oldType, newType}, oldMatches, newMatches}
 	}
 
 	return nil
 }
 
-func detectStreamChanges(newType, oldType *GeneralizedType, context *EvolutionContext) TypeChange {
+func detectStreamChanges(newType, oldType *GeneralizedType, innerChange TypeChange, context *EvolutionContext) TypeChange {
 	if _, ok := oldType.Dimensionality.(*Stream); !ok {
-		// CHANGE: Changed a non-Stream to a Stream
 		return &TypeChangeIncompatible{TypePair{oldType, newType}}
 	}
-
-	if ch := compareTypes(newType.Cases[0].Type, oldType.Cases[0].Type, context); ch != nil {
-		// CHANGE: Changed Stream type
-		return &TypeChangeStreamTypeChanged{TypePair{oldType, newType}, ch}
+	if innerChange != nil {
+		return &TypeChangeStreamTypeChanged{TypePair{oldType, newType}, innerChange}
 	}
 	return nil
 }
 
-func detectVectorChanges(newType, oldType *GeneralizedType, context *EvolutionContext) TypeChange {
+func detectVectorChanges(newType, oldType *GeneralizedType, innerChange TypeChange, context *EvolutionContext) TypeChange {
 	newDim := newType.Dimensionality.(*Vector)
 	oldDim, ok := oldType.Dimensionality.(*Vector)
 	if !ok {
@@ -1419,23 +1458,16 @@ func detectVectorChanges(newType, oldType *GeneralizedType, context *EvolutionCo
 		return &TypeChangeIncompatible{TypePair{oldType, newType}}
 	}
 
-	if ch := compareTypes(newType.Cases[0].Type, oldType.Cases[0].Type, context); ch != nil {
-		// CHANGE: Changed Vector type
-		return &TypeChangeVectorTypeChanged{TypePair{oldType, newType}, ch}
+	if innerChange != nil {
+		return &TypeChangeVectorTypeChanged{TypePair{oldType, newType}, innerChange}
 	}
-
 	return nil
 }
 
-func detectArrayChanges(newType, oldType *GeneralizedType, context *EvolutionContext) TypeChange {
+func detectArrayChanges(newType, oldType *GeneralizedType, innerChange TypeChange, context *EvolutionContext) TypeChange {
 	newDim := newType.Dimensionality.(*Array)
 	oldDim, ok := oldType.Dimensionality.(*Array)
 	if !ok {
-		return &TypeChangeIncompatible{TypePair{oldType, newType}}
-	}
-
-	if ch := compareTypes(newType.Cases[0].Type, oldType.Cases[0].Type, context); ch != nil {
-		// CHANGE: Changed Array type
 		return &TypeChangeIncompatible{TypePair{oldType, newType}}
 	}
 
@@ -1467,10 +1499,16 @@ func detectArrayChanges(newType, oldType *GeneralizedType, context *EvolutionCon
 			}
 		}
 	}
+
+	if innerChange != nil {
+		// CHANGE: Changed Array type
+		return &TypeChangeIncompatible{TypePair{oldType, newType}}
+	}
+
 	return nil
 }
 
-func detectMapChanges(newType, oldType *GeneralizedType, context *EvolutionContext) TypeChange {
+func detectMapChanges(newType, oldType *GeneralizedType, innerChange TypeChange, context *EvolutionContext) TypeChange {
 	newDim := newType.Dimensionality.(*Map)
 	oldDim, ok := oldType.Dimensionality.(*Map)
 	if !ok {
@@ -1481,7 +1519,8 @@ func detectMapChanges(newType, oldType *GeneralizedType, context *EvolutionConte
 		// CHANGE: Changed Map key type
 		return &TypeChangeIncompatible{TypePair{oldType, newType}}
 	}
-	if ch := compareTypes(newType.Cases[0].Type, oldType.Cases[0].Type, context); ch != nil {
+
+	if innerChange != nil {
 		// CHANGE: Changed Map value type
 		return &TypeChangeIncompatible{TypePair{oldType, newType}}
 	}

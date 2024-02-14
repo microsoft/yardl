@@ -256,18 +256,11 @@ type PrimitiveChangeStringToNumber struct{ DefinitionPair }
 func typeChangeIsError(tc TypeChange) bool {
 	switch tc := tc.(type) {
 	case *TypeChangeStreamTypeChanged:
-		// A Stream's Type can only change if it is a changed TypeDefinition
-		if _, ok := tc.InnerChange.(*TypeChangeDefinitionChanged); !ok {
-			return true
-		}
+		return typeChangeIsError(tc.InnerChange)
 	case *TypeChangeVectorTypeChanged:
-		// A Vector's Type can only change if it is a changed TypeDefinition
-		if _, ok := tc.InnerChange.(*TypeChangeDefinitionChanged); !ok {
-			return true
-		}
+		return typeChangeIsError(tc.InnerChange)
 	case *TypeChangeOptionalTypeChanged:
 		return typeChangeIsError(tc.InnerChange)
-
 	case *TypeChangeIncompatible:
 		return true
 	}
@@ -293,9 +286,9 @@ func typeChangeWarningReason(tc TypeChange) string {
 		return fmt.Sprintf("will result in reading the default zero value for '%s' if it does not have a value at runtime", TypeToShortSyntax(tc.NewType(), true))
 
 	case *TypeChangeScalarToUnion:
-		return fmt.Sprintf("will result in a write error if its value is not of type '%s' at runtime", TypeToShortSyntax(tc.OldType(), true))
+		return fmt.Sprintf("will result in writing the default zero value if its value is not of type '%s' at runtime", TypeToShortSyntax(tc.OldType(), true))
 	case *TypeChangeUnionToScalar:
-		return fmt.Sprintf("will result in a read error if its value is not of type '%s' at runtime", TypeToShortSyntax(tc.NewType(), true))
+		return fmt.Sprintf("will result in reading the default zero value if its value is not of type '%s' at runtime", TypeToShortSyntax(tc.NewType(), true))
 
 	case *TypeChangeOptionalToUnion:
 		oldInnerType := tc.OldType().(*GeneralizedType).Cases[1].Type
@@ -313,7 +306,7 @@ func typeChangeWarningReason(tc TypeChange) string {
 			}
 		}
 		if len(removed) > 0 {
-			return fmt.Sprintf("may result in a read error if its value at runtime is of type %s", strings.Join(removed, " or "))
+			return fmt.Sprintf("will result in a read error if its value at runtime is of type %s", strings.Join(removed, " or "))
 		}
 
 		var added []string
@@ -324,7 +317,7 @@ func typeChangeWarningReason(tc TypeChange) string {
 			}
 		}
 		if len(added) > 0 {
-			return fmt.Sprintf("may result in a write error if its value at runtime is of type %s", strings.Join(added, " or "))
+			return fmt.Sprintf("will result in a write error if its value at runtime is of type %s", strings.Join(added, " or "))
 		}
 	case *TypeChangeStreamTypeChanged:
 		return typeChangeWarningReason(tc.InnerChange)

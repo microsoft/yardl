@@ -96,6 +96,32 @@ class ProtocolWithChangesWriter : public evo_test::ProtocolWithChangesWriterBase
 
   void WriteRecordToAliasedAliasImpl(evo_test::AliasOfAliasedRecordWithChanges const& value) override;
 
+  void WriteStreamIntToStringToFloatImpl(std::string const& value) override;
+
+  void WriteStreamIntToStringToFloatImpl(std::vector<std::string> const& values) override;
+
+  void EndStreamIntToStringToFloatImpl() override;
+
+  void WriteVectorIntToStringToFloatImpl(std::vector<std::string> const& value) override;
+
+  void WriteIntFloatUnionReorderedImpl(std::variant<float, int32_t> const& value) override;
+
+  void WriteVectorUnionReorderedImpl(std::vector<std::variant<float, int32_t>> const& value) override;
+
+  void WriteStreamUnionReorderedImpl(std::variant<std::string, int32_t> const& value) override;
+
+  void EndStreamUnionReorderedImpl() override;
+
+  void WriteIntToUnionStreamImpl(int32_t const& value) override;
+
+  void WriteIntToUnionStreamImpl(std::vector<int32_t> const& values) override;
+
+  void EndIntToUnionStreamImpl() override;
+
+  void WriteUnionStreamTypeChangeImpl(std::variant<int32_t, bool> const& value) override;
+
+  void EndUnionStreamTypeChangeImpl() override;
+
   void WriteStreamOfAliasTypeChangeImpl(evo_test::StreamItem const& value) override;
 
   void EndStreamOfAliasTypeChangeImpl() override;
@@ -230,6 +256,10 @@ class ProtocolWithChangesWriter : public evo_test::ProtocolWithChangesWriterBase
   void Flush() override;
 
   private:
+  std::unique_ptr<yardl::hdf5::DatasetWriter> streamIntToStringToFloat_dataset_state_;
+  std::unique_ptr<yardl::hdf5::UnionDatasetWriter<2>> streamUnionReordered_dataset_state_;
+  std::unique_ptr<yardl::hdf5::DatasetWriter> intToUnionStream_dataset_state_;
+  std::unique_ptr<yardl::hdf5::UnionDatasetWriter<2>> unionStreamTypeChange_dataset_state_;
   std::unique_ptr<yardl::hdf5::UnionDatasetWriter<2>> streamOfAliasTypeChange_dataset_state_;
   std::unique_ptr<yardl::hdf5::DatasetWriter> genericRecordStream_dataset_state_;
   std::unique_ptr<yardl::hdf5::DatasetWriter> genericParentRecordStream_dataset_state_;
@@ -319,6 +349,24 @@ class ProtocolWithChangesReader : public evo_test::ProtocolWithChangesReaderBase
   void ReadRecordToAliasedRecordImpl(evo_test::AliasedRecordWithChanges& value) override;
 
   void ReadRecordToAliasedAliasImpl(evo_test::AliasOfAliasedRecordWithChanges& value) override;
+
+  bool ReadStreamIntToStringToFloatImpl(std::string& value) override;
+
+  bool ReadStreamIntToStringToFloatImpl(std::vector<std::string>& values) override;
+
+  void ReadVectorIntToStringToFloatImpl(std::vector<std::string>& value) override;
+
+  void ReadIntFloatUnionReorderedImpl(std::variant<float, int32_t>& value) override;
+
+  void ReadVectorUnionReorderedImpl(std::vector<std::variant<float, int32_t>>& value) override;
+
+  bool ReadStreamUnionReorderedImpl(std::variant<std::string, int32_t>& value) override;
+
+  bool ReadIntToUnionStreamImpl(int32_t& value) override;
+
+  bool ReadIntToUnionStreamImpl(std::vector<int32_t>& values) override;
+
+  bool ReadUnionStreamTypeChangeImpl(std::variant<int32_t, bool>& value) override;
 
   bool ReadStreamOfAliasTypeChangeImpl(evo_test::StreamItem& value) override;
 
@@ -441,6 +489,10 @@ class ProtocolWithChangesReader : public evo_test::ProtocolWithChangesReaderBase
   bool ReadAddedRecordStreamImpl(std::vector<evo_test::RecordWithChanges>& values) override;
 
   private:
+  std::unique_ptr<yardl::hdf5::DatasetReader> streamIntToStringToFloat_dataset_state_;
+  std::unique_ptr<yardl::hdf5::UnionDatasetReader<2>> streamUnionReordered_dataset_state_;
+  std::unique_ptr<yardl::hdf5::DatasetReader> intToUnionStream_dataset_state_;
+  std::unique_ptr<yardl::hdf5::UnionDatasetReader<2>> unionStreamTypeChange_dataset_state_;
   std::unique_ptr<yardl::hdf5::UnionDatasetReader<2>> streamOfAliasTypeChange_dataset_state_;
   std::unique_ptr<yardl::hdf5::DatasetReader> genericRecordStream_dataset_state_;
   std::unique_ptr<yardl::hdf5::DatasetReader> genericParentRecordStream_dataset_state_;

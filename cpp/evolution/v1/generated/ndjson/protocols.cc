@@ -324,6 +324,54 @@ struct adl_serializer<std::variant<std::monostate, evo_test::RecordWithChanges, 
 };
 
 template <>
+struct adl_serializer<std::variant<float, int32_t>> {
+  static void to_json(ordered_json& j, std::variant<float, int32_t> const& value) {
+    switch (value.index()) {
+      case 0:
+        j = ordered_json{ {"float32", std::get<float>(value)} };
+        break;
+      case 1:
+        j = ordered_json{ {"int32", std::get<int32_t>(value)} };
+        break;
+      default:
+        throw std::runtime_error("Invalid union value");
+    }
+  }
+
+  static void from_json(ordered_json const& j, std::variant<float, int32_t>& value) {
+    auto it = j.begin();
+    std::string tag = it.key();
+    if (tag == "float32") {
+      value = it.value().get<float>();
+      return;
+    }
+    if (tag == "int32") {
+      value = it.value().get<int32_t>();
+      return;
+    }
+  }
+};
+
+template <>
+struct adl_serializer<std::variant<std::string, int32_t>> {
+  static void to_json(ordered_json& j, std::variant<std::string, int32_t> const& value) {
+    std::visit([&j](auto const& v) {j = v;}, value);
+  }
+
+  static void from_json(ordered_json const& j, std::variant<std::string, int32_t>& value) {
+    if ((j.is_string())) {
+      value = j.get<std::string>();
+      return;
+    }
+    if ((j.is_number())) {
+      value = j.get<int32_t>();
+      return;
+    }
+    throw std::runtime_error("Invalid union value");
+  }
+};
+
+template <>
 struct adl_serializer<std::variant<float, evo_test::RecordWithChanges, std::string, int32_t>> {
   static void to_json(ordered_json& j, std::variant<float, evo_test::RecordWithChanges, std::string, int32_t> const& value) {
     switch (value.index()) {
@@ -842,6 +890,34 @@ void ProtocolWithChangesWriter::WriteRecordToAliasedAliasImpl(evo_test::AliasOfA
   ordered_json json_value = value;
   yardl::ndjson::WriteProtocolValue(stream_, "recordToAliasedAlias", json_value);}
 
+void ProtocolWithChangesWriter::WriteStreamIntToStringToFloatImpl(std::string const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "streamIntToStringToFloat", json_value);}
+
+void ProtocolWithChangesWriter::WriteVectorIntToStringToFloatImpl(std::vector<std::string> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "vectorIntToStringToFloat", json_value);}
+
+void ProtocolWithChangesWriter::WriteIntFloatUnionReorderedImpl(std::variant<float, int32_t> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "intFloatUnionReordered", json_value);}
+
+void ProtocolWithChangesWriter::WriteVectorUnionReorderedImpl(std::vector<std::variant<float, int32_t>> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "vectorUnionReordered", json_value);}
+
+void ProtocolWithChangesWriter::WriteStreamUnionReorderedImpl(std::variant<std::string, int32_t> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "streamUnionReordered", json_value);}
+
+void ProtocolWithChangesWriter::WriteIntToUnionStreamImpl(int32_t const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "intToUnionStream", json_value);}
+
+void ProtocolWithChangesWriter::WriteUnionStreamTypeChangeImpl(std::variant<int32_t, bool> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "unionStreamTypeChange", json_value);}
+
 void ProtocolWithChangesWriter::WriteStreamOfAliasTypeChangeImpl(evo_test::StreamItem const& value) {
   ordered_json json_value = value;
   yardl::ndjson::WriteProtocolValue(stream_, "streamOfAliasTypeChange", json_value);}
@@ -1228,6 +1304,34 @@ void ProtocolWithChangesReader::ReadRecordToAliasedRecordImpl(evo_test::AliasedR
 
 void ProtocolWithChangesReader::ReadRecordToAliasedAliasImpl(evo_test::AliasOfAliasedRecordWithChanges& value) {
   yardl::ndjson::ReadProtocolValue(stream_, line_, "recordToAliasedAlias", true, unused_step_, value);
+}
+
+bool ProtocolWithChangesReader::ReadStreamIntToStringToFloatImpl(std::string& value) {
+  return yardl::ndjson::ReadProtocolValue(stream_, line_, "streamIntToStringToFloat", false, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadVectorIntToStringToFloatImpl(std::vector<std::string>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "vectorIntToStringToFloat", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadIntFloatUnionReorderedImpl(std::variant<float, int32_t>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "intFloatUnionReordered", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadVectorUnionReorderedImpl(std::vector<std::variant<float, int32_t>>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "vectorUnionReordered", true, unused_step_, value);
+}
+
+bool ProtocolWithChangesReader::ReadStreamUnionReorderedImpl(std::variant<std::string, int32_t>& value) {
+  return yardl::ndjson::ReadProtocolValue(stream_, line_, "streamUnionReordered", false, unused_step_, value);
+}
+
+bool ProtocolWithChangesReader::ReadIntToUnionStreamImpl(int32_t& value) {
+  return yardl::ndjson::ReadProtocolValue(stream_, line_, "intToUnionStream", false, unused_step_, value);
+}
+
+bool ProtocolWithChangesReader::ReadUnionStreamTypeChangeImpl(std::variant<int32_t, bool>& value) {
+  return yardl::ndjson::ReadProtocolValue(stream_, line_, "unionStreamTypeChange", false, unused_step_, value);
 }
 
 bool ProtocolWithChangesReader::ReadStreamOfAliasTypeChangeImpl(evo_test::StreamItem& value) {

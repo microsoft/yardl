@@ -66,6 +66,18 @@ class ProtocolWithChangesWriter : public evo_test::ProtocolWithChangesWriterBase
   void WriteRecordToRenamedRecordImpl(evo_test::RenamedRecord const& value) override;
   void WriteRecordToAliasedRecordImpl(evo_test::RecordWithChanges const& value) override;
   void WriteRecordToAliasedAliasImpl(evo_test::RecordWithChanges const& value) override;
+  // Stream and Vector type changes
+  void WriteStreamIntToStringToFloatImpl(float const& value) override;
+  void EndStreamIntToStringToFloatImpl() override {}
+  void WriteVectorIntToStringToFloatImpl(std::vector<float> const& value) override;
+  void WriteIntFloatUnionReorderedImpl(std::variant<int32_t, float> const& value) override;
+  void WriteVectorUnionReorderedImpl(std::vector<std::variant<int32_t, float>> const& value) override;
+  void WriteStreamUnionReorderedImpl(std::variant<int32_t, std::string> const& value) override;
+  void EndStreamUnionReorderedImpl() override {}
+  void WriteIntToUnionStreamImpl(std::variant<std::string, int32_t> const& value) override;
+  void EndIntToUnionStreamImpl() override {}
+  void WriteUnionStreamTypeChangeImpl(std::variant<int32_t, float> const& value) override;
+  void EndUnionStreamTypeChangeImpl() override {}
   void WriteStreamOfAliasTypeChangeImpl(evo_test::StreamItem const& value) override;
   void EndStreamOfAliasTypeChangeImpl() override {}
   // Comprehensive NamedType changes
@@ -186,6 +198,13 @@ class ProtocolWithChangesReader : public evo_test::ProtocolWithChangesReaderBase
   void ReadRecordToRenamedRecordImpl(evo_test::RenamedRecord& value) override;
   void ReadRecordToAliasedRecordImpl(evo_test::RecordWithChanges& value) override;
   void ReadRecordToAliasedAliasImpl(evo_test::RecordWithChanges& value) override;
+  bool ReadStreamIntToStringToFloatImpl(float& value) override;
+  void ReadVectorIntToStringToFloatImpl(std::vector<float>& value) override;
+  void ReadIntFloatUnionReorderedImpl(std::variant<int32_t, float>& value) override;
+  void ReadVectorUnionReorderedImpl(std::vector<std::variant<int32_t, float>>& value) override;
+  bool ReadStreamUnionReorderedImpl(std::variant<int32_t, std::string>& value) override;
+  bool ReadIntToUnionStreamImpl(std::variant<std::string, int32_t>& value) override;
+  bool ReadUnionStreamTypeChangeImpl(std::variant<int32_t, float>& value) override;
   bool ReadStreamOfAliasTypeChangeImpl(evo_test::StreamItem& value) override;
   void ReadRlinkImpl(evo_test::RLink& value) override;
   void ReadRlinkRXImpl(evo_test::RLink& value) override;

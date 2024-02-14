@@ -550,7 +550,7 @@ func writeTypeConversion(w *formatting.IndentedWriter, typeChange dsl.TypeChange
 			fmt.Fprintf(w, "} catch (...) {\n")
 			w.Indented(func() {
 				errMsg := fmt.Sprintf(`Unable to convert string \"" + %s + "\" to number`, sourceName)
-				fmt.Fprintf(w, "throw new std::runtime_error(\"%s\");\n", errMsg)
+				fmt.Fprintf(w, "throw std::runtime_error(\"%s\");\n", errMsg)
 			})
 			fmt.Fprintf(w, "}\n")
 
@@ -618,7 +618,7 @@ func writeTypeConversion(w *formatting.IndentedWriter, typeChange dsl.TypeChange
 
 	case *dsl.TypeChangeUnionTypesetChanged:
 		if write {
-			writeTypeConversion(w, typeChange.Inverse(), sourceName, targetName, !write)
+			writeTypeConversion(w, tc.Inverse(), sourceName, targetName, !write)
 			return
 		}
 
@@ -630,16 +630,53 @@ func writeTypeConversion(w *formatting.IndentedWriter, typeChange dsl.TypeChange
 					if tc.OldMatches[i] {
 						fmt.Fprintf(w, "%s = std::get<%d>(%s);\n", targetName, i, sourceName)
 					} else {
-						fmt.Fprintf(w, "throw new std::runtime_error(\"Union type incompatible with previous version of model\");\n")
+						fmt.Fprintf(w, "throw std::runtime_error(\"Union type incompatible with previous version of model\");\n")
 					}
 					fmt.Fprintf(w, "break;\n")
 
 				})
 				fmt.Fprintf(w, "}\n")
 			}
-			fmt.Fprintf(w, "default: throw new std::runtime_error(\"Invalid union index.\");\n")
+			fmt.Fprintf(w, "default: throw std::runtime_error(\"Invalid union index.\");\n")
 		})
 		fmt.Fprintf(w, "}\n")
+
+	case *dsl.TypeChangeVectorTypeChanged:
+		if write {
+			writeTypeConversion(w, tc.Inverse(), sourceName, targetName, !write)
+			return
+		}
+
+		fmt.Fprintf(w, "%s.resize(%s.size());\n", targetName, sourceName)
+		fmt.Fprintf(w, "for (size_t i = 0; i < %s.size(); i++) {\n", sourceName)
+		w.Indented(func() {
+			tmpItemName := sourceName + "_item"
+			tmpItemType := common.TypeSyntax(tc.InnerChange.NewType())
+			fmt.Fprintf(w, "%s %s = {};\n", tmpItemType, tmpItemName)
+			writeTypeConversion(w, tc.InnerChange, fmt.Sprintf("%s[i]", sourceName), tmpItemName, write)
+			fmt.Fprintf(w, "%s[i] = %s;\n", targetName, tmpItemName)
+		})
+		fmt.Fprintf(w, "}\n")
+
+	case *dsl.TypeChangeStreamTypeChanged:
+		change := &dsl.TypeChangeVectorTypeChanged{TypePair: tc.TypePair, InnerChange: tc.InnerChange}
+		writeTypeConversion(w, change, sourceName, targetName, write)
+		// NOTE: This is the same as Vector TypeChange
+		// if write {
+		// 	writeTypeConversion(w, tc.Inverse(), sourceName, targetName, !write)
+		// 	return
+		// }
+
+		// fmt.Fprintf(w, "%s.resize(%s.size());\n", targetName, sourceName)
+		// fmt.Fprintf(w, "for (size_t i = 0; i < %s.size(); i++) {\n", sourceName)
+		// w.Indented(func() {
+		// 	tmpItemName := sourceName + "_item"
+		// 	tmpItemType := common.TypeSyntax(tc.InnerChange.NewType())
+		// 	fmt.Fprintf(w, "%s %s = {};\n", tmpItemType, tmpItemName)
+		// 	writeTypeConversion(w, tc.InnerChange, fmt.Sprintf("%s[i]", sourceName), tmpItemName, write)
+		// 	fmt.Fprintf(w, "%s[i] = %s;\n", targetName, tmpItemName)
+		// })
+		// fmt.Fprintf(w, "}\n")
 
 	default:
 		panic("Expected a TypeChange")
@@ -822,7 +859,13 @@ func writeProtocolMethods(w *formatting.IndentedWriter, p *dsl.ProtocolDefinitio
 
 		fmt.Fprintf(w, "%s %s::%s(%s& value) {\n", returnType, readerClassName, common.ProtocolReadImplMethodName(step), common.TypeSyntax(step.Type))
 		w.Indented(func() {
+			if step.IsStream() {
+				w.WriteStringln("bool read_block_successful = false;")
+			}
 			writeProtocolStep(w, step, stepChanges, false, false)
+			if step.IsStream() {
+				w.WriteStringln("return read_block_successful;")
+			}
 		})
 		w.WriteString("}\n\n")
 
@@ -920,25 +963,29 @@ func writeStepRw(w *formatting.IndentedWriter, stepType dsl.Type, target string,
 			vectorType := *stepType.(*dsl.GeneralizedType)
 			vectorType.Dimensionality = &dsl.Vector{}
 			stepType = &vectorType
-			fmt.Fprintf(w, "%s(stream_, values);\n", typeRwFunction(stepType, write))
+			fmt.Fprintf(w, "%s(stream_, %s);\n", typeRwFunction(stepType, write), target)
 		} else {
-			fmt.Fprintf(w, "yardl::binary::WriteBlock<%s, %s>(stream_, value);\n", common.TypeSyntax(stepType), typeRwFunction(stepType, write))
+			fmt.Fprintf(w, "yardl::binary::WriteBlock<%s, %s>(stream_, %s);\n", common.TypeSyntax(stepType), typeRwFunction(stepType, write), target)
 		}
 	} else {
 		if isPlural {
 			stepType = stepType.(*dsl.GeneralizedType).ToScalar()
-			fmt.Fprintf(w, "yardl::binary::ReadBlocksIntoVector<%s, %s>(stream_, current_block_remaining_, values);\n", common.TypeSyntax(stepType), typeRwFunction(stepType, write))
+			fmt.Fprintf(w, "yardl::binary::ReadBlocksIntoVector<%s, %s>(stream_, current_block_remaining_, %s);\n", common.TypeSyntax(stepType), typeRwFunction(stepType, write), target)
 		} else {
-			fmt.Fprintf(w, "return yardl::binary::ReadBlock<%s, %s>(stream_, current_block_remaining_, value);\n", common.TypeSyntax(stepType), typeRwFunction(stepType, write))
+			fmt.Fprintf(w, "read_block_successful = yardl::binary::ReadBlock<%s, %s>(stream_, current_block_remaining_, %s);\n", common.TypeSyntax(stepType), typeRwFunction(stepType, write), target)
 		}
 	}
 }
 
 func writeProtocolStep(w *formatting.IndentedWriter, step *dsl.ProtocolStep, changes map[string]dsl.TypeChange, isPlural bool, write bool) {
+	target := "value"
+	if isPlural {
+		target = "values"
+	}
 
 	writeChangeSwitchCase(w, changes,
 		func(w *formatting.IndentedWriter) {
-			writeStepRw(w, step.Type, "value", step.IsStream(), isPlural, write)
+			writeStepRw(w, step.Type, target, step.IsStream(), isPlural, write)
 		},
 		func(w *formatting.IndentedWriter) {
 			// Handle "added" ProtocolSteps
@@ -958,20 +1005,53 @@ func writeProtocolStep(w *formatting.IndentedWriter, step *dsl.ProtocolStep, cha
 		},
 		func(w *formatting.IndentedWriter, change dsl.TypeChange) {
 			// Handle conversions for ProtocolStep type changes
-			if requiresExplicitConversion(change) {
+			if !requiresExplicitConversion(change) {
+				writeStepRw(w, change.OldType(), target, step.IsStream(), isPlural, write)
+				return
+			}
+
+			// Otherwise, we need to do explicit conversion for this ProtocolStep
+			if isPlural {
+				tmpVecName := common.FieldIdentifierName(step.Name)
+				tmpVecType := *change.OldType().(*dsl.GeneralizedType)
+				tmpVecType.Dimensionality = &dsl.Vector{}
+				fmt.Fprintf(w, "%s %s = {};\n", common.TypeSyntax(&tmpVecType), tmpVecName)
+
+				if write {
+					writeTypeConversion(w, change, target, tmpVecName, write)
+					writeStepRw(w, change.OldType(), tmpVecName, step.IsStream(), isPlural, write)
+				} else {
+					fmt.Fprintf(w, "%s.reserve(%s.capacity());\n", tmpVecName, target)
+					writeStepRw(w, change.OldType(), tmpVecName, step.IsStream(), isPlural, write)
+					writeTypeConversion(w, change, tmpVecName, target, write)
+				}
+			} else {
+				if step.IsStream() {
+					// Reading/Writing the singular form for a stream so we only need the inner stream type change
+					if ch, streamTypeChanged := change.(*dsl.TypeChangeStreamTypeChanged); streamTypeChanged {
+						change = ch.InnerChange
+					}
+				}
+
 				tmpVarName := common.FieldIdentifierName(step.Name)
 				tmpVarType := common.TypeSyntax(change.OldType())
 				fmt.Fprintf(w, "%s %s = {};\n", tmpVarType, tmpVarName)
 
 				if write {
-					writeTypeConversion(w, change, "value", tmpVarName, write)
+					writeTypeConversion(w, change, target, tmpVarName, write)
 					writeStepRw(w, change.OldType(), tmpVarName, step.IsStream(), isPlural, write)
 				} else {
 					writeStepRw(w, change.OldType(), tmpVarName, step.IsStream(), isPlural, write)
-					writeTypeConversion(w, change, tmpVarName, "value", write)
+					if step.IsStream() {
+						fmt.Fprintf(w, "if (read_block_successful) {\n")
+						w.Indented(func() {
+							writeTypeConversion(w, change, tmpVarName, target, write)
+						})
+						fmt.Fprintf(w, "}\n")
+					} else {
+						writeTypeConversion(w, change, tmpVarName, target, write)
+					}
 				}
-			} else {
-				writeStepRw(w, change.OldType(), "value", step.IsStream(), isPlural, write)
 			}
 		},
 	)

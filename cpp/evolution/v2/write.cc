@@ -75,6 +75,32 @@ int main(void) {
   w.WriteRecordToAliasedRecord(rec);
   w.WriteRecordToAliasedAlias(rec);
 
+  for (int i = 0; i < 42; i++) {
+    w.WriteStreamIntToStringToFloat(42.0);
+  }
+  w.EndStreamIntToStringToFloat();
+
+  std::vector<float> float_vec(42, 42.0);
+  w.WriteVectorIntToStringToFloat(float_vec);
+
+  w.WriteIntFloatUnionReordered(static_cast<float>(M_PI));
+
+  std::vector<std::variant<int, float>> vec(42, static_cast<float>(M_PI));
+  w.WriteVectorUnionReordered(vec);
+
+  for (int i = 0; i < 42; i++) {
+    w.WriteStreamUnionReordered("Hello, World!");
+  }
+  w.EndStreamUnionReordered();
+
+  std::vector<std::variant<std::string, int>> int_string_vec(42, 42);
+  w.WriteIntToUnionStream(int_string_vec);
+  w.EndIntToUnionStream();
+
+  std::vector<std::variant<int, float>> int_float_vec(42, 42);
+  w.WriteUnionStreamTypeChange(int_float_vec);
+  w.EndUnionStreamTypeChange();
+
   w.WriteStreamOfAliasTypeChange(std::vector<StreamItem>(7, rec));
   w.EndStreamOfAliasTypeChange();
 

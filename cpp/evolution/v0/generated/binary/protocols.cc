@@ -791,6 +791,46 @@ void ProtocolWithChangesWriter::WriteRecordToAliasedAliasImpl(evo_test::RecordWi
   evo_test::binary::WriteRecordWithChanges(stream_, value);
 }
 
+void ProtocolWithChangesWriter::WriteStreamIntToStringToFloatImpl(int32_t const& value) {
+  yardl::binary::WriteBlock<int32_t, yardl::binary::WriteInteger>(stream_, value);
+}
+
+void ProtocolWithChangesWriter::WriteStreamIntToStringToFloatImpl(std::vector<int32_t> const& values) {
+  if (!values.empty()) {
+    yardl::binary::WriteVector<int32_t, yardl::binary::WriteInteger>(stream_, values);
+  }
+}
+
+void ProtocolWithChangesWriter::EndStreamIntToStringToFloatImpl() {
+  yardl::binary::WriteInteger(stream_, 0U);
+}
+
+void ProtocolWithChangesWriter::WriteVectorIntToStringToFloatImpl(std::vector<int32_t> const& value) {
+  yardl::binary::WriteVector<int32_t, yardl::binary::WriteInteger>(stream_, value);
+}
+
+void ProtocolWithChangesWriter::WriteIntFloatUnionReorderedImpl(std::variant<int32_t, float> const& value) {
+  WriteUnion<int32_t, yardl::binary::WriteInteger, float, yardl::binary::WriteFloatingPoint>(stream_, value);
+}
+
+void ProtocolWithChangesWriter::WriteVectorUnionReorderedImpl(std::vector<std::variant<int32_t, float>> const& value) {
+  yardl::binary::WriteVector<std::variant<int32_t, float>, WriteUnion<int32_t, yardl::binary::WriteInteger, float, yardl::binary::WriteFloatingPoint>>(stream_, value);
+}
+
+void ProtocolWithChangesWriter::WriteStreamUnionReorderedImpl(std::variant<int32_t, std::string> const& value) {
+  yardl::binary::WriteBlock<std::variant<int32_t, std::string>, WriteUnion<int32_t, yardl::binary::WriteInteger, std::string, yardl::binary::WriteString>>(stream_, value);
+}
+
+void ProtocolWithChangesWriter::WriteStreamUnionReorderedImpl(std::vector<std::variant<int32_t, std::string>> const& values) {
+  if (!values.empty()) {
+    yardl::binary::WriteVector<std::variant<int32_t, std::string>, WriteUnion<int32_t, yardl::binary::WriteInteger, std::string, yardl::binary::WriteString>>(stream_, values);
+  }
+}
+
+void ProtocolWithChangesWriter::EndStreamUnionReorderedImpl() {
+  yardl::binary::WriteInteger(stream_, 0U);
+}
+
 void ProtocolWithChangesWriter::WriteStreamOfAliasTypeChangeImpl(evo_test::StreamItem const& value) {
   yardl::binary::WriteBlock<evo_test::StreamItem, evo_test::binary::WriteStreamItem>(stream_, value);
 }
@@ -1207,8 +1247,44 @@ void ProtocolWithChangesReader::ReadRecordToAliasedAliasImpl(evo_test::RecordWit
   evo_test::binary::ReadRecordWithChanges(stream_, value);
 }
 
+bool ProtocolWithChangesReader::ReadStreamIntToStringToFloatImpl(int32_t& value) {
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<int32_t, yardl::binary::ReadInteger>(stream_, current_block_remaining_, value);
+  return read_block_successful;
+}
+
+bool ProtocolWithChangesReader::ReadStreamIntToStringToFloatImpl(std::vector<int32_t>& values) {
+  yardl::binary::ReadBlocksIntoVector<int32_t, yardl::binary::ReadInteger>(stream_, current_block_remaining_, values);
+  return current_block_remaining_ != 0;
+}
+
+void ProtocolWithChangesReader::ReadVectorIntToStringToFloatImpl(std::vector<int32_t>& value) {
+  yardl::binary::ReadVector<int32_t, yardl::binary::ReadInteger>(stream_, value);
+}
+
+void ProtocolWithChangesReader::ReadIntFloatUnionReorderedImpl(std::variant<int32_t, float>& value) {
+  ReadUnion<int32_t, yardl::binary::ReadInteger, float, yardl::binary::ReadFloatingPoint>(stream_, value);
+}
+
+void ProtocolWithChangesReader::ReadVectorUnionReorderedImpl(std::vector<std::variant<int32_t, float>>& value) {
+  yardl::binary::ReadVector<std::variant<int32_t, float>, ReadUnion<int32_t, yardl::binary::ReadInteger, float, yardl::binary::ReadFloatingPoint>>(stream_, value);
+}
+
+bool ProtocolWithChangesReader::ReadStreamUnionReorderedImpl(std::variant<int32_t, std::string>& value) {
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<std::variant<int32_t, std::string>, ReadUnion<int32_t, yardl::binary::ReadInteger, std::string, yardl::binary::ReadString>>(stream_, current_block_remaining_, value);
+  return read_block_successful;
+}
+
+bool ProtocolWithChangesReader::ReadStreamUnionReorderedImpl(std::vector<std::variant<int32_t, std::string>>& values) {
+  yardl::binary::ReadBlocksIntoVector<std::variant<int32_t, std::string>, ReadUnion<int32_t, yardl::binary::ReadInteger, std::string, yardl::binary::ReadString>>(stream_, current_block_remaining_, values);
+  return current_block_remaining_ != 0;
+}
+
 bool ProtocolWithChangesReader::ReadStreamOfAliasTypeChangeImpl(evo_test::StreamItem& value) {
-  return yardl::binary::ReadBlock<evo_test::StreamItem, evo_test::binary::ReadStreamItem>(stream_, current_block_remaining_, value);
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<evo_test::StreamItem, evo_test::binary::ReadStreamItem>(stream_, current_block_remaining_, value);
+  return read_block_successful;
 }
 
 bool ProtocolWithChangesReader::ReadStreamOfAliasTypeChangeImpl(std::vector<evo_test::StreamItem>& values) {
@@ -1409,7 +1485,9 @@ void ProtocolWithChangesReader::ReadGenericNestedRecordsImpl(evo_test::GenericRe
 }
 
 bool ProtocolWithChangesReader::ReadGenericRecordStreamImpl(evo_test::GenericRecord<int32_t, std::string>& value) {
-  return yardl::binary::ReadBlock<evo_test::GenericRecord<int32_t, std::string>, evo_test::binary::ReadGenericRecord<int32_t, yardl::binary::ReadInteger, std::string, yardl::binary::ReadString>>(stream_, current_block_remaining_, value);
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<evo_test::GenericRecord<int32_t, std::string>, evo_test::binary::ReadGenericRecord<int32_t, yardl::binary::ReadInteger, std::string, yardl::binary::ReadString>>(stream_, current_block_remaining_, value);
+  return read_block_successful;
 }
 
 bool ProtocolWithChangesReader::ReadGenericRecordStreamImpl(std::vector<evo_test::GenericRecord<int32_t, std::string>>& values) {
@@ -1418,7 +1496,9 @@ bool ProtocolWithChangesReader::ReadGenericRecordStreamImpl(std::vector<evo_test
 }
 
 bool ProtocolWithChangesReader::ReadGenericParentRecordStreamImpl(evo_test::GenericParentRecord<int32_t>& value) {
-  return yardl::binary::ReadBlock<evo_test::GenericParentRecord<int32_t>, evo_test::binary::ReadGenericParentRecord<int32_t, yardl::binary::ReadInteger>>(stream_, current_block_remaining_, value);
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<evo_test::GenericParentRecord<int32_t>, evo_test::binary::ReadGenericParentRecord<int32_t, yardl::binary::ReadInteger>>(stream_, current_block_remaining_, value);
+  return read_block_successful;
 }
 
 bool ProtocolWithChangesReader::ReadGenericParentRecordStreamImpl(std::vector<evo_test::GenericParentRecord<int32_t>>& values) {
@@ -1431,7 +1511,9 @@ void ProtocolWithChangesReader::ReadVectorRecordWithChangesImpl(std::vector<evo_
 }
 
 bool ProtocolWithChangesReader::ReadStreamedRecordWithChangesImpl(evo_test::RecordWithChanges& value) {
-  return yardl::binary::ReadBlock<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges>(stream_, current_block_remaining_, value);
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges>(stream_, current_block_remaining_, value);
+  return read_block_successful;
 }
 
 bool ProtocolWithChangesReader::ReadStreamedRecordWithChangesImpl(std::vector<evo_test::RecordWithChanges>& values) {
@@ -1466,7 +1548,9 @@ void UnusedProtocolWriter::CloseImpl() {
 }
 
 bool UnusedProtocolReader::ReadRecordsImpl(evo_test::UnchangedRecord& value) {
-  return yardl::binary::ReadBlock<evo_test::UnchangedRecord, evo_test::binary::ReadUnchangedRecord>(stream_, current_block_remaining_, value);
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<evo_test::UnchangedRecord, evo_test::binary::ReadUnchangedRecord>(stream_, current_block_remaining_, value);
+  return read_block_successful;
 }
 
 bool UnusedProtocolReader::ReadRecordsImpl(std::vector<evo_test::UnchangedRecord>& values) {

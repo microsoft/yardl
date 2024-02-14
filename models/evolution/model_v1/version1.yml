@@ -50,6 +50,25 @@ ProtocolWithChanges: !protocol
     recordToAliasedRecord: AliasedRecordWithChanges
     recordToAliasedAlias: AliasOfAliasedRecordWithChanges
 
+    # Stream and Vector type changes
+    streamIntToStringToFloat: !stream
+      items: string
+    vectorIntToStringToFloat: !vector
+      items: string
+
+    intFloatUnionReordered: [float, int]
+
+    vectorUnionReordered: !vector
+      items: [float, int]
+    streamUnionReordered: !stream
+      items: [string, int]
+
+    intToUnionStream: !stream
+      items: int
+
+    unionStreamTypeChange: !stream
+      items: [int, bool]
+
     streamOfAliasTypeChange: !stream
       items: StreamItem
 
