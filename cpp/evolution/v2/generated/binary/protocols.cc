@@ -788,10 +788,16 @@ template<typename Y, yardl::binary::Reader<Y> ReadY, typename Z, yardl::binary::
 [[maybe_unused]] void ReadRecordWithChanges_v1(yardl::binary::CodedInputStream& stream, evo_test::RecordWithChanges& value) {
   double float_to_double = {};
   yardl::binary::ReadFloatingPoint(stream, float_to_double);
+  if (float_to_double > std::numeric_limits<float>::max() || float_to_double < std::numeric_limits<float>::lowest()) {
+    throw std::runtime_error("Numeric overflow detected while converting 'float64' to 'float32'");
+  }
   value.float_to_double = static_cast<float>(float_to_double);
   evo_test::binary::ReadUnchangedRecord_v1(stream, value.unchanged_record);
   int64_t int_to_long = {};
   yardl::binary::ReadInteger(stream, int_to_long);
+  if (int_to_long > std::numeric_limits<int32_t>::max() || int_to_long < std::numeric_limits<int32_t>::lowest()) {
+    throw std::runtime_error("Numeric overflow detected while converting 'int64' to 'int32'");
+  }
   value.int_to_long = static_cast<int32_t>(int_to_long);
   std::optional<std::string> optional_long_to_string = {};
   yardl::binary::ReadOptional<std::string, yardl::binary::ReadString>(stream, optional_long_to_string);
@@ -1128,6 +1134,9 @@ void ProtocolWithChangesWriter::WriteInt8ToUintImpl(int8_t const& value) {
   switch (version_) {
   case Version::v1: {
     uint32_t int8_to_uint = {};
+    if (value < 0) {
+      throw std::runtime_error("Negative overflow detected while converting 'int8' to 'uint32'");
+    }
     int8_to_uint = static_cast<uint32_t>(value);
     yardl::binary::WriteInteger(stream_, int8_to_uint);
     break;
@@ -1142,6 +1151,9 @@ void ProtocolWithChangesWriter::WriteInt8ToUlongImpl(int8_t const& value) {
   switch (version_) {
   case Version::v1: {
     uint64_t int8_to_ulong = {};
+    if (value < 0) {
+      throw std::runtime_error("Negative overflow detected while converting 'int8' to 'uint64'");
+    }
     int8_to_ulong = static_cast<uint64_t>(value);
     yardl::binary::WriteInteger(stream_, int8_to_ulong);
     break;
@@ -1184,6 +1196,9 @@ void ProtocolWithChangesWriter::WriteIntToUintImpl(int32_t const& value) {
   switch (version_) {
   case Version::v1: {
     uint32_t int_to_uint = {};
+    if (value < 0) {
+      throw std::runtime_error("Negative overflow detected while converting 'int32' to 'uint32'");
+    }
     int_to_uint = static_cast<uint32_t>(value);
     yardl::binary::WriteInteger(stream_, int_to_uint);
     break;
@@ -1254,6 +1269,9 @@ void ProtocolWithChangesWriter::WriteUintToFloatImpl(uint32_t const& value) {
   switch (version_) {
   case Version::v1: {
     float uint_to_float = {};
+    if (value > std::numeric_limits<float>::max()) {
+      throw std::runtime_error("Numeric overflow detected while converting 'uint32' to 'float32'");
+    }
     uint_to_float = static_cast<float>(value);
     yardl::binary::WriteFloatingPoint(stream_, uint_to_float);
     break;
@@ -3183,6 +3201,9 @@ void ProtocolWithChangesReader::ReadInt8ToIntImpl(int8_t& value) {
   case Version::v1: {
     int32_t int8_to_int = {};
     yardl::binary::ReadInteger(stream_, int8_to_int);
+    if (int8_to_int > std::numeric_limits<int8_t>::max() || int8_to_int < std::numeric_limits<int8_t>::lowest()) {
+      throw std::runtime_error("Numeric overflow detected while converting 'int32' to 'int8'");
+    }
     value = static_cast<int8_t>(int8_to_int);
     break;
   }
@@ -3197,6 +3218,9 @@ void ProtocolWithChangesReader::ReadInt8ToLongImpl(int8_t& value) {
   case Version::v1: {
     int64_t int8_to_long = {};
     yardl::binary::ReadInteger(stream_, int8_to_long);
+    if (int8_to_long > std::numeric_limits<int8_t>::max() || int8_to_long < std::numeric_limits<int8_t>::lowest()) {
+      throw std::runtime_error("Numeric overflow detected while converting 'int64' to 'int8'");
+    }
     value = static_cast<int8_t>(int8_to_long);
     break;
   }
@@ -3211,6 +3235,9 @@ void ProtocolWithChangesReader::ReadInt8ToUintImpl(int8_t& value) {
   case Version::v1: {
     uint32_t int8_to_uint = {};
     yardl::binary::ReadInteger(stream_, int8_to_uint);
+    if (int8_to_uint > std::numeric_limits<int8_t>::max()) {
+      throw std::runtime_error("Numeric overflow detected while converting 'uint32' to 'int8'");
+    }
     value = static_cast<int8_t>(int8_to_uint);
     break;
   }
@@ -3225,6 +3252,9 @@ void ProtocolWithChangesReader::ReadInt8ToUlongImpl(int8_t& value) {
   case Version::v1: {
     uint64_t int8_to_ulong = {};
     yardl::binary::ReadInteger(stream_, int8_to_ulong);
+    if (int8_to_ulong > std::numeric_limits<int8_t>::max()) {
+      throw std::runtime_error("Numeric overflow detected while converting 'uint64' to 'int8'");
+    }
     value = static_cast<int8_t>(int8_to_ulong);
     break;
   }
@@ -3239,6 +3269,9 @@ void ProtocolWithChangesReader::ReadInt8ToFloatImpl(int8_t& value) {
   case Version::v1: {
     float int8_to_float = {};
     yardl::binary::ReadFloatingPoint(stream_, int8_to_float);
+    if (int8_to_float > std::numeric_limits<int8_t>::max() || int8_to_float < std::numeric_limits<int8_t>::lowest()) {
+      throw std::runtime_error("Numeric overflow detected while converting 'float32' to 'int8'");
+    }
     value = static_cast<int8_t>(std::round(int8_to_float));
     break;
   }
@@ -3253,6 +3286,9 @@ void ProtocolWithChangesReader::ReadInt8ToDoubleImpl(int8_t& value) {
   case Version::v1: {
     double int8_to_double = {};
     yardl::binary::ReadFloatingPoint(stream_, int8_to_double);
+    if (int8_to_double > std::numeric_limits<int8_t>::max() || int8_to_double < std::numeric_limits<int8_t>::lowest()) {
+      throw std::runtime_error("Numeric overflow detected while converting 'float64' to 'int8'");
+    }
     value = static_cast<int8_t>(std::round(int8_to_double));
     break;
   }
@@ -3267,6 +3303,9 @@ void ProtocolWithChangesReader::ReadIntToUintImpl(int32_t& value) {
   case Version::v1: {
     uint32_t int_to_uint = {};
     yardl::binary::ReadInteger(stream_, int_to_uint);
+    if (int_to_uint > std::numeric_limits<int32_t>::max()) {
+      throw std::runtime_error("Numeric overflow detected while converting 'uint32' to 'int32'");
+    }
     value = static_cast<int32_t>(int_to_uint);
     break;
   }
@@ -3281,6 +3320,9 @@ void ProtocolWithChangesReader::ReadIntToLongImpl(int32_t& value) {
   case Version::v1: {
     int64_t int_to_long = {};
     yardl::binary::ReadInteger(stream_, int_to_long);
+    if (int_to_long > std::numeric_limits<int32_t>::max() || int_to_long < std::numeric_limits<int32_t>::lowest()) {
+      throw std::runtime_error("Numeric overflow detected while converting 'int64' to 'int32'");
+    }
     value = static_cast<int32_t>(int_to_long);
     break;
   }
@@ -3309,6 +3351,9 @@ void ProtocolWithChangesReader::ReadIntToDoubleImpl(int32_t& value) {
   case Version::v1: {
     double int_to_double = {};
     yardl::binary::ReadFloatingPoint(stream_, int_to_double);
+    if (int_to_double > std::numeric_limits<int32_t>::max() || int_to_double < std::numeric_limits<int32_t>::lowest()) {
+      throw std::runtime_error("Numeric overflow detected while converting 'float64' to 'int32'");
+    }
     value = static_cast<int32_t>(std::round(int_to_double));
     break;
   }
@@ -3323,6 +3368,9 @@ void ProtocolWithChangesReader::ReadUintToUlongImpl(uint32_t& value) {
   case Version::v1: {
     uint64_t uint_to_ulong = {};
     yardl::binary::ReadInteger(stream_, uint_to_ulong);
+    if (uint_to_ulong > std::numeric_limits<uint32_t>::max() || uint_to_ulong < std::numeric_limits<uint32_t>::lowest()) {
+      throw std::runtime_error("Numeric overflow detected while converting 'uint64' to 'uint32'");
+    }
     value = static_cast<uint32_t>(uint_to_ulong);
     break;
   }
@@ -3337,6 +3385,9 @@ void ProtocolWithChangesReader::ReadUintToFloatImpl(uint32_t& value) {
   case Version::v1: {
     float uint_to_float = {};
     yardl::binary::ReadFloatingPoint(stream_, uint_to_float);
+    if (uint_to_float < 0) {
+      throw std::runtime_error("Negative overflow detected while converting 'float32' to 'uint32'");
+    }
     value = static_cast<uint32_t>(std::round(uint_to_float));
     break;
   }
@@ -3351,6 +3402,12 @@ void ProtocolWithChangesReader::ReadUintToDoubleImpl(uint32_t& value) {
   case Version::v1: {
     double uint_to_double = {};
     yardl::binary::ReadFloatingPoint(stream_, uint_to_double);
+    if (uint_to_double < 0) {
+      throw std::runtime_error("Negative overflow detected while converting 'float64' to 'uint32'");
+    }
+    if (uint_to_double > std::numeric_limits<uint32_t>::max()) {
+      throw std::runtime_error("Numeric overflow detected while converting 'float64' to 'uint32'");
+    }
     value = static_cast<uint32_t>(std::round(uint_to_double));
     break;
   }
@@ -3365,6 +3422,9 @@ void ProtocolWithChangesReader::ReadFloatToDoubleImpl(float& value) {
   case Version::v1: {
     double float_to_double = {};
     yardl::binary::ReadFloatingPoint(stream_, float_to_double);
+    if (float_to_double > std::numeric_limits<float>::max() || float_to_double < std::numeric_limits<float>::lowest()) {
+      throw std::runtime_error("Numeric overflow detected while converting 'float64' to 'float32'");
+    }
     value = static_cast<float>(float_to_double);
     break;
   }

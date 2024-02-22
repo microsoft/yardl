@@ -51,16 +51,16 @@ int main(void) {
   r.ReadInt8ToLong(int8);
   EVO_ASSERT(int8 == INT8_MIN);
   r.ReadInt8ToUint(int8);
-  EVO_ASSERT(int8 == INT8_MIN);
+  EVO_ASSERT(int8 == INT8_MAX);
   r.ReadInt8ToUlong(int8);
-  EVO_ASSERT(int8 == INT8_MIN);
+  EVO_ASSERT(int8 == INT8_MAX);
   r.ReadInt8ToFloat(int8);
   EVO_ASSERT(int8 == INT8_MIN);
   r.ReadInt8ToDouble(int8);
   EVO_ASSERT(int8 == INT8_MIN);
 
   r.ReadIntToUint(int32);
-  EVO_ASSERT(int32 == INT_MIN);
+  EVO_ASSERT(int32 == INT_MAX);
   r.ReadIntToLong(int32);
   EVO_ASSERT(int32 == INT_MIN);
   r.ReadIntToFloat(int32);

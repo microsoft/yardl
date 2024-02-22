@@ -8,12 +8,12 @@ int main(void) {
 
   w.WriteInt8ToInt(INT8_MIN);
   w.WriteInt8ToLong(INT8_MIN);
-  w.WriteInt8ToUint(INT8_MIN);
-  w.WriteInt8ToUlong(INT8_MIN);
+  w.WriteInt8ToUint(INT8_MAX);
+  w.WriteInt8ToUlong(INT8_MAX);
   w.WriteInt8ToFloat(INT8_MIN);
   w.WriteInt8ToDouble(INT8_MIN);
 
-  w.WriteIntToUint(INT_MIN);
+  w.WriteIntToUint(INT_MAX);
   w.WriteIntToLong(INT_MIN);
   w.WriteIntToFloat(INT8_MIN);
   w.WriteIntToDouble(INT8_MIN);

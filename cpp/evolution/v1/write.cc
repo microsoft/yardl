@@ -8,12 +8,12 @@ int main(void) {
 
   w.WriteInt8ToInt(static_cast<int>(INT8_MIN));
   w.WriteInt8ToLong(static_cast<long>(INT8_MIN));
-  w.WriteInt8ToUint(static_cast<uint32_t>(INT8_MIN));
-  w.WriteInt8ToUlong(static_cast<uint64_t>(INT8_MIN));
+  w.WriteInt8ToUint(static_cast<uint32_t>(INT8_MAX));
+  w.WriteInt8ToUlong(static_cast<uint64_t>(INT8_MAX));
   w.WriteInt8ToFloat(static_cast<float>(INT8_MIN));
   w.WriteInt8ToDouble(static_cast<double>(INT8_MIN));
 
-  w.WriteIntToUint(static_cast<uint32_t>(INT_MIN));
+  w.WriteIntToUint(static_cast<uint32_t>(INT_MAX));
   w.WriteIntToLong(static_cast<long>(INT_MIN));
   w.WriteIntToFloat(static_cast<float>(INT8_MIN));
   w.WriteIntToDouble(static_cast<double>(INT8_MIN));

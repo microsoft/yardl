@@ -52,16 +52,16 @@ int main(void) {
   r.ReadInt8ToLong(int64);
   EVO_ASSERT(int64 == INT8_MIN);
   r.ReadInt8ToUint(uint32);
-  EVO_ASSERT(uint32 == static_cast<uint32_t>(INT8_MIN));
+  EVO_ASSERT(uint32 == static_cast<uint32_t>(INT8_MAX));
   r.ReadInt8ToUlong(uint64);
-  EVO_ASSERT(uint64 == static_cast<uint64_t>(INT8_MIN));
+  EVO_ASSERT(uint64 == static_cast<uint64_t>(INT8_MAX));
   r.ReadInt8ToFloat(flt);
   EVO_ASSERT_EQUALISH(flt, static_cast<float>(INT8_MIN));
   r.ReadInt8ToDouble(dbl);
   EVO_ASSERT_EQUALISH(dbl, static_cast<double>(INT8_MIN));
 
   r.ReadIntToUint(uint32);
-  EVO_ASSERT(uint32 == static_cast<uint32_t>(INT_MIN));
+  EVO_ASSERT(uint32 == static_cast<uint32_t>(INT_MAX));
   r.ReadIntToLong(int64);
   EVO_ASSERT(int64 == static_cast<int64_t>(INT_MIN));
   r.ReadIntToFloat(flt);

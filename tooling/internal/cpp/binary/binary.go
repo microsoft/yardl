@@ -515,6 +515,38 @@ func writeTypeConversion(w *formatting.IndentedWriter, typeChange dsl.TypeChange
 			oldPrim := tc.OldType().(*dsl.SimpleType).ResolvedDefinition.(dsl.PrimitiveDefinition)
 			newPrim := tc.NewType().(*dsl.SimpleType).ResolvedDefinition.(dsl.PrimitiveDefinition)
 			rhs := sourceName
+
+			// Negative overflow check
+			if dsl.IsSignedPrimitive(oldPrim) && !dsl.IsSignedPrimitive(newPrim) {
+				fmt.Fprintf(w, "if (%s < 0) {\n", rhs)
+				w.Indented(func() {
+					fmt.Fprintf(w, "throw std::runtime_error(\"Negative overflow detected while converting '%s' to '%s'\");\n", dsl.TypeToShortSyntax(tc.OldType(), false), dsl.TypeToShortSyntax(tc.NewType(), false))
+				})
+				fmt.Fprintf(w, "}\n")
+			}
+
+			// Downcast overflow check
+			if dsl.GetPrimitiveWidth(oldPrim) > dsl.GetPrimitiveWidth(newPrim) {
+				if dsl.IsSignedPrimitive(oldPrim) == dsl.IsSignedPrimitive(newPrim) {
+					fmt.Fprintf(w, "if (%s > std::numeric_limits<%s>::max() || %s < std::numeric_limits<%s>::lowest()) {\n", rhs, common.TypeSyntax(tc.NewType()), rhs, common.TypeSyntax(tc.NewType()))
+				} else {
+					fmt.Fprintf(w, "if (%s > std::numeric_limits<%s>::max()) {\n", rhs, common.TypeSyntax(tc.NewType()))
+				}
+				w.Indented(func() {
+					fmt.Fprintf(w, "throw std::runtime_error(\"Numeric overflow detected while converting '%s' to '%s'\");\n", dsl.TypeToShortSyntax(tc.OldType(), false), dsl.TypeToShortSyntax(tc.NewType(), false))
+				})
+				fmt.Fprintf(w, "}\n")
+			}
+
+			// Unsigned -> Signed overflow check
+			if dsl.GetPrimitiveWidth(oldPrim) == dsl.GetPrimitiveWidth(newPrim) && !dsl.IsSignedPrimitive(oldPrim) && dsl.IsSignedPrimitive(newPrim) {
+				fmt.Fprintf(w, "if (%s > std::numeric_limits<%s>::max()) {\n", rhs, common.TypeSyntax(tc.NewType()))
+				w.Indented(func() {
+					fmt.Fprintf(w, "throw std::runtime_error(\"Numeric overflow detected while converting '%s' to '%s'\");\n", dsl.TypeToShortSyntax(tc.OldType(), false), dsl.TypeToShortSyntax(tc.NewType(), false))
+				})
+				fmt.Fprintf(w, "}\n")
+			}
+
 			if dsl.GetPrimitiveKind(oldPrim) == dsl.PrimitiveKindFloatingPoint && dsl.GetPrimitiveKind(newPrim) == dsl.PrimitiveKindInteger {
 				rhs = fmt.Sprintf("std::round(%s)", rhs)
 			}
