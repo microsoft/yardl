@@ -218,7 +218,14 @@ func writeCompatibilityAliasDefinition(w *formatting.IndentedWriter, ch dsl.Defi
 	oldDef := ch.PreviousDefinition()
 	newDef := ch.LatestDefinition()
 	common.WriteDefinitionTemplateSpec(w, oldDef)
-	fmt.Fprintf(w, "using %s = %s;\n\n", common.TypeIdentifierName(oldDef.GetDefinitionMeta().Name), common.TypeDefinitionSyntax(newDef))
+	switch ch := ch.(type) {
+	case *dsl.AliasRemoved:
+		if nt, ok := ch.LatestDefinition().(*dsl.NamedType); ok {
+			fmt.Fprintf(w, "using %s = %s;\n\n", common.TypeIdentifierName(oldDef.GetDefinitionMeta().Name), common.TypeSyntax(nt.Type))
+		}
+	default:
+		fmt.Fprintf(w, "using %s = %s;\n\n", common.TypeIdentifierName(oldDef.GetDefinitionMeta().Name), common.TypeDefinitionSyntax(newDef))
+	}
 }
 
 func writeComputedFieldExpression(w *formatting.IndentedWriter, expression dsl.Expression) {

@@ -140,8 +140,11 @@ using AliasedOpenGenericRecord = evo_test::GenericRecord<A, B>;
 template <typename T>
 using AliasedHalfClosedGenericRecord = evo_test::AliasedOpenGenericRecord<T, std::string>;
 
+template <typename X, typename Y>
+using GenericUnion2 = std::variant<X, Y>;
+
 template <typename T1, typename T2>
-using GenericUnion = std::variant<T1, T2>;
+using GenericUnion = evo_test::GenericUnion2<T1, T2>;
 
 template <typename A, typename B>
 using AliasedOpenGenericUnion = evo_test::GenericUnion<A, B>;
@@ -168,7 +171,13 @@ struct GenericParentRecord {
   }
 };
 
+template <typename T, typename U>
+using GenericUnionReversed = evo_test::GenericUnion2<U, T>;
+
 using AliasedClosedGenericRecord = evo_test::AliasedHalfClosedGenericRecord<int32_t>;
+
+template <typename X, typename Y>
+using GenericRecordReversed = evo_test::GenericRecord<Y, X>;
 
 using AliasedGenericRecordOrString = std::variant<evo_test::GenericRecord<int32_t, std::string>, std::string>;
 
@@ -223,6 +232,8 @@ using AliasedEnum = evo_test::GrowingEnum;
 
 using AliasedLongToString_v0 = evo_test::AliasedLongToString;
 
+using UnchangedRecord_v0 = evo_test::UnchangedRecord;
+
 using RecordWithChanges_v0 = evo_test::RecordWithChanges;
 
 using AliasedRecordWithChanges_v0 = evo_test::AliasedRecordWithChanges;
@@ -239,20 +250,25 @@ using RA_v0 = evo_test::RZ;
 
 using RLink_v0 = evo_test::RLink;
 
-using UnusedButChangedRecord_v0 = evo_test::UnusedButChangedRecord;
-
 template <typename T1, typename T2>
 using GenericRecord_v0 = evo_test::GenericRecord<T1, T2>;
 
+template <typename T1, typename T2>
+using GenericUnion_v0 = evo_test::GenericUnion<T1, T2>;
+
 template <typename T>
 using GenericParentRecord_v0 = evo_test::GenericParentRecord<T>;
+
+template <typename T>
+using AliasedHalfClosedGenericUnion_v0 = evo_test::GenericUnion<T, float>;
 
 using AliasedClosedGenericUnion_v0 = evo_test::AliasedClosedGenericUnion;
 
 template <typename T>
 using AliasedHalfClosedGenericRecord_v0 = evo_test::AliasedHalfClosedGenericRecord<T>;
 
-using AliasedClosedGenericRecord_v0 = evo_test::AliasedClosedGenericRecord;
+template <typename T2>
+using UnchangedGeneric_v0 = evo_test::OldUnchangedGeneric<T2>;
 
 template <typename Y, typename Z>
 using ChangedGeneric_v0 = evo_test::OldChangedGeneric<Y, Z>;

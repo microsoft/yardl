@@ -698,6 +698,14 @@ template<typename Y, yardl::binary::Reader<Y> ReadY, typename Z, yardl::binary::
   evo_test::binary::ReadUnchangedGeneric<Z, ReadZ>(stream, value.z);
 }
 
+[[maybe_unused]] void WriteUnchangedRecord_v0(yardl::binary::CodedOutputStream& stream, evo_test::UnchangedRecord const& value) {
+  evo_test::binary::WriteUnchangedRecord(stream, value);
+}
+
+[[maybe_unused]] void ReadUnchangedRecord_v0(yardl::binary::CodedInputStream& stream, evo_test::UnchangedRecord& value) {
+  evo_test::binary::ReadUnchangedRecord(stream, value);
+}
+
 [[maybe_unused]] void WriteRecordWithChanges_v0(yardl::binary::CodedOutputStream& stream, evo_test::RecordWithChanges const& value) {
   float deprecated_float = {};
   yardl::binary::WriteFloatingPoint(stream, deprecated_float);
@@ -707,7 +715,7 @@ template<typename Y, yardl::binary::Reader<Y> ReadY, typename Z, yardl::binary::
   yardl::binary::WriteFixedNDArray<uint8_t, yardl::binary::WriteInteger, 7>(stream, value.deprecated_array);
   yardl::binary::WriteOptional<int64_t, yardl::binary::WriteInteger>(stream, value.optional_long_to_string);
   yardl::binary::WriteMap<std::string, std::vector<int32_t>, yardl::binary::WriteString, yardl::binary::WriteVector<int32_t, yardl::binary::WriteInteger>>(stream, value.deprecated_map);
-  evo_test::binary::WriteUnchangedRecord(stream, value.unchanged_record);
+  evo_test::binary::WriteUnchangedRecord_v0(stream, value.unchanged_record);
 }
 
 [[maybe_unused]] void ReadRecordWithChanges_v0(yardl::binary::CodedInputStream& stream, evo_test::RecordWithChanges& value) {
@@ -719,7 +727,7 @@ template<typename Y, yardl::binary::Reader<Y> ReadY, typename Z, yardl::binary::
   yardl::binary::ReadFixedNDArray<uint8_t, yardl::binary::ReadInteger, 7>(stream, value.deprecated_array);
   yardl::binary::ReadOptional<int64_t, yardl::binary::ReadInteger>(stream, value.optional_long_to_string);
   yardl::binary::ReadMap<std::string, std::vector<int32_t>, yardl::binary::ReadString, yardl::binary::ReadVector<int32_t, yardl::binary::ReadInteger>>(stream, value.deprecated_map);
-  evo_test::binary::ReadUnchangedRecord(stream, value.unchanged_record);
+  evo_test::binary::ReadUnchangedRecord_v0(stream, value.unchanged_record);
 }
 
 [[maybe_unused]] void WriteAliasedRecordWithChanges_v0(yardl::binary::CodedOutputStream& stream, evo_test::AliasedRecordWithChanges const& value) {
@@ -754,11 +762,19 @@ template<typename Y, yardl::binary::Reader<Y> ReadY, typename Z, yardl::binary::
   }
 }
 
+[[maybe_unused]] void WriteUnchangedRecord_v1(yardl::binary::CodedOutputStream& stream, evo_test::UnchangedRecord const& value) {
+  evo_test::binary::WriteUnchangedRecord(stream, value);
+}
+
+[[maybe_unused]] void ReadUnchangedRecord_v1(yardl::binary::CodedInputStream& stream, evo_test::UnchangedRecord& value) {
+  evo_test::binary::ReadUnchangedRecord(stream, value);
+}
+
 [[maybe_unused]] void WriteRecordWithChanges_v1(yardl::binary::CodedOutputStream& stream, evo_test::RecordWithChanges const& value) {
   double float_to_double = {};
   float_to_double = static_cast<double>(value.float_to_double);
   yardl::binary::WriteFloatingPoint(stream, float_to_double);
-  evo_test::binary::WriteUnchangedRecord(stream, value.unchanged_record);
+  evo_test::binary::WriteUnchangedRecord_v1(stream, value.unchanged_record);
   int64_t int_to_long = {};
   int_to_long = static_cast<int64_t>(value.int_to_long);
   yardl::binary::WriteInteger(stream, int_to_long);
@@ -773,7 +789,7 @@ template<typename Y, yardl::binary::Reader<Y> ReadY, typename Z, yardl::binary::
   double float_to_double = {};
   yardl::binary::ReadFloatingPoint(stream, float_to_double);
   value.float_to_double = static_cast<float>(float_to_double);
-  evo_test::binary::ReadUnchangedRecord(stream, value.unchanged_record);
+  evo_test::binary::ReadUnchangedRecord_v1(stream, value.unchanged_record);
   int64_t int_to_long = {};
   yardl::binary::ReadInteger(stream, int_to_long);
   value.int_to_long = static_cast<int32_t>(int_to_long);
@@ -884,20 +900,6 @@ template<typename Y, yardl::binary::Reader<Y> ReadY, typename Z, yardl::binary::
   evo_test::binary::ReadRLink_v1(stream, value);
 }
 
-[[maybe_unused]] void WriteUnusedButChangedRecord_v1(yardl::binary::CodedOutputStream& stream, evo_test::UnusedButChangedRecord const& value) {
-  float age = {};
-  age = static_cast<float>(value.age);
-  yardl::binary::WriteFloatingPoint(stream, age);
-  yardl::binary::WriteString(stream, value.name);
-}
-
-[[maybe_unused]] void ReadUnusedButChangedRecord_v1(yardl::binary::CodedInputStream& stream, evo_test::UnusedButChangedRecord& value) {
-  float age = {};
-  yardl::binary::ReadFloatingPoint(stream, age);
-  value.age = static_cast<int32_t>(std::round(age));
-  yardl::binary::ReadString(stream, value.name);
-}
-
 template<typename T1, yardl::binary::Writer<T1> WriteT1, typename T2, yardl::binary::Writer<T2> WriteT2>
 [[maybe_unused]] void WriteGenericRecord_v1(yardl::binary::CodedOutputStream& stream, evo_test::GenericRecord<T1, T2> const& value) {
   WriteT2(stream, value.field_2);
@@ -934,6 +936,26 @@ template<typename T, yardl::binary::Reader<T> ReadT>
   evo_test::binary::ReadAliasedOpenGenericRecord_v1<T, ReadT, std::string, yardl::binary::ReadString>(stream, value);
 }
 
+template<typename X, yardl::binary::Writer<X> WriteX, typename Y, yardl::binary::Writer<Y> WriteY>
+[[maybe_unused]] void WriteGenericUnion2_v1(yardl::binary::CodedOutputStream& stream, evo_test::GenericUnion2_v1<X, Y> const& value) {
+  WriteUnion<X, WriteX, Y, WriteY>(stream, value);
+}
+
+template<typename X, yardl::binary::Reader<X> ReadX, typename Y, yardl::binary::Reader<Y> ReadY>
+[[maybe_unused]] void ReadGenericUnion2_v1(yardl::binary::CodedInputStream& stream, evo_test::GenericUnion2_v1<X, Y>& value) {
+  ReadUnion<X, ReadX, Y, ReadY>(stream, value);
+}
+
+template<typename T1, yardl::binary::Writer<T1> WriteT1, typename T2, yardl::binary::Writer<T2> WriteT2>
+[[maybe_unused]] void WriteGenericUnion_v1(yardl::binary::CodedOutputStream& stream, evo_test::GenericUnion<T1, T2> const& value) {
+  evo_test::binary::WriteGenericUnion<T1, WriteT1, T2, WriteT2>(stream, value);
+}
+
+template<typename T1, yardl::binary::Reader<T1> ReadT1, typename T2, yardl::binary::Reader<T2> ReadT2>
+[[maybe_unused]] void ReadGenericUnion_v1(yardl::binary::CodedInputStream& stream, evo_test::GenericUnion<T1, T2>& value) {
+  evo_test::binary::ReadGenericUnion<T1, ReadT1, T2, ReadT2>(stream, value);
+}
+
 template<typename A, yardl::binary::Writer<A> WriteA, typename B, yardl::binary::Writer<B> WriteB>
 [[maybe_unused]] void WriteAliasedOpenGenericUnion_v1(yardl::binary::CodedOutputStream& stream, evo_test::GenericUnion<A, B> const& value) {
   evo_test::binary::WriteGenericUnion<A, WriteA, B, WriteB>(stream, value);
@@ -944,12 +966,22 @@ template<typename A, yardl::binary::Reader<A> ReadA, typename B, yardl::binary::
   evo_test::binary::ReadGenericUnion<A, ReadA, B, ReadB>(stream, value);
 }
 
+template<typename T, yardl::binary::Writer<T> WriteT>
+[[maybe_unused]] void WriteAliasedHalfClosedGenericUnion_v1(yardl::binary::CodedOutputStream& stream, evo_test::GenericUnion<T, float> const& value) {
+  evo_test::binary::WriteGenericUnion<T, WriteT, float, yardl::binary::WriteFloatingPoint>(stream, value);
+}
+
+template<typename T, yardl::binary::Reader<T> ReadT>
+[[maybe_unused]] void ReadAliasedHalfClosedGenericUnion_v1(yardl::binary::CodedInputStream& stream, evo_test::GenericUnion<T, float>& value) {
+  evo_test::binary::ReadGenericUnion<T, ReadT, float, yardl::binary::ReadFloatingPoint>(stream, value);
+}
+
 [[maybe_unused]] void WriteAliasedClosedGenericUnion_v1(yardl::binary::CodedOutputStream& stream, evo_test::AliasedClosedGenericUnion const& value) {
-  evo_test::binary::WriteAliasedHalfClosedGenericUnion<evo_test::GenericRecord_v1<int32_t, std::string>, evo_test::binary::WriteGenericRecord_v1<int32_t, yardl::binary::WriteInteger, std::string, yardl::binary::WriteString>>(stream, value);
+  evo_test::binary::WriteAliasedHalfClosedGenericUnion_v1<evo_test::GenericRecord_v1<int32_t, std::string>, evo_test::binary::WriteGenericRecord_v1<int32_t, yardl::binary::WriteInteger, std::string, yardl::binary::WriteString>>(stream, value);
 }
 
 [[maybe_unused]] void ReadAliasedClosedGenericUnion_v1(yardl::binary::CodedInputStream& stream, evo_test::AliasedClosedGenericUnion& value) {
-  evo_test::binary::ReadAliasedHalfClosedGenericUnion<evo_test::GenericRecord_v1<int32_t, std::string>, evo_test::binary::ReadGenericRecord_v1<int32_t, yardl::binary::ReadInteger, std::string, yardl::binary::ReadString>>(stream, value);
+  evo_test::binary::ReadAliasedHalfClosedGenericUnion_v1<evo_test::GenericRecord_v1<int32_t, std::string>, evo_test::binary::ReadGenericRecord_v1<int32_t, yardl::binary::ReadInteger, std::string, yardl::binary::ReadString>>(stream, value);
 }
 
 template<typename T, yardl::binary::Writer<T> WriteT>
@@ -974,6 +1006,16 @@ template<typename T, yardl::binary::Reader<T> ReadT>
   evo_test::binary::ReadAliasedHalfClosedGenericRecord_v1<int32_t, yardl::binary::ReadInteger>(stream, value);
 }
 
+template<typename X, yardl::binary::Writer<X> WriteX, typename Y, yardl::binary::Writer<Y> WriteY>
+[[maybe_unused]] void WriteGenericRecordReversed_v1(yardl::binary::CodedOutputStream& stream, evo_test::GenericRecord<Y, X> const& value) {
+  evo_test::binary::WriteGenericRecord_v1<Y, WriteY, X, WriteX>(stream, value);
+}
+
+template<typename X, yardl::binary::Reader<X> ReadX, typename Y, yardl::binary::Reader<Y> ReadY>
+[[maybe_unused]] void ReadGenericRecordReversed_v1(yardl::binary::CodedInputStream& stream, evo_test::GenericRecord<Y, X>& value) {
+  evo_test::binary::ReadGenericRecord_v1<Y, ReadY, X, ReadX>(stream, value);
+}
+
 template<typename T2, yardl::binary::Writer<T2> WriteT2>
 [[maybe_unused]] void WriteOldUnchangedGeneric_v1(yardl::binary::CodedOutputStream& stream, evo_test::UnchangedGeneric<T2> const& value) {
   evo_test::binary::WriteUnchangedGeneric<T2, WriteT2>(stream, value);
@@ -982,6 +1024,16 @@ template<typename T2, yardl::binary::Writer<T2> WriteT2>
 template<typename T2, yardl::binary::Reader<T2> ReadT2>
 [[maybe_unused]] void ReadOldUnchangedGeneric_v1(yardl::binary::CodedInputStream& stream, evo_test::UnchangedGeneric<T2>& value) {
   evo_test::binary::ReadUnchangedGeneric<T2, ReadT2>(stream, value);
+}
+
+template<typename A, yardl::binary::Writer<A> WriteA>
+[[maybe_unused]] void WriteUnchangedGeneric_v1(yardl::binary::CodedOutputStream& stream, evo_test::UnchangedGeneric<A> const& value) {
+  evo_test::binary::WriteUnchangedGeneric<A, WriteA>(stream, value);
+}
+
+template<typename A, yardl::binary::Reader<A> ReadA>
+[[maybe_unused]] void ReadUnchangedGeneric_v1(yardl::binary::CodedInputStream& stream, evo_test::UnchangedGeneric<A>& value) {
+  evo_test::binary::ReadUnchangedGeneric<A, ReadA>(stream, value);
 }
 
 [[maybe_unused]] void WriteUnchanged_v1(yardl::binary::CodedOutputStream& stream, evo_test::UnchangedGeneric<int32_t> const& value) {
@@ -2751,6 +2803,18 @@ void ProtocolWithChangesWriter::WriteAliasedGenericRecordToAliasImpl(evo_test::A
   }
 }
 
+void ProtocolWithChangesWriter::WriteGenericRecordToReversedImpl(evo_test::GenericRecord<int32_t, std::string> const& value) {
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::WriteGenericRecordReversed_v1<std::string, yardl::binary::WriteString, int32_t, yardl::binary::WriteInteger>(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::WriteGenericRecord<int32_t, yardl::binary::WriteInteger, std::string, yardl::binary::WriteString>(stream_, value);
+    break;
+  }
+}
+
 void ProtocolWithChangesWriter::WriteClosedGenericRecordToUnionImpl(evo_test::AliasedClosedGenericRecord const& value) {
   switch (version_) {
   case Version::v1: {
@@ -2779,10 +2843,34 @@ void ProtocolWithChangesWriter::WriteGenericRecordToAliasedUnionImpl(evo_test::G
   }
 }
 
+void ProtocolWithChangesWriter::WriteGenericUnionToReversedImpl(evo_test::GenericUnion<evo_test::GenericRecord<int32_t, std::string>, float> const& value) {
+  switch (version_) {
+  case Version::v1: {
+    std::variant<evo_test::GenericRecord_v1<int32_t, std::string>, float> generic_union_to_reversed = {};
+    switch (value.index()) {
+      case 0: {
+        generic_union_to_reversed = std::get<0>(value);
+        break;
+      }
+      case 1: {
+        generic_union_to_reversed = std::get<1>(value);
+        break;
+      }
+      default: throw std::runtime_error("Invalid union index.");
+    }
+    WriteUnion<evo_test::GenericRecord_v1<int32_t, std::string>, evo_test::binary::WriteGenericRecord_v1<int32_t, yardl::binary::WriteInteger, std::string, yardl::binary::WriteString>, float, yardl::binary::WriteFloatingPoint>(stream_, generic_union_to_reversed);
+    break;
+  }
+  default:
+    evo_test::binary::WriteGenericUnion<evo_test::GenericRecord<int32_t, std::string>, evo_test::binary::WriteGenericRecord<int32_t, yardl::binary::WriteInteger, std::string, yardl::binary::WriteString>, float, yardl::binary::WriteFloatingPoint>(stream_, value);
+    break;
+  }
+}
+
 void ProtocolWithChangesWriter::WriteGenericUnionOfChangedRecordImpl(evo_test::GenericUnion<evo_test::GenericRecord<int32_t, std::string>, float> const& value) {
   switch (version_) {
   case Version::v1: {
-    evo_test::binary::WriteGenericUnion<evo_test::GenericRecord_v1<int32_t, std::string>, evo_test::binary::WriteGenericRecord_v1<int32_t, yardl::binary::WriteInteger, std::string, yardl::binary::WriteString>, float, yardl::binary::WriteFloatingPoint>(stream_, value);
+    evo_test::binary::WriteGenericUnion_v1<evo_test::GenericRecord_v1<int32_t, std::string>, evo_test::binary::WriteGenericRecord_v1<int32_t, yardl::binary::WriteInteger, std::string, yardl::binary::WriteString>, float, yardl::binary::WriteFloatingPoint>(stream_, value);
     break;
   }
   default:
@@ -4839,6 +4927,18 @@ void ProtocolWithChangesReader::ReadAliasedGenericRecordToAliasImpl(evo_test::Al
   }
 }
 
+void ProtocolWithChangesReader::ReadGenericRecordToReversedImpl(evo_test::GenericRecord<int32_t, std::string>& value) {
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::ReadGenericRecordReversed_v1<std::string, yardl::binary::ReadString, int32_t, yardl::binary::ReadInteger>(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::ReadGenericRecord<int32_t, yardl::binary::ReadInteger, std::string, yardl::binary::ReadString>(stream_, value);
+    break;
+  }
+}
+
 void ProtocolWithChangesReader::ReadClosedGenericRecordToUnionImpl(evo_test::AliasedClosedGenericRecord& value) {
   switch (version_) {
   case Version::v1: {
@@ -4871,10 +4971,34 @@ void ProtocolWithChangesReader::ReadGenericRecordToAliasedUnionImpl(evo_test::Ge
   }
 }
 
+void ProtocolWithChangesReader::ReadGenericUnionToReversedImpl(evo_test::GenericUnion<evo_test::GenericRecord<int32_t, std::string>, float>& value) {
+  switch (version_) {
+  case Version::v1: {
+    std::variant<evo_test::GenericRecord_v1<int32_t, std::string>, float> generic_union_to_reversed = {};
+    ReadUnion<evo_test::GenericRecord_v1<int32_t, std::string>, evo_test::binary::ReadGenericRecord_v1<int32_t, yardl::binary::ReadInteger, std::string, yardl::binary::ReadString>, float, yardl::binary::ReadFloatingPoint>(stream_, generic_union_to_reversed);
+    switch (generic_union_to_reversed.index()) {
+      case 0: {
+        value = std::get<0>(generic_union_to_reversed);
+        break;
+      }
+      case 1: {
+        value = std::get<1>(generic_union_to_reversed);
+        break;
+      }
+      default: throw std::runtime_error("Invalid union index.");
+    }
+    break;
+  }
+  default:
+    evo_test::binary::ReadGenericUnion<evo_test::GenericRecord<int32_t, std::string>, evo_test::binary::ReadGenericRecord<int32_t, yardl::binary::ReadInteger, std::string, yardl::binary::ReadString>, float, yardl::binary::ReadFloatingPoint>(stream_, value);
+    break;
+  }
+}
+
 void ProtocolWithChangesReader::ReadGenericUnionOfChangedRecordImpl(evo_test::GenericUnion<evo_test::GenericRecord<int32_t, std::string>, float>& value) {
   switch (version_) {
   case Version::v1: {
-    evo_test::binary::ReadGenericUnion<evo_test::GenericRecord_v1<int32_t, std::string>, evo_test::binary::ReadGenericRecord_v1<int32_t, yardl::binary::ReadInteger, std::string, yardl::binary::ReadString>, float, yardl::binary::ReadFloatingPoint>(stream_, value);
+    evo_test::binary::ReadGenericUnion_v1<evo_test::GenericRecord_v1<int32_t, std::string>, evo_test::binary::ReadGenericRecord_v1<int32_t, yardl::binary::ReadInteger, std::string, yardl::binary::ReadString>, float, yardl::binary::ReadFloatingPoint>(stream_, value);
     break;
   }
   default:

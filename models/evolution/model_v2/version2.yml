@@ -128,10 +128,12 @@ ProtocolWithChanges: !protocol
     genericRecordToClosedAlias: GenericRecord<int, string>
     genericRecordToHalfClosedAlias: GenericRecord<int, string>
     aliasedGenericRecordToAlias: AliasedHalfClosedGenericRecord<int>
+    genericRecordToReversed: GenericRecord<int, string>
 
     closedGenericRecordToUnion: AliasedClosedGenericRecord
     genericRecordToAliasedUnion: GenericRecord<int, string>
 
+    genericUnionToReversed: GenericUnion<GenericRecord<int, string>, float>
     genericUnionOfChangedRecord: GenericUnion<GenericRecord<int, string>, float>
 
     genericParentRecord: GenericParentRecord<int>

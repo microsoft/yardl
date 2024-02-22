@@ -756,8 +756,13 @@ func writeCompatibilitySerializers(w *formatting.IndentedWriter, change dsl.Defi
 		case *dsl.CompatibilityChange:
 			fmt.Fprintf(w, "%s(stream, value);\n", typeDefinitionRwFunction(change.LatestDefinition(), write))
 
+		case *dsl.AliasRemoved:
+			if nt, ok := change.LatestDefinition().(*dsl.NamedType); ok {
+				fmt.Fprintf(w, "%s(stream, value);\n", typeRwFunction(nt.Type, write))
+			}
+
 		default:
-			panic(fmt.Sprintf("Unexpected type %T", change.PreviousDefinition()))
+			panic(fmt.Sprintf("Unexpected change %T", change))
 		}
 	}
 

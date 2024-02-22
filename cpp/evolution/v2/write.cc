@@ -1,8 +1,7 @@
+#include "../evolution_testing.h"
 #include "generated/binary/protocols.h"
 
 using namespace evo_test;
-
-static std::string HelloWorld = "Hello, World!";
 
 int main(void) {
   ::binary::ProtocolWithChangesWriter w(std::cout);
@@ -160,17 +159,19 @@ int main(void) {
   GenericRecord<int, std::string> generic_record;
   generic_record.removed = true;
   generic_record.field_1 = 42;
-  generic_record.field_2 = "42";
+  generic_record.field_2 = HelloWorld;
 
   w.WriteGenericRecord(generic_record);
   w.WriteGenericRecordToOpenAlias(generic_record);
   w.WriteGenericRecordToClosedAlias(generic_record);
   w.WriteGenericRecordToHalfClosedAlias(generic_record);
   w.WriteAliasedGenericRecordToAlias(generic_record);
+  w.WriteGenericRecordToReversed(generic_record);
 
   w.WriteClosedGenericRecordToUnion(generic_record);
   w.WriteGenericRecordToAliasedUnion(generic_record);
 
+  w.WriteGenericUnionToReversed(generic_record);
   w.WriteGenericUnionOfChangedRecord(generic_record);
 
   GenericParentRecord<int> generic_parent;
@@ -178,7 +179,7 @@ int main(void) {
 
   GenericRecord<GenericUnion<int, float>, std::string> generic_record_of_union;
   generic_record_of_union.field_1 = 42;
-  generic_record_of_union.field_2 = "Hello, World";
+  generic_record_of_union.field_2 = HelloWorld;
   generic_parent.record_of_union = generic_record_of_union;
 
   generic_parent.union_of_record = generic_record;

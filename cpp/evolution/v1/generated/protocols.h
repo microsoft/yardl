@@ -325,67 +325,73 @@ class ProtocolWithChangesWriterBase {
   void WriteAliasedGenericRecordToAlias(evo_test::AliasedOpenGenericRecord<int32_t, std::string> const& value);
 
   // Ordinal 90.
-  void WriteClosedGenericRecordToUnion(std::variant<evo_test::GenericRecord<int32_t, std::string>, std::string> const& value);
+  void WriteGenericRecordToReversed(evo_test::GenericRecordReversed<std::string, int32_t> const& value);
 
   // Ordinal 91.
-  void WriteGenericRecordToAliasedUnion(evo_test::AliasedGenericRecordOrString const& value);
+  void WriteClosedGenericRecordToUnion(std::variant<evo_test::GenericRecord<int32_t, std::string>, std::string> const& value);
 
   // Ordinal 92.
-  void WriteGenericUnionOfChangedRecord(evo_test::GenericUnion<evo_test::GenericRecord<int32_t, std::string>, float> const& value);
+  void WriteGenericRecordToAliasedUnion(evo_test::AliasedGenericRecordOrString const& value);
 
   // Ordinal 93.
-  void WriteGenericParentRecord(evo_test::GenericParentRecord<int32_t> const& value);
+  void WriteGenericUnionToReversed(evo_test::GenericUnionReversed<float, evo_test::GenericRecord<int32_t, std::string>> const& value);
 
   // Ordinal 94.
-  void WriteGenericNestedRecords(evo_test::GenericRecord<evo_test::Unchanged, evo_test::Changed> const& value);
+  void WriteGenericUnionOfChangedRecord(evo_test::GenericUnion<evo_test::GenericRecord<int32_t, std::string>, float> const& value);
 
   // Ordinal 95.
+  void WriteGenericParentRecord(evo_test::GenericParentRecord<int32_t> const& value);
+
+  // Ordinal 96.
+  void WriteGenericNestedRecords(evo_test::GenericRecord<evo_test::Unchanged, evo_test::Changed> const& value);
+
+  // Ordinal 97.
   // Call this method for each element of the `genericRecordStream` stream, then call `EndGenericRecordStream() when done.`
   void WriteGenericRecordStream(evo_test::AliasedClosedGenericRecord const& value);
 
-  // Ordinal 95.
+  // Ordinal 97.
   // Call this method to write many values to the `genericRecordStream` stream, then call `EndGenericRecordStream()` when done.
   void WriteGenericRecordStream(std::vector<evo_test::AliasedClosedGenericRecord> const& values);
 
   // Marks the end of the `genericRecordStream` stream.
   void EndGenericRecordStream();
 
-  // Ordinal 96.
+  // Ordinal 98.
   // Call this method for each element of the `genericParentRecordStream` stream, then call `EndGenericParentRecordStream() when done.`
   void WriteGenericParentRecordStream(evo_test::GenericParentRecord<int32_t> const& value);
 
-  // Ordinal 96.
+  // Ordinal 98.
   // Call this method to write many values to the `genericParentRecordStream` stream, then call `EndGenericParentRecordStream()` when done.
   void WriteGenericParentRecordStream(std::vector<evo_test::GenericParentRecord<int32_t>> const& values);
 
   // Marks the end of the `genericParentRecordStream` stream.
   void EndGenericParentRecordStream();
 
-  // Ordinal 97.
+  // Ordinal 99.
   void WriteVectorRecordWithChanges(std::vector<evo_test::RecordWithChanges> const& value);
 
-  // Ordinal 98.
+  // Ordinal 100.
   // Call this method for each element of the `streamedRecordWithChanges` stream, then call `EndStreamedRecordWithChanges() when done.`
   void WriteStreamedRecordWithChanges(evo_test::RecordWithChanges const& value);
 
-  // Ordinal 98.
+  // Ordinal 100.
   // Call this method to write many values to the `streamedRecordWithChanges` stream, then call `EndStreamedRecordWithChanges()` when done.
   void WriteStreamedRecordWithChanges(std::vector<evo_test::RecordWithChanges> const& values);
 
   // Marks the end of the `streamedRecordWithChanges` stream.
   void EndStreamedRecordWithChanges();
 
-  // Ordinal 99.
+  // Ordinal 101.
   void WriteAddedOptional(std::optional<evo_test::RecordWithChanges> const& value);
 
-  // Ordinal 100.
+  // Ordinal 102.
   void WriteAddedMap(std::unordered_map<std::string, std::string> const& value);
 
-  // Ordinal 101.
+  // Ordinal 103.
   // Call this method for each element of the `addedRecordStream` stream, then call `EndAddedRecordStream() when done.`
   void WriteAddedRecordStream(evo_test::RecordWithChanges const& value);
 
-  // Ordinal 101.
+  // Ordinal 103.
   // Call this method to write many values to the `addedRecordStream` stream, then call `EndAddedRecordStream()` when done.
   void WriteAddedRecordStream(std::vector<evo_test::RecordWithChanges> const& values);
 
@@ -501,8 +507,10 @@ class ProtocolWithChangesWriterBase {
   virtual void WriteGenericRecordToClosedAliasImpl(evo_test::AliasedClosedGenericRecord const& value) = 0;
   virtual void WriteGenericRecordToHalfClosedAliasImpl(evo_test::AliasedHalfClosedGenericRecord<int32_t> const& value) = 0;
   virtual void WriteAliasedGenericRecordToAliasImpl(evo_test::AliasedOpenGenericRecord<int32_t, std::string> const& value) = 0;
+  virtual void WriteGenericRecordToReversedImpl(evo_test::GenericRecordReversed<std::string, int32_t> const& value) = 0;
   virtual void WriteClosedGenericRecordToUnionImpl(std::variant<evo_test::GenericRecord<int32_t, std::string>, std::string> const& value) = 0;
   virtual void WriteGenericRecordToAliasedUnionImpl(evo_test::AliasedGenericRecordOrString const& value) = 0;
+  virtual void WriteGenericUnionToReversedImpl(evo_test::GenericUnionReversed<float, evo_test::GenericRecord<int32_t, std::string>> const& value) = 0;
   virtual void WriteGenericUnionOfChangedRecordImpl(evo_test::GenericUnion<evo_test::GenericRecord<int32_t, std::string>, float> const& value) = 0;
   virtual void WriteGenericParentRecordImpl(evo_test::GenericParentRecord<int32_t> const& value) = 0;
   virtual void WriteGenericNestedRecordsImpl(evo_test::GenericRecord<evo_test::Unchanged, evo_test::Changed> const& value) = 0;
@@ -827,51 +835,57 @@ class ProtocolWithChangesReaderBase {
   void ReadAliasedGenericRecordToAlias(evo_test::AliasedOpenGenericRecord<int32_t, std::string>& value);
 
   // Ordinal 90.
-  void ReadClosedGenericRecordToUnion(std::variant<evo_test::GenericRecord<int32_t, std::string>, std::string>& value);
+  void ReadGenericRecordToReversed(evo_test::GenericRecordReversed<std::string, int32_t>& value);
 
   // Ordinal 91.
-  void ReadGenericRecordToAliasedUnion(evo_test::AliasedGenericRecordOrString& value);
+  void ReadClosedGenericRecordToUnion(std::variant<evo_test::GenericRecord<int32_t, std::string>, std::string>& value);
 
   // Ordinal 92.
-  void ReadGenericUnionOfChangedRecord(evo_test::GenericUnion<evo_test::GenericRecord<int32_t, std::string>, float>& value);
+  void ReadGenericRecordToAliasedUnion(evo_test::AliasedGenericRecordOrString& value);
 
   // Ordinal 93.
-  void ReadGenericParentRecord(evo_test::GenericParentRecord<int32_t>& value);
+  void ReadGenericUnionToReversed(evo_test::GenericUnionReversed<float, evo_test::GenericRecord<int32_t, std::string>>& value);
 
   // Ordinal 94.
+  void ReadGenericUnionOfChangedRecord(evo_test::GenericUnion<evo_test::GenericRecord<int32_t, std::string>, float>& value);
+
+  // Ordinal 95.
+  void ReadGenericParentRecord(evo_test::GenericParentRecord<int32_t>& value);
+
+  // Ordinal 96.
   void ReadGenericNestedRecords(evo_test::GenericRecord<evo_test::Unchanged, evo_test::Changed>& value);
 
-  // Ordinal 95.
+  // Ordinal 97.
   [[nodiscard]] bool ReadGenericRecordStream(evo_test::AliasedClosedGenericRecord& value);
 
-  // Ordinal 95.
+  // Ordinal 97.
   [[nodiscard]] bool ReadGenericRecordStream(std::vector<evo_test::AliasedClosedGenericRecord>& values);
 
-  // Ordinal 96.
+  // Ordinal 98.
   [[nodiscard]] bool ReadGenericParentRecordStream(evo_test::GenericParentRecord<int32_t>& value);
 
-  // Ordinal 96.
+  // Ordinal 98.
   [[nodiscard]] bool ReadGenericParentRecordStream(std::vector<evo_test::GenericParentRecord<int32_t>>& values);
 
-  // Ordinal 97.
+  // Ordinal 99.
   void ReadVectorRecordWithChanges(std::vector<evo_test::RecordWithChanges>& value);
 
-  // Ordinal 98.
+  // Ordinal 100.
   [[nodiscard]] bool ReadStreamedRecordWithChanges(evo_test::RecordWithChanges& value);
 
-  // Ordinal 98.
+  // Ordinal 100.
   [[nodiscard]] bool ReadStreamedRecordWithChanges(std::vector<evo_test::RecordWithChanges>& values);
 
-  // Ordinal 99.
+  // Ordinal 101.
   void ReadAddedOptional(std::optional<evo_test::RecordWithChanges>& value);
 
-  // Ordinal 100.
+  // Ordinal 102.
   void ReadAddedMap(std::unordered_map<std::string, std::string>& value);
 
-  // Ordinal 101.
+  // Ordinal 103.
   [[nodiscard]] bool ReadAddedRecordStream(evo_test::RecordWithChanges& value);
 
-  // Ordinal 101.
+  // Ordinal 103.
   [[nodiscard]] bool ReadAddedRecordStream(std::vector<evo_test::RecordWithChanges>& values);
 
   // Optionaly close this writer before destructing. Validates that all steps were completely read.
@@ -977,8 +991,10 @@ class ProtocolWithChangesReaderBase {
   virtual void ReadGenericRecordToClosedAliasImpl(evo_test::AliasedClosedGenericRecord& value) = 0;
   virtual void ReadGenericRecordToHalfClosedAliasImpl(evo_test::AliasedHalfClosedGenericRecord<int32_t>& value) = 0;
   virtual void ReadAliasedGenericRecordToAliasImpl(evo_test::AliasedOpenGenericRecord<int32_t, std::string>& value) = 0;
+  virtual void ReadGenericRecordToReversedImpl(evo_test::GenericRecordReversed<std::string, int32_t>& value) = 0;
   virtual void ReadClosedGenericRecordToUnionImpl(std::variant<evo_test::GenericRecord<int32_t, std::string>, std::string>& value) = 0;
   virtual void ReadGenericRecordToAliasedUnionImpl(evo_test::AliasedGenericRecordOrString& value) = 0;
+  virtual void ReadGenericUnionToReversedImpl(evo_test::GenericUnionReversed<float, evo_test::GenericRecord<int32_t, std::string>>& value) = 0;
   virtual void ReadGenericUnionOfChangedRecordImpl(evo_test::GenericUnion<evo_test::GenericRecord<int32_t, std::string>, float>& value) = 0;
   virtual void ReadGenericParentRecordImpl(evo_test::GenericParentRecord<int32_t>& value) = 0;
   virtual void ReadGenericNestedRecordsImpl(evo_test::GenericRecord<evo_test::Unchanged, evo_test::Changed>& value) = 0;

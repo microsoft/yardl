@@ -124,8 +124,10 @@ class ProtocolWithChangesWriter : public evo_test::ProtocolWithChangesWriterBase
   void WriteGenericRecordToClosedAliasImpl(evo_test::AliasedClosedGenericRecord const& value) override;
   void WriteGenericRecordToHalfClosedAliasImpl(evo_test::AliasedHalfClosedGenericRecord<int32_t> const& value) override;
   void WriteAliasedGenericRecordToAliasImpl(evo_test::AliasedOpenGenericRecord<int32_t, std::string> const& value) override;
+  void WriteGenericRecordToReversedImpl(evo_test::GenericRecordReversed<std::string, int32_t> const& value) override;
   void WriteClosedGenericRecordToUnionImpl(std::variant<evo_test::GenericRecord<int32_t, std::string>, std::string> const& value) override;
   void WriteGenericRecordToAliasedUnionImpl(evo_test::AliasedGenericRecordOrString const& value) override;
+  void WriteGenericUnionToReversedImpl(evo_test::GenericUnionReversed<float, evo_test::GenericRecord<int32_t, std::string>> const& value) override;
   void WriteGenericUnionOfChangedRecordImpl(evo_test::GenericUnion<evo_test::GenericRecord<int32_t, std::string>, float> const& value) override;
   void WriteGenericParentRecordImpl(evo_test::GenericParentRecord<int32_t> const& value) override;
   void WriteGenericNestedRecordsImpl(evo_test::GenericRecord<evo_test::Unchanged, evo_test::Changed> const& value) override;
@@ -245,8 +247,10 @@ class ProtocolWithChangesReader : public evo_test::ProtocolWithChangesReaderBase
   void ReadGenericRecordToClosedAliasImpl(evo_test::AliasedClosedGenericRecord& value) override;
   void ReadGenericRecordToHalfClosedAliasImpl(evo_test::AliasedHalfClosedGenericRecord<int32_t>& value) override;
   void ReadAliasedGenericRecordToAliasImpl(evo_test::AliasedOpenGenericRecord<int32_t, std::string>& value) override;
+  void ReadGenericRecordToReversedImpl(evo_test::GenericRecordReversed<std::string, int32_t>& value) override;
   void ReadClosedGenericRecordToUnionImpl(std::variant<evo_test::GenericRecord<int32_t, std::string>, std::string>& value) override;
   void ReadGenericRecordToAliasedUnionImpl(evo_test::AliasedGenericRecordOrString& value) override;
+  void ReadGenericUnionToReversedImpl(evo_test::GenericUnionReversed<float, evo_test::GenericRecord<int32_t, std::string>>& value) override;
   void ReadGenericUnionOfChangedRecordImpl(evo_test::GenericUnion<evo_test::GenericRecord<int32_t, std::string>, float>& value) override;
   void ReadGenericParentRecordImpl(evo_test::GenericParentRecord<int32_t>& value) override;
   void ReadGenericNestedRecordsImpl(evo_test::GenericRecord<evo_test::Unchanged, evo_test::Changed>& value) override;

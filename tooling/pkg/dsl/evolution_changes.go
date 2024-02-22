@@ -249,6 +249,10 @@ type CompatibilityChange struct {
 	DefinitionPair
 }
 
+type AliasRemoved struct {
+	DefinitionPair
+}
+
 type PrimitiveChangeNumberToNumber struct{ DefinitionPair }
 type PrimitiveChangeNumberToString struct{ DefinitionPair }
 type PrimitiveChangeStringToNumber struct{ DefinitionPair }

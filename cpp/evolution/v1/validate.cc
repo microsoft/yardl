@@ -19,7 +19,7 @@ void validateRecordWithChanges(RecordWithChanges const& rec) {
 
 #define validateGenericRecord(record)           \
   do {                                          \
-    EVO_ASSERT(record.field_2 == "42");         \
+    EVO_ASSERT(record.field_2 == HelloWorld);   \
     EVO_ASSERT(record.field_1 == 42);           \
     if (record.added.has_value()) {             \
       EVO_ASSERT(record.added.value() == true); \
@@ -31,7 +31,7 @@ void validateRecordWithChanges(RecordWithChanges const& rec) {
     validateGenericRecord(parent.record);                          \
     EVO_ASSERT(parent.record_of_union.field_1.index() == 0);       \
     EVO_ASSERT(std::get<0>(parent.record_of_union.field_1) == 42); \
-    EVO_ASSERT(parent.record_of_union.field_2 == "Hello, World");  \
+    EVO_ASSERT(parent.record_of_union.field_2 == HelloWorld);      \
     EVO_ASSERT(parent.union_of_record.index() == 0);               \
     validateGenericRecord(std::get<0>(parent.union_of_record));    \
   } while (0)
@@ -366,6 +366,8 @@ int main(void) {
   validateGenericRecord(generic_record);
   r.ReadAliasedGenericRecordToAlias(generic_record);
   validateGenericRecord(generic_record);
+  r.ReadGenericRecordToReversed(generic_record);
+  validateGenericRecord(generic_record);
 
   std::variant<GenericRecord<int, std::string>, std::string> generic_record_or_string;
   r.ReadClosedGenericRecordToUnion(generic_record_or_string);
@@ -376,6 +378,9 @@ int main(void) {
   validateGenericRecord(std::get<0>(generic_record_or_string));
 
   GenericUnion<GenericRecord<int, std::string>, float> generic_union_record;
+  r.ReadGenericUnionToReversed(generic_union_record);
+  assert(generic_union_record.index() == 0);
+  validateGenericRecord(std::get<0>(generic_union_record));
   r.ReadGenericUnionOfChangedRecord(generic_union_record);
   assert(generic_union_record.index() == 0);
   validateGenericRecord(std::get<0>(generic_union_record));

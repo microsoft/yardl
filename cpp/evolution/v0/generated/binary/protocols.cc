@@ -1017,12 +1017,20 @@ void ProtocolWithChangesWriter::WriteAliasedGenericRecordToAliasImpl(evo_test::A
   evo_test::binary::WriteAliasedHalfClosedGenericRecord<int32_t, yardl::binary::WriteInteger>(stream_, value);
 }
 
+void ProtocolWithChangesWriter::WriteGenericRecordToReversedImpl(evo_test::GenericRecord<int32_t, std::string> const& value) {
+  evo_test::binary::WriteGenericRecord<int32_t, yardl::binary::WriteInteger, std::string, yardl::binary::WriteString>(stream_, value);
+}
+
 void ProtocolWithChangesWriter::WriteClosedGenericRecordToUnionImpl(evo_test::AliasedClosedGenericRecord const& value) {
   evo_test::binary::WriteAliasedClosedGenericRecord(stream_, value);
 }
 
 void ProtocolWithChangesWriter::WriteGenericRecordToAliasedUnionImpl(evo_test::GenericRecord<int32_t, std::string> const& value) {
   evo_test::binary::WriteGenericRecord<int32_t, yardl::binary::WriteInteger, std::string, yardl::binary::WriteString>(stream_, value);
+}
+
+void ProtocolWithChangesWriter::WriteGenericUnionToReversedImpl(evo_test::AliasedClosedGenericUnion const& value) {
+  evo_test::binary::WriteAliasedClosedGenericUnion(stream_, value);
 }
 
 void ProtocolWithChangesWriter::WriteGenericUnionOfChangedRecordImpl(evo_test::AliasedClosedGenericUnion const& value) {
@@ -1464,12 +1472,20 @@ void ProtocolWithChangesReader::ReadAliasedGenericRecordToAliasImpl(evo_test::Al
   evo_test::binary::ReadAliasedHalfClosedGenericRecord<int32_t, yardl::binary::ReadInteger>(stream_, value);
 }
 
+void ProtocolWithChangesReader::ReadGenericRecordToReversedImpl(evo_test::GenericRecord<int32_t, std::string>& value) {
+  evo_test::binary::ReadGenericRecord<int32_t, yardl::binary::ReadInteger, std::string, yardl::binary::ReadString>(stream_, value);
+}
+
 void ProtocolWithChangesReader::ReadClosedGenericRecordToUnionImpl(evo_test::AliasedClosedGenericRecord& value) {
   evo_test::binary::ReadAliasedClosedGenericRecord(stream_, value);
 }
 
 void ProtocolWithChangesReader::ReadGenericRecordToAliasedUnionImpl(evo_test::GenericRecord<int32_t, std::string>& value) {
   evo_test::binary::ReadGenericRecord<int32_t, yardl::binary::ReadInteger, std::string, yardl::binary::ReadString>(stream_, value);
+}
+
+void ProtocolWithChangesReader::ReadGenericUnionToReversedImpl(evo_test::AliasedClosedGenericUnion& value) {
+  evo_test::binary::ReadAliasedClosedGenericUnion(stream_, value);
 }
 
 void ProtocolWithChangesReader::ReadGenericUnionOfChangedRecordImpl(evo_test::AliasedClosedGenericUnion& value) {

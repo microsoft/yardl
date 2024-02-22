@@ -204,9 +204,13 @@ class ProtocolWithChangesWriter : public evo_test::ProtocolWithChangesWriterBase
 
   void WriteAliasedGenericRecordToAliasImpl(evo_test::AliasedHalfClosedGenericRecord<int32_t> const& value) override;
 
+  void WriteGenericRecordToReversedImpl(evo_test::GenericRecord<int32_t, std::string> const& value) override;
+
   void WriteClosedGenericRecordToUnionImpl(evo_test::AliasedClosedGenericRecord const& value) override;
 
   void WriteGenericRecordToAliasedUnionImpl(evo_test::GenericRecord<int32_t, std::string> const& value) override;
+
+  void WriteGenericUnionToReversedImpl(evo_test::AliasedClosedGenericUnion const& value) override;
 
   void WriteGenericUnionOfChangedRecordImpl(evo_test::AliasedClosedGenericUnion const& value) override;
 
@@ -431,9 +435,13 @@ class ProtocolWithChangesReader : public evo_test::ProtocolWithChangesReaderBase
 
   void ReadAliasedGenericRecordToAliasImpl(evo_test::AliasedHalfClosedGenericRecord<int32_t>& value) override;
 
+  void ReadGenericRecordToReversedImpl(evo_test::GenericRecord<int32_t, std::string>& value) override;
+
   void ReadClosedGenericRecordToUnionImpl(evo_test::AliasedClosedGenericRecord& value) override;
 
   void ReadGenericRecordToAliasedUnionImpl(evo_test::GenericRecord<int32_t, std::string>& value) override;
+
+  void ReadGenericUnionToReversedImpl(evo_test::AliasedClosedGenericUnion& value) override;
 
   void ReadGenericUnionOfChangedRecordImpl(evo_test::AliasedClosedGenericUnion& value) override;
 

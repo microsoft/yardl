@@ -190,6 +190,8 @@ enum class GrowingEnum : uint16_t {
 
 // Compatibility aliases for version v0.
 
+using UnchangedRecord_v0 = evo_test::UnchangedRecord;
+
 using RecordWithChanges_v0 = evo_test::RecordWithChanges;
 
 using AliasedRecordWithChanges_v0 = evo_test::AliasedRecordWithChanges;
@@ -201,6 +203,8 @@ using GrowingEnum_v0 = evo_test::GrowingEnum;
 // Compatibility aliases for version v1.
 
 using AliasedLongToString_v1 = evo_test::AliasedLongToString;
+
+using UnchangedRecord_v1 = evo_test::UnchangedRecord;
 
 using RecordWithChanges_v1 = evo_test::RecordWithChanges;
 
@@ -224,8 +228,6 @@ using RLink_v1 = evo_test::RLink;
 
 using RX_v1 = evo_test::RC;
 
-using UnusedButChangedRecord_v1 = evo_test::UnusedButChangedRecord;
-
 template <typename T1, typename T2>
 using GenericRecord_v1 = evo_test::GenericRecord<T1, T2>;
 
@@ -235,8 +237,17 @@ using AliasedOpenGenericRecord_v1 = evo_test::GenericRecord<A, B>;
 template <typename T>
 using AliasedHalfClosedGenericRecord_v1 = evo_test::AliasedHalfClosedGenericRecord<T>;
 
+template <typename X, typename Y>
+using GenericUnion2_v1 = std::variant<X, Y>;
+
+template <typename T1, typename T2>
+using GenericUnion_v1 = evo_test::GenericUnion<T1, T2>;
+
 template <typename A, typename B>
 using AliasedOpenGenericUnion_v1 = evo_test::GenericUnion<A, B>;
+
+template <typename T>
+using AliasedHalfClosedGenericUnion_v1 = evo_test::GenericUnion<T, float>;
 
 using AliasedClosedGenericUnion_v1 = evo_test::AliasedClosedGenericUnion;
 
@@ -245,8 +256,14 @@ using GenericParentRecord_v1 = evo_test::GenericParentRecord<T>;
 
 using AliasedClosedGenericRecord_v1 = evo_test::AliasedClosedGenericRecord;
 
+template <typename X, typename Y>
+using GenericRecordReversed_v1 = evo_test::GenericRecord<Y, X>;
+
 template <typename T2>
 using OldUnchangedGeneric_v1 = evo_test::UnchangedGeneric<T2>;
+
+template <typename A>
+using UnchangedGeneric_v1 = evo_test::UnchangedGeneric<A>;
 
 using Unchanged_v1 = evo_test::UnchangedGeneric<int32_t>;
 

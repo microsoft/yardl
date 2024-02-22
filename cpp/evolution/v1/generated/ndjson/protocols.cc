@@ -139,10 +139,10 @@ struct adl_serializer<std::variant<T1, T2>> {
   static void to_json(ordered_json& j, std::variant<T1, T2> const& value) {
     switch (value.index()) {
       case 0:
-        j = ordered_json{ {"T1", std::get<T1>(value)} };
+        j = ordered_json{ {"X", std::get<T1>(value)} };
         break;
       case 1:
-        j = ordered_json{ {"T2", std::get<T2>(value)} };
+        j = ordered_json{ {"Y", std::get<T2>(value)} };
         break;
       default:
         throw std::runtime_error("Invalid union value");
@@ -152,11 +152,11 @@ struct adl_serializer<std::variant<T1, T2>> {
   static void from_json(ordered_json const& j, std::variant<T1, T2>& value) {
     auto it = j.begin();
     std::string tag = it.key();
-    if (tag == "T1") {
+    if (tag == "X") {
       value = it.value().get<T1>();
       return;
     }
-    if (tag == "T2") {
+    if (tag == "Y") {
       value = it.value().get<T2>();
       return;
     }
@@ -462,10 +462,10 @@ struct adl_serializer<std::variant<int32_t, float>> {
   static void to_json(ordered_json& j, std::variant<int32_t, float> const& value) {
     switch (value.index()) {
       case 0:
-        j = ordered_json{ {"T1", std::get<int32_t>(value)} };
+        j = ordered_json{ {"X", std::get<int32_t>(value)} };
         break;
       case 1:
-        j = ordered_json{ {"T2", std::get<float>(value)} };
+        j = ordered_json{ {"Y", std::get<float>(value)} };
         break;
       default:
         throw std::runtime_error("Invalid union value");
@@ -475,11 +475,11 @@ struct adl_serializer<std::variant<int32_t, float>> {
   static void from_json(ordered_json const& j, std::variant<int32_t, float>& value) {
     auto it = j.begin();
     std::string tag = it.key();
-    if (tag == "T1") {
+    if (tag == "X") {
       value = it.value().get<int32_t>();
       return;
     }
-    if (tag == "T2") {
+    if (tag == "Y") {
       value = it.value().get<float>();
       return;
     }
@@ -1094,6 +1094,10 @@ void ProtocolWithChangesWriter::WriteAliasedGenericRecordToAliasImpl(evo_test::A
   ordered_json json_value = value;
   yardl::ndjson::WriteProtocolValue(stream_, "aliasedGenericRecordToAlias", json_value);}
 
+void ProtocolWithChangesWriter::WriteGenericRecordToReversedImpl(evo_test::GenericRecordReversed<std::string, int32_t> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "genericRecordToReversed", json_value);}
+
 void ProtocolWithChangesWriter::WriteClosedGenericRecordToUnionImpl(std::variant<evo_test::GenericRecord<int32_t, std::string>, std::string> const& value) {
   ordered_json json_value = value;
   yardl::ndjson::WriteProtocolValue(stream_, "closedGenericRecordToUnion", json_value);}
@@ -1101,6 +1105,10 @@ void ProtocolWithChangesWriter::WriteClosedGenericRecordToUnionImpl(std::variant
 void ProtocolWithChangesWriter::WriteGenericRecordToAliasedUnionImpl(evo_test::AliasedGenericRecordOrString const& value) {
   ordered_json json_value = value;
   yardl::ndjson::WriteProtocolValue(stream_, "genericRecordToAliasedUnion", json_value);}
+
+void ProtocolWithChangesWriter::WriteGenericUnionToReversedImpl(evo_test::GenericUnionReversed<float, evo_test::GenericRecord<int32_t, std::string>> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "genericUnionToReversed", json_value);}
 
 void ProtocolWithChangesWriter::WriteGenericUnionOfChangedRecordImpl(evo_test::GenericUnion<evo_test::GenericRecord<int32_t, std::string>, float> const& value) {
   ordered_json json_value = value;
@@ -1510,12 +1518,20 @@ void ProtocolWithChangesReader::ReadAliasedGenericRecordToAliasImpl(evo_test::Al
   yardl::ndjson::ReadProtocolValue(stream_, line_, "aliasedGenericRecordToAlias", true, unused_step_, value);
 }
 
+void ProtocolWithChangesReader::ReadGenericRecordToReversedImpl(evo_test::GenericRecordReversed<std::string, int32_t>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "genericRecordToReversed", true, unused_step_, value);
+}
+
 void ProtocolWithChangesReader::ReadClosedGenericRecordToUnionImpl(std::variant<evo_test::GenericRecord<int32_t, std::string>, std::string>& value) {
   yardl::ndjson::ReadProtocolValue(stream_, line_, "closedGenericRecordToUnion", true, unused_step_, value);
 }
 
 void ProtocolWithChangesReader::ReadGenericRecordToAliasedUnionImpl(evo_test::AliasedGenericRecordOrString& value) {
   yardl::ndjson::ReadProtocolValue(stream_, line_, "genericRecordToAliasedUnion", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadGenericUnionToReversedImpl(evo_test::GenericUnionReversed<float, evo_test::GenericRecord<int32_t, std::string>>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "genericUnionToReversed", true, unused_step_, value);
 }
 
 void ProtocolWithChangesReader::ReadGenericUnionOfChangedRecordImpl(evo_test::GenericUnion<evo_test::GenericRecord<int32_t, std::string>, float>& value) {

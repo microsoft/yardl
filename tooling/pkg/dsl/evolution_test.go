@@ -99,13 +99,21 @@ P: !protocol
 }
 
 func TestEnumChanges(t *testing.T) {
-	base := `
+	model := `
+P: !protocol
+  sequence:
+    x: X
+
+%s
+`
+
+	baseEnum := `
 X: !enum
   base: int
   values: [a, b, c]
 `
 
-	versions := []string{`
+	changedEnums := []string{`
 # Enum base type changed
 X: !enum
   base: uint64
@@ -136,8 +144,8 @@ X: !enum
     c: 2
 `}
 
-	for _, version := range versions {
-		latest, previous, labels := parseVersions(t, []string{base, version})
+	for _, changedEnum := range changedEnums {
+		latest, previous, labels := parseVersions(t, []string{fmt.Sprintf(model, baseEnum), fmt.Sprintf(model, changedEnum)})
 		_, _, err := ValidateEvolution(latest, previous, labels)
 		assert.NotNil(t, err)
 	}
@@ -586,31 +594,11 @@ AliasedUnionWithChange: [float, string]
 // yardl is currently strict with Generic changes.
 // The following are currently invalid:
 // 1. Changing the number of TypeParameters on a Generic TypeDefinition
-// 1. Renaming the TypeParameters on a Generic TypeDefinition
 func TestGenericDefinitionParameterChanges(t *testing.T) {
 	pairs := []struct {
 		previous string
 		latest   string
 	}{
-		// Rename Generic Record TypeParameters
-		{`
-P: !protocol
-  sequence:
-    x: GenericRecord<int, string>
-GenericRecord<T1, T2>: !record
-  fields:
-    x: T1
-    y: T2
-`, `
-P: !protocol
-  sequence:
-    x: GenericRecord<int, string>
-GenericRecord<A, B>: !record
-  fields:
-    x: A
-    y: B
-`},
-
 		// Add TypeParameter to Generic Record
 		{`
 P: !protocol
@@ -649,19 +637,6 @@ GenericRecord<T1>: !record
   fields:
     x: T1
     y: string
-`},
-
-		// Rename Generic Union TypeParameters
-		{`
-P: !protocol
-  sequence:
-    x: GenericUnion<int, string>
-GenericUnion<T1, T2>: [T1, T2]
-`, `
-P: !protocol
-  sequence:
-    x: GenericUnion<int, string>
-GenericUnion<A, B>: [A, B]
 `},
 
 		// Add TypeParameter to Generic Union
@@ -878,6 +853,38 @@ ChangedGenericRecord<A, B>: !record
 		_, _, err = ValidateEvolution(latest, previous, labels)
 		assert.NotNil(t, err, "typeA: %s, typeB: %s", tt.typeB, tt.typeA)
 	}
+}
+
+func TestSwappedGenericArgs(t *testing.T) {
+	modelA := `
+P: !protocol
+  sequence:
+    x: X<int, float>
+
+X<A, B>: !record
+  fields:
+    a: A
+    b: B
+`
+	modelB := `
+P: !protocol
+  sequence:
+    x: Y<int, float>
+
+Y<T1, T2>: X<T2, T1>
+X<T, U>: !record
+  fields:
+    a: T
+    b: U
+`
+
+	latest, previous, labels := parseVersions(t, []string{modelA, modelB})
+	_, _, err := ValidateEvolution(latest, previous, labels)
+	assert.NotNil(t, err, "modelA: %s, modelB: %s", modelA, modelB)
+
+	latest, previous, labels = parseVersions(t, []string{modelB, modelA})
+	_, _, err = ValidateEvolution(latest, previous, labels)
+	assert.NotNil(t, err, "modelA: %s, modelB: %s", modelB, modelA)
 }
 
 func TestUnchangedGenericAliases(t *testing.T) {

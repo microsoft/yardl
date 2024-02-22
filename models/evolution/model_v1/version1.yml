@@ -128,12 +128,14 @@ ProtocolWithChanges: !protocol
     genericRecordToClosedAlias: AliasedClosedGenericRecord
     genericRecordToHalfClosedAlias: AliasedHalfClosedGenericRecord<int>
     aliasedGenericRecordToAlias: AliasedOpenGenericRecord<int, string>
+    genericRecordToReversed: GenericRecordReversed<string, int>
 
     closedGenericRecordToUnion: !union
         r: GenericRecord<int, string>
         s: string
     genericRecordToAliasedUnion: AliasedGenericRecordOrString
 
+    genericUnionToReversed: GenericUnionReversed<float, GenericRecord<int, string>>
     genericUnionOfChangedRecord: GenericUnion<GenericRecord<int, string>, float>
 
     genericParentRecord: GenericParentRecord<int>
@@ -214,10 +216,12 @@ GenericParentRecord<T>: !record
     recordOfUnion: AliasedOpenGenericRecord<AliasedOpenGenericUnion<T, float>, string>
     unionOfRecord: AliasedClosedGenericUnion
 
-GenericUnion<T1, T2>: [T1, T2]
+GenericUnion2<X, Y>: [X, Y]
+GenericUnion<T1, T2>: GenericUnion2<T1, T2>
 AliasedOpenGenericUnion<A, B>: GenericUnion<A, B>
 AliasedHalfClosedGenericUnion<T>: AliasedOpenGenericUnion<T, float>
 AliasedClosedGenericUnion: AliasedHalfClosedGenericUnion<GenericRecord<int, string>>
+GenericUnionReversed<T, U>: GenericUnion2<U, T>
 
 GenericRecord<T1, T2>: !record
   fields:
@@ -228,6 +232,7 @@ GenericRecord<T1, T2>: !record
 AliasedOpenGenericRecord<A, B>: GenericRecord<A, B>
 AliasedHalfClosedGenericRecord<T>: AliasedOpenGenericRecord<T, string>
 AliasedClosedGenericRecord: AliasedHalfClosedGenericRecord<int>
+GenericRecordReversed<X, Y>: GenericRecord<Y, X>
 
 AliasedGenericRecordOrString: !union
   r: GenericRecord<int, string>
