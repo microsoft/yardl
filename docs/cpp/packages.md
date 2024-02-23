@@ -11,6 +11,7 @@ Here is a commented `_package.yml` file:
 namespace: MyNamespace
 
 # Import model types from external locations (URLs)
+#
 # URLs may be one of the following:
 #   1. Path to local directory, either
 #     - Relative to the `_package.yml` manifest, or
@@ -23,6 +24,12 @@ imports:
   - ../myCommonTypes
   - /workspaces/yardl/models/more-common-types
   - https://github.com/microsoft/yardl?ref=31a6e29&dir=models/test
+
+# Evolve your schema from previous versions
+# See imports above for details on specifying model version locations
+versions:
+  v0_1: ../models/test/v0.1
+  v20240201: https://github.com/microsoft/yardl/models/test/v20240201
 
 # Settings for C++ code generation (optional)
 cpp:

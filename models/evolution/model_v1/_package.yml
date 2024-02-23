@@ -1,0 +1,11 @@
+namespace: EvoTest
+
+versions:
+  v0: ../model_v0
+
+cpp:
+  sourcesOutputDir: ../../../cpp/evolution/v1/generated
+  generateCMakeLists: false
+
+# python:
+#   outputDir: ../python/v1

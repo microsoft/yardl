@@ -4,6 +4,7 @@
 package cmd
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/rs/zerolog/log"
@@ -21,9 +22,13 @@ func newValidateCommand() *cobra.Command {
 		DisableFlagsInUseLine: true,
 		Args:                  cobra.NoArgs,
 		Run: func(cmd *cobra.Command, args []string) {
-			err := validateImpl()
+			warnings, err := validateImpl()
 			if err != nil {
-				log.Fatal().Msgf("%v", err)
+				fmt.Fprintln(os.Stderr, err)
+				os.Exit(1)
+			}
+			for _, warning := range warnings {
+				log.Warn().Msg(warning)
 			}
 		},
 	}
@@ -31,46 +36,65 @@ func newValidateCommand() *cobra.Command {
 	return cmd
 }
 
-func validateImpl() error {
+func validateImpl() ([]string, error) {
 	inputDir, err := os.Getwd()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	packageInfo, err := packaging.LoadPackage(inputDir)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	_, err = validatePackage(packageInfo)
+	_, warnings, err := validatePackage(packageInfo)
 
-	return err
+	return warnings, err
 }
 
-func validatePackage(packageInfo *packaging.PackageInfo) (*dsl.Environment, error) {
+func validatePackage(packageInfo *packaging.PackageInfo) (*dsl.Environment, []string, error) {
 	namespaces, err := parseAndFlattenNamespaces(packageInfo)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	env, err := dsl.Validate(namespaces)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	for _, packageInfo := range packageInfo.Predecessors {
-		namespaces, err := parseAndFlattenNamespaces(packageInfo)
+	var versionEnvs []*dsl.Environment
+	var labels []string
+	for _, version := range packageInfo.Versions {
+		for _, label := range labels {
+			if label == version.Label {
+				return env, nil, fmt.Errorf("duplicate predecessor label %s", version.Label)
+			}
+		}
+		labels = append(labels, version.Label)
+
+		namespaces, err := parseAndFlattenNamespaces(version.Package)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 
-		_, err = dsl.Validate(namespaces)
+		oldEnv, err := dsl.Validate(namespaces)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
+		}
+
+		versionEnvs = append(versionEnvs, oldEnv)
+	}
+
+	var warnings []string
+	if len(versionEnvs) > 0 {
+		env, warnings, err = dsl.ValidateEvolution(env, versionEnvs, labels)
+		if err != nil {
+			return nil, warnings, err
 		}
 	}
 
-	return env, nil
+	return env, warnings, nil
 }
 
 func parseAndFlattenNamespaces(p *packaging.PackageInfo) ([]*dsl.Namespace, error) {
@@ -88,7 +112,7 @@ func parseAndFlattenNamespaces(p *packaging.PackageInfo) ([]*dsl.Namespace, erro
 
 func parsePackageNamespaces(p *packaging.PackageInfo, alreadyParsed map[string]*dsl.Namespace) (*dsl.Namespace, error) {
 	if existing, found := alreadyParsed[p.Namespace]; found {
-		log.Debug().Msgf("Already parsed namespace %s (%p)", existing.Name, existing)
+		log.Debug().Msgf("Already parsed namespace %s", existing.Name)
 		return existing, nil
 	}
 
@@ -98,10 +122,10 @@ func parsePackageNamespaces(p *packaging.PackageInfo, alreadyParsed map[string]*
 	}
 
 	alreadyParsed[p.Namespace] = namespace
-	log.Debug().Msgf("Parsed namespace %s (%p)", namespace.Name, namespace)
+	log.Debug().Msgf("Parsed namespace %s", namespace.Name)
 
-	for _, dep := range p.Imports {
-		ns, err := parsePackageNamespaces(dep, alreadyParsed)
+	for _, imp := range p.Imports {
+		ns, err := parsePackageNamespaces(imp.Package, alreadyParsed)
 		if err != nil {
 			return namespace, nil
 		}

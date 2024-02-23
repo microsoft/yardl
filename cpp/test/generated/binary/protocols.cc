@@ -2604,8 +2604,7 @@ template<typename U, yardl::binary::Reader<U> ReadU, typename V, yardl::binary::
 } // namespace
 
 void BenchmarkFloat256x256Writer::WriteFloat256x256Impl(yardl::FixedNDArray<float, 256, 256> const& value) {
-  yardl::binary::WriteInteger(stream_, 1U);
-  yardl::binary::WriteFixedNDArray<float, yardl::binary::WriteFloatingPoint, 256, 256>(stream_, value);
+  yardl::binary::WriteBlock<yardl::FixedNDArray<float, 256, 256>, yardl::binary::WriteFixedNDArray<float, yardl::binary::WriteFloatingPoint, 256, 256>>(stream_, value);
 }
 
 void BenchmarkFloat256x256Writer::WriteFloat256x256Impl(std::vector<yardl::FixedNDArray<float, 256, 256>> const& values) {
@@ -2627,15 +2626,9 @@ void BenchmarkFloat256x256Writer::CloseImpl() {
 }
 
 bool BenchmarkFloat256x256Reader::ReadFloat256x256Impl(yardl::FixedNDArray<float, 256, 256>& value) {
-  if (current_block_remaining_ == 0) {
-    yardl::binary::ReadInteger(stream_, current_block_remaining_);
-    if (current_block_remaining_ == 0) {
-      return false;
-    }
-  }
-  yardl::binary::ReadFixedNDArray<float, yardl::binary::ReadFloatingPoint, 256, 256>(stream_, value);
-  current_block_remaining_--;
-  return true;
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<yardl::FixedNDArray<float, 256, 256>, yardl::binary::ReadFixedNDArray<float, yardl::binary::ReadFloatingPoint, 256, 256>>(stream_, current_block_remaining_, value);
+  return read_block_successful;
 }
 
 bool BenchmarkFloat256x256Reader::ReadFloat256x256Impl(std::vector<yardl::FixedNDArray<float, 256, 256>>& values) {
@@ -2648,8 +2641,7 @@ void BenchmarkFloat256x256Reader::CloseImpl() {
 }
 
 void BenchmarkInt256x256Writer::WriteInt256x256Impl(yardl::FixedNDArray<int32_t, 256, 256> const& value) {
-  yardl::binary::WriteInteger(stream_, 1U);
-  yardl::binary::WriteFixedNDArray<int32_t, yardl::binary::WriteInteger, 256, 256>(stream_, value);
+  yardl::binary::WriteBlock<yardl::FixedNDArray<int32_t, 256, 256>, yardl::binary::WriteFixedNDArray<int32_t, yardl::binary::WriteInteger, 256, 256>>(stream_, value);
 }
 
 void BenchmarkInt256x256Writer::WriteInt256x256Impl(std::vector<yardl::FixedNDArray<int32_t, 256, 256>> const& values) {
@@ -2671,15 +2663,9 @@ void BenchmarkInt256x256Writer::CloseImpl() {
 }
 
 bool BenchmarkInt256x256Reader::ReadInt256x256Impl(yardl::FixedNDArray<int32_t, 256, 256>& value) {
-  if (current_block_remaining_ == 0) {
-    yardl::binary::ReadInteger(stream_, current_block_remaining_);
-    if (current_block_remaining_ == 0) {
-      return false;
-    }
-  }
-  yardl::binary::ReadFixedNDArray<int32_t, yardl::binary::ReadInteger, 256, 256>(stream_, value);
-  current_block_remaining_--;
-  return true;
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<yardl::FixedNDArray<int32_t, 256, 256>, yardl::binary::ReadFixedNDArray<int32_t, yardl::binary::ReadInteger, 256, 256>>(stream_, current_block_remaining_, value);
+  return read_block_successful;
 }
 
 bool BenchmarkInt256x256Reader::ReadInt256x256Impl(std::vector<yardl::FixedNDArray<int32_t, 256, 256>>& values) {
@@ -2692,8 +2678,7 @@ void BenchmarkInt256x256Reader::CloseImpl() {
 }
 
 void BenchmarkFloatVlenWriter::WriteFloatArrayImpl(yardl::NDArray<float, 2> const& value) {
-  yardl::binary::WriteInteger(stream_, 1U);
-  yardl::binary::WriteNDArray<float, yardl::binary::WriteFloatingPoint, 2>(stream_, value);
+  yardl::binary::WriteBlock<yardl::NDArray<float, 2>, yardl::binary::WriteNDArray<float, yardl::binary::WriteFloatingPoint, 2>>(stream_, value);
 }
 
 void BenchmarkFloatVlenWriter::WriteFloatArrayImpl(std::vector<yardl::NDArray<float, 2>> const& values) {
@@ -2715,15 +2700,9 @@ void BenchmarkFloatVlenWriter::CloseImpl() {
 }
 
 bool BenchmarkFloatVlenReader::ReadFloatArrayImpl(yardl::NDArray<float, 2>& value) {
-  if (current_block_remaining_ == 0) {
-    yardl::binary::ReadInteger(stream_, current_block_remaining_);
-    if (current_block_remaining_ == 0) {
-      return false;
-    }
-  }
-  yardl::binary::ReadNDArray<float, yardl::binary::ReadFloatingPoint, 2>(stream_, value);
-  current_block_remaining_--;
-  return true;
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<yardl::NDArray<float, 2>, yardl::binary::ReadNDArray<float, yardl::binary::ReadFloatingPoint, 2>>(stream_, current_block_remaining_, value);
+  return read_block_successful;
 }
 
 bool BenchmarkFloatVlenReader::ReadFloatArrayImpl(std::vector<yardl::NDArray<float, 2>>& values) {
@@ -2736,8 +2715,7 @@ void BenchmarkFloatVlenReader::CloseImpl() {
 }
 
 void BenchmarkSmallRecordWriter::WriteSmallRecordImpl(test_model::SmallBenchmarkRecord const& value) {
-  yardl::binary::WriteInteger(stream_, 1U);
-  test_model::binary::WriteSmallBenchmarkRecord(stream_, value);
+  yardl::binary::WriteBlock<test_model::SmallBenchmarkRecord, test_model::binary::WriteSmallBenchmarkRecord>(stream_, value);
 }
 
 void BenchmarkSmallRecordWriter::WriteSmallRecordImpl(std::vector<test_model::SmallBenchmarkRecord> const& values) {
@@ -2759,15 +2737,9 @@ void BenchmarkSmallRecordWriter::CloseImpl() {
 }
 
 bool BenchmarkSmallRecordReader::ReadSmallRecordImpl(test_model::SmallBenchmarkRecord& value) {
-  if (current_block_remaining_ == 0) {
-    yardl::binary::ReadInteger(stream_, current_block_remaining_);
-    if (current_block_remaining_ == 0) {
-      return false;
-    }
-  }
-  test_model::binary::ReadSmallBenchmarkRecord(stream_, value);
-  current_block_remaining_--;
-  return true;
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<test_model::SmallBenchmarkRecord, test_model::binary::ReadSmallBenchmarkRecord>(stream_, current_block_remaining_, value);
+  return read_block_successful;
 }
 
 bool BenchmarkSmallRecordReader::ReadSmallRecordImpl(std::vector<test_model::SmallBenchmarkRecord>& values) {
@@ -2780,8 +2752,7 @@ void BenchmarkSmallRecordReader::CloseImpl() {
 }
 
 void BenchmarkSmallRecordWithOptionalsWriter::WriteSmallRecordImpl(test_model::SimpleEncodingCounters const& value) {
-  yardl::binary::WriteInteger(stream_, 1U);
-  test_model::binary::WriteSimpleEncodingCounters(stream_, value);
+  yardl::binary::WriteBlock<test_model::SimpleEncodingCounters, test_model::binary::WriteSimpleEncodingCounters>(stream_, value);
 }
 
 void BenchmarkSmallRecordWithOptionalsWriter::WriteSmallRecordImpl(std::vector<test_model::SimpleEncodingCounters> const& values) {
@@ -2803,15 +2774,9 @@ void BenchmarkSmallRecordWithOptionalsWriter::CloseImpl() {
 }
 
 bool BenchmarkSmallRecordWithOptionalsReader::ReadSmallRecordImpl(test_model::SimpleEncodingCounters& value) {
-  if (current_block_remaining_ == 0) {
-    yardl::binary::ReadInteger(stream_, current_block_remaining_);
-    if (current_block_remaining_ == 0) {
-      return false;
-    }
-  }
-  test_model::binary::ReadSimpleEncodingCounters(stream_, value);
-  current_block_remaining_--;
-  return true;
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<test_model::SimpleEncodingCounters, test_model::binary::ReadSimpleEncodingCounters>(stream_, current_block_remaining_, value);
+  return read_block_successful;
 }
 
 bool BenchmarkSmallRecordWithOptionalsReader::ReadSmallRecordImpl(std::vector<test_model::SimpleEncodingCounters>& values) {
@@ -2824,8 +2789,7 @@ void BenchmarkSmallRecordWithOptionalsReader::CloseImpl() {
 }
 
 void BenchmarkSimpleMrdWriter::WriteDataImpl(std::variant<test_model::SimpleAcquisition, image::Image<float>> const& value) {
-  yardl::binary::WriteInteger(stream_, 1U);
-  WriteUnion<test_model::SimpleAcquisition, test_model::binary::WriteSimpleAcquisition, image::Image<float>, image::binary::WriteImage<float, yardl::binary::WriteFloatingPoint>>(stream_, value);
+  yardl::binary::WriteBlock<std::variant<test_model::SimpleAcquisition, image::Image<float>>, WriteUnion<test_model::SimpleAcquisition, test_model::binary::WriteSimpleAcquisition, image::Image<float>, image::binary::WriteImage<float, yardl::binary::WriteFloatingPoint>>>(stream_, value);
 }
 
 void BenchmarkSimpleMrdWriter::WriteDataImpl(std::vector<std::variant<test_model::SimpleAcquisition, image::Image<float>>> const& values) {
@@ -2847,15 +2811,9 @@ void BenchmarkSimpleMrdWriter::CloseImpl() {
 }
 
 bool BenchmarkSimpleMrdReader::ReadDataImpl(std::variant<test_model::SimpleAcquisition, image::Image<float>>& value) {
-  if (current_block_remaining_ == 0) {
-    yardl::binary::ReadInteger(stream_, current_block_remaining_);
-    if (current_block_remaining_ == 0) {
-      return false;
-    }
-  }
-  ReadUnion<test_model::SimpleAcquisition, test_model::binary::ReadSimpleAcquisition, image::Image<float>, image::binary::ReadImage<float, yardl::binary::ReadFloatingPoint>>(stream_, value);
-  current_block_remaining_--;
-  return true;
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<std::variant<test_model::SimpleAcquisition, image::Image<float>>, ReadUnion<test_model::SimpleAcquisition, test_model::binary::ReadSimpleAcquisition, image::Image<float>, image::binary::ReadImage<float, yardl::binary::ReadFloatingPoint>>>(stream_, current_block_remaining_, value);
+  return read_block_successful;
 }
 
 bool BenchmarkSimpleMrdReader::ReadDataImpl(std::vector<std::variant<test_model::SimpleAcquisition, image::Image<float>>>& values) {
@@ -3096,8 +3054,7 @@ void FixedVectorsReader::CloseImpl() {
 }
 
 void StreamsWriter::WriteIntDataImpl(int32_t const& value) {
-  yardl::binary::WriteInteger(stream_, 1U);
-  yardl::binary::WriteInteger(stream_, value);
+  yardl::binary::WriteBlock<int32_t, yardl::binary::WriteInteger>(stream_, value);
 }
 
 void StreamsWriter::WriteIntDataImpl(std::vector<int32_t> const& values) {
@@ -3111,8 +3068,7 @@ void StreamsWriter::EndIntDataImpl() {
 }
 
 void StreamsWriter::WriteOptionalIntDataImpl(std::optional<int32_t> const& value) {
-  yardl::binary::WriteInteger(stream_, 1U);
-  yardl::binary::WriteOptional<int32_t, yardl::binary::WriteInteger>(stream_, value);
+  yardl::binary::WriteBlock<std::optional<int32_t>, yardl::binary::WriteOptional<int32_t, yardl::binary::WriteInteger>>(stream_, value);
 }
 
 void StreamsWriter::WriteOptionalIntDataImpl(std::vector<std::optional<int32_t>> const& values) {
@@ -3126,8 +3082,7 @@ void StreamsWriter::EndOptionalIntDataImpl() {
 }
 
 void StreamsWriter::WriteRecordWithOptionalVectorDataImpl(test_model::RecordWithOptionalVector const& value) {
-  yardl::binary::WriteInteger(stream_, 1U);
-  test_model::binary::WriteRecordWithOptionalVector(stream_, value);
+  yardl::binary::WriteBlock<test_model::RecordWithOptionalVector, test_model::binary::WriteRecordWithOptionalVector>(stream_, value);
 }
 
 void StreamsWriter::WriteRecordWithOptionalVectorDataImpl(std::vector<test_model::RecordWithOptionalVector> const& values) {
@@ -3141,8 +3096,7 @@ void StreamsWriter::EndRecordWithOptionalVectorDataImpl() {
 }
 
 void StreamsWriter::WriteFixedVectorImpl(std::array<int32_t, 3> const& value) {
-  yardl::binary::WriteInteger(stream_, 1U);
-  yardl::binary::WriteArray<int32_t, yardl::binary::WriteInteger, 3>(stream_, value);
+  yardl::binary::WriteBlock<std::array<int32_t, 3>, yardl::binary::WriteArray<int32_t, yardl::binary::WriteInteger, 3>>(stream_, value);
 }
 
 void StreamsWriter::WriteFixedVectorImpl(std::vector<std::array<int32_t, 3>> const& values) {
@@ -3164,15 +3118,9 @@ void StreamsWriter::CloseImpl() {
 }
 
 bool StreamsReader::ReadIntDataImpl(int32_t& value) {
-  if (current_block_remaining_ == 0) {
-    yardl::binary::ReadInteger(stream_, current_block_remaining_);
-    if (current_block_remaining_ == 0) {
-      return false;
-    }
-  }
-  yardl::binary::ReadInteger(stream_, value);
-  current_block_remaining_--;
-  return true;
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<int32_t, yardl::binary::ReadInteger>(stream_, current_block_remaining_, value);
+  return read_block_successful;
 }
 
 bool StreamsReader::ReadIntDataImpl(std::vector<int32_t>& values) {
@@ -3181,15 +3129,9 @@ bool StreamsReader::ReadIntDataImpl(std::vector<int32_t>& values) {
 }
 
 bool StreamsReader::ReadOptionalIntDataImpl(std::optional<int32_t>& value) {
-  if (current_block_remaining_ == 0) {
-    yardl::binary::ReadInteger(stream_, current_block_remaining_);
-    if (current_block_remaining_ == 0) {
-      return false;
-    }
-  }
-  yardl::binary::ReadOptional<int32_t, yardl::binary::ReadInteger>(stream_, value);
-  current_block_remaining_--;
-  return true;
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<std::optional<int32_t>, yardl::binary::ReadOptional<int32_t, yardl::binary::ReadInteger>>(stream_, current_block_remaining_, value);
+  return read_block_successful;
 }
 
 bool StreamsReader::ReadOptionalIntDataImpl(std::vector<std::optional<int32_t>>& values) {
@@ -3198,15 +3140,9 @@ bool StreamsReader::ReadOptionalIntDataImpl(std::vector<std::optional<int32_t>>&
 }
 
 bool StreamsReader::ReadRecordWithOptionalVectorDataImpl(test_model::RecordWithOptionalVector& value) {
-  if (current_block_remaining_ == 0) {
-    yardl::binary::ReadInteger(stream_, current_block_remaining_);
-    if (current_block_remaining_ == 0) {
-      return false;
-    }
-  }
-  test_model::binary::ReadRecordWithOptionalVector(stream_, value);
-  current_block_remaining_--;
-  return true;
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<test_model::RecordWithOptionalVector, test_model::binary::ReadRecordWithOptionalVector>(stream_, current_block_remaining_, value);
+  return read_block_successful;
 }
 
 bool StreamsReader::ReadRecordWithOptionalVectorDataImpl(std::vector<test_model::RecordWithOptionalVector>& values) {
@@ -3215,15 +3151,9 @@ bool StreamsReader::ReadRecordWithOptionalVectorDataImpl(std::vector<test_model:
 }
 
 bool StreamsReader::ReadFixedVectorImpl(std::array<int32_t, 3>& value) {
-  if (current_block_remaining_ == 0) {
-    yardl::binary::ReadInteger(stream_, current_block_remaining_);
-    if (current_block_remaining_ == 0) {
-      return false;
-    }
-  }
-  yardl::binary::ReadArray<int32_t, yardl::binary::ReadInteger, 3>(stream_, value);
-  current_block_remaining_--;
-  return true;
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<std::array<int32_t, 3>, yardl::binary::ReadArray<int32_t, yardl::binary::ReadInteger, 3>>(stream_, current_block_remaining_, value);
+  return read_block_successful;
 }
 
 bool StreamsReader::ReadFixedVectorImpl(std::vector<std::array<int32_t, 3>>& values) {
@@ -3628,8 +3558,7 @@ void UnionsReader::CloseImpl() {
 }
 
 void StreamsOfUnionsWriter::WriteIntOrSimpleRecordImpl(std::variant<int32_t, test_model::SimpleRecord> const& value) {
-  yardl::binary::WriteInteger(stream_, 1U);
-  WriteUnion<int32_t, yardl::binary::WriteInteger, test_model::SimpleRecord, test_model::binary::WriteSimpleRecord>(stream_, value);
+  yardl::binary::WriteBlock<std::variant<int32_t, test_model::SimpleRecord>, WriteUnion<int32_t, yardl::binary::WriteInteger, test_model::SimpleRecord, test_model::binary::WriteSimpleRecord>>(stream_, value);
 }
 
 void StreamsOfUnionsWriter::WriteIntOrSimpleRecordImpl(std::vector<std::variant<int32_t, test_model::SimpleRecord>> const& values) {
@@ -3643,8 +3572,7 @@ void StreamsOfUnionsWriter::EndIntOrSimpleRecordImpl() {
 }
 
 void StreamsOfUnionsWriter::WriteNullableIntOrSimpleRecordImpl(std::variant<std::monostate, int32_t, test_model::SimpleRecord> const& value) {
-  yardl::binary::WriteInteger(stream_, 1U);
-  WriteUnion<std::monostate, yardl::binary::WriteMonostate, int32_t, yardl::binary::WriteInteger, test_model::SimpleRecord, test_model::binary::WriteSimpleRecord>(stream_, value);
+  yardl::binary::WriteBlock<std::variant<std::monostate, int32_t, test_model::SimpleRecord>, WriteUnion<std::monostate, yardl::binary::WriteMonostate, int32_t, yardl::binary::WriteInteger, test_model::SimpleRecord, test_model::binary::WriteSimpleRecord>>(stream_, value);
 }
 
 void StreamsOfUnionsWriter::WriteNullableIntOrSimpleRecordImpl(std::vector<std::variant<std::monostate, int32_t, test_model::SimpleRecord>> const& values) {
@@ -3666,15 +3594,9 @@ void StreamsOfUnionsWriter::CloseImpl() {
 }
 
 bool StreamsOfUnionsReader::ReadIntOrSimpleRecordImpl(std::variant<int32_t, test_model::SimpleRecord>& value) {
-  if (current_block_remaining_ == 0) {
-    yardl::binary::ReadInteger(stream_, current_block_remaining_);
-    if (current_block_remaining_ == 0) {
-      return false;
-    }
-  }
-  ReadUnion<int32_t, yardl::binary::ReadInteger, test_model::SimpleRecord, test_model::binary::ReadSimpleRecord>(stream_, value);
-  current_block_remaining_--;
-  return true;
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<std::variant<int32_t, test_model::SimpleRecord>, ReadUnion<int32_t, yardl::binary::ReadInteger, test_model::SimpleRecord, test_model::binary::ReadSimpleRecord>>(stream_, current_block_remaining_, value);
+  return read_block_successful;
 }
 
 bool StreamsOfUnionsReader::ReadIntOrSimpleRecordImpl(std::vector<std::variant<int32_t, test_model::SimpleRecord>>& values) {
@@ -3683,15 +3605,9 @@ bool StreamsOfUnionsReader::ReadIntOrSimpleRecordImpl(std::vector<std::variant<i
 }
 
 bool StreamsOfUnionsReader::ReadNullableIntOrSimpleRecordImpl(std::variant<std::monostate, int32_t, test_model::SimpleRecord>& value) {
-  if (current_block_remaining_ == 0) {
-    yardl::binary::ReadInteger(stream_, current_block_remaining_);
-    if (current_block_remaining_ == 0) {
-      return false;
-    }
-  }
-  ReadUnion<std::monostate, yardl::binary::ReadMonostate, int32_t, yardl::binary::ReadInteger, test_model::SimpleRecord, test_model::binary::ReadSimpleRecord>(stream_, value);
-  current_block_remaining_--;
-  return true;
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<std::variant<std::monostate, int32_t, test_model::SimpleRecord>, ReadUnion<std::monostate, yardl::binary::ReadMonostate, int32_t, yardl::binary::ReadInteger, test_model::SimpleRecord, test_model::binary::ReadSimpleRecord>>(stream_, current_block_remaining_, value);
+  return read_block_successful;
 }
 
 bool StreamsOfUnionsReader::ReadNullableIntOrSimpleRecordImpl(std::vector<std::variant<std::monostate, int32_t, test_model::SimpleRecord>>& values) {
@@ -3740,8 +3656,7 @@ void EnumsReader::CloseImpl() {
 }
 
 void FlagsWriter::WriteDaysImpl(test_model::DaysOfWeek const& value) {
-  yardl::binary::WriteInteger(stream_, 1U);
-  test_model::binary::WriteDaysOfWeek(stream_, value);
+  yardl::binary::WriteBlock<test_model::DaysOfWeek, test_model::binary::WriteDaysOfWeek>(stream_, value);
 }
 
 void FlagsWriter::WriteDaysImpl(std::vector<test_model::DaysOfWeek> const& values) {
@@ -3755,8 +3670,7 @@ void FlagsWriter::EndDaysImpl() {
 }
 
 void FlagsWriter::WriteFormatsImpl(test_model::TextFormat const& value) {
-  yardl::binary::WriteInteger(stream_, 1U);
-  test_model::binary::WriteTextFormat(stream_, value);
+  yardl::binary::WriteBlock<test_model::TextFormat, test_model::binary::WriteTextFormat>(stream_, value);
 }
 
 void FlagsWriter::WriteFormatsImpl(std::vector<test_model::TextFormat> const& values) {
@@ -3778,15 +3692,9 @@ void FlagsWriter::CloseImpl() {
 }
 
 bool FlagsReader::ReadDaysImpl(test_model::DaysOfWeek& value) {
-  if (current_block_remaining_ == 0) {
-    yardl::binary::ReadInteger(stream_, current_block_remaining_);
-    if (current_block_remaining_ == 0) {
-      return false;
-    }
-  }
-  test_model::binary::ReadDaysOfWeek(stream_, value);
-  current_block_remaining_--;
-  return true;
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<test_model::DaysOfWeek, test_model::binary::ReadDaysOfWeek>(stream_, current_block_remaining_, value);
+  return read_block_successful;
 }
 
 bool FlagsReader::ReadDaysImpl(std::vector<test_model::DaysOfWeek>& values) {
@@ -3795,15 +3703,9 @@ bool FlagsReader::ReadDaysImpl(std::vector<test_model::DaysOfWeek>& values) {
 }
 
 bool FlagsReader::ReadFormatsImpl(test_model::TextFormat& value) {
-  if (current_block_remaining_ == 0) {
-    yardl::binary::ReadInteger(stream_, current_block_remaining_);
-    if (current_block_remaining_ == 0) {
-      return false;
-    }
-  }
-  test_model::binary::ReadTextFormat(stream_, value);
-  current_block_remaining_--;
-  return true;
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<test_model::TextFormat, test_model::binary::ReadTextFormat>(stream_, current_block_remaining_, value);
+  return read_block_successful;
 }
 
 bool FlagsReader::ReadFormatsImpl(std::vector<test_model::TextFormat>& values) {
@@ -3820,8 +3722,7 @@ void StateTestWriter::WriteAnIntImpl(int32_t const& value) {
 }
 
 void StateTestWriter::WriteAStreamImpl(int32_t const& value) {
-  yardl::binary::WriteInteger(stream_, 1U);
-  yardl::binary::WriteInteger(stream_, value);
+  yardl::binary::WriteBlock<int32_t, yardl::binary::WriteInteger>(stream_, value);
 }
 
 void StateTestWriter::WriteAStreamImpl(std::vector<int32_t> const& values) {
@@ -3851,15 +3752,9 @@ void StateTestReader::ReadAnIntImpl(int32_t& value) {
 }
 
 bool StateTestReader::ReadAStreamImpl(int32_t& value) {
-  if (current_block_remaining_ == 0) {
-    yardl::binary::ReadInteger(stream_, current_block_remaining_);
-    if (current_block_remaining_ == 0) {
-      return false;
-    }
-  }
-  yardl::binary::ReadInteger(stream_, value);
-  current_block_remaining_--;
-  return true;
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<int32_t, yardl::binary::ReadInteger>(stream_, current_block_remaining_, value);
+  return read_block_successful;
 }
 
 bool StateTestReader::ReadAStreamImpl(std::vector<int32_t>& values) {
@@ -3908,8 +3803,7 @@ void SimpleGenericsWriter::WriteIntStringTupleImpl(tuples::Tuple<int32_t, std::s
 }
 
 void SimpleGenericsWriter::WriteStreamOfTypeVariantsImpl(std::variant<image::FloatImage, test_model::Image<double>> const& value) {
-  yardl::binary::WriteInteger(stream_, 1U);
-  WriteUnion<image::FloatImage, image::binary::WriteFloatImage, test_model::Image<double>, test_model::binary::WriteImage<double, yardl::binary::WriteFloatingPoint>>(stream_, value);
+  yardl::binary::WriteBlock<std::variant<image::FloatImage, test_model::Image<double>>, WriteUnion<image::FloatImage, image::binary::WriteFloatImage, test_model::Image<double>, test_model::binary::WriteImage<double, yardl::binary::WriteFloatingPoint>>>(stream_, value);
 }
 
 void SimpleGenericsWriter::WriteStreamOfTypeVariantsImpl(std::vector<std::variant<image::FloatImage, test_model::Image<double>>> const& values) {
@@ -3963,15 +3857,9 @@ void SimpleGenericsReader::ReadIntStringTupleImpl(tuples::Tuple<int32_t, std::st
 }
 
 bool SimpleGenericsReader::ReadStreamOfTypeVariantsImpl(std::variant<image::FloatImage, test_model::Image<double>>& value) {
-  if (current_block_remaining_ == 0) {
-    yardl::binary::ReadInteger(stream_, current_block_remaining_);
-    if (current_block_remaining_ == 0) {
-      return false;
-    }
-  }
-  ReadUnion<image::FloatImage, image::binary::ReadFloatImage, test_model::Image<double>, test_model::binary::ReadImage<double, yardl::binary::ReadFloatingPoint>>(stream_, value);
-  current_block_remaining_--;
-  return true;
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<std::variant<image::FloatImage, test_model::Image<double>>, ReadUnion<image::FloatImage, image::binary::ReadFloatImage, test_model::Image<double>, test_model::binary::ReadImage<double, yardl::binary::ReadFloatingPoint>>>(stream_, current_block_remaining_, value);
+  return read_block_successful;
 }
 
 bool SimpleGenericsReader::ReadStreamOfTypeVariantsImpl(std::vector<std::variant<image::FloatImage, test_model::Image<double>>>& values) {
@@ -4072,8 +3960,7 @@ void AliasesWriter::WriteAliasedGenericFixedVectorImpl(test_model::AliasedGeneri
 }
 
 void AliasesWriter::WriteStreamOfAliasedGenericUnion2Impl(test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum> const& value) {
-  yardl::binary::WriteInteger(stream_, 1U);
-  test_model::binary::WriteAliasedGenericUnion2<test_model::AliasedString, test_model::binary::WriteAliasedString, test_model::AliasedEnum, test_model::binary::WriteAliasedEnum>(stream_, value);
+  yardl::binary::WriteBlock<test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum>, test_model::binary::WriteAliasedGenericUnion2<test_model::AliasedString, test_model::binary::WriteAliasedString, test_model::AliasedEnum, test_model::binary::WriteAliasedEnum>>(stream_, value);
 }
 
 void AliasesWriter::WriteStreamOfAliasedGenericUnion2Impl(std::vector<test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum>> const& values) {
@@ -4131,15 +4018,9 @@ void AliasesReader::ReadAliasedGenericFixedVectorImpl(test_model::AliasedGeneric
 }
 
 bool AliasesReader::ReadStreamOfAliasedGenericUnion2Impl(test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum>& value) {
-  if (current_block_remaining_ == 0) {
-    yardl::binary::ReadInteger(stream_, current_block_remaining_);
-    if (current_block_remaining_ == 0) {
-      return false;
-    }
-  }
-  test_model::binary::ReadAliasedGenericUnion2<test_model::AliasedString, test_model::binary::ReadAliasedString, test_model::AliasedEnum, test_model::binary::ReadAliasedEnum>(stream_, value);
-  current_block_remaining_--;
-  return true;
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum>, test_model::binary::ReadAliasedGenericUnion2<test_model::AliasedString, test_model::binary::ReadAliasedString, test_model::AliasedEnum, test_model::binary::ReadAliasedEnum>>(stream_, current_block_remaining_, value);
+  return read_block_successful;
 }
 
 bool AliasesReader::ReadStreamOfAliasedGenericUnion2Impl(std::vector<test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum>>& values) {
@@ -4152,8 +4033,7 @@ void AliasesReader::CloseImpl() {
 }
 
 void StreamsOfAliasedUnionsWriter::WriteIntOrSimpleRecordImpl(test_model::AliasedIntOrSimpleRecord const& value) {
-  yardl::binary::WriteInteger(stream_, 1U);
-  test_model::binary::WriteAliasedIntOrSimpleRecord(stream_, value);
+  yardl::binary::WriteBlock<test_model::AliasedIntOrSimpleRecord, test_model::binary::WriteAliasedIntOrSimpleRecord>(stream_, value);
 }
 
 void StreamsOfAliasedUnionsWriter::WriteIntOrSimpleRecordImpl(std::vector<test_model::AliasedIntOrSimpleRecord> const& values) {
@@ -4167,8 +4047,7 @@ void StreamsOfAliasedUnionsWriter::EndIntOrSimpleRecordImpl() {
 }
 
 void StreamsOfAliasedUnionsWriter::WriteNullableIntOrSimpleRecordImpl(test_model::AliasedNullableIntSimpleRecord const& value) {
-  yardl::binary::WriteInteger(stream_, 1U);
-  test_model::binary::WriteAliasedNullableIntSimpleRecord(stream_, value);
+  yardl::binary::WriteBlock<test_model::AliasedNullableIntSimpleRecord, test_model::binary::WriteAliasedNullableIntSimpleRecord>(stream_, value);
 }
 
 void StreamsOfAliasedUnionsWriter::WriteNullableIntOrSimpleRecordImpl(std::vector<test_model::AliasedNullableIntSimpleRecord> const& values) {
@@ -4190,15 +4069,9 @@ void StreamsOfAliasedUnionsWriter::CloseImpl() {
 }
 
 bool StreamsOfAliasedUnionsReader::ReadIntOrSimpleRecordImpl(test_model::AliasedIntOrSimpleRecord& value) {
-  if (current_block_remaining_ == 0) {
-    yardl::binary::ReadInteger(stream_, current_block_remaining_);
-    if (current_block_remaining_ == 0) {
-      return false;
-    }
-  }
-  test_model::binary::ReadAliasedIntOrSimpleRecord(stream_, value);
-  current_block_remaining_--;
-  return true;
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<test_model::AliasedIntOrSimpleRecord, test_model::binary::ReadAliasedIntOrSimpleRecord>(stream_, current_block_remaining_, value);
+  return read_block_successful;
 }
 
 bool StreamsOfAliasedUnionsReader::ReadIntOrSimpleRecordImpl(std::vector<test_model::AliasedIntOrSimpleRecord>& values) {
@@ -4207,15 +4080,9 @@ bool StreamsOfAliasedUnionsReader::ReadIntOrSimpleRecordImpl(std::vector<test_mo
 }
 
 bool StreamsOfAliasedUnionsReader::ReadNullableIntOrSimpleRecordImpl(test_model::AliasedNullableIntSimpleRecord& value) {
-  if (current_block_remaining_ == 0) {
-    yardl::binary::ReadInteger(stream_, current_block_remaining_);
-    if (current_block_remaining_ == 0) {
-      return false;
-    }
-  }
-  test_model::binary::ReadAliasedNullableIntSimpleRecord(stream_, value);
-  current_block_remaining_--;
-  return true;
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<test_model::AliasedNullableIntSimpleRecord, test_model::binary::ReadAliasedNullableIntSimpleRecord>(stream_, current_block_remaining_, value);
+  return read_block_successful;
 }
 
 bool StreamsOfAliasedUnionsReader::ReadNullableIntOrSimpleRecordImpl(std::vector<test_model::AliasedNullableIntSimpleRecord>& values) {
@@ -4248,8 +4115,7 @@ void ProtocolWithComputedFieldsReader::CloseImpl() {
 }
 
 void ProtocolWithKeywordStepsWriter::WriteIntImpl(test_model::RecordWithKeywordFields const& value) {
-  yardl::binary::WriteInteger(stream_, 1U);
-  test_model::binary::WriteRecordWithKeywordFields(stream_, value);
+  yardl::binary::WriteBlock<test_model::RecordWithKeywordFields, test_model::binary::WriteRecordWithKeywordFields>(stream_, value);
 }
 
 void ProtocolWithKeywordStepsWriter::WriteIntImpl(std::vector<test_model::RecordWithKeywordFields> const& values) {
@@ -4275,15 +4141,9 @@ void ProtocolWithKeywordStepsWriter::CloseImpl() {
 }
 
 bool ProtocolWithKeywordStepsReader::ReadIntImpl(test_model::RecordWithKeywordFields& value) {
-  if (current_block_remaining_ == 0) {
-    yardl::binary::ReadInteger(stream_, current_block_remaining_);
-    if (current_block_remaining_ == 0) {
-      return false;
-    }
-  }
-  test_model::binary::ReadRecordWithKeywordFields(stream_, value);
-  current_block_remaining_--;
-  return true;
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<test_model::RecordWithKeywordFields, test_model::binary::ReadRecordWithKeywordFields>(stream_, current_block_remaining_, value);
+  return read_block_successful;
 }
 
 bool ProtocolWithKeywordStepsReader::ReadIntImpl(std::vector<test_model::RecordWithKeywordFields>& values) {

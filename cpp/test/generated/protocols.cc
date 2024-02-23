@@ -38,6 +38,16 @@ void BenchmarkFloat256x256ReaderBaseInvalidState(uint8_t attempted, uint8_t curr
 
 std::string BenchmarkFloat256x256WriterBase::schema_ = R"({"protocol":{"name":"BenchmarkFloat256x256","sequence":[{"name":"float256x256","type":{"stream":{"items":{"array":{"items":"float32","dimensions":[{"length":256},{"length":256}]}}}}}]},"types":null})";
 
+std::vector<std::string> BenchmarkFloat256x256WriterBase::previous_schemas_ = {
+};
+
+std::string BenchmarkFloat256x256WriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Current: return BenchmarkFloat256x256WriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol BenchmarkFloat256x256.");
+  }
+
+}
 void BenchmarkFloat256x256WriterBase::WriteFloat256x256(yardl::FixedNDArray<float, 256, 256> const& value) {
   if (unlikely(state_ != 0)) {
     BenchmarkFloat256x256WriterBaseInvalidState(0, false, state_);
@@ -80,6 +90,14 @@ void BenchmarkFloat256x256WriterBase::Close() {
 
 std::string BenchmarkFloat256x256ReaderBase::schema_ = BenchmarkFloat256x256WriterBase::schema_;
 
+std::vector<std::string> BenchmarkFloat256x256ReaderBase::previous_schemas_ = BenchmarkFloat256x256WriterBase::previous_schemas_;
+
+Version BenchmarkFloat256x256ReaderBase::VersionFromSchema(std::string const& schema) {
+  if (schema == BenchmarkFloat256x256WriterBase::schema_) {
+    return Version::Current;
+  }
+  throw std::runtime_error("The schema does not match any version supported by protocol BenchmarkFloat256x256.");
+}
 bool BenchmarkFloat256x256ReaderBase::ReadFloat256x256(yardl::FixedNDArray<float, 256, 256>& value) {
   if (unlikely(state_ != 0)) {
     if (state_ == 1) {
@@ -191,6 +209,16 @@ void BenchmarkInt256x256ReaderBaseInvalidState(uint8_t attempted, uint8_t curren
 
 std::string BenchmarkInt256x256WriterBase::schema_ = R"({"protocol":{"name":"BenchmarkInt256x256","sequence":[{"name":"int256x256","type":{"stream":{"items":{"array":{"items":"int32","dimensions":[{"length":256},{"length":256}]}}}}}]},"types":null})";
 
+std::vector<std::string> BenchmarkInt256x256WriterBase::previous_schemas_ = {
+};
+
+std::string BenchmarkInt256x256WriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Current: return BenchmarkInt256x256WriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol BenchmarkInt256x256.");
+  }
+
+}
 void BenchmarkInt256x256WriterBase::WriteInt256x256(yardl::FixedNDArray<int32_t, 256, 256> const& value) {
   if (unlikely(state_ != 0)) {
     BenchmarkInt256x256WriterBaseInvalidState(0, false, state_);
@@ -233,6 +261,14 @@ void BenchmarkInt256x256WriterBase::Close() {
 
 std::string BenchmarkInt256x256ReaderBase::schema_ = BenchmarkInt256x256WriterBase::schema_;
 
+std::vector<std::string> BenchmarkInt256x256ReaderBase::previous_schemas_ = BenchmarkInt256x256WriterBase::previous_schemas_;
+
+Version BenchmarkInt256x256ReaderBase::VersionFromSchema(std::string const& schema) {
+  if (schema == BenchmarkInt256x256WriterBase::schema_) {
+    return Version::Current;
+  }
+  throw std::runtime_error("The schema does not match any version supported by protocol BenchmarkInt256x256.");
+}
 bool BenchmarkInt256x256ReaderBase::ReadInt256x256(yardl::FixedNDArray<int32_t, 256, 256>& value) {
   if (unlikely(state_ != 0)) {
     if (state_ == 1) {
@@ -344,6 +380,16 @@ void BenchmarkFloatVlenReaderBaseInvalidState(uint8_t attempted, uint8_t current
 
 std::string BenchmarkFloatVlenWriterBase::schema_ = R"({"protocol":{"name":"BenchmarkFloatVlen","sequence":[{"name":"floatArray","type":{"stream":{"items":{"array":{"items":"float32","dimensions":2}}}}}]},"types":null})";
 
+std::vector<std::string> BenchmarkFloatVlenWriterBase::previous_schemas_ = {
+};
+
+std::string BenchmarkFloatVlenWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Current: return BenchmarkFloatVlenWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol BenchmarkFloatVlen.");
+  }
+
+}
 void BenchmarkFloatVlenWriterBase::WriteFloatArray(yardl::NDArray<float, 2> const& value) {
   if (unlikely(state_ != 0)) {
     BenchmarkFloatVlenWriterBaseInvalidState(0, false, state_);
@@ -386,6 +432,14 @@ void BenchmarkFloatVlenWriterBase::Close() {
 
 std::string BenchmarkFloatVlenReaderBase::schema_ = BenchmarkFloatVlenWriterBase::schema_;
 
+std::vector<std::string> BenchmarkFloatVlenReaderBase::previous_schemas_ = BenchmarkFloatVlenWriterBase::previous_schemas_;
+
+Version BenchmarkFloatVlenReaderBase::VersionFromSchema(std::string const& schema) {
+  if (schema == BenchmarkFloatVlenWriterBase::schema_) {
+    return Version::Current;
+  }
+  throw std::runtime_error("The schema does not match any version supported by protocol BenchmarkFloatVlen.");
+}
 bool BenchmarkFloatVlenReaderBase::ReadFloatArray(yardl::NDArray<float, 2>& value) {
   if (unlikely(state_ != 0)) {
     if (state_ == 1) {
@@ -497,6 +551,16 @@ void BenchmarkSmallRecordReaderBaseInvalidState(uint8_t attempted, uint8_t curre
 
 std::string BenchmarkSmallRecordWriterBase::schema_ = R"({"protocol":{"name":"BenchmarkSmallRecord","sequence":[{"name":"smallRecord","type":{"stream":{"items":"TestModel.SmallBenchmarkRecord"}}}]},"types":[{"name":"SmallBenchmarkRecord","fields":[{"name":"a","type":"float64"},{"name":"b","type":"float32"},{"name":"c","type":"float32"}]}]})";
 
+std::vector<std::string> BenchmarkSmallRecordWriterBase::previous_schemas_ = {
+};
+
+std::string BenchmarkSmallRecordWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Current: return BenchmarkSmallRecordWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol BenchmarkSmallRecord.");
+  }
+
+}
 void BenchmarkSmallRecordWriterBase::WriteSmallRecord(test_model::SmallBenchmarkRecord const& value) {
   if (unlikely(state_ != 0)) {
     BenchmarkSmallRecordWriterBaseInvalidState(0, false, state_);
@@ -539,6 +603,14 @@ void BenchmarkSmallRecordWriterBase::Close() {
 
 std::string BenchmarkSmallRecordReaderBase::schema_ = BenchmarkSmallRecordWriterBase::schema_;
 
+std::vector<std::string> BenchmarkSmallRecordReaderBase::previous_schemas_ = BenchmarkSmallRecordWriterBase::previous_schemas_;
+
+Version BenchmarkSmallRecordReaderBase::VersionFromSchema(std::string const& schema) {
+  if (schema == BenchmarkSmallRecordWriterBase::schema_) {
+    return Version::Current;
+  }
+  throw std::runtime_error("The schema does not match any version supported by protocol BenchmarkSmallRecord.");
+}
 bool BenchmarkSmallRecordReaderBase::ReadSmallRecord(test_model::SmallBenchmarkRecord& value) {
   if (unlikely(state_ != 0)) {
     if (state_ == 1) {
@@ -650,6 +722,16 @@ void BenchmarkSmallRecordWithOptionalsReaderBaseInvalidState(uint8_t attempted, 
 
 std::string BenchmarkSmallRecordWithOptionalsWriterBase::schema_ = R"({"protocol":{"name":"BenchmarkSmallRecordWithOptionals","sequence":[{"name":"smallRecord","type":{"stream":{"items":"TestModel.SimpleEncodingCounters"}}}]},"types":[{"name":"SimpleEncodingCounters","fields":[{"name":"e1","type":[null,"uint32"]},{"name":"e2","type":[null,"uint32"]},{"name":"slice","type":[null,"uint32"]},{"name":"repetition","type":[null,"uint32"]}]}]})";
 
+std::vector<std::string> BenchmarkSmallRecordWithOptionalsWriterBase::previous_schemas_ = {
+};
+
+std::string BenchmarkSmallRecordWithOptionalsWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Current: return BenchmarkSmallRecordWithOptionalsWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol BenchmarkSmallRecordWithOptionals.");
+  }
+
+}
 void BenchmarkSmallRecordWithOptionalsWriterBase::WriteSmallRecord(test_model::SimpleEncodingCounters const& value) {
   if (unlikely(state_ != 0)) {
     BenchmarkSmallRecordWithOptionalsWriterBaseInvalidState(0, false, state_);
@@ -692,6 +774,14 @@ void BenchmarkSmallRecordWithOptionalsWriterBase::Close() {
 
 std::string BenchmarkSmallRecordWithOptionalsReaderBase::schema_ = BenchmarkSmallRecordWithOptionalsWriterBase::schema_;
 
+std::vector<std::string> BenchmarkSmallRecordWithOptionalsReaderBase::previous_schemas_ = BenchmarkSmallRecordWithOptionalsWriterBase::previous_schemas_;
+
+Version BenchmarkSmallRecordWithOptionalsReaderBase::VersionFromSchema(std::string const& schema) {
+  if (schema == BenchmarkSmallRecordWithOptionalsWriterBase::schema_) {
+    return Version::Current;
+  }
+  throw std::runtime_error("The schema does not match any version supported by protocol BenchmarkSmallRecordWithOptionals.");
+}
 bool BenchmarkSmallRecordWithOptionalsReaderBase::ReadSmallRecord(test_model::SimpleEncodingCounters& value) {
   if (unlikely(state_ != 0)) {
     if (state_ == 1) {
@@ -803,6 +893,16 @@ void BenchmarkSimpleMrdReaderBaseInvalidState(uint8_t attempted, uint8_t current
 
 std::string BenchmarkSimpleMrdWriterBase::schema_ = R"({"protocol":{"name":"BenchmarkSimpleMrd","sequence":[{"name":"data","type":{"stream":{"items":[{"tag":"acquisition","explicitTag":true,"type":"TestModel.SimpleAcquisition"},{"tag":"image","explicitTag":true,"type":{"name":"Image.Image","typeArguments":["float32"]}}]}}}]},"types":[{"name":"Image","typeParameters":["T"],"type":{"array":{"items":"T","dimensions":[{"name":"x"},{"name":"y"}]}}},{"name":"SimpleAcquisition","fields":[{"name":"flags","type":"uint64"},{"name":"idx","type":"TestModel.SimpleEncodingCounters"},{"name":"data","type":{"array":{"items":"complexfloat32","dimensions":2}}},{"name":"trajectory","type":{"array":{"items":"float32","dimensions":2}}}]},{"name":"SimpleEncodingCounters","fields":[{"name":"e1","type":[null,"uint32"]},{"name":"e2","type":[null,"uint32"]},{"name":"slice","type":[null,"uint32"]},{"name":"repetition","type":[null,"uint32"]}]}]})";
 
+std::vector<std::string> BenchmarkSimpleMrdWriterBase::previous_schemas_ = {
+};
+
+std::string BenchmarkSimpleMrdWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Current: return BenchmarkSimpleMrdWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol BenchmarkSimpleMrd.");
+  }
+
+}
 void BenchmarkSimpleMrdWriterBase::WriteData(std::variant<test_model::SimpleAcquisition, image::Image<float>> const& value) {
   if (unlikely(state_ != 0)) {
     BenchmarkSimpleMrdWriterBaseInvalidState(0, false, state_);
@@ -845,6 +945,14 @@ void BenchmarkSimpleMrdWriterBase::Close() {
 
 std::string BenchmarkSimpleMrdReaderBase::schema_ = BenchmarkSimpleMrdWriterBase::schema_;
 
+std::vector<std::string> BenchmarkSimpleMrdReaderBase::previous_schemas_ = BenchmarkSimpleMrdWriterBase::previous_schemas_;
+
+Version BenchmarkSimpleMrdReaderBase::VersionFromSchema(std::string const& schema) {
+  if (schema == BenchmarkSimpleMrdWriterBase::schema_) {
+    return Version::Current;
+  }
+  throw std::runtime_error("The schema does not match any version supported by protocol BenchmarkSimpleMrd.");
+}
 bool BenchmarkSimpleMrdReaderBase::ReadData(std::variant<test_model::SimpleAcquisition, image::Image<float>>& value) {
   if (unlikely(state_ != 0)) {
     if (state_ == 1) {
@@ -959,6 +1067,16 @@ void ScalarsReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
 
 std::string ScalarsWriterBase::schema_ = R"({"protocol":{"name":"Scalars","sequence":[{"name":"int32","type":"int32"},{"name":"record","type":"TestModel.RecordWithPrimitives"}]},"types":[{"name":"RecordWithPrimitives","fields":[{"name":"boolField","type":"bool"},{"name":"int8Field","type":"int8"},{"name":"uint8Field","type":"uint8"},{"name":"int16Field","type":"int16"},{"name":"uint16Field","type":"uint16"},{"name":"int32Field","type":"int32"},{"name":"uint32Field","type":"uint32"},{"name":"int64Field","type":"int64"},{"name":"uint64Field","type":"uint64"},{"name":"sizeField","type":"size"},{"name":"float32Field","type":"float32"},{"name":"float64Field","type":"float64"},{"name":"complexfloat32Field","type":"complexfloat32"},{"name":"complexfloat64Field","type":"complexfloat64"},{"name":"dateField","type":"date"},{"name":"timeField","type":"time"},{"name":"datetimeField","type":"datetime"}]}]})";
 
+std::vector<std::string> ScalarsWriterBase::previous_schemas_ = {
+};
+
+std::string ScalarsWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Current: return ScalarsWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol Scalars.");
+  }
+
+}
 void ScalarsWriterBase::WriteInt32(int32_t const& value) {
   if (unlikely(state_ != 0)) {
     ScalarsWriterBaseInvalidState(0, false, state_);
@@ -987,6 +1105,14 @@ void ScalarsWriterBase::Close() {
 
 std::string ScalarsReaderBase::schema_ = ScalarsWriterBase::schema_;
 
+std::vector<std::string> ScalarsReaderBase::previous_schemas_ = ScalarsWriterBase::previous_schemas_;
+
+Version ScalarsReaderBase::VersionFromSchema(std::string const& schema) {
+  if (schema == ScalarsWriterBase::schema_) {
+    return Version::Current;
+  }
+  throw std::runtime_error("The schema does not match any version supported by protocol Scalars.");
+}
 void ScalarsReaderBase::ReadInt32(int32_t& value) {
   if (unlikely(state_ != 0)) {
     ScalarsReaderBaseInvalidState(0, state_);
@@ -1063,6 +1189,16 @@ void ScalarOptionalsReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
 
 std::string ScalarOptionalsWriterBase::schema_ = R"({"protocol":{"name":"ScalarOptionals","sequence":[{"name":"optionalInt","type":[null,"int32"]},{"name":"optionalRecord","type":[null,"TestModel.SimpleRecord"]},{"name":"recordWithOptionalFields","type":"TestModel.RecordWithOptionalFields"},{"name":"optionalRecordWithOptionalFields","type":[null,"TestModel.RecordWithOptionalFields"]}]},"types":[{"name":"RecordWithOptionalFields","fields":[{"name":"optionalInt","type":[null,"int32"]},{"name":"optionalIntAlternateSyntax","type":[null,"int32"]},{"name":"optionalTime","type":[null,"time"]}]},{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]}]})";
 
+std::vector<std::string> ScalarOptionalsWriterBase::previous_schemas_ = {
+};
+
+std::string ScalarOptionalsWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Current: return ScalarOptionalsWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol ScalarOptionals.");
+  }
+
+}
 void ScalarOptionalsWriterBase::WriteOptionalInt(std::optional<int32_t> const& value) {
   if (unlikely(state_ != 0)) {
     ScalarOptionalsWriterBaseInvalidState(0, false, state_);
@@ -1109,6 +1245,14 @@ void ScalarOptionalsWriterBase::Close() {
 
 std::string ScalarOptionalsReaderBase::schema_ = ScalarOptionalsWriterBase::schema_;
 
+std::vector<std::string> ScalarOptionalsReaderBase::previous_schemas_ = ScalarOptionalsWriterBase::previous_schemas_;
+
+Version ScalarOptionalsReaderBase::VersionFromSchema(std::string const& schema) {
+  if (schema == ScalarOptionalsWriterBase::schema_) {
+    return Version::Current;
+  }
+  throw std::runtime_error("The schema does not match any version supported by protocol ScalarOptionals.");
+}
 void ScalarOptionalsReaderBase::ReadOptionalInt(std::optional<int32_t>& value) {
   if (unlikely(state_ != 0)) {
     ScalarOptionalsReaderBaseInvalidState(0, state_);
@@ -1204,6 +1348,16 @@ void NestedRecordsReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
 
 std::string NestedRecordsWriterBase::schema_ = R"({"protocol":{"name":"NestedRecords","sequence":[{"name":"tupleWithRecords","type":"TestModel.TupleWithRecords"}]},"types":[{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]},{"name":"TupleWithRecords","fields":[{"name":"a","type":"TestModel.SimpleRecord"},{"name":"b","type":"TestModel.SimpleRecord"}]}]})";
 
+std::vector<std::string> NestedRecordsWriterBase::previous_schemas_ = {
+};
+
+std::string NestedRecordsWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Current: return NestedRecordsWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol NestedRecords.");
+  }
+
+}
 void NestedRecordsWriterBase::WriteTupleWithRecords(test_model::TupleWithRecords const& value) {
   if (unlikely(state_ != 0)) {
     NestedRecordsWriterBaseInvalidState(0, false, state_);
@@ -1223,6 +1377,14 @@ void NestedRecordsWriterBase::Close() {
 
 std::string NestedRecordsReaderBase::schema_ = NestedRecordsWriterBase::schema_;
 
+std::vector<std::string> NestedRecordsReaderBase::previous_schemas_ = NestedRecordsWriterBase::previous_schemas_;
+
+Version NestedRecordsReaderBase::VersionFromSchema(std::string const& schema) {
+  if (schema == NestedRecordsWriterBase::schema_) {
+    return Version::Current;
+  }
+  throw std::runtime_error("The schema does not match any version supported by protocol NestedRecords.");
+}
 void NestedRecordsReaderBase::ReadTupleWithRecords(test_model::TupleWithRecords& value) {
   if (unlikely(state_ != 0)) {
     NestedRecordsReaderBaseInvalidState(0, state_);
@@ -1285,6 +1447,16 @@ void VlensReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
 
 std::string VlensWriterBase::schema_ = R"({"protocol":{"name":"Vlens","sequence":[{"name":"intVector","type":{"vector":{"items":"int32"}}},{"name":"complexVector","type":{"vector":{"items":"complexfloat32"}}},{"name":"recordWithVlens","type":"TestModel.RecordWithVlens"},{"name":"vlenOfRecordWithVlens","type":{"vector":{"items":"TestModel.RecordWithVlens"}}}]},"types":[{"name":"RecordWithVlens","fields":[{"name":"a","type":{"vector":{"items":"TestModel.SimpleRecord"}}},{"name":"b","type":"int32"},{"name":"c","type":"int32"}]},{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]}]})";
 
+std::vector<std::string> VlensWriterBase::previous_schemas_ = {
+};
+
+std::string VlensWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Current: return VlensWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol Vlens.");
+  }
+
+}
 void VlensWriterBase::WriteIntVector(std::vector<int32_t> const& value) {
   if (unlikely(state_ != 0)) {
     VlensWriterBaseInvalidState(0, false, state_);
@@ -1331,6 +1503,14 @@ void VlensWriterBase::Close() {
 
 std::string VlensReaderBase::schema_ = VlensWriterBase::schema_;
 
+std::vector<std::string> VlensReaderBase::previous_schemas_ = VlensWriterBase::previous_schemas_;
+
+Version VlensReaderBase::VersionFromSchema(std::string const& schema) {
+  if (schema == VlensWriterBase::schema_) {
+    return Version::Current;
+  }
+  throw std::runtime_error("The schema does not match any version supported by protocol Vlens.");
+}
 void VlensReaderBase::ReadIntVector(std::vector<int32_t>& value) {
   if (unlikely(state_ != 0)) {
     VlensReaderBaseInvalidState(0, state_);
@@ -1429,6 +1609,16 @@ void StringsReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
 
 std::string StringsWriterBase::schema_ = R"({"protocol":{"name":"Strings","sequence":[{"name":"singleString","type":"string"},{"name":"recWithString","type":"TestModel.RecordWithStrings"}]},"types":[{"name":"RecordWithStrings","fields":[{"name":"a","type":"string"},{"name":"b","type":"string"}]}]})";
 
+std::vector<std::string> StringsWriterBase::previous_schemas_ = {
+};
+
+std::string StringsWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Current: return StringsWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol Strings.");
+  }
+
+}
 void StringsWriterBase::WriteSingleString(std::string const& value) {
   if (unlikely(state_ != 0)) {
     StringsWriterBaseInvalidState(0, false, state_);
@@ -1457,6 +1647,14 @@ void StringsWriterBase::Close() {
 
 std::string StringsReaderBase::schema_ = StringsWriterBase::schema_;
 
+std::vector<std::string> StringsReaderBase::previous_schemas_ = StringsWriterBase::previous_schemas_;
+
+Version StringsReaderBase::VersionFromSchema(std::string const& schema) {
+  if (schema == StringsWriterBase::schema_) {
+    return Version::Current;
+  }
+  throw std::runtime_error("The schema does not match any version supported by protocol Strings.");
+}
 void StringsReaderBase::ReadSingleString(std::string& value) {
   if (unlikely(state_ != 0)) {
     StringsReaderBaseInvalidState(0, state_);
@@ -1524,6 +1722,16 @@ void OptionalVectorsReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
 
 std::string OptionalVectorsWriterBase::schema_ = R"({"protocol":{"name":"OptionalVectors","sequence":[{"name":"recordWithOptionalVector","type":"TestModel.RecordWithOptionalVector"}]},"types":[{"name":"RecordWithOptionalVector","fields":[{"name":"optionalVector","type":[null,{"vector":{"items":"int32"}}]}]}]})";
 
+std::vector<std::string> OptionalVectorsWriterBase::previous_schemas_ = {
+};
+
+std::string OptionalVectorsWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Current: return OptionalVectorsWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol OptionalVectors.");
+  }
+
+}
 void OptionalVectorsWriterBase::WriteRecordWithOptionalVector(test_model::RecordWithOptionalVector const& value) {
   if (unlikely(state_ != 0)) {
     OptionalVectorsWriterBaseInvalidState(0, false, state_);
@@ -1543,6 +1751,14 @@ void OptionalVectorsWriterBase::Close() {
 
 std::string OptionalVectorsReaderBase::schema_ = OptionalVectorsWriterBase::schema_;
 
+std::vector<std::string> OptionalVectorsReaderBase::previous_schemas_ = OptionalVectorsWriterBase::previous_schemas_;
+
+Version OptionalVectorsReaderBase::VersionFromSchema(std::string const& schema) {
+  if (schema == OptionalVectorsWriterBase::schema_) {
+    return Version::Current;
+  }
+  throw std::runtime_error("The schema does not match any version supported by protocol OptionalVectors.");
+}
 void OptionalVectorsReaderBase::ReadRecordWithOptionalVector(test_model::RecordWithOptionalVector& value) {
   if (unlikely(state_ != 0)) {
     OptionalVectorsReaderBaseInvalidState(0, state_);
@@ -1605,6 +1821,16 @@ void FixedVectorsReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
 
 std::string FixedVectorsWriterBase::schema_ = R"({"protocol":{"name":"FixedVectors","sequence":[{"name":"fixedIntVector","type":{"vector":{"items":"int32","length":5}}},{"name":"fixedSimpleRecordVector","type":{"vector":{"items":"TestModel.SimpleRecord","length":3}}},{"name":"fixedRecordWithVlensVector","type":{"vector":{"items":"TestModel.RecordWithVlens","length":2}}},{"name":"recordWithFixedVectors","type":"TestModel.RecordWithFixedVectors"}]},"types":[{"name":"RecordWithFixedVectors","fields":[{"name":"fixedIntVector","type":{"vector":{"items":"int32","length":5}}},{"name":"fixedSimpleRecordVector","type":{"vector":{"items":"TestModel.SimpleRecord","length":3}}},{"name":"fixedRecordWithVlensVector","type":{"vector":{"items":"TestModel.RecordWithVlens","length":2}}}]},{"name":"RecordWithVlens","fields":[{"name":"a","type":{"vector":{"items":"TestModel.SimpleRecord"}}},{"name":"b","type":"int32"},{"name":"c","type":"int32"}]},{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]}]})";
 
+std::vector<std::string> FixedVectorsWriterBase::previous_schemas_ = {
+};
+
+std::string FixedVectorsWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Current: return FixedVectorsWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol FixedVectors.");
+  }
+
+}
 void FixedVectorsWriterBase::WriteFixedIntVector(std::array<int32_t, 5> const& value) {
   if (unlikely(state_ != 0)) {
     FixedVectorsWriterBaseInvalidState(0, false, state_);
@@ -1651,6 +1877,14 @@ void FixedVectorsWriterBase::Close() {
 
 std::string FixedVectorsReaderBase::schema_ = FixedVectorsWriterBase::schema_;
 
+std::vector<std::string> FixedVectorsReaderBase::previous_schemas_ = FixedVectorsWriterBase::previous_schemas_;
+
+Version FixedVectorsReaderBase::VersionFromSchema(std::string const& schema) {
+  if (schema == FixedVectorsWriterBase::schema_) {
+    return Version::Current;
+  }
+  throw std::runtime_error("The schema does not match any version supported by protocol FixedVectors.");
+}
 void FixedVectorsReaderBase::ReadFixedIntVector(std::array<int32_t, 5>& value) {
   if (unlikely(state_ != 0)) {
     FixedVectorsReaderBaseInvalidState(0, state_);
@@ -1755,6 +1989,16 @@ void StreamsReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
 
 std::string StreamsWriterBase::schema_ = R"({"protocol":{"name":"Streams","sequence":[{"name":"intData","type":{"stream":{"items":"int32"}}},{"name":"optionalIntData","type":{"stream":{"items":[null,"int32"]}}},{"name":"recordWithOptionalVectorData","type":{"stream":{"items":"TestModel.RecordWithOptionalVector"}}},{"name":"fixedVector","type":{"stream":{"items":{"vector":{"items":"int32","length":3}}}}}]},"types":[{"name":"RecordWithOptionalVector","fields":[{"name":"optionalVector","type":[null,{"vector":{"items":"int32"}}]}]}]})";
 
+std::vector<std::string> StreamsWriterBase::previous_schemas_ = {
+};
+
+std::string StreamsWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Current: return StreamsWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol Streams.");
+  }
+
+}
 void StreamsWriterBase::WriteIntData(int32_t const& value) {
   if (unlikely(state_ != 0)) {
     StreamsWriterBaseInvalidState(0, false, state_);
@@ -1893,6 +2137,14 @@ void StreamsWriterBase::Close() {
 
 std::string StreamsReaderBase::schema_ = StreamsWriterBase::schema_;
 
+std::vector<std::string> StreamsReaderBase::previous_schemas_ = StreamsWriterBase::previous_schemas_;
+
+Version StreamsReaderBase::VersionFromSchema(std::string const& schema) {
+  if (schema == StreamsWriterBase::schema_) {
+    return Version::Current;
+  }
+  throw std::runtime_error("The schema does not match any version supported by protocol Streams.");
+}
 bool StreamsReaderBase::ReadIntData(int32_t& value) {
   if (unlikely(state_ != 0)) {
     if (state_ == 1) {
@@ -2244,6 +2496,16 @@ void FixedArraysReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
 
 std::string FixedArraysWriterBase::schema_ = R"({"protocol":{"name":"FixedArrays","sequence":[{"name":"ints","type":{"array":{"items":"int32","dimensions":[{"length":2},{"length":3}]}}},{"name":"fixedSimpleRecordArray","type":{"array":{"items":"TestModel.SimpleRecord","dimensions":[{"length":3},{"length":2}]}}},{"name":"fixedRecordWithVlensArray","type":{"array":{"items":"TestModel.RecordWithVlens","dimensions":[{"length":2},{"length":2}]}}},{"name":"recordWithFixedArrays","type":"TestModel.RecordWithFixedArrays"},{"name":"namedArray","type":"TestModel.NamedFixedNDArray"}]},"types":[{"name":"NamedFixedNDArray","type":{"array":{"items":"int32","dimensions":[{"name":"dimA","length":2},{"name":"dimB","length":4}]}}},{"name":"RecordWithFixedArrays","fields":[{"name":"ints","type":{"array":{"items":"int32","dimensions":[{"length":2},{"length":3}]}}},{"name":"fixedSimpleRecordArray","type":{"array":{"items":"TestModel.SimpleRecord","dimensions":[{"length":3},{"length":2}]}}},{"name":"fixedRecordWithVlensArray","type":{"array":{"items":"TestModel.RecordWithVlens","dimensions":[{"length":2},{"length":2}]}}}]},{"name":"RecordWithVlens","fields":[{"name":"a","type":{"vector":{"items":"TestModel.SimpleRecord"}}},{"name":"b","type":"int32"},{"name":"c","type":"int32"}]},{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]}]})";
 
+std::vector<std::string> FixedArraysWriterBase::previous_schemas_ = {
+};
+
+std::string FixedArraysWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Current: return FixedArraysWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol FixedArrays.");
+  }
+
+}
 void FixedArraysWriterBase::WriteInts(yardl::FixedNDArray<int32_t, 2, 3> const& value) {
   if (unlikely(state_ != 0)) {
     FixedArraysWriterBaseInvalidState(0, false, state_);
@@ -2299,6 +2561,14 @@ void FixedArraysWriterBase::Close() {
 
 std::string FixedArraysReaderBase::schema_ = FixedArraysWriterBase::schema_;
 
+std::vector<std::string> FixedArraysReaderBase::previous_schemas_ = FixedArraysWriterBase::previous_schemas_;
+
+Version FixedArraysReaderBase::VersionFromSchema(std::string const& schema) {
+  if (schema == FixedArraysWriterBase::schema_) {
+    return Version::Current;
+  }
+  throw std::runtime_error("The schema does not match any version supported by protocol FixedArrays.");
+}
 void FixedArraysReaderBase::ReadInts(yardl::FixedNDArray<int32_t, 2, 3>& value) {
   if (unlikely(state_ != 0)) {
     FixedArraysReaderBaseInvalidState(0, state_);
@@ -2432,6 +2702,16 @@ void SubarraysReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
 
 std::string SubarraysWriterBase::schema_ = R"({"protocol":{"name":"Subarrays","sequence":[{"name":"dynamicWithFixedIntSubarray","type":{"array":{"items":{"array":{"items":"int32","dimensions":[{"length":3}]}}}}},{"name":"dynamicWithFixedFloatSubarray","type":{"array":{"items":{"array":{"items":"float32","dimensions":[{"length":3}]}}}}},{"name":"knownDimCountWithFixedIntSubarray","type":{"array":{"items":{"array":{"items":"int32","dimensions":[{"length":3}]}},"dimensions":1}}},{"name":"knownDimCountWithFixedFloatSubarray","type":{"array":{"items":{"array":{"items":"float32","dimensions":[{"length":3}]}},"dimensions":1}}},{"name":"fixedWithFixedIntSubarray","type":{"array":{"items":{"array":{"items":"int32","dimensions":[{"length":3}]}},"dimensions":[{"length":2}]}}},{"name":"fixedWithFixedFloatSubarray","type":{"array":{"items":{"array":{"items":"float32","dimensions":[{"length":3}]}},"dimensions":[{"length":2}]}}},{"name":"nestedSubarray","type":{"array":{"items":{"array":{"items":{"array":{"items":"int32","dimensions":[{"length":3}]}},"dimensions":[{"length":2}]}}}}},{"name":"dynamicWithFixedVectorSubarray","type":{"array":{"items":{"vector":{"items":"int32","length":3}}}}},{"name":"genericSubarray","type":{"name":"TestModel.Image","typeArguments":[{"array":{"items":"int32","dimensions":[{"length":3}]}}]}}]},"types":[{"name":"Image","typeParameters":["T"],"type":{"array":{"items":"T","dimensions":[{"name":"x"},{"name":"y"}]}}},{"name":"Image","typeParameters":["T"],"type":{"name":"Image.Image","typeArguments":["T"]}}]})";
 
+std::vector<std::string> SubarraysWriterBase::previous_schemas_ = {
+};
+
+std::string SubarraysWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Current: return SubarraysWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol Subarrays.");
+  }
+
+}
 void SubarraysWriterBase::WriteDynamicWithFixedIntSubarray(yardl::DynamicNDArray<yardl::FixedNDArray<int32_t, 3>> const& value) {
   if (unlikely(state_ != 0)) {
     SubarraysWriterBaseInvalidState(0, false, state_);
@@ -2523,6 +2803,14 @@ void SubarraysWriterBase::Close() {
 
 std::string SubarraysReaderBase::schema_ = SubarraysWriterBase::schema_;
 
+std::vector<std::string> SubarraysReaderBase::previous_schemas_ = SubarraysWriterBase::previous_schemas_;
+
+Version SubarraysReaderBase::VersionFromSchema(std::string const& schema) {
+  if (schema == SubarraysWriterBase::schema_) {
+    return Version::Current;
+  }
+  throw std::runtime_error("The schema does not match any version supported by protocol Subarrays.");
+}
 void SubarraysReaderBase::ReadDynamicWithFixedIntSubarray(yardl::DynamicNDArray<yardl::FixedNDArray<int32_t, 3>>& value) {
   if (unlikely(state_ != 0)) {
     SubarraysReaderBaseInvalidState(0, state_);
@@ -2691,6 +2979,16 @@ void SubarraysInRecordsReaderBaseInvalidState(uint8_t attempted, uint8_t current
 
 std::string SubarraysInRecordsWriterBase::schema_ = R"({"protocol":{"name":"SubarraysInRecords","sequence":[{"name":"withFixedSubarrays","type":{"array":{"items":"TestModel.RecordWithFixedCollections"}}},{"name":"withVlenSubarrays","type":{"array":{"items":"TestModel.RecordWithVlenCollections"}}}]},"types":[{"name":"RecordWithFixedCollections","fields":[{"name":"fixedVector","type":{"vector":{"items":"int32","length":3}}},{"name":"fixedArray","type":{"array":{"items":"int32","dimensions":[{"length":2},{"length":3}]}}}]},{"name":"RecordWithVlenCollections","fields":[{"name":"vector","type":{"vector":{"items":"int32"}}},{"name":"array","type":{"array":{"items":"int32","dimensions":2}}}]}]})";
 
+std::vector<std::string> SubarraysInRecordsWriterBase::previous_schemas_ = {
+};
+
+std::string SubarraysInRecordsWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Current: return SubarraysInRecordsWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol SubarraysInRecords.");
+  }
+
+}
 void SubarraysInRecordsWriterBase::WriteWithFixedSubarrays(yardl::DynamicNDArray<test_model::RecordWithFixedCollections> const& value) {
   if (unlikely(state_ != 0)) {
     SubarraysInRecordsWriterBaseInvalidState(0, false, state_);
@@ -2719,6 +3017,14 @@ void SubarraysInRecordsWriterBase::Close() {
 
 std::string SubarraysInRecordsReaderBase::schema_ = SubarraysInRecordsWriterBase::schema_;
 
+std::vector<std::string> SubarraysInRecordsReaderBase::previous_schemas_ = SubarraysInRecordsWriterBase::previous_schemas_;
+
+Version SubarraysInRecordsReaderBase::VersionFromSchema(std::string const& schema) {
+  if (schema == SubarraysInRecordsWriterBase::schema_) {
+    return Version::Current;
+  }
+  throw std::runtime_error("The schema does not match any version supported by protocol SubarraysInRecords.");
+}
 void SubarraysInRecordsReaderBase::ReadWithFixedSubarrays(yardl::DynamicNDArray<test_model::RecordWithFixedCollections>& value) {
   if (unlikely(state_ != 0)) {
     SubarraysInRecordsReaderBaseInvalidState(0, state_);
@@ -2798,6 +3104,16 @@ void NDArraysReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
 
 std::string NDArraysWriterBase::schema_ = R"({"protocol":{"name":"NDArrays","sequence":[{"name":"ints","type":{"array":{"items":"int32","dimensions":2}}},{"name":"simpleRecordArray","type":{"array":{"items":"TestModel.SimpleRecord","dimensions":2}}},{"name":"recordWithVlensArray","type":{"array":{"items":"TestModel.RecordWithVlens","dimensions":2}}},{"name":"recordWithNDArrays","type":"TestModel.RecordWithNDArrays"},{"name":"namedArray","type":"TestModel.NamedNDArray"}]},"types":[{"name":"NamedNDArray","type":{"array":{"items":"int32","dimensions":[{"name":"dimA"},{"name":"dimB"}]}}},{"name":"RecordWithNDArrays","fields":[{"name":"ints","type":{"array":{"items":"int32","dimensions":2}}},{"name":"fixedSimpleRecordArray","type":{"array":{"items":"TestModel.SimpleRecord","dimensions":2}}},{"name":"fixedRecordWithVlensArray","type":{"array":{"items":"TestModel.RecordWithVlens","dimensions":2}}}]},{"name":"RecordWithVlens","fields":[{"name":"a","type":{"vector":{"items":"TestModel.SimpleRecord"}}},{"name":"b","type":"int32"},{"name":"c","type":"int32"}]},{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]}]})";
 
+std::vector<std::string> NDArraysWriterBase::previous_schemas_ = {
+};
+
+std::string NDArraysWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Current: return NDArraysWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol NDArrays.");
+  }
+
+}
 void NDArraysWriterBase::WriteInts(yardl::NDArray<int32_t, 2> const& value) {
   if (unlikely(state_ != 0)) {
     NDArraysWriterBaseInvalidState(0, false, state_);
@@ -2853,6 +3169,14 @@ void NDArraysWriterBase::Close() {
 
 std::string NDArraysReaderBase::schema_ = NDArraysWriterBase::schema_;
 
+std::vector<std::string> NDArraysReaderBase::previous_schemas_ = NDArraysWriterBase::previous_schemas_;
+
+Version NDArraysReaderBase::VersionFromSchema(std::string const& schema) {
+  if (schema == NDArraysWriterBase::schema_) {
+    return Version::Current;
+  }
+  throw std::runtime_error("The schema does not match any version supported by protocol NDArrays.");
+}
 void NDArraysReaderBase::ReadInts(yardl::NDArray<int32_t, 2>& value) {
   if (unlikely(state_ != 0)) {
     NDArraysReaderBaseInvalidState(0, state_);
@@ -2971,6 +3295,16 @@ void NDArraysSingleDimensionReaderBaseInvalidState(uint8_t attempted, uint8_t cu
 
 std::string NDArraysSingleDimensionWriterBase::schema_ = R"({"protocol":{"name":"NDArraysSingleDimension","sequence":[{"name":"ints","type":{"array":{"items":"int32","dimensions":1}}},{"name":"simpleRecordArray","type":{"array":{"items":"TestModel.SimpleRecord","dimensions":1}}},{"name":"recordWithVlensArray","type":{"array":{"items":"TestModel.RecordWithVlens","dimensions":1}}},{"name":"recordWithNDArrays","type":"TestModel.RecordWithNDArraysSingleDimension"}]},"types":[{"name":"RecordWithNDArraysSingleDimension","fields":[{"name":"ints","type":{"array":{"items":"int32","dimensions":1}}},{"name":"fixedSimpleRecordArray","type":{"array":{"items":"TestModel.SimpleRecord","dimensions":1}}},{"name":"fixedRecordWithVlensArray","type":{"array":{"items":"TestModel.RecordWithVlens","dimensions":1}}}]},{"name":"RecordWithVlens","fields":[{"name":"a","type":{"vector":{"items":"TestModel.SimpleRecord"}}},{"name":"b","type":"int32"},{"name":"c","type":"int32"}]},{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]}]})";
 
+std::vector<std::string> NDArraysSingleDimensionWriterBase::previous_schemas_ = {
+};
+
+std::string NDArraysSingleDimensionWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Current: return NDArraysSingleDimensionWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol NDArraysSingleDimension.");
+  }
+
+}
 void NDArraysSingleDimensionWriterBase::WriteInts(yardl::NDArray<int32_t, 1> const& value) {
   if (unlikely(state_ != 0)) {
     NDArraysSingleDimensionWriterBaseInvalidState(0, false, state_);
@@ -3017,6 +3351,14 @@ void NDArraysSingleDimensionWriterBase::Close() {
 
 std::string NDArraysSingleDimensionReaderBase::schema_ = NDArraysSingleDimensionWriterBase::schema_;
 
+std::vector<std::string> NDArraysSingleDimensionReaderBase::previous_schemas_ = NDArraysSingleDimensionWriterBase::previous_schemas_;
+
+Version NDArraysSingleDimensionReaderBase::VersionFromSchema(std::string const& schema) {
+  if (schema == NDArraysSingleDimensionWriterBase::schema_) {
+    return Version::Current;
+  }
+  throw std::runtime_error("The schema does not match any version supported by protocol NDArraysSingleDimension.");
+}
 void NDArraysSingleDimensionReaderBase::ReadInts(yardl::NDArray<int32_t, 1>& value) {
   if (unlikely(state_ != 0)) {
     NDArraysSingleDimensionReaderBaseInvalidState(0, state_);
@@ -3121,6 +3463,16 @@ void DynamicNDArraysReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
 
 std::string DynamicNDArraysWriterBase::schema_ = R"({"protocol":{"name":"DynamicNDArrays","sequence":[{"name":"ints","type":{"array":{"items":"int32"}}},{"name":"simpleRecordArray","type":{"array":{"items":"TestModel.SimpleRecord"}}},{"name":"recordWithVlensArray","type":{"array":{"items":"TestModel.RecordWithVlens"}}},{"name":"recordWithDynamicNDArrays","type":"TestModel.RecordWithDynamicNDArrays"}]},"types":[{"name":"IntArray","type":{"array":{"items":"int32"}}},{"name":"RecordWithDynamicNDArrays","fields":[{"name":"ints","type":"TestModel.IntArray"},{"name":"simpleRecordArray","type":{"array":{"items":"TestModel.SimpleRecord"}}},{"name":"recordWithVlensArray","type":{"array":{"items":"TestModel.RecordWithVlens"}}}]},{"name":"RecordWithVlens","fields":[{"name":"a","type":{"vector":{"items":"TestModel.SimpleRecord"}}},{"name":"b","type":"int32"},{"name":"c","type":"int32"}]},{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]}]})";
 
+std::vector<std::string> DynamicNDArraysWriterBase::previous_schemas_ = {
+};
+
+std::string DynamicNDArraysWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Current: return DynamicNDArraysWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol DynamicNDArrays.");
+  }
+
+}
 void DynamicNDArraysWriterBase::WriteInts(yardl::DynamicNDArray<int32_t> const& value) {
   if (unlikely(state_ != 0)) {
     DynamicNDArraysWriterBaseInvalidState(0, false, state_);
@@ -3167,6 +3519,14 @@ void DynamicNDArraysWriterBase::Close() {
 
 std::string DynamicNDArraysReaderBase::schema_ = DynamicNDArraysWriterBase::schema_;
 
+std::vector<std::string> DynamicNDArraysReaderBase::previous_schemas_ = DynamicNDArraysWriterBase::previous_schemas_;
+
+Version DynamicNDArraysReaderBase::VersionFromSchema(std::string const& schema) {
+  if (schema == DynamicNDArraysWriterBase::schema_) {
+    return Version::Current;
+  }
+  throw std::runtime_error("The schema does not match any version supported by protocol DynamicNDArrays.");
+}
 void DynamicNDArraysReaderBase::ReadInts(yardl::DynamicNDArray<int32_t>& value) {
   if (unlikely(state_ != 0)) {
     DynamicNDArraysReaderBaseInvalidState(0, state_);
@@ -3271,6 +3631,16 @@ void MapsReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
 
 std::string MapsWriterBase::schema_ = R"({"protocol":{"name":"Maps","sequence":[{"name":"stringToInt","type":{"map":{"keys":"string","values":"int32"}}},{"name":"intToString","type":{"map":{"keys":"int32","values":"string"}}},{"name":"stringToUnion","type":{"map":{"keys":"string","values":[{"tag":"string","type":"string"},{"tag":"int32","type":"int32"}]}}},{"name":"aliasedGeneric","type":{"name":"BasicTypes.AliasedMap","typeArguments":["string","int32"]}}]},"types":[{"name":"AliasedMap","typeParameters":["K","V"],"type":{"map":{"keys":"K","values":"V"}}}]})";
 
+std::vector<std::string> MapsWriterBase::previous_schemas_ = {
+};
+
+std::string MapsWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Current: return MapsWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol Maps.");
+  }
+
+}
 void MapsWriterBase::WriteStringToInt(std::unordered_map<std::string, int32_t> const& value) {
   if (unlikely(state_ != 0)) {
     MapsWriterBaseInvalidState(0, false, state_);
@@ -3317,6 +3687,14 @@ void MapsWriterBase::Close() {
 
 std::string MapsReaderBase::schema_ = MapsWriterBase::schema_;
 
+std::vector<std::string> MapsReaderBase::previous_schemas_ = MapsWriterBase::previous_schemas_;
+
+Version MapsReaderBase::VersionFromSchema(std::string const& schema) {
+  if (schema == MapsWriterBase::schema_) {
+    return Version::Current;
+  }
+  throw std::runtime_error("The schema does not match any version supported by protocol Maps.");
+}
 void MapsReaderBase::ReadStringToInt(std::unordered_map<std::string, int32_t>& value) {
   if (unlikely(state_ != 0)) {
     MapsReaderBaseInvalidState(0, state_);
@@ -3421,6 +3799,16 @@ void UnionsReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
 
 std::string UnionsWriterBase::schema_ = R"({"protocol":{"name":"Unions","sequence":[{"name":"intOrSimpleRecord","type":[{"tag":"int32","type":"int32"},{"tag":"SimpleRecord","type":"TestModel.SimpleRecord"}]},{"name":"intOrRecordWithVlens","type":[{"tag":"int32","type":"int32"},{"tag":"RecordWithVlens","type":"TestModel.RecordWithVlens"}]},{"name":"monosotateOrIntOrSimpleRecord","type":[null,{"tag":"int32","type":"int32"},{"tag":"SimpleRecord","type":"TestModel.SimpleRecord"}]},{"name":"recordWithUnions","type":"BasicTypes.RecordWithUnions"}]},"types":[{"name":"DaysOfWeek","values":[{"symbol":"monday","value":1},{"symbol":"tuesday","value":2},{"symbol":"wednesday","value":4},{"symbol":"thursday","value":8},{"symbol":"friday","value":16},{"symbol":"saturday","value":32},{"symbol":"sunday","value":64}]},{"name":"Fruits","values":[{"symbol":"apple","value":0},{"symbol":"banana","value":1},{"symbol":"pear","value":2}]},{"name":"GenericNullableUnion2","typeParameters":["T1","T2"],"type":[null,{"tag":"T1","type":"T1"},{"tag":"T2","type":"T2"}]},{"name":"RecordWithUnions","fields":[{"name":"nullOrIntOrString","type":[null,{"tag":"int32","type":"int32"},{"tag":"string","type":"string"}]},{"name":"dateOrDatetime","type":[{"tag":"time","type":"time"},{"tag":"datetime","type":"datetime"}]},{"name":"nullOrFruitsOrDaysOfWeek","type":{"name":"BasicTypes.GenericNullableUnion2","typeArguments":["BasicTypes.Fruits","BasicTypes.DaysOfWeek"]}}]},{"name":"RecordWithVlens","fields":[{"name":"a","type":{"vector":{"items":"TestModel.SimpleRecord"}}},{"name":"b","type":"int32"},{"name":"c","type":"int32"}]},{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]}]})";
 
+std::vector<std::string> UnionsWriterBase::previous_schemas_ = {
+};
+
+std::string UnionsWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Current: return UnionsWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol Unions.");
+  }
+
+}
 void UnionsWriterBase::WriteIntOrSimpleRecord(std::variant<int32_t, test_model::SimpleRecord> const& value) {
   if (unlikely(state_ != 0)) {
     UnionsWriterBaseInvalidState(0, false, state_);
@@ -3467,6 +3855,14 @@ void UnionsWriterBase::Close() {
 
 std::string UnionsReaderBase::schema_ = UnionsWriterBase::schema_;
 
+std::vector<std::string> UnionsReaderBase::previous_schemas_ = UnionsWriterBase::previous_schemas_;
+
+Version UnionsReaderBase::VersionFromSchema(std::string const& schema) {
+  if (schema == UnionsWriterBase::schema_) {
+    return Version::Current;
+  }
+  throw std::runtime_error("The schema does not match any version supported by protocol Unions.");
+}
 void UnionsReaderBase::ReadIntOrSimpleRecord(std::variant<int32_t, test_model::SimpleRecord>& value) {
   if (unlikely(state_ != 0)) {
     UnionsReaderBaseInvalidState(0, state_);
@@ -3565,6 +3961,16 @@ void StreamsOfUnionsReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
 
 std::string StreamsOfUnionsWriterBase::schema_ = R"({"protocol":{"name":"StreamsOfUnions","sequence":[{"name":"intOrSimpleRecord","type":{"stream":{"items":[{"tag":"int32","type":"int32"},{"tag":"SimpleRecord","type":"TestModel.SimpleRecord"}]}}},{"name":"nullableIntOrSimpleRecord","type":{"stream":{"items":[null,{"tag":"int32","type":"int32"},{"tag":"SimpleRecord","type":"TestModel.SimpleRecord"}]}}}]},"types":[{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]}]})";
 
+std::vector<std::string> StreamsOfUnionsWriterBase::previous_schemas_ = {
+};
+
+std::string StreamsOfUnionsWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Current: return StreamsOfUnionsWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol StreamsOfUnions.");
+  }
+
+}
 void StreamsOfUnionsWriterBase::WriteIntOrSimpleRecord(std::variant<int32_t, test_model::SimpleRecord> const& value) {
   if (unlikely(state_ != 0)) {
     StreamsOfUnionsWriterBaseInvalidState(0, false, state_);
@@ -3639,6 +4045,14 @@ void StreamsOfUnionsWriterBase::Close() {
 
 std::string StreamsOfUnionsReaderBase::schema_ = StreamsOfUnionsWriterBase::schema_;
 
+std::vector<std::string> StreamsOfUnionsReaderBase::previous_schemas_ = StreamsOfUnionsWriterBase::previous_schemas_;
+
+Version StreamsOfUnionsReaderBase::VersionFromSchema(std::string const& schema) {
+  if (schema == StreamsOfUnionsWriterBase::schema_) {
+    return Version::Current;
+  }
+  throw std::runtime_error("The schema does not match any version supported by protocol StreamsOfUnions.");
+}
 bool StreamsOfUnionsReaderBase::ReadIntOrSimpleRecord(std::variant<int32_t, test_model::SimpleRecord>& value) {
   if (unlikely(state_ != 0)) {
     if (state_ == 1) {
@@ -3832,6 +4246,16 @@ void EnumsReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
 
 std::string EnumsWriterBase::schema_ = R"({"protocol":{"name":"Enums","sequence":[{"name":"single","type":"TestModel.Fruits"},{"name":"vec","type":{"vector":{"items":"TestModel.Fruits"}}},{"name":"size","type":"TestModel.SizeBasedEnum"}]},"types":[{"name":"Fruits","values":[{"symbol":"apple","value":0},{"symbol":"banana","value":1},{"symbol":"pear","value":2}]},{"name":"Fruits","type":"BasicTypes.Fruits"},{"name":"SizeBasedEnum","base":"size","values":[{"symbol":"a","value":0},{"symbol":"b","value":1},{"symbol":"c","value":2}]}]})";
 
+std::vector<std::string> EnumsWriterBase::previous_schemas_ = {
+};
+
+std::string EnumsWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Current: return EnumsWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol Enums.");
+  }
+
+}
 void EnumsWriterBase::WriteSingle(test_model::Fruits const& value) {
   if (unlikely(state_ != 0)) {
     EnumsWriterBaseInvalidState(0, false, state_);
@@ -3869,6 +4293,14 @@ void EnumsWriterBase::Close() {
 
 std::string EnumsReaderBase::schema_ = EnumsWriterBase::schema_;
 
+std::vector<std::string> EnumsReaderBase::previous_schemas_ = EnumsWriterBase::previous_schemas_;
+
+Version EnumsReaderBase::VersionFromSchema(std::string const& schema) {
+  if (schema == EnumsWriterBase::schema_) {
+    return Version::Current;
+  }
+  throw std::runtime_error("The schema does not match any version supported by protocol Enums.");
+}
 void EnumsReaderBase::ReadSingle(test_model::Fruits& value) {
   if (unlikely(state_ != 0)) {
     EnumsReaderBaseInvalidState(0, state_);
@@ -3953,6 +4385,16 @@ void FlagsReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
 
 std::string FlagsWriterBase::schema_ = R"({"protocol":{"name":"Flags","sequence":[{"name":"days","type":{"stream":{"items":"TestModel.DaysOfWeek"}}},{"name":"formats","type":{"stream":{"items":"TestModel.TextFormat"}}}]},"types":[{"name":"DaysOfWeek","values":[{"symbol":"monday","value":1},{"symbol":"tuesday","value":2},{"symbol":"wednesday","value":4},{"symbol":"thursday","value":8},{"symbol":"friday","value":16},{"symbol":"saturday","value":32},{"symbol":"sunday","value":64}]},{"name":"TextFormat","base":"uint64","values":[{"symbol":"regular","value":0},{"symbol":"bold","value":1},{"symbol":"italic","value":2},{"symbol":"underline","value":4},{"symbol":"strikethrough","value":8}]},{"name":"DaysOfWeek","type":"BasicTypes.DaysOfWeek"},{"name":"TextFormat","type":"BasicTypes.TextFormat"}]})";
 
+std::vector<std::string> FlagsWriterBase::previous_schemas_ = {
+};
+
+std::string FlagsWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Current: return FlagsWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol Flags.");
+  }
+
+}
 void FlagsWriterBase::WriteDays(test_model::DaysOfWeek const& value) {
   if (unlikely(state_ != 0)) {
     FlagsWriterBaseInvalidState(0, false, state_);
@@ -4027,6 +4469,14 @@ void FlagsWriterBase::Close() {
 
 std::string FlagsReaderBase::schema_ = FlagsWriterBase::schema_;
 
+std::vector<std::string> FlagsReaderBase::previous_schemas_ = FlagsWriterBase::previous_schemas_;
+
+Version FlagsReaderBase::VersionFromSchema(std::string const& schema) {
+  if (schema == FlagsWriterBase::schema_) {
+    return Version::Current;
+  }
+  throw std::runtime_error("The schema does not match any version supported by protocol Flags.");
+}
 bool FlagsReaderBase::ReadDays(test_model::DaysOfWeek& value) {
   if (unlikely(state_ != 0)) {
     if (state_ == 1) {
@@ -4220,6 +4670,16 @@ void StateTestReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
 
 std::string StateTestWriterBase::schema_ = R"({"protocol":{"name":"StateTest","sequence":[{"name":"anInt","type":"int32"},{"name":"aStream","type":{"stream":{"items":"int32"}}},{"name":"anotherInt","type":"int32"}]},"types":null})";
 
+std::vector<std::string> StateTestWriterBase::previous_schemas_ = {
+};
+
+std::string StateTestWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Current: return StateTestWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol StateTest.");
+  }
+
+}
 void StateTestWriterBase::WriteAnInt(int32_t const& value) {
   if (unlikely(state_ != 0)) {
     StateTestWriterBaseInvalidState(0, false, state_);
@@ -4280,6 +4740,14 @@ void StateTestWriterBase::Close() {
 
 std::string StateTestReaderBase::schema_ = StateTestWriterBase::schema_;
 
+std::vector<std::string> StateTestReaderBase::previous_schemas_ = StateTestWriterBase::previous_schemas_;
+
+Version StateTestReaderBase::VersionFromSchema(std::string const& schema) {
+  if (schema == StateTestWriterBase::schema_) {
+    return Version::Current;
+  }
+  throw std::runtime_error("The schema does not match any version supported by protocol StateTest.");
+}
 void StateTestReaderBase::ReadAnInt(int32_t& value) {
   if (unlikely(state_ != 0)) {
     StateTestReaderBaseInvalidState(0, state_);
@@ -4443,6 +4911,16 @@ void SimpleGenericsReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
 
 std::string SimpleGenericsWriterBase::schema_ = R"({"protocol":{"name":"SimpleGenerics","sequence":[{"name":"floatImage","type":"Image.FloatImage"},{"name":"intImage","type":"Image.IntImage"},{"name":"intImageAlternateSyntax","type":{"name":"TestModel.Image","typeArguments":["int32"]}},{"name":"stringImage","type":{"name":"TestModel.Image","typeArguments":["string"]}},{"name":"intFloatTuple","type":{"name":"Tuples.Tuple","typeArguments":["int32","float32"]}},{"name":"floatFloatTuple","type":{"name":"Tuples.Tuple","typeArguments":["float32","float32"]}},{"name":"intFloatTupleAlternateSyntax","type":{"name":"Tuples.Tuple","typeArguments":["int32","float32"]}},{"name":"intStringTuple","type":{"name":"Tuples.Tuple","typeArguments":["int32","string"]}},{"name":"streamOfTypeVariants","type":{"stream":{"items":[{"tag":"imageFloat","explicitTag":true,"type":"Image.FloatImage"},{"tag":"imageDouble","explicitTag":true,"type":{"name":"TestModel.Image","typeArguments":["float64"]}}]}}}]},"types":[{"name":"FloatImage","type":{"name":"Image.Image","typeArguments":["float32"]}},{"name":"Image","typeParameters":["T"],"type":{"array":{"items":"T","dimensions":[{"name":"x"},{"name":"y"}]}}},{"name":"IntImage","type":{"name":"Image.Image","typeArguments":["int32"]}},{"name":"Image","typeParameters":["T"],"type":{"name":"Image.Image","typeArguments":["T"]}},{"name":"Tuple","typeParameters":["T1","T2"],"fields":[{"name":"v1","type":"T1"},{"name":"v2","type":"T2"}]}]})";
 
+std::vector<std::string> SimpleGenericsWriterBase::previous_schemas_ = {
+};
+
+std::string SimpleGenericsWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Current: return SimpleGenericsWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol SimpleGenerics.");
+  }
+
+}
 void SimpleGenericsWriterBase::WriteFloatImage(image::FloatImage const& value) {
   if (unlikely(state_ != 0)) {
     SimpleGenericsWriterBaseInvalidState(0, false, state_);
@@ -4557,6 +5035,14 @@ void SimpleGenericsWriterBase::Close() {
 
 std::string SimpleGenericsReaderBase::schema_ = SimpleGenericsWriterBase::schema_;
 
+std::vector<std::string> SimpleGenericsReaderBase::previous_schemas_ = SimpleGenericsWriterBase::previous_schemas_;
+
+Version SimpleGenericsReaderBase::VersionFromSchema(std::string const& schema) {
+  if (schema == SimpleGenericsWriterBase::schema_) {
+    return Version::Current;
+  }
+  throw std::runtime_error("The schema does not match any version supported by protocol SimpleGenerics.");
+}
 void SimpleGenericsReaderBase::ReadFloatImage(image::FloatImage& value) {
   if (unlikely(state_ != 0)) {
     SimpleGenericsReaderBaseInvalidState(0, state_);
@@ -4792,6 +5278,16 @@ void AdvancedGenericsReaderBaseInvalidState(uint8_t attempted, uint8_t current) 
 
 std::string AdvancedGenericsWriterBase::schema_ = R"({"protocol":{"name":"AdvancedGenerics","sequence":[{"name":"floatImageImage","type":{"name":"TestModel.Image","typeArguments":[{"name":"TestModel.Image","typeArguments":["float32"]}]}},{"name":"genericRecord1","type":{"name":"TestModel.GenericRecord","typeArguments":["int32","string"]}},{"name":"tupleOfOptionals","type":{"name":"TestModel.MyTuple","typeArguments":[[null,"int32"],[null,"string"]]}},{"name":"tupleOfOptionalsAlternateSyntax","type":{"name":"TestModel.MyTuple","typeArguments":[[null,"int32"],[null,"string"]]}},{"name":"tupleOfVectors","type":{"name":"TestModel.MyTuple","typeArguments":[{"vector":{"items":"int32"}},{"vector":{"items":"float32"}}]}}]},"types":[{"name":"MyTuple","typeParameters":["T1","T2"],"type":{"name":"Tuples.Tuple","typeArguments":["T1","T2"]}},{"name":"Image","typeParameters":["T"],"type":{"array":{"items":"T","dimensions":[{"name":"x"},{"name":"y"}]}}},{"name":"GenericRecord","typeParameters":["T1","T2"],"fields":[{"name":"scalar1","type":"T1"},{"name":"scalar2","type":"T2"},{"name":"vector1","type":{"vector":{"items":"T1"}}},{"name":"image2","type":{"name":"TestModel.Image","typeArguments":["T2"]}}]},{"name":"Image","typeParameters":["T"],"type":{"name":"Image.Image","typeArguments":["T"]}},{"name":"MyTuple","typeParameters":["T1","T2"],"type":{"name":"BasicTypes.MyTuple","typeArguments":["T1","T2"]}},{"name":"Tuple","typeParameters":["T1","T2"],"fields":[{"name":"v1","type":"T1"},{"name":"v2","type":"T2"}]}]})";
 
+std::vector<std::string> AdvancedGenericsWriterBase::previous_schemas_ = {
+};
+
+std::string AdvancedGenericsWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Current: return AdvancedGenericsWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol AdvancedGenerics.");
+  }
+
+}
 void AdvancedGenericsWriterBase::WriteFloatImageImage(test_model::Image<test_model::Image<float>> const& value) {
   if (unlikely(state_ != 0)) {
     AdvancedGenericsWriterBaseInvalidState(0, false, state_);
@@ -4847,6 +5343,14 @@ void AdvancedGenericsWriterBase::Close() {
 
 std::string AdvancedGenericsReaderBase::schema_ = AdvancedGenericsWriterBase::schema_;
 
+std::vector<std::string> AdvancedGenericsReaderBase::previous_schemas_ = AdvancedGenericsWriterBase::previous_schemas_;
+
+Version AdvancedGenericsReaderBase::VersionFromSchema(std::string const& schema) {
+  if (schema == AdvancedGenericsWriterBase::schema_) {
+    return Version::Current;
+  }
+  throw std::runtime_error("The schema does not match any version supported by protocol AdvancedGenerics.");
+}
 void AdvancedGenericsReaderBase::ReadFloatImageImage(test_model::Image<test_model::Image<float>>& value) {
   if (unlikely(state_ != 0)) {
     AdvancedGenericsReaderBaseInvalidState(0, state_);
@@ -4983,6 +5487,16 @@ void AliasesReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
 
 std::string AliasesWriterBase::schema_ = R"({"protocol":{"name":"Aliases","sequence":[{"name":"aliasedString","type":"TestModel.AliasedString"},{"name":"aliasedEnum","type":"TestModel.AliasedEnum"},{"name":"aliasedOpenGeneric","type":{"name":"TestModel.AliasedOpenGeneric","typeArguments":["TestModel.AliasedString","TestModel.AliasedEnum"]}},{"name":"aliasedClosedGeneric","type":"TestModel.AliasedClosedGeneric"},{"name":"aliasedOptional","type":"TestModel.AliasedOptional"},{"name":"aliasedGenericOptional","type":{"name":"TestModel.AliasedGenericOptional","typeArguments":["float32"]}},{"name":"aliasedGenericUnion2","type":{"name":"TestModel.AliasedGenericUnion2","typeArguments":["TestModel.AliasedString","TestModel.AliasedEnum"]}},{"name":"aliasedGenericVector","type":{"name":"TestModel.AliasedGenericVector","typeArguments":["float32"]}},{"name":"aliasedGenericFixedVector","type":{"name":"TestModel.AliasedGenericFixedVector","typeArguments":["float32"]}},{"name":"streamOfAliasedGenericUnion2","type":{"stream":{"items":{"name":"TestModel.AliasedGenericUnion2","typeArguments":["TestModel.AliasedString","TestModel.AliasedEnum"]}}}}]},"types":[{"name":"Fruits","values":[{"symbol":"apple","value":0},{"symbol":"banana","value":1},{"symbol":"pear","value":2}]},{"name":"GenericUnion2","typeParameters":["T1","T2"],"type":[{"tag":"T1","type":"T1"},{"tag":"T2","type":"T2"}]},{"name":"GenericVector","typeParameters":["T"],"type":{"vector":{"items":"T"}}},{"name":"MyTuple","typeParameters":["T1","T2"],"type":{"name":"Tuples.Tuple","typeArguments":["T1","T2"]}},{"name":"AliasedClosedGeneric","type":{"name":"TestModel.AliasedTuple","typeArguments":["TestModel.AliasedString","TestModel.AliasedEnum"]}},{"name":"AliasedEnum","type":"TestModel.Fruits"},{"name":"AliasedGenericFixedVector","typeParameters":["T"],"type":{"vector":{"items":"T","length":3}}},{"name":"AliasedGenericOptional","typeParameters":["T"],"type":[null,"T"]},{"name":"AliasedGenericUnion2","typeParameters":["T1","T2"],"type":{"name":"BasicTypes.GenericUnion2","typeArguments":["T1","T2"]}},{"name":"AliasedGenericVector","typeParameters":["T"],"type":{"name":"BasicTypes.GenericVector","typeArguments":["T"]}},{"name":"AliasedOpenGeneric","typeParameters":["T1","T2"],"type":{"name":"TestModel.AliasedTuple","typeArguments":["T1","T2"]}},{"name":"AliasedOptional","type":[null,"int32"]},{"name":"AliasedString","type":"string"},{"name":"AliasedTuple","typeParameters":["T1","T2"],"type":{"name":"TestModel.MyTuple","typeArguments":["T1","T2"]}},{"name":"Fruits","type":"BasicTypes.Fruits"},{"name":"MyTuple","typeParameters":["T1","T2"],"type":{"name":"BasicTypes.MyTuple","typeArguments":["T1","T2"]}},{"name":"Tuple","typeParameters":["T1","T2"],"fields":[{"name":"v1","type":"T1"},{"name":"v2","type":"T2"}]}]})";
 
+std::vector<std::string> AliasesWriterBase::previous_schemas_ = {
+};
+
+std::string AliasesWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Current: return AliasesWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol Aliases.");
+  }
+
+}
 void AliasesWriterBase::WriteAliasedString(test_model::AliasedString const& value) {
   if (unlikely(state_ != 0)) {
     AliasesWriterBaseInvalidState(0, false, state_);
@@ -5106,6 +5620,14 @@ void AliasesWriterBase::Close() {
 
 std::string AliasesReaderBase::schema_ = AliasesWriterBase::schema_;
 
+std::vector<std::string> AliasesReaderBase::previous_schemas_ = AliasesWriterBase::previous_schemas_;
+
+Version AliasesReaderBase::VersionFromSchema(std::string const& schema) {
+  if (schema == AliasesWriterBase::schema_) {
+    return Version::Current;
+  }
+  throw std::runtime_error("The schema does not match any version supported by protocol Aliases.");
+}
 void AliasesReaderBase::ReadAliasedString(test_model::AliasedString& value) {
   if (unlikely(state_ != 0)) {
     AliasesReaderBaseInvalidState(0, state_);
@@ -5346,6 +5868,16 @@ void StreamsOfAliasedUnionsReaderBaseInvalidState(uint8_t attempted, uint8_t cur
 
 std::string StreamsOfAliasedUnionsWriterBase::schema_ = R"({"protocol":{"name":"StreamsOfAliasedUnions","sequence":[{"name":"intOrSimpleRecord","type":{"stream":{"items":"TestModel.AliasedIntOrSimpleRecord"}}},{"name":"nullableIntOrSimpleRecord","type":{"stream":{"items":"TestModel.AliasedNullableIntSimpleRecord"}}}]},"types":[{"name":"AliasedIntOrSimpleRecord","type":[{"tag":"int32","type":"int32"},{"tag":"SimpleRecord","type":"TestModel.SimpleRecord"}]},{"name":"AliasedNullableIntSimpleRecord","type":[null,{"tag":"int32","type":"int32"},{"tag":"SimpleRecord","type":"TestModel.SimpleRecord"}]},{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]}]})";
 
+std::vector<std::string> StreamsOfAliasedUnionsWriterBase::previous_schemas_ = {
+};
+
+std::string StreamsOfAliasedUnionsWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Current: return StreamsOfAliasedUnionsWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol StreamsOfAliasedUnions.");
+  }
+
+}
 void StreamsOfAliasedUnionsWriterBase::WriteIntOrSimpleRecord(test_model::AliasedIntOrSimpleRecord const& value) {
   if (unlikely(state_ != 0)) {
     StreamsOfAliasedUnionsWriterBaseInvalidState(0, false, state_);
@@ -5420,6 +5952,14 @@ void StreamsOfAliasedUnionsWriterBase::Close() {
 
 std::string StreamsOfAliasedUnionsReaderBase::schema_ = StreamsOfAliasedUnionsWriterBase::schema_;
 
+std::vector<std::string> StreamsOfAliasedUnionsReaderBase::previous_schemas_ = StreamsOfAliasedUnionsWriterBase::previous_schemas_;
+
+Version StreamsOfAliasedUnionsReaderBase::VersionFromSchema(std::string const& schema) {
+  if (schema == StreamsOfAliasedUnionsWriterBase::schema_) {
+    return Version::Current;
+  }
+  throw std::runtime_error("The schema does not match any version supported by protocol StreamsOfAliasedUnions.");
+}
 bool StreamsOfAliasedUnionsReaderBase::ReadIntOrSimpleRecord(test_model::AliasedIntOrSimpleRecord& value) {
   if (unlikely(state_ != 0)) {
     if (state_ == 1) {
@@ -5607,6 +6147,16 @@ void ProtocolWithComputedFieldsReaderBaseInvalidState(uint8_t attempted, uint8_t
 
 std::string ProtocolWithComputedFieldsWriterBase::schema_ = R"({"protocol":{"name":"ProtocolWithComputedFields","sequence":[{"name":"recordWithComputedFields","type":"TestModel.RecordWithComputedFields"}]},"types":[{"name":"GenericRecordWithComputedFields","typeParameters":["T0","T1"],"fields":[{"name":"f1","type":[{"tag":"T0","type":"T0"},{"tag":"T1","type":"T1"}]}]},{"name":"MyTuple","typeParameters":["T1","T2"],"type":{"name":"Tuples.Tuple","typeArguments":["T1","T2"]}},{"name":"MyTuple","typeParameters":["T1","T2"],"type":{"name":"BasicTypes.MyTuple","typeArguments":["T1","T2"]}},{"name":"NamedNDArray","type":{"array":{"items":"int32","dimensions":[{"name":"dimA"},{"name":"dimB"}]}}},{"name":"RecordWithComputedFields","fields":[{"name":"arrayField","type":{"array":{"items":"int32","dimensions":[{"name":"x"},{"name":"y"}]}}},{"name":"arrayFieldMapDimensions","type":{"array":{"items":"int32","dimensions":[{"name":"x"},{"name":"y"}]}}},{"name":"dynamicArrayField","type":{"array":{"items":"int32"}}},{"name":"fixedArrayField","type":{"array":{"items":"int32","dimensions":[{"name":"x","length":3},{"name":"y","length":4}]}}},{"name":"intField","type":"int32"},{"name":"int8Field","type":"int8"},{"name":"uint8Field","type":"uint8"},{"name":"int16Field","type":"int16"},{"name":"uint16Field","type":"uint16"},{"name":"uint32Field","type":"uint32"},{"name":"int64Field","type":"int64"},{"name":"uint64Field","type":"uint64"},{"name":"sizeField","type":"size"},{"name":"float32Field","type":"float32"},{"name":"float64Field","type":"float64"},{"name":"complexfloat32Field","type":"complexfloat32"},{"name":"complexfloat64Field","type":"complexfloat64"},{"name":"stringField","type":"string"},{"name":"tupleField","type":{"name":"TestModel.MyTuple","typeArguments":["int32","int32"]}},{"name":"vectorField","type":{"vector":{"items":"int32"}}},{"name":"vectorOfVectorsField","type":{"vector":{"items":{"vector":{"items":"int32"}}}}},{"name":"fixedVectorField","type":{"vector":{"items":"int32","length":3}}},{"name":"optionalNamedArray","type":[null,"TestModel.NamedNDArray"]},{"name":"intFloatUnion","type":[{"tag":"int32","type":"int32"},{"tag":"float32","type":"float32"}]},{"name":"nullableIntFloatUnion","type":[null,{"tag":"int32","type":"int32"},{"tag":"float32","type":"float32"}]},{"name":"unionWithNestedGenericUnion","type":[{"tag":"int","explicitTag":true,"type":"int32"},{"tag":"genericRecordWithComputedFields","explicitTag":true,"type":{"name":"BasicTypes.GenericRecordWithComputedFields","typeArguments":["string","float32"]}}]},{"name":"mapField","type":{"map":{"keys":"string","values":"string"}}}]},{"name":"Tuple","typeParameters":["T1","T2"],"fields":[{"name":"v1","type":"T1"},{"name":"v2","type":"T2"}]}]})";
 
+std::vector<std::string> ProtocolWithComputedFieldsWriterBase::previous_schemas_ = {
+};
+
+std::string ProtocolWithComputedFieldsWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Current: return ProtocolWithComputedFieldsWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol ProtocolWithComputedFields.");
+  }
+
+}
 void ProtocolWithComputedFieldsWriterBase::WriteRecordWithComputedFields(test_model::RecordWithComputedFields const& value) {
   if (unlikely(state_ != 0)) {
     ProtocolWithComputedFieldsWriterBaseInvalidState(0, false, state_);
@@ -5626,6 +6176,14 @@ void ProtocolWithComputedFieldsWriterBase::Close() {
 
 std::string ProtocolWithComputedFieldsReaderBase::schema_ = ProtocolWithComputedFieldsWriterBase::schema_;
 
+std::vector<std::string> ProtocolWithComputedFieldsReaderBase::previous_schemas_ = ProtocolWithComputedFieldsWriterBase::previous_schemas_;
+
+Version ProtocolWithComputedFieldsReaderBase::VersionFromSchema(std::string const& schema) {
+  if (schema == ProtocolWithComputedFieldsWriterBase::schema_) {
+    return Version::Current;
+  }
+  throw std::runtime_error("The schema does not match any version supported by protocol ProtocolWithComputedFields.");
+}
 void ProtocolWithComputedFieldsReaderBase::ReadRecordWithComputedFields(test_model::RecordWithComputedFields& value) {
   if (unlikely(state_ != 0)) {
     ProtocolWithComputedFieldsReaderBaseInvalidState(0, state_);
@@ -5682,6 +6240,16 @@ void ProtocolWithKeywordStepsReaderBaseInvalidState(uint8_t attempted, uint8_t c
 
 std::string ProtocolWithKeywordStepsWriterBase::schema_ = R"({"protocol":{"name":"ProtocolWithKeywordSteps","sequence":[{"name":"int","type":{"stream":{"items":"TestModel.RecordWithKeywordFields"}}},{"name":"float","type":"TestModel.EnumWithKeywordSymbols"}]},"types":[{"name":"ArrayWithKeywordDimensionNames","type":{"array":{"items":"int32","dimensions":[{"name":"while"},{"name":"do"}]}}},{"name":"EnumWithKeywordSymbols","values":[{"symbol":"try","value":2},{"symbol":"catch","value":1}]},{"name":"RecordWithKeywordFields","fields":[{"name":"int","type":"string"},{"name":"sizeof","type":"TestModel.ArrayWithKeywordDimensionNames"},{"name":"if","type":"TestModel.EnumWithKeywordSymbols"}]}]})";
 
+std::vector<std::string> ProtocolWithKeywordStepsWriterBase::previous_schemas_ = {
+};
+
+std::string ProtocolWithKeywordStepsWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Current: return ProtocolWithKeywordStepsWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol ProtocolWithKeywordSteps.");
+  }
+
+}
 void ProtocolWithKeywordStepsWriterBase::WriteInt(test_model::RecordWithKeywordFields const& value) {
   if (unlikely(state_ != 0)) {
     ProtocolWithKeywordStepsWriterBaseInvalidState(0, false, state_);
@@ -5733,6 +6301,14 @@ void ProtocolWithKeywordStepsWriterBase::Close() {
 
 std::string ProtocolWithKeywordStepsReaderBase::schema_ = ProtocolWithKeywordStepsWriterBase::schema_;
 
+std::vector<std::string> ProtocolWithKeywordStepsReaderBase::previous_schemas_ = ProtocolWithKeywordStepsWriterBase::previous_schemas_;
+
+Version ProtocolWithKeywordStepsReaderBase::VersionFromSchema(std::string const& schema) {
+  if (schema == ProtocolWithKeywordStepsWriterBase::schema_) {
+    return Version::Current;
+  }
+  throw std::runtime_error("The schema does not match any version supported by protocol ProtocolWithKeywordSteps.");
+}
 bool ProtocolWithKeywordStepsReaderBase::ReadInt(test_model::RecordWithKeywordFields& value) {
   if (unlikely(state_ != 0)) {
     if (state_ == 1) {

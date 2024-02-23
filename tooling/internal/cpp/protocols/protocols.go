@@ -66,6 +66,15 @@ func writeHeader(env *dsl.Environment, options packaging.CppCodegenOptions) erro
 }
 
 func writeDeclarations(w *formatting.IndentedWriter, ns *dsl.Namespace) {
+	fmt.Fprintf(w, "enum class Version {\n")
+	w.Indented(func() {
+		for _, v := range ns.Versions {
+			fmt.Fprintf(w, "%s,\n", v)
+		}
+		fmt.Fprintln(w, "Current")
+	})
+	fmt.Fprintln(w, "};")
+
 	formatting.Delimited(w, "\n", ns.Protocols, func(w *formatting.IndentedWriter, i int, p *dsl.ProtocolDefinition) {
 
 		// Writer
@@ -117,6 +126,8 @@ func writeDeclarations(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 			w.WriteString("virtual void CloseImpl() {}\n\n")
 
 			w.WriteString("static std::string schema_;\n\n")
+			w.WriteString("static std::vector<std::string> previous_schemas_;\n\n")
+			w.WriteString("static std::string SchemaFromVersion(Version version);\n\n")
 
 			w.WriteStringln("private:")
 			w.WriteString("uint8_t state_ = 0;\n\n")
@@ -177,6 +188,8 @@ func writeDeclarations(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 			w.WriteString("virtual void CloseImpl() {}\n")
 
 			w.WriteString("static std::string schema_;\n\n")
+			w.WriteString("static std::vector<std::string> previous_schemas_;\n\n")
+			w.WriteString("static Version VersionFromSchema(const std::string& schema);\n\n")
 
 			w.WriteStringln("private:")
 			w.WriteStringln("uint8_t state_ = 0;")
@@ -196,6 +209,31 @@ func writeDefinitions(w *formatting.IndentedWriter, ns *dsl.Namespace, symbolTab
 		// Writers
 
 		fmt.Fprintf(w, "std::string %s::schema_ = R\"(%s)\";\n\n", common.AbstractWriterName(p), dsl.GetProtocolSchemaString(p, symbolTable))
+		fmt.Fprintf(w, "std::vector<std::string> %s::previous_schemas_ = {\n", common.AbstractWriterName(p))
+		w.Indented(func() {
+			for _, versionLabel := range ns.Versions {
+				change := p.Versions[versionLabel]
+				if change != nil {
+					fmt.Fprintf(w, "R\"(%s)\",\n", change.PreviousSchema)
+				} else {
+					fmt.Fprintf(w, "%s::schema_,\n", common.AbstractWriterName(p))
+				}
+			}
+		})
+		fmt.Fprintf(w, "};\n\n")
+
+		fmt.Fprintf(w, "std::string %s::SchemaFromVersion(Version version) {\n", common.AbstractWriterName(p))
+		w.Indented(func() {
+			w.WriteStringln("switch (version) {")
+			for i, versionLabel := range ns.Versions {
+				fmt.Fprintf(w, "case Version::%s: return previous_schemas_[%d]; break;\n", versionLabel, i)
+			}
+			fmt.Fprintf(w, "case Version::Current: return %s::schema_; break;\n", common.AbstractWriterName(p))
+			fmt.Fprintf(w, "default: throw std::runtime_error(\"The version does not correspond to any schema supported by protocol %s.\");\n", p.Name)
+			w.WriteStringln("}")
+			w.WriteStringln("")
+		})
+		fmt.Fprintln(w, "}")
 
 		for i, step := range p.Sequence {
 			writeWriteMethod := func(signature string, variableName string) {
@@ -261,6 +299,25 @@ func writeDefinitions(w *formatting.IndentedWriter, ns *dsl.Namespace, symbolTab
 		// Readers
 
 		fmt.Fprintf(w, "std::string %s::schema_ = %s::schema_;\n\n", common.AbstractReaderName(p), common.AbstractWriterName(p))
+		fmt.Fprintf(w, "std::vector<std::string> %s::previous_schemas_ = %s::previous_schemas_;\n\n", common.AbstractReaderName(p), common.AbstractWriterName(p))
+
+		fmt.Fprintf(w, "Version %s::VersionFromSchema(std::string const& schema) {\n", common.AbstractReaderName(p))
+		w.Indented(func() {
+			fmt.Fprintf(w, "if (schema == %s::schema_) {\n", common.AbstractWriterName(p))
+			w.Indented(func() {
+				w.WriteStringln("return Version::Current;")
+			})
+			w.WriteStringln("}")
+			for i, versionLabel := range ns.Versions {
+				fmt.Fprintf(w, "else if (schema == previous_schemas_[%d]) {\n", i)
+				w.Indented(func() {
+					fmt.Fprintf(w, "return Version::%s;\n", versionLabel)
+				})
+				w.WriteStringln("}")
+			}
+			fmt.Fprintf(w, "throw std::runtime_error(\"The schema does not match any version supported by protocol %s.\");\n", p.Name)
+		})
+		fmt.Fprintln(w, "}")
 
 		for i, step := range p.Sequence {
 			returnType := "void"

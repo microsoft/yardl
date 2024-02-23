@@ -196,12 +196,36 @@ func writeNamespaceMembers(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 			fmt.Fprint(w, "};\n\n")
 		}
 	}
+
+	// Write "compatibility" aliases for TypeDefinitions with changed names
+	for _, versionLabel := range ns.Versions {
+		if len(ns.DefinitionChanges[versionLabel]) > 0 {
+			fmt.Fprintf(w, "// Compatibility aliases for version %s.\n\n", versionLabel)
+			for _, ch := range ns.DefinitionChanges[versionLabel] {
+				writeCompatibilityAliasDefinition(w, ch)
+			}
+		}
+	}
 }
 
 func writeNamedTypeDefinition(w *formatting.IndentedWriter, nt *dsl.NamedType) {
 	common.WriteComment(w, nt.Comment)
 	common.WriteDefinitionTemplateSpec(w, nt)
 	fmt.Fprintf(w, "using %s = %s;\n\n", common.TypeIdentifierName(nt.Name), common.TypeSyntax(nt.Type))
+}
+
+func writeCompatibilityAliasDefinition(w *formatting.IndentedWriter, ch dsl.DefinitionChange) {
+	oldDef := ch.PreviousDefinition()
+	newDef := ch.LatestDefinition()
+	common.WriteDefinitionTemplateSpec(w, oldDef)
+	switch ch := ch.(type) {
+	case *dsl.AliasRemoved:
+		if nt, ok := ch.LatestDefinition().(*dsl.NamedType); ok {
+			fmt.Fprintf(w, "using %s = %s;\n\n", common.TypeIdentifierName(oldDef.GetDefinitionMeta().Name), common.TypeSyntax(nt.Type))
+		}
+	default:
+		fmt.Fprintf(w, "using %s = %s;\n\n", common.TypeIdentifierName(oldDef.GetDefinitionMeta().Name), common.TypeDefinitionSyntax(newDef))
+	}
 }
 
 func writeComputedFieldExpression(w *formatting.IndentedWriter, expression dsl.Expression) {

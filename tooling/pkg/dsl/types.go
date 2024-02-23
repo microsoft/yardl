@@ -79,11 +79,13 @@ func (st SymbolTable) Clone() SymbolTable {
 }
 
 type Namespace struct {
-	Name            string                `json:"name"`
-	TypeDefinitions TypeDefinitions       `json:"types,omitempty"`
-	Protocols       []*ProtocolDefinition `json:"protocols,omitempty"`
-	References      []*Namespace          `json:"-"`
-	IsTopLevel      bool                  `json:"-"`
+	Name              string                        `json:"name"`
+	TypeDefinitions   TypeDefinitions               `json:"types,omitempty"`
+	Protocols         []*ProtocolDefinition         `json:"protocols,omitempty"`
+	Versions          []string                      `json:"-"`
+	DefinitionChanges map[string][]DefinitionChange `json:"-"`
+	References        []*Namespace                  `json:"-"`
+	IsTopLevel        bool                          `json:"-"`
 }
 
 func (n *Namespace) GetNodeMeta() *NodeMeta {
@@ -450,7 +452,8 @@ type EnumValue struct {
 // Protocols
 type ProtocolDefinition struct {
 	*DefinitionMeta
-	Sequence ProtocolSteps `json:"sequence"`
+	Sequence ProtocolSteps              `json:"sequence"`
+	Versions map[string]*ProtocolChange `json:"-"`
 }
 
 func (p *ProtocolDefinition) GetDefinitionMeta() *DefinitionMeta {

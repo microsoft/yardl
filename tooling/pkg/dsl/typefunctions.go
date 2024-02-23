@@ -562,6 +562,21 @@ func GetPrimitiveKind(t PrimitiveDefinition) PrimitiveKind {
 	}
 }
 
+func GetPrimitiveWidth(t PrimitiveDefinition) int {
+	switch t {
+	case Int8, Uint8:
+		return 8
+	case Int16, Uint16:
+		return 16
+	case Int32, Uint32, Float32, ComplexFloat32:
+		return 32
+	case Int64, Uint64, Size, Float64, ComplexFloat64:
+		return 64
+	default:
+		return 0
+	}
+}
+
 func GetKindIfPrimitive(t Type) (primitiveKind PrimitiveKind, ok bool) {
 	prim, ok := GetPrimitiveType(t)
 	if !ok {
@@ -573,6 +588,19 @@ func GetKindIfPrimitive(t Type) (primitiveKind PrimitiveKind, ok bool) {
 
 func IsIntegralPrimitive(prim PrimitiveDefinition) bool {
 	return GetPrimitiveKind(prim) == PrimitiveKindInteger
+}
+
+func IsSignedPrimitive(prim PrimitiveDefinition) bool {
+	switch GetPrimitiveKind(prim) {
+	case PrimitiveKindInteger:
+		switch prim {
+		case Int8, Int16, Int32, Int64:
+			return true
+		}
+	case PrimitiveKindComplexFloatingPoint, PrimitiveKindFloatingPoint:
+		return true
+	}
+	return false
 }
 
 func IsIntegralType(t Type) bool {
@@ -908,6 +936,9 @@ func TypeToShortSyntax(t Type, qualified bool) string {
 				return fmt.Sprintf("%s->(%s)", key, baseSyntax)
 			}
 			return fmt.Sprintf("%s->%s", key, baseSyntax)
+
+		case *Stream:
+			return fmt.Sprintf("stream<%s>", baseSyntax)
 
 		default:
 			panic(fmt.Sprintf("unknown dimensionality type: %T", t.Dimensionality))

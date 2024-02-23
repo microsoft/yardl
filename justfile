@@ -25,6 +25,11 @@ cpp_version := "17"
 @generate-remote-import: install
     cd models/remote-import && yardl generate
 
+@generate-evolution: install
+    cd models/evolution/model_v0 && yardl generate 2>&1
+    cd models/evolution/model_v1 && yardl generate 2>&1
+    cd models/evolution/model_v2 && yardl generate 2>&1
+
 @build-sandbox: generate-sandbox ensure-build-dir
     cd cpp/build && ninja sandbox_exec
 
@@ -40,12 +45,12 @@ cpp_version := "17"
 @run-sandbox-python-quiet: build-sandbox
     python python/run_sandbox.py > /dev/null
 
-@build-all: generate generate-sandbox generate-remote-import configure
+@build-all: generate generate-sandbox generate-remote-import generate-evolution configure
     cd cpp/build && ninja
 
 @tooling-test:
     cd tooling; \
-    go test ./... | { grep -v "\\[[no test files\\]" || true; }
+    go test ./... | { grep -v "\\[no test files\\]" || true; }
 
 @watch-tooling-test:
     cd tooling; \
@@ -64,7 +69,12 @@ cpp_version := "17"
     ninja tests; \
     ./tests --gtest_brief=1
 
-@test: tooling-test cpp-test python-test
+@evolution-test: generate-evolution ensure-build-dir
+    cd cpp/build; \
+    ninja evolution/all; \
+    python ../evolution/test-evolution.py
+
+@test: tooling-test cpp-test python-test evolution-test
 
 @benchmark: generate ensure-build-dir
     cd cpp/build; \

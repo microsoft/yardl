@@ -84,18 +84,18 @@ func writeHeaderFile(env *dsl.Environment, options packaging.CppCodegenOptions) 
 			fmt.Fprintf(w, "class %s : public %s, yardl::binary::BinaryWriter {\n", writerClassName, common.QualifiedAbstractWriterName(protocol))
 			w.Indented(func() {
 				w.WriteStringln("public:")
-				fmt.Fprintf(w, "%s(std::ostream& stream)\n", writerClassName)
+				fmt.Fprintf(w, "%s(std::ostream& stream, Version version = Version::Current)\n", writerClassName)
 				w.Indented(func() {
 					w.Indented(func() {
-						w.WriteStringln(": yardl::binary::BinaryWriter(stream, schema_) {")
+						fmt.Fprintf(w, ": yardl::binary::BinaryWriter(stream, %s::SchemaFromVersion(version)), version_(version) {", common.QualifiedAbstractWriterName(protocol))
 					})
 				})
 				w.WriteStringln("}\n")
 
-				fmt.Fprintf(w, "%s(std::string file_name)\n", writerClassName)
+				fmt.Fprintf(w, "%s(std::string file_name, Version version = Version::Current)\n", writerClassName)
 				w.Indented(func() {
 					w.Indented(func() {
-						w.WriteStringln(": yardl::binary::BinaryWriter(file_name, schema_) {")
+						fmt.Fprintf(w, ": yardl::binary::BinaryWriter(file_name, %s::SchemaFromVersion(version)), version_(version) {", common.QualifiedAbstractWriterName(protocol))
 					})
 				})
 				w.WriteStringln("}\n")
@@ -116,6 +116,8 @@ func writeHeaderFile(env *dsl.Environment, options packaging.CppCodegenOptions) 
 				}
 
 				w.WriteString("void CloseImpl() override;\n")
+				w.WriteStringln("")
+				w.WriteStringln("Version version_;")
 			})
 			fmt.Fprint(w, "};\n\n")
 
@@ -128,7 +130,7 @@ func writeHeaderFile(env *dsl.Environment, options packaging.CppCodegenOptions) 
 				fmt.Fprintf(w, "%s(std::istream& stream)\n", readerClassName)
 				w.Indented(func() {
 					w.Indented(func() {
-						w.WriteStringln(": yardl::binary::BinaryReader(stream, schema_) {")
+						fmt.Fprintf(w, ": yardl::binary::BinaryReader(stream), version_(%s::VersionFromSchema(schema_read_)) {", common.QualifiedAbstractReaderName(protocol))
 					})
 				})
 				w.WriteStringln("}\n")
@@ -136,10 +138,12 @@ func writeHeaderFile(env *dsl.Environment, options packaging.CppCodegenOptions) 
 				fmt.Fprintf(w, "%s(std::string file_name)\n", readerClassName)
 				w.Indented(func() {
 					w.Indented(func() {
-						w.WriteStringln(": yardl::binary::BinaryReader(file_name, schema_) {")
+						fmt.Fprintf(w, ": yardl::binary::BinaryReader(file_name), version_(%s::VersionFromSchema(schema_read_)) {", common.QualifiedAbstractReaderName(protocol))
 					})
 				})
 				w.WriteStringln("}\n")
+
+				fmt.Fprintf(w, "Version GetVersion() { return version_; }\n\n")
 
 				w.WriteStringln("protected:")
 				hasStream := false
@@ -159,6 +163,9 @@ func writeHeaderFile(env *dsl.Environment, options packaging.CppCodegenOptions) 
 				}
 
 				w.WriteString("void CloseImpl() override;\n")
+				w.WriteStringln("")
+				w.WriteStringln("Version version_;")
+
 				if hasStream {
 					w.WriteStringln("\nprivate:")
 					w.WriteStringln("size_t current_block_remaining_ = 0;")
@@ -258,6 +265,47 @@ func collectUnionArities(env *dsl.Environment) []int {
 
 	dsl.Visit(env, func(self dsl.Visitor, node dsl.Node) {
 		switch t := node.(type) {
+		case nil:
+			return
+		case *dsl.ProtocolDefinition:
+			for _, change := range t.Versions {
+				if change == nil {
+					continue
+				}
+
+				for _, tc := range change.StepChanges {
+					if tc == nil {
+						continue
+					}
+					self.Visit(tc.OldType())
+				}
+			}
+			self.VisitChildren(node)
+
+		case *dsl.Namespace:
+			for _, v := range t.Versions {
+				for _, change := range t.DefinitionChanges[v] {
+					if change == nil {
+						continue
+					}
+
+					switch change := change.(type) {
+					case *dsl.RecordChange:
+						for _, tc := range change.FieldChanges {
+							if tc == nil {
+								continue
+							}
+							self.Visit(tc.OldType())
+						}
+					case *dsl.NamedTypeChange:
+						if tc := change.TypeChange; tc != nil {
+							self.Visit(tc.OldType())
+						}
+					}
+				}
+			}
+			self.VisitChildren(node)
+
 		case *dsl.GeneralizedType:
 			if t.Cases.IsUnion() {
 				arities[len(t.Cases)] = nil
@@ -365,6 +413,12 @@ func writeNamespaceDefinitions(w *formatting.IndentedWriter, ns *dsl.Namespace) 
 		for _, typeDef := range ns.TypeDefinitions {
 			writeSerializers(w, typeDef)
 		}
+
+		for _, versionLabel := range ns.Versions {
+			for _, change := range ns.DefinitionChanges[versionLabel] {
+				writeCompatibilitySerializers(w, change, versionLabel)
+			}
+		}
 		w.WriteString("} // namespace\n\n")
 	}
 
@@ -451,15 +505,370 @@ func writeRwFunctionTemplateDeclaration(t dsl.TypeDefinition, w *formatting.Inde
 	}
 }
 
+// Writes code needed to convert sourceName: typeChange.Old() into targetName: typeChange.New() on read, or vice-versa on write
+func writeTypeConversion(w *formatting.IndentedWriter, typeChange dsl.TypeChange, sourceName, targetName string, write bool) {
+	switch tc := typeChange.(type) {
+	case *dsl.TypeChangeNumberToNumber:
+		if write {
+			writeTypeConversion(w, tc.Inverse(), sourceName, targetName, !write)
+		} else {
+			oldPrim := tc.OldType().(*dsl.SimpleType).ResolvedDefinition.(dsl.PrimitiveDefinition)
+			newPrim := tc.NewType().(*dsl.SimpleType).ResolvedDefinition.(dsl.PrimitiveDefinition)
+			rhs := sourceName
+
+			overflowCheck := ""
+			if dsl.GetPrimitiveKind(oldPrim) == dsl.PrimitiveKindFloatingPoint {
+				if dsl.GetPrimitiveKind(newPrim) == dsl.PrimitiveKindInteger ||
+					(dsl.GetPrimitiveKind(newPrim) == dsl.PrimitiveKindFloatingPoint && dsl.GetPrimitiveWidth(oldPrim) > dsl.GetPrimitiveWidth(newPrim)) {
+					overflowCheck = fmt.Sprintf("if (%s > std::numeric_limits<%s>::max() || %s < std::numeric_limits<%s>::lowest()) {\n", rhs, common.TypeSyntax(tc.NewType()), rhs, common.TypeSyntax(tc.NewType()))
+				}
+			}
+
+			if dsl.GetPrimitiveKind(oldPrim) == dsl.PrimitiveKindInteger && dsl.GetPrimitiveKind(newPrim) == dsl.PrimitiveKindInteger {
+				if dsl.IsSignedPrimitive(oldPrim) {
+					if dsl.IsSignedPrimitive(newPrim) {
+						if dsl.GetPrimitiveWidth(oldPrim) > dsl.GetPrimitiveWidth(newPrim) {
+							overflowCheck = fmt.Sprintf("if (%s > std::numeric_limits<%s>::max() || %s < std::numeric_limits<%s>::lowest()) {\n", rhs, common.TypeSyntax(tc.NewType()), rhs, common.TypeSyntax(tc.NewType()))
+						}
+					} else {
+						if dsl.GetPrimitiveWidth(oldPrim) > dsl.GetPrimitiveWidth(newPrim) {
+							overflowCheck = fmt.Sprintf("if (%s > std::numeric_limits<%s>::max() || %s < 0) {\n", rhs, common.TypeSyntax(tc.NewType()), rhs)
+						} else {
+							overflowCheck = fmt.Sprintf("if (%s < 0) {\n", rhs)
+						}
+					}
+				} else {
+					if dsl.GetPrimitiveWidth(oldPrim) > dsl.GetPrimitiveWidth(newPrim) ||
+						(dsl.IsSignedPrimitive(newPrim) && dsl.GetPrimitiveWidth(oldPrim) == dsl.GetPrimitiveWidth(newPrim)) {
+						overflowCheck = fmt.Sprintf("if (%s > std::numeric_limits<%s>::max()) {\n", rhs, common.TypeSyntax(tc.NewType()))
+
+					}
+				}
+			}
+
+			if len(overflowCheck) > 0 {
+				fmt.Fprintf(w, "%s", overflowCheck)
+				w.Indented(func() {
+					fmt.Fprintf(w, "throw std::runtime_error(\"Numeric overflow detected while converting '%s' to '%s'\");\n", dsl.TypeToShortSyntax(tc.OldType(), false), dsl.TypeToShortSyntax(tc.NewType(), false))
+				})
+				fmt.Fprintf(w, "}\n")
+			}
+
+			if dsl.GetPrimitiveKind(oldPrim) == dsl.PrimitiveKindFloatingPoint && dsl.GetPrimitiveKind(newPrim) == dsl.PrimitiveKindInteger {
+				rhs = fmt.Sprintf("std::round(%s)", rhs)
+			}
+
+			fmt.Fprintf(w, "%s = static_cast<%s>(%s);\n", targetName, common.TypeSyntax(tc.NewType()), rhs)
+		}
+
+	case *dsl.TypeChangeComplexToComplex:
+		if write {
+			writeTypeConversion(w, tc.Inverse(), sourceName, targetName, !write)
+		} else {
+			oldPrim := tc.OldType().(*dsl.SimpleType).ResolvedDefinition.(dsl.PrimitiveDefinition)
+			newPrim := tc.NewType().(*dsl.SimpleType).ResolvedDefinition.(dsl.PrimitiveDefinition)
+			if dsl.GetPrimitiveWidth(oldPrim) > dsl.GetPrimitiveWidth(newPrim) {
+				fmt.Fprintf(w, "if (std::real(%s) > std::numeric_limits<%s::value_type>::max() || std::real(%s) < std::numeric_limits<%s::value_type>::lowest()) {\n", sourceName, common.TypeSyntax(tc.NewType()), sourceName, common.TypeSyntax(tc.NewType()))
+				w.Indented(func() {
+					fmt.Fprintf(w, "throw std::runtime_error(\"Real part overflow detected while converting '%s' to '%s'\");\n", dsl.TypeToShortSyntax(tc.OldType(), false), dsl.TypeToShortSyntax(tc.NewType(), false))
+				})
+				fmt.Fprintf(w, "}\n")
+
+				fmt.Fprintf(w, "if (std::imag(%s) > std::numeric_limits<%s::value_type>::max() || std::imag(%s) < std::numeric_limits<%s::value_type>::lowest()) {\n", sourceName, common.TypeSyntax(tc.NewType()), sourceName, common.TypeSyntax(tc.NewType()))
+				w.Indented(func() {
+					fmt.Fprintf(w, "throw std::runtime_error(\"Imaginary part overflow detected while converting '%s' to '%s'\");\n", dsl.TypeToShortSyntax(tc.OldType(), false), dsl.TypeToShortSyntax(tc.NewType(), false))
+				})
+				fmt.Fprintf(w, "}\n")
+			}
+			fmt.Fprintf(w, "%s = %s(%s);\n", targetName, common.TypeSyntax(tc.NewType()), sourceName)
+		}
+
+	case *dsl.TypeChangeStringToNumber:
+		writeTypeConversion(w, tc.Inverse(), sourceName, targetName, !write)
+	case *dsl.TypeChangeNumberToString:
+		if write {
+			rhs := sourceName
+			def := tc.OldType().(*dsl.SimpleType).ResolvedDefinition
+			switch def.(dsl.PrimitiveDefinition) {
+			case dsl.PrimitiveInt8, dsl.PrimitiveInt16, dsl.PrimitiveInt32:
+				rhs = fmt.Sprintf("std::stoi(%s)", sourceName)
+			case dsl.PrimitiveInt64:
+				rhs = fmt.Sprintf("std::stol(%s)", sourceName)
+			case dsl.PrimitiveUint8, dsl.PrimitiveUint16, dsl.PrimitiveUint32, dsl.PrimitiveUint64:
+				rhs = fmt.Sprintf("std::stoul(%s)", sourceName)
+			case dsl.PrimitiveFloat32:
+				rhs = fmt.Sprintf("std::stof(%s)", sourceName)
+			case dsl.PrimitiveFloat64:
+				rhs = fmt.Sprintf("std::stod(%s)", sourceName)
+			default:
+				rhs = sourceName
+			}
+
+			fmt.Fprintf(w, "try {\n")
+			w.Indented(func() {
+				fmt.Fprintf(w, "%s = %s;\n", targetName, rhs)
+			})
+			fmt.Fprintf(w, "} catch (...) {\n")
+			w.Indented(func() {
+				errMsg := fmt.Sprintf(`Unable to convert string \"" + %s + "\" to number`, sourceName)
+				fmt.Fprintf(w, "throw std::runtime_error(\"%s\");\n", errMsg)
+			})
+			fmt.Fprintf(w, "}\n")
+
+		} else {
+			fmt.Fprintf(w, "%s = std::to_string(%s);\n", targetName, sourceName)
+		}
+
+	case *dsl.TypeChangeOptionalTypeChanged:
+		fmt.Fprintf(w, "if (%s.has_value()) {\n", sourceName)
+		w.Indented(func() {
+			writeTypeConversion(w, tc.InnerChange, sourceName+".value()", targetName, write)
+		})
+		fmt.Fprintf(w, "}\n")
+
+	case *dsl.TypeChangeOptionalToScalar:
+		writeTypeConversion(w, tc.Inverse(), sourceName, targetName, !write)
+	case *dsl.TypeChangeScalarToOptional:
+		if write {
+			fmt.Fprintf(w, "if (%s.has_value()) {\n", sourceName)
+			w.Indented(func() {
+				fmt.Fprintf(w, "%s = %s.value();\n", targetName, sourceName)
+			})
+			fmt.Fprintf(w, "}\n")
+		} else {
+			fmt.Fprintf(w, "%s = %s;\n", targetName, sourceName)
+		}
+
+	case *dsl.TypeChangeUnionToScalar:
+		writeTypeConversion(w, tc.Inverse(), sourceName, targetName, !write)
+	case *dsl.TypeChangeScalarToUnion:
+		if write {
+			// Writing a Union as a Scalar
+			fmt.Fprintf(w, "if (%s.index() == %d) {\n", sourceName, tc.TypeIndex)
+			w.Indented(func() {
+				fmt.Fprintf(w, "%s = std::get<%d>(%s);\n", targetName, tc.TypeIndex, sourceName)
+			})
+			fmt.Fprintf(w, "}\n")
+		} else {
+			// Reading a Scalar into a Union
+			fmt.Fprintf(w, "%s = %s;\n", targetName, sourceName)
+		}
+
+	case *dsl.TypeChangeUnionToOptional:
+		writeTypeConversion(w, tc.Inverse(), sourceName, targetName, !write)
+	case *dsl.TypeChangeOptionalToUnion:
+		if write {
+			// Writing a Union as an Optional
+			fmt.Fprintf(w, "if (%s.index() == %d) {\n", sourceName, tc.TypeIndex)
+			w.Indented(func() {
+				fmt.Fprintf(w, "%s = std::get<%d>(%s);\n", targetName, tc.TypeIndex, sourceName)
+			})
+			fmt.Fprintf(w, "}\n")
+		} else {
+			// Reading an Optional into a Union
+			fmt.Fprintf(w, "if (%s.has_value()) {\n", sourceName)
+			w.Indented(func() {
+				fmt.Fprintf(w, "%s = %s.value();\n", targetName, sourceName)
+			})
+			fmt.Fprintf(w, "} else {\n")
+			w.Indented(func() {
+				fmt.Fprintf(w, "%s = std::monostate{};\n", targetName)
+			})
+			fmt.Fprintf(w, "}\n")
+		}
+
+	case *dsl.TypeChangeUnionTypesetChanged:
+		if write {
+			writeTypeConversion(w, tc.Inverse(), sourceName, targetName, !write)
+			return
+		}
+
+		fmt.Fprintf(w, "switch (%s.index()) {\n", sourceName)
+		w.Indented(func() {
+			for i := range tc.OldType().(*dsl.GeneralizedType).Cases {
+				fmt.Fprintf(w, "case %d: {\n", i)
+				w.Indented(func() {
+					if tc.OldMatches[i] {
+						fmt.Fprintf(w, "%s = std::get<%d>(%s);\n", targetName, i, sourceName)
+					} else {
+						var expectedTypes []string
+						for _, c := range tc.OldType().(*dsl.GeneralizedType).Cases {
+							expectedTypes = append(expectedTypes, fmt.Sprintf(`"%s"`, dsl.TypeToShortSyntax(c.Type, true)))
+						}
+						fmt.Fprintf(w, "std::vector<std::string> source_types = {%s};\n", strings.Join(expectedTypes, ", "))
+						fmt.Fprintf(w, "throw std::runtime_error(\"Source type '\" + source_types[%d] + \"' incompatible with target union type '%s'\");\n", i, dsl.TypeToShortSyntax(tc.NewType(), false))
+					}
+					fmt.Fprintf(w, "break;\n")
+
+				})
+				fmt.Fprintf(w, "}\n")
+			}
+			fmt.Fprintf(w, "default: throw std::runtime_error(\"Invalid union index.\");\n")
+		})
+		fmt.Fprintf(w, "}\n")
+
+	case *dsl.TypeChangeVectorTypeChanged:
+		if write {
+			writeTypeConversion(w, tc.Inverse(), sourceName, targetName, !write)
+			return
+		}
+
+		fmt.Fprintf(w, "%s.resize(%s.size());\n", targetName, sourceName)
+		fmt.Fprintf(w, "for (size_t i = 0; i < %s.size(); i++) {\n", sourceName)
+		w.Indented(func() {
+			tmpItemName := "item"
+			tmpItemType := common.TypeSyntax(tc.InnerChange.NewType())
+			fmt.Fprintf(w, "%s %s = {};\n", tmpItemType, tmpItemName)
+			writeTypeConversion(w, tc.InnerChange, fmt.Sprintf("%s[i]", sourceName), tmpItemName, write)
+			fmt.Fprintf(w, "%s[i] = %s;\n", targetName, tmpItemName)
+		})
+		fmt.Fprintf(w, "}\n")
+
+	case *dsl.TypeChangeStreamTypeChanged:
+		change := &dsl.TypeChangeVectorTypeChanged{TypePair: tc.TypePair, InnerChange: tc.InnerChange}
+		writeTypeConversion(w, change, sourceName, targetName, write)
+
+	default:
+		panic("Expected a TypeChange")
+	}
+}
+
+// If a TypeChange is the result of an underlying TypeDefinition change, we don't need to perform
+// explicit conversion - we only need to call the corresponding "compatibility" serializer functions
+func requiresExplicitConversion(tc dsl.TypeChange) bool {
+	switch tc := tc.(type) {
+	case *dsl.TypeChangeDefinitionChanged:
+		return false
+	case *dsl.TypeChangeOptionalTypeChanged:
+		return requiresExplicitConversion(tc.InnerChange)
+	case *dsl.TypeChangeStreamTypeChanged:
+		return requiresExplicitConversion(tc.InnerChange)
+	case *dsl.TypeChangeVectorTypeChanged:
+		return requiresExplicitConversion(tc.InnerChange)
+	}
+	return true
+}
+
+func writeCompatibilitySerializers(w *formatting.IndentedWriter, change dsl.DefinitionChange, versionLabel string) {
+	switch change.(type) {
+	case *dsl.EnumChange:
+		// Enums are trivially serializable, and EnumChanges do not require conversion
+		return
+	}
+
+	writeFallbackBody := func(write bool) {
+		switch change := change.(type) {
+		case *dsl.RecordChange:
+			p := change.PreviousDefinition().(*dsl.RecordDefinition)
+			for i, field := range p.Fields {
+				tmpVarName := common.FieldIdentifierName(field.Name)
+				if change.FieldRemoved[i] {
+					// Field was removed: Read it and discard, or Write "default" value
+					tmpVarType := common.TypeSyntax(field.Type)
+					fmt.Fprintf(w, "%s %s = {};\n", tmpVarType, tmpVarName)
+					fmt.Fprintf(w, "%s(stream, %s);\n", typeRwFunction(field.Type, write), tmpVarName)
+				} else if tc := change.FieldChanges[i]; tc != nil {
+					// Field type change: Handle type conversions
+					if requiresExplicitConversion(tc) {
+						tmpVarType := common.TypeSyntax(tc.OldType())
+						fmt.Fprintf(w, "%s %s = {};\n", tmpVarType, tmpVarName)
+
+						if write {
+							writeTypeConversion(w, tc, fmt.Sprintf("value.%s", tmpVarName), tmpVarName, write)
+							fmt.Fprintf(w, "%s(stream, %s);\n", typeRwFunction(tc.OldType(), write), tmpVarName)
+						} else {
+							fmt.Fprintf(w, "%s(stream, %s);\n", typeRwFunction(tc.OldType(), write), tmpVarName)
+							writeTypeConversion(w, tc, tmpVarName, fmt.Sprintf("value.%s", tmpVarName), write)
+						}
+					} else {
+						fmt.Fprintf(w, "%s(stream, value.%s);\n", typeRwFunction(tc.OldType(), write), tmpVarName)
+					}
+				} else {
+					fmt.Fprintf(w, "%s(stream, value.%s);\n", typeRwFunction(field.Type, write), tmpVarName)
+				}
+			}
+		case *dsl.NamedTypeChange:
+			switch prev := change.PreviousDefinition().(type) {
+			case *dsl.NamedType:
+				// prev := change.PreviousDefinition().(*dsl.NamedType)
+				if tc := change.TypeChange; tc != nil {
+					tmpVarName := common.FieldIdentifierName(prev.Name)
+					if requiresExplicitConversion(tc) {
+						varType := common.TypeSyntax(tc.OldType())
+						fmt.Fprintf(w, "%s %s = {};\n", varType, tmpVarName)
+						if write {
+							writeTypeConversion(w, tc, "value", tmpVarName, write)
+							fmt.Fprintf(w, "%s(stream, %s);\n", typeRwFunction(tc.OldType(), write), tmpVarName)
+						} else {
+							fmt.Fprintf(w, "%s(stream, %s);\n", typeRwFunction(tc.OldType(), write), tmpVarName)
+							writeTypeConversion(w, tc, tmpVarName, "value", write)
+						}
+					} else {
+						fmt.Fprintf(w, "%s(stream, value);\n", typeRwFunction(tc.OldType(), write))
+					}
+				} else {
+					fmt.Fprintf(w, "%s(stream, value);\n", typeRwFunction(prev.Type, write))
+				}
+
+			case dsl.TypeDefinition:
+				fmt.Fprintf(w, "%s(stream, value);\n", typeDefinitionRwFunction(prev, write))
+			}
+
+		case *dsl.CompatibilityChange:
+			fmt.Fprintf(w, "%s(stream, value);\n", typeDefinitionRwFunction(change.LatestDefinition(), write))
+
+		case *dsl.AliasRemoved:
+			if nt, ok := change.LatestDefinition().(*dsl.NamedType); ok {
+				fmt.Fprintf(w, "%s(stream, value);\n", typeRwFunction(nt.Type, write))
+			}
+
+		default:
+			panic(fmt.Sprintf("Unexpected change %T", change))
+		}
+	}
+
+	writeCompatibilityRwFunctionSignature(change.PreviousDefinition(), change.LatestDefinition(), w, true)
+	w.Indented(func() {
+		writeFallbackBody(true)
+	})
+	w.WriteString("}\n\n")
+
+	writeCompatibilityRwFunctionSignature(change.PreviousDefinition(), change.LatestDefinition(), w, false)
+	w.Indented(func() {
+		writeFallbackBody(false)
+	})
+	w.WriteString("}\n\n")
+}
+
+func writeCompatibilityRwFunctionSignature(old dsl.TypeDefinition, new dsl.TypeDefinition, w *formatting.IndentedWriter, write bool) {
+	writeRwFunctionTemplateDeclaration(old, w, write)
+	if write {
+		fmt.Fprintf(w, "[[maybe_unused]] void Write%s(yardl::binary::CodedOutputStream& stream, %s const& value) {\n", old.GetDefinitionMeta().Name, common.TypeDefinitionSyntax(new))
+	} else {
+		fmt.Fprintf(w, "[[maybe_unused]] void Read%s(yardl::binary::CodedInputStream& stream, %s& value) {\n", old.GetDefinitionMeta().Name, common.TypeDefinitionSyntax(new))
+	}
+}
+
 func writeProtocolMethods(w *formatting.IndentedWriter, p *dsl.ProtocolDefinition) {
+
+	extractStepChanges := func(stepIndex int) map[string]dsl.TypeChange {
+		stepChanges := make(map[string]dsl.TypeChange)
+		for label, protocolChange := range p.Versions {
+			if protocolChange == nil {
+				continue
+			}
+			stepChanges[label] = protocolChange.StepChanges[stepIndex]
+		}
+		return stepChanges
+	}
+
 	writerClassName := BinaryWriterClassName(p)
-	for _, step := range p.Sequence {
+	for i, step := range p.Sequence {
+		stepChanges := extractStepChanges(i)
+
 		fmt.Fprintf(w, "void %s::%s(%s const& value) {\n", writerClassName, common.ProtocolWriteImplMethodName(step), common.TypeSyntax(step.Type))
 		w.Indented(func() {
-			if step.IsStream() {
-				w.WriteString("yardl::binary::WriteInteger(stream_, 1U);\n")
-			}
-			fmt.Fprintf(w, "%s(stream_, value);\n", typeRwFunction(step.Type, true))
+			writeProtocolStep(w, step, stepChanges, false, true)
 		})
 		w.WriteString("}\n\n")
 
@@ -468,9 +877,7 @@ func writeProtocolMethods(w *formatting.IndentedWriter, p *dsl.ProtocolDefinitio
 			w.Indented(func() {
 				w.WriteStringln("if (!values.empty()) {")
 				w.Indented(func() {
-					vectorType := *step.Type.(*dsl.GeneralizedType)
-					vectorType.Dimensionality = &dsl.Vector{}
-					fmt.Fprintf(w, "%s(stream_, values);\n", typeRwFunction(&vectorType, true))
+					writeProtocolStep(w, step, stepChanges, true, true)
 				})
 				w.WriteStringln("}")
 			})
@@ -478,7 +885,7 @@ func writeProtocolMethods(w *formatting.IndentedWriter, p *dsl.ProtocolDefinitio
 
 			fmt.Fprintf(w, "void %s::%s() {\n", writerClassName, common.ProtocolWriteEndImplMethodName(step))
 			w.Indented(func() {
-				w.WriteString("yardl::binary::WriteInteger(stream_, 0U);\n")
+				writeEndStream(w, stepChanges)
 			})
 			w.WriteString("}\n\n")
 		}
@@ -497,7 +904,9 @@ func writeProtocolMethods(w *formatting.IndentedWriter, p *dsl.ProtocolDefinitio
 	w.WriteString("}\n\n")
 
 	readerClassName := BinaryReaderClassName(p)
-	for _, step := range p.Sequence {
+	for i, step := range p.Sequence {
+		stepChanges := extractStepChanges(i)
+
 		returnType := "void"
 		if step.IsStream() {
 			returnType = "bool"
@@ -506,22 +915,11 @@ func writeProtocolMethods(w *formatting.IndentedWriter, p *dsl.ProtocolDefinitio
 		fmt.Fprintf(w, "%s %s::%s(%s& value) {\n", returnType, readerClassName, common.ProtocolReadImplMethodName(step), common.TypeSyntax(step.Type))
 		w.Indented(func() {
 			if step.IsStream() {
-				w.WriteStringln("if (current_block_remaining_ == 0) {")
-				w.Indented(func() {
-					w.WriteStringln("yardl::binary::ReadInteger(stream_, current_block_remaining_);")
-					w.WriteStringln("if (current_block_remaining_ == 0) {")
-					w.Indented(func() {
-						w.WriteStringln("return false;")
-					})
-					w.WriteStringln("}")
-				})
-				w.WriteStringln("}")
+				w.WriteStringln("bool read_block_successful = false;")
 			}
-
-			fmt.Fprintf(w, "%s(stream_, value);\n", typeRwFunction(step.Type, false))
+			writeProtocolStep(w, step, stepChanges, false, false)
 			if step.IsStream() {
-				w.WriteStringln("current_block_remaining_--;")
-				w.WriteStringln("return true;")
+				w.WriteStringln("return read_block_successful;")
 			}
 		})
 		w.WriteString("}\n\n")
@@ -529,13 +927,10 @@ func writeProtocolMethods(w *formatting.IndentedWriter, p *dsl.ProtocolDefinitio
 		if step.IsStream() {
 			fmt.Fprintf(w, "%s %s::%s(std::vector<%s>& values) {\n", returnType, readerClassName, common.ProtocolReadImplMethodName(step), common.TypeSyntax(step.Type))
 			w.Indented(func() {
-				scalarType := step.Type.(*dsl.GeneralizedType).ToScalar()
-
-				fmt.Fprintf(w, "yardl::binary::ReadBlocksIntoVector<%s, %s>(stream_, current_block_remaining_, values);\n", common.TypeSyntax(scalarType), typeRwFunction(scalarType, false))
+				writeProtocolStep(w, step, stepChanges, true, false)
 				w.WriteStringln("return current_block_remaining_ != 0;")
 			})
 			w.WriteString("}\n\n")
-
 		}
 	}
 
@@ -544,6 +939,189 @@ func writeProtocolMethods(w *formatting.IndentedWriter, p *dsl.ProtocolDefinitio
 		w.WriteString("stream_.VerifyFinished();\n")
 	})
 	w.WriteString("}\n\n")
+}
+
+// Writes a switch statement with cases for each version of a ProtocolStep
+// Only if there are version changes or the ProtocolStep was added
+func writeChangeSwitchCase(w *formatting.IndentedWriter, changes map[string]dsl.TypeChange,
+	writeDefault, writeAdded func(*formatting.IndentedWriter),
+	writeConversion func(*formatting.IndentedWriter, dsl.TypeChange)) {
+
+	allNil := func(vs map[string]dsl.TypeChange) bool {
+		for _, v := range vs {
+			if v != nil {
+				return false
+			}
+		}
+		return true
+	}
+
+	if allNil(changes) {
+		// Skip switch statement - this ProtocolStep has never changed
+		writeDefault(w)
+		return
+	}
+
+	// Sort the case labels for deterministic ordering
+	var versionLabels []string
+	for versionLabel := range changes {
+		versionLabels = append(versionLabels, versionLabel)
+	}
+	sort.Strings(versionLabels)
+
+	fmt.Fprintf(w, "switch (version_) {\n")
+	for _, versionLabel := range versionLabels {
+		change := changes[versionLabel]
+		if change == nil {
+			continue
+		}
+
+		_, stepAdded := change.(*dsl.TypeChangeStepAdded)
+		if writeConversion == nil && !stepAdded {
+			continue
+		}
+
+		fmt.Fprintf(w, "case Version::%s: {\n", versionLabel)
+		w.Indented(func() {
+			defer func() {
+				w.WriteStringln("break;")
+			}()
+
+			if stepAdded {
+				if writeAdded != nil {
+					writeAdded(w)
+				}
+			} else {
+				if writeConversion != nil {
+					writeConversion(w, change)
+				}
+			}
+		})
+		w.WriteStringln("}")
+	}
+	fmt.Fprintln(w, "default:")
+	w.Indented(func() {
+		writeDefault(w)
+		fmt.Fprintln(w, "break;")
+	})
+	fmt.Fprintln(w, "}")
+}
+
+func writeStepRw(w *formatting.IndentedWriter, stepType dsl.Type, target string, isStream, isPlural, write bool) {
+	if !isStream {
+		fmt.Fprintf(w, "%s(stream_, %s);\n", typeRwFunction(stepType, write), target)
+		return
+	}
+
+	if write {
+		if isPlural {
+			vectorType := *stepType.(*dsl.GeneralizedType)
+			vectorType.Dimensionality = &dsl.Vector{}
+			stepType = &vectorType
+			fmt.Fprintf(w, "%s(stream_, %s);\n", typeRwFunction(stepType, write), target)
+		} else {
+			fmt.Fprintf(w, "yardl::binary::WriteBlock<%s, %s>(stream_, %s);\n", common.TypeSyntax(stepType), typeRwFunction(stepType, write), target)
+		}
+	} else {
+		if isPlural {
+			stepType = stepType.(*dsl.GeneralizedType).ToScalar()
+			fmt.Fprintf(w, "yardl::binary::ReadBlocksIntoVector<%s, %s>(stream_, current_block_remaining_, %s);\n", common.TypeSyntax(stepType), typeRwFunction(stepType, write), target)
+		} else {
+			fmt.Fprintf(w, "read_block_successful = yardl::binary::ReadBlock<%s, %s>(stream_, current_block_remaining_, %s);\n", common.TypeSyntax(stepType), typeRwFunction(stepType, write), target)
+		}
+	}
+}
+
+func writeProtocolStep(w *formatting.IndentedWriter, step *dsl.ProtocolStep, changes map[string]dsl.TypeChange, isPlural bool, write bool) {
+	target := "value"
+	if isPlural {
+		target = "values"
+	}
+
+	writeChangeSwitchCase(w, changes,
+		func(w *formatting.IndentedWriter) {
+			writeStepRw(w, step.Type, target, step.IsStream(), isPlural, write)
+		},
+		func(w *formatting.IndentedWriter) {
+			// Handle "added" ProtocolSteps
+			if !write {
+				if isPlural {
+					fmt.Fprintln(w, "values.clear();")
+				} else {
+					tmpVarType := common.TypeSyntax(step.Type)
+					tmpVarName := common.FieldIdentifierName(step.Name)
+					fmt.Fprintf(w, "%s %s = {};\n", tmpVarType, tmpVarName)
+					fmt.Fprintf(w, "value = std::move(%s);\n", tmpVarName)
+					if step.IsStream() {
+						fmt.Fprintf(w, "return false;\n")
+					}
+				}
+			}
+		},
+		func(w *formatting.IndentedWriter, change dsl.TypeChange) {
+			// Handle conversions for ProtocolStep type changes
+			if !requiresExplicitConversion(change) {
+				writeStepRw(w, change.OldType(), target, step.IsStream(), isPlural, write)
+				return
+			}
+
+			// Otherwise, we need to do explicit conversion for this ProtocolStep
+			if isPlural {
+				tmpVecName := common.FieldIdentifierName(step.Name)
+				tmpVecType := *change.OldType().(*dsl.GeneralizedType)
+				tmpVecType.Dimensionality = &dsl.Vector{}
+				fmt.Fprintf(w, "%s %s = {};\n", common.TypeSyntax(&tmpVecType), tmpVecName)
+
+				if write {
+					writeTypeConversion(w, change, target, tmpVecName, write)
+					writeStepRw(w, change.OldType(), tmpVecName, step.IsStream(), isPlural, write)
+				} else {
+					fmt.Fprintf(w, "%s.reserve(%s.capacity());\n", tmpVecName, target)
+					writeStepRw(w, change.OldType(), tmpVecName, step.IsStream(), isPlural, write)
+					writeTypeConversion(w, change, tmpVecName, target, write)
+				}
+			} else {
+				if step.IsStream() {
+					// Reading/Writing the singular form for a stream so we only need the inner stream type change
+					if ch, streamTypeChanged := change.(*dsl.TypeChangeStreamTypeChanged); streamTypeChanged {
+						change = ch.InnerChange
+					}
+				}
+
+				tmpVarName := common.FieldIdentifierName(step.Name)
+				tmpVarType := common.TypeSyntax(change.OldType())
+				fmt.Fprintf(w, "%s %s = {};\n", tmpVarType, tmpVarName)
+
+				if write {
+					writeTypeConversion(w, change, target, tmpVarName, write)
+					writeStepRw(w, change.OldType(), tmpVarName, step.IsStream(), isPlural, write)
+				} else {
+					writeStepRw(w, change.OldType(), tmpVarName, step.IsStream(), isPlural, write)
+					if step.IsStream() {
+						fmt.Fprintf(w, "if (read_block_successful) {\n")
+						w.Indented(func() {
+							writeTypeConversion(w, change, tmpVarName, target, write)
+						})
+						fmt.Fprintf(w, "}\n")
+					} else {
+						writeTypeConversion(w, change, tmpVarName, target, write)
+					}
+				}
+			}
+		},
+	)
+}
+
+func writeEndStream(w *formatting.IndentedWriter, stepChanges map[string]dsl.TypeChange) {
+
+	writeChangeSwitchCase(w, stepChanges,
+		func(w *formatting.IndentedWriter) {
+			w.WriteString("yardl::binary::WriteInteger(stream_, 0U);\n")
+		},
+		func(w *formatting.IndentedWriter) {
+			// No-op: Don't write stream end for added ProtocolSteps
+		},
+		nil)
 }
 
 func typeDefinitionRwFunction(t dsl.TypeDefinition, write bool) string {
@@ -580,6 +1158,7 @@ func typeDefinitionRwFunction(t dsl.TypeDefinition, write bool) string {
 		return fmt.Sprintf("%s%s", verb(write), common.TypeDefinitionSyntax(t))
 	default:
 		meta := t.GetDefinitionMeta()
+		suffix := meta.Name
 		verb := verb(write)
 		typeArgumentsString := ""
 		if len(meta.TypeParameters) > 0 {
@@ -597,7 +1176,7 @@ func typeDefinitionRwFunction(t dsl.TypeDefinition, write bool) string {
 			}
 			typeArgumentsString = fmt.Sprintf("<%s>", strings.Join(typeArguments, ", "))
 		}
-		return fmt.Sprintf("%s::binary::%s%s%s", common.NamespaceIdentifierName(meta.Namespace), verb, meta.Name, typeArgumentsString)
+		return fmt.Sprintf("%s::binary::%s%s%s", common.NamespaceIdentifierName(meta.Namespace), verb, suffix, typeArgumentsString)
 	}
 }
 

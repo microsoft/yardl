@@ -1,0 +1,225 @@
+ProtocolWithChanges: !protocol
+  sequence:
+    int8ToInt: int8
+    int8ToLong: int8
+    int8ToUint: int8
+    int8ToUlong: int8
+    int8ToFloat: int8
+    int8ToDouble: int8
+
+    intToUint: int
+    intToLong: int
+    intToFloat: int
+    intToDouble: int
+    uintToUlong: uint
+    uintToFloat: uint
+    uintToDouble: uint
+
+    floatToDouble: float
+
+    complexFloatToComplexDouble: complexfloat32
+
+    intToString: int
+    uintToString: uint
+    longToString: long
+    ulongToString: ulong
+    floatToString: float
+    doubleToString: double
+
+    intToOptional: int
+    floatToOptional: float
+    stringToOptional: string
+
+    intToUnion: int
+    floatToUnion: float
+    stringToUnion: string
+
+    optionalIntToFloat: int?
+    optionalFloatToString: float?
+
+    aliasedLongToString: AliasedLongToString
+    stringToAliasedString: string
+    stringToAliasedInt: string
+
+    enumToAliasedEnum: GrowingEnum
+
+    optionalIntToUnion: int?
+    optionalRecordToUnion: RecordWithChanges?
+
+    recordWithChanges: RecordWithChanges
+    aliasedRecordWithChanges: AliasedRecordWithChanges
+    recordToRenamedRecord: RenamedRecord
+    recordToAliasedRecord: RecordWithChanges
+    recordToAliasedAlias: RecordWithChanges
+
+    # Stream and Vector type changes
+    streamIntToStringToFloat: !stream
+      items: int
+    vectorIntToStringToFloat: !vector
+      items: int
+
+    intFloatUnionReordered: [int, float]
+
+    vectorUnionReordered: !vector
+      items: [int, float]
+    streamUnionReordered: !stream
+      items: [int, string]
+
+    streamOfAliasTypeChange: !stream
+      items: StreamItem
+
+    # Comprehensive NamedType changes
+    rlink: RLink
+    rlinkRX: RLink
+    rlinkRY: RLink
+    rlinkRZ: RLink
+
+    raRLink: RA
+    raRX: RA
+    raRY: RA
+    raRZ: RA
+
+    rbRLink: RB
+    rbRX: RB
+    rbRY: RB
+    rbRZ: RB
+
+    rcRLink: RC
+    rcRX: RC
+    rcRY: RC
+    rcRZ: RC
+
+    rlinkRNew: RLink
+    raRNew: RA
+    rbRNew: RB
+    rcRNew: RC
+
+    rlinkRUnion: RLink
+    raRUnion: RA
+    rbRUnion: RB
+    rcRUnion: RC
+
+    optionalRecordWithChanges: RecordWithChanges?
+    aliasedOptionalRecordWithChanges: AliasedRecordWithChanges?
+
+    unionRecordWithChanges: [RecordWithChanges, int]
+    # aliasedUnionRecordWithChanges: [AliasedRecordWithChanges, int]
+
+    unionWithSameTypeset: [RecordWithChanges, int, float, string]
+    unionWithTypesAdded: [RecordWithChanges, float]
+    unionWithTypesRemoved: [RecordWithChanges, int, float, string]
+
+    recordToOptional: RecordWithChanges
+    recordToAliasedOptional: RecordWithChanges
+    recordToUnion: RecordWithChanges
+    recordToAliasedUnion: RecordWithChanges
+
+    unionToAliasedUnion: [RecordWithChanges, int]
+    unionToAliasedUnionWithChanges: [RecordWithChanges, int]
+    optionalToAliasedOptional: RecordWithChanges?
+    optionalToAliasedOptionalWithChanges: int?
+
+    genericRecord: GenericRecord<int, string>
+    genericRecordToOpenAlias: GenericRecord<int, string>
+    genericRecordToClosedAlias: GenericRecord<int, string>
+    genericRecordToHalfClosedAlias: GenericRecord<int, string>
+    aliasedGenericRecordToAlias: AliasedHalfClosedGenericRecord<int>
+    genericRecordToReversed: GenericRecord<int, string>
+
+    closedGenericRecordToUnion: AliasedClosedGenericRecord
+    genericRecordToAliasedUnion: GenericRecord<int, string>
+
+    genericUnionToReversed: AliasedClosedGenericUnion
+    genericUnionOfChangedRecord: AliasedClosedGenericUnion
+
+    genericParentRecord: GenericParentRecord<int>
+
+    genericNestedRecords: GenericRecord<UnchangedGeneric<int>, ChangedGeneric<string, int>>
+
+    genericRecordStream: !stream
+      items: GenericRecord<int, string>
+
+    genericParentRecordStream: !stream
+      items: GenericParentRecord<int>
+
+    vectorRecordWithChanges: RecordWithChanges*
+
+    streamedRecordWithChanges: !stream
+      items: RecordWithChanges
+
+
+AliasedLongToString: long
+AliasedRecordWithChanges: RecordWithChanges
+
+RecordWithChanges: !record
+  fields:
+    deprecatedFloat: float
+    intToLong: int
+    deprecatedVector: int*
+    floatToDouble: float
+    deprecatedArray: byte[7]
+    optionalLongToString: long?
+    deprecatedMap: string->int*
+    unchangedRecord: UnchangedRecord
+
+UnchangedRecord: !record
+  fields:
+    name: string
+    age: int
+    meta: string->double
+
+RenamedRecord: !record
+  fields:
+    i: int
+    s: string
+
+StreamItem: RecordWithChanges
+
+RLink: RA
+RA: RB
+RB: RC
+RC: !record
+  fields:
+    subject: string
+
+UnusedProtocol: !protocol
+  sequence:
+    records: !stream
+      items: UnchangedRecord
+
+UnusedButChangedRecord: !record
+  fields:
+    name: string
+    age: int
+
+GenericParentRecord<T>: !record
+  fields:
+    record: GenericRecord<T, string>
+    recordOfUnion: GenericRecord<GenericUnion<T, float>, string>
+    unionOfRecord: GenericUnion<GenericRecord<int, string>, float>
+
+GenericUnion<T1, T2>: [T1, T2]
+AliasedHalfClosedGenericUnion<T>: GenericUnion<T, float>
+AliasedClosedGenericUnion: AliasedHalfClosedGenericUnion<GenericRecord<int, string>>
+
+GenericRecord<T1, T2>: !record
+  fields:
+    removed: bool?
+    field1: T1
+    field2: T2
+
+AliasedHalfClosedGenericRecord<T>: GenericRecord<T, string>
+AliasedClosedGenericRecord: AliasedHalfClosedGenericRecord<int>
+
+UnchangedGeneric<T2>: !record
+  fields:
+    field: T2
+
+ChangedGeneric<Y, Z>: !record
+  fields:
+    y: Y
+    z: UnchangedGeneric<Z>
+
+GrowingEnum: !enum
+  base: uint16
+  values: [a, b, c]
