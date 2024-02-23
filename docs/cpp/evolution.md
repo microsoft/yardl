@@ -1,6 +1,6 @@
 # Schema Evolution
 
-Data models often change over time, thus, yardl provides support for evolving your schema in a cross-version compatible manner.
+Yardl provides support for evolving data models while maintaining compatibility across versions.
 
 When deploying protocol readers and writers generated from the current version of your schema, you may need the ability to read and write older versions of your data.
 Conversely, you may want to update older versions of your software to read and write the current version.
@@ -8,6 +8,9 @@ Conversely, you may want to update older versions of your software to read and w
 Yardl supports cross-version compatibility by *statically* generating conversions to and from other versions of your schema (i.e. at yardl codegen time).
 
 In the future, yardl will support *dynamic* compatibility between schema versions, enabling backward- and forward-compatibility between any schema version at runtime.
+
+**Currently, schema evolution is only supported for the binary encoding format using C++.**
+In the future, yardl will support schema evolution for other encodings and for Python.
 
 
 ## Statically-Generated Compatibility

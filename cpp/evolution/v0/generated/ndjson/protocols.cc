@@ -568,6 +568,10 @@ void ProtocolWithChangesWriter::WriteFloatToDoubleImpl(float const& value) {
   ordered_json json_value = value;
   yardl::ndjson::WriteProtocolValue(stream_, "floatToDouble", json_value);}
 
+void ProtocolWithChangesWriter::WriteComplexFloatToComplexDoubleImpl(std::complex<float> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "complexFloatToComplexDouble", json_value);}
+
 void ProtocolWithChangesWriter::WriteIntToStringImpl(int32_t const& value) {
   ordered_json json_value = value;
   yardl::ndjson::WriteProtocolValue(stream_, "intToString", json_value);}
@@ -970,6 +974,10 @@ void ProtocolWithChangesReader::ReadUintToDoubleImpl(uint32_t& value) {
 
 void ProtocolWithChangesReader::ReadFloatToDoubleImpl(float& value) {
   yardl::ndjson::ReadProtocolValue(stream_, line_, "floatToDouble", true, unused_step_, value);
+}
+
+void ProtocolWithChangesReader::ReadComplexFloatToComplexDoubleImpl(std::complex<float>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "complexFloatToComplexDouble", true, unused_step_, value);
 }
 
 void ProtocolWithChangesReader::ReadIntToStringImpl(int32_t& value) {

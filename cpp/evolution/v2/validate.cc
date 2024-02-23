@@ -78,6 +78,11 @@ int main(void) {
   r.ReadFloatToDouble(flt);
   EVO_ASSERT_EQUALISH(flt, M_PI);
 
+  std::complex<float> cxflt;
+  r.ReadComplexFloatToComplexDouble(cxflt);
+  EVO_ASSERT_EQUALISH(cxflt.real(), M_PI);
+  EVO_ASSERT_EQUALISH(cxflt.imag(), -M_PI);
+
   r.ReadIntToString(int32);
   EVO_ASSERT(int32 == INT_MIN);
   r.ReadUintToString(uint32);

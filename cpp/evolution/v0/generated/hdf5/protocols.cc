@@ -565,6 +565,10 @@ void ProtocolWithChangesWriter::WriteFloatToDoubleImpl(float const& value) {
   yardl::hdf5::WriteScalarDataset<float, float>(group_, "floatToDouble", H5::PredType::NATIVE_FLOAT, value);
 }
 
+void ProtocolWithChangesWriter::WriteComplexFloatToComplexDoubleImpl(std::complex<float> const& value) {
+  yardl::hdf5::WriteScalarDataset<std::complex<float>, std::complex<float>>(group_, "complexFloatToComplexDouble", yardl::hdf5::ComplexTypeDdl<float>(), value);
+}
+
 void ProtocolWithChangesWriter::WriteIntToStringImpl(int32_t const& value) {
   yardl::hdf5::WriteScalarDataset<int32_t, int32_t>(group_, "intToString", H5::PredType::NATIVE_INT32, value);
 }
@@ -1092,6 +1096,10 @@ void ProtocolWithChangesReader::ReadUintToDoubleImpl(uint32_t& value) {
 
 void ProtocolWithChangesReader::ReadFloatToDoubleImpl(float& value) {
   yardl::hdf5::ReadScalarDataset<float, float>(group_, "floatToDouble", H5::PredType::NATIVE_FLOAT, value);
+}
+
+void ProtocolWithChangesReader::ReadComplexFloatToComplexDoubleImpl(std::complex<float>& value) {
+  yardl::hdf5::ReadScalarDataset<std::complex<float>, std::complex<float>>(group_, "complexFloatToComplexDouble", yardl::hdf5::ComplexTypeDdl<float>(), value);
 }
 
 void ProtocolWithChangesReader::ReadIntToStringImpl(int32_t& value) {

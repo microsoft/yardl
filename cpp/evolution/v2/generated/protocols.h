@@ -55,86 +55,89 @@ class ProtocolWithChangesWriterBase {
   void WriteFloatToDouble(float const& value);
 
   // Ordinal 14.
-  void WriteIntToString(int32_t const& value);
+  void WriteComplexFloatToComplexDouble(std::complex<float> const& value);
 
   // Ordinal 15.
-  void WriteUintToString(uint32_t const& value);
+  void WriteIntToString(int32_t const& value);
 
   // Ordinal 16.
-  void WriteLongToString(int64_t const& value);
+  void WriteUintToString(uint32_t const& value);
 
   // Ordinal 17.
-  void WriteUlongToString(uint64_t const& value);
+  void WriteLongToString(int64_t const& value);
 
   // Ordinal 18.
-  void WriteFloatToString(float const& value);
+  void WriteUlongToString(uint64_t const& value);
 
   // Ordinal 19.
-  void WriteDoubleToString(double const& value);
+  void WriteFloatToString(float const& value);
 
   // Ordinal 20.
-  void WriteIntToOptional(int32_t const& value);
+  void WriteDoubleToString(double const& value);
 
   // Ordinal 21.
-  void WriteFloatToOptional(float const& value);
+  void WriteIntToOptional(int32_t const& value);
 
   // Ordinal 22.
-  void WriteStringToOptional(std::string const& value);
+  void WriteFloatToOptional(float const& value);
 
   // Ordinal 23.
-  void WriteIntToUnion(int32_t const& value);
+  void WriteStringToOptional(std::string const& value);
 
   // Ordinal 24.
-  void WriteFloatToUnion(float const& value);
+  void WriteIntToUnion(int32_t const& value);
 
   // Ordinal 25.
-  void WriteStringToUnion(std::string const& value);
+  void WriteFloatToUnion(float const& value);
 
   // Ordinal 26.
-  void WriteOptionalIntToFloat(std::optional<int32_t> const& value);
+  void WriteStringToUnion(std::string const& value);
 
   // Ordinal 27.
-  void WriteOptionalFloatToString(std::optional<float> const& value);
+  void WriteOptionalIntToFloat(std::optional<int32_t> const& value);
 
   // Ordinal 28.
-  void WriteAliasedLongToString(evo_test::AliasedLongToString const& value);
+  void WriteOptionalFloatToString(std::optional<float> const& value);
 
   // Ordinal 29.
-  void WriteStringToAliasedString(std::string const& value);
+  void WriteAliasedLongToString(evo_test::AliasedLongToString const& value);
 
   // Ordinal 30.
-  void WriteStringToAliasedInt(std::string const& value);
+  void WriteStringToAliasedString(std::string const& value);
 
   // Ordinal 31.
-  void WriteEnumToAliasedEnum(evo_test::GrowingEnum const& value);
+  void WriteStringToAliasedInt(std::string const& value);
 
   // Ordinal 32.
-  void WriteOptionalIntToUnion(std::optional<int32_t> const& value);
+  void WriteEnumToAliasedEnum(evo_test::GrowingEnum const& value);
 
   // Ordinal 33.
-  void WriteOptionalRecordToUnion(std::optional<evo_test::RecordWithChanges> const& value);
+  void WriteOptionalIntToUnion(std::optional<int32_t> const& value);
 
   // Ordinal 34.
-  void WriteRecordWithChanges(evo_test::RecordWithChanges const& value);
+  void WriteOptionalRecordToUnion(std::optional<evo_test::RecordWithChanges> const& value);
 
   // Ordinal 35.
-  void WriteAliasedRecordWithChanges(evo_test::AliasedRecordWithChanges const& value);
+  void WriteRecordWithChanges(evo_test::RecordWithChanges const& value);
 
   // Ordinal 36.
-  void WriteRecordToRenamedRecord(evo_test::RenamedRecord const& value);
+  void WriteAliasedRecordWithChanges(evo_test::AliasedRecordWithChanges const& value);
 
   // Ordinal 37.
-  void WriteRecordToAliasedRecord(evo_test::RecordWithChanges const& value);
+  void WriteRecordToRenamedRecord(evo_test::RenamedRecord const& value);
 
   // Ordinal 38.
-  void WriteRecordToAliasedAlias(evo_test::RecordWithChanges const& value);
+  void WriteRecordToAliasedRecord(evo_test::RecordWithChanges const& value);
 
   // Ordinal 39.
+  void WriteRecordToAliasedAlias(evo_test::RecordWithChanges const& value);
+
+  // Ordinal 40.
   // Stream and Vector type changes
   // Call this method for each element of the `streamIntToStringToFloat` stream, then call `EndStreamIntToStringToFloat() when done.`
   void WriteStreamIntToStringToFloat(float const& value);
 
-  // Ordinal 39.
+  // Ordinal 40.
   // Stream and Vector type changes
   // Call this method to write many values to the `streamIntToStringToFloat` stream, then call `EndStreamIntToStringToFloat()` when done.
   void WriteStreamIntToStringToFloat(std::vector<float> const& values);
@@ -142,274 +145,274 @@ class ProtocolWithChangesWriterBase {
   // Marks the end of the `streamIntToStringToFloat` stream.
   void EndStreamIntToStringToFloat();
 
-  // Ordinal 40.
+  // Ordinal 41.
   void WriteVectorIntToStringToFloat(std::vector<float> const& value);
 
-  // Ordinal 41.
+  // Ordinal 42.
   void WriteIntFloatUnionReordered(std::variant<int32_t, float> const& value);
 
-  // Ordinal 42.
+  // Ordinal 43.
   void WriteVectorUnionReordered(std::vector<std::variant<int32_t, float>> const& value);
 
-  // Ordinal 43.
+  // Ordinal 44.
   // Call this method for each element of the `streamUnionReordered` stream, then call `EndStreamUnionReordered() when done.`
   void WriteStreamUnionReordered(std::variant<int32_t, std::string> const& value);
 
-  // Ordinal 43.
+  // Ordinal 44.
   // Call this method to write many values to the `streamUnionReordered` stream, then call `EndStreamUnionReordered()` when done.
   void WriteStreamUnionReordered(std::vector<std::variant<int32_t, std::string>> const& values);
 
   // Marks the end of the `streamUnionReordered` stream.
   void EndStreamUnionReordered();
 
-  // Ordinal 44.
+  // Ordinal 45.
   // Call this method for each element of the `intToUnionStream` stream, then call `EndIntToUnionStream() when done.`
   void WriteIntToUnionStream(std::variant<std::string, int32_t> const& value);
 
-  // Ordinal 44.
+  // Ordinal 45.
   // Call this method to write many values to the `intToUnionStream` stream, then call `EndIntToUnionStream()` when done.
   void WriteIntToUnionStream(std::vector<std::variant<std::string, int32_t>> const& values);
 
   // Marks the end of the `intToUnionStream` stream.
   void EndIntToUnionStream();
 
-  // Ordinal 45.
+  // Ordinal 46.
   // Call this method for each element of the `unionStreamTypeChange` stream, then call `EndUnionStreamTypeChange() when done.`
   void WriteUnionStreamTypeChange(std::variant<int32_t, float> const& value);
 
-  // Ordinal 45.
+  // Ordinal 46.
   // Call this method to write many values to the `unionStreamTypeChange` stream, then call `EndUnionStreamTypeChange()` when done.
   void WriteUnionStreamTypeChange(std::vector<std::variant<int32_t, float>> const& values);
 
   // Marks the end of the `unionStreamTypeChange` stream.
   void EndUnionStreamTypeChange();
 
-  // Ordinal 46.
+  // Ordinal 47.
   // Call this method for each element of the `streamOfAliasTypeChange` stream, then call `EndStreamOfAliasTypeChange() when done.`
   void WriteStreamOfAliasTypeChange(evo_test::StreamItem const& value);
 
-  // Ordinal 46.
+  // Ordinal 47.
   // Call this method to write many values to the `streamOfAliasTypeChange` stream, then call `EndStreamOfAliasTypeChange()` when done.
   void WriteStreamOfAliasTypeChange(std::vector<evo_test::StreamItem> const& values);
 
   // Marks the end of the `streamOfAliasTypeChange` stream.
   void EndStreamOfAliasTypeChange();
 
-  // Ordinal 47.
+  // Ordinal 48.
   // Comprehensive NamedType changes
   void WriteRlink(evo_test::RLink const& value);
 
-  // Ordinal 48.
+  // Ordinal 49.
   void WriteRlinkRX(evo_test::RLink const& value);
 
-  // Ordinal 49.
+  // Ordinal 50.
   void WriteRlinkRY(evo_test::RLink const& value);
 
-  // Ordinal 50.
+  // Ordinal 51.
   void WriteRlinkRZ(evo_test::RLink const& value);
 
-  // Ordinal 51.
+  // Ordinal 52.
   void WriteRaRLink(evo_test::RA const& value);
 
-  // Ordinal 52.
+  // Ordinal 53.
   void WriteRaRX(evo_test::RA const& value);
 
-  // Ordinal 53.
+  // Ordinal 54.
   void WriteRaRY(evo_test::RA const& value);
 
-  // Ordinal 54.
+  // Ordinal 55.
   void WriteRaRZ(evo_test::RA const& value);
 
-  // Ordinal 55.
+  // Ordinal 56.
   void WriteRbRLink(evo_test::RB const& value);
 
-  // Ordinal 56.
+  // Ordinal 57.
   void WriteRbRX(evo_test::RB const& value);
 
-  // Ordinal 57.
+  // Ordinal 58.
   void WriteRbRY(evo_test::RB const& value);
 
-  // Ordinal 58.
+  // Ordinal 59.
   void WriteRbRZ(evo_test::RB const& value);
 
-  // Ordinal 59.
+  // Ordinal 60.
   void WriteRcRLink(evo_test::RC const& value);
 
-  // Ordinal 60.
+  // Ordinal 61.
   void WriteRcRX(evo_test::RC const& value);
 
-  // Ordinal 61.
+  // Ordinal 62.
   void WriteRcRY(evo_test::RC const& value);
 
-  // Ordinal 62.
+  // Ordinal 63.
   void WriteRcRZ(evo_test::RC const& value);
 
-  // Ordinal 63.
+  // Ordinal 64.
   void WriteRlinkRNew(evo_test::RLink const& value);
 
-  // Ordinal 64.
+  // Ordinal 65.
   void WriteRaRNew(evo_test::RA const& value);
 
-  // Ordinal 65.
+  // Ordinal 66.
   void WriteRbRNew(evo_test::RB const& value);
 
-  // Ordinal 66.
+  // Ordinal 67.
   void WriteRcRNew(evo_test::RC const& value);
 
-  // Ordinal 67.
+  // Ordinal 68.
   void WriteRlinkRUnion(evo_test::RLink const& value);
 
-  // Ordinal 68.
+  // Ordinal 69.
   void WriteRaRUnion(evo_test::RA const& value);
 
-  // Ordinal 69.
+  // Ordinal 70.
   void WriteRbRUnion(evo_test::RB const& value);
 
-  // Ordinal 70.
+  // Ordinal 71.
   void WriteRcRUnion(evo_test::RC const& value);
 
-  // Ordinal 71.
+  // Ordinal 72.
   void WriteOptionalRecordWithChanges(std::optional<evo_test::RecordWithChanges> const& value);
 
-  // Ordinal 72.
+  // Ordinal 73.
   void WriteAliasedOptionalRecordWithChanges(std::optional<evo_test::AliasedRecordWithChanges> const& value);
 
-  // Ordinal 73.
+  // Ordinal 74.
   void WriteUnionRecordWithChanges(std::variant<evo_test::RecordWithChanges, int32_t> const& value);
 
-  // Ordinal 74.
+  // Ordinal 75.
   void WriteUnionWithSameTypeset(std::variant<evo_test::RecordWithChanges, int32_t, float, std::string> const& value);
 
-  // Ordinal 75.
+  // Ordinal 76.
   void WriteUnionWithTypesAdded(std::variant<evo_test::RecordWithChanges, float> const& value);
 
-  // Ordinal 76.
+  // Ordinal 77.
   void WriteUnionWithTypesRemoved(std::variant<evo_test::RecordWithChanges, int32_t, float, std::string> const& value);
 
-  // Ordinal 77.
+  // Ordinal 78.
   void WriteRecordToOptional(evo_test::RecordWithChanges const& value);
 
-  // Ordinal 78.
+  // Ordinal 79.
   void WriteRecordToAliasedOptional(evo_test::RecordWithChanges const& value);
 
-  // Ordinal 79.
+  // Ordinal 80.
   void WriteRecordToUnion(evo_test::RecordWithChanges const& value);
 
-  // Ordinal 80.
+  // Ordinal 81.
   void WriteRecordToAliasedUnion(evo_test::RecordWithChanges const& value);
 
-  // Ordinal 81.
+  // Ordinal 82.
   void WriteUnionToAliasedUnion(std::variant<evo_test::RecordWithChanges, int32_t> const& value);
 
-  // Ordinal 82.
+  // Ordinal 83.
   void WriteUnionToAliasedUnionWithChanges(std::variant<evo_test::RecordWithChanges, int32_t> const& value);
 
-  // Ordinal 83.
+  // Ordinal 84.
   void WriteOptionalToAliasedOptional(std::optional<evo_test::RecordWithChanges> const& value);
 
-  // Ordinal 84.
+  // Ordinal 85.
   void WriteOptionalToAliasedOptionalWithChanges(std::optional<int32_t> const& value);
 
-  // Ordinal 85.
+  // Ordinal 86.
   void WriteGenericRecord(evo_test::GenericRecord<int32_t, std::string> const& value);
 
-  // Ordinal 86.
+  // Ordinal 87.
   void WriteGenericRecordToOpenAlias(evo_test::GenericRecord<int32_t, std::string> const& value);
 
-  // Ordinal 87.
+  // Ordinal 88.
   void WriteGenericRecordToClosedAlias(evo_test::GenericRecord<int32_t, std::string> const& value);
 
-  // Ordinal 88.
+  // Ordinal 89.
   void WriteGenericRecordToHalfClosedAlias(evo_test::GenericRecord<int32_t, std::string> const& value);
 
-  // Ordinal 89.
+  // Ordinal 90.
   void WriteAliasedGenericRecordToAlias(evo_test::AliasedHalfClosedGenericRecord<int32_t> const& value);
 
-  // Ordinal 90.
+  // Ordinal 91.
   void WriteGenericRecordToReversed(evo_test::GenericRecord<int32_t, std::string> const& value);
 
-  // Ordinal 91.
+  // Ordinal 92.
   void WriteClosedGenericRecordToUnion(evo_test::AliasedClosedGenericRecord const& value);
 
-  // Ordinal 92.
+  // Ordinal 93.
   void WriteGenericRecordToAliasedUnion(evo_test::GenericRecord<int32_t, std::string> const& value);
 
-  // Ordinal 93.
+  // Ordinal 94.
   void WriteGenericUnionToReversed(evo_test::GenericUnion<evo_test::GenericRecord<int32_t, std::string>, float> const& value);
 
-  // Ordinal 94.
+  // Ordinal 95.
   void WriteGenericUnionOfChangedRecord(evo_test::GenericUnion<evo_test::GenericRecord<int32_t, std::string>, float> const& value);
 
-  // Ordinal 95.
+  // Ordinal 96.
   void WriteGenericParentRecord(evo_test::GenericParentRecord<int32_t> const& value);
 
-  // Ordinal 96.
+  // Ordinal 97.
   void WriteGenericNestedRecords(evo_test::GenericRecord<evo_test::UnchangedGeneric<int32_t>, evo_test::ChangedGeneric<std::string, int32_t>> const& value);
 
-  // Ordinal 97.
+  // Ordinal 98.
   // Call this method for each element of the `genericRecordStream` stream, then call `EndGenericRecordStream() when done.`
   void WriteGenericRecordStream(evo_test::GenericRecord<int32_t, std::string> const& value);
 
-  // Ordinal 97.
+  // Ordinal 98.
   // Call this method to write many values to the `genericRecordStream` stream, then call `EndGenericRecordStream()` when done.
   void WriteGenericRecordStream(std::vector<evo_test::GenericRecord<int32_t, std::string>> const& values);
 
   // Marks the end of the `genericRecordStream` stream.
   void EndGenericRecordStream();
 
-  // Ordinal 98.
+  // Ordinal 99.
   // Call this method for each element of the `genericParentRecordStream` stream, then call `EndGenericParentRecordStream() when done.`
   void WriteGenericParentRecordStream(evo_test::GenericParentRecord<int32_t> const& value);
 
-  // Ordinal 98.
+  // Ordinal 99.
   // Call this method to write many values to the `genericParentRecordStream` stream, then call `EndGenericParentRecordStream()` when done.
   void WriteGenericParentRecordStream(std::vector<evo_test::GenericParentRecord<int32_t>> const& values);
 
   // Marks the end of the `genericParentRecordStream` stream.
   void EndGenericParentRecordStream();
 
-  // Ordinal 99.
+  // Ordinal 100.
   void WriteVectorRecordWithChanges(std::vector<evo_test::RecordWithChanges> const& value);
 
-  // Ordinal 100.
+  // Ordinal 101.
   // Call this method for each element of the `streamedRecordWithChanges` stream, then call `EndStreamedRecordWithChanges() when done.`
   void WriteStreamedRecordWithChanges(evo_test::RecordWithChanges const& value);
 
-  // Ordinal 100.
+  // Ordinal 101.
   // Call this method to write many values to the `streamedRecordWithChanges` stream, then call `EndStreamedRecordWithChanges()` when done.
   void WriteStreamedRecordWithChanges(std::vector<evo_test::RecordWithChanges> const& values);
 
   // Marks the end of the `streamedRecordWithChanges` stream.
   void EndStreamedRecordWithChanges();
 
-  // Ordinal 101.
+  // Ordinal 102.
   void WriteAddedStringVector(std::vector<evo_test::AliasedString> const& value);
 
-  // Ordinal 102.
+  // Ordinal 103.
   void WriteAddedOptional(std::optional<evo_test::RecordWithChanges> const& value);
 
-  // Ordinal 103.
+  // Ordinal 104.
   void WriteAddedMap(std::unordered_map<std::string, std::string> const& value);
 
-  // Ordinal 104.
+  // Ordinal 105.
   void WriteAddedUnion(std::variant<std::monostate, evo_test::RecordWithChanges, std::string> const& value);
 
-  // Ordinal 105.
+  // Ordinal 106.
   // Call this method for each element of the `addedRecordStream` stream, then call `EndAddedRecordStream() when done.`
   void WriteAddedRecordStream(evo_test::RecordWithChanges const& value);
 
-  // Ordinal 105.
+  // Ordinal 106.
   // Call this method to write many values to the `addedRecordStream` stream, then call `EndAddedRecordStream()` when done.
   void WriteAddedRecordStream(std::vector<evo_test::RecordWithChanges> const& values);
 
   // Marks the end of the `addedRecordStream` stream.
   void EndAddedRecordStream();
 
-  // Ordinal 106.
+  // Ordinal 107.
   // Call this method for each element of the `addedUnionStream` stream, then call `EndAddedUnionStream() when done.`
   void WriteAddedUnionStream(std::variant<evo_test::RecordWithChanges, evo_test::RenamedRecord> const& value);
 
-  // Ordinal 106.
+  // Ordinal 107.
   // Call this method to write many values to the `addedUnionStream` stream, then call `EndAddedUnionStream()` when done.
   void WriteAddedUnionStream(std::vector<std::variant<evo_test::RecordWithChanges, evo_test::RenamedRecord>> const& values);
 
@@ -439,6 +442,7 @@ class ProtocolWithChangesWriterBase {
   virtual void WriteUintToFloatImpl(uint32_t const& value) = 0;
   virtual void WriteUintToDoubleImpl(uint32_t const& value) = 0;
   virtual void WriteFloatToDoubleImpl(float const& value) = 0;
+  virtual void WriteComplexFloatToComplexDoubleImpl(std::complex<float> const& value) = 0;
   virtual void WriteIntToStringImpl(int32_t const& value) = 0;
   virtual void WriteUintToStringImpl(uint32_t const& value) = 0;
   virtual void WriteLongToStringImpl(int64_t const& value) = 0;
@@ -612,315 +616,318 @@ class ProtocolWithChangesReaderBase {
   void ReadFloatToDouble(float& value);
 
   // Ordinal 14.
-  void ReadIntToString(int32_t& value);
+  void ReadComplexFloatToComplexDouble(std::complex<float>& value);
 
   // Ordinal 15.
-  void ReadUintToString(uint32_t& value);
+  void ReadIntToString(int32_t& value);
 
   // Ordinal 16.
-  void ReadLongToString(int64_t& value);
+  void ReadUintToString(uint32_t& value);
 
   // Ordinal 17.
-  void ReadUlongToString(uint64_t& value);
+  void ReadLongToString(int64_t& value);
 
   // Ordinal 18.
-  void ReadFloatToString(float& value);
+  void ReadUlongToString(uint64_t& value);
 
   // Ordinal 19.
-  void ReadDoubleToString(double& value);
+  void ReadFloatToString(float& value);
 
   // Ordinal 20.
-  void ReadIntToOptional(int32_t& value);
+  void ReadDoubleToString(double& value);
 
   // Ordinal 21.
-  void ReadFloatToOptional(float& value);
+  void ReadIntToOptional(int32_t& value);
 
   // Ordinal 22.
-  void ReadStringToOptional(std::string& value);
+  void ReadFloatToOptional(float& value);
 
   // Ordinal 23.
-  void ReadIntToUnion(int32_t& value);
+  void ReadStringToOptional(std::string& value);
 
   // Ordinal 24.
-  void ReadFloatToUnion(float& value);
+  void ReadIntToUnion(int32_t& value);
 
   // Ordinal 25.
-  void ReadStringToUnion(std::string& value);
+  void ReadFloatToUnion(float& value);
 
   // Ordinal 26.
-  void ReadOptionalIntToFloat(std::optional<int32_t>& value);
+  void ReadStringToUnion(std::string& value);
 
   // Ordinal 27.
-  void ReadOptionalFloatToString(std::optional<float>& value);
+  void ReadOptionalIntToFloat(std::optional<int32_t>& value);
 
   // Ordinal 28.
-  void ReadAliasedLongToString(evo_test::AliasedLongToString& value);
+  void ReadOptionalFloatToString(std::optional<float>& value);
 
   // Ordinal 29.
-  void ReadStringToAliasedString(std::string& value);
+  void ReadAliasedLongToString(evo_test::AliasedLongToString& value);
 
   // Ordinal 30.
-  void ReadStringToAliasedInt(std::string& value);
+  void ReadStringToAliasedString(std::string& value);
 
   // Ordinal 31.
-  void ReadEnumToAliasedEnum(evo_test::GrowingEnum& value);
+  void ReadStringToAliasedInt(std::string& value);
 
   // Ordinal 32.
-  void ReadOptionalIntToUnion(std::optional<int32_t>& value);
+  void ReadEnumToAliasedEnum(evo_test::GrowingEnum& value);
 
   // Ordinal 33.
-  void ReadOptionalRecordToUnion(std::optional<evo_test::RecordWithChanges>& value);
+  void ReadOptionalIntToUnion(std::optional<int32_t>& value);
 
   // Ordinal 34.
-  void ReadRecordWithChanges(evo_test::RecordWithChanges& value);
+  void ReadOptionalRecordToUnion(std::optional<evo_test::RecordWithChanges>& value);
 
   // Ordinal 35.
-  void ReadAliasedRecordWithChanges(evo_test::AliasedRecordWithChanges& value);
+  void ReadRecordWithChanges(evo_test::RecordWithChanges& value);
 
   // Ordinal 36.
-  void ReadRecordToRenamedRecord(evo_test::RenamedRecord& value);
+  void ReadAliasedRecordWithChanges(evo_test::AliasedRecordWithChanges& value);
 
   // Ordinal 37.
-  void ReadRecordToAliasedRecord(evo_test::RecordWithChanges& value);
+  void ReadRecordToRenamedRecord(evo_test::RenamedRecord& value);
 
   // Ordinal 38.
-  void ReadRecordToAliasedAlias(evo_test::RecordWithChanges& value);
+  void ReadRecordToAliasedRecord(evo_test::RecordWithChanges& value);
 
   // Ordinal 39.
+  void ReadRecordToAliasedAlias(evo_test::RecordWithChanges& value);
+
+  // Ordinal 40.
   // Stream and Vector type changes
   [[nodiscard]] bool ReadStreamIntToStringToFloat(float& value);
 
-  // Ordinal 39.
+  // Ordinal 40.
   // Stream and Vector type changes
   [[nodiscard]] bool ReadStreamIntToStringToFloat(std::vector<float>& values);
 
-  // Ordinal 40.
+  // Ordinal 41.
   void ReadVectorIntToStringToFloat(std::vector<float>& value);
 
-  // Ordinal 41.
+  // Ordinal 42.
   void ReadIntFloatUnionReordered(std::variant<int32_t, float>& value);
 
-  // Ordinal 42.
+  // Ordinal 43.
   void ReadVectorUnionReordered(std::vector<std::variant<int32_t, float>>& value);
 
-  // Ordinal 43.
+  // Ordinal 44.
   [[nodiscard]] bool ReadStreamUnionReordered(std::variant<int32_t, std::string>& value);
 
-  // Ordinal 43.
+  // Ordinal 44.
   [[nodiscard]] bool ReadStreamUnionReordered(std::vector<std::variant<int32_t, std::string>>& values);
 
-  // Ordinal 44.
+  // Ordinal 45.
   [[nodiscard]] bool ReadIntToUnionStream(std::variant<std::string, int32_t>& value);
 
-  // Ordinal 44.
+  // Ordinal 45.
   [[nodiscard]] bool ReadIntToUnionStream(std::vector<std::variant<std::string, int32_t>>& values);
 
-  // Ordinal 45.
+  // Ordinal 46.
   [[nodiscard]] bool ReadUnionStreamTypeChange(std::variant<int32_t, float>& value);
 
-  // Ordinal 45.
+  // Ordinal 46.
   [[nodiscard]] bool ReadUnionStreamTypeChange(std::vector<std::variant<int32_t, float>>& values);
 
-  // Ordinal 46.
+  // Ordinal 47.
   [[nodiscard]] bool ReadStreamOfAliasTypeChange(evo_test::StreamItem& value);
 
-  // Ordinal 46.
+  // Ordinal 47.
   [[nodiscard]] bool ReadStreamOfAliasTypeChange(std::vector<evo_test::StreamItem>& values);
 
-  // Ordinal 47.
+  // Ordinal 48.
   // Comprehensive NamedType changes
   void ReadRlink(evo_test::RLink& value);
 
-  // Ordinal 48.
+  // Ordinal 49.
   void ReadRlinkRX(evo_test::RLink& value);
 
-  // Ordinal 49.
+  // Ordinal 50.
   void ReadRlinkRY(evo_test::RLink& value);
 
-  // Ordinal 50.
+  // Ordinal 51.
   void ReadRlinkRZ(evo_test::RLink& value);
 
-  // Ordinal 51.
+  // Ordinal 52.
   void ReadRaRLink(evo_test::RA& value);
 
-  // Ordinal 52.
+  // Ordinal 53.
   void ReadRaRX(evo_test::RA& value);
 
-  // Ordinal 53.
+  // Ordinal 54.
   void ReadRaRY(evo_test::RA& value);
 
-  // Ordinal 54.
+  // Ordinal 55.
   void ReadRaRZ(evo_test::RA& value);
 
-  // Ordinal 55.
+  // Ordinal 56.
   void ReadRbRLink(evo_test::RB& value);
 
-  // Ordinal 56.
+  // Ordinal 57.
   void ReadRbRX(evo_test::RB& value);
 
-  // Ordinal 57.
+  // Ordinal 58.
   void ReadRbRY(evo_test::RB& value);
 
-  // Ordinal 58.
+  // Ordinal 59.
   void ReadRbRZ(evo_test::RB& value);
 
-  // Ordinal 59.
+  // Ordinal 60.
   void ReadRcRLink(evo_test::RC& value);
 
-  // Ordinal 60.
+  // Ordinal 61.
   void ReadRcRX(evo_test::RC& value);
 
-  // Ordinal 61.
+  // Ordinal 62.
   void ReadRcRY(evo_test::RC& value);
 
-  // Ordinal 62.
+  // Ordinal 63.
   void ReadRcRZ(evo_test::RC& value);
 
-  // Ordinal 63.
+  // Ordinal 64.
   void ReadRlinkRNew(evo_test::RLink& value);
 
-  // Ordinal 64.
+  // Ordinal 65.
   void ReadRaRNew(evo_test::RA& value);
 
-  // Ordinal 65.
+  // Ordinal 66.
   void ReadRbRNew(evo_test::RB& value);
 
-  // Ordinal 66.
+  // Ordinal 67.
   void ReadRcRNew(evo_test::RC& value);
 
-  // Ordinal 67.
+  // Ordinal 68.
   void ReadRlinkRUnion(evo_test::RLink& value);
 
-  // Ordinal 68.
+  // Ordinal 69.
   void ReadRaRUnion(evo_test::RA& value);
 
-  // Ordinal 69.
+  // Ordinal 70.
   void ReadRbRUnion(evo_test::RB& value);
 
-  // Ordinal 70.
+  // Ordinal 71.
   void ReadRcRUnion(evo_test::RC& value);
 
-  // Ordinal 71.
+  // Ordinal 72.
   void ReadOptionalRecordWithChanges(std::optional<evo_test::RecordWithChanges>& value);
 
-  // Ordinal 72.
+  // Ordinal 73.
   void ReadAliasedOptionalRecordWithChanges(std::optional<evo_test::AliasedRecordWithChanges>& value);
 
-  // Ordinal 73.
+  // Ordinal 74.
   void ReadUnionRecordWithChanges(std::variant<evo_test::RecordWithChanges, int32_t>& value);
 
-  // Ordinal 74.
+  // Ordinal 75.
   void ReadUnionWithSameTypeset(std::variant<evo_test::RecordWithChanges, int32_t, float, std::string>& value);
 
-  // Ordinal 75.
+  // Ordinal 76.
   void ReadUnionWithTypesAdded(std::variant<evo_test::RecordWithChanges, float>& value);
 
-  // Ordinal 76.
+  // Ordinal 77.
   void ReadUnionWithTypesRemoved(std::variant<evo_test::RecordWithChanges, int32_t, float, std::string>& value);
 
-  // Ordinal 77.
+  // Ordinal 78.
   void ReadRecordToOptional(evo_test::RecordWithChanges& value);
 
-  // Ordinal 78.
+  // Ordinal 79.
   void ReadRecordToAliasedOptional(evo_test::RecordWithChanges& value);
 
-  // Ordinal 79.
+  // Ordinal 80.
   void ReadRecordToUnion(evo_test::RecordWithChanges& value);
 
-  // Ordinal 80.
+  // Ordinal 81.
   void ReadRecordToAliasedUnion(evo_test::RecordWithChanges& value);
 
-  // Ordinal 81.
+  // Ordinal 82.
   void ReadUnionToAliasedUnion(std::variant<evo_test::RecordWithChanges, int32_t>& value);
 
-  // Ordinal 82.
+  // Ordinal 83.
   void ReadUnionToAliasedUnionWithChanges(std::variant<evo_test::RecordWithChanges, int32_t>& value);
 
-  // Ordinal 83.
+  // Ordinal 84.
   void ReadOptionalToAliasedOptional(std::optional<evo_test::RecordWithChanges>& value);
 
-  // Ordinal 84.
+  // Ordinal 85.
   void ReadOptionalToAliasedOptionalWithChanges(std::optional<int32_t>& value);
 
-  // Ordinal 85.
+  // Ordinal 86.
   void ReadGenericRecord(evo_test::GenericRecord<int32_t, std::string>& value);
 
-  // Ordinal 86.
+  // Ordinal 87.
   void ReadGenericRecordToOpenAlias(evo_test::GenericRecord<int32_t, std::string>& value);
 
-  // Ordinal 87.
+  // Ordinal 88.
   void ReadGenericRecordToClosedAlias(evo_test::GenericRecord<int32_t, std::string>& value);
 
-  // Ordinal 88.
+  // Ordinal 89.
   void ReadGenericRecordToHalfClosedAlias(evo_test::GenericRecord<int32_t, std::string>& value);
 
-  // Ordinal 89.
+  // Ordinal 90.
   void ReadAliasedGenericRecordToAlias(evo_test::AliasedHalfClosedGenericRecord<int32_t>& value);
 
-  // Ordinal 90.
+  // Ordinal 91.
   void ReadGenericRecordToReversed(evo_test::GenericRecord<int32_t, std::string>& value);
 
-  // Ordinal 91.
+  // Ordinal 92.
   void ReadClosedGenericRecordToUnion(evo_test::AliasedClosedGenericRecord& value);
 
-  // Ordinal 92.
+  // Ordinal 93.
   void ReadGenericRecordToAliasedUnion(evo_test::GenericRecord<int32_t, std::string>& value);
 
-  // Ordinal 93.
+  // Ordinal 94.
   void ReadGenericUnionToReversed(evo_test::GenericUnion<evo_test::GenericRecord<int32_t, std::string>, float>& value);
 
-  // Ordinal 94.
+  // Ordinal 95.
   void ReadGenericUnionOfChangedRecord(evo_test::GenericUnion<evo_test::GenericRecord<int32_t, std::string>, float>& value);
 
-  // Ordinal 95.
+  // Ordinal 96.
   void ReadGenericParentRecord(evo_test::GenericParentRecord<int32_t>& value);
 
-  // Ordinal 96.
+  // Ordinal 97.
   void ReadGenericNestedRecords(evo_test::GenericRecord<evo_test::UnchangedGeneric<int32_t>, evo_test::ChangedGeneric<std::string, int32_t>>& value);
 
-  // Ordinal 97.
+  // Ordinal 98.
   [[nodiscard]] bool ReadGenericRecordStream(evo_test::GenericRecord<int32_t, std::string>& value);
 
-  // Ordinal 97.
+  // Ordinal 98.
   [[nodiscard]] bool ReadGenericRecordStream(std::vector<evo_test::GenericRecord<int32_t, std::string>>& values);
 
-  // Ordinal 98.
+  // Ordinal 99.
   [[nodiscard]] bool ReadGenericParentRecordStream(evo_test::GenericParentRecord<int32_t>& value);
 
-  // Ordinal 98.
+  // Ordinal 99.
   [[nodiscard]] bool ReadGenericParentRecordStream(std::vector<evo_test::GenericParentRecord<int32_t>>& values);
 
-  // Ordinal 99.
+  // Ordinal 100.
   void ReadVectorRecordWithChanges(std::vector<evo_test::RecordWithChanges>& value);
 
-  // Ordinal 100.
+  // Ordinal 101.
   [[nodiscard]] bool ReadStreamedRecordWithChanges(evo_test::RecordWithChanges& value);
 
-  // Ordinal 100.
+  // Ordinal 101.
   [[nodiscard]] bool ReadStreamedRecordWithChanges(std::vector<evo_test::RecordWithChanges>& values);
 
-  // Ordinal 101.
+  // Ordinal 102.
   void ReadAddedStringVector(std::vector<evo_test::AliasedString>& value);
 
-  // Ordinal 102.
+  // Ordinal 103.
   void ReadAddedOptional(std::optional<evo_test::RecordWithChanges>& value);
 
-  // Ordinal 103.
+  // Ordinal 104.
   void ReadAddedMap(std::unordered_map<std::string, std::string>& value);
 
-  // Ordinal 104.
+  // Ordinal 105.
   void ReadAddedUnion(std::variant<std::monostate, evo_test::RecordWithChanges, std::string>& value);
 
-  // Ordinal 105.
+  // Ordinal 106.
   [[nodiscard]] bool ReadAddedRecordStream(evo_test::RecordWithChanges& value);
 
-  // Ordinal 105.
+  // Ordinal 106.
   [[nodiscard]] bool ReadAddedRecordStream(std::vector<evo_test::RecordWithChanges>& values);
 
-  // Ordinal 106.
+  // Ordinal 107.
   [[nodiscard]] bool ReadAddedUnionStream(std::variant<evo_test::RecordWithChanges, evo_test::RenamedRecord>& value);
 
-  // Ordinal 106.
+  // Ordinal 107.
   [[nodiscard]] bool ReadAddedUnionStream(std::vector<std::variant<evo_test::RecordWithChanges, evo_test::RenamedRecord>>& values);
 
   // Optionaly close this writer before destructing. Validates that all steps were completely read.
@@ -945,6 +952,7 @@ class ProtocolWithChangesReaderBase {
   virtual void ReadUintToFloatImpl(uint32_t& value) = 0;
   virtual void ReadUintToDoubleImpl(uint32_t& value) = 0;
   virtual void ReadFloatToDoubleImpl(float& value) = 0;
+  virtual void ReadComplexFloatToComplexDoubleImpl(std::complex<float>& value) = 0;
   virtual void ReadIntToStringImpl(int32_t& value) = 0;
   virtual void ReadUintToStringImpl(uint32_t& value) = 0;
   virtual void ReadLongToStringImpl(int64_t& value) = 0;

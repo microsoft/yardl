@@ -1248,6 +1248,10 @@ func detectPrimitiveTypeChange(newType, oldType *SimpleType) TypeChange {
 		}
 	}
 
+	if GetPrimitiveKind(oldPrimitive) == PrimitiveKindComplexFloatingPoint && GetPrimitiveKind(newPrimitive) == PrimitiveKindComplexFloatingPoint {
+		return &TypeChangeComplexToComplex{TypePair{oldType, newType}}
+	}
+
 	return &TypeChangeIncompatible{TypePair{oldType, newType}}
 }
 

@@ -36,6 +36,12 @@ func (tc *TypeChangeNumberToNumber) Inverse() TypeChange {
 	return &TypeChangeNumberToNumber{tc.Swap()}
 }
 
+type TypeChangeComplexToComplex struct{ TypePair }
+
+func (tc *TypeChangeComplexToComplex) Inverse() TypeChange {
+	return &TypeChangeComplexToComplex{tc.Swap()}
+}
+
 type TypeChangeNumberToString struct{ TypePair }
 
 func (tc *TypeChangeNumberToString) Inverse() TypeChange {
@@ -156,6 +162,7 @@ func (tc *TypeChangeStepAdded) Inverse() TypeChange {
 
 var (
 	_ TypeChange = (*TypeChangeNumberToNumber)(nil)
+	_ TypeChange = (*TypeChangeComplexToComplex)(nil)
 	_ TypeChange = (*TypeChangeNumberToString)(nil)
 	_ TypeChange = (*TypeChangeStringToNumber)(nil)
 	_ TypeChange = (*TypeChangeScalarToOptional)(nil)
@@ -178,10 +185,7 @@ var (
 	_ DefinitionChange = (*EnumChange)(nil)
 	_ DefinitionChange = (*ProtocolChange)(nil)
 	_ DefinitionChange = (*CompatibilityChange)(nil)
-
-	_ DefinitionChange = (*PrimitiveChangeNumberToNumber)(nil)
-	_ DefinitionChange = (*PrimitiveChangeNumberToString)(nil)
-	_ DefinitionChange = (*PrimitiveChangeStringToNumber)(nil)
+	_ DefinitionChange = (*AliasRemoved)(nil)
 )
 
 type DefinitionChange interface {
@@ -253,10 +257,6 @@ type AliasRemoved struct {
 	DefinitionPair
 }
 
-type PrimitiveChangeNumberToNumber struct{ DefinitionPair }
-type PrimitiveChangeNumberToString struct{ DefinitionPair }
-type PrimitiveChangeStringToNumber struct{ DefinitionPair }
-
 func typeChangeIsError(tc TypeChange) bool {
 	switch tc := tc.(type) {
 	case *TypeChangeStreamTypeChanged:
@@ -277,7 +277,7 @@ func typeChangeToError(tc TypeChange) string {
 
 func typeChangeWarningReason(tc TypeChange) string {
 	switch tc := tc.(type) {
-	case *TypeChangeNumberToNumber:
+	case *TypeChangeNumberToNumber, *TypeChangeComplexToComplex:
 		return "may result in numeric overflow or loss of precision"
 	case *TypeChangeNumberToString:
 		return fmt.Sprintf("will result in a write error if its value cannot be converted to type '%s' at runtime", TypeToShortSyntax(tc.OldType(), true))

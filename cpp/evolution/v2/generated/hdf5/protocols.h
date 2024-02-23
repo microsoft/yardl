@@ -46,6 +46,8 @@ class ProtocolWithChangesWriter : public evo_test::ProtocolWithChangesWriterBase
 
   void WriteFloatToDoubleImpl(float const& value) override;
 
+  void WriteComplexFloatToComplexDoubleImpl(std::complex<float> const& value) override;
+
   void WriteIntToStringImpl(int32_t const& value) override;
 
   void WriteUintToStringImpl(uint32_t const& value) override;
@@ -312,6 +314,8 @@ class ProtocolWithChangesReader : public evo_test::ProtocolWithChangesReaderBase
   void ReadUintToDoubleImpl(uint32_t& value) override;
 
   void ReadFloatToDoubleImpl(float& value) override;
+
+  void ReadComplexFloatToComplexDoubleImpl(std::complex<float>& value) override;
 
   void ReadIntToStringImpl(int32_t& value) override;
 

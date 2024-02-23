@@ -17,6 +17,8 @@ ProtocolWithChanges: !protocol
 
     floatToDouble: float
 
+    complexFloatToComplexDouble: complexfloat32
+
     intToString: int
     uintToString: uint
     longToString: long

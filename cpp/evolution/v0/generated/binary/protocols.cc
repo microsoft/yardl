@@ -691,6 +691,10 @@ void ProtocolWithChangesWriter::WriteFloatToDoubleImpl(float const& value) {
   yardl::binary::WriteFloatingPoint(stream_, value);
 }
 
+void ProtocolWithChangesWriter::WriteComplexFloatToComplexDoubleImpl(std::complex<float> const& value) {
+  yardl::binary::WriteFloatingPoint(stream_, value);
+}
+
 void ProtocolWithChangesWriter::WriteIntToStringImpl(int32_t const& value) {
   yardl::binary::WriteInteger(stream_, value);
 }
@@ -1152,6 +1156,10 @@ void ProtocolWithChangesReader::ReadUintToDoubleImpl(uint32_t& value) {
 }
 
 void ProtocolWithChangesReader::ReadFloatToDoubleImpl(float& value) {
+  yardl::binary::ReadFloatingPoint(stream_, value);
+}
+
+void ProtocolWithChangesReader::ReadComplexFloatToComplexDoubleImpl(std::complex<float>& value) {
   yardl::binary::ReadFloatingPoint(stream_, value);
 }
 

@@ -516,31 +516,38 @@ func writeTypeConversion(w *formatting.IndentedWriter, typeChange dsl.TypeChange
 			newPrim := tc.NewType().(*dsl.SimpleType).ResolvedDefinition.(dsl.PrimitiveDefinition)
 			rhs := sourceName
 
-			// Negative overflow check
-			if dsl.IsSignedPrimitive(oldPrim) && !dsl.IsSignedPrimitive(newPrim) {
-				fmt.Fprintf(w, "if (%s < 0) {\n", rhs)
-				w.Indented(func() {
-					fmt.Fprintf(w, "throw std::runtime_error(\"Negative overflow detected while converting '%s' to '%s'\");\n", dsl.TypeToShortSyntax(tc.OldType(), false), dsl.TypeToShortSyntax(tc.NewType(), false))
-				})
-				fmt.Fprintf(w, "}\n")
-			}
-
-			// Downcast overflow check
-			if dsl.GetPrimitiveWidth(oldPrim) > dsl.GetPrimitiveWidth(newPrim) {
-				if dsl.IsSignedPrimitive(oldPrim) == dsl.IsSignedPrimitive(newPrim) {
-					fmt.Fprintf(w, "if (%s > std::numeric_limits<%s>::max() || %s < std::numeric_limits<%s>::lowest()) {\n", rhs, common.TypeSyntax(tc.NewType()), rhs, common.TypeSyntax(tc.NewType()))
-				} else {
-					fmt.Fprintf(w, "if (%s > std::numeric_limits<%s>::max()) {\n", rhs, common.TypeSyntax(tc.NewType()))
+			overflowCheck := ""
+			if dsl.GetPrimitiveKind(oldPrim) == dsl.PrimitiveKindFloatingPoint {
+				if dsl.GetPrimitiveKind(newPrim) == dsl.PrimitiveKindInteger ||
+					(dsl.GetPrimitiveKind(newPrim) == dsl.PrimitiveKindFloatingPoint && dsl.GetPrimitiveWidth(oldPrim) > dsl.GetPrimitiveWidth(newPrim)) {
+					overflowCheck = fmt.Sprintf("if (%s > std::numeric_limits<%s>::max() || %s < std::numeric_limits<%s>::lowest()) {\n", rhs, common.TypeSyntax(tc.NewType()), rhs, common.TypeSyntax(tc.NewType()))
 				}
-				w.Indented(func() {
-					fmt.Fprintf(w, "throw std::runtime_error(\"Numeric overflow detected while converting '%s' to '%s'\");\n", dsl.TypeToShortSyntax(tc.OldType(), false), dsl.TypeToShortSyntax(tc.NewType(), false))
-				})
-				fmt.Fprintf(w, "}\n")
 			}
 
-			// Unsigned -> Signed overflow check
-			if dsl.GetPrimitiveWidth(oldPrim) == dsl.GetPrimitiveWidth(newPrim) && !dsl.IsSignedPrimitive(oldPrim) && dsl.IsSignedPrimitive(newPrim) {
-				fmt.Fprintf(w, "if (%s > std::numeric_limits<%s>::max()) {\n", rhs, common.TypeSyntax(tc.NewType()))
+			if dsl.GetPrimitiveKind(oldPrim) == dsl.PrimitiveKindInteger && dsl.GetPrimitiveKind(newPrim) == dsl.PrimitiveKindInteger {
+				if dsl.IsSignedPrimitive(oldPrim) {
+					if dsl.IsSignedPrimitive(newPrim) {
+						if dsl.GetPrimitiveWidth(oldPrim) > dsl.GetPrimitiveWidth(newPrim) {
+							overflowCheck = fmt.Sprintf("if (%s > std::numeric_limits<%s>::max() || %s < std::numeric_limits<%s>::lowest()) {\n", rhs, common.TypeSyntax(tc.NewType()), rhs, common.TypeSyntax(tc.NewType()))
+						}
+					} else {
+						if dsl.GetPrimitiveWidth(oldPrim) > dsl.GetPrimitiveWidth(newPrim) {
+							overflowCheck = fmt.Sprintf("if (%s > std::numeric_limits<%s>::max() || %s < 0) {\n", rhs, common.TypeSyntax(tc.NewType()), rhs)
+						} else {
+							overflowCheck = fmt.Sprintf("if (%s < 0) {\n", rhs)
+						}
+					}
+				} else {
+					if dsl.GetPrimitiveWidth(oldPrim) > dsl.GetPrimitiveWidth(newPrim) ||
+						(dsl.IsSignedPrimitive(newPrim) && dsl.GetPrimitiveWidth(oldPrim) == dsl.GetPrimitiveWidth(newPrim)) {
+						overflowCheck = fmt.Sprintf("if (%s > std::numeric_limits<%s>::max()) {\n", rhs, common.TypeSyntax(tc.NewType()))
+
+					}
+				}
+			}
+
+			if len(overflowCheck) > 0 {
+				fmt.Fprintf(w, "%s", overflowCheck)
 				w.Indented(func() {
 					fmt.Fprintf(w, "throw std::runtime_error(\"Numeric overflow detected while converting '%s' to '%s'\");\n", dsl.TypeToShortSyntax(tc.OldType(), false), dsl.TypeToShortSyntax(tc.NewType(), false))
 				})
@@ -552,6 +559,28 @@ func writeTypeConversion(w *formatting.IndentedWriter, typeChange dsl.TypeChange
 			}
 
 			fmt.Fprintf(w, "%s = static_cast<%s>(%s);\n", targetName, common.TypeSyntax(tc.NewType()), rhs)
+		}
+
+	case *dsl.TypeChangeComplexToComplex:
+		if write {
+			writeTypeConversion(w, tc.Inverse(), sourceName, targetName, !write)
+		} else {
+			oldPrim := tc.OldType().(*dsl.SimpleType).ResolvedDefinition.(dsl.PrimitiveDefinition)
+			newPrim := tc.NewType().(*dsl.SimpleType).ResolvedDefinition.(dsl.PrimitiveDefinition)
+			if dsl.GetPrimitiveWidth(oldPrim) > dsl.GetPrimitiveWidth(newPrim) {
+				fmt.Fprintf(w, "if (std::real(%s) > std::numeric_limits<%s::value_type>::max() || std::real(%s) < std::numeric_limits<%s::value_type>::lowest()) {\n", sourceName, common.TypeSyntax(tc.NewType()), sourceName, common.TypeSyntax(tc.NewType()))
+				w.Indented(func() {
+					fmt.Fprintf(w, "throw std::runtime_error(\"Real part overflow detected while converting '%s' to '%s'\");\n", dsl.TypeToShortSyntax(tc.OldType(), false), dsl.TypeToShortSyntax(tc.NewType(), false))
+				})
+				fmt.Fprintf(w, "}\n")
+
+				fmt.Fprintf(w, "if (std::imag(%s) > std::numeric_limits<%s::value_type>::max() || std::imag(%s) < std::numeric_limits<%s::value_type>::lowest()) {\n", sourceName, common.TypeSyntax(tc.NewType()), sourceName, common.TypeSyntax(tc.NewType()))
+				w.Indented(func() {
+					fmt.Fprintf(w, "throw std::runtime_error(\"Imaginary part overflow detected while converting '%s' to '%s'\");\n", dsl.TypeToShortSyntax(tc.OldType(), false), dsl.TypeToShortSyntax(tc.NewType(), false))
+				})
+				fmt.Fprintf(w, "}\n")
+			}
+			fmt.Fprintf(w, "%s = %s(%s);\n", targetName, common.TypeSyntax(tc.NewType()), sourceName)
 		}
 
 	case *dsl.TypeChangeStringToNumber:

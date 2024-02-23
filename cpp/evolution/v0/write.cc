@@ -23,6 +23,8 @@ int main(void) {
 
   w.WriteFloatToDouble(static_cast<float>(M_PI));
 
+  w.WriteComplexFloatToComplexDouble({M_PI, -M_PI});
+
   w.WriteIntToString(INT_MIN);
   w.WriteUintToString(UINT_MAX);
   w.WriteLongToString(LONG_MIN);

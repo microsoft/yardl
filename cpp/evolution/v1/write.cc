@@ -23,6 +23,8 @@ int main(void) {
 
   w.WriteFloatToDouble(M_PI);
 
+  w.WriteComplexFloatToComplexDouble({M_PI, -M_PI});
+
   w.WriteIntToString(std::to_string(INT_MIN));
   w.WriteUintToString(std::to_string(UINT_MAX));
   w.WriteLongToString(std::to_string(LONG_MIN));
