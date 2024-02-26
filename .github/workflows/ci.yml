@@ -215,6 +215,10 @@ jobs:
       # - smoketestMac # Disabling until this is fixed: https://github.com/Homebrew/homebrew-core/issues/159691
       - noticeCheck
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
     steps:
       - uses: actions/checkout@v3
         with:
