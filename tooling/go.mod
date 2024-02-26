@@ -4,7 +4,7 @@ go 1.21
 
 require (
 	github.com/alecthomas/participle/v2 v2.1.1
-	github.com/dlclark/regexp2 v1.10.0
+	github.com/dlclark/regexp2 v1.11.0
 	github.com/fsnotify/fsnotify v1.7.0
 	github.com/inancgumus/screen v0.0.0-20190314163918-06e984b86ed3
 	github.com/rs/zerolog v1.32.0
