@@ -285,10 +285,10 @@ func typeSerializer(t dsl.Type, contextNamespace string, namedType *dsl.NamedTyp
 			if td.IsFixed() {
 				dims := make([]string, len(*td.Dimensions))
 				for i, d := range *td.Dimensions {
-					dims[i] = strconv.FormatUint(*d.Length, 10)
+					dims[len(*td.Dimensions)-i-1] = strconv.FormatUint(*d.Length, 10)
 				}
 
-				return fmt.Sprintf("yardl.binary.FixedNDArraySerializer(%s, (%s,))", getScalarSerializer(), strings.Join(dims, ", "))
+				return fmt.Sprintf("yardl.binary.FixedNDArraySerializer(%s, [%s])", getScalarSerializer(), strings.Join(dims, ", "))
 			}
 
 			if td.HasKnownNumberOfDimensions() {

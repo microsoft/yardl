@@ -130,9 +130,8 @@ var TypeSyntaxWriter dsl.TypeSyntaxWriter[string] = func(self dsl.TypeSyntaxWrit
 		case *dsl.Vector:
 			return fmt.Sprintf("list[%s]", scalarString)
 		case *dsl.Array:
-			// TODO: Array type arg
+			return scalarString
 			// return fmt.Sprintf("npt.NDArray[%s]", TypeArrayTypeArgument(t.ToScalar()))
-			panic("Arrays not yet supported")
 		case *dsl.Map:
 			return fmt.Sprintf("dict[%s, %s]", self.ToSyntax(d.KeyType, contextNamespace), scalarString)
 		default:
