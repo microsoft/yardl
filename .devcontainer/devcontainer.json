@@ -2,10 +2,11 @@
 // https://github.com/microsoft/vscode-dev-containerdevcotns/tree/v0.238.0/containers/go
 {
   "name": "yardl",
-  "dockerComposeFile": "docker-compose.yml",
-  "service": "devcontainer",
-  "workspaceFolder": "/workspaces/yardl",
-
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".."
+  },
+  "runArgs": ["--cap-add=SYS_PTRACE", "--security-opt", "seccomp=unconfined"],
   "overrideCommand": false,
   "mounts": [
     // Bind mount docker socket under an alias to support docker-from-docker
@@ -101,6 +102,7 @@
         "JacquesLucke.gcov-viewer",
         "jinliming2.vscode-go-template",
         "matepek.vscode-catch2-test-adapter",
+        "mathworks.language-matlab",
         "mhutchie.git-graph",
         "ms-python.black-formatter",
         "ms-python.python",

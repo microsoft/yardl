@@ -13,6 +13,7 @@ FROM ${DEVCONTAINER_BASE} as file-normalizer
 
 COPY environment.yml \
      .devcontainer/devcontainer.bashrc  \
+     .devcontainer/matlab-r2023b.ubuntu-22.04.dependencies.txt \
      /data/
 
 RUN chmod -R 555 /data/
@@ -116,3 +117,56 @@ RUN . /opt/conda/etc/profile.d/conda.sh \
     && mkdir -p /home/vscode/.local/share/CMakeTools \
     && echo "[{\"name\":\"Conda\",\"compilers\":{\"C\":\"$GCC\",\"CXX\":\"$GXX\"}}]" > /home/vscode/.local/share/CMakeTools/cmake-tools-kits.json \
     && chown vscode:conda /home/vscode/.local/share/CMakeTools/cmake-tools-kits.json
+
+
+#########################################################
+# Install Matlab
+#   Based on mathworks/{matlab-deps:r2023b,matlab:r2023b}
+#########################################################
+
+ENV DEBIAN_FRONTEND="noninteractive" TZ="Etc/UTC"
+
+COPY --from=file-normalizer /data/matlab-r2023b.ubuntu-22.04.dependencies.txt /tmp/matlab-dependencies.txt
+
+RUN export DEBIAN_FRONTEND=noninteractive \
+    && apt-get update \
+    && apt-get install --no-install-recommends --yes \
+    `cat /tmp/matlab-dependencies.txt` \
+    wget \
+    unzip \
+    ca-certificates \
+    && apt-get clean \
+    && apt-get -y autoremove \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN [ -d /usr/share/X11/xkb ] || mkdir -p /usr/share/X11/xkb
+
+ARG MATLAB_RELEASE=r2023b
+ARG MATLAB_PRODUCT_LIST="MATLAB"
+ARG MATLAB_INSTALL_LOCATION="/opt/matlab/${MATLAB_RELEASE}"
+ARG LICENSE_SERVER=
+
+RUN adduser --shell /bin/bash --disabled-password --gecos "" matlab \
+    && echo "matlab ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/matlab \
+    && chmod 0440 /etc/sudoers.d/matlab
+
+USER matlab
+WORKDIR /home/matlab
+
+RUN wget -q https://www.mathworks.com/mpm/glnxa64/mpm \
+    && chmod +x mpm \
+    && sudo HOME=${HOME} ./mpm install \
+    --release=${MATLAB_RELEASE} \
+    --destination=${MATLAB_INSTALL_LOCATION} \
+    --products ${MATLAB_PRODUCT_LIST} \
+    || (echo "MPM Installation Failure. See below for more information:" && cat /tmp/mathworks_root.log && false) \
+    && sudo rm -f mpm /tmp/mathworks_root.log \
+    && sudo ln -s ${MATLAB_INSTALL_LOCATION}/bin/matlab /usr/local/bin/matlab
+
+# Configure the Matlab License Servier
+# Option 1: Specify the host and port of the machine that serves the network licenses
+# e.g. ENV MLM_LICENSE_FILE=27000@flexlm-server-name
+ENV MLM_LICENSE_FILE=$LICENSE_SERVER
+
+# Option 2: Alternatively, copy your network license file into the container.
+# COPY Network.lic ${MATLAB_INSTALL_LOCATION}/licenses/
