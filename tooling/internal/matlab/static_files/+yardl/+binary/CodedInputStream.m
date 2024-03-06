@@ -1,34 +1,47 @@
 classdef CodedInputStream < handle
 
-    properties
-        fileId
+    properties (Access=private)
+        fid_
+        owns_stream_
     end
 
     methods
-        function obj = CodedInputStream(fileId)
-            obj.fileId = fileId;
+        function self = CodedInputStream(input)
+            if isa(input, "string") || isa(input, "char")
+                [fileId, errMsg] = fopen(input, "r");
+                if fileId < 0
+                    throw(yardl.binary.Exception(errMsg));
+                end
+                self.fid_ = fileId;
+                self.owns_stream_ = true;
+            else
+                self.fid_ = input;
+                self.owns_stream_ = false;
+            end
         end
 
-        function close(obj)
-            % flush...
-            obj.fileId = -1;
+        function close(self)
+            if self.owns_stream_ && self.fid_ > 2
+                fclose(self.fid_);
+                self.fid_ = -1;
+            end
         end
 
-        % In Python, this uses struct packing for any object...
-        function res = read(obj, count)
-            res = fread(obj.fileId, count, "*uint8");
+        % In Python, this uses struct packing for any selfect...
+        function res = read(self, count)
+            res = fread(self.fid_, count, "*uint8");
         end
 
-        function res = read_byte(obj)
-            res = fread(obj.fileId, 1, "*uint8");
+        function res = read_byte(self)
+            res = fread(self.fid_, 1, "*uint8");
         end
 
-        function res = read_unsigned_varint(obj)
+        function res = read_unsigned_varint(self)
             res = uint64(0);
             shift = uint8(0);
 
             while true
-                byte = obj.read_byte();
+                byte = self.read_byte();
                 res = bitor(res, bitshift(uint64(bitand(byte, 0x7F)), shift));
                 if byte < 0x80
                     return
@@ -43,8 +56,8 @@ classdef CodedInputStream < handle
             res = bitxor(int64(bitshift(value, -1)), -int64(bitand(value, 1)));
         end
 
-        function res = read_signed_varint(obj)
-            res = obj.zigzag_decode(obj.read_unsigned_varint());
+        function res = read_signed_varint(self)
+            res = self.zigzag_decode(self.read_unsigned_varint());
         end
 
     end

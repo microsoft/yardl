@@ -4,127 +4,113 @@
 package binary
 
 import (
-	"bytes"
 	"fmt"
-	"path"
 	"strconv"
 	"strings"
 
 	"github.com/microsoft/yardl/tooling/internal/formatting"
-	"github.com/microsoft/yardl/tooling/internal/iocommon"
 	"github.com/microsoft/yardl/tooling/internal/matlab/common"
 	"github.com/microsoft/yardl/tooling/pkg/dsl"
 )
 
-func WriteBinary(ns *dsl.Namespace, packageDir string) error {
+func WriteBinary(fw *common.MatlabFileWriter, ns *dsl.Namespace) error {
 
 	if ns.IsTopLevel {
-		if err := writeProtocols(ns, packageDir); err != nil {
+		if err := writeProtocols(fw, ns); err != nil {
 			return err
 		}
 	}
 
-	return writeRecordSerializers(ns, packageDir)
+	return writeRecordSerializers(fw, ns)
 }
 
-func writeProtocols(ns *dsl.Namespace, packageDir string) error {
+func writeProtocols(fw *common.MatlabFileWriter, ns *dsl.Namespace) error {
 	for _, p := range ns.Protocols {
-
-		if err := writeProtocolWriter(p, ns, packageDir); err != nil {
+		if err := writeProtocolWriter(fw, p, ns); err != nil {
 			return err
 		}
 
-		if err := writeProtocolReader(p, ns, packageDir); err != nil {
+		if err := writeProtocolReader(fw, p, ns); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func writeProtocolWriter(p *dsl.ProtocolDefinition, ns *dsl.Namespace, packageDir string) error {
-	b := bytes.Buffer{}
-	w := formatting.NewIndentedWriter(&b, "    ")
-	common.WriteGeneratedFileHeader(w)
-
-	common.WriteComment(w, fmt.Sprintf("Binary writer for the %s protocol", p.Name))
-	common.WriteComment(w, p.Comment)
-	fmt.Fprintf(w, "classdef %s < yardl.binary.BinaryProtocolWriter & %s\n", BinaryWriterName(p), common.AbstractWriterName(p))
-	common.WriteBlockBody(w, func() {
-
-		w.WriteStringln("methods")
+func writeProtocolWriter(fw *common.MatlabFileWriter, p *dsl.ProtocolDefinition, ns *dsl.Namespace) error {
+	return fw.WriteFile(BinaryWriterName(p), func(w *formatting.IndentedWriter) {
+		common.WriteComment(w, fmt.Sprintf("Binary writer for the %s protocol", p.Name))
+		common.WriteComment(w, p.Comment)
+		fmt.Fprintf(w, "classdef %s < yardl.binary.BinaryProtocolWriter & %s\n", BinaryWriterName(p), common.AbstractWriterName(p))
 		common.WriteBlockBody(w, func() {
-			fmt.Fprintf(w, "function obj = %s(filename)\n", BinaryWriterName(p))
+
+			w.WriteStringln("methods")
 			common.WriteBlockBody(w, func() {
-				fmt.Fprintf(w, "obj@%s();\n", common.AbstractWriterName(p))
-				fmt.Fprintf(w, "obj@yardl.binary.BinaryProtocolWriter(filename, %s.schema);\n", common.AbstractWriterName(p))
+				fmt.Fprintf(w, "function obj = %s(filename)\n", BinaryWriterName(p))
+				common.WriteBlockBody(w, func() {
+					fmt.Fprintf(w, "obj@%s();\n", common.AbstractWriterName(p))
+					fmt.Fprintf(w, "obj@yardl.binary.BinaryProtocolWriter(filename, %s.schema);\n", common.AbstractWriterName(p))
+				})
+			})
+			w.WriteStringln("")
+
+			w.WriteStringln("methods (Access=protected)")
+			common.WriteBlockBody(w, func() {
+				for i, step := range p.Sequence {
+					fmt.Fprintf(w, "function %s(obj, value)\n", common.ProtocolWriteImplMethodName(step))
+					common.WriteBlockBody(w, func() {
+						fmt.Fprintf(w, "w = %s;\n", typeSerializer(step.Type, ns.Name, nil))
+						w.WriteStringln("w.write(obj.stream_, value);")
+					})
+					if i < len(p.Sequence)-1 {
+						w.WriteStringln("")
+					}
+				}
 			})
 		})
-		w.WriteStringln("")
-
-		w.WriteStringln("methods (Access=protected)")
-		common.WriteBlockBody(w, func() {
-			for i, step := range p.Sequence {
-				fmt.Fprintf(w, "function %s(obj, value)\n", common.ProtocolWriteImplMethodName(step))
-				common.WriteBlockBody(w, func() {
-					fmt.Fprintf(w, "w = %s;\n", typeSerializer(step.Type, ns.Name, nil))
-					w.WriteStringln("w.write(obj.stream_, value);")
-				})
-				if i < len(p.Sequence)-1 {
-					w.WriteStringln("")
-				}
-			}
-		})
 	})
-
-	binaryPath := path.Join(packageDir, fmt.Sprintf("%s.m", BinaryWriterName(p)))
-	return iocommon.WriteFileIfNeeded(binaryPath, b.Bytes(), 0644)
 }
 
-func writeProtocolReader(p *dsl.ProtocolDefinition, ns *dsl.Namespace, packageDir string) error {
-	b := bytes.Buffer{}
-	w := formatting.NewIndentedWriter(&b, "    ")
-	common.WriteGeneratedFileHeader(w)
-
-	common.WriteComment(w, fmt.Sprintf("Binary reader for the %s protocol", p.Name))
-	common.WriteComment(w, p.Comment)
-	fmt.Fprintf(w, "classdef %s < yardl.binary.BinaryProtocolReader & %s\n", BinaryReaderName(p), common.AbstractReaderName(p))
-	common.WriteBlockBody(w, func() {
-
-		w.WriteStringln("methods")
+func writeProtocolReader(fw *common.MatlabFileWriter, p *dsl.ProtocolDefinition, ns *dsl.Namespace) error {
+	return fw.WriteFile(BinaryReaderName(p), func(w *formatting.IndentedWriter) {
+		common.WriteComment(w, fmt.Sprintf("Binary reader for the %s protocol", p.Name))
+		common.WriteComment(w, p.Comment)
+		fmt.Fprintf(w, "classdef %s < yardl.binary.BinaryProtocolReader & %s\n", BinaryReaderName(p), common.AbstractReaderName(p))
 		common.WriteBlockBody(w, func() {
-			fmt.Fprintf(w, "function obj = %s(filename)\n", BinaryReaderName(p))
+
+			w.WriteStringln("methods")
 			common.WriteBlockBody(w, func() {
-				fmt.Fprintf(w, "obj@%s();\n", common.AbstractReaderName(p))
-				fmt.Fprintf(w, "obj@yardl.binary.BinaryProtocolReader(filename, %s.schema);\n", common.AbstractReaderName(p))
+				fmt.Fprintf(w, "function obj = %s(filename)\n", BinaryReaderName(p))
+				common.WriteBlockBody(w, func() {
+					fmt.Fprintf(w, "obj@%s();\n", common.AbstractReaderName(p))
+					fmt.Fprintf(w, "obj@yardl.binary.BinaryProtocolReader(filename, %s.schema);\n", common.AbstractReaderName(p))
+				})
+			})
+			w.WriteStringln("")
+
+			w.WriteStringln("methods (Access=protected)")
+			common.WriteBlockBody(w, func() {
+				for i, step := range p.Sequence {
+					fmt.Fprintf(w, "function value = %s(obj, value)\n", common.ProtocolReadImplMethodName(step))
+					common.WriteBlockBody(w, func() {
+						fmt.Fprintf(w, "r = %s;\n", typeSerializer(step.Type, ns.Name, nil))
+						w.WriteStringln("value = r.read(obj.stream_);")
+					})
+
+					if i < len(p.Sequence)-1 {
+						w.WriteStringln("")
+					}
+				}
 			})
 		})
-		w.WriteStringln("")
-
-		w.WriteStringln("methods (Access=protected)")
-		common.WriteBlockBody(w, func() {
-			for i, step := range p.Sequence {
-				fmt.Fprintf(w, "function value = %s(obj, value)\n", common.ProtocolReadImplMethodName(step))
-				common.WriteBlockBody(w, func() {
-					fmt.Fprintf(w, "r = %s;\n", typeSerializer(step.Type, ns.Name, nil))
-					w.WriteStringln("value = r.read(obj.stream_);")
-				})
-
-				if i < len(p.Sequence)-1 {
-					w.WriteStringln("")
-				}
-			}
-		})
 	})
-
-	binaryPath := path.Join(packageDir, fmt.Sprintf("%s.m", BinaryReaderName(p)))
-	return iocommon.WriteFileIfNeeded(binaryPath, b.Bytes(), 0644)
 }
 
-func writeRecordSerializers(ns *dsl.Namespace, packageDir string) error {
+func writeRecordSerializers(fw *common.MatlabFileWriter, ns *dsl.Namespace) error {
 	for _, td := range ns.TypeDefinitions {
 		switch td := td.(type) {
 		case *dsl.RecordDefinition:
-			if err := writeRecordSerializer(td, ns, packageDir); err != nil {
+			if err := writeRecordSerializer(fw, td, ns); err != nil {
 				return err
 			}
 		}
@@ -132,48 +118,56 @@ func writeRecordSerializers(ns *dsl.Namespace, packageDir string) error {
 	return nil
 }
 
-func writeRecordSerializer(rec *dsl.RecordDefinition, ns *dsl.Namespace, packageDir string) error {
-	b := bytes.Buffer{}
-	w := formatting.NewIndentedWriter(&b, "    ")
-	common.WriteGeneratedFileHeader(w)
+func writeRecordSerializer(fw *common.MatlabFileWriter, rec *dsl.RecordDefinition, ns *dsl.Namespace) error {
+	return fw.WriteFile(recordSerializerClassName(rec, ns.Name), func(w *formatting.IndentedWriter) {
 
-	typeSyntax := common.TypeSyntax(rec, ns.Name)
-	fmt.Fprintf(w, "classdef %s < yardl.binary.RecordSerializer\n", recordSerializerClassName(rec, ns.Name))
-	common.WriteBlockBody(w, func() {
-
-		w.WriteStringln("methods")
+		typeSyntax := common.TypeSyntax(rec, ns.Name)
+		fmt.Fprintf(w, "classdef %s < yardl.binary.RecordSerializer\n", recordSerializerClassName(rec, ns.Name))
 		common.WriteBlockBody(w, func() {
-			fmt.Fprintf(w, "function obj = %s()\n", recordSerializerClassName(rec, ns.Name))
+
+			w.WriteStringln("methods")
 			common.WriteBlockBody(w, func() {
-				for i, field := range rec.Fields {
-					fmt.Fprintf(w, "field_serializers{%d} = %s;\n", i+1, typeSerializer(field.Type, ns.Name, nil))
+				if len(rec.TypeParameters) > 0 {
+					typeParamSerializers := make([]string, 0, len(rec.TypeParameters))
+					for _, tp := range rec.TypeParameters {
+						typeParamSerializers = append(
+							typeParamSerializers,
+							typeDefinitionSerializer(tp, ns.Name))
+					}
+
+					fmt.Fprintf(w, "function obj = %s(%s)\n", recordSerializerClassName(rec, ns.Name), strings.Join(typeParamSerializers, ", "))
+				} else {
+					fmt.Fprintf(w, "function obj = %s()\n", recordSerializerClassName(rec, ns.Name))
 				}
-				fmt.Fprintf(w, "obj@yardl.binary.RecordSerializer(field_serializers);\n")
-			})
-			w.WriteStringln("")
 
-			fmt.Fprintf(w, "function write(obj, outstream, value)\n")
-			common.WriteBlockBody(w, func() {
-				fmt.Fprintf(w, "assert(isa(value, '%s'));\n", typeSyntax)
+				common.WriteBlockBody(w, func() {
+					for i, field := range rec.Fields {
+						fmt.Fprintf(w, "field_serializers{%d} = %s;\n", i+1, typeSerializer(field.Type, ns.Name, nil))
+					}
+					fmt.Fprintf(w, "obj@yardl.binary.RecordSerializer(field_serializers);\n")
+				})
+				w.WriteStringln("")
 
-				fieldAccesses := make([]string, len(rec.Fields))
-				for i, field := range rec.Fields {
-					fieldAccesses[i] = fmt.Sprintf("value.%s", common.FieldIdentifierName(field.Name))
-				}
-				fmt.Fprintf(w, "obj.write_(outstream, %s)\n", strings.Join(fieldAccesses, ", "))
-			})
-			w.WriteStringln("")
+				fmt.Fprintf(w, "function write(obj, outstream, value)\n")
+				common.WriteBlockBody(w, func() {
+					fmt.Fprintf(w, "assert(isa(value, '%s'));\n", typeSyntax)
 
-			fmt.Fprintf(w, "function value = read(obj, instream)\n")
-			common.WriteBlockBody(w, func() {
-				w.WriteStringln("field_values = obj.read_(instream);")
-				fmt.Fprintf(w, "value = %s(field_values{:});\n", typeSyntax)
+					fieldAccesses := make([]string, len(rec.Fields))
+					for i, field := range rec.Fields {
+						fieldAccesses[i] = fmt.Sprintf("value.%s", common.FieldIdentifierName(field.Name))
+					}
+					fmt.Fprintf(w, "obj.write_(outstream, %s)\n", strings.Join(fieldAccesses, ", "))
+				})
+				w.WriteStringln("")
+
+				fmt.Fprintf(w, "function value = read(obj, instream)\n")
+				common.WriteBlockBody(w, func() {
+					w.WriteStringln("field_values = obj.read_(instream);")
+					fmt.Fprintf(w, "value = %s(field_values{:});\n", typeSyntax)
+				})
 			})
 		})
 	})
-
-	binaryPath := path.Join(packageDir, fmt.Sprintf("%s.m", recordSerializerClassName(rec, ns.Name)))
-	return iocommon.WriteFileIfNeeded(binaryPath, b.Bytes(), 0644)
 }
 
 func recordSerializerClassName(record *dsl.RecordDefinition, contextNamespace string) string {
@@ -229,7 +223,7 @@ func typeDefinitionSerializer(t dsl.TypeDefinition, contextNamespace string) str
 func typeSerializer(t dsl.Type, contextNamespace string, namedType *dsl.NamedType) string {
 	switch t := t.(type) {
 	case nil:
-		return "yardl.binary.none_serializer"
+		return "yardl.binary.NoneSerializer"
 	case *dsl.SimpleType:
 		return typeDefinitionSerializer(t.ResolvedDefinition, contextNamespace)
 	case *dsl.GeneralizedType:
@@ -241,34 +235,27 @@ func typeSerializer(t dsl.Type, contextNamespace string, namedType *dsl.NamedTyp
 				return fmt.Sprintf("yardl.binary.OptionalSerializer(%s)", typeSerializer(t.Cases[1].Type, contextNamespace, namedType))
 			}
 
-			// TODO:!
-			return fmt.Sprintf("NOT YET IMPLEMENTED")
+			unionClassName, _ := common.UnionClassName(t)
+			if namedType != nil {
+				unionClassName = namedType.Name
+				if namedType.Namespace != contextNamespace {
+					unionClassName = fmt.Sprintf("%s.%s", common.NamespaceIdentifierName(namedType.Namespace), unionClassName)
+				}
+			}
 
-			// unionClassName, typeParameters := common.UnionClassName(t)
-			// if namedType != nil {
-			// 	unionClassName = namedType.Name
-			// 	if namedType.Namespace != contextNamespace {
-			// 		unionClassName = fmt.Sprintf("%s.%s", common.NamespaceIdentifierName(namedType.Namespace), unionClassName)
-			// 	}
-			// }
+			serializers := make([]string, len(t.Cases))
+			factories := make([]string, len(t.Cases))
+			for i, c := range t.Cases {
+				if c.Type == nil {
+					serializers[i] = "yardl.None"
+					factories[i] = "yardl.None"
+				} else {
+					serializers[i] = typeSerializer(c.Type, contextNamespace, namedType)
+					factories[i] = fmt.Sprintf("@%s.%s", unionClassName, formatting.ToPascalCase(c.Tag))
+				}
+			}
 
-			// var classSyntax string
-			// if len(typeParameters) == 0 {
-			// 	classSyntax = unionClassName
-			// } else {
-			// 	classSyntax = fmt.Sprintf("%s[%s]", unionClassName, typeParameters)
-			// }
-			// options := make([]string, len(t.Cases))
-			// for i, c := range t.Cases {
-			// 	if c.Type == nil {
-			// 		options[i] = "None"
-			// 	} else {
-			// 		options[i] = fmt.Sprintf("(%s.%s, %s)", classSyntax, formatting.ToPascalCase(c.Tag), typeSerializer(c.Type, contextNamespace, namedType))
-			// 	}
-			// }
-
-			// return fmt.Sprintf("yardl.binary.UnionSerializer(%s, [%s])", unionClassName, strings.Join(options, ", "))
-
+			return fmt.Sprintf("yardl.binary.UnionSerializer('%s', {%s}, {%s})", unionClassName, strings.Join(serializers, ", "), strings.Join(factories, ", "))
 		}
 		switch td := t.Dimensionality.(type) {
 		case nil:

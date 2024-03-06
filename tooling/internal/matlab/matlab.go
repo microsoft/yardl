@@ -4,7 +4,6 @@
 package matlab
 
 import (
-	"bytes"
 	"embed"
 	"os"
 	"path"
@@ -42,7 +41,13 @@ func Generate(env *dsl.Environment, options packaging.MatlabCodegenOptions) erro
 		if !ns.IsTopLevel {
 			packageDir = path.Join(packageDir, common.PackageDir(ns.Name))
 		}
-		err = writeNamespace(ns, env.SymbolTable, packageDir)
+
+		if err := os.MkdirAll(packageDir, 0775); err != nil {
+			return err
+		}
+
+		fw := &common.MatlabFileWriter{PackageDir: packageDir}
+		err = writeNamespace(fw, ns, env.SymbolTable)
 		if err != nil {
 			return err
 		}
@@ -51,26 +56,18 @@ func Generate(env *dsl.Environment, options packaging.MatlabCodegenOptions) erro
 	return nil
 }
 
-func writeNamespace(ns *dsl.Namespace, st dsl.SymbolTable, packageDir string) error {
-	if err := os.MkdirAll(packageDir, 0775); err != nil {
-		return err
-	}
-
-	if err := writePackageInitFile(ns, packageDir); err != nil {
-		return err
-	}
-
-	if err := types.WriteTypes(ns, st, packageDir); err != nil {
+func writeNamespace(fw *common.MatlabFileWriter, ns *dsl.Namespace, st dsl.SymbolTable) error {
+	if err := types.WriteTypes(fw, ns, st); err != nil {
 		return err
 	}
 
 	if ns.IsTopLevel {
-		if err := protocols.WriteProtocols(ns, st, packageDir); err != nil {
+		if err := protocols.WriteProtocols(fw, ns, st); err != nil {
 			return err
 		}
 	}
 
-	if err := binary.WriteBinary(ns, packageDir); err != nil {
+	if err := binary.WriteBinary(fw, ns); err != nil {
 		return err
 	}
 
@@ -79,12 +76,4 @@ func writeNamespace(ns *dsl.Namespace, st dsl.SymbolTable, packageDir string) er
 	// }
 
 	return nil
-}
-
-func writePackageInitFile(ns *dsl.Namespace, packageDir string) error {
-	b := bytes.Buffer{}
-	w := formatting.NewIndentedWriter(&b, "  ")
-	common.WriteGeneratedFileHeader(w)
-
-	return iocommon.WriteFileIfNeeded(path.Join(packageDir, "init.m"), b.Bytes(), 0644)
 }

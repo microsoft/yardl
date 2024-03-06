@@ -8,7 +8,7 @@ classdef Uint32Serializer < yardl.binary.TypeSerializer
         end
 
         function res = read(instream)
-            res = instream.read_unsigned_varint();
+            res = uint32(instream.read_unsigned_varint());
         end
     end
 end

@@ -4,135 +4,197 @@
 package types
 
 import (
-	"bytes"
 	"fmt"
-	"path"
 	"strings"
 
 	"github.com/microsoft/yardl/tooling/internal/formatting"
-	"github.com/microsoft/yardl/tooling/internal/iocommon"
 	"github.com/microsoft/yardl/tooling/internal/matlab/common"
 	"github.com/microsoft/yardl/tooling/pkg/dsl"
 )
 
-func WriteTypes(ns *dsl.Namespace, st dsl.SymbolTable, packageDir string) error {
+func WriteTypes(fw *common.MatlabFileWriter, ns *dsl.Namespace, st dsl.SymbolTable) error {
+	unionGenerated := make(map[string]bool)
+
 	for _, td := range ns.TypeDefinitions {
-		b := bytes.Buffer{}
-		w := formatting.NewIndentedWriter(&b, "  ")
-		common.WriteGeneratedFileHeader(w)
-
-		switch td := td.(type) {
-		case *dsl.NamedType:
-			writeNamedType(w, td)
-		case *dsl.EnumDefinition:
-			writeEnum(w, td)
-		case *dsl.RecordDefinition:
-			writeRecord(w, td, st)
-		default:
-			panic(fmt.Sprintf("unsupported type definition: %T", td))
-		}
-
-		fname := fmt.Sprintf("%s.m", common.TypeSyntax(td, ns.Name))
-
-		definitionsPath := path.Join(packageDir, fname)
-		if err := iocommon.WriteFileIfNeeded(definitionsPath, b.Bytes(), 0644); err != nil {
+		if err := writeUnionClasses(fw, td, unionGenerated); err != nil {
 			return err
 		}
 	}
+
+	for _, td := range ns.TypeDefinitions {
+		var err error
+		switch td := td.(type) {
+		case *dsl.NamedType:
+			if !unionGenerated[td.Name] {
+				err = writeNamedType(fw, td)
+			}
+		case *dsl.EnumDefinition:
+			err = writeEnum(fw, td)
+		case *dsl.RecordDefinition:
+			err = writeRecord(fw, td, st)
+		default:
+			panic(fmt.Sprintf("unsupported type definition: %T", td))
+		}
+		if err != nil {
+			return err
+		}
+	}
+
+	for _, p := range ns.Protocols {
+		if err := writeUnionClasses(fw, p, unionGenerated); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
-func writeNamedType(w *formatting.IndentedWriter, td *dsl.NamedType) {
-	common.WriteComment(w, td.Comment)
-	fmt.Fprintf(w, "classdef %s < %s\n", common.TypeSyntax(td, td.Namespace), common.TypeSyntax(td.Type, td.Namespace))
-	w.WriteStringln("end")
+func writeUnionClasses(fw *common.MatlabFileWriter, td dsl.TypeDefinition, unionGenerated map[string]bool) error {
+	var writeError error
+	dsl.Visit(td, func(self dsl.Visitor, node dsl.Node) {
+		switch node := node.(type) {
+		case *dsl.GeneralizedType:
+			if node.Cases.IsUnion() {
+				unionClassName, typeParameters := common.UnionClassName(node)
+				if !unionGenerated[unionClassName] {
+					if _, isNamedType := td.(*dsl.NamedType); isNamedType {
+						// This is a named type defining a union, so we will use the named type's name instead
+						unionClassName = td.GetDefinitionMeta().Name
+					}
+					writeError = fw.WriteFile(unionClassName, func(w *formatting.IndentedWriter) {
+						writeUnionClass(w, unionClassName, typeParameters, node, td.GetDefinitionMeta().Namespace)
+					})
+					if writeError != nil {
+						return
+					}
+					unionGenerated[unionClassName] = true
+				}
+			}
+		}
+		self.VisitChildren(node)
+	})
+
+	return writeError
 }
 
-func writeEnum(w *formatting.IndentedWriter, enum *dsl.EnumDefinition) {
-	var base string
-	if enum.BaseType == nil {
-		base = "uint64"
-	} else {
-		base = common.TypeSyntax(enum.BaseType, enum.Namespace)
-	}
-
-	common.WriteComment(w, enum.Comment)
-	enumTypeSyntax := common.TypeSyntax(enum, enum.Namespace)
-	fmt.Fprintf(w, "classdef %s < %s\n", enumTypeSyntax, base)
+func writeUnionClass(w *formatting.IndentedWriter, className string, typeParameters string, generalizedType *dsl.GeneralizedType, contextNamespace string) error {
+	fmt.Fprintf(w, "classdef %s < yardl.Union\n", className)
 	common.WriteBlockBody(w, func() {
-		fmt.Fprintf(w, "enumeration\n")
+		w.WriteStringln("methods (Static)")
 		common.WriteBlockBody(w, func() {
-			for _, value := range enum.Values {
-				common.WriteComment(w, value.Comment)
-				fmt.Fprintf(w, "%s (%d)\n", common.EnumValueIdentifierName(value.Symbol), &value.IntegerValue)
+			for i, tc := range generalizedType.Cases {
+				if tc.Type == nil {
+					continue
+				}
+
+				fmt.Fprintf(w, "function res = %s(value)\n", formatting.ToPascalCase(tc.Tag))
+				common.WriteBlockBody(w, func() {
+					fmt.Fprintf(w, "res = %s(%d, value);\n", className, i+1)
+				})
 			}
+		})
+	})
+
+	return nil
+}
+
+func writeNamedType(fw *common.MatlabFileWriter, td *dsl.NamedType) error {
+	return fw.WriteFile(common.TypeSyntax(td, td.Namespace), func(w *formatting.IndentedWriter) {
+		common.WriteComment(w, td.Comment)
+		fmt.Fprintf(w, "classdef %s < %s\n", common.TypeSyntax(td, td.Namespace), common.TypeSyntax(td.Type, td.Namespace))
+		w.WriteStringln("end")
+	})
+}
+
+func writeEnum(fw *common.MatlabFileWriter, enum *dsl.EnumDefinition) error {
+	return fw.WriteFile(common.TypeSyntax(enum, enum.Namespace), func(w *formatting.IndentedWriter) {
+		var base string
+		if enum.BaseType == nil {
+			base = "uint64"
+		} else {
+			base = common.TypeSyntax(enum.BaseType, enum.Namespace)
+		}
+
+		common.WriteComment(w, enum.Comment)
+		enumTypeSyntax := common.TypeSyntax(enum, enum.Namespace)
+		fmt.Fprintf(w, "classdef %s < %s\n", enumTypeSyntax, base)
+		common.WriteBlockBody(w, func() {
+			fmt.Fprintf(w, "enumeration\n")
+			common.WriteBlockBody(w, func() {
+				for _, value := range enum.Values {
+					common.WriteComment(w, value.Comment)
+					fmt.Fprintf(w, "%s (%d)\n", common.EnumValueIdentifierName(value.Symbol), &value.IntegerValue)
+				}
+			})
 		})
 	})
 }
 
-func writeRecord(w *formatting.IndentedWriter, rec *dsl.RecordDefinition, st dsl.SymbolTable) {
-	common.WriteComment(w, rec.Comment)
+func writeRecord(fw *common.MatlabFileWriter, rec *dsl.RecordDefinition, st dsl.SymbolTable) error {
+	return fw.WriteFile(common.TypeSyntax(rec, rec.Namespace), func(w *formatting.IndentedWriter) {
+		common.WriteComment(w, rec.Comment)
 
-	fmt.Fprintf(w, "classdef %s < handle\n", common.TypeSyntax(rec, rec.Namespace))
-	common.WriteBlockBody(w, func() {
-
-		w.WriteStringln("properties")
-		var fieldNames []string
-		common.WriteBlockBody(w, func() {
-			for i, field := range rec.Fields {
-				common.WriteComment(w, field.Comment)
-				fieldNames = append(fieldNames, common.FieldIdentifierName(field.Name))
-				fmt.Fprintf(w, "%s\n", common.FieldIdentifierName(field.Name))
-				if i < len(rec.Fields)-1 {
-					w.WriteStringln("")
-				}
-			}
-		})
-		w.WriteStringln("")
-
-		w.WriteStringln("methods")
+		fmt.Fprintf(w, "classdef %s < handle\n", common.TypeSyntax(rec, rec.Namespace))
 		common.WriteBlockBody(w, func() {
 
-			// Record Constructor
-			fmt.Fprintf(w, "function obj = %s(%s)\n", rec.Name, strings.Join(fieldNames, ", "))
+			w.WriteStringln("properties")
+			var fieldNames []string
 			common.WriteBlockBody(w, func() {
-				for _, field := range rec.Fields {
-					fmt.Fprintf(w, "obj.%s = %s;\n", common.FieldIdentifierName(field.Name), common.FieldIdentifierName(field.Name))
+				for i, field := range rec.Fields {
+					common.WriteComment(w, field.Comment)
+					fieldNames = append(fieldNames, common.FieldIdentifierName(field.Name))
+					fmt.Fprintf(w, "%s\n", common.FieldIdentifierName(field.Name))
+					if i < len(rec.Fields)-1 {
+						w.WriteStringln("")
+					}
 				}
 			})
 			w.WriteStringln("")
 
-			// Computed Fields
-			for _, computedField := range rec.ComputedFields {
-				fieldName := common.ComputedFieldIdentifierName(computedField.Name)
+			w.WriteStringln("methods")
+			common.WriteBlockBody(w, func() {
 
-				common.WriteComment(w, computedField.Comment)
-				fmt.Fprintf(w, "function res = %s(self)\n", fieldName)
+				// Record Constructor
+				fmt.Fprintf(w, "function obj = %s(%s)\n", rec.Name, strings.Join(fieldNames, ", "))
 				common.WriteBlockBody(w, func() {
-					writeComputedFieldExpression(w, computedField.Expression, rec.Namespace)
+					for _, field := range rec.Fields {
+						fmt.Fprintf(w, "obj.%s = %s;\n", common.FieldIdentifierName(field.Name), common.FieldIdentifierName(field.Name))
+					}
 				})
 				w.WriteStringln("")
-			}
-			w.WriteStringln("")
 
-			// eq method
-			w.WriteStringln("function res = eq(obj, other)")
-			common.WriteBlockBody(w, func() {
-				w.WriteStringln("res = ...")
-				w.Indented(func() {
-					fmt.Fprintf(w, "isa(other, '%s')", common.TypeSyntax(rec, rec.Namespace))
-					for _, field := range rec.Fields {
-						w.WriteStringln(" && ...")
-						fieldIdentifier := common.FieldIdentifierName(field.Name)
-						w.WriteString(typeEqualityExpression(field.Type, "obj."+fieldIdentifier, "other."+fieldIdentifier))
-					}
-					w.WriteStringln(";")
+				// Computed Fields
+				for _, computedField := range rec.ComputedFields {
+					fieldName := common.ComputedFieldIdentifierName(computedField.Name)
+
+					common.WriteComment(w, computedField.Comment)
+					fmt.Fprintf(w, "function res = %s(self)\n", fieldName)
+					common.WriteBlockBody(w, func() {
+						writeComputedFieldExpression(w, computedField.Expression, rec.Namespace)
+					})
+					w.WriteStringln("")
+				}
+				w.WriteStringln("")
+
+				// eq method
+				w.WriteStringln("function res = eq(obj, other)")
+				common.WriteBlockBody(w, func() {
+					w.WriteStringln("res = ...")
+					w.Indented(func() {
+						fmt.Fprintf(w, "isa(other, '%s')", common.TypeSyntax(rec, rec.Namespace))
+						for _, field := range rec.Fields {
+							w.WriteStringln(" && ...")
+							fieldIdentifier := common.FieldIdentifierName(field.Name)
+							w.WriteString(typeEqualityExpression(field.Type, "obj."+fieldIdentifier, "other."+fieldIdentifier))
+						}
+						w.WriteStringln(";")
+					})
 				})
+
+				// neq method
 			})
 
-			// neq method
 		})
-
 	})
 }
 
@@ -145,7 +207,6 @@ func typeEqualityExpression(t dsl.Type, a, b string) string {
 	}
 
 	// TODO: Other forms
-	// panic(fmt.Sprintf("How about type equality expression for %s", dsl.TypeToShortSyntax(t, false)))
 	return fmt.Sprintf("all(%s == %s)", a, b)
 }
 
@@ -211,7 +272,7 @@ func writeComputedFieldExpression(w *formatting.IndentedWriter, expression dsl.E
 						for i, d := range *dims {
 							fmt.Fprintf(w, "if dim_name == \"%s\"\n", *d.Name)
 							w.Indented(func() {
-								fmt.Fprintf(w, "dim = %d;\n", i)
+								fmt.Fprintf(w, "dim = %d;\n", len(*dims)-i)
 							})
 							w.WriteString("else")
 						}
@@ -367,12 +428,19 @@ func writeComputedFieldExpression(w *formatting.IndentedWriter, expression dsl.E
 						self.Visit(t.Arguments[0], tailWrapper{})
 
 						if len(t.Arguments) > 1 {
-							w.WriteString("(")
+							w.WriteString(", [")
 							remainingArgs := t.Arguments[1:]
 							formatting.Delimited(w, ", ", remainingArgs, func(w *formatting.IndentedWriter, i int, arg dsl.Expression) {
+								if _, ok := arg.(*dsl.IntegerLiteralExpression); ok {
+									// Need to adjust integer literals for 1-based indexing in Matlab
+									// fmt.Fprintf(w, "%d", big.NewInt(0).Add(&intArg.Value, big.NewInt(1)))
+									w.WriteString("ndims(")
+									self.Visit(t.Arguments[0], tailWrapper{})
+									w.WriteString(")-")
+								}
 								self.Visit(arg, tailWrapper{})
 							})
-							fmt.Fprintf(w, ")")
+							fmt.Fprintf(w, "]")
 						}
 						w.WriteString(")")
 					}
@@ -399,7 +467,7 @@ func writeComputedFieldExpression(w *formatting.IndentedWriter, expression dsl.E
 			unionVariableName := newVarName()
 			fmt.Fprintf(w, "%s = ", unionVariableName)
 			self.Visit(t.Target, tailWrapper{})
-			w.WriteStringln("")
+			w.WriteStringln(";")
 
 			if targetType.Cases.IsOptional() {
 				for i, switchCase := range t.Cases {
@@ -410,41 +478,41 @@ func writeComputedFieldExpression(w *formatting.IndentedWriter, expression dsl.E
 
 			if targetType.Cases.IsUnion() {
 				// Special handling for SwitchExpression over a Union from an imported namespace
-				// targetTypeNamespace := ""
-				// dsl.Visit(t.Target, func(self dsl.Visitor, node dsl.Node) {
-				// 	switch node := node.(type) {
-				// 	case *dsl.SimpleType:
-				// 		self.Visit(node.ResolvedDefinition)
-				// 	case *dsl.RecordDefinition:
-				// 		for _, field := range node.Fields {
-				// 			u := dsl.GetUnderlyingType(field.Type)
-				// 			if u == t.Target.GetResolvedType() {
-				// 				if targetTypeNamespace == "" {
-				// 					meta := node.GetDefinitionMeta()
-				// 					targetTypeNamespace = meta.Namespace
-				// 				}
-				// 				return
-				// 			}
-				// 		}
-				// 	case dsl.Expression:
-				// 		t := node.GetResolvedType()
-				// 		if t != nil {
-				// 			self.Visit(t)
-				// 		}
-				// 	}
-				// 	self.VisitChildren(node)
-				// })
+				targetTypeNamespace := ""
+				dsl.Visit(t.Target, func(self dsl.Visitor, node dsl.Node) {
+					switch node := node.(type) {
+					case *dsl.SimpleType:
+						self.Visit(node.ResolvedDefinition)
+					case *dsl.RecordDefinition:
+						for _, field := range node.Fields {
+							u := dsl.GetUnderlyingType(field.Type)
+							if u == t.Target.GetResolvedType() {
+								if targetTypeNamespace == "" {
+									meta := node.GetDefinitionMeta()
+									targetTypeNamespace = meta.Namespace
+								}
+								return
+							}
+						}
+					case dsl.Expression:
+						t := node.GetResolvedType()
+						if t != nil {
+							self.Visit(t)
+						}
+					}
+					self.VisitChildren(node)
+				})
 
-				// unionClassName, _ := common.UnionClassName(targetType)
-				// if targetTypeNamespace != "" && targetTypeNamespace != contextNamespace {
-				// 	unionClassName = fmt.Sprintf("%s.%s", common.NamespaceIdentifierName(targetTypeNamespace), unionClassName)
-				// }
+				unionClassName, _ := common.UnionClassName(targetType)
+				if targetTypeNamespace != "" && targetTypeNamespace != contextNamespace {
+					unionClassName = fmt.Sprintf("%s.%s", common.NamespaceIdentifierName(targetTypeNamespace), unionClassName)
+				}
 
-				// for _, switchCase := range t.Cases {
-				// 	writeSwitchCaseOverUnion(w, targetType, unionClassName, switchCase, unionVariableName, self, tail)
-				// }
+				for _, switchCase := range t.Cases {
+					writeSwitchCaseOverUnion(w, targetType, unionClassName, switchCase, unionVariableName, self, tail)
+				}
 
-				// fmt.Fprintf(w, "raise RuntimeError(\"Unexpected union case\")\n")
+				w.WriteStringln(`throw(yardl.Error("Unexpected union case"))`)
 				return
 			}
 
@@ -508,6 +576,43 @@ func writeSwitchCaseOverOptional(w *formatting.IndentedWriter, switchCase *dsl.S
 		writeTypeCase(&t.TypePattern, common.FieldIdentifierName(t.Identifier))
 	case *dsl.DiscardPattern:
 		writeCore("")
+	default:
+		panic(fmt.Sprintf("Unknown pattern type '%T'", switchCase.Pattern))
+	}
+}
+
+func writeSwitchCaseOverUnion(w *formatting.IndentedWriter, unionType *dsl.GeneralizedType, unionClassName string, switchCase *dsl.SwitchCase, variableName string, visitor dsl.VisitorWithContext[tailWrapper], tail tailWrapper) {
+	writeTypeCase := func(typePattern *dsl.TypePattern, declarationIdentifier string) {
+		for i, typeCase := range unionType.Cases {
+			if dsl.TypesEqual(typePattern.Type, typeCase.Type) {
+				if typePattern.Type == nil {
+					fmt.Fprintf(w, "if isa(%s, 'yardl.None')\n", variableName)
+					common.WriteBlockBody(w, func() {
+						visitor.Visit(switchCase.Expression, tail)
+					})
+				} else {
+					// fmt.Fprintf(w, "if isa(%s, %s.%s):\n", variableName, unionClassName, formatting.ToPascalCase(typeCase.Tag))
+					fmt.Fprintf(w, "if %s.index == %d\n", variableName, i+1)
+					common.WriteBlockBody(w, func() {
+						if declarationIdentifier != "" {
+							fmt.Fprintf(w, "%s = %s.value\n", declarationIdentifier, variableName)
+						}
+						visitor.Visit(switchCase.Expression, tail)
+					})
+				}
+				return
+			}
+		}
+		panic(fmt.Sprintf("Did not find pattern type  '%s'", dsl.TypeToShortSyntax(typePattern.Type, false)))
+	}
+
+	switch t := switchCase.Pattern.(type) {
+	case *dsl.TypePattern:
+		writeTypeCase(t, "")
+	case *dsl.DeclarationPattern:
+		writeTypeCase(&t.TypePattern, common.FieldIdentifierName(t.Identifier))
+	case *dsl.DiscardPattern:
+		visitor.Visit(switchCase.Expression, tail)
 	default:
 		panic(fmt.Sprintf("Unknown pattern type '%T'", switchCase.Pattern))
 	}

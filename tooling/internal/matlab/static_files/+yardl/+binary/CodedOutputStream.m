@@ -1,47 +1,60 @@
 classdef CodedOutputStream < handle
 
-    properties
-        fid
+    properties (Access=private)
+        fid_
+        owns_stream_
     end
 
     methods
-        function obj = CodedOutputStream(fileId)
-            obj.fid = fileId;
+        function self = CodedOutputStream(output)
+            if isa(output, "string") || isa(output, "char")
+                [fileId, errMsg] = fopen(output, "w");
+                if fileId < 0
+                    throw(yardl.binary.Exception(errMsg));
+                end
+                self.fid_ = fileId;
+                self.owns_stream_ = true;
+            else
+                self.fid_ = input;
+                self.owns_stream_ = false;
+            end
         end
 
-        function close(obj)
-            % flush...
-            obj.fid = -1;
+        function close(self)
+            if self.owns_stream_ && self.fid_ > 2
+                fclose(self.fid_);
+                self.fid_ = -1;
+            end
         end
 
-        function write(obj, value)
+        function write(self, value)
             assert(isa(value, "uint8"));
-            fwrite(obj.fid, value, "uint8");
+            fwrite(self.fid_, value, "uint8");
         end
 
-        function write_bytes(obj, bytes)
-            fwrite(obj.fid, bytes, "uint8");
+        function write_bytes(self, bytes)
+            fwrite(self.fid_, bytes, "uint8");
         end
 
-        function write_byte_no_check(obj, value)
+        function write_byte_no_check(self, value)
             assert(isscalar(value));
             assert(all(value >= 0));
             assert(all(value <= intmax("uint8")));
 
-            fwrite(obj.fid, value, "uint8");
+            fwrite(self.fid_, value, "uint8");
         end
 
-        function write_unsigned_varint(obj, value)
+        function write_unsigned_varint(self, value)
             assert(isscalar(value));
 
             int_val = uint64(value);
             while true
                 if int_val < 0x80
-                    obj.write_byte_no_check(int_val);
+                    self.write_byte_no_check(int_val);
                     return
                 end
 
-                obj.write_byte_no_check(bitor(bitand(int_val, uint64(0x7F)), uint64(0x80)));
+                self.write_byte_no_check(bitor(bitand(int_val, uint64(0x7F)), uint64(0x80)));
                 int_val = bitshift(int_val, -7);
             end
         end
@@ -51,10 +64,10 @@ classdef CodedOutputStream < handle
             res = bitxor(bitshift(int_val, 1), bitshift(int_val, -63));
         end
 
-        function write_signed_varint(obj, value)
+        function write_signed_varint(self, value)
             assert(isscalar(value));
 
-            obj.write_unsigned_varint(obj.zigzag_encode(value));
+            self.write_unsigned_varint(self.zigzag_encode(value));
         end
 
     end
