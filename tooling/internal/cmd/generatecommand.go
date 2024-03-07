@@ -37,20 +37,20 @@ func newGenerateCommand() *cobra.Command {
 		DisableFlagsInUseLine: true,
 		Args:                  cobra.NoArgs,
 		Run: func(*cobra.Command, []string) {
-			packageInfo, warnings, err := generateImpl()
-			if err != nil {
-				// avoiding returning the error here because
-				// cobra prefixes the error with "Error: "
-				fmt.Fprintln(os.Stderr, err)
-				os.Exit(1)
-			}
-
-			for _, warning := range warnings {
-				log.Warn().Msg(warning)
-			}
-			WriteSuccessfulSummary(packageInfo)
-
 			if !flags.watch {
+				packageInfo, warnings, err := generateImpl()
+				if err != nil {
+					// avoiding returning the error here because
+					// cobra prefixes the error with "Error: "
+					fmt.Fprintln(os.Stderr, err)
+					os.Exit(1)
+				}
+
+				for _, warning := range warnings {
+					log.Warn().Msg(warning)
+				}
+				WriteSuccessfulSummary(packageInfo)
+
 				return
 			}
 
@@ -64,16 +64,9 @@ func newGenerateCommand() *cobra.Command {
 			completedChannel := make(chan error)
 			go dedupLoop(watcher, completedChannel)
 
-			toWatch := []string{"."}
-			for _, ref := range packageInfo.GetAllReferencedPackages() {
-				toWatch = append(toWatch, ref.PackageDir())
-			}
-
-			for _, watched := range toWatch {
-				err = watcher.Add(watched)
-				if err != nil {
-					log.Fatal().Err(err).Msg("")
-				}
+			err = watcher.Add(".")
+			if err != nil {
+				log.Fatal().Err(err).Msg("")
 			}
 
 			err = <-completedChannel
@@ -90,10 +83,23 @@ func newGenerateCommand() *cobra.Command {
 
 // dedup fsnotify events
 func dedupLoop(w *fsnotify.Watcher, completedChannel chan<- error) {
-	generateInWatchMode()
+	regenerate := func() {
+		dirsToWatch := generateInWatchMode()
+		if dirsToWatch != nil && len(dirsToWatch) > len(w.WatchList()) {
+			for _, dir := range dirsToWatch {
+				if err := w.Add(dir); err != nil {
+					completedChannel <- err
+					return
+				}
+			}
+		}
+
+	}
+
+	regenerate()
 
 	const waitFor = 5 * time.Millisecond
-	timer := time.AfterFunc(math.MaxInt64, generateInWatchMode)
+	timer := time.AfterFunc(math.MaxInt64, regenerate)
 	timer.Stop()
 
 	for {
@@ -118,7 +124,8 @@ func dedupLoop(w *fsnotify.Watcher, completedChannel chan<- error) {
 	}
 }
 
-func generateInWatchMode() {
+// Returns the directories to watch after parsing all package imports, or nil on error
+func generateInWatchMode() []string {
 	defer func() {
 		if err := recover(); err != nil {
 			screen.Clear()
@@ -140,7 +147,14 @@ func generateInWatchMode() {
 			log.Warn().Msg(warning)
 		}
 		WriteSuccessfulSummary(packageInfo)
+
+		var dirsToWatch []string
+		for _, ref := range packageInfo.GetAllReferencedPackages() {
+			dirsToWatch = append(dirsToWatch, ref.PackageDir())
+		}
+		return dirsToWatch
 	}
+	return nil
 }
 
 func WriteSuccessfulSummary(packageInfo *packaging.PackageInfo) {
