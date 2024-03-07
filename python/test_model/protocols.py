@@ -23,20 +23,27 @@ class BenchmarkFloat256x256WriterBase(abc.ABC):
 
     schema = r"""{"protocol":{"name":"BenchmarkFloat256x256","sequence":[{"name":"float256x256","type":{"stream":{"items":{"array":{"items":"float32","dimensions":[{"length":256},{"length":256}]}}}}}]},"types":null}"""
 
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
-        if exc is None and self._state == 1:
+    def close(self) -> None:
+        if self._state == 1:
             try:
                 self._end_stream()
                 return
             finally:
-                self.close()
-        self.close()
-        if exc is None and self._state != 2:
+                self._close()
+        self._close()
+        if self._state != 2:
             expected_method = self._state_to_method_name((self._state + 1) & ~1)
             raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
+        try:
+            self.close()
+        except Exception as e:
+            if exc is None:
+                raise e
 
     def write_float256x256(self, value: collections.abc.Iterable[npt.NDArray[np.float32]]) -> None:
         """Ordinal 0"""
@@ -52,7 +59,7 @@ class BenchmarkFloat256x256WriterBase(abc.ABC):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def close(self) -> None:
+    def _close(self) -> None:
         pass
 
     @abc.abstractmethod
@@ -76,14 +83,9 @@ class BenchmarkFloat256x256ReaderBase(abc.ABC):
     def __init__(self) -> None:
         self._state = 0
 
-    schema = BenchmarkFloat256x256WriterBase.schema
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
-        self.close()
-        if exc is None and self._state != 2:
+    def close(self) -> None:
+        self._close()
+        if self._state != 2:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
@@ -92,8 +94,20 @@ class BenchmarkFloat256x256ReaderBase(abc.ABC):
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
 
+    schema = BenchmarkFloat256x256WriterBase.schema
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
+        try:
+            self.close()
+        except Exception as e:
+            if exc is None:
+                raise e
+
     @abc.abstractmethod
-    def close(self) -> None:
+    def _close(self) -> None:
         raise NotImplementedError()
 
     def read_float256x256(self) -> collections.abc.Iterable[npt.NDArray[np.float32]]:
@@ -141,20 +155,27 @@ class BenchmarkInt256x256WriterBase(abc.ABC):
 
     schema = r"""{"protocol":{"name":"BenchmarkInt256x256","sequence":[{"name":"int256x256","type":{"stream":{"items":{"array":{"items":"int32","dimensions":[{"length":256},{"length":256}]}}}}}]},"types":null}"""
 
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
-        if exc is None and self._state == 1:
+    def close(self) -> None:
+        if self._state == 1:
             try:
                 self._end_stream()
                 return
             finally:
-                self.close()
-        self.close()
-        if exc is None and self._state != 2:
+                self._close()
+        self._close()
+        if self._state != 2:
             expected_method = self._state_to_method_name((self._state + 1) & ~1)
             raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
+        try:
+            self.close()
+        except Exception as e:
+            if exc is None:
+                raise e
 
     def write_int256x256(self, value: collections.abc.Iterable[npt.NDArray[np.int32]]) -> None:
         """Ordinal 0"""
@@ -170,7 +191,7 @@ class BenchmarkInt256x256WriterBase(abc.ABC):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def close(self) -> None:
+    def _close(self) -> None:
         pass
 
     @abc.abstractmethod
@@ -194,14 +215,9 @@ class BenchmarkInt256x256ReaderBase(abc.ABC):
     def __init__(self) -> None:
         self._state = 0
 
-    schema = BenchmarkInt256x256WriterBase.schema
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
-        self.close()
-        if exc is None and self._state != 2:
+    def close(self) -> None:
+        self._close()
+        if self._state != 2:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
@@ -210,8 +226,20 @@ class BenchmarkInt256x256ReaderBase(abc.ABC):
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
 
+    schema = BenchmarkInt256x256WriterBase.schema
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
+        try:
+            self.close()
+        except Exception as e:
+            if exc is None:
+                raise e
+
     @abc.abstractmethod
-    def close(self) -> None:
+    def _close(self) -> None:
         raise NotImplementedError()
 
     def read_int256x256(self) -> collections.abc.Iterable[npt.NDArray[np.int32]]:
@@ -259,20 +287,27 @@ class BenchmarkFloatVlenWriterBase(abc.ABC):
 
     schema = r"""{"protocol":{"name":"BenchmarkFloatVlen","sequence":[{"name":"floatArray","type":{"stream":{"items":{"array":{"items":"float32","dimensions":2}}}}}]},"types":null}"""
 
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
-        if exc is None and self._state == 1:
+    def close(self) -> None:
+        if self._state == 1:
             try:
                 self._end_stream()
                 return
             finally:
-                self.close()
-        self.close()
-        if exc is None and self._state != 2:
+                self._close()
+        self._close()
+        if self._state != 2:
             expected_method = self._state_to_method_name((self._state + 1) & ~1)
             raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
+        try:
+            self.close()
+        except Exception as e:
+            if exc is None:
+                raise e
 
     def write_float_array(self, value: collections.abc.Iterable[npt.NDArray[np.float32]]) -> None:
         """Ordinal 0"""
@@ -288,7 +323,7 @@ class BenchmarkFloatVlenWriterBase(abc.ABC):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def close(self) -> None:
+    def _close(self) -> None:
         pass
 
     @abc.abstractmethod
@@ -312,14 +347,9 @@ class BenchmarkFloatVlenReaderBase(abc.ABC):
     def __init__(self) -> None:
         self._state = 0
 
-    schema = BenchmarkFloatVlenWriterBase.schema
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
-        self.close()
-        if exc is None and self._state != 2:
+    def close(self) -> None:
+        self._close()
+        if self._state != 2:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
@@ -328,8 +358,20 @@ class BenchmarkFloatVlenReaderBase(abc.ABC):
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
 
+    schema = BenchmarkFloatVlenWriterBase.schema
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
+        try:
+            self.close()
+        except Exception as e:
+            if exc is None:
+                raise e
+
     @abc.abstractmethod
-    def close(self) -> None:
+    def _close(self) -> None:
         raise NotImplementedError()
 
     def read_float_array(self) -> collections.abc.Iterable[npt.NDArray[np.float32]]:
@@ -377,20 +419,27 @@ class BenchmarkSmallRecordWriterBase(abc.ABC):
 
     schema = r"""{"protocol":{"name":"BenchmarkSmallRecord","sequence":[{"name":"smallRecord","type":{"stream":{"items":"TestModel.SmallBenchmarkRecord"}}}]},"types":[{"name":"SmallBenchmarkRecord","fields":[{"name":"a","type":"float64"},{"name":"b","type":"float32"},{"name":"c","type":"float32"}]}]}"""
 
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
-        if exc is None and self._state == 1:
+    def close(self) -> None:
+        if self._state == 1:
             try:
                 self._end_stream()
                 return
             finally:
-                self.close()
-        self.close()
-        if exc is None and self._state != 2:
+                self._close()
+        self._close()
+        if self._state != 2:
             expected_method = self._state_to_method_name((self._state + 1) & ~1)
             raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
+        try:
+            self.close()
+        except Exception as e:
+            if exc is None:
+                raise e
 
     def write_small_record(self, value: collections.abc.Iterable[SmallBenchmarkRecord]) -> None:
         """Ordinal 0"""
@@ -406,7 +455,7 @@ class BenchmarkSmallRecordWriterBase(abc.ABC):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def close(self) -> None:
+    def _close(self) -> None:
         pass
 
     @abc.abstractmethod
@@ -430,14 +479,9 @@ class BenchmarkSmallRecordReaderBase(abc.ABC):
     def __init__(self) -> None:
         self._state = 0
 
-    schema = BenchmarkSmallRecordWriterBase.schema
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
-        self.close()
-        if exc is None and self._state != 2:
+    def close(self) -> None:
+        self._close()
+        if self._state != 2:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
@@ -446,8 +490,20 @@ class BenchmarkSmallRecordReaderBase(abc.ABC):
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
 
+    schema = BenchmarkSmallRecordWriterBase.schema
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
+        try:
+            self.close()
+        except Exception as e:
+            if exc is None:
+                raise e
+
     @abc.abstractmethod
-    def close(self) -> None:
+    def _close(self) -> None:
         raise NotImplementedError()
 
     def read_small_record(self) -> collections.abc.Iterable[SmallBenchmarkRecord]:
@@ -495,20 +551,27 @@ class BenchmarkSmallRecordWithOptionalsWriterBase(abc.ABC):
 
     schema = r"""{"protocol":{"name":"BenchmarkSmallRecordWithOptionals","sequence":[{"name":"smallRecord","type":{"stream":{"items":"TestModel.SimpleEncodingCounters"}}}]},"types":[{"name":"SimpleEncodingCounters","fields":[{"name":"e1","type":[null,"uint32"]},{"name":"e2","type":[null,"uint32"]},{"name":"slice","type":[null,"uint32"]},{"name":"repetition","type":[null,"uint32"]}]}]}"""
 
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
-        if exc is None and self._state == 1:
+    def close(self) -> None:
+        if self._state == 1:
             try:
                 self._end_stream()
                 return
             finally:
-                self.close()
-        self.close()
-        if exc is None and self._state != 2:
+                self._close()
+        self._close()
+        if self._state != 2:
             expected_method = self._state_to_method_name((self._state + 1) & ~1)
             raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
+        try:
+            self.close()
+        except Exception as e:
+            if exc is None:
+                raise e
 
     def write_small_record(self, value: collections.abc.Iterable[SimpleEncodingCounters]) -> None:
         """Ordinal 0"""
@@ -524,7 +587,7 @@ class BenchmarkSmallRecordWithOptionalsWriterBase(abc.ABC):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def close(self) -> None:
+    def _close(self) -> None:
         pass
 
     @abc.abstractmethod
@@ -548,14 +611,9 @@ class BenchmarkSmallRecordWithOptionalsReaderBase(abc.ABC):
     def __init__(self) -> None:
         self._state = 0
 
-    schema = BenchmarkSmallRecordWithOptionalsWriterBase.schema
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
-        self.close()
-        if exc is None and self._state != 2:
+    def close(self) -> None:
+        self._close()
+        if self._state != 2:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
@@ -564,8 +622,20 @@ class BenchmarkSmallRecordWithOptionalsReaderBase(abc.ABC):
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
 
+    schema = BenchmarkSmallRecordWithOptionalsWriterBase.schema
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
+        try:
+            self.close()
+        except Exception as e:
+            if exc is None:
+                raise e
+
     @abc.abstractmethod
-    def close(self) -> None:
+    def _close(self) -> None:
         raise NotImplementedError()
 
     def read_small_record(self) -> collections.abc.Iterable[SimpleEncodingCounters]:
@@ -613,20 +683,27 @@ class BenchmarkSimpleMrdWriterBase(abc.ABC):
 
     schema = r"""{"protocol":{"name":"BenchmarkSimpleMrd","sequence":[{"name":"data","type":{"stream":{"items":[{"tag":"acquisition","explicitTag":true,"type":"TestModel.SimpleAcquisition"},{"tag":"image","explicitTag":true,"type":{"name":"Image.Image","typeArguments":["float32"]}}]}}}]},"types":[{"name":"Image","typeParameters":["T"],"type":{"array":{"items":"T","dimensions":[{"name":"x"},{"name":"y"}]}}},{"name":"SimpleAcquisition","fields":[{"name":"flags","type":"uint64"},{"name":"idx","type":"TestModel.SimpleEncodingCounters"},{"name":"data","type":{"array":{"items":"complexfloat32","dimensions":2}}},{"name":"trajectory","type":{"array":{"items":"float32","dimensions":2}}}]},{"name":"SimpleEncodingCounters","fields":[{"name":"e1","type":[null,"uint32"]},{"name":"e2","type":[null,"uint32"]},{"name":"slice","type":[null,"uint32"]},{"name":"repetition","type":[null,"uint32"]}]}]}"""
 
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
-        if exc is None and self._state == 1:
+    def close(self) -> None:
+        if self._state == 1:
             try:
                 self._end_stream()
                 return
             finally:
-                self.close()
-        self.close()
-        if exc is None and self._state != 2:
+                self._close()
+        self._close()
+        if self._state != 2:
             expected_method = self._state_to_method_name((self._state + 1) & ~1)
             raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
+        try:
+            self.close()
+        except Exception as e:
+            if exc is None:
+                raise e
 
     def write_data(self, value: collections.abc.Iterable[AcquisitionOrImage]) -> None:
         """Ordinal 0"""
@@ -642,7 +719,7 @@ class BenchmarkSimpleMrdWriterBase(abc.ABC):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def close(self) -> None:
+    def _close(self) -> None:
         pass
 
     @abc.abstractmethod
@@ -666,14 +743,9 @@ class BenchmarkSimpleMrdReaderBase(abc.ABC):
     def __init__(self) -> None:
         self._state = 0
 
-    schema = BenchmarkSimpleMrdWriterBase.schema
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
-        self.close()
-        if exc is None and self._state != 2:
+    def close(self) -> None:
+        self._close()
+        if self._state != 2:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
@@ -682,8 +754,20 @@ class BenchmarkSimpleMrdReaderBase(abc.ABC):
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
 
+    schema = BenchmarkSimpleMrdWriterBase.schema
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
+        try:
+            self.close()
+        except Exception as e:
+            if exc is None:
+                raise e
+
     @abc.abstractmethod
-    def close(self) -> None:
+    def _close(self) -> None:
         raise NotImplementedError()
 
     def read_data(self) -> collections.abc.Iterable[AcquisitionOrImage]:
@@ -731,14 +815,21 @@ class ScalarsWriterBase(abc.ABC):
 
     schema = r"""{"protocol":{"name":"Scalars","sequence":[{"name":"int32","type":"int32"},{"name":"record","type":"TestModel.RecordWithPrimitives"}]},"types":[{"name":"RecordWithPrimitives","fields":[{"name":"boolField","type":"bool"},{"name":"int8Field","type":"int8"},{"name":"uint8Field","type":"uint8"},{"name":"int16Field","type":"int16"},{"name":"uint16Field","type":"uint16"},{"name":"int32Field","type":"int32"},{"name":"uint32Field","type":"uint32"},{"name":"int64Field","type":"int64"},{"name":"uint64Field","type":"uint64"},{"name":"sizeField","type":"size"},{"name":"float32Field","type":"float32"},{"name":"float64Field","type":"float64"},{"name":"complexfloat32Field","type":"complexfloat32"},{"name":"complexfloat64Field","type":"complexfloat64"},{"name":"dateField","type":"date"},{"name":"timeField","type":"time"},{"name":"datetimeField","type":"datetime"}]}]}"""
 
+    def close(self) -> None:
+        self._close()
+        if self._state != 4:
+            expected_method = self._state_to_method_name((self._state + 1) & ~1)
+            raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+
     def __enter__(self):
         return self
 
     def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
-        self.close()
-        if exc is None and self._state != 4:
-            expected_method = self._state_to_method_name((self._state + 1) & ~1)
-            raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+        try:
+            self.close()
+        except Exception as e:
+            if exc is None:
+                raise e
 
     def write_int32(self, value: yardl.Int32) -> None:
         """Ordinal 0"""
@@ -767,7 +858,7 @@ class ScalarsWriterBase(abc.ABC):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def close(self) -> None:
+    def _close(self) -> None:
         pass
 
     @abc.abstractmethod
@@ -793,14 +884,9 @@ class ScalarsReaderBase(abc.ABC):
     def __init__(self) -> None:
         self._state = 0
 
-    schema = ScalarsWriterBase.schema
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
-        self.close()
-        if exc is None and self._state != 4:
+    def close(self) -> None:
+        self._close()
+        if self._state != 4:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
@@ -809,8 +895,20 @@ class ScalarsReaderBase(abc.ABC):
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
 
+    schema = ScalarsWriterBase.schema
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
+        try:
+            self.close()
+        except Exception as e:
+            if exc is None:
+                raise e
+
     @abc.abstractmethod
-    def close(self) -> None:
+    def _close(self) -> None:
         raise NotImplementedError()
 
     def read_int32(self) -> yardl.Int32:
@@ -875,14 +973,21 @@ class ScalarOptionalsWriterBase(abc.ABC):
 
     schema = r"""{"protocol":{"name":"ScalarOptionals","sequence":[{"name":"optionalInt","type":[null,"int32"]},{"name":"optionalRecord","type":[null,"TestModel.SimpleRecord"]},{"name":"recordWithOptionalFields","type":"TestModel.RecordWithOptionalFields"},{"name":"optionalRecordWithOptionalFields","type":[null,"TestModel.RecordWithOptionalFields"]}]},"types":[{"name":"RecordWithOptionalFields","fields":[{"name":"optionalInt","type":[null,"int32"]},{"name":"optionalIntAlternateSyntax","type":[null,"int32"]},{"name":"optionalTime","type":[null,"time"]}]},{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]}]}"""
 
+    def close(self) -> None:
+        self._close()
+        if self._state != 8:
+            expected_method = self._state_to_method_name((self._state + 1) & ~1)
+            raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+
     def __enter__(self):
         return self
 
     def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
-        self.close()
-        if exc is None and self._state != 8:
-            expected_method = self._state_to_method_name((self._state + 1) & ~1)
-            raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+        try:
+            self.close()
+        except Exception as e:
+            if exc is None:
+                raise e
 
     def write_optional_int(self, value: typing.Optional[yardl.Int32]) -> None:
         """Ordinal 0"""
@@ -937,7 +1042,7 @@ class ScalarOptionalsWriterBase(abc.ABC):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def close(self) -> None:
+    def _close(self) -> None:
         pass
 
     @abc.abstractmethod
@@ -967,14 +1072,9 @@ class ScalarOptionalsReaderBase(abc.ABC):
     def __init__(self) -> None:
         self._state = 0
 
-    schema = ScalarOptionalsWriterBase.schema
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
-        self.close()
-        if exc is None and self._state != 8:
+    def close(self) -> None:
+        self._close()
+        if self._state != 8:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
@@ -983,8 +1083,20 @@ class ScalarOptionalsReaderBase(abc.ABC):
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
 
+    schema = ScalarOptionalsWriterBase.schema
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
+        try:
+            self.close()
+        except Exception as e:
+            if exc is None:
+                raise e
+
     @abc.abstractmethod
-    def close(self) -> None:
+    def _close(self) -> None:
         raise NotImplementedError()
 
     def read_optional_int(self) -> typing.Optional[yardl.Int32]:
@@ -1083,14 +1195,21 @@ class NestedRecordsWriterBase(abc.ABC):
 
     schema = r"""{"protocol":{"name":"NestedRecords","sequence":[{"name":"tupleWithRecords","type":"TestModel.TupleWithRecords"}]},"types":[{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]},{"name":"TupleWithRecords","fields":[{"name":"a","type":"TestModel.SimpleRecord"},{"name":"b","type":"TestModel.SimpleRecord"}]}]}"""
 
+    def close(self) -> None:
+        self._close()
+        if self._state != 2:
+            expected_method = self._state_to_method_name((self._state + 1) & ~1)
+            raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+
     def __enter__(self):
         return self
 
     def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
-        self.close()
-        if exc is None and self._state != 2:
-            expected_method = self._state_to_method_name((self._state + 1) & ~1)
-            raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+        try:
+            self.close()
+        except Exception as e:
+            if exc is None:
+                raise e
 
     def write_tuple_with_records(self, value: TupleWithRecords) -> None:
         """Ordinal 0"""
@@ -1106,7 +1225,7 @@ class NestedRecordsWriterBase(abc.ABC):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def close(self) -> None:
+    def _close(self) -> None:
         pass
 
     @abc.abstractmethod
@@ -1130,14 +1249,9 @@ class NestedRecordsReaderBase(abc.ABC):
     def __init__(self) -> None:
         self._state = 0
 
-    schema = NestedRecordsWriterBase.schema
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
-        self.close()
-        if exc is None and self._state != 2:
+    def close(self) -> None:
+        self._close()
+        if self._state != 2:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
@@ -1146,8 +1260,20 @@ class NestedRecordsReaderBase(abc.ABC):
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
 
+    schema = NestedRecordsWriterBase.schema
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
+        try:
+            self.close()
+        except Exception as e:
+            if exc is None:
+                raise e
+
     @abc.abstractmethod
-    def close(self) -> None:
+    def _close(self) -> None:
         raise NotImplementedError()
 
     def read_tuple_with_records(self) -> TupleWithRecords:
@@ -1195,14 +1321,21 @@ class VlensWriterBase(abc.ABC):
 
     schema = r"""{"protocol":{"name":"Vlens","sequence":[{"name":"intVector","type":{"vector":{"items":"int32"}}},{"name":"complexVector","type":{"vector":{"items":"complexfloat32"}}},{"name":"recordWithVlens","type":"TestModel.RecordWithVlens"},{"name":"vlenOfRecordWithVlens","type":{"vector":{"items":"TestModel.RecordWithVlens"}}}]},"types":[{"name":"RecordWithVlens","fields":[{"name":"a","type":{"vector":{"items":"TestModel.SimpleRecord"}}},{"name":"b","type":"int32"},{"name":"c","type":"int32"}]},{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]}]}"""
 
+    def close(self) -> None:
+        self._close()
+        if self._state != 8:
+            expected_method = self._state_to_method_name((self._state + 1) & ~1)
+            raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+
     def __enter__(self):
         return self
 
     def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
-        self.close()
-        if exc is None and self._state != 8:
-            expected_method = self._state_to_method_name((self._state + 1) & ~1)
-            raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+        try:
+            self.close()
+        except Exception as e:
+            if exc is None:
+                raise e
 
     def write_int_vector(self, value: list[yardl.Int32]) -> None:
         """Ordinal 0"""
@@ -1257,7 +1390,7 @@ class VlensWriterBase(abc.ABC):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def close(self) -> None:
+    def _close(self) -> None:
         pass
 
     @abc.abstractmethod
@@ -1287,14 +1420,9 @@ class VlensReaderBase(abc.ABC):
     def __init__(self) -> None:
         self._state = 0
 
-    schema = VlensWriterBase.schema
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
-        self.close()
-        if exc is None and self._state != 8:
+    def close(self) -> None:
+        self._close()
+        if self._state != 8:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
@@ -1303,8 +1431,20 @@ class VlensReaderBase(abc.ABC):
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
 
+    schema = VlensWriterBase.schema
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
+        try:
+            self.close()
+        except Exception as e:
+            if exc is None:
+                raise e
+
     @abc.abstractmethod
-    def close(self) -> None:
+    def _close(self) -> None:
         raise NotImplementedError()
 
     def read_int_vector(self) -> list[yardl.Int32]:
@@ -1403,14 +1543,21 @@ class StringsWriterBase(abc.ABC):
 
     schema = r"""{"protocol":{"name":"Strings","sequence":[{"name":"singleString","type":"string"},{"name":"recWithString","type":"TestModel.RecordWithStrings"}]},"types":[{"name":"RecordWithStrings","fields":[{"name":"a","type":"string"},{"name":"b","type":"string"}]}]}"""
 
+    def close(self) -> None:
+        self._close()
+        if self._state != 4:
+            expected_method = self._state_to_method_name((self._state + 1) & ~1)
+            raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+
     def __enter__(self):
         return self
 
     def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
-        self.close()
-        if exc is None and self._state != 4:
-            expected_method = self._state_to_method_name((self._state + 1) & ~1)
-            raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+        try:
+            self.close()
+        except Exception as e:
+            if exc is None:
+                raise e
 
     def write_single_string(self, value: str) -> None:
         """Ordinal 0"""
@@ -1439,7 +1586,7 @@ class StringsWriterBase(abc.ABC):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def close(self) -> None:
+    def _close(self) -> None:
         pass
 
     @abc.abstractmethod
@@ -1465,14 +1612,9 @@ class StringsReaderBase(abc.ABC):
     def __init__(self) -> None:
         self._state = 0
 
-    schema = StringsWriterBase.schema
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
-        self.close()
-        if exc is None and self._state != 4:
+    def close(self) -> None:
+        self._close()
+        if self._state != 4:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
@@ -1481,8 +1623,20 @@ class StringsReaderBase(abc.ABC):
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
 
+    schema = StringsWriterBase.schema
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
+        try:
+            self.close()
+        except Exception as e:
+            if exc is None:
+                raise e
+
     @abc.abstractmethod
-    def close(self) -> None:
+    def _close(self) -> None:
         raise NotImplementedError()
 
     def read_single_string(self) -> str:
@@ -1547,14 +1701,21 @@ class OptionalVectorsWriterBase(abc.ABC):
 
     schema = r"""{"protocol":{"name":"OptionalVectors","sequence":[{"name":"recordWithOptionalVector","type":"TestModel.RecordWithOptionalVector"}]},"types":[{"name":"RecordWithOptionalVector","fields":[{"name":"optionalVector","type":[null,{"vector":{"items":"int32"}}]}]}]}"""
 
+    def close(self) -> None:
+        self._close()
+        if self._state != 2:
+            expected_method = self._state_to_method_name((self._state + 1) & ~1)
+            raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+
     def __enter__(self):
         return self
 
     def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
-        self.close()
-        if exc is None and self._state != 2:
-            expected_method = self._state_to_method_name((self._state + 1) & ~1)
-            raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+        try:
+            self.close()
+        except Exception as e:
+            if exc is None:
+                raise e
 
     def write_record_with_optional_vector(self, value: RecordWithOptionalVector) -> None:
         """Ordinal 0"""
@@ -1570,7 +1731,7 @@ class OptionalVectorsWriterBase(abc.ABC):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def close(self) -> None:
+    def _close(self) -> None:
         pass
 
     @abc.abstractmethod
@@ -1594,14 +1755,9 @@ class OptionalVectorsReaderBase(abc.ABC):
     def __init__(self) -> None:
         self._state = 0
 
-    schema = OptionalVectorsWriterBase.schema
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
-        self.close()
-        if exc is None and self._state != 2:
+    def close(self) -> None:
+        self._close()
+        if self._state != 2:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
@@ -1610,8 +1766,20 @@ class OptionalVectorsReaderBase(abc.ABC):
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
 
+    schema = OptionalVectorsWriterBase.schema
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
+        try:
+            self.close()
+        except Exception as e:
+            if exc is None:
+                raise e
+
     @abc.abstractmethod
-    def close(self) -> None:
+    def _close(self) -> None:
         raise NotImplementedError()
 
     def read_record_with_optional_vector(self) -> RecordWithOptionalVector:
@@ -1659,14 +1827,21 @@ class FixedVectorsWriterBase(abc.ABC):
 
     schema = r"""{"protocol":{"name":"FixedVectors","sequence":[{"name":"fixedIntVector","type":{"vector":{"items":"int32","length":5}}},{"name":"fixedSimpleRecordVector","type":{"vector":{"items":"TestModel.SimpleRecord","length":3}}},{"name":"fixedRecordWithVlensVector","type":{"vector":{"items":"TestModel.RecordWithVlens","length":2}}},{"name":"recordWithFixedVectors","type":"TestModel.RecordWithFixedVectors"}]},"types":[{"name":"RecordWithFixedVectors","fields":[{"name":"fixedIntVector","type":{"vector":{"items":"int32","length":5}}},{"name":"fixedSimpleRecordVector","type":{"vector":{"items":"TestModel.SimpleRecord","length":3}}},{"name":"fixedRecordWithVlensVector","type":{"vector":{"items":"TestModel.RecordWithVlens","length":2}}}]},{"name":"RecordWithVlens","fields":[{"name":"a","type":{"vector":{"items":"TestModel.SimpleRecord"}}},{"name":"b","type":"int32"},{"name":"c","type":"int32"}]},{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]}]}"""
 
+    def close(self) -> None:
+        self._close()
+        if self._state != 8:
+            expected_method = self._state_to_method_name((self._state + 1) & ~1)
+            raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+
     def __enter__(self):
         return self
 
     def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
-        self.close()
-        if exc is None and self._state != 8:
-            expected_method = self._state_to_method_name((self._state + 1) & ~1)
-            raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+        try:
+            self.close()
+        except Exception as e:
+            if exc is None:
+                raise e
 
     def write_fixed_int_vector(self, value: list[yardl.Int32]) -> None:
         """Ordinal 0"""
@@ -1721,7 +1896,7 @@ class FixedVectorsWriterBase(abc.ABC):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def close(self) -> None:
+    def _close(self) -> None:
         pass
 
     @abc.abstractmethod
@@ -1751,14 +1926,9 @@ class FixedVectorsReaderBase(abc.ABC):
     def __init__(self) -> None:
         self._state = 0
 
-    schema = FixedVectorsWriterBase.schema
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
-        self.close()
-        if exc is None and self._state != 8:
+    def close(self) -> None:
+        self._close()
+        if self._state != 8:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
@@ -1767,8 +1937,20 @@ class FixedVectorsReaderBase(abc.ABC):
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
 
+    schema = FixedVectorsWriterBase.schema
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
+        try:
+            self.close()
+        except Exception as e:
+            if exc is None:
+                raise e
+
     @abc.abstractmethod
-    def close(self) -> None:
+    def _close(self) -> None:
         raise NotImplementedError()
 
     def read_fixed_int_vector(self) -> list[yardl.Int32]:
@@ -1867,20 +2049,27 @@ class StreamsWriterBase(abc.ABC):
 
     schema = r"""{"protocol":{"name":"Streams","sequence":[{"name":"intData","type":{"stream":{"items":"int32"}}},{"name":"optionalIntData","type":{"stream":{"items":[null,"int32"]}}},{"name":"recordWithOptionalVectorData","type":{"stream":{"items":"TestModel.RecordWithOptionalVector"}}},{"name":"fixedVector","type":{"stream":{"items":{"vector":{"items":"int32","length":3}}}}}]},"types":[{"name":"RecordWithOptionalVector","fields":[{"name":"optionalVector","type":[null,{"vector":{"items":"int32"}}]}]}]}"""
 
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
-        if exc is None and self._state == 7:
+    def close(self) -> None:
+        if self._state == 7:
             try:
                 self._end_stream()
                 return
             finally:
-                self.close()
-        self.close()
-        if exc is None and self._state != 8:
+                self._close()
+        self._close()
+        if self._state != 8:
             expected_method = self._state_to_method_name((self._state + 1) & ~1)
             raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
+        try:
+            self.close()
+        except Exception as e:
+            if exc is None:
+                raise e
 
     def write_int_data(self, value: collections.abc.Iterable[yardl.Int32]) -> None:
         """Ordinal 0"""
@@ -1944,7 +2133,7 @@ class StreamsWriterBase(abc.ABC):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def close(self) -> None:
+    def _close(self) -> None:
         pass
 
     @abc.abstractmethod
@@ -1974,14 +2163,9 @@ class StreamsReaderBase(abc.ABC):
     def __init__(self) -> None:
         self._state = 0
 
-    schema = StreamsWriterBase.schema
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
-        self.close()
-        if exc is None and self._state != 8:
+    def close(self) -> None:
+        self._close()
+        if self._state != 8:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
@@ -1990,8 +2174,20 @@ class StreamsReaderBase(abc.ABC):
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
 
+    schema = StreamsWriterBase.schema
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
+        try:
+            self.close()
+        except Exception as e:
+            if exc is None:
+                raise e
+
     @abc.abstractmethod
-    def close(self) -> None:
+    def _close(self) -> None:
         raise NotImplementedError()
 
     def read_int_data(self) -> collections.abc.Iterable[yardl.Int32]:
@@ -2090,14 +2286,21 @@ class FixedArraysWriterBase(abc.ABC):
 
     schema = r"""{"protocol":{"name":"FixedArrays","sequence":[{"name":"ints","type":{"array":{"items":"int32","dimensions":[{"length":2},{"length":3}]}}},{"name":"fixedSimpleRecordArray","type":{"array":{"items":"TestModel.SimpleRecord","dimensions":[{"length":3},{"length":2}]}}},{"name":"fixedRecordWithVlensArray","type":{"array":{"items":"TestModel.RecordWithVlens","dimensions":[{"length":2},{"length":2}]}}},{"name":"recordWithFixedArrays","type":"TestModel.RecordWithFixedArrays"},{"name":"namedArray","type":"TestModel.NamedFixedNDArray"}]},"types":[{"name":"NamedFixedNDArray","type":{"array":{"items":"int32","dimensions":[{"name":"dimA","length":2},{"name":"dimB","length":4}]}}},{"name":"RecordWithFixedArrays","fields":[{"name":"ints","type":{"array":{"items":"int32","dimensions":[{"length":2},{"length":3}]}}},{"name":"fixedSimpleRecordArray","type":{"array":{"items":"TestModel.SimpleRecord","dimensions":[{"length":3},{"length":2}]}}},{"name":"fixedRecordWithVlensArray","type":{"array":{"items":"TestModel.RecordWithVlens","dimensions":[{"length":2},{"length":2}]}}}]},{"name":"RecordWithVlens","fields":[{"name":"a","type":{"vector":{"items":"TestModel.SimpleRecord"}}},{"name":"b","type":"int32"},{"name":"c","type":"int32"}]},{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]}]}"""
 
+    def close(self) -> None:
+        self._close()
+        if self._state != 10:
+            expected_method = self._state_to_method_name((self._state + 1) & ~1)
+            raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+
     def __enter__(self):
         return self
 
     def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
-        self.close()
-        if exc is None and self._state != 10:
-            expected_method = self._state_to_method_name((self._state + 1) & ~1)
-            raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+        try:
+            self.close()
+        except Exception as e:
+            if exc is None:
+                raise e
 
     def write_ints(self, value: npt.NDArray[np.int32]) -> None:
         """Ordinal 0"""
@@ -2165,7 +2368,7 @@ class FixedArraysWriterBase(abc.ABC):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def close(self) -> None:
+    def _close(self) -> None:
         pass
 
     @abc.abstractmethod
@@ -2197,14 +2400,9 @@ class FixedArraysReaderBase(abc.ABC):
     def __init__(self) -> None:
         self._state = 0
 
-    schema = FixedArraysWriterBase.schema
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
-        self.close()
-        if exc is None and self._state != 10:
+    def close(self) -> None:
+        self._close()
+        if self._state != 10:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
@@ -2213,8 +2411,20 @@ class FixedArraysReaderBase(abc.ABC):
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
 
+    schema = FixedArraysWriterBase.schema
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
+        try:
+            self.close()
+        except Exception as e:
+            if exc is None:
+                raise e
+
     @abc.abstractmethod
-    def close(self) -> None:
+    def _close(self) -> None:
         raise NotImplementedError()
 
     def read_ints(self) -> npt.NDArray[np.int32]:
@@ -2330,14 +2540,21 @@ class SubarraysWriterBase(abc.ABC):
 
     schema = r"""{"protocol":{"name":"Subarrays","sequence":[{"name":"dynamicWithFixedIntSubarray","type":{"array":{"items":{"array":{"items":"int32","dimensions":[{"length":3}]}}}}},{"name":"dynamicWithFixedFloatSubarray","type":{"array":{"items":{"array":{"items":"float32","dimensions":[{"length":3}]}}}}},{"name":"knownDimCountWithFixedIntSubarray","type":{"array":{"items":{"array":{"items":"int32","dimensions":[{"length":3}]}},"dimensions":1}}},{"name":"knownDimCountWithFixedFloatSubarray","type":{"array":{"items":{"array":{"items":"float32","dimensions":[{"length":3}]}},"dimensions":1}}},{"name":"fixedWithFixedIntSubarray","type":{"array":{"items":{"array":{"items":"int32","dimensions":[{"length":3}]}},"dimensions":[{"length":2}]}}},{"name":"fixedWithFixedFloatSubarray","type":{"array":{"items":{"array":{"items":"float32","dimensions":[{"length":3}]}},"dimensions":[{"length":2}]}}},{"name":"nestedSubarray","type":{"array":{"items":{"array":{"items":{"array":{"items":"int32","dimensions":[{"length":3}]}},"dimensions":[{"length":2}]}}}}},{"name":"dynamicWithFixedVectorSubarray","type":{"array":{"items":{"vector":{"items":"int32","length":3}}}}},{"name":"genericSubarray","type":{"name":"TestModel.Image","typeArguments":[{"array":{"items":"int32","dimensions":[{"length":3}]}}]}}]},"types":[{"name":"Image","typeParameters":["T"],"type":{"array":{"items":"T","dimensions":[{"name":"x"},{"name":"y"}]}}},{"name":"Image","typeParameters":["T"],"type":{"name":"Image.Image","typeArguments":["T"]}}]}"""
 
+    def close(self) -> None:
+        self._close()
+        if self._state != 18:
+            expected_method = self._state_to_method_name((self._state + 1) & ~1)
+            raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+
     def __enter__(self):
         return self
 
     def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
-        self.close()
-        if exc is None and self._state != 18:
-            expected_method = self._state_to_method_name((self._state + 1) & ~1)
-            raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+        try:
+            self.close()
+        except Exception as e:
+            if exc is None:
+                raise e
 
     def write_dynamic_with_fixed_int_subarray(self, value: npt.NDArray[np.int32]) -> None:
         """Ordinal 0"""
@@ -2457,7 +2674,7 @@ class SubarraysWriterBase(abc.ABC):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def close(self) -> None:
+    def _close(self) -> None:
         pass
 
     @abc.abstractmethod
@@ -2497,14 +2714,9 @@ class SubarraysReaderBase(abc.ABC):
     def __init__(self) -> None:
         self._state = 0
 
-    schema = SubarraysWriterBase.schema
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
-        self.close()
-        if exc is None and self._state != 18:
+    def close(self) -> None:
+        self._close()
+        if self._state != 18:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
@@ -2513,8 +2725,20 @@ class SubarraysReaderBase(abc.ABC):
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
 
+    schema = SubarraysWriterBase.schema
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
+        try:
+            self.close()
+        except Exception as e:
+            if exc is None:
+                raise e
+
     @abc.abstractmethod
-    def close(self) -> None:
+    def _close(self) -> None:
         raise NotImplementedError()
 
     def read_dynamic_with_fixed_int_subarray(self) -> npt.NDArray[np.int32]:
@@ -2698,14 +2922,21 @@ class SubarraysInRecordsWriterBase(abc.ABC):
 
     schema = r"""{"protocol":{"name":"SubarraysInRecords","sequence":[{"name":"withFixedSubarrays","type":{"array":{"items":"TestModel.RecordWithFixedCollections"}}},{"name":"withVlenSubarrays","type":{"array":{"items":"TestModel.RecordWithVlenCollections"}}}]},"types":[{"name":"RecordWithFixedCollections","fields":[{"name":"fixedVector","type":{"vector":{"items":"int32","length":3}}},{"name":"fixedArray","type":{"array":{"items":"int32","dimensions":[{"length":2},{"length":3}]}}}]},{"name":"RecordWithVlenCollections","fields":[{"name":"vector","type":{"vector":{"items":"int32"}}},{"name":"array","type":{"array":{"items":"int32","dimensions":2}}}]}]}"""
 
+    def close(self) -> None:
+        self._close()
+        if self._state != 4:
+            expected_method = self._state_to_method_name((self._state + 1) & ~1)
+            raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+
     def __enter__(self):
         return self
 
     def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
-        self.close()
-        if exc is None and self._state != 4:
-            expected_method = self._state_to_method_name((self._state + 1) & ~1)
-            raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+        try:
+            self.close()
+        except Exception as e:
+            if exc is None:
+                raise e
 
     def write_with_fixed_subarrays(self, value: npt.NDArray[np.void]) -> None:
         """Ordinal 0"""
@@ -2734,7 +2965,7 @@ class SubarraysInRecordsWriterBase(abc.ABC):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def close(self) -> None:
+    def _close(self) -> None:
         pass
 
     @abc.abstractmethod
@@ -2760,14 +2991,9 @@ class SubarraysInRecordsReaderBase(abc.ABC):
     def __init__(self) -> None:
         self._state = 0
 
-    schema = SubarraysInRecordsWriterBase.schema
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
-        self.close()
-        if exc is None and self._state != 4:
+    def close(self) -> None:
+        self._close()
+        if self._state != 4:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
@@ -2776,8 +3002,20 @@ class SubarraysInRecordsReaderBase(abc.ABC):
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
 
+    schema = SubarraysInRecordsWriterBase.schema
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
+        try:
+            self.close()
+        except Exception as e:
+            if exc is None:
+                raise e
+
     @abc.abstractmethod
-    def close(self) -> None:
+    def _close(self) -> None:
         raise NotImplementedError()
 
     def read_with_fixed_subarrays(self) -> npt.NDArray[np.void]:
@@ -2842,14 +3080,21 @@ class NDArraysWriterBase(abc.ABC):
 
     schema = r"""{"protocol":{"name":"NDArrays","sequence":[{"name":"ints","type":{"array":{"items":"int32","dimensions":2}}},{"name":"simpleRecordArray","type":{"array":{"items":"TestModel.SimpleRecord","dimensions":2}}},{"name":"recordWithVlensArray","type":{"array":{"items":"TestModel.RecordWithVlens","dimensions":2}}},{"name":"recordWithNDArrays","type":"TestModel.RecordWithNDArrays"},{"name":"namedArray","type":"TestModel.NamedNDArray"}]},"types":[{"name":"NamedNDArray","type":{"array":{"items":"int32","dimensions":[{"name":"dimA"},{"name":"dimB"}]}}},{"name":"RecordWithNDArrays","fields":[{"name":"ints","type":{"array":{"items":"int32","dimensions":2}}},{"name":"fixedSimpleRecordArray","type":{"array":{"items":"TestModel.SimpleRecord","dimensions":2}}},{"name":"fixedRecordWithVlensArray","type":{"array":{"items":"TestModel.RecordWithVlens","dimensions":2}}}]},{"name":"RecordWithVlens","fields":[{"name":"a","type":{"vector":{"items":"TestModel.SimpleRecord"}}},{"name":"b","type":"int32"},{"name":"c","type":"int32"}]},{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]}]}"""
 
+    def close(self) -> None:
+        self._close()
+        if self._state != 10:
+            expected_method = self._state_to_method_name((self._state + 1) & ~1)
+            raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+
     def __enter__(self):
         return self
 
     def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
-        self.close()
-        if exc is None and self._state != 10:
-            expected_method = self._state_to_method_name((self._state + 1) & ~1)
-            raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+        try:
+            self.close()
+        except Exception as e:
+            if exc is None:
+                raise e
 
     def write_ints(self, value: npt.NDArray[np.int32]) -> None:
         """Ordinal 0"""
@@ -2917,7 +3162,7 @@ class NDArraysWriterBase(abc.ABC):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def close(self) -> None:
+    def _close(self) -> None:
         pass
 
     @abc.abstractmethod
@@ -2949,14 +3194,9 @@ class NDArraysReaderBase(abc.ABC):
     def __init__(self) -> None:
         self._state = 0
 
-    schema = NDArraysWriterBase.schema
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
-        self.close()
-        if exc is None and self._state != 10:
+    def close(self) -> None:
+        self._close()
+        if self._state != 10:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
@@ -2965,8 +3205,20 @@ class NDArraysReaderBase(abc.ABC):
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
 
+    schema = NDArraysWriterBase.schema
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
+        try:
+            self.close()
+        except Exception as e:
+            if exc is None:
+                raise e
+
     @abc.abstractmethod
-    def close(self) -> None:
+    def _close(self) -> None:
         raise NotImplementedError()
 
     def read_ints(self) -> npt.NDArray[np.int32]:
@@ -3082,14 +3334,21 @@ class NDArraysSingleDimensionWriterBase(abc.ABC):
 
     schema = r"""{"protocol":{"name":"NDArraysSingleDimension","sequence":[{"name":"ints","type":{"array":{"items":"int32","dimensions":1}}},{"name":"simpleRecordArray","type":{"array":{"items":"TestModel.SimpleRecord","dimensions":1}}},{"name":"recordWithVlensArray","type":{"array":{"items":"TestModel.RecordWithVlens","dimensions":1}}},{"name":"recordWithNDArrays","type":"TestModel.RecordWithNDArraysSingleDimension"}]},"types":[{"name":"RecordWithNDArraysSingleDimension","fields":[{"name":"ints","type":{"array":{"items":"int32","dimensions":1}}},{"name":"fixedSimpleRecordArray","type":{"array":{"items":"TestModel.SimpleRecord","dimensions":1}}},{"name":"fixedRecordWithVlensArray","type":{"array":{"items":"TestModel.RecordWithVlens","dimensions":1}}}]},{"name":"RecordWithVlens","fields":[{"name":"a","type":{"vector":{"items":"TestModel.SimpleRecord"}}},{"name":"b","type":"int32"},{"name":"c","type":"int32"}]},{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]}]}"""
 
+    def close(self) -> None:
+        self._close()
+        if self._state != 8:
+            expected_method = self._state_to_method_name((self._state + 1) & ~1)
+            raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+
     def __enter__(self):
         return self
 
     def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
-        self.close()
-        if exc is None and self._state != 8:
-            expected_method = self._state_to_method_name((self._state + 1) & ~1)
-            raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+        try:
+            self.close()
+        except Exception as e:
+            if exc is None:
+                raise e
 
     def write_ints(self, value: npt.NDArray[np.int32]) -> None:
         """Ordinal 0"""
@@ -3144,7 +3403,7 @@ class NDArraysSingleDimensionWriterBase(abc.ABC):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def close(self) -> None:
+    def _close(self) -> None:
         pass
 
     @abc.abstractmethod
@@ -3174,14 +3433,9 @@ class NDArraysSingleDimensionReaderBase(abc.ABC):
     def __init__(self) -> None:
         self._state = 0
 
-    schema = NDArraysSingleDimensionWriterBase.schema
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
-        self.close()
-        if exc is None and self._state != 8:
+    def close(self) -> None:
+        self._close()
+        if self._state != 8:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
@@ -3190,8 +3444,20 @@ class NDArraysSingleDimensionReaderBase(abc.ABC):
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
 
+    schema = NDArraysSingleDimensionWriterBase.schema
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
+        try:
+            self.close()
+        except Exception as e:
+            if exc is None:
+                raise e
+
     @abc.abstractmethod
-    def close(self) -> None:
+    def _close(self) -> None:
         raise NotImplementedError()
 
     def read_ints(self) -> npt.NDArray[np.int32]:
@@ -3290,14 +3556,21 @@ class DynamicNDArraysWriterBase(abc.ABC):
 
     schema = r"""{"protocol":{"name":"DynamicNDArrays","sequence":[{"name":"ints","type":{"array":{"items":"int32"}}},{"name":"simpleRecordArray","type":{"array":{"items":"TestModel.SimpleRecord"}}},{"name":"recordWithVlensArray","type":{"array":{"items":"TestModel.RecordWithVlens"}}},{"name":"recordWithDynamicNDArrays","type":"TestModel.RecordWithDynamicNDArrays"}]},"types":[{"name":"IntArray","type":{"array":{"items":"int32"}}},{"name":"RecordWithDynamicNDArrays","fields":[{"name":"ints","type":"TestModel.IntArray"},{"name":"simpleRecordArray","type":{"array":{"items":"TestModel.SimpleRecord"}}},{"name":"recordWithVlensArray","type":{"array":{"items":"TestModel.RecordWithVlens"}}}]},{"name":"RecordWithVlens","fields":[{"name":"a","type":{"vector":{"items":"TestModel.SimpleRecord"}}},{"name":"b","type":"int32"},{"name":"c","type":"int32"}]},{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]}]}"""
 
+    def close(self) -> None:
+        self._close()
+        if self._state != 8:
+            expected_method = self._state_to_method_name((self._state + 1) & ~1)
+            raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+
     def __enter__(self):
         return self
 
     def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
-        self.close()
-        if exc is None and self._state != 8:
-            expected_method = self._state_to_method_name((self._state + 1) & ~1)
-            raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+        try:
+            self.close()
+        except Exception as e:
+            if exc is None:
+                raise e
 
     def write_ints(self, value: npt.NDArray[np.int32]) -> None:
         """Ordinal 0"""
@@ -3352,7 +3625,7 @@ class DynamicNDArraysWriterBase(abc.ABC):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def close(self) -> None:
+    def _close(self) -> None:
         pass
 
     @abc.abstractmethod
@@ -3382,14 +3655,9 @@ class DynamicNDArraysReaderBase(abc.ABC):
     def __init__(self) -> None:
         self._state = 0
 
-    schema = DynamicNDArraysWriterBase.schema
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
-        self.close()
-        if exc is None and self._state != 8:
+    def close(self) -> None:
+        self._close()
+        if self._state != 8:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
@@ -3398,8 +3666,20 @@ class DynamicNDArraysReaderBase(abc.ABC):
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
 
+    schema = DynamicNDArraysWriterBase.schema
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
+        try:
+            self.close()
+        except Exception as e:
+            if exc is None:
+                raise e
+
     @abc.abstractmethod
-    def close(self) -> None:
+    def _close(self) -> None:
         raise NotImplementedError()
 
     def read_ints(self) -> npt.NDArray[np.int32]:
@@ -3498,14 +3778,21 @@ class MapsWriterBase(abc.ABC):
 
     schema = r"""{"protocol":{"name":"Maps","sequence":[{"name":"stringToInt","type":{"map":{"keys":"string","values":"int32"}}},{"name":"intToString","type":{"map":{"keys":"int32","values":"string"}}},{"name":"stringToUnion","type":{"map":{"keys":"string","values":[{"tag":"string","type":"string"},{"tag":"int32","type":"int32"}]}}},{"name":"aliasedGeneric","type":{"name":"BasicTypes.AliasedMap","typeArguments":["string","int32"]}}]},"types":[{"name":"AliasedMap","typeParameters":["K","V"],"type":{"map":{"keys":"K","values":"V"}}}]}"""
 
+    def close(self) -> None:
+        self._close()
+        if self._state != 8:
+            expected_method = self._state_to_method_name((self._state + 1) & ~1)
+            raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+
     def __enter__(self):
         return self
 
     def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
-        self.close()
-        if exc is None and self._state != 8:
-            expected_method = self._state_to_method_name((self._state + 1) & ~1)
-            raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+        try:
+            self.close()
+        except Exception as e:
+            if exc is None:
+                raise e
 
     def write_string_to_int(self, value: dict[str, yardl.Int32]) -> None:
         """Ordinal 0"""
@@ -3560,7 +3847,7 @@ class MapsWriterBase(abc.ABC):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def close(self) -> None:
+    def _close(self) -> None:
         pass
 
     @abc.abstractmethod
@@ -3590,14 +3877,9 @@ class MapsReaderBase(abc.ABC):
     def __init__(self) -> None:
         self._state = 0
 
-    schema = MapsWriterBase.schema
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
-        self.close()
-        if exc is None and self._state != 8:
+    def close(self) -> None:
+        self._close()
+        if self._state != 8:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
@@ -3606,8 +3888,20 @@ class MapsReaderBase(abc.ABC):
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
 
+    schema = MapsWriterBase.schema
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
+        try:
+            self.close()
+        except Exception as e:
+            if exc is None:
+                raise e
+
     @abc.abstractmethod
-    def close(self) -> None:
+    def _close(self) -> None:
         raise NotImplementedError()
 
     def read_string_to_int(self) -> dict[str, yardl.Int32]:
@@ -3706,14 +4000,21 @@ class UnionsWriterBase(abc.ABC):
 
     schema = r"""{"protocol":{"name":"Unions","sequence":[{"name":"intOrSimpleRecord","type":[{"tag":"int32","type":"int32"},{"tag":"SimpleRecord","type":"TestModel.SimpleRecord"}]},{"name":"intOrRecordWithVlens","type":[{"tag":"int32","type":"int32"},{"tag":"RecordWithVlens","type":"TestModel.RecordWithVlens"}]},{"name":"monosotateOrIntOrSimpleRecord","type":[null,{"tag":"int32","type":"int32"},{"tag":"SimpleRecord","type":"TestModel.SimpleRecord"}]},{"name":"recordWithUnions","type":"BasicTypes.RecordWithUnions"}]},"types":[{"name":"DaysOfWeek","values":[{"symbol":"monday","value":1},{"symbol":"tuesday","value":2},{"symbol":"wednesday","value":4},{"symbol":"thursday","value":8},{"symbol":"friday","value":16},{"symbol":"saturday","value":32},{"symbol":"sunday","value":64}]},{"name":"Fruits","values":[{"symbol":"apple","value":0},{"symbol":"banana","value":1},{"symbol":"pear","value":2}]},{"name":"GenericNullableUnion2","typeParameters":["T1","T2"],"type":[null,{"tag":"T1","type":"T1"},{"tag":"T2","type":"T2"}]},{"name":"RecordWithUnions","fields":[{"name":"nullOrIntOrString","type":[null,{"tag":"int32","type":"int32"},{"tag":"string","type":"string"}]},{"name":"dateOrDatetime","type":[{"tag":"time","type":"time"},{"tag":"datetime","type":"datetime"}]},{"name":"nullOrFruitsOrDaysOfWeek","type":{"name":"BasicTypes.GenericNullableUnion2","typeArguments":["BasicTypes.Fruits","BasicTypes.DaysOfWeek"]}}]},{"name":"RecordWithVlens","fields":[{"name":"a","type":{"vector":{"items":"TestModel.SimpleRecord"}}},{"name":"b","type":"int32"},{"name":"c","type":"int32"}]},{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]}]}"""
 
+    def close(self) -> None:
+        self._close()
+        if self._state != 8:
+            expected_method = self._state_to_method_name((self._state + 1) & ~1)
+            raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+
     def __enter__(self):
         return self
 
     def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
-        self.close()
-        if exc is None and self._state != 8:
-            expected_method = self._state_to_method_name((self._state + 1) & ~1)
-            raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+        try:
+            self.close()
+        except Exception as e:
+            if exc is None:
+                raise e
 
     def write_int_or_simple_record(self, value: Int32OrSimpleRecord) -> None:
         """Ordinal 0"""
@@ -3768,7 +4069,7 @@ class UnionsWriterBase(abc.ABC):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def close(self) -> None:
+    def _close(self) -> None:
         pass
 
     @abc.abstractmethod
@@ -3798,14 +4099,9 @@ class UnionsReaderBase(abc.ABC):
     def __init__(self) -> None:
         self._state = 0
 
-    schema = UnionsWriterBase.schema
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
-        self.close()
-        if exc is None and self._state != 8:
+    def close(self) -> None:
+        self._close()
+        if self._state != 8:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
@@ -3814,8 +4110,20 @@ class UnionsReaderBase(abc.ABC):
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
 
+    schema = UnionsWriterBase.schema
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
+        try:
+            self.close()
+        except Exception as e:
+            if exc is None:
+                raise e
+
     @abc.abstractmethod
-    def close(self) -> None:
+    def _close(self) -> None:
         raise NotImplementedError()
 
     def read_int_or_simple_record(self) -> Int32OrSimpleRecord:
@@ -3914,20 +4222,27 @@ class StreamsOfUnionsWriterBase(abc.ABC):
 
     schema = r"""{"protocol":{"name":"StreamsOfUnions","sequence":[{"name":"intOrSimpleRecord","type":{"stream":{"items":[{"tag":"int32","type":"int32"},{"tag":"SimpleRecord","type":"TestModel.SimpleRecord"}]}}},{"name":"nullableIntOrSimpleRecord","type":{"stream":{"items":[null,{"tag":"int32","type":"int32"},{"tag":"SimpleRecord","type":"TestModel.SimpleRecord"}]}}}]},"types":[{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]}]}"""
 
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
-        if exc is None and self._state == 3:
+    def close(self) -> None:
+        if self._state == 3:
             try:
                 self._end_stream()
                 return
             finally:
-                self.close()
-        self.close()
-        if exc is None and self._state != 4:
+                self._close()
+        self._close()
+        if self._state != 4:
             expected_method = self._state_to_method_name((self._state + 1) & ~1)
             raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
+        try:
+            self.close()
+        except Exception as e:
+            if exc is None:
+                raise e
 
     def write_int_or_simple_record(self, value: collections.abc.Iterable[Int32OrSimpleRecord]) -> None:
         """Ordinal 0"""
@@ -3959,7 +4274,7 @@ class StreamsOfUnionsWriterBase(abc.ABC):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def close(self) -> None:
+    def _close(self) -> None:
         pass
 
     @abc.abstractmethod
@@ -3985,14 +4300,9 @@ class StreamsOfUnionsReaderBase(abc.ABC):
     def __init__(self) -> None:
         self._state = 0
 
-    schema = StreamsOfUnionsWriterBase.schema
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
-        self.close()
-        if exc is None and self._state != 4:
+    def close(self) -> None:
+        self._close()
+        if self._state != 4:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
@@ -4001,8 +4311,20 @@ class StreamsOfUnionsReaderBase(abc.ABC):
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
 
+    schema = StreamsOfUnionsWriterBase.schema
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
+        try:
+            self.close()
+        except Exception as e:
+            if exc is None:
+                raise e
+
     @abc.abstractmethod
-    def close(self) -> None:
+    def _close(self) -> None:
         raise NotImplementedError()
 
     def read_int_or_simple_record(self) -> collections.abc.Iterable[Int32OrSimpleRecord]:
@@ -4067,14 +4389,21 @@ class EnumsWriterBase(abc.ABC):
 
     schema = r"""{"protocol":{"name":"Enums","sequence":[{"name":"single","type":"TestModel.Fruits"},{"name":"vec","type":{"vector":{"items":"TestModel.Fruits"}}},{"name":"size","type":"TestModel.SizeBasedEnum"}]},"types":[{"name":"Fruits","values":[{"symbol":"apple","value":0},{"symbol":"banana","value":1},{"symbol":"pear","value":2}]},{"name":"Fruits","type":"BasicTypes.Fruits"},{"name":"SizeBasedEnum","base":"size","values":[{"symbol":"a","value":0},{"symbol":"b","value":1},{"symbol":"c","value":2}]}]}"""
 
+    def close(self) -> None:
+        self._close()
+        if self._state != 6:
+            expected_method = self._state_to_method_name((self._state + 1) & ~1)
+            raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+
     def __enter__(self):
         return self
 
     def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
-        self.close()
-        if exc is None and self._state != 6:
-            expected_method = self._state_to_method_name((self._state + 1) & ~1)
-            raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+        try:
+            self.close()
+        except Exception as e:
+            if exc is None:
+                raise e
 
     def write_single(self, value: Fruits) -> None:
         """Ordinal 0"""
@@ -4116,7 +4445,7 @@ class EnumsWriterBase(abc.ABC):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def close(self) -> None:
+    def _close(self) -> None:
         pass
 
     @abc.abstractmethod
@@ -4144,14 +4473,9 @@ class EnumsReaderBase(abc.ABC):
     def __init__(self) -> None:
         self._state = 0
 
-    schema = EnumsWriterBase.schema
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
-        self.close()
-        if exc is None and self._state != 6:
+    def close(self) -> None:
+        self._close()
+        if self._state != 6:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
@@ -4160,8 +4484,20 @@ class EnumsReaderBase(abc.ABC):
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
 
+    schema = EnumsWriterBase.schema
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
+        try:
+            self.close()
+        except Exception as e:
+            if exc is None:
+                raise e
+
     @abc.abstractmethod
-    def close(self) -> None:
+    def _close(self) -> None:
         raise NotImplementedError()
 
     def read_single(self) -> Fruits:
@@ -4243,20 +4579,27 @@ class FlagsWriterBase(abc.ABC):
 
     schema = r"""{"protocol":{"name":"Flags","sequence":[{"name":"days","type":{"stream":{"items":"TestModel.DaysOfWeek"}}},{"name":"formats","type":{"stream":{"items":"TestModel.TextFormat"}}}]},"types":[{"name":"DaysOfWeek","values":[{"symbol":"monday","value":1},{"symbol":"tuesday","value":2},{"symbol":"wednesday","value":4},{"symbol":"thursday","value":8},{"symbol":"friday","value":16},{"symbol":"saturday","value":32},{"symbol":"sunday","value":64}]},{"name":"TextFormat","base":"uint64","values":[{"symbol":"regular","value":0},{"symbol":"bold","value":1},{"symbol":"italic","value":2},{"symbol":"underline","value":4},{"symbol":"strikethrough","value":8}]},{"name":"DaysOfWeek","type":"BasicTypes.DaysOfWeek"},{"name":"TextFormat","type":"BasicTypes.TextFormat"}]}"""
 
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
-        if exc is None and self._state == 3:
+    def close(self) -> None:
+        if self._state == 3:
             try:
                 self._end_stream()
                 return
             finally:
-                self.close()
-        self.close()
-        if exc is None and self._state != 4:
+                self._close()
+        self._close()
+        if self._state != 4:
             expected_method = self._state_to_method_name((self._state + 1) & ~1)
             raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
+        try:
+            self.close()
+        except Exception as e:
+            if exc is None:
+                raise e
 
     def write_days(self, value: collections.abc.Iterable[DaysOfWeek]) -> None:
         """Ordinal 0"""
@@ -4288,7 +4631,7 @@ class FlagsWriterBase(abc.ABC):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def close(self) -> None:
+    def _close(self) -> None:
         pass
 
     @abc.abstractmethod
@@ -4314,14 +4657,9 @@ class FlagsReaderBase(abc.ABC):
     def __init__(self) -> None:
         self._state = 0
 
-    schema = FlagsWriterBase.schema
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
-        self.close()
-        if exc is None and self._state != 4:
+    def close(self) -> None:
+        self._close()
+        if self._state != 4:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
@@ -4330,8 +4668,20 @@ class FlagsReaderBase(abc.ABC):
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
 
+    schema = FlagsWriterBase.schema
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
+        try:
+            self.close()
+        except Exception as e:
+            if exc is None:
+                raise e
+
     @abc.abstractmethod
-    def close(self) -> None:
+    def _close(self) -> None:
         raise NotImplementedError()
 
     def read_days(self) -> collections.abc.Iterable[DaysOfWeek]:
@@ -4396,14 +4746,21 @@ class StateTestWriterBase(abc.ABC):
 
     schema = r"""{"protocol":{"name":"StateTest","sequence":[{"name":"anInt","type":"int32"},{"name":"aStream","type":{"stream":{"items":"int32"}}},{"name":"anotherInt","type":"int32"}]},"types":null}"""
 
+    def close(self) -> None:
+        self._close()
+        if self._state != 6:
+            expected_method = self._state_to_method_name((self._state + 1) & ~1)
+            raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+
     def __enter__(self):
         return self
 
     def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
-        self.close()
-        if exc is None and self._state != 6:
-            expected_method = self._state_to_method_name((self._state + 1) & ~1)
-            raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+        try:
+            self.close()
+        except Exception as e:
+            if exc is None:
+                raise e
 
     def write_an_int(self, value: yardl.Int32) -> None:
         """Ordinal 0"""
@@ -4448,7 +4805,7 @@ class StateTestWriterBase(abc.ABC):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def close(self) -> None:
+    def _close(self) -> None:
         pass
 
     @abc.abstractmethod
@@ -4476,14 +4833,9 @@ class StateTestReaderBase(abc.ABC):
     def __init__(self) -> None:
         self._state = 0
 
-    schema = StateTestWriterBase.schema
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
-        self.close()
-        if exc is None and self._state != 6:
+    def close(self) -> None:
+        self._close()
+        if self._state != 6:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
@@ -4492,8 +4844,20 @@ class StateTestReaderBase(abc.ABC):
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
 
+    schema = StateTestWriterBase.schema
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
+        try:
+            self.close()
+        except Exception as e:
+            if exc is None:
+                raise e
+
     @abc.abstractmethod
-    def close(self) -> None:
+    def _close(self) -> None:
         raise NotImplementedError()
 
     def read_an_int(self) -> yardl.Int32:
@@ -4575,20 +4939,27 @@ class SimpleGenericsWriterBase(abc.ABC):
 
     schema = r"""{"protocol":{"name":"SimpleGenerics","sequence":[{"name":"floatImage","type":"Image.FloatImage"},{"name":"intImage","type":"Image.IntImage"},{"name":"intImageAlternateSyntax","type":{"name":"TestModel.Image","typeArguments":["int32"]}},{"name":"stringImage","type":{"name":"TestModel.Image","typeArguments":["string"]}},{"name":"intFloatTuple","type":{"name":"Tuples.Tuple","typeArguments":["int32","float32"]}},{"name":"floatFloatTuple","type":{"name":"Tuples.Tuple","typeArguments":["float32","float32"]}},{"name":"intFloatTupleAlternateSyntax","type":{"name":"Tuples.Tuple","typeArguments":["int32","float32"]}},{"name":"intStringTuple","type":{"name":"Tuples.Tuple","typeArguments":["int32","string"]}},{"name":"streamOfTypeVariants","type":{"stream":{"items":[{"tag":"imageFloat","explicitTag":true,"type":"Image.FloatImage"},{"tag":"imageDouble","explicitTag":true,"type":{"name":"TestModel.Image","typeArguments":["float64"]}}]}}}]},"types":[{"name":"FloatImage","type":{"name":"Image.Image","typeArguments":["float32"]}},{"name":"Image","typeParameters":["T"],"type":{"array":{"items":"T","dimensions":[{"name":"x"},{"name":"y"}]}}},{"name":"IntImage","type":{"name":"Image.Image","typeArguments":["int32"]}},{"name":"Image","typeParameters":["T"],"type":{"name":"Image.Image","typeArguments":["T"]}},{"name":"Tuple","typeParameters":["T1","T2"],"fields":[{"name":"v1","type":"T1"},{"name":"v2","type":"T2"}]}]}"""
 
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
-        if exc is None and self._state == 17:
+    def close(self) -> None:
+        if self._state == 17:
             try:
                 self._end_stream()
                 return
             finally:
-                self.close()
-        self.close()
-        if exc is None and self._state != 18:
+                self._close()
+        self._close()
+        if self._state != 18:
             expected_method = self._state_to_method_name((self._state + 1) & ~1)
             raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
+        try:
+            self.close()
+        except Exception as e:
+            if exc is None:
+                raise e
 
     def write_float_image(self, value: image.FloatImage) -> None:
         """Ordinal 0"""
@@ -4708,7 +5079,7 @@ class SimpleGenericsWriterBase(abc.ABC):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def close(self) -> None:
+    def _close(self) -> None:
         pass
 
     @abc.abstractmethod
@@ -4748,14 +5119,9 @@ class SimpleGenericsReaderBase(abc.ABC):
     def __init__(self) -> None:
         self._state = 0
 
-    schema = SimpleGenericsWriterBase.schema
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
-        self.close()
-        if exc is None and self._state != 18:
+    def close(self) -> None:
+        self._close()
+        if self._state != 18:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
@@ -4764,8 +5130,20 @@ class SimpleGenericsReaderBase(abc.ABC):
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
 
+    schema = SimpleGenericsWriterBase.schema
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
+        try:
+            self.close()
+        except Exception as e:
+            if exc is None:
+                raise e
+
     @abc.abstractmethod
-    def close(self) -> None:
+    def _close(self) -> None:
         raise NotImplementedError()
 
     def read_float_image(self) -> image.FloatImage:
@@ -4949,14 +5327,21 @@ class AdvancedGenericsWriterBase(abc.ABC):
 
     schema = r"""{"protocol":{"name":"AdvancedGenerics","sequence":[{"name":"floatImageImage","type":{"name":"TestModel.Image","typeArguments":[{"name":"TestModel.Image","typeArguments":["float32"]}]}},{"name":"genericRecord1","type":{"name":"TestModel.GenericRecord","typeArguments":["int32","string"]}},{"name":"tupleOfOptionals","type":{"name":"TestModel.MyTuple","typeArguments":[[null,"int32"],[null,"string"]]}},{"name":"tupleOfOptionalsAlternateSyntax","type":{"name":"TestModel.MyTuple","typeArguments":[[null,"int32"],[null,"string"]]}},{"name":"tupleOfVectors","type":{"name":"TestModel.MyTuple","typeArguments":[{"vector":{"items":"int32"}},{"vector":{"items":"float32"}}]}}]},"types":[{"name":"MyTuple","typeParameters":["T1","T2"],"type":{"name":"Tuples.Tuple","typeArguments":["T1","T2"]}},{"name":"Image","typeParameters":["T"],"type":{"array":{"items":"T","dimensions":[{"name":"x"},{"name":"y"}]}}},{"name":"GenericRecord","typeParameters":["T1","T2"],"fields":[{"name":"scalar1","type":"T1"},{"name":"scalar2","type":"T2"},{"name":"vector1","type":{"vector":{"items":"T1"}}},{"name":"image2","type":{"name":"TestModel.Image","typeArguments":["T2"]}}]},{"name":"Image","typeParameters":["T"],"type":{"name":"Image.Image","typeArguments":["T"]}},{"name":"MyTuple","typeParameters":["T1","T2"],"type":{"name":"BasicTypes.MyTuple","typeArguments":["T1","T2"]}},{"name":"Tuple","typeParameters":["T1","T2"],"fields":[{"name":"v1","type":"T1"},{"name":"v2","type":"T2"}]}]}"""
 
+    def close(self) -> None:
+        self._close()
+        if self._state != 10:
+            expected_method = self._state_to_method_name((self._state + 1) & ~1)
+            raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+
     def __enter__(self):
         return self
 
     def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
-        self.close()
-        if exc is None and self._state != 10:
-            expected_method = self._state_to_method_name((self._state + 1) & ~1)
-            raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+        try:
+            self.close()
+        except Exception as e:
+            if exc is None:
+                raise e
 
     def write_float_image_image(self, value: Image[np.object_]) -> None:
         """Ordinal 0"""
@@ -5024,7 +5409,7 @@ class AdvancedGenericsWriterBase(abc.ABC):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def close(self) -> None:
+    def _close(self) -> None:
         pass
 
     @abc.abstractmethod
@@ -5056,14 +5441,9 @@ class AdvancedGenericsReaderBase(abc.ABC):
     def __init__(self) -> None:
         self._state = 0
 
-    schema = AdvancedGenericsWriterBase.schema
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
-        self.close()
-        if exc is None and self._state != 10:
+    def close(self) -> None:
+        self._close()
+        if self._state != 10:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
@@ -5072,8 +5452,20 @@ class AdvancedGenericsReaderBase(abc.ABC):
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
 
+    schema = AdvancedGenericsWriterBase.schema
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
+        try:
+            self.close()
+        except Exception as e:
+            if exc is None:
+                raise e
+
     @abc.abstractmethod
-    def close(self) -> None:
+    def _close(self) -> None:
         raise NotImplementedError()
 
     def read_float_image_image(self) -> Image[np.object_]:
@@ -5189,20 +5581,27 @@ class AliasesWriterBase(abc.ABC):
 
     schema = r"""{"protocol":{"name":"Aliases","sequence":[{"name":"aliasedString","type":"TestModel.AliasedString"},{"name":"aliasedEnum","type":"TestModel.AliasedEnum"},{"name":"aliasedOpenGeneric","type":{"name":"TestModel.AliasedOpenGeneric","typeArguments":["TestModel.AliasedString","TestModel.AliasedEnum"]}},{"name":"aliasedClosedGeneric","type":"TestModel.AliasedClosedGeneric"},{"name":"aliasedOptional","type":"TestModel.AliasedOptional"},{"name":"aliasedGenericOptional","type":{"name":"TestModel.AliasedGenericOptional","typeArguments":["float32"]}},{"name":"aliasedGenericUnion2","type":{"name":"TestModel.AliasedGenericUnion2","typeArguments":["TestModel.AliasedString","TestModel.AliasedEnum"]}},{"name":"aliasedGenericVector","type":{"name":"TestModel.AliasedGenericVector","typeArguments":["float32"]}},{"name":"aliasedGenericFixedVector","type":{"name":"TestModel.AliasedGenericFixedVector","typeArguments":["float32"]}},{"name":"streamOfAliasedGenericUnion2","type":{"stream":{"items":{"name":"TestModel.AliasedGenericUnion2","typeArguments":["TestModel.AliasedString","TestModel.AliasedEnum"]}}}}]},"types":[{"name":"Fruits","values":[{"symbol":"apple","value":0},{"symbol":"banana","value":1},{"symbol":"pear","value":2}]},{"name":"GenericUnion2","typeParameters":["T1","T2"],"type":[{"tag":"T1","type":"T1"},{"tag":"T2","type":"T2"}]},{"name":"GenericVector","typeParameters":["T"],"type":{"vector":{"items":"T"}}},{"name":"MyTuple","typeParameters":["T1","T2"],"type":{"name":"Tuples.Tuple","typeArguments":["T1","T2"]}},{"name":"AliasedClosedGeneric","type":{"name":"TestModel.AliasedTuple","typeArguments":["TestModel.AliasedString","TestModel.AliasedEnum"]}},{"name":"AliasedEnum","type":"TestModel.Fruits"},{"name":"AliasedGenericFixedVector","typeParameters":["T"],"type":{"vector":{"items":"T","length":3}}},{"name":"AliasedGenericOptional","typeParameters":["T"],"type":[null,"T"]},{"name":"AliasedGenericUnion2","typeParameters":["T1","T2"],"type":{"name":"BasicTypes.GenericUnion2","typeArguments":["T1","T2"]}},{"name":"AliasedGenericVector","typeParameters":["T"],"type":{"name":"BasicTypes.GenericVector","typeArguments":["T"]}},{"name":"AliasedOpenGeneric","typeParameters":["T1","T2"],"type":{"name":"TestModel.AliasedTuple","typeArguments":["T1","T2"]}},{"name":"AliasedOptional","type":[null,"int32"]},{"name":"AliasedString","type":"string"},{"name":"AliasedTuple","typeParameters":["T1","T2"],"type":{"name":"TestModel.MyTuple","typeArguments":["T1","T2"]}},{"name":"Fruits","type":"BasicTypes.Fruits"},{"name":"MyTuple","typeParameters":["T1","T2"],"type":{"name":"BasicTypes.MyTuple","typeArguments":["T1","T2"]}},{"name":"Tuple","typeParameters":["T1","T2"],"fields":[{"name":"v1","type":"T1"},{"name":"v2","type":"T2"}]}]}"""
 
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
-        if exc is None and self._state == 19:
+    def close(self) -> None:
+        if self._state == 19:
             try:
                 self._end_stream()
                 return
             finally:
-                self.close()
-        self.close()
-        if exc is None and self._state != 20:
+                self._close()
+        self._close()
+        if self._state != 20:
             expected_method = self._state_to_method_name((self._state + 1) & ~1)
             raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
+        try:
+            self.close()
+        except Exception as e:
+            if exc is None:
+                raise e
 
     def write_aliased_string(self, value: AliasedString) -> None:
         """Ordinal 0"""
@@ -5335,7 +5734,7 @@ class AliasesWriterBase(abc.ABC):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def close(self) -> None:
+    def _close(self) -> None:
         pass
 
     @abc.abstractmethod
@@ -5377,14 +5776,9 @@ class AliasesReaderBase(abc.ABC):
     def __init__(self) -> None:
         self._state = 0
 
-    schema = AliasesWriterBase.schema
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
-        self.close()
-        if exc is None and self._state != 20:
+    def close(self) -> None:
+        self._close()
+        if self._state != 20:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
@@ -5393,8 +5787,20 @@ class AliasesReaderBase(abc.ABC):
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
 
+    schema = AliasesWriterBase.schema
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
+        try:
+            self.close()
+        except Exception as e:
+            if exc is None:
+                raise e
+
     @abc.abstractmethod
-    def close(self) -> None:
+    def _close(self) -> None:
         raise NotImplementedError()
 
     def read_aliased_string(self) -> AliasedString:
@@ -5595,20 +6001,27 @@ class StreamsOfAliasedUnionsWriterBase(abc.ABC):
 
     schema = r"""{"protocol":{"name":"StreamsOfAliasedUnions","sequence":[{"name":"intOrSimpleRecord","type":{"stream":{"items":"TestModel.AliasedIntOrSimpleRecord"}}},{"name":"nullableIntOrSimpleRecord","type":{"stream":{"items":"TestModel.AliasedNullableIntSimpleRecord"}}}]},"types":[{"name":"AliasedIntOrSimpleRecord","type":[{"tag":"int32","type":"int32"},{"tag":"SimpleRecord","type":"TestModel.SimpleRecord"}]},{"name":"AliasedNullableIntSimpleRecord","type":[null,{"tag":"int32","type":"int32"},{"tag":"SimpleRecord","type":"TestModel.SimpleRecord"}]},{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]}]}"""
 
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
-        if exc is None and self._state == 3:
+    def close(self) -> None:
+        if self._state == 3:
             try:
                 self._end_stream()
                 return
             finally:
-                self.close()
-        self.close()
-        if exc is None and self._state != 4:
+                self._close()
+        self._close()
+        if self._state != 4:
             expected_method = self._state_to_method_name((self._state + 1) & ~1)
             raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
+        try:
+            self.close()
+        except Exception as e:
+            if exc is None:
+                raise e
 
     def write_int_or_simple_record(self, value: collections.abc.Iterable[AliasedIntOrSimpleRecord]) -> None:
         """Ordinal 0"""
@@ -5640,7 +6053,7 @@ class StreamsOfAliasedUnionsWriterBase(abc.ABC):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def close(self) -> None:
+    def _close(self) -> None:
         pass
 
     @abc.abstractmethod
@@ -5666,14 +6079,9 @@ class StreamsOfAliasedUnionsReaderBase(abc.ABC):
     def __init__(self) -> None:
         self._state = 0
 
-    schema = StreamsOfAliasedUnionsWriterBase.schema
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
-        self.close()
-        if exc is None and self._state != 4:
+    def close(self) -> None:
+        self._close()
+        if self._state != 4:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
@@ -5682,8 +6090,20 @@ class StreamsOfAliasedUnionsReaderBase(abc.ABC):
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
 
+    schema = StreamsOfAliasedUnionsWriterBase.schema
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
+        try:
+            self.close()
+        except Exception as e:
+            if exc is None:
+                raise e
+
     @abc.abstractmethod
-    def close(self) -> None:
+    def _close(self) -> None:
         raise NotImplementedError()
 
     def read_int_or_simple_record(self) -> collections.abc.Iterable[AliasedIntOrSimpleRecord]:
@@ -5748,14 +6168,21 @@ class ProtocolWithComputedFieldsWriterBase(abc.ABC):
 
     schema = r"""{"protocol":{"name":"ProtocolWithComputedFields","sequence":[{"name":"recordWithComputedFields","type":"TestModel.RecordWithComputedFields"}]},"types":[{"name":"GenericRecordWithComputedFields","typeParameters":["T0","T1"],"fields":[{"name":"f1","type":[{"tag":"T0","type":"T0"},{"tag":"T1","type":"T1"}]}]},{"name":"MyTuple","typeParameters":["T1","T2"],"type":{"name":"Tuples.Tuple","typeArguments":["T1","T2"]}},{"name":"MyTuple","typeParameters":["T1","T2"],"type":{"name":"BasicTypes.MyTuple","typeArguments":["T1","T2"]}},{"name":"NamedNDArray","type":{"array":{"items":"int32","dimensions":[{"name":"dimA"},{"name":"dimB"}]}}},{"name":"RecordWithComputedFields","fields":[{"name":"arrayField","type":{"array":{"items":"int32","dimensions":[{"name":"x"},{"name":"y"}]}}},{"name":"arrayFieldMapDimensions","type":{"array":{"items":"int32","dimensions":[{"name":"x"},{"name":"y"}]}}},{"name":"dynamicArrayField","type":{"array":{"items":"int32"}}},{"name":"fixedArrayField","type":{"array":{"items":"int32","dimensions":[{"name":"x","length":3},{"name":"y","length":4}]}}},{"name":"intField","type":"int32"},{"name":"int8Field","type":"int8"},{"name":"uint8Field","type":"uint8"},{"name":"int16Field","type":"int16"},{"name":"uint16Field","type":"uint16"},{"name":"uint32Field","type":"uint32"},{"name":"int64Field","type":"int64"},{"name":"uint64Field","type":"uint64"},{"name":"sizeField","type":"size"},{"name":"float32Field","type":"float32"},{"name":"float64Field","type":"float64"},{"name":"complexfloat32Field","type":"complexfloat32"},{"name":"complexfloat64Field","type":"complexfloat64"},{"name":"stringField","type":"string"},{"name":"tupleField","type":{"name":"TestModel.MyTuple","typeArguments":["int32","int32"]}},{"name":"vectorField","type":{"vector":{"items":"int32"}}},{"name":"vectorOfVectorsField","type":{"vector":{"items":{"vector":{"items":"int32"}}}}},{"name":"fixedVectorField","type":{"vector":{"items":"int32","length":3}}},{"name":"optionalNamedArray","type":[null,"TestModel.NamedNDArray"]},{"name":"intFloatUnion","type":[{"tag":"int32","type":"int32"},{"tag":"float32","type":"float32"}]},{"name":"nullableIntFloatUnion","type":[null,{"tag":"int32","type":"int32"},{"tag":"float32","type":"float32"}]},{"name":"unionWithNestedGenericUnion","type":[{"tag":"int","explicitTag":true,"type":"int32"},{"tag":"genericRecordWithComputedFields","explicitTag":true,"type":{"name":"BasicTypes.GenericRecordWithComputedFields","typeArguments":["string","float32"]}}]},{"name":"mapField","type":{"map":{"keys":"string","values":"string"}}}]},{"name":"Tuple","typeParameters":["T1","T2"],"fields":[{"name":"v1","type":"T1"},{"name":"v2","type":"T2"}]}]}"""
 
+    def close(self) -> None:
+        self._close()
+        if self._state != 2:
+            expected_method = self._state_to_method_name((self._state + 1) & ~1)
+            raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+
     def __enter__(self):
         return self
 
     def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
-        self.close()
-        if exc is None and self._state != 2:
-            expected_method = self._state_to_method_name((self._state + 1) & ~1)
-            raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+        try:
+            self.close()
+        except Exception as e:
+            if exc is None:
+                raise e
 
     def write_record_with_computed_fields(self, value: RecordWithComputedFields) -> None:
         """Ordinal 0"""
@@ -5771,7 +6198,7 @@ class ProtocolWithComputedFieldsWriterBase(abc.ABC):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def close(self) -> None:
+    def _close(self) -> None:
         pass
 
     @abc.abstractmethod
@@ -5795,14 +6222,9 @@ class ProtocolWithComputedFieldsReaderBase(abc.ABC):
     def __init__(self) -> None:
         self._state = 0
 
-    schema = ProtocolWithComputedFieldsWriterBase.schema
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
-        self.close()
-        if exc is None and self._state != 2:
+    def close(self) -> None:
+        self._close()
+        if self._state != 2:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
@@ -5811,8 +6233,20 @@ class ProtocolWithComputedFieldsReaderBase(abc.ABC):
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
 
+    schema = ProtocolWithComputedFieldsWriterBase.schema
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
+        try:
+            self.close()
+        except Exception as e:
+            if exc is None:
+                raise e
+
     @abc.abstractmethod
-    def close(self) -> None:
+    def _close(self) -> None:
         raise NotImplementedError()
 
     def read_record_with_computed_fields(self) -> RecordWithComputedFields:
@@ -5860,14 +6294,21 @@ class ProtocolWithKeywordStepsWriterBase(abc.ABC):
 
     schema = r"""{"protocol":{"name":"ProtocolWithKeywordSteps","sequence":[{"name":"int","type":{"stream":{"items":"TestModel.RecordWithKeywordFields"}}},{"name":"float","type":"TestModel.EnumWithKeywordSymbols"}]},"types":[{"name":"ArrayWithKeywordDimensionNames","type":{"array":{"items":"int32","dimensions":[{"name":"while"},{"name":"do"}]}}},{"name":"EnumWithKeywordSymbols","values":[{"symbol":"try","value":2},{"symbol":"catch","value":1}]},{"name":"RecordWithKeywordFields","fields":[{"name":"int","type":"string"},{"name":"sizeof","type":"TestModel.ArrayWithKeywordDimensionNames"},{"name":"if","type":"TestModel.EnumWithKeywordSymbols"}]}]}"""
 
+    def close(self) -> None:
+        self._close()
+        if self._state != 4:
+            expected_method = self._state_to_method_name((self._state + 1) & ~1)
+            raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+
     def __enter__(self):
         return self
 
     def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
-        self.close()
-        if exc is None and self._state != 4:
-            expected_method = self._state_to_method_name((self._state + 1) & ~1)
-            raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+        try:
+            self.close()
+        except Exception as e:
+            if exc is None:
+                raise e
 
     def write_int(self, value: collections.abc.Iterable[RecordWithKeywordFields]) -> None:
         """Ordinal 0"""
@@ -5899,7 +6340,7 @@ class ProtocolWithKeywordStepsWriterBase(abc.ABC):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def close(self) -> None:
+    def _close(self) -> None:
         pass
 
     @abc.abstractmethod
@@ -5925,14 +6366,9 @@ class ProtocolWithKeywordStepsReaderBase(abc.ABC):
     def __init__(self) -> None:
         self._state = 0
 
-    schema = ProtocolWithKeywordStepsWriterBase.schema
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
-        self.close()
-        if exc is None and self._state != 4:
+    def close(self) -> None:
+        self._close()
+        if self._state != 4:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
@@ -5941,8 +6377,20 @@ class ProtocolWithKeywordStepsReaderBase(abc.ABC):
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
 
+    schema = ProtocolWithKeywordStepsWriterBase.schema
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
+        try:
+            self.close()
+        except Exception as e:
+            if exc is None:
+                raise e
+
     @abc.abstractmethod
-    def close(self) -> None:
+    def _close(self) -> None:
         raise NotImplementedError()
 
     def read_int(self) -> collections.abc.Iterable[RecordWithKeywordFields]:

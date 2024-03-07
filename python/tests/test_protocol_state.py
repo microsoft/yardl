@@ -17,8 +17,8 @@ class _TestStateTestWriter(tm.StateTestWriterBase):
     def _end_stream(self) -> None:
         pass
 
-    def close(self) -> None:
-        return super().close()
+    def _close(self) -> None:
+        pass
 
 
 def test_proper_sequence_write():
@@ -72,7 +72,7 @@ class _TestStateTestReader(tm.StateTestReaderBase):
     def _read_another_int(self) -> tm.Int32:
         return -4
 
-    def close(self) -> None:
+    def _close(self) -> None:
         pass
 
 

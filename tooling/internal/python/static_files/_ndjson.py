@@ -61,7 +61,7 @@ class NDJsonProtocolWriter(ABC):
             },
         )
 
-    def close(self) -> None:
+    def _close(self) -> None:
         if self._owns_stream:
             self._stream.close()
 
@@ -124,7 +124,7 @@ class NDJsonProtocolReader:
                 "The schema of the data to be read is not compatible with the current protocol."
             )
 
-    def close(self) -> None:
+    def _close(self) -> None:
         if self._owns_stream:
             self._stream.close()
 
