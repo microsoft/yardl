@@ -3777,5 +3777,17 @@ void ProtocolWithKeywordStepsReader::CloseImpl() {
   VerifyFinished();
 }
 
+void EmptyProtocolWriter::Flush() {
+  stream_.flush();
+}
+
+void EmptyProtocolWriter::CloseImpl() {
+  stream_.flush();
+}
+
+void EmptyProtocolReader::CloseImpl() {
+  VerifyFinished();
+}
+
 } // namespace test_model::ndjson
 

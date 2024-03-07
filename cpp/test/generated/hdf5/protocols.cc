@@ -3543,5 +3543,13 @@ void ProtocolWithKeywordStepsReader::ReadFloatImpl(test_model::EnumWithKeywordSy
   yardl::hdf5::ReadScalarDataset<test_model::EnumWithKeywordSymbols, test_model::EnumWithKeywordSymbols>(group_, "float", test_model::hdf5::GetEnumWithKeywordSymbolsHdf5Ddl(), value);
 }
 
+EmptyProtocolWriter::EmptyProtocolWriter(std::string path)
+    : yardl::hdf5::Hdf5Writer::Hdf5Writer(path, "EmptyProtocol", schema_) {
+}
+
+EmptyProtocolReader::EmptyProtocolReader(std::string path)
+    : yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "EmptyProtocol", schema_) {
+}
+
 } // namespace test_model::hdf5
 

@@ -1187,6 +1187,23 @@ class BinaryProtocolWithKeywordStepsReader(_binary.BinaryProtocolReader, Protoco
     def _read_float(self) -> EnumWithKeywordSymbols:
         return _binary.EnumSerializer(_binary.int32_serializer, EnumWithKeywordSymbols).read(self._stream)
 
+class BinaryEmptyProtocolWriter(_binary.BinaryProtocolWriter, EmptyProtocolWriterBase):
+    """Binary writer for the EmptyProtocol protocol."""
+
+
+    def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
+        EmptyProtocolWriterBase.__init__(self)
+        _binary.BinaryProtocolWriter.__init__(self, stream, EmptyProtocolWriterBase.schema)
+
+
+class BinaryEmptyProtocolReader(_binary.BinaryProtocolReader, EmptyProtocolReaderBase):
+    """Binary writer for the EmptyProtocol protocol."""
+
+
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
+        EmptyProtocolReaderBase.__init__(self)
+        _binary.BinaryProtocolReader.__init__(self, stream, EmptyProtocolReaderBase.schema)
+
 class SmallBenchmarkRecordSerializer(_binary.RecordSerializer[SmallBenchmarkRecord]):
     def __init__(self) -> None:
         super().__init__([("a", _binary.float64_serializer), ("b", _binary.float32_serializer), ("c", _binary.float32_serializer)])

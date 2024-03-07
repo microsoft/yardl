@@ -5173,6 +5173,10 @@
               "type": "TestModel.EnumWithKeywordSymbols"
             }
           ]
+        },
+        {
+          "name": "EmptyProtocol",
+          "sequence": null
         }
       ]
     }

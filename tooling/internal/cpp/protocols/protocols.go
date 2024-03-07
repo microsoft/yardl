@@ -527,35 +527,39 @@ func writeProtocolCopyToMethod(w *formatting.IndentedWriter, p *dsl.ProtocolDefi
 	w.WriteStringln(") {")
 
 	w.Indented(func() {
-		for _, s := range p.Sequence {
-			if s.IsStream() {
-				bufferSizeParameterName := fmt.Sprintf("%s_buffer_size", formatting.ToSnakeCase(s.Name))
-				fmt.Fprintf(w, "if (%s > 1) {\n", bufferSizeParameterName)
-				w.Indented(func() {
-					fmt.Fprintf(w, "std::vector<%s> values;\n", common.TypeSyntax(s.Type))
-					fmt.Fprintf(w, "values.reserve(%s);\n", bufferSizeParameterName)
-					fmt.Fprintf(w, "while(%s(values)) {\n", common.ProtocolReadMethodName(s))
-					fmt.Fprintf(w.Indent(), "writer.%s(values);\n", common.ProtocolWriteMethodName(s))
-					w.WriteStringln("}")
-					fmt.Fprintf(w, "writer.%s();\n", common.ProtocolWriteEndMethodName(s))
-				})
-				w.WriteStringln("} else {")
-				w.Indented(func() {
-					fmt.Fprintf(w, "%s value;\n", common.TypeSyntax(s.Type))
-					fmt.Fprintf(w, "while(%s(value)) {\n", common.ProtocolReadMethodName(s))
-					fmt.Fprintf(w.Indent(), "writer.%s(value);\n", common.ProtocolWriteMethodName(s))
-					w.WriteStringln("}")
-					fmt.Fprintf(w, "writer.%s();\n", common.ProtocolWriteEndMethodName(s))
-				})
-				w.WriteString("}\n")
-			} else {
-				w.WriteStringln("{")
-				w.Indented(func() {
-					fmt.Fprintf(w, "%s value;\n", common.TypeSyntax(s.Type))
-					fmt.Fprintf(w, "%s(value);\n", common.ProtocolReadMethodName(s))
-					fmt.Fprintf(w, "writer.%s(value);\n", common.ProtocolWriteMethodName(s))
-				})
-				w.WriteString("}\n")
+		if len(p.Sequence) == 0 {
+			w.WriteStringln("(void)(writer);")
+		} else {
+			for _, s := range p.Sequence {
+				if s.IsStream() {
+					bufferSizeParameterName := fmt.Sprintf("%s_buffer_size", formatting.ToSnakeCase(s.Name))
+					fmt.Fprintf(w, "if (%s > 1) {\n", bufferSizeParameterName)
+					w.Indented(func() {
+						fmt.Fprintf(w, "std::vector<%s> values;\n", common.TypeSyntax(s.Type))
+						fmt.Fprintf(w, "values.reserve(%s);\n", bufferSizeParameterName)
+						fmt.Fprintf(w, "while(%s(values)) {\n", common.ProtocolReadMethodName(s))
+						fmt.Fprintf(w.Indent(), "writer.%s(values);\n", common.ProtocolWriteMethodName(s))
+						w.WriteStringln("}")
+						fmt.Fprintf(w, "writer.%s();\n", common.ProtocolWriteEndMethodName(s))
+					})
+					w.WriteStringln("} else {")
+					w.Indented(func() {
+						fmt.Fprintf(w, "%s value;\n", common.TypeSyntax(s.Type))
+						fmt.Fprintf(w, "while(%s(value)) {\n", common.ProtocolReadMethodName(s))
+						fmt.Fprintf(w.Indent(), "writer.%s(value);\n", common.ProtocolWriteMethodName(s))
+						w.WriteStringln("}")
+						fmt.Fprintf(w, "writer.%s();\n", common.ProtocolWriteEndMethodName(s))
+					})
+					w.WriteString("}\n")
+				} else {
+					w.WriteStringln("{")
+					w.Indented(func() {
+						fmt.Fprintf(w, "%s value;\n", common.TypeSyntax(s.Type))
+						fmt.Fprintf(w, "%s(value);\n", common.ProtocolReadMethodName(s))
+						fmt.Fprintf(w, "writer.%s(value);\n", common.ProtocolWriteMethodName(s))
+					})
+					w.WriteString("}\n")
+				}
 			}
 		}
 	})

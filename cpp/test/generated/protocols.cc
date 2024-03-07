@@ -6404,4 +6404,69 @@ void ProtocolWithKeywordStepsReaderBase::CopyTo(ProtocolWithKeywordStepsWriterBa
     writer.WriteFloat(value);
   }
 }
+
+namespace {
+void EmptyProtocolWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end, uint8_t current) {
+  std::string expected_method;
+  switch (current) {
+  }
+  std::string attempted_method;
+  switch (attempted) {
+  case 0: attempted_method = "Close()"; break;
+  }
+  throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
+}
+
+void EmptyProtocolReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
+  auto f = [](uint8_t i) -> std::string {
+    switch (i/2) {
+    case 0: return "Close()";
+    default: return "<unknown>";
+    }
+  };
+  throw std::runtime_error("Expected call to " + f(current) + " but received call to " + f(attempted) + " instead.");
+}
+
+} // namespace 
+
+std::string EmptyProtocolWriterBase::schema_ = R"({"protocol":{"name":"EmptyProtocol","sequence":null},"types":null})";
+
+std::vector<std::string> EmptyProtocolWriterBase::previous_schemas_ = {
+};
+
+std::string EmptyProtocolWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Current: return EmptyProtocolWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol EmptyProtocol.");
+  }
+
+}
+void EmptyProtocolWriterBase::Close() {
+  if (unlikely(state_ != 0)) {
+    EmptyProtocolWriterBaseInvalidState(0, false, state_);
+  }
+
+  CloseImpl();
+}
+
+std::string EmptyProtocolReaderBase::schema_ = EmptyProtocolWriterBase::schema_;
+
+std::vector<std::string> EmptyProtocolReaderBase::previous_schemas_ = EmptyProtocolWriterBase::previous_schemas_;
+
+Version EmptyProtocolReaderBase::VersionFromSchema(std::string const& schema) {
+  if (schema == EmptyProtocolWriterBase::schema_) {
+    return Version::Current;
+  }
+  throw std::runtime_error("The schema does not match any version supported by protocol EmptyProtocol.");
+}
+void EmptyProtocolReaderBase::Close() {
+  if (unlikely(state_ != 0)) {
+    EmptyProtocolReaderBaseInvalidState(0, state_);
+  }
+
+  CloseImpl();
+}
+void EmptyProtocolReaderBase::CopyTo(EmptyProtocolWriterBase& writer) {
+  (void)(writer);
+}
 } // namespace test_model

@@ -1265,4 +1265,36 @@ class ProtocolWithKeywordStepsReader : public test_model::ProtocolWithKeywordSte
   void CloseImpl() override;
 };
 
+// NDJSON writer for the EmptyProtocol protocol.
+class EmptyProtocolWriter : public test_model::EmptyProtocolWriterBase, yardl::ndjson::NDJsonWriter {
+  public:
+  EmptyProtocolWriter(std::ostream& stream)
+      : yardl::ndjson::NDJsonWriter(stream, schema_) {
+  }
+
+  EmptyProtocolWriter(std::string file_name)
+      : yardl::ndjson::NDJsonWriter(file_name, schema_) {
+  }
+
+  void Flush() override;
+
+  protected:
+  void CloseImpl() override;
+};
+
+// NDJSON reader for the EmptyProtocol protocol.
+class EmptyProtocolReader : public test_model::EmptyProtocolReaderBase, yardl::ndjson::NDJsonReader {
+  public:
+  EmptyProtocolReader(std::istream& stream)
+      : yardl::ndjson::NDJsonReader(stream, schema_) {
+  }
+
+  EmptyProtocolReader(std::string file_name)
+      : yardl::ndjson::NDJsonReader(file_name, schema_) {
+  }
+
+  protected:
+  void CloseImpl() override;
+};
+
 } // namespace test_model::ndjson

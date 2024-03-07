@@ -4104,6 +4104,39 @@ class TestProtocolWithKeywordStepsWriterBase : public ProtocolWithKeywordStepsWr
   MockProtocolWithKeywordStepsWriter mock_writer_;
   bool close_called_ = false;
 };
+
+class MockEmptyProtocolWriter : public EmptyProtocolWriterBase {
+  public:
+  void Verify() {
+  }
+};
+
+class TestEmptyProtocolWriterBase : public EmptyProtocolWriterBase {
+  public:
+  TestEmptyProtocolWriterBase(std::unique_ptr<test_model::EmptyProtocolWriterBase> writer, std::function<std::unique_ptr<EmptyProtocolReaderBase>()> create_reader) : writer_(std::move(writer)), create_reader_(create_reader) {
+  }
+
+  ~TestEmptyProtocolWriterBase() {
+    if (!close_called_ && !std::uncaught_exceptions()) {
+      ADD_FAILURE() << "Close() needs to be called on 'TestEmptyProtocolWriterBase' to verify mocks";
+    }
+  }
+
+  protected:
+  void CloseImpl() override {
+    close_called_ = true;
+    writer_->Close();
+    std::unique_ptr<EmptyProtocolReaderBase> reader = create_reader_();
+    reader->CopyTo(mock_writer_);
+    mock_writer_.Verify();
+  }
+
+  private:
+  std::unique_ptr<test_model::EmptyProtocolWriterBase> writer_;
+  std::function<std::unique_ptr<test_model::EmptyProtocolReaderBase>()> create_reader_;
+  MockEmptyProtocolWriter mock_writer_;
+  bool close_called_ = false;
+};
 } // namespace
 } // namespace test_model
 
@@ -4361,6 +4394,14 @@ std::unique_ptr<test_model::ProtocolWithKeywordStepsWriterBase> CreateValidating
   return std::make_unique<test_model::TestProtocolWithKeywordStepsWriterBase>(
     CreateWriter<test_model::ProtocolWithKeywordStepsWriterBase>(format, filename),
     [format, filename](){ return CreateReader<test_model::ProtocolWithKeywordStepsReaderBase>(format, filename);}
+  );
+}
+
+template<>
+std::unique_ptr<test_model::EmptyProtocolWriterBase> CreateValidatingWriter<test_model::EmptyProtocolWriterBase>(Format format, std::string const& filename) {
+  return std::make_unique<test_model::TestEmptyProtocolWriterBase>(
+    CreateWriter<test_model::EmptyProtocolWriterBase>(format, filename),
+    [format, filename](){ return CreateReader<test_model::EmptyProtocolReaderBase>(format, filename);}
   );
 }
 

@@ -5998,3 +5998,84 @@ class ProtocolWithKeywordStepsReaderBase(abc.ABC):
             return 'read_float'
         return "<unknown>"
 
+class EmptyProtocolWriterBase(abc.ABC):
+    """Abstract writer for the EmptyProtocol protocol."""
+
+
+    def __init__(self) -> None:
+        self._state = 0
+
+    schema = r"""{"protocol":{"name":"EmptyProtocol","sequence":null},"types":null}"""
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
+        self.close()
+        if exc is None and self._state != 0:
+            expected_method = self._state_to_method_name((self._state + 1) & ~1)
+            raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+
+    @abc.abstractmethod
+    def close(self) -> None:
+        pass
+
+    @abc.abstractmethod
+    def _end_stream(self) -> None:
+        pass
+
+    def _raise_unexpected_state(self, actual: int) -> None:
+        expected_method = self._state_to_method_name(self._state)
+        actual_method = self._state_to_method_name(actual)
+        raise ProtocolError(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
+
+    def _state_to_method_name(self, state: int) -> str:
+        return "<unknown>"
+
+class EmptyProtocolReaderBase(abc.ABC):
+    """Abstract reader for the EmptyProtocol protocol."""
+
+
+    def __init__(self) -> None:
+        self._state = 0
+
+    schema = EmptyProtocolWriterBase.schema
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
+        self.close()
+        if exc is None and self._state != 0:
+            if self._state % 2 == 1:
+                previous_method = self._state_to_method_name(self._state - 1)
+                raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
+            else:
+                expected_method = self._state_to_method_name(self._state)
+                raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
+            	
+
+    @abc.abstractmethod
+    def close(self) -> None:
+        raise NotImplementedError()
+
+    def copy_to(self, writer: EmptyProtocolWriterBase) -> None:
+        pass
+
+    T = typing.TypeVar('T')
+    def _wrap_iterable(self, iterable: collections.abc.Iterable[T], final_state: int) -> collections.abc.Iterable[T]:
+        yield from iterable
+        self._state = final_state
+
+    def _raise_unexpected_state(self, actual: int) -> None:
+        actual_method = self._state_to_method_name(actual)
+        if self._state % 2 == 1:
+            previous_method = self._state_to_method_name(self._state - 1)
+            raise ProtocolError(f"Received call to '{actual_method}' but the iterable returned by '{previous_method}' was not fully consumed.")
+        else:
+            expected_method = self._state_to_method_name(self._state)
+            raise ProtocolError(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
+        	
+    def _state_to_method_name(self, state: int) -> str:
+        return "<unknown>"
+

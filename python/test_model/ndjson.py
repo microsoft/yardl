@@ -4018,3 +4018,20 @@ class NDJsonProtocolWithKeywordStepsReader(_ndjson.NDJsonProtocolReader, Protoco
         converter = _ndjson.EnumConverter(EnumWithKeywordSymbols, np.int32, enum_with_keyword_symbols_name_to_value_map, enum_with_keyword_symbols_value_to_name_map)
         return converter.from_json(json_object)
 
+class NDJsonEmptyProtocolWriter(_ndjson.NDJsonProtocolWriter, EmptyProtocolWriterBase):
+    """NDJson writer for the EmptyProtocol protocol."""
+
+
+    def __init__(self, stream: typing.Union[typing.TextIO, str]) -> None:
+        EmptyProtocolWriterBase.__init__(self)
+        _ndjson.NDJsonProtocolWriter.__init__(self, stream, EmptyProtocolWriterBase.schema)
+
+
+class NDJsonEmptyProtocolReader(_ndjson.NDJsonProtocolReader, EmptyProtocolReaderBase):
+    """NDJson writer for the EmptyProtocol protocol."""
+
+
+    def __init__(self, stream: typing.Union[io.BufferedReader, typing.TextIO, str]) -> None:
+        EmptyProtocolReaderBase.__init__(self)
+        _ndjson.NDJsonProtocolReader.__init__(self, stream, EmptyProtocolReaderBase.schema)
+

@@ -903,4 +903,32 @@ std::unique_ptr<test_model::ProtocolWithKeywordStepsReaderBase> CreateReader<tes
   }
 }
 
+template<>
+std::unique_ptr<test_model::EmptyProtocolWriterBase> CreateWriter<test_model::EmptyProtocolWriterBase>(Format format, std::string const& filename) {
+  switch (format) {
+  case Format::kHdf5:
+    return std::make_unique<test_model::hdf5::EmptyProtocolWriter>(filename);
+  case Format::kBinary:
+    return std::make_unique<test_model::binary::EmptyProtocolWriter>(filename);
+  case Format::kNDJson:
+    return std::make_unique<test_model::ndjson::EmptyProtocolWriter>(filename);
+  default:
+    throw std::runtime_error("Unknown format");
+  }
+}
+
+template<>
+std::unique_ptr<test_model::EmptyProtocolReaderBase> CreateReader<test_model::EmptyProtocolReaderBase>(Format format, std::string const& filename) {
+  switch (format) {
+  case Format::kHdf5:
+    return std::make_unique<test_model::hdf5::EmptyProtocolReader>(filename);
+  case Format::kBinary:
+    return std::make_unique<test_model::binary::EmptyProtocolReader>(filename);
+  case Format::kNDJson:
+    return std::make_unique<test_model::ndjson::EmptyProtocolReader>(filename);
+  default:
+    throw std::runtime_error("Unknown format");
+  }
+}
+
 }

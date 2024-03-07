@@ -1411,4 +1411,38 @@ class ProtocolWithKeywordStepsReader : public test_model::ProtocolWithKeywordSte
   size_t current_block_remaining_ = 0;
 };
 
+// Binary writer for the EmptyProtocol protocol.
+class EmptyProtocolWriter : public test_model::EmptyProtocolWriterBase, yardl::binary::BinaryWriter {
+  public:
+  EmptyProtocolWriter(std::ostream& stream, Version version = Version::Current)
+      : yardl::binary::BinaryWriter(stream, test_model::EmptyProtocolWriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  EmptyProtocolWriter(std::string file_name, Version version = Version::Current)
+      : yardl::binary::BinaryWriter(file_name, test_model::EmptyProtocolWriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  void Flush() override;
+
+  protected:
+  void CloseImpl() override;
+
+  Version version_;
+};
+
+// Binary reader for the EmptyProtocol protocol.
+class EmptyProtocolReader : public test_model::EmptyProtocolReaderBase, yardl::binary::BinaryReader {
+  public:
+  EmptyProtocolReader(std::istream& stream)
+      : yardl::binary::BinaryReader(stream), version_(test_model::EmptyProtocolReaderBase::VersionFromSchema(schema_read_)) {}
+
+  EmptyProtocolReader(std::string file_name)
+      : yardl::binary::BinaryReader(file_name), version_(test_model::EmptyProtocolReaderBase::VersionFromSchema(schema_read_)) {}
+
+  Version GetVersion() { return version_; }
+
+  protected:
+  void CloseImpl() override;
+
+  Version version_;
+};
+
 } // namespace test_model::binary

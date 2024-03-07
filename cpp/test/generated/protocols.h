@@ -2654,4 +2654,52 @@ class ProtocolWithKeywordStepsReaderBase {
   private:
   uint8_t state_ = 0;
 };
+
+// Abstract writer for the EmptyProtocol protocol.
+class EmptyProtocolWriterBase {
+  public:
+  // Optionaly close this writer before destructing. Validates that all steps were completed.
+  void Close();
+
+  virtual ~EmptyProtocolWriterBase() = default;
+
+  // Flushes all buffered data.
+  virtual void Flush() {}
+
+  protected:
+  virtual void CloseImpl() {}
+
+  static std::string schema_;
+
+  static std::vector<std::string> previous_schemas_;
+
+  static std::string SchemaFromVersion(Version version);
+
+  private:
+  uint8_t state_ = 0;
+
+  friend class EmptyProtocolReaderBase;
+};
+
+// Abstract reader for the EmptyProtocol protocol.
+class EmptyProtocolReaderBase {
+  public:
+  // Optionaly close this writer before destructing. Validates that all steps were completely read.
+  void Close();
+
+  void CopyTo(EmptyProtocolWriterBase& writer);
+
+  virtual ~EmptyProtocolReaderBase() = default;
+
+  protected:
+  virtual void CloseImpl() {}
+  static std::string schema_;
+
+  static std::vector<std::string> previous_schemas_;
+
+  static Version VersionFromSchema(const std::string& schema);
+
+  private:
+  uint8_t state_ = 0;
+};
 } // namespace test_model

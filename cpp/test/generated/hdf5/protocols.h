@@ -1119,5 +1119,22 @@ class ProtocolWithKeywordStepsReader : public test_model::ProtocolWithKeywordSte
   std::unique_ptr<yardl::hdf5::DatasetReader> int_dataset_state_;
 };
 
+// HDF5 writer for the EmptyProtocol protocol.
+class EmptyProtocolWriter : public test_model::EmptyProtocolWriterBase, public yardl::hdf5::Hdf5Writer {
+  public:
+  EmptyProtocolWriter(std::string path);
+
+  protected:
+  private:
+};
+
+// HDF5 reader for the EmptyProtocol protocol.
+class EmptyProtocolReader : public test_model::EmptyProtocolReaderBase, public yardl::hdf5::Hdf5Reader {
+  public:
+  EmptyProtocolReader(std::string path);
+
+  private:
+};
+
 } // namespace test_model
 

@@ -4159,5 +4159,17 @@ void ProtocolWithKeywordStepsReader::CloseImpl() {
   stream_.VerifyFinished();
 }
 
+void EmptyProtocolWriter::Flush() {
+  stream_.Flush();
+}
+
+void EmptyProtocolWriter::CloseImpl() {
+  stream_.Flush();
+}
+
+void EmptyProtocolReader::CloseImpl() {
+  stream_.VerifyFinished();
+}
+
 } // namespace test_model::binary
 
