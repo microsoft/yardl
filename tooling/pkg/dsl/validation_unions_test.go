@@ -65,7 +65,10 @@ X: !record
     f: !union
       g1: GenericRecord<int>
       g2: GenericRecord<int>
-GenericRecord<T>: !record`
+GenericRecord<T>: !record
+  fields:
+    unused: T
+`
 
 	_, err := parseAndValidate(t, src)
 	assert.ErrorContains(t, err, "redundant union type cases")

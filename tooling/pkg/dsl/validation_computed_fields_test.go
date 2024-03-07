@@ -12,6 +12,8 @@ import (
 func TestDuplicateComputedFieldName(t *testing.T) {
 	src := `
 X: !record
+  fields:
+    unused: int
   computedFields:
     f: 1
     f: 2`
@@ -22,6 +24,8 @@ X: !record
 func TestUnboundField(t *testing.T) {
 	src := `
 X: !record
+  fields:
+    unused: int
   computedFields:
     f: missingField`
 	_, err := parseAndValidate(t, src)
@@ -31,6 +35,8 @@ X: !record
 func TestRecursiveField(t *testing.T) {
 	src := `
 X: !record
+  fields:
+    unused: int
   computedFields:
     f: f`
 	_, err := parseAndValidate(t, src)
@@ -40,6 +46,8 @@ X: !record
 func TestCycle(t *testing.T) {
 	src := `
 X: !record
+  fields:
+    unused: int
   computedFields:
     a: b
     b: c
@@ -51,6 +59,8 @@ X: !record
 func TestNoCycle(t *testing.T) {
 	src := `
 X: !record
+  fields:
+    unused: int
   computedFields:
     a: b
     b: c
@@ -62,6 +72,8 @@ X: !record
 func TestIntTooLarge(t *testing.T) {
 	src := `
 X: !record
+  fields:
+    unused: int
   computedFields:
     a: 0xFFFFFFFFFFFFFFFF1`
 	_, err := parseAndValidate(t, src)
@@ -71,6 +83,8 @@ X: !record
 func TestNegativeIntTooLarge(t *testing.T) {
 	src := `
 X: !record
+  fields:
+    unused: int
   computedFields:
     a: -0x8000000000000001`
 	_, err := parseAndValidate(t, src)
@@ -94,6 +108,8 @@ Y: !record
 func TestChainedExpressionTargetNotResolved(t *testing.T) {
 	src := `
 X: !record
+  fields:
+    unused: int
   computedFields:
     yInt: y.anInt`
 	_, err := parseAndValidate(t, src)
@@ -187,6 +203,8 @@ X: !record
 func TestIndexOnUnresolved(t *testing.T) {
 	src := `
 R: !record
+  fields:
+    unused: int
 X: !record
   fields:
     r: R
@@ -398,6 +416,7 @@ func TestSizeNoArgs(t *testing.T) {
 	src := `
 X: !record
   fields:
+    unused: int
   computedFields:
     vSize: size()`
 	_, err := parseAndValidate(t, src)
@@ -408,6 +427,7 @@ func TestSizeSingleArgWrongType(t *testing.T) {
 	src := `
 X: !record
   fields:
+    unused: int
   computedFields:
     vSize: size(1)`
 	_, err := parseAndValidate(t, src)
@@ -552,6 +572,8 @@ X: !record
 func TestArrayDimensionIndexInvalidArg1Type(t *testing.T) {
 	src := `
 X: !record
+  fields:
+    unused: int
   computedFields:
     dimIndeX: dimensionIndex(1, "x")`
 	_, err := parseAndValidate(t, src)
@@ -634,6 +656,8 @@ X: !record
 func TestArrayDimensionCountInvalidArgType(t *testing.T) {
 	src := `
 X: !record
+  fields:
+    unused: int
   computedFields:
     dimCount: dimensionCount(1)`
 	_, err := parseAndValidate(t, src)
@@ -643,6 +667,8 @@ X: !record
 func TestSwitchErrorInTarget(t *testing.T) {
 	src := `
 X: !record
+  fields:
+    unused: int
   computedFields:
     c:
       !switch missing:
@@ -822,6 +848,8 @@ X: !record
 func TestArithmeticIncompatibleOperands(t *testing.T) {
 	src := `
 X: !record
+  fields:
+    unused: int
   computedFields:
     c1: 1 + "2"
 `
@@ -845,6 +873,8 @@ X: !record
 func TestCastToUnrecognizedType(t *testing.T) {
 	src := `
 X: !record
+  fields:
+    unused: int
   computedFields:
     c1: 1 as what
 `
@@ -854,6 +884,8 @@ X: !record
 func TestValidCasts(t *testing.T) {
 	src := `
 X: !record
+  fields:
+    unused: int
   computedFields:
     c1: 1 as int
     c2: 1.1 as int

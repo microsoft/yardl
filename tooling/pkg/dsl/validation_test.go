@@ -22,6 +22,8 @@ Rec: !record
 func TestRecordComputedFieldNameInvalid(t *testing.T) {
 	src := `
 Rec: !record
+  fields:
+    unused: int
   computedFields:
     A: 1
 `
