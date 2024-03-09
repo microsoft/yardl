@@ -116,13 +116,10 @@ def create_validating_writer_class(
 
             attrs[method.__name__] = mk_wrapper()
 
-        def exit_wrapper(*args, **kwargs):
-            result = writer_class.__exit__(  # pyright: ignore[reportGeneralTypeIssues]
+        def close_wrapper(*args, **kwargs):
+            writer_class.close(  # pyright: ignore[reportGeneralTypeIssues]
                 *args, **kwargs
             )
-            if args[1] is not None:
-                # There was an exception, don't validate
-                return result
 
             self = args[0]
             this_buffer = self._buffer.getvalue()
@@ -132,8 +129,6 @@ def create_validating_writer_class(
             )
 
             validate(this_buffer, validating_instance)
-
-            return result
 
         def validate(this_buffer, validating_instance):
             # 1. Validate that we get the same data when we read the output back in
@@ -175,7 +170,7 @@ def create_validating_writer_class(
             )
             reader.copy_to(validating_instance)
 
-        attrs["__exit__"] = exit_wrapper
+        attrs["close"] = close_wrapper
 
         def init_wrapper(*args, **kwargs):
             recorded_args = {}

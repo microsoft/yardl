@@ -61,6 +61,32 @@ func writeAbstractWriter(w *formatting.IndentedWriter, p *dsl.ProtocolDefinition
 		fmt.Fprintf(w, `schema = r"""%s"""`, dsl.GetProtocolSchemaString(p, st))
 		w.WriteStringln("\n")
 
+		// close
+		w.WriteStringln("def close(self) -> None:")
+		w.Indented(func() {
+			if len(p.Sequence) > 0 && p.Sequence[len(p.Sequence)-1].IsStream() {
+				fmt.Fprintf(w, "if self._state == %d:\n", len(p.Sequence)*2-1)
+				w.Indented(func() {
+					w.WriteStringln("try:")
+					w.Indented(func() {
+						w.WriteStringln("self._end_stream()")
+						w.WriteStringln("return")
+					})
+					w.WriteStringln("finally:")
+					w.Indented(func() {
+						w.WriteStringln("self._close()")
+					})
+				})
+			}
+			w.WriteStringln("self._close()")
+			fmt.Fprintf(w, "if self._state != %d:\n", len(p.Sequence)*2)
+			w.Indented(func() {
+				w.WriteStringln("expected_method = self._state_to_method_name((self._state + 1) & ~1)")
+				w.WriteStringln(`raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")`)
+			})
+		})
+		w.WriteStringln("")
+
 		// dunder methods
 		w.WriteStringln("def __enter__(self):")
 		w.Indented(func() {
@@ -70,25 +96,16 @@ func writeAbstractWriter(w *formatting.IndentedWriter, p *dsl.ProtocolDefinition
 
 		w.WriteStringln("def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:")
 		w.Indented(func() {
-			if len(p.Sequence) > 0 && p.Sequence[len(p.Sequence)-1].IsStream() {
-				fmt.Fprintf(w, "if exc is None and self._state == %d:\n", len(p.Sequence)*2-1)
-				w.Indented(func() {
-					w.WriteStringln("try:")
-					w.Indented(func() {
-						w.WriteStringln("self._end_stream()")
-						w.WriteStringln("return")
-					})
-					w.WriteStringln("finally:")
-					w.Indented(func() {
-						w.WriteStringln("self.close()")
-					})
-				})
-			}
-			w.WriteStringln("self.close()")
-			fmt.Fprintf(w, "if exc is None and self._state != %d:\n", len(p.Sequence)*2)
+			w.WriteStringln("try:")
 			w.Indented(func() {
-				w.WriteStringln("expected_method = self._state_to_method_name((self._state + 1) & ~1)")
-				w.WriteStringln(`raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")`)
+				w.WriteStringln("self.close()")
+			})
+			w.WriteStringln("except Exception as e:")
+			w.Indented(func() {
+				w.WriteStringln("if exc is None:")
+				w.Indented(func() {
+					w.WriteStringln("raise e")
+				})
 			})
 		})
 		w.WriteStringln("")
@@ -150,7 +167,7 @@ func writeAbstractWriter(w *formatting.IndentedWriter, p *dsl.ProtocolDefinition
 
 		// close method
 		w.WriteStringln("@abc.abstractmethod")
-		w.WriteStringln("def close(self) -> None:")
+		w.WriteStringln("def _close(self) -> None:")
 		w.Indented(func() {
 			w.WriteStringln("pass")
 		})
@@ -200,6 +217,23 @@ func writeAbstractReader(w *formatting.IndentedWriter, p *dsl.ProtocolDefinition
 		})
 		w.WriteStringln("")
 
+		// close method
+		w.WriteStringln("def close(self) -> None:")
+		w.Indented(func() {
+			w.WriteStringln("self._close()")
+			fmt.Fprintf(w, "if self._state != %d:\n", len(p.Sequence)*2)
+			w.Indented(func() {
+				w.WriteStringln(`if self._state % 2 == 1:
+    previous_method = self._state_to_method_name(self._state - 1)
+    raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
+else:
+    expected_method = self._state_to_method_name(self._state)
+    raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
+	`)
+			})
+		})
+		w.WriteStringln("")
+
 		// schema field
 		fmt.Fprintf(w, `schema = %s.schema`, common.AbstractWriterName(p))
 		w.WriteStringln("\n")
@@ -213,22 +247,22 @@ func writeAbstractReader(w *formatting.IndentedWriter, p *dsl.ProtocolDefinition
 
 		w.WriteStringln("def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:")
 		w.Indented(func() {
-			w.WriteStringln("self.close()")
-			fmt.Fprintf(w, "if exc is None and self._state != %d:\n", len(p.Sequence)*2)
+			w.WriteStringln("try:")
 			w.Indented(func() {
-				w.WriteStringln(`if self._state % 2 == 1:
-    previous_method = self._state_to_method_name(self._state - 1)
-    raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
-else:
-    expected_method = self._state_to_method_name(self._state)
-    raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
-	`)
+				w.WriteStringln("self.close()")
+			})
+			w.WriteStringln("except Exception as e:")
+			w.Indented(func() {
+				w.WriteStringln("if exc is None:")
+				w.Indented(func() {
+					w.WriteStringln("raise e")
+				})
 			})
 		})
 		w.WriteStringln("")
 
 		w.WriteStringln("@abc.abstractmethod")
-		w.WriteStringln("def close(self) -> None:")
+		w.WriteStringln("def _close(self) -> None:")
 		w.Indented(func() {
 			w.WriteStringln("raise NotImplementedError()")
 		})
