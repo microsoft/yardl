@@ -12,6 +12,8 @@ import (
 func TestTypeNamesNotUnique(t *testing.T) {
 	src := `
 X: !record
+  fields:
+    unused: int
 X: !enum
 `
 	_, err := parseAndValidate(t, src)
@@ -21,7 +23,11 @@ X: !enum
 func TestTypeNamesNotUniqueOneWithGenericParameters(t *testing.T) {
 	src := `
 X<T>: !record
+  fields:
+    unused: T
 X<T1, T2>: !record
+  fields:
+    unused: [T1, T2]
 `
 	_, err := parseAndValidate(t, src)
 	assert.ErrorContains(t, err, "the name 'X' is already defined in ")
