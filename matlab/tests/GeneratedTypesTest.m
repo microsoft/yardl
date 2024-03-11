@@ -2,100 +2,103 @@ classdef GeneratedTypesTest < matlab.unittest.TestCase
     methods (Test)
 
         function testDefaultRecordWithPrimitives(testCase)
-            r = RecordWithPrimitives();
+            r = test_model.RecordWithPrimitives();
 
-            assert(r.bool_field == false);
-            assert(r.int32_field == int32(0));
-            assert(r.date_field == datetime(1970, 1, 1));
-            assert(r.time_field == yardl.Time(0));
-            assert(r.datetime_field == yardl.DateTime(0));
+            testCase.verifyEqual(r.bool_field, false);
+            testCase.verifyEqual(r.int32_field, int32(0));
+            testCase.verifyEqual(r.date_field, yardl.Date());
+            testCase.verifyEqual(r.time_field, yardl.Time());
+            testCase.verifyEqual(r.datetime_field, yardl.DateTime());
         end
 
         function testDefaultRecordWithVectors(testCase)
-            r = RecordWithVectors();
+            r = test_model.RecordWithVectors();
 
-            assert(isequal(r.default_vector, int32([])));
-            assert(isequal(r.default_vector_fixed_length, int32([0, 0, 0])));
-            assert(isequal(r.default_vector, int32([])));
+            testCase.verifyEqual(r.default_vector, int32([]));
+            testCase.verifyEqual(r.default_vector_fixed_length, int32([0, 0, 0]));
+            testCase.verifyEqual(r.default_vector, int32([]));
         end
 
         function testDefaultRecordWithArrays(testCase)
-            r = RecordWithArrays();
+            import matlab.unittest.constraints.IsEmpty
+            import matlab.unittest.constraints.IsInstanceOf
 
-            assert(isequal(r.default_array, int32([])));
-            assert(isempty(r.default_array_with_empty_dimension));
-            assert(isempty(r.rank_1_array));
-            assert(isempty(r.rank_2_array));
-            assert(isequal(size(r.rank_2_array), [0, 0]));
-            assert(isempty(r.rank_2_array_with_named_dimensions));
-            assert(isequal(size(r.rank_2_array_with_named_dimensions), [0, 0]));
+            r = test_model.RecordWithArrays();
 
-            assert(isequal(r.rank_2_fixed_array, zeros(4, 3, 'int32')));
-            assert(isequal(r.rank_2_fixed_array_with_named_dimensions, zeros(4, 3, 'int32')));
+            testCase.verifyEqual(r.default_array, int32([]));
+            testCase.verifyThat(r.default_array_with_empty_dimension, IsEmpty);
+            testCase.verifyThat(r.rank_1_array, IsEmpty);
+            testCase.verifyThat(r.rank_2_array, IsEmpty);
+            testCase.verifyEqual(size(r.rank_2_array), [0, 0]);
+            testCase.verifyThat(r.rank_2_array_with_named_dimensions, IsEmpty);
+            testCase.verifyEqual(size(r.rank_2_array_with_named_dimensions), [0, 0]);
 
-            assert(isempty(r.dynamic_array));
-            assert(isa(r.dynamic_array, 'int32'));
+            testCase.verifyEqual(r.rank_2_fixed_array, zeros(4, 3, 'int32'));
+            testCase.verifyEqual(r.rank_2_fixed_array_with_named_dimensions, zeros(4, 3, 'int32'));
 
-            assert(isa(r.array_of_vectors, 'int32'));
-            assert(isequal(size(r.array_of_vectors), [5, 4]));
+            testCase.verifyThat(r.dynamic_array, IsEmpty);
+            testCase.verifyThat(r.dynamic_array, IsInstanceOf('int32'));
+
+            testCase.verifyThat(r.array_of_vectors, IsInstanceOf('int32'));
+            testCase.verifyEqual(size(r.array_of_vectors), [5, 4]);
         end
 
         function testDefaultRecordWithOptionalFields(testCase)
-            r = RecordWithOptionalFields();
+            r = test_model.RecordWithOptionalFields();
 
-            assert(r.optional_int == yardl.None);
+            testCase.verifyEqual(r.optional_int, yardl.None);
         end
 
         function testDefaultRecordWithUnionsOfContainers(testCase)
-            r = RecordWithUnionsOfContainers();
+            r = test_model.RecordWithUnionsOfContainers();
 
-            assert(r.map_or_scalar == MapOrScalar.Map(containers.Map));
-            assert(r.vector_or_scalar == VectorOrScalar.Vector(int32([])));
-            assert(r.array_or_scalar == ArrayOrScalar.Array(int32([])));
+            testCase.verifyEqual(r.map_or_scalar, test_model.MapOrScalar.Map(containers.Map));
+            testCase.verifyEqual(r.vector_or_scalar, test_model.VectorOrScalar.Vector(int32([])));
+            testCase.verifyEqual(r.array_or_scalar, test_model.ArrayOrScalar.Array(int32([])));
         end
 
         function testDefaultRecordWithAliasedGenerics(testCase)
-            r = RecordWithAliasedGenerics();
+            r = test_model.RecordWithAliasedGenerics();
 
-            assert(r.my_strings.v1 == "");
-            assert(r.my_strings.v2 == "");
-            assert(r.aliased_strings.v1 == "");
-            assert(r.aliased_strings.v2 == "");
+            testCase.verifyEqual(r.my_strings.v1, "");
+            testCase.verifyEqual(r.my_strings.v2, "");
+            testCase.verifyEqual(r.aliased_strings.v1, "");
+            testCase.verifyEqual(r.aliased_strings.v2, "");
         end
 
         function testDefaultRecordGenericEmpty(testCase)
-            g1 = RecordWithOptionalGenericField();
+            g1 = test_model.RecordWithOptionalGenericField();
             testCase.verifyEqual(g1.v, yardl.None);
 
-            g1a = RecordWithAliasedOptionalGenericField();
+            g1a = test_model.RecordWithAliasedOptionalGenericField();
             testCase.verifyEqual(g1a.v, g1.v);
 
-            g2 = RecordWithOptionalGenericUnionField();
+            g2 = test_model.RecordWithOptionalGenericUnionField();
             testCase.verifyEqual(g2.v, yardl.None);
 
-            g2a = RecordWithAliasedOptionalGenericUnionField();
+            g2a = test_model.RecordWithAliasedOptionalGenericUnionField();
             testCase.verifyEqual(g2a.v, g2.v)
 
-            testCase.verifyError(@() MyTuple(), 'MATLAB:minrhs');
-            rm = RecordWithGenericMaps();
+            testCase.verifyError(@() test_model.MyTuple(), 'MATLAB:minrhs');
+            rm = test_model.RecordWithGenericMaps();
             testCase.verifyEqual(rm.m, containers.Map());
             testCase.verifyEqual(rm.am, rm.m);
         end
 
         function testDefaultRecordWithGenericRequiredArguments(testCase)
-            testCase.verifyError(@() RecordWithGenericArrays(), 'MATLAB:minrhs');
-            testCase.verifyError(@() RecordWithGenericVectors(), 'MATLAB:minrhs');
-            testCase.verifyError(@() RecordWithGenericFixedVectors(), 'MATLAB:minrhs');
+            testCase.verifyError(@() test_model.RecordWithGenericArrays(), 'MATLAB:minrhs');
+            testCase.verifyError(@() test_model.RecordWithGenericVectors(), 'MATLAB:minrhs');
+            testCase.verifyError(@() test_model.RecordWithGenericFixedVectors(), 'MATLAB:minrhs');
         end
 
         function testDefaultRecordContainingNestedGenericRecords(testCase)
-            r = RecordContainingNestedGenericRecords();
+            r = test_model.RecordContainingNestedGenericRecords();
 
-            g1 = RecordWithOptionalGenericField();
-            g1a = RecordWithAliasedOptionalGenericField();
-            g2 = RecordWithOptionalGenericUnionField();
-            g2a = RecordWithAliasedOptionalGenericUnionField();
-            g7 = RecordWithGenericMaps();
+            g1 = test_model.RecordWithOptionalGenericField();
+            g1a = test_model.RecordWithAliasedOptionalGenericField();
+            g2 = test_model.RecordWithOptionalGenericUnionField();
+            g2a = test_model.RecordWithAliasedOptionalGenericUnionField();
+            g7 = test_model.RecordWithGenericMaps();
 
             testCase.verifyEqual(r.f1, g1);
             testCase.verifyEqual(r.f1a, g1a);

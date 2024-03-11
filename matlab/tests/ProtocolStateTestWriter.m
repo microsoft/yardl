@@ -1,4 +1,4 @@
-classdef ProtocolStateTestWriter < StateTestWriterBase
+classdef ProtocolStateTestWriter < test_model.StateTestWriterBase
 
     methods (Access=protected)
 

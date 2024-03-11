@@ -57,14 +57,14 @@ func writeUnionClasses(fw *common.MatlabFileWriter, td dsl.TypeDefinition, union
 		switch node := node.(type) {
 		case *dsl.GeneralizedType:
 			if node.Cases.IsUnion() {
-				unionClassName, typeParameters := common.UnionClassName(node)
+				unionClassName := common.UnionClassName(node)
 				if !unionGenerated[unionClassName] {
 					if _, isNamedType := td.(*dsl.NamedType); isNamedType {
 						// This is a named type defining a union, so we will use the named type's name instead
 						unionClassName = td.GetDefinitionMeta().Name
 					}
 					writeError = fw.WriteFile(unionClassName, func(w *formatting.IndentedWriter) {
-						writeUnionClass(w, unionClassName, typeParameters, node, td.GetDefinitionMeta().Namespace)
+						writeUnionClass(w, unionClassName, node, td.GetDefinitionMeta().Namespace)
 					})
 					if writeError != nil {
 						return
@@ -79,7 +79,7 @@ func writeUnionClasses(fw *common.MatlabFileWriter, td dsl.TypeDefinition, union
 	return writeError
 }
 
-func writeUnionClass(w *formatting.IndentedWriter, className string, typeParameters string, generalizedType *dsl.GeneralizedType, contextNamespace string) error {
+func writeUnionClass(w *formatting.IndentedWriter, className string, generalizedType *dsl.GeneralizedType, contextNamespace string) error {
 	fmt.Fprintf(w, "classdef %s < yardl.Union\n", className)
 	common.WriteBlockBody(w, func() {
 		w.WriteStringln("methods (Static)")
@@ -91,7 +91,7 @@ func writeUnionClass(w *formatting.IndentedWriter, className string, typeParamet
 
 				fmt.Fprintf(w, "function res = %s(value)\n", formatting.ToPascalCase(tc.Tag))
 				common.WriteBlockBody(w, func() {
-					fmt.Fprintf(w, "res = %s(%d, value);\n", className, i+1)
+					fmt.Fprintf(w, "res = %s.%s(%d, value);\n", common.NamespaceIdentifierName(contextNamespace), className, i+1)
 				})
 			}
 		})
@@ -101,15 +101,15 @@ func writeUnionClass(w *formatting.IndentedWriter, className string, typeParamet
 }
 
 func writeNamedType(fw *common.MatlabFileWriter, td *dsl.NamedType) error {
-	return fw.WriteFile(common.TypeSyntax(td, td.Namespace), func(w *formatting.IndentedWriter) {
+	return fw.WriteFile(common.TypeIdentifierName(td.Name), func(w *formatting.IndentedWriter) {
 		common.WriteComment(w, td.Comment)
-		fmt.Fprintf(w, "classdef %s < %s\n", common.TypeSyntax(td, td.Namespace), common.TypeSyntax(td.Type, td.Namespace))
+		fmt.Fprintf(w, "classdef %s < %s\n", common.TypeIdentifierName(td.Name), common.TypeSyntax(td.Type, td.Namespace))
 		w.WriteStringln("end")
 	})
 }
 
 func writeEnum(fw *common.MatlabFileWriter, enum *dsl.EnumDefinition) error {
-	return fw.WriteFile(common.TypeSyntax(enum, enum.Namespace), func(w *formatting.IndentedWriter) {
+	return fw.WriteFile(common.TypeIdentifierName(enum.Name), func(w *formatting.IndentedWriter) {
 		var base string
 		if enum.BaseType == nil {
 			base = "uint64"
@@ -118,8 +118,7 @@ func writeEnum(fw *common.MatlabFileWriter, enum *dsl.EnumDefinition) error {
 		}
 
 		common.WriteComment(w, enum.Comment)
-		enumTypeSyntax := common.TypeSyntax(enum, enum.Namespace)
-		fmt.Fprintf(w, "classdef %s < %s\n", enumTypeSyntax, base)
+		fmt.Fprintf(w, "classdef %s < %s\n", common.TypeIdentifierName(enum.Name), base)
 		common.WriteBlockBody(w, func() {
 			// NOTE: We don't use Matlab enumeration class because you can't inherit from it
 			// and we use inheritance to define NamedTypes
@@ -135,10 +134,10 @@ func writeEnum(fw *common.MatlabFileWriter, enum *dsl.EnumDefinition) error {
 }
 
 func writeRecord(fw *common.MatlabFileWriter, rec *dsl.RecordDefinition, st dsl.SymbolTable) error {
-	return fw.WriteFile(common.TypeSyntax(rec, rec.Namespace), func(w *formatting.IndentedWriter) {
+	return fw.WriteFile(common.TypeIdentifierName(rec.Name), func(w *formatting.IndentedWriter) {
 		common.WriteComment(w, rec.Comment)
 
-		fmt.Fprintf(w, "classdef %s < handle\n", common.TypeSyntax(rec, rec.Namespace))
+		fmt.Fprintf(w, "classdef %s < handle\n", common.TypeIdentifierName(rec.Name))
 		common.WriteBlockBody(w, func() {
 
 			w.WriteStringln("properties")
@@ -538,7 +537,7 @@ func writeComputedFieldExpression(w *formatting.IndentedWriter, expression dsl.E
 					self.VisitChildren(node)
 				})
 
-				unionClassName, _ := common.UnionClassName(targetType)
+				unionClassName := common.UnionClassName(targetType)
 				if targetTypeNamespace != "" && targetTypeNamespace != contextNamespace {
 					unionClassName = fmt.Sprintf("%s.%s", common.NamespaceIdentifierName(targetTypeNamespace), unionClassName)
 				}
@@ -732,7 +731,9 @@ func typeDefault(t dsl.Type, contextNamespace string, namedType string, st dsl.S
 			if namedType != "" {
 				unionClassName = namedType
 			} else {
-				unionClassName, _ = common.UnionClassName(t)
+				unionClassName = common.UnionClassName(t)
+
+				unionClassName = fmt.Sprintf("%s.%s", common.NamespaceIdentifierName(contextNamespace), unionClassName)
 			}
 
 			unionCaseConstructor := fmt.Sprintf("%s.%s", unionClassName, formatting.ToPascalCase(t.Cases[0].Tag))
@@ -779,8 +780,6 @@ func typeDefault(t dsl.Type, contextNamespace string, namedType string, st dsl.S
 				return "", defaultValueKindNone
 			}
 
-			dtype := common.TypeSyntax(scalar, contextNamespace)
-
 			if td.IsFixed() {
 				dims := make([]string, len(*td.Dimensions))
 				for i, d := range *td.Dimensions {
@@ -794,6 +793,8 @@ func typeDefault(t dsl.Type, contextNamespace string, namedType string, st dsl.S
 
 				return fmt.Sprintf("repelem(%s, %s)", scalarDefault, strings.Join(dims, ", ")), defaultValueKindMutable
 			}
+
+			dtype := common.TypeSyntax(scalar, contextNamespace)
 
 			if td.HasKnownNumberOfDimensions() {
 				shape := strings.Repeat("0, ", len(*td.Dimensions))[0 : len(*td.Dimensions)*3-2]
@@ -883,7 +884,7 @@ func typeDefinitionDefault(t dsl.TypeDefinition, contextNamespace string, st dsl
 			}
 
 			// Basic record type
-			return fmt.Sprintf("%s()", common.TypeSyntaxWithoutTypeParameters(t, contextNamespace)), defaultValueKindMutable
+			return fmt.Sprintf("%s()", common.TypeSyntax(t, contextNamespace)), defaultValueKindMutable
 		}
 
 		args := make([]string, 0)
@@ -895,7 +896,7 @@ func typeDefinitionDefault(t dsl.TypeDefinition, contextNamespace string, st dsl
 			args = append(args, fieldDefaultExpr)
 		}
 
-		return fmt.Sprintf("%s(%s)", common.TypeSyntaxWithoutTypeParameters(t, contextNamespace), strings.Join(args, ", ")), defaultValueKindMutable
+		return fmt.Sprintf("%s(%s)", common.TypeSyntax(t, contextNamespace), strings.Join(args, ", ")), defaultValueKindMutable
 	}
 
 	return "", defaultValueKindNone

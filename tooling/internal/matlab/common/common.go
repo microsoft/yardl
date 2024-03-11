@@ -62,14 +62,7 @@ var TypeSyntaxWriter dsl.TypeSyntaxWriter[string] = func(self dsl.TypeSyntaxWrit
 		return TypeIdentifierName(t.Name)
 	case dsl.TypeDefinition:
 		meta := t.GetDefinitionMeta()
-		typeName := TypeIdentifierName(meta.Name)
-		if t.GetDefinitionMeta().Namespace != contextNamespace {
-			typeName = fmt.Sprintf("%s.%s", formatting.ToSnakeCase(meta.Namespace), typeName)
-		}
-
-		typeSyntax := typeName
-
-		return typeSyntax
+		return fmt.Sprintf("%s.%s", NamespaceIdentifierName(meta.Namespace), TypeIdentifierName(meta.Name))
 
 	case nil:
 		return "None"
@@ -84,7 +77,7 @@ var TypeSyntaxWriter dsl.TypeSyntaxWriter[string] = func(self dsl.TypeSyntaxWrit
 				return "yardl.Optional"
 			}
 
-			return UnionSyntax(t)
+			return UnionClassName(t)
 		}()
 
 		switch d := t.Dimensionality.(type) {
@@ -99,33 +92,10 @@ var TypeSyntaxWriter dsl.TypeSyntaxWriter[string] = func(self dsl.TypeSyntaxWrit
 	default:
 		panic(fmt.Sprintf("unexpected type %T", t))
 	}
-
 }
 
 func TypeSyntax(typeOrTypeDefinition dsl.Node, contextNamespace string) string {
 	return TypeSyntaxWriter.ToSyntax(typeOrTypeDefinition, contextNamespace)
-}
-
-var typeSyntaxWithoutTypeParametersWriter dsl.TypeSyntaxWriter[string] = func(self dsl.TypeSyntaxWriter[string], t dsl.Node, contextNamespace string) string {
-	switch t := t.(type) {
-	case dsl.TypeDefinition:
-		meta := t.GetDefinitionMeta()
-		if len(meta.TypeParameters) > 0 {
-			meta := t.GetDefinitionMeta()
-			typeName := TypeIdentifierName(meta.Name)
-			if t.GetDefinitionMeta().Namespace != contextNamespace {
-				typeName = fmt.Sprintf("%s.%s", formatting.ToSnakeCase(meta.Namespace), typeName)
-			}
-
-			return typeName
-		}
-	}
-
-	return TypeSyntaxWriter(self, t, contextNamespace)
-}
-
-func TypeSyntaxWithoutTypeParameters(typeOrTypeDefinition dsl.Node, contextNamespace string) string {
-	return typeSyntaxWithoutTypeParametersWriter.ToSyntax(typeOrTypeDefinition, contextNamespace)
 }
 
 func ComputedFieldIdentifierName(name string) string {
@@ -171,7 +141,7 @@ func EnumValueIdentifierName(name string) string {
 	return cased + "_"
 }
 
-func UnionClassName(gt *dsl.GeneralizedType) (className string, typeParameters string) {
+func UnionClassName(gt *dsl.GeneralizedType) (className string) {
 	if !gt.Cases.IsUnion() {
 		panic("Not a union")
 	}
@@ -184,25 +154,7 @@ func UnionClassName(gt *dsl.GeneralizedType) (className string, typeParameters s
 		cases = append(cases, formatting.ToPascalCase(typeCase.Tag))
 	}
 
-	return strings.Join(cases, "Or"), ""
-}
-
-func UnionSyntax(gt *dsl.GeneralizedType) string {
-	className, typeParameters := UnionClassName(gt)
-	var syntax string
-	if len(typeParameters) > 0 {
-		// TODO: Remove
-		syntax = fmt.Sprintf("%s[%s]", className, typeParameters)
-	} else {
-		syntax = className
-	}
-
-	// TODO: Not needed in Matlab
-	// if gt.Cases.HasNullOption() {
-	// 	return fmt.Sprintf("typing.Optional[%s]", syntax)
-	// }
-
-	return syntax
+	return strings.Join(cases, "Or")
 }
 
 func WriteBlockBody(w *formatting.IndentedWriter, f func()) {

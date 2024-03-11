@@ -178,31 +178,31 @@ func recordSerializerClassName(record *dsl.RecordDefinition, contextNamespace st
 	return className
 }
 
-func typeDefinitionSerializer(t dsl.TypeDefinition, contextNamespace string) string {
-	switch t := t.(type) {
+func typeDefinitionSerializer(td dsl.TypeDefinition, contextNamespace string) string {
+	switch td := td.(type) {
 	case dsl.PrimitiveDefinition:
-		return fmt.Sprintf("yardl.binary.%sSerializer", formatting.ToPascalCase(string(t)))
+		return fmt.Sprintf("yardl.binary.%sSerializer", formatting.ToPascalCase(string(td)))
 	case *dsl.EnumDefinition:
 		var baseType dsl.Type
-		if t.BaseType != nil {
-			baseType = t.BaseType
+		if td.BaseType != nil {
+			baseType = td.BaseType
 		} else {
 			baseType = dsl.Int32Type
 		}
 
 		elementSerializer := typeSerializer(baseType, contextNamespace, nil)
-		return fmt.Sprintf("yardl.binary.EnumSerializer(%s, @%s)", elementSerializer, common.TypeSyntax(t, contextNamespace))
+		return fmt.Sprintf("yardl.binary.EnumSerializer(%s, @%s)", elementSerializer, common.TypeSyntax(td, contextNamespace))
 	case *dsl.RecordDefinition:
-		serializerName := recordSerializerClassName(t, contextNamespace)
-		if len(t.TypeParameters) == 0 {
+		serializerName := recordSerializerClassName(td, contextNamespace)
+		if len(td.TypeParameters) == 0 {
 			return fmt.Sprintf("%s()", serializerName)
 		}
-		if len(t.TypeArguments) == 0 {
+		if len(td.TypeArguments) == 0 {
 			panic("Expected type arguments")
 		}
 
-		typeArguments := make([]string, 0, len(t.TypeArguments))
-		for _, arg := range t.TypeArguments {
+		typeArguments := make([]string, 0, len(td.TypeArguments))
+		for _, arg := range td.TypeArguments {
 			typeArguments = append(typeArguments, typeSerializer(arg, contextNamespace, nil))
 		}
 
@@ -212,11 +212,11 @@ func typeDefinitionSerializer(t dsl.TypeDefinition, contextNamespace string) str
 
 		return fmt.Sprintf("%s(%s)", serializerName, strings.Join(typeArguments, ", "))
 	case *dsl.GenericTypeParameter:
-		return fmt.Sprintf("%s_serializer", formatting.ToSnakeCase(t.Name))
+		return fmt.Sprintf("%s_serializer", formatting.ToSnakeCase(td.Name))
 	case *dsl.NamedType:
-		return typeSerializer(t.Type, contextNamespace, t)
+		return typeSerializer(td.Type, contextNamespace, td)
 	default:
-		panic(fmt.Sprintf("Not implemented %T", t))
+		panic(fmt.Sprintf("Not implemented %T", td))
 	}
 }
 
@@ -235,7 +235,7 @@ func typeSerializer(t dsl.Type, contextNamespace string, namedType *dsl.NamedTyp
 				return fmt.Sprintf("yardl.binary.OptionalSerializer(%s)", typeSerializer(t.Cases[1].Type, contextNamespace, namedType))
 			}
 
-			unionClassName, _ := common.UnionClassName(t)
+			unionClassName := common.UnionClassName(t)
 			if namedType != nil {
 				unionClassName = namedType.Name
 				if namedType.Namespace != contextNamespace {

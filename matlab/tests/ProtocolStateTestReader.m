@@ -1,4 +1,4 @@
-classdef ProtocolStateTestReader < StateTestReaderBase
+classdef ProtocolStateTestReader < test_model.StateTestReaderBase
 
     methods (Access=protected)
 
