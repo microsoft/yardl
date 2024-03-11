@@ -7,7 +7,11 @@ classdef DateTime < handle
 
     methods
         function obj = DateTime(nanoseconds_since_epoch)
-            obj.nanoseconds_since_epoch_ = nanoseconds_since_epoch;
+            if nargin > 0
+                obj.nanoseconds_since_epoch_ = nanoseconds_since_epoch;
+            else
+                obj.nanoseconds_since_epoch_ = 0;
+            end
         end
 
         function value = value(obj)
@@ -23,11 +27,8 @@ classdef DateTime < handle
                 other = yardl.DateTime.from_datetime(other);
             end
 
-            if isa(other, 'yardl.DateTime')
-                eq = all([obj.value] == [other.value]);
-            else
-                eq = false;
-            end
+            eq = isa(other, 'yardl.DateTime') && ...
+                all([obj.value] == [other.value]);
         end
     end
 
@@ -36,6 +37,15 @@ classdef DateTime < handle
             value.TimeZone = 'UTC';
             nanoseconds_since_epoch = convertTo(value, 'epochtime', 'TicksPerSecond', 1e9);
             dt = yardl.DateTime(nanoseconds_since_epoch);
+        end
+
+        function dt = from_components(year, month, day, hour, minute, second, nanosecond)
+            if ~(nanosecond >= 0 && nanosecond < 999999999)
+                throw(yardl.ValueError("nanosecond must be in 0..1e9"));
+            end
+            mdt = datetime(year, month, day, hour, minute, second, 'TimeZone', 'UTC');
+            seconds_since_epoch = convertTo(mdt, 'epochtime');
+            dt = yardl.DateTime(seconds_since_epoch * 1e9 + nanosecond);
         end
     end
 

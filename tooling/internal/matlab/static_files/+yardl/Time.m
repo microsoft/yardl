@@ -8,7 +8,14 @@ classdef Time < handle
 
     methods
         function obj = Time(nanoseconds_since_midnight)
-            obj.nanoseconds_since_midnight_ = nanoseconds_since_midnight;
+            if nargin > 0
+                if nanoseconds_since_midnight < 0 || nanoseconds_since_midnight >= 24*60*60*1e9
+                    throw(yardl.ValuError("Time must be between 00:00:00 and 23:59:59.999999999"));
+                end
+                obj.nanoseconds_since_midnight_ = nanoseconds_since_midnight;
+            else
+                obj.nanoseconds_since_midnight_ = 0;
+            end
         end
 
         function value = value(obj)
@@ -24,18 +31,34 @@ classdef Time < handle
                 other = yardl.Time.from_datetime(other);
             end
 
-            if isa(other, 'yardl.Time')
-                eq = all([obj.value] == [other.value]);
-            else
-                eq = false;
-            end
+            eq = isa(other, 'yardl.Time') && ...
+                all([obj.value] == [other.value]);
         end
     end
 
     methods (Static)
         function t = from_datetime(value)
-            nanoseconds_since_midnight = convertTo(value, 'epochtime', 'Epoch', datetime('today', 'TimeZone', value.TimeZone), 'TicksPerSecond', 1e9);
+            nanoseconds_since_midnight = convertTo(value, 'epochtime', ...
+                    'Epoch', datetime(value.Year, value.Month, value.Day, 'TimeZone', value.TimeZone), ...
+                    'TicksPerSecond', 1e9);
             t = yardl.Time(nanoseconds_since_midnight);
+        end
+
+        function t = from_components(hour, minute, second, nanosecond)
+            if ~(hour >= 0 && hour <= 23)
+                throw(yardl.ValueError("hour must be between 0 and 23"));
+            end
+            if ~(minute >= 0 && minute <= 59)
+                throw(yardl.ValueError("minute must be between 0 and 59"));
+            end
+            if ~(second >= 0 && second <= 59)
+                throw(yardl.ValueError("second must be between 0 and 59"));
+            end
+            if ~(nanosecond >= 0 && nanosecond <= 999999999)
+                throw(yardl.ValueError("nanosecond must be between 0 and 999999999"));
+            end
+
+            t = yardl.Time(hour * 60*60*1e9 + minute * 60*1e9 + second * 1e9 + nanosecond);
         end
     end
 

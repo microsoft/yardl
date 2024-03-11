@@ -1,3 +1,7 @@
-addpath("../generated/test_model/")
+addpath("../generated/test_model/");
 
-run(CodedStreamTest)
+run(YardlTypesTest);
+run(CodedStreamTest);
+run(ProtocolStateTest);
+run(GeneratedTypesTest);
+run(EqualityTest);

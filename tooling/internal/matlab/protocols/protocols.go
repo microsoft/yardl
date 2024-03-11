@@ -227,8 +227,6 @@ func writeAbstractReader(fw *common.MatlabFileWriter, p *dsl.ProtocolDefinition,
 
 						fmt.Fprintf(w, "value = obj.%s();\n", common.ProtocolReadImplMethodName(step))
 						if step.IsStream() {
-							// fmt.Fprintf(w, "obj.state_ = %d;\n", i*2+1)
-							// fmt.Fprintf(w, "value = obj.wrap_iterable_(value, %d);\n", (i+1)*2)
 							fmt.Fprintf(w, "obj.state_ = %d;\n", (i+1)*2)
 						} else {
 							fmt.Fprintf(w, "obj.state_ = %d;\n", (i+1)*2)
@@ -270,29 +268,12 @@ func writeAbstractReader(fw *common.MatlabFileWriter, p *dsl.ProtocolDefinition,
 
 			w.WriteStringln("methods (Access=private)")
 			common.WriteBlockBody(w, func() {
-				// wrap_iterable method
-				w.WriteStringln("function value = wrap_iterable_(obj, iterable, final_state)")
-				common.WriteBlockBody(w, func() {
-					w.WriteStringln("% This is a no-op... In python, it's yield from iterable")
-					w.WriteStringln("value = iterable;")
-					w.WriteStringln("obj.state_ = final_state;")
-				})
-				w.WriteStringln("")
-
 				// raise_unexpected_state method
 				w.WriteStringln("function raise_unexpected_state_(obj, actual)")
 				common.WriteBlockBody(w, func() {
 					w.WriteStringln("actual_method = obj.state_to_method_name_(actual);")
-					w.WriteStringln("if mod(obj.state_, 2) == 1")
-					w.Indented(func() {
-						w.WriteStringln("previous_method = obj.state_to_method_name_(obj.state_ - 1);")
-						w.WriteStringln(`throw(yardl.ProtocolError("Received call to '%s' but the iterable returned by '%s' was not fully consumed.", actual_method, previous_method));`)
-					})
-					w.WriteStringln("else")
-					common.WriteBlockBody(w, func() {
-						w.WriteStringln("expected_method = obj.state_to_method_name_(obj.state_);")
-						w.WriteStringln(`throw(yardl.ProtocolError("Expected call to '%s' but received call to '%s'.", expected_method, actual_method));`)
-					})
+					w.WriteStringln("expected_method = obj.state_to_method_name_(obj.state_);")
+					w.WriteStringln(`throw(yardl.ProtocolError("Expected call to '%s' but received call to '%s'.", expected_method, actual_method));`)
 				})
 				w.WriteStringln("")
 

@@ -37,26 +37,24 @@ var TypeSyntaxWriter dsl.TypeSyntaxWriter[string] = func(self dsl.TypeSyntaxWrit
 			return "uint32"
 		case dsl.Int64:
 			return "int64"
-		case dsl.Uint64:
-			return "uint64"
-		case dsl.Size:
+		case dsl.Uint64, dsl.Size:
 			return "uint64"
 		case dsl.Float32:
-			return "float32"
+			return "single"
 		case dsl.Float64:
-			return "float64"
+			return "double"
 		case dsl.ComplexFloat32:
 			return "complex"
 		case dsl.ComplexFloat64:
 			return "complex"
 		case dsl.String:
-			return "str"
+			return "string"
 		case dsl.Date:
-			return "datetime"
+			return "yardl.Date"
 		case dsl.Time:
-			return "datetime"
+			return "yardl.Time"
 		case dsl.DateTime:
-			return "datetime"
+			return "yardl.DateTime"
 		default:
 			panic(fmt.Sprintf("primitive '%v' not recognized", t))
 		}
@@ -106,6 +104,28 @@ var TypeSyntaxWriter dsl.TypeSyntaxWriter[string] = func(self dsl.TypeSyntaxWrit
 
 func TypeSyntax(typeOrTypeDefinition dsl.Node, contextNamespace string) string {
 	return TypeSyntaxWriter.ToSyntax(typeOrTypeDefinition, contextNamespace)
+}
+
+var typeSyntaxWithoutTypeParametersWriter dsl.TypeSyntaxWriter[string] = func(self dsl.TypeSyntaxWriter[string], t dsl.Node, contextNamespace string) string {
+	switch t := t.(type) {
+	case dsl.TypeDefinition:
+		meta := t.GetDefinitionMeta()
+		if len(meta.TypeParameters) > 0 {
+			meta := t.GetDefinitionMeta()
+			typeName := TypeIdentifierName(meta.Name)
+			if t.GetDefinitionMeta().Namespace != contextNamespace {
+				typeName = fmt.Sprintf("%s.%s", formatting.ToSnakeCase(meta.Namespace), typeName)
+			}
+
+			return typeName
+		}
+	}
+
+	return TypeSyntaxWriter(self, t, contextNamespace)
+}
+
+func TypeSyntaxWithoutTypeParameters(typeOrTypeDefinition dsl.Node, contextNamespace string) string {
+	return typeSyntaxWithoutTypeParametersWriter.ToSyntax(typeOrTypeDefinition, contextNamespace)
 }
 
 func ComputedFieldIdentifierName(name string) string {

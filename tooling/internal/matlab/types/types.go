@@ -5,11 +5,13 @@ package types
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/microsoft/yardl/tooling/internal/formatting"
 	"github.com/microsoft/yardl/tooling/internal/matlab/common"
 	"github.com/microsoft/yardl/tooling/pkg/dsl"
+	"github.com/rs/zerolog/log"
 )
 
 func WriteTypes(fw *common.MatlabFileWriter, ns *dsl.Namespace, st dsl.SymbolTable) error {
@@ -119,11 +121,13 @@ func writeEnum(fw *common.MatlabFileWriter, enum *dsl.EnumDefinition) error {
 		enumTypeSyntax := common.TypeSyntax(enum, enum.Namespace)
 		fmt.Fprintf(w, "classdef %s < %s\n", enumTypeSyntax, base)
 		common.WriteBlockBody(w, func() {
-			fmt.Fprintf(w, "enumeration\n")
+			// NOTE: We don't use Matlab enumeration class because you can't inherit from it
+			// and we use inheritance to define NamedTypes
+			w.WriteStringln("properties (Constant)")
 			common.WriteBlockBody(w, func() {
 				for _, value := range enum.Values {
 					common.WriteComment(w, value.Comment)
-					fmt.Fprintf(w, "%s (%d)\n", common.EnumValueIdentifierName(value.Symbol), &value.IntegerValue)
+					fmt.Fprintf(w, "%s = %d\n", common.EnumValueIdentifierName(value.Symbol), &value.IntegerValue)
 				}
 			})
 		})
@@ -139,13 +143,18 @@ func writeRecord(fw *common.MatlabFileWriter, rec *dsl.RecordDefinition, st dsl.
 
 			w.WriteStringln("properties")
 			var fieldNames []string
+			requireConstructorArgs := false
 			common.WriteBlockBody(w, func() {
-				for i, field := range rec.Fields {
+				for _, field := range rec.Fields {
 					common.WriteComment(w, field.Comment)
-					fieldNames = append(fieldNames, common.FieldIdentifierName(field.Name))
-					fmt.Fprintf(w, "%s\n", common.FieldIdentifierName(field.Name))
-					if i < len(rec.Fields)-1 {
-						w.WriteStringln("")
+					fieldName := common.FieldIdentifierName(field.Name)
+					fieldNames = append(fieldNames, fieldName)
+					w.WriteStringln(fieldName)
+
+					_, defaultExpressionKind := typeDefault(field.Type, rec.Namespace, "", st)
+					switch defaultExpressionKind {
+					case defaultValueKindNone:
+						requireConstructorArgs = true
 					}
 				}
 			})
@@ -157,24 +166,50 @@ func writeRecord(fw *common.MatlabFileWriter, rec *dsl.RecordDefinition, st dsl.
 				// Record Constructor
 				fmt.Fprintf(w, "function obj = %s(%s)\n", rec.Name, strings.Join(fieldNames, ", "))
 				common.WriteBlockBody(w, func() {
-					for _, field := range rec.Fields {
-						fmt.Fprintf(w, "obj.%s = %s;\n", common.FieldIdentifierName(field.Name), common.FieldIdentifierName(field.Name))
+					if requireConstructorArgs {
+						log.Warn().Msgf("Record %s requires constructor arguments", rec.Name)
+						for _, field := range rec.Fields {
+							fmt.Fprintf(w, "obj.%s = %s;\n", common.FieldIdentifierName(field.Name), common.FieldIdentifierName(field.Name))
+						}
+					} else {
+						w.WriteStringln("if nargin > 0")
+						w.Indented(func() {
+							for _, field := range rec.Fields {
+								fmt.Fprintf(w, "obj.%s = %s;\n", common.FieldIdentifierName(field.Name), common.FieldIdentifierName(field.Name))
+							}
+						})
+						w.WriteStringln("else")
+						common.WriteBlockBody(w, func() {
+							for _, field := range rec.Fields {
+								fieldName := common.FieldIdentifierName(field.Name)
+								defaultExpression, defaultExpressionKind := typeDefault(field.Type, rec.Namespace, "", st)
+								switch defaultExpressionKind {
+								case defaultValueKindNone:
+									w.WriteStringln(fieldName)
+								case defaultValueKindImmutable, defaultValueKindMutable:
+									fmt.Fprintf(w, "obj.%s = %s;\n", fieldName, defaultExpression)
+								}
+							}
+						})
 					}
+
 				})
 				w.WriteStringln("")
 
 				// Computed Fields
-				for _, computedField := range rec.ComputedFields {
-					fieldName := common.ComputedFieldIdentifierName(computedField.Name)
+				if len(rec.ComputedFields) > 0 {
+					for _, computedField := range rec.ComputedFields {
+						fieldName := common.ComputedFieldIdentifierName(computedField.Name)
 
-					common.WriteComment(w, computedField.Comment)
-					fmt.Fprintf(w, "function res = %s(self)\n", fieldName)
-					common.WriteBlockBody(w, func() {
-						writeComputedFieldExpression(w, computedField.Expression, rec.Namespace)
-					})
+						common.WriteComment(w, computedField.Comment)
+						fmt.Fprintf(w, "function res = %s(self)\n", fieldName)
+						common.WriteBlockBody(w, func() {
+							writeComputedFieldExpression(w, computedField.Expression, rec.Namespace)
+						})
+						w.WriteStringln("")
+					}
 					w.WriteStringln("")
 				}
-				w.WriteStringln("")
 
 				// eq method
 				w.WriteStringln("function res = eq(obj, other)")
@@ -653,8 +688,12 @@ func writeTypeConversion(w *formatting.IndentedWriter, t dsl.Type, next func()) 
 					return "complex(double(", "))"
 				case dsl.String:
 					return "string(", ")"
-				case dsl.Date, dsl.Time, dsl.DateTime:
-					return "datetime(", ")"
+				case dsl.Date:
+					return "yardl.Date(", ")"
+				case dsl.Time:
+					return "yardl.Time(", ")"
+				case dsl.DateTime:
+					return "yardl.DateTime(", ")"
 				}
 			}
 		}
@@ -665,4 +704,199 @@ func writeTypeConversion(w *formatting.IndentedWriter, t dsl.Type, next func()) 
 	w.WriteString(open)
 	next()
 	w.WriteString(close)
+}
+
+type defaultValueKind int
+
+const (
+	defaultValueKindNone defaultValueKind = iota
+	defaultValueKindImmutable
+	defaultValueKindMutable
+)
+
+func typeDefault(t dsl.Type, contextNamespace string, namedType string, st dsl.SymbolTable) (string, defaultValueKind) {
+	switch t := t.(type) {
+	case nil:
+		return "yardl.None", defaultValueKindImmutable
+	case *dsl.SimpleType:
+		return typeDefinitionDefault(t.ResolvedDefinition, contextNamespace, st)
+	case *dsl.GeneralizedType:
+		switch td := t.Dimensionality.(type) {
+		case nil:
+			defaultExpression, defaultKind := typeDefault(t.Cases[0].Type, contextNamespace, "", st)
+			if t.Cases.IsSingle() || t.Cases.HasNullOption() {
+				return defaultExpression, defaultKind
+			}
+
+			var unionClassName string
+			if namedType != "" {
+				unionClassName = namedType
+			} else {
+				unionClassName, _ = common.UnionClassName(t)
+			}
+
+			unionCaseConstructor := fmt.Sprintf("%s.%s", unionClassName, formatting.ToPascalCase(t.Cases[0].Tag))
+
+			switch defaultKind {
+			case defaultValueKindNone:
+				return "", defaultKind
+			case defaultValueKindImmutable:
+				return fmt.Sprintf(`%s(%s)`, unionCaseConstructor, defaultExpression), defaultKind
+			case defaultValueKindMutable:
+				if t, ok := dsl.GetUnderlyingType(t.Cases[0].Type).(*dsl.SimpleType); ok {
+					if _, ok := t.ResolvedDefinition.(*dsl.RecordDefinition); ok {
+						return fmt.Sprintf(`%s(%s())`, unionCaseConstructor, defaultExpression), defaultValueKindMutable
+					}
+				}
+				return fmt.Sprintf(`%s(%s)`, unionCaseConstructor, defaultExpression), defaultValueKindMutable
+			}
+
+			return fmt.Sprintf(`("%s", %s)`, t.Cases[0].Tag, defaultExpression), defaultValueKindImmutable
+		case *dsl.Vector:
+			scalar := t.ToScalar()
+			if dsl.TypeContainsGenericTypeParameter(scalar) {
+				return "", defaultValueKindNone
+			}
+
+			dtype := common.TypeSyntax(scalar, contextNamespace)
+
+			if td.Length == nil {
+				return fmt.Sprintf("%s.empty()", dtype), defaultValueKindMutable
+			}
+
+			scalarDefault, scalarDefaultKind := typeDefault(t.Cases[0].Type, contextNamespace, "", st)
+
+			switch scalarDefaultKind {
+			case defaultValueKindNone:
+				return "", defaultValueKindNone
+			case defaultValueKindImmutable, defaultValueKindMutable:
+				return fmt.Sprintf("repelem(%s, %d)", scalarDefault, *td.Length), defaultValueKindMutable
+			}
+
+		case *dsl.Array:
+			scalar := t.ToScalar()
+			if dsl.TypeContainsGenericTypeParameter(scalar) {
+				return "", defaultValueKindNone
+			}
+
+			dtype := common.TypeSyntax(scalar, contextNamespace)
+
+			if td.IsFixed() {
+				dims := make([]string, len(*td.Dimensions))
+				for i, d := range *td.Dimensions {
+					dims[len(*td.Dimensions)-i-1] = strconv.FormatUint(*d.Length, 10)
+				}
+				if len(dims) == 1 {
+					dims = append(dims, "1")
+				}
+
+				scalarDefault, _ := typeDefault(scalar, contextNamespace, "", st)
+
+				return fmt.Sprintf("repelem(%s, %s)", scalarDefault, strings.Join(dims, ", ")), defaultValueKindMutable
+			}
+
+			if td.HasKnownNumberOfDimensions() {
+				shape := strings.Repeat("0, ", len(*td.Dimensions))[0 : len(*td.Dimensions)*3-2]
+				return fmt.Sprintf("%s.empty(%s)", dtype, shape), defaultValueKindMutable
+			}
+
+			return fmt.Sprintf("%s.empty()", dtype), defaultValueKindMutable
+
+		case *dsl.Map:
+			return "containers.Map", defaultValueKindMutable
+		}
+	}
+
+	return "", defaultValueKindNone
+}
+
+func typeDefinitionDefault(t dsl.TypeDefinition, contextNamespace string, st dsl.SymbolTable) (string, defaultValueKind) {
+	switch t := t.(type) {
+	case dsl.PrimitiveDefinition:
+		switch t {
+		case dsl.Bool:
+			return "false", defaultValueKindImmutable
+		case dsl.Int8:
+			return "int8(0)", defaultValueKindImmutable
+		case dsl.Uint8:
+			return "uint8(0)", defaultValueKindImmutable
+		case dsl.Int16:
+			return "int16(0)", defaultValueKindImmutable
+		case dsl.Uint16:
+			return "uint16(0)", defaultValueKindImmutable
+		case dsl.Int32:
+			return "int32(0)", defaultValueKindImmutable
+		case dsl.Uint32:
+			return "uint32(0)", defaultValueKindImmutable
+		case dsl.Int64:
+			return "int64(0)", defaultValueKindImmutable
+		case dsl.Uint64, dsl.Size:
+			return "uint64(0)", defaultValueKindImmutable
+		case dsl.Float32:
+			return "single(0)", defaultValueKindImmutable
+		case dsl.Float64:
+			return "0", defaultValueKindImmutable
+		case dsl.ComplexFloat32, dsl.ComplexFloat64:
+			return "0j", defaultValueKindImmutable
+		case dsl.String:
+			return `""`, defaultValueKindImmutable
+		case dsl.Date:
+			return "yardl.Date()", defaultValueKindImmutable
+		case dsl.Time:
+			return "yardl.Time()", defaultValueKindImmutable
+		case dsl.DateTime:
+			return "yardl.DateTime()", defaultValueKindImmutable
+		}
+	case *dsl.EnumDefinition:
+		zeroValue := t.GetZeroValue()
+		if t.IsFlags {
+			if zeroValue == nil {
+				return fmt.Sprintf("%s(0)", common.TypeSyntax(t, contextNamespace)), defaultValueKindImmutable
+			} else {
+				return fmt.Sprintf("%s.%s", common.TypeSyntax(t, contextNamespace), common.EnumValueIdentifierName(zeroValue.Symbol)), defaultValueKindImmutable
+			}
+		}
+
+		if zeroValue == nil {
+			return "", defaultValueKindNone
+		}
+
+		return fmt.Sprintf("%s.%s", common.TypeSyntax(t, contextNamespace), common.EnumValueIdentifierName(zeroValue.Symbol)), defaultValueKindImmutable
+	case *dsl.NamedType:
+		return typeDefault(t.Type, contextNamespace, common.TypeSyntax(t, contextNamespace), st)
+
+	case *dsl.RecordDefinition:
+		if len(t.TypeArguments) == 0 {
+			if len(t.TypeParameters) > 0 {
+				// *Open* Generic Record type
+				// Should never get here - typeDefault is only called on Fields, which must be closed if generic
+				panic(fmt.Sprintf("No typeDefault for open generic record %s", t.Name))
+			}
+
+			for _, f := range t.Fields {
+				_, fieldDefaultKind := typeDefault(f.Type, contextNamespace, "", st)
+				if fieldDefaultKind == defaultValueKindNone {
+					// Basic, closed record type
+					// Should never get here - a Field in a closed record should always have a default type
+					panic(fmt.Sprintf("No typeDefault for record field %s.%s", t.Name, f.Name))
+				}
+			}
+
+			// Basic record type
+			return fmt.Sprintf("%s()", common.TypeSyntaxWithoutTypeParameters(t, contextNamespace)), defaultValueKindMutable
+		}
+
+		args := make([]string, 0)
+		for _, f := range t.Fields {
+			fieldDefaultExpr, fieldDefaultKind := typeDefault(f.Type, contextNamespace, "", st)
+			if fieldDefaultKind == defaultValueKindNone {
+				return "", defaultValueKindNone
+			}
+			args = append(args, fieldDefaultExpr)
+		}
+
+		return fmt.Sprintf("%s(%s)", common.TypeSyntaxWithoutTypeParameters(t, contextNamespace), strings.Join(args, ", ")), defaultValueKindMutable
+	}
+
+	return "", defaultValueKindNone
 }
