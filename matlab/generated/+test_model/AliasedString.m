@@ -1,0 +1,2 @@
+classdef AliasedString < string
+end

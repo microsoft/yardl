@@ -1,0 +1,2 @@
+classdef AliasedMap < dictionary
+end
