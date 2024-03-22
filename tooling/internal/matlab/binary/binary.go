@@ -14,7 +14,6 @@ import (
 )
 
 func WriteBinary(fw *common.MatlabFileWriter, ns *dsl.Namespace) error {
-
 	if ns.IsTopLevel {
 		if err := writeProtocols(fw, ns); err != nil {
 			return err
@@ -41,15 +40,16 @@ func writeProtocolWriter(fw *common.MatlabFileWriter, p *dsl.ProtocolDefinition,
 	return fw.WriteFile(BinaryWriterName(p), func(w *formatting.IndentedWriter) {
 		common.WriteComment(w, fmt.Sprintf("Binary writer for the %s protocol", p.Name))
 		common.WriteComment(w, p.Comment)
-		fmt.Fprintf(w, "classdef %s < yardl.binary.BinaryProtocolWriter & %s\n", BinaryWriterName(p), common.AbstractWriterName(p))
+		abstractWriterName := fmt.Sprintf("%s.%s", common.NamespaceIdentifierName(p.Namespace), common.AbstractWriterName(p))
+		fmt.Fprintf(w, "classdef %s < yardl.binary.BinaryProtocolWriter & %s\n", BinaryWriterName(p), abstractWriterName)
 		common.WriteBlockBody(w, func() {
 
 			w.WriteStringln("methods")
 			common.WriteBlockBody(w, func() {
 				fmt.Fprintf(w, "function obj = %s(filename)\n", BinaryWriterName(p))
 				common.WriteBlockBody(w, func() {
-					fmt.Fprintf(w, "obj@%s();\n", common.AbstractWriterName(p))
-					fmt.Fprintf(w, "obj@yardl.binary.BinaryProtocolWriter(filename, %s.schema);\n", common.AbstractWriterName(p))
+					fmt.Fprintf(w, "obj@%s();\n", abstractWriterName)
+					fmt.Fprintf(w, "obj@yardl.binary.BinaryProtocolWriter(filename, %s.schema);\n", abstractWriterName)
 				})
 			})
 			w.WriteStringln("")
@@ -75,15 +75,16 @@ func writeProtocolReader(fw *common.MatlabFileWriter, p *dsl.ProtocolDefinition,
 	return fw.WriteFile(BinaryReaderName(p), func(w *formatting.IndentedWriter) {
 		common.WriteComment(w, fmt.Sprintf("Binary reader for the %s protocol", p.Name))
 		common.WriteComment(w, p.Comment)
-		fmt.Fprintf(w, "classdef %s < yardl.binary.BinaryProtocolReader & %s\n", BinaryReaderName(p), common.AbstractReaderName(p))
+		abstractReaderName := fmt.Sprintf("%s.%s", common.NamespaceIdentifierName(p.Namespace), common.AbstractReaderName(p))
+		fmt.Fprintf(w, "classdef %s < yardl.binary.BinaryProtocolReader & %s\n", BinaryReaderName(p), abstractReaderName)
 		common.WriteBlockBody(w, func() {
 
 			w.WriteStringln("methods")
 			common.WriteBlockBody(w, func() {
 				fmt.Fprintf(w, "function obj = %s(filename)\n", BinaryReaderName(p))
 				common.WriteBlockBody(w, func() {
-					fmt.Fprintf(w, "obj@%s();\n", common.AbstractReaderName(p))
-					fmt.Fprintf(w, "obj@yardl.binary.BinaryProtocolReader(filename, %s.schema);\n", common.AbstractReaderName(p))
+					fmt.Fprintf(w, "obj@%s();\n", abstractReaderName)
+					fmt.Fprintf(w, "obj@yardl.binary.BinaryProtocolReader(filename, %s.schema);\n", abstractReaderName)
 				})
 			})
 			w.WriteStringln("")
@@ -91,7 +92,7 @@ func writeProtocolReader(fw *common.MatlabFileWriter, p *dsl.ProtocolDefinition,
 			w.WriteStringln("methods (Access=protected)")
 			common.WriteBlockBody(w, func() {
 				for i, step := range p.Sequence {
-					fmt.Fprintf(w, "function value = %s(obj, value)\n", common.ProtocolReadImplMethodName(step))
+					fmt.Fprintf(w, "function value = %s(obj)\n", common.ProtocolReadImplMethodName(step))
 					common.WriteBlockBody(w, func() {
 						fmt.Fprintf(w, "r = %s;\n", typeSerializer(step.Type, ns.Name, nil))
 						w.WriteStringln("value = r.read(obj.stream_);")
@@ -144,7 +145,7 @@ func writeRecordSerializer(fw *common.MatlabFileWriter, rec *dsl.RecordDefinitio
 					for i, field := range rec.Fields {
 						fmt.Fprintf(w, "field_serializers{%d} = %s;\n", i+1, typeSerializer(field.Type, ns.Name, nil))
 					}
-					fmt.Fprintf(w, "obj@yardl.binary.RecordSerializer(field_serializers);\n")
+					fmt.Fprintf(w, "obj@yardl.binary.RecordSerializer('%s', field_serializers);\n", typeSyntax)
 				})
 				w.WriteStringln("")
 
@@ -171,17 +172,14 @@ func writeRecordSerializer(fw *common.MatlabFileWriter, rec *dsl.RecordDefinitio
 }
 
 func recordSerializerClassName(record *dsl.RecordDefinition, contextNamespace string) string {
-	className := fmt.Sprintf("%sSerializer", formatting.ToPascalCase(record.Name))
-	if record.Namespace != contextNamespace {
-		className = fmt.Sprintf("%s.binary.%s", common.NamespaceIdentifierName(record.Namespace), className)
-	}
-	return className
+	return fmt.Sprintf("%sSerializer", formatting.ToPascalCase(record.Name))
 }
 
 func typeDefinitionSerializer(td dsl.TypeDefinition, contextNamespace string) string {
 	switch td := td.(type) {
 	case dsl.PrimitiveDefinition:
 		return fmt.Sprintf("yardl.binary.%sSerializer", formatting.ToPascalCase(string(td)))
+
 	case *dsl.EnumDefinition:
 		var baseType dsl.Type
 		if td.BaseType != nil {
@@ -191,11 +189,13 @@ func typeDefinitionSerializer(td dsl.TypeDefinition, contextNamespace string) st
 		}
 
 		elementSerializer := typeSerializer(baseType, contextNamespace, nil)
-		return fmt.Sprintf("yardl.binary.EnumSerializer(%s, @%s)", elementSerializer, common.TypeSyntax(td, contextNamespace))
+		enumSyntax := common.TypeSyntax(td, contextNamespace)
+		return fmt.Sprintf("yardl.binary.EnumSerializer('%s', @%s, %s)", enumSyntax, enumSyntax, elementSerializer)
+
 	case *dsl.RecordDefinition:
-		serializerName := recordSerializerClassName(td, contextNamespace)
+		qualifiedSerializerName := fmt.Sprintf("%s.%s", common.NamespaceIdentifierName(td.Namespace), recordSerializerClassName(td, contextNamespace))
 		if len(td.TypeParameters) == 0 {
-			return fmt.Sprintf("%s()", serializerName)
+			return fmt.Sprintf("%s()", qualifiedSerializerName)
 		}
 		if len(td.TypeArguments) == 0 {
 			panic("Expected type arguments")
@@ -207,14 +207,18 @@ func typeDefinitionSerializer(td dsl.TypeDefinition, contextNamespace string) st
 		}
 
 		if len(typeArguments) == 0 {
-			return fmt.Sprintf("%s()", serializerName)
+			panic("How could this be possible?")
+			return fmt.Sprintf("%s()", qualifiedSerializerName)
 		}
 
-		return fmt.Sprintf("%s(%s)", serializerName, strings.Join(typeArguments, ", "))
+		return fmt.Sprintf("%s(%s)", qualifiedSerializerName, strings.Join(typeArguments, ", "))
+
 	case *dsl.GenericTypeParameter:
 		return fmt.Sprintf("%s_serializer", formatting.ToSnakeCase(td.Name))
+
 	case *dsl.NamedType:
 		return typeSerializer(td.Type, contextNamespace, td)
+
 	default:
 		panic(fmt.Sprintf("Not implemented %T", td))
 	}
@@ -237,26 +241,25 @@ func typeSerializer(t dsl.Type, contextNamespace string, namedType *dsl.NamedTyp
 
 			unionClassName := common.UnionClassName(t)
 			if namedType != nil {
-				unionClassName = namedType.Name
-				if namedType.Namespace != contextNamespace {
-					unionClassName = fmt.Sprintf("%s.%s", common.NamespaceIdentifierName(namedType.Namespace), unionClassName)
-				}
+				unionClassName = fmt.Sprintf("%s.%s", common.NamespaceIdentifierName(namedType.Namespace), namedType.Name)
+			} else {
+				unionClassName = fmt.Sprintf("%s.%s", common.NamespaceIdentifierName(contextNamespace), unionClassName)
 			}
 
 			serializers := make([]string, len(t.Cases))
 			factories := make([]string, len(t.Cases))
 			for i, c := range t.Cases {
 				if c.Type == nil {
-					serializers[i] = "yardl.None"
+					serializers[i] = "yardl.binary.NoneSerializer"
 					factories[i] = "yardl.None"
 				} else {
 					serializers[i] = typeSerializer(c.Type, contextNamespace, namedType)
 					factories[i] = fmt.Sprintf("@%s.%s", unionClassName, formatting.ToPascalCase(c.Tag))
 				}
 			}
-
 			return fmt.Sprintf("yardl.binary.UnionSerializer('%s', {%s}, {%s})", unionClassName, strings.Join(serializers, ", "), strings.Join(factories, ", "))
 		}
+
 		switch td := t.Dimensionality.(type) {
 		case nil:
 			return getScalarSerializer()
@@ -266,7 +269,6 @@ func typeSerializer(t dsl.Type, contextNamespace string, namedType *dsl.NamedTyp
 			if td.Length != nil {
 				return fmt.Sprintf("yardl.binary.FixedVectorSerializer(%s, %d)", getScalarSerializer(), *td.Length)
 			}
-
 			return fmt.Sprintf("yardl.binary.VectorSerializer(%s)", getScalarSerializer())
 		case *dsl.Array:
 			if td.IsFixed() {
@@ -289,6 +291,7 @@ func typeSerializer(t dsl.Type, contextNamespace string, namedType *dsl.NamedTyp
 			valueSerializer := typeSerializer(t.ToScalar(), contextNamespace, namedType)
 
 			return fmt.Sprintf("yardl.binary.MapSerializer(%s, %s)", keySerializer, valueSerializer)
+
 		default:
 			panic(fmt.Sprintf("Not implemented %T", t.Dimensionality))
 		}

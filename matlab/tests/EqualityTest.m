@@ -1,6 +1,9 @@
 classdef EqualityTest < matlab.unittest.TestCase
     methods (Test)
 
+        % TODO: Add tests for equality of *arrays* of each type,
+        %   since Matlab eq method applies to both scalar and non-scalar values
+
         function testSimpleEquality(testCase)
             a = test_model.SimpleRecord(1, 2, 3);
             b = test_model.SimpleRecord(1, 2, 3);

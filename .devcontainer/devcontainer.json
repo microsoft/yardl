@@ -10,7 +10,8 @@
   "overrideCommand": false,
   "mounts": [
     // Bind mount docker socket under an alias to support docker-from-docker
-    "source=/var/run/docker.sock,target=/var/run/docker-host.sock,type=bind"
+    "source=/var/run/docker.sock,target=/var/run/docker-host.sock,type=bind",
+    "source=${localEnv:MATLAB_LICENSE_FILE:/dev/null},target=/opt/matlab/latest/licenses/license.lic,type=bind"
   ],
   "remoteUser": "vscode",
 

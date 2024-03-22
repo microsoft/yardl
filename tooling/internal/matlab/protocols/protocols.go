@@ -43,12 +43,6 @@ func writeAbstractWriter(fw *common.MatlabFileWriter, p *dsl.ProtocolDefinition,
 				common.WriteBlockBody(w, func() { w.WriteStringln("obj.state_ = 0;") })
 				w.WriteStringln("")
 
-				// Destructor
-				// w.WriteStringln("function delete(obj)")
-				// common.WriteBlockBody(w, func() {
-				// })
-				// w.WriteStringln("")
-
 				// Close method
 				w.WriteStringln("function close(obj)")
 				common.WriteBlockBody(w, func() {
@@ -187,12 +181,6 @@ func writeAbstractReader(fw *common.MatlabFileWriter, p *dsl.ProtocolDefinition,
 				})
 				w.WriteStringln("")
 
-				// Destructor
-				// w.WriteStringln("function delete(obj)")
-				// common.WriteBlockBody(w, func() {
-				// })
-				// w.WriteStringln("")
-
 				// Close method
 				w.WriteStringln("function close(obj)")
 				common.WriteBlockBody(w, func() {
@@ -249,7 +237,7 @@ func writeAbstractReader(fw *common.MatlabFileWriter, p *dsl.ProtocolDefinition,
 			common.WriteBlockBody(w, func() {
 				w.WriteStringln("function res = schema()")
 				common.WriteBlockBody(w, func() {
-					fmt.Fprintf(w, "res = %s.schema;\n", common.AbstractWriterName(p))
+					fmt.Fprintf(w, "res = %s.%s.schema;\n", common.NamespaceIdentifierName(ns.Name), common.AbstractWriterName(p))
 				})
 			})
 			w.WriteStringln("")
@@ -282,11 +270,15 @@ func writeAbstractReader(fw *common.MatlabFileWriter, p *dsl.ProtocolDefinition,
 				common.WriteBlockBody(w, func() {
 					for i, step := range p.Sequence {
 						fmt.Fprintf(w, "if state == %d\n", i*2)
-						common.WriteBlockBody(w, func() {
+						w.Indented(func() {
 							fmt.Fprintf(w, "name = '%s';\n", common.ProtocolReadMethodName(step))
 						})
+						w.WriteString("else")
 					}
-					w.WriteStringln("name = '<unknown>';")
+					w.WriteStringln("")
+					common.WriteBlockBody(w, func() {
+						w.WriteStringln("name = '<unknown>';")
+					})
 				})
 			})
 		})

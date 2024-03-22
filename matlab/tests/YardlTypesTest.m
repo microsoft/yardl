@@ -71,5 +71,80 @@ classdef YardlTypesTest < matlab.unittest.TestCase
             testCase.verifyError(@() yardl.Time.from_components(12, 22, 44, 9999999999999999), 'yardl:ValueError');
         end
 
+        function testOptionals(testCase)
+            % None.has_value == false
+            testCase.verifyEqual(yardl.None().has_value, false);
+            % Optional(X).has_value == true
+            testCase.verifyEqual(yardl.Optional(42).has_value, true);
+
+            % ERROR: None.value
+            testCase.verifyError(@() yardl.None().value, 'yardl:ValueError');
+
+            % ERROR: None.has_value = true
+            function setHasValueTrue()
+                o = yardl.None;
+                o.has_value = true;
+            end
+            testCase.verifyError(@setHasValueTrue, 'MATLAB:class:SetProhibited');
+
+            % ERROR: Optional(x).has_value = false
+            function setHasValueFalse()
+                o = yardl.Optional(42);
+                o.has_value = false;
+            end
+            testCase.verifyError(@setHasValueFalse, 'MATLAB:class:SetProhibited');
+
+            % None == None
+            testCase.verifyEqual(yardl.None, yardl.None);
+
+            % Optional(X) == Optional(X)
+            testCase.verifyEqual(yardl.Optional(int16(42)), yardl.Optional(int16(42)));
+            testCase.verifyEqual(yardl.Optional("hello"), yardl.Optional("hello"));
+            testCase.verifyEqual(yardl.Optional([]), yardl.Optional([]));
+            testCase.verifyEqual(yardl.Optional([[1, 2]; [3, 4]]), yardl.Optional([[1, 2]; [3, 4]]));
+
+            % Optional(X) == X
+            testCase.verifyTrue(yardl.Optional(int16(42)) == int16(42));
+            testCase.verifyTrue(yardl.Optional("hello") == "hello");
+            testCase.verifyTrue(isequal(yardl.Optional([]), []));
+            testCase.verifyTrue(isequal(yardl.Optional([[1, 2]; [3, 4]]), [[1, 2]; [3, 4]]));
+
+            % X == Optional(X)
+            testCase.verifyEqual(int16(42), yardl.Optional(int16(42)));
+            testCase.verifyEqual("hello", yardl.Optional("hello"));
+            testCase.verifyEqual([], yardl.Optional([]));
+            testCase.verifyEqual([[1, 2]; [3, 4]], yardl.Optional([[1, 2]; [3, 4]]));
+
+            % None ~= Optional(X)
+            testCase.verifyNotEqual(yardl.None, yardl.Optional(42));
+
+            % Optional(X) ~= None
+            testCase.verifyNotEqual(yardl.Optional(42), yardl.None);
+
+            % None ~= X
+            testCase.verifyNotEqual(yardl.None, 42);
+            % X ~= None
+            testCase.verifyNotEqual(42, yardl.None);
+
+            % [Optionals] == [Optionals]
+            os = arrayfun(@yardl.Optional, 1:5);
+            testCase.verifyEqual(os, os);
+
+            % [Nones] == [Nones]
+            nones = repelem(yardl.None, 5);
+            testCase.verifyEqual(nones, nones);
+
+            % [Optional, None, ...] == [Optional, None, ...]
+            mixed1 = [1, 2, yardl.None, 4, 5, yardl.None];
+            testCase.verifyEqual(mixed1, mixed1);
+            mixed2 = [yardl.Optional(1), yardl.Optional(2), yardl.None, yardl.Optional(4), yardl.Optional(5), yardl.None];
+            testCase.verifyEqual(mixed1, mixed2);
+            testCase.verifyEqual(mixed2, mixed1);
+
+            % [Optional, None, ...] ~= [None, Optional, ...]
+            mixed3 = [1, 2, yardl.None, 4, 5, 6];
+            testCase.verifyNotEqual(mixed1, mixed3);
+            testCase.verifyNotEqual(mixed3, mixed1);
+        end
     end
 end

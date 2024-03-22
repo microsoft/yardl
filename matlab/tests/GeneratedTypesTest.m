@@ -52,7 +52,8 @@ classdef GeneratedTypesTest < matlab.unittest.TestCase
         function testDefaultRecordWithUnionsOfContainers(testCase)
             r = test_model.RecordWithUnionsOfContainers();
 
-            testCase.verifyEqual(r.map_or_scalar, test_model.MapOrScalar.Map(containers.Map));
+            % testCase.verifyEqual(r.map_or_scalar, test_model.MapOrScalar.Map(containers.Map));
+            testCase.verifyEqual(r.map_or_scalar, test_model.MapOrScalar.Map(dictionary));
             testCase.verifyEqual(r.vector_or_scalar, test_model.VectorOrScalar.Vector(int32([])));
             testCase.verifyEqual(r.array_or_scalar, test_model.ArrayOrScalar.Array(int32([])));
         end
@@ -81,7 +82,8 @@ classdef GeneratedTypesTest < matlab.unittest.TestCase
 
             testCase.verifyError(@() test_model.MyTuple(), 'MATLAB:minrhs');
             rm = test_model.RecordWithGenericMaps();
-            testCase.verifyEqual(rm.m, containers.Map());
+            % testCase.verifyEqual(rm.m, containers.Map());
+            testCase.verifyEqual(rm.m, dictionary);
             testCase.verifyEqual(rm.am, rm.m);
         end
 

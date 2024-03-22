@@ -19,6 +19,8 @@ python:
 
 matlab:
   outputDir: ../../matlab/generated
+  internalGenerateMocks: true
+  internalSymlinkStaticFiles: true
 
 json:
   outputDir: ../../cpp/test/generated

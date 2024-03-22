@@ -122,6 +122,10 @@ RUN . /opt/conda/etc/profile.d/conda.sh \
 #########################################################
 # Install Matlab
 #   Based on mathworks/{matlab-deps:r2023b,matlab:r2023b}
+#
+# Configure the Matlab License Server to use Matlab within the devcontainer (including VSCode extensions):
+#   In your HOST environment, export the environment variable MATLAB_LICENSE_FILE, e.g.
+#       export MATLAB_LICENSE_FILE=/mnt/c/Users/username/Documents/MATLAB/license.lic
 #########################################################
 
 ENV DEBIAN_FRONTEND="noninteractive" TZ="Etc/UTC"
@@ -153,6 +157,8 @@ RUN adduser --shell /bin/bash --disabled-password --gecos "" matlab \
 USER matlab
 WORKDIR /home/matlab
 
+ENV MLM_LICENSE_FILE=${LICENSE_SERVER}
+
 RUN wget -q https://www.mathworks.com/mpm/glnxa64/mpm \
     && chmod +x mpm \
     && sudo HOME=${HOME} ./mpm install \
@@ -161,12 +167,5 @@ RUN wget -q https://www.mathworks.com/mpm/glnxa64/mpm \
     --products ${MATLAB_PRODUCT_LIST} \
     || (echo "MPM Installation Failure. See below for more information:" && cat /tmp/mathworks_root.log && false) \
     && sudo rm -f mpm /tmp/mathworks_root.log \
-    && sudo ln -s ${MATLAB_INSTALL_LOCATION}/bin/matlab /usr/local/bin/matlab
-
-# Configure the Matlab License Servier
-# Option 1: Specify the host and port of the machine that serves the network licenses
-# e.g. ENV MLM_LICENSE_FILE=27000@flexlm-server-name
-ENV MLM_LICENSE_FILE=$LICENSE_SERVER
-
-# Option 2: Alternatively, copy your network license file into the container.
-# COPY Network.lic ${MATLAB_INSTALL_LOCATION}/licenses/
+    && sudo ln -s ${MATLAB_INSTALL_LOCATION}/bin/matlab /usr/local/bin/matlab \
+    && sudo ln -s ${MATLAB_INSTALL_LOCATION} /opt/matlab/latest

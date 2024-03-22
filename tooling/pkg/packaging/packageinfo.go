@@ -220,6 +220,7 @@ type MatlabCodegenOptions struct {
 	PackageInfo                *PackageInfo `yaml:"-"`
 	OutputDir                  string       `yaml:"outputDir"`
 	InternalSymlinkStaticFiles bool         `yaml:"internalSymlinkStaticFiles"`
+	InternalGenerateMocks      bool         `yaml:"internalGenerateMocks"`
 }
 
 // Parses PackageInfo in dir then loads all package Imports and Predecessors

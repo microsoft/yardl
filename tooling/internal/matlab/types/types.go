@@ -31,7 +31,7 @@ func WriteTypes(fw *common.MatlabFileWriter, ns *dsl.Namespace, st dsl.SymbolTab
 				err = writeNamedType(fw, td)
 			}
 		case *dsl.EnumDefinition:
-			err = writeEnum(fw, td)
+			err = writeEnum(fw, td, nil)
 		case *dsl.RecordDefinition:
 			err = writeRecord(fw, td, st)
 		default:
@@ -80,21 +80,42 @@ func writeUnionClasses(fw *common.MatlabFileWriter, td dsl.TypeDefinition, union
 }
 
 func writeUnionClass(w *formatting.IndentedWriter, className string, generalizedType *dsl.GeneralizedType, contextNamespace string) error {
+	qualifiedClassName := fmt.Sprintf("%s.%s", common.NamespaceIdentifierName(contextNamespace), className)
 	fmt.Fprintf(w, "classdef %s < yardl.Union\n", className)
 	common.WriteBlockBody(w, func() {
 		w.WriteStringln("methods (Static)")
 		common.WriteBlockBody(w, func() {
-			for i, tc := range generalizedType.Cases {
+			index := 1
+			for _, tc := range generalizedType.Cases {
 				if tc.Type == nil {
 					continue
 				}
 
 				fmt.Fprintf(w, "function res = %s(value)\n", formatting.ToPascalCase(tc.Tag))
 				common.WriteBlockBody(w, func() {
-					fmt.Fprintf(w, "res = %s.%s(%d, value);\n", common.NamespaceIdentifierName(contextNamespace), className, i+1)
+					fmt.Fprintf(w, "res = %s(%d, value);\n", qualifiedClassName, index)
 				})
+				index += 1
+				w.WriteStringln("")
 			}
+
+			writeZerosStaticMethod(w, qualifiedClassName, []string{"0", "yardl.None"})
 		})
+		w.WriteStringln("")
+
+		w.WriteStringln("methods")
+		common.WriteBlockBody(w, func() {
+			w.WriteStringln("function eq = eq(self, other)")
+			common.WriteBlockBody(w, func() {
+				fmt.Fprintf(w, "eq = isa(other, '%s') && other.index == self.index && other.value == self.value;\n", qualifiedClassName)
+			})
+			w.WriteStringln("")
+			w.WriteStringln("function ne = ne(self, other)")
+			common.WriteBlockBody(w, func() {
+				w.WriteStringln("ne = ~self.eq(other);")
+			})
+		})
+
 	})
 
 	return nil
@@ -103,13 +124,103 @@ func writeUnionClass(w *formatting.IndentedWriter, className string, generalized
 func writeNamedType(fw *common.MatlabFileWriter, td *dsl.NamedType) error {
 	return fw.WriteFile(common.TypeIdentifierName(td.Name), func(w *formatting.IndentedWriter) {
 		common.WriteComment(w, td.Comment)
+
+		ut := dsl.GetUnderlyingType(td.Type)
+		// If the underlying type is a RecordDefinition or Optional, we will generate a "function" alias
+		if st, ok := ut.(*dsl.SimpleType); ok {
+			if _, ok := st.ResolvedDefinition.(*dsl.RecordDefinition); ok {
+				fmt.Fprintf(w, "function c = %s(varargin) \n", common.TypeIdentifierName(td.Name))
+				common.WriteBlockBody(w, func() {
+					fmt.Fprintf(w, "c = %s(varargin{:});\n", common.TypeSyntax(td.Type, td.Namespace))
+				})
+				return
+			}
+		} else if gt, ok := ut.(*dsl.GeneralizedType); ok {
+			if gt.Cases.IsOptional() {
+				innerType := gt.Cases[1].Type
+				fmt.Fprintf(w, "function o = %s(value) \n", common.TypeIdentifierName(td.Name))
+				common.WriteBlockBody(w, func() {
+					if !dsl.TypeContainsGenericTypeParameter(innerType) {
+						fmt.Fprintf(w, "assert(isa(value, '%s'));\n", common.TypeSyntax(innerType, td.Namespace))
+					}
+					fmt.Fprintf(w, "o = %s(value);\n", common.TypeSyntax(td.Type, td.Namespace))
+				})
+				return
+			}
+
+			switch gt.Dimensionality.(type) {
+			case *dsl.Vector, *dsl.Array:
+				scalar := gt.ToScalar()
+				fmt.Fprintf(w, "function a = %s(array) \n", common.TypeIdentifierName(td.Name))
+				common.WriteBlockBody(w, func() {
+					if !dsl.TypeContainsGenericTypeParameter(scalar) {
+						fmt.Fprintf(w, "assert(isa(array, '%s'));\n", common.TypeSyntax(scalar, td.Namespace))
+					}
+					// fmt.Fprintf(w, "a = array;\n", common.TypeSyntax(td.Type, td.Namespace))
+					w.WriteStringln("a = array;")
+				})
+				return
+			}
+		}
+
+		// Otherwise, it's a subclass of the underlying type
 		fmt.Fprintf(w, "classdef %s < %s\n", common.TypeIdentifierName(td.Name), common.TypeSyntax(td.Type, td.Namespace))
 		w.WriteStringln("end")
 	})
+
+	// writeClassdefAlias := func() error {
+	// 	return fw.WriteFile(common.TypeIdentifierName(td.Name), func(w *formatting.IndentedWriter) {
+	// 		common.WriteComment(w, td.Comment)
+	// 		fmt.Fprintf(w, "classdef %s < %s\n", common.TypeIdentifierName(td.Name), common.TypeSyntax(td.Type, td.Namespace))
+	// 		w.WriteStringln("end")
+	// 	})
+	// }
+
+	// writeFunctionAlias := func(t dsl.Type) error {
+	// 	return fw.WriteFile(common.TypeIdentifierName(td.Name), func(w *formatting.IndentedWriter) {
+	// 		common.WriteComment(w, td.Comment)
+	// 		fmt.Fprintf(w, "function c = %s(varargin) \n", common.TypeIdentifierName(td.Name))
+	// 		common.WriteBlockBody(w, func() {
+	// 			if t == nil {
+	// 				w.WriteStringln("c = varargin{:};")
+	// 			} else {
+	// 				fmt.Fprintf(w, "c = %s(varargin{:});\n", common.TypeSyntax(t, td.Namespace))
+	// 			}
+	// 		})
+	// 	})
+	// }
+
+	// ut := dsl.GetUnderlyingType(td.Type)
+	// // If the underlying type is a RecordDefinition or Optional, we will generate a "function" alias
+	// if st, ok := ut.(*dsl.SimpleType); ok {
+	// 	if _, ok := st.ResolvedDefinition.(*dsl.RecordDefinition); ok {
+	// 		return writeFunctionAlias(td.Type)
+	// 	}
+	// } else if gt, ok := ut.(*dsl.GeneralizedType); ok {
+	// 	if gt.Cases.IsOptional() {
+	// 		return writeFunctionAlias(td.Type)
+	// 	}
+
+	// 	switch gt.Dimensionality.(type) {
+	// 	case *dsl.Vector, *dsl.Array:
+	// 		// scalar := gt.ToScalar()
+	// 		// if dsl.TypeContainsGenericTypeParameter(scalar) {
+	// 		// 	return writeFunctionAlias(nil)
+	// 		// }
+	// 		// return writeFunctionAlias(scalar)
+	// 		return writeFunctionAlias(nil)
+	// 	}
+	// }
+
+	// return writeClassdefAlias()
 }
 
-func writeEnum(fw *common.MatlabFileWriter, enum *dsl.EnumDefinition) error {
-	return fw.WriteFile(common.TypeIdentifierName(enum.Name), func(w *formatting.IndentedWriter) {
+func writeEnum(fw *common.MatlabFileWriter, enum *dsl.EnumDefinition, namedType *dsl.NamedType) error {
+	enumName := common.TypeIdentifierName(enum.Name)
+	if namedType != nil {
+		enumName = common.TypeIdentifierName(namedType.Name)
+	}
+	return fw.WriteFile(enumName, func(w *formatting.IndentedWriter) {
 		var base string
 		if enum.BaseType == nil {
 			base = "uint64"
@@ -118,26 +229,30 @@ func writeEnum(fw *common.MatlabFileWriter, enum *dsl.EnumDefinition) error {
 		}
 
 		common.WriteComment(w, enum.Comment)
-		fmt.Fprintf(w, "classdef %s < %s\n", common.TypeIdentifierName(enum.Name), base)
+		fmt.Fprintf(w, "classdef %s < %s\n", enumName, base)
 		common.WriteBlockBody(w, func() {
-			// NOTE: We don't use Matlab enumeration class because you can't inherit from it
-			// and we use inheritance to define NamedTypes
-			w.WriteStringln("properties (Constant)")
+			w.WriteStringln("methods (Static)")
 			common.WriteBlockBody(w, func() {
 				for _, value := range enum.Values {
 					common.WriteComment(w, value.Comment)
-					fmt.Fprintf(w, "%s = %d\n", common.EnumValueIdentifierName(value.Symbol), &value.IntegerValue)
+					fmt.Fprintf(w, "function e = %s\n", common.EnumValueIdentifierName(value.Symbol))
+					common.WriteBlockBody(w, func() {
+						fmt.Fprintf(w, "e = %s(%d);\n", common.TypeSyntax(enum, enum.Namespace), &value.IntegerValue)
+					})
 				}
+				w.WriteStringln("")
+				writeZerosStaticMethod(w, common.TypeSyntax(enum, enum.Namespace), []string{"0"})
 			})
 		})
 	})
 }
 
 func writeRecord(fw *common.MatlabFileWriter, rec *dsl.RecordDefinition, st dsl.SymbolTable) error {
-	return fw.WriteFile(common.TypeIdentifierName(rec.Name), func(w *formatting.IndentedWriter) {
+	recordName := common.TypeIdentifierName(rec.Name)
+	return fw.WriteFile(recordName, func(w *formatting.IndentedWriter) {
 		common.WriteComment(w, rec.Comment)
 
-		fmt.Fprintf(w, "classdef %s < handle\n", common.TypeIdentifierName(rec.Name))
+		fmt.Fprintf(w, "classdef %s < handle\n", recordName)
 		common.WriteBlockBody(w, func() {
 
 			w.WriteStringln("properties")
@@ -163,10 +278,9 @@ func writeRecord(fw *common.MatlabFileWriter, rec *dsl.RecordDefinition, st dsl.
 			common.WriteBlockBody(w, func() {
 
 				// Record Constructor
-				fmt.Fprintf(w, "function obj = %s(%s)\n", rec.Name, strings.Join(fieldNames, ", "))
+				fmt.Fprintf(w, "function obj = %s(%s)\n", recordName, strings.Join(fieldNames, ", "))
 				common.WriteBlockBody(w, func() {
 					if requireConstructorArgs {
-						log.Warn().Msgf("Record %s requires constructor arguments", rec.Name)
 						for _, field := range rec.Fields {
 							fmt.Fprintf(w, "obj.%s = %s;\n", common.FieldIdentifierName(field.Name), common.FieldIdentifierName(field.Name))
 						}
@@ -191,7 +305,6 @@ func writeRecord(fw *common.MatlabFileWriter, rec *dsl.RecordDefinition, st dsl.
 							}
 						})
 					}
-
 				})
 				w.WriteStringln("")
 
@@ -224,24 +337,54 @@ func writeRecord(fw *common.MatlabFileWriter, rec *dsl.RecordDefinition, st dsl.
 						w.WriteStringln(";")
 					})
 				})
+				w.WriteStringln("")
 
 				// neq method
+				w.WriteStringln("function res = ne(obj, other)")
+				common.WriteBlockBody(w, func() {
+					w.WriteStringln("res = ~obj.eq(other);")
+				})
 			})
+			w.WriteStringln("")
 
+			if !requireConstructorArgs {
+				w.WriteStringln("methods (Static)")
+				common.WriteBlockBody(w, func() {
+					writeZerosStaticMethod(w, common.TypeSyntax(rec, rec.Namespace), []string{})
+				})
+			}
+		})
+	})
+}
+
+func writeZerosStaticMethod(w *formatting.IndentedWriter, typeSyntax string, defaultArgs []string) {
+	// zeros method, only if can be constructed without arguments
+	w.WriteStringln("function z = zeros(varargin)")
+	common.WriteBlockBody(w, func() {
+		fmt.Fprintf(w, "elem = %s(%s);\n", typeSyntax, strings.Join(defaultArgs, ", "))
+		w.WriteStringln("if nargin == 0")
+		w.Indented(func() {
+			w.WriteStringln("z = elem;")
+		})
+		w.WriteStringln("elseif nargin == 1")
+		w.Indented(func() {
+			w.WriteStringln("n = varargin{1};")
+			w.WriteStringln("z = reshape(repelem(elem, n*n), [n, n]);")
+		})
+		w.WriteStringln("else")
+		common.WriteBlockBody(w, func() {
+			w.WriteStringln("sz = [varargin{:}];")
+			w.WriteStringln("z = reshape(repelem(elem, prod(sz)), sz);")
 		})
 	})
 }
 
 func typeEqualityExpression(t dsl.Type, a, b string) string {
-	// TODO: Figure out equality because in Matlab both 'a' and 'b' can be scalar or non-scalar...
 	if hasSimpleEquality(t) {
-		// return fmt.Sprintf("%s == %s", a, b)
-		return fmt.Sprintf("all(%s == %s)", a, b)
-		// return fmt.Sprintf("all([%s] == [%s])", a, b)
+		return fmt.Sprintf("all([%s] == [%s])", a, b)
 	}
 
-	// TODO: Other forms
-	return fmt.Sprintf("all(%s == %s)", a, b)
+	return fmt.Sprintf("isequal(%s, %s)", a, b)
 }
 
 func hasSimpleEquality(t dsl.Node) bool {
@@ -306,7 +449,8 @@ func writeComputedFieldExpression(w *formatting.IndentedWriter, expression dsl.E
 						for i, d := range *dims {
 							fmt.Fprintf(w, "if dim_name == \"%s\"\n", *d.Name)
 							w.Indented(func() {
-								fmt.Fprintf(w, "dim = %d;\n", len(*dims)-i)
+								// fmt.Fprintf(w, "dim = %d;\n", len(*dims)-i)
+								fmt.Fprintf(w, "dim = %d;\n", i)
 							})
 							w.WriteString("else")
 						}
@@ -441,8 +585,24 @@ func writeComputedFieldExpression(w *formatting.IndentedWriter, expression dsl.E
 
 			tail.Run(func() {
 				self.Visit(target, tailWrapper{})
-				w.WriteString("(")
-				formatting.Delimited(w, ", ", arguments, func(w *formatting.IndentedWriter, i int, a *dsl.SubscriptArgument) {
+
+				startSubscript := "("
+				delimeter := ", "
+				dsl.Visit(target.GetResolvedType(), func(self dsl.Visitor, node dsl.Node) {
+					switch t := node.(type) {
+					case *dsl.GeneralizedType:
+						switch t.Dimensionality.(type) {
+						case *dsl.Vector, *dsl.Array:
+							startSubscript = "(1+"
+							delimeter = ", 1+"
+							return
+						}
+					}
+					self.VisitChildren(node)
+				})
+
+				w.WriteString(startSubscript)
+				formatting.Delimited(w, delimeter, arguments, func(w *formatting.IndentedWriter, i int, a *dsl.SubscriptArgument) {
 					self.Visit(a.Value, tailWrapper{})
 				})
 				w.WriteString(")")
@@ -453,40 +613,48 @@ func writeComputedFieldExpression(w *formatting.IndentedWriter, expression dsl.E
 				switch t.FunctionName {
 				case dsl.FunctionSize:
 					switch dsl.ToGeneralizedType(dsl.GetUnderlyingType(t.Arguments[0].GetResolvedType())).Dimensionality.(type) {
-					case *dsl.Vector, *dsl.Map:
+					case *dsl.Map:
+						// length for containers.Map, numEntries for dictionary
+						fmt.Fprintf(w, "numEntries(")
+						self.Visit(t.Arguments[0], tailWrapper{})
+						fmt.Fprintf(w, ")")
+
+					case *dsl.Vector:
 						fmt.Fprintf(w, "length(")
 						self.Visit(t.Arguments[0], tailWrapper{})
 						fmt.Fprintf(w, ")")
-					case *dsl.Array:
-						w.WriteString("size(")
-						self.Visit(t.Arguments[0], tailWrapper{})
 
+					case *dsl.Array:
 						if len(t.Arguments) > 1 {
-							w.WriteString(", [")
+							w.WriteString("size(")
+							self.Visit(t.Arguments[0], tailWrapper{})
+							w.WriteString(", 1+")
 							remainingArgs := t.Arguments[1:]
-							formatting.Delimited(w, ", ", remainingArgs, func(w *formatting.IndentedWriter, i int, arg dsl.Expression) {
-								if _, ok := arg.(*dsl.IntegerLiteralExpression); ok {
-									// Need to adjust integer literals for 1-based indexing in Matlab
-									// fmt.Fprintf(w, "%d", big.NewInt(0).Add(&intArg.Value, big.NewInt(1)))
-									w.WriteString("ndims(")
-									self.Visit(t.Arguments[0], tailWrapper{})
-									w.WriteString(")-")
-								}
+							formatting.Delimited(w, ", 1+", remainingArgs, func(w *formatting.IndentedWriter, i int, arg dsl.Expression) {
+								// if _, ok := arg.(*dsl.IntegerLiteralExpression); ok {
+								// 	// Need to adjust integer literals for 1-based indexing in Matlab
+								// 	// fmt.Fprintf(w, "%d", big.NewInt(0).Add(&intArg.Value, big.NewInt(1)))
+								// 	w.WriteString("ndims(")
+								// 	self.Visit(t.Arguments[0], tailWrapper{})
+								// 	w.WriteString(")-")
+								// }
 								self.Visit(arg, tailWrapper{})
 							})
-							fmt.Fprintf(w, "]")
+						} else {
+							w.WriteString("numel(")
+							self.Visit(t.Arguments[0], tailWrapper{})
 						}
 						w.WriteString(")")
 					}
 
 				case dsl.FunctionDimensionIndex:
 					helperFuncName := helperFunctionLookup[t.Arguments[0].GetResolvedType()]
-					fmt.Fprintf(w, "%s(", helperFuncName)
+					fmt.Fprintf(w, "1 + %s(", helperFuncName)
 					self.Visit(t.Arguments[1], tailWrapper{})
 					w.WriteString(")")
 
 				case dsl.FunctionDimensionCount:
-					w.WriteString("ndims(")
+					w.WriteString("yardl.dimension_count(")
 					self.Visit(t.Arguments[0], tailWrapper{})
 					w.WriteString(")")
 
@@ -546,7 +714,7 @@ func writeComputedFieldExpression(w *formatting.IndentedWriter, expression dsl.E
 					writeSwitchCaseOverUnion(w, targetType, unionClassName, switchCase, unionVariableName, self, tail)
 				}
 
-				w.WriteStringln(`throw(yardl.Error("Unexpected union case"))`)
+				w.WriteStringln(`throw(yardl.RuntimeError("Unexpected union case"))`)
 				return
 			}
 
@@ -593,9 +761,13 @@ func writeSwitchCaseOverOptional(w *formatting.IndentedWriter, switchCase *dsl.S
 		}
 
 		if typePattern.Type == nil {
-			fmt.Fprintf(w, "if isa(%s, yardl.None)\n", variableName)
+			// fmt.Fprintf(w, "if isa(%s, 'yardl.None')\n", variableName)
+			// fmt.Fprintf(w, "if isa(%s, 'yardl.Optional') && ~%s.has_value()\n", variableName, variableName)
+			fmt.Fprintf(w, "if %s == yardl.None\n", variableName)
 		} else {
-			fmt.Fprintf(w, "if ~isa(%s, yardl.None)\n", variableName)
+			// fmt.Fprintf(w, "if ~isa(%s, 'yardl.None')\n", variableName)
+			// fmt.Fprintf(w, "if isa(%s, 'yardl.Optional') && %s.has_value()\n", variableName, variableName)
+			fmt.Fprintf(w, "if %s ~= yardl.None\n", variableName)
 		}
 
 		common.WriteBlockBody(w, func() {
@@ -616,20 +788,29 @@ func writeSwitchCaseOverOptional(w *formatting.IndentedWriter, switchCase *dsl.S
 }
 
 func writeSwitchCaseOverUnion(w *formatting.IndentedWriter, unionType *dsl.GeneralizedType, unionClassName string, switchCase *dsl.SwitchCase, variableName string, visitor dsl.VisitorWithContext[tailWrapper], tail tailWrapper) {
+	caseIndexOffset := 1
 	writeTypeCase := func(typePattern *dsl.TypePattern, declarationIdentifier string) {
 		for i, typeCase := range unionType.Cases {
+			if typeCase.Type == nil {
+				caseIndexOffset = 0
+			}
+
+			log.Warn().Msgf("%d: %s | %d", i, typeCase.Tag, caseIndexOffset)
+
 			if dsl.TypesEqual(typePattern.Type, typeCase.Type) {
 				if typePattern.Type == nil {
-					fmt.Fprintf(w, "if isa(%s, 'yardl.None')\n", variableName)
+					// fmt.Fprintf(w, "if isa(%s, 'yardl.None')\n", variableName)
+					// fmt.Fprintf(w, "if isa(%s, 'yardl.Optional') && ~%s.has_value()\n", variableName, variableName)
+					fmt.Fprintf(w, "if %s == yardl.None\n", variableName)
 					common.WriteBlockBody(w, func() {
 						visitor.Visit(switchCase.Expression, tail)
 					})
 				} else {
 					// fmt.Fprintf(w, "if isa(%s, %s.%s):\n", variableName, unionClassName, formatting.ToPascalCase(typeCase.Tag))
-					fmt.Fprintf(w, "if %s.index == %d\n", variableName, i+1)
+					fmt.Fprintf(w, "if %s.index == %d\n", variableName, i+caseIndexOffset)
 					common.WriteBlockBody(w, func() {
 						if declarationIdentifier != "" {
-							fmt.Fprintf(w, "%s = %s.value\n", declarationIdentifier, variableName)
+							fmt.Fprintf(w, "%s = %s.value;\n", declarationIdentifier, variableName)
 						}
 						visitor.Visit(switchCase.Expression, tail)
 					})
@@ -753,6 +934,7 @@ func typeDefault(t dsl.Type, contextNamespace string, namedType string, st dsl.S
 			}
 
 			return fmt.Sprintf(`("%s", %s)`, t.Cases[0].Tag, defaultExpression), defaultValueKindImmutable
+
 		case *dsl.Vector:
 			scalar := t.ToScalar()
 			if dsl.TypeContainsGenericTypeParameter(scalar) {
@@ -760,13 +942,11 @@ func typeDefault(t dsl.Type, contextNamespace string, namedType string, st dsl.S
 			}
 
 			dtype := common.TypeSyntax(scalar, contextNamespace)
-
 			if td.Length == nil {
 				return fmt.Sprintf("%s.empty()", dtype), defaultValueKindMutable
 			}
 
 			scalarDefault, scalarDefaultKind := typeDefault(t.Cases[0].Type, contextNamespace, "", st)
-
 			switch scalarDefaultKind {
 			case defaultValueKindNone:
 				return "", defaultValueKindNone
@@ -795,16 +975,15 @@ func typeDefault(t dsl.Type, contextNamespace string, namedType string, st dsl.S
 			}
 
 			dtype := common.TypeSyntax(scalar, contextNamespace)
-
 			if td.HasKnownNumberOfDimensions() {
 				shape := strings.Repeat("0, ", len(*td.Dimensions))[0 : len(*td.Dimensions)*3-2]
 				return fmt.Sprintf("%s.empty(%s)", dtype, shape), defaultValueKindMutable
 			}
-
 			return fmt.Sprintf("%s.empty()", dtype), defaultValueKindMutable
 
 		case *dsl.Map:
-			return "containers.Map", defaultValueKindMutable
+			// return "containers.Map", defaultValueKindMutable
+			return "dictionary", defaultValueKindMutable
 		}
 	}
 
@@ -836,9 +1015,11 @@ func typeDefinitionDefault(t dsl.TypeDefinition, contextNamespace string, st dsl
 		case dsl.Float32:
 			return "single(0)", defaultValueKindImmutable
 		case dsl.Float64:
-			return "0", defaultValueKindImmutable
-		case dsl.ComplexFloat32, dsl.ComplexFloat64:
-			return "0j", defaultValueKindImmutable
+			return "double(0)", defaultValueKindImmutable
+		case dsl.ComplexFloat32:
+			return "complex(single(0))", defaultValueKindImmutable
+		case dsl.ComplexFloat64:
+			return "complex(0)", defaultValueKindImmutable
 		case dsl.String:
 			return `""`, defaultValueKindImmutable
 		case dsl.Date:
@@ -848,6 +1029,7 @@ func typeDefinitionDefault(t dsl.TypeDefinition, contextNamespace string, st dsl
 		case dsl.DateTime:
 			return "yardl.DateTime()", defaultValueKindImmutable
 		}
+
 	case *dsl.EnumDefinition:
 		zeroValue := t.GetZeroValue()
 		if t.IsFlags {
@@ -863,6 +1045,7 @@ func typeDefinitionDefault(t dsl.TypeDefinition, contextNamespace string, st dsl
 		}
 
 		return fmt.Sprintf("%s.%s", common.TypeSyntax(t, contextNamespace), common.EnumValueIdentifierName(zeroValue.Symbol)), defaultValueKindImmutable
+
 	case *dsl.NamedType:
 		return typeDefault(t.Type, contextNamespace, common.TypeSyntax(t, contextNamespace), st)
 
