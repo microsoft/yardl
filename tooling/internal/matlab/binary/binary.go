@@ -193,7 +193,7 @@ func typeDefinitionSerializer(td dsl.TypeDefinition, contextNamespace string) st
 		return fmt.Sprintf("yardl.binary.EnumSerializer('%s', @%s, %s)", enumSyntax, enumSyntax, elementSerializer)
 
 	case *dsl.RecordDefinition:
-		qualifiedSerializerName := fmt.Sprintf("%s.%s", common.NamespaceIdentifierName(td.Namespace), recordSerializerClassName(td, contextNamespace))
+		qualifiedSerializerName := fmt.Sprintf("%s.binary.%s", common.NamespaceIdentifierName(td.Namespace), recordSerializerClassName(td, contextNamespace))
 		if len(td.TypeParameters) == 0 {
 			return fmt.Sprintf("%s()", qualifiedSerializerName)
 		}
@@ -301,9 +301,11 @@ func typeSerializer(t dsl.Type, contextNamespace string, namedType *dsl.NamedTyp
 }
 
 func BinaryWriterName(p *dsl.ProtocolDefinition) string {
-	return fmt.Sprintf("Binary%sWriter", formatting.ToPascalCase(p.Name))
+	// return fmt.Sprintf("Binary%sWriter", formatting.ToPascalCase(p.Name))
+	return fmt.Sprintf("%sWriter", formatting.ToPascalCase(p.Name))
 }
 
 func BinaryReaderName(p *dsl.ProtocolDefinition) string {
-	return fmt.Sprintf("Binary%sReader", formatting.ToPascalCase(p.Name))
+	// return fmt.Sprintf("Binary%sReader", formatting.ToPascalCase(p.Name))
+	return fmt.Sprintf("%sReader", formatting.ToPascalCase(p.Name))
 }

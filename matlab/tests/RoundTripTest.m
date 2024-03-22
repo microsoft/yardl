@@ -1,7 +1,7 @@
 classdef RoundTripTest < matlab.unittest.TestCase
     properties (TestParameter)
-        % format = {"Binary", "NDJson"};
-        format = {"Binary"};
+        % format = {"binary", "ndjson"};
+        format = {"binary"};
     end
 
     methods (Test)
@@ -471,11 +471,8 @@ end
 
 
 function w = create_validating_writer(testCase, format, protocol)
-    % writer_name = 'test_model.' + format + eraseBetween(name, strlength(name)-3, strlength(name));
-    % reader_name = replaceBetween(wname, strlength(wname)-5, strlength(wname), "Reader");
-
-    writer_name = "test_model." + format + protocol + "Writer";
-    reader_name = "test_model." + format + protocol + "Reader";
+    writer_name = "test_model." + format + "." + protocol + "Writer";
+    reader_name = "test_model." + format + "." + protocol + "Reader";
     test_writer_name = "test_model.testing.Test" + protocol + "Writer";
 
     create_writer = str2func(writer_name);

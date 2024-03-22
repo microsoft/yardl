@@ -38,13 +38,13 @@ func Generate(env *dsl.Environment, options packaging.MatlabCodegenOptions) erro
 			return err
 		}
 
-		fw := &common.MatlabFileWriter{PackageDir: packageDir}
-		if err := types.WriteTypes(fw, ns, env.SymbolTable); err != nil {
+		topLevelFileWriter := &common.MatlabFileWriter{PackageDir: packageDir}
+		if err := types.WriteTypes(topLevelFileWriter, ns, env.SymbolTable); err != nil {
 			return err
 		}
 
 		if ns.IsTopLevel {
-			if err := protocols.WriteProtocols(fw, ns, env.SymbolTable); err != nil {
+			if err := protocols.WriteProtocols(topLevelFileWriter, ns, env.SymbolTable); err != nil {
 				return err
 			}
 
@@ -54,14 +54,18 @@ func Generate(env *dsl.Environment, options packaging.MatlabCodegenOptions) erro
 					return err
 				}
 				fw := &common.MatlabFileWriter{PackageDir: mocksDir}
-				err = mocks.WriteMocks(fw, ns)
-				if err != nil {
+				if err := mocks.WriteMocks(fw, ns); err != nil {
 					return err
 				}
 			}
 		}
 
-		if err := binary.WriteBinary(fw, ns); err != nil {
+		binaryDir := path.Join(packageDir, common.PackageDir("binary"))
+		if err := os.MkdirAll(binaryDir, 0775); err != nil {
+			return err
+		}
+		binaryFileWriter := &common.MatlabFileWriter{PackageDir: binaryDir}
+		if err := binary.WriteBinary(binaryFileWriter, ns); err != nil {
 			return err
 		}
 	}
