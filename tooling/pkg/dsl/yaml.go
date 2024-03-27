@@ -151,6 +151,7 @@ func (meta *DefinitionMeta) UnmarshalYAML(value *yaml.Node) error {
 }
 
 func (rec *RecordDefinition) UnmarshalYAML(value *yaml.Node) error {
+	parsedFields := false
 	for i := 0; i < len(value.Content); i += 2 {
 		k := value.Content[i]
 		v := value.Content[i+1]
@@ -160,14 +161,24 @@ func (rec *RecordDefinition) UnmarshalYAML(value *yaml.Node) error {
 			if err != nil {
 				return err
 			}
+			if len(rec.Fields) > 0 {
+				parsedFields = true
+			}
 		case "computedFields":
 			err := v.DecodeWithOptions(&rec.ComputedFields, yaml.DecodeOptions{KnownFields: true})
 			if err != nil {
 				return err
 			}
+			if len(rec.ComputedFields) == 0 {
+				return parseError(value, "!record specification computedFields cannot be empty")
+			}
 		default:
 			return parseError(k, "field '%s' is not valid on a !record specification", k.Value)
 		}
+	}
+
+	if !parsedFields {
+		return parseError(value, "!record specification must define at least one field")
 	}
 
 	return nil
@@ -440,6 +451,7 @@ func convertPattern(pat *parser.Pattern, node NodeMeta) Pattern {
 }
 
 func (protocol *ProtocolDefinition) UnmarshalYAML(value *yaml.Node) error {
+	parsedSequence := false
 	for i := 0; i < len(value.Content); i += 2 {
 		k := value.Content[i]
 		v := value.Content[i+1]
@@ -449,9 +461,16 @@ func (protocol *ProtocolDefinition) UnmarshalYAML(value *yaml.Node) error {
 			if err != nil {
 				return err
 			}
+			if len(protocol.Sequence) > 0 {
+				parsedSequence = true
+			}
 		default:
 			return parseError(k, "field '%s' is not valid on a !protocol specification", k.Value)
 		}
+	}
+
+	if !parsedSequence {
+		return parseError(value, "!protocol specification must define a non-empty sequence")
 	}
 
 	return nil

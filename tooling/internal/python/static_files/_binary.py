@@ -61,7 +61,7 @@ class BinaryProtocolWriter(ABC):
         write_fixed_int32(self._stream, CURRENT_BINARY_FORMAT_VERSION)
         string_serializer.write(self._stream, schema)
 
-    def close(self) -> None:
+    def _close(self) -> None:
         self._stream.close()
 
     def _end_stream(self) -> None:
@@ -88,7 +88,7 @@ class BinaryProtocolReader(ABC):
         if expected_schema and self._schema != expected_schema:
             raise RuntimeError("Invalid schema")
 
-    def close(self) -> None:
+    def _close(self) -> None:
         self._stream.close()
 
 

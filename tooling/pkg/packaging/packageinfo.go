@@ -227,7 +227,7 @@ type MatlabCodegenOptions struct {
 func LoadPackage(dir string) (*PackageInfo, error) {
 	packageInfo, err := loadPackageVersion(dir)
 	if err != nil {
-		return nil, err
+		return packageInfo, err
 	}
 
 	vdirs, err := collectVersions(packageInfo)

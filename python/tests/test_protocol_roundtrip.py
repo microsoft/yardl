@@ -743,3 +743,25 @@ def test_aliases(format: Format):
                 ),
             ]
         )
+
+
+def test_streams_of_unions_manual_close(format: Format):
+    w = create_validating_writer_class(format, tm.StreamsOfUnionsWriterBase)()
+    w.write_int_or_simple_record(
+        [
+            tm.Int32OrSimpleRecord.Int32(1),
+            tm.Int32OrSimpleRecord.SimpleRecord(tm.SimpleRecord(x=1, y=2, z=3)),
+            tm.Int32OrSimpleRecord.Int32(2),
+        ]
+    )
+    w.write_nullable_int_or_simple_record(
+        [
+            None,
+            tm.Int32OrSimpleRecord.Int32(1),
+            tm.Int32OrSimpleRecord.SimpleRecord(tm.SimpleRecord(x=1, y=2, z=3)),
+            None,
+            tm.Int32OrSimpleRecord.Int32(2),
+            None,
+        ]
+    )
+    w.close()

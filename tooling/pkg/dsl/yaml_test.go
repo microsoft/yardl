@@ -67,6 +67,31 @@ func TestBasicErrors(t *testing.T) {
 	}
 }
 
+func TestEmptyFieldErrors(t *testing.T) {
+	testCases := []struct {
+		src string
+		err string
+	}{
+		{"P: !protocol", "must define a non-empty sequence"},
+		{"P: !protocol\n  sequence:", "must define a non-empty sequence"},
+		{"R: !record", "must define at least one field"},
+		{"R: !record\n  fields:", "must define at least one field"},
+		{`
+R: !record
+  fields:
+    x: int
+  computedFields:`, "computedFields cannot be empty"},
+	}
+
+	for _, tC := range testCases {
+		t.Run(tC.src, func(t *testing.T) {
+			_, err := parse(t, tC.src)
+			require.ErrorContains(t, err, tC.err)
+		})
+	}
+
+}
+
 func TestCommentsOnRecords(t *testing.T) {
 	src := `
 # This is a comment on a record

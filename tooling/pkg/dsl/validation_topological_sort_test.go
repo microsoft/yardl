@@ -41,6 +41,8 @@ R1: !record
   fields:
     f1: R2<R1>
 R2<T>: !record
+  fields:
+    f1: T
 `
 	_, err := parseAndValidate(t, src)
 	require.ErrorContains(t, err, "there is a reference cycle, which is not supported, within namespace 'test': Record 'R1' -> Field 'f1' -> Record 'R1'")
