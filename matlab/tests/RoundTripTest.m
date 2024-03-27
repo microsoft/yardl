@@ -145,8 +145,7 @@ classdef RoundTripTest < matlab.unittest.TestCase
         end
 
         function testSubarrays(testCase, format)
-            % TODO: Gotta figure out the (Python) subarray logic (in Matlab)
-            testCase.assumeFail();
+            % TODO: Add checks for input validation errors (e.g. unexpected array shape). See Python tests.
 
             w = create_validating_writer(testCase, format, 'Subarrays');
 
@@ -168,28 +167,40 @@ classdef RoundTripTest < matlab.unittest.TestCase
             floats = transpose(single([[1, 2, 3]; [4, 5, 6]]));
             w.write_fixed_with_fixed_float_subarray(floats);
 
-            ints = transpose(int32([...
-                    [[1, 2, 3]; [4, 5, 6]]; ...
-                    [[10, 20, 30]; [40, 50, 60]]; ...
-                    [[100, 200, 300]; [400, 500, 600]] ...
-                ]));
-            w.write_nested_subarray(ints);
+            nested(:, :, 1) = int32([[1; 2; 3], [4; 5; 6]]);
+            nested(:, :, 2) = [[10; 20; 30], [40; 50; 60]];
+            nested(:, :, 3) = [[100; 200; 300], [400; 500; 600]];
+            w.write_nested_subarray(nested);
 
             ints = transpose(int32([[1, 2, 3]; [4, 5, 6]]));
             w.write_dynamic_with_fixed_vector_subarray(ints);
 
-            images = transpose(int32([...
-                    [[1, 2, 3]; [4, 5, 6]]; ...
-                    [[10, 11, 12]; [13, 14, 15]]; ...
-                ]));
-            w.write_generic_subarray(images);
+            image(:, 1, 1) = int32([1; 2; 3]);
+            image(:, 1, 2) = [4; 5; 6];
+            image(:, 2, 1) = [10; 11; 12];
+            image(:, 2, 2) = [13; 14; 15];
+            w.write_generic_subarray(image);
 
             w.close();
         end
 
         function testSubarraysInRecords(testCase, format)
-            % TODO: Gotta figure out the (Python) subarray logic (in Matlab)
-            testCase.assumeFail();
+            RF = @test_model.RecordWithFixedCollections;
+            records_with_fixed = [...
+                RF(int32([1, 2, 3]), int32([[11; 12; 13], [14; 15; 16]])), ...
+                RF(int32([101, 102, 103]), int32([[1011; 1012; 1013], [1014; 1015; 1016]])), ...
+            ];
+
+            RV = @test_model.RecordWithVlenCollections;
+            records_with_vlens = [...
+                RV(int32([1, 2, 3]), int32([[11, 12, 13]; [14, 15, 16]])), ...])
+                RV(int32([101, 102, 103]), int32([[1011, 1012, 1013]; [1014, 1015, 1016]])), ...
+            ];
+
+            w = create_validating_writer(testCase, format, 'SubarraysInRecords');
+            w.write_with_fixed_subarrays(records_with_fixed);
+            w.write_with_vlen_subarrays(records_with_vlens);
+            w.close();
         end
 
         function testNDArrays(testCase, format)

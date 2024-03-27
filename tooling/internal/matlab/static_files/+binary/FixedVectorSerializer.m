@@ -11,6 +11,10 @@ classdef FixedVectorSerializer < yardl.binary.TypeSerializer
         end
 
         function write(obj, outstream, values)
+            if iscolumn(values)
+                values = transpose(values);
+            end
+
             s = size(values);
             count = s(end);
 
@@ -47,13 +51,11 @@ classdef FixedVectorSerializer < yardl.binary.TypeSerializer
                     res{i} = obj.item_serializer_.read(instream);
                 end
             elseif isscalar(item_shape)
-                % res = zeros(obj.getShape(), obj.getClass());
                 res = yardl.allocate(obj.getClass(), obj.getShape());
                 for i = 1:obj.length_
                     res(i) = obj.item_serializer_.read(instream);
                 end
             else
-                % res = zeros([prod(item_shape), obj.length_], obj.getClass());
                 res = yardl.allocate(obj.getClass(), [prod(item_shape), obj.length_]);
                 for i = 1:obj.length_
                     item = obj.item_serializer_.read(instream);

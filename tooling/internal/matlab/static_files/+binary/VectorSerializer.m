@@ -39,7 +39,6 @@ classdef VectorSerializer < yardl.binary.TypeSerializer
         function res = read(obj, instream)
             count = instream.read_unsigned_varint();
             if count == 0
-                % res = zeros(0, obj.getClass());
                 res = yardl.allocate(obj.getClass(), 0);
                 return;
             end
@@ -51,14 +50,12 @@ classdef VectorSerializer < yardl.binary.TypeSerializer
                     res{i} = obj.item_serializer_.read(instream);
                 end
             elseif isscalar(item_shape)
-                % res = zeros([1 count], obj.getClass());
                 res = yardl.allocate(obj.getClass(), [1 count]);
                 for i = 1:count
                     res(i) = obj.item_serializer_.read(instream);
                 end
                 res = squeeze(res);
             else
-                % res = zeros([prod(item_shape), count], obj.getClass());
                 res = yardl.allocate(obj.getClass(), [prod(item_shape), count]);
                 for i = 1:count
                     item = obj.item_serializer_.read(instream);

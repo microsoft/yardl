@@ -13,7 +13,7 @@ classdef FixedNDArraySerializer < yardl.binary.NDArraySerializerBase
         function write(self, outstream, values)
             sz = size(values);
 
-            if sz == self.shape_
+            if numel(values) == prod(self.shape_)
                 % This is an NDArray of scalars
                 self.write_data_(outstream, values(:));
                 return;
@@ -39,7 +39,13 @@ classdef FixedNDArraySerializer < yardl.binary.NDArraySerializerBase
         end
 
         function value = read(self, instream)
-            value = self.read_data_(instream, self.shape_);
+            % TODO: Better way of doing this? Possibly needed elsewhere to?
+            %       self.shape_ should really be non-scalar...
+            if isscalar(self.shape_)
+                value = self.read_data_(instream, [1 self.shape_]);
+            else
+                value = self.read_data_(instream, self.shape_);
+            end
         end
 
         function s = getShape(obj)
@@ -47,7 +53,7 @@ classdef FixedNDArraySerializer < yardl.binary.NDArraySerializerBase
             if isempty(item_shape)
                 s = obj.shape_;
             elseif isscalar(item_shape)
-                s = obj.shape_;
+                s = [item_shape obj.shape_ ];
             else
                 s = [item_shape obj.shape_];
                 s = s(s>1);

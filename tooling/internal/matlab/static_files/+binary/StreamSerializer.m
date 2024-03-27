@@ -54,7 +54,6 @@ classdef StreamSerializer < yardl.binary.TypeSerializer
                     count = instream.read_unsigned_varint();
                 end
             elseif isscalar(item_shape)
-                % res = zeros([item_shape, count], obj.getClass());
                 res = yardl.allocate(obj.getClass(), [item_shape, count]);
                 idx = 1;
                 while count > 0
@@ -65,7 +64,6 @@ classdef StreamSerializer < yardl.binary.TypeSerializer
                     count = instream.read_unsigned_varint();
                 end
             else
-                % res = zeros([prod(item_shape), count], obj.getClass());
                 res = yardl.allocate(obj.getClass(), [prod(item_shape), count]);
                 total_count = 0;
                 while count > 0
