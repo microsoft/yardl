@@ -123,14 +123,13 @@ func writeUnionClass(w *formatting.IndentedWriter, className string, generalized
 
 func writeNamedType(fw *common.MatlabFileWriter, td *dsl.NamedType) error {
 	return fw.WriteFile(common.TypeIdentifierName(td.Name), func(w *formatting.IndentedWriter) {
-		common.WriteComment(w, td.Comment)
-
 		ut := dsl.GetUnderlyingType(td.Type)
 		// If the underlying type is a RecordDefinition or Optional, we will generate a "function" alias
 		if st, ok := ut.(*dsl.SimpleType); ok {
 			if _, ok := st.ResolvedDefinition.(*dsl.RecordDefinition); ok {
 				fmt.Fprintf(w, "function c = %s(varargin) \n", common.TypeIdentifierName(td.Name))
 				common.WriteBlockBody(w, func() {
+					common.WriteComment(w, td.Comment)
 					fmt.Fprintf(w, "c = %s(varargin{:});\n", common.TypeSyntax(td.Type, td.Namespace))
 				})
 				return
@@ -140,6 +139,7 @@ func writeNamedType(fw *common.MatlabFileWriter, td *dsl.NamedType) error {
 				innerType := gt.Cases[1].Type
 				fmt.Fprintf(w, "function o = %s(value) \n", common.TypeIdentifierName(td.Name))
 				common.WriteBlockBody(w, func() {
+					common.WriteComment(w, td.Comment)
 					if !dsl.TypeContainsGenericTypeParameter(innerType) {
 						fmt.Fprintf(w, "assert(isa(value, '%s'));\n", common.TypeSyntax(innerType, td.Namespace))
 					}
@@ -153,10 +153,10 @@ func writeNamedType(fw *common.MatlabFileWriter, td *dsl.NamedType) error {
 				scalar := gt.ToScalar()
 				fmt.Fprintf(w, "function a = %s(array) \n", common.TypeIdentifierName(td.Name))
 				common.WriteBlockBody(w, func() {
+					common.WriteComment(w, td.Comment)
 					if !dsl.TypeContainsGenericTypeParameter(scalar) {
 						fmt.Fprintf(w, "assert(isa(array, '%s'));\n", common.TypeSyntax(scalar, td.Namespace))
 					}
-					// fmt.Fprintf(w, "a = array;\n", common.TypeSyntax(td.Type, td.Namespace))
 					w.WriteStringln("a = array;")
 				})
 				return
@@ -165,54 +165,10 @@ func writeNamedType(fw *common.MatlabFileWriter, td *dsl.NamedType) error {
 
 		// Otherwise, it's a subclass of the underlying type
 		fmt.Fprintf(w, "classdef %s < %s\n", common.TypeIdentifierName(td.Name), common.TypeSyntax(td.Type, td.Namespace))
-		w.WriteStringln("end")
+		common.WriteBlockBody(w, func() {
+			common.WriteComment(w, td.Comment)
+		})
 	})
-
-	// writeClassdefAlias := func() error {
-	// 	return fw.WriteFile(common.TypeIdentifierName(td.Name), func(w *formatting.IndentedWriter) {
-	// 		common.WriteComment(w, td.Comment)
-	// 		fmt.Fprintf(w, "classdef %s < %s\n", common.TypeIdentifierName(td.Name), common.TypeSyntax(td.Type, td.Namespace))
-	// 		w.WriteStringln("end")
-	// 	})
-	// }
-
-	// writeFunctionAlias := func(t dsl.Type) error {
-	// 	return fw.WriteFile(common.TypeIdentifierName(td.Name), func(w *formatting.IndentedWriter) {
-	// 		common.WriteComment(w, td.Comment)
-	// 		fmt.Fprintf(w, "function c = %s(varargin) \n", common.TypeIdentifierName(td.Name))
-	// 		common.WriteBlockBody(w, func() {
-	// 			if t == nil {
-	// 				w.WriteStringln("c = varargin{:};")
-	// 			} else {
-	// 				fmt.Fprintf(w, "c = %s(varargin{:});\n", common.TypeSyntax(t, td.Namespace))
-	// 			}
-	// 		})
-	// 	})
-	// }
-
-	// ut := dsl.GetUnderlyingType(td.Type)
-	// // If the underlying type is a RecordDefinition or Optional, we will generate a "function" alias
-	// if st, ok := ut.(*dsl.SimpleType); ok {
-	// 	if _, ok := st.ResolvedDefinition.(*dsl.RecordDefinition); ok {
-	// 		return writeFunctionAlias(td.Type)
-	// 	}
-	// } else if gt, ok := ut.(*dsl.GeneralizedType); ok {
-	// 	if gt.Cases.IsOptional() {
-	// 		return writeFunctionAlias(td.Type)
-	// 	}
-
-	// 	switch gt.Dimensionality.(type) {
-	// 	case *dsl.Vector, *dsl.Array:
-	// 		// scalar := gt.ToScalar()
-	// 		// if dsl.TypeContainsGenericTypeParameter(scalar) {
-	// 		// 	return writeFunctionAlias(nil)
-	// 		// }
-	// 		// return writeFunctionAlias(scalar)
-	// 		return writeFunctionAlias(nil)
-	// 	}
-	// }
-
-	// return writeClassdefAlias()
 }
 
 func writeEnum(fw *common.MatlabFileWriter, enum *dsl.EnumDefinition, namedType *dsl.NamedType) error {
@@ -228,9 +184,9 @@ func writeEnum(fw *common.MatlabFileWriter, enum *dsl.EnumDefinition, namedType 
 			base = common.TypeSyntax(enum.BaseType, enum.Namespace)
 		}
 
-		common.WriteComment(w, enum.Comment)
 		fmt.Fprintf(w, "classdef %s < %s\n", enumName, base)
 		common.WriteBlockBody(w, func() {
+			common.WriteComment(w, enum.Comment)
 			w.WriteStringln("methods (Static)")
 			common.WriteBlockBody(w, func() {
 				for _, value := range enum.Values {
@@ -250,10 +206,9 @@ func writeEnum(fw *common.MatlabFileWriter, enum *dsl.EnumDefinition, namedType 
 func writeRecord(fw *common.MatlabFileWriter, rec *dsl.RecordDefinition, st dsl.SymbolTable) error {
 	recordName := common.TypeIdentifierName(rec.Name)
 	return fw.WriteFile(recordName, func(w *formatting.IndentedWriter) {
-		common.WriteComment(w, rec.Comment)
-
 		fmt.Fprintf(w, "classdef %s < handle\n", recordName)
 		common.WriteBlockBody(w, func() {
+			common.WriteComment(w, rec.Comment)
 
 			w.WriteStringln("properties")
 			var fieldNames []string
@@ -313,9 +268,9 @@ func writeRecord(fw *common.MatlabFileWriter, rec *dsl.RecordDefinition, st dsl.
 					for _, computedField := range rec.ComputedFields {
 						fieldName := common.ComputedFieldIdentifierName(computedField.Name)
 
-						common.WriteComment(w, computedField.Comment)
 						fmt.Fprintf(w, "function res = %s(self)\n", fieldName)
 						common.WriteBlockBody(w, func() {
+							common.WriteComment(w, computedField.Comment)
 							writeComputedFieldExpression(w, computedField.Expression, rec.Namespace)
 						})
 						w.WriteStringln("")
@@ -363,19 +318,17 @@ func writeZerosStaticMethod(w *formatting.IndentedWriter, typeSyntax string, def
 	common.WriteBlockBody(w, func() {
 		fmt.Fprintf(w, "elem = %s(%s);\n", typeSyntax, strings.Join(defaultArgs, ", "))
 		w.WriteStringln("if nargin == 0")
-		w.Indented(func() {
-			w.WriteStringln("z = elem;")
-		})
-		w.WriteStringln("elseif nargin == 1")
-		w.Indented(func() {
-			w.WriteStringln("n = varargin{1};")
-			w.WriteStringln("z = reshape(repelem(elem, n*n), [n, n]);")
-		})
-		w.WriteStringln("else")
 		common.WriteBlockBody(w, func() {
-			w.WriteStringln("sz = [varargin{:}];")
-			w.WriteStringln("z = reshape(repelem(elem, prod(sz)), sz);")
+			w.WriteStringln("z = elem;")
+			w.WriteStringln("return;")
 		})
+
+		w.WriteStringln("sz = [varargin{:}];")
+		w.WriteStringln("if isscalar(sz)")
+		common.WriteBlockBody(w, func() {
+			w.WriteStringln("sz = [sz, sz];")
+		})
+		w.WriteStringln("z = reshape(repelem(elem, prod(sz)), sz);")
 	})
 }
 

@@ -248,7 +248,6 @@ classdef RoundTripTest < matlab.unittest.TestCase
         end
 
         function testMaps(testCase, format)
-            % d = containers.Map('KeyType', 'char', 'ValueType', 'int32');
             d = dictionary();
             d("a") = int32(1);
             d("b") = 2;
@@ -257,18 +256,8 @@ classdef RoundTripTest < matlab.unittest.TestCase
             w = create_validating_writer(testCase, format, 'Maps');
             w.write_string_to_int(d);
 
-            % TODO: Need to use R2022b 'dictionary' to properly build the map in MapSerializer.read
-            %       i.e. an "empty" containers.Map() has a KeyType of 'char'
-            % w.write_int_to_string(containers.Map(int32([1, 2, 3]), ["a", "b", "c"]));
             w.write_int_to_string(dictionary(int32([1, 2, 3]), ["a", "b", "c"]));
 
-            % TODO: Need to use R2022b `dictionary` to store objects as values...
-            % w.write_string_to_union(...
-            %     containers.Map(...
-            %         ["a", "b"], ...
-            %         [test_model.StringOrInt32.Int32(1), test_model.StringOrInt32.String("2")] ...
-            %     ) ...
-            % );
             w.write_string_to_union(...
                 dictionary(...
                     ["a", "b"], ...
@@ -332,9 +321,6 @@ classdef RoundTripTest < matlab.unittest.TestCase
         end
 
         function testSimpleStreams(testCase, format)
-            % TODO: Need to fix Stream read/write of multidimensional arrays (see write_fixed_vector)
-            testCase.assumeFail();
-
             w = create_validating_writer(testCase, format, 'Streams');
 
             % TODO: MockWriter can't yet handle multiple stream write calls (the result of read is always the full concatenated stream)
@@ -349,9 +335,9 @@ classdef RoundTripTest < matlab.unittest.TestCase
                 test_model.RecordWithOptionalVector(int32(1:10)) ...
             ]);
             w.write_fixed_vector(...
-                transpose([...
+                transpose(int32([...
                     [1, 2, 3]; [1, 2, 3]; [1, 2, 3]; [1, 2, 3];
-                ])...
+                ]))...
             );
             w.close();
 
@@ -418,9 +404,6 @@ classdef RoundTripTest < matlab.unittest.TestCase
         end
 
         function testAdvancedGenerics(testCase, format)
-            % TODO: Fix NDArraySerializers for nested NDArrays
-            testCase.assumeFail();
-
             w = create_validating_writer(testCase, format, 'AdvancedGenerics');
 
             i1 = single([[3, 4, 5]; [6, 7, 8]]);
@@ -428,11 +411,15 @@ classdef RoundTripTest < matlab.unittest.TestCase
             i3 = single([[300, 400, 500]; [600, 700, 800]]);
             i4 = single([[3000, 4000, 5000]; [6000, 7000, 8000]]);
 
-            % TODO: How would I declare it with zeros first, then fill it with img_img_array[:] = ... ?  e.g. (in Python)
-            img_img_array = i1;
-            img_img_array(:, :, 2) = i2;
-            img_img_array(:, :, 3) = i3;
-            img_img_array(:, :, 4) = i4;
+            % img_img_array = zeros([size(i1) 2 2], 'single');
+            % img_img_array(:, :, 1, 1) = i1;
+            % img_img_array(:, :, 1, 2) = i2;
+            % img_img_array(:, :, 2, 1) = i3;
+            % img_img_array(:, :, 2, 2) = i4;
+            img_img_array{1, 1} = i1;
+            img_img_array{1, 2} = i2;
+            img_img_array{2, 1} = i3;
+            img_img_array{2, 2} = i4;
 
             w.write_float_image_image(img_img_array);
 

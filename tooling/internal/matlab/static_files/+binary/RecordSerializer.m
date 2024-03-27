@@ -1,4 +1,4 @@
-classdef RecordSerializer < handle
+classdef RecordSerializer < yardl.binary.TypeSerializer
 
     properties
         field_serializers

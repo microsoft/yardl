@@ -2,6 +2,8 @@ classdef YardlTypesTest < matlab.unittest.TestCase
 
     methods (Test)
 
+        % TODO: Add test for yardl.allocate for "each" kind of type
+
         function testDateTimeFromValidDatetime(testCase)
             dt = yardl.DateTime.from_datetime(datetime(2020, 2, 29, 12, 22, 44, .111222));
             testCase.verifyEqual(dt.value(), int64(1582978964000111222));

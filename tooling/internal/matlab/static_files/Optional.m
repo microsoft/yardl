@@ -83,13 +83,14 @@ classdef Optional < handle
             elem = yardl.None;
             if nargin == 0
                 z = elem;
-            elseif nargin == 1
-                n = varargin{1};
-                z = reshape(repelem(elem, n*n), [n, n]);
-            else
-                sz = [varargin{:}];
-                z = reshape(repelem(elem, prod(sz)), sz);
+                return
             end
+
+            sz = [varargin{:}];
+            if isscalar(sz)
+                sz = [sz, sz];
+            end
+            z = reshape(repelem(elem, prod(sz)), sz);
         end
     end
 end

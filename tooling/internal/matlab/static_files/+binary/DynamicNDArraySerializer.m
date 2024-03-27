@@ -1,8 +1,8 @@
 classdef DynamicNDArraySerializer < yardl.binary.NDArraySerializerBase
 
     methods
-        function self = DynamicNDArraySerializer(element_serializer)
-            self@yardl.binary.NDArraySerializerBase(element_serializer);
+        function self = DynamicNDArraySerializer(item_serializer)
+            self@yardl.binary.NDArraySerializerBase(item_serializer);
         end
 
         function write(self, outstream, value)

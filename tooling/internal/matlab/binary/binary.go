@@ -38,11 +38,11 @@ func writeProtocols(fw *common.MatlabFileWriter, ns *dsl.Namespace) error {
 
 func writeProtocolWriter(fw *common.MatlabFileWriter, p *dsl.ProtocolDefinition, ns *dsl.Namespace) error {
 	return fw.WriteFile(BinaryWriterName(p), func(w *formatting.IndentedWriter) {
-		common.WriteComment(w, fmt.Sprintf("Binary writer for the %s protocol", p.Name))
-		common.WriteComment(w, p.Comment)
 		abstractWriterName := fmt.Sprintf("%s.%s", common.NamespaceIdentifierName(p.Namespace), common.AbstractWriterName(p))
 		fmt.Fprintf(w, "classdef %s < yardl.binary.BinaryProtocolWriter & %s\n", BinaryWriterName(p), abstractWriterName)
 		common.WriteBlockBody(w, func() {
+			common.WriteComment(w, fmt.Sprintf("Binary writer for the %s protocol", p.Name))
+			common.WriteComment(w, p.Comment)
 
 			w.WriteStringln("methods")
 			common.WriteBlockBody(w, func() {
@@ -73,11 +73,11 @@ func writeProtocolWriter(fw *common.MatlabFileWriter, p *dsl.ProtocolDefinition,
 
 func writeProtocolReader(fw *common.MatlabFileWriter, p *dsl.ProtocolDefinition, ns *dsl.Namespace) error {
 	return fw.WriteFile(BinaryReaderName(p), func(w *formatting.IndentedWriter) {
-		common.WriteComment(w, fmt.Sprintf("Binary reader for the %s protocol", p.Name))
-		common.WriteComment(w, p.Comment)
 		abstractReaderName := fmt.Sprintf("%s.%s", common.NamespaceIdentifierName(p.Namespace), common.AbstractReaderName(p))
 		fmt.Fprintf(w, "classdef %s < yardl.binary.BinaryProtocolReader & %s\n", BinaryReaderName(p), abstractReaderName)
 		common.WriteBlockBody(w, func() {
+			common.WriteComment(w, fmt.Sprintf("Binary reader for the %s protocol", p.Name))
+			common.WriteComment(w, p.Comment)
 
 			w.WriteStringln("methods")
 			common.WriteBlockBody(w, func() {

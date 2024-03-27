@@ -44,6 +44,20 @@ classdef Date < handle
         function d = from_components(y, m, d)
             d = yardl.Date.from_datetime(datetime(y, m, d));
         end
+
+        function z = zeros(varargin)
+            elem = yardl.Date(0);
+            if nargin == 0
+                z = elem;
+                return
+            end
+
+            sz = [varargin{:}];
+            if isscalar(sz)
+                sz = [sz, sz];
+            end
+            z = reshape(repelem(elem, prod(sz)), sz);
+        end
     end
 
 end

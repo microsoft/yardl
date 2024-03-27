@@ -1,11 +1,11 @@
 classdef OptionalSerializer < yardl.binary.TypeSerializer
     properties
-        element_serializer_;
+        item_serializer_;
     end
 
     methods
-        function obj = OptionalSerializer(element_serializer)
-            obj.element_serializer_ = element_serializer;
+        function obj = OptionalSerializer(item_serializer)
+            obj.item_serializer_ = item_serializer;
         end
 
         function write(obj, outstream, value)
@@ -14,19 +14,19 @@ classdef OptionalSerializer < yardl.binary.TypeSerializer
             %     return
             % end
             % outstream.write_byte_no_check(1);
-            % obj.element_serializer_.write(outstream, value);
+            % obj.item_serializer_.write(outstream, value);
 
             if isa(value, 'yardl.Optional')
                 if value.has_value()
                     outstream.write_byte_no_check(1);
-                    obj.element_serializer_.write(outstream, value.value());
+                    obj.item_serializer_.write(outstream, value.value());
                 else
                     outstream.write_byte_no_check(0);
                     return
                 end
             else
                 outstream.write_byte_no_check(1);
-                obj.element_serializer_.write(outstream, value);
+                obj.item_serializer_.write(outstream, value);
             end
         end
 
@@ -35,15 +35,15 @@ classdef OptionalSerializer < yardl.binary.TypeSerializer
             if has_value == 0
                 res = yardl.None;
             else
-                res = obj.element_serializer_.read(instream);
+                res = obj.item_serializer_.read(instream);
 
-                % value = obj.element_serializer_.read(instream);
+                % value = obj.item_serializer_.read(instream);
                 % res = yardl.Optional(value);
             end
         end
 
         function c = getClass(obj)
-            % c = obj.element_serializer_.getClass();
+            % c = obj.item_serializer_.getClass();
             c = 'yardl.Optional';
         end
     end

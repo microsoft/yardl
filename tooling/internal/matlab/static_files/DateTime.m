@@ -51,6 +51,20 @@ classdef DateTime < handle
             seconds_since_epoch = convertTo(mdt, 'epochtime');
             dt = yardl.DateTime(seconds_since_epoch * 1e9 + nanosecond);
         end
+
+        function z = zeros(varargin)
+            elem = yardl.DateTime(0);
+            if nargin == 0
+                z = elem;
+                return
+            end
+
+            sz = [varargin{:}];
+            if isscalar(sz)
+                sz = [sz, sz];
+            end
+            z = reshape(repelem(elem, prod(sz)), sz);
+        end
     end
 
 end

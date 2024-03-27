@@ -1,6 +1,8 @@
 classdef GeneratedTypesTest < matlab.unittest.TestCase
     methods (Test)
 
+        % TODO: Add test for yardl.allocate for "each" kind of type
+
         function testDefaultRecordWithPrimitives(testCase)
             r = test_model.RecordWithPrimitives();
 

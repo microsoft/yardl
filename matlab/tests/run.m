@@ -8,4 +8,6 @@ run(GeneratedTypesTest);
 run(EqualityTest);
 run(ComputedFieldsTest);
 
+run(SerializerShapeTest);
+
 run(RoundTripTest);

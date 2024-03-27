@@ -4,25 +4,54 @@ classdef FixedNDArraySerializer < yardl.binary.NDArraySerializerBase
         shape_
     end
 
-
     methods
-        function self = FixedNDArraySerializer(element_serializer, shape)
-            self@yardl.binary.NDArraySerializerBase(element_serializer);
+        function self = FixedNDArraySerializer(item_serializer, shape)
+            self@yardl.binary.NDArraySerializerBase(item_serializer);
             self.shape_ = shape;
         end
 
-        function write(self, outstream, value)
-            if size(value) ~= self.shape_
+        function write(self, outstream, values)
+            sz = size(values);
+
+            if sz == self.shape_
+                % This is an NDArray of scalars
+                self.write_data_(outstream, values(:));
+                return;
+            end
+
+            if length(sz) < length(self.shape_)
                 expected = sprintf("%d ", self.shape_);
-                actual = sprintf("%d ", size(value));
+                actual = sprintf("%d ", sz);
                 throw(yardl.ValueError("Expected shape [%s], got [%s]", expected, actual));
             end
 
-            self.write_data_(outstream, value);
+            fixedSize = sz(end-length(self.shape_)+1:end);
+            if fixedSize ~= self.shape_
+                expected = sprintf("%d ", self.shape_);
+                actual = sprintf("%d ", fixedSize);
+                throw(yardl.ValueError("Expected shape [%s], got [%s]", expected, actual));
+            end
+
+            inner_shape = sz(1:end-length(self.shape_));
+            values = reshape(values, [inner_shape prod(self.shape_)]);
+
+            self.write_data_(outstream, values);
         end
 
         function value = read(self, instream)
             value = self.read_data_(instream, self.shape_);
+        end
+
+        function s = getShape(obj)
+            item_shape = obj.item_serializer_.getShape();
+            if isempty(item_shape)
+                s = obj.shape_;
+            elseif isscalar(item_shape)
+                s = obj.shape_;
+            else
+                s = [item_shape obj.shape_];
+                s = s(s>1);
+            end
         end
     end
 end

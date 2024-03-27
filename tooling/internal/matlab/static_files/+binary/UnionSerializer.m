@@ -78,5 +78,12 @@ classdef UnionSerializer < handle
                 c = obj.classname_;
             end
         end
+
+    end
+
+    methods (Static)
+        function s = getShape()
+            s = 1;
+        end
     end
 end
