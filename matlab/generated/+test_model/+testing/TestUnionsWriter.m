@@ -6,17 +6,22 @@ classdef TestUnionsWriter < test_model.UnionsWriterBase
     create_reader_
     mock_writer_
     close_called_
+    filename_
+    format_
   end
 
   methods
-    function obj = TestUnionsWriter(testCase, writer, create_reader)
-      obj.writer_ = writer;
+    function obj = TestUnionsWriter(testCase, format, create_writer, create_reader)
+      obj.filename_ = tempname();
+      obj.format_ = format;
+      obj.writer_ = create_writer(obj.filename_);
       obj.create_reader_ = create_reader;
       obj.mock_writer_ = test_model.testing.MockUnionsWriter(testCase);
       obj.close_called_ = false;
     end
 
     function delete(obj)
+      % delete(obj.filename_);
       if ~obj.close_called_
         % ADD_FAILURE() << ...;
         throw(yardl.RuntimeError("Close() must be called on 'TestUnionsWriter' to verify mocks"));
@@ -48,10 +53,21 @@ classdef TestUnionsWriter < test_model.UnionsWriterBase
     function close_(obj)
       obj.close_called_ = true;
       obj.writer_.close();
-      reader = obj.create_reader_();
+      mock_copy = copy(obj.mock_writer_);
+
+      reader = obj.create_reader_(obj.filename_);
       reader.copy_to(obj.mock_writer_);
       reader.close();
       obj.mock_writer_.verify();
+      obj.mock_writer_.close();
+
+      translated = invoke_translator(obj.filename_, obj.format_, obj.format_);
+      reader = obj.create_reader_(translated);
+      reader.copy_to(mock_copy);
+      reader.close();
+      mock_copy.verify();
+      mock_copy.close();
+      % delete(translated);
     end
 
     function end_stream_(obj)

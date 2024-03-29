@@ -56,6 +56,9 @@ classdef FixedNDArraySerializer < yardl.binary.NDArraySerializerBase
                 s = [item_shape obj.shape_ ];
             else
                 s = [item_shape obj.shape_];
+            end
+
+            if length(s) > 2
                 s = s(s>1);
             end
         end

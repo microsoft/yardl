@@ -9,6 +9,10 @@ classdef StreamSerializer < yardl.binary.TypeSerializer
         end
 
         function write(obj, outstream, values)
+            if isempty(values)
+                return;
+            end
+
             s = size(values);
             count = s(end);
             outstream.write_unsigned_varint(count);

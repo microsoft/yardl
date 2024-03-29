@@ -334,11 +334,10 @@ classdef RoundTripTest < matlab.unittest.TestCase
         function testSimpleStreams(testCase, format)
             w = create_validating_writer(testCase, format, 'Streams');
 
-            % TODO: MockWriter can't yet handle multiple stream write calls (the result of read is always the full concatenated stream)
-            % w.write_int_data(int32(1:10));
-            % w.write_int_data(int32(1:20));
-            w.write_int_data(int32(1:30));
-
+            % Non-empty streams
+            w.write_int_data(int32(1:10));
+            w.write_int_data(42);
+            w.write_int_data(int32(1:20));
             w.write_optional_int_data([1, 2, yardl.None, 4, 5, yardl.None, 7, 8, 9, 10]);
             w.write_record_with_optional_vector_data([...
                 test_model.RecordWithOptionalVector(), ...
@@ -352,6 +351,17 @@ classdef RoundTripTest < matlab.unittest.TestCase
             );
             w.close();
 
+            % Mixed empty/non-empty streams
+            w = create_validating_writer(testCase, format, 'Streams');
+            w.write_int_data(int32(1:10))
+            w.write_int_data([]);
+            w.write_optional_int_data([]);
+            w.write_optional_int_data([1, 2, yardl.None, 4, 5, yardl.None, 7, 8, 9, 10]);
+            w.write_record_with_optional_vector_data([]);
+            w.write_fixed_vector(int32(repmat([1;2;3], 1,4)));
+            w.close();
+
+            % All empty streams
             w = create_validating_writer(testCase, format, 'Streams');
             w.write_int_data([]);
             w.write_optional_int_data([]);
@@ -477,7 +487,5 @@ function w = create_validating_writer(testCase, format, protocol)
     create_reader = str2func(reader_name);
     create_test_writer = str2func(test_writer_name);
 
-    testfile = tempname;
-    writer = create_writer(testfile);
-    w = create_test_writer(testCase, writer, @() create_reader(testfile));
+    w = create_test_writer(testCase, format, @(f) create_writer(f), @(f) create_reader(f));
 end
