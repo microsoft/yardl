@@ -584,6 +584,7 @@ def test_flags(format: Format):
 def test_simple_streams(format: Format):
     c = create_validating_writer_class(format, tm.StreamsWriterBase)
 
+    # non-empty streams
     with c() as w:
         w.write_int_data(range(10))
         w.write_int_data(range(20))
@@ -598,6 +599,13 @@ def test_simple_streams(format: Format):
                 ),
             ]
         )
+        w.write_fixed_vector(([1, 2, 3] for _ in range(4)))
+
+    # mixed empty and non-empty streams
+    with c() as w:
+        w.write_int_data(range(0))
+        w.write_optional_int_data([1, 2, None, 4, 5, None, 7, 8, 9, 10])
+        w.write_record_with_optional_vector_data([])
         w.write_fixed_vector(([1, 2, 3] for _ in range(4)))
 
     # empty streams

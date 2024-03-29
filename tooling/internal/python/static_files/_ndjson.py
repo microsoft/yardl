@@ -136,6 +136,7 @@ class NDJsonProtocolReader:
                 return value
             if required:
                 raise ValueError(f"Expected protocol step '{stepName}' not found.")
+            return MISSING_SENTINEL
 
         line = self._stream.readline()
         if line == "":
