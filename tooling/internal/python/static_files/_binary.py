@@ -77,7 +77,7 @@ class BinaryProtocolReader(ABC):
     ) -> None:
         self._stream = CodedInputStream(stream)
         magic_bytes = self._stream.read_view(len(MAGIC_BYTES))
-        if magic_bytes != MAGIC_BYTES: # pyright: ignore [reportUnnecessaryComparison]
+        if magic_bytes != MAGIC_BYTES:  # pyright: ignore [reportUnnecessaryComparison]
             raise RuntimeError("Invalid magic bytes")
 
         version = read_fixed_int32(self._stream)
@@ -955,7 +955,7 @@ class StreamSerializer(TypeSerializer[Iterable[T], Any]):
     def write(self, stream: CodedOutputStream, value: Iterable[T]) -> None:
         # Note that the final 0 is missing and will be added before the next protocol step
         # or the protocol is closed.
-        if isinstance(value, list):
+        if isinstance(value, list) and len(value) > 0:
             stream.write_unsigned_varint(len(value))
             for element in value:
                 self._element_serializer.write(stream, element)

@@ -459,6 +459,24 @@ TEST_P(RoundTripTests, SimpleDatasets) {
   tw->Close();
 }
 
+TEST_P(RoundTripTests, SimpleDatasets_Mixed) {
+  auto tw = CreateValidatingWriter<StreamsWriterBase>();
+
+  tw->WriteIntData({});
+  tw->EndIntData();
+
+  tw->WriteOptionalIntData({10, 11, {}, 13, 14, 15, {}, 17, 18, 19});
+  tw->EndOptionalIntData();
+
+  tw->EndRecordWithOptionalVectorData();
+
+  tw->WriteFixedVector({1, 2, 3});
+  tw->WriteFixedVector({4, 5, 6});
+  tw->EndFixedVector();
+
+  tw->Close();
+}
+
 TEST_P(RoundTripTests, SimpleDatasets_Empty) {
   auto tw = CreateValidatingWriter<StreamsWriterBase>();
 
