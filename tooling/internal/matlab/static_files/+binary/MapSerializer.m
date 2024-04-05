@@ -1,3 +1,6 @@
+% Copyright (c) Microsoft Corporation.
+% Licensed under the MIT License.
+
 classdef MapSerializer < yardl.binary.TypeSerializer
     properties
         key_serializer_;
@@ -11,19 +14,12 @@ classdef MapSerializer < yardl.binary.TypeSerializer
         end
 
         function write(obj, outstream, value)
-            % assert(isa(value, 'containers.Map'))
-            % OR, starting in R2022, Mathworks recommends using `dictionary`
             assert(isa(value, 'dictionary'))
-
-            % count = length(value);
             count = numEntries(value);
-
             outstream.write_unsigned_varint(count);
             ks = keys(value);
             vs = values(value);
             for i = 1:count
-                % obj.key_serializer_.write(outstream, ks{i});
-                % obj.value_serializer_.write(outstream, vs{i});
                 obj.key_serializer_.write(outstream, ks(i));
                 obj.value_serializer_.write(outstream, vs(i));
             end
@@ -31,11 +27,7 @@ classdef MapSerializer < yardl.binary.TypeSerializer
 
         function res = read(obj, instream)
             count = instream.read_unsigned_varint();
-
-            % TODO: If we can require R2022, should use `dictionary`
-            % res = containers.Map('KeyType', obj.key_serializer_.getClass(), 'ValueType', obj.value_serializer_.getClass());
             res = dictionary();
-
             for i = 1:count
                 k = obj.key_serializer_.read(instream);
                 v = obj.value_serializer_.read(instream);
@@ -44,7 +36,6 @@ classdef MapSerializer < yardl.binary.TypeSerializer
         end
 
         function c = getClass(obj)
-            % c = 'containers.Map';
             c = 'dictionary';
         end
     end

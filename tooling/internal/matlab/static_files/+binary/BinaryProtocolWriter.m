@@ -1,3 +1,6 @@
+% Copyright (c) Microsoft Corporation.
+% Licensed under the MIT License.
+
 classdef BinaryProtocolWriter < handle
 
     properties (Access=protected)

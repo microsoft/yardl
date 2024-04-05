@@ -1,3 +1,6 @@
+% Copyright (c) Microsoft Corporation.
+% Licensed under the MIT License.
+
 classdef VectorSerializer < yardl.binary.TypeSerializer
     properties
         item_serializer_;

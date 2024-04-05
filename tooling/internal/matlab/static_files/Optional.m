@@ -1,3 +1,6 @@
+% Copyright (c) Microsoft Corporation.
+% Licensed under the MIT License.
+
 classdef Optional < handle
     properties (SetAccess=protected)
         has_value
@@ -6,7 +9,7 @@ classdef Optional < handle
 
     methods
         function obj = Optional(varargin)
-            if nargin > 0 && ~isa(varargin{1}, 'yardl.Optional')
+            if nargin > 0
                 obj.value = varargin{1};
                 obj.has_value = true;
             else
@@ -23,32 +26,15 @@ classdef Optional < handle
         end
 
         function eq = eq(a, b)
-            % if isa(a, 'yardl.Optional')
-            %     if isa(b, 'yardl.Optional')
-            %         if a.has_value && b.has_value
-            %             eq = a.value == b.value;
-            %         else
-            %             eq = a.has_value == b.has_value;
-            %         end
-            %     else
-            %         eq = a.has_value && b == a.value;
-            %     end
-            % else
-            %     % b is the Optional
-            %     eq = b.has_value && a == b.value;
-            % end
-
             if isa(a, 'yardl.Optional')
                 if isa(b, 'yardl.Optional')
                     if all([a.has_value]) && all([b.has_value])
-                        % eq = [a.value] == [b.value];
                         eq = isequal([a.value], [b.value]);
                     else
                         eq = [a.has_value] == [b.has_value];
                     end
                 else
                     if all([a.has_value])
-                        % eq = b == [a.value];
                         eq = isequal(b, [a.value]);
                     else
                         eq = false;
@@ -57,7 +43,6 @@ classdef Optional < handle
             else
                 % b is the Optional
                 if all([b.has_value])
-                    % eq = a == [b.value];
                     eq = isequal(a, [b.value]);
                 else
                     eq = false;

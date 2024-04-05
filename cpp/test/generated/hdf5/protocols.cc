@@ -1010,6 +1010,7 @@ struct _Inner_RecordWithComputedFields {
       vector_field(o.vector_field),
       vector_of_vectors_field(o.vector_of_vectors_field),
       fixed_vector_field(o.fixed_vector_field),
+      fixed_vector_of_vectors_field(o.fixed_vector_of_vectors_field),
       optional_named_array(o.optional_named_array),
       int_float_union(o.int_float_union),
       nullable_int_float_union(o.nullable_int_float_union),
@@ -1040,6 +1041,7 @@ struct _Inner_RecordWithComputedFields {
     yardl::hdf5::ToOuter(vector_field, o.vector_field);
     yardl::hdf5::ToOuter(vector_of_vectors_field, o.vector_of_vectors_field);
     yardl::hdf5::ToOuter(fixed_vector_field, o.fixed_vector_field);
+    yardl::hdf5::ToOuter(fixed_vector_of_vectors_field, o.fixed_vector_of_vectors_field);
     yardl::hdf5::ToOuter(optional_named_array, o.optional_named_array);
     yardl::hdf5::ToOuter(int_float_union, o.int_float_union);
     yardl::hdf5::ToOuter(nullable_int_float_union, o.nullable_int_float_union);
@@ -1069,6 +1071,7 @@ struct _Inner_RecordWithComputedFields {
   yardl::hdf5::InnerVlen<int32_t, int32_t> vector_field;
   yardl::hdf5::InnerVlen<yardl::hdf5::InnerVlen<int32_t, int32_t>, std::vector<int32_t>> vector_of_vectors_field;
   std::array<int32_t, 3> fixed_vector_field;
+  std::array<std::array<int32_t, 3>, 2> fixed_vector_of_vectors_field;
   yardl::hdf5::InnerOptional<yardl::hdf5::InnerNdArray<int32_t, int32_t, 2>, test_model::NamedNDArray> optional_named_array;
   ::InnerUnion2<int32_t, int32_t, float, float> int_float_union;
   ::InnerUnion2<int32_t, int32_t, float, float> nullable_int_float_union;
@@ -1514,6 +1517,7 @@ template <typename _A_Inner, typename A, typename _B_Inner, typename B>
   t.insertMember("vectorField", HOFFSET(RecordType, vector_field), yardl::hdf5::InnerVlenDdl(H5::PredType::NATIVE_INT32));
   t.insertMember("vectorOfVectorsField", HOFFSET(RecordType, vector_of_vectors_field), yardl::hdf5::InnerVlenDdl(yardl::hdf5::InnerVlenDdl(H5::PredType::NATIVE_INT32)));
   t.insertMember("fixedVectorField", HOFFSET(RecordType, fixed_vector_field), yardl::hdf5::FixedVectorDdl(H5::PredType::NATIVE_INT32, 3));
+  t.insertMember("fixedVectorOfVectorsField", HOFFSET(RecordType, fixed_vector_of_vectors_field), yardl::hdf5::FixedVectorDdl(yardl::hdf5::FixedVectorDdl(H5::PredType::NATIVE_INT32, 3), 2));
   t.insertMember("optionalNamedArray", HOFFSET(RecordType, optional_named_array), yardl::hdf5::OptionalTypeDdl<yardl::hdf5::InnerNdArray<int32_t, int32_t, 2>, test_model::NamedNDArray>(yardl::hdf5::NDArrayDdl<int32_t, int32_t, 2>(H5::PredType::NATIVE_INT32)));
   t.insertMember("intFloatUnion", HOFFSET(RecordType, int_float_union), ::InnerUnion2Ddl<int32_t, int32_t, float, float>(false, H5::PredType::NATIVE_INT32, "int32", H5::PredType::NATIVE_FLOAT, "float32"));
   t.insertMember("nullableIntFloatUnion", HOFFSET(RecordType, nullable_int_float_union), ::InnerUnion2Ddl<int32_t, int32_t, float, float>(true, H5::PredType::NATIVE_INT32, "int32", H5::PredType::NATIVE_FLOAT, "float32"));

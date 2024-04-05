@@ -24,6 +24,7 @@ classdef RecordWithComputedFields < handle
     vector_field
     vector_of_vectors_field
     fixed_vector_field
+    fixed_vector_of_vectors_field
     optional_named_array
     int_float_union
     nullable_int_float_union
@@ -32,7 +33,7 @@ classdef RecordWithComputedFields < handle
   end
 
   methods
-    function obj = RecordWithComputedFields(array_field, array_field_map_dimensions, dynamic_array_field, fixed_array_field, int_field, int8_field, uint8_field, int16_field, uint16_field, uint32_field, int64_field, uint64_field, size_field, float32_field, float64_field, complexfloat32_field, complexfloat64_field, string_field, tuple_field, vector_field, vector_of_vectors_field, fixed_vector_field, optional_named_array, int_float_union, nullable_int_float_union, union_with_nested_generic_union, map_field)
+    function obj = RecordWithComputedFields(array_field, array_field_map_dimensions, dynamic_array_field, fixed_array_field, int_field, int8_field, uint8_field, int16_field, uint16_field, uint32_field, int64_field, uint64_field, size_field, float32_field, float64_field, complexfloat32_field, complexfloat64_field, string_field, tuple_field, vector_field, vector_of_vectors_field, fixed_vector_field, fixed_vector_of_vectors_field, optional_named_array, int_float_union, nullable_int_float_union, union_with_nested_generic_union, map_field)
       if nargin > 0
         obj.array_field = array_field;
         obj.array_field_map_dimensions = array_field_map_dimensions;
@@ -56,6 +57,7 @@ classdef RecordWithComputedFields < handle
         obj.vector_field = vector_field;
         obj.vector_of_vectors_field = vector_of_vectors_field;
         obj.fixed_vector_field = fixed_vector_field;
+        obj.fixed_vector_of_vectors_field = fixed_vector_of_vectors_field;
         obj.optional_named_array = optional_named_array;
         obj.int_float_union = int_float_union;
         obj.nullable_int_float_union = nullable_int_float_union;
@@ -84,6 +86,7 @@ classdef RecordWithComputedFields < handle
         obj.vector_field = int32.empty();
         obj.vector_of_vectors_field = int32.empty();
         obj.fixed_vector_field = repelem(int32(0), 3);
+        obj.fixed_vector_of_vectors_field = repelem({repelem(int32(0), 3)}, 2);
         obj.optional_named_array = yardl.None;
         obj.int_float_union = test_model.Int32OrFloat32.Int32(int32(0));
         obj.nullable_int_float_union = yardl.None;
@@ -158,12 +161,12 @@ classdef RecordWithComputedFields < handle
     end
 
     function res = access_array_field_element(self)
-      res = self.array_field(1+0, 1+1);
+      res = self.array_field(1+1, 1+0);
       return
     end
 
     function res = access_array_field_element_by_name(self)
-      res = self.array_field(1+0, 1+1);
+      res = self.array_field(1+1, 1+0);
       return
     end
 
@@ -178,7 +181,12 @@ classdef RecordWithComputedFields < handle
     end
 
     function res = access_vector_of_vectors_field(self)
-      res = self.vector_of_vectors_field(1+1, 1+2);
+      res = self.vector_of_vectors_field(1+2, 1+1);
+      return
+    end
+
+    function res = access_fixed_vector_of_vectors_field(self)
+      res = self.fixed_vector_of_vectors_field(1+2, 1+1);
       return
     end
 
@@ -188,27 +196,27 @@ classdef RecordWithComputedFields < handle
     end
 
     function res = array_x_size(self)
-      res = size(self.array_field, 1+0);
+      res = size(self.array_field, ndims(self.array_field)-(0));
       return
     end
 
     function res = array_y_size(self)
-      res = size(self.array_field, 1+1);
+      res = size(self.array_field, ndims(self.array_field)-(1));
       return
     end
 
     function res = array_0_size(self)
-      res = size(self.array_field, 1+0);
+      res = size(self.array_field, ndims(self.array_field)-(0));
       return
     end
 
     function res = array_1_size(self)
-      res = size(self.array_field, 1+1);
+      res = size(self.array_field, ndims(self.array_field)-(1));
       return
     end
 
     function res = array_size_from_int_field(self)
-      res = size(self.array_field, 1+self.int_field);
+      res = size(self.array_field, ndims(self.array_field)-(self.int_field));
       return
     end
 
@@ -223,17 +231,17 @@ classdef RecordWithComputedFields < handle
         end
 
       end
-      res = size(self.array_field, 1+1 + helper_0_(self.string_field));
+      res = size(self.array_field, ndims(self.array_field)-(helper_0_(self.string_field)));
       return
     end
 
     function res = array_size_from_nested_int_field(self)
-      res = size(self.array_field, 1+self.tuple_field.v1);
+      res = size(self.array_field, ndims(self.array_field)-(self.tuple_field.v1));
       return
     end
 
     function res = array_field_map_dimensions_x_size(self)
-      res = size(self.array_field_map_dimensions, 1+0);
+      res = size(self.array_field_map_dimensions, ndims(self.array_field_map_dimensions)-(0));
       return
     end
 
@@ -262,33 +270,18 @@ classdef RecordWithComputedFields < handle
       return
     end
 
-    function res = array_dimension_x_index(self)
-      function dim = helper_0_(dim_name)
-        if dim_name == "x"
-          dim = 0;
-        elseif dim_name == "y"
-          dim = 1;
-        else
-          throw(yardl.KeyError("Unknown dimension name: '%s'", dim_name));
-        end
+    function res = fixed_vector_of_vectors_size(self)
+      res = 2;
+      return
+    end
 
-      end
-      res = 1 + helper_0_("x");
+    function res = array_dimension_x_index(self)
+      res = 0;
       return
     end
 
     function res = array_dimension_y_index(self)
-      function dim = helper_0_(dim_name)
-        if dim_name == "x"
-          dim = 0;
-        elseif dim_name == "y"
-          dim = 1;
-        else
-          throw(yardl.KeyError("Unknown dimension name: '%s'", dim_name));
-        end
-
-      end
-      res = 1 + helper_0_("y");
+      res = 1;
       return
     end
 
@@ -303,7 +296,7 @@ classdef RecordWithComputedFields < handle
         end
 
       end
-      res = 1 + helper_0_(self.string_field);
+      res = helper_0_(self.string_field);
       return
     end
 
@@ -401,7 +394,6 @@ classdef RecordWithComputedFields < handle
       end
       res = "float";
       return
-      throw(yardl.RuntimeError("Unexpected union case"))
     end
 
     function res = nested_switch(self)
@@ -468,7 +460,7 @@ classdef RecordWithComputedFields < handle
     end
 
     function res = arithmetic_5(self)
-      res = size(self.array_field, 1+2 - 1);
+      res = size(self.array_field, ndims(self.array_field)-(2 - 1));
       return
     end
 
@@ -558,6 +550,7 @@ classdef RecordWithComputedFields < handle
         all([obj.vector_field] == [other.vector_field]) && ...
         all([obj.vector_of_vectors_field] == [other.vector_of_vectors_field]) && ...
         all([obj.fixed_vector_field] == [other.fixed_vector_field]) && ...
+        all([obj.fixed_vector_of_vectors_field] == [other.fixed_vector_of_vectors_field]) && ...
         isequal(obj.optional_named_array, other.optional_named_array) && ...
         all([obj.int_float_union] == [other.int_float_union]) && ...
         all([obj.nullable_int_float_union] == [other.nullable_int_float_union]) && ...

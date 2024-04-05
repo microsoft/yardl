@@ -1,5 +1,8 @@
-% A basic datetime with nanosecond precision, always in UTC.
+% Copyright (c) Microsoft Corporation.
+% Licensed under the MIT License.
+
 classdef DateTime < handle
+    % A basic datetime with nanosecond precision, always in UTC.
 
     properties (Access=private)
         nanoseconds_since_epoch_

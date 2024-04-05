@@ -137,16 +137,12 @@ classdef RoundTripTest < matlab.unittest.TestCase
             w.write_fixed_record_with_vlens_array(vlens_recs);
             w.write_record_with_fixed_arrays(rec_with_fixed);
 
-            % TODO: Like in Python, named fixed arrays are kind of broken since it
-            % doesn't seem to be possible to specify the shape of the array in the type
             named_fixed_array = transpose(int32([[1, 2, 3, 4]; [5, 6, 7, 8]]));
             w.write_named_array(named_fixed_array)
             w.close();
         end
 
         function testSubarrays(testCase, format)
-            % TODO: Add checks for input validation errors (e.g. unexpected array shape). See Python tests.
-
             w = create_validating_writer(testCase, format, 'Subarrays');
 
             ints = transpose(int32([[1, 2, 3]; [4, 5, 6]]));
@@ -315,7 +311,6 @@ classdef RoundTripTest < matlab.unittest.TestCase
             w.write_days([...
                     test_model.DaysOfWeek.SUNDAY, ...
                     test_model.DaysOfWeek(mon_or_wed_or_fri), ...
-... % bitor(bitor(test_model.DaysOfWeek.MONDAY, test_model.DaysOfWeek.WEDNESDAY), test_model.DaysOfWeek.FRIDAY), ...
                     test_model.DaysOfWeek(0), ...
                     test_model.DaysOfWeek(282839), ...
                     test_model.DaysOfWeek(234532) ...
@@ -432,11 +427,6 @@ classdef RoundTripTest < matlab.unittest.TestCase
             i3 = single([[300, 400, 500]; [600, 700, 800]]);
             i4 = single([[3000, 4000, 5000]; [6000, 7000, 8000]]);
 
-            % img_img_array = zeros([size(i1) 2 2], 'single');
-            % img_img_array(:, :, 1, 1) = i1;
-            % img_img_array(:, :, 1, 2) = i2;
-            % img_img_array(:, :, 2, 1) = i3;
-            % img_img_array(:, :, 2, 2) = i4;
             img_img_array{1, 1} = i1;
             img_img_array{1, 2} = i2;
             img_img_array{2, 1} = i3;

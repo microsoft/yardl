@@ -1,3 +1,6 @@
+% Copyright (c) Microsoft Corporation.
+% Licensed under the MIT License.
+
 classdef Int8Serializer < yardl.binary.TypeSerializer
     methods (Static)
         function write(outstream, value)

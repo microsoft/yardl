@@ -2445,6 +2445,20 @@
                 }
               },
               {
+                "name": "fixedVectorOfVectorsField",
+                "type": {
+                  "vector": {
+                    "items": {
+                      "vector": {
+                        "items": "int32",
+                        "length": 3
+                      }
+                    },
+                    "length": 2
+                  }
+                }
+              },
+              {
                 "name": "optionalNamedArray",
                 "type": [
                   null,
@@ -2717,6 +2731,37 @@
                 }
               },
               {
+                "name": "accessFixedVectorOfVectorsField",
+                "expression": {
+                  "subscript": {
+                    "target": {
+                      "subscript": {
+                        "target": {
+                          "memberAccess": {
+                            "member": "fixedVectorOfVectorsField",
+                            "kind": "field"
+                          }
+                        },
+                        "arguments": [
+                          {
+                            "expression": {
+                              "integer": 1
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    "arguments": [
+                      {
+                        "expression": {
+                          "integer": 2
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              {
                 "name": "arraySize",
                 "expression": {
                   "call": {
@@ -2950,6 +2995,12 @@
                 "name": "fixedVectorSize",
                 "expression": {
                   "integer": 3
+                }
+              },
+              {
+                "name": "fixedVectorOfVectorsSize",
+                "expression": {
+                  "integer": 2
                 }
               },
               {

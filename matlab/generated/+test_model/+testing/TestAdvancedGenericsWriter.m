@@ -21,7 +21,7 @@ classdef TestAdvancedGenericsWriter < test_model.AdvancedGenericsWriterBase
     end
 
     function delete(obj)
-      % delete(obj.filename_);
+      delete(obj.filename_);
       if ~obj.close_called_
         % ADD_FAILURE() << ...;
         throw(yardl.RuntimeError("Close() must be called on 'TestAdvancedGenericsWriter' to verify mocks"));
@@ -72,7 +72,7 @@ classdef TestAdvancedGenericsWriter < test_model.AdvancedGenericsWriterBase
       reader.close();
       mock_copy.verify();
       mock_copy.close();
-      % delete(translated);
+      delete(translated);
     end
 
     function end_stream_(obj)

@@ -21,7 +21,7 @@ classdef TestScalarsWriter < test_model.ScalarsWriterBase
     end
 
     function delete(obj)
-      % delete(obj.filename_);
+      delete(obj.filename_);
       if ~obj.close_called_
         % ADD_FAILURE() << ...;
         throw(yardl.RuntimeError("Close() must be called on 'TestScalarsWriter' to verify mocks"));
@@ -57,7 +57,7 @@ classdef TestScalarsWriter < test_model.ScalarsWriterBase
       reader.close();
       mock_copy.verify();
       mock_copy.close();
-      % delete(translated);
+      delete(translated);
     end
 
     function end_stream_(obj)

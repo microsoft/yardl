@@ -1,3 +1,6 @@
+% Copyright (c) Microsoft Corporation.
+% Licensed under the MIT License.
+
 classdef DynamicNDArraySerializer < yardl.binary.NDArraySerializerBase
 
     methods

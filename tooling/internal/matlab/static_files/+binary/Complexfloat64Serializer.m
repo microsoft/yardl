@@ -1,3 +1,6 @@
+% Copyright (c) Microsoft Corporation.
+% Licensed under the MIT License.
+
 classdef Complexfloat64Serializer < yardl.binary.TypeSerializer
     methods (Static)
         function write(outstream, value)

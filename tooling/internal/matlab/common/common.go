@@ -14,8 +14,28 @@ import (
 	"github.com/microsoft/yardl/tooling/pkg/dsl"
 )
 
-// TODO: Populate all Matlab reserved names
-var isReservedName = map[string]bool{}
+var isReservedName = map[string]bool{
+	"break":      true,
+	"case":       true,
+	"catch":      true,
+	"classdef":   true,
+	"continue":   true,
+	"else":       true,
+	"elseif":     true,
+	"end":        true,
+	"for":        true,
+	"function":   true,
+	"global":     true,
+	"if":         true,
+	"otherwise":  true,
+	"parfor":     true,
+	"persistent": true,
+	"return":     true,
+	"spmd":       true,
+	"switch":     true,
+	"try":        true,
+	"while":      true,
+}
 
 var TypeSyntaxWriter dsl.TypeSyntaxWriter[string] = func(self dsl.TypeSyntaxWriter[string], t dsl.Node, contextNamespace string) string {
 	switch t := t.(type) {
@@ -43,10 +63,6 @@ var TypeSyntaxWriter dsl.TypeSyntaxWriter[string] = func(self dsl.TypeSyntaxWrit
 			return "single"
 		case dsl.Float64, dsl.ComplexFloat64:
 			return "double"
-		// case dsl.ComplexFloat32:
-		// 	return "complex"
-		// case dsl.ComplexFloat64:
-		// 	return "complex"
 		case dsl.String:
 			return "string"
 		case dsl.Date:
@@ -84,8 +100,6 @@ var TypeSyntaxWriter dsl.TypeSyntaxWriter[string] = func(self dsl.TypeSyntaxWrit
 		case nil, *dsl.Stream, *dsl.Vector, *dsl.Array:
 			return scalarString
 		case *dsl.Map:
-			// TODO: Update to Matlab `dictionary` class when we require Matlab version >= r2023b
-			// return "containers.Map"
 			return "dictionary"
 		default:
 			panic(fmt.Sprintf("unexpected type %T", d))

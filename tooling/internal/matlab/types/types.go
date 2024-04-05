@@ -5,13 +5,13 @@ package types
 
 import (
 	"fmt"
+	"slices"
 	"strconv"
 	"strings"
 
 	"github.com/microsoft/yardl/tooling/internal/formatting"
 	"github.com/microsoft/yardl/tooling/internal/matlab/common"
 	"github.com/microsoft/yardl/tooling/pkg/dsl"
-	"github.com/rs/zerolog/log"
 )
 
 func WriteTypes(fw *common.MatlabFileWriter, ns *dsl.Namespace, st dsl.SymbolTable) error {
@@ -402,7 +402,6 @@ func writeComputedFieldExpression(w *formatting.IndentedWriter, expression dsl.E
 						for i, d := range *dims {
 							fmt.Fprintf(w, "if dim_name == \"%s\"\n", *d.Name)
 							w.Indented(func() {
-								// fmt.Fprintf(w, "dim = %d;\n", len(*dims)-i)
 								fmt.Fprintf(w, "dim = %d;\n", i)
 							})
 							w.WriteString("else")
@@ -555,6 +554,7 @@ func writeComputedFieldExpression(w *formatting.IndentedWriter, expression dsl.E
 				})
 
 				w.WriteString(startSubscript)
+				slices.Reverse(arguments)
 				formatting.Delimited(w, delimeter, arguments, func(w *formatting.IndentedWriter, i int, a *dsl.SubscriptArgument) {
 					self.Visit(a.Value, tailWrapper{})
 				})
@@ -567,7 +567,6 @@ func writeComputedFieldExpression(w *formatting.IndentedWriter, expression dsl.E
 				case dsl.FunctionSize:
 					switch dsl.ToGeneralizedType(dsl.GetUnderlyingType(t.Arguments[0].GetResolvedType())).Dimensionality.(type) {
 					case *dsl.Map:
-						// length for containers.Map, numEntries for dictionary
 						fmt.Fprintf(w, "numEntries(")
 						self.Visit(t.Arguments[0], tailWrapper{})
 						fmt.Fprintf(w, ")")
@@ -581,18 +580,14 @@ func writeComputedFieldExpression(w *formatting.IndentedWriter, expression dsl.E
 						if len(t.Arguments) > 1 {
 							w.WriteString("size(")
 							self.Visit(t.Arguments[0], tailWrapper{})
-							w.WriteString(", 1+")
-							remainingArgs := t.Arguments[1:]
-							formatting.Delimited(w, ", 1+", remainingArgs, func(w *formatting.IndentedWriter, i int, arg dsl.Expression) {
-								// if _, ok := arg.(*dsl.IntegerLiteralExpression); ok {
-								// 	// Need to adjust integer literals for 1-based indexing in Matlab
-								// 	// fmt.Fprintf(w, "%d", big.NewInt(0).Add(&intArg.Value, big.NewInt(1)))
-								// 	w.WriteString("ndims(")
-								// 	self.Visit(t.Arguments[0], tailWrapper{})
-								// 	w.WriteString(")-")
-								// }
+							for _, arg := range t.Arguments[1:] {
+								w.WriteString(", ")
+								w.WriteString("ndims(")
+								self.Visit(t.Arguments[0], tailWrapper{})
+								w.WriteString(")-(")
 								self.Visit(arg, tailWrapper{})
-							})
+								w.WriteString(")")
+							}
 						} else {
 							w.WriteString("numel(")
 							self.Visit(t.Arguments[0], tailWrapper{})
@@ -602,7 +597,7 @@ func writeComputedFieldExpression(w *formatting.IndentedWriter, expression dsl.E
 
 				case dsl.FunctionDimensionIndex:
 					helperFuncName := helperFunctionLookup[t.Arguments[0].GetResolvedType()]
-					fmt.Fprintf(w, "1 + %s(", helperFuncName)
+					fmt.Fprintf(w, "%s(", helperFuncName)
 					self.Visit(t.Arguments[1], tailWrapper{})
 					w.WriteString(")")
 
@@ -667,7 +662,9 @@ func writeComputedFieldExpression(w *formatting.IndentedWriter, expression dsl.E
 					writeSwitchCaseOverUnion(w, targetType, unionClassName, switchCase, unionVariableName, self, tail)
 				}
 
-				w.WriteStringln(`throw(yardl.RuntimeError("Unexpected union case"))`)
+				if _, ok := t.Cases[len(t.Cases)-1].Pattern.(*dsl.DiscardPattern); !ok {
+					w.WriteStringln(`throw(yardl.RuntimeError("Unexpected union case"))`)
+				}
 				return
 			}
 
@@ -714,12 +711,8 @@ func writeSwitchCaseOverOptional(w *formatting.IndentedWriter, switchCase *dsl.S
 		}
 
 		if typePattern.Type == nil {
-			// fmt.Fprintf(w, "if isa(%s, 'yardl.None')\n", variableName)
-			// fmt.Fprintf(w, "if isa(%s, 'yardl.Optional') && ~%s.has_value()\n", variableName, variableName)
 			fmt.Fprintf(w, "if %s == yardl.None\n", variableName)
 		} else {
-			// fmt.Fprintf(w, "if ~isa(%s, 'yardl.None')\n", variableName)
-			// fmt.Fprintf(w, "if isa(%s, 'yardl.Optional') && %s.has_value()\n", variableName, variableName)
 			fmt.Fprintf(w, "if %s ~= yardl.None\n", variableName)
 		}
 
@@ -748,18 +741,13 @@ func writeSwitchCaseOverUnion(w *formatting.IndentedWriter, unionType *dsl.Gener
 				caseIndexOffset = 0
 			}
 
-			log.Warn().Msgf("%d: %s | %d", i, typeCase.Tag, caseIndexOffset)
-
 			if dsl.TypesEqual(typePattern.Type, typeCase.Type) {
 				if typePattern.Type == nil {
-					// fmt.Fprintf(w, "if isa(%s, 'yardl.None')\n", variableName)
-					// fmt.Fprintf(w, "if isa(%s, 'yardl.Optional') && ~%s.has_value()\n", variableName, variableName)
 					fmt.Fprintf(w, "if %s == yardl.None\n", variableName)
 					common.WriteBlockBody(w, func() {
 						visitor.Visit(switchCase.Expression, tail)
 					})
 				} else {
-					// fmt.Fprintf(w, "if isa(%s, %s.%s):\n", variableName, unionClassName, formatting.ToPascalCase(typeCase.Tag))
 					fmt.Fprintf(w, "if %s.index == %d\n", variableName, i+caseIndexOffset)
 					common.WriteBlockBody(w, func() {
 						if declarationIdentifier != "" {
@@ -904,6 +892,12 @@ func typeDefault(t dsl.Type, contextNamespace string, namedType string, st dsl.S
 			case defaultValueKindNone:
 				return "", defaultValueKindNone
 			case defaultValueKindImmutable, defaultValueKindMutable:
+				if gt, ok := t.Cases[0].Type.(*dsl.GeneralizedType); ok {
+					switch gt.Dimensionality.(type) {
+					case *dsl.Vector, *dsl.Array:
+						return fmt.Sprintf("repelem({%s}, %d)", scalarDefault, *td.Length), scalarDefaultKind
+					}
+				}
 				return fmt.Sprintf("repelem(%s, %d)", scalarDefault, *td.Length), defaultValueKindMutable
 			}
 
@@ -935,7 +929,6 @@ func typeDefault(t dsl.Type, contextNamespace string, namedType string, st dsl.S
 			return fmt.Sprintf("%s.empty()", dtype), defaultValueKindMutable
 
 		case *dsl.Map:
-			// return "containers.Map", defaultValueKindMutable
 			return "dictionary", defaultValueKindMutable
 		}
 	}

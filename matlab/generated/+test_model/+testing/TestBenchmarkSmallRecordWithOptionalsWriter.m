@@ -21,7 +21,7 @@ classdef TestBenchmarkSmallRecordWithOptionalsWriter < test_model.BenchmarkSmall
     end
 
     function delete(obj)
-      % delete(obj.filename_);
+      delete(obj.filename_);
       if ~obj.close_called_
         % ADD_FAILURE() << ...;
         throw(yardl.RuntimeError("Close() must be called on 'TestBenchmarkSmallRecordWithOptionalsWriter' to verify mocks"));
@@ -52,7 +52,7 @@ classdef TestBenchmarkSmallRecordWithOptionalsWriter < test_model.BenchmarkSmall
       reader.close();
       mock_copy.verify();
       mock_copy.close();
-      % delete(translated);
+      delete(translated);
     end
 
     function end_stream_(obj)

@@ -1,8 +1,6 @@
 classdef GeneratedTypesTest < matlab.unittest.TestCase
     methods (Test)
 
-        % TODO: Add test for yardl.allocate for "each" kind of type
-
         function testDefaultRecordWithPrimitives(testCase)
             r = test_model.RecordWithPrimitives();
 
@@ -54,7 +52,6 @@ classdef GeneratedTypesTest < matlab.unittest.TestCase
         function testDefaultRecordWithUnionsOfContainers(testCase)
             r = test_model.RecordWithUnionsOfContainers();
 
-            % testCase.verifyEqual(r.map_or_scalar, test_model.MapOrScalar.Map(containers.Map));
             testCase.verifyEqual(r.map_or_scalar, test_model.MapOrScalar.Map(dictionary));
             testCase.verifyEqual(r.vector_or_scalar, test_model.VectorOrScalar.Vector(int32([])));
             testCase.verifyEqual(r.array_or_scalar, test_model.ArrayOrScalar.Array(int32([])));
@@ -84,7 +81,6 @@ classdef GeneratedTypesTest < matlab.unittest.TestCase
 
             testCase.verifyError(@() test_model.MyTuple(), 'MATLAB:minrhs');
             rm = test_model.RecordWithGenericMaps();
-            % testCase.verifyEqual(rm.m, containers.Map());
             testCase.verifyEqual(rm.m, dictionary);
             testCase.verifyEqual(rm.am, rm.m);
         end
@@ -135,6 +131,47 @@ classdef GeneratedTypesTest < matlab.unittest.TestCase
             testCase.verifyEqual(r.nested.g6.aliased_dynamic_nd, r.nested.g6.dynamic_nd);
 
             testCase.verifyEqual(r.nested.g7, g7);
+        end
+
+        function testYardlAllocate(testCase)
+            rs = yardl.allocate('test_model.RecordWithPrimitives', 5);
+            testCase.verifyEqual(size(rs), [5, 5]);
+            testCase.verifyTrue(all(rs == test_model.RecordWithPrimitives()));
+
+            os = yardl.allocate('yardl.Optional', 1, 4);
+            testCase.verifyEqual(size(os), [1, 4]);
+            testCase.verifyTrue(all(os == yardl.None));
+
+            us = yardl.allocate('basic_types.Int32OrString', 5, 2);
+            testCase.verifyEqual(size(us), [5, 2]);
+            testCase.verifyTrue(all([us.index] == 0));
+            testCase.verifyTrue(all(us == basic_types.Int32OrString(0, yardl.None)));
+
+            ns = yardl.allocate('int16', 0);
+            testCase.verifyEqual(class(ns), 'int16');
+            testCase.verifyEqual(size(ns), [0, 0]);
+
+            bs = yardl.allocate('logical', [2, 3, 4]);
+            testCase.verifyEqual(class(bs), 'logical');
+            testCase.verifyEqual(size(bs), [2, 3, 4]);
+            testCase.verifyTrue(all(bs(:) == false));
+
+            ss = yardl.allocate('string', 2);
+            testCase.verifyEqual(class(ss), 'string');
+            testCase.verifyEqual(size(ss), [2, 2]);
+            testCase.verifyTrue(all(ss(:) == ""));
+
+            ds = yardl.allocate('yardl.Date', 3, 1);
+            testCase.verifyEqual(size(ds), [3, 1]);
+            testCase.verifyTrue(all(ds == yardl.Date(0)));
+
+            ts = yardl.allocate('yardl.Time', 3);
+            testCase.verifyEqual(size(ts), [3, 3]);
+            testCase.verifyTrue(all(ts == yardl.Time(0)));
+
+            dts = yardl.allocate('yardl.DateTime', 3, 3);
+            testCase.verifyEqual(size(dts), [3, 3]);
+            testCase.verifyTrue(all(dts == yardl.DateTime(0)));
         end
 
     end

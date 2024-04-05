@@ -1,9 +1,6 @@
 classdef EqualityTest < matlab.unittest.TestCase
     methods (Test)
 
-        % TODO: Add tests for equality of *arrays* of each type,
-        %   since Matlab eq method applies to both scalar and non-scalar values
-
         function testSimpleEquality(testCase)
             a = test_model.SimpleRecord(1, 2, 3);
             b = test_model.SimpleRecord(1, 2, 3);
@@ -11,6 +8,9 @@ classdef EqualityTest < matlab.unittest.TestCase
 
             c = test_model.SimpleRecord(1, 2, 4);
             testCase.verifyNotEqual(a, c);
+
+            testCase.verifyEqual([a, b], [b, a]);
+            testCase.verifyNotEqual([a, b], [b, c]);
         end
 
         function testFlagsEquality(testCase)
@@ -26,6 +26,8 @@ classdef EqualityTest < matlab.unittest.TestCase
             e = test_model.DaysOfWeek(0xFFFF);
             f = test_model.DaysOfWeek(0xFFFF);
             testCase.verifyEqual(e, f);
+
+            testCase.verifyEqual([a, b, c, d, e, f], [b, a, d, c, f, e]);
         end
 
         function testEnumEquality(testCase)
@@ -36,6 +38,9 @@ classdef EqualityTest < matlab.unittest.TestCase
             c = test_model.Fruits(10000);
             d = test_model.Fruits(10000);
             testCase.verifyEqual(c, d);
+
+            testCase.verifyEqual([a, b, c, d], [b, a, d, c]);
+            testCase.verifyNotEqual([a, b, c, d], [b, c, a, d]);
         end
 
         function testRecordWithEnumEquality(testCase)
@@ -45,6 +50,8 @@ classdef EqualityTest < matlab.unittest.TestCase
 
             c = test_model.RecordWithEnums(test_model.Fruits.APPLE, test_model.DaysOfWeek.SATURDAY, 0);
             testCase.verifyNotEqual(a, c);
+
+            testCase.verifyEqual([a, b, c], [b, a, c]);
         end
 
         function testDateEquality(testCase)
@@ -58,6 +65,8 @@ classdef EqualityTest < matlab.unittest.TestCase
             c = test_model.RecordWithPrimitives();
             c.date_field = yardl.Date.from_components(2020, 1, 2);
             testCase.verifyNotEqual(a, c);
+
+            testCase.verifyEqual([a, b, c], [b, a, c]);
         end
 
         function testTimeEquality(testCase)
@@ -71,6 +80,8 @@ classdef EqualityTest < matlab.unittest.TestCase
             c = test_model.RecordWithPrimitives();
             c.time_field = yardl.Time.from_components(12, 22, 45, 0);
             testCase.verifyNotEqual(a, c);
+
+            testCase.verifyEqual([a, b, c], [b, a, c]);
         end
 
         function testDateTimeEquality(testCase)
@@ -84,6 +95,8 @@ classdef EqualityTest < matlab.unittest.TestCase
             c = test_model.RecordWithPrimitives();
             c.datetime_field = yardl.DateTime.from_components(2020, 1, 1, 12, 22, 45, 0);
             testCase.verifyNotEqual(a, c);
+
+            testCase.verifyEqual([a, b, c], [b, a, c]);
         end
 
         function testStringEquality(testCase)
@@ -93,6 +106,8 @@ classdef EqualityTest < matlab.unittest.TestCase
 
             c = test_model.RecordWithStrings("a", "c");
             testCase.verifyNotEqual(a, c);
+
+            testCase.verifyEqual([a, b, c], [b, a, c]);
         end
 
 
@@ -110,6 +125,8 @@ classdef EqualityTest < matlab.unittest.TestCase
             );
 
             testCase.verifyEqual(a, b);
+
+            testCase.verifyEqual([a, b], [b, a]);
         end
 
         function testOptionalIntEquality(testCase)
@@ -128,6 +145,8 @@ classdef EqualityTest < matlab.unittest.TestCase
             e = test_model.RecordWithOptionalFields();
             testCase.verifyEqual(d, e);
             testCase.verifyNotEqual(a, d);
+
+            testCase.verifyEqual([a, b, c, d, e], [b, a, c, e, d]);
         end
 
         function testTimeVectorEquality(testCase)
@@ -143,6 +162,8 @@ classdef EqualityTest < matlab.unittest.TestCase
                 [yardl.Time.from_components(1, 1, 1, 1), yardl.Time.from_components(1, 1, 1, 2)] ...
             );
             testCase.verifyNotEqual(a, c);
+
+            testCase.verifyEqual([a, b, c], [b, a, c]);
         end
 
         function testSimpleArrayEquality(testCase)
@@ -155,6 +176,8 @@ classdef EqualityTest < matlab.unittest.TestCase
             c = test_model.RecordWithArrays();
             c.default_array = int32([1, 2, 4]);
             testCase.verifyNotEqual(a, c);
+
+            testCase.verifyEqual([a, b, c], [b, a, c]);
         end
 
         function testSimpleUnionEquality(testCase)
@@ -173,11 +196,13 @@ classdef EqualityTest < matlab.unittest.TestCase
 
             e = basic_types.RecordWithUnions();
             e.null_or_int_or_string = basic_types.Int32OrString.String("hello");
-            d = basic_types.RecordWithUnions();
-            d.null_or_int_or_string = basic_types.Int32OrString.String("hello");
-            testCase.verifyEqual(e, d);
+            f = basic_types.RecordWithUnions();
+            f.null_or_int_or_string = basic_types.Int32OrString.String("hello");
+            testCase.verifyEqual(e, f);
             testCase.verifyNotEqual(a, e);
             testCase.verifyNotEqual(c, e);
+
+            testCase.verifyEqual([a, b, c, d, e, f], [b, a, d, c, f, e]);
         end
 
         function testTimeUnionEquality(testCase)
@@ -186,6 +211,8 @@ classdef EqualityTest < matlab.unittest.TestCase
             b = basic_types.RecordWithUnions();
             b.date_or_datetime = basic_types.TimeOrDatetime.Time(yardl.Time.from_components(1, 1, 1, 1));
             testCase.verifyEqual(a, b);
+
+            testCase.verifyEqual([a, b], [b, a]);
         end
 
         function testGenericEquality(testCase)
@@ -199,6 +226,8 @@ classdef EqualityTest < matlab.unittest.TestCase
 
             e = test_model.AliasedTuple(42.0, "hello, world");
             testCase.verifyTrue(c == e);
+
+            testCase.verifyEqual({a, b, c, d, e}, {b, a, d, c, e});
         end
 
     end

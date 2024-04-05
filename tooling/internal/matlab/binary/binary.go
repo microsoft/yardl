@@ -206,11 +206,6 @@ func typeDefinitionSerializer(td dsl.TypeDefinition, contextNamespace string) st
 			typeArguments = append(typeArguments, typeSerializer(arg, contextNamespace, nil))
 		}
 
-		if len(typeArguments) == 0 {
-			panic("How could this be possible?")
-			return fmt.Sprintf("%s()", qualifiedSerializerName)
-		}
-
 		return fmt.Sprintf("%s(%s)", qualifiedSerializerName, strings.Join(typeArguments, ", "))
 
 	case *dsl.GenericTypeParameter:
@@ -301,11 +296,9 @@ func typeSerializer(t dsl.Type, contextNamespace string, namedType *dsl.NamedTyp
 }
 
 func BinaryWriterName(p *dsl.ProtocolDefinition) string {
-	// return fmt.Sprintf("Binary%sWriter", formatting.ToPascalCase(p.Name))
 	return fmt.Sprintf("%sWriter", formatting.ToPascalCase(p.Name))
 }
 
 func BinaryReaderName(p *dsl.ProtocolDefinition) string {
-	// return fmt.Sprintf("Binary%sReader", formatting.ToPascalCase(p.Name))
 	return fmt.Sprintf("%sReader", formatting.ToPascalCase(p.Name))
 }

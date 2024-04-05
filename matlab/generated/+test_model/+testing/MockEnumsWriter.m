@@ -11,65 +11,65 @@ classdef MockEnumsWriter < matlab.mixin.Copyable & test_model.EnumsWriterBase
   methods
     function obj = MockEnumsWriter(testCase)
       obj.testCase_ = testCase;
-      obj.write_single_written = Node.empty();
-      obj.write_vec_written = Node.empty();
-      obj.write_size_written = Node.empty();
+      obj.write_single_written = yardl.None;
+      obj.write_vec_written = yardl.None;
+      obj.write_size_written = yardl.None;
     end
 
     function expect_write_single_(obj, value)
-      if isempty(obj.write_single_written)
-        obj.write_single_written = Node(value);
-      else
+      if obj.write_single_written.has_value()
         last_dim = ndims(value);
-        obj.write_single_written = Node(cat(last_dim, obj.write_single_written(1).value, value));
+        obj.write_single_written = yardl.Optional(cat(last_dim, obj.write_single_written.value, value));
+      else
+        obj.write_single_written = yardl.Optional(value);
       end
     end
 
     function expect_write_vec_(obj, value)
-      if isempty(obj.write_vec_written)
-        obj.write_vec_written = Node(value);
-      else
+      if obj.write_vec_written.has_value()
         last_dim = ndims(value);
-        obj.write_vec_written = Node(cat(last_dim, obj.write_vec_written(1).value, value));
+        obj.write_vec_written = yardl.Optional(cat(last_dim, obj.write_vec_written.value, value));
+      else
+        obj.write_vec_written = yardl.Optional(value);
       end
     end
 
     function expect_write_size_(obj, value)
-      if isempty(obj.write_size_written)
-        obj.write_size_written = Node(value);
-      else
+      if obj.write_size_written.has_value()
         last_dim = ndims(value);
-        obj.write_size_written = Node(cat(last_dim, obj.write_size_written(1).value, value));
+        obj.write_size_written = yardl.Optional(cat(last_dim, obj.write_size_written.value, value));
+      else
+        obj.write_size_written = yardl.Optional(value);
       end
     end
 
     function verify(obj)
-      obj.testCase_.verifyTrue(isempty(obj.write_single_written), "Expected call to write_single_ was not received");
-      obj.testCase_.verifyTrue(isempty(obj.write_vec_written), "Expected call to write_vec_ was not received");
-      obj.testCase_.verifyTrue(isempty(obj.write_size_written), "Expected call to write_size_ was not received");
+      obj.testCase_.verifyEqual(obj.write_single_written, yardl.None, "Expected call to write_single_ was not received");
+      obj.testCase_.verifyEqual(obj.write_vec_written, yardl.None, "Expected call to write_vec_ was not received");
+      obj.testCase_.verifyEqual(obj.write_size_written, yardl.None, "Expected call to write_size_ was not received");
     end
   end
 
   methods (Access=protected)
     function write_single_(obj, value)
-      obj.testCase_.verifyTrue(~isempty(obj.write_single_written), "Unexpected call to write_single_");
-      expected = obj.write_single_written(1).value;
+      obj.testCase_.verifyTrue(obj.write_single_written.has_value(), "Unexpected call to write_single_");
+      expected = obj.write_single_written.value;
       obj.testCase_.verifyEqual(value, expected, "Unexpected argument value for call to write_single_");
-      obj.write_single_written = Node.empty();
+      obj.write_single_written = yardl.None;
     end
 
     function write_vec_(obj, value)
-      obj.testCase_.verifyTrue(~isempty(obj.write_vec_written), "Unexpected call to write_vec_");
-      expected = obj.write_vec_written(1).value;
+      obj.testCase_.verifyTrue(obj.write_vec_written.has_value(), "Unexpected call to write_vec_");
+      expected = obj.write_vec_written.value;
       obj.testCase_.verifyEqual(value, expected, "Unexpected argument value for call to write_vec_");
-      obj.write_vec_written = Node.empty();
+      obj.write_vec_written = yardl.None;
     end
 
     function write_size_(obj, value)
-      obj.testCase_.verifyTrue(~isempty(obj.write_size_written), "Unexpected call to write_size_");
-      expected = obj.write_size_written(1).value;
+      obj.testCase_.verifyTrue(obj.write_size_written.has_value(), "Unexpected call to write_size_");
+      expected = obj.write_size_written.value;
       obj.testCase_.verifyEqual(value, expected, "Unexpected argument value for call to write_size_");
-      obj.write_size_written = Node.empty();
+      obj.write_size_written = yardl.None;
     end
 
     function close_(obj)

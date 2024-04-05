@@ -1,3 +1,6 @@
+% Copyright (c) Microsoft Corporation.
+% Licensed under the MIT License.
+
 classdef UnionSerializer < handle
 
     properties (Access=protected)
@@ -35,15 +38,6 @@ classdef UnionSerializer < handle
                     return;
                 end
             end
-
-            % if isa(value, 'yardl.Optional') && ~value.has_value()
-            %     if isa(obj.case_serializers_{1}, 'yardl.binary.NoneSerializer')
-            %         outstream.write_byte_no_check(0);
-            %         return;
-            %     else
-            %         throw(yardl.TypeError("None is not valid for this union type"))
-            %     end
-            % end
 
             if ~isa(value, obj.classname_)
                 throw(yardl.TypeError("Expected union value of type %s, got %s", obj.classname_, class(value)))

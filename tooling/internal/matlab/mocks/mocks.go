@@ -43,7 +43,7 @@ func writeProtocolMock(fw *common.MatlabFileWriter, p *dsl.ProtocolDefinition) e
 				common.WriteBlockBody(w, func() {
 					w.WriteStringln("obj.testCase_ = testCase;")
 					for _, step := range p.Sequence {
-						fmt.Fprintf(w, "obj.%swritten = Node.empty();\n", common.ProtocolWriteImplMethodName(step))
+						fmt.Fprintf(w, "obj.%swritten = yardl.None;\n", common.ProtocolWriteImplMethodName(step))
 					}
 				})
 				w.WriteStringln("")
@@ -51,14 +51,14 @@ func writeProtocolMock(fw *common.MatlabFileWriter, p *dsl.ProtocolDefinition) e
 				for _, step := range p.Sequence {
 					fmt.Fprintf(w, "function expect_%s(obj, value)\n", common.ProtocolWriteImplMethodName(step))
 					common.WriteBlockBody(w, func() {
-						fmt.Fprintf(w, "if isempty(obj.%swritten)\n", common.ProtocolWriteImplMethodName(step))
+						fmt.Fprintf(w, "if obj.%swritten.has_value()\n", common.ProtocolWriteImplMethodName(step))
 						w.Indented(func() {
-							fmt.Fprintf(w, "obj.%swritten = Node(value);\n", common.ProtocolWriteImplMethodName(step))
+							fmt.Fprintf(w, "last_dim = ndims(value);\n")
+							fmt.Fprintf(w, "obj.%swritten = yardl.Optional(cat(last_dim, obj.%swritten.value, value));\n", common.ProtocolWriteImplMethodName(step), common.ProtocolWriteImplMethodName(step))
 						})
 						w.WriteStringln("else")
 						common.WriteBlockBody(w, func() {
-							fmt.Fprintf(w, "last_dim = ndims(value);\n")
-							fmt.Fprintf(w, "obj.%swritten = Node(cat(last_dim, obj.%swritten(1).value, value));\n", common.ProtocolWriteImplMethodName(step), common.ProtocolWriteImplMethodName(step))
+							fmt.Fprintf(w, "obj.%swritten = yardl.Optional(value);\n", common.ProtocolWriteImplMethodName(step))
 						})
 					})
 					w.WriteStringln("")
@@ -68,7 +68,7 @@ func writeProtocolMock(fw *common.MatlabFileWriter, p *dsl.ProtocolDefinition) e
 				common.WriteBlockBody(w, func() {
 					for _, step := range p.Sequence {
 						diagnostic := fmt.Sprintf("Expected call to %s was not received", common.ProtocolWriteImplMethodName(step))
-						fmt.Fprintf(w, "obj.testCase_.verifyTrue(isempty(obj.%swritten), \"%s\");\n", common.ProtocolWriteImplMethodName(step), diagnostic)
+						fmt.Fprintf(w, "obj.testCase_.verifyEqual(obj.%swritten, yardl.None, \"%s\");\n", common.ProtocolWriteImplMethodName(step), diagnostic)
 					}
 				})
 			})
@@ -79,10 +79,10 @@ func writeProtocolMock(fw *common.MatlabFileWriter, p *dsl.ProtocolDefinition) e
 				for _, step := range p.Sequence {
 					fmt.Fprintf(w, "function %s(obj, value)\n", common.ProtocolWriteImplMethodName(step))
 					common.WriteBlockBody(w, func() {
-						fmt.Fprintf(w, "obj.testCase_.verifyTrue(~isempty(obj.%swritten), \"Unexpected call to %s\");\n", common.ProtocolWriteImplMethodName(step), common.ProtocolWriteImplMethodName(step))
-						fmt.Fprintf(w, "expected = obj.%swritten(1).value;\n", common.ProtocolWriteImplMethodName(step))
+						fmt.Fprintf(w, "obj.testCase_.verifyTrue(obj.%swritten.has_value(), \"Unexpected call to %s\");\n", common.ProtocolWriteImplMethodName(step), common.ProtocolWriteImplMethodName(step))
+						fmt.Fprintf(w, "expected = obj.%swritten.value;\n", common.ProtocolWriteImplMethodName(step))
 						fmt.Fprintf(w, "obj.testCase_.verifyEqual(value, expected, \"Unexpected argument value for call to %s\");\n", common.ProtocolWriteImplMethodName(step))
-						fmt.Fprintf(w, "obj.%swritten = Node.empty();\n", common.ProtocolWriteImplMethodName(step))
+						fmt.Fprintf(w, "obj.%swritten = yardl.None;\n", common.ProtocolWriteImplMethodName(step))
 					})
 					w.WriteStringln("")
 				}
@@ -118,7 +118,6 @@ func writeProtocolTestWriter(fw *common.MatlabFileWriter, p *dsl.ProtocolDefinit
 				fmt.Fprintf(w, "function obj = %s(testCase, format, create_writer, create_reader)\n", testWriterName(p))
 				common.WriteBlockBody(w, func() {
 					w.WriteStringln("obj.filename_ = tempname();")
-					// w.WriteStringln("obj.filename_ = sprintf(\"%s" + formatting.ToPascalCase(p.Name) + ".bin\", tempdir());")
 					w.WriteStringln("obj.format_ = format;")
 					w.WriteStringln("obj.writer_ = create_writer(obj.filename_);")
 					w.WriteStringln("obj.create_reader_ = create_reader;")
@@ -130,7 +129,7 @@ func writeProtocolTestWriter(fw *common.MatlabFileWriter, p *dsl.ProtocolDefinit
 
 				w.WriteStringln("function delete(obj)")
 				common.WriteBlockBody(w, func() {
-					w.WriteStringln("% delete(obj.filename_);")
+					w.WriteStringln("delete(obj.filename_);")
 					w.WriteStringln("if ~obj.close_called_")
 					common.WriteBlockBody(w, func() {
 						common.WriteComment(w, "ADD_FAILURE() << ...;")
@@ -171,7 +170,7 @@ func writeProtocolTestWriter(fw *common.MatlabFileWriter, p *dsl.ProtocolDefinit
 					w.WriteStringln("reader.close();")
 					w.WriteStringln("mock_copy.verify();")
 					w.WriteStringln("mock_copy.close();")
-					w.WriteStringln("% delete(translated);")
+					w.WriteStringln("delete(translated);")
 				})
 				w.WriteStringln("")
 

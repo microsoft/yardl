@@ -1,6 +1,9 @@
-% A basic time of day with nanosecond precision. It is not timezone-aware and is
-% meant to represent a wall clock time.
+% Copyright (c) Microsoft Corporation.
+% Licensed under the MIT License.
+
 classdef Time < handle
+    % A basic time of day with nanosecond precision. It is not timezone-aware and is
+    % meant to represent a wall clock time.
 
     properties (Access=private)
         nanoseconds_since_midnight_

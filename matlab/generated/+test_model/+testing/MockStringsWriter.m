@@ -10,47 +10,47 @@ classdef MockStringsWriter < matlab.mixin.Copyable & test_model.StringsWriterBas
   methods
     function obj = MockStringsWriter(testCase)
       obj.testCase_ = testCase;
-      obj.write_single_string_written = Node.empty();
-      obj.write_rec_with_string_written = Node.empty();
+      obj.write_single_string_written = yardl.None;
+      obj.write_rec_with_string_written = yardl.None;
     end
 
     function expect_write_single_string_(obj, value)
-      if isempty(obj.write_single_string_written)
-        obj.write_single_string_written = Node(value);
-      else
+      if obj.write_single_string_written.has_value()
         last_dim = ndims(value);
-        obj.write_single_string_written = Node(cat(last_dim, obj.write_single_string_written(1).value, value));
+        obj.write_single_string_written = yardl.Optional(cat(last_dim, obj.write_single_string_written.value, value));
+      else
+        obj.write_single_string_written = yardl.Optional(value);
       end
     end
 
     function expect_write_rec_with_string_(obj, value)
-      if isempty(obj.write_rec_with_string_written)
-        obj.write_rec_with_string_written = Node(value);
-      else
+      if obj.write_rec_with_string_written.has_value()
         last_dim = ndims(value);
-        obj.write_rec_with_string_written = Node(cat(last_dim, obj.write_rec_with_string_written(1).value, value));
+        obj.write_rec_with_string_written = yardl.Optional(cat(last_dim, obj.write_rec_with_string_written.value, value));
+      else
+        obj.write_rec_with_string_written = yardl.Optional(value);
       end
     end
 
     function verify(obj)
-      obj.testCase_.verifyTrue(isempty(obj.write_single_string_written), "Expected call to write_single_string_ was not received");
-      obj.testCase_.verifyTrue(isempty(obj.write_rec_with_string_written), "Expected call to write_rec_with_string_ was not received");
+      obj.testCase_.verifyEqual(obj.write_single_string_written, yardl.None, "Expected call to write_single_string_ was not received");
+      obj.testCase_.verifyEqual(obj.write_rec_with_string_written, yardl.None, "Expected call to write_rec_with_string_ was not received");
     end
   end
 
   methods (Access=protected)
     function write_single_string_(obj, value)
-      obj.testCase_.verifyTrue(~isempty(obj.write_single_string_written), "Unexpected call to write_single_string_");
-      expected = obj.write_single_string_written(1).value;
+      obj.testCase_.verifyTrue(obj.write_single_string_written.has_value(), "Unexpected call to write_single_string_");
+      expected = obj.write_single_string_written.value;
       obj.testCase_.verifyEqual(value, expected, "Unexpected argument value for call to write_single_string_");
-      obj.write_single_string_written = Node.empty();
+      obj.write_single_string_written = yardl.None;
     end
 
     function write_rec_with_string_(obj, value)
-      obj.testCase_.verifyTrue(~isempty(obj.write_rec_with_string_written), "Unexpected call to write_rec_with_string_");
-      expected = obj.write_rec_with_string_written(1).value;
+      obj.testCase_.verifyTrue(obj.write_rec_with_string_written.has_value(), "Unexpected call to write_rec_with_string_");
+      expected = obj.write_rec_with_string_written.value;
       obj.testCase_.verifyEqual(value, expected, "Unexpected argument value for call to write_rec_with_string_");
-      obj.write_rec_with_string_written = Node.empty();
+      obj.write_rec_with_string_written = yardl.None;
     end
 
     function close_(obj)

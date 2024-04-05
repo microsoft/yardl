@@ -2378,6 +2378,9 @@ void to_json(ordered_json& j, test_model::RecordWithComputedFields const& value)
   if (yardl::ndjson::ShouldSerializeFieldValue(value.fixed_vector_field)) {
     j.push_back({"fixedVectorField", value.fixed_vector_field});
   }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.fixed_vector_of_vectors_field)) {
+    j.push_back({"fixedVectorOfVectorsField", value.fixed_vector_of_vectors_field});
+  }
   if (yardl::ndjson::ShouldSerializeFieldValue(value.optional_named_array)) {
     j.push_back({"optionalNamedArray", value.optional_named_array});
   }
@@ -2461,6 +2464,9 @@ void from_json(ordered_json const& j, test_model::RecordWithComputedFields& valu
   }
   if (auto it = j.find("fixedVectorField"); it != j.end()) {
     it->get_to(value.fixed_vector_field);
+  }
+  if (auto it = j.find("fixedVectorOfVectorsField"); it != j.end()) {
+    it->get_to(value.fixed_vector_of_vectors_field);
   }
   if (auto it = j.find("optionalNamedArray"); it != j.end()) {
     it->get_to(value.optional_named_array);

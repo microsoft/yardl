@@ -1,3 +1,6 @@
+% Copyright (c) Microsoft Corporation.
+% Licensed under the MIT License.
+
 classdef NoneSerializer < yardl.binary.TypeSerializer
     methods (Static)
         function write(outstream, value)

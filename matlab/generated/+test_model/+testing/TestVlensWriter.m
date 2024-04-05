@@ -21,7 +21,7 @@ classdef TestVlensWriter < test_model.VlensWriterBase
     end
 
     function delete(obj)
-      % delete(obj.filename_);
+      delete(obj.filename_);
       if ~obj.close_called_
         % ADD_FAILURE() << ...;
         throw(yardl.RuntimeError("Close() must be called on 'TestVlensWriter' to verify mocks"));
@@ -67,7 +67,7 @@ classdef TestVlensWriter < test_model.VlensWriterBase
       reader.close();
       mock_copy.verify();
       mock_copy.close();
-      % delete(translated);
+      delete(translated);
     end
 
     function end_stream_(obj)

@@ -13,101 +13,101 @@ classdef MockAdvancedGenericsWriter < matlab.mixin.Copyable & test_model.Advance
   methods
     function obj = MockAdvancedGenericsWriter(testCase)
       obj.testCase_ = testCase;
-      obj.write_float_image_image_written = Node.empty();
-      obj.write_generic_record_1_written = Node.empty();
-      obj.write_tuple_of_optionals_written = Node.empty();
-      obj.write_tuple_of_optionals_alternate_syntax_written = Node.empty();
-      obj.write_tuple_of_vectors_written = Node.empty();
+      obj.write_float_image_image_written = yardl.None;
+      obj.write_generic_record_1_written = yardl.None;
+      obj.write_tuple_of_optionals_written = yardl.None;
+      obj.write_tuple_of_optionals_alternate_syntax_written = yardl.None;
+      obj.write_tuple_of_vectors_written = yardl.None;
     end
 
     function expect_write_float_image_image_(obj, value)
-      if isempty(obj.write_float_image_image_written)
-        obj.write_float_image_image_written = Node(value);
-      else
+      if obj.write_float_image_image_written.has_value()
         last_dim = ndims(value);
-        obj.write_float_image_image_written = Node(cat(last_dim, obj.write_float_image_image_written(1).value, value));
+        obj.write_float_image_image_written = yardl.Optional(cat(last_dim, obj.write_float_image_image_written.value, value));
+      else
+        obj.write_float_image_image_written = yardl.Optional(value);
       end
     end
 
     function expect_write_generic_record_1_(obj, value)
-      if isempty(obj.write_generic_record_1_written)
-        obj.write_generic_record_1_written = Node(value);
-      else
+      if obj.write_generic_record_1_written.has_value()
         last_dim = ndims(value);
-        obj.write_generic_record_1_written = Node(cat(last_dim, obj.write_generic_record_1_written(1).value, value));
+        obj.write_generic_record_1_written = yardl.Optional(cat(last_dim, obj.write_generic_record_1_written.value, value));
+      else
+        obj.write_generic_record_1_written = yardl.Optional(value);
       end
     end
 
     function expect_write_tuple_of_optionals_(obj, value)
-      if isempty(obj.write_tuple_of_optionals_written)
-        obj.write_tuple_of_optionals_written = Node(value);
-      else
+      if obj.write_tuple_of_optionals_written.has_value()
         last_dim = ndims(value);
-        obj.write_tuple_of_optionals_written = Node(cat(last_dim, obj.write_tuple_of_optionals_written(1).value, value));
+        obj.write_tuple_of_optionals_written = yardl.Optional(cat(last_dim, obj.write_tuple_of_optionals_written.value, value));
+      else
+        obj.write_tuple_of_optionals_written = yardl.Optional(value);
       end
     end
 
     function expect_write_tuple_of_optionals_alternate_syntax_(obj, value)
-      if isempty(obj.write_tuple_of_optionals_alternate_syntax_written)
-        obj.write_tuple_of_optionals_alternate_syntax_written = Node(value);
-      else
+      if obj.write_tuple_of_optionals_alternate_syntax_written.has_value()
         last_dim = ndims(value);
-        obj.write_tuple_of_optionals_alternate_syntax_written = Node(cat(last_dim, obj.write_tuple_of_optionals_alternate_syntax_written(1).value, value));
+        obj.write_tuple_of_optionals_alternate_syntax_written = yardl.Optional(cat(last_dim, obj.write_tuple_of_optionals_alternate_syntax_written.value, value));
+      else
+        obj.write_tuple_of_optionals_alternate_syntax_written = yardl.Optional(value);
       end
     end
 
     function expect_write_tuple_of_vectors_(obj, value)
-      if isempty(obj.write_tuple_of_vectors_written)
-        obj.write_tuple_of_vectors_written = Node(value);
-      else
+      if obj.write_tuple_of_vectors_written.has_value()
         last_dim = ndims(value);
-        obj.write_tuple_of_vectors_written = Node(cat(last_dim, obj.write_tuple_of_vectors_written(1).value, value));
+        obj.write_tuple_of_vectors_written = yardl.Optional(cat(last_dim, obj.write_tuple_of_vectors_written.value, value));
+      else
+        obj.write_tuple_of_vectors_written = yardl.Optional(value);
       end
     end
 
     function verify(obj)
-      obj.testCase_.verifyTrue(isempty(obj.write_float_image_image_written), "Expected call to write_float_image_image_ was not received");
-      obj.testCase_.verifyTrue(isempty(obj.write_generic_record_1_written), "Expected call to write_generic_record_1_ was not received");
-      obj.testCase_.verifyTrue(isempty(obj.write_tuple_of_optionals_written), "Expected call to write_tuple_of_optionals_ was not received");
-      obj.testCase_.verifyTrue(isempty(obj.write_tuple_of_optionals_alternate_syntax_written), "Expected call to write_tuple_of_optionals_alternate_syntax_ was not received");
-      obj.testCase_.verifyTrue(isempty(obj.write_tuple_of_vectors_written), "Expected call to write_tuple_of_vectors_ was not received");
+      obj.testCase_.verifyEqual(obj.write_float_image_image_written, yardl.None, "Expected call to write_float_image_image_ was not received");
+      obj.testCase_.verifyEqual(obj.write_generic_record_1_written, yardl.None, "Expected call to write_generic_record_1_ was not received");
+      obj.testCase_.verifyEqual(obj.write_tuple_of_optionals_written, yardl.None, "Expected call to write_tuple_of_optionals_ was not received");
+      obj.testCase_.verifyEqual(obj.write_tuple_of_optionals_alternate_syntax_written, yardl.None, "Expected call to write_tuple_of_optionals_alternate_syntax_ was not received");
+      obj.testCase_.verifyEqual(obj.write_tuple_of_vectors_written, yardl.None, "Expected call to write_tuple_of_vectors_ was not received");
     end
   end
 
   methods (Access=protected)
     function write_float_image_image_(obj, value)
-      obj.testCase_.verifyTrue(~isempty(obj.write_float_image_image_written), "Unexpected call to write_float_image_image_");
-      expected = obj.write_float_image_image_written(1).value;
+      obj.testCase_.verifyTrue(obj.write_float_image_image_written.has_value(), "Unexpected call to write_float_image_image_");
+      expected = obj.write_float_image_image_written.value;
       obj.testCase_.verifyEqual(value, expected, "Unexpected argument value for call to write_float_image_image_");
-      obj.write_float_image_image_written = Node.empty();
+      obj.write_float_image_image_written = yardl.None;
     end
 
     function write_generic_record_1_(obj, value)
-      obj.testCase_.verifyTrue(~isempty(obj.write_generic_record_1_written), "Unexpected call to write_generic_record_1_");
-      expected = obj.write_generic_record_1_written(1).value;
+      obj.testCase_.verifyTrue(obj.write_generic_record_1_written.has_value(), "Unexpected call to write_generic_record_1_");
+      expected = obj.write_generic_record_1_written.value;
       obj.testCase_.verifyEqual(value, expected, "Unexpected argument value for call to write_generic_record_1_");
-      obj.write_generic_record_1_written = Node.empty();
+      obj.write_generic_record_1_written = yardl.None;
     end
 
     function write_tuple_of_optionals_(obj, value)
-      obj.testCase_.verifyTrue(~isempty(obj.write_tuple_of_optionals_written), "Unexpected call to write_tuple_of_optionals_");
-      expected = obj.write_tuple_of_optionals_written(1).value;
+      obj.testCase_.verifyTrue(obj.write_tuple_of_optionals_written.has_value(), "Unexpected call to write_tuple_of_optionals_");
+      expected = obj.write_tuple_of_optionals_written.value;
       obj.testCase_.verifyEqual(value, expected, "Unexpected argument value for call to write_tuple_of_optionals_");
-      obj.write_tuple_of_optionals_written = Node.empty();
+      obj.write_tuple_of_optionals_written = yardl.None;
     end
 
     function write_tuple_of_optionals_alternate_syntax_(obj, value)
-      obj.testCase_.verifyTrue(~isempty(obj.write_tuple_of_optionals_alternate_syntax_written), "Unexpected call to write_tuple_of_optionals_alternate_syntax_");
-      expected = obj.write_tuple_of_optionals_alternate_syntax_written(1).value;
+      obj.testCase_.verifyTrue(obj.write_tuple_of_optionals_alternate_syntax_written.has_value(), "Unexpected call to write_tuple_of_optionals_alternate_syntax_");
+      expected = obj.write_tuple_of_optionals_alternate_syntax_written.value;
       obj.testCase_.verifyEqual(value, expected, "Unexpected argument value for call to write_tuple_of_optionals_alternate_syntax_");
-      obj.write_tuple_of_optionals_alternate_syntax_written = Node.empty();
+      obj.write_tuple_of_optionals_alternate_syntax_written = yardl.None;
     end
 
     function write_tuple_of_vectors_(obj, value)
-      obj.testCase_.verifyTrue(~isempty(obj.write_tuple_of_vectors_written), "Unexpected call to write_tuple_of_vectors_");
-      expected = obj.write_tuple_of_vectors_written(1).value;
+      obj.testCase_.verifyTrue(obj.write_tuple_of_vectors_written.has_value(), "Unexpected call to write_tuple_of_vectors_");
+      expected = obj.write_tuple_of_vectors_written.value;
       obj.testCase_.verifyEqual(value, expected, "Unexpected argument value for call to write_tuple_of_vectors_");
-      obj.write_tuple_of_vectors_written = Node.empty();
+      obj.write_tuple_of_vectors_written = yardl.None;
     end
 
     function close_(obj)

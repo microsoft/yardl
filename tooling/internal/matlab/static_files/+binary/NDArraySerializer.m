@@ -1,3 +1,6 @@
+% Copyright (c) Microsoft Corporation.
+% Licensed under the MIT License.
+
 classdef NDArraySerializer < yardl.binary.NDArraySerializerBase
 
     properties

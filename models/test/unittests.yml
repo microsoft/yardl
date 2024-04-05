@@ -554,6 +554,7 @@ RecordWithComputedFields: !record
     vectorField: int*
     vectorOfVectorsField: int**
     fixedVectorField: int*3
+    fixedVectorOfVectorsField: int*3*2
     optionalNamedArray: NamedNDArray?
     intFloatUnion: [int, float]
     nullableIntFloatUnion: [null, int, float]
@@ -582,6 +583,7 @@ RecordWithComputedFields: !record
     accessVectorField: vectorField
     accessVectorFieldElement: vectorField[1]
     accessVectorOfVectorsField: vectorOfVectorsField[1][2]
+    accessFixedVectorOfVectorsField: fixedVectorOfVectorsField[1][2]
     arraySize: size(arrayField)
     arrayXSize: size(arrayField, "x")
     arrayYSize: size(arrayField, "y")
@@ -596,6 +598,7 @@ RecordWithComputedFields: !record
     fixedArray0Size: size(fixedArrayField, 0)
     vectorSize: size(vectorField)
     fixedVectorSize: size(fixedVectorField)
+    fixedVectorOfVectorsSize: size(fixedVectorOfVectorsField)
     arrayDimensionXIndex: dimensionIndex(arrayField, "x")
     arrayDimensionYIndex: dimensionIndex(arrayField, "y")
     arrayDimensionIndexFromStringField: dimensionIndex(arrayField, stringField)

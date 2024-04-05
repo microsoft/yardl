@@ -10,47 +10,47 @@ classdef MockFlagsWriter < matlab.mixin.Copyable & test_model.FlagsWriterBase
   methods
     function obj = MockFlagsWriter(testCase)
       obj.testCase_ = testCase;
-      obj.write_days_written = Node.empty();
-      obj.write_formats_written = Node.empty();
+      obj.write_days_written = yardl.None;
+      obj.write_formats_written = yardl.None;
     end
 
     function expect_write_days_(obj, value)
-      if isempty(obj.write_days_written)
-        obj.write_days_written = Node(value);
-      else
+      if obj.write_days_written.has_value()
         last_dim = ndims(value);
-        obj.write_days_written = Node(cat(last_dim, obj.write_days_written(1).value, value));
+        obj.write_days_written = yardl.Optional(cat(last_dim, obj.write_days_written.value, value));
+      else
+        obj.write_days_written = yardl.Optional(value);
       end
     end
 
     function expect_write_formats_(obj, value)
-      if isempty(obj.write_formats_written)
-        obj.write_formats_written = Node(value);
-      else
+      if obj.write_formats_written.has_value()
         last_dim = ndims(value);
-        obj.write_formats_written = Node(cat(last_dim, obj.write_formats_written(1).value, value));
+        obj.write_formats_written = yardl.Optional(cat(last_dim, obj.write_formats_written.value, value));
+      else
+        obj.write_formats_written = yardl.Optional(value);
       end
     end
 
     function verify(obj)
-      obj.testCase_.verifyTrue(isempty(obj.write_days_written), "Expected call to write_days_ was not received");
-      obj.testCase_.verifyTrue(isempty(obj.write_formats_written), "Expected call to write_formats_ was not received");
+      obj.testCase_.verifyEqual(obj.write_days_written, yardl.None, "Expected call to write_days_ was not received");
+      obj.testCase_.verifyEqual(obj.write_formats_written, yardl.None, "Expected call to write_formats_ was not received");
     end
   end
 
   methods (Access=protected)
     function write_days_(obj, value)
-      obj.testCase_.verifyTrue(~isempty(obj.write_days_written), "Unexpected call to write_days_");
-      expected = obj.write_days_written(1).value;
+      obj.testCase_.verifyTrue(obj.write_days_written.has_value(), "Unexpected call to write_days_");
+      expected = obj.write_days_written.value;
       obj.testCase_.verifyEqual(value, expected, "Unexpected argument value for call to write_days_");
-      obj.write_days_written = Node.empty();
+      obj.write_days_written = yardl.None;
     end
 
     function write_formats_(obj, value)
-      obj.testCase_.verifyTrue(~isempty(obj.write_formats_written), "Unexpected call to write_formats_");
-      expected = obj.write_formats_written(1).value;
+      obj.testCase_.verifyTrue(obj.write_formats_written.has_value(), "Unexpected call to write_formats_");
+      expected = obj.write_formats_written.value;
       obj.testCase_.verifyEqual(value, expected, "Unexpected argument value for call to write_formats_");
-      obj.write_formats_written = Node.empty();
+      obj.write_formats_written = yardl.None;
     end
 
     function close_(obj)

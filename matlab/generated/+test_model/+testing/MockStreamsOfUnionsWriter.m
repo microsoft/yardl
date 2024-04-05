@@ -10,47 +10,47 @@ classdef MockStreamsOfUnionsWriter < matlab.mixin.Copyable & test_model.StreamsO
   methods
     function obj = MockStreamsOfUnionsWriter(testCase)
       obj.testCase_ = testCase;
-      obj.write_int_or_simple_record_written = Node.empty();
-      obj.write_nullable_int_or_simple_record_written = Node.empty();
+      obj.write_int_or_simple_record_written = yardl.None;
+      obj.write_nullable_int_or_simple_record_written = yardl.None;
     end
 
     function expect_write_int_or_simple_record_(obj, value)
-      if isempty(obj.write_int_or_simple_record_written)
-        obj.write_int_or_simple_record_written = Node(value);
-      else
+      if obj.write_int_or_simple_record_written.has_value()
         last_dim = ndims(value);
-        obj.write_int_or_simple_record_written = Node(cat(last_dim, obj.write_int_or_simple_record_written(1).value, value));
+        obj.write_int_or_simple_record_written = yardl.Optional(cat(last_dim, obj.write_int_or_simple_record_written.value, value));
+      else
+        obj.write_int_or_simple_record_written = yardl.Optional(value);
       end
     end
 
     function expect_write_nullable_int_or_simple_record_(obj, value)
-      if isempty(obj.write_nullable_int_or_simple_record_written)
-        obj.write_nullable_int_or_simple_record_written = Node(value);
-      else
+      if obj.write_nullable_int_or_simple_record_written.has_value()
         last_dim = ndims(value);
-        obj.write_nullable_int_or_simple_record_written = Node(cat(last_dim, obj.write_nullable_int_or_simple_record_written(1).value, value));
+        obj.write_nullable_int_or_simple_record_written = yardl.Optional(cat(last_dim, obj.write_nullable_int_or_simple_record_written.value, value));
+      else
+        obj.write_nullable_int_or_simple_record_written = yardl.Optional(value);
       end
     end
 
     function verify(obj)
-      obj.testCase_.verifyTrue(isempty(obj.write_int_or_simple_record_written), "Expected call to write_int_or_simple_record_ was not received");
-      obj.testCase_.verifyTrue(isempty(obj.write_nullable_int_or_simple_record_written), "Expected call to write_nullable_int_or_simple_record_ was not received");
+      obj.testCase_.verifyEqual(obj.write_int_or_simple_record_written, yardl.None, "Expected call to write_int_or_simple_record_ was not received");
+      obj.testCase_.verifyEqual(obj.write_nullable_int_or_simple_record_written, yardl.None, "Expected call to write_nullable_int_or_simple_record_ was not received");
     end
   end
 
   methods (Access=protected)
     function write_int_or_simple_record_(obj, value)
-      obj.testCase_.verifyTrue(~isempty(obj.write_int_or_simple_record_written), "Unexpected call to write_int_or_simple_record_");
-      expected = obj.write_int_or_simple_record_written(1).value;
+      obj.testCase_.verifyTrue(obj.write_int_or_simple_record_written.has_value(), "Unexpected call to write_int_or_simple_record_");
+      expected = obj.write_int_or_simple_record_written.value;
       obj.testCase_.verifyEqual(value, expected, "Unexpected argument value for call to write_int_or_simple_record_");
-      obj.write_int_or_simple_record_written = Node.empty();
+      obj.write_int_or_simple_record_written = yardl.None;
     end
 
     function write_nullable_int_or_simple_record_(obj, value)
-      obj.testCase_.verifyTrue(~isempty(obj.write_nullable_int_or_simple_record_written), "Unexpected call to write_nullable_int_or_simple_record_");
-      expected = obj.write_nullable_int_or_simple_record_written(1).value;
+      obj.testCase_.verifyTrue(obj.write_nullable_int_or_simple_record_written.has_value(), "Unexpected call to write_nullable_int_or_simple_record_");
+      expected = obj.write_nullable_int_or_simple_record_written.value;
       obj.testCase_.verifyEqual(value, expected, "Unexpected argument value for call to write_nullable_int_or_simple_record_");
-      obj.write_nullable_int_or_simple_record_written = Node.empty();
+      obj.write_nullable_int_or_simple_record_written = yardl.None;
     end
 
     function close_(obj)

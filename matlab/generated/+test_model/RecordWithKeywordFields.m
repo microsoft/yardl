@@ -4,14 +4,14 @@ classdef RecordWithKeywordFields < handle
   properties
     int
     sizeof
-    if
+    if_
   end
 
   methods
-    function obj = RecordWithKeywordFields(int, sizeof, if)
+    function obj = RecordWithKeywordFields(int, sizeof, if_)
       obj.int = int;
       obj.sizeof = sizeof;
-      obj.if = if;
+      obj.if_ = if_;
     end
 
     function res = float(self)
@@ -24,8 +24,8 @@ classdef RecordWithKeywordFields < handle
       return
     end
 
-    function res = return(self)
-      res = self.sizeof(1, 2);
+    function res = return_(self)
+      res = self.sizeof(2, 1);
       return
     end
 
@@ -35,7 +35,7 @@ classdef RecordWithKeywordFields < handle
         isa(other, 'test_model.RecordWithKeywordFields') && ...
         all([obj.int] == [other.int]) && ...
         isequal(obj.sizeof, other.sizeof) && ...
-        all([obj.if] == [other.if]);
+        all([obj.if_] == [other.if_]);
     end
 
     function res = ne(obj, other)

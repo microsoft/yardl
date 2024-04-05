@@ -12,83 +12,83 @@ classdef MockStreamsWriter < matlab.mixin.Copyable & test_model.StreamsWriterBas
   methods
     function obj = MockStreamsWriter(testCase)
       obj.testCase_ = testCase;
-      obj.write_int_data_written = Node.empty();
-      obj.write_optional_int_data_written = Node.empty();
-      obj.write_record_with_optional_vector_data_written = Node.empty();
-      obj.write_fixed_vector_written = Node.empty();
+      obj.write_int_data_written = yardl.None;
+      obj.write_optional_int_data_written = yardl.None;
+      obj.write_record_with_optional_vector_data_written = yardl.None;
+      obj.write_fixed_vector_written = yardl.None;
     end
 
     function expect_write_int_data_(obj, value)
-      if isempty(obj.write_int_data_written)
-        obj.write_int_data_written = Node(value);
-      else
+      if obj.write_int_data_written.has_value()
         last_dim = ndims(value);
-        obj.write_int_data_written = Node(cat(last_dim, obj.write_int_data_written(1).value, value));
+        obj.write_int_data_written = yardl.Optional(cat(last_dim, obj.write_int_data_written.value, value));
+      else
+        obj.write_int_data_written = yardl.Optional(value);
       end
     end
 
     function expect_write_optional_int_data_(obj, value)
-      if isempty(obj.write_optional_int_data_written)
-        obj.write_optional_int_data_written = Node(value);
-      else
+      if obj.write_optional_int_data_written.has_value()
         last_dim = ndims(value);
-        obj.write_optional_int_data_written = Node(cat(last_dim, obj.write_optional_int_data_written(1).value, value));
+        obj.write_optional_int_data_written = yardl.Optional(cat(last_dim, obj.write_optional_int_data_written.value, value));
+      else
+        obj.write_optional_int_data_written = yardl.Optional(value);
       end
     end
 
     function expect_write_record_with_optional_vector_data_(obj, value)
-      if isempty(obj.write_record_with_optional_vector_data_written)
-        obj.write_record_with_optional_vector_data_written = Node(value);
-      else
+      if obj.write_record_with_optional_vector_data_written.has_value()
         last_dim = ndims(value);
-        obj.write_record_with_optional_vector_data_written = Node(cat(last_dim, obj.write_record_with_optional_vector_data_written(1).value, value));
+        obj.write_record_with_optional_vector_data_written = yardl.Optional(cat(last_dim, obj.write_record_with_optional_vector_data_written.value, value));
+      else
+        obj.write_record_with_optional_vector_data_written = yardl.Optional(value);
       end
     end
 
     function expect_write_fixed_vector_(obj, value)
-      if isempty(obj.write_fixed_vector_written)
-        obj.write_fixed_vector_written = Node(value);
-      else
+      if obj.write_fixed_vector_written.has_value()
         last_dim = ndims(value);
-        obj.write_fixed_vector_written = Node(cat(last_dim, obj.write_fixed_vector_written(1).value, value));
+        obj.write_fixed_vector_written = yardl.Optional(cat(last_dim, obj.write_fixed_vector_written.value, value));
+      else
+        obj.write_fixed_vector_written = yardl.Optional(value);
       end
     end
 
     function verify(obj)
-      obj.testCase_.verifyTrue(isempty(obj.write_int_data_written), "Expected call to write_int_data_ was not received");
-      obj.testCase_.verifyTrue(isempty(obj.write_optional_int_data_written), "Expected call to write_optional_int_data_ was not received");
-      obj.testCase_.verifyTrue(isempty(obj.write_record_with_optional_vector_data_written), "Expected call to write_record_with_optional_vector_data_ was not received");
-      obj.testCase_.verifyTrue(isempty(obj.write_fixed_vector_written), "Expected call to write_fixed_vector_ was not received");
+      obj.testCase_.verifyEqual(obj.write_int_data_written, yardl.None, "Expected call to write_int_data_ was not received");
+      obj.testCase_.verifyEqual(obj.write_optional_int_data_written, yardl.None, "Expected call to write_optional_int_data_ was not received");
+      obj.testCase_.verifyEqual(obj.write_record_with_optional_vector_data_written, yardl.None, "Expected call to write_record_with_optional_vector_data_ was not received");
+      obj.testCase_.verifyEqual(obj.write_fixed_vector_written, yardl.None, "Expected call to write_fixed_vector_ was not received");
     end
   end
 
   methods (Access=protected)
     function write_int_data_(obj, value)
-      obj.testCase_.verifyTrue(~isempty(obj.write_int_data_written), "Unexpected call to write_int_data_");
-      expected = obj.write_int_data_written(1).value;
+      obj.testCase_.verifyTrue(obj.write_int_data_written.has_value(), "Unexpected call to write_int_data_");
+      expected = obj.write_int_data_written.value;
       obj.testCase_.verifyEqual(value, expected, "Unexpected argument value for call to write_int_data_");
-      obj.write_int_data_written = Node.empty();
+      obj.write_int_data_written = yardl.None;
     end
 
     function write_optional_int_data_(obj, value)
-      obj.testCase_.verifyTrue(~isempty(obj.write_optional_int_data_written), "Unexpected call to write_optional_int_data_");
-      expected = obj.write_optional_int_data_written(1).value;
+      obj.testCase_.verifyTrue(obj.write_optional_int_data_written.has_value(), "Unexpected call to write_optional_int_data_");
+      expected = obj.write_optional_int_data_written.value;
       obj.testCase_.verifyEqual(value, expected, "Unexpected argument value for call to write_optional_int_data_");
-      obj.write_optional_int_data_written = Node.empty();
+      obj.write_optional_int_data_written = yardl.None;
     end
 
     function write_record_with_optional_vector_data_(obj, value)
-      obj.testCase_.verifyTrue(~isempty(obj.write_record_with_optional_vector_data_written), "Unexpected call to write_record_with_optional_vector_data_");
-      expected = obj.write_record_with_optional_vector_data_written(1).value;
+      obj.testCase_.verifyTrue(obj.write_record_with_optional_vector_data_written.has_value(), "Unexpected call to write_record_with_optional_vector_data_");
+      expected = obj.write_record_with_optional_vector_data_written.value;
       obj.testCase_.verifyEqual(value, expected, "Unexpected argument value for call to write_record_with_optional_vector_data_");
-      obj.write_record_with_optional_vector_data_written = Node.empty();
+      obj.write_record_with_optional_vector_data_written = yardl.None;
     end
 
     function write_fixed_vector_(obj, value)
-      obj.testCase_.verifyTrue(~isempty(obj.write_fixed_vector_written), "Unexpected call to write_fixed_vector_");
-      expected = obj.write_fixed_vector_written(1).value;
+      obj.testCase_.verifyTrue(obj.write_fixed_vector_written.has_value(), "Unexpected call to write_fixed_vector_");
+      expected = obj.write_fixed_vector_written.value;
       obj.testCase_.verifyEqual(value, expected, "Unexpected argument value for call to write_fixed_vector_");
-      obj.write_fixed_vector_written = Node.empty();
+      obj.write_fixed_vector_written = yardl.None;
     end
 
     function close_(obj)

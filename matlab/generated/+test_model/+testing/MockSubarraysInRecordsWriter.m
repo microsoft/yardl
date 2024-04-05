@@ -10,47 +10,47 @@ classdef MockSubarraysInRecordsWriter < matlab.mixin.Copyable & test_model.Subar
   methods
     function obj = MockSubarraysInRecordsWriter(testCase)
       obj.testCase_ = testCase;
-      obj.write_with_fixed_subarrays_written = Node.empty();
-      obj.write_with_vlen_subarrays_written = Node.empty();
+      obj.write_with_fixed_subarrays_written = yardl.None;
+      obj.write_with_vlen_subarrays_written = yardl.None;
     end
 
     function expect_write_with_fixed_subarrays_(obj, value)
-      if isempty(obj.write_with_fixed_subarrays_written)
-        obj.write_with_fixed_subarrays_written = Node(value);
-      else
+      if obj.write_with_fixed_subarrays_written.has_value()
         last_dim = ndims(value);
-        obj.write_with_fixed_subarrays_written = Node(cat(last_dim, obj.write_with_fixed_subarrays_written(1).value, value));
+        obj.write_with_fixed_subarrays_written = yardl.Optional(cat(last_dim, obj.write_with_fixed_subarrays_written.value, value));
+      else
+        obj.write_with_fixed_subarrays_written = yardl.Optional(value);
       end
     end
 
     function expect_write_with_vlen_subarrays_(obj, value)
-      if isempty(obj.write_with_vlen_subarrays_written)
-        obj.write_with_vlen_subarrays_written = Node(value);
-      else
+      if obj.write_with_vlen_subarrays_written.has_value()
         last_dim = ndims(value);
-        obj.write_with_vlen_subarrays_written = Node(cat(last_dim, obj.write_with_vlen_subarrays_written(1).value, value));
+        obj.write_with_vlen_subarrays_written = yardl.Optional(cat(last_dim, obj.write_with_vlen_subarrays_written.value, value));
+      else
+        obj.write_with_vlen_subarrays_written = yardl.Optional(value);
       end
     end
 
     function verify(obj)
-      obj.testCase_.verifyTrue(isempty(obj.write_with_fixed_subarrays_written), "Expected call to write_with_fixed_subarrays_ was not received");
-      obj.testCase_.verifyTrue(isempty(obj.write_with_vlen_subarrays_written), "Expected call to write_with_vlen_subarrays_ was not received");
+      obj.testCase_.verifyEqual(obj.write_with_fixed_subarrays_written, yardl.None, "Expected call to write_with_fixed_subarrays_ was not received");
+      obj.testCase_.verifyEqual(obj.write_with_vlen_subarrays_written, yardl.None, "Expected call to write_with_vlen_subarrays_ was not received");
     end
   end
 
   methods (Access=protected)
     function write_with_fixed_subarrays_(obj, value)
-      obj.testCase_.verifyTrue(~isempty(obj.write_with_fixed_subarrays_written), "Unexpected call to write_with_fixed_subarrays_");
-      expected = obj.write_with_fixed_subarrays_written(1).value;
+      obj.testCase_.verifyTrue(obj.write_with_fixed_subarrays_written.has_value(), "Unexpected call to write_with_fixed_subarrays_");
+      expected = obj.write_with_fixed_subarrays_written.value;
       obj.testCase_.verifyEqual(value, expected, "Unexpected argument value for call to write_with_fixed_subarrays_");
-      obj.write_with_fixed_subarrays_written = Node.empty();
+      obj.write_with_fixed_subarrays_written = yardl.None;
     end
 
     function write_with_vlen_subarrays_(obj, value)
-      obj.testCase_.verifyTrue(~isempty(obj.write_with_vlen_subarrays_written), "Unexpected call to write_with_vlen_subarrays_");
-      expected = obj.write_with_vlen_subarrays_written(1).value;
+      obj.testCase_.verifyTrue(obj.write_with_vlen_subarrays_written.has_value(), "Unexpected call to write_with_vlen_subarrays_");
+      expected = obj.write_with_vlen_subarrays_written.value;
       obj.testCase_.verifyEqual(value, expected, "Unexpected argument value for call to write_with_vlen_subarrays_");
-      obj.write_with_vlen_subarrays_written = Node.empty();
+      obj.write_with_vlen_subarrays_written = yardl.None;
     end
 
     function close_(obj)

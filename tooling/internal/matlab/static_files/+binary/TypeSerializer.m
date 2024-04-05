@@ -1,3 +1,6 @@
+% Copyright (c) Microsoft Corporation.
+% Licensed under the MIT License.
+
 classdef TypeSerializer < handle
     methods (Static, Abstract)
         write(obj, stream, value)

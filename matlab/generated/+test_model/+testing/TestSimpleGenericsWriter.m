@@ -21,7 +21,7 @@ classdef TestSimpleGenericsWriter < test_model.SimpleGenericsWriterBase
     end
 
     function delete(obj)
-      % delete(obj.filename_);
+      delete(obj.filename_);
       if ~obj.close_called_
         % ADD_FAILURE() << ...;
         throw(yardl.RuntimeError("Close() must be called on 'TestSimpleGenericsWriter' to verify mocks"));
@@ -92,7 +92,7 @@ classdef TestSimpleGenericsWriter < test_model.SimpleGenericsWriterBase
       reader.close();
       mock_copy.verify();
       mock_copy.close();
-      % delete(translated);
+      delete(translated);
     end
 
     function end_stream_(obj)

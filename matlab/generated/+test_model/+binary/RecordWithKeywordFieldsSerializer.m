@@ -11,7 +11,7 @@ classdef RecordWithKeywordFieldsSerializer < yardl.binary.RecordSerializer
 
     function write(obj, outstream, value)
       assert(isa(value, 'test_model.RecordWithKeywordFields'));
-      obj.write_(outstream, value.int, value.sizeof, value.if)
+      obj.write_(outstream, value.int, value.sizeof, value.if_)
     end
 
     function value = read(obj, instream)

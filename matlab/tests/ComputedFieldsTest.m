@@ -4,34 +4,37 @@ classdef ComputedFieldsTest < matlab.unittest.TestCase
         function testFieldAccess(testCase)
             r = test_model.RecordWithComputedFields();
 
-            r.int_field = 42;
-            testCase.verifyEqual(r.access_int_field(), 42);
+            r.int_field = int32(42);
+            testCase.verifyEqual(r.access_int_field(), int32(42));
+            testCase.verifyEqual(r.access_other_computed_field(), r.access_int_field());
 
             r.string_field = "hello";
             testCase.verifyEqual(r.access_string_field(), "hello");
 
-            r.tuple_field = test_model.MyTuple(1, 1);
+            r.tuple_field = test_model.MyTuple(1, 2);
             testCase.verifyEqual(r.access_tuple_field(), r.tuple_field);
             testCase.verifyEqual(r.access_nested_tuple_field(), r.tuple_field.v2);
 
-            r.array_field = int32([[1, 2, 3]; [4, 5, 6]]);
+            r.array_field = int32([[1; 2; 3], [4; 5; 6]]);
             testCase.verifyEqual(r.access_array_field(), r.array_field);
-            testCase.verifyEqual(r.access_array_field_element(), r.array_field(1, 2));
-            testCase.verifyEqual(r.access_array_field_element_by_name(), r.array_field(1, 2));
+            testCase.verifyEqual(r.access_array_field_element(), r.array_field(2, 1));
+            testCase.verifyEqual(r.access_array_field_element_by_name(), r.array_field(2, 1));
 
-            testCase.verifyEqual(r.access_other_computed_field(), r.access_int_field());
+            r.vector_field = [1, 2, 3, 4];
+            testCase.verifyEqual(r.access_vector_field, r.vector_field);
+            testCase.verifyEqual(r.access_vector_field_element(), r.vector_field(2));
+            r.vector_of_vectors_field = int32([[1; 2; 3], [4; 5; 6]]);
+            testCase.verifyEqual(r.access_vector_of_vectors_field(), r.vector_of_vectors_field(3, 2));
+            r.fixed_vector_of_vectors_field = int32([[1; 2; 3], [4; 5; 6]]);
+            testCase.verifyEqual(r.access_fixed_vector_of_vectors_field(), r.fixed_vector_of_vectors_field(3, 2));
 
-            r.vector_of_vectors_field = [[1, 2, 3]; [4, 5, 6]];
-            testCase.verifyEqual(r.access_vector_of_vectors_field(), r.vector_of_vectors_field(2, 3));
-
-            % NOTE: containers.Map supports only `char` keys/values, not `string`
-            r.map_field = containers.Map(["hello", "world"], ["world", "bye"], 'UniformValues', true);
+            r.map_field = dictionary(["hello", "world"], ["world", "bye"]);
             testCase.verifyEqual(r.access_map(), r.map_field);
-            testCase.verifyEqual(r.access_map_entry(), 'world');
-            testCase.verifyEqual(r.access_map_entry_with_computed_field(), 'world');
-            testCase.verifyEqual(r.access_map_entry_with_computed_field_nested(), 'bye');
+            testCase.verifyEqual(r.access_map_entry(), "world");
+            testCase.verifyEqual(r.access_map_entry_with_computed_field(), "world");
+            testCase.verifyEqual(r.access_map_entry_with_computed_field_nested(), "bye");
 
-            testCase.verifyError(@() r.access_missing_map_entry(), "MATLAB:Containers:Map:NoKey");
+            testCase.verifyError(@() r.access_missing_map_entry(), "MATLAB:dictionary:ScalarKeyNotFound");
         end
 
         function testLiterals(testCase)
@@ -45,11 +48,11 @@ classdef ComputedFieldsTest < matlab.unittest.TestCase
         function testDimensionIndex(testCase)
             r = test_model.RecordWithComputedFields();
 
-            testCase.verifyEqual(r.array_dimension_x_index(), 1);
-            testCase.verifyEqual(r.array_dimension_y_index(), 2);
+            testCase.verifyEqual(r.array_dimension_x_index(), 0);
+            testCase.verifyEqual(r.array_dimension_y_index(), 1);
 
             r.string_field = "y";
-            testCase.verifyEqual(r.array_dimension_index_from_string_field(), 2);
+            testCase.verifyEqual(r.array_dimension_index_from_string_field(), 1);
 
             r.string_field = "missing";
             testCase.verifyError(@() r.array_dimension_index_from_string_field(), "yardl:KeyError");
@@ -60,7 +63,7 @@ classdef ComputedFieldsTest < matlab.unittest.TestCase
 
             testCase.verifyEqual(r.array_dimension_count(), 2);
 
-            r.dynamic_array_field = int32([[1, 2, 3]; [4, 5, 6]]);
+            r.dynamic_array_field = int32([[1; 2; 3], [4; 5; 6]]);
             testCase.verifyEqual(r.dynamic_array_dimension_count(), 2);
             r.dynamic_array_field = int32([1, 2, 3]);
             testCase.verifyEqual(r.dynamic_array_dimension_count(), 1);
@@ -73,23 +76,19 @@ classdef ComputedFieldsTest < matlab.unittest.TestCase
             testCase.verifyEqual(r.vector_size(), 4);
 
             testCase.verifyEqual(r.fixed_vector_size(), 3);
+            testCase.verifyEqual(r.fixed_vector_of_vectors_size(), 2);
         end
 
         function testMapSize(testCase)
             r = test_model.RecordWithComputedFields();
             testCase.verifyEqual(r.map_size(), 0);
-            % r.map_field = containers.Map(["hello", "bonjour"], ["world", "monde"], 'UniformValues', true);
             r.map_field = dictionary(["hello", "bonjour"], ["world", "monde"]);
             testCase.verifyEqual(r.map_size(), 2);
         end
 
         function testArraySize(testCase)
-            %%%%%%%%%%%%%%%%%%%%%%
-            % TODO: Fix 1-based array indexing
-            testCase.assumeFail();
-
             r = test_model.RecordWithComputedFields();
-            r.array_field = int32([[1, 2, 3]; [4, 5, 6]]);
+            r.array_field = int32([[1; 2; 3], [4; 5; 6]]);
 
             testCase.verifyEqual(r.array_size(), 6);
             testCase.verifyEqual(r.array_x_size(), 2);
@@ -97,12 +96,10 @@ classdef ComputedFieldsTest < matlab.unittest.TestCase
             testCase.verifyEqual(r.array_0_size(), 2);
             testCase.verifyEqual(r.array_1_size(), 3);
 
-
             testCase.verifyEqual(r.array_size_from_int_field(), 2);
             r.int_field = 1;
             testCase.verifyEqual(r.array_size_from_int_field(), 3);
 
-            % TODO: Bug in computed field codegen 1-based indexing!
             r.string_field = "x";
             testCase.verifyEqual(r.array_size_from_string_field(), 2);
             r.string_field = "y";
@@ -113,22 +110,17 @@ classdef ComputedFieldsTest < matlab.unittest.TestCase
 
             r.tuple_field.v1 = 1;
             testCase.verifyEqual(r.array_size_from_nested_int_field(), 3);
-            testCase.verifyEqual(r.fixed_array_size(), numel(r.fixed_array_field));
-            % TODO: Bug in dimension ordering...
-            testCase.verifyEqual(r.fixed_array_x_size(), size(r.fixed_array_field, 1));
-            testCase.verifyEqual(r.fixed_array_0_size(), size(r.fixed_array_field, 1));
+            testCase.verifyEqual(r.fixed_array_size(), 12);
+            testCase.verifyEqual(r.fixed_array_x_size(), 3);
+            testCase.verifyEqual(r.fixed_array_0_size(), 3);
 
-            r.array_field_map_dimensions = int32([[1, 2, 3]; [4, 5, 6]]);
+            r.array_field_map_dimensions = int32([[1; 2; 3], [4; 5; 6]]);
             testCase.verifyEqual(r.array_field_map_dimensions_x_size(), 2);
         end
 
         function testSwitch(testCase)
-            %%%%%%%%%%%%%%%%%%%%%%
-            % TODO: Fix Optionals elsewhere before fixing computed switch statements
-            testCase.assumeFail();
-
             r = test_model.RecordWithComputedFields();
-            r.optional_named_array = int32([[1, 2, 3]; [4, 5, 6]]);
+            r.optional_named_array = int32([[1; 2; 3], [4; 5; 6]]);
             testCase.verifyEqual(r.optional_named_array_length(), 6);
             testCase.verifyEqual(r.optional_named_array_length_with_discard(), 6);
 
@@ -180,7 +172,7 @@ classdef ComputedFieldsTest < matlab.unittest.TestCase
             testCase.verifyEqual(r.arithmetic_2(), 11);
             testCase.verifyEqual(r.arithmetic_3(), 13);
 
-            r.array_field = int32([[1, 2, 3]; [4, 5, 6]]);
+            r.array_field = int32([[1; 2; 3], [4; 5; 6]]);
             r.int_field = 1;
             testCase.verifyEqual(r.arithmetic_4(), 5);
             testCase.verifyEqual(r.arithmetic_5(), 3);

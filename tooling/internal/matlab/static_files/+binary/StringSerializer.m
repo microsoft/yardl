@@ -1,9 +1,9 @@
+% Copyright (c) Microsoft Corporation.
+% Licensed under the MIT License.
+
 classdef StringSerializer < yardl.binary.TypeSerializer
     methods (Static)
         function write(outstream, value)
-            % if ischar(value)
-            %     value = convertCharsToStrings(value);
-            % end
             bytes = unicode2native(value, "utf-8");
             outstream.write_unsigned_varint(length(bytes));
             outstream.write_bytes(bytes);

@@ -1,3 +1,6 @@
+% Copyright (c) Microsoft Corporation.
+% Licensed under the MIT License.
+
 classdef OptionalSerializer < yardl.binary.TypeSerializer
     properties
         item_serializer_;
@@ -9,13 +12,6 @@ classdef OptionalSerializer < yardl.binary.TypeSerializer
         end
 
         function write(obj, outstream, value)
-            % if isa(value, 'yardl.None')
-            %     outstream.write_byte_no_check(0);
-            %     return
-            % end
-            % outstream.write_byte_no_check(1);
-            % obj.item_serializer_.write(outstream, value);
-
             if isa(value, 'yardl.Optional')
                 if value.has_value()
                     outstream.write_byte_no_check(1);
@@ -36,14 +32,10 @@ classdef OptionalSerializer < yardl.binary.TypeSerializer
                 res = yardl.None;
             else
                 res = obj.item_serializer_.read(instream);
-
-                % value = obj.item_serializer_.read(instream);
-                % res = yardl.Optional(value);
             end
         end
 
         function c = getClass(obj)
-            % c = obj.item_serializer_.getClass();
             c = 'yardl.Optional';
         end
     end
