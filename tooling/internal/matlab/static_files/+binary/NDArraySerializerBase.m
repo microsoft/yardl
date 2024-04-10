@@ -22,6 +22,11 @@ classdef NDArraySerializerBase < yardl.binary.TypeSerializer
             % N is the "flattened" dimension of the NDArray, and
             % A, B, ... are the dimensions of the inner items.
 
+            if ~iscell(values) && self.item_serializer_.isTriviallySerializable()
+                self.item_serializer_.writeTrivially(outstream, values);
+                return;
+            end
+
             sz = size(values);
 
             if ndims(values) > 2
@@ -62,19 +67,22 @@ classdef NDArraySerializerBase < yardl.binary.TypeSerializer
                 for i = 1:flat_length
                     res{i} = self.item_serializer_.read(instream);
                 end
-            elseif isscalar(item_shape)
-                res = yardl.allocate(self.getClass(), shape);
-                for i = 1:flat_length
-                    res(i) = self.item_serializer_.read(instream);
-                end
-                res = squeeze(res);
+                return
+            end
+
+            if self.item_serializer_.isTriviallySerializable()
+                res = self.item_serializer_.readTrivially(instream, [prod(item_shape), flat_length]);
             else
                 res = yardl.allocate(self.getClass(), [prod(item_shape), flat_length]);
                 for i = 1:flat_length
                     item = self.item_serializer_.read(instream);
                     res(:, i) = item(:);
                 end
-                res = squeeze(reshape(res, [item_shape shape]));
+            end
+
+            res = squeeze(reshape(res, [item_shape shape]));
+            if iscolumn(res)
+                res = transpose(res);
             end
         end
     end

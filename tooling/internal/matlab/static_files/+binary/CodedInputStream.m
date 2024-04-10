@@ -39,6 +39,10 @@ classdef CodedInputStream < handle
             res = fread(self.fid_, 1, "*uint8");
         end
 
+        function res = read_values_directly(self, shape, precision)
+            res = fread(self.fid_, shape, "*"+precision);
+        end
+
         function res = read_unsigned_varint(self)
             res = uint64(0);
             shift = uint8(0);
@@ -55,7 +59,6 @@ classdef CodedInputStream < handle
 
         function res = zigzag_decode(~, value)
             value = uint64(value);
-            % res = int64(bitxor(bitshift(value, -1), -bitand(value, 1)));
             res = bitxor(int64(bitshift(value, -1)), -int64(bitand(value, 1)));
         end
 

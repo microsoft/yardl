@@ -1,3 +1,6 @@
+% Copyright (c) Microsoft Corporation.
+% Licensed under the MIT License.
+
 classdef RoundTripTest < matlab.unittest.TestCase
     properties (TestParameter)
         % format = {"binary", "ndjson"};

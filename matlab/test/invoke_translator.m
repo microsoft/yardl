@@ -1,6 +1,8 @@
+% Copyright (c) Microsoft Corporation.
+% Licensed under the MIT License.
+
 function output_filename = invoke_translator(input_filename, input_format, output_format)
     translator_path = "../../cpp/build/translator";
-    % output_filename = tempname();
     output_filename = sprintf("%s.translated", input_filename);
     dump = "cat";
     if ispc

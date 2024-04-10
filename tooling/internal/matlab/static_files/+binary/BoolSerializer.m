@@ -17,5 +17,9 @@ classdef BoolSerializer < yardl.binary.TypeSerializer
         function c = getClass()
             c = 'logical';
         end
+
+        function trivial = isTriviallySerializable()
+            trivial = true;
+        end
     end
 end

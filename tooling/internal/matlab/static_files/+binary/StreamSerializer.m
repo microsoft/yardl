@@ -16,6 +16,9 @@ classdef StreamSerializer < yardl.binary.TypeSerializer
                 return;
             end
 
+            if iscolumn(values)
+                values = transpose(values);
+            end
             s = size(values);
             count = s(end);
             outstream.write_unsigned_varint(count);
@@ -35,7 +38,6 @@ classdef StreamSerializer < yardl.binary.TypeSerializer
                     end
                 else
                     for i = 1:count
-                        % obj.item_serializer_.write(outstream, values(:, i));
                         obj.item_serializer_.write(outstream, transpose(values(:, i)));
                     end
                 end
@@ -60,30 +62,25 @@ classdef StreamSerializer < yardl.binary.TypeSerializer
                     end
                     count = instream.read_unsigned_varint();
                 end
-            elseif isscalar(item_shape)
-                res = yardl.allocate(obj.getClass(), [item_shape, count]);
-                idx = 1;
-                while count > 0
-                    for c = 1:count
-                        res(idx) = obj.item_serializer_.read(instream);
-                        idx = idx + 1;
-                    end
-                    count = instream.read_unsigned_varint();
-                end
-            else
-                res = yardl.allocate(obj.getClass(), [prod(item_shape), count]);
-                total_count = 0;
-                while count > 0
-                    for c = 1:count
-                        idx = total_count + c;
-                        item = obj.item_serializer_.read(instream);
-                        res(:, idx) = item(:);
-                    end
+                return
+            end
 
-                    total_count = total_count + count;
-                    count = instream.read_unsigned_varint();
+            res = yardl.allocate(obj.getClass(), [prod(item_shape), count]);
+            total_count = 0;
+            while count > 0
+                for c = 1:count
+                    idx = total_count + c;
+                    item = obj.item_serializer_.read(instream);
+                    res(:, idx) = item(:);
                 end
-                res = squeeze(reshape(res, [item_shape, total_count]));
+
+                total_count = total_count + count;
+                count = instream.read_unsigned_varint();
+            end
+
+            res = squeeze(reshape(res, [item_shape, total_count]));
+            if iscolumn(res)
+                res = transpose(res);
             end
         end
 

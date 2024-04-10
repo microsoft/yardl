@@ -27,5 +27,17 @@ classdef EnumSerializer < yardl.binary.TypeSerializer
         function c = getClass(obj)
             c = obj.classname_;
         end
+
+        function trivial = isTriviallySerializable(obj)
+            trivial = obj.integer_serializer_.isTriviallySerializable();
+        end
+
+        function writeTrivially(self, outstream, values)
+            self.integer_serializer_.writeTrivially(outstream, values);
+        end
+
+        function res = readTrivially(self, instream, shape)
+            res = self.integer_serializer_.readTrivially(instream, shape);
+        end
     end
 end

@@ -1,3 +1,6 @@
+% Copyright (c) Microsoft Corporation.
+% Licensed under the MIT License.
+
 classdef YardlTypesTest < matlab.unittest.TestCase
 
     methods (Test)

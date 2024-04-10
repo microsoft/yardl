@@ -11,7 +11,7 @@ classdef CodedOutputStream < handle
     methods
         function self = CodedOutputStream(output)
             if isa(output, "string") || isa(output, "char")
-                [fileId, errMsg] = fopen(output, "w");
+                [fileId, errMsg] = fopen(output, "W");
                 if fileId < 0
                     throw(yardl.binary.Exception(errMsg));
                 end
@@ -45,6 +45,10 @@ classdef CodedOutputStream < handle
             assert(all(value <= intmax("uint8")));
 
             fwrite(self.fid_, value, "uint8");
+        end
+
+        function write_values_directly(self, values, precision)
+            fwrite(self.fid_, values, precision);
         end
 
         function write_unsigned_varint(self, value)

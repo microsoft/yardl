@@ -12,6 +12,9 @@ classdef VectorSerializer < yardl.binary.TypeSerializer
         end
 
         function write(obj, outstream, values)
+            if iscolumn(values)
+                values = transpose(values);
+            end
             s = size(values);
             count = s(end);
             outstream.write_unsigned_varint(count);
@@ -24,6 +27,11 @@ classdef VectorSerializer < yardl.binary.TypeSerializer
                 end
             else
                 % values is an array, so must have shape [A, B, ..., COUNT]
+                if obj.item_serializer_.isTriviallySerializable()
+                    obj.item_serializer_.writeTrivially(outstream, values);
+                    return
+                end
+
                 if ndims(values) > 2
                     r = reshape(values, [], count);
                     for i = 1:count
@@ -32,7 +40,6 @@ classdef VectorSerializer < yardl.binary.TypeSerializer
                     end
                 else
                     for i = 1:count
-                        % obj.item_serializer_.write(outstream, values(:, i));
                         obj.item_serializer_.write(outstream, transpose(values(:, i)));
                     end
                 end
@@ -52,19 +59,22 @@ classdef VectorSerializer < yardl.binary.TypeSerializer
                 for i = 1:count
                     res{i} = obj.item_serializer_.read(instream);
                 end
-            elseif isscalar(item_shape)
-                res = yardl.allocate(obj.getClass(), [1 count]);
-                for i = 1:count
-                    res(i) = obj.item_serializer_.read(instream);
-                end
-                res = squeeze(res);
+                return
+            end
+
+            if obj.item_serializer_.isTriviallySerializable()
+                res = obj.item_serializer_.readTrivially(instream, [prod(item_shape), count]);
             else
                 res = yardl.allocate(obj.getClass(), [prod(item_shape), count]);
                 for i = 1:count
                     item = obj.item_serializer_.read(instream);
                     res(:, i) = item(:);
                 end
-                res = squeeze(reshape(res, [item_shape, total_count]));
+            end
+
+            res = squeeze(reshape(res, [item_shape, count]));
+            if iscolumn(res)
+                res = transpose(res);
             end
         end
 

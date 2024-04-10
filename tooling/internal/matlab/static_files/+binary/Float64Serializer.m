@@ -17,5 +17,9 @@ classdef Float64Serializer < yardl.binary.TypeSerializer
         function c = getClass()
             c = 'double';
         end
+
+        function trivial = isTriviallySerializable()
+            trivial = true;
+        end
     end
 end

@@ -1,3 +1,6 @@
+% Copyright (c) Microsoft Corporation.
+% Licensed under the MIT License.
+
 classdef ProtocolStateTest < matlab.unittest.TestCase
     methods (Test)
 

@@ -17,7 +17,6 @@ classdef FixedVectorSerializer < yardl.binary.TypeSerializer
             if iscolumn(values)
                 values = transpose(values);
             end
-
             s = size(values);
             count = s(end);
 
@@ -31,6 +30,11 @@ classdef FixedVectorSerializer < yardl.binary.TypeSerializer
                     obj.item_serializer_.write(outstream, values{i});
                 end
             else
+                if obj.item_serializer_.isTriviallySerializable()
+                    obj.item_serializer_.writeTrivially(outstream, values);
+                    return
+                end
+
                 if ndims(values) > 2
                     r = reshape(values, [], count);
                     for i = 1:count
@@ -39,7 +43,6 @@ classdef FixedVectorSerializer < yardl.binary.TypeSerializer
                     end
                 else
                     for i = 1:count
-                        % obj.item_serializer_.write(outstream, values(:, i));
                         obj.item_serializer_.write(outstream, transpose(values(:, i)));
                     end
                 end
@@ -53,18 +56,22 @@ classdef FixedVectorSerializer < yardl.binary.TypeSerializer
                 for i = 1:obj.length_
                     res{i} = obj.item_serializer_.read(instream);
                 end
-            elseif isscalar(item_shape)
-                res = yardl.allocate(obj.getClass(), obj.getShape());
-                for i = 1:obj.length_
-                    res(i) = obj.item_serializer_.read(instream);
-                end
+                return
+            end
+
+            if obj.item_serializer_.isTriviallySerializable()
+                res = obj.item_serializer_.readTrivially(instream, [prod(item_shape), obj.length_]);
             else
                 res = yardl.allocate(obj.getClass(), [prod(item_shape), obj.length_]);
                 for i = 1:obj.length_
                     item = obj.item_serializer_.read(instream);
                     res(:, i) = item(:);
                 end
-                res = squeeze(reshape(res, [item_shape, obj.length_]));
+            end
+
+            res = squeeze(reshape(res, [item_shape, obj.length_]));
+            if iscolumn(res)
+                res = transpose(res);
             end
         end
 
@@ -82,6 +89,18 @@ classdef FixedVectorSerializer < yardl.binary.TypeSerializer
                 s = [item_shape obj.length_];
                 s = s(s>1);
             end
+        end
+
+        function trivial = isTriviallySerializable(obj)
+            trivial = obj.item_serializer_.isTriviallySerializable();
+        end
+
+        function writeTrivially(self, outstream, values)
+            self.item_serializer_.writeTrivially(outstream, values);
+        end
+
+        function res = readTrivially(self, instream, shape)
+            res = self.item_serializer_.readTrivially(instream, shape);
         end
     end
 end

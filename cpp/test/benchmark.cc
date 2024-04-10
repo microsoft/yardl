@@ -310,7 +310,7 @@ std::optional<std::function<Result(Format)>> GetScenarioFunction(std::string sce
 
 int main(int argc, char* argv[]) {
   if (argc != 3) {
-    std::cerr << "Incorrect number of arguments. Usage: banchmark <scenario> <hdf5 | binary | ndjson>" << std::endl;
+    std::cerr << "Incorrect number of arguments. Usage: benchmark <scenario> <hdf5 | binary | ndjson>" << std::endl;
     return 1;
   }
 

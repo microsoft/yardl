@@ -1,3 +1,6 @@
+% Copyright (c) Microsoft Corporation.
+% Licensed under the MIT License.
+
 classdef ProtocolStateTestReader < test_model.StateTestReaderBase
 
     methods (Access=protected)

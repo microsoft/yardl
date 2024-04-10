@@ -1,2 +1,0 @@
-addpath("../generated/");
-runtests(pwd)

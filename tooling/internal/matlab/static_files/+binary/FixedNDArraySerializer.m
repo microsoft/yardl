@@ -42,8 +42,6 @@ classdef FixedNDArraySerializer < yardl.binary.NDArraySerializerBase
         end
 
         function value = read(self, instream)
-            % TODO: Better way of doing this? Possibly needed elsewhere to?
-            %       self.shape_ should really be non-scalar...
             if isscalar(self.shape_)
                 value = self.read_data_(instream, [1 self.shape_]);
             else
@@ -55,8 +53,6 @@ classdef FixedNDArraySerializer < yardl.binary.NDArraySerializerBase
             item_shape = obj.item_serializer_.getShape();
             if isempty(item_shape)
                 s = obj.shape_;
-            elseif isscalar(item_shape)
-                s = [item_shape obj.shape_ ];
             else
                 s = [item_shape obj.shape_];
             end
@@ -64,6 +60,18 @@ classdef FixedNDArraySerializer < yardl.binary.NDArraySerializerBase
             if length(s) > 2
                 s = s(s>1);
             end
+        end
+
+        function trivial = isTriviallySerializable(obj)
+            trivial = obj.item_serializer_.isTriviallySerializable();
+        end
+
+        function writeTrivially(self, outstream, values)
+            self.item_serializer_.writeTrivially(outstream, values);
+        end
+
+        function res = readTrivially(self, instream, shape)
+            res = self.item_serializer_.readTrivially(instream, shape);
         end
     end
 end

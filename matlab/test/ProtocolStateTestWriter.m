@@ -1,3 +1,6 @@
+% Copyright (c) Microsoft Corporation.
+% Licensed under the MIT License.
+
 classdef ProtocolStateTestWriter < test_model.StateTestWriterBase
 
     methods (Access=protected)

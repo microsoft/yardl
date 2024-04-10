@@ -17,5 +17,9 @@ classdef Int8Serializer < yardl.binary.TypeSerializer
         function c = getClass()
             c = 'int8';
         end
+
+        function trivial = isTriviallySerializable()
+            trivial = true;
+        end
     end
 end
