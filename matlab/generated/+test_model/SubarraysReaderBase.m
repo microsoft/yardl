@@ -114,15 +114,42 @@ classdef SubarraysReaderBase < handle
     end
 
     function copy_to(obj, writer)
-      writer.write_dynamic_with_fixed_int_subarray(obj.read_dynamic_with_fixed_int_subarray());
-      writer.write_dynamic_with_fixed_float_subarray(obj.read_dynamic_with_fixed_float_subarray());
-      writer.write_known_dim_count_with_fixed_int_subarray(obj.read_known_dim_count_with_fixed_int_subarray());
-      writer.write_known_dim_count_with_fixed_float_subarray(obj.read_known_dim_count_with_fixed_float_subarray());
-      writer.write_fixed_with_fixed_int_subarray(obj.read_fixed_with_fixed_int_subarray());
-      writer.write_fixed_with_fixed_float_subarray(obj.read_fixed_with_fixed_float_subarray());
-      writer.write_nested_subarray(obj.read_nested_subarray());
-      writer.write_dynamic_with_fixed_vector_subarray(obj.read_dynamic_with_fixed_vector_subarray());
-      writer.write_generic_subarray(obj.read_generic_subarray());
+      while obj.has_dynamic_with_fixed_int_subarray()
+        item = obj.read_dynamic_with_fixed_int_subarray();
+        writer.write_dynamic_with_fixed_int_subarray({item});
+      end
+      while obj.has_dynamic_with_fixed_float_subarray()
+        item = obj.read_dynamic_with_fixed_float_subarray();
+        writer.write_dynamic_with_fixed_float_subarray({item});
+      end
+      while obj.has_known_dim_count_with_fixed_int_subarray()
+        item = obj.read_known_dim_count_with_fixed_int_subarray();
+        writer.write_known_dim_count_with_fixed_int_subarray({item});
+      end
+      while obj.has_known_dim_count_with_fixed_float_subarray()
+        item = obj.read_known_dim_count_with_fixed_float_subarray();
+        writer.write_known_dim_count_with_fixed_float_subarray({item});
+      end
+      while obj.has_fixed_with_fixed_int_subarray()
+        item = obj.read_fixed_with_fixed_int_subarray();
+        writer.write_fixed_with_fixed_int_subarray({item});
+      end
+      while obj.has_fixed_with_fixed_float_subarray()
+        item = obj.read_fixed_with_fixed_float_subarray();
+        writer.write_fixed_with_fixed_float_subarray({item});
+      end
+      while obj.has_nested_subarray()
+        item = obj.read_nested_subarray();
+        writer.write_nested_subarray({item});
+      end
+      while obj.has_dynamic_with_fixed_vector_subarray()
+        item = obj.read_dynamic_with_fixed_vector_subarray();
+        writer.write_dynamic_with_fixed_vector_subarray({item});
+      end
+      while obj.has_generic_subarray()
+        item = obj.read_generic_subarray();
+        writer.write_generic_subarray({item});
+      end
     end
   end
 
@@ -133,15 +160,15 @@ classdef SubarraysReaderBase < handle
   end
 
   methods (Abstract, Access=protected)
-    read_dynamic_with_fixed_int_subarray_(obj, value)
-    read_dynamic_with_fixed_float_subarray_(obj, value)
-    read_known_dim_count_with_fixed_int_subarray_(obj, value)
-    read_known_dim_count_with_fixed_float_subarray_(obj, value)
-    read_fixed_with_fixed_int_subarray_(obj, value)
-    read_fixed_with_fixed_float_subarray_(obj, value)
-    read_nested_subarray_(obj, value)
-    read_dynamic_with_fixed_vector_subarray_(obj, value)
-    read_generic_subarray_(obj, value)
+    read_dynamic_with_fixed_int_subarray_(obj)
+    read_dynamic_with_fixed_float_subarray_(obj)
+    read_known_dim_count_with_fixed_int_subarray_(obj)
+    read_known_dim_count_with_fixed_float_subarray_(obj)
+    read_fixed_with_fixed_int_subarray_(obj)
+    read_fixed_with_fixed_float_subarray_(obj)
+    read_nested_subarray_(obj)
+    read_dynamic_with_fixed_vector_subarray_(obj)
+    read_generic_subarray_(obj)
 
     close_(obj)
   end

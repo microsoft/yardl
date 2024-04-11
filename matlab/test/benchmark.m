@@ -109,7 +109,7 @@ function res = benchmark_float256x256(format)
         a(i) = i - eps;
     end
 
-    repetitions = scale_repetitions(1000, scale);
+    repetitions = scale_repetitions(10000, scale);
     total_bytes = 4 * numel(a) * repetitions;
 
     [create_writer, create_reader] = create_writer_reader(format, 'BenchmarkFloat256x256');
@@ -124,8 +124,12 @@ function res = benchmark_float256x256(format)
 
     function read()
         r = create_reader(get_output_filename());
-        res = r.read_float256x256();
-        assert(size(res, 3) == repetitions);
+        count = 0;
+        while r.has_float256x256()
+            b = r.read_float256x256();
+            count = count + 1;
+        end
+        assert(count == repetitions);
         r.close();
     end
 
@@ -140,7 +144,7 @@ function res = benchmark_float_vlen(format)
         a(i) = i - eps;
     end
 
-    repetitions = scale_repetitions(5000, scale);
+    repetitions = scale_repetitions(10000, scale);
     total_bytes = 4 * numel(a) * repetitions;
 
     [create_writer, create_reader] = create_writer_reader(format, 'BenchmarkFloatVlen');
@@ -155,8 +159,12 @@ function res = benchmark_float_vlen(format)
 
     function read()
         r = create_reader(get_output_filename());
-        res = r.read_float_array();
-        assert(size(res, 2) == repetitions);
+        count = 0;
+        while r.has_float_array()
+            b = r.read_float_array();
+            count = count + 1;
+        end
+        assert(count == repetitions);
         r.close();
     end
 
@@ -186,8 +194,12 @@ function res = benchmark_small_int_256x256(format)
 
     function read()
         r = create_reader(get_output_filename());
-        res = r.read_int256x256();
-        assert(size(res, 3) == repetitions);
+        count = 0;
+        while r.has_int256x256()
+            b = r.read_int256x256();
+            count = count + 1;
+        end
+        assert(count == repetitions);
         r.close();
     end
 
@@ -214,8 +226,12 @@ function res = benchmark_small_record(format)
 
     function read()
         r = create_reader(get_output_filename());
-        res = r.read_small_record();
-        assert(size(res, 2) == repetitions);
+        count = 0;
+        while r.has_small_record()
+            b = r.read_small_record();
+            count = count + 1;
+        end
+        assert(count == repetitions);
         r.close();
     end
 
@@ -256,8 +272,12 @@ function res = benchmark_simple_mrd(format)
 
     function read()
         r = create_reader(get_output_filename());
-        res = r.read_data();
-        assert(size(res, 2) == repetitions);
+        count = 0;
+        while r.has_data()
+            b = r.read_data();
+            count = count + 1;
+        end
+        assert(count == repetitions);
         r.close();
     end
 

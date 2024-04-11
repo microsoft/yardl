@@ -2,27 +2,33 @@
 
 classdef EnumsReader < yardl.binary.BinaryProtocolReader & test_model.EnumsReaderBase
   % Binary reader for the Enums protocol
+  properties (Access=protected)
+    single_serializer
+    vec_serializer
+    size_serializer
+  end
+
   methods
     function obj = EnumsReader(filename)
       obj@test_model.EnumsReaderBase();
       obj@yardl.binary.BinaryProtocolReader(filename, test_model.EnumsReaderBase.schema);
+      obj.single_serializer = yardl.binary.EnumSerializer('basic_types.Fruits', @basic_types.Fruits, yardl.binary.Int32Serializer);
+      obj.vec_serializer = yardl.binary.VectorSerializer(yardl.binary.EnumSerializer('basic_types.Fruits', @basic_types.Fruits, yardl.binary.Int32Serializer));
+      obj.size_serializer = yardl.binary.EnumSerializer('test_model.SizeBasedEnum', @test_model.SizeBasedEnum, yardl.binary.SizeSerializer);
     end
   end
 
   methods (Access=protected)
     function value = read_single_(obj)
-      r = yardl.binary.EnumSerializer('basic_types.Fruits', @basic_types.Fruits, yardl.binary.Int32Serializer);
-      value = r.read(obj.stream_);
+      value = obj.single_serializer.read(obj.stream_);
     end
 
     function value = read_vec_(obj)
-      r = yardl.binary.VectorSerializer(yardl.binary.EnumSerializer('basic_types.Fruits', @basic_types.Fruits, yardl.binary.Int32Serializer));
-      value = r.read(obj.stream_);
+      value = obj.vec_serializer.read(obj.stream_);
     end
 
     function value = read_size_(obj)
-      r = yardl.binary.EnumSerializer('test_model.SizeBasedEnum', @test_model.SizeBasedEnum, yardl.binary.SizeSerializer);
-      value = r.read(obj.stream_);
+      value = obj.size_serializer.read(obj.stream_);
     end
   end
 end

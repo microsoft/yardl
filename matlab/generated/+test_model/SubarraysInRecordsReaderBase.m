@@ -44,8 +44,14 @@ classdef SubarraysInRecordsReaderBase < handle
     end
 
     function copy_to(obj, writer)
-      writer.write_with_fixed_subarrays(obj.read_with_fixed_subarrays());
-      writer.write_with_vlen_subarrays(obj.read_with_vlen_subarrays());
+      while obj.has_with_fixed_subarrays()
+        item = obj.read_with_fixed_subarrays();
+        writer.write_with_fixed_subarrays({item});
+      end
+      while obj.has_with_vlen_subarrays()
+        item = obj.read_with_vlen_subarrays();
+        writer.write_with_vlen_subarrays({item});
+      end
     end
   end
 
@@ -56,8 +62,8 @@ classdef SubarraysInRecordsReaderBase < handle
   end
 
   methods (Abstract, Access=protected)
-    read_with_fixed_subarrays_(obj, value)
-    read_with_vlen_subarrays_(obj, value)
+    read_with_fixed_subarrays_(obj)
+    read_with_vlen_subarrays_(obj)
 
     close_(obj)
   end

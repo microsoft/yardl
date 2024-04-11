@@ -24,50 +24,102 @@ classdef StreamsReaderBase < handle
     end
 
     % Ordinal 0
+    function more = has_int_data(obj)
+      if obj.state_ ~= 0
+        obj.raise_unexpected_state_(0);
+      end
+
+      more = obj.has_int_data_();
+      if ~more
+        obj.state_ = 2;
+      end
+    end
+
     function value = read_int_data(obj)
       if obj.state_ ~= 0
         obj.raise_unexpected_state_(0);
       end
 
       value = obj.read_int_data_();
-      obj.state_ = 2;
     end
 
     % Ordinal 1
+    function more = has_optional_int_data(obj)
+      if obj.state_ ~= 2
+        obj.raise_unexpected_state_(2);
+      end
+
+      more = obj.has_optional_int_data_();
+      if ~more
+        obj.state_ = 4;
+      end
+    end
+
     function value = read_optional_int_data(obj)
       if obj.state_ ~= 2
         obj.raise_unexpected_state_(2);
       end
 
       value = obj.read_optional_int_data_();
-      obj.state_ = 4;
     end
 
     % Ordinal 2
+    function more = has_record_with_optional_vector_data(obj)
+      if obj.state_ ~= 4
+        obj.raise_unexpected_state_(4);
+      end
+
+      more = obj.has_record_with_optional_vector_data_();
+      if ~more
+        obj.state_ = 6;
+      end
+    end
+
     function value = read_record_with_optional_vector_data(obj)
       if obj.state_ ~= 4
         obj.raise_unexpected_state_(4);
       end
 
       value = obj.read_record_with_optional_vector_data_();
-      obj.state_ = 6;
     end
 
     % Ordinal 3
+    function more = has_fixed_vector(obj)
+      if obj.state_ ~= 6
+        obj.raise_unexpected_state_(6);
+      end
+
+      more = obj.has_fixed_vector_();
+      if ~more
+        obj.state_ = 8;
+      end
+    end
+
     function value = read_fixed_vector(obj)
       if obj.state_ ~= 6
         obj.raise_unexpected_state_(6);
       end
 
       value = obj.read_fixed_vector_();
-      obj.state_ = 8;
     end
 
     function copy_to(obj, writer)
-      writer.write_int_data(obj.read_int_data());
-      writer.write_optional_int_data(obj.read_optional_int_data());
-      writer.write_record_with_optional_vector_data(obj.read_record_with_optional_vector_data());
-      writer.write_fixed_vector(obj.read_fixed_vector());
+      while obj.has_int_data()
+        item = obj.read_int_data();
+        writer.write_int_data({item});
+      end
+      while obj.has_optional_int_data()
+        item = obj.read_optional_int_data();
+        writer.write_optional_int_data({item});
+      end
+      while obj.has_record_with_optional_vector_data()
+        item = obj.read_record_with_optional_vector_data();
+        writer.write_record_with_optional_vector_data({item});
+      end
+      while obj.has_fixed_vector()
+        item = obj.read_fixed_vector();
+        writer.write_fixed_vector({item});
+      end
     end
   end
 
@@ -78,10 +130,14 @@ classdef StreamsReaderBase < handle
   end
 
   methods (Abstract, Access=protected)
-    read_int_data_(obj, value)
-    read_optional_int_data_(obj, value)
-    read_record_with_optional_vector_data_(obj, value)
-    read_fixed_vector_(obj, value)
+    has_int_data_(obj)
+    read_int_data_(obj)
+    has_optional_int_data_(obj)
+    read_optional_int_data_(obj)
+    has_record_with_optional_vector_data_(obj)
+    read_record_with_optional_vector_data_(obj)
+    has_fixed_vector_(obj)
+    read_fixed_vector_(obj)
 
     close_(obj)
   end

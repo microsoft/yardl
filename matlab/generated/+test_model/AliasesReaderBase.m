@@ -114,26 +114,66 @@ classdef AliasesReaderBase < handle
     end
 
     % Ordinal 9
+    function more = has_stream_of_aliased_generic_union_2(obj)
+      if obj.state_ ~= 18
+        obj.raise_unexpected_state_(18);
+      end
+
+      more = obj.has_stream_of_aliased_generic_union_2_();
+      if ~more
+        obj.state_ = 20;
+      end
+    end
+
     function value = read_stream_of_aliased_generic_union_2(obj)
       if obj.state_ ~= 18
         obj.raise_unexpected_state_(18);
       end
 
       value = obj.read_stream_of_aliased_generic_union_2_();
-      obj.state_ = 20;
     end
 
     function copy_to(obj, writer)
-      writer.write_aliased_string(obj.read_aliased_string());
-      writer.write_aliased_enum(obj.read_aliased_enum());
-      writer.write_aliased_open_generic(obj.read_aliased_open_generic());
-      writer.write_aliased_closed_generic(obj.read_aliased_closed_generic());
-      writer.write_aliased_optional(obj.read_aliased_optional());
-      writer.write_aliased_generic_optional(obj.read_aliased_generic_optional());
-      writer.write_aliased_generic_union_2(obj.read_aliased_generic_union_2());
-      writer.write_aliased_generic_vector(obj.read_aliased_generic_vector());
-      writer.write_aliased_generic_fixed_vector(obj.read_aliased_generic_fixed_vector());
-      writer.write_stream_of_aliased_generic_union_2(obj.read_stream_of_aliased_generic_union_2());
+      while obj.has_aliased_string()
+        item = obj.read_aliased_string();
+        writer.write_aliased_string({item});
+      end
+      while obj.has_aliased_enum()
+        item = obj.read_aliased_enum();
+        writer.write_aliased_enum({item});
+      end
+      while obj.has_aliased_open_generic()
+        item = obj.read_aliased_open_generic();
+        writer.write_aliased_open_generic({item});
+      end
+      while obj.has_aliased_closed_generic()
+        item = obj.read_aliased_closed_generic();
+        writer.write_aliased_closed_generic({item});
+      end
+      while obj.has_aliased_optional()
+        item = obj.read_aliased_optional();
+        writer.write_aliased_optional({item});
+      end
+      while obj.has_aliased_generic_optional()
+        item = obj.read_aliased_generic_optional();
+        writer.write_aliased_generic_optional({item});
+      end
+      while obj.has_aliased_generic_union_2()
+        item = obj.read_aliased_generic_union_2();
+        writer.write_aliased_generic_union_2({item});
+      end
+      while obj.has_aliased_generic_vector()
+        item = obj.read_aliased_generic_vector();
+        writer.write_aliased_generic_vector({item});
+      end
+      while obj.has_aliased_generic_fixed_vector()
+        item = obj.read_aliased_generic_fixed_vector();
+        writer.write_aliased_generic_fixed_vector({item});
+      end
+      while obj.has_stream_of_aliased_generic_union_2()
+        item = obj.read_stream_of_aliased_generic_union_2();
+        writer.write_stream_of_aliased_generic_union_2({item});
+      end
     end
   end
 
@@ -144,16 +184,17 @@ classdef AliasesReaderBase < handle
   end
 
   methods (Abstract, Access=protected)
-    read_aliased_string_(obj, value)
-    read_aliased_enum_(obj, value)
-    read_aliased_open_generic_(obj, value)
-    read_aliased_closed_generic_(obj, value)
-    read_aliased_optional_(obj, value)
-    read_aliased_generic_optional_(obj, value)
-    read_aliased_generic_union_2_(obj, value)
-    read_aliased_generic_vector_(obj, value)
-    read_aliased_generic_fixed_vector_(obj, value)
-    read_stream_of_aliased_generic_union_2_(obj, value)
+    read_aliased_string_(obj)
+    read_aliased_enum_(obj)
+    read_aliased_open_generic_(obj)
+    read_aliased_closed_generic_(obj)
+    read_aliased_optional_(obj)
+    read_aliased_generic_optional_(obj)
+    read_aliased_generic_union_2_(obj)
+    read_aliased_generic_vector_(obj)
+    read_aliased_generic_fixed_vector_(obj)
+    has_stream_of_aliased_generic_union_2_(obj)
+    read_stream_of_aliased_generic_union_2_(obj)
 
     close_(obj)
   end

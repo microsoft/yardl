@@ -64,10 +64,22 @@ classdef UnionsReaderBase < handle
     end
 
     function copy_to(obj, writer)
-      writer.write_int_or_simple_record(obj.read_int_or_simple_record());
-      writer.write_int_or_record_with_vlens(obj.read_int_or_record_with_vlens());
-      writer.write_monosotate_or_int_or_simple_record(obj.read_monosotate_or_int_or_simple_record());
-      writer.write_record_with_unions(obj.read_record_with_unions());
+      while obj.has_int_or_simple_record()
+        item = obj.read_int_or_simple_record();
+        writer.write_int_or_simple_record({item});
+      end
+      while obj.has_int_or_record_with_vlens()
+        item = obj.read_int_or_record_with_vlens();
+        writer.write_int_or_record_with_vlens({item});
+      end
+      while obj.has_monosotate_or_int_or_simple_record()
+        item = obj.read_monosotate_or_int_or_simple_record();
+        writer.write_monosotate_or_int_or_simple_record({item});
+      end
+      while obj.has_record_with_unions()
+        item = obj.read_record_with_unions();
+        writer.write_record_with_unions({item});
+      end
     end
   end
 
@@ -78,10 +90,10 @@ classdef UnionsReaderBase < handle
   end
 
   methods (Abstract, Access=protected)
-    read_int_or_simple_record_(obj, value)
-    read_int_or_record_with_vlens_(obj, value)
-    read_monosotate_or_int_or_simple_record_(obj, value)
-    read_record_with_unions_(obj, value)
+    read_int_or_simple_record_(obj)
+    read_int_or_record_with_vlens_(obj)
+    read_monosotate_or_int_or_simple_record_(obj)
+    read_record_with_unions_(obj)
 
     close_(obj)
   end

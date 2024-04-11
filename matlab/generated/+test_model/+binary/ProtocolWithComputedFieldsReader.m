@@ -2,17 +2,21 @@
 
 classdef ProtocolWithComputedFieldsReader < yardl.binary.BinaryProtocolReader & test_model.ProtocolWithComputedFieldsReaderBase
   % Binary reader for the ProtocolWithComputedFields protocol
+  properties (Access=protected)
+    record_with_computed_fields_serializer
+  end
+
   methods
     function obj = ProtocolWithComputedFieldsReader(filename)
       obj@test_model.ProtocolWithComputedFieldsReaderBase();
       obj@yardl.binary.BinaryProtocolReader(filename, test_model.ProtocolWithComputedFieldsReaderBase.schema);
+      obj.record_with_computed_fields_serializer = test_model.binary.RecordWithComputedFieldsSerializer();
     end
   end
 
   methods (Access=protected)
     function value = read_record_with_computed_fields_(obj)
-      r = test_model.binary.RecordWithComputedFieldsSerializer();
-      value = r.read(obj.stream_);
+      value = obj.record_with_computed_fields_serializer.read(obj.stream_);
     end
   end
 end

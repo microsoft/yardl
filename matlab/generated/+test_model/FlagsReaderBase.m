@@ -24,28 +24,54 @@ classdef FlagsReaderBase < handle
     end
 
     % Ordinal 0
+    function more = has_days(obj)
+      if obj.state_ ~= 0
+        obj.raise_unexpected_state_(0);
+      end
+
+      more = obj.has_days_();
+      if ~more
+        obj.state_ = 2;
+      end
+    end
+
     function value = read_days(obj)
       if obj.state_ ~= 0
         obj.raise_unexpected_state_(0);
       end
 
       value = obj.read_days_();
-      obj.state_ = 2;
     end
 
     % Ordinal 1
+    function more = has_formats(obj)
+      if obj.state_ ~= 2
+        obj.raise_unexpected_state_(2);
+      end
+
+      more = obj.has_formats_();
+      if ~more
+        obj.state_ = 4;
+      end
+    end
+
     function value = read_formats(obj)
       if obj.state_ ~= 2
         obj.raise_unexpected_state_(2);
       end
 
       value = obj.read_formats_();
-      obj.state_ = 4;
     end
 
     function copy_to(obj, writer)
-      writer.write_days(obj.read_days());
-      writer.write_formats(obj.read_formats());
+      while obj.has_days()
+        item = obj.read_days();
+        writer.write_days({item});
+      end
+      while obj.has_formats()
+        item = obj.read_formats();
+        writer.write_formats({item});
+      end
     end
   end
 
@@ -56,8 +82,10 @@ classdef FlagsReaderBase < handle
   end
 
   methods (Abstract, Access=protected)
-    read_days_(obj, value)
-    read_formats_(obj, value)
+    has_days_(obj)
+    read_days_(obj)
+    has_formats_(obj)
+    read_formats_(obj)
 
     close_(obj)
   end

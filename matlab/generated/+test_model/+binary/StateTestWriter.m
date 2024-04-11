@@ -2,27 +2,33 @@
 
 classdef StateTestWriter < yardl.binary.BinaryProtocolWriter & test_model.StateTestWriterBase
   % Binary writer for the StateTest protocol
+  properties (Access=protected)
+    an_int_serializer
+    a_stream_serializer
+    another_int_serializer
+  end
+
   methods
     function obj = StateTestWriter(filename)
       obj@test_model.StateTestWriterBase();
       obj@yardl.binary.BinaryProtocolWriter(filename, test_model.StateTestWriterBase.schema);
+      obj.an_int_serializer = yardl.binary.Int32Serializer;
+      obj.a_stream_serializer = yardl.binary.StreamSerializer(yardl.binary.Int32Serializer);
+      obj.another_int_serializer = yardl.binary.Int32Serializer;
     end
   end
 
   methods (Access=protected)
     function write_an_int_(obj, value)
-      w = yardl.binary.Int32Serializer;
-      w.write(obj.stream_, value);
+      obj.an_int_serializer.write(obj.stream_, value);
     end
 
     function write_a_stream_(obj, value)
-      w = yardl.binary.StreamSerializer(yardl.binary.Int32Serializer);
-      w.write(obj.stream_, value);
+      obj.a_stream_serializer.write(obj.stream_, value);
     end
 
     function write_another_int_(obj, value)
-      w = yardl.binary.Int32Serializer;
-      w.write(obj.stream_, value);
+      obj.another_int_serializer.write(obj.stream_, value);
     end
   end
 end

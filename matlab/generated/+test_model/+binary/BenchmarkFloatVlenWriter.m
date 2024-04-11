@@ -2,17 +2,21 @@
 
 classdef BenchmarkFloatVlenWriter < yardl.binary.BinaryProtocolWriter & test_model.BenchmarkFloatVlenWriterBase
   % Binary writer for the BenchmarkFloatVlen protocol
+  properties (Access=protected)
+    float_array_serializer
+  end
+
   methods
     function obj = BenchmarkFloatVlenWriter(filename)
       obj@test_model.BenchmarkFloatVlenWriterBase();
       obj@yardl.binary.BinaryProtocolWriter(filename, test_model.BenchmarkFloatVlenWriterBase.schema);
+      obj.float_array_serializer = yardl.binary.StreamSerializer(yardl.binary.NDArraySerializer(yardl.binary.Float32Serializer, 2));
     end
   end
 
   methods (Access=protected)
     function write_float_array_(obj, value)
-      w = yardl.binary.StreamSerializer(yardl.binary.NDArraySerializer(yardl.binary.Float32Serializer, 2));
-      w.write(obj.stream_, value);
+      obj.float_array_serializer.write(obj.stream_, value);
     end
   end
 end

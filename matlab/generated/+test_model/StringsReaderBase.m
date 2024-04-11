@@ -44,8 +44,14 @@ classdef StringsReaderBase < handle
     end
 
     function copy_to(obj, writer)
-      writer.write_single_string(obj.read_single_string());
-      writer.write_rec_with_string(obj.read_rec_with_string());
+      while obj.has_single_string()
+        item = obj.read_single_string();
+        writer.write_single_string({item});
+      end
+      while obj.has_rec_with_string()
+        item = obj.read_rec_with_string();
+        writer.write_rec_with_string({item});
+      end
     end
   end
 
@@ -56,8 +62,8 @@ classdef StringsReaderBase < handle
   end
 
   methods (Abstract, Access=protected)
-    read_single_string_(obj, value)
-    read_rec_with_string_(obj, value)
+    read_single_string_(obj)
+    read_rec_with_string_(obj)
 
     close_(obj)
   end

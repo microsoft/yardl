@@ -34,13 +34,23 @@ classdef StateTestReaderBase < handle
     end
 
     % Ordinal 1
+    function more = has_a_stream(obj)
+      if obj.state_ ~= 2
+        obj.raise_unexpected_state_(2);
+      end
+
+      more = obj.has_a_stream_();
+      if ~more
+        obj.state_ = 4;
+      end
+    end
+
     function value = read_a_stream(obj)
       if obj.state_ ~= 2
         obj.raise_unexpected_state_(2);
       end
 
       value = obj.read_a_stream_();
-      obj.state_ = 4;
     end
 
     % Ordinal 2
@@ -54,9 +64,18 @@ classdef StateTestReaderBase < handle
     end
 
     function copy_to(obj, writer)
-      writer.write_an_int(obj.read_an_int());
-      writer.write_a_stream(obj.read_a_stream());
-      writer.write_another_int(obj.read_another_int());
+      while obj.has_an_int()
+        item = obj.read_an_int();
+        writer.write_an_int({item});
+      end
+      while obj.has_a_stream()
+        item = obj.read_a_stream();
+        writer.write_a_stream({item});
+      end
+      while obj.has_another_int()
+        item = obj.read_another_int();
+        writer.write_another_int({item});
+      end
     end
   end
 
@@ -67,9 +86,10 @@ classdef StateTestReaderBase < handle
   end
 
   methods (Abstract, Access=protected)
-    read_an_int_(obj, value)
-    read_a_stream_(obj, value)
-    read_another_int_(obj, value)
+    read_an_int_(obj)
+    has_a_stream_(obj)
+    read_a_stream_(obj)
+    read_another_int_(obj)
 
     close_(obj)
   end

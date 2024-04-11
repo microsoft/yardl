@@ -2,22 +2,27 @@
 
 classdef SubarraysInRecordsWriter < yardl.binary.BinaryProtocolWriter & test_model.SubarraysInRecordsWriterBase
   % Binary writer for the SubarraysInRecords protocol
+  properties (Access=protected)
+    with_fixed_subarrays_serializer
+    with_vlen_subarrays_serializer
+  end
+
   methods
     function obj = SubarraysInRecordsWriter(filename)
       obj@test_model.SubarraysInRecordsWriterBase();
       obj@yardl.binary.BinaryProtocolWriter(filename, test_model.SubarraysInRecordsWriterBase.schema);
+      obj.with_fixed_subarrays_serializer = yardl.binary.DynamicNDArraySerializer(test_model.binary.RecordWithFixedCollectionsSerializer());
+      obj.with_vlen_subarrays_serializer = yardl.binary.DynamicNDArraySerializer(test_model.binary.RecordWithVlenCollectionsSerializer());
     end
   end
 
   methods (Access=protected)
     function write_with_fixed_subarrays_(obj, value)
-      w = yardl.binary.DynamicNDArraySerializer(test_model.binary.RecordWithFixedCollectionsSerializer());
-      w.write(obj.stream_, value);
+      obj.with_fixed_subarrays_serializer.write(obj.stream_, value);
     end
 
     function write_with_vlen_subarrays_(obj, value)
-      w = yardl.binary.DynamicNDArraySerializer(test_model.binary.RecordWithVlenCollectionsSerializer());
-      w.write(obj.stream_, value);
+      obj.with_vlen_subarrays_serializer.write(obj.stream_, value);
     end
   end
 end

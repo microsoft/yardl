@@ -2,27 +2,37 @@
 
 classdef StateTestReader < yardl.binary.BinaryProtocolReader & test_model.StateTestReaderBase
   % Binary reader for the StateTest protocol
+  properties (Access=protected)
+    an_int_serializer
+    a_stream_serializer
+    another_int_serializer
+  end
+
   methods
     function obj = StateTestReader(filename)
       obj@test_model.StateTestReaderBase();
       obj@yardl.binary.BinaryProtocolReader(filename, test_model.StateTestReaderBase.schema);
+      obj.an_int_serializer = yardl.binary.Int32Serializer;
+      obj.a_stream_serializer = yardl.binary.StreamSerializer(yardl.binary.Int32Serializer);
+      obj.another_int_serializer = yardl.binary.Int32Serializer;
     end
   end
 
   methods (Access=protected)
     function value = read_an_int_(obj)
-      r = yardl.binary.Int32Serializer;
-      value = r.read(obj.stream_);
+      value = obj.an_int_serializer.read(obj.stream_);
+    end
+
+    function more = has_a_stream_(obj)
+      more = obj.a_stream_serializer.hasnext(obj.stream_);
     end
 
     function value = read_a_stream_(obj)
-      r = yardl.binary.StreamSerializer(yardl.binary.Int32Serializer);
-      value = r.read(obj.stream_);
+      value = obj.a_stream_serializer.read(obj.stream_);
     end
 
     function value = read_another_int_(obj)
-      r = yardl.binary.Int32Serializer;
-      value = r.read(obj.stream_);
+      value = obj.another_int_serializer.read(obj.stream_);
     end
   end
 end

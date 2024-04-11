@@ -2,17 +2,21 @@
 
 classdef OptionalVectorsWriter < yardl.binary.BinaryProtocolWriter & test_model.OptionalVectorsWriterBase
   % Binary writer for the OptionalVectors protocol
+  properties (Access=protected)
+    record_with_optional_vector_serializer
+  end
+
   methods
     function obj = OptionalVectorsWriter(filename)
       obj@test_model.OptionalVectorsWriterBase();
       obj@yardl.binary.BinaryProtocolWriter(filename, test_model.OptionalVectorsWriterBase.schema);
+      obj.record_with_optional_vector_serializer = test_model.binary.RecordWithOptionalVectorSerializer();
     end
   end
 
   methods (Access=protected)
     function write_record_with_optional_vector_(obj, value)
-      w = test_model.binary.RecordWithOptionalVectorSerializer();
-      w.write(obj.stream_, value);
+      obj.record_with_optional_vector_serializer.write(obj.stream_, value);
     end
   end
 end

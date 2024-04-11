@@ -2,37 +2,45 @@
 
 classdef FixedArraysWriter < yardl.binary.BinaryProtocolWriter & test_model.FixedArraysWriterBase
   % Binary writer for the FixedArrays protocol
+  properties (Access=protected)
+    ints_serializer
+    fixed_simple_record_array_serializer
+    fixed_record_with_vlens_array_serializer
+    record_with_fixed_arrays_serializer
+    named_array_serializer
+  end
+
   methods
     function obj = FixedArraysWriter(filename)
       obj@test_model.FixedArraysWriterBase();
       obj@yardl.binary.BinaryProtocolWriter(filename, test_model.FixedArraysWriterBase.schema);
+      obj.ints_serializer = yardl.binary.FixedNDArraySerializer(yardl.binary.Int32Serializer, [3, 2]);
+      obj.fixed_simple_record_array_serializer = yardl.binary.FixedNDArraySerializer(test_model.binary.SimpleRecordSerializer(), [2, 3]);
+      obj.fixed_record_with_vlens_array_serializer = yardl.binary.FixedNDArraySerializer(test_model.binary.RecordWithVlensSerializer(), [2, 2]);
+      obj.record_with_fixed_arrays_serializer = test_model.binary.RecordWithFixedArraysSerializer();
+      obj.named_array_serializer = yardl.binary.FixedNDArraySerializer(yardl.binary.Int32Serializer, [4, 2]);
     end
   end
 
   methods (Access=protected)
     function write_ints_(obj, value)
-      w = yardl.binary.FixedNDArraySerializer(yardl.binary.Int32Serializer, [3, 2]);
-      w.write(obj.stream_, value);
+      obj.ints_serializer.write(obj.stream_, value);
     end
 
     function write_fixed_simple_record_array_(obj, value)
-      w = yardl.binary.FixedNDArraySerializer(test_model.binary.SimpleRecordSerializer(), [2, 3]);
-      w.write(obj.stream_, value);
+      obj.fixed_simple_record_array_serializer.write(obj.stream_, value);
     end
 
     function write_fixed_record_with_vlens_array_(obj, value)
-      w = yardl.binary.FixedNDArraySerializer(test_model.binary.RecordWithVlensSerializer(), [2, 2]);
-      w.write(obj.stream_, value);
+      obj.fixed_record_with_vlens_array_serializer.write(obj.stream_, value);
     end
 
     function write_record_with_fixed_arrays_(obj, value)
-      w = test_model.binary.RecordWithFixedArraysSerializer();
-      w.write(obj.stream_, value);
+      obj.record_with_fixed_arrays_serializer.write(obj.stream_, value);
     end
 
     function write_named_array_(obj, value)
-      w = yardl.binary.FixedNDArraySerializer(yardl.binary.Int32Serializer, [4, 2]);
-      w.write(obj.stream_, value);
+      obj.named_array_serializer.write(obj.stream_, value);
     end
   end
 end

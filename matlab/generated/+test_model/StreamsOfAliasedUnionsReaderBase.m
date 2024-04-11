@@ -24,28 +24,54 @@ classdef StreamsOfAliasedUnionsReaderBase < handle
     end
 
     % Ordinal 0
+    function more = has_int_or_simple_record(obj)
+      if obj.state_ ~= 0
+        obj.raise_unexpected_state_(0);
+      end
+
+      more = obj.has_int_or_simple_record_();
+      if ~more
+        obj.state_ = 2;
+      end
+    end
+
     function value = read_int_or_simple_record(obj)
       if obj.state_ ~= 0
         obj.raise_unexpected_state_(0);
       end
 
       value = obj.read_int_or_simple_record_();
-      obj.state_ = 2;
     end
 
     % Ordinal 1
+    function more = has_nullable_int_or_simple_record(obj)
+      if obj.state_ ~= 2
+        obj.raise_unexpected_state_(2);
+      end
+
+      more = obj.has_nullable_int_or_simple_record_();
+      if ~more
+        obj.state_ = 4;
+      end
+    end
+
     function value = read_nullable_int_or_simple_record(obj)
       if obj.state_ ~= 2
         obj.raise_unexpected_state_(2);
       end
 
       value = obj.read_nullable_int_or_simple_record_();
-      obj.state_ = 4;
     end
 
     function copy_to(obj, writer)
-      writer.write_int_or_simple_record(obj.read_int_or_simple_record());
-      writer.write_nullable_int_or_simple_record(obj.read_nullable_int_or_simple_record());
+      while obj.has_int_or_simple_record()
+        item = obj.read_int_or_simple_record();
+        writer.write_int_or_simple_record({item});
+      end
+      while obj.has_nullable_int_or_simple_record()
+        item = obj.read_nullable_int_or_simple_record();
+        writer.write_nullable_int_or_simple_record({item});
+      end
     end
   end
 
@@ -56,8 +82,10 @@ classdef StreamsOfAliasedUnionsReaderBase < handle
   end
 
   methods (Abstract, Access=protected)
-    read_int_or_simple_record_(obj, value)
-    read_nullable_int_or_simple_record_(obj, value)
+    has_int_or_simple_record_(obj)
+    read_int_or_simple_record_(obj)
+    has_nullable_int_or_simple_record_(obj)
+    read_nullable_int_or_simple_record_(obj)
 
     close_(obj)
   end

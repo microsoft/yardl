@@ -4,11 +4,13 @@
 classdef StreamSerializer < yardl.binary.TypeSerializer
     properties
         item_serializer_;
+        items_remaining_;
     end
 
     methods
         function obj = StreamSerializer(item_serializer)
             obj.item_serializer_ = item_serializer;
+            obj.items_remaining_ = 0;
         end
 
         function write(obj, outstream, values)
@@ -44,44 +46,24 @@ classdef StreamSerializer < yardl.binary.TypeSerializer
             end
         end
 
+        function res = hasnext(obj, instream)
+            if obj.items_remaining_ <= 0
+                obj.items_remaining_ = instream.read_unsigned_varint();
+                if obj.items_remaining_ <= 0
+                    res = false;
+                    return;
+                end
+            end
+            res = true;
+        end
+
         function res = read(obj, instream)
-            count = instream.read_unsigned_varint();
-            if count == 0
-                res = [];
-                return;
+            if obj.items_remaining_ <= 0
+                throw(yardl.RuntimeError("Stream has been exhausted"));
             end
 
-            item_shape = obj.item_serializer_.getShape();
-            if isempty(item_shape)
-                res = cell(1, count);
-                idx = 1;
-                while count > 0
-                    for c = 1:count
-                        res{idx} = obj.item_serializer_.read(instream);
-                        idx = idx + 1;
-                    end
-                    count = instream.read_unsigned_varint();
-                end
-                return
-            end
-
-            res = yardl.allocate(obj.getClass(), [prod(item_shape), count]);
-            total_count = 0;
-            while count > 0
-                for c = 1:count
-                    idx = total_count + c;
-                    item = obj.item_serializer_.read(instream);
-                    res(:, idx) = item(:);
-                end
-
-                total_count = total_count + count;
-                count = instream.read_unsigned_varint();
-            end
-
-            res = squeeze(reshape(res, [item_shape, total_count]));
-            if iscolumn(res)
-                res = transpose(res);
-            end
+            res = obj.item_serializer_.read(instream);
+            obj.items_remaining_ = obj.items_remaining_ - 1;
         end
 
         function c = getClass(obj)

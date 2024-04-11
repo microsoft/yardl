@@ -88,5 +88,45 @@ classdef CodedStreamTest < matlab.unittest.TestCase
             r.close();
         end
 
+        function testFloats(testCase)
+            filename = tempname;
+
+            f = single(42.75);
+            d = double(-42.75);
+            fs = rand(123, 89, 'single');
+            ds = rand(123, 89);
+
+            cf = single(complex(7, -8));
+            df = complex(7, -8);
+            cfs = complex(rand(123, 89, 'single'), rand(123, 89, 'single'));
+            dfs = complex(rand(123, 89), rand(123, 89));
+
+            float32Serializer = yardl.binary.Float32Serializer;
+            float64Serializer = yardl.binary.Float64Serializer;
+            complexFloat32Serializer = yardl.binary.Complexfloat32Serializer;
+            complexFloat64Serializer = yardl.binary.Complexfloat64Serializer;
+
+            w = yardl.binary.CodedOutputStream(filename);
+            float32Serializer.write(w, f);
+            float64Serializer.write(w, d);
+            float32Serializer.writeTrivially(w, fs);
+            float64Serializer.writeTrivially(w, ds);
+            complexFloat32Serializer.write(w, cf);
+            complexFloat64Serializer.write(w, df);
+            complexFloat32Serializer.writeTrivially(w, cfs);
+            complexFloat64Serializer.writeTrivially(w, dfs);
+            w.close();
+
+            r = yardl.binary.CodedInputStream(filename);
+            testCase.verifyEqual(float32Serializer.read(r), f);
+            testCase.verifyEqual(float64Serializer.read(r), d);
+            testCase.verifyEqual(float32Serializer.readTrivially(r, size(fs)), fs);
+            testCase.verifyEqual(float64Serializer.readTrivially(r, size(ds)), ds);
+            testCase.verifyEqual(complexFloat32Serializer.read(r), cf);
+            testCase.verifyEqual(complexFloat64Serializer.read(r), df);
+            testCase.verifyEqual(complexFloat32Serializer.readTrivially(r, size(cfs)), cfs);
+            testCase.verifyEqual(complexFloat64Serializer.readTrivially(r, size(dfs)), dfs);
+            r.close();
+        end
     end
 end

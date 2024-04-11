@@ -34,7 +34,10 @@ classdef ProtocolWithComputedFieldsReaderBase < handle
     end
 
     function copy_to(obj, writer)
-      writer.write_record_with_computed_fields(obj.read_record_with_computed_fields());
+      while obj.has_record_with_computed_fields()
+        item = obj.read_record_with_computed_fields();
+        writer.write_record_with_computed_fields({item});
+      end
     end
   end
 
@@ -45,7 +48,7 @@ classdef ProtocolWithComputedFieldsReaderBase < handle
   end
 
   methods (Abstract, Access=protected)
-    read_record_with_computed_fields_(obj, value)
+    read_record_with_computed_fields_(obj)
 
     close_(obj)
   end

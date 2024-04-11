@@ -64,10 +64,22 @@ classdef FixedVectorsReaderBase < handle
     end
 
     function copy_to(obj, writer)
-      writer.write_fixed_int_vector(obj.read_fixed_int_vector());
-      writer.write_fixed_simple_record_vector(obj.read_fixed_simple_record_vector());
-      writer.write_fixed_record_with_vlens_vector(obj.read_fixed_record_with_vlens_vector());
-      writer.write_record_with_fixed_vectors(obj.read_record_with_fixed_vectors());
+      while obj.has_fixed_int_vector()
+        item = obj.read_fixed_int_vector();
+        writer.write_fixed_int_vector({item});
+      end
+      while obj.has_fixed_simple_record_vector()
+        item = obj.read_fixed_simple_record_vector();
+        writer.write_fixed_simple_record_vector({item});
+      end
+      while obj.has_fixed_record_with_vlens_vector()
+        item = obj.read_fixed_record_with_vlens_vector();
+        writer.write_fixed_record_with_vlens_vector({item});
+      end
+      while obj.has_record_with_fixed_vectors()
+        item = obj.read_record_with_fixed_vectors();
+        writer.write_record_with_fixed_vectors({item});
+      end
     end
   end
 
@@ -78,10 +90,10 @@ classdef FixedVectorsReaderBase < handle
   end
 
   methods (Abstract, Access=protected)
-    read_fixed_int_vector_(obj, value)
-    read_fixed_simple_record_vector_(obj, value)
-    read_fixed_record_with_vlens_vector_(obj, value)
-    read_record_with_fixed_vectors_(obj, value)
+    read_fixed_int_vector_(obj)
+    read_fixed_simple_record_vector_(obj)
+    read_fixed_record_with_vlens_vector_(obj)
+    read_record_with_fixed_vectors_(obj)
 
     close_(obj)
   end

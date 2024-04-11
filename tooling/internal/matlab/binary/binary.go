@@ -44,12 +44,23 @@ func writeProtocolWriter(fw *common.MatlabFileWriter, p *dsl.ProtocolDefinition,
 			common.WriteComment(w, fmt.Sprintf("Binary writer for the %s protocol", p.Name))
 			common.WriteComment(w, p.Comment)
 
+			w.WriteStringln("properties (Access=protected)")
+			common.WriteBlockBody(w, func() {
+				for _, step := range p.Sequence {
+					w.WriteStringln(serializerName(step))
+				}
+			})
+
+			w.WriteStringln("")
 			w.WriteStringln("methods")
 			common.WriteBlockBody(w, func() {
 				fmt.Fprintf(w, "function obj = %s(filename)\n", BinaryWriterName(p))
 				common.WriteBlockBody(w, func() {
 					fmt.Fprintf(w, "obj@%s();\n", abstractWriterName)
 					fmt.Fprintf(w, "obj@yardl.binary.BinaryProtocolWriter(filename, %s.schema);\n", abstractWriterName)
+					for _, step := range p.Sequence {
+						fmt.Fprintf(w, "obj.%s = %s;\n", serializerName(step), typeSerializer(step.Type, ns.Name, nil))
+					}
 				})
 			})
 			w.WriteStringln("")
@@ -59,8 +70,7 @@ func writeProtocolWriter(fw *common.MatlabFileWriter, p *dsl.ProtocolDefinition,
 				for i, step := range p.Sequence {
 					fmt.Fprintf(w, "function %s(obj, value)\n", common.ProtocolWriteImplMethodName(step))
 					common.WriteBlockBody(w, func() {
-						fmt.Fprintf(w, "w = %s;\n", typeSerializer(step.Type, ns.Name, nil))
-						w.WriteStringln("w.write(obj.stream_, value);")
+						fmt.Fprintf(w, "obj.%s.write(obj.stream_, value);\n", serializerName(step))
 					})
 					if i < len(p.Sequence)-1 {
 						w.WriteStringln("")
@@ -79,12 +89,23 @@ func writeProtocolReader(fw *common.MatlabFileWriter, p *dsl.ProtocolDefinition,
 			common.WriteComment(w, fmt.Sprintf("Binary reader for the %s protocol", p.Name))
 			common.WriteComment(w, p.Comment)
 
+			w.WriteStringln("properties (Access=protected)")
+			common.WriteBlockBody(w, func() {
+				for _, step := range p.Sequence {
+					w.WriteStringln(serializerName(step))
+				}
+			})
+			w.WriteStringln("")
+
 			w.WriteStringln("methods")
 			common.WriteBlockBody(w, func() {
 				fmt.Fprintf(w, "function obj = %s(filename)\n", BinaryReaderName(p))
 				common.WriteBlockBody(w, func() {
 					fmt.Fprintf(w, "obj@%s();\n", abstractReaderName)
 					fmt.Fprintf(w, "obj@yardl.binary.BinaryProtocolReader(filename, %s.schema);\n", abstractReaderName)
+					for _, step := range p.Sequence {
+						fmt.Fprintf(w, "obj.%s = %s;\n", serializerName(step), typeSerializer(step.Type, ns.Name, nil))
+					}
 				})
 			})
 			w.WriteStringln("")
@@ -92,12 +113,18 @@ func writeProtocolReader(fw *common.MatlabFileWriter, p *dsl.ProtocolDefinition,
 			w.WriteStringln("methods (Access=protected)")
 			common.WriteBlockBody(w, func() {
 				for i, step := range p.Sequence {
+					if step.IsStream() {
+						fmt.Fprintf(w, "function more = %s(obj)\n", common.ProtocolHasMoreImplMethodName(step))
+						common.WriteBlockBody(w, func() {
+							fmt.Fprintf(w, "more = obj.%s.hasnext(obj.stream_);\n", serializerName(step))
+						})
+						w.WriteStringln("")
+					}
+
 					fmt.Fprintf(w, "function value = %s(obj)\n", common.ProtocolReadImplMethodName(step))
 					common.WriteBlockBody(w, func() {
-						fmt.Fprintf(w, "r = %s;\n", typeSerializer(step.Type, ns.Name, nil))
-						w.WriteStringln("value = r.read(obj.stream_);")
+						fmt.Fprintf(w, "value = obj.%s.read(obj.stream_);\n", serializerName(step))
 					})
-
 					if i < len(p.Sequence)-1 {
 						w.WriteStringln("")
 					}
@@ -105,6 +132,10 @@ func writeProtocolReader(fw *common.MatlabFileWriter, p *dsl.ProtocolDefinition,
 			})
 		})
 	})
+}
+
+func serializerName(step *dsl.ProtocolStep) string {
+	return fmt.Sprintf("%s_serializer", formatting.ToSnakeCase(step.Name))
 }
 
 func writeRecordSerializers(fw *common.MatlabFileWriter, ns *dsl.Namespace) error {

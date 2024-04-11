@@ -24,17 +24,30 @@ classdef BenchmarkInt256x256ReaderBase < handle
     end
 
     % Ordinal 0
+    function more = has_int256x256(obj)
+      if obj.state_ ~= 0
+        obj.raise_unexpected_state_(0);
+      end
+
+      more = obj.has_int256x256_();
+      if ~more
+        obj.state_ = 2;
+      end
+    end
+
     function value = read_int256x256(obj)
       if obj.state_ ~= 0
         obj.raise_unexpected_state_(0);
       end
 
       value = obj.read_int256x256_();
-      obj.state_ = 2;
     end
 
     function copy_to(obj, writer)
-      writer.write_int256x256(obj.read_int256x256());
+      while obj.has_int256x256()
+        item = obj.read_int256x256();
+        writer.write_int256x256({item});
+      end
     end
   end
 
@@ -45,7 +58,8 @@ classdef BenchmarkInt256x256ReaderBase < handle
   end
 
   methods (Abstract, Access=protected)
-    read_int256x256_(obj, value)
+    has_int256x256_(obj)
+    read_int256x256_(obj)
 
     close_(obj)
   end

@@ -24,17 +24,30 @@ classdef BenchmarkSimpleMrdReaderBase < handle
     end
 
     % Ordinal 0
+    function more = has_data(obj)
+      if obj.state_ ~= 0
+        obj.raise_unexpected_state_(0);
+      end
+
+      more = obj.has_data_();
+      if ~more
+        obj.state_ = 2;
+      end
+    end
+
     function value = read_data(obj)
       if obj.state_ ~= 0
         obj.raise_unexpected_state_(0);
       end
 
       value = obj.read_data_();
-      obj.state_ = 2;
     end
 
     function copy_to(obj, writer)
-      writer.write_data(obj.read_data());
+      while obj.has_data()
+        item = obj.read_data();
+        writer.write_data({item});
+      end
     end
   end
 
@@ -45,7 +58,8 @@ classdef BenchmarkSimpleMrdReaderBase < handle
   end
 
   methods (Abstract, Access=protected)
-    read_data_(obj, value)
+    has_data_(obj)
+    read_data_(obj)
 
     close_(obj)
   end

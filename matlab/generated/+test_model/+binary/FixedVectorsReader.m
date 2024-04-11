@@ -2,32 +2,39 @@
 
 classdef FixedVectorsReader < yardl.binary.BinaryProtocolReader & test_model.FixedVectorsReaderBase
   % Binary reader for the FixedVectors protocol
+  properties (Access=protected)
+    fixed_int_vector_serializer
+    fixed_simple_record_vector_serializer
+    fixed_record_with_vlens_vector_serializer
+    record_with_fixed_vectors_serializer
+  end
+
   methods
     function obj = FixedVectorsReader(filename)
       obj@test_model.FixedVectorsReaderBase();
       obj@yardl.binary.BinaryProtocolReader(filename, test_model.FixedVectorsReaderBase.schema);
+      obj.fixed_int_vector_serializer = yardl.binary.FixedVectorSerializer(yardl.binary.Int32Serializer, 5);
+      obj.fixed_simple_record_vector_serializer = yardl.binary.FixedVectorSerializer(test_model.binary.SimpleRecordSerializer(), 3);
+      obj.fixed_record_with_vlens_vector_serializer = yardl.binary.FixedVectorSerializer(test_model.binary.RecordWithVlensSerializer(), 2);
+      obj.record_with_fixed_vectors_serializer = test_model.binary.RecordWithFixedVectorsSerializer();
     end
   end
 
   methods (Access=protected)
     function value = read_fixed_int_vector_(obj)
-      r = yardl.binary.FixedVectorSerializer(yardl.binary.Int32Serializer, 5);
-      value = r.read(obj.stream_);
+      value = obj.fixed_int_vector_serializer.read(obj.stream_);
     end
 
     function value = read_fixed_simple_record_vector_(obj)
-      r = yardl.binary.FixedVectorSerializer(test_model.binary.SimpleRecordSerializer(), 3);
-      value = r.read(obj.stream_);
+      value = obj.fixed_simple_record_vector_serializer.read(obj.stream_);
     end
 
     function value = read_fixed_record_with_vlens_vector_(obj)
-      r = yardl.binary.FixedVectorSerializer(test_model.binary.RecordWithVlensSerializer(), 2);
-      value = r.read(obj.stream_);
+      value = obj.fixed_record_with_vlens_vector_serializer.read(obj.stream_);
     end
 
     function value = read_record_with_fixed_vectors_(obj)
-      r = test_model.binary.RecordWithFixedVectorsSerializer();
-      value = r.read(obj.stream_);
+      value = obj.record_with_fixed_vectors_serializer.read(obj.stream_);
     end
   end
 end

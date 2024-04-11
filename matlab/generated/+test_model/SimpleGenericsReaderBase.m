@@ -104,25 +104,62 @@ classdef SimpleGenericsReaderBase < handle
     end
 
     % Ordinal 8
+    function more = has_stream_of_type_variants(obj)
+      if obj.state_ ~= 16
+        obj.raise_unexpected_state_(16);
+      end
+
+      more = obj.has_stream_of_type_variants_();
+      if ~more
+        obj.state_ = 18;
+      end
+    end
+
     function value = read_stream_of_type_variants(obj)
       if obj.state_ ~= 16
         obj.raise_unexpected_state_(16);
       end
 
       value = obj.read_stream_of_type_variants_();
-      obj.state_ = 18;
     end
 
     function copy_to(obj, writer)
-      writer.write_float_image(obj.read_float_image());
-      writer.write_int_image(obj.read_int_image());
-      writer.write_int_image_alternate_syntax(obj.read_int_image_alternate_syntax());
-      writer.write_string_image(obj.read_string_image());
-      writer.write_int_float_tuple(obj.read_int_float_tuple());
-      writer.write_float_float_tuple(obj.read_float_float_tuple());
-      writer.write_int_float_tuple_alternate_syntax(obj.read_int_float_tuple_alternate_syntax());
-      writer.write_int_string_tuple(obj.read_int_string_tuple());
-      writer.write_stream_of_type_variants(obj.read_stream_of_type_variants());
+      while obj.has_float_image()
+        item = obj.read_float_image();
+        writer.write_float_image({item});
+      end
+      while obj.has_int_image()
+        item = obj.read_int_image();
+        writer.write_int_image({item});
+      end
+      while obj.has_int_image_alternate_syntax()
+        item = obj.read_int_image_alternate_syntax();
+        writer.write_int_image_alternate_syntax({item});
+      end
+      while obj.has_string_image()
+        item = obj.read_string_image();
+        writer.write_string_image({item});
+      end
+      while obj.has_int_float_tuple()
+        item = obj.read_int_float_tuple();
+        writer.write_int_float_tuple({item});
+      end
+      while obj.has_float_float_tuple()
+        item = obj.read_float_float_tuple();
+        writer.write_float_float_tuple({item});
+      end
+      while obj.has_int_float_tuple_alternate_syntax()
+        item = obj.read_int_float_tuple_alternate_syntax();
+        writer.write_int_float_tuple_alternate_syntax({item});
+      end
+      while obj.has_int_string_tuple()
+        item = obj.read_int_string_tuple();
+        writer.write_int_string_tuple({item});
+      end
+      while obj.has_stream_of_type_variants()
+        item = obj.read_stream_of_type_variants();
+        writer.write_stream_of_type_variants({item});
+      end
     end
   end
 
@@ -133,15 +170,16 @@ classdef SimpleGenericsReaderBase < handle
   end
 
   methods (Abstract, Access=protected)
-    read_float_image_(obj, value)
-    read_int_image_(obj, value)
-    read_int_image_alternate_syntax_(obj, value)
-    read_string_image_(obj, value)
-    read_int_float_tuple_(obj, value)
-    read_float_float_tuple_(obj, value)
-    read_int_float_tuple_alternate_syntax_(obj, value)
-    read_int_string_tuple_(obj, value)
-    read_stream_of_type_variants_(obj, value)
+    read_float_image_(obj)
+    read_int_image_(obj)
+    read_int_image_alternate_syntax_(obj)
+    read_string_image_(obj)
+    read_int_float_tuple_(obj)
+    read_float_float_tuple_(obj)
+    read_int_float_tuple_alternate_syntax_(obj)
+    read_int_string_tuple_(obj)
+    has_stream_of_type_variants_(obj)
+    read_stream_of_type_variants_(obj)
 
     close_(obj)
   end

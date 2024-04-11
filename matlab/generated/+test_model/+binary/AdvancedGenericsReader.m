@@ -2,37 +2,45 @@
 
 classdef AdvancedGenericsReader < yardl.binary.BinaryProtocolReader & test_model.AdvancedGenericsReaderBase
   % Binary reader for the AdvancedGenerics protocol
+  properties (Access=protected)
+    float_image_image_serializer
+    generic_record_1_serializer
+    tuple_of_optionals_serializer
+    tuple_of_optionals_alternate_syntax_serializer
+    tuple_of_vectors_serializer
+  end
+
   methods
     function obj = AdvancedGenericsReader(filename)
       obj@test_model.AdvancedGenericsReaderBase();
       obj@yardl.binary.BinaryProtocolReader(filename, test_model.AdvancedGenericsReaderBase.schema);
+      obj.float_image_image_serializer = yardl.binary.NDArraySerializer(yardl.binary.NDArraySerializer(yardl.binary.Float32Serializer, 2), 2);
+      obj.generic_record_1_serializer = test_model.binary.GenericRecordSerializer(yardl.binary.Int32Serializer, yardl.binary.StringSerializer);
+      obj.tuple_of_optionals_serializer = tuples.binary.TupleSerializer(yardl.binary.OptionalSerializer(yardl.binary.Int32Serializer), yardl.binary.OptionalSerializer(yardl.binary.StringSerializer));
+      obj.tuple_of_optionals_alternate_syntax_serializer = tuples.binary.TupleSerializer(yardl.binary.OptionalSerializer(yardl.binary.Int32Serializer), yardl.binary.OptionalSerializer(yardl.binary.StringSerializer));
+      obj.tuple_of_vectors_serializer = tuples.binary.TupleSerializer(yardl.binary.VectorSerializer(yardl.binary.Int32Serializer), yardl.binary.VectorSerializer(yardl.binary.Float32Serializer));
     end
   end
 
   methods (Access=protected)
     function value = read_float_image_image_(obj)
-      r = yardl.binary.NDArraySerializer(yardl.binary.NDArraySerializer(yardl.binary.Float32Serializer, 2), 2);
-      value = r.read(obj.stream_);
+      value = obj.float_image_image_serializer.read(obj.stream_);
     end
 
     function value = read_generic_record_1_(obj)
-      r = test_model.binary.GenericRecordSerializer(yardl.binary.Int32Serializer, yardl.binary.StringSerializer);
-      value = r.read(obj.stream_);
+      value = obj.generic_record_1_serializer.read(obj.stream_);
     end
 
     function value = read_tuple_of_optionals_(obj)
-      r = tuples.binary.TupleSerializer(yardl.binary.OptionalSerializer(yardl.binary.Int32Serializer), yardl.binary.OptionalSerializer(yardl.binary.StringSerializer));
-      value = r.read(obj.stream_);
+      value = obj.tuple_of_optionals_serializer.read(obj.stream_);
     end
 
     function value = read_tuple_of_optionals_alternate_syntax_(obj)
-      r = tuples.binary.TupleSerializer(yardl.binary.OptionalSerializer(yardl.binary.Int32Serializer), yardl.binary.OptionalSerializer(yardl.binary.StringSerializer));
-      value = r.read(obj.stream_);
+      value = obj.tuple_of_optionals_alternate_syntax_serializer.read(obj.stream_);
     end
 
     function value = read_tuple_of_vectors_(obj)
-      r = tuples.binary.TupleSerializer(yardl.binary.VectorSerializer(yardl.binary.Int32Serializer), yardl.binary.VectorSerializer(yardl.binary.Float32Serializer));
-      value = r.read(obj.stream_);
+      value = obj.tuple_of_vectors_serializer.read(obj.stream_);
     end
   end
 end

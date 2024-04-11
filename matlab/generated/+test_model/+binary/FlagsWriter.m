@@ -2,22 +2,27 @@
 
 classdef FlagsWriter < yardl.binary.BinaryProtocolWriter & test_model.FlagsWriterBase
   % Binary writer for the Flags protocol
+  properties (Access=protected)
+    days_serializer
+    formats_serializer
+  end
+
   methods
     function obj = FlagsWriter(filename)
       obj@test_model.FlagsWriterBase();
       obj@yardl.binary.BinaryProtocolWriter(filename, test_model.FlagsWriterBase.schema);
+      obj.days_serializer = yardl.binary.StreamSerializer(yardl.binary.EnumSerializer('basic_types.DaysOfWeek', @basic_types.DaysOfWeek, yardl.binary.Int32Serializer));
+      obj.formats_serializer = yardl.binary.StreamSerializer(yardl.binary.EnumSerializer('basic_types.TextFormat', @basic_types.TextFormat, yardl.binary.Uint64Serializer));
     end
   end
 
   methods (Access=protected)
     function write_days_(obj, value)
-      w = yardl.binary.StreamSerializer(yardl.binary.EnumSerializer('basic_types.DaysOfWeek', @basic_types.DaysOfWeek, yardl.binary.Int32Serializer));
-      w.write(obj.stream_, value);
+      obj.days_serializer.write(obj.stream_, value);
     end
 
     function write_formats_(obj, value)
-      w = yardl.binary.StreamSerializer(yardl.binary.EnumSerializer('basic_types.TextFormat', @basic_types.TextFormat, yardl.binary.Uint64Serializer));
-      w.write(obj.stream_, value);
+      obj.formats_serializer.write(obj.stream_, value);
     end
   end
 end

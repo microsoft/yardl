@@ -2,22 +2,31 @@
 
 classdef ProtocolWithKeywordStepsReader < yardl.binary.BinaryProtocolReader & test_model.ProtocolWithKeywordStepsReaderBase
   % Binary reader for the ProtocolWithKeywordSteps protocol
+  properties (Access=protected)
+    int_serializer
+    float_serializer
+  end
+
   methods
     function obj = ProtocolWithKeywordStepsReader(filename)
       obj@test_model.ProtocolWithKeywordStepsReaderBase();
       obj@yardl.binary.BinaryProtocolReader(filename, test_model.ProtocolWithKeywordStepsReaderBase.schema);
+      obj.int_serializer = yardl.binary.StreamSerializer(test_model.binary.RecordWithKeywordFieldsSerializer());
+      obj.float_serializer = yardl.binary.EnumSerializer('test_model.EnumWithKeywordSymbols', @test_model.EnumWithKeywordSymbols, yardl.binary.Int32Serializer);
     end
   end
 
   methods (Access=protected)
+    function more = has_int_(obj)
+      more = obj.int_serializer.hasnext(obj.stream_);
+    end
+
     function value = read_int_(obj)
-      r = yardl.binary.StreamSerializer(test_model.binary.RecordWithKeywordFieldsSerializer());
-      value = r.read(obj.stream_);
+      value = obj.int_serializer.read(obj.stream_);
     end
 
     function value = read_float_(obj)
-      r = yardl.binary.EnumSerializer('test_model.EnumWithKeywordSymbols', @test_model.EnumWithKeywordSymbols, yardl.binary.Int32Serializer);
-      value = r.read(obj.stream_);
+      value = obj.float_serializer.read(obj.stream_);
     end
   end
 end

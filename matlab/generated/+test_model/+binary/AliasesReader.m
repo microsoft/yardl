@@ -2,62 +2,79 @@
 
 classdef AliasesReader < yardl.binary.BinaryProtocolReader & test_model.AliasesReaderBase
   % Binary reader for the Aliases protocol
+  properties (Access=protected)
+    aliased_string_serializer
+    aliased_enum_serializer
+    aliased_open_generic_serializer
+    aliased_closed_generic_serializer
+    aliased_optional_serializer
+    aliased_generic_optional_serializer
+    aliased_generic_union_2_serializer
+    aliased_generic_vector_serializer
+    aliased_generic_fixed_vector_serializer
+    stream_of_aliased_generic_union_2_serializer
+  end
+
   methods
     function obj = AliasesReader(filename)
       obj@test_model.AliasesReaderBase();
       obj@yardl.binary.BinaryProtocolReader(filename, test_model.AliasesReaderBase.schema);
+      obj.aliased_string_serializer = yardl.binary.StringSerializer;
+      obj.aliased_enum_serializer = yardl.binary.EnumSerializer('basic_types.Fruits', @basic_types.Fruits, yardl.binary.Int32Serializer);
+      obj.aliased_open_generic_serializer = tuples.binary.TupleSerializer(yardl.binary.StringSerializer, yardl.binary.EnumSerializer('basic_types.Fruits', @basic_types.Fruits, yardl.binary.Int32Serializer));
+      obj.aliased_closed_generic_serializer = tuples.binary.TupleSerializer(yardl.binary.StringSerializer, yardl.binary.EnumSerializer('basic_types.Fruits', @basic_types.Fruits, yardl.binary.Int32Serializer));
+      obj.aliased_optional_serializer = yardl.binary.OptionalSerializer(yardl.binary.Int32Serializer);
+      obj.aliased_generic_optional_serializer = yardl.binary.OptionalSerializer(yardl.binary.Float32Serializer);
+      obj.aliased_generic_union_2_serializer = yardl.binary.UnionSerializer('basic_types.GenericUnion2', {yardl.binary.StringSerializer, yardl.binary.EnumSerializer('basic_types.Fruits', @basic_types.Fruits, yardl.binary.Int32Serializer)}, {@basic_types.GenericUnion2.T1, @basic_types.GenericUnion2.T2});
+      obj.aliased_generic_vector_serializer = yardl.binary.VectorSerializer(yardl.binary.Float32Serializer);
+      obj.aliased_generic_fixed_vector_serializer = yardl.binary.FixedVectorSerializer(yardl.binary.Float32Serializer, 3);
+      obj.stream_of_aliased_generic_union_2_serializer = yardl.binary.StreamSerializer(yardl.binary.UnionSerializer('basic_types.GenericUnion2', {yardl.binary.StringSerializer, yardl.binary.EnumSerializer('basic_types.Fruits', @basic_types.Fruits, yardl.binary.Int32Serializer)}, {@basic_types.GenericUnion2.T1, @basic_types.GenericUnion2.T2}));
     end
   end
 
   methods (Access=protected)
     function value = read_aliased_string_(obj)
-      r = yardl.binary.StringSerializer;
-      value = r.read(obj.stream_);
+      value = obj.aliased_string_serializer.read(obj.stream_);
     end
 
     function value = read_aliased_enum_(obj)
-      r = yardl.binary.EnumSerializer('basic_types.Fruits', @basic_types.Fruits, yardl.binary.Int32Serializer);
-      value = r.read(obj.stream_);
+      value = obj.aliased_enum_serializer.read(obj.stream_);
     end
 
     function value = read_aliased_open_generic_(obj)
-      r = tuples.binary.TupleSerializer(yardl.binary.StringSerializer, yardl.binary.EnumSerializer('basic_types.Fruits', @basic_types.Fruits, yardl.binary.Int32Serializer));
-      value = r.read(obj.stream_);
+      value = obj.aliased_open_generic_serializer.read(obj.stream_);
     end
 
     function value = read_aliased_closed_generic_(obj)
-      r = tuples.binary.TupleSerializer(yardl.binary.StringSerializer, yardl.binary.EnumSerializer('basic_types.Fruits', @basic_types.Fruits, yardl.binary.Int32Serializer));
-      value = r.read(obj.stream_);
+      value = obj.aliased_closed_generic_serializer.read(obj.stream_);
     end
 
     function value = read_aliased_optional_(obj)
-      r = yardl.binary.OptionalSerializer(yardl.binary.Int32Serializer);
-      value = r.read(obj.stream_);
+      value = obj.aliased_optional_serializer.read(obj.stream_);
     end
 
     function value = read_aliased_generic_optional_(obj)
-      r = yardl.binary.OptionalSerializer(yardl.binary.Float32Serializer);
-      value = r.read(obj.stream_);
+      value = obj.aliased_generic_optional_serializer.read(obj.stream_);
     end
 
     function value = read_aliased_generic_union_2_(obj)
-      r = yardl.binary.UnionSerializer('basic_types.GenericUnion2', {yardl.binary.StringSerializer, yardl.binary.EnumSerializer('basic_types.Fruits', @basic_types.Fruits, yardl.binary.Int32Serializer)}, {@basic_types.GenericUnion2.T1, @basic_types.GenericUnion2.T2});
-      value = r.read(obj.stream_);
+      value = obj.aliased_generic_union_2_serializer.read(obj.stream_);
     end
 
     function value = read_aliased_generic_vector_(obj)
-      r = yardl.binary.VectorSerializer(yardl.binary.Float32Serializer);
-      value = r.read(obj.stream_);
+      value = obj.aliased_generic_vector_serializer.read(obj.stream_);
     end
 
     function value = read_aliased_generic_fixed_vector_(obj)
-      r = yardl.binary.FixedVectorSerializer(yardl.binary.Float32Serializer, 3);
-      value = r.read(obj.stream_);
+      value = obj.aliased_generic_fixed_vector_serializer.read(obj.stream_);
+    end
+
+    function more = has_stream_of_aliased_generic_union_2_(obj)
+      more = obj.stream_of_aliased_generic_union_2_serializer.hasnext(obj.stream_);
     end
 
     function value = read_stream_of_aliased_generic_union_2_(obj)
-      r = yardl.binary.StreamSerializer(yardl.binary.UnionSerializer('basic_types.GenericUnion2', {yardl.binary.StringSerializer, yardl.binary.EnumSerializer('basic_types.Fruits', @basic_types.Fruits, yardl.binary.Int32Serializer)}, {@basic_types.GenericUnion2.T1, @basic_types.GenericUnion2.T2}));
-      value = r.read(obj.stream_);
+      value = obj.stream_of_aliased_generic_union_2_serializer.read(obj.stream_);
     end
   end
 end

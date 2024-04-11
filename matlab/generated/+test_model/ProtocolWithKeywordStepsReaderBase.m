@@ -24,13 +24,23 @@ classdef ProtocolWithKeywordStepsReaderBase < handle
     end
 
     % Ordinal 0
+    function more = has_int(obj)
+      if obj.state_ ~= 0
+        obj.raise_unexpected_state_(0);
+      end
+
+      more = obj.has_int_();
+      if ~more
+        obj.state_ = 2;
+      end
+    end
+
     function value = read_int(obj)
       if obj.state_ ~= 0
         obj.raise_unexpected_state_(0);
       end
 
       value = obj.read_int_();
-      obj.state_ = 2;
     end
 
     % Ordinal 1
@@ -44,8 +54,14 @@ classdef ProtocolWithKeywordStepsReaderBase < handle
     end
 
     function copy_to(obj, writer)
-      writer.write_int(obj.read_int());
-      writer.write_float(obj.read_float());
+      while obj.has_int()
+        item = obj.read_int();
+        writer.write_int({item});
+      end
+      while obj.has_float()
+        item = obj.read_float();
+        writer.write_float({item});
+      end
     end
   end
 
@@ -56,8 +72,9 @@ classdef ProtocolWithKeywordStepsReaderBase < handle
   end
 
   methods (Abstract, Access=protected)
-    read_int_(obj, value)
-    read_float_(obj, value)
+    has_int_(obj)
+    read_int_(obj)
+    read_float_(obj)
 
     close_(obj)
   end

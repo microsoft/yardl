@@ -2,17 +2,21 @@
 
 classdef BenchmarkSimpleMrdWriter < yardl.binary.BinaryProtocolWriter & test_model.BenchmarkSimpleMrdWriterBase
   % Binary writer for the BenchmarkSimpleMrd protocol
+  properties (Access=protected)
+    data_serializer
+  end
+
   methods
     function obj = BenchmarkSimpleMrdWriter(filename)
       obj@test_model.BenchmarkSimpleMrdWriterBase();
       obj@yardl.binary.BinaryProtocolWriter(filename, test_model.BenchmarkSimpleMrdWriterBase.schema);
+      obj.data_serializer = yardl.binary.StreamSerializer(yardl.binary.UnionSerializer('test_model.AcquisitionOrImage', {test_model.binary.SimpleAcquisitionSerializer(), yardl.binary.NDArraySerializer(yardl.binary.Float32Serializer, 2)}, {@test_model.AcquisitionOrImage.Acquisition, @test_model.AcquisitionOrImage.Image}));
     end
   end
 
   methods (Access=protected)
     function write_data_(obj, value)
-      w = yardl.binary.StreamSerializer(yardl.binary.UnionSerializer('test_model.AcquisitionOrImage', {test_model.binary.SimpleAcquisitionSerializer(), yardl.binary.NDArraySerializer(yardl.binary.Float32Serializer, 2)}, {@test_model.AcquisitionOrImage.Acquisition, @test_model.AcquisitionOrImage.Image}));
-      w.write(obj.stream_, value);
+      obj.data_serializer.write(obj.stream_, value);
     end
   end
 end

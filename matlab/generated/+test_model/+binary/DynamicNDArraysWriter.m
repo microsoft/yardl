@@ -2,32 +2,39 @@
 
 classdef DynamicNDArraysWriter < yardl.binary.BinaryProtocolWriter & test_model.DynamicNDArraysWriterBase
   % Binary writer for the DynamicNDArrays protocol
+  properties (Access=protected)
+    ints_serializer
+    simple_record_array_serializer
+    record_with_vlens_array_serializer
+    record_with_dynamic_nd_arrays_serializer
+  end
+
   methods
     function obj = DynamicNDArraysWriter(filename)
       obj@test_model.DynamicNDArraysWriterBase();
       obj@yardl.binary.BinaryProtocolWriter(filename, test_model.DynamicNDArraysWriterBase.schema);
+      obj.ints_serializer = yardl.binary.DynamicNDArraySerializer(yardl.binary.Int32Serializer);
+      obj.simple_record_array_serializer = yardl.binary.DynamicNDArraySerializer(test_model.binary.SimpleRecordSerializer());
+      obj.record_with_vlens_array_serializer = yardl.binary.DynamicNDArraySerializer(test_model.binary.RecordWithVlensSerializer());
+      obj.record_with_dynamic_nd_arrays_serializer = test_model.binary.RecordWithDynamicNDArraysSerializer();
     end
   end
 
   methods (Access=protected)
     function write_ints_(obj, value)
-      w = yardl.binary.DynamicNDArraySerializer(yardl.binary.Int32Serializer);
-      w.write(obj.stream_, value);
+      obj.ints_serializer.write(obj.stream_, value);
     end
 
     function write_simple_record_array_(obj, value)
-      w = yardl.binary.DynamicNDArraySerializer(test_model.binary.SimpleRecordSerializer());
-      w.write(obj.stream_, value);
+      obj.simple_record_array_serializer.write(obj.stream_, value);
     end
 
     function write_record_with_vlens_array_(obj, value)
-      w = yardl.binary.DynamicNDArraySerializer(test_model.binary.RecordWithVlensSerializer());
-      w.write(obj.stream_, value);
+      obj.record_with_vlens_array_serializer.write(obj.stream_, value);
     end
 
     function write_record_with_dynamic_nd_arrays_(obj, value)
-      w = test_model.binary.RecordWithDynamicNDArraysSerializer();
-      w.write(obj.stream_, value);
+      obj.record_with_dynamic_nd_arrays_serializer.write(obj.stream_, value);
     end
   end
 end

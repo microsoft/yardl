@@ -2,32 +2,39 @@
 
 classdef ScalarOptionalsReader < yardl.binary.BinaryProtocolReader & test_model.ScalarOptionalsReaderBase
   % Binary reader for the ScalarOptionals protocol
+  properties (Access=protected)
+    optional_int_serializer
+    optional_record_serializer
+    record_with_optional_fields_serializer
+    optional_record_with_optional_fields_serializer
+  end
+
   methods
     function obj = ScalarOptionalsReader(filename)
       obj@test_model.ScalarOptionalsReaderBase();
       obj@yardl.binary.BinaryProtocolReader(filename, test_model.ScalarOptionalsReaderBase.schema);
+      obj.optional_int_serializer = yardl.binary.OptionalSerializer(yardl.binary.Int32Serializer);
+      obj.optional_record_serializer = yardl.binary.OptionalSerializer(test_model.binary.SimpleRecordSerializer());
+      obj.record_with_optional_fields_serializer = test_model.binary.RecordWithOptionalFieldsSerializer();
+      obj.optional_record_with_optional_fields_serializer = yardl.binary.OptionalSerializer(test_model.binary.RecordWithOptionalFieldsSerializer());
     end
   end
 
   methods (Access=protected)
     function value = read_optional_int_(obj)
-      r = yardl.binary.OptionalSerializer(yardl.binary.Int32Serializer);
-      value = r.read(obj.stream_);
+      value = obj.optional_int_serializer.read(obj.stream_);
     end
 
     function value = read_optional_record_(obj)
-      r = yardl.binary.OptionalSerializer(test_model.binary.SimpleRecordSerializer());
-      value = r.read(obj.stream_);
+      value = obj.optional_record_serializer.read(obj.stream_);
     end
 
     function value = read_record_with_optional_fields_(obj)
-      r = test_model.binary.RecordWithOptionalFieldsSerializer();
-      value = r.read(obj.stream_);
+      value = obj.record_with_optional_fields_serializer.read(obj.stream_);
     end
 
     function value = read_optional_record_with_optional_fields_(obj)
-      r = yardl.binary.OptionalSerializer(test_model.binary.RecordWithOptionalFieldsSerializer());
-      value = r.read(obj.stream_);
+      value = obj.optional_record_with_optional_fields_serializer.read(obj.stream_);
     end
   end
 end

@@ -2,32 +2,39 @@
 
 classdef ScalarOptionalsWriter < yardl.binary.BinaryProtocolWriter & test_model.ScalarOptionalsWriterBase
   % Binary writer for the ScalarOptionals protocol
+  properties (Access=protected)
+    optional_int_serializer
+    optional_record_serializer
+    record_with_optional_fields_serializer
+    optional_record_with_optional_fields_serializer
+  end
+
   methods
     function obj = ScalarOptionalsWriter(filename)
       obj@test_model.ScalarOptionalsWriterBase();
       obj@yardl.binary.BinaryProtocolWriter(filename, test_model.ScalarOptionalsWriterBase.schema);
+      obj.optional_int_serializer = yardl.binary.OptionalSerializer(yardl.binary.Int32Serializer);
+      obj.optional_record_serializer = yardl.binary.OptionalSerializer(test_model.binary.SimpleRecordSerializer());
+      obj.record_with_optional_fields_serializer = test_model.binary.RecordWithOptionalFieldsSerializer();
+      obj.optional_record_with_optional_fields_serializer = yardl.binary.OptionalSerializer(test_model.binary.RecordWithOptionalFieldsSerializer());
     end
   end
 
   methods (Access=protected)
     function write_optional_int_(obj, value)
-      w = yardl.binary.OptionalSerializer(yardl.binary.Int32Serializer);
-      w.write(obj.stream_, value);
+      obj.optional_int_serializer.write(obj.stream_, value);
     end
 
     function write_optional_record_(obj, value)
-      w = yardl.binary.OptionalSerializer(test_model.binary.SimpleRecordSerializer());
-      w.write(obj.stream_, value);
+      obj.optional_record_serializer.write(obj.stream_, value);
     end
 
     function write_record_with_optional_fields_(obj, value)
-      w = test_model.binary.RecordWithOptionalFieldsSerializer();
-      w.write(obj.stream_, value);
+      obj.record_with_optional_fields_serializer.write(obj.stream_, value);
     end
 
     function write_optional_record_with_optional_fields_(obj, value)
-      w = yardl.binary.OptionalSerializer(test_model.binary.RecordWithOptionalFieldsSerializer());
-      w.write(obj.stream_, value);
+      obj.optional_record_with_optional_fields_serializer.write(obj.stream_, value);
     end
   end
 end

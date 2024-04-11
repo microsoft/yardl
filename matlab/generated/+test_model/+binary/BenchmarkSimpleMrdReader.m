@@ -2,17 +2,25 @@
 
 classdef BenchmarkSimpleMrdReader < yardl.binary.BinaryProtocolReader & test_model.BenchmarkSimpleMrdReaderBase
   % Binary reader for the BenchmarkSimpleMrd protocol
+  properties (Access=protected)
+    data_serializer
+  end
+
   methods
     function obj = BenchmarkSimpleMrdReader(filename)
       obj@test_model.BenchmarkSimpleMrdReaderBase();
       obj@yardl.binary.BinaryProtocolReader(filename, test_model.BenchmarkSimpleMrdReaderBase.schema);
+      obj.data_serializer = yardl.binary.StreamSerializer(yardl.binary.UnionSerializer('test_model.AcquisitionOrImage', {test_model.binary.SimpleAcquisitionSerializer(), yardl.binary.NDArraySerializer(yardl.binary.Float32Serializer, 2)}, {@test_model.AcquisitionOrImage.Acquisition, @test_model.AcquisitionOrImage.Image}));
     end
   end
 
   methods (Access=protected)
+    function more = has_data_(obj)
+      more = obj.data_serializer.hasnext(obj.stream_);
+    end
+
     function value = read_data_(obj)
-      r = yardl.binary.StreamSerializer(yardl.binary.UnionSerializer('test_model.AcquisitionOrImage', {test_model.binary.SimpleAcquisitionSerializer(), yardl.binary.NDArraySerializer(yardl.binary.Float32Serializer, 2)}, {@test_model.AcquisitionOrImage.Acquisition, @test_model.AcquisitionOrImage.Image}));
-      value = r.read(obj.stream_);
+      value = obj.data_serializer.read(obj.stream_);
     end
   end
 end

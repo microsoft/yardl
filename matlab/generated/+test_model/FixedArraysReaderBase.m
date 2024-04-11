@@ -74,11 +74,26 @@ classdef FixedArraysReaderBase < handle
     end
 
     function copy_to(obj, writer)
-      writer.write_ints(obj.read_ints());
-      writer.write_fixed_simple_record_array(obj.read_fixed_simple_record_array());
-      writer.write_fixed_record_with_vlens_array(obj.read_fixed_record_with_vlens_array());
-      writer.write_record_with_fixed_arrays(obj.read_record_with_fixed_arrays());
-      writer.write_named_array(obj.read_named_array());
+      while obj.has_ints()
+        item = obj.read_ints();
+        writer.write_ints({item});
+      end
+      while obj.has_fixed_simple_record_array()
+        item = obj.read_fixed_simple_record_array();
+        writer.write_fixed_simple_record_array({item});
+      end
+      while obj.has_fixed_record_with_vlens_array()
+        item = obj.read_fixed_record_with_vlens_array();
+        writer.write_fixed_record_with_vlens_array({item});
+      end
+      while obj.has_record_with_fixed_arrays()
+        item = obj.read_record_with_fixed_arrays();
+        writer.write_record_with_fixed_arrays({item});
+      end
+      while obj.has_named_array()
+        item = obj.read_named_array();
+        writer.write_named_array({item});
+      end
     end
   end
 
@@ -89,11 +104,11 @@ classdef FixedArraysReaderBase < handle
   end
 
   methods (Abstract, Access=protected)
-    read_ints_(obj, value)
-    read_fixed_simple_record_array_(obj, value)
-    read_fixed_record_with_vlens_array_(obj, value)
-    read_record_with_fixed_arrays_(obj, value)
-    read_named_array_(obj, value)
+    read_ints_(obj)
+    read_fixed_simple_record_array_(obj)
+    read_fixed_record_with_vlens_array_(obj)
+    read_record_with_fixed_arrays_(obj)
+    read_named_array_(obj)
 
     close_(obj)
   end

@@ -30,7 +30,6 @@ classdef CodedInputStream < handle
             end
         end
 
-        % In Python, this uses struct packing for any selfect...
         function res = read(self, count)
             res = fread(self.fid_, count, "*uint8");
         end

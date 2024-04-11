@@ -34,7 +34,10 @@ classdef NestedRecordsReaderBase < handle
     end
 
     function copy_to(obj, writer)
-      writer.write_tuple_with_records(obj.read_tuple_with_records());
+      while obj.has_tuple_with_records()
+        item = obj.read_tuple_with_records();
+        writer.write_tuple_with_records({item});
+      end
     end
   end
 
@@ -45,7 +48,7 @@ classdef NestedRecordsReaderBase < handle
   end
 
   methods (Abstract, Access=protected)
-    read_tuple_with_records_(obj, value)
+    read_tuple_with_records_(obj)
 
     close_(obj)
   end

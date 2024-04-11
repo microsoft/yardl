@@ -2,22 +2,27 @@
 
 classdef ScalarsWriter < yardl.binary.BinaryProtocolWriter & test_model.ScalarsWriterBase
   % Binary writer for the Scalars protocol
+  properties (Access=protected)
+    int32_serializer
+    record_serializer
+  end
+
   methods
     function obj = ScalarsWriter(filename)
       obj@test_model.ScalarsWriterBase();
       obj@yardl.binary.BinaryProtocolWriter(filename, test_model.ScalarsWriterBase.schema);
+      obj.int32_serializer = yardl.binary.Int32Serializer;
+      obj.record_serializer = test_model.binary.RecordWithPrimitivesSerializer();
     end
   end
 
   methods (Access=protected)
     function write_int32_(obj, value)
-      w = yardl.binary.Int32Serializer;
-      w.write(obj.stream_, value);
+      obj.int32_serializer.write(obj.stream_, value);
     end
 
     function write_record_(obj, value)
-      w = test_model.binary.RecordWithPrimitivesSerializer();
-      w.write(obj.stream_, value);
+      obj.record_serializer.write(obj.stream_, value);
     end
   end
 end

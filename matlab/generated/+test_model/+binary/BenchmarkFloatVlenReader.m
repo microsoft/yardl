@@ -2,17 +2,25 @@
 
 classdef BenchmarkFloatVlenReader < yardl.binary.BinaryProtocolReader & test_model.BenchmarkFloatVlenReaderBase
   % Binary reader for the BenchmarkFloatVlen protocol
+  properties (Access=protected)
+    float_array_serializer
+  end
+
   methods
     function obj = BenchmarkFloatVlenReader(filename)
       obj@test_model.BenchmarkFloatVlenReaderBase();
       obj@yardl.binary.BinaryProtocolReader(filename, test_model.BenchmarkFloatVlenReaderBase.schema);
+      obj.float_array_serializer = yardl.binary.StreamSerializer(yardl.binary.NDArraySerializer(yardl.binary.Float32Serializer, 2));
     end
   end
 
   methods (Access=protected)
+    function more = has_float_array_(obj)
+      more = obj.float_array_serializer.hasnext(obj.stream_);
+    end
+
     function value = read_float_array_(obj)
-      r = yardl.binary.StreamSerializer(yardl.binary.NDArraySerializer(yardl.binary.Float32Serializer, 2));
-      value = r.read(obj.stream_);
+      value = obj.float_array_serializer.read(obj.stream_);
     end
   end
 end

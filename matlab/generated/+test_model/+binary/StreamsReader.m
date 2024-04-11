@@ -2,32 +2,55 @@
 
 classdef StreamsReader < yardl.binary.BinaryProtocolReader & test_model.StreamsReaderBase
   % Binary reader for the Streams protocol
+  properties (Access=protected)
+    int_data_serializer
+    optional_int_data_serializer
+    record_with_optional_vector_data_serializer
+    fixed_vector_serializer
+  end
+
   methods
     function obj = StreamsReader(filename)
       obj@test_model.StreamsReaderBase();
       obj@yardl.binary.BinaryProtocolReader(filename, test_model.StreamsReaderBase.schema);
+      obj.int_data_serializer = yardl.binary.StreamSerializer(yardl.binary.Int32Serializer);
+      obj.optional_int_data_serializer = yardl.binary.StreamSerializer(yardl.binary.OptionalSerializer(yardl.binary.Int32Serializer));
+      obj.record_with_optional_vector_data_serializer = yardl.binary.StreamSerializer(test_model.binary.RecordWithOptionalVectorSerializer());
+      obj.fixed_vector_serializer = yardl.binary.StreamSerializer(yardl.binary.FixedVectorSerializer(yardl.binary.Int32Serializer, 3));
     end
   end
 
   methods (Access=protected)
+    function more = has_int_data_(obj)
+      more = obj.int_data_serializer.hasnext(obj.stream_);
+    end
+
     function value = read_int_data_(obj)
-      r = yardl.binary.StreamSerializer(yardl.binary.Int32Serializer);
-      value = r.read(obj.stream_);
+      value = obj.int_data_serializer.read(obj.stream_);
+    end
+
+    function more = has_optional_int_data_(obj)
+      more = obj.optional_int_data_serializer.hasnext(obj.stream_);
     end
 
     function value = read_optional_int_data_(obj)
-      r = yardl.binary.StreamSerializer(yardl.binary.OptionalSerializer(yardl.binary.Int32Serializer));
-      value = r.read(obj.stream_);
+      value = obj.optional_int_data_serializer.read(obj.stream_);
+    end
+
+    function more = has_record_with_optional_vector_data_(obj)
+      more = obj.record_with_optional_vector_data_serializer.hasnext(obj.stream_);
     end
 
     function value = read_record_with_optional_vector_data_(obj)
-      r = yardl.binary.StreamSerializer(test_model.binary.RecordWithOptionalVectorSerializer());
-      value = r.read(obj.stream_);
+      value = obj.record_with_optional_vector_data_serializer.read(obj.stream_);
+    end
+
+    function more = has_fixed_vector_(obj)
+      more = obj.fixed_vector_serializer.hasnext(obj.stream_);
     end
 
     function value = read_fixed_vector_(obj)
-      r = yardl.binary.StreamSerializer(yardl.binary.FixedVectorSerializer(yardl.binary.Int32Serializer, 3));
-      value = r.read(obj.stream_);
+      value = obj.fixed_vector_serializer.read(obj.stream_);
     end
   end
 end

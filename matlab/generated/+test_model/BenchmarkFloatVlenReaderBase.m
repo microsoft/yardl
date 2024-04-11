@@ -24,17 +24,30 @@ classdef BenchmarkFloatVlenReaderBase < handle
     end
 
     % Ordinal 0
+    function more = has_float_array(obj)
+      if obj.state_ ~= 0
+        obj.raise_unexpected_state_(0);
+      end
+
+      more = obj.has_float_array_();
+      if ~more
+        obj.state_ = 2;
+      end
+    end
+
     function value = read_float_array(obj)
       if obj.state_ ~= 0
         obj.raise_unexpected_state_(0);
       end
 
       value = obj.read_float_array_();
-      obj.state_ = 2;
     end
 
     function copy_to(obj, writer)
-      writer.write_float_array(obj.read_float_array());
+      while obj.has_float_array()
+        item = obj.read_float_array();
+        writer.write_float_array({item});
+      end
     end
   end
 
@@ -45,7 +58,8 @@ classdef BenchmarkFloatVlenReaderBase < handle
   end
 
   methods (Abstract, Access=protected)
-    read_float_array_(obj, value)
+    has_float_array_(obj)
+    read_float_array_(obj)
 
     close_(obj)
   end

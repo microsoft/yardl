@@ -45,20 +45,25 @@ classdef ProtocolStateTest < matlab.unittest.TestCase
         function testProperSequenceRead(testCase)
             r = ProtocolStateTestReader();
             r.read_an_int();
-            r.read_a_stream();
+            while r.has_a_stream()
+                r.read_a_stream();
+            end
             r.read_another_int();
             r.close();
         end
 
         function testReadSkipFirstStep(testCase)
             r = ProtocolStateTestReader();
+            testCase.verifyError(@() r.has_a_stream(), 'yardl:ProtocolError');
             testCase.verifyError(@() r.read_a_stream(), 'yardl:ProtocolError');
         end
 
         function testReadCloseEarly(testCase)
             r = ProtocolStateTestReader();
             r.read_an_int();
-            r.read_a_stream();
+            while r.has_a_stream()
+                r.read_a_stream();
+            end
             testCase.verifyError(@() r.close(), 'yardl:ProtocolError');
         end
 

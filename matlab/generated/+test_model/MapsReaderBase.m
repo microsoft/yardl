@@ -64,10 +64,22 @@ classdef MapsReaderBase < handle
     end
 
     function copy_to(obj, writer)
-      writer.write_string_to_int(obj.read_string_to_int());
-      writer.write_int_to_string(obj.read_int_to_string());
-      writer.write_string_to_union(obj.read_string_to_union());
-      writer.write_aliased_generic(obj.read_aliased_generic());
+      while obj.has_string_to_int()
+        item = obj.read_string_to_int();
+        writer.write_string_to_int({item});
+      end
+      while obj.has_int_to_string()
+        item = obj.read_int_to_string();
+        writer.write_int_to_string({item});
+      end
+      while obj.has_string_to_union()
+        item = obj.read_string_to_union();
+        writer.write_string_to_union({item});
+      end
+      while obj.has_aliased_generic()
+        item = obj.read_aliased_generic();
+        writer.write_aliased_generic({item});
+      end
     end
   end
 
@@ -78,10 +90,10 @@ classdef MapsReaderBase < handle
   end
 
   methods (Abstract, Access=protected)
-    read_string_to_int_(obj, value)
-    read_int_to_string_(obj, value)
-    read_string_to_union_(obj, value)
-    read_aliased_generic_(obj, value)
+    read_string_to_int_(obj)
+    read_int_to_string_(obj)
+    read_string_to_union_(obj)
+    read_aliased_generic_(obj)
 
     close_(obj)
   end

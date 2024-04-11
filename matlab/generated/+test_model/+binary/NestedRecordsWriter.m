@@ -2,17 +2,21 @@
 
 classdef NestedRecordsWriter < yardl.binary.BinaryProtocolWriter & test_model.NestedRecordsWriterBase
   % Binary writer for the NestedRecords protocol
+  properties (Access=protected)
+    tuple_with_records_serializer
+  end
+
   methods
     function obj = NestedRecordsWriter(filename)
       obj@test_model.NestedRecordsWriterBase();
       obj@yardl.binary.BinaryProtocolWriter(filename, test_model.NestedRecordsWriterBase.schema);
+      obj.tuple_with_records_serializer = test_model.binary.TupleWithRecordsSerializer();
     end
   end
 
   methods (Access=protected)
     function write_tuple_with_records_(obj, value)
-      w = test_model.binary.TupleWithRecordsSerializer();
-      w.write(obj.stream_, value);
+      obj.tuple_with_records_serializer.write(obj.stream_, value);
     end
   end
 end

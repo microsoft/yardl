@@ -154,7 +154,6 @@ func writeAbstractWriter(fw *common.MatlabFileWriter, p *dsl.ProtocolDefinition,
 					})
 				})
 			})
-
 		})
 	})
 }
@@ -201,9 +200,26 @@ func writeAbstractReader(fw *common.MatlabFileWriter, p *dsl.ProtocolDefinition,
 				})
 				w.WriteStringln("")
 
-				// Public read methods
+				// Public has/read methods
 				for i, step := range p.Sequence {
 					common.WriteComment(w, fmt.Sprintf("Ordinal %d", i))
+					if step.IsStream() {
+						fmt.Fprintf(w, "function more = %s(obj)\n", common.ProtocolHasMoreMethodName(step))
+						common.WriteBlockBody(w, func() {
+							fmt.Fprintf(w, "if obj.state_ ~= %d\n", i*2)
+							common.WriteBlockBody(w, func() {
+								fmt.Fprintf(w, "obj.raise_unexpected_state_(%d);\n", i*2)
+							})
+							w.WriteStringln("")
+
+							fmt.Fprintf(w, "more = obj.%s();\n", common.ProtocolHasMoreImplMethodName(step))
+							w.WriteStringln("if ~more")
+							common.WriteBlockBody(w, func() {
+								fmt.Fprintf(w, "obj.state_ = %d;\n", (i+1)*2)
+							})
+						})
+						w.WriteStringln("")
+					}
 					common.WriteComment(w, step.Comment)
 					fmt.Fprintf(w, "function value = %s(obj)\n", common.ProtocolReadMethodName(step))
 					common.WriteBlockBody(w, func() {
@@ -214,9 +230,7 @@ func writeAbstractReader(fw *common.MatlabFileWriter, p *dsl.ProtocolDefinition,
 						w.WriteStringln("")
 
 						fmt.Fprintf(w, "value = obj.%s();\n", common.ProtocolReadImplMethodName(step))
-						if step.IsStream() {
-							fmt.Fprintf(w, "obj.state_ = %d;\n", (i+1)*2)
-						} else {
+						if !step.IsStream() {
 							fmt.Fprintf(w, "obj.state_ = %d;\n", (i+1)*2)
 						}
 					})
@@ -227,7 +241,11 @@ func writeAbstractReader(fw *common.MatlabFileWriter, p *dsl.ProtocolDefinition,
 				fmt.Fprintf(w, "function copy_to(obj, writer)\n")
 				common.WriteBlockBody(w, func() {
 					for _, step := range p.Sequence {
-						fmt.Fprintf(w, "writer.%s(obj.%s());\n", common.ProtocolWriteMethodName(step), common.ProtocolReadMethodName(step))
+						fmt.Fprintf(w, "while obj.%s()\n", common.ProtocolHasMoreMethodName(step))
+						common.WriteBlockBody(w, func() {
+							fmt.Fprintf(w, "item = obj.%s();\n", common.ProtocolReadMethodName(step))
+							fmt.Fprintf(w, "writer.%s({item});\n", common.ProtocolWriteMethodName(step))
+						})
 					}
 				})
 			})
@@ -246,7 +264,10 @@ func writeAbstractReader(fw *common.MatlabFileWriter, p *dsl.ProtocolDefinition,
 			w.WriteStringln("methods (Abstract, Access=protected)")
 			common.WriteBlockBody(w, func() {
 				for _, step := range p.Sequence {
-					fmt.Fprintf(w, "%s(obj, value)\n", common.ProtocolReadImplMethodName(step))
+					if step.IsStream() {
+						fmt.Fprintf(w, "%s(obj)\n", common.ProtocolHasMoreImplMethodName(step))
+					}
+					fmt.Fprintf(w, "%s(obj)\n", common.ProtocolReadImplMethodName(step))
 				}
 
 				w.WriteStringln("")

@@ -54,9 +54,18 @@ classdef EnumsReaderBase < handle
     end
 
     function copy_to(obj, writer)
-      writer.write_single(obj.read_single());
-      writer.write_vec(obj.read_vec());
-      writer.write_size(obj.read_size());
+      while obj.has_single()
+        item = obj.read_single();
+        writer.write_single({item});
+      end
+      while obj.has_vec()
+        item = obj.read_vec();
+        writer.write_vec({item});
+      end
+      while obj.has_size()
+        item = obj.read_size();
+        writer.write_size({item});
+      end
     end
   end
 
@@ -67,9 +76,9 @@ classdef EnumsReaderBase < handle
   end
 
   methods (Abstract, Access=protected)
-    read_single_(obj, value)
-    read_vec_(obj, value)
-    read_size_(obj, value)
+    read_single_(obj)
+    read_vec_(obj)
+    read_size_(obj)
 
     close_(obj)
   end

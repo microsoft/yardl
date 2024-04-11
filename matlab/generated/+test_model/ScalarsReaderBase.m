@@ -44,8 +44,14 @@ classdef ScalarsReaderBase < handle
     end
 
     function copy_to(obj, writer)
-      writer.write_int32(obj.read_int32());
-      writer.write_record(obj.read_record());
+      while obj.has_int32()
+        item = obj.read_int32();
+        writer.write_int32({item});
+      end
+      while obj.has_record()
+        item = obj.read_record();
+        writer.write_record({item});
+      end
     end
   end
 
@@ -56,8 +62,8 @@ classdef ScalarsReaderBase < handle
   end
 
   methods (Abstract, Access=protected)
-    read_int32_(obj, value)
-    read_record_(obj, value)
+    read_int32_(obj)
+    read_record_(obj)
 
     close_(obj)
   end

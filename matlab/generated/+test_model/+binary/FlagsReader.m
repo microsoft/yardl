@@ -2,22 +2,35 @@
 
 classdef FlagsReader < yardl.binary.BinaryProtocolReader & test_model.FlagsReaderBase
   % Binary reader for the Flags protocol
+  properties (Access=protected)
+    days_serializer
+    formats_serializer
+  end
+
   methods
     function obj = FlagsReader(filename)
       obj@test_model.FlagsReaderBase();
       obj@yardl.binary.BinaryProtocolReader(filename, test_model.FlagsReaderBase.schema);
+      obj.days_serializer = yardl.binary.StreamSerializer(yardl.binary.EnumSerializer('basic_types.DaysOfWeek', @basic_types.DaysOfWeek, yardl.binary.Int32Serializer));
+      obj.formats_serializer = yardl.binary.StreamSerializer(yardl.binary.EnumSerializer('basic_types.TextFormat', @basic_types.TextFormat, yardl.binary.Uint64Serializer));
     end
   end
 
   methods (Access=protected)
+    function more = has_days_(obj)
+      more = obj.days_serializer.hasnext(obj.stream_);
+    end
+
     function value = read_days_(obj)
-      r = yardl.binary.StreamSerializer(yardl.binary.EnumSerializer('basic_types.DaysOfWeek', @basic_types.DaysOfWeek, yardl.binary.Int32Serializer));
-      value = r.read(obj.stream_);
+      value = obj.days_serializer.read(obj.stream_);
+    end
+
+    function more = has_formats_(obj)
+      more = obj.formats_serializer.hasnext(obj.stream_);
     end
 
     function value = read_formats_(obj)
-      r = yardl.binary.StreamSerializer(yardl.binary.EnumSerializer('basic_types.TextFormat', @basic_types.TextFormat, yardl.binary.Uint64Serializer));
-      value = r.read(obj.stream_);
+      value = obj.formats_serializer.read(obj.stream_);
     end
   end
 end

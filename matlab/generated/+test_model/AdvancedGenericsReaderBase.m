@@ -74,11 +74,26 @@ classdef AdvancedGenericsReaderBase < handle
     end
 
     function copy_to(obj, writer)
-      writer.write_float_image_image(obj.read_float_image_image());
-      writer.write_generic_record_1(obj.read_generic_record_1());
-      writer.write_tuple_of_optionals(obj.read_tuple_of_optionals());
-      writer.write_tuple_of_optionals_alternate_syntax(obj.read_tuple_of_optionals_alternate_syntax());
-      writer.write_tuple_of_vectors(obj.read_tuple_of_vectors());
+      while obj.has_float_image_image()
+        item = obj.read_float_image_image();
+        writer.write_float_image_image({item});
+      end
+      while obj.has_generic_record_1()
+        item = obj.read_generic_record_1();
+        writer.write_generic_record_1({item});
+      end
+      while obj.has_tuple_of_optionals()
+        item = obj.read_tuple_of_optionals();
+        writer.write_tuple_of_optionals({item});
+      end
+      while obj.has_tuple_of_optionals_alternate_syntax()
+        item = obj.read_tuple_of_optionals_alternate_syntax();
+        writer.write_tuple_of_optionals_alternate_syntax({item});
+      end
+      while obj.has_tuple_of_vectors()
+        item = obj.read_tuple_of_vectors();
+        writer.write_tuple_of_vectors({item});
+      end
     end
   end
 
@@ -89,11 +104,11 @@ classdef AdvancedGenericsReaderBase < handle
   end
 
   methods (Abstract, Access=protected)
-    read_float_image_image_(obj, value)
-    read_generic_record_1_(obj, value)
-    read_tuple_of_optionals_(obj, value)
-    read_tuple_of_optionals_alternate_syntax_(obj, value)
-    read_tuple_of_vectors_(obj, value)
+    read_float_image_image_(obj)
+    read_generic_record_1_(obj)
+    read_tuple_of_optionals_(obj)
+    read_tuple_of_optionals_alternate_syntax_(obj)
+    read_tuple_of_vectors_(obj)
 
     close_(obj)
   end

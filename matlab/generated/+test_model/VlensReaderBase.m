@@ -64,10 +64,22 @@ classdef VlensReaderBase < handle
     end
 
     function copy_to(obj, writer)
-      writer.write_int_vector(obj.read_int_vector());
-      writer.write_complex_vector(obj.read_complex_vector());
-      writer.write_record_with_vlens(obj.read_record_with_vlens());
-      writer.write_vlen_of_record_with_vlens(obj.read_vlen_of_record_with_vlens());
+      while obj.has_int_vector()
+        item = obj.read_int_vector();
+        writer.write_int_vector({item});
+      end
+      while obj.has_complex_vector()
+        item = obj.read_complex_vector();
+        writer.write_complex_vector({item});
+      end
+      while obj.has_record_with_vlens()
+        item = obj.read_record_with_vlens();
+        writer.write_record_with_vlens({item});
+      end
+      while obj.has_vlen_of_record_with_vlens()
+        item = obj.read_vlen_of_record_with_vlens();
+        writer.write_vlen_of_record_with_vlens({item});
+      end
     end
   end
 
@@ -78,10 +90,10 @@ classdef VlensReaderBase < handle
   end
 
   methods (Abstract, Access=protected)
-    read_int_vector_(obj, value)
-    read_complex_vector_(obj, value)
-    read_record_with_vlens_(obj, value)
-    read_vlen_of_record_with_vlens_(obj, value)
+    read_int_vector_(obj)
+    read_complex_vector_(obj)
+    read_record_with_vlens_(obj)
+    read_vlen_of_record_with_vlens_(obj)
 
     close_(obj)
   end

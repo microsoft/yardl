@@ -2,37 +2,45 @@
 
 classdef NDArraysWriter < yardl.binary.BinaryProtocolWriter & test_model.NDArraysWriterBase
   % Binary writer for the NDArrays protocol
+  properties (Access=protected)
+    ints_serializer
+    simple_record_array_serializer
+    record_with_vlens_array_serializer
+    record_with_nd_arrays_serializer
+    named_array_serializer
+  end
+
   methods
     function obj = NDArraysWriter(filename)
       obj@test_model.NDArraysWriterBase();
       obj@yardl.binary.BinaryProtocolWriter(filename, test_model.NDArraysWriterBase.schema);
+      obj.ints_serializer = yardl.binary.NDArraySerializer(yardl.binary.Int32Serializer, 2);
+      obj.simple_record_array_serializer = yardl.binary.NDArraySerializer(test_model.binary.SimpleRecordSerializer(), 2);
+      obj.record_with_vlens_array_serializer = yardl.binary.NDArraySerializer(test_model.binary.RecordWithVlensSerializer(), 2);
+      obj.record_with_nd_arrays_serializer = test_model.binary.RecordWithNDArraysSerializer();
+      obj.named_array_serializer = yardl.binary.NDArraySerializer(yardl.binary.Int32Serializer, 2);
     end
   end
 
   methods (Access=protected)
     function write_ints_(obj, value)
-      w = yardl.binary.NDArraySerializer(yardl.binary.Int32Serializer, 2);
-      w.write(obj.stream_, value);
+      obj.ints_serializer.write(obj.stream_, value);
     end
 
     function write_simple_record_array_(obj, value)
-      w = yardl.binary.NDArraySerializer(test_model.binary.SimpleRecordSerializer(), 2);
-      w.write(obj.stream_, value);
+      obj.simple_record_array_serializer.write(obj.stream_, value);
     end
 
     function write_record_with_vlens_array_(obj, value)
-      w = yardl.binary.NDArraySerializer(test_model.binary.RecordWithVlensSerializer(), 2);
-      w.write(obj.stream_, value);
+      obj.record_with_vlens_array_serializer.write(obj.stream_, value);
     end
 
     function write_record_with_nd_arrays_(obj, value)
-      w = test_model.binary.RecordWithNDArraysSerializer();
-      w.write(obj.stream_, value);
+      obj.record_with_nd_arrays_serializer.write(obj.stream_, value);
     end
 
     function write_named_array_(obj, value)
-      w = yardl.binary.NDArraySerializer(yardl.binary.Int32Serializer, 2);
-      w.write(obj.stream_, value);
+      obj.named_array_serializer.write(obj.stream_, value);
     end
   end
 end

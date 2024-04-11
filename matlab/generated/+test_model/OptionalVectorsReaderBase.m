@@ -34,7 +34,10 @@ classdef OptionalVectorsReaderBase < handle
     end
 
     function copy_to(obj, writer)
-      writer.write_record_with_optional_vector(obj.read_record_with_optional_vector());
+      while obj.has_record_with_optional_vector()
+        item = obj.read_record_with_optional_vector();
+        writer.write_record_with_optional_vector({item});
+      end
     end
   end
 
@@ -45,7 +48,7 @@ classdef OptionalVectorsReaderBase < handle
   end
 
   methods (Abstract, Access=protected)
-    read_record_with_optional_vector_(obj, value)
+    read_record_with_optional_vector_(obj)
 
     close_(obj)
   end

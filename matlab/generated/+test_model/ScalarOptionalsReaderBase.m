@@ -64,10 +64,22 @@ classdef ScalarOptionalsReaderBase < handle
     end
 
     function copy_to(obj, writer)
-      writer.write_optional_int(obj.read_optional_int());
-      writer.write_optional_record(obj.read_optional_record());
-      writer.write_record_with_optional_fields(obj.read_record_with_optional_fields());
-      writer.write_optional_record_with_optional_fields(obj.read_optional_record_with_optional_fields());
+      while obj.has_optional_int()
+        item = obj.read_optional_int();
+        writer.write_optional_int({item});
+      end
+      while obj.has_optional_record()
+        item = obj.read_optional_record();
+        writer.write_optional_record({item});
+      end
+      while obj.has_record_with_optional_fields()
+        item = obj.read_record_with_optional_fields();
+        writer.write_record_with_optional_fields({item});
+      end
+      while obj.has_optional_record_with_optional_fields()
+        item = obj.read_optional_record_with_optional_fields();
+        writer.write_optional_record_with_optional_fields({item});
+      end
     end
   end
 
@@ -78,10 +90,10 @@ classdef ScalarOptionalsReaderBase < handle
   end
 
   methods (Abstract, Access=protected)
-    read_optional_int_(obj, value)
-    read_optional_record_(obj, value)
-    read_record_with_optional_fields_(obj, value)
-    read_optional_record_with_optional_fields_(obj, value)
+    read_optional_int_(obj)
+    read_optional_record_(obj)
+    read_record_with_optional_fields_(obj)
+    read_optional_record_with_optional_fields_(obj)
 
     close_(obj)
   end

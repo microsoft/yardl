@@ -24,17 +24,30 @@ classdef BenchmarkSmallRecordReaderBase < handle
     end
 
     % Ordinal 0
+    function more = has_small_record(obj)
+      if obj.state_ ~= 0
+        obj.raise_unexpected_state_(0);
+      end
+
+      more = obj.has_small_record_();
+      if ~more
+        obj.state_ = 2;
+      end
+    end
+
     function value = read_small_record(obj)
       if obj.state_ ~= 0
         obj.raise_unexpected_state_(0);
       end
 
       value = obj.read_small_record_();
-      obj.state_ = 2;
     end
 
     function copy_to(obj, writer)
-      writer.write_small_record(obj.read_small_record());
+      while obj.has_small_record()
+        item = obj.read_small_record();
+        writer.write_small_record({item});
+      end
     end
   end
 
@@ -45,7 +58,8 @@ classdef BenchmarkSmallRecordReaderBase < handle
   end
 
   methods (Abstract, Access=protected)
-    read_small_record_(obj, value)
+    has_small_record_(obj)
+    read_small_record_(obj)
 
     close_(obj)
   end
