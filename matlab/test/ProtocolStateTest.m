@@ -8,6 +8,7 @@ classdef ProtocolStateTest < matlab.unittest.TestCase
             w = ProtocolStateTestWriter();
             w.write_an_int(1);
             w.write_a_stream([1, 2, 3]);
+            w.end_a_stream();
             w.write_another_int(3);
             w.close();
         end
@@ -16,6 +17,7 @@ classdef ProtocolStateTest < matlab.unittest.TestCase
             w = ProtocolStateTestWriter();
             w.write_an_int(1);
             w.write_a_stream([]);
+            w.end_a_stream();
             w.write_another_int(3);
             w.close();
         end
@@ -25,6 +27,7 @@ classdef ProtocolStateTest < matlab.unittest.TestCase
             w.write_an_int(1);
             w.write_a_stream([1, 2, 3]);
             w.write_a_stream([4, 5, 6]);
+            w.end_a_stream();
             w.write_another_int(3);
             w.close();
         end
@@ -32,6 +35,13 @@ classdef ProtocolStateTest < matlab.unittest.TestCase
         function testSequenceWriteMissingFirstStep(testCase)
             w = ProtocolStateTestWriter();
             testCase.verifyError(@() w.write_a_stream([1, 2, 3]), 'yardl:ProtocolError');
+        end
+
+        function testSequenceWriteMissingEndStream(testCase)
+            w = ProtocolStateTestWriter();
+            w.write_an_int(1);
+            w.write_a_stream([1, 2, 3]);
+            testCase.verifyError(@() w.write_another_int(4), 'yardl:ProtocolError');
         end
 
         function testSequenceWritePrematureClose(testCase)

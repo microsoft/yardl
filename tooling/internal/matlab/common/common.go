@@ -203,6 +203,10 @@ func ProtocolWriteImplMethodName(s *dsl.ProtocolStep) string {
 	return fmt.Sprintf("write_%s_", formatting.ToSnakeCase(s.Name))
 }
 
+func ProtocolEndMethodName(s *dsl.ProtocolStep) string {
+	return fmt.Sprintf("end_%s", formatting.ToSnakeCase(s.Name))
+}
+
 func ProtocolReadMethodName(s *dsl.ProtocolStep) string {
 	return fmt.Sprintf("read_%s", formatting.ToSnakeCase(s.Name))
 }

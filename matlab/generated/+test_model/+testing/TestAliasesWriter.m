@@ -27,6 +27,11 @@ classdef TestAliasesWriter < test_model.AliasesWriterBase
         throw(yardl.RuntimeError("Close() must be called on 'TestAliasesWriter' to verify mocks"));
       end
     end
+    function end_stream_of_aliased_generic_union_2(obj)
+      end_stream_of_aliased_generic_union_2@test_model.AliasesWriterBase(obj);
+      obj.writer_.end_stream_of_aliased_generic_union_2();
+    end
+
   end
 
   methods (Access=protected)

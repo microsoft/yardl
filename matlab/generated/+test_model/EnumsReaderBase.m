@@ -12,14 +12,9 @@ classdef EnumsReaderBase < handle
 
     function close(obj)
       obj.close_();
-      if obj.state_ ~= 6
-        if mod(obj.state_, 2) == 1
-          previous_method = obj.state_to_method_name_(obj.state_ - 1);
-          throw(yardl.ProtocolError("Protocol reader closed before all data was consumed. The iterable returned by '%s' was not fully consumed.", previous_method));
-        else
-          expected_method = obj.state_to_method_name_(obj.state_);
-          throw(yardl.ProtocolError("Protocol reader closed before all data was consumed. Expected call to '%s'.", expected_method));
-        end
+      if obj.state_ ~= 3
+        expected_method = obj.state_to_method_name_(obj.state_);
+        throw(yardl.ProtocolError("Protocol reader closed before all data was consumed. Expected call to '%s'.", expected_method));
       end
     end
 
@@ -30,42 +25,33 @@ classdef EnumsReaderBase < handle
       end
 
       value = obj.read_single_();
-      obj.state_ = 2;
+      obj.state_ = 1;
     end
 
     % Ordinal 1
     function value = read_vec(obj)
-      if obj.state_ ~= 2
-        obj.raise_unexpected_state_(2);
+      if obj.state_ ~= 1
+        obj.raise_unexpected_state_(1);
       end
 
       value = obj.read_vec_();
-      obj.state_ = 4;
+      obj.state_ = 2;
     end
 
     % Ordinal 2
     function value = read_size(obj)
-      if obj.state_ ~= 4
-        obj.raise_unexpected_state_(4);
+      if obj.state_ ~= 2
+        obj.raise_unexpected_state_(2);
       end
 
       value = obj.read_size_();
-      obj.state_ = 6;
+      obj.state_ = 3;
     end
 
     function copy_to(obj, writer)
-      while obj.has_single()
-        item = obj.read_single();
-        writer.write_single({item});
-      end
-      while obj.has_vec()
-        item = obj.read_vec();
-        writer.write_vec({item});
-      end
-      while obj.has_size()
-        item = obj.read_size();
-        writer.write_size({item});
-      end
+      writer.write_single(obj.read_single());
+      writer.write_vec(obj.read_vec());
+      writer.write_size(obj.read_size());
     end
   end
 
@@ -93,9 +79,9 @@ classdef EnumsReaderBase < handle
     function name = state_to_method_name_(obj, state)
       if state == 0
         name = 'read_single';
-      elseif state == 2
+      elseif state == 1
         name = 'read_vec';
-      elseif state == 4
+      elseif state == 2
         name = 'read_size';
       else
         name = '<unknown>';

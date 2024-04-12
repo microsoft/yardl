@@ -3,54 +3,42 @@
 classdef MockScalarsWriter < matlab.mixin.Copyable & test_model.ScalarsWriterBase
   properties
     testCase_
-    write_int32_written
-    write_record_written
+    expected_int32
+    expected_record
   end
 
   methods
     function obj = MockScalarsWriter(testCase)
       obj.testCase_ = testCase;
-      obj.write_int32_written = yardl.None;
-      obj.write_record_written = yardl.None;
+      obj.expected_int32 = yardl.None;
+      obj.expected_record = yardl.None;
     end
 
     function expect_write_int32_(obj, value)
-      if obj.write_int32_written.has_value()
-        last_dim = ndims(value);
-        obj.write_int32_written = yardl.Optional(cat(last_dim, obj.write_int32_written.value, value));
-      else
-        obj.write_int32_written = yardl.Optional(value);
-      end
+      obj.expected_int32 = yardl.Optional(value);
     end
 
     function expect_write_record_(obj, value)
-      if obj.write_record_written.has_value()
-        last_dim = ndims(value);
-        obj.write_record_written = yardl.Optional(cat(last_dim, obj.write_record_written.value, value));
-      else
-        obj.write_record_written = yardl.Optional(value);
-      end
+      obj.expected_record = yardl.Optional(value);
     end
 
     function verify(obj)
-      obj.testCase_.verifyEqual(obj.write_int32_written, yardl.None, "Expected call to write_int32_ was not received");
-      obj.testCase_.verifyEqual(obj.write_record_written, yardl.None, "Expected call to write_record_ was not received");
+      obj.testCase_.verifyEqual(obj.expected_int32, yardl.None, "Expected call to write_int32_ was not received");
+      obj.testCase_.verifyEqual(obj.expected_record, yardl.None, "Expected call to write_record_ was not received");
     end
   end
 
   methods (Access=protected)
     function write_int32_(obj, value)
-      obj.testCase_.verifyTrue(obj.write_int32_written.has_value(), "Unexpected call to write_int32_");
-      expected = obj.write_int32_written.value;
-      obj.testCase_.verifyEqual(value, expected, "Unexpected argument value for call to write_int32_");
-      obj.write_int32_written = yardl.None;
+      obj.testCase_.verifyTrue(obj.expected_int32.has_value(), "Unexpected call to write_int32_");
+      obj.testCase_.verifyEqual(value, obj.expected_int32.value, "Unexpected argument value for call to write_int32_");
+      obj.expected_int32 = yardl.None;
     end
 
     function write_record_(obj, value)
-      obj.testCase_.verifyTrue(obj.write_record_written.has_value(), "Unexpected call to write_record_");
-      expected = obj.write_record_written.value;
-      obj.testCase_.verifyEqual(value, expected, "Unexpected argument value for call to write_record_");
-      obj.write_record_written = yardl.None;
+      obj.testCase_.verifyTrue(obj.expected_record.has_value(), "Unexpected call to write_record_");
+      obj.testCase_.verifyEqual(value, obj.expected_record.value, "Unexpected argument value for call to write_record_");
+      obj.expected_record = yardl.None;
     end
 
     function close_(obj)

@@ -3,187 +3,147 @@
 classdef MockSimpleGenericsWriter < matlab.mixin.Copyable & test_model.SimpleGenericsWriterBase
   properties
     testCase_
-    write_float_image_written
-    write_int_image_written
-    write_int_image_alternate_syntax_written
-    write_string_image_written
-    write_int_float_tuple_written
-    write_float_float_tuple_written
-    write_int_float_tuple_alternate_syntax_written
-    write_int_string_tuple_written
-    write_stream_of_type_variants_written
+    expected_float_image
+    expected_int_image
+    expected_int_image_alternate_syntax
+    expected_string_image
+    expected_int_float_tuple
+    expected_float_float_tuple
+    expected_int_float_tuple_alternate_syntax
+    expected_int_string_tuple
+    expected_stream_of_type_variants
   end
 
   methods
     function obj = MockSimpleGenericsWriter(testCase)
       obj.testCase_ = testCase;
-      obj.write_float_image_written = yardl.None;
-      obj.write_int_image_written = yardl.None;
-      obj.write_int_image_alternate_syntax_written = yardl.None;
-      obj.write_string_image_written = yardl.None;
-      obj.write_int_float_tuple_written = yardl.None;
-      obj.write_float_float_tuple_written = yardl.None;
-      obj.write_int_float_tuple_alternate_syntax_written = yardl.None;
-      obj.write_int_string_tuple_written = yardl.None;
-      obj.write_stream_of_type_variants_written = yardl.None;
+      obj.expected_float_image = yardl.None;
+      obj.expected_int_image = yardl.None;
+      obj.expected_int_image_alternate_syntax = yardl.None;
+      obj.expected_string_image = yardl.None;
+      obj.expected_int_float_tuple = yardl.None;
+      obj.expected_float_float_tuple = yardl.None;
+      obj.expected_int_float_tuple_alternate_syntax = yardl.None;
+      obj.expected_int_string_tuple = yardl.None;
+      obj.expected_stream_of_type_variants = {};
     end
 
     function expect_write_float_image_(obj, value)
-      if obj.write_float_image_written.has_value()
-        last_dim = ndims(value);
-        obj.write_float_image_written = yardl.Optional(cat(last_dim, obj.write_float_image_written.value, value));
-      else
-        obj.write_float_image_written = yardl.Optional(value);
-      end
+      obj.expected_float_image = yardl.Optional(value);
     end
 
     function expect_write_int_image_(obj, value)
-      if obj.write_int_image_written.has_value()
-        last_dim = ndims(value);
-        obj.write_int_image_written = yardl.Optional(cat(last_dim, obj.write_int_image_written.value, value));
-      else
-        obj.write_int_image_written = yardl.Optional(value);
-      end
+      obj.expected_int_image = yardl.Optional(value);
     end
 
     function expect_write_int_image_alternate_syntax_(obj, value)
-      if obj.write_int_image_alternate_syntax_written.has_value()
-        last_dim = ndims(value);
-        obj.write_int_image_alternate_syntax_written = yardl.Optional(cat(last_dim, obj.write_int_image_alternate_syntax_written.value, value));
-      else
-        obj.write_int_image_alternate_syntax_written = yardl.Optional(value);
-      end
+      obj.expected_int_image_alternate_syntax = yardl.Optional(value);
     end
 
     function expect_write_string_image_(obj, value)
-      if obj.write_string_image_written.has_value()
-        last_dim = ndims(value);
-        obj.write_string_image_written = yardl.Optional(cat(last_dim, obj.write_string_image_written.value, value));
-      else
-        obj.write_string_image_written = yardl.Optional(value);
-      end
+      obj.expected_string_image = yardl.Optional(value);
     end
 
     function expect_write_int_float_tuple_(obj, value)
-      if obj.write_int_float_tuple_written.has_value()
-        last_dim = ndims(value);
-        obj.write_int_float_tuple_written = yardl.Optional(cat(last_dim, obj.write_int_float_tuple_written.value, value));
-      else
-        obj.write_int_float_tuple_written = yardl.Optional(value);
-      end
+      obj.expected_int_float_tuple = yardl.Optional(value);
     end
 
     function expect_write_float_float_tuple_(obj, value)
-      if obj.write_float_float_tuple_written.has_value()
-        last_dim = ndims(value);
-        obj.write_float_float_tuple_written = yardl.Optional(cat(last_dim, obj.write_float_float_tuple_written.value, value));
-      else
-        obj.write_float_float_tuple_written = yardl.Optional(value);
-      end
+      obj.expected_float_float_tuple = yardl.Optional(value);
     end
 
     function expect_write_int_float_tuple_alternate_syntax_(obj, value)
-      if obj.write_int_float_tuple_alternate_syntax_written.has_value()
-        last_dim = ndims(value);
-        obj.write_int_float_tuple_alternate_syntax_written = yardl.Optional(cat(last_dim, obj.write_int_float_tuple_alternate_syntax_written.value, value));
-      else
-        obj.write_int_float_tuple_alternate_syntax_written = yardl.Optional(value);
-      end
+      obj.expected_int_float_tuple_alternate_syntax = yardl.Optional(value);
     end
 
     function expect_write_int_string_tuple_(obj, value)
-      if obj.write_int_string_tuple_written.has_value()
-        last_dim = ndims(value);
-        obj.write_int_string_tuple_written = yardl.Optional(cat(last_dim, obj.write_int_string_tuple_written.value, value));
-      else
-        obj.write_int_string_tuple_written = yardl.Optional(value);
-      end
+      obj.expected_int_string_tuple = yardl.Optional(value);
     end
 
     function expect_write_stream_of_type_variants_(obj, value)
-      if obj.write_stream_of_type_variants_written.has_value()
-        last_dim = ndims(value);
-        obj.write_stream_of_type_variants_written = yardl.Optional(cat(last_dim, obj.write_stream_of_type_variants_written.value, value));
-      else
-        obj.write_stream_of_type_variants_written = yardl.Optional(value);
+      if iscell(value)
+        for n = 1:numel(value)
+          obj.expected_stream_of_type_variants{end+1} = value{n};
+        end
+        return;
+      end
+      shape = size(value);
+      lastDim = ndims(value);
+      count = shape(lastDim);
+      index = repelem({':'}, lastDim-1);
+      for n = 1:count
+        obj.expected_stream_of_type_variants{end+1} = value(index{:}, n);
       end
     end
 
     function verify(obj)
-      obj.testCase_.verifyEqual(obj.write_float_image_written, yardl.None, "Expected call to write_float_image_ was not received");
-      obj.testCase_.verifyEqual(obj.write_int_image_written, yardl.None, "Expected call to write_int_image_ was not received");
-      obj.testCase_.verifyEqual(obj.write_int_image_alternate_syntax_written, yardl.None, "Expected call to write_int_image_alternate_syntax_ was not received");
-      obj.testCase_.verifyEqual(obj.write_string_image_written, yardl.None, "Expected call to write_string_image_ was not received");
-      obj.testCase_.verifyEqual(obj.write_int_float_tuple_written, yardl.None, "Expected call to write_int_float_tuple_ was not received");
-      obj.testCase_.verifyEqual(obj.write_float_float_tuple_written, yardl.None, "Expected call to write_float_float_tuple_ was not received");
-      obj.testCase_.verifyEqual(obj.write_int_float_tuple_alternate_syntax_written, yardl.None, "Expected call to write_int_float_tuple_alternate_syntax_ was not received");
-      obj.testCase_.verifyEqual(obj.write_int_string_tuple_written, yardl.None, "Expected call to write_int_string_tuple_ was not received");
-      obj.testCase_.verifyEqual(obj.write_stream_of_type_variants_written, yardl.None, "Expected call to write_stream_of_type_variants_ was not received");
+      obj.testCase_.verifyEqual(obj.expected_float_image, yardl.None, "Expected call to write_float_image_ was not received");
+      obj.testCase_.verifyEqual(obj.expected_int_image, yardl.None, "Expected call to write_int_image_ was not received");
+      obj.testCase_.verifyEqual(obj.expected_int_image_alternate_syntax, yardl.None, "Expected call to write_int_image_alternate_syntax_ was not received");
+      obj.testCase_.verifyEqual(obj.expected_string_image, yardl.None, "Expected call to write_string_image_ was not received");
+      obj.testCase_.verifyEqual(obj.expected_int_float_tuple, yardl.None, "Expected call to write_int_float_tuple_ was not received");
+      obj.testCase_.verifyEqual(obj.expected_float_float_tuple, yardl.None, "Expected call to write_float_float_tuple_ was not received");
+      obj.testCase_.verifyEqual(obj.expected_int_float_tuple_alternate_syntax, yardl.None, "Expected call to write_int_float_tuple_alternate_syntax_ was not received");
+      obj.testCase_.verifyEqual(obj.expected_int_string_tuple, yardl.None, "Expected call to write_int_string_tuple_ was not received");
+      obj.testCase_.verifyTrue(isempty(obj.expected_stream_of_type_variants), "Expected call to write_stream_of_type_variants_ was not received");
     end
   end
 
   methods (Access=protected)
     function write_float_image_(obj, value)
-      obj.testCase_.verifyTrue(obj.write_float_image_written.has_value(), "Unexpected call to write_float_image_");
-      expected = obj.write_float_image_written.value;
-      obj.testCase_.verifyEqual(value, expected, "Unexpected argument value for call to write_float_image_");
-      obj.write_float_image_written = yardl.None;
+      obj.testCase_.verifyTrue(obj.expected_float_image.has_value(), "Unexpected call to write_float_image_");
+      obj.testCase_.verifyEqual(value, obj.expected_float_image.value, "Unexpected argument value for call to write_float_image_");
+      obj.expected_float_image = yardl.None;
     end
 
     function write_int_image_(obj, value)
-      obj.testCase_.verifyTrue(obj.write_int_image_written.has_value(), "Unexpected call to write_int_image_");
-      expected = obj.write_int_image_written.value;
-      obj.testCase_.verifyEqual(value, expected, "Unexpected argument value for call to write_int_image_");
-      obj.write_int_image_written = yardl.None;
+      obj.testCase_.verifyTrue(obj.expected_int_image.has_value(), "Unexpected call to write_int_image_");
+      obj.testCase_.verifyEqual(value, obj.expected_int_image.value, "Unexpected argument value for call to write_int_image_");
+      obj.expected_int_image = yardl.None;
     end
 
     function write_int_image_alternate_syntax_(obj, value)
-      obj.testCase_.verifyTrue(obj.write_int_image_alternate_syntax_written.has_value(), "Unexpected call to write_int_image_alternate_syntax_");
-      expected = obj.write_int_image_alternate_syntax_written.value;
-      obj.testCase_.verifyEqual(value, expected, "Unexpected argument value for call to write_int_image_alternate_syntax_");
-      obj.write_int_image_alternate_syntax_written = yardl.None;
+      obj.testCase_.verifyTrue(obj.expected_int_image_alternate_syntax.has_value(), "Unexpected call to write_int_image_alternate_syntax_");
+      obj.testCase_.verifyEqual(value, obj.expected_int_image_alternate_syntax.value, "Unexpected argument value for call to write_int_image_alternate_syntax_");
+      obj.expected_int_image_alternate_syntax = yardl.None;
     end
 
     function write_string_image_(obj, value)
-      obj.testCase_.verifyTrue(obj.write_string_image_written.has_value(), "Unexpected call to write_string_image_");
-      expected = obj.write_string_image_written.value;
-      obj.testCase_.verifyEqual(value, expected, "Unexpected argument value for call to write_string_image_");
-      obj.write_string_image_written = yardl.None;
+      obj.testCase_.verifyTrue(obj.expected_string_image.has_value(), "Unexpected call to write_string_image_");
+      obj.testCase_.verifyEqual(value, obj.expected_string_image.value, "Unexpected argument value for call to write_string_image_");
+      obj.expected_string_image = yardl.None;
     end
 
     function write_int_float_tuple_(obj, value)
-      obj.testCase_.verifyTrue(obj.write_int_float_tuple_written.has_value(), "Unexpected call to write_int_float_tuple_");
-      expected = obj.write_int_float_tuple_written.value;
-      obj.testCase_.verifyEqual(value, expected, "Unexpected argument value for call to write_int_float_tuple_");
-      obj.write_int_float_tuple_written = yardl.None;
+      obj.testCase_.verifyTrue(obj.expected_int_float_tuple.has_value(), "Unexpected call to write_int_float_tuple_");
+      obj.testCase_.verifyEqual(value, obj.expected_int_float_tuple.value, "Unexpected argument value for call to write_int_float_tuple_");
+      obj.expected_int_float_tuple = yardl.None;
     end
 
     function write_float_float_tuple_(obj, value)
-      obj.testCase_.verifyTrue(obj.write_float_float_tuple_written.has_value(), "Unexpected call to write_float_float_tuple_");
-      expected = obj.write_float_float_tuple_written.value;
-      obj.testCase_.verifyEqual(value, expected, "Unexpected argument value for call to write_float_float_tuple_");
-      obj.write_float_float_tuple_written = yardl.None;
+      obj.testCase_.verifyTrue(obj.expected_float_float_tuple.has_value(), "Unexpected call to write_float_float_tuple_");
+      obj.testCase_.verifyEqual(value, obj.expected_float_float_tuple.value, "Unexpected argument value for call to write_float_float_tuple_");
+      obj.expected_float_float_tuple = yardl.None;
     end
 
     function write_int_float_tuple_alternate_syntax_(obj, value)
-      obj.testCase_.verifyTrue(obj.write_int_float_tuple_alternate_syntax_written.has_value(), "Unexpected call to write_int_float_tuple_alternate_syntax_");
-      expected = obj.write_int_float_tuple_alternate_syntax_written.value;
-      obj.testCase_.verifyEqual(value, expected, "Unexpected argument value for call to write_int_float_tuple_alternate_syntax_");
-      obj.write_int_float_tuple_alternate_syntax_written = yardl.None;
+      obj.testCase_.verifyTrue(obj.expected_int_float_tuple_alternate_syntax.has_value(), "Unexpected call to write_int_float_tuple_alternate_syntax_");
+      obj.testCase_.verifyEqual(value, obj.expected_int_float_tuple_alternate_syntax.value, "Unexpected argument value for call to write_int_float_tuple_alternate_syntax_");
+      obj.expected_int_float_tuple_alternate_syntax = yardl.None;
     end
 
     function write_int_string_tuple_(obj, value)
-      obj.testCase_.verifyTrue(obj.write_int_string_tuple_written.has_value(), "Unexpected call to write_int_string_tuple_");
-      expected = obj.write_int_string_tuple_written.value;
-      obj.testCase_.verifyEqual(value, expected, "Unexpected argument value for call to write_int_string_tuple_");
-      obj.write_int_string_tuple_written = yardl.None;
+      obj.testCase_.verifyTrue(obj.expected_int_string_tuple.has_value(), "Unexpected call to write_int_string_tuple_");
+      obj.testCase_.verifyEqual(value, obj.expected_int_string_tuple.value, "Unexpected argument value for call to write_int_string_tuple_");
+      obj.expected_int_string_tuple = yardl.None;
     end
 
     function write_stream_of_type_variants_(obj, value)
-      obj.testCase_.verifyTrue(obj.write_stream_of_type_variants_written.has_value(), "Unexpected call to write_stream_of_type_variants_");
-      expected = obj.write_stream_of_type_variants_written.value;
-      obj.testCase_.verifyEqual(value, expected, "Unexpected argument value for call to write_stream_of_type_variants_");
-      obj.write_stream_of_type_variants_written = yardl.None;
+      assert(iscell(value));
+      assert(isscalar(value));
+      obj.testCase_.verifyFalse(isempty(obj.expected_stream_of_type_variants), "Unexpected call to write_stream_of_type_variants_");
+      obj.testCase_.verifyEqual(value{1}, obj.expected_stream_of_type_variants{1}, "Unexpected argument value for call to write_stream_of_type_variants_");
+      obj.expected_stream_of_type_variants = obj.expected_stream_of_type_variants(2:end);
     end
 
     function close_(obj)

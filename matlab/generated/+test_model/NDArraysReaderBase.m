@@ -12,14 +12,9 @@ classdef NDArraysReaderBase < handle
 
     function close(obj)
       obj.close_();
-      if obj.state_ ~= 10
-        if mod(obj.state_, 2) == 1
-          previous_method = obj.state_to_method_name_(obj.state_ - 1);
-          throw(yardl.ProtocolError("Protocol reader closed before all data was consumed. The iterable returned by '%s' was not fully consumed.", previous_method));
-        else
-          expected_method = obj.state_to_method_name_(obj.state_);
-          throw(yardl.ProtocolError("Protocol reader closed before all data was consumed. Expected call to '%s'.", expected_method));
-        end
+      if obj.state_ ~= 5
+        expected_method = obj.state_to_method_name_(obj.state_);
+        throw(yardl.ProtocolError("Protocol reader closed before all data was consumed. Expected call to '%s'.", expected_method));
       end
     end
 
@@ -30,70 +25,55 @@ classdef NDArraysReaderBase < handle
       end
 
       value = obj.read_ints_();
-      obj.state_ = 2;
+      obj.state_ = 1;
     end
 
     % Ordinal 1
     function value = read_simple_record_array(obj)
-      if obj.state_ ~= 2
-        obj.raise_unexpected_state_(2);
+      if obj.state_ ~= 1
+        obj.raise_unexpected_state_(1);
       end
 
       value = obj.read_simple_record_array_();
-      obj.state_ = 4;
+      obj.state_ = 2;
     end
 
     % Ordinal 2
     function value = read_record_with_vlens_array(obj)
-      if obj.state_ ~= 4
-        obj.raise_unexpected_state_(4);
+      if obj.state_ ~= 2
+        obj.raise_unexpected_state_(2);
       end
 
       value = obj.read_record_with_vlens_array_();
-      obj.state_ = 6;
+      obj.state_ = 3;
     end
 
     % Ordinal 3
     function value = read_record_with_nd_arrays(obj)
-      if obj.state_ ~= 6
-        obj.raise_unexpected_state_(6);
+      if obj.state_ ~= 3
+        obj.raise_unexpected_state_(3);
       end
 
       value = obj.read_record_with_nd_arrays_();
-      obj.state_ = 8;
+      obj.state_ = 4;
     end
 
     % Ordinal 4
     function value = read_named_array(obj)
-      if obj.state_ ~= 8
-        obj.raise_unexpected_state_(8);
+      if obj.state_ ~= 4
+        obj.raise_unexpected_state_(4);
       end
 
       value = obj.read_named_array_();
-      obj.state_ = 10;
+      obj.state_ = 5;
     end
 
     function copy_to(obj, writer)
-      while obj.has_ints()
-        item = obj.read_ints();
-        writer.write_ints({item});
-      end
-      while obj.has_simple_record_array()
-        item = obj.read_simple_record_array();
-        writer.write_simple_record_array({item});
-      end
-      while obj.has_record_with_vlens_array()
-        item = obj.read_record_with_vlens_array();
-        writer.write_record_with_vlens_array({item});
-      end
-      while obj.has_record_with_nd_arrays()
-        item = obj.read_record_with_nd_arrays();
-        writer.write_record_with_nd_arrays({item});
-      end
-      while obj.has_named_array()
-        item = obj.read_named_array();
-        writer.write_named_array({item});
-      end
+      writer.write_ints(obj.read_ints());
+      writer.write_simple_record_array(obj.read_simple_record_array());
+      writer.write_record_with_vlens_array(obj.read_record_with_vlens_array());
+      writer.write_record_with_nd_arrays(obj.read_record_with_nd_arrays());
+      writer.write_named_array(obj.read_named_array());
     end
   end
 
@@ -123,13 +103,13 @@ classdef NDArraysReaderBase < handle
     function name = state_to_method_name_(obj, state)
       if state == 0
         name = 'read_ints';
-      elseif state == 2
+      elseif state == 1
         name = 'read_simple_record_array';
-      elseif state == 4
+      elseif state == 2
         name = 'read_record_with_vlens_array';
-      elseif state == 6
+      elseif state == 3
         name = 'read_record_with_nd_arrays';
-      elseif state == 8
+      elseif state == 4
         name = 'read_named_array';
       else
         name = '<unknown>';

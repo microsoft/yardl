@@ -13,7 +13,7 @@ classdef (Abstract) NestedRecordsWriterBase < handle
 
     function close(obj)
       obj.close_();
-      if obj.state_ ~= 2
+      if obj.state_ ~= 1
         expected_method = obj.state_to_method_name_(bitand((int32(obj.state_) + 1), bitcmp(1, 'int8')));
         throw(yardl.ProtocolError("Protocol writer closed before all steps were called. Expected call to '%s'.", expected_method));
       end
@@ -26,7 +26,7 @@ classdef (Abstract) NestedRecordsWriterBase < handle
       end
 
       obj.write_tuple_with_records_(value);
-      obj.state_ = 2;
+      obj.state_ = 1;
     end
   end
 

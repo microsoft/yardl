@@ -27,6 +27,11 @@ classdef TestSimpleGenericsWriter < test_model.SimpleGenericsWriterBase
         throw(yardl.RuntimeError("Close() must be called on 'TestSimpleGenericsWriter' to verify mocks"));
       end
     end
+    function end_stream_of_type_variants(obj)
+      end_stream_of_type_variants@test_model.SimpleGenericsWriterBase(obj);
+      obj.writer_.end_stream_of_type_variants();
+    end
+
   end
 
   methods (Access=protected)

@@ -12,14 +12,9 @@ classdef FlagsReaderBase < handle
 
     function close(obj)
       obj.close_();
-      if obj.state_ ~= 4
-        if mod(obj.state_, 2) == 1
-          previous_method = obj.state_to_method_name_(obj.state_ - 1);
-          throw(yardl.ProtocolError("Protocol reader closed before all data was consumed. The iterable returned by '%s' was not fully consumed.", previous_method));
-        else
-          expected_method = obj.state_to_method_name_(obj.state_);
-          throw(yardl.ProtocolError("Protocol reader closed before all data was consumed. Expected call to '%s'.", expected_method));
-        end
+      if obj.state_ ~= 2
+        expected_method = obj.state_to_method_name_(obj.state_);
+        throw(yardl.ProtocolError("Protocol reader closed before all data was consumed. Expected call to '%s'.", expected_method));
       end
     end
 
@@ -31,7 +26,7 @@ classdef FlagsReaderBase < handle
 
       more = obj.has_days_();
       if ~more
-        obj.state_ = 2;
+        obj.state_ = 1;
       end
     end
 
@@ -45,19 +40,19 @@ classdef FlagsReaderBase < handle
 
     % Ordinal 1
     function more = has_formats(obj)
-      if obj.state_ ~= 2
-        obj.raise_unexpected_state_(2);
+      if obj.state_ ~= 1
+        obj.raise_unexpected_state_(1);
       end
 
       more = obj.has_formats_();
       if ~more
-        obj.state_ = 4;
+        obj.state_ = 2;
       end
     end
 
     function value = read_formats(obj)
-      if obj.state_ ~= 2
-        obj.raise_unexpected_state_(2);
+      if obj.state_ ~= 1
+        obj.raise_unexpected_state_(1);
       end
 
       value = obj.read_formats_();
@@ -68,10 +63,12 @@ classdef FlagsReaderBase < handle
         item = obj.read_days();
         writer.write_days({item});
       end
+      writer.end_days();
       while obj.has_formats()
         item = obj.read_formats();
         writer.write_formats({item});
       end
+      writer.end_formats();
     end
   end
 
@@ -100,7 +97,7 @@ classdef FlagsReaderBase < handle
     function name = state_to_method_name_(obj, state)
       if state == 0
         name = 'read_days';
-      elseif state == 2
+      elseif state == 1
         name = 'read_formats';
       else
         name = '<unknown>';

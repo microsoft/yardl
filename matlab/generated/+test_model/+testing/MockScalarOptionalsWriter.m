@@ -3,92 +3,68 @@
 classdef MockScalarOptionalsWriter < matlab.mixin.Copyable & test_model.ScalarOptionalsWriterBase
   properties
     testCase_
-    write_optional_int_written
-    write_optional_record_written
-    write_record_with_optional_fields_written
-    write_optional_record_with_optional_fields_written
+    expected_optional_int
+    expected_optional_record
+    expected_record_with_optional_fields
+    expected_optional_record_with_optional_fields
   end
 
   methods
     function obj = MockScalarOptionalsWriter(testCase)
       obj.testCase_ = testCase;
-      obj.write_optional_int_written = yardl.None;
-      obj.write_optional_record_written = yardl.None;
-      obj.write_record_with_optional_fields_written = yardl.None;
-      obj.write_optional_record_with_optional_fields_written = yardl.None;
+      obj.expected_optional_int = yardl.None;
+      obj.expected_optional_record = yardl.None;
+      obj.expected_record_with_optional_fields = yardl.None;
+      obj.expected_optional_record_with_optional_fields = yardl.None;
     end
 
     function expect_write_optional_int_(obj, value)
-      if obj.write_optional_int_written.has_value()
-        last_dim = ndims(value);
-        obj.write_optional_int_written = yardl.Optional(cat(last_dim, obj.write_optional_int_written.value, value));
-      else
-        obj.write_optional_int_written = yardl.Optional(value);
-      end
+      obj.expected_optional_int = yardl.Optional(value);
     end
 
     function expect_write_optional_record_(obj, value)
-      if obj.write_optional_record_written.has_value()
-        last_dim = ndims(value);
-        obj.write_optional_record_written = yardl.Optional(cat(last_dim, obj.write_optional_record_written.value, value));
-      else
-        obj.write_optional_record_written = yardl.Optional(value);
-      end
+      obj.expected_optional_record = yardl.Optional(value);
     end
 
     function expect_write_record_with_optional_fields_(obj, value)
-      if obj.write_record_with_optional_fields_written.has_value()
-        last_dim = ndims(value);
-        obj.write_record_with_optional_fields_written = yardl.Optional(cat(last_dim, obj.write_record_with_optional_fields_written.value, value));
-      else
-        obj.write_record_with_optional_fields_written = yardl.Optional(value);
-      end
+      obj.expected_record_with_optional_fields = yardl.Optional(value);
     end
 
     function expect_write_optional_record_with_optional_fields_(obj, value)
-      if obj.write_optional_record_with_optional_fields_written.has_value()
-        last_dim = ndims(value);
-        obj.write_optional_record_with_optional_fields_written = yardl.Optional(cat(last_dim, obj.write_optional_record_with_optional_fields_written.value, value));
-      else
-        obj.write_optional_record_with_optional_fields_written = yardl.Optional(value);
-      end
+      obj.expected_optional_record_with_optional_fields = yardl.Optional(value);
     end
 
     function verify(obj)
-      obj.testCase_.verifyEqual(obj.write_optional_int_written, yardl.None, "Expected call to write_optional_int_ was not received");
-      obj.testCase_.verifyEqual(obj.write_optional_record_written, yardl.None, "Expected call to write_optional_record_ was not received");
-      obj.testCase_.verifyEqual(obj.write_record_with_optional_fields_written, yardl.None, "Expected call to write_record_with_optional_fields_ was not received");
-      obj.testCase_.verifyEqual(obj.write_optional_record_with_optional_fields_written, yardl.None, "Expected call to write_optional_record_with_optional_fields_ was not received");
+      obj.testCase_.verifyEqual(obj.expected_optional_int, yardl.None, "Expected call to write_optional_int_ was not received");
+      obj.testCase_.verifyEqual(obj.expected_optional_record, yardl.None, "Expected call to write_optional_record_ was not received");
+      obj.testCase_.verifyEqual(obj.expected_record_with_optional_fields, yardl.None, "Expected call to write_record_with_optional_fields_ was not received");
+      obj.testCase_.verifyEqual(obj.expected_optional_record_with_optional_fields, yardl.None, "Expected call to write_optional_record_with_optional_fields_ was not received");
     end
   end
 
   methods (Access=protected)
     function write_optional_int_(obj, value)
-      obj.testCase_.verifyTrue(obj.write_optional_int_written.has_value(), "Unexpected call to write_optional_int_");
-      expected = obj.write_optional_int_written.value;
-      obj.testCase_.verifyEqual(value, expected, "Unexpected argument value for call to write_optional_int_");
-      obj.write_optional_int_written = yardl.None;
+      obj.testCase_.verifyTrue(obj.expected_optional_int.has_value(), "Unexpected call to write_optional_int_");
+      obj.testCase_.verifyEqual(value, obj.expected_optional_int.value, "Unexpected argument value for call to write_optional_int_");
+      obj.expected_optional_int = yardl.None;
     end
 
     function write_optional_record_(obj, value)
-      obj.testCase_.verifyTrue(obj.write_optional_record_written.has_value(), "Unexpected call to write_optional_record_");
-      expected = obj.write_optional_record_written.value;
-      obj.testCase_.verifyEqual(value, expected, "Unexpected argument value for call to write_optional_record_");
-      obj.write_optional_record_written = yardl.None;
+      obj.testCase_.verifyTrue(obj.expected_optional_record.has_value(), "Unexpected call to write_optional_record_");
+      obj.testCase_.verifyEqual(value, obj.expected_optional_record.value, "Unexpected argument value for call to write_optional_record_");
+      obj.expected_optional_record = yardl.None;
     end
 
     function write_record_with_optional_fields_(obj, value)
-      obj.testCase_.verifyTrue(obj.write_record_with_optional_fields_written.has_value(), "Unexpected call to write_record_with_optional_fields_");
-      expected = obj.write_record_with_optional_fields_written.value;
-      obj.testCase_.verifyEqual(value, expected, "Unexpected argument value for call to write_record_with_optional_fields_");
-      obj.write_record_with_optional_fields_written = yardl.None;
+      obj.testCase_.verifyTrue(obj.expected_record_with_optional_fields.has_value(), "Unexpected call to write_record_with_optional_fields_");
+      obj.testCase_.verifyEqual(value, obj.expected_record_with_optional_fields.value, "Unexpected argument value for call to write_record_with_optional_fields_");
+      obj.expected_record_with_optional_fields = yardl.None;
     end
 
     function write_optional_record_with_optional_fields_(obj, value)
-      obj.testCase_.verifyTrue(obj.write_optional_record_with_optional_fields_written.has_value(), "Unexpected call to write_optional_record_with_optional_fields_");
-      expected = obj.write_optional_record_with_optional_fields_written.value;
-      obj.testCase_.verifyEqual(value, expected, "Unexpected argument value for call to write_optional_record_with_optional_fields_");
-      obj.write_optional_record_with_optional_fields_written = yardl.None;
+      obj.testCase_.verifyTrue(obj.expected_optional_record_with_optional_fields.has_value(), "Unexpected call to write_optional_record_with_optional_fields_");
+      obj.testCase_.verifyEqual(value, obj.expected_optional_record_with_optional_fields.value, "Unexpected argument value for call to write_optional_record_with_optional_fields_");
+      obj.expected_optional_record_with_optional_fields = yardl.None;
     end
 
     function close_(obj)

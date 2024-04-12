@@ -3,92 +3,68 @@
 classdef MockUnionsWriter < matlab.mixin.Copyable & test_model.UnionsWriterBase
   properties
     testCase_
-    write_int_or_simple_record_written
-    write_int_or_record_with_vlens_written
-    write_monosotate_or_int_or_simple_record_written
-    write_record_with_unions_written
+    expected_int_or_simple_record
+    expected_int_or_record_with_vlens
+    expected_monosotate_or_int_or_simple_record
+    expected_record_with_unions
   end
 
   methods
     function obj = MockUnionsWriter(testCase)
       obj.testCase_ = testCase;
-      obj.write_int_or_simple_record_written = yardl.None;
-      obj.write_int_or_record_with_vlens_written = yardl.None;
-      obj.write_monosotate_or_int_or_simple_record_written = yardl.None;
-      obj.write_record_with_unions_written = yardl.None;
+      obj.expected_int_or_simple_record = yardl.None;
+      obj.expected_int_or_record_with_vlens = yardl.None;
+      obj.expected_monosotate_or_int_or_simple_record = yardl.None;
+      obj.expected_record_with_unions = yardl.None;
     end
 
     function expect_write_int_or_simple_record_(obj, value)
-      if obj.write_int_or_simple_record_written.has_value()
-        last_dim = ndims(value);
-        obj.write_int_or_simple_record_written = yardl.Optional(cat(last_dim, obj.write_int_or_simple_record_written.value, value));
-      else
-        obj.write_int_or_simple_record_written = yardl.Optional(value);
-      end
+      obj.expected_int_or_simple_record = yardl.Optional(value);
     end
 
     function expect_write_int_or_record_with_vlens_(obj, value)
-      if obj.write_int_or_record_with_vlens_written.has_value()
-        last_dim = ndims(value);
-        obj.write_int_or_record_with_vlens_written = yardl.Optional(cat(last_dim, obj.write_int_or_record_with_vlens_written.value, value));
-      else
-        obj.write_int_or_record_with_vlens_written = yardl.Optional(value);
-      end
+      obj.expected_int_or_record_with_vlens = yardl.Optional(value);
     end
 
     function expect_write_monosotate_or_int_or_simple_record_(obj, value)
-      if obj.write_monosotate_or_int_or_simple_record_written.has_value()
-        last_dim = ndims(value);
-        obj.write_monosotate_or_int_or_simple_record_written = yardl.Optional(cat(last_dim, obj.write_monosotate_or_int_or_simple_record_written.value, value));
-      else
-        obj.write_monosotate_or_int_or_simple_record_written = yardl.Optional(value);
-      end
+      obj.expected_monosotate_or_int_or_simple_record = yardl.Optional(value);
     end
 
     function expect_write_record_with_unions_(obj, value)
-      if obj.write_record_with_unions_written.has_value()
-        last_dim = ndims(value);
-        obj.write_record_with_unions_written = yardl.Optional(cat(last_dim, obj.write_record_with_unions_written.value, value));
-      else
-        obj.write_record_with_unions_written = yardl.Optional(value);
-      end
+      obj.expected_record_with_unions = yardl.Optional(value);
     end
 
     function verify(obj)
-      obj.testCase_.verifyEqual(obj.write_int_or_simple_record_written, yardl.None, "Expected call to write_int_or_simple_record_ was not received");
-      obj.testCase_.verifyEqual(obj.write_int_or_record_with_vlens_written, yardl.None, "Expected call to write_int_or_record_with_vlens_ was not received");
-      obj.testCase_.verifyEqual(obj.write_monosotate_or_int_or_simple_record_written, yardl.None, "Expected call to write_monosotate_or_int_or_simple_record_ was not received");
-      obj.testCase_.verifyEqual(obj.write_record_with_unions_written, yardl.None, "Expected call to write_record_with_unions_ was not received");
+      obj.testCase_.verifyEqual(obj.expected_int_or_simple_record, yardl.None, "Expected call to write_int_or_simple_record_ was not received");
+      obj.testCase_.verifyEqual(obj.expected_int_or_record_with_vlens, yardl.None, "Expected call to write_int_or_record_with_vlens_ was not received");
+      obj.testCase_.verifyEqual(obj.expected_monosotate_or_int_or_simple_record, yardl.None, "Expected call to write_monosotate_or_int_or_simple_record_ was not received");
+      obj.testCase_.verifyEqual(obj.expected_record_with_unions, yardl.None, "Expected call to write_record_with_unions_ was not received");
     end
   end
 
   methods (Access=protected)
     function write_int_or_simple_record_(obj, value)
-      obj.testCase_.verifyTrue(obj.write_int_or_simple_record_written.has_value(), "Unexpected call to write_int_or_simple_record_");
-      expected = obj.write_int_or_simple_record_written.value;
-      obj.testCase_.verifyEqual(value, expected, "Unexpected argument value for call to write_int_or_simple_record_");
-      obj.write_int_or_simple_record_written = yardl.None;
+      obj.testCase_.verifyTrue(obj.expected_int_or_simple_record.has_value(), "Unexpected call to write_int_or_simple_record_");
+      obj.testCase_.verifyEqual(value, obj.expected_int_or_simple_record.value, "Unexpected argument value for call to write_int_or_simple_record_");
+      obj.expected_int_or_simple_record = yardl.None;
     end
 
     function write_int_or_record_with_vlens_(obj, value)
-      obj.testCase_.verifyTrue(obj.write_int_or_record_with_vlens_written.has_value(), "Unexpected call to write_int_or_record_with_vlens_");
-      expected = obj.write_int_or_record_with_vlens_written.value;
-      obj.testCase_.verifyEqual(value, expected, "Unexpected argument value for call to write_int_or_record_with_vlens_");
-      obj.write_int_or_record_with_vlens_written = yardl.None;
+      obj.testCase_.verifyTrue(obj.expected_int_or_record_with_vlens.has_value(), "Unexpected call to write_int_or_record_with_vlens_");
+      obj.testCase_.verifyEqual(value, obj.expected_int_or_record_with_vlens.value, "Unexpected argument value for call to write_int_or_record_with_vlens_");
+      obj.expected_int_or_record_with_vlens = yardl.None;
     end
 
     function write_monosotate_or_int_or_simple_record_(obj, value)
-      obj.testCase_.verifyTrue(obj.write_monosotate_or_int_or_simple_record_written.has_value(), "Unexpected call to write_monosotate_or_int_or_simple_record_");
-      expected = obj.write_monosotate_or_int_or_simple_record_written.value;
-      obj.testCase_.verifyEqual(value, expected, "Unexpected argument value for call to write_monosotate_or_int_or_simple_record_");
-      obj.write_monosotate_or_int_or_simple_record_written = yardl.None;
+      obj.testCase_.verifyTrue(obj.expected_monosotate_or_int_or_simple_record.has_value(), "Unexpected call to write_monosotate_or_int_or_simple_record_");
+      obj.testCase_.verifyEqual(value, obj.expected_monosotate_or_int_or_simple_record.value, "Unexpected argument value for call to write_monosotate_or_int_or_simple_record_");
+      obj.expected_monosotate_or_int_or_simple_record = yardl.None;
     end
 
     function write_record_with_unions_(obj, value)
-      obj.testCase_.verifyTrue(obj.write_record_with_unions_written.has_value(), "Unexpected call to write_record_with_unions_");
-      expected = obj.write_record_with_unions_written.value;
-      obj.testCase_.verifyEqual(value, expected, "Unexpected argument value for call to write_record_with_unions_");
-      obj.write_record_with_unions_written = yardl.None;
+      obj.testCase_.verifyTrue(obj.expected_record_with_unions.has_value(), "Unexpected call to write_record_with_unions_");
+      obj.testCase_.verifyEqual(value, obj.expected_record_with_unions.value, "Unexpected argument value for call to write_record_with_unions_");
+      obj.expected_record_with_unions = yardl.None;
     end
 
     function close_(obj)

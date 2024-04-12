@@ -119,6 +119,7 @@ function res = benchmark_float256x256(format)
         for r = 1:repetitions
             w.write_float256x256({a});
         end
+        w.end_float256x256();
         w.close();
     end
 
@@ -154,6 +155,7 @@ function res = benchmark_float_vlen(format)
         for r = 1:repetitions
             w.write_float_array({a});
         end
+        w.end_float_array();
         w.close();
     end
 
@@ -189,6 +191,7 @@ function res = benchmark_small_int_256x256(format)
         for r = 1:repetitions
             w.write_int256x256({a});
         end
+        w.end_int256x256();
         w.close();
     end
 
@@ -221,6 +224,7 @@ function res = benchmark_small_record(format)
         for r = 1:repetitions
             w.write_small_record({record});
         end
+        w.end_small_record();
         w.close();
     end
 
@@ -267,6 +271,7 @@ function res = benchmark_simple_mrd(format)
         for r = 1:repetitions
             w.write_data({value});
         end
+        w.end_data();
         w.close();
     end
 

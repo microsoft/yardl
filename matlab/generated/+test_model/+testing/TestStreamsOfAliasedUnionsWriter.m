@@ -27,6 +27,16 @@ classdef TestStreamsOfAliasedUnionsWriter < test_model.StreamsOfAliasedUnionsWri
         throw(yardl.RuntimeError("Close() must be called on 'TestStreamsOfAliasedUnionsWriter' to verify mocks"));
       end
     end
+    function end_int_or_simple_record(obj)
+      end_int_or_simple_record@test_model.StreamsOfAliasedUnionsWriterBase(obj);
+      obj.writer_.end_int_or_simple_record();
+    end
+
+    function end_nullable_int_or_simple_record(obj)
+      end_nullable_int_or_simple_record@test_model.StreamsOfAliasedUnionsWriterBase(obj);
+      obj.writer_.end_nullable_int_or_simple_record();
+    end
+
   end
 
   methods (Access=protected)

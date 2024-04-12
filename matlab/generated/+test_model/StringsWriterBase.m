@@ -13,7 +13,7 @@ classdef (Abstract) StringsWriterBase < handle
 
     function close(obj)
       obj.close_();
-      if obj.state_ ~= 4
+      if obj.state_ ~= 2
         expected_method = obj.state_to_method_name_(bitand((int32(obj.state_) + 1), bitcmp(1, 'int8')));
         throw(yardl.ProtocolError("Protocol writer closed before all steps were called. Expected call to '%s'.", expected_method));
       end
@@ -26,17 +26,17 @@ classdef (Abstract) StringsWriterBase < handle
       end
 
       obj.write_single_string_(value);
-      obj.state_ = 2;
+      obj.state_ = 1;
     end
 
     % Ordinal 1
     function write_rec_with_string(obj, value)
-      if obj.state_ ~= 2
-        obj.raise_unexpected_state_(2);
+      if obj.state_ ~= 1
+        obj.raise_unexpected_state_(1);
       end
 
       obj.write_rec_with_string_(value);
-      obj.state_ = 4;
+      obj.state_ = 2;
     end
   end
 
@@ -64,7 +64,7 @@ classdef (Abstract) StringsWriterBase < handle
     function name = state_to_method_name_(obj, state)
       if state == 0
         name = 'write_single_string';
-      elseif state == 2
+      elseif state == 1
         name = 'write_rec_with_string';
       else
         name = '<unknown>';

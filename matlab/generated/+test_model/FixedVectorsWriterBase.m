@@ -13,7 +13,7 @@ classdef (Abstract) FixedVectorsWriterBase < handle
 
     function close(obj)
       obj.close_();
-      if obj.state_ ~= 8
+      if obj.state_ ~= 4
         expected_method = obj.state_to_method_name_(bitand((int32(obj.state_) + 1), bitcmp(1, 'int8')));
         throw(yardl.ProtocolError("Protocol writer closed before all steps were called. Expected call to '%s'.", expected_method));
       end
@@ -26,37 +26,37 @@ classdef (Abstract) FixedVectorsWriterBase < handle
       end
 
       obj.write_fixed_int_vector_(value);
-      obj.state_ = 2;
+      obj.state_ = 1;
     end
 
     % Ordinal 1
     function write_fixed_simple_record_vector(obj, value)
-      if obj.state_ ~= 2
-        obj.raise_unexpected_state_(2);
+      if obj.state_ ~= 1
+        obj.raise_unexpected_state_(1);
       end
 
       obj.write_fixed_simple_record_vector_(value);
-      obj.state_ = 4;
+      obj.state_ = 2;
     end
 
     % Ordinal 2
     function write_fixed_record_with_vlens_vector(obj, value)
-      if obj.state_ ~= 4
-        obj.raise_unexpected_state_(4);
+      if obj.state_ ~= 2
+        obj.raise_unexpected_state_(2);
       end
 
       obj.write_fixed_record_with_vlens_vector_(value);
-      obj.state_ = 6;
+      obj.state_ = 3;
     end
 
     % Ordinal 3
     function write_record_with_fixed_vectors(obj, value)
-      if obj.state_ ~= 6
-        obj.raise_unexpected_state_(6);
+      if obj.state_ ~= 3
+        obj.raise_unexpected_state_(3);
       end
 
       obj.write_record_with_fixed_vectors_(value);
-      obj.state_ = 8;
+      obj.state_ = 4;
     end
   end
 
@@ -86,11 +86,11 @@ classdef (Abstract) FixedVectorsWriterBase < handle
     function name = state_to_method_name_(obj, state)
       if state == 0
         name = 'write_fixed_int_vector';
-      elseif state == 2
+      elseif state == 1
         name = 'write_fixed_simple_record_vector';
-      elseif state == 4
+      elseif state == 2
         name = 'write_fixed_record_with_vlens_vector';
-      elseif state == 6
+      elseif state == 3
         name = 'write_record_with_fixed_vectors';
       else
         name = '<unknown>';

@@ -27,6 +27,11 @@ classdef TestBenchmarkFloatVlenWriter < test_model.BenchmarkFloatVlenWriterBase
         throw(yardl.RuntimeError("Close() must be called on 'TestBenchmarkFloatVlenWriter' to verify mocks"));
       end
     end
+    function end_float_array(obj)
+      end_float_array@test_model.BenchmarkFloatVlenWriterBase(obj);
+      obj.writer_.end_float_array();
+    end
+
   end
 
   methods (Access=protected)

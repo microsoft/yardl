@@ -13,7 +13,7 @@ classdef (Abstract) AdvancedGenericsWriterBase < handle
 
     function close(obj)
       obj.close_();
-      if obj.state_ ~= 10
+      if obj.state_ ~= 5
         expected_method = obj.state_to_method_name_(bitand((int32(obj.state_) + 1), bitcmp(1, 'int8')));
         throw(yardl.ProtocolError("Protocol writer closed before all steps were called. Expected call to '%s'.", expected_method));
       end
@@ -26,47 +26,47 @@ classdef (Abstract) AdvancedGenericsWriterBase < handle
       end
 
       obj.write_float_image_image_(value);
-      obj.state_ = 2;
+      obj.state_ = 1;
     end
 
     % Ordinal 1
     function write_generic_record_1(obj, value)
-      if obj.state_ ~= 2
-        obj.raise_unexpected_state_(2);
+      if obj.state_ ~= 1
+        obj.raise_unexpected_state_(1);
       end
 
       obj.write_generic_record_1_(value);
-      obj.state_ = 4;
+      obj.state_ = 2;
     end
 
     % Ordinal 2
     function write_tuple_of_optionals(obj, value)
-      if obj.state_ ~= 4
-        obj.raise_unexpected_state_(4);
+      if obj.state_ ~= 2
+        obj.raise_unexpected_state_(2);
       end
 
       obj.write_tuple_of_optionals_(value);
-      obj.state_ = 6;
+      obj.state_ = 3;
     end
 
     % Ordinal 3
     function write_tuple_of_optionals_alternate_syntax(obj, value)
-      if obj.state_ ~= 6
-        obj.raise_unexpected_state_(6);
+      if obj.state_ ~= 3
+        obj.raise_unexpected_state_(3);
       end
 
       obj.write_tuple_of_optionals_alternate_syntax_(value);
-      obj.state_ = 8;
+      obj.state_ = 4;
     end
 
     % Ordinal 4
     function write_tuple_of_vectors(obj, value)
-      if obj.state_ ~= 8
-        obj.raise_unexpected_state_(8);
+      if obj.state_ ~= 4
+        obj.raise_unexpected_state_(4);
       end
 
       obj.write_tuple_of_vectors_(value);
-      obj.state_ = 10;
+      obj.state_ = 5;
     end
   end
 
@@ -97,13 +97,13 @@ classdef (Abstract) AdvancedGenericsWriterBase < handle
     function name = state_to_method_name_(obj, state)
       if state == 0
         name = 'write_float_image_image';
-      elseif state == 2
+      elseif state == 1
         name = 'write_generic_record_1';
-      elseif state == 4
+      elseif state == 2
         name = 'write_tuple_of_optionals';
-      elseif state == 6
+      elseif state == 3
         name = 'write_tuple_of_optionals_alternate_syntax';
-      elseif state == 8
+      elseif state == 4
         name = 'write_tuple_of_vectors';
       else
         name = '<unknown>';

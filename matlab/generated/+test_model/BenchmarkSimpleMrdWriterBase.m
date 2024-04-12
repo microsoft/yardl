@@ -12,13 +12,8 @@ classdef (Abstract) BenchmarkSimpleMrdWriterBase < handle
     end
 
     function close(obj)
-      if obj.state_ == 1
-        obj.end_stream_();
-        obj.close_();
-        return
-      end
       obj.close_();
-      if obj.state_ ~= 2
+      if obj.state_ ~= 1
         expected_method = obj.state_to_method_name_(bitand((int32(obj.state_) + 1), bitcmp(1, 'int8')));
         throw(yardl.ProtocolError("Protocol writer closed before all steps were called. Expected call to '%s'.", expected_method));
       end
@@ -26,11 +21,19 @@ classdef (Abstract) BenchmarkSimpleMrdWriterBase < handle
 
     % Ordinal 0
     function write_data(obj, value)
-      if bitand(int32(obj.state_), bitcmp(1, 'int8')) ~= 0
+      if obj.state_ ~= 0
         obj.raise_unexpected_state_(0);
       end
 
       obj.write_data_(value);
+    end
+
+    function end_data(obj)
+      if obj.state_ ~= 0
+        obj.raise_unexpected_state_(0);
+      end
+
+      obj.end_stream_();
       obj.state_ = 1;
     end
   end
@@ -57,7 +60,7 @@ classdef (Abstract) BenchmarkSimpleMrdWriterBase < handle
 
     function name = state_to_method_name_(obj, state)
       if state == 0
-        name = 'write_data';
+        name = 'write_data or end_data';
       else
         name = '<unknown>';
       end

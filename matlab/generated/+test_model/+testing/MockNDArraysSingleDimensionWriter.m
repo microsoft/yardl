@@ -3,92 +3,68 @@
 classdef MockNDArraysSingleDimensionWriter < matlab.mixin.Copyable & test_model.NDArraysSingleDimensionWriterBase
   properties
     testCase_
-    write_ints_written
-    write_simple_record_array_written
-    write_record_with_vlens_array_written
-    write_record_with_nd_arrays_written
+    expected_ints
+    expected_simple_record_array
+    expected_record_with_vlens_array
+    expected_record_with_nd_arrays
   end
 
   methods
     function obj = MockNDArraysSingleDimensionWriter(testCase)
       obj.testCase_ = testCase;
-      obj.write_ints_written = yardl.None;
-      obj.write_simple_record_array_written = yardl.None;
-      obj.write_record_with_vlens_array_written = yardl.None;
-      obj.write_record_with_nd_arrays_written = yardl.None;
+      obj.expected_ints = yardl.None;
+      obj.expected_simple_record_array = yardl.None;
+      obj.expected_record_with_vlens_array = yardl.None;
+      obj.expected_record_with_nd_arrays = yardl.None;
     end
 
     function expect_write_ints_(obj, value)
-      if obj.write_ints_written.has_value()
-        last_dim = ndims(value);
-        obj.write_ints_written = yardl.Optional(cat(last_dim, obj.write_ints_written.value, value));
-      else
-        obj.write_ints_written = yardl.Optional(value);
-      end
+      obj.expected_ints = yardl.Optional(value);
     end
 
     function expect_write_simple_record_array_(obj, value)
-      if obj.write_simple_record_array_written.has_value()
-        last_dim = ndims(value);
-        obj.write_simple_record_array_written = yardl.Optional(cat(last_dim, obj.write_simple_record_array_written.value, value));
-      else
-        obj.write_simple_record_array_written = yardl.Optional(value);
-      end
+      obj.expected_simple_record_array = yardl.Optional(value);
     end
 
     function expect_write_record_with_vlens_array_(obj, value)
-      if obj.write_record_with_vlens_array_written.has_value()
-        last_dim = ndims(value);
-        obj.write_record_with_vlens_array_written = yardl.Optional(cat(last_dim, obj.write_record_with_vlens_array_written.value, value));
-      else
-        obj.write_record_with_vlens_array_written = yardl.Optional(value);
-      end
+      obj.expected_record_with_vlens_array = yardl.Optional(value);
     end
 
     function expect_write_record_with_nd_arrays_(obj, value)
-      if obj.write_record_with_nd_arrays_written.has_value()
-        last_dim = ndims(value);
-        obj.write_record_with_nd_arrays_written = yardl.Optional(cat(last_dim, obj.write_record_with_nd_arrays_written.value, value));
-      else
-        obj.write_record_with_nd_arrays_written = yardl.Optional(value);
-      end
+      obj.expected_record_with_nd_arrays = yardl.Optional(value);
     end
 
     function verify(obj)
-      obj.testCase_.verifyEqual(obj.write_ints_written, yardl.None, "Expected call to write_ints_ was not received");
-      obj.testCase_.verifyEqual(obj.write_simple_record_array_written, yardl.None, "Expected call to write_simple_record_array_ was not received");
-      obj.testCase_.verifyEqual(obj.write_record_with_vlens_array_written, yardl.None, "Expected call to write_record_with_vlens_array_ was not received");
-      obj.testCase_.verifyEqual(obj.write_record_with_nd_arrays_written, yardl.None, "Expected call to write_record_with_nd_arrays_ was not received");
+      obj.testCase_.verifyEqual(obj.expected_ints, yardl.None, "Expected call to write_ints_ was not received");
+      obj.testCase_.verifyEqual(obj.expected_simple_record_array, yardl.None, "Expected call to write_simple_record_array_ was not received");
+      obj.testCase_.verifyEqual(obj.expected_record_with_vlens_array, yardl.None, "Expected call to write_record_with_vlens_array_ was not received");
+      obj.testCase_.verifyEqual(obj.expected_record_with_nd_arrays, yardl.None, "Expected call to write_record_with_nd_arrays_ was not received");
     end
   end
 
   methods (Access=protected)
     function write_ints_(obj, value)
-      obj.testCase_.verifyTrue(obj.write_ints_written.has_value(), "Unexpected call to write_ints_");
-      expected = obj.write_ints_written.value;
-      obj.testCase_.verifyEqual(value, expected, "Unexpected argument value for call to write_ints_");
-      obj.write_ints_written = yardl.None;
+      obj.testCase_.verifyTrue(obj.expected_ints.has_value(), "Unexpected call to write_ints_");
+      obj.testCase_.verifyEqual(value, obj.expected_ints.value, "Unexpected argument value for call to write_ints_");
+      obj.expected_ints = yardl.None;
     end
 
     function write_simple_record_array_(obj, value)
-      obj.testCase_.verifyTrue(obj.write_simple_record_array_written.has_value(), "Unexpected call to write_simple_record_array_");
-      expected = obj.write_simple_record_array_written.value;
-      obj.testCase_.verifyEqual(value, expected, "Unexpected argument value for call to write_simple_record_array_");
-      obj.write_simple_record_array_written = yardl.None;
+      obj.testCase_.verifyTrue(obj.expected_simple_record_array.has_value(), "Unexpected call to write_simple_record_array_");
+      obj.testCase_.verifyEqual(value, obj.expected_simple_record_array.value, "Unexpected argument value for call to write_simple_record_array_");
+      obj.expected_simple_record_array = yardl.None;
     end
 
     function write_record_with_vlens_array_(obj, value)
-      obj.testCase_.verifyTrue(obj.write_record_with_vlens_array_written.has_value(), "Unexpected call to write_record_with_vlens_array_");
-      expected = obj.write_record_with_vlens_array_written.value;
-      obj.testCase_.verifyEqual(value, expected, "Unexpected argument value for call to write_record_with_vlens_array_");
-      obj.write_record_with_vlens_array_written = yardl.None;
+      obj.testCase_.verifyTrue(obj.expected_record_with_vlens_array.has_value(), "Unexpected call to write_record_with_vlens_array_");
+      obj.testCase_.verifyEqual(value, obj.expected_record_with_vlens_array.value, "Unexpected argument value for call to write_record_with_vlens_array_");
+      obj.expected_record_with_vlens_array = yardl.None;
     end
 
     function write_record_with_nd_arrays_(obj, value)
-      obj.testCase_.verifyTrue(obj.write_record_with_nd_arrays_written.has_value(), "Unexpected call to write_record_with_nd_arrays_");
-      expected = obj.write_record_with_nd_arrays_written.value;
-      obj.testCase_.verifyEqual(value, expected, "Unexpected argument value for call to write_record_with_nd_arrays_");
-      obj.write_record_with_nd_arrays_written = yardl.None;
+      obj.testCase_.verifyTrue(obj.expected_record_with_nd_arrays.has_value(), "Unexpected call to write_record_with_nd_arrays_");
+      obj.testCase_.verifyEqual(value, obj.expected_record_with_nd_arrays.value, "Unexpected argument value for call to write_record_with_nd_arrays_");
+      obj.expected_record_with_nd_arrays = yardl.None;
     end
 
     function close_(obj)

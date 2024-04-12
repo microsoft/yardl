@@ -12,14 +12,9 @@ classdef ScalarOptionalsReaderBase < handle
 
     function close(obj)
       obj.close_();
-      if obj.state_ ~= 8
-        if mod(obj.state_, 2) == 1
-          previous_method = obj.state_to_method_name_(obj.state_ - 1);
-          throw(yardl.ProtocolError("Protocol reader closed before all data was consumed. The iterable returned by '%s' was not fully consumed.", previous_method));
-        else
-          expected_method = obj.state_to_method_name_(obj.state_);
-          throw(yardl.ProtocolError("Protocol reader closed before all data was consumed. Expected call to '%s'.", expected_method));
-        end
+      if obj.state_ ~= 4
+        expected_method = obj.state_to_method_name_(obj.state_);
+        throw(yardl.ProtocolError("Protocol reader closed before all data was consumed. Expected call to '%s'.", expected_method));
       end
     end
 
@@ -30,56 +25,44 @@ classdef ScalarOptionalsReaderBase < handle
       end
 
       value = obj.read_optional_int_();
-      obj.state_ = 2;
+      obj.state_ = 1;
     end
 
     % Ordinal 1
     function value = read_optional_record(obj)
-      if obj.state_ ~= 2
-        obj.raise_unexpected_state_(2);
+      if obj.state_ ~= 1
+        obj.raise_unexpected_state_(1);
       end
 
       value = obj.read_optional_record_();
-      obj.state_ = 4;
+      obj.state_ = 2;
     end
 
     % Ordinal 2
     function value = read_record_with_optional_fields(obj)
-      if obj.state_ ~= 4
-        obj.raise_unexpected_state_(4);
+      if obj.state_ ~= 2
+        obj.raise_unexpected_state_(2);
       end
 
       value = obj.read_record_with_optional_fields_();
-      obj.state_ = 6;
+      obj.state_ = 3;
     end
 
     % Ordinal 3
     function value = read_optional_record_with_optional_fields(obj)
-      if obj.state_ ~= 6
-        obj.raise_unexpected_state_(6);
+      if obj.state_ ~= 3
+        obj.raise_unexpected_state_(3);
       end
 
       value = obj.read_optional_record_with_optional_fields_();
-      obj.state_ = 8;
+      obj.state_ = 4;
     end
 
     function copy_to(obj, writer)
-      while obj.has_optional_int()
-        item = obj.read_optional_int();
-        writer.write_optional_int({item});
-      end
-      while obj.has_optional_record()
-        item = obj.read_optional_record();
-        writer.write_optional_record({item});
-      end
-      while obj.has_record_with_optional_fields()
-        item = obj.read_record_with_optional_fields();
-        writer.write_record_with_optional_fields({item});
-      end
-      while obj.has_optional_record_with_optional_fields()
-        item = obj.read_optional_record_with_optional_fields();
-        writer.write_optional_record_with_optional_fields({item});
-      end
+      writer.write_optional_int(obj.read_optional_int());
+      writer.write_optional_record(obj.read_optional_record());
+      writer.write_record_with_optional_fields(obj.read_record_with_optional_fields());
+      writer.write_optional_record_with_optional_fields(obj.read_optional_record_with_optional_fields());
     end
   end
 
@@ -108,11 +91,11 @@ classdef ScalarOptionalsReaderBase < handle
     function name = state_to_method_name_(obj, state)
       if state == 0
         name = 'read_optional_int';
-      elseif state == 2
+      elseif state == 1
         name = 'read_optional_record';
-      elseif state == 4
+      elseif state == 2
         name = 'read_record_with_optional_fields';
-      elseif state == 6
+      elseif state == 3
         name = 'read_optional_record_with_optional_fields';
       else
         name = '<unknown>';

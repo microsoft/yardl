@@ -12,14 +12,9 @@ classdef SubarraysReaderBase < handle
 
     function close(obj)
       obj.close_();
-      if obj.state_ ~= 18
-        if mod(obj.state_, 2) == 1
-          previous_method = obj.state_to_method_name_(obj.state_ - 1);
-          throw(yardl.ProtocolError("Protocol reader closed before all data was consumed. The iterable returned by '%s' was not fully consumed.", previous_method));
-        else
-          expected_method = obj.state_to_method_name_(obj.state_);
-          throw(yardl.ProtocolError("Protocol reader closed before all data was consumed. Expected call to '%s'.", expected_method));
-        end
+      if obj.state_ ~= 9
+        expected_method = obj.state_to_method_name_(obj.state_);
+        throw(yardl.ProtocolError("Protocol reader closed before all data was consumed. Expected call to '%s'.", expected_method));
       end
     end
 
@@ -30,126 +25,99 @@ classdef SubarraysReaderBase < handle
       end
 
       value = obj.read_dynamic_with_fixed_int_subarray_();
-      obj.state_ = 2;
+      obj.state_ = 1;
     end
 
     % Ordinal 1
     function value = read_dynamic_with_fixed_float_subarray(obj)
-      if obj.state_ ~= 2
-        obj.raise_unexpected_state_(2);
+      if obj.state_ ~= 1
+        obj.raise_unexpected_state_(1);
       end
 
       value = obj.read_dynamic_with_fixed_float_subarray_();
-      obj.state_ = 4;
+      obj.state_ = 2;
     end
 
     % Ordinal 2
     function value = read_known_dim_count_with_fixed_int_subarray(obj)
-      if obj.state_ ~= 4
-        obj.raise_unexpected_state_(4);
+      if obj.state_ ~= 2
+        obj.raise_unexpected_state_(2);
       end
 
       value = obj.read_known_dim_count_with_fixed_int_subarray_();
-      obj.state_ = 6;
+      obj.state_ = 3;
     end
 
     % Ordinal 3
     function value = read_known_dim_count_with_fixed_float_subarray(obj)
-      if obj.state_ ~= 6
-        obj.raise_unexpected_state_(6);
+      if obj.state_ ~= 3
+        obj.raise_unexpected_state_(3);
       end
 
       value = obj.read_known_dim_count_with_fixed_float_subarray_();
-      obj.state_ = 8;
+      obj.state_ = 4;
     end
 
     % Ordinal 4
     function value = read_fixed_with_fixed_int_subarray(obj)
-      if obj.state_ ~= 8
-        obj.raise_unexpected_state_(8);
+      if obj.state_ ~= 4
+        obj.raise_unexpected_state_(4);
       end
 
       value = obj.read_fixed_with_fixed_int_subarray_();
-      obj.state_ = 10;
+      obj.state_ = 5;
     end
 
     % Ordinal 5
     function value = read_fixed_with_fixed_float_subarray(obj)
-      if obj.state_ ~= 10
-        obj.raise_unexpected_state_(10);
+      if obj.state_ ~= 5
+        obj.raise_unexpected_state_(5);
       end
 
       value = obj.read_fixed_with_fixed_float_subarray_();
-      obj.state_ = 12;
+      obj.state_ = 6;
     end
 
     % Ordinal 6
     function value = read_nested_subarray(obj)
-      if obj.state_ ~= 12
-        obj.raise_unexpected_state_(12);
+      if obj.state_ ~= 6
+        obj.raise_unexpected_state_(6);
       end
 
       value = obj.read_nested_subarray_();
-      obj.state_ = 14;
+      obj.state_ = 7;
     end
 
     % Ordinal 7
     function value = read_dynamic_with_fixed_vector_subarray(obj)
-      if obj.state_ ~= 14
-        obj.raise_unexpected_state_(14);
+      if obj.state_ ~= 7
+        obj.raise_unexpected_state_(7);
       end
 
       value = obj.read_dynamic_with_fixed_vector_subarray_();
-      obj.state_ = 16;
+      obj.state_ = 8;
     end
 
     % Ordinal 8
     function value = read_generic_subarray(obj)
-      if obj.state_ ~= 16
-        obj.raise_unexpected_state_(16);
+      if obj.state_ ~= 8
+        obj.raise_unexpected_state_(8);
       end
 
       value = obj.read_generic_subarray_();
-      obj.state_ = 18;
+      obj.state_ = 9;
     end
 
     function copy_to(obj, writer)
-      while obj.has_dynamic_with_fixed_int_subarray()
-        item = obj.read_dynamic_with_fixed_int_subarray();
-        writer.write_dynamic_with_fixed_int_subarray({item});
-      end
-      while obj.has_dynamic_with_fixed_float_subarray()
-        item = obj.read_dynamic_with_fixed_float_subarray();
-        writer.write_dynamic_with_fixed_float_subarray({item});
-      end
-      while obj.has_known_dim_count_with_fixed_int_subarray()
-        item = obj.read_known_dim_count_with_fixed_int_subarray();
-        writer.write_known_dim_count_with_fixed_int_subarray({item});
-      end
-      while obj.has_known_dim_count_with_fixed_float_subarray()
-        item = obj.read_known_dim_count_with_fixed_float_subarray();
-        writer.write_known_dim_count_with_fixed_float_subarray({item});
-      end
-      while obj.has_fixed_with_fixed_int_subarray()
-        item = obj.read_fixed_with_fixed_int_subarray();
-        writer.write_fixed_with_fixed_int_subarray({item});
-      end
-      while obj.has_fixed_with_fixed_float_subarray()
-        item = obj.read_fixed_with_fixed_float_subarray();
-        writer.write_fixed_with_fixed_float_subarray({item});
-      end
-      while obj.has_nested_subarray()
-        item = obj.read_nested_subarray();
-        writer.write_nested_subarray({item});
-      end
-      while obj.has_dynamic_with_fixed_vector_subarray()
-        item = obj.read_dynamic_with_fixed_vector_subarray();
-        writer.write_dynamic_with_fixed_vector_subarray({item});
-      end
-      while obj.has_generic_subarray()
-        item = obj.read_generic_subarray();
-        writer.write_generic_subarray({item});
-      end
+      writer.write_dynamic_with_fixed_int_subarray(obj.read_dynamic_with_fixed_int_subarray());
+      writer.write_dynamic_with_fixed_float_subarray(obj.read_dynamic_with_fixed_float_subarray());
+      writer.write_known_dim_count_with_fixed_int_subarray(obj.read_known_dim_count_with_fixed_int_subarray());
+      writer.write_known_dim_count_with_fixed_float_subarray(obj.read_known_dim_count_with_fixed_float_subarray());
+      writer.write_fixed_with_fixed_int_subarray(obj.read_fixed_with_fixed_int_subarray());
+      writer.write_fixed_with_fixed_float_subarray(obj.read_fixed_with_fixed_float_subarray());
+      writer.write_nested_subarray(obj.read_nested_subarray());
+      writer.write_dynamic_with_fixed_vector_subarray(obj.read_dynamic_with_fixed_vector_subarray());
+      writer.write_generic_subarray(obj.read_generic_subarray());
     end
   end
 
@@ -183,21 +151,21 @@ classdef SubarraysReaderBase < handle
     function name = state_to_method_name_(obj, state)
       if state == 0
         name = 'read_dynamic_with_fixed_int_subarray';
-      elseif state == 2
+      elseif state == 1
         name = 'read_dynamic_with_fixed_float_subarray';
-      elseif state == 4
+      elseif state == 2
         name = 'read_known_dim_count_with_fixed_int_subarray';
-      elseif state == 6
+      elseif state == 3
         name = 'read_known_dim_count_with_fixed_float_subarray';
-      elseif state == 8
+      elseif state == 4
         name = 'read_fixed_with_fixed_int_subarray';
-      elseif state == 10
+      elseif state == 5
         name = 'read_fixed_with_fixed_float_subarray';
-      elseif state == 12
+      elseif state == 6
         name = 'read_nested_subarray';
-      elseif state == 14
+      elseif state == 7
         name = 'read_dynamic_with_fixed_vector_subarray';
-      elseif state == 16
+      elseif state == 8
         name = 'read_generic_subarray';
       else
         name = '<unknown>';

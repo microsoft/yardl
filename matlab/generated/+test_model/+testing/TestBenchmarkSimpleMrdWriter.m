@@ -27,6 +27,11 @@ classdef TestBenchmarkSimpleMrdWriter < test_model.BenchmarkSimpleMrdWriterBase
         throw(yardl.RuntimeError("Close() must be called on 'TestBenchmarkSimpleMrdWriter' to verify mocks"));
       end
     end
+    function end_data(obj)
+      end_data@test_model.BenchmarkSimpleMrdWriterBase(obj);
+      obj.writer_.end_data();
+    end
+
   end
 
   methods (Access=protected)

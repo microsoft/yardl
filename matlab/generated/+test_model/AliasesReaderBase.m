@@ -12,14 +12,9 @@ classdef AliasesReaderBase < handle
 
     function close(obj)
       obj.close_();
-      if obj.state_ ~= 20
-        if mod(obj.state_, 2) == 1
-          previous_method = obj.state_to_method_name_(obj.state_ - 1);
-          throw(yardl.ProtocolError("Protocol reader closed before all data was consumed. The iterable returned by '%s' was not fully consumed.", previous_method));
-        else
-          expected_method = obj.state_to_method_name_(obj.state_);
-          throw(yardl.ProtocolError("Protocol reader closed before all data was consumed. Expected call to '%s'.", expected_method));
-        end
+      if obj.state_ ~= 10
+        expected_method = obj.state_to_method_name_(obj.state_);
+        throw(yardl.ProtocolError("Protocol reader closed before all data was consumed. Expected call to '%s'.", expected_method));
       end
     end
 
@@ -30,150 +25,124 @@ classdef AliasesReaderBase < handle
       end
 
       value = obj.read_aliased_string_();
-      obj.state_ = 2;
+      obj.state_ = 1;
     end
 
     % Ordinal 1
     function value = read_aliased_enum(obj)
-      if obj.state_ ~= 2
-        obj.raise_unexpected_state_(2);
+      if obj.state_ ~= 1
+        obj.raise_unexpected_state_(1);
       end
 
       value = obj.read_aliased_enum_();
-      obj.state_ = 4;
+      obj.state_ = 2;
     end
 
     % Ordinal 2
     function value = read_aliased_open_generic(obj)
-      if obj.state_ ~= 4
-        obj.raise_unexpected_state_(4);
+      if obj.state_ ~= 2
+        obj.raise_unexpected_state_(2);
       end
 
       value = obj.read_aliased_open_generic_();
-      obj.state_ = 6;
+      obj.state_ = 3;
     end
 
     % Ordinal 3
     function value = read_aliased_closed_generic(obj)
-      if obj.state_ ~= 6
-        obj.raise_unexpected_state_(6);
+      if obj.state_ ~= 3
+        obj.raise_unexpected_state_(3);
       end
 
       value = obj.read_aliased_closed_generic_();
-      obj.state_ = 8;
+      obj.state_ = 4;
     end
 
     % Ordinal 4
     function value = read_aliased_optional(obj)
-      if obj.state_ ~= 8
-        obj.raise_unexpected_state_(8);
+      if obj.state_ ~= 4
+        obj.raise_unexpected_state_(4);
       end
 
       value = obj.read_aliased_optional_();
-      obj.state_ = 10;
+      obj.state_ = 5;
     end
 
     % Ordinal 5
     function value = read_aliased_generic_optional(obj)
-      if obj.state_ ~= 10
-        obj.raise_unexpected_state_(10);
+      if obj.state_ ~= 5
+        obj.raise_unexpected_state_(5);
       end
 
       value = obj.read_aliased_generic_optional_();
-      obj.state_ = 12;
+      obj.state_ = 6;
     end
 
     % Ordinal 6
     function value = read_aliased_generic_union_2(obj)
-      if obj.state_ ~= 12
-        obj.raise_unexpected_state_(12);
+      if obj.state_ ~= 6
+        obj.raise_unexpected_state_(6);
       end
 
       value = obj.read_aliased_generic_union_2_();
-      obj.state_ = 14;
+      obj.state_ = 7;
     end
 
     % Ordinal 7
     function value = read_aliased_generic_vector(obj)
-      if obj.state_ ~= 14
-        obj.raise_unexpected_state_(14);
+      if obj.state_ ~= 7
+        obj.raise_unexpected_state_(7);
       end
 
       value = obj.read_aliased_generic_vector_();
-      obj.state_ = 16;
+      obj.state_ = 8;
     end
 
     % Ordinal 8
     function value = read_aliased_generic_fixed_vector(obj)
-      if obj.state_ ~= 16
-        obj.raise_unexpected_state_(16);
+      if obj.state_ ~= 8
+        obj.raise_unexpected_state_(8);
       end
 
       value = obj.read_aliased_generic_fixed_vector_();
-      obj.state_ = 18;
+      obj.state_ = 9;
     end
 
     % Ordinal 9
     function more = has_stream_of_aliased_generic_union_2(obj)
-      if obj.state_ ~= 18
-        obj.raise_unexpected_state_(18);
+      if obj.state_ ~= 9
+        obj.raise_unexpected_state_(9);
       end
 
       more = obj.has_stream_of_aliased_generic_union_2_();
       if ~more
-        obj.state_ = 20;
+        obj.state_ = 10;
       end
     end
 
     function value = read_stream_of_aliased_generic_union_2(obj)
-      if obj.state_ ~= 18
-        obj.raise_unexpected_state_(18);
+      if obj.state_ ~= 9
+        obj.raise_unexpected_state_(9);
       end
 
       value = obj.read_stream_of_aliased_generic_union_2_();
     end
 
     function copy_to(obj, writer)
-      while obj.has_aliased_string()
-        item = obj.read_aliased_string();
-        writer.write_aliased_string({item});
-      end
-      while obj.has_aliased_enum()
-        item = obj.read_aliased_enum();
-        writer.write_aliased_enum({item});
-      end
-      while obj.has_aliased_open_generic()
-        item = obj.read_aliased_open_generic();
-        writer.write_aliased_open_generic({item});
-      end
-      while obj.has_aliased_closed_generic()
-        item = obj.read_aliased_closed_generic();
-        writer.write_aliased_closed_generic({item});
-      end
-      while obj.has_aliased_optional()
-        item = obj.read_aliased_optional();
-        writer.write_aliased_optional({item});
-      end
-      while obj.has_aliased_generic_optional()
-        item = obj.read_aliased_generic_optional();
-        writer.write_aliased_generic_optional({item});
-      end
-      while obj.has_aliased_generic_union_2()
-        item = obj.read_aliased_generic_union_2();
-        writer.write_aliased_generic_union_2({item});
-      end
-      while obj.has_aliased_generic_vector()
-        item = obj.read_aliased_generic_vector();
-        writer.write_aliased_generic_vector({item});
-      end
-      while obj.has_aliased_generic_fixed_vector()
-        item = obj.read_aliased_generic_fixed_vector();
-        writer.write_aliased_generic_fixed_vector({item});
-      end
+      writer.write_aliased_string(obj.read_aliased_string());
+      writer.write_aliased_enum(obj.read_aliased_enum());
+      writer.write_aliased_open_generic(obj.read_aliased_open_generic());
+      writer.write_aliased_closed_generic(obj.read_aliased_closed_generic());
+      writer.write_aliased_optional(obj.read_aliased_optional());
+      writer.write_aliased_generic_optional(obj.read_aliased_generic_optional());
+      writer.write_aliased_generic_union_2(obj.read_aliased_generic_union_2());
+      writer.write_aliased_generic_vector(obj.read_aliased_generic_vector());
+      writer.write_aliased_generic_fixed_vector(obj.read_aliased_generic_fixed_vector());
       while obj.has_stream_of_aliased_generic_union_2()
         item = obj.read_stream_of_aliased_generic_union_2();
         writer.write_stream_of_aliased_generic_union_2({item});
       end
+      writer.end_stream_of_aliased_generic_union_2();
     end
   end
 
@@ -209,23 +178,23 @@ classdef AliasesReaderBase < handle
     function name = state_to_method_name_(obj, state)
       if state == 0
         name = 'read_aliased_string';
-      elseif state == 2
+      elseif state == 1
         name = 'read_aliased_enum';
-      elseif state == 4
+      elseif state == 2
         name = 'read_aliased_open_generic';
-      elseif state == 6
+      elseif state == 3
         name = 'read_aliased_closed_generic';
-      elseif state == 8
+      elseif state == 4
         name = 'read_aliased_optional';
-      elseif state == 10
+      elseif state == 5
         name = 'read_aliased_generic_optional';
-      elseif state == 12
+      elseif state == 6
         name = 'read_aliased_generic_union_2';
-      elseif state == 14
+      elseif state == 7
         name = 'read_aliased_generic_vector';
-      elseif state == 16
+      elseif state == 8
         name = 'read_aliased_generic_fixed_vector';
-      elseif state == 18
+      elseif state == 9
         name = 'read_stream_of_aliased_generic_union_2';
       else
         name = '<unknown>';

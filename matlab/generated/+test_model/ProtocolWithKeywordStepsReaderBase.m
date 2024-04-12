@@ -12,14 +12,9 @@ classdef ProtocolWithKeywordStepsReaderBase < handle
 
     function close(obj)
       obj.close_();
-      if obj.state_ ~= 4
-        if mod(obj.state_, 2) == 1
-          previous_method = obj.state_to_method_name_(obj.state_ - 1);
-          throw(yardl.ProtocolError("Protocol reader closed before all data was consumed. The iterable returned by '%s' was not fully consumed.", previous_method));
-        else
-          expected_method = obj.state_to_method_name_(obj.state_);
-          throw(yardl.ProtocolError("Protocol reader closed before all data was consumed. Expected call to '%s'.", expected_method));
-        end
+      if obj.state_ ~= 2
+        expected_method = obj.state_to_method_name_(obj.state_);
+        throw(yardl.ProtocolError("Protocol reader closed before all data was consumed. Expected call to '%s'.", expected_method));
       end
     end
 
@@ -31,7 +26,7 @@ classdef ProtocolWithKeywordStepsReaderBase < handle
 
       more = obj.has_int_();
       if ~more
-        obj.state_ = 2;
+        obj.state_ = 1;
       end
     end
 
@@ -45,12 +40,12 @@ classdef ProtocolWithKeywordStepsReaderBase < handle
 
     % Ordinal 1
     function value = read_float(obj)
-      if obj.state_ ~= 2
-        obj.raise_unexpected_state_(2);
+      if obj.state_ ~= 1
+        obj.raise_unexpected_state_(1);
       end
 
       value = obj.read_float_();
-      obj.state_ = 4;
+      obj.state_ = 2;
     end
 
     function copy_to(obj, writer)
@@ -58,10 +53,8 @@ classdef ProtocolWithKeywordStepsReaderBase < handle
         item = obj.read_int();
         writer.write_int({item});
       end
-      while obj.has_float()
-        item = obj.read_float();
-        writer.write_float({item});
-      end
+      writer.end_int();
+      writer.write_float(obj.read_float());
     end
   end
 
@@ -89,7 +82,7 @@ classdef ProtocolWithKeywordStepsReaderBase < handle
     function name = state_to_method_name_(obj, state)
       if state == 0
         name = 'read_int';
-      elseif state == 2
+      elseif state == 1
         name = 'read_float';
       else
         name = '<unknown>';

@@ -12,14 +12,9 @@ classdef StreamsReaderBase < handle
 
     function close(obj)
       obj.close_();
-      if obj.state_ ~= 8
-        if mod(obj.state_, 2) == 1
-          previous_method = obj.state_to_method_name_(obj.state_ - 1);
-          throw(yardl.ProtocolError("Protocol reader closed before all data was consumed. The iterable returned by '%s' was not fully consumed.", previous_method));
-        else
-          expected_method = obj.state_to_method_name_(obj.state_);
-          throw(yardl.ProtocolError("Protocol reader closed before all data was consumed. Expected call to '%s'.", expected_method));
-        end
+      if obj.state_ ~= 4
+        expected_method = obj.state_to_method_name_(obj.state_);
+        throw(yardl.ProtocolError("Protocol reader closed before all data was consumed. Expected call to '%s'.", expected_method));
       end
     end
 
@@ -31,7 +26,7 @@ classdef StreamsReaderBase < handle
 
       more = obj.has_int_data_();
       if ~more
-        obj.state_ = 2;
+        obj.state_ = 1;
       end
     end
 
@@ -45,19 +40,19 @@ classdef StreamsReaderBase < handle
 
     % Ordinal 1
     function more = has_optional_int_data(obj)
-      if obj.state_ ~= 2
-        obj.raise_unexpected_state_(2);
+      if obj.state_ ~= 1
+        obj.raise_unexpected_state_(1);
       end
 
       more = obj.has_optional_int_data_();
       if ~more
-        obj.state_ = 4;
+        obj.state_ = 2;
       end
     end
 
     function value = read_optional_int_data(obj)
-      if obj.state_ ~= 2
-        obj.raise_unexpected_state_(2);
+      if obj.state_ ~= 1
+        obj.raise_unexpected_state_(1);
       end
 
       value = obj.read_optional_int_data_();
@@ -65,19 +60,19 @@ classdef StreamsReaderBase < handle
 
     % Ordinal 2
     function more = has_record_with_optional_vector_data(obj)
-      if obj.state_ ~= 4
-        obj.raise_unexpected_state_(4);
+      if obj.state_ ~= 2
+        obj.raise_unexpected_state_(2);
       end
 
       more = obj.has_record_with_optional_vector_data_();
       if ~more
-        obj.state_ = 6;
+        obj.state_ = 3;
       end
     end
 
     function value = read_record_with_optional_vector_data(obj)
-      if obj.state_ ~= 4
-        obj.raise_unexpected_state_(4);
+      if obj.state_ ~= 2
+        obj.raise_unexpected_state_(2);
       end
 
       value = obj.read_record_with_optional_vector_data_();
@@ -85,19 +80,19 @@ classdef StreamsReaderBase < handle
 
     % Ordinal 3
     function more = has_fixed_vector(obj)
-      if obj.state_ ~= 6
-        obj.raise_unexpected_state_(6);
+      if obj.state_ ~= 3
+        obj.raise_unexpected_state_(3);
       end
 
       more = obj.has_fixed_vector_();
       if ~more
-        obj.state_ = 8;
+        obj.state_ = 4;
       end
     end
 
     function value = read_fixed_vector(obj)
-      if obj.state_ ~= 6
-        obj.raise_unexpected_state_(6);
+      if obj.state_ ~= 3
+        obj.raise_unexpected_state_(3);
       end
 
       value = obj.read_fixed_vector_();
@@ -108,18 +103,22 @@ classdef StreamsReaderBase < handle
         item = obj.read_int_data();
         writer.write_int_data({item});
       end
+      writer.end_int_data();
       while obj.has_optional_int_data()
         item = obj.read_optional_int_data();
         writer.write_optional_int_data({item});
       end
+      writer.end_optional_int_data();
       while obj.has_record_with_optional_vector_data()
         item = obj.read_record_with_optional_vector_data();
         writer.write_record_with_optional_vector_data({item});
       end
+      writer.end_record_with_optional_vector_data();
       while obj.has_fixed_vector()
         item = obj.read_fixed_vector();
         writer.write_fixed_vector({item});
       end
+      writer.end_fixed_vector();
     end
   end
 
@@ -152,11 +151,11 @@ classdef StreamsReaderBase < handle
     function name = state_to_method_name_(obj, state)
       if state == 0
         name = 'read_int_data';
-      elseif state == 2
+      elseif state == 1
         name = 'read_optional_int_data';
-      elseif state == 4
+      elseif state == 2
         name = 'read_record_with_optional_vector_data';
-      elseif state == 6
+      elseif state == 3
         name = 'read_fixed_vector';
       else
         name = '<unknown>';

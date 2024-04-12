@@ -3,206 +3,160 @@
 classdef MockAliasesWriter < matlab.mixin.Copyable & test_model.AliasesWriterBase
   properties
     testCase_
-    write_aliased_string_written
-    write_aliased_enum_written
-    write_aliased_open_generic_written
-    write_aliased_closed_generic_written
-    write_aliased_optional_written
-    write_aliased_generic_optional_written
-    write_aliased_generic_union_2_written
-    write_aliased_generic_vector_written
-    write_aliased_generic_fixed_vector_written
-    write_stream_of_aliased_generic_union_2_written
+    expected_aliased_string
+    expected_aliased_enum
+    expected_aliased_open_generic
+    expected_aliased_closed_generic
+    expected_aliased_optional
+    expected_aliased_generic_optional
+    expected_aliased_generic_union_2
+    expected_aliased_generic_vector
+    expected_aliased_generic_fixed_vector
+    expected_stream_of_aliased_generic_union_2
   end
 
   methods
     function obj = MockAliasesWriter(testCase)
       obj.testCase_ = testCase;
-      obj.write_aliased_string_written = yardl.None;
-      obj.write_aliased_enum_written = yardl.None;
-      obj.write_aliased_open_generic_written = yardl.None;
-      obj.write_aliased_closed_generic_written = yardl.None;
-      obj.write_aliased_optional_written = yardl.None;
-      obj.write_aliased_generic_optional_written = yardl.None;
-      obj.write_aliased_generic_union_2_written = yardl.None;
-      obj.write_aliased_generic_vector_written = yardl.None;
-      obj.write_aliased_generic_fixed_vector_written = yardl.None;
-      obj.write_stream_of_aliased_generic_union_2_written = yardl.None;
+      obj.expected_aliased_string = yardl.None;
+      obj.expected_aliased_enum = yardl.None;
+      obj.expected_aliased_open_generic = yardl.None;
+      obj.expected_aliased_closed_generic = yardl.None;
+      obj.expected_aliased_optional = yardl.None;
+      obj.expected_aliased_generic_optional = yardl.None;
+      obj.expected_aliased_generic_union_2 = yardl.None;
+      obj.expected_aliased_generic_vector = yardl.None;
+      obj.expected_aliased_generic_fixed_vector = yardl.None;
+      obj.expected_stream_of_aliased_generic_union_2 = {};
     end
 
     function expect_write_aliased_string_(obj, value)
-      if obj.write_aliased_string_written.has_value()
-        last_dim = ndims(value);
-        obj.write_aliased_string_written = yardl.Optional(cat(last_dim, obj.write_aliased_string_written.value, value));
-      else
-        obj.write_aliased_string_written = yardl.Optional(value);
-      end
+      obj.expected_aliased_string = yardl.Optional(value);
     end
 
     function expect_write_aliased_enum_(obj, value)
-      if obj.write_aliased_enum_written.has_value()
-        last_dim = ndims(value);
-        obj.write_aliased_enum_written = yardl.Optional(cat(last_dim, obj.write_aliased_enum_written.value, value));
-      else
-        obj.write_aliased_enum_written = yardl.Optional(value);
-      end
+      obj.expected_aliased_enum = yardl.Optional(value);
     end
 
     function expect_write_aliased_open_generic_(obj, value)
-      if obj.write_aliased_open_generic_written.has_value()
-        last_dim = ndims(value);
-        obj.write_aliased_open_generic_written = yardl.Optional(cat(last_dim, obj.write_aliased_open_generic_written.value, value));
-      else
-        obj.write_aliased_open_generic_written = yardl.Optional(value);
-      end
+      obj.expected_aliased_open_generic = yardl.Optional(value);
     end
 
     function expect_write_aliased_closed_generic_(obj, value)
-      if obj.write_aliased_closed_generic_written.has_value()
-        last_dim = ndims(value);
-        obj.write_aliased_closed_generic_written = yardl.Optional(cat(last_dim, obj.write_aliased_closed_generic_written.value, value));
-      else
-        obj.write_aliased_closed_generic_written = yardl.Optional(value);
-      end
+      obj.expected_aliased_closed_generic = yardl.Optional(value);
     end
 
     function expect_write_aliased_optional_(obj, value)
-      if obj.write_aliased_optional_written.has_value()
-        last_dim = ndims(value);
-        obj.write_aliased_optional_written = yardl.Optional(cat(last_dim, obj.write_aliased_optional_written.value, value));
-      else
-        obj.write_aliased_optional_written = yardl.Optional(value);
-      end
+      obj.expected_aliased_optional = yardl.Optional(value);
     end
 
     function expect_write_aliased_generic_optional_(obj, value)
-      if obj.write_aliased_generic_optional_written.has_value()
-        last_dim = ndims(value);
-        obj.write_aliased_generic_optional_written = yardl.Optional(cat(last_dim, obj.write_aliased_generic_optional_written.value, value));
-      else
-        obj.write_aliased_generic_optional_written = yardl.Optional(value);
-      end
+      obj.expected_aliased_generic_optional = yardl.Optional(value);
     end
 
     function expect_write_aliased_generic_union_2_(obj, value)
-      if obj.write_aliased_generic_union_2_written.has_value()
-        last_dim = ndims(value);
-        obj.write_aliased_generic_union_2_written = yardl.Optional(cat(last_dim, obj.write_aliased_generic_union_2_written.value, value));
-      else
-        obj.write_aliased_generic_union_2_written = yardl.Optional(value);
-      end
+      obj.expected_aliased_generic_union_2 = yardl.Optional(value);
     end
 
     function expect_write_aliased_generic_vector_(obj, value)
-      if obj.write_aliased_generic_vector_written.has_value()
-        last_dim = ndims(value);
-        obj.write_aliased_generic_vector_written = yardl.Optional(cat(last_dim, obj.write_aliased_generic_vector_written.value, value));
-      else
-        obj.write_aliased_generic_vector_written = yardl.Optional(value);
-      end
+      obj.expected_aliased_generic_vector = yardl.Optional(value);
     end
 
     function expect_write_aliased_generic_fixed_vector_(obj, value)
-      if obj.write_aliased_generic_fixed_vector_written.has_value()
-        last_dim = ndims(value);
-        obj.write_aliased_generic_fixed_vector_written = yardl.Optional(cat(last_dim, obj.write_aliased_generic_fixed_vector_written.value, value));
-      else
-        obj.write_aliased_generic_fixed_vector_written = yardl.Optional(value);
-      end
+      obj.expected_aliased_generic_fixed_vector = yardl.Optional(value);
     end
 
     function expect_write_stream_of_aliased_generic_union_2_(obj, value)
-      if obj.write_stream_of_aliased_generic_union_2_written.has_value()
-        last_dim = ndims(value);
-        obj.write_stream_of_aliased_generic_union_2_written = yardl.Optional(cat(last_dim, obj.write_stream_of_aliased_generic_union_2_written.value, value));
-      else
-        obj.write_stream_of_aliased_generic_union_2_written = yardl.Optional(value);
+      if iscell(value)
+        for n = 1:numel(value)
+          obj.expected_stream_of_aliased_generic_union_2{end+1} = value{n};
+        end
+        return;
+      end
+      shape = size(value);
+      lastDim = ndims(value);
+      count = shape(lastDim);
+      index = repelem({':'}, lastDim-1);
+      for n = 1:count
+        obj.expected_stream_of_aliased_generic_union_2{end+1} = value(index{:}, n);
       end
     end
 
     function verify(obj)
-      obj.testCase_.verifyEqual(obj.write_aliased_string_written, yardl.None, "Expected call to write_aliased_string_ was not received");
-      obj.testCase_.verifyEqual(obj.write_aliased_enum_written, yardl.None, "Expected call to write_aliased_enum_ was not received");
-      obj.testCase_.verifyEqual(obj.write_aliased_open_generic_written, yardl.None, "Expected call to write_aliased_open_generic_ was not received");
-      obj.testCase_.verifyEqual(obj.write_aliased_closed_generic_written, yardl.None, "Expected call to write_aliased_closed_generic_ was not received");
-      obj.testCase_.verifyEqual(obj.write_aliased_optional_written, yardl.None, "Expected call to write_aliased_optional_ was not received");
-      obj.testCase_.verifyEqual(obj.write_aliased_generic_optional_written, yardl.None, "Expected call to write_aliased_generic_optional_ was not received");
-      obj.testCase_.verifyEqual(obj.write_aliased_generic_union_2_written, yardl.None, "Expected call to write_aliased_generic_union_2_ was not received");
-      obj.testCase_.verifyEqual(obj.write_aliased_generic_vector_written, yardl.None, "Expected call to write_aliased_generic_vector_ was not received");
-      obj.testCase_.verifyEqual(obj.write_aliased_generic_fixed_vector_written, yardl.None, "Expected call to write_aliased_generic_fixed_vector_ was not received");
-      obj.testCase_.verifyEqual(obj.write_stream_of_aliased_generic_union_2_written, yardl.None, "Expected call to write_stream_of_aliased_generic_union_2_ was not received");
+      obj.testCase_.verifyEqual(obj.expected_aliased_string, yardl.None, "Expected call to write_aliased_string_ was not received");
+      obj.testCase_.verifyEqual(obj.expected_aliased_enum, yardl.None, "Expected call to write_aliased_enum_ was not received");
+      obj.testCase_.verifyEqual(obj.expected_aliased_open_generic, yardl.None, "Expected call to write_aliased_open_generic_ was not received");
+      obj.testCase_.verifyEqual(obj.expected_aliased_closed_generic, yardl.None, "Expected call to write_aliased_closed_generic_ was not received");
+      obj.testCase_.verifyEqual(obj.expected_aliased_optional, yardl.None, "Expected call to write_aliased_optional_ was not received");
+      obj.testCase_.verifyEqual(obj.expected_aliased_generic_optional, yardl.None, "Expected call to write_aliased_generic_optional_ was not received");
+      obj.testCase_.verifyEqual(obj.expected_aliased_generic_union_2, yardl.None, "Expected call to write_aliased_generic_union_2_ was not received");
+      obj.testCase_.verifyEqual(obj.expected_aliased_generic_vector, yardl.None, "Expected call to write_aliased_generic_vector_ was not received");
+      obj.testCase_.verifyEqual(obj.expected_aliased_generic_fixed_vector, yardl.None, "Expected call to write_aliased_generic_fixed_vector_ was not received");
+      obj.testCase_.verifyTrue(isempty(obj.expected_stream_of_aliased_generic_union_2), "Expected call to write_stream_of_aliased_generic_union_2_ was not received");
     end
   end
 
   methods (Access=protected)
     function write_aliased_string_(obj, value)
-      obj.testCase_.verifyTrue(obj.write_aliased_string_written.has_value(), "Unexpected call to write_aliased_string_");
-      expected = obj.write_aliased_string_written.value;
-      obj.testCase_.verifyEqual(value, expected, "Unexpected argument value for call to write_aliased_string_");
-      obj.write_aliased_string_written = yardl.None;
+      obj.testCase_.verifyTrue(obj.expected_aliased_string.has_value(), "Unexpected call to write_aliased_string_");
+      obj.testCase_.verifyEqual(value, obj.expected_aliased_string.value, "Unexpected argument value for call to write_aliased_string_");
+      obj.expected_aliased_string = yardl.None;
     end
 
     function write_aliased_enum_(obj, value)
-      obj.testCase_.verifyTrue(obj.write_aliased_enum_written.has_value(), "Unexpected call to write_aliased_enum_");
-      expected = obj.write_aliased_enum_written.value;
-      obj.testCase_.verifyEqual(value, expected, "Unexpected argument value for call to write_aliased_enum_");
-      obj.write_aliased_enum_written = yardl.None;
+      obj.testCase_.verifyTrue(obj.expected_aliased_enum.has_value(), "Unexpected call to write_aliased_enum_");
+      obj.testCase_.verifyEqual(value, obj.expected_aliased_enum.value, "Unexpected argument value for call to write_aliased_enum_");
+      obj.expected_aliased_enum = yardl.None;
     end
 
     function write_aliased_open_generic_(obj, value)
-      obj.testCase_.verifyTrue(obj.write_aliased_open_generic_written.has_value(), "Unexpected call to write_aliased_open_generic_");
-      expected = obj.write_aliased_open_generic_written.value;
-      obj.testCase_.verifyEqual(value, expected, "Unexpected argument value for call to write_aliased_open_generic_");
-      obj.write_aliased_open_generic_written = yardl.None;
+      obj.testCase_.verifyTrue(obj.expected_aliased_open_generic.has_value(), "Unexpected call to write_aliased_open_generic_");
+      obj.testCase_.verifyEqual(value, obj.expected_aliased_open_generic.value, "Unexpected argument value for call to write_aliased_open_generic_");
+      obj.expected_aliased_open_generic = yardl.None;
     end
 
     function write_aliased_closed_generic_(obj, value)
-      obj.testCase_.verifyTrue(obj.write_aliased_closed_generic_written.has_value(), "Unexpected call to write_aliased_closed_generic_");
-      expected = obj.write_aliased_closed_generic_written.value;
-      obj.testCase_.verifyEqual(value, expected, "Unexpected argument value for call to write_aliased_closed_generic_");
-      obj.write_aliased_closed_generic_written = yardl.None;
+      obj.testCase_.verifyTrue(obj.expected_aliased_closed_generic.has_value(), "Unexpected call to write_aliased_closed_generic_");
+      obj.testCase_.verifyEqual(value, obj.expected_aliased_closed_generic.value, "Unexpected argument value for call to write_aliased_closed_generic_");
+      obj.expected_aliased_closed_generic = yardl.None;
     end
 
     function write_aliased_optional_(obj, value)
-      obj.testCase_.verifyTrue(obj.write_aliased_optional_written.has_value(), "Unexpected call to write_aliased_optional_");
-      expected = obj.write_aliased_optional_written.value;
-      obj.testCase_.verifyEqual(value, expected, "Unexpected argument value for call to write_aliased_optional_");
-      obj.write_aliased_optional_written = yardl.None;
+      obj.testCase_.verifyTrue(obj.expected_aliased_optional.has_value(), "Unexpected call to write_aliased_optional_");
+      obj.testCase_.verifyEqual(value, obj.expected_aliased_optional.value, "Unexpected argument value for call to write_aliased_optional_");
+      obj.expected_aliased_optional = yardl.None;
     end
 
     function write_aliased_generic_optional_(obj, value)
-      obj.testCase_.verifyTrue(obj.write_aliased_generic_optional_written.has_value(), "Unexpected call to write_aliased_generic_optional_");
-      expected = obj.write_aliased_generic_optional_written.value;
-      obj.testCase_.verifyEqual(value, expected, "Unexpected argument value for call to write_aliased_generic_optional_");
-      obj.write_aliased_generic_optional_written = yardl.None;
+      obj.testCase_.verifyTrue(obj.expected_aliased_generic_optional.has_value(), "Unexpected call to write_aliased_generic_optional_");
+      obj.testCase_.verifyEqual(value, obj.expected_aliased_generic_optional.value, "Unexpected argument value for call to write_aliased_generic_optional_");
+      obj.expected_aliased_generic_optional = yardl.None;
     end
 
     function write_aliased_generic_union_2_(obj, value)
-      obj.testCase_.verifyTrue(obj.write_aliased_generic_union_2_written.has_value(), "Unexpected call to write_aliased_generic_union_2_");
-      expected = obj.write_aliased_generic_union_2_written.value;
-      obj.testCase_.verifyEqual(value, expected, "Unexpected argument value for call to write_aliased_generic_union_2_");
-      obj.write_aliased_generic_union_2_written = yardl.None;
+      obj.testCase_.verifyTrue(obj.expected_aliased_generic_union_2.has_value(), "Unexpected call to write_aliased_generic_union_2_");
+      obj.testCase_.verifyEqual(value, obj.expected_aliased_generic_union_2.value, "Unexpected argument value for call to write_aliased_generic_union_2_");
+      obj.expected_aliased_generic_union_2 = yardl.None;
     end
 
     function write_aliased_generic_vector_(obj, value)
-      obj.testCase_.verifyTrue(obj.write_aliased_generic_vector_written.has_value(), "Unexpected call to write_aliased_generic_vector_");
-      expected = obj.write_aliased_generic_vector_written.value;
-      obj.testCase_.verifyEqual(value, expected, "Unexpected argument value for call to write_aliased_generic_vector_");
-      obj.write_aliased_generic_vector_written = yardl.None;
+      obj.testCase_.verifyTrue(obj.expected_aliased_generic_vector.has_value(), "Unexpected call to write_aliased_generic_vector_");
+      obj.testCase_.verifyEqual(value, obj.expected_aliased_generic_vector.value, "Unexpected argument value for call to write_aliased_generic_vector_");
+      obj.expected_aliased_generic_vector = yardl.None;
     end
 
     function write_aliased_generic_fixed_vector_(obj, value)
-      obj.testCase_.verifyTrue(obj.write_aliased_generic_fixed_vector_written.has_value(), "Unexpected call to write_aliased_generic_fixed_vector_");
-      expected = obj.write_aliased_generic_fixed_vector_written.value;
-      obj.testCase_.verifyEqual(value, expected, "Unexpected argument value for call to write_aliased_generic_fixed_vector_");
-      obj.write_aliased_generic_fixed_vector_written = yardl.None;
+      obj.testCase_.verifyTrue(obj.expected_aliased_generic_fixed_vector.has_value(), "Unexpected call to write_aliased_generic_fixed_vector_");
+      obj.testCase_.verifyEqual(value, obj.expected_aliased_generic_fixed_vector.value, "Unexpected argument value for call to write_aliased_generic_fixed_vector_");
+      obj.expected_aliased_generic_fixed_vector = yardl.None;
     end
 
     function write_stream_of_aliased_generic_union_2_(obj, value)
-      obj.testCase_.verifyTrue(obj.write_stream_of_aliased_generic_union_2_written.has_value(), "Unexpected call to write_stream_of_aliased_generic_union_2_");
-      expected = obj.write_stream_of_aliased_generic_union_2_written.value;
-      obj.testCase_.verifyEqual(value, expected, "Unexpected argument value for call to write_stream_of_aliased_generic_union_2_");
-      obj.write_stream_of_aliased_generic_union_2_written = yardl.None;
+      assert(iscell(value));
+      assert(isscalar(value));
+      obj.testCase_.verifyFalse(isempty(obj.expected_stream_of_aliased_generic_union_2), "Unexpected call to write_stream_of_aliased_generic_union_2_");
+      obj.testCase_.verifyEqual(value{1}, obj.expected_stream_of_aliased_generic_union_2{1}, "Unexpected argument value for call to write_stream_of_aliased_generic_union_2_");
+      obj.expected_stream_of_aliased_generic_union_2 = obj.expected_stream_of_aliased_generic_union_2(2:end);
     end
 
     function close_(obj)

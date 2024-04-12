@@ -3,54 +3,70 @@
 classdef MockFlagsWriter < matlab.mixin.Copyable & test_model.FlagsWriterBase
   properties
     testCase_
-    write_days_written
-    write_formats_written
+    expected_days
+    expected_formats
   end
 
   methods
     function obj = MockFlagsWriter(testCase)
       obj.testCase_ = testCase;
-      obj.write_days_written = yardl.None;
-      obj.write_formats_written = yardl.None;
+      obj.expected_days = {};
+      obj.expected_formats = {};
     end
 
     function expect_write_days_(obj, value)
-      if obj.write_days_written.has_value()
-        last_dim = ndims(value);
-        obj.write_days_written = yardl.Optional(cat(last_dim, obj.write_days_written.value, value));
-      else
-        obj.write_days_written = yardl.Optional(value);
+      if iscell(value)
+        for n = 1:numel(value)
+          obj.expected_days{end+1} = value{n};
+        end
+        return;
+      end
+      shape = size(value);
+      lastDim = ndims(value);
+      count = shape(lastDim);
+      index = repelem({':'}, lastDim-1);
+      for n = 1:count
+        obj.expected_days{end+1} = value(index{:}, n);
       end
     end
 
     function expect_write_formats_(obj, value)
-      if obj.write_formats_written.has_value()
-        last_dim = ndims(value);
-        obj.write_formats_written = yardl.Optional(cat(last_dim, obj.write_formats_written.value, value));
-      else
-        obj.write_formats_written = yardl.Optional(value);
+      if iscell(value)
+        for n = 1:numel(value)
+          obj.expected_formats{end+1} = value{n};
+        end
+        return;
+      end
+      shape = size(value);
+      lastDim = ndims(value);
+      count = shape(lastDim);
+      index = repelem({':'}, lastDim-1);
+      for n = 1:count
+        obj.expected_formats{end+1} = value(index{:}, n);
       end
     end
 
     function verify(obj)
-      obj.testCase_.verifyEqual(obj.write_days_written, yardl.None, "Expected call to write_days_ was not received");
-      obj.testCase_.verifyEqual(obj.write_formats_written, yardl.None, "Expected call to write_formats_ was not received");
+      obj.testCase_.verifyTrue(isempty(obj.expected_days), "Expected call to write_days_ was not received");
+      obj.testCase_.verifyTrue(isempty(obj.expected_formats), "Expected call to write_formats_ was not received");
     end
   end
 
   methods (Access=protected)
     function write_days_(obj, value)
-      obj.testCase_.verifyTrue(obj.write_days_written.has_value(), "Unexpected call to write_days_");
-      expected = obj.write_days_written.value;
-      obj.testCase_.verifyEqual(value, expected, "Unexpected argument value for call to write_days_");
-      obj.write_days_written = yardl.None;
+      assert(iscell(value));
+      assert(isscalar(value));
+      obj.testCase_.verifyFalse(isempty(obj.expected_days), "Unexpected call to write_days_");
+      obj.testCase_.verifyEqual(value{1}, obj.expected_days{1}, "Unexpected argument value for call to write_days_");
+      obj.expected_days = obj.expected_days(2:end);
     end
 
     function write_formats_(obj, value)
-      obj.testCase_.verifyTrue(obj.write_formats_written.has_value(), "Unexpected call to write_formats_");
-      expected = obj.write_formats_written.value;
-      obj.testCase_.verifyEqual(value, expected, "Unexpected argument value for call to write_formats_");
-      obj.write_formats_written = yardl.None;
+      assert(iscell(value));
+      assert(isscalar(value));
+      obj.testCase_.verifyFalse(isempty(obj.expected_formats), "Unexpected call to write_formats_");
+      obj.testCase_.verifyEqual(value{1}, obj.expected_formats{1}, "Unexpected argument value for call to write_formats_");
+      obj.expected_formats = obj.expected_formats(2:end);
     end
 
     function close_(obj)

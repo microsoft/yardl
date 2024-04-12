@@ -27,6 +27,16 @@ classdef TestStreamsOfUnionsWriter < test_model.StreamsOfUnionsWriterBase
         throw(yardl.RuntimeError("Close() must be called on 'TestStreamsOfUnionsWriter' to verify mocks"));
       end
     end
+    function end_int_or_simple_record(obj)
+      end_int_or_simple_record@test_model.StreamsOfUnionsWriterBase(obj);
+      obj.writer_.end_int_or_simple_record();
+    end
+
+    function end_nullable_int_or_simple_record(obj)
+      end_nullable_int_or_simple_record@test_model.StreamsOfUnionsWriterBase(obj);
+      obj.writer_.end_nullable_int_or_simple_record();
+    end
+
   end
 
   methods (Access=protected)

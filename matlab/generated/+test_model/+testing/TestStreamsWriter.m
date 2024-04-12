@@ -27,6 +27,26 @@ classdef TestStreamsWriter < test_model.StreamsWriterBase
         throw(yardl.RuntimeError("Close() must be called on 'TestStreamsWriter' to verify mocks"));
       end
     end
+    function end_int_data(obj)
+      end_int_data@test_model.StreamsWriterBase(obj);
+      obj.writer_.end_int_data();
+    end
+
+    function end_optional_int_data(obj)
+      end_optional_int_data@test_model.StreamsWriterBase(obj);
+      obj.writer_.end_optional_int_data();
+    end
+
+    function end_record_with_optional_vector_data(obj)
+      end_record_with_optional_vector_data@test_model.StreamsWriterBase(obj);
+      obj.writer_.end_record_with_optional_vector_data();
+    end
+
+    function end_fixed_vector(obj)
+      end_fixed_vector@test_model.StreamsWriterBase(obj);
+      obj.writer_.end_fixed_vector();
+    end
+
   end
 
   methods (Access=protected)

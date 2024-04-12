@@ -12,14 +12,9 @@ classdef SubarraysInRecordsReaderBase < handle
 
     function close(obj)
       obj.close_();
-      if obj.state_ ~= 4
-        if mod(obj.state_, 2) == 1
-          previous_method = obj.state_to_method_name_(obj.state_ - 1);
-          throw(yardl.ProtocolError("Protocol reader closed before all data was consumed. The iterable returned by '%s' was not fully consumed.", previous_method));
-        else
-          expected_method = obj.state_to_method_name_(obj.state_);
-          throw(yardl.ProtocolError("Protocol reader closed before all data was consumed. Expected call to '%s'.", expected_method));
-        end
+      if obj.state_ ~= 2
+        expected_method = obj.state_to_method_name_(obj.state_);
+        throw(yardl.ProtocolError("Protocol reader closed before all data was consumed. Expected call to '%s'.", expected_method));
       end
     end
 
@@ -30,28 +25,22 @@ classdef SubarraysInRecordsReaderBase < handle
       end
 
       value = obj.read_with_fixed_subarrays_();
-      obj.state_ = 2;
+      obj.state_ = 1;
     end
 
     % Ordinal 1
     function value = read_with_vlen_subarrays(obj)
-      if obj.state_ ~= 2
-        obj.raise_unexpected_state_(2);
+      if obj.state_ ~= 1
+        obj.raise_unexpected_state_(1);
       end
 
       value = obj.read_with_vlen_subarrays_();
-      obj.state_ = 4;
+      obj.state_ = 2;
     end
 
     function copy_to(obj, writer)
-      while obj.has_with_fixed_subarrays()
-        item = obj.read_with_fixed_subarrays();
-        writer.write_with_fixed_subarrays({item});
-      end
-      while obj.has_with_vlen_subarrays()
-        item = obj.read_with_vlen_subarrays();
-        writer.write_with_vlen_subarrays({item});
-      end
+      writer.write_with_fixed_subarrays(obj.read_with_fixed_subarrays());
+      writer.write_with_vlen_subarrays(obj.read_with_vlen_subarrays());
     end
   end
 
@@ -78,7 +67,7 @@ classdef SubarraysInRecordsReaderBase < handle
     function name = state_to_method_name_(obj, state)
       if state == 0
         name = 'read_with_fixed_subarrays';
-      elseif state == 2
+      elseif state == 1
         name = 'read_with_vlen_subarrays';
       else
         name = '<unknown>';

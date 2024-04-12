@@ -13,7 +13,7 @@ classdef (Abstract) EnumsWriterBase < handle
 
     function close(obj)
       obj.close_();
-      if obj.state_ ~= 6
+      if obj.state_ ~= 3
         expected_method = obj.state_to_method_name_(bitand((int32(obj.state_) + 1), bitcmp(1, 'int8')));
         throw(yardl.ProtocolError("Protocol writer closed before all steps were called. Expected call to '%s'.", expected_method));
       end
@@ -26,27 +26,27 @@ classdef (Abstract) EnumsWriterBase < handle
       end
 
       obj.write_single_(value);
-      obj.state_ = 2;
+      obj.state_ = 1;
     end
 
     % Ordinal 1
     function write_vec(obj, value)
-      if obj.state_ ~= 2
-        obj.raise_unexpected_state_(2);
+      if obj.state_ ~= 1
+        obj.raise_unexpected_state_(1);
       end
 
       obj.write_vec_(value);
-      obj.state_ = 4;
+      obj.state_ = 2;
     end
 
     % Ordinal 2
     function write_size(obj, value)
-      if obj.state_ ~= 4
-        obj.raise_unexpected_state_(4);
+      if obj.state_ ~= 2
+        obj.raise_unexpected_state_(2);
       end
 
       obj.write_size_(value);
-      obj.state_ = 6;
+      obj.state_ = 3;
     end
   end
 
@@ -75,9 +75,9 @@ classdef (Abstract) EnumsWriterBase < handle
     function name = state_to_method_name_(obj, state)
       if state == 0
         name = 'write_single';
-      elseif state == 2
+      elseif state == 1
         name = 'write_vec';
-      elseif state == 4
+      elseif state == 2
         name = 'write_size';
       else
         name = '<unknown>';

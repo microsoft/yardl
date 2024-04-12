@@ -27,6 +27,11 @@ classdef TestProtocolWithKeywordStepsWriter < test_model.ProtocolWithKeywordStep
         throw(yardl.RuntimeError("Close() must be called on 'TestProtocolWithKeywordStepsWriter' to verify mocks"));
       end
     end
+    function end_int(obj)
+      end_int@test_model.ProtocolWithKeywordStepsWriterBase(obj);
+      obj.writer_.end_int();
+    end
+
   end
 
   methods (Access=protected)

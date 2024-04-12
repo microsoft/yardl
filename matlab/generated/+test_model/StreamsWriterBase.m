@@ -12,13 +12,8 @@ classdef (Abstract) StreamsWriterBase < handle
     end
 
     function close(obj)
-      if obj.state_ == 7
-        obj.end_stream_();
-        obj.close_();
-        return
-      end
       obj.close_();
-      if obj.state_ ~= 8
+      if obj.state_ ~= 4
         expected_method = obj.state_to_method_name_(bitand((int32(obj.state_) + 1), bitcmp(1, 'int8')));
         throw(yardl.ProtocolError("Protocol writer closed before all steps were called. Expected call to '%s'.", expected_method));
       end
@@ -26,51 +21,74 @@ classdef (Abstract) StreamsWriterBase < handle
 
     % Ordinal 0
     function write_int_data(obj, value)
-      if bitand(int32(obj.state_), bitcmp(1, 'int8')) ~= 0
+      if obj.state_ ~= 0
         obj.raise_unexpected_state_(0);
       end
 
       obj.write_int_data_(value);
+    end
+
+    function end_int_data(obj)
+      if obj.state_ ~= 0
+        obj.raise_unexpected_state_(0);
+      end
+
+      obj.end_stream_();
       obj.state_ = 1;
     end
 
     % Ordinal 1
     function write_optional_int_data(obj, value)
-      if obj.state_ == 1
-        obj.end_stream_();
-        obj.state_ = 2;
-      elseif bitand(int32(obj.state_), bitcmp(1, 'int8')) ~= 2
-        obj.raise_unexpected_state_(2);
+      if obj.state_ ~= 1
+        obj.raise_unexpected_state_(1);
       end
 
       obj.write_optional_int_data_(value);
-      obj.state_ = 3;
+    end
+
+    function end_optional_int_data(obj)
+      if obj.state_ ~= 1
+        obj.raise_unexpected_state_(1);
+      end
+
+      obj.end_stream_();
+      obj.state_ = 2;
     end
 
     % Ordinal 2
     function write_record_with_optional_vector_data(obj, value)
-      if obj.state_ == 3
-        obj.end_stream_();
-        obj.state_ = 4;
-      elseif bitand(int32(obj.state_), bitcmp(1, 'int8')) ~= 4
-        obj.raise_unexpected_state_(4);
+      if obj.state_ ~= 2
+        obj.raise_unexpected_state_(2);
       end
 
       obj.write_record_with_optional_vector_data_(value);
-      obj.state_ = 5;
+    end
+
+    function end_record_with_optional_vector_data(obj)
+      if obj.state_ ~= 2
+        obj.raise_unexpected_state_(2);
+      end
+
+      obj.end_stream_();
+      obj.state_ = 3;
     end
 
     % Ordinal 3
     function write_fixed_vector(obj, value)
-      if obj.state_ == 5
-        obj.end_stream_();
-        obj.state_ = 6;
-      elseif bitand(int32(obj.state_), bitcmp(1, 'int8')) ~= 6
-        obj.raise_unexpected_state_(6);
+      if obj.state_ ~= 3
+        obj.raise_unexpected_state_(3);
       end
 
       obj.write_fixed_vector_(value);
-      obj.state_ = 7;
+    end
+
+    function end_fixed_vector(obj)
+      if obj.state_ ~= 3
+        obj.raise_unexpected_state_(3);
+      end
+
+      obj.end_stream_();
+      obj.state_ = 4;
     end
   end
 
@@ -99,13 +117,13 @@ classdef (Abstract) StreamsWriterBase < handle
 
     function name = state_to_method_name_(obj, state)
       if state == 0
-        name = 'write_int_data';
+        name = 'write_int_data or end_int_data';
+      elseif state == 1
+        name = 'write_optional_int_data or end_optional_int_data';
       elseif state == 2
-        name = 'write_optional_int_data';
-      elseif state == 4
-        name = 'write_record_with_optional_vector_data';
-      elseif state == 6
-        name = 'write_fixed_vector';
+        name = 'write_record_with_optional_vector_data or end_record_with_optional_vector_data';
+      elseif state == 3
+        name = 'write_fixed_vector or end_fixed_vector';
       else
         name = '<unknown>';
       end

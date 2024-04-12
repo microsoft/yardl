@@ -12,14 +12,9 @@ classdef AdvancedGenericsReaderBase < handle
 
     function close(obj)
       obj.close_();
-      if obj.state_ ~= 10
-        if mod(obj.state_, 2) == 1
-          previous_method = obj.state_to_method_name_(obj.state_ - 1);
-          throw(yardl.ProtocolError("Protocol reader closed before all data was consumed. The iterable returned by '%s' was not fully consumed.", previous_method));
-        else
-          expected_method = obj.state_to_method_name_(obj.state_);
-          throw(yardl.ProtocolError("Protocol reader closed before all data was consumed. Expected call to '%s'.", expected_method));
-        end
+      if obj.state_ ~= 5
+        expected_method = obj.state_to_method_name_(obj.state_);
+        throw(yardl.ProtocolError("Protocol reader closed before all data was consumed. Expected call to '%s'.", expected_method));
       end
     end
 
@@ -30,70 +25,55 @@ classdef AdvancedGenericsReaderBase < handle
       end
 
       value = obj.read_float_image_image_();
-      obj.state_ = 2;
+      obj.state_ = 1;
     end
 
     % Ordinal 1
     function value = read_generic_record_1(obj)
-      if obj.state_ ~= 2
-        obj.raise_unexpected_state_(2);
+      if obj.state_ ~= 1
+        obj.raise_unexpected_state_(1);
       end
 
       value = obj.read_generic_record_1_();
-      obj.state_ = 4;
+      obj.state_ = 2;
     end
 
     % Ordinal 2
     function value = read_tuple_of_optionals(obj)
-      if obj.state_ ~= 4
-        obj.raise_unexpected_state_(4);
+      if obj.state_ ~= 2
+        obj.raise_unexpected_state_(2);
       end
 
       value = obj.read_tuple_of_optionals_();
-      obj.state_ = 6;
+      obj.state_ = 3;
     end
 
     % Ordinal 3
     function value = read_tuple_of_optionals_alternate_syntax(obj)
-      if obj.state_ ~= 6
-        obj.raise_unexpected_state_(6);
+      if obj.state_ ~= 3
+        obj.raise_unexpected_state_(3);
       end
 
       value = obj.read_tuple_of_optionals_alternate_syntax_();
-      obj.state_ = 8;
+      obj.state_ = 4;
     end
 
     % Ordinal 4
     function value = read_tuple_of_vectors(obj)
-      if obj.state_ ~= 8
-        obj.raise_unexpected_state_(8);
+      if obj.state_ ~= 4
+        obj.raise_unexpected_state_(4);
       end
 
       value = obj.read_tuple_of_vectors_();
-      obj.state_ = 10;
+      obj.state_ = 5;
     end
 
     function copy_to(obj, writer)
-      while obj.has_float_image_image()
-        item = obj.read_float_image_image();
-        writer.write_float_image_image({item});
-      end
-      while obj.has_generic_record_1()
-        item = obj.read_generic_record_1();
-        writer.write_generic_record_1({item});
-      end
-      while obj.has_tuple_of_optionals()
-        item = obj.read_tuple_of_optionals();
-        writer.write_tuple_of_optionals({item});
-      end
-      while obj.has_tuple_of_optionals_alternate_syntax()
-        item = obj.read_tuple_of_optionals_alternate_syntax();
-        writer.write_tuple_of_optionals_alternate_syntax({item});
-      end
-      while obj.has_tuple_of_vectors()
-        item = obj.read_tuple_of_vectors();
-        writer.write_tuple_of_vectors({item});
-      end
+      writer.write_float_image_image(obj.read_float_image_image());
+      writer.write_generic_record_1(obj.read_generic_record_1());
+      writer.write_tuple_of_optionals(obj.read_tuple_of_optionals());
+      writer.write_tuple_of_optionals_alternate_syntax(obj.read_tuple_of_optionals_alternate_syntax());
+      writer.write_tuple_of_vectors(obj.read_tuple_of_vectors());
     end
   end
 
@@ -123,13 +103,13 @@ classdef AdvancedGenericsReaderBase < handle
     function name = state_to_method_name_(obj, state)
       if state == 0
         name = 'read_float_image_image';
-      elseif state == 2
+      elseif state == 1
         name = 'read_generic_record_1';
-      elseif state == 4
+      elseif state == 2
         name = 'read_tuple_of_optionals';
-      elseif state == 6
+      elseif state == 3
         name = 'read_tuple_of_optionals_alternate_syntax';
-      elseif state == 8
+      elseif state == 4
         name = 'read_tuple_of_vectors';
       else
         name = '<unknown>';

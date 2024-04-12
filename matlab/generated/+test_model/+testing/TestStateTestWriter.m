@@ -27,6 +27,11 @@ classdef TestStateTestWriter < test_model.StateTestWriterBase
         throw(yardl.RuntimeError("Close() must be called on 'TestStateTestWriter' to verify mocks"));
       end
     end
+    function end_a_stream(obj)
+      end_a_stream@test_model.StateTestWriterBase(obj);
+      obj.writer_.end_a_stream();
+    end
+
   end
 
   methods (Access=protected)

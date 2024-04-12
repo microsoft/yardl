@@ -13,7 +13,7 @@ classdef (Abstract) StateTestWriterBase < handle
 
     function close(obj)
       obj.close_();
-      if obj.state_ ~= 6
+      if obj.state_ ~= 3
         expected_method = obj.state_to_method_name_(bitand((int32(obj.state_) + 1), bitcmp(1, 'int8')));
         throw(yardl.ProtocolError("Protocol writer closed before all steps were called. Expected call to '%s'.", expected_method));
       end
@@ -26,30 +26,35 @@ classdef (Abstract) StateTestWriterBase < handle
       end
 
       obj.write_an_int_(value);
-      obj.state_ = 2;
+      obj.state_ = 1;
     end
 
     % Ordinal 1
     function write_a_stream(obj, value)
-      if bitand(int32(obj.state_), bitcmp(1, 'int8')) ~= 2
-        obj.raise_unexpected_state_(2);
+      if obj.state_ ~= 1
+        obj.raise_unexpected_state_(1);
       end
 
       obj.write_a_stream_(value);
-      obj.state_ = 3;
+    end
+
+    function end_a_stream(obj)
+      if obj.state_ ~= 1
+        obj.raise_unexpected_state_(1);
+      end
+
+      obj.end_stream_();
+      obj.state_ = 2;
     end
 
     % Ordinal 2
     function write_another_int(obj, value)
-      if obj.state_ == 3
-        obj.end_stream_();
-        obj.state_ = 4;
-      elseif obj.state_ ~= 4
-        obj.raise_unexpected_state_(4);
+      if obj.state_ ~= 2
+        obj.raise_unexpected_state_(2);
       end
 
       obj.write_another_int_(value);
-      obj.state_ = 6;
+      obj.state_ = 3;
     end
   end
 
@@ -78,9 +83,9 @@ classdef (Abstract) StateTestWriterBase < handle
     function name = state_to_method_name_(obj, state)
       if state == 0
         name = 'write_an_int';
+      elseif state == 1
+        name = 'write_a_stream or end_a_stream';
       elseif state == 2
-        name = 'write_a_stream';
-      elseif state == 4
         name = 'write_another_int';
       else
         name = '<unknown>';

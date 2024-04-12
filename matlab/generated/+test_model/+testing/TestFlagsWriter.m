@@ -27,6 +27,16 @@ classdef TestFlagsWriter < test_model.FlagsWriterBase
         throw(yardl.RuntimeError("Close() must be called on 'TestFlagsWriter' to verify mocks"));
       end
     end
+    function end_days(obj)
+      end_days@test_model.FlagsWriterBase(obj);
+      obj.writer_.end_days();
+    end
+
+    function end_formats(obj)
+      end_formats@test_model.FlagsWriterBase(obj);
+      obj.writer_.end_formats();
+    end
+
   end
 
   methods (Access=protected)

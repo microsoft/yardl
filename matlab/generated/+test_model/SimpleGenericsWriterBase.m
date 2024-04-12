@@ -12,13 +12,8 @@ classdef (Abstract) SimpleGenericsWriterBase < handle
     end
 
     function close(obj)
-      if obj.state_ == 17
-        obj.end_stream_();
-        obj.close_();
-        return
-      end
       obj.close_();
-      if obj.state_ ~= 18
+      if obj.state_ ~= 9
         expected_method = obj.state_to_method_name_(bitand((int32(obj.state_) + 1), bitcmp(1, 'int8')));
         throw(yardl.ProtocolError("Protocol writer closed before all steps were called. Expected call to '%s'.", expected_method));
       end
@@ -31,87 +26,95 @@ classdef (Abstract) SimpleGenericsWriterBase < handle
       end
 
       obj.write_float_image_(value);
-      obj.state_ = 2;
+      obj.state_ = 1;
     end
 
     % Ordinal 1
     function write_int_image(obj, value)
-      if obj.state_ ~= 2
-        obj.raise_unexpected_state_(2);
+      if obj.state_ ~= 1
+        obj.raise_unexpected_state_(1);
       end
 
       obj.write_int_image_(value);
-      obj.state_ = 4;
+      obj.state_ = 2;
     end
 
     % Ordinal 2
     function write_int_image_alternate_syntax(obj, value)
-      if obj.state_ ~= 4
-        obj.raise_unexpected_state_(4);
+      if obj.state_ ~= 2
+        obj.raise_unexpected_state_(2);
       end
 
       obj.write_int_image_alternate_syntax_(value);
-      obj.state_ = 6;
+      obj.state_ = 3;
     end
 
     % Ordinal 3
     function write_string_image(obj, value)
-      if obj.state_ ~= 6
-        obj.raise_unexpected_state_(6);
+      if obj.state_ ~= 3
+        obj.raise_unexpected_state_(3);
       end
 
       obj.write_string_image_(value);
-      obj.state_ = 8;
+      obj.state_ = 4;
     end
 
     % Ordinal 4
     function write_int_float_tuple(obj, value)
-      if obj.state_ ~= 8
-        obj.raise_unexpected_state_(8);
+      if obj.state_ ~= 4
+        obj.raise_unexpected_state_(4);
       end
 
       obj.write_int_float_tuple_(value);
-      obj.state_ = 10;
+      obj.state_ = 5;
     end
 
     % Ordinal 5
     function write_float_float_tuple(obj, value)
-      if obj.state_ ~= 10
-        obj.raise_unexpected_state_(10);
+      if obj.state_ ~= 5
+        obj.raise_unexpected_state_(5);
       end
 
       obj.write_float_float_tuple_(value);
-      obj.state_ = 12;
+      obj.state_ = 6;
     end
 
     % Ordinal 6
     function write_int_float_tuple_alternate_syntax(obj, value)
-      if obj.state_ ~= 12
-        obj.raise_unexpected_state_(12);
+      if obj.state_ ~= 6
+        obj.raise_unexpected_state_(6);
       end
 
       obj.write_int_float_tuple_alternate_syntax_(value);
-      obj.state_ = 14;
+      obj.state_ = 7;
     end
 
     % Ordinal 7
     function write_int_string_tuple(obj, value)
-      if obj.state_ ~= 14
-        obj.raise_unexpected_state_(14);
+      if obj.state_ ~= 7
+        obj.raise_unexpected_state_(7);
       end
 
       obj.write_int_string_tuple_(value);
-      obj.state_ = 16;
+      obj.state_ = 8;
     end
 
     % Ordinal 8
     function write_stream_of_type_variants(obj, value)
-      if bitand(int32(obj.state_), bitcmp(1, 'int8')) ~= 16
-        obj.raise_unexpected_state_(16);
+      if obj.state_ ~= 8
+        obj.raise_unexpected_state_(8);
       end
 
       obj.write_stream_of_type_variants_(value);
-      obj.state_ = 17;
+    end
+
+    function end_stream_of_type_variants(obj)
+      if obj.state_ ~= 8
+        obj.raise_unexpected_state_(8);
+      end
+
+      obj.end_stream_();
+      obj.state_ = 9;
     end
   end
 
@@ -146,22 +149,22 @@ classdef (Abstract) SimpleGenericsWriterBase < handle
     function name = state_to_method_name_(obj, state)
       if state == 0
         name = 'write_float_image';
-      elseif state == 2
+      elseif state == 1
         name = 'write_int_image';
-      elseif state == 4
+      elseif state == 2
         name = 'write_int_image_alternate_syntax';
-      elseif state == 6
+      elseif state == 3
         name = 'write_string_image';
-      elseif state == 8
+      elseif state == 4
         name = 'write_int_float_tuple';
-      elseif state == 10
+      elseif state == 5
         name = 'write_float_float_tuple';
-      elseif state == 12
+      elseif state == 6
         name = 'write_int_float_tuple_alternate_syntax';
-      elseif state == 14
+      elseif state == 7
         name = 'write_int_string_tuple';
-      elseif state == 16
-        name = 'write_stream_of_type_variants';
+      elseif state == 8
+        name = 'write_stream_of_type_variants or end_stream_of_type_variants';
       else
         name = '<unknown>';
       end

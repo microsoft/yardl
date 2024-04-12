@@ -3,35 +3,43 @@
 classdef MockBenchmarkFloatVlenWriter < matlab.mixin.Copyable & test_model.BenchmarkFloatVlenWriterBase
   properties
     testCase_
-    write_float_array_written
+    expected_float_array
   end
 
   methods
     function obj = MockBenchmarkFloatVlenWriter(testCase)
       obj.testCase_ = testCase;
-      obj.write_float_array_written = yardl.None;
+      obj.expected_float_array = {};
     end
 
     function expect_write_float_array_(obj, value)
-      if obj.write_float_array_written.has_value()
-        last_dim = ndims(value);
-        obj.write_float_array_written = yardl.Optional(cat(last_dim, obj.write_float_array_written.value, value));
-      else
-        obj.write_float_array_written = yardl.Optional(value);
+      if iscell(value)
+        for n = 1:numel(value)
+          obj.expected_float_array{end+1} = value{n};
+        end
+        return;
+      end
+      shape = size(value);
+      lastDim = ndims(value);
+      count = shape(lastDim);
+      index = repelem({':'}, lastDim-1);
+      for n = 1:count
+        obj.expected_float_array{end+1} = value(index{:}, n);
       end
     end
 
     function verify(obj)
-      obj.testCase_.verifyEqual(obj.write_float_array_written, yardl.None, "Expected call to write_float_array_ was not received");
+      obj.testCase_.verifyTrue(isempty(obj.expected_float_array), "Expected call to write_float_array_ was not received");
     end
   end
 
   methods (Access=protected)
     function write_float_array_(obj, value)
-      obj.testCase_.verifyTrue(obj.write_float_array_written.has_value(), "Unexpected call to write_float_array_");
-      expected = obj.write_float_array_written.value;
-      obj.testCase_.verifyEqual(value, expected, "Unexpected argument value for call to write_float_array_");
-      obj.write_float_array_written = yardl.None;
+      assert(iscell(value));
+      assert(isscalar(value));
+      obj.testCase_.verifyFalse(isempty(obj.expected_float_array), "Unexpected call to write_float_array_");
+      obj.testCase_.verifyEqual(value{1}, obj.expected_float_array{1}, "Unexpected argument value for call to write_float_array_");
+      obj.expected_float_array = obj.expected_float_array(2:end);
     end
 
     function close_(obj)

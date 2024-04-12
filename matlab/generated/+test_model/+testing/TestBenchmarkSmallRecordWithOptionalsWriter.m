@@ -27,6 +27,11 @@ classdef TestBenchmarkSmallRecordWithOptionalsWriter < test_model.BenchmarkSmall
         throw(yardl.RuntimeError("Close() must be called on 'TestBenchmarkSmallRecordWithOptionalsWriter' to verify mocks"));
       end
     end
+    function end_small_record(obj)
+      end_small_record@test_model.BenchmarkSmallRecordWithOptionalsWriterBase(obj);
+      obj.writer_.end_small_record();
+    end
+
   end
 
   methods (Access=protected)

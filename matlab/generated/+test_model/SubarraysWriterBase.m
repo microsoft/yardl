@@ -13,7 +13,7 @@ classdef (Abstract) SubarraysWriterBase < handle
 
     function close(obj)
       obj.close_();
-      if obj.state_ ~= 18
+      if obj.state_ ~= 9
         expected_method = obj.state_to_method_name_(bitand((int32(obj.state_) + 1), bitcmp(1, 'int8')));
         throw(yardl.ProtocolError("Protocol writer closed before all steps were called. Expected call to '%s'.", expected_method));
       end
@@ -26,87 +26,87 @@ classdef (Abstract) SubarraysWriterBase < handle
       end
 
       obj.write_dynamic_with_fixed_int_subarray_(value);
-      obj.state_ = 2;
+      obj.state_ = 1;
     end
 
     % Ordinal 1
     function write_dynamic_with_fixed_float_subarray(obj, value)
-      if obj.state_ ~= 2
-        obj.raise_unexpected_state_(2);
+      if obj.state_ ~= 1
+        obj.raise_unexpected_state_(1);
       end
 
       obj.write_dynamic_with_fixed_float_subarray_(value);
-      obj.state_ = 4;
+      obj.state_ = 2;
     end
 
     % Ordinal 2
     function write_known_dim_count_with_fixed_int_subarray(obj, value)
-      if obj.state_ ~= 4
-        obj.raise_unexpected_state_(4);
+      if obj.state_ ~= 2
+        obj.raise_unexpected_state_(2);
       end
 
       obj.write_known_dim_count_with_fixed_int_subarray_(value);
-      obj.state_ = 6;
+      obj.state_ = 3;
     end
 
     % Ordinal 3
     function write_known_dim_count_with_fixed_float_subarray(obj, value)
-      if obj.state_ ~= 6
-        obj.raise_unexpected_state_(6);
+      if obj.state_ ~= 3
+        obj.raise_unexpected_state_(3);
       end
 
       obj.write_known_dim_count_with_fixed_float_subarray_(value);
-      obj.state_ = 8;
+      obj.state_ = 4;
     end
 
     % Ordinal 4
     function write_fixed_with_fixed_int_subarray(obj, value)
-      if obj.state_ ~= 8
-        obj.raise_unexpected_state_(8);
+      if obj.state_ ~= 4
+        obj.raise_unexpected_state_(4);
       end
 
       obj.write_fixed_with_fixed_int_subarray_(value);
-      obj.state_ = 10;
+      obj.state_ = 5;
     end
 
     % Ordinal 5
     function write_fixed_with_fixed_float_subarray(obj, value)
-      if obj.state_ ~= 10
-        obj.raise_unexpected_state_(10);
+      if obj.state_ ~= 5
+        obj.raise_unexpected_state_(5);
       end
 
       obj.write_fixed_with_fixed_float_subarray_(value);
-      obj.state_ = 12;
+      obj.state_ = 6;
     end
 
     % Ordinal 6
     function write_nested_subarray(obj, value)
-      if obj.state_ ~= 12
-        obj.raise_unexpected_state_(12);
+      if obj.state_ ~= 6
+        obj.raise_unexpected_state_(6);
       end
 
       obj.write_nested_subarray_(value);
-      obj.state_ = 14;
+      obj.state_ = 7;
     end
 
     % Ordinal 7
     function write_dynamic_with_fixed_vector_subarray(obj, value)
-      if obj.state_ ~= 14
-        obj.raise_unexpected_state_(14);
+      if obj.state_ ~= 7
+        obj.raise_unexpected_state_(7);
       end
 
       obj.write_dynamic_with_fixed_vector_subarray_(value);
-      obj.state_ = 16;
+      obj.state_ = 8;
     end
 
     % Ordinal 8
     function write_generic_subarray(obj, value)
-      if obj.state_ ~= 16
-        obj.raise_unexpected_state_(16);
+      if obj.state_ ~= 8
+        obj.raise_unexpected_state_(8);
       end
 
       obj.write_generic_subarray_(value);
-      obj.state_ = 18;
+      obj.state_ = 9;
     end
   end
 
@@ -141,21 +141,21 @@ classdef (Abstract) SubarraysWriterBase < handle
     function name = state_to_method_name_(obj, state)
       if state == 0
         name = 'write_dynamic_with_fixed_int_subarray';
-      elseif state == 2
+      elseif state == 1
         name = 'write_dynamic_with_fixed_float_subarray';
-      elseif state == 4
+      elseif state == 2
         name = 'write_known_dim_count_with_fixed_int_subarray';
-      elseif state == 6
+      elseif state == 3
         name = 'write_known_dim_count_with_fixed_float_subarray';
-      elseif state == 8
+      elseif state == 4
         name = 'write_fixed_with_fixed_int_subarray';
-      elseif state == 10
+      elseif state == 5
         name = 'write_fixed_with_fixed_float_subarray';
-      elseif state == 12
+      elseif state == 6
         name = 'write_nested_subarray';
-      elseif state == 14
+      elseif state == 7
         name = 'write_dynamic_with_fixed_vector_subarray';
-      elseif state == 16
+      elseif state == 8
         name = 'write_generic_subarray';
       else
         name = '<unknown>';

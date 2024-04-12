@@ -12,14 +12,9 @@ classdef StreamsOfAliasedUnionsReaderBase < handle
 
     function close(obj)
       obj.close_();
-      if obj.state_ ~= 4
-        if mod(obj.state_, 2) == 1
-          previous_method = obj.state_to_method_name_(obj.state_ - 1);
-          throw(yardl.ProtocolError("Protocol reader closed before all data was consumed. The iterable returned by '%s' was not fully consumed.", previous_method));
-        else
-          expected_method = obj.state_to_method_name_(obj.state_);
-          throw(yardl.ProtocolError("Protocol reader closed before all data was consumed. Expected call to '%s'.", expected_method));
-        end
+      if obj.state_ ~= 2
+        expected_method = obj.state_to_method_name_(obj.state_);
+        throw(yardl.ProtocolError("Protocol reader closed before all data was consumed. Expected call to '%s'.", expected_method));
       end
     end
 
@@ -31,7 +26,7 @@ classdef StreamsOfAliasedUnionsReaderBase < handle
 
       more = obj.has_int_or_simple_record_();
       if ~more
-        obj.state_ = 2;
+        obj.state_ = 1;
       end
     end
 
@@ -45,19 +40,19 @@ classdef StreamsOfAliasedUnionsReaderBase < handle
 
     % Ordinal 1
     function more = has_nullable_int_or_simple_record(obj)
-      if obj.state_ ~= 2
-        obj.raise_unexpected_state_(2);
+      if obj.state_ ~= 1
+        obj.raise_unexpected_state_(1);
       end
 
       more = obj.has_nullable_int_or_simple_record_();
       if ~more
-        obj.state_ = 4;
+        obj.state_ = 2;
       end
     end
 
     function value = read_nullable_int_or_simple_record(obj)
-      if obj.state_ ~= 2
-        obj.raise_unexpected_state_(2);
+      if obj.state_ ~= 1
+        obj.raise_unexpected_state_(1);
       end
 
       value = obj.read_nullable_int_or_simple_record_();
@@ -68,10 +63,12 @@ classdef StreamsOfAliasedUnionsReaderBase < handle
         item = obj.read_int_or_simple_record();
         writer.write_int_or_simple_record({item});
       end
+      writer.end_int_or_simple_record();
       while obj.has_nullable_int_or_simple_record()
         item = obj.read_nullable_int_or_simple_record();
         writer.write_nullable_int_or_simple_record({item});
       end
+      writer.end_nullable_int_or_simple_record();
     end
   end
 
@@ -100,7 +97,7 @@ classdef StreamsOfAliasedUnionsReaderBase < handle
     function name = state_to_method_name_(obj, state)
       if state == 0
         name = 'read_int_or_simple_record';
-      elseif state == 2
+      elseif state == 1
         name = 'read_nullable_int_or_simple_record';
       else
         name = '<unknown>';

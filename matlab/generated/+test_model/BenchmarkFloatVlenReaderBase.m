@@ -12,14 +12,9 @@ classdef BenchmarkFloatVlenReaderBase < handle
 
     function close(obj)
       obj.close_();
-      if obj.state_ ~= 2
-        if mod(obj.state_, 2) == 1
-          previous_method = obj.state_to_method_name_(obj.state_ - 1);
-          throw(yardl.ProtocolError("Protocol reader closed before all data was consumed. The iterable returned by '%s' was not fully consumed.", previous_method));
-        else
-          expected_method = obj.state_to_method_name_(obj.state_);
-          throw(yardl.ProtocolError("Protocol reader closed before all data was consumed. Expected call to '%s'.", expected_method));
-        end
+      if obj.state_ ~= 1
+        expected_method = obj.state_to_method_name_(obj.state_);
+        throw(yardl.ProtocolError("Protocol reader closed before all data was consumed. Expected call to '%s'.", expected_method));
       end
     end
 
@@ -31,7 +26,7 @@ classdef BenchmarkFloatVlenReaderBase < handle
 
       more = obj.has_float_array_();
       if ~more
-        obj.state_ = 2;
+        obj.state_ = 1;
       end
     end
 
@@ -48,6 +43,7 @@ classdef BenchmarkFloatVlenReaderBase < handle
         item = obj.read_float_array();
         writer.write_float_array({item});
       end
+      writer.end_float_array();
     end
   end
 

@@ -12,14 +12,9 @@ classdef StateTestReaderBase < handle
 
     function close(obj)
       obj.close_();
-      if obj.state_ ~= 6
-        if mod(obj.state_, 2) == 1
-          previous_method = obj.state_to_method_name_(obj.state_ - 1);
-          throw(yardl.ProtocolError("Protocol reader closed before all data was consumed. The iterable returned by '%s' was not fully consumed.", previous_method));
-        else
-          expected_method = obj.state_to_method_name_(obj.state_);
-          throw(yardl.ProtocolError("Protocol reader closed before all data was consumed. Expected call to '%s'.", expected_method));
-        end
+      if obj.state_ ~= 3
+        expected_method = obj.state_to_method_name_(obj.state_);
+        throw(yardl.ProtocolError("Protocol reader closed before all data was consumed. Expected call to '%s'.", expected_method));
       end
     end
 
@@ -30,24 +25,24 @@ classdef StateTestReaderBase < handle
       end
 
       value = obj.read_an_int_();
-      obj.state_ = 2;
+      obj.state_ = 1;
     end
 
     % Ordinal 1
     function more = has_a_stream(obj)
-      if obj.state_ ~= 2
-        obj.raise_unexpected_state_(2);
+      if obj.state_ ~= 1
+        obj.raise_unexpected_state_(1);
       end
 
       more = obj.has_a_stream_();
       if ~more
-        obj.state_ = 4;
+        obj.state_ = 2;
       end
     end
 
     function value = read_a_stream(obj)
-      if obj.state_ ~= 2
-        obj.raise_unexpected_state_(2);
+      if obj.state_ ~= 1
+        obj.raise_unexpected_state_(1);
       end
 
       value = obj.read_a_stream_();
@@ -55,27 +50,22 @@ classdef StateTestReaderBase < handle
 
     % Ordinal 2
     function value = read_another_int(obj)
-      if obj.state_ ~= 4
-        obj.raise_unexpected_state_(4);
+      if obj.state_ ~= 2
+        obj.raise_unexpected_state_(2);
       end
 
       value = obj.read_another_int_();
-      obj.state_ = 6;
+      obj.state_ = 3;
     end
 
     function copy_to(obj, writer)
-      while obj.has_an_int()
-        item = obj.read_an_int();
-        writer.write_an_int({item});
-      end
+      writer.write_an_int(obj.read_an_int());
       while obj.has_a_stream()
         item = obj.read_a_stream();
         writer.write_a_stream({item});
       end
-      while obj.has_another_int()
-        item = obj.read_another_int();
-        writer.write_another_int({item});
-      end
+      writer.end_a_stream();
+      writer.write_another_int(obj.read_another_int());
     end
   end
 
@@ -104,9 +94,9 @@ classdef StateTestReaderBase < handle
     function name = state_to_method_name_(obj, state)
       if state == 0
         name = 'read_an_int';
-      elseif state == 2
+      elseif state == 1
         name = 'read_a_stream';
-      elseif state == 4
+      elseif state == 2
         name = 'read_another_int';
       else
         name = '<unknown>';

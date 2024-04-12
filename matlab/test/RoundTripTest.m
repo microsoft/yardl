@@ -318,6 +318,7 @@ classdef RoundTripTest < matlab.unittest.TestCase
                     test_model.DaysOfWeek(282839), ...
                     test_model.DaysOfWeek(234532) ...
                 ]);
+            w.end_days();
 
             w.write_formats([...
                     test_model.TextFormat.BOLD, ...
@@ -325,46 +326,64 @@ classdef RoundTripTest < matlab.unittest.TestCase
                     test_model.TextFormat.REGULAR, ...
                     test_model.TextFormat(232932) ...
                 ]);
+            w.end_formats();
 
             w.close();
         end
 
         function testSimpleStreams(testCase, format)
-            w = create_validating_writer(testCase, format, 'Streams');
-
             % Non-empty streams
+            w = create_validating_writer(testCase, format, 'Streams');
             w.write_int_data(int32(1:10));
-            w.write_int_data(42);
+            w.write_int_data(int32(42));
             w.write_int_data(int32(1:20));
+            w.end_int_data();
             w.write_optional_int_data([1, 2, yardl.None, 4, 5, yardl.None, 7, 8, 9, 10]);
+            w.end_optional_int_data();
             w.write_record_with_optional_vector_data([...
                 test_model.RecordWithOptionalVector(), ...
                 test_model.RecordWithOptionalVector(int32([1, 2, 3])), ...
                 test_model.RecordWithOptionalVector(int32(1:10)) ...
             ]);
+            w.end_record_with_optional_vector_data();
             w.write_fixed_vector(...
-                transpose(int32([...
-                    [1, 2, 3]; [1, 2, 3]; [1, 2, 3]; [1, 2, 3];
-                ]))...
+                repelem({int32([1, 2, 3])}, 4)...
             );
+            w.end_fixed_vector();
             w.close();
 
             % Mixed empty/non-empty streams
             w = create_validating_writer(testCase, format, 'Streams');
             w.write_int_data(int32(1:10))
             w.write_int_data([]);
+            w.end_int_data();
             w.write_optional_int_data([]);
             w.write_optional_int_data([1, 2, yardl.None, 4, 5, yardl.None, 7, 8, 9, 10]);
+            w.end_optional_int_data();
             w.write_record_with_optional_vector_data([]);
-            w.write_fixed_vector(int32(repmat([1;2;3], 1,4)));
+            w.end_record_with_optional_vector_data();
+            % w.write_fixed_vector(int32(repmat([1;2;3], 1,4)));
+            w.write_fixed_vector(repelem({int32([1, 2, 3])}, 4));
+            w.end_fixed_vector();
             w.close();
 
-            % All empty streams
+            % % All empty streams
             w = create_validating_writer(testCase, format, 'Streams');
             w.write_int_data([]);
+            w.end_int_data();
             w.write_optional_int_data([]);
+            w.end_optional_int_data();
             w.write_record_with_optional_vector_data([]);
+            w.end_record_with_optional_vector_data();
             w.write_fixed_vector([]);
+            w.end_fixed_vector();
+            w.close();
+
+            w = create_validating_writer(testCase, format, 'Streams');
+            w.end_int_data();
+            w.end_optional_int_data();
+            w.end_record_with_optional_vector_data();
+            w.end_fixed_vector();
             w.close();
         end
 
@@ -375,6 +394,7 @@ classdef RoundTripTest < matlab.unittest.TestCase
                 test_model.Int32OrSimpleRecord.SimpleRecord(test_model.SimpleRecord(1, 2, 3)), ...
                 test_model.Int32OrSimpleRecord.Int32(2) ...
             ]);
+            w.end_int_or_simple_record();
             w.write_nullable_int_or_simple_record([...
                 yardl.None, ...
                 test_model.Int32OrSimpleRecord.Int32(1), ...
@@ -383,6 +403,7 @@ classdef RoundTripTest < matlab.unittest.TestCase
                 test_model.Int32OrSimpleRecord.Int32(2), ...
                 yardl.None ...
             ]);
+            w.end_nullable_int_or_simple_record();
             w.close();
         end
 
@@ -393,6 +414,7 @@ classdef RoundTripTest < matlab.unittest.TestCase
                 test_model.AliasedIntOrSimpleRecord.SimpleRecord(test_model.SimpleRecord(1, 2, 3)), ...
                 test_model.AliasedIntOrSimpleRecord.Int32(2) ...
             ]);
+            w.end_int_or_simple_record();
             w.write_nullable_int_or_simple_record([...
                 yardl.None, ...
                 test_model.AliasedNullableIntSimpleRecord.Int32(1), ...
@@ -401,6 +423,7 @@ classdef RoundTripTest < matlab.unittest.TestCase
                 test_model.AliasedNullableIntSimpleRecord.Int32(2), ...
                 yardl.None ...
             ]);
+            w.end_nullable_int_or_simple_record();
             w.close();
         end
 
@@ -419,6 +442,7 @@ classdef RoundTripTest < matlab.unittest.TestCase
                 test_model.ImageFloatOrImageDouble.ImageFloat(transpose(single([[1, 2]; [3, 4]]))), ...
                 test_model.ImageFloatOrImageDouble.ImageDouble(transpose([[1, 2]; [3, 4]])) ...
             ]);
+            w.end_stream_of_type_variants();
             w.close();
         end
 
@@ -465,6 +489,7 @@ classdef RoundTripTest < matlab.unittest.TestCase
                 test_model.AliasedGenericUnion2.T1("hello"), ...
                 test_model.AliasedGenericUnion2.T2(test_model.Fruits.APPLE) ...
             ]);
+            w.end_stream_of_aliased_generic_union_2();
             w.close();
         end
     end

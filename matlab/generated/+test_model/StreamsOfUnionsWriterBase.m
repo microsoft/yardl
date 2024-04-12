@@ -12,13 +12,8 @@ classdef (Abstract) StreamsOfUnionsWriterBase < handle
     end
 
     function close(obj)
-      if obj.state_ == 3
-        obj.end_stream_();
-        obj.close_();
-        return
-      end
       obj.close_();
-      if obj.state_ ~= 4
+      if obj.state_ ~= 2
         expected_method = obj.state_to_method_name_(bitand((int32(obj.state_) + 1), bitcmp(1, 'int8')));
         throw(yardl.ProtocolError("Protocol writer closed before all steps were called. Expected call to '%s'.", expected_method));
       end
@@ -26,25 +21,38 @@ classdef (Abstract) StreamsOfUnionsWriterBase < handle
 
     % Ordinal 0
     function write_int_or_simple_record(obj, value)
-      if bitand(int32(obj.state_), bitcmp(1, 'int8')) ~= 0
+      if obj.state_ ~= 0
         obj.raise_unexpected_state_(0);
       end
 
       obj.write_int_or_simple_record_(value);
+    end
+
+    function end_int_or_simple_record(obj)
+      if obj.state_ ~= 0
+        obj.raise_unexpected_state_(0);
+      end
+
+      obj.end_stream_();
       obj.state_ = 1;
     end
 
     % Ordinal 1
     function write_nullable_int_or_simple_record(obj, value)
-      if obj.state_ == 1
-        obj.end_stream_();
-        obj.state_ = 2;
-      elseif bitand(int32(obj.state_), bitcmp(1, 'int8')) ~= 2
-        obj.raise_unexpected_state_(2);
+      if obj.state_ ~= 1
+        obj.raise_unexpected_state_(1);
       end
 
       obj.write_nullable_int_or_simple_record_(value);
-      obj.state_ = 3;
+    end
+
+    function end_nullable_int_or_simple_record(obj)
+      if obj.state_ ~= 1
+        obj.raise_unexpected_state_(1);
+      end
+
+      obj.end_stream_();
+      obj.state_ = 2;
     end
   end
 
@@ -71,9 +79,9 @@ classdef (Abstract) StreamsOfUnionsWriterBase < handle
 
     function name = state_to_method_name_(obj, state)
       if state == 0
-        name = 'write_int_or_simple_record';
-      elseif state == 2
-        name = 'write_nullable_int_or_simple_record';
+        name = 'write_int_or_simple_record or end_int_or_simple_record';
+      elseif state == 1
+        name = 'write_nullable_int_or_simple_record or end_nullable_int_or_simple_record';
       else
         name = '<unknown>';
       end

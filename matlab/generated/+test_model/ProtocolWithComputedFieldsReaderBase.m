@@ -12,14 +12,9 @@ classdef ProtocolWithComputedFieldsReaderBase < handle
 
     function close(obj)
       obj.close_();
-      if obj.state_ ~= 2
-        if mod(obj.state_, 2) == 1
-          previous_method = obj.state_to_method_name_(obj.state_ - 1);
-          throw(yardl.ProtocolError("Protocol reader closed before all data was consumed. The iterable returned by '%s' was not fully consumed.", previous_method));
-        else
-          expected_method = obj.state_to_method_name_(obj.state_);
-          throw(yardl.ProtocolError("Protocol reader closed before all data was consumed. Expected call to '%s'.", expected_method));
-        end
+      if obj.state_ ~= 1
+        expected_method = obj.state_to_method_name_(obj.state_);
+        throw(yardl.ProtocolError("Protocol reader closed before all data was consumed. Expected call to '%s'.", expected_method));
       end
     end
 
@@ -30,14 +25,11 @@ classdef ProtocolWithComputedFieldsReaderBase < handle
       end
 
       value = obj.read_record_with_computed_fields_();
-      obj.state_ = 2;
+      obj.state_ = 1;
     end
 
     function copy_to(obj, writer)
-      while obj.has_record_with_computed_fields()
-        item = obj.read_record_with_computed_fields();
-        writer.write_record_with_computed_fields({item});
-      end
+      writer.write_record_with_computed_fields(obj.read_record_with_computed_fields());
     end
   end
 

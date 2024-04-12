@@ -27,6 +27,11 @@ classdef TestBenchmarkFloat256x256Writer < test_model.BenchmarkFloat256x256Write
         throw(yardl.RuntimeError("Close() must be called on 'TestBenchmarkFloat256x256Writer' to verify mocks"));
       end
     end
+    function end_float256x256(obj)
+      end_float256x256@test_model.BenchmarkFloat256x256WriterBase(obj);
+      obj.writer_.end_float256x256();
+    end
+
   end
 
   methods (Access=protected)
