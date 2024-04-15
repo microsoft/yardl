@@ -2,20 +2,24 @@
 
 classdef RecordWithEnumsSerializer < yardl.binary.RecordSerializer
   methods
-    function obj = RecordWithEnumsSerializer()
+    function self = RecordWithEnumsSerializer()
       field_serializers{1} = yardl.binary.EnumSerializer('basic_types.Fruits', @basic_types.Fruits, yardl.binary.Int32Serializer);
       field_serializers{2} = yardl.binary.EnumSerializer('basic_types.DaysOfWeek', @basic_types.DaysOfWeek, yardl.binary.Int32Serializer);
       field_serializers{3} = yardl.binary.EnumSerializer('basic_types.TextFormat', @basic_types.TextFormat, yardl.binary.Uint64Serializer);
-      obj@yardl.binary.RecordSerializer('test_model.RecordWithEnums', field_serializers);
+      self@yardl.binary.RecordSerializer('test_model.RecordWithEnums', field_serializers);
     end
 
-    function write(obj, outstream, value)
-      assert(isa(value, 'test_model.RecordWithEnums'));
-      obj.write_(outstream, value.enum, value.flags, value.flags_2)
+    function write(self, outstream, value)
+      arguments
+        self
+        outstream (1,1) yardl.binary.CodedOutputStream
+        value (1,1) test_model.RecordWithEnums
+      end
+      self.write_(outstream, value.enum, value.flags, value.flags_2)
     end
 
-    function value = read(obj, instream)
-      field_values = obj.read_(instream);
+    function value = read(self, instream)
+      field_values = self.read_(instream);
       value = test_model.RecordWithEnums(field_values{:});
     end
   end

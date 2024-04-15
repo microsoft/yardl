@@ -9,26 +9,26 @@ classdef EnumsWriter < yardl.binary.BinaryProtocolWriter & test_model.EnumsWrite
   end
 
   methods
-    function obj = EnumsWriter(filename)
-      obj@test_model.EnumsWriterBase();
-      obj@yardl.binary.BinaryProtocolWriter(filename, test_model.EnumsWriterBase.schema);
-      obj.single_serializer = yardl.binary.EnumSerializer('basic_types.Fruits', @basic_types.Fruits, yardl.binary.Int32Serializer);
-      obj.vec_serializer = yardl.binary.VectorSerializer(yardl.binary.EnumSerializer('basic_types.Fruits', @basic_types.Fruits, yardl.binary.Int32Serializer));
-      obj.size_serializer = yardl.binary.EnumSerializer('test_model.SizeBasedEnum', @test_model.SizeBasedEnum, yardl.binary.SizeSerializer);
+    function self = EnumsWriter(filename)
+      self@test_model.EnumsWriterBase();
+      self@yardl.binary.BinaryProtocolWriter(filename, test_model.EnumsWriterBase.schema);
+      self.single_serializer = yardl.binary.EnumSerializer('basic_types.Fruits', @basic_types.Fruits, yardl.binary.Int32Serializer);
+      self.vec_serializer = yardl.binary.VectorSerializer(yardl.binary.EnumSerializer('basic_types.Fruits', @basic_types.Fruits, yardl.binary.Int32Serializer));
+      self.size_serializer = yardl.binary.EnumSerializer('test_model.SizeBasedEnum', @test_model.SizeBasedEnum, yardl.binary.SizeSerializer);
     end
   end
 
   methods (Access=protected)
-    function write_single_(obj, value)
-      obj.single_serializer.write(obj.stream_, value);
+    function write_single_(self, value)
+      self.single_serializer.write(self.stream_, value);
     end
 
-    function write_vec_(obj, value)
-      obj.vec_serializer.write(obj.stream_, value);
+    function write_vec_(self, value)
+      self.vec_serializer.write(self.stream_, value);
     end
 
-    function write_size_(obj, value)
-      obj.size_serializer.write(obj.stream_, value);
+    function write_size_(self, value)
+      self.size_serializer.write(self.stream_, value);
     end
   end
 end

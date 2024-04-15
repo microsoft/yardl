@@ -7,20 +7,20 @@ classdef BenchmarkSimpleMrdReader < yardl.binary.BinaryProtocolReader & test_mod
   end
 
   methods
-    function obj = BenchmarkSimpleMrdReader(filename)
-      obj@test_model.BenchmarkSimpleMrdReaderBase();
-      obj@yardl.binary.BinaryProtocolReader(filename, test_model.BenchmarkSimpleMrdReaderBase.schema);
-      obj.data_serializer = yardl.binary.StreamSerializer(yardl.binary.UnionSerializer('test_model.AcquisitionOrImage', {test_model.binary.SimpleAcquisitionSerializer(), yardl.binary.NDArraySerializer(yardl.binary.Float32Serializer, 2)}, {@test_model.AcquisitionOrImage.Acquisition, @test_model.AcquisitionOrImage.Image}));
+    function self = BenchmarkSimpleMrdReader(filename)
+      self@test_model.BenchmarkSimpleMrdReaderBase();
+      self@yardl.binary.BinaryProtocolReader(filename, test_model.BenchmarkSimpleMrdReaderBase.schema);
+      self.data_serializer = yardl.binary.StreamSerializer(yardl.binary.UnionSerializer('test_model.AcquisitionOrImage', {test_model.binary.SimpleAcquisitionSerializer(), yardl.binary.NDArraySerializer(yardl.binary.Float32Serializer, 2)}, {@test_model.AcquisitionOrImage.Acquisition, @test_model.AcquisitionOrImage.Image}));
     end
   end
 
   methods (Access=protected)
-    function more = has_data_(obj)
-      more = obj.data_serializer.hasnext(obj.stream_);
+    function more = has_data_(self)
+      more = self.data_serializer.hasnext(self.stream_);
     end
 
-    function value = read_data_(obj)
-      value = obj.data_serializer.read(obj.stream_);
+    function value = read_data_(self)
+      value = self.data_serializer.read(self.stream_);
     end
   end
 end

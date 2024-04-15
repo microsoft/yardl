@@ -7,25 +7,25 @@ classdef RecordNotUsedInProtocol < handle
   end
 
   methods
-    function obj = RecordNotUsedInProtocol(u1, u2)
+    function self = RecordNotUsedInProtocol(u1, u2)
       if nargin > 0
-        obj.u1 = u1;
-        obj.u2 = u2;
+        self.u1 = u1;
+        self.u2 = u2;
       else
-        obj.u1 = test_model.GenericUnion3.T(int32(0));
-        obj.u2 = test_model.GenericUnion3Alternate.U(int32(0));
+        self.u1 = test_model.GenericUnion3.T(int32(0));
+        self.u2 = test_model.GenericUnion3Alternate.U(int32(0));
       end
     end
 
-    function res = eq(obj, other)
+    function res = eq(self, other)
       res = ...
         isa(other, 'test_model.RecordNotUsedInProtocol') && ...
-        all([obj.u1] == [other.u1]) && ...
-        all([obj.u2] == [other.u2]);
+        all([self.u1] == [other.u1]) && ...
+        all([self.u2] == [other.u2]);
     end
 
-    function res = ne(obj, other)
-      res = ~obj.eq(other);
+    function res = ne(self, other)
+      res = ~self.eq(other);
     end
   end
 

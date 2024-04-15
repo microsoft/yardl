@@ -10,31 +10,31 @@ classdef MapsWriter < yardl.binary.BinaryProtocolWriter & test_model.MapsWriterB
   end
 
   methods
-    function obj = MapsWriter(filename)
-      obj@test_model.MapsWriterBase();
-      obj@yardl.binary.BinaryProtocolWriter(filename, test_model.MapsWriterBase.schema);
-      obj.string_to_int_serializer = yardl.binary.MapSerializer(yardl.binary.StringSerializer, yardl.binary.Int32Serializer);
-      obj.int_to_string_serializer = yardl.binary.MapSerializer(yardl.binary.Int32Serializer, yardl.binary.StringSerializer);
-      obj.string_to_union_serializer = yardl.binary.MapSerializer(yardl.binary.StringSerializer, yardl.binary.UnionSerializer('test_model.StringOrInt32', {yardl.binary.StringSerializer, yardl.binary.Int32Serializer}, {@test_model.StringOrInt32.String, @test_model.StringOrInt32.Int32}));
-      obj.aliased_generic_serializer = yardl.binary.MapSerializer(yardl.binary.StringSerializer, yardl.binary.Int32Serializer);
+    function self = MapsWriter(filename)
+      self@test_model.MapsWriterBase();
+      self@yardl.binary.BinaryProtocolWriter(filename, test_model.MapsWriterBase.schema);
+      self.string_to_int_serializer = yardl.binary.MapSerializer(yardl.binary.StringSerializer, yardl.binary.Int32Serializer);
+      self.int_to_string_serializer = yardl.binary.MapSerializer(yardl.binary.Int32Serializer, yardl.binary.StringSerializer);
+      self.string_to_union_serializer = yardl.binary.MapSerializer(yardl.binary.StringSerializer, yardl.binary.UnionSerializer('test_model.StringOrInt32', {yardl.binary.StringSerializer, yardl.binary.Int32Serializer}, {@test_model.StringOrInt32.String, @test_model.StringOrInt32.Int32}));
+      self.aliased_generic_serializer = yardl.binary.MapSerializer(yardl.binary.StringSerializer, yardl.binary.Int32Serializer);
     end
   end
 
   methods (Access=protected)
-    function write_string_to_int_(obj, value)
-      obj.string_to_int_serializer.write(obj.stream_, value);
+    function write_string_to_int_(self, value)
+      self.string_to_int_serializer.write(self.stream_, value);
     end
 
-    function write_int_to_string_(obj, value)
-      obj.int_to_string_serializer.write(obj.stream_, value);
+    function write_int_to_string_(self, value)
+      self.int_to_string_serializer.write(self.stream_, value);
     end
 
-    function write_string_to_union_(obj, value)
-      obj.string_to_union_serializer.write(obj.stream_, value);
+    function write_string_to_union_(self, value)
+      self.string_to_union_serializer.write(self.stream_, value);
     end
 
-    function write_aliased_generic_(obj, value)
-      obj.aliased_generic_serializer.write(obj.stream_, value);
+    function write_aliased_generic_(self, value)
+      self.aliased_generic_serializer.write(self.stream_, value);
     end
   end
 end

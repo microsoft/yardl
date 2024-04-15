@@ -8,21 +8,21 @@ classdef StringsReader < yardl.binary.BinaryProtocolReader & test_model.StringsR
   end
 
   methods
-    function obj = StringsReader(filename)
-      obj@test_model.StringsReaderBase();
-      obj@yardl.binary.BinaryProtocolReader(filename, test_model.StringsReaderBase.schema);
-      obj.single_string_serializer = yardl.binary.StringSerializer;
-      obj.rec_with_string_serializer = test_model.binary.RecordWithStringsSerializer();
+    function self = StringsReader(filename)
+      self@test_model.StringsReaderBase();
+      self@yardl.binary.BinaryProtocolReader(filename, test_model.StringsReaderBase.schema);
+      self.single_string_serializer = yardl.binary.StringSerializer;
+      self.rec_with_string_serializer = test_model.binary.RecordWithStringsSerializer();
     end
   end
 
   methods (Access=protected)
-    function value = read_single_string_(obj)
-      value = obj.single_string_serializer.read(obj.stream_);
+    function value = read_single_string_(self)
+      value = self.single_string_serializer.read(self.stream_);
     end
 
-    function value = read_rec_with_string_(obj)
-      value = obj.rec_with_string_serializer.read(obj.stream_);
+    function value = read_rec_with_string_(self)
+      value = self.rec_with_string_serializer.read(self.stream_);
     end
   end
 end

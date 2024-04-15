@@ -11,36 +11,36 @@ classdef FixedArraysReader < yardl.binary.BinaryProtocolReader & test_model.Fixe
   end
 
   methods
-    function obj = FixedArraysReader(filename)
-      obj@test_model.FixedArraysReaderBase();
-      obj@yardl.binary.BinaryProtocolReader(filename, test_model.FixedArraysReaderBase.schema);
-      obj.ints_serializer = yardl.binary.FixedNDArraySerializer(yardl.binary.Int32Serializer, [3, 2]);
-      obj.fixed_simple_record_array_serializer = yardl.binary.FixedNDArraySerializer(test_model.binary.SimpleRecordSerializer(), [2, 3]);
-      obj.fixed_record_with_vlens_array_serializer = yardl.binary.FixedNDArraySerializer(test_model.binary.RecordWithVlensSerializer(), [2, 2]);
-      obj.record_with_fixed_arrays_serializer = test_model.binary.RecordWithFixedArraysSerializer();
-      obj.named_array_serializer = yardl.binary.FixedNDArraySerializer(yardl.binary.Int32Serializer, [4, 2]);
+    function self = FixedArraysReader(filename)
+      self@test_model.FixedArraysReaderBase();
+      self@yardl.binary.BinaryProtocolReader(filename, test_model.FixedArraysReaderBase.schema);
+      self.ints_serializer = yardl.binary.FixedNDArraySerializer(yardl.binary.Int32Serializer, [3, 2]);
+      self.fixed_simple_record_array_serializer = yardl.binary.FixedNDArraySerializer(test_model.binary.SimpleRecordSerializer(), [2, 3]);
+      self.fixed_record_with_vlens_array_serializer = yardl.binary.FixedNDArraySerializer(test_model.binary.RecordWithVlensSerializer(), [2, 2]);
+      self.record_with_fixed_arrays_serializer = test_model.binary.RecordWithFixedArraysSerializer();
+      self.named_array_serializer = yardl.binary.FixedNDArraySerializer(yardl.binary.Int32Serializer, [4, 2]);
     end
   end
 
   methods (Access=protected)
-    function value = read_ints_(obj)
-      value = obj.ints_serializer.read(obj.stream_);
+    function value = read_ints_(self)
+      value = self.ints_serializer.read(self.stream_);
     end
 
-    function value = read_fixed_simple_record_array_(obj)
-      value = obj.fixed_simple_record_array_serializer.read(obj.stream_);
+    function value = read_fixed_simple_record_array_(self)
+      value = self.fixed_simple_record_array_serializer.read(self.stream_);
     end
 
-    function value = read_fixed_record_with_vlens_array_(obj)
-      value = obj.fixed_record_with_vlens_array_serializer.read(obj.stream_);
+    function value = read_fixed_record_with_vlens_array_(self)
+      value = self.fixed_record_with_vlens_array_serializer.read(self.stream_);
     end
 
-    function value = read_record_with_fixed_arrays_(obj)
-      value = obj.record_with_fixed_arrays_serializer.read(obj.stream_);
+    function value = read_record_with_fixed_arrays_(self)
+      value = self.record_with_fixed_arrays_serializer.read(self.stream_);
     end
 
-    function value = read_named_array_(obj)
-      value = obj.named_array_serializer.read(obj.stream_);
+    function value = read_named_array_(self)
+      value = self.named_array_serializer.read(self.stream_);
     end
   end
 end

@@ -7,20 +7,20 @@ classdef BenchmarkSmallRecordReader < yardl.binary.BinaryProtocolReader & test_m
   end
 
   methods
-    function obj = BenchmarkSmallRecordReader(filename)
-      obj@test_model.BenchmarkSmallRecordReaderBase();
-      obj@yardl.binary.BinaryProtocolReader(filename, test_model.BenchmarkSmallRecordReaderBase.schema);
-      obj.small_record_serializer = yardl.binary.StreamSerializer(test_model.binary.SmallBenchmarkRecordSerializer());
+    function self = BenchmarkSmallRecordReader(filename)
+      self@test_model.BenchmarkSmallRecordReaderBase();
+      self@yardl.binary.BinaryProtocolReader(filename, test_model.BenchmarkSmallRecordReaderBase.schema);
+      self.small_record_serializer = yardl.binary.StreamSerializer(test_model.binary.SmallBenchmarkRecordSerializer());
     end
   end
 
   methods (Access=protected)
-    function more = has_small_record_(obj)
-      more = obj.small_record_serializer.hasnext(obj.stream_);
+    function more = has_small_record_(self)
+      more = self.small_record_serializer.hasnext(self.stream_);
     end
 
-    function value = read_small_record_(obj)
-      value = obj.small_record_serializer.read(obj.stream_);
+    function value = read_small_record_(self)
+      value = self.small_record_serializer.read(self.stream_);
     end
   end
 end

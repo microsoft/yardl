@@ -2,7 +2,7 @@
 
 classdef RecordWithComputedFieldsSerializer < yardl.binary.RecordSerializer
   methods
-    function obj = RecordWithComputedFieldsSerializer()
+    function self = RecordWithComputedFieldsSerializer()
       field_serializers{1} = yardl.binary.NDArraySerializer(yardl.binary.Int32Serializer, 2);
       field_serializers{2} = yardl.binary.NDArraySerializer(yardl.binary.Int32Serializer, 2);
       field_serializers{3} = yardl.binary.DynamicNDArraySerializer(yardl.binary.Int32Serializer);
@@ -31,16 +31,20 @@ classdef RecordWithComputedFieldsSerializer < yardl.binary.RecordSerializer
       field_serializers{26} = yardl.binary.UnionSerializer('test_model.Int32OrFloat32', {yardl.binary.NoneSerializer, yardl.binary.Int32Serializer, yardl.binary.Float32Serializer}, {yardl.None, @test_model.Int32OrFloat32.Int32, @test_model.Int32OrFloat32.Float32});
       field_serializers{27} = yardl.binary.UnionSerializer('test_model.IntOrGenericRecordWithComputedFields', {yardl.binary.Int32Serializer, basic_types.binary.GenericRecordWithComputedFieldsSerializer(yardl.binary.StringSerializer, yardl.binary.Float32Serializer)}, {@test_model.IntOrGenericRecordWithComputedFields.Int, @test_model.IntOrGenericRecordWithComputedFields.GenericRecordWithComputedFields});
       field_serializers{28} = yardl.binary.MapSerializer(yardl.binary.StringSerializer, yardl.binary.StringSerializer);
-      obj@yardl.binary.RecordSerializer('test_model.RecordWithComputedFields', field_serializers);
+      self@yardl.binary.RecordSerializer('test_model.RecordWithComputedFields', field_serializers);
     end
 
-    function write(obj, outstream, value)
-      assert(isa(value, 'test_model.RecordWithComputedFields'));
-      obj.write_(outstream, value.array_field, value.array_field_map_dimensions, value.dynamic_array_field, value.fixed_array_field, value.int_field, value.int8_field, value.uint8_field, value.int16_field, value.uint16_field, value.uint32_field, value.int64_field, value.uint64_field, value.size_field, value.float32_field, value.float64_field, value.complexfloat32_field, value.complexfloat64_field, value.string_field, value.tuple_field, value.vector_field, value.vector_of_vectors_field, value.fixed_vector_field, value.fixed_vector_of_vectors_field, value.optional_named_array, value.int_float_union, value.nullable_int_float_union, value.union_with_nested_generic_union, value.map_field)
+    function write(self, outstream, value)
+      arguments
+        self
+        outstream (1,1) yardl.binary.CodedOutputStream
+        value (1,1) test_model.RecordWithComputedFields
+      end
+      self.write_(outstream, value.array_field, value.array_field_map_dimensions, value.dynamic_array_field, value.fixed_array_field, value.int_field, value.int8_field, value.uint8_field, value.int16_field, value.uint16_field, value.uint32_field, value.int64_field, value.uint64_field, value.size_field, value.float32_field, value.float64_field, value.complexfloat32_field, value.complexfloat64_field, value.string_field, value.tuple_field, value.vector_field, value.vector_of_vectors_field, value.fixed_vector_field, value.fixed_vector_of_vectors_field, value.optional_named_array, value.int_float_union, value.nullable_int_float_union, value.union_with_nested_generic_union, value.map_field)
     end
 
-    function value = read(obj, instream)
-      field_values = obj.read_(instream);
+    function value = read(self, instream)
+      field_values = self.read_(instream);
       value = test_model.RecordWithComputedFields(field_values{:});
     end
   end

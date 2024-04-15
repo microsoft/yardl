@@ -10,31 +10,31 @@ classdef UnionsWriter < yardl.binary.BinaryProtocolWriter & test_model.UnionsWri
   end
 
   methods
-    function obj = UnionsWriter(filename)
-      obj@test_model.UnionsWriterBase();
-      obj@yardl.binary.BinaryProtocolWriter(filename, test_model.UnionsWriterBase.schema);
-      obj.int_or_simple_record_serializer = yardl.binary.UnionSerializer('test_model.Int32OrSimpleRecord', {yardl.binary.Int32Serializer, test_model.binary.SimpleRecordSerializer()}, {@test_model.Int32OrSimpleRecord.Int32, @test_model.Int32OrSimpleRecord.SimpleRecord});
-      obj.int_or_record_with_vlens_serializer = yardl.binary.UnionSerializer('test_model.Int32OrRecordWithVlens', {yardl.binary.Int32Serializer, test_model.binary.RecordWithVlensSerializer()}, {@test_model.Int32OrRecordWithVlens.Int32, @test_model.Int32OrRecordWithVlens.RecordWithVlens});
-      obj.monosotate_or_int_or_simple_record_serializer = yardl.binary.UnionSerializer('test_model.Int32OrSimpleRecord', {yardl.binary.NoneSerializer, yardl.binary.Int32Serializer, test_model.binary.SimpleRecordSerializer()}, {yardl.None, @test_model.Int32OrSimpleRecord.Int32, @test_model.Int32OrSimpleRecord.SimpleRecord});
-      obj.record_with_unions_serializer = basic_types.binary.RecordWithUnionsSerializer();
+    function self = UnionsWriter(filename)
+      self@test_model.UnionsWriterBase();
+      self@yardl.binary.BinaryProtocolWriter(filename, test_model.UnionsWriterBase.schema);
+      self.int_or_simple_record_serializer = yardl.binary.UnionSerializer('test_model.Int32OrSimpleRecord', {yardl.binary.Int32Serializer, test_model.binary.SimpleRecordSerializer()}, {@test_model.Int32OrSimpleRecord.Int32, @test_model.Int32OrSimpleRecord.SimpleRecord});
+      self.int_or_record_with_vlens_serializer = yardl.binary.UnionSerializer('test_model.Int32OrRecordWithVlens', {yardl.binary.Int32Serializer, test_model.binary.RecordWithVlensSerializer()}, {@test_model.Int32OrRecordWithVlens.Int32, @test_model.Int32OrRecordWithVlens.RecordWithVlens});
+      self.monosotate_or_int_or_simple_record_serializer = yardl.binary.UnionSerializer('test_model.Int32OrSimpleRecord', {yardl.binary.NoneSerializer, yardl.binary.Int32Serializer, test_model.binary.SimpleRecordSerializer()}, {yardl.None, @test_model.Int32OrSimpleRecord.Int32, @test_model.Int32OrSimpleRecord.SimpleRecord});
+      self.record_with_unions_serializer = basic_types.binary.RecordWithUnionsSerializer();
     end
   end
 
   methods (Access=protected)
-    function write_int_or_simple_record_(obj, value)
-      obj.int_or_simple_record_serializer.write(obj.stream_, value);
+    function write_int_or_simple_record_(self, value)
+      self.int_or_simple_record_serializer.write(self.stream_, value);
     end
 
-    function write_int_or_record_with_vlens_(obj, value)
-      obj.int_or_record_with_vlens_serializer.write(obj.stream_, value);
+    function write_int_or_record_with_vlens_(self, value)
+      self.int_or_record_with_vlens_serializer.write(self.stream_, value);
     end
 
-    function write_monosotate_or_int_or_simple_record_(obj, value)
-      obj.monosotate_or_int_or_simple_record_serializer.write(obj.stream_, value);
+    function write_monosotate_or_int_or_simple_record_(self, value)
+      self.monosotate_or_int_or_simple_record_serializer.write(self.stream_, value);
     end
 
-    function write_record_with_unions_(obj, value)
-      obj.record_with_unions_serializer.write(obj.stream_, value);
+    function write_record_with_unions_(self, value)
+      self.record_with_unions_serializer.write(self.stream_, value);
     end
   end
 end

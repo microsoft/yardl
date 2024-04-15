@@ -7,25 +7,25 @@ classdef RecordWithGenericMaps < handle
   end
 
   methods
-    function obj = RecordWithGenericMaps(m, am)
+    function self = RecordWithGenericMaps(m, am)
       if nargin > 0
-        obj.m = m;
-        obj.am = am;
+        self.m = m;
+        self.am = am;
       else
-        obj.m = dictionary;
-        obj.am = dictionary;
+        self.m = dictionary;
+        self.am = dictionary;
       end
     end
 
-    function res = eq(obj, other)
+    function res = eq(self, other)
       res = ...
         isa(other, 'test_model.RecordWithGenericMaps') && ...
-        isequal(obj.m, other.m) && ...
-        isequal(obj.am, other.am);
+        isequal(self.m, other.m) && ...
+        isequal(self.am, other.am);
     end
 
-    function res = ne(obj, other)
-      res = ~obj.eq(other);
+    function res = ne(self, other)
+      res = ~self.eq(other);
     end
   end
 

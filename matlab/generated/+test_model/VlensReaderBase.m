@@ -6,63 +6,63 @@ classdef VlensReaderBase < handle
   end
 
   methods
-    function obj = VlensReaderBase()
-      obj.state_ = 0;
+    function self = VlensReaderBase()
+      self.state_ = 0;
     end
 
-    function close(obj)
-      obj.close_();
-      if obj.state_ ~= 4
-        expected_method = obj.state_to_method_name_(obj.state_);
+    function close(self)
+      self.close_();
+      if self.state_ ~= 4
+        expected_method = self.state_to_method_name_(self.state_);
         throw(yardl.ProtocolError("Protocol reader closed before all data was consumed. Expected call to '%s'.", expected_method));
       end
     end
 
     % Ordinal 0
-    function value = read_int_vector(obj)
-      if obj.state_ ~= 0
-        obj.raise_unexpected_state_(0);
+    function value = read_int_vector(self)
+      if self.state_ ~= 0
+        self.raise_unexpected_state_(0);
       end
 
-      value = obj.read_int_vector_();
-      obj.state_ = 1;
+      value = self.read_int_vector_();
+      self.state_ = 1;
     end
 
     % Ordinal 1
-    function value = read_complex_vector(obj)
-      if obj.state_ ~= 1
-        obj.raise_unexpected_state_(1);
+    function value = read_complex_vector(self)
+      if self.state_ ~= 1
+        self.raise_unexpected_state_(1);
       end
 
-      value = obj.read_complex_vector_();
-      obj.state_ = 2;
+      value = self.read_complex_vector_();
+      self.state_ = 2;
     end
 
     % Ordinal 2
-    function value = read_record_with_vlens(obj)
-      if obj.state_ ~= 2
-        obj.raise_unexpected_state_(2);
+    function value = read_record_with_vlens(self)
+      if self.state_ ~= 2
+        self.raise_unexpected_state_(2);
       end
 
-      value = obj.read_record_with_vlens_();
-      obj.state_ = 3;
+      value = self.read_record_with_vlens_();
+      self.state_ = 3;
     end
 
     % Ordinal 3
-    function value = read_vlen_of_record_with_vlens(obj)
-      if obj.state_ ~= 3
-        obj.raise_unexpected_state_(3);
+    function value = read_vlen_of_record_with_vlens(self)
+      if self.state_ ~= 3
+        self.raise_unexpected_state_(3);
       end
 
-      value = obj.read_vlen_of_record_with_vlens_();
-      obj.state_ = 4;
+      value = self.read_vlen_of_record_with_vlens_();
+      self.state_ = 4;
     end
 
-    function copy_to(obj, writer)
-      writer.write_int_vector(obj.read_int_vector());
-      writer.write_complex_vector(obj.read_complex_vector());
-      writer.write_record_with_vlens(obj.read_record_with_vlens());
-      writer.write_vlen_of_record_with_vlens(obj.read_vlen_of_record_with_vlens());
+    function copy_to(self, writer)
+      writer.write_int_vector(self.read_int_vector());
+      writer.write_complex_vector(self.read_complex_vector());
+      writer.write_record_with_vlens(self.read_record_with_vlens());
+      writer.write_vlen_of_record_with_vlens(self.read_vlen_of_record_with_vlens());
     end
   end
 
@@ -73,32 +73,32 @@ classdef VlensReaderBase < handle
   end
 
   methods (Abstract, Access=protected)
-    read_int_vector_(obj)
-    read_complex_vector_(obj)
-    read_record_with_vlens_(obj)
-    read_vlen_of_record_with_vlens_(obj)
+    read_int_vector_(self)
+    read_complex_vector_(self)
+    read_record_with_vlens_(self)
+    read_vlen_of_record_with_vlens_(self)
 
-    close_(obj)
+    close_(self)
   end
 
   methods (Access=private)
-    function raise_unexpected_state_(obj, actual)
-      actual_method = obj.state_to_method_name_(actual);
-      expected_method = obj.state_to_method_name_(obj.state_);
+    function raise_unexpected_state_(self, actual)
+      actual_method = self.state_to_method_name_(actual);
+      expected_method = self.state_to_method_name_(self.state_);
       throw(yardl.ProtocolError("Expected call to '%s' but received call to '%s'.", expected_method, actual_method));
     end
 
-    function name = state_to_method_name_(obj, state)
+    function name = state_to_method_name_(self, state)
       if state == 0
-        name = 'read_int_vector';
+        name = "read_int_vector";
       elseif state == 1
-        name = 'read_complex_vector';
+        name = "read_complex_vector";
       elseif state == 2
-        name = 'read_record_with_vlens';
+        name = "read_record_with_vlens";
       elseif state == 3
-        name = 'read_vlen_of_record_with_vlens';
+        name = "read_vlen_of_record_with_vlens";
       else
-        name = '<unknown>';
+        name = "<unknown>";
       end
     end
   end

@@ -5,14 +5,6 @@ classdef CodedStreamTest < matlab.unittest.TestCase
 
     methods (Test)
 
-        function testScalarByte(testCase)
-            % w = yardl.binary.CodedOutputStream(tempname)
-            % for i = 0:15
-            %     w.
-            % end
-        end
-
-
         function testVarShort(testCase)
             entries = int16([0, 1, 5, 33, 0x7E, 0x7F, 0x80, 0x81, 255, 256, 257, 838, 0x3FFF, 0x4000, 0x4001, 0x7FFF]);
 
@@ -30,6 +22,8 @@ classdef CodedStreamTest < matlab.unittest.TestCase
                 testCase.verifyEqual(yardl.binary.Int16Serializer.read(r), -entries(i));
             end
             r.close();
+
+            delete(filename);
         end
 
         function testVarUShort(testCase)
@@ -47,6 +41,8 @@ classdef CodedStreamTest < matlab.unittest.TestCase
                 testCase.verifyEqual(yardl.binary.Uint16Serializer.read(r), entries(i));
             end
             r.close();
+
+            delete(filename);
         end
 
         function testVarIntegers(testCase)
@@ -86,6 +82,45 @@ classdef CodedStreamTest < matlab.unittest.TestCase
                 testCase.verifyEqual(yardl.binary.Int64Serializer.read(r), -bitor(int64(entries(i)), int64(0x400000000)));
             end
             r.close();
+
+            delete(filename);
+        end
+
+        function testBytes(testCase)
+            filename = tempname;
+
+            val = 42;
+            unsigned = uint8([0, 1, 5, 33, 0x7E, 0x7F, 0x80, 0x81, 255]);
+            signed = int8([0, 1, 5, 33, 0x7E, 0x7F, -0x80, -0x7F, -1]);
+
+            unsignedSerializer = yardl.binary.Uint8Serializer;
+            signedSerializer = yardl.binary.Int8Serializer;
+
+            w = yardl.binary.CodedOutputStream(filename);
+            w.write_byte(uint8(val));
+            testCase.verifyError(@() w.write_byte(-1), 'MATLAB:validators:mustBeA');
+            testCase.verifyError(@() w.write_byte(256), 'MATLAB:validators:mustBeA');
+
+            w.write_bytes(unsigned);
+            testCase.verifyError(@() w.write_bytes(signed), 'MATLAB:validators:mustBeA');
+
+            unsignedSerializer.write(w, val);
+            unsignedSerializer.write_trivially(w, unsigned);
+
+            signedSerializer.write(w, -val);
+            signedSerializer.write_trivially(w, signed);
+            w.close();
+
+            r = yardl.binary.CodedInputStream(filename);
+            testCase.verifyEqual(r.read_byte(), uint8(val));
+            testCase.verifyEqual(r.read_bytes(length(unsigned)), unsigned);
+            testCase.verifyEqual(unsignedSerializer.read(r), uint8(val));
+            testCase.verifyEqual(unsignedSerializer.read_trivially(r, length(unsigned)), unsigned);
+            testCase.verifyEqual(signedSerializer.read(r), int8(-val));
+            testCase.verifyEqual(signedSerializer.read_trivially(r, length(signed)), signed);
+            r.close();
+
+            delete(filename);
         end
 
         function testFloats(testCase)
@@ -109,24 +144,69 @@ classdef CodedStreamTest < matlab.unittest.TestCase
             w = yardl.binary.CodedOutputStream(filename);
             float32Serializer.write(w, f);
             float64Serializer.write(w, d);
-            float32Serializer.writeTrivially(w, fs);
-            float64Serializer.writeTrivially(w, ds);
+            float32Serializer.write_trivially(w, fs);
+            float64Serializer.write_trivially(w, ds);
             complexFloat32Serializer.write(w, cf);
             complexFloat64Serializer.write(w, df);
-            complexFloat32Serializer.writeTrivially(w, cfs);
-            complexFloat64Serializer.writeTrivially(w, dfs);
+            complexFloat32Serializer.write_trivially(w, cfs);
+            complexFloat64Serializer.write_trivially(w, dfs);
             w.close();
 
             r = yardl.binary.CodedInputStream(filename);
             testCase.verifyEqual(float32Serializer.read(r), f);
             testCase.verifyEqual(float64Serializer.read(r), d);
-            testCase.verifyEqual(float32Serializer.readTrivially(r, size(fs)), fs);
-            testCase.verifyEqual(float64Serializer.readTrivially(r, size(ds)), ds);
+            testCase.verifyEqual(float32Serializer.read_trivially(r, size(fs)), fs);
+            testCase.verifyEqual(float64Serializer.read_trivially(r, size(ds)), ds);
             testCase.verifyEqual(complexFloat32Serializer.read(r), cf);
             testCase.verifyEqual(complexFloat64Serializer.read(r), df);
-            testCase.verifyEqual(complexFloat32Serializer.readTrivially(r, size(cfs)), cfs);
-            testCase.verifyEqual(complexFloat64Serializer.readTrivially(r, size(dfs)), dfs);
+            testCase.verifyEqual(complexFloat32Serializer.read_trivially(r, size(cfs)), cfs);
+            testCase.verifyEqual(complexFloat64Serializer.read_trivially(r, size(dfs)), dfs);
             r.close();
+
+            delete(filename);
+        end
+
+        function testBools(testCase)
+            filename = tempname;
+
+            bools = [true, false, true, false];
+            boolSerializer = yardl.binary.BoolSerializer;
+
+            w = yardl.binary.CodedOutputStream(filename);
+            boolSerializer.write(w, true);
+            boolSerializer.write_trivially(w, bools);
+            w.close();
+
+            r = yardl.binary.CodedInputStream(filename);
+            testCase.verifyEqual(boolSerializer.read(r), true);
+            testCase.verifyEqual(boolSerializer.read_trivially(r, size(bools)), bools);
+            r.close();
+
+            delete(filename);
+        end
+
+        function testNonTrivialErrors(testCase)
+            filename = tempname;
+
+            int16Serializer = yardl.binary.Int16Serializer;
+            int32Serializer = yardl.binary.Int32Serializer;
+            int64Serializer = yardl.binary.Int64Serializer;
+            uint16Serializer = yardl.binary.Uint16Serializer;
+            uint32Serializer = yardl.binary.Uint32Serializer;
+            uint64Serializer = yardl.binary.Uint64Serializer;
+            stringSerializer = yardl.binary.StringSerializer;
+
+            w = yardl.binary.CodedOutputStream(filename);
+            testCase.verifyError(@() int16Serializer.write_trivially(w, []), 'yardl:TypeError');
+            testCase.verifyError(@() int32Serializer.write_trivially(w, []), 'yardl:TypeError');
+            testCase.verifyError(@() int64Serializer.write_trivially(w, []), 'yardl:TypeError');
+            testCase.verifyError(@() uint16Serializer.write_trivially(w, []), 'yardl:TypeError');
+            testCase.verifyError(@() uint32Serializer.write_trivially(w, []), 'yardl:TypeError');
+            testCase.verifyError(@() uint64Serializer.write_trivially(w, []), 'yardl:TypeError');
+            testCase.verifyError(@() stringSerializer.write_trivially(w, []), 'yardl:TypeError');
+            w.close();
+
+            delete(filename);
         end
     end
 end

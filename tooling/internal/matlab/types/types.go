@@ -105,6 +105,19 @@ func writeUnionClass(w *formatting.IndentedWriter, className string, generalized
 
 		w.WriteStringln("methods")
 		common.WriteBlockBody(w, func() {
+			index := 1
+			for _, tc := range generalizedType.Cases {
+				if tc.Type == nil {
+					continue
+				}
+				fmt.Fprintf(w, "function res = is%s(self)\n", formatting.ToPascalCase(tc.Tag))
+				common.WriteBlockBody(w, func() {
+					fmt.Fprintf(w, "res = self.index == %d;\n", index)
+				})
+				index += 1
+				w.WriteStringln("")
+			}
+
 			w.WriteStringln("function eq = eq(self, other)")
 			common.WriteBlockBody(w, func() {
 				fmt.Fprintf(w, "eq = isa(other, '%s') && other.index == self.index && other.value == self.value;\n", qualifiedClassName)
@@ -141,7 +154,10 @@ func writeNamedType(fw *common.MatlabFileWriter, td *dsl.NamedType) error {
 				common.WriteBlockBody(w, func() {
 					common.WriteComment(w, td.Comment)
 					if !dsl.TypeContainsGenericTypeParameter(innerType) {
-						fmt.Fprintf(w, "assert(isa(value, '%s'));\n", common.TypeSyntax(innerType, td.Namespace))
+						w.WriteStringln("arguments")
+						common.WriteBlockBody(w, func() {
+							fmt.Fprintf(w, "value %s\n", common.TypeSyntax(innerType, td.Namespace))
+						})
 					}
 					fmt.Fprintf(w, "o = %s(value);\n", common.TypeSyntax(td.Type, td.Namespace))
 				})
@@ -155,7 +171,10 @@ func writeNamedType(fw *common.MatlabFileWriter, td *dsl.NamedType) error {
 				common.WriteBlockBody(w, func() {
 					common.WriteComment(w, td.Comment)
 					if !dsl.TypeContainsGenericTypeParameter(scalar) {
-						fmt.Fprintf(w, "assert(isa(array, '%s'));\n", common.TypeSyntax(scalar, td.Namespace))
+						w.WriteStringln("arguments")
+						common.WriteBlockBody(w, func() {
+							fmt.Fprintf(w, "array %s\n", common.TypeSyntax(scalar, td.Namespace))
+						})
 					}
 					w.WriteStringln("a = array;")
 				})
@@ -233,17 +252,17 @@ func writeRecord(fw *common.MatlabFileWriter, rec *dsl.RecordDefinition, st dsl.
 			common.WriteBlockBody(w, func() {
 
 				// Record Constructor
-				fmt.Fprintf(w, "function obj = %s(%s)\n", recordName, strings.Join(fieldNames, ", "))
+				fmt.Fprintf(w, "function self = %s(%s)\n", recordName, strings.Join(fieldNames, ", "))
 				common.WriteBlockBody(w, func() {
 					if requireConstructorArgs {
 						for _, field := range rec.Fields {
-							fmt.Fprintf(w, "obj.%s = %s;\n", common.FieldIdentifierName(field.Name), common.FieldIdentifierName(field.Name))
+							fmt.Fprintf(w, "self.%s = %s;\n", common.FieldIdentifierName(field.Name), common.FieldIdentifierName(field.Name))
 						}
 					} else {
 						w.WriteStringln("if nargin > 0")
 						w.Indented(func() {
 							for _, field := range rec.Fields {
-								fmt.Fprintf(w, "obj.%s = %s;\n", common.FieldIdentifierName(field.Name), common.FieldIdentifierName(field.Name))
+								fmt.Fprintf(w, "self.%s = %s;\n", common.FieldIdentifierName(field.Name), common.FieldIdentifierName(field.Name))
 							}
 						})
 						w.WriteStringln("else")
@@ -255,7 +274,7 @@ func writeRecord(fw *common.MatlabFileWriter, rec *dsl.RecordDefinition, st dsl.
 								case defaultValueKindNone:
 									w.WriteStringln(fieldName)
 								case defaultValueKindImmutable, defaultValueKindMutable:
-									fmt.Fprintf(w, "obj.%s = %s;\n", fieldName, defaultExpression)
+									fmt.Fprintf(w, "self.%s = %s;\n", fieldName, defaultExpression)
 								}
 							}
 						})
@@ -279,7 +298,7 @@ func writeRecord(fw *common.MatlabFileWriter, rec *dsl.RecordDefinition, st dsl.
 				}
 
 				// eq method
-				w.WriteStringln("function res = eq(obj, other)")
+				w.WriteStringln("function res = eq(self, other)")
 				common.WriteBlockBody(w, func() {
 					w.WriteStringln("res = ...")
 					w.Indented(func() {
@@ -287,7 +306,7 @@ func writeRecord(fw *common.MatlabFileWriter, rec *dsl.RecordDefinition, st dsl.
 						for _, field := range rec.Fields {
 							w.WriteStringln(" && ...")
 							fieldIdentifier := common.FieldIdentifierName(field.Name)
-							w.WriteString(typeEqualityExpression(field.Type, "obj."+fieldIdentifier, "other."+fieldIdentifier))
+							w.WriteString(typeEqualityExpression(field.Type, "self."+fieldIdentifier, "other."+fieldIdentifier))
 						}
 						w.WriteStringln(";")
 					})
@@ -295,9 +314,9 @@ func writeRecord(fw *common.MatlabFileWriter, rec *dsl.RecordDefinition, st dsl.
 				w.WriteStringln("")
 
 				// neq method
-				w.WriteStringln("function res = ne(obj, other)")
+				w.WriteStringln("function res = ne(self, other)")
 				common.WriteBlockBody(w, func() {
-					w.WriteStringln("res = ~obj.eq(other);")
+					w.WriteStringln("res = ~self.eq(other);")
 				})
 			})
 			w.WriteStringln("")
@@ -408,7 +427,7 @@ func writeComputedFieldExpression(w *formatting.IndentedWriter, expression dsl.E
 						}
 						w.WriteStringln("")
 						common.WriteBlockBody(w, func() {
-							w.WriteStringln(`throw(yardl.KeyError("Unknown dimension name: '%s'", dim_name));`)
+							w.WriteStringln(`throw(yardl.ValueError("Unknown dimension name: '%s'", dim_name));`)
 						})
 						w.WriteStringln("")
 					})

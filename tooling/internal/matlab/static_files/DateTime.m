@@ -9,33 +9,33 @@ classdef DateTime < handle
     end
 
     methods
-        function obj = DateTime(nanoseconds_since_epoch)
+        function self = DateTime(nanoseconds_since_epoch)
             if nargin > 0
-                obj.nanoseconds_since_epoch_ = nanoseconds_since_epoch;
+                self.nanoseconds_since_epoch_ = nanoseconds_since_epoch;
             else
-                obj.nanoseconds_since_epoch_ = 0;
+                self.nanoseconds_since_epoch_ = 0;
             end
         end
 
-        function value = value(obj)
-            value = obj.nanoseconds_since_epoch_;
+        function value = value(self)
+            value = self.nanoseconds_since_epoch_;
         end
 
-        function dt = to_datetime(obj)
-            dt = datetime(obj.nanoseconds_since_epoch_, 'ConvertFrom', 'epochtime', 'TicksPerSecond', 1e9);
+        function dt = to_datetime(self)
+            dt = datetime(self.nanoseconds_since_epoch_, 'ConvertFrom', 'epochtime', 'TicksPerSecond', 1e9);
         end
 
-        function eq = eq(obj, other)
+        function eq = eq(self, other)
             if isa(other, 'datetime')
                 other = yardl.DateTime.from_datetime(other);
             end
 
             eq = isa(other, 'yardl.DateTime') && ...
-                all([obj.value] == [other.value]);
+                all([self.value] == [other.value]);
         end
 
-        function ne = new(obj, other)
-            ne = ~obj.eq(other);
+        function ne = new(self, other)
+            ne = ~self.eq(other);
         end
     end
 
@@ -53,6 +53,10 @@ classdef DateTime < handle
             mdt = datetime(year, month, day, hour, minute, second, 'TimeZone', 'UTC');
             seconds_since_epoch = convertTo(mdt, 'epochtime');
             dt = yardl.DateTime(seconds_since_epoch * 1e9 + nanosecond);
+        end
+
+        function dt = now(~)
+            dt = yardl.DateTime.from_datetime(datetime('now'));
         end
 
         function z = zeros(varargin)

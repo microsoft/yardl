@@ -33,65 +33,65 @@ classdef RecordWithComputedFields < handle
   end
 
   methods
-    function obj = RecordWithComputedFields(array_field, array_field_map_dimensions, dynamic_array_field, fixed_array_field, int_field, int8_field, uint8_field, int16_field, uint16_field, uint32_field, int64_field, uint64_field, size_field, float32_field, float64_field, complexfloat32_field, complexfloat64_field, string_field, tuple_field, vector_field, vector_of_vectors_field, fixed_vector_field, fixed_vector_of_vectors_field, optional_named_array, int_float_union, nullable_int_float_union, union_with_nested_generic_union, map_field)
+    function self = RecordWithComputedFields(array_field, array_field_map_dimensions, dynamic_array_field, fixed_array_field, int_field, int8_field, uint8_field, int16_field, uint16_field, uint32_field, int64_field, uint64_field, size_field, float32_field, float64_field, complexfloat32_field, complexfloat64_field, string_field, tuple_field, vector_field, vector_of_vectors_field, fixed_vector_field, fixed_vector_of_vectors_field, optional_named_array, int_float_union, nullable_int_float_union, union_with_nested_generic_union, map_field)
       if nargin > 0
-        obj.array_field = array_field;
-        obj.array_field_map_dimensions = array_field_map_dimensions;
-        obj.dynamic_array_field = dynamic_array_field;
-        obj.fixed_array_field = fixed_array_field;
-        obj.int_field = int_field;
-        obj.int8_field = int8_field;
-        obj.uint8_field = uint8_field;
-        obj.int16_field = int16_field;
-        obj.uint16_field = uint16_field;
-        obj.uint32_field = uint32_field;
-        obj.int64_field = int64_field;
-        obj.uint64_field = uint64_field;
-        obj.size_field = size_field;
-        obj.float32_field = float32_field;
-        obj.float64_field = float64_field;
-        obj.complexfloat32_field = complexfloat32_field;
-        obj.complexfloat64_field = complexfloat64_field;
-        obj.string_field = string_field;
-        obj.tuple_field = tuple_field;
-        obj.vector_field = vector_field;
-        obj.vector_of_vectors_field = vector_of_vectors_field;
-        obj.fixed_vector_field = fixed_vector_field;
-        obj.fixed_vector_of_vectors_field = fixed_vector_of_vectors_field;
-        obj.optional_named_array = optional_named_array;
-        obj.int_float_union = int_float_union;
-        obj.nullable_int_float_union = nullable_int_float_union;
-        obj.union_with_nested_generic_union = union_with_nested_generic_union;
-        obj.map_field = map_field;
+        self.array_field = array_field;
+        self.array_field_map_dimensions = array_field_map_dimensions;
+        self.dynamic_array_field = dynamic_array_field;
+        self.fixed_array_field = fixed_array_field;
+        self.int_field = int_field;
+        self.int8_field = int8_field;
+        self.uint8_field = uint8_field;
+        self.int16_field = int16_field;
+        self.uint16_field = uint16_field;
+        self.uint32_field = uint32_field;
+        self.int64_field = int64_field;
+        self.uint64_field = uint64_field;
+        self.size_field = size_field;
+        self.float32_field = float32_field;
+        self.float64_field = float64_field;
+        self.complexfloat32_field = complexfloat32_field;
+        self.complexfloat64_field = complexfloat64_field;
+        self.string_field = string_field;
+        self.tuple_field = tuple_field;
+        self.vector_field = vector_field;
+        self.vector_of_vectors_field = vector_of_vectors_field;
+        self.fixed_vector_field = fixed_vector_field;
+        self.fixed_vector_of_vectors_field = fixed_vector_of_vectors_field;
+        self.optional_named_array = optional_named_array;
+        self.int_float_union = int_float_union;
+        self.nullable_int_float_union = nullable_int_float_union;
+        self.union_with_nested_generic_union = union_with_nested_generic_union;
+        self.map_field = map_field;
       else
-        obj.array_field = int32.empty(0, 0);
-        obj.array_field_map_dimensions = int32.empty(0, 0);
-        obj.dynamic_array_field = int32.empty();
-        obj.fixed_array_field = repelem(int32(0), 4, 3);
-        obj.int_field = int32(0);
-        obj.int8_field = int8(0);
-        obj.uint8_field = uint8(0);
-        obj.int16_field = int16(0);
-        obj.uint16_field = uint16(0);
-        obj.uint32_field = uint32(0);
-        obj.int64_field = int64(0);
-        obj.uint64_field = uint64(0);
-        obj.size_field = uint64(0);
-        obj.float32_field = single(0);
-        obj.float64_field = double(0);
-        obj.complexfloat32_field = complex(single(0));
-        obj.complexfloat64_field = complex(0);
-        obj.string_field = "";
-        obj.tuple_field = tuples.Tuple(int32(0), int32(0));
-        obj.vector_field = int32.empty();
-        obj.vector_of_vectors_field = int32.empty();
-        obj.fixed_vector_field = repelem(int32(0), 3);
-        obj.fixed_vector_of_vectors_field = repelem({repelem(int32(0), 3)}, 2);
-        obj.optional_named_array = yardl.None;
-        obj.int_float_union = test_model.Int32OrFloat32.Int32(int32(0));
-        obj.nullable_int_float_union = yardl.None;
-        obj.union_with_nested_generic_union = test_model.IntOrGenericRecordWithComputedFields.Int(int32(0));
-        obj.map_field = dictionary;
+        self.array_field = int32.empty(0, 0);
+        self.array_field_map_dimensions = int32.empty(0, 0);
+        self.dynamic_array_field = int32.empty();
+        self.fixed_array_field = repelem(int32(0), 4, 3);
+        self.int_field = int32(0);
+        self.int8_field = int8(0);
+        self.uint8_field = uint8(0);
+        self.int16_field = int16(0);
+        self.uint16_field = uint16(0);
+        self.uint32_field = uint32(0);
+        self.int64_field = int64(0);
+        self.uint64_field = uint64(0);
+        self.size_field = uint64(0);
+        self.float32_field = single(0);
+        self.float64_field = double(0);
+        self.complexfloat32_field = complex(single(0));
+        self.complexfloat64_field = complex(0);
+        self.string_field = "";
+        self.tuple_field = tuples.Tuple(int32(0), int32(0));
+        self.vector_field = int32.empty();
+        self.vector_of_vectors_field = int32.empty();
+        self.fixed_vector_field = repelem(int32(0), 3);
+        self.fixed_vector_of_vectors_field = repelem({repelem(int32(0), 3)}, 2);
+        self.optional_named_array = yardl.None;
+        self.int_float_union = test_model.Int32OrFloat32.Int32(int32(0));
+        self.nullable_int_float_union = yardl.None;
+        self.union_with_nested_generic_union = test_model.IntOrGenericRecordWithComputedFields.Int(int32(0));
+        self.map_field = dictionary;
       end
     end
 
@@ -227,7 +227,7 @@ classdef RecordWithComputedFields < handle
         elseif dim_name == "y"
           dim = 1;
         else
-          throw(yardl.KeyError("Unknown dimension name: '%s'", dim_name));
+          throw(yardl.ValueError("Unknown dimension name: '%s'", dim_name));
         end
 
       end
@@ -292,7 +292,7 @@ classdef RecordWithComputedFields < handle
         elseif dim_name == "y"
           dim = 1;
         else
-          throw(yardl.KeyError("Unknown dimension name: '%s'", dim_name));
+          throw(yardl.ValueError("Unknown dimension name: '%s'", dim_name));
         end
 
       end
@@ -525,41 +525,41 @@ classdef RecordWithComputedFields < handle
     end
 
 
-    function res = eq(obj, other)
+    function res = eq(self, other)
       res = ...
         isa(other, 'test_model.RecordWithComputedFields') && ...
-        isequal(obj.array_field, other.array_field) && ...
-        isequal(obj.array_field_map_dimensions, other.array_field_map_dimensions) && ...
-        isequal(obj.dynamic_array_field, other.dynamic_array_field) && ...
-        isequal(obj.fixed_array_field, other.fixed_array_field) && ...
-        all([obj.int_field] == [other.int_field]) && ...
-        all([obj.int8_field] == [other.int8_field]) && ...
-        all([obj.uint8_field] == [other.uint8_field]) && ...
-        all([obj.int16_field] == [other.int16_field]) && ...
-        all([obj.uint16_field] == [other.uint16_field]) && ...
-        all([obj.uint32_field] == [other.uint32_field]) && ...
-        all([obj.int64_field] == [other.int64_field]) && ...
-        all([obj.uint64_field] == [other.uint64_field]) && ...
-        all([obj.size_field] == [other.size_field]) && ...
-        all([obj.float32_field] == [other.float32_field]) && ...
-        all([obj.float64_field] == [other.float64_field]) && ...
-        all([obj.complexfloat32_field] == [other.complexfloat32_field]) && ...
-        all([obj.complexfloat64_field] == [other.complexfloat64_field]) && ...
-        all([obj.string_field] == [other.string_field]) && ...
-        isequal(obj.tuple_field, other.tuple_field) && ...
-        all([obj.vector_field] == [other.vector_field]) && ...
-        all([obj.vector_of_vectors_field] == [other.vector_of_vectors_field]) && ...
-        all([obj.fixed_vector_field] == [other.fixed_vector_field]) && ...
-        all([obj.fixed_vector_of_vectors_field] == [other.fixed_vector_of_vectors_field]) && ...
-        isequal(obj.optional_named_array, other.optional_named_array) && ...
-        all([obj.int_float_union] == [other.int_float_union]) && ...
-        all([obj.nullable_int_float_union] == [other.nullable_int_float_union]) && ...
-        all([obj.union_with_nested_generic_union] == [other.union_with_nested_generic_union]) && ...
-        all([obj.map_field] == [other.map_field]);
+        isequal(self.array_field, other.array_field) && ...
+        isequal(self.array_field_map_dimensions, other.array_field_map_dimensions) && ...
+        isequal(self.dynamic_array_field, other.dynamic_array_field) && ...
+        isequal(self.fixed_array_field, other.fixed_array_field) && ...
+        all([self.int_field] == [other.int_field]) && ...
+        all([self.int8_field] == [other.int8_field]) && ...
+        all([self.uint8_field] == [other.uint8_field]) && ...
+        all([self.int16_field] == [other.int16_field]) && ...
+        all([self.uint16_field] == [other.uint16_field]) && ...
+        all([self.uint32_field] == [other.uint32_field]) && ...
+        all([self.int64_field] == [other.int64_field]) && ...
+        all([self.uint64_field] == [other.uint64_field]) && ...
+        all([self.size_field] == [other.size_field]) && ...
+        all([self.float32_field] == [other.float32_field]) && ...
+        all([self.float64_field] == [other.float64_field]) && ...
+        all([self.complexfloat32_field] == [other.complexfloat32_field]) && ...
+        all([self.complexfloat64_field] == [other.complexfloat64_field]) && ...
+        all([self.string_field] == [other.string_field]) && ...
+        isequal(self.tuple_field, other.tuple_field) && ...
+        all([self.vector_field] == [other.vector_field]) && ...
+        all([self.vector_of_vectors_field] == [other.vector_of_vectors_field]) && ...
+        all([self.fixed_vector_field] == [other.fixed_vector_field]) && ...
+        all([self.fixed_vector_of_vectors_field] == [other.fixed_vector_of_vectors_field]) && ...
+        isequal(self.optional_named_array, other.optional_named_array) && ...
+        all([self.int_float_union] == [other.int_float_union]) && ...
+        all([self.nullable_int_float_union] == [other.nullable_int_float_union]) && ...
+        all([self.union_with_nested_generic_union] == [other.union_with_nested_generic_union]) && ...
+        all([self.map_field] == [other.map_field]);
     end
 
-    function res = ne(obj, other)
-      res = ~obj.eq(other);
+    function res = ne(self, other)
+      res = ~self.eq(other);
     end
   end
 

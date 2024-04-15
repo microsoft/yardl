@@ -2,20 +2,24 @@
 
 classdef SmallBenchmarkRecordSerializer < yardl.binary.RecordSerializer
   methods
-    function obj = SmallBenchmarkRecordSerializer()
+    function self = SmallBenchmarkRecordSerializer()
       field_serializers{1} = yardl.binary.Float64Serializer;
       field_serializers{2} = yardl.binary.Float32Serializer;
       field_serializers{3} = yardl.binary.Float32Serializer;
-      obj@yardl.binary.RecordSerializer('test_model.SmallBenchmarkRecord', field_serializers);
+      self@yardl.binary.RecordSerializer('test_model.SmallBenchmarkRecord', field_serializers);
     end
 
-    function write(obj, outstream, value)
-      assert(isa(value, 'test_model.SmallBenchmarkRecord'));
-      obj.write_(outstream, value.a, value.b, value.c)
+    function write(self, outstream, value)
+      arguments
+        self
+        outstream (1,1) yardl.binary.CodedOutputStream
+        value (1,1) test_model.SmallBenchmarkRecord
+      end
+      self.write_(outstream, value.a, value.b, value.c)
     end
 
-    function value = read(obj, instream)
-      field_values = obj.read_(instream);
+    function value = read(self, instream)
+      field_values = self.read_(instream);
       value = test_model.SmallBenchmarkRecord(field_values{:});
     end
   end

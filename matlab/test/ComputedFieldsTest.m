@@ -58,7 +58,7 @@ classdef ComputedFieldsTest < matlab.unittest.TestCase
             testCase.verifyEqual(r.array_dimension_index_from_string_field(), 1);
 
             r.string_field = "missing";
-            testCase.verifyError(@() r.array_dimension_index_from_string_field(), "yardl:KeyError");
+            testCase.verifyError(@() r.array_dimension_index_from_string_field(), "yardl:ValueError");
         end
 
         function testDimensionCount(testCase)
@@ -109,7 +109,7 @@ classdef ComputedFieldsTest < matlab.unittest.TestCase
             testCase.verifyEqual(r.array_size_from_string_field(), 3);
 
             r.string_field = "missing";
-            testCase.verifyError(@() r.array_size_from_string_field(), "yardl:KeyError");
+            testCase.verifyError(@() r.array_size_from_string_field(), "yardl:ValueError");
 
             r.tuple_field.v1 = 1;
             testCase.verifyEqual(r.array_size_from_nested_int_field(), 3);

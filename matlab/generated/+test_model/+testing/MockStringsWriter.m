@@ -8,42 +8,42 @@ classdef MockStringsWriter < matlab.mixin.Copyable & test_model.StringsWriterBas
   end
 
   methods
-    function obj = MockStringsWriter(testCase)
-      obj.testCase_ = testCase;
-      obj.expected_single_string = yardl.None;
-      obj.expected_rec_with_string = yardl.None;
+    function self = MockStringsWriter(testCase)
+      self.testCase_ = testCase;
+      self.expected_single_string = yardl.None;
+      self.expected_rec_with_string = yardl.None;
     end
 
-    function expect_write_single_string_(obj, value)
-      obj.expected_single_string = yardl.Optional(value);
+    function expect_write_single_string_(self, value)
+      self.expected_single_string = yardl.Optional(value);
     end
 
-    function expect_write_rec_with_string_(obj, value)
-      obj.expected_rec_with_string = yardl.Optional(value);
+    function expect_write_rec_with_string_(self, value)
+      self.expected_rec_with_string = yardl.Optional(value);
     end
 
-    function verify(obj)
-      obj.testCase_.verifyEqual(obj.expected_single_string, yardl.None, "Expected call to write_single_string_ was not received");
-      obj.testCase_.verifyEqual(obj.expected_rec_with_string, yardl.None, "Expected call to write_rec_with_string_ was not received");
+    function verify(self)
+      self.testCase_.verifyEqual(self.expected_single_string, yardl.None, "Expected call to write_single_string_ was not received");
+      self.testCase_.verifyEqual(self.expected_rec_with_string, yardl.None, "Expected call to write_rec_with_string_ was not received");
     end
   end
 
   methods (Access=protected)
-    function write_single_string_(obj, value)
-      obj.testCase_.verifyTrue(obj.expected_single_string.has_value(), "Unexpected call to write_single_string_");
-      obj.testCase_.verifyEqual(value, obj.expected_single_string.value, "Unexpected argument value for call to write_single_string_");
-      obj.expected_single_string = yardl.None;
+    function write_single_string_(self, value)
+      self.testCase_.verifyTrue(self.expected_single_string.has_value(), "Unexpected call to write_single_string_");
+      self.testCase_.verifyEqual(value, self.expected_single_string.value, "Unexpected argument value for call to write_single_string_");
+      self.expected_single_string = yardl.None;
     end
 
-    function write_rec_with_string_(obj, value)
-      obj.testCase_.verifyTrue(obj.expected_rec_with_string.has_value(), "Unexpected call to write_rec_with_string_");
-      obj.testCase_.verifyEqual(value, obj.expected_rec_with_string.value, "Unexpected argument value for call to write_rec_with_string_");
-      obj.expected_rec_with_string = yardl.None;
+    function write_rec_with_string_(self, value)
+      self.testCase_.verifyTrue(self.expected_rec_with_string.has_value(), "Unexpected call to write_rec_with_string_");
+      self.testCase_.verifyEqual(value, self.expected_rec_with_string.value, "Unexpected argument value for call to write_rec_with_string_");
+      self.expected_rec_with_string = yardl.None;
     end
 
-    function close_(obj)
+    function close_(self)
     end
-    function end_stream_(obj)
+    function end_stream_(self)
     end
   end
 end

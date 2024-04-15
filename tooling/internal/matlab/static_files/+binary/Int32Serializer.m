@@ -4,9 +4,10 @@
 classdef Int32Serializer < yardl.binary.TypeSerializer
     methods (Static)
         function write(outstream, value)
-            assert(value <= intmax("int32"));
-            assert(value >= intmin("int32"));
-            value = int32(value);
+            arguments
+                outstream (1,1) yardl.binary.CodedOutputStream
+                value (1,1) {mustBeInRange(value, -2147483648, 2147483647)}
+            end
             outstream.write_signed_varint(value);
         end
 
@@ -14,8 +15,8 @@ classdef Int32Serializer < yardl.binary.TypeSerializer
             res = int32(instream.read_signed_varint());
         end
 
-        function c = getClass()
-            c = 'int32';
+        function c = get_class()
+            c = "int32";
         end
     end
 end

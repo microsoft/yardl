@@ -6,129 +6,129 @@ classdef SimpleGenericsReaderBase < handle
   end
 
   methods
-    function obj = SimpleGenericsReaderBase()
-      obj.state_ = 0;
+    function self = SimpleGenericsReaderBase()
+      self.state_ = 0;
     end
 
-    function close(obj)
-      obj.close_();
-      if obj.state_ ~= 9
-        expected_method = obj.state_to_method_name_(obj.state_);
+    function close(self)
+      self.close_();
+      if self.state_ ~= 9
+        expected_method = self.state_to_method_name_(self.state_);
         throw(yardl.ProtocolError("Protocol reader closed before all data was consumed. Expected call to '%s'.", expected_method));
       end
     end
 
     % Ordinal 0
-    function value = read_float_image(obj)
-      if obj.state_ ~= 0
-        obj.raise_unexpected_state_(0);
+    function value = read_float_image(self)
+      if self.state_ ~= 0
+        self.raise_unexpected_state_(0);
       end
 
-      value = obj.read_float_image_();
-      obj.state_ = 1;
+      value = self.read_float_image_();
+      self.state_ = 1;
     end
 
     % Ordinal 1
-    function value = read_int_image(obj)
-      if obj.state_ ~= 1
-        obj.raise_unexpected_state_(1);
+    function value = read_int_image(self)
+      if self.state_ ~= 1
+        self.raise_unexpected_state_(1);
       end
 
-      value = obj.read_int_image_();
-      obj.state_ = 2;
+      value = self.read_int_image_();
+      self.state_ = 2;
     end
 
     % Ordinal 2
-    function value = read_int_image_alternate_syntax(obj)
-      if obj.state_ ~= 2
-        obj.raise_unexpected_state_(2);
+    function value = read_int_image_alternate_syntax(self)
+      if self.state_ ~= 2
+        self.raise_unexpected_state_(2);
       end
 
-      value = obj.read_int_image_alternate_syntax_();
-      obj.state_ = 3;
+      value = self.read_int_image_alternate_syntax_();
+      self.state_ = 3;
     end
 
     % Ordinal 3
-    function value = read_string_image(obj)
-      if obj.state_ ~= 3
-        obj.raise_unexpected_state_(3);
+    function value = read_string_image(self)
+      if self.state_ ~= 3
+        self.raise_unexpected_state_(3);
       end
 
-      value = obj.read_string_image_();
-      obj.state_ = 4;
+      value = self.read_string_image_();
+      self.state_ = 4;
     end
 
     % Ordinal 4
-    function value = read_int_float_tuple(obj)
-      if obj.state_ ~= 4
-        obj.raise_unexpected_state_(4);
+    function value = read_int_float_tuple(self)
+      if self.state_ ~= 4
+        self.raise_unexpected_state_(4);
       end
 
-      value = obj.read_int_float_tuple_();
-      obj.state_ = 5;
+      value = self.read_int_float_tuple_();
+      self.state_ = 5;
     end
 
     % Ordinal 5
-    function value = read_float_float_tuple(obj)
-      if obj.state_ ~= 5
-        obj.raise_unexpected_state_(5);
+    function value = read_float_float_tuple(self)
+      if self.state_ ~= 5
+        self.raise_unexpected_state_(5);
       end
 
-      value = obj.read_float_float_tuple_();
-      obj.state_ = 6;
+      value = self.read_float_float_tuple_();
+      self.state_ = 6;
     end
 
     % Ordinal 6
-    function value = read_int_float_tuple_alternate_syntax(obj)
-      if obj.state_ ~= 6
-        obj.raise_unexpected_state_(6);
+    function value = read_int_float_tuple_alternate_syntax(self)
+      if self.state_ ~= 6
+        self.raise_unexpected_state_(6);
       end
 
-      value = obj.read_int_float_tuple_alternate_syntax_();
-      obj.state_ = 7;
+      value = self.read_int_float_tuple_alternate_syntax_();
+      self.state_ = 7;
     end
 
     % Ordinal 7
-    function value = read_int_string_tuple(obj)
-      if obj.state_ ~= 7
-        obj.raise_unexpected_state_(7);
+    function value = read_int_string_tuple(self)
+      if self.state_ ~= 7
+        self.raise_unexpected_state_(7);
       end
 
-      value = obj.read_int_string_tuple_();
-      obj.state_ = 8;
+      value = self.read_int_string_tuple_();
+      self.state_ = 8;
     end
 
     % Ordinal 8
-    function more = has_stream_of_type_variants(obj)
-      if obj.state_ ~= 8
-        obj.raise_unexpected_state_(8);
+    function more = has_stream_of_type_variants(self)
+      if self.state_ ~= 8
+        self.raise_unexpected_state_(8);
       end
 
-      more = obj.has_stream_of_type_variants_();
+      more = self.has_stream_of_type_variants_();
       if ~more
-        obj.state_ = 9;
+        self.state_ = 9;
       end
     end
 
-    function value = read_stream_of_type_variants(obj)
-      if obj.state_ ~= 8
-        obj.raise_unexpected_state_(8);
+    function value = read_stream_of_type_variants(self)
+      if self.state_ ~= 8
+        self.raise_unexpected_state_(8);
       end
 
-      value = obj.read_stream_of_type_variants_();
+      value = self.read_stream_of_type_variants_();
     end
 
-    function copy_to(obj, writer)
-      writer.write_float_image(obj.read_float_image());
-      writer.write_int_image(obj.read_int_image());
-      writer.write_int_image_alternate_syntax(obj.read_int_image_alternate_syntax());
-      writer.write_string_image(obj.read_string_image());
-      writer.write_int_float_tuple(obj.read_int_float_tuple());
-      writer.write_float_float_tuple(obj.read_float_float_tuple());
-      writer.write_int_float_tuple_alternate_syntax(obj.read_int_float_tuple_alternate_syntax());
-      writer.write_int_string_tuple(obj.read_int_string_tuple());
-      while obj.has_stream_of_type_variants()
-        item = obj.read_stream_of_type_variants();
+    function copy_to(self, writer)
+      writer.write_float_image(self.read_float_image());
+      writer.write_int_image(self.read_int_image());
+      writer.write_int_image_alternate_syntax(self.read_int_image_alternate_syntax());
+      writer.write_string_image(self.read_string_image());
+      writer.write_int_float_tuple(self.read_int_float_tuple());
+      writer.write_float_float_tuple(self.read_float_float_tuple());
+      writer.write_int_float_tuple_alternate_syntax(self.read_int_float_tuple_alternate_syntax());
+      writer.write_int_string_tuple(self.read_int_string_tuple());
+      while self.has_stream_of_type_variants()
+        item = self.read_stream_of_type_variants();
         writer.write_stream_of_type_variants({item});
       end
       writer.end_stream_of_type_variants();
@@ -142,48 +142,48 @@ classdef SimpleGenericsReaderBase < handle
   end
 
   methods (Abstract, Access=protected)
-    read_float_image_(obj)
-    read_int_image_(obj)
-    read_int_image_alternate_syntax_(obj)
-    read_string_image_(obj)
-    read_int_float_tuple_(obj)
-    read_float_float_tuple_(obj)
-    read_int_float_tuple_alternate_syntax_(obj)
-    read_int_string_tuple_(obj)
-    has_stream_of_type_variants_(obj)
-    read_stream_of_type_variants_(obj)
+    read_float_image_(self)
+    read_int_image_(self)
+    read_int_image_alternate_syntax_(self)
+    read_string_image_(self)
+    read_int_float_tuple_(self)
+    read_float_float_tuple_(self)
+    read_int_float_tuple_alternate_syntax_(self)
+    read_int_string_tuple_(self)
+    has_stream_of_type_variants_(self)
+    read_stream_of_type_variants_(self)
 
-    close_(obj)
+    close_(self)
   end
 
   methods (Access=private)
-    function raise_unexpected_state_(obj, actual)
-      actual_method = obj.state_to_method_name_(actual);
-      expected_method = obj.state_to_method_name_(obj.state_);
+    function raise_unexpected_state_(self, actual)
+      actual_method = self.state_to_method_name_(actual);
+      expected_method = self.state_to_method_name_(self.state_);
       throw(yardl.ProtocolError("Expected call to '%s' but received call to '%s'.", expected_method, actual_method));
     end
 
-    function name = state_to_method_name_(obj, state)
+    function name = state_to_method_name_(self, state)
       if state == 0
-        name = 'read_float_image';
+        name = "read_float_image";
       elseif state == 1
-        name = 'read_int_image';
+        name = "read_int_image";
       elseif state == 2
-        name = 'read_int_image_alternate_syntax';
+        name = "read_int_image_alternate_syntax";
       elseif state == 3
-        name = 'read_string_image';
+        name = "read_string_image";
       elseif state == 4
-        name = 'read_int_float_tuple';
+        name = "read_int_float_tuple";
       elseif state == 5
-        name = 'read_float_float_tuple';
+        name = "read_float_float_tuple";
       elseif state == 6
-        name = 'read_int_float_tuple_alternate_syntax';
+        name = "read_int_float_tuple_alternate_syntax";
       elseif state == 7
-        name = 'read_int_string_tuple';
+        name = "read_int_string_tuple";
       elseif state == 8
-        name = 'read_stream_of_type_variants';
+        name = "read_stream_of_type_variants";
       else
-        name = '<unknown>';
+        name = "<unknown>";
       end
     end
   end

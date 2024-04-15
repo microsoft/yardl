@@ -10,36 +10,36 @@ classdef Time < handle
     end
 
     methods
-        function obj = Time(nanoseconds_since_midnight)
+        function self = Time(nanoseconds_since_midnight)
             if nargin > 0
                 if nanoseconds_since_midnight < 0 || nanoseconds_since_midnight >= 24*60*60*1e9
                     throw(yardl.ValuError("Time must be between 00:00:00 and 23:59:59.999999999"));
                 end
-                obj.nanoseconds_since_midnight_ = nanoseconds_since_midnight;
+                self.nanoseconds_since_midnight_ = nanoseconds_since_midnight;
             else
-                obj.nanoseconds_since_midnight_ = 0;
+                self.nanoseconds_since_midnight_ = 0;
             end
         end
 
-        function value = value(obj)
-            value = obj.nanoseconds_since_midnight_;
+        function value = value(self)
+            value = self.nanoseconds_since_midnight_;
         end
 
-        function dt = to_datetime(obj)
-            dt = datetime(obj.nanoseconds_since_midnight_, 'ConvertFrom', 'epochtime', 'Epoch', datetime('today'), 'TicksPerSecond', 1e9);
+        function dt = to_datetime(self)
+            dt = datetime(self.nanoseconds_since_midnight_, 'ConvertFrom', 'epochtime', 'Epoch', datetime('today'), 'TicksPerSecond', 1e9);
         end
 
-        function eq = eq(obj, other)
+        function eq = eq(self, other)
             if isa(other, 'datetime')
                 other = yardl.Time.from_datetime(other);
             end
 
             eq = isa(other, 'yardl.Time') && ...
-                all([obj.value] == [other.value]);
+                all([self.value] == [other.value]);
         end
 
-        function ne = new(obj, other)
-            ne = ~obj.eq(other);
+        function ne = new(self, other)
+            ne = ~self.eq(other);
         end
     end
 

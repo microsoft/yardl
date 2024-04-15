@@ -8,28 +8,28 @@ classdef RecordWithOptionalFields < handle
   end
 
   methods
-    function obj = RecordWithOptionalFields(optional_int, optional_int_alternate_syntax, optional_time)
+    function self = RecordWithOptionalFields(optional_int, optional_int_alternate_syntax, optional_time)
       if nargin > 0
-        obj.optional_int = optional_int;
-        obj.optional_int_alternate_syntax = optional_int_alternate_syntax;
-        obj.optional_time = optional_time;
+        self.optional_int = optional_int;
+        self.optional_int_alternate_syntax = optional_int_alternate_syntax;
+        self.optional_time = optional_time;
       else
-        obj.optional_int = yardl.None;
-        obj.optional_int_alternate_syntax = yardl.None;
-        obj.optional_time = yardl.None;
+        self.optional_int = yardl.None;
+        self.optional_int_alternate_syntax = yardl.None;
+        self.optional_time = yardl.None;
       end
     end
 
-    function res = eq(obj, other)
+    function res = eq(self, other)
       res = ...
         isa(other, 'test_model.RecordWithOptionalFields') && ...
-        all([obj.optional_int] == [other.optional_int]) && ...
-        all([obj.optional_int_alternate_syntax] == [other.optional_int_alternate_syntax]) && ...
-        all([obj.optional_time] == [other.optional_time]);
+        all([self.optional_int] == [other.optional_int]) && ...
+        all([self.optional_int_alternate_syntax] == [other.optional_int_alternate_syntax]) && ...
+        all([self.optional_time] == [other.optional_time]);
     end
 
-    function res = ne(obj, other)
-      res = ~obj.eq(other);
+    function res = ne(self, other)
+      res = ~self.eq(other);
     end
   end
 

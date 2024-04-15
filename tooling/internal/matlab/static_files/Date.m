@@ -8,33 +8,33 @@ classdef Date < handle
     end
 
     methods
-        function obj = Date(days_since_epoch)
+        function self = Date(days_since_epoch)
             if nargin > 0
-                obj.days_since_epoch_ = days_since_epoch;
+                self.days_since_epoch_ = days_since_epoch;
             else
-                obj.days_since_epoch_ = 0;
+                self.days_since_epoch_ = 0;
             end
         end
 
-        function value = value(obj)
-            value = obj.days_since_epoch_;
+        function value = value(self)
+            value = self.days_since_epoch_;
         end
 
-        function dt = to_datetime(obj)
-            dt = datetime(0, 'ConvertFrom', 'epochtime') + days(obj.days_since_epoch_);
+        function dt = to_datetime(self)
+            dt = datetime(0, 'ConvertFrom', 'epochtime') + days(self.days_since_epoch_);
         end
 
-        function eq = eq(obj, other)
+        function eq = eq(self, other)
             if isa(other, 'datetime')
                 other = yardl.Date.from_datetime(other);
             end
 
             eq = isa(other, 'yardl.Date') && ...
-                all([obj.value] == [other.value]);
+                all([self.value] == [other.value]);
         end
 
-        function ne = new(obj, other)
-            ne = ~obj.eq(other);
+        function ne = new(self, other)
+            ne = ~self.eq(other);
         end
     end
 

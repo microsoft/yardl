@@ -9,16 +9,16 @@ classdef CodedOutputStream < handle
     end
 
     methods
-        function self = CodedOutputStream(output)
-            if isa(output, "string") || isa(output, "char")
-                [fileId, errMsg] = fopen(output, "W");
+        function self = CodedOutputStream(outfile)
+            if isa(outfile, "string") || isa(outfile, "char")
+                [fileId, errMsg] = fopen(outfile, "W");
                 if fileId < 0
                     throw(yardl.binary.Exception(errMsg));
                 end
                 self.fid_ = fileId;
                 self.owns_stream_ = true;
             else
-                self.fid_ = input;
+                self.fid_ = outfile;
                 self.owns_stream_ = false;
             end
         end
@@ -30,20 +30,19 @@ classdef CodedOutputStream < handle
             end
         end
 
-        function write(self, value)
-            assert(isa(value, "uint8"));
-            fwrite(self.fid_, value, "uint8");
-        end
-
         function write_bytes(self, bytes)
+            arguments
+                self
+                bytes (1,:) {mustBeA(bytes, "uint8")}
+            end
             fwrite(self.fid_, bytes, "uint8");
         end
 
-        function write_byte_no_check(self, value)
-            assert(isscalar(value));
-            assert(all(value >= 0));
-            assert(all(value <= intmax("uint8")));
-
+        function write_byte(self, value)
+            arguments
+                self
+                value (1,1) {mustBeA(value, "uint8")}
+            end
             fwrite(self.fid_, value, "uint8");
         end
 
@@ -52,16 +51,19 @@ classdef CodedOutputStream < handle
         end
 
         function write_unsigned_varint(self, value)
-            assert(isscalar(value));
+            arguments
+                self
+                value (1,1) {mustBeInteger,mustBeNonnegative}
+            end
 
             int_val = uint64(value);
             while true
                 if int_val < 0x80
-                    self.write_byte_no_check(int_val);
+                    self.write_byte(uint8(int_val));
                     return
                 end
 
-                self.write_byte_no_check(bitor(bitand(int_val, uint64(0x7F)), uint64(0x80)));
+                self.write_byte(uint8(bitor(bitand(int_val, uint64(0x7F)), uint64(0x80))));
                 int_val = bitshift(int_val, -7);
             end
         end
@@ -72,10 +74,11 @@ classdef CodedOutputStream < handle
         end
 
         function write_signed_varint(self, value)
-            assert(isscalar(value));
-
+            arguments
+                self
+                value (1,1) {mustBeInteger}
+            end
             self.write_unsigned_varint(self.zigzag_encode(value));
         end
-
     end
 end

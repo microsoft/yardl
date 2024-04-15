@@ -9,35 +9,35 @@ classdef EnumSerializer < yardl.binary.TypeSerializer
     end
 
     methods
-        function obj = EnumSerializer(classname, classconstructor, integer_serializer)
-            obj.classname_ = classname;
-            obj.constructor_ = classconstructor;
-            obj.integer_serializer_ = integer_serializer;
+        function self = EnumSerializer(classname, classconstructor, integer_serializer)
+            self.classname_ = classname;
+            self.constructor_ = classconstructor;
+            self.integer_serializer_ = integer_serializer;
         end
 
-        function write(obj, outstream, value)
-            obj.integer_serializer_.write(outstream, value);
+        function write(self, outstream, value)
+            self.integer_serializer_.write(outstream, value);
         end
 
-        function res = read(obj, instream)
-            int_value = obj.integer_serializer_.read(instream);
-            res = obj.constructor_(int_value);
+        function res = read(self, instream)
+            int_value = self.integer_serializer_.read(instream);
+            res = self.constructor_(int_value);
         end
 
-        function c = getClass(obj)
-            c = obj.classname_;
+        function c = get_class(self)
+            c = self.classname_;
         end
 
-        function trivial = isTriviallySerializable(obj)
-            trivial = obj.integer_serializer_.isTriviallySerializable();
+        function trivial = is_trivially_serializable(self)
+            trivial = self.integer_serializer_.is_trivially_serializable();
         end
 
-        function writeTrivially(self, outstream, values)
-            self.integer_serializer_.writeTrivially(outstream, values);
+        function write_trivially(self, outstream, values)
+            self.integer_serializer_.write_trivially(outstream, values);
         end
 
-        function res = readTrivially(self, instream, shape)
-            res = self.integer_serializer_.readTrivially(instream, shape);
+        function res = read_trivially(self, instream, shape)
+            res = self.integer_serializer_.read_trivially(instream, shape);
         end
     end
 end

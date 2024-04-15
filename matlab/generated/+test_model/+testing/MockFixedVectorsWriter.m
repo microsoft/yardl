@@ -10,66 +10,66 @@ classdef MockFixedVectorsWriter < matlab.mixin.Copyable & test_model.FixedVector
   end
 
   methods
-    function obj = MockFixedVectorsWriter(testCase)
-      obj.testCase_ = testCase;
-      obj.expected_fixed_int_vector = yardl.None;
-      obj.expected_fixed_simple_record_vector = yardl.None;
-      obj.expected_fixed_record_with_vlens_vector = yardl.None;
-      obj.expected_record_with_fixed_vectors = yardl.None;
+    function self = MockFixedVectorsWriter(testCase)
+      self.testCase_ = testCase;
+      self.expected_fixed_int_vector = yardl.None;
+      self.expected_fixed_simple_record_vector = yardl.None;
+      self.expected_fixed_record_with_vlens_vector = yardl.None;
+      self.expected_record_with_fixed_vectors = yardl.None;
     end
 
-    function expect_write_fixed_int_vector_(obj, value)
-      obj.expected_fixed_int_vector = yardl.Optional(value);
+    function expect_write_fixed_int_vector_(self, value)
+      self.expected_fixed_int_vector = yardl.Optional(value);
     end
 
-    function expect_write_fixed_simple_record_vector_(obj, value)
-      obj.expected_fixed_simple_record_vector = yardl.Optional(value);
+    function expect_write_fixed_simple_record_vector_(self, value)
+      self.expected_fixed_simple_record_vector = yardl.Optional(value);
     end
 
-    function expect_write_fixed_record_with_vlens_vector_(obj, value)
-      obj.expected_fixed_record_with_vlens_vector = yardl.Optional(value);
+    function expect_write_fixed_record_with_vlens_vector_(self, value)
+      self.expected_fixed_record_with_vlens_vector = yardl.Optional(value);
     end
 
-    function expect_write_record_with_fixed_vectors_(obj, value)
-      obj.expected_record_with_fixed_vectors = yardl.Optional(value);
+    function expect_write_record_with_fixed_vectors_(self, value)
+      self.expected_record_with_fixed_vectors = yardl.Optional(value);
     end
 
-    function verify(obj)
-      obj.testCase_.verifyEqual(obj.expected_fixed_int_vector, yardl.None, "Expected call to write_fixed_int_vector_ was not received");
-      obj.testCase_.verifyEqual(obj.expected_fixed_simple_record_vector, yardl.None, "Expected call to write_fixed_simple_record_vector_ was not received");
-      obj.testCase_.verifyEqual(obj.expected_fixed_record_with_vlens_vector, yardl.None, "Expected call to write_fixed_record_with_vlens_vector_ was not received");
-      obj.testCase_.verifyEqual(obj.expected_record_with_fixed_vectors, yardl.None, "Expected call to write_record_with_fixed_vectors_ was not received");
+    function verify(self)
+      self.testCase_.verifyEqual(self.expected_fixed_int_vector, yardl.None, "Expected call to write_fixed_int_vector_ was not received");
+      self.testCase_.verifyEqual(self.expected_fixed_simple_record_vector, yardl.None, "Expected call to write_fixed_simple_record_vector_ was not received");
+      self.testCase_.verifyEqual(self.expected_fixed_record_with_vlens_vector, yardl.None, "Expected call to write_fixed_record_with_vlens_vector_ was not received");
+      self.testCase_.verifyEqual(self.expected_record_with_fixed_vectors, yardl.None, "Expected call to write_record_with_fixed_vectors_ was not received");
     end
   end
 
   methods (Access=protected)
-    function write_fixed_int_vector_(obj, value)
-      obj.testCase_.verifyTrue(obj.expected_fixed_int_vector.has_value(), "Unexpected call to write_fixed_int_vector_");
-      obj.testCase_.verifyEqual(value, obj.expected_fixed_int_vector.value, "Unexpected argument value for call to write_fixed_int_vector_");
-      obj.expected_fixed_int_vector = yardl.None;
+    function write_fixed_int_vector_(self, value)
+      self.testCase_.verifyTrue(self.expected_fixed_int_vector.has_value(), "Unexpected call to write_fixed_int_vector_");
+      self.testCase_.verifyEqual(value, self.expected_fixed_int_vector.value, "Unexpected argument value for call to write_fixed_int_vector_");
+      self.expected_fixed_int_vector = yardl.None;
     end
 
-    function write_fixed_simple_record_vector_(obj, value)
-      obj.testCase_.verifyTrue(obj.expected_fixed_simple_record_vector.has_value(), "Unexpected call to write_fixed_simple_record_vector_");
-      obj.testCase_.verifyEqual(value, obj.expected_fixed_simple_record_vector.value, "Unexpected argument value for call to write_fixed_simple_record_vector_");
-      obj.expected_fixed_simple_record_vector = yardl.None;
+    function write_fixed_simple_record_vector_(self, value)
+      self.testCase_.verifyTrue(self.expected_fixed_simple_record_vector.has_value(), "Unexpected call to write_fixed_simple_record_vector_");
+      self.testCase_.verifyEqual(value, self.expected_fixed_simple_record_vector.value, "Unexpected argument value for call to write_fixed_simple_record_vector_");
+      self.expected_fixed_simple_record_vector = yardl.None;
     end
 
-    function write_fixed_record_with_vlens_vector_(obj, value)
-      obj.testCase_.verifyTrue(obj.expected_fixed_record_with_vlens_vector.has_value(), "Unexpected call to write_fixed_record_with_vlens_vector_");
-      obj.testCase_.verifyEqual(value, obj.expected_fixed_record_with_vlens_vector.value, "Unexpected argument value for call to write_fixed_record_with_vlens_vector_");
-      obj.expected_fixed_record_with_vlens_vector = yardl.None;
+    function write_fixed_record_with_vlens_vector_(self, value)
+      self.testCase_.verifyTrue(self.expected_fixed_record_with_vlens_vector.has_value(), "Unexpected call to write_fixed_record_with_vlens_vector_");
+      self.testCase_.verifyEqual(value, self.expected_fixed_record_with_vlens_vector.value, "Unexpected argument value for call to write_fixed_record_with_vlens_vector_");
+      self.expected_fixed_record_with_vlens_vector = yardl.None;
     end
 
-    function write_record_with_fixed_vectors_(obj, value)
-      obj.testCase_.verifyTrue(obj.expected_record_with_fixed_vectors.has_value(), "Unexpected call to write_record_with_fixed_vectors_");
-      obj.testCase_.verifyEqual(value, obj.expected_record_with_fixed_vectors.value, "Unexpected argument value for call to write_record_with_fixed_vectors_");
-      obj.expected_record_with_fixed_vectors = yardl.None;
+    function write_record_with_fixed_vectors_(self, value)
+      self.testCase_.verifyTrue(self.expected_record_with_fixed_vectors.has_value(), "Unexpected call to write_record_with_fixed_vectors_");
+      self.testCase_.verifyEqual(value, self.expected_record_with_fixed_vectors.value, "Unexpected argument value for call to write_record_with_fixed_vectors_");
+      self.expected_record_with_fixed_vectors = yardl.None;
     end
 
-    function close_(obj)
+    function close_(self)
     end
-    function end_stream_(obj)
+    function end_stream_(self)
     end
   end
 end

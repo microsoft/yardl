@@ -8,28 +8,28 @@ classdef SmallBenchmarkRecord < handle
   end
 
   methods
-    function obj = SmallBenchmarkRecord(a, b, c)
+    function self = SmallBenchmarkRecord(a, b, c)
       if nargin > 0
-        obj.a = a;
-        obj.b = b;
-        obj.c = c;
+        self.a = a;
+        self.b = b;
+        self.c = c;
       else
-        obj.a = double(0);
-        obj.b = single(0);
-        obj.c = single(0);
+        self.a = double(0);
+        self.b = single(0);
+        self.c = single(0);
       end
     end
 
-    function res = eq(obj, other)
+    function res = eq(self, other)
       res = ...
         isa(other, 'test_model.SmallBenchmarkRecord') && ...
-        all([obj.a] == [other.a]) && ...
-        all([obj.b] == [other.b]) && ...
-        all([obj.c] == [other.c]);
+        all([self.a] == [other.a]) && ...
+        all([self.b] == [other.b]) && ...
+        all([self.c] == [other.c]);
     end
 
-    function res = ne(obj, other)
-      res = ~obj.eq(other);
+    function res = ne(self, other)
+      res = ~self.eq(other);
     end
   end
 

@@ -8,28 +8,28 @@ classdef RecordWithUnions < handle
   end
 
   methods
-    function obj = RecordWithUnions(null_or_int_or_string, date_or_datetime, null_or_fruits_or_days_of_week)
+    function self = RecordWithUnions(null_or_int_or_string, date_or_datetime, null_or_fruits_or_days_of_week)
       if nargin > 0
-        obj.null_or_int_or_string = null_or_int_or_string;
-        obj.date_or_datetime = date_or_datetime;
-        obj.null_or_fruits_or_days_of_week = null_or_fruits_or_days_of_week;
+        self.null_or_int_or_string = null_or_int_or_string;
+        self.date_or_datetime = date_or_datetime;
+        self.null_or_fruits_or_days_of_week = null_or_fruits_or_days_of_week;
       else
-        obj.null_or_int_or_string = yardl.None;
-        obj.date_or_datetime = basic_types.TimeOrDatetime.Time(yardl.Time());
-        obj.null_or_fruits_or_days_of_week = yardl.None;
+        self.null_or_int_or_string = yardl.None;
+        self.date_or_datetime = basic_types.TimeOrDatetime.Time(yardl.Time());
+        self.null_or_fruits_or_days_of_week = yardl.None;
       end
     end
 
-    function res = eq(obj, other)
+    function res = eq(self, other)
       res = ...
         isa(other, 'basic_types.RecordWithUnions') && ...
-        all([obj.null_or_int_or_string] == [other.null_or_int_or_string]) && ...
-        all([obj.date_or_datetime] == [other.date_or_datetime]) && ...
-        all([obj.null_or_fruits_or_days_of_week] == [other.null_or_fruits_or_days_of_week]);
+        all([self.null_or_int_or_string] == [other.null_or_int_or_string]) && ...
+        all([self.date_or_datetime] == [other.date_or_datetime]) && ...
+        all([self.null_or_fruits_or_days_of_week] == [other.null_or_fruits_or_days_of_week]);
     end
 
-    function res = ne(obj, other)
-      res = ~obj.eq(other);
+    function res = ne(self, other)
+      res = ~self.eq(other);
     end
   end
 

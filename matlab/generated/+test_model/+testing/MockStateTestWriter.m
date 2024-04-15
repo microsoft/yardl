@@ -9,21 +9,21 @@ classdef MockStateTestWriter < matlab.mixin.Copyable & test_model.StateTestWrite
   end
 
   methods
-    function obj = MockStateTestWriter(testCase)
-      obj.testCase_ = testCase;
-      obj.expected_an_int = yardl.None;
-      obj.expected_a_stream = {};
-      obj.expected_another_int = yardl.None;
+    function self = MockStateTestWriter(testCase)
+      self.testCase_ = testCase;
+      self.expected_an_int = yardl.None;
+      self.expected_a_stream = {};
+      self.expected_another_int = yardl.None;
     end
 
-    function expect_write_an_int_(obj, value)
-      obj.expected_an_int = yardl.Optional(value);
+    function expect_write_an_int_(self, value)
+      self.expected_an_int = yardl.Optional(value);
     end
 
-    function expect_write_a_stream_(obj, value)
+    function expect_write_a_stream_(self, value)
       if iscell(value)
         for n = 1:numel(value)
-          obj.expected_a_stream{end+1} = value{n};
+          self.expected_a_stream{end+1} = value{n};
         end
         return;
       end
@@ -32,45 +32,45 @@ classdef MockStateTestWriter < matlab.mixin.Copyable & test_model.StateTestWrite
       count = shape(lastDim);
       index = repelem({':'}, lastDim-1);
       for n = 1:count
-        obj.expected_a_stream{end+1} = value(index{:}, n);
+        self.expected_a_stream{end+1} = value(index{:}, n);
       end
     end
 
-    function expect_write_another_int_(obj, value)
-      obj.expected_another_int = yardl.Optional(value);
+    function expect_write_another_int_(self, value)
+      self.expected_another_int = yardl.Optional(value);
     end
 
-    function verify(obj)
-      obj.testCase_.verifyEqual(obj.expected_an_int, yardl.None, "Expected call to write_an_int_ was not received");
-      obj.testCase_.verifyTrue(isempty(obj.expected_a_stream), "Expected call to write_a_stream_ was not received");
-      obj.testCase_.verifyEqual(obj.expected_another_int, yardl.None, "Expected call to write_another_int_ was not received");
+    function verify(self)
+      self.testCase_.verifyEqual(self.expected_an_int, yardl.None, "Expected call to write_an_int_ was not received");
+      self.testCase_.verifyTrue(isempty(self.expected_a_stream), "Expected call to write_a_stream_ was not received");
+      self.testCase_.verifyEqual(self.expected_another_int, yardl.None, "Expected call to write_another_int_ was not received");
     end
   end
 
   methods (Access=protected)
-    function write_an_int_(obj, value)
-      obj.testCase_.verifyTrue(obj.expected_an_int.has_value(), "Unexpected call to write_an_int_");
-      obj.testCase_.verifyEqual(value, obj.expected_an_int.value, "Unexpected argument value for call to write_an_int_");
-      obj.expected_an_int = yardl.None;
+    function write_an_int_(self, value)
+      self.testCase_.verifyTrue(self.expected_an_int.has_value(), "Unexpected call to write_an_int_");
+      self.testCase_.verifyEqual(value, self.expected_an_int.value, "Unexpected argument value for call to write_an_int_");
+      self.expected_an_int = yardl.None;
     end
 
-    function write_a_stream_(obj, value)
+    function write_a_stream_(self, value)
       assert(iscell(value));
       assert(isscalar(value));
-      obj.testCase_.verifyFalse(isempty(obj.expected_a_stream), "Unexpected call to write_a_stream_");
-      obj.testCase_.verifyEqual(value{1}, obj.expected_a_stream{1}, "Unexpected argument value for call to write_a_stream_");
-      obj.expected_a_stream = obj.expected_a_stream(2:end);
+      self.testCase_.verifyFalse(isempty(self.expected_a_stream), "Unexpected call to write_a_stream_");
+      self.testCase_.verifyEqual(value{1}, self.expected_a_stream{1}, "Unexpected argument value for call to write_a_stream_");
+      self.expected_a_stream = self.expected_a_stream(2:end);
     end
 
-    function write_another_int_(obj, value)
-      obj.testCase_.verifyTrue(obj.expected_another_int.has_value(), "Unexpected call to write_another_int_");
-      obj.testCase_.verifyEqual(value, obj.expected_another_int.value, "Unexpected argument value for call to write_another_int_");
-      obj.expected_another_int = yardl.None;
+    function write_another_int_(self, value)
+      self.testCase_.verifyTrue(self.expected_another_int.has_value(), "Unexpected call to write_another_int_");
+      self.testCase_.verifyEqual(value, self.expected_another_int.value, "Unexpected argument value for call to write_another_int_");
+      self.expected_another_int = yardl.None;
     end
 
-    function close_(obj)
+    function close_(self)
     end
-    function end_stream_(obj)
+    function end_stream_(self)
     end
   end
 end

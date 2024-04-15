@@ -8,21 +8,21 @@ classdef StreamsOfUnionsWriter < yardl.binary.BinaryProtocolWriter & test_model.
   end
 
   methods
-    function obj = StreamsOfUnionsWriter(filename)
-      obj@test_model.StreamsOfUnionsWriterBase();
-      obj@yardl.binary.BinaryProtocolWriter(filename, test_model.StreamsOfUnionsWriterBase.schema);
-      obj.int_or_simple_record_serializer = yardl.binary.StreamSerializer(yardl.binary.UnionSerializer('test_model.Int32OrSimpleRecord', {yardl.binary.Int32Serializer, test_model.binary.SimpleRecordSerializer()}, {@test_model.Int32OrSimpleRecord.Int32, @test_model.Int32OrSimpleRecord.SimpleRecord}));
-      obj.nullable_int_or_simple_record_serializer = yardl.binary.StreamSerializer(yardl.binary.UnionSerializer('test_model.Int32OrSimpleRecord', {yardl.binary.NoneSerializer, yardl.binary.Int32Serializer, test_model.binary.SimpleRecordSerializer()}, {yardl.None, @test_model.Int32OrSimpleRecord.Int32, @test_model.Int32OrSimpleRecord.SimpleRecord}));
+    function self = StreamsOfUnionsWriter(filename)
+      self@test_model.StreamsOfUnionsWriterBase();
+      self@yardl.binary.BinaryProtocolWriter(filename, test_model.StreamsOfUnionsWriterBase.schema);
+      self.int_or_simple_record_serializer = yardl.binary.StreamSerializer(yardl.binary.UnionSerializer('test_model.Int32OrSimpleRecord', {yardl.binary.Int32Serializer, test_model.binary.SimpleRecordSerializer()}, {@test_model.Int32OrSimpleRecord.Int32, @test_model.Int32OrSimpleRecord.SimpleRecord}));
+      self.nullable_int_or_simple_record_serializer = yardl.binary.StreamSerializer(yardl.binary.UnionSerializer('test_model.Int32OrSimpleRecord', {yardl.binary.NoneSerializer, yardl.binary.Int32Serializer, test_model.binary.SimpleRecordSerializer()}, {yardl.None, @test_model.Int32OrSimpleRecord.Int32, @test_model.Int32OrSimpleRecord.SimpleRecord}));
     end
   end
 
   methods (Access=protected)
-    function write_int_or_simple_record_(obj, value)
-      obj.int_or_simple_record_serializer.write(obj.stream_, value);
+    function write_int_or_simple_record_(self, value)
+      self.int_or_simple_record_serializer.write(self.stream_, value);
     end
 
-    function write_nullable_int_or_simple_record_(obj, value)
-      obj.nullable_int_or_simple_record_serializer.write(obj.stream_, value);
+    function write_nullable_int_or_simple_record_(self, value)
+      self.nullable_int_or_simple_record_serializer.write(self.stream_, value);
     end
   end
 end

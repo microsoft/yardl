@@ -8,28 +8,28 @@ classdef SimpleRecord < handle
   end
 
   methods
-    function obj = SimpleRecord(x, y, z)
+    function self = SimpleRecord(x, y, z)
       if nargin > 0
-        obj.x = x;
-        obj.y = y;
-        obj.z = z;
+        self.x = x;
+        self.y = y;
+        self.z = z;
       else
-        obj.x = int32(0);
-        obj.y = int32(0);
-        obj.z = int32(0);
+        self.x = int32(0);
+        self.y = int32(0);
+        self.z = int32(0);
       end
     end
 
-    function res = eq(obj, other)
+    function res = eq(self, other)
       res = ...
         isa(other, 'test_model.SimpleRecord') && ...
-        all([obj.x] == [other.x]) && ...
-        all([obj.y] == [other.y]) && ...
-        all([obj.z] == [other.z]);
+        all([self.x] == [other.x]) && ...
+        all([self.y] == [other.y]) && ...
+        all([self.z] == [other.z]);
     end
 
-    function res = ne(obj, other)
-      res = ~obj.eq(other);
+    function res = ne(self, other)
+      res = ~self.eq(other);
     end
   end
 

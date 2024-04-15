@@ -9,16 +9,16 @@ classdef CodedInputStream < handle
     end
 
     methods
-        function self = CodedInputStream(input)
-            if isa(input, "string") || isa(input, "char")
-                [fileId, errMsg] = fopen(input, "r");
+        function self = CodedInputStream(infile)
+            if isa(infile, "string") || isa(infile, "char")
+                [fileId, errMsg] = fopen(infile, "r");
                 if fileId < 0
                     throw(yardl.binary.Exception(errMsg));
                 end
                 self.fid_ = fileId;
                 self.owns_stream_ = true;
             else
-                self.fid_ = input;
+                self.fid_ = infile;
                 self.owns_stream_ = false;
             end
         end
@@ -30,8 +30,11 @@ classdef CodedInputStream < handle
             end
         end
 
-        function res = read(self, count)
+        function res = read_bytes(self, count)
             res = fread(self.fid_, count, "*uint8");
+            if iscolumn(res)
+                res = transpose(res);
+            end
         end
 
         function res = read_byte(self)
@@ -40,6 +43,9 @@ classdef CodedInputStream < handle
 
         function res = read_values_directly(self, shape, precision)
             res = fread(self.fid_, shape, "*"+precision);
+            if iscolumn(res)
+                res = transpose(res);
+            end
         end
 
         function res = read_unsigned_varint(self)
@@ -64,6 +70,5 @@ classdef CodedInputStream < handle
         function res = read_signed_varint(self)
             res = self.zigzag_decode(self.read_unsigned_varint());
         end
-
     end
 end

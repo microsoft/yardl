@@ -8,28 +8,28 @@ classdef RecordWithDynamicNDArrays < handle
   end
 
   methods
-    function obj = RecordWithDynamicNDArrays(ints, simple_record_array, record_with_vlens_array)
+    function self = RecordWithDynamicNDArrays(ints, simple_record_array, record_with_vlens_array)
       if nargin > 0
-        obj.ints = ints;
-        obj.simple_record_array = simple_record_array;
-        obj.record_with_vlens_array = record_with_vlens_array;
+        self.ints = ints;
+        self.simple_record_array = simple_record_array;
+        self.record_with_vlens_array = record_with_vlens_array;
       else
-        obj.ints = int32.empty();
-        obj.simple_record_array = test_model.SimpleRecord.empty();
-        obj.record_with_vlens_array = test_model.RecordWithVlens.empty();
+        self.ints = int32.empty();
+        self.simple_record_array = test_model.SimpleRecord.empty();
+        self.record_with_vlens_array = test_model.RecordWithVlens.empty();
       end
     end
 
-    function res = eq(obj, other)
+    function res = eq(self, other)
       res = ...
         isa(other, 'test_model.RecordWithDynamicNDArrays') && ...
-        isequal(obj.ints, other.ints) && ...
-        isequal(obj.simple_record_array, other.simple_record_array) && ...
-        isequal(obj.record_with_vlens_array, other.record_with_vlens_array);
+        isequal(self.ints, other.ints) && ...
+        isequal(self.simple_record_array, other.simple_record_array) && ...
+        isequal(self.record_with_vlens_array, other.record_with_vlens_array);
     end
 
-    function res = ne(obj, other)
-      res = ~obj.eq(other);
+    function res = ne(self, other)
+      res = ~self.eq(other);
     end
   end
 

@@ -10,66 +10,66 @@ classdef MockMapsWriter < matlab.mixin.Copyable & test_model.MapsWriterBase
   end
 
   methods
-    function obj = MockMapsWriter(testCase)
-      obj.testCase_ = testCase;
-      obj.expected_string_to_int = yardl.None;
-      obj.expected_int_to_string = yardl.None;
-      obj.expected_string_to_union = yardl.None;
-      obj.expected_aliased_generic = yardl.None;
+    function self = MockMapsWriter(testCase)
+      self.testCase_ = testCase;
+      self.expected_string_to_int = yardl.None;
+      self.expected_int_to_string = yardl.None;
+      self.expected_string_to_union = yardl.None;
+      self.expected_aliased_generic = yardl.None;
     end
 
-    function expect_write_string_to_int_(obj, value)
-      obj.expected_string_to_int = yardl.Optional(value);
+    function expect_write_string_to_int_(self, value)
+      self.expected_string_to_int = yardl.Optional(value);
     end
 
-    function expect_write_int_to_string_(obj, value)
-      obj.expected_int_to_string = yardl.Optional(value);
+    function expect_write_int_to_string_(self, value)
+      self.expected_int_to_string = yardl.Optional(value);
     end
 
-    function expect_write_string_to_union_(obj, value)
-      obj.expected_string_to_union = yardl.Optional(value);
+    function expect_write_string_to_union_(self, value)
+      self.expected_string_to_union = yardl.Optional(value);
     end
 
-    function expect_write_aliased_generic_(obj, value)
-      obj.expected_aliased_generic = yardl.Optional(value);
+    function expect_write_aliased_generic_(self, value)
+      self.expected_aliased_generic = yardl.Optional(value);
     end
 
-    function verify(obj)
-      obj.testCase_.verifyEqual(obj.expected_string_to_int, yardl.None, "Expected call to write_string_to_int_ was not received");
-      obj.testCase_.verifyEqual(obj.expected_int_to_string, yardl.None, "Expected call to write_int_to_string_ was not received");
-      obj.testCase_.verifyEqual(obj.expected_string_to_union, yardl.None, "Expected call to write_string_to_union_ was not received");
-      obj.testCase_.verifyEqual(obj.expected_aliased_generic, yardl.None, "Expected call to write_aliased_generic_ was not received");
+    function verify(self)
+      self.testCase_.verifyEqual(self.expected_string_to_int, yardl.None, "Expected call to write_string_to_int_ was not received");
+      self.testCase_.verifyEqual(self.expected_int_to_string, yardl.None, "Expected call to write_int_to_string_ was not received");
+      self.testCase_.verifyEqual(self.expected_string_to_union, yardl.None, "Expected call to write_string_to_union_ was not received");
+      self.testCase_.verifyEqual(self.expected_aliased_generic, yardl.None, "Expected call to write_aliased_generic_ was not received");
     end
   end
 
   methods (Access=protected)
-    function write_string_to_int_(obj, value)
-      obj.testCase_.verifyTrue(obj.expected_string_to_int.has_value(), "Unexpected call to write_string_to_int_");
-      obj.testCase_.verifyEqual(value, obj.expected_string_to_int.value, "Unexpected argument value for call to write_string_to_int_");
-      obj.expected_string_to_int = yardl.None;
+    function write_string_to_int_(self, value)
+      self.testCase_.verifyTrue(self.expected_string_to_int.has_value(), "Unexpected call to write_string_to_int_");
+      self.testCase_.verifyEqual(value, self.expected_string_to_int.value, "Unexpected argument value for call to write_string_to_int_");
+      self.expected_string_to_int = yardl.None;
     end
 
-    function write_int_to_string_(obj, value)
-      obj.testCase_.verifyTrue(obj.expected_int_to_string.has_value(), "Unexpected call to write_int_to_string_");
-      obj.testCase_.verifyEqual(value, obj.expected_int_to_string.value, "Unexpected argument value for call to write_int_to_string_");
-      obj.expected_int_to_string = yardl.None;
+    function write_int_to_string_(self, value)
+      self.testCase_.verifyTrue(self.expected_int_to_string.has_value(), "Unexpected call to write_int_to_string_");
+      self.testCase_.verifyEqual(value, self.expected_int_to_string.value, "Unexpected argument value for call to write_int_to_string_");
+      self.expected_int_to_string = yardl.None;
     end
 
-    function write_string_to_union_(obj, value)
-      obj.testCase_.verifyTrue(obj.expected_string_to_union.has_value(), "Unexpected call to write_string_to_union_");
-      obj.testCase_.verifyEqual(value, obj.expected_string_to_union.value, "Unexpected argument value for call to write_string_to_union_");
-      obj.expected_string_to_union = yardl.None;
+    function write_string_to_union_(self, value)
+      self.testCase_.verifyTrue(self.expected_string_to_union.has_value(), "Unexpected call to write_string_to_union_");
+      self.testCase_.verifyEqual(value, self.expected_string_to_union.value, "Unexpected argument value for call to write_string_to_union_");
+      self.expected_string_to_union = yardl.None;
     end
 
-    function write_aliased_generic_(obj, value)
-      obj.testCase_.verifyTrue(obj.expected_aliased_generic.has_value(), "Unexpected call to write_aliased_generic_");
-      obj.testCase_.verifyEqual(value, obj.expected_aliased_generic.value, "Unexpected argument value for call to write_aliased_generic_");
-      obj.expected_aliased_generic = yardl.None;
+    function write_aliased_generic_(self, value)
+      self.testCase_.verifyTrue(self.expected_aliased_generic.has_value(), "Unexpected call to write_aliased_generic_");
+      self.testCase_.verifyEqual(value, self.expected_aliased_generic.value, "Unexpected argument value for call to write_aliased_generic_");
+      self.expected_aliased_generic = yardl.None;
     end
 
-    function close_(obj)
+    function close_(self)
     end
-    function end_stream_(obj)
+    function end_stream_(self)
     end
   end
 end

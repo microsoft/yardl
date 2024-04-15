@@ -10,31 +10,31 @@ classdef VlensReader < yardl.binary.BinaryProtocolReader & test_model.VlensReade
   end
 
   methods
-    function obj = VlensReader(filename)
-      obj@test_model.VlensReaderBase();
-      obj@yardl.binary.BinaryProtocolReader(filename, test_model.VlensReaderBase.schema);
-      obj.int_vector_serializer = yardl.binary.VectorSerializer(yardl.binary.Int32Serializer);
-      obj.complex_vector_serializer = yardl.binary.VectorSerializer(yardl.binary.Complexfloat32Serializer);
-      obj.record_with_vlens_serializer = test_model.binary.RecordWithVlensSerializer();
-      obj.vlen_of_record_with_vlens_serializer = yardl.binary.VectorSerializer(test_model.binary.RecordWithVlensSerializer());
+    function self = VlensReader(filename)
+      self@test_model.VlensReaderBase();
+      self@yardl.binary.BinaryProtocolReader(filename, test_model.VlensReaderBase.schema);
+      self.int_vector_serializer = yardl.binary.VectorSerializer(yardl.binary.Int32Serializer);
+      self.complex_vector_serializer = yardl.binary.VectorSerializer(yardl.binary.Complexfloat32Serializer);
+      self.record_with_vlens_serializer = test_model.binary.RecordWithVlensSerializer();
+      self.vlen_of_record_with_vlens_serializer = yardl.binary.VectorSerializer(test_model.binary.RecordWithVlensSerializer());
     end
   end
 
   methods (Access=protected)
-    function value = read_int_vector_(obj)
-      value = obj.int_vector_serializer.read(obj.stream_);
+    function value = read_int_vector_(self)
+      value = self.int_vector_serializer.read(self.stream_);
     end
 
-    function value = read_complex_vector_(obj)
-      value = obj.complex_vector_serializer.read(obj.stream_);
+    function value = read_complex_vector_(self)
+      value = self.complex_vector_serializer.read(self.stream_);
     end
 
-    function value = read_record_with_vlens_(obj)
-      value = obj.record_with_vlens_serializer.read(obj.stream_);
+    function value = read_record_with_vlens_(self)
+      value = self.record_with_vlens_serializer.read(self.stream_);
     end
 
-    function value = read_vlen_of_record_with_vlens_(obj)
-      value = obj.vlen_of_record_with_vlens_serializer.read(obj.stream_);
+    function value = read_vlen_of_record_with_vlens_(self)
+      value = self.vlen_of_record_with_vlens_serializer.read(self.stream_);
     end
   end
 end

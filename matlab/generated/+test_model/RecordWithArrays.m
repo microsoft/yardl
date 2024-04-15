@@ -14,46 +14,46 @@ classdef RecordWithArrays < handle
   end
 
   methods
-    function obj = RecordWithArrays(default_array, default_array_with_empty_dimension, rank_1_array, rank_2_array, rank_2_array_with_named_dimensions, rank_2_fixed_array, rank_2_fixed_array_with_named_dimensions, dynamic_array, array_of_vectors)
+    function self = RecordWithArrays(default_array, default_array_with_empty_dimension, rank_1_array, rank_2_array, rank_2_array_with_named_dimensions, rank_2_fixed_array, rank_2_fixed_array_with_named_dimensions, dynamic_array, array_of_vectors)
       if nargin > 0
-        obj.default_array = default_array;
-        obj.default_array_with_empty_dimension = default_array_with_empty_dimension;
-        obj.rank_1_array = rank_1_array;
-        obj.rank_2_array = rank_2_array;
-        obj.rank_2_array_with_named_dimensions = rank_2_array_with_named_dimensions;
-        obj.rank_2_fixed_array = rank_2_fixed_array;
-        obj.rank_2_fixed_array_with_named_dimensions = rank_2_fixed_array_with_named_dimensions;
-        obj.dynamic_array = dynamic_array;
-        obj.array_of_vectors = array_of_vectors;
+        self.default_array = default_array;
+        self.default_array_with_empty_dimension = default_array_with_empty_dimension;
+        self.rank_1_array = rank_1_array;
+        self.rank_2_array = rank_2_array;
+        self.rank_2_array_with_named_dimensions = rank_2_array_with_named_dimensions;
+        self.rank_2_fixed_array = rank_2_fixed_array;
+        self.rank_2_fixed_array_with_named_dimensions = rank_2_fixed_array_with_named_dimensions;
+        self.dynamic_array = dynamic_array;
+        self.array_of_vectors = array_of_vectors;
       else
-        obj.default_array = int32.empty();
-        obj.default_array_with_empty_dimension = int32.empty();
-        obj.rank_1_array = int32.empty(0);
-        obj.rank_2_array = int32.empty(0, 0);
-        obj.rank_2_array_with_named_dimensions = int32.empty(0, 0);
-        obj.rank_2_fixed_array = repelem(int32(0), 4, 3);
-        obj.rank_2_fixed_array_with_named_dimensions = repelem(int32(0), 4, 3);
-        obj.dynamic_array = int32.empty();
-        obj.array_of_vectors = repelem(repelem(int32(0), 4), 5, 1);
+        self.default_array = int32.empty();
+        self.default_array_with_empty_dimension = int32.empty();
+        self.rank_1_array = int32.empty(0);
+        self.rank_2_array = int32.empty(0, 0);
+        self.rank_2_array_with_named_dimensions = int32.empty(0, 0);
+        self.rank_2_fixed_array = repelem(int32(0), 4, 3);
+        self.rank_2_fixed_array_with_named_dimensions = repelem(int32(0), 4, 3);
+        self.dynamic_array = int32.empty();
+        self.array_of_vectors = repelem(repelem(int32(0), 4), 5, 1);
       end
     end
 
-    function res = eq(obj, other)
+    function res = eq(self, other)
       res = ...
         isa(other, 'test_model.RecordWithArrays') && ...
-        isequal(obj.default_array, other.default_array) && ...
-        isequal(obj.default_array_with_empty_dimension, other.default_array_with_empty_dimension) && ...
-        isequal(obj.rank_1_array, other.rank_1_array) && ...
-        isequal(obj.rank_2_array, other.rank_2_array) && ...
-        isequal(obj.rank_2_array_with_named_dimensions, other.rank_2_array_with_named_dimensions) && ...
-        isequal(obj.rank_2_fixed_array, other.rank_2_fixed_array) && ...
-        isequal(obj.rank_2_fixed_array_with_named_dimensions, other.rank_2_fixed_array_with_named_dimensions) && ...
-        isequal(obj.dynamic_array, other.dynamic_array) && ...
-        isequal(obj.array_of_vectors, other.array_of_vectors);
+        isequal(self.default_array, other.default_array) && ...
+        isequal(self.default_array_with_empty_dimension, other.default_array_with_empty_dimension) && ...
+        isequal(self.rank_1_array, other.rank_1_array) && ...
+        isequal(self.rank_2_array, other.rank_2_array) && ...
+        isequal(self.rank_2_array_with_named_dimensions, other.rank_2_array_with_named_dimensions) && ...
+        isequal(self.rank_2_fixed_array, other.rank_2_fixed_array) && ...
+        isequal(self.rank_2_fixed_array_with_named_dimensions, other.rank_2_fixed_array_with_named_dimensions) && ...
+        isequal(self.dynamic_array, other.dynamic_array) && ...
+        isequal(self.array_of_vectors, other.array_of_vectors);
     end
 
-    function res = ne(obj, other)
-      res = ~obj.eq(other);
+    function res = ne(self, other)
+      res = ~self.eq(other);
     end
   end
 

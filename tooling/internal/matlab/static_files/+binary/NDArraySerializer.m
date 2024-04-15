@@ -19,7 +19,6 @@ classdef NDArraySerializer < yardl.binary.NDArraySerializerBase
             end
 
             sz = size(values);
-
             flipped_shape = flip(sz);
             for dim = 1: self.ndims_
                 len = flipped_shape(dim);
@@ -46,7 +45,6 @@ classdef NDArraySerializer < yardl.binary.NDArraySerializerBase
                 flipped_shape(dim) = instream.read_unsigned_varint();
             end
             shape = flip(flipped_shape);
-
             value = self.read_data_(instream, shape);
         end
     end

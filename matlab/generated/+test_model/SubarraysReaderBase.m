@@ -6,118 +6,118 @@ classdef SubarraysReaderBase < handle
   end
 
   methods
-    function obj = SubarraysReaderBase()
-      obj.state_ = 0;
+    function self = SubarraysReaderBase()
+      self.state_ = 0;
     end
 
-    function close(obj)
-      obj.close_();
-      if obj.state_ ~= 9
-        expected_method = obj.state_to_method_name_(obj.state_);
+    function close(self)
+      self.close_();
+      if self.state_ ~= 9
+        expected_method = self.state_to_method_name_(self.state_);
         throw(yardl.ProtocolError("Protocol reader closed before all data was consumed. Expected call to '%s'.", expected_method));
       end
     end
 
     % Ordinal 0
-    function value = read_dynamic_with_fixed_int_subarray(obj)
-      if obj.state_ ~= 0
-        obj.raise_unexpected_state_(0);
+    function value = read_dynamic_with_fixed_int_subarray(self)
+      if self.state_ ~= 0
+        self.raise_unexpected_state_(0);
       end
 
-      value = obj.read_dynamic_with_fixed_int_subarray_();
-      obj.state_ = 1;
+      value = self.read_dynamic_with_fixed_int_subarray_();
+      self.state_ = 1;
     end
 
     % Ordinal 1
-    function value = read_dynamic_with_fixed_float_subarray(obj)
-      if obj.state_ ~= 1
-        obj.raise_unexpected_state_(1);
+    function value = read_dynamic_with_fixed_float_subarray(self)
+      if self.state_ ~= 1
+        self.raise_unexpected_state_(1);
       end
 
-      value = obj.read_dynamic_with_fixed_float_subarray_();
-      obj.state_ = 2;
+      value = self.read_dynamic_with_fixed_float_subarray_();
+      self.state_ = 2;
     end
 
     % Ordinal 2
-    function value = read_known_dim_count_with_fixed_int_subarray(obj)
-      if obj.state_ ~= 2
-        obj.raise_unexpected_state_(2);
+    function value = read_known_dim_count_with_fixed_int_subarray(self)
+      if self.state_ ~= 2
+        self.raise_unexpected_state_(2);
       end
 
-      value = obj.read_known_dim_count_with_fixed_int_subarray_();
-      obj.state_ = 3;
+      value = self.read_known_dim_count_with_fixed_int_subarray_();
+      self.state_ = 3;
     end
 
     % Ordinal 3
-    function value = read_known_dim_count_with_fixed_float_subarray(obj)
-      if obj.state_ ~= 3
-        obj.raise_unexpected_state_(3);
+    function value = read_known_dim_count_with_fixed_float_subarray(self)
+      if self.state_ ~= 3
+        self.raise_unexpected_state_(3);
       end
 
-      value = obj.read_known_dim_count_with_fixed_float_subarray_();
-      obj.state_ = 4;
+      value = self.read_known_dim_count_with_fixed_float_subarray_();
+      self.state_ = 4;
     end
 
     % Ordinal 4
-    function value = read_fixed_with_fixed_int_subarray(obj)
-      if obj.state_ ~= 4
-        obj.raise_unexpected_state_(4);
+    function value = read_fixed_with_fixed_int_subarray(self)
+      if self.state_ ~= 4
+        self.raise_unexpected_state_(4);
       end
 
-      value = obj.read_fixed_with_fixed_int_subarray_();
-      obj.state_ = 5;
+      value = self.read_fixed_with_fixed_int_subarray_();
+      self.state_ = 5;
     end
 
     % Ordinal 5
-    function value = read_fixed_with_fixed_float_subarray(obj)
-      if obj.state_ ~= 5
-        obj.raise_unexpected_state_(5);
+    function value = read_fixed_with_fixed_float_subarray(self)
+      if self.state_ ~= 5
+        self.raise_unexpected_state_(5);
       end
 
-      value = obj.read_fixed_with_fixed_float_subarray_();
-      obj.state_ = 6;
+      value = self.read_fixed_with_fixed_float_subarray_();
+      self.state_ = 6;
     end
 
     % Ordinal 6
-    function value = read_nested_subarray(obj)
-      if obj.state_ ~= 6
-        obj.raise_unexpected_state_(6);
+    function value = read_nested_subarray(self)
+      if self.state_ ~= 6
+        self.raise_unexpected_state_(6);
       end
 
-      value = obj.read_nested_subarray_();
-      obj.state_ = 7;
+      value = self.read_nested_subarray_();
+      self.state_ = 7;
     end
 
     % Ordinal 7
-    function value = read_dynamic_with_fixed_vector_subarray(obj)
-      if obj.state_ ~= 7
-        obj.raise_unexpected_state_(7);
+    function value = read_dynamic_with_fixed_vector_subarray(self)
+      if self.state_ ~= 7
+        self.raise_unexpected_state_(7);
       end
 
-      value = obj.read_dynamic_with_fixed_vector_subarray_();
-      obj.state_ = 8;
+      value = self.read_dynamic_with_fixed_vector_subarray_();
+      self.state_ = 8;
     end
 
     % Ordinal 8
-    function value = read_generic_subarray(obj)
-      if obj.state_ ~= 8
-        obj.raise_unexpected_state_(8);
+    function value = read_generic_subarray(self)
+      if self.state_ ~= 8
+        self.raise_unexpected_state_(8);
       end
 
-      value = obj.read_generic_subarray_();
-      obj.state_ = 9;
+      value = self.read_generic_subarray_();
+      self.state_ = 9;
     end
 
-    function copy_to(obj, writer)
-      writer.write_dynamic_with_fixed_int_subarray(obj.read_dynamic_with_fixed_int_subarray());
-      writer.write_dynamic_with_fixed_float_subarray(obj.read_dynamic_with_fixed_float_subarray());
-      writer.write_known_dim_count_with_fixed_int_subarray(obj.read_known_dim_count_with_fixed_int_subarray());
-      writer.write_known_dim_count_with_fixed_float_subarray(obj.read_known_dim_count_with_fixed_float_subarray());
-      writer.write_fixed_with_fixed_int_subarray(obj.read_fixed_with_fixed_int_subarray());
-      writer.write_fixed_with_fixed_float_subarray(obj.read_fixed_with_fixed_float_subarray());
-      writer.write_nested_subarray(obj.read_nested_subarray());
-      writer.write_dynamic_with_fixed_vector_subarray(obj.read_dynamic_with_fixed_vector_subarray());
-      writer.write_generic_subarray(obj.read_generic_subarray());
+    function copy_to(self, writer)
+      writer.write_dynamic_with_fixed_int_subarray(self.read_dynamic_with_fixed_int_subarray());
+      writer.write_dynamic_with_fixed_float_subarray(self.read_dynamic_with_fixed_float_subarray());
+      writer.write_known_dim_count_with_fixed_int_subarray(self.read_known_dim_count_with_fixed_int_subarray());
+      writer.write_known_dim_count_with_fixed_float_subarray(self.read_known_dim_count_with_fixed_float_subarray());
+      writer.write_fixed_with_fixed_int_subarray(self.read_fixed_with_fixed_int_subarray());
+      writer.write_fixed_with_fixed_float_subarray(self.read_fixed_with_fixed_float_subarray());
+      writer.write_nested_subarray(self.read_nested_subarray());
+      writer.write_dynamic_with_fixed_vector_subarray(self.read_dynamic_with_fixed_vector_subarray());
+      writer.write_generic_subarray(self.read_generic_subarray());
     end
   end
 
@@ -128,47 +128,47 @@ classdef SubarraysReaderBase < handle
   end
 
   methods (Abstract, Access=protected)
-    read_dynamic_with_fixed_int_subarray_(obj)
-    read_dynamic_with_fixed_float_subarray_(obj)
-    read_known_dim_count_with_fixed_int_subarray_(obj)
-    read_known_dim_count_with_fixed_float_subarray_(obj)
-    read_fixed_with_fixed_int_subarray_(obj)
-    read_fixed_with_fixed_float_subarray_(obj)
-    read_nested_subarray_(obj)
-    read_dynamic_with_fixed_vector_subarray_(obj)
-    read_generic_subarray_(obj)
+    read_dynamic_with_fixed_int_subarray_(self)
+    read_dynamic_with_fixed_float_subarray_(self)
+    read_known_dim_count_with_fixed_int_subarray_(self)
+    read_known_dim_count_with_fixed_float_subarray_(self)
+    read_fixed_with_fixed_int_subarray_(self)
+    read_fixed_with_fixed_float_subarray_(self)
+    read_nested_subarray_(self)
+    read_dynamic_with_fixed_vector_subarray_(self)
+    read_generic_subarray_(self)
 
-    close_(obj)
+    close_(self)
   end
 
   methods (Access=private)
-    function raise_unexpected_state_(obj, actual)
-      actual_method = obj.state_to_method_name_(actual);
-      expected_method = obj.state_to_method_name_(obj.state_);
+    function raise_unexpected_state_(self, actual)
+      actual_method = self.state_to_method_name_(actual);
+      expected_method = self.state_to_method_name_(self.state_);
       throw(yardl.ProtocolError("Expected call to '%s' but received call to '%s'.", expected_method, actual_method));
     end
 
-    function name = state_to_method_name_(obj, state)
+    function name = state_to_method_name_(self, state)
       if state == 0
-        name = 'read_dynamic_with_fixed_int_subarray';
+        name = "read_dynamic_with_fixed_int_subarray";
       elseif state == 1
-        name = 'read_dynamic_with_fixed_float_subarray';
+        name = "read_dynamic_with_fixed_float_subarray";
       elseif state == 2
-        name = 'read_known_dim_count_with_fixed_int_subarray';
+        name = "read_known_dim_count_with_fixed_int_subarray";
       elseif state == 3
-        name = 'read_known_dim_count_with_fixed_float_subarray';
+        name = "read_known_dim_count_with_fixed_float_subarray";
       elseif state == 4
-        name = 'read_fixed_with_fixed_int_subarray';
+        name = "read_fixed_with_fixed_int_subarray";
       elseif state == 5
-        name = 'read_fixed_with_fixed_float_subarray';
+        name = "read_fixed_with_fixed_float_subarray";
       elseif state == 6
-        name = 'read_nested_subarray';
+        name = "read_nested_subarray";
       elseif state == 7
-        name = 'read_dynamic_with_fixed_vector_subarray';
+        name = "read_dynamic_with_fixed_vector_subarray";
       elseif state == 8
-        name = 'read_generic_subarray';
+        name = "read_generic_subarray";
       else
-        name = '<unknown>';
+        name = "<unknown>";
       end
     end
   end

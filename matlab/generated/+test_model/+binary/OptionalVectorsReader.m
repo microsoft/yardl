@@ -7,16 +7,16 @@ classdef OptionalVectorsReader < yardl.binary.BinaryProtocolReader & test_model.
   end
 
   methods
-    function obj = OptionalVectorsReader(filename)
-      obj@test_model.OptionalVectorsReaderBase();
-      obj@yardl.binary.BinaryProtocolReader(filename, test_model.OptionalVectorsReaderBase.schema);
-      obj.record_with_optional_vector_serializer = test_model.binary.RecordWithOptionalVectorSerializer();
+    function self = OptionalVectorsReader(filename)
+      self@test_model.OptionalVectorsReaderBase();
+      self@yardl.binary.BinaryProtocolReader(filename, test_model.OptionalVectorsReaderBase.schema);
+      self.record_with_optional_vector_serializer = test_model.binary.RecordWithOptionalVectorSerializer();
     end
   end
 
   methods (Access=protected)
-    function value = read_record_with_optional_vector_(obj)
-      value = obj.record_with_optional_vector_serializer.read(obj.stream_);
+    function value = read_record_with_optional_vector_(self)
+      value = self.record_with_optional_vector_serializer.read(self.stream_);
     end
   end
 end

@@ -133,7 +133,7 @@ Yardl has the following primitive types:
 | `int32`          |                                                                         | `yardl.Int32`         | `int`                  |
 | `int`            | Alias of `int32`                                                        |                       |                        |
 | `uint32`         |                                                                         | `yardl.UInt32`        | `int`                  |
-| `uint`           | Alias of `unit32`                                                       |                       |                        |
+| `uint`           | Alias of `uint32`                                                       |                       |                        |
 | `int64`          |                                                                         | `yardl.Int64`         | `int`                  |
 | `long`           | Alias of `int64`                                                        |                       |                        |
 | `uint64`         |                                                                         | `yardl.UInt64`        | `int`                  |
@@ -391,7 +391,7 @@ Or with explicit values and an optional base type:
 
 ```yaml
 Permissions: !flags
-  base: unit8
+  base: uint8
   values:
     read: 1
     write: 2

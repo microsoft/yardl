@@ -7,25 +7,25 @@ classdef TupleWithRecords < handle
   end
 
   methods
-    function obj = TupleWithRecords(a, b)
+    function self = TupleWithRecords(a, b)
       if nargin > 0
-        obj.a = a;
-        obj.b = b;
+        self.a = a;
+        self.b = b;
       else
-        obj.a = test_model.SimpleRecord();
-        obj.b = test_model.SimpleRecord();
+        self.a = test_model.SimpleRecord();
+        self.b = test_model.SimpleRecord();
       end
     end
 
-    function res = eq(obj, other)
+    function res = eq(self, other)
       res = ...
         isa(other, 'test_model.TupleWithRecords') && ...
-        all([obj.a] == [other.a]) && ...
-        all([obj.b] == [other.b]);
+        all([self.a] == [other.a]) && ...
+        all([self.b] == [other.b]);
     end
 
-    function res = ne(obj, other)
-      res = ~obj.eq(other);
+    function res = ne(self, other)
+      res = ~self.eq(other);
     end
   end
 

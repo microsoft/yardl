@@ -10,31 +10,31 @@ classdef UnionsReader < yardl.binary.BinaryProtocolReader & test_model.UnionsRea
   end
 
   methods
-    function obj = UnionsReader(filename)
-      obj@test_model.UnionsReaderBase();
-      obj@yardl.binary.BinaryProtocolReader(filename, test_model.UnionsReaderBase.schema);
-      obj.int_or_simple_record_serializer = yardl.binary.UnionSerializer('test_model.Int32OrSimpleRecord', {yardl.binary.Int32Serializer, test_model.binary.SimpleRecordSerializer()}, {@test_model.Int32OrSimpleRecord.Int32, @test_model.Int32OrSimpleRecord.SimpleRecord});
-      obj.int_or_record_with_vlens_serializer = yardl.binary.UnionSerializer('test_model.Int32OrRecordWithVlens', {yardl.binary.Int32Serializer, test_model.binary.RecordWithVlensSerializer()}, {@test_model.Int32OrRecordWithVlens.Int32, @test_model.Int32OrRecordWithVlens.RecordWithVlens});
-      obj.monosotate_or_int_or_simple_record_serializer = yardl.binary.UnionSerializer('test_model.Int32OrSimpleRecord', {yardl.binary.NoneSerializer, yardl.binary.Int32Serializer, test_model.binary.SimpleRecordSerializer()}, {yardl.None, @test_model.Int32OrSimpleRecord.Int32, @test_model.Int32OrSimpleRecord.SimpleRecord});
-      obj.record_with_unions_serializer = basic_types.binary.RecordWithUnionsSerializer();
+    function self = UnionsReader(filename)
+      self@test_model.UnionsReaderBase();
+      self@yardl.binary.BinaryProtocolReader(filename, test_model.UnionsReaderBase.schema);
+      self.int_or_simple_record_serializer = yardl.binary.UnionSerializer('test_model.Int32OrSimpleRecord', {yardl.binary.Int32Serializer, test_model.binary.SimpleRecordSerializer()}, {@test_model.Int32OrSimpleRecord.Int32, @test_model.Int32OrSimpleRecord.SimpleRecord});
+      self.int_or_record_with_vlens_serializer = yardl.binary.UnionSerializer('test_model.Int32OrRecordWithVlens', {yardl.binary.Int32Serializer, test_model.binary.RecordWithVlensSerializer()}, {@test_model.Int32OrRecordWithVlens.Int32, @test_model.Int32OrRecordWithVlens.RecordWithVlens});
+      self.monosotate_or_int_or_simple_record_serializer = yardl.binary.UnionSerializer('test_model.Int32OrSimpleRecord', {yardl.binary.NoneSerializer, yardl.binary.Int32Serializer, test_model.binary.SimpleRecordSerializer()}, {yardl.None, @test_model.Int32OrSimpleRecord.Int32, @test_model.Int32OrSimpleRecord.SimpleRecord});
+      self.record_with_unions_serializer = basic_types.binary.RecordWithUnionsSerializer();
     end
   end
 
   methods (Access=protected)
-    function value = read_int_or_simple_record_(obj)
-      value = obj.int_or_simple_record_serializer.read(obj.stream_);
+    function value = read_int_or_simple_record_(self)
+      value = self.int_or_simple_record_serializer.read(self.stream_);
     end
 
-    function value = read_int_or_record_with_vlens_(obj)
-      value = obj.int_or_record_with_vlens_serializer.read(obj.stream_);
+    function value = read_int_or_record_with_vlens_(self)
+      value = self.int_or_record_with_vlens_serializer.read(self.stream_);
     end
 
-    function value = read_monosotate_or_int_or_simple_record_(obj)
-      value = obj.monosotate_or_int_or_simple_record_serializer.read(obj.stream_);
+    function value = read_monosotate_or_int_or_simple_record_(self)
+      value = self.monosotate_or_int_or_simple_record_serializer.read(self.stream_);
     end
 
-    function value = read_record_with_unions_(obj)
-      value = obj.record_with_unions_serializer.read(obj.stream_);
+    function value = read_record_with_unions_(self)
+      value = self.record_with_unions_serializer.read(self.stream_);
     end
   end
 end

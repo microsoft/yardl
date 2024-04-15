@@ -10,66 +10,66 @@ classdef MockVlensWriter < matlab.mixin.Copyable & test_model.VlensWriterBase
   end
 
   methods
-    function obj = MockVlensWriter(testCase)
-      obj.testCase_ = testCase;
-      obj.expected_int_vector = yardl.None;
-      obj.expected_complex_vector = yardl.None;
-      obj.expected_record_with_vlens = yardl.None;
-      obj.expected_vlen_of_record_with_vlens = yardl.None;
+    function self = MockVlensWriter(testCase)
+      self.testCase_ = testCase;
+      self.expected_int_vector = yardl.None;
+      self.expected_complex_vector = yardl.None;
+      self.expected_record_with_vlens = yardl.None;
+      self.expected_vlen_of_record_with_vlens = yardl.None;
     end
 
-    function expect_write_int_vector_(obj, value)
-      obj.expected_int_vector = yardl.Optional(value);
+    function expect_write_int_vector_(self, value)
+      self.expected_int_vector = yardl.Optional(value);
     end
 
-    function expect_write_complex_vector_(obj, value)
-      obj.expected_complex_vector = yardl.Optional(value);
+    function expect_write_complex_vector_(self, value)
+      self.expected_complex_vector = yardl.Optional(value);
     end
 
-    function expect_write_record_with_vlens_(obj, value)
-      obj.expected_record_with_vlens = yardl.Optional(value);
+    function expect_write_record_with_vlens_(self, value)
+      self.expected_record_with_vlens = yardl.Optional(value);
     end
 
-    function expect_write_vlen_of_record_with_vlens_(obj, value)
-      obj.expected_vlen_of_record_with_vlens = yardl.Optional(value);
+    function expect_write_vlen_of_record_with_vlens_(self, value)
+      self.expected_vlen_of_record_with_vlens = yardl.Optional(value);
     end
 
-    function verify(obj)
-      obj.testCase_.verifyEqual(obj.expected_int_vector, yardl.None, "Expected call to write_int_vector_ was not received");
-      obj.testCase_.verifyEqual(obj.expected_complex_vector, yardl.None, "Expected call to write_complex_vector_ was not received");
-      obj.testCase_.verifyEqual(obj.expected_record_with_vlens, yardl.None, "Expected call to write_record_with_vlens_ was not received");
-      obj.testCase_.verifyEqual(obj.expected_vlen_of_record_with_vlens, yardl.None, "Expected call to write_vlen_of_record_with_vlens_ was not received");
+    function verify(self)
+      self.testCase_.verifyEqual(self.expected_int_vector, yardl.None, "Expected call to write_int_vector_ was not received");
+      self.testCase_.verifyEqual(self.expected_complex_vector, yardl.None, "Expected call to write_complex_vector_ was not received");
+      self.testCase_.verifyEqual(self.expected_record_with_vlens, yardl.None, "Expected call to write_record_with_vlens_ was not received");
+      self.testCase_.verifyEqual(self.expected_vlen_of_record_with_vlens, yardl.None, "Expected call to write_vlen_of_record_with_vlens_ was not received");
     end
   end
 
   methods (Access=protected)
-    function write_int_vector_(obj, value)
-      obj.testCase_.verifyTrue(obj.expected_int_vector.has_value(), "Unexpected call to write_int_vector_");
-      obj.testCase_.verifyEqual(value, obj.expected_int_vector.value, "Unexpected argument value for call to write_int_vector_");
-      obj.expected_int_vector = yardl.None;
+    function write_int_vector_(self, value)
+      self.testCase_.verifyTrue(self.expected_int_vector.has_value(), "Unexpected call to write_int_vector_");
+      self.testCase_.verifyEqual(value, self.expected_int_vector.value, "Unexpected argument value for call to write_int_vector_");
+      self.expected_int_vector = yardl.None;
     end
 
-    function write_complex_vector_(obj, value)
-      obj.testCase_.verifyTrue(obj.expected_complex_vector.has_value(), "Unexpected call to write_complex_vector_");
-      obj.testCase_.verifyEqual(value, obj.expected_complex_vector.value, "Unexpected argument value for call to write_complex_vector_");
-      obj.expected_complex_vector = yardl.None;
+    function write_complex_vector_(self, value)
+      self.testCase_.verifyTrue(self.expected_complex_vector.has_value(), "Unexpected call to write_complex_vector_");
+      self.testCase_.verifyEqual(value, self.expected_complex_vector.value, "Unexpected argument value for call to write_complex_vector_");
+      self.expected_complex_vector = yardl.None;
     end
 
-    function write_record_with_vlens_(obj, value)
-      obj.testCase_.verifyTrue(obj.expected_record_with_vlens.has_value(), "Unexpected call to write_record_with_vlens_");
-      obj.testCase_.verifyEqual(value, obj.expected_record_with_vlens.value, "Unexpected argument value for call to write_record_with_vlens_");
-      obj.expected_record_with_vlens = yardl.None;
+    function write_record_with_vlens_(self, value)
+      self.testCase_.verifyTrue(self.expected_record_with_vlens.has_value(), "Unexpected call to write_record_with_vlens_");
+      self.testCase_.verifyEqual(value, self.expected_record_with_vlens.value, "Unexpected argument value for call to write_record_with_vlens_");
+      self.expected_record_with_vlens = yardl.None;
     end
 
-    function write_vlen_of_record_with_vlens_(obj, value)
-      obj.testCase_.verifyTrue(obj.expected_vlen_of_record_with_vlens.has_value(), "Unexpected call to write_vlen_of_record_with_vlens_");
-      obj.testCase_.verifyEqual(value, obj.expected_vlen_of_record_with_vlens.value, "Unexpected argument value for call to write_vlen_of_record_with_vlens_");
-      obj.expected_vlen_of_record_with_vlens = yardl.None;
+    function write_vlen_of_record_with_vlens_(self, value)
+      self.testCase_.verifyTrue(self.expected_vlen_of_record_with_vlens.has_value(), "Unexpected call to write_vlen_of_record_with_vlens_");
+      self.testCase_.verifyEqual(value, self.expected_vlen_of_record_with_vlens.value, "Unexpected argument value for call to write_vlen_of_record_with_vlens_");
+      self.expected_vlen_of_record_with_vlens = yardl.None;
     end
 
-    function close_(obj)
+    function close_(self)
     end
-    function end_stream_(obj)
+    function end_stream_(self)
     end
   end
 end

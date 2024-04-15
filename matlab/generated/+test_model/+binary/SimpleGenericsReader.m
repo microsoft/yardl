@@ -15,60 +15,60 @@ classdef SimpleGenericsReader < yardl.binary.BinaryProtocolReader & test_model.S
   end
 
   methods
-    function obj = SimpleGenericsReader(filename)
-      obj@test_model.SimpleGenericsReaderBase();
-      obj@yardl.binary.BinaryProtocolReader(filename, test_model.SimpleGenericsReaderBase.schema);
-      obj.float_image_serializer = yardl.binary.NDArraySerializer(yardl.binary.Float32Serializer, 2);
-      obj.int_image_serializer = yardl.binary.NDArraySerializer(yardl.binary.Int32Serializer, 2);
-      obj.int_image_alternate_syntax_serializer = yardl.binary.NDArraySerializer(yardl.binary.Int32Serializer, 2);
-      obj.string_image_serializer = yardl.binary.NDArraySerializer(yardl.binary.StringSerializer, 2);
-      obj.int_float_tuple_serializer = tuples.binary.TupleSerializer(yardl.binary.Int32Serializer, yardl.binary.Float32Serializer);
-      obj.float_float_tuple_serializer = tuples.binary.TupleSerializer(yardl.binary.Float32Serializer, yardl.binary.Float32Serializer);
-      obj.int_float_tuple_alternate_syntax_serializer = tuples.binary.TupleSerializer(yardl.binary.Int32Serializer, yardl.binary.Float32Serializer);
-      obj.int_string_tuple_serializer = tuples.binary.TupleSerializer(yardl.binary.Int32Serializer, yardl.binary.StringSerializer);
-      obj.stream_of_type_variants_serializer = yardl.binary.StreamSerializer(yardl.binary.UnionSerializer('test_model.ImageFloatOrImageDouble', {yardl.binary.NDArraySerializer(yardl.binary.Float32Serializer, 2), yardl.binary.NDArraySerializer(yardl.binary.Float64Serializer, 2)}, {@test_model.ImageFloatOrImageDouble.ImageFloat, @test_model.ImageFloatOrImageDouble.ImageDouble}));
+    function self = SimpleGenericsReader(filename)
+      self@test_model.SimpleGenericsReaderBase();
+      self@yardl.binary.BinaryProtocolReader(filename, test_model.SimpleGenericsReaderBase.schema);
+      self.float_image_serializer = yardl.binary.NDArraySerializer(yardl.binary.Float32Serializer, 2);
+      self.int_image_serializer = yardl.binary.NDArraySerializer(yardl.binary.Int32Serializer, 2);
+      self.int_image_alternate_syntax_serializer = yardl.binary.NDArraySerializer(yardl.binary.Int32Serializer, 2);
+      self.string_image_serializer = yardl.binary.NDArraySerializer(yardl.binary.StringSerializer, 2);
+      self.int_float_tuple_serializer = tuples.binary.TupleSerializer(yardl.binary.Int32Serializer, yardl.binary.Float32Serializer);
+      self.float_float_tuple_serializer = tuples.binary.TupleSerializer(yardl.binary.Float32Serializer, yardl.binary.Float32Serializer);
+      self.int_float_tuple_alternate_syntax_serializer = tuples.binary.TupleSerializer(yardl.binary.Int32Serializer, yardl.binary.Float32Serializer);
+      self.int_string_tuple_serializer = tuples.binary.TupleSerializer(yardl.binary.Int32Serializer, yardl.binary.StringSerializer);
+      self.stream_of_type_variants_serializer = yardl.binary.StreamSerializer(yardl.binary.UnionSerializer('test_model.ImageFloatOrImageDouble', {yardl.binary.NDArraySerializer(yardl.binary.Float32Serializer, 2), yardl.binary.NDArraySerializer(yardl.binary.Float64Serializer, 2)}, {@test_model.ImageFloatOrImageDouble.ImageFloat, @test_model.ImageFloatOrImageDouble.ImageDouble}));
     end
   end
 
   methods (Access=protected)
-    function value = read_float_image_(obj)
-      value = obj.float_image_serializer.read(obj.stream_);
+    function value = read_float_image_(self)
+      value = self.float_image_serializer.read(self.stream_);
     end
 
-    function value = read_int_image_(obj)
-      value = obj.int_image_serializer.read(obj.stream_);
+    function value = read_int_image_(self)
+      value = self.int_image_serializer.read(self.stream_);
     end
 
-    function value = read_int_image_alternate_syntax_(obj)
-      value = obj.int_image_alternate_syntax_serializer.read(obj.stream_);
+    function value = read_int_image_alternate_syntax_(self)
+      value = self.int_image_alternate_syntax_serializer.read(self.stream_);
     end
 
-    function value = read_string_image_(obj)
-      value = obj.string_image_serializer.read(obj.stream_);
+    function value = read_string_image_(self)
+      value = self.string_image_serializer.read(self.stream_);
     end
 
-    function value = read_int_float_tuple_(obj)
-      value = obj.int_float_tuple_serializer.read(obj.stream_);
+    function value = read_int_float_tuple_(self)
+      value = self.int_float_tuple_serializer.read(self.stream_);
     end
 
-    function value = read_float_float_tuple_(obj)
-      value = obj.float_float_tuple_serializer.read(obj.stream_);
+    function value = read_float_float_tuple_(self)
+      value = self.float_float_tuple_serializer.read(self.stream_);
     end
 
-    function value = read_int_float_tuple_alternate_syntax_(obj)
-      value = obj.int_float_tuple_alternate_syntax_serializer.read(obj.stream_);
+    function value = read_int_float_tuple_alternate_syntax_(self)
+      value = self.int_float_tuple_alternate_syntax_serializer.read(self.stream_);
     end
 
-    function value = read_int_string_tuple_(obj)
-      value = obj.int_string_tuple_serializer.read(obj.stream_);
+    function value = read_int_string_tuple_(self)
+      value = self.int_string_tuple_serializer.read(self.stream_);
     end
 
-    function more = has_stream_of_type_variants_(obj)
-      more = obj.stream_of_type_variants_serializer.hasnext(obj.stream_);
+    function more = has_stream_of_type_variants_(self)
+      more = self.stream_of_type_variants_serializer.hasnext(self.stream_);
     end
 
-    function value = read_stream_of_type_variants_(obj)
-      value = obj.stream_of_type_variants_serializer.read(obj.stream_);
+    function value = read_stream_of_type_variants_(self)
+      value = self.stream_of_type_variants_serializer.read(self.stream_);
     end
   end
 end

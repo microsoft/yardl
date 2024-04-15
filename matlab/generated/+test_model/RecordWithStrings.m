@@ -7,25 +7,25 @@ classdef RecordWithStrings < handle
   end
 
   methods
-    function obj = RecordWithStrings(a, b)
+    function self = RecordWithStrings(a, b)
       if nargin > 0
-        obj.a = a;
-        obj.b = b;
+        self.a = a;
+        self.b = b;
       else
-        obj.a = "";
-        obj.b = "";
+        self.a = "";
+        self.b = "";
       end
     end
 
-    function res = eq(obj, other)
+    function res = eq(self, other)
       res = ...
         isa(other, 'test_model.RecordWithStrings') && ...
-        all([obj.a] == [other.a]) && ...
-        all([obj.b] == [other.b]);
+        all([self.a] == [other.a]) && ...
+        all([self.b] == [other.b]);
     end
 
-    function res = ne(obj, other)
-      res = ~obj.eq(other);
+    function res = ne(self, other)
+      res = ~self.eq(other);
     end
   end
 

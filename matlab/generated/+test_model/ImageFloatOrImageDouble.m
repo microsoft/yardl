@@ -25,6 +25,14 @@ classdef ImageFloatOrImageDouble < yardl.Union
   end
 
   methods
+    function res = isImageFloat(self)
+      res = self.index == 1;
+    end
+
+    function res = isImageDouble(self)
+      res = self.index == 2;
+    end
+
     function eq = eq(self, other)
       eq = isa(other, 'test_model.ImageFloatOrImageDouble') && other.index == self.index && other.value == self.value;
     end

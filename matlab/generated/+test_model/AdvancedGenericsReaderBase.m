@@ -6,74 +6,74 @@ classdef AdvancedGenericsReaderBase < handle
   end
 
   methods
-    function obj = AdvancedGenericsReaderBase()
-      obj.state_ = 0;
+    function self = AdvancedGenericsReaderBase()
+      self.state_ = 0;
     end
 
-    function close(obj)
-      obj.close_();
-      if obj.state_ ~= 5
-        expected_method = obj.state_to_method_name_(obj.state_);
+    function close(self)
+      self.close_();
+      if self.state_ ~= 5
+        expected_method = self.state_to_method_name_(self.state_);
         throw(yardl.ProtocolError("Protocol reader closed before all data was consumed. Expected call to '%s'.", expected_method));
       end
     end
 
     % Ordinal 0
-    function value = read_float_image_image(obj)
-      if obj.state_ ~= 0
-        obj.raise_unexpected_state_(0);
+    function value = read_float_image_image(self)
+      if self.state_ ~= 0
+        self.raise_unexpected_state_(0);
       end
 
-      value = obj.read_float_image_image_();
-      obj.state_ = 1;
+      value = self.read_float_image_image_();
+      self.state_ = 1;
     end
 
     % Ordinal 1
-    function value = read_generic_record_1(obj)
-      if obj.state_ ~= 1
-        obj.raise_unexpected_state_(1);
+    function value = read_generic_record_1(self)
+      if self.state_ ~= 1
+        self.raise_unexpected_state_(1);
       end
 
-      value = obj.read_generic_record_1_();
-      obj.state_ = 2;
+      value = self.read_generic_record_1_();
+      self.state_ = 2;
     end
 
     % Ordinal 2
-    function value = read_tuple_of_optionals(obj)
-      if obj.state_ ~= 2
-        obj.raise_unexpected_state_(2);
+    function value = read_tuple_of_optionals(self)
+      if self.state_ ~= 2
+        self.raise_unexpected_state_(2);
       end
 
-      value = obj.read_tuple_of_optionals_();
-      obj.state_ = 3;
+      value = self.read_tuple_of_optionals_();
+      self.state_ = 3;
     end
 
     % Ordinal 3
-    function value = read_tuple_of_optionals_alternate_syntax(obj)
-      if obj.state_ ~= 3
-        obj.raise_unexpected_state_(3);
+    function value = read_tuple_of_optionals_alternate_syntax(self)
+      if self.state_ ~= 3
+        self.raise_unexpected_state_(3);
       end
 
-      value = obj.read_tuple_of_optionals_alternate_syntax_();
-      obj.state_ = 4;
+      value = self.read_tuple_of_optionals_alternate_syntax_();
+      self.state_ = 4;
     end
 
     % Ordinal 4
-    function value = read_tuple_of_vectors(obj)
-      if obj.state_ ~= 4
-        obj.raise_unexpected_state_(4);
+    function value = read_tuple_of_vectors(self)
+      if self.state_ ~= 4
+        self.raise_unexpected_state_(4);
       end
 
-      value = obj.read_tuple_of_vectors_();
-      obj.state_ = 5;
+      value = self.read_tuple_of_vectors_();
+      self.state_ = 5;
     end
 
-    function copy_to(obj, writer)
-      writer.write_float_image_image(obj.read_float_image_image());
-      writer.write_generic_record_1(obj.read_generic_record_1());
-      writer.write_tuple_of_optionals(obj.read_tuple_of_optionals());
-      writer.write_tuple_of_optionals_alternate_syntax(obj.read_tuple_of_optionals_alternate_syntax());
-      writer.write_tuple_of_vectors(obj.read_tuple_of_vectors());
+    function copy_to(self, writer)
+      writer.write_float_image_image(self.read_float_image_image());
+      writer.write_generic_record_1(self.read_generic_record_1());
+      writer.write_tuple_of_optionals(self.read_tuple_of_optionals());
+      writer.write_tuple_of_optionals_alternate_syntax(self.read_tuple_of_optionals_alternate_syntax());
+      writer.write_tuple_of_vectors(self.read_tuple_of_vectors());
     end
   end
 
@@ -84,35 +84,35 @@ classdef AdvancedGenericsReaderBase < handle
   end
 
   methods (Abstract, Access=protected)
-    read_float_image_image_(obj)
-    read_generic_record_1_(obj)
-    read_tuple_of_optionals_(obj)
-    read_tuple_of_optionals_alternate_syntax_(obj)
-    read_tuple_of_vectors_(obj)
+    read_float_image_image_(self)
+    read_generic_record_1_(self)
+    read_tuple_of_optionals_(self)
+    read_tuple_of_optionals_alternate_syntax_(self)
+    read_tuple_of_vectors_(self)
 
-    close_(obj)
+    close_(self)
   end
 
   methods (Access=private)
-    function raise_unexpected_state_(obj, actual)
-      actual_method = obj.state_to_method_name_(actual);
-      expected_method = obj.state_to_method_name_(obj.state_);
+    function raise_unexpected_state_(self, actual)
+      actual_method = self.state_to_method_name_(actual);
+      expected_method = self.state_to_method_name_(self.state_);
       throw(yardl.ProtocolError("Expected call to '%s' but received call to '%s'.", expected_method, actual_method));
     end
 
-    function name = state_to_method_name_(obj, state)
+    function name = state_to_method_name_(self, state)
       if state == 0
-        name = 'read_float_image_image';
+        name = "read_float_image_image";
       elseif state == 1
-        name = 'read_generic_record_1';
+        name = "read_generic_record_1";
       elseif state == 2
-        name = 'read_tuple_of_optionals';
+        name = "read_tuple_of_optionals";
       elseif state == 3
-        name = 'read_tuple_of_optionals_alternate_syntax';
+        name = "read_tuple_of_optionals_alternate_syntax";
       elseif state == 4
-        name = 'read_tuple_of_vectors';
+        name = "read_tuple_of_vectors";
       else
-        name = '<unknown>';
+        name = "<unknown>";
       end
     end
   end

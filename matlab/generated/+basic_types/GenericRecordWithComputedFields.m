@@ -6,8 +6,8 @@ classdef GenericRecordWithComputedFields < handle
   end
 
   methods
-    function obj = GenericRecordWithComputedFields(f1)
-      obj.f1 = f1;
+    function self = GenericRecordWithComputedFields(f1)
+      self.f1 = f1;
     end
 
     function res = type_index(self)
@@ -24,14 +24,14 @@ classdef GenericRecordWithComputedFields < handle
     end
 
 
-    function res = eq(obj, other)
+    function res = eq(self, other)
       res = ...
         isa(other, 'basic_types.GenericRecordWithComputedFields') && ...
-        isequal(obj.f1, other.f1);
+        isequal(self.f1, other.f1);
     end
 
-    function res = ne(obj, other)
-      res = ~obj.eq(other);
+    function res = ne(self, other)
+      res = ~self.eq(other);
     end
   end
 

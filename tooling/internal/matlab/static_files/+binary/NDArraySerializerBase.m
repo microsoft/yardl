@@ -22,8 +22,8 @@ classdef NDArraySerializerBase < yardl.binary.TypeSerializer
             % N is the "flattened" dimension of the NDArray, and
             % A, B, ... are the dimensions of the inner items.
 
-            if ~iscell(values) && self.item_serializer_.isTriviallySerializable()
-                self.item_serializer_.writeTrivially(outstream, values);
+            if ~iscell(values) && self.item_serializer_.is_trivially_serializable()
+                self.item_serializer_.write_trivially(outstream, values);
                 return;
             end
 
@@ -49,7 +49,6 @@ classdef NDArraySerializerBase < yardl.binary.TypeSerializer
                     end
                 end
             else
-                assert(ismatrix(values));
                 count = sz(end);
                 for i = 1:count
                     self.item_serializer_.write(outstream, values(:, i));
@@ -60,7 +59,7 @@ classdef NDArraySerializerBase < yardl.binary.TypeSerializer
         function res = read_data_(self, instream, shape)
             flat_length = prod(shape);
 
-            item_shape = self.item_serializer_.getShape();
+            item_shape = self.item_serializer_.get_shape();
 
             if isempty(item_shape)
                 res = cell(shape);
@@ -70,10 +69,10 @@ classdef NDArraySerializerBase < yardl.binary.TypeSerializer
                 return
             end
 
-            if self.item_serializer_.isTriviallySerializable()
-                res = self.item_serializer_.readTrivially(instream, [prod(item_shape), flat_length]);
+            if self.item_serializer_.is_trivially_serializable()
+                res = self.item_serializer_.read_trivially(instream, [prod(item_shape), flat_length]);
             else
-                res = yardl.allocate(self.getClass(), [prod(item_shape), flat_length]);
+                res = yardl.allocate(self.get_class(), [prod(item_shape), flat_length]);
                 for i = 1:flat_length
                     item = self.item_serializer_.read(instream);
                     res(:, i) = item(:);
@@ -88,11 +87,11 @@ classdef NDArraySerializerBase < yardl.binary.TypeSerializer
     end
 
     methods
-        function c = getClass(self)
-            c = self.item_serializer_.getClass();
+        function c = get_class(self)
+            c = self.item_serializer_.get_class();
         end
 
-        function s = getShape(~)
+        function s = get_shape(~)
             s = [];
         end
     end

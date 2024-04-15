@@ -6,18 +6,18 @@ classdef RecordWithGenericVectorOfRecords < handle
   end
 
   methods
-    function obj = RecordWithGenericVectorOfRecords(v)
-      obj.v = v;
+    function self = RecordWithGenericVectorOfRecords(v)
+      self.v = v;
     end
 
-    function res = eq(obj, other)
+    function res = eq(self, other)
       res = ...
         isa(other, 'test_model.RecordWithGenericVectorOfRecords') && ...
-        isequal(obj.v, other.v);
+        isequal(self.v, other.v);
     end
 
-    function res = ne(obj, other)
-      res = ~obj.eq(other);
+    function res = ne(self, other)
+      res = ~self.eq(other);
     end
   end
 

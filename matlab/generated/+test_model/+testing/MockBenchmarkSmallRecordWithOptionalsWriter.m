@@ -7,15 +7,15 @@ classdef MockBenchmarkSmallRecordWithOptionalsWriter < matlab.mixin.Copyable & t
   end
 
   methods
-    function obj = MockBenchmarkSmallRecordWithOptionalsWriter(testCase)
-      obj.testCase_ = testCase;
-      obj.expected_small_record = {};
+    function self = MockBenchmarkSmallRecordWithOptionalsWriter(testCase)
+      self.testCase_ = testCase;
+      self.expected_small_record = {};
     end
 
-    function expect_write_small_record_(obj, value)
+    function expect_write_small_record_(self, value)
       if iscell(value)
         for n = 1:numel(value)
-          obj.expected_small_record{end+1} = value{n};
+          self.expected_small_record{end+1} = value{n};
         end
         return;
       end
@@ -24,27 +24,27 @@ classdef MockBenchmarkSmallRecordWithOptionalsWriter < matlab.mixin.Copyable & t
       count = shape(lastDim);
       index = repelem({':'}, lastDim-1);
       for n = 1:count
-        obj.expected_small_record{end+1} = value(index{:}, n);
+        self.expected_small_record{end+1} = value(index{:}, n);
       end
     end
 
-    function verify(obj)
-      obj.testCase_.verifyTrue(isempty(obj.expected_small_record), "Expected call to write_small_record_ was not received");
+    function verify(self)
+      self.testCase_.verifyTrue(isempty(self.expected_small_record), "Expected call to write_small_record_ was not received");
     end
   end
 
   methods (Access=protected)
-    function write_small_record_(obj, value)
+    function write_small_record_(self, value)
       assert(iscell(value));
       assert(isscalar(value));
-      obj.testCase_.verifyFalse(isempty(obj.expected_small_record), "Unexpected call to write_small_record_");
-      obj.testCase_.verifyEqual(value{1}, obj.expected_small_record{1}, "Unexpected argument value for call to write_small_record_");
-      obj.expected_small_record = obj.expected_small_record(2:end);
+      self.testCase_.verifyFalse(isempty(self.expected_small_record), "Unexpected call to write_small_record_");
+      self.testCase_.verifyEqual(value{1}, self.expected_small_record{1}, "Unexpected argument value for call to write_small_record_");
+      self.expected_small_record = self.expected_small_record(2:end);
     end
 
-    function close_(obj)
+    function close_(self)
     end
-    function end_stream_(obj)
+    function end_stream_(self)
     end
   end
 end

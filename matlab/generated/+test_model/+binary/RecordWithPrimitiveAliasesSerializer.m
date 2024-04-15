@@ -2,7 +2,7 @@
 
 classdef RecordWithPrimitiveAliasesSerializer < yardl.binary.RecordSerializer
   methods
-    function obj = RecordWithPrimitiveAliasesSerializer()
+    function self = RecordWithPrimitiveAliasesSerializer()
       field_serializers{1} = yardl.binary.Uint8Serializer;
       field_serializers{2} = yardl.binary.Int32Serializer;
       field_serializers{3} = yardl.binary.Uint32Serializer;
@@ -12,16 +12,20 @@ classdef RecordWithPrimitiveAliasesSerializer < yardl.binary.RecordSerializer
       field_serializers{7} = yardl.binary.Float64Serializer;
       field_serializers{8} = yardl.binary.Complexfloat32Serializer;
       field_serializers{9} = yardl.binary.Complexfloat64Serializer;
-      obj@yardl.binary.RecordSerializer('test_model.RecordWithPrimitiveAliases', field_serializers);
+      self@yardl.binary.RecordSerializer('test_model.RecordWithPrimitiveAliases', field_serializers);
     end
 
-    function write(obj, outstream, value)
-      assert(isa(value, 'test_model.RecordWithPrimitiveAliases'));
-      obj.write_(outstream, value.byte_field, value.int_field, value.uint_field, value.long_field, value.ulong_field, value.float_field, value.double_field, value.complexfloat_field, value.complexdouble_field)
+    function write(self, outstream, value)
+      arguments
+        self
+        outstream (1,1) yardl.binary.CodedOutputStream
+        value (1,1) test_model.RecordWithPrimitiveAliases
+      end
+      self.write_(outstream, value.byte_field, value.int_field, value.uint_field, value.long_field, value.ulong_field, value.float_field, value.double_field, value.complexfloat_field, value.complexdouble_field)
     end
 
-    function value = read(obj, instream)
-      field_values = obj.read_(instream);
+    function value = read(self, instream)
+      field_values = self.read_(instream);
       value = test_model.RecordWithPrimitiveAliases(field_values{:});
     end
   end

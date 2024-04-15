@@ -7,25 +7,25 @@ classdef RecordWithAliasedGenerics < handle
   end
 
   methods
-    function obj = RecordWithAliasedGenerics(my_strings, aliased_strings)
+    function self = RecordWithAliasedGenerics(my_strings, aliased_strings)
       if nargin > 0
-        obj.my_strings = my_strings;
-        obj.aliased_strings = aliased_strings;
+        self.my_strings = my_strings;
+        self.aliased_strings = aliased_strings;
       else
-        obj.my_strings = tuples.Tuple("", "");
-        obj.aliased_strings = tuples.Tuple("", "");
+        self.my_strings = tuples.Tuple("", "");
+        self.aliased_strings = tuples.Tuple("", "");
       end
     end
 
-    function res = eq(obj, other)
+    function res = eq(self, other)
       res = ...
         isa(other, 'test_model.RecordWithAliasedGenerics') && ...
-        isequal(obj.my_strings, other.my_strings) && ...
-        isequal(obj.aliased_strings, other.aliased_strings);
+        isequal(self.my_strings, other.my_strings) && ...
+        isequal(self.aliased_strings, other.aliased_strings);
     end
 
-    function res = ne(obj, other)
-      res = ~obj.eq(other);
+    function res = ne(self, other)
+      res = ~self.eq(other);
     end
   end
 

@@ -25,6 +25,14 @@ classdef Int32OrString < yardl.Union
   end
 
   methods
+    function res = isInt32(self)
+      res = self.index == 1;
+    end
+
+    function res = isString(self)
+      res = self.index == 2;
+    end
+
     function eq = eq(self, other)
       eq = isa(other, 'basic_types.Int32OrString') && other.index == self.index && other.value == self.value;
     end

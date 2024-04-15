@@ -8,28 +8,28 @@ classdef RecordWithVlens < handle
   end
 
   methods
-    function obj = RecordWithVlens(a, b, c)
+    function self = RecordWithVlens(a, b, c)
       if nargin > 0
-        obj.a = a;
-        obj.b = b;
-        obj.c = c;
+        self.a = a;
+        self.b = b;
+        self.c = c;
       else
-        obj.a = test_model.SimpleRecord.empty();
-        obj.b = int32(0);
-        obj.c = int32(0);
+        self.a = test_model.SimpleRecord.empty();
+        self.b = int32(0);
+        self.c = int32(0);
       end
     end
 
-    function res = eq(obj, other)
+    function res = eq(self, other)
       res = ...
         isa(other, 'test_model.RecordWithVlens') && ...
-        all([obj.a] == [other.a]) && ...
-        all([obj.b] == [other.b]) && ...
-        all([obj.c] == [other.c]);
+        all([self.a] == [other.a]) && ...
+        all([self.b] == [other.b]) && ...
+        all([self.c] == [other.c]);
     end
 
-    function res = ne(obj, other)
-      res = ~obj.eq(other);
+    function res = ne(self, other)
+      res = ~self.eq(other);
     end
   end
 

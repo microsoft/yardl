@@ -7,30 +7,30 @@ classdef MockNestedRecordsWriter < matlab.mixin.Copyable & test_model.NestedReco
   end
 
   methods
-    function obj = MockNestedRecordsWriter(testCase)
-      obj.testCase_ = testCase;
-      obj.expected_tuple_with_records = yardl.None;
+    function self = MockNestedRecordsWriter(testCase)
+      self.testCase_ = testCase;
+      self.expected_tuple_with_records = yardl.None;
     end
 
-    function expect_write_tuple_with_records_(obj, value)
-      obj.expected_tuple_with_records = yardl.Optional(value);
+    function expect_write_tuple_with_records_(self, value)
+      self.expected_tuple_with_records = yardl.Optional(value);
     end
 
-    function verify(obj)
-      obj.testCase_.verifyEqual(obj.expected_tuple_with_records, yardl.None, "Expected call to write_tuple_with_records_ was not received");
+    function verify(self)
+      self.testCase_.verifyEqual(self.expected_tuple_with_records, yardl.None, "Expected call to write_tuple_with_records_ was not received");
     end
   end
 
   methods (Access=protected)
-    function write_tuple_with_records_(obj, value)
-      obj.testCase_.verifyTrue(obj.expected_tuple_with_records.has_value(), "Unexpected call to write_tuple_with_records_");
-      obj.testCase_.verifyEqual(value, obj.expected_tuple_with_records.value, "Unexpected argument value for call to write_tuple_with_records_");
-      obj.expected_tuple_with_records = yardl.None;
+    function write_tuple_with_records_(self, value)
+      self.testCase_.verifyTrue(self.expected_tuple_with_records.has_value(), "Unexpected call to write_tuple_with_records_");
+      self.testCase_.verifyEqual(value, self.expected_tuple_with_records.value, "Unexpected argument value for call to write_tuple_with_records_");
+      self.expected_tuple_with_records = yardl.None;
     end
 
-    function close_(obj)
+    function close_(self)
     end
-    function end_stream_(obj)
+    function end_stream_(self)
     end
   end
 end

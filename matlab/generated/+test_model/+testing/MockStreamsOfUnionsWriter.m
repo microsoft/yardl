@@ -8,16 +8,16 @@ classdef MockStreamsOfUnionsWriter < matlab.mixin.Copyable & test_model.StreamsO
   end
 
   methods
-    function obj = MockStreamsOfUnionsWriter(testCase)
-      obj.testCase_ = testCase;
-      obj.expected_int_or_simple_record = {};
-      obj.expected_nullable_int_or_simple_record = {};
+    function self = MockStreamsOfUnionsWriter(testCase)
+      self.testCase_ = testCase;
+      self.expected_int_or_simple_record = {};
+      self.expected_nullable_int_or_simple_record = {};
     end
 
-    function expect_write_int_or_simple_record_(obj, value)
+    function expect_write_int_or_simple_record_(self, value)
       if iscell(value)
         for n = 1:numel(value)
-          obj.expected_int_or_simple_record{end+1} = value{n};
+          self.expected_int_or_simple_record{end+1} = value{n};
         end
         return;
       end
@@ -26,14 +26,14 @@ classdef MockStreamsOfUnionsWriter < matlab.mixin.Copyable & test_model.StreamsO
       count = shape(lastDim);
       index = repelem({':'}, lastDim-1);
       for n = 1:count
-        obj.expected_int_or_simple_record{end+1} = value(index{:}, n);
+        self.expected_int_or_simple_record{end+1} = value(index{:}, n);
       end
     end
 
-    function expect_write_nullable_int_or_simple_record_(obj, value)
+    function expect_write_nullable_int_or_simple_record_(self, value)
       if iscell(value)
         for n = 1:numel(value)
-          obj.expected_nullable_int_or_simple_record{end+1} = value{n};
+          self.expected_nullable_int_or_simple_record{end+1} = value{n};
         end
         return;
       end
@@ -42,36 +42,36 @@ classdef MockStreamsOfUnionsWriter < matlab.mixin.Copyable & test_model.StreamsO
       count = shape(lastDim);
       index = repelem({':'}, lastDim-1);
       for n = 1:count
-        obj.expected_nullable_int_or_simple_record{end+1} = value(index{:}, n);
+        self.expected_nullable_int_or_simple_record{end+1} = value(index{:}, n);
       end
     end
 
-    function verify(obj)
-      obj.testCase_.verifyTrue(isempty(obj.expected_int_or_simple_record), "Expected call to write_int_or_simple_record_ was not received");
-      obj.testCase_.verifyTrue(isempty(obj.expected_nullable_int_or_simple_record), "Expected call to write_nullable_int_or_simple_record_ was not received");
+    function verify(self)
+      self.testCase_.verifyTrue(isempty(self.expected_int_or_simple_record), "Expected call to write_int_or_simple_record_ was not received");
+      self.testCase_.verifyTrue(isempty(self.expected_nullable_int_or_simple_record), "Expected call to write_nullable_int_or_simple_record_ was not received");
     end
   end
 
   methods (Access=protected)
-    function write_int_or_simple_record_(obj, value)
+    function write_int_or_simple_record_(self, value)
       assert(iscell(value));
       assert(isscalar(value));
-      obj.testCase_.verifyFalse(isempty(obj.expected_int_or_simple_record), "Unexpected call to write_int_or_simple_record_");
-      obj.testCase_.verifyEqual(value{1}, obj.expected_int_or_simple_record{1}, "Unexpected argument value for call to write_int_or_simple_record_");
-      obj.expected_int_or_simple_record = obj.expected_int_or_simple_record(2:end);
+      self.testCase_.verifyFalse(isempty(self.expected_int_or_simple_record), "Unexpected call to write_int_or_simple_record_");
+      self.testCase_.verifyEqual(value{1}, self.expected_int_or_simple_record{1}, "Unexpected argument value for call to write_int_or_simple_record_");
+      self.expected_int_or_simple_record = self.expected_int_or_simple_record(2:end);
     end
 
-    function write_nullable_int_or_simple_record_(obj, value)
+    function write_nullable_int_or_simple_record_(self, value)
       assert(iscell(value));
       assert(isscalar(value));
-      obj.testCase_.verifyFalse(isempty(obj.expected_nullable_int_or_simple_record), "Unexpected call to write_nullable_int_or_simple_record_");
-      obj.testCase_.verifyEqual(value{1}, obj.expected_nullable_int_or_simple_record{1}, "Unexpected argument value for call to write_nullable_int_or_simple_record_");
-      obj.expected_nullable_int_or_simple_record = obj.expected_nullable_int_or_simple_record(2:end);
+      self.testCase_.verifyFalse(isempty(self.expected_nullable_int_or_simple_record), "Unexpected call to write_nullable_int_or_simple_record_");
+      self.testCase_.verifyEqual(value{1}, self.expected_nullable_int_or_simple_record{1}, "Unexpected argument value for call to write_nullable_int_or_simple_record_");
+      self.expected_nullable_int_or_simple_record = self.expected_nullable_int_or_simple_record(2:end);
     end
 
-    function close_(obj)
+    function close_(self)
     end
-    function end_stream_(obj)
+    function end_stream_(self)
     end
   end
 end

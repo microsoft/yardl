@@ -8,17 +8,17 @@ classdef Union < handle
     end
 
     methods
-        function obj = Union(index, value)
-            obj.index_ = index;
-            obj.value_ = value;
+        function self = Union(index, value)
+            self.index_ = index;
+            self.value_ = value;
         end
 
-        function i = index(obj)
-            i = obj.index_;
+        function i = index(self)
+            i = self.index_;
         end
 
-        function v = value(obj)
-            v = obj.value_;
+        function v = value(self)
+            v = self.value_;
         end
     end
 end

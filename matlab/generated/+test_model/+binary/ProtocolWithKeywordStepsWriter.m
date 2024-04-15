@@ -8,21 +8,21 @@ classdef ProtocolWithKeywordStepsWriter < yardl.binary.BinaryProtocolWriter & te
   end
 
   methods
-    function obj = ProtocolWithKeywordStepsWriter(filename)
-      obj@test_model.ProtocolWithKeywordStepsWriterBase();
-      obj@yardl.binary.BinaryProtocolWriter(filename, test_model.ProtocolWithKeywordStepsWriterBase.schema);
-      obj.int_serializer = yardl.binary.StreamSerializer(test_model.binary.RecordWithKeywordFieldsSerializer());
-      obj.float_serializer = yardl.binary.EnumSerializer('test_model.EnumWithKeywordSymbols', @test_model.EnumWithKeywordSymbols, yardl.binary.Int32Serializer);
+    function self = ProtocolWithKeywordStepsWriter(filename)
+      self@test_model.ProtocolWithKeywordStepsWriterBase();
+      self@yardl.binary.BinaryProtocolWriter(filename, test_model.ProtocolWithKeywordStepsWriterBase.schema);
+      self.int_serializer = yardl.binary.StreamSerializer(test_model.binary.RecordWithKeywordFieldsSerializer());
+      self.float_serializer = yardl.binary.EnumSerializer('test_model.EnumWithKeywordSymbols', @test_model.EnumWithKeywordSymbols, yardl.binary.Int32Serializer);
     end
   end
 
   methods (Access=protected)
-    function write_int_(obj, value)
-      obj.int_serializer.write(obj.stream_, value);
+    function write_int_(self, value)
+      self.int_serializer.write(self.stream_, value);
     end
 
-    function write_float_(obj, value)
-      obj.float_serializer.write(obj.stream_, value);
+    function write_float_(self, value)
+      self.float_serializer.write(self.stream_, value);
     end
   end
 end

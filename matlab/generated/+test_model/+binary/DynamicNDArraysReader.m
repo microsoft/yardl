@@ -10,31 +10,31 @@ classdef DynamicNDArraysReader < yardl.binary.BinaryProtocolReader & test_model.
   end
 
   methods
-    function obj = DynamicNDArraysReader(filename)
-      obj@test_model.DynamicNDArraysReaderBase();
-      obj@yardl.binary.BinaryProtocolReader(filename, test_model.DynamicNDArraysReaderBase.schema);
-      obj.ints_serializer = yardl.binary.DynamicNDArraySerializer(yardl.binary.Int32Serializer);
-      obj.simple_record_array_serializer = yardl.binary.DynamicNDArraySerializer(test_model.binary.SimpleRecordSerializer());
-      obj.record_with_vlens_array_serializer = yardl.binary.DynamicNDArraySerializer(test_model.binary.RecordWithVlensSerializer());
-      obj.record_with_dynamic_nd_arrays_serializer = test_model.binary.RecordWithDynamicNDArraysSerializer();
+    function self = DynamicNDArraysReader(filename)
+      self@test_model.DynamicNDArraysReaderBase();
+      self@yardl.binary.BinaryProtocolReader(filename, test_model.DynamicNDArraysReaderBase.schema);
+      self.ints_serializer = yardl.binary.DynamicNDArraySerializer(yardl.binary.Int32Serializer);
+      self.simple_record_array_serializer = yardl.binary.DynamicNDArraySerializer(test_model.binary.SimpleRecordSerializer());
+      self.record_with_vlens_array_serializer = yardl.binary.DynamicNDArraySerializer(test_model.binary.RecordWithVlensSerializer());
+      self.record_with_dynamic_nd_arrays_serializer = test_model.binary.RecordWithDynamicNDArraysSerializer();
     end
   end
 
   methods (Access=protected)
-    function value = read_ints_(obj)
-      value = obj.ints_serializer.read(obj.stream_);
+    function value = read_ints_(self)
+      value = self.ints_serializer.read(self.stream_);
     end
 
-    function value = read_simple_record_array_(obj)
-      value = obj.simple_record_array_serializer.read(obj.stream_);
+    function value = read_simple_record_array_(self)
+      value = self.simple_record_array_serializer.read(self.stream_);
     end
 
-    function value = read_record_with_vlens_array_(obj)
-      value = obj.record_with_vlens_array_serializer.read(obj.stream_);
+    function value = read_record_with_vlens_array_(self)
+      value = self.record_with_vlens_array_serializer.read(self.stream_);
     end
 
-    function value = read_record_with_dynamic_nd_arrays_(obj)
-      value = obj.record_with_dynamic_nd_arrays_serializer.read(obj.stream_);
+    function value = read_record_with_dynamic_nd_arrays_(self)
+      value = self.record_with_dynamic_nd_arrays_serializer.read(self.stream_);
     end
   end
 end

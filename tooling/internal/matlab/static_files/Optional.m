@@ -8,21 +8,21 @@ classdef Optional < handle
     end
 
     methods
-        function obj = Optional(varargin)
+        function self = Optional(varargin)
             if nargin > 0
-                obj.value = varargin{1};
-                obj.has_value = true;
+                self.value = varargin{1};
+                self.has_value = true;
             else
-                obj.value = NaN;
-                obj.has_value = false;
+                self.value = NaN;
+                self.has_value = false;
             end
         end
 
-        function v = get.value(obj)
-            if ~obj.has_value
+        function v = get.value(self)
+            if ~self.has_value
                 throw(yardl.ValueError("Optional type does not have a value"));
             end
-            v = obj.value;
+            v = self.value;
         end
 
         function eq = eq(a, b)

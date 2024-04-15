@@ -9,30 +9,30 @@ classdef StateTestReader < yardl.binary.BinaryProtocolReader & test_model.StateT
   end
 
   methods
-    function obj = StateTestReader(filename)
-      obj@test_model.StateTestReaderBase();
-      obj@yardl.binary.BinaryProtocolReader(filename, test_model.StateTestReaderBase.schema);
-      obj.an_int_serializer = yardl.binary.Int32Serializer;
-      obj.a_stream_serializer = yardl.binary.StreamSerializer(yardl.binary.Int32Serializer);
-      obj.another_int_serializer = yardl.binary.Int32Serializer;
+    function self = StateTestReader(filename)
+      self@test_model.StateTestReaderBase();
+      self@yardl.binary.BinaryProtocolReader(filename, test_model.StateTestReaderBase.schema);
+      self.an_int_serializer = yardl.binary.Int32Serializer;
+      self.a_stream_serializer = yardl.binary.StreamSerializer(yardl.binary.Int32Serializer);
+      self.another_int_serializer = yardl.binary.Int32Serializer;
     end
   end
 
   methods (Access=protected)
-    function value = read_an_int_(obj)
-      value = obj.an_int_serializer.read(obj.stream_);
+    function value = read_an_int_(self)
+      value = self.an_int_serializer.read(self.stream_);
     end
 
-    function more = has_a_stream_(obj)
-      more = obj.a_stream_serializer.hasnext(obj.stream_);
+    function more = has_a_stream_(self)
+      more = self.a_stream_serializer.hasnext(self.stream_);
     end
 
-    function value = read_a_stream_(obj)
-      value = obj.a_stream_serializer.read(obj.stream_);
+    function value = read_a_stream_(self)
+      value = self.a_stream_serializer.read(self.stream_);
     end
 
-    function value = read_another_int_(obj)
-      value = obj.another_int_serializer.read(obj.stream_);
+    function value = read_another_int_(self)
+      value = self.another_int_serializer.read(self.stream_);
     end
   end
 end

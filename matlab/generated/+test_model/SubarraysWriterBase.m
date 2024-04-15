@@ -7,106 +7,106 @@ classdef (Abstract) SubarraysWriterBase < handle
   end
 
   methods
-    function obj = SubarraysWriterBase()
-      obj.state_ = 0;
+    function self = SubarraysWriterBase()
+      self.state_ = 0;
     end
 
-    function close(obj)
-      obj.close_();
-      if obj.state_ ~= 9
-        expected_method = obj.state_to_method_name_(bitand((int32(obj.state_) + 1), bitcmp(1, 'int8')));
+    function close(self)
+      self.close_();
+      if self.state_ ~= 9
+        expected_method = self.state_to_method_name_(self.state_);
         throw(yardl.ProtocolError("Protocol writer closed before all steps were called. Expected call to '%s'.", expected_method));
       end
     end
 
     % Ordinal 0
-    function write_dynamic_with_fixed_int_subarray(obj, value)
-      if obj.state_ ~= 0
-        obj.raise_unexpected_state_(0);
+    function write_dynamic_with_fixed_int_subarray(self, value)
+      if self.state_ ~= 0
+        self.raise_unexpected_state_(0);
       end
 
-      obj.write_dynamic_with_fixed_int_subarray_(value);
-      obj.state_ = 1;
+      self.write_dynamic_with_fixed_int_subarray_(value);
+      self.state_ = 1;
     end
 
     % Ordinal 1
-    function write_dynamic_with_fixed_float_subarray(obj, value)
-      if obj.state_ ~= 1
-        obj.raise_unexpected_state_(1);
+    function write_dynamic_with_fixed_float_subarray(self, value)
+      if self.state_ ~= 1
+        self.raise_unexpected_state_(1);
       end
 
-      obj.write_dynamic_with_fixed_float_subarray_(value);
-      obj.state_ = 2;
+      self.write_dynamic_with_fixed_float_subarray_(value);
+      self.state_ = 2;
     end
 
     % Ordinal 2
-    function write_known_dim_count_with_fixed_int_subarray(obj, value)
-      if obj.state_ ~= 2
-        obj.raise_unexpected_state_(2);
+    function write_known_dim_count_with_fixed_int_subarray(self, value)
+      if self.state_ ~= 2
+        self.raise_unexpected_state_(2);
       end
 
-      obj.write_known_dim_count_with_fixed_int_subarray_(value);
-      obj.state_ = 3;
+      self.write_known_dim_count_with_fixed_int_subarray_(value);
+      self.state_ = 3;
     end
 
     % Ordinal 3
-    function write_known_dim_count_with_fixed_float_subarray(obj, value)
-      if obj.state_ ~= 3
-        obj.raise_unexpected_state_(3);
+    function write_known_dim_count_with_fixed_float_subarray(self, value)
+      if self.state_ ~= 3
+        self.raise_unexpected_state_(3);
       end
 
-      obj.write_known_dim_count_with_fixed_float_subarray_(value);
-      obj.state_ = 4;
+      self.write_known_dim_count_with_fixed_float_subarray_(value);
+      self.state_ = 4;
     end
 
     % Ordinal 4
-    function write_fixed_with_fixed_int_subarray(obj, value)
-      if obj.state_ ~= 4
-        obj.raise_unexpected_state_(4);
+    function write_fixed_with_fixed_int_subarray(self, value)
+      if self.state_ ~= 4
+        self.raise_unexpected_state_(4);
       end
 
-      obj.write_fixed_with_fixed_int_subarray_(value);
-      obj.state_ = 5;
+      self.write_fixed_with_fixed_int_subarray_(value);
+      self.state_ = 5;
     end
 
     % Ordinal 5
-    function write_fixed_with_fixed_float_subarray(obj, value)
-      if obj.state_ ~= 5
-        obj.raise_unexpected_state_(5);
+    function write_fixed_with_fixed_float_subarray(self, value)
+      if self.state_ ~= 5
+        self.raise_unexpected_state_(5);
       end
 
-      obj.write_fixed_with_fixed_float_subarray_(value);
-      obj.state_ = 6;
+      self.write_fixed_with_fixed_float_subarray_(value);
+      self.state_ = 6;
     end
 
     % Ordinal 6
-    function write_nested_subarray(obj, value)
-      if obj.state_ ~= 6
-        obj.raise_unexpected_state_(6);
+    function write_nested_subarray(self, value)
+      if self.state_ ~= 6
+        self.raise_unexpected_state_(6);
       end
 
-      obj.write_nested_subarray_(value);
-      obj.state_ = 7;
+      self.write_nested_subarray_(value);
+      self.state_ = 7;
     end
 
     % Ordinal 7
-    function write_dynamic_with_fixed_vector_subarray(obj, value)
-      if obj.state_ ~= 7
-        obj.raise_unexpected_state_(7);
+    function write_dynamic_with_fixed_vector_subarray(self, value)
+      if self.state_ ~= 7
+        self.raise_unexpected_state_(7);
       end
 
-      obj.write_dynamic_with_fixed_vector_subarray_(value);
-      obj.state_ = 8;
+      self.write_dynamic_with_fixed_vector_subarray_(value);
+      self.state_ = 8;
     end
 
     % Ordinal 8
-    function write_generic_subarray(obj, value)
-      if obj.state_ ~= 8
-        obj.raise_unexpected_state_(8);
+    function write_generic_subarray(self, value)
+      if self.state_ ~= 8
+        self.raise_unexpected_state_(8);
       end
 
-      obj.write_generic_subarray_(value);
-      obj.state_ = 9;
+      self.write_generic_subarray_(value);
+      self.state_ = 9;
     end
   end
 
@@ -117,46 +117,46 @@ classdef (Abstract) SubarraysWriterBase < handle
   end
 
   methods (Abstract, Access=protected)
-    write_dynamic_with_fixed_int_subarray_(obj, value)
-    write_dynamic_with_fixed_float_subarray_(obj, value)
-    write_known_dim_count_with_fixed_int_subarray_(obj, value)
-    write_known_dim_count_with_fixed_float_subarray_(obj, value)
-    write_fixed_with_fixed_int_subarray_(obj, value)
-    write_fixed_with_fixed_float_subarray_(obj, value)
-    write_nested_subarray_(obj, value)
-    write_dynamic_with_fixed_vector_subarray_(obj, value)
-    write_generic_subarray_(obj, value)
+    write_dynamic_with_fixed_int_subarray_(self, value)
+    write_dynamic_with_fixed_float_subarray_(self, value)
+    write_known_dim_count_with_fixed_int_subarray_(self, value)
+    write_known_dim_count_with_fixed_float_subarray_(self, value)
+    write_fixed_with_fixed_int_subarray_(self, value)
+    write_fixed_with_fixed_float_subarray_(self, value)
+    write_nested_subarray_(self, value)
+    write_dynamic_with_fixed_vector_subarray_(self, value)
+    write_generic_subarray_(self, value)
 
-    end_stream_(obj)
-    close_(obj)
+    end_stream_(self)
+    close_(self)
   end
 
   methods (Access=private)
-    function raise_unexpected_state_(obj, actual)
-      expected_method = obj.state_to_method_name_(obj.state_);
-      actual_method = obj.state_to_method_name_(actual);
+    function raise_unexpected_state_(self, actual)
+      expected_method = self.state_to_method_name_(self.state_);
+      actual_method = self.state_to_method_name_(actual);
       throw(yardl.ProtocolError("Expected call to '%s' but received call to '%s'", expected_method, actual_method));
     end
 
-    function name = state_to_method_name_(obj, state)
+    function name = state_to_method_name_(self, state)
       if state == 0
-        name = 'write_dynamic_with_fixed_int_subarray';
+        name = "write_dynamic_with_fixed_int_subarray";
       elseif state == 1
-        name = 'write_dynamic_with_fixed_float_subarray';
+        name = "write_dynamic_with_fixed_float_subarray";
       elseif state == 2
-        name = 'write_known_dim_count_with_fixed_int_subarray';
+        name = "write_known_dim_count_with_fixed_int_subarray";
       elseif state == 3
-        name = 'write_known_dim_count_with_fixed_float_subarray';
+        name = "write_known_dim_count_with_fixed_float_subarray";
       elseif state == 4
-        name = 'write_fixed_with_fixed_int_subarray';
+        name = "write_fixed_with_fixed_int_subarray";
       elseif state == 5
-        name = 'write_fixed_with_fixed_float_subarray';
+        name = "write_fixed_with_fixed_float_subarray";
       elseif state == 6
-        name = 'write_nested_subarray';
+        name = "write_nested_subarray";
       elseif state == 7
-        name = 'write_dynamic_with_fixed_vector_subarray';
+        name = "write_dynamic_with_fixed_vector_subarray";
       elseif state == 8
-        name = 'write_generic_subarray';
+        name = "write_generic_subarray";
       else
         name = '<unknown>';
       end

@@ -6,55 +6,55 @@ classdef ProtocolWithKeywordStepsReaderBase < handle
   end
 
   methods
-    function obj = ProtocolWithKeywordStepsReaderBase()
-      obj.state_ = 0;
+    function self = ProtocolWithKeywordStepsReaderBase()
+      self.state_ = 0;
     end
 
-    function close(obj)
-      obj.close_();
-      if obj.state_ ~= 2
-        expected_method = obj.state_to_method_name_(obj.state_);
+    function close(self)
+      self.close_();
+      if self.state_ ~= 2
+        expected_method = self.state_to_method_name_(self.state_);
         throw(yardl.ProtocolError("Protocol reader closed before all data was consumed. Expected call to '%s'.", expected_method));
       end
     end
 
     % Ordinal 0
-    function more = has_int(obj)
-      if obj.state_ ~= 0
-        obj.raise_unexpected_state_(0);
+    function more = has_int(self)
+      if self.state_ ~= 0
+        self.raise_unexpected_state_(0);
       end
 
-      more = obj.has_int_();
+      more = self.has_int_();
       if ~more
-        obj.state_ = 1;
+        self.state_ = 1;
       end
     end
 
-    function value = read_int(obj)
-      if obj.state_ ~= 0
-        obj.raise_unexpected_state_(0);
+    function value = read_int(self)
+      if self.state_ ~= 0
+        self.raise_unexpected_state_(0);
       end
 
-      value = obj.read_int_();
+      value = self.read_int_();
     end
 
     % Ordinal 1
-    function value = read_float(obj)
-      if obj.state_ ~= 1
-        obj.raise_unexpected_state_(1);
+    function value = read_float(self)
+      if self.state_ ~= 1
+        self.raise_unexpected_state_(1);
       end
 
-      value = obj.read_float_();
-      obj.state_ = 2;
+      value = self.read_float_();
+      self.state_ = 2;
     end
 
-    function copy_to(obj, writer)
-      while obj.has_int()
-        item = obj.read_int();
+    function copy_to(self, writer)
+      while self.has_int()
+        item = self.read_int();
         writer.write_int({item});
       end
       writer.end_int();
-      writer.write_float(obj.read_float());
+      writer.write_float(self.read_float());
     end
   end
 
@@ -65,27 +65,27 @@ classdef ProtocolWithKeywordStepsReaderBase < handle
   end
 
   methods (Abstract, Access=protected)
-    has_int_(obj)
-    read_int_(obj)
-    read_float_(obj)
+    has_int_(self)
+    read_int_(self)
+    read_float_(self)
 
-    close_(obj)
+    close_(self)
   end
 
   methods (Access=private)
-    function raise_unexpected_state_(obj, actual)
-      actual_method = obj.state_to_method_name_(actual);
-      expected_method = obj.state_to_method_name_(obj.state_);
+    function raise_unexpected_state_(self, actual)
+      actual_method = self.state_to_method_name_(actual);
+      expected_method = self.state_to_method_name_(self.state_);
       throw(yardl.ProtocolError("Expected call to '%s' but received call to '%s'.", expected_method, actual_method));
     end
 
-    function name = state_to_method_name_(obj, state)
+    function name = state_to_method_name_(self, state)
       if state == 0
-        name = 'read_int';
+        name = "read_int";
       elseif state == 1
-        name = 'read_float';
+        name = "read_float";
       else
-        name = '<unknown>';
+        name = "<unknown>";
       end
     end
   end

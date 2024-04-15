@@ -8,21 +8,21 @@ classdef ScalarsWriter < yardl.binary.BinaryProtocolWriter & test_model.ScalarsW
   end
 
   methods
-    function obj = ScalarsWriter(filename)
-      obj@test_model.ScalarsWriterBase();
-      obj@yardl.binary.BinaryProtocolWriter(filename, test_model.ScalarsWriterBase.schema);
-      obj.int32_serializer = yardl.binary.Int32Serializer;
-      obj.record_serializer = test_model.binary.RecordWithPrimitivesSerializer();
+    function self = ScalarsWriter(filename)
+      self@test_model.ScalarsWriterBase();
+      self@yardl.binary.BinaryProtocolWriter(filename, test_model.ScalarsWriterBase.schema);
+      self.int32_serializer = yardl.binary.Int32Serializer;
+      self.record_serializer = test_model.binary.RecordWithPrimitivesSerializer();
     end
   end
 
   methods (Access=protected)
-    function write_int32_(obj, value)
-      obj.int32_serializer.write(obj.stream_, value);
+    function write_int32_(self, value)
+      self.int32_serializer.write(self.stream_, value);
     end
 
-    function write_record_(obj, value)
-      obj.record_serializer.write(obj.stream_, value);
+    function write_record_(self, value)
+      self.record_serializer.write(self.stream_, value);
     end
   end
 end

@@ -9,26 +9,26 @@ classdef StateTestWriter < yardl.binary.BinaryProtocolWriter & test_model.StateT
   end
 
   methods
-    function obj = StateTestWriter(filename)
-      obj@test_model.StateTestWriterBase();
-      obj@yardl.binary.BinaryProtocolWriter(filename, test_model.StateTestWriterBase.schema);
-      obj.an_int_serializer = yardl.binary.Int32Serializer;
-      obj.a_stream_serializer = yardl.binary.StreamSerializer(yardl.binary.Int32Serializer);
-      obj.another_int_serializer = yardl.binary.Int32Serializer;
+    function self = StateTestWriter(filename)
+      self@test_model.StateTestWriterBase();
+      self@yardl.binary.BinaryProtocolWriter(filename, test_model.StateTestWriterBase.schema);
+      self.an_int_serializer = yardl.binary.Int32Serializer;
+      self.a_stream_serializer = yardl.binary.StreamSerializer(yardl.binary.Int32Serializer);
+      self.another_int_serializer = yardl.binary.Int32Serializer;
     end
   end
 
   methods (Access=protected)
-    function write_an_int_(obj, value)
-      obj.an_int_serializer.write(obj.stream_, value);
+    function write_an_int_(self, value)
+      self.an_int_serializer.write(self.stream_, value);
     end
 
-    function write_a_stream_(obj, value)
-      obj.a_stream_serializer.write(obj.stream_, value);
+    function write_a_stream_(self, value)
+      self.a_stream_serializer.write(self.stream_, value);
     end
 
-    function write_another_int_(obj, value)
-      obj.another_int_serializer.write(obj.stream_, value);
+    function write_another_int_(self, value)
+      self.another_int_serializer.write(self.stream_, value);
     end
   end
 end

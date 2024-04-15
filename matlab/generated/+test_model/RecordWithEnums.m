@@ -8,28 +8,28 @@ classdef RecordWithEnums < handle
   end
 
   methods
-    function obj = RecordWithEnums(enum, flags, flags_2)
+    function self = RecordWithEnums(enum, flags, flags_2)
       if nargin > 0
-        obj.enum = enum;
-        obj.flags = flags;
-        obj.flags_2 = flags_2;
+        self.enum = enum;
+        self.flags = flags;
+        self.flags_2 = flags_2;
       else
-        obj.enum = basic_types.Fruits.APPLE;
-        obj.flags = basic_types.DaysOfWeek(0);
-        obj.flags_2 = basic_types.TextFormat.REGULAR;
+        self.enum = basic_types.Fruits.APPLE;
+        self.flags = basic_types.DaysOfWeek(0);
+        self.flags_2 = basic_types.TextFormat.REGULAR;
       end
     end
 
-    function res = eq(obj, other)
+    function res = eq(self, other)
       res = ...
         isa(other, 'test_model.RecordWithEnums') && ...
-        all([obj.enum] == [other.enum]) && ...
-        all([obj.flags] == [other.flags]) && ...
-        all([obj.flags_2] == [other.flags_2]);
+        all([self.enum] == [other.enum]) && ...
+        all([self.flags] == [other.flags]) && ...
+        all([self.flags_2] == [other.flags_2]);
     end
 
-    function res = ne(obj, other)
-      res = ~obj.eq(other);
+    function res = ne(self, other)
+      res = ~self.eq(other);
     end
   end
 

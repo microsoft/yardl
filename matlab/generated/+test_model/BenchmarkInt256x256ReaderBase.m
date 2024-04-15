@@ -6,41 +6,41 @@ classdef BenchmarkInt256x256ReaderBase < handle
   end
 
   methods
-    function obj = BenchmarkInt256x256ReaderBase()
-      obj.state_ = 0;
+    function self = BenchmarkInt256x256ReaderBase()
+      self.state_ = 0;
     end
 
-    function close(obj)
-      obj.close_();
-      if obj.state_ ~= 1
-        expected_method = obj.state_to_method_name_(obj.state_);
+    function close(self)
+      self.close_();
+      if self.state_ ~= 1
+        expected_method = self.state_to_method_name_(self.state_);
         throw(yardl.ProtocolError("Protocol reader closed before all data was consumed. Expected call to '%s'.", expected_method));
       end
     end
 
     % Ordinal 0
-    function more = has_int256x256(obj)
-      if obj.state_ ~= 0
-        obj.raise_unexpected_state_(0);
+    function more = has_int256x256(self)
+      if self.state_ ~= 0
+        self.raise_unexpected_state_(0);
       end
 
-      more = obj.has_int256x256_();
+      more = self.has_int256x256_();
       if ~more
-        obj.state_ = 1;
+        self.state_ = 1;
       end
     end
 
-    function value = read_int256x256(obj)
-      if obj.state_ ~= 0
-        obj.raise_unexpected_state_(0);
+    function value = read_int256x256(self)
+      if self.state_ ~= 0
+        self.raise_unexpected_state_(0);
       end
 
-      value = obj.read_int256x256_();
+      value = self.read_int256x256_();
     end
 
-    function copy_to(obj, writer)
-      while obj.has_int256x256()
-        item = obj.read_int256x256();
+    function copy_to(self, writer)
+      while self.has_int256x256()
+        item = self.read_int256x256();
         writer.write_int256x256({item});
       end
       writer.end_int256x256();
@@ -54,24 +54,24 @@ classdef BenchmarkInt256x256ReaderBase < handle
   end
 
   methods (Abstract, Access=protected)
-    has_int256x256_(obj)
-    read_int256x256_(obj)
+    has_int256x256_(self)
+    read_int256x256_(self)
 
-    close_(obj)
+    close_(self)
   end
 
   methods (Access=private)
-    function raise_unexpected_state_(obj, actual)
-      actual_method = obj.state_to_method_name_(actual);
-      expected_method = obj.state_to_method_name_(obj.state_);
+    function raise_unexpected_state_(self, actual)
+      actual_method = self.state_to_method_name_(actual);
+      expected_method = self.state_to_method_name_(self.state_);
       throw(yardl.ProtocolError("Expected call to '%s' but received call to '%s'.", expected_method, actual_method));
     end
 
-    function name = state_to_method_name_(obj, state)
+    function name = state_to_method_name_(self, state)
       if state == 0
-        name = 'read_int256x256';
+        name = "read_int256x256";
       else
-        name = '<unknown>';
+        name = "<unknown>";
       end
     end
   end

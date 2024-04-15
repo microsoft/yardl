@@ -6,52 +6,52 @@ classdef EnumsReaderBase < handle
   end
 
   methods
-    function obj = EnumsReaderBase()
-      obj.state_ = 0;
+    function self = EnumsReaderBase()
+      self.state_ = 0;
     end
 
-    function close(obj)
-      obj.close_();
-      if obj.state_ ~= 3
-        expected_method = obj.state_to_method_name_(obj.state_);
+    function close(self)
+      self.close_();
+      if self.state_ ~= 3
+        expected_method = self.state_to_method_name_(self.state_);
         throw(yardl.ProtocolError("Protocol reader closed before all data was consumed. Expected call to '%s'.", expected_method));
       end
     end
 
     % Ordinal 0
-    function value = read_single(obj)
-      if obj.state_ ~= 0
-        obj.raise_unexpected_state_(0);
+    function value = read_single(self)
+      if self.state_ ~= 0
+        self.raise_unexpected_state_(0);
       end
 
-      value = obj.read_single_();
-      obj.state_ = 1;
+      value = self.read_single_();
+      self.state_ = 1;
     end
 
     % Ordinal 1
-    function value = read_vec(obj)
-      if obj.state_ ~= 1
-        obj.raise_unexpected_state_(1);
+    function value = read_vec(self)
+      if self.state_ ~= 1
+        self.raise_unexpected_state_(1);
       end
 
-      value = obj.read_vec_();
-      obj.state_ = 2;
+      value = self.read_vec_();
+      self.state_ = 2;
     end
 
     % Ordinal 2
-    function value = read_size(obj)
-      if obj.state_ ~= 2
-        obj.raise_unexpected_state_(2);
+    function value = read_size(self)
+      if self.state_ ~= 2
+        self.raise_unexpected_state_(2);
       end
 
-      value = obj.read_size_();
-      obj.state_ = 3;
+      value = self.read_size_();
+      self.state_ = 3;
     end
 
-    function copy_to(obj, writer)
-      writer.write_single(obj.read_single());
-      writer.write_vec(obj.read_vec());
-      writer.write_size(obj.read_size());
+    function copy_to(self, writer)
+      writer.write_single(self.read_single());
+      writer.write_vec(self.read_vec());
+      writer.write_size(self.read_size());
     end
   end
 
@@ -62,29 +62,29 @@ classdef EnumsReaderBase < handle
   end
 
   methods (Abstract, Access=protected)
-    read_single_(obj)
-    read_vec_(obj)
-    read_size_(obj)
+    read_single_(self)
+    read_vec_(self)
+    read_size_(self)
 
-    close_(obj)
+    close_(self)
   end
 
   methods (Access=private)
-    function raise_unexpected_state_(obj, actual)
-      actual_method = obj.state_to_method_name_(actual);
-      expected_method = obj.state_to_method_name_(obj.state_);
+    function raise_unexpected_state_(self, actual)
+      actual_method = self.state_to_method_name_(actual);
+      expected_method = self.state_to_method_name_(self.state_);
       throw(yardl.ProtocolError("Expected call to '%s' but received call to '%s'.", expected_method, actual_method));
     end
 
-    function name = state_to_method_name_(obj, state)
+    function name = state_to_method_name_(self, state)
       if state == 0
-        name = 'read_single';
+        name = "read_single";
       elseif state == 1
-        name = 'read_vec';
+        name = "read_vec";
       elseif state == 2
-        name = 'read_size';
+        name = "read_size";
       else
-        name = '<unknown>';
+        name = "<unknown>";
       end
     end
   end

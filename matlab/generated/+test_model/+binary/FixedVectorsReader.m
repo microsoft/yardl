@@ -10,31 +10,31 @@ classdef FixedVectorsReader < yardl.binary.BinaryProtocolReader & test_model.Fix
   end
 
   methods
-    function obj = FixedVectorsReader(filename)
-      obj@test_model.FixedVectorsReaderBase();
-      obj@yardl.binary.BinaryProtocolReader(filename, test_model.FixedVectorsReaderBase.schema);
-      obj.fixed_int_vector_serializer = yardl.binary.FixedVectorSerializer(yardl.binary.Int32Serializer, 5);
-      obj.fixed_simple_record_vector_serializer = yardl.binary.FixedVectorSerializer(test_model.binary.SimpleRecordSerializer(), 3);
-      obj.fixed_record_with_vlens_vector_serializer = yardl.binary.FixedVectorSerializer(test_model.binary.RecordWithVlensSerializer(), 2);
-      obj.record_with_fixed_vectors_serializer = test_model.binary.RecordWithFixedVectorsSerializer();
+    function self = FixedVectorsReader(filename)
+      self@test_model.FixedVectorsReaderBase();
+      self@yardl.binary.BinaryProtocolReader(filename, test_model.FixedVectorsReaderBase.schema);
+      self.fixed_int_vector_serializer = yardl.binary.FixedVectorSerializer(yardl.binary.Int32Serializer, 5);
+      self.fixed_simple_record_vector_serializer = yardl.binary.FixedVectorSerializer(test_model.binary.SimpleRecordSerializer(), 3);
+      self.fixed_record_with_vlens_vector_serializer = yardl.binary.FixedVectorSerializer(test_model.binary.RecordWithVlensSerializer(), 2);
+      self.record_with_fixed_vectors_serializer = test_model.binary.RecordWithFixedVectorsSerializer();
     end
   end
 
   methods (Access=protected)
-    function value = read_fixed_int_vector_(obj)
-      value = obj.fixed_int_vector_serializer.read(obj.stream_);
+    function value = read_fixed_int_vector_(self)
+      value = self.fixed_int_vector_serializer.read(self.stream_);
     end
 
-    function value = read_fixed_simple_record_vector_(obj)
-      value = obj.fixed_simple_record_vector_serializer.read(obj.stream_);
+    function value = read_fixed_simple_record_vector_(self)
+      value = self.fixed_simple_record_vector_serializer.read(self.stream_);
     end
 
-    function value = read_fixed_record_with_vlens_vector_(obj)
-      value = obj.fixed_record_with_vlens_vector_serializer.read(obj.stream_);
+    function value = read_fixed_record_with_vlens_vector_(self)
+      value = self.fixed_record_with_vlens_vector_serializer.read(self.stream_);
     end
 
-    function value = read_record_with_fixed_vectors_(obj)
-      value = obj.record_with_fixed_vectors_serializer.read(obj.stream_);
+    function value = read_record_with_fixed_vectors_(self)
+      value = self.record_with_fixed_vectors_serializer.read(self.stream_);
     end
   end
 end

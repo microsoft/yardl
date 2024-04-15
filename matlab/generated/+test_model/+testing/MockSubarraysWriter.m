@@ -15,126 +15,126 @@ classdef MockSubarraysWriter < matlab.mixin.Copyable & test_model.SubarraysWrite
   end
 
   methods
-    function obj = MockSubarraysWriter(testCase)
-      obj.testCase_ = testCase;
-      obj.expected_dynamic_with_fixed_int_subarray = yardl.None;
-      obj.expected_dynamic_with_fixed_float_subarray = yardl.None;
-      obj.expected_known_dim_count_with_fixed_int_subarray = yardl.None;
-      obj.expected_known_dim_count_with_fixed_float_subarray = yardl.None;
-      obj.expected_fixed_with_fixed_int_subarray = yardl.None;
-      obj.expected_fixed_with_fixed_float_subarray = yardl.None;
-      obj.expected_nested_subarray = yardl.None;
-      obj.expected_dynamic_with_fixed_vector_subarray = yardl.None;
-      obj.expected_generic_subarray = yardl.None;
+    function self = MockSubarraysWriter(testCase)
+      self.testCase_ = testCase;
+      self.expected_dynamic_with_fixed_int_subarray = yardl.None;
+      self.expected_dynamic_with_fixed_float_subarray = yardl.None;
+      self.expected_known_dim_count_with_fixed_int_subarray = yardl.None;
+      self.expected_known_dim_count_with_fixed_float_subarray = yardl.None;
+      self.expected_fixed_with_fixed_int_subarray = yardl.None;
+      self.expected_fixed_with_fixed_float_subarray = yardl.None;
+      self.expected_nested_subarray = yardl.None;
+      self.expected_dynamic_with_fixed_vector_subarray = yardl.None;
+      self.expected_generic_subarray = yardl.None;
     end
 
-    function expect_write_dynamic_with_fixed_int_subarray_(obj, value)
-      obj.expected_dynamic_with_fixed_int_subarray = yardl.Optional(value);
+    function expect_write_dynamic_with_fixed_int_subarray_(self, value)
+      self.expected_dynamic_with_fixed_int_subarray = yardl.Optional(value);
     end
 
-    function expect_write_dynamic_with_fixed_float_subarray_(obj, value)
-      obj.expected_dynamic_with_fixed_float_subarray = yardl.Optional(value);
+    function expect_write_dynamic_with_fixed_float_subarray_(self, value)
+      self.expected_dynamic_with_fixed_float_subarray = yardl.Optional(value);
     end
 
-    function expect_write_known_dim_count_with_fixed_int_subarray_(obj, value)
-      obj.expected_known_dim_count_with_fixed_int_subarray = yardl.Optional(value);
+    function expect_write_known_dim_count_with_fixed_int_subarray_(self, value)
+      self.expected_known_dim_count_with_fixed_int_subarray = yardl.Optional(value);
     end
 
-    function expect_write_known_dim_count_with_fixed_float_subarray_(obj, value)
-      obj.expected_known_dim_count_with_fixed_float_subarray = yardl.Optional(value);
+    function expect_write_known_dim_count_with_fixed_float_subarray_(self, value)
+      self.expected_known_dim_count_with_fixed_float_subarray = yardl.Optional(value);
     end
 
-    function expect_write_fixed_with_fixed_int_subarray_(obj, value)
-      obj.expected_fixed_with_fixed_int_subarray = yardl.Optional(value);
+    function expect_write_fixed_with_fixed_int_subarray_(self, value)
+      self.expected_fixed_with_fixed_int_subarray = yardl.Optional(value);
     end
 
-    function expect_write_fixed_with_fixed_float_subarray_(obj, value)
-      obj.expected_fixed_with_fixed_float_subarray = yardl.Optional(value);
+    function expect_write_fixed_with_fixed_float_subarray_(self, value)
+      self.expected_fixed_with_fixed_float_subarray = yardl.Optional(value);
     end
 
-    function expect_write_nested_subarray_(obj, value)
-      obj.expected_nested_subarray = yardl.Optional(value);
+    function expect_write_nested_subarray_(self, value)
+      self.expected_nested_subarray = yardl.Optional(value);
     end
 
-    function expect_write_dynamic_with_fixed_vector_subarray_(obj, value)
-      obj.expected_dynamic_with_fixed_vector_subarray = yardl.Optional(value);
+    function expect_write_dynamic_with_fixed_vector_subarray_(self, value)
+      self.expected_dynamic_with_fixed_vector_subarray = yardl.Optional(value);
     end
 
-    function expect_write_generic_subarray_(obj, value)
-      obj.expected_generic_subarray = yardl.Optional(value);
+    function expect_write_generic_subarray_(self, value)
+      self.expected_generic_subarray = yardl.Optional(value);
     end
 
-    function verify(obj)
-      obj.testCase_.verifyEqual(obj.expected_dynamic_with_fixed_int_subarray, yardl.None, "Expected call to write_dynamic_with_fixed_int_subarray_ was not received");
-      obj.testCase_.verifyEqual(obj.expected_dynamic_with_fixed_float_subarray, yardl.None, "Expected call to write_dynamic_with_fixed_float_subarray_ was not received");
-      obj.testCase_.verifyEqual(obj.expected_known_dim_count_with_fixed_int_subarray, yardl.None, "Expected call to write_known_dim_count_with_fixed_int_subarray_ was not received");
-      obj.testCase_.verifyEqual(obj.expected_known_dim_count_with_fixed_float_subarray, yardl.None, "Expected call to write_known_dim_count_with_fixed_float_subarray_ was not received");
-      obj.testCase_.verifyEqual(obj.expected_fixed_with_fixed_int_subarray, yardl.None, "Expected call to write_fixed_with_fixed_int_subarray_ was not received");
-      obj.testCase_.verifyEqual(obj.expected_fixed_with_fixed_float_subarray, yardl.None, "Expected call to write_fixed_with_fixed_float_subarray_ was not received");
-      obj.testCase_.verifyEqual(obj.expected_nested_subarray, yardl.None, "Expected call to write_nested_subarray_ was not received");
-      obj.testCase_.verifyEqual(obj.expected_dynamic_with_fixed_vector_subarray, yardl.None, "Expected call to write_dynamic_with_fixed_vector_subarray_ was not received");
-      obj.testCase_.verifyEqual(obj.expected_generic_subarray, yardl.None, "Expected call to write_generic_subarray_ was not received");
+    function verify(self)
+      self.testCase_.verifyEqual(self.expected_dynamic_with_fixed_int_subarray, yardl.None, "Expected call to write_dynamic_with_fixed_int_subarray_ was not received");
+      self.testCase_.verifyEqual(self.expected_dynamic_with_fixed_float_subarray, yardl.None, "Expected call to write_dynamic_with_fixed_float_subarray_ was not received");
+      self.testCase_.verifyEqual(self.expected_known_dim_count_with_fixed_int_subarray, yardl.None, "Expected call to write_known_dim_count_with_fixed_int_subarray_ was not received");
+      self.testCase_.verifyEqual(self.expected_known_dim_count_with_fixed_float_subarray, yardl.None, "Expected call to write_known_dim_count_with_fixed_float_subarray_ was not received");
+      self.testCase_.verifyEqual(self.expected_fixed_with_fixed_int_subarray, yardl.None, "Expected call to write_fixed_with_fixed_int_subarray_ was not received");
+      self.testCase_.verifyEqual(self.expected_fixed_with_fixed_float_subarray, yardl.None, "Expected call to write_fixed_with_fixed_float_subarray_ was not received");
+      self.testCase_.verifyEqual(self.expected_nested_subarray, yardl.None, "Expected call to write_nested_subarray_ was not received");
+      self.testCase_.verifyEqual(self.expected_dynamic_with_fixed_vector_subarray, yardl.None, "Expected call to write_dynamic_with_fixed_vector_subarray_ was not received");
+      self.testCase_.verifyEqual(self.expected_generic_subarray, yardl.None, "Expected call to write_generic_subarray_ was not received");
     end
   end
 
   methods (Access=protected)
-    function write_dynamic_with_fixed_int_subarray_(obj, value)
-      obj.testCase_.verifyTrue(obj.expected_dynamic_with_fixed_int_subarray.has_value(), "Unexpected call to write_dynamic_with_fixed_int_subarray_");
-      obj.testCase_.verifyEqual(value, obj.expected_dynamic_with_fixed_int_subarray.value, "Unexpected argument value for call to write_dynamic_with_fixed_int_subarray_");
-      obj.expected_dynamic_with_fixed_int_subarray = yardl.None;
+    function write_dynamic_with_fixed_int_subarray_(self, value)
+      self.testCase_.verifyTrue(self.expected_dynamic_with_fixed_int_subarray.has_value(), "Unexpected call to write_dynamic_with_fixed_int_subarray_");
+      self.testCase_.verifyEqual(value, self.expected_dynamic_with_fixed_int_subarray.value, "Unexpected argument value for call to write_dynamic_with_fixed_int_subarray_");
+      self.expected_dynamic_with_fixed_int_subarray = yardl.None;
     end
 
-    function write_dynamic_with_fixed_float_subarray_(obj, value)
-      obj.testCase_.verifyTrue(obj.expected_dynamic_with_fixed_float_subarray.has_value(), "Unexpected call to write_dynamic_with_fixed_float_subarray_");
-      obj.testCase_.verifyEqual(value, obj.expected_dynamic_with_fixed_float_subarray.value, "Unexpected argument value for call to write_dynamic_with_fixed_float_subarray_");
-      obj.expected_dynamic_with_fixed_float_subarray = yardl.None;
+    function write_dynamic_with_fixed_float_subarray_(self, value)
+      self.testCase_.verifyTrue(self.expected_dynamic_with_fixed_float_subarray.has_value(), "Unexpected call to write_dynamic_with_fixed_float_subarray_");
+      self.testCase_.verifyEqual(value, self.expected_dynamic_with_fixed_float_subarray.value, "Unexpected argument value for call to write_dynamic_with_fixed_float_subarray_");
+      self.expected_dynamic_with_fixed_float_subarray = yardl.None;
     end
 
-    function write_known_dim_count_with_fixed_int_subarray_(obj, value)
-      obj.testCase_.verifyTrue(obj.expected_known_dim_count_with_fixed_int_subarray.has_value(), "Unexpected call to write_known_dim_count_with_fixed_int_subarray_");
-      obj.testCase_.verifyEqual(value, obj.expected_known_dim_count_with_fixed_int_subarray.value, "Unexpected argument value for call to write_known_dim_count_with_fixed_int_subarray_");
-      obj.expected_known_dim_count_with_fixed_int_subarray = yardl.None;
+    function write_known_dim_count_with_fixed_int_subarray_(self, value)
+      self.testCase_.verifyTrue(self.expected_known_dim_count_with_fixed_int_subarray.has_value(), "Unexpected call to write_known_dim_count_with_fixed_int_subarray_");
+      self.testCase_.verifyEqual(value, self.expected_known_dim_count_with_fixed_int_subarray.value, "Unexpected argument value for call to write_known_dim_count_with_fixed_int_subarray_");
+      self.expected_known_dim_count_with_fixed_int_subarray = yardl.None;
     end
 
-    function write_known_dim_count_with_fixed_float_subarray_(obj, value)
-      obj.testCase_.verifyTrue(obj.expected_known_dim_count_with_fixed_float_subarray.has_value(), "Unexpected call to write_known_dim_count_with_fixed_float_subarray_");
-      obj.testCase_.verifyEqual(value, obj.expected_known_dim_count_with_fixed_float_subarray.value, "Unexpected argument value for call to write_known_dim_count_with_fixed_float_subarray_");
-      obj.expected_known_dim_count_with_fixed_float_subarray = yardl.None;
+    function write_known_dim_count_with_fixed_float_subarray_(self, value)
+      self.testCase_.verifyTrue(self.expected_known_dim_count_with_fixed_float_subarray.has_value(), "Unexpected call to write_known_dim_count_with_fixed_float_subarray_");
+      self.testCase_.verifyEqual(value, self.expected_known_dim_count_with_fixed_float_subarray.value, "Unexpected argument value for call to write_known_dim_count_with_fixed_float_subarray_");
+      self.expected_known_dim_count_with_fixed_float_subarray = yardl.None;
     end
 
-    function write_fixed_with_fixed_int_subarray_(obj, value)
-      obj.testCase_.verifyTrue(obj.expected_fixed_with_fixed_int_subarray.has_value(), "Unexpected call to write_fixed_with_fixed_int_subarray_");
-      obj.testCase_.verifyEqual(value, obj.expected_fixed_with_fixed_int_subarray.value, "Unexpected argument value for call to write_fixed_with_fixed_int_subarray_");
-      obj.expected_fixed_with_fixed_int_subarray = yardl.None;
+    function write_fixed_with_fixed_int_subarray_(self, value)
+      self.testCase_.verifyTrue(self.expected_fixed_with_fixed_int_subarray.has_value(), "Unexpected call to write_fixed_with_fixed_int_subarray_");
+      self.testCase_.verifyEqual(value, self.expected_fixed_with_fixed_int_subarray.value, "Unexpected argument value for call to write_fixed_with_fixed_int_subarray_");
+      self.expected_fixed_with_fixed_int_subarray = yardl.None;
     end
 
-    function write_fixed_with_fixed_float_subarray_(obj, value)
-      obj.testCase_.verifyTrue(obj.expected_fixed_with_fixed_float_subarray.has_value(), "Unexpected call to write_fixed_with_fixed_float_subarray_");
-      obj.testCase_.verifyEqual(value, obj.expected_fixed_with_fixed_float_subarray.value, "Unexpected argument value for call to write_fixed_with_fixed_float_subarray_");
-      obj.expected_fixed_with_fixed_float_subarray = yardl.None;
+    function write_fixed_with_fixed_float_subarray_(self, value)
+      self.testCase_.verifyTrue(self.expected_fixed_with_fixed_float_subarray.has_value(), "Unexpected call to write_fixed_with_fixed_float_subarray_");
+      self.testCase_.verifyEqual(value, self.expected_fixed_with_fixed_float_subarray.value, "Unexpected argument value for call to write_fixed_with_fixed_float_subarray_");
+      self.expected_fixed_with_fixed_float_subarray = yardl.None;
     end
 
-    function write_nested_subarray_(obj, value)
-      obj.testCase_.verifyTrue(obj.expected_nested_subarray.has_value(), "Unexpected call to write_nested_subarray_");
-      obj.testCase_.verifyEqual(value, obj.expected_nested_subarray.value, "Unexpected argument value for call to write_nested_subarray_");
-      obj.expected_nested_subarray = yardl.None;
+    function write_nested_subarray_(self, value)
+      self.testCase_.verifyTrue(self.expected_nested_subarray.has_value(), "Unexpected call to write_nested_subarray_");
+      self.testCase_.verifyEqual(value, self.expected_nested_subarray.value, "Unexpected argument value for call to write_nested_subarray_");
+      self.expected_nested_subarray = yardl.None;
     end
 
-    function write_dynamic_with_fixed_vector_subarray_(obj, value)
-      obj.testCase_.verifyTrue(obj.expected_dynamic_with_fixed_vector_subarray.has_value(), "Unexpected call to write_dynamic_with_fixed_vector_subarray_");
-      obj.testCase_.verifyEqual(value, obj.expected_dynamic_with_fixed_vector_subarray.value, "Unexpected argument value for call to write_dynamic_with_fixed_vector_subarray_");
-      obj.expected_dynamic_with_fixed_vector_subarray = yardl.None;
+    function write_dynamic_with_fixed_vector_subarray_(self, value)
+      self.testCase_.verifyTrue(self.expected_dynamic_with_fixed_vector_subarray.has_value(), "Unexpected call to write_dynamic_with_fixed_vector_subarray_");
+      self.testCase_.verifyEqual(value, self.expected_dynamic_with_fixed_vector_subarray.value, "Unexpected argument value for call to write_dynamic_with_fixed_vector_subarray_");
+      self.expected_dynamic_with_fixed_vector_subarray = yardl.None;
     end
 
-    function write_generic_subarray_(obj, value)
-      obj.testCase_.verifyTrue(obj.expected_generic_subarray.has_value(), "Unexpected call to write_generic_subarray_");
-      obj.testCase_.verifyEqual(value, obj.expected_generic_subarray.value, "Unexpected argument value for call to write_generic_subarray_");
-      obj.expected_generic_subarray = yardl.None;
+    function write_generic_subarray_(self, value)
+      self.testCase_.verifyTrue(self.expected_generic_subarray.has_value(), "Unexpected call to write_generic_subarray_");
+      self.testCase_.verifyEqual(value, self.expected_generic_subarray.value, "Unexpected argument value for call to write_generic_subarray_");
+      self.expected_generic_subarray = yardl.None;
     end
 
-    function close_(obj)
+    function close_(self)
     end
-    function end_stream_(obj)
+    function end_stream_(self)
     end
   end
 end

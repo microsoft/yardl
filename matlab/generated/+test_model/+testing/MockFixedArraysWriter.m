@@ -11,78 +11,78 @@ classdef MockFixedArraysWriter < matlab.mixin.Copyable & test_model.FixedArraysW
   end
 
   methods
-    function obj = MockFixedArraysWriter(testCase)
-      obj.testCase_ = testCase;
-      obj.expected_ints = yardl.None;
-      obj.expected_fixed_simple_record_array = yardl.None;
-      obj.expected_fixed_record_with_vlens_array = yardl.None;
-      obj.expected_record_with_fixed_arrays = yardl.None;
-      obj.expected_named_array = yardl.None;
+    function self = MockFixedArraysWriter(testCase)
+      self.testCase_ = testCase;
+      self.expected_ints = yardl.None;
+      self.expected_fixed_simple_record_array = yardl.None;
+      self.expected_fixed_record_with_vlens_array = yardl.None;
+      self.expected_record_with_fixed_arrays = yardl.None;
+      self.expected_named_array = yardl.None;
     end
 
-    function expect_write_ints_(obj, value)
-      obj.expected_ints = yardl.Optional(value);
+    function expect_write_ints_(self, value)
+      self.expected_ints = yardl.Optional(value);
     end
 
-    function expect_write_fixed_simple_record_array_(obj, value)
-      obj.expected_fixed_simple_record_array = yardl.Optional(value);
+    function expect_write_fixed_simple_record_array_(self, value)
+      self.expected_fixed_simple_record_array = yardl.Optional(value);
     end
 
-    function expect_write_fixed_record_with_vlens_array_(obj, value)
-      obj.expected_fixed_record_with_vlens_array = yardl.Optional(value);
+    function expect_write_fixed_record_with_vlens_array_(self, value)
+      self.expected_fixed_record_with_vlens_array = yardl.Optional(value);
     end
 
-    function expect_write_record_with_fixed_arrays_(obj, value)
-      obj.expected_record_with_fixed_arrays = yardl.Optional(value);
+    function expect_write_record_with_fixed_arrays_(self, value)
+      self.expected_record_with_fixed_arrays = yardl.Optional(value);
     end
 
-    function expect_write_named_array_(obj, value)
-      obj.expected_named_array = yardl.Optional(value);
+    function expect_write_named_array_(self, value)
+      self.expected_named_array = yardl.Optional(value);
     end
 
-    function verify(obj)
-      obj.testCase_.verifyEqual(obj.expected_ints, yardl.None, "Expected call to write_ints_ was not received");
-      obj.testCase_.verifyEqual(obj.expected_fixed_simple_record_array, yardl.None, "Expected call to write_fixed_simple_record_array_ was not received");
-      obj.testCase_.verifyEqual(obj.expected_fixed_record_with_vlens_array, yardl.None, "Expected call to write_fixed_record_with_vlens_array_ was not received");
-      obj.testCase_.verifyEqual(obj.expected_record_with_fixed_arrays, yardl.None, "Expected call to write_record_with_fixed_arrays_ was not received");
-      obj.testCase_.verifyEqual(obj.expected_named_array, yardl.None, "Expected call to write_named_array_ was not received");
+    function verify(self)
+      self.testCase_.verifyEqual(self.expected_ints, yardl.None, "Expected call to write_ints_ was not received");
+      self.testCase_.verifyEqual(self.expected_fixed_simple_record_array, yardl.None, "Expected call to write_fixed_simple_record_array_ was not received");
+      self.testCase_.verifyEqual(self.expected_fixed_record_with_vlens_array, yardl.None, "Expected call to write_fixed_record_with_vlens_array_ was not received");
+      self.testCase_.verifyEqual(self.expected_record_with_fixed_arrays, yardl.None, "Expected call to write_record_with_fixed_arrays_ was not received");
+      self.testCase_.verifyEqual(self.expected_named_array, yardl.None, "Expected call to write_named_array_ was not received");
     end
   end
 
   methods (Access=protected)
-    function write_ints_(obj, value)
-      obj.testCase_.verifyTrue(obj.expected_ints.has_value(), "Unexpected call to write_ints_");
-      obj.testCase_.verifyEqual(value, obj.expected_ints.value, "Unexpected argument value for call to write_ints_");
-      obj.expected_ints = yardl.None;
+    function write_ints_(self, value)
+      self.testCase_.verifyTrue(self.expected_ints.has_value(), "Unexpected call to write_ints_");
+      self.testCase_.verifyEqual(value, self.expected_ints.value, "Unexpected argument value for call to write_ints_");
+      self.expected_ints = yardl.None;
     end
 
-    function write_fixed_simple_record_array_(obj, value)
-      obj.testCase_.verifyTrue(obj.expected_fixed_simple_record_array.has_value(), "Unexpected call to write_fixed_simple_record_array_");
-      obj.testCase_.verifyEqual(value, obj.expected_fixed_simple_record_array.value, "Unexpected argument value for call to write_fixed_simple_record_array_");
-      obj.expected_fixed_simple_record_array = yardl.None;
+    function write_fixed_simple_record_array_(self, value)
+      self.testCase_.verifyTrue(self.expected_fixed_simple_record_array.has_value(), "Unexpected call to write_fixed_simple_record_array_");
+      self.testCase_.verifyEqual(value, self.expected_fixed_simple_record_array.value, "Unexpected argument value for call to write_fixed_simple_record_array_");
+      self.expected_fixed_simple_record_array = yardl.None;
     end
 
-    function write_fixed_record_with_vlens_array_(obj, value)
-      obj.testCase_.verifyTrue(obj.expected_fixed_record_with_vlens_array.has_value(), "Unexpected call to write_fixed_record_with_vlens_array_");
-      obj.testCase_.verifyEqual(value, obj.expected_fixed_record_with_vlens_array.value, "Unexpected argument value for call to write_fixed_record_with_vlens_array_");
-      obj.expected_fixed_record_with_vlens_array = yardl.None;
+    function write_fixed_record_with_vlens_array_(self, value)
+      self.testCase_.verifyTrue(self.expected_fixed_record_with_vlens_array.has_value(), "Unexpected call to write_fixed_record_with_vlens_array_");
+      self.testCase_.verifyEqual(value, self.expected_fixed_record_with_vlens_array.value, "Unexpected argument value for call to write_fixed_record_with_vlens_array_");
+      self.expected_fixed_record_with_vlens_array = yardl.None;
     end
 
-    function write_record_with_fixed_arrays_(obj, value)
-      obj.testCase_.verifyTrue(obj.expected_record_with_fixed_arrays.has_value(), "Unexpected call to write_record_with_fixed_arrays_");
-      obj.testCase_.verifyEqual(value, obj.expected_record_with_fixed_arrays.value, "Unexpected argument value for call to write_record_with_fixed_arrays_");
-      obj.expected_record_with_fixed_arrays = yardl.None;
+    function write_record_with_fixed_arrays_(self, value)
+      self.testCase_.verifyTrue(self.expected_record_with_fixed_arrays.has_value(), "Unexpected call to write_record_with_fixed_arrays_");
+      self.testCase_.verifyEqual(value, self.expected_record_with_fixed_arrays.value, "Unexpected argument value for call to write_record_with_fixed_arrays_");
+      self.expected_record_with_fixed_arrays = yardl.None;
     end
 
-    function write_named_array_(obj, value)
-      obj.testCase_.verifyTrue(obj.expected_named_array.has_value(), "Unexpected call to write_named_array_");
-      obj.testCase_.verifyEqual(value, obj.expected_named_array.value, "Unexpected argument value for call to write_named_array_");
-      obj.expected_named_array = yardl.None;
+    function write_named_array_(self, value)
+      self.testCase_.verifyTrue(self.expected_named_array.has_value(), "Unexpected call to write_named_array_");
+      self.testCase_.verifyEqual(value, self.expected_named_array.value, "Unexpected argument value for call to write_named_array_");
+      self.expected_named_array = yardl.None;
     end
 
-    function close_(obj)
+    function close_(self)
     end
-    function end_stream_(obj)
+    function end_stream_(self)
     end
   end
 end

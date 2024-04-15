@@ -8,21 +8,21 @@ classdef StringsWriter < yardl.binary.BinaryProtocolWriter & test_model.StringsW
   end
 
   methods
-    function obj = StringsWriter(filename)
-      obj@test_model.StringsWriterBase();
-      obj@yardl.binary.BinaryProtocolWriter(filename, test_model.StringsWriterBase.schema);
-      obj.single_string_serializer = yardl.binary.StringSerializer;
-      obj.rec_with_string_serializer = test_model.binary.RecordWithStringsSerializer();
+    function self = StringsWriter(filename)
+      self@test_model.StringsWriterBase();
+      self@yardl.binary.BinaryProtocolWriter(filename, test_model.StringsWriterBase.schema);
+      self.single_string_serializer = yardl.binary.StringSerializer;
+      self.rec_with_string_serializer = test_model.binary.RecordWithStringsSerializer();
     end
   end
 
   methods (Access=protected)
-    function write_single_string_(obj, value)
-      obj.single_string_serializer.write(obj.stream_, value);
+    function write_single_string_(self, value)
+      self.single_string_serializer.write(self.stream_, value);
     end
 
-    function write_rec_with_string_(obj, value)
-      obj.rec_with_string_serializer.write(obj.stream_, value);
+    function write_rec_with_string_(self, value)
+      self.rec_with_string_serializer.write(self.stream_, value);
     end
   end
 end

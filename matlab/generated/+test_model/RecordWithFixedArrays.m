@@ -8,28 +8,28 @@ classdef RecordWithFixedArrays < handle
   end
 
   methods
-    function obj = RecordWithFixedArrays(ints, fixed_simple_record_array, fixed_record_with_vlens_array)
+    function self = RecordWithFixedArrays(ints, fixed_simple_record_array, fixed_record_with_vlens_array)
       if nargin > 0
-        obj.ints = ints;
-        obj.fixed_simple_record_array = fixed_simple_record_array;
-        obj.fixed_record_with_vlens_array = fixed_record_with_vlens_array;
+        self.ints = ints;
+        self.fixed_simple_record_array = fixed_simple_record_array;
+        self.fixed_record_with_vlens_array = fixed_record_with_vlens_array;
       else
-        obj.ints = repelem(int32(0), 3, 2);
-        obj.fixed_simple_record_array = repelem(test_model.SimpleRecord(), 2, 3);
-        obj.fixed_record_with_vlens_array = repelem(test_model.RecordWithVlens(), 2, 2);
+        self.ints = repelem(int32(0), 3, 2);
+        self.fixed_simple_record_array = repelem(test_model.SimpleRecord(), 2, 3);
+        self.fixed_record_with_vlens_array = repelem(test_model.RecordWithVlens(), 2, 2);
       end
     end
 
-    function res = eq(obj, other)
+    function res = eq(self, other)
       res = ...
         isa(other, 'test_model.RecordWithFixedArrays') && ...
-        isequal(obj.ints, other.ints) && ...
-        isequal(obj.fixed_simple_record_array, other.fixed_simple_record_array) && ...
-        isequal(obj.fixed_record_with_vlens_array, other.fixed_record_with_vlens_array);
+        isequal(self.ints, other.ints) && ...
+        isequal(self.fixed_simple_record_array, other.fixed_simple_record_array) && ...
+        isequal(self.fixed_record_with_vlens_array, other.fixed_record_with_vlens_array);
     end
 
-    function res = ne(obj, other)
-      res = ~obj.eq(other);
+    function res = ne(self, other)
+      res = ~self.eq(other);
     end
   end
 

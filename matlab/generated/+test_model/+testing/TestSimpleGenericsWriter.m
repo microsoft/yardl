@@ -11,88 +11,88 @@ classdef TestSimpleGenericsWriter < test_model.SimpleGenericsWriterBase
   end
 
   methods
-    function obj = TestSimpleGenericsWriter(testCase, format, create_writer, create_reader)
-      obj.filename_ = tempname();
-      obj.format_ = format;
-      obj.writer_ = create_writer(obj.filename_);
-      obj.create_reader_ = create_reader;
-      obj.mock_writer_ = test_model.testing.MockSimpleGenericsWriter(testCase);
-      obj.close_called_ = false;
+    function self = TestSimpleGenericsWriter(testCase, format, create_writer, create_reader)
+      self.filename_ = tempname();
+      self.format_ = format;
+      self.writer_ = create_writer(self.filename_);
+      self.create_reader_ = create_reader;
+      self.mock_writer_ = test_model.testing.MockSimpleGenericsWriter(testCase);
+      self.close_called_ = false;
     end
 
-    function delete(obj)
-      delete(obj.filename_);
-      if ~obj.close_called_
+    function delete(self)
+      delete(self.filename_);
+      if ~self.close_called_
         % ADD_FAILURE() << ...;
         throw(yardl.RuntimeError("Close() must be called on 'TestSimpleGenericsWriter' to verify mocks"));
       end
     end
-    function end_stream_of_type_variants(obj)
-      end_stream_of_type_variants@test_model.SimpleGenericsWriterBase(obj);
-      obj.writer_.end_stream_of_type_variants();
+    function end_stream_of_type_variants(self)
+      end_stream_of_type_variants@test_model.SimpleGenericsWriterBase(self);
+      self.writer_.end_stream_of_type_variants();
     end
 
   end
 
   methods (Access=protected)
-    function write_float_image_(obj, value)
-      obj.writer_.write_float_image(value);
-      obj.mock_writer_.expect_write_float_image_(value);
+    function write_float_image_(self, value)
+      self.writer_.write_float_image(value);
+      self.mock_writer_.expect_write_float_image_(value);
     end
 
-    function write_int_image_(obj, value)
-      obj.writer_.write_int_image(value);
-      obj.mock_writer_.expect_write_int_image_(value);
+    function write_int_image_(self, value)
+      self.writer_.write_int_image(value);
+      self.mock_writer_.expect_write_int_image_(value);
     end
 
-    function write_int_image_alternate_syntax_(obj, value)
-      obj.writer_.write_int_image_alternate_syntax(value);
-      obj.mock_writer_.expect_write_int_image_alternate_syntax_(value);
+    function write_int_image_alternate_syntax_(self, value)
+      self.writer_.write_int_image_alternate_syntax(value);
+      self.mock_writer_.expect_write_int_image_alternate_syntax_(value);
     end
 
-    function write_string_image_(obj, value)
-      obj.writer_.write_string_image(value);
-      obj.mock_writer_.expect_write_string_image_(value);
+    function write_string_image_(self, value)
+      self.writer_.write_string_image(value);
+      self.mock_writer_.expect_write_string_image_(value);
     end
 
-    function write_int_float_tuple_(obj, value)
-      obj.writer_.write_int_float_tuple(value);
-      obj.mock_writer_.expect_write_int_float_tuple_(value);
+    function write_int_float_tuple_(self, value)
+      self.writer_.write_int_float_tuple(value);
+      self.mock_writer_.expect_write_int_float_tuple_(value);
     end
 
-    function write_float_float_tuple_(obj, value)
-      obj.writer_.write_float_float_tuple(value);
-      obj.mock_writer_.expect_write_float_float_tuple_(value);
+    function write_float_float_tuple_(self, value)
+      self.writer_.write_float_float_tuple(value);
+      self.mock_writer_.expect_write_float_float_tuple_(value);
     end
 
-    function write_int_float_tuple_alternate_syntax_(obj, value)
-      obj.writer_.write_int_float_tuple_alternate_syntax(value);
-      obj.mock_writer_.expect_write_int_float_tuple_alternate_syntax_(value);
+    function write_int_float_tuple_alternate_syntax_(self, value)
+      self.writer_.write_int_float_tuple_alternate_syntax(value);
+      self.mock_writer_.expect_write_int_float_tuple_alternate_syntax_(value);
     end
 
-    function write_int_string_tuple_(obj, value)
-      obj.writer_.write_int_string_tuple(value);
-      obj.mock_writer_.expect_write_int_string_tuple_(value);
+    function write_int_string_tuple_(self, value)
+      self.writer_.write_int_string_tuple(value);
+      self.mock_writer_.expect_write_int_string_tuple_(value);
     end
 
-    function write_stream_of_type_variants_(obj, value)
-      obj.writer_.write_stream_of_type_variants(value);
-      obj.mock_writer_.expect_write_stream_of_type_variants_(value);
+    function write_stream_of_type_variants_(self, value)
+      self.writer_.write_stream_of_type_variants(value);
+      self.mock_writer_.expect_write_stream_of_type_variants_(value);
     end
 
-    function close_(obj)
-      obj.close_called_ = true;
-      obj.writer_.close();
-      mock_copy = copy(obj.mock_writer_);
+    function close_(self)
+      self.close_called_ = true;
+      self.writer_.close();
+      mock_copy = copy(self.mock_writer_);
 
-      reader = obj.create_reader_(obj.filename_);
-      reader.copy_to(obj.mock_writer_);
+      reader = self.create_reader_(self.filename_);
+      reader.copy_to(self.mock_writer_);
       reader.close();
-      obj.mock_writer_.verify();
-      obj.mock_writer_.close();
+      self.mock_writer_.verify();
+      self.mock_writer_.close();
 
-      translated = invoke_translator(obj.filename_, obj.format_, obj.format_);
-      reader = obj.create_reader_(translated);
+      translated = invoke_translator(self.filename_, self.format_, self.format_);
+      reader = self.create_reader_(translated);
       reader.copy_to(mock_copy);
       reader.close();
       mock_copy.verify();
@@ -100,7 +100,7 @@ classdef TestSimpleGenericsWriter < test_model.SimpleGenericsWriterBase
       delete(translated);
     end
 
-    function end_stream_(obj)
+    function end_stream_(self)
     end
   end
 end

@@ -7,15 +7,15 @@ classdef MockBenchmarkSimpleMrdWriter < matlab.mixin.Copyable & test_model.Bench
   end
 
   methods
-    function obj = MockBenchmarkSimpleMrdWriter(testCase)
-      obj.testCase_ = testCase;
-      obj.expected_data = {};
+    function self = MockBenchmarkSimpleMrdWriter(testCase)
+      self.testCase_ = testCase;
+      self.expected_data = {};
     end
 
-    function expect_write_data_(obj, value)
+    function expect_write_data_(self, value)
       if iscell(value)
         for n = 1:numel(value)
-          obj.expected_data{end+1} = value{n};
+          self.expected_data{end+1} = value{n};
         end
         return;
       end
@@ -24,27 +24,27 @@ classdef MockBenchmarkSimpleMrdWriter < matlab.mixin.Copyable & test_model.Bench
       count = shape(lastDim);
       index = repelem({':'}, lastDim-1);
       for n = 1:count
-        obj.expected_data{end+1} = value(index{:}, n);
+        self.expected_data{end+1} = value(index{:}, n);
       end
     end
 
-    function verify(obj)
-      obj.testCase_.verifyTrue(isempty(obj.expected_data), "Expected call to write_data_ was not received");
+    function verify(self)
+      self.testCase_.verifyTrue(isempty(self.expected_data), "Expected call to write_data_ was not received");
     end
   end
 
   methods (Access=protected)
-    function write_data_(obj, value)
+    function write_data_(self, value)
       assert(iscell(value));
       assert(isscalar(value));
-      obj.testCase_.verifyFalse(isempty(obj.expected_data), "Unexpected call to write_data_");
-      obj.testCase_.verifyEqual(value{1}, obj.expected_data{1}, "Unexpected argument value for call to write_data_");
-      obj.expected_data = obj.expected_data(2:end);
+      self.testCase_.verifyFalse(isempty(self.expected_data), "Unexpected call to write_data_");
+      self.testCase_.verifyEqual(value{1}, self.expected_data{1}, "Unexpected argument value for call to write_data_");
+      self.expected_data = self.expected_data(2:end);
     end
 
-    function close_(obj)
+    function close_(self)
     end
-    function end_stream_(obj)
+    function end_stream_(self)
     end
   end
 end

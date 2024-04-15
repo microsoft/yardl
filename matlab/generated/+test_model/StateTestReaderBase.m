@@ -6,66 +6,66 @@ classdef StateTestReaderBase < handle
   end
 
   methods
-    function obj = StateTestReaderBase()
-      obj.state_ = 0;
+    function self = StateTestReaderBase()
+      self.state_ = 0;
     end
 
-    function close(obj)
-      obj.close_();
-      if obj.state_ ~= 3
-        expected_method = obj.state_to_method_name_(obj.state_);
+    function close(self)
+      self.close_();
+      if self.state_ ~= 3
+        expected_method = self.state_to_method_name_(self.state_);
         throw(yardl.ProtocolError("Protocol reader closed before all data was consumed. Expected call to '%s'.", expected_method));
       end
     end
 
     % Ordinal 0
-    function value = read_an_int(obj)
-      if obj.state_ ~= 0
-        obj.raise_unexpected_state_(0);
+    function value = read_an_int(self)
+      if self.state_ ~= 0
+        self.raise_unexpected_state_(0);
       end
 
-      value = obj.read_an_int_();
-      obj.state_ = 1;
+      value = self.read_an_int_();
+      self.state_ = 1;
     end
 
     % Ordinal 1
-    function more = has_a_stream(obj)
-      if obj.state_ ~= 1
-        obj.raise_unexpected_state_(1);
+    function more = has_a_stream(self)
+      if self.state_ ~= 1
+        self.raise_unexpected_state_(1);
       end
 
-      more = obj.has_a_stream_();
+      more = self.has_a_stream_();
       if ~more
-        obj.state_ = 2;
+        self.state_ = 2;
       end
     end
 
-    function value = read_a_stream(obj)
-      if obj.state_ ~= 1
-        obj.raise_unexpected_state_(1);
+    function value = read_a_stream(self)
+      if self.state_ ~= 1
+        self.raise_unexpected_state_(1);
       end
 
-      value = obj.read_a_stream_();
+      value = self.read_a_stream_();
     end
 
     % Ordinal 2
-    function value = read_another_int(obj)
-      if obj.state_ ~= 2
-        obj.raise_unexpected_state_(2);
+    function value = read_another_int(self)
+      if self.state_ ~= 2
+        self.raise_unexpected_state_(2);
       end
 
-      value = obj.read_another_int_();
-      obj.state_ = 3;
+      value = self.read_another_int_();
+      self.state_ = 3;
     end
 
-    function copy_to(obj, writer)
-      writer.write_an_int(obj.read_an_int());
-      while obj.has_a_stream()
-        item = obj.read_a_stream();
+    function copy_to(self, writer)
+      writer.write_an_int(self.read_an_int());
+      while self.has_a_stream()
+        item = self.read_a_stream();
         writer.write_a_stream({item});
       end
       writer.end_a_stream();
-      writer.write_another_int(obj.read_another_int());
+      writer.write_another_int(self.read_another_int());
     end
   end
 
@@ -76,30 +76,30 @@ classdef StateTestReaderBase < handle
   end
 
   methods (Abstract, Access=protected)
-    read_an_int_(obj)
-    has_a_stream_(obj)
-    read_a_stream_(obj)
-    read_another_int_(obj)
+    read_an_int_(self)
+    has_a_stream_(self)
+    read_a_stream_(self)
+    read_another_int_(self)
 
-    close_(obj)
+    close_(self)
   end
 
   methods (Access=private)
-    function raise_unexpected_state_(obj, actual)
-      actual_method = obj.state_to_method_name_(actual);
-      expected_method = obj.state_to_method_name_(obj.state_);
+    function raise_unexpected_state_(self, actual)
+      actual_method = self.state_to_method_name_(actual);
+      expected_method = self.state_to_method_name_(self.state_);
       throw(yardl.ProtocolError("Expected call to '%s' but received call to '%s'.", expected_method, actual_method));
     end
 
-    function name = state_to_method_name_(obj, state)
+    function name = state_to_method_name_(self, state)
       if state == 0
-        name = 'read_an_int';
+        name = "read_an_int";
       elseif state == 1
-        name = 'read_a_stream';
+        name = "read_a_stream";
       elseif state == 2
-        name = 'read_another_int';
+        name = "read_another_int";
       else
-        name = '<unknown>';
+        name = "<unknown>";
       end
     end
   end

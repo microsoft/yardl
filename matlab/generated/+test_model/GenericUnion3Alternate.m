@@ -29,6 +29,18 @@ classdef GenericUnion3Alternate < yardl.Union
   end
 
   methods
+    function res = isU(self)
+      res = self.index == 1;
+    end
+
+    function res = isV(self)
+      res = self.index == 2;
+    end
+
+    function res = isW(self)
+      res = self.index == 3;
+    end
+
     function eq = eq(self, other)
       eq = isa(other, 'test_model.GenericUnion3Alternate') && other.index == self.index && other.value == self.value;
     end

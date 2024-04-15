@@ -9,31 +9,31 @@ classdef SimpleEncodingCounters < handle
   end
 
   methods
-    function obj = SimpleEncodingCounters(e1, e2, slice, repetition)
+    function self = SimpleEncodingCounters(e1, e2, slice, repetition)
       if nargin > 0
-        obj.e1 = e1;
-        obj.e2 = e2;
-        obj.slice = slice;
-        obj.repetition = repetition;
+        self.e1 = e1;
+        self.e2 = e2;
+        self.slice = slice;
+        self.repetition = repetition;
       else
-        obj.e1 = yardl.None;
-        obj.e2 = yardl.None;
-        obj.slice = yardl.None;
-        obj.repetition = yardl.None;
+        self.e1 = yardl.None;
+        self.e2 = yardl.None;
+        self.slice = yardl.None;
+        self.repetition = yardl.None;
       end
     end
 
-    function res = eq(obj, other)
+    function res = eq(self, other)
       res = ...
         isa(other, 'test_model.SimpleEncodingCounters') && ...
-        all([obj.e1] == [other.e1]) && ...
-        all([obj.e2] == [other.e2]) && ...
-        all([obj.slice] == [other.slice]) && ...
-        all([obj.repetition] == [other.repetition]);
+        all([self.e1] == [other.e1]) && ...
+        all([self.e2] == [other.e2]) && ...
+        all([self.slice] == [other.slice]) && ...
+        all([self.repetition] == [other.repetition]);
     end
 
-    function res = ne(obj, other)
-      res = ~obj.eq(other);
+    function res = ne(self, other)
+      res = ~self.eq(other);
     end
   end
 

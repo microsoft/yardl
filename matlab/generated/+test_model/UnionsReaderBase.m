@@ -6,63 +6,63 @@ classdef UnionsReaderBase < handle
   end
 
   methods
-    function obj = UnionsReaderBase()
-      obj.state_ = 0;
+    function self = UnionsReaderBase()
+      self.state_ = 0;
     end
 
-    function close(obj)
-      obj.close_();
-      if obj.state_ ~= 4
-        expected_method = obj.state_to_method_name_(obj.state_);
+    function close(self)
+      self.close_();
+      if self.state_ ~= 4
+        expected_method = self.state_to_method_name_(self.state_);
         throw(yardl.ProtocolError("Protocol reader closed before all data was consumed. Expected call to '%s'.", expected_method));
       end
     end
 
     % Ordinal 0
-    function value = read_int_or_simple_record(obj)
-      if obj.state_ ~= 0
-        obj.raise_unexpected_state_(0);
+    function value = read_int_or_simple_record(self)
+      if self.state_ ~= 0
+        self.raise_unexpected_state_(0);
       end
 
-      value = obj.read_int_or_simple_record_();
-      obj.state_ = 1;
+      value = self.read_int_or_simple_record_();
+      self.state_ = 1;
     end
 
     % Ordinal 1
-    function value = read_int_or_record_with_vlens(obj)
-      if obj.state_ ~= 1
-        obj.raise_unexpected_state_(1);
+    function value = read_int_or_record_with_vlens(self)
+      if self.state_ ~= 1
+        self.raise_unexpected_state_(1);
       end
 
-      value = obj.read_int_or_record_with_vlens_();
-      obj.state_ = 2;
+      value = self.read_int_or_record_with_vlens_();
+      self.state_ = 2;
     end
 
     % Ordinal 2
-    function value = read_monosotate_or_int_or_simple_record(obj)
-      if obj.state_ ~= 2
-        obj.raise_unexpected_state_(2);
+    function value = read_monosotate_or_int_or_simple_record(self)
+      if self.state_ ~= 2
+        self.raise_unexpected_state_(2);
       end
 
-      value = obj.read_monosotate_or_int_or_simple_record_();
-      obj.state_ = 3;
+      value = self.read_monosotate_or_int_or_simple_record_();
+      self.state_ = 3;
     end
 
     % Ordinal 3
-    function value = read_record_with_unions(obj)
-      if obj.state_ ~= 3
-        obj.raise_unexpected_state_(3);
+    function value = read_record_with_unions(self)
+      if self.state_ ~= 3
+        self.raise_unexpected_state_(3);
       end
 
-      value = obj.read_record_with_unions_();
-      obj.state_ = 4;
+      value = self.read_record_with_unions_();
+      self.state_ = 4;
     end
 
-    function copy_to(obj, writer)
-      writer.write_int_or_simple_record(obj.read_int_or_simple_record());
-      writer.write_int_or_record_with_vlens(obj.read_int_or_record_with_vlens());
-      writer.write_monosotate_or_int_or_simple_record(obj.read_monosotate_or_int_or_simple_record());
-      writer.write_record_with_unions(obj.read_record_with_unions());
+    function copy_to(self, writer)
+      writer.write_int_or_simple_record(self.read_int_or_simple_record());
+      writer.write_int_or_record_with_vlens(self.read_int_or_record_with_vlens());
+      writer.write_monosotate_or_int_or_simple_record(self.read_monosotate_or_int_or_simple_record());
+      writer.write_record_with_unions(self.read_record_with_unions());
     end
   end
 
@@ -73,32 +73,32 @@ classdef UnionsReaderBase < handle
   end
 
   methods (Abstract, Access=protected)
-    read_int_or_simple_record_(obj)
-    read_int_or_record_with_vlens_(obj)
-    read_monosotate_or_int_or_simple_record_(obj)
-    read_record_with_unions_(obj)
+    read_int_or_simple_record_(self)
+    read_int_or_record_with_vlens_(self)
+    read_monosotate_or_int_or_simple_record_(self)
+    read_record_with_unions_(self)
 
-    close_(obj)
+    close_(self)
   end
 
   methods (Access=private)
-    function raise_unexpected_state_(obj, actual)
-      actual_method = obj.state_to_method_name_(actual);
-      expected_method = obj.state_to_method_name_(obj.state_);
+    function raise_unexpected_state_(self, actual)
+      actual_method = self.state_to_method_name_(actual);
+      expected_method = self.state_to_method_name_(self.state_);
       throw(yardl.ProtocolError("Expected call to '%s' but received call to '%s'.", expected_method, actual_method));
     end
 
-    function name = state_to_method_name_(obj, state)
+    function name = state_to_method_name_(self, state)
       if state == 0
-        name = 'read_int_or_simple_record';
+        name = "read_int_or_simple_record";
       elseif state == 1
-        name = 'read_int_or_record_with_vlens';
+        name = "read_int_or_record_with_vlens";
       elseif state == 2
-        name = 'read_monosotate_or_int_or_simple_record';
+        name = "read_monosotate_or_int_or_simple_record";
       elseif state == 3
-        name = 'read_record_with_unions';
+        name = "read_record_with_unions";
       else
-        name = '<unknown>';
+        name = "<unknown>";
       end
     end
   end

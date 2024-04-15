@@ -7,16 +7,16 @@ classdef NestedRecordsReader < yardl.binary.BinaryProtocolReader & test_model.Ne
   end
 
   methods
-    function obj = NestedRecordsReader(filename)
-      obj@test_model.NestedRecordsReaderBase();
-      obj@yardl.binary.BinaryProtocolReader(filename, test_model.NestedRecordsReaderBase.schema);
-      obj.tuple_with_records_serializer = test_model.binary.TupleWithRecordsSerializer();
+    function self = NestedRecordsReader(filename)
+      self@test_model.NestedRecordsReaderBase();
+      self@yardl.binary.BinaryProtocolReader(filename, test_model.NestedRecordsReaderBase.schema);
+      self.tuple_with_records_serializer = test_model.binary.TupleWithRecordsSerializer();
     end
   end
 
   methods (Access=protected)
-    function value = read_tuple_with_records_(obj)
-      value = obj.tuple_with_records_serializer.read(obj.stream_);
+    function value = read_tuple_with_records_(self)
+      value = self.tuple_with_records_serializer.read(self.stream_);
     end
   end
 end

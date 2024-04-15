@@ -25,6 +25,14 @@ classdef ArrayOrScalar < yardl.Union
   end
 
   methods
+    function res = isArray(self)
+      res = self.index == 1;
+    end
+
+    function res = isScalar(self)
+      res = self.index == 2;
+    end
+
     function eq = eq(self, other)
       eq = isa(other, 'test_model.ArrayOrScalar') && other.index == self.index && other.value == self.value;
     end

@@ -7,20 +7,20 @@ classdef RecordWithGenericVectors < handle
   end
 
   methods
-    function obj = RecordWithGenericVectors(v, av)
-      obj.v = v;
-      obj.av = av;
+    function self = RecordWithGenericVectors(v, av)
+      self.v = v;
+      self.av = av;
     end
 
-    function res = eq(obj, other)
+    function res = eq(self, other)
       res = ...
         isa(other, 'test_model.RecordWithGenericVectors') && ...
-        isequal(obj.v, other.v) && ...
-        isequal(obj.av, other.av);
+        isequal(self.v, other.v) && ...
+        isequal(self.av, other.av);
     end
 
-    function res = ne(obj, other)
-      res = ~obj.eq(other);
+    function res = ne(self, other)
+      res = ~self.eq(other);
     end
   end
 

@@ -7,16 +7,16 @@ classdef BenchmarkFloat256x256Writer < yardl.binary.BinaryProtocolWriter & test_
   end
 
   methods
-    function obj = BenchmarkFloat256x256Writer(filename)
-      obj@test_model.BenchmarkFloat256x256WriterBase();
-      obj@yardl.binary.BinaryProtocolWriter(filename, test_model.BenchmarkFloat256x256WriterBase.schema);
-      obj.float256x256_serializer = yardl.binary.StreamSerializer(yardl.binary.FixedNDArraySerializer(yardl.binary.Float32Serializer, [256, 256]));
+    function self = BenchmarkFloat256x256Writer(filename)
+      self@test_model.BenchmarkFloat256x256WriterBase();
+      self@yardl.binary.BinaryProtocolWriter(filename, test_model.BenchmarkFloat256x256WriterBase.schema);
+      self.float256x256_serializer = yardl.binary.StreamSerializer(yardl.binary.FixedNDArraySerializer(yardl.binary.Float32Serializer, [256, 256]));
     end
   end
 
   methods (Access=protected)
-    function write_float256x256_(obj, value)
-      obj.float256x256_serializer.write(obj.stream_, value);
+    function write_float256x256_(self, value)
+      self.float256x256_serializer.write(self.stream_, value);
     end
   end
 end

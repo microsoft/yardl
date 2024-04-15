@@ -25,6 +25,14 @@ classdef T0OrT1 < yardl.Union
   end
 
   methods
+    function res = isT0(self)
+      res = self.index == 1;
+    end
+
+    function res = isT1(self)
+      res = self.index == 2;
+    end
+
     function eq = eq(self, other)
       eq = isa(other, 'basic_types.T0OrT1') && other.index == self.index && other.value == self.value;
     end

@@ -6,22 +6,22 @@ classdef RecordWithVectorOfTimes < handle
   end
 
   methods
-    function obj = RecordWithVectorOfTimes(times)
+    function self = RecordWithVectorOfTimes(times)
       if nargin > 0
-        obj.times = times;
+        self.times = times;
       else
-        obj.times = yardl.Time.empty();
+        self.times = yardl.Time.empty();
       end
     end
 
-    function res = eq(obj, other)
+    function res = eq(self, other)
       res = ...
         isa(other, 'test_model.RecordWithVectorOfTimes') && ...
-        all([obj.times] == [other.times]);
+        all([self.times] == [other.times]);
     end
 
-    function res = ne(obj, other)
-      res = ~obj.eq(other);
+    function res = ne(self, other)
+      res = ~self.eq(other);
     end
   end
 

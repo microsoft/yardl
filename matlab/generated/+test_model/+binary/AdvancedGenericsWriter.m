@@ -11,36 +11,36 @@ classdef AdvancedGenericsWriter < yardl.binary.BinaryProtocolWriter & test_model
   end
 
   methods
-    function obj = AdvancedGenericsWriter(filename)
-      obj@test_model.AdvancedGenericsWriterBase();
-      obj@yardl.binary.BinaryProtocolWriter(filename, test_model.AdvancedGenericsWriterBase.schema);
-      obj.float_image_image_serializer = yardl.binary.NDArraySerializer(yardl.binary.NDArraySerializer(yardl.binary.Float32Serializer, 2), 2);
-      obj.generic_record_1_serializer = test_model.binary.GenericRecordSerializer(yardl.binary.Int32Serializer, yardl.binary.StringSerializer);
-      obj.tuple_of_optionals_serializer = tuples.binary.TupleSerializer(yardl.binary.OptionalSerializer(yardl.binary.Int32Serializer), yardl.binary.OptionalSerializer(yardl.binary.StringSerializer));
-      obj.tuple_of_optionals_alternate_syntax_serializer = tuples.binary.TupleSerializer(yardl.binary.OptionalSerializer(yardl.binary.Int32Serializer), yardl.binary.OptionalSerializer(yardl.binary.StringSerializer));
-      obj.tuple_of_vectors_serializer = tuples.binary.TupleSerializer(yardl.binary.VectorSerializer(yardl.binary.Int32Serializer), yardl.binary.VectorSerializer(yardl.binary.Float32Serializer));
+    function self = AdvancedGenericsWriter(filename)
+      self@test_model.AdvancedGenericsWriterBase();
+      self@yardl.binary.BinaryProtocolWriter(filename, test_model.AdvancedGenericsWriterBase.schema);
+      self.float_image_image_serializer = yardl.binary.NDArraySerializer(yardl.binary.NDArraySerializer(yardl.binary.Float32Serializer, 2), 2);
+      self.generic_record_1_serializer = test_model.binary.GenericRecordSerializer(yardl.binary.Int32Serializer, yardl.binary.StringSerializer);
+      self.tuple_of_optionals_serializer = tuples.binary.TupleSerializer(yardl.binary.OptionalSerializer(yardl.binary.Int32Serializer), yardl.binary.OptionalSerializer(yardl.binary.StringSerializer));
+      self.tuple_of_optionals_alternate_syntax_serializer = tuples.binary.TupleSerializer(yardl.binary.OptionalSerializer(yardl.binary.Int32Serializer), yardl.binary.OptionalSerializer(yardl.binary.StringSerializer));
+      self.tuple_of_vectors_serializer = tuples.binary.TupleSerializer(yardl.binary.VectorSerializer(yardl.binary.Int32Serializer), yardl.binary.VectorSerializer(yardl.binary.Float32Serializer));
     end
   end
 
   methods (Access=protected)
-    function write_float_image_image_(obj, value)
-      obj.float_image_image_serializer.write(obj.stream_, value);
+    function write_float_image_image_(self, value)
+      self.float_image_image_serializer.write(self.stream_, value);
     end
 
-    function write_generic_record_1_(obj, value)
-      obj.generic_record_1_serializer.write(obj.stream_, value);
+    function write_generic_record_1_(self, value)
+      self.generic_record_1_serializer.write(self.stream_, value);
     end
 
-    function write_tuple_of_optionals_(obj, value)
-      obj.tuple_of_optionals_serializer.write(obj.stream_, value);
+    function write_tuple_of_optionals_(self, value)
+      self.tuple_of_optionals_serializer.write(self.stream_, value);
     end
 
-    function write_tuple_of_optionals_alternate_syntax_(obj, value)
-      obj.tuple_of_optionals_alternate_syntax_serializer.write(obj.stream_, value);
+    function write_tuple_of_optionals_alternate_syntax_(self, value)
+      self.tuple_of_optionals_alternate_syntax_serializer.write(self.stream_, value);
     end
 
-    function write_tuple_of_vectors_(obj, value)
-      obj.tuple_of_vectors_serializer.write(obj.stream_, value);
+    function write_tuple_of_vectors_(self, value)
+      self.tuple_of_vectors_serializer.write(self.stream_, value);
     end
   end
 end

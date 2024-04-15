@@ -2,7 +2,7 @@
 
 classdef RecordContainingGenericRecordsSerializer < yardl.binary.RecordSerializer
   methods
-    function obj = RecordContainingGenericRecordsSerializer(a_serializer, b_serializer)
+    function self = RecordContainingGenericRecordsSerializer(a_serializer, b_serializer)
       field_serializers{1} = test_model.binary.RecordWithOptionalGenericFieldSerializer(a_serializer);
       field_serializers{2} = test_model.binary.RecordWithAliasedOptionalGenericFieldSerializer(a_serializer);
       field_serializers{3} = test_model.binary.RecordWithOptionalGenericUnionFieldSerializer(a_serializer, b_serializer);
@@ -13,16 +13,20 @@ classdef RecordContainingGenericRecordsSerializer < yardl.binary.RecordSerialize
       field_serializers{8} = test_model.binary.RecordWithGenericFixedVectorsSerializer(b_serializer);
       field_serializers{9} = test_model.binary.RecordWithGenericArraysSerializer(b_serializer);
       field_serializers{10} = test_model.binary.RecordWithGenericMapsSerializer(a_serializer, b_serializer);
-      obj@yardl.binary.RecordSerializer('test_model.RecordContainingGenericRecords', field_serializers);
+      self@yardl.binary.RecordSerializer('test_model.RecordContainingGenericRecords', field_serializers);
     end
 
-    function write(obj, outstream, value)
-      assert(isa(value, 'test_model.RecordContainingGenericRecords'));
-      obj.write_(outstream, value.g1, value.g1a, value.g2, value.g2a, value.g3, value.g3a, value.g4, value.g5, value.g6, value.g7)
+    function write(self, outstream, value)
+      arguments
+        self
+        outstream (1,1) yardl.binary.CodedOutputStream
+        value (1,1) test_model.RecordContainingGenericRecords
+      end
+      self.write_(outstream, value.g1, value.g1a, value.g2, value.g2a, value.g3, value.g3a, value.g4, value.g5, value.g6, value.g7)
     end
 
-    function value = read(obj, instream)
-      field_values = obj.read_(instream);
+    function value = read(self, instream)
+      field_values = self.read_(instream);
       value = test_model.RecordContainingGenericRecords(field_values{:});
     end
   end

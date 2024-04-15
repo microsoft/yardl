@@ -3,8 +3,11 @@
 
 classdef BoolSerializer < yardl.binary.TypeSerializer
     methods (Static)
-        function write( outstream, value)
-            assert(islogical(value));
+        function write(outstream, value)
+            arguments
+                outstream (1,1) yardl.binary.CodedOutputStream
+                value (1,1) {mustBeInRange(value, 0, 1)}
+            end
             byte = cast(value, "uint8");
             outstream.write_bytes(byte);
         end
@@ -14,11 +17,11 @@ classdef BoolSerializer < yardl.binary.TypeSerializer
             res = cast(byte, "logical");
         end
 
-        function c = getClass()
-            c = 'logical';
+        function c = get_class()
+            c = "logical";
         end
 
-        function trivial = isTriviallySerializable()
+        function trivial = is_trivially_serializable()
             trivial = true;
         end
     end

@@ -8,28 +8,28 @@ classdef RecordWithFixedVectors < handle
   end
 
   methods
-    function obj = RecordWithFixedVectors(fixed_int_vector, fixed_simple_record_vector, fixed_record_with_vlens_vector)
+    function self = RecordWithFixedVectors(fixed_int_vector, fixed_simple_record_vector, fixed_record_with_vlens_vector)
       if nargin > 0
-        obj.fixed_int_vector = fixed_int_vector;
-        obj.fixed_simple_record_vector = fixed_simple_record_vector;
-        obj.fixed_record_with_vlens_vector = fixed_record_with_vlens_vector;
+        self.fixed_int_vector = fixed_int_vector;
+        self.fixed_simple_record_vector = fixed_simple_record_vector;
+        self.fixed_record_with_vlens_vector = fixed_record_with_vlens_vector;
       else
-        obj.fixed_int_vector = repelem(int32(0), 5);
-        obj.fixed_simple_record_vector = repelem(test_model.SimpleRecord(), 3);
-        obj.fixed_record_with_vlens_vector = repelem(test_model.RecordWithVlens(), 2);
+        self.fixed_int_vector = repelem(int32(0), 5);
+        self.fixed_simple_record_vector = repelem(test_model.SimpleRecord(), 3);
+        self.fixed_record_with_vlens_vector = repelem(test_model.RecordWithVlens(), 2);
       end
     end
 
-    function res = eq(obj, other)
+    function res = eq(self, other)
       res = ...
         isa(other, 'test_model.RecordWithFixedVectors') && ...
-        all([obj.fixed_int_vector] == [other.fixed_int_vector]) && ...
-        all([obj.fixed_simple_record_vector] == [other.fixed_simple_record_vector]) && ...
-        all([obj.fixed_record_with_vlens_vector] == [other.fixed_record_with_vlens_vector]);
+        all([self.fixed_int_vector] == [other.fixed_int_vector]) && ...
+        all([self.fixed_simple_record_vector] == [other.fixed_simple_record_vector]) && ...
+        all([self.fixed_record_with_vlens_vector] == [other.fixed_record_with_vlens_vector]);
     end
 
-    function res = ne(obj, other)
-      res = ~obj.eq(other);
+    function res = ne(self, other)
+      res = ~self.eq(other);
     end
   end
 

@@ -11,36 +11,36 @@ classdef NDArraysWriter < yardl.binary.BinaryProtocolWriter & test_model.NDArray
   end
 
   methods
-    function obj = NDArraysWriter(filename)
-      obj@test_model.NDArraysWriterBase();
-      obj@yardl.binary.BinaryProtocolWriter(filename, test_model.NDArraysWriterBase.schema);
-      obj.ints_serializer = yardl.binary.NDArraySerializer(yardl.binary.Int32Serializer, 2);
-      obj.simple_record_array_serializer = yardl.binary.NDArraySerializer(test_model.binary.SimpleRecordSerializer(), 2);
-      obj.record_with_vlens_array_serializer = yardl.binary.NDArraySerializer(test_model.binary.RecordWithVlensSerializer(), 2);
-      obj.record_with_nd_arrays_serializer = test_model.binary.RecordWithNDArraysSerializer();
-      obj.named_array_serializer = yardl.binary.NDArraySerializer(yardl.binary.Int32Serializer, 2);
+    function self = NDArraysWriter(filename)
+      self@test_model.NDArraysWriterBase();
+      self@yardl.binary.BinaryProtocolWriter(filename, test_model.NDArraysWriterBase.schema);
+      self.ints_serializer = yardl.binary.NDArraySerializer(yardl.binary.Int32Serializer, 2);
+      self.simple_record_array_serializer = yardl.binary.NDArraySerializer(test_model.binary.SimpleRecordSerializer(), 2);
+      self.record_with_vlens_array_serializer = yardl.binary.NDArraySerializer(test_model.binary.RecordWithVlensSerializer(), 2);
+      self.record_with_nd_arrays_serializer = test_model.binary.RecordWithNDArraysSerializer();
+      self.named_array_serializer = yardl.binary.NDArraySerializer(yardl.binary.Int32Serializer, 2);
     end
   end
 
   methods (Access=protected)
-    function write_ints_(obj, value)
-      obj.ints_serializer.write(obj.stream_, value);
+    function write_ints_(self, value)
+      self.ints_serializer.write(self.stream_, value);
     end
 
-    function write_simple_record_array_(obj, value)
-      obj.simple_record_array_serializer.write(obj.stream_, value);
+    function write_simple_record_array_(self, value)
+      self.simple_record_array_serializer.write(self.stream_, value);
     end
 
-    function write_record_with_vlens_array_(obj, value)
-      obj.record_with_vlens_array_serializer.write(obj.stream_, value);
+    function write_record_with_vlens_array_(self, value)
+      self.record_with_vlens_array_serializer.write(self.stream_, value);
     end
 
-    function write_record_with_nd_arrays_(obj, value)
-      obj.record_with_nd_arrays_serializer.write(obj.stream_, value);
+    function write_record_with_nd_arrays_(self, value)
+      self.record_with_nd_arrays_serializer.write(self.stream_, value);
     end
 
-    function write_named_array_(obj, value)
-      obj.named_array_serializer.write(obj.stream_, value);
+    function write_named_array_(self, value)
+      self.named_array_serializer.write(self.stream_, value);
     end
   end
 end

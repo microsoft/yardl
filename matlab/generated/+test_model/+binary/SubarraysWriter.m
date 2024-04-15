@@ -15,56 +15,56 @@ classdef SubarraysWriter < yardl.binary.BinaryProtocolWriter & test_model.Subarr
   end
 
   methods
-    function obj = SubarraysWriter(filename)
-      obj@test_model.SubarraysWriterBase();
-      obj@yardl.binary.BinaryProtocolWriter(filename, test_model.SubarraysWriterBase.schema);
-      obj.dynamic_with_fixed_int_subarray_serializer = yardl.binary.DynamicNDArraySerializer(yardl.binary.FixedNDArraySerializer(yardl.binary.Int32Serializer, [3]));
-      obj.dynamic_with_fixed_float_subarray_serializer = yardl.binary.DynamicNDArraySerializer(yardl.binary.FixedNDArraySerializer(yardl.binary.Float32Serializer, [3]));
-      obj.known_dim_count_with_fixed_int_subarray_serializer = yardl.binary.NDArraySerializer(yardl.binary.FixedNDArraySerializer(yardl.binary.Int32Serializer, [3]), 1);
-      obj.known_dim_count_with_fixed_float_subarray_serializer = yardl.binary.NDArraySerializer(yardl.binary.FixedNDArraySerializer(yardl.binary.Float32Serializer, [3]), 1);
-      obj.fixed_with_fixed_int_subarray_serializer = yardl.binary.FixedNDArraySerializer(yardl.binary.FixedNDArraySerializer(yardl.binary.Int32Serializer, [3]), [2]);
-      obj.fixed_with_fixed_float_subarray_serializer = yardl.binary.FixedNDArraySerializer(yardl.binary.FixedNDArraySerializer(yardl.binary.Float32Serializer, [3]), [2]);
-      obj.nested_subarray_serializer = yardl.binary.DynamicNDArraySerializer(yardl.binary.FixedNDArraySerializer(yardl.binary.FixedNDArraySerializer(yardl.binary.Int32Serializer, [3]), [2]));
-      obj.dynamic_with_fixed_vector_subarray_serializer = yardl.binary.DynamicNDArraySerializer(yardl.binary.FixedVectorSerializer(yardl.binary.Int32Serializer, 3));
-      obj.generic_subarray_serializer = yardl.binary.NDArraySerializer(yardl.binary.FixedNDArraySerializer(yardl.binary.Int32Serializer, [3]), 2);
+    function self = SubarraysWriter(filename)
+      self@test_model.SubarraysWriterBase();
+      self@yardl.binary.BinaryProtocolWriter(filename, test_model.SubarraysWriterBase.schema);
+      self.dynamic_with_fixed_int_subarray_serializer = yardl.binary.DynamicNDArraySerializer(yardl.binary.FixedNDArraySerializer(yardl.binary.Int32Serializer, [3]));
+      self.dynamic_with_fixed_float_subarray_serializer = yardl.binary.DynamicNDArraySerializer(yardl.binary.FixedNDArraySerializer(yardl.binary.Float32Serializer, [3]));
+      self.known_dim_count_with_fixed_int_subarray_serializer = yardl.binary.NDArraySerializer(yardl.binary.FixedNDArraySerializer(yardl.binary.Int32Serializer, [3]), 1);
+      self.known_dim_count_with_fixed_float_subarray_serializer = yardl.binary.NDArraySerializer(yardl.binary.FixedNDArraySerializer(yardl.binary.Float32Serializer, [3]), 1);
+      self.fixed_with_fixed_int_subarray_serializer = yardl.binary.FixedNDArraySerializer(yardl.binary.FixedNDArraySerializer(yardl.binary.Int32Serializer, [3]), [2]);
+      self.fixed_with_fixed_float_subarray_serializer = yardl.binary.FixedNDArraySerializer(yardl.binary.FixedNDArraySerializer(yardl.binary.Float32Serializer, [3]), [2]);
+      self.nested_subarray_serializer = yardl.binary.DynamicNDArraySerializer(yardl.binary.FixedNDArraySerializer(yardl.binary.FixedNDArraySerializer(yardl.binary.Int32Serializer, [3]), [2]));
+      self.dynamic_with_fixed_vector_subarray_serializer = yardl.binary.DynamicNDArraySerializer(yardl.binary.FixedVectorSerializer(yardl.binary.Int32Serializer, 3));
+      self.generic_subarray_serializer = yardl.binary.NDArraySerializer(yardl.binary.FixedNDArraySerializer(yardl.binary.Int32Serializer, [3]), 2);
     end
   end
 
   methods (Access=protected)
-    function write_dynamic_with_fixed_int_subarray_(obj, value)
-      obj.dynamic_with_fixed_int_subarray_serializer.write(obj.stream_, value);
+    function write_dynamic_with_fixed_int_subarray_(self, value)
+      self.dynamic_with_fixed_int_subarray_serializer.write(self.stream_, value);
     end
 
-    function write_dynamic_with_fixed_float_subarray_(obj, value)
-      obj.dynamic_with_fixed_float_subarray_serializer.write(obj.stream_, value);
+    function write_dynamic_with_fixed_float_subarray_(self, value)
+      self.dynamic_with_fixed_float_subarray_serializer.write(self.stream_, value);
     end
 
-    function write_known_dim_count_with_fixed_int_subarray_(obj, value)
-      obj.known_dim_count_with_fixed_int_subarray_serializer.write(obj.stream_, value);
+    function write_known_dim_count_with_fixed_int_subarray_(self, value)
+      self.known_dim_count_with_fixed_int_subarray_serializer.write(self.stream_, value);
     end
 
-    function write_known_dim_count_with_fixed_float_subarray_(obj, value)
-      obj.known_dim_count_with_fixed_float_subarray_serializer.write(obj.stream_, value);
+    function write_known_dim_count_with_fixed_float_subarray_(self, value)
+      self.known_dim_count_with_fixed_float_subarray_serializer.write(self.stream_, value);
     end
 
-    function write_fixed_with_fixed_int_subarray_(obj, value)
-      obj.fixed_with_fixed_int_subarray_serializer.write(obj.stream_, value);
+    function write_fixed_with_fixed_int_subarray_(self, value)
+      self.fixed_with_fixed_int_subarray_serializer.write(self.stream_, value);
     end
 
-    function write_fixed_with_fixed_float_subarray_(obj, value)
-      obj.fixed_with_fixed_float_subarray_serializer.write(obj.stream_, value);
+    function write_fixed_with_fixed_float_subarray_(self, value)
+      self.fixed_with_fixed_float_subarray_serializer.write(self.stream_, value);
     end
 
-    function write_nested_subarray_(obj, value)
-      obj.nested_subarray_serializer.write(obj.stream_, value);
+    function write_nested_subarray_(self, value)
+      self.nested_subarray_serializer.write(self.stream_, value);
     end
 
-    function write_dynamic_with_fixed_vector_subarray_(obj, value)
-      obj.dynamic_with_fixed_vector_subarray_serializer.write(obj.stream_, value);
+    function write_dynamic_with_fixed_vector_subarray_(self, value)
+      self.dynamic_with_fixed_vector_subarray_serializer.write(self.stream_, value);
     end
 
-    function write_generic_subarray_(obj, value)
-      obj.generic_subarray_serializer.write(obj.stream_, value);
+    function write_generic_subarray_(self, value)
+      self.generic_subarray_serializer.write(self.stream_, value);
     end
   end
 end

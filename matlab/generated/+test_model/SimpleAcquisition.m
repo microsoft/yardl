@@ -9,31 +9,31 @@ classdef SimpleAcquisition < handle
   end
 
   methods
-    function obj = SimpleAcquisition(flags, idx, data, trajectory)
+    function self = SimpleAcquisition(flags, idx, data, trajectory)
       if nargin > 0
-        obj.flags = flags;
-        obj.idx = idx;
-        obj.data = data;
-        obj.trajectory = trajectory;
+        self.flags = flags;
+        self.idx = idx;
+        self.data = data;
+        self.trajectory = trajectory;
       else
-        obj.flags = uint64(0);
-        obj.idx = test_model.SimpleEncodingCounters();
-        obj.data = single.empty(0, 0);
-        obj.trajectory = single.empty(0, 0);
+        self.flags = uint64(0);
+        self.idx = test_model.SimpleEncodingCounters();
+        self.data = single.empty(0, 0);
+        self.trajectory = single.empty(0, 0);
       end
     end
 
-    function res = eq(obj, other)
+    function res = eq(self, other)
       res = ...
         isa(other, 'test_model.SimpleAcquisition') && ...
-        all([obj.flags] == [other.flags]) && ...
-        all([obj.idx] == [other.idx]) && ...
-        isequal(obj.data, other.data) && ...
-        isequal(obj.trajectory, other.trajectory);
+        all([self.flags] == [other.flags]) && ...
+        all([self.idx] == [other.idx]) && ...
+        isequal(self.data, other.data) && ...
+        isequal(self.trajectory, other.trajectory);
     end
 
-    function res = ne(obj, other)
-      res = ~obj.eq(other);
+    function res = ne(self, other)
+      res = ~self.eq(other);
     end
   end
 

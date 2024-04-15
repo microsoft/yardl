@@ -3,15 +3,15 @@
 
 classdef NoneSerializer < yardl.binary.TypeSerializer
     methods (Static)
-        function write(outstream, value)
+        function write(~, ~)
         end
 
-        function res = read(instream)
+        function res = read(~)
             res = yardl.None;
         end
 
-        function c = getClass()
-            c = 'yardl.Optional';
+        function c = get_class()
+            c = "yardl.Optional";
         end
     end
 end

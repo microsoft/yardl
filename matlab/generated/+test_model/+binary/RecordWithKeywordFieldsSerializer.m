@@ -2,20 +2,24 @@
 
 classdef RecordWithKeywordFieldsSerializer < yardl.binary.RecordSerializer
   methods
-    function obj = RecordWithKeywordFieldsSerializer()
+    function self = RecordWithKeywordFieldsSerializer()
       field_serializers{1} = yardl.binary.StringSerializer;
       field_serializers{2} = yardl.binary.NDArraySerializer(yardl.binary.Int32Serializer, 2);
       field_serializers{3} = yardl.binary.EnumSerializer('test_model.EnumWithKeywordSymbols', @test_model.EnumWithKeywordSymbols, yardl.binary.Int32Serializer);
-      obj@yardl.binary.RecordSerializer('test_model.RecordWithKeywordFields', field_serializers);
+      self@yardl.binary.RecordSerializer('test_model.RecordWithKeywordFields', field_serializers);
     end
 
-    function write(obj, outstream, value)
-      assert(isa(value, 'test_model.RecordWithKeywordFields'));
-      obj.write_(outstream, value.int, value.sizeof, value.if_)
+    function write(self, outstream, value)
+      arguments
+        self
+        outstream (1,1) yardl.binary.CodedOutputStream
+        value (1,1) test_model.RecordWithKeywordFields
+      end
+      self.write_(outstream, value.int, value.sizeof, value.if_)
     end
 
-    function value = read(obj, instream)
-      field_values = obj.read_(instream);
+    function value = read(self, instream)
+      field_values = self.read_(instream);
       value = test_model.RecordWithKeywordFields(field_values{:});
     end
   end

@@ -8,21 +8,21 @@ classdef SubarraysInRecordsReader < yardl.binary.BinaryProtocolReader & test_mod
   end
 
   methods
-    function obj = SubarraysInRecordsReader(filename)
-      obj@test_model.SubarraysInRecordsReaderBase();
-      obj@yardl.binary.BinaryProtocolReader(filename, test_model.SubarraysInRecordsReaderBase.schema);
-      obj.with_fixed_subarrays_serializer = yardl.binary.DynamicNDArraySerializer(test_model.binary.RecordWithFixedCollectionsSerializer());
-      obj.with_vlen_subarrays_serializer = yardl.binary.DynamicNDArraySerializer(test_model.binary.RecordWithVlenCollectionsSerializer());
+    function self = SubarraysInRecordsReader(filename)
+      self@test_model.SubarraysInRecordsReaderBase();
+      self@yardl.binary.BinaryProtocolReader(filename, test_model.SubarraysInRecordsReaderBase.schema);
+      self.with_fixed_subarrays_serializer = yardl.binary.DynamicNDArraySerializer(test_model.binary.RecordWithFixedCollectionsSerializer());
+      self.with_vlen_subarrays_serializer = yardl.binary.DynamicNDArraySerializer(test_model.binary.RecordWithVlenCollectionsSerializer());
     end
   end
 
   methods (Access=protected)
-    function value = read_with_fixed_subarrays_(obj)
-      value = obj.with_fixed_subarrays_serializer.read(obj.stream_);
+    function value = read_with_fixed_subarrays_(self)
+      value = self.with_fixed_subarrays_serializer.read(self.stream_);
     end
 
-    function value = read_with_vlen_subarrays_(obj)
-      value = obj.with_vlen_subarrays_serializer.read(obj.stream_);
+    function value = read_with_vlen_subarrays_(self)
+      value = self.with_vlen_subarrays_serializer.read(self.stream_);
     end
   end
 end

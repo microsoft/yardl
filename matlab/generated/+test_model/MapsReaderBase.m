@@ -6,63 +6,63 @@ classdef MapsReaderBase < handle
   end
 
   methods
-    function obj = MapsReaderBase()
-      obj.state_ = 0;
+    function self = MapsReaderBase()
+      self.state_ = 0;
     end
 
-    function close(obj)
-      obj.close_();
-      if obj.state_ ~= 4
-        expected_method = obj.state_to_method_name_(obj.state_);
+    function close(self)
+      self.close_();
+      if self.state_ ~= 4
+        expected_method = self.state_to_method_name_(self.state_);
         throw(yardl.ProtocolError("Protocol reader closed before all data was consumed. Expected call to '%s'.", expected_method));
       end
     end
 
     % Ordinal 0
-    function value = read_string_to_int(obj)
-      if obj.state_ ~= 0
-        obj.raise_unexpected_state_(0);
+    function value = read_string_to_int(self)
+      if self.state_ ~= 0
+        self.raise_unexpected_state_(0);
       end
 
-      value = obj.read_string_to_int_();
-      obj.state_ = 1;
+      value = self.read_string_to_int_();
+      self.state_ = 1;
     end
 
     % Ordinal 1
-    function value = read_int_to_string(obj)
-      if obj.state_ ~= 1
-        obj.raise_unexpected_state_(1);
+    function value = read_int_to_string(self)
+      if self.state_ ~= 1
+        self.raise_unexpected_state_(1);
       end
 
-      value = obj.read_int_to_string_();
-      obj.state_ = 2;
+      value = self.read_int_to_string_();
+      self.state_ = 2;
     end
 
     % Ordinal 2
-    function value = read_string_to_union(obj)
-      if obj.state_ ~= 2
-        obj.raise_unexpected_state_(2);
+    function value = read_string_to_union(self)
+      if self.state_ ~= 2
+        self.raise_unexpected_state_(2);
       end
 
-      value = obj.read_string_to_union_();
-      obj.state_ = 3;
+      value = self.read_string_to_union_();
+      self.state_ = 3;
     end
 
     % Ordinal 3
-    function value = read_aliased_generic(obj)
-      if obj.state_ ~= 3
-        obj.raise_unexpected_state_(3);
+    function value = read_aliased_generic(self)
+      if self.state_ ~= 3
+        self.raise_unexpected_state_(3);
       end
 
-      value = obj.read_aliased_generic_();
-      obj.state_ = 4;
+      value = self.read_aliased_generic_();
+      self.state_ = 4;
     end
 
-    function copy_to(obj, writer)
-      writer.write_string_to_int(obj.read_string_to_int());
-      writer.write_int_to_string(obj.read_int_to_string());
-      writer.write_string_to_union(obj.read_string_to_union());
-      writer.write_aliased_generic(obj.read_aliased_generic());
+    function copy_to(self, writer)
+      writer.write_string_to_int(self.read_string_to_int());
+      writer.write_int_to_string(self.read_int_to_string());
+      writer.write_string_to_union(self.read_string_to_union());
+      writer.write_aliased_generic(self.read_aliased_generic());
     end
   end
 
@@ -73,32 +73,32 @@ classdef MapsReaderBase < handle
   end
 
   methods (Abstract, Access=protected)
-    read_string_to_int_(obj)
-    read_int_to_string_(obj)
-    read_string_to_union_(obj)
-    read_aliased_generic_(obj)
+    read_string_to_int_(self)
+    read_int_to_string_(self)
+    read_string_to_union_(self)
+    read_aliased_generic_(self)
 
-    close_(obj)
+    close_(self)
   end
 
   methods (Access=private)
-    function raise_unexpected_state_(obj, actual)
-      actual_method = obj.state_to_method_name_(actual);
-      expected_method = obj.state_to_method_name_(obj.state_);
+    function raise_unexpected_state_(self, actual)
+      actual_method = self.state_to_method_name_(actual);
+      expected_method = self.state_to_method_name_(self.state_);
       throw(yardl.ProtocolError("Expected call to '%s' but received call to '%s'.", expected_method, actual_method));
     end
 
-    function name = state_to_method_name_(obj, state)
+    function name = state_to_method_name_(self, state)
       if state == 0
-        name = 'read_string_to_int';
+        name = "read_string_to_int";
       elseif state == 1
-        name = 'read_int_to_string';
+        name = "read_int_to_string";
       elseif state == 2
-        name = 'read_string_to_union';
+        name = "read_string_to_union";
       elseif state == 3
-        name = 'read_aliased_generic';
+        name = "read_aliased_generic";
       else
-        name = '<unknown>';
+        name = "<unknown>";
       end
     end
   end

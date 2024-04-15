@@ -7,16 +7,16 @@ classdef ProtocolWithComputedFieldsWriter < yardl.binary.BinaryProtocolWriter & 
   end
 
   methods
-    function obj = ProtocolWithComputedFieldsWriter(filename)
-      obj@test_model.ProtocolWithComputedFieldsWriterBase();
-      obj@yardl.binary.BinaryProtocolWriter(filename, test_model.ProtocolWithComputedFieldsWriterBase.schema);
-      obj.record_with_computed_fields_serializer = test_model.binary.RecordWithComputedFieldsSerializer();
+    function self = ProtocolWithComputedFieldsWriter(filename)
+      self@test_model.ProtocolWithComputedFieldsWriterBase();
+      self@yardl.binary.BinaryProtocolWriter(filename, test_model.ProtocolWithComputedFieldsWriterBase.schema);
+      self.record_with_computed_fields_serializer = test_model.binary.RecordWithComputedFieldsSerializer();
     end
   end
 
   methods (Access=protected)
-    function write_record_with_computed_fields_(obj, value)
-      obj.record_with_computed_fields_serializer.write(obj.stream_, value);
+    function write_record_with_computed_fields_(self, value)
+      self.record_with_computed_fields_serializer.write(self.stream_, value);
     end
   end
 end

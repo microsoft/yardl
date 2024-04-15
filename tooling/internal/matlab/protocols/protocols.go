@@ -39,17 +39,17 @@ func writeAbstractWriter(fw *common.MatlabFileWriter, p *dsl.ProtocolDefinition,
 			w.WriteStringln("methods")
 			common.WriteBlockBody(w, func() {
 				// Constructor
-				fmt.Fprintf(w, "function obj = %s()\n", common.AbstractWriterName(p))
-				common.WriteBlockBody(w, func() { w.WriteStringln("obj.state_ = 0;") })
+				fmt.Fprintf(w, "function self = %s()\n", common.AbstractWriterName(p))
+				common.WriteBlockBody(w, func() { w.WriteStringln("self.state_ = 0;") })
 				w.WriteStringln("")
 
 				// Close method
-				w.WriteStringln("function close(obj)")
+				w.WriteStringln("function close(self)")
 				common.WriteBlockBody(w, func() {
-					w.WriteStringln("obj.close_();")
-					fmt.Fprintf(w, "if obj.state_ ~= %d\n", len(p.Sequence))
+					w.WriteStringln("self.close_();")
+					fmt.Fprintf(w, "if self.state_ ~= %d\n", len(p.Sequence))
 					common.WriteBlockBody(w, func() {
-						w.WriteStringln("expected_method = obj.state_to_method_name_(bitand((int32(obj.state_) + 1), bitcmp(1, 'int8')));")
+						w.WriteStringln("expected_method = self.state_to_method_name_(self.state_);")
 						w.WriteStringln(`throw(yardl.ProtocolError("Protocol writer closed before all steps were called. Expected call to '%s'.", expected_method));`)
 					})
 				})
@@ -59,30 +59,30 @@ func writeAbstractWriter(fw *common.MatlabFileWriter, p *dsl.ProtocolDefinition,
 				for i, step := range p.Sequence {
 					common.WriteComment(w, fmt.Sprintf("Ordinal %d", i))
 					common.WriteComment(w, step.Comment)
-					fmt.Fprintf(w, "function %s(obj, value)\n", common.ProtocolWriteMethodName(step))
+					fmt.Fprintf(w, "function %s(self, value)\n", common.ProtocolWriteMethodName(step))
 					common.WriteBlockBody(w, func() {
-						fmt.Fprintf(w, "if obj.state_ ~= %d\n", i)
+						fmt.Fprintf(w, "if self.state_ ~= %d\n", i)
 						common.WriteBlockBody(w, func() {
-							fmt.Fprintf(w, "obj.raise_unexpected_state_(%d);\n", i)
+							fmt.Fprintf(w, "self.raise_unexpected_state_(%d);\n", i)
 						})
 						w.WriteStringln("")
-						fmt.Fprintf(w, "obj.%s(value);\n", common.ProtocolWriteImplMethodName(step))
+						fmt.Fprintf(w, "self.%s(value);\n", common.ProtocolWriteImplMethodName(step))
 						if !step.IsStream() {
-							fmt.Fprintf(w, "obj.state_ = %d;\n", i+1)
+							fmt.Fprintf(w, "self.state_ = %d;\n", i+1)
 						}
 					})
 
 					if step.IsStream() {
 						w.WriteStringln("")
-						fmt.Fprintf(w, "function %s(obj)\n", common.ProtocolEndMethodName(step))
+						fmt.Fprintf(w, "function %s(self)\n", common.ProtocolEndMethodName(step))
 						common.WriteBlockBody(w, func() {
-							fmt.Fprintf(w, "if obj.state_ ~= %d\n", i)
+							fmt.Fprintf(w, "if self.state_ ~= %d\n", i)
 							common.WriteBlockBody(w, func() {
-								fmt.Fprintf(w, "obj.raise_unexpected_state_(%d);\n", i)
+								fmt.Fprintf(w, "self.raise_unexpected_state_(%d);\n", i)
 							})
 							w.WriteStringln("")
-							fmt.Fprintf(w, "obj.end_stream_();\n")
-							fmt.Fprintf(w, "obj.state_ = %d;\n", i+1)
+							fmt.Fprintf(w, "self.end_stream_();\n")
+							fmt.Fprintf(w, "self.state_ = %d;\n", i+1)
 						})
 					}
 
@@ -106,14 +106,14 @@ func writeAbstractWriter(fw *common.MatlabFileWriter, p *dsl.ProtocolDefinition,
 			w.WriteStringln("methods (Abstract, Access=protected)")
 			common.WriteBlockBody(w, func() {
 				for _, step := range p.Sequence {
-					fmt.Fprintf(w, "%s(obj, value)\n", common.ProtocolWriteImplMethodName(step))
+					fmt.Fprintf(w, "%s(self, value)\n", common.ProtocolWriteImplMethodName(step))
 				}
 				w.WriteStringln("")
 
 				// end_stream method
-				w.WriteStringln("end_stream_(obj)")
+				w.WriteStringln("end_stream_(self)")
 				// underlying close method
-				w.WriteStringln("close_(obj)")
+				w.WriteStringln("close_(self)")
 			})
 			w.WriteStringln("")
 
@@ -121,23 +121,23 @@ func writeAbstractWriter(fw *common.MatlabFileWriter, p *dsl.ProtocolDefinition,
 			w.WriteStringln("methods (Access=private)")
 			common.WriteBlockBody(w, func() {
 				// raise_unexpected_state method
-				w.WriteStringln("function raise_unexpected_state_(obj, actual)")
+				w.WriteStringln("function raise_unexpected_state_(self, actual)")
 				common.WriteBlockBody(w, func() {
-					w.WriteStringln("expected_method = obj.state_to_method_name_(obj.state_);")
-					w.WriteStringln("actual_method = obj.state_to_method_name_(actual);")
+					w.WriteStringln("expected_method = self.state_to_method_name_(self.state_);")
+					w.WriteStringln("actual_method = self.state_to_method_name_(actual);")
 					w.WriteStringln(`throw(yardl.ProtocolError("Expected call to '%s' but received call to '%s'", expected_method, actual_method));`)
 				})
 				w.WriteStringln("")
 
-				w.WriteStringln("function name = state_to_method_name_(obj, state)")
+				w.WriteStringln("function name = state_to_method_name_(self, state)")
 				common.WriteBlockBody(w, func() {
 					for i, step := range p.Sequence {
 						fmt.Fprintf(w, "if state == %d\n", i)
 						w.Indented(func() {
 							if step.IsStream() {
-								fmt.Fprintf(w, "name = '%s or %s';\n", common.ProtocolWriteMethodName(step), common.ProtocolEndMethodName(step))
+								fmt.Fprintf(w, "name = \"%s or %s\";\n", common.ProtocolWriteMethodName(step), common.ProtocolEndMethodName(step))
 							} else {
-								fmt.Fprintf(w, "name = '%s';\n", common.ProtocolWriteMethodName(step))
+								fmt.Fprintf(w, "name = \"%s\";\n", common.ProtocolWriteMethodName(step))
 							}
 						})
 						w.WriteString("else")
@@ -168,19 +168,19 @@ func writeAbstractReader(fw *common.MatlabFileWriter, p *dsl.ProtocolDefinition,
 			w.WriteStringln("methods")
 			common.WriteBlockBody(w, func() {
 				// Constructor
-				fmt.Fprintf(w, "function obj = %s()\n", common.AbstractReaderName(p))
+				fmt.Fprintf(w, "function self = %s()\n", common.AbstractReaderName(p))
 				common.WriteBlockBody(w, func() {
-					w.WriteStringln("obj.state_ = 0;")
+					w.WriteStringln("self.state_ = 0;")
 				})
 				w.WriteStringln("")
 
 				// Close method
-				w.WriteStringln("function close(obj)")
+				w.WriteStringln("function close(self)")
 				common.WriteBlockBody(w, func() {
-					w.WriteStringln("obj.close_();")
-					fmt.Fprintf(w, "if obj.state_ ~= %d\n", len(p.Sequence))
+					w.WriteStringln("self.close_();")
+					fmt.Fprintf(w, "if self.state_ ~= %d\n", len(p.Sequence))
 					common.WriteBlockBody(w, func() {
-						w.WriteStringln("expected_method = obj.state_to_method_name_(obj.state_);")
+						w.WriteStringln("expected_method = self.state_to_method_name_(self.state_);")
 						w.WriteStringln(`throw(yardl.ProtocolError("Protocol reader closed before all data was consumed. Expected call to '%s'.", expected_method));`)
 					})
 				})
@@ -190,52 +190,52 @@ func writeAbstractReader(fw *common.MatlabFileWriter, p *dsl.ProtocolDefinition,
 				for i, step := range p.Sequence {
 					common.WriteComment(w, fmt.Sprintf("Ordinal %d", i))
 					if step.IsStream() {
-						fmt.Fprintf(w, "function more = %s(obj)\n", common.ProtocolHasMoreMethodName(step))
+						fmt.Fprintf(w, "function more = %s(self)\n", common.ProtocolHasMoreMethodName(step))
 						common.WriteBlockBody(w, func() {
-							fmt.Fprintf(w, "if obj.state_ ~= %d\n", i)
+							fmt.Fprintf(w, "if self.state_ ~= %d\n", i)
 							common.WriteBlockBody(w, func() {
-								fmt.Fprintf(w, "obj.raise_unexpected_state_(%d);\n", i)
+								fmt.Fprintf(w, "self.raise_unexpected_state_(%d);\n", i)
 							})
 							w.WriteStringln("")
 
-							fmt.Fprintf(w, "more = obj.%s();\n", common.ProtocolHasMoreImplMethodName(step))
+							fmt.Fprintf(w, "more = self.%s();\n", common.ProtocolHasMoreImplMethodName(step))
 							w.WriteStringln("if ~more")
 							common.WriteBlockBody(w, func() {
-								fmt.Fprintf(w, "obj.state_ = %d;\n", i+1)
+								fmt.Fprintf(w, "self.state_ = %d;\n", i+1)
 							})
 						})
 						w.WriteStringln("")
 					}
 					common.WriteComment(w, step.Comment)
-					fmt.Fprintf(w, "function value = %s(obj)\n", common.ProtocolReadMethodName(step))
+					fmt.Fprintf(w, "function value = %s(self)\n", common.ProtocolReadMethodName(step))
 					common.WriteBlockBody(w, func() {
-						fmt.Fprintf(w, "if obj.state_ ~= %d\n", i)
+						fmt.Fprintf(w, "if self.state_ ~= %d\n", i)
 						common.WriteBlockBody(w, func() {
-							fmt.Fprintf(w, "obj.raise_unexpected_state_(%d);\n", i)
+							fmt.Fprintf(w, "self.raise_unexpected_state_(%d);\n", i)
 						})
 						w.WriteStringln("")
 
-						fmt.Fprintf(w, "value = obj.%s();\n", common.ProtocolReadImplMethodName(step))
+						fmt.Fprintf(w, "value = self.%s();\n", common.ProtocolReadImplMethodName(step))
 						if !step.IsStream() {
-							fmt.Fprintf(w, "obj.state_ = %d;\n", i+1)
+							fmt.Fprintf(w, "self.state_ = %d;\n", i+1)
 						}
 					})
 					w.WriteStringln("")
 				}
 
 				// copy_to method
-				fmt.Fprintf(w, "function copy_to(obj, writer)\n")
+				fmt.Fprintf(w, "function copy_to(self, writer)\n")
 				common.WriteBlockBody(w, func() {
 					for _, step := range p.Sequence {
 						if step.IsStream() {
-							fmt.Fprintf(w, "while obj.%s()\n", common.ProtocolHasMoreMethodName(step))
+							fmt.Fprintf(w, "while self.%s()\n", common.ProtocolHasMoreMethodName(step))
 							common.WriteBlockBody(w, func() {
-								fmt.Fprintf(w, "item = obj.%s();\n", common.ProtocolReadMethodName(step))
+								fmt.Fprintf(w, "item = self.%s();\n", common.ProtocolReadMethodName(step))
 								fmt.Fprintf(w, "writer.%s({item});\n", common.ProtocolWriteMethodName(step))
 							})
 							fmt.Fprintf(w, "writer.%s();\n", common.ProtocolEndMethodName(step))
 						} else {
-							fmt.Fprintf(w, "writer.%s(obj.%s());\n", common.ProtocolWriteMethodName(step), common.ProtocolReadMethodName(step))
+							fmt.Fprintf(w, "writer.%s(self.%s());\n", common.ProtocolWriteMethodName(step), common.ProtocolReadMethodName(step))
 						}
 					}
 				})
@@ -256,40 +256,40 @@ func writeAbstractReader(fw *common.MatlabFileWriter, p *dsl.ProtocolDefinition,
 			common.WriteBlockBody(w, func() {
 				for _, step := range p.Sequence {
 					if step.IsStream() {
-						fmt.Fprintf(w, "%s(obj)\n", common.ProtocolHasMoreImplMethodName(step))
+						fmt.Fprintf(w, "%s(self)\n", common.ProtocolHasMoreImplMethodName(step))
 					}
-					fmt.Fprintf(w, "%s(obj)\n", common.ProtocolReadImplMethodName(step))
+					fmt.Fprintf(w, "%s(self)\n", common.ProtocolReadImplMethodName(step))
 				}
 
 				w.WriteStringln("")
-				w.WriteStringln("close_(obj)")
+				w.WriteStringln("close_(self)")
 			})
 			w.WriteStringln("")
 
 			w.WriteStringln("methods (Access=private)")
 			common.WriteBlockBody(w, func() {
 				// raise_unexpected_state method
-				w.WriteStringln("function raise_unexpected_state_(obj, actual)")
+				w.WriteStringln("function raise_unexpected_state_(self, actual)")
 				common.WriteBlockBody(w, func() {
-					w.WriteStringln("actual_method = obj.state_to_method_name_(actual);")
-					w.WriteStringln("expected_method = obj.state_to_method_name_(obj.state_);")
+					w.WriteStringln("actual_method = self.state_to_method_name_(actual);")
+					w.WriteStringln("expected_method = self.state_to_method_name_(self.state_);")
 					w.WriteStringln(`throw(yardl.ProtocolError("Expected call to '%s' but received call to '%s'.", expected_method, actual_method));`)
 				})
 				w.WriteStringln("")
 
 				// state_to_method_name method
-				w.WriteStringln("function name = state_to_method_name_(obj, state)")
+				w.WriteStringln("function name = state_to_method_name_(self, state)")
 				common.WriteBlockBody(w, func() {
 					for i, step := range p.Sequence {
 						fmt.Fprintf(w, "if state == %d\n", i)
 						w.Indented(func() {
-							fmt.Fprintf(w, "name = '%s';\n", common.ProtocolReadMethodName(step))
+							fmt.Fprintf(w, "name = \"%s\";\n", common.ProtocolReadMethodName(step))
 						})
 						w.WriteString("else")
 					}
 					w.WriteStringln("")
 					common.WriteBlockBody(w, func() {
-						w.WriteStringln("name = '<unknown>';")
+						w.WriteStringln("name = \"<unknown>\";")
 					})
 				})
 			})

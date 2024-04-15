@@ -6,41 +6,41 @@ classdef StringsReaderBase < handle
   end
 
   methods
-    function obj = StringsReaderBase()
-      obj.state_ = 0;
+    function self = StringsReaderBase()
+      self.state_ = 0;
     end
 
-    function close(obj)
-      obj.close_();
-      if obj.state_ ~= 2
-        expected_method = obj.state_to_method_name_(obj.state_);
+    function close(self)
+      self.close_();
+      if self.state_ ~= 2
+        expected_method = self.state_to_method_name_(self.state_);
         throw(yardl.ProtocolError("Protocol reader closed before all data was consumed. Expected call to '%s'.", expected_method));
       end
     end
 
     % Ordinal 0
-    function value = read_single_string(obj)
-      if obj.state_ ~= 0
-        obj.raise_unexpected_state_(0);
+    function value = read_single_string(self)
+      if self.state_ ~= 0
+        self.raise_unexpected_state_(0);
       end
 
-      value = obj.read_single_string_();
-      obj.state_ = 1;
+      value = self.read_single_string_();
+      self.state_ = 1;
     end
 
     % Ordinal 1
-    function value = read_rec_with_string(obj)
-      if obj.state_ ~= 1
-        obj.raise_unexpected_state_(1);
+    function value = read_rec_with_string(self)
+      if self.state_ ~= 1
+        self.raise_unexpected_state_(1);
       end
 
-      value = obj.read_rec_with_string_();
-      obj.state_ = 2;
+      value = self.read_rec_with_string_();
+      self.state_ = 2;
     end
 
-    function copy_to(obj, writer)
-      writer.write_single_string(obj.read_single_string());
-      writer.write_rec_with_string(obj.read_rec_with_string());
+    function copy_to(self, writer)
+      writer.write_single_string(self.read_single_string());
+      writer.write_rec_with_string(self.read_rec_with_string());
     end
   end
 
@@ -51,26 +51,26 @@ classdef StringsReaderBase < handle
   end
 
   methods (Abstract, Access=protected)
-    read_single_string_(obj)
-    read_rec_with_string_(obj)
+    read_single_string_(self)
+    read_rec_with_string_(self)
 
-    close_(obj)
+    close_(self)
   end
 
   methods (Access=private)
-    function raise_unexpected_state_(obj, actual)
-      actual_method = obj.state_to_method_name_(actual);
-      expected_method = obj.state_to_method_name_(obj.state_);
+    function raise_unexpected_state_(self, actual)
+      actual_method = self.state_to_method_name_(actual);
+      expected_method = self.state_to_method_name_(self.state_);
       throw(yardl.ProtocolError("Expected call to '%s' but received call to '%s'.", expected_method, actual_method));
     end
 
-    function name = state_to_method_name_(obj, state)
+    function name = state_to_method_name_(self, state)
       if state == 0
-        name = 'read_single_string';
+        name = "read_single_string";
       elseif state == 1
-        name = 'read_rec_with_string';
+        name = "read_rec_with_string";
       else
-        name = '<unknown>';
+        name = "<unknown>";
       end
     end
   end

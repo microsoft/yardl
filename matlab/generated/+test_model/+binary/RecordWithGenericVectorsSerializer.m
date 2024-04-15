@@ -2,19 +2,23 @@
 
 classdef RecordWithGenericVectorsSerializer < yardl.binary.RecordSerializer
   methods
-    function obj = RecordWithGenericVectorsSerializer(t_serializer)
+    function self = RecordWithGenericVectorsSerializer(t_serializer)
       field_serializers{1} = yardl.binary.VectorSerializer(t_serializer);
       field_serializers{2} = yardl.binary.VectorSerializer(t_serializer);
-      obj@yardl.binary.RecordSerializer('test_model.RecordWithGenericVectors', field_serializers);
+      self@yardl.binary.RecordSerializer('test_model.RecordWithGenericVectors', field_serializers);
     end
 
-    function write(obj, outstream, value)
-      assert(isa(value, 'test_model.RecordWithGenericVectors'));
-      obj.write_(outstream, value.v, value.av)
+    function write(self, outstream, value)
+      arguments
+        self
+        outstream (1,1) yardl.binary.CodedOutputStream
+        value (1,1) test_model.RecordWithGenericVectors
+      end
+      self.write_(outstream, value.v, value.av)
     end
 
-    function value = read(obj, instream)
-      field_values = obj.read_(instream);
+    function value = read(self, instream)
+      field_values = self.read_(instream);
       value = test_model.RecordWithGenericVectors(field_values{:});
     end
   end

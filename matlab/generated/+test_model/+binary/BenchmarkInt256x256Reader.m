@@ -7,20 +7,20 @@ classdef BenchmarkInt256x256Reader < yardl.binary.BinaryProtocolReader & test_mo
   end
 
   methods
-    function obj = BenchmarkInt256x256Reader(filename)
-      obj@test_model.BenchmarkInt256x256ReaderBase();
-      obj@yardl.binary.BinaryProtocolReader(filename, test_model.BenchmarkInt256x256ReaderBase.schema);
-      obj.int256x256_serializer = yardl.binary.StreamSerializer(yardl.binary.FixedNDArraySerializer(yardl.binary.Int32Serializer, [256, 256]));
+    function self = BenchmarkInt256x256Reader(filename)
+      self@test_model.BenchmarkInt256x256ReaderBase();
+      self@yardl.binary.BinaryProtocolReader(filename, test_model.BenchmarkInt256x256ReaderBase.schema);
+      self.int256x256_serializer = yardl.binary.StreamSerializer(yardl.binary.FixedNDArraySerializer(yardl.binary.Int32Serializer, [256, 256]));
     end
   end
 
   methods (Access=protected)
-    function more = has_int256x256_(obj)
-      more = obj.int256x256_serializer.hasnext(obj.stream_);
+    function more = has_int256x256_(self)
+      more = self.int256x256_serializer.hasnext(self.stream_);
     end
 
-    function value = read_int256x256_(obj)
-      value = obj.int256x256_serializer.read(obj.stream_);
+    function value = read_int256x256_(self)
+      value = self.int256x256_serializer.read(self.stream_);
     end
   end
 end

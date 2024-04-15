@@ -8,21 +8,21 @@ classdef SubarraysInRecordsWriter < yardl.binary.BinaryProtocolWriter & test_mod
   end
 
   methods
-    function obj = SubarraysInRecordsWriter(filename)
-      obj@test_model.SubarraysInRecordsWriterBase();
-      obj@yardl.binary.BinaryProtocolWriter(filename, test_model.SubarraysInRecordsWriterBase.schema);
-      obj.with_fixed_subarrays_serializer = yardl.binary.DynamicNDArraySerializer(test_model.binary.RecordWithFixedCollectionsSerializer());
-      obj.with_vlen_subarrays_serializer = yardl.binary.DynamicNDArraySerializer(test_model.binary.RecordWithVlenCollectionsSerializer());
+    function self = SubarraysInRecordsWriter(filename)
+      self@test_model.SubarraysInRecordsWriterBase();
+      self@yardl.binary.BinaryProtocolWriter(filename, test_model.SubarraysInRecordsWriterBase.schema);
+      self.with_fixed_subarrays_serializer = yardl.binary.DynamicNDArraySerializer(test_model.binary.RecordWithFixedCollectionsSerializer());
+      self.with_vlen_subarrays_serializer = yardl.binary.DynamicNDArraySerializer(test_model.binary.RecordWithVlenCollectionsSerializer());
     end
   end
 
   methods (Access=protected)
-    function write_with_fixed_subarrays_(obj, value)
-      obj.with_fixed_subarrays_serializer.write(obj.stream_, value);
+    function write_with_fixed_subarrays_(self, value)
+      self.with_fixed_subarrays_serializer.write(self.stream_, value);
     end
 
-    function write_with_vlen_subarrays_(obj, value)
-      obj.with_vlen_subarrays_serializer.write(obj.stream_, value);
+    function write_with_vlen_subarrays_(self, value)
+      self.with_vlen_subarrays_serializer.write(self.stream_, value);
     end
   end
 end

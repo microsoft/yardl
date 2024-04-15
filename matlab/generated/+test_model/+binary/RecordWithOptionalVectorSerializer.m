@@ -2,18 +2,22 @@
 
 classdef RecordWithOptionalVectorSerializer < yardl.binary.RecordSerializer
   methods
-    function obj = RecordWithOptionalVectorSerializer()
+    function self = RecordWithOptionalVectorSerializer()
       field_serializers{1} = yardl.binary.OptionalSerializer(yardl.binary.VectorSerializer(yardl.binary.Int32Serializer));
-      obj@yardl.binary.RecordSerializer('test_model.RecordWithOptionalVector', field_serializers);
+      self@yardl.binary.RecordSerializer('test_model.RecordWithOptionalVector', field_serializers);
     end
 
-    function write(obj, outstream, value)
-      assert(isa(value, 'test_model.RecordWithOptionalVector'));
-      obj.write_(outstream, value.optional_vector)
+    function write(self, outstream, value)
+      arguments
+        self
+        outstream (1,1) yardl.binary.CodedOutputStream
+        value (1,1) test_model.RecordWithOptionalVector
+      end
+      self.write_(outstream, value.optional_vector)
     end
 
-    function value = read(obj, instream)
-      field_values = obj.read_(instream);
+    function value = read(self, instream)
+      field_values = self.read_(instream);
       value = test_model.RecordWithOptionalVector(field_values{:});
     end
   end

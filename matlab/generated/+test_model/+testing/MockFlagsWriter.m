@@ -8,16 +8,16 @@ classdef MockFlagsWriter < matlab.mixin.Copyable & test_model.FlagsWriterBase
   end
 
   methods
-    function obj = MockFlagsWriter(testCase)
-      obj.testCase_ = testCase;
-      obj.expected_days = {};
-      obj.expected_formats = {};
+    function self = MockFlagsWriter(testCase)
+      self.testCase_ = testCase;
+      self.expected_days = {};
+      self.expected_formats = {};
     end
 
-    function expect_write_days_(obj, value)
+    function expect_write_days_(self, value)
       if iscell(value)
         for n = 1:numel(value)
-          obj.expected_days{end+1} = value{n};
+          self.expected_days{end+1} = value{n};
         end
         return;
       end
@@ -26,14 +26,14 @@ classdef MockFlagsWriter < matlab.mixin.Copyable & test_model.FlagsWriterBase
       count = shape(lastDim);
       index = repelem({':'}, lastDim-1);
       for n = 1:count
-        obj.expected_days{end+1} = value(index{:}, n);
+        self.expected_days{end+1} = value(index{:}, n);
       end
     end
 
-    function expect_write_formats_(obj, value)
+    function expect_write_formats_(self, value)
       if iscell(value)
         for n = 1:numel(value)
-          obj.expected_formats{end+1} = value{n};
+          self.expected_formats{end+1} = value{n};
         end
         return;
       end
@@ -42,36 +42,36 @@ classdef MockFlagsWriter < matlab.mixin.Copyable & test_model.FlagsWriterBase
       count = shape(lastDim);
       index = repelem({':'}, lastDim-1);
       for n = 1:count
-        obj.expected_formats{end+1} = value(index{:}, n);
+        self.expected_formats{end+1} = value(index{:}, n);
       end
     end
 
-    function verify(obj)
-      obj.testCase_.verifyTrue(isempty(obj.expected_days), "Expected call to write_days_ was not received");
-      obj.testCase_.verifyTrue(isempty(obj.expected_formats), "Expected call to write_formats_ was not received");
+    function verify(self)
+      self.testCase_.verifyTrue(isempty(self.expected_days), "Expected call to write_days_ was not received");
+      self.testCase_.verifyTrue(isempty(self.expected_formats), "Expected call to write_formats_ was not received");
     end
   end
 
   methods (Access=protected)
-    function write_days_(obj, value)
+    function write_days_(self, value)
       assert(iscell(value));
       assert(isscalar(value));
-      obj.testCase_.verifyFalse(isempty(obj.expected_days), "Unexpected call to write_days_");
-      obj.testCase_.verifyEqual(value{1}, obj.expected_days{1}, "Unexpected argument value for call to write_days_");
-      obj.expected_days = obj.expected_days(2:end);
+      self.testCase_.verifyFalse(isempty(self.expected_days), "Unexpected call to write_days_");
+      self.testCase_.verifyEqual(value{1}, self.expected_days{1}, "Unexpected argument value for call to write_days_");
+      self.expected_days = self.expected_days(2:end);
     end
 
-    function write_formats_(obj, value)
+    function write_formats_(self, value)
       assert(iscell(value));
       assert(isscalar(value));
-      obj.testCase_.verifyFalse(isempty(obj.expected_formats), "Unexpected call to write_formats_");
-      obj.testCase_.verifyEqual(value{1}, obj.expected_formats{1}, "Unexpected argument value for call to write_formats_");
-      obj.expected_formats = obj.expected_formats(2:end);
+      self.testCase_.verifyFalse(isempty(self.expected_formats), "Unexpected call to write_formats_");
+      self.testCase_.verifyEqual(value{1}, self.expected_formats{1}, "Unexpected argument value for call to write_formats_");
+      self.expected_formats = self.expected_formats(2:end);
     end
 
-    function close_(obj)
+    function close_(self)
     end
-    function end_stream_(obj)
+    function end_stream_(self)
     end
   end
 end

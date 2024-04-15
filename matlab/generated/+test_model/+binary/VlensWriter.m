@@ -10,31 +10,31 @@ classdef VlensWriter < yardl.binary.BinaryProtocolWriter & test_model.VlensWrite
   end
 
   methods
-    function obj = VlensWriter(filename)
-      obj@test_model.VlensWriterBase();
-      obj@yardl.binary.BinaryProtocolWriter(filename, test_model.VlensWriterBase.schema);
-      obj.int_vector_serializer = yardl.binary.VectorSerializer(yardl.binary.Int32Serializer);
-      obj.complex_vector_serializer = yardl.binary.VectorSerializer(yardl.binary.Complexfloat32Serializer);
-      obj.record_with_vlens_serializer = test_model.binary.RecordWithVlensSerializer();
-      obj.vlen_of_record_with_vlens_serializer = yardl.binary.VectorSerializer(test_model.binary.RecordWithVlensSerializer());
+    function self = VlensWriter(filename)
+      self@test_model.VlensWriterBase();
+      self@yardl.binary.BinaryProtocolWriter(filename, test_model.VlensWriterBase.schema);
+      self.int_vector_serializer = yardl.binary.VectorSerializer(yardl.binary.Int32Serializer);
+      self.complex_vector_serializer = yardl.binary.VectorSerializer(yardl.binary.Complexfloat32Serializer);
+      self.record_with_vlens_serializer = test_model.binary.RecordWithVlensSerializer();
+      self.vlen_of_record_with_vlens_serializer = yardl.binary.VectorSerializer(test_model.binary.RecordWithVlensSerializer());
     end
   end
 
   methods (Access=protected)
-    function write_int_vector_(obj, value)
-      obj.int_vector_serializer.write(obj.stream_, value);
+    function write_int_vector_(self, value)
+      self.int_vector_serializer.write(self.stream_, value);
     end
 
-    function write_complex_vector_(obj, value)
-      obj.complex_vector_serializer.write(obj.stream_, value);
+    function write_complex_vector_(self, value)
+      self.complex_vector_serializer.write(self.stream_, value);
     end
 
-    function write_record_with_vlens_(obj, value)
-      obj.record_with_vlens_serializer.write(obj.stream_, value);
+    function write_record_with_vlens_(self, value)
+      self.record_with_vlens_serializer.write(self.stream_, value);
     end
 
-    function write_vlen_of_record_with_vlens_(obj, value)
-      obj.vlen_of_record_with_vlens_serializer.write(obj.stream_, value);
+    function write_vlen_of_record_with_vlens_(self, value)
+      self.vlen_of_record_with_vlens_serializer.write(self.stream_, value);
     end
   end
 end

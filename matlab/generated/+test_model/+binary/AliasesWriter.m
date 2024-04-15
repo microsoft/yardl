@@ -16,61 +16,61 @@ classdef AliasesWriter < yardl.binary.BinaryProtocolWriter & test_model.AliasesW
   end
 
   methods
-    function obj = AliasesWriter(filename)
-      obj@test_model.AliasesWriterBase();
-      obj@yardl.binary.BinaryProtocolWriter(filename, test_model.AliasesWriterBase.schema);
-      obj.aliased_string_serializer = yardl.binary.StringSerializer;
-      obj.aliased_enum_serializer = yardl.binary.EnumSerializer('basic_types.Fruits', @basic_types.Fruits, yardl.binary.Int32Serializer);
-      obj.aliased_open_generic_serializer = tuples.binary.TupleSerializer(yardl.binary.StringSerializer, yardl.binary.EnumSerializer('basic_types.Fruits', @basic_types.Fruits, yardl.binary.Int32Serializer));
-      obj.aliased_closed_generic_serializer = tuples.binary.TupleSerializer(yardl.binary.StringSerializer, yardl.binary.EnumSerializer('basic_types.Fruits', @basic_types.Fruits, yardl.binary.Int32Serializer));
-      obj.aliased_optional_serializer = yardl.binary.OptionalSerializer(yardl.binary.Int32Serializer);
-      obj.aliased_generic_optional_serializer = yardl.binary.OptionalSerializer(yardl.binary.Float32Serializer);
-      obj.aliased_generic_union_2_serializer = yardl.binary.UnionSerializer('basic_types.GenericUnion2', {yardl.binary.StringSerializer, yardl.binary.EnumSerializer('basic_types.Fruits', @basic_types.Fruits, yardl.binary.Int32Serializer)}, {@basic_types.GenericUnion2.T1, @basic_types.GenericUnion2.T2});
-      obj.aliased_generic_vector_serializer = yardl.binary.VectorSerializer(yardl.binary.Float32Serializer);
-      obj.aliased_generic_fixed_vector_serializer = yardl.binary.FixedVectorSerializer(yardl.binary.Float32Serializer, 3);
-      obj.stream_of_aliased_generic_union_2_serializer = yardl.binary.StreamSerializer(yardl.binary.UnionSerializer('basic_types.GenericUnion2', {yardl.binary.StringSerializer, yardl.binary.EnumSerializer('basic_types.Fruits', @basic_types.Fruits, yardl.binary.Int32Serializer)}, {@basic_types.GenericUnion2.T1, @basic_types.GenericUnion2.T2}));
+    function self = AliasesWriter(filename)
+      self@test_model.AliasesWriterBase();
+      self@yardl.binary.BinaryProtocolWriter(filename, test_model.AliasesWriterBase.schema);
+      self.aliased_string_serializer = yardl.binary.StringSerializer;
+      self.aliased_enum_serializer = yardl.binary.EnumSerializer('basic_types.Fruits', @basic_types.Fruits, yardl.binary.Int32Serializer);
+      self.aliased_open_generic_serializer = tuples.binary.TupleSerializer(yardl.binary.StringSerializer, yardl.binary.EnumSerializer('basic_types.Fruits', @basic_types.Fruits, yardl.binary.Int32Serializer));
+      self.aliased_closed_generic_serializer = tuples.binary.TupleSerializer(yardl.binary.StringSerializer, yardl.binary.EnumSerializer('basic_types.Fruits', @basic_types.Fruits, yardl.binary.Int32Serializer));
+      self.aliased_optional_serializer = yardl.binary.OptionalSerializer(yardl.binary.Int32Serializer);
+      self.aliased_generic_optional_serializer = yardl.binary.OptionalSerializer(yardl.binary.Float32Serializer);
+      self.aliased_generic_union_2_serializer = yardl.binary.UnionSerializer('basic_types.GenericUnion2', {yardl.binary.StringSerializer, yardl.binary.EnumSerializer('basic_types.Fruits', @basic_types.Fruits, yardl.binary.Int32Serializer)}, {@basic_types.GenericUnion2.T1, @basic_types.GenericUnion2.T2});
+      self.aliased_generic_vector_serializer = yardl.binary.VectorSerializer(yardl.binary.Float32Serializer);
+      self.aliased_generic_fixed_vector_serializer = yardl.binary.FixedVectorSerializer(yardl.binary.Float32Serializer, 3);
+      self.stream_of_aliased_generic_union_2_serializer = yardl.binary.StreamSerializer(yardl.binary.UnionSerializer('basic_types.GenericUnion2', {yardl.binary.StringSerializer, yardl.binary.EnumSerializer('basic_types.Fruits', @basic_types.Fruits, yardl.binary.Int32Serializer)}, {@basic_types.GenericUnion2.T1, @basic_types.GenericUnion2.T2}));
     end
   end
 
   methods (Access=protected)
-    function write_aliased_string_(obj, value)
-      obj.aliased_string_serializer.write(obj.stream_, value);
+    function write_aliased_string_(self, value)
+      self.aliased_string_serializer.write(self.stream_, value);
     end
 
-    function write_aliased_enum_(obj, value)
-      obj.aliased_enum_serializer.write(obj.stream_, value);
+    function write_aliased_enum_(self, value)
+      self.aliased_enum_serializer.write(self.stream_, value);
     end
 
-    function write_aliased_open_generic_(obj, value)
-      obj.aliased_open_generic_serializer.write(obj.stream_, value);
+    function write_aliased_open_generic_(self, value)
+      self.aliased_open_generic_serializer.write(self.stream_, value);
     end
 
-    function write_aliased_closed_generic_(obj, value)
-      obj.aliased_closed_generic_serializer.write(obj.stream_, value);
+    function write_aliased_closed_generic_(self, value)
+      self.aliased_closed_generic_serializer.write(self.stream_, value);
     end
 
-    function write_aliased_optional_(obj, value)
-      obj.aliased_optional_serializer.write(obj.stream_, value);
+    function write_aliased_optional_(self, value)
+      self.aliased_optional_serializer.write(self.stream_, value);
     end
 
-    function write_aliased_generic_optional_(obj, value)
-      obj.aliased_generic_optional_serializer.write(obj.stream_, value);
+    function write_aliased_generic_optional_(self, value)
+      self.aliased_generic_optional_serializer.write(self.stream_, value);
     end
 
-    function write_aliased_generic_union_2_(obj, value)
-      obj.aliased_generic_union_2_serializer.write(obj.stream_, value);
+    function write_aliased_generic_union_2_(self, value)
+      self.aliased_generic_union_2_serializer.write(self.stream_, value);
     end
 
-    function write_aliased_generic_vector_(obj, value)
-      obj.aliased_generic_vector_serializer.write(obj.stream_, value);
+    function write_aliased_generic_vector_(self, value)
+      self.aliased_generic_vector_serializer.write(self.stream_, value);
     end
 
-    function write_aliased_generic_fixed_vector_(obj, value)
-      obj.aliased_generic_fixed_vector_serializer.write(obj.stream_, value);
+    function write_aliased_generic_fixed_vector_(self, value)
+      self.aliased_generic_fixed_vector_serializer.write(self.stream_, value);
     end
 
-    function write_stream_of_aliased_generic_union_2_(obj, value)
-      obj.stream_of_aliased_generic_union_2_serializer.write(obj.stream_, value);
+    function write_stream_of_aliased_generic_union_2_(self, value)
+      self.stream_of_aliased_generic_union_2_serializer.write(self.stream_, value);
     end
   end
 end

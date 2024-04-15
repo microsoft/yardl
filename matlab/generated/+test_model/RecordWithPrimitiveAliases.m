@@ -14,46 +14,46 @@ classdef RecordWithPrimitiveAliases < handle
   end
 
   methods
-    function obj = RecordWithPrimitiveAliases(byte_field, int_field, uint_field, long_field, ulong_field, float_field, double_field, complexfloat_field, complexdouble_field)
+    function self = RecordWithPrimitiveAliases(byte_field, int_field, uint_field, long_field, ulong_field, float_field, double_field, complexfloat_field, complexdouble_field)
       if nargin > 0
-        obj.byte_field = byte_field;
-        obj.int_field = int_field;
-        obj.uint_field = uint_field;
-        obj.long_field = long_field;
-        obj.ulong_field = ulong_field;
-        obj.float_field = float_field;
-        obj.double_field = double_field;
-        obj.complexfloat_field = complexfloat_field;
-        obj.complexdouble_field = complexdouble_field;
+        self.byte_field = byte_field;
+        self.int_field = int_field;
+        self.uint_field = uint_field;
+        self.long_field = long_field;
+        self.ulong_field = ulong_field;
+        self.float_field = float_field;
+        self.double_field = double_field;
+        self.complexfloat_field = complexfloat_field;
+        self.complexdouble_field = complexdouble_field;
       else
-        obj.byte_field = uint8(0);
-        obj.int_field = int32(0);
-        obj.uint_field = uint32(0);
-        obj.long_field = int64(0);
-        obj.ulong_field = uint64(0);
-        obj.float_field = single(0);
-        obj.double_field = double(0);
-        obj.complexfloat_field = complex(single(0));
-        obj.complexdouble_field = complex(0);
+        self.byte_field = uint8(0);
+        self.int_field = int32(0);
+        self.uint_field = uint32(0);
+        self.long_field = int64(0);
+        self.ulong_field = uint64(0);
+        self.float_field = single(0);
+        self.double_field = double(0);
+        self.complexfloat_field = complex(single(0));
+        self.complexdouble_field = complex(0);
       end
     end
 
-    function res = eq(obj, other)
+    function res = eq(self, other)
       res = ...
         isa(other, 'test_model.RecordWithPrimitiveAliases') && ...
-        all([obj.byte_field] == [other.byte_field]) && ...
-        all([obj.int_field] == [other.int_field]) && ...
-        all([obj.uint_field] == [other.uint_field]) && ...
-        all([obj.long_field] == [other.long_field]) && ...
-        all([obj.ulong_field] == [other.ulong_field]) && ...
-        all([obj.float_field] == [other.float_field]) && ...
-        all([obj.double_field] == [other.double_field]) && ...
-        all([obj.complexfloat_field] == [other.complexfloat_field]) && ...
-        all([obj.complexdouble_field] == [other.complexdouble_field]);
+        all([self.byte_field] == [other.byte_field]) && ...
+        all([self.int_field] == [other.int_field]) && ...
+        all([self.uint_field] == [other.uint_field]) && ...
+        all([self.long_field] == [other.long_field]) && ...
+        all([self.ulong_field] == [other.ulong_field]) && ...
+        all([self.float_field] == [other.float_field]) && ...
+        all([self.double_field] == [other.double_field]) && ...
+        all([self.complexfloat_field] == [other.complexfloat_field]) && ...
+        all([self.complexdouble_field] == [other.complexdouble_field]);
     end
 
-    function res = ne(obj, other)
-      res = ~obj.eq(other);
+    function res = ne(self, other)
+      res = ~self.eq(other);
     end
   end
 

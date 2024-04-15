@@ -4,9 +4,10 @@
 classdef Uint64Serializer < yardl.binary.TypeSerializer
     methods (Static)
         function write(outstream, value)
-            assert(value <= intmax("uint64"));
-            assert(value >= intmin("uint64"));
-            value = uint64(value);
+            arguments
+                outstream (1,1) yardl.binary.CodedOutputStream
+                value (1,1) {mustBeInRange(value, 0, 18446744073709551615)}
+            end
             outstream.write_unsigned_varint(value);
         end
 
@@ -14,8 +15,8 @@ classdef Uint64Serializer < yardl.binary.TypeSerializer
             res = uint64(instream.read_unsigned_varint());
         end
 
-        function c = getClass()
-            c = 'uint64';
+        function c = get_class()
+            c = "uint64";
         end
     end
 end

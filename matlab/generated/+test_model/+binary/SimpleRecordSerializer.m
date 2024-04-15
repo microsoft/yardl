@@ -2,20 +2,24 @@
 
 classdef SimpleRecordSerializer < yardl.binary.RecordSerializer
   methods
-    function obj = SimpleRecordSerializer()
+    function self = SimpleRecordSerializer()
       field_serializers{1} = yardl.binary.Int32Serializer;
       field_serializers{2} = yardl.binary.Int32Serializer;
       field_serializers{3} = yardl.binary.Int32Serializer;
-      obj@yardl.binary.RecordSerializer('test_model.SimpleRecord', field_serializers);
+      self@yardl.binary.RecordSerializer('test_model.SimpleRecord', field_serializers);
     end
 
-    function write(obj, outstream, value)
-      assert(isa(value, 'test_model.SimpleRecord'));
-      obj.write_(outstream, value.x, value.y, value.z)
+    function write(self, outstream, value)
+      arguments
+        self
+        outstream (1,1) yardl.binary.CodedOutputStream
+        value (1,1) test_model.SimpleRecord
+      end
+      self.write_(outstream, value.x, value.y, value.z)
     end
 
-    function value = read(obj, instream)
-      field_values = obj.read_(instream);
+    function value = read(self, instream)
+      field_values = self.read_(instream);
       value = test_model.SimpleRecord(field_values{:});
     end
   end

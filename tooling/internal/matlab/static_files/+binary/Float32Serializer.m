@@ -4,24 +4,25 @@
 classdef Float32Serializer < yardl.binary.TypeSerializer
     methods (Static)
         function write(outstream, value)
-            % assert(class(value) == "single");
-            assert(value <= realmax('single'));
-            assert(value >= -realmax('single'));
+            arguments
+                outstream (1,1) yardl.binary.CodedOutputStream
+                value (1,1) single
+            end
 
             bytes = typecast(single(value), "uint8");
             outstream.write_bytes(bytes);
         end
 
         function res = read(instream)
-            bytes = instream.read(4);
+            bytes = instream.read_bytes(4);
             res = typecast(bytes, "single");
         end
 
-        function c = getClass()
-            c = 'single';
+        function c = get_class()
+            c = "single";
         end
 
-        function trivial = isTriviallySerializable()
+        function trivial = is_trivially_serializable()
             trivial = true;
         end
     end

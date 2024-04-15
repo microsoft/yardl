@@ -6,22 +6,22 @@ classdef RecordWithOptionalVector < handle
   end
 
   methods
-    function obj = RecordWithOptionalVector(optional_vector)
+    function self = RecordWithOptionalVector(optional_vector)
       if nargin > 0
-        obj.optional_vector = optional_vector;
+        self.optional_vector = optional_vector;
       else
-        obj.optional_vector = yardl.None;
+        self.optional_vector = yardl.None;
       end
     end
 
-    function res = eq(obj, other)
+    function res = eq(self, other)
       res = ...
         isa(other, 'test_model.RecordWithOptionalVector') && ...
-        all([obj.optional_vector] == [other.optional_vector]);
+        all([self.optional_vector] == [other.optional_vector]);
     end
 
-    function res = ne(obj, other)
-      res = ~obj.eq(other);
+    function res = ne(self, other)
+      res = ~self.eq(other);
     end
   end
 

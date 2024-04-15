@@ -8,21 +8,21 @@ classdef ScalarsReader < yardl.binary.BinaryProtocolReader & test_model.ScalarsR
   end
 
   methods
-    function obj = ScalarsReader(filename)
-      obj@test_model.ScalarsReaderBase();
-      obj@yardl.binary.BinaryProtocolReader(filename, test_model.ScalarsReaderBase.schema);
-      obj.int32_serializer = yardl.binary.Int32Serializer;
-      obj.record_serializer = test_model.binary.RecordWithPrimitivesSerializer();
+    function self = ScalarsReader(filename)
+      self@test_model.ScalarsReaderBase();
+      self@yardl.binary.BinaryProtocolReader(filename, test_model.ScalarsReaderBase.schema);
+      self.int32_serializer = yardl.binary.Int32Serializer;
+      self.record_serializer = test_model.binary.RecordWithPrimitivesSerializer();
     end
   end
 
   methods (Access=protected)
-    function value = read_int32_(obj)
-      value = obj.int32_serializer.read(obj.stream_);
+    function value = read_int32_(self)
+      value = self.int32_serializer.read(self.stream_);
     end
 
-    function value = read_record_(obj)
-      value = obj.record_serializer.read(obj.stream_);
+    function value = read_record_(self)
+      value = self.record_serializer.read(self.stream_);
     end
   end
 end

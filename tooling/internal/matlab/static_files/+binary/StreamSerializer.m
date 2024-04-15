@@ -8,12 +8,12 @@ classdef StreamSerializer < yardl.binary.TypeSerializer
     end
 
     methods
-        function obj = StreamSerializer(item_serializer)
-            obj.item_serializer_ = item_serializer;
-            obj.items_remaining_ = 0;
+        function self = StreamSerializer(item_serializer)
+            self.item_serializer_ = item_serializer;
+            self.items_remaining_ = 0;
         end
 
-        function write(obj, outstream, values)
+        function write(self, outstream, values)
             if isempty(values)
                 return;
             end
@@ -26,9 +26,11 @@ classdef StreamSerializer < yardl.binary.TypeSerializer
             outstream.write_unsigned_varint(count);
 
             if iscell(values)
-                assert(s(1) == 1);
+                if ~isvector(s)
+                    throw(yardl.ValueError("cell array must be a vector"));
+                end
                 for i = 1:count
-                    obj.item_serializer_.write(outstream, values{i});
+                    self.item_serializer_.write(outstream, values{i});
                 end
             else
                 if ndims(values) > 2
@@ -36,20 +38,20 @@ classdef StreamSerializer < yardl.binary.TypeSerializer
                     inner_shape = s(1:end-1);
                     for i = 1:count
                         val = reshape(r(:, i), inner_shape);
-                        obj.item_serializer_.write(outstream, val);
+                        self.item_serializer_.write(outstream, val);
                     end
                 else
                     for i = 1:count
-                        obj.item_serializer_.write(outstream, transpose(values(:, i)));
+                        self.item_serializer_.write(outstream, transpose(values(:, i)));
                     end
                 end
             end
         end
 
-        function res = hasnext(obj, instream)
-            if obj.items_remaining_ <= 0
-                obj.items_remaining_ = instream.read_unsigned_varint();
-                if obj.items_remaining_ <= 0
+        function res = hasnext(self, instream)
+            if self.items_remaining_ <= 0
+                self.items_remaining_ = instream.read_unsigned_varint();
+                if self.items_remaining_ <= 0
                     res = false;
                     return;
                 end
@@ -57,20 +59,20 @@ classdef StreamSerializer < yardl.binary.TypeSerializer
             res = true;
         end
 
-        function res = read(obj, instream)
-            if obj.items_remaining_ <= 0
+        function res = read(self, instream)
+            if self.items_remaining_ <= 0
                 throw(yardl.RuntimeError("Stream has been exhausted"));
             end
 
-            res = obj.item_serializer_.read(instream);
-            obj.items_remaining_ = obj.items_remaining_ - 1;
+            res = self.item_serializer_.read(instream);
+            self.items_remaining_ = self.items_remaining_ - 1;
         end
 
-        function c = getClass(obj)
-            c = obj.item_serializer_.getClass();
+        function c = get_class(self)
+            c = self.item_serializer_.get_class();
         end
 
-        function s = getShape(~)
+        function s = get_shape(~)
             s = [];
         end
     end

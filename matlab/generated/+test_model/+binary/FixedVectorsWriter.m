@@ -10,31 +10,31 @@ classdef FixedVectorsWriter < yardl.binary.BinaryProtocolWriter & test_model.Fix
   end
 
   methods
-    function obj = FixedVectorsWriter(filename)
-      obj@test_model.FixedVectorsWriterBase();
-      obj@yardl.binary.BinaryProtocolWriter(filename, test_model.FixedVectorsWriterBase.schema);
-      obj.fixed_int_vector_serializer = yardl.binary.FixedVectorSerializer(yardl.binary.Int32Serializer, 5);
-      obj.fixed_simple_record_vector_serializer = yardl.binary.FixedVectorSerializer(test_model.binary.SimpleRecordSerializer(), 3);
-      obj.fixed_record_with_vlens_vector_serializer = yardl.binary.FixedVectorSerializer(test_model.binary.RecordWithVlensSerializer(), 2);
-      obj.record_with_fixed_vectors_serializer = test_model.binary.RecordWithFixedVectorsSerializer();
+    function self = FixedVectorsWriter(filename)
+      self@test_model.FixedVectorsWriterBase();
+      self@yardl.binary.BinaryProtocolWriter(filename, test_model.FixedVectorsWriterBase.schema);
+      self.fixed_int_vector_serializer = yardl.binary.FixedVectorSerializer(yardl.binary.Int32Serializer, 5);
+      self.fixed_simple_record_vector_serializer = yardl.binary.FixedVectorSerializer(test_model.binary.SimpleRecordSerializer(), 3);
+      self.fixed_record_with_vlens_vector_serializer = yardl.binary.FixedVectorSerializer(test_model.binary.RecordWithVlensSerializer(), 2);
+      self.record_with_fixed_vectors_serializer = test_model.binary.RecordWithFixedVectorsSerializer();
     end
   end
 
   methods (Access=protected)
-    function write_fixed_int_vector_(obj, value)
-      obj.fixed_int_vector_serializer.write(obj.stream_, value);
+    function write_fixed_int_vector_(self, value)
+      self.fixed_int_vector_serializer.write(self.stream_, value);
     end
 
-    function write_fixed_simple_record_vector_(obj, value)
-      obj.fixed_simple_record_vector_serializer.write(obj.stream_, value);
+    function write_fixed_simple_record_vector_(self, value)
+      self.fixed_simple_record_vector_serializer.write(self.stream_, value);
     end
 
-    function write_fixed_record_with_vlens_vector_(obj, value)
-      obj.fixed_record_with_vlens_vector_serializer.write(obj.stream_, value);
+    function write_fixed_record_with_vlens_vector_(self, value)
+      self.fixed_record_with_vlens_vector_serializer.write(self.stream_, value);
     end
 
-    function write_record_with_fixed_vectors_(obj, value)
-      obj.record_with_fixed_vectors_serializer.write(obj.stream_, value);
+    function write_record_with_fixed_vectors_(self, value)
+      self.record_with_fixed_vectors_serializer.write(self.stream_, value);
     end
   end
 end

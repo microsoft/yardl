@@ -77,7 +77,7 @@ class BinaryProtocolReader(ABC):
     ) -> None:
         self._stream = CodedInputStream(stream)
         magic_bytes = self._stream.read_view(len(MAGIC_BYTES))
-        if magic_bytes != MAGIC_BYTES: # pyright: ignore [reportUnnecessaryComparison]
+        if magic_bytes != MAGIC_BYTES:  # pyright: ignore [reportUnnecessaryComparison]
             raise RuntimeError("Invalid magic bytes")
 
         version = read_fixed_int32(self._stream)
@@ -408,7 +408,7 @@ class Int16Serializer(TypeSerializer[Int16, np.int16]):
                     f"Value {value} is outside the range of a signed 16-bit integer"
                 )
         elif not isinstance(value, cast(type, np.int16)):
-            raise ValueError(f"Value in not an signed 16-bit integer: {value}")
+            raise ValueError(f"Value is not an signed 16-bit integer: {value}")
 
         stream.write_signed_varint(value)
 
@@ -436,7 +436,7 @@ class UInt16Serializer(TypeSerializer[UInt16, np.uint16]):
                     f"Value {value} is outside the range of an unsigned 16-bit integer"
                 )
         elif not isinstance(value, cast(type, np.uint16)):
-            raise ValueError(f"Value in not an unsigned 16-bit integer: {value}")
+            raise ValueError(f"Value is not an unsigned 16-bit integer: {value}")
 
         stream.write_unsigned_varint(value)
 
@@ -464,7 +464,7 @@ class Int32Serializer(TypeSerializer[Int32, np.int32]):
                     f"Value {value} is outside the range of a signed 32-bit integer"
                 )
         elif not isinstance(value, cast(type, np.int32)):
-            raise ValueError(f"Value in not a signed 32-bit integer: {value}")
+            raise ValueError(f"Value is not a signed 32-bit integer: {value}")
 
         stream.write_signed_varint(value)
 
@@ -492,7 +492,7 @@ class UInt32Serializer(TypeSerializer[UInt32, np.uint32]):
                     f"Value {value} is outside the range of an unsigned 32-bit integer"
                 )
         elif not isinstance(value, cast(type, np.uint32)):
-            raise ValueError(f"Value in not an unsigned 32-bit integer: {value}")
+            raise ValueError(f"Value is not an unsigned 32-bit integer: {value}")
 
         stream.write_unsigned_varint(value)
 
@@ -520,7 +520,7 @@ class Int64Serializer(TypeSerializer[Int64, np.int64]):
                     f"Value {value} is outside the range of a signed 64-bit integer"
                 )
         elif not isinstance(value, cast(type, np.int64)):
-            raise ValueError(f"Value in not a signed 64-bit integer: {value}")
+            raise ValueError(f"Value is not a signed 64-bit integer: {value}")
 
         stream.write_signed_varint(value)
 
@@ -548,7 +548,7 @@ class UInt64Serializer(TypeSerializer[UInt64, np.uint64]):
                     f"Value {value} is outside the range of an unsigned 64-bit integer"
                 )
         elif not isinstance(value, cast(type, np.uint64)):
-            raise ValueError(f"Value in not an unsigned 64-bit integer: {value}")
+            raise ValueError(f"Value is not an unsigned 64-bit integer: {value}")
 
         stream.write_unsigned_varint(value)
 
@@ -576,7 +576,7 @@ class SizeSerializer(TypeSerializer[Size, np.uint64]):
                     f"Value {value} is outside the range of an unsigned 64-bit integer"
                 )
         elif not isinstance(value, cast(type, np.uint64)):
-            raise ValueError(f"Value in not an unsigned 64-bit integer: {value}")
+            raise ValueError(f"Value is not an unsigned 64-bit integer: {value}")
 
         stream.write_unsigned_varint(value)
 

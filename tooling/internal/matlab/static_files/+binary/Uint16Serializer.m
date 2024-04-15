@@ -4,9 +4,10 @@
 classdef Uint16Serializer < yardl.binary.TypeSerializer
     methods (Static)
         function write(outstream, value)
-            assert(value <= intmax("uint16"));
-            assert(value >= intmin("uint16"));
-            value = uint16(value);
+            arguments
+                outstream (1,1) yardl.binary.CodedOutputStream
+                value (1,1) {mustBeInRange(value, 0, 65535)}
+            end
             outstream.write_unsigned_varint(value);
         end
 
@@ -14,8 +15,8 @@ classdef Uint16Serializer < yardl.binary.TypeSerializer
             res = uint16(instream.read_unsigned_varint());
         end
 
-        function c = getClass()
-            c = 'uint16';
+        function c = get_class()
+            c = "uint16";
         end
     end
 end

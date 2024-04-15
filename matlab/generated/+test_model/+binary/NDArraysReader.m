@@ -11,36 +11,36 @@ classdef NDArraysReader < yardl.binary.BinaryProtocolReader & test_model.NDArray
   end
 
   methods
-    function obj = NDArraysReader(filename)
-      obj@test_model.NDArraysReaderBase();
-      obj@yardl.binary.BinaryProtocolReader(filename, test_model.NDArraysReaderBase.schema);
-      obj.ints_serializer = yardl.binary.NDArraySerializer(yardl.binary.Int32Serializer, 2);
-      obj.simple_record_array_serializer = yardl.binary.NDArraySerializer(test_model.binary.SimpleRecordSerializer(), 2);
-      obj.record_with_vlens_array_serializer = yardl.binary.NDArraySerializer(test_model.binary.RecordWithVlensSerializer(), 2);
-      obj.record_with_nd_arrays_serializer = test_model.binary.RecordWithNDArraysSerializer();
-      obj.named_array_serializer = yardl.binary.NDArraySerializer(yardl.binary.Int32Serializer, 2);
+    function self = NDArraysReader(filename)
+      self@test_model.NDArraysReaderBase();
+      self@yardl.binary.BinaryProtocolReader(filename, test_model.NDArraysReaderBase.schema);
+      self.ints_serializer = yardl.binary.NDArraySerializer(yardl.binary.Int32Serializer, 2);
+      self.simple_record_array_serializer = yardl.binary.NDArraySerializer(test_model.binary.SimpleRecordSerializer(), 2);
+      self.record_with_vlens_array_serializer = yardl.binary.NDArraySerializer(test_model.binary.RecordWithVlensSerializer(), 2);
+      self.record_with_nd_arrays_serializer = test_model.binary.RecordWithNDArraysSerializer();
+      self.named_array_serializer = yardl.binary.NDArraySerializer(yardl.binary.Int32Serializer, 2);
     end
   end
 
   methods (Access=protected)
-    function value = read_ints_(obj)
-      value = obj.ints_serializer.read(obj.stream_);
+    function value = read_ints_(self)
+      value = self.ints_serializer.read(self.stream_);
     end
 
-    function value = read_simple_record_array_(obj)
-      value = obj.simple_record_array_serializer.read(obj.stream_);
+    function value = read_simple_record_array_(self)
+      value = self.simple_record_array_serializer.read(self.stream_);
     end
 
-    function value = read_record_with_vlens_array_(obj)
-      value = obj.record_with_vlens_array_serializer.read(obj.stream_);
+    function value = read_record_with_vlens_array_(self)
+      value = self.record_with_vlens_array_serializer.read(self.stream_);
     end
 
-    function value = read_record_with_nd_arrays_(obj)
-      value = obj.record_with_nd_arrays_serializer.read(obj.stream_);
+    function value = read_record_with_nd_arrays_(self)
+      value = self.record_with_nd_arrays_serializer.read(self.stream_);
     end
 
-    function value = read_named_array_(obj)
-      value = obj.named_array_serializer.read(obj.stream_);
+    function value = read_named_array_(self)
+      value = self.named_array_serializer.read(self.stream_);
     end
   end
 end

@@ -7,20 +7,20 @@ classdef RecordWithGenericFixedVectors < handle
   end
 
   methods
-    function obj = RecordWithGenericFixedVectors(fv, afv)
-      obj.fv = fv;
-      obj.afv = afv;
+    function self = RecordWithGenericFixedVectors(fv, afv)
+      self.fv = fv;
+      self.afv = afv;
     end
 
-    function res = eq(obj, other)
+    function res = eq(self, other)
       res = ...
         isa(other, 'test_model.RecordWithGenericFixedVectors') && ...
-        isequal(obj.fv, other.fv) && ...
-        isequal(obj.afv, other.afv);
+        isequal(self.fv, other.fv) && ...
+        isequal(self.afv, other.afv);
     end
 
-    function res = ne(obj, other)
-      res = ~obj.eq(other);
+    function res = ne(self, other)
+      res = ~self.eq(other);
     end
   end
 

@@ -7,16 +7,16 @@ classdef BenchmarkSmallRecordWriter < yardl.binary.BinaryProtocolWriter & test_m
   end
 
   methods
-    function obj = BenchmarkSmallRecordWriter(filename)
-      obj@test_model.BenchmarkSmallRecordWriterBase();
-      obj@yardl.binary.BinaryProtocolWriter(filename, test_model.BenchmarkSmallRecordWriterBase.schema);
-      obj.small_record_serializer = yardl.binary.StreamSerializer(test_model.binary.SmallBenchmarkRecordSerializer());
+    function self = BenchmarkSmallRecordWriter(filename)
+      self@test_model.BenchmarkSmallRecordWriterBase();
+      self@yardl.binary.BinaryProtocolWriter(filename, test_model.BenchmarkSmallRecordWriterBase.schema);
+      self.small_record_serializer = yardl.binary.StreamSerializer(test_model.binary.SmallBenchmarkRecordSerializer());
     end
   end
 
   methods (Access=protected)
-    function write_small_record_(obj, value)
-      obj.small_record_serializer.write(obj.stream_, value);
+    function write_small_record_(self, value)
+      self.small_record_serializer.write(self.stream_, value);
     end
   end
 end

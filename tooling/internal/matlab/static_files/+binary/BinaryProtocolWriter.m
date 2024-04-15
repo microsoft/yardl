@@ -8,29 +8,30 @@ classdef BinaryProtocolWriter < handle
     end
 
     methods
-        function obj = BinaryProtocolWriter(output, schema)
-            obj.stream_ = yardl.binary.CodedOutputStream(output);
-            obj.stream_.write_bytes(yardl.binary.MAGIC_BYTES);
-            write_fixed_int32(obj.stream_, yardl.binary.CURRENT_BINARY_FORMAT_VERSION);
+        function self = BinaryProtocolWriter(outfile, schema)
+            self.stream_ = yardl.binary.CodedOutputStream(outfile);
+            self.stream_.write_bytes(yardl.binary.MAGIC_BYTES);
+            write_fixed_int32(self.stream_, yardl.binary.CURRENT_BINARY_FORMAT_VERSION);
             s = yardl.binary.StringSerializer();
-            s.write(obj.stream_, schema);
+            s.write(self.stream_, schema);
         end
     end
 
     methods (Access=protected)
-        function end_stream_(obj)
-            obj.stream_.write_byte_no_check(0);
+        function end_stream_(self)
+            self.stream_.write_byte(uint8(0));
         end
 
-        function close_(obj)
-            obj.stream_.close();
+        function close_(self)
+            self.stream_.close();
         end
     end
 end
 
 function write_fixed_int32(stream, value)
-    assert(value >= intmin("int32"));
-    assert(value <= intmax("int32"));
-    value = int32(value);
-    stream.write(typecast(value, "uint8"));
+    arguments
+        stream (1,1) yardl.binary.CodedOutputStream
+        value (1,1) {mustBeA(value, "int32")}
+    end
+    stream.write_bytes(typecast(value, "uint8"));
 end

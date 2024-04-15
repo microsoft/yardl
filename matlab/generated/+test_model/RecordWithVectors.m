@@ -8,28 +8,28 @@ classdef RecordWithVectors < handle
   end
 
   methods
-    function obj = RecordWithVectors(default_vector, default_vector_fixed_length, vector_of_vectors)
+    function self = RecordWithVectors(default_vector, default_vector_fixed_length, vector_of_vectors)
       if nargin > 0
-        obj.default_vector = default_vector;
-        obj.default_vector_fixed_length = default_vector_fixed_length;
-        obj.vector_of_vectors = vector_of_vectors;
+        self.default_vector = default_vector;
+        self.default_vector_fixed_length = default_vector_fixed_length;
+        self.vector_of_vectors = vector_of_vectors;
       else
-        obj.default_vector = int32.empty();
-        obj.default_vector_fixed_length = repelem(int32(0), 3);
-        obj.vector_of_vectors = int32.empty();
+        self.default_vector = int32.empty();
+        self.default_vector_fixed_length = repelem(int32(0), 3);
+        self.vector_of_vectors = int32.empty();
       end
     end
 
-    function res = eq(obj, other)
+    function res = eq(self, other)
       res = ...
         isa(other, 'test_model.RecordWithVectors') && ...
-        all([obj.default_vector] == [other.default_vector]) && ...
-        all([obj.default_vector_fixed_length] == [other.default_vector_fixed_length]) && ...
-        all([obj.vector_of_vectors] == [other.vector_of_vectors]);
+        all([self.default_vector] == [other.default_vector]) && ...
+        all([self.default_vector_fixed_length] == [other.default_vector_fixed_length]) && ...
+        all([self.vector_of_vectors] == [other.vector_of_vectors]);
     end
 
-    function res = ne(obj, other)
-      res = ~obj.eq(other);
+    function res = ne(self, other)
+      res = ~self.eq(other);
     end
   end
 

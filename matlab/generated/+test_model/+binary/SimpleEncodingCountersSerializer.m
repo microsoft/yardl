@@ -2,21 +2,25 @@
 
 classdef SimpleEncodingCountersSerializer < yardl.binary.RecordSerializer
   methods
-    function obj = SimpleEncodingCountersSerializer()
+    function self = SimpleEncodingCountersSerializer()
       field_serializers{1} = yardl.binary.OptionalSerializer(yardl.binary.Uint32Serializer);
       field_serializers{2} = yardl.binary.OptionalSerializer(yardl.binary.Uint32Serializer);
       field_serializers{3} = yardl.binary.OptionalSerializer(yardl.binary.Uint32Serializer);
       field_serializers{4} = yardl.binary.OptionalSerializer(yardl.binary.Uint32Serializer);
-      obj@yardl.binary.RecordSerializer('test_model.SimpleEncodingCounters', field_serializers);
+      self@yardl.binary.RecordSerializer('test_model.SimpleEncodingCounters', field_serializers);
     end
 
-    function write(obj, outstream, value)
-      assert(isa(value, 'test_model.SimpleEncodingCounters'));
-      obj.write_(outstream, value.e1, value.e2, value.slice, value.repetition)
+    function write(self, outstream, value)
+      arguments
+        self
+        outstream (1,1) yardl.binary.CodedOutputStream
+        value (1,1) test_model.SimpleEncodingCounters
+      end
+      self.write_(outstream, value.e1, value.e2, value.slice, value.repetition)
     end
 
-    function value = read(obj, instream)
-      field_values = obj.read_(instream);
+    function value = read(self, instream)
+      field_values = self.read_(instream);
       value = test_model.SimpleEncodingCounters(field_values{:});
     end
   end

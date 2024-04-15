@@ -3,34 +3,34 @@
 
 classdef TypeSerializer < handle
     methods (Static, Abstract)
-        write(obj, stream, value)
-        res = read(obj, stream)
-        c = getClass(obj)
+        write(self, stream, value)
+        res = read(self, stream)
+        c = get_class(self)
     end
 
     methods (Static)
-        function s = getShape()
+        function s = get_shape()
             s = 1;
         end
 
-        function trivial = isTriviallySerializable()
+        function trivial = is_trivially_serializable()
             trivial = false;
         end
     end
 
     methods
-        function writeTrivially(obj, stream, values)
-            if ~obj.isTriviallySerializable()
-                error("Not implemented for non-trivially-serializable types")
+        function write_trivially(self, stream, values)
+            if ~self.is_trivially_serializable()
+                throw(yardl.TypeError("Not implemented for non-trivially-serializable types"));
             end
-            stream.write_values_directly(values, obj.getClass());
+            stream.write_values_directly(values, self.get_class());
         end
 
-        function res = readTrivially(obj, stream, shape)
-            if ~obj.isTriviallySerializable()
-                error("Not implemented for non-trivially-serializable types")
+        function res = read_trivially(self, stream, shape)
+            if ~self.is_trivially_serializable()
+                throw(yardl.TypeError("Not implemented for non-trivially-serializable types"));
             end
-            res = stream.read_values_directly(shape, obj.getClass());
+            res = stream.read_values_directly(shape, self.get_class());
         end
     end
 end

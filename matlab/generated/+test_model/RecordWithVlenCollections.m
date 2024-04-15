@@ -7,25 +7,25 @@ classdef RecordWithVlenCollections < handle
   end
 
   methods
-    function obj = RecordWithVlenCollections(vector, array)
+    function self = RecordWithVlenCollections(vector, array)
       if nargin > 0
-        obj.vector = vector;
-        obj.array = array;
+        self.vector = vector;
+        self.array = array;
       else
-        obj.vector = int32.empty();
-        obj.array = int32.empty(0, 0);
+        self.vector = int32.empty();
+        self.array = int32.empty(0, 0);
       end
     end
 
-    function res = eq(obj, other)
+    function res = eq(self, other)
       res = ...
         isa(other, 'test_model.RecordWithVlenCollections') && ...
-        all([obj.vector] == [other.vector]) && ...
-        isequal(obj.array, other.array);
+        all([self.vector] == [other.vector]) && ...
+        isequal(self.array, other.array);
     end
 
-    function res = ne(obj, other)
-      res = ~obj.eq(other);
+    function res = ne(self, other)
+      res = ~self.eq(other);
     end
   end
 

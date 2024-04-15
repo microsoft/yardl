@@ -25,6 +25,14 @@ classdef Int32OrFloat32 < yardl.Union
   end
 
   methods
+    function res = isInt32(self)
+      res = self.index == 1;
+    end
+
+    function res = isFloat32(self)
+      res = self.index == 2;
+    end
+
     function eq = eq(self, other)
       eq = isa(other, 'test_model.Int32OrFloat32') && other.index == self.index && other.value == self.value;
     end

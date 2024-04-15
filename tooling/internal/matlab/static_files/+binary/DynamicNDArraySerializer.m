@@ -9,18 +9,14 @@ classdef DynamicNDArraySerializer < yardl.binary.NDArraySerializerBase
         end
 
         function write(self, outstream, values)
-
-            item_shape = self.item_serializer_.getShape();
-
+            item_shape = self.item_serializer_.get_shape();
             shape = size(values);
             if isempty(item_shape)
                 % values is an array of variable-length vectors or arrays
                 values = values(:);
-
             elseif isscalar(item_shape)
                 % values is an array of scalars
                 values = values(:);
-
             else
                 % values is an array of fixed-length vectors or arrays
                 item_shape = item_shape(item_shape > 1);

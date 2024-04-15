@@ -25,6 +25,14 @@ classdef GenericNullableUnion2 < yardl.Union
   end
 
   methods
+    function res = isT1(self)
+      res = self.index == 1;
+    end
+
+    function res = isT2(self)
+      res = self.index == 2;
+    end
+
     function eq = eq(self, other)
       eq = isa(other, 'basic_types.GenericNullableUnion2') && other.index == self.index && other.value == self.value;
     end

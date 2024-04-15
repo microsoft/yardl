@@ -25,6 +25,14 @@ classdef Int32OrSimpleRecord < yardl.Union
   end
 
   methods
+    function res = isInt32(self)
+      res = self.index == 1;
+    end
+
+    function res = isSimpleRecord(self)
+      res = self.index == 2;
+    end
+
     function eq = eq(self, other)
       eq = isa(other, 'test_model.Int32OrSimpleRecord') && other.index == self.index && other.value == self.value;
     end

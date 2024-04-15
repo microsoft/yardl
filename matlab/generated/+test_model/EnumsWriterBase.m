@@ -7,46 +7,46 @@ classdef (Abstract) EnumsWriterBase < handle
   end
 
   methods
-    function obj = EnumsWriterBase()
-      obj.state_ = 0;
+    function self = EnumsWriterBase()
+      self.state_ = 0;
     end
 
-    function close(obj)
-      obj.close_();
-      if obj.state_ ~= 3
-        expected_method = obj.state_to_method_name_(bitand((int32(obj.state_) + 1), bitcmp(1, 'int8')));
+    function close(self)
+      self.close_();
+      if self.state_ ~= 3
+        expected_method = self.state_to_method_name_(self.state_);
         throw(yardl.ProtocolError("Protocol writer closed before all steps were called. Expected call to '%s'.", expected_method));
       end
     end
 
     % Ordinal 0
-    function write_single(obj, value)
-      if obj.state_ ~= 0
-        obj.raise_unexpected_state_(0);
+    function write_single(self, value)
+      if self.state_ ~= 0
+        self.raise_unexpected_state_(0);
       end
 
-      obj.write_single_(value);
-      obj.state_ = 1;
+      self.write_single_(value);
+      self.state_ = 1;
     end
 
     % Ordinal 1
-    function write_vec(obj, value)
-      if obj.state_ ~= 1
-        obj.raise_unexpected_state_(1);
+    function write_vec(self, value)
+      if self.state_ ~= 1
+        self.raise_unexpected_state_(1);
       end
 
-      obj.write_vec_(value);
-      obj.state_ = 2;
+      self.write_vec_(value);
+      self.state_ = 2;
     end
 
     % Ordinal 2
-    function write_size(obj, value)
-      if obj.state_ ~= 2
-        obj.raise_unexpected_state_(2);
+    function write_size(self, value)
+      if self.state_ ~= 2
+        self.raise_unexpected_state_(2);
       end
 
-      obj.write_size_(value);
-      obj.state_ = 3;
+      self.write_size_(value);
+      self.state_ = 3;
     end
   end
 
@@ -57,28 +57,28 @@ classdef (Abstract) EnumsWriterBase < handle
   end
 
   methods (Abstract, Access=protected)
-    write_single_(obj, value)
-    write_vec_(obj, value)
-    write_size_(obj, value)
+    write_single_(self, value)
+    write_vec_(self, value)
+    write_size_(self, value)
 
-    end_stream_(obj)
-    close_(obj)
+    end_stream_(self)
+    close_(self)
   end
 
   methods (Access=private)
-    function raise_unexpected_state_(obj, actual)
-      expected_method = obj.state_to_method_name_(obj.state_);
-      actual_method = obj.state_to_method_name_(actual);
+    function raise_unexpected_state_(self, actual)
+      expected_method = self.state_to_method_name_(self.state_);
+      actual_method = self.state_to_method_name_(actual);
       throw(yardl.ProtocolError("Expected call to '%s' but received call to '%s'", expected_method, actual_method));
     end
 
-    function name = state_to_method_name_(obj, state)
+    function name = state_to_method_name_(self, state)
       if state == 0
-        name = 'write_single';
+        name = "write_single";
       elseif state == 1
-        name = 'write_vec';
+        name = "write_vec";
       elseif state == 2
-        name = 'write_size';
+        name = "write_size";
       else
         name = '<unknown>';
       end

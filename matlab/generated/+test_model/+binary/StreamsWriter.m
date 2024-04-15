@@ -10,31 +10,31 @@ classdef StreamsWriter < yardl.binary.BinaryProtocolWriter & test_model.StreamsW
   end
 
   methods
-    function obj = StreamsWriter(filename)
-      obj@test_model.StreamsWriterBase();
-      obj@yardl.binary.BinaryProtocolWriter(filename, test_model.StreamsWriterBase.schema);
-      obj.int_data_serializer = yardl.binary.StreamSerializer(yardl.binary.Int32Serializer);
-      obj.optional_int_data_serializer = yardl.binary.StreamSerializer(yardl.binary.OptionalSerializer(yardl.binary.Int32Serializer));
-      obj.record_with_optional_vector_data_serializer = yardl.binary.StreamSerializer(test_model.binary.RecordWithOptionalVectorSerializer());
-      obj.fixed_vector_serializer = yardl.binary.StreamSerializer(yardl.binary.FixedVectorSerializer(yardl.binary.Int32Serializer, 3));
+    function self = StreamsWriter(filename)
+      self@test_model.StreamsWriterBase();
+      self@yardl.binary.BinaryProtocolWriter(filename, test_model.StreamsWriterBase.schema);
+      self.int_data_serializer = yardl.binary.StreamSerializer(yardl.binary.Int32Serializer);
+      self.optional_int_data_serializer = yardl.binary.StreamSerializer(yardl.binary.OptionalSerializer(yardl.binary.Int32Serializer));
+      self.record_with_optional_vector_data_serializer = yardl.binary.StreamSerializer(test_model.binary.RecordWithOptionalVectorSerializer());
+      self.fixed_vector_serializer = yardl.binary.StreamSerializer(yardl.binary.FixedVectorSerializer(yardl.binary.Int32Serializer, 3));
     end
   end
 
   methods (Access=protected)
-    function write_int_data_(obj, value)
-      obj.int_data_serializer.write(obj.stream_, value);
+    function write_int_data_(self, value)
+      self.int_data_serializer.write(self.stream_, value);
     end
 
-    function write_optional_int_data_(obj, value)
-      obj.optional_int_data_serializer.write(obj.stream_, value);
+    function write_optional_int_data_(self, value)
+      self.optional_int_data_serializer.write(self.stream_, value);
     end
 
-    function write_record_with_optional_vector_data_(obj, value)
-      obj.record_with_optional_vector_data_serializer.write(obj.stream_, value);
+    function write_record_with_optional_vector_data_(self, value)
+      self.record_with_optional_vector_data_serializer.write(self.stream_, value);
     end
 
-    function write_fixed_vector_(obj, value)
-      obj.fixed_vector_serializer.write(obj.stream_, value);
+    function write_fixed_vector_(self, value)
+      self.fixed_vector_serializer.write(self.stream_, value);
     end
   end
 end

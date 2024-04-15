@@ -8,28 +8,28 @@ classdef RecordWithUnionsOfContainers < handle
   end
 
   methods
-    function obj = RecordWithUnionsOfContainers(map_or_scalar, vector_or_scalar, array_or_scalar)
+    function self = RecordWithUnionsOfContainers(map_or_scalar, vector_or_scalar, array_or_scalar)
       if nargin > 0
-        obj.map_or_scalar = map_or_scalar;
-        obj.vector_or_scalar = vector_or_scalar;
-        obj.array_or_scalar = array_or_scalar;
+        self.map_or_scalar = map_or_scalar;
+        self.vector_or_scalar = vector_or_scalar;
+        self.array_or_scalar = array_or_scalar;
       else
-        obj.map_or_scalar = test_model.MapOrScalar.Map(dictionary);
-        obj.vector_or_scalar = test_model.VectorOrScalar.Vector(int32.empty());
-        obj.array_or_scalar = test_model.ArrayOrScalar.Array(int32.empty());
+        self.map_or_scalar = test_model.MapOrScalar.Map(dictionary);
+        self.vector_or_scalar = test_model.VectorOrScalar.Vector(int32.empty());
+        self.array_or_scalar = test_model.ArrayOrScalar.Array(int32.empty());
       end
     end
 
-    function res = eq(obj, other)
+    function res = eq(self, other)
       res = ...
         isa(other, 'test_model.RecordWithUnionsOfContainers') && ...
-        all([obj.map_or_scalar] == [other.map_or_scalar]) && ...
-        all([obj.vector_or_scalar] == [other.vector_or_scalar]) && ...
-        isequal(obj.array_or_scalar, other.array_or_scalar);
+        all([self.map_or_scalar] == [other.map_or_scalar]) && ...
+        all([self.vector_or_scalar] == [other.vector_or_scalar]) && ...
+        isequal(self.array_or_scalar, other.array_or_scalar);
     end
 
-    function res = ne(obj, other)
-      res = ~obj.eq(other);
+    function res = ne(self, other)
+      res = ~self.eq(other);
     end
   end
 

@@ -6,22 +6,22 @@ classdef RecordWithOptionalGenericUnionField < handle
   end
 
   methods
-    function obj = RecordWithOptionalGenericUnionField(v)
+    function self = RecordWithOptionalGenericUnionField(v)
       if nargin > 0
-        obj.v = v;
+        self.v = v;
       else
-        obj.v = yardl.None;
+        self.v = yardl.None;
       end
     end
 
-    function res = eq(obj, other)
+    function res = eq(self, other)
       res = ...
         isa(other, 'test_model.RecordWithOptionalGenericUnionField') && ...
-        isequal(obj.v, other.v);
+        isequal(self.v, other.v);
     end
 
-    function res = ne(obj, other)
-      res = ~obj.eq(other);
+    function res = ne(self, other)
+      res = ~self.eq(other);
     end
   end
 

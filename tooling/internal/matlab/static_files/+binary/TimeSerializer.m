@@ -4,9 +4,9 @@
 classdef TimeSerializer < yardl.binary.TypeSerializer
     methods (Static)
         function write(outstream, value)
-            if isa(value, 'datetime')
+            if isa(value, "datetime")
                 value = yardl.Time.from_datetime(value).value;
-            elseif isa(value, 'yardl.Time')
+            elseif isa(value, "yardl.Time")
                 value = value.value;
             else
                 throw(yardl.TypeError("Expected datetime or yardl.Time, got %s", class(value)));
@@ -20,8 +20,8 @@ classdef TimeSerializer < yardl.binary.TypeSerializer
             res = yardl.Time(value);
         end
 
-        function c = getClass()
-            c = 'yardl.Time';
+        function c = get_class()
+            c = "yardl.Time";
         end
     end
 end

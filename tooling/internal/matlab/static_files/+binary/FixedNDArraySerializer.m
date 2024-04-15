@@ -14,14 +14,13 @@ classdef FixedNDArraySerializer < yardl.binary.NDArraySerializerBase
         end
 
         function write(self, outstream, values)
-            sz = size(values);
-
             if numel(values) == prod(self.shape_)
                 % This is an NDArray of scalars
                 self.write_data_(outstream, values(:));
                 return;
             end
 
+            sz = size(values);
             if length(sz) < length(self.shape_)
                 expected = sprintf("%d ", self.shape_);
                 actual = sprintf("%d ", sz);
@@ -49,12 +48,12 @@ classdef FixedNDArraySerializer < yardl.binary.NDArraySerializerBase
             end
         end
 
-        function s = getShape(obj)
-            item_shape = obj.item_serializer_.getShape();
+        function s = get_shape(self)
+            item_shape = self.item_serializer_.get_shape();
             if isempty(item_shape)
-                s = obj.shape_;
+                s = self.shape_;
             else
-                s = [item_shape obj.shape_];
+                s = [item_shape self.shape_];
             end
 
             if length(s) > 2
@@ -62,16 +61,16 @@ classdef FixedNDArraySerializer < yardl.binary.NDArraySerializerBase
             end
         end
 
-        function trivial = isTriviallySerializable(obj)
-            trivial = obj.item_serializer_.isTriviallySerializable();
+        function trivial = is_trivially_serializable(self)
+            trivial = self.item_serializer_.is_trivially_serializable();
         end
 
-        function writeTrivially(self, outstream, values)
-            self.item_serializer_.writeTrivially(outstream, values);
+        function write_trivially(self, outstream, values)
+            self.item_serializer_.write_trivially(outstream, values);
         end
 
-        function res = readTrivially(self, instream, shape)
-            res = self.item_serializer_.readTrivially(instream, shape);
+        function res = read_trivially(self, instream, shape)
+            res = self.item_serializer_.read_trivially(instream, shape);
         end
     end
 end

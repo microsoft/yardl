@@ -8,20 +8,20 @@ classdef BinaryProtocolReader < handle
     end
 
     methods
-        function obj = BinaryProtocolReader(input, expected_schema)
-            obj.stream_ = yardl.binary.CodedInputStream(input);
-            magic_bytes = obj.stream_.read(length(yardl.binary.MAGIC_BYTES));
+        function self = BinaryProtocolReader(infile, expected_schema)
+            self.stream_ = yardl.binary.CodedInputStream(infile);
+            magic_bytes = self.stream_.read_bytes(length(yardl.binary.MAGIC_BYTES));
             if magic_bytes ~= yardl.binary.MAGIC_BYTES
                 throw(yardl.binary.Exception("Invalid magic bytes"));
             end
 
-            version = read_fixed_int32(obj.stream_);
+            version = read_fixed_int32(self.stream_);
             if version ~= yardl.binary.CURRENT_BINARY_FORMAT_VERSION
                 throw(yardl.binary.Exception("Invalid binary format version"));
             end
 
             s = yardl.binary.StringSerializer();
-            schema = s.read(obj.stream_);
+            schema = s.read(self.stream_);
             if ~isempty(expected_schema) & schema ~= expected_schema
                 throw(yardl.binary.Exception("Invalid schema"));
             end
@@ -29,12 +29,12 @@ classdef BinaryProtocolReader < handle
     end
 
     methods (Access=protected)
-        function close_(obj)
-            obj.stream_.close();
+        function close_(self)
+            self.stream_.close();
         end
     end
 end
 
 function res = read_fixed_int32(stream)
-    res = typecast(stream.read(4), "int32");
+    res = typecast(stream.read_bytes(4), "int32");
 end

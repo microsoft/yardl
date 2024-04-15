@@ -45,6 +45,11 @@ cpp:
 python:
   # The directory where the generated Python package will be written
   outputDir: ../path/relative/to/this/file
+
+# Settings for Matlab code generation (optional)
+matlab:
+  # The directory where the generated Matlab packages will be written
+  outputDir: ../path/relative/to/this/file
 ```
 
 In the future, this file will be able to reference previous versions of

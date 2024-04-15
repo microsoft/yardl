@@ -7,25 +7,25 @@ classdef RecordWithFixedCollections < handle
   end
 
   methods
-    function obj = RecordWithFixedCollections(fixed_vector, fixed_array)
+    function self = RecordWithFixedCollections(fixed_vector, fixed_array)
       if nargin > 0
-        obj.fixed_vector = fixed_vector;
-        obj.fixed_array = fixed_array;
+        self.fixed_vector = fixed_vector;
+        self.fixed_array = fixed_array;
       else
-        obj.fixed_vector = repelem(int32(0), 3);
-        obj.fixed_array = repelem(int32(0), 3, 2);
+        self.fixed_vector = repelem(int32(0), 3);
+        self.fixed_array = repelem(int32(0), 3, 2);
       end
     end
 
-    function res = eq(obj, other)
+    function res = eq(self, other)
       res = ...
         isa(other, 'test_model.RecordWithFixedCollections') && ...
-        all([obj.fixed_vector] == [other.fixed_vector]) && ...
-        isequal(obj.fixed_array, other.fixed_array);
+        all([self.fixed_vector] == [other.fixed_vector]) && ...
+        isequal(self.fixed_array, other.fixed_array);
     end
 
-    function res = ne(obj, other)
-      res = ~obj.eq(other);
+    function res = ne(self, other)
+      res = ~self.eq(other);
     end
   end
 
