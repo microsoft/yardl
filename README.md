@@ -123,6 +123,16 @@ $ just
 
 from the repo root.
 
+To enable support for Matlab, you must provide a Matlab license file to the devcontainer.
+In your HOST environment, export the environment variable `MATLAB_LICENSE_FILE`,
+e.g. in `$HOME/.profile`
+
+```bash
+export MATLAB_LICENSE_FILE=/mnt/c/Users/username/Documents/MATLAB/license.lic
+```
+
+Then invoke `just matlab=enabled ...`.
+
 ## Contributing
 
 This project welcomes contributions and suggestions.  Most contributions require

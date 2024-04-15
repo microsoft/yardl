@@ -1,6 +1,7 @@
 #! /usr/bin/env python3
 
 from dataclasses import dataclass
+import argparse
 import inspect
 import json
 import os
@@ -23,10 +24,6 @@ from tests.factories import (
 
 
 OUTPUT_FILE = "/tmp/benchmark_data.dat"
-
-# Setting this to True will display the roundtrip duration instead of the throughput
-# and should only be done to calibrate the scales of each scenario and format.
-DISPLAY_DURATIONS = False
 
 
 @dataclass
@@ -263,7 +260,9 @@ def invoke_cpp_benchmark(scenario: str, format: Format) -> Optional[Result]:
 
 def invoke_matlab_benchmark(scenario: str, format: Format) -> Optional[Result]:
     res = subprocess.run(
-        ["matlab", "-batch", f"benchmark('{scenario}', '{format}')"],
+        # Workaround for CI: run-matlab-command is a wrapper around `matlab -batch`
+        # See https://github.com/matlab-actions/run-command/issues/53
+        ["run-matlab-command", f"benchmark('{scenario}', '{format}')"],
         cwd=_matlab_benchmark_path,
         stdout=subprocess.PIPE,
         check=True,
@@ -279,11 +278,15 @@ def scenario_name(scenario_func: Callable[[Format], Optional[Result]]) -> str:
 
 
 def invoke_benchmark(
-    scenario_func: Callable[[Format], Optional[Result]], format: Format
+    scenario_func: Callable[[Format], Optional[Result]],
+    format: Format,
+    include_matlab: bool,
 ) -> MutlitingualResults:
     cpp_res = invoke_cpp_benchmark(scenario_name(scenario_func), format)
     python_res = scenario_func(format)
-    matlab_res = invoke_matlab_benchmark(scenario_name(scenario_func), format)
+    matlab_res = None
+    if include_matlab:
+        matlab_res = invoke_matlab_benchmark(scenario_name(scenario_func), format)
     return MutlitingualResults(cpp=cpp_res, python=python_res, matlab=matlab_res)
 
 
@@ -293,6 +296,7 @@ def update_table(
     scenario_func: Callable[[Format], Optional[Result]],
     format: Format,
     results: MutlitingualResults,
+    display_durations: bool,
 ):
     def format_float(thoughput: float) -> str:
         return f"{thoughput:,.2f}"
@@ -306,7 +310,7 @@ def update_table(
             return "green"
         return None
 
-    if DISPLAY_DURATIONS:
+    if display_durations:
         table.add_row(
             scenario_name(scenario_func),
             str(format),
@@ -367,8 +371,22 @@ def update_table(
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--display-durations",
+        action="store_true",
+        help="Display the roundtrip duration instead of the throughput. "
+        "Use only to calibrate the scales of each scenario and format",
+    )
+    parser.add_argument(
+        "--include-matlab",
+        action="store_true",
+        help="Include Matlab benchmarking results",
+    )
+    args = parser.parse_args()
+
     table = Table()
-    if DISPLAY_DURATIONS:
+    if args.display_durations:
         table.title = "Roundtrip duration"
         table.add_column("Scenario")
         table.add_column("Format")
@@ -393,5 +411,7 @@ if __name__ == "__main__":
         ):
             table.add_section()
             for format in [Format.HDF5, Format.BINARY, Format.NDJSON]:
-                res = invoke_benchmark(benchmark_func, format)
-                update_table(table, live, benchmark_func, format, res)
+                res = invoke_benchmark(benchmark_func, format, args.include_matlab)
+                update_table(
+                    table, live, benchmark_func, format, res, args.display_durations
+                )

@@ -2,6 +2,11 @@ set shell := ['bash', '-ceuo', 'pipefail']
 
 cpp_version := "17"
 
+matlab := "disabled"
+matlab-test-cmd := if matlab != "disabled" { "run-matlab-command runTests" } else { "echo Skipping Matlab tests..." }
+benchmark-cmd := if matlab != "disabled" { "python python/benchmark.py --include-matlab" } else { "python python/benchmark.py" }
+
+
 @default: validate
   echo $'\n\e[1;34mNote: you can run \'just test\' to a run an inner-loop subset of the complete validation'
 
@@ -69,18 +74,22 @@ cpp_version := "17"
     ninja tests; \
     ./tests --gtest_brief=1
 
+@matlab-test: generate build-translator
+    cd matlab/test; \
+    {{ matlab-test-cmd }}
+
 @evolution-test: generate-evolution ensure-build-dir
     cd cpp/build; \
     ninja evolution/all; \
     python ../evolution/test-evolution.py
 
-@test: tooling-test cpp-test python-test evolution-test
+@test: tooling-test cpp-test python-test matlab-test evolution-test
 
 @benchmark: generate ensure-build-dir
     cd cpp/build; \
     ninja benchmark; \
     cd ../..; \
-    python python/benchmark.py
+    {{ benchmark-cmd }}
 
 @watch-generate-test: install
     watchexec -r -c -w tooling/ -- "just install && cd models/test && yardl generate --watch"

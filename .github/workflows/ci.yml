@@ -35,7 +35,7 @@ jobs:
         uses: ./.github/actions/configure-environment
 
       - name: Build and test
-        run: just cpp_version=${{ matrix.cppVersion }} validate-with-no-changes
+        run: just cpp_version=${{ matrix.cppVersion }} matlab=enabled validate-with-no-changes
 
   buildBinaries:
     name: Build yardl binaries

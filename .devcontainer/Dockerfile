@@ -169,3 +169,8 @@ RUN wget -q https://www.mathworks.com/mpm/glnxa64/mpm \
     && sudo rm -f mpm /tmp/mathworks_root.log \
     && sudo ln -s ${MATLAB_INSTALL_LOCATION}/bin/matlab /usr/local/bin/matlab \
     && sudo ln -s ${MATLAB_INSTALL_LOCATION} /opt/matlab/latest
+
+# Install workaround run-matlab-command script to unify local and CI invocations of `matlab -batch`
+# See https://github.com/matlab-actions/run-command/issues/53
+RUN sudo wget -O /usr/local/bin/run-matlab-command https://ssd.mathworks.com/supportfiles/ci/run-matlab-command/v2/glnxa64/run-matlab-command \
+    && sudo chmod +x /usr/local/bin/run-matlab-command

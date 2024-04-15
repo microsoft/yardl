@@ -2,4 +2,4 @@
 % Licensed under the MIT License.
 
 addpath("../generated/");
-runtests(pwd)
+assertSuccess(runtests(pwd));
