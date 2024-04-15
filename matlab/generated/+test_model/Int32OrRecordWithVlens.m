@@ -34,7 +34,7 @@ classdef Int32OrRecordWithVlens < yardl.Union
     end
 
     function eq = eq(self, other)
-      eq = isa(other, 'test_model.Int32OrRecordWithVlens') && other.index == self.index && other.value == self.value;
+      eq = isa(other, "test_model.Int32OrRecordWithVlens") && other.index == self.index && other.value == self.value;
     end
 
     function ne = ne(self, other)

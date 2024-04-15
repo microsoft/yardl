@@ -34,7 +34,7 @@ classdef Int32OrString < yardl.Union
     end
 
     function eq = eq(self, other)
-      eq = isa(other, 'basic_types.Int32OrString') && other.index == self.index && other.value == self.value;
+      eq = isa(other, "basic_types.Int32OrString") && other.index == self.index && other.value == self.value;
     end
 
     function ne = ne(self, other)

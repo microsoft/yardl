@@ -34,7 +34,7 @@ classdef Int32OrSimpleRecord < yardl.Union
     end
 
     function eq = eq(self, other)
-      eq = isa(other, 'test_model.Int32OrSimpleRecord') && other.index == self.index && other.value == self.value;
+      eq = isa(other, "test_model.Int32OrSimpleRecord") && other.index == self.index && other.value == self.value;
     end
 
     function ne = ne(self, other)

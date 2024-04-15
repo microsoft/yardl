@@ -120,7 +120,7 @@ func writeUnionClass(w *formatting.IndentedWriter, className string, generalized
 
 			w.WriteStringln("function eq = eq(self, other)")
 			common.WriteBlockBody(w, func() {
-				fmt.Fprintf(w, "eq = isa(other, '%s') && other.index == self.index && other.value == self.value;\n", qualifiedClassName)
+				fmt.Fprintf(w, "eq = isa(other, \"%s\") && other.index == self.index && other.value == self.value;\n", qualifiedClassName)
 			})
 			w.WriteStringln("")
 			w.WriteStringln("function ne = ne(self, other)")
@@ -302,7 +302,7 @@ func writeRecord(fw *common.MatlabFileWriter, rec *dsl.RecordDefinition, st dsl.
 				common.WriteBlockBody(w, func() {
 					w.WriteStringln("res = ...")
 					w.Indented(func() {
-						fmt.Fprintf(w, "isa(other, '%s')", common.TypeSyntax(rec, rec.Namespace))
+						fmt.Fprintf(w, "isa(other, \"%s\")", common.TypeSyntax(rec, rec.Namespace))
 						for _, field := range rec.Fields {
 							w.WriteStringln(" && ...")
 							fieldIdentifier := common.FieldIdentifierName(field.Name)
@@ -671,12 +671,11 @@ func writeComputedFieldExpression(w *formatting.IndentedWriter, expression dsl.E
 					}
 					self.VisitChildren(node)
 				})
-
-				unionClassName := common.UnionClassName(targetType)
-				if targetTypeNamespace != "" && targetTypeNamespace != contextNamespace {
-					unionClassName = fmt.Sprintf("%s.%s", common.NamespaceIdentifierName(targetTypeNamespace), unionClassName)
+				if targetTypeNamespace == "" {
+					targetTypeNamespace = contextNamespace
 				}
 
+				unionClassName := fmt.Sprintf("%s.%s", common.NamespaceIdentifierName(targetTypeNamespace), common.UnionClassName(targetType))
 				for _, switchCase := range t.Cases {
 					writeSwitchCaseOverUnion(w, targetType, unionClassName, switchCase, unionVariableName, self, tail)
 				}
@@ -767,7 +766,7 @@ func writeSwitchCaseOverUnion(w *formatting.IndentedWriter, unionType *dsl.Gener
 						visitor.Visit(switchCase.Expression, tail)
 					})
 				} else {
-					fmt.Fprintf(w, "if %s.index == %d\n", variableName, i+caseIndexOffset)
+					fmt.Fprintf(w, "if isa(%s, \"%s\") && %s.index == %d\n", variableName, unionClassName, variableName, i+caseIndexOffset)
 					common.WriteBlockBody(w, func() {
 						if declarationIdentifier != "" {
 							fmt.Fprintf(w, "%s = %s.value;\n", declarationIdentifier, variableName)
@@ -872,9 +871,7 @@ func typeDefault(t dsl.Type, contextNamespace string, namedType string, st dsl.S
 			if namedType != "" {
 				unionClassName = namedType
 			} else {
-				unionClassName = common.UnionClassName(t)
-
-				unionClassName = fmt.Sprintf("%s.%s", common.NamespaceIdentifierName(contextNamespace), unionClassName)
+				unionClassName = fmt.Sprintf("%s.%s", common.NamespaceIdentifierName(contextNamespace), common.UnionClassName(t))
 			}
 
 			unionCaseConstructor := fmt.Sprintf("%s.%s", unionClassName, formatting.ToPascalCase(t.Cases[0].Tag))

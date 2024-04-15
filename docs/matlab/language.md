@@ -166,7 +166,8 @@ Yardl has the following primitive types:
 
 `yardl.Date`, `yardl.Time`, and `yardl.DateTime` are custom classes because
 Yardl uses nanosecond precision and Matlab's `datetime` has only microsecond precision.
-Each of them can be easily converted to a Matlab `datetime` by calling its static `to_datetime()` method.
+Each of them can be easily converted to/from a Matlab `datetime` by calling
+the corresponding `to_datetime()` or `from_datetime()` method.
 
 ## Optional Types
 
@@ -370,9 +371,9 @@ Example usage:
 
 ```matlab
 permissions = bitor(sandbox.Permissions.READ, sandbox.Permissions.EXECUTE);
-# ...
+% ...
 if bitand(sandbox.Permissions.READ, permissions)
-    # ...
+    % ...
 end
 ```
 
@@ -524,10 +525,13 @@ dimensions: `int[()]`.
 In Matlab, arrays are always created with dimensions reversed with respect to the model definition.
 This means that an array defined as `Image: double[x, y, z]` has the shape `[z, y, x]` in Matlab.
 
-This convention maintains consistency across yardl with respect to indexing
-multi-dimensional arrays, and provides the best serialization performance, since
-Yardl currently supports only C-order when serializing multi-dimensional arrays.
-Matlab, however, uses Fortran-order to store and serialize multi-dimensional arrays.
+Yardl currently supports serializing multi-dimensional arrays only in
+C-continguous order, where the last dimension increases most rapidly.
+Matlab, however, uses Fortran-order to store and serialize multi-dimensional
+arrays, where the first dimension increases most rapidly.
+
+By reversing Matlab array dimensions, yardl maintains consistency with Matlab's
+support for multi-dimensional array indexing, and provides optimal serialization performance.
 
 As a side effect, if you define a *matrix* in yardl as `matrix: double[row, col]`,
 you will need to transpose the array in Matlab.
@@ -549,7 +553,6 @@ ans =
 
      4     2
 
->> r.close();
 ```
 
 To create an array with more than two dimensions, use Matlab pages:
@@ -654,12 +657,28 @@ Computed fields become parameterless methods on the generated Python class. Here
 is an example of invoking the field from the preceding Yardl definition:
 
 ```matlab
->>> rec = sandbox.MyRec(sandbox.Int32OrNamedArray.Int32(4));
->>> rec.my_union_size()
+>> rec = sandbox.MyRec(sandbox.Int32OrNamedArray.Int32(4));
+>> rec.my_union_size()
 
-    ans =
+ans =
 
-        1
+    1
+
+>> arr = sandbox.NamedArray(int32(ones(7)));
+>> rec = sandbox.MyRec(sandbox.Int32OrNamedArray.NamedArray(arr));
+>> rec.my_union_size()
+
+ans =
+
+    49
+
+>> rec = sandbox.MyRec(yardl.None);
+>> rec.my_union_size()
+
+ans =
+
+     0
+
 ```
 
 ## Generics

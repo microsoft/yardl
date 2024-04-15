@@ -12,11 +12,11 @@ classdef GenericRecordWithComputedFields < handle
 
     function res = type_index(self)
       var1 = self.f1;
-      if var1.index == 1
+      if isa(var1, "basic_types.T0OrT1") && var1.index == 1
         res = 0;
         return
       end
-      if var1.index == 2
+      if isa(var1, "basic_types.T0OrT1") && var1.index == 2
         res = 1;
         return
       end
@@ -26,7 +26,7 @@ classdef GenericRecordWithComputedFields < handle
 
     function res = eq(self, other)
       res = ...
-        isa(other, 'basic_types.GenericRecordWithComputedFields') && ...
+        isa(other, "basic_types.GenericRecordWithComputedFields") && ...
         isequal(self.f1, other.f1);
     end
 

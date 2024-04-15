@@ -369,12 +369,12 @@ classdef RecordWithComputedFields < handle
 
     function res = int_float_union_as_float(self)
       var1 = self.int_float_union;
-      if var1.index == 1
+      if isa(var1, "test_model.Int32OrFloat32") && var1.index == 1
         i_foo = var1.value;
         res = single(i_foo);
         return
       end
-      if var1.index == 2
+      if isa(var1, "test_model.Int32OrFloat32") && var1.index == 2
         f = var1.value;
         res = f;
         return
@@ -388,7 +388,7 @@ classdef RecordWithComputedFields < handle
         res = "null";
         return
       end
-      if var1.index == 1
+      if isa(var1, "test_model.Int32OrFloat32") && var1.index == 1
         res = "int";
         return
       end
@@ -398,18 +398,18 @@ classdef RecordWithComputedFields < handle
 
     function res = nested_switch(self)
       var1 = self.union_with_nested_generic_union;
-      if var1.index == 1
+      if isa(var1, "test_model.IntOrGenericRecordWithComputedFields") && var1.index == 1
         res = -1;
         return
       end
-      if var1.index == 2
+      if isa(var1, "test_model.IntOrGenericRecordWithComputedFields") && var1.index == 2
         rec = var1.value;
         var2 = rec.f1;
-        if var2.index == 2
+        if isa(var2, "basic_types.T0OrT1") && var2.index == 2
           res = int32(20);
           return
         end
-        if var2.index == 1
+        if isa(var2, "basic_types.T0OrT1") && var2.index == 1
           res = int32(10);
           return
         end
@@ -420,11 +420,11 @@ classdef RecordWithComputedFields < handle
 
     function res = use_nested_computed_field(self)
       var1 = self.union_with_nested_generic_union;
-      if var1.index == 1
+      if isa(var1, "test_model.IntOrGenericRecordWithComputedFields") && var1.index == 1
         res = -1;
         return
       end
-      if var1.index == 2
+      if isa(var1, "test_model.IntOrGenericRecordWithComputedFields") && var1.index == 2
         rec = var1.value;
         res = int32(rec.type_index());
         return
@@ -527,7 +527,7 @@ classdef RecordWithComputedFields < handle
 
     function res = eq(self, other)
       res = ...
-        isa(other, 'test_model.RecordWithComputedFields') && ...
+        isa(other, "test_model.RecordWithComputedFields") && ...
         isequal(self.array_field, other.array_field) && ...
         isequal(self.array_field_map_dimensions, other.array_field_map_dimensions) && ...
         isequal(self.dynamic_array_field, other.dynamic_array_field) && ...

@@ -176,30 +176,3 @@ hexdump -C playground.bin
 Note that the binary file contains a JSON representation of the protocol's
 schema. This allows code that was not previously aware of this protocol to
 deserialize the contents.
-
-<!-- In addition to the compact binary format, we can write the protocol out to an
-NDJSON file. This requires only a few modifications to our code:
-
-```matlab
-samples = [playground.Sample(yardl.DateTime.now(), [1, 2, 3]), playground.Sample(yardl.DateTime.now(), [4, 5, 6])];
-
-path = "playground.bin"; // [!code --]
-path = "playground.ndjson"; // [!code ++]
-
-w = playground.binary.MyProtocolWriter(path); // [!code --]
-w = playground.ndjson.MyProtocolWriter(path); // [!code ++]
-w.write_header(playground.Header("Me"));
-w.write_samples(samples);
-w.end_samples();
-w.close();
-
-r = playground.binary.MyProtocolReader(path); // [!code --]
-r = playground.ndjson.MyProtocolReader(path); // [!code --]
-disp(r.read_header());
-while r.has_samples():
-  sample = r.read_samples();
-  disp(sample.timestamp, sample.data);
-end
-r.close();
-
-``` -->

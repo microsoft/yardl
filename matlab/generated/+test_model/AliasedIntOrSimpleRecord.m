@@ -34,7 +34,7 @@ classdef AliasedIntOrSimpleRecord < yardl.Union
     end
 
     function eq = eq(self, other)
-      eq = isa(other, 'test_model.AliasedIntOrSimpleRecord') && other.index == self.index && other.value == self.value;
+      eq = isa(other, "test_model.AliasedIntOrSimpleRecord") && other.index == self.index && other.value == self.value;
     end
 
     function ne = ne(self, other)
