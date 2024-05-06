@@ -238,6 +238,17 @@ void TranslateStream(std::string const& protocol_name, yardl::testing::Format in
     reader->CopyTo(*writer);
     return;
   }
+  if (protocol_name == "MultiDArrays") {
+    auto reader = input_format == yardl::testing::Format::kBinary
+      ? std::unique_ptr<test_model::MultiDArraysReaderBase>(new test_model::binary::MultiDArraysReader(input))
+      : std::unique_ptr<test_model::MultiDArraysReaderBase>(new test_model::ndjson::MultiDArraysReader(input));
+
+    auto writer = output_format == yardl::testing::Format::kBinary
+      ? std::unique_ptr<test_model::MultiDArraysWriterBase>(new test_model::binary::MultiDArraysWriter(output))
+      : std::unique_ptr<test_model::MultiDArraysWriterBase>(new test_model::ndjson::MultiDArraysWriter(output));
+    reader->CopyTo(*writer);
+    return;
+  }
   if (protocol_name == "Maps") {
     auto reader = input_format == yardl::testing::Format::kBinary
       ? std::unique_ptr<test_model::MapsReaderBase>(new test_model::binary::MapsReader(input))

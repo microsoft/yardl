@@ -777,6 +777,44 @@ class DynamicNDArraysReader : public test_model::DynamicNDArraysReaderBase, yard
   void CloseImpl() override;
 };
 
+// NDJSON writer for the MultiDArrays protocol.
+class MultiDArraysWriter : public test_model::MultiDArraysWriterBase, yardl::ndjson::NDJsonWriter {
+  public:
+  MultiDArraysWriter(std::ostream& stream)
+      : yardl::ndjson::NDJsonWriter(stream, schema_) {
+  }
+
+  MultiDArraysWriter(std::string file_name)
+      : yardl::ndjson::NDJsonWriter(file_name, schema_) {
+  }
+
+  void Flush() override;
+
+  protected:
+  void WriteImagesImpl(yardl::NDArray<float, 4> const& value) override;
+  void EndImagesImpl() override {}
+  void WriteFramesImpl(yardl::FixedNDArray<float, 1, 1, 64, 32> const& value) override;
+  void EndFramesImpl() override {}
+  void CloseImpl() override;
+};
+
+// NDJSON reader for the MultiDArrays protocol.
+class MultiDArraysReader : public test_model::MultiDArraysReaderBase, yardl::ndjson::NDJsonReader {
+  public:
+  MultiDArraysReader(std::istream& stream)
+      : yardl::ndjson::NDJsonReader(stream, schema_) {
+  }
+
+  MultiDArraysReader(std::string file_name)
+      : yardl::ndjson::NDJsonReader(file_name, schema_) {
+  }
+
+  protected:
+  bool ReadImagesImpl(yardl::NDArray<float, 4>& value) override;
+  bool ReadFramesImpl(yardl::FixedNDArray<float, 1, 1, 64, 32>& value) override;
+  void CloseImpl() override;
+};
+
 // NDJSON writer for the Maps protocol.
 class MapsWriter : public test_model::MapsWriterBase, yardl::ndjson::NDJsonWriter {
   public:

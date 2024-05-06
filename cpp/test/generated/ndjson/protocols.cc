@@ -3263,6 +3263,34 @@ void DynamicNDArraysReader::CloseImpl() {
   VerifyFinished();
 }
 
+void MultiDArraysWriter::WriteImagesImpl(yardl::NDArray<float, 4> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "images", json_value);}
+
+void MultiDArraysWriter::WriteFramesImpl(yardl::FixedNDArray<float, 1, 1, 64, 32> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "frames", json_value);}
+
+void MultiDArraysWriter::Flush() {
+  stream_.flush();
+}
+
+void MultiDArraysWriter::CloseImpl() {
+  stream_.flush();
+}
+
+bool MultiDArraysReader::ReadImagesImpl(yardl::NDArray<float, 4>& value) {
+  return yardl::ndjson::ReadProtocolValue(stream_, line_, "images", false, unused_step_, value);
+}
+
+bool MultiDArraysReader::ReadFramesImpl(yardl::FixedNDArray<float, 1, 1, 64, 32>& value) {
+  return yardl::ndjson::ReadProtocolValue(stream_, line_, "frames", false, unused_step_, value);
+}
+
+void MultiDArraysReader::CloseImpl() {
+  VerifyFinished();
+}
+
 void MapsWriter::WriteStringToIntImpl(std::unordered_map<std::string, int32_t> const& value) {
   ordered_json json_value = value;
   yardl::ndjson::WriteProtocolValue(stream_, "stringToInt", json_value);}

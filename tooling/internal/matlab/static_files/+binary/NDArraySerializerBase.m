@@ -79,7 +79,15 @@ classdef NDArraySerializerBase < yardl.binary.TypeSerializer
                 end
             end
 
-            res = squeeze(reshape(res, [item_shape shape]));
+            % Tricky reshaping to remove unnecessary singleton dimensions in
+            %   subarrays, arrays of fixed vectors, etc.
+            item_shape = item_shape(item_shape > 1);
+            if isempty(item_shape) && isscalar(shape)
+                item_shape = 1;
+            end
+            newshape = [item_shape shape];
+            res = reshape(res, newshape);
+
             if iscolumn(res)
                 res = transpose(res);
             end

@@ -41,11 +41,7 @@ classdef FixedNDArraySerializer < yardl.binary.NDArraySerializerBase
         end
 
         function value = read(self, instream)
-            if isscalar(self.shape_)
-                value = self.read_data_(instream, [1 self.shape_]);
-            else
-                value = self.read_data_(instream, self.shape_);
-            end
+            value = self.read_data_(instream, self.shape_);
         end
 
         function s = get_shape(self)

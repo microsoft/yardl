@@ -2311,6 +2311,141 @@ class TestDynamicNDArraysWriterBase : public DynamicNDArraysWriterBase {
   bool close_called_ = false;
 };
 
+class MockMultiDArraysWriter : public MultiDArraysWriterBase {
+  public:
+  void WriteImagesImpl (yardl::NDArray<float, 4> const& value) override {
+    if (WriteImagesImpl_expected_values_.empty()) {
+      throw std::runtime_error("Unexpected call to WriteImagesImpl");
+    }
+    if (WriteImagesImpl_expected_values_.front() != value) {
+      throw std::runtime_error("Unexpected argument value for call to WriteImagesImpl");
+    }
+    WriteImagesImpl_expected_values_.pop();
+  }
+
+  std::queue<yardl::NDArray<float, 4>> WriteImagesImpl_expected_values_;
+
+  void ExpectWriteImagesImpl (yardl::NDArray<float, 4> const& value) {
+    WriteImagesImpl_expected_values_.push(value);
+  }
+
+  void EndImagesImpl () override {
+    if (--EndImagesImpl_expected_call_count_ < 0) {
+      throw std::runtime_error("Unexpected call to EndImagesImpl");
+    }
+  }
+
+  int EndImagesImpl_expected_call_count_ = 0;
+
+  void ExpectEndImagesImpl () {
+    EndImagesImpl_expected_call_count_++;
+  }
+
+  void WriteFramesImpl (yardl::FixedNDArray<float, 1, 1, 64, 32> const& value) override {
+    if (WriteFramesImpl_expected_values_.empty()) {
+      throw std::runtime_error("Unexpected call to WriteFramesImpl");
+    }
+    if (WriteFramesImpl_expected_values_.front() != value) {
+      throw std::runtime_error("Unexpected argument value for call to WriteFramesImpl");
+    }
+    WriteFramesImpl_expected_values_.pop();
+  }
+
+  std::queue<yardl::FixedNDArray<float, 1, 1, 64, 32>> WriteFramesImpl_expected_values_;
+
+  void ExpectWriteFramesImpl (yardl::FixedNDArray<float, 1, 1, 64, 32> const& value) {
+    WriteFramesImpl_expected_values_.push(value);
+  }
+
+  void EndFramesImpl () override {
+    if (--EndFramesImpl_expected_call_count_ < 0) {
+      throw std::runtime_error("Unexpected call to EndFramesImpl");
+    }
+  }
+
+  int EndFramesImpl_expected_call_count_ = 0;
+
+  void ExpectEndFramesImpl () {
+    EndFramesImpl_expected_call_count_++;
+  }
+
+  void Verify() {
+    if (!WriteImagesImpl_expected_values_.empty()) {
+      throw std::runtime_error("Expected call to WriteImagesImpl was not received");
+    }
+    if (EndImagesImpl_expected_call_count_ > 0) {
+      throw std::runtime_error("Expected call to EndImagesImpl was not received");
+    }
+    if (!WriteFramesImpl_expected_values_.empty()) {
+      throw std::runtime_error("Expected call to WriteFramesImpl was not received");
+    }
+    if (EndFramesImpl_expected_call_count_ > 0) {
+      throw std::runtime_error("Expected call to EndFramesImpl was not received");
+    }
+  }
+};
+
+class TestMultiDArraysWriterBase : public MultiDArraysWriterBase {
+  public:
+  TestMultiDArraysWriterBase(std::unique_ptr<test_model::MultiDArraysWriterBase> writer, std::function<std::unique_ptr<MultiDArraysReaderBase>()> create_reader) : writer_(std::move(writer)), create_reader_(create_reader) {
+  }
+
+  ~TestMultiDArraysWriterBase() {
+    if (!close_called_ && !std::uncaught_exceptions()) {
+      ADD_FAILURE() << "Close() needs to be called on 'TestMultiDArraysWriterBase' to verify mocks";
+    }
+  }
+
+  protected:
+  void WriteImagesImpl(yardl::NDArray<float, 4> const& value) override {
+    writer_->WriteImages(value);
+    mock_writer_.ExpectWriteImagesImpl(value);
+  }
+
+  void WriteImagesImpl(std::vector<yardl::NDArray<float, 4>> const& values) override {
+    writer_->WriteImages(values);
+    for (auto const& v : values) {
+      mock_writer_.ExpectWriteImagesImpl(v);
+    }
+  }
+
+  void EndImagesImpl() override {
+    writer_->EndImages();
+    mock_writer_.ExpectEndImagesImpl();
+  }
+
+  void WriteFramesImpl(yardl::FixedNDArray<float, 1, 1, 64, 32> const& value) override {
+    writer_->WriteFrames(value);
+    mock_writer_.ExpectWriteFramesImpl(value);
+  }
+
+  void WriteFramesImpl(std::vector<yardl::FixedNDArray<float, 1, 1, 64, 32>> const& values) override {
+    writer_->WriteFrames(values);
+    for (auto const& v : values) {
+      mock_writer_.ExpectWriteFramesImpl(v);
+    }
+  }
+
+  void EndFramesImpl() override {
+    writer_->EndFrames();
+    mock_writer_.ExpectEndFramesImpl();
+  }
+
+  void CloseImpl() override {
+    close_called_ = true;
+    writer_->Close();
+    std::unique_ptr<MultiDArraysReaderBase> reader = create_reader_();
+    reader->CopyTo(mock_writer_, 2, 1);
+    mock_writer_.Verify();
+  }
+
+  private:
+  std::unique_ptr<test_model::MultiDArraysWriterBase> writer_;
+  std::function<std::unique_ptr<test_model::MultiDArraysReaderBase>()> create_reader_;
+  MockMultiDArraysWriter mock_writer_;
+  bool close_called_ = false;
+};
+
 class MockMapsWriter : public MapsWriterBase {
   public:
   void WriteStringToIntImpl (std::unordered_map<std::string, int32_t> const& value) override {
@@ -4265,6 +4400,14 @@ std::unique_ptr<test_model::DynamicNDArraysWriterBase> CreateValidatingWriter<te
   return std::make_unique<test_model::TestDynamicNDArraysWriterBase>(
     CreateWriter<test_model::DynamicNDArraysWriterBase>(format, filename),
     [format, filename](){ return CreateReader<test_model::DynamicNDArraysReaderBase>(format, filename);}
+  );
+}
+
+template<>
+std::unique_ptr<test_model::MultiDArraysWriterBase> CreateValidatingWriter<test_model::MultiDArraysWriterBase>(Format format, std::string const& filename) {
+  return std::make_unique<test_model::TestMultiDArraysWriterBase>(
+    CreateWriter<test_model::MultiDArraysWriterBase>(format, filename),
+    [format, filename](){ return CreateReader<test_model::MultiDArraysReaderBase>(format, filename);}
   );
 }
 

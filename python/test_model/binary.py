@@ -701,6 +701,35 @@ class BinaryDynamicNDArraysReader(_binary.BinaryProtocolReader, DynamicNDArraysR
     def _read_record_with_dynamic_nd_arrays(self) -> RecordWithDynamicNDArrays:
         return RecordWithDynamicNDArraysSerializer().read(self._stream)
 
+class BinaryMultiDArraysWriter(_binary.BinaryProtocolWriter, MultiDArraysWriterBase):
+    """Binary writer for the MultiDArrays protocol."""
+
+
+    def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
+        MultiDArraysWriterBase.__init__(self)
+        _binary.BinaryProtocolWriter.__init__(self, stream, MultiDArraysWriterBase.schema)
+
+    def _write_images(self, value: collections.abc.Iterable[npt.NDArray[np.float32]]) -> None:
+        _binary.StreamSerializer(_binary.NDArraySerializer(_binary.float32_serializer, 4)).write(self._stream, value)
+
+    def _write_frames(self, value: collections.abc.Iterable[npt.NDArray[np.float32]]) -> None:
+        _binary.StreamSerializer(_binary.FixedNDArraySerializer(_binary.float32_serializer, (1, 1, 64, 32,))).write(self._stream, value)
+
+
+class BinaryMultiDArraysReader(_binary.BinaryProtocolReader, MultiDArraysReaderBase):
+    """Binary writer for the MultiDArrays protocol."""
+
+
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
+        MultiDArraysReaderBase.__init__(self)
+        _binary.BinaryProtocolReader.__init__(self, stream, MultiDArraysReaderBase.schema)
+
+    def _read_images(self) -> collections.abc.Iterable[npt.NDArray[np.float32]]:
+        return _binary.StreamSerializer(_binary.NDArraySerializer(_binary.float32_serializer, 4)).read(self._stream)
+
+    def _read_frames(self) -> collections.abc.Iterable[npt.NDArray[np.float32]]:
+        return _binary.StreamSerializer(_binary.FixedNDArraySerializer(_binary.float32_serializer, (1, 1, 64, 32,))).read(self._stream)
+
 class BinaryMapsWriter(_binary.BinaryProtocolWriter, MapsWriterBase):
     """Binary writer for the Maps protocol."""
 

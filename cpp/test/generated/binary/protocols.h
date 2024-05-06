@@ -858,6 +858,53 @@ class DynamicNDArraysReader : public test_model::DynamicNDArraysReaderBase, yard
   Version version_;
 };
 
+// Binary writer for the MultiDArrays protocol.
+class MultiDArraysWriter : public test_model::MultiDArraysWriterBase, yardl::binary::BinaryWriter {
+  public:
+  MultiDArraysWriter(std::ostream& stream, Version version = Version::Current)
+      : yardl::binary::BinaryWriter(stream, test_model::MultiDArraysWriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  MultiDArraysWriter(std::string file_name, Version version = Version::Current)
+      : yardl::binary::BinaryWriter(file_name, test_model::MultiDArraysWriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  void Flush() override;
+
+  protected:
+  void WriteImagesImpl(yardl::NDArray<float, 4> const& value) override;
+  void WriteImagesImpl(std::vector<yardl::NDArray<float, 4>> const& values) override;
+  void EndImagesImpl() override;
+  void WriteFramesImpl(yardl::FixedNDArray<float, 1, 1, 64, 32> const& value) override;
+  void WriteFramesImpl(std::vector<yardl::FixedNDArray<float, 1, 1, 64, 32>> const& values) override;
+  void EndFramesImpl() override;
+  void CloseImpl() override;
+
+  Version version_;
+};
+
+// Binary reader for the MultiDArrays protocol.
+class MultiDArraysReader : public test_model::MultiDArraysReaderBase, yardl::binary::BinaryReader {
+  public:
+  MultiDArraysReader(std::istream& stream)
+      : yardl::binary::BinaryReader(stream), version_(test_model::MultiDArraysReaderBase::VersionFromSchema(schema_read_)) {}
+
+  MultiDArraysReader(std::string file_name)
+      : yardl::binary::BinaryReader(file_name), version_(test_model::MultiDArraysReaderBase::VersionFromSchema(schema_read_)) {}
+
+  Version GetVersion() { return version_; }
+
+  protected:
+  bool ReadImagesImpl(yardl::NDArray<float, 4>& value) override;
+  bool ReadImagesImpl(std::vector<yardl::NDArray<float, 4>>& values) override;
+  bool ReadFramesImpl(yardl::FixedNDArray<float, 1, 1, 64, 32>& value) override;
+  bool ReadFramesImpl(std::vector<yardl::FixedNDArray<float, 1, 1, 64, 32>>& values) override;
+  void CloseImpl() override;
+
+  Version version_;
+
+  private:
+  size_t current_block_remaining_ = 0;
+};
+
 // Binary writer for the Maps protocol.
 class MapsWriter : public test_model::MapsWriterBase, yardl::binary::BinaryWriter {
   public:

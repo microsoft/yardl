@@ -257,6 +257,28 @@ classdef RoundTripTest < matlab.unittest.TestCase
             w.close();
         end
 
+        function testMultiDArrays(testCase, format)
+            % ch=8, z=2, y=64, x=32
+            img = zeros(32, 64, 2, 8, 'single');
+            w = create_validating_writer(testCase, format, 'MultiDArrays');
+
+            w.write_images({...
+                img(:,:,:,1), ...
+                img(:,:,1,1), ...
+                img(:,1,1,:), ...
+                img(1,1,1,1) ...
+            });
+            w.end_images();
+
+            w.write_frames({...
+                img(:,:,1,1), ...
+                img(:,:,2,1) ...
+            });
+            w.end_frames();
+
+            w.close();
+        end
+
         function testMaps(testCase, format)
             d = dictionary();
             d("a") = int32(1);

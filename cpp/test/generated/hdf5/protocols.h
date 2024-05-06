@@ -659,6 +659,47 @@ class DynamicNDArraysReader : public test_model::DynamicNDArraysReaderBase, publ
   private:
 };
 
+// HDF5 writer for the MultiDArrays protocol.
+class MultiDArraysWriter : public test_model::MultiDArraysWriterBase, public yardl::hdf5::Hdf5Writer {
+  public:
+  MultiDArraysWriter(std::string path);
+
+  protected:
+  void WriteImagesImpl(yardl::NDArray<float, 4> const& value) override;
+
+  void WriteImagesImpl(std::vector<yardl::NDArray<float, 4>> const& values) override;
+
+  void EndImagesImpl() override;
+
+  void WriteFramesImpl(yardl::FixedNDArray<float, 1, 1, 64, 32> const& value) override;
+
+  void WriteFramesImpl(std::vector<yardl::FixedNDArray<float, 1, 1, 64, 32>> const& values) override;
+
+  void EndFramesImpl() override;
+
+  private:
+  std::unique_ptr<yardl::hdf5::DatasetWriter> images_dataset_state_;
+  std::unique_ptr<yardl::hdf5::DatasetWriter> frames_dataset_state_;
+};
+
+// HDF5 reader for the MultiDArrays protocol.
+class MultiDArraysReader : public test_model::MultiDArraysReaderBase, public yardl::hdf5::Hdf5Reader {
+  public:
+  MultiDArraysReader(std::string path);
+
+  bool ReadImagesImpl(yardl::NDArray<float, 4>& value) override;
+
+  bool ReadImagesImpl(std::vector<yardl::NDArray<float, 4>>& values) override;
+
+  bool ReadFramesImpl(yardl::FixedNDArray<float, 1, 1, 64, 32>& value) override;
+
+  bool ReadFramesImpl(std::vector<yardl::FixedNDArray<float, 1, 1, 64, 32>>& values) override;
+
+  private:
+  std::unique_ptr<yardl::hdf5::DatasetReader> images_dataset_state_;
+  std::unique_ptr<yardl::hdf5::DatasetReader> frames_dataset_state_;
+};
+
 // HDF5 writer for the Maps protocol.
 class MapsWriter : public test_model::MapsWriterBase, public yardl::hdf5::Hdf5Writer {
   public:

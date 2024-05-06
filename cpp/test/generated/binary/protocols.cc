@@ -3472,6 +3472,68 @@ void DynamicNDArraysReader::CloseImpl() {
   stream_.VerifyFinished();
 }
 
+void MultiDArraysWriter::WriteImagesImpl(yardl::NDArray<float, 4> const& value) {
+  yardl::binary::WriteBlock<yardl::NDArray<float, 4>, yardl::binary::WriteNDArray<float, yardl::binary::WriteFloatingPoint, 4>>(stream_, value);
+}
+
+void MultiDArraysWriter::WriteImagesImpl(std::vector<yardl::NDArray<float, 4>> const& values) {
+  if (!values.empty()) {
+    yardl::binary::WriteVector<yardl::NDArray<float, 4>, yardl::binary::WriteNDArray<float, yardl::binary::WriteFloatingPoint, 4>>(stream_, values);
+  }
+}
+
+void MultiDArraysWriter::EndImagesImpl() {
+  yardl::binary::WriteInteger(stream_, 0U);
+}
+
+void MultiDArraysWriter::WriteFramesImpl(yardl::FixedNDArray<float, 1, 1, 64, 32> const& value) {
+  yardl::binary::WriteBlock<yardl::FixedNDArray<float, 1, 1, 64, 32>, yardl::binary::WriteFixedNDArray<float, yardl::binary::WriteFloatingPoint, 1, 1, 64, 32>>(stream_, value);
+}
+
+void MultiDArraysWriter::WriteFramesImpl(std::vector<yardl::FixedNDArray<float, 1, 1, 64, 32>> const& values) {
+  if (!values.empty()) {
+    yardl::binary::WriteVector<yardl::FixedNDArray<float, 1, 1, 64, 32>, yardl::binary::WriteFixedNDArray<float, yardl::binary::WriteFloatingPoint, 1, 1, 64, 32>>(stream_, values);
+  }
+}
+
+void MultiDArraysWriter::EndFramesImpl() {
+  yardl::binary::WriteInteger(stream_, 0U);
+}
+
+void MultiDArraysWriter::Flush() {
+  stream_.Flush();
+}
+
+void MultiDArraysWriter::CloseImpl() {
+  stream_.Flush();
+}
+
+bool MultiDArraysReader::ReadImagesImpl(yardl::NDArray<float, 4>& value) {
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<yardl::NDArray<float, 4>, yardl::binary::ReadNDArray<float, yardl::binary::ReadFloatingPoint, 4>>(stream_, current_block_remaining_, value);
+  return read_block_successful;
+}
+
+bool MultiDArraysReader::ReadImagesImpl(std::vector<yardl::NDArray<float, 4>>& values) {
+  yardl::binary::ReadBlocksIntoVector<yardl::NDArray<float, 4>, yardl::binary::ReadNDArray<float, yardl::binary::ReadFloatingPoint, 4>>(stream_, current_block_remaining_, values);
+  return current_block_remaining_ != 0;
+}
+
+bool MultiDArraysReader::ReadFramesImpl(yardl::FixedNDArray<float, 1, 1, 64, 32>& value) {
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<yardl::FixedNDArray<float, 1, 1, 64, 32>, yardl::binary::ReadFixedNDArray<float, yardl::binary::ReadFloatingPoint, 1, 1, 64, 32>>(stream_, current_block_remaining_, value);
+  return read_block_successful;
+}
+
+bool MultiDArraysReader::ReadFramesImpl(std::vector<yardl::FixedNDArray<float, 1, 1, 64, 32>>& values) {
+  yardl::binary::ReadBlocksIntoVector<yardl::FixedNDArray<float, 1, 1, 64, 32>, yardl::binary::ReadFixedNDArray<float, yardl::binary::ReadFloatingPoint, 1, 1, 64, 32>>(stream_, current_block_remaining_, values);
+  return current_block_remaining_ != 0;
+}
+
+void MultiDArraysReader::CloseImpl() {
+  stream_.VerifyFinished();
+}
+
 void MapsWriter::WriteStringToIntImpl(std::unordered_map<std::string, int32_t> const& value) {
   yardl::binary::WriteMap<std::string, int32_t, yardl::binary::WriteString, yardl::binary::WriteInteger>(stream_, value);
 }

@@ -14,18 +14,18 @@ classdef NDArraySerializer < yardl.binary.NDArraySerializerBase
         end
 
         function write(self, outstream, values)
+            sz = size(values);
             if ndims(values) < self.ndims_
-                throw(yardl.ValueError("Expected %d dimensions, got %d", self.ndims_, ndims(values)));
+                sz = [sz ones(1, self.ndims_-ndims(values))];
             end
 
-            sz = size(values);
             flipped_shape = flip(sz);
-            for dim = 1: self.ndims_
+            for dim = 1:self.ndims_
                 len = flipped_shape(dim);
                 outstream.write_unsigned_varint(len);
             end
 
-            if ndims(values) == self.ndims_
+            if length(sz) == self.ndims_
                 % This is an NDArray of scalars
                 self.write_data_(outstream, values(:));
                 return

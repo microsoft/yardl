@@ -297,6 +297,13 @@ DynamicNDArrays: !protocol
     recordWithVlensArray: RecordWithVlens[]
     recordWithDynamicNDArrays: RecordWithDynamicNDArrays
 
+MultiDArrays: !protocol
+  sequence:
+    images: !stream
+      items: float[ch, z, y, x]
+    frames: !stream
+      items: float[ch:1, z:1, y:64, x:32]
+
 Maps: !protocol
   sequence:
     stringToInt: string->int
