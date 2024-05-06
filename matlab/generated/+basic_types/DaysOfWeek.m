@@ -2,26 +2,26 @@
 
 classdef DaysOfWeek < uint64
   methods (Static)
-    function e = MONDAY
-      e = basic_types.DaysOfWeek(1);
+    function v = MONDAY
+      v = basic_types.DaysOfWeek(1);
     end
-    function e = TUESDAY
-      e = basic_types.DaysOfWeek(2);
+    function v = TUESDAY
+      v = basic_types.DaysOfWeek(2);
     end
-    function e = WEDNESDAY
-      e = basic_types.DaysOfWeek(4);
+    function v = WEDNESDAY
+      v = basic_types.DaysOfWeek(4);
     end
-    function e = THURSDAY
-      e = basic_types.DaysOfWeek(8);
+    function v = THURSDAY
+      v = basic_types.DaysOfWeek(8);
     end
-    function e = FRIDAY
-      e = basic_types.DaysOfWeek(16);
+    function v = FRIDAY
+      v = basic_types.DaysOfWeek(16);
     end
-    function e = SATURDAY
-      e = basic_types.DaysOfWeek(32);
+    function v = SATURDAY
+      v = basic_types.DaysOfWeek(32);
     end
-    function e = SUNDAY
-      e = basic_types.DaysOfWeek(64);
+    function v = SUNDAY
+      v = basic_types.DaysOfWeek(64);
     end
 
     function z = zeros(varargin)
@@ -35,6 +35,34 @@ classdef DaysOfWeek < uint64
         sz = [sz, sz];
       end
       z = reshape(repelem(elem, prod(sz)), sz);
+    end
+  end
+
+  methods
+    function self = DaysOfWeek(varargin)
+      if nargin == 0
+        value = 0;
+      elseif nargin == 1
+        value = varargin{1};
+      else
+        value = 0;
+        for i = 1:nargin
+          value = bitor(value, varargin{i});
+        end
+      end
+      self@uint64(value);
+    end
+
+    function res = has_flags(self, flag)
+      res = bitand(self, flag) == flag;
+    end
+
+    function res = with_flags(self, flag)
+      res = basic_types.DaysOfWeek(bitor(self, flag));
+    end
+
+    function res = without_flags(self, flag)
+      res = basic_types.DaysOfWeek(bitand(self, bitcmp(flag)));
     end
   end
 end

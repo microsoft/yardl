@@ -2,8 +2,8 @@
 
 classdef UInt64Enum < uint64
   methods (Static)
-    function e = A
-      e = test_model.UInt64Enum(9223372036854775808);
+    function v = A
+      v = test_model.UInt64Enum(9223372036854775808);
     end
 
     function z = zeros(varargin)

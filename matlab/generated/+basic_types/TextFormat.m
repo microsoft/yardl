@@ -2,20 +2,20 @@
 
 classdef TextFormat < uint64
   methods (Static)
-    function e = REGULAR
-      e = basic_types.TextFormat(0);
+    function v = REGULAR
+      v = basic_types.TextFormat(0);
     end
-    function e = BOLD
-      e = basic_types.TextFormat(1);
+    function v = BOLD
+      v = basic_types.TextFormat(1);
     end
-    function e = ITALIC
-      e = basic_types.TextFormat(2);
+    function v = ITALIC
+      v = basic_types.TextFormat(2);
     end
-    function e = UNDERLINE
-      e = basic_types.TextFormat(4);
+    function v = UNDERLINE
+      v = basic_types.TextFormat(4);
     end
-    function e = STRIKETHROUGH
-      e = basic_types.TextFormat(8);
+    function v = STRIKETHROUGH
+      v = basic_types.TextFormat(8);
     end
 
     function z = zeros(varargin)
@@ -29,6 +29,34 @@ classdef TextFormat < uint64
         sz = [sz, sz];
       end
       z = reshape(repelem(elem, prod(sz)), sz);
+    end
+  end
+
+  methods
+    function self = TextFormat(varargin)
+      if nargin == 0
+        value = 0;
+      elseif nargin == 1
+        value = varargin{1};
+      else
+        value = 0;
+        for i = 1:nargin
+          value = bitor(value, varargin{i});
+        end
+      end
+      self@uint64(value);
+    end
+
+    function res = has_flags(self, flag)
+      res = bitand(self, flag) == flag;
+    end
+
+    function res = with_flags(self, flag)
+      res = basic_types.TextFormat(bitor(self, flag));
+    end
+
+    function res = without_flags(self, flag)
+      res = basic_types.TextFormat(bitand(self, bitcmp(flag)));
     end
   end
 end

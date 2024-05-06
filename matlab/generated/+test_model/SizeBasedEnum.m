@@ -2,14 +2,14 @@
 
 classdef SizeBasedEnum < uint64
   methods (Static)
-    function e = A
-      e = test_model.SizeBasedEnum(0);
+    function v = A
+      v = test_model.SizeBasedEnum(0);
     end
-    function e = B
-      e = test_model.SizeBasedEnum(1);
+    function v = B
+      v = test_model.SizeBasedEnum(1);
     end
-    function e = C
-      e = test_model.SizeBasedEnum(2);
+    function v = C
+      v = test_model.SizeBasedEnum(2);
     end
 
     function z = zeros(varargin)

@@ -66,6 +66,7 @@ func writeAbstractWriter(fw *common.MatlabFileWriter, p *dsl.ProtocolDefinition,
 							fmt.Fprintf(w, "self.raise_unexpected_state_(%d);\n", i)
 						})
 						w.WriteStringln("")
+
 						fmt.Fprintf(w, "self.%s(value);\n", common.ProtocolWriteImplMethodName(step))
 						if !step.IsStream() {
 							fmt.Fprintf(w, "self.state_ = %d;\n", i+1)
@@ -73,6 +74,7 @@ func writeAbstractWriter(fw *common.MatlabFileWriter, p *dsl.ProtocolDefinition,
 					})
 
 					if step.IsStream() {
+						// End stream method
 						w.WriteStringln("")
 						fmt.Fprintf(w, "function %s(self)\n", common.ProtocolEndMethodName(step))
 						common.WriteBlockBody(w, func() {

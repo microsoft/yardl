@@ -177,5 +177,37 @@ classdef GeneratedTypesTest < matlab.unittest.TestCase
             testCase.verifyTrue(all(dts == yardl.DateTime(0)));
         end
 
+        function testFlags(testCase)
+            zero = test_model.TextFormat(0);
+            regular = test_model.TextFormat.REGULAR;
+            bold = test_model.TextFormat.BOLD;
+            underline = test_model.TextFormat.UNDERLINE;
+            bold_underline = bold.with_flags(underline);
+            bold_underline2 = test_model.TextFormat(bold, underline);
+            everything = regular.with_flags(test_model.TextFormat(bold, underline, 2, 8));
+
+            testCase.verifyEqual(zero, regular);
+
+            testCase.verifyEqual(everything, test_model.TextFormat(0b1111));
+
+            testCase.verifyEqual(regular.with_flags(test_model.TextFormat.BOLD), test_model.TextFormat.BOLD);
+            testCase.verifyEqual(regular.with_flags(uint64(1)), test_model.TextFormat.BOLD);
+            testCase.verifyEqual(bold.with_flags(underline), bold_underline);
+            testCase.verifyEqual(bold.with_flags(underline), bold_underline2);
+
+            testCase.verifyEqual(bold_underline.without_flags(bold), underline);
+            testCase.verifyEqual(bold_underline.without_flags(uint64(1)), underline);
+            testCase.verifyEqual(bold_underline2.without_flags(bold), underline);
+            testCase.verifyEqual(bold_underline2.without_flags(uint64(1)), underline);
+
+            testCase.verifyTrue(bold.has_flags(uint64(1)));
+            testCase.verifyTrue(bold.has_flags(bold));
+            testCase.verifyTrue(bold_underline.has_flags(bold));
+            testCase.verifyTrue(bold_underline.has_flags(underline));
+            testCase.verifyTrue(bold_underline.has_flags(bold_underline));
+            testCase.verifyTrue(bold_underline2.has_flags(bold));
+            testCase.verifyTrue(bold_underline2.has_flags(underline));
+            testCase.verifyTrue(bold_underline2.has_flags(bold_underline));
+        end
     end
 end

@@ -265,17 +265,22 @@ classdef RoundTripTest < matlab.unittest.TestCase
 
             w = create_validating_writer(testCase, format, 'Maps');
             w.write_string_to_int(d);
-
             w.write_int_to_string(dictionary(int32([1, 2, 3]), ["a", "b", "c"]));
-
             w.write_string_to_union(...
                 dictionary(...
                     ["a", "b"], ...
                     [test_model.StringOrInt32.Int32(1), test_model.StringOrInt32.String("2")] ...
                 ) ...
             );
-
             w.write_aliased_generic(d);
+            w.close();
+
+            % Now again for "empty" maps
+            w = create_validating_writer(testCase, format, 'Maps');
+            w.write_string_to_int(dictionary());
+            w.write_int_to_string(dictionary());
+            w.write_string_to_union(dictionary());
+            w.write_aliased_generic(dictionary());
             w.close();
         end
 

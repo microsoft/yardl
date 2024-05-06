@@ -27,6 +27,7 @@ classdef OptionalSerializer < yardl.binary.TypeSerializer
         end
 
         function res = read(self, instream)
+            % Returns either yardl.None or the inner optional value
             has_value = instream.read_byte();
             if has_value == 0
                 res = yardl.None;

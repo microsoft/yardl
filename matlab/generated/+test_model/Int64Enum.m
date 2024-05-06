@@ -2,8 +2,8 @@
 
 classdef Int64Enum < int64
   methods (Static)
-    function e = B
-      e = test_model.Int64Enum(-4611686018427387904);
+    function v = B
+      v = test_model.Int64Enum(-4611686018427387904);
     end
 
     function z = zeros(varargin)

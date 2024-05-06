@@ -210,14 +210,57 @@ func writeEnum(fw *common.MatlabFileWriter, enum *dsl.EnumDefinition, namedType 
 			common.WriteBlockBody(w, func() {
 				for _, value := range enum.Values {
 					common.WriteComment(w, value.Comment)
-					fmt.Fprintf(w, "function e = %s\n", common.EnumValueIdentifierName(value.Symbol))
+					fmt.Fprintf(w, "function v = %s\n", common.EnumValueIdentifierName(value.Symbol))
 					common.WriteBlockBody(w, func() {
-						fmt.Fprintf(w, "e = %s(%d);\n", common.TypeSyntax(enum, enum.Namespace), &value.IntegerValue)
+						fmt.Fprintf(w, "v = %s(%d);\n", common.TypeSyntax(enum, enum.Namespace), &value.IntegerValue)
 					})
 				}
 				w.WriteStringln("")
 				writeZerosStaticMethod(w, common.TypeSyntax(enum, enum.Namespace), []string{"0"})
 			})
+
+			if enum.IsFlags {
+				// Additional methods for flag checks
+				w.WriteStringln("")
+				w.WriteStringln("methods")
+				common.WriteBlockBody(w, func() {
+					fmt.Fprintf(w, "function self = %s(varargin)\n", enumName)
+					common.WriteBlockBody(w, func() {
+						w.WriteStringln("if nargin == 0")
+						w.Indented(func() {
+							w.WriteStringln("value = 0;")
+						})
+						w.WriteStringln("elseif nargin == 1")
+						w.Indented(func() {
+							w.WriteStringln("value = varargin{1};")
+						})
+						w.WriteStringln("else")
+						common.WriteBlockBody(w, func() {
+							w.WriteStringln("value = 0;")
+							w.WriteStringln("for i = 1:nargin")
+							common.WriteBlockBody(w, func() {
+								w.WriteStringln("value = bitor(value, varargin{i});")
+							})
+						})
+						fmt.Fprintf(w, "self@%s(value);\n", base)
+					})
+					w.WriteStringln("")
+					w.WriteStringln("function res = has_flags(self, flag)")
+					common.WriteBlockBody(w, func() {
+						w.WriteStringln("res = bitand(self, flag) == flag;")
+					})
+					w.WriteStringln("")
+					w.WriteStringln("function res = with_flags(self, flag)")
+					common.WriteBlockBody(w, func() {
+						fmt.Fprintf(w, "res = %s(bitor(self, flag));\n", common.TypeSyntax(enum, enum.Namespace))
+					})
+					w.WriteStringln("")
+					w.WriteStringln("function res = without_flags(self, flag)")
+					common.WriteBlockBody(w, func() {
+						fmt.Fprintf(w, "res = %s(bitand(self, bitcmp(flag)));\n", common.TypeSyntax(enum, enum.Namespace))
+					})
+				})
+			}
 		})
 	})
 }

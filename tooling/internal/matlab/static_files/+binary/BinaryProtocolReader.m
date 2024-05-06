@@ -12,18 +12,18 @@ classdef BinaryProtocolReader < handle
             self.stream_ = yardl.binary.CodedInputStream(infile);
             magic_bytes = self.stream_.read_bytes(length(yardl.binary.MAGIC_BYTES));
             if magic_bytes ~= yardl.binary.MAGIC_BYTES
-                throw(yardl.binary.Exception("Invalid magic bytes"));
+                throw(yardl.ProtocolError("Invalid magic bytes"));
             end
 
             version = read_fixed_int32(self.stream_);
             if version ~= yardl.binary.CURRENT_BINARY_FORMAT_VERSION
-                throw(yardl.binary.Exception("Invalid binary format version"));
+                throw(yardl.ProtocolError("Invalid binary format version"));
             end
 
             s = yardl.binary.StringSerializer();
             schema = s.read(self.stream_);
             if ~isempty(expected_schema) & schema ~= expected_schema
-                throw(yardl.binary.Exception("Invalid schema"));
+                throw(yardl.ProtocolError("Invalid schema"));
             end
         end
     end

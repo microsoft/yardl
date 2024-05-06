@@ -13,7 +13,7 @@ classdef CodedOutputStream < handle
             if isa(outfile, "string") || isa(outfile, "char")
                 [fileId, errMsg] = fopen(outfile, "W");
                 if fileId < 0
-                    throw(yardl.binary.Exception(errMsg));
+                    throw(yardl.RuntimError(errMsg));
                 end
                 self.fid_ = fileId;
                 self.owns_stream_ = true;

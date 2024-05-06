@@ -2,11 +2,11 @@
 
 classdef EnumWithKeywordSymbols < uint64
   methods (Static)
-    function e = TRY
-      e = test_model.EnumWithKeywordSymbols(2);
+    function v = TRY
+      v = test_model.EnumWithKeywordSymbols(2);
     end
-    function e = CATCH
-      e = test_model.EnumWithKeywordSymbols(1);
+    function v = CATCH
+      v = test_model.EnumWithKeywordSymbols(1);
     end
 
     function z = zeros(varargin)

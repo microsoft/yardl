@@ -19,8 +19,13 @@ classdef MapSerializer < yardl.binary.TypeSerializer
                 outstream (1,1) yardl.binary.CodedOutputStream
                 value (1,1) dictionary
             end
+
             count = numEntries(value);
             outstream.write_unsigned_varint(count);
+            if count == 0
+                return
+            end
+
             ks = keys(value);
             vs = values(value);
             for i = 1:count
