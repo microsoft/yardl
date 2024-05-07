@@ -371,8 +371,14 @@ Example usage:
 
 ```matlab
 permissions = bitor(sandbox.Permissions.READ, sandbox.Permissions.EXECUTE);
+% Or
+permissions = sandbox.Permissions.READ.with_flag(sandbox.Permissions.EXECUTE);
 % ...
 if bitand(sandbox.Permissions.READ, permissions)
+    % ...
+end
+% Or
+if permissions.has_flags(sandbox.Permissions.READ)
     % ...
 end
 ```
@@ -657,7 +663,7 @@ Computed fields become parameterless methods on the generated Python class. Here
 is an example of invoking the field from the preceding Yardl definition:
 
 ```matlab
->> rec = sandbox.MyRec(sandbox.Int32OrNamedArray.Int32(4));
+>> rec = sandbox.MyRec(my_union=sandbox.Int32OrNamedArray.Int32(4));
 >> rec.my_union_size()
 
 ans =
@@ -665,14 +671,14 @@ ans =
     1
 
 >> arr = sandbox.NamedArray(int32(ones(7)));
->> rec = sandbox.MyRec(sandbox.Int32OrNamedArray.NamedArray(arr));
+>> rec = sandbox.MyRec(my_union=sandbox.Int32OrNamedArray.NamedArray(arr));
 >> rec.my_union_size()
 
 ans =
 
     49
 
->> rec = sandbox.MyRec(yardl.None);
+>> rec = sandbox.MyRec(my_union=yardl.None);
 >> rec.my_union_size()
 
 ans =
@@ -711,7 +717,7 @@ w = sandbox.binary.MyProtocolWriter("sandbox.bin");
 w.write_point(p);
 w.close();
 
-p = sandbox.Point("a", "b");
+p = sandbox.Point(x="a", y="b");
 w = sandbox.binary.MyProtocolWriter("sandbox.bin");
 w.write_point(p); % Error: ...Value must be of type int32 or be convertible to int32. // [!code error]
 w.close();
@@ -729,8 +735,8 @@ MyTuple: BasicTypes.Tuple<string, int>
 Imported types are likewise namespaced in Matlab packages:
 
 ```matlab
-t1 = basic_types.Tuple("John Smith", 42);
-t2 = sandbox.MyTuple("John Smith", 42);
+t1 = basic_types.Tuple(v1="John Smith", v2=42);
+t2 = sandbox.MyTuple(v1="John Smith", v2=42);
 assert(t1 == t2);
 ```
 
