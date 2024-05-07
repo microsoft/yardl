@@ -8,16 +8,15 @@ classdef RecordWithNDArrays < handle
   end
 
   methods
-    function self = RecordWithNDArrays(ints, fixed_simple_record_array, fixed_record_with_vlens_array)
-      if nargin > 0
-        self.ints = ints;
-        self.fixed_simple_record_array = fixed_simple_record_array;
-        self.fixed_record_with_vlens_array = fixed_record_with_vlens_array;
-      else
-        self.ints = int32.empty(0, 0);
-        self.fixed_simple_record_array = test_model.SimpleRecord.empty(0, 0);
-        self.fixed_record_with_vlens_array = test_model.RecordWithVlens.empty(0, 0);
+    function self = RecordWithNDArrays(kwargs)
+      arguments
+        kwargs.ints = int32.empty(0, 0);
+        kwargs.fixed_simple_record_array = test_model.SimpleRecord.empty(0, 0);
+        kwargs.fixed_record_with_vlens_array = test_model.RecordWithVlens.empty(0, 0);
       end
+      self.ints = kwargs.ints;
+      self.fixed_simple_record_array = kwargs.fixed_simple_record_array;
+      self.fixed_record_with_vlens_array = kwargs.fixed_record_with_vlens_array;
     end
 
     function res = eq(self, other)

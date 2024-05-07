@@ -14,12 +14,12 @@ classdef RecordWithFixedCollectionsSerializer < yardl.binary.RecordSerializer
         outstream (1,1) yardl.binary.CodedOutputStream
         value (1,1) test_model.RecordWithFixedCollections
       end
-      self.write_(outstream, value.fixed_vector, value.fixed_array)
+      self.write_(outstream, value.fixed_vector, value.fixed_array);
     end
 
     function value = read(self, instream)
-      field_values = self.read_(instream);
-      value = test_model.RecordWithFixedCollections(field_values{:});
+      fields = self.read_(instream);
+      value = test_model.RecordWithFixedCollections(fixed_vector=fields{1}, fixed_array=fields{2});
     end
   end
 end

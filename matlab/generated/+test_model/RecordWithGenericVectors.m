@@ -7,9 +7,19 @@ classdef RecordWithGenericVectors < handle
   end
 
   methods
-    function self = RecordWithGenericVectors(v, av)
-      self.v = v;
-      self.av = av;
+    function self = RecordWithGenericVectors(kwargs)
+      arguments
+        kwargs.v;
+        kwargs.av;
+      end
+      if ~isfield(kwargs, "v")
+        throw(yardl.TypeError("Missing required keyword argument 'v'"))
+      end
+      self.v = kwargs.v;
+      if ~isfield(kwargs, "av")
+        throw(yardl.TypeError("Missing required keyword argument 'av'"))
+      end
+      self.av = kwargs.av;
     end
 
     function res = eq(self, other)

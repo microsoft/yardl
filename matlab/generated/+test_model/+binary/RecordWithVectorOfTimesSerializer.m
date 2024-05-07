@@ -13,12 +13,12 @@ classdef RecordWithVectorOfTimesSerializer < yardl.binary.RecordSerializer
         outstream (1,1) yardl.binary.CodedOutputStream
         value (1,1) test_model.RecordWithVectorOfTimes
       end
-      self.write_(outstream, value.times)
+      self.write_(outstream, value.times);
     end
 
     function value = read(self, instream)
-      field_values = self.read_(instream);
-      value = test_model.RecordWithVectorOfTimes(field_values{:});
+      fields = self.read_(instream);
+      value = test_model.RecordWithVectorOfTimes(times=fields{1});
     end
   end
 end

@@ -8,16 +8,15 @@ classdef RecordWithUnionsOfContainers < handle
   end
 
   methods
-    function self = RecordWithUnionsOfContainers(map_or_scalar, vector_or_scalar, array_or_scalar)
-      if nargin > 0
-        self.map_or_scalar = map_or_scalar;
-        self.vector_or_scalar = vector_or_scalar;
-        self.array_or_scalar = array_or_scalar;
-      else
-        self.map_or_scalar = test_model.MapOrScalar.Map(dictionary);
-        self.vector_or_scalar = test_model.VectorOrScalar.Vector(int32.empty());
-        self.array_or_scalar = test_model.ArrayOrScalar.Array(int32.empty());
+    function self = RecordWithUnionsOfContainers(kwargs)
+      arguments
+        kwargs.map_or_scalar = test_model.MapOrScalar.Map(dictionary);
+        kwargs.vector_or_scalar = test_model.VectorOrScalar.Vector(int32.empty());
+        kwargs.array_or_scalar = test_model.ArrayOrScalar.Array(int32.empty());
       end
+      self.map_or_scalar = kwargs.map_or_scalar;
+      self.vector_or_scalar = kwargs.vector_or_scalar;
+      self.array_or_scalar = kwargs.array_or_scalar;
     end
 
     function res = eq(self, other)

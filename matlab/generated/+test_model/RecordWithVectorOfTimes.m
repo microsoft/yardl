@@ -6,12 +6,11 @@ classdef RecordWithVectorOfTimes < handle
   end
 
   methods
-    function self = RecordWithVectorOfTimes(times)
-      if nargin > 0
-        self.times = times;
-      else
-        self.times = yardl.Time.empty();
+    function self = RecordWithVectorOfTimes(kwargs)
+      arguments
+        kwargs.times = yardl.Time.empty();
       end
+      self.times = kwargs.times;
     end
 
     function res = eq(self, other)

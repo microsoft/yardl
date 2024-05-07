@@ -17,12 +17,12 @@ classdef RecordContainingNestedGenericRecordsSerializer < yardl.binary.RecordSer
         outstream (1,1) yardl.binary.CodedOutputStream
         value (1,1) test_model.RecordContainingNestedGenericRecords
       end
-      self.write_(outstream, value.f1, value.f1a, value.f2, value.f2a, value.nested)
+      self.write_(outstream, value.f1, value.f1a, value.f2, value.f2a, value.nested);
     end
 
     function value = read(self, instream)
-      field_values = self.read_(instream);
-      value = test_model.RecordContainingNestedGenericRecords(field_values{:});
+      fields = self.read_(instream);
+      value = test_model.RecordContainingNestedGenericRecords(f1=fields{1}, f1a=fields{2}, f2=fields{3}, f2a=fields{4}, nested=fields{5});
     end
   end
 end

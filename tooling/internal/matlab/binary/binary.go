@@ -193,14 +193,18 @@ func writeRecordSerializer(fw *common.MatlabFileWriter, rec *dsl.RecordDefinitio
 					for i, field := range rec.Fields {
 						fieldAccesses[i] = fmt.Sprintf("value.%s", common.FieldIdentifierName(field.Name))
 					}
-					fmt.Fprintf(w, "self.write_(outstream, %s)\n", strings.Join(fieldAccesses, ", "))
+					fmt.Fprintf(w, "self.write_(outstream, %s);\n", strings.Join(fieldAccesses, ", "))
 				})
 				w.WriteStringln("")
 
 				fmt.Fprintf(w, "function value = read(self, instream)\n")
 				common.WriteBlockBody(w, func() {
-					w.WriteStringln("field_values = self.read_(instream);")
-					fmt.Fprintf(w, "value = %s(field_values{:});\n", typeSyntax)
+					w.WriteStringln("fields = self.read_(instream);")
+					fieldWrites := make([]string, len(rec.Fields))
+					for i, field := range rec.Fields {
+						fieldWrites[i] = fmt.Sprintf("%s=fields{%d}", common.FieldIdentifierName(field.Name), i+1)
+					}
+					fmt.Fprintf(w, "value = %s(%s);\n", typeSyntax, strings.Join(fieldWrites, ", "))
 				})
 			})
 		})

@@ -15,12 +15,12 @@ classdef RecordWithEnumsSerializer < yardl.binary.RecordSerializer
         outstream (1,1) yardl.binary.CodedOutputStream
         value (1,1) test_model.RecordWithEnums
       end
-      self.write_(outstream, value.enum, value.flags, value.flags_2)
+      self.write_(outstream, value.enum, value.flags, value.flags_2);
     end
 
     function value = read(self, instream)
-      field_values = self.read_(instream);
-      value = test_model.RecordWithEnums(field_values{:});
+      fields = self.read_(instream);
+      value = test_model.RecordWithEnums(enum=fields{1}, flags=fields{2}, flags_2=fields{3});
     end
   end
 end

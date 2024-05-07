@@ -8,10 +8,18 @@ classdef RecordWithKeywordFields < handle
   end
 
   methods
-    function self = RecordWithKeywordFields(int, sizeof, if_)
-      self.int = int;
-      self.sizeof = sizeof;
-      self.if_ = if_;
+    function self = RecordWithKeywordFields(kwargs)
+      arguments
+        kwargs.int = "";
+        kwargs.sizeof = int32.empty(0, 0);
+        kwargs.if_;
+      end
+      self.int = kwargs.int;
+      self.sizeof = kwargs.sizeof;
+      if ~isfield(kwargs, "if_")
+        throw(yardl.TypeError("Missing required keyword argument 'if_'"))
+      end
+      self.if_ = kwargs.if_;
     end
 
     function res = float(self)

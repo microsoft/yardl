@@ -29,12 +29,12 @@ classdef RecordWithPrimitivesSerializer < yardl.binary.RecordSerializer
         outstream (1,1) yardl.binary.CodedOutputStream
         value (1,1) test_model.RecordWithPrimitives
       end
-      self.write_(outstream, value.bool_field, value.int8_field, value.uint8_field, value.int16_field, value.uint16_field, value.int32_field, value.uint32_field, value.int64_field, value.uint64_field, value.size_field, value.float32_field, value.float64_field, value.complexfloat32_field, value.complexfloat64_field, value.date_field, value.time_field, value.datetime_field)
+      self.write_(outstream, value.bool_field, value.int8_field, value.uint8_field, value.int16_field, value.uint16_field, value.int32_field, value.uint32_field, value.int64_field, value.uint64_field, value.size_field, value.float32_field, value.float64_field, value.complexfloat32_field, value.complexfloat64_field, value.date_field, value.time_field, value.datetime_field);
     end
 
     function value = read(self, instream)
-      field_values = self.read_(instream);
-      value = test_model.RecordWithPrimitives(field_values{:});
+      fields = self.read_(instream);
+      value = test_model.RecordWithPrimitives(bool_field=fields{1}, int8_field=fields{2}, uint8_field=fields{3}, int16_field=fields{4}, uint16_field=fields{5}, int32_field=fields{6}, uint32_field=fields{7}, int64_field=fields{8}, uint64_field=fields{9}, size_field=fields{10}, float32_field=fields{11}, float64_field=fields{12}, complexfloat32_field=fields{13}, complexfloat64_field=fields{14}, date_field=fields{15}, time_field=fields{16}, datetime_field=fields{17});
     end
   end
 end

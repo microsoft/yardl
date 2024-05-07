@@ -8,16 +8,15 @@ classdef RecordWithOptionalFields < handle
   end
 
   methods
-    function self = RecordWithOptionalFields(optional_int, optional_int_alternate_syntax, optional_time)
-      if nargin > 0
-        self.optional_int = optional_int;
-        self.optional_int_alternate_syntax = optional_int_alternate_syntax;
-        self.optional_time = optional_time;
-      else
-        self.optional_int = yardl.None;
-        self.optional_int_alternate_syntax = yardl.None;
-        self.optional_time = yardl.None;
+    function self = RecordWithOptionalFields(kwargs)
+      arguments
+        kwargs.optional_int = yardl.None;
+        kwargs.optional_int_alternate_syntax = yardl.None;
+        kwargs.optional_time = yardl.None;
       end
+      self.optional_int = kwargs.optional_int;
+      self.optional_int_alternate_syntax = kwargs.optional_int_alternate_syntax;
+      self.optional_time = kwargs.optional_time;
     end
 
     function res = eq(self, other)

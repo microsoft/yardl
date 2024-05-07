@@ -8,16 +8,15 @@ classdef RecordWithUnions < handle
   end
 
   methods
-    function self = RecordWithUnions(null_or_int_or_string, date_or_datetime, null_or_fruits_or_days_of_week)
-      if nargin > 0
-        self.null_or_int_or_string = null_or_int_or_string;
-        self.date_or_datetime = date_or_datetime;
-        self.null_or_fruits_or_days_of_week = null_or_fruits_or_days_of_week;
-      else
-        self.null_or_int_or_string = yardl.None;
-        self.date_or_datetime = basic_types.TimeOrDatetime.Time(yardl.Time());
-        self.null_or_fruits_or_days_of_week = yardl.None;
+    function self = RecordWithUnions(kwargs)
+      arguments
+        kwargs.null_or_int_or_string = yardl.None;
+        kwargs.date_or_datetime = basic_types.TimeOrDatetime.Time(yardl.Time());
+        kwargs.null_or_fruits_or_days_of_week = yardl.None;
       end
+      self.null_or_int_or_string = kwargs.null_or_int_or_string;
+      self.date_or_datetime = kwargs.date_or_datetime;
+      self.null_or_fruits_or_days_of_week = kwargs.null_or_fruits_or_days_of_week;
     end
 
     function res = eq(self, other)

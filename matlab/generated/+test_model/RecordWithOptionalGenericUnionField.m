@@ -6,12 +6,11 @@ classdef RecordWithOptionalGenericUnionField < handle
   end
 
   methods
-    function self = RecordWithOptionalGenericUnionField(v)
-      if nargin > 0
-        self.v = v;
-      else
-        self.v = yardl.None;
+    function self = RecordWithOptionalGenericUnionField(kwargs)
+      arguments
+        kwargs.v = yardl.None;
       end
+      self.v = kwargs.v;
     end
 
     function res = eq(self, other)

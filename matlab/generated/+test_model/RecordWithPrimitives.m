@@ -22,44 +22,43 @@ classdef RecordWithPrimitives < handle
   end
 
   methods
-    function self = RecordWithPrimitives(bool_field, int8_field, uint8_field, int16_field, uint16_field, int32_field, uint32_field, int64_field, uint64_field, size_field, float32_field, float64_field, complexfloat32_field, complexfloat64_field, date_field, time_field, datetime_field)
-      if nargin > 0
-        self.bool_field = bool_field;
-        self.int8_field = int8_field;
-        self.uint8_field = uint8_field;
-        self.int16_field = int16_field;
-        self.uint16_field = uint16_field;
-        self.int32_field = int32_field;
-        self.uint32_field = uint32_field;
-        self.int64_field = int64_field;
-        self.uint64_field = uint64_field;
-        self.size_field = size_field;
-        self.float32_field = float32_field;
-        self.float64_field = float64_field;
-        self.complexfloat32_field = complexfloat32_field;
-        self.complexfloat64_field = complexfloat64_field;
-        self.date_field = date_field;
-        self.time_field = time_field;
-        self.datetime_field = datetime_field;
-      else
-        self.bool_field = false;
-        self.int8_field = int8(0);
-        self.uint8_field = uint8(0);
-        self.int16_field = int16(0);
-        self.uint16_field = uint16(0);
-        self.int32_field = int32(0);
-        self.uint32_field = uint32(0);
-        self.int64_field = int64(0);
-        self.uint64_field = uint64(0);
-        self.size_field = uint64(0);
-        self.float32_field = single(0);
-        self.float64_field = double(0);
-        self.complexfloat32_field = complex(single(0));
-        self.complexfloat64_field = complex(0);
-        self.date_field = yardl.Date();
-        self.time_field = yardl.Time();
-        self.datetime_field = yardl.DateTime();
+    function self = RecordWithPrimitives(kwargs)
+      arguments
+        kwargs.bool_field = false;
+        kwargs.int8_field = int8(0);
+        kwargs.uint8_field = uint8(0);
+        kwargs.int16_field = int16(0);
+        kwargs.uint16_field = uint16(0);
+        kwargs.int32_field = int32(0);
+        kwargs.uint32_field = uint32(0);
+        kwargs.int64_field = int64(0);
+        kwargs.uint64_field = uint64(0);
+        kwargs.size_field = uint64(0);
+        kwargs.float32_field = single(0);
+        kwargs.float64_field = double(0);
+        kwargs.complexfloat32_field = complex(single(0));
+        kwargs.complexfloat64_field = complex(0);
+        kwargs.date_field = yardl.Date();
+        kwargs.time_field = yardl.Time();
+        kwargs.datetime_field = yardl.DateTime();
       end
+      self.bool_field = kwargs.bool_field;
+      self.int8_field = kwargs.int8_field;
+      self.uint8_field = kwargs.uint8_field;
+      self.int16_field = kwargs.int16_field;
+      self.uint16_field = kwargs.uint16_field;
+      self.int32_field = kwargs.int32_field;
+      self.uint32_field = kwargs.uint32_field;
+      self.int64_field = kwargs.int64_field;
+      self.uint64_field = kwargs.uint64_field;
+      self.size_field = kwargs.size_field;
+      self.float32_field = kwargs.float32_field;
+      self.float64_field = kwargs.float64_field;
+      self.complexfloat32_field = kwargs.complexfloat32_field;
+      self.complexfloat64_field = kwargs.complexfloat64_field;
+      self.date_field = kwargs.date_field;
+      self.time_field = kwargs.time_field;
+      self.datetime_field = kwargs.datetime_field;
     end
 
     function res = eq(self, other)

@@ -82,16 +82,19 @@ classdef GeneratedTypesTest < matlab.unittest.TestCase
             g2a = test_model.RecordWithAliasedOptionalGenericUnionField();
             testCase.verifyEqual(g2a.v, g2.v)
 
-            testCase.verifyError(@() test_model.MyTuple(), 'MATLAB:minrhs');
+            % testCase.verifyError(@() test_model.MyTuple(), 'MATLAB:minrhs');
+            testCase.verifyError(@() test_model.MyTuple(), 'yardl:TypeError');
+            t = test_model.MyTuple(v1="a", v2=42);
+
             rm = test_model.RecordWithGenericMaps();
             testCase.verifyEqual(rm.m, dictionary);
             testCase.verifyEqual(rm.am, rm.m);
         end
 
         function testDefaultRecordWithGenericRequiredArguments(testCase)
-            testCase.verifyError(@() test_model.RecordWithGenericArrays(), 'MATLAB:minrhs');
-            testCase.verifyError(@() test_model.RecordWithGenericVectors(), 'MATLAB:minrhs');
-            testCase.verifyError(@() test_model.RecordWithGenericFixedVectors(), 'MATLAB:minrhs');
+            testCase.verifyError(@() test_model.RecordWithGenericArrays(), 'yardl:TypeError');
+            testCase.verifyError(@() test_model.RecordWithGenericVectors(), 'yardl:TypeError');
+            testCase.verifyError(@() test_model.RecordWithGenericFixedVectors(), 'yardl:TypeError');
         end
 
         function testDefaultRecordContainingNestedGenericRecords(testCase)

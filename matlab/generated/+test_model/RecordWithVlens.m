@@ -8,16 +8,15 @@ classdef RecordWithVlens < handle
   end
 
   methods
-    function self = RecordWithVlens(a, b, c)
-      if nargin > 0
-        self.a = a;
-        self.b = b;
-        self.c = c;
-      else
-        self.a = test_model.SimpleRecord.empty();
-        self.b = int32(0);
-        self.c = int32(0);
+    function self = RecordWithVlens(kwargs)
+      arguments
+        kwargs.a = test_model.SimpleRecord.empty();
+        kwargs.b = int32(0);
+        kwargs.c = int32(0);
       end
+      self.a = kwargs.a;
+      self.b = kwargs.b;
+      self.c = kwargs.c;
     end
 
     function res = eq(self, other)

@@ -8,16 +8,15 @@ classdef SimpleRecord < handle
   end
 
   methods
-    function self = SimpleRecord(x, y, z)
-      if nargin > 0
-        self.x = x;
-        self.y = y;
-        self.z = z;
-      else
-        self.x = int32(0);
-        self.y = int32(0);
-        self.z = int32(0);
+    function self = SimpleRecord(kwargs)
+      arguments
+        kwargs.x = int32(0);
+        kwargs.y = int32(0);
+        kwargs.z = int32(0);
       end
+      self.x = kwargs.x;
+      self.y = kwargs.y;
+      self.z = kwargs.z;
     end
 
     function res = eq(self, other)

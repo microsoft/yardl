@@ -9,18 +9,17 @@ classdef SimpleAcquisition < handle
   end
 
   methods
-    function self = SimpleAcquisition(flags, idx, data, trajectory)
-      if nargin > 0
-        self.flags = flags;
-        self.idx = idx;
-        self.data = data;
-        self.trajectory = trajectory;
-      else
-        self.flags = uint64(0);
-        self.idx = test_model.SimpleEncodingCounters();
-        self.data = single.empty(0, 0);
-        self.trajectory = single.empty(0, 0);
+    function self = SimpleAcquisition(kwargs)
+      arguments
+        kwargs.flags = uint64(0);
+        kwargs.idx = test_model.SimpleEncodingCounters();
+        kwargs.data = single.empty(0, 0);
+        kwargs.trajectory = single.empty(0, 0);
       end
+      self.flags = kwargs.flags;
+      self.idx = kwargs.idx;
+      self.data = kwargs.data;
+      self.trajectory = kwargs.trajectory;
     end
 
     function res = eq(self, other)

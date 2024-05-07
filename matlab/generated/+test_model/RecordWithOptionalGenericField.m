@@ -6,12 +6,11 @@ classdef RecordWithOptionalGenericField < handle
   end
 
   methods
-    function self = RecordWithOptionalGenericField(v)
-      if nargin > 0
-        self.v = v;
-      else
-        self.v = yardl.None;
+    function self = RecordWithOptionalGenericField(kwargs)
+      arguments
+        kwargs.v = yardl.None;
       end
+      self.v = kwargs.v;
     end
 
     function res = eq(self, other)

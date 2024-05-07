@@ -13,12 +13,12 @@ classdef RecordWithOptionalVectorSerializer < yardl.binary.RecordSerializer
         outstream (1,1) yardl.binary.CodedOutputStream
         value (1,1) test_model.RecordWithOptionalVector
       end
-      self.write_(outstream, value.optional_vector)
+      self.write_(outstream, value.optional_vector);
     end
 
     function value = read(self, instream)
-      field_values = self.read_(instream);
-      value = test_model.RecordWithOptionalVector(field_values{:});
+      fields = self.read_(instream);
+      value = test_model.RecordWithOptionalVector(optional_vector=fields{1});
     end
   end
 end

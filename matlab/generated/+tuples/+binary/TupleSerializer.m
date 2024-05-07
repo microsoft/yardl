@@ -14,12 +14,12 @@ classdef TupleSerializer < yardl.binary.RecordSerializer
         outstream (1,1) yardl.binary.CodedOutputStream
         value (1,1) tuples.Tuple
       end
-      self.write_(outstream, value.v1, value.v2)
+      self.write_(outstream, value.v1, value.v2);
     end
 
     function value = read(self, instream)
-      field_values = self.read_(instream);
-      value = tuples.Tuple(field_values{:});
+      fields = self.read_(instream);
+      value = tuples.Tuple(v1=fields{1}, v2=fields{2});
     end
   end
 end

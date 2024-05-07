@@ -14,12 +14,12 @@ classdef RecordWithVlenCollectionsSerializer < yardl.binary.RecordSerializer
         outstream (1,1) yardl.binary.CodedOutputStream
         value (1,1) test_model.RecordWithVlenCollections
       end
-      self.write_(outstream, value.vector, value.array)
+      self.write_(outstream, value.vector, value.array);
     end
 
     function value = read(self, instream)
-      field_values = self.read_(instream);
-      value = test_model.RecordWithVlenCollections(field_values{:});
+      fields = self.read_(instream);
+      value = test_model.RecordWithVlenCollections(vector=fields{1}, array=fields{2});
     end
   end
 end

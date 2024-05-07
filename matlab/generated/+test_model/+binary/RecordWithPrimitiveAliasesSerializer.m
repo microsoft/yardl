@@ -21,12 +21,12 @@ classdef RecordWithPrimitiveAliasesSerializer < yardl.binary.RecordSerializer
         outstream (1,1) yardl.binary.CodedOutputStream
         value (1,1) test_model.RecordWithPrimitiveAliases
       end
-      self.write_(outstream, value.byte_field, value.int_field, value.uint_field, value.long_field, value.ulong_field, value.float_field, value.double_field, value.complexfloat_field, value.complexdouble_field)
+      self.write_(outstream, value.byte_field, value.int_field, value.uint_field, value.long_field, value.ulong_field, value.float_field, value.double_field, value.complexfloat_field, value.complexdouble_field);
     end
 
     function value = read(self, instream)
-      field_values = self.read_(instream);
-      value = test_model.RecordWithPrimitiveAliases(field_values{:});
+      fields = self.read_(instream);
+      value = test_model.RecordWithPrimitiveAliases(byte_field=fields{1}, int_field=fields{2}, uint_field=fields{3}, long_field=fields{4}, ulong_field=fields{5}, float_field=fields{6}, double_field=fields{7}, complexfloat_field=fields{8}, complexdouble_field=fields{9});
     end
   end
 end

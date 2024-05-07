@@ -7,14 +7,13 @@ classdef RecordWithAliasedGenerics < handle
   end
 
   methods
-    function self = RecordWithAliasedGenerics(my_strings, aliased_strings)
-      if nargin > 0
-        self.my_strings = my_strings;
-        self.aliased_strings = aliased_strings;
-      else
-        self.my_strings = tuples.Tuple("", "");
-        self.aliased_strings = tuples.Tuple("", "");
+    function self = RecordWithAliasedGenerics(kwargs)
+      arguments
+        kwargs.my_strings = tuples.Tuple(v1="", v2="");
+        kwargs.aliased_strings = tuples.Tuple(v1="", v2="");
       end
+      self.my_strings = kwargs.my_strings;
+      self.aliased_strings = kwargs.aliased_strings;
     end
 
     function res = eq(self, other)

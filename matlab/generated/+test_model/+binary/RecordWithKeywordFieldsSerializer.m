@@ -15,12 +15,12 @@ classdef RecordWithKeywordFieldsSerializer < yardl.binary.RecordSerializer
         outstream (1,1) yardl.binary.CodedOutputStream
         value (1,1) test_model.RecordWithKeywordFields
       end
-      self.write_(outstream, value.int, value.sizeof, value.if_)
+      self.write_(outstream, value.int, value.sizeof, value.if_);
     end
 
     function value = read(self, instream)
-      field_values = self.read_(instream);
-      value = test_model.RecordWithKeywordFields(field_values{:});
+      fields = self.read_(instream);
+      value = test_model.RecordWithKeywordFields(int=fields{1}, sizeof=fields{2}, if_=fields{3});
     end
   end
 end

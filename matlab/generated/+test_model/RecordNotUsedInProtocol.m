@@ -7,14 +7,13 @@ classdef RecordNotUsedInProtocol < handle
   end
 
   methods
-    function self = RecordNotUsedInProtocol(u1, u2)
-      if nargin > 0
-        self.u1 = u1;
-        self.u2 = u2;
-      else
-        self.u1 = test_model.GenericUnion3.T(int32(0));
-        self.u2 = test_model.GenericUnion3Alternate.U(int32(0));
+    function self = RecordNotUsedInProtocol(kwargs)
+      arguments
+        kwargs.u1 = test_model.GenericUnion3.T(int32(0));
+        kwargs.u2 = test_model.GenericUnion3Alternate.U(int32(0));
       end
+      self.u1 = kwargs.u1;
+      self.u2 = kwargs.u2;
     end
 
     function res = eq(self, other)

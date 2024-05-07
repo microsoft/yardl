@@ -15,12 +15,12 @@ classdef RecordWithOptionalFieldsSerializer < yardl.binary.RecordSerializer
         outstream (1,1) yardl.binary.CodedOutputStream
         value (1,1) test_model.RecordWithOptionalFields
       end
-      self.write_(outstream, value.optional_int, value.optional_int_alternate_syntax, value.optional_time)
+      self.write_(outstream, value.optional_int, value.optional_int_alternate_syntax, value.optional_time);
     end
 
     function value = read(self, instream)
-      field_values = self.read_(instream);
-      value = test_model.RecordWithOptionalFields(field_values{:});
+      fields = self.read_(instream);
+      value = test_model.RecordWithOptionalFields(optional_int=fields{1}, optional_int_alternate_syntax=fields{2}, optional_time=fields{3});
     end
   end
 end

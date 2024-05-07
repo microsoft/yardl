@@ -16,12 +16,12 @@ classdef GenericRecordSerializer < yardl.binary.RecordSerializer
         outstream (1,1) yardl.binary.CodedOutputStream
         value (1,1) test_model.GenericRecord
       end
-      self.write_(outstream, value.scalar_1, value.scalar_2, value.vector_1, value.image_2)
+      self.write_(outstream, value.scalar_1, value.scalar_2, value.vector_1, value.image_2);
     end
 
     function value = read(self, instream)
-      field_values = self.read_(instream);
-      value = test_model.GenericRecord(field_values{:});
+      fields = self.read_(instream);
+      value = test_model.GenericRecord(scalar_1=fields{1}, scalar_2=fields{2}, vector_1=fields{3}, image_2=fields{4});
     end
   end
 end

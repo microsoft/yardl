@@ -9,18 +9,17 @@ classdef SimpleEncodingCounters < handle
   end
 
   methods
-    function self = SimpleEncodingCounters(e1, e2, slice, repetition)
-      if nargin > 0
-        self.e1 = e1;
-        self.e2 = e2;
-        self.slice = slice;
-        self.repetition = repetition;
-      else
-        self.e1 = yardl.None;
-        self.e2 = yardl.None;
-        self.slice = yardl.None;
-        self.repetition = yardl.None;
+    function self = SimpleEncodingCounters(kwargs)
+      arguments
+        kwargs.e1 = yardl.None;
+        kwargs.e2 = yardl.None;
+        kwargs.slice = yardl.None;
+        kwargs.repetition = yardl.None;
       end
+      self.e1 = kwargs.e1;
+      self.e2 = kwargs.e2;
+      self.slice = kwargs.slice;
+      self.repetition = kwargs.repetition;
     end
 
     function res = eq(self, other)

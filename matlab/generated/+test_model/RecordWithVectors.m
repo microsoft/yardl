@@ -8,16 +8,15 @@ classdef RecordWithVectors < handle
   end
 
   methods
-    function self = RecordWithVectors(default_vector, default_vector_fixed_length, vector_of_vectors)
-      if nargin > 0
-        self.default_vector = default_vector;
-        self.default_vector_fixed_length = default_vector_fixed_length;
-        self.vector_of_vectors = vector_of_vectors;
-      else
-        self.default_vector = int32.empty();
-        self.default_vector_fixed_length = repelem(int32(0), 3);
-        self.vector_of_vectors = int32.empty();
+    function self = RecordWithVectors(kwargs)
+      arguments
+        kwargs.default_vector = int32.empty();
+        kwargs.default_vector_fixed_length = repelem(int32(0), 3);
+        kwargs.vector_of_vectors = int32.empty();
       end
+      self.default_vector = kwargs.default_vector;
+      self.default_vector_fixed_length = kwargs.default_vector_fixed_length;
+      self.vector_of_vectors = kwargs.vector_of_vectors;
     end
 
     function res = eq(self, other)

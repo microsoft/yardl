@@ -7,14 +7,13 @@ classdef RecordWithStrings < handle
   end
 
   methods
-    function self = RecordWithStrings(a, b)
-      if nargin > 0
-        self.a = a;
-        self.b = b;
-      else
-        self.a = "";
-        self.b = "";
+    function self = RecordWithStrings(kwargs)
+      arguments
+        kwargs.a = "";
+        kwargs.b = "";
       end
+      self.a = kwargs.a;
+      self.b = kwargs.b;
     end
 
     function res = eq(self, other)

@@ -14,7 +14,7 @@ classdef ComputedFieldsTest < matlab.unittest.TestCase
             r.string_field = "hello";
             testCase.verifyEqual(r.access_string_field(), "hello");
 
-            r.tuple_field = test_model.MyTuple(1, 2);
+            r.tuple_field = test_model.MyTuple(v1=1, v2=2);
             testCase.verifyEqual(r.access_tuple_field(), r.tuple_field);
             testCase.verifyEqual(r.access_nested_tuple_field(), r.tuple_field.v2);
 
@@ -147,13 +147,13 @@ classdef ComputedFieldsTest < matlab.unittest.TestCase
             testCase.verifyEqual(r.nested_switch(), -1);
             testCase.verifyEqual(r.use_nested_computed_field(), -1);
 
-            g0 = basic_types.GenericRecordWithComputedFields(basic_types.T0OrT1.T0("hi"));
+            g0 = basic_types.GenericRecordWithComputedFields(f1=basic_types.T0OrT1.T0("hi"));
             r.union_with_nested_generic_union = ...
                 test_model.IntOrGenericRecordWithComputedFields.GenericRecordWithComputedFields(g0);
             testCase.verifyEqual(r.nested_switch(), int32(10));
             testCase.verifyEqual(r.use_nested_computed_field(), int32(0));
 
-            g1 = basic_types.GenericRecordWithComputedFields(basic_types.T0OrT1.T1(single(42.9)));
+            g1 = basic_types.GenericRecordWithComputedFields(f1=basic_types.T0OrT1.T1(single(42.9)));
             r.union_with_nested_generic_union = ...
                 test_model.IntOrGenericRecordWithComputedFields.GenericRecordWithComputedFields(g1);
             testCase.verifyEqual(r.nested_switch(), int32(20));
@@ -163,7 +163,7 @@ classdef ComputedFieldsTest < matlab.unittest.TestCase
             testCase.verifyEqual(r.switch_over_single_value(), int32(10));
 
 
-            gr = basic_types.GenericRecordWithComputedFields(basic_types.T0OrT1.T0(int32(42)));
+            gr = basic_types.GenericRecordWithComputedFields(f1=basic_types.T0OrT1.T0(int32(42)));
             testCase.verifyEqual(gr.type_index(), 0);
             gr.f1 = basic_types.T0OrT1.T1(single(42.9));
             testCase.verifyEqual(gr.type_index(), 1);

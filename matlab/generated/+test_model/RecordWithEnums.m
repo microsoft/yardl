@@ -8,16 +8,15 @@ classdef RecordWithEnums < handle
   end
 
   methods
-    function self = RecordWithEnums(enum, flags, flags_2)
-      if nargin > 0
-        self.enum = enum;
-        self.flags = flags;
-        self.flags_2 = flags_2;
-      else
-        self.enum = basic_types.Fruits.APPLE;
-        self.flags = basic_types.DaysOfWeek(0);
-        self.flags_2 = basic_types.TextFormat.REGULAR;
+    function self = RecordWithEnums(kwargs)
+      arguments
+        kwargs.enum = basic_types.Fruits.APPLE;
+        kwargs.flags = basic_types.DaysOfWeek(0);
+        kwargs.flags_2 = basic_types.TextFormat.REGULAR;
       end
+      self.enum = kwargs.enum;
+      self.flags = kwargs.flags;
+      self.flags_2 = kwargs.flags_2;
     end
 
     function res = eq(self, other)

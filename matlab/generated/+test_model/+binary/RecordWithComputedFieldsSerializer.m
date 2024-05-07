@@ -40,12 +40,12 @@ classdef RecordWithComputedFieldsSerializer < yardl.binary.RecordSerializer
         outstream (1,1) yardl.binary.CodedOutputStream
         value (1,1) test_model.RecordWithComputedFields
       end
-      self.write_(outstream, value.array_field, value.array_field_map_dimensions, value.dynamic_array_field, value.fixed_array_field, value.int_field, value.int8_field, value.uint8_field, value.int16_field, value.uint16_field, value.uint32_field, value.int64_field, value.uint64_field, value.size_field, value.float32_field, value.float64_field, value.complexfloat32_field, value.complexfloat64_field, value.string_field, value.tuple_field, value.vector_field, value.vector_of_vectors_field, value.fixed_vector_field, value.fixed_vector_of_vectors_field, value.optional_named_array, value.int_float_union, value.nullable_int_float_union, value.union_with_nested_generic_union, value.map_field)
+      self.write_(outstream, value.array_field, value.array_field_map_dimensions, value.dynamic_array_field, value.fixed_array_field, value.int_field, value.int8_field, value.uint8_field, value.int16_field, value.uint16_field, value.uint32_field, value.int64_field, value.uint64_field, value.size_field, value.float32_field, value.float64_field, value.complexfloat32_field, value.complexfloat64_field, value.string_field, value.tuple_field, value.vector_field, value.vector_of_vectors_field, value.fixed_vector_field, value.fixed_vector_of_vectors_field, value.optional_named_array, value.int_float_union, value.nullable_int_float_union, value.union_with_nested_generic_union, value.map_field);
     end
 
     function value = read(self, instream)
-      field_values = self.read_(instream);
-      value = test_model.RecordWithComputedFields(field_values{:});
+      fields = self.read_(instream);
+      value = test_model.RecordWithComputedFields(array_field=fields{1}, array_field_map_dimensions=fields{2}, dynamic_array_field=fields{3}, fixed_array_field=fields{4}, int_field=fields{5}, int8_field=fields{6}, uint8_field=fields{7}, int16_field=fields{8}, uint16_field=fields{9}, uint32_field=fields{10}, int64_field=fields{11}, uint64_field=fields{12}, size_field=fields{13}, float32_field=fields{14}, float64_field=fields{15}, complexfloat32_field=fields{16}, complexfloat64_field=fields{17}, string_field=fields{18}, tuple_field=fields{19}, vector_field=fields{20}, vector_of_vectors_field=fields{21}, fixed_vector_field=fields{22}, fixed_vector_of_vectors_field=fields{23}, optional_named_array=fields{24}, int_float_union=fields{25}, nullable_int_float_union=fields{26}, union_with_nested_generic_union=fields{27}, map_field=fields{28});
     end
   end
 end

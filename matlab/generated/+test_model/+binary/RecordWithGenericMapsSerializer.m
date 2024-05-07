@@ -14,12 +14,12 @@ classdef RecordWithGenericMapsSerializer < yardl.binary.RecordSerializer
         outstream (1,1) yardl.binary.CodedOutputStream
         value (1,1) test_model.RecordWithGenericMaps
       end
-      self.write_(outstream, value.m, value.am)
+      self.write_(outstream, value.m, value.am);
     end
 
     function value = read(self, instream)
-      field_values = self.read_(instream);
-      value = test_model.RecordWithGenericMaps(field_values{:});
+      fields = self.read_(instream);
+      value = test_model.RecordWithGenericMaps(m=fields{1}, am=fields{2});
     end
   end
 end

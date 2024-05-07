@@ -13,12 +13,12 @@ classdef RecordWithAliasedOptionalGenericFieldSerializer < yardl.binary.RecordSe
         outstream (1,1) yardl.binary.CodedOutputStream
         value (1,1) test_model.RecordWithAliasedOptionalGenericField
       end
-      self.write_(outstream, value.v)
+      self.write_(outstream, value.v);
     end
 
     function value = read(self, instream)
-      field_values = self.read_(instream);
-      value = test_model.RecordWithAliasedOptionalGenericField(field_values{:});
+      fields = self.read_(instream);
+      value = test_model.RecordWithAliasedOptionalGenericField(v=fields{1});
     end
   end
 end

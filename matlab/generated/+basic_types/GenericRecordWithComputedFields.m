@@ -6,8 +6,14 @@ classdef GenericRecordWithComputedFields < handle
   end
 
   methods
-    function self = GenericRecordWithComputedFields(f1)
-      self.f1 = f1;
+    function self = GenericRecordWithComputedFields(kwargs)
+      arguments
+        kwargs.f1;
+      end
+      if ~isfield(kwargs, "f1")
+        throw(yardl.TypeError("Missing required keyword argument 'f1'"))
+      end
+      self.f1 = kwargs.f1;
     end
 
     function res = type_index(self)

@@ -9,11 +9,29 @@ classdef GenericRecord < handle
   end
 
   methods
-    function self = GenericRecord(scalar_1, scalar_2, vector_1, image_2)
-      self.scalar_1 = scalar_1;
-      self.scalar_2 = scalar_2;
-      self.vector_1 = vector_1;
-      self.image_2 = image_2;
+    function self = GenericRecord(kwargs)
+      arguments
+        kwargs.scalar_1;
+        kwargs.scalar_2;
+        kwargs.vector_1;
+        kwargs.image_2;
+      end
+      if ~isfield(kwargs, "scalar_1")
+        throw(yardl.TypeError("Missing required keyword argument 'scalar_1'"))
+      end
+      self.scalar_1 = kwargs.scalar_1;
+      if ~isfield(kwargs, "scalar_2")
+        throw(yardl.TypeError("Missing required keyword argument 'scalar_2'"))
+      end
+      self.scalar_2 = kwargs.scalar_2;
+      if ~isfield(kwargs, "vector_1")
+        throw(yardl.TypeError("Missing required keyword argument 'vector_1'"))
+      end
+      self.vector_1 = kwargs.vector_1;
+      if ~isfield(kwargs, "image_2")
+        throw(yardl.TypeError("Missing required keyword argument 'image_2'"))
+      end
+      self.image_2 = kwargs.image_2;
     end
 
     function res = eq(self, other)

@@ -7,9 +7,19 @@ classdef Tuple < handle
   end
 
   methods
-    function self = Tuple(v1, v2)
-      self.v1 = v1;
-      self.v2 = v2;
+    function self = Tuple(kwargs)
+      arguments
+        kwargs.v1;
+        kwargs.v2;
+      end
+      if ~isfield(kwargs, "v1")
+        throw(yardl.TypeError("Missing required keyword argument 'v1'"))
+      end
+      self.v1 = kwargs.v1;
+      if ~isfield(kwargs, "v2")
+        throw(yardl.TypeError("Missing required keyword argument 'v2'"))
+      end
+      self.v2 = kwargs.v2;
     end
 
     function res = eq(self, other)

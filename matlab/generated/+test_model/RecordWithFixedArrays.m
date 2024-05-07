@@ -8,16 +8,15 @@ classdef RecordWithFixedArrays < handle
   end
 
   methods
-    function self = RecordWithFixedArrays(ints, fixed_simple_record_array, fixed_record_with_vlens_array)
-      if nargin > 0
-        self.ints = ints;
-        self.fixed_simple_record_array = fixed_simple_record_array;
-        self.fixed_record_with_vlens_array = fixed_record_with_vlens_array;
-      else
-        self.ints = repelem(int32(0), 3, 2);
-        self.fixed_simple_record_array = repelem(test_model.SimpleRecord(), 2, 3);
-        self.fixed_record_with_vlens_array = repelem(test_model.RecordWithVlens(), 2, 2);
+    function self = RecordWithFixedArrays(kwargs)
+      arguments
+        kwargs.ints = repelem(int32(0), 3, 2);
+        kwargs.fixed_simple_record_array = repelem(test_model.SimpleRecord(), 2, 3);
+        kwargs.fixed_record_with_vlens_array = repelem(test_model.RecordWithVlens(), 2, 2);
       end
+      self.ints = kwargs.ints;
+      self.fixed_simple_record_array = kwargs.fixed_simple_record_array;
+      self.fixed_record_with_vlens_array = kwargs.fixed_record_with_vlens_array;
     end
 
     function res = eq(self, other)

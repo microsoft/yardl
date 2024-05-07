@@ -15,12 +15,12 @@ classdef RecordWithUnionsSerializer < yardl.binary.RecordSerializer
         outstream (1,1) yardl.binary.CodedOutputStream
         value (1,1) basic_types.RecordWithUnions
       end
-      self.write_(outstream, value.null_or_int_or_string, value.date_or_datetime, value.null_or_fruits_or_days_of_week)
+      self.write_(outstream, value.null_or_int_or_string, value.date_or_datetime, value.null_or_fruits_or_days_of_week);
     end
 
     function value = read(self, instream)
-      field_values = self.read_(instream);
-      value = basic_types.RecordWithUnions(field_values{:});
+      fields = self.read_(instream);
+      value = basic_types.RecordWithUnions(null_or_int_or_string=fields{1}, date_or_datetime=fields{2}, null_or_fruits_or_days_of_week=fields{3});
     end
   end
 end

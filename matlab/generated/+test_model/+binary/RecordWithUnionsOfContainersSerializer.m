@@ -15,12 +15,12 @@ classdef RecordWithUnionsOfContainersSerializer < yardl.binary.RecordSerializer
         outstream (1,1) yardl.binary.CodedOutputStream
         value (1,1) test_model.RecordWithUnionsOfContainers
       end
-      self.write_(outstream, value.map_or_scalar, value.vector_or_scalar, value.array_or_scalar)
+      self.write_(outstream, value.map_or_scalar, value.vector_or_scalar, value.array_or_scalar);
     end
 
     function value = read(self, instream)
-      field_values = self.read_(instream);
-      value = test_model.RecordWithUnionsOfContainers(field_values{:});
+      fields = self.read_(instream);
+      value = test_model.RecordWithUnionsOfContainers(map_or_scalar=fields{1}, vector_or_scalar=fields{2}, array_or_scalar=fields{3});
     end
   end
 end

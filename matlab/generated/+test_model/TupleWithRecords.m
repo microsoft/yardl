@@ -7,14 +7,13 @@ classdef TupleWithRecords < handle
   end
 
   methods
-    function self = TupleWithRecords(a, b)
-      if nargin > 0
-        self.a = a;
-        self.b = b;
-      else
-        self.a = test_model.SimpleRecord();
-        self.b = test_model.SimpleRecord();
+    function self = TupleWithRecords(kwargs)
+      arguments
+        kwargs.a = test_model.SimpleRecord();
+        kwargs.b = test_model.SimpleRecord();
       end
+      self.a = kwargs.a;
+      self.b = kwargs.b;
     end
 
     function res = eq(self, other)

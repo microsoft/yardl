@@ -7,14 +7,13 @@ classdef RecordWithVlenCollections < handle
   end
 
   methods
-    function self = RecordWithVlenCollections(vector, array)
-      if nargin > 0
-        self.vector = vector;
-        self.array = array;
-      else
-        self.vector = int32.empty();
-        self.array = int32.empty(0, 0);
+    function self = RecordWithVlenCollections(kwargs)
+      arguments
+        kwargs.vector = int32.empty();
+        kwargs.array = int32.empty(0, 0);
       end
+      self.vector = kwargs.vector;
+      self.array = kwargs.array;
     end
 
     function res = eq(self, other)

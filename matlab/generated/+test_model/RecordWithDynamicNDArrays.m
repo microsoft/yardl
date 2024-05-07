@@ -8,16 +8,15 @@ classdef RecordWithDynamicNDArrays < handle
   end
 
   methods
-    function self = RecordWithDynamicNDArrays(ints, simple_record_array, record_with_vlens_array)
-      if nargin > 0
-        self.ints = ints;
-        self.simple_record_array = simple_record_array;
-        self.record_with_vlens_array = record_with_vlens_array;
-      else
-        self.ints = int32.empty();
-        self.simple_record_array = test_model.SimpleRecord.empty();
-        self.record_with_vlens_array = test_model.RecordWithVlens.empty();
+    function self = RecordWithDynamicNDArrays(kwargs)
+      arguments
+        kwargs.ints = int32.empty();
+        kwargs.simple_record_array = test_model.SimpleRecord.empty();
+        kwargs.record_with_vlens_array = test_model.RecordWithVlens.empty();
       end
+      self.ints = kwargs.ints;
+      self.simple_record_array = kwargs.simple_record_array;
+      self.record_with_vlens_array = kwargs.record_with_vlens_array;
     end
 
     function res = eq(self, other)

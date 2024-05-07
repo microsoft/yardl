@@ -22,12 +22,12 @@ classdef RecordContainingGenericRecordsSerializer < yardl.binary.RecordSerialize
         outstream (1,1) yardl.binary.CodedOutputStream
         value (1,1) test_model.RecordContainingGenericRecords
       end
-      self.write_(outstream, value.g1, value.g1a, value.g2, value.g2a, value.g3, value.g3a, value.g4, value.g5, value.g6, value.g7)
+      self.write_(outstream, value.g1, value.g1a, value.g2, value.g2a, value.g3, value.g3a, value.g4, value.g5, value.g6, value.g7);
     end
 
     function value = read(self, instream)
-      field_values = self.read_(instream);
-      value = test_model.RecordContainingGenericRecords(field_values{:});
+      fields = self.read_(instream);
+      value = test_model.RecordContainingGenericRecords(g1=fields{1}, g1a=fields{2}, g2=fields{3}, g2a=fields{4}, g3=fields{5}, g3a=fields{6}, g4=fields{7}, g5=fields{8}, g6=fields{9}, g7=fields{10});
     end
   end
 end

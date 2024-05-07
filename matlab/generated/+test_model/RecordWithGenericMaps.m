@@ -7,14 +7,13 @@ classdef RecordWithGenericMaps < handle
   end
 
   methods
-    function self = RecordWithGenericMaps(m, am)
-      if nargin > 0
-        self.m = m;
-        self.am = am;
-      else
-        self.m = dictionary;
-        self.am = dictionary;
+    function self = RecordWithGenericMaps(kwargs)
+      arguments
+        kwargs.m = dictionary;
+        kwargs.am = dictionary;
       end
+      self.m = kwargs.m;
+      self.am = kwargs.am;
     end
 
     function res = eq(self, other)

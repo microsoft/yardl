@@ -15,12 +15,12 @@ classdef RecordWithDynamicNDArraysSerializer < yardl.binary.RecordSerializer
         outstream (1,1) yardl.binary.CodedOutputStream
         value (1,1) test_model.RecordWithDynamicNDArrays
       end
-      self.write_(outstream, value.ints, value.simple_record_array, value.record_with_vlens_array)
+      self.write_(outstream, value.ints, value.simple_record_array, value.record_with_vlens_array);
     end
 
     function value = read(self, instream)
-      field_values = self.read_(instream);
-      value = test_model.RecordWithDynamicNDArrays(field_values{:});
+      fields = self.read_(instream);
+      value = test_model.RecordWithDynamicNDArrays(ints=fields{1}, simple_record_array=fields{2}, record_with_vlens_array=fields{3});
     end
   end
 end

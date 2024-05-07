@@ -11,13 +11,39 @@ classdef RecordWithGenericArrays < handle
   end
 
   methods
-    function self = RecordWithGenericArrays(nd, fixed_nd, dynamic_nd, aliased_nd, aliased_fixed_nd, aliased_dynamic_nd)
-      self.nd = nd;
-      self.fixed_nd = fixed_nd;
-      self.dynamic_nd = dynamic_nd;
-      self.aliased_nd = aliased_nd;
-      self.aliased_fixed_nd = aliased_fixed_nd;
-      self.aliased_dynamic_nd = aliased_dynamic_nd;
+    function self = RecordWithGenericArrays(kwargs)
+      arguments
+        kwargs.nd;
+        kwargs.fixed_nd;
+        kwargs.dynamic_nd;
+        kwargs.aliased_nd;
+        kwargs.aliased_fixed_nd;
+        kwargs.aliased_dynamic_nd;
+      end
+      if ~isfield(kwargs, "nd")
+        throw(yardl.TypeError("Missing required keyword argument 'nd'"))
+      end
+      self.nd = kwargs.nd;
+      if ~isfield(kwargs, "fixed_nd")
+        throw(yardl.TypeError("Missing required keyword argument 'fixed_nd'"))
+      end
+      self.fixed_nd = kwargs.fixed_nd;
+      if ~isfield(kwargs, "dynamic_nd")
+        throw(yardl.TypeError("Missing required keyword argument 'dynamic_nd'"))
+      end
+      self.dynamic_nd = kwargs.dynamic_nd;
+      if ~isfield(kwargs, "aliased_nd")
+        throw(yardl.TypeError("Missing required keyword argument 'aliased_nd'"))
+      end
+      self.aliased_nd = kwargs.aliased_nd;
+      if ~isfield(kwargs, "aliased_fixed_nd")
+        throw(yardl.TypeError("Missing required keyword argument 'aliased_fixed_nd'"))
+      end
+      self.aliased_fixed_nd = kwargs.aliased_fixed_nd;
+      if ~isfield(kwargs, "aliased_dynamic_nd")
+        throw(yardl.TypeError("Missing required keyword argument 'aliased_dynamic_nd'"))
+      end
+      self.aliased_dynamic_nd = kwargs.aliased_dynamic_nd;
     end
 
     function res = eq(self, other)

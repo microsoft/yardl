@@ -15,12 +15,12 @@ classdef SimpleRecordSerializer < yardl.binary.RecordSerializer
         outstream (1,1) yardl.binary.CodedOutputStream
         value (1,1) test_model.SimpleRecord
       end
-      self.write_(outstream, value.x, value.y, value.z)
+      self.write_(outstream, value.x, value.y, value.z);
     end
 
     function value = read(self, instream)
-      field_values = self.read_(instream);
-      value = test_model.SimpleRecord(field_values{:});
+      fields = self.read_(instream);
+      value = test_model.SimpleRecord(x=fields{1}, y=fields{2}, z=fields{3});
     end
   end
 end

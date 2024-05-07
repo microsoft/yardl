@@ -14,12 +14,12 @@ classdef RecordNotUsedInProtocolSerializer < yardl.binary.RecordSerializer
         outstream (1,1) yardl.binary.CodedOutputStream
         value (1,1) test_model.RecordNotUsedInProtocol
       end
-      self.write_(outstream, value.u1, value.u2)
+      self.write_(outstream, value.u1, value.u2);
     end
 
     function value = read(self, instream)
-      field_values = self.read_(instream);
-      value = test_model.RecordNotUsedInProtocol(field_values{:});
+      fields = self.read_(instream);
+      value = test_model.RecordNotUsedInProtocol(u1=fields{1}, u2=fields{2});
     end
   end
 end

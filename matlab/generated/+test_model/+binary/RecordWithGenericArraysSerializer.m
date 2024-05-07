@@ -18,12 +18,12 @@ classdef RecordWithGenericArraysSerializer < yardl.binary.RecordSerializer
         outstream (1,1) yardl.binary.CodedOutputStream
         value (1,1) test_model.RecordWithGenericArrays
       end
-      self.write_(outstream, value.nd, value.fixed_nd, value.dynamic_nd, value.aliased_nd, value.aliased_fixed_nd, value.aliased_dynamic_nd)
+      self.write_(outstream, value.nd, value.fixed_nd, value.dynamic_nd, value.aliased_nd, value.aliased_fixed_nd, value.aliased_dynamic_nd);
     end
 
     function value = read(self, instream)
-      field_values = self.read_(instream);
-      value = test_model.RecordWithGenericArrays(field_values{:});
+      fields = self.read_(instream);
+      value = test_model.RecordWithGenericArrays(nd=fields{1}, fixed_nd=fields{2}, dynamic_nd=fields{3}, aliased_nd=fields{4}, aliased_fixed_nd=fields{5}, aliased_dynamic_nd=fields{6});
     end
   end
 end

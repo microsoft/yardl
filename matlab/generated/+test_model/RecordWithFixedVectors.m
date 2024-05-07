@@ -8,16 +8,15 @@ classdef RecordWithFixedVectors < handle
   end
 
   methods
-    function self = RecordWithFixedVectors(fixed_int_vector, fixed_simple_record_vector, fixed_record_with_vlens_vector)
-      if nargin > 0
-        self.fixed_int_vector = fixed_int_vector;
-        self.fixed_simple_record_vector = fixed_simple_record_vector;
-        self.fixed_record_with_vlens_vector = fixed_record_with_vlens_vector;
-      else
-        self.fixed_int_vector = repelem(int32(0), 5);
-        self.fixed_simple_record_vector = repelem(test_model.SimpleRecord(), 3);
-        self.fixed_record_with_vlens_vector = repelem(test_model.RecordWithVlens(), 2);
+    function self = RecordWithFixedVectors(kwargs)
+      arguments
+        kwargs.fixed_int_vector = repelem(int32(0), 5);
+        kwargs.fixed_simple_record_vector = repelem(test_model.SimpleRecord(), 3);
+        kwargs.fixed_record_with_vlens_vector = repelem(test_model.RecordWithVlens(), 2);
       end
+      self.fixed_int_vector = kwargs.fixed_int_vector;
+      self.fixed_simple_record_vector = kwargs.fixed_simple_record_vector;
+      self.fixed_record_with_vlens_vector = kwargs.fixed_record_with_vlens_vector;
     end
 
     function res = eq(self, other)

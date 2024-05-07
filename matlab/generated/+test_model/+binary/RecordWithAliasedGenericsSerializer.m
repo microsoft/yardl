@@ -14,12 +14,12 @@ classdef RecordWithAliasedGenericsSerializer < yardl.binary.RecordSerializer
         outstream (1,1) yardl.binary.CodedOutputStream
         value (1,1) test_model.RecordWithAliasedGenerics
       end
-      self.write_(outstream, value.my_strings, value.aliased_strings)
+      self.write_(outstream, value.my_strings, value.aliased_strings);
     end
 
     function value = read(self, instream)
-      field_values = self.read_(instream);
-      value = test_model.RecordWithAliasedGenerics(field_values{:});
+      fields = self.read_(instream);
+      value = test_model.RecordWithAliasedGenerics(my_strings=fields{1}, aliased_strings=fields{2});
     end
   end
 end

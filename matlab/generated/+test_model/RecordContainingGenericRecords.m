@@ -15,17 +15,44 @@ classdef RecordContainingGenericRecords < handle
   end
 
   methods
-    function self = RecordContainingGenericRecords(g1, g1a, g2, g2a, g3, g3a, g4, g5, g6, g7)
-      self.g1 = g1;
-      self.g1a = g1a;
-      self.g2 = g2;
-      self.g2a = g2a;
-      self.g3 = g3;
-      self.g3a = g3a;
-      self.g4 = g4;
-      self.g5 = g5;
-      self.g6 = g6;
-      self.g7 = g7;
+    function self = RecordContainingGenericRecords(kwargs)
+      arguments
+        kwargs.g1 = test_model.RecordWithOptionalGenericField();
+        kwargs.g1a = test_model.RecordWithAliasedOptionalGenericField();
+        kwargs.g2 = test_model.RecordWithOptionalGenericUnionField();
+        kwargs.g2a = test_model.RecordWithAliasedOptionalGenericUnionField();
+        kwargs.g3;
+        kwargs.g3a;
+        kwargs.g4;
+        kwargs.g5;
+        kwargs.g6;
+        kwargs.g7 = test_model.RecordWithGenericMaps();
+      end
+      self.g1 = kwargs.g1;
+      self.g1a = kwargs.g1a;
+      self.g2 = kwargs.g2;
+      self.g2a = kwargs.g2a;
+      if ~isfield(kwargs, "g3")
+        throw(yardl.TypeError("Missing required keyword argument 'g3'"))
+      end
+      self.g3 = kwargs.g3;
+      if ~isfield(kwargs, "g3a")
+        throw(yardl.TypeError("Missing required keyword argument 'g3a'"))
+      end
+      self.g3a = kwargs.g3a;
+      if ~isfield(kwargs, "g4")
+        throw(yardl.TypeError("Missing required keyword argument 'g4'"))
+      end
+      self.g4 = kwargs.g4;
+      if ~isfield(kwargs, "g5")
+        throw(yardl.TypeError("Missing required keyword argument 'g5'"))
+      end
+      self.g5 = kwargs.g5;
+      if ~isfield(kwargs, "g6")
+        throw(yardl.TypeError("Missing required keyword argument 'g6'"))
+      end
+      self.g6 = kwargs.g6;
+      self.g7 = kwargs.g7;
     end
 
     function res = eq(self, other)

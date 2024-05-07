@@ -8,16 +8,15 @@ classdef SmallBenchmarkRecord < handle
   end
 
   methods
-    function self = SmallBenchmarkRecord(a, b, c)
-      if nargin > 0
-        self.a = a;
-        self.b = b;
-        self.c = c;
-      else
-        self.a = double(0);
-        self.b = single(0);
-        self.c = single(0);
+    function self = SmallBenchmarkRecord(kwargs)
+      arguments
+        kwargs.a = double(0);
+        kwargs.b = single(0);
+        kwargs.c = single(0);
       end
+      self.a = kwargs.a;
+      self.b = kwargs.b;
+      self.c = kwargs.c;
     end
 
     function res = eq(self, other)

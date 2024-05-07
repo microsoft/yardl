@@ -212,7 +212,10 @@ end
 function res = benchmark_small_record(format)
     scale = 1;
 
-    record = test_model.SmallBenchmarkRecord(double(73278383.23123213), single(78323.2820379), single(-2938923.29882));
+    record = test_model.SmallBenchmarkRecord();
+    record.a = double(73278383.23123213);
+    record.b = single(78323.2820379);
+    record.c = single(-2938923.29882);
 
     repetitions = scale_repetitions(50000, scale);
     total_bytes = 16 * repetitions;

@@ -16,12 +16,12 @@ classdef SimpleEncodingCountersSerializer < yardl.binary.RecordSerializer
         outstream (1,1) yardl.binary.CodedOutputStream
         value (1,1) test_model.SimpleEncodingCounters
       end
-      self.write_(outstream, value.e1, value.e2, value.slice, value.repetition)
+      self.write_(outstream, value.e1, value.e2, value.slice, value.repetition);
     end
 
     function value = read(self, instream)
-      field_values = self.read_(instream);
-      value = test_model.SimpleEncodingCounters(field_values{:});
+      fields = self.read_(instream);
+      value = test_model.SimpleEncodingCounters(e1=fields{1}, e2=fields{2}, slice=fields{3}, repetition=fields{4});
     end
   end
 end

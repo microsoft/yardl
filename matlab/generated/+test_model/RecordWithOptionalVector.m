@@ -6,12 +6,11 @@ classdef RecordWithOptionalVector < handle
   end
 
   methods
-    function self = RecordWithOptionalVector(optional_vector)
-      if nargin > 0
-        self.optional_vector = optional_vector;
-      else
-        self.optional_vector = yardl.None;
+    function self = RecordWithOptionalVector(kwargs)
+      arguments
+        kwargs.optional_vector = yardl.None;
       end
+      self.optional_vector = kwargs.optional_vector;
     end
 
     function res = eq(self, other)

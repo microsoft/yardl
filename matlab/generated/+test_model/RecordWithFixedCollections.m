@@ -7,14 +7,13 @@ classdef RecordWithFixedCollections < handle
   end
 
   methods
-    function self = RecordWithFixedCollections(fixed_vector, fixed_array)
-      if nargin > 0
-        self.fixed_vector = fixed_vector;
-        self.fixed_array = fixed_array;
-      else
-        self.fixed_vector = repelem(int32(0), 3);
-        self.fixed_array = repelem(int32(0), 3, 2);
+    function self = RecordWithFixedCollections(kwargs)
+      arguments
+        kwargs.fixed_vector = repelem(int32(0), 3);
+        kwargs.fixed_array = repelem(int32(0), 3, 2);
       end
+      self.fixed_vector = kwargs.fixed_vector;
+      self.fixed_array = kwargs.fixed_array;
     end
 
     function res = eq(self, other)

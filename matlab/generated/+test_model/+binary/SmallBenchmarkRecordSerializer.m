@@ -15,12 +15,12 @@ classdef SmallBenchmarkRecordSerializer < yardl.binary.RecordSerializer
         outstream (1,1) yardl.binary.CodedOutputStream
         value (1,1) test_model.SmallBenchmarkRecord
       end
-      self.write_(outstream, value.a, value.b, value.c)
+      self.write_(outstream, value.a, value.b, value.c);
     end
 
     function value = read(self, instream)
-      field_values = self.read_(instream);
-      value = test_model.SmallBenchmarkRecord(field_values{:});
+      fields = self.read_(instream);
+      value = test_model.SmallBenchmarkRecord(a=fields{1}, b=fields{2}, c=fields{3});
     end
   end
 end

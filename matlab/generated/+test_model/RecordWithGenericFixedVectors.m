@@ -7,9 +7,19 @@ classdef RecordWithGenericFixedVectors < handle
   end
 
   methods
-    function self = RecordWithGenericFixedVectors(fv, afv)
-      self.fv = fv;
-      self.afv = afv;
+    function self = RecordWithGenericFixedVectors(kwargs)
+      arguments
+        kwargs.fv;
+        kwargs.afv;
+      end
+      if ~isfield(kwargs, "fv")
+        throw(yardl.TypeError("Missing required keyword argument 'fv'"))
+      end
+      self.fv = kwargs.fv;
+      if ~isfield(kwargs, "afv")
+        throw(yardl.TypeError("Missing required keyword argument 'afv'"))
+      end
+      self.afv = kwargs.afv;
     end
 
     function res = eq(self, other)

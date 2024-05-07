@@ -15,12 +15,12 @@ classdef RecordWithVectorsSerializer < yardl.binary.RecordSerializer
         outstream (1,1) yardl.binary.CodedOutputStream
         value (1,1) test_model.RecordWithVectors
       end
-      self.write_(outstream, value.default_vector, value.default_vector_fixed_length, value.vector_of_vectors)
+      self.write_(outstream, value.default_vector, value.default_vector_fixed_length, value.vector_of_vectors);
     end
 
     function value = read(self, instream)
-      field_values = self.read_(instream);
-      value = test_model.RecordWithVectors(field_values{:});
+      fields = self.read_(instream);
+      value = test_model.RecordWithVectors(default_vector=fields{1}, default_vector_fixed_length=fields{2}, vector_of_vectors=fields{3});
     end
   end
 end

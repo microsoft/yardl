@@ -16,12 +16,12 @@ classdef SimpleAcquisitionSerializer < yardl.binary.RecordSerializer
         outstream (1,1) yardl.binary.CodedOutputStream
         value (1,1) test_model.SimpleAcquisition
       end
-      self.write_(outstream, value.flags, value.idx, value.data, value.trajectory)
+      self.write_(outstream, value.flags, value.idx, value.data, value.trajectory);
     end
 
     function value = read(self, instream)
-      field_values = self.read_(instream);
-      value = test_model.SimpleAcquisition(field_values{:});
+      fields = self.read_(instream);
+      value = test_model.SimpleAcquisition(flags=fields{1}, idx=fields{2}, data=fields{3}, trajectory=fields{4});
     end
   end
 end

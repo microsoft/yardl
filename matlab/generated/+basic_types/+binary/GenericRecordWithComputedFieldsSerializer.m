@@ -13,12 +13,12 @@ classdef GenericRecordWithComputedFieldsSerializer < yardl.binary.RecordSerializ
         outstream (1,1) yardl.binary.CodedOutputStream
         value (1,1) basic_types.GenericRecordWithComputedFields
       end
-      self.write_(outstream, value.f1)
+      self.write_(outstream, value.f1);
     end
 
     function value = read(self, instream)
-      field_values = self.read_(instream);
-      value = basic_types.GenericRecordWithComputedFields(field_values{:});
+      fields = self.read_(instream);
+      value = basic_types.GenericRecordWithComputedFields(f1=fields{1});
     end
   end
 end

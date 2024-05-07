@@ -14,28 +14,27 @@ classdef RecordWithPrimitiveAliases < handle
   end
 
   methods
-    function self = RecordWithPrimitiveAliases(byte_field, int_field, uint_field, long_field, ulong_field, float_field, double_field, complexfloat_field, complexdouble_field)
-      if nargin > 0
-        self.byte_field = byte_field;
-        self.int_field = int_field;
-        self.uint_field = uint_field;
-        self.long_field = long_field;
-        self.ulong_field = ulong_field;
-        self.float_field = float_field;
-        self.double_field = double_field;
-        self.complexfloat_field = complexfloat_field;
-        self.complexdouble_field = complexdouble_field;
-      else
-        self.byte_field = uint8(0);
-        self.int_field = int32(0);
-        self.uint_field = uint32(0);
-        self.long_field = int64(0);
-        self.ulong_field = uint64(0);
-        self.float_field = single(0);
-        self.double_field = double(0);
-        self.complexfloat_field = complex(single(0));
-        self.complexdouble_field = complex(0);
+    function self = RecordWithPrimitiveAliases(kwargs)
+      arguments
+        kwargs.byte_field = uint8(0);
+        kwargs.int_field = int32(0);
+        kwargs.uint_field = uint32(0);
+        kwargs.long_field = int64(0);
+        kwargs.ulong_field = uint64(0);
+        kwargs.float_field = single(0);
+        kwargs.double_field = double(0);
+        kwargs.complexfloat_field = complex(single(0));
+        kwargs.complexdouble_field = complex(0);
       end
+      self.byte_field = kwargs.byte_field;
+      self.int_field = kwargs.int_field;
+      self.uint_field = kwargs.uint_field;
+      self.long_field = kwargs.long_field;
+      self.ulong_field = kwargs.ulong_field;
+      self.float_field = kwargs.float_field;
+      self.double_field = kwargs.double_field;
+      self.complexfloat_field = kwargs.complexfloat_field;
+      self.complexdouble_field = kwargs.complexdouble_field;
     end
 
     function res = eq(self, other)
