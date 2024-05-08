@@ -6,13 +6,19 @@
     "dockerfile": "Dockerfile",
     "context": ".."
   },
-  "runArgs": ["--cap-add=SYS_PTRACE", "--security-opt", "seccomp=unconfined"],
+  "runArgs": [
+    "--cap-add=SYS_PTRACE",
+    "--security-opt",
+    "seccomp=unconfined",
+    "--network=host"
+  ],
   "overrideCommand": false,
   "mounts": [
     // Bind mount docker socket under an alias to support docker-from-docker
     "source=/var/run/docker.sock,target=/var/run/docker-host.sock,type=bind",
-    "source=${localEnv:MATLAB_LICENSE_FILE:/dev/null},target=/opt/matlab/latest/licenses/license.lic,type=bind"
+    "source=${localEnv:MATLAB_LICENSE_FILE:/dev/null},target=/opt/matlab/latest/licenses/license.host.lic,type=bind,readonly"
   ],
+  "onCreateCommand": ".devcontainer/devcontainer-on-create.sh",
   "remoteUser": "vscode",
 
   // Configure tool-specific properties.
