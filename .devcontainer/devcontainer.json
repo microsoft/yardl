@@ -16,7 +16,7 @@
   "mounts": [
     // Bind mount docker socket under an alias to support docker-from-docker
     "source=/var/run/docker.sock,target=/var/run/docker-host.sock,type=bind",
-    "source=${localEnv:MATLAB_LICENSE_FILE:/dev/null},target=/opt/matlab/latest/licenses/license.host.lic,type=bind,readonly"
+    "source=${localEnv:MATLAB_LICENSE_FILE:/dev/null},target=/tmp/matlab.host.lic,type=bind,readonly"
   ],
   "onCreateCommand": ".devcontainer/devcontainer-on-create.sh",
   "remoteUser": "vscode",
@@ -126,6 +126,7 @@
 
   "containerEnv": {
     "PYTHONPATH": "/workspaces/yardl/python",
-    "CGO_ENABLED": "0"
+    "CGO_ENABLED": "0",
+    "MATLAB_LICENSE_FILE": "/opt/matlab/latest/licenses/license.lic"
   }
 }
