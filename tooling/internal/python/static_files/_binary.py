@@ -408,7 +408,7 @@ class Int16Serializer(TypeSerializer[Int16, np.int16]):
                     f"Value {value} is outside the range of a signed 16-bit integer"
                 )
         elif not isinstance(value, cast(type, np.int16)):
-            raise ValueError(f"Value is not an signed 16-bit integer: {value}")
+            raise ValueError(f"Value is not a signed 16-bit integer: {value}")
 
         stream.write_signed_varint(value)
 

@@ -2,7 +2,7 @@
 
 :::info Note
 
-The Matlab implementation supports the binary format, but does not
+The MATLAB implementation supports the binary format, but does not
 currently support HDF5 or NDJSON.
 
 :::
@@ -97,7 +97,7 @@ connection.
 ## Records
 
 Records have fields and, optionally, [computed fields](#computed-fields). In
-generated Matlab code, they map to class definitions.
+generated MATLAB code, they map to class definitions.
 
 Fields have a name and can be of any primitive or compound type. For example:
 
@@ -126,15 +126,25 @@ RecordB: !record
 
 Note that Yardl does not support type inheritance.
 
-The generated class constructors take arguments for each field and
+The generated class constructors accept *named* arguments for each field and
 in most cases they are optional. They are only required when the field type is
 [generic](#generics).
+
+Example:
+
+```matlab
+r1 = MyRecord();
+r1.myIntField = uint32(42);
+r1.myStringField = "hello, world";
+
+r2 = MyRecord(myIntField=uint32(42), myStringField="hello, world");
+```
 
 ## Primitive Types
 
 Yardl has the following primitive types:
 
-| Yardl Type       | Comment                                                                 | Matlab Type        |
+| Yardl Type       | Comment                                                                 | MATLAB Type        |
 | ---------------- | ----------------------------------------------------------------------- | -------------------|
 | `bool`           |                                                                         | `logical`          |
 | `int8`           |                                                                         | `int8`             |
@@ -165,8 +175,8 @@ Yardl has the following primitive types:
 | `datetime`       | A number of nanoseconds since the epoch                                 | `yardl.DateTime`   |
 
 `yardl.Date`, `yardl.Time`, and `yardl.DateTime` are custom classes because
-Yardl uses nanosecond precision and Matlab's `datetime` has only microsecond precision.
-Each of them can be easily converted to/from a Matlab `datetime` by calling
+Yardl uses nanosecond precision and MATLAB's `datetime` has only microsecond precision.
+Each of them can be easily converted to/from a MATLAB `datetime` by calling
 the corresponding `to_datetime()` or `from_datetime()` method.
 
 ## Optional Types
@@ -188,7 +198,7 @@ Rec: !record
     optionalInt: [null, int] # equivalent to the example above
 ```
 
-In Matlab, optional values can be instantiated using `yardl.Optional(value)`, and have the value `yardl.None` when not set.
+In MATLAB, optional values can be instantiated using `yardl.Optional(value)`, and have the value `yardl.None` when not set.
 
 ## Unions
 
@@ -208,12 +218,12 @@ Rec: !record
       - float
 ```
 
-The `null` type in the example above means that no value (`yardl.None` in Matlab) is
+The `null` type in the example above means that no value (`yardl.None` in MATLAB) is
 also a possibility.
 
 ### Generated Union Types
 
-For the Matlab codegen, we represent unions as a [tagged
+For the MATLAB codegen, we represent unions as a [tagged
 union](https://en.wikipedia.org/wiki/Tagged_union) and we generate a class for
 each union in a model. In the example above, the union `[int, float]` would have
 a class named `Int32OrFloat32`. Each union case then has a corresponding static
@@ -307,9 +317,9 @@ Fruits: !enum
     - pear
 ```
 
-Enums are generated as custom Matlab class definitions, *not* using Matlab's `enumeration` support, which doesn't allow integer values that are not explicitly defined in the enum definition.
+Enums are generated as custom MATLAB class definitions, *not* using MATLAB's `enumeration` support, which doesn't allow integer values that are not explicitly defined in the enum definition.
 
-In Matlab, use the enum constructor to create new values, or the generated static methods for predefined values:
+In MATLAB, use the enum constructor to create new values, or the generated static methods for predefined values:
 
 ```matlab
 fruit1 = sandbox.Fruits.APPLE;
@@ -365,7 +375,7 @@ Any value without an integer value will have the next power of two bit set that
 is greater than the previous value. In the example above, `execute` would have
 the value 4.
 
-Like Enums, Flags are generated as custom Matlab class definitions.
+Like Enums, Flags are generated as custom MATLAB class definitions.
 
 Example usage:
 
@@ -404,11 +414,11 @@ MyMap: !map
 
 Keys are required to be scalar primitive types.
 
-These map to the Matlab `dictionary` type.
+These map to the MATLAB `dictionary` type.
 
 :::info Note
 
-Matlab's `dictionary` type was introduced in Matlab r2022b, effectively replacing
+MATLAB's `dictionary` type was introduced in MATLAB r2022b, effectively replacing
 the `containers.Map` type. The `containers.Map` does not provide sufficient
 support for yardl types (including primitive strings) as keys or values.
 
@@ -442,7 +452,7 @@ MyRec: !record
       length: 10
 ```
 
-Both flavors of vectors are generated as Matlab arrays.
+Both flavors of vectors are generated as MATLAB arrays.
 The generated protocol readers/writers also support cell arrays as vectors.
 When working with vectors of vectors, the last dimension represents the outer vector:
 
@@ -459,7 +469,7 @@ vs = { [1, 2, 3], [4, 5], [7] };
 
 ## Arrays
 
-Arrays are multidimensional and map to Matlab arrays. Like vectors, there is a simple
+Arrays are multidimensional and map to MATLAB arrays. Like vectors, there is a simple
 syntax and an expanded syntax for declaring them. Both syntaxes are shown in the
 examples below.
 
@@ -526,21 +536,21 @@ array with 1 dimension of unknown length, you can either give the dimension a
 name (`int[x]`) or use parentheses to disambiguate from an empty set of
 dimensions: `int[()]`.
 
-### Matlab Arrays
+### MATLAB Arrays
 
-In Matlab, arrays are always created with dimensions reversed with respect to the model definition.
-This means that an array defined as `Image: double[x, y, z]` has the shape `[z, y, x]` in Matlab.
+In MATLAB, arrays are always created with dimensions reversed with respect to the model definition.
+This means that an array defined as `Image: double[x, y, z]` has the shape `[z, y, x]` in MATLAB.
 
 Yardl currently supports serializing multi-dimensional arrays only in
 C-continguous order, where the last dimension increases most rapidly.
-Matlab, however, uses Fortran-order to store and serialize multi-dimensional
+MATLAB, however, uses Fortran-order to store and serialize multi-dimensional
 arrays, where the first dimension increases most rapidly.
 
-By reversing Matlab array dimensions, yardl maintains consistency with Matlab's
+By reversing MATLAB array dimensions, yardl maintains consistency with MATLAB's
 support for multi-dimensional array indexing, and provides optimal serialization performance.
 
 As a side effect, if you define a *matrix* in yardl as `matrix: double[row, col]`,
-you will need to transpose the array in Matlab.
+you will need to transpose the array in MATLAB.
 
 Example:
 
@@ -561,7 +571,7 @@ ans =
 
 ```
 
-To create an array with more than two dimensions, use Matlab pages:
+To create an array with more than two dimensions, use MATLAB pages:
 
 ```yaml
 ndarray: double[2, 3, 4]
@@ -594,7 +604,7 @@ Name: string
 This simply gives another name to a type, so the `Name` type above is no
 different from the `string` type.
 
-In Matlab, aliases are generated in one of three forms:
+In MATLAB, aliases are generated in one of three forms:
 1. Union class definition for union types
 2. Function wrapper for optionals/vectors/arrays
 3. Subclass definitions for all other types
@@ -707,7 +717,7 @@ references `Point` with `int` as its type argument.
 
 Records and type aliases can be generic, but enums, flags, and protocols cannot.
 
-In Matlab, generics are treated as open types.
+In MATLAB, generics are treated as open types.
 Type validation occurs when values are written using a ProtocolWriter.
 
 ```matlab
@@ -732,7 +742,7 @@ through their respective yardl namespace:
 MyTuple: BasicTypes.Tuple<string, int>
 ```
 
-Imported types are likewise namespaced in Matlab packages:
+Imported types are likewise namespaced in MATLAB packages:
 
 ```matlab
 t1 = basic_types.Tuple(v1="John Smith", v2=42);

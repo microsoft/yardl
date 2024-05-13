@@ -16,7 +16,7 @@ hero:
       text: Get Started With C++
       link: /cpp/installation
     - theme: brand
-      text: Get Started With Matlab
+      text: Get Started With MATLAB
       link: /matlab/quickstart
     - theme: alt
       text: View on GitHub
@@ -24,7 +24,7 @@ hero:
 
 features:
   - title: Multiple Languages
-    details: Define your model in a simple YAML syntax and generate clean Python, C++, and Matlab.
+    details: Define your model in a simple YAML syntax and generate clean Python, C++, and MATLAB.
   - title: Multiple Formats
     details: Supports writing to a compact binary format, NDJSON, or HDF5.
   - title: Stream-Oriented

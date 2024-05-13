@@ -6,7 +6,7 @@
 
 ### Dependencies
 
-The generated Matlab code requires Matlab R2022b or newer.
+The generated MATLAB code requires MATLAB R2022b or newer.
 
 ## Getting our Feet Wet
 
@@ -49,7 +49,7 @@ matlab:
 ```
 
 It specifies the package's namespace along with code generation settings. The
-`matlab.outputDir` property specifies where the generated Matlab package should
+`matlab.outputDir` property specifies where the generated MATLAB package should
 go. If you are not interested in generating Python or C++ code, you can remove
 the corresponding property from the file:
 
@@ -107,13 +107,13 @@ written to or read from a file or binary stream (e.g. over a network
 connection). This example protocol says that there will be one `Header` value
 followed by an unknown number of `Sample`s. `Header` and `Sample` are records.
 
-To generate Matlab code for this model, `cd` into the `model` directory and run:
+To generate MATLAB code for this model, `cd` into the `model` directory and run:
 
 ```bash
 yardl generate
 ```
 
-This will generate a Matlab package in the `outputDir` directory:
+This will generate a MATLAB package in the `outputDir` directory:
 
 ```txt
 $ tree .
@@ -138,7 +138,7 @@ The top-level package, e.g. `+playground`, contains the class definitions for (1
 
 The adjacent `+yardl` package contains definitions for primitive types, error handling, and serializers.
 
-To use these packages from outside of the `matlab` directory, use Matlab's `addpath` function, e.g. `addpath("../path/to/parent/directory");`.
+To use these packages from outside of the `matlab` directory, use MATLAB's `addpath` function, e.g. `addpath("../path/to/parent/directory");`.
 
 Ok, let's write some code! In our `matlab` directory (containing the generated
 `+playground` package), create `run_playground.m` that looks like this:
@@ -165,7 +165,7 @@ end
 r.close();
 ```
 
-Run this directly in Matlab, e.g. `run_playground`, or on the command-line with `matlab -batch run_playground`.
+Run this directly in MATLAB, e.g. `run_playground`, or on the command-line with `matlab -batch run_playground`.
 
 You can inspect the binary file our code produced with:
 

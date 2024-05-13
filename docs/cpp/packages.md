@@ -46,9 +46,9 @@ python:
   # The directory where the generated Python package will be written
   outputDir: ../path/relative/to/this/file
 
-# Settings for Matlab code generation (optional)
+# Settings for MATLAB code generation (optional)
 matlab:
-  # The directory where the generated Matlab packages will be written
+  # The directory where the generated MATLAB packages will be written
   outputDir: ../path/relative/to/this/file
 ```
 

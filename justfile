@@ -4,6 +4,7 @@ cpp_version := "17"
 
 matlab := "disabled"
 matlab-test-cmd := if matlab != "disabled" { "run-matlab-command runTests" } else { "echo Skipping Matlab tests..." }
+matlab-sandbox-cmd := if matlab != "disabled" { "run-matlab-command run_sandbox" } else { "echo Skipping Matlab sandbox..." }
 benchmark-cmd := if matlab != "disabled" { "python python/benchmark.py --include-matlab" } else { "python python/benchmark.py" }
 
 
@@ -47,8 +48,16 @@ benchmark-cmd := if matlab != "disabled" { "python python/benchmark.py --include
 @run-sandbox-python: generate-sandbox
     python python/run_sandbox.py
 
-@run-sandbox-python-quiet: build-sandbox
+@run-sandbox-python-quiet: generate-sandbox
     python python/run_sandbox.py > /dev/null
+
+@run-sandbox-matlab: generate-sandbox
+    cd matlab; \
+    {{ matlab-sandbox-cmd }}
+
+@run-sandbox-matlab-quiet: generate-sandbox
+    cd matlab; \
+    {{ matlab-sandbox-cmd }} > /dev/null
 
 @build-all: generate generate-sandbox generate-remote-import generate-evolution configure
     cd cpp/build && ninja
@@ -110,7 +119,7 @@ type-check: generate generate-sandbox
     cd python
     pyright .
 
-@validate: build-all test type-check run-sandbox-quiet run-sandbox-python-quiet benchmark
+@validate: build-all test type-check run-sandbox-quiet run-sandbox-python-quiet run-sandbox-matlab-quiet benchmark
 
 validate-with-no-changes: validate
     #!/usr/bin/env bash
