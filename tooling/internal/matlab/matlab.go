@@ -33,42 +33,52 @@ func Generate(env *dsl.Environment, options packaging.MatlabCodegenOptions) erro
 	}
 
 	for _, ns := range env.Namespaces {
+		// Write package Types and Protocol definitions
 		packageDir := path.Join(options.OutputDir, common.PackageDir(ns.Name))
-		if err := os.MkdirAll(packageDir, 0775); err != nil {
-			return err
-		}
-
-		topLevelFileWriter := &common.MatlabFileWriter{PackageDir: packageDir}
-		if err := types.WriteTypes(topLevelFileWriter, ns, env.SymbolTable); err != nil {
-			return err
-		}
-
-		if ns.IsTopLevel {
-			if err := protocols.WriteProtocols(topLevelFileWriter, ns, env.SymbolTable); err != nil {
+		if err := updatePackage(packageDir, func(fw *common.MatlabFileWriter) error {
+			if err := types.WriteTypes(fw, ns, env.SymbolTable); err != nil {
 				return err
 			}
-
-			if options.InternalGenerateMocks {
-				mocksDir := path.Join(packageDir, common.PackageDir("testing"))
-				if err := os.MkdirAll(mocksDir, 0775); err != nil {
-					return err
-				}
-				fw := &common.MatlabFileWriter{PackageDir: mocksDir}
-				if err := mocks.WriteMocks(fw, ns); err != nil {
+			if ns.IsTopLevel {
+				if err := protocols.WriteProtocols(fw, ns, env.SymbolTable); err != nil {
 					return err
 				}
 			}
+			return nil
+		}); err != nil {
+			return err
 		}
 
+		// Write binary serializers
 		binaryDir := path.Join(packageDir, common.PackageDir("binary"))
-		if err := os.MkdirAll(binaryDir, 0775); err != nil {
+		if err := updatePackage(binaryDir, func(fw *common.MatlabFileWriter) error {
+			return binary.WriteBinary(fw, ns)
+		}); err != nil {
 			return err
 		}
-		binaryFileWriter := &common.MatlabFileWriter{PackageDir: binaryDir}
-		if err := binary.WriteBinary(binaryFileWriter, ns); err != nil {
-			return err
+
+		// Write mocks and test support classes
+		if ns.IsTopLevel && options.InternalGenerateMocks {
+			mocksDir := path.Join(packageDir, common.PackageDir("testing"))
+			if err := updatePackage(mocksDir, func(fw *common.MatlabFileWriter) error {
+				return mocks.WriteMocks(fw, ns)
+			}); err != nil {
+				return err
+			}
 		}
 	}
 
 	return nil
+}
+
+// Creates `+package` directory, writes the package implementation, and removes stale files.
+func updatePackage(packageDir string, writePackageImpl func(*common.MatlabFileWriter) error) error {
+	if err := os.MkdirAll(packageDir, 0775); err != nil {
+		return err
+	}
+	fw := &common.MatlabFileWriter{PackageDir: packageDir}
+
+	writePackageImpl(fw)
+
+	return fw.RemoveStaleFiles()
 }

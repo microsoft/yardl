@@ -6,12 +6,14 @@ package common
 import (
 	"bytes"
 	"fmt"
+	"os"
 	"path"
 	"strings"
 
 	"github.com/microsoft/yardl/tooling/internal/formatting"
 	"github.com/microsoft/yardl/tooling/internal/iocommon"
 	"github.com/microsoft/yardl/tooling/pkg/dsl"
+	"github.com/rs/zerolog/log"
 )
 
 var isReservedName = map[string]bool{
@@ -229,7 +231,8 @@ func WriteGeneratedFileHeader(w *formatting.IndentedWriter) {
 }
 
 type MatlabFileWriter struct {
-	PackageDir string
+	PackageDir   string
+	filesWritten []string
 }
 
 func (fw *MatlabFileWriter) WriteFile(name string, writeContents func(w *formatting.IndentedWriter)) error {
@@ -239,10 +242,37 @@ func (fw *MatlabFileWriter) WriteFile(name string, writeContents func(w *formatt
 
 	writeContents(w)
 
-	fname := fmt.Sprintf("%s.m", name)
-	definitionsPath := path.Join(fw.PackageDir, fname)
-	if err := iocommon.WriteFileIfNeeded(definitionsPath, b.Bytes(), 0644); err != nil {
+	filepath := path.Join(fw.PackageDir, fmt.Sprintf("%s.m", name))
+	if err := iocommon.WriteFileIfNeeded(filepath, b.Bytes(), 0644); err != nil {
 		return err
+	}
+	fw.filesWritten = append(fw.filesWritten, filepath)
+	return nil
+}
+
+func (fw *MatlabFileWriter) RemoveStaleFiles() error {
+	written := make(map[string]bool)
+	for _, fname := range fw.filesWritten {
+		written[fname] = true
+	}
+
+	entries, err := os.ReadDir(fw.PackageDir)
+	if err != nil {
+		return err
+	}
+
+	var stalePaths []string
+	for _, entry := range entries {
+		filename := path.Join(fw.PackageDir, entry.Name())
+		if !entry.IsDir() && !written[filename] {
+			stalePaths = append(stalePaths, filename)
+		}
+	}
+	for _, name := range stalePaths {
+		log.Debug().Msgf("Removing stale file %s", name)
+		if err := os.Remove(name); err != nil {
+			return err
+		}
 	}
 	return nil
 }

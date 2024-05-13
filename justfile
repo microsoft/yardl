@@ -3,7 +3,7 @@ set shell := ['bash', '-ceuo', 'pipefail']
 cpp_version := "17"
 
 matlab := "disabled"
-matlab-test-cmd := if matlab != "disabled" { "run-matlab-command runTests" } else { "echo Skipping Matlab tests..." }
+matlab-test-cmd := if matlab != "disabled" { "run-matlab-command run_tests" } else { "echo Skipping Matlab tests..." }
 matlab-sandbox-cmd := if matlab != "disabled" { "run-matlab-command run_sandbox" } else { "echo Skipping Matlab sandbox..." }
 benchmark-cmd := if matlab != "disabled" { "python python/benchmark.py --include-matlab" } else { "python python/benchmark.py" }
 
