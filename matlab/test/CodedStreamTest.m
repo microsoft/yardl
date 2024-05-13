@@ -5,6 +5,23 @@ classdef CodedStreamTest < matlab.unittest.TestCase
 
     methods (Test)
 
+        function testConstructors(testCase)
+            filename = "/mnt/does_not_exist/foo/bar";
+            testCase.verifyError(@() yardl.binary.CodedInputStream(filename), 'yardl:RuntimeError');
+            testCase.verifyError(@() yardl.binary.CodedOutputStream(filename), 'yardl:RuntimeError');
+
+            filename = tempname;
+            [fid, errmsg] = fopen(filename, 'w');
+            w = yardl.binary.CodedOutputStream(fid);
+            w.close();
+
+            [fid, errmsg] = fopen(filename, 'r');
+            r = yardl.binary.CodedInputStream(fid);
+            r.close();
+
+            delete(filename);
+        end
+
         function testVarShort(testCase)
             entries = int16([0, 1, 5, 33, 0x7E, 0x7F, 0x80, 0x81, 255, 256, 257, 838, 0x3FFF, 0x4000, 0x4001, 0x7FFF]);
 
