@@ -212,5 +212,17 @@ classdef GeneratedTypesTest < matlab.unittest.TestCase
             testCase.verifyTrue(bold_underline2.has_flags(underline));
             testCase.verifyTrue(bold_underline2.has_flags(bold_underline));
         end
+
+        function testUnionTags(testCase)
+            isi = basic_types.Int32OrString.Int32(42);
+            testCase.verifyTrue(isi.isInt32());
+            testCase.verifyFalse(isi.isString());
+            testCase.verifyEqual(isi.tag(), "Int32");
+
+            iss = basic_types.Int32OrString.String("hello");
+            testCase.verifyTrue(iss.isString());
+            testCase.verifyFalse(iss.isInt32());
+            testCase.verifyEqual(iss.tag(), "String");
+        end
     end
 end

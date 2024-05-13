@@ -3,25 +3,25 @@
 
 classdef Date < handle
 
-    properties (Access=private)
-        days_since_epoch_
+    properties (SetAccess=private)
+        days_since_epoch
     end
 
     methods
         function self = Date(days_since_epoch)
             if nargin > 0
-                self.days_since_epoch_ = days_since_epoch;
+                self.days_since_epoch = days_since_epoch;
             else
-                self.days_since_epoch_ = 0;
+                self.days_since_epoch = 0;
             end
         end
 
         function value = value(self)
-            value = self.days_since_epoch_;
+            value = self.days_since_epoch;
         end
 
         function dt = to_datetime(self)
-            dt = datetime(0, 'ConvertFrom', 'epochtime') + days(self.days_since_epoch_);
+            dt = datetime(0, 'ConvertFrom', 'epochtime') + days(self.days_since_epoch);
         end
 
         function eq = eq(self, other)

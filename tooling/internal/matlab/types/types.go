@@ -106,11 +106,14 @@ func writeUnionClass(w *formatting.IndentedWriter, className string, generalized
 		w.WriteStringln("methods")
 		common.WriteBlockBody(w, func() {
 			index := 1
+			var tags []string
 			for _, tc := range generalizedType.Cases {
 				if tc.Type == nil {
 					continue
 				}
-				fmt.Fprintf(w, "function res = is%s(self)\n", formatting.ToPascalCase(tc.Tag))
+				tag := formatting.ToPascalCase(tc.Tag)
+				tags = append(tags, fmt.Sprintf(`"%s"`, tag))
+				fmt.Fprintf(w, "function res = is%s(self)\n", tag)
 				common.WriteBlockBody(w, func() {
 					fmt.Fprintf(w, "res = self.index == %d;\n", index)
 				})
@@ -120,12 +123,18 @@ func writeUnionClass(w *formatting.IndentedWriter, className string, generalized
 
 			w.WriteStringln("function eq = eq(self, other)")
 			common.WriteBlockBody(w, func() {
-				fmt.Fprintf(w, "eq = isa(other, \"%s\") && other.index == self.index && other.value == self.value;\n", qualifiedClassName)
+				fmt.Fprintf(w, "eq = isa(other, \"%s\") && other.index == self.index && %s;\n", qualifiedClassName, typeEqualityExpression(generalizedType, "self.value", "other.value"))
 			})
 			w.WriteStringln("")
 			w.WriteStringln("function ne = ne(self, other)")
 			common.WriteBlockBody(w, func() {
 				w.WriteStringln("ne = ~self.eq(other);")
+			})
+			w.WriteStringln("")
+			w.WriteStringln("function t = tag(self)")
+			common.WriteBlockBody(w, func() {
+				fmt.Fprintf(w, "tags_ = [%s];\n", strings.Join(tags, ", "))
+				w.WriteStringln("t = tags_(self.index_);")
 			})
 		})
 
@@ -137,20 +146,30 @@ func writeUnionClass(w *formatting.IndentedWriter, className string, generalized
 func writeNamedType(fw *common.MatlabFileWriter, td *dsl.NamedType) error {
 	return fw.WriteFile(common.TypeIdentifierName(td.Name), func(w *formatting.IndentedWriter) {
 		ut := dsl.GetUnderlyingType(td.Type)
-		// If the underlying type is a RecordDefinition or Optional, we will generate a "function" alias
+		// If the underlying type is a RecordDefinition, PrimitiveString, Optional,
+		// 		Vector, Array, or Map - we will generate a "function" alias
 		if st, ok := ut.(*dsl.SimpleType); ok {
 			if _, ok := st.ResolvedDefinition.(*dsl.RecordDefinition); ok {
-				fmt.Fprintf(w, "function c = %s(varargin) \n", common.TypeIdentifierName(td.Name))
+				fmt.Fprintf(w, "function c = %s(varargin)\n", common.TypeIdentifierName(td.Name))
 				common.WriteBlockBody(w, func() {
 					common.WriteComment(w, td.Comment)
 					fmt.Fprintf(w, "c = %s(varargin{:});\n", common.TypeSyntax(td.Type, td.Namespace))
 				})
 				return
+			} else if pd, ok := st.ResolvedDefinition.(dsl.PrimitiveDefinition); ok {
+				if pd == dsl.PrimitiveString {
+					fmt.Fprintf(w, "function s = %s(varargin)\n", common.TypeIdentifierName(td.Name))
+					common.WriteBlockBody(w, func() {
+						common.WriteComment(w, td.Comment)
+						fmt.Fprintf(w, "s = %s(varargin{:});\n", common.TypeSyntax(td.Type, td.Namespace))
+					})
+					return
+				}
 			}
 		} else if gt, ok := ut.(*dsl.GeneralizedType); ok {
 			if gt.Cases.IsOptional() {
 				innerType := gt.Cases[1].Type
-				fmt.Fprintf(w, "function o = %s(value) \n", common.TypeIdentifierName(td.Name))
+				fmt.Fprintf(w, "function o = %s(value)\n", common.TypeIdentifierName(td.Name))
 				common.WriteBlockBody(w, func() {
 					common.WriteComment(w, td.Comment)
 					if !dsl.TypeContainsGenericTypeParameter(innerType) {
@@ -167,7 +186,7 @@ func writeNamedType(fw *common.MatlabFileWriter, td *dsl.NamedType) error {
 			switch gt.Dimensionality.(type) {
 			case *dsl.Vector, *dsl.Array:
 				scalar := gt.ToScalar()
-				fmt.Fprintf(w, "function a = %s(array) \n", common.TypeIdentifierName(td.Name))
+				fmt.Fprintf(w, "function a = %s(array)\n", common.TypeIdentifierName(td.Name))
 				common.WriteBlockBody(w, func() {
 					common.WriteComment(w, td.Comment)
 					if !dsl.TypeContainsGenericTypeParameter(scalar) {
@@ -177,6 +196,13 @@ func writeNamedType(fw *common.MatlabFileWriter, td *dsl.NamedType) error {
 						})
 					}
 					w.WriteStringln("a = array;")
+				})
+				return
+			case *dsl.Map:
+				fmt.Fprintf(w, "function m = %s(varargin)\n", common.TypeIdentifierName(td.Name))
+				common.WriteBlockBody(w, func() {
+					common.WriteComment(w, td.Comment)
+					fmt.Fprintf(w, "m = %s(varargin{:});\n", common.TypeSyntax(td.Type, td.Namespace))
 				})
 				return
 			}

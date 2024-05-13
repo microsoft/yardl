@@ -34,11 +34,16 @@ classdef MapOrScalar < yardl.Union
     end
 
     function eq = eq(self, other)
-      eq = isa(other, "test_model.MapOrScalar") && other.index == self.index && other.value == self.value;
+      eq = isa(other, "test_model.MapOrScalar") && other.index == self.index && all([self.value] == [other.value]);
     end
 
     function ne = ne(self, other)
       ne = ~self.eq(other);
+    end
+
+    function t = tag(self)
+      tags_ = ["Map", "Scalar"];
+      t = tags_(self.index_);
     end
   end
 end

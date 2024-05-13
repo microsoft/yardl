@@ -34,11 +34,16 @@ classdef UOrV < yardl.Union
     end
 
     function eq = eq(self, other)
-      eq = isa(other, "test_model.UOrV") && other.index == self.index && other.value == self.value;
+      eq = isa(other, "test_model.UOrV") && other.index == self.index && isequal(self.value, other.value);
     end
 
     function ne = ne(self, other)
       ne = ~self.eq(other);
+    end
+
+    function t = tag(self)
+      tags_ = ["U", "V"];
+      t = tags_(self.index_);
     end
   end
 end

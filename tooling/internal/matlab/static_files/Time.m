@@ -5,8 +5,8 @@ classdef Time < handle
     % A basic time of day with nanosecond precision. It is not timezone-aware and is
     % meant to represent a wall clock time.
 
-    properties (Access=private)
-        nanoseconds_since_midnight_
+    properties (SetAccess=private)
+        nanoseconds_since_midnight
     end
 
     methods
@@ -15,18 +15,18 @@ classdef Time < handle
                 if nanoseconds_since_midnight < 0 || nanoseconds_since_midnight >= 24*60*60*1e9
                     throw(yardl.ValuError("Time must be between 00:00:00 and 23:59:59.999999999"));
                 end
-                self.nanoseconds_since_midnight_ = nanoseconds_since_midnight;
+                self.nanoseconds_since_midnight = nanoseconds_since_midnight;
             else
-                self.nanoseconds_since_midnight_ = 0;
+                self.nanoseconds_since_midnight = 0;
             end
         end
 
         function value = value(self)
-            value = self.nanoseconds_since_midnight_;
+            value = self.nanoseconds_since_midnight;
         end
 
         function dt = to_datetime(self)
-            dt = datetime(self.nanoseconds_since_midnight_, 'ConvertFrom', 'epochtime', 'Epoch', datetime('today'), 'TicksPerSecond', 1e9);
+            dt = datetime(self.nanoseconds_since_midnight, 'ConvertFrom', 'epochtime', 'Epoch', datetime('today'), 'TicksPerSecond', 1e9);
         end
 
         function eq = eq(self, other)

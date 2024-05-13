@@ -4,25 +4,25 @@
 classdef DateTime < handle
     % A basic datetime with nanosecond precision, always in UTC.
 
-    properties (Access=private)
-        nanoseconds_since_epoch_
+    properties (SetAccess=private)
+        nanoseconds_since_epoch
     end
 
     methods
         function self = DateTime(nanoseconds_since_epoch)
             if nargin > 0
-                self.nanoseconds_since_epoch_ = nanoseconds_since_epoch;
+                self.nanoseconds_since_epoch = nanoseconds_since_epoch;
             else
-                self.nanoseconds_since_epoch_ = 0;
+                self.nanoseconds_since_epoch = 0;
             end
         end
 
         function value = value(self)
-            value = self.nanoseconds_since_epoch_;
+            value = self.nanoseconds_since_epoch;
         end
 
         function dt = to_datetime(self)
-            dt = datetime(self.nanoseconds_since_epoch_, 'ConvertFrom', 'epochtime', 'TicksPerSecond', 1e9);
+            dt = datetime(self.nanoseconds_since_epoch, 'ConvertFrom', 'epochtime', 'TicksPerSecond', 1e9);
         end
 
         function eq = eq(self, other)
