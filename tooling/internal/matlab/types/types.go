@@ -123,7 +123,7 @@ func writeUnionClass(w *formatting.IndentedWriter, className string, generalized
 
 			w.WriteStringln("function eq = eq(self, other)")
 			common.WriteBlockBody(w, func() {
-				fmt.Fprintf(w, "eq = isa(other, \"%s\") && other.index == self.index && %s;\n", qualifiedClassName, typeEqualityExpression(generalizedType, "self.value", "other.value"))
+				fmt.Fprintf(w, "eq = isa(other, \"%s\") && isequal(self.index, other.index) && isequal(self.value, other.value);\n", qualifiedClassName)
 			})
 			w.WriteStringln("")
 			w.WriteStringln("function ne = ne(self, other)")
@@ -373,7 +373,7 @@ func writeRecord(fw *common.MatlabFileWriter, rec *dsl.RecordDefinition, st dsl.
 						for _, field := range rec.Fields {
 							w.WriteStringln(" && ...")
 							fieldIdentifier := common.FieldIdentifierName(field.Name)
-							w.WriteString(typeEqualityExpression(field.Type, "self."+fieldIdentifier, "other."+fieldIdentifier))
+							fmt.Fprintf(w, "isequal(%s, %s)", "self."+fieldIdentifier, "other."+fieldIdentifier)
 						}
 						w.WriteStringln(";")
 					})
@@ -416,30 +416,6 @@ func writeZerosStaticMethod(w *formatting.IndentedWriter, typeSyntax string, def
 		})
 		w.WriteStringln("z = reshape(repelem(elem, prod(sz)), sz);")
 	})
-}
-
-func typeEqualityExpression(t dsl.Type, a, b string) string {
-	if hasSimpleEquality(t) {
-		return fmt.Sprintf("all([%s] == [%s])", a, b)
-	}
-
-	return fmt.Sprintf("isequal(%s, %s)", a, b)
-}
-
-func hasSimpleEquality(t dsl.Node) bool {
-	res := true
-	dsl.Visit(t, func(self dsl.Visitor, node dsl.Node) {
-		switch t := node.(type) {
-		case *dsl.SimpleType:
-			self.Visit(t.ResolvedDefinition)
-		case *dsl.Array, *dsl.GenericTypeParameter:
-			res = false
-			return
-		}
-
-		self.VisitChildren(node)
-	})
-	return res
 }
 
 type tailHandler func(next func())

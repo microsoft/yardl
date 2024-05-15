@@ -34,7 +34,7 @@ classdef StringOrInt32 < yardl.Union
     end
 
     function eq = eq(self, other)
-      eq = isa(other, "test_model.StringOrInt32") && other.index == self.index && all([self.value] == [other.value]);
+      eq = isa(other, "test_model.StringOrInt32") && isequal(self.index, other.index) && isequal(self.value, other.value);
     end
 
     function ne = ne(self, other)

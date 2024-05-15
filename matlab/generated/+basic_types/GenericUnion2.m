@@ -34,7 +34,7 @@ classdef GenericUnion2 < yardl.Union
     end
 
     function eq = eq(self, other)
-      eq = isa(other, "basic_types.GenericUnion2") && other.index == self.index && isequal(self.value, other.value);
+      eq = isa(other, "basic_types.GenericUnion2") && isequal(self.index, other.index) && isequal(self.value, other.value);
     end
 
     function ne = ne(self, other)

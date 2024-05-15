@@ -4,38 +4,40 @@
 classdef Optional < handle
     properties (SetAccess=protected)
         has_value
-        value
+    end
+
+    properties (Access=protected)
+        value_
     end
 
     methods
         function self = Optional(varargin)
             if nargin > 0
-                self.value = varargin{1};
+                self.value_ = varargin{1};
                 self.has_value = true;
             else
-                self.value = NaN;
                 self.has_value = false;
             end
         end
 
-        function v = get.value(self)
+        function v = value(self)
             if ~self.has_value
                 throw(yardl.ValueError("Optional type does not have a value"));
             end
-            v = self.value;
+            v = self.value_;
         end
 
         function eq = eq(a, b)
             if isa(a, 'yardl.Optional')
                 if isa(b, 'yardl.Optional')
                     if all([a.has_value]) && all([b.has_value])
-                        eq = isequal([a.value], [b.value]);
+                        eq = isequal([a.value_], [b.value_]);
                     else
                         eq = [a.has_value] == [b.has_value];
                     end
                 else
                     if all([a.has_value])
-                        eq = isequal(b, [a.value]);
+                        eq = isequal(b, [a.value_]);
                     else
                         eq = false;
                     end
@@ -43,7 +45,7 @@ classdef Optional < handle
             else
                 % b is the Optional
                 if all([b.has_value])
-                    eq = isequal(a, [b.value]);
+                    eq = isequal(a, [b.value_]);
                 else
                     eq = false;
                 end
@@ -54,12 +56,12 @@ classdef Optional < handle
             ne = ~eq(a, b);
         end
 
-        function isequal = isequal(a, b)
-            isequal = all(eq(a, b));
+        function isequal = isequal(a, varargin)
+            isequal = all(eq(a, [varargin{:}]));
         end
 
-        function isequaln = isequaln(a, b)
-            isequaln = all(eq(a, b));
+        function isequaln = isequaln(a, varargin)
+            isequaln = isequal(a, [varargin{:}]);
         end
     end
 

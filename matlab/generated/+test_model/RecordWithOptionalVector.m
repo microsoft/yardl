@@ -16,7 +16,7 @@ classdef RecordWithOptionalVector < handle
     function res = eq(self, other)
       res = ...
         isa(other, "test_model.RecordWithOptionalVector") && ...
-        all([self.optional_vector] == [other.optional_vector]);
+        isequal(self.optional_vector, other.optional_vector);
     end
 
     function res = ne(self, other)

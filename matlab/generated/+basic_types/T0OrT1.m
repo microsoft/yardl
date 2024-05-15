@@ -34,7 +34,7 @@ classdef T0OrT1 < yardl.Union
     end
 
     function eq = eq(self, other)
-      eq = isa(other, "basic_types.T0OrT1") && other.index == self.index && isequal(self.value, other.value);
+      eq = isa(other, "basic_types.T0OrT1") && isequal(self.index, other.index) && isequal(self.value, other.value);
     end
 
     function ne = ne(self, other)

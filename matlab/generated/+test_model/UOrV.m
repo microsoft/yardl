@@ -34,7 +34,7 @@ classdef UOrV < yardl.Union
     end
 
     function eq = eq(self, other)
-      eq = isa(other, "test_model.UOrV") && other.index == self.index && isequal(self.value, other.value);
+      eq = isa(other, "test_model.UOrV") && isequal(self.index, other.index) && isequal(self.value, other.value);
     end
 
     function ne = ne(self, other)

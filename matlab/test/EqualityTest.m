@@ -241,5 +241,16 @@ classdef EqualityTest < matlab.unittest.TestCase
             testCase.verifyEqual({a, b, c, d, e}, {b, a, d, c, e});
         end
 
+        function testRecordWithComputedFieldsEquality(testCase)
+            a = test_model.RecordWithComputedFields();
+            b = test_model.RecordWithComputedFields();
+            testCase.verifyEqual(a, b);
+            testCase.verifyTrue(a == b);
+            testCase.verifyTrue(isequal(a, b));
+
+            b.vector_field = [1, 2, 3];
+            testCase.verifyFalse(a == b);
+            testCase.verifyFalse(isequal(a, b));
+        end
     end
 end
