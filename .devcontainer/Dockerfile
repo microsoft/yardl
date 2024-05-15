@@ -168,7 +168,8 @@ RUN wget -q https://www.mathworks.com/mpm/glnxa64/mpm \
     || (echo "MPM Installation Failure. See below for more information:" && cat /tmp/mathworks_root.log && false) \
     && sudo rm -f mpm /tmp/mathworks_root.log \
     && sudo ln -s ${MATLAB_INSTALL_LOCATION}/bin/matlab /usr/local/bin/matlab \
-    && sudo ln -s ${MATLAB_INSTALL_LOCATION} /opt/matlab/latest
+    && sudo ln -s ${MATLAB_INSTALL_LOCATION} /opt/matlab/latest \
+    && sudo mkdir -p ${MATLAB_INSTALL_LOCATION}/licenses
 
 # Install workaround run-matlab-command script to unify local and CI invocations of `matlab -batch`
 # See https://github.com/matlab-actions/run-command/issues/53
