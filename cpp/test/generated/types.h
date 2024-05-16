@@ -908,6 +908,7 @@ struct RecordWithComputedFields {
   std::vector<int32_t> vector_field{};
   std::vector<std::vector<int32_t>> vector_of_vectors_field{};
   std::array<int32_t, 3> fixed_vector_field{};
+  std::array<std::array<int32_t, 3>, 2> fixed_vector_of_vectors_field{};
   std::optional<test_model::NamedNDArray> optional_named_array{};
   std::variant<int32_t, float> int_float_union{};
   std::variant<std::monostate, int32_t, float> nullable_int_float_union{};
@@ -1030,6 +1031,14 @@ struct RecordWithComputedFields {
     return const_cast<int32_t&>(std::as_const(*this).AccessVectorOfVectorsField());
   }
 
+  int32_t const& AccessFixedVectorOfVectorsField() const {
+    return fixed_vector_of_vectors_field.at(1).at(2);
+  }
+
+  int32_t& AccessFixedVectorOfVectorsField() {
+    return const_cast<int32_t&>(std::as_const(*this).AccessFixedVectorOfVectorsField());
+  }
+
   yardl::Size ArraySize() const {
     return array_field.size();
   }
@@ -1088,6 +1097,10 @@ struct RecordWithComputedFields {
 
   yardl::Size FixedVectorSize() const {
     return 3ULL;
+  }
+
+  yardl::Size FixedVectorOfVectorsSize() const {
+    return 2ULL;
   }
 
   yardl::Size ArrayDimensionXIndex() const {
@@ -1345,6 +1358,7 @@ struct RecordWithComputedFields {
       vector_field == other.vector_field &&
       vector_of_vectors_field == other.vector_of_vectors_field &&
       fixed_vector_field == other.fixed_vector_field &&
+      fixed_vector_of_vectors_field == other.fixed_vector_of_vectors_field &&
       optional_named_array == other.optional_named_array &&
       int_float_union == other.int_float_union &&
       nullable_int_float_union == other.nullable_int_float_union &&

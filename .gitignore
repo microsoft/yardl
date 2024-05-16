@@ -24,3 +24,5 @@ cpp/build/
 cpp/sandbox/generated/
 
 **/*.bin
+
+matlab_workspace.mat

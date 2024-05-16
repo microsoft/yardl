@@ -2378,6 +2378,9 @@ void to_json(ordered_json& j, test_model::RecordWithComputedFields const& value)
   if (yardl::ndjson::ShouldSerializeFieldValue(value.fixed_vector_field)) {
     j.push_back({"fixedVectorField", value.fixed_vector_field});
   }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.fixed_vector_of_vectors_field)) {
+    j.push_back({"fixedVectorOfVectorsField", value.fixed_vector_of_vectors_field});
+  }
   if (yardl::ndjson::ShouldSerializeFieldValue(value.optional_named_array)) {
     j.push_back({"optionalNamedArray", value.optional_named_array});
   }
@@ -2461,6 +2464,9 @@ void from_json(ordered_json const& j, test_model::RecordWithComputedFields& valu
   }
   if (auto it = j.find("fixedVectorField"); it != j.end()) {
     it->get_to(value.fixed_vector_field);
+  }
+  if (auto it = j.find("fixedVectorOfVectorsField"); it != j.end()) {
+    it->get_to(value.fixed_vector_of_vectors_field);
   }
   if (auto it = j.find("optionalNamedArray"); it != j.end()) {
     it->get_to(value.optional_named_array);
@@ -3254,6 +3260,34 @@ void DynamicNDArraysReader::ReadRecordWithDynamicNDArraysImpl(test_model::Record
 }
 
 void DynamicNDArraysReader::CloseImpl() {
+  VerifyFinished();
+}
+
+void MultiDArraysWriter::WriteImagesImpl(yardl::NDArray<float, 4> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "images", json_value);}
+
+void MultiDArraysWriter::WriteFramesImpl(yardl::FixedNDArray<float, 1, 1, 64, 32> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "frames", json_value);}
+
+void MultiDArraysWriter::Flush() {
+  stream_.flush();
+}
+
+void MultiDArraysWriter::CloseImpl() {
+  stream_.flush();
+}
+
+bool MultiDArraysReader::ReadImagesImpl(yardl::NDArray<float, 4>& value) {
+  return yardl::ndjson::ReadProtocolValue(stream_, line_, "images", false, unused_step_, value);
+}
+
+bool MultiDArraysReader::ReadFramesImpl(yardl::FixedNDArray<float, 1, 1, 64, 32>& value) {
+  return yardl::ndjson::ReadProtocolValue(stream_, line_, "frames", false, unused_step_, value);
+}
+
+void MultiDArraysReader::CloseImpl() {
   VerifyFinished();
 }
 

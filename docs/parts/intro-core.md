@@ -33,9 +33,6 @@ expect to introduce breaking changes until the project reaches V1.
 
 We currently support C++ and Python codegen. Other planned features include:
 
-- Reading data with a different schema version
-- MATLAB support
-- References between packages
-- Validating schema evolution is non-breaking
+- Python and MATLAB support for reading data with a different schema version
 - Constraints
 - Improvements to the language and editing experience

@@ -33,6 +33,7 @@ type PackageInfo struct {
 	Json   *JsonCodegenOptions   `yaml:"json,omitempty"`
 	Cpp    *CppCodegenOptions    `yaml:"cpp,omitempty"`
 	Python *PythonCodegenOptions `yaml:"python,omitempty"`
+	Matlab *MatlabCodegenOptions `yaml:"matlab,omitempty"`
 }
 
 func (p *PackageInfo) PackageDir() string {
@@ -109,6 +110,15 @@ func (p *PackageInfo) validate() error {
 			errorSink.Add(validation.NewValidationError(errors.New("the 'python.outputDir' field must not be empty"), p.FilePath))
 		} else {
 			p.Python.OutputDir = filepath.Join(p.PackageDir(), p.Python.OutputDir)
+		}
+	}
+
+	if p.Matlab != nil {
+		p.Matlab.PackageInfo = p
+		if p.Matlab.OutputDir == "" {
+			errorSink.Add(validation.NewValidationError(errors.New("the 'matlab.outputDir' field must not be empty"), p.FilePath))
+		} else {
+			p.Matlab.OutputDir = filepath.Join(p.PackageDir(), p.Matlab.OutputDir)
 		}
 	}
 
@@ -206,7 +216,14 @@ type PythonCodegenOptions struct {
 	InternalSymlinkStaticFiles bool         `yaml:"internalSymlinkStaticFiles"`
 }
 
-// Parses PackageInfo in dir then loads all package Imports and Versions
+type MatlabCodegenOptions struct {
+	PackageInfo                *PackageInfo `yaml:"-"`
+	OutputDir                  string       `yaml:"outputDir"`
+	InternalSymlinkStaticFiles bool         `yaml:"internalSymlinkStaticFiles"`
+	InternalGenerateMocks      bool         `yaml:"internalGenerateMocks"`
+}
+
+// Parses PackageInfo in dir then loads all package Imports and Predecessors
 func LoadPackage(dir string) (*PackageInfo, error) {
 	packageInfo, err := loadPackageVersion(dir)
 	if err != nil {

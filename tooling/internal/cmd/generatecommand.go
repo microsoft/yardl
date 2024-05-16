@@ -18,6 +18,7 @@ import (
 	"github.com/inancgumus/screen"
 	"github.com/microsoft/yardl/tooling/internal/cpp"
 	"github.com/microsoft/yardl/tooling/internal/iocommon"
+	"github.com/microsoft/yardl/tooling/internal/matlab"
 	"github.com/microsoft/yardl/tooling/internal/python"
 	"github.com/microsoft/yardl/tooling/pkg/dsl"
 	"github.com/microsoft/yardl/tooling/pkg/packaging"
@@ -167,6 +168,9 @@ func WriteSuccessfulSummary(packageInfo *packaging.PackageInfo) {
 	if packageInfo.Json != nil {
 		fmt.Printf("✅ Wrote JSON to %s.\n", packageInfo.Json.OutputDir)
 	}
+	if packageInfo.Matlab != nil {
+		fmt.Printf("✅ Wrote Matlab to %s.\n", packageInfo.Matlab.OutputDir)
+	}
 }
 
 func generateImpl() (*packaging.PackageInfo, []string, error) {
@@ -201,6 +205,13 @@ func generateImpl() (*packaging.PackageInfo, []string, error) {
 
 	if packageInfo.Json != nil {
 		err = outputJson(env, packageInfo.Json)
+		if err != nil {
+			return packageInfo, warnings, err
+		}
+	}
+
+	if packageInfo.Matlab != nil {
+		err = matlab.Generate(env, *packageInfo.Matlab)
 		if err != nil {
 			return packageInfo, warnings, err
 		}

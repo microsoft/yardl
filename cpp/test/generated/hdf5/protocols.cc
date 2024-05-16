@@ -1010,6 +1010,7 @@ struct _Inner_RecordWithComputedFields {
       vector_field(o.vector_field),
       vector_of_vectors_field(o.vector_of_vectors_field),
       fixed_vector_field(o.fixed_vector_field),
+      fixed_vector_of_vectors_field(o.fixed_vector_of_vectors_field),
       optional_named_array(o.optional_named_array),
       int_float_union(o.int_float_union),
       nullable_int_float_union(o.nullable_int_float_union),
@@ -1040,6 +1041,7 @@ struct _Inner_RecordWithComputedFields {
     yardl::hdf5::ToOuter(vector_field, o.vector_field);
     yardl::hdf5::ToOuter(vector_of_vectors_field, o.vector_of_vectors_field);
     yardl::hdf5::ToOuter(fixed_vector_field, o.fixed_vector_field);
+    yardl::hdf5::ToOuter(fixed_vector_of_vectors_field, o.fixed_vector_of_vectors_field);
     yardl::hdf5::ToOuter(optional_named_array, o.optional_named_array);
     yardl::hdf5::ToOuter(int_float_union, o.int_float_union);
     yardl::hdf5::ToOuter(nullable_int_float_union, o.nullable_int_float_union);
@@ -1069,6 +1071,7 @@ struct _Inner_RecordWithComputedFields {
   yardl::hdf5::InnerVlen<int32_t, int32_t> vector_field;
   yardl::hdf5::InnerVlen<yardl::hdf5::InnerVlen<int32_t, int32_t>, std::vector<int32_t>> vector_of_vectors_field;
   std::array<int32_t, 3> fixed_vector_field;
+  std::array<std::array<int32_t, 3>, 2> fixed_vector_of_vectors_field;
   yardl::hdf5::InnerOptional<yardl::hdf5::InnerNdArray<int32_t, int32_t, 2>, test_model::NamedNDArray> optional_named_array;
   ::InnerUnion2<int32_t, int32_t, float, float> int_float_union;
   ::InnerUnion2<int32_t, int32_t, float, float> nullable_int_float_union;
@@ -1514,6 +1517,7 @@ template <typename _A_Inner, typename A, typename _B_Inner, typename B>
   t.insertMember("vectorField", HOFFSET(RecordType, vector_field), yardl::hdf5::InnerVlenDdl(H5::PredType::NATIVE_INT32));
   t.insertMember("vectorOfVectorsField", HOFFSET(RecordType, vector_of_vectors_field), yardl::hdf5::InnerVlenDdl(yardl::hdf5::InnerVlenDdl(H5::PredType::NATIVE_INT32)));
   t.insertMember("fixedVectorField", HOFFSET(RecordType, fixed_vector_field), yardl::hdf5::FixedVectorDdl(H5::PredType::NATIVE_INT32, 3));
+  t.insertMember("fixedVectorOfVectorsField", HOFFSET(RecordType, fixed_vector_of_vectors_field), yardl::hdf5::FixedVectorDdl(yardl::hdf5::FixedVectorDdl(H5::PredType::NATIVE_INT32, 3), 2));
   t.insertMember("optionalNamedArray", HOFFSET(RecordType, optional_named_array), yardl::hdf5::OptionalTypeDdl<yardl::hdf5::InnerNdArray<int32_t, int32_t, 2>, test_model::NamedNDArray>(yardl::hdf5::NDArrayDdl<int32_t, int32_t, 2>(H5::PredType::NATIVE_INT32)));
   t.insertMember("intFloatUnion", HOFFSET(RecordType, int_float_union), ::InnerUnion2Ddl<int32_t, int32_t, float, float>(false, H5::PredType::NATIVE_INT32, "int32", H5::PredType::NATIVE_FLOAT, "float32"));
   t.insertMember("nullableIntFloatUnion", HOFFSET(RecordType, nullable_int_float_union), ::InnerUnion2Ddl<int32_t, int32_t, float, float>(true, H5::PredType::NATIVE_INT32, "int32", H5::PredType::NATIVE_FLOAT, "float32"));
@@ -2585,6 +2589,114 @@ void DynamicNDArraysReader::ReadRecordWithVlensArrayImpl(yardl::DynamicNDArray<t
 
 void DynamicNDArraysReader::ReadRecordWithDynamicNDArraysImpl(test_model::RecordWithDynamicNDArrays& value) {
   yardl::hdf5::ReadScalarDataset<test_model::hdf5::_Inner_RecordWithDynamicNDArrays, test_model::RecordWithDynamicNDArrays>(group_, "recordWithDynamicNDArrays", test_model::hdf5::GetRecordWithDynamicNDArraysHdf5Ddl(), value);
+}
+
+MultiDArraysWriter::MultiDArraysWriter(std::string path)
+    : yardl::hdf5::Hdf5Writer::Hdf5Writer(path, "MultiDArrays", schema_) {
+}
+
+void MultiDArraysWriter::WriteImagesImpl(yardl::NDArray<float, 4> const& value) {
+  if (!images_dataset_state_) {
+    images_dataset_state_ = std::make_unique<yardl::hdf5::DatasetWriter>(group_, "images", yardl::hdf5::NDArrayDdl<float, float, 4>(H5::PredType::NATIVE_FLOAT), std::max(sizeof(yardl::hdf5::InnerNdArray<float, float, 4>), sizeof(yardl::NDArray<float, 4>)));
+  }
+
+  images_dataset_state_->Append<yardl::hdf5::InnerNdArray<float, float, 4>, yardl::NDArray<float, 4>>(value);
+}
+
+void MultiDArraysWriter::WriteImagesImpl(std::vector<yardl::NDArray<float, 4>> const& values) {
+  if (!images_dataset_state_) {
+    images_dataset_state_ = std::make_unique<yardl::hdf5::DatasetWriter>(group_, "images", yardl::hdf5::NDArrayDdl<float, float, 4>(H5::PredType::NATIVE_FLOAT), std::max(sizeof(yardl::hdf5::InnerNdArray<float, float, 4>), sizeof(yardl::NDArray<float, 4>)));
+  }
+
+  images_dataset_state_->AppendBatch<yardl::hdf5::InnerNdArray<float, float, 4>, yardl::NDArray<float, 4>>(values);
+}
+
+void MultiDArraysWriter::EndImagesImpl() {
+  if (!images_dataset_state_) {
+    images_dataset_state_ = std::make_unique<yardl::hdf5::DatasetWriter>(group_, "images", yardl::hdf5::NDArrayDdl<float, float, 4>(H5::PredType::NATIVE_FLOAT), std::max(sizeof(yardl::hdf5::InnerNdArray<float, float, 4>), sizeof(yardl::NDArray<float, 4>)));
+  }
+
+  images_dataset_state_.reset();
+}
+
+void MultiDArraysWriter::WriteFramesImpl(yardl::FixedNDArray<float, 1, 1, 64, 32> const& value) {
+  if (!frames_dataset_state_) {
+    frames_dataset_state_ = std::make_unique<yardl::hdf5::DatasetWriter>(group_, "frames", yardl::hdf5::FixedNDArrayDdl(H5::PredType::NATIVE_FLOAT, {1, 1, 64, 32}), 0);
+  }
+
+  frames_dataset_state_->Append<yardl::FixedNDArray<float, 1, 1, 64, 32>, yardl::FixedNDArray<float, 1, 1, 64, 32>>(value);
+}
+
+void MultiDArraysWriter::WriteFramesImpl(std::vector<yardl::FixedNDArray<float, 1, 1, 64, 32>> const& values) {
+  if (!frames_dataset_state_) {
+    frames_dataset_state_ = std::make_unique<yardl::hdf5::DatasetWriter>(group_, "frames", yardl::hdf5::FixedNDArrayDdl(H5::PredType::NATIVE_FLOAT, {1, 1, 64, 32}), 0);
+  }
+
+  frames_dataset_state_->AppendBatch<yardl::FixedNDArray<float, 1, 1, 64, 32>, yardl::FixedNDArray<float, 1, 1, 64, 32>>(values);
+}
+
+void MultiDArraysWriter::EndFramesImpl() {
+  if (!frames_dataset_state_) {
+    frames_dataset_state_ = std::make_unique<yardl::hdf5::DatasetWriter>(group_, "frames", yardl::hdf5::FixedNDArrayDdl(H5::PredType::NATIVE_FLOAT, {1, 1, 64, 32}), 0);
+  }
+
+  frames_dataset_state_.reset();
+}
+
+MultiDArraysReader::MultiDArraysReader(std::string path)
+    : yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "MultiDArrays", schema_) {
+}
+
+bool MultiDArraysReader::ReadImagesImpl(yardl::NDArray<float, 4>& value) {
+  if (!images_dataset_state_) {
+    images_dataset_state_ = std::make_unique<yardl::hdf5::DatasetReader>(group_, "images", yardl::hdf5::NDArrayDdl<float, float, 4>(H5::PredType::NATIVE_FLOAT), std::max(sizeof(yardl::hdf5::InnerNdArray<float, float, 4>), sizeof(yardl::NDArray<float, 4>)));
+  }
+
+  bool has_value = images_dataset_state_->Read<yardl::hdf5::InnerNdArray<float, float, 4>, yardl::NDArray<float, 4>>(value);
+  if (!has_value) {
+    images_dataset_state_.reset();
+  }
+
+  return has_value;
+}
+
+bool MultiDArraysReader::ReadImagesImpl(std::vector<yardl::NDArray<float, 4>>& values) {
+  if (!images_dataset_state_) {
+    images_dataset_state_ = std::make_unique<yardl::hdf5::DatasetReader>(group_, "images", yardl::hdf5::NDArrayDdl<float, float, 4>(H5::PredType::NATIVE_FLOAT));
+  }
+
+  bool has_more = images_dataset_state_->ReadBatch<yardl::hdf5::InnerNdArray<float, float, 4>, yardl::NDArray<float, 4>>(values);
+  if (!has_more) {
+    images_dataset_state_.reset();
+  }
+
+  return has_more;
+}
+
+bool MultiDArraysReader::ReadFramesImpl(yardl::FixedNDArray<float, 1, 1, 64, 32>& value) {
+  if (!frames_dataset_state_) {
+    frames_dataset_state_ = std::make_unique<yardl::hdf5::DatasetReader>(group_, "frames", yardl::hdf5::FixedNDArrayDdl(H5::PredType::NATIVE_FLOAT, {1, 1, 64, 32}), 0);
+  }
+
+  bool has_value = frames_dataset_state_->Read<yardl::FixedNDArray<float, 1, 1, 64, 32>, yardl::FixedNDArray<float, 1, 1, 64, 32>>(value);
+  if (!has_value) {
+    frames_dataset_state_.reset();
+  }
+
+  return has_value;
+}
+
+bool MultiDArraysReader::ReadFramesImpl(std::vector<yardl::FixedNDArray<float, 1, 1, 64, 32>>& values) {
+  if (!frames_dataset_state_) {
+    frames_dataset_state_ = std::make_unique<yardl::hdf5::DatasetReader>(group_, "frames", yardl::hdf5::FixedNDArrayDdl(H5::PredType::NATIVE_FLOAT, {1, 1, 64, 32}));
+  }
+
+  bool has_more = frames_dataset_state_->ReadBatch<yardl::FixedNDArray<float, 1, 1, 64, 32>, yardl::FixedNDArray<float, 1, 1, 64, 32>>(values);
+  if (!has_more) {
+    frames_dataset_state_.reset();
+  }
+
+  return has_more;
 }
 
 MapsWriter::MapsWriter(std::string path)

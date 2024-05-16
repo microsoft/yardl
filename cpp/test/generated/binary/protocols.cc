@@ -547,13 +547,14 @@ struct IsTriviallySerializable<test_model::RecordWithComputedFields> {
     IsTriviallySerializable<decltype(__T__::vector_field)>::value &&
     IsTriviallySerializable<decltype(__T__::vector_of_vectors_field)>::value &&
     IsTriviallySerializable<decltype(__T__::fixed_vector_field)>::value &&
+    IsTriviallySerializable<decltype(__T__::fixed_vector_of_vectors_field)>::value &&
     IsTriviallySerializable<decltype(__T__::optional_named_array)>::value &&
     IsTriviallySerializable<decltype(__T__::int_float_union)>::value &&
     IsTriviallySerializable<decltype(__T__::nullable_int_float_union)>::value &&
     IsTriviallySerializable<decltype(__T__::union_with_nested_generic_union)>::value &&
     IsTriviallySerializable<decltype(__T__::map_field)>::value &&
-    (sizeof(__T__) == (sizeof(__T__::array_field) + sizeof(__T__::array_field_map_dimensions) + sizeof(__T__::dynamic_array_field) + sizeof(__T__::fixed_array_field) + sizeof(__T__::int_field) + sizeof(__T__::int8_field) + sizeof(__T__::uint8_field) + sizeof(__T__::int16_field) + sizeof(__T__::uint16_field) + sizeof(__T__::uint32_field) + sizeof(__T__::int64_field) + sizeof(__T__::uint64_field) + sizeof(__T__::size_field) + sizeof(__T__::float32_field) + sizeof(__T__::float64_field) + sizeof(__T__::complexfloat32_field) + sizeof(__T__::complexfloat64_field) + sizeof(__T__::string_field) + sizeof(__T__::tuple_field) + sizeof(__T__::vector_field) + sizeof(__T__::vector_of_vectors_field) + sizeof(__T__::fixed_vector_field) + sizeof(__T__::optional_named_array) + sizeof(__T__::int_float_union) + sizeof(__T__::nullable_int_float_union) + sizeof(__T__::union_with_nested_generic_union) + sizeof(__T__::map_field))) &&
-    offsetof(__T__, array_field) < offsetof(__T__, array_field_map_dimensions) && offsetof(__T__, array_field_map_dimensions) < offsetof(__T__, dynamic_array_field) && offsetof(__T__, dynamic_array_field) < offsetof(__T__, fixed_array_field) && offsetof(__T__, fixed_array_field) < offsetof(__T__, int_field) && offsetof(__T__, int_field) < offsetof(__T__, int8_field) && offsetof(__T__, int8_field) < offsetof(__T__, uint8_field) && offsetof(__T__, uint8_field) < offsetof(__T__, int16_field) && offsetof(__T__, int16_field) < offsetof(__T__, uint16_field) && offsetof(__T__, uint16_field) < offsetof(__T__, uint32_field) && offsetof(__T__, uint32_field) < offsetof(__T__, int64_field) && offsetof(__T__, int64_field) < offsetof(__T__, uint64_field) && offsetof(__T__, uint64_field) < offsetof(__T__, size_field) && offsetof(__T__, size_field) < offsetof(__T__, float32_field) && offsetof(__T__, float32_field) < offsetof(__T__, float64_field) && offsetof(__T__, float64_field) < offsetof(__T__, complexfloat32_field) && offsetof(__T__, complexfloat32_field) < offsetof(__T__, complexfloat64_field) && offsetof(__T__, complexfloat64_field) < offsetof(__T__, string_field) && offsetof(__T__, string_field) < offsetof(__T__, tuple_field) && offsetof(__T__, tuple_field) < offsetof(__T__, vector_field) && offsetof(__T__, vector_field) < offsetof(__T__, vector_of_vectors_field) && offsetof(__T__, vector_of_vectors_field) < offsetof(__T__, fixed_vector_field) && offsetof(__T__, fixed_vector_field) < offsetof(__T__, optional_named_array) && offsetof(__T__, optional_named_array) < offsetof(__T__, int_float_union) && offsetof(__T__, int_float_union) < offsetof(__T__, nullable_int_float_union) && offsetof(__T__, nullable_int_float_union) < offsetof(__T__, union_with_nested_generic_union) && offsetof(__T__, union_with_nested_generic_union) < offsetof(__T__, map_field);
+    (sizeof(__T__) == (sizeof(__T__::array_field) + sizeof(__T__::array_field_map_dimensions) + sizeof(__T__::dynamic_array_field) + sizeof(__T__::fixed_array_field) + sizeof(__T__::int_field) + sizeof(__T__::int8_field) + sizeof(__T__::uint8_field) + sizeof(__T__::int16_field) + sizeof(__T__::uint16_field) + sizeof(__T__::uint32_field) + sizeof(__T__::int64_field) + sizeof(__T__::uint64_field) + sizeof(__T__::size_field) + sizeof(__T__::float32_field) + sizeof(__T__::float64_field) + sizeof(__T__::complexfloat32_field) + sizeof(__T__::complexfloat64_field) + sizeof(__T__::string_field) + sizeof(__T__::tuple_field) + sizeof(__T__::vector_field) + sizeof(__T__::vector_of_vectors_field) + sizeof(__T__::fixed_vector_field) + sizeof(__T__::fixed_vector_of_vectors_field) + sizeof(__T__::optional_named_array) + sizeof(__T__::int_float_union) + sizeof(__T__::nullable_int_float_union) + sizeof(__T__::union_with_nested_generic_union) + sizeof(__T__::map_field))) &&
+    offsetof(__T__, array_field) < offsetof(__T__, array_field_map_dimensions) && offsetof(__T__, array_field_map_dimensions) < offsetof(__T__, dynamic_array_field) && offsetof(__T__, dynamic_array_field) < offsetof(__T__, fixed_array_field) && offsetof(__T__, fixed_array_field) < offsetof(__T__, int_field) && offsetof(__T__, int_field) < offsetof(__T__, int8_field) && offsetof(__T__, int8_field) < offsetof(__T__, uint8_field) && offsetof(__T__, uint8_field) < offsetof(__T__, int16_field) && offsetof(__T__, int16_field) < offsetof(__T__, uint16_field) && offsetof(__T__, uint16_field) < offsetof(__T__, uint32_field) && offsetof(__T__, uint32_field) < offsetof(__T__, int64_field) && offsetof(__T__, int64_field) < offsetof(__T__, uint64_field) && offsetof(__T__, uint64_field) < offsetof(__T__, size_field) && offsetof(__T__, size_field) < offsetof(__T__, float32_field) && offsetof(__T__, float32_field) < offsetof(__T__, float64_field) && offsetof(__T__, float64_field) < offsetof(__T__, complexfloat32_field) && offsetof(__T__, complexfloat32_field) < offsetof(__T__, complexfloat64_field) && offsetof(__T__, complexfloat64_field) < offsetof(__T__, string_field) && offsetof(__T__, string_field) < offsetof(__T__, tuple_field) && offsetof(__T__, tuple_field) < offsetof(__T__, vector_field) && offsetof(__T__, vector_field) < offsetof(__T__, vector_of_vectors_field) && offsetof(__T__, vector_of_vectors_field) < offsetof(__T__, fixed_vector_field) && offsetof(__T__, fixed_vector_field) < offsetof(__T__, fixed_vector_of_vectors_field) && offsetof(__T__, fixed_vector_of_vectors_field) < offsetof(__T__, optional_named_array) && offsetof(__T__, optional_named_array) < offsetof(__T__, int_float_union) && offsetof(__T__, int_float_union) < offsetof(__T__, nullable_int_float_union) && offsetof(__T__, nullable_int_float_union) < offsetof(__T__, union_with_nested_generic_union) && offsetof(__T__, union_with_nested_generic_union) < offsetof(__T__, map_field);
 };
 
 template <>
@@ -2439,6 +2440,7 @@ template<typename A, yardl::binary::Reader<A> ReadA, typename B, yardl::binary::
   yardl::binary::WriteVector<int32_t, yardl::binary::WriteInteger>(stream, value.vector_field);
   yardl::binary::WriteVector<std::vector<int32_t>, yardl::binary::WriteVector<int32_t, yardl::binary::WriteInteger>>(stream, value.vector_of_vectors_field);
   yardl::binary::WriteArray<int32_t, yardl::binary::WriteInteger, 3>(stream, value.fixed_vector_field);
+  yardl::binary::WriteArray<std::array<int32_t, 3>, yardl::binary::WriteArray<int32_t, yardl::binary::WriteInteger, 3>, 2>(stream, value.fixed_vector_of_vectors_field);
   yardl::binary::WriteOptional<test_model::NamedNDArray, test_model::binary::WriteNamedNDArray>(stream, value.optional_named_array);
   WriteUnion<int32_t, yardl::binary::WriteInteger, float, yardl::binary::WriteFloatingPoint>(stream, value.int_float_union);
   WriteUnion<std::monostate, yardl::binary::WriteMonostate, int32_t, yardl::binary::WriteInteger, float, yardl::binary::WriteFloatingPoint>(stream, value.nullable_int_float_union);
@@ -2474,6 +2476,7 @@ template<typename A, yardl::binary::Reader<A> ReadA, typename B, yardl::binary::
   yardl::binary::ReadVector<int32_t, yardl::binary::ReadInteger>(stream, value.vector_field);
   yardl::binary::ReadVector<std::vector<int32_t>, yardl::binary::ReadVector<int32_t, yardl::binary::ReadInteger>>(stream, value.vector_of_vectors_field);
   yardl::binary::ReadArray<int32_t, yardl::binary::ReadInteger, 3>(stream, value.fixed_vector_field);
+  yardl::binary::ReadArray<std::array<int32_t, 3>, yardl::binary::ReadArray<int32_t, yardl::binary::ReadInteger, 3>, 2>(stream, value.fixed_vector_of_vectors_field);
   yardl::binary::ReadOptional<test_model::NamedNDArray, test_model::binary::ReadNamedNDArray>(stream, value.optional_named_array);
   ReadUnion<int32_t, yardl::binary::ReadInteger, float, yardl::binary::ReadFloatingPoint>(stream, value.int_float_union);
   ReadUnion<std::monostate, yardl::binary::ReadMonostate, int32_t, yardl::binary::ReadInteger, float, yardl::binary::ReadFloatingPoint>(stream, value.nullable_int_float_union);
@@ -3466,6 +3469,68 @@ void DynamicNDArraysReader::ReadRecordWithDynamicNDArraysImpl(test_model::Record
 }
 
 void DynamicNDArraysReader::CloseImpl() {
+  stream_.VerifyFinished();
+}
+
+void MultiDArraysWriter::WriteImagesImpl(yardl::NDArray<float, 4> const& value) {
+  yardl::binary::WriteBlock<yardl::NDArray<float, 4>, yardl::binary::WriteNDArray<float, yardl::binary::WriteFloatingPoint, 4>>(stream_, value);
+}
+
+void MultiDArraysWriter::WriteImagesImpl(std::vector<yardl::NDArray<float, 4>> const& values) {
+  if (!values.empty()) {
+    yardl::binary::WriteVector<yardl::NDArray<float, 4>, yardl::binary::WriteNDArray<float, yardl::binary::WriteFloatingPoint, 4>>(stream_, values);
+  }
+}
+
+void MultiDArraysWriter::EndImagesImpl() {
+  yardl::binary::WriteInteger(stream_, 0U);
+}
+
+void MultiDArraysWriter::WriteFramesImpl(yardl::FixedNDArray<float, 1, 1, 64, 32> const& value) {
+  yardl::binary::WriteBlock<yardl::FixedNDArray<float, 1, 1, 64, 32>, yardl::binary::WriteFixedNDArray<float, yardl::binary::WriteFloatingPoint, 1, 1, 64, 32>>(stream_, value);
+}
+
+void MultiDArraysWriter::WriteFramesImpl(std::vector<yardl::FixedNDArray<float, 1, 1, 64, 32>> const& values) {
+  if (!values.empty()) {
+    yardl::binary::WriteVector<yardl::FixedNDArray<float, 1, 1, 64, 32>, yardl::binary::WriteFixedNDArray<float, yardl::binary::WriteFloatingPoint, 1, 1, 64, 32>>(stream_, values);
+  }
+}
+
+void MultiDArraysWriter::EndFramesImpl() {
+  yardl::binary::WriteInteger(stream_, 0U);
+}
+
+void MultiDArraysWriter::Flush() {
+  stream_.Flush();
+}
+
+void MultiDArraysWriter::CloseImpl() {
+  stream_.Flush();
+}
+
+bool MultiDArraysReader::ReadImagesImpl(yardl::NDArray<float, 4>& value) {
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<yardl::NDArray<float, 4>, yardl::binary::ReadNDArray<float, yardl::binary::ReadFloatingPoint, 4>>(stream_, current_block_remaining_, value);
+  return read_block_successful;
+}
+
+bool MultiDArraysReader::ReadImagesImpl(std::vector<yardl::NDArray<float, 4>>& values) {
+  yardl::binary::ReadBlocksIntoVector<yardl::NDArray<float, 4>, yardl::binary::ReadNDArray<float, yardl::binary::ReadFloatingPoint, 4>>(stream_, current_block_remaining_, values);
+  return current_block_remaining_ != 0;
+}
+
+bool MultiDArraysReader::ReadFramesImpl(yardl::FixedNDArray<float, 1, 1, 64, 32>& value) {
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<yardl::FixedNDArray<float, 1, 1, 64, 32>, yardl::binary::ReadFixedNDArray<float, yardl::binary::ReadFloatingPoint, 1, 1, 64, 32>>(stream_, current_block_remaining_, value);
+  return read_block_successful;
+}
+
+bool MultiDArraysReader::ReadFramesImpl(std::vector<yardl::FixedNDArray<float, 1, 1, 64, 32>>& values) {
+  yardl::binary::ReadBlocksIntoVector<yardl::FixedNDArray<float, 1, 1, 64, 32>, yardl::binary::ReadFixedNDArray<float, yardl::binary::ReadFloatingPoint, 1, 1, 64, 32>>(stream_, current_block_remaining_, values);
+  return current_block_remaining_ != 0;
+}
+
+void MultiDArraysReader::CloseImpl() {
   stream_.VerifyFinished();
 }
 

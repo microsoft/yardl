@@ -1,6 +1,7 @@
 #! /usr/bin/env python3
 
 from dataclasses import dataclass
+import argparse
 import inspect
 import json
 import os
@@ -24,10 +25,6 @@ from tests.factories import (
 
 OUTPUT_FILE = "/tmp/benchmark_data.dat"
 
-# Setting this to True will display the roundtrip duration instead of the throughput
-# and should only be done to calibrate the scales of each scenario and format.
-DISPLAY_DURATIONS = False
-
 
 @dataclass
 class Result:
@@ -39,11 +36,16 @@ class Result:
 class MutlitingualResults(NamedTuple):
     cpp: Optional[Result]
     python: Optional[Result]
+    matlab: Optional[Result]
 
 
 _cpp_benchmark_path = (
     pathlib.Path(__file__).parent / "../cpp/build/benchmark"
 ).resolve()
+
+_matlab_benchmark_path = (
+    (pathlib.Path(__file__).parent / "../matlab/test/benchmark.m").resolve().parent
+)
 
 
 def scale_repetitions(repetitions: int, scale: float):
@@ -256,16 +258,36 @@ def invoke_cpp_benchmark(scenario: str, format: Format) -> Optional[Result]:
     return Result(**json.loads(res.stdout), roundtrip_duration_seconds=elapsed_seconds)
 
 
+def invoke_matlab_benchmark(scenario: str, format: Format) -> Optional[Result]:
+    res = subprocess.run(
+        # Workaround for CI: run-matlab-command is a wrapper around `matlab -batch`
+        # See https://github.com/matlab-actions/run-command/issues/53
+        ["run-matlab-command", f"benchmark('{scenario}', '{format}')"],
+        cwd=_matlab_benchmark_path,
+        stdout=subprocess.PIPE,
+        check=True,
+        encoding="utf-8",
+    )
+    if res.stdout.strip() == "":
+        return None
+    return Result(**json.loads(res.stdout))
+
+
 def scenario_name(scenario_func: Callable[[Format], Optional[Result]]) -> str:
     return scenario_func.__name__.removeprefix("benchmark").replace("_", "")
 
 
 def invoke_benchmark(
-    scenario_func: Callable[[Format], Optional[Result]], format: Format
+    scenario_func: Callable[[Format], Optional[Result]],
+    format: Format,
+    include_matlab: bool,
 ) -> MutlitingualResults:
     cpp_res = invoke_cpp_benchmark(scenario_name(scenario_func), format)
     python_res = scenario_func(format)
-    return MutlitingualResults(cpp=cpp_res, python=python_res)
+    matlab_res = None
+    if include_matlab:
+        matlab_res = invoke_matlab_benchmark(scenario_name(scenario_func), format)
+    return MutlitingualResults(cpp=cpp_res, python=python_res, matlab=matlab_res)
 
 
 def update_table(
@@ -274,6 +296,7 @@ def update_table(
     scenario_func: Callable[[Format], Optional[Result]],
     format: Format,
     results: MutlitingualResults,
+    display_durations: bool,
 ):
     def format_float(thoughput: float) -> str:
         return f"{thoughput:,.2f}"
@@ -287,45 +310,89 @@ def update_table(
             return "green"
         return None
 
-    if DISPLAY_DURATIONS:
+    if display_durations:
         table.add_row(
             scenario_name(scenario_func),
             str(format),
-            format_float(results.cpp.roundtrip_duration_seconds)
-            if results.cpp
-            else None,
-            format_float(results.python.roundtrip_duration_seconds)
-            if results.python
-            else None,
+            (
+                format_float(results.cpp.roundtrip_duration_seconds)
+                if results.cpp
+                else None
+            ),
+            (
+                format_float(results.python.roundtrip_duration_seconds)
+                if results.python
+                else None
+            ),
+            (
+                format_float(results.matlab.roundtrip_duration_seconds)
+                if results.matlab
+                else None
+            ),
             style=color(),
         )
     else:
         table.add_row(
             scenario_name(scenario_func),
             str(format),
-            format_float(results.cpp.write_mi_bytes_per_second)
-            if results.cpp
-            else None,
-            format_float(results.cpp.read_mi_bytes_per_second) if results.cpp else None,
-            format_float(results.python.write_mi_bytes_per_second)
-            if results.python
-            else None,
-            format_float(results.python.read_mi_bytes_per_second)
-            if results.python
-            else None,
+            (
+                format_float(results.cpp.write_mi_bytes_per_second)
+                if results.cpp
+                else None
+            ),
+            (
+                format_float(results.cpp.read_mi_bytes_per_second)
+                if results.cpp
+                else None
+            ),
+            (
+                format_float(results.python.write_mi_bytes_per_second)
+                if results.python
+                else None
+            ),
+            (
+                format_float(results.python.read_mi_bytes_per_second)
+                if results.python
+                else None
+            ),
+            (
+                format_float(results.matlab.write_mi_bytes_per_second)
+                if results.matlab
+                else None
+            ),
+            (
+                format_float(results.matlab.read_mi_bytes_per_second)
+                if results.matlab
+                else None
+            ),
             style=color(),
         )
     live.refresh()
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--display-durations",
+        action="store_true",
+        help="Display the roundtrip duration instead of the throughput. "
+        "Use only to calibrate the scales of each scenario and format",
+    )
+    parser.add_argument(
+        "--include-matlab",
+        action="store_true",
+        help="Include Matlab benchmarking results",
+    )
+    args = parser.parse_args()
+
     table = Table()
-    if DISPLAY_DURATIONS:
+    if args.display_durations:
         table.title = "Roundtrip duration"
         table.add_column("Scenario")
         table.add_column("Format")
         table.add_column("C++ Duration", justify="right")
         table.add_column("Python Duration", justify="right")
+        table.add_column("Matlab Duration", justify="right")
     else:
         table.title = "Throughput in MiB/s"
         table.add_column("Scenario")
@@ -334,6 +401,8 @@ if __name__ == "__main__":
         table.add_column("C++ Read", justify="right")
         table.add_column("Python Write", justify="right")
         table.add_column("Python Read", justify="right")
+        table.add_column("Matlab Write", justify="right")
+        table.add_column("Matlab Read", justify="right")
 
     with Live(table, auto_refresh=False) as live:
         for _, benchmark_func in inspect.getmembers(
@@ -342,5 +411,7 @@ if __name__ == "__main__":
         ):
             table.add_section()
             for format in [Format.HDF5, Format.BINARY, Format.NDJSON]:
-                res = invoke_benchmark(benchmark_func, format)
-                update_table(table, live, benchmark_func, format, res)
+                res = invoke_benchmark(benchmark_func, format, args.include_matlab)
+                update_table(
+                    table, live, benchmark_func, format, res, args.display_durations
+                )

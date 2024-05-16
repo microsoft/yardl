@@ -3594,6 +3594,288 @@ void DynamicNDArraysReaderBase::CopyTo(DynamicNDArraysWriterBase& writer) {
 }
 
 namespace {
+void MultiDArraysWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end, uint8_t current) {
+  std::string expected_method;
+  switch (current) {
+  case 0: expected_method = "WriteImages() or EndImages()"; break;
+  case 1: expected_method = "WriteFrames() or EndFrames()"; break;
+  }
+  std::string attempted_method;
+  switch (attempted) {
+  case 0: attempted_method = end ? "EndImages()" : "WriteImages()"; break;
+  case 1: attempted_method = end ? "EndFrames()" : "WriteFrames()"; break;
+  case 2: attempted_method = "Close()"; break;
+  }
+  throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
+}
+
+void MultiDArraysReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
+  auto f = [](uint8_t i) -> std::string {
+    switch (i/2) {
+    case 0: return "ReadImages()";
+    case 1: return "ReadFrames()";
+    case 2: return "Close()";
+    default: return "<unknown>";
+    }
+  };
+  throw std::runtime_error("Expected call to " + f(current) + " but received call to " + f(attempted) + " instead.");
+}
+
+} // namespace 
+
+std::string MultiDArraysWriterBase::schema_ = R"({"protocol":{"name":"MultiDArrays","sequence":[{"name":"images","type":{"stream":{"items":{"array":{"items":"float32","dimensions":[{"name":"ch"},{"name":"z"},{"name":"y"},{"name":"x"}]}}}}},{"name":"frames","type":{"stream":{"items":{"array":{"items":"float32","dimensions":[{"name":"ch","length":1},{"name":"z","length":1},{"name":"y","length":64},{"name":"x","length":32}]}}}}}]},"types":null})";
+
+std::vector<std::string> MultiDArraysWriterBase::previous_schemas_ = {
+};
+
+std::string MultiDArraysWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Current: return MultiDArraysWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol MultiDArrays.");
+  }
+
+}
+void MultiDArraysWriterBase::WriteImages(yardl::NDArray<float, 4> const& value) {
+  if (unlikely(state_ != 0)) {
+    MultiDArraysWriterBaseInvalidState(0, false, state_);
+  }
+
+  WriteImagesImpl(value);
+}
+
+void MultiDArraysWriterBase::WriteImages(std::vector<yardl::NDArray<float, 4>> const& values) {
+  if (unlikely(state_ != 0)) {
+    MultiDArraysWriterBaseInvalidState(0, false, state_);
+  }
+
+  WriteImagesImpl(values);
+}
+
+void MultiDArraysWriterBase::EndImages() {
+  if (unlikely(state_ != 0)) {
+    MultiDArraysWriterBaseInvalidState(0, true, state_);
+  }
+
+  EndImagesImpl();
+  state_ = 1;
+}
+
+// fallback implementation
+void MultiDArraysWriterBase::WriteImagesImpl(std::vector<yardl::NDArray<float, 4>> const& values) {
+  for (auto const& v : values) {
+    WriteImagesImpl(v);
+  }
+}
+
+void MultiDArraysWriterBase::WriteFrames(yardl::FixedNDArray<float, 1, 1, 64, 32> const& value) {
+  if (unlikely(state_ != 1)) {
+    MultiDArraysWriterBaseInvalidState(1, false, state_);
+  }
+
+  WriteFramesImpl(value);
+}
+
+void MultiDArraysWriterBase::WriteFrames(std::vector<yardl::FixedNDArray<float, 1, 1, 64, 32>> const& values) {
+  if (unlikely(state_ != 1)) {
+    MultiDArraysWriterBaseInvalidState(1, false, state_);
+  }
+
+  WriteFramesImpl(values);
+}
+
+void MultiDArraysWriterBase::EndFrames() {
+  if (unlikely(state_ != 1)) {
+    MultiDArraysWriterBaseInvalidState(1, true, state_);
+  }
+
+  EndFramesImpl();
+  state_ = 2;
+}
+
+// fallback implementation
+void MultiDArraysWriterBase::WriteFramesImpl(std::vector<yardl::FixedNDArray<float, 1, 1, 64, 32>> const& values) {
+  for (auto const& v : values) {
+    WriteFramesImpl(v);
+  }
+}
+
+void MultiDArraysWriterBase::Close() {
+  if (unlikely(state_ != 2)) {
+    MultiDArraysWriterBaseInvalidState(2, false, state_);
+  }
+
+  CloseImpl();
+}
+
+std::string MultiDArraysReaderBase::schema_ = MultiDArraysWriterBase::schema_;
+
+std::vector<std::string> MultiDArraysReaderBase::previous_schemas_ = MultiDArraysWriterBase::previous_schemas_;
+
+Version MultiDArraysReaderBase::VersionFromSchema(std::string const& schema) {
+  if (schema == MultiDArraysWriterBase::schema_) {
+    return Version::Current;
+  }
+  throw std::runtime_error("The schema does not match any version supported by protocol MultiDArrays.");
+}
+bool MultiDArraysReaderBase::ReadImages(yardl::NDArray<float, 4>& value) {
+  if (unlikely(state_ != 0)) {
+    if (state_ == 1) {
+      state_ = 2;
+      return false;
+    }
+    MultiDArraysReaderBaseInvalidState(0, state_);
+  }
+
+  bool result = ReadImagesImpl(value);
+  if (!result) {
+    state_ = 2;
+  }
+  return result;
+}
+
+bool MultiDArraysReaderBase::ReadImages(std::vector<yardl::NDArray<float, 4>>& values) {
+  if (values.capacity() == 0) {
+    throw std::runtime_error("vector must have a nonzero capacity.");
+  }
+  if (unlikely(state_ != 0)) {
+    if (state_ == 1) {
+      state_ = 2;
+      values.clear();
+      return false;
+    }
+    MultiDArraysReaderBaseInvalidState(0, state_);
+  }
+
+  if (!ReadImagesImpl(values)) {
+    state_ = 1;
+    return values.size() > 0;
+  }
+  return true;
+}
+
+// fallback implementation
+bool MultiDArraysReaderBase::ReadImagesImpl(std::vector<yardl::NDArray<float, 4>>& values) {
+  size_t i = 0;
+  while (true) {
+    if (i == values.size()) {
+      values.resize(i + 1);
+    }
+    if (!ReadImagesImpl(values[i])) {
+      values.resize(i);
+      return false;
+    }
+    i++;
+    if (i == values.capacity()) {
+      return true;
+    }
+  }
+}
+
+bool MultiDArraysReaderBase::ReadFrames(yardl::FixedNDArray<float, 1, 1, 64, 32>& value) {
+  if (unlikely(state_ != 2)) {
+    if (state_ == 3) {
+      state_ = 4;
+      return false;
+    }
+    if (state_ == 1) {
+      state_ = 2;
+    } else {
+      MultiDArraysReaderBaseInvalidState(2, state_);
+    }
+  }
+
+  bool result = ReadFramesImpl(value);
+  if (!result) {
+    state_ = 4;
+  }
+  return result;
+}
+
+bool MultiDArraysReaderBase::ReadFrames(std::vector<yardl::FixedNDArray<float, 1, 1, 64, 32>>& values) {
+  if (values.capacity() == 0) {
+    throw std::runtime_error("vector must have a nonzero capacity.");
+  }
+  if (unlikely(state_ != 2)) {
+    if (state_ == 3) {
+      state_ = 4;
+      values.clear();
+      return false;
+    }
+    if (state_ == 1) {
+      state_ = 2;
+    } else {
+      MultiDArraysReaderBaseInvalidState(2, state_);
+    }
+  }
+
+  if (!ReadFramesImpl(values)) {
+    state_ = 3;
+    return values.size() > 0;
+  }
+  return true;
+}
+
+// fallback implementation
+bool MultiDArraysReaderBase::ReadFramesImpl(std::vector<yardl::FixedNDArray<float, 1, 1, 64, 32>>& values) {
+  size_t i = 0;
+  while (true) {
+    if (i == values.size()) {
+      values.resize(i + 1);
+    }
+    if (!ReadFramesImpl(values[i])) {
+      values.resize(i);
+      return false;
+    }
+    i++;
+    if (i == values.capacity()) {
+      return true;
+    }
+  }
+}
+
+void MultiDArraysReaderBase::Close() {
+  if (unlikely(state_ != 4)) {
+    if (state_ == 3) {
+      state_ = 4;
+    } else {
+      MultiDArraysReaderBaseInvalidState(4, state_);
+    }
+  }
+
+  CloseImpl();
+}
+void MultiDArraysReaderBase::CopyTo(MultiDArraysWriterBase& writer, size_t images_buffer_size, size_t frames_buffer_size) {
+  if (images_buffer_size > 1) {
+    std::vector<yardl::NDArray<float, 4>> values;
+    values.reserve(images_buffer_size);
+    while(ReadImages(values)) {
+      writer.WriteImages(values);
+    }
+    writer.EndImages();
+  } else {
+    yardl::NDArray<float, 4> value;
+    while(ReadImages(value)) {
+      writer.WriteImages(value);
+    }
+    writer.EndImages();
+  }
+  if (frames_buffer_size > 1) {
+    std::vector<yardl::FixedNDArray<float, 1, 1, 64, 32>> values;
+    values.reserve(frames_buffer_size);
+    while(ReadFrames(values)) {
+      writer.WriteFrames(values);
+    }
+    writer.EndFrames();
+  } else {
+    yardl::FixedNDArray<float, 1, 1, 64, 32> value;
+    while(ReadFrames(value)) {
+      writer.WriteFrames(value);
+    }
+    writer.EndFrames();
+  }
+}
+
+namespace {
 void MapsWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end, uint8_t current) {
   std::string expected_method;
   switch (current) {
@@ -6145,7 +6427,7 @@ void ProtocolWithComputedFieldsReaderBaseInvalidState(uint8_t attempted, uint8_t
 
 } // namespace 
 
-std::string ProtocolWithComputedFieldsWriterBase::schema_ = R"({"protocol":{"name":"ProtocolWithComputedFields","sequence":[{"name":"recordWithComputedFields","type":"TestModel.RecordWithComputedFields"}]},"types":[{"name":"GenericRecordWithComputedFields","typeParameters":["T0","T1"],"fields":[{"name":"f1","type":[{"tag":"T0","type":"T0"},{"tag":"T1","type":"T1"}]}]},{"name":"MyTuple","typeParameters":["T1","T2"],"type":{"name":"Tuples.Tuple","typeArguments":["T1","T2"]}},{"name":"MyTuple","typeParameters":["T1","T2"],"type":{"name":"BasicTypes.MyTuple","typeArguments":["T1","T2"]}},{"name":"NamedNDArray","type":{"array":{"items":"int32","dimensions":[{"name":"dimA"},{"name":"dimB"}]}}},{"name":"RecordWithComputedFields","fields":[{"name":"arrayField","type":{"array":{"items":"int32","dimensions":[{"name":"x"},{"name":"y"}]}}},{"name":"arrayFieldMapDimensions","type":{"array":{"items":"int32","dimensions":[{"name":"x"},{"name":"y"}]}}},{"name":"dynamicArrayField","type":{"array":{"items":"int32"}}},{"name":"fixedArrayField","type":{"array":{"items":"int32","dimensions":[{"name":"x","length":3},{"name":"y","length":4}]}}},{"name":"intField","type":"int32"},{"name":"int8Field","type":"int8"},{"name":"uint8Field","type":"uint8"},{"name":"int16Field","type":"int16"},{"name":"uint16Field","type":"uint16"},{"name":"uint32Field","type":"uint32"},{"name":"int64Field","type":"int64"},{"name":"uint64Field","type":"uint64"},{"name":"sizeField","type":"size"},{"name":"float32Field","type":"float32"},{"name":"float64Field","type":"float64"},{"name":"complexfloat32Field","type":"complexfloat32"},{"name":"complexfloat64Field","type":"complexfloat64"},{"name":"stringField","type":"string"},{"name":"tupleField","type":{"name":"TestModel.MyTuple","typeArguments":["int32","int32"]}},{"name":"vectorField","type":{"vector":{"items":"int32"}}},{"name":"vectorOfVectorsField","type":{"vector":{"items":{"vector":{"items":"int32"}}}}},{"name":"fixedVectorField","type":{"vector":{"items":"int32","length":3}}},{"name":"optionalNamedArray","type":[null,"TestModel.NamedNDArray"]},{"name":"intFloatUnion","type":[{"tag":"int32","type":"int32"},{"tag":"float32","type":"float32"}]},{"name":"nullableIntFloatUnion","type":[null,{"tag":"int32","type":"int32"},{"tag":"float32","type":"float32"}]},{"name":"unionWithNestedGenericUnion","type":[{"tag":"int","explicitTag":true,"type":"int32"},{"tag":"genericRecordWithComputedFields","explicitTag":true,"type":{"name":"BasicTypes.GenericRecordWithComputedFields","typeArguments":["string","float32"]}}]},{"name":"mapField","type":{"map":{"keys":"string","values":"string"}}}]},{"name":"Tuple","typeParameters":["T1","T2"],"fields":[{"name":"v1","type":"T1"},{"name":"v2","type":"T2"}]}]})";
+std::string ProtocolWithComputedFieldsWriterBase::schema_ = R"({"protocol":{"name":"ProtocolWithComputedFields","sequence":[{"name":"recordWithComputedFields","type":"TestModel.RecordWithComputedFields"}]},"types":[{"name":"GenericRecordWithComputedFields","typeParameters":["T0","T1"],"fields":[{"name":"f1","type":[{"tag":"T0","type":"T0"},{"tag":"T1","type":"T1"}]}]},{"name":"MyTuple","typeParameters":["T1","T2"],"type":{"name":"Tuples.Tuple","typeArguments":["T1","T2"]}},{"name":"MyTuple","typeParameters":["T1","T2"],"type":{"name":"BasicTypes.MyTuple","typeArguments":["T1","T2"]}},{"name":"NamedNDArray","type":{"array":{"items":"int32","dimensions":[{"name":"dimA"},{"name":"dimB"}]}}},{"name":"RecordWithComputedFields","fields":[{"name":"arrayField","type":{"array":{"items":"int32","dimensions":[{"name":"x"},{"name":"y"}]}}},{"name":"arrayFieldMapDimensions","type":{"array":{"items":"int32","dimensions":[{"name":"x"},{"name":"y"}]}}},{"name":"dynamicArrayField","type":{"array":{"items":"int32"}}},{"name":"fixedArrayField","type":{"array":{"items":"int32","dimensions":[{"name":"x","length":3},{"name":"y","length":4}]}}},{"name":"intField","type":"int32"},{"name":"int8Field","type":"int8"},{"name":"uint8Field","type":"uint8"},{"name":"int16Field","type":"int16"},{"name":"uint16Field","type":"uint16"},{"name":"uint32Field","type":"uint32"},{"name":"int64Field","type":"int64"},{"name":"uint64Field","type":"uint64"},{"name":"sizeField","type":"size"},{"name":"float32Field","type":"float32"},{"name":"float64Field","type":"float64"},{"name":"complexfloat32Field","type":"complexfloat32"},{"name":"complexfloat64Field","type":"complexfloat64"},{"name":"stringField","type":"string"},{"name":"tupleField","type":{"name":"TestModel.MyTuple","typeArguments":["int32","int32"]}},{"name":"vectorField","type":{"vector":{"items":"int32"}}},{"name":"vectorOfVectorsField","type":{"vector":{"items":{"vector":{"items":"int32"}}}}},{"name":"fixedVectorField","type":{"vector":{"items":"int32","length":3}}},{"name":"fixedVectorOfVectorsField","type":{"vector":{"items":{"vector":{"items":"int32","length":3}},"length":2}}},{"name":"optionalNamedArray","type":[null,"TestModel.NamedNDArray"]},{"name":"intFloatUnion","type":[{"tag":"int32","type":"int32"},{"tag":"float32","type":"float32"}]},{"name":"nullableIntFloatUnion","type":[null,{"tag":"int32","type":"int32"},{"tag":"float32","type":"float32"}]},{"name":"unionWithNestedGenericUnion","type":[{"tag":"int","explicitTag":true,"type":"int32"},{"tag":"genericRecordWithComputedFields","explicitTag":true,"type":{"name":"BasicTypes.GenericRecordWithComputedFields","typeArguments":["string","float32"]}}]},{"name":"mapField","type":{"map":{"keys":"string","values":"string"}}}]},{"name":"Tuple","typeParameters":["T1","T2"],"fields":[{"name":"v1","type":"T1"},{"name":"v2","type":"T2"}]}]})";
 
 std::vector<std::string> ProtocolWithComputedFieldsWriterBase::previous_schemas_ = {
 };

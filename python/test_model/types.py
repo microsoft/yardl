@@ -1433,6 +1433,7 @@ class RecordWithComputedFields:
     vector_field: list[yardl.Int32]
     vector_of_vectors_field: list[list[yardl.Int32]]
     fixed_vector_field: list[yardl.Int32]
+    fixed_vector_of_vectors_field: list[list[yardl.Int32]]
     optional_named_array: typing.Optional[NamedNDArray]
     int_float_union: Int32OrFloat32
     nullable_int_float_union: typing.Optional[Int32OrFloat32]
@@ -1462,6 +1463,7 @@ class RecordWithComputedFields:
         vector_field: typing.Optional[list[yardl.Int32]] = None,
         vector_of_vectors_field: typing.Optional[list[list[yardl.Int32]]] = None,
         fixed_vector_field: typing.Optional[list[yardl.Int32]] = None,
+        fixed_vector_of_vectors_field: typing.Optional[list[list[yardl.Int32]]] = None,
         optional_named_array: typing.Optional[NamedNDArray] = None,
         int_float_union: Int32OrFloat32 = Int32OrFloat32.Int32(0),
         nullable_int_float_union: typing.Optional[Int32OrFloat32] = None,
@@ -1490,6 +1492,7 @@ class RecordWithComputedFields:
         self.vector_field = vector_field if vector_field is not None else []
         self.vector_of_vectors_field = vector_of_vectors_field if vector_of_vectors_field is not None else []
         self.fixed_vector_field = fixed_vector_field if fixed_vector_field is not None else [0] * 3
+        self.fixed_vector_of_vectors_field = fixed_vector_of_vectors_field if fixed_vector_of_vectors_field is not None else [[0] * 3 for _ in range(2)]
         self.optional_named_array = optional_named_array
         self.int_float_union = int_float_union
         self.nullable_int_float_union = nullable_int_float_union
@@ -1550,6 +1553,9 @@ class RecordWithComputedFields:
     def access_vector_of_vectors_field(self) -> yardl.Int32:
         return self.vector_of_vectors_field[1][2]
 
+    def access_fixed_vector_of_vectors_field(self) -> yardl.Int32:
+        return self.fixed_vector_of_vectors_field[1][2]
+
     def array_size(self) -> yardl.Size:
         return self.array_field.size
 
@@ -1598,6 +1604,9 @@ class RecordWithComputedFields:
 
     def fixed_vector_size(self) -> yardl.Size:
         return 3
+
+    def fixed_vector_of_vectors_size(self) -> yardl.Size:
+        return 2
 
     def array_dimension_x_index(self) -> yardl.Size:
         return 0
@@ -1779,6 +1788,7 @@ class RecordWithComputedFields:
             and self.vector_field == other.vector_field
             and self.vector_of_vectors_field == other.vector_of_vectors_field
             and self.fixed_vector_field == other.fixed_vector_field
+            and self.fixed_vector_of_vectors_field == other.fixed_vector_of_vectors_field
             and (other.optional_named_array is None if self.optional_named_array is None else (other.optional_named_array is not None and yardl.structural_equal(self.optional_named_array, other.optional_named_array)))
             and self.int_float_union == other.int_float_union
             and self.nullable_int_float_union == other.nullable_int_float_union
@@ -1787,10 +1797,10 @@ class RecordWithComputedFields:
         )
 
     def __str__(self) -> str:
-        return f"RecordWithComputedFields(arrayField={self.array_field}, arrayFieldMapDimensions={self.array_field_map_dimensions}, dynamicArrayField={self.dynamic_array_field}, fixedArrayField={self.fixed_array_field}, intField={self.int_field}, int8Field={self.int8_field}, uint8Field={self.uint8_field}, int16Field={self.int16_field}, uint16Field={self.uint16_field}, uint32Field={self.uint32_field}, int64Field={self.int64_field}, uint64Field={self.uint64_field}, sizeField={self.size_field}, float32Field={self.float32_field}, float64Field={self.float64_field}, complexfloat32Field={self.complexfloat32_field}, complexfloat64Field={self.complexfloat64_field}, stringField={self.string_field}, tupleField={self.tuple_field}, vectorField={self.vector_field}, vectorOfVectorsField={self.vector_of_vectors_field}, fixedVectorField={self.fixed_vector_field}, optionalNamedArray={self.optional_named_array}, intFloatUnion={self.int_float_union}, nullableIntFloatUnion={self.nullable_int_float_union}, unionWithNestedGenericUnion={self.union_with_nested_generic_union}, mapField={self.map_field})"
+        return f"RecordWithComputedFields(arrayField={self.array_field}, arrayFieldMapDimensions={self.array_field_map_dimensions}, dynamicArrayField={self.dynamic_array_field}, fixedArrayField={self.fixed_array_field}, intField={self.int_field}, int8Field={self.int8_field}, uint8Field={self.uint8_field}, int16Field={self.int16_field}, uint16Field={self.uint16_field}, uint32Field={self.uint32_field}, int64Field={self.int64_field}, uint64Field={self.uint64_field}, sizeField={self.size_field}, float32Field={self.float32_field}, float64Field={self.float64_field}, complexfloat32Field={self.complexfloat32_field}, complexfloat64Field={self.complexfloat64_field}, stringField={self.string_field}, tupleField={self.tuple_field}, vectorField={self.vector_field}, vectorOfVectorsField={self.vector_of_vectors_field}, fixedVectorField={self.fixed_vector_field}, fixedVectorOfVectorsField={self.fixed_vector_of_vectors_field}, optionalNamedArray={self.optional_named_array}, intFloatUnion={self.int_float_union}, nullableIntFloatUnion={self.nullable_int_float_union}, unionWithNestedGenericUnion={self.union_with_nested_generic_union}, mapField={self.map_field})"
 
     def __repr__(self) -> str:
-        return f"RecordWithComputedFields(arrayField={repr(self.array_field)}, arrayFieldMapDimensions={repr(self.array_field_map_dimensions)}, dynamicArrayField={repr(self.dynamic_array_field)}, fixedArrayField={repr(self.fixed_array_field)}, intField={repr(self.int_field)}, int8Field={repr(self.int8_field)}, uint8Field={repr(self.uint8_field)}, int16Field={repr(self.int16_field)}, uint16Field={repr(self.uint16_field)}, uint32Field={repr(self.uint32_field)}, int64Field={repr(self.int64_field)}, uint64Field={repr(self.uint64_field)}, sizeField={repr(self.size_field)}, float32Field={repr(self.float32_field)}, float64Field={repr(self.float64_field)}, complexfloat32Field={repr(self.complexfloat32_field)}, complexfloat64Field={repr(self.complexfloat64_field)}, stringField={repr(self.string_field)}, tupleField={repr(self.tuple_field)}, vectorField={repr(self.vector_field)}, vectorOfVectorsField={repr(self.vector_of_vectors_field)}, fixedVectorField={repr(self.fixed_vector_field)}, optionalNamedArray={repr(self.optional_named_array)}, intFloatUnion={repr(self.int_float_union)}, nullableIntFloatUnion={repr(self.nullable_int_float_union)}, unionWithNestedGenericUnion={repr(self.union_with_nested_generic_union)}, mapField={repr(self.map_field)})"
+        return f"RecordWithComputedFields(arrayField={repr(self.array_field)}, arrayFieldMapDimensions={repr(self.array_field_map_dimensions)}, dynamicArrayField={repr(self.dynamic_array_field)}, fixedArrayField={repr(self.fixed_array_field)}, intField={repr(self.int_field)}, int8Field={repr(self.int8_field)}, uint8Field={repr(self.uint8_field)}, int16Field={repr(self.int16_field)}, uint16Field={repr(self.uint16_field)}, uint32Field={repr(self.uint32_field)}, int64Field={repr(self.int64_field)}, uint64Field={repr(self.uint64_field)}, sizeField={repr(self.size_field)}, float32Field={repr(self.float32_field)}, float64Field={repr(self.float64_field)}, complexfloat32Field={repr(self.complexfloat32_field)}, complexfloat64Field={repr(self.complexfloat64_field)}, stringField={repr(self.string_field)}, tupleField={repr(self.tuple_field)}, vectorField={repr(self.vector_field)}, vectorOfVectorsField={repr(self.vector_of_vectors_field)}, fixedVectorField={repr(self.fixed_vector_field)}, fixedVectorOfVectorsField={repr(self.fixed_vector_of_vectors_field)}, optionalNamedArray={repr(self.optional_named_array)}, intFloatUnion={repr(self.int_float_union)}, nullableIntFloatUnion={repr(self.nullable_int_float_union)}, unionWithNestedGenericUnion={repr(self.union_with_nested_generic_union)}, mapField={repr(self.map_field)})"
 
 
 class GenericUnionWithRepeatedTypeParameters(typing.Generic[T, T_NP]):
@@ -2037,7 +2047,7 @@ def _mk_get_dtype():
     dtype_map.setdefault(typing.Optional[AliasedNullableIntSimpleRecord], np.dtype(np.object_))
     dtype_map.setdefault(Int32OrFloat32, np.dtype(np.object_))
     dtype_map.setdefault(IntOrGenericRecordWithComputedFields, np.dtype(np.object_))
-    dtype_map.setdefault(RecordWithComputedFields, np.dtype([('array_field', np.dtype(np.object_)), ('array_field_map_dimensions', np.dtype(np.object_)), ('dynamic_array_field', np.dtype(np.object_)), ('fixed_array_field', np.dtype(np.int32), (3, 4,)), ('int_field', np.dtype(np.int32)), ('int8_field', np.dtype(np.int8)), ('uint8_field', np.dtype(np.uint8)), ('int16_field', np.dtype(np.int16)), ('uint16_field', np.dtype(np.uint16)), ('uint32_field', np.dtype(np.uint32)), ('int64_field', np.dtype(np.int64)), ('uint64_field', np.dtype(np.uint64)), ('size_field', np.dtype(np.uint64)), ('float32_field', np.dtype(np.float32)), ('float64_field', np.dtype(np.float64)), ('complexfloat32_field', np.dtype(np.complex64)), ('complexfloat64_field', np.dtype(np.complex128)), ('string_field', np.dtype(np.object_)), ('tuple_field', get_dtype(types.GenericAlias(tuples.Tuple, (yardl.Int32, yardl.Int32,)))), ('vector_field', np.dtype(np.object_)), ('vector_of_vectors_field', np.dtype(np.object_)), ('fixed_vector_field', np.dtype(np.int32), (3,)), ('optional_named_array', np.dtype([('has_value', np.dtype(np.bool_)), ('value', np.dtype(np.object_))], align=True)), ('int_float_union', np.dtype(np.object_)), ('nullable_int_float_union', np.dtype(np.object_)), ('union_with_nested_generic_union', np.dtype(np.object_)), ('map_field', np.dtype(np.object_))], align=True))
+    dtype_map.setdefault(RecordWithComputedFields, np.dtype([('array_field', np.dtype(np.object_)), ('array_field_map_dimensions', np.dtype(np.object_)), ('dynamic_array_field', np.dtype(np.object_)), ('fixed_array_field', np.dtype(np.int32), (3, 4,)), ('int_field', np.dtype(np.int32)), ('int8_field', np.dtype(np.int8)), ('uint8_field', np.dtype(np.uint8)), ('int16_field', np.dtype(np.int16)), ('uint16_field', np.dtype(np.uint16)), ('uint32_field', np.dtype(np.uint32)), ('int64_field', np.dtype(np.int64)), ('uint64_field', np.dtype(np.uint64)), ('size_field', np.dtype(np.uint64)), ('float32_field', np.dtype(np.float32)), ('float64_field', np.dtype(np.float64)), ('complexfloat32_field', np.dtype(np.complex64)), ('complexfloat64_field', np.dtype(np.complex128)), ('string_field', np.dtype(np.object_)), ('tuple_field', get_dtype(types.GenericAlias(tuples.Tuple, (yardl.Int32, yardl.Int32,)))), ('vector_field', np.dtype(np.object_)), ('vector_of_vectors_field', np.dtype(np.object_)), ('fixed_vector_field', np.dtype(np.int32), (3,)), ('fixed_vector_of_vectors_field', np.dtype(np.int32), (2,)), ('optional_named_array', np.dtype([('has_value', np.dtype(np.bool_)), ('value', np.dtype(np.object_))], align=True)), ('int_float_union', np.dtype(np.object_)), ('nullable_int_float_union', np.dtype(np.object_)), ('union_with_nested_generic_union', np.dtype(np.object_)), ('map_field', np.dtype(np.object_))], align=True))
     dtype_map.setdefault(GenericUnionWithRepeatedTypeParameters, lambda type_args: np.dtype(np.object_))
     dtype_map.setdefault(GenericUnion3, lambda type_args: np.dtype(np.object_))
     dtype_map.setdefault(GenericUnion3Alternate, lambda type_args: np.dtype(np.object_))

@@ -21,6 +21,11 @@ export default defineConfig({
         activeMatch: "/cpp/",
       },
       {
+        text: "Matlab Documentation",
+        link: "/matlab/introduction",
+        activeMatch: "/matlab/",
+      },
+      {
         text: "Reference",
         link: "/reference/binary",
         activeMatch: "/reference/",
@@ -70,6 +75,26 @@ export default defineConfig({
         },
         { text: "Reference", link: "/reference/binary" },
       ],
+      "/matlab/": [
+        {
+          text: "Getting Started (Matlab)",
+          collapsed: false,
+          items: [
+            { text: "Introduction", link: "/matlab/introduction" },
+            { text: "Quick Start", link: "/matlab/quickstart" },
+          ],
+        },
+        {
+          text: "Yardl Guide (Matlab)",
+          collapsed: false,
+          items: [
+            { text: "Packages", link: "/matlab/packages" },
+            { text: "The Yardl Language", link: "/matlab/language" },
+            // { text: "Schema Evolution", link: "/matlab/evolution" },
+          ],
+        },
+        { text: "Reference", link: "/reference/binary" },
+      ],
       "/reference/": [
         {
           text: "Reference",
@@ -115,6 +140,10 @@ export default defineConfig({
 
                 if (documentId.startsWith("/yardl/python")) {
                   return ["Python"].concat(fieldValue);
+                }
+
+                if (documentId.startsWith("/yardl/matlab")) {
+                  return ["Matlab"].concat(fieldValue);
                 }
               }
 

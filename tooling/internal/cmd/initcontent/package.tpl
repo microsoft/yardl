@@ -5,3 +5,6 @@ cpp:
 
 python:
   outputDir: ../python
+
+matlab:
+  outputDir: ../matlab

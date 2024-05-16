@@ -2140,6 +2140,7 @@ class RecordWithComputedFieldsConverter(_ndjson.JsonConverter[RecordWithComputed
         self._vector_field_converter = _ndjson.VectorConverter(_ndjson.int32_converter)
         self._vector_of_vectors_field_converter = _ndjson.VectorConverter(_ndjson.VectorConverter(_ndjson.int32_converter))
         self._fixed_vector_field_converter = _ndjson.FixedVectorConverter(_ndjson.int32_converter, 3)
+        self._fixed_vector_of_vectors_field_converter = _ndjson.FixedVectorConverter(_ndjson.FixedVectorConverter(_ndjson.int32_converter, 3), 2)
         self._optional_named_array_converter = _ndjson.OptionalConverter(_ndjson.NDArrayConverter(_ndjson.int32_converter, 2))
         self._int_float_union_converter = _ndjson.UnionConverter(Int32OrFloat32, [(Int32OrFloat32.Int32, _ndjson.int32_converter, [int, float]), (Int32OrFloat32.Float32, _ndjson.float32_converter, [int, float])], False)
         self._nullable_int_float_union_converter = _ndjson.UnionConverter(Int32OrFloat32, [None, (Int32OrFloat32.Int32, _ndjson.int32_converter, [int, float]), (Int32OrFloat32.Float32, _ndjson.float32_converter, [int, float])], False)
@@ -2168,6 +2169,7 @@ class RecordWithComputedFieldsConverter(_ndjson.JsonConverter[RecordWithComputed
             ("vector_field", self._vector_field_converter.overall_dtype()),
             ("vector_of_vectors_field", self._vector_of_vectors_field_converter.overall_dtype()),
             ("fixed_vector_field", self._fixed_vector_field_converter.overall_dtype()),
+            ("fixed_vector_of_vectors_field", self._fixed_vector_of_vectors_field_converter.overall_dtype()),
             ("optional_named_array", self._optional_named_array_converter.overall_dtype()),
             ("int_float_union", self._int_float_union_converter.overall_dtype()),
             ("nullable_int_float_union", self._nullable_int_float_union_converter.overall_dtype()),
@@ -2202,6 +2204,7 @@ class RecordWithComputedFieldsConverter(_ndjson.JsonConverter[RecordWithComputed
         json_object["vectorField"] = self._vector_field_converter.to_json(value.vector_field)
         json_object["vectorOfVectorsField"] = self._vector_of_vectors_field_converter.to_json(value.vector_of_vectors_field)
         json_object["fixedVectorField"] = self._fixed_vector_field_converter.to_json(value.fixed_vector_field)
+        json_object["fixedVectorOfVectorsField"] = self._fixed_vector_of_vectors_field_converter.to_json(value.fixed_vector_of_vectors_field)
         if value.optional_named_array is not None:
             json_object["optionalNamedArray"] = self._optional_named_array_converter.to_json(value.optional_named_array)
         json_object["intFloatUnion"] = self._int_float_union_converter.to_json(value.int_float_union)
@@ -2238,6 +2241,7 @@ class RecordWithComputedFieldsConverter(_ndjson.JsonConverter[RecordWithComputed
         json_object["vectorField"] = self._vector_field_converter.numpy_to_json(value["vector_field"])
         json_object["vectorOfVectorsField"] = self._vector_of_vectors_field_converter.numpy_to_json(value["vector_of_vectors_field"])
         json_object["fixedVectorField"] = self._fixed_vector_field_converter.numpy_to_json(value["fixed_vector_field"])
+        json_object["fixedVectorOfVectorsField"] = self._fixed_vector_of_vectors_field_converter.numpy_to_json(value["fixed_vector_of_vectors_field"])
         if (field_val := value["optional_named_array"]) is not None:
             json_object["optionalNamedArray"] = self._optional_named_array_converter.numpy_to_json(field_val)
         json_object["intFloatUnion"] = self._int_float_union_converter.numpy_to_json(value["int_float_union"])
@@ -2273,6 +2277,7 @@ class RecordWithComputedFieldsConverter(_ndjson.JsonConverter[RecordWithComputed
             vector_field=self._vector_field_converter.from_json(json_object["vectorField"],),
             vector_of_vectors_field=self._vector_of_vectors_field_converter.from_json(json_object["vectorOfVectorsField"],),
             fixed_vector_field=self._fixed_vector_field_converter.from_json(json_object["fixedVectorField"],),
+            fixed_vector_of_vectors_field=self._fixed_vector_of_vectors_field_converter.from_json(json_object["fixedVectorOfVectorsField"],),
             optional_named_array=self._optional_named_array_converter.from_json(json_object.get("optionalNamedArray")),
             int_float_union=self._int_float_union_converter.from_json(json_object["intFloatUnion"],),
             nullable_int_float_union=self._nullable_int_float_union_converter.from_json(json_object.get("nullableIntFloatUnion")),
@@ -2306,6 +2311,7 @@ class RecordWithComputedFieldsConverter(_ndjson.JsonConverter[RecordWithComputed
             self._vector_field_converter.from_json_to_numpy(json_object["vectorField"]),
             self._vector_of_vectors_field_converter.from_json_to_numpy(json_object["vectorOfVectorsField"]),
             self._fixed_vector_field_converter.from_json_to_numpy(json_object["fixedVectorField"]),
+            self._fixed_vector_of_vectors_field_converter.from_json_to_numpy(json_object["fixedVectorOfVectorsField"]),
             self._optional_named_array_converter.from_json_to_numpy(json_object.get("optionalNamedArray")),
             self._int_float_union_converter.from_json_to_numpy(json_object["intFloatUnion"]),
             self._nullable_int_float_union_converter.from_json_to_numpy(json_object.get("nullableIntFloatUnion")),
@@ -3333,6 +3339,45 @@ class NDJsonDynamicNDArraysReader(_ndjson.NDJsonProtocolReader, DynamicNDArraysR
         json_object = self._read_json_line("recordWithDynamicNDArrays", True)
         converter = RecordWithDynamicNDArraysConverter()
         return converter.from_json(json_object)
+
+class NDJsonMultiDArraysWriter(_ndjson.NDJsonProtocolWriter, MultiDArraysWriterBase):
+    """NDJson writer for the MultiDArrays protocol."""
+
+
+    def __init__(self, stream: typing.Union[typing.TextIO, str]) -> None:
+        MultiDArraysWriterBase.__init__(self)
+        _ndjson.NDJsonProtocolWriter.__init__(self, stream, MultiDArraysWriterBase.schema)
+
+    def _write_images(self, value: collections.abc.Iterable[npt.NDArray[np.float32]]) -> None:
+        converter = _ndjson.NDArrayConverter(_ndjson.float32_converter, 4)
+        for item in value:
+            json_item = converter.to_json(item)
+            self._write_json_line({"images": json_item})
+
+    def _write_frames(self, value: collections.abc.Iterable[npt.NDArray[np.float32]]) -> None:
+        converter = _ndjson.FixedNDArrayConverter(_ndjson.float32_converter, (1, 1, 64, 32,))
+        for item in value:
+            json_item = converter.to_json(item)
+            self._write_json_line({"frames": json_item})
+
+
+class NDJsonMultiDArraysReader(_ndjson.NDJsonProtocolReader, MultiDArraysReaderBase):
+    """NDJson writer for the MultiDArrays protocol."""
+
+
+    def __init__(self, stream: typing.Union[io.BufferedReader, typing.TextIO, str]) -> None:
+        MultiDArraysReaderBase.__init__(self)
+        _ndjson.NDJsonProtocolReader.__init__(self, stream, MultiDArraysReaderBase.schema)
+
+    def _read_images(self) -> collections.abc.Iterable[npt.NDArray[np.float32]]:
+        converter = _ndjson.NDArrayConverter(_ndjson.float32_converter, 4)
+        while (json_object := self._read_json_line("images", False)) is not _ndjson.MISSING_SENTINEL:
+            yield converter.from_json(json_object)
+
+    def _read_frames(self) -> collections.abc.Iterable[npt.NDArray[np.float32]]:
+        converter = _ndjson.FixedNDArrayConverter(_ndjson.float32_converter, (1, 1, 64, 32,))
+        while (json_object := self._read_json_line("frames", False)) is not _ndjson.MISSING_SENTINEL:
+            yield converter.from_json(json_object)
 
 class NDJsonMapsWriter(_ndjson.NDJsonProtocolWriter, MapsWriterBase):
     """NDJson writer for the Maps protocol."""

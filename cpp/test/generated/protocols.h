@@ -1563,6 +1563,98 @@ class DynamicNDArraysReaderBase {
   uint8_t state_ = 0;
 };
 
+// Abstract writer for the MultiDArrays protocol.
+class MultiDArraysWriterBase {
+  public:
+  // Ordinal 0.
+  // Call this method for each element of the `images` stream, then call `EndImages() when done.`
+  void WriteImages(yardl::NDArray<float, 4> const& value);
+
+  // Ordinal 0.
+  // Call this method to write many values to the `images` stream, then call `EndImages()` when done.
+  void WriteImages(std::vector<yardl::NDArray<float, 4>> const& values);
+
+  // Marks the end of the `images` stream.
+  void EndImages();
+
+  // Ordinal 1.
+  // Call this method for each element of the `frames` stream, then call `EndFrames() when done.`
+  void WriteFrames(yardl::FixedNDArray<float, 1, 1, 64, 32> const& value);
+
+  // Ordinal 1.
+  // Call this method to write many values to the `frames` stream, then call `EndFrames()` when done.
+  void WriteFrames(std::vector<yardl::FixedNDArray<float, 1, 1, 64, 32>> const& values);
+
+  // Marks the end of the `frames` stream.
+  void EndFrames();
+
+  // Optionaly close this writer before destructing. Validates that all steps were completed.
+  void Close();
+
+  virtual ~MultiDArraysWriterBase() = default;
+
+  // Flushes all buffered data.
+  virtual void Flush() {}
+
+  protected:
+  virtual void WriteImagesImpl(yardl::NDArray<float, 4> const& value) = 0;
+  virtual void WriteImagesImpl(std::vector<yardl::NDArray<float, 4>> const& value);
+  virtual void EndImagesImpl() = 0;
+  virtual void WriteFramesImpl(yardl::FixedNDArray<float, 1, 1, 64, 32> const& value) = 0;
+  virtual void WriteFramesImpl(std::vector<yardl::FixedNDArray<float, 1, 1, 64, 32>> const& value);
+  virtual void EndFramesImpl() = 0;
+  virtual void CloseImpl() {}
+
+  static std::string schema_;
+
+  static std::vector<std::string> previous_schemas_;
+
+  static std::string SchemaFromVersion(Version version);
+
+  private:
+  uint8_t state_ = 0;
+
+  friend class MultiDArraysReaderBase;
+};
+
+// Abstract reader for the MultiDArrays protocol.
+class MultiDArraysReaderBase {
+  public:
+  // Ordinal 0.
+  [[nodiscard]] bool ReadImages(yardl::NDArray<float, 4>& value);
+
+  // Ordinal 0.
+  [[nodiscard]] bool ReadImages(std::vector<yardl::NDArray<float, 4>>& values);
+
+  // Ordinal 1.
+  [[nodiscard]] bool ReadFrames(yardl::FixedNDArray<float, 1, 1, 64, 32>& value);
+
+  // Ordinal 1.
+  [[nodiscard]] bool ReadFrames(std::vector<yardl::FixedNDArray<float, 1, 1, 64, 32>>& values);
+
+  // Optionaly close this writer before destructing. Validates that all steps were completely read.
+  void Close();
+
+  void CopyTo(MultiDArraysWriterBase& writer, size_t images_buffer_size = 1, size_t frames_buffer_size = 1);
+
+  virtual ~MultiDArraysReaderBase() = default;
+
+  protected:
+  virtual bool ReadImagesImpl(yardl::NDArray<float, 4>& value) = 0;
+  virtual bool ReadImagesImpl(std::vector<yardl::NDArray<float, 4>>& values);
+  virtual bool ReadFramesImpl(yardl::FixedNDArray<float, 1, 1, 64, 32>& value) = 0;
+  virtual bool ReadFramesImpl(std::vector<yardl::FixedNDArray<float, 1, 1, 64, 32>>& values);
+  virtual void CloseImpl() {}
+  static std::string schema_;
+
+  static std::vector<std::string> previous_schemas_;
+
+  static Version VersionFromSchema(const std::string& schema);
+
+  private:
+  uint8_t state_ = 0;
+};
+
 // Abstract writer for the Maps protocol.
 class MapsWriterBase {
   public:
