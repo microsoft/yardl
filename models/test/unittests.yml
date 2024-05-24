@@ -304,6 +304,11 @@ MultiDArrays: !protocol
     frames: !stream
       items: float[ch:1, z:1, y:64, x:32]
 
+ComplexArrays: !protocol
+  sequence:
+    floats: complexfloat32[]
+    doubles: complexfloat64[,]
+
 Maps: !protocol
   sequence:
     stringToInt: string->int

@@ -1655,6 +1655,70 @@ class MultiDArraysReaderBase {
   uint8_t state_ = 0;
 };
 
+// Abstract writer for the ComplexArrays protocol.
+class ComplexArraysWriterBase {
+  public:
+  // Ordinal 0.
+  void WriteFloats(yardl::DynamicNDArray<std::complex<float>> const& value);
+
+  // Ordinal 1.
+  void WriteDoubles(yardl::NDArray<std::complex<double>, 2> const& value);
+
+  // Optionaly close this writer before destructing. Validates that all steps were completed.
+  void Close();
+
+  virtual ~ComplexArraysWriterBase() = default;
+
+  // Flushes all buffered data.
+  virtual void Flush() {}
+
+  protected:
+  virtual void WriteFloatsImpl(yardl::DynamicNDArray<std::complex<float>> const& value) = 0;
+  virtual void WriteDoublesImpl(yardl::NDArray<std::complex<double>, 2> const& value) = 0;
+  virtual void CloseImpl() {}
+
+  static std::string schema_;
+
+  static std::vector<std::string> previous_schemas_;
+
+  static std::string SchemaFromVersion(Version version);
+
+  private:
+  uint8_t state_ = 0;
+
+  friend class ComplexArraysReaderBase;
+};
+
+// Abstract reader for the ComplexArrays protocol.
+class ComplexArraysReaderBase {
+  public:
+  // Ordinal 0.
+  void ReadFloats(yardl::DynamicNDArray<std::complex<float>>& value);
+
+  // Ordinal 1.
+  void ReadDoubles(yardl::NDArray<std::complex<double>, 2>& value);
+
+  // Optionaly close this writer before destructing. Validates that all steps were completely read.
+  void Close();
+
+  void CopyTo(ComplexArraysWriterBase& writer);
+
+  virtual ~ComplexArraysReaderBase() = default;
+
+  protected:
+  virtual void ReadFloatsImpl(yardl::DynamicNDArray<std::complex<float>>& value) = 0;
+  virtual void ReadDoublesImpl(yardl::NDArray<std::complex<double>, 2>& value) = 0;
+  virtual void CloseImpl() {}
+  static std::string schema_;
+
+  static std::vector<std::string> previous_schemas_;
+
+  static Version VersionFromSchema(const std::string& schema);
+
+  private:
+  uint8_t state_ = 0;
+};
+
 // Abstract writer for the Maps protocol.
 class MapsWriterBase {
   public:

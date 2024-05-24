@@ -3936,6 +3936,164 @@ class MultiDArraysReaderBase(abc.ABC):
             return 'read_frames'
         return "<unknown>"
 
+class ComplexArraysWriterBase(abc.ABC):
+    """Abstract writer for the ComplexArrays protocol."""
+
+
+    def __init__(self) -> None:
+        self._state = 0
+
+    schema = r"""{"protocol":{"name":"ComplexArrays","sequence":[{"name":"floats","type":{"array":{"items":"complexfloat32"}}},{"name":"doubles","type":{"array":{"items":"complexfloat64","dimensions":2}}}]},"types":null}"""
+
+    def close(self) -> None:
+        self._close()
+        if self._state != 4:
+            expected_method = self._state_to_method_name((self._state + 1) & ~1)
+            raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
+        try:
+            self.close()
+        except Exception as e:
+            if exc is None:
+                raise e
+
+    def write_floats(self, value: npt.NDArray[np.complex64]) -> None:
+        """Ordinal 0"""
+
+        if self._state != 0:
+            self._raise_unexpected_state(0)
+
+        self._write_floats(value)
+        self._state = 2
+
+    def write_doubles(self, value: npt.NDArray[np.complex128]) -> None:
+        """Ordinal 1"""
+
+        if self._state != 2:
+            self._raise_unexpected_state(2)
+
+        self._write_doubles(value)
+        self._state = 4
+
+    @abc.abstractmethod
+    def _write_floats(self, value: npt.NDArray[np.complex64]) -> None:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _write_doubles(self, value: npt.NDArray[np.complex128]) -> None:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _close(self) -> None:
+        pass
+
+    @abc.abstractmethod
+    def _end_stream(self) -> None:
+        pass
+
+    def _raise_unexpected_state(self, actual: int) -> None:
+        expected_method = self._state_to_method_name(self._state)
+        actual_method = self._state_to_method_name(actual)
+        raise ProtocolError(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
+
+    def _state_to_method_name(self, state: int) -> str:
+        if state == 0:
+            return 'write_floats'
+        if state == 2:
+            return 'write_doubles'
+        return "<unknown>"
+
+class ComplexArraysReaderBase(abc.ABC):
+    """Abstract reader for the ComplexArrays protocol."""
+
+
+    def __init__(self) -> None:
+        self._state = 0
+
+    def close(self) -> None:
+        self._close()
+        if self._state != 4:
+            if self._state % 2 == 1:
+                previous_method = self._state_to_method_name(self._state - 1)
+                raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
+            else:
+                expected_method = self._state_to_method_name(self._state)
+                raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
+            	
+
+    schema = ComplexArraysWriterBase.schema
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
+        try:
+            self.close()
+        except Exception as e:
+            if exc is None:
+                raise e
+
+    @abc.abstractmethod
+    def _close(self) -> None:
+        raise NotImplementedError()
+
+    def read_floats(self) -> npt.NDArray[np.complex64]:
+        """Ordinal 0"""
+
+        if self._state != 0:
+            self._raise_unexpected_state(0)
+
+        value = self._read_floats()
+        self._state = 2
+        return value
+
+    def read_doubles(self) -> npt.NDArray[np.complex128]:
+        """Ordinal 1"""
+
+        if self._state != 2:
+            self._raise_unexpected_state(2)
+
+        value = self._read_doubles()
+        self._state = 4
+        return value
+
+    def copy_to(self, writer: ComplexArraysWriterBase) -> None:
+        writer.write_floats(self.read_floats())
+        writer.write_doubles(self.read_doubles())
+
+    @abc.abstractmethod
+    def _read_floats(self) -> npt.NDArray[np.complex64]:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _read_doubles(self) -> npt.NDArray[np.complex128]:
+        raise NotImplementedError()
+
+    T = typing.TypeVar('T')
+    def _wrap_iterable(self, iterable: collections.abc.Iterable[T], final_state: int) -> collections.abc.Iterable[T]:
+        yield from iterable
+        self._state = final_state
+
+    def _raise_unexpected_state(self, actual: int) -> None:
+        actual_method = self._state_to_method_name(actual)
+        if self._state % 2 == 1:
+            previous_method = self._state_to_method_name(self._state - 1)
+            raise ProtocolError(f"Received call to '{actual_method}' but the iterable returned by '{previous_method}' was not fully consumed.")
+        else:
+            expected_method = self._state_to_method_name(self._state)
+            raise ProtocolError(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
+        	
+    def _state_to_method_name(self, state: int) -> str:
+        if state == 0:
+            return 'read_floats'
+        if state == 2:
+            return 'read_doubles'
+        return "<unknown>"
+
 class MapsWriterBase(abc.ABC):
     """Abstract writer for the Maps protocol."""
 

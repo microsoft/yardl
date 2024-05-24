@@ -628,6 +628,9 @@ class Complex32Serializer(StructSerializer[ComplexFloat, np.complex64]):
     def write(self, stream: CodedOutputStream, value: ComplexFloat) -> None:
         stream.write(self._struct, value.real, value.imag)
 
+    def write_numpy(self, stream: CodedOutputStream, value: np.complex64) -> None:
+        stream.write(self._struct, value.real, value.imag)
+
     def read(self, stream: CodedInputStream) -> ComplexFloat:
         return ComplexFloat(*stream.read(self._struct))
 
@@ -647,6 +650,9 @@ class Complex64Serializer(StructSerializer[ComplexDouble, np.complex128]):
         super().__init__(np.complex128, "<dd")
 
     def write(self, stream: CodedOutputStream, value: ComplexDouble) -> None:
+        stream.write(self._struct, value.real, value.imag)
+
+    def write_numpy(self, stream: CodedOutputStream, value: np.complex128) -> None:
         stream.write(self._struct, value.real, value.imag)
 
     def read(self, stream: CodedInputStream) -> ComplexDouble:

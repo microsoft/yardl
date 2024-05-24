@@ -700,6 +700,31 @@ class MultiDArraysReader : public test_model::MultiDArraysReaderBase, public yar
   std::unique_ptr<yardl::hdf5::DatasetReader> frames_dataset_state_;
 };
 
+// HDF5 writer for the ComplexArrays protocol.
+class ComplexArraysWriter : public test_model::ComplexArraysWriterBase, public yardl::hdf5::Hdf5Writer {
+  public:
+  ComplexArraysWriter(std::string path);
+
+  protected:
+  void WriteFloatsImpl(yardl::DynamicNDArray<std::complex<float>> const& value) override;
+
+  void WriteDoublesImpl(yardl::NDArray<std::complex<double>, 2> const& value) override;
+
+  private:
+};
+
+// HDF5 reader for the ComplexArrays protocol.
+class ComplexArraysReader : public test_model::ComplexArraysReaderBase, public yardl::hdf5::Hdf5Reader {
+  public:
+  ComplexArraysReader(std::string path);
+
+  void ReadFloatsImpl(yardl::DynamicNDArray<std::complex<float>>& value) override;
+
+  void ReadDoublesImpl(yardl::NDArray<std::complex<double>, 2>& value) override;
+
+  private:
+};
+
 // HDF5 writer for the Maps protocol.
 class MapsWriter : public test_model::MapsWriterBase, public yardl::hdf5::Hdf5Writer {
   public:

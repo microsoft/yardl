@@ -213,6 +213,21 @@ def test_fixed_arrays(format: Format):
         w.write_named_array(named_fixed_array)
 
 
+def test_complex_arrays(format: Format):
+    with create_validating_writer_class(format, tm.ComplexArraysWriterBase)() as w:
+        fs = np.zeros((2, 16), dtype=np.complex64)
+        w.write_floats(fs)
+        ds = np.zeros((2, 16), dtype=np.complex128)
+        w.write_doubles(ds)
+
+    # Again but with arrays in Fortran order
+    with create_validating_writer_class(format, tm.ComplexArraysWriterBase)() as w:
+        fs = np.zeros((2, 16), dtype=np.complex64, order="F")
+        w.write_floats(fs)
+        ds = np.zeros((2, 16), dtype=np.complex128, order="F")
+        w.write_doubles(ds)
+
+
 def test_subarrays(format: Format):
     with create_validating_writer_class(format, tm.SubarraysWriterBase)() as w:
         with pytest.raises(

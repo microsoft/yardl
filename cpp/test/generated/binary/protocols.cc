@@ -3534,6 +3534,34 @@ void MultiDArraysReader::CloseImpl() {
   stream_.VerifyFinished();
 }
 
+void ComplexArraysWriter::WriteFloatsImpl(yardl::DynamicNDArray<std::complex<float>> const& value) {
+  yardl::binary::WriteDynamicNDArray<std::complex<float>, yardl::binary::WriteFloatingPoint>(stream_, value);
+}
+
+void ComplexArraysWriter::WriteDoublesImpl(yardl::NDArray<std::complex<double>, 2> const& value) {
+  yardl::binary::WriteNDArray<std::complex<double>, yardl::binary::WriteFloatingPoint, 2>(stream_, value);
+}
+
+void ComplexArraysWriter::Flush() {
+  stream_.Flush();
+}
+
+void ComplexArraysWriter::CloseImpl() {
+  stream_.Flush();
+}
+
+void ComplexArraysReader::ReadFloatsImpl(yardl::DynamicNDArray<std::complex<float>>& value) {
+  yardl::binary::ReadDynamicNDArray<std::complex<float>, yardl::binary::ReadFloatingPoint>(stream_, value);
+}
+
+void ComplexArraysReader::ReadDoublesImpl(yardl::NDArray<std::complex<double>, 2>& value) {
+  yardl::binary::ReadNDArray<std::complex<double>, yardl::binary::ReadFloatingPoint, 2>(stream_, value);
+}
+
+void ComplexArraysReader::CloseImpl() {
+  stream_.VerifyFinished();
+}
+
 void MapsWriter::WriteStringToIntImpl(std::unordered_map<std::string, int32_t> const& value) {
   yardl::binary::WriteMap<std::string, int32_t, yardl::binary::WriteString, yardl::binary::WriteInteger>(stream_, value);
 }
