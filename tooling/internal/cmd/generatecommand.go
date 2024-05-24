@@ -43,7 +43,7 @@ func newGenerateCommand() *cobra.Command {
 				if err != nil {
 					// avoiding returning the error here because
 					// cobra prefixes the error with "Error: "
-					fmt.Fprintln(os.Stderr, err)
+					log.Error().Msg(err.Error())
 					os.Exit(1)
 				}
 
@@ -139,11 +139,10 @@ func generateInWatchMode() []string {
 	screen.Clear()
 	screen.MoveTopLeft()
 
-	fmt.Printf("Validated model package '%s' at %v.\n\n", packageInfo.Namespace, time.Now().Format("15:04:05"))
-
 	if err != nil {
-		fmt.Println(err)
+		log.Error().Msg(err.Error())
 	} else {
+		fmt.Printf("Validated model package '%s' at %v.\n\n", packageInfo.Namespace, time.Now().Format("15:04:05"))
 		for _, warning := range warnings {
 			log.Warn().Msg(warning)
 		}
