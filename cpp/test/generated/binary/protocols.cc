@@ -1840,6 +1840,24 @@ template<typename T1, yardl::binary::Reader<T1> ReadT1, typename T2, yardl::bina
   test_model::binary::ReadFruits(stream, value);
 }
 
+[[maybe_unused]] void WriteAliasedSimpleRecord(yardl::binary::CodedOutputStream& stream, test_model::AliasedSimpleRecord const& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<test_model::AliasedSimpleRecord>::value) {
+    yardl::binary::WriteTriviallySerializable(stream, value);
+    return;
+  }
+
+  test_model::binary::WriteSimpleRecord(stream, value);
+}
+
+[[maybe_unused]] void ReadAliasedSimpleRecord(yardl::binary::CodedInputStream& stream, test_model::AliasedSimpleRecord& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<test_model::AliasedSimpleRecord>::value) {
+    yardl::binary::ReadTriviallySerializable(stream, value);
+    return;
+  }
+
+  test_model::binary::ReadSimpleRecord(stream, value);
+}
+
 template<typename T1, yardl::binary::Writer<T1> WriteT1, typename T2, yardl::binary::Writer<T2> WriteT2>
 [[maybe_unused]] void WriteAliasedOpenGeneric(yardl::binary::CodedOutputStream& stream, test_model::AliasedOpenGeneric<T1, T2> const& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<test_model::AliasedOpenGeneric<T1, T2>>::value) {
@@ -2392,6 +2410,24 @@ template<typename A, yardl::binary::Reader<A> ReadA, typename B, yardl::binary::
   }
 
   ReadUnion<int32_t, yardl::binary::ReadInteger, test_model::SimpleRecord, test_model::binary::ReadSimpleRecord>(stream, value);
+}
+
+[[maybe_unused]] void WriteAliasedIntOrAliasedSimpleRecord(yardl::binary::CodedOutputStream& stream, test_model::AliasedIntOrAliasedSimpleRecord const& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<test_model::AliasedIntOrAliasedSimpleRecord>::value) {
+    yardl::binary::WriteTriviallySerializable(stream, value);
+    return;
+  }
+
+  WriteUnion<int32_t, yardl::binary::WriteInteger, test_model::AliasedSimpleRecord, test_model::binary::WriteAliasedSimpleRecord>(stream, value);
+}
+
+[[maybe_unused]] void ReadAliasedIntOrAliasedSimpleRecord(yardl::binary::CodedInputStream& stream, test_model::AliasedIntOrAliasedSimpleRecord& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<test_model::AliasedIntOrAliasedSimpleRecord>::value) {
+    yardl::binary::ReadTriviallySerializable(stream, value);
+    return;
+  }
+
+  ReadUnion<int32_t, yardl::binary::ReadInteger, test_model::AliasedSimpleRecord, test_model::binary::ReadAliasedSimpleRecord>(stream, value);
 }
 
 [[maybe_unused]] void WriteAliasedNullableIntSimpleRecord(yardl::binary::CodedOutputStream& stream, test_model::AliasedNullableIntSimpleRecord const& value) {

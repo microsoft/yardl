@@ -657,6 +657,8 @@ using AliasedString = std::string;
 
 using AliasedEnum = test_model::Fruits;
 
+using AliasedSimpleRecord = test_model::SimpleRecord;
+
 template <typename T1, typename T2>
 using AliasedOpenGeneric = test_model::AliasedTuple<T1, T2>;
 
@@ -882,6 +884,8 @@ struct RecordContainingNestedGenericRecords {
 };
 
 using AliasedIntOrSimpleRecord = std::variant<int32_t, test_model::SimpleRecord>;
+
+using AliasedIntOrAliasedSimpleRecord = std::variant<int32_t, test_model::AliasedSimpleRecord>;
 
 using AliasedNullableIntSimpleRecord = std::variant<std::monostate, int32_t, test_model::SimpleRecord>;
 

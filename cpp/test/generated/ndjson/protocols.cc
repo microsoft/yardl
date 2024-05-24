@@ -678,21 +678,21 @@ struct adl_serializer<std::variant<int32_t, float, std::string>> {
 };
 
 template <>
-struct adl_serializer<std::variant<test_model::SimpleAcquisition, image::Image<float>>> {
-  static void to_json(ordered_json& j, std::variant<test_model::SimpleAcquisition, image::Image<float>> const& value) {
+struct adl_serializer<std::variant<test_model::SimpleAcquisition, yardl::NDArray<float, 2>>> {
+  static void to_json(ordered_json& j, std::variant<test_model::SimpleAcquisition, yardl::NDArray<float, 2>> const& value) {
     switch (value.index()) {
       case 0:
         j = ordered_json{ {"acquisition", std::get<test_model::SimpleAcquisition>(value)} };
         break;
       case 1:
-        j = ordered_json{ {"image", std::get<image::Image<float>>(value)} };
+        j = ordered_json{ {"image", std::get<yardl::NDArray<float, 2>>(value)} };
         break;
       default:
         throw std::runtime_error("Invalid union value");
     }
   }
 
-  static void from_json(ordered_json const& j, std::variant<test_model::SimpleAcquisition, image::Image<float>>& value) {
+  static void from_json(ordered_json const& j, std::variant<test_model::SimpleAcquisition, yardl::NDArray<float, 2>>& value) {
     auto it = j.begin();
     std::string tag = it.key();
     if (tag == "acquisition") {
@@ -700,7 +700,7 @@ struct adl_serializer<std::variant<test_model::SimpleAcquisition, image::Image<f
       return;
     }
     if (tag == "image") {
-      value = it.value().get<image::Image<float>>();
+      value = it.value().get<yardl::NDArray<float, 2>>();
       return;
     }
   }
@@ -745,58 +745,58 @@ struct adl_serializer<std::variant<int32_t, test_model::RecordWithVlens>> {
 };
 
 template <>
-struct adl_serializer<std::variant<image::FloatImage, test_model::Image<double>>> {
-  static void to_json(ordered_json& j, std::variant<image::FloatImage, test_model::Image<double>> const& value) {
+struct adl_serializer<std::variant<yardl::NDArray<float, 2>, yardl::NDArray<double, 2>>> {
+  static void to_json(ordered_json& j, std::variant<yardl::NDArray<float, 2>, yardl::NDArray<double, 2>> const& value) {
     switch (value.index()) {
       case 0:
-        j = ordered_json{ {"imageFloat", std::get<image::FloatImage>(value)} };
+        j = ordered_json{ {"imageFloat", std::get<yardl::NDArray<float, 2>>(value)} };
         break;
       case 1:
-        j = ordered_json{ {"imageDouble", std::get<test_model::Image<double>>(value)} };
+        j = ordered_json{ {"imageDouble", std::get<yardl::NDArray<double, 2>>(value)} };
         break;
       default:
         throw std::runtime_error("Invalid union value");
     }
   }
 
-  static void from_json(ordered_json const& j, std::variant<image::FloatImage, test_model::Image<double>>& value) {
+  static void from_json(ordered_json const& j, std::variant<yardl::NDArray<float, 2>, yardl::NDArray<double, 2>>& value) {
     auto it = j.begin();
     std::string tag = it.key();
     if (tag == "imageFloat") {
-      value = it.value().get<image::FloatImage>();
+      value = it.value().get<yardl::NDArray<float, 2>>();
       return;
     }
     if (tag == "imageDouble") {
-      value = it.value().get<test_model::Image<double>>();
+      value = it.value().get<yardl::NDArray<double, 2>>();
       return;
     }
   }
 };
 
 template <>
-struct adl_serializer<std::variant<test_model::AliasedString, test_model::AliasedEnum>> {
-  static void to_json(ordered_json& j, std::variant<test_model::AliasedString, test_model::AliasedEnum> const& value) {
+struct adl_serializer<std::variant<std::string, basic_types::Fruits>> {
+  static void to_json(ordered_json& j, std::variant<std::string, basic_types::Fruits> const& value) {
     switch (value.index()) {
       case 0:
-        j = ordered_json{ {"T1", std::get<test_model::AliasedString>(value)} };
+        j = ordered_json{ {"T1", std::get<std::string>(value)} };
         break;
       case 1:
-        j = ordered_json{ {"T2", std::get<test_model::AliasedEnum>(value)} };
+        j = ordered_json{ {"T2", std::get<basic_types::Fruits>(value)} };
         break;
       default:
         throw std::runtime_error("Invalid union value");
     }
   }
 
-  static void from_json(ordered_json const& j, std::variant<test_model::AliasedString, test_model::AliasedEnum>& value) {
+  static void from_json(ordered_json const& j, std::variant<std::string, basic_types::Fruits>& value) {
     auto it = j.begin();
     std::string tag = it.key();
     if (tag == "T1") {
-      value = it.value().get<test_model::AliasedString>();
+      value = it.value().get<std::string>();
       return;
     }
     if (tag == "T2") {
-      value = it.value().get<test_model::AliasedEnum>();
+      value = it.value().get<basic_types::Fruits>();
       return;
     }
   }
