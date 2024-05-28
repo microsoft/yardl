@@ -1003,6 +1003,8 @@ AliasedString = str
 
 AliasedEnum = Fruits
 
+AliasedSimpleRecord = SimpleRecord
+
 AliasedOpenGeneric = AliasedTuple
 
 AliasedClosedGeneric = AliasedTuple[AliasedString, AliasedEnum]
@@ -1376,6 +1378,17 @@ class AliasedIntOrSimpleRecordUnionCase(AliasedIntOrSimpleRecord, yardl.UnionCas
 AliasedIntOrSimpleRecord.Int32 = type("AliasedIntOrSimpleRecord.Int32", (AliasedIntOrSimpleRecordUnionCase,), {"index": 0, "tag": "int32"})
 AliasedIntOrSimpleRecord.SimpleRecord = type("AliasedIntOrSimpleRecord.SimpleRecord", (AliasedIntOrSimpleRecordUnionCase,), {"index": 1, "tag": "SimpleRecord"})
 del AliasedIntOrSimpleRecordUnionCase
+
+class AliasedIntOrAliasedSimpleRecord:
+    Int32: typing.ClassVar[type["AliasedIntOrAliasedSimpleRecordUnionCase[yardl.Int32]"]]
+    AliasedSimpleRecord: typing.ClassVar[type["AliasedIntOrAliasedSimpleRecordUnionCase[AliasedSimpleRecord]"]]
+
+class AliasedIntOrAliasedSimpleRecordUnionCase(AliasedIntOrAliasedSimpleRecord, yardl.UnionCase[_T]):
+    pass
+
+AliasedIntOrAliasedSimpleRecord.Int32 = type("AliasedIntOrAliasedSimpleRecord.Int32", (AliasedIntOrAliasedSimpleRecordUnionCase,), {"index": 0, "tag": "int32"})
+AliasedIntOrAliasedSimpleRecord.AliasedSimpleRecord = type("AliasedIntOrAliasedSimpleRecord.AliasedSimpleRecord", (AliasedIntOrAliasedSimpleRecordUnionCase,), {"index": 1, "tag": "AliasedSimpleRecord"})
+del AliasedIntOrAliasedSimpleRecordUnionCase
 
 class AliasedNullableIntSimpleRecord:
     Int32: typing.ClassVar[type["AliasedNullableIntSimpleRecordUnionCase[yardl.Int32]"]]
@@ -2023,6 +2036,7 @@ def _mk_get_dtype():
     dtype_map.setdefault(RecordWithAliasedGenerics, np.dtype([('my_strings', get_dtype(types.GenericAlias(tuples.Tuple, (str, str,)))), ('aliased_strings', get_dtype(types.GenericAlias(tuples.Tuple, (str, str,))))], align=True))
     dtype_map.setdefault(AliasedString, np.dtype(np.object_))
     dtype_map.setdefault(AliasedEnum, get_dtype(basic_types.Fruits))
+    dtype_map.setdefault(AliasedSimpleRecord, get_dtype(SimpleRecord))
     dtype_map.setdefault(AliasedOpenGeneric, lambda type_args: get_dtype(types.GenericAlias(tuples.Tuple, (type_args[0], type_args[1],))))
     dtype_map.setdefault(AliasedClosedGeneric, get_dtype(types.GenericAlias(tuples.Tuple, (AliasedString, AliasedEnum,))))
     dtype_map.setdefault(AliasedOptional, np.dtype([('has_value', np.dtype(np.bool_)), ('value', np.dtype(np.int32))], align=True))
@@ -2043,6 +2057,7 @@ def _mk_get_dtype():
     dtype_map.setdefault(RecordContainingGenericRecords, lambda type_args: np.dtype([('g1', get_dtype(types.GenericAlias(RecordWithOptionalGenericField, (type_args[0],)))), ('g1a', get_dtype(types.GenericAlias(RecordWithAliasedOptionalGenericField, (type_args[0],)))), ('g2', get_dtype(types.GenericAlias(RecordWithOptionalGenericUnionField, (type_args[0], type_args[1],)))), ('g2a', get_dtype(types.GenericAlias(RecordWithAliasedOptionalGenericUnionField, (type_args[0], type_args[1],)))), ('g3', get_dtype(types.GenericAlias(tuples.Tuple, (type_args[0], type_args[1],)))), ('g3a', get_dtype(types.GenericAlias(tuples.Tuple, (type_args[0], type_args[1],)))), ('g4', get_dtype(types.GenericAlias(RecordWithGenericVectors, (type_args[1],)))), ('g5', get_dtype(types.GenericAlias(RecordWithGenericFixedVectors, (type_args[1],)))), ('g6', get_dtype(types.GenericAlias(RecordWithGenericArrays, (type_args[1],)))), ('g7', get_dtype(types.GenericAlias(RecordWithGenericMaps, (type_args[0], type_args[1],))))], align=True))
     dtype_map.setdefault(RecordContainingNestedGenericRecords, np.dtype([('f1', get_dtype(types.GenericAlias(RecordWithOptionalGenericField, (str,)))), ('f1a', get_dtype(types.GenericAlias(RecordWithAliasedOptionalGenericField, (str,)))), ('f2', get_dtype(types.GenericAlias(RecordWithOptionalGenericUnionField, (str, yardl.Int32,)))), ('f2a', get_dtype(types.GenericAlias(RecordWithAliasedOptionalGenericUnionField, (str, yardl.Int32,)))), ('nested', get_dtype(types.GenericAlias(RecordContainingGenericRecords, (str, yardl.Int32,))))], align=True))
     dtype_map.setdefault(AliasedIntOrSimpleRecord, np.dtype(np.object_))
+    dtype_map.setdefault(AliasedIntOrAliasedSimpleRecord, np.dtype(np.object_))
     dtype_map.setdefault(AliasedNullableIntSimpleRecord, np.dtype(np.object_))
     dtype_map.setdefault(typing.Optional[AliasedNullableIntSimpleRecord], np.dtype(np.object_))
     dtype_map.setdefault(Int32OrFloat32, np.dtype(np.object_))

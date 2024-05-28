@@ -94,6 +94,9 @@ func WriteNdJson(env *dsl.Environment, options packaging.CppCodegenOptions) erro
 			self.Visit(t.ResolvedDefinition)
 		case *dsl.GeneralizedType:
 			if t.Cases.IsUnion() {
+				// Convert the union cases to their u types so we don't generate
+				// duplicate `adl_serializer` specializations for the same type.
+				t = dsl.ToUnionOfUnderlyingTypes(t)
 				scalarType := dsl.NormalizeGenericTypeParameters(t.ToScalar()).(*dsl.GeneralizedType)
 				typeSyntax := common.TypeSyntax(scalarType)
 				if _, ok := unionsBySyntax[typeSyntax]; !ok {

@@ -87,21 +87,21 @@ struct adl_serializer<std::variant<evo_test::RecordWithChanges, std::string>> {
 };
 
 template <>
-struct adl_serializer<std::variant<evo_test::RecordWithChanges, evo_test::RenamedRecord>> {
-  static void to_json(ordered_json& j, std::variant<evo_test::RecordWithChanges, evo_test::RenamedRecord> const& value) {
+struct adl_serializer<std::variant<evo_test::RecordWithChanges, evo_test::DeprecatedRecord>> {
+  static void to_json(ordered_json& j, std::variant<evo_test::RecordWithChanges, evo_test::DeprecatedRecord> const& value) {
     switch (value.index()) {
       case 0:
         j = ordered_json{ {"RecordWithChanges", std::get<evo_test::RecordWithChanges>(value)} };
         break;
       case 1:
-        j = ordered_json{ {"RenamedRecord", std::get<evo_test::RenamedRecord>(value)} };
+        j = ordered_json{ {"RenamedRecord", std::get<evo_test::DeprecatedRecord>(value)} };
         break;
       default:
         throw std::runtime_error("Invalid union value");
     }
   }
 
-  static void from_json(ordered_json const& j, std::variant<evo_test::RecordWithChanges, evo_test::RenamedRecord>& value) {
+  static void from_json(ordered_json const& j, std::variant<evo_test::RecordWithChanges, evo_test::DeprecatedRecord>& value) {
     auto it = j.begin();
     std::string tag = it.key();
     if (tag == "RecordWithChanges") {
@@ -109,21 +109,21 @@ struct adl_serializer<std::variant<evo_test::RecordWithChanges, evo_test::Rename
       return;
     }
     if (tag == "RenamedRecord") {
-      value = it.value().get<evo_test::RenamedRecord>();
+      value = it.value().get<evo_test::DeprecatedRecord>();
       return;
     }
   }
 };
 
 template <>
-struct adl_serializer<std::variant<evo_test::RX, std::string>> {
-  static void to_json(ordered_json& j, std::variant<evo_test::RX, std::string> const& value) {
+struct adl_serializer<std::variant<evo_test::RZ, std::string>> {
+  static void to_json(ordered_json& j, std::variant<evo_test::RZ, std::string> const& value) {
     std::visit([&j](auto const& v) {j = v;}, value);
   }
 
-  static void from_json(ordered_json const& j, std::variant<evo_test::RX, std::string>& value) {
+  static void from_json(ordered_json const& j, std::variant<evo_test::RZ, std::string>& value) {
     if ((j.is_object())) {
-      value = j.get<evo_test::RX>();
+      value = j.get<evo_test::RZ>();
       return;
     }
     if ((j.is_string())) {

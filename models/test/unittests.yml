@@ -428,6 +428,7 @@ AdvancedGenerics: !protocol
 
 AliasedString: string
 AliasedEnum: Fruits
+AliasedSimpleRecord: SimpleRecord
 AliasedOpenGeneric<T1,T2>: AliasedTuple<T1,T2>
 AliasedClosedGeneric: AliasedTuple<AliasedString, AliasedEnum>
 AliasedOptional: int?
@@ -528,6 +529,7 @@ Aliases: !protocol
       items: AliasedGenericUnion2<AliasedString, AliasedEnum>
 
 AliasedIntOrSimpleRecord: [int, SimpleRecord]
+AliasedIntOrAliasedSimpleRecord: [int, AliasedSimpleRecord]
 AliasedNullableIntSimpleRecord: [null, int, SimpleRecord]
 
 StreamsOfAliasedUnions: !protocol

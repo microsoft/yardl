@@ -522,6 +522,18 @@ func GetUnderlyingType(t Type) Type {
 	return t
 }
 
+// Convert a Union's TypeCases to their respective underlying Types
+func ToUnionOfUnderlyingTypes(t *GeneralizedType) *GeneralizedType {
+	u := *t
+	u.Cases = make([]*TypeCase, len(t.Cases))
+	for i, c := range t.Cases {
+		nc := *c
+		nc.Type = GetUnderlyingType(c.Type)
+		u.Cases[i] = &nc
+	}
+	return &u
+}
+
 func GetPrimitiveType(t Type) (primitive PrimitiveDefinition, ok bool) {
 	switch t := GetUnderlyingType(t).(type) {
 	case *SimpleType:
