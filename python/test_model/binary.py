@@ -730,6 +730,35 @@ class BinaryMultiDArraysReader(_binary.BinaryProtocolReader, MultiDArraysReaderB
     def _read_frames(self) -> collections.abc.Iterable[npt.NDArray[np.float32]]:
         return _binary.StreamSerializer(_binary.FixedNDArraySerializer(_binary.float32_serializer, (1, 1, 64, 32,))).read(self._stream)
 
+class BinaryComplexArraysWriter(_binary.BinaryProtocolWriter, ComplexArraysWriterBase):
+    """Binary writer for the ComplexArrays protocol."""
+
+
+    def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
+        ComplexArraysWriterBase.__init__(self)
+        _binary.BinaryProtocolWriter.__init__(self, stream, ComplexArraysWriterBase.schema)
+
+    def _write_floats(self, value: npt.NDArray[np.complex64]) -> None:
+        _binary.DynamicNDArraySerializer(_binary.complexfloat32_serializer).write(self._stream, value)
+
+    def _write_doubles(self, value: npt.NDArray[np.complex128]) -> None:
+        _binary.NDArraySerializer(_binary.complexfloat64_serializer, 2).write(self._stream, value)
+
+
+class BinaryComplexArraysReader(_binary.BinaryProtocolReader, ComplexArraysReaderBase):
+    """Binary writer for the ComplexArrays protocol."""
+
+
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
+        ComplexArraysReaderBase.__init__(self)
+        _binary.BinaryProtocolReader.__init__(self, stream, ComplexArraysReaderBase.schema)
+
+    def _read_floats(self) -> npt.NDArray[np.complex64]:
+        return _binary.DynamicNDArraySerializer(_binary.complexfloat32_serializer).read(self._stream)
+
+    def _read_doubles(self) -> npt.NDArray[np.complex128]:
+        return _binary.NDArraySerializer(_binary.complexfloat64_serializer, 2).read(self._stream)
+
 class BinaryMapsWriter(_binary.BinaryProtocolWriter, MapsWriterBase):
     """Binary writer for the Maps protocol."""
 

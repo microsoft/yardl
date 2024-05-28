@@ -3379,6 +3379,43 @@ class NDJsonMultiDArraysReader(_ndjson.NDJsonProtocolReader, MultiDArraysReaderB
         while (json_object := self._read_json_line("frames", False)) is not _ndjson.MISSING_SENTINEL:
             yield converter.from_json(json_object)
 
+class NDJsonComplexArraysWriter(_ndjson.NDJsonProtocolWriter, ComplexArraysWriterBase):
+    """NDJson writer for the ComplexArrays protocol."""
+
+
+    def __init__(self, stream: typing.Union[typing.TextIO, str]) -> None:
+        ComplexArraysWriterBase.__init__(self)
+        _ndjson.NDJsonProtocolWriter.__init__(self, stream, ComplexArraysWriterBase.schema)
+
+    def _write_floats(self, value: npt.NDArray[np.complex64]) -> None:
+        converter = _ndjson.DynamicNDArrayConverter(_ndjson.complexfloat32_converter)
+        json_value = converter.to_json(value)
+        self._write_json_line({"floats": json_value})
+
+    def _write_doubles(self, value: npt.NDArray[np.complex128]) -> None:
+        converter = _ndjson.NDArrayConverter(_ndjson.complexfloat64_converter, 2)
+        json_value = converter.to_json(value)
+        self._write_json_line({"doubles": json_value})
+
+
+class NDJsonComplexArraysReader(_ndjson.NDJsonProtocolReader, ComplexArraysReaderBase):
+    """NDJson writer for the ComplexArrays protocol."""
+
+
+    def __init__(self, stream: typing.Union[io.BufferedReader, typing.TextIO, str]) -> None:
+        ComplexArraysReaderBase.__init__(self)
+        _ndjson.NDJsonProtocolReader.__init__(self, stream, ComplexArraysReaderBase.schema)
+
+    def _read_floats(self) -> npt.NDArray[np.complex64]:
+        json_object = self._read_json_line("floats", True)
+        converter = _ndjson.DynamicNDArrayConverter(_ndjson.complexfloat32_converter)
+        return converter.from_json(json_object)
+
+    def _read_doubles(self) -> npt.NDArray[np.complex128]:
+        json_object = self._read_json_line("doubles", True)
+        converter = _ndjson.NDArrayConverter(_ndjson.complexfloat64_converter, 2)
+        return converter.from_json(json_object)
+
 class NDJsonMapsWriter(_ndjson.NDJsonProtocolWriter, MapsWriterBase):
     """NDJson writer for the Maps protocol."""
 

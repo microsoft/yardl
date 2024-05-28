@@ -815,6 +815,42 @@ class MultiDArraysReader : public test_model::MultiDArraysReaderBase, yardl::ndj
   void CloseImpl() override;
 };
 
+// NDJSON writer for the ComplexArrays protocol.
+class ComplexArraysWriter : public test_model::ComplexArraysWriterBase, yardl::ndjson::NDJsonWriter {
+  public:
+  ComplexArraysWriter(std::ostream& stream)
+      : yardl::ndjson::NDJsonWriter(stream, schema_) {
+  }
+
+  ComplexArraysWriter(std::string file_name)
+      : yardl::ndjson::NDJsonWriter(file_name, schema_) {
+  }
+
+  void Flush() override;
+
+  protected:
+  void WriteFloatsImpl(yardl::DynamicNDArray<std::complex<float>> const& value) override;
+  void WriteDoublesImpl(yardl::NDArray<std::complex<double>, 2> const& value) override;
+  void CloseImpl() override;
+};
+
+// NDJSON reader for the ComplexArrays protocol.
+class ComplexArraysReader : public test_model::ComplexArraysReaderBase, yardl::ndjson::NDJsonReader {
+  public:
+  ComplexArraysReader(std::istream& stream)
+      : yardl::ndjson::NDJsonReader(stream, schema_) {
+  }
+
+  ComplexArraysReader(std::string file_name)
+      : yardl::ndjson::NDJsonReader(file_name, schema_) {
+  }
+
+  protected:
+  void ReadFloatsImpl(yardl::DynamicNDArray<std::complex<float>>& value) override;
+  void ReadDoublesImpl(yardl::NDArray<std::complex<double>, 2>& value) override;
+  void CloseImpl() override;
+};
+
 // NDJSON writer for the Maps protocol.
 class MapsWriter : public test_model::MapsWriterBase, yardl::ndjson::NDJsonWriter {
   public:

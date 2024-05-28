@@ -596,6 +596,34 @@ std::unique_ptr<test_model::MultiDArraysReaderBase> CreateReader<test_model::Mul
 }
 
 template<>
+std::unique_ptr<test_model::ComplexArraysWriterBase> CreateWriter<test_model::ComplexArraysWriterBase>(Format format, std::string const& filename) {
+  switch (format) {
+  case Format::kHdf5:
+    return std::make_unique<test_model::hdf5::ComplexArraysWriter>(filename);
+  case Format::kBinary:
+    return std::make_unique<test_model::binary::ComplexArraysWriter>(filename);
+  case Format::kNDJson:
+    return std::make_unique<test_model::ndjson::ComplexArraysWriter>(filename);
+  default:
+    throw std::runtime_error("Unknown format");
+  }
+}
+
+template<>
+std::unique_ptr<test_model::ComplexArraysReaderBase> CreateReader<test_model::ComplexArraysReaderBase>(Format format, std::string const& filename) {
+  switch (format) {
+  case Format::kHdf5:
+    return std::make_unique<test_model::hdf5::ComplexArraysReader>(filename);
+  case Format::kBinary:
+    return std::make_unique<test_model::binary::ComplexArraysReader>(filename);
+  case Format::kNDJson:
+    return std::make_unique<test_model::ndjson::ComplexArraysReader>(filename);
+  default:
+    throw std::runtime_error("Unknown format");
+  }
+}
+
+template<>
 std::unique_ptr<test_model::MapsWriterBase> CreateWriter<test_model::MapsWriterBase>(Format format, std::string const& filename) {
   switch (format) {
   case Format::kHdf5:

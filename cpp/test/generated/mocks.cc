@@ -2446,6 +2446,87 @@ class TestMultiDArraysWriterBase : public MultiDArraysWriterBase {
   bool close_called_ = false;
 };
 
+class MockComplexArraysWriter : public ComplexArraysWriterBase {
+  public:
+  void WriteFloatsImpl (yardl::DynamicNDArray<std::complex<float>> const& value) override {
+    if (WriteFloatsImpl_expected_values_.empty()) {
+      throw std::runtime_error("Unexpected call to WriteFloatsImpl");
+    }
+    if (WriteFloatsImpl_expected_values_.front() != value) {
+      throw std::runtime_error("Unexpected argument value for call to WriteFloatsImpl");
+    }
+    WriteFloatsImpl_expected_values_.pop();
+  }
+
+  std::queue<yardl::DynamicNDArray<std::complex<float>>> WriteFloatsImpl_expected_values_;
+
+  void ExpectWriteFloatsImpl (yardl::DynamicNDArray<std::complex<float>> const& value) {
+    WriteFloatsImpl_expected_values_.push(value);
+  }
+
+  void WriteDoublesImpl (yardl::NDArray<std::complex<double>, 2> const& value) override {
+    if (WriteDoublesImpl_expected_values_.empty()) {
+      throw std::runtime_error("Unexpected call to WriteDoublesImpl");
+    }
+    if (WriteDoublesImpl_expected_values_.front() != value) {
+      throw std::runtime_error("Unexpected argument value for call to WriteDoublesImpl");
+    }
+    WriteDoublesImpl_expected_values_.pop();
+  }
+
+  std::queue<yardl::NDArray<std::complex<double>, 2>> WriteDoublesImpl_expected_values_;
+
+  void ExpectWriteDoublesImpl (yardl::NDArray<std::complex<double>, 2> const& value) {
+    WriteDoublesImpl_expected_values_.push(value);
+  }
+
+  void Verify() {
+    if (!WriteFloatsImpl_expected_values_.empty()) {
+      throw std::runtime_error("Expected call to WriteFloatsImpl was not received");
+    }
+    if (!WriteDoublesImpl_expected_values_.empty()) {
+      throw std::runtime_error("Expected call to WriteDoublesImpl was not received");
+    }
+  }
+};
+
+class TestComplexArraysWriterBase : public ComplexArraysWriterBase {
+  public:
+  TestComplexArraysWriterBase(std::unique_ptr<test_model::ComplexArraysWriterBase> writer, std::function<std::unique_ptr<ComplexArraysReaderBase>()> create_reader) : writer_(std::move(writer)), create_reader_(create_reader) {
+  }
+
+  ~TestComplexArraysWriterBase() {
+    if (!close_called_ && !std::uncaught_exceptions()) {
+      ADD_FAILURE() << "Close() needs to be called on 'TestComplexArraysWriterBase' to verify mocks";
+    }
+  }
+
+  protected:
+  void WriteFloatsImpl(yardl::DynamicNDArray<std::complex<float>> const& value) override {
+    writer_->WriteFloats(value);
+    mock_writer_.ExpectWriteFloatsImpl(value);
+  }
+
+  void WriteDoublesImpl(yardl::NDArray<std::complex<double>, 2> const& value) override {
+    writer_->WriteDoubles(value);
+    mock_writer_.ExpectWriteDoublesImpl(value);
+  }
+
+  void CloseImpl() override {
+    close_called_ = true;
+    writer_->Close();
+    std::unique_ptr<ComplexArraysReaderBase> reader = create_reader_();
+    reader->CopyTo(mock_writer_);
+    mock_writer_.Verify();
+  }
+
+  private:
+  std::unique_ptr<test_model::ComplexArraysWriterBase> writer_;
+  std::function<std::unique_ptr<test_model::ComplexArraysReaderBase>()> create_reader_;
+  MockComplexArraysWriter mock_writer_;
+  bool close_called_ = false;
+};
+
 class MockMapsWriter : public MapsWriterBase {
   public:
   void WriteStringToIntImpl (std::unordered_map<std::string, int32_t> const& value) override {
@@ -4408,6 +4489,14 @@ std::unique_ptr<test_model::MultiDArraysWriterBase> CreateValidatingWriter<test_
   return std::make_unique<test_model::TestMultiDArraysWriterBase>(
     CreateWriter<test_model::MultiDArraysWriterBase>(format, filename),
     [format, filename](){ return CreateReader<test_model::MultiDArraysReaderBase>(format, filename);}
+  );
+}
+
+template<>
+std::unique_ptr<test_model::ComplexArraysWriterBase> CreateValidatingWriter<test_model::ComplexArraysWriterBase>(Format format, std::string const& filename) {
+  return std::make_unique<test_model::TestComplexArraysWriterBase>(
+    CreateWriter<test_model::ComplexArraysWriterBase>(format, filename),
+    [format, filename](){ return CreateReader<test_model::ComplexArraysReaderBase>(format, filename);}
   );
 }
 

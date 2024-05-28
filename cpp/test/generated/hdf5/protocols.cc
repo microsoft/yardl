@@ -2699,6 +2699,30 @@ bool MultiDArraysReader::ReadFramesImpl(std::vector<yardl::FixedNDArray<float, 1
   return has_more;
 }
 
+ComplexArraysWriter::ComplexArraysWriter(std::string path)
+    : yardl::hdf5::Hdf5Writer::Hdf5Writer(path, "ComplexArrays", schema_) {
+}
+
+void ComplexArraysWriter::WriteFloatsImpl(yardl::DynamicNDArray<std::complex<float>> const& value) {
+  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerDynamicNdArray<std::complex<float>, std::complex<float>>, yardl::DynamicNDArray<std::complex<float>>>(group_, "floats", yardl::hdf5::DynamicNDArrayDdl<std::complex<float>, std::complex<float>>(yardl::hdf5::ComplexTypeDdl<float>()), value);
+}
+
+void ComplexArraysWriter::WriteDoublesImpl(yardl::NDArray<std::complex<double>, 2> const& value) {
+  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerNdArray<std::complex<double>, std::complex<double>, 2>, yardl::NDArray<std::complex<double>, 2>>(group_, "doubles", yardl::hdf5::NDArrayDdl<std::complex<double>, std::complex<double>, 2>(yardl::hdf5::ComplexTypeDdl<double>()), value);
+}
+
+ComplexArraysReader::ComplexArraysReader(std::string path)
+    : yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "ComplexArrays", schema_) {
+}
+
+void ComplexArraysReader::ReadFloatsImpl(yardl::DynamicNDArray<std::complex<float>>& value) {
+  yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerDynamicNdArray<std::complex<float>, std::complex<float>>, yardl::DynamicNDArray<std::complex<float>>>(group_, "floats", yardl::hdf5::DynamicNDArrayDdl<std::complex<float>, std::complex<float>>(yardl::hdf5::ComplexTypeDdl<float>()), value);
+}
+
+void ComplexArraysReader::ReadDoublesImpl(yardl::NDArray<std::complex<double>, 2>& value) {
+  yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerNdArray<std::complex<double>, std::complex<double>, 2>, yardl::NDArray<std::complex<double>, 2>>(group_, "doubles", yardl::hdf5::NDArrayDdl<std::complex<double>, std::complex<double>, 2>(yardl::hdf5::ComplexTypeDdl<double>()), value);
+}
+
 MapsWriter::MapsWriter(std::string path)
     : yardl::hdf5::Hdf5Writer::Hdf5Writer(path, "Maps", schema_) {
 }

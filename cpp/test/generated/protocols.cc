@@ -3876,6 +3876,122 @@ void MultiDArraysReaderBase::CopyTo(MultiDArraysWriterBase& writer, size_t image
 }
 
 namespace {
+void ComplexArraysWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end, uint8_t current) {
+  std::string expected_method;
+  switch (current) {
+  case 0: expected_method = "WriteFloats()"; break;
+  case 1: expected_method = "WriteDoubles()"; break;
+  }
+  std::string attempted_method;
+  switch (attempted) {
+  case 0: attempted_method = "WriteFloats()"; break;
+  case 1: attempted_method = "WriteDoubles()"; break;
+  case 2: attempted_method = "Close()"; break;
+  }
+  throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
+}
+
+void ComplexArraysReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
+  auto f = [](uint8_t i) -> std::string {
+    switch (i/2) {
+    case 0: return "ReadFloats()";
+    case 1: return "ReadDoubles()";
+    case 2: return "Close()";
+    default: return "<unknown>";
+    }
+  };
+  throw std::runtime_error("Expected call to " + f(current) + " but received call to " + f(attempted) + " instead.");
+}
+
+} // namespace 
+
+std::string ComplexArraysWriterBase::schema_ = R"({"protocol":{"name":"ComplexArrays","sequence":[{"name":"floats","type":{"array":{"items":"complexfloat32"}}},{"name":"doubles","type":{"array":{"items":"complexfloat64","dimensions":2}}}]},"types":null})";
+
+std::vector<std::string> ComplexArraysWriterBase::previous_schemas_ = {
+};
+
+std::string ComplexArraysWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Current: return ComplexArraysWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol ComplexArrays.");
+  }
+
+}
+void ComplexArraysWriterBase::WriteFloats(yardl::DynamicNDArray<std::complex<float>> const& value) {
+  if (unlikely(state_ != 0)) {
+    ComplexArraysWriterBaseInvalidState(0, false, state_);
+  }
+
+  WriteFloatsImpl(value);
+  state_ = 1;
+}
+
+void ComplexArraysWriterBase::WriteDoubles(yardl::NDArray<std::complex<double>, 2> const& value) {
+  if (unlikely(state_ != 1)) {
+    ComplexArraysWriterBaseInvalidState(1, false, state_);
+  }
+
+  WriteDoublesImpl(value);
+  state_ = 2;
+}
+
+void ComplexArraysWriterBase::Close() {
+  if (unlikely(state_ != 2)) {
+    ComplexArraysWriterBaseInvalidState(2, false, state_);
+  }
+
+  CloseImpl();
+}
+
+std::string ComplexArraysReaderBase::schema_ = ComplexArraysWriterBase::schema_;
+
+std::vector<std::string> ComplexArraysReaderBase::previous_schemas_ = ComplexArraysWriterBase::previous_schemas_;
+
+Version ComplexArraysReaderBase::VersionFromSchema(std::string const& schema) {
+  if (schema == ComplexArraysWriterBase::schema_) {
+    return Version::Current;
+  }
+  throw std::runtime_error("The schema does not match any version supported by protocol ComplexArrays.");
+}
+void ComplexArraysReaderBase::ReadFloats(yardl::DynamicNDArray<std::complex<float>>& value) {
+  if (unlikely(state_ != 0)) {
+    ComplexArraysReaderBaseInvalidState(0, state_);
+  }
+
+  ReadFloatsImpl(value);
+  state_ = 2;
+}
+
+void ComplexArraysReaderBase::ReadDoubles(yardl::NDArray<std::complex<double>, 2>& value) {
+  if (unlikely(state_ != 2)) {
+    ComplexArraysReaderBaseInvalidState(2, state_);
+  }
+
+  ReadDoublesImpl(value);
+  state_ = 4;
+}
+
+void ComplexArraysReaderBase::Close() {
+  if (unlikely(state_ != 4)) {
+    ComplexArraysReaderBaseInvalidState(4, state_);
+  }
+
+  CloseImpl();
+}
+void ComplexArraysReaderBase::CopyTo(ComplexArraysWriterBase& writer) {
+  {
+    yardl::DynamicNDArray<std::complex<float>> value;
+    ReadFloats(value);
+    writer.WriteFloats(value);
+  }
+  {
+    yardl::NDArray<std::complex<double>, 2> value;
+    ReadDoubles(value);
+    writer.WriteDoubles(value);
+  }
+}
+
+namespace {
 void MapsWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end, uint8_t current) {
   std::string expected_method;
   switch (current) {

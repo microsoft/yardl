@@ -4802,6 +4802,28 @@
           ]
         },
         {
+          "name": "ComplexArrays",
+          "sequence": [
+            {
+              "name": "floats",
+              "type": {
+                "array": {
+                  "items": "complexfloat32"
+                }
+              }
+            },
+            {
+              "name": "doubles",
+              "type": {
+                "array": {
+                  "items": "complexfloat64",
+                  "dimensions": 2
+                }
+              }
+            }
+          ]
+        },
+        {
           "name": "Maps",
           "sequence": [
             {

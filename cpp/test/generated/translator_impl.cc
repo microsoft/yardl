@@ -249,6 +249,17 @@ void TranslateStream(std::string const& protocol_name, yardl::testing::Format in
     reader->CopyTo(*writer);
     return;
   }
+  if (protocol_name == "ComplexArrays") {
+    auto reader = input_format == yardl::testing::Format::kBinary
+      ? std::unique_ptr<test_model::ComplexArraysReaderBase>(new test_model::binary::ComplexArraysReader(input))
+      : std::unique_ptr<test_model::ComplexArraysReaderBase>(new test_model::ndjson::ComplexArraysReader(input));
+
+    auto writer = output_format == yardl::testing::Format::kBinary
+      ? std::unique_ptr<test_model::ComplexArraysWriterBase>(new test_model::binary::ComplexArraysWriter(output))
+      : std::unique_ptr<test_model::ComplexArraysWriterBase>(new test_model::ndjson::ComplexArraysWriter(output));
+    reader->CopyTo(*writer);
+    return;
+  }
   if (protocol_name == "Maps") {
     auto reader = input_format == yardl::testing::Format::kBinary
       ? std::unique_ptr<test_model::MapsReaderBase>(new test_model::binary::MapsReader(input))

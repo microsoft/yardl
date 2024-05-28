@@ -3291,6 +3291,34 @@ void MultiDArraysReader::CloseImpl() {
   VerifyFinished();
 }
 
+void ComplexArraysWriter::WriteFloatsImpl(yardl::DynamicNDArray<std::complex<float>> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "floats", json_value);}
+
+void ComplexArraysWriter::WriteDoublesImpl(yardl::NDArray<std::complex<double>, 2> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "doubles", json_value);}
+
+void ComplexArraysWriter::Flush() {
+  stream_.flush();
+}
+
+void ComplexArraysWriter::CloseImpl() {
+  stream_.flush();
+}
+
+void ComplexArraysReader::ReadFloatsImpl(yardl::DynamicNDArray<std::complex<float>>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "floats", true, unused_step_, value);
+}
+
+void ComplexArraysReader::ReadDoublesImpl(yardl::NDArray<std::complex<double>, 2>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "doubles", true, unused_step_, value);
+}
+
+void ComplexArraysReader::CloseImpl() {
+  VerifyFinished();
+}
+
 void MapsWriter::WriteStringToIntImpl(std::unordered_map<std::string, int32_t> const& value) {
   ordered_json json_value = value;
   yardl::ndjson::WriteProtocolValue(stream_, "stringToInt", json_value);}

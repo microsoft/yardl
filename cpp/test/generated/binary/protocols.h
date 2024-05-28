@@ -905,6 +905,44 @@ class MultiDArraysReader : public test_model::MultiDArraysReaderBase, yardl::bin
   size_t current_block_remaining_ = 0;
 };
 
+// Binary writer for the ComplexArrays protocol.
+class ComplexArraysWriter : public test_model::ComplexArraysWriterBase, yardl::binary::BinaryWriter {
+  public:
+  ComplexArraysWriter(std::ostream& stream, Version version = Version::Current)
+      : yardl::binary::BinaryWriter(stream, test_model::ComplexArraysWriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  ComplexArraysWriter(std::string file_name, Version version = Version::Current)
+      : yardl::binary::BinaryWriter(file_name, test_model::ComplexArraysWriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  void Flush() override;
+
+  protected:
+  void WriteFloatsImpl(yardl::DynamicNDArray<std::complex<float>> const& value) override;
+  void WriteDoublesImpl(yardl::NDArray<std::complex<double>, 2> const& value) override;
+  void CloseImpl() override;
+
+  Version version_;
+};
+
+// Binary reader for the ComplexArrays protocol.
+class ComplexArraysReader : public test_model::ComplexArraysReaderBase, yardl::binary::BinaryReader {
+  public:
+  ComplexArraysReader(std::istream& stream)
+      : yardl::binary::BinaryReader(stream), version_(test_model::ComplexArraysReaderBase::VersionFromSchema(schema_read_)) {}
+
+  ComplexArraysReader(std::string file_name)
+      : yardl::binary::BinaryReader(file_name), version_(test_model::ComplexArraysReaderBase::VersionFromSchema(schema_read_)) {}
+
+  Version GetVersion() { return version_; }
+
+  protected:
+  void ReadFloatsImpl(yardl::DynamicNDArray<std::complex<float>>& value) override;
+  void ReadDoublesImpl(yardl::NDArray<std::complex<double>, 2>& value) override;
+  void CloseImpl() override;
+
+  Version version_;
+};
+
 // Binary writer for the Maps protocol.
 class MapsWriter : public test_model::MapsWriterBase, yardl::binary::BinaryWriter {
   public:
