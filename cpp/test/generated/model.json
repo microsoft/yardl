@@ -4059,6 +4059,20 @@
               }
             ]
           }
+        },
+        {
+          "record": {
+            "name": "RecordWithOptionalDate",
+            "fields": [
+              {
+                "name": "dateField",
+                "type": [
+                  null,
+                  "date"
+                ]
+              }
+            ]
+          }
         }
       ],
       "protocols": [
@@ -5326,6 +5340,18 @@
             {
               "name": "float",
               "type": "TestModel.EnumWithKeywordSymbols"
+            }
+          ]
+        },
+        {
+          "name": "ProtocolWithOptionalDate",
+          "sequence": [
+            {
+              "name": "record",
+              "type": [
+                null,
+                "TestModel.RecordWithOptionalDate"
+              ]
             }
           ]
         }

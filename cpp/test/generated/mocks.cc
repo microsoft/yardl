@@ -4320,6 +4320,63 @@ class TestProtocolWithKeywordStepsWriterBase : public ProtocolWithKeywordStepsWr
   MockProtocolWithKeywordStepsWriter mock_writer_;
   bool close_called_ = false;
 };
+
+class MockProtocolWithOptionalDateWriter : public ProtocolWithOptionalDateWriterBase {
+  public:
+  void WriteRecordImpl (std::optional<test_model::RecordWithOptionalDate> const& value) override {
+    if (WriteRecordImpl_expected_values_.empty()) {
+      throw std::runtime_error("Unexpected call to WriteRecordImpl");
+    }
+    if (WriteRecordImpl_expected_values_.front() != value) {
+      throw std::runtime_error("Unexpected argument value for call to WriteRecordImpl");
+    }
+    WriteRecordImpl_expected_values_.pop();
+  }
+
+  std::queue<std::optional<test_model::RecordWithOptionalDate>> WriteRecordImpl_expected_values_;
+
+  void ExpectWriteRecordImpl (std::optional<test_model::RecordWithOptionalDate> const& value) {
+    WriteRecordImpl_expected_values_.push(value);
+  }
+
+  void Verify() {
+    if (!WriteRecordImpl_expected_values_.empty()) {
+      throw std::runtime_error("Expected call to WriteRecordImpl was not received");
+    }
+  }
+};
+
+class TestProtocolWithOptionalDateWriterBase : public ProtocolWithOptionalDateWriterBase {
+  public:
+  TestProtocolWithOptionalDateWriterBase(std::unique_ptr<test_model::ProtocolWithOptionalDateWriterBase> writer, std::function<std::unique_ptr<ProtocolWithOptionalDateReaderBase>()> create_reader) : writer_(std::move(writer)), create_reader_(create_reader) {
+  }
+
+  ~TestProtocolWithOptionalDateWriterBase() {
+    if (!close_called_ && !std::uncaught_exceptions()) {
+      ADD_FAILURE() << "Close() needs to be called on 'TestProtocolWithOptionalDateWriterBase' to verify mocks";
+    }
+  }
+
+  protected:
+  void WriteRecordImpl(std::optional<test_model::RecordWithOptionalDate> const& value) override {
+    writer_->WriteRecord(value);
+    mock_writer_.ExpectWriteRecordImpl(value);
+  }
+
+  void CloseImpl() override {
+    close_called_ = true;
+    writer_->Close();
+    std::unique_ptr<ProtocolWithOptionalDateReaderBase> reader = create_reader_();
+    reader->CopyTo(mock_writer_);
+    mock_writer_.Verify();
+  }
+
+  private:
+  std::unique_ptr<test_model::ProtocolWithOptionalDateWriterBase> writer_;
+  std::function<std::unique_ptr<test_model::ProtocolWithOptionalDateReaderBase>()> create_reader_;
+  MockProtocolWithOptionalDateWriter mock_writer_;
+  bool close_called_ = false;
+};
 } // namespace
 } // namespace test_model
 
@@ -4593,6 +4650,14 @@ std::unique_ptr<test_model::ProtocolWithKeywordStepsWriterBase> CreateValidating
   return std::make_unique<test_model::TestProtocolWithKeywordStepsWriterBase>(
     CreateWriter<test_model::ProtocolWithKeywordStepsWriterBase>(format, filename),
     [format, filename](){ return CreateReader<test_model::ProtocolWithKeywordStepsReaderBase>(format, filename);}
+  );
+}
+
+template<>
+std::unique_ptr<test_model::ProtocolWithOptionalDateWriterBase> CreateValidatingWriter<test_model::ProtocolWithOptionalDateWriterBase>(Format format, std::string const& filename) {
+  return std::make_unique<test_model::TestProtocolWithOptionalDateWriterBase>(
+    CreateWriter<test_model::ProtocolWithOptionalDateWriterBase>(format, filename),
+    [format, filename](){ return CreateReader<test_model::ProtocolWithOptionalDateReaderBase>(format, filename);}
   );
 }
 

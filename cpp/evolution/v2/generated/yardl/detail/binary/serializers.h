@@ -14,10 +14,6 @@
 #include "../../yardl.h"
 #include "coded_stream.h"
 
-#if __cplusplus >= 202002L
-#include <bit>
-#endif
-
 namespace yardl::binary {
 
 /**
@@ -177,11 +173,7 @@ inline void WriteDate(CodedOutputStream& stream, yardl::Date const& value) {
 inline void ReadDate(CodedInputStream& stream, yardl::Date& value) {
   int64_t days;
   ReadInteger(stream, days);
-#if __cplusplus < 202002L
   value = yardl::Date(date::days(days));
-#else
-  value = yardl::Date{std::chrono::days{days}};
-#endif
 }
 
 inline void WriteTime(CodedOutputStream& stream, yardl::Time const& value) {
@@ -202,13 +194,9 @@ inline void WriteDateTime(CodedOutputStream& stream, yardl::DateTime const& valu
 inline void ReadDateTime(CodedInputStream& stream, yardl::DateTime& value) {
   int64_t ns;
   ReadInteger(stream, ns);
-#if __cplusplus < 202002L
-  value = yardl::DateTime(date::sys_time<std::chrono::nanoseconds>(std::chrono::nanoseconds(ns)));
-#else
   value = yardl::DateTime{
       std::chrono::time_point<std::chrono::system_clock,
                               std::chrono::nanoseconds>(std::chrono::nanoseconds(ns))};
-#endif
 }
 
 template <typename T, Writer<T> WriteElement>

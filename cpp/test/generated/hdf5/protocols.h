@@ -1185,5 +1185,26 @@ class ProtocolWithKeywordStepsReader : public test_model::ProtocolWithKeywordSte
   std::unique_ptr<yardl::hdf5::DatasetReader> int_dataset_state_;
 };
 
+// HDF5 writer for the ProtocolWithOptionalDate protocol.
+class ProtocolWithOptionalDateWriter : public test_model::ProtocolWithOptionalDateWriterBase, public yardl::hdf5::Hdf5Writer {
+  public:
+  ProtocolWithOptionalDateWriter(std::string path);
+
+  protected:
+  void WriteRecordImpl(std::optional<test_model::RecordWithOptionalDate> const& value) override;
+
+  private:
+};
+
+// HDF5 reader for the ProtocolWithOptionalDate protocol.
+class ProtocolWithOptionalDateReader : public test_model::ProtocolWithOptionalDateReaderBase, public yardl::hdf5::Hdf5Reader {
+  public:
+  ProtocolWithOptionalDateReader(std::string path);
+
+  void ReadRecordImpl(std::optional<test_model::RecordWithOptionalDate>& value) override;
+
+  private:
+};
+
 } // namespace test_model
 

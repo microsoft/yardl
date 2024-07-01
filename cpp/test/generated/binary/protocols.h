@@ -1496,4 +1496,40 @@ class ProtocolWithKeywordStepsReader : public test_model::ProtocolWithKeywordSte
   size_t current_block_remaining_ = 0;
 };
 
+// Binary writer for the ProtocolWithOptionalDate protocol.
+class ProtocolWithOptionalDateWriter : public test_model::ProtocolWithOptionalDateWriterBase, yardl::binary::BinaryWriter {
+  public:
+  ProtocolWithOptionalDateWriter(std::ostream& stream, Version version = Version::Current)
+      : yardl::binary::BinaryWriter(stream, test_model::ProtocolWithOptionalDateWriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  ProtocolWithOptionalDateWriter(std::string file_name, Version version = Version::Current)
+      : yardl::binary::BinaryWriter(file_name, test_model::ProtocolWithOptionalDateWriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  void Flush() override;
+
+  protected:
+  void WriteRecordImpl(std::optional<test_model::RecordWithOptionalDate> const& value) override;
+  void CloseImpl() override;
+
+  Version version_;
+};
+
+// Binary reader for the ProtocolWithOptionalDate protocol.
+class ProtocolWithOptionalDateReader : public test_model::ProtocolWithOptionalDateReaderBase, yardl::binary::BinaryReader {
+  public:
+  ProtocolWithOptionalDateReader(std::istream& stream)
+      : yardl::binary::BinaryReader(stream), version_(test_model::ProtocolWithOptionalDateReaderBase::VersionFromSchema(schema_read_)) {}
+
+  ProtocolWithOptionalDateReader(std::string file_name)
+      : yardl::binary::BinaryReader(file_name), version_(test_model::ProtocolWithOptionalDateReaderBase::VersionFromSchema(schema_read_)) {}
+
+  Version GetVersion() { return version_; }
+
+  protected:
+  void ReadRecordImpl(std::optional<test_model::RecordWithOptionalDate>& value) override;
+  void CloseImpl() override;
+
+  Version version_;
+};
+
 } // namespace test_model::binary

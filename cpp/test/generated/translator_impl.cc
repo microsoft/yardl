@@ -392,6 +392,17 @@ void TranslateStream(std::string const& protocol_name, yardl::testing::Format in
     reader->CopyTo(*writer);
     return;
   }
+  if (protocol_name == "ProtocolWithOptionalDate") {
+    auto reader = input_format == yardl::testing::Format::kBinary
+      ? std::unique_ptr<test_model::ProtocolWithOptionalDateReaderBase>(new test_model::binary::ProtocolWithOptionalDateReader(input))
+      : std::unique_ptr<test_model::ProtocolWithOptionalDateReaderBase>(new test_model::ndjson::ProtocolWithOptionalDateReader(input));
+
+    auto writer = output_format == yardl::testing::Format::kBinary
+      ? std::unique_ptr<test_model::ProtocolWithOptionalDateWriterBase>(new test_model::binary::ProtocolWithOptionalDateWriter(output))
+      : std::unique_ptr<test_model::ProtocolWithOptionalDateWriterBase>(new test_model::ndjson::ProtocolWithOptionalDateWriter(output));
+    reader->CopyTo(*writer);
+    return;
+  }
   throw std::runtime_error("Unsupported protocol " + protocol_name);
 }
 } // namespace yardl::testing

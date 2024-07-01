@@ -125,25 +125,12 @@ struct adl_serializer<std::monostate> {
 template <>
 struct adl_serializer<yardl::Date> {
   static void to_json(ordered_json& j, yardl::Date const& value) {
-#if __cplusplus < 202002L
     j = date::format("%F", value);
-#else
-    date::local_days ld(value.time_since_epoch());
-    j = date::format("%F", ld);
-#endif
   }
 
   static void from_json(ordered_json const& j, yardl::Date& value) {
     std::stringstream ss{j.get<std::string>()};
-
-#if __cplusplus < 202002L
     ss >> date::parse("%F", value);
-#else
-    date::local_days ld;
-    ss >> date::parse("%F", ld);
-    value = yardl::Date(ld.time_since_epoch());
-#endif
-
     if (ss.fail()) {
       throw std::runtime_error("invalid date format");
     }

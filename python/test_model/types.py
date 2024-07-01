@@ -1924,6 +1924,27 @@ class RecordWithKeywordFields:
         return f"RecordWithKeywordFields(int={repr(self.int_)}, sizeof={repr(self.sizeof)}, if={repr(self.if_)})"
 
 
+class RecordWithOptionalDate:
+    date_field: typing.Optional[datetime.date]
+
+    def __init__(self, *,
+        date_field: typing.Optional[datetime.date] = None,
+    ):
+        self.date_field = date_field
+
+    def __eq__(self, other: object) -> bool:
+        return (
+            isinstance(other, RecordWithOptionalDate)
+            and self.date_field == other.date_field
+        )
+
+    def __str__(self) -> str:
+        return f"RecordWithOptionalDate(dateField={self.date_field})"
+
+    def __repr__(self) -> str:
+        return f"RecordWithOptionalDate(dateField={repr(self.date_field)})"
+
+
 class AcquisitionOrImage:
     Acquisition: typing.ClassVar[type["AcquisitionOrImageUnionCase[SimpleAcquisition]"]]
     Image: typing.ClassVar[type["AcquisitionOrImageUnionCase[image.Image[np.float32]]"]]
@@ -2069,6 +2090,7 @@ def _mk_get_dtype():
     dtype_map.setdefault(RecordNotUsedInProtocol, np.dtype([('u1', np.dtype(np.object_)), ('u2', np.dtype(np.object_))], align=True))
     dtype_map.setdefault(EnumWithKeywordSymbols, np.dtype(np.int32))
     dtype_map.setdefault(RecordWithKeywordFields, np.dtype([('int_', np.dtype(np.object_)), ('sizeof', np.dtype(np.object_)), ('if_', get_dtype(EnumWithKeywordSymbols))], align=True))
+    dtype_map.setdefault(RecordWithOptionalDate, np.dtype([('date_field', np.dtype([('has_value', np.dtype(np.bool_)), ('value', np.dtype(np.datetime64))], align=True))], align=True))
     dtype_map.setdefault(AcquisitionOrImage, np.dtype(np.object_))
     dtype_map.setdefault(StringOrInt32, np.dtype(np.object_))
     dtype_map.setdefault(Int32OrSimpleRecord, np.dtype(np.object_))
