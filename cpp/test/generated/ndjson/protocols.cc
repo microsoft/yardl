@@ -467,6 +467,35 @@ struct adl_serializer<std::variant<std::monostate, int32_t, test_model::SimpleRe
 };
 
 template <>
+struct adl_serializer<std::variant<test_model::RecordWithGenericVectors<int32_t>, test_model::RecordWithGenericArrays<float>>> {
+  static void to_json(ordered_json& j, std::variant<test_model::RecordWithGenericVectors<int32_t>, test_model::RecordWithGenericArrays<float>> const& value) {
+    switch (value.index()) {
+      case 0:
+        j = ordered_json{ {"RecordWithIntVectors", std::get<test_model::RecordWithGenericVectors<int32_t>>(value)} };
+        break;
+      case 1:
+        j = ordered_json{ {"RecordWithFloatArrays", std::get<test_model::RecordWithGenericArrays<float>>(value)} };
+        break;
+      default:
+        throw std::runtime_error("Invalid union value");
+    }
+  }
+
+  static void from_json(ordered_json const& j, std::variant<test_model::RecordWithGenericVectors<int32_t>, test_model::RecordWithGenericArrays<float>>& value) {
+    auto it = j.begin();
+    std::string tag = it.key();
+    if (tag == "RecordWithIntVectors") {
+      value = it.value().get<test_model::RecordWithGenericVectors<int32_t>>();
+      return;
+    }
+    if (tag == "RecordWithFloatArrays") {
+      value = it.value().get<test_model::RecordWithGenericArrays<float>>();
+      return;
+    }
+  }
+};
+
+template <>
 struct adl_serializer<std::variant<int32_t, float>> {
   static void to_json(ordered_json& j, std::variant<int32_t, float> const& value) {
     switch (value.index()) {
