@@ -959,4 +959,32 @@ std::unique_ptr<test_model::ProtocolWithKeywordStepsReaderBase> CreateReader<tes
   }
 }
 
+template<>
+std::unique_ptr<test_model::ProtocolWithOptionalDateWriterBase> CreateWriter<test_model::ProtocolWithOptionalDateWriterBase>(Format format, std::string const& filename) {
+  switch (format) {
+  case Format::kHdf5:
+    return std::make_unique<test_model::hdf5::ProtocolWithOptionalDateWriter>(filename);
+  case Format::kBinary:
+    return std::make_unique<test_model::binary::ProtocolWithOptionalDateWriter>(filename);
+  case Format::kNDJson:
+    return std::make_unique<test_model::ndjson::ProtocolWithOptionalDateWriter>(filename);
+  default:
+    throw std::runtime_error("Unknown format");
+  }
+}
+
+template<>
+std::unique_ptr<test_model::ProtocolWithOptionalDateReaderBase> CreateReader<test_model::ProtocolWithOptionalDateReaderBase>(Format format, std::string const& filename) {
+  switch (format) {
+  case Format::kHdf5:
+    return std::make_unique<test_model::hdf5::ProtocolWithOptionalDateReader>(filename);
+  case Format::kBinary:
+    return std::make_unique<test_model::binary::ProtocolWithOptionalDateReader>(filename);
+  case Format::kNDJson:
+    return std::make_unique<test_model::ndjson::ProtocolWithOptionalDateReader>(filename);
+  default:
+    throw std::runtime_error("Unknown format");
+  }
+}
+
 }

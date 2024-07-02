@@ -1245,6 +1245,29 @@ class BinaryProtocolWithKeywordStepsReader(_binary.BinaryProtocolReader, Protoco
     def _read_float(self) -> EnumWithKeywordSymbols:
         return _binary.EnumSerializer(_binary.int32_serializer, EnumWithKeywordSymbols).read(self._stream)
 
+class BinaryProtocolWithOptionalDateWriter(_binary.BinaryProtocolWriter, ProtocolWithOptionalDateWriterBase):
+    """Binary writer for the ProtocolWithOptionalDate protocol."""
+
+
+    def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
+        ProtocolWithOptionalDateWriterBase.__init__(self)
+        _binary.BinaryProtocolWriter.__init__(self, stream, ProtocolWithOptionalDateWriterBase.schema)
+
+    def _write_record(self, value: typing.Optional[RecordWithOptionalDate]) -> None:
+        _binary.OptionalSerializer(RecordWithOptionalDateSerializer()).write(self._stream, value)
+
+
+class BinaryProtocolWithOptionalDateReader(_binary.BinaryProtocolReader, ProtocolWithOptionalDateReaderBase):
+    """Binary writer for the ProtocolWithOptionalDate protocol."""
+
+
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
+        ProtocolWithOptionalDateReaderBase.__init__(self)
+        _binary.BinaryProtocolReader.__init__(self, stream, ProtocolWithOptionalDateReaderBase.schema)
+
+    def _read_record(self) -> typing.Optional[RecordWithOptionalDate]:
+        return _binary.OptionalSerializer(RecordWithOptionalDateSerializer()).read(self._stream)
+
 class SmallBenchmarkRecordSerializer(_binary.RecordSerializer[SmallBenchmarkRecord]):
     def __init__(self) -> None:
         super().__init__([("a", _binary.float64_serializer), ("b", _binary.float32_serializer), ("c", _binary.float32_serializer)])
@@ -1981,5 +2004,23 @@ class RecordWithKeywordFieldsSerializer(_binary.RecordSerializer[RecordWithKeywo
     def read(self, stream: _binary.CodedInputStream) -> RecordWithKeywordFields:
         field_values = self._read(stream)
         return RecordWithKeywordFields(int_=field_values[0], sizeof=field_values[1], if_=field_values[2])
+
+
+class RecordWithOptionalDateSerializer(_binary.RecordSerializer[RecordWithOptionalDate]):
+    def __init__(self) -> None:
+        super().__init__([("date_field", _binary.OptionalSerializer(_binary.date_serializer))])
+
+    def write(self, stream: _binary.CodedOutputStream, value: RecordWithOptionalDate) -> None:
+        if isinstance(value, np.void):
+            self.write_numpy(stream, value)
+            return
+        self._write(stream, value.date_field)
+
+    def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
+        self._write(stream, value['date_field'])
+
+    def read(self, stream: _binary.CodedInputStream) -> RecordWithOptionalDate:
+        field_values = self._read(stream)
+        return RecordWithOptionalDate(date_field=field_values[0])
 
 

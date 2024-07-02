@@ -2810,4 +2810,60 @@ class ProtocolWithKeywordStepsReaderBase {
   private:
   uint8_t state_ = 0;
 };
+
+// Abstract writer for the ProtocolWithOptionalDate protocol.
+class ProtocolWithOptionalDateWriterBase {
+  public:
+  // Ordinal 0.
+  void WriteRecord(std::optional<test_model::RecordWithOptionalDate> const& value);
+
+  // Optionaly close this writer before destructing. Validates that all steps were completed.
+  void Close();
+
+  virtual ~ProtocolWithOptionalDateWriterBase() = default;
+
+  // Flushes all buffered data.
+  virtual void Flush() {}
+
+  protected:
+  virtual void WriteRecordImpl(std::optional<test_model::RecordWithOptionalDate> const& value) = 0;
+  virtual void CloseImpl() {}
+
+  static std::string schema_;
+
+  static std::vector<std::string> previous_schemas_;
+
+  static std::string SchemaFromVersion(Version version);
+
+  private:
+  uint8_t state_ = 0;
+
+  friend class ProtocolWithOptionalDateReaderBase;
+};
+
+// Abstract reader for the ProtocolWithOptionalDate protocol.
+class ProtocolWithOptionalDateReaderBase {
+  public:
+  // Ordinal 0.
+  void ReadRecord(std::optional<test_model::RecordWithOptionalDate>& value);
+
+  // Optionaly close this writer before destructing. Validates that all steps were completely read.
+  void Close();
+
+  void CopyTo(ProtocolWithOptionalDateWriterBase& writer);
+
+  virtual ~ProtocolWithOptionalDateReaderBase() = default;
+
+  protected:
+  virtual void ReadRecordImpl(std::optional<test_model::RecordWithOptionalDate>& value) = 0;
+  virtual void CloseImpl() {}
+  static std::string schema_;
+
+  static std::vector<std::string> previous_schemas_;
+
+  static Version VersionFromSchema(const std::string& schema);
+
+  private:
+  uint8_t state_ = 0;
+};
 } // namespace test_model

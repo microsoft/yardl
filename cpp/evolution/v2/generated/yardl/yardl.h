@@ -5,11 +5,7 @@
 
 #include <chrono>
 
-#if __cplusplus < 202002L
-// This functionality is part of the standard library as of C++20
 #include <date/date.h>
-#endif
-
 #include <xtensor/xarray.hpp>
 #include <xtensor/xfixed.hpp>
 #include <xtensor/xtensor.hpp>
@@ -46,17 +42,10 @@ using NDArray = xt::xtensor<T, N, xt::layout_type::row_major>;
 template <typename T>
 using DynamicNDArray = xt::xarray<T, xt::layout_type::row_major>;
 
-#if __cplusplus < 202002L
 /**
  * @brief Represents a date as a number of days since the epoch.
  */
 using Date = date::local_days;
-#else
-/**
- * @brief Represents a date as a number of days since the epoch.
- */
-using Date = std::chrono::local_days;
-#endif
 
 /**
  * @brief Represents a time of day as the number of nanoseconds since midnight.
@@ -66,8 +55,7 @@ using Time = std::chrono::duration<int64_t, std::nano>;
 /**
  * @brief Represents a datetime as the number of nanoseconds since the epoch.
  */
-using DateTime = std::chrono::time_point<std::chrono::system_clock,
-                                         std::chrono::duration<int64_t, std::nano>>;
+using DateTime = std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds>;
 
 /**
  * @brief The same as size_t when it is 64 bits, otherwise uint64_t.

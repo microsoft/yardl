@@ -1451,5 +1451,17 @@ struct RecordWithKeywordFields {
   }
 };
 
+struct RecordWithOptionalDate {
+  std::optional<yardl::Date> date_field{};
+
+  bool operator==(const RecordWithOptionalDate& other) const {
+    return date_field == other.date_field;
+  }
+
+  bool operator!=(const RecordWithOptionalDate& other) const {
+    return !(*this == other);
+  }
+};
+
 } // namespace test_model
 

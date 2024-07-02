@@ -6771,3 +6771,129 @@ class ProtocolWithKeywordStepsReaderBase(abc.ABC):
             return 'read_float'
         return "<unknown>"
 
+class ProtocolWithOptionalDateWriterBase(abc.ABC):
+    """Abstract writer for the ProtocolWithOptionalDate protocol."""
+
+
+    def __init__(self) -> None:
+        self._state = 0
+
+    schema = r"""{"protocol":{"name":"ProtocolWithOptionalDate","sequence":[{"name":"record","type":[null,"TestModel.RecordWithOptionalDate"]}]},"types":[{"name":"RecordWithOptionalDate","fields":[{"name":"dateField","type":[null,"date"]}]}]}"""
+
+    def close(self) -> None:
+        self._close()
+        if self._state != 2:
+            expected_method = self._state_to_method_name((self._state + 1) & ~1)
+            raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
+        try:
+            self.close()
+        except Exception as e:
+            if exc is None:
+                raise e
+
+    def write_record(self, value: typing.Optional[RecordWithOptionalDate]) -> None:
+        """Ordinal 0"""
+
+        if self._state != 0:
+            self._raise_unexpected_state(0)
+
+        self._write_record(value)
+        self._state = 2
+
+    @abc.abstractmethod
+    def _write_record(self, value: typing.Optional[RecordWithOptionalDate]) -> None:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _close(self) -> None:
+        pass
+
+    @abc.abstractmethod
+    def _end_stream(self) -> None:
+        pass
+
+    def _raise_unexpected_state(self, actual: int) -> None:
+        expected_method = self._state_to_method_name(self._state)
+        actual_method = self._state_to_method_name(actual)
+        raise ProtocolError(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
+
+    def _state_to_method_name(self, state: int) -> str:
+        if state == 0:
+            return 'write_record'
+        return "<unknown>"
+
+class ProtocolWithOptionalDateReaderBase(abc.ABC):
+    """Abstract reader for the ProtocolWithOptionalDate protocol."""
+
+
+    def __init__(self) -> None:
+        self._state = 0
+
+    def close(self) -> None:
+        self._close()
+        if self._state != 2:
+            if self._state % 2 == 1:
+                previous_method = self._state_to_method_name(self._state - 1)
+                raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
+            else:
+                expected_method = self._state_to_method_name(self._state)
+                raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
+            	
+
+    schema = ProtocolWithOptionalDateWriterBase.schema
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
+        try:
+            self.close()
+        except Exception as e:
+            if exc is None:
+                raise e
+
+    @abc.abstractmethod
+    def _close(self) -> None:
+        raise NotImplementedError()
+
+    def read_record(self) -> typing.Optional[RecordWithOptionalDate]:
+        """Ordinal 0"""
+
+        if self._state != 0:
+            self._raise_unexpected_state(0)
+
+        value = self._read_record()
+        self._state = 2
+        return value
+
+    def copy_to(self, writer: ProtocolWithOptionalDateWriterBase) -> None:
+        writer.write_record(self.read_record())
+
+    @abc.abstractmethod
+    def _read_record(self) -> typing.Optional[RecordWithOptionalDate]:
+        raise NotImplementedError()
+
+    T = typing.TypeVar('T')
+    def _wrap_iterable(self, iterable: collections.abc.Iterable[T], final_state: int) -> collections.abc.Iterable[T]:
+        yield from iterable
+        self._state = final_state
+
+    def _raise_unexpected_state(self, actual: int) -> None:
+        actual_method = self._state_to_method_name(actual)
+        if self._state % 2 == 1:
+            previous_method = self._state_to_method_name(self._state - 1)
+            raise ProtocolError(f"Received call to '{actual_method}' but the iterable returned by '{previous_method}' was not fully consumed.")
+        else:
+            expected_method = self._state_to_method_name(self._state)
+            raise ProtocolError(f"Expected to call to '{expected_method}' but received call to '{actual_method}'.")
+        	
+    def _state_to_method_name(self, state: int) -> str:
+        if state == 0:
+            return 'read_record'
+        return "<unknown>"
+

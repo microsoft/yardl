@@ -1339,4 +1339,38 @@ class ProtocolWithKeywordStepsReader : public test_model::ProtocolWithKeywordSte
   void CloseImpl() override;
 };
 
+// NDJSON writer for the ProtocolWithOptionalDate protocol.
+class ProtocolWithOptionalDateWriter : public test_model::ProtocolWithOptionalDateWriterBase, yardl::ndjson::NDJsonWriter {
+  public:
+  ProtocolWithOptionalDateWriter(std::ostream& stream)
+      : yardl::ndjson::NDJsonWriter(stream, schema_) {
+  }
+
+  ProtocolWithOptionalDateWriter(std::string file_name)
+      : yardl::ndjson::NDJsonWriter(file_name, schema_) {
+  }
+
+  void Flush() override;
+
+  protected:
+  void WriteRecordImpl(std::optional<test_model::RecordWithOptionalDate> const& value) override;
+  void CloseImpl() override;
+};
+
+// NDJSON reader for the ProtocolWithOptionalDate protocol.
+class ProtocolWithOptionalDateReader : public test_model::ProtocolWithOptionalDateReaderBase, yardl::ndjson::NDJsonReader {
+  public:
+  ProtocolWithOptionalDateReader(std::istream& stream)
+      : yardl::ndjson::NDJsonReader(stream, schema_) {
+  }
+
+  ProtocolWithOptionalDateReader(std::string file_name)
+      : yardl::ndjson::NDJsonReader(file_name, schema_) {
+  }
+
+  protected:
+  void ReadRecordImpl(std::optional<test_model::RecordWithOptionalDate>& value) override;
+  void CloseImpl() override;
+};
+
 } // namespace test_model::ndjson

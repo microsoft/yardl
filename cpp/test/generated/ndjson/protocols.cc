@@ -200,6 +200,9 @@ void from_json(ordered_json const& j, test_model::EnumWithKeywordSymbols& value)
 void to_json(ordered_json& j, test_model::RecordWithKeywordFields const& value);
 void from_json(ordered_json const& j, test_model::RecordWithKeywordFields& value);
 
+void to_json(ordered_json& j, test_model::RecordWithOptionalDate const& value);
+void from_json(ordered_json const& j, test_model::RecordWithOptionalDate& value);
+
 } // namespace test_model
 
 NLOHMANN_JSON_NAMESPACE_BEGIN
@@ -2593,6 +2596,19 @@ void from_json(ordered_json const& j, test_model::RecordWithKeywordFields& value
   }
 }
 
+void to_json(ordered_json& j, test_model::RecordWithOptionalDate const& value) {
+  j = ordered_json::object();
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.date_field)) {
+    j.push_back({"dateField", value.date_field});
+  }
+}
+
+void from_json(ordered_json const& j, test_model::RecordWithOptionalDate& value) {
+  if (auto it = j.find("dateField"); it != j.end()) {
+    it->get_to(value.date_field);
+  }
+}
+
 } // namespace test_model
 
 namespace test_model::ndjson {
@@ -3865,6 +3881,26 @@ void ProtocolWithKeywordStepsReader::ReadFloatImpl(test_model::EnumWithKeywordSy
 }
 
 void ProtocolWithKeywordStepsReader::CloseImpl() {
+  VerifyFinished();
+}
+
+void ProtocolWithOptionalDateWriter::WriteRecordImpl(std::optional<test_model::RecordWithOptionalDate> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "record", json_value);}
+
+void ProtocolWithOptionalDateWriter::Flush() {
+  stream_.flush();
+}
+
+void ProtocolWithOptionalDateWriter::CloseImpl() {
+  stream_.flush();
+}
+
+void ProtocolWithOptionalDateReader::ReadRecordImpl(std::optional<test_model::RecordWithOptionalDate>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "record", true, unused_step_, value);
+}
+
+void ProtocolWithOptionalDateReader::CloseImpl() {
   VerifyFinished();
 }
 

@@ -1114,6 +1114,19 @@ struct _Inner_RecordWithKeywordFields {
   test_model::EnumWithKeywordSymbols if_field;
 };
 
+struct _Inner_RecordWithOptionalDate {
+  _Inner_RecordWithOptionalDate() {} 
+  _Inner_RecordWithOptionalDate(test_model::RecordWithOptionalDate const& o) 
+      : date_field(o.date_field) {
+  }
+
+  void ToOuter (test_model::RecordWithOptionalDate& o) const {
+    yardl::hdf5::ToOuter(date_field, o.date_field);
+  }
+
+  yardl::hdf5::InnerOptional<yardl::Date, yardl::Date> date_field;
+};
+
 [[maybe_unused]] H5::CompType GetSmallBenchmarkRecordHdf5Ddl() {
   using RecordType = test_model::SmallBenchmarkRecord;
   H5::CompType t(sizeof(RecordType));
@@ -1540,6 +1553,13 @@ template <typename _A_Inner, typename A, typename _B_Inner, typename B>
   t.insertMember("int", HOFFSET(RecordType, int_field), yardl::hdf5::InnerVlenStringDdl());
   t.insertMember("sizeof", HOFFSET(RecordType, sizeof_field), yardl::hdf5::NDArrayDdl<int32_t, int32_t, 2>(H5::PredType::NATIVE_INT32));
   t.insertMember("if", HOFFSET(RecordType, if_field), test_model::hdf5::GetEnumWithKeywordSymbolsHdf5Ddl());
+  return t;
+}
+
+[[maybe_unused]] H5::CompType GetRecordWithOptionalDateHdf5Ddl() {
+  using RecordType = test_model::hdf5::_Inner_RecordWithOptionalDate;
+  H5::CompType t(sizeof(RecordType));
+  t.insertMember("dateField", HOFFSET(RecordType, date_field), yardl::hdf5::OptionalTypeDdl<yardl::Date, yardl::Date>(yardl::hdf5::DateTypeDdl()));
   return t;
 }
 
@@ -3677,6 +3697,22 @@ bool ProtocolWithKeywordStepsReader::ReadIntImpl(std::vector<test_model::RecordW
 
 void ProtocolWithKeywordStepsReader::ReadFloatImpl(test_model::EnumWithKeywordSymbols& value) {
   yardl::hdf5::ReadScalarDataset<test_model::EnumWithKeywordSymbols, test_model::EnumWithKeywordSymbols>(group_, "float", test_model::hdf5::GetEnumWithKeywordSymbolsHdf5Ddl(), value);
+}
+
+ProtocolWithOptionalDateWriter::ProtocolWithOptionalDateWriter(std::string path)
+    : yardl::hdf5::Hdf5Writer::Hdf5Writer(path, "ProtocolWithOptionalDate", schema_) {
+}
+
+void ProtocolWithOptionalDateWriter::WriteRecordImpl(std::optional<test_model::RecordWithOptionalDate> const& value) {
+  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerOptional<test_model::hdf5::_Inner_RecordWithOptionalDate, test_model::RecordWithOptionalDate>, std::optional<test_model::RecordWithOptionalDate>>(group_, "record", yardl::hdf5::OptionalTypeDdl<test_model::hdf5::_Inner_RecordWithOptionalDate, test_model::RecordWithOptionalDate>(test_model::hdf5::GetRecordWithOptionalDateHdf5Ddl()), value);
+}
+
+ProtocolWithOptionalDateReader::ProtocolWithOptionalDateReader(std::string path)
+    : yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "ProtocolWithOptionalDate", schema_) {
+}
+
+void ProtocolWithOptionalDateReader::ReadRecordImpl(std::optional<test_model::RecordWithOptionalDate>& value) {
+  yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerOptional<test_model::hdf5::_Inner_RecordWithOptionalDate, test_model::RecordWithOptionalDate>, std::optional<test_model::RecordWithOptionalDate>>(group_, "record", yardl::hdf5::OptionalTypeDdl<test_model::hdf5::_Inner_RecordWithOptionalDate, test_model::RecordWithOptionalDate>(test_model::hdf5::GetRecordWithOptionalDateHdf5Ddl()), value);
 }
 
 } // namespace test_model::hdf5

@@ -14,8 +14,16 @@ add_executable(tests
   roundtrip_test.cc
 )
 
+# This additional test must be compiled with C++20 to test compatibility with
+# the C++17 version of the generated library
+add_library(abi_test OBJECT
+  abi_test.cc
+)
+set_property(TARGET abi_test PROPERTY CXX_STANDARD 20)
+
 target_link_libraries(
   tests
+  abi_test
   fmt
   gtest
   gtest_main

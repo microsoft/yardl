@@ -2420,6 +2420,46 @@ class RecordWithKeywordFieldsConverter(_ndjson.JsonConverter[RecordWithKeywordFi
         ) # type:ignore 
 
 
+class RecordWithOptionalDateConverter(_ndjson.JsonConverter[RecordWithOptionalDate, np.void]):
+    def __init__(self) -> None:
+        self._date_field_converter = _ndjson.OptionalConverter(_ndjson.date_converter)
+        super().__init__(np.dtype([
+            ("date_field", self._date_field_converter.overall_dtype()),
+        ]))
+
+    def to_json(self, value: RecordWithOptionalDate) -> object:
+        if not isinstance(value, RecordWithOptionalDate): # pyright: ignore [reportUnnecessaryIsInstance]
+            raise TypeError("Expected 'RecordWithOptionalDate' instance")
+        json_object = {}
+
+        if value.date_field is not None:
+            json_object["dateField"] = self._date_field_converter.to_json(value.date_field)
+        return json_object
+
+    def numpy_to_json(self, value: np.void) -> object:
+        if not isinstance(value, np.void): # pyright: ignore [reportUnnecessaryIsInstance]
+            raise TypeError("Expected 'np.void' instance")
+        json_object = {}
+
+        if (field_val := value["date_field"]) is not None:
+            json_object["dateField"] = self._date_field_converter.numpy_to_json(field_val)
+        return json_object
+
+    def from_json(self, json_object: object) -> RecordWithOptionalDate:
+        if not isinstance(json_object, dict):
+            raise TypeError("Expected 'dict' instance")
+        return RecordWithOptionalDate(
+            date_field=self._date_field_converter.from_json(json_object.get("dateField")),
+        )
+
+    def from_json_to_numpy(self, json_object: object) -> np.void:
+        if not isinstance(json_object, dict):
+            raise TypeError("Expected 'dict' instance")
+        return (
+            self._date_field_converter.from_json_to_numpy(json_object.get("dateField")),
+        ) # type:ignore 
+
+
 class NDJsonBenchmarkFloat256x256Writer(_ndjson.NDJsonProtocolWriter, BenchmarkFloat256x256WriterBase):
     """NDJson writer for the BenchmarkFloat256x256 protocol."""
 
@@ -4098,5 +4138,32 @@ class NDJsonProtocolWithKeywordStepsReader(_ndjson.NDJsonProtocolReader, Protoco
     def _read_float(self) -> EnumWithKeywordSymbols:
         json_object = self._read_json_line("float", True)
         converter = _ndjson.EnumConverter(EnumWithKeywordSymbols, np.int32, enum_with_keyword_symbols_name_to_value_map, enum_with_keyword_symbols_value_to_name_map)
+        return converter.from_json(json_object)
+
+class NDJsonProtocolWithOptionalDateWriter(_ndjson.NDJsonProtocolWriter, ProtocolWithOptionalDateWriterBase):
+    """NDJson writer for the ProtocolWithOptionalDate protocol."""
+
+
+    def __init__(self, stream: typing.Union[typing.TextIO, str]) -> None:
+        ProtocolWithOptionalDateWriterBase.__init__(self)
+        _ndjson.NDJsonProtocolWriter.__init__(self, stream, ProtocolWithOptionalDateWriterBase.schema)
+
+    def _write_record(self, value: typing.Optional[RecordWithOptionalDate]) -> None:
+        converter = _ndjson.OptionalConverter(RecordWithOptionalDateConverter())
+        json_value = converter.to_json(value)
+        self._write_json_line({"record": json_value})
+
+
+class NDJsonProtocolWithOptionalDateReader(_ndjson.NDJsonProtocolReader, ProtocolWithOptionalDateReaderBase):
+    """NDJson writer for the ProtocolWithOptionalDate protocol."""
+
+
+    def __init__(self, stream: typing.Union[io.BufferedReader, typing.TextIO, str]) -> None:
+        ProtocolWithOptionalDateReaderBase.__init__(self)
+        _ndjson.NDJsonProtocolReader.__init__(self, stream, ProtocolWithOptionalDateReaderBase.schema)
+
+    def _read_record(self) -> typing.Optional[RecordWithOptionalDate]:
+        json_object = self._read_json_line("record", True)
+        converter = _ndjson.OptionalConverter(RecordWithOptionalDateConverter())
         return converter.from_json(json_object)
 

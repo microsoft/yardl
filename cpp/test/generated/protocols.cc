@@ -6802,4 +6802,94 @@ void ProtocolWithKeywordStepsReaderBase::CopyTo(ProtocolWithKeywordStepsWriterBa
     writer.WriteFloat(value);
   }
 }
+
+namespace {
+void ProtocolWithOptionalDateWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end, uint8_t current) {
+  std::string expected_method;
+  switch (current) {
+  case 0: expected_method = "WriteRecord()"; break;
+  }
+  std::string attempted_method;
+  switch (attempted) {
+  case 0: attempted_method = "WriteRecord()"; break;
+  case 1: attempted_method = "Close()"; break;
+  }
+  throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
+}
+
+void ProtocolWithOptionalDateReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
+  auto f = [](uint8_t i) -> std::string {
+    switch (i/2) {
+    case 0: return "ReadRecord()";
+    case 1: return "Close()";
+    default: return "<unknown>";
+    }
+  };
+  throw std::runtime_error("Expected call to " + f(current) + " but received call to " + f(attempted) + " instead.");
+}
+
+} // namespace 
+
+std::string ProtocolWithOptionalDateWriterBase::schema_ = R"({"protocol":{"name":"ProtocolWithOptionalDate","sequence":[{"name":"record","type":[null,"TestModel.RecordWithOptionalDate"]}]},"types":[{"name":"RecordWithOptionalDate","fields":[{"name":"dateField","type":[null,"date"]}]}]})";
+
+std::vector<std::string> ProtocolWithOptionalDateWriterBase::previous_schemas_ = {
+};
+
+std::string ProtocolWithOptionalDateWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Current: return ProtocolWithOptionalDateWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol ProtocolWithOptionalDate.");
+  }
+
+}
+void ProtocolWithOptionalDateWriterBase::WriteRecord(std::optional<test_model::RecordWithOptionalDate> const& value) {
+  if (unlikely(state_ != 0)) {
+    ProtocolWithOptionalDateWriterBaseInvalidState(0, false, state_);
+  }
+
+  WriteRecordImpl(value);
+  state_ = 1;
+}
+
+void ProtocolWithOptionalDateWriterBase::Close() {
+  if (unlikely(state_ != 1)) {
+    ProtocolWithOptionalDateWriterBaseInvalidState(1, false, state_);
+  }
+
+  CloseImpl();
+}
+
+std::string ProtocolWithOptionalDateReaderBase::schema_ = ProtocolWithOptionalDateWriterBase::schema_;
+
+std::vector<std::string> ProtocolWithOptionalDateReaderBase::previous_schemas_ = ProtocolWithOptionalDateWriterBase::previous_schemas_;
+
+Version ProtocolWithOptionalDateReaderBase::VersionFromSchema(std::string const& schema) {
+  if (schema == ProtocolWithOptionalDateWriterBase::schema_) {
+    return Version::Current;
+  }
+  throw std::runtime_error("The schema does not match any version supported by protocol ProtocolWithOptionalDate.");
+}
+void ProtocolWithOptionalDateReaderBase::ReadRecord(std::optional<test_model::RecordWithOptionalDate>& value) {
+  if (unlikely(state_ != 0)) {
+    ProtocolWithOptionalDateReaderBaseInvalidState(0, state_);
+  }
+
+  ReadRecordImpl(value);
+  state_ = 2;
+}
+
+void ProtocolWithOptionalDateReaderBase::Close() {
+  if (unlikely(state_ != 2)) {
+    ProtocolWithOptionalDateReaderBaseInvalidState(2, state_);
+  }
+
+  CloseImpl();
+}
+void ProtocolWithOptionalDateReaderBase::CopyTo(ProtocolWithOptionalDateWriterBase& writer) {
+  {
+    std::optional<test_model::RecordWithOptionalDate> value;
+    ReadRecord(value);
+    writer.WriteRecord(value);
+  }
+}
 } // namespace test_model
