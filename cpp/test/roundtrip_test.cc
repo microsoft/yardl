@@ -11,11 +11,7 @@ using namespace test_model;
 using namespace yardl;
 using namespace yardl::testing;
 
-#if __cplusplus < 202002L
 using year = date::year;
-#else
-using year = std::chrono::year;
-#endif
 
 namespace {
 

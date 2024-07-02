@@ -37,15 +37,9 @@ static inline H5::PredType const& SizeTypeDdl() {
  * of days since the epoch.
  */
 static inline H5::DataType DateTypeDdl() {
-#if __cplusplus < 202002L
   static_assert(sizeof(yardl::Date) == sizeof(int32_t));
   static_assert(std::is_same_v<yardl::Date::rep, int32_t>);
   return H5::PredType::NATIVE_INT32;
-#else
-  static_assert(sizeof(yardl::Date) == sizeof(int64_t));
-  static_assert(std::is_same_v<yardl::Date::rep, int64_t>);
-  return H5::PredType::NATIVE_INT64;
-#endif
 }
 
 /**

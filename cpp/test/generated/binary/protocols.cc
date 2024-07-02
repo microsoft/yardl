@@ -580,6 +580,15 @@ struct IsTriviallySerializable<test_model::RecordWithKeywordFields> {
     offsetof(__T__, int_field) < offsetof(__T__, sizeof_field) && offsetof(__T__, sizeof_field) < offsetof(__T__, if_field);
 };
 
+template <>
+struct IsTriviallySerializable<test_model::RecordWithOptionalDate> {
+  using __T__ = test_model::RecordWithOptionalDate;
+  static constexpr bool value = 
+    std::is_standard_layout_v<__T__> &&
+    IsTriviallySerializable<decltype(__T__::date_field)>::value &&
+    (sizeof(__T__) == (sizeof(__T__::date_field)));
+};
+
 #ifndef _MSC_VER
 #pragma GCC diagnostic pop // #pragma GCC diagnostic ignored "-Winvalid-offsetof" 
 #endif
@@ -2694,6 +2703,24 @@ template<typename U, yardl::binary::Reader<U> ReadU, typename V, yardl::binary::
   yardl::binary::ReadEnum<test_model::EnumWithKeywordSymbols>(stream, value.if_field);
 }
 
+[[maybe_unused]] void WriteRecordWithOptionalDate(yardl::binary::CodedOutputStream& stream, test_model::RecordWithOptionalDate const& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<test_model::RecordWithOptionalDate>::value) {
+    yardl::binary::WriteTriviallySerializable(stream, value);
+    return;
+  }
+
+  yardl::binary::WriteOptional<yardl::Date, yardl::binary::WriteDate>(stream, value.date_field);
+}
+
+[[maybe_unused]] void ReadRecordWithOptionalDate(yardl::binary::CodedInputStream& stream, test_model::RecordWithOptionalDate& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<test_model::RecordWithOptionalDate>::value) {
+    yardl::binary::ReadTriviallySerializable(stream, value);
+    return;
+  }
+
+  yardl::binary::ReadOptional<yardl::Date, yardl::binary::ReadDate>(stream, value.date_field);
+}
+
 } // namespace
 
 void BenchmarkFloat256x256Writer::WriteFloat256x256Impl(yardl::FixedNDArray<float, 256, 256> const& value) {
@@ -4339,6 +4366,26 @@ void ProtocolWithKeywordStepsReader::ReadFloatImpl(test_model::EnumWithKeywordSy
 }
 
 void ProtocolWithKeywordStepsReader::CloseImpl() {
+  stream_.VerifyFinished();
+}
+
+void ProtocolWithOptionalDateWriter::WriteRecordImpl(std::optional<test_model::RecordWithOptionalDate> const& value) {
+  yardl::binary::WriteOptional<test_model::RecordWithOptionalDate, test_model::binary::WriteRecordWithOptionalDate>(stream_, value);
+}
+
+void ProtocolWithOptionalDateWriter::Flush() {
+  stream_.Flush();
+}
+
+void ProtocolWithOptionalDateWriter::CloseImpl() {
+  stream_.Flush();
+}
+
+void ProtocolWithOptionalDateReader::ReadRecordImpl(std::optional<test_model::RecordWithOptionalDate>& value) {
+  yardl::binary::ReadOptional<test_model::RecordWithOptionalDate, test_model::binary::ReadRecordWithOptionalDate>(stream_, value);
+}
+
+void ProtocolWithOptionalDateReader::CloseImpl() {
   stream_.VerifyFinished();
 }
 

@@ -729,3 +729,12 @@ ProtocolWithKeywordSteps: !protocol
       items: RecordWithKeywordFields
     float: EnumWithKeywordSymbols
 # END delibrately using C++ keywords and macros as identitiers
+
+
+RecordWithOptionalDate: !record
+  fields:
+    dateField: date?
+
+ProtocolWithOptionalDate: !protocol
+  sequence:
+    record: RecordWithOptionalDate?
