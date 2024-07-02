@@ -889,6 +889,12 @@ using AliasedIntOrAliasedSimpleRecord = std::variant<int32_t, test_model::Aliase
 
 using AliasedNullableIntSimpleRecord = std::variant<std::monostate, int32_t, test_model::SimpleRecord>;
 
+using RecordWithIntVectors = test_model::RecordWithGenericVectors<int32_t>;
+
+using RecordWithFloatArrays = test_model::RecordWithGenericArrays<float>;
+
+using UnionOfContainerRecords = std::variant<test_model::RecordWithIntVectors, test_model::RecordWithFloatArrays>;
+
 struct RecordWithComputedFields {
   yardl::NDArray<int32_t, 2> array_field{};
   yardl::NDArray<int32_t, 2> array_field_map_dimensions{};

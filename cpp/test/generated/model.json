@@ -2309,6 +2309,43 @@
           }
         },
         {
+          "alias": {
+            "name": "RecordWithIntVectors",
+            "type": {
+              "name": "TestModel.RecordWithGenericVectors",
+              "typeArguments": [
+                "int32"
+              ]
+            }
+          }
+        },
+        {
+          "alias": {
+            "name": "RecordWithFloatArrays",
+            "type": {
+              "name": "TestModel.RecordWithGenericArrays",
+              "typeArguments": [
+                "float32"
+              ]
+            }
+          }
+        },
+        {
+          "alias": {
+            "name": "UnionOfContainerRecords",
+            "type": [
+              {
+                "tag": "RecordWithIntVectors",
+                "type": "TestModel.RecordWithIntVectors"
+              },
+              {
+                "tag": "RecordWithFloatArrays",
+                "type": "TestModel.RecordWithFloatArrays"
+              }
+            ]
+          }
+        },
+        {
           "record": {
             "name": "RecordWithComputedFields",
             "fields": [

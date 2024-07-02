@@ -1401,6 +1401,21 @@ AliasedNullableIntSimpleRecord.Int32 = type("AliasedNullableIntSimpleRecord.Int3
 AliasedNullableIntSimpleRecord.SimpleRecord = type("AliasedNullableIntSimpleRecord.SimpleRecord", (AliasedNullableIntSimpleRecordUnionCase,), {"index": 1, "tag": "SimpleRecord"})
 del AliasedNullableIntSimpleRecordUnionCase
 
+RecordWithIntVectors = RecordWithGenericVectors[yardl.Int32]
+
+RecordWithFloatArrays = RecordWithGenericArrays[np.float32]
+
+class UnionOfContainerRecords:
+    RecordWithIntVectors: typing.ClassVar[type["UnionOfContainerRecordsUnionCase[RecordWithIntVectors]"]]
+    RecordWithFloatArrays: typing.ClassVar[type["UnionOfContainerRecordsUnionCase[RecordWithFloatArrays]"]]
+
+class UnionOfContainerRecordsUnionCase(UnionOfContainerRecords, yardl.UnionCase[_T]):
+    pass
+
+UnionOfContainerRecords.RecordWithIntVectors = type("UnionOfContainerRecords.RecordWithIntVectors", (UnionOfContainerRecordsUnionCase,), {"index": 0, "tag": "RecordWithIntVectors"})
+UnionOfContainerRecords.RecordWithFloatArrays = type("UnionOfContainerRecords.RecordWithFloatArrays", (UnionOfContainerRecordsUnionCase,), {"index": 1, "tag": "RecordWithFloatArrays"})
+del UnionOfContainerRecordsUnionCase
+
 class Int32OrFloat32:
     Int32: typing.ClassVar[type["Int32OrFloat32UnionCase[yardl.Int32]"]]
     Float32: typing.ClassVar[type["Int32OrFloat32UnionCase[yardl.Float32]"]]
@@ -2060,6 +2075,9 @@ def _mk_get_dtype():
     dtype_map.setdefault(AliasedIntOrAliasedSimpleRecord, np.dtype(np.object_))
     dtype_map.setdefault(AliasedNullableIntSimpleRecord, np.dtype(np.object_))
     dtype_map.setdefault(typing.Optional[AliasedNullableIntSimpleRecord], np.dtype(np.object_))
+    dtype_map.setdefault(RecordWithIntVectors, get_dtype(types.GenericAlias(RecordWithGenericVectors, (yardl.Int32,))))
+    dtype_map.setdefault(RecordWithFloatArrays, get_dtype(types.GenericAlias(RecordWithGenericArrays, (yardl.Float32,))))
+    dtype_map.setdefault(UnionOfContainerRecords, np.dtype(np.object_))
     dtype_map.setdefault(Int32OrFloat32, np.dtype(np.object_))
     dtype_map.setdefault(IntOrGenericRecordWithComputedFields, np.dtype(np.object_))
     dtype_map.setdefault(RecordWithComputedFields, np.dtype([('array_field', np.dtype(np.object_)), ('array_field_map_dimensions', np.dtype(np.object_)), ('dynamic_array_field', np.dtype(np.object_)), ('fixed_array_field', np.dtype(np.int32), (3, 4,)), ('int_field', np.dtype(np.int32)), ('int8_field', np.dtype(np.int8)), ('uint8_field', np.dtype(np.uint8)), ('int16_field', np.dtype(np.int16)), ('uint16_field', np.dtype(np.uint16)), ('uint32_field', np.dtype(np.uint32)), ('int64_field', np.dtype(np.int64)), ('uint64_field', np.dtype(np.uint64)), ('size_field', np.dtype(np.uint64)), ('float32_field', np.dtype(np.float32)), ('float64_field', np.dtype(np.float64)), ('complexfloat32_field', np.dtype(np.complex64)), ('complexfloat64_field', np.dtype(np.complex128)), ('string_field', np.dtype(np.object_)), ('tuple_field', get_dtype(types.GenericAlias(tuples.Tuple, (yardl.Int32, yardl.Int32,)))), ('vector_field', np.dtype(np.object_)), ('vector_of_vectors_field', np.dtype(np.object_)), ('fixed_vector_field', np.dtype(np.int32), (3,)), ('fixed_vector_of_vectors_field', np.dtype(np.int32), (2,)), ('optional_named_array', np.dtype([('has_value', np.dtype(np.bool_)), ('value', np.dtype(np.object_))], align=True)), ('int_float_union', np.dtype(np.object_)), ('nullable_int_float_union', np.dtype(np.object_)), ('union_with_nested_generic_union', np.dtype(np.object_)), ('map_field', np.dtype(np.object_))], align=True))

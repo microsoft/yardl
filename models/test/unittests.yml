@@ -544,6 +544,10 @@ StreamsOfAliasedUnions: !protocol
     nullableIntOrSimpleRecord: !stream
       items: AliasedNullableIntSimpleRecord
 
+RecordWithIntVectors: RecordWithGenericVectors<int>
+RecordWithFloatArrays: RecordWithGenericArrays<float>
+UnionOfContainerRecords: [RecordWithIntVectors, RecordWithFloatArrays]
+
 RecordWithComputedFields: !record
   fields:
     arrayField: int[x, y]

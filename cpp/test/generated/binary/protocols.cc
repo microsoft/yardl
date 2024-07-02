@@ -2448,6 +2448,60 @@ template<typename A, yardl::binary::Reader<A> ReadA, typename B, yardl::binary::
   ReadUnion<std::monostate, yardl::binary::ReadMonostate, int32_t, yardl::binary::ReadInteger, test_model::SimpleRecord, test_model::binary::ReadSimpleRecord>(stream, value);
 }
 
+[[maybe_unused]] void WriteRecordWithIntVectors(yardl::binary::CodedOutputStream& stream, test_model::RecordWithIntVectors const& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<test_model::RecordWithIntVectors>::value) {
+    yardl::binary::WriteTriviallySerializable(stream, value);
+    return;
+  }
+
+  test_model::binary::WriteRecordWithGenericVectors<int32_t, yardl::binary::WriteInteger>(stream, value);
+}
+
+[[maybe_unused]] void ReadRecordWithIntVectors(yardl::binary::CodedInputStream& stream, test_model::RecordWithIntVectors& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<test_model::RecordWithIntVectors>::value) {
+    yardl::binary::ReadTriviallySerializable(stream, value);
+    return;
+  }
+
+  test_model::binary::ReadRecordWithGenericVectors<int32_t, yardl::binary::ReadInteger>(stream, value);
+}
+
+[[maybe_unused]] void WriteRecordWithFloatArrays(yardl::binary::CodedOutputStream& stream, test_model::RecordWithFloatArrays const& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<test_model::RecordWithFloatArrays>::value) {
+    yardl::binary::WriteTriviallySerializable(stream, value);
+    return;
+  }
+
+  test_model::binary::WriteRecordWithGenericArrays<float, yardl::binary::WriteFloatingPoint>(stream, value);
+}
+
+[[maybe_unused]] void ReadRecordWithFloatArrays(yardl::binary::CodedInputStream& stream, test_model::RecordWithFloatArrays& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<test_model::RecordWithFloatArrays>::value) {
+    yardl::binary::ReadTriviallySerializable(stream, value);
+    return;
+  }
+
+  test_model::binary::ReadRecordWithGenericArrays<float, yardl::binary::ReadFloatingPoint>(stream, value);
+}
+
+[[maybe_unused]] void WriteUnionOfContainerRecords(yardl::binary::CodedOutputStream& stream, test_model::UnionOfContainerRecords const& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<test_model::UnionOfContainerRecords>::value) {
+    yardl::binary::WriteTriviallySerializable(stream, value);
+    return;
+  }
+
+  WriteUnion<test_model::RecordWithIntVectors, test_model::binary::WriteRecordWithIntVectors, test_model::RecordWithFloatArrays, test_model::binary::WriteRecordWithFloatArrays>(stream, value);
+}
+
+[[maybe_unused]] void ReadUnionOfContainerRecords(yardl::binary::CodedInputStream& stream, test_model::UnionOfContainerRecords& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<test_model::UnionOfContainerRecords>::value) {
+    yardl::binary::ReadTriviallySerializable(stream, value);
+    return;
+  }
+
+  ReadUnion<test_model::RecordWithIntVectors, test_model::binary::ReadRecordWithIntVectors, test_model::RecordWithFloatArrays, test_model::binary::ReadRecordWithFloatArrays>(stream, value);
+}
+
 [[maybe_unused]] void WriteRecordWithComputedFields(yardl::binary::CodedOutputStream& stream, test_model::RecordWithComputedFields const& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<test_model::RecordWithComputedFields>::value) {
     yardl::binary::WriteTriviallySerializable(stream, value);

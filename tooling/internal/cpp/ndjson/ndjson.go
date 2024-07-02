@@ -452,9 +452,8 @@ func writeUnionConverters(w *formatting.IndentedWriter, unionType *dsl.Generaliz
 			}
 			return
 		case *dsl.NamedType:
-			self.Visit(node.DefinitionMeta)
+			self.Visit(node.Type)
 		case *dsl.SimpleType:
-			self.VisitChildren(node)
 			self.Visit(node.ResolvedDefinition)
 		default:
 			self.VisitChildren(node)
