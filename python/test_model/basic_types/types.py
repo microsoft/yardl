@@ -202,11 +202,15 @@ def _mk_get_dtype():
     dtype_map.setdefault(GenericUnion2, lambda type_args: np.dtype(np.object_))
     dtype_map.setdefault(GenericNullableUnion2, lambda type_args: np.dtype(np.object_))
     dtype_map.setdefault(GenericNullableUnion2, lambda type_args: np.dtype(np.object_))
-    dtype_map.setdefault(Int32OrString, np.dtype(np.object_))
-    dtype_map.setdefault(TimeOrDatetime, np.dtype(np.object_))
     dtype_map.setdefault(RecordWithUnions, np.dtype([('null_or_int_or_string', np.dtype(np.object_)), ('date_or_datetime', np.dtype(np.object_)), ('null_or_fruits_or_days_of_week', np.dtype(np.object_))], align=True))
-    dtype_map.setdefault(T0OrT1, np.dtype(np.object_))
+    dtype_map.setdefault(Int32OrString, np.dtype(np.object_))
+    dtype_map.setdefault(Int32OrString.Int32, np.dtype(np.int32))
+    dtype_map.setdefault(Int32OrString.String, np.dtype(np.object_))
+    dtype_map.setdefault(TimeOrDatetime, np.dtype(np.object_))
+    dtype_map.setdefault(TimeOrDatetime.Time, np.dtype(np.timedelta64))
+    dtype_map.setdefault(TimeOrDatetime.Datetime, np.dtype(np.datetime64))
     dtype_map.setdefault(GenericRecordWithComputedFields, lambda type_args: np.dtype([('f1', np.dtype(np.object_))], align=True))
+    dtype_map.setdefault(T0OrT1, np.dtype(np.object_))
 
     return get_dtype
 
