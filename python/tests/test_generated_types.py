@@ -194,9 +194,18 @@ def test_get_dtype():
     assert tm.get_dtype(typing.Union[tm.Int32, tm.Float32]) == np.object_
 
     assert tm.get_dtype(tm.basic_types.Int32OrString) == np.object_
+    assert tm.get_dtype(tm.basic_types.Int32OrString.Int32) == np.int32
+    assert tm.get_dtype(tm.basic_types.Int32OrString.String) == np.object_
 
     assert tm.get_dtype(tm.basic_types.TimeOrDatetime) == np.object_
+    assert tm.get_dtype(tm.basic_types.TimeOrDatetime.Time) == np.timedelta64
+    assert tm.get_dtype(tm.basic_types.TimeOrDatetime.Datetime) == np.datetime64
+
     assert tm.get_dtype(tm.Int32OrSimpleRecord) == np.object_
+    assert tm.get_dtype(tm.Int32OrSimpleRecord.Int32) == np.int32
+    assert tm.get_dtype(tm.Int32OrSimpleRecord.SimpleRecord) == tm.get_dtype(
+        tm.SimpleRecord
+    )
 
     assert tm.get_dtype(tm.AliasedOptional) == np.dtype(
         [("has_value", "?"), ("value", np.int32)], align=True
@@ -216,6 +225,10 @@ def test_get_dtype():
     )
 
     assert tm.get_dtype(tm.AliasedNullableIntSimpleRecord) == np.object_
+    assert tm.get_dtype(tm.AliasedNullableIntSimpleRecord.Int32) == np.int32
+    assert tm.get_dtype(tm.AliasedNullableIntSimpleRecord.SimpleRecord) == tm.get_dtype(
+        tm.SimpleRecord
+    )
     assert (
         tm.get_dtype(typing.Optional[tm.AliasedNullableIntSimpleRecord]) == np.object_
     )

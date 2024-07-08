@@ -1008,58 +1008,63 @@ func writeGetDTypeFunc(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 			root:      true,
 		}
 
-		writeUnionDtypeIfNeeded := func(td dsl.Node, unions map[string]any, callingNamespace string) {
-			dsl.VisitWithContext[string](td, "", func(self dsl.VisitorWithContext[string], node dsl.Node, currentNamespace string) {
+		writeUnionCaseDtypes := func(gt *dsl.GeneralizedType, unionClassName string) {
+			for _, tc := range gt.Cases {
+				if tc.Type != nil && !dsl.TypeContainsGenericTypeParameter(tc.Type) {
+					tag := formatting.ToPascalCase(tc.Tag)
+					fmt.Fprintf(w, "dtype_map.setdefault(%s.%s, %s)\n", unionClassName, tag, typeDTypeExpression(tc.Type, context))
+				}
+			}
+		}
+
+		writeUnionDtypeIfNeeded := func(td dsl.TypeDefinition, unions map[string]bool, callingNamespace string) {
+			dsl.VisitWithContext(td, "", func(self dsl.VisitorWithContext[string], node dsl.Node, currentNamespace string) {
 				switch node := node.(type) {
 				case dsl.TypeDefinition:
 					currentNamespace = node.GetDefinitionMeta().Namespace
-				}
-				switch node := node.(type) {
-				case *dsl.NamedType:
-					if gt, ok := node.Type.(*dsl.GeneralizedType); ok {
-						if gt.Cases.IsUnion() {
-							// Special handling for dtype entry of nullable aliased unions
-							if gt.Cases.HasNullOption() {
-								// This an aliased union, where null is one of the options, e.g. X = [null, int, float]
-								// register X: ... instead of typing.Optional[X]: ...
-								// by stripping away the null option
-								gtClone := *gt
-								gtClone.Cases = gtClone.Cases[1:]
-								ntClone := *node
-								ntClone.Type = &gtClone
-								td := &ntClone
-								fmt.Fprintf(w, "dtype_map.setdefault(%s, %s)\n", common.TypeSyntaxWithoutTypeParameters(td, callingNamespace), typeDefinitionDTypeExpression(td, context))
-							}
-							// Return early - we use the alias name for this union type over the yardl-generate UnionClassName
-							return
-						}
-					}
+
 				case *dsl.GeneralizedType:
 					if node.Cases.IsUnion() {
 						unionClassName, _ := common.UnionClassName(node)
+						nt, isNamedType := td.(*dsl.NamedType)
+						if isNamedType {
+							// This is a named type defining a union, so we will use the named type's name instead
+							unionClassName = td.GetDefinitionMeta().Name
+						}
 						if currentNamespace != callingNamespace {
 							unionClassName = fmt.Sprintf("%s.%s", common.NamespaceIdentifierName(currentNamespace), unionClassName)
 						}
-						if _, ok := unions[unionClassName]; !ok {
-							unions[unionClassName] = nil
-							fmt.Fprintf(w, "dtype_map.setdefault(%s, %s)\n", unionClassName, typeDTypeExpression(node, context))
+
+						if !unions[unionClassName] {
+							unions[unionClassName] = true
+							if isNamedType {
+								fmt.Fprintf(w, "dtype_map.setdefault(%s, %s)\n", unionClassName, typeDefinitionDTypeExpression(nt, context))
+							} else {
+								fmt.Fprintf(w, "dtype_map.setdefault(%s, %s)\n", unionClassName, typeDTypeExpression(node, context))
+							}
+							writeUnionCaseDtypes(node, unionClassName)
 						}
 					}
-
 				}
+
 				self.VisitChildren(node, currentNamespace)
 			})
 		}
 
 		writeDefaults := func(ns *dsl.Namespace, contextNamespace string) {
-			unions := make(map[string]any)
-			for _, td := range ns.TypeDefinitions {
-				writeUnionDtypeIfNeeded(td, unions, contextNamespace)
+			unions := make(map[string]bool)
 
-				// Skip Named arrays, vectors, and maps because they resolve to Python built-in types having dtype=np.object_
+			for _, td := range ns.TypeDefinitions {
+				isUnion := false
+
 				if td, ok := td.(*dsl.NamedType); ok {
 					if gt, ok := dsl.GetUnderlyingType(td.Type).(*dsl.GeneralizedType); ok {
+						if gt.Cases.IsUnion() && !gt.Cases.HasNullOption() {
+							isUnion = true
+						}
 						switch gt.Dimensionality.(type) {
+						// Skip Named arrays, vectors, and maps because they resolve to Python
+						// 	built-in types having dtype=np.object_
 						case *dsl.Array, *dsl.Vector, *dsl.Map:
 							continue
 						}
@@ -1067,9 +1072,14 @@ func writeGetDTypeFunc(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 				}
 
 				fmt.Fprintf(w, "dtype_map.setdefault(%s, %s)\n", common.TypeSyntaxWithoutTypeParameters(td, contextNamespace), typeDefinitionDTypeExpression(td, context))
+
+				if !isUnion {
+					writeUnionDtypeIfNeeded(td, unions, contextNamespace)
+				}
 			}
-			for _, td := range ns.Protocols {
-				writeUnionDtypeIfNeeded(td, unions, contextNamespace)
+
+			for _, p := range ns.Protocols {
+				writeUnionDtypeIfNeeded(p, unions, contextNamespace)
 			}
 		}
 
@@ -1136,7 +1146,6 @@ func typeDefinitionDTypeExpression(t dsl.TypeDefinition, context dTypeExpression
 			dtypeExpression = fmt.Sprintf("get_dtype(types.GenericAlias(%s, (%s,)))", common.TypeSyntaxWithoutTypeParameters(t, context.namespace), strings.Join(typeArgs, ", "))
 		} else {
 			dtypeExpression = fmt.Sprintf("get_dtype(%s)", common.TypeSyntaxWithoutTypeParameters(t, context.namespace))
-
 		}
 
 		return dtypeExpression

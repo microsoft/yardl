@@ -65,6 +65,11 @@
         // Python linting.
         "python.analysis.typeCheckingMode": "strict",
         "python.analysis.diagnosticMode": "workspace",
+        "python.analysis.include": [
+          "${workspaceFolder}/python",
+          "${workspaceFolder}/smoketest",
+          "${workspaceFolder}/tooling/internal/python/static_files"
+        ],
 
         "python.defaultInterpreterPath": "/opt/conda/envs/yardl/bin/python",
         "python.terminal.activateEnvironment": false, // Disable the extension calling activate when the integrated terminal launches. We take care of this in ~/.bashrc.
