@@ -92,6 +92,7 @@ from .types import (
     RecordWithNDArrays,
     RecordWithNDArraysSingleDimension,
     RecordWithNamedFixedArrays,
+    RecordWithNoDefaultEnum,
     RecordWithOptionalDate,
     RecordWithOptionalFields,
     RecordWithOptionalGenericField,

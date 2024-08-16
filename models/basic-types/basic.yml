@@ -1,8 +1,8 @@
 Fruits: !enum
   values:
-    - apple
-    - banana
-    - pear
+    apple: 1
+    banana: 2
+    pear: 3
 
 DaysOfWeek: !flags
   values:

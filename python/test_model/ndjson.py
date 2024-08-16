@@ -1408,15 +1408,55 @@ size_based_enum_name_to_value_map = {
 }
 size_based_enum_value_to_name_map = {v: n for n, v in size_based_enum_name_to_value_map.items()}
 
+class RecordWithNoDefaultEnumConverter(_ndjson.JsonConverter[RecordWithNoDefaultEnum, np.void]):
+    def __init__(self) -> None:
+        self._enum_converter = _ndjson.EnumConverter(basic_types.Fruits, np.int32, basic_types.ndjson.fruits_name_to_value_map, basic_types.ndjson.fruits_value_to_name_map)
+        super().__init__(np.dtype([
+            ("enum", self._enum_converter.overall_dtype()),
+        ]))
+
+    def to_json(self, value: RecordWithNoDefaultEnum) -> object:
+        if not isinstance(value, RecordWithNoDefaultEnum): # pyright: ignore [reportUnnecessaryIsInstance]
+            raise TypeError("Expected 'RecordWithNoDefaultEnum' instance")
+        json_object = {}
+
+        json_object["enum"] = self._enum_converter.to_json(value.enum)
+        return json_object
+
+    def numpy_to_json(self, value: np.void) -> object:
+        if not isinstance(value, np.void): # pyright: ignore [reportUnnecessaryIsInstance]
+            raise TypeError("Expected 'np.void' instance")
+        json_object = {}
+
+        json_object["enum"] = self._enum_converter.numpy_to_json(value["enum"])
+        return json_object
+
+    def from_json(self, json_object: object) -> RecordWithNoDefaultEnum:
+        if not isinstance(json_object, dict):
+            raise TypeError("Expected 'dict' instance")
+        return RecordWithNoDefaultEnum(
+            enum=self._enum_converter.from_json(json_object["enum"],),
+        )
+
+    def from_json_to_numpy(self, json_object: object) -> np.void:
+        if not isinstance(json_object, dict):
+            raise TypeError("Expected 'dict' instance")
+        return (
+            self._enum_converter.from_json_to_numpy(json_object["enum"]),
+        ) # type:ignore 
+
+
 class RecordWithEnumsConverter(_ndjson.JsonConverter[RecordWithEnums, np.void]):
     def __init__(self) -> None:
         self._enum_converter = _ndjson.EnumConverter(basic_types.Fruits, np.int32, basic_types.ndjson.fruits_name_to_value_map, basic_types.ndjson.fruits_value_to_name_map)
         self._flags_converter = _ndjson.FlagsConverter(basic_types.DaysOfWeek, np.int32, basic_types.ndjson.days_of_week_name_to_value_map, basic_types.ndjson.days_of_week_value_to_name_map)
         self._flags_2_converter = _ndjson.FlagsConverter(basic_types.TextFormat, np.uint64, basic_types.ndjson.text_format_name_to_value_map, basic_types.ndjson.text_format_value_to_name_map)
+        self._rec_converter = RecordWithNoDefaultEnumConverter()
         super().__init__(np.dtype([
             ("enum", self._enum_converter.overall_dtype()),
             ("flags", self._flags_converter.overall_dtype()),
             ("flags_2", self._flags_2_converter.overall_dtype()),
+            ("rec", self._rec_converter.overall_dtype()),
         ]))
 
     def to_json(self, value: RecordWithEnums) -> object:
@@ -1427,6 +1467,7 @@ class RecordWithEnumsConverter(_ndjson.JsonConverter[RecordWithEnums, np.void]):
         json_object["enum"] = self._enum_converter.to_json(value.enum)
         json_object["flags"] = self._flags_converter.to_json(value.flags)
         json_object["flags2"] = self._flags_2_converter.to_json(value.flags_2)
+        json_object["rec"] = self._rec_converter.to_json(value.rec)
         return json_object
 
     def numpy_to_json(self, value: np.void) -> object:
@@ -1437,6 +1478,7 @@ class RecordWithEnumsConverter(_ndjson.JsonConverter[RecordWithEnums, np.void]):
         json_object["enum"] = self._enum_converter.numpy_to_json(value["enum"])
         json_object["flags"] = self._flags_converter.numpy_to_json(value["flags"])
         json_object["flags2"] = self._flags_2_converter.numpy_to_json(value["flags_2"])
+        json_object["rec"] = self._rec_converter.numpy_to_json(value["rec"])
         return json_object
 
     def from_json(self, json_object: object) -> RecordWithEnums:
@@ -1446,6 +1488,7 @@ class RecordWithEnumsConverter(_ndjson.JsonConverter[RecordWithEnums, np.void]):
             enum=self._enum_converter.from_json(json_object["enum"],),
             flags=self._flags_converter.from_json(json_object["flags"],),
             flags_2=self._flags_2_converter.from_json(json_object["flags2"],),
+            rec=self._rec_converter.from_json(json_object["rec"],),
         )
 
     def from_json_to_numpy(self, json_object: object) -> np.void:
@@ -1455,6 +1498,7 @@ class RecordWithEnumsConverter(_ndjson.JsonConverter[RecordWithEnums, np.void]):
             self._enum_converter.from_json_to_numpy(json_object["enum"]),
             self._flags_converter.from_json_to_numpy(json_object["flags"]),
             self._flags_2_converter.from_json_to_numpy(json_object["flags2"]),
+            self._rec_converter.from_json_to_numpy(json_object["rec"]),
         ) # type:ignore 
 
 
@@ -3632,6 +3676,11 @@ class NDJsonEnumsWriter(_ndjson.NDJsonProtocolWriter, EnumsWriterBase):
         json_value = converter.to_json(value)
         self._write_json_line({"size": json_value})
 
+    def _write_rec(self, value: RecordWithEnums) -> None:
+        converter = RecordWithEnumsConverter()
+        json_value = converter.to_json(value)
+        self._write_json_line({"rec": json_value})
+
 
 class NDJsonEnumsReader(_ndjson.NDJsonProtocolReader, EnumsReaderBase):
     """NDJson writer for the Enums protocol."""
@@ -3654,6 +3703,11 @@ class NDJsonEnumsReader(_ndjson.NDJsonProtocolReader, EnumsReaderBase):
     def _read_size(self) -> SizeBasedEnum:
         json_object = self._read_json_line("size", True)
         converter = _ndjson.EnumConverter(SizeBasedEnum, np.uint64, size_based_enum_name_to_value_map, size_based_enum_value_to_name_map)
+        return converter.from_json(json_object)
+
+    def _read_rec(self) -> RecordWithEnums:
+        json_object = self._read_json_line("rec", True)
+        converter = RecordWithEnumsConverter()
         return converter.from_json(json_object)
 
 class NDJsonFlagsWriter(_ndjson.NDJsonProtocolWriter, FlagsWriterBase):

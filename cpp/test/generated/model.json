@@ -33,15 +33,15 @@
             "values": [
               {
                 "symbol": "apple",
-                "value": 0
-              },
-              {
-                "symbol": "banana",
                 "value": 1
               },
               {
-                "symbol": "pear",
+                "symbol": "banana",
                 "value": 2
+              },
+              {
+                "symbol": "pear",
+                "value": 3
               }
             ]
           }
@@ -1477,6 +1477,17 @@
         },
         {
           "record": {
+            "name": "RecordWithNoDefaultEnum",
+            "fields": [
+              {
+                "name": "enum",
+                "type": "TestModel.Fruits"
+              }
+            ]
+          }
+        },
+        {
+          "record": {
             "name": "RecordWithEnums",
             "fields": [
               {
@@ -1490,6 +1501,10 @@
               {
                 "name": "flags2",
                 "type": "TestModel.TextFormat"
+              },
+              {
+                "name": "rec",
+                "type": "TestModel.RecordWithNoDefaultEnum"
               }
             ]
           }
@@ -5032,6 +5047,10 @@
             {
               "name": "size",
               "type": "TestModel.SizeBasedEnum"
+            },
+            {
+              "name": "rec",
+              "type": "TestModel.RecordWithEnums"
             }
           ]
         },

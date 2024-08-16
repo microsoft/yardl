@@ -40,15 +40,30 @@ def test_enum_equality():
 
 def test_record_with_enum_equality():
     a = tm.RecordWithEnums(
-        enum=tm.Fruits.APPLE, flags=tm.DaysOfWeek.SATURDAY | tm.DaysOfWeek.SUNDAY
+        enum=tm.Fruits.APPLE,
+        flags=tm.DaysOfWeek.SATURDAY | tm.DaysOfWeek.SUNDAY,
+        rec=tm.RecordWithNoDefaultEnum(enum=tm.Fruits.PEAR),
     )
     b = tm.RecordWithEnums(
-        enum=tm.Fruits.APPLE, flags=tm.DaysOfWeek.SATURDAY | tm.DaysOfWeek.SUNDAY
+        enum=tm.Fruits.APPLE,
+        flags=tm.DaysOfWeek.SATURDAY | tm.DaysOfWeek.SUNDAY,
+        rec=tm.RecordWithNoDefaultEnum(enum=tm.Fruits.PEAR),
     )
     assert a == b
 
-    c = tm.RecordWithEnums(enum=tm.Fruits.APPLE, flags=tm.DaysOfWeek.SATURDAY)
+    c = tm.RecordWithEnums(
+        enum=tm.Fruits.APPLE,
+        flags=tm.DaysOfWeek.SATURDAY,
+        rec=tm.RecordWithNoDefaultEnum(enum=tm.Fruits.PEAR),
+    )
     assert a != c
+
+    d = tm.RecordWithEnums(
+        enum=tm.Fruits.APPLE,
+        flags=tm.DaysOfWeek.SATURDAY | tm.DaysOfWeek.SUNDAY,
+        rec=tm.RecordWithNoDefaultEnum(enum=tm.Fruits.APPLE),
+    )
+    assert a != d
 
 
 def test_date_equality():

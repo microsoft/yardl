@@ -986,6 +986,7 @@ class EnumsWriter : public test_model::EnumsWriterBase, yardl::ndjson::NDJsonWri
   void WriteSingleImpl(test_model::Fruits const& value) override;
   void WriteVecImpl(std::vector<test_model::Fruits> const& value) override;
   void WriteSizeImpl(test_model::SizeBasedEnum const& value) override;
+  void WriteRecImpl(test_model::RecordWithEnums const& value) override;
   void CloseImpl() override;
 };
 
@@ -1004,6 +1005,7 @@ class EnumsReader : public test_model::EnumsReaderBase, yardl::ndjson::NDJsonRea
   void ReadSingleImpl(test_model::Fruits& value) override;
   void ReadVecImpl(std::vector<test_model::Fruits>& value) override;
   void ReadSizeImpl(test_model::SizeBasedEnum& value) override;
+  void ReadRecImpl(test_model::RecordWithEnums& value) override;
   void CloseImpl() override;
 };
 

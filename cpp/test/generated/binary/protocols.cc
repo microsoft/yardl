@@ -359,6 +359,15 @@ struct IsTriviallySerializable<test_model::RecordWithUnionsOfContainers> {
 };
 
 template <>
+struct IsTriviallySerializable<test_model::RecordWithNoDefaultEnum> {
+  using __T__ = test_model::RecordWithNoDefaultEnum;
+  static constexpr bool value = 
+    std::is_standard_layout_v<__T__> &&
+    IsTriviallySerializable<decltype(__T__::enum_field)>::value &&
+    (sizeof(__T__) == (sizeof(__T__::enum_field)));
+};
+
+template <>
 struct IsTriviallySerializable<test_model::RecordWithEnums> {
   using __T__ = test_model::RecordWithEnums;
   static constexpr bool value = 
@@ -366,8 +375,9 @@ struct IsTriviallySerializable<test_model::RecordWithEnums> {
     IsTriviallySerializable<decltype(__T__::enum_field)>::value &&
     IsTriviallySerializable<decltype(__T__::flags)>::value &&
     IsTriviallySerializable<decltype(__T__::flags_2)>::value &&
-    (sizeof(__T__) == (sizeof(__T__::enum_field) + sizeof(__T__::flags) + sizeof(__T__::flags_2))) &&
-    offsetof(__T__, enum_field) < offsetof(__T__, flags) && offsetof(__T__, flags) < offsetof(__T__, flags_2);
+    IsTriviallySerializable<decltype(__T__::rec)>::value &&
+    (sizeof(__T__) == (sizeof(__T__::enum_field) + sizeof(__T__::flags) + sizeof(__T__::flags_2) + sizeof(__T__::rec))) &&
+    offsetof(__T__, enum_field) < offsetof(__T__, flags) && offsetof(__T__, flags) < offsetof(__T__, flags_2) && offsetof(__T__, flags_2) < offsetof(__T__, rec);
 };
 
 template <typename T1, typename T2>
@@ -1685,6 +1695,24 @@ namespace {
   yardl::binary::ReadFlags<basic_types::TextFormat>(stream, value);
 }
 
+[[maybe_unused]] void WriteRecordWithNoDefaultEnum(yardl::binary::CodedOutputStream& stream, test_model::RecordWithNoDefaultEnum const& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<test_model::RecordWithNoDefaultEnum>::value) {
+    yardl::binary::WriteTriviallySerializable(stream, value);
+    return;
+  }
+
+  test_model::binary::WriteFruits(stream, value.enum_field);
+}
+
+[[maybe_unused]] void ReadRecordWithNoDefaultEnum(yardl::binary::CodedInputStream& stream, test_model::RecordWithNoDefaultEnum& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<test_model::RecordWithNoDefaultEnum>::value) {
+    yardl::binary::ReadTriviallySerializable(stream, value);
+    return;
+  }
+
+  test_model::binary::ReadFruits(stream, value.enum_field);
+}
+
 [[maybe_unused]] void WriteRecordWithEnums(yardl::binary::CodedOutputStream& stream, test_model::RecordWithEnums const& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<test_model::RecordWithEnums>::value) {
     yardl::binary::WriteTriviallySerializable(stream, value);
@@ -1694,6 +1722,7 @@ namespace {
   test_model::binary::WriteFruits(stream, value.enum_field);
   test_model::binary::WriteDaysOfWeek(stream, value.flags);
   test_model::binary::WriteTextFormat(stream, value.flags_2);
+  test_model::binary::WriteRecordWithNoDefaultEnum(stream, value.rec);
 }
 
 [[maybe_unused]] void ReadRecordWithEnums(yardl::binary::CodedInputStream& stream, test_model::RecordWithEnums& value) {
@@ -1705,6 +1734,7 @@ namespace {
   test_model::binary::ReadFruits(stream, value.enum_field);
   test_model::binary::ReadDaysOfWeek(stream, value.flags);
   test_model::binary::ReadTextFormat(stream, value.flags_2);
+  test_model::binary::ReadRecordWithNoDefaultEnum(stream, value.rec);
 }
 
 template<typename T, yardl::binary::Writer<T> WriteT>
@@ -3841,6 +3871,10 @@ void EnumsWriter::WriteSizeImpl(test_model::SizeBasedEnum const& value) {
   yardl::binary::WriteEnum<test_model::SizeBasedEnum>(stream_, value);
 }
 
+void EnumsWriter::WriteRecImpl(test_model::RecordWithEnums const& value) {
+  test_model::binary::WriteRecordWithEnums(stream_, value);
+}
+
 void EnumsWriter::Flush() {
   stream_.Flush();
 }
@@ -3859,6 +3893,10 @@ void EnumsReader::ReadVecImpl(std::vector<test_model::Fruits>& value) {
 
 void EnumsReader::ReadSizeImpl(test_model::SizeBasedEnum& value) {
   yardl::binary::ReadEnum<test_model::SizeBasedEnum>(stream_, value);
+}
+
+void EnumsReader::ReadRecImpl(test_model::RecordWithEnums& value) {
+  test_model::binary::ReadRecordWithEnums(stream_, value);
 }
 
 void EnumsReader::CloseImpl() {
