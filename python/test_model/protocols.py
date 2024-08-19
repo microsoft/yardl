@@ -4101,11 +4101,11 @@ class MapsWriterBase(abc.ABC):
     def __init__(self) -> None:
         self._state = 0
 
-    schema = r"""{"protocol":{"name":"Maps","sequence":[{"name":"stringToInt","type":{"map":{"keys":"string","values":"int32"}}},{"name":"intToString","type":{"map":{"keys":"int32","values":"string"}}},{"name":"stringToUnion","type":{"map":{"keys":"string","values":[{"tag":"string","type":"string"},{"tag":"int32","type":"int32"}]}}},{"name":"aliasedGeneric","type":{"name":"BasicTypes.AliasedMap","typeArguments":["string","int32"]}}]},"types":[{"name":"AliasedMap","typeParameters":["K","V"],"type":{"map":{"keys":"K","values":"V"}}}]}"""
+    schema = r"""{"protocol":{"name":"Maps","sequence":[{"name":"stringToInt","type":{"map":{"keys":"string","values":"int32"}}},{"name":"intToString","type":{"map":{"keys":"int32","values":"string"}}},{"name":"stringToUnion","type":{"map":{"keys":"string","values":[{"tag":"string","type":"string"},{"tag":"int32","type":"int32"}]}}},{"name":"aliasedGeneric","type":{"name":"BasicTypes.AliasedMap","typeArguments":["string","int32"]}},{"name":"records","type":{"vector":{"items":"TestModel.RecordWithMaps"}}}]},"types":[{"name":"AliasedMap","typeParameters":["K","V"],"type":{"map":{"keys":"K","values":"V"}}},{"name":"RecordWithMaps","fields":[{"name":"set1","type":{"map":{"keys":"uint32","values":"uint32"}}},{"name":"set2","type":{"map":{"keys":"int32","values":"bool"}}}]}]}"""
 
     def close(self) -> None:
         self._close()
-        if self._state != 8:
+        if self._state != 10:
             expected_method = self._state_to_method_name((self._state + 1) & ~1)
             raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
 
@@ -4155,6 +4155,15 @@ class MapsWriterBase(abc.ABC):
         self._write_aliased_generic(value)
         self._state = 8
 
+    def write_records(self, value: list[RecordWithMaps]) -> None:
+        """Ordinal 4"""
+
+        if self._state != 8:
+            self._raise_unexpected_state(8)
+
+        self._write_records(value)
+        self._state = 10
+
     @abc.abstractmethod
     def _write_string_to_int(self, value: dict[str, yardl.Int32]) -> None:
         raise NotImplementedError()
@@ -4169,6 +4178,10 @@ class MapsWriterBase(abc.ABC):
 
     @abc.abstractmethod
     def _write_aliased_generic(self, value: basic_types.AliasedMap[str, yardl.Int32]) -> None:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _write_records(self, value: list[RecordWithMaps]) -> None:
         raise NotImplementedError()
 
     @abc.abstractmethod
@@ -4193,6 +4206,8 @@ class MapsWriterBase(abc.ABC):
             return 'write_string_to_union'
         if state == 6:
             return 'write_aliased_generic'
+        if state == 8:
+            return 'write_records'
         return "<unknown>"
 
 class MapsReaderBase(abc.ABC):
@@ -4204,7 +4219,7 @@ class MapsReaderBase(abc.ABC):
 
     def close(self) -> None:
         self._close()
-        if self._state != 8:
+        if self._state != 10:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
@@ -4269,11 +4284,22 @@ class MapsReaderBase(abc.ABC):
         self._state = 8
         return value
 
+    def read_records(self) -> list[RecordWithMaps]:
+        """Ordinal 4"""
+
+        if self._state != 8:
+            self._raise_unexpected_state(8)
+
+        value = self._read_records()
+        self._state = 10
+        return value
+
     def copy_to(self, writer: MapsWriterBase) -> None:
         writer.write_string_to_int(self.read_string_to_int())
         writer.write_int_to_string(self.read_int_to_string())
         writer.write_string_to_union(self.read_string_to_union())
         writer.write_aliased_generic(self.read_aliased_generic())
+        writer.write_records(self.read_records())
 
     @abc.abstractmethod
     def _read_string_to_int(self) -> dict[str, yardl.Int32]:
@@ -4289,6 +4315,10 @@ class MapsReaderBase(abc.ABC):
 
     @abc.abstractmethod
     def _read_aliased_generic(self) -> basic_types.AliasedMap[str, yardl.Int32]:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _read_records(self) -> list[RecordWithMaps]:
         raise NotImplementedError()
 
     T = typing.TypeVar('T')
@@ -4314,6 +4344,8 @@ class MapsReaderBase(abc.ABC):
             return 'read_string_to_union'
         if state == 6:
             return 'read_aliased_generic'
+        if state == 8:
+            return 'read_records'
         return "<unknown>"
 
 class UnionsWriterBase(abc.ABC):

@@ -115,6 +115,9 @@ void from_json(ordered_json const& j, test_model::RecordWithVlenCollections& val
 void to_json(ordered_json& j, test_model::RecordWithUnionsOfContainers const& value);
 void from_json(ordered_json const& j, test_model::RecordWithUnionsOfContainers& value);
 
+void to_json(ordered_json& j, test_model::RecordWithMaps const& value);
+void from_json(ordered_json const& j, test_model::RecordWithMaps& value);
+
 void to_json(ordered_json& j, test_model::UInt64Enum const& value);
 void from_json(ordered_json const& j, test_model::UInt64Enum& value);
 
@@ -1875,6 +1878,25 @@ void from_json(ordered_json const& j, test_model::RecordWithUnionsOfContainers& 
   }
 }
 
+void to_json(ordered_json& j, test_model::RecordWithMaps const& value) {
+  j = ordered_json::object();
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.set_1)) {
+    j.push_back({"set1", value.set_1});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.set_2)) {
+    j.push_back({"set2", value.set_2});
+  }
+}
+
+void from_json(ordered_json const& j, test_model::RecordWithMaps& value) {
+  if (auto it = j.find("set1"); it != j.end()) {
+    it->get_to(value.set_1);
+  }
+  if (auto it = j.find("set2"); it != j.end()) {
+    it->get_to(value.set_2);
+  }
+}
+
 namespace {
 std::unordered_map<std::string, test_model::UInt64Enum> const __UInt64Enum_values = {
   {"a", test_model::UInt64Enum::kA},
@@ -3380,6 +3402,10 @@ void MapsWriter::WriteAliasedGenericImpl(basic_types::AliasedMap<std::string, in
   ordered_json json_value = value;
   yardl::ndjson::WriteProtocolValue(stream_, "aliasedGeneric", json_value);}
 
+void MapsWriter::WriteRecordsImpl(std::vector<test_model::RecordWithMaps> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "records", json_value);}
+
 void MapsWriter::Flush() {
   stream_.flush();
 }
@@ -3402,6 +3428,10 @@ void MapsReader::ReadStringToUnionImpl(std::unordered_map<std::string, std::vari
 
 void MapsReader::ReadAliasedGenericImpl(basic_types::AliasedMap<std::string, int32_t>& value) {
   yardl::ndjson::ReadProtocolValue(stream_, line_, "aliasedGeneric", true, unused_step_, value);
+}
+
+void MapsReader::ReadRecordsImpl(std::vector<test_model::RecordWithMaps>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "records", true, unused_step_, value);
 }
 
 void MapsReader::CloseImpl() {

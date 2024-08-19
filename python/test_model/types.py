@@ -889,6 +889,31 @@ class RecordWithUnionsOfContainers:
 
 NamedNDArray = npt.NDArray[np.int32]
 
+class RecordWithMaps:
+    set_1: dict[yardl.UInt32, yardl.UInt32]
+    set_2: dict[yardl.Int32, bool]
+
+    def __init__(self, *,
+        set_1: typing.Optional[dict[yardl.UInt32, yardl.UInt32]] = None,
+        set_2: typing.Optional[dict[yardl.Int32, bool]] = None,
+    ):
+        self.set_1 = set_1 if set_1 is not None else {}
+        self.set_2 = set_2 if set_2 is not None else {}
+
+    def __eq__(self, other: object) -> bool:
+        return (
+            isinstance(other, RecordWithMaps)
+            and self.set_1 == other.set_1
+            and self.set_2 == other.set_2
+        )
+
+    def __str__(self) -> str:
+        return f"RecordWithMaps(set1={self.set_1}, set2={self.set_2})"
+
+    def __repr__(self) -> str:
+        return f"RecordWithMaps(set1={repr(self.set_1)}, set2={repr(self.set_2)})"
+
+
 Fruits = basic_types.Fruits
 
 class UInt64Enum(yardl.OutOfRangeEnum):
@@ -2069,6 +2094,7 @@ def _mk_get_dtype():
     dtype_map.setdefault(ArrayOrScalar, np.dtype(np.object_))
     dtype_map.setdefault(ArrayOrScalar.Array, np.dtype(np.object_))
     dtype_map.setdefault(ArrayOrScalar.Scalar, np.dtype(np.int32))
+    dtype_map.setdefault(RecordWithMaps, np.dtype([('set_1', np.dtype(np.object_)), ('set_2', np.dtype(np.object_))], align=True))
     dtype_map.setdefault(Fruits, get_dtype(basic_types.Fruits))
     dtype_map.setdefault(UInt64Enum, np.dtype(np.uint64))
     dtype_map.setdefault(Int64Enum, np.dtype(np.int64))

@@ -359,6 +359,17 @@ struct IsTriviallySerializable<test_model::RecordWithUnionsOfContainers> {
 };
 
 template <>
+struct IsTriviallySerializable<test_model::RecordWithMaps> {
+  using __T__ = test_model::RecordWithMaps;
+  static constexpr bool value = 
+    std::is_standard_layout_v<__T__> &&
+    IsTriviallySerializable<decltype(__T__::set_1)>::value &&
+    IsTriviallySerializable<decltype(__T__::set_2)>::value &&
+    (sizeof(__T__) == (sizeof(__T__::set_1) + sizeof(__T__::set_2))) &&
+    offsetof(__T__, set_1) < offsetof(__T__, set_2);
+};
+
+template <>
 struct IsTriviallySerializable<test_model::RecordWithEnums> {
   using __T__ = test_model::RecordWithEnums;
   static constexpr bool value = 
@@ -1629,6 +1640,26 @@ namespace {
   }
 
   yardl::binary::ReadNDArray<int32_t, yardl::binary::ReadInteger, 2>(stream, value);
+}
+
+[[maybe_unused]] void WriteRecordWithMaps(yardl::binary::CodedOutputStream& stream, test_model::RecordWithMaps const& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<test_model::RecordWithMaps>::value) {
+    yardl::binary::WriteTriviallySerializable(stream, value);
+    return;
+  }
+
+  yardl::binary::WriteMap<uint32_t, uint32_t, yardl::binary::WriteInteger, yardl::binary::WriteInteger>(stream, value.set_1);
+  yardl::binary::WriteMap<int32_t, bool, yardl::binary::WriteInteger, yardl::binary::WriteInteger>(stream, value.set_2);
+}
+
+[[maybe_unused]] void ReadRecordWithMaps(yardl::binary::CodedInputStream& stream, test_model::RecordWithMaps& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<test_model::RecordWithMaps>::value) {
+    yardl::binary::ReadTriviallySerializable(stream, value);
+    return;
+  }
+
+  yardl::binary::ReadMap<uint32_t, uint32_t, yardl::binary::ReadInteger, yardl::binary::ReadInteger>(stream, value.set_1);
+  yardl::binary::ReadMap<int32_t, bool, yardl::binary::ReadInteger, yardl::binary::ReadInteger>(stream, value.set_2);
 }
 
 [[maybe_unused]] void WriteFruits(yardl::binary::CodedOutputStream& stream, test_model::Fruits const& value) {
@@ -3695,6 +3726,10 @@ void MapsWriter::WriteAliasedGenericImpl(basic_types::AliasedMap<std::string, in
   basic_types::binary::WriteAliasedMap<std::string, yardl::binary::WriteString, int32_t, yardl::binary::WriteInteger>(stream_, value);
 }
 
+void MapsWriter::WriteRecordsImpl(std::vector<test_model::RecordWithMaps> const& value) {
+  yardl::binary::WriteVector<test_model::RecordWithMaps, test_model::binary::WriteRecordWithMaps>(stream_, value);
+}
+
 void MapsWriter::Flush() {
   stream_.Flush();
 }
@@ -3717,6 +3752,10 @@ void MapsReader::ReadStringToUnionImpl(std::unordered_map<std::string, std::vari
 
 void MapsReader::ReadAliasedGenericImpl(basic_types::AliasedMap<std::string, int32_t>& value) {
   basic_types::binary::ReadAliasedMap<std::string, yardl::binary::ReadString, int32_t, yardl::binary::ReadInteger>(stream_, value);
+}
+
+void MapsReader::ReadRecordsImpl(std::vector<test_model::RecordWithMaps>& value) {
+  yardl::binary::ReadVector<test_model::RecordWithMaps, test_model::binary::ReadRecordWithMaps>(stream_, value);
 }
 
 void MapsReader::CloseImpl() {

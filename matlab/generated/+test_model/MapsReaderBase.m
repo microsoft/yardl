@@ -12,7 +12,7 @@ classdef MapsReaderBase < handle
 
     function close(self)
       self.close_();
-      if self.state_ ~= 4
+      if self.state_ ~= 5
         expected_method = self.state_to_method_name_(self.state_);
         throw(yardl.ProtocolError("Protocol reader closed before all data was consumed. Expected call to '%s'.", expected_method));
       end
@@ -58,11 +58,22 @@ classdef MapsReaderBase < handle
       self.state_ = 4;
     end
 
+    % Ordinal 4
+    function value = read_records(self)
+      if self.state_ ~= 4
+        self.raise_unexpected_state_(4);
+      end
+
+      value = self.read_records_();
+      self.state_ = 5;
+    end
+
     function copy_to(self, writer)
       writer.write_string_to_int(self.read_string_to_int());
       writer.write_int_to_string(self.read_int_to_string());
       writer.write_string_to_union(self.read_string_to_union());
       writer.write_aliased_generic(self.read_aliased_generic());
+      writer.write_records(self.read_records());
     end
   end
 
@@ -77,6 +88,7 @@ classdef MapsReaderBase < handle
     read_int_to_string_(self)
     read_string_to_union_(self)
     read_aliased_generic_(self)
+    read_records_(self)
 
     close_(self)
   end
@@ -97,6 +109,8 @@ classdef MapsReaderBase < handle
         name = "read_string_to_union";
       elseif state == 3
         name = "read_aliased_generic";
+      elseif state == 4
+        name = "read_records";
       else
         name = "<unknown>";
       end

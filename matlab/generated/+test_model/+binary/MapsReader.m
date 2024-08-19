@@ -7,6 +7,7 @@ classdef MapsReader < yardl.binary.BinaryProtocolReader & test_model.MapsReaderB
     int_to_string_serializer
     string_to_union_serializer
     aliased_generic_serializer
+    records_serializer
   end
 
   methods
@@ -17,6 +18,7 @@ classdef MapsReader < yardl.binary.BinaryProtocolReader & test_model.MapsReaderB
       self.int_to_string_serializer = yardl.binary.MapSerializer(yardl.binary.Int32Serializer, yardl.binary.StringSerializer);
       self.string_to_union_serializer = yardl.binary.MapSerializer(yardl.binary.StringSerializer, yardl.binary.UnionSerializer('test_model.StringOrInt32', {yardl.binary.StringSerializer, yardl.binary.Int32Serializer}, {@test_model.StringOrInt32.String, @test_model.StringOrInt32.Int32}));
       self.aliased_generic_serializer = yardl.binary.MapSerializer(yardl.binary.StringSerializer, yardl.binary.Int32Serializer);
+      self.records_serializer = yardl.binary.VectorSerializer(test_model.binary.RecordWithMapsSerializer());
     end
   end
 
@@ -35,6 +37,10 @@ classdef MapsReader < yardl.binary.BinaryProtocolReader & test_model.MapsReaderB
 
     function value = read_aliased_generic_(self)
       value = self.aliased_generic_serializer.read(self.stream_);
+    end
+
+    function value = read_records_(self)
+      value = self.records_serializer.read(self.stream_);
     end
   end
 end

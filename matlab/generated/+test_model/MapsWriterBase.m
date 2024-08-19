@@ -13,7 +13,7 @@ classdef (Abstract) MapsWriterBase < handle
 
     function close(self)
       self.close_();
-      if self.state_ ~= 4
+      if self.state_ ~= 5
         expected_method = self.state_to_method_name_(self.state_);
         throw(yardl.ProtocolError("Protocol writer closed before all steps were called. Expected call to '%s'.", expected_method));
       end
@@ -58,11 +58,21 @@ classdef (Abstract) MapsWriterBase < handle
       self.write_aliased_generic_(value);
       self.state_ = 4;
     end
+
+    % Ordinal 4
+    function write_records(self, value)
+      if self.state_ ~= 4
+        self.raise_unexpected_state_(4);
+      end
+
+      self.write_records_(value);
+      self.state_ = 5;
+    end
   end
 
   methods (Static)
     function res = schema()
-      res = string('{"protocol":{"name":"Maps","sequence":[{"name":"stringToInt","type":{"map":{"keys":"string","values":"int32"}}},{"name":"intToString","type":{"map":{"keys":"int32","values":"string"}}},{"name":"stringToUnion","type":{"map":{"keys":"string","values":[{"tag":"string","type":"string"},{"tag":"int32","type":"int32"}]}}},{"name":"aliasedGeneric","type":{"name":"BasicTypes.AliasedMap","typeArguments":["string","int32"]}}]},"types":[{"name":"AliasedMap","typeParameters":["K","V"],"type":{"map":{"keys":"K","values":"V"}}}]}');
+      res = string('{"protocol":{"name":"Maps","sequence":[{"name":"stringToInt","type":{"map":{"keys":"string","values":"int32"}}},{"name":"intToString","type":{"map":{"keys":"int32","values":"string"}}},{"name":"stringToUnion","type":{"map":{"keys":"string","values":[{"tag":"string","type":"string"},{"tag":"int32","type":"int32"}]}}},{"name":"aliasedGeneric","type":{"name":"BasicTypes.AliasedMap","typeArguments":["string","int32"]}},{"name":"records","type":{"vector":{"items":"TestModel.RecordWithMaps"}}}]},"types":[{"name":"AliasedMap","typeParameters":["K","V"],"type":{"map":{"keys":"K","values":"V"}}},{"name":"RecordWithMaps","fields":[{"name":"set1","type":{"map":{"keys":"uint32","values":"uint32"}}},{"name":"set2","type":{"map":{"keys":"int32","values":"bool"}}}]}]}');
     end
   end
 
@@ -71,6 +81,7 @@ classdef (Abstract) MapsWriterBase < handle
     write_int_to_string_(self, value)
     write_string_to_union_(self, value)
     write_aliased_generic_(self, value)
+    write_records_(self, value)
 
     end_stream_(self)
     close_(self)
@@ -92,6 +103,8 @@ classdef (Abstract) MapsWriterBase < handle
         name = "write_string_to_union";
       elseif state == 3
         name = "write_aliased_generic";
+      elseif state == 4
+        name = "write_records";
       else
         name = '<unknown>';
       end

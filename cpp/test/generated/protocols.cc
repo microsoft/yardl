@@ -3999,6 +3999,7 @@ void MapsWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end, ui
   case 1: expected_method = "WriteIntToString()"; break;
   case 2: expected_method = "WriteStringToUnion()"; break;
   case 3: expected_method = "WriteAliasedGeneric()"; break;
+  case 4: expected_method = "WriteRecords()"; break;
   }
   std::string attempted_method;
   switch (attempted) {
@@ -4006,7 +4007,8 @@ void MapsWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end, ui
   case 1: attempted_method = "WriteIntToString()"; break;
   case 2: attempted_method = "WriteStringToUnion()"; break;
   case 3: attempted_method = "WriteAliasedGeneric()"; break;
-  case 4: attempted_method = "Close()"; break;
+  case 4: attempted_method = "WriteRecords()"; break;
+  case 5: attempted_method = "Close()"; break;
   }
   throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
 }
@@ -4018,7 +4020,8 @@ void MapsReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
     case 1: return "ReadIntToString()";
     case 2: return "ReadStringToUnion()";
     case 3: return "ReadAliasedGeneric()";
-    case 4: return "Close()";
+    case 4: return "ReadRecords()";
+    case 5: return "Close()";
     default: return "<unknown>";
     }
   };
@@ -4027,7 +4030,7 @@ void MapsReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
 
 } // namespace 
 
-std::string MapsWriterBase::schema_ = R"({"protocol":{"name":"Maps","sequence":[{"name":"stringToInt","type":{"map":{"keys":"string","values":"int32"}}},{"name":"intToString","type":{"map":{"keys":"int32","values":"string"}}},{"name":"stringToUnion","type":{"map":{"keys":"string","values":[{"tag":"string","type":"string"},{"tag":"int32","type":"int32"}]}}},{"name":"aliasedGeneric","type":{"name":"BasicTypes.AliasedMap","typeArguments":["string","int32"]}}]},"types":[{"name":"AliasedMap","typeParameters":["K","V"],"type":{"map":{"keys":"K","values":"V"}}}]})";
+std::string MapsWriterBase::schema_ = R"({"protocol":{"name":"Maps","sequence":[{"name":"stringToInt","type":{"map":{"keys":"string","values":"int32"}}},{"name":"intToString","type":{"map":{"keys":"int32","values":"string"}}},{"name":"stringToUnion","type":{"map":{"keys":"string","values":[{"tag":"string","type":"string"},{"tag":"int32","type":"int32"}]}}},{"name":"aliasedGeneric","type":{"name":"BasicTypes.AliasedMap","typeArguments":["string","int32"]}},{"name":"records","type":{"vector":{"items":"TestModel.RecordWithMaps"}}}]},"types":[{"name":"AliasedMap","typeParameters":["K","V"],"type":{"map":{"keys":"K","values":"V"}}},{"name":"RecordWithMaps","fields":[{"name":"set1","type":{"map":{"keys":"uint32","values":"uint32"}}},{"name":"set2","type":{"map":{"keys":"int32","values":"bool"}}}]}]})";
 
 std::vector<std::string> MapsWriterBase::previous_schemas_ = {
 };
@@ -4075,9 +4078,18 @@ void MapsWriterBase::WriteAliasedGeneric(basic_types::AliasedMap<std::string, in
   state_ = 4;
 }
 
-void MapsWriterBase::Close() {
+void MapsWriterBase::WriteRecords(std::vector<test_model::RecordWithMaps> const& value) {
   if (unlikely(state_ != 4)) {
     MapsWriterBaseInvalidState(4, false, state_);
+  }
+
+  WriteRecordsImpl(value);
+  state_ = 5;
+}
+
+void MapsWriterBase::Close() {
+  if (unlikely(state_ != 5)) {
+    MapsWriterBaseInvalidState(5, false, state_);
   }
 
   CloseImpl();
@@ -4129,9 +4141,18 @@ void MapsReaderBase::ReadAliasedGeneric(basic_types::AliasedMap<std::string, int
   state_ = 8;
 }
 
-void MapsReaderBase::Close() {
+void MapsReaderBase::ReadRecords(std::vector<test_model::RecordWithMaps>& value) {
   if (unlikely(state_ != 8)) {
     MapsReaderBaseInvalidState(8, state_);
+  }
+
+  ReadRecordsImpl(value);
+  state_ = 10;
+}
+
+void MapsReaderBase::Close() {
+  if (unlikely(state_ != 10)) {
+    MapsReaderBaseInvalidState(10, state_);
   }
 
   CloseImpl();
@@ -4156,6 +4177,11 @@ void MapsReaderBase::CopyTo(MapsWriterBase& writer) {
     basic_types::AliasedMap<std::string, int32_t> value;
     ReadAliasedGeneric(value);
     writer.WriteAliasedGeneric(value);
+  }
+  {
+    std::vector<test_model::RecordWithMaps> value;
+    ReadRecords(value);
+    writer.WriteRecords(value);
   }
 }
 
