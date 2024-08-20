@@ -42,10 +42,6 @@ target_link_libraries(benchmark
 
 add_subdirectory(generated)
 
-if (MSVC)
-target_compile_options(test_model_generated PRIVATE /bigobj)
-endif()
-
 gtest_discover_tests(tests)
 
 add_executable(translator

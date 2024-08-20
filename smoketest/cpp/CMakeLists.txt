@@ -12,4 +12,8 @@ endif()
 add_executable(smoketest smoketest.cc)
 target_link_libraries(smoketest smoketest_generated)
 
+if (MSVC)
+  target_compile_options(test_model_generated PRIVATE /bigobj)
+endif()
+
 add_subdirectory(generated)
