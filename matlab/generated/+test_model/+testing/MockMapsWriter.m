@@ -7,6 +7,7 @@ classdef MockMapsWriter < matlab.mixin.Copyable & test_model.MapsWriterBase
     expected_int_to_string
     expected_string_to_union
     expected_aliased_generic
+    expected_records
   end
 
   methods
@@ -16,6 +17,7 @@ classdef MockMapsWriter < matlab.mixin.Copyable & test_model.MapsWriterBase
       self.expected_int_to_string = yardl.None;
       self.expected_string_to_union = yardl.None;
       self.expected_aliased_generic = yardl.None;
+      self.expected_records = yardl.None;
     end
 
     function expect_write_string_to_int_(self, value)
@@ -34,11 +36,16 @@ classdef MockMapsWriter < matlab.mixin.Copyable & test_model.MapsWriterBase
       self.expected_aliased_generic = yardl.Optional(value);
     end
 
+    function expect_write_records_(self, value)
+      self.expected_records = yardl.Optional(value);
+    end
+
     function verify(self)
       self.testCase_.verifyEqual(self.expected_string_to_int, yardl.None, "Expected call to write_string_to_int_ was not received");
       self.testCase_.verifyEqual(self.expected_int_to_string, yardl.None, "Expected call to write_int_to_string_ was not received");
       self.testCase_.verifyEqual(self.expected_string_to_union, yardl.None, "Expected call to write_string_to_union_ was not received");
       self.testCase_.verifyEqual(self.expected_aliased_generic, yardl.None, "Expected call to write_aliased_generic_ was not received");
+      self.testCase_.verifyEqual(self.expected_records, yardl.None, "Expected call to write_records_ was not received");
     end
   end
 
@@ -65,6 +72,12 @@ classdef MockMapsWriter < matlab.mixin.Copyable & test_model.MapsWriterBase
       self.testCase_.verifyTrue(self.expected_aliased_generic.has_value(), "Unexpected call to write_aliased_generic_");
       self.testCase_.verifyEqual(value, self.expected_aliased_generic.value, "Unexpected argument value for call to write_aliased_generic_");
       self.expected_aliased_generic = yardl.None;
+    end
+
+    function write_records_(self, value)
+      self.testCase_.verifyTrue(self.expected_records.has_value(), "Unexpected call to write_records_");
+      self.testCase_.verifyEqual(value, self.expected_records.value, "Unexpected argument value for call to write_records_");
+      self.expected_records = yardl.None;
     end
 
     function close_(self)

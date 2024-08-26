@@ -4,7 +4,7 @@ project(smoketest)
 set(CMAKE_CXX_STANDARD 17)
 
 if(WIN32)
-  add_compile_options(/W3 /WX)
+  add_compile_options(/W3 /WX /bigobj)
 else()
   add_compile_options(-Wall -Wextra -pedantic -Werror)
 endif()

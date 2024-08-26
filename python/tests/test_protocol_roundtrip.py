@@ -533,6 +533,12 @@ def test_maps(format: Format):
             {"a": tm.StringOrInt32.Int32(1), "b": tm.StringOrInt32.String("2")}
         )
         w.write_aliased_generic({"a": 1, "b": 2, "c": 3})
+        w.write_records(
+            [
+                tm.RecordWithMaps(set_1={1: 1, 2: 2}, set_2={-1: True, 3: False}),
+                tm.RecordWithMaps(set_1={1: 2, 2: 1}, set_2={-1: False, 3: True}),
+            ]
+        )
 
 
 def test_unions(format: Format):

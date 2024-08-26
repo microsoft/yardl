@@ -2593,6 +2593,22 @@ class MockMapsWriter : public MapsWriterBase {
     WriteAliasedGenericImpl_expected_values_.push(value);
   }
 
+  void WriteRecordsImpl (std::vector<test_model::RecordWithMaps> const& value) override {
+    if (WriteRecordsImpl_expected_values_.empty()) {
+      throw std::runtime_error("Unexpected call to WriteRecordsImpl");
+    }
+    if (WriteRecordsImpl_expected_values_.front() != value) {
+      throw std::runtime_error("Unexpected argument value for call to WriteRecordsImpl");
+    }
+    WriteRecordsImpl_expected_values_.pop();
+  }
+
+  std::queue<std::vector<test_model::RecordWithMaps>> WriteRecordsImpl_expected_values_;
+
+  void ExpectWriteRecordsImpl (std::vector<test_model::RecordWithMaps> const& value) {
+    WriteRecordsImpl_expected_values_.push(value);
+  }
+
   void Verify() {
     if (!WriteStringToIntImpl_expected_values_.empty()) {
       throw std::runtime_error("Expected call to WriteStringToIntImpl was not received");
@@ -2605,6 +2621,9 @@ class MockMapsWriter : public MapsWriterBase {
     }
     if (!WriteAliasedGenericImpl_expected_values_.empty()) {
       throw std::runtime_error("Expected call to WriteAliasedGenericImpl was not received");
+    }
+    if (!WriteRecordsImpl_expected_values_.empty()) {
+      throw std::runtime_error("Expected call to WriteRecordsImpl was not received");
     }
   }
 };
@@ -2639,6 +2658,11 @@ class TestMapsWriterBase : public MapsWriterBase {
   void WriteAliasedGenericImpl(basic_types::AliasedMap<std::string, int32_t> const& value) override {
     writer_->WriteAliasedGeneric(value);
     mock_writer_.ExpectWriteAliasedGenericImpl(value);
+  }
+
+  void WriteRecordsImpl(std::vector<test_model::RecordWithMaps> const& value) override {
+    writer_->WriteRecords(value);
+    mock_writer_.ExpectWriteRecordsImpl(value);
   }
 
   void CloseImpl() override {

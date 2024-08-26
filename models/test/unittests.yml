@@ -309,6 +309,11 @@ ComplexArrays: !protocol
     floats: complexfloat32[]
     doubles: complexfloat64[,]
 
+RecordWithMaps: !record
+  fields:
+    set1: uint->uint
+    set2: int->bool
+
 Maps: !protocol
   sequence:
     stringToInt: string->int
@@ -317,6 +322,7 @@ Maps: !protocol
       keys: string
       values: [string, int]
     aliasedGeneric: BasicTypes.AliasedMap<string, int>
+    records: RecordWithMaps*
 
 Unions: !protocol
   sequence:

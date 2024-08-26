@@ -739,6 +739,8 @@ class MapsWriter : public test_model::MapsWriterBase, public yardl::hdf5::Hdf5Wr
 
   void WriteAliasedGenericImpl(basic_types::AliasedMap<std::string, int32_t> const& value) override;
 
+  void WriteRecordsImpl(std::vector<test_model::RecordWithMaps> const& value) override;
+
   private:
 };
 
@@ -754,6 +756,8 @@ class MapsReader : public test_model::MapsReaderBase, public yardl::hdf5::Hdf5Re
   void ReadStringToUnionImpl(std::unordered_map<std::string, std::variant<std::string, int32_t>>& value) override;
 
   void ReadAliasedGenericImpl(basic_types::AliasedMap<std::string, int32_t>& value) override;
+
+  void ReadRecordsImpl(std::vector<test_model::RecordWithMaps>& value) override;
 
   private:
 };

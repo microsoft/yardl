@@ -89,6 +89,7 @@ from .types import (
     RecordWithGenericVectors,
     RecordWithIntVectors,
     RecordWithKeywordFields,
+    RecordWithMaps,
     RecordWithNDArrays,
     RecordWithNDArraysSingleDimension,
     RecordWithNamedFixedArrays,

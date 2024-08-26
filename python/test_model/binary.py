@@ -779,6 +779,9 @@ class BinaryMapsWriter(_binary.BinaryProtocolWriter, MapsWriterBase):
     def _write_aliased_generic(self, value: basic_types.AliasedMap[str, yardl.Int32]) -> None:
         _binary.MapSerializer(_binary.string_serializer, _binary.int32_serializer).write(self._stream, value)
 
+    def _write_records(self, value: list[RecordWithMaps]) -> None:
+        _binary.VectorSerializer(RecordWithMapsSerializer()).write(self._stream, value)
+
 
 class BinaryMapsReader(_binary.BinaryProtocolReader, MapsReaderBase):
     """Binary writer for the Maps protocol."""
@@ -799,6 +802,9 @@ class BinaryMapsReader(_binary.BinaryProtocolReader, MapsReaderBase):
 
     def _read_aliased_generic(self) -> basic_types.AliasedMap[str, yardl.Int32]:
         return _binary.MapSerializer(_binary.string_serializer, _binary.int32_serializer).read(self._stream)
+
+    def _read_records(self) -> list[RecordWithMaps]:
+        return _binary.VectorSerializer(RecordWithMapsSerializer()).read(self._stream)
 
 class BinaryUnionsWriter(_binary.BinaryProtocolWriter, UnionsWriterBase):
     """Binary writer for the Unions protocol."""
@@ -1704,6 +1710,24 @@ class RecordWithUnionsOfContainersSerializer(_binary.RecordSerializer[RecordWith
     def read(self, stream: _binary.CodedInputStream) -> RecordWithUnionsOfContainers:
         field_values = self._read(stream)
         return RecordWithUnionsOfContainers(map_or_scalar=field_values[0], vector_or_scalar=field_values[1], array_or_scalar=field_values[2])
+
+
+class RecordWithMapsSerializer(_binary.RecordSerializer[RecordWithMaps]):
+    def __init__(self) -> None:
+        super().__init__([("set_1", _binary.MapSerializer(_binary.uint32_serializer, _binary.uint32_serializer)), ("set_2", _binary.MapSerializer(_binary.int32_serializer, _binary.bool_serializer))])
+
+    def write(self, stream: _binary.CodedOutputStream, value: RecordWithMaps) -> None:
+        if isinstance(value, np.void):
+            self.write_numpy(stream, value)
+            return
+        self._write(stream, value.set_1, value.set_2)
+
+    def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
+        self._write(stream, value['set_1'], value['set_2'])
+
+    def read(self, stream: _binary.CodedInputStream) -> RecordWithMaps:
+        field_values = self._read(stream)
+        return RecordWithMaps(set_1=field_values[0], set_2=field_values[1])
 
 
 class RecordWithNoDefaultEnumSerializer(_binary.RecordSerializer[RecordWithNoDefaultEnum]):

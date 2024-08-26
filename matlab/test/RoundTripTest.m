@@ -313,6 +313,10 @@ classdef RoundTripTest < matlab.unittest.TestCase
                 ) ...
             );
             w.write_aliased_generic(d);
+
+            r1 = test_model.RecordWithMaps(set_1=dictionary(uint32(1), uint32(1), uint32(2), uint32(2)), set_2=dictionary(int32(-1), true, int32(3), false));
+            r2 = test_model.RecordWithMaps(set_1=dictionary(uint32(1), uint32(2), uint32(2), uint32(1)), set_2=dictionary(int32(-1), false, int32(3), true));
+            w.write_records([r1, r2]);
             w.close();
 
             % Now again for "empty" maps
@@ -321,6 +325,8 @@ classdef RoundTripTest < matlab.unittest.TestCase
             w.write_int_to_string(dictionary());
             w.write_string_to_union(dictionary());
             w.write_aliased_generic(dictionary());
+            w.write_records([test_model.RecordWithMaps(set_1=dictionary(), set_2=dictionary())]);
+
             w.close();
         end
 

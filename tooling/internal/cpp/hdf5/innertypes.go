@@ -290,6 +290,8 @@ func needsInnerType(node dsl.Node) bool {
 					result = true
 					return
 				}
+			case *dsl.Map:
+				result = true
 			}
 			self.VisitChildren(node)
 		case dsl.PrimitiveDefinition:

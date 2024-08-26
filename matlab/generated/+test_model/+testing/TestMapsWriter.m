@@ -50,6 +50,11 @@ classdef TestMapsWriter < test_model.MapsWriterBase
       self.mock_writer_.expect_write_aliased_generic_(value);
     end
 
+    function write_records_(self, value)
+      self.writer_.write_records(value);
+      self.mock_writer_.expect_write_records_(value);
+    end
+
     function close_(self)
       self.close_called_ = true;
       self.writer_.close();

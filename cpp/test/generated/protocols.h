@@ -1734,6 +1734,9 @@ class MapsWriterBase {
   // Ordinal 3.
   void WriteAliasedGeneric(basic_types::AliasedMap<std::string, int32_t> const& value);
 
+  // Ordinal 4.
+  void WriteRecords(std::vector<test_model::RecordWithMaps> const& value);
+
   // Optionaly close this writer before destructing. Validates that all steps were completed.
   void Close();
 
@@ -1747,6 +1750,7 @@ class MapsWriterBase {
   virtual void WriteIntToStringImpl(std::unordered_map<int32_t, std::string> const& value) = 0;
   virtual void WriteStringToUnionImpl(std::unordered_map<std::string, std::variant<std::string, int32_t>> const& value) = 0;
   virtual void WriteAliasedGenericImpl(basic_types::AliasedMap<std::string, int32_t> const& value) = 0;
+  virtual void WriteRecordsImpl(std::vector<test_model::RecordWithMaps> const& value) = 0;
   virtual void CloseImpl() {}
 
   static std::string schema_;
@@ -1776,6 +1780,9 @@ class MapsReaderBase {
   // Ordinal 3.
   void ReadAliasedGeneric(basic_types::AliasedMap<std::string, int32_t>& value);
 
+  // Ordinal 4.
+  void ReadRecords(std::vector<test_model::RecordWithMaps>& value);
+
   // Optionaly close this writer before destructing. Validates that all steps were completely read.
   void Close();
 
@@ -1788,6 +1795,7 @@ class MapsReaderBase {
   virtual void ReadIntToStringImpl(std::unordered_map<int32_t, std::string>& value) = 0;
   virtual void ReadStringToUnionImpl(std::unordered_map<std::string, std::variant<std::string, int32_t>>& value) = 0;
   virtual void ReadAliasedGenericImpl(basic_types::AliasedMap<std::string, int32_t>& value) = 0;
+  virtual void ReadRecordsImpl(std::vector<test_model::RecordWithMaps>& value) = 0;
   virtual void CloseImpl() {}
   static std::string schema_;
 

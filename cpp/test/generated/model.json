@@ -1414,6 +1414,31 @@
           }
         },
         {
+          "record": {
+            "name": "RecordWithMaps",
+            "fields": [
+              {
+                "name": "set1",
+                "type": {
+                  "map": {
+                    "keys": "uint32",
+                    "values": "uint32"
+                  }
+                }
+              },
+              {
+                "name": "set2",
+                "type": {
+                  "map": {
+                    "keys": "int32",
+                    "values": "bool"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
           "alias": {
             "name": "Fruits",
             "type": "BasicTypes.Fruits"
@@ -4936,6 +4961,14 @@
                   "string",
                   "int32"
                 ]
+              }
+            },
+            {
+              "name": "records",
+              "type": {
+                "vector": {
+                  "items": "TestModel.RecordWithMaps"
+                }
               }
             }
           ]

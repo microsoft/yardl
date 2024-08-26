@@ -366,6 +366,10 @@ TEST_P(RoundTripTests, Maps) {
   tw->WriteIntToString({{1, "a"}, {2, "b"}, {3, "c"}});
   tw->WriteStringToUnion({{"a", 1}, {"b", "2"}});
   tw->WriteAliasedGeneric({{"a", 1}, {"b", 2}, {"c", 3}});
+  tw->WriteRecords({
+      {{{1, 1}, {2, 2}}, {{-1, true}, {3, false}}},
+      {{{1, 2}, {2, 1}}, {{-1, false}, {3, true}}},
+  });
 
   tw->Close();
 }

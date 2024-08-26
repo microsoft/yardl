@@ -730,6 +730,22 @@ struct _Inner_RecordWithUnionsOfContainers {
   ::InnerUnion2<yardl::hdf5::InnerDynamicNdArray<int32_t, int32_t>, yardl::DynamicNDArray<int32_t>, int32_t, int32_t> array_or_scalar;
 };
 
+struct _Inner_RecordWithMaps {
+  _Inner_RecordWithMaps() {} 
+  _Inner_RecordWithMaps(test_model::RecordWithMaps const& o) 
+      : set_1(o.set_1),
+      set_2(o.set_2) {
+  }
+
+  void ToOuter (test_model::RecordWithMaps& o) const {
+    yardl::hdf5::ToOuter(set_1, o.set_1);
+    yardl::hdf5::ToOuter(set_2, o.set_2);
+  }
+
+  yardl::hdf5::InnerMap<uint32_t, uint32_t, uint32_t, uint32_t> set_1;
+  yardl::hdf5::InnerMap<int32_t, int32_t, bool, bool> set_2;
+};
+
 template <typename _T1_Inner, typename T1, typename _T2_Inner, typename T2>
 struct _Inner_GenericRecord {
   _Inner_GenericRecord() {} 
@@ -1366,6 +1382,14 @@ struct _Inner_RecordWithOptionalDate {
   t.insertMember("mapOrScalar", HOFFSET(RecordType, map_or_scalar), ::InnerUnion2Ddl<yardl::hdf5::InnerMap<yardl::hdf5::InnerVlenString, std::string, int32_t, int32_t>, std::unordered_map<std::string, int32_t>, int32_t, int32_t>(false, yardl::hdf5::InnerMapDdl<yardl::hdf5::InnerVlenString, int32_t>(yardl::hdf5::InnerVlenStringDdl(), H5::PredType::NATIVE_INT32), "map", H5::PredType::NATIVE_INT32, "scalar"));
   t.insertMember("vectorOrScalar", HOFFSET(RecordType, vector_or_scalar), ::InnerUnion2Ddl<yardl::hdf5::InnerVlen<int32_t, int32_t>, std::vector<int32_t>, int32_t, int32_t>(false, yardl::hdf5::InnerVlenDdl(H5::PredType::NATIVE_INT32), "vector", H5::PredType::NATIVE_INT32, "scalar"));
   t.insertMember("arrayOrScalar", HOFFSET(RecordType, array_or_scalar), ::InnerUnion2Ddl<yardl::hdf5::InnerDynamicNdArray<int32_t, int32_t>, yardl::DynamicNDArray<int32_t>, int32_t, int32_t>(false, yardl::hdf5::DynamicNDArrayDdl<int32_t, int32_t>(H5::PredType::NATIVE_INT32), "array", H5::PredType::NATIVE_INT32, "scalar"));
+  return t;
+}
+
+[[maybe_unused]] H5::CompType GetRecordWithMapsHdf5Ddl() {
+  using RecordType = test_model::hdf5::_Inner_RecordWithMaps;
+  H5::CompType t(sizeof(RecordType));
+  t.insertMember("set1", HOFFSET(RecordType, set_1), yardl::hdf5::InnerMapDdl<uint32_t, uint32_t>(H5::PredType::NATIVE_UINT32, H5::PredType::NATIVE_UINT32));
+  t.insertMember("set2", HOFFSET(RecordType, set_2), yardl::hdf5::InnerMapDdl<int32_t, bool>(H5::PredType::NATIVE_INT32, H5::PredType::NATIVE_HBOOL));
   return t;
 }
 
@@ -2771,6 +2795,10 @@ void MapsWriter::WriteAliasedGenericImpl(basic_types::AliasedMap<std::string, in
   yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerMap<yardl::hdf5::InnerVlenString, std::string, int32_t, int32_t>, basic_types::AliasedMap<std::string, int32_t>>(group_, "aliasedGeneric", yardl::hdf5::InnerMapDdl<yardl::hdf5::InnerVlenString, int32_t>(yardl::hdf5::InnerVlenStringDdl(), H5::PredType::NATIVE_INT32), value);
 }
 
+void MapsWriter::WriteRecordsImpl(std::vector<test_model::RecordWithMaps> const& value) {
+  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerVlen<test_model::hdf5::_Inner_RecordWithMaps, test_model::RecordWithMaps>, std::vector<test_model::RecordWithMaps>>(group_, "records", yardl::hdf5::InnerVlenDdl(test_model::hdf5::GetRecordWithMapsHdf5Ddl()), value);
+}
+
 MapsReader::MapsReader(std::string path)
     : yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "Maps", schema_) {
 }
@@ -2789,6 +2817,10 @@ void MapsReader::ReadStringToUnionImpl(std::unordered_map<std::string, std::vari
 
 void MapsReader::ReadAliasedGenericImpl(basic_types::AliasedMap<std::string, int32_t>& value) {
   yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerMap<yardl::hdf5::InnerVlenString, std::string, int32_t, int32_t>, basic_types::AliasedMap<std::string, int32_t>>(group_, "aliasedGeneric", yardl::hdf5::InnerMapDdl<yardl::hdf5::InnerVlenString, int32_t>(yardl::hdf5::InnerVlenStringDdl(), H5::PredType::NATIVE_INT32), value);
+}
+
+void MapsReader::ReadRecordsImpl(std::vector<test_model::RecordWithMaps>& value) {
+  yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerVlen<test_model::hdf5::_Inner_RecordWithMaps, test_model::RecordWithMaps>, std::vector<test_model::RecordWithMaps>>(group_, "records", yardl::hdf5::InnerVlenDdl(test_model::hdf5::GetRecordWithMapsHdf5Ddl()), value);
 }
 
 UnionsWriter::UnionsWriter(std::string path)

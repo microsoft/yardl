@@ -1391,6 +1391,50 @@ class RecordWithUnionsOfContainersConverter(_ndjson.JsonConverter[RecordWithUnio
         ) # type:ignore 
 
 
+class RecordWithMapsConverter(_ndjson.JsonConverter[RecordWithMaps, np.void]):
+    def __init__(self) -> None:
+        self._set_1_converter = _ndjson.MapConverter(_ndjson.uint32_converter, _ndjson.uint32_converter)
+        self._set_2_converter = _ndjson.MapConverter(_ndjson.int32_converter, _ndjson.bool_converter)
+        super().__init__(np.dtype([
+            ("set_1", self._set_1_converter.overall_dtype()),
+            ("set_2", self._set_2_converter.overall_dtype()),
+        ]))
+
+    def to_json(self, value: RecordWithMaps) -> object:
+        if not isinstance(value, RecordWithMaps): # pyright: ignore [reportUnnecessaryIsInstance]
+            raise TypeError("Expected 'RecordWithMaps' instance")
+        json_object = {}
+
+        json_object["set1"] = self._set_1_converter.to_json(value.set_1)
+        json_object["set2"] = self._set_2_converter.to_json(value.set_2)
+        return json_object
+
+    def numpy_to_json(self, value: np.void) -> object:
+        if not isinstance(value, np.void): # pyright: ignore [reportUnnecessaryIsInstance]
+            raise TypeError("Expected 'np.void' instance")
+        json_object = {}
+
+        json_object["set1"] = self._set_1_converter.numpy_to_json(value["set_1"])
+        json_object["set2"] = self._set_2_converter.numpy_to_json(value["set_2"])
+        return json_object
+
+    def from_json(self, json_object: object) -> RecordWithMaps:
+        if not isinstance(json_object, dict):
+            raise TypeError("Expected 'dict' instance")
+        return RecordWithMaps(
+            set_1=self._set_1_converter.from_json(json_object["set1"],),
+            set_2=self._set_2_converter.from_json(json_object["set2"],),
+        )
+
+    def from_json_to_numpy(self, json_object: object) -> np.void:
+        if not isinstance(json_object, dict):
+            raise TypeError("Expected 'dict' instance")
+        return (
+            self._set_1_converter.from_json_to_numpy(json_object["set1"]),
+            self._set_2_converter.from_json_to_numpy(json_object["set2"]),
+        ) # type:ignore 
+
+
 u_int64_enum_name_to_value_map = {
     "a": UInt64Enum.A,
 }
@@ -3528,6 +3572,11 @@ class NDJsonMapsWriter(_ndjson.NDJsonProtocolWriter, MapsWriterBase):
         json_value = converter.to_json(value)
         self._write_json_line({"aliasedGeneric": json_value})
 
+    def _write_records(self, value: list[RecordWithMaps]) -> None:
+        converter = _ndjson.VectorConverter(RecordWithMapsConverter())
+        json_value = converter.to_json(value)
+        self._write_json_line({"records": json_value})
+
 
 class NDJsonMapsReader(_ndjson.NDJsonProtocolReader, MapsReaderBase):
     """NDJson writer for the Maps protocol."""
@@ -3555,6 +3604,11 @@ class NDJsonMapsReader(_ndjson.NDJsonProtocolReader, MapsReaderBase):
     def _read_aliased_generic(self) -> basic_types.AliasedMap[str, yardl.Int32]:
         json_object = self._read_json_line("aliasedGeneric", True)
         converter = _ndjson.MapConverter(_ndjson.string_converter, _ndjson.int32_converter)
+        return converter.from_json(json_object)
+
+    def _read_records(self) -> list[RecordWithMaps]:
+        json_object = self._read_json_line("records", True)
+        converter = _ndjson.VectorConverter(RecordWithMapsConverter())
         return converter.from_json(json_object)
 
 class NDJsonUnionsWriter(_ndjson.NDJsonProtocolWriter, UnionsWriterBase):
