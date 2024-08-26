@@ -3,13 +3,13 @@
 classdef Fruits < uint64
   methods (Static)
     function v = APPLE
-      v = basic_types.Fruits(0);
-    end
-    function v = BANANA
       v = basic_types.Fruits(1);
     end
-    function v = PEAR
+    function v = BANANA
       v = basic_types.Fruits(2);
+    end
+    function v = PEAR
+      v = basic_types.Fruits(3);
     end
 
     function z = zeros(varargin)

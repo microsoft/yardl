@@ -30,9 +30,9 @@ struct Tuple {
 
 namespace basic_types {
 enum class Fruits {
-  kApple = 0,
-  kBanana = 1,
-  kPear = 2,
+  kApple = 1,
+  kBanana = 2,
+  kPear = 3,
 };
 
 struct DaysOfWeek : yardl::BaseFlags<int32_t, DaysOfWeek> {
@@ -595,15 +595,29 @@ using DaysOfWeek = basic_types::DaysOfWeek;
 
 using TextFormat = basic_types::TextFormat;
 
+struct RecordWithNoDefaultEnum {
+  test_model::Fruits enum_field{};
+
+  bool operator==(const RecordWithNoDefaultEnum& other) const {
+    return enum_field == other.enum_field;
+  }
+
+  bool operator!=(const RecordWithNoDefaultEnum& other) const {
+    return !(*this == other);
+  }
+};
+
 struct RecordWithEnums {
   test_model::Fruits enum_field{};
   test_model::DaysOfWeek flags{};
   test_model::TextFormat flags_2{};
+  test_model::RecordWithNoDefaultEnum rec{};
 
   bool operator==(const RecordWithEnums& other) const {
     return enum_field == other.enum_field &&
       flags == other.flags &&
-      flags_2 == other.flags_2;
+      flags_2 == other.flags_2 &&
+      rec == other.rec;
   }
 
   bool operator!=(const RecordWithEnums& other) const {

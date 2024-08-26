@@ -954,24 +954,10 @@ func typeDefinitionDefault(t dsl.TypeDefinition, contextNamespace string, st dsl
 		return typeDefault(t.Type, contextNamespace, common.TypeSyntax(t, contextNamespace), st)
 
 	case *dsl.RecordDefinition:
-		if len(t.TypeArguments) == 0 {
-			if len(t.TypeParameters) > 0 {
-				// *Open* Generic Record type
-				// Should never get here - typeDefault is only called on Fields, which must be closed if generic
-				panic(fmt.Sprintf("No typeDefault for open generic record %s", t.Name))
-			}
-
-			for _, f := range t.Fields {
-				_, fieldDefaultKind := typeDefault(f.Type, contextNamespace, "", st)
-				if fieldDefaultKind == defaultValueKindNone {
-					// Basic, closed record type
-					// Should never get here - a Field in a closed record should always have a default type
-					panic(fmt.Sprintf("No typeDefault for record field %s.%s", t.Name, f.Name))
-				}
-			}
-
-			// Basic record type
-			return fmt.Sprintf("%s()", common.TypeSyntaxWithoutTypeParameters(t, contextNamespace)), defaultValueKindMutable
+		if len(t.TypeArguments) == 0 && len(t.TypeParameters) > 0 {
+			// *Open* Generic Record type
+			// Should never get here - typeDefault is only called on Fields, which must be closed if generic
+			panic(fmt.Sprintf("No typeDefault for open generic record %s", t.Name))
 		}
 
 		// t is a *closed* generic record type

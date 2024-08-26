@@ -353,16 +353,22 @@ Enums: !protocol
     single: Fruits
     vec: Fruits*
     size: SizeBasedEnum
+    rec: RecordWithEnums
 
 DaysOfWeek: BasicTypes.DaysOfWeek
 
 TextFormat: BasicTypes.TextFormat
+
+RecordWithNoDefaultEnum: !record
+  fields:
+    enum: Fruits
 
 RecordWithEnums: !record
   fields:
     enum: Fruits
     flags: DaysOfWeek
     flags2: TextFormat
+    rec: RecordWithNoDefaultEnum
 
 Flags: !protocol
   sequence:

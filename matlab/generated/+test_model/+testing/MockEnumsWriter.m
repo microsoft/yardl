@@ -6,6 +6,7 @@ classdef MockEnumsWriter < matlab.mixin.Copyable & test_model.EnumsWriterBase
     expected_single
     expected_vec
     expected_size
+    expected_rec
   end
 
   methods
@@ -14,6 +15,7 @@ classdef MockEnumsWriter < matlab.mixin.Copyable & test_model.EnumsWriterBase
       self.expected_single = yardl.None;
       self.expected_vec = yardl.None;
       self.expected_size = yardl.None;
+      self.expected_rec = yardl.None;
     end
 
     function expect_write_single_(self, value)
@@ -28,10 +30,15 @@ classdef MockEnumsWriter < matlab.mixin.Copyable & test_model.EnumsWriterBase
       self.expected_size = yardl.Optional(value);
     end
 
+    function expect_write_rec_(self, value)
+      self.expected_rec = yardl.Optional(value);
+    end
+
     function verify(self)
       self.testCase_.verifyEqual(self.expected_single, yardl.None, "Expected call to write_single_ was not received");
       self.testCase_.verifyEqual(self.expected_vec, yardl.None, "Expected call to write_vec_ was not received");
       self.testCase_.verifyEqual(self.expected_size, yardl.None, "Expected call to write_size_ was not received");
+      self.testCase_.verifyEqual(self.expected_rec, yardl.None, "Expected call to write_rec_ was not received");
     end
   end
 
@@ -52,6 +59,12 @@ classdef MockEnumsWriter < matlab.mixin.Copyable & test_model.EnumsWriterBase
       self.testCase_.verifyTrue(self.expected_size.has_value(), "Unexpected call to write_size_");
       self.testCase_.verifyEqual(value, self.expected_size.value, "Unexpected argument value for call to write_size_");
       self.expected_size = yardl.None;
+    end
+
+    function write_rec_(self, value)
+      self.testCase_.verifyTrue(self.expected_rec.has_value(), "Unexpected call to write_rec_");
+      self.testCase_.verifyEqual(value, self.expected_rec.value, "Unexpected argument value for call to write_rec_");
+      self.expected_rec = yardl.None;
     end
 
     function close_(self)

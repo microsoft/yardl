@@ -124,6 +124,9 @@ void from_json(ordered_json const& j, test_model::Int64Enum& value);
 void to_json(ordered_json& j, test_model::SizeBasedEnum const& value);
 void from_json(ordered_json const& j, test_model::SizeBasedEnum& value);
 
+void to_json(ordered_json& j, test_model::RecordWithNoDefaultEnum const& value);
+void from_json(ordered_json const& j, test_model::RecordWithNoDefaultEnum& value);
+
 void to_json(ordered_json& j, test_model::RecordWithEnums const& value);
 void from_json(ordered_json const& j, test_model::RecordWithEnums& value);
 
@@ -1976,6 +1979,19 @@ void from_json(ordered_json const& j, test_model::SizeBasedEnum& value) {
   value = static_cast<test_model::SizeBasedEnum>(j.get<underlying_type>());
 }
 
+void to_json(ordered_json& j, test_model::RecordWithNoDefaultEnum const& value) {
+  j = ordered_json::object();
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.enum_field)) {
+    j.push_back({"enum", value.enum_field});
+  }
+}
+
+void from_json(ordered_json const& j, test_model::RecordWithNoDefaultEnum& value) {
+  if (auto it = j.find("enum"); it != j.end()) {
+    it->get_to(value.enum_field);
+  }
+}
+
 void to_json(ordered_json& j, test_model::RecordWithEnums const& value) {
   j = ordered_json::object();
   if (yardl::ndjson::ShouldSerializeFieldValue(value.enum_field)) {
@@ -1986,6 +2002,9 @@ void to_json(ordered_json& j, test_model::RecordWithEnums const& value) {
   }
   if (yardl::ndjson::ShouldSerializeFieldValue(value.flags_2)) {
     j.push_back({"flags2", value.flags_2});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.rec)) {
+    j.push_back({"rec", value.rec});
   }
 }
 
@@ -1998,6 +2017,9 @@ void from_json(ordered_json const& j, test_model::RecordWithEnums& value) {
   }
   if (auto it = j.find("flags2"); it != j.end()) {
     it->get_to(value.flags_2);
+  }
+  if (auto it = j.find("rec"); it != j.end()) {
+    it->get_to(value.rec);
   }
 }
 
@@ -3492,6 +3514,10 @@ void EnumsWriter::WriteSizeImpl(test_model::SizeBasedEnum const& value) {
   ordered_json json_value = value;
   yardl::ndjson::WriteProtocolValue(stream_, "size", json_value);}
 
+void EnumsWriter::WriteRecImpl(test_model::RecordWithEnums const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "rec", json_value);}
+
 void EnumsWriter::Flush() {
   stream_.flush();
 }
@@ -3510,6 +3536,10 @@ void EnumsReader::ReadVecImpl(std::vector<test_model::Fruits>& value) {
 
 void EnumsReader::ReadSizeImpl(test_model::SizeBasedEnum& value) {
   yardl::ndjson::ReadProtocolValue(stream_, line_, "size", true, unused_step_, value);
+}
+
+void EnumsReader::ReadRecImpl(test_model::RecordWithEnums& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "rec", true, unused_step_, value);
 }
 
 void EnumsReader::CloseImpl() {
