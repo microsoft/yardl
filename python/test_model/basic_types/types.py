@@ -33,9 +33,9 @@ T0_NP = typing.TypeVar("T0_NP", bound=np.generic)
 
 
 class Fruits(yardl.OutOfRangeEnum):
-    APPLE = 0
-    BANANA = 1
-    PEAR = 2
+    APPLE = 1
+    BANANA = 2
+    PEAR = 3
 
 class DaysOfWeek(enum.IntFlag):
     MONDAY = 1

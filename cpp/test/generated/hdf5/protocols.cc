@@ -259,11 +259,11 @@ namespace basic_types::hdf5 {
 namespace {
 [[maybe_unused]] H5::EnumType GetFruitsHdf5Ddl() {
   H5::EnumType t(H5::PredType::NATIVE_INT32);
-  int32_t i = 0;
+  int32_t i = 1;
   t.insert("apple", &i);
-  i = 1;
-  t.insert("banana", &i);
   i = 2;
+  t.insert("banana", &i);
+  i = 3;
   t.insert("pear", &i);
   return t;
 }
@@ -1393,12 +1393,20 @@ struct _Inner_RecordWithOptionalDate {
   return t;
 }
 
+[[maybe_unused]] H5::CompType GetRecordWithNoDefaultEnumHdf5Ddl() {
+  using RecordType = test_model::RecordWithNoDefaultEnum;
+  H5::CompType t(sizeof(RecordType));
+  t.insertMember("enum", HOFFSET(RecordType, enum_field), basic_types::hdf5::GetFruitsHdf5Ddl());
+  return t;
+}
+
 [[maybe_unused]] H5::CompType GetRecordWithEnumsHdf5Ddl() {
   using RecordType = test_model::RecordWithEnums;
   H5::CompType t(sizeof(RecordType));
   t.insertMember("enum", HOFFSET(RecordType, enum_field), basic_types::hdf5::GetFruitsHdf5Ddl());
   t.insertMember("flags", HOFFSET(RecordType, flags), H5::PredType::NATIVE_INT32);
   t.insertMember("flags2", HOFFSET(RecordType, flags_2), H5::PredType::NATIVE_UINT64);
+  t.insertMember("rec", HOFFSET(RecordType, rec), test_model::hdf5::GetRecordWithNoDefaultEnumHdf5Ddl());
   return t;
 }
 
@@ -3001,6 +3009,10 @@ void EnumsWriter::WriteSizeImpl(test_model::SizeBasedEnum const& value) {
   yardl::hdf5::WriteScalarDataset<test_model::SizeBasedEnum, test_model::SizeBasedEnum>(group_, "size", test_model::hdf5::GetSizeBasedEnumHdf5Ddl(), value);
 }
 
+void EnumsWriter::WriteRecImpl(test_model::RecordWithEnums const& value) {
+  yardl::hdf5::WriteScalarDataset<test_model::RecordWithEnums, test_model::RecordWithEnums>(group_, "rec", test_model::hdf5::GetRecordWithEnumsHdf5Ddl(), value);
+}
+
 EnumsReader::EnumsReader(std::string path)
     : yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "Enums", schema_) {
 }
@@ -3015,6 +3027,10 @@ void EnumsReader::ReadVecImpl(std::vector<test_model::Fruits>& value) {
 
 void EnumsReader::ReadSizeImpl(test_model::SizeBasedEnum& value) {
   yardl::hdf5::ReadScalarDataset<test_model::SizeBasedEnum, test_model::SizeBasedEnum>(group_, "size", test_model::hdf5::GetSizeBasedEnumHdf5Ddl(), value);
+}
+
+void EnumsReader::ReadRecImpl(test_model::RecordWithEnums& value) {
+  yardl::hdf5::ReadScalarDataset<test_model::RecordWithEnums, test_model::RecordWithEnums>(group_, "rec", test_model::hdf5::GetRecordWithEnumsHdf5Ddl(), value);
 }
 
 FlagsWriter::FlagsWriter(std::string path)

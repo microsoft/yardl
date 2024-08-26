@@ -2994,6 +2994,22 @@ class MockEnumsWriter : public EnumsWriterBase {
     WriteSizeImpl_expected_values_.push(value);
   }
 
+  void WriteRecImpl (test_model::RecordWithEnums const& value) override {
+    if (WriteRecImpl_expected_values_.empty()) {
+      throw std::runtime_error("Unexpected call to WriteRecImpl");
+    }
+    if (WriteRecImpl_expected_values_.front() != value) {
+      throw std::runtime_error("Unexpected argument value for call to WriteRecImpl");
+    }
+    WriteRecImpl_expected_values_.pop();
+  }
+
+  std::queue<test_model::RecordWithEnums> WriteRecImpl_expected_values_;
+
+  void ExpectWriteRecImpl (test_model::RecordWithEnums const& value) {
+    WriteRecImpl_expected_values_.push(value);
+  }
+
   void Verify() {
     if (!WriteSingleImpl_expected_values_.empty()) {
       throw std::runtime_error("Expected call to WriteSingleImpl was not received");
@@ -3003,6 +3019,9 @@ class MockEnumsWriter : public EnumsWriterBase {
     }
     if (!WriteSizeImpl_expected_values_.empty()) {
       throw std::runtime_error("Expected call to WriteSizeImpl was not received");
+    }
+    if (!WriteRecImpl_expected_values_.empty()) {
+      throw std::runtime_error("Expected call to WriteRecImpl was not received");
     }
   }
 };
@@ -3032,6 +3051,11 @@ class TestEnumsWriterBase : public EnumsWriterBase {
   void WriteSizeImpl(test_model::SizeBasedEnum const& value) override {
     writer_->WriteSize(value);
     mock_writer_.ExpectWriteSizeImpl(value);
+  }
+
+  void WriteRecImpl(test_model::RecordWithEnums const& value) override {
+    writer_->WriteRec(value);
+    mock_writer_.ExpectWriteRecImpl(value);
   }
 
   void CloseImpl() override {

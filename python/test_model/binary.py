@@ -893,6 +893,9 @@ class BinaryEnumsWriter(_binary.BinaryProtocolWriter, EnumsWriterBase):
     def _write_size(self, value: SizeBasedEnum) -> None:
         _binary.EnumSerializer(_binary.size_serializer, SizeBasedEnum).write(self._stream, value)
 
+    def _write_rec(self, value: RecordWithEnums) -> None:
+        RecordWithEnumsSerializer().write(self._stream, value)
+
 
 class BinaryEnumsReader(_binary.BinaryProtocolReader, EnumsReaderBase):
     """Binary writer for the Enums protocol."""
@@ -910,6 +913,9 @@ class BinaryEnumsReader(_binary.BinaryProtocolReader, EnumsReaderBase):
 
     def _read_size(self) -> SizeBasedEnum:
         return _binary.EnumSerializer(_binary.size_serializer, SizeBasedEnum).read(self._stream)
+
+    def _read_rec(self) -> RecordWithEnums:
+        return RecordWithEnumsSerializer().read(self._stream)
 
 class BinaryFlagsWriter(_binary.BinaryProtocolWriter, FlagsWriterBase):
     """Binary writer for the Flags protocol."""
@@ -1724,22 +1730,40 @@ class RecordWithMapsSerializer(_binary.RecordSerializer[RecordWithMaps]):
         return RecordWithMaps(set_1=field_values[0], set_2=field_values[1])
 
 
+class RecordWithNoDefaultEnumSerializer(_binary.RecordSerializer[RecordWithNoDefaultEnum]):
+    def __init__(self) -> None:
+        super().__init__([("enum", _binary.EnumSerializer(_binary.int32_serializer, basic_types.Fruits))])
+
+    def write(self, stream: _binary.CodedOutputStream, value: RecordWithNoDefaultEnum) -> None:
+        if isinstance(value, np.void):
+            self.write_numpy(stream, value)
+            return
+        self._write(stream, value.enum)
+
+    def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
+        self._write(stream, value['enum'])
+
+    def read(self, stream: _binary.CodedInputStream) -> RecordWithNoDefaultEnum:
+        field_values = self._read(stream)
+        return RecordWithNoDefaultEnum(enum=field_values[0])
+
+
 class RecordWithEnumsSerializer(_binary.RecordSerializer[RecordWithEnums]):
     def __init__(self) -> None:
-        super().__init__([("enum", _binary.EnumSerializer(_binary.int32_serializer, basic_types.Fruits)), ("flags", _binary.EnumSerializer(_binary.int32_serializer, basic_types.DaysOfWeek)), ("flags_2", _binary.EnumSerializer(_binary.uint64_serializer, basic_types.TextFormat))])
+        super().__init__([("enum", _binary.EnumSerializer(_binary.int32_serializer, basic_types.Fruits)), ("flags", _binary.EnumSerializer(_binary.int32_serializer, basic_types.DaysOfWeek)), ("flags_2", _binary.EnumSerializer(_binary.uint64_serializer, basic_types.TextFormat)), ("rec", RecordWithNoDefaultEnumSerializer())])
 
     def write(self, stream: _binary.CodedOutputStream, value: RecordWithEnums) -> None:
         if isinstance(value, np.void):
             self.write_numpy(stream, value)
             return
-        self._write(stream, value.enum, value.flags, value.flags_2)
+        self._write(stream, value.enum, value.flags, value.flags_2, value.rec)
 
     def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
-        self._write(stream, value['enum'], value['flags'], value['flags_2'])
+        self._write(stream, value['enum'], value['flags'], value['flags_2'], value['rec'])
 
     def read(self, stream: _binary.CodedInputStream) -> RecordWithEnums:
         field_values = self._read(stream)
-        return RecordWithEnums(enum=field_values[0], flags=field_values[1], flags_2=field_values[2])
+        return RecordWithEnums(enum=field_values[0], flags=field_values[1], flags_2=field_values[2], rec=field_values[3])
 
 
 class GenericRecordSerializer(typing.Generic[T1, T1_NP, T2, T2_NP], _binary.RecordSerializer[GenericRecord[T1, T2, T2_NP]]):

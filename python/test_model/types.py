@@ -931,19 +931,43 @@ DaysOfWeek = basic_types.DaysOfWeek
 
 TextFormat = basic_types.TextFormat
 
+class RecordWithNoDefaultEnum:
+    enum: Fruits
+
+    def __init__(self, *,
+        enum: Fruits,
+    ):
+        self.enum = enum
+
+    def __eq__(self, other: object) -> bool:
+        return (
+            isinstance(other, RecordWithNoDefaultEnum)
+            and self.enum == other.enum
+        )
+
+    def __str__(self) -> str:
+        return f"RecordWithNoDefaultEnum(enum={self.enum})"
+
+    def __repr__(self) -> str:
+        return f"RecordWithNoDefaultEnum(enum={repr(self.enum)})"
+
+
 class RecordWithEnums:
     enum: Fruits
     flags: DaysOfWeek
     flags_2: TextFormat
+    rec: RecordWithNoDefaultEnum
 
     def __init__(self, *,
-        enum: Fruits = basic_types.Fruits.APPLE,
+        enum: Fruits,
         flags: DaysOfWeek = basic_types.DaysOfWeek(0),
         flags_2: TextFormat = basic_types.TextFormat.REGULAR,
+        rec: RecordWithNoDefaultEnum,
     ):
         self.enum = enum
         self.flags = flags
         self.flags_2 = flags_2
+        self.rec = rec
 
     def __eq__(self, other: object) -> bool:
         return (
@@ -951,13 +975,14 @@ class RecordWithEnums:
             and self.enum == other.enum
             and self.flags == other.flags
             and self.flags_2 == other.flags_2
+            and self.rec == other.rec
         )
 
     def __str__(self) -> str:
-        return f"RecordWithEnums(enum={self.enum}, flags={self.flags}, flags2={self.flags_2})"
+        return f"RecordWithEnums(enum={self.enum}, flags={self.flags}, flags2={self.flags_2}, rec={self.rec})"
 
     def __repr__(self) -> str:
-        return f"RecordWithEnums(enum={repr(self.enum)}, flags={repr(self.flags)}, flags2={repr(self.flags_2)})"
+        return f"RecordWithEnums(enum={repr(self.enum)}, flags={repr(self.flags)}, flags2={repr(self.flags_2)}, rec={repr(self.rec)})"
 
 
 Image = image.Image[T_NP]
@@ -2101,7 +2126,8 @@ def _mk_get_dtype():
     dtype_map.setdefault(SizeBasedEnum, np.dtype(np.uint64))
     dtype_map.setdefault(DaysOfWeek, get_dtype(basic_types.DaysOfWeek))
     dtype_map.setdefault(TextFormat, get_dtype(basic_types.TextFormat))
-    dtype_map.setdefault(RecordWithEnums, np.dtype([('enum', get_dtype(basic_types.Fruits)), ('flags', get_dtype(basic_types.DaysOfWeek)), ('flags_2', get_dtype(basic_types.TextFormat))], align=True))
+    dtype_map.setdefault(RecordWithNoDefaultEnum, np.dtype([('enum', get_dtype(basic_types.Fruits))], align=True))
+    dtype_map.setdefault(RecordWithEnums, np.dtype([('enum', get_dtype(basic_types.Fruits)), ('flags', get_dtype(basic_types.DaysOfWeek)), ('flags_2', get_dtype(basic_types.TextFormat)), ('rec', get_dtype(RecordWithNoDefaultEnum))], align=True))
     dtype_map.setdefault(GenericRecord, lambda type_args: np.dtype([('scalar_1', get_dtype(type_args[0])), ('scalar_2', get_dtype(type_args[1])), ('vector_1', np.dtype(np.object_)), ('image_2', np.dtype(np.object_))], align=True))
     dtype_map.setdefault(MyTuple, lambda type_args: get_dtype(types.GenericAlias(tuples.Tuple, (type_args[0], type_args[1],))))
     dtype_map.setdefault(AliasedTuple, lambda type_args: get_dtype(types.GenericAlias(tuples.Tuple, (type_args[0], type_args[1],))))

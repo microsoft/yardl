@@ -355,6 +355,9 @@ classdef RoundTripTest < matlab.unittest.TestCase
             w.write_single(test_model.Fruits.APPLE);
             w.write_vec([test_model.Fruits.APPLE, test_model.Fruits.BANANA, test_model.Fruits(233983)]);
             w.write_size(test_model.SizeBasedEnum.C);
+            w.write_rec(test_model.RecordWithEnums(...
+                    enum=test_model.Fruits.PEAR, ...
+                    rec=test_model.RecordWithNoDefaultEnum(enum=test_model.Fruits.BANANA)));
             w.close();
         end
 

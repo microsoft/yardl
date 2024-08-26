@@ -843,6 +843,8 @@ class EnumsWriter : public test_model::EnumsWriterBase, public yardl::hdf5::Hdf5
 
   void WriteSizeImpl(test_model::SizeBasedEnum const& value) override;
 
+  void WriteRecImpl(test_model::RecordWithEnums const& value) override;
+
   private:
 };
 
@@ -856,6 +858,8 @@ class EnumsReader : public test_model::EnumsReaderBase, public yardl::hdf5::Hdf5
   void ReadVecImpl(std::vector<test_model::Fruits>& value) override;
 
   void ReadSizeImpl(test_model::SizeBasedEnum& value) override;
+
+  void ReadRecImpl(test_model::RecordWithEnums& value) override;
 
   private:
 };

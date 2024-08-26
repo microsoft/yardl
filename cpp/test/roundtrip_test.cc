@@ -406,6 +406,7 @@ TEST_P(RoundTripTests, Enums) {
   tw->WriteSingle(Fruits::kApple);
   tw->WriteVec({Fruits::kApple, Fruits::kBanana});
   tw->WriteSize(SizeBasedEnum::kC);
+  tw->WriteRec(RecordWithEnums{Fruits::kBanana, DaysOfWeek::kMonday, TextFormat::kBold, RecordWithNoDefaultEnum{Fruits::kPear}});
 
   tw->Close();
 }

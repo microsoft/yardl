@@ -580,6 +580,12 @@ def test_enums(format: Format):
         w.write_single(tm.Fruits.APPLE)
         w.write_vec([tm.Fruits.APPLE, tm.Fruits.BANANA, tm.Fruits(233983)])
         w.write_size(tm.SizeBasedEnum.C)
+        w.write_rec(
+            tm.RecordWithEnums(
+                enum=tm.Fruits.PEAR,
+                rec=tm.RecordWithNoDefaultEnum(enum=tm.Fruits.BANANA),
+            )
+        )
 
 
 def test_flags(format: Format):
