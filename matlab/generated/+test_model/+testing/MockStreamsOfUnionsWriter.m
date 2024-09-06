@@ -5,6 +5,7 @@ classdef MockStreamsOfUnionsWriter < matlab.mixin.Copyable & test_model.StreamsO
     testCase_
     expected_int_or_simple_record
     expected_nullable_int_or_simple_record
+    expected_many_cases
   end
 
   methods
@@ -12,6 +13,7 @@ classdef MockStreamsOfUnionsWriter < matlab.mixin.Copyable & test_model.StreamsO
       self.testCase_ = testCase;
       self.expected_int_or_simple_record = {};
       self.expected_nullable_int_or_simple_record = {};
+      self.expected_many_cases = {};
     end
 
     function expect_write_int_or_simple_record_(self, value)
@@ -46,9 +48,26 @@ classdef MockStreamsOfUnionsWriter < matlab.mixin.Copyable & test_model.StreamsO
       end
     end
 
+    function expect_write_many_cases_(self, value)
+      if iscell(value)
+        for n = 1:numel(value)
+          self.expected_many_cases{end+1} = value{n};
+        end
+        return;
+      end
+      shape = size(value);
+      lastDim = ndims(value);
+      count = shape(lastDim);
+      index = repelem({':'}, lastDim-1);
+      for n = 1:count
+        self.expected_many_cases{end+1} = value(index{:}, n);
+      end
+    end
+
     function verify(self)
       self.testCase_.verifyTrue(isempty(self.expected_int_or_simple_record), "Expected call to write_int_or_simple_record_ was not received");
       self.testCase_.verifyTrue(isempty(self.expected_nullable_int_or_simple_record), "Expected call to write_nullable_int_or_simple_record_ was not received");
+      self.testCase_.verifyTrue(isempty(self.expected_many_cases), "Expected call to write_many_cases_ was not received");
     end
   end
 
@@ -67,6 +86,14 @@ classdef MockStreamsOfUnionsWriter < matlab.mixin.Copyable & test_model.StreamsO
       self.testCase_.verifyFalse(isempty(self.expected_nullable_int_or_simple_record), "Unexpected call to write_nullable_int_or_simple_record_");
       self.testCase_.verifyEqual(value{1}, self.expected_nullable_int_or_simple_record{1}, "Unexpected argument value for call to write_nullable_int_or_simple_record_");
       self.expected_nullable_int_or_simple_record = self.expected_nullable_int_or_simple_record(2:end);
+    end
+
+    function write_many_cases_(self, value)
+      assert(iscell(value));
+      assert(isscalar(value));
+      self.testCase_.verifyFalse(isempty(self.expected_many_cases), "Unexpected call to write_many_cases_");
+      self.testCase_.verifyEqual(value{1}, self.expected_many_cases{1}, "Unexpected argument value for call to write_many_cases_");
+      self.expected_many_cases = self.expected_many_cases(2:end);
     end
 
     function close_(self)

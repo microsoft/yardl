@@ -809,12 +809,17 @@ class StreamsOfUnionsWriter : public test_model::StreamsOfUnionsWriterBase, publ
 
   void EndNullableIntOrSimpleRecordImpl() override;
 
+  void WriteManyCasesImpl(std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray> const& value) override;
+
+  void EndManyCasesImpl() override;
+
   public:
   void Flush() override;
 
   private:
   std::unique_ptr<yardl::hdf5::UnionDatasetWriter<2>> intOrSimpleRecord_dataset_state_;
   std::unique_ptr<yardl::hdf5::UnionDatasetWriter<2>> nullableIntOrSimpleRecord_dataset_state_;
+  std::unique_ptr<yardl::hdf5::UnionDatasetWriter<5>> manyCases_dataset_state_;
 };
 
 // HDF5 reader for the StreamsOfUnions protocol.
@@ -826,9 +831,12 @@ class StreamsOfUnionsReader : public test_model::StreamsOfUnionsReaderBase, publ
 
   bool ReadNullableIntOrSimpleRecordImpl(std::variant<std::monostate, int32_t, test_model::SimpleRecord>& value) override;
 
+  bool ReadManyCasesImpl(std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray>& value) override;
+
   private:
   std::unique_ptr<yardl::hdf5::UnionDatasetReader<2>> intOrSimpleRecord_dataset_state_;
   std::unique_ptr<yardl::hdf5::UnionDatasetReader<2>> nullableIntOrSimpleRecord_dataset_state_;
+  std::unique_ptr<yardl::hdf5::UnionDatasetReader<5>> manyCases_dataset_state_;
 };
 
 // HDF5 writer for the Enums protocol.

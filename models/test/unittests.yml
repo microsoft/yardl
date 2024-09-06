@@ -337,6 +337,8 @@ StreamsOfUnions: !protocol
       items: [int, SimpleRecord]
     nullableIntOrSimpleRecord: !stream
       items: [null, int, SimpleRecord]
+    manyCases: !stream
+      items: [int, float, string, SimpleRecord, NamedFixedNDArray]
 
 Fruits: BasicTypes.Fruits
 

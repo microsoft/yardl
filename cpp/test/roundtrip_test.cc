@@ -506,6 +506,14 @@ TEST_P(RoundTripTests, StreamsOfUnions) {
   tw->WriteNullableIntOrSimpleRecord(2);
   tw->EndNullableIntOrSimpleRecord();
 
+  tw->WriteManyCases(3);
+  tw->WriteManyCases(3.14159f);
+  tw->WriteManyCases("Hello, World!");
+  tw->WriteManyCases(SimpleRecord{1, 2, 3});
+  NamedFixedNDArray named = {{1, 2, 3, 4}, {5, 6, 7, 8}};
+  tw->WriteManyCases(named);
+  tw->EndManyCases();
+
   tw->Close();
 }
 

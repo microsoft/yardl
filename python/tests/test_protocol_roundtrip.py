@@ -662,6 +662,21 @@ def test_streams_of_unions(format: Format):
                 None,
             ]
         )
+        w.write_many_cases(
+            [
+                tm.Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray.Int32(3),
+                tm.Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray.Float32(7.0),
+                tm.Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray.String(
+                    "hello"
+                ),
+                tm.Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray.SimpleRecord(
+                    tm.SimpleRecord(x=1, y=2, z=3)
+                ),
+                tm.Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray.NamedFixedNDArray(
+                    np.array([[1, 2, 3, 4], [5, 6, 7, 8]], dtype=np.int32)
+                ),
+            ]
+        )
 
 
 def test_streams_of_aliased_unions(format: Format):
@@ -797,6 +812,19 @@ def test_streams_of_unions_manual_close(format: Format):
             None,
             tm.Int32OrSimpleRecord.Int32(2),
             None,
+        ]
+    )
+    w.write_many_cases(
+        [
+            tm.Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray.Int32(3),
+            tm.Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray.Float32(7.0),
+            tm.Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray.String("hello"),
+            tm.Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray.SimpleRecord(
+                tm.SimpleRecord(x=1, y=2, z=3)
+            ),
+            tm.Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray.NamedFixedNDArray(
+                np.array([[1, 2, 3, 4], [5, 6, 7, 8]], dtype=np.int32)
+            ),
         ]
     )
     w.close()

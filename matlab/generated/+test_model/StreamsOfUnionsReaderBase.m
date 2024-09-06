@@ -12,7 +12,7 @@ classdef StreamsOfUnionsReaderBase < handle
 
     function close(self)
       self.close_();
-      if self.state_ ~= 2
+      if self.state_ ~= 3
         expected_method = self.state_to_method_name_(self.state_);
         throw(yardl.ProtocolError("Protocol reader closed before all data was consumed. Expected call to '%s'.", expected_method));
       end
@@ -58,6 +58,26 @@ classdef StreamsOfUnionsReaderBase < handle
       value = self.read_nullable_int_or_simple_record_();
     end
 
+    % Ordinal 2
+    function more = has_many_cases(self)
+      if self.state_ ~= 2
+        self.raise_unexpected_state_(2);
+      end
+
+      more = self.has_many_cases_();
+      if ~more
+        self.state_ = 3;
+      end
+    end
+
+    function value = read_many_cases(self)
+      if self.state_ ~= 2
+        self.raise_unexpected_state_(2);
+      end
+
+      value = self.read_many_cases_();
+    end
+
     function copy_to(self, writer)
       while self.has_int_or_simple_record()
         item = self.read_int_or_simple_record();
@@ -69,6 +89,11 @@ classdef StreamsOfUnionsReaderBase < handle
         writer.write_nullable_int_or_simple_record({item});
       end
       writer.end_nullable_int_or_simple_record();
+      while self.has_many_cases()
+        item = self.read_many_cases();
+        writer.write_many_cases({item});
+      end
+      writer.end_many_cases();
     end
   end
 
@@ -83,6 +108,8 @@ classdef StreamsOfUnionsReaderBase < handle
     read_int_or_simple_record_(self)
     has_nullable_int_or_simple_record_(self)
     read_nullable_int_or_simple_record_(self)
+    has_many_cases_(self)
+    read_many_cases_(self)
 
     close_(self)
   end
@@ -99,6 +126,8 @@ classdef StreamsOfUnionsReaderBase < handle
         name = "read_int_or_simple_record";
       elseif state == 1
         name = "read_nullable_int_or_simple_record";
+      elseif state == 2
+        name = "read_many_cases";
       else
         name = "<unknown>";
       end

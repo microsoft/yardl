@@ -221,6 +221,151 @@ H5::CompType InnerUnion3Ddl(bool nullable, H5::DataType const& t0, std::string c
   rtn.insertMember(tag2, HOFFSET(UnionType, value2_), t2);
   return rtn;
 }
+
+template <typename TInner0, typename TOuter0, typename TInner1, typename TOuter1, typename TInner2, typename TOuter2, typename TInner3, typename TOuter3, typename TInner4, typename TOuter4>
+class InnerUnion5 {
+  public:
+  InnerUnion5() : type_index_(-1) {} 
+  InnerUnion5(std::variant<TOuter0, TOuter1, TOuter2, TOuter3, TOuter4> const& v) : type_index_(static_cast<int8_t>(v.index())) {
+    Init(v);
+  }
+
+  InnerUnion5(std::variant<std::monostate, TOuter0, TOuter1, TOuter2, TOuter3, TOuter4> const& v) : type_index_(static_cast<int8_t>(v.index()) - 1) {
+    Init(v);
+  }
+
+  InnerUnion5(InnerUnion5 const& v) = delete;
+
+  InnerUnion5 operator=(InnerUnion5 const&) = delete;
+
+  ~InnerUnion5() {
+    switch (type_index_) {
+    case 0:
+      value0_.~TInner0();
+      break;
+    case 1:
+      value1_.~TInner1();
+      break;
+    case 2:
+      value2_.~TInner2();
+      break;
+    case 3:
+      value3_.~TInner3();
+      break;
+    case 4:
+      value4_.~TInner4();
+      break;
+    }
+  }
+
+  void ToOuter(std::variant<TOuter0, TOuter1, TOuter2, TOuter3, TOuter4>& o) const {
+    ToOuterImpl(o);
+  }
+
+  void ToOuter(std::variant<std::monostate, TOuter0, TOuter1, TOuter2, TOuter3, TOuter4>& o) const {
+    ToOuterImpl(o);
+  }
+
+  int8_t type_index_;
+  union {
+    char empty0_[sizeof(TInner0)]{};
+    TInner0 value0_;
+  };
+  union {
+    char empty1_[sizeof(TInner1)]{};
+    TInner1 value1_;
+  };
+  union {
+    char empty2_[sizeof(TInner2)]{};
+    TInner2 value2_;
+  };
+  union {
+    char empty3_[sizeof(TInner3)]{};
+    TInner3 value3_;
+  };
+  union {
+    char empty4_[sizeof(TInner4)]{};
+    TInner4 value4_;
+  };
+
+  private:
+  template <typename T>
+  void Init(T const& v) {
+    constexpr size_t offset = GetOuterVariantOffset<std::remove_const_t<std::remove_reference_t<decltype(v)>>>();
+    switch (type_index_) {
+    case 0:
+      new (&value0_) TInner0(std::get<0 + offset>(v));
+      return;
+    case 1:
+      new (&value1_) TInner1(std::get<1 + offset>(v));
+      return;
+    case 2:
+      new (&value2_) TInner2(std::get<2 + offset>(v));
+      return;
+    case 3:
+      new (&value3_) TInner3(std::get<3 + offset>(v));
+      return;
+    case 4:
+      new (&value4_) TInner4(std::get<4 + offset>(v));
+      return;
+    }
+  }
+
+  template <typename TVariant>
+  void ToOuterImpl(TVariant& o) const {
+    constexpr size_t offset = GetOuterVariantOffset<TVariant>();
+    switch (type_index_) {
+    case -1:
+      if constexpr (offset == 1) {
+        o.template emplace<0>(std::monostate{});
+        return;
+      }
+    case 0:
+      o.template emplace<0 + offset>();
+      yardl::hdf5::ToOuter(value0_, std::get<0 + offset>(o));
+      return;
+    case 1:
+      o.template emplace<1 + offset>();
+      yardl::hdf5::ToOuter(value1_, std::get<1 + offset>(o));
+      return;
+    case 2:
+      o.template emplace<2 + offset>();
+      yardl::hdf5::ToOuter(value2_, std::get<2 + offset>(o));
+      return;
+    case 3:
+      o.template emplace<3 + offset>();
+      yardl::hdf5::ToOuter(value3_, std::get<3 + offset>(o));
+      return;
+    case 4:
+      o.template emplace<4 + offset>();
+      yardl::hdf5::ToOuter(value4_, std::get<4 + offset>(o));
+      return;
+    }
+    throw std::runtime_error("unrecognized type variant type index " + std::to_string(type_index_));
+  }
+
+  template <typename TVariant>
+  static constexpr size_t GetOuterVariantOffset() {
+    constexpr bool has_monostate = std::is_same_v<std::monostate, std::variant_alternative_t<0, TVariant>>;
+    if constexpr (has_monostate) {
+      return 1;
+    }
+      return 0;
+  }
+};
+
+template <typename TInner0, typename TOuter0, typename TInner1, typename TOuter1, typename TInner2, typename TOuter2, typename TInner3, typename TOuter3, typename TInner4, typename TOuter4>
+H5::CompType InnerUnion5Ddl(bool nullable, H5::DataType const& t0, std::string const& tag0, H5::DataType const& t1, std::string const& tag1, H5::DataType const& t2, std::string const& tag2, H5::DataType const& t3, std::string const& tag3, H5::DataType const& t4, std::string const& tag4) {
+  using UnionType = ::InnerUnion5<TInner0, TOuter0, TInner1, TOuter1, TInner2, TOuter2, TInner3, TOuter3, TInner4, TOuter4>;
+  H5::CompType rtn(sizeof(UnionType));
+  rtn.insertMember("$type", HOFFSET(UnionType, type_index_), yardl::hdf5::UnionTypeEnumDdl(nullable, tag0, tag1, tag2, tag3, tag4));
+  rtn.insertMember(tag0, HOFFSET(UnionType, value0_), t0);
+  rtn.insertMember(tag1, HOFFSET(UnionType, value1_), t1);
+  rtn.insertMember(tag2, HOFFSET(UnionType, value2_), t2);
+  rtn.insertMember(tag3, HOFFSET(UnionType, value3_), t3);
+  rtn.insertMember(tag4, HOFFSET(UnionType, value4_), t4);
+  return rtn;
+}
 }
 
 namespace tuples::hdf5 {
@@ -2923,12 +3068,48 @@ void StreamsOfUnionsWriter::EndNullableIntOrSimpleRecordImpl() {
   nullableIntOrSimpleRecord_dataset_state_.reset();
 }
 
+void StreamsOfUnionsWriter::WriteManyCasesImpl(std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray> const& value) {
+  if (!manyCases_dataset_state_) {
+    manyCases_dataset_state_ = std::make_unique<yardl::hdf5::UnionDatasetWriter<5>>(group_, "manyCases", false, std::make_tuple(H5::PredType::NATIVE_INT32, "int32", static_cast<size_t>(std::max(sizeof(::InnerUnion5<int32_t, int32_t, float, float, yardl::hdf5::InnerVlenString, std::string, test_model::SimpleRecord, test_model::SimpleRecord, yardl::FixedNDArray<int32_t, 2, 4>, test_model::NamedFixedNDArray>), sizeof(std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray>)))), std::make_tuple(H5::PredType::NATIVE_FLOAT, "float32", static_cast<size_t>(std::max(sizeof(::InnerUnion5<int32_t, int32_t, float, float, yardl::hdf5::InnerVlenString, std::string, test_model::SimpleRecord, test_model::SimpleRecord, yardl::FixedNDArray<int32_t, 2, 4>, test_model::NamedFixedNDArray>), sizeof(std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray>)))), std::make_tuple(yardl::hdf5::InnerVlenStringDdl(), "string", static_cast<size_t>(std::max(sizeof(::InnerUnion5<int32_t, int32_t, float, float, yardl::hdf5::InnerVlenString, std::string, test_model::SimpleRecord, test_model::SimpleRecord, yardl::FixedNDArray<int32_t, 2, 4>, test_model::NamedFixedNDArray>), sizeof(std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray>)))), std::make_tuple(test_model::hdf5::GetSimpleRecordHdf5Ddl(), "SimpleRecord", static_cast<size_t>(std::max(sizeof(::InnerUnion5<int32_t, int32_t, float, float, yardl::hdf5::InnerVlenString, std::string, test_model::SimpleRecord, test_model::SimpleRecord, yardl::FixedNDArray<int32_t, 2, 4>, test_model::NamedFixedNDArray>), sizeof(std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray>)))), std::make_tuple(yardl::hdf5::FixedNDArrayDdl(H5::PredType::NATIVE_INT32, {2, 4}), "NamedFixedNDArray", static_cast<size_t>(std::max(sizeof(::InnerUnion5<int32_t, int32_t, float, float, yardl::hdf5::InnerVlenString, std::string, test_model::SimpleRecord, test_model::SimpleRecord, yardl::FixedNDArray<int32_t, 2, 4>, test_model::NamedFixedNDArray>), sizeof(std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray>)))));
+  }
+
+  std::visit(
+    [&](auto const& arg) {
+      using T = std::decay_t<decltype(arg)>;
+      if constexpr (std::is_same_v<T, int32_t>) {
+        manyCases_dataset_state_->Append<int32_t, int32_t>(static_cast<int8_t>(value.index()), arg);
+      } else if constexpr (std::is_same_v<T, float>) {
+        manyCases_dataset_state_->Append<float, float>(static_cast<int8_t>(value.index()), arg);
+      } else if constexpr (std::is_same_v<T, std::string>) {
+        manyCases_dataset_state_->Append<yardl::hdf5::InnerVlenString, std::string>(static_cast<int8_t>(value.index()), arg);
+      } else if constexpr (std::is_same_v<T, test_model::SimpleRecord>) {
+        manyCases_dataset_state_->Append<test_model::SimpleRecord, test_model::SimpleRecord>(static_cast<int8_t>(value.index()), arg);
+      } else if constexpr (std::is_same_v<T, test_model::NamedFixedNDArray>) {
+        manyCases_dataset_state_->Append<yardl::FixedNDArray<int32_t, 2, 4>, test_model::NamedFixedNDArray>(static_cast<int8_t>(value.index()), arg);
+      } else {
+        static_assert(yardl::hdf5::always_false_v<T>, "non-exhaustive visitor!");
+      }
+    },
+    value);
+}
+
+void StreamsOfUnionsWriter::EndManyCasesImpl() {
+  if (!manyCases_dataset_state_) {
+    manyCases_dataset_state_ = std::make_unique<yardl::hdf5::UnionDatasetWriter<5>>(group_, "manyCases", false, std::make_tuple(H5::PredType::NATIVE_INT32, "int32", static_cast<size_t>(std::max(sizeof(::InnerUnion5<int32_t, int32_t, float, float, yardl::hdf5::InnerVlenString, std::string, test_model::SimpleRecord, test_model::SimpleRecord, yardl::FixedNDArray<int32_t, 2, 4>, test_model::NamedFixedNDArray>), sizeof(std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray>)))), std::make_tuple(H5::PredType::NATIVE_FLOAT, "float32", static_cast<size_t>(std::max(sizeof(::InnerUnion5<int32_t, int32_t, float, float, yardl::hdf5::InnerVlenString, std::string, test_model::SimpleRecord, test_model::SimpleRecord, yardl::FixedNDArray<int32_t, 2, 4>, test_model::NamedFixedNDArray>), sizeof(std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray>)))), std::make_tuple(yardl::hdf5::InnerVlenStringDdl(), "string", static_cast<size_t>(std::max(sizeof(::InnerUnion5<int32_t, int32_t, float, float, yardl::hdf5::InnerVlenString, std::string, test_model::SimpleRecord, test_model::SimpleRecord, yardl::FixedNDArray<int32_t, 2, 4>, test_model::NamedFixedNDArray>), sizeof(std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray>)))), std::make_tuple(test_model::hdf5::GetSimpleRecordHdf5Ddl(), "SimpleRecord", static_cast<size_t>(std::max(sizeof(::InnerUnion5<int32_t, int32_t, float, float, yardl::hdf5::InnerVlenString, std::string, test_model::SimpleRecord, test_model::SimpleRecord, yardl::FixedNDArray<int32_t, 2, 4>, test_model::NamedFixedNDArray>), sizeof(std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray>)))), std::make_tuple(yardl::hdf5::FixedNDArrayDdl(H5::PredType::NATIVE_INT32, {2, 4}), "NamedFixedNDArray", static_cast<size_t>(std::max(sizeof(::InnerUnion5<int32_t, int32_t, float, float, yardl::hdf5::InnerVlenString, std::string, test_model::SimpleRecord, test_model::SimpleRecord, yardl::FixedNDArray<int32_t, 2, 4>, test_model::NamedFixedNDArray>), sizeof(std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray>)))));
+  }
+
+  manyCases_dataset_state_.reset();
+}
+
 void StreamsOfUnionsWriter::Flush() {
   if (intOrSimpleRecord_dataset_state_) {
     intOrSimpleRecord_dataset_state_->Flush();
   }
   if (nullableIntOrSimpleRecord_dataset_state_) {
     nullableIntOrSimpleRecord_dataset_state_->Flush();
+  }
+  if (manyCases_dataset_state_) {
+    manyCases_dataset_state_->Flush();
   }
 }
 
@@ -2986,6 +3167,48 @@ bool StreamsOfUnionsReader::ReadNullableIntOrSimpleRecordImpl(std::variant<std::
   case 1: {
     test_model::SimpleRecord& ref = value.emplace<2>();
     reader->Read<test_model::SimpleRecord, test_model::SimpleRecord>(ref);
+    break;
+  }
+  }
+
+  return true;
+}
+
+bool StreamsOfUnionsReader::ReadManyCasesImpl(std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray>& value) {
+  if (!manyCases_dataset_state_) {
+    manyCases_dataset_state_ = std::make_unique<yardl::hdf5::UnionDatasetReader<5>>(group_, "manyCases", false, std::make_tuple(H5::PredType::NATIVE_INT32, "int32", static_cast<size_t>(std::max(sizeof(::InnerUnion5<int32_t, int32_t, float, float, yardl::hdf5::InnerVlenString, std::string, test_model::SimpleRecord, test_model::SimpleRecord, yardl::FixedNDArray<int32_t, 2, 4>, test_model::NamedFixedNDArray>), sizeof(std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray>)))), std::make_tuple(H5::PredType::NATIVE_FLOAT, "float32", static_cast<size_t>(std::max(sizeof(::InnerUnion5<int32_t, int32_t, float, float, yardl::hdf5::InnerVlenString, std::string, test_model::SimpleRecord, test_model::SimpleRecord, yardl::FixedNDArray<int32_t, 2, 4>, test_model::NamedFixedNDArray>), sizeof(std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray>)))), std::make_tuple(yardl::hdf5::InnerVlenStringDdl(), "string", static_cast<size_t>(std::max(sizeof(::InnerUnion5<int32_t, int32_t, float, float, yardl::hdf5::InnerVlenString, std::string, test_model::SimpleRecord, test_model::SimpleRecord, yardl::FixedNDArray<int32_t, 2, 4>, test_model::NamedFixedNDArray>), sizeof(std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray>)))), std::make_tuple(test_model::hdf5::GetSimpleRecordHdf5Ddl(), "SimpleRecord", static_cast<size_t>(std::max(sizeof(::InnerUnion5<int32_t, int32_t, float, float, yardl::hdf5::InnerVlenString, std::string, test_model::SimpleRecord, test_model::SimpleRecord, yardl::FixedNDArray<int32_t, 2, 4>, test_model::NamedFixedNDArray>), sizeof(std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray>)))), std::make_tuple(yardl::hdf5::FixedNDArrayDdl(H5::PredType::NATIVE_INT32, {2, 4}), "NamedFixedNDArray", static_cast<size_t>(std::max(sizeof(::InnerUnion5<int32_t, int32_t, float, float, yardl::hdf5::InnerVlenString, std::string, test_model::SimpleRecord, test_model::SimpleRecord, yardl::FixedNDArray<int32_t, 2, 4>, test_model::NamedFixedNDArray>), sizeof(std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray>)))));
+  }
+
+  auto [has_result, type_index, reader] = manyCases_dataset_state_->ReadIndex();
+  if (!has_result) {
+    manyCases_dataset_state_.reset();
+    return false;
+  }
+
+  switch (type_index) {
+  case 0: {
+    int32_t& ref = value.emplace<0>();
+    reader->Read<int32_t, int32_t>(ref);
+    break;
+  }
+  case 1: {
+    float& ref = value.emplace<1>();
+    reader->Read<float, float>(ref);
+    break;
+  }
+  case 2: {
+    std::string& ref = value.emplace<2>();
+    reader->Read<yardl::hdf5::InnerVlenString, std::string>(ref);
+    break;
+  }
+  case 3: {
+    test_model::SimpleRecord& ref = value.emplace<3>();
+    reader->Read<test_model::SimpleRecord, test_model::SimpleRecord>(ref);
+    break;
+  }
+  case 4: {
+    test_model::NamedFixedNDArray& ref = value.emplace<4>();
+    reader->Read<yardl::FixedNDArray<int32_t, 2, 4>, test_model::NamedFixedNDArray>(ref);
     break;
   }
   }

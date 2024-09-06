@@ -5,6 +5,7 @@ classdef StreamsOfUnionsReader < yardl.binary.BinaryProtocolReader & test_model.
   properties (Access=protected)
     int_or_simple_record_serializer
     nullable_int_or_simple_record_serializer
+    many_cases_serializer
   end
 
   methods
@@ -13,6 +14,7 @@ classdef StreamsOfUnionsReader < yardl.binary.BinaryProtocolReader & test_model.
       self@yardl.binary.BinaryProtocolReader(filename, test_model.StreamsOfUnionsReaderBase.schema);
       self.int_or_simple_record_serializer = yardl.binary.StreamSerializer(yardl.binary.UnionSerializer('test_model.Int32OrSimpleRecord', {yardl.binary.Int32Serializer, test_model.binary.SimpleRecordSerializer()}, {@test_model.Int32OrSimpleRecord.Int32, @test_model.Int32OrSimpleRecord.SimpleRecord}));
       self.nullable_int_or_simple_record_serializer = yardl.binary.StreamSerializer(yardl.binary.UnionSerializer('test_model.Int32OrSimpleRecord', {yardl.binary.NoneSerializer, yardl.binary.Int32Serializer, test_model.binary.SimpleRecordSerializer()}, {yardl.None, @test_model.Int32OrSimpleRecord.Int32, @test_model.Int32OrSimpleRecord.SimpleRecord}));
+      self.many_cases_serializer = yardl.binary.StreamSerializer(yardl.binary.UnionSerializer('test_model.Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray', {yardl.binary.Int32Serializer, yardl.binary.Float32Serializer, yardl.binary.StringSerializer, test_model.binary.SimpleRecordSerializer(), yardl.binary.FixedNDArraySerializer(yardl.binary.Int32Serializer, [4, 2])}, {@test_model.Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray.Int32, @test_model.Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray.Float32, @test_model.Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray.String, @test_model.Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray.SimpleRecord, @test_model.Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray.NamedFixedNDArray}));
     end
   end
 
@@ -31,6 +33,14 @@ classdef StreamsOfUnionsReader < yardl.binary.BinaryProtocolReader & test_model.
 
     function value = read_nullable_int_or_simple_record_(self)
       value = self.nullable_int_or_simple_record_serializer.read(self.stream_);
+    end
+
+    function more = has_many_cases_(self)
+      more = self.many_cases_serializer.hasnext(self.stream_);
+    end
+
+    function value = read_many_cases_(self)
+      value = self.many_cases_serializer.read(self.stream_);
     end
   end
 end

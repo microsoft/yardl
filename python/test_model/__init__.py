@@ -56,6 +56,7 @@ from .types import (
     Image,
     ImageFloatOrImageDouble,
     Int32OrFloat32,
+    Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray,
     Int32OrRecordWithVlens,
     Int32OrSimpleRecord,
     Int64Enum,

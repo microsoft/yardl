@@ -5059,6 +5059,35 @@
                   ]
                 }
               }
+            },
+            {
+              "name": "manyCases",
+              "type": {
+                "stream": {
+                  "items": [
+                    {
+                      "tag": "int32",
+                      "type": "int32"
+                    },
+                    {
+                      "tag": "float32",
+                      "type": "float32"
+                    },
+                    {
+                      "tag": "string",
+                      "type": "string"
+                    },
+                    {
+                      "tag": "SimpleRecord",
+                      "type": "TestModel.SimpleRecord"
+                    },
+                    {
+                      "tag": "NamedFixedNDArray",
+                      "type": "TestModel.NamedFixedNDArray"
+                    }
+                  ]
+                }
+              }
             }
           ]
         },

@@ -3688,6 +3688,12 @@ class NDJsonStreamsOfUnionsWriter(_ndjson.NDJsonProtocolWriter, StreamsOfUnionsW
             json_item = converter.to_json(item)
             self._write_json_line({"nullableIntOrSimpleRecord": json_item})
 
+    def _write_many_cases(self, value: collections.abc.Iterable[Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray]) -> None:
+        converter = _ndjson.UnionConverter(Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray, [(Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray.Int32, _ndjson.int32_converter, [int, float]), (Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray.Float32, _ndjson.float32_converter, [int, float]), (Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray.String, _ndjson.string_converter, [str]), (Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray.SimpleRecord, SimpleRecordConverter(), [dict]), (Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray.NamedFixedNDArray, _ndjson.FixedNDArrayConverter(_ndjson.int32_converter, (2, 4,)), [list])], False)
+        for item in value:
+            json_item = converter.to_json(item)
+            self._write_json_line({"manyCases": json_item})
+
 
 class NDJsonStreamsOfUnionsReader(_ndjson.NDJsonProtocolReader, StreamsOfUnionsReaderBase):
     """NDJson writer for the StreamsOfUnions protocol."""
@@ -3705,6 +3711,11 @@ class NDJsonStreamsOfUnionsReader(_ndjson.NDJsonProtocolReader, StreamsOfUnionsR
     def _read_nullable_int_or_simple_record(self) -> collections.abc.Iterable[typing.Optional[Int32OrSimpleRecord]]:
         converter = _ndjson.UnionConverter(Int32OrSimpleRecord, [None, (Int32OrSimpleRecord.Int32, _ndjson.int32_converter, [int, float]), (Int32OrSimpleRecord.SimpleRecord, SimpleRecordConverter(), [dict])], True)
         while (json_object := self._read_json_line("nullableIntOrSimpleRecord", False)) is not _ndjson.MISSING_SENTINEL:
+            yield converter.from_json(json_object)
+
+    def _read_many_cases(self) -> collections.abc.Iterable[Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray]:
+        converter = _ndjson.UnionConverter(Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray, [(Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray.Int32, _ndjson.int32_converter, [int, float]), (Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray.Float32, _ndjson.float32_converter, [int, float]), (Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray.String, _ndjson.string_converter, [str]), (Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray.SimpleRecord, SimpleRecordConverter(), [dict]), (Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray.NamedFixedNDArray, _ndjson.FixedNDArrayConverter(_ndjson.int32_converter, (2, 4,)), [list])], False)
+        while (json_object := self._read_json_line("manyCases", False)) is not _ndjson.MISSING_SENTINEL:
             yield converter.from_json(json_object)
 
 class NDJsonEnumsWriter(_ndjson.NDJsonProtocolWriter, EnumsWriterBase):

@@ -136,6 +136,14 @@ TEST(Hdf5Tests, StreamsOfUnionsInSeparateDatasets) {
     w.WriteNullableIntOrSimpleRecord(SimpleRecord{1, 2, 3});
     w.EndNullableIntOrSimpleRecord();
 
+    w.WriteManyCases(3);
+    w.WriteManyCases(3.14159f);
+    w.WriteManyCases("Hello, World!");
+    w.WriteManyCases(SimpleRecord{1, 2, 3});
+    NamedFixedNDArray named = {{1, 2, 3, 4}, {5, 6, 7, 8}};
+    w.WriteManyCases(named);
+    w.EndManyCases();
+
     w.Close();
   }
 
@@ -149,6 +157,13 @@ TEST(Hdf5Tests, StreamsOfUnionsInSeparateDatasets) {
   stepGroup2.openDataSet("$index");
   stepGroup2.openDataSet("int32");
   stepGroup2.openDataSet("SimpleRecord");
+  auto stepGroup3 = protocolGroup.openGroup("manyCases");
+  stepGroup3.openDataSet("$index");
+  stepGroup3.openDataSet("int32");
+  stepGroup3.openDataSet("float32");
+  stepGroup3.openDataSet("string");
+  stepGroup3.openDataSet("SimpleRecord");
+  stepGroup3.openDataSet("NamedFixedNDArray");
 }
 
 TEST(Hdf5Tests, StreamsOfAliasedUnionsInSeparateDatasets) {
