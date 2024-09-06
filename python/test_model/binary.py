@@ -861,6 +861,9 @@ class BinaryStreamsOfUnionsWriter(_binary.BinaryProtocolWriter, StreamsOfUnionsW
     def _write_nullable_int_or_simple_record(self, value: collections.abc.Iterable[typing.Optional[Int32OrSimpleRecord]]) -> None:
         _binary.StreamSerializer(_binary.UnionSerializer(Int32OrSimpleRecord, [None, (Int32OrSimpleRecord.Int32, _binary.int32_serializer), (Int32OrSimpleRecord.SimpleRecord, SimpleRecordSerializer())])).write(self._stream, value)
 
+    def _write_many_cases(self, value: collections.abc.Iterable[Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray]) -> None:
+        _binary.StreamSerializer(_binary.UnionSerializer(Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray, [(Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray.Int32, _binary.int32_serializer), (Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray.Float32, _binary.float32_serializer), (Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray.String, _binary.string_serializer), (Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray.SimpleRecord, SimpleRecordSerializer()), (Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray.NamedFixedNDArray, _binary.FixedNDArraySerializer(_binary.int32_serializer, (2, 4,)))])).write(self._stream, value)
+
 
 class BinaryStreamsOfUnionsReader(_binary.BinaryProtocolReader, StreamsOfUnionsReaderBase):
     """Binary writer for the StreamsOfUnions protocol."""
@@ -875,6 +878,9 @@ class BinaryStreamsOfUnionsReader(_binary.BinaryProtocolReader, StreamsOfUnionsR
 
     def _read_nullable_int_or_simple_record(self) -> collections.abc.Iterable[typing.Optional[Int32OrSimpleRecord]]:
         return _binary.StreamSerializer(_binary.UnionSerializer(Int32OrSimpleRecord, [None, (Int32OrSimpleRecord.Int32, _binary.int32_serializer), (Int32OrSimpleRecord.SimpleRecord, SimpleRecordSerializer())])).read(self._stream)
+
+    def _read_many_cases(self) -> collections.abc.Iterable[Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray]:
+        return _binary.StreamSerializer(_binary.UnionSerializer(Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray, [(Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray.Int32, _binary.int32_serializer), (Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray.Float32, _binary.float32_serializer), (Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray.String, _binary.string_serializer), (Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray.SimpleRecord, SimpleRecordSerializer()), (Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray.NamedFixedNDArray, _binary.FixedNDArraySerializer(_binary.int32_serializer, (2, 4,)))])).read(self._stream)
 
 class BinaryEnumsWriter(_binary.BinaryProtocolWriter, EnumsWriterBase):
     """Binary writer for the Enums protocol."""

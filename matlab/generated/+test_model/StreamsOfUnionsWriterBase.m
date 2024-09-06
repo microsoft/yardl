@@ -13,7 +13,7 @@ classdef (Abstract) StreamsOfUnionsWriterBase < handle
 
     function close(self)
       self.close_();
-      if self.state_ ~= 2
+      if self.state_ ~= 3
         expected_method = self.state_to_method_name_(self.state_);
         throw(yardl.ProtocolError("Protocol writer closed before all steps were called. Expected call to '%s'.", expected_method));
       end
@@ -54,17 +54,36 @@ classdef (Abstract) StreamsOfUnionsWriterBase < handle
       self.end_stream_();
       self.state_ = 2;
     end
+
+    % Ordinal 2
+    function write_many_cases(self, value)
+      if self.state_ ~= 2
+        self.raise_unexpected_state_(2);
+      end
+
+      self.write_many_cases_(value);
+    end
+
+    function end_many_cases(self)
+      if self.state_ ~= 2
+        self.raise_unexpected_state_(2);
+      end
+
+      self.end_stream_();
+      self.state_ = 3;
+    end
   end
 
   methods (Static)
     function res = schema()
-      res = string('{"protocol":{"name":"StreamsOfUnions","sequence":[{"name":"intOrSimpleRecord","type":{"stream":{"items":[{"tag":"int32","type":"int32"},{"tag":"SimpleRecord","type":"TestModel.SimpleRecord"}]}}},{"name":"nullableIntOrSimpleRecord","type":{"stream":{"items":[null,{"tag":"int32","type":"int32"},{"tag":"SimpleRecord","type":"TestModel.SimpleRecord"}]}}}]},"types":[{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]}]}');
+      res = string('{"protocol":{"name":"StreamsOfUnions","sequence":[{"name":"intOrSimpleRecord","type":{"stream":{"items":[{"tag":"int32","type":"int32"},{"tag":"SimpleRecord","type":"TestModel.SimpleRecord"}]}}},{"name":"nullableIntOrSimpleRecord","type":{"stream":{"items":[null,{"tag":"int32","type":"int32"},{"tag":"SimpleRecord","type":"TestModel.SimpleRecord"}]}}},{"name":"manyCases","type":{"stream":{"items":[{"tag":"int32","type":"int32"},{"tag":"float32","type":"float32"},{"tag":"string","type":"string"},{"tag":"SimpleRecord","type":"TestModel.SimpleRecord"},{"tag":"NamedFixedNDArray","type":"TestModel.NamedFixedNDArray"}]}}}]},"types":[{"name":"NamedFixedNDArray","type":{"array":{"items":"int32","dimensions":[{"name":"dimA","length":2},{"name":"dimB","length":4}]}}},{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]}]}');
     end
   end
 
   methods (Abstract, Access=protected)
     write_int_or_simple_record_(self, value)
     write_nullable_int_or_simple_record_(self, value)
+    write_many_cases_(self, value)
 
     end_stream_(self)
     close_(self)
@@ -82,6 +101,8 @@ classdef (Abstract) StreamsOfUnionsWriterBase < handle
         name = "write_int_or_simple_record or end_int_or_simple_record";
       elseif state == 1
         name = "write_nullable_int_or_simple_record or end_nullable_int_or_simple_record";
+      elseif state == 2
+        name = "write_many_cases or end_many_cases";
       else
         name = '<unknown>';
       end

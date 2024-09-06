@@ -4577,17 +4577,17 @@ class StreamsOfUnionsWriterBase(abc.ABC):
     def __init__(self) -> None:
         self._state = 0
 
-    schema = r"""{"protocol":{"name":"StreamsOfUnions","sequence":[{"name":"intOrSimpleRecord","type":{"stream":{"items":[{"tag":"int32","type":"int32"},{"tag":"SimpleRecord","type":"TestModel.SimpleRecord"}]}}},{"name":"nullableIntOrSimpleRecord","type":{"stream":{"items":[null,{"tag":"int32","type":"int32"},{"tag":"SimpleRecord","type":"TestModel.SimpleRecord"}]}}}]},"types":[{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]}]}"""
+    schema = r"""{"protocol":{"name":"StreamsOfUnions","sequence":[{"name":"intOrSimpleRecord","type":{"stream":{"items":[{"tag":"int32","type":"int32"},{"tag":"SimpleRecord","type":"TestModel.SimpleRecord"}]}}},{"name":"nullableIntOrSimpleRecord","type":{"stream":{"items":[null,{"tag":"int32","type":"int32"},{"tag":"SimpleRecord","type":"TestModel.SimpleRecord"}]}}},{"name":"manyCases","type":{"stream":{"items":[{"tag":"int32","type":"int32"},{"tag":"float32","type":"float32"},{"tag":"string","type":"string"},{"tag":"SimpleRecord","type":"TestModel.SimpleRecord"},{"tag":"NamedFixedNDArray","type":"TestModel.NamedFixedNDArray"}]}}}]},"types":[{"name":"NamedFixedNDArray","type":{"array":{"items":"int32","dimensions":[{"name":"dimA","length":2},{"name":"dimB","length":4}]}}},{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]}]}"""
 
     def close(self) -> None:
-        if self._state == 3:
+        if self._state == 5:
             try:
                 self._end_stream()
                 return
             finally:
                 self._close()
         self._close()
-        if self._state != 4:
+        if self._state != 6:
             expected_method = self._state_to_method_name((self._state + 1) & ~1)
             raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
 
@@ -4622,12 +4622,28 @@ class StreamsOfUnionsWriterBase(abc.ABC):
         self._write_nullable_int_or_simple_record(value)
         self._state = 3
 
+    def write_many_cases(self, value: collections.abc.Iterable[Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray]) -> None:
+        """Ordinal 2"""
+
+        if self._state == 3:
+            self._end_stream()
+            self._state = 4
+        elif self._state & ~1 != 4:
+            self._raise_unexpected_state(4)
+
+        self._write_many_cases(value)
+        self._state = 5
+
     @abc.abstractmethod
     def _write_int_or_simple_record(self, value: collections.abc.Iterable[Int32OrSimpleRecord]) -> None:
         raise NotImplementedError()
 
     @abc.abstractmethod
     def _write_nullable_int_or_simple_record(self, value: collections.abc.Iterable[typing.Optional[Int32OrSimpleRecord]]) -> None:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _write_many_cases(self, value: collections.abc.Iterable[Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray]) -> None:
         raise NotImplementedError()
 
     @abc.abstractmethod
@@ -4648,6 +4664,8 @@ class StreamsOfUnionsWriterBase(abc.ABC):
             return 'write_int_or_simple_record'
         if state == 2:
             return 'write_nullable_int_or_simple_record'
+        if state == 4:
+            return 'write_many_cases'
         return "<unknown>"
 
 class StreamsOfUnionsReaderBase(abc.ABC):
@@ -4659,7 +4677,7 @@ class StreamsOfUnionsReaderBase(abc.ABC):
 
     def close(self) -> None:
         self._close()
-        if self._state != 4:
+        if self._state != 6:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
@@ -4704,9 +4722,20 @@ class StreamsOfUnionsReaderBase(abc.ABC):
         self._state = 3
         return self._wrap_iterable(value, 4)
 
+    def read_many_cases(self) -> collections.abc.Iterable[Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray]:
+        """Ordinal 2"""
+
+        if self._state != 4:
+            self._raise_unexpected_state(4)
+
+        value = self._read_many_cases()
+        self._state = 5
+        return self._wrap_iterable(value, 6)
+
     def copy_to(self, writer: StreamsOfUnionsWriterBase) -> None:
         writer.write_int_or_simple_record(self.read_int_or_simple_record())
         writer.write_nullable_int_or_simple_record(self.read_nullable_int_or_simple_record())
+        writer.write_many_cases(self.read_many_cases())
 
     @abc.abstractmethod
     def _read_int_or_simple_record(self) -> collections.abc.Iterable[Int32OrSimpleRecord]:
@@ -4714,6 +4743,10 @@ class StreamsOfUnionsReaderBase(abc.ABC):
 
     @abc.abstractmethod
     def _read_nullable_int_or_simple_record(self) -> collections.abc.Iterable[typing.Optional[Int32OrSimpleRecord]]:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _read_many_cases(self) -> collections.abc.Iterable[Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray]:
         raise NotImplementedError()
 
     T = typing.TypeVar('T')
@@ -4735,6 +4768,8 @@ class StreamsOfUnionsReaderBase(abc.ABC):
             return 'read_int_or_simple_record'
         if state == 2:
             return 'read_nullable_int_or_simple_record'
+        if state == 4:
+            return 'read_many_cases'
         return "<unknown>"
 
 class EnumsWriterBase(abc.ABC):

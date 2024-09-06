@@ -20,12 +20,10 @@ func collectUnionArities(env *dsl.Environment) []int {
 	dsl.Visit(env, func(self dsl.Visitor, node dsl.Node) {
 		switch t := node.(type) {
 		case *dsl.GeneralizedType:
-			if _, isStream := t.Dimensionality.(*dsl.Stream); !isStream {
-				if t.Cases[0].IsNullType() {
-					if len(t.Cases) > 2 {
-						arities[len(t.Cases)-1] = nil
-					}
-				} else if len(t.Cases) > 1 {
+			if t.Cases.IsUnion() {
+				if t.Cases.HasNullOption() {
+					arities[len(t.Cases)-1] = nil
+				} else {
 					arities[len(t.Cases)] = nil
 				}
 			}

@@ -1912,6 +1912,17 @@ class StreamsOfUnionsWriterBase {
   // Marks the end of the `nullableIntOrSimpleRecord` stream.
   void EndNullableIntOrSimpleRecord();
 
+  // Ordinal 2.
+  // Call this method for each element of the `manyCases` stream, then call `EndManyCases() when done.`
+  void WriteManyCases(std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray> const& value);
+
+  // Ordinal 2.
+  // Call this method to write many values to the `manyCases` stream, then call `EndManyCases()` when done.
+  void WriteManyCases(std::vector<std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray>> const& values);
+
+  // Marks the end of the `manyCases` stream.
+  void EndManyCases();
+
   // Optionaly close this writer before destructing. Validates that all steps were completed.
   void Close();
 
@@ -1927,6 +1938,9 @@ class StreamsOfUnionsWriterBase {
   virtual void WriteNullableIntOrSimpleRecordImpl(std::variant<std::monostate, int32_t, test_model::SimpleRecord> const& value) = 0;
   virtual void WriteNullableIntOrSimpleRecordImpl(std::vector<std::variant<std::monostate, int32_t, test_model::SimpleRecord>> const& value);
   virtual void EndNullableIntOrSimpleRecordImpl() = 0;
+  virtual void WriteManyCasesImpl(std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray> const& value) = 0;
+  virtual void WriteManyCasesImpl(std::vector<std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray>> const& value);
+  virtual void EndManyCasesImpl() = 0;
   virtual void CloseImpl() {}
 
   static std::string schema_;
@@ -1956,10 +1970,16 @@ class StreamsOfUnionsReaderBase {
   // Ordinal 1.
   [[nodiscard]] bool ReadNullableIntOrSimpleRecord(std::vector<std::variant<std::monostate, int32_t, test_model::SimpleRecord>>& values);
 
+  // Ordinal 2.
+  [[nodiscard]] bool ReadManyCases(std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray>& value);
+
+  // Ordinal 2.
+  [[nodiscard]] bool ReadManyCases(std::vector<std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray>>& values);
+
   // Optionaly close this writer before destructing. Validates that all steps were completely read.
   void Close();
 
-  void CopyTo(StreamsOfUnionsWriterBase& writer, size_t int_or_simple_record_buffer_size = 1, size_t nullable_int_or_simple_record_buffer_size = 1);
+  void CopyTo(StreamsOfUnionsWriterBase& writer, size_t int_or_simple_record_buffer_size = 1, size_t nullable_int_or_simple_record_buffer_size = 1, size_t many_cases_buffer_size = 1);
 
   virtual ~StreamsOfUnionsReaderBase() = default;
 
@@ -1968,6 +1988,8 @@ class StreamsOfUnionsReaderBase {
   virtual bool ReadIntOrSimpleRecordImpl(std::vector<std::variant<int32_t, test_model::SimpleRecord>>& values);
   virtual bool ReadNullableIntOrSimpleRecordImpl(std::variant<std::monostate, int32_t, test_model::SimpleRecord>& value) = 0;
   virtual bool ReadNullableIntOrSimpleRecordImpl(std::vector<std::variant<std::monostate, int32_t, test_model::SimpleRecord>>& values);
+  virtual bool ReadManyCasesImpl(std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray>& value) = 0;
+  virtual bool ReadManyCasesImpl(std::vector<std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray>>& values);
   virtual void CloseImpl() {}
   static std::string schema_;
 

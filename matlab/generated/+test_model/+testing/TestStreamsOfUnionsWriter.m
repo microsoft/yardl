@@ -37,6 +37,11 @@ classdef TestStreamsOfUnionsWriter < test_model.StreamsOfUnionsWriterBase
       self.writer_.end_nullable_int_or_simple_record();
     end
 
+    function end_many_cases(self)
+      end_many_cases@test_model.StreamsOfUnionsWriterBase(self);
+      self.writer_.end_many_cases();
+    end
+
   end
 
   methods (Access=protected)
@@ -48,6 +53,11 @@ classdef TestStreamsOfUnionsWriter < test_model.StreamsOfUnionsWriterBase
     function write_nullable_int_or_simple_record_(self, value)
       self.writer_.write_nullable_int_or_simple_record(value);
       self.mock_writer_.expect_write_nullable_int_or_simple_record_(value);
+    end
+
+    function write_many_cases_(self, value)
+      self.writer_.write_many_cases(value);
+      self.mock_writer_.expect_write_many_cases_(value);
     end
 
     function close_(self)

@@ -5,6 +5,7 @@ classdef StreamsOfUnionsWriter < yardl.binary.BinaryProtocolWriter & test_model.
   properties (Access=protected)
     int_or_simple_record_serializer
     nullable_int_or_simple_record_serializer
+    many_cases_serializer
   end
 
   methods
@@ -13,6 +14,7 @@ classdef StreamsOfUnionsWriter < yardl.binary.BinaryProtocolWriter & test_model.
       self@yardl.binary.BinaryProtocolWriter(filename, test_model.StreamsOfUnionsWriterBase.schema);
       self.int_or_simple_record_serializer = yardl.binary.StreamSerializer(yardl.binary.UnionSerializer('test_model.Int32OrSimpleRecord', {yardl.binary.Int32Serializer, test_model.binary.SimpleRecordSerializer()}, {@test_model.Int32OrSimpleRecord.Int32, @test_model.Int32OrSimpleRecord.SimpleRecord}));
       self.nullable_int_or_simple_record_serializer = yardl.binary.StreamSerializer(yardl.binary.UnionSerializer('test_model.Int32OrSimpleRecord', {yardl.binary.NoneSerializer, yardl.binary.Int32Serializer, test_model.binary.SimpleRecordSerializer()}, {yardl.None, @test_model.Int32OrSimpleRecord.Int32, @test_model.Int32OrSimpleRecord.SimpleRecord}));
+      self.many_cases_serializer = yardl.binary.StreamSerializer(yardl.binary.UnionSerializer('test_model.Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray', {yardl.binary.Int32Serializer, yardl.binary.Float32Serializer, yardl.binary.StringSerializer, test_model.binary.SimpleRecordSerializer(), yardl.binary.FixedNDArraySerializer(yardl.binary.Int32Serializer, [4, 2])}, {@test_model.Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray.Int32, @test_model.Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray.Float32, @test_model.Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray.String, @test_model.Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray.SimpleRecord, @test_model.Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray.NamedFixedNDArray}));
     end
   end
 
@@ -23,6 +25,10 @@ classdef StreamsOfUnionsWriter < yardl.binary.BinaryProtocolWriter & test_model.
 
     function write_nullable_int_or_simple_record_(self, value)
       self.nullable_int_or_simple_record_serializer.write(self.stream_, value);
+    end
+
+    function write_many_cases_(self, value)
+      self.many_cases_serializer.write(self.stream_, value);
     end
   end
 end

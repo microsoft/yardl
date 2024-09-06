@@ -2867,6 +2867,34 @@ class MockStreamsOfUnionsWriter : public StreamsOfUnionsWriterBase {
     EndNullableIntOrSimpleRecordImpl_expected_call_count_++;
   }
 
+  void WriteManyCasesImpl (std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray> const& value) override {
+    if (WriteManyCasesImpl_expected_values_.empty()) {
+      throw std::runtime_error("Unexpected call to WriteManyCasesImpl");
+    }
+    if (WriteManyCasesImpl_expected_values_.front() != value) {
+      throw std::runtime_error("Unexpected argument value for call to WriteManyCasesImpl");
+    }
+    WriteManyCasesImpl_expected_values_.pop();
+  }
+
+  std::queue<std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray>> WriteManyCasesImpl_expected_values_;
+
+  void ExpectWriteManyCasesImpl (std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray> const& value) {
+    WriteManyCasesImpl_expected_values_.push(value);
+  }
+
+  void EndManyCasesImpl () override {
+    if (--EndManyCasesImpl_expected_call_count_ < 0) {
+      throw std::runtime_error("Unexpected call to EndManyCasesImpl");
+    }
+  }
+
+  int EndManyCasesImpl_expected_call_count_ = 0;
+
+  void ExpectEndManyCasesImpl () {
+    EndManyCasesImpl_expected_call_count_++;
+  }
+
   void Verify() {
     if (!WriteIntOrSimpleRecordImpl_expected_values_.empty()) {
       throw std::runtime_error("Expected call to WriteIntOrSimpleRecordImpl was not received");
@@ -2879,6 +2907,12 @@ class MockStreamsOfUnionsWriter : public StreamsOfUnionsWriterBase {
     }
     if (EndNullableIntOrSimpleRecordImpl_expected_call_count_ > 0) {
       throw std::runtime_error("Expected call to EndNullableIntOrSimpleRecordImpl was not received");
+    }
+    if (!WriteManyCasesImpl_expected_values_.empty()) {
+      throw std::runtime_error("Expected call to WriteManyCasesImpl was not received");
+    }
+    if (EndManyCasesImpl_expected_call_count_ > 0) {
+      throw std::runtime_error("Expected call to EndManyCasesImpl was not received");
     }
   }
 };
@@ -2929,11 +2963,28 @@ class TestStreamsOfUnionsWriterBase : public StreamsOfUnionsWriterBase {
     mock_writer_.ExpectEndNullableIntOrSimpleRecordImpl();
   }
 
+  void WriteManyCasesImpl(std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray> const& value) override {
+    writer_->WriteManyCases(value);
+    mock_writer_.ExpectWriteManyCasesImpl(value);
+  }
+
+  void WriteManyCasesImpl(std::vector<std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray>> const& values) override {
+    writer_->WriteManyCases(values);
+    for (auto const& v : values) {
+      mock_writer_.ExpectWriteManyCasesImpl(v);
+    }
+  }
+
+  void EndManyCasesImpl() override {
+    writer_->EndManyCases();
+    mock_writer_.ExpectEndManyCasesImpl();
+  }
+
   void CloseImpl() override {
     close_called_ = true;
     writer_->Close();
     std::unique_ptr<StreamsOfUnionsReaderBase> reader = create_reader_();
-    reader->CopyTo(mock_writer_, 2, 1);
+    reader->CopyTo(mock_writer_, 2, 1, 4);
     mock_writer_.Verify();
   }
 

@@ -2054,6 +2054,23 @@ Int32OrRecordWithVlens.Int32 = type("Int32OrRecordWithVlens.Int32", (Int32OrReco
 Int32OrRecordWithVlens.RecordWithVlens = type("Int32OrRecordWithVlens.RecordWithVlens", (Int32OrRecordWithVlensUnionCase,), {"index": 1, "tag": "RecordWithVlens"})
 del Int32OrRecordWithVlensUnionCase
 
+class Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray:
+    Int32: typing.ClassVar[type["Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArrayUnionCase[yardl.Int32]"]]
+    Float32: typing.ClassVar[type["Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArrayUnionCase[yardl.Float32]"]]
+    String: typing.ClassVar[type["Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArrayUnionCase[str]"]]
+    SimpleRecord: typing.ClassVar[type["Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArrayUnionCase[SimpleRecord]"]]
+    NamedFixedNDArray: typing.ClassVar[type["Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArrayUnionCase[NamedFixedNDArray]"]]
+
+class Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArrayUnionCase(Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray, yardl.UnionCase[_T]):
+    pass
+
+Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray.Int32 = type("Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray.Int32", (Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArrayUnionCase,), {"index": 0, "tag": "int32"})
+Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray.Float32 = type("Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray.Float32", (Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArrayUnionCase,), {"index": 1, "tag": "float32"})
+Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray.String = type("Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray.String", (Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArrayUnionCase,), {"index": 2, "tag": "string"})
+Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray.SimpleRecord = type("Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray.SimpleRecord", (Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArrayUnionCase,), {"index": 3, "tag": "SimpleRecord"})
+Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray.NamedFixedNDArray = type("Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray.NamedFixedNDArray", (Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArrayUnionCase,), {"index": 4, "tag": "NamedFixedNDArray"})
+del Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArrayUnionCase
+
 class ImageFloatOrImageDouble:
     ImageFloat: typing.ClassVar[type["ImageFloatOrImageDoubleUnionCase[image.FloatImage]"]]
     ImageDouble: typing.ClassVar[type["ImageFloatOrImageDoubleUnionCase[Image[np.float64]]"]]
@@ -2189,6 +2206,12 @@ def _mk_get_dtype():
     dtype_map.setdefault(Int32OrRecordWithVlens, np.dtype(np.object_))
     dtype_map.setdefault(Int32OrRecordWithVlens.Int32, np.dtype(np.int32))
     dtype_map.setdefault(Int32OrRecordWithVlens.RecordWithVlens, get_dtype(RecordWithVlens))
+    dtype_map.setdefault(Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray, np.dtype(np.object_))
+    dtype_map.setdefault(Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray.Int32, np.dtype(np.int32))
+    dtype_map.setdefault(Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray.Float32, np.dtype(np.float32))
+    dtype_map.setdefault(Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray.String, np.dtype(np.object_))
+    dtype_map.setdefault(Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray.SimpleRecord, get_dtype(SimpleRecord))
+    dtype_map.setdefault(Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray.NamedFixedNDArray, np.dtype(np.int32))
     dtype_map.setdefault(ImageFloatOrImageDouble, np.dtype(np.object_))
     dtype_map.setdefault(ImageFloatOrImageDouble.ImageFloat, np.dtype(np.object_))
     dtype_map.setdefault(ImageFloatOrImageDouble.ImageDouble, np.dtype(np.object_))

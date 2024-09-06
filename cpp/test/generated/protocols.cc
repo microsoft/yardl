@@ -4359,12 +4359,14 @@ void StreamsOfUnionsWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] b
   switch (current) {
   case 0: expected_method = "WriteIntOrSimpleRecord() or EndIntOrSimpleRecord()"; break;
   case 1: expected_method = "WriteNullableIntOrSimpleRecord() or EndNullableIntOrSimpleRecord()"; break;
+  case 2: expected_method = "WriteManyCases() or EndManyCases()"; break;
   }
   std::string attempted_method;
   switch (attempted) {
   case 0: attempted_method = end ? "EndIntOrSimpleRecord()" : "WriteIntOrSimpleRecord()"; break;
   case 1: attempted_method = end ? "EndNullableIntOrSimpleRecord()" : "WriteNullableIntOrSimpleRecord()"; break;
-  case 2: attempted_method = "Close()"; break;
+  case 2: attempted_method = end ? "EndManyCases()" : "WriteManyCases()"; break;
+  case 3: attempted_method = "Close()"; break;
   }
   throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
 }
@@ -4374,7 +4376,8 @@ void StreamsOfUnionsReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
     switch (i/2) {
     case 0: return "ReadIntOrSimpleRecord()";
     case 1: return "ReadNullableIntOrSimpleRecord()";
-    case 2: return "Close()";
+    case 2: return "ReadManyCases()";
+    case 3: return "Close()";
     default: return "<unknown>";
     }
   };
@@ -4383,7 +4386,7 @@ void StreamsOfUnionsReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
 
 } // namespace 
 
-std::string StreamsOfUnionsWriterBase::schema_ = R"({"protocol":{"name":"StreamsOfUnions","sequence":[{"name":"intOrSimpleRecord","type":{"stream":{"items":[{"tag":"int32","type":"int32"},{"tag":"SimpleRecord","type":"TestModel.SimpleRecord"}]}}},{"name":"nullableIntOrSimpleRecord","type":{"stream":{"items":[null,{"tag":"int32","type":"int32"},{"tag":"SimpleRecord","type":"TestModel.SimpleRecord"}]}}}]},"types":[{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]}]})";
+std::string StreamsOfUnionsWriterBase::schema_ = R"({"protocol":{"name":"StreamsOfUnions","sequence":[{"name":"intOrSimpleRecord","type":{"stream":{"items":[{"tag":"int32","type":"int32"},{"tag":"SimpleRecord","type":"TestModel.SimpleRecord"}]}}},{"name":"nullableIntOrSimpleRecord","type":{"stream":{"items":[null,{"tag":"int32","type":"int32"},{"tag":"SimpleRecord","type":"TestModel.SimpleRecord"}]}}},{"name":"manyCases","type":{"stream":{"items":[{"tag":"int32","type":"int32"},{"tag":"float32","type":"float32"},{"tag":"string","type":"string"},{"tag":"SimpleRecord","type":"TestModel.SimpleRecord"},{"tag":"NamedFixedNDArray","type":"TestModel.NamedFixedNDArray"}]}}}]},"types":[{"name":"NamedFixedNDArray","type":{"array":{"items":"int32","dimensions":[{"name":"dimA","length":2},{"name":"dimB","length":4}]}}},{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]}]})";
 
 std::vector<std::string> StreamsOfUnionsWriterBase::previous_schemas_ = {
 };
@@ -4459,9 +4462,41 @@ void StreamsOfUnionsWriterBase::WriteNullableIntOrSimpleRecordImpl(std::vector<s
   }
 }
 
-void StreamsOfUnionsWriterBase::Close() {
+void StreamsOfUnionsWriterBase::WriteManyCases(std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray> const& value) {
   if (unlikely(state_ != 2)) {
     StreamsOfUnionsWriterBaseInvalidState(2, false, state_);
+  }
+
+  WriteManyCasesImpl(value);
+}
+
+void StreamsOfUnionsWriterBase::WriteManyCases(std::vector<std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray>> const& values) {
+  if (unlikely(state_ != 2)) {
+    StreamsOfUnionsWriterBaseInvalidState(2, false, state_);
+  }
+
+  WriteManyCasesImpl(values);
+}
+
+void StreamsOfUnionsWriterBase::EndManyCases() {
+  if (unlikely(state_ != 2)) {
+    StreamsOfUnionsWriterBaseInvalidState(2, true, state_);
+  }
+
+  EndManyCasesImpl();
+  state_ = 3;
+}
+
+// fallback implementation
+void StreamsOfUnionsWriterBase::WriteManyCasesImpl(std::vector<std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray>> const& values) {
+  for (auto const& v : values) {
+    WriteManyCasesImpl(v);
+  }
+}
+
+void StreamsOfUnionsWriterBase::Close() {
+  if (unlikely(state_ != 3)) {
+    StreamsOfUnionsWriterBaseInvalidState(3, false, state_);
   }
 
   CloseImpl();
@@ -4593,8 +4628,12 @@ bool StreamsOfUnionsReaderBase::ReadNullableIntOrSimpleRecordImpl(std::vector<st
   }
 }
 
-void StreamsOfUnionsReaderBase::Close() {
+bool StreamsOfUnionsReaderBase::ReadManyCases(std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray>& value) {
   if (unlikely(state_ != 4)) {
+    if (state_ == 5) {
+      state_ = 6;
+      return false;
+    }
     if (state_ == 3) {
       state_ = 4;
     } else {
@@ -4602,9 +4641,67 @@ void StreamsOfUnionsReaderBase::Close() {
     }
   }
 
+  bool result = ReadManyCasesImpl(value);
+  if (!result) {
+    state_ = 6;
+  }
+  return result;
+}
+
+bool StreamsOfUnionsReaderBase::ReadManyCases(std::vector<std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray>>& values) {
+  if (values.capacity() == 0) {
+    throw std::runtime_error("vector must have a nonzero capacity.");
+  }
+  if (unlikely(state_ != 4)) {
+    if (state_ == 5) {
+      state_ = 6;
+      values.clear();
+      return false;
+    }
+    if (state_ == 3) {
+      state_ = 4;
+    } else {
+      StreamsOfUnionsReaderBaseInvalidState(4, state_);
+    }
+  }
+
+  if (!ReadManyCasesImpl(values)) {
+    state_ = 5;
+    return values.size() > 0;
+  }
+  return true;
+}
+
+// fallback implementation
+bool StreamsOfUnionsReaderBase::ReadManyCasesImpl(std::vector<std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray>>& values) {
+  size_t i = 0;
+  while (true) {
+    if (i == values.size()) {
+      values.resize(i + 1);
+    }
+    if (!ReadManyCasesImpl(values[i])) {
+      values.resize(i);
+      return false;
+    }
+    i++;
+    if (i == values.capacity()) {
+      return true;
+    }
+  }
+}
+
+void StreamsOfUnionsReaderBase::Close() {
+  if (unlikely(state_ != 6)) {
+    if (state_ == 5) {
+      state_ = 6;
+    } else {
+      StreamsOfUnionsReaderBaseInvalidState(6, state_);
+    }
+  }
+
   CloseImpl();
 }
-void StreamsOfUnionsReaderBase::CopyTo(StreamsOfUnionsWriterBase& writer, size_t int_or_simple_record_buffer_size, size_t nullable_int_or_simple_record_buffer_size) {
+void StreamsOfUnionsReaderBase::CopyTo(StreamsOfUnionsWriterBase& writer, size_t int_or_simple_record_buffer_size, size_t nullable_int_or_simple_record_buffer_size, size_t many_cases_buffer_size) {
   if (int_or_simple_record_buffer_size > 1) {
     std::vector<std::variant<int32_t, test_model::SimpleRecord>> values;
     values.reserve(int_or_simple_record_buffer_size);
@@ -4632,6 +4729,20 @@ void StreamsOfUnionsReaderBase::CopyTo(StreamsOfUnionsWriterBase& writer, size_t
       writer.WriteNullableIntOrSimpleRecord(value);
     }
     writer.EndNullableIntOrSimpleRecord();
+  }
+  if (many_cases_buffer_size > 1) {
+    std::vector<std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray>> values;
+    values.reserve(many_cases_buffer_size);
+    while(ReadManyCases(values)) {
+      writer.WriteManyCases(values);
+    }
+    writer.EndManyCases();
+  } else {
+    std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray> value;
+    while(ReadManyCases(value)) {
+      writer.WriteManyCases(value);
+    }
+    writer.EndManyCases();
   }
 }
 

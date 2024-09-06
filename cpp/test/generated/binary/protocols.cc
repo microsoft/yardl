@@ -704,6 +704,78 @@ void ReadUnion(yardl::binary::CodedInputStream& stream, std::variant<T0, T1, T2>
     default: throw std::runtime_error("Invalid union index.");
   }
 }
+
+template<typename T0, yardl::binary::Writer<T0> WriteT0, typename T1, yardl::binary::Writer<T1> WriteT1, typename T2, yardl::binary::Writer<T2> WriteT2, typename T3, yardl::binary::Writer<T3> WriteT3, typename T4, yardl::binary::Writer<T4> WriteT4>
+void WriteUnion(yardl::binary::CodedOutputStream& stream, std::variant<T0, T1, T2, T3, T4> const& value) {
+  yardl::binary::WriteInteger(stream, value.index());
+  switch (value.index()) {
+  case 0: {
+    T0 const& v = std::get<0>(value);
+    WriteT0(stream, v);
+    break;
+  }
+  case 1: {
+    T1 const& v = std::get<1>(value);
+    WriteT1(stream, v);
+    break;
+  }
+  case 2: {
+    T2 const& v = std::get<2>(value);
+    WriteT2(stream, v);
+    break;
+  }
+  case 3: {
+    T3 const& v = std::get<3>(value);
+    WriteT3(stream, v);
+    break;
+  }
+  case 4: {
+    T4 const& v = std::get<4>(value);
+    WriteT4(stream, v);
+    break;
+  }
+  default: throw std::runtime_error("Invalid union index.");
+  }
+}
+
+template<typename T0, yardl::binary::Reader<T0> ReadT0, typename T1, yardl::binary::Reader<T1> ReadT1, typename T2, yardl::binary::Reader<T2> ReadT2, typename T3, yardl::binary::Reader<T3> ReadT3, typename T4, yardl::binary::Reader<T4> ReadT4>
+void ReadUnion(yardl::binary::CodedInputStream& stream, std::variant<T0, T1, T2, T3, T4>& value) {
+  size_t index;
+  yardl::binary::ReadInteger(stream, index);
+  switch (index) {
+    case 0: {
+      T0 v;
+      ReadT0(stream, v);
+      value = std::move(v);
+      break;
+    }
+    case 1: {
+      T1 v;
+      ReadT1(stream, v);
+      value = std::move(v);
+      break;
+    }
+    case 2: {
+      T2 v;
+      ReadT2(stream, v);
+      value = std::move(v);
+      break;
+    }
+    case 3: {
+      T3 v;
+      ReadT3(stream, v);
+      value = std::move(v);
+      break;
+    }
+    case 4: {
+      T4 v;
+      ReadT4(stream, v);
+      value = std::move(v);
+      break;
+    }
+    default: throw std::runtime_error("Invalid union index.");
+  }
+}
 } // namespace
 
 namespace tuples::binary {
@@ -3864,6 +3936,20 @@ void StreamsOfUnionsWriter::EndNullableIntOrSimpleRecordImpl() {
   yardl::binary::WriteInteger(stream_, 0U);
 }
 
+void StreamsOfUnionsWriter::WriteManyCasesImpl(std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray> const& value) {
+  yardl::binary::WriteBlock<std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray>, WriteUnion<int32_t, yardl::binary::WriteInteger, float, yardl::binary::WriteFloatingPoint, std::string, yardl::binary::WriteString, test_model::SimpleRecord, test_model::binary::WriteSimpleRecord, test_model::NamedFixedNDArray, test_model::binary::WriteNamedFixedNDArray>>(stream_, value);
+}
+
+void StreamsOfUnionsWriter::WriteManyCasesImpl(std::vector<std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray>> const& values) {
+  if (!values.empty()) {
+    yardl::binary::WriteVector<std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray>, WriteUnion<int32_t, yardl::binary::WriteInteger, float, yardl::binary::WriteFloatingPoint, std::string, yardl::binary::WriteString, test_model::SimpleRecord, test_model::binary::WriteSimpleRecord, test_model::NamedFixedNDArray, test_model::binary::WriteNamedFixedNDArray>>(stream_, values);
+  }
+}
+
+void StreamsOfUnionsWriter::EndManyCasesImpl() {
+  yardl::binary::WriteInteger(stream_, 0U);
+}
+
 void StreamsOfUnionsWriter::Flush() {
   stream_.Flush();
 }
@@ -3891,6 +3977,17 @@ bool StreamsOfUnionsReader::ReadNullableIntOrSimpleRecordImpl(std::variant<std::
 
 bool StreamsOfUnionsReader::ReadNullableIntOrSimpleRecordImpl(std::vector<std::variant<std::monostate, int32_t, test_model::SimpleRecord>>& values) {
   yardl::binary::ReadBlocksIntoVector<std::variant<std::monostate, int32_t, test_model::SimpleRecord>, ReadUnion<std::monostate, yardl::binary::ReadMonostate, int32_t, yardl::binary::ReadInteger, test_model::SimpleRecord, test_model::binary::ReadSimpleRecord>>(stream_, current_block_remaining_, values);
+  return current_block_remaining_ != 0;
+}
+
+bool StreamsOfUnionsReader::ReadManyCasesImpl(std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray>& value) {
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray>, ReadUnion<int32_t, yardl::binary::ReadInteger, float, yardl::binary::ReadFloatingPoint, std::string, yardl::binary::ReadString, test_model::SimpleRecord, test_model::binary::ReadSimpleRecord, test_model::NamedFixedNDArray, test_model::binary::ReadNamedFixedNDArray>>(stream_, current_block_remaining_, value);
+  return read_block_successful;
+}
+
+bool StreamsOfUnionsReader::ReadManyCasesImpl(std::vector<std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray>>& values) {
+  yardl::binary::ReadBlocksIntoVector<std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray>, ReadUnion<int32_t, yardl::binary::ReadInteger, float, yardl::binary::ReadFloatingPoint, std::string, yardl::binary::ReadString, test_model::SimpleRecord, test_model::binary::ReadSimpleRecord, test_model::NamedFixedNDArray, test_model::binary::ReadNamedFixedNDArray>>(stream_, current_block_remaining_, values);
   return current_block_remaining_ != 0;
 }
 

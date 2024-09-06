@@ -783,6 +783,56 @@ struct adl_serializer<std::variant<int32_t, test_model::RecordWithVlens>> {
 };
 
 template <>
+struct adl_serializer<std::variant<int32_t, float, std::string, test_model::SimpleRecord, yardl::FixedNDArray<int32_t, 2, 4>>> {
+  static void to_json(ordered_json& j, std::variant<int32_t, float, std::string, test_model::SimpleRecord, yardl::FixedNDArray<int32_t, 2, 4>> const& value) {
+    switch (value.index()) {
+      case 0:
+        j = ordered_json{ {"int32", std::get<int32_t>(value)} };
+        break;
+      case 1:
+        j = ordered_json{ {"float32", std::get<float>(value)} };
+        break;
+      case 2:
+        j = ordered_json{ {"string", std::get<std::string>(value)} };
+        break;
+      case 3:
+        j = ordered_json{ {"SimpleRecord", std::get<test_model::SimpleRecord>(value)} };
+        break;
+      case 4:
+        j = ordered_json{ {"NamedFixedNDArray", std::get<yardl::FixedNDArray<int32_t, 2, 4>>(value)} };
+        break;
+      default:
+        throw std::runtime_error("Invalid union value");
+    }
+  }
+
+  static void from_json(ordered_json const& j, std::variant<int32_t, float, std::string, test_model::SimpleRecord, yardl::FixedNDArray<int32_t, 2, 4>>& value) {
+    auto it = j.begin();
+    std::string tag = it.key();
+    if (tag == "int32") {
+      value = it.value().get<int32_t>();
+      return;
+    }
+    if (tag == "float32") {
+      value = it.value().get<float>();
+      return;
+    }
+    if (tag == "string") {
+      value = it.value().get<std::string>();
+      return;
+    }
+    if (tag == "SimpleRecord") {
+      value = it.value().get<test_model::SimpleRecord>();
+      return;
+    }
+    if (tag == "NamedFixedNDArray") {
+      value = it.value().get<yardl::FixedNDArray<int32_t, 2, 4>>();
+      return;
+    }
+  }
+};
+
+template <>
 struct adl_serializer<std::variant<yardl::NDArray<float, 2>, yardl::NDArray<double, 2>>> {
   static void to_json(ordered_json& j, std::variant<yardl::NDArray<float, 2>, yardl::NDArray<double, 2>> const& value) {
     switch (value.index()) {
@@ -3512,6 +3562,10 @@ void StreamsOfUnionsWriter::WriteNullableIntOrSimpleRecordImpl(std::variant<std:
   ordered_json json_value = value;
   yardl::ndjson::WriteProtocolValue(stream_, "nullableIntOrSimpleRecord", json_value);}
 
+void StreamsOfUnionsWriter::WriteManyCasesImpl(std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "manyCases", json_value);}
+
 void StreamsOfUnionsWriter::Flush() {
   stream_.flush();
 }
@@ -3526,6 +3580,10 @@ bool StreamsOfUnionsReader::ReadIntOrSimpleRecordImpl(std::variant<int32_t, test
 
 bool StreamsOfUnionsReader::ReadNullableIntOrSimpleRecordImpl(std::variant<std::monostate, int32_t, test_model::SimpleRecord>& value) {
   return yardl::ndjson::ReadProtocolValue(stream_, line_, "nullableIntOrSimpleRecord", false, unused_step_, value);
+}
+
+bool StreamsOfUnionsReader::ReadManyCasesImpl(std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray>& value) {
+  return yardl::ndjson::ReadProtocolValue(stream_, line_, "manyCases", false, unused_step_, value);
 }
 
 void StreamsOfUnionsReader::CloseImpl() {

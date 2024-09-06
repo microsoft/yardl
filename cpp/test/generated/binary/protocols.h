@@ -1047,6 +1047,9 @@ class StreamsOfUnionsWriter : public test_model::StreamsOfUnionsWriterBase, yard
   void WriteNullableIntOrSimpleRecordImpl(std::variant<std::monostate, int32_t, test_model::SimpleRecord> const& value) override;
   void WriteNullableIntOrSimpleRecordImpl(std::vector<std::variant<std::monostate, int32_t, test_model::SimpleRecord>> const& values) override;
   void EndNullableIntOrSimpleRecordImpl() override;
+  void WriteManyCasesImpl(std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray> const& value) override;
+  void WriteManyCasesImpl(std::vector<std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray>> const& values) override;
+  void EndManyCasesImpl() override;
   void CloseImpl() override;
 
   Version version_;
@@ -1068,6 +1071,8 @@ class StreamsOfUnionsReader : public test_model::StreamsOfUnionsReaderBase, yard
   bool ReadIntOrSimpleRecordImpl(std::vector<std::variant<int32_t, test_model::SimpleRecord>>& values) override;
   bool ReadNullableIntOrSimpleRecordImpl(std::variant<std::monostate, int32_t, test_model::SimpleRecord>& value) override;
   bool ReadNullableIntOrSimpleRecordImpl(std::vector<std::variant<std::monostate, int32_t, test_model::SimpleRecord>>& values) override;
+  bool ReadManyCasesImpl(std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray>& value) override;
+  bool ReadManyCasesImpl(std::vector<std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray>>& values) override;
   void CloseImpl() override;
 
   Version version_;

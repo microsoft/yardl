@@ -951,6 +951,8 @@ class StreamsOfUnionsWriter : public test_model::StreamsOfUnionsWriterBase, yard
   void EndIntOrSimpleRecordImpl() override {}
   void WriteNullableIntOrSimpleRecordImpl(std::variant<std::monostate, int32_t, test_model::SimpleRecord> const& value) override;
   void EndNullableIntOrSimpleRecordImpl() override {}
+  void WriteManyCasesImpl(std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray> const& value) override;
+  void EndManyCasesImpl() override {}
   void CloseImpl() override;
 };
 
@@ -968,6 +970,7 @@ class StreamsOfUnionsReader : public test_model::StreamsOfUnionsReaderBase, yard
   protected:
   bool ReadIntOrSimpleRecordImpl(std::variant<int32_t, test_model::SimpleRecord>& value) override;
   bool ReadNullableIntOrSimpleRecordImpl(std::variant<std::monostate, int32_t, test_model::SimpleRecord>& value) override;
+  bool ReadManyCasesImpl(std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray>& value) override;
   void CloseImpl() override;
 };
 
