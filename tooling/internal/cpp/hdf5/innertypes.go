@@ -284,10 +284,11 @@ func needsInnerType(node dsl.Node) bool {
 					return
 				}
 			case *dsl.Array:
-				if !d.IsFixed() {
-					result = true
-					return
-				}
+				// TODO Joe: No longer treating FixedNDArray differently
+				// if !d.IsFixed() {
+				result = true
+				return
+				// }
 			case *dsl.Map:
 				result = true
 			}
@@ -320,10 +321,11 @@ func containsVlen(node dsl.Node) bool {
 					return
 				}
 			case *dsl.Array:
-				if !d.IsFixed() {
-					result = true
-					return
-				}
+				// TODO Joe: No longer treating FixedNDArray differently
+				// if !d.IsFixed() {
+				result = true
+				return
+				// }
 			}
 			self.VisitChildren(node)
 		case dsl.PrimitiveDefinition:
@@ -383,14 +385,15 @@ func innerTypeSyntax(t dsl.Type) string {
 			}
 
 			if d.IsFixed() {
-				if needsInnerType(t.ToScalar()) {
-					maxes := make([]string, len(*d.Dimensions))
-					for i, dim := range *d.Dimensions {
-						maxes[i] = fmt.Sprint(*dim.Length)
-					}
-					return fmt.Sprintf("yardl::hdf5::InnerFixedNdArray<%s, %s, %s>", scalarTInnerSyntax, scalarTOuterSyntax, strings.Join(maxes, ", "))
+				// TODO Joe: No longer treating FixedNDArray differently
+				// if needsInnerType(t.ToScalar()) {
+				maxes := make([]string, len(*d.Dimensions))
+				for i, dim := range *d.Dimensions {
+					maxes[i] = fmt.Sprint(*dim.Length)
 				}
-				return common.TypeSyntax(t)
+				return fmt.Sprintf("yardl::hdf5::InnerFixedNdArray<%s, %s, %s>", scalarTInnerSyntax, scalarTOuterSyntax, strings.Join(maxes, ", "))
+				// }
+				// return common.TypeSyntax(t)
 			}
 			if len(*d.Dimensions) == 1 {
 				return fmt.Sprintf("yardl::hdf5::InnerVlen<%s, %s>", scalarTInnerSyntax, scalarTOuterSyntax)
@@ -566,7 +569,8 @@ func typeDdlExpression(t dsl.Type) string {
 				for i, dim := range *d.Dimensions {
 					maxes[i] = fmt.Sprint(*dim.Length)
 				}
-				return fmt.Sprintf("yardl::hdf5::FixedNDArrayDdl(%s, {%s})", typeDdlExpression(scalarT), strings.Join(maxes, ", "))
+				// return fmt.Sprintf("yardl::hdf5::FixedNDArrayDdl(%s, {%s})", typeDdlExpression(scalarT), strings.Join(maxes, ", "))
+				return fmt.Sprintf("yardl::hdf5::FixedNDArrayDdl<%s, %s, %s>(%s)", innerTypeSyntax(scalarT), common.TypeSyntax(scalarT), strings.Join(maxes, ", "), scalarDdl)
 			}
 
 			if len(*d.Dimensions) == 1 {

@@ -180,7 +180,6 @@ func writeHeaderFile(env *dsl.Environment, options packaging.CppCodegenOptions) 
 
 #include "../yardl/detail/ndjson/reader_writer.h"
 #include "../protocols.h"
-#include "../types.h"
 `)
 
 	for _, ns := range env.Namespaces {

@@ -56,7 +56,6 @@ func writeSourceFile(env *dsl.Environment, options packaging.CppCodegenOptions) 
 	common.WriteGeneratedFileHeader(w)
 
 	w.WriteStringln(`#include "types.h"`)
-	w.WriteStringln(`#include "yardl/yardl.h"`)
 
 	for _, ns := range env.Namespaces {
 		fmt.Fprintf(w, "namespace %s {\n", common.NamespaceIdentifierName(ns.Name))
@@ -310,25 +309,36 @@ func writeComputedFieldExpression(w *formatting.IndentedWriter, expression dsl.E
 				w.WriteString(common.FieldIdentifierName(t.Member))
 			}
 		case *dsl.SubscriptExpression:
-			self.Visit(t.Target)
-			w.WriteString(".at(")
+			switch dsl.ToGeneralizedType(dsl.GetUnderlyingType(t.Target.GetResolvedType())).Dimensionality.(type) {
+			case *dsl.Vector, *dsl.Map:
+				self.Visit(t.Target)
+				w.WriteString(".at(")
+			case *dsl.Array:
+				w.WriteString("")
+				fmt.Fprintf(w, "yardl::at(")
+				self.Visit(t.Target)
+				fmt.Fprintf(w, ", ")
+			}
 			formatting.Delimited(w, ", ", t.Arguments, func(w *formatting.IndentedWriter, i int, a *dsl.SubscriptArgument) {
 				self.Visit(a.Value)
 			})
 			w.WriteString(")")
-		case *dsl.Vector:
 		case *dsl.FunctionCallExpression:
 			switch t.FunctionName {
 			case dsl.FunctionSize:
-				self.Visit(t.Arguments[0])
 				switch dsl.ToGeneralizedType(dsl.GetUnderlyingType(t.Arguments[0].GetResolvedType())).Dimensionality.(type) {
 				case *dsl.Vector, *dsl.Map:
+					self.Visit(t.Arguments[0])
 					fmt.Fprintf(w, ".size(")
 				case *dsl.Array:
 					if len(t.Arguments) == 1 {
-						fmt.Fprintf(w, ".size(")
+						fmt.Fprintf(w, "yardl::size(")
 					} else {
-						fmt.Fprintf(w, ".shape(")
+						fmt.Fprintf(w, "yardl::shape(")
+					}
+					self.Visit(t.Arguments[0])
+					if len(t.Arguments) > 1 {
+						fmt.Fprintf(w, ", ")
 					}
 				}
 				if len(t.Arguments) > 1 {
@@ -354,8 +364,9 @@ func writeComputedFieldExpression(w *formatting.IndentedWriter, expression dsl.E
 				w.WriteString(")")
 
 			case dsl.FunctionDimensionCount:
+				fmt.Fprintf(w, "yardl::dimension(")
 				self.Visit(t.Arguments[0])
-				fmt.Fprintf(w, ".dimension()")
+				fmt.Fprintf(w, ")")
 			default:
 				panic(fmt.Sprintf("Unknown function '%s'", t.FunctionName))
 			}

@@ -32,9 +32,14 @@ benchmark-cmd := if matlab != "disabled" { "python python/benchmark.py --include
     cd models/remote-import && yardl generate
 
 @generate-evolution: install
-    cd models/evolution/model_v0 && yardl generate 2>&1
-    cd models/evolution/model_v1 && yardl generate 2>&1
-    cd models/evolution/model_v2 && yardl generate 2>&1
+    cd models/evolution/model_v0 && yardl generate --quiet 2>&1
+    cd models/evolution/model_v1 && yardl generate --quiet 2>&1
+    cd models/evolution/model_v2 && yardl generate --quiet 2>&1
+
+@generate-ndarray: install
+    cd models/ndarray; \
+    ln -sf ../test/unittests.yml ../test/benchmarking.yml ./; \
+    yardl generate
 
 @build-sandbox: generate-sandbox ensure-build-dir
     cd cpp/build && ninja sandbox_exec
@@ -83,6 +88,11 @@ benchmark-cmd := if matlab != "disabled" { "python python/benchmark.py --include
     ninja tests; \
     ./tests --gtest_brief=1
 
+@cpp-test-ndarray: generate-ndarray ensure-build-dir
+    cd cpp/build; \
+    ninja tests; \
+    ./tests --gtest_brief=1
+
 @matlab-test: generate build-translator
     cd matlab/test; \
     {{ matlab-test-cmd }}
@@ -92,7 +102,7 @@ benchmark-cmd := if matlab != "disabled" { "python python/benchmark.py --include
     ninja evolution/all; \
     python ../evolution/test-evolution.py
 
-@test: tooling-test cpp-test python-test matlab-test evolution-test
+@test: tooling-test cpp-test python-test matlab-test evolution-test cpp-test-ndarray
 
 @benchmark: generate ensure-build-dir
     cd cpp/build; \

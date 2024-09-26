@@ -183,13 +183,13 @@ func (versions *Versions) UnmarshalYAML(value *yaml.Node) error {
 }
 
 type CppCodegenOptions struct {
-	PackageInfo        *PackageInfo `yaml:"-"`
-	SourcesOutputDir   string       `yaml:"sourcesOutputDir"`
-	GenerateCMakeLists bool         `yaml:"generateCMakeLists"`
+	PackageInfo         *PackageInfo `yaml:"-"`
+	SourcesOutputDir    string       `yaml:"sourcesOutputDir"`
+	GenerateCMakeLists  bool         `yaml:"generateCMakeLists"`
+	OverrideArrayHeader string       `yaml:"overrideArrayHeader"`
 
-	InternalSymlinkStaticHeaders bool `yaml:"internalSymlinkStaticHeaders"`
-	InternalGenerateMocks        bool `yaml:"internalGenerateMocks"`
-	InternalGenerateTranslator   bool `yaml:"internalGenerateTranslator"`
+	InternalGenerateMocks      bool `yaml:"internalGenerateMocks"`
+	InternalGenerateTranslator bool `yaml:"internalGenerateTranslator"`
 }
 
 func (o CppCodegenOptions) ChangeOutputDir(newRelativeDir string) CppCodegenOptions {

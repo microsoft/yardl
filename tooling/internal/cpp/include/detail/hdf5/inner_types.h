@@ -118,12 +118,12 @@ struct InnerVlen : public hvl_t {
   }
 
   InnerVlen(NDArray<TOuter, 1> const& o)
-      : hvl_t{o.size(), MallocOrThrow(o.size() * sizeof(TInner))} {
+      : hvl_t{yardl::size(o), MallocOrThrow(yardl::size(o) * sizeof(TInner))} {
     if constexpr (std::is_same_v<TInner, TOuter>) {
       static_assert(std::is_trivially_copyable_v<TInner>);
-      std::memcpy(p, o.data(), len * sizeof(TInner));
+      std::memcpy(p, yardl::dataptr(o), len * sizeof(TInner));
     } else {
-      auto o_iter = o.begin();
+      auto o_iter = std::begin(o);
       auto p_ptr = static_cast<TInner*>(p);
       for (size_t i = 0; i < len; i++) {
         new (p_ptr++) TInner(*o_iter++);
@@ -169,14 +169,14 @@ struct InnerVlen : public hvl_t {
 
   void ToOuter(NDArray<TOuter, 1>& o) const {
     std::array<size_t, 1> shape = {len};
-    o.resize(shape);
+    yardl::resize(o, shape);
     if (len > 0) {
       if constexpr (std::is_same_v<TInner, TOuter>) {
         static_assert(std::is_trivially_copyable_v<TInner>);
-        std::memcpy(o.data(), static_cast<TInner*>(p), len * sizeof(TOuter));
+        std::memcpy(yardl::dataptr(o), static_cast<TInner*>(p), len * sizeof(TOuter));
       } else {
         TInner* inner_objects = static_cast<TInner*>(p);
-        auto o_iter = o.begin();
+        auto o_iter = std::begin(o);
         for (size_t i = 0; i < len; i++) {
           TInner& inner_object = inner_objects[i];
           inner_object.ToOuter(*o_iter++);
@@ -240,35 +240,95 @@ class InnerFixedVector : public std::array<TInner, N> {
 /**
  * @brief An HDF5-compatible representation a fixed-size multidimensional array.
  */
+// template <typename TInner, typename TOuter, size_t... Dims>
+// class InnerFixedNdArray : public yardl::FixedNDArray<TInner, Dims...> {
+//  public:
+//   InnerFixedNdArray() {}
+//   InnerFixedNdArray(yardl::FixedNDArray<TOuter, Dims...> const& o) {
+//     auto o_iter = std::begin(o);
+//     TInner* i_data_ptr = yardl::dataptr(*this);
+//     for (size_t i = 0; i < length; i++) {
+//       new (i_data_ptr++) TInner(*o_iter++);
+//     }
+//   }
+
+//   template <typename TFixedNDArray,
+//             std::enable_if_t<std::is_base_of_v<
+//                                  yardl::FixedNDArray<TOuter, Dims...>,
+//                                  TFixedNDArray>,
+//                              bool> = true>
+//   void ToOuter(TFixedNDArray& o) const {
+//     if constexpr (std::is_same_v<TInner, TOuter>) {
+//       static_assert(std::is_trivially_copyable_v<TInner>);
+//       std::memcpy(yardl::dataptr(o), yardl::dataptr(*this), length * sizeof(TOuter));
+//     } else {
+//       auto o_iter = std::begin(o);
+//       auto i_iter = std::begin(*this);
+//       for (size_t i = 0; i < length; i++) {
+//         (*i_iter++).ToOuter(*o_iter++);
+//       }
+//     }
+//   }
+
+//  private:
+//   static constexpr size_t length = (Dims * ...);
+// };
+
 template <typename TInner, typename TOuter, size_t... Dims>
-class InnerFixedNdArray : public yardl::FixedNDArray<TInner, Dims...> {
+class InnerFixedNdArray {
  public:
   InnerFixedNdArray() {}
-  InnerFixedNdArray(yardl::FixedNDArray<TOuter, Dims...> const& o) {
-    auto o_iter = o.begin();
-    TInner* i_data_ptr = this->data();
-    for (size_t i = 0; i < length; i++) {
-      new (i_data_ptr++) TInner(*o_iter++);
-    }
-  }
-
-  template <typename TFixedNDArray,
-            std::enable_if_t<std::is_base_of_v<
-                                 yardl::FixedNDArray<TOuter, Dims...>,
-                                 TFixedNDArray>,
-                             bool> = true>
-  void ToOuter(TFixedNDArray& o) const {
+  InnerFixedNdArray(FixedNDArray<TOuter, Dims...> const& o)
+      : data_{yardl::size(o), malloc(yardl::size(o) * sizeof(TInner))} {
     if constexpr (std::is_same_v<TInner, TOuter>) {
       static_assert(std::is_trivially_copyable_v<TInner>);
-      std::memcpy(o.data(), this->data(), length * sizeof(TOuter));
+      std::memcpy(data_.p, yardl::dataptr(o), data_.len * sizeof(TOuter));
     } else {
-      auto o_iter = o.begin();
-      auto i_iter = this->begin();
-      for (size_t i = 0; i < length; i++) {
-        (*i_iter++).ToOuter(*o_iter++);
+      auto o_iter = std::begin(o);
+      auto p = static_cast<TInner*>(data_.p);
+      for (size_t i = 0; i < data_.len; i++) {
+        new (p++) TInner(*o_iter++);
       }
     }
   }
+
+  InnerFixedNdArray(InnerFixedNdArray<TInner, TOuter, Dims...> const&) = delete;
+
+  ~InnerFixedNdArray() {
+    if (data_.p != nullptr) {
+      if constexpr (!std::is_trivially_destructible_v<TInner>) {
+        for (size_t i = 0; i < data_.len; i++) {
+          auto inner_object = static_cast<TInner*>(data_.p) + i;
+          inner_object->~TInner();
+        }
+      }
+
+      free(data_.p);
+      data_.p = nullptr;
+      data_.len = 0;
+    }
+  }
+
+  InnerFixedNdArray<TInner, TOuter, Dims...>& operator=(InnerFixedNdArray<TInner, TOuter, Dims...> const&) = delete;
+
+  template <typename TFixedNdArray, std::enable_if_t<std::is_base_of_v<FixedNDArray<TOuter, Dims...>, TFixedNdArray>, bool> = true>
+  void ToOuter(TFixedNdArray& rtn) const {
+    if (data_.len > 0) {
+      if constexpr (std::is_same_v<TInner, TOuter>) {
+        static_assert(std::is_trivially_copyable_v<TInner>);
+        std::memcpy(yardl::dataptr(rtn), static_cast<TInner*>(data_.p), data_.len * sizeof(TInner));
+      } else {
+        TInner* inner_objects = static_cast<TInner*>(data_.p);
+        auto rtn_iter = std::begin(rtn);
+        for (size_t i = 0; i < length; i++) {
+          TInner& inner_object = inner_objects[i];
+          inner_object.ToOuter(*rtn_iter++);
+        }
+      }
+    }
+  }
+
+  hvl_t data_;
 
  private:
   static constexpr size_t length = (Dims * ...);
@@ -283,11 +343,11 @@ struct InnerNdArray {
   InnerNdArray() : dimensions_{}, data_{0, nullptr} {}
 
   InnerNdArray(NDArray<TOuter, N> const& o)
-      : dimensions_(o.shape()), data_{o.size(), malloc(o.size() * sizeof(TInner))} {
+      : dimensions_(yardl::shape(o)), data_{yardl::size(o), malloc(yardl::size(o) * sizeof(TInner))} {
     if constexpr (std::is_same_v<TInner, TOuter>) {
-      std::memcpy(data_.p, o.data(), data_.len * sizeof(TInner));
+      std::memcpy(data_.p, yardl::dataptr(o), data_.len * sizeof(TInner));
     } else {
-      auto o_iter = o.begin();
+      auto o_iter = std::begin(o);
       auto p = static_cast<TInner*>(data_.p);
       for (size_t i = 0; i < data_.len; i++) {
         new (p++) TInner(*o_iter++);
@@ -316,14 +376,14 @@ struct InnerNdArray {
 
   template <typename TNDArray, std::enable_if_t<std::is_base_of_v<NDArray<TOuter, N>, TNDArray>, bool> = true>
   void ToOuter(TNDArray& rtn) const {
-    rtn.resize(dimensions_);
+    yardl::resize(rtn, dimensions_);
     if (data_.len > 0) {
       if constexpr (std::is_same_v<TInner, TOuter>) {
         static_assert(std::is_trivially_copyable_v<TInner>);
-        std::memcpy(rtn.data(), static_cast<TInner*>(data_.p), data_.len * sizeof(TInner));
+        std::memcpy(yardl::dataptr(rtn), static_cast<TInner*>(data_.p), data_.len * sizeof(TInner));
       } else {
         TInner* inner_objects = static_cast<TInner*>(data_.p);
-        auto rtn_iter = rtn.begin();
+        auto rtn_iter = std::begin(rtn);
         for (size_t i = 0; i < data_.len; i++) {
           TInner& inner_object = inner_objects[i];
           inner_object.ToOuter(*rtn_iter++);
@@ -344,13 +404,13 @@ struct InnerDynamicNdArray {
   InnerDynamicNdArray() : dimensions_{0, nullptr}, data_{0, nullptr} {}
 
   InnerDynamicNdArray(DynamicNDArray<TOuter> const& o)
-      : dimensions_{o.dimension(), MallocOrThrow(o.dimension() * sizeof(size_t))},
-        data_{o.size(), MallocOrThrow(o.size() * sizeof(TInner))} {
-    memcpy(dimensions_.p, o.shape().data(), o.dimension() * sizeof(size_t));
+      : dimensions_{yardl::dimension(o), MallocOrThrow(yardl::dimension(o) * sizeof(size_t))},
+        data_{yardl::size(o), MallocOrThrow(yardl::size(o) * sizeof(TInner))} {
+    memcpy(dimensions_.p, yardl::shape(o).data(), yardl::dimension(o) * sizeof(size_t));
     if constexpr (std::is_same_v<TInner, TOuter>) {
-      std::memcpy(data_.p, o.data(), data_.len * sizeof(TInner));
+      std::memcpy(data_.p, yardl::dataptr(o), data_.len * sizeof(TInner));
     } else {
-      auto o_iter = o.begin();
+      auto o_iter = std::begin(o);
       auto p = static_cast<TInner*>(data_.p);
       for (size_t i = 0; i < data_.len; i++) {
         new (p++) TInner(*o_iter++);
@@ -387,14 +447,14 @@ struct InnerDynamicNdArray {
   void ToOuter(TDynamicNDArray& rtn) const {
     std::vector<size_t> dims(static_cast<size_t*>(dimensions_.p),
                              static_cast<size_t*>(dimensions_.p) + dimensions_.len);
-    rtn.resize(dims);
+    yardl::resize(rtn, dims);
     if (data_.len > 0) {
       if constexpr (std::is_same_v<TInner, TOuter>) {
         static_assert(std::is_trivially_copyable_v<TInner>);
-        std::memcpy(rtn.data(), static_cast<TInner*>(data_.p), data_.len * sizeof(TInner));
+        std::memcpy(yardl::dataptr(rtn), static_cast<TInner*>(data_.p), data_.len * sizeof(TInner));
       } else {
         TInner* inner_objects = static_cast<TInner*>(data_.p);
-        auto rtn_iter = rtn.begin();
+        auto rtn_iter = std::begin(rtn);
         for (size_t i = 0; i < data_.len; i++) {
           TInner& inner_object = inner_objects[i];
           inner_object.ToOuter(*rtn_iter++);

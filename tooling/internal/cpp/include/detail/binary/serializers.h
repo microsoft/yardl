@@ -67,11 +67,12 @@ struct IsTriviallySerializable<std::array<T, N>,
     : std::true_type {
 };
 
-template <typename T, size_t... Dims>
-struct IsTriviallySerializable<yardl::FixedNDArray<T, Dims...>,
-                               typename std::enable_if_t<IsTriviallySerializable<T>::value>>
-    : std::true_type {
-};
+// TODO Joe: We can no longer assume FixedNDArray is trivially serializable e.g. if implemented by user
+// template <typename T, size_t... Dims>
+// struct IsTriviallySerializable<yardl::FixedNDArray<T, Dims...>,
+//                                typename std::enable_if_t<IsTriviallySerializable<T>::value>>
+//     : std::true_type {
+// };
 
 template <typename T>
 inline void WriteTriviallySerializable(CodedOutputStream& stream, T const& value) {
@@ -276,14 +277,14 @@ inline void ReadArray(CodedInputStream& stream, std::array<T, N>& value) {
 
 template <typename T, Writer<T> WriteElement>
 inline void WriteDynamicNDArray(CodedOutputStream& stream, yardl::DynamicNDArray<T> const& value) {
-  auto shape = value.shape();
+  auto shape = yardl::shape(value);
   WriteInteger(stream, shape.size());
   for (auto const& dim : shape) {
     WriteInteger(stream, dim);
   }
 
   if constexpr (IsTriviallySerializable<T>::value) {
-    stream.WriteBytes(value.data(), value.size() * sizeof(T));
+    stream.WriteBytes(yardl::dataptr(value), yardl::size(value) * sizeof(T));
     return;
   }
 
@@ -296,10 +297,10 @@ template <typename T, Reader<T> ReadElement>
 inline void ReadDynamicNDArray(CodedInputStream& stream, yardl::DynamicNDArray<T>& value) {
   std::vector<size_t> shape;
   ReadVector<size_t, &ReadInteger>(stream, shape);
-  value.resize(shape);
+  yardl::resize(value, shape);
 
   if constexpr (IsTriviallySerializable<T>::value) {
-    stream.ReadBytes(value.data(), value.size() * sizeof(T));
+    stream.ReadBytes(yardl::dataptr(value), yardl::size(value) * sizeof(T));
     return;
   }
 
@@ -310,12 +311,12 @@ inline void ReadDynamicNDArray(CodedInputStream& stream, yardl::DynamicNDArray<T
 
 template <typename T, Writer<T> WriteElement, size_t N>
 inline void WriteNDArray(CodedOutputStream& stream, yardl::NDArray<T, N> const& value) {
-  for (auto const& dim : value.shape()) {
+  for (auto const& dim : yardl::shape(value)) {
     WriteInteger(stream, dim);
   }
 
   if constexpr (IsTriviallySerializable<T>::value) {
-    stream.WriteBytes(value.data(), value.size() * sizeof(T));
+    stream.WriteBytes(yardl::dataptr(value), yardl::size(value) * sizeof(T));
     return;
   }
 
@@ -328,10 +329,10 @@ template <typename T, Reader<T> ReadElement, size_t N>
 inline void ReadNDArray(CodedInputStream& stream, yardl::NDArray<T, N>& value) {
   std::array<size_t, N> shape;
   ReadArray<size_t, &ReadInteger, N>(stream, shape);
-  value.resize(shape);
+  yardl::resize(value, shape);
 
   if constexpr (IsTriviallySerializable<T>::value) {
-    stream.ReadBytes(value.data(), value.size() * sizeof(T));
+    stream.ReadBytes(yardl::dataptr(value), yardl::size(value) * sizeof(T));
     return;
   }
 
@@ -344,7 +345,7 @@ template <typename T, Writer<T> WriteElement, size_t... Dims>
 inline void WriteFixedNDArray(CodedOutputStream& stream,
                               yardl::FixedNDArray<T, Dims...> const& value) {
   if constexpr (IsTriviallySerializable<T>::value) {
-    stream.WriteBytes(value.data(), value.size() * sizeof(T));
+    stream.WriteBytes(yardl::dataptr(value), yardl::size(value) * sizeof(T));
     return;
   }
 
@@ -356,7 +357,7 @@ inline void WriteFixedNDArray(CodedOutputStream& stream,
 template <typename T, Reader<T> ReadElement, size_t... Dims>
 inline void ReadFixedNDArray(CodedInputStream& stream, yardl::FixedNDArray<T, Dims...>& value) {
   if constexpr (IsTriviallySerializable<T>::value) {
-    stream.ReadBytes(value.data(), value.size() * sizeof(T));
+    stream.ReadBytes(yardl::dataptr(value), yardl::size(value) * sizeof(T));
     return;
   }
 

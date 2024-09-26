@@ -67,9 +67,8 @@ func writeHeaderFile(env *dsl.Environment, options packaging.CppCodegenOptions) 
 #include <variant>
 #include <vector>
 
-#include "../yardl/detail/binary/reader_writer.h"
 #include "../protocols.h"
-#include "../types.h"
+#include "../yardl/detail/binary/reader_writer.h"
 `)
 
 	for _, ns := range env.Namespaces {

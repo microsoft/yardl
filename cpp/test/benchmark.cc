@@ -37,7 +37,7 @@ Result BenchmarkFloat256x256(Format format) {
   }
 
   size_t const repetitions = ScaleRepetitions(10000, scale);
-  size_t const total_size = sizeof(a) * repetitions;
+  size_t const total_size = sizeof(float) * yardl::size(a) * repetitions;
 
   return TimeScenario(
       total_size,
@@ -77,7 +77,7 @@ Result BenchmarkFloatVlen(Format format) {
   }
 
   size_t const repetitions = ScaleRepetitions(10000, scale);
-  size_t const total_size = sizeof(float) * a.size() * repetitions;
+  size_t const total_size = sizeof(float) * yardl::size(a) * repetitions;
 
   return TimeScenario(
       total_size,
@@ -114,7 +114,7 @@ Result BenchmarkSmallInt256x256(Format format) {
   }
 
   size_t const repetitions = ScaleRepetitions(6000, scale);
-  size_t const total_size = sizeof(a) * repetitions;
+  size_t const total_size = sizeof(float) * yardl::size(a) * repetitions;
 
   return TimeScenario(
       total_size,
@@ -255,12 +255,12 @@ Result BenchmarkSimpleMrd(Format format) {
   }();
 
   SimpleAcquisition acq;
-  acq.data.resize({32, 256});
+  yardl::resize(acq.data, {32, 256});
   acq.trajectory = yardl::NDArray<float, 2>({32, 2});
   std::variant<SimpleAcquisition, Image<float>> value = acq;
 
   size_t const repetitions = ScaleRepetitions(30000, scale);
-  size_t single_size = sizeof(value) + acq.data.size() * sizeof(std::complex<float>) + acq.trajectory.size() * sizeof(float);
+  size_t single_size = sizeof(value) + yardl::size(acq.data) * sizeof(std::complex<float>) + yardl::size(acq.trajectory) * sizeof(float);
   if (single_size != 66032) {
     throw std::runtime_error("Unexpected size: " + std::to_string(single_size));
   }

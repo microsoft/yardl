@@ -28,8 +28,8 @@ TEST(ComputedFieldsTests, AccessFields) {
 
   r.array_field = {{1, 2, 3}, {4, 5, 6}};
   EXPECT_EQ(r.AccessArrayField(), r.array_field);
-  EXPECT_EQ(r.AccessArrayFieldElement(), r.array_field.at(0, 1));
-  EXPECT_EQ(r.AccessArrayFieldElementByName(), r.array_field.at(0, 1));
+  EXPECT_EQ(r.AccessArrayFieldElement(), yardl::at(r.array_field, 0, 1));
+  EXPECT_EQ(r.AccessArrayFieldElementByName(), yardl::at(r.array_field, 0, 1));
 
   EXPECT_EQ(r.AccessOtherComputedField(), r.AccessIntField());
 
@@ -114,9 +114,9 @@ TEST(ComputedFieldsTests, ArraySize) {
   r.tuple_field.v1 = 1;
   ASSERT_EQ(r.ArraySizeFromNestedIntField(), 3);
 
-  ASSERT_EQ(r.FixedArraySize(), r.fixed_array_field.size());
-  ASSERT_EQ(r.FixedArrayXSize(), r.fixed_array_field.shape(0));
-  ASSERT_EQ(r.FixedArray0Size(), r.fixed_array_field.shape(0));
+  ASSERT_EQ(r.FixedArraySize(), yardl::size(r.fixed_array_field));
+  ASSERT_EQ(r.FixedArrayXSize(), yardl::shape(r.fixed_array_field, 0));
+  ASSERT_EQ(r.FixedArray0Size(), yardl::shape(r.fixed_array_field, 0));
 
   r.array_field_map_dimensions = {{1, 2, 3}, {4, 5, 6}};
   ASSERT_EQ(r.ArrayFieldMapDimensionsXSize(), 2);

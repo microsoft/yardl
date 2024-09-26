@@ -181,7 +181,7 @@ struct adl_serializer<std::complex<T>> {
 template <typename T>
 struct adl_serializer<yardl::DynamicNDArray<T>> {
   static void to_json(ordered_json& j, yardl::DynamicNDArray<T> const& value) {
-    auto shape = value.shape();
+    auto shape = yardl::shape(value);
     auto data_array = ordered_json::array();
     for (auto const& v : value) {
       data_array.push_back(v);
@@ -190,7 +190,7 @@ struct adl_serializer<yardl::DynamicNDArray<T>> {
   }
 
   static void from_json(ordered_json const& j, yardl::DynamicNDArray<T>& value) {
-    value.resize(j.at("shape").get<std::vector<size_t>>());
+    yardl::resize(value, j.at("shape").get<std::vector<size_t>>());
     auto data_array = j.at("data").get<std::vector<T>>();
     size_t i = 0;
     for (auto& element : value) {
@@ -202,7 +202,7 @@ struct adl_serializer<yardl::DynamicNDArray<T>> {
 template <typename T, size_t N>
 struct adl_serializer<yardl::NDArray<T, N>> {
   static void to_json(ordered_json& j, yardl::NDArray<T, N> const& value) {
-    auto shape = value.shape();
+    auto shape = yardl::shape(value);
     auto data_array = ordered_json::array();
     for (auto const& v : value) {
       data_array.push_back(v);
@@ -211,7 +211,7 @@ struct adl_serializer<yardl::NDArray<T, N>> {
   }
 
   static void from_json(ordered_json const& j, yardl::NDArray<T, N>& value) {
-    value.resize(j.at("shape").get<std::vector<size_t>>());
+    yardl::resize(value, j.at("shape").get<std::array<size_t, N>>());
     auto data_array = j.at("data").get<std::vector<T>>();
     size_t i = 0;
     for (auto& element : value) {

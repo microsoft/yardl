@@ -10,7 +10,6 @@
 
 #include "../yardl/detail/ndjson/reader_writer.h"
 #include "../protocols.h"
-#include "../types.h"
 
 namespace test_model::ndjson {
 // NDJSON writer for the BenchmarkFloat256x256 protocol.
