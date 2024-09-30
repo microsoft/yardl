@@ -67,12 +67,11 @@ struct IsTriviallySerializable<std::array<T, N>,
     : std::true_type {
 };
 
-// TODO Joe: We can no longer assume FixedNDArray is trivially serializable e.g. if implemented by user
-// template <typename T, size_t... Dims>
-// struct IsTriviallySerializable<yardl::FixedNDArray<T, Dims...>,
-//                                typename std::enable_if_t<IsTriviallySerializable<T>::value>>
-//     : std::true_type {
-// };
+template <typename T, size_t... Dims>
+struct IsTriviallySerializable<yardl::FixedNDArray<T, Dims...>,
+                               typename std::enable_if_t<IsTriviallySerializable<T>::value>>
+    : std::true_type {
+};
 
 template <typename T>
 inline void WriteTriviallySerializable(CodedOutputStream& stream, T const& value) {

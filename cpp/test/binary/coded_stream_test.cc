@@ -534,6 +534,7 @@ TEST(CodedStreamTests, TypesThatAreTriviallySerializable) {
   static_assert(IsTriviallySerializable<std::complex<float>>::value);
   static_assert(IsTriviallySerializable<std::complex<double>>::value);
   static_assert(IsTriviallySerializable<std::array<float, 2>>::value);
+  static_assert(IsTriviallySerializable<yardl::FixedNDArray<float, 2, 3>>::value);
 }
 
 TEST(CodedStreamTests, TypesThatAreNotTriviallySerializable) {
@@ -542,7 +543,6 @@ TEST(CodedStreamTests, TypesThatAreNotTriviallySerializable) {
   static_assert(!IsTriviallySerializable<std::vector<float>>::value);
   static_assert(!IsTriviallySerializable<yardl::DynamicNDArray<float>>::value);
   static_assert(!IsTriviallySerializable<yardl::NDArray<float, 2>>::value);
-  static_assert(!IsTriviallySerializable<yardl::FixedNDArray<float, 2, 3>>::value);
 }
 
 }  // namespace

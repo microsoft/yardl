@@ -240,95 +240,35 @@ class InnerFixedVector : public std::array<TInner, N> {
 /**
  * @brief An HDF5-compatible representation a fixed-size multidimensional array.
  */
-// template <typename TInner, typename TOuter, size_t... Dims>
-// class InnerFixedNdArray : public yardl::FixedNDArray<TInner, Dims...> {
-//  public:
-//   InnerFixedNdArray() {}
-//   InnerFixedNdArray(yardl::FixedNDArray<TOuter, Dims...> const& o) {
-//     auto o_iter = std::begin(o);
-//     TInner* i_data_ptr = yardl::dataptr(*this);
-//     for (size_t i = 0; i < length; i++) {
-//       new (i_data_ptr++) TInner(*o_iter++);
-//     }
-//   }
-
-//   template <typename TFixedNDArray,
-//             std::enable_if_t<std::is_base_of_v<
-//                                  yardl::FixedNDArray<TOuter, Dims...>,
-//                                  TFixedNDArray>,
-//                              bool> = true>
-//   void ToOuter(TFixedNDArray& o) const {
-//     if constexpr (std::is_same_v<TInner, TOuter>) {
-//       static_assert(std::is_trivially_copyable_v<TInner>);
-//       std::memcpy(yardl::dataptr(o), yardl::dataptr(*this), length * sizeof(TOuter));
-//     } else {
-//       auto o_iter = std::begin(o);
-//       auto i_iter = std::begin(*this);
-//       for (size_t i = 0; i < length; i++) {
-//         (*i_iter++).ToOuter(*o_iter++);
-//       }
-//     }
-//   }
-
-//  private:
-//   static constexpr size_t length = (Dims * ...);
-// };
-
 template <typename TInner, typename TOuter, size_t... Dims>
-class InnerFixedNdArray {
+class InnerFixedNdArray : public yardl::FixedNDArray<TInner, Dims...> {
  public:
   InnerFixedNdArray() {}
-  InnerFixedNdArray(FixedNDArray<TOuter, Dims...> const& o)
-      : data_{yardl::size(o), malloc(yardl::size(o) * sizeof(TInner))} {
+  InnerFixedNdArray(yardl::FixedNDArray<TOuter, Dims...> const& o) {
+    auto o_iter = std::begin(o);
+    TInner* i_data_ptr = yardl::dataptr(*this);
+    for (size_t i = 0; i < length; i++) {
+      new (i_data_ptr++) TInner(*o_iter++);
+    }
+  }
+
+  template <typename TFixedNDArray,
+            std::enable_if_t<std::is_base_of_v<
+                                 yardl::FixedNDArray<TOuter, Dims...>,
+                                 TFixedNDArray>,
+                             bool> = true>
+  void ToOuter(TFixedNDArray& o) const {
     if constexpr (std::is_same_v<TInner, TOuter>) {
       static_assert(std::is_trivially_copyable_v<TInner>);
-      std::memcpy(data_.p, yardl::dataptr(o), data_.len * sizeof(TOuter));
+      std::memcpy(yardl::dataptr(o), yardl::dataptr(*this), length * sizeof(TOuter));
     } else {
       auto o_iter = std::begin(o);
-      auto p = static_cast<TInner*>(data_.p);
-      for (size_t i = 0; i < data_.len; i++) {
-        new (p++) TInner(*o_iter++);
+      auto i_iter = std::begin(*this);
+      for (size_t i = 0; i < length; i++) {
+        (*i_iter++).ToOuter(*o_iter++);
       }
     }
   }
-
-  InnerFixedNdArray(InnerFixedNdArray<TInner, TOuter, Dims...> const&) = delete;
-
-  ~InnerFixedNdArray() {
-    if (data_.p != nullptr) {
-      if constexpr (!std::is_trivially_destructible_v<TInner>) {
-        for (size_t i = 0; i < data_.len; i++) {
-          auto inner_object = static_cast<TInner*>(data_.p) + i;
-          inner_object->~TInner();
-        }
-      }
-
-      free(data_.p);
-      data_.p = nullptr;
-      data_.len = 0;
-    }
-  }
-
-  InnerFixedNdArray<TInner, TOuter, Dims...>& operator=(InnerFixedNdArray<TInner, TOuter, Dims...> const&) = delete;
-
-  template <typename TFixedNdArray, std::enable_if_t<std::is_base_of_v<FixedNDArray<TOuter, Dims...>, TFixedNdArray>, bool> = true>
-  void ToOuter(TFixedNdArray& rtn) const {
-    if (data_.len > 0) {
-      if constexpr (std::is_same_v<TInner, TOuter>) {
-        static_assert(std::is_trivially_copyable_v<TInner>);
-        std::memcpy(yardl::dataptr(rtn), static_cast<TInner*>(data_.p), data_.len * sizeof(TInner));
-      } else {
-        TInner* inner_objects = static_cast<TInner*>(data_.p);
-        auto rtn_iter = std::begin(rtn);
-        for (size_t i = 0; i < length; i++) {
-          TInner& inner_object = inner_objects[i];
-          inner_object.ToOuter(*rtn_iter++);
-        }
-      }
-    }
-  }
-
-  hvl_t data_;
 
  private:
   static constexpr size_t length = (Dims * ...);

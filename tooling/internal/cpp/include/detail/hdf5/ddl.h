@@ -133,19 +133,9 @@ static inline H5::ArrayType FixedVectorDdl(H5::DataType const& element_type, hsi
 /**
  * @brief Creates a datatype for a fixed-size NDArray
  */
-/* TODO Joe: Fix the FixedNDArray ddl/inner_types so it is stored as an array, not VarLenType */
-// static inline H5::ArrayType FixedNDArrayDdl(H5::DataType const& element_type,
-//                                             std::initializer_list<hsize_t> dimensions) {
-//   return H5::ArrayType(element_type, static_cast<int>(dimensions.size()), std::data(dimensions));
-// }
-template <typename TInner, typename TOuter, size_t... Dims>
-H5::CompType FixedNDArrayDdl(H5::DataType const& element_type) {
-  using ArrayType = InnerFixedNdArray<TInner, TOuter, Dims...>;
-  H5::CompType compType(sizeof(ArrayType));
-  // std::vector<hsize_t> dims{Dims...};
-  // compType.insertMember("data", HOFFSET(ArrayType, data_), H5::ArrayType(element_type, dims.size(), dims.data()));
-  compType.insertMember("data", HOFFSET(ArrayType, data_), H5::VarLenType(element_type));
-  return compType;
+static inline H5::ArrayType FixedNDArrayDdl(H5::DataType const& element_type,
+                                            std::initializer_list<hsize_t> dimensions) {
+  return H5::ArrayType(element_type, static_cast<int>(dimensions.size()), std::data(dimensions));
 }
 
 /**

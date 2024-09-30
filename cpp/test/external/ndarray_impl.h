@@ -3,6 +3,8 @@
 #include <array>
 #include <cstddef>
 
+#include <xtensor/xfixed.hpp>
+
 #include "hoNDArray.h"
 
 namespace yardl {
@@ -112,32 +114,29 @@ inline void nested_copy(T&& iter, std::initializer_list<S> s) {
  * @tparam Dims the array dimensions
  */
 template <typename T, size_t... Dims>
-class FixedNDArray : public external::hoNDArray<T> {
-  using BaseType = external::hoNDArray<T>;
+using FixedNDArray = xt::xtensor_fixed<T, xt::xshape<Dims...>,
+                                       xt::layout_type::row_major, false>;
 
- public:
-  FixedNDArray() : BaseType() {
-    auto shape = std::vector<size_t>{Dims...};
-    this->create(detail::reversed(shape));
-  }
+/**** FixedNDArray Implementation ****/
+template <typename T, size_t... Dims>
+size_t size(FixedNDArray<T, Dims...> const& arr) { return arr.size(); }
 
-  FixedNDArray(detail::nested_initializer_list_t<T, sizeof...(Dims)> t)
-      : FixedNDArray() {
-    auto shape = detail::initialize_shape<std::vector<size_t>>(t);
-    if (detail::reversed(shape) != this->get_dimensions()) {
-      throw std::runtime_error("Initializer list shape does not match FixedNDArray shape");
-    }
-    detail::nested_copy(this->begin(), t);
-  }
+template <typename T, size_t... Dims>
+size_t dimension(FixedNDArray<T, Dims...> const& arr) { return arr.dimension(); }
 
-  bool operator==(FixedNDArray const& other) const {
-    return BaseType::operator==(other);
-  }
+template <typename T, size_t... Dims>
+std::vector<size_t> shape(FixedNDArray<T, Dims...> const& arr) { return arr.shape(); }
 
-  bool operator!=(FixedNDArray const& other) const {
-    return BaseType::operator!=(other);
-  }
-};
+template <typename T, size_t... Dims>
+size_t shape(FixedNDArray<T, Dims...> const& arr, size_t dim) { return arr.shape(dim); }
+
+template <typename T, size_t... Dims>
+T* dataptr(FixedNDArray<T, Dims...>& arr) { return arr.data(); }
+template <typename T, size_t... Dims>
+T const* dataptr(FixedNDArray<T, Dims...> const& arr) { return arr.data(); }
+
+template <typename T, size_t... Dims, class... Args>
+T const& at(FixedNDArray<T, Dims...> const& arr, Args... idx) { return arr.at(idx...); }
 
 /**
  * @brief  A multidimensional array where the number of dimensions

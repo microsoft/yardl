@@ -299,7 +299,7 @@ struct _Inner_RecordWithChanges {
   int32_t int_to_long;
   yardl::hdf5::InnerVlen<int32_t, int32_t> deprecated_vector;
   float float_to_double;
-  yardl::hdf5::InnerFixedNdArray<uint8_t, uint8_t, 7> deprecated_array;
+  yardl::FixedNDArray<uint8_t, 7> deprecated_array;
   yardl::hdf5::InnerOptional<int64_t, int64_t> optional_long_to_string;
   yardl::hdf5::InnerMap<yardl::hdf5::InnerVlenString, std::string, yardl::hdf5::InnerVlen<int32_t, int32_t>, std::vector<int32_t>> deprecated_map;
   evo_test::hdf5::_Inner_UnchangedRecord unchanged_record;
@@ -436,7 +436,7 @@ struct _Inner_ChangedGeneric {
   t.insertMember("intToLong", HOFFSET(RecordType, int_to_long), H5::PredType::NATIVE_INT32);
   t.insertMember("deprecatedVector", HOFFSET(RecordType, deprecated_vector), yardl::hdf5::InnerVlenDdl(H5::PredType::NATIVE_INT32));
   t.insertMember("floatToDouble", HOFFSET(RecordType, float_to_double), H5::PredType::NATIVE_FLOAT);
-  t.insertMember("deprecatedArray", HOFFSET(RecordType, deprecated_array), yardl::hdf5::FixedNDArrayDdl<uint8_t, uint8_t, 7>(H5::PredType::NATIVE_UINT8));
+  t.insertMember("deprecatedArray", HOFFSET(RecordType, deprecated_array), yardl::hdf5::FixedNDArrayDdl(H5::PredType::NATIVE_UINT8, {7}));
   t.insertMember("optionalLongToString", HOFFSET(RecordType, optional_long_to_string), yardl::hdf5::OptionalTypeDdl<int64_t, int64_t>(H5::PredType::NATIVE_INT64));
   t.insertMember("deprecatedMap", HOFFSET(RecordType, deprecated_map), yardl::hdf5::InnerMapDdl<yardl::hdf5::InnerVlenString, yardl::hdf5::InnerVlen<int32_t, int32_t>>(yardl::hdf5::InnerVlenStringDdl(), yardl::hdf5::InnerVlenDdl(H5::PredType::NATIVE_INT32)));
   t.insertMember("unchangedRecord", HOFFSET(RecordType, unchanged_record), evo_test::hdf5::GetUnchangedRecordHdf5Ddl());

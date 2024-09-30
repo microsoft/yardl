@@ -67,21 +67,12 @@ size_t size(NDArray<T, N> const& arr) { return arr.size(); }
 template <typename T, size_t N>
 size_t dimension(NDArray<T, N> const& arr) { return arr.dimension(); }
 
-// template <typename T, size_t N>
-// std::vector<size_t> shape(NDArray<T, N> const& arr) {
-//   auto shape = arr.shape();
-//   std::vector<size_t> vshape;
-//   std::copy(shape.begin(), shape.end(), std::back_inserter(vshape));
-//   return vshape;
-// }
 template <typename T, size_t N>
 std::array<size_t, N> shape(NDArray<T, N> const& arr) { return arr.shape(); }
 
 template <typename T, size_t N>
 size_t shape(NDArray<T, N> const& arr, size_t dim) { return arr.shape(dim); }
 
-// template <typename T, size_t N>
-// void resize(NDArray<T, N>& arr, std::vector<size_t> const& shape) { arr.resize(shape, true); }
 template <typename T, size_t N>
 void resize(NDArray<T, N>& arr, std::array<size_t, N> const& shape) { arr.resize(shape, true); }
 

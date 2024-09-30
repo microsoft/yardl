@@ -188,8 +188,9 @@ type CppCodegenOptions struct {
 	GenerateCMakeLists  bool         `yaml:"generateCMakeLists"`
 	OverrideArrayHeader string       `yaml:"overrideArrayHeader"`
 
-	InternalGenerateMocks      bool `yaml:"internalGenerateMocks"`
-	InternalGenerateTranslator bool `yaml:"internalGenerateTranslator"`
+	InternalSymlinkStaticHeaders bool `yaml:"internalSymlinkStaticHeaders"`
+	InternalGenerateMocks        bool `yaml:"internalGenerateMocks"`
+	InternalGenerateTranslator   bool `yaml:"internalGenerateTranslator"`
 }
 
 func (o CppCodegenOptions) ChangeOutputDir(newRelativeDir string) CppCodegenOptions {
