@@ -39,6 +39,7 @@ export default defineConfig({
           collapsed: false,
           items: [
             { text: "Introduction", link: "/python/introduction" },
+            { text: "Installation", link: "/python/installation" },
             { text: "Quick Start", link: "/python/quickstart" },
           ],
         },
@@ -70,6 +71,7 @@ export default defineConfig({
             { text: "Packages", link: "/cpp/packages" },
             { text: "The Yardl Language", link: "/cpp/language" },
             { text: "Performance Tips", link: "/cpp/performance" },
+            { text: "Configurable Arrays", link: "/cpp/arrays"},
             { text: "Schema Evolution", link: "/cpp/evolution" },
           ],
         },
@@ -81,6 +83,7 @@ export default defineConfig({
           collapsed: false,
           items: [
             { text: "Introduction", link: "/matlab/introduction" },
+            { text: "Installation", link: "/matlab/installation" },
             { text: "Quick Start", link: "/matlab/quickstart" },
           ],
         },
