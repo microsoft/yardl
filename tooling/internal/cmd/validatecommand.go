@@ -22,7 +22,12 @@ func newValidateCommand() *cobra.Command {
 		DisableFlagsInUseLine: true,
 		Args:                  cobra.NoArgs,
 		Run: func(cmd *cobra.Command, args []string) {
-			warnings, err := validateImpl()
+			configOverrides, err := cmd.Flags().GetStringArray("config")
+			if err != nil {
+				log.Fatal().Msgf("error getting config: %v", err)
+			}
+
+			warnings, err := validateImpl(configOverrides)
 			if err != nil {
 				fmt.Fprintln(os.Stderr, err)
 				os.Exit(1)
@@ -36,7 +41,7 @@ func newValidateCommand() *cobra.Command {
 	return cmd
 }
 
-func validateImpl() ([]string, error) {
+func validateImpl(configArgs []string) ([]string, error) {
 	inputDir, err := os.Getwd()
 	if err != nil {
 		return nil, err
@@ -44,6 +49,10 @@ func validateImpl() ([]string, error) {
 
 	packageInfo, err := packaging.LoadPackage(inputDir)
 	if err != nil {
+		return nil, err
+	}
+
+	if err := updatePackageInfoFromArgs(packageInfo, configArgs); err != nil {
 		return nil, err
 	}
 

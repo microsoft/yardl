@@ -2,6 +2,8 @@
 
 A Yardl package is a directory with a `_package.yml` manifest.
 
+## Package Manifest
+
 Here is an example commented `_package.yml` file:
 
 ```yaml
@@ -55,4 +57,15 @@ python:
 matlab:
   # The directory where the generated MATLAB packages will be written
   outputDir: ../path/relative/to/this/file
+```
+
+## Overriding the Package Manifest
+
+Fields in the `_package.yml` manifest can be overriden on the command-line using the `-c/--config` flag, e.g.
+
+```bash
+$ yardl generate -c cpp.sourcesOutputDir=/tmp/$(date +%F_%T)/generated
+✅ Wrote C++ to /tmp/2024-09-30_16:39:43/generated.
+✅ Wrote Python to /workspaces/yardl/python.
+✅ Wrote Matlab to /workspaces/yardl/matlab/generated.
 ```
