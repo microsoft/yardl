@@ -37,9 +37,7 @@ benchmark-cmd := if matlab != "disabled" { "python python/benchmark.py --include
     cd models/evolution/model_v2 && yardl generate --quiet 2>&1
 
 @generate-ndarray: install
-    cd models/ndarray; \
-    ln -sf ../test/unittests.yml ../test/benchmarking.yml ./; \
-    yardl generate
+    cd models/test && yardl generate -c cpp.overrideArrayHeader=external/ndarray_impl.h
 
 @build-sandbox: generate-sandbox ensure-build-dir
     cd cpp/build && ninja sandbox_exec
@@ -91,7 +89,8 @@ benchmark-cmd := if matlab != "disabled" { "python python/benchmark.py --include
 @cpp-test-ndarray: generate-ndarray ensure-build-dir
     cd cpp/build; \
     ninja tests; \
-    ./tests --gtest_brief=1
+    ./tests --gtest_brief=1; \
+    just generate # regenerate the test model without the ndarray override
 
 @matlab-test: generate build-translator
     cd matlab/test; \
