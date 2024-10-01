@@ -119,24 +119,24 @@ using FixedNDArray = xt::xtensor_fixed<T, xt::xshape<Dims...>,
 
 /**** FixedNDArray Implementation ****/
 template <typename T, size_t... Dims>
-size_t size(FixedNDArray<T, Dims...> const& arr) { return arr.size(); }
+constexpr size_t size(FixedNDArray<T, Dims...> const& arr) { return arr.size(); }
 
 template <typename T, size_t... Dims>
-size_t dimension(FixedNDArray<T, Dims...> const& arr) { return arr.dimension(); }
+constexpr size_t dimension(FixedNDArray<T, Dims...> const& arr) { return arr.dimension(); }
 
 template <typename T, size_t... Dims>
-std::vector<size_t> shape(FixedNDArray<T, Dims...> const& arr) { return arr.shape(); }
+constexpr std::array<size_t, sizeof...(Dims)> shape(FixedNDArray<T, Dims...> const& arr) { return arr.shape(); }
 
 template <typename T, size_t... Dims>
-size_t shape(FixedNDArray<T, Dims...> const& arr, size_t dim) { return arr.shape(dim); }
+constexpr size_t shape(FixedNDArray<T, Dims...> const& arr, size_t dim) { return arr.shape(dim); }
 
 template <typename T, size_t... Dims>
-T* dataptr(FixedNDArray<T, Dims...>& arr) { return arr.data(); }
+constexpr T* dataptr(FixedNDArray<T, Dims...>& arr) { return arr.data(); }
 template <typename T, size_t... Dims>
-T const* dataptr(FixedNDArray<T, Dims...> const& arr) { return arr.data(); }
+constexpr T const* dataptr(FixedNDArray<T, Dims...> const& arr) { return arr.data(); }
 
 template <typename T, size_t... Dims, class... Args>
-T const& at(FixedNDArray<T, Dims...> const& arr, Args... idx) { return arr.at(idx...); }
+constexpr T const& at(FixedNDArray<T, Dims...> const& arr, Args... idx) { return arr.at(idx...); }
 
 /**
  * @brief  A multidimensional array where the number of dimensions

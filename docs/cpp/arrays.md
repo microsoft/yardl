@@ -126,7 +126,7 @@ The following functions must be defined for *each* array type `A<T>`:
 
 The following functions must be defined in addition to those above:
 
-1. `std::vector<size_t> shape(FixedNDArray<T, Dims...> const& a)`
+1. `std::array<size_, sizeof...(Dims)> shape(FixedNDArray<T, Dims...> const& a)`
 
     Returns the shape (dimensions) of the fixed array.
 
@@ -134,13 +134,13 @@ The following functions must be defined in addition to those above:
 
     Returns the shape (dimensions) of the dynamic array.
 
-1. `void resize(DynamicNDArray<T>& a, std::vector<size_t> const& shape)`
-
-    Changes the array's shape (dimensions) without preserving data.
-
 1. `std::array<size_t> shape(NDArray<T, N> const& a)`
 
     Returns the shape (dimensions) of the ndarray.
+
+1. `void resize(DynamicNDArray<T>& a, std::vector<size_t> const& shape)`
+
+    Changes the array's shape (dimensions) without preserving data.
 
 1. `void resize(NDArray<T, N>& a, std::array<size_t> const& shape)`
 

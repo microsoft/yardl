@@ -38,7 +38,7 @@ func newGenerateCommand() *cobra.Command {
 		DisableFlagsInUseLine: true,
 		Args:                  cobra.NoArgs,
 		Run: func(cmd *cobra.Command, args []string) {
-			configOverrides, err := cmd.Flags().GetStringArray("config")
+			configOverrides, err := cmd.Flags().GetStringToString("config")
 			if err != nil {
 				log.Fatal().Msgf("error getting config: %v", err)
 			}
@@ -88,7 +88,7 @@ func newGenerateCommand() *cobra.Command {
 }
 
 // dedup fsnotify events
-func dedupLoop(configArgs []string, w *fsnotify.Watcher, completedChannel chan<- error) {
+func dedupLoop(configArgs map[string]string, w *fsnotify.Watcher, completedChannel chan<- error) {
 	regenerate := func() {
 		dirsToWatch := generateInWatchMode(configArgs)
 		if dirsToWatch != nil && len(dirsToWatch) > len(w.WatchList()) {
@@ -131,7 +131,7 @@ func dedupLoop(configArgs []string, w *fsnotify.Watcher, completedChannel chan<-
 }
 
 // Returns the directories to watch after parsing all package imports, or nil on error
-func generateInWatchMode(configArgs []string) []string {
+func generateInWatchMode(configArgs map[string]string) []string {
 	defer func() {
 		if err := recover(); err != nil {
 			screen.Clear()
@@ -177,7 +177,7 @@ func WriteSuccessfulSummary(packageInfo *packaging.PackageInfo) {
 	}
 }
 
-func generateImpl(configArgs []string) (*packaging.PackageInfo, []string, error) {
+func generateImpl(configArgs map[string]string) (*packaging.PackageInfo, []string, error) {
 	inputDir, err := os.Getwd()
 	if err != nil {
 		return nil, nil, err

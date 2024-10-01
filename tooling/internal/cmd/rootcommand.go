@@ -49,7 +49,7 @@ Read more at https://github.com/microsoft/yardl`,
 
 	cobra.EnableCommandSorting = false
 
-	cmd.PersistentFlags().StringArrayP("config", "c", nil, "Override `key=value` pair in \"_package.yml\"")
+	cmd.PersistentFlags().StringToStringP("config", "c", nil, "Override `key=value` pair in \"_package.yml\"")
 
 	cmd.PersistentFlags().BoolVarP(&verbose, "verbose", "", false, "show debug output")
 	cmd.PersistentFlags().BoolVarP(&quiet, "quiet", "", false, "hide warnings")
