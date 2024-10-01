@@ -14,13 +14,11 @@ runs:
         ' environment.yml > ci-environment.yml
 
     - name: Setup Mambaforge
-      uses: conda-incubator/setup-miniconda@v2
+      uses: conda-incubator/setup-miniconda@v3
       with:
-        miniforge-variant: Mambaforge
         miniforge-version: latest
         # Do not specify environment file - see Cache step below
         activate-environment: yardl
-        use-mamba: true
 
     - name: Get Date
       id: get-date
