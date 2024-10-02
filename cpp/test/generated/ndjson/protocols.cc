@@ -25,6 +25,9 @@ void from_json(ordered_json const& j, basic_types::DaysOfWeek& value);
 void to_json(ordered_json& j, basic_types::TextFormat const& value);
 void from_json(ordered_json const& j, basic_types::TextFormat& value);
 
+void to_json(ordered_json& j, basic_types::RecordWithString const& value);
+void from_json(ordered_json const& j, basic_types::RecordWithString& value);
+
 void to_json(ordered_json& j, basic_types::RecordWithUnions const& value);
 void from_json(ordered_json const& j, basic_types::RecordWithUnions& value);
 
@@ -347,6 +350,25 @@ struct adl_serializer<std::variant<std::monostate, basic_types::Fruits, basic_ty
     }
     if ((j.is_array())) {
       value = j.get<basic_types::DaysOfWeek>();
+      return;
+    }
+    throw std::runtime_error("Invalid union value");
+  }
+};
+
+template <>
+struct adl_serializer<std::variant<basic_types::RecordWithString, int32_t>> {
+  static void to_json(ordered_json& j, std::variant<basic_types::RecordWithString, int32_t> const& value) {
+    std::visit([&j](auto const& v) {j = v;}, value);
+  }
+
+  static void from_json(ordered_json const& j, std::variant<basic_types::RecordWithString, int32_t>& value) {
+    if ((j.is_object())) {
+      value = j.get<basic_types::RecordWithString>();
+      return;
+    }
+    if ((j.is_number())) {
+      value = j.get<int32_t>();
       return;
     }
     throw std::runtime_error("Invalid union value");
@@ -1125,6 +1147,19 @@ void from_json(ordered_json const& j, basic_types::TextFormat& value) {
   }
 }
 
+void to_json(ordered_json& j, basic_types::RecordWithString const& value) {
+  j = ordered_json::object();
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.i)) {
+    j.push_back({"i", value.i});
+  }
+}
+
+void from_json(ordered_json const& j, basic_types::RecordWithString& value) {
+  if (auto it = j.find("i"); it != j.end()) {
+    it->get_to(value.i);
+  }
+}
+
 void to_json(ordered_json& j, basic_types::RecordWithUnions const& value) {
   j = ordered_json::object();
   if (yardl::ndjson::ShouldSerializeFieldValue(value.null_or_int_or_string)) {
@@ -1135,6 +1170,9 @@ void to_json(ordered_json& j, basic_types::RecordWithUnions const& value) {
   }
   if (yardl::ndjson::ShouldSerializeFieldValue(value.null_or_fruits_or_days_of_week)) {
     j.push_back({"nullOrFruitsOrDaysOfWeek", value.null_or_fruits_or_days_of_week});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.record_or_int)) {
+    j.push_back({"recordOrInt", value.record_or_int});
   }
 }
 
@@ -1147,6 +1185,9 @@ void from_json(ordered_json const& j, basic_types::RecordWithUnions& value) {
   }
   if (auto it = j.find("nullOrFruitsOrDaysOfWeek"); it != j.end()) {
     it->get_to(value.null_or_fruits_or_days_of_week);
+  }
+  if (auto it = j.find("recordOrInt"); it != j.end()) {
+    it->get_to(value.record_or_int);
   }
 }
 

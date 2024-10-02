@@ -33,11 +33,16 @@ GenericNullableUnion2<T1, T2>: [null, T1, T2]
 
 GenericVector<T>: T*
 
+RecordWithString: !record
+  fields:
+    i: string
+
 RecordWithUnions: !record
   fields:
     nullOrIntOrString: [null, int, string]
     dateOrDatetime: [time, datetime]
     nullOrFruitsOrDaysOfWeek: GenericNullableUnion2<Fruits, DaysOfWeek>
+    recordOrInt: [RecordWithString, int]
 
 GenericRecordWithComputedFields<T0, T1>: !record
   fields:

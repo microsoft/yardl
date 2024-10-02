@@ -70,15 +70,29 @@ using GenericNullableUnion2 = std::variant<std::monostate, T1, T2>;
 template <typename T>
 using GenericVector = std::vector<T>;
 
+struct RecordWithString {
+  std::string i{};
+
+  bool operator==(const RecordWithString& other) const {
+    return i == other.i;
+  }
+
+  bool operator!=(const RecordWithString& other) const {
+    return !(*this == other);
+  }
+};
+
 struct RecordWithUnions {
   std::variant<std::monostate, int32_t, std::string> null_or_int_or_string{};
   std::variant<yardl::Time, yardl::DateTime> date_or_datetime{};
   basic_types::GenericNullableUnion2<basic_types::Fruits, basic_types::DaysOfWeek> null_or_fruits_or_days_of_week{};
+  std::variant<basic_types::RecordWithString, int32_t> record_or_int{};
 
   bool operator==(const RecordWithUnions& other) const {
     return null_or_int_or_string == other.null_or_int_or_string &&
       date_or_datetime == other.date_or_datetime &&
-      null_or_fruits_or_days_of_week == other.null_or_fruits_or_days_of_week;
+      null_or_fruits_or_days_of_week == other.null_or_fruits_or_days_of_week &&
+      record_or_int == other.record_or_int;
   }
 
   bool operator!=(const RecordWithUnions& other) const {

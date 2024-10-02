@@ -413,23 +413,39 @@ namespace {
   return t;
 }
 
+struct _Inner_RecordWithString {
+  _Inner_RecordWithString() {} 
+  _Inner_RecordWithString(basic_types::RecordWithString const& o) 
+      : i(o.i) {
+  }
+
+  void ToOuter (basic_types::RecordWithString& o) const {
+    yardl::hdf5::ToOuter(i, o.i);
+  }
+
+  yardl::hdf5::InnerVlenString i;
+};
+
 struct _Inner_RecordWithUnions {
   _Inner_RecordWithUnions() {} 
   _Inner_RecordWithUnions(basic_types::RecordWithUnions const& o) 
       : null_or_int_or_string(o.null_or_int_or_string),
       date_or_datetime(o.date_or_datetime),
-      null_or_fruits_or_days_of_week(o.null_or_fruits_or_days_of_week) {
+      null_or_fruits_or_days_of_week(o.null_or_fruits_or_days_of_week),
+      record_or_int(o.record_or_int) {
   }
 
   void ToOuter (basic_types::RecordWithUnions& o) const {
     yardl::hdf5::ToOuter(null_or_int_or_string, o.null_or_int_or_string);
     yardl::hdf5::ToOuter(date_or_datetime, o.date_or_datetime);
     yardl::hdf5::ToOuter(null_or_fruits_or_days_of_week, o.null_or_fruits_or_days_of_week);
+    yardl::hdf5::ToOuter(record_or_int, o.record_or_int);
   }
 
   ::InnerUnion2<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string> null_or_int_or_string;
   ::InnerUnion2<yardl::Time, yardl::Time, yardl::DateTime, yardl::DateTime> date_or_datetime;
   ::InnerUnion2<basic_types::Fruits, basic_types::Fruits, basic_types::DaysOfWeek, basic_types::DaysOfWeek> null_or_fruits_or_days_of_week;
+  ::InnerUnion2<basic_types::hdf5::_Inner_RecordWithString, basic_types::RecordWithString, int32_t, int32_t> record_or_int;
 };
 
 template <typename _T0_Inner, typename T0, typename _T1_Inner, typename T1>
@@ -446,12 +462,20 @@ struct _Inner_GenericRecordWithComputedFields {
   ::InnerUnion2<_T0_Inner, T0, _T1_Inner, T1> f1;
 };
 
+[[maybe_unused]] H5::CompType GetRecordWithStringHdf5Ddl() {
+  using RecordType = basic_types::hdf5::_Inner_RecordWithString;
+  H5::CompType t(sizeof(RecordType));
+  t.insertMember("i", HOFFSET(RecordType, i), yardl::hdf5::InnerVlenStringDdl());
+  return t;
+}
+
 [[maybe_unused]] H5::CompType GetRecordWithUnionsHdf5Ddl() {
   using RecordType = basic_types::hdf5::_Inner_RecordWithUnions;
   H5::CompType t(sizeof(RecordType));
   t.insertMember("nullOrIntOrString", HOFFSET(RecordType, null_or_int_or_string), ::InnerUnion2Ddl<int32_t, int32_t, yardl::hdf5::InnerVlenString, std::string>(true, H5::PredType::NATIVE_INT32, "int32", yardl::hdf5::InnerVlenStringDdl(), "string"));
   t.insertMember("dateOrDatetime", HOFFSET(RecordType, date_or_datetime), ::InnerUnion2Ddl<yardl::Time, yardl::Time, yardl::DateTime, yardl::DateTime>(false, yardl::hdf5::TimeTypeDdl(), "time", yardl::hdf5::DateTimeTypeDdl(), "datetime"));
   t.insertMember("nullOrFruitsOrDaysOfWeek", HOFFSET(RecordType, null_or_fruits_or_days_of_week), ::InnerUnion2Ddl<basic_types::Fruits, basic_types::Fruits, basic_types::DaysOfWeek, basic_types::DaysOfWeek>(true, basic_types::hdf5::GetFruitsHdf5Ddl(), "T1", H5::PredType::NATIVE_INT32, "T2"));
+  t.insertMember("recordOrInt", HOFFSET(RecordType, record_or_int), ::InnerUnion2Ddl<basic_types::hdf5::_Inner_RecordWithString, basic_types::RecordWithString, int32_t, int32_t>(false, basic_types::hdf5::GetRecordWithStringHdf5Ddl(), "RecordWithString", H5::PredType::NATIVE_INT32, "int32"));
   return t;
 }
 
