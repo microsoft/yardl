@@ -922,18 +922,9 @@ func typeDefault(t dsl.Type, contextNamespace string, namedType string, st dsl.S
 			switch defaultKind {
 			case defaultValueKindNone:
 				return "", defaultKind
-			case defaultValueKindImmutable:
+			default:
 				return fmt.Sprintf(`%s(%s)`, unionCaseConstructor, defaultExpression), defaultKind
-			case defaultValueKindMutable:
-				if t, ok := dsl.GetUnderlyingType(t.Cases[0].Type).(*dsl.SimpleType); ok {
-					if _, ok := t.ResolvedDefinition.(*dsl.RecordDefinition); ok {
-						return fmt.Sprintf(`%s(%s())`, unionCaseConstructor, defaultExpression), defaultValueKindMutable
-					}
-				}
-				return fmt.Sprintf(`%s(%s)`, unionCaseConstructor, defaultExpression), defaultValueKindMutable
 			}
-
-			return fmt.Sprintf(`("%s", %s)`, t.Cases[0].Tag, defaultExpression), defaultValueKindImmutable
 
 		case *dsl.Vector:
 			scalar := t.ToScalar()

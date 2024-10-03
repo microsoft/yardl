@@ -45,15 +45,55 @@ text_format_name_to_value_map = {
 }
 text_format_value_to_name_map = {v: n for n, v in text_format_name_to_value_map.items()}
 
+class RecordWithStringConverter(_ndjson.JsonConverter[RecordWithString, np.void]):
+    def __init__(self) -> None:
+        self._i_converter = _ndjson.string_converter
+        super().__init__(np.dtype([
+            ("i", self._i_converter.overall_dtype()),
+        ]))
+
+    def to_json(self, value: RecordWithString) -> object:
+        if not isinstance(value, RecordWithString): # pyright: ignore [reportUnnecessaryIsInstance]
+            raise TypeError("Expected 'RecordWithString' instance")
+        json_object = {}
+
+        json_object["i"] = self._i_converter.to_json(value.i)
+        return json_object
+
+    def numpy_to_json(self, value: np.void) -> object:
+        if not isinstance(value, np.void): # pyright: ignore [reportUnnecessaryIsInstance]
+            raise TypeError("Expected 'np.void' instance")
+        json_object = {}
+
+        json_object["i"] = self._i_converter.numpy_to_json(value["i"])
+        return json_object
+
+    def from_json(self, json_object: object) -> RecordWithString:
+        if not isinstance(json_object, dict):
+            raise TypeError("Expected 'dict' instance")
+        return RecordWithString(
+            i=self._i_converter.from_json(json_object["i"],),
+        )
+
+    def from_json_to_numpy(self, json_object: object) -> np.void:
+        if not isinstance(json_object, dict):
+            raise TypeError("Expected 'dict' instance")
+        return (
+            self._i_converter.from_json_to_numpy(json_object["i"]),
+        ) # type:ignore 
+
+
 class RecordWithUnionsConverter(_ndjson.JsonConverter[RecordWithUnions, np.void]):
     def __init__(self) -> None:
         self._null_or_int_or_string_converter = _ndjson.UnionConverter(Int32OrString, [None, (Int32OrString.Int32, _ndjson.int32_converter, [int, float]), (Int32OrString.String, _ndjson.string_converter, [str])], True)
         self._date_or_datetime_converter = _ndjson.UnionConverter(TimeOrDatetime, [(TimeOrDatetime.Time, _ndjson.time_converter, [int, float]), (TimeOrDatetime.Datetime, _ndjson.datetime_converter, [int, float])], False)
         self._null_or_fruits_or_days_of_week_converter = _ndjson.UnionConverter(GenericNullableUnion2, [None, (GenericNullableUnion2.T1, _ndjson.EnumConverter(Fruits, np.int32, fruits_name_to_value_map, fruits_value_to_name_map), [int, float, str]), (GenericNullableUnion2.T2, _ndjson.FlagsConverter(DaysOfWeek, np.int32, days_of_week_name_to_value_map, days_of_week_value_to_name_map), [list])], True)
+        self._record_or_int_converter = _ndjson.UnionConverter(RecordWithStringOrInt32, [(RecordWithStringOrInt32.RecordWithString, RecordWithStringConverter(), [dict]), (RecordWithStringOrInt32.Int32, _ndjson.int32_converter, [int, float])], True)
         super().__init__(np.dtype([
             ("null_or_int_or_string", self._null_or_int_or_string_converter.overall_dtype()),
             ("date_or_datetime", self._date_or_datetime_converter.overall_dtype()),
             ("null_or_fruits_or_days_of_week", self._null_or_fruits_or_days_of_week_converter.overall_dtype()),
+            ("record_or_int", self._record_or_int_converter.overall_dtype()),
         ]))
 
     def to_json(self, value: RecordWithUnions) -> object:
@@ -66,6 +106,7 @@ class RecordWithUnionsConverter(_ndjson.JsonConverter[RecordWithUnions, np.void]
         json_object["dateOrDatetime"] = self._date_or_datetime_converter.to_json(value.date_or_datetime)
         if value.null_or_fruits_or_days_of_week is not None:
             json_object["nullOrFruitsOrDaysOfWeek"] = self._null_or_fruits_or_days_of_week_converter.to_json(value.null_or_fruits_or_days_of_week)
+        json_object["recordOrInt"] = self._record_or_int_converter.to_json(value.record_or_int)
         return json_object
 
     def numpy_to_json(self, value: np.void) -> object:
@@ -78,6 +119,7 @@ class RecordWithUnionsConverter(_ndjson.JsonConverter[RecordWithUnions, np.void]
         json_object["dateOrDatetime"] = self._date_or_datetime_converter.numpy_to_json(value["date_or_datetime"])
         if (field_val := value["null_or_fruits_or_days_of_week"]) is not None:
             json_object["nullOrFruitsOrDaysOfWeek"] = self._null_or_fruits_or_days_of_week_converter.numpy_to_json(field_val)
+        json_object["recordOrInt"] = self._record_or_int_converter.numpy_to_json(value["record_or_int"])
         return json_object
 
     def from_json(self, json_object: object) -> RecordWithUnions:
@@ -87,6 +129,7 @@ class RecordWithUnionsConverter(_ndjson.JsonConverter[RecordWithUnions, np.void]
             null_or_int_or_string=self._null_or_int_or_string_converter.from_json(json_object.get("nullOrIntOrString")),
             date_or_datetime=self._date_or_datetime_converter.from_json(json_object["dateOrDatetime"],),
             null_or_fruits_or_days_of_week=self._null_or_fruits_or_days_of_week_converter.from_json(json_object.get("nullOrFruitsOrDaysOfWeek")),
+            record_or_int=self._record_or_int_converter.from_json(json_object["recordOrInt"],),
         )
 
     def from_json_to_numpy(self, json_object: object) -> np.void:
@@ -96,6 +139,7 @@ class RecordWithUnionsConverter(_ndjson.JsonConverter[RecordWithUnions, np.void]
             self._null_or_int_or_string_converter.from_json_to_numpy(json_object.get("nullOrIntOrString")),
             self._date_or_datetime_converter.from_json_to_numpy(json_object["dateOrDatetime"]),
             self._null_or_fruits_or_days_of_week_converter.from_json_to_numpy(json_object.get("nullOrFruitsOrDaysOfWeek")),
+            self._record_or_int_converter.from_json_to_numpy(json_object["recordOrInt"]),
         ) # type:ignore 
 
 

@@ -194,6 +194,17 @@
         },
         {
           "record": {
+            "name": "RecordWithString",
+            "fields": [
+              {
+                "name": "i",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        {
+          "record": {
             "name": "RecordWithUnions",
             "fields": [
               {
@@ -232,6 +243,19 @@
                     "BasicTypes.DaysOfWeek"
                   ]
                 }
+              },
+              {
+                "name": "recordOrInt",
+                "type": [
+                  {
+                    "tag": "RecordWithString",
+                    "type": "BasicTypes.RecordWithString"
+                  },
+                  {
+                    "tag": "int32",
+                    "type": "int32"
+                  }
+                ]
               }
             ]
           }

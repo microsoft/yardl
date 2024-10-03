@@ -14,6 +14,8 @@ from .types import (
     GenericVector,
     Int32OrString,
     MyTuple,
+    RecordWithString,
+    RecordWithStringOrInt32,
     RecordWithUnions,
     T0OrT1,
     TextFormat,
