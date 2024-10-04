@@ -29,7 +29,7 @@ func newValidateCommand() *cobra.Command {
 
 			warnings, err := validateImpl(configOverrides)
 			if err != nil {
-				fmt.Fprintln(os.Stderr, err)
+				log.Error().Msg(err.Error())
 				os.Exit(1)
 			}
 			for _, warning := range warnings {

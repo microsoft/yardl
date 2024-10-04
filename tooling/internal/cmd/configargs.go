@@ -22,7 +22,7 @@ func updatePackageInfoFromArgs(packageInfo *packaging.PackageInfo, configArgs ma
 			log.Info().Msgf("Overriding config key %s with value %s", key, value)
 			k.Set(key, value)
 		} else {
-			log.Info().Msgf("Ignoring invalid config key %s", key)
+			return fmt.Errorf("invalid config key %s", key)
 		}
 	}
 
