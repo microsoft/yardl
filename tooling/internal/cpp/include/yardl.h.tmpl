@@ -6,41 +6,10 @@
 #include <chrono>
 
 #include <date/date.h>
-#include <xtensor/xarray.hpp>
-#include <xtensor/xfixed.hpp>
-#include <xtensor/xtensor.hpp>
+
+#include "{{.ArrayHeader}}"
 
 namespace yardl {
-
-/**
- * @brief A multidimensional array where all dimension sizes
- * are known at compile-time.
- *
- * @tparam T the element type
- * @tparam Dims the array dimensions
- */
-template <typename T, size_t... Dims>
-using FixedNDArray = xt::xtensor_fixed<T, xt::xshape<Dims...>,
-                                       xt::layout_type::row_major, false>;
-
-/**
- * @brief  A multidimensional array where the number of dimensions
- * is known at compile-time
- *
- * @tparam T the element type
- * @tparam N the number of dimensions
- */
-template <typename T, size_t N>
-using NDArray = xt::xtensor<T, N, xt::layout_type::row_major>;
-
-/**
- * @brief  A multidimensional array where the number of dimensions
- * is not known at compile-time
- *
- * @tparam T the element type
- */
-template <typename T>
-using DynamicNDArray = xt::xarray<T, xt::layout_type::row_major>;
 
 /**
  * @brief Represents a date as a number of days since the epoch.
@@ -75,7 +44,7 @@ struct BaseFlags {
  public:
   BaseFlags() = default;
   BaseFlags(TValue value) : value_(value) {}
-  BaseFlags(TDerived const& other) : value_(other.value_){};
+  BaseFlags(TDerived const& other) : value_(other.value_) {};
 
   using value_type = TValue;
 

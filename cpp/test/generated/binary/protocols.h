@@ -8,9 +8,8 @@
 #include <variant>
 #include <vector>
 
-#include "../yardl/detail/binary/reader_writer.h"
 #include "../protocols.h"
-#include "../types.h"
+#include "../yardl/detail/binary/reader_writer.h"
 
 namespace test_model::binary {
 // Binary writer for the BenchmarkFloat256x256 protocol.

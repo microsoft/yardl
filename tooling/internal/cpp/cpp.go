@@ -4,25 +4,20 @@
 package cpp
 
 import (
-	"embed"
 	_ "embed"
 	"os"
-	"path"
 
 	"github.com/microsoft/yardl/tooling/internal/cpp/binary"
 	"github.com/microsoft/yardl/tooling/internal/cpp/hdf5"
+	"github.com/microsoft/yardl/tooling/internal/cpp/include"
 	"github.com/microsoft/yardl/tooling/internal/cpp/mocks"
 	"github.com/microsoft/yardl/tooling/internal/cpp/ndjson"
 	"github.com/microsoft/yardl/tooling/internal/cpp/protocols"
 	"github.com/microsoft/yardl/tooling/internal/cpp/translator"
 	"github.com/microsoft/yardl/tooling/internal/cpp/types"
-	"github.com/microsoft/yardl/tooling/internal/iocommon"
 	"github.com/microsoft/yardl/tooling/pkg/dsl"
 	"github.com/microsoft/yardl/tooling/pkg/packaging"
 )
-
-//go:embed include/*
-var includes embed.FS
 
 func Generate(env *dsl.Environment, options packaging.CppCodegenOptions) error {
 	err := os.MkdirAll(options.SourcesOutputDir, 0775)
@@ -30,7 +25,7 @@ func Generate(env *dsl.Environment, options packaging.CppCodegenOptions) error {
 		return err
 	}
 
-	err = iocommon.CopyEmbeddedStaticFiles(path.Join(options.SourcesOutputDir, "yardl"), options.InternalSymlinkStaticHeaders, includes)
+	err = include.GenerateYardlHeaders(options)
 	if err != nil {
 		return err
 	}

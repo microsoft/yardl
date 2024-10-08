@@ -1044,7 +1044,7 @@ struct RecordWithComputedFields {
   }
 
   int32_t const& AccessArrayFieldElement() const {
-    return array_field.at(0, 1);
+    return yardl::at(array_field, 0, 1);
   }
 
   int32_t& AccessArrayFieldElement() {
@@ -1052,7 +1052,7 @@ struct RecordWithComputedFields {
   }
 
   int32_t const& AccessArrayFieldElementByName() const {
-    return array_field.at(0, 1);
+    return yardl::at(array_field, 0, 1);
   }
 
   int32_t& AccessArrayFieldElementByName() {
@@ -1092,31 +1092,31 @@ struct RecordWithComputedFields {
   }
 
   yardl::Size ArraySize() const {
-    return array_field.size();
+    return yardl::size(array_field);
   }
 
   yardl::Size ArrayXSize() const {
-    return array_field.shape(0);
+    return yardl::shape(array_field, 0);
   }
 
   yardl::Size ArrayYSize() const {
-    return array_field.shape(1);
+    return yardl::shape(array_field, 1);
   }
 
   yardl::Size Array0Size() const {
-    return array_field.shape(0);
+    return yardl::shape(array_field, 0);
   }
 
   yardl::Size Array1Size() const {
-    return array_field.shape(1);
+    return yardl::shape(array_field, 1);
   }
 
   yardl::Size ArraySizeFromIntField() const {
-    return array_field.shape(int_field);
+    return yardl::shape(array_field, int_field);
   }
 
   yardl::Size ArraySizeFromStringField() const {
-    return array_field.shape(([](std::string dim_name) {
+    return yardl::shape(array_field, ([](std::string dim_name) {
       if (dim_name == "x") return 0;
       if (dim_name == "y") return 1;
       throw std::invalid_argument("Unknown dimension name: " + dim_name);
@@ -1124,11 +1124,11 @@ struct RecordWithComputedFields {
   }
 
   yardl::Size ArraySizeFromNestedIntField() const {
-    return array_field.shape(tuple_field.v1);
+    return yardl::shape(array_field, tuple_field.v1);
   }
 
   yardl::Size ArrayFieldMapDimensionsXSize() const {
-    return array_field_map_dimensions.shape(0);
+    return yardl::shape(array_field_map_dimensions, 0);
   }
 
   yardl::Size FixedArraySize() const {
@@ -1176,7 +1176,7 @@ struct RecordWithComputedFields {
   }
 
   yardl::Size DynamicArrayDimensionCount() const {
-    return dynamic_array_field.dimension();
+    return yardl::dimension(dynamic_array_field);
   }
 
   std::unordered_map<std::string, std::string> const& AccessMap() const {
@@ -1231,7 +1231,7 @@ struct RecordWithComputedFields {
     return [](auto&& __case_arg__) -> yardl::Size {
       if (__case_arg__.has_value()) {
         test_model::NamedNDArray const& arr = __case_arg__.value();
-        return arr.size();
+        return yardl::size(arr);
       }
       return 0ULL;
     }(optional_named_array);
@@ -1241,7 +1241,7 @@ struct RecordWithComputedFields {
     return [](auto&& __case_arg__) -> yardl::Size {
       if (__case_arg__.has_value()) {
         test_model::NamedNDArray const& arr = __case_arg__.value();
-        return arr.size();
+        return yardl::size(arr);
       }
       return 0ULL;
     }(optional_named_array);
@@ -1336,7 +1336,7 @@ struct RecordWithComputedFields {
   }
 
   yardl::Size Arithmetic5() const {
-    return array_field.shape(2 - 1);
+    return yardl::shape(array_field, 2 - 1);
   }
 
   int32_t Arithmetic6() const {
@@ -1475,7 +1475,7 @@ struct RecordWithKeywordFields {
   }
 
   int32_t const& Return() const {
-    return sizeof_field.at(1, 2);
+    return yardl::at(sizeof_field, 1, 2);
   }
 
   int32_t& Return() {

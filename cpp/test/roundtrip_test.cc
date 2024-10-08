@@ -235,9 +235,9 @@ TEST_P(RoundTripTests, NDArrays) {
   auto tw = CreateValidatingWriter<NDArraysWriterBase>();
 
   NDArray<int, 2> arr = {{1, 2, 3}, {4, 5, 6}};
-  ASSERT_EQ(arr.dimension(), 2);
-  ASSERT_EQ(arr.shape(0), 2);
-  ASSERT_EQ(arr.shape(1), 3);
+  ASSERT_EQ(yardl::dimension(arr), 2);
+  ASSERT_EQ(yardl::shape(arr, 0), 2);
+  ASSERT_EQ(yardl::shape(arr, 1), 3);
   tw->WriteInts(arr);
 
   tw->WriteSimpleRecordArray({
@@ -286,8 +286,8 @@ TEST_P(RoundTripTests, NDArraysSingleDimension) {
   auto tw = CreateValidatingWriter<NDArraysSingleDimensionWriterBase>();
 
   NDArray<int, 1> arr = {{1, 2, 3}};
-  ASSERT_EQ(arr.dimension(), 1);
-  ASSERT_EQ(arr.shape(0), 3);
+  ASSERT_EQ(yardl::dimension(arr), 1);
+  ASSERT_EQ(yardl::shape(arr, 0), 3);
   tw->WriteInts(arr);
 
   tw->WriteSimpleRecordArray({

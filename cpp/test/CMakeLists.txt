@@ -3,6 +3,9 @@ enable_testing()
 find_package(fmt CONFIG REQUIRED)
 find_package(GTest REQUIRED)
 
+# This is only needed by `yardl.h` in the custom NDArray test (i.e. `just cpp-test-ndarray`)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+
 add_executable(tests
   binary/coded_stream_test.cc
   binary/header_test.cc

@@ -8,9 +8,8 @@
 #include <variant>
 #include <vector>
 
-#include "../yardl/detail/binary/reader_writer.h"
 #include "../protocols.h"
-#include "../types.h"
+#include "../yardl/detail/binary/reader_writer.h"
 
 namespace evo_test::binary {
 // Binary writer for the ProtocolWithChanges protocol.

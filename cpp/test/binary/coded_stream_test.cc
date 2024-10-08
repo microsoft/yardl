@@ -3,6 +3,7 @@
 
 #include <fstream>
 #include <iostream>
+#include <numeric>
 
 #include <gtest/gtest.h>
 
@@ -12,7 +13,7 @@ using namespace yardl::binary;
 
 namespace {
 
-[[maybe_unused]] void WriteStringStreamToDebugFile(const std::string str) {
+[[maybe_unused]] void WriteStringStreamToDebugFile(std::string const str) {
   std::ofstream file("debug.bin", std::ios::binary);
   file.write(str.data(), str.size());
   file.close();

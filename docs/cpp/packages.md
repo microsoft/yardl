@@ -2,7 +2,9 @@
 
 A Yardl package is a directory with a `_package.yml` manifest.
 
-Here is a commented `_package.yml` file:
+## Package Manifest
+
+Here is an example commented `_package.yml` file:
 
 ```yaml
 # _package.yml
@@ -41,6 +43,11 @@ cpp:
   # Default true
   generateCMakeLists: true
 
+  # Include path for custom NDArray implementation header file
+  # If provided, the generated C++ code will include this header
+  # instead of Yardl's default NDArray implementation
+  overrideArrayHeader: path/to/custom/NDArray/header
+
 # Settings for Python code generation (optional)
 python:
   # The directory where the generated Python package will be written
@@ -52,5 +59,13 @@ matlab:
   outputDir: ../path/relative/to/this/file
 ```
 
-In the future, this file will be able to reference previous versions of
-your packages and specify options for other languages.
+## Overriding the Package Manifest
+
+Fields in the `_package.yml` manifest can be overriden on the command-line using the `-c/--config` flag, e.g.
+
+```bash
+$ yardl generate -c cpp.sourcesOutputDir=/tmp/$(date +%F_%T)/generated
+✅ Wrote C++ to /tmp/2024-09-30_16:39:43/generated.
+✅ Wrote Python to /workspaces/yardl/python.
+✅ Wrote Matlab to /workspaces/yardl/matlab/generated.
+```

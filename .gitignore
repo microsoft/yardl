@@ -21,7 +21,6 @@ dist/
 .vscode/settings.json
 
 cpp/build/
-cpp/sandbox/generated/
 
 **/*.bin
 

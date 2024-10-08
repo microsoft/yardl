@@ -373,7 +373,9 @@ array with 1 dimension of unknown length, you can either give the dimension a
 name (`int[x]`) or use parentheses to disambiguate from an empty set of
 dimensions: `int[()]`.
 
-In C++, we use the xtensor library for arrays.
+By default, Yardl uses the xtensor library for its C++ array implementation.
+Yardl also supports custom C++ array implementations. See [Configurable Arrays](arrays)
+for details on configuring Yardl with a user-provided array implementation header.
 
 ## Maps
 
@@ -475,7 +477,7 @@ MyRec: !record
 Computed fields become parameterless methods on the generated C++ struct. Here
 is an example of invoking the field from the preceding Yardl definition:
 
-```C++
+```cpp
 sandbox::MyRec r;
 r.my_union = 4;
 
@@ -517,7 +519,7 @@ MyTuple: BasicTypes.Tuple<string, int>
 
 Imported types are likewise namespaced in C++:
 
-```C++
+```cpp
 basic_types::Tuple<std::string, int> info = {"John Smith", 42};
 MyTuple myInfo = info;
 ```

@@ -8,7 +8,6 @@
 #include <vector>
 
 #include "../protocols.h"
-#include "../types.h"
 #include "../yardl/detail/hdf5/io.h"
 
 namespace test_model::hdf5 {

@@ -37,9 +37,14 @@ func newGenerateCommand() *cobra.Command {
 		Long:                  `generate code for the package in the current directory`,
 		DisableFlagsInUseLine: true,
 		Args:                  cobra.NoArgs,
-		Run: func(*cobra.Command, []string) {
+		Run: func(cmd *cobra.Command, args []string) {
+			configOverrides, err := cmd.Flags().GetStringToString("config")
+			if err != nil {
+				log.Fatal().Msgf("error getting config: %v", err)
+			}
+
 			if !flags.watch {
-				packageInfo, warnings, err := generateImpl()
+				packageInfo, warnings, err := generateImpl(configOverrides)
 				if err != nil {
 					// avoiding returning the error here because
 					// cobra prefixes the error with "Error: "
@@ -63,7 +68,7 @@ func newGenerateCommand() *cobra.Command {
 			defer watcher.Close()
 
 			completedChannel := make(chan error)
-			go dedupLoop(watcher, completedChannel)
+			go dedupLoop(configOverrides, watcher, completedChannel)
 
 			err = watcher.Add(".")
 			if err != nil {
@@ -83,9 +88,9 @@ func newGenerateCommand() *cobra.Command {
 }
 
 // dedup fsnotify events
-func dedupLoop(w *fsnotify.Watcher, completedChannel chan<- error) {
+func dedupLoop(configArgs map[string]string, w *fsnotify.Watcher, completedChannel chan<- error) {
 	regenerate := func() {
-		dirsToWatch := generateInWatchMode()
+		dirsToWatch := generateInWatchMode(configArgs)
 		if dirsToWatch != nil && len(dirsToWatch) > len(w.WatchList()) {
 			for _, dir := range dirsToWatch {
 				if err := w.Add(dir); err != nil {
@@ -126,7 +131,7 @@ func dedupLoop(w *fsnotify.Watcher, completedChannel chan<- error) {
 }
 
 // Returns the directories to watch after parsing all package imports, or nil on error
-func generateInWatchMode() []string {
+func generateInWatchMode(configArgs map[string]string) []string {
 	defer func() {
 		if err := recover(); err != nil {
 			screen.Clear()
@@ -135,7 +140,7 @@ func generateInWatchMode() []string {
 		}
 	}()
 
-	packageInfo, warnings, err := generateImpl()
+	packageInfo, warnings, err := generateImpl(configArgs)
 	screen.Clear()
 	screen.MoveTopLeft()
 
@@ -172,7 +177,7 @@ func WriteSuccessfulSummary(packageInfo *packaging.PackageInfo) {
 	}
 }
 
-func generateImpl() (*packaging.PackageInfo, []string, error) {
+func generateImpl(configArgs map[string]string) (*packaging.PackageInfo, []string, error) {
 	inputDir, err := os.Getwd()
 	if err != nil {
 		return nil, nil, err
@@ -180,6 +185,10 @@ func generateImpl() (*packaging.PackageInfo, []string, error) {
 
 	packageInfo, err := packaging.LoadPackage(inputDir)
 	if err != nil {
+		return packageInfo, nil, err
+	}
+
+	if err := updatePackageInfoFromArgs(packageInfo, configArgs); err != nil {
 		return packageInfo, nil, err
 	}
 

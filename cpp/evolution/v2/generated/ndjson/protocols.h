@@ -10,7 +10,6 @@
 
 #include "../yardl/detail/ndjson/reader_writer.h"
 #include "../protocols.h"
-#include "../types.h"
 
 namespace evo_test::ndjson {
 // NDJSON writer for the ProtocolWithChanges protocol.
