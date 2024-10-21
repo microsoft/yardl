@@ -7,8 +7,10 @@
 #include <memory>
 
 #include "header.h"
+#include "index.h"
 
 namespace yardl::binary {
+
 class BinaryWriter {
  protected:
   BinaryWriter(std::ostream& stream, std::string const& schema)
@@ -66,6 +68,30 @@ class BinaryReader {
  protected:
   yardl::binary::CodedInputStream stream_;
   std::string schema_read_;
+};
+
+class BinaryIndexedWriter : public BinaryWriter {
+ protected:
+  BinaryIndexedWriter(std::ostream& stream, std::string const& schema)
+      : BinaryWriter(stream, schema) {}
+
+  BinaryIndexedWriter(std::string file_name, std::string const& schema)
+      : BinaryWriter(file_name, schema) {}
+
+ protected:
+  yardl::binary::Index step_index_;
+};
+
+class BinaryIndexedReader : public BinaryReader {
+ protected:
+  BinaryIndexedReader(std::istream& stream)
+      : BinaryReader(stream), step_index_(ReadIndex(stream_)) {}
+
+  BinaryIndexedReader(std::string file_name)
+      : BinaryReader(file_name), step_index_(ReadIndex(stream_)) {}
+
+ protected:
+  yardl::binary::Index step_index_;
 };
 
 }  // namespace yardl::binary

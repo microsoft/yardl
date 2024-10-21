@@ -234,6 +234,25 @@ inline void WriteVector(CodedOutputStream& stream, std::vector<T> const& value) 
   }
 }
 
+template <typename T, Writer<T> WriteElement>
+inline void WriteVectorAndSaveOffsets(CodedOutputStream& stream, std::vector<T> const& value, std::vector<size_t>& offsets) {
+  WriteInteger(stream, value.size());
+  auto start = stream.Pos();
+
+  if constexpr (IsTriviallySerializable<T>::value) {
+    stream.WriteBytes(value.data(), value.size() * sizeof(T));
+    for (size_t i = 0; i < value.size(); i++) {
+      offsets.push_back(start + i * sizeof(T));
+    }
+    return;
+  }
+
+  for (auto const& element : value) {
+    offsets.push_back(stream.Pos());
+    WriteElement(stream, element);
+  }
+}
+
 template <typename T, Reader<T> ReadElement>
 inline void ReadVector(CodedInputStream& stream, std::vector<T>& value) {
   uint64_t size;
@@ -427,6 +446,13 @@ inline void ReadFlags(CodedInputStream& stream, T& value) {
 template <typename T, Writer<T> WriteElement>
 inline void WriteBlock(CodedOutputStream& stream, T const& source) {
   WriteInteger(stream, 1U);
+  WriteElement(stream, source);
+}
+
+template <typename T, Writer<T> WriteElement>
+inline void WriteBlockAndSaveOffset(CodedOutputStream& stream, T const& source, size_t& offset) {
+  WriteInteger(stream, 1U);
+  offset = stream.Pos();
   WriteElement(stream, source);
 }
 

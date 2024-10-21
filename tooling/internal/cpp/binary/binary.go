@@ -77,6 +77,8 @@ func writeHeaderFile(env *dsl.Environment, options packaging.CppCodegenOptions) 
 		}
 		fmt.Fprintf(w, "namespace %s::binary {\n", common.NamespaceIdentifierName(ns.Name))
 		for _, protocol := range ns.Protocols {
+
+			// Binary Writer
 			common.WriteComment(w, fmt.Sprintf("Binary writer for the %s protocol.", protocol.Name))
 			common.WriteComment(w, protocol.Comment)
 			writerClassName := BinaryWriterClassName(protocol)
@@ -120,6 +122,51 @@ func writeHeaderFile(env *dsl.Environment, options packaging.CppCodegenOptions) 
 			})
 			fmt.Fprint(w, "};\n\n")
 
+			// Binary Indexed Writer
+			common.WriteComment(w, fmt.Sprintf("Binary indexed writer for the %s protocol.", protocol.Name))
+			common.WriteComment(w, protocol.Comment)
+			indexedWriterClassName := BinaryIndexedWriterClassName(protocol)
+			fmt.Fprintf(w, "class %s : public %s, yardl::binary::BinaryIndexedWriter {\n", indexedWriterClassName, common.QualifiedAbstractWriterName(protocol))
+			w.Indented(func() {
+				w.WriteStringln("public:")
+				fmt.Fprintf(w, "%s(std::ostream& stream, Version version = Version::Current)\n", indexedWriterClassName)
+				w.Indented(func() {
+					w.Indented(func() {
+						fmt.Fprintf(w, ": yardl::binary::BinaryIndexedWriter(stream, %s::SchemaFromVersion(version)), version_(version) {", common.QualifiedAbstractWriterName(protocol))
+					})
+				})
+				w.WriteStringln("}\n")
+
+				fmt.Fprintf(w, "%s(std::string file_name, Version version = Version::Current)\n", indexedWriterClassName)
+				w.Indented(func() {
+					w.Indented(func() {
+						fmt.Fprintf(w, ": yardl::binary::BinaryIndexedWriter(file_name, %s::SchemaFromVersion(version)), version_(version) {", common.QualifiedAbstractWriterName(protocol))
+					})
+				})
+				w.WriteStringln("}\n")
+
+				w.WriteString("void Flush() override;\n\n")
+
+				w.WriteStringln("protected:")
+				for _, step := range protocol.Sequence {
+					endMethodName := common.ProtocolWriteEndImplMethodName(step)
+					common.WriteComment(w, step.Comment)
+
+					fmt.Fprintf(w, "void %s(%s const& value) override;\n", common.ProtocolWriteImplMethodName(step), common.TypeSyntax(step.Type))
+
+					if step.IsStream() {
+						fmt.Fprintf(w, "void %s(std::vector<%s> const& values) override;\n", common.ProtocolWriteImplMethodName(step), common.TypeSyntax(step.Type))
+						fmt.Fprintf(w, "void %s() override;\n", endMethodName)
+					}
+				}
+
+				w.WriteString("void CloseImpl() override;\n")
+				w.WriteStringln("")
+				w.WriteStringln("Version version_;")
+			})
+			fmt.Fprint(w, "};\n\n")
+
+			// Binary Reader
 			common.WriteComment(w, fmt.Sprintf("Binary reader for the %s protocol.", protocol.Name))
 			common.WriteComment(w, protocol.Comment)
 			readerClassName := BinaryReaderClassName(protocol)
@@ -158,6 +205,57 @@ func writeHeaderFile(env *dsl.Environment, options packaging.CppCodegenOptions) 
 					fmt.Fprintf(w, "%s %s(%s& value) override;\n", returnType, common.ProtocolReadImplMethodName(step), common.TypeSyntax(step.Type))
 					if step.IsStream() {
 						fmt.Fprintf(w, "bool %s(std::vector<%s>& values) override;\n", common.ProtocolReadImplMethodName(step), common.TypeSyntax(step.Type))
+					}
+				}
+
+				w.WriteString("void CloseImpl() override;\n")
+				w.WriteStringln("")
+				w.WriteStringln("Version version_;")
+
+				if hasStream {
+					w.WriteStringln("\nprivate:")
+					w.WriteStringln("size_t current_block_remaining_ = 0;")
+				}
+			})
+			fmt.Fprint(w, "};\n\n")
+
+			// Binary Indexed Reader
+			common.WriteComment(w, fmt.Sprintf("Binary indexed reader for the %s protocol.", protocol.Name))
+			common.WriteComment(w, protocol.Comment)
+			indexedReaderClassName := BinaryIndexedReaderClassName(protocol)
+			fmt.Fprintf(w, "class %s : public %s, yardl::binary::BinaryIndexedReader {\n", indexedReaderClassName, common.QualifiedAbstractIndexedReaderName(protocol))
+			w.Indented(func() {
+				fmt.Fprintln(w, "public:")
+				fmt.Fprintf(w, "%s(std::istream& stream)\n", indexedReaderClassName)
+				w.Indented(func() {
+					w.Indented(func() {
+						fmt.Fprintf(w, ": yardl::binary::BinaryIndexedReader(stream), version_(%s::VersionFromSchema(schema_read_)) {", common.QualifiedAbstractIndexedReaderName(protocol))
+					})
+				})
+				w.WriteStringln("}\n")
+
+				fmt.Fprintf(w, "%s(std::string file_name)\n", indexedReaderClassName)
+				w.Indented(func() {
+					w.Indented(func() {
+						fmt.Fprintf(w, ": yardl::binary::BinaryIndexedReader(file_name), version_(%s::VersionFromSchema(schema_read_)) {", common.QualifiedAbstractIndexedReaderName(protocol))
+					})
+				})
+				w.WriteStringln("}\n")
+
+				fmt.Fprintf(w, "Version GetVersion() { return version_; }\n\n")
+
+				w.WriteStringln("protected:")
+				hasStream := false
+				for _, step := range protocol.Sequence {
+					if step.IsStream() {
+						hasStream = true
+					}
+
+					if step.IsStream() {
+						fmt.Fprintf(w, "bool %s(%s& value, size_t idx) override;\n", common.ProtocolReadImplMethodName(step), common.TypeSyntax(step.Type))
+						fmt.Fprintf(w, "bool %s(std::vector<%s>& values, size_t idx) override;\n", common.ProtocolReadImplMethodName(step), common.TypeSyntax(step.Type))
+					} else {
+						fmt.Fprintf(w, "void %s(%s& value) override;\n", common.ProtocolReadImplMethodName(step), common.TypeSyntax(step.Type))
 					}
 				}
 
@@ -861,13 +959,14 @@ func writeProtocolMethods(w *formatting.IndentedWriter, p *dsl.ProtocolDefinitio
 		return stepChanges
 	}
 
+	// Writer steps
 	writerClassName := BinaryWriterClassName(p)
 	for i, step := range p.Sequence {
 		stepChanges := extractStepChanges(i)
 
 		fmt.Fprintf(w, "void %s::%s(%s const& value) {\n", writerClassName, common.ProtocolWriteImplMethodName(step), common.TypeSyntax(step.Type))
 		w.Indented(func() {
-			writeProtocolStep(w, step, stepChanges, false, true)
+			writeProtocolStep(w, step, stepChanges, false, true, false)
 		})
 		w.WriteString("}\n\n")
 
@@ -876,7 +975,7 @@ func writeProtocolMethods(w *formatting.IndentedWriter, p *dsl.ProtocolDefinitio
 			w.Indented(func() {
 				w.WriteStringln("if (!values.empty()) {")
 				w.Indented(func() {
-					writeProtocolStep(w, step, stepChanges, true, true)
+					writeProtocolStep(w, step, stepChanges, true, true, false)
 				})
 				w.WriteStringln("}")
 			})
@@ -902,6 +1001,7 @@ func writeProtocolMethods(w *formatting.IndentedWriter, p *dsl.ProtocolDefinitio
 	})
 	w.WriteString("}\n\n")
 
+	// Reader steps
 	readerClassName := BinaryReaderClassName(p)
 	for i, step := range p.Sequence {
 		stepChanges := extractStepChanges(i)
@@ -916,7 +1016,7 @@ func writeProtocolMethods(w *formatting.IndentedWriter, p *dsl.ProtocolDefinitio
 			if step.IsStream() {
 				w.WriteStringln("bool read_block_successful = false;")
 			}
-			writeProtocolStep(w, step, stepChanges, false, false)
+			writeProtocolStep(w, step, stepChanges, false, false, false)
 			if step.IsStream() {
 				w.WriteStringln("return read_block_successful;")
 			}
@@ -926,7 +1026,7 @@ func writeProtocolMethods(w *formatting.IndentedWriter, p *dsl.ProtocolDefinitio
 		if step.IsStream() {
 			fmt.Fprintf(w, "%s %s::%s(std::vector<%s>& values) {\n", returnType, readerClassName, common.ProtocolReadImplMethodName(step), common.TypeSyntax(step.Type))
 			w.Indented(func() {
-				writeProtocolStep(w, step, stepChanges, true, false)
+				writeProtocolStep(w, step, stepChanges, true, false, false)
 				w.WriteStringln("return current_block_remaining_ != 0;")
 			})
 			w.WriteString("}\n\n")
@@ -937,6 +1037,123 @@ func writeProtocolMethods(w *formatting.IndentedWriter, p *dsl.ProtocolDefinitio
 	w.Indented(func() {
 		w.WriteString("stream_.VerifyFinished();\n")
 	})
+	w.WriteString("}\n\n")
+
+	// Indexed Writer steps
+	indexedWriterClassName := BinaryIndexedWriterClassName(p)
+	for i, step := range p.Sequence {
+		stepChanges := extractStepChanges(i)
+
+		fmt.Fprintf(w, "void %s::%s(%s const& value) {\n", indexedWriterClassName, common.ProtocolWriteImplMethodName(step), common.TypeSyntax(step.Type))
+		w.Indented(func() {
+
+			fmt.Fprintf(w, "auto pos = stream_.Pos();\n")
+			fmt.Fprintf(w, "step_index_.set_step_offset(\"%s\", pos);\n", formatting.ToPascalCase(step.Name))
+
+			if step.IsStream() {
+				fmt.Fprintf(w, "size_t item_offset = 0;\n")
+			}
+
+			writeProtocolStep(w, step, stepChanges, false, true, true)
+
+			if step.IsStream() {
+				fmt.Fprintf(w, "step_index_.add_stream_offset(\"%s\", item_offset);\n", formatting.ToPascalCase(step.Name))
+			}
+
+		})
+		w.WriteString("}\n\n")
+
+		if step.IsStream() {
+			fmt.Fprintf(w, "void %s::%s(std::vector<%s> const& values) {\n", indexedWriterClassName, common.ProtocolWriteImplMethodName(step), common.TypeSyntax(step.Type))
+			w.Indented(func() {
+				w.WriteStringln("if (!values.empty()) {")
+				w.Indented(func() {
+
+					fmt.Fprintf(w, "step_index_.set_step_offset(\"%s\", stream_.Pos());\n", formatting.ToPascalCase(step.Name))
+
+					fmt.Fprintf(w, "std::vector<size_t> item_offsets;\n")
+					fmt.Fprintf(w, "item_offsets.reserve(values.size());\n")
+					writeProtocolStep(w, step, stepChanges, true, true, true)
+					fmt.Fprintf(w, "step_index_.add_stream_offsets(\"%s\", item_offsets);\n", formatting.ToPascalCase(step.Name))
+
+				})
+				w.WriteStringln("}")
+			})
+			w.WriteString("}\n\n")
+
+			fmt.Fprintf(w, "void %s::%s() {\n", indexedWriterClassName, common.ProtocolWriteEndImplMethodName(step))
+			w.Indented(func() {
+				writeEndStream(w, stepChanges)
+			})
+			w.WriteString("}\n\n")
+		}
+	}
+
+	fmt.Fprintf(w, "void %s::Flush() {\n", indexedWriterClassName)
+	w.Indented(func() {
+		w.WriteString("stream_.Flush();\n")
+	})
+	w.WriteString("}\n\n")
+
+	fmt.Fprintf(w, "void %s::CloseImpl() {\n", indexedWriterClassName)
+	w.Indented(func() {
+		fmt.Fprintf(w, "yardl::binary::WriteIndex(stream_, step_index_);\n")
+		w.WriteStringln("")
+		w.WriteString("stream_.Flush();\n")
+	})
+	w.WriteString("}\n\n")
+
+	// Indexed Reader steps
+	indexedReaderClassName := BinaryIndexedReaderClassName(p)
+	for i, step := range p.Sequence {
+		stepChanges := extractStepChanges(i)
+
+		if step.IsStream() {
+			fmt.Fprintf(w, "bool %s::%s(%s& value, size_t idx) {\n", indexedReaderClassName, common.ProtocolReadImplMethodName(step), common.TypeSyntax(step.Type))
+			w.Indented(func() {
+				fmt.Fprintf(w, "size_t abs_offset = 0, items_remaining = 0;\n")
+				fmt.Fprintf(w, "if (!step_index_.find_stream_item(\"%s\", idx, abs_offset, items_remaining)) {\n", formatting.ToPascalCase(step.Name))
+				w.Indented(func() {
+					w.WriteStringln("return false;")
+				})
+				w.WriteStringln("}")
+				fmt.Fprintf(w, "stream_.Seek(abs_offset);\n")
+				fmt.Fprintf(w, "current_block_remaining_ = items_remaining;\n")
+
+				w.WriteStringln("bool read_block_successful = false;")
+				writeProtocolStep(w, step, stepChanges, false, false, true)
+				w.WriteStringln("return read_block_successful;")
+			})
+			w.WriteString("}\n\n")
+
+			fmt.Fprintf(w, "bool %s::%s(std::vector<%s>& values, size_t idx) {\n", indexedReaderClassName, common.ProtocolReadImplMethodName(step), common.TypeSyntax(step.Type))
+			w.Indented(func() {
+				fmt.Fprintf(w, "size_t abs_offset = 0, items_remaining = 0;\n")
+				fmt.Fprintf(w, "if (!step_index_.find_stream_item(\"%s\", idx, abs_offset, items_remaining)) {\n", formatting.ToPascalCase(step.Name))
+				w.Indented(func() {
+					w.WriteStringln("values.clear();")
+					w.WriteStringln("return false;")
+				})
+				w.WriteStringln("}")
+				fmt.Fprintf(w, "stream_.Seek(abs_offset);\n")
+				fmt.Fprintf(w, "current_block_remaining_ = items_remaining;\n")
+
+				writeProtocolStep(w, step, stepChanges, true, false, true)
+				w.WriteStringln("return current_block_remaining_ != 0;")
+			})
+			w.WriteString("}\n\n")
+		} else {
+			fmt.Fprintf(w, "void %s::%s(%s& value) {\n", indexedReaderClassName, common.ProtocolReadImplMethodName(step), common.TypeSyntax(step.Type))
+			w.Indented(func() {
+				fmt.Fprintf(w, "auto pos = step_index_.get_step_offset(\"%s\");\n", formatting.ToPascalCase(step.Name))
+				fmt.Fprintf(w, "stream_.Seek(pos);\n")
+				writeProtocolStep(w, step, stepChanges, false, false, true)
+			})
+			w.WriteString("}\n\n")
+		}
+	}
+
+	fmt.Fprintf(w, "void %s::CloseImpl() {\n", indexedReaderClassName)
 	w.WriteString("}\n\n")
 }
 
@@ -1006,20 +1223,30 @@ func writeChangeSwitchCase(w *formatting.IndentedWriter, changes map[string]dsl.
 	fmt.Fprintln(w, "}")
 }
 
-func writeStepRw(w *formatting.IndentedWriter, stepType dsl.Type, target string, isStream, isPlural, write bool) {
+func writeStepRw(w *formatting.IndentedWriter, stepType dsl.Type, target string, isStream, isPlural, write bool, indexed bool) {
 	if !isStream {
 		fmt.Fprintf(w, "%s(stream_, %s);\n", typeRwFunction(stepType, write), target)
 		return
 	}
 
+	// This step is a stream, and requires special handling
 	if write {
 		if isPlural {
-			vectorType := *stepType.(*dsl.GeneralizedType)
-			vectorType.Dimensionality = &dsl.Vector{}
-			stepType = &vectorType
-			fmt.Fprintf(w, "%s(stream_, %s);\n", typeRwFunction(stepType, write), target)
+			if indexed {
+				stepType = stepType.(*dsl.GeneralizedType).ToScalar()
+				fmt.Fprintf(w, "yardl::binary::WriteVectorAndSaveOffsets<%s, %s>(stream_, %s, item_offsets);\n", common.TypeSyntax(stepType), typeRwFunction(stepType, write), target)
+			} else {
+				vectorType := *stepType.(*dsl.GeneralizedType)
+				vectorType.Dimensionality = &dsl.Vector{}
+				stepType = &vectorType
+				fmt.Fprintf(w, "%s(stream_, %s);\n", typeRwFunction(stepType, write), target)
+			}
 		} else {
-			fmt.Fprintf(w, "yardl::binary::WriteBlock<%s, %s>(stream_, %s);\n", common.TypeSyntax(stepType), typeRwFunction(stepType, write), target)
+			if indexed {
+				fmt.Fprintf(w, "yardl::binary::WriteBlockAndSaveOffset<%s, %s>(stream_, %s, item_offset);\n", common.TypeSyntax(stepType), typeRwFunction(stepType, write), target)
+			} else {
+				fmt.Fprintf(w, "yardl::binary::WriteBlock<%s, %s>(stream_, %s);\n", common.TypeSyntax(stepType), typeRwFunction(stepType, write), target)
+			}
 		}
 	} else {
 		if isPlural {
@@ -1031,7 +1258,7 @@ func writeStepRw(w *formatting.IndentedWriter, stepType dsl.Type, target string,
 	}
 }
 
-func writeProtocolStep(w *formatting.IndentedWriter, step *dsl.ProtocolStep, changes map[string]dsl.TypeChange, isPlural bool, write bool) {
+func writeProtocolStep(w *formatting.IndentedWriter, step *dsl.ProtocolStep, changes map[string]dsl.TypeChange, isPlural bool, write bool, indexed bool) {
 	target := "value"
 	if isPlural {
 		target = "values"
@@ -1039,7 +1266,7 @@ func writeProtocolStep(w *formatting.IndentedWriter, step *dsl.ProtocolStep, cha
 
 	writeChangeSwitchCase(w, changes,
 		func(w *formatting.IndentedWriter) {
-			writeStepRw(w, step.Type, target, step.IsStream(), isPlural, write)
+			writeStepRw(w, step.Type, target, step.IsStream(), isPlural, write, indexed)
 		},
 		func(w *formatting.IndentedWriter) {
 			// Handle "added" ProtocolSteps
@@ -1060,7 +1287,7 @@ func writeProtocolStep(w *formatting.IndentedWriter, step *dsl.ProtocolStep, cha
 		func(w *formatting.IndentedWriter, change dsl.TypeChange) {
 			// Handle conversions for ProtocolStep type changes
 			if !requiresExplicitConversion(change) {
-				writeStepRw(w, change.OldType(), target, step.IsStream(), isPlural, write)
+				writeStepRw(w, change.OldType(), target, step.IsStream(), isPlural, write, indexed)
 				return
 			}
 
@@ -1073,10 +1300,10 @@ func writeProtocolStep(w *formatting.IndentedWriter, step *dsl.ProtocolStep, cha
 
 				if write {
 					writeTypeConversion(w, change, target, tmpVecName, write)
-					writeStepRw(w, change.OldType(), tmpVecName, step.IsStream(), isPlural, write)
+					writeStepRw(w, change.OldType(), tmpVecName, step.IsStream(), isPlural, write, indexed)
 				} else {
 					fmt.Fprintf(w, "%s.reserve(%s.capacity());\n", tmpVecName, target)
-					writeStepRw(w, change.OldType(), tmpVecName, step.IsStream(), isPlural, write)
+					writeStepRw(w, change.OldType(), tmpVecName, step.IsStream(), isPlural, write, indexed)
 					writeTypeConversion(w, change, tmpVecName, target, write)
 				}
 			} else {
@@ -1093,9 +1320,9 @@ func writeProtocolStep(w *formatting.IndentedWriter, step *dsl.ProtocolStep, cha
 
 				if write {
 					writeTypeConversion(w, change, target, tmpVarName, write)
-					writeStepRw(w, change.OldType(), tmpVarName, step.IsStream(), isPlural, write)
+					writeStepRw(w, change.OldType(), tmpVarName, step.IsStream(), isPlural, write, indexed)
 				} else {
-					writeStepRw(w, change.OldType(), tmpVarName, step.IsStream(), isPlural, write)
+					writeStepRw(w, change.OldType(), tmpVarName, step.IsStream(), isPlural, write, indexed)
 					if step.IsStream() {
 						fmt.Fprintf(w, "if (read_block_successful) {\n")
 						w.Indented(func() {
@@ -1239,6 +1466,10 @@ func BinaryWriterClassName(p *dsl.ProtocolDefinition) string {
 	return fmt.Sprintf("%sWriter", p.Name)
 }
 
+func BinaryIndexedWriterClassName(p *dsl.ProtocolDefinition) string {
+	return fmt.Sprintf("%sIndexedWriter", p.Name)
+}
+
 func QualifiedBinaryWriterClassName(p *dsl.ProtocolDefinition) string {
 	return fmt.Sprintf("%s::binary::%s", common.TypeNamespaceIdentifierName(p), BinaryWriterClassName(p))
 }
@@ -1249,4 +1480,8 @@ func BinaryReaderClassName(p *dsl.ProtocolDefinition) string {
 
 func QualifiedBinaryReaderClassName(p *dsl.ProtocolDefinition) string {
 	return fmt.Sprintf("%s::binary::%s", common.TypeNamespaceIdentifierName(p), BinaryReaderClassName(p))
+}
+
+func BinaryIndexedReaderClassName(p *dsl.ProtocolDefinition) string {
+	return fmt.Sprintf("%sIndexedReader", p.Name)
 }

@@ -1,0 +1,23 @@
+set shell := ['bash', '-ceuo', 'pipefail']
+
+cpp_version := "17"
+
+@default: run
+
+@configure:
+    mkdir -p cpp/build; \
+    cd cpp/build; \
+    cmake -GNinja -D CMAKE_CXX_STANDARD={{ cpp_version }} ..
+
+@install:
+    cd ../../ ; \
+    just install
+
+@generate: install
+    cd model && yardl generate
+
+@build: generate configure
+    cd cpp/build && ninja
+
+@run: build
+    ./cpp/build/sketch

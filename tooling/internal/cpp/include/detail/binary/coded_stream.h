@@ -35,7 +35,8 @@ class CodedOutputStream {
       : stream_(stream),
         buffer_(buffer_size),
         buffer_ptr_(buffer_.data()),
-        buffer_end_ptr_(buffer_ptr_ + buffer_.size()) {
+        buffer_end_ptr_(buffer_ptr_ + buffer_.size()),
+        pos_(0) {
   }
 
   ~CodedOutputStream() {
@@ -49,6 +50,7 @@ class CodedOutputStream {
     }
 
     *buffer_ptr_++ = v;
+    pos_ += 1;
   }
 
   void WriteVarInt32(uint32_t const& value) {
@@ -92,11 +94,12 @@ class CodedOutputStream {
 #endif
 
     buffer_ptr_ += sizeof(value);
+    pos_ += sizeof(value);
   }
 
   void WriteBytes(void const* data, size_t size_in_bytes) {
     while (true) {
-      const size_t remaining_buffer_space = RemainingBufferSpace();
+      size_t const remaining_buffer_space = RemainingBufferSpace();
       if (remaining_buffer_space >= size_in_bytes) {
         memcpy(buffer_ptr_, data, size_in_bytes);
         buffer_ptr_ += size_in_bytes;
@@ -112,11 +115,17 @@ class CodedOutputStream {
 
       FlushBuffer();
     }
+
+    pos_ += size_in_bytes;
   }
 
   void Flush() {
     FlushBuffer();
     stream_.flush();
+  }
+
+  size_t Pos() {
+    return pos_;
   }
 
  private:
@@ -127,12 +136,14 @@ class CodedOutputStream {
 
   template <typename T, std::enable_if_t<std::is_integral_v<T> && std::is_unsigned_v<T>, bool> = true>
   void WriteVarInt(T value) {
+    auto start = buffer_ptr_;
     while (value > 0x7F) {
       *buffer_ptr_++ = static_cast<uint8_t>(value) | 0x80;
       value >>= 7;
     }
 
     *buffer_ptr_++ = static_cast<uint8_t>(value);
+    pos_ += buffer_ptr_ - start;
   }
 
   static uint32_t ZigZagEncode32(int32_t v) {
@@ -160,6 +171,7 @@ class CodedOutputStream {
   std::vector<uint8_t> buffer_;
   uint8_t* buffer_ptr_;
   uint8_t* buffer_end_ptr_;
+  size_t pos_;
 };
 
 /**
@@ -172,7 +184,8 @@ class CodedInputStream {
       : stream_(stream),
         buffer_(buffer_size),
         buffer_ptr_(buffer_.data()),
-        buffer_end_ptr_(buffer_ptr_) {
+        buffer_end_ptr_(buffer_ptr_),
+        pos_(0) {
   }
 
  public:
@@ -259,6 +272,37 @@ class CodedInputStream {
     throw std::runtime_error("Stream was not completely read");
   }
 
+  size_t Pos() {
+    return pos_;
+  }
+
+  void Seek(size_t offset) {
+    if (offset < pos_ || offset >= pos_ + buffer_.size()) {
+      // Seek and re-buffer
+      at_eof_ = false;
+      stream_.clear();
+      stream_.seekg(offset);
+      if (stream_.fail()) {
+        throw std::runtime_error("Failed to seek in stream");
+      }
+      FillBuffer();
+    } else {
+      // Desired offset is already buffered...
+      buffer_ptr_ = buffer_.data() + (offset - pos_);
+    }
+  }
+
+  void SeekBackwardFromEnd(size_t offset) {
+    stream_.clear();
+    auto pos = stream_.tellg();
+    stream_.seekg(0, std::ios::beg);
+    stream_.seekg(0, std::ios::end);
+    auto desired = stream_.tellg() - static_cast<std::streamoff>(offset);
+    stream_.seekg(pos);
+
+    Seek(desired);
+  }
+
  private:
   template <typename T, std::enable_if_t<std::is_integral_v<T>, bool> = true>
   static void ReadFixedIntegerFastFromArray(T& value, uint8_t*& local_buffer_ptr) {
@@ -335,6 +379,7 @@ class CodedInputStream {
       throw EndOfStreamException();
     }
 
+    pos_ = stream_.tellg();
     stream_.read(reinterpret_cast<char*>(buffer_.data()), buffer_.size());
     at_eof_ = stream_.eof();
     auto bytes_read = stream_.gcount();
@@ -353,6 +398,8 @@ class CodedInputStream {
   uint8_t* buffer_ptr_;
   uint8_t* buffer_end_ptr_;
   bool at_eof_ = false;
+
+  size_t pos_;
 };
 
 }  // namespace yardl::binary
