@@ -152,7 +152,17 @@ var TypeSyntaxWriter dsl.TypeSyntaxWriter[string] = func(self dsl.TypeSyntaxWrit
 	case nil:
 		return "None"
 	case *dsl.SimpleType:
-		return self.ToSyntax(t.ResolvedDefinition, contextNamespace)
+		if t.IsRecursive {
+			def := t.ResolvedDefinition
+			meta := def.GetDefinitionMeta()
+			typeName := RecursiveTypeAliasName(meta.Name)
+			if meta.Namespace != contextNamespace {
+				typeName = fmt.Sprintf("%s.%s", formatting.ToSnakeCase(meta.Namespace), typeName)
+			}
+			return typeName
+		} else {
+			return self.ToSyntax(t.ResolvedDefinition, contextNamespace)
+		}
 	case *dsl.GeneralizedType:
 		scalarString := func() string {
 			if t.Cases.IsSingle() {
@@ -384,6 +394,10 @@ func TypeIdentifierName(name string) string {
 	}
 
 	return name + "_"
+}
+
+func RecursiveTypeAliasName(name string) string {
+	return fmt.Sprintf("%s__", TypeIdentifierName(name))
 }
 
 func UnionClassName(gt *dsl.GeneralizedType) (className string, typeParameters string) {

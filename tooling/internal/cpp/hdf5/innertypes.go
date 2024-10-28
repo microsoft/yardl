@@ -270,7 +270,9 @@ func needsInnerType(node dsl.Node) bool {
 	dsl.Visit(node, func(self dsl.Visitor, node dsl.Node) {
 		switch t := node.(type) {
 		case *dsl.SimpleType:
-			self.Visit(t.ResolvedDefinition)
+			if !t.IsRecursive {
+				self.Visit(t.ResolvedDefinition)
+			}
 			self.VisitChildren(node)
 		case *dsl.GeneralizedType:
 			if len(t.Cases) > 1 {
@@ -310,7 +312,9 @@ func containsVlen(node dsl.Node) bool {
 	dsl.Visit(node, func(self dsl.Visitor, node dsl.Node) {
 		switch t := node.(type) {
 		case *dsl.SimpleType:
-			self.Visit(t.ResolvedDefinition)
+			if !t.IsRecursive {
+				self.Visit(t.ResolvedDefinition)
+			}
 			self.VisitChildren(node)
 		case *dsl.GeneralizedType:
 			switch d := t.Dimensionality.(type) {

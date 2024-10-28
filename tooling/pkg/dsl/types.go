@@ -364,6 +364,7 @@ type SimpleType struct {
 	Name               string
 	TypeArguments      []Type
 	ResolvedDefinition TypeDefinition
+	IsRecursive        bool
 }
 
 type GeneralizedType struct {

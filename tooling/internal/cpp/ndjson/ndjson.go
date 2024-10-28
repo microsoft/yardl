@@ -91,7 +91,9 @@ func WriteNdJson(env *dsl.Environment, options packaging.CppCodegenOptions) erro
 	dsl.Visit(env, func(self dsl.Visitor, node dsl.Node) {
 		switch t := node.(type) {
 		case *dsl.SimpleType:
-			self.Visit(t.ResolvedDefinition)
+			if !t.IsRecursive {
+				self.Visit(t.ResolvedDefinition)
+			}
 		case *dsl.GeneralizedType:
 			if t.Cases.IsUnion() {
 				// Convert the union cases to their u types so we don't generate
@@ -453,7 +455,9 @@ func writeUnionConverters(w *formatting.IndentedWriter, unionType *dsl.Generaliz
 		case *dsl.NamedType:
 			self.Visit(node.Type)
 		case *dsl.SimpleType:
-			self.Visit(node.ResolvedDefinition)
+			if !node.IsRecursive {
+				self.Visit(node.ResolvedDefinition)
+			}
 		default:
 			self.VisitChildren(node)
 		}

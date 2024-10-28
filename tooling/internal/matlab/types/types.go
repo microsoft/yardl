@@ -901,7 +901,11 @@ func typeDefault(t dsl.Type, contextNamespace string, namedType string, st dsl.S
 	case nil:
 		return "yardl.None", defaultValueKindImmutable
 	case *dsl.SimpleType:
-		return typeDefinitionDefault(t.ResolvedDefinition, contextNamespace, st)
+		if t.IsRecursive {
+			return "yardl.None", defaultValueKindImmutable
+		} else {
+			return typeDefinitionDefault(t.ResolvedDefinition, contextNamespace, st)
+		}
 	case *dsl.GeneralizedType:
 		switch td := t.Dimensionality.(type) {
 		case nil:

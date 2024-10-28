@@ -409,6 +409,24 @@ func writeUnionSerializers(w *formatting.IndentedWriter, env *dsl.Environment) {
 func writeNamespaceDefinitions(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 	if len(ns.TypeDefinitions) > 0 {
 		w.WriteStringln("namespace {")
+
+		// Write forward declarations for recursive types
+		forwardDecls := make(map[dsl.TypeDefinition]bool)
+		dsl.Visit(ns, func(self dsl.Visitor, node dsl.Node) {
+			switch t := node.(type) {
+			case *dsl.SimpleType:
+				if t.IsRecursive {
+					forwardDecls[t.ResolvedDefinition] = true
+				}
+			default:
+				self.VisitChildren(node)
+			}
+		})
+		for td := range forwardDecls {
+			writeSerializerDeclaration(w, td)
+		}
+
+		// Write serializer definitions
 		for _, typeDef := range ns.TypeDefinitions {
 			writeSerializers(w, typeDef)
 		}
@@ -426,6 +444,19 @@ func writeNamespaceDefinitions(w *formatting.IndentedWriter, ns *dsl.Namespace) 
 			writeProtocolMethods(w, protocol)
 		}
 	}
+}
+
+func writeSerializerDeclaration(w *formatting.IndentedWriter, t dsl.TypeDefinition) {
+	switch t.(type) {
+	case *dsl.EnumDefinition:
+		return
+	}
+
+	writeRwFunctionTemplateDeclaration(t, w, true)
+	fmt.Fprintf(w, "[[maybe_unused]] void Write%s(yardl::binary::CodedOutputStream& stream, %s const& value);\n\n", t.GetDefinitionMeta().Name, common.TypeDefinitionSyntax(t))
+
+	writeRwFunctionTemplateDeclaration(t, w, false)
+	fmt.Fprintf(w, "[[maybe_unused]] void Read%s(yardl::binary::CodedInputStream& stream, %s& value);\n\n", t.GetDefinitionMeta().Name, common.TypeDefinitionSyntax(t))
 }
 
 func writeSerializers(w *formatting.IndentedWriter, t dsl.TypeDefinition) {
@@ -1184,6 +1215,11 @@ func typeRwFunction(t dsl.Type, write bool) string {
 	case nil:
 		return fmt.Sprintf("yardl::binary::%sMonostate", verb(write))
 	case *dsl.SimpleType:
+		if t.IsRecursive {
+			tCopy := *t
+			tCopy.IsRecursive = false
+			return fmt.Sprintf("yardl::binary::%sPointer<%s, %s>", verb(write), common.TypeSyntax(&tCopy), typeRwFunction(&tCopy, write))
+		}
 		return typeDefinitionRwFunction(t.ResolvedDefinition, write)
 	case *dsl.GeneralizedType:
 		scalarType := t.ToScalar()

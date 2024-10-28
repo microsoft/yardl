@@ -124,7 +124,7 @@ func (meta *DefinitionMeta) UnmarshalYAML(value *yaml.Node) error {
 		return parseError(value, err.Error())
 	}
 
-	parsedType := convertType(parsedTypeString, meta.NodeMeta)
+	parsedType := convertType(parsedTypeString, meta.NodeMeta, false)
 	simpleParsedType, ok := parsedType.(*SimpleType)
 	if !ok {
 		return parseError(value, "not a valid type declaration name")
@@ -370,7 +370,7 @@ func UnmarshalPattern(patternNode *yaml.Node) (Pattern, error) {
 	}
 }
 
-func convertType(ast *parser.Type, node NodeMeta) Type {
+func convertType(ast *parser.Type, node NodeMeta, markedRecursive bool) Type {
 	nodeWithPositionUpdated := node
 	nodeWithPositionUpdated.Column += ast.Pos.Offset
 
@@ -378,11 +378,14 @@ func convertType(ast *parser.Type, node NodeMeta) Type {
 	if ast.Named != nil {
 		simpleType := SimpleType{NodeMeta: nodeWithPositionUpdated, Name: ast.Named.Name}
 		for _, typeArg := range ast.Named.TypeArgs {
-			simpleType.TypeArguments = append(simpleType.TypeArguments, convertType(typeArg, node))
+			simpleType.TypeArguments = append(simpleType.TypeArguments, convertType(typeArg, node, false))
 		}
+
+		simpleType.IsRecursive = markedRecursive || ast.Named.Recursive
+
 		t = &simpleType
 	} else if ast.Sub != nil {
-		t = convertType(ast.Sub, node)
+		t = convertType(ast.Sub, node, markedRecursive)
 	} else {
 		panic("unreachable")
 	}
@@ -404,7 +407,7 @@ func applyTypeTail(inner Type, tail parser.TypeTail) Type {
 	if tail.Optional {
 		gt.Cases = append(TypeCases{&TypeCase{NodeMeta: nodeMeta}}, gt.Cases...)
 	} else if tail.MapValue != nil {
-		gt.Cases = TypeCases{&TypeCase{NodeMeta: nodeMeta, Type: convertType(tail.MapValue, nodeMeta)}}
+		gt.Cases = TypeCases{&TypeCase{NodeMeta: nodeMeta, Type: convertType(tail.MapValue, nodeMeta, false)}}
 		gt.Dimensionality = &Map{
 			NodeMeta: nodeMeta,
 			KeyType:  inner,
@@ -439,7 +442,7 @@ func convertPattern(pat *parser.Pattern, node NodeMeta) Pattern {
 		return &DiscardPattern{NodeMeta: node}
 	}
 	if pat.Type != nil {
-		tp := TypePattern{NodeMeta: node, Type: convertType(pat.Type, node)}
+		tp := TypePattern{NodeMeta: node, Type: convertType(pat.Type, node, false)}
 		if pat.Variable != nil {
 			return &DeclarationPattern{TypePattern: tp, Identifier: *pat.Variable}
 		}
@@ -735,13 +738,13 @@ func UnmarshalTypeYAML(value *yaml.Node) (Type, error) {
 	switch value.Tag {
 	case "!!null":
 		return nil, nil
-	case "!!str":
+	case "!!str", "!recursive":
 		parsedTypeTree, err := parser.ParseType(value.Value)
 		if err != nil {
 			return nil, parseError(value, err.Error())
 		}
 
-		return convertType(parsedTypeTree, createNodeMeta(value)), nil
+		return convertType(parsedTypeTree, createNodeMeta(value), value.Tag == "!recursive"), nil
 	case "!generic":
 		return UnmarshalGenericNode(value)
 	case "!!seq":

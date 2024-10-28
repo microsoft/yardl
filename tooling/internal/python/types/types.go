@@ -63,6 +63,8 @@ func writeTypes(w *formatting.IndentedWriter, st dsl.SymbolTable, ns *dsl.Namesp
 
 	unions := make(map[string]any)
 
+	writeRecursiveTypeAliases(w, ns)
+
 	for _, td := range ns.TypeDefinitions {
 		writeUnionClasses(w, td, unions)
 		switch td := td.(type) {
@@ -81,6 +83,25 @@ func writeTypes(w *formatting.IndentedWriter, st dsl.SymbolTable, ns *dsl.Namesp
 
 	for _, p := range ns.Protocols {
 		writeUnionClasses(w, p, unions)
+	}
+}
+
+func writeRecursiveTypeAliases(w *formatting.IndentedWriter, ns *dsl.Namespace) {
+	tds := make(map[dsl.TypeDefinition]bool)
+	dsl.Visit(ns, func(self dsl.Visitor, node dsl.Node) {
+		switch node := node.(type) {
+		case *dsl.SimpleType:
+			if node.IsRecursive {
+				tds[node.ResolvedDefinition] = true
+			}
+		}
+		self.VisitChildren(node)
+	})
+	if len(tds) > 0 {
+		for td := range tds {
+			fmt.Fprintf(w, "%s: typing.TypeAlias = \"%s\"\n", common.RecursiveTypeAliasName(td.GetDefinitionMeta().Name), common.TypeSyntax(td, td.GetDefinitionMeta().Namespace))
+		}
+		w.WriteStringln("")
 	}
 }
 
@@ -189,7 +210,7 @@ func writeNamedType(w *formatting.IndentedWriter, td *dsl.NamedType) {
 }
 
 func writeRecord(w *formatting.IndentedWriter, rec *dsl.RecordDefinition, st dsl.SymbolTable) {
-	fmt.Fprintf(w, "class %s%s:\n", common.TypeSyntaxWithoutTypeParameters(rec, rec.Namespace), GetGenericBase(rec))
+	fmt.Fprintf(w, "class %s%s:\n", common.TypeIdentifierName(rec.Name), GetGenericBase(rec))
 	w.Indented(func() {
 		common.WriteDocstring(w, rec.Comment)
 		for _, field := range rec.Fields {
@@ -333,7 +354,11 @@ func hasSimpleEquality(t dsl.Node) bool {
 	dsl.Visit(t, func(self dsl.Visitor, node dsl.Node) {
 		switch t := node.(type) {
 		case *dsl.SimpleType:
-			self.Visit(t.ResolvedDefinition)
+			if t.IsRecursive {
+				return
+			} else {
+				self.Visit(t.ResolvedDefinition)
+			}
 		case *dsl.Array, *dsl.GenericTypeParameter:
 			res = false
 			return
@@ -828,7 +853,11 @@ func typeDefault(t dsl.Type, contextNamespace string, namedType string, st dsl.S
 	case nil:
 		return "None", defaultValueKindImmutable
 	case *dsl.SimpleType:
-		return typeDefinitionDefault(t.ResolvedDefinition, contextNamespace, st)
+		if t.IsRecursive {
+			return "None", defaultValueKindImmutable
+		} else {
+			return typeDefinitionDefault(t.ResolvedDefinition, contextNamespace, st)
+		}
 	case *dsl.GeneralizedType:
 		switch td := t.Dimensionality.(type) {
 		case nil:
@@ -1184,8 +1213,12 @@ func typeDefinitionDTypeExpression(t dsl.TypeDefinition, context dTypeExpression
 func typeDTypeExpression(t dsl.Type, context dTypeExpressionContext) string {
 	switch t := dsl.GetUnderlyingType(t).(type) {
 	case *dsl.SimpleType:
-		context.root = false
-		return typeDefinitionDTypeExpression(t.ResolvedDefinition, context)
+		if t.IsRecursive {
+			return "np.dtype(np.object_)"
+		} else {
+			context.root = false
+			return typeDefinitionDTypeExpression(t.ResolvedDefinition, context)
+		}
 
 	case *dsl.GeneralizedType:
 		switch td := t.Dimensionality.(type) {

@@ -15,6 +15,7 @@ func topologicalSortTypes(env *Environment, errorSink *validation.ErrorSink) *En
 	for _, ns := range env.Namespaces {
 		sortedTypes := []TypeDefinition{}
 		predecessors := make(map[Node]Node)
+		visitingRecursiveType := false
 
 		VisitWithContext(ns, rootSentinel, func(self VisitorWithContext[Node], node Node, parent Node) {
 			switch t := node.(type) {
@@ -23,7 +24,7 @@ func topologicalSortTypes(env *Environment, errorSink *validation.ErrorSink) *En
 			case TypeDefinition:
 				pred, found := predecessors[t]
 				if found {
-					if pred != nil {
+					if !visitingRecursiveType && pred != nil {
 						nodeNameFunc := func(n Node) string {
 							switch nt := n.(type) {
 							case *RecordDefinition:
@@ -67,7 +68,12 @@ func topologicalSortTypes(env *Environment, errorSink *validation.ErrorSink) *En
 				delete(predecessors, t)
 
 			case *SimpleType:
+				wasVisitingRecursiveType := visitingRecursiveType
+
 				if t.ResolvedDefinition != nil {
+					if t.IsRecursive {
+						visitingRecursiveType = true
+					}
 					definitionMeta := t.ResolvedDefinition.GetDefinitionMeta()
 					if definitionMeta.Namespace == ns.Name {
 						self.Visit(env.SymbolTable.GetGenericTypeDefinition(t.ResolvedDefinition), parent)
@@ -80,6 +86,8 @@ func topologicalSortTypes(env *Environment, errorSink *validation.ErrorSink) *En
 				}
 
 				self.VisitChildren(node, parent)
+				visitingRecursiveType = wasVisitingRecursiveType
+
 			default:
 				self.VisitChildren(node, parent)
 			}

@@ -1,0 +1,80 @@
+MyProtocol: !protocol
+  sequence:
+    tree: BinaryTree
+    ptree: !recursive BinaryTree
+
+    list: LinkedList<string>?
+
+    # dirs: !stream
+    #   items: Directory
+    cwd: !stream
+      items: DirectoryEntry
+
+
+BinaryTree: !record
+  fields:
+    value: int
+    left: !recursive BinaryTree
+    right: !recursive BinaryTree
+
+
+LinkedList<T>: !record
+  fields:
+    value: T
+    next: !recursive LinkedList<T>
+
+
+Directory: !record
+  fields:
+    name: string
+    entries: DirectoryEntry*
+File: !record
+  fields:
+    name: string
+    data: byte*
+DirectoryEntry: [File, !recursive Directory]
+
+
+### This should throw an error because the recursive type is a Union, not a Record
+# Directory: !record
+#   fields:
+#     name: string
+#     entries: !recursive DirectoryEntry*
+# File: !record
+#   fields:
+#     name: string
+#     data: byte*
+# DirectoryEntry: [File, Directory]
+
+
+### This should throw an error because the recursive type is a Vector, not a Record
+# A: B*
+# B: string-> !recursive A
+
+### This is valid but not a practical use case
+# A: !record
+#   fields:
+#     maps: B*
+# B: !map
+#   keys: string
+#   values: !recursive A
+
+
+# Z: Y?
+# # Z: !record
+# #   fields:
+# #     y: Y?
+# Y: !recursive Z*
+
+# # Q: R[]
+# Q: !record
+#   fields:
+#     r: R[4]
+# R: S*8
+# S: !recursive Q[]
+
+# Q: !record
+#   fields:
+#     r: R*4
+# R: S*8
+# S: !recursive Q*

@@ -35,9 +35,10 @@ func (t Type) String() string {
 }
 
 type TypeName struct {
-	Pos      lexer.Position
-	Name     string  `parser:"@Ident @('.' Ident)*"`
-	TypeArgs []*Type `parser:"('<' @@ (',' @@)* '>')?"`
+	Pos       lexer.Position
+	Recursive bool    `parser:"@('!' 'recursive')?"`
+	Name      string  `parser:"@Ident @('.' Ident)*"`
+	TypeArgs  []*Type `parser:"('<' @@ (',' @@)* '>')?"`
 }
 
 func (n TypeName) String() string {

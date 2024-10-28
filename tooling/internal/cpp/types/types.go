@@ -79,6 +79,24 @@ func writeSourceFile(env *dsl.Environment, options packaging.CppCodegenOptions) 
 }
 
 func writeNamespaceMembers(w *formatting.IndentedWriter, ns *dsl.Namespace) {
+	// Write forward declarations for recursive types
+	forwardDecls := make(map[dsl.TypeDefinition]bool)
+	dsl.Visit(ns, func(self dsl.Visitor, node dsl.Node) {
+		switch t := node.(type) {
+		case *dsl.SimpleType:
+			if t.IsRecursive {
+				forwardDecls[t.ResolvedDefinition] = true
+			}
+		default:
+			self.VisitChildren(node)
+		}
+	})
+	for td := range forwardDecls {
+		common.WriteDefinitionTemplateSpec(w, td)
+		fmt.Fprintf(w, "struct %s;\n\n", common.TypeIdentifierName(td.GetDefinitionMeta().Name))
+	}
+
+	// Write all Type Definitions
 	for _, td := range ns.TypeDefinitions {
 		switch td := td.(type) {
 		case *dsl.EnumDefinition:

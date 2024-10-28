@@ -45,6 +45,9 @@ func MakeGenericType(genericTypeDefinition TypeDefinition, typeArguments []Type,
 			if shallow {
 				return t
 			}
+			if t.IsRecursive {
+				return t
+			}
 			if targetParam, ok := t.ResolvedDefinition.(*GenericTypeParameter); ok {
 				for i, genericTypeParam := range meta.TypeParameters {
 					if genericTypeParam == targetParam {
@@ -819,7 +822,9 @@ func TypeContainsGenericTypeParameter(node Type) bool {
 		case *NamedType:
 			self.Visit(node.Type)
 		case *SimpleType:
-			self.Visit(node.ResolvedDefinition)
+			if !node.IsRecursive {
+				self.Visit(node.ResolvedDefinition)
+			}
 		default:
 			self.VisitChildren(node)
 		}

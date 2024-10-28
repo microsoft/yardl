@@ -68,7 +68,7 @@ func GetTypeParameterUse(root dsl.Node, typeParameter *dsl.GenericTypeParameter)
 				return
 			}
 
-			if len(node.ResolvedDefinition.GetDefinitionMeta().TypeParameters) > 0 {
+			if !node.IsRecursive && len(node.ResolvedDefinition.GetDefinitionMeta().TypeParameters) > 0 {
 				self.Visit(node.ResolvedDefinition, inArray)
 				return
 			}

@@ -257,7 +257,12 @@ func typeSerializer(t dsl.Type, contextNamespace string, namedType *dsl.NamedTyp
 	case nil:
 		return "_binary.none_serializer"
 	case *dsl.SimpleType:
-		return typeDefinitionSerializer(t.ResolvedDefinition, contextNamespace)
+		if t.IsRecursive {
+			innerSerializer := typeDefinitionSerializer(t.ResolvedDefinition, contextNamespace)
+			return fmt.Sprintf("_binary.RecursiveSerializer(lambda *args, **kwargs : %s)", innerSerializer)
+		} else {
+			return typeDefinitionSerializer(t.ResolvedDefinition, contextNamespace)
+		}
 	case *dsl.GeneralizedType:
 		getScalarSerializer := func() string {
 			if t.Cases.IsSingle() {

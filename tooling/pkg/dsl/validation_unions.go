@@ -207,8 +207,10 @@ func validateUnionCases(env *Environment, errorSink *validation.ErrorSink) *Envi
 
 		case *SimpleType:
 			if len(t.ResolvedDefinition.GetDefinitionMeta().TypeArguments) > 0 {
-				// Check the referenced type with the type arguments provided
-				self.Visit(t.ResolvedDefinition, true)
+				if !t.IsRecursive {
+					// Check the referenced type with the type arguments provided
+					self.Visit(t.ResolvedDefinition, true)
+				}
 			}
 		default:
 			self.VisitChildren(node, visitingReference)

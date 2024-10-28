@@ -228,7 +228,12 @@ func TypeSyntax(t dsl.Type) string {
 	case nil:
 		return "std::monostate"
 	case *dsl.SimpleType:
-		return TypeDefinitionSyntax(t.ResolvedDefinition)
+		syntax := TypeDefinitionSyntax(t.ResolvedDefinition)
+		if t.IsRecursive {
+			return fmt.Sprintf("std::unique_ptr<%s>", syntax)
+		} else {
+			return syntax
+		}
 	case *dsl.GeneralizedType:
 		scalarString := func() string {
 			if t.Cases.IsSingle() {

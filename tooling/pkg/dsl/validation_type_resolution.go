@@ -72,6 +72,13 @@ func resolveTypes(env *Environment, errorSink *validation.ErrorSink) *Environmen
 		case *SimpleType:
 			self.VisitChildren(node, context)
 			err := resolveType(t, context.currentNamespace, context.symbolTable, true)
+			if t.IsRecursive {
+				switch td := t.ResolvedDefinition.(type) {
+				case *RecordDefinition:
+				default:
+					errorSink.Add(validationError(t, "recursive type '%s' must be a record", td.GetDefinitionMeta().Name))
+				}
+			}
 			if err != nil {
 				errorSink.Add(validationError(t, err.Error()))
 				break
