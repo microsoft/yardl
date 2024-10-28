@@ -57,6 +57,7 @@ std::string MyProtocolWriterBase::SchemaFromVersion(Version version) {
   }
 
 }
+
 void MyProtocolWriterBase::WriteTree(sketch::BinaryTree const& value) {
   if (unlikely(state_ != 0)) {
     MyProtocolWriterBaseInvalidState(0, false, state_);
@@ -134,6 +135,7 @@ Version MyProtocolReaderBase::VersionFromSchema(std::string const& schema) {
   }
   throw std::runtime_error("The schema does not match any version supported by protocol MyProtocol.");
 }
+
 void MyProtocolReaderBase::ReadTree(sketch::BinaryTree& value) {
   if (unlikely(state_ != 0)) {
     MyProtocolReaderBaseInvalidState(0, state_);
@@ -256,5 +258,46 @@ void MyProtocolReaderBase::CopyTo(MyProtocolWriterBase& writer, size_t cwd_buffe
     }
     writer.EndCwd();
   }
+}
+
+std::string MyProtocolIndexedReaderBase::schema_ = MyProtocolWriterBase::schema_;
+
+std::vector<std::string> MyProtocolIndexedReaderBase::previous_schemas_ = MyProtocolWriterBase::previous_schemas_;
+
+Version MyProtocolIndexedReaderBase::VersionFromSchema(std::string const& schema) {
+  if (schema == MyProtocolWriterBase::schema_) {
+    return Version::Current;
+  }
+  throw std::runtime_error("The schema does not match any version supported by protocol MyProtocol.");
+}
+
+void MyProtocolIndexedReaderBase::ReadTree(sketch::BinaryTree& value) {
+  ReadTreeImpl(value);
+}
+
+void MyProtocolIndexedReaderBase::ReadPtree(std::unique_ptr<sketch::BinaryTree>& value) {
+  ReadPtreeImpl(value);
+}
+
+void MyProtocolIndexedReaderBase::ReadList(std::optional<sketch::LinkedList<std::string>>& value) {
+  ReadListImpl(value);
+}
+
+bool MyProtocolIndexedReaderBase::ReadCwd(sketch::DirectoryEntry& value, size_t idx) {
+  return ReadCwdImpl(value, idx);
+}
+
+bool MyProtocolIndexedReaderBase::ReadCwd(std::vector<sketch::DirectoryEntry>& values, size_t idx) {
+  if (values.capacity() == 0) {
+    throw std::runtime_error("vector must have a nonzero capacity.");
+  }
+  if (!ReadCwdImpl(values, idx)) {
+    return values.size() > 0;
+  }
+  return true;
+}
+
+void MyProtocolIndexedReaderBase::Close() {
+  CloseImpl();
 }
 } // namespace sketch

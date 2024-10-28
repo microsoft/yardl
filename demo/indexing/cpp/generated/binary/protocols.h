@@ -13,6 +13,8 @@
 
 namespace sketch::binary {
 // Binary writer for the MyProtocol protocol.
+// This is an example protocol, which is defined as a Header value
+// followed by a stream of zero or more Sample values
 class MyProtocolWriter : public sketch::MyProtocolWriterBase, yardl::binary::BinaryWriter {
   public:
   MyProtocolWriter(std::ostream& stream, Version version = Version::Current)
@@ -24,20 +26,20 @@ class MyProtocolWriter : public sketch::MyProtocolWriterBase, yardl::binary::Bin
   void Flush() override;
 
   protected:
-  void WriteTreeImpl(sketch::BinaryTree const& value) override;
-  void WritePtreeImpl(std::unique_ptr<sketch::BinaryTree> const& value) override;
-  void WriteListImpl(std::optional<sketch::LinkedList<std::string>> const& value) override;
-  // dirs: !stream
-  //   items: Directory
-  void WriteCwdImpl(sketch::DirectoryEntry const& value) override;
-  void WriteCwdImpl(std::vector<sketch::DirectoryEntry> const& values) override;
-  void EndCwdImpl() override;
+  // A Header value
+  void WriteHeaderImpl(sketch::Header const& value) override;
+  // A stream of Samples
+  void WriteSamplesImpl(sketch::Sample const& value) override;
+  void WriteSamplesImpl(std::vector<sketch::Sample> const& values) override;
+  void EndSamplesImpl() override;
   void CloseImpl() override;
 
   Version version_;
 };
 
 // Binary indexed writer for the MyProtocol protocol.
+// This is an example protocol, which is defined as a Header value
+// followed by a stream of zero or more Sample values
 class MyProtocolIndexedWriter : public sketch::MyProtocolWriterBase, yardl::binary::BinaryIndexedWriter {
   public:
   MyProtocolIndexedWriter(std::ostream& stream, Version version = Version::Current)
@@ -49,20 +51,20 @@ class MyProtocolIndexedWriter : public sketch::MyProtocolWriterBase, yardl::bina
   void Flush() override;
 
   protected:
-  void WriteTreeImpl(sketch::BinaryTree const& value) override;
-  void WritePtreeImpl(std::unique_ptr<sketch::BinaryTree> const& value) override;
-  void WriteListImpl(std::optional<sketch::LinkedList<std::string>> const& value) override;
-  // dirs: !stream
-  //   items: Directory
-  void WriteCwdImpl(sketch::DirectoryEntry const& value) override;
-  void WriteCwdImpl(std::vector<sketch::DirectoryEntry> const& values) override;
-  void EndCwdImpl() override;
+  // A Header value
+  void WriteHeaderImpl(sketch::Header const& value) override;
+  // A stream of Samples
+  void WriteSamplesImpl(sketch::Sample const& value) override;
+  void WriteSamplesImpl(std::vector<sketch::Sample> const& values) override;
+  void EndSamplesImpl() override;
   void CloseImpl() override;
 
   Version version_;
 };
 
 // Binary reader for the MyProtocol protocol.
+// This is an example protocol, which is defined as a Header value
+// followed by a stream of zero or more Sample values
 class MyProtocolReader : public sketch::MyProtocolReaderBase, yardl::binary::BinaryReader {
   public:
   MyProtocolReader(std::istream& stream)
@@ -74,11 +76,9 @@ class MyProtocolReader : public sketch::MyProtocolReaderBase, yardl::binary::Bin
   Version GetVersion() { return version_; }
 
   protected:
-  void ReadTreeImpl(sketch::BinaryTree& value) override;
-  void ReadPtreeImpl(std::unique_ptr<sketch::BinaryTree>& value) override;
-  void ReadListImpl(std::optional<sketch::LinkedList<std::string>>& value) override;
-  bool ReadCwdImpl(sketch::DirectoryEntry& value) override;
-  bool ReadCwdImpl(std::vector<sketch::DirectoryEntry>& values) override;
+  void ReadHeaderImpl(sketch::Header& value) override;
+  bool ReadSamplesImpl(sketch::Sample& value) override;
+  bool ReadSamplesImpl(std::vector<sketch::Sample>& values) override;
   void CloseImpl() override;
 
   Version version_;
@@ -88,6 +88,8 @@ class MyProtocolReader : public sketch::MyProtocolReaderBase, yardl::binary::Bin
 };
 
 // Binary indexed reader for the MyProtocol protocol.
+// This is an example protocol, which is defined as a Header value
+// followed by a stream of zero or more Sample values
 class MyProtocolIndexedReader : public sketch::MyProtocolIndexedReaderBase, yardl::binary::BinaryIndexedReader {
   public:
   MyProtocolIndexedReader(std::istream& stream)
@@ -99,11 +101,9 @@ class MyProtocolIndexedReader : public sketch::MyProtocolIndexedReaderBase, yard
   Version GetVersion() { return version_; }
 
   protected:
-  void ReadTreeImpl(sketch::BinaryTree& value) override;
-  void ReadPtreeImpl(std::unique_ptr<sketch::BinaryTree>& value) override;
-  void ReadListImpl(std::optional<sketch::LinkedList<std::string>>& value) override;
-  bool ReadCwdImpl(sketch::DirectoryEntry& value, size_t idx) override;
-  bool ReadCwdImpl(std::vector<sketch::DirectoryEntry>& values, size_t idx) override;
+  void ReadHeaderImpl(sketch::Header& value) override;
+  bool ReadSamplesImpl(sketch::Sample& value, size_t idx) override;
+  bool ReadSamplesImpl(std::vector<sketch::Sample>& values, size_t idx) override;
   void CloseImpl() override;
 
   Version version_;

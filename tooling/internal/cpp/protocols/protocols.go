@@ -133,6 +133,7 @@ func writeDeclarations(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 			w.WriteString("uint8_t state_ = 0;\n\n")
 
 			fmt.Fprintf(w, "friend class %s;\n", common.AbstractReaderName(p))
+			fmt.Fprintf(w, "friend class %s;\n", common.AbstractIndexedReaderName(p))
 		})
 		fmt.Fprint(w, "};\n\n")
 
@@ -194,6 +195,55 @@ func writeDeclarations(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 			w.WriteStringln("private:")
 			w.WriteStringln("uint8_t state_ = 0;")
 		})
+		fmt.Fprint(w, "};\n\n")
+
+		// Indexed Reader
+		common.WriteComment(w, fmt.Sprintf("Abstract Indexed reader for the %s protocol.", p.Name))
+		common.WriteComment(w, p.Comment)
+		fmt.Fprintf(w, "class %s {\n", common.AbstractIndexedReaderName(p))
+		w.Indented(func() {
+			w.WriteString("public:\n")
+			for i, step := range p.Sequence {
+				common.WriteComment(w, fmt.Sprintf("Ordinal %d.", i))
+				common.WriteComment(w, step.Comment)
+
+				if step.IsStream() {
+					returnType := "[[nodiscard]] bool"
+					fmt.Fprintf(w, "%s %s(%s& value, size_t idx=0);\n\n", returnType, common.ProtocolReadMethodName(step), common.TypeSyntax(step.Type))
+
+					common.WriteComment(w, fmt.Sprintf("Ordinal %d.", i))
+					common.WriteComment(w, step.Comment)
+					fmt.Fprintf(w, "%s %s(std::vector<%s>& values, size_t idx=0);\n\n", returnType, common.ProtocolReadMethodName(step), common.TypeSyntax(step.Type))
+				} else {
+					fmt.Fprintf(w, "void %s(%s& value);\n\n", common.ProtocolReadMethodName(step), common.TypeSyntax(step.Type))
+
+				}
+			}
+
+			common.WriteComment(w, "Optionaly close this writer before destructing")
+			w.WriteString("void Close();\n\n")
+
+			fmt.Fprintf(w, "virtual ~%s() = default;\n\n", common.AbstractIndexedReaderName(p))
+
+			w.WriteStringln("protected:")
+			for _, step := range p.Sequence {
+				if step.IsStream() {
+					fmt.Fprintf(w, "virtual bool %s(%s& value, size_t idx) = 0;\n", common.ProtocolReadImplMethodName(step), common.TypeSyntax(step.Type))
+					fmt.Fprintf(w, "virtual bool %s(std::vector<%s>& values, size_t idx) = 0;\n", common.ProtocolReadImplMethodName(step), common.TypeSyntax(step.Type))
+				} else {
+					fmt.Fprintf(w, "virtual void %s(%s& value) = 0;\n", common.ProtocolReadImplMethodName(step), common.TypeSyntax(step.Type))
+				}
+			}
+
+			w.WriteString("virtual void CloseImpl() {}\n")
+
+			w.WriteString("static std::string schema_;\n\n")
+			w.WriteString("static std::vector<std::string> previous_schemas_;\n\n")
+			w.WriteString("static Version VersionFromSchema(const std::string& schema);\n\n")
+
+			w.WriteStringln("private:")
+			w.WriteStringln("uint8_t state_ = 0;")
+		})
 		fmt.Fprint(w, "};\n")
 	})
 }
@@ -233,7 +283,7 @@ func writeDefinitions(w *formatting.IndentedWriter, ns *dsl.Namespace, symbolTab
 			w.WriteStringln("}")
 			w.WriteStringln("")
 		})
-		fmt.Fprintln(w, "}")
+		fmt.Fprintf(w, "}\n\n")
 
 		for i, step := range p.Sequence {
 			writeWriteMethod := func(signature string, variableName string) {
@@ -317,7 +367,7 @@ func writeDefinitions(w *formatting.IndentedWriter, ns *dsl.Namespace, symbolTab
 			}
 			fmt.Fprintf(w, "throw std::runtime_error(\"The schema does not match any version supported by protocol %s.\");\n", p.Name)
 		})
-		fmt.Fprintln(w, "}")
+		fmt.Fprintf(w, "}\n\n")
 
 		for i, step := range p.Sequence {
 			returnType := "void"
@@ -409,6 +459,77 @@ func writeDefinitions(w *formatting.IndentedWriter, ns *dsl.Namespace, symbolTab
 		w.WriteString("}\n")
 
 		writeProtocolCopyToMethod(w, p)
+
+		w.WriteString("\n")
+
+		// Indexed Readers
+		fmt.Fprintf(w, "std::string %s::schema_ = %s::schema_;\n\n", common.AbstractIndexedReaderName(p), common.AbstractWriterName(p))
+		fmt.Fprintf(w, "std::vector<std::string> %s::previous_schemas_ = %s::previous_schemas_;\n\n", common.AbstractIndexedReaderName(p), common.AbstractWriterName(p))
+
+		fmt.Fprintf(w, "Version %s::VersionFromSchema(std::string const& schema) {\n", common.AbstractIndexedReaderName(p))
+		w.Indented(func() {
+			fmt.Fprintf(w, "if (schema == %s::schema_) {\n", common.AbstractWriterName(p))
+			w.Indented(func() {
+				w.WriteStringln("return Version::Current;")
+			})
+			w.WriteStringln("}")
+			for i, versionLabel := range ns.Versions {
+				fmt.Fprintf(w, "else if (schema == previous_schemas_[%d]) {\n", i)
+				w.Indented(func() {
+					fmt.Fprintf(w, "return Version::%s;\n", versionLabel)
+				})
+				w.WriteStringln("}")
+			}
+			fmt.Fprintf(w, "throw std::runtime_error(\"The schema does not match any version supported by protocol %s.\");\n", p.Name)
+		})
+		fmt.Fprintf(w, "}\n\n")
+
+		for _, step := range p.Sequence {
+			returnType := "void"
+			if step.IsStream() {
+				returnType = "bool"
+			}
+
+			if step.IsStream() {
+				fmt.Fprintf(w, "%s %s::%s(%s& value, size_t idx) {\n", returnType, common.AbstractIndexedReaderName(p), common.ProtocolReadMethodName(step), common.TypeSyntax(step.Type))
+			} else {
+				fmt.Fprintf(w, "%s %s::%s(%s& value) {\n", returnType, common.AbstractIndexedReaderName(p), common.ProtocolReadMethodName(step), common.TypeSyntax(step.Type))
+			}
+			w.Indented(func() {
+				if step.IsStream() {
+					fmt.Fprintf(w, "return %s(value, idx);\n", common.ProtocolReadImplMethodName(step))
+				} else {
+					fmt.Fprintf(w, "%s(value);\n", common.ProtocolReadImplMethodName(step))
+				}
+			})
+			w.WriteString("}\n\n")
+
+			if step.IsStream() {
+				fmt.Fprintf(w, "%s %s::%s(std::vector<%s>& values, size_t idx) {\n", returnType, common.AbstractIndexedReaderName(p), common.ProtocolReadMethodName(step), common.TypeSyntax(step.Type))
+				w.Indented(func() {
+					w.WriteStringln("if (values.capacity() == 0) {")
+					w.Indented(func() {
+						w.WriteStringln("throw std::runtime_error(\"vector must have a nonzero capacity.\");")
+					})
+					w.WriteStringln("}")
+
+					fmt.Fprintf(w, "if (!%s(values, idx)) {\n", common.ProtocolReadImplMethodName(step))
+					w.Indented(func() {
+						w.WriteStringln("return values.size() > 0;")
+					})
+					w.WriteStringln("}")
+					w.WriteStringln("return true;")
+				})
+				w.WriteString("}\n\n")
+			}
+		}
+
+		fmt.Fprintf(w, "void %s::Close() {\n", common.AbstractIndexedReaderName(p))
+		w.Indented(func() {
+			fmt.Fprintf(w, "CloseImpl();\n")
+		})
+		w.WriteString("}\n")
+
 	})
 }
 

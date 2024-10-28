@@ -20,7 +20,7 @@ dist/
 
 .vscode/settings.json
 
-cpp/build/
+**/cpp/build/
 
 **/*.bin
 

@@ -286,5 +286,100 @@ void MyProtocolReader::CloseImpl() {
   stream_.VerifyFinished();
 }
 
+void MyProtocolIndexedWriter::WriteTreeImpl(sketch::BinaryTree const& value) {
+  auto pos = stream_.Pos();
+  step_index_.set_step_offset("Tree", pos);
+  sketch::binary::WriteBinaryTree(stream_, value);
+}
+
+void MyProtocolIndexedWriter::WritePtreeImpl(std::unique_ptr<sketch::BinaryTree> const& value) {
+  auto pos = stream_.Pos();
+  step_index_.set_step_offset("Ptree", pos);
+  yardl::binary::WritePointer<sketch::BinaryTree, sketch::binary::WriteBinaryTree>(stream_, value);
+}
+
+void MyProtocolIndexedWriter::WriteListImpl(std::optional<sketch::LinkedList<std::string>> const& value) {
+  auto pos = stream_.Pos();
+  step_index_.set_step_offset("List", pos);
+  yardl::binary::WriteOptional<sketch::LinkedList<std::string>, sketch::binary::WriteLinkedList<std::string, yardl::binary::WriteString>>(stream_, value);
+}
+
+void MyProtocolIndexedWriter::WriteCwdImpl(sketch::DirectoryEntry const& value) {
+  auto pos = stream_.Pos();
+  step_index_.set_step_offset("Cwd", pos);
+  size_t item_offset = 0;
+  yardl::binary::WriteBlockAndSaveOffset<sketch::DirectoryEntry, sketch::binary::WriteDirectoryEntry>(stream_, value, item_offset);
+  step_index_.add_stream_offset("Cwd", item_offset);
+}
+
+void MyProtocolIndexedWriter::WriteCwdImpl(std::vector<sketch::DirectoryEntry> const& values) {
+  if (!values.empty()) {
+    step_index_.set_step_offset("Cwd", stream_.Pos());
+    std::vector<size_t> item_offsets;
+    item_offsets.reserve(values.size());
+    yardl::binary::WriteVectorAndSaveOffsets<sketch::DirectoryEntry, sketch::binary::WriteDirectoryEntry>(stream_, values, item_offsets);
+    step_index_.add_stream_offsets("Cwd", item_offsets);
+  }
+}
+
+void MyProtocolIndexedWriter::EndCwdImpl() {
+  yardl::binary::WriteInteger(stream_, 0U);
+}
+
+void MyProtocolIndexedWriter::Flush() {
+  stream_.Flush();
+}
+
+void MyProtocolIndexedWriter::CloseImpl() {
+  yardl::binary::WriteIndex(stream_, step_index_);
+
+  stream_.Flush();
+}
+
+void MyProtocolIndexedReader::ReadTreeImpl(sketch::BinaryTree& value) {
+  auto pos = step_index_.get_step_offset("Tree");
+  stream_.Seek(pos);
+  sketch::binary::ReadBinaryTree(stream_, value);
+}
+
+void MyProtocolIndexedReader::ReadPtreeImpl(std::unique_ptr<sketch::BinaryTree>& value) {
+  auto pos = step_index_.get_step_offset("Ptree");
+  stream_.Seek(pos);
+  yardl::binary::ReadPointer<sketch::BinaryTree, sketch::binary::ReadBinaryTree>(stream_, value);
+}
+
+void MyProtocolIndexedReader::ReadListImpl(std::optional<sketch::LinkedList<std::string>>& value) {
+  auto pos = step_index_.get_step_offset("List");
+  stream_.Seek(pos);
+  yardl::binary::ReadOptional<sketch::LinkedList<std::string>, sketch::binary::ReadLinkedList<std::string, yardl::binary::ReadString>>(stream_, value);
+}
+
+bool MyProtocolIndexedReader::ReadCwdImpl(sketch::DirectoryEntry& value, size_t idx) {
+  size_t abs_offset = 0, items_remaining = 0;
+  if (!step_index_.find_stream_item("Cwd", idx, abs_offset, items_remaining)) {
+    return false;
+  }
+  stream_.Seek(abs_offset);
+  current_block_remaining_ = items_remaining;
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<sketch::DirectoryEntry, sketch::binary::ReadDirectoryEntry>(stream_, current_block_remaining_, value);
+  return read_block_successful;
+}
+
+bool MyProtocolIndexedReader::ReadCwdImpl(std::vector<sketch::DirectoryEntry>& values, size_t idx) {
+  size_t abs_offset = 0, items_remaining = 0;
+  if (!step_index_.find_stream_item("Cwd", idx, abs_offset, items_remaining)) {
+    values.clear();
+    return false;
+  }
+  stream_.Seek(abs_offset);
+  current_block_remaining_ = items_remaining;
+  yardl::binary::ReadBlocksIntoVector<sketch::DirectoryEntry, sketch::binary::ReadDirectoryEntry>(stream_, current_block_remaining_, values);
+  return current_block_remaining_ != 0;
+}
+
+void MyProtocolIndexedReader::CloseImpl() {
+}
+
 } // namespace sketch::binary
 

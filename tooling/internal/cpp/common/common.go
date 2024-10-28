@@ -424,6 +424,14 @@ func QualifiedAbstractReaderName(p *dsl.ProtocolDefinition) string {
 	return fmt.Sprintf("%s::%s", TypeNamespaceIdentifierName(p), AbstractReaderName(p))
 }
 
+func AbstractIndexedReaderName(p *dsl.ProtocolDefinition) string {
+	return fmt.Sprintf("%sIndexedReaderBase", p.Name)
+}
+
+func QualifiedAbstractIndexedReaderName(p *dsl.ProtocolDefinition) string {
+	return fmt.Sprintf("%s::%s", TypeNamespaceIdentifierName(p), AbstractIndexedReaderName(p))
+}
+
 func ProtocolWriteMethodName(s *dsl.ProtocolStep) string {
 	return fmt.Sprintf("Write%s", formatting.ToPascalCase(s.Name))
 }

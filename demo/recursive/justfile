@@ -8,7 +8,7 @@ matlab-sandbox-cmd := if matlab != "disabled" { "run-matlab-command run_sandbox"
 benchmark-cmd := if matlab != "disabled" { "python python/benchmark.py --include-matlab" } else { "python python/benchmark.py" }
 
 
-@default: generate
+@default: run
 
 @configure:
     mkdir -p cpp/build; \
@@ -24,3 +24,9 @@ benchmark-cmd := if matlab != "disabled" { "python python/benchmark.py --include
 
 @build: generate configure
     cd cpp/build && ninja
+
+@run: build
+    echo "C++ demo:"; \
+    ./cpp/build/recursive; \
+    echo "Python demo:"; \
+    python python/main.py
