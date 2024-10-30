@@ -390,6 +390,9 @@ class Index:
     def get_step_offset(self, step: str) -> int:
         return self.step_offsets[step]
 
+    def get_stream_size(self, step: str) -> int:
+        return len(self.stream_offsets[step])
+
     # Returns tuple (absolute_offset, num_items_remaining_in_corresponding_block)
     def find_stream_item(self, step: str, index: int) -> tuple[int, int]:
         blocks = self.stream_blocks[step]

@@ -3,6 +3,12 @@
 
 #include "generated/binary/protocols.h"
 
+#define ASSERT(cond, msg)                                  \
+  if (!(cond)) {                                           \
+    std::cerr << "Assertion failed: " << msg << std::endl; \
+    exit(1);                                               \
+  }
+
 int main(void) {
   std::stringstream output;
 
@@ -44,9 +50,7 @@ int main(void) {
       caught_expected = true;
     }
 
-    if (!caught_expected) {
-      std::cerr << "Fail: Expected MyProtocolIndexedReader to throw exception!" << std::endl;
-    }
+    ASSERT(caught_expected, "Expected MyProtocolIndexedReader to throw exception!");
   }
 
   output = std::stringstream{};
@@ -79,16 +83,12 @@ int main(void) {
     }
     std::shuffle(indices.begin(), indices.end(), g);
 
+    ASSERT(reader.CountSamples() == sample_count, "CountSamples() failed");
+
     sketch::Sample sample;
     for (size_t idx : indices) {
-      if (!reader.ReadSamples(sample, idx)) {
-        std::cerr << "No more samples to read " << idx << std::endl;
-        break;
-      }
-      if (sample.id != idx) {
-        std::cerr << "Failed to read sample " << idx << std::endl;
-        break;
-      }
+      ASSERT(reader.ReadSamples(sample, idx), "Failed to read sample");
+      ASSERT(sample.id == idx, "Failed to read correct sample");
     }
 
     reader.Close();
@@ -106,7 +106,7 @@ int main(void) {
       // Do something with samples
       idx += samples.size();
     }
-    std::cerr << "Batch read all samples: " << (idx == sample_count ? "SUCCESS" : "FAILURE") << std::endl;
+    ASSERT(idx == sample_count, "Batch read all samples failed");
     reader.Close();
   }
 
@@ -125,13 +125,15 @@ int main(void) {
     std::stringstream input(serialized);
     sketch::binary::MyProtocolIndexedReader reader(input);
 
+    ASSERT(reader.CountSamples() == 0, "CountSamples() failed");
+
     sketch::Sample sample;
     size_t idx = 0;
     while (reader.ReadSamples(sample, idx)) {
       // Do something with samples
       idx += 1;
     }
-    std::cerr << "Read empty samples: " << (idx == 0 ? "SUCCESS" : "FAILURE") << std::endl;
+    ASSERT(idx == 0, "Read empty samples failed");
     reader.Close();
   }
 

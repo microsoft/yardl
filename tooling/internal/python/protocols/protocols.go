@@ -427,6 +427,11 @@ func writeAbstractIndexedReader(w *formatting.IndentedWriter, p *dsl.ProtocolDef
 					fmt.Fprintf(w, "value = self.%s(idx)\n", common.ProtocolReadImplMethodName(step))
 					fmt.Fprintf(w, "return self._wrap_iterable(value)\n")
 				})
+				w.WriteStringln("")
+				fmt.Fprintf(w, "def %s(self) -> int:\n", common.ProtocolStreamSizeMethodName(step))
+				w.Indented(func() {
+					fmt.Fprintf(w, "return self.%s()\n", common.ProtocolStreamSizeImplMethodName(step))
+				})
 			} else {
 				fmt.Fprintf(w, "def %s(self) -> %s:\n", common.ProtocolReadMethodName(step), valueType)
 				w.Indented(func() {

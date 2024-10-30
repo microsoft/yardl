@@ -42,6 +42,10 @@ class Index {
     return step_offsets.at(step_name);
   }
 
+  size_t get_stream_size(std::string const& step_name) const {
+    return stream_offsets.at(step_name).size();
+  }
+
   // Given the name of a Stream ProtocolStep and an index into the stream, sets the
   //  1. absolute byte offset into the stream, and
   //  2. number of items remaining in corresponding stream block

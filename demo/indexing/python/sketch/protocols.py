@@ -211,6 +211,9 @@ class MyProtocolIndexedReaderBase(abc.ABC):
         value = self._read_samples(idx)
         return self._wrap_iterable(value)
 
+    def count_samples(self) -> int:
+        return self._count_samples()
+
     def copy_to(self, writer: MyProtocolWriterBase) -> None:
         writer.write_header(self.read_header())
         writer.write_samples(self.read_samples())

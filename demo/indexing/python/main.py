@@ -65,6 +65,7 @@ def test_empty_stream():
         header_read = reader.read_header()
         samples_read = list(reader.read_samples())
 
+        assert reader.count_samples() == 0
         assert header_read == HEADER
         assert len(samples_read) == 0
 
@@ -84,6 +85,7 @@ def test_stream_read():
         samples_read = list(reader.read_samples())
 
         assert reader.read_header() == HEADER
+        assert reader.count_samples() == total_samples
         assert len(samples_read) == total_samples
 
     stream.seek(0)

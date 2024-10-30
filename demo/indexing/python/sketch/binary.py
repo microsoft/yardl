@@ -87,6 +87,9 @@ class BinaryMyProtocolIndexedReader(_binary.BinaryProtocolIndexedReader, MyProto
         self._stream.seek(offset)
         return _binary.StreamSerializer(SampleSerializer()).read_mid_stream(self._stream, remaining)
 
+    def _count_samples(self) -> int:
+        return self._index.get_stream_size("Samples")
+
 class HeaderSerializer(_binary.RecordSerializer[Header]):
     def __init__(self) -> None:
         super().__init__([("subject", _binary.string_serializer)])

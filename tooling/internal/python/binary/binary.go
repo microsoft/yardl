@@ -271,6 +271,11 @@ func writeProtocols(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 						serializer := typeSerializer(step.Type, ns.Name, nil)
 						fmt.Fprintf(w, "return %s.read_mid_stream(self._stream, remaining)\n", serializer)
 					})
+					w.WriteStringln("")
+					fmt.Fprintf(w, "def %s(self) -> int:\n", common.ProtocolStreamSizeImplMethodName(step))
+					w.Indented(func() {
+						fmt.Fprintf(w, "return self._index.get_stream_size(\"%s\")\n", formatting.ToPascalCase(step.Name))
+					})
 				} else {
 					fmt.Fprintf(w, "def %s(self) -> %s:\n", common.ProtocolReadImplMethodName(step), valueType)
 					w.Indented(func() {
