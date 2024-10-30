@@ -11,4 +11,6 @@ Header: !record
 Sample: !record
   fields:
     id: uint
-    data: int*
+    data: !array
+      items: int
+      dimensions: 1

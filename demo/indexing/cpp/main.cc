@@ -19,6 +19,7 @@ int main(void) {
   std::vector<sketch::Sample> samples(77);
   for (auto& sample : samples) {
     sample.id = sample_count++;
+    sample.data = xt::arange<int32_t>(sample_count, sample_count + 1000);
   }
 
   writer.WriteSamples(samples);

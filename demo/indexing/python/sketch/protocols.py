@@ -21,7 +21,7 @@ class MyProtocolWriterBase(abc.ABC):
     def __init__(self) -> None:
         self._state = 0
 
-    schema = r"""{"protocol":{"name":"MyProtocol","sequence":[{"name":"header","type":"Sketch.Header"},{"name":"samples","type":{"stream":{"items":"Sketch.Sample"}}}]},"types":[{"name":"Header","fields":[{"name":"subject","type":"string"}]},{"name":"Sample","fields":[{"name":"id","type":"uint32"},{"name":"data","type":{"vector":{"items":"int32"}}}]}]}"""
+    schema = r"""{"protocol":{"name":"MyProtocol","sequence":[{"name":"header","type":"Sketch.Header"},{"name":"samples","type":{"stream":{"items":"Sketch.Sample"}}}]},"types":[{"name":"Header","fields":[{"name":"subject","type":"string"}]},{"name":"Sample","fields":[{"name":"id","type":"uint32"},{"name":"data","type":{"array":{"items":"int32","dimensions":1}}}]}]}"""
 
     def close(self) -> None:
         if self._state == 3:

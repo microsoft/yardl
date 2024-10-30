@@ -1,6 +1,7 @@
 import sketch
 from io import BytesIO
 import itertools
+import numpy as np
 
 HEADER = sketch.Header(subject="Hello World!")
 
@@ -8,7 +9,9 @@ HEADER = sketch.Header(subject="Hello World!")
 def generate_samples(N, start=0):
     for i in range(N):
         v = i + start
-        yield sketch.Sample(id=v, data=[v, v + 1, v + 2])
+        # Intentionally generating a "large" NumPy array for each sample
+        # to test the underlying Indexing mechanisms.
+        yield sketch.Sample(id=v, data=np.arange(v, v + 1000, dtype=np.int32))
 
 
 def main():

@@ -110,7 +110,7 @@ class HeaderSerializer(_binary.RecordSerializer[Header]):
 
 class SampleSerializer(_binary.RecordSerializer[Sample]):
     def __init__(self) -> None:
-        super().__init__([("id", _binary.uint32_serializer), ("data", _binary.VectorSerializer(_binary.int32_serializer))])
+        super().__init__([("id", _binary.uint32_serializer), ("data", _binary.NDArraySerializer(_binary.int32_serializer, 1))])
 
     def write(self, stream: _binary.CodedOutputStream, value: Sample) -> None:
         if isinstance(value, np.void):
