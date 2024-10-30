@@ -1046,36 +1046,27 @@ func writeProtocolMethods(w *formatting.IndentedWriter, p *dsl.ProtocolDefinitio
 
 		fmt.Fprintf(w, "void %s::%s(%s const& value) {\n", indexedWriterClassName, common.ProtocolWriteImplMethodName(step), common.TypeSyntax(step.Type))
 		w.Indented(func() {
-
-			fmt.Fprintf(w, "auto pos = stream_.Pos();\n")
-			fmt.Fprintf(w, "step_index_.set_step_offset(\"%s\", pos);\n", formatting.ToPascalCase(step.Name))
-
+			fmt.Fprintf(w, "step_index_.set_step_offset(\"%s\", stream_.Pos());\n", formatting.ToPascalCase(step.Name))
 			if step.IsStream() {
 				fmt.Fprintf(w, "size_t item_offset = 0;\n")
 			}
-
 			writeProtocolStep(w, step, stepChanges, false, true, true)
-
 			if step.IsStream() {
 				fmt.Fprintf(w, "step_index_.add_stream_offset(\"%s\", item_offset);\n", formatting.ToPascalCase(step.Name))
 			}
-
 		})
 		w.WriteString("}\n\n")
 
 		if step.IsStream() {
 			fmt.Fprintf(w, "void %s::%s(std::vector<%s> const& values) {\n", indexedWriterClassName, common.ProtocolWriteImplMethodName(step), common.TypeSyntax(step.Type))
 			w.Indented(func() {
+				fmt.Fprintf(w, "step_index_.set_step_offset(\"%s\", stream_.Pos());\n", formatting.ToPascalCase(step.Name))
 				w.WriteStringln("if (!values.empty()) {")
 				w.Indented(func() {
-
-					fmt.Fprintf(w, "step_index_.set_step_offset(\"%s\", stream_.Pos());\n", formatting.ToPascalCase(step.Name))
-
 					fmt.Fprintf(w, "std::vector<size_t> item_offsets;\n")
 					fmt.Fprintf(w, "item_offsets.reserve(values.size());\n")
 					writeProtocolStep(w, step, stepChanges, true, true, true)
 					fmt.Fprintf(w, "step_index_.add_stream_offsets(\"%s\", item_offsets);\n", formatting.ToPascalCase(step.Name))
-
 				})
 				w.WriteStringln("}")
 			})
@@ -1083,6 +1074,7 @@ func writeProtocolMethods(w *formatting.IndentedWriter, p *dsl.ProtocolDefinitio
 
 			fmt.Fprintf(w, "void %s::%s() {\n", indexedWriterClassName, common.ProtocolWriteEndImplMethodName(step))
 			w.Indented(func() {
+				fmt.Fprintf(w, "step_index_.set_step_offset(\"%s\", stream_.Pos());\n", formatting.ToPascalCase(step.Name))
 				writeEndStream(w, stepChanges)
 			})
 			w.WriteString("}\n\n")
@@ -1098,7 +1090,6 @@ func writeProtocolMethods(w *formatting.IndentedWriter, p *dsl.ProtocolDefinitio
 	fmt.Fprintf(w, "void %s::CloseImpl() {\n", indexedWriterClassName)
 	w.Indented(func() {
 		fmt.Fprintf(w, "yardl::binary::WriteIndex(stream_, step_index_);\n")
-		w.WriteStringln("")
 		w.WriteString("stream_.Flush();\n")
 	})
 	w.WriteString("}\n\n")
@@ -1111,14 +1102,13 @@ func writeProtocolMethods(w *formatting.IndentedWriter, p *dsl.ProtocolDefinitio
 		if step.IsStream() {
 			fmt.Fprintf(w, "bool %s::%s(%s& value, size_t idx) {\n", indexedReaderClassName, common.ProtocolReadImplMethodName(step), common.TypeSyntax(step.Type))
 			w.Indented(func() {
-				fmt.Fprintf(w, "size_t abs_offset = 0, items_remaining = 0;\n")
-				fmt.Fprintf(w, "if (!step_index_.find_stream_item(\"%s\", idx, abs_offset, items_remaining)) {\n", formatting.ToPascalCase(step.Name))
+				fmt.Fprintf(w, "size_t abs_offset = 0;\n")
+				fmt.Fprintf(w, "if (!step_index_.find_stream_item(\"%s\", idx, abs_offset, current_block_remaining_)) {\n", formatting.ToPascalCase(step.Name))
 				w.Indented(func() {
 					w.WriteStringln("return false;")
 				})
 				w.WriteStringln("}")
 				fmt.Fprintf(w, "stream_.Seek(abs_offset);\n")
-				fmt.Fprintf(w, "current_block_remaining_ = items_remaining;\n")
 
 				w.WriteStringln("bool read_block_successful = false;")
 				writeProtocolStep(w, step, stepChanges, false, false, true)
@@ -1128,15 +1118,14 @@ func writeProtocolMethods(w *formatting.IndentedWriter, p *dsl.ProtocolDefinitio
 
 			fmt.Fprintf(w, "bool %s::%s(std::vector<%s>& values, size_t idx) {\n", indexedReaderClassName, common.ProtocolReadImplMethodName(step), common.TypeSyntax(step.Type))
 			w.Indented(func() {
-				fmt.Fprintf(w, "size_t abs_offset = 0, items_remaining = 0;\n")
-				fmt.Fprintf(w, "if (!step_index_.find_stream_item(\"%s\", idx, abs_offset, items_remaining)) {\n", formatting.ToPascalCase(step.Name))
+				fmt.Fprintf(w, "size_t abs_offset = 0;\n")
+				fmt.Fprintf(w, "if (!step_index_.find_stream_item(\"%s\", idx, abs_offset, current_block_remaining_)) {\n", formatting.ToPascalCase(step.Name))
 				w.Indented(func() {
 					w.WriteStringln("values.clear();")
 					w.WriteStringln("return false;")
 				})
 				w.WriteStringln("}")
 				fmt.Fprintf(w, "stream_.Seek(abs_offset);\n")
-				fmt.Fprintf(w, "current_block_remaining_ = items_remaining;\n")
 
 				writeProtocolStep(w, step, stepChanges, true, false, true)
 				w.WriteStringln("return current_block_remaining_ != 0;")

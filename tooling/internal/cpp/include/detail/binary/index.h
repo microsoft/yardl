@@ -47,6 +47,22 @@ class Index {
   //  2. number of items remaining in corresponding stream block
   //  Returns true on success, false on error, including index out of range
   bool find_stream_item(std::string const& step_name, size_t index, size_t& absolute_offset, size_t& items_remaining) const {
+    if (stream_offsets.count(step_name) == 0) {
+      if (index == 0) {
+        absolute_offset = step_offsets.at(step_name);
+        items_remaining = 0;
+        return true;
+      }
+      return false;
+    }
+
+    auto& offsets = stream_offsets.at(step_name);
+    if (index >= offsets.size()) {
+      // Index out-of-bounds
+      return false;
+    }
+    absolute_offset = offsets.at(index);
+
     auto& blocks = stream_blocks.at(step_name);
     size_t last_block = 0;
     for (auto const& block : blocks) {
@@ -55,18 +71,10 @@ class Index {
         break;
       }
     }
-
-    auto& offsets = stream_offsets.at(step_name);
     if (last_block == 0) {
       last_block = offsets.size();
     }
     items_remaining = last_block - index;
-
-    try {
-      absolute_offset = offsets.at(index);
-    } catch (const std::out_of_range& ex) {
-      return false;
-    }
 
     return true;
   }
@@ -102,7 +110,6 @@ class Index {
   std::unordered_map<std::string, std::vector<size_t>> stream_blocks;
 };
 
-
 static inline std::array<char, 10> INDEX_MAGIC_BYTES = {'y', 'a', 'r', 'd', 'l', 'i', 'n', 'd', 'e', 'x'};
 static inline uint32_t kBinaryIndexFormatVersionNumber = 1;
 
@@ -110,11 +117,11 @@ inline Index ReadIndex(CodedInputStream& stream) {
   auto pos = stream.Pos();
 
   size_t index_offset = 0;
-  stream.SeekBackwardFromEnd(sizeof(index_offset));
+  stream.Seek(-sizeof(index_offset));
   stream.ReadFixedInteger(index_offset);
   try {
     stream.Seek(index_offset);
-  } catch (const std::exception& e) {
+  } catch (std::exception const& e) {
     throw std::runtime_error("Binary Index not found in stream.");
   }
 
@@ -142,7 +149,7 @@ inline Index ReadIndex(CodedInputStream& stream) {
 }
 
 inline void WriteIndex(CodedOutputStream& stream, Index const& index) {
-  auto pos = stream.Pos();
+  size_t pos = stream.Pos();
 
   stream.WriteBytes(INDEX_MAGIC_BYTES.data(), INDEX_MAGIC_BYTES.size());
   stream.WriteFixedInteger(kBinaryIndexFormatVersionNumber);

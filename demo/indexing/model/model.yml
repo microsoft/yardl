@@ -1,27 +1,14 @@
-# You can read more about the yardl syntax here: https://aka.ms/yardl/docs
-
-# This is an example protocol, which is defined as a Header value
-# followed by a stream of zero or more Sample values
 MyProtocol: !protocol
   sequence:
-
-    # A Header value
     header: Header
-
-    # A stream of Samples
     samples: !stream
       items: Sample
 
-# Header is a record with a single string field
 Header: !record
   fields:
     subject: string
 
-# Sample is a record made up of a datetime and
-# a vector of integers
 Sample: !record
   fields:
     id: uint
-
-    # A vector of integers
     data: int*

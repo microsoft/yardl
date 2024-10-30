@@ -517,6 +517,10 @@ func AbstractReaderName(p *dsl.ProtocolDefinition) string {
 	return fmt.Sprintf("%sReaderBase", formatting.ToPascalCase(p.Name))
 }
 
+func AbstractIndexedReaderName(p *dsl.ProtocolDefinition) string {
+	return fmt.Sprintf("%sIndexedReaderBase", formatting.ToPascalCase(p.Name))
+}
+
 func ProtocolWriteMethodName(s *dsl.ProtocolStep) string {
 	return fmt.Sprintf("write_%s", formatting.ToSnakeCase(s.Name))
 }

@@ -3,9 +3,7 @@
 
 #include "generated/binary/protocols.h"
 
-
-int main(void)
-{
+int main(void) {
   std::stringstream output;
 
   sketch::binary::MyProtocolWriter writer(output);
@@ -36,12 +34,13 @@ int main(void)
 
   auto serialized_without_index = output.str();
 
+  // Try to load IndexedReader without an index. Should throw an exception.
   {
     bool caught_expected = false;
     std::stringstream input(serialized_without_index);
     try {
       sketch::binary::MyProtocolIndexedReader reader(input);
-    } catch (const std::exception& ex) {
+    } catch (std::exception const& ex) {
       caught_expected = true;
     }
 
@@ -52,6 +51,7 @@ int main(void)
 
   output = std::stringstream{};
 
+  // Copy the protocol stream to a new stream with indexing
   {
     std::stringstream input(serialized_without_index);
     sketch::binary::MyProtocolReader reader(input);
@@ -65,6 +65,7 @@ int main(void)
 
   auto serialized_with_index = output.str();
 
+  // Test reading stream element-by-element from index
   {
     std::stringstream input(serialized_with_index);
     sketch::binary::MyProtocolIndexedReader reader(input);
@@ -93,6 +94,7 @@ int main(void)
     reader.Close();
   }
 
+  // Test batch reading stream from index
   {
     std::stringstream input(serialized_with_index);
     sketch::binary::MyProtocolIndexedReader reader(input);
@@ -105,6 +107,31 @@ int main(void)
       idx += samples.size();
     }
     std::cerr << "Batch read all samples: " << (idx == sample_count ? "SUCCESS" : "FAILURE") << std::endl;
+    reader.Close();
+  }
+
+  // Test indexing with an empty stream
+  {
+    std::stringstream output;
+
+    sketch::binary::MyProtocolIndexedWriter writer(output);
+    writer.WriteHeader(sketch::Header{"John Doe"});
+
+    writer.EndSamples();
+    writer.Close();
+
+    auto serialized = output.str();
+
+    std::stringstream input(serialized);
+    sketch::binary::MyProtocolIndexedReader reader(input);
+
+    sketch::Sample sample;
+    size_t idx = 0;
+    while (reader.ReadSamples(sample, idx)) {
+      // Do something with samples
+      idx += 1;
+    }
+    std::cerr << "Read empty samples: " << (idx == 0 ? "SUCCESS" : "FAILURE") << std::endl;
     reader.Close();
   }
 
