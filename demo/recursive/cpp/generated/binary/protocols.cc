@@ -287,42 +287,40 @@ void MyProtocolReader::CloseImpl() {
 }
 
 void MyProtocolIndexedWriter::WriteTreeImpl(sketch::BinaryTree const& value) {
-  auto pos = stream_.Pos();
-  step_index_.set_step_offset("Tree", pos);
+  step_index_.set_step_offset("Tree", stream_.Pos());
   sketch::binary::WriteBinaryTree(stream_, value);
 }
 
 void MyProtocolIndexedWriter::WritePtreeImpl(std::unique_ptr<sketch::BinaryTree> const& value) {
-  auto pos = stream_.Pos();
-  step_index_.set_step_offset("Ptree", pos);
+  step_index_.set_step_offset("Ptree", stream_.Pos());
   yardl::binary::WritePointer<sketch::BinaryTree, sketch::binary::WriteBinaryTree>(stream_, value);
 }
 
 void MyProtocolIndexedWriter::WriteListImpl(std::optional<sketch::LinkedList<std::string>> const& value) {
-  auto pos = stream_.Pos();
-  step_index_.set_step_offset("List", pos);
+  step_index_.set_step_offset("List", stream_.Pos());
   yardl::binary::WriteOptional<sketch::LinkedList<std::string>, sketch::binary::WriteLinkedList<std::string, yardl::binary::WriteString>>(stream_, value);
 }
 
 void MyProtocolIndexedWriter::WriteCwdImpl(sketch::DirectoryEntry const& value) {
-  auto pos = stream_.Pos();
-  step_index_.set_step_offset("Cwd", pos);
+  step_index_.set_step_offset("Cwd", stream_.Pos());
   size_t item_offset = 0;
   yardl::binary::WriteBlockAndSaveOffset<sketch::DirectoryEntry, sketch::binary::WriteDirectoryEntry>(stream_, value, item_offset);
   step_index_.add_stream_offset("Cwd", item_offset);
 }
 
 void MyProtocolIndexedWriter::WriteCwdImpl(std::vector<sketch::DirectoryEntry> const& values) {
+  step_index_.set_step_offset("Cwd", stream_.Pos());
+  std::vector<size_t> item_offsets;
+  item_offsets.reserve(values.size());
   if (!values.empty()) {
-    step_index_.set_step_offset("Cwd", stream_.Pos());
-    std::vector<size_t> item_offsets;
-    item_offsets.reserve(values.size());
     yardl::binary::WriteVectorAndSaveOffsets<sketch::DirectoryEntry, sketch::binary::WriteDirectoryEntry>(stream_, values, item_offsets);
-    step_index_.add_stream_offsets("Cwd", item_offsets);
   }
+  step_index_.add_stream_offsets("Cwd", item_offsets);
 }
 
 void MyProtocolIndexedWriter::EndCwdImpl() {
+  step_index_.set_step_offset("Cwd", stream_.Pos());
+  step_index_.add_stream_offsets("Cwd", std::vector<size_t>{});
   yardl::binary::WriteInteger(stream_, 0U);
 }
 
@@ -332,7 +330,6 @@ void MyProtocolIndexedWriter::Flush() {
 
 void MyProtocolIndexedWriter::CloseImpl() {
   yardl::binary::WriteIndex(stream_, step_index_);
-
   stream_.Flush();
 }
 
@@ -355,27 +352,29 @@ void MyProtocolIndexedReader::ReadListImpl(std::optional<sketch::LinkedList<std:
 }
 
 bool MyProtocolIndexedReader::ReadCwdImpl(sketch::DirectoryEntry& value, size_t idx) {
-  size_t abs_offset = 0, items_remaining = 0;
-  if (!step_index_.find_stream_item("Cwd", idx, abs_offset, items_remaining)) {
+  size_t abs_offset = 0;
+  if (!step_index_.find_stream_item("Cwd", idx, abs_offset, current_block_remaining_)) {
     return false;
   }
   stream_.Seek(abs_offset);
-  current_block_remaining_ = items_remaining;
   bool read_block_successful = false;
   read_block_successful = yardl::binary::ReadBlock<sketch::DirectoryEntry, sketch::binary::ReadDirectoryEntry>(stream_, current_block_remaining_, value);
   return read_block_successful;
 }
 
 bool MyProtocolIndexedReader::ReadCwdImpl(std::vector<sketch::DirectoryEntry>& values, size_t idx) {
-  size_t abs_offset = 0, items_remaining = 0;
-  if (!step_index_.find_stream_item("Cwd", idx, abs_offset, items_remaining)) {
+  size_t abs_offset = 0;
+  if (!step_index_.find_stream_item("Cwd", idx, abs_offset, current_block_remaining_)) {
     values.clear();
     return false;
   }
   stream_.Seek(abs_offset);
-  current_block_remaining_ = items_remaining;
   yardl::binary::ReadBlocksIntoVector<sketch::DirectoryEntry, sketch::binary::ReadDirectoryEntry>(stream_, current_block_remaining_, values);
   return current_block_remaining_ != 0;
+}
+
+size_t MyProtocolIndexedReader::CountCwdImpl() {
+  return step_index_.get_stream_size("Cwd");
 }
 
 void MyProtocolIndexedReader::CloseImpl() {

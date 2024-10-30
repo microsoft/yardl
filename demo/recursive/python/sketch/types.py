@@ -21,9 +21,9 @@ T = typing.TypeVar("T")
 T_NP = typing.TypeVar("T_NP", bound=np.generic)
 
 
+BinaryTree__: typing.TypeAlias = "BinaryTree"
 LinkedList__: typing.TypeAlias = "LinkedList[T]"
 Directory__: typing.TypeAlias = "Directory"
-BinaryTree__: typing.TypeAlias = "BinaryTree"
 
 class BinaryTree:
     value: yardl.Int32

@@ -132,6 +132,8 @@ class MyProtocolIndexedReaderBase {
   //   items: Directory
   [[nodiscard]] bool ReadCwd(std::vector<sketch::DirectoryEntry>& values, size_t idx=0);
 
+  [[nodiscard]] size_t CountCwd();
+
   // Optionaly close this writer before destructing
   void Close();
 
@@ -143,6 +145,7 @@ class MyProtocolIndexedReaderBase {
   virtual void ReadListImpl(std::optional<sketch::LinkedList<std::string>>& value) = 0;
   virtual bool ReadCwdImpl(sketch::DirectoryEntry& value, size_t idx) = 0;
   virtual bool ReadCwdImpl(std::vector<sketch::DirectoryEntry>& values, size_t idx) = 0;
+  virtual size_t CountCwdImpl() = 0;
   virtual void CloseImpl() {}
   static std::string schema_;
 

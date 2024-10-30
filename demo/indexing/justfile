@@ -20,4 +20,7 @@ cpp_version := "17"
     cd cpp/build && ninja
 
 @run: build
-    ./cpp/build/sketch
+    echo "-------- C++ demo --------"; \
+    ./cpp/build/sketch; \
+    echo "-------- Python demo --------"; \
+    python python/main.py

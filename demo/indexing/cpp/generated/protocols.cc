@@ -237,6 +237,10 @@ bool MyProtocolIndexedReaderBase::ReadSamples(std::vector<sketch::Sample>& value
   return true;
 }
 
+size_t MyProtocolIndexedReaderBase::CountSamples() {
+  return CountSamplesImpl();
+}
+
 void MyProtocolIndexedReaderBase::Close() {
   CloseImpl();
 }

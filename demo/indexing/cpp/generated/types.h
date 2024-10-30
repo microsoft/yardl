@@ -11,7 +11,6 @@
 #include "yardl/yardl.h"
 
 namespace sketch {
-// Header is a record with a single string field
 struct Header {
   std::string subject{};
 
@@ -24,11 +23,8 @@ struct Header {
   }
 };
 
-// Sample is a record made up of a datetime and
-// a vector of integers
 struct Sample {
   uint32_t id{};
-  // A vector of integers
   std::vector<int32_t> data{};
 
   bool operator==(const Sample& other) const {

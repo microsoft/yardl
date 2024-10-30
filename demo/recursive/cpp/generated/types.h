@@ -11,12 +11,12 @@
 #include "yardl/yardl.h"
 
 namespace sketch {
-struct Directory;
-
 struct BinaryTree;
 
 template <typename T>
 struct LinkedList;
+
+struct Directory;
 
 struct BinaryTree {
   int32_t value{};

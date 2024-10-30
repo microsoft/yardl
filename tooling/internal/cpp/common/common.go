@@ -456,6 +456,14 @@ func ProtocolReadImplMethodName(s *dsl.ProtocolStep) string {
 	return fmt.Sprintf("Read%sImpl", formatting.ToPascalCase(s.Name))
 }
 
+func ProtocolStreamSizeMethodName(s *dsl.ProtocolStep) string {
+	return fmt.Sprintf("Count%s", formatting.ToPascalCase(s.Name))
+}
+
+func ProtocolStreamSizeImplMethodName(s *dsl.ProtocolStep) string {
+	return fmt.Sprintf("Count%sImpl", formatting.ToPascalCase(s.Name))
+}
+
 func EnumIntegerLiteral(e *dsl.EnumDefinition, v *dsl.EnumValue) string {
 	if e.BaseType == nil {
 		return fmt.Sprintf("%d", &v.IntegerValue)

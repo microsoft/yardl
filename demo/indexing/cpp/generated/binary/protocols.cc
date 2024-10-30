@@ -127,30 +127,30 @@ void MyProtocolReader::CloseImpl() {
 }
 
 void MyProtocolIndexedWriter::WriteHeaderImpl(sketch::Header const& value) {
-  auto pos = stream_.Pos();
-  step_index_.set_step_offset("Header", pos);
+  step_index_.set_step_offset("Header", stream_.Pos());
   sketch::binary::WriteHeader(stream_, value);
 }
 
 void MyProtocolIndexedWriter::WriteSamplesImpl(sketch::Sample const& value) {
-  auto pos = stream_.Pos();
-  step_index_.set_step_offset("Samples", pos);
+  step_index_.set_step_offset("Samples", stream_.Pos());
   size_t item_offset = 0;
   yardl::binary::WriteBlockAndSaveOffset<sketch::Sample, sketch::binary::WriteSample>(stream_, value, item_offset);
   step_index_.add_stream_offset("Samples", item_offset);
 }
 
 void MyProtocolIndexedWriter::WriteSamplesImpl(std::vector<sketch::Sample> const& values) {
+  step_index_.set_step_offset("Samples", stream_.Pos());
+  std::vector<size_t> item_offsets;
+  item_offsets.reserve(values.size());
   if (!values.empty()) {
-    step_index_.set_step_offset("Samples", stream_.Pos());
-    std::vector<size_t> item_offsets;
-    item_offsets.reserve(values.size());
     yardl::binary::WriteVectorAndSaveOffsets<sketch::Sample, sketch::binary::WriteSample>(stream_, values, item_offsets);
-    step_index_.add_stream_offsets("Samples", item_offsets);
   }
+  step_index_.add_stream_offsets("Samples", item_offsets);
 }
 
 void MyProtocolIndexedWriter::EndSamplesImpl() {
+  step_index_.set_step_offset("Samples", stream_.Pos());
+  step_index_.add_stream_offsets("Samples", std::vector<size_t>{});
   yardl::binary::WriteInteger(stream_, 0U);
 }
 
@@ -160,7 +160,6 @@ void MyProtocolIndexedWriter::Flush() {
 
 void MyProtocolIndexedWriter::CloseImpl() {
   yardl::binary::WriteIndex(stream_, step_index_);
-
   stream_.Flush();
 }
 
@@ -171,27 +170,29 @@ void MyProtocolIndexedReader::ReadHeaderImpl(sketch::Header& value) {
 }
 
 bool MyProtocolIndexedReader::ReadSamplesImpl(sketch::Sample& value, size_t idx) {
-  size_t abs_offset = 0, items_remaining = 0;
-  if (!step_index_.find_stream_item("Samples", idx, abs_offset, items_remaining)) {
+  size_t abs_offset = 0;
+  if (!step_index_.find_stream_item("Samples", idx, abs_offset, current_block_remaining_)) {
     return false;
   }
   stream_.Seek(abs_offset);
-  current_block_remaining_ = items_remaining;
   bool read_block_successful = false;
   read_block_successful = yardl::binary::ReadBlock<sketch::Sample, sketch::binary::ReadSample>(stream_, current_block_remaining_, value);
   return read_block_successful;
 }
 
 bool MyProtocolIndexedReader::ReadSamplesImpl(std::vector<sketch::Sample>& values, size_t idx) {
-  size_t abs_offset = 0, items_remaining = 0;
-  if (!step_index_.find_stream_item("Samples", idx, abs_offset, items_remaining)) {
+  size_t abs_offset = 0;
+  if (!step_index_.find_stream_item("Samples", idx, abs_offset, current_block_remaining_)) {
     values.clear();
     return false;
   }
   stream_.Seek(abs_offset);
-  current_block_remaining_ = items_remaining;
   yardl::binary::ReadBlocksIntoVector<sketch::Sample, sketch::binary::ReadSample>(stream_, current_block_remaining_, values);
   return current_block_remaining_ != 0;
+}
+
+size_t MyProtocolIndexedReader::CountSamplesImpl() {
+  return step_index_.get_stream_size("Samples");
 }
 
 void MyProtocolIndexedReader::CloseImpl() {

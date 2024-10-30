@@ -3,8 +3,8 @@ namespace: Sketch
 cpp:
   sourcesOutputDir: ../cpp/generated
 
-# python:
-#   outputDir: ../python
+python:
+  outputDir: ../python
 
 # matlab:
 #   outputDir: ../matlab

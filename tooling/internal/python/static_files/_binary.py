@@ -20,6 +20,7 @@ from typing import (
 from abc import ABC, abstractmethod
 import struct
 import sys
+import os
 import numpy as np
 
 from numpy.lib import recfunctions
@@ -32,6 +33,9 @@ if sys.byteorder != "little":
 
 MAGIC_BYTES: bytes = b"yardl"
 CURRENT_BINARY_FORMAT_VERSION: int = 1
+
+INDEX_MAGIC_BYTES: bytes = b"yardlindex"
+CURRENT_BINARY_INDEX_FORMAT_VERSION: int = 1
 
 INT8_MIN: int = np.iinfo(np.int8).min
 INT8_MAX: int = np.iinfo(np.int8).max
@@ -92,6 +96,27 @@ class BinaryProtocolReader(ABC):
         self._stream.close()
 
 
+class BinaryProtocolIndexedWriter(BinaryProtocolWriter):
+    def __init__(self, stream: Union[BinaryIO, str], schema: str) -> None:
+        super().__init__(stream, schema)
+        self._index = Index()
+
+    def _close(self) -> None:
+        self._index.write(self._stream)
+        super()._close()
+
+
+class BinaryProtocolIndexedReader(BinaryProtocolReader):
+    def __init__(
+        self,
+        stream: Union[BufferedReader, BytesIO, BinaryIO, str],
+        expected_schema: Optional[str],
+    ) -> None:
+        super().__init__(stream, expected_schema)
+        # Load the index from the end of the stream
+        self._index = Index.read(self._stream)
+
+
 class CodedOutputStream:
     def __init__(
         self, stream: Union[BinaryIO, str], *, buffer_size: int = 65536
@@ -105,6 +130,7 @@ class CodedOutputStream:
 
         self._buffer = bytearray(buffer_size)
         self._offset = 0
+        self._streampos = 0
 
     def close(self) -> None:
         self.flush()
@@ -119,6 +145,7 @@ class CodedOutputStream:
         if self._offset > 0:
             self._stream.write(self._buffer[: self._offset])
             self._stream.flush()
+            self._streampos += self._offset
             self._offset = 0
 
     def write(self, formatter: struct.Struct, *args: Any) -> None:
@@ -128,6 +155,7 @@ class CodedOutputStream:
 
         formatter.pack_into(self._buffer, self._offset, *args)
         self._offset += size
+        self._streampos += size
 
     def write_bytes(self, data: Union[bytes, bytearray]) -> None:
         if len(data) > (len(self._buffer) - self._offset):
@@ -136,6 +164,7 @@ class CodedOutputStream:
         else:
             self._buffer[self._offset : self._offset + len(data)] = data
             self._offset += len(data)
+            self._streampos += len(data)
 
     def write_bytes_directly(self, data: Union[bytes, bytearray, memoryview]) -> None:
         self.flush()
@@ -145,6 +174,7 @@ class CodedOutputStream:
         assert 0 <= value <= UINT8_MAX
         self._buffer[self._offset] = value
         self._offset += 1
+        self._streampos += 1
 
     def write_unsigned_varint(
         self,
@@ -176,6 +206,9 @@ class CodedOutputStream:
     ) -> None:
         self.write_unsigned_varint(self.zigzag_encode(value))
 
+    def pos(self) -> int:
+        return self._streampos
+
 
 class CodedInputStream:
     def __init__(
@@ -199,6 +232,8 @@ class CodedInputStream:
         self._view = memoryview(self._buffer)
         self._offset = 0
         self._at_end = False
+        self._last_read_pos = 0
+        self._streampos = 0
 
     def close(self) -> None:
         if self._owns_stream:
@@ -282,6 +317,31 @@ class CodedInputStream:
         self._offset += count
         return bytearray(result)
 
+    def seek(self, offset: int) -> None:
+        if offset < 0:
+            pos = self._stream.tell()
+            self._stream.seek(offset, os.SEEK_END)
+            desired = self._stream.tell()
+            self._stream.seek(pos)
+            self.seek(desired)
+        else:
+            if (
+                offset < self._last_read_pos
+                or offset >= self._last_read_pos + self._last_read_count
+            ):
+                self._at_end = False
+                try:
+                    self._stream.seek(offset)
+                except Exception as e:
+                    raise RuntimeError(f"Failed to seek to {offset}") from e
+                self._last_read_count = self._offset
+                self._fill_buffer(1)
+            else:
+                self._offset = offset - self._last_read_pos
+
+    def pos(self) -> int:
+        return self._last_read_pos + self._offset
+
     def _fill_buffer(self, min_count: int = 0) -> None:
         remaining = self._last_read_count - self._offset
         if remaining > 0:
@@ -290,6 +350,7 @@ class CodedInputStream:
             ]
             self._buffer[:remaining] = remaining_view
 
+        self._last_read_pos = self._stream.tell()
         slice = memoryview(self._buffer)[remaining:]
         self._last_read_count = self._stream.readinto(slice) + remaining
         self._offset = 0
@@ -297,6 +358,117 @@ class CodedInputStream:
             self._at_end = True
         if min_count > 0 and (self._last_read_count) < min_count:
             raise EOFError("Unexpected EOF")
+
+
+class Index:
+    def __init__(self) -> None:
+        self.step_offsets = {}
+        self.stream_offsets = {}
+        self.stream_blocks = {}
+
+    def set_step_offset(self, step: str, offset: int) -> None:
+        if step not in self.step_offsets:
+            self.step_offsets[step] = offset
+
+    def add_stream_offsets(
+        self, step: str, offsets: Iterable[int], num_blocks: int
+    ) -> None:
+        if step not in self.stream_blocks:
+            self.stream_blocks[step] = []
+        if step not in self.stream_offsets:
+            self.stream_offsets[step] = []
+        stream_length = len(self.stream_offsets[step])
+        if num_blocks == 1:
+            self.stream_blocks[step].append(stream_length)
+        elif num_blocks > 1:
+            blocks = [stream_length + i for i in range(len(offsets))]
+            self.stream_blocks[step].extend(blocks)
+        else:
+            pass
+        self.stream_offsets[step].extend(offsets)
+
+    def get_step_offset(self, step: str) -> int:
+        return self.step_offsets[step]
+
+    def get_stream_size(self, step: str) -> int:
+        return len(self.stream_offsets[step])
+
+    # Returns tuple (absolute_offset, num_items_remaining_in_corresponding_block)
+    def find_stream_item(self, step: str, index: int) -> tuple[int, int]:
+        blocks = self.stream_blocks[step]
+        offsets = self.stream_offsets[step]
+
+        if index >= len(offsets):
+            # Handle case where stream is empty
+            if index == 0 and len(offsets) == 0:
+                return self.get_step_offset(step), 0
+            raise IndexError("Index out of range")
+
+        last_block = 0
+        for block in blocks:
+            if block > index:
+                last_block = block
+                break
+        if last_block == 0:
+            last_block = len(offsets)
+        items_remaining = last_block - index
+        absolute_offset = offsets[index]
+        return absolute_offset, items_remaining
+
+    def write(self, stream: CodedOutputStream) -> None:
+        pos = stream.pos()
+        stream.write_bytes(INDEX_MAGIC_BYTES)
+        write_fixed_int32(stream, CURRENT_BINARY_INDEX_FORMAT_VERSION)
+        MapSerializer(string_serializer, size_serializer).write(
+            stream, self.step_offsets
+        )
+        MapSerializer(string_serializer, VectorSerializer(size_serializer)).write(
+            stream, self.stream_offsets
+        )
+        MapSerializer(string_serializer, VectorSerializer(size_serializer)).write(
+            stream, self.stream_blocks
+        )
+        write_fixed_size_t(stream, pos)
+
+    @staticmethod
+    def read(stream: CodedInputStream) -> None:
+        pos = stream.pos()
+
+        stream.seek(-size_t_struct.size)
+        index_offset = read_fixed_size_t(stream)
+
+        try:
+            stream.seek(index_offset)
+        except EOFError:
+            raise RuntimeError("Binary Index not found in stream.")
+
+        magic_bytes = stream.read_view(len(INDEX_MAGIC_BYTES))
+        if magic_bytes != INDEX_MAGIC_BYTES:
+            raise RuntimeError(
+                "Binary Index in the stream is not in the expected format."
+            )
+
+        version = read_fixed_int32(stream)
+        if version != CURRENT_BINARY_INDEX_FORMAT_VERSION:
+            raise RuntimeError(
+                "Binary Index in the stream is not in the expected format. Unsupported version."
+            )
+
+        index = Index()
+
+        index.step_offsets = MapSerializer(string_serializer, size_serializer).read(
+            stream
+        )
+        index.stream_offsets = MapSerializer(
+            string_serializer, VectorSerializer(size_serializer)
+        ).read(stream)
+        index.stream_blocks = MapSerializer(
+            string_serializer, VectorSerializer(size_serializer)
+        ).read(stream)
+
+        stream.seek(pos)
+
+        return index
 
 
 T = TypeVar("T")
@@ -970,6 +1142,28 @@ class StreamSerializer(TypeSerializer[Iterable[T], Any]):
                 stream.write_byte_no_check(1)
                 self._element_serializer.write(stream, element)
 
+    def write_and_save_offsets(
+        self, stream: CodedOutputStream, value: Iterable[T]
+    ) -> Iterable[int]:
+        # Note that the final 0 is missing and will be added before the next protocol step
+        # or the protocol is closed.
+        offsets = []
+        num_blocks = 0
+        if isinstance(value, list) and len(value) > 0:
+            stream.write_unsigned_varint(len(value))
+            for element in value:
+                offsets.append(stream.pos())
+                self._element_serializer.write(stream, element)
+            num_blocks = 1
+        else:
+            for element in value:
+                stream.write_byte_no_check(1)
+                offsets.append(stream.pos())
+                self._element_serializer.write(stream, element)
+            num_blocks = len(offsets)
+
+        return offsets, num_blocks
+
     def write_numpy(self, stream: CodedOutputStream, value: Any) -> None:
         raise NotImplementedError()
 
@@ -977,6 +1171,11 @@ class StreamSerializer(TypeSerializer[Iterable[T], Any]):
         while (i := stream.read_unsigned_varint()) > 0:
             for _ in range(i):
                 yield self._element_serializer.read(stream)
+
+    def read_mid_stream(self, stream: CodedInputStream, remaining: int) -> Iterable[T]:
+        for _ in range(remaining):
+            yield self._element_serializer.read(stream)
+        yield from self.read(stream)
 
     def read_numpy(self, stream: CodedInputStream) -> np.object_:
         raise NotImplementedError()
@@ -1328,23 +1527,6 @@ class RecordSerializer(TypeSerializer[T, np.void]):
         return cast(np.void, self._read(stream))
 
 
-# Only used in the header
-int32_struct = struct.Struct("<i")
-assert int32_struct.size == 4
-
-
-def write_fixed_int32(stream: CodedOutputStream, value: int) -> None:
-    if value < INT32_MIN or value > INT32_MAX:
-        raise ValueError(
-            f"Value {value} is outside the range of a signed 32-bit integer"
-        )
-    stream.write(int32_struct, value)
-
-
-def read_fixed_int32(stream: CodedInputStream) -> int:
-    return stream.read(int32_struct)[0]
-
-
 class RecursiveSerializer(Generic[T, T_NP], TypeSerializer[T, np.void]):
     def __init__(self, element_serializer_type: TypeSerializer[T, T_NP]) -> None:
         super().__init__(np.dtype([("has_value", np.bool_), ("value", np.object_)]))
@@ -1396,3 +1578,37 @@ class RecursiveSerializer(Generic[T, T_NP], TypeSerializer[T, np.void]):
         #     self._element_serializer = self._element_serializer_type()
         # return self._element_serializer.is_trivially_serializable()
         return super().is_trivially_serializable()
+
+
+# Only used in the header
+int32_struct = struct.Struct("<i")
+assert int32_struct.size == 4
+
+
+def write_fixed_int32(stream: CodedOutputStream, value: int) -> None:
+    if value < INT32_MIN or value > INT32_MAX:
+        raise ValueError(
+            f"Value {value} is outside the range of a signed 32-bit integer"
+        )
+    stream.write(int32_struct, value)
+
+
+def read_fixed_int32(stream: CodedInputStream) -> int:
+    return stream.read(int32_struct)[0]
+
+
+# Only used for serializing a binary Index
+size_t_struct = struct.Struct("<Q")
+assert size_t_struct.size == 8
+
+
+def write_fixed_size_t(stream: CodedOutputStream, value: int) -> None:
+    if value < 0 or value > UINT64_MAX:
+        raise ValueError(
+            f"Value {value} is outside the range of an unsigned 64-bit integer"
+        )
+    stream.write(size_t_struct, value)
+
+
+def read_fixed_size_t(stream: CodedInputStream) -> int:
+    return stream.read(size_t_struct)[0]

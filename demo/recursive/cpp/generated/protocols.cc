@@ -297,6 +297,10 @@ bool MyProtocolIndexedReaderBase::ReadCwd(std::vector<sketch::DirectoryEntry>& v
   return true;
 }
 
+size_t MyProtocolIndexedReaderBase::CountCwd() {
+  return CountCwdImpl();
+}
+
 void MyProtocolIndexedReaderBase::Close() {
   CloseImpl();
 }

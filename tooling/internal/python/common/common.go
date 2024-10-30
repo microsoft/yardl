@@ -531,6 +531,10 @@ func AbstractReaderName(p *dsl.ProtocolDefinition) string {
 	return fmt.Sprintf("%sReaderBase", formatting.ToPascalCase(p.Name))
 }
 
+func AbstractIndexedReaderName(p *dsl.ProtocolDefinition) string {
+	return fmt.Sprintf("%sIndexedReaderBase", formatting.ToPascalCase(p.Name))
+}
+
 func ProtocolWriteMethodName(s *dsl.ProtocolStep) string {
 	return fmt.Sprintf("write_%s", formatting.ToSnakeCase(s.Name))
 }
@@ -545,6 +549,14 @@ func ProtocolReadMethodName(s *dsl.ProtocolStep) string {
 
 func ProtocolReadImplMethodName(s *dsl.ProtocolStep) string {
 	return fmt.Sprintf("_read_%s", formatting.ToSnakeCase(s.Name))
+}
+
+func ProtocolStreamSizeMethodName(s *dsl.ProtocolStep) string {
+	return fmt.Sprintf("count_%s", formatting.ToSnakeCase(s.Name))
+}
+
+func ProtocolStreamSizeImplMethodName(s *dsl.ProtocolStep) string {
+	return fmt.Sprintf("_count_%s", formatting.ToSnakeCase(s.Name))
 }
 
 func WriteGeneratedFileHeader(w *formatting.IndentedWriter) {

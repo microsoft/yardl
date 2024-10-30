@@ -8,21 +8,16 @@ enum class Version {
   Current
 };
 // Abstract writer for the MyProtocol protocol.
-// This is an example protocol, which is defined as a Header value
-// followed by a stream of zero or more Sample values
 class MyProtocolWriterBase {
   public:
   // Ordinal 0.
-  // A Header value
   void WriteHeader(sketch::Header const& value);
 
   // Ordinal 1.
-  // A stream of Samples
   // Call this method for each element of the `samples` stream, then call `EndSamples() when done.`
   void WriteSamples(sketch::Sample const& value);
 
   // Ordinal 1.
-  // A stream of Samples
   // Call this method to write many values to the `samples` stream, then call `EndSamples()` when done.
   void WriteSamples(std::vector<sketch::Sample> const& values);
 
@@ -58,20 +53,15 @@ class MyProtocolWriterBase {
 };
 
 // Abstract reader for the MyProtocol protocol.
-// This is an example protocol, which is defined as a Header value
-// followed by a stream of zero or more Sample values
 class MyProtocolReaderBase {
   public:
   // Ordinal 0.
-  // A Header value
   void ReadHeader(sketch::Header& value);
 
   // Ordinal 1.
-  // A stream of Samples
   [[nodiscard]] bool ReadSamples(sketch::Sample& value);
 
   // Ordinal 1.
-  // A stream of Samples
   [[nodiscard]] bool ReadSamples(std::vector<sketch::Sample>& values);
 
   // Optionaly close this writer before destructing. Validates that all steps were completely read.
@@ -97,21 +87,18 @@ class MyProtocolReaderBase {
 };
 
 // Abstract Indexed reader for the MyProtocol protocol.
-// This is an example protocol, which is defined as a Header value
-// followed by a stream of zero or more Sample values
 class MyProtocolIndexedReaderBase {
   public:
   // Ordinal 0.
-  // A Header value
   void ReadHeader(sketch::Header& value);
 
   // Ordinal 1.
-  // A stream of Samples
   [[nodiscard]] bool ReadSamples(sketch::Sample& value, size_t idx=0);
 
   // Ordinal 1.
-  // A stream of Samples
   [[nodiscard]] bool ReadSamples(std::vector<sketch::Sample>& values, size_t idx=0);
+
+  [[nodiscard]] size_t CountSamples();
 
   // Optionaly close this writer before destructing
   void Close();
@@ -122,6 +109,7 @@ class MyProtocolIndexedReaderBase {
   virtual void ReadHeaderImpl(sketch::Header& value) = 0;
   virtual bool ReadSamplesImpl(sketch::Sample& value, size_t idx) = 0;
   virtual bool ReadSamplesImpl(std::vector<sketch::Sample>& values, size_t idx) = 0;
+  virtual size_t CountSamplesImpl() = 0;
   virtual void CloseImpl() {}
   static std::string schema_;
 

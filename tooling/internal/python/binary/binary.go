@@ -207,6 +207,87 @@ func writeProtocols(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 				w.WriteStringln("")
 			}
 		})
+
+		w.WriteStringln("")
+
+		// Indexed writer
+		fmt.Fprintf(w, "class %s(_binary.BinaryProtocolIndexedWriter, %s):\n", BinaryIndexedWriterName(p), common.AbstractWriterName(p))
+		w.Indented(func() {
+			common.WriteDocstringWithLeadingLine(w, fmt.Sprintf("Binary indexed writer for the %s protocol.", p.Name), p.Comment)
+			w.WriteStringln("")
+
+			w.WriteStringln("def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:")
+			w.Indented(func() {
+				fmt.Fprintf(w, "%s.__init__(self)\n", common.AbstractWriterName(p))
+				fmt.Fprintf(w, "_binary.BinaryProtocolIndexedWriter.__init__(self, stream, %s.schema)\n", common.AbstractWriterName(p))
+			})
+			w.WriteStringln("")
+
+			for _, step := range p.Sequence {
+				valueType := common.TypeSyntax(step.Type, ns.Name)
+				if step.IsStream() {
+					valueType = fmt.Sprintf("collections.abc.Iterable[%s]", valueType)
+				}
+				fmt.Fprintf(w, "def %s(self, value: %s) -> None:\n", common.ProtocolWriteImplMethodName(step), valueType)
+				w.Indented(func() {
+					fmt.Fprintf(w, "pos = self._stream.pos()\n")
+					fmt.Fprintf(w, "self._index.set_step_offset(\"%s\", pos)\n", formatting.ToPascalCase(step.Name))
+					serializer := typeSerializer(step.Type, ns.Name, nil)
+					if step.IsStream() {
+						fmt.Fprintf(w, "offsets, num_blocks = %s.write_and_save_offsets(self._stream, value)\n", serializer)
+						fmt.Fprintf(w, "self._index.add_stream_offsets(\"%s\", offsets, num_blocks)\n", formatting.ToPascalCase(step.Name))
+					} else {
+						fmt.Fprintf(w, "%s.write(self._stream, value)\n", serializer)
+
+					}
+				})
+				w.WriteStringln("")
+			}
+		})
+
+		w.WriteStringln("")
+
+		// Indexed reader
+		fmt.Fprintf(w, "class %s(_binary.BinaryProtocolIndexedReader, %s):\n", BinaryIndexedReaderName(p), common.AbstractIndexedReaderName(p))
+		w.Indented(func() {
+			common.WriteDocstringWithLeadingLine(w, fmt.Sprintf("Binary indexed writer for the %s protocol.", p.Name), p.Comment)
+			w.WriteStringln("")
+
+			w.WriteStringln("def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:")
+			w.Indented(func() {
+				fmt.Fprintf(w, "%s.__init__(self)\n", common.AbstractIndexedReaderName(p))
+				fmt.Fprintf(w, "_binary.BinaryProtocolIndexedReader.__init__(self, stream, %s.schema)\n", common.AbstractIndexedReaderName(p))
+			})
+			w.WriteStringln("")
+
+			for _, step := range p.Sequence {
+				valueType := common.TypeSyntax(step.Type, ns.Name)
+				if step.IsStream() {
+					valueType = fmt.Sprintf("collections.abc.Iterable[%s]", valueType)
+					fmt.Fprintf(w, "def %s(self, idx: int = 0) -> %s:\n", common.ProtocolReadImplMethodName(step), valueType)
+					w.Indented(func() {
+						fmt.Fprintf(w, "offset, remaining = self._index.find_stream_item(\"%s\", idx)\n", formatting.ToPascalCase(step.Name))
+						fmt.Fprintf(w, "self._stream.seek(offset)\n")
+						serializer := typeSerializer(step.Type, ns.Name, nil)
+						fmt.Fprintf(w, "return %s.read_mid_stream(self._stream, remaining)\n", serializer)
+					})
+					w.WriteStringln("")
+					fmt.Fprintf(w, "def %s(self) -> int:\n", common.ProtocolStreamSizeImplMethodName(step))
+					w.Indented(func() {
+						fmt.Fprintf(w, "return self._index.get_stream_size(\"%s\")\n", formatting.ToPascalCase(step.Name))
+					})
+				} else {
+					fmt.Fprintf(w, "def %s(self) -> %s:\n", common.ProtocolReadImplMethodName(step), valueType)
+					w.Indented(func() {
+						fmt.Fprintf(w, "pos = self._index.get_step_offset(\"%s\")\n", formatting.ToPascalCase(step.Name))
+						fmt.Fprintf(w, "self._stream.seek(pos)\n")
+						serializer := typeSerializer(step.Type, ns.Name, nil)
+						fmt.Fprintf(w, "return %s.read(self._stream)\n", serializer)
+					})
+				}
+				w.WriteStringln("")
+			}
+		})
 	}
 }
 
@@ -344,4 +425,12 @@ func BinaryWriterName(p *dsl.ProtocolDefinition) string {
 
 func BinaryReaderName(p *dsl.ProtocolDefinition) string {
 	return fmt.Sprintf("Binary%sReader", formatting.ToPascalCase(p.Name))
+}
+
+func BinaryIndexedWriterName(p *dsl.ProtocolDefinition) string {
+	return fmt.Sprintf("Binary%sIndexedWriter", formatting.ToPascalCase(p.Name))
+}
+
+func BinaryIndexedReaderName(p *dsl.ProtocolDefinition) string {
+	return fmt.Sprintf("Binary%sIndexedReader", formatting.ToPascalCase(p.Name))
 }

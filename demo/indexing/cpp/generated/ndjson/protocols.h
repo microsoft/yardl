@@ -13,8 +13,6 @@
 
 namespace sketch::ndjson {
 // NDJSON writer for the MyProtocol protocol.
-// This is an example protocol, which is defined as a Header value
-// followed by a stream of zero or more Sample values
 class MyProtocolWriter : public sketch::MyProtocolWriterBase, yardl::ndjson::NDJsonWriter {
   public:
   MyProtocolWriter(std::ostream& stream)
@@ -28,17 +26,13 @@ class MyProtocolWriter : public sketch::MyProtocolWriterBase, yardl::ndjson::NDJ
   void Flush() override;
 
   protected:
-  // A Header value
   void WriteHeaderImpl(sketch::Header const& value) override;
-  // A stream of Samples
   void WriteSamplesImpl(sketch::Sample const& value) override;
   void EndSamplesImpl() override {}
   void CloseImpl() override;
 };
 
 // NDJSON reader for the MyProtocol protocol.
-// This is an example protocol, which is defined as a Header value
-// followed by a stream of zero or more Sample values
 class MyProtocolReader : public sketch::MyProtocolReaderBase, yardl::ndjson::NDJsonReader {
   public:
   MyProtocolReader(std::istream& stream)

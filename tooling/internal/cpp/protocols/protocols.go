@@ -214,9 +214,10 @@ func writeDeclarations(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 					common.WriteComment(w, fmt.Sprintf("Ordinal %d.", i))
 					common.WriteComment(w, step.Comment)
 					fmt.Fprintf(w, "%s %s(std::vector<%s>& values, size_t idx=0);\n\n", returnType, common.ProtocolReadMethodName(step), common.TypeSyntax(step.Type))
+
+					fmt.Fprintf(w, "[[nodiscard]] size_t %s();\n\n", common.ProtocolStreamSizeMethodName(step))
 				} else {
 					fmt.Fprintf(w, "void %s(%s& value);\n\n", common.ProtocolReadMethodName(step), common.TypeSyntax(step.Type))
-
 				}
 			}
 
@@ -230,6 +231,7 @@ func writeDeclarations(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 				if step.IsStream() {
 					fmt.Fprintf(w, "virtual bool %s(%s& value, size_t idx) = 0;\n", common.ProtocolReadImplMethodName(step), common.TypeSyntax(step.Type))
 					fmt.Fprintf(w, "virtual bool %s(std::vector<%s>& values, size_t idx) = 0;\n", common.ProtocolReadImplMethodName(step), common.TypeSyntax(step.Type))
+					fmt.Fprintf(w, "virtual size_t %s() = 0;\n", common.ProtocolStreamSizeImplMethodName(step))
 				} else {
 					fmt.Fprintf(w, "virtual void %s(%s& value) = 0;\n", common.ProtocolReadImplMethodName(step), common.TypeSyntax(step.Type))
 				}
@@ -519,6 +521,12 @@ func writeDefinitions(w *formatting.IndentedWriter, ns *dsl.Namespace, symbolTab
 					})
 					w.WriteStringln("}")
 					w.WriteStringln("return true;")
+				})
+				w.WriteString("}\n\n")
+
+				fmt.Fprintf(w, "size_t %s::%s() {\n", common.AbstractIndexedReaderName(p), common.ProtocolStreamSizeMethodName(step))
+				w.Indented(func() {
+					fmt.Fprintf(w, "return %s();\n", common.ProtocolStreamSizeImplMethodName(step))
 				})
 				w.WriteString("}\n\n")
 			}

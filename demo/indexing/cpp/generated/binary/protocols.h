@@ -13,8 +13,6 @@
 
 namespace sketch::binary {
 // Binary writer for the MyProtocol protocol.
-// This is an example protocol, which is defined as a Header value
-// followed by a stream of zero or more Sample values
 class MyProtocolWriter : public sketch::MyProtocolWriterBase, yardl::binary::BinaryWriter {
   public:
   MyProtocolWriter(std::ostream& stream, Version version = Version::Current)
@@ -26,9 +24,7 @@ class MyProtocolWriter : public sketch::MyProtocolWriterBase, yardl::binary::Bin
   void Flush() override;
 
   protected:
-  // A Header value
   void WriteHeaderImpl(sketch::Header const& value) override;
-  // A stream of Samples
   void WriteSamplesImpl(sketch::Sample const& value) override;
   void WriteSamplesImpl(std::vector<sketch::Sample> const& values) override;
   void EndSamplesImpl() override;
@@ -38,8 +34,6 @@ class MyProtocolWriter : public sketch::MyProtocolWriterBase, yardl::binary::Bin
 };
 
 // Binary indexed writer for the MyProtocol protocol.
-// This is an example protocol, which is defined as a Header value
-// followed by a stream of zero or more Sample values
 class MyProtocolIndexedWriter : public sketch::MyProtocolWriterBase, yardl::binary::BinaryIndexedWriter {
   public:
   MyProtocolIndexedWriter(std::ostream& stream, Version version = Version::Current)
@@ -51,9 +45,7 @@ class MyProtocolIndexedWriter : public sketch::MyProtocolWriterBase, yardl::bina
   void Flush() override;
 
   protected:
-  // A Header value
   void WriteHeaderImpl(sketch::Header const& value) override;
-  // A stream of Samples
   void WriteSamplesImpl(sketch::Sample const& value) override;
   void WriteSamplesImpl(std::vector<sketch::Sample> const& values) override;
   void EndSamplesImpl() override;
@@ -63,8 +55,6 @@ class MyProtocolIndexedWriter : public sketch::MyProtocolWriterBase, yardl::bina
 };
 
 // Binary reader for the MyProtocol protocol.
-// This is an example protocol, which is defined as a Header value
-// followed by a stream of zero or more Sample values
 class MyProtocolReader : public sketch::MyProtocolReaderBase, yardl::binary::BinaryReader {
   public:
   MyProtocolReader(std::istream& stream)
@@ -88,8 +78,6 @@ class MyProtocolReader : public sketch::MyProtocolReaderBase, yardl::binary::Bin
 };
 
 // Binary indexed reader for the MyProtocol protocol.
-// This is an example protocol, which is defined as a Header value
-// followed by a stream of zero or more Sample values
 class MyProtocolIndexedReader : public sketch::MyProtocolIndexedReaderBase, yardl::binary::BinaryIndexedReader {
   public:
   MyProtocolIndexedReader(std::istream& stream)
@@ -104,6 +92,7 @@ class MyProtocolIndexedReader : public sketch::MyProtocolIndexedReaderBase, yard
   void ReadHeaderImpl(sketch::Header& value) override;
   bool ReadSamplesImpl(sketch::Sample& value, size_t idx) override;
   bool ReadSamplesImpl(std::vector<sketch::Sample>& values, size_t idx) override;
+  size_t CountSamplesImpl() override;
   void CloseImpl() override;
 
   Version version_;

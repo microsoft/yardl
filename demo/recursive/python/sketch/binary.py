@@ -60,6 +60,68 @@ class BinaryMyProtocolReader(_binary.BinaryProtocolReader, MyProtocolReaderBase)
     def _read_cwd(self) -> collections.abc.Iterable[DirectoryEntry]:
         return _binary.StreamSerializer(_binary.UnionSerializer(DirectoryEntry, [(DirectoryEntry.File, FileSerializer()), (DirectoryEntry.Directory, _binary.RecursiveSerializer(lambda *args, **kwargs : DirectorySerializer()))])).read(self._stream)
 
+
+class BinaryMyProtocolIndexedWriter(_binary.BinaryProtocolIndexedWriter, MyProtocolWriterBase):
+    """Binary indexed writer for the MyProtocol protocol."""
+
+
+    def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
+        MyProtocolWriterBase.__init__(self)
+        _binary.BinaryProtocolIndexedWriter.__init__(self, stream, MyProtocolWriterBase.schema)
+
+    def _write_tree(self, value: BinaryTree) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("Tree", pos)
+        BinaryTreeSerializer().write(self._stream, value)
+
+    def _write_ptree(self, value: BinaryTree__) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("Ptree", pos)
+        _binary.RecursiveSerializer(lambda *args, **kwargs : BinaryTreeSerializer()).write(self._stream, value)
+
+    def _write_list(self, value: typing.Optional[LinkedList[str]]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("List", pos)
+        _binary.OptionalSerializer(LinkedListSerializer(_binary.string_serializer)).write(self._stream, value)
+
+    def _write_cwd(self, value: collections.abc.Iterable[DirectoryEntry]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("Cwd", pos)
+        offsets, num_blocks = _binary.StreamSerializer(_binary.UnionSerializer(DirectoryEntry, [(DirectoryEntry.File, FileSerializer()), (DirectoryEntry.Directory, _binary.RecursiveSerializer(lambda *args, **kwargs : DirectorySerializer()))])).write_and_save_offsets(self._stream, value)
+        self._index.add_stream_offsets("Cwd", offsets, num_blocks)
+
+
+class BinaryMyProtocolIndexedReader(_binary.BinaryProtocolIndexedReader, MyProtocolIndexedReaderBase):
+    """Binary indexed writer for the MyProtocol protocol."""
+
+
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
+        MyProtocolIndexedReaderBase.__init__(self)
+        _binary.BinaryProtocolIndexedReader.__init__(self, stream, MyProtocolIndexedReaderBase.schema)
+
+    def _read_tree(self) -> BinaryTree:
+        pos = self._index.get_step_offset("Tree")
+        self._stream.seek(pos)
+        return BinaryTreeSerializer().read(self._stream)
+
+    def _read_ptree(self) -> BinaryTree__:
+        pos = self._index.get_step_offset("Ptree")
+        self._stream.seek(pos)
+        return _binary.RecursiveSerializer(lambda *args, **kwargs : BinaryTreeSerializer()).read(self._stream)
+
+    def _read_list(self) -> typing.Optional[LinkedList[str]]:
+        pos = self._index.get_step_offset("List")
+        self._stream.seek(pos)
+        return _binary.OptionalSerializer(LinkedListSerializer(_binary.string_serializer)).read(self._stream)
+
+    def _read_cwd(self, idx: int = 0) -> collections.abc.Iterable[DirectoryEntry]:
+        offset, remaining = self._index.find_stream_item("Cwd", idx)
+        self._stream.seek(offset)
+        return _binary.StreamSerializer(_binary.UnionSerializer(DirectoryEntry, [(DirectoryEntry.File, FileSerializer()), (DirectoryEntry.Directory, _binary.RecursiveSerializer(lambda *args, **kwargs : DirectorySerializer()))])).read_mid_stream(self._stream, remaining)
+
+    def _count_cwd(self) -> int:
+        return self._index.get_stream_size("Cwd")
+
 class BinaryTreeSerializer(_binary.RecordSerializer[BinaryTree]):
     def __init__(self) -> None:
         super().__init__([("value", _binary.int32_serializer), ("left", _binary.RecursiveSerializer(lambda *args, **kwargs : BinaryTreeSerializer())), ("right", _binary.RecursiveSerializer(lambda *args, **kwargs : BinaryTreeSerializer()))])

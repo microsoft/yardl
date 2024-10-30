@@ -12,8 +12,6 @@
 
 namespace sketch::hdf5 {
 // HDF5 writer for the MyProtocol protocol.
-// This is an example protocol, which is defined as a Header value
-// followed by a stream of zero or more Sample values
 class MyProtocolWriter : public sketch::MyProtocolWriterBase, public yardl::hdf5::Hdf5Writer {
   public:
   MyProtocolWriter(std::string path);
@@ -32,8 +30,6 @@ class MyProtocolWriter : public sketch::MyProtocolWriterBase, public yardl::hdf5
 };
 
 // HDF5 reader for the MyProtocol protocol.
-// This is an example protocol, which is defined as a Header value
-// followed by a stream of zero or more Sample values
 class MyProtocolReader : public sketch::MyProtocolReaderBase, public yardl::hdf5::Hdf5Reader {
   public:
   MyProtocolReader(std::string path);

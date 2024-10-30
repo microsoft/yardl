@@ -21,17 +21,17 @@ class MyProtocolWriterBase(abc.ABC):
     def __init__(self) -> None:
         self._state = 0
 
-    schema = r"""{"protocol":{"name":"MyProtocol","sequence":[{"name":"tree","type":"Sketch.BinaryTree"},{"name":"ptree","type":"Sketch.BinaryTree"},{"name":"list","type":[null,{"name":"Sketch.LinkedList","typeArguments":["string"]}]},{"name":"cwd","type":{"stream":{"items":"Sketch.DirectoryEntry"}}}]},"types":[{"name":"BinaryTree","fields":[{"name":"value","type":"int32"},{"name":"left","type":"Sketch.BinaryTree"},{"name":"right","type":"Sketch.BinaryTree"}]},{"name":"Directory","fields":[{"name":"name","type":"string"},{"name":"entries","type":{"vector":{"items":"Sketch.DirectoryEntry"}}}]},{"name":"DirectoryEntry","type":[{"tag":"File","type":"Sketch.File"},{"tag":"Directory","type":"Sketch.Directory"}]},{"name":"File","fields":[{"name":"name","type":"string"},{"name":"data","type":{"vector":{"items":"uint8"}}}]},{"name":"LinkedList","typeParameters":["T"],"fields":[{"name":"value","type":"T"},{"name":"next","type":{"name":"Sketch.LinkedList","typeArguments":["T"]}}]}]}"""
+    schema = r"""{"protocol":{"name":"MyProtocol","sequence":[{"name":"header","type":"Sketch.Header"},{"name":"samples","type":{"stream":{"items":"Sketch.Sample"}}}]},"types":[{"name":"Header","fields":[{"name":"subject","type":"string"}]},{"name":"Sample","fields":[{"name":"id","type":"uint32"},{"name":"data","type":{"vector":{"items":"int32"}}}]}]}"""
 
     def close(self) -> None:
-        if self._state == 7:
+        if self._state == 3:
             try:
                 self._end_stream()
                 return
             finally:
                 self._close()
         self._close()
-        if self._state != 8:
+        if self._state != 4:
             expected_method = self._state_to_method_name((self._state + 1) & ~1)
             raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
 
@@ -45,60 +45,30 @@ class MyProtocolWriterBase(abc.ABC):
             if exc is None:
                 raise e
 
-    def write_tree(self, value: BinaryTree) -> None:
+    def write_header(self, value: Header) -> None:
         """Ordinal 0"""
 
         if self._state != 0:
             self._raise_unexpected_state(0)
 
-        self._write_tree(value)
+        self._write_header(value)
         self._state = 2
 
-    def write_ptree(self, value: BinaryTree__) -> None:
+    def write_samples(self, value: collections.abc.Iterable[Sample]) -> None:
         """Ordinal 1"""
 
-        if self._state != 2:
+        if self._state & ~1 != 2:
             self._raise_unexpected_state(2)
 
-        self._write_ptree(value)
-        self._state = 4
-
-    def write_list(self, value: typing.Optional[LinkedList[str]]) -> None:
-        """Ordinal 2"""
-
-        if self._state != 4:
-            self._raise_unexpected_state(4)
-
-        self._write_list(value)
-        self._state = 6
-
-    def write_cwd(self, value: collections.abc.Iterable[DirectoryEntry]) -> None:
-        """Ordinal 3
-
-        dirs: !stream
-          items: Directory
-        """
-
-        if self._state & ~1 != 6:
-            self._raise_unexpected_state(6)
-
-        self._write_cwd(value)
-        self._state = 7
+        self._write_samples(value)
+        self._state = 3
 
     @abc.abstractmethod
-    def _write_tree(self, value: BinaryTree) -> None:
+    def _write_header(self, value: Header) -> None:
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def _write_ptree(self, value: BinaryTree__) -> None:
-        raise NotImplementedError()
-
-    @abc.abstractmethod
-    def _write_list(self, value: typing.Optional[LinkedList[str]]) -> None:
-        raise NotImplementedError()
-
-    @abc.abstractmethod
-    def _write_cwd(self, value: collections.abc.Iterable[DirectoryEntry]) -> None:
+    def _write_samples(self, value: collections.abc.Iterable[Sample]) -> None:
         raise NotImplementedError()
 
     @abc.abstractmethod
@@ -116,13 +86,9 @@ class MyProtocolWriterBase(abc.ABC):
 
     def _state_to_method_name(self, state: int) -> str:
         if state == 0:
-            return 'write_tree'
+            return 'write_header'
         if state == 2:
-            return 'write_ptree'
-        if state == 4:
-            return 'write_list'
-        if state == 6:
-            return 'write_cwd'
+            return 'write_samples'
         return "<unknown>"
 
 class MyProtocolReaderBase(abc.ABC):
@@ -134,7 +100,7 @@ class MyProtocolReaderBase(abc.ABC):
 
     def close(self) -> None:
         self._close()
-        if self._state != 8:
+        if self._state != 4:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
@@ -159,70 +125,36 @@ class MyProtocolReaderBase(abc.ABC):
     def _close(self) -> None:
         raise NotImplementedError()
 
-    def read_tree(self) -> BinaryTree:
+    def read_header(self) -> Header:
         """Ordinal 0"""
 
         if self._state != 0:
             self._raise_unexpected_state(0)
 
-        value = self._read_tree()
+        value = self._read_header()
         self._state = 2
         return value
 
-    def read_ptree(self) -> BinaryTree__:
+    def read_samples(self) -> collections.abc.Iterable[Sample]:
         """Ordinal 1"""
 
         if self._state != 2:
             self._raise_unexpected_state(2)
 
-        value = self._read_ptree()
-        self._state = 4
-        return value
-
-    def read_list(self) -> typing.Optional[LinkedList[str]]:
-        """Ordinal 2"""
-
-        if self._state != 4:
-            self._raise_unexpected_state(4)
-
-        value = self._read_list()
-        self._state = 6
-        return value
-
-    def read_cwd(self) -> collections.abc.Iterable[DirectoryEntry]:
-        """Ordinal 3
-
-        dirs: !stream
-          items: Directory
-        """
-
-        if self._state != 6:
-            self._raise_unexpected_state(6)
-
-        value = self._read_cwd()
-        self._state = 7
-        return self._wrap_iterable(value, 8)
+        value = self._read_samples()
+        self._state = 3
+        return self._wrap_iterable(value, 4)
 
     def copy_to(self, writer: MyProtocolWriterBase) -> None:
-        writer.write_tree(self.read_tree())
-        writer.write_ptree(self.read_ptree())
-        writer.write_list(self.read_list())
-        writer.write_cwd(self.read_cwd())
+        writer.write_header(self.read_header())
+        writer.write_samples(self.read_samples())
 
     @abc.abstractmethod
-    def _read_tree(self) -> BinaryTree:
+    def _read_header(self) -> Header:
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def _read_ptree(self) -> BinaryTree__:
-        raise NotImplementedError()
-
-    @abc.abstractmethod
-    def _read_list(self) -> typing.Optional[LinkedList[str]]:
-        raise NotImplementedError()
-
-    @abc.abstractmethod
-    def _read_cwd(self) -> collections.abc.Iterable[DirectoryEntry]:
+    def _read_samples(self) -> collections.abc.Iterable[Sample]:
         raise NotImplementedError()
 
     T = typing.TypeVar('T')
@@ -241,13 +173,9 @@ class MyProtocolReaderBase(abc.ABC):
         	
     def _state_to_method_name(self, state: int) -> str:
         if state == 0:
-            return 'read_tree'
+            return 'read_header'
         if state == 2:
-            return 'read_ptree'
-        if state == 4:
-            return 'read_list'
-        if state == 6:
-            return 'read_cwd'
+            return 'read_samples'
         return "<unknown>"
 
 class MyProtocolIndexedReaderBase(abc.ABC):
@@ -276,46 +204,26 @@ class MyProtocolIndexedReaderBase(abc.ABC):
     def _close(self) -> None:
         raise NotImplementedError()
 
-    def read_tree(self) -> BinaryTree:
-        return self._read_tree()
+    def read_header(self) -> Header:
+        return self._read_header()
 
-    def read_ptree(self) -> BinaryTree__:
-        return self._read_ptree()
-
-    def read_list(self) -> typing.Optional[LinkedList[str]]:
-        return self._read_list()
-
-    def read_cwd(self, idx: int = 0) -> collections.abc.Iterable[DirectoryEntry]:
-        """dirs: !stream
-          items: Directory
-        """
-
-        value = self._read_cwd(idx)
+    def read_samples(self, idx: int = 0) -> collections.abc.Iterable[Sample]:
+        value = self._read_samples(idx)
         return self._wrap_iterable(value)
 
-    def count_cwd(self) -> int:
-        return self._count_cwd()
+    def count_samples(self) -> int:
+        return self._count_samples()
 
     def copy_to(self, writer: MyProtocolWriterBase) -> None:
-        writer.write_tree(self.read_tree())
-        writer.write_ptree(self.read_ptree())
-        writer.write_list(self.read_list())
-        writer.write_cwd(self.read_cwd())
+        writer.write_header(self.read_header())
+        writer.write_samples(self.read_samples())
 
     @abc.abstractmethod
-    def _read_tree(self) -> BinaryTree:
+    def _read_header(self) -> Header:
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def _read_ptree(self) -> BinaryTree__:
-        raise NotImplementedError()
-
-    @abc.abstractmethod
-    def _read_list(self) -> typing.Optional[LinkedList[str]]:
-        raise NotImplementedError()
-
-    @abc.abstractmethod
-    def _read_cwd(self, idx: int = 0) -> collections.abc.Iterable[DirectoryEntry]:
+    def _read_samples(self, idx: int = 0) -> collections.abc.Iterable[Sample]:
         raise NotImplementedError()
 
     T = typing.TypeVar('T')

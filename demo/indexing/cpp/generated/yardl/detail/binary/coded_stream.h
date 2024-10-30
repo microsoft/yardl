@@ -185,7 +185,7 @@ class CodedInputStream {
         buffer_(buffer_size),
         buffer_ptr_(buffer_.data()),
         buffer_end_ptr_(buffer_ptr_),
-        pos_(0) {
+        last_read_pos_(0) {
   }
 
  public:
@@ -273,34 +273,37 @@ class CodedInputStream {
   }
 
   size_t Pos() {
-    return pos_;
+    return last_read_pos_ + (buffer_ptr_ - buffer_.data());
   }
 
-  void Seek(size_t offset) {
-    if (offset < pos_ || offset >= pos_ + buffer_.size()) {
-      // Seek and re-buffer
-      at_eof_ = false;
+  void Seek(int64_t whence) {
+    if (whence < 0) {
+      // Seek backward from the end of stream
       stream_.clear();
-      stream_.seekg(offset);
-      if (stream_.fail()) {
-        throw std::runtime_error("Failed to seek in stream");
+      auto pos = stream_.tellg();
+      stream_.seekg(whence, std::ios::end);
+      auto desired = stream_.tellg();
+      stream_.seekg(pos);
+
+      if (desired > 0) {
+        Seek(desired);
       }
-      FillBuffer();
     } else {
-      // Desired offset is already buffered...
-      buffer_ptr_ = buffer_.data() + (offset - pos_);
+      size_t offset = static_cast<size_t>(whence);
+      if (offset < last_read_pos_ || offset >= last_read_pos_ + (buffer_end_ptr_ - buffer_.data())) {
+        // Seek and re-buffer
+        at_eof_ = false;
+        stream_.clear();
+        stream_.seekg(offset);
+        if (stream_.fail()) {
+          throw std::runtime_error("Failed to seek in stream");
+        }
+        FillBuffer();
+      } else {
+        // Desired offset is already buffered...
+        buffer_ptr_ = buffer_.data() + (offset - last_read_pos_);
+      }
     }
-  }
-
-  void SeekBackwardFromEnd(size_t offset) {
-    stream_.clear();
-    auto pos = stream_.tellg();
-    stream_.seekg(0, std::ios::beg);
-    stream_.seekg(0, std::ios::end);
-    auto desired = stream_.tellg() - static_cast<std::streamoff>(offset);
-    stream_.seekg(pos);
-
-    Seek(desired);
   }
 
  private:
@@ -379,7 +382,7 @@ class CodedInputStream {
       throw EndOfStreamException();
     }
 
-    pos_ = stream_.tellg();
+    last_read_pos_ = stream_.tellg();
     stream_.read(reinterpret_cast<char*>(buffer_.data()), buffer_.size());
     at_eof_ = stream_.eof();
     auto bytes_read = stream_.gcount();
@@ -399,7 +402,7 @@ class CodedInputStream {
   uint8_t* buffer_end_ptr_;
   bool at_eof_ = false;
 
-  size_t pos_;
+  size_t last_read_pos_;
 };
 
 }  // namespace yardl::binary

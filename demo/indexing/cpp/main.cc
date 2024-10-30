@@ -3,9 +3,13 @@
 
 #include "generated/binary/protocols.h"
 
+#define ASSERT(cond, msg)                                  \
+  if (!(cond)) {                                           \
+    std::cerr << "Assertion failed: " << msg << std::endl; \
+    exit(1);                                               \
+  }
 
-int main(void)
-{
+int main(void) {
   std::stringstream output;
 
   sketch::binary::MyProtocolWriter writer(output);
@@ -36,22 +40,22 @@ int main(void)
 
   auto serialized_without_index = output.str();
 
+  // Try to load IndexedReader without an index. Should throw an exception.
   {
     bool caught_expected = false;
     std::stringstream input(serialized_without_index);
     try {
       sketch::binary::MyProtocolIndexedReader reader(input);
-    } catch (const std::exception& ex) {
+    } catch (std::exception const& ex) {
       caught_expected = true;
     }
 
-    if (!caught_expected) {
-      std::cerr << "Fail: Expected MyProtocolIndexedReader to throw exception!" << std::endl;
-    }
+    ASSERT(caught_expected, "Expected MyProtocolIndexedReader to throw exception!");
   }
 
   output = std::stringstream{};
 
+  // Copy the protocol stream to a new stream with indexing
   {
     std::stringstream input(serialized_without_index);
     sketch::binary::MyProtocolReader reader(input);
@@ -65,6 +69,7 @@ int main(void)
 
   auto serialized_with_index = output.str();
 
+  // Test reading stream element-by-element from index
   {
     std::stringstream input(serialized_with_index);
     sketch::binary::MyProtocolIndexedReader reader(input);
@@ -78,21 +83,18 @@ int main(void)
     }
     std::shuffle(indices.begin(), indices.end(), g);
 
+    ASSERT(reader.CountSamples() == sample_count, "CountSamples() failed");
+
     sketch::Sample sample;
     for (size_t idx : indices) {
-      if (!reader.ReadSamples(sample, idx)) {
-        std::cerr << "No more samples to read " << idx << std::endl;
-        break;
-      }
-      if (sample.id != idx) {
-        std::cerr << "Failed to read sample " << idx << std::endl;
-        break;
-      }
+      ASSERT(reader.ReadSamples(sample, idx), "Failed to read sample");
+      ASSERT(sample.id == idx, "Failed to read correct sample");
     }
 
     reader.Close();
   }
 
+  // Test batch reading stream from index
   {
     std::stringstream input(serialized_with_index);
     sketch::binary::MyProtocolIndexedReader reader(input);
@@ -104,7 +106,34 @@ int main(void)
       // Do something with samples
       idx += samples.size();
     }
-    std::cerr << "Batch read all samples: " << (idx == sample_count ? "SUCCESS" : "FAILURE") << std::endl;
+    ASSERT(idx == sample_count, "Batch read all samples failed");
+    reader.Close();
+  }
+
+  // Test indexing with an empty stream
+  {
+    std::stringstream output;
+
+    sketch::binary::MyProtocolIndexedWriter writer(output);
+    writer.WriteHeader(sketch::Header{"John Doe"});
+
+    writer.EndSamples();
+    writer.Close();
+
+    auto serialized = output.str();
+
+    std::stringstream input(serialized);
+    sketch::binary::MyProtocolIndexedReader reader(input);
+
+    ASSERT(reader.CountSamples() == 0, "CountSamples() failed");
+
+    sketch::Sample sample;
+    size_t idx = 0;
+    while (reader.ReadSamples(sample, idx)) {
+      // Do something with samples
+      idx += 1;
+    }
+    ASSERT(idx == 0, "Read empty samples failed");
     reader.Close();
   }
 

@@ -163,7 +163,7 @@ if _parse_version(_np.__version__) < _MIN_NUMPY_VERSION:
 
 	var protocolsMembers []string
 	for _, p := range ns.Protocols {
-		protocolsMembers = append(protocolsMembers, common.AbstractWriterName(p), common.AbstractReaderName(p))
+		protocolsMembers = append(protocolsMembers, common.AbstractWriterName(p), common.AbstractReaderName(p), common.AbstractIndexedReaderName(p))
 	}
 	if ns.IsTopLevel && len(protocolsMembers) > 0 {
 		sort.Slice(protocolsMembers, func(i, j int) bool {
@@ -178,9 +178,10 @@ if _parse_version(_np.__version__) < _MIN_NUMPY_VERSION:
 		})
 		fmt.Fprintf(w, ")\n")
 
-		for i, p := range ns.Protocols {
-			protocolsMembers[i*2] = binary.BinaryWriterName(p)
-			protocolsMembers[i*2+1] = binary.BinaryReaderName(p)
+		protocolsMembers = nil
+		for _, p := range ns.Protocols {
+			protocolsMembers = append(protocolsMembers, binary.BinaryWriterName(p), binary.BinaryReaderName(p),
+				binary.BinaryIndexedWriterName(p), binary.BinaryIndexedReaderName(p))
 		}
 
 		sort.Slice(protocolsMembers, func(i, j int) bool {
@@ -195,9 +196,9 @@ if _parse_version(_np.__version__) < _MIN_NUMPY_VERSION:
 		})
 		fmt.Fprintf(w, ")\n")
 
-		for i, p := range ns.Protocols {
-			protocolsMembers[i*2] = ndjson.NDJsonWriterName(p)
-			protocolsMembers[i*2+1] = ndjson.NDJsonReaderName(p)
+		protocolsMembers = nil
+		for _, p := range ns.Protocols {
+			protocolsMembers = append(protocolsMembers, ndjson.NDJsonWriterName(p), ndjson.NDJsonReaderName(p))
 		}
 
 		sort.Slice(protocolsMembers, func(i, j int) bool {

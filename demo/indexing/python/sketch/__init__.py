@@ -20,11 +20,8 @@ if _parse_version(_np.__version__) < _MIN_NUMPY_VERSION:
 
 from .yardl_types import *
 from .types import (
-    BinaryTree,
-    Directory,
-    DirectoryEntry,
-    File,
-    LinkedList,
+    Header,
+    Sample,
     get_dtype,
 )
 from .protocols import (
