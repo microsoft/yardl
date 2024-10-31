@@ -19,8 +19,12 @@ cpp_version := "17"
 @build: generate configure
     cd cpp/build && ninja
 
-@run: build
+@run: run-cpp run-python
+
+@run-cpp: build
     echo "-------- C++ demo --------"; \
     ./cpp/build/sketch; \
+
+@run-python: generate
     echo "-------- Python demo --------"; \
     python python/main.py

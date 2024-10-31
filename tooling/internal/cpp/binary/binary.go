@@ -252,6 +252,8 @@ func writeHeaderFile(env *dsl.Environment, options packaging.CppCodegenOptions) 
 					}
 
 					if step.IsStream() {
+						fmt.Fprintf(w, "bool %s(%s& value) override;\n", common.ProtocolReadImplMethodName(step), common.TypeSyntax(step.Type))
+						fmt.Fprintf(w, "bool %s(std::vector<%s>& values) override;\n", common.ProtocolReadImplMethodName(step), common.TypeSyntax(step.Type))
 						fmt.Fprintf(w, "bool %s(%s& value, size_t idx) override;\n", common.ProtocolReadImplMethodName(step), common.TypeSyntax(step.Type))
 						fmt.Fprintf(w, "bool %s(std::vector<%s>& values, size_t idx) override;\n", common.ProtocolReadImplMethodName(step), common.TypeSyntax(step.Type))
 						fmt.Fprintf(w, "size_t %s() override;\n", common.ProtocolStreamSizeImplMethodName(step))
@@ -1102,6 +1104,42 @@ func writeProtocolMethods(w *formatting.IndentedWriter, p *dsl.ProtocolDefinitio
 		stepChanges := extractStepChanges(i)
 
 		if step.IsStream() {
+			stepChanges := extractStepChanges(i)
+
+			nextStep := "std::nullopt"
+			if i+1 < len(p.Sequence) {
+				nextStep = fmt.Sprintf("\"%s\"", formatting.ToPascalCase(p.Sequence[i+1].Name))
+			}
+
+			fmt.Fprintf(w, "bool %s::%s(%s& value) {\n", indexedReaderClassName, common.ProtocolReadImplMethodName(step), common.TypeSyntax(step.Type))
+			w.Indented(func() {
+				fmt.Fprintf(w, "if (!step_index_.offset_within_stream(\"%s\", %s, stream_.Pos())) {\n", formatting.ToPascalCase(step.Name), nextStep)
+				w.Indented(func() {
+					fmt.Fprintf(w, "stream_.Seek(step_index_.get_step_offset(\"%s\"));\n", formatting.ToPascalCase(step.Name))
+				})
+				w.WriteStringln("}")
+
+				w.WriteStringln("bool read_block_successful = false;")
+				writeProtocolStep(w, step, stepChanges, false, false, false)
+				w.WriteStringln("return read_block_successful;")
+			})
+			w.WriteString("}\n\n")
+
+			fmt.Fprintf(w, "bool %s::%s(std::vector<%s>& values) {\n", indexedReaderClassName, common.ProtocolReadImplMethodName(step), common.TypeSyntax(step.Type))
+			w.Indented(func() {
+				fmt.Fprintf(w, "if (!step_index_.offset_within_stream(\"%s\", %s, stream_.Pos())) {\n", formatting.ToPascalCase(step.Name), nextStep)
+				w.Indented(func() {
+					fmt.Fprintf(w, "stream_.Seek(step_index_.get_step_offset(\"%s\"));\n", formatting.ToPascalCase(step.Name))
+				})
+				w.WriteStringln("}")
+
+				writeProtocolStep(w, step, stepChanges, true, false, false)
+				w.WriteStringln("return current_block_remaining_ != 0;")
+			})
+			w.WriteString("}\n\n")
+
+			////////////////////////////////
+
 			fmt.Fprintf(w, "bool %s::%s(%s& value, size_t idx) {\n", indexedReaderClassName, common.ProtocolReadImplMethodName(step), common.TypeSyntax(step.Type))
 			w.Indented(func() {
 				fmt.Fprintf(w, "size_t abs_offset = 0;\n")
@@ -1136,7 +1174,7 @@ func writeProtocolMethods(w *formatting.IndentedWriter, p *dsl.ProtocolDefinitio
 
 			fmt.Fprintf(w, "size_t %s::%s() {\n", indexedReaderClassName, common.ProtocolStreamSizeImplMethodName(step))
 			w.Indented(func() {
-				fmt.Fprintf(w, "return step_index_.get_stream_size(\"%s\");\n", formatting.ToPascalCase(step.Name))
+				fmt.Fprintf(w, "return step_index_.get_stream_count(\"%s\");\n", formatting.ToPascalCase(step.Name))
 			})
 			w.WriteString("}\n\n")
 		} else {
