@@ -268,5 +268,9 @@ class MyProtocolIndexedReaderBase(MyProtocolReaderBase):
     def _read_cwd(self, idx: int = 0) -> collections.abc.Iterable[DirectoryEntry]:
         raise NotImplementedError()
 
+    @abc.abstractmethod
+    def _count_cwd(self) -> int:
+        raise NotImplementedError()
+
     def _raise_unexpected_state(self, actual: int) -> None:
         pass

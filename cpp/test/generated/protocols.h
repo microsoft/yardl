@@ -42,9 +42,11 @@ class BenchmarkFloat256x256WriterBase {
   static std::string SchemaFromVersion(Version version);
 
   private:
+  virtual void InvalidState(uint8_t attempted, [[maybe_unused]] bool end);
   uint8_t state_ = 0;
 
   friend class BenchmarkFloat256x256ReaderBase;
+  friend class BenchmarkFloat256x256IndexedReaderBase;
 };
 
 // Abstract reader for the BenchmarkFloat256x256 protocol.
@@ -74,7 +76,27 @@ class BenchmarkFloat256x256ReaderBase {
   static Version VersionFromSchema(const std::string& schema);
 
   private:
+  virtual void InvalidState(uint8_t attempted);
   uint8_t state_ = 0;
+};
+
+// Abstract Indexed reader for the BenchmarkFloat256x256 protocol.
+class BenchmarkFloat256x256IndexedReaderBase : public BenchmarkFloat256x256ReaderBase {
+  public:
+  using BenchmarkFloat256x256ReaderBase::ReadFloat256x256;
+  [[nodiscard]] bool ReadFloat256x256(yardl::FixedNDArray<float, 256, 256>& value, size_t idx);
+  [[nodiscard]] bool ReadFloat256x256(std::vector<yardl::FixedNDArray<float, 256, 256>>& values, size_t idx);
+  [[nodiscard]] size_t CountFloat256x256();
+
+  virtual ~BenchmarkFloat256x256IndexedReaderBase() = default;
+
+  protected:
+  virtual bool ReadFloat256x256Impl(yardl::FixedNDArray<float, 256, 256>& value, size_t idx) = 0;
+  virtual bool ReadFloat256x256Impl(std::vector<yardl::FixedNDArray<float, 256, 256>>& values, size_t idx) = 0;
+  virtual size_t CountFloat256x256Impl() = 0;
+  virtual void CloseImpl() {}
+  private:
+  virtual void InvalidState(uint8_t attempted) override;
 };
 
 // Abstract writer for the BenchmarkInt256x256 protocol.
@@ -112,9 +134,11 @@ class BenchmarkInt256x256WriterBase {
   static std::string SchemaFromVersion(Version version);
 
   private:
+  virtual void InvalidState(uint8_t attempted, [[maybe_unused]] bool end);
   uint8_t state_ = 0;
 
   friend class BenchmarkInt256x256ReaderBase;
+  friend class BenchmarkInt256x256IndexedReaderBase;
 };
 
 // Abstract reader for the BenchmarkInt256x256 protocol.
@@ -144,7 +168,27 @@ class BenchmarkInt256x256ReaderBase {
   static Version VersionFromSchema(const std::string& schema);
 
   private:
+  virtual void InvalidState(uint8_t attempted);
   uint8_t state_ = 0;
+};
+
+// Abstract Indexed reader for the BenchmarkInt256x256 protocol.
+class BenchmarkInt256x256IndexedReaderBase : public BenchmarkInt256x256ReaderBase {
+  public:
+  using BenchmarkInt256x256ReaderBase::ReadInt256x256;
+  [[nodiscard]] bool ReadInt256x256(yardl::FixedNDArray<int32_t, 256, 256>& value, size_t idx);
+  [[nodiscard]] bool ReadInt256x256(std::vector<yardl::FixedNDArray<int32_t, 256, 256>>& values, size_t idx);
+  [[nodiscard]] size_t CountInt256x256();
+
+  virtual ~BenchmarkInt256x256IndexedReaderBase() = default;
+
+  protected:
+  virtual bool ReadInt256x256Impl(yardl::FixedNDArray<int32_t, 256, 256>& value, size_t idx) = 0;
+  virtual bool ReadInt256x256Impl(std::vector<yardl::FixedNDArray<int32_t, 256, 256>>& values, size_t idx) = 0;
+  virtual size_t CountInt256x256Impl() = 0;
+  virtual void CloseImpl() {}
+  private:
+  virtual void InvalidState(uint8_t attempted) override;
 };
 
 // Abstract writer for the BenchmarkFloatVlen protocol.
@@ -182,9 +226,11 @@ class BenchmarkFloatVlenWriterBase {
   static std::string SchemaFromVersion(Version version);
 
   private:
+  virtual void InvalidState(uint8_t attempted, [[maybe_unused]] bool end);
   uint8_t state_ = 0;
 
   friend class BenchmarkFloatVlenReaderBase;
+  friend class BenchmarkFloatVlenIndexedReaderBase;
 };
 
 // Abstract reader for the BenchmarkFloatVlen protocol.
@@ -214,7 +260,27 @@ class BenchmarkFloatVlenReaderBase {
   static Version VersionFromSchema(const std::string& schema);
 
   private:
+  virtual void InvalidState(uint8_t attempted);
   uint8_t state_ = 0;
+};
+
+// Abstract Indexed reader for the BenchmarkFloatVlen protocol.
+class BenchmarkFloatVlenIndexedReaderBase : public BenchmarkFloatVlenReaderBase {
+  public:
+  using BenchmarkFloatVlenReaderBase::ReadFloatArray;
+  [[nodiscard]] bool ReadFloatArray(yardl::NDArray<float, 2>& value, size_t idx);
+  [[nodiscard]] bool ReadFloatArray(std::vector<yardl::NDArray<float, 2>>& values, size_t idx);
+  [[nodiscard]] size_t CountFloatArray();
+
+  virtual ~BenchmarkFloatVlenIndexedReaderBase() = default;
+
+  protected:
+  virtual bool ReadFloatArrayImpl(yardl::NDArray<float, 2>& value, size_t idx) = 0;
+  virtual bool ReadFloatArrayImpl(std::vector<yardl::NDArray<float, 2>>& values, size_t idx) = 0;
+  virtual size_t CountFloatArrayImpl() = 0;
+  virtual void CloseImpl() {}
+  private:
+  virtual void InvalidState(uint8_t attempted) override;
 };
 
 // Abstract writer for the BenchmarkSmallRecord protocol.
@@ -252,9 +318,11 @@ class BenchmarkSmallRecordWriterBase {
   static std::string SchemaFromVersion(Version version);
 
   private:
+  virtual void InvalidState(uint8_t attempted, [[maybe_unused]] bool end);
   uint8_t state_ = 0;
 
   friend class BenchmarkSmallRecordReaderBase;
+  friend class BenchmarkSmallRecordIndexedReaderBase;
 };
 
 // Abstract reader for the BenchmarkSmallRecord protocol.
@@ -284,7 +352,27 @@ class BenchmarkSmallRecordReaderBase {
   static Version VersionFromSchema(const std::string& schema);
 
   private:
+  virtual void InvalidState(uint8_t attempted);
   uint8_t state_ = 0;
+};
+
+// Abstract Indexed reader for the BenchmarkSmallRecord protocol.
+class BenchmarkSmallRecordIndexedReaderBase : public BenchmarkSmallRecordReaderBase {
+  public:
+  using BenchmarkSmallRecordReaderBase::ReadSmallRecord;
+  [[nodiscard]] bool ReadSmallRecord(test_model::SmallBenchmarkRecord& value, size_t idx);
+  [[nodiscard]] bool ReadSmallRecord(std::vector<test_model::SmallBenchmarkRecord>& values, size_t idx);
+  [[nodiscard]] size_t CountSmallRecord();
+
+  virtual ~BenchmarkSmallRecordIndexedReaderBase() = default;
+
+  protected:
+  virtual bool ReadSmallRecordImpl(test_model::SmallBenchmarkRecord& value, size_t idx) = 0;
+  virtual bool ReadSmallRecordImpl(std::vector<test_model::SmallBenchmarkRecord>& values, size_t idx) = 0;
+  virtual size_t CountSmallRecordImpl() = 0;
+  virtual void CloseImpl() {}
+  private:
+  virtual void InvalidState(uint8_t attempted) override;
 };
 
 // Abstract writer for the BenchmarkSmallRecordWithOptionals protocol.
@@ -322,9 +410,11 @@ class BenchmarkSmallRecordWithOptionalsWriterBase {
   static std::string SchemaFromVersion(Version version);
 
   private:
+  virtual void InvalidState(uint8_t attempted, [[maybe_unused]] bool end);
   uint8_t state_ = 0;
 
   friend class BenchmarkSmallRecordWithOptionalsReaderBase;
+  friend class BenchmarkSmallRecordWithOptionalsIndexedReaderBase;
 };
 
 // Abstract reader for the BenchmarkSmallRecordWithOptionals protocol.
@@ -354,7 +444,27 @@ class BenchmarkSmallRecordWithOptionalsReaderBase {
   static Version VersionFromSchema(const std::string& schema);
 
   private:
+  virtual void InvalidState(uint8_t attempted);
   uint8_t state_ = 0;
+};
+
+// Abstract Indexed reader for the BenchmarkSmallRecordWithOptionals protocol.
+class BenchmarkSmallRecordWithOptionalsIndexedReaderBase : public BenchmarkSmallRecordWithOptionalsReaderBase {
+  public:
+  using BenchmarkSmallRecordWithOptionalsReaderBase::ReadSmallRecord;
+  [[nodiscard]] bool ReadSmallRecord(test_model::SimpleEncodingCounters& value, size_t idx);
+  [[nodiscard]] bool ReadSmallRecord(std::vector<test_model::SimpleEncodingCounters>& values, size_t idx);
+  [[nodiscard]] size_t CountSmallRecord();
+
+  virtual ~BenchmarkSmallRecordWithOptionalsIndexedReaderBase() = default;
+
+  protected:
+  virtual bool ReadSmallRecordImpl(test_model::SimpleEncodingCounters& value, size_t idx) = 0;
+  virtual bool ReadSmallRecordImpl(std::vector<test_model::SimpleEncodingCounters>& values, size_t idx) = 0;
+  virtual size_t CountSmallRecordImpl() = 0;
+  virtual void CloseImpl() {}
+  private:
+  virtual void InvalidState(uint8_t attempted) override;
 };
 
 // Abstract writer for the BenchmarkSimpleMrd protocol.
@@ -392,9 +502,11 @@ class BenchmarkSimpleMrdWriterBase {
   static std::string SchemaFromVersion(Version version);
 
   private:
+  virtual void InvalidState(uint8_t attempted, [[maybe_unused]] bool end);
   uint8_t state_ = 0;
 
   friend class BenchmarkSimpleMrdReaderBase;
+  friend class BenchmarkSimpleMrdIndexedReaderBase;
 };
 
 // Abstract reader for the BenchmarkSimpleMrd protocol.
@@ -424,7 +536,27 @@ class BenchmarkSimpleMrdReaderBase {
   static Version VersionFromSchema(const std::string& schema);
 
   private:
+  virtual void InvalidState(uint8_t attempted);
   uint8_t state_ = 0;
+};
+
+// Abstract Indexed reader for the BenchmarkSimpleMrd protocol.
+class BenchmarkSimpleMrdIndexedReaderBase : public BenchmarkSimpleMrdReaderBase {
+  public:
+  using BenchmarkSimpleMrdReaderBase::ReadData;
+  [[nodiscard]] bool ReadData(std::variant<test_model::SimpleAcquisition, image::Image<float>>& value, size_t idx);
+  [[nodiscard]] bool ReadData(std::vector<std::variant<test_model::SimpleAcquisition, image::Image<float>>>& values, size_t idx);
+  [[nodiscard]] size_t CountData();
+
+  virtual ~BenchmarkSimpleMrdIndexedReaderBase() = default;
+
+  protected:
+  virtual bool ReadDataImpl(std::variant<test_model::SimpleAcquisition, image::Image<float>>& value, size_t idx) = 0;
+  virtual bool ReadDataImpl(std::vector<std::variant<test_model::SimpleAcquisition, image::Image<float>>>& values, size_t idx) = 0;
+  virtual size_t CountDataImpl() = 0;
+  virtual void CloseImpl() {}
+  private:
+  virtual void InvalidState(uint8_t attempted) override;
 };
 
 // Abstract writer for the Scalars protocol.
@@ -456,9 +588,11 @@ class ScalarsWriterBase {
   static std::string SchemaFromVersion(Version version);
 
   private:
+  virtual void InvalidState(uint8_t attempted, [[maybe_unused]] bool end);
   uint8_t state_ = 0;
 
   friend class ScalarsReaderBase;
+  friend class ScalarsIndexedReaderBase;
 };
 
 // Abstract reader for the Scalars protocol.
@@ -488,7 +622,19 @@ class ScalarsReaderBase {
   static Version VersionFromSchema(const std::string& schema);
 
   private:
+  virtual void InvalidState(uint8_t attempted);
   uint8_t state_ = 0;
+};
+
+// Abstract Indexed reader for the Scalars protocol.
+class ScalarsIndexedReaderBase : public ScalarsReaderBase {
+  public:
+  virtual ~ScalarsIndexedReaderBase() = default;
+
+  protected:
+  virtual void CloseImpl() {}
+  private:
+  virtual void InvalidState(uint8_t attempted) override;
 };
 
 // Abstract writer for the ScalarOptionals protocol.
@@ -528,9 +674,11 @@ class ScalarOptionalsWriterBase {
   static std::string SchemaFromVersion(Version version);
 
   private:
+  virtual void InvalidState(uint8_t attempted, [[maybe_unused]] bool end);
   uint8_t state_ = 0;
 
   friend class ScalarOptionalsReaderBase;
+  friend class ScalarOptionalsIndexedReaderBase;
 };
 
 // Abstract reader for the ScalarOptionals protocol.
@@ -568,7 +716,19 @@ class ScalarOptionalsReaderBase {
   static Version VersionFromSchema(const std::string& schema);
 
   private:
+  virtual void InvalidState(uint8_t attempted);
   uint8_t state_ = 0;
+};
+
+// Abstract Indexed reader for the ScalarOptionals protocol.
+class ScalarOptionalsIndexedReaderBase : public ScalarOptionalsReaderBase {
+  public:
+  virtual ~ScalarOptionalsIndexedReaderBase() = default;
+
+  protected:
+  virtual void CloseImpl() {}
+  private:
+  virtual void InvalidState(uint8_t attempted) override;
 };
 
 // Abstract writer for the NestedRecords protocol.
@@ -596,9 +756,11 @@ class NestedRecordsWriterBase {
   static std::string SchemaFromVersion(Version version);
 
   private:
+  virtual void InvalidState(uint8_t attempted, [[maybe_unused]] bool end);
   uint8_t state_ = 0;
 
   friend class NestedRecordsReaderBase;
+  friend class NestedRecordsIndexedReaderBase;
 };
 
 // Abstract reader for the NestedRecords protocol.
@@ -624,7 +786,19 @@ class NestedRecordsReaderBase {
   static Version VersionFromSchema(const std::string& schema);
 
   private:
+  virtual void InvalidState(uint8_t attempted);
   uint8_t state_ = 0;
+};
+
+// Abstract Indexed reader for the NestedRecords protocol.
+class NestedRecordsIndexedReaderBase : public NestedRecordsReaderBase {
+  public:
+  virtual ~NestedRecordsIndexedReaderBase() = default;
+
+  protected:
+  virtual void CloseImpl() {}
+  private:
+  virtual void InvalidState(uint8_t attempted) override;
 };
 
 // Abstract writer for the Vlens protocol.
@@ -664,9 +838,11 @@ class VlensWriterBase {
   static std::string SchemaFromVersion(Version version);
 
   private:
+  virtual void InvalidState(uint8_t attempted, [[maybe_unused]] bool end);
   uint8_t state_ = 0;
 
   friend class VlensReaderBase;
+  friend class VlensIndexedReaderBase;
 };
 
 // Abstract reader for the Vlens protocol.
@@ -704,7 +880,19 @@ class VlensReaderBase {
   static Version VersionFromSchema(const std::string& schema);
 
   private:
+  virtual void InvalidState(uint8_t attempted);
   uint8_t state_ = 0;
+};
+
+// Abstract Indexed reader for the Vlens protocol.
+class VlensIndexedReaderBase : public VlensReaderBase {
+  public:
+  virtual ~VlensIndexedReaderBase() = default;
+
+  protected:
+  virtual void CloseImpl() {}
+  private:
+  virtual void InvalidState(uint8_t attempted) override;
 };
 
 // Abstract writer for the Strings protocol.
@@ -736,9 +924,11 @@ class StringsWriterBase {
   static std::string SchemaFromVersion(Version version);
 
   private:
+  virtual void InvalidState(uint8_t attempted, [[maybe_unused]] bool end);
   uint8_t state_ = 0;
 
   friend class StringsReaderBase;
+  friend class StringsIndexedReaderBase;
 };
 
 // Abstract reader for the Strings protocol.
@@ -768,7 +958,19 @@ class StringsReaderBase {
   static Version VersionFromSchema(const std::string& schema);
 
   private:
+  virtual void InvalidState(uint8_t attempted);
   uint8_t state_ = 0;
+};
+
+// Abstract Indexed reader for the Strings protocol.
+class StringsIndexedReaderBase : public StringsReaderBase {
+  public:
+  virtual ~StringsIndexedReaderBase() = default;
+
+  protected:
+  virtual void CloseImpl() {}
+  private:
+  virtual void InvalidState(uint8_t attempted) override;
 };
 
 // Abstract writer for the OptionalVectors protocol.
@@ -796,9 +998,11 @@ class OptionalVectorsWriterBase {
   static std::string SchemaFromVersion(Version version);
 
   private:
+  virtual void InvalidState(uint8_t attempted, [[maybe_unused]] bool end);
   uint8_t state_ = 0;
 
   friend class OptionalVectorsReaderBase;
+  friend class OptionalVectorsIndexedReaderBase;
 };
 
 // Abstract reader for the OptionalVectors protocol.
@@ -824,7 +1028,19 @@ class OptionalVectorsReaderBase {
   static Version VersionFromSchema(const std::string& schema);
 
   private:
+  virtual void InvalidState(uint8_t attempted);
   uint8_t state_ = 0;
+};
+
+// Abstract Indexed reader for the OptionalVectors protocol.
+class OptionalVectorsIndexedReaderBase : public OptionalVectorsReaderBase {
+  public:
+  virtual ~OptionalVectorsIndexedReaderBase() = default;
+
+  protected:
+  virtual void CloseImpl() {}
+  private:
+  virtual void InvalidState(uint8_t attempted) override;
 };
 
 // Abstract writer for the FixedVectors protocol.
@@ -864,9 +1080,11 @@ class FixedVectorsWriterBase {
   static std::string SchemaFromVersion(Version version);
 
   private:
+  virtual void InvalidState(uint8_t attempted, [[maybe_unused]] bool end);
   uint8_t state_ = 0;
 
   friend class FixedVectorsReaderBase;
+  friend class FixedVectorsIndexedReaderBase;
 };
 
 // Abstract reader for the FixedVectors protocol.
@@ -904,7 +1122,19 @@ class FixedVectorsReaderBase {
   static Version VersionFromSchema(const std::string& schema);
 
   private:
+  virtual void InvalidState(uint8_t attempted);
   uint8_t state_ = 0;
+};
+
+// Abstract Indexed reader for the FixedVectors protocol.
+class FixedVectorsIndexedReaderBase : public FixedVectorsReaderBase {
+  public:
+  virtual ~FixedVectorsIndexedReaderBase() = default;
+
+  protected:
+  virtual void CloseImpl() {}
+  private:
+  virtual void InvalidState(uint8_t attempted) override;
 };
 
 // Abstract writer for the Streams protocol.
@@ -984,9 +1214,11 @@ class StreamsWriterBase {
   static std::string SchemaFromVersion(Version version);
 
   private:
+  virtual void InvalidState(uint8_t attempted, [[maybe_unused]] bool end);
   uint8_t state_ = 0;
 
   friend class StreamsReaderBase;
+  friend class StreamsIndexedReaderBase;
 };
 
 // Abstract reader for the Streams protocol.
@@ -1040,7 +1272,51 @@ class StreamsReaderBase {
   static Version VersionFromSchema(const std::string& schema);
 
   private:
+  virtual void InvalidState(uint8_t attempted);
   uint8_t state_ = 0;
+};
+
+// Abstract Indexed reader for the Streams protocol.
+class StreamsIndexedReaderBase : public StreamsReaderBase {
+  public:
+  using StreamsReaderBase::ReadIntData;
+  [[nodiscard]] bool ReadIntData(int32_t& value, size_t idx);
+  [[nodiscard]] bool ReadIntData(std::vector<int32_t>& values, size_t idx);
+  [[nodiscard]] size_t CountIntData();
+
+  using StreamsReaderBase::ReadOptionalIntData;
+  [[nodiscard]] bool ReadOptionalIntData(std::optional<int32_t>& value, size_t idx);
+  [[nodiscard]] bool ReadOptionalIntData(std::vector<std::optional<int32_t>>& values, size_t idx);
+  [[nodiscard]] size_t CountOptionalIntData();
+
+  using StreamsReaderBase::ReadRecordWithOptionalVectorData;
+  [[nodiscard]] bool ReadRecordWithOptionalVectorData(test_model::RecordWithOptionalVector& value, size_t idx);
+  [[nodiscard]] bool ReadRecordWithOptionalVectorData(std::vector<test_model::RecordWithOptionalVector>& values, size_t idx);
+  [[nodiscard]] size_t CountRecordWithOptionalVectorData();
+
+  using StreamsReaderBase::ReadFixedVector;
+  [[nodiscard]] bool ReadFixedVector(std::array<int32_t, 3>& value, size_t idx);
+  [[nodiscard]] bool ReadFixedVector(std::vector<std::array<int32_t, 3>>& values, size_t idx);
+  [[nodiscard]] size_t CountFixedVector();
+
+  virtual ~StreamsIndexedReaderBase() = default;
+
+  protected:
+  virtual bool ReadIntDataImpl(int32_t& value, size_t idx) = 0;
+  virtual bool ReadIntDataImpl(std::vector<int32_t>& values, size_t idx) = 0;
+  virtual size_t CountIntDataImpl() = 0;
+  virtual bool ReadOptionalIntDataImpl(std::optional<int32_t>& value, size_t idx) = 0;
+  virtual bool ReadOptionalIntDataImpl(std::vector<std::optional<int32_t>>& values, size_t idx) = 0;
+  virtual size_t CountOptionalIntDataImpl() = 0;
+  virtual bool ReadRecordWithOptionalVectorDataImpl(test_model::RecordWithOptionalVector& value, size_t idx) = 0;
+  virtual bool ReadRecordWithOptionalVectorDataImpl(std::vector<test_model::RecordWithOptionalVector>& values, size_t idx) = 0;
+  virtual size_t CountRecordWithOptionalVectorDataImpl() = 0;
+  virtual bool ReadFixedVectorImpl(std::array<int32_t, 3>& value, size_t idx) = 0;
+  virtual bool ReadFixedVectorImpl(std::vector<std::array<int32_t, 3>>& values, size_t idx) = 0;
+  virtual size_t CountFixedVectorImpl() = 0;
+  virtual void CloseImpl() {}
+  private:
+  virtual void InvalidState(uint8_t attempted) override;
 };
 
 // Abstract writer for the FixedArrays protocol.
@@ -1084,9 +1360,11 @@ class FixedArraysWriterBase {
   static std::string SchemaFromVersion(Version version);
 
   private:
+  virtual void InvalidState(uint8_t attempted, [[maybe_unused]] bool end);
   uint8_t state_ = 0;
 
   friend class FixedArraysReaderBase;
+  friend class FixedArraysIndexedReaderBase;
 };
 
 // Abstract reader for the FixedArrays protocol.
@@ -1128,7 +1406,19 @@ class FixedArraysReaderBase {
   static Version VersionFromSchema(const std::string& schema);
 
   private:
+  virtual void InvalidState(uint8_t attempted);
   uint8_t state_ = 0;
+};
+
+// Abstract Indexed reader for the FixedArrays protocol.
+class FixedArraysIndexedReaderBase : public FixedArraysReaderBase {
+  public:
+  virtual ~FixedArraysIndexedReaderBase() = default;
+
+  protected:
+  virtual void CloseImpl() {}
+  private:
+  virtual void InvalidState(uint8_t attempted) override;
 };
 
 // Abstract writer for the Subarrays protocol.
@@ -1188,9 +1478,11 @@ class SubarraysWriterBase {
   static std::string SchemaFromVersion(Version version);
 
   private:
+  virtual void InvalidState(uint8_t attempted, [[maybe_unused]] bool end);
   uint8_t state_ = 0;
 
   friend class SubarraysReaderBase;
+  friend class SubarraysIndexedReaderBase;
 };
 
 // Abstract reader for the Subarrays protocol.
@@ -1248,7 +1540,19 @@ class SubarraysReaderBase {
   static Version VersionFromSchema(const std::string& schema);
 
   private:
+  virtual void InvalidState(uint8_t attempted);
   uint8_t state_ = 0;
+};
+
+// Abstract Indexed reader for the Subarrays protocol.
+class SubarraysIndexedReaderBase : public SubarraysReaderBase {
+  public:
+  virtual ~SubarraysIndexedReaderBase() = default;
+
+  protected:
+  virtual void CloseImpl() {}
+  private:
+  virtual void InvalidState(uint8_t attempted) override;
 };
 
 // Abstract writer for the SubarraysInRecords protocol.
@@ -1280,9 +1584,11 @@ class SubarraysInRecordsWriterBase {
   static std::string SchemaFromVersion(Version version);
 
   private:
+  virtual void InvalidState(uint8_t attempted, [[maybe_unused]] bool end);
   uint8_t state_ = 0;
 
   friend class SubarraysInRecordsReaderBase;
+  friend class SubarraysInRecordsIndexedReaderBase;
 };
 
 // Abstract reader for the SubarraysInRecords protocol.
@@ -1312,7 +1618,19 @@ class SubarraysInRecordsReaderBase {
   static Version VersionFromSchema(const std::string& schema);
 
   private:
+  virtual void InvalidState(uint8_t attempted);
   uint8_t state_ = 0;
+};
+
+// Abstract Indexed reader for the SubarraysInRecords protocol.
+class SubarraysInRecordsIndexedReaderBase : public SubarraysInRecordsReaderBase {
+  public:
+  virtual ~SubarraysInRecordsIndexedReaderBase() = default;
+
+  protected:
+  virtual void CloseImpl() {}
+  private:
+  virtual void InvalidState(uint8_t attempted) override;
 };
 
 // Abstract writer for the NDArrays protocol.
@@ -1356,9 +1674,11 @@ class NDArraysWriterBase {
   static std::string SchemaFromVersion(Version version);
 
   private:
+  virtual void InvalidState(uint8_t attempted, [[maybe_unused]] bool end);
   uint8_t state_ = 0;
 
   friend class NDArraysReaderBase;
+  friend class NDArraysIndexedReaderBase;
 };
 
 // Abstract reader for the NDArrays protocol.
@@ -1400,7 +1720,19 @@ class NDArraysReaderBase {
   static Version VersionFromSchema(const std::string& schema);
 
   private:
+  virtual void InvalidState(uint8_t attempted);
   uint8_t state_ = 0;
+};
+
+// Abstract Indexed reader for the NDArrays protocol.
+class NDArraysIndexedReaderBase : public NDArraysReaderBase {
+  public:
+  virtual ~NDArraysIndexedReaderBase() = default;
+
+  protected:
+  virtual void CloseImpl() {}
+  private:
+  virtual void InvalidState(uint8_t attempted) override;
 };
 
 // Abstract writer for the NDArraysSingleDimension protocol.
@@ -1440,9 +1772,11 @@ class NDArraysSingleDimensionWriterBase {
   static std::string SchemaFromVersion(Version version);
 
   private:
+  virtual void InvalidState(uint8_t attempted, [[maybe_unused]] bool end);
   uint8_t state_ = 0;
 
   friend class NDArraysSingleDimensionReaderBase;
+  friend class NDArraysSingleDimensionIndexedReaderBase;
 };
 
 // Abstract reader for the NDArraysSingleDimension protocol.
@@ -1480,7 +1814,19 @@ class NDArraysSingleDimensionReaderBase {
   static Version VersionFromSchema(const std::string& schema);
 
   private:
+  virtual void InvalidState(uint8_t attempted);
   uint8_t state_ = 0;
+};
+
+// Abstract Indexed reader for the NDArraysSingleDimension protocol.
+class NDArraysSingleDimensionIndexedReaderBase : public NDArraysSingleDimensionReaderBase {
+  public:
+  virtual ~NDArraysSingleDimensionIndexedReaderBase() = default;
+
+  protected:
+  virtual void CloseImpl() {}
+  private:
+  virtual void InvalidState(uint8_t attempted) override;
 };
 
 // Abstract writer for the DynamicNDArrays protocol.
@@ -1520,9 +1866,11 @@ class DynamicNDArraysWriterBase {
   static std::string SchemaFromVersion(Version version);
 
   private:
+  virtual void InvalidState(uint8_t attempted, [[maybe_unused]] bool end);
   uint8_t state_ = 0;
 
   friend class DynamicNDArraysReaderBase;
+  friend class DynamicNDArraysIndexedReaderBase;
 };
 
 // Abstract reader for the DynamicNDArrays protocol.
@@ -1560,7 +1908,19 @@ class DynamicNDArraysReaderBase {
   static Version VersionFromSchema(const std::string& schema);
 
   private:
+  virtual void InvalidState(uint8_t attempted);
   uint8_t state_ = 0;
+};
+
+// Abstract Indexed reader for the DynamicNDArrays protocol.
+class DynamicNDArraysIndexedReaderBase : public DynamicNDArraysReaderBase {
+  public:
+  virtual ~DynamicNDArraysIndexedReaderBase() = default;
+
+  protected:
+  virtual void CloseImpl() {}
+  private:
+  virtual void InvalidState(uint8_t attempted) override;
 };
 
 // Abstract writer for the MultiDArrays protocol.
@@ -1612,9 +1972,11 @@ class MultiDArraysWriterBase {
   static std::string SchemaFromVersion(Version version);
 
   private:
+  virtual void InvalidState(uint8_t attempted, [[maybe_unused]] bool end);
   uint8_t state_ = 0;
 
   friend class MultiDArraysReaderBase;
+  friend class MultiDArraysIndexedReaderBase;
 };
 
 // Abstract reader for the MultiDArrays protocol.
@@ -1652,7 +2014,35 @@ class MultiDArraysReaderBase {
   static Version VersionFromSchema(const std::string& schema);
 
   private:
+  virtual void InvalidState(uint8_t attempted);
   uint8_t state_ = 0;
+};
+
+// Abstract Indexed reader for the MultiDArrays protocol.
+class MultiDArraysIndexedReaderBase : public MultiDArraysReaderBase {
+  public:
+  using MultiDArraysReaderBase::ReadImages;
+  [[nodiscard]] bool ReadImages(yardl::NDArray<float, 4>& value, size_t idx);
+  [[nodiscard]] bool ReadImages(std::vector<yardl::NDArray<float, 4>>& values, size_t idx);
+  [[nodiscard]] size_t CountImages();
+
+  using MultiDArraysReaderBase::ReadFrames;
+  [[nodiscard]] bool ReadFrames(yardl::FixedNDArray<float, 1, 1, 64, 32>& value, size_t idx);
+  [[nodiscard]] bool ReadFrames(std::vector<yardl::FixedNDArray<float, 1, 1, 64, 32>>& values, size_t idx);
+  [[nodiscard]] size_t CountFrames();
+
+  virtual ~MultiDArraysIndexedReaderBase() = default;
+
+  protected:
+  virtual bool ReadImagesImpl(yardl::NDArray<float, 4>& value, size_t idx) = 0;
+  virtual bool ReadImagesImpl(std::vector<yardl::NDArray<float, 4>>& values, size_t idx) = 0;
+  virtual size_t CountImagesImpl() = 0;
+  virtual bool ReadFramesImpl(yardl::FixedNDArray<float, 1, 1, 64, 32>& value, size_t idx) = 0;
+  virtual bool ReadFramesImpl(std::vector<yardl::FixedNDArray<float, 1, 1, 64, 32>>& values, size_t idx) = 0;
+  virtual size_t CountFramesImpl() = 0;
+  virtual void CloseImpl() {}
+  private:
+  virtual void InvalidState(uint8_t attempted) override;
 };
 
 // Abstract writer for the ComplexArrays protocol.
@@ -1684,9 +2074,11 @@ class ComplexArraysWriterBase {
   static std::string SchemaFromVersion(Version version);
 
   private:
+  virtual void InvalidState(uint8_t attempted, [[maybe_unused]] bool end);
   uint8_t state_ = 0;
 
   friend class ComplexArraysReaderBase;
+  friend class ComplexArraysIndexedReaderBase;
 };
 
 // Abstract reader for the ComplexArrays protocol.
@@ -1716,7 +2108,19 @@ class ComplexArraysReaderBase {
   static Version VersionFromSchema(const std::string& schema);
 
   private:
+  virtual void InvalidState(uint8_t attempted);
   uint8_t state_ = 0;
+};
+
+// Abstract Indexed reader for the ComplexArrays protocol.
+class ComplexArraysIndexedReaderBase : public ComplexArraysReaderBase {
+  public:
+  virtual ~ComplexArraysIndexedReaderBase() = default;
+
+  protected:
+  virtual void CloseImpl() {}
+  private:
+  virtual void InvalidState(uint8_t attempted) override;
 };
 
 // Abstract writer for the Maps protocol.
@@ -1760,9 +2164,11 @@ class MapsWriterBase {
   static std::string SchemaFromVersion(Version version);
 
   private:
+  virtual void InvalidState(uint8_t attempted, [[maybe_unused]] bool end);
   uint8_t state_ = 0;
 
   friend class MapsReaderBase;
+  friend class MapsIndexedReaderBase;
 };
 
 // Abstract reader for the Maps protocol.
@@ -1804,7 +2210,19 @@ class MapsReaderBase {
   static Version VersionFromSchema(const std::string& schema);
 
   private:
+  virtual void InvalidState(uint8_t attempted);
   uint8_t state_ = 0;
+};
+
+// Abstract Indexed reader for the Maps protocol.
+class MapsIndexedReaderBase : public MapsReaderBase {
+  public:
+  virtual ~MapsIndexedReaderBase() = default;
+
+  protected:
+  virtual void CloseImpl() {}
+  private:
+  virtual void InvalidState(uint8_t attempted) override;
 };
 
 // Abstract writer for the Unions protocol.
@@ -1844,9 +2262,11 @@ class UnionsWriterBase {
   static std::string SchemaFromVersion(Version version);
 
   private:
+  virtual void InvalidState(uint8_t attempted, [[maybe_unused]] bool end);
   uint8_t state_ = 0;
 
   friend class UnionsReaderBase;
+  friend class UnionsIndexedReaderBase;
 };
 
 // Abstract reader for the Unions protocol.
@@ -1884,7 +2304,19 @@ class UnionsReaderBase {
   static Version VersionFromSchema(const std::string& schema);
 
   private:
+  virtual void InvalidState(uint8_t attempted);
   uint8_t state_ = 0;
+};
+
+// Abstract Indexed reader for the Unions protocol.
+class UnionsIndexedReaderBase : public UnionsReaderBase {
+  public:
+  virtual ~UnionsIndexedReaderBase() = default;
+
+  protected:
+  virtual void CloseImpl() {}
+  private:
+  virtual void InvalidState(uint8_t attempted) override;
 };
 
 // Abstract writer for the StreamsOfUnions protocol.
@@ -1950,9 +2382,11 @@ class StreamsOfUnionsWriterBase {
   static std::string SchemaFromVersion(Version version);
 
   private:
+  virtual void InvalidState(uint8_t attempted, [[maybe_unused]] bool end);
   uint8_t state_ = 0;
 
   friend class StreamsOfUnionsReaderBase;
+  friend class StreamsOfUnionsIndexedReaderBase;
 };
 
 // Abstract reader for the StreamsOfUnions protocol.
@@ -1998,7 +2432,43 @@ class StreamsOfUnionsReaderBase {
   static Version VersionFromSchema(const std::string& schema);
 
   private:
+  virtual void InvalidState(uint8_t attempted);
   uint8_t state_ = 0;
+};
+
+// Abstract Indexed reader for the StreamsOfUnions protocol.
+class StreamsOfUnionsIndexedReaderBase : public StreamsOfUnionsReaderBase {
+  public:
+  using StreamsOfUnionsReaderBase::ReadIntOrSimpleRecord;
+  [[nodiscard]] bool ReadIntOrSimpleRecord(std::variant<int32_t, test_model::SimpleRecord>& value, size_t idx);
+  [[nodiscard]] bool ReadIntOrSimpleRecord(std::vector<std::variant<int32_t, test_model::SimpleRecord>>& values, size_t idx);
+  [[nodiscard]] size_t CountIntOrSimpleRecord();
+
+  using StreamsOfUnionsReaderBase::ReadNullableIntOrSimpleRecord;
+  [[nodiscard]] bool ReadNullableIntOrSimpleRecord(std::variant<std::monostate, int32_t, test_model::SimpleRecord>& value, size_t idx);
+  [[nodiscard]] bool ReadNullableIntOrSimpleRecord(std::vector<std::variant<std::monostate, int32_t, test_model::SimpleRecord>>& values, size_t idx);
+  [[nodiscard]] size_t CountNullableIntOrSimpleRecord();
+
+  using StreamsOfUnionsReaderBase::ReadManyCases;
+  [[nodiscard]] bool ReadManyCases(std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray>& value, size_t idx);
+  [[nodiscard]] bool ReadManyCases(std::vector<std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray>>& values, size_t idx);
+  [[nodiscard]] size_t CountManyCases();
+
+  virtual ~StreamsOfUnionsIndexedReaderBase() = default;
+
+  protected:
+  virtual bool ReadIntOrSimpleRecordImpl(std::variant<int32_t, test_model::SimpleRecord>& value, size_t idx) = 0;
+  virtual bool ReadIntOrSimpleRecordImpl(std::vector<std::variant<int32_t, test_model::SimpleRecord>>& values, size_t idx) = 0;
+  virtual size_t CountIntOrSimpleRecordImpl() = 0;
+  virtual bool ReadNullableIntOrSimpleRecordImpl(std::variant<std::monostate, int32_t, test_model::SimpleRecord>& value, size_t idx) = 0;
+  virtual bool ReadNullableIntOrSimpleRecordImpl(std::vector<std::variant<std::monostate, int32_t, test_model::SimpleRecord>>& values, size_t idx) = 0;
+  virtual size_t CountNullableIntOrSimpleRecordImpl() = 0;
+  virtual bool ReadManyCasesImpl(std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray>& value, size_t idx) = 0;
+  virtual bool ReadManyCasesImpl(std::vector<std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray>>& values, size_t idx) = 0;
+  virtual size_t CountManyCasesImpl() = 0;
+  virtual void CloseImpl() {}
+  private:
+  virtual void InvalidState(uint8_t attempted) override;
 };
 
 // Abstract writer for the Enums protocol.
@@ -2038,9 +2508,11 @@ class EnumsWriterBase {
   static std::string SchemaFromVersion(Version version);
 
   private:
+  virtual void InvalidState(uint8_t attempted, [[maybe_unused]] bool end);
   uint8_t state_ = 0;
 
   friend class EnumsReaderBase;
+  friend class EnumsIndexedReaderBase;
 };
 
 // Abstract reader for the Enums protocol.
@@ -2078,7 +2550,19 @@ class EnumsReaderBase {
   static Version VersionFromSchema(const std::string& schema);
 
   private:
+  virtual void InvalidState(uint8_t attempted);
   uint8_t state_ = 0;
+};
+
+// Abstract Indexed reader for the Enums protocol.
+class EnumsIndexedReaderBase : public EnumsReaderBase {
+  public:
+  virtual ~EnumsIndexedReaderBase() = default;
+
+  protected:
+  virtual void CloseImpl() {}
+  private:
+  virtual void InvalidState(uint8_t attempted) override;
 };
 
 // Abstract writer for the Flags protocol.
@@ -2130,9 +2614,11 @@ class FlagsWriterBase {
   static std::string SchemaFromVersion(Version version);
 
   private:
+  virtual void InvalidState(uint8_t attempted, [[maybe_unused]] bool end);
   uint8_t state_ = 0;
 
   friend class FlagsReaderBase;
+  friend class FlagsIndexedReaderBase;
 };
 
 // Abstract reader for the Flags protocol.
@@ -2170,7 +2656,35 @@ class FlagsReaderBase {
   static Version VersionFromSchema(const std::string& schema);
 
   private:
+  virtual void InvalidState(uint8_t attempted);
   uint8_t state_ = 0;
+};
+
+// Abstract Indexed reader for the Flags protocol.
+class FlagsIndexedReaderBase : public FlagsReaderBase {
+  public:
+  using FlagsReaderBase::ReadDays;
+  [[nodiscard]] bool ReadDays(test_model::DaysOfWeek& value, size_t idx);
+  [[nodiscard]] bool ReadDays(std::vector<test_model::DaysOfWeek>& values, size_t idx);
+  [[nodiscard]] size_t CountDays();
+
+  using FlagsReaderBase::ReadFormats;
+  [[nodiscard]] bool ReadFormats(test_model::TextFormat& value, size_t idx);
+  [[nodiscard]] bool ReadFormats(std::vector<test_model::TextFormat>& values, size_t idx);
+  [[nodiscard]] size_t CountFormats();
+
+  virtual ~FlagsIndexedReaderBase() = default;
+
+  protected:
+  virtual bool ReadDaysImpl(test_model::DaysOfWeek& value, size_t idx) = 0;
+  virtual bool ReadDaysImpl(std::vector<test_model::DaysOfWeek>& values, size_t idx) = 0;
+  virtual size_t CountDaysImpl() = 0;
+  virtual bool ReadFormatsImpl(test_model::TextFormat& value, size_t idx) = 0;
+  virtual bool ReadFormatsImpl(std::vector<test_model::TextFormat>& values, size_t idx) = 0;
+  virtual size_t CountFormatsImpl() = 0;
+  virtual void CloseImpl() {}
+  private:
+  virtual void InvalidState(uint8_t attempted) override;
 };
 
 // Abstract writer for the StateTest protocol.
@@ -2216,9 +2730,11 @@ class StateTestWriterBase {
   static std::string SchemaFromVersion(Version version);
 
   private:
+  virtual void InvalidState(uint8_t attempted, [[maybe_unused]] bool end);
   uint8_t state_ = 0;
 
   friend class StateTestReaderBase;
+  friend class StateTestIndexedReaderBase;
 };
 
 // Abstract reader for the StateTest protocol.
@@ -2256,7 +2772,27 @@ class StateTestReaderBase {
   static Version VersionFromSchema(const std::string& schema);
 
   private:
+  virtual void InvalidState(uint8_t attempted);
   uint8_t state_ = 0;
+};
+
+// Abstract Indexed reader for the StateTest protocol.
+class StateTestIndexedReaderBase : public StateTestReaderBase {
+  public:
+  using StateTestReaderBase::ReadAStream;
+  [[nodiscard]] bool ReadAStream(int32_t& value, size_t idx);
+  [[nodiscard]] bool ReadAStream(std::vector<int32_t>& values, size_t idx);
+  [[nodiscard]] size_t CountAStream();
+
+  virtual ~StateTestIndexedReaderBase() = default;
+
+  protected:
+  virtual bool ReadAStreamImpl(int32_t& value, size_t idx) = 0;
+  virtual bool ReadAStreamImpl(std::vector<int32_t>& values, size_t idx) = 0;
+  virtual size_t CountAStreamImpl() = 0;
+  virtual void CloseImpl() {}
+  private:
+  virtual void InvalidState(uint8_t attempted) override;
 };
 
 // Abstract writer for the SimpleGenerics protocol.
@@ -2326,9 +2862,11 @@ class SimpleGenericsWriterBase {
   static std::string SchemaFromVersion(Version version);
 
   private:
+  virtual void InvalidState(uint8_t attempted, [[maybe_unused]] bool end);
   uint8_t state_ = 0;
 
   friend class SimpleGenericsReaderBase;
+  friend class SimpleGenericsIndexedReaderBase;
 };
 
 // Abstract reader for the SimpleGenerics protocol.
@@ -2390,7 +2928,27 @@ class SimpleGenericsReaderBase {
   static Version VersionFromSchema(const std::string& schema);
 
   private:
+  virtual void InvalidState(uint8_t attempted);
   uint8_t state_ = 0;
+};
+
+// Abstract Indexed reader for the SimpleGenerics protocol.
+class SimpleGenericsIndexedReaderBase : public SimpleGenericsReaderBase {
+  public:
+  using SimpleGenericsReaderBase::ReadStreamOfTypeVariants;
+  [[nodiscard]] bool ReadStreamOfTypeVariants(std::variant<image::FloatImage, test_model::Image<double>>& value, size_t idx);
+  [[nodiscard]] bool ReadStreamOfTypeVariants(std::vector<std::variant<image::FloatImage, test_model::Image<double>>>& values, size_t idx);
+  [[nodiscard]] size_t CountStreamOfTypeVariants();
+
+  virtual ~SimpleGenericsIndexedReaderBase() = default;
+
+  protected:
+  virtual bool ReadStreamOfTypeVariantsImpl(std::variant<image::FloatImage, test_model::Image<double>>& value, size_t idx) = 0;
+  virtual bool ReadStreamOfTypeVariantsImpl(std::vector<std::variant<image::FloatImage, test_model::Image<double>>>& values, size_t idx) = 0;
+  virtual size_t CountStreamOfTypeVariantsImpl() = 0;
+  virtual void CloseImpl() {}
+  private:
+  virtual void InvalidState(uint8_t attempted) override;
 };
 
 // Abstract writer for the AdvancedGenerics protocol.
@@ -2434,9 +2992,11 @@ class AdvancedGenericsWriterBase {
   static std::string SchemaFromVersion(Version version);
 
   private:
+  virtual void InvalidState(uint8_t attempted, [[maybe_unused]] bool end);
   uint8_t state_ = 0;
 
   friend class AdvancedGenericsReaderBase;
+  friend class AdvancedGenericsIndexedReaderBase;
 };
 
 // Abstract reader for the AdvancedGenerics protocol.
@@ -2478,7 +3038,19 @@ class AdvancedGenericsReaderBase {
   static Version VersionFromSchema(const std::string& schema);
 
   private:
+  virtual void InvalidState(uint8_t attempted);
   uint8_t state_ = 0;
+};
+
+// Abstract Indexed reader for the AdvancedGenerics protocol.
+class AdvancedGenericsIndexedReaderBase : public AdvancedGenericsReaderBase {
+  public:
+  virtual ~AdvancedGenericsIndexedReaderBase() = default;
+
+  protected:
+  virtual void CloseImpl() {}
+  private:
+  virtual void InvalidState(uint8_t attempted) override;
 };
 
 // Abstract writer for the Aliases protocol.
@@ -2552,9 +3124,11 @@ class AliasesWriterBase {
   static std::string SchemaFromVersion(Version version);
 
   private:
+  virtual void InvalidState(uint8_t attempted, [[maybe_unused]] bool end);
   uint8_t state_ = 0;
 
   friend class AliasesReaderBase;
+  friend class AliasesIndexedReaderBase;
 };
 
 // Abstract reader for the Aliases protocol.
@@ -2620,7 +3194,27 @@ class AliasesReaderBase {
   static Version VersionFromSchema(const std::string& schema);
 
   private:
+  virtual void InvalidState(uint8_t attempted);
   uint8_t state_ = 0;
+};
+
+// Abstract Indexed reader for the Aliases protocol.
+class AliasesIndexedReaderBase : public AliasesReaderBase {
+  public:
+  using AliasesReaderBase::ReadStreamOfAliasedGenericUnion2;
+  [[nodiscard]] bool ReadStreamOfAliasedGenericUnion2(test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum>& value, size_t idx);
+  [[nodiscard]] bool ReadStreamOfAliasedGenericUnion2(std::vector<test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum>>& values, size_t idx);
+  [[nodiscard]] size_t CountStreamOfAliasedGenericUnion2();
+
+  virtual ~AliasesIndexedReaderBase() = default;
+
+  protected:
+  virtual bool ReadStreamOfAliasedGenericUnion2Impl(test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum>& value, size_t idx) = 0;
+  virtual bool ReadStreamOfAliasedGenericUnion2Impl(std::vector<test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum>>& values, size_t idx) = 0;
+  virtual size_t CountStreamOfAliasedGenericUnion2Impl() = 0;
+  virtual void CloseImpl() {}
+  private:
+  virtual void InvalidState(uint8_t attempted) override;
 };
 
 // Abstract writer for the StreamsOfAliasedUnions protocol.
@@ -2672,9 +3266,11 @@ class StreamsOfAliasedUnionsWriterBase {
   static std::string SchemaFromVersion(Version version);
 
   private:
+  virtual void InvalidState(uint8_t attempted, [[maybe_unused]] bool end);
   uint8_t state_ = 0;
 
   friend class StreamsOfAliasedUnionsReaderBase;
+  friend class StreamsOfAliasedUnionsIndexedReaderBase;
 };
 
 // Abstract reader for the StreamsOfAliasedUnions protocol.
@@ -2712,7 +3308,35 @@ class StreamsOfAliasedUnionsReaderBase {
   static Version VersionFromSchema(const std::string& schema);
 
   private:
+  virtual void InvalidState(uint8_t attempted);
   uint8_t state_ = 0;
+};
+
+// Abstract Indexed reader for the StreamsOfAliasedUnions protocol.
+class StreamsOfAliasedUnionsIndexedReaderBase : public StreamsOfAliasedUnionsReaderBase {
+  public:
+  using StreamsOfAliasedUnionsReaderBase::ReadIntOrSimpleRecord;
+  [[nodiscard]] bool ReadIntOrSimpleRecord(test_model::AliasedIntOrSimpleRecord& value, size_t idx);
+  [[nodiscard]] bool ReadIntOrSimpleRecord(std::vector<test_model::AliasedIntOrSimpleRecord>& values, size_t idx);
+  [[nodiscard]] size_t CountIntOrSimpleRecord();
+
+  using StreamsOfAliasedUnionsReaderBase::ReadNullableIntOrSimpleRecord;
+  [[nodiscard]] bool ReadNullableIntOrSimpleRecord(test_model::AliasedNullableIntSimpleRecord& value, size_t idx);
+  [[nodiscard]] bool ReadNullableIntOrSimpleRecord(std::vector<test_model::AliasedNullableIntSimpleRecord>& values, size_t idx);
+  [[nodiscard]] size_t CountNullableIntOrSimpleRecord();
+
+  virtual ~StreamsOfAliasedUnionsIndexedReaderBase() = default;
+
+  protected:
+  virtual bool ReadIntOrSimpleRecordImpl(test_model::AliasedIntOrSimpleRecord& value, size_t idx) = 0;
+  virtual bool ReadIntOrSimpleRecordImpl(std::vector<test_model::AliasedIntOrSimpleRecord>& values, size_t idx) = 0;
+  virtual size_t CountIntOrSimpleRecordImpl() = 0;
+  virtual bool ReadNullableIntOrSimpleRecordImpl(test_model::AliasedNullableIntSimpleRecord& value, size_t idx) = 0;
+  virtual bool ReadNullableIntOrSimpleRecordImpl(std::vector<test_model::AliasedNullableIntSimpleRecord>& values, size_t idx) = 0;
+  virtual size_t CountNullableIntOrSimpleRecordImpl() = 0;
+  virtual void CloseImpl() {}
+  private:
+  virtual void InvalidState(uint8_t attempted) override;
 };
 
 // Abstract writer for the ProtocolWithComputedFields protocol.
@@ -2740,9 +3364,11 @@ class ProtocolWithComputedFieldsWriterBase {
   static std::string SchemaFromVersion(Version version);
 
   private:
+  virtual void InvalidState(uint8_t attempted, [[maybe_unused]] bool end);
   uint8_t state_ = 0;
 
   friend class ProtocolWithComputedFieldsReaderBase;
+  friend class ProtocolWithComputedFieldsIndexedReaderBase;
 };
 
 // Abstract reader for the ProtocolWithComputedFields protocol.
@@ -2768,7 +3394,19 @@ class ProtocolWithComputedFieldsReaderBase {
   static Version VersionFromSchema(const std::string& schema);
 
   private:
+  virtual void InvalidState(uint8_t attempted);
   uint8_t state_ = 0;
+};
+
+// Abstract Indexed reader for the ProtocolWithComputedFields protocol.
+class ProtocolWithComputedFieldsIndexedReaderBase : public ProtocolWithComputedFieldsReaderBase {
+  public:
+  virtual ~ProtocolWithComputedFieldsIndexedReaderBase() = default;
+
+  protected:
+  virtual void CloseImpl() {}
+  private:
+  virtual void InvalidState(uint8_t attempted) override;
 };
 
 // Abstract writer for the ProtocolWithKeywordSteps protocol.
@@ -2810,9 +3448,11 @@ class ProtocolWithKeywordStepsWriterBase {
   static std::string SchemaFromVersion(Version version);
 
   private:
+  virtual void InvalidState(uint8_t attempted, [[maybe_unused]] bool end);
   uint8_t state_ = 0;
 
   friend class ProtocolWithKeywordStepsReaderBase;
+  friend class ProtocolWithKeywordStepsIndexedReaderBase;
 };
 
 // Abstract reader for the ProtocolWithKeywordSteps protocol.
@@ -2846,7 +3486,27 @@ class ProtocolWithKeywordStepsReaderBase {
   static Version VersionFromSchema(const std::string& schema);
 
   private:
+  virtual void InvalidState(uint8_t attempted);
   uint8_t state_ = 0;
+};
+
+// Abstract Indexed reader for the ProtocolWithKeywordSteps protocol.
+class ProtocolWithKeywordStepsIndexedReaderBase : public ProtocolWithKeywordStepsReaderBase {
+  public:
+  using ProtocolWithKeywordStepsReaderBase::ReadInt;
+  [[nodiscard]] bool ReadInt(test_model::RecordWithKeywordFields& value, size_t idx);
+  [[nodiscard]] bool ReadInt(std::vector<test_model::RecordWithKeywordFields>& values, size_t idx);
+  [[nodiscard]] size_t CountInt();
+
+  virtual ~ProtocolWithKeywordStepsIndexedReaderBase() = default;
+
+  protected:
+  virtual bool ReadIntImpl(test_model::RecordWithKeywordFields& value, size_t idx) = 0;
+  virtual bool ReadIntImpl(std::vector<test_model::RecordWithKeywordFields>& values, size_t idx) = 0;
+  virtual size_t CountIntImpl() = 0;
+  virtual void CloseImpl() {}
+  private:
+  virtual void InvalidState(uint8_t attempted) override;
 };
 
 // Abstract writer for the ProtocolWithOptionalDate protocol.
@@ -2874,9 +3534,11 @@ class ProtocolWithOptionalDateWriterBase {
   static std::string SchemaFromVersion(Version version);
 
   private:
+  virtual void InvalidState(uint8_t attempted, [[maybe_unused]] bool end);
   uint8_t state_ = 0;
 
   friend class ProtocolWithOptionalDateReaderBase;
+  friend class ProtocolWithOptionalDateIndexedReaderBase;
 };
 
 // Abstract reader for the ProtocolWithOptionalDate protocol.
@@ -2902,6 +3564,18 @@ class ProtocolWithOptionalDateReaderBase {
   static Version VersionFromSchema(const std::string& schema);
 
   private:
+  virtual void InvalidState(uint8_t attempted);
   uint8_t state_ = 0;
+};
+
+// Abstract Indexed reader for the ProtocolWithOptionalDate protocol.
+class ProtocolWithOptionalDateIndexedReaderBase : public ProtocolWithOptionalDateReaderBase {
+  public:
+  virtual ~ProtocolWithOptionalDateIndexedReaderBase() = default;
+
+  protected:
+  virtual void CloseImpl() {}
+  private:
+  virtual void InvalidState(uint8_t attempted) override;
 };
 } // namespace test_model

@@ -2923,6 +2923,84 @@ void BenchmarkFloat256x256Reader::CloseImpl() {
   stream_.VerifyFinished();
 }
 
+void BenchmarkFloat256x256IndexedWriter::WriteFloat256x256Impl(yardl::FixedNDArray<float, 256, 256> const& value) {
+  step_index_.set_step_offset("Float256x256", stream_.Pos());
+  size_t item_offset = 0;
+  yardl::binary::WriteBlockAndSaveOffset<yardl::FixedNDArray<float, 256, 256>, yardl::binary::WriteFixedNDArray<float, yardl::binary::WriteFloatingPoint, 256, 256>>(stream_, value, item_offset);
+  step_index_.add_stream_offset("Float256x256", item_offset);
+}
+
+void BenchmarkFloat256x256IndexedWriter::WriteFloat256x256Impl(std::vector<yardl::FixedNDArray<float, 256, 256>> const& values) {
+  step_index_.set_step_offset("Float256x256", stream_.Pos());
+  std::vector<size_t> item_offsets;
+  item_offsets.reserve(values.size());
+  if (!values.empty()) {
+    yardl::binary::WriteVectorAndSaveOffsets<yardl::FixedNDArray<float, 256, 256>, yardl::binary::WriteFixedNDArray<float, yardl::binary::WriteFloatingPoint, 256, 256>>(stream_, values, item_offsets);
+  }
+  step_index_.add_stream_offsets("Float256x256", item_offsets);
+}
+
+void BenchmarkFloat256x256IndexedWriter::EndFloat256x256Impl() {
+  step_index_.set_step_offset("Float256x256", stream_.Pos());
+  step_index_.add_stream_offsets("Float256x256", std::vector<size_t>{});
+  yardl::binary::WriteInteger(stream_, 0U);
+}
+
+void BenchmarkFloat256x256IndexedWriter::Flush() {
+  stream_.Flush();
+}
+
+void BenchmarkFloat256x256IndexedWriter::CloseImpl() {
+  yardl::binary::WriteIndex(stream_, step_index_);
+  stream_.Flush();
+}
+
+bool BenchmarkFloat256x256IndexedReader::ReadFloat256x256Impl(yardl::FixedNDArray<float, 256, 256>& value) {
+  if (!step_index_.offset_within_stream("Float256x256", std::nullopt, stream_.Pos())) {
+    stream_.Seek(step_index_.get_step_offset("Float256x256"));
+  }
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<yardl::FixedNDArray<float, 256, 256>, yardl::binary::ReadFixedNDArray<float, yardl::binary::ReadFloatingPoint, 256, 256>>(stream_, current_block_remaining_, value);
+  return read_block_successful;
+}
+
+bool BenchmarkFloat256x256IndexedReader::ReadFloat256x256Impl(std::vector<yardl::FixedNDArray<float, 256, 256>>& values) {
+  if (!step_index_.offset_within_stream("Float256x256", std::nullopt, stream_.Pos())) {
+    stream_.Seek(step_index_.get_step_offset("Float256x256"));
+  }
+  yardl::binary::ReadBlocksIntoVector<yardl::FixedNDArray<float, 256, 256>, yardl::binary::ReadFixedNDArray<float, yardl::binary::ReadFloatingPoint, 256, 256>>(stream_, current_block_remaining_, values);
+  return current_block_remaining_ != 0;
+}
+
+bool BenchmarkFloat256x256IndexedReader::ReadFloat256x256Impl(yardl::FixedNDArray<float, 256, 256>& value, size_t idx) {
+  size_t abs_offset = 0;
+  if (!step_index_.find_stream_item("Float256x256", idx, abs_offset, current_block_remaining_)) {
+    return false;
+  }
+  stream_.Seek(abs_offset);
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<yardl::FixedNDArray<float, 256, 256>, yardl::binary::ReadFixedNDArray<float, yardl::binary::ReadFloatingPoint, 256, 256>>(stream_, current_block_remaining_, value);
+  return read_block_successful;
+}
+
+bool BenchmarkFloat256x256IndexedReader::ReadFloat256x256Impl(std::vector<yardl::FixedNDArray<float, 256, 256>>& values, size_t idx) {
+  size_t abs_offset = 0;
+  if (!step_index_.find_stream_item("Float256x256", idx, abs_offset, current_block_remaining_)) {
+    values.clear();
+    return false;
+  }
+  stream_.Seek(abs_offset);
+  yardl::binary::ReadBlocksIntoVector<yardl::FixedNDArray<float, 256, 256>, yardl::binary::ReadFixedNDArray<float, yardl::binary::ReadFloatingPoint, 256, 256>>(stream_, current_block_remaining_, values);
+  return current_block_remaining_ != 0;
+}
+
+size_t BenchmarkFloat256x256IndexedReader::CountFloat256x256Impl() {
+  return step_index_.get_stream_count("Float256x256");
+}
+
+void BenchmarkFloat256x256IndexedReader::CloseImpl() {
+}
+
 void BenchmarkInt256x256Writer::WriteInt256x256Impl(yardl::FixedNDArray<int32_t, 256, 256> const& value) {
   yardl::binary::WriteBlock<yardl::FixedNDArray<int32_t, 256, 256>, yardl::binary::WriteFixedNDArray<int32_t, yardl::binary::WriteInteger, 256, 256>>(stream_, value);
 }
@@ -2958,6 +3036,84 @@ bool BenchmarkInt256x256Reader::ReadInt256x256Impl(std::vector<yardl::FixedNDArr
 
 void BenchmarkInt256x256Reader::CloseImpl() {
   stream_.VerifyFinished();
+}
+
+void BenchmarkInt256x256IndexedWriter::WriteInt256x256Impl(yardl::FixedNDArray<int32_t, 256, 256> const& value) {
+  step_index_.set_step_offset("Int256x256", stream_.Pos());
+  size_t item_offset = 0;
+  yardl::binary::WriteBlockAndSaveOffset<yardl::FixedNDArray<int32_t, 256, 256>, yardl::binary::WriteFixedNDArray<int32_t, yardl::binary::WriteInteger, 256, 256>>(stream_, value, item_offset);
+  step_index_.add_stream_offset("Int256x256", item_offset);
+}
+
+void BenchmarkInt256x256IndexedWriter::WriteInt256x256Impl(std::vector<yardl::FixedNDArray<int32_t, 256, 256>> const& values) {
+  step_index_.set_step_offset("Int256x256", stream_.Pos());
+  std::vector<size_t> item_offsets;
+  item_offsets.reserve(values.size());
+  if (!values.empty()) {
+    yardl::binary::WriteVectorAndSaveOffsets<yardl::FixedNDArray<int32_t, 256, 256>, yardl::binary::WriteFixedNDArray<int32_t, yardl::binary::WriteInteger, 256, 256>>(stream_, values, item_offsets);
+  }
+  step_index_.add_stream_offsets("Int256x256", item_offsets);
+}
+
+void BenchmarkInt256x256IndexedWriter::EndInt256x256Impl() {
+  step_index_.set_step_offset("Int256x256", stream_.Pos());
+  step_index_.add_stream_offsets("Int256x256", std::vector<size_t>{});
+  yardl::binary::WriteInteger(stream_, 0U);
+}
+
+void BenchmarkInt256x256IndexedWriter::Flush() {
+  stream_.Flush();
+}
+
+void BenchmarkInt256x256IndexedWriter::CloseImpl() {
+  yardl::binary::WriteIndex(stream_, step_index_);
+  stream_.Flush();
+}
+
+bool BenchmarkInt256x256IndexedReader::ReadInt256x256Impl(yardl::FixedNDArray<int32_t, 256, 256>& value) {
+  if (!step_index_.offset_within_stream("Int256x256", std::nullopt, stream_.Pos())) {
+    stream_.Seek(step_index_.get_step_offset("Int256x256"));
+  }
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<yardl::FixedNDArray<int32_t, 256, 256>, yardl::binary::ReadFixedNDArray<int32_t, yardl::binary::ReadInteger, 256, 256>>(stream_, current_block_remaining_, value);
+  return read_block_successful;
+}
+
+bool BenchmarkInt256x256IndexedReader::ReadInt256x256Impl(std::vector<yardl::FixedNDArray<int32_t, 256, 256>>& values) {
+  if (!step_index_.offset_within_stream("Int256x256", std::nullopt, stream_.Pos())) {
+    stream_.Seek(step_index_.get_step_offset("Int256x256"));
+  }
+  yardl::binary::ReadBlocksIntoVector<yardl::FixedNDArray<int32_t, 256, 256>, yardl::binary::ReadFixedNDArray<int32_t, yardl::binary::ReadInteger, 256, 256>>(stream_, current_block_remaining_, values);
+  return current_block_remaining_ != 0;
+}
+
+bool BenchmarkInt256x256IndexedReader::ReadInt256x256Impl(yardl::FixedNDArray<int32_t, 256, 256>& value, size_t idx) {
+  size_t abs_offset = 0;
+  if (!step_index_.find_stream_item("Int256x256", idx, abs_offset, current_block_remaining_)) {
+    return false;
+  }
+  stream_.Seek(abs_offset);
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<yardl::FixedNDArray<int32_t, 256, 256>, yardl::binary::ReadFixedNDArray<int32_t, yardl::binary::ReadInteger, 256, 256>>(stream_, current_block_remaining_, value);
+  return read_block_successful;
+}
+
+bool BenchmarkInt256x256IndexedReader::ReadInt256x256Impl(std::vector<yardl::FixedNDArray<int32_t, 256, 256>>& values, size_t idx) {
+  size_t abs_offset = 0;
+  if (!step_index_.find_stream_item("Int256x256", idx, abs_offset, current_block_remaining_)) {
+    values.clear();
+    return false;
+  }
+  stream_.Seek(abs_offset);
+  yardl::binary::ReadBlocksIntoVector<yardl::FixedNDArray<int32_t, 256, 256>, yardl::binary::ReadFixedNDArray<int32_t, yardl::binary::ReadInteger, 256, 256>>(stream_, current_block_remaining_, values);
+  return current_block_remaining_ != 0;
+}
+
+size_t BenchmarkInt256x256IndexedReader::CountInt256x256Impl() {
+  return step_index_.get_stream_count("Int256x256");
+}
+
+void BenchmarkInt256x256IndexedReader::CloseImpl() {
 }
 
 void BenchmarkFloatVlenWriter::WriteFloatArrayImpl(yardl::NDArray<float, 2> const& value) {
@@ -2997,6 +3153,84 @@ void BenchmarkFloatVlenReader::CloseImpl() {
   stream_.VerifyFinished();
 }
 
+void BenchmarkFloatVlenIndexedWriter::WriteFloatArrayImpl(yardl::NDArray<float, 2> const& value) {
+  step_index_.set_step_offset("FloatArray", stream_.Pos());
+  size_t item_offset = 0;
+  yardl::binary::WriteBlockAndSaveOffset<yardl::NDArray<float, 2>, yardl::binary::WriteNDArray<float, yardl::binary::WriteFloatingPoint, 2>>(stream_, value, item_offset);
+  step_index_.add_stream_offset("FloatArray", item_offset);
+}
+
+void BenchmarkFloatVlenIndexedWriter::WriteFloatArrayImpl(std::vector<yardl::NDArray<float, 2>> const& values) {
+  step_index_.set_step_offset("FloatArray", stream_.Pos());
+  std::vector<size_t> item_offsets;
+  item_offsets.reserve(values.size());
+  if (!values.empty()) {
+    yardl::binary::WriteVectorAndSaveOffsets<yardl::NDArray<float, 2>, yardl::binary::WriteNDArray<float, yardl::binary::WriteFloatingPoint, 2>>(stream_, values, item_offsets);
+  }
+  step_index_.add_stream_offsets("FloatArray", item_offsets);
+}
+
+void BenchmarkFloatVlenIndexedWriter::EndFloatArrayImpl() {
+  step_index_.set_step_offset("FloatArray", stream_.Pos());
+  step_index_.add_stream_offsets("FloatArray", std::vector<size_t>{});
+  yardl::binary::WriteInteger(stream_, 0U);
+}
+
+void BenchmarkFloatVlenIndexedWriter::Flush() {
+  stream_.Flush();
+}
+
+void BenchmarkFloatVlenIndexedWriter::CloseImpl() {
+  yardl::binary::WriteIndex(stream_, step_index_);
+  stream_.Flush();
+}
+
+bool BenchmarkFloatVlenIndexedReader::ReadFloatArrayImpl(yardl::NDArray<float, 2>& value) {
+  if (!step_index_.offset_within_stream("FloatArray", std::nullopt, stream_.Pos())) {
+    stream_.Seek(step_index_.get_step_offset("FloatArray"));
+  }
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<yardl::NDArray<float, 2>, yardl::binary::ReadNDArray<float, yardl::binary::ReadFloatingPoint, 2>>(stream_, current_block_remaining_, value);
+  return read_block_successful;
+}
+
+bool BenchmarkFloatVlenIndexedReader::ReadFloatArrayImpl(std::vector<yardl::NDArray<float, 2>>& values) {
+  if (!step_index_.offset_within_stream("FloatArray", std::nullopt, stream_.Pos())) {
+    stream_.Seek(step_index_.get_step_offset("FloatArray"));
+  }
+  yardl::binary::ReadBlocksIntoVector<yardl::NDArray<float, 2>, yardl::binary::ReadNDArray<float, yardl::binary::ReadFloatingPoint, 2>>(stream_, current_block_remaining_, values);
+  return current_block_remaining_ != 0;
+}
+
+bool BenchmarkFloatVlenIndexedReader::ReadFloatArrayImpl(yardl::NDArray<float, 2>& value, size_t idx) {
+  size_t abs_offset = 0;
+  if (!step_index_.find_stream_item("FloatArray", idx, abs_offset, current_block_remaining_)) {
+    return false;
+  }
+  stream_.Seek(abs_offset);
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<yardl::NDArray<float, 2>, yardl::binary::ReadNDArray<float, yardl::binary::ReadFloatingPoint, 2>>(stream_, current_block_remaining_, value);
+  return read_block_successful;
+}
+
+bool BenchmarkFloatVlenIndexedReader::ReadFloatArrayImpl(std::vector<yardl::NDArray<float, 2>>& values, size_t idx) {
+  size_t abs_offset = 0;
+  if (!step_index_.find_stream_item("FloatArray", idx, abs_offset, current_block_remaining_)) {
+    values.clear();
+    return false;
+  }
+  stream_.Seek(abs_offset);
+  yardl::binary::ReadBlocksIntoVector<yardl::NDArray<float, 2>, yardl::binary::ReadNDArray<float, yardl::binary::ReadFloatingPoint, 2>>(stream_, current_block_remaining_, values);
+  return current_block_remaining_ != 0;
+}
+
+size_t BenchmarkFloatVlenIndexedReader::CountFloatArrayImpl() {
+  return step_index_.get_stream_count("FloatArray");
+}
+
+void BenchmarkFloatVlenIndexedReader::CloseImpl() {
+}
+
 void BenchmarkSmallRecordWriter::WriteSmallRecordImpl(test_model::SmallBenchmarkRecord const& value) {
   yardl::binary::WriteBlock<test_model::SmallBenchmarkRecord, test_model::binary::WriteSmallBenchmarkRecord>(stream_, value);
 }
@@ -3032,6 +3266,84 @@ bool BenchmarkSmallRecordReader::ReadSmallRecordImpl(std::vector<test_model::Sma
 
 void BenchmarkSmallRecordReader::CloseImpl() {
   stream_.VerifyFinished();
+}
+
+void BenchmarkSmallRecordIndexedWriter::WriteSmallRecordImpl(test_model::SmallBenchmarkRecord const& value) {
+  step_index_.set_step_offset("SmallRecord", stream_.Pos());
+  size_t item_offset = 0;
+  yardl::binary::WriteBlockAndSaveOffset<test_model::SmallBenchmarkRecord, test_model::binary::WriteSmallBenchmarkRecord>(stream_, value, item_offset);
+  step_index_.add_stream_offset("SmallRecord", item_offset);
+}
+
+void BenchmarkSmallRecordIndexedWriter::WriteSmallRecordImpl(std::vector<test_model::SmallBenchmarkRecord> const& values) {
+  step_index_.set_step_offset("SmallRecord", stream_.Pos());
+  std::vector<size_t> item_offsets;
+  item_offsets.reserve(values.size());
+  if (!values.empty()) {
+    yardl::binary::WriteVectorAndSaveOffsets<test_model::SmallBenchmarkRecord, test_model::binary::WriteSmallBenchmarkRecord>(stream_, values, item_offsets);
+  }
+  step_index_.add_stream_offsets("SmallRecord", item_offsets);
+}
+
+void BenchmarkSmallRecordIndexedWriter::EndSmallRecordImpl() {
+  step_index_.set_step_offset("SmallRecord", stream_.Pos());
+  step_index_.add_stream_offsets("SmallRecord", std::vector<size_t>{});
+  yardl::binary::WriteInteger(stream_, 0U);
+}
+
+void BenchmarkSmallRecordIndexedWriter::Flush() {
+  stream_.Flush();
+}
+
+void BenchmarkSmallRecordIndexedWriter::CloseImpl() {
+  yardl::binary::WriteIndex(stream_, step_index_);
+  stream_.Flush();
+}
+
+bool BenchmarkSmallRecordIndexedReader::ReadSmallRecordImpl(test_model::SmallBenchmarkRecord& value) {
+  if (!step_index_.offset_within_stream("SmallRecord", std::nullopt, stream_.Pos())) {
+    stream_.Seek(step_index_.get_step_offset("SmallRecord"));
+  }
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<test_model::SmallBenchmarkRecord, test_model::binary::ReadSmallBenchmarkRecord>(stream_, current_block_remaining_, value);
+  return read_block_successful;
+}
+
+bool BenchmarkSmallRecordIndexedReader::ReadSmallRecordImpl(std::vector<test_model::SmallBenchmarkRecord>& values) {
+  if (!step_index_.offset_within_stream("SmallRecord", std::nullopt, stream_.Pos())) {
+    stream_.Seek(step_index_.get_step_offset("SmallRecord"));
+  }
+  yardl::binary::ReadBlocksIntoVector<test_model::SmallBenchmarkRecord, test_model::binary::ReadSmallBenchmarkRecord>(stream_, current_block_remaining_, values);
+  return current_block_remaining_ != 0;
+}
+
+bool BenchmarkSmallRecordIndexedReader::ReadSmallRecordImpl(test_model::SmallBenchmarkRecord& value, size_t idx) {
+  size_t abs_offset = 0;
+  if (!step_index_.find_stream_item("SmallRecord", idx, abs_offset, current_block_remaining_)) {
+    return false;
+  }
+  stream_.Seek(abs_offset);
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<test_model::SmallBenchmarkRecord, test_model::binary::ReadSmallBenchmarkRecord>(stream_, current_block_remaining_, value);
+  return read_block_successful;
+}
+
+bool BenchmarkSmallRecordIndexedReader::ReadSmallRecordImpl(std::vector<test_model::SmallBenchmarkRecord>& values, size_t idx) {
+  size_t abs_offset = 0;
+  if (!step_index_.find_stream_item("SmallRecord", idx, abs_offset, current_block_remaining_)) {
+    values.clear();
+    return false;
+  }
+  stream_.Seek(abs_offset);
+  yardl::binary::ReadBlocksIntoVector<test_model::SmallBenchmarkRecord, test_model::binary::ReadSmallBenchmarkRecord>(stream_, current_block_remaining_, values);
+  return current_block_remaining_ != 0;
+}
+
+size_t BenchmarkSmallRecordIndexedReader::CountSmallRecordImpl() {
+  return step_index_.get_stream_count("SmallRecord");
+}
+
+void BenchmarkSmallRecordIndexedReader::CloseImpl() {
 }
 
 void BenchmarkSmallRecordWithOptionalsWriter::WriteSmallRecordImpl(test_model::SimpleEncodingCounters const& value) {
@@ -3071,6 +3383,84 @@ void BenchmarkSmallRecordWithOptionalsReader::CloseImpl() {
   stream_.VerifyFinished();
 }
 
+void BenchmarkSmallRecordWithOptionalsIndexedWriter::WriteSmallRecordImpl(test_model::SimpleEncodingCounters const& value) {
+  step_index_.set_step_offset("SmallRecord", stream_.Pos());
+  size_t item_offset = 0;
+  yardl::binary::WriteBlockAndSaveOffset<test_model::SimpleEncodingCounters, test_model::binary::WriteSimpleEncodingCounters>(stream_, value, item_offset);
+  step_index_.add_stream_offset("SmallRecord", item_offset);
+}
+
+void BenchmarkSmallRecordWithOptionalsIndexedWriter::WriteSmallRecordImpl(std::vector<test_model::SimpleEncodingCounters> const& values) {
+  step_index_.set_step_offset("SmallRecord", stream_.Pos());
+  std::vector<size_t> item_offsets;
+  item_offsets.reserve(values.size());
+  if (!values.empty()) {
+    yardl::binary::WriteVectorAndSaveOffsets<test_model::SimpleEncodingCounters, test_model::binary::WriteSimpleEncodingCounters>(stream_, values, item_offsets);
+  }
+  step_index_.add_stream_offsets("SmallRecord", item_offsets);
+}
+
+void BenchmarkSmallRecordWithOptionalsIndexedWriter::EndSmallRecordImpl() {
+  step_index_.set_step_offset("SmallRecord", stream_.Pos());
+  step_index_.add_stream_offsets("SmallRecord", std::vector<size_t>{});
+  yardl::binary::WriteInteger(stream_, 0U);
+}
+
+void BenchmarkSmallRecordWithOptionalsIndexedWriter::Flush() {
+  stream_.Flush();
+}
+
+void BenchmarkSmallRecordWithOptionalsIndexedWriter::CloseImpl() {
+  yardl::binary::WriteIndex(stream_, step_index_);
+  stream_.Flush();
+}
+
+bool BenchmarkSmallRecordWithOptionalsIndexedReader::ReadSmallRecordImpl(test_model::SimpleEncodingCounters& value) {
+  if (!step_index_.offset_within_stream("SmallRecord", std::nullopt, stream_.Pos())) {
+    stream_.Seek(step_index_.get_step_offset("SmallRecord"));
+  }
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<test_model::SimpleEncodingCounters, test_model::binary::ReadSimpleEncodingCounters>(stream_, current_block_remaining_, value);
+  return read_block_successful;
+}
+
+bool BenchmarkSmallRecordWithOptionalsIndexedReader::ReadSmallRecordImpl(std::vector<test_model::SimpleEncodingCounters>& values) {
+  if (!step_index_.offset_within_stream("SmallRecord", std::nullopt, stream_.Pos())) {
+    stream_.Seek(step_index_.get_step_offset("SmallRecord"));
+  }
+  yardl::binary::ReadBlocksIntoVector<test_model::SimpleEncodingCounters, test_model::binary::ReadSimpleEncodingCounters>(stream_, current_block_remaining_, values);
+  return current_block_remaining_ != 0;
+}
+
+bool BenchmarkSmallRecordWithOptionalsIndexedReader::ReadSmallRecordImpl(test_model::SimpleEncodingCounters& value, size_t idx) {
+  size_t abs_offset = 0;
+  if (!step_index_.find_stream_item("SmallRecord", idx, abs_offset, current_block_remaining_)) {
+    return false;
+  }
+  stream_.Seek(abs_offset);
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<test_model::SimpleEncodingCounters, test_model::binary::ReadSimpleEncodingCounters>(stream_, current_block_remaining_, value);
+  return read_block_successful;
+}
+
+bool BenchmarkSmallRecordWithOptionalsIndexedReader::ReadSmallRecordImpl(std::vector<test_model::SimpleEncodingCounters>& values, size_t idx) {
+  size_t abs_offset = 0;
+  if (!step_index_.find_stream_item("SmallRecord", idx, abs_offset, current_block_remaining_)) {
+    values.clear();
+    return false;
+  }
+  stream_.Seek(abs_offset);
+  yardl::binary::ReadBlocksIntoVector<test_model::SimpleEncodingCounters, test_model::binary::ReadSimpleEncodingCounters>(stream_, current_block_remaining_, values);
+  return current_block_remaining_ != 0;
+}
+
+size_t BenchmarkSmallRecordWithOptionalsIndexedReader::CountSmallRecordImpl() {
+  return step_index_.get_stream_count("SmallRecord");
+}
+
+void BenchmarkSmallRecordWithOptionalsIndexedReader::CloseImpl() {
+}
+
 void BenchmarkSimpleMrdWriter::WriteDataImpl(std::variant<test_model::SimpleAcquisition, image::Image<float>> const& value) {
   yardl::binary::WriteBlock<std::variant<test_model::SimpleAcquisition, image::Image<float>>, WriteUnion<test_model::SimpleAcquisition, test_model::binary::WriteSimpleAcquisition, image::Image<float>, image::binary::WriteImage<float, yardl::binary::WriteFloatingPoint>>>(stream_, value);
 }
@@ -3108,6 +3498,84 @@ void BenchmarkSimpleMrdReader::CloseImpl() {
   stream_.VerifyFinished();
 }
 
+void BenchmarkSimpleMrdIndexedWriter::WriteDataImpl(std::variant<test_model::SimpleAcquisition, image::Image<float>> const& value) {
+  step_index_.set_step_offset("Data", stream_.Pos());
+  size_t item_offset = 0;
+  yardl::binary::WriteBlockAndSaveOffset<std::variant<test_model::SimpleAcquisition, image::Image<float>>, WriteUnion<test_model::SimpleAcquisition, test_model::binary::WriteSimpleAcquisition, image::Image<float>, image::binary::WriteImage<float, yardl::binary::WriteFloatingPoint>>>(stream_, value, item_offset);
+  step_index_.add_stream_offset("Data", item_offset);
+}
+
+void BenchmarkSimpleMrdIndexedWriter::WriteDataImpl(std::vector<std::variant<test_model::SimpleAcquisition, image::Image<float>>> const& values) {
+  step_index_.set_step_offset("Data", stream_.Pos());
+  std::vector<size_t> item_offsets;
+  item_offsets.reserve(values.size());
+  if (!values.empty()) {
+    yardl::binary::WriteVectorAndSaveOffsets<std::variant<test_model::SimpleAcquisition, image::Image<float>>, WriteUnion<test_model::SimpleAcquisition, test_model::binary::WriteSimpleAcquisition, image::Image<float>, image::binary::WriteImage<float, yardl::binary::WriteFloatingPoint>>>(stream_, values, item_offsets);
+  }
+  step_index_.add_stream_offsets("Data", item_offsets);
+}
+
+void BenchmarkSimpleMrdIndexedWriter::EndDataImpl() {
+  step_index_.set_step_offset("Data", stream_.Pos());
+  step_index_.add_stream_offsets("Data", std::vector<size_t>{});
+  yardl::binary::WriteInteger(stream_, 0U);
+}
+
+void BenchmarkSimpleMrdIndexedWriter::Flush() {
+  stream_.Flush();
+}
+
+void BenchmarkSimpleMrdIndexedWriter::CloseImpl() {
+  yardl::binary::WriteIndex(stream_, step_index_);
+  stream_.Flush();
+}
+
+bool BenchmarkSimpleMrdIndexedReader::ReadDataImpl(std::variant<test_model::SimpleAcquisition, image::Image<float>>& value) {
+  if (!step_index_.offset_within_stream("Data", std::nullopt, stream_.Pos())) {
+    stream_.Seek(step_index_.get_step_offset("Data"));
+  }
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<std::variant<test_model::SimpleAcquisition, image::Image<float>>, ReadUnion<test_model::SimpleAcquisition, test_model::binary::ReadSimpleAcquisition, image::Image<float>, image::binary::ReadImage<float, yardl::binary::ReadFloatingPoint>>>(stream_, current_block_remaining_, value);
+  return read_block_successful;
+}
+
+bool BenchmarkSimpleMrdIndexedReader::ReadDataImpl(std::vector<std::variant<test_model::SimpleAcquisition, image::Image<float>>>& values) {
+  if (!step_index_.offset_within_stream("Data", std::nullopt, stream_.Pos())) {
+    stream_.Seek(step_index_.get_step_offset("Data"));
+  }
+  yardl::binary::ReadBlocksIntoVector<std::variant<test_model::SimpleAcquisition, image::Image<float>>, ReadUnion<test_model::SimpleAcquisition, test_model::binary::ReadSimpleAcquisition, image::Image<float>, image::binary::ReadImage<float, yardl::binary::ReadFloatingPoint>>>(stream_, current_block_remaining_, values);
+  return current_block_remaining_ != 0;
+}
+
+bool BenchmarkSimpleMrdIndexedReader::ReadDataImpl(std::variant<test_model::SimpleAcquisition, image::Image<float>>& value, size_t idx) {
+  size_t abs_offset = 0;
+  if (!step_index_.find_stream_item("Data", idx, abs_offset, current_block_remaining_)) {
+    return false;
+  }
+  stream_.Seek(abs_offset);
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<std::variant<test_model::SimpleAcquisition, image::Image<float>>, ReadUnion<test_model::SimpleAcquisition, test_model::binary::ReadSimpleAcquisition, image::Image<float>, image::binary::ReadImage<float, yardl::binary::ReadFloatingPoint>>>(stream_, current_block_remaining_, value);
+  return read_block_successful;
+}
+
+bool BenchmarkSimpleMrdIndexedReader::ReadDataImpl(std::vector<std::variant<test_model::SimpleAcquisition, image::Image<float>>>& values, size_t idx) {
+  size_t abs_offset = 0;
+  if (!step_index_.find_stream_item("Data", idx, abs_offset, current_block_remaining_)) {
+    values.clear();
+    return false;
+  }
+  stream_.Seek(abs_offset);
+  yardl::binary::ReadBlocksIntoVector<std::variant<test_model::SimpleAcquisition, image::Image<float>>, ReadUnion<test_model::SimpleAcquisition, test_model::binary::ReadSimpleAcquisition, image::Image<float>, image::binary::ReadImage<float, yardl::binary::ReadFloatingPoint>>>(stream_, current_block_remaining_, values);
+  return current_block_remaining_ != 0;
+}
+
+size_t BenchmarkSimpleMrdIndexedReader::CountDataImpl() {
+  return step_index_.get_stream_count("Data");
+}
+
+void BenchmarkSimpleMrdIndexedReader::CloseImpl() {
+}
+
 void ScalarsWriter::WriteInt32Impl(int32_t const& value) {
   yardl::binary::WriteInteger(stream_, value);
 }
@@ -3134,6 +3602,40 @@ void ScalarsReader::ReadRecordImpl(test_model::RecordWithPrimitives& value) {
 
 void ScalarsReader::CloseImpl() {
   stream_.VerifyFinished();
+}
+
+void ScalarsIndexedWriter::WriteInt32Impl(int32_t const& value) {
+  step_index_.set_step_offset("Int32", stream_.Pos());
+  yardl::binary::WriteInteger(stream_, value);
+}
+
+void ScalarsIndexedWriter::WriteRecordImpl(test_model::RecordWithPrimitives const& value) {
+  step_index_.set_step_offset("Record", stream_.Pos());
+  test_model::binary::WriteRecordWithPrimitives(stream_, value);
+}
+
+void ScalarsIndexedWriter::Flush() {
+  stream_.Flush();
+}
+
+void ScalarsIndexedWriter::CloseImpl() {
+  yardl::binary::WriteIndex(stream_, step_index_);
+  stream_.Flush();
+}
+
+void ScalarsIndexedReader::ReadInt32Impl(int32_t& value) {
+  auto pos = step_index_.get_step_offset("Int32");
+  stream_.Seek(pos);
+  yardl::binary::ReadInteger(stream_, value);
+}
+
+void ScalarsIndexedReader::ReadRecordImpl(test_model::RecordWithPrimitives& value) {
+  auto pos = step_index_.get_step_offset("Record");
+  stream_.Seek(pos);
+  test_model::binary::ReadRecordWithPrimitives(stream_, value);
+}
+
+void ScalarsIndexedReader::CloseImpl() {
 }
 
 void ScalarOptionalsWriter::WriteOptionalIntImpl(std::optional<int32_t> const& value) {
@@ -3180,6 +3682,62 @@ void ScalarOptionalsReader::CloseImpl() {
   stream_.VerifyFinished();
 }
 
+void ScalarOptionalsIndexedWriter::WriteOptionalIntImpl(std::optional<int32_t> const& value) {
+  step_index_.set_step_offset("OptionalInt", stream_.Pos());
+  yardl::binary::WriteOptional<int32_t, yardl::binary::WriteInteger>(stream_, value);
+}
+
+void ScalarOptionalsIndexedWriter::WriteOptionalRecordImpl(std::optional<test_model::SimpleRecord> const& value) {
+  step_index_.set_step_offset("OptionalRecord", stream_.Pos());
+  yardl::binary::WriteOptional<test_model::SimpleRecord, test_model::binary::WriteSimpleRecord>(stream_, value);
+}
+
+void ScalarOptionalsIndexedWriter::WriteRecordWithOptionalFieldsImpl(test_model::RecordWithOptionalFields const& value) {
+  step_index_.set_step_offset("RecordWithOptionalFields", stream_.Pos());
+  test_model::binary::WriteRecordWithOptionalFields(stream_, value);
+}
+
+void ScalarOptionalsIndexedWriter::WriteOptionalRecordWithOptionalFieldsImpl(std::optional<test_model::RecordWithOptionalFields> const& value) {
+  step_index_.set_step_offset("OptionalRecordWithOptionalFields", stream_.Pos());
+  yardl::binary::WriteOptional<test_model::RecordWithOptionalFields, test_model::binary::WriteRecordWithOptionalFields>(stream_, value);
+}
+
+void ScalarOptionalsIndexedWriter::Flush() {
+  stream_.Flush();
+}
+
+void ScalarOptionalsIndexedWriter::CloseImpl() {
+  yardl::binary::WriteIndex(stream_, step_index_);
+  stream_.Flush();
+}
+
+void ScalarOptionalsIndexedReader::ReadOptionalIntImpl(std::optional<int32_t>& value) {
+  auto pos = step_index_.get_step_offset("OptionalInt");
+  stream_.Seek(pos);
+  yardl::binary::ReadOptional<int32_t, yardl::binary::ReadInteger>(stream_, value);
+}
+
+void ScalarOptionalsIndexedReader::ReadOptionalRecordImpl(std::optional<test_model::SimpleRecord>& value) {
+  auto pos = step_index_.get_step_offset("OptionalRecord");
+  stream_.Seek(pos);
+  yardl::binary::ReadOptional<test_model::SimpleRecord, test_model::binary::ReadSimpleRecord>(stream_, value);
+}
+
+void ScalarOptionalsIndexedReader::ReadRecordWithOptionalFieldsImpl(test_model::RecordWithOptionalFields& value) {
+  auto pos = step_index_.get_step_offset("RecordWithOptionalFields");
+  stream_.Seek(pos);
+  test_model::binary::ReadRecordWithOptionalFields(stream_, value);
+}
+
+void ScalarOptionalsIndexedReader::ReadOptionalRecordWithOptionalFieldsImpl(std::optional<test_model::RecordWithOptionalFields>& value) {
+  auto pos = step_index_.get_step_offset("OptionalRecordWithOptionalFields");
+  stream_.Seek(pos);
+  yardl::binary::ReadOptional<test_model::RecordWithOptionalFields, test_model::binary::ReadRecordWithOptionalFields>(stream_, value);
+}
+
+void ScalarOptionalsIndexedReader::CloseImpl() {
+}
+
 void NestedRecordsWriter::WriteTupleWithRecordsImpl(test_model::TupleWithRecords const& value) {
   test_model::binary::WriteTupleWithRecords(stream_, value);
 }
@@ -3198,6 +3756,29 @@ void NestedRecordsReader::ReadTupleWithRecordsImpl(test_model::TupleWithRecords&
 
 void NestedRecordsReader::CloseImpl() {
   stream_.VerifyFinished();
+}
+
+void NestedRecordsIndexedWriter::WriteTupleWithRecordsImpl(test_model::TupleWithRecords const& value) {
+  step_index_.set_step_offset("TupleWithRecords", stream_.Pos());
+  test_model::binary::WriteTupleWithRecords(stream_, value);
+}
+
+void NestedRecordsIndexedWriter::Flush() {
+  stream_.Flush();
+}
+
+void NestedRecordsIndexedWriter::CloseImpl() {
+  yardl::binary::WriteIndex(stream_, step_index_);
+  stream_.Flush();
+}
+
+void NestedRecordsIndexedReader::ReadTupleWithRecordsImpl(test_model::TupleWithRecords& value) {
+  auto pos = step_index_.get_step_offset("TupleWithRecords");
+  stream_.Seek(pos);
+  test_model::binary::ReadTupleWithRecords(stream_, value);
+}
+
+void NestedRecordsIndexedReader::CloseImpl() {
 }
 
 void VlensWriter::WriteIntVectorImpl(std::vector<int32_t> const& value) {
@@ -3244,6 +3825,62 @@ void VlensReader::CloseImpl() {
   stream_.VerifyFinished();
 }
 
+void VlensIndexedWriter::WriteIntVectorImpl(std::vector<int32_t> const& value) {
+  step_index_.set_step_offset("IntVector", stream_.Pos());
+  yardl::binary::WriteVector<int32_t, yardl::binary::WriteInteger>(stream_, value);
+}
+
+void VlensIndexedWriter::WriteComplexVectorImpl(std::vector<std::complex<float>> const& value) {
+  step_index_.set_step_offset("ComplexVector", stream_.Pos());
+  yardl::binary::WriteVector<std::complex<float>, yardl::binary::WriteFloatingPoint>(stream_, value);
+}
+
+void VlensIndexedWriter::WriteRecordWithVlensImpl(test_model::RecordWithVlens const& value) {
+  step_index_.set_step_offset("RecordWithVlens", stream_.Pos());
+  test_model::binary::WriteRecordWithVlens(stream_, value);
+}
+
+void VlensIndexedWriter::WriteVlenOfRecordWithVlensImpl(std::vector<test_model::RecordWithVlens> const& value) {
+  step_index_.set_step_offset("VlenOfRecordWithVlens", stream_.Pos());
+  yardl::binary::WriteVector<test_model::RecordWithVlens, test_model::binary::WriteRecordWithVlens>(stream_, value);
+}
+
+void VlensIndexedWriter::Flush() {
+  stream_.Flush();
+}
+
+void VlensIndexedWriter::CloseImpl() {
+  yardl::binary::WriteIndex(stream_, step_index_);
+  stream_.Flush();
+}
+
+void VlensIndexedReader::ReadIntVectorImpl(std::vector<int32_t>& value) {
+  auto pos = step_index_.get_step_offset("IntVector");
+  stream_.Seek(pos);
+  yardl::binary::ReadVector<int32_t, yardl::binary::ReadInteger>(stream_, value);
+}
+
+void VlensIndexedReader::ReadComplexVectorImpl(std::vector<std::complex<float>>& value) {
+  auto pos = step_index_.get_step_offset("ComplexVector");
+  stream_.Seek(pos);
+  yardl::binary::ReadVector<std::complex<float>, yardl::binary::ReadFloatingPoint>(stream_, value);
+}
+
+void VlensIndexedReader::ReadRecordWithVlensImpl(test_model::RecordWithVlens& value) {
+  auto pos = step_index_.get_step_offset("RecordWithVlens");
+  stream_.Seek(pos);
+  test_model::binary::ReadRecordWithVlens(stream_, value);
+}
+
+void VlensIndexedReader::ReadVlenOfRecordWithVlensImpl(std::vector<test_model::RecordWithVlens>& value) {
+  auto pos = step_index_.get_step_offset("VlenOfRecordWithVlens");
+  stream_.Seek(pos);
+  yardl::binary::ReadVector<test_model::RecordWithVlens, test_model::binary::ReadRecordWithVlens>(stream_, value);
+}
+
+void VlensIndexedReader::CloseImpl() {
+}
+
 void StringsWriter::WriteSingleStringImpl(std::string const& value) {
   yardl::binary::WriteString(stream_, value);
 }
@@ -3272,6 +3909,40 @@ void StringsReader::CloseImpl() {
   stream_.VerifyFinished();
 }
 
+void StringsIndexedWriter::WriteSingleStringImpl(std::string const& value) {
+  step_index_.set_step_offset("SingleString", stream_.Pos());
+  yardl::binary::WriteString(stream_, value);
+}
+
+void StringsIndexedWriter::WriteRecWithStringImpl(test_model::RecordWithStrings const& value) {
+  step_index_.set_step_offset("RecWithString", stream_.Pos());
+  test_model::binary::WriteRecordWithStrings(stream_, value);
+}
+
+void StringsIndexedWriter::Flush() {
+  stream_.Flush();
+}
+
+void StringsIndexedWriter::CloseImpl() {
+  yardl::binary::WriteIndex(stream_, step_index_);
+  stream_.Flush();
+}
+
+void StringsIndexedReader::ReadSingleStringImpl(std::string& value) {
+  auto pos = step_index_.get_step_offset("SingleString");
+  stream_.Seek(pos);
+  yardl::binary::ReadString(stream_, value);
+}
+
+void StringsIndexedReader::ReadRecWithStringImpl(test_model::RecordWithStrings& value) {
+  auto pos = step_index_.get_step_offset("RecWithString");
+  stream_.Seek(pos);
+  test_model::binary::ReadRecordWithStrings(stream_, value);
+}
+
+void StringsIndexedReader::CloseImpl() {
+}
+
 void OptionalVectorsWriter::WriteRecordWithOptionalVectorImpl(test_model::RecordWithOptionalVector const& value) {
   test_model::binary::WriteRecordWithOptionalVector(stream_, value);
 }
@@ -3290,6 +3961,29 @@ void OptionalVectorsReader::ReadRecordWithOptionalVectorImpl(test_model::RecordW
 
 void OptionalVectorsReader::CloseImpl() {
   stream_.VerifyFinished();
+}
+
+void OptionalVectorsIndexedWriter::WriteRecordWithOptionalVectorImpl(test_model::RecordWithOptionalVector const& value) {
+  step_index_.set_step_offset("RecordWithOptionalVector", stream_.Pos());
+  test_model::binary::WriteRecordWithOptionalVector(stream_, value);
+}
+
+void OptionalVectorsIndexedWriter::Flush() {
+  stream_.Flush();
+}
+
+void OptionalVectorsIndexedWriter::CloseImpl() {
+  yardl::binary::WriteIndex(stream_, step_index_);
+  stream_.Flush();
+}
+
+void OptionalVectorsIndexedReader::ReadRecordWithOptionalVectorImpl(test_model::RecordWithOptionalVector& value) {
+  auto pos = step_index_.get_step_offset("RecordWithOptionalVector");
+  stream_.Seek(pos);
+  test_model::binary::ReadRecordWithOptionalVector(stream_, value);
+}
+
+void OptionalVectorsIndexedReader::CloseImpl() {
 }
 
 void FixedVectorsWriter::WriteFixedIntVectorImpl(std::array<int32_t, 5> const& value) {
@@ -3334,6 +4028,62 @@ void FixedVectorsReader::ReadRecordWithFixedVectorsImpl(test_model::RecordWithFi
 
 void FixedVectorsReader::CloseImpl() {
   stream_.VerifyFinished();
+}
+
+void FixedVectorsIndexedWriter::WriteFixedIntVectorImpl(std::array<int32_t, 5> const& value) {
+  step_index_.set_step_offset("FixedIntVector", stream_.Pos());
+  yardl::binary::WriteArray<int32_t, yardl::binary::WriteInteger, 5>(stream_, value);
+}
+
+void FixedVectorsIndexedWriter::WriteFixedSimpleRecordVectorImpl(std::array<test_model::SimpleRecord, 3> const& value) {
+  step_index_.set_step_offset("FixedSimpleRecordVector", stream_.Pos());
+  yardl::binary::WriteArray<test_model::SimpleRecord, test_model::binary::WriteSimpleRecord, 3>(stream_, value);
+}
+
+void FixedVectorsIndexedWriter::WriteFixedRecordWithVlensVectorImpl(std::array<test_model::RecordWithVlens, 2> const& value) {
+  step_index_.set_step_offset("FixedRecordWithVlensVector", stream_.Pos());
+  yardl::binary::WriteArray<test_model::RecordWithVlens, test_model::binary::WriteRecordWithVlens, 2>(stream_, value);
+}
+
+void FixedVectorsIndexedWriter::WriteRecordWithFixedVectorsImpl(test_model::RecordWithFixedVectors const& value) {
+  step_index_.set_step_offset("RecordWithFixedVectors", stream_.Pos());
+  test_model::binary::WriteRecordWithFixedVectors(stream_, value);
+}
+
+void FixedVectorsIndexedWriter::Flush() {
+  stream_.Flush();
+}
+
+void FixedVectorsIndexedWriter::CloseImpl() {
+  yardl::binary::WriteIndex(stream_, step_index_);
+  stream_.Flush();
+}
+
+void FixedVectorsIndexedReader::ReadFixedIntVectorImpl(std::array<int32_t, 5>& value) {
+  auto pos = step_index_.get_step_offset("FixedIntVector");
+  stream_.Seek(pos);
+  yardl::binary::ReadArray<int32_t, yardl::binary::ReadInteger, 5>(stream_, value);
+}
+
+void FixedVectorsIndexedReader::ReadFixedSimpleRecordVectorImpl(std::array<test_model::SimpleRecord, 3>& value) {
+  auto pos = step_index_.get_step_offset("FixedSimpleRecordVector");
+  stream_.Seek(pos);
+  yardl::binary::ReadArray<test_model::SimpleRecord, test_model::binary::ReadSimpleRecord, 3>(stream_, value);
+}
+
+void FixedVectorsIndexedReader::ReadFixedRecordWithVlensVectorImpl(std::array<test_model::RecordWithVlens, 2>& value) {
+  auto pos = step_index_.get_step_offset("FixedRecordWithVlensVector");
+  stream_.Seek(pos);
+  yardl::binary::ReadArray<test_model::RecordWithVlens, test_model::binary::ReadRecordWithVlens, 2>(stream_, value);
+}
+
+void FixedVectorsIndexedReader::ReadRecordWithFixedVectorsImpl(test_model::RecordWithFixedVectors& value) {
+  auto pos = step_index_.get_step_offset("RecordWithFixedVectors");
+  stream_.Seek(pos);
+  test_model::binary::ReadRecordWithFixedVectors(stream_, value);
+}
+
+void FixedVectorsIndexedReader::CloseImpl() {
 }
 
 void StreamsWriter::WriteIntDataImpl(int32_t const& value) {
@@ -3448,6 +4198,282 @@ void StreamsReader::CloseImpl() {
   stream_.VerifyFinished();
 }
 
+void StreamsIndexedWriter::WriteIntDataImpl(int32_t const& value) {
+  step_index_.set_step_offset("IntData", stream_.Pos());
+  size_t item_offset = 0;
+  yardl::binary::WriteBlockAndSaveOffset<int32_t, yardl::binary::WriteInteger>(stream_, value, item_offset);
+  step_index_.add_stream_offset("IntData", item_offset);
+}
+
+void StreamsIndexedWriter::WriteIntDataImpl(std::vector<int32_t> const& values) {
+  step_index_.set_step_offset("IntData", stream_.Pos());
+  std::vector<size_t> item_offsets;
+  item_offsets.reserve(values.size());
+  if (!values.empty()) {
+    yardl::binary::WriteVectorAndSaveOffsets<int32_t, yardl::binary::WriteInteger>(stream_, values, item_offsets);
+  }
+  step_index_.add_stream_offsets("IntData", item_offsets);
+}
+
+void StreamsIndexedWriter::EndIntDataImpl() {
+  step_index_.set_step_offset("IntData", stream_.Pos());
+  step_index_.add_stream_offsets("IntData", std::vector<size_t>{});
+  yardl::binary::WriteInteger(stream_, 0U);
+}
+
+void StreamsIndexedWriter::WriteOptionalIntDataImpl(std::optional<int32_t> const& value) {
+  step_index_.set_step_offset("OptionalIntData", stream_.Pos());
+  size_t item_offset = 0;
+  yardl::binary::WriteBlockAndSaveOffset<std::optional<int32_t>, yardl::binary::WriteOptional<int32_t, yardl::binary::WriteInteger>>(stream_, value, item_offset);
+  step_index_.add_stream_offset("OptionalIntData", item_offset);
+}
+
+void StreamsIndexedWriter::WriteOptionalIntDataImpl(std::vector<std::optional<int32_t>> const& values) {
+  step_index_.set_step_offset("OptionalIntData", stream_.Pos());
+  std::vector<size_t> item_offsets;
+  item_offsets.reserve(values.size());
+  if (!values.empty()) {
+    yardl::binary::WriteVectorAndSaveOffsets<std::optional<int32_t>, yardl::binary::WriteOptional<int32_t, yardl::binary::WriteInteger>>(stream_, values, item_offsets);
+  }
+  step_index_.add_stream_offsets("OptionalIntData", item_offsets);
+}
+
+void StreamsIndexedWriter::EndOptionalIntDataImpl() {
+  step_index_.set_step_offset("OptionalIntData", stream_.Pos());
+  step_index_.add_stream_offsets("OptionalIntData", std::vector<size_t>{});
+  yardl::binary::WriteInteger(stream_, 0U);
+}
+
+void StreamsIndexedWriter::WriteRecordWithOptionalVectorDataImpl(test_model::RecordWithOptionalVector const& value) {
+  step_index_.set_step_offset("RecordWithOptionalVectorData", stream_.Pos());
+  size_t item_offset = 0;
+  yardl::binary::WriteBlockAndSaveOffset<test_model::RecordWithOptionalVector, test_model::binary::WriteRecordWithOptionalVector>(stream_, value, item_offset);
+  step_index_.add_stream_offset("RecordWithOptionalVectorData", item_offset);
+}
+
+void StreamsIndexedWriter::WriteRecordWithOptionalVectorDataImpl(std::vector<test_model::RecordWithOptionalVector> const& values) {
+  step_index_.set_step_offset("RecordWithOptionalVectorData", stream_.Pos());
+  std::vector<size_t> item_offsets;
+  item_offsets.reserve(values.size());
+  if (!values.empty()) {
+    yardl::binary::WriteVectorAndSaveOffsets<test_model::RecordWithOptionalVector, test_model::binary::WriteRecordWithOptionalVector>(stream_, values, item_offsets);
+  }
+  step_index_.add_stream_offsets("RecordWithOptionalVectorData", item_offsets);
+}
+
+void StreamsIndexedWriter::EndRecordWithOptionalVectorDataImpl() {
+  step_index_.set_step_offset("RecordWithOptionalVectorData", stream_.Pos());
+  step_index_.add_stream_offsets("RecordWithOptionalVectorData", std::vector<size_t>{});
+  yardl::binary::WriteInteger(stream_, 0U);
+}
+
+void StreamsIndexedWriter::WriteFixedVectorImpl(std::array<int32_t, 3> const& value) {
+  step_index_.set_step_offset("FixedVector", stream_.Pos());
+  size_t item_offset = 0;
+  yardl::binary::WriteBlockAndSaveOffset<std::array<int32_t, 3>, yardl::binary::WriteArray<int32_t, yardl::binary::WriteInteger, 3>>(stream_, value, item_offset);
+  step_index_.add_stream_offset("FixedVector", item_offset);
+}
+
+void StreamsIndexedWriter::WriteFixedVectorImpl(std::vector<std::array<int32_t, 3>> const& values) {
+  step_index_.set_step_offset("FixedVector", stream_.Pos());
+  std::vector<size_t> item_offsets;
+  item_offsets.reserve(values.size());
+  if (!values.empty()) {
+    yardl::binary::WriteVectorAndSaveOffsets<std::array<int32_t, 3>, yardl::binary::WriteArray<int32_t, yardl::binary::WriteInteger, 3>>(stream_, values, item_offsets);
+  }
+  step_index_.add_stream_offsets("FixedVector", item_offsets);
+}
+
+void StreamsIndexedWriter::EndFixedVectorImpl() {
+  step_index_.set_step_offset("FixedVector", stream_.Pos());
+  step_index_.add_stream_offsets("FixedVector", std::vector<size_t>{});
+  yardl::binary::WriteInteger(stream_, 0U);
+}
+
+void StreamsIndexedWriter::Flush() {
+  stream_.Flush();
+}
+
+void StreamsIndexedWriter::CloseImpl() {
+  yardl::binary::WriteIndex(stream_, step_index_);
+  stream_.Flush();
+}
+
+bool StreamsIndexedReader::ReadIntDataImpl(int32_t& value) {
+  if (!step_index_.offset_within_stream("IntData", "OptionalIntData", stream_.Pos())) {
+    stream_.Seek(step_index_.get_step_offset("IntData"));
+  }
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<int32_t, yardl::binary::ReadInteger>(stream_, current_block_remaining_, value);
+  return read_block_successful;
+}
+
+bool StreamsIndexedReader::ReadIntDataImpl(std::vector<int32_t>& values) {
+  if (!step_index_.offset_within_stream("IntData", "OptionalIntData", stream_.Pos())) {
+    stream_.Seek(step_index_.get_step_offset("IntData"));
+  }
+  yardl::binary::ReadBlocksIntoVector<int32_t, yardl::binary::ReadInteger>(stream_, current_block_remaining_, values);
+  return current_block_remaining_ != 0;
+}
+
+bool StreamsIndexedReader::ReadIntDataImpl(int32_t& value, size_t idx) {
+  size_t abs_offset = 0;
+  if (!step_index_.find_stream_item("IntData", idx, abs_offset, current_block_remaining_)) {
+    return false;
+  }
+  stream_.Seek(abs_offset);
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<int32_t, yardl::binary::ReadInteger>(stream_, current_block_remaining_, value);
+  return read_block_successful;
+}
+
+bool StreamsIndexedReader::ReadIntDataImpl(std::vector<int32_t>& values, size_t idx) {
+  size_t abs_offset = 0;
+  if (!step_index_.find_stream_item("IntData", idx, abs_offset, current_block_remaining_)) {
+    values.clear();
+    return false;
+  }
+  stream_.Seek(abs_offset);
+  yardl::binary::ReadBlocksIntoVector<int32_t, yardl::binary::ReadInteger>(stream_, current_block_remaining_, values);
+  return current_block_remaining_ != 0;
+}
+
+size_t StreamsIndexedReader::CountIntDataImpl() {
+  return step_index_.get_stream_count("IntData");
+}
+
+bool StreamsIndexedReader::ReadOptionalIntDataImpl(std::optional<int32_t>& value) {
+  if (!step_index_.offset_within_stream("OptionalIntData", "RecordWithOptionalVectorData", stream_.Pos())) {
+    stream_.Seek(step_index_.get_step_offset("OptionalIntData"));
+  }
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<std::optional<int32_t>, yardl::binary::ReadOptional<int32_t, yardl::binary::ReadInteger>>(stream_, current_block_remaining_, value);
+  return read_block_successful;
+}
+
+bool StreamsIndexedReader::ReadOptionalIntDataImpl(std::vector<std::optional<int32_t>>& values) {
+  if (!step_index_.offset_within_stream("OptionalIntData", "RecordWithOptionalVectorData", stream_.Pos())) {
+    stream_.Seek(step_index_.get_step_offset("OptionalIntData"));
+  }
+  yardl::binary::ReadBlocksIntoVector<std::optional<int32_t>, yardl::binary::ReadOptional<int32_t, yardl::binary::ReadInteger>>(stream_, current_block_remaining_, values);
+  return current_block_remaining_ != 0;
+}
+
+bool StreamsIndexedReader::ReadOptionalIntDataImpl(std::optional<int32_t>& value, size_t idx) {
+  size_t abs_offset = 0;
+  if (!step_index_.find_stream_item("OptionalIntData", idx, abs_offset, current_block_remaining_)) {
+    return false;
+  }
+  stream_.Seek(abs_offset);
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<std::optional<int32_t>, yardl::binary::ReadOptional<int32_t, yardl::binary::ReadInteger>>(stream_, current_block_remaining_, value);
+  return read_block_successful;
+}
+
+bool StreamsIndexedReader::ReadOptionalIntDataImpl(std::vector<std::optional<int32_t>>& values, size_t idx) {
+  size_t abs_offset = 0;
+  if (!step_index_.find_stream_item("OptionalIntData", idx, abs_offset, current_block_remaining_)) {
+    values.clear();
+    return false;
+  }
+  stream_.Seek(abs_offset);
+  yardl::binary::ReadBlocksIntoVector<std::optional<int32_t>, yardl::binary::ReadOptional<int32_t, yardl::binary::ReadInteger>>(stream_, current_block_remaining_, values);
+  return current_block_remaining_ != 0;
+}
+
+size_t StreamsIndexedReader::CountOptionalIntDataImpl() {
+  return step_index_.get_stream_count("OptionalIntData");
+}
+
+bool StreamsIndexedReader::ReadRecordWithOptionalVectorDataImpl(test_model::RecordWithOptionalVector& value) {
+  if (!step_index_.offset_within_stream("RecordWithOptionalVectorData", "FixedVector", stream_.Pos())) {
+    stream_.Seek(step_index_.get_step_offset("RecordWithOptionalVectorData"));
+  }
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<test_model::RecordWithOptionalVector, test_model::binary::ReadRecordWithOptionalVector>(stream_, current_block_remaining_, value);
+  return read_block_successful;
+}
+
+bool StreamsIndexedReader::ReadRecordWithOptionalVectorDataImpl(std::vector<test_model::RecordWithOptionalVector>& values) {
+  if (!step_index_.offset_within_stream("RecordWithOptionalVectorData", "FixedVector", stream_.Pos())) {
+    stream_.Seek(step_index_.get_step_offset("RecordWithOptionalVectorData"));
+  }
+  yardl::binary::ReadBlocksIntoVector<test_model::RecordWithOptionalVector, test_model::binary::ReadRecordWithOptionalVector>(stream_, current_block_remaining_, values);
+  return current_block_remaining_ != 0;
+}
+
+bool StreamsIndexedReader::ReadRecordWithOptionalVectorDataImpl(test_model::RecordWithOptionalVector& value, size_t idx) {
+  size_t abs_offset = 0;
+  if (!step_index_.find_stream_item("RecordWithOptionalVectorData", idx, abs_offset, current_block_remaining_)) {
+    return false;
+  }
+  stream_.Seek(abs_offset);
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<test_model::RecordWithOptionalVector, test_model::binary::ReadRecordWithOptionalVector>(stream_, current_block_remaining_, value);
+  return read_block_successful;
+}
+
+bool StreamsIndexedReader::ReadRecordWithOptionalVectorDataImpl(std::vector<test_model::RecordWithOptionalVector>& values, size_t idx) {
+  size_t abs_offset = 0;
+  if (!step_index_.find_stream_item("RecordWithOptionalVectorData", idx, abs_offset, current_block_remaining_)) {
+    values.clear();
+    return false;
+  }
+  stream_.Seek(abs_offset);
+  yardl::binary::ReadBlocksIntoVector<test_model::RecordWithOptionalVector, test_model::binary::ReadRecordWithOptionalVector>(stream_, current_block_remaining_, values);
+  return current_block_remaining_ != 0;
+}
+
+size_t StreamsIndexedReader::CountRecordWithOptionalVectorDataImpl() {
+  return step_index_.get_stream_count("RecordWithOptionalVectorData");
+}
+
+bool StreamsIndexedReader::ReadFixedVectorImpl(std::array<int32_t, 3>& value) {
+  if (!step_index_.offset_within_stream("FixedVector", std::nullopt, stream_.Pos())) {
+    stream_.Seek(step_index_.get_step_offset("FixedVector"));
+  }
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<std::array<int32_t, 3>, yardl::binary::ReadArray<int32_t, yardl::binary::ReadInteger, 3>>(stream_, current_block_remaining_, value);
+  return read_block_successful;
+}
+
+bool StreamsIndexedReader::ReadFixedVectorImpl(std::vector<std::array<int32_t, 3>>& values) {
+  if (!step_index_.offset_within_stream("FixedVector", std::nullopt, stream_.Pos())) {
+    stream_.Seek(step_index_.get_step_offset("FixedVector"));
+  }
+  yardl::binary::ReadBlocksIntoVector<std::array<int32_t, 3>, yardl::binary::ReadArray<int32_t, yardl::binary::ReadInteger, 3>>(stream_, current_block_remaining_, values);
+  return current_block_remaining_ != 0;
+}
+
+bool StreamsIndexedReader::ReadFixedVectorImpl(std::array<int32_t, 3>& value, size_t idx) {
+  size_t abs_offset = 0;
+  if (!step_index_.find_stream_item("FixedVector", idx, abs_offset, current_block_remaining_)) {
+    return false;
+  }
+  stream_.Seek(abs_offset);
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<std::array<int32_t, 3>, yardl::binary::ReadArray<int32_t, yardl::binary::ReadInteger, 3>>(stream_, current_block_remaining_, value);
+  return read_block_successful;
+}
+
+bool StreamsIndexedReader::ReadFixedVectorImpl(std::vector<std::array<int32_t, 3>>& values, size_t idx) {
+  size_t abs_offset = 0;
+  if (!step_index_.find_stream_item("FixedVector", idx, abs_offset, current_block_remaining_)) {
+    values.clear();
+    return false;
+  }
+  stream_.Seek(abs_offset);
+  yardl::binary::ReadBlocksIntoVector<std::array<int32_t, 3>, yardl::binary::ReadArray<int32_t, yardl::binary::ReadInteger, 3>>(stream_, current_block_remaining_, values);
+  return current_block_remaining_ != 0;
+}
+
+size_t StreamsIndexedReader::CountFixedVectorImpl() {
+  return step_index_.get_stream_count("FixedVector");
+}
+
+void StreamsIndexedReader::CloseImpl() {
+}
+
 void FixedArraysWriter::WriteIntsImpl(yardl::FixedNDArray<int32_t, 2, 3> const& value) {
   yardl::binary::WriteFixedNDArray<int32_t, yardl::binary::WriteInteger, 2, 3>(stream_, value);
 }
@@ -3498,6 +4524,73 @@ void FixedArraysReader::ReadNamedArrayImpl(test_model::NamedFixedNDArray& value)
 
 void FixedArraysReader::CloseImpl() {
   stream_.VerifyFinished();
+}
+
+void FixedArraysIndexedWriter::WriteIntsImpl(yardl::FixedNDArray<int32_t, 2, 3> const& value) {
+  step_index_.set_step_offset("Ints", stream_.Pos());
+  yardl::binary::WriteFixedNDArray<int32_t, yardl::binary::WriteInteger, 2, 3>(stream_, value);
+}
+
+void FixedArraysIndexedWriter::WriteFixedSimpleRecordArrayImpl(yardl::FixedNDArray<test_model::SimpleRecord, 3, 2> const& value) {
+  step_index_.set_step_offset("FixedSimpleRecordArray", stream_.Pos());
+  yardl::binary::WriteFixedNDArray<test_model::SimpleRecord, test_model::binary::WriteSimpleRecord, 3, 2>(stream_, value);
+}
+
+void FixedArraysIndexedWriter::WriteFixedRecordWithVlensArrayImpl(yardl::FixedNDArray<test_model::RecordWithVlens, 2, 2> const& value) {
+  step_index_.set_step_offset("FixedRecordWithVlensArray", stream_.Pos());
+  yardl::binary::WriteFixedNDArray<test_model::RecordWithVlens, test_model::binary::WriteRecordWithVlens, 2, 2>(stream_, value);
+}
+
+void FixedArraysIndexedWriter::WriteRecordWithFixedArraysImpl(test_model::RecordWithFixedArrays const& value) {
+  step_index_.set_step_offset("RecordWithFixedArrays", stream_.Pos());
+  test_model::binary::WriteRecordWithFixedArrays(stream_, value);
+}
+
+void FixedArraysIndexedWriter::WriteNamedArrayImpl(test_model::NamedFixedNDArray const& value) {
+  step_index_.set_step_offset("NamedArray", stream_.Pos());
+  test_model::binary::WriteNamedFixedNDArray(stream_, value);
+}
+
+void FixedArraysIndexedWriter::Flush() {
+  stream_.Flush();
+}
+
+void FixedArraysIndexedWriter::CloseImpl() {
+  yardl::binary::WriteIndex(stream_, step_index_);
+  stream_.Flush();
+}
+
+void FixedArraysIndexedReader::ReadIntsImpl(yardl::FixedNDArray<int32_t, 2, 3>& value) {
+  auto pos = step_index_.get_step_offset("Ints");
+  stream_.Seek(pos);
+  yardl::binary::ReadFixedNDArray<int32_t, yardl::binary::ReadInteger, 2, 3>(stream_, value);
+}
+
+void FixedArraysIndexedReader::ReadFixedSimpleRecordArrayImpl(yardl::FixedNDArray<test_model::SimpleRecord, 3, 2>& value) {
+  auto pos = step_index_.get_step_offset("FixedSimpleRecordArray");
+  stream_.Seek(pos);
+  yardl::binary::ReadFixedNDArray<test_model::SimpleRecord, test_model::binary::ReadSimpleRecord, 3, 2>(stream_, value);
+}
+
+void FixedArraysIndexedReader::ReadFixedRecordWithVlensArrayImpl(yardl::FixedNDArray<test_model::RecordWithVlens, 2, 2>& value) {
+  auto pos = step_index_.get_step_offset("FixedRecordWithVlensArray");
+  stream_.Seek(pos);
+  yardl::binary::ReadFixedNDArray<test_model::RecordWithVlens, test_model::binary::ReadRecordWithVlens, 2, 2>(stream_, value);
+}
+
+void FixedArraysIndexedReader::ReadRecordWithFixedArraysImpl(test_model::RecordWithFixedArrays& value) {
+  auto pos = step_index_.get_step_offset("RecordWithFixedArrays");
+  stream_.Seek(pos);
+  test_model::binary::ReadRecordWithFixedArrays(stream_, value);
+}
+
+void FixedArraysIndexedReader::ReadNamedArrayImpl(test_model::NamedFixedNDArray& value) {
+  auto pos = step_index_.get_step_offset("NamedArray");
+  stream_.Seek(pos);
+  test_model::binary::ReadNamedFixedNDArray(stream_, value);
+}
+
+void FixedArraysIndexedReader::CloseImpl() {
 }
 
 void SubarraysWriter::WriteDynamicWithFixedIntSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<int32_t, 3>> const& value) {
@@ -3584,6 +4677,117 @@ void SubarraysReader::CloseImpl() {
   stream_.VerifyFinished();
 }
 
+void SubarraysIndexedWriter::WriteDynamicWithFixedIntSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<int32_t, 3>> const& value) {
+  step_index_.set_step_offset("DynamicWithFixedIntSubarray", stream_.Pos());
+  yardl::binary::WriteDynamicNDArray<yardl::FixedNDArray<int32_t, 3>, yardl::binary::WriteFixedNDArray<int32_t, yardl::binary::WriteInteger, 3>>(stream_, value);
+}
+
+void SubarraysIndexedWriter::WriteDynamicWithFixedFloatSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<float, 3>> const& value) {
+  step_index_.set_step_offset("DynamicWithFixedFloatSubarray", stream_.Pos());
+  yardl::binary::WriteDynamicNDArray<yardl::FixedNDArray<float, 3>, yardl::binary::WriteFixedNDArray<float, yardl::binary::WriteFloatingPoint, 3>>(stream_, value);
+}
+
+void SubarraysIndexedWriter::WriteKnownDimCountWithFixedIntSubarrayImpl(yardl::NDArray<yardl::FixedNDArray<int32_t, 3>, 1> const& value) {
+  step_index_.set_step_offset("KnownDimCountWithFixedIntSubarray", stream_.Pos());
+  yardl::binary::WriteNDArray<yardl::FixedNDArray<int32_t, 3>, yardl::binary::WriteFixedNDArray<int32_t, yardl::binary::WriteInteger, 3>, 1>(stream_, value);
+}
+
+void SubarraysIndexedWriter::WriteKnownDimCountWithFixedFloatSubarrayImpl(yardl::NDArray<yardl::FixedNDArray<float, 3>, 1> const& value) {
+  step_index_.set_step_offset("KnownDimCountWithFixedFloatSubarray", stream_.Pos());
+  yardl::binary::WriteNDArray<yardl::FixedNDArray<float, 3>, yardl::binary::WriteFixedNDArray<float, yardl::binary::WriteFloatingPoint, 3>, 1>(stream_, value);
+}
+
+void SubarraysIndexedWriter::WriteFixedWithFixedIntSubarrayImpl(yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2> const& value) {
+  step_index_.set_step_offset("FixedWithFixedIntSubarray", stream_.Pos());
+  yardl::binary::WriteFixedNDArray<yardl::FixedNDArray<int32_t, 3>, yardl::binary::WriteFixedNDArray<int32_t, yardl::binary::WriteInteger, 3>, 2>(stream_, value);
+}
+
+void SubarraysIndexedWriter::WriteFixedWithFixedFloatSubarrayImpl(yardl::FixedNDArray<yardl::FixedNDArray<float, 3>, 2> const& value) {
+  step_index_.set_step_offset("FixedWithFixedFloatSubarray", stream_.Pos());
+  yardl::binary::WriteFixedNDArray<yardl::FixedNDArray<float, 3>, yardl::binary::WriteFixedNDArray<float, yardl::binary::WriteFloatingPoint, 3>, 2>(stream_, value);
+}
+
+void SubarraysIndexedWriter::WriteNestedSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>> const& value) {
+  step_index_.set_step_offset("NestedSubarray", stream_.Pos());
+  yardl::binary::WriteDynamicNDArray<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>, yardl::binary::WriteFixedNDArray<yardl::FixedNDArray<int32_t, 3>, yardl::binary::WriteFixedNDArray<int32_t, yardl::binary::WriteInteger, 3>, 2>>(stream_, value);
+}
+
+void SubarraysIndexedWriter::WriteDynamicWithFixedVectorSubarrayImpl(yardl::DynamicNDArray<std::array<int32_t, 3>> const& value) {
+  step_index_.set_step_offset("DynamicWithFixedVectorSubarray", stream_.Pos());
+  yardl::binary::WriteDynamicNDArray<std::array<int32_t, 3>, yardl::binary::WriteArray<int32_t, yardl::binary::WriteInteger, 3>>(stream_, value);
+}
+
+void SubarraysIndexedWriter::WriteGenericSubarrayImpl(test_model::Image<yardl::FixedNDArray<int32_t, 3>> const& value) {
+  step_index_.set_step_offset("GenericSubarray", stream_.Pos());
+  test_model::binary::WriteImage<yardl::FixedNDArray<int32_t, 3>, yardl::binary::WriteFixedNDArray<int32_t, yardl::binary::WriteInteger, 3>>(stream_, value);
+}
+
+void SubarraysIndexedWriter::Flush() {
+  stream_.Flush();
+}
+
+void SubarraysIndexedWriter::CloseImpl() {
+  yardl::binary::WriteIndex(stream_, step_index_);
+  stream_.Flush();
+}
+
+void SubarraysIndexedReader::ReadDynamicWithFixedIntSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<int32_t, 3>>& value) {
+  auto pos = step_index_.get_step_offset("DynamicWithFixedIntSubarray");
+  stream_.Seek(pos);
+  yardl::binary::ReadDynamicNDArray<yardl::FixedNDArray<int32_t, 3>, yardl::binary::ReadFixedNDArray<int32_t, yardl::binary::ReadInteger, 3>>(stream_, value);
+}
+
+void SubarraysIndexedReader::ReadDynamicWithFixedFloatSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<float, 3>>& value) {
+  auto pos = step_index_.get_step_offset("DynamicWithFixedFloatSubarray");
+  stream_.Seek(pos);
+  yardl::binary::ReadDynamicNDArray<yardl::FixedNDArray<float, 3>, yardl::binary::ReadFixedNDArray<float, yardl::binary::ReadFloatingPoint, 3>>(stream_, value);
+}
+
+void SubarraysIndexedReader::ReadKnownDimCountWithFixedIntSubarrayImpl(yardl::NDArray<yardl::FixedNDArray<int32_t, 3>, 1>& value) {
+  auto pos = step_index_.get_step_offset("KnownDimCountWithFixedIntSubarray");
+  stream_.Seek(pos);
+  yardl::binary::ReadNDArray<yardl::FixedNDArray<int32_t, 3>, yardl::binary::ReadFixedNDArray<int32_t, yardl::binary::ReadInteger, 3>, 1>(stream_, value);
+}
+
+void SubarraysIndexedReader::ReadKnownDimCountWithFixedFloatSubarrayImpl(yardl::NDArray<yardl::FixedNDArray<float, 3>, 1>& value) {
+  auto pos = step_index_.get_step_offset("KnownDimCountWithFixedFloatSubarray");
+  stream_.Seek(pos);
+  yardl::binary::ReadNDArray<yardl::FixedNDArray<float, 3>, yardl::binary::ReadFixedNDArray<float, yardl::binary::ReadFloatingPoint, 3>, 1>(stream_, value);
+}
+
+void SubarraysIndexedReader::ReadFixedWithFixedIntSubarrayImpl(yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>& value) {
+  auto pos = step_index_.get_step_offset("FixedWithFixedIntSubarray");
+  stream_.Seek(pos);
+  yardl::binary::ReadFixedNDArray<yardl::FixedNDArray<int32_t, 3>, yardl::binary::ReadFixedNDArray<int32_t, yardl::binary::ReadInteger, 3>, 2>(stream_, value);
+}
+
+void SubarraysIndexedReader::ReadFixedWithFixedFloatSubarrayImpl(yardl::FixedNDArray<yardl::FixedNDArray<float, 3>, 2>& value) {
+  auto pos = step_index_.get_step_offset("FixedWithFixedFloatSubarray");
+  stream_.Seek(pos);
+  yardl::binary::ReadFixedNDArray<yardl::FixedNDArray<float, 3>, yardl::binary::ReadFixedNDArray<float, yardl::binary::ReadFloatingPoint, 3>, 2>(stream_, value);
+}
+
+void SubarraysIndexedReader::ReadNestedSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>>& value) {
+  auto pos = step_index_.get_step_offset("NestedSubarray");
+  stream_.Seek(pos);
+  yardl::binary::ReadDynamicNDArray<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>, yardl::binary::ReadFixedNDArray<yardl::FixedNDArray<int32_t, 3>, yardl::binary::ReadFixedNDArray<int32_t, yardl::binary::ReadInteger, 3>, 2>>(stream_, value);
+}
+
+void SubarraysIndexedReader::ReadDynamicWithFixedVectorSubarrayImpl(yardl::DynamicNDArray<std::array<int32_t, 3>>& value) {
+  auto pos = step_index_.get_step_offset("DynamicWithFixedVectorSubarray");
+  stream_.Seek(pos);
+  yardl::binary::ReadDynamicNDArray<std::array<int32_t, 3>, yardl::binary::ReadArray<int32_t, yardl::binary::ReadInteger, 3>>(stream_, value);
+}
+
+void SubarraysIndexedReader::ReadGenericSubarrayImpl(test_model::Image<yardl::FixedNDArray<int32_t, 3>>& value) {
+  auto pos = step_index_.get_step_offset("GenericSubarray");
+  stream_.Seek(pos);
+  test_model::binary::ReadImage<yardl::FixedNDArray<int32_t, 3>, yardl::binary::ReadFixedNDArray<int32_t, yardl::binary::ReadInteger, 3>>(stream_, value);
+}
+
+void SubarraysIndexedReader::CloseImpl() {
+}
+
 void SubarraysInRecordsWriter::WriteWithFixedSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithFixedCollections> const& value) {
   yardl::binary::WriteDynamicNDArray<test_model::RecordWithFixedCollections, test_model::binary::WriteRecordWithFixedCollections>(stream_, value);
 }
@@ -3610,6 +4814,40 @@ void SubarraysInRecordsReader::ReadWithVlenSubarraysImpl(yardl::DynamicNDArray<t
 
 void SubarraysInRecordsReader::CloseImpl() {
   stream_.VerifyFinished();
+}
+
+void SubarraysInRecordsIndexedWriter::WriteWithFixedSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithFixedCollections> const& value) {
+  step_index_.set_step_offset("WithFixedSubarrays", stream_.Pos());
+  yardl::binary::WriteDynamicNDArray<test_model::RecordWithFixedCollections, test_model::binary::WriteRecordWithFixedCollections>(stream_, value);
+}
+
+void SubarraysInRecordsIndexedWriter::WriteWithVlenSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithVlenCollections> const& value) {
+  step_index_.set_step_offset("WithVlenSubarrays", stream_.Pos());
+  yardl::binary::WriteDynamicNDArray<test_model::RecordWithVlenCollections, test_model::binary::WriteRecordWithVlenCollections>(stream_, value);
+}
+
+void SubarraysInRecordsIndexedWriter::Flush() {
+  stream_.Flush();
+}
+
+void SubarraysInRecordsIndexedWriter::CloseImpl() {
+  yardl::binary::WriteIndex(stream_, step_index_);
+  stream_.Flush();
+}
+
+void SubarraysInRecordsIndexedReader::ReadWithFixedSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithFixedCollections>& value) {
+  auto pos = step_index_.get_step_offset("WithFixedSubarrays");
+  stream_.Seek(pos);
+  yardl::binary::ReadDynamicNDArray<test_model::RecordWithFixedCollections, test_model::binary::ReadRecordWithFixedCollections>(stream_, value);
+}
+
+void SubarraysInRecordsIndexedReader::ReadWithVlenSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithVlenCollections>& value) {
+  auto pos = step_index_.get_step_offset("WithVlenSubarrays");
+  stream_.Seek(pos);
+  yardl::binary::ReadDynamicNDArray<test_model::RecordWithVlenCollections, test_model::binary::ReadRecordWithVlenCollections>(stream_, value);
+}
+
+void SubarraysInRecordsIndexedReader::CloseImpl() {
 }
 
 void NDArraysWriter::WriteIntsImpl(yardl::NDArray<int32_t, 2> const& value) {
@@ -3664,6 +4902,73 @@ void NDArraysReader::CloseImpl() {
   stream_.VerifyFinished();
 }
 
+void NDArraysIndexedWriter::WriteIntsImpl(yardl::NDArray<int32_t, 2> const& value) {
+  step_index_.set_step_offset("Ints", stream_.Pos());
+  yardl::binary::WriteNDArray<int32_t, yardl::binary::WriteInteger, 2>(stream_, value);
+}
+
+void NDArraysIndexedWriter::WriteSimpleRecordArrayImpl(yardl::NDArray<test_model::SimpleRecord, 2> const& value) {
+  step_index_.set_step_offset("SimpleRecordArray", stream_.Pos());
+  yardl::binary::WriteNDArray<test_model::SimpleRecord, test_model::binary::WriteSimpleRecord, 2>(stream_, value);
+}
+
+void NDArraysIndexedWriter::WriteRecordWithVlensArrayImpl(yardl::NDArray<test_model::RecordWithVlens, 2> const& value) {
+  step_index_.set_step_offset("RecordWithVlensArray", stream_.Pos());
+  yardl::binary::WriteNDArray<test_model::RecordWithVlens, test_model::binary::WriteRecordWithVlens, 2>(stream_, value);
+}
+
+void NDArraysIndexedWriter::WriteRecordWithNDArraysImpl(test_model::RecordWithNDArrays const& value) {
+  step_index_.set_step_offset("RecordWithNDArrays", stream_.Pos());
+  test_model::binary::WriteRecordWithNDArrays(stream_, value);
+}
+
+void NDArraysIndexedWriter::WriteNamedArrayImpl(test_model::NamedNDArray const& value) {
+  step_index_.set_step_offset("NamedArray", stream_.Pos());
+  test_model::binary::WriteNamedNDArray(stream_, value);
+}
+
+void NDArraysIndexedWriter::Flush() {
+  stream_.Flush();
+}
+
+void NDArraysIndexedWriter::CloseImpl() {
+  yardl::binary::WriteIndex(stream_, step_index_);
+  stream_.Flush();
+}
+
+void NDArraysIndexedReader::ReadIntsImpl(yardl::NDArray<int32_t, 2>& value) {
+  auto pos = step_index_.get_step_offset("Ints");
+  stream_.Seek(pos);
+  yardl::binary::ReadNDArray<int32_t, yardl::binary::ReadInteger, 2>(stream_, value);
+}
+
+void NDArraysIndexedReader::ReadSimpleRecordArrayImpl(yardl::NDArray<test_model::SimpleRecord, 2>& value) {
+  auto pos = step_index_.get_step_offset("SimpleRecordArray");
+  stream_.Seek(pos);
+  yardl::binary::ReadNDArray<test_model::SimpleRecord, test_model::binary::ReadSimpleRecord, 2>(stream_, value);
+}
+
+void NDArraysIndexedReader::ReadRecordWithVlensArrayImpl(yardl::NDArray<test_model::RecordWithVlens, 2>& value) {
+  auto pos = step_index_.get_step_offset("RecordWithVlensArray");
+  stream_.Seek(pos);
+  yardl::binary::ReadNDArray<test_model::RecordWithVlens, test_model::binary::ReadRecordWithVlens, 2>(stream_, value);
+}
+
+void NDArraysIndexedReader::ReadRecordWithNDArraysImpl(test_model::RecordWithNDArrays& value) {
+  auto pos = step_index_.get_step_offset("RecordWithNDArrays");
+  stream_.Seek(pos);
+  test_model::binary::ReadRecordWithNDArrays(stream_, value);
+}
+
+void NDArraysIndexedReader::ReadNamedArrayImpl(test_model::NamedNDArray& value) {
+  auto pos = step_index_.get_step_offset("NamedArray");
+  stream_.Seek(pos);
+  test_model::binary::ReadNamedNDArray(stream_, value);
+}
+
+void NDArraysIndexedReader::CloseImpl() {
+}
+
 void NDArraysSingleDimensionWriter::WriteIntsImpl(yardl::NDArray<int32_t, 1> const& value) {
   yardl::binary::WriteNDArray<int32_t, yardl::binary::WriteInteger, 1>(stream_, value);
 }
@@ -3708,6 +5013,62 @@ void NDArraysSingleDimensionReader::CloseImpl() {
   stream_.VerifyFinished();
 }
 
+void NDArraysSingleDimensionIndexedWriter::WriteIntsImpl(yardl::NDArray<int32_t, 1> const& value) {
+  step_index_.set_step_offset("Ints", stream_.Pos());
+  yardl::binary::WriteNDArray<int32_t, yardl::binary::WriteInteger, 1>(stream_, value);
+}
+
+void NDArraysSingleDimensionIndexedWriter::WriteSimpleRecordArrayImpl(yardl::NDArray<test_model::SimpleRecord, 1> const& value) {
+  step_index_.set_step_offset("SimpleRecordArray", stream_.Pos());
+  yardl::binary::WriteNDArray<test_model::SimpleRecord, test_model::binary::WriteSimpleRecord, 1>(stream_, value);
+}
+
+void NDArraysSingleDimensionIndexedWriter::WriteRecordWithVlensArrayImpl(yardl::NDArray<test_model::RecordWithVlens, 1> const& value) {
+  step_index_.set_step_offset("RecordWithVlensArray", stream_.Pos());
+  yardl::binary::WriteNDArray<test_model::RecordWithVlens, test_model::binary::WriteRecordWithVlens, 1>(stream_, value);
+}
+
+void NDArraysSingleDimensionIndexedWriter::WriteRecordWithNDArraysImpl(test_model::RecordWithNDArraysSingleDimension const& value) {
+  step_index_.set_step_offset("RecordWithNDArrays", stream_.Pos());
+  test_model::binary::WriteRecordWithNDArraysSingleDimension(stream_, value);
+}
+
+void NDArraysSingleDimensionIndexedWriter::Flush() {
+  stream_.Flush();
+}
+
+void NDArraysSingleDimensionIndexedWriter::CloseImpl() {
+  yardl::binary::WriteIndex(stream_, step_index_);
+  stream_.Flush();
+}
+
+void NDArraysSingleDimensionIndexedReader::ReadIntsImpl(yardl::NDArray<int32_t, 1>& value) {
+  auto pos = step_index_.get_step_offset("Ints");
+  stream_.Seek(pos);
+  yardl::binary::ReadNDArray<int32_t, yardl::binary::ReadInteger, 1>(stream_, value);
+}
+
+void NDArraysSingleDimensionIndexedReader::ReadSimpleRecordArrayImpl(yardl::NDArray<test_model::SimpleRecord, 1>& value) {
+  auto pos = step_index_.get_step_offset("SimpleRecordArray");
+  stream_.Seek(pos);
+  yardl::binary::ReadNDArray<test_model::SimpleRecord, test_model::binary::ReadSimpleRecord, 1>(stream_, value);
+}
+
+void NDArraysSingleDimensionIndexedReader::ReadRecordWithVlensArrayImpl(yardl::NDArray<test_model::RecordWithVlens, 1>& value) {
+  auto pos = step_index_.get_step_offset("RecordWithVlensArray");
+  stream_.Seek(pos);
+  yardl::binary::ReadNDArray<test_model::RecordWithVlens, test_model::binary::ReadRecordWithVlens, 1>(stream_, value);
+}
+
+void NDArraysSingleDimensionIndexedReader::ReadRecordWithNDArraysImpl(test_model::RecordWithNDArraysSingleDimension& value) {
+  auto pos = step_index_.get_step_offset("RecordWithNDArrays");
+  stream_.Seek(pos);
+  test_model::binary::ReadRecordWithNDArraysSingleDimension(stream_, value);
+}
+
+void NDArraysSingleDimensionIndexedReader::CloseImpl() {
+}
+
 void DynamicNDArraysWriter::WriteIntsImpl(yardl::DynamicNDArray<int32_t> const& value) {
   yardl::binary::WriteDynamicNDArray<int32_t, yardl::binary::WriteInteger>(stream_, value);
 }
@@ -3750,6 +5111,62 @@ void DynamicNDArraysReader::ReadRecordWithDynamicNDArraysImpl(test_model::Record
 
 void DynamicNDArraysReader::CloseImpl() {
   stream_.VerifyFinished();
+}
+
+void DynamicNDArraysIndexedWriter::WriteIntsImpl(yardl::DynamicNDArray<int32_t> const& value) {
+  step_index_.set_step_offset("Ints", stream_.Pos());
+  yardl::binary::WriteDynamicNDArray<int32_t, yardl::binary::WriteInteger>(stream_, value);
+}
+
+void DynamicNDArraysIndexedWriter::WriteSimpleRecordArrayImpl(yardl::DynamicNDArray<test_model::SimpleRecord> const& value) {
+  step_index_.set_step_offset("SimpleRecordArray", stream_.Pos());
+  yardl::binary::WriteDynamicNDArray<test_model::SimpleRecord, test_model::binary::WriteSimpleRecord>(stream_, value);
+}
+
+void DynamicNDArraysIndexedWriter::WriteRecordWithVlensArrayImpl(yardl::DynamicNDArray<test_model::RecordWithVlens> const& value) {
+  step_index_.set_step_offset("RecordWithVlensArray", stream_.Pos());
+  yardl::binary::WriteDynamicNDArray<test_model::RecordWithVlens, test_model::binary::WriteRecordWithVlens>(stream_, value);
+}
+
+void DynamicNDArraysIndexedWriter::WriteRecordWithDynamicNDArraysImpl(test_model::RecordWithDynamicNDArrays const& value) {
+  step_index_.set_step_offset("RecordWithDynamicNDArrays", stream_.Pos());
+  test_model::binary::WriteRecordWithDynamicNDArrays(stream_, value);
+}
+
+void DynamicNDArraysIndexedWriter::Flush() {
+  stream_.Flush();
+}
+
+void DynamicNDArraysIndexedWriter::CloseImpl() {
+  yardl::binary::WriteIndex(stream_, step_index_);
+  stream_.Flush();
+}
+
+void DynamicNDArraysIndexedReader::ReadIntsImpl(yardl::DynamicNDArray<int32_t>& value) {
+  auto pos = step_index_.get_step_offset("Ints");
+  stream_.Seek(pos);
+  yardl::binary::ReadDynamicNDArray<int32_t, yardl::binary::ReadInteger>(stream_, value);
+}
+
+void DynamicNDArraysIndexedReader::ReadSimpleRecordArrayImpl(yardl::DynamicNDArray<test_model::SimpleRecord>& value) {
+  auto pos = step_index_.get_step_offset("SimpleRecordArray");
+  stream_.Seek(pos);
+  yardl::binary::ReadDynamicNDArray<test_model::SimpleRecord, test_model::binary::ReadSimpleRecord>(stream_, value);
+}
+
+void DynamicNDArraysIndexedReader::ReadRecordWithVlensArrayImpl(yardl::DynamicNDArray<test_model::RecordWithVlens>& value) {
+  auto pos = step_index_.get_step_offset("RecordWithVlensArray");
+  stream_.Seek(pos);
+  yardl::binary::ReadDynamicNDArray<test_model::RecordWithVlens, test_model::binary::ReadRecordWithVlens>(stream_, value);
+}
+
+void DynamicNDArraysIndexedReader::ReadRecordWithDynamicNDArraysImpl(test_model::RecordWithDynamicNDArrays& value) {
+  auto pos = step_index_.get_step_offset("RecordWithDynamicNDArrays");
+  stream_.Seek(pos);
+  test_model::binary::ReadRecordWithDynamicNDArrays(stream_, value);
+}
+
+void DynamicNDArraysIndexedReader::CloseImpl() {
 }
 
 void MultiDArraysWriter::WriteImagesImpl(yardl::NDArray<float, 4> const& value) {
@@ -3814,6 +5231,150 @@ void MultiDArraysReader::CloseImpl() {
   stream_.VerifyFinished();
 }
 
+void MultiDArraysIndexedWriter::WriteImagesImpl(yardl::NDArray<float, 4> const& value) {
+  step_index_.set_step_offset("Images", stream_.Pos());
+  size_t item_offset = 0;
+  yardl::binary::WriteBlockAndSaveOffset<yardl::NDArray<float, 4>, yardl::binary::WriteNDArray<float, yardl::binary::WriteFloatingPoint, 4>>(stream_, value, item_offset);
+  step_index_.add_stream_offset("Images", item_offset);
+}
+
+void MultiDArraysIndexedWriter::WriteImagesImpl(std::vector<yardl::NDArray<float, 4>> const& values) {
+  step_index_.set_step_offset("Images", stream_.Pos());
+  std::vector<size_t> item_offsets;
+  item_offsets.reserve(values.size());
+  if (!values.empty()) {
+    yardl::binary::WriteVectorAndSaveOffsets<yardl::NDArray<float, 4>, yardl::binary::WriteNDArray<float, yardl::binary::WriteFloatingPoint, 4>>(stream_, values, item_offsets);
+  }
+  step_index_.add_stream_offsets("Images", item_offsets);
+}
+
+void MultiDArraysIndexedWriter::EndImagesImpl() {
+  step_index_.set_step_offset("Images", stream_.Pos());
+  step_index_.add_stream_offsets("Images", std::vector<size_t>{});
+  yardl::binary::WriteInteger(stream_, 0U);
+}
+
+void MultiDArraysIndexedWriter::WriteFramesImpl(yardl::FixedNDArray<float, 1, 1, 64, 32> const& value) {
+  step_index_.set_step_offset("Frames", stream_.Pos());
+  size_t item_offset = 0;
+  yardl::binary::WriteBlockAndSaveOffset<yardl::FixedNDArray<float, 1, 1, 64, 32>, yardl::binary::WriteFixedNDArray<float, yardl::binary::WriteFloatingPoint, 1, 1, 64, 32>>(stream_, value, item_offset);
+  step_index_.add_stream_offset("Frames", item_offset);
+}
+
+void MultiDArraysIndexedWriter::WriteFramesImpl(std::vector<yardl::FixedNDArray<float, 1, 1, 64, 32>> const& values) {
+  step_index_.set_step_offset("Frames", stream_.Pos());
+  std::vector<size_t> item_offsets;
+  item_offsets.reserve(values.size());
+  if (!values.empty()) {
+    yardl::binary::WriteVectorAndSaveOffsets<yardl::FixedNDArray<float, 1, 1, 64, 32>, yardl::binary::WriteFixedNDArray<float, yardl::binary::WriteFloatingPoint, 1, 1, 64, 32>>(stream_, values, item_offsets);
+  }
+  step_index_.add_stream_offsets("Frames", item_offsets);
+}
+
+void MultiDArraysIndexedWriter::EndFramesImpl() {
+  step_index_.set_step_offset("Frames", stream_.Pos());
+  step_index_.add_stream_offsets("Frames", std::vector<size_t>{});
+  yardl::binary::WriteInteger(stream_, 0U);
+}
+
+void MultiDArraysIndexedWriter::Flush() {
+  stream_.Flush();
+}
+
+void MultiDArraysIndexedWriter::CloseImpl() {
+  yardl::binary::WriteIndex(stream_, step_index_);
+  stream_.Flush();
+}
+
+bool MultiDArraysIndexedReader::ReadImagesImpl(yardl::NDArray<float, 4>& value) {
+  if (!step_index_.offset_within_stream("Images", "Frames", stream_.Pos())) {
+    stream_.Seek(step_index_.get_step_offset("Images"));
+  }
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<yardl::NDArray<float, 4>, yardl::binary::ReadNDArray<float, yardl::binary::ReadFloatingPoint, 4>>(stream_, current_block_remaining_, value);
+  return read_block_successful;
+}
+
+bool MultiDArraysIndexedReader::ReadImagesImpl(std::vector<yardl::NDArray<float, 4>>& values) {
+  if (!step_index_.offset_within_stream("Images", "Frames", stream_.Pos())) {
+    stream_.Seek(step_index_.get_step_offset("Images"));
+  }
+  yardl::binary::ReadBlocksIntoVector<yardl::NDArray<float, 4>, yardl::binary::ReadNDArray<float, yardl::binary::ReadFloatingPoint, 4>>(stream_, current_block_remaining_, values);
+  return current_block_remaining_ != 0;
+}
+
+bool MultiDArraysIndexedReader::ReadImagesImpl(yardl::NDArray<float, 4>& value, size_t idx) {
+  size_t abs_offset = 0;
+  if (!step_index_.find_stream_item("Images", idx, abs_offset, current_block_remaining_)) {
+    return false;
+  }
+  stream_.Seek(abs_offset);
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<yardl::NDArray<float, 4>, yardl::binary::ReadNDArray<float, yardl::binary::ReadFloatingPoint, 4>>(stream_, current_block_remaining_, value);
+  return read_block_successful;
+}
+
+bool MultiDArraysIndexedReader::ReadImagesImpl(std::vector<yardl::NDArray<float, 4>>& values, size_t idx) {
+  size_t abs_offset = 0;
+  if (!step_index_.find_stream_item("Images", idx, abs_offset, current_block_remaining_)) {
+    values.clear();
+    return false;
+  }
+  stream_.Seek(abs_offset);
+  yardl::binary::ReadBlocksIntoVector<yardl::NDArray<float, 4>, yardl::binary::ReadNDArray<float, yardl::binary::ReadFloatingPoint, 4>>(stream_, current_block_remaining_, values);
+  return current_block_remaining_ != 0;
+}
+
+size_t MultiDArraysIndexedReader::CountImagesImpl() {
+  return step_index_.get_stream_count("Images");
+}
+
+bool MultiDArraysIndexedReader::ReadFramesImpl(yardl::FixedNDArray<float, 1, 1, 64, 32>& value) {
+  if (!step_index_.offset_within_stream("Frames", std::nullopt, stream_.Pos())) {
+    stream_.Seek(step_index_.get_step_offset("Frames"));
+  }
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<yardl::FixedNDArray<float, 1, 1, 64, 32>, yardl::binary::ReadFixedNDArray<float, yardl::binary::ReadFloatingPoint, 1, 1, 64, 32>>(stream_, current_block_remaining_, value);
+  return read_block_successful;
+}
+
+bool MultiDArraysIndexedReader::ReadFramesImpl(std::vector<yardl::FixedNDArray<float, 1, 1, 64, 32>>& values) {
+  if (!step_index_.offset_within_stream("Frames", std::nullopt, stream_.Pos())) {
+    stream_.Seek(step_index_.get_step_offset("Frames"));
+  }
+  yardl::binary::ReadBlocksIntoVector<yardl::FixedNDArray<float, 1, 1, 64, 32>, yardl::binary::ReadFixedNDArray<float, yardl::binary::ReadFloatingPoint, 1, 1, 64, 32>>(stream_, current_block_remaining_, values);
+  return current_block_remaining_ != 0;
+}
+
+bool MultiDArraysIndexedReader::ReadFramesImpl(yardl::FixedNDArray<float, 1, 1, 64, 32>& value, size_t idx) {
+  size_t abs_offset = 0;
+  if (!step_index_.find_stream_item("Frames", idx, abs_offset, current_block_remaining_)) {
+    return false;
+  }
+  stream_.Seek(abs_offset);
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<yardl::FixedNDArray<float, 1, 1, 64, 32>, yardl::binary::ReadFixedNDArray<float, yardl::binary::ReadFloatingPoint, 1, 1, 64, 32>>(stream_, current_block_remaining_, value);
+  return read_block_successful;
+}
+
+bool MultiDArraysIndexedReader::ReadFramesImpl(std::vector<yardl::FixedNDArray<float, 1, 1, 64, 32>>& values, size_t idx) {
+  size_t abs_offset = 0;
+  if (!step_index_.find_stream_item("Frames", idx, abs_offset, current_block_remaining_)) {
+    values.clear();
+    return false;
+  }
+  stream_.Seek(abs_offset);
+  yardl::binary::ReadBlocksIntoVector<yardl::FixedNDArray<float, 1, 1, 64, 32>, yardl::binary::ReadFixedNDArray<float, yardl::binary::ReadFloatingPoint, 1, 1, 64, 32>>(stream_, current_block_remaining_, values);
+  return current_block_remaining_ != 0;
+}
+
+size_t MultiDArraysIndexedReader::CountFramesImpl() {
+  return step_index_.get_stream_count("Frames");
+}
+
+void MultiDArraysIndexedReader::CloseImpl() {
+}
+
 void ComplexArraysWriter::WriteFloatsImpl(yardl::DynamicNDArray<std::complex<float>> const& value) {
   yardl::binary::WriteDynamicNDArray<std::complex<float>, yardl::binary::WriteFloatingPoint>(stream_, value);
 }
@@ -3840,6 +5401,40 @@ void ComplexArraysReader::ReadDoublesImpl(yardl::NDArray<std::complex<double>, 2
 
 void ComplexArraysReader::CloseImpl() {
   stream_.VerifyFinished();
+}
+
+void ComplexArraysIndexedWriter::WriteFloatsImpl(yardl::DynamicNDArray<std::complex<float>> const& value) {
+  step_index_.set_step_offset("Floats", stream_.Pos());
+  yardl::binary::WriteDynamicNDArray<std::complex<float>, yardl::binary::WriteFloatingPoint>(stream_, value);
+}
+
+void ComplexArraysIndexedWriter::WriteDoublesImpl(yardl::NDArray<std::complex<double>, 2> const& value) {
+  step_index_.set_step_offset("Doubles", stream_.Pos());
+  yardl::binary::WriteNDArray<std::complex<double>, yardl::binary::WriteFloatingPoint, 2>(stream_, value);
+}
+
+void ComplexArraysIndexedWriter::Flush() {
+  stream_.Flush();
+}
+
+void ComplexArraysIndexedWriter::CloseImpl() {
+  yardl::binary::WriteIndex(stream_, step_index_);
+  stream_.Flush();
+}
+
+void ComplexArraysIndexedReader::ReadFloatsImpl(yardl::DynamicNDArray<std::complex<float>>& value) {
+  auto pos = step_index_.get_step_offset("Floats");
+  stream_.Seek(pos);
+  yardl::binary::ReadDynamicNDArray<std::complex<float>, yardl::binary::ReadFloatingPoint>(stream_, value);
+}
+
+void ComplexArraysIndexedReader::ReadDoublesImpl(yardl::NDArray<std::complex<double>, 2>& value) {
+  auto pos = step_index_.get_step_offset("Doubles");
+  stream_.Seek(pos);
+  yardl::binary::ReadNDArray<std::complex<double>, yardl::binary::ReadFloatingPoint, 2>(stream_, value);
+}
+
+void ComplexArraysIndexedReader::CloseImpl() {
 }
 
 void MapsWriter::WriteStringToIntImpl(std::unordered_map<std::string, int32_t> const& value) {
@@ -3894,6 +5489,73 @@ void MapsReader::CloseImpl() {
   stream_.VerifyFinished();
 }
 
+void MapsIndexedWriter::WriteStringToIntImpl(std::unordered_map<std::string, int32_t> const& value) {
+  step_index_.set_step_offset("StringToInt", stream_.Pos());
+  yardl::binary::WriteMap<std::string, int32_t, yardl::binary::WriteString, yardl::binary::WriteInteger>(stream_, value);
+}
+
+void MapsIndexedWriter::WriteIntToStringImpl(std::unordered_map<int32_t, std::string> const& value) {
+  step_index_.set_step_offset("IntToString", stream_.Pos());
+  yardl::binary::WriteMap<int32_t, std::string, yardl::binary::WriteInteger, yardl::binary::WriteString>(stream_, value);
+}
+
+void MapsIndexedWriter::WriteStringToUnionImpl(std::unordered_map<std::string, std::variant<std::string, int32_t>> const& value) {
+  step_index_.set_step_offset("StringToUnion", stream_.Pos());
+  yardl::binary::WriteMap<std::string, std::variant<std::string, int32_t>, yardl::binary::WriteString, WriteUnion<std::string, yardl::binary::WriteString, int32_t, yardl::binary::WriteInteger>>(stream_, value);
+}
+
+void MapsIndexedWriter::WriteAliasedGenericImpl(basic_types::AliasedMap<std::string, int32_t> const& value) {
+  step_index_.set_step_offset("AliasedGeneric", stream_.Pos());
+  basic_types::binary::WriteAliasedMap<std::string, yardl::binary::WriteString, int32_t, yardl::binary::WriteInteger>(stream_, value);
+}
+
+void MapsIndexedWriter::WriteRecordsImpl(std::vector<test_model::RecordWithMaps> const& value) {
+  step_index_.set_step_offset("Records", stream_.Pos());
+  yardl::binary::WriteVector<test_model::RecordWithMaps, test_model::binary::WriteRecordWithMaps>(stream_, value);
+}
+
+void MapsIndexedWriter::Flush() {
+  stream_.Flush();
+}
+
+void MapsIndexedWriter::CloseImpl() {
+  yardl::binary::WriteIndex(stream_, step_index_);
+  stream_.Flush();
+}
+
+void MapsIndexedReader::ReadStringToIntImpl(std::unordered_map<std::string, int32_t>& value) {
+  auto pos = step_index_.get_step_offset("StringToInt");
+  stream_.Seek(pos);
+  yardl::binary::ReadMap<std::string, int32_t, yardl::binary::ReadString, yardl::binary::ReadInteger>(stream_, value);
+}
+
+void MapsIndexedReader::ReadIntToStringImpl(std::unordered_map<int32_t, std::string>& value) {
+  auto pos = step_index_.get_step_offset("IntToString");
+  stream_.Seek(pos);
+  yardl::binary::ReadMap<int32_t, std::string, yardl::binary::ReadInteger, yardl::binary::ReadString>(stream_, value);
+}
+
+void MapsIndexedReader::ReadStringToUnionImpl(std::unordered_map<std::string, std::variant<std::string, int32_t>>& value) {
+  auto pos = step_index_.get_step_offset("StringToUnion");
+  stream_.Seek(pos);
+  yardl::binary::ReadMap<std::string, std::variant<std::string, int32_t>, yardl::binary::ReadString, ReadUnion<std::string, yardl::binary::ReadString, int32_t, yardl::binary::ReadInteger>>(stream_, value);
+}
+
+void MapsIndexedReader::ReadAliasedGenericImpl(basic_types::AliasedMap<std::string, int32_t>& value) {
+  auto pos = step_index_.get_step_offset("AliasedGeneric");
+  stream_.Seek(pos);
+  basic_types::binary::ReadAliasedMap<std::string, yardl::binary::ReadString, int32_t, yardl::binary::ReadInteger>(stream_, value);
+}
+
+void MapsIndexedReader::ReadRecordsImpl(std::vector<test_model::RecordWithMaps>& value) {
+  auto pos = step_index_.get_step_offset("Records");
+  stream_.Seek(pos);
+  yardl::binary::ReadVector<test_model::RecordWithMaps, test_model::binary::ReadRecordWithMaps>(stream_, value);
+}
+
+void MapsIndexedReader::CloseImpl() {
+}
+
 void UnionsWriter::WriteIntOrSimpleRecordImpl(std::variant<int32_t, test_model::SimpleRecord> const& value) {
   WriteUnion<int32_t, yardl::binary::WriteInteger, test_model::SimpleRecord, test_model::binary::WriteSimpleRecord>(stream_, value);
 }
@@ -3936,6 +5598,62 @@ void UnionsReader::ReadRecordWithUnionsImpl(basic_types::RecordWithUnions& value
 
 void UnionsReader::CloseImpl() {
   stream_.VerifyFinished();
+}
+
+void UnionsIndexedWriter::WriteIntOrSimpleRecordImpl(std::variant<int32_t, test_model::SimpleRecord> const& value) {
+  step_index_.set_step_offset("IntOrSimpleRecord", stream_.Pos());
+  WriteUnion<int32_t, yardl::binary::WriteInteger, test_model::SimpleRecord, test_model::binary::WriteSimpleRecord>(stream_, value);
+}
+
+void UnionsIndexedWriter::WriteIntOrRecordWithVlensImpl(std::variant<int32_t, test_model::RecordWithVlens> const& value) {
+  step_index_.set_step_offset("IntOrRecordWithVlens", stream_.Pos());
+  WriteUnion<int32_t, yardl::binary::WriteInteger, test_model::RecordWithVlens, test_model::binary::WriteRecordWithVlens>(stream_, value);
+}
+
+void UnionsIndexedWriter::WriteMonosotateOrIntOrSimpleRecordImpl(std::variant<std::monostate, int32_t, test_model::SimpleRecord> const& value) {
+  step_index_.set_step_offset("MonosotateOrIntOrSimpleRecord", stream_.Pos());
+  WriteUnion<std::monostate, yardl::binary::WriteMonostate, int32_t, yardl::binary::WriteInteger, test_model::SimpleRecord, test_model::binary::WriteSimpleRecord>(stream_, value);
+}
+
+void UnionsIndexedWriter::WriteRecordWithUnionsImpl(basic_types::RecordWithUnions const& value) {
+  step_index_.set_step_offset("RecordWithUnions", stream_.Pos());
+  basic_types::binary::WriteRecordWithUnions(stream_, value);
+}
+
+void UnionsIndexedWriter::Flush() {
+  stream_.Flush();
+}
+
+void UnionsIndexedWriter::CloseImpl() {
+  yardl::binary::WriteIndex(stream_, step_index_);
+  stream_.Flush();
+}
+
+void UnionsIndexedReader::ReadIntOrSimpleRecordImpl(std::variant<int32_t, test_model::SimpleRecord>& value) {
+  auto pos = step_index_.get_step_offset("IntOrSimpleRecord");
+  stream_.Seek(pos);
+  ReadUnion<int32_t, yardl::binary::ReadInteger, test_model::SimpleRecord, test_model::binary::ReadSimpleRecord>(stream_, value);
+}
+
+void UnionsIndexedReader::ReadIntOrRecordWithVlensImpl(std::variant<int32_t, test_model::RecordWithVlens>& value) {
+  auto pos = step_index_.get_step_offset("IntOrRecordWithVlens");
+  stream_.Seek(pos);
+  ReadUnion<int32_t, yardl::binary::ReadInteger, test_model::RecordWithVlens, test_model::binary::ReadRecordWithVlens>(stream_, value);
+}
+
+void UnionsIndexedReader::ReadMonosotateOrIntOrSimpleRecordImpl(std::variant<std::monostate, int32_t, test_model::SimpleRecord>& value) {
+  auto pos = step_index_.get_step_offset("MonosotateOrIntOrSimpleRecord");
+  stream_.Seek(pos);
+  ReadUnion<std::monostate, yardl::binary::ReadMonostate, int32_t, yardl::binary::ReadInteger, test_model::SimpleRecord, test_model::binary::ReadSimpleRecord>(stream_, value);
+}
+
+void UnionsIndexedReader::ReadRecordWithUnionsImpl(basic_types::RecordWithUnions& value) {
+  auto pos = step_index_.get_step_offset("RecordWithUnions");
+  stream_.Seek(pos);
+  basic_types::binary::ReadRecordWithUnions(stream_, value);
+}
+
+void UnionsIndexedReader::CloseImpl() {
 }
 
 void StreamsOfUnionsWriter::WriteIntOrSimpleRecordImpl(std::variant<int32_t, test_model::SimpleRecord> const& value) {
@@ -4025,6 +5743,216 @@ void StreamsOfUnionsReader::CloseImpl() {
   stream_.VerifyFinished();
 }
 
+void StreamsOfUnionsIndexedWriter::WriteIntOrSimpleRecordImpl(std::variant<int32_t, test_model::SimpleRecord> const& value) {
+  step_index_.set_step_offset("IntOrSimpleRecord", stream_.Pos());
+  size_t item_offset = 0;
+  yardl::binary::WriteBlockAndSaveOffset<std::variant<int32_t, test_model::SimpleRecord>, WriteUnion<int32_t, yardl::binary::WriteInteger, test_model::SimpleRecord, test_model::binary::WriteSimpleRecord>>(stream_, value, item_offset);
+  step_index_.add_stream_offset("IntOrSimpleRecord", item_offset);
+}
+
+void StreamsOfUnionsIndexedWriter::WriteIntOrSimpleRecordImpl(std::vector<std::variant<int32_t, test_model::SimpleRecord>> const& values) {
+  step_index_.set_step_offset("IntOrSimpleRecord", stream_.Pos());
+  std::vector<size_t> item_offsets;
+  item_offsets.reserve(values.size());
+  if (!values.empty()) {
+    yardl::binary::WriteVectorAndSaveOffsets<std::variant<int32_t, test_model::SimpleRecord>, WriteUnion<int32_t, yardl::binary::WriteInteger, test_model::SimpleRecord, test_model::binary::WriteSimpleRecord>>(stream_, values, item_offsets);
+  }
+  step_index_.add_stream_offsets("IntOrSimpleRecord", item_offsets);
+}
+
+void StreamsOfUnionsIndexedWriter::EndIntOrSimpleRecordImpl() {
+  step_index_.set_step_offset("IntOrSimpleRecord", stream_.Pos());
+  step_index_.add_stream_offsets("IntOrSimpleRecord", std::vector<size_t>{});
+  yardl::binary::WriteInteger(stream_, 0U);
+}
+
+void StreamsOfUnionsIndexedWriter::WriteNullableIntOrSimpleRecordImpl(std::variant<std::monostate, int32_t, test_model::SimpleRecord> const& value) {
+  step_index_.set_step_offset("NullableIntOrSimpleRecord", stream_.Pos());
+  size_t item_offset = 0;
+  yardl::binary::WriteBlockAndSaveOffset<std::variant<std::monostate, int32_t, test_model::SimpleRecord>, WriteUnion<std::monostate, yardl::binary::WriteMonostate, int32_t, yardl::binary::WriteInteger, test_model::SimpleRecord, test_model::binary::WriteSimpleRecord>>(stream_, value, item_offset);
+  step_index_.add_stream_offset("NullableIntOrSimpleRecord", item_offset);
+}
+
+void StreamsOfUnionsIndexedWriter::WriteNullableIntOrSimpleRecordImpl(std::vector<std::variant<std::monostate, int32_t, test_model::SimpleRecord>> const& values) {
+  step_index_.set_step_offset("NullableIntOrSimpleRecord", stream_.Pos());
+  std::vector<size_t> item_offsets;
+  item_offsets.reserve(values.size());
+  if (!values.empty()) {
+    yardl::binary::WriteVectorAndSaveOffsets<std::variant<std::monostate, int32_t, test_model::SimpleRecord>, WriteUnion<std::monostate, yardl::binary::WriteMonostate, int32_t, yardl::binary::WriteInteger, test_model::SimpleRecord, test_model::binary::WriteSimpleRecord>>(stream_, values, item_offsets);
+  }
+  step_index_.add_stream_offsets("NullableIntOrSimpleRecord", item_offsets);
+}
+
+void StreamsOfUnionsIndexedWriter::EndNullableIntOrSimpleRecordImpl() {
+  step_index_.set_step_offset("NullableIntOrSimpleRecord", stream_.Pos());
+  step_index_.add_stream_offsets("NullableIntOrSimpleRecord", std::vector<size_t>{});
+  yardl::binary::WriteInteger(stream_, 0U);
+}
+
+void StreamsOfUnionsIndexedWriter::WriteManyCasesImpl(std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray> const& value) {
+  step_index_.set_step_offset("ManyCases", stream_.Pos());
+  size_t item_offset = 0;
+  yardl::binary::WriteBlockAndSaveOffset<std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray>, WriteUnion<int32_t, yardl::binary::WriteInteger, float, yardl::binary::WriteFloatingPoint, std::string, yardl::binary::WriteString, test_model::SimpleRecord, test_model::binary::WriteSimpleRecord, test_model::NamedFixedNDArray, test_model::binary::WriteNamedFixedNDArray>>(stream_, value, item_offset);
+  step_index_.add_stream_offset("ManyCases", item_offset);
+}
+
+void StreamsOfUnionsIndexedWriter::WriteManyCasesImpl(std::vector<std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray>> const& values) {
+  step_index_.set_step_offset("ManyCases", stream_.Pos());
+  std::vector<size_t> item_offsets;
+  item_offsets.reserve(values.size());
+  if (!values.empty()) {
+    yardl::binary::WriteVectorAndSaveOffsets<std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray>, WriteUnion<int32_t, yardl::binary::WriteInteger, float, yardl::binary::WriteFloatingPoint, std::string, yardl::binary::WriteString, test_model::SimpleRecord, test_model::binary::WriteSimpleRecord, test_model::NamedFixedNDArray, test_model::binary::WriteNamedFixedNDArray>>(stream_, values, item_offsets);
+  }
+  step_index_.add_stream_offsets("ManyCases", item_offsets);
+}
+
+void StreamsOfUnionsIndexedWriter::EndManyCasesImpl() {
+  step_index_.set_step_offset("ManyCases", stream_.Pos());
+  step_index_.add_stream_offsets("ManyCases", std::vector<size_t>{});
+  yardl::binary::WriteInteger(stream_, 0U);
+}
+
+void StreamsOfUnionsIndexedWriter::Flush() {
+  stream_.Flush();
+}
+
+void StreamsOfUnionsIndexedWriter::CloseImpl() {
+  yardl::binary::WriteIndex(stream_, step_index_);
+  stream_.Flush();
+}
+
+bool StreamsOfUnionsIndexedReader::ReadIntOrSimpleRecordImpl(std::variant<int32_t, test_model::SimpleRecord>& value) {
+  if (!step_index_.offset_within_stream("IntOrSimpleRecord", "NullableIntOrSimpleRecord", stream_.Pos())) {
+    stream_.Seek(step_index_.get_step_offset("IntOrSimpleRecord"));
+  }
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<std::variant<int32_t, test_model::SimpleRecord>, ReadUnion<int32_t, yardl::binary::ReadInteger, test_model::SimpleRecord, test_model::binary::ReadSimpleRecord>>(stream_, current_block_remaining_, value);
+  return read_block_successful;
+}
+
+bool StreamsOfUnionsIndexedReader::ReadIntOrSimpleRecordImpl(std::vector<std::variant<int32_t, test_model::SimpleRecord>>& values) {
+  if (!step_index_.offset_within_stream("IntOrSimpleRecord", "NullableIntOrSimpleRecord", stream_.Pos())) {
+    stream_.Seek(step_index_.get_step_offset("IntOrSimpleRecord"));
+  }
+  yardl::binary::ReadBlocksIntoVector<std::variant<int32_t, test_model::SimpleRecord>, ReadUnion<int32_t, yardl::binary::ReadInteger, test_model::SimpleRecord, test_model::binary::ReadSimpleRecord>>(stream_, current_block_remaining_, values);
+  return current_block_remaining_ != 0;
+}
+
+bool StreamsOfUnionsIndexedReader::ReadIntOrSimpleRecordImpl(std::variant<int32_t, test_model::SimpleRecord>& value, size_t idx) {
+  size_t abs_offset = 0;
+  if (!step_index_.find_stream_item("IntOrSimpleRecord", idx, abs_offset, current_block_remaining_)) {
+    return false;
+  }
+  stream_.Seek(abs_offset);
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<std::variant<int32_t, test_model::SimpleRecord>, ReadUnion<int32_t, yardl::binary::ReadInteger, test_model::SimpleRecord, test_model::binary::ReadSimpleRecord>>(stream_, current_block_remaining_, value);
+  return read_block_successful;
+}
+
+bool StreamsOfUnionsIndexedReader::ReadIntOrSimpleRecordImpl(std::vector<std::variant<int32_t, test_model::SimpleRecord>>& values, size_t idx) {
+  size_t abs_offset = 0;
+  if (!step_index_.find_stream_item("IntOrSimpleRecord", idx, abs_offset, current_block_remaining_)) {
+    values.clear();
+    return false;
+  }
+  stream_.Seek(abs_offset);
+  yardl::binary::ReadBlocksIntoVector<std::variant<int32_t, test_model::SimpleRecord>, ReadUnion<int32_t, yardl::binary::ReadInteger, test_model::SimpleRecord, test_model::binary::ReadSimpleRecord>>(stream_, current_block_remaining_, values);
+  return current_block_remaining_ != 0;
+}
+
+size_t StreamsOfUnionsIndexedReader::CountIntOrSimpleRecordImpl() {
+  return step_index_.get_stream_count("IntOrSimpleRecord");
+}
+
+bool StreamsOfUnionsIndexedReader::ReadNullableIntOrSimpleRecordImpl(std::variant<std::monostate, int32_t, test_model::SimpleRecord>& value) {
+  if (!step_index_.offset_within_stream("NullableIntOrSimpleRecord", "ManyCases", stream_.Pos())) {
+    stream_.Seek(step_index_.get_step_offset("NullableIntOrSimpleRecord"));
+  }
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<std::variant<std::monostate, int32_t, test_model::SimpleRecord>, ReadUnion<std::monostate, yardl::binary::ReadMonostate, int32_t, yardl::binary::ReadInteger, test_model::SimpleRecord, test_model::binary::ReadSimpleRecord>>(stream_, current_block_remaining_, value);
+  return read_block_successful;
+}
+
+bool StreamsOfUnionsIndexedReader::ReadNullableIntOrSimpleRecordImpl(std::vector<std::variant<std::monostate, int32_t, test_model::SimpleRecord>>& values) {
+  if (!step_index_.offset_within_stream("NullableIntOrSimpleRecord", "ManyCases", stream_.Pos())) {
+    stream_.Seek(step_index_.get_step_offset("NullableIntOrSimpleRecord"));
+  }
+  yardl::binary::ReadBlocksIntoVector<std::variant<std::monostate, int32_t, test_model::SimpleRecord>, ReadUnion<std::monostate, yardl::binary::ReadMonostate, int32_t, yardl::binary::ReadInteger, test_model::SimpleRecord, test_model::binary::ReadSimpleRecord>>(stream_, current_block_remaining_, values);
+  return current_block_remaining_ != 0;
+}
+
+bool StreamsOfUnionsIndexedReader::ReadNullableIntOrSimpleRecordImpl(std::variant<std::monostate, int32_t, test_model::SimpleRecord>& value, size_t idx) {
+  size_t abs_offset = 0;
+  if (!step_index_.find_stream_item("NullableIntOrSimpleRecord", idx, abs_offset, current_block_remaining_)) {
+    return false;
+  }
+  stream_.Seek(abs_offset);
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<std::variant<std::monostate, int32_t, test_model::SimpleRecord>, ReadUnion<std::monostate, yardl::binary::ReadMonostate, int32_t, yardl::binary::ReadInteger, test_model::SimpleRecord, test_model::binary::ReadSimpleRecord>>(stream_, current_block_remaining_, value);
+  return read_block_successful;
+}
+
+bool StreamsOfUnionsIndexedReader::ReadNullableIntOrSimpleRecordImpl(std::vector<std::variant<std::monostate, int32_t, test_model::SimpleRecord>>& values, size_t idx) {
+  size_t abs_offset = 0;
+  if (!step_index_.find_stream_item("NullableIntOrSimpleRecord", idx, abs_offset, current_block_remaining_)) {
+    values.clear();
+    return false;
+  }
+  stream_.Seek(abs_offset);
+  yardl::binary::ReadBlocksIntoVector<std::variant<std::monostate, int32_t, test_model::SimpleRecord>, ReadUnion<std::monostate, yardl::binary::ReadMonostate, int32_t, yardl::binary::ReadInteger, test_model::SimpleRecord, test_model::binary::ReadSimpleRecord>>(stream_, current_block_remaining_, values);
+  return current_block_remaining_ != 0;
+}
+
+size_t StreamsOfUnionsIndexedReader::CountNullableIntOrSimpleRecordImpl() {
+  return step_index_.get_stream_count("NullableIntOrSimpleRecord");
+}
+
+bool StreamsOfUnionsIndexedReader::ReadManyCasesImpl(std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray>& value) {
+  if (!step_index_.offset_within_stream("ManyCases", std::nullopt, stream_.Pos())) {
+    stream_.Seek(step_index_.get_step_offset("ManyCases"));
+  }
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray>, ReadUnion<int32_t, yardl::binary::ReadInteger, float, yardl::binary::ReadFloatingPoint, std::string, yardl::binary::ReadString, test_model::SimpleRecord, test_model::binary::ReadSimpleRecord, test_model::NamedFixedNDArray, test_model::binary::ReadNamedFixedNDArray>>(stream_, current_block_remaining_, value);
+  return read_block_successful;
+}
+
+bool StreamsOfUnionsIndexedReader::ReadManyCasesImpl(std::vector<std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray>>& values) {
+  if (!step_index_.offset_within_stream("ManyCases", std::nullopt, stream_.Pos())) {
+    stream_.Seek(step_index_.get_step_offset("ManyCases"));
+  }
+  yardl::binary::ReadBlocksIntoVector<std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray>, ReadUnion<int32_t, yardl::binary::ReadInteger, float, yardl::binary::ReadFloatingPoint, std::string, yardl::binary::ReadString, test_model::SimpleRecord, test_model::binary::ReadSimpleRecord, test_model::NamedFixedNDArray, test_model::binary::ReadNamedFixedNDArray>>(stream_, current_block_remaining_, values);
+  return current_block_remaining_ != 0;
+}
+
+bool StreamsOfUnionsIndexedReader::ReadManyCasesImpl(std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray>& value, size_t idx) {
+  size_t abs_offset = 0;
+  if (!step_index_.find_stream_item("ManyCases", idx, abs_offset, current_block_remaining_)) {
+    return false;
+  }
+  stream_.Seek(abs_offset);
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray>, ReadUnion<int32_t, yardl::binary::ReadInteger, float, yardl::binary::ReadFloatingPoint, std::string, yardl::binary::ReadString, test_model::SimpleRecord, test_model::binary::ReadSimpleRecord, test_model::NamedFixedNDArray, test_model::binary::ReadNamedFixedNDArray>>(stream_, current_block_remaining_, value);
+  return read_block_successful;
+}
+
+bool StreamsOfUnionsIndexedReader::ReadManyCasesImpl(std::vector<std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray>>& values, size_t idx) {
+  size_t abs_offset = 0;
+  if (!step_index_.find_stream_item("ManyCases", idx, abs_offset, current_block_remaining_)) {
+    values.clear();
+    return false;
+  }
+  stream_.Seek(abs_offset);
+  yardl::binary::ReadBlocksIntoVector<std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray>, ReadUnion<int32_t, yardl::binary::ReadInteger, float, yardl::binary::ReadFloatingPoint, std::string, yardl::binary::ReadString, test_model::SimpleRecord, test_model::binary::ReadSimpleRecord, test_model::NamedFixedNDArray, test_model::binary::ReadNamedFixedNDArray>>(stream_, current_block_remaining_, values);
+  return current_block_remaining_ != 0;
+}
+
+size_t StreamsOfUnionsIndexedReader::CountManyCasesImpl() {
+  return step_index_.get_stream_count("ManyCases");
+}
+
+void StreamsOfUnionsIndexedReader::CloseImpl() {
+}
+
 void EnumsWriter::WriteSingleImpl(test_model::Fruits const& value) {
   test_model::binary::WriteFruits(stream_, value);
 }
@@ -4067,6 +5995,62 @@ void EnumsReader::ReadRecImpl(test_model::RecordWithEnums& value) {
 
 void EnumsReader::CloseImpl() {
   stream_.VerifyFinished();
+}
+
+void EnumsIndexedWriter::WriteSingleImpl(test_model::Fruits const& value) {
+  step_index_.set_step_offset("Single", stream_.Pos());
+  test_model::binary::WriteFruits(stream_, value);
+}
+
+void EnumsIndexedWriter::WriteVecImpl(std::vector<test_model::Fruits> const& value) {
+  step_index_.set_step_offset("Vec", stream_.Pos());
+  yardl::binary::WriteVector<test_model::Fruits, test_model::binary::WriteFruits>(stream_, value);
+}
+
+void EnumsIndexedWriter::WriteSizeImpl(test_model::SizeBasedEnum const& value) {
+  step_index_.set_step_offset("Size", stream_.Pos());
+  yardl::binary::WriteEnum<test_model::SizeBasedEnum>(stream_, value);
+}
+
+void EnumsIndexedWriter::WriteRecImpl(test_model::RecordWithEnums const& value) {
+  step_index_.set_step_offset("Rec", stream_.Pos());
+  test_model::binary::WriteRecordWithEnums(stream_, value);
+}
+
+void EnumsIndexedWriter::Flush() {
+  stream_.Flush();
+}
+
+void EnumsIndexedWriter::CloseImpl() {
+  yardl::binary::WriteIndex(stream_, step_index_);
+  stream_.Flush();
+}
+
+void EnumsIndexedReader::ReadSingleImpl(test_model::Fruits& value) {
+  auto pos = step_index_.get_step_offset("Single");
+  stream_.Seek(pos);
+  test_model::binary::ReadFruits(stream_, value);
+}
+
+void EnumsIndexedReader::ReadVecImpl(std::vector<test_model::Fruits>& value) {
+  auto pos = step_index_.get_step_offset("Vec");
+  stream_.Seek(pos);
+  yardl::binary::ReadVector<test_model::Fruits, test_model::binary::ReadFruits>(stream_, value);
+}
+
+void EnumsIndexedReader::ReadSizeImpl(test_model::SizeBasedEnum& value) {
+  auto pos = step_index_.get_step_offset("Size");
+  stream_.Seek(pos);
+  yardl::binary::ReadEnum<test_model::SizeBasedEnum>(stream_, value);
+}
+
+void EnumsIndexedReader::ReadRecImpl(test_model::RecordWithEnums& value) {
+  auto pos = step_index_.get_step_offset("Rec");
+  stream_.Seek(pos);
+  test_model::binary::ReadRecordWithEnums(stream_, value);
+}
+
+void EnumsIndexedReader::CloseImpl() {
 }
 
 void FlagsWriter::WriteDaysImpl(test_model::DaysOfWeek const& value) {
@@ -4131,6 +6115,150 @@ void FlagsReader::CloseImpl() {
   stream_.VerifyFinished();
 }
 
+void FlagsIndexedWriter::WriteDaysImpl(test_model::DaysOfWeek const& value) {
+  step_index_.set_step_offset("Days", stream_.Pos());
+  size_t item_offset = 0;
+  yardl::binary::WriteBlockAndSaveOffset<test_model::DaysOfWeek, test_model::binary::WriteDaysOfWeek>(stream_, value, item_offset);
+  step_index_.add_stream_offset("Days", item_offset);
+}
+
+void FlagsIndexedWriter::WriteDaysImpl(std::vector<test_model::DaysOfWeek> const& values) {
+  step_index_.set_step_offset("Days", stream_.Pos());
+  std::vector<size_t> item_offsets;
+  item_offsets.reserve(values.size());
+  if (!values.empty()) {
+    yardl::binary::WriteVectorAndSaveOffsets<test_model::DaysOfWeek, test_model::binary::WriteDaysOfWeek>(stream_, values, item_offsets);
+  }
+  step_index_.add_stream_offsets("Days", item_offsets);
+}
+
+void FlagsIndexedWriter::EndDaysImpl() {
+  step_index_.set_step_offset("Days", stream_.Pos());
+  step_index_.add_stream_offsets("Days", std::vector<size_t>{});
+  yardl::binary::WriteInteger(stream_, 0U);
+}
+
+void FlagsIndexedWriter::WriteFormatsImpl(test_model::TextFormat const& value) {
+  step_index_.set_step_offset("Formats", stream_.Pos());
+  size_t item_offset = 0;
+  yardl::binary::WriteBlockAndSaveOffset<test_model::TextFormat, test_model::binary::WriteTextFormat>(stream_, value, item_offset);
+  step_index_.add_stream_offset("Formats", item_offset);
+}
+
+void FlagsIndexedWriter::WriteFormatsImpl(std::vector<test_model::TextFormat> const& values) {
+  step_index_.set_step_offset("Formats", stream_.Pos());
+  std::vector<size_t> item_offsets;
+  item_offsets.reserve(values.size());
+  if (!values.empty()) {
+    yardl::binary::WriteVectorAndSaveOffsets<test_model::TextFormat, test_model::binary::WriteTextFormat>(stream_, values, item_offsets);
+  }
+  step_index_.add_stream_offsets("Formats", item_offsets);
+}
+
+void FlagsIndexedWriter::EndFormatsImpl() {
+  step_index_.set_step_offset("Formats", stream_.Pos());
+  step_index_.add_stream_offsets("Formats", std::vector<size_t>{});
+  yardl::binary::WriteInteger(stream_, 0U);
+}
+
+void FlagsIndexedWriter::Flush() {
+  stream_.Flush();
+}
+
+void FlagsIndexedWriter::CloseImpl() {
+  yardl::binary::WriteIndex(stream_, step_index_);
+  stream_.Flush();
+}
+
+bool FlagsIndexedReader::ReadDaysImpl(test_model::DaysOfWeek& value) {
+  if (!step_index_.offset_within_stream("Days", "Formats", stream_.Pos())) {
+    stream_.Seek(step_index_.get_step_offset("Days"));
+  }
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<test_model::DaysOfWeek, test_model::binary::ReadDaysOfWeek>(stream_, current_block_remaining_, value);
+  return read_block_successful;
+}
+
+bool FlagsIndexedReader::ReadDaysImpl(std::vector<test_model::DaysOfWeek>& values) {
+  if (!step_index_.offset_within_stream("Days", "Formats", stream_.Pos())) {
+    stream_.Seek(step_index_.get_step_offset("Days"));
+  }
+  yardl::binary::ReadBlocksIntoVector<test_model::DaysOfWeek, test_model::binary::ReadDaysOfWeek>(stream_, current_block_remaining_, values);
+  return current_block_remaining_ != 0;
+}
+
+bool FlagsIndexedReader::ReadDaysImpl(test_model::DaysOfWeek& value, size_t idx) {
+  size_t abs_offset = 0;
+  if (!step_index_.find_stream_item("Days", idx, abs_offset, current_block_remaining_)) {
+    return false;
+  }
+  stream_.Seek(abs_offset);
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<test_model::DaysOfWeek, test_model::binary::ReadDaysOfWeek>(stream_, current_block_remaining_, value);
+  return read_block_successful;
+}
+
+bool FlagsIndexedReader::ReadDaysImpl(std::vector<test_model::DaysOfWeek>& values, size_t idx) {
+  size_t abs_offset = 0;
+  if (!step_index_.find_stream_item("Days", idx, abs_offset, current_block_remaining_)) {
+    values.clear();
+    return false;
+  }
+  stream_.Seek(abs_offset);
+  yardl::binary::ReadBlocksIntoVector<test_model::DaysOfWeek, test_model::binary::ReadDaysOfWeek>(stream_, current_block_remaining_, values);
+  return current_block_remaining_ != 0;
+}
+
+size_t FlagsIndexedReader::CountDaysImpl() {
+  return step_index_.get_stream_count("Days");
+}
+
+bool FlagsIndexedReader::ReadFormatsImpl(test_model::TextFormat& value) {
+  if (!step_index_.offset_within_stream("Formats", std::nullopt, stream_.Pos())) {
+    stream_.Seek(step_index_.get_step_offset("Formats"));
+  }
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<test_model::TextFormat, test_model::binary::ReadTextFormat>(stream_, current_block_remaining_, value);
+  return read_block_successful;
+}
+
+bool FlagsIndexedReader::ReadFormatsImpl(std::vector<test_model::TextFormat>& values) {
+  if (!step_index_.offset_within_stream("Formats", std::nullopt, stream_.Pos())) {
+    stream_.Seek(step_index_.get_step_offset("Formats"));
+  }
+  yardl::binary::ReadBlocksIntoVector<test_model::TextFormat, test_model::binary::ReadTextFormat>(stream_, current_block_remaining_, values);
+  return current_block_remaining_ != 0;
+}
+
+bool FlagsIndexedReader::ReadFormatsImpl(test_model::TextFormat& value, size_t idx) {
+  size_t abs_offset = 0;
+  if (!step_index_.find_stream_item("Formats", idx, abs_offset, current_block_remaining_)) {
+    return false;
+  }
+  stream_.Seek(abs_offset);
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<test_model::TextFormat, test_model::binary::ReadTextFormat>(stream_, current_block_remaining_, value);
+  return read_block_successful;
+}
+
+bool FlagsIndexedReader::ReadFormatsImpl(std::vector<test_model::TextFormat>& values, size_t idx) {
+  size_t abs_offset = 0;
+  if (!step_index_.find_stream_item("Formats", idx, abs_offset, current_block_remaining_)) {
+    values.clear();
+    return false;
+  }
+  stream_.Seek(abs_offset);
+  yardl::binary::ReadBlocksIntoVector<test_model::TextFormat, test_model::binary::ReadTextFormat>(stream_, current_block_remaining_, values);
+  return current_block_remaining_ != 0;
+}
+
+size_t FlagsIndexedReader::CountFormatsImpl() {
+  return step_index_.get_stream_count("Formats");
+}
+
+void FlagsIndexedReader::CloseImpl() {
+}
+
 void StateTestWriter::WriteAnIntImpl(int32_t const& value) {
   yardl::binary::WriteInteger(stream_, value);
 }
@@ -4182,6 +6310,106 @@ void StateTestReader::ReadAnotherIntImpl(int32_t& value) {
 
 void StateTestReader::CloseImpl() {
   stream_.VerifyFinished();
+}
+
+void StateTestIndexedWriter::WriteAnIntImpl(int32_t const& value) {
+  step_index_.set_step_offset("AnInt", stream_.Pos());
+  yardl::binary::WriteInteger(stream_, value);
+}
+
+void StateTestIndexedWriter::WriteAStreamImpl(int32_t const& value) {
+  step_index_.set_step_offset("AStream", stream_.Pos());
+  size_t item_offset = 0;
+  yardl::binary::WriteBlockAndSaveOffset<int32_t, yardl::binary::WriteInteger>(stream_, value, item_offset);
+  step_index_.add_stream_offset("AStream", item_offset);
+}
+
+void StateTestIndexedWriter::WriteAStreamImpl(std::vector<int32_t> const& values) {
+  step_index_.set_step_offset("AStream", stream_.Pos());
+  std::vector<size_t> item_offsets;
+  item_offsets.reserve(values.size());
+  if (!values.empty()) {
+    yardl::binary::WriteVectorAndSaveOffsets<int32_t, yardl::binary::WriteInteger>(stream_, values, item_offsets);
+  }
+  step_index_.add_stream_offsets("AStream", item_offsets);
+}
+
+void StateTestIndexedWriter::EndAStreamImpl() {
+  step_index_.set_step_offset("AStream", stream_.Pos());
+  step_index_.add_stream_offsets("AStream", std::vector<size_t>{});
+  yardl::binary::WriteInteger(stream_, 0U);
+}
+
+void StateTestIndexedWriter::WriteAnotherIntImpl(int32_t const& value) {
+  step_index_.set_step_offset("AnotherInt", stream_.Pos());
+  yardl::binary::WriteInteger(stream_, value);
+}
+
+void StateTestIndexedWriter::Flush() {
+  stream_.Flush();
+}
+
+void StateTestIndexedWriter::CloseImpl() {
+  yardl::binary::WriteIndex(stream_, step_index_);
+  stream_.Flush();
+}
+
+void StateTestIndexedReader::ReadAnIntImpl(int32_t& value) {
+  auto pos = step_index_.get_step_offset("AnInt");
+  stream_.Seek(pos);
+  yardl::binary::ReadInteger(stream_, value);
+}
+
+bool StateTestIndexedReader::ReadAStreamImpl(int32_t& value) {
+  if (!step_index_.offset_within_stream("AStream", "AnotherInt", stream_.Pos())) {
+    stream_.Seek(step_index_.get_step_offset("AStream"));
+  }
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<int32_t, yardl::binary::ReadInteger>(stream_, current_block_remaining_, value);
+  return read_block_successful;
+}
+
+bool StateTestIndexedReader::ReadAStreamImpl(std::vector<int32_t>& values) {
+  if (!step_index_.offset_within_stream("AStream", "AnotherInt", stream_.Pos())) {
+    stream_.Seek(step_index_.get_step_offset("AStream"));
+  }
+  yardl::binary::ReadBlocksIntoVector<int32_t, yardl::binary::ReadInteger>(stream_, current_block_remaining_, values);
+  return current_block_remaining_ != 0;
+}
+
+bool StateTestIndexedReader::ReadAStreamImpl(int32_t& value, size_t idx) {
+  size_t abs_offset = 0;
+  if (!step_index_.find_stream_item("AStream", idx, abs_offset, current_block_remaining_)) {
+    return false;
+  }
+  stream_.Seek(abs_offset);
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<int32_t, yardl::binary::ReadInteger>(stream_, current_block_remaining_, value);
+  return read_block_successful;
+}
+
+bool StateTestIndexedReader::ReadAStreamImpl(std::vector<int32_t>& values, size_t idx) {
+  size_t abs_offset = 0;
+  if (!step_index_.find_stream_item("AStream", idx, abs_offset, current_block_remaining_)) {
+    values.clear();
+    return false;
+  }
+  stream_.Seek(abs_offset);
+  yardl::binary::ReadBlocksIntoVector<int32_t, yardl::binary::ReadInteger>(stream_, current_block_remaining_, values);
+  return current_block_remaining_ != 0;
+}
+
+size_t StateTestIndexedReader::CountAStreamImpl() {
+  return step_index_.get_stream_count("AStream");
+}
+
+void StateTestIndexedReader::ReadAnotherIntImpl(int32_t& value) {
+  auto pos = step_index_.get_step_offset("AnotherInt");
+  stream_.Seek(pos);
+  yardl::binary::ReadInteger(stream_, value);
+}
+
+void StateTestIndexedReader::CloseImpl() {
 }
 
 void SimpleGenericsWriter::WriteFloatImageImpl(image::FloatImage const& value) {
@@ -4285,6 +6513,172 @@ void SimpleGenericsReader::CloseImpl() {
   stream_.VerifyFinished();
 }
 
+void SimpleGenericsIndexedWriter::WriteFloatImageImpl(image::FloatImage const& value) {
+  step_index_.set_step_offset("FloatImage", stream_.Pos());
+  image::binary::WriteFloatImage(stream_, value);
+}
+
+void SimpleGenericsIndexedWriter::WriteIntImageImpl(image::IntImage const& value) {
+  step_index_.set_step_offset("IntImage", stream_.Pos());
+  image::binary::WriteIntImage(stream_, value);
+}
+
+void SimpleGenericsIndexedWriter::WriteIntImageAlternateSyntaxImpl(test_model::Image<int32_t> const& value) {
+  step_index_.set_step_offset("IntImageAlternateSyntax", stream_.Pos());
+  test_model::binary::WriteImage<int32_t, yardl::binary::WriteInteger>(stream_, value);
+}
+
+void SimpleGenericsIndexedWriter::WriteStringImageImpl(test_model::Image<std::string> const& value) {
+  step_index_.set_step_offset("StringImage", stream_.Pos());
+  test_model::binary::WriteImage<std::string, yardl::binary::WriteString>(stream_, value);
+}
+
+void SimpleGenericsIndexedWriter::WriteIntFloatTupleImpl(tuples::Tuple<int32_t, float> const& value) {
+  step_index_.set_step_offset("IntFloatTuple", stream_.Pos());
+  tuples::binary::WriteTuple<int32_t, yardl::binary::WriteInteger, float, yardl::binary::WriteFloatingPoint>(stream_, value);
+}
+
+void SimpleGenericsIndexedWriter::WriteFloatFloatTupleImpl(tuples::Tuple<float, float> const& value) {
+  step_index_.set_step_offset("FloatFloatTuple", stream_.Pos());
+  tuples::binary::WriteTuple<float, yardl::binary::WriteFloatingPoint, float, yardl::binary::WriteFloatingPoint>(stream_, value);
+}
+
+void SimpleGenericsIndexedWriter::WriteIntFloatTupleAlternateSyntaxImpl(tuples::Tuple<int32_t, float> const& value) {
+  step_index_.set_step_offset("IntFloatTupleAlternateSyntax", stream_.Pos());
+  tuples::binary::WriteTuple<int32_t, yardl::binary::WriteInteger, float, yardl::binary::WriteFloatingPoint>(stream_, value);
+}
+
+void SimpleGenericsIndexedWriter::WriteIntStringTupleImpl(tuples::Tuple<int32_t, std::string> const& value) {
+  step_index_.set_step_offset("IntStringTuple", stream_.Pos());
+  tuples::binary::WriteTuple<int32_t, yardl::binary::WriteInteger, std::string, yardl::binary::WriteString>(stream_, value);
+}
+
+void SimpleGenericsIndexedWriter::WriteStreamOfTypeVariantsImpl(std::variant<image::FloatImage, test_model::Image<double>> const& value) {
+  step_index_.set_step_offset("StreamOfTypeVariants", stream_.Pos());
+  size_t item_offset = 0;
+  yardl::binary::WriteBlockAndSaveOffset<std::variant<image::FloatImage, test_model::Image<double>>, WriteUnion<image::FloatImage, image::binary::WriteFloatImage, test_model::Image<double>, test_model::binary::WriteImage<double, yardl::binary::WriteFloatingPoint>>>(stream_, value, item_offset);
+  step_index_.add_stream_offset("StreamOfTypeVariants", item_offset);
+}
+
+void SimpleGenericsIndexedWriter::WriteStreamOfTypeVariantsImpl(std::vector<std::variant<image::FloatImage, test_model::Image<double>>> const& values) {
+  step_index_.set_step_offset("StreamOfTypeVariants", stream_.Pos());
+  std::vector<size_t> item_offsets;
+  item_offsets.reserve(values.size());
+  if (!values.empty()) {
+    yardl::binary::WriteVectorAndSaveOffsets<std::variant<image::FloatImage, test_model::Image<double>>, WriteUnion<image::FloatImage, image::binary::WriteFloatImage, test_model::Image<double>, test_model::binary::WriteImage<double, yardl::binary::WriteFloatingPoint>>>(stream_, values, item_offsets);
+  }
+  step_index_.add_stream_offsets("StreamOfTypeVariants", item_offsets);
+}
+
+void SimpleGenericsIndexedWriter::EndStreamOfTypeVariantsImpl() {
+  step_index_.set_step_offset("StreamOfTypeVariants", stream_.Pos());
+  step_index_.add_stream_offsets("StreamOfTypeVariants", std::vector<size_t>{});
+  yardl::binary::WriteInteger(stream_, 0U);
+}
+
+void SimpleGenericsIndexedWriter::Flush() {
+  stream_.Flush();
+}
+
+void SimpleGenericsIndexedWriter::CloseImpl() {
+  yardl::binary::WriteIndex(stream_, step_index_);
+  stream_.Flush();
+}
+
+void SimpleGenericsIndexedReader::ReadFloatImageImpl(image::FloatImage& value) {
+  auto pos = step_index_.get_step_offset("FloatImage");
+  stream_.Seek(pos);
+  image::binary::ReadFloatImage(stream_, value);
+}
+
+void SimpleGenericsIndexedReader::ReadIntImageImpl(image::IntImage& value) {
+  auto pos = step_index_.get_step_offset("IntImage");
+  stream_.Seek(pos);
+  image::binary::ReadIntImage(stream_, value);
+}
+
+void SimpleGenericsIndexedReader::ReadIntImageAlternateSyntaxImpl(test_model::Image<int32_t>& value) {
+  auto pos = step_index_.get_step_offset("IntImageAlternateSyntax");
+  stream_.Seek(pos);
+  test_model::binary::ReadImage<int32_t, yardl::binary::ReadInteger>(stream_, value);
+}
+
+void SimpleGenericsIndexedReader::ReadStringImageImpl(test_model::Image<std::string>& value) {
+  auto pos = step_index_.get_step_offset("StringImage");
+  stream_.Seek(pos);
+  test_model::binary::ReadImage<std::string, yardl::binary::ReadString>(stream_, value);
+}
+
+void SimpleGenericsIndexedReader::ReadIntFloatTupleImpl(tuples::Tuple<int32_t, float>& value) {
+  auto pos = step_index_.get_step_offset("IntFloatTuple");
+  stream_.Seek(pos);
+  tuples::binary::ReadTuple<int32_t, yardl::binary::ReadInteger, float, yardl::binary::ReadFloatingPoint>(stream_, value);
+}
+
+void SimpleGenericsIndexedReader::ReadFloatFloatTupleImpl(tuples::Tuple<float, float>& value) {
+  auto pos = step_index_.get_step_offset("FloatFloatTuple");
+  stream_.Seek(pos);
+  tuples::binary::ReadTuple<float, yardl::binary::ReadFloatingPoint, float, yardl::binary::ReadFloatingPoint>(stream_, value);
+}
+
+void SimpleGenericsIndexedReader::ReadIntFloatTupleAlternateSyntaxImpl(tuples::Tuple<int32_t, float>& value) {
+  auto pos = step_index_.get_step_offset("IntFloatTupleAlternateSyntax");
+  stream_.Seek(pos);
+  tuples::binary::ReadTuple<int32_t, yardl::binary::ReadInteger, float, yardl::binary::ReadFloatingPoint>(stream_, value);
+}
+
+void SimpleGenericsIndexedReader::ReadIntStringTupleImpl(tuples::Tuple<int32_t, std::string>& value) {
+  auto pos = step_index_.get_step_offset("IntStringTuple");
+  stream_.Seek(pos);
+  tuples::binary::ReadTuple<int32_t, yardl::binary::ReadInteger, std::string, yardl::binary::ReadString>(stream_, value);
+}
+
+bool SimpleGenericsIndexedReader::ReadStreamOfTypeVariantsImpl(std::variant<image::FloatImage, test_model::Image<double>>& value) {
+  if (!step_index_.offset_within_stream("StreamOfTypeVariants", std::nullopt, stream_.Pos())) {
+    stream_.Seek(step_index_.get_step_offset("StreamOfTypeVariants"));
+  }
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<std::variant<image::FloatImage, test_model::Image<double>>, ReadUnion<image::FloatImage, image::binary::ReadFloatImage, test_model::Image<double>, test_model::binary::ReadImage<double, yardl::binary::ReadFloatingPoint>>>(stream_, current_block_remaining_, value);
+  return read_block_successful;
+}
+
+bool SimpleGenericsIndexedReader::ReadStreamOfTypeVariantsImpl(std::vector<std::variant<image::FloatImage, test_model::Image<double>>>& values) {
+  if (!step_index_.offset_within_stream("StreamOfTypeVariants", std::nullopt, stream_.Pos())) {
+    stream_.Seek(step_index_.get_step_offset("StreamOfTypeVariants"));
+  }
+  yardl::binary::ReadBlocksIntoVector<std::variant<image::FloatImage, test_model::Image<double>>, ReadUnion<image::FloatImage, image::binary::ReadFloatImage, test_model::Image<double>, test_model::binary::ReadImage<double, yardl::binary::ReadFloatingPoint>>>(stream_, current_block_remaining_, values);
+  return current_block_remaining_ != 0;
+}
+
+bool SimpleGenericsIndexedReader::ReadStreamOfTypeVariantsImpl(std::variant<image::FloatImage, test_model::Image<double>>& value, size_t idx) {
+  size_t abs_offset = 0;
+  if (!step_index_.find_stream_item("StreamOfTypeVariants", idx, abs_offset, current_block_remaining_)) {
+    return false;
+  }
+  stream_.Seek(abs_offset);
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<std::variant<image::FloatImage, test_model::Image<double>>, ReadUnion<image::FloatImage, image::binary::ReadFloatImage, test_model::Image<double>, test_model::binary::ReadImage<double, yardl::binary::ReadFloatingPoint>>>(stream_, current_block_remaining_, value);
+  return read_block_successful;
+}
+
+bool SimpleGenericsIndexedReader::ReadStreamOfTypeVariantsImpl(std::vector<std::variant<image::FloatImage, test_model::Image<double>>>& values, size_t idx) {
+  size_t abs_offset = 0;
+  if (!step_index_.find_stream_item("StreamOfTypeVariants", idx, abs_offset, current_block_remaining_)) {
+    values.clear();
+    return false;
+  }
+  stream_.Seek(abs_offset);
+  yardl::binary::ReadBlocksIntoVector<std::variant<image::FloatImage, test_model::Image<double>>, ReadUnion<image::FloatImage, image::binary::ReadFloatImage, test_model::Image<double>, test_model::binary::ReadImage<double, yardl::binary::ReadFloatingPoint>>>(stream_, current_block_remaining_, values);
+  return current_block_remaining_ != 0;
+}
+
+size_t SimpleGenericsIndexedReader::CountStreamOfTypeVariantsImpl() {
+  return step_index_.get_stream_count("StreamOfTypeVariants");
+}
+
+void SimpleGenericsIndexedReader::CloseImpl() {
+}
+
 void AdvancedGenericsWriter::WriteFloatImageImageImpl(test_model::Image<test_model::Image<float>> const& value) {
   test_model::binary::WriteImage<test_model::Image<float>, test_model::binary::WriteImage<float, yardl::binary::WriteFloatingPoint>>(stream_, value);
 }
@@ -4335,6 +6729,73 @@ void AdvancedGenericsReader::ReadTupleOfVectorsImpl(test_model::MyTuple<std::vec
 
 void AdvancedGenericsReader::CloseImpl() {
   stream_.VerifyFinished();
+}
+
+void AdvancedGenericsIndexedWriter::WriteFloatImageImageImpl(test_model::Image<test_model::Image<float>> const& value) {
+  step_index_.set_step_offset("FloatImageImage", stream_.Pos());
+  test_model::binary::WriteImage<test_model::Image<float>, test_model::binary::WriteImage<float, yardl::binary::WriteFloatingPoint>>(stream_, value);
+}
+
+void AdvancedGenericsIndexedWriter::WriteGenericRecord1Impl(test_model::GenericRecord<int32_t, std::string> const& value) {
+  step_index_.set_step_offset("GenericRecord1", stream_.Pos());
+  test_model::binary::WriteGenericRecord<int32_t, yardl::binary::WriteInteger, std::string, yardl::binary::WriteString>(stream_, value);
+}
+
+void AdvancedGenericsIndexedWriter::WriteTupleOfOptionalsImpl(test_model::MyTuple<std::optional<int32_t>, std::optional<std::string>> const& value) {
+  step_index_.set_step_offset("TupleOfOptionals", stream_.Pos());
+  test_model::binary::WriteMyTuple<std::optional<int32_t>, yardl::binary::WriteOptional<int32_t, yardl::binary::WriteInteger>, std::optional<std::string>, yardl::binary::WriteOptional<std::string, yardl::binary::WriteString>>(stream_, value);
+}
+
+void AdvancedGenericsIndexedWriter::WriteTupleOfOptionalsAlternateSyntaxImpl(test_model::MyTuple<std::optional<int32_t>, std::optional<std::string>> const& value) {
+  step_index_.set_step_offset("TupleOfOptionalsAlternateSyntax", stream_.Pos());
+  test_model::binary::WriteMyTuple<std::optional<int32_t>, yardl::binary::WriteOptional<int32_t, yardl::binary::WriteInteger>, std::optional<std::string>, yardl::binary::WriteOptional<std::string, yardl::binary::WriteString>>(stream_, value);
+}
+
+void AdvancedGenericsIndexedWriter::WriteTupleOfVectorsImpl(test_model::MyTuple<std::vector<int32_t>, std::vector<float>> const& value) {
+  step_index_.set_step_offset("TupleOfVectors", stream_.Pos());
+  test_model::binary::WriteMyTuple<std::vector<int32_t>, yardl::binary::WriteVector<int32_t, yardl::binary::WriteInteger>, std::vector<float>, yardl::binary::WriteVector<float, yardl::binary::WriteFloatingPoint>>(stream_, value);
+}
+
+void AdvancedGenericsIndexedWriter::Flush() {
+  stream_.Flush();
+}
+
+void AdvancedGenericsIndexedWriter::CloseImpl() {
+  yardl::binary::WriteIndex(stream_, step_index_);
+  stream_.Flush();
+}
+
+void AdvancedGenericsIndexedReader::ReadFloatImageImageImpl(test_model::Image<test_model::Image<float>>& value) {
+  auto pos = step_index_.get_step_offset("FloatImageImage");
+  stream_.Seek(pos);
+  test_model::binary::ReadImage<test_model::Image<float>, test_model::binary::ReadImage<float, yardl::binary::ReadFloatingPoint>>(stream_, value);
+}
+
+void AdvancedGenericsIndexedReader::ReadGenericRecord1Impl(test_model::GenericRecord<int32_t, std::string>& value) {
+  auto pos = step_index_.get_step_offset("GenericRecord1");
+  stream_.Seek(pos);
+  test_model::binary::ReadGenericRecord<int32_t, yardl::binary::ReadInteger, std::string, yardl::binary::ReadString>(stream_, value);
+}
+
+void AdvancedGenericsIndexedReader::ReadTupleOfOptionalsImpl(test_model::MyTuple<std::optional<int32_t>, std::optional<std::string>>& value) {
+  auto pos = step_index_.get_step_offset("TupleOfOptionals");
+  stream_.Seek(pos);
+  test_model::binary::ReadMyTuple<std::optional<int32_t>, yardl::binary::ReadOptional<int32_t, yardl::binary::ReadInteger>, std::optional<std::string>, yardl::binary::ReadOptional<std::string, yardl::binary::ReadString>>(stream_, value);
+}
+
+void AdvancedGenericsIndexedReader::ReadTupleOfOptionalsAlternateSyntaxImpl(test_model::MyTuple<std::optional<int32_t>, std::optional<std::string>>& value) {
+  auto pos = step_index_.get_step_offset("TupleOfOptionalsAlternateSyntax");
+  stream_.Seek(pos);
+  test_model::binary::ReadMyTuple<std::optional<int32_t>, yardl::binary::ReadOptional<int32_t, yardl::binary::ReadInteger>, std::optional<std::string>, yardl::binary::ReadOptional<std::string, yardl::binary::ReadString>>(stream_, value);
+}
+
+void AdvancedGenericsIndexedReader::ReadTupleOfVectorsImpl(test_model::MyTuple<std::vector<int32_t>, std::vector<float>>& value) {
+  auto pos = step_index_.get_step_offset("TupleOfVectors");
+  stream_.Seek(pos);
+  test_model::binary::ReadMyTuple<std::vector<int32_t>, yardl::binary::ReadVector<int32_t, yardl::binary::ReadInteger>, std::vector<float>, yardl::binary::ReadVector<float, yardl::binary::ReadFloatingPoint>>(stream_, value);
+}
+
+void AdvancedGenericsIndexedReader::CloseImpl() {
 }
 
 void AliasesWriter::WriteAliasedStringImpl(test_model::AliasedString const& value) {
@@ -4446,6 +6907,183 @@ void AliasesReader::CloseImpl() {
   stream_.VerifyFinished();
 }
 
+void AliasesIndexedWriter::WriteAliasedStringImpl(test_model::AliasedString const& value) {
+  step_index_.set_step_offset("AliasedString", stream_.Pos());
+  test_model::binary::WriteAliasedString(stream_, value);
+}
+
+void AliasesIndexedWriter::WriteAliasedEnumImpl(test_model::AliasedEnum const& value) {
+  step_index_.set_step_offset("AliasedEnum", stream_.Pos());
+  test_model::binary::WriteAliasedEnum(stream_, value);
+}
+
+void AliasesIndexedWriter::WriteAliasedOpenGenericImpl(test_model::AliasedOpenGeneric<test_model::AliasedString, test_model::AliasedEnum> const& value) {
+  step_index_.set_step_offset("AliasedOpenGeneric", stream_.Pos());
+  test_model::binary::WriteAliasedOpenGeneric<test_model::AliasedString, test_model::binary::WriteAliasedString, test_model::AliasedEnum, test_model::binary::WriteAliasedEnum>(stream_, value);
+}
+
+void AliasesIndexedWriter::WriteAliasedClosedGenericImpl(test_model::AliasedClosedGeneric const& value) {
+  step_index_.set_step_offset("AliasedClosedGeneric", stream_.Pos());
+  test_model::binary::WriteAliasedClosedGeneric(stream_, value);
+}
+
+void AliasesIndexedWriter::WriteAliasedOptionalImpl(test_model::AliasedOptional const& value) {
+  step_index_.set_step_offset("AliasedOptional", stream_.Pos());
+  test_model::binary::WriteAliasedOptional(stream_, value);
+}
+
+void AliasesIndexedWriter::WriteAliasedGenericOptionalImpl(test_model::AliasedGenericOptional<float> const& value) {
+  step_index_.set_step_offset("AliasedGenericOptional", stream_.Pos());
+  test_model::binary::WriteAliasedGenericOptional<float, yardl::binary::WriteFloatingPoint>(stream_, value);
+}
+
+void AliasesIndexedWriter::WriteAliasedGenericUnion2Impl(test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum> const& value) {
+  step_index_.set_step_offset("AliasedGenericUnion2", stream_.Pos());
+  test_model::binary::WriteAliasedGenericUnion2<test_model::AliasedString, test_model::binary::WriteAliasedString, test_model::AliasedEnum, test_model::binary::WriteAliasedEnum>(stream_, value);
+}
+
+void AliasesIndexedWriter::WriteAliasedGenericVectorImpl(test_model::AliasedGenericVector<float> const& value) {
+  step_index_.set_step_offset("AliasedGenericVector", stream_.Pos());
+  test_model::binary::WriteAliasedGenericVector<float, yardl::binary::WriteFloatingPoint>(stream_, value);
+}
+
+void AliasesIndexedWriter::WriteAliasedGenericFixedVectorImpl(test_model::AliasedGenericFixedVector<float> const& value) {
+  step_index_.set_step_offset("AliasedGenericFixedVector", stream_.Pos());
+  test_model::binary::WriteAliasedGenericFixedVector<float, yardl::binary::WriteFloatingPoint>(stream_, value);
+}
+
+void AliasesIndexedWriter::WriteStreamOfAliasedGenericUnion2Impl(test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum> const& value) {
+  step_index_.set_step_offset("StreamOfAliasedGenericUnion2", stream_.Pos());
+  size_t item_offset = 0;
+  yardl::binary::WriteBlockAndSaveOffset<test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum>, test_model::binary::WriteAliasedGenericUnion2<test_model::AliasedString, test_model::binary::WriteAliasedString, test_model::AliasedEnum, test_model::binary::WriteAliasedEnum>>(stream_, value, item_offset);
+  step_index_.add_stream_offset("StreamOfAliasedGenericUnion2", item_offset);
+}
+
+void AliasesIndexedWriter::WriteStreamOfAliasedGenericUnion2Impl(std::vector<test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum>> const& values) {
+  step_index_.set_step_offset("StreamOfAliasedGenericUnion2", stream_.Pos());
+  std::vector<size_t> item_offsets;
+  item_offsets.reserve(values.size());
+  if (!values.empty()) {
+    yardl::binary::WriteVectorAndSaveOffsets<test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum>, test_model::binary::WriteAliasedGenericUnion2<test_model::AliasedString, test_model::binary::WriteAliasedString, test_model::AliasedEnum, test_model::binary::WriteAliasedEnum>>(stream_, values, item_offsets);
+  }
+  step_index_.add_stream_offsets("StreamOfAliasedGenericUnion2", item_offsets);
+}
+
+void AliasesIndexedWriter::EndStreamOfAliasedGenericUnion2Impl() {
+  step_index_.set_step_offset("StreamOfAliasedGenericUnion2", stream_.Pos());
+  step_index_.add_stream_offsets("StreamOfAliasedGenericUnion2", std::vector<size_t>{});
+  yardl::binary::WriteInteger(stream_, 0U);
+}
+
+void AliasesIndexedWriter::Flush() {
+  stream_.Flush();
+}
+
+void AliasesIndexedWriter::CloseImpl() {
+  yardl::binary::WriteIndex(stream_, step_index_);
+  stream_.Flush();
+}
+
+void AliasesIndexedReader::ReadAliasedStringImpl(test_model::AliasedString& value) {
+  auto pos = step_index_.get_step_offset("AliasedString");
+  stream_.Seek(pos);
+  test_model::binary::ReadAliasedString(stream_, value);
+}
+
+void AliasesIndexedReader::ReadAliasedEnumImpl(test_model::AliasedEnum& value) {
+  auto pos = step_index_.get_step_offset("AliasedEnum");
+  stream_.Seek(pos);
+  test_model::binary::ReadAliasedEnum(stream_, value);
+}
+
+void AliasesIndexedReader::ReadAliasedOpenGenericImpl(test_model::AliasedOpenGeneric<test_model::AliasedString, test_model::AliasedEnum>& value) {
+  auto pos = step_index_.get_step_offset("AliasedOpenGeneric");
+  stream_.Seek(pos);
+  test_model::binary::ReadAliasedOpenGeneric<test_model::AliasedString, test_model::binary::ReadAliasedString, test_model::AliasedEnum, test_model::binary::ReadAliasedEnum>(stream_, value);
+}
+
+void AliasesIndexedReader::ReadAliasedClosedGenericImpl(test_model::AliasedClosedGeneric& value) {
+  auto pos = step_index_.get_step_offset("AliasedClosedGeneric");
+  stream_.Seek(pos);
+  test_model::binary::ReadAliasedClosedGeneric(stream_, value);
+}
+
+void AliasesIndexedReader::ReadAliasedOptionalImpl(test_model::AliasedOptional& value) {
+  auto pos = step_index_.get_step_offset("AliasedOptional");
+  stream_.Seek(pos);
+  test_model::binary::ReadAliasedOptional(stream_, value);
+}
+
+void AliasesIndexedReader::ReadAliasedGenericOptionalImpl(test_model::AliasedGenericOptional<float>& value) {
+  auto pos = step_index_.get_step_offset("AliasedGenericOptional");
+  stream_.Seek(pos);
+  test_model::binary::ReadAliasedGenericOptional<float, yardl::binary::ReadFloatingPoint>(stream_, value);
+}
+
+void AliasesIndexedReader::ReadAliasedGenericUnion2Impl(test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum>& value) {
+  auto pos = step_index_.get_step_offset("AliasedGenericUnion2");
+  stream_.Seek(pos);
+  test_model::binary::ReadAliasedGenericUnion2<test_model::AliasedString, test_model::binary::ReadAliasedString, test_model::AliasedEnum, test_model::binary::ReadAliasedEnum>(stream_, value);
+}
+
+void AliasesIndexedReader::ReadAliasedGenericVectorImpl(test_model::AliasedGenericVector<float>& value) {
+  auto pos = step_index_.get_step_offset("AliasedGenericVector");
+  stream_.Seek(pos);
+  test_model::binary::ReadAliasedGenericVector<float, yardl::binary::ReadFloatingPoint>(stream_, value);
+}
+
+void AliasesIndexedReader::ReadAliasedGenericFixedVectorImpl(test_model::AliasedGenericFixedVector<float>& value) {
+  auto pos = step_index_.get_step_offset("AliasedGenericFixedVector");
+  stream_.Seek(pos);
+  test_model::binary::ReadAliasedGenericFixedVector<float, yardl::binary::ReadFloatingPoint>(stream_, value);
+}
+
+bool AliasesIndexedReader::ReadStreamOfAliasedGenericUnion2Impl(test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum>& value) {
+  if (!step_index_.offset_within_stream("StreamOfAliasedGenericUnion2", std::nullopt, stream_.Pos())) {
+    stream_.Seek(step_index_.get_step_offset("StreamOfAliasedGenericUnion2"));
+  }
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum>, test_model::binary::ReadAliasedGenericUnion2<test_model::AliasedString, test_model::binary::ReadAliasedString, test_model::AliasedEnum, test_model::binary::ReadAliasedEnum>>(stream_, current_block_remaining_, value);
+  return read_block_successful;
+}
+
+bool AliasesIndexedReader::ReadStreamOfAliasedGenericUnion2Impl(std::vector<test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum>>& values) {
+  if (!step_index_.offset_within_stream("StreamOfAliasedGenericUnion2", std::nullopt, stream_.Pos())) {
+    stream_.Seek(step_index_.get_step_offset("StreamOfAliasedGenericUnion2"));
+  }
+  yardl::binary::ReadBlocksIntoVector<test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum>, test_model::binary::ReadAliasedGenericUnion2<test_model::AliasedString, test_model::binary::ReadAliasedString, test_model::AliasedEnum, test_model::binary::ReadAliasedEnum>>(stream_, current_block_remaining_, values);
+  return current_block_remaining_ != 0;
+}
+
+bool AliasesIndexedReader::ReadStreamOfAliasedGenericUnion2Impl(test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum>& value, size_t idx) {
+  size_t abs_offset = 0;
+  if (!step_index_.find_stream_item("StreamOfAliasedGenericUnion2", idx, abs_offset, current_block_remaining_)) {
+    return false;
+  }
+  stream_.Seek(abs_offset);
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum>, test_model::binary::ReadAliasedGenericUnion2<test_model::AliasedString, test_model::binary::ReadAliasedString, test_model::AliasedEnum, test_model::binary::ReadAliasedEnum>>(stream_, current_block_remaining_, value);
+  return read_block_successful;
+}
+
+bool AliasesIndexedReader::ReadStreamOfAliasedGenericUnion2Impl(std::vector<test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum>>& values, size_t idx) {
+  size_t abs_offset = 0;
+  if (!step_index_.find_stream_item("StreamOfAliasedGenericUnion2", idx, abs_offset, current_block_remaining_)) {
+    values.clear();
+    return false;
+  }
+  stream_.Seek(abs_offset);
+  yardl::binary::ReadBlocksIntoVector<test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum>, test_model::binary::ReadAliasedGenericUnion2<test_model::AliasedString, test_model::binary::ReadAliasedString, test_model::AliasedEnum, test_model::binary::ReadAliasedEnum>>(stream_, current_block_remaining_, values);
+  return current_block_remaining_ != 0;
+}
+
+size_t AliasesIndexedReader::CountStreamOfAliasedGenericUnion2Impl() {
+  return step_index_.get_stream_count("StreamOfAliasedGenericUnion2");
+}
+
+void AliasesIndexedReader::CloseImpl() {
+}
+
 void StreamsOfAliasedUnionsWriter::WriteIntOrSimpleRecordImpl(test_model::AliasedIntOrSimpleRecord const& value) {
   yardl::binary::WriteBlock<test_model::AliasedIntOrSimpleRecord, test_model::binary::WriteAliasedIntOrSimpleRecord>(stream_, value);
 }
@@ -4508,6 +7146,150 @@ void StreamsOfAliasedUnionsReader::CloseImpl() {
   stream_.VerifyFinished();
 }
 
+void StreamsOfAliasedUnionsIndexedWriter::WriteIntOrSimpleRecordImpl(test_model::AliasedIntOrSimpleRecord const& value) {
+  step_index_.set_step_offset("IntOrSimpleRecord", stream_.Pos());
+  size_t item_offset = 0;
+  yardl::binary::WriteBlockAndSaveOffset<test_model::AliasedIntOrSimpleRecord, test_model::binary::WriteAliasedIntOrSimpleRecord>(stream_, value, item_offset);
+  step_index_.add_stream_offset("IntOrSimpleRecord", item_offset);
+}
+
+void StreamsOfAliasedUnionsIndexedWriter::WriteIntOrSimpleRecordImpl(std::vector<test_model::AliasedIntOrSimpleRecord> const& values) {
+  step_index_.set_step_offset("IntOrSimpleRecord", stream_.Pos());
+  std::vector<size_t> item_offsets;
+  item_offsets.reserve(values.size());
+  if (!values.empty()) {
+    yardl::binary::WriteVectorAndSaveOffsets<test_model::AliasedIntOrSimpleRecord, test_model::binary::WriteAliasedIntOrSimpleRecord>(stream_, values, item_offsets);
+  }
+  step_index_.add_stream_offsets("IntOrSimpleRecord", item_offsets);
+}
+
+void StreamsOfAliasedUnionsIndexedWriter::EndIntOrSimpleRecordImpl() {
+  step_index_.set_step_offset("IntOrSimpleRecord", stream_.Pos());
+  step_index_.add_stream_offsets("IntOrSimpleRecord", std::vector<size_t>{});
+  yardl::binary::WriteInteger(stream_, 0U);
+}
+
+void StreamsOfAliasedUnionsIndexedWriter::WriteNullableIntOrSimpleRecordImpl(test_model::AliasedNullableIntSimpleRecord const& value) {
+  step_index_.set_step_offset("NullableIntOrSimpleRecord", stream_.Pos());
+  size_t item_offset = 0;
+  yardl::binary::WriteBlockAndSaveOffset<test_model::AliasedNullableIntSimpleRecord, test_model::binary::WriteAliasedNullableIntSimpleRecord>(stream_, value, item_offset);
+  step_index_.add_stream_offset("NullableIntOrSimpleRecord", item_offset);
+}
+
+void StreamsOfAliasedUnionsIndexedWriter::WriteNullableIntOrSimpleRecordImpl(std::vector<test_model::AliasedNullableIntSimpleRecord> const& values) {
+  step_index_.set_step_offset("NullableIntOrSimpleRecord", stream_.Pos());
+  std::vector<size_t> item_offsets;
+  item_offsets.reserve(values.size());
+  if (!values.empty()) {
+    yardl::binary::WriteVectorAndSaveOffsets<test_model::AliasedNullableIntSimpleRecord, test_model::binary::WriteAliasedNullableIntSimpleRecord>(stream_, values, item_offsets);
+  }
+  step_index_.add_stream_offsets("NullableIntOrSimpleRecord", item_offsets);
+}
+
+void StreamsOfAliasedUnionsIndexedWriter::EndNullableIntOrSimpleRecordImpl() {
+  step_index_.set_step_offset("NullableIntOrSimpleRecord", stream_.Pos());
+  step_index_.add_stream_offsets("NullableIntOrSimpleRecord", std::vector<size_t>{});
+  yardl::binary::WriteInteger(stream_, 0U);
+}
+
+void StreamsOfAliasedUnionsIndexedWriter::Flush() {
+  stream_.Flush();
+}
+
+void StreamsOfAliasedUnionsIndexedWriter::CloseImpl() {
+  yardl::binary::WriteIndex(stream_, step_index_);
+  stream_.Flush();
+}
+
+bool StreamsOfAliasedUnionsIndexedReader::ReadIntOrSimpleRecordImpl(test_model::AliasedIntOrSimpleRecord& value) {
+  if (!step_index_.offset_within_stream("IntOrSimpleRecord", "NullableIntOrSimpleRecord", stream_.Pos())) {
+    stream_.Seek(step_index_.get_step_offset("IntOrSimpleRecord"));
+  }
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<test_model::AliasedIntOrSimpleRecord, test_model::binary::ReadAliasedIntOrSimpleRecord>(stream_, current_block_remaining_, value);
+  return read_block_successful;
+}
+
+bool StreamsOfAliasedUnionsIndexedReader::ReadIntOrSimpleRecordImpl(std::vector<test_model::AliasedIntOrSimpleRecord>& values) {
+  if (!step_index_.offset_within_stream("IntOrSimpleRecord", "NullableIntOrSimpleRecord", stream_.Pos())) {
+    stream_.Seek(step_index_.get_step_offset("IntOrSimpleRecord"));
+  }
+  yardl::binary::ReadBlocksIntoVector<test_model::AliasedIntOrSimpleRecord, test_model::binary::ReadAliasedIntOrSimpleRecord>(stream_, current_block_remaining_, values);
+  return current_block_remaining_ != 0;
+}
+
+bool StreamsOfAliasedUnionsIndexedReader::ReadIntOrSimpleRecordImpl(test_model::AliasedIntOrSimpleRecord& value, size_t idx) {
+  size_t abs_offset = 0;
+  if (!step_index_.find_stream_item("IntOrSimpleRecord", idx, abs_offset, current_block_remaining_)) {
+    return false;
+  }
+  stream_.Seek(abs_offset);
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<test_model::AliasedIntOrSimpleRecord, test_model::binary::ReadAliasedIntOrSimpleRecord>(stream_, current_block_remaining_, value);
+  return read_block_successful;
+}
+
+bool StreamsOfAliasedUnionsIndexedReader::ReadIntOrSimpleRecordImpl(std::vector<test_model::AliasedIntOrSimpleRecord>& values, size_t idx) {
+  size_t abs_offset = 0;
+  if (!step_index_.find_stream_item("IntOrSimpleRecord", idx, abs_offset, current_block_remaining_)) {
+    values.clear();
+    return false;
+  }
+  stream_.Seek(abs_offset);
+  yardl::binary::ReadBlocksIntoVector<test_model::AliasedIntOrSimpleRecord, test_model::binary::ReadAliasedIntOrSimpleRecord>(stream_, current_block_remaining_, values);
+  return current_block_remaining_ != 0;
+}
+
+size_t StreamsOfAliasedUnionsIndexedReader::CountIntOrSimpleRecordImpl() {
+  return step_index_.get_stream_count("IntOrSimpleRecord");
+}
+
+bool StreamsOfAliasedUnionsIndexedReader::ReadNullableIntOrSimpleRecordImpl(test_model::AliasedNullableIntSimpleRecord& value) {
+  if (!step_index_.offset_within_stream("NullableIntOrSimpleRecord", std::nullopt, stream_.Pos())) {
+    stream_.Seek(step_index_.get_step_offset("NullableIntOrSimpleRecord"));
+  }
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<test_model::AliasedNullableIntSimpleRecord, test_model::binary::ReadAliasedNullableIntSimpleRecord>(stream_, current_block_remaining_, value);
+  return read_block_successful;
+}
+
+bool StreamsOfAliasedUnionsIndexedReader::ReadNullableIntOrSimpleRecordImpl(std::vector<test_model::AliasedNullableIntSimpleRecord>& values) {
+  if (!step_index_.offset_within_stream("NullableIntOrSimpleRecord", std::nullopt, stream_.Pos())) {
+    stream_.Seek(step_index_.get_step_offset("NullableIntOrSimpleRecord"));
+  }
+  yardl::binary::ReadBlocksIntoVector<test_model::AliasedNullableIntSimpleRecord, test_model::binary::ReadAliasedNullableIntSimpleRecord>(stream_, current_block_remaining_, values);
+  return current_block_remaining_ != 0;
+}
+
+bool StreamsOfAliasedUnionsIndexedReader::ReadNullableIntOrSimpleRecordImpl(test_model::AliasedNullableIntSimpleRecord& value, size_t idx) {
+  size_t abs_offset = 0;
+  if (!step_index_.find_stream_item("NullableIntOrSimpleRecord", idx, abs_offset, current_block_remaining_)) {
+    return false;
+  }
+  stream_.Seek(abs_offset);
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<test_model::AliasedNullableIntSimpleRecord, test_model::binary::ReadAliasedNullableIntSimpleRecord>(stream_, current_block_remaining_, value);
+  return read_block_successful;
+}
+
+bool StreamsOfAliasedUnionsIndexedReader::ReadNullableIntOrSimpleRecordImpl(std::vector<test_model::AliasedNullableIntSimpleRecord>& values, size_t idx) {
+  size_t abs_offset = 0;
+  if (!step_index_.find_stream_item("NullableIntOrSimpleRecord", idx, abs_offset, current_block_remaining_)) {
+    values.clear();
+    return false;
+  }
+  stream_.Seek(abs_offset);
+  yardl::binary::ReadBlocksIntoVector<test_model::AliasedNullableIntSimpleRecord, test_model::binary::ReadAliasedNullableIntSimpleRecord>(stream_, current_block_remaining_, values);
+  return current_block_remaining_ != 0;
+}
+
+size_t StreamsOfAliasedUnionsIndexedReader::CountNullableIntOrSimpleRecordImpl() {
+  return step_index_.get_stream_count("NullableIntOrSimpleRecord");
+}
+
+void StreamsOfAliasedUnionsIndexedReader::CloseImpl() {
+}
+
 void ProtocolWithComputedFieldsWriter::WriteRecordWithComputedFieldsImpl(test_model::RecordWithComputedFields const& value) {
   test_model::binary::WriteRecordWithComputedFields(stream_, value);
 }
@@ -4526,6 +7308,29 @@ void ProtocolWithComputedFieldsReader::ReadRecordWithComputedFieldsImpl(test_mod
 
 void ProtocolWithComputedFieldsReader::CloseImpl() {
   stream_.VerifyFinished();
+}
+
+void ProtocolWithComputedFieldsIndexedWriter::WriteRecordWithComputedFieldsImpl(test_model::RecordWithComputedFields const& value) {
+  step_index_.set_step_offset("RecordWithComputedFields", stream_.Pos());
+  test_model::binary::WriteRecordWithComputedFields(stream_, value);
+}
+
+void ProtocolWithComputedFieldsIndexedWriter::Flush() {
+  stream_.Flush();
+}
+
+void ProtocolWithComputedFieldsIndexedWriter::CloseImpl() {
+  yardl::binary::WriteIndex(stream_, step_index_);
+  stream_.Flush();
+}
+
+void ProtocolWithComputedFieldsIndexedReader::ReadRecordWithComputedFieldsImpl(test_model::RecordWithComputedFields& value) {
+  auto pos = step_index_.get_step_offset("RecordWithComputedFields");
+  stream_.Seek(pos);
+  test_model::binary::ReadRecordWithComputedFields(stream_, value);
+}
+
+void ProtocolWithComputedFieldsIndexedReader::CloseImpl() {
 }
 
 void ProtocolWithKeywordStepsWriter::WriteIntImpl(test_model::RecordWithKeywordFields const& value) {
@@ -4573,6 +7378,95 @@ void ProtocolWithKeywordStepsReader::CloseImpl() {
   stream_.VerifyFinished();
 }
 
+void ProtocolWithKeywordStepsIndexedWriter::WriteIntImpl(test_model::RecordWithKeywordFields const& value) {
+  step_index_.set_step_offset("Int", stream_.Pos());
+  size_t item_offset = 0;
+  yardl::binary::WriteBlockAndSaveOffset<test_model::RecordWithKeywordFields, test_model::binary::WriteRecordWithKeywordFields>(stream_, value, item_offset);
+  step_index_.add_stream_offset("Int", item_offset);
+}
+
+void ProtocolWithKeywordStepsIndexedWriter::WriteIntImpl(std::vector<test_model::RecordWithKeywordFields> const& values) {
+  step_index_.set_step_offset("Int", stream_.Pos());
+  std::vector<size_t> item_offsets;
+  item_offsets.reserve(values.size());
+  if (!values.empty()) {
+    yardl::binary::WriteVectorAndSaveOffsets<test_model::RecordWithKeywordFields, test_model::binary::WriteRecordWithKeywordFields>(stream_, values, item_offsets);
+  }
+  step_index_.add_stream_offsets("Int", item_offsets);
+}
+
+void ProtocolWithKeywordStepsIndexedWriter::EndIntImpl() {
+  step_index_.set_step_offset("Int", stream_.Pos());
+  step_index_.add_stream_offsets("Int", std::vector<size_t>{});
+  yardl::binary::WriteInteger(stream_, 0U);
+}
+
+void ProtocolWithKeywordStepsIndexedWriter::WriteFloatImpl(test_model::EnumWithKeywordSymbols const& value) {
+  step_index_.set_step_offset("Float", stream_.Pos());
+  yardl::binary::WriteEnum<test_model::EnumWithKeywordSymbols>(stream_, value);
+}
+
+void ProtocolWithKeywordStepsIndexedWriter::Flush() {
+  stream_.Flush();
+}
+
+void ProtocolWithKeywordStepsIndexedWriter::CloseImpl() {
+  yardl::binary::WriteIndex(stream_, step_index_);
+  stream_.Flush();
+}
+
+bool ProtocolWithKeywordStepsIndexedReader::ReadIntImpl(test_model::RecordWithKeywordFields& value) {
+  if (!step_index_.offset_within_stream("Int", "Float", stream_.Pos())) {
+    stream_.Seek(step_index_.get_step_offset("Int"));
+  }
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<test_model::RecordWithKeywordFields, test_model::binary::ReadRecordWithKeywordFields>(stream_, current_block_remaining_, value);
+  return read_block_successful;
+}
+
+bool ProtocolWithKeywordStepsIndexedReader::ReadIntImpl(std::vector<test_model::RecordWithKeywordFields>& values) {
+  if (!step_index_.offset_within_stream("Int", "Float", stream_.Pos())) {
+    stream_.Seek(step_index_.get_step_offset("Int"));
+  }
+  yardl::binary::ReadBlocksIntoVector<test_model::RecordWithKeywordFields, test_model::binary::ReadRecordWithKeywordFields>(stream_, current_block_remaining_, values);
+  return current_block_remaining_ != 0;
+}
+
+bool ProtocolWithKeywordStepsIndexedReader::ReadIntImpl(test_model::RecordWithKeywordFields& value, size_t idx) {
+  size_t abs_offset = 0;
+  if (!step_index_.find_stream_item("Int", idx, abs_offset, current_block_remaining_)) {
+    return false;
+  }
+  stream_.Seek(abs_offset);
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<test_model::RecordWithKeywordFields, test_model::binary::ReadRecordWithKeywordFields>(stream_, current_block_remaining_, value);
+  return read_block_successful;
+}
+
+bool ProtocolWithKeywordStepsIndexedReader::ReadIntImpl(std::vector<test_model::RecordWithKeywordFields>& values, size_t idx) {
+  size_t abs_offset = 0;
+  if (!step_index_.find_stream_item("Int", idx, abs_offset, current_block_remaining_)) {
+    values.clear();
+    return false;
+  }
+  stream_.Seek(abs_offset);
+  yardl::binary::ReadBlocksIntoVector<test_model::RecordWithKeywordFields, test_model::binary::ReadRecordWithKeywordFields>(stream_, current_block_remaining_, values);
+  return current_block_remaining_ != 0;
+}
+
+size_t ProtocolWithKeywordStepsIndexedReader::CountIntImpl() {
+  return step_index_.get_stream_count("Int");
+}
+
+void ProtocolWithKeywordStepsIndexedReader::ReadFloatImpl(test_model::EnumWithKeywordSymbols& value) {
+  auto pos = step_index_.get_step_offset("Float");
+  stream_.Seek(pos);
+  yardl::binary::ReadEnum<test_model::EnumWithKeywordSymbols>(stream_, value);
+}
+
+void ProtocolWithKeywordStepsIndexedReader::CloseImpl() {
+}
+
 void ProtocolWithOptionalDateWriter::WriteRecordImpl(std::optional<test_model::RecordWithOptionalDate> const& value) {
   yardl::binary::WriteOptional<test_model::RecordWithOptionalDate, test_model::binary::WriteRecordWithOptionalDate>(stream_, value);
 }
@@ -4591,6 +7485,29 @@ void ProtocolWithOptionalDateReader::ReadRecordImpl(std::optional<test_model::Re
 
 void ProtocolWithOptionalDateReader::CloseImpl() {
   stream_.VerifyFinished();
+}
+
+void ProtocolWithOptionalDateIndexedWriter::WriteRecordImpl(std::optional<test_model::RecordWithOptionalDate> const& value) {
+  step_index_.set_step_offset("Record", stream_.Pos());
+  yardl::binary::WriteOptional<test_model::RecordWithOptionalDate, test_model::binary::WriteRecordWithOptionalDate>(stream_, value);
+}
+
+void ProtocolWithOptionalDateIndexedWriter::Flush() {
+  stream_.Flush();
+}
+
+void ProtocolWithOptionalDateIndexedWriter::CloseImpl() {
+  yardl::binary::WriteIndex(stream_, step_index_);
+  stream_.Flush();
+}
+
+void ProtocolWithOptionalDateIndexedReader::ReadRecordImpl(std::optional<test_model::RecordWithOptionalDate>& value) {
+  auto pos = step_index_.get_step_offset("Record");
+  stream_.Seek(pos);
+  yardl::binary::ReadOptional<test_model::RecordWithOptionalDate, test_model::binary::ReadRecordWithOptionalDate>(stream_, value);
+}
+
+void ProtocolWithOptionalDateIndexedReader::CloseImpl() {
 }
 
 } // namespace test_model::binary

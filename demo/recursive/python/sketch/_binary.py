@@ -16,6 +16,7 @@ from typing import (
     Optional,
     Tuple,
     cast,
+    Callable,
 )
 from abc import ABC, abstractmethod
 import struct
@@ -99,7 +100,7 @@ class BinaryProtocolReader(ABC):
 class BinaryProtocolIndexedWriter(BinaryProtocolWriter):
     def __init__(self, stream: Union[BinaryIO, str], schema: str) -> None:
         super().__init__(stream, schema)
-        self._index = Index()
+        self._index: Index = Index()
 
     def _close(self) -> None:
         self._index.write(self._stream)
@@ -114,7 +115,7 @@ class BinaryProtocolIndexedReader(BinaryProtocolReader):
     ) -> None:
         super().__init__(stream, expected_schema)
         # Load the index from the end of the stream
-        self._index = Index.read(self._stream)
+        self._index: Index = Index.read(self._stream)
 
 
 class CodedOutputStream:
@@ -365,16 +366,16 @@ class CodedInputStream:
 
 class Index:
     def __init__(self) -> None:
-        self.step_offsets = {}
-        self.stream_offsets = {}
-        self.stream_blocks = {}
+        self.step_offsets: dict[str, int] = {}
+        self.stream_offsets: dict[str, list[int]] = {}
+        self.stream_blocks: dict[str, list[int]] = {}
 
     def set_step_offset(self, step: str, offset: int) -> None:
         if step not in self.step_offsets:
             self.step_offsets[step] = offset
 
     def add_stream_offsets(
-        self, step: str, offsets: Iterable[int], num_blocks: int
+        self, step: str, offsets: list[int], num_blocks: int
     ) -> None:
         if step not in self.stream_blocks:
             self.stream_blocks[step] = []
@@ -434,7 +435,7 @@ class Index:
         write_fixed_size_t(stream, pos)
 
     @staticmethod
-    def read(stream: CodedInputStream) -> None:
+    def read(stream: CodedInputStream) -> "Index":
         pos = stream.pos()
 
         stream.seek(-size_t_struct.size)
@@ -446,7 +447,9 @@ class Index:
             raise RuntimeError("Binary Index not found in stream.")
 
         magic_bytes = stream.read_view(len(INDEX_MAGIC_BYTES))
-        if magic_bytes != INDEX_MAGIC_BYTES:
+        if (
+            magic_bytes != INDEX_MAGIC_BYTES
+        ):  # pyright: ignore [reportUnnecessaryComparison]
             raise RuntimeError(
                 "Binary Index in the stream is not in the expected format."
             )
@@ -1147,10 +1150,10 @@ class StreamSerializer(TypeSerializer[Iterable[T], Any]):
 
     def write_and_save_offsets(
         self, stream: CodedOutputStream, value: Iterable[T]
-    ) -> Iterable[int]:
+    ) -> Tuple[list[int], int]:
         # Note that the final 0 is missing and will be added before the next protocol step
         # or the protocol is closed.
-        offsets = []
+        offsets: list[int] = []
         num_blocks = 0
         if isinstance(value, list) and len(value) > 0:
             stream.write_unsigned_varint(len(value))
@@ -1530,11 +1533,13 @@ class RecordSerializer(TypeSerializer[T, np.void]):
         return cast(np.void, self._read(stream))
 
 
-class RecursiveSerializer(Generic[T, T_NP], TypeSerializer[T, np.void]):
-    def __init__(self, element_serializer_type: TypeSerializer[T, T_NP]) -> None:
+class RecursiveSerializer(Generic[T, T_NP], TypeSerializer[Optional[T], np.void]):
+    def __init__(
+        self, element_serializer_type: Callable[[], TypeSerializer[Optional[T], T_NP]]
+    ) -> None:
         super().__init__(np.dtype([("has_value", np.bool_), ("value", np.object_)]))
         self._element_serializer_type = element_serializer_type
-        self._element_serializer = None
+        self._element_serializer: Union[TypeSerializer[Optional[T], T_NP], None] = None
         self._none = cast(np.void, np.zeros((), dtype=self.overall_dtype())[()])
 
     def write(self, stream: CodedOutputStream, value: Optional[T]) -> None:

@@ -22,7 +22,6 @@ from . import yardl_types as yardl
 class BinaryBenchmarkFloat256x256Writer(_binary.BinaryProtocolWriter, BenchmarkFloat256x256WriterBase):
     """Binary writer for the BenchmarkFloat256x256 protocol."""
 
-
     def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
         BenchmarkFloat256x256WriterBase.__init__(self)
         _binary.BinaryProtocolWriter.__init__(self, stream, BenchmarkFloat256x256WriterBase.schema)
@@ -34,7 +33,6 @@ class BinaryBenchmarkFloat256x256Writer(_binary.BinaryProtocolWriter, BenchmarkF
 class BinaryBenchmarkFloat256x256Reader(_binary.BinaryProtocolReader, BenchmarkFloat256x256ReaderBase):
     """Binary writer for the BenchmarkFloat256x256 protocol."""
 
-
     def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
         BenchmarkFloat256x256ReaderBase.__init__(self)
         _binary.BinaryProtocolReader.__init__(self, stream, BenchmarkFloat256x256ReaderBase.schema)
@@ -42,9 +40,38 @@ class BinaryBenchmarkFloat256x256Reader(_binary.BinaryProtocolReader, BenchmarkF
     def _read_float256x256(self) -> collections.abc.Iterable[npt.NDArray[np.float32]]:
         return _binary.StreamSerializer(_binary.FixedNDArraySerializer(_binary.float32_serializer, (256, 256,))).read(self._stream)
 
+
+class BinaryBenchmarkFloat256x256IndexedWriter(_binary.BinaryProtocolIndexedWriter, BenchmarkFloat256x256WriterBase):
+    """Binary indexed writer for the BenchmarkFloat256x256 protocol."""
+
+    def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
+        BenchmarkFloat256x256WriterBase.__init__(self)
+        _binary.BinaryProtocolIndexedWriter.__init__(self, stream, BenchmarkFloat256x256WriterBase.schema)
+
+    def _write_float256x256(self, value: collections.abc.Iterable[npt.NDArray[np.float32]]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("Float256x256", pos)
+        offsets, num_blocks = _binary.StreamSerializer(_binary.FixedNDArraySerializer(_binary.float32_serializer, (256, 256,))).write_and_save_offsets(self._stream, value)
+        self._index.add_stream_offsets("Float256x256", offsets, num_blocks)
+
+
+class BinaryBenchmarkFloat256x256IndexedReader(_binary.BinaryProtocolIndexedReader, BenchmarkFloat256x256IndexedReaderBase):
+    """Binary indexed writer for the BenchmarkFloat256x256 protocol."""
+
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
+        BenchmarkFloat256x256IndexedReaderBase.__init__(self)
+        _binary.BinaryProtocolIndexedReader.__init__(self, stream, BenchmarkFloat256x256IndexedReaderBase.schema)
+
+    def _read_float256x256(self, idx: int) -> collections.abc.Iterable[npt.NDArray[np.float32]]: # pyright: ignore [reportIncompatibleMethodOverride]
+        offset, remaining = self._index.find_stream_item("Float256x256", idx)
+        self._stream.seek(offset)
+        return _binary.StreamSerializer(_binary.FixedNDArraySerializer(_binary.float32_serializer, (256, 256,))).read_mid_stream(self._stream, remaining)
+
+    def _count_float256x256(self) -> int:
+        return self._index.get_stream_size("Float256x256")
+
 class BinaryBenchmarkInt256x256Writer(_binary.BinaryProtocolWriter, BenchmarkInt256x256WriterBase):
     """Binary writer for the BenchmarkInt256x256 protocol."""
-
 
     def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
         BenchmarkInt256x256WriterBase.__init__(self)
@@ -57,7 +84,6 @@ class BinaryBenchmarkInt256x256Writer(_binary.BinaryProtocolWriter, BenchmarkInt
 class BinaryBenchmarkInt256x256Reader(_binary.BinaryProtocolReader, BenchmarkInt256x256ReaderBase):
     """Binary writer for the BenchmarkInt256x256 protocol."""
 
-
     def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
         BenchmarkInt256x256ReaderBase.__init__(self)
         _binary.BinaryProtocolReader.__init__(self, stream, BenchmarkInt256x256ReaderBase.schema)
@@ -65,9 +91,38 @@ class BinaryBenchmarkInt256x256Reader(_binary.BinaryProtocolReader, BenchmarkInt
     def _read_int256x256(self) -> collections.abc.Iterable[npt.NDArray[np.int32]]:
         return _binary.StreamSerializer(_binary.FixedNDArraySerializer(_binary.int32_serializer, (256, 256,))).read(self._stream)
 
+
+class BinaryBenchmarkInt256x256IndexedWriter(_binary.BinaryProtocolIndexedWriter, BenchmarkInt256x256WriterBase):
+    """Binary indexed writer for the BenchmarkInt256x256 protocol."""
+
+    def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
+        BenchmarkInt256x256WriterBase.__init__(self)
+        _binary.BinaryProtocolIndexedWriter.__init__(self, stream, BenchmarkInt256x256WriterBase.schema)
+
+    def _write_int256x256(self, value: collections.abc.Iterable[npt.NDArray[np.int32]]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("Int256x256", pos)
+        offsets, num_blocks = _binary.StreamSerializer(_binary.FixedNDArraySerializer(_binary.int32_serializer, (256, 256,))).write_and_save_offsets(self._stream, value)
+        self._index.add_stream_offsets("Int256x256", offsets, num_blocks)
+
+
+class BinaryBenchmarkInt256x256IndexedReader(_binary.BinaryProtocolIndexedReader, BenchmarkInt256x256IndexedReaderBase):
+    """Binary indexed writer for the BenchmarkInt256x256 protocol."""
+
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
+        BenchmarkInt256x256IndexedReaderBase.__init__(self)
+        _binary.BinaryProtocolIndexedReader.__init__(self, stream, BenchmarkInt256x256IndexedReaderBase.schema)
+
+    def _read_int256x256(self, idx: int) -> collections.abc.Iterable[npt.NDArray[np.int32]]: # pyright: ignore [reportIncompatibleMethodOverride]
+        offset, remaining = self._index.find_stream_item("Int256x256", idx)
+        self._stream.seek(offset)
+        return _binary.StreamSerializer(_binary.FixedNDArraySerializer(_binary.int32_serializer, (256, 256,))).read_mid_stream(self._stream, remaining)
+
+    def _count_int256x256(self) -> int:
+        return self._index.get_stream_size("Int256x256")
+
 class BinaryBenchmarkFloatVlenWriter(_binary.BinaryProtocolWriter, BenchmarkFloatVlenWriterBase):
     """Binary writer for the BenchmarkFloatVlen protocol."""
-
 
     def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
         BenchmarkFloatVlenWriterBase.__init__(self)
@@ -80,7 +135,6 @@ class BinaryBenchmarkFloatVlenWriter(_binary.BinaryProtocolWriter, BenchmarkFloa
 class BinaryBenchmarkFloatVlenReader(_binary.BinaryProtocolReader, BenchmarkFloatVlenReaderBase):
     """Binary writer for the BenchmarkFloatVlen protocol."""
 
-
     def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
         BenchmarkFloatVlenReaderBase.__init__(self)
         _binary.BinaryProtocolReader.__init__(self, stream, BenchmarkFloatVlenReaderBase.schema)
@@ -88,9 +142,38 @@ class BinaryBenchmarkFloatVlenReader(_binary.BinaryProtocolReader, BenchmarkFloa
     def _read_float_array(self) -> collections.abc.Iterable[npt.NDArray[np.float32]]:
         return _binary.StreamSerializer(_binary.NDArraySerializer(_binary.float32_serializer, 2)).read(self._stream)
 
+
+class BinaryBenchmarkFloatVlenIndexedWriter(_binary.BinaryProtocolIndexedWriter, BenchmarkFloatVlenWriterBase):
+    """Binary indexed writer for the BenchmarkFloatVlen protocol."""
+
+    def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
+        BenchmarkFloatVlenWriterBase.__init__(self)
+        _binary.BinaryProtocolIndexedWriter.__init__(self, stream, BenchmarkFloatVlenWriterBase.schema)
+
+    def _write_float_array(self, value: collections.abc.Iterable[npt.NDArray[np.float32]]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("FloatArray", pos)
+        offsets, num_blocks = _binary.StreamSerializer(_binary.NDArraySerializer(_binary.float32_serializer, 2)).write_and_save_offsets(self._stream, value)
+        self._index.add_stream_offsets("FloatArray", offsets, num_blocks)
+
+
+class BinaryBenchmarkFloatVlenIndexedReader(_binary.BinaryProtocolIndexedReader, BenchmarkFloatVlenIndexedReaderBase):
+    """Binary indexed writer for the BenchmarkFloatVlen protocol."""
+
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
+        BenchmarkFloatVlenIndexedReaderBase.__init__(self)
+        _binary.BinaryProtocolIndexedReader.__init__(self, stream, BenchmarkFloatVlenIndexedReaderBase.schema)
+
+    def _read_float_array(self, idx: int) -> collections.abc.Iterable[npt.NDArray[np.float32]]: # pyright: ignore [reportIncompatibleMethodOverride]
+        offset, remaining = self._index.find_stream_item("FloatArray", idx)
+        self._stream.seek(offset)
+        return _binary.StreamSerializer(_binary.NDArraySerializer(_binary.float32_serializer, 2)).read_mid_stream(self._stream, remaining)
+
+    def _count_float_array(self) -> int:
+        return self._index.get_stream_size("FloatArray")
+
 class BinaryBenchmarkSmallRecordWriter(_binary.BinaryProtocolWriter, BenchmarkSmallRecordWriterBase):
     """Binary writer for the BenchmarkSmallRecord protocol."""
-
 
     def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
         BenchmarkSmallRecordWriterBase.__init__(self)
@@ -103,7 +186,6 @@ class BinaryBenchmarkSmallRecordWriter(_binary.BinaryProtocolWriter, BenchmarkSm
 class BinaryBenchmarkSmallRecordReader(_binary.BinaryProtocolReader, BenchmarkSmallRecordReaderBase):
     """Binary writer for the BenchmarkSmallRecord protocol."""
 
-
     def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
         BenchmarkSmallRecordReaderBase.__init__(self)
         _binary.BinaryProtocolReader.__init__(self, stream, BenchmarkSmallRecordReaderBase.schema)
@@ -111,9 +193,38 @@ class BinaryBenchmarkSmallRecordReader(_binary.BinaryProtocolReader, BenchmarkSm
     def _read_small_record(self) -> collections.abc.Iterable[SmallBenchmarkRecord]:
         return _binary.StreamSerializer(SmallBenchmarkRecordSerializer()).read(self._stream)
 
+
+class BinaryBenchmarkSmallRecordIndexedWriter(_binary.BinaryProtocolIndexedWriter, BenchmarkSmallRecordWriterBase):
+    """Binary indexed writer for the BenchmarkSmallRecord protocol."""
+
+    def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
+        BenchmarkSmallRecordWriterBase.__init__(self)
+        _binary.BinaryProtocolIndexedWriter.__init__(self, stream, BenchmarkSmallRecordWriterBase.schema)
+
+    def _write_small_record(self, value: collections.abc.Iterable[SmallBenchmarkRecord]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("SmallRecord", pos)
+        offsets, num_blocks = _binary.StreamSerializer(SmallBenchmarkRecordSerializer()).write_and_save_offsets(self._stream, value)
+        self._index.add_stream_offsets("SmallRecord", offsets, num_blocks)
+
+
+class BinaryBenchmarkSmallRecordIndexedReader(_binary.BinaryProtocolIndexedReader, BenchmarkSmallRecordIndexedReaderBase):
+    """Binary indexed writer for the BenchmarkSmallRecord protocol."""
+
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
+        BenchmarkSmallRecordIndexedReaderBase.__init__(self)
+        _binary.BinaryProtocolIndexedReader.__init__(self, stream, BenchmarkSmallRecordIndexedReaderBase.schema)
+
+    def _read_small_record(self, idx: int) -> collections.abc.Iterable[SmallBenchmarkRecord]: # pyright: ignore [reportIncompatibleMethodOverride]
+        offset, remaining = self._index.find_stream_item("SmallRecord", idx)
+        self._stream.seek(offset)
+        return _binary.StreamSerializer(SmallBenchmarkRecordSerializer()).read_mid_stream(self._stream, remaining)
+
+    def _count_small_record(self) -> int:
+        return self._index.get_stream_size("SmallRecord")
+
 class BinaryBenchmarkSmallRecordWithOptionalsWriter(_binary.BinaryProtocolWriter, BenchmarkSmallRecordWithOptionalsWriterBase):
     """Binary writer for the BenchmarkSmallRecordWithOptionals protocol."""
-
 
     def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
         BenchmarkSmallRecordWithOptionalsWriterBase.__init__(self)
@@ -126,7 +237,6 @@ class BinaryBenchmarkSmallRecordWithOptionalsWriter(_binary.BinaryProtocolWriter
 class BinaryBenchmarkSmallRecordWithOptionalsReader(_binary.BinaryProtocolReader, BenchmarkSmallRecordWithOptionalsReaderBase):
     """Binary writer for the BenchmarkSmallRecordWithOptionals protocol."""
 
-
     def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
         BenchmarkSmallRecordWithOptionalsReaderBase.__init__(self)
         _binary.BinaryProtocolReader.__init__(self, stream, BenchmarkSmallRecordWithOptionalsReaderBase.schema)
@@ -134,9 +244,38 @@ class BinaryBenchmarkSmallRecordWithOptionalsReader(_binary.BinaryProtocolReader
     def _read_small_record(self) -> collections.abc.Iterable[SimpleEncodingCounters]:
         return _binary.StreamSerializer(SimpleEncodingCountersSerializer()).read(self._stream)
 
+
+class BinaryBenchmarkSmallRecordWithOptionalsIndexedWriter(_binary.BinaryProtocolIndexedWriter, BenchmarkSmallRecordWithOptionalsWriterBase):
+    """Binary indexed writer for the BenchmarkSmallRecordWithOptionals protocol."""
+
+    def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
+        BenchmarkSmallRecordWithOptionalsWriterBase.__init__(self)
+        _binary.BinaryProtocolIndexedWriter.__init__(self, stream, BenchmarkSmallRecordWithOptionalsWriterBase.schema)
+
+    def _write_small_record(self, value: collections.abc.Iterable[SimpleEncodingCounters]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("SmallRecord", pos)
+        offsets, num_blocks = _binary.StreamSerializer(SimpleEncodingCountersSerializer()).write_and_save_offsets(self._stream, value)
+        self._index.add_stream_offsets("SmallRecord", offsets, num_blocks)
+
+
+class BinaryBenchmarkSmallRecordWithOptionalsIndexedReader(_binary.BinaryProtocolIndexedReader, BenchmarkSmallRecordWithOptionalsIndexedReaderBase):
+    """Binary indexed writer for the BenchmarkSmallRecordWithOptionals protocol."""
+
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
+        BenchmarkSmallRecordWithOptionalsIndexedReaderBase.__init__(self)
+        _binary.BinaryProtocolIndexedReader.__init__(self, stream, BenchmarkSmallRecordWithOptionalsIndexedReaderBase.schema)
+
+    def _read_small_record(self, idx: int) -> collections.abc.Iterable[SimpleEncodingCounters]: # pyright: ignore [reportIncompatibleMethodOverride]
+        offset, remaining = self._index.find_stream_item("SmallRecord", idx)
+        self._stream.seek(offset)
+        return _binary.StreamSerializer(SimpleEncodingCountersSerializer()).read_mid_stream(self._stream, remaining)
+
+    def _count_small_record(self) -> int:
+        return self._index.get_stream_size("SmallRecord")
+
 class BinaryBenchmarkSimpleMrdWriter(_binary.BinaryProtocolWriter, BenchmarkSimpleMrdWriterBase):
     """Binary writer for the BenchmarkSimpleMrd protocol."""
-
 
     def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
         BenchmarkSimpleMrdWriterBase.__init__(self)
@@ -149,7 +288,6 @@ class BinaryBenchmarkSimpleMrdWriter(_binary.BinaryProtocolWriter, BenchmarkSimp
 class BinaryBenchmarkSimpleMrdReader(_binary.BinaryProtocolReader, BenchmarkSimpleMrdReaderBase):
     """Binary writer for the BenchmarkSimpleMrd protocol."""
 
-
     def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
         BenchmarkSimpleMrdReaderBase.__init__(self)
         _binary.BinaryProtocolReader.__init__(self, stream, BenchmarkSimpleMrdReaderBase.schema)
@@ -157,9 +295,38 @@ class BinaryBenchmarkSimpleMrdReader(_binary.BinaryProtocolReader, BenchmarkSimp
     def _read_data(self) -> collections.abc.Iterable[AcquisitionOrImage]:
         return _binary.StreamSerializer(_binary.UnionSerializer(AcquisitionOrImage, [(AcquisitionOrImage.Acquisition, SimpleAcquisitionSerializer()), (AcquisitionOrImage.Image, _binary.NDArraySerializer(_binary.float32_serializer, 2))])).read(self._stream)
 
+
+class BinaryBenchmarkSimpleMrdIndexedWriter(_binary.BinaryProtocolIndexedWriter, BenchmarkSimpleMrdWriterBase):
+    """Binary indexed writer for the BenchmarkSimpleMrd protocol."""
+
+    def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
+        BenchmarkSimpleMrdWriterBase.__init__(self)
+        _binary.BinaryProtocolIndexedWriter.__init__(self, stream, BenchmarkSimpleMrdWriterBase.schema)
+
+    def _write_data(self, value: collections.abc.Iterable[AcquisitionOrImage]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("Data", pos)
+        offsets, num_blocks = _binary.StreamSerializer(_binary.UnionSerializer(AcquisitionOrImage, [(AcquisitionOrImage.Acquisition, SimpleAcquisitionSerializer()), (AcquisitionOrImage.Image, _binary.NDArraySerializer(_binary.float32_serializer, 2))])).write_and_save_offsets(self._stream, value)
+        self._index.add_stream_offsets("Data", offsets, num_blocks)
+
+
+class BinaryBenchmarkSimpleMrdIndexedReader(_binary.BinaryProtocolIndexedReader, BenchmarkSimpleMrdIndexedReaderBase):
+    """Binary indexed writer for the BenchmarkSimpleMrd protocol."""
+
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
+        BenchmarkSimpleMrdIndexedReaderBase.__init__(self)
+        _binary.BinaryProtocolIndexedReader.__init__(self, stream, BenchmarkSimpleMrdIndexedReaderBase.schema)
+
+    def _read_data(self, idx: int) -> collections.abc.Iterable[AcquisitionOrImage]: # pyright: ignore [reportIncompatibleMethodOverride]
+        offset, remaining = self._index.find_stream_item("Data", idx)
+        self._stream.seek(offset)
+        return _binary.StreamSerializer(_binary.UnionSerializer(AcquisitionOrImage, [(AcquisitionOrImage.Acquisition, SimpleAcquisitionSerializer()), (AcquisitionOrImage.Image, _binary.NDArraySerializer(_binary.float32_serializer, 2))])).read_mid_stream(self._stream, remaining)
+
+    def _count_data(self) -> int:
+        return self._index.get_stream_size("Data")
+
 class BinaryScalarsWriter(_binary.BinaryProtocolWriter, ScalarsWriterBase):
     """Binary writer for the Scalars protocol."""
-
 
     def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
         ScalarsWriterBase.__init__(self)
@@ -175,7 +342,6 @@ class BinaryScalarsWriter(_binary.BinaryProtocolWriter, ScalarsWriterBase):
 class BinaryScalarsReader(_binary.BinaryProtocolReader, ScalarsReaderBase):
     """Binary writer for the Scalars protocol."""
 
-
     def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
         ScalarsReaderBase.__init__(self)
         _binary.BinaryProtocolReader.__init__(self, stream, ScalarsReaderBase.schema)
@@ -186,9 +352,44 @@ class BinaryScalarsReader(_binary.BinaryProtocolReader, ScalarsReaderBase):
     def _read_record(self) -> RecordWithPrimitives:
         return RecordWithPrimitivesSerializer().read(self._stream)
 
+
+class BinaryScalarsIndexedWriter(_binary.BinaryProtocolIndexedWriter, ScalarsWriterBase):
+    """Binary indexed writer for the Scalars protocol."""
+
+    def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
+        ScalarsWriterBase.__init__(self)
+        _binary.BinaryProtocolIndexedWriter.__init__(self, stream, ScalarsWriterBase.schema)
+
+    def _write_int32(self, value: yardl.Int32) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("Int32", pos)
+        _binary.int32_serializer.write(self._stream, value)
+
+    def _write_record(self, value: RecordWithPrimitives) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("Record", pos)
+        RecordWithPrimitivesSerializer().write(self._stream, value)
+
+
+class BinaryScalarsIndexedReader(_binary.BinaryProtocolIndexedReader, ScalarsIndexedReaderBase):
+    """Binary indexed writer for the Scalars protocol."""
+
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
+        ScalarsIndexedReaderBase.__init__(self)
+        _binary.BinaryProtocolIndexedReader.__init__(self, stream, ScalarsIndexedReaderBase.schema)
+
+    def _read_int32(self) -> yardl.Int32:
+        pos = self._index.get_step_offset("Int32")
+        self._stream.seek(pos)
+        return _binary.int32_serializer.read(self._stream)
+
+    def _read_record(self) -> RecordWithPrimitives:
+        pos = self._index.get_step_offset("Record")
+        self._stream.seek(pos)
+        return RecordWithPrimitivesSerializer().read(self._stream)
+
 class BinaryScalarOptionalsWriter(_binary.BinaryProtocolWriter, ScalarOptionalsWriterBase):
     """Binary writer for the ScalarOptionals protocol."""
-
 
     def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
         ScalarOptionalsWriterBase.__init__(self)
@@ -210,7 +411,6 @@ class BinaryScalarOptionalsWriter(_binary.BinaryProtocolWriter, ScalarOptionalsW
 class BinaryScalarOptionalsReader(_binary.BinaryProtocolReader, ScalarOptionalsReaderBase):
     """Binary writer for the ScalarOptionals protocol."""
 
-
     def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
         ScalarOptionalsReaderBase.__init__(self)
         _binary.BinaryProtocolReader.__init__(self, stream, ScalarOptionalsReaderBase.schema)
@@ -227,9 +427,64 @@ class BinaryScalarOptionalsReader(_binary.BinaryProtocolReader, ScalarOptionalsR
     def _read_optional_record_with_optional_fields(self) -> typing.Optional[RecordWithOptionalFields]:
         return _binary.OptionalSerializer(RecordWithOptionalFieldsSerializer()).read(self._stream)
 
+
+class BinaryScalarOptionalsIndexedWriter(_binary.BinaryProtocolIndexedWriter, ScalarOptionalsWriterBase):
+    """Binary indexed writer for the ScalarOptionals protocol."""
+
+    def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
+        ScalarOptionalsWriterBase.__init__(self)
+        _binary.BinaryProtocolIndexedWriter.__init__(self, stream, ScalarOptionalsWriterBase.schema)
+
+    def _write_optional_int(self, value: typing.Optional[yardl.Int32]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("OptionalInt", pos)
+        _binary.OptionalSerializer(_binary.int32_serializer).write(self._stream, value)
+
+    def _write_optional_record(self, value: typing.Optional[SimpleRecord]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("OptionalRecord", pos)
+        _binary.OptionalSerializer(SimpleRecordSerializer()).write(self._stream, value)
+
+    def _write_record_with_optional_fields(self, value: RecordWithOptionalFields) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("RecordWithOptionalFields", pos)
+        RecordWithOptionalFieldsSerializer().write(self._stream, value)
+
+    def _write_optional_record_with_optional_fields(self, value: typing.Optional[RecordWithOptionalFields]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("OptionalRecordWithOptionalFields", pos)
+        _binary.OptionalSerializer(RecordWithOptionalFieldsSerializer()).write(self._stream, value)
+
+
+class BinaryScalarOptionalsIndexedReader(_binary.BinaryProtocolIndexedReader, ScalarOptionalsIndexedReaderBase):
+    """Binary indexed writer for the ScalarOptionals protocol."""
+
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
+        ScalarOptionalsIndexedReaderBase.__init__(self)
+        _binary.BinaryProtocolIndexedReader.__init__(self, stream, ScalarOptionalsIndexedReaderBase.schema)
+
+    def _read_optional_int(self) -> typing.Optional[yardl.Int32]:
+        pos = self._index.get_step_offset("OptionalInt")
+        self._stream.seek(pos)
+        return _binary.OptionalSerializer(_binary.int32_serializer).read(self._stream)
+
+    def _read_optional_record(self) -> typing.Optional[SimpleRecord]:
+        pos = self._index.get_step_offset("OptionalRecord")
+        self._stream.seek(pos)
+        return _binary.OptionalSerializer(SimpleRecordSerializer()).read(self._stream)
+
+    def _read_record_with_optional_fields(self) -> RecordWithOptionalFields:
+        pos = self._index.get_step_offset("RecordWithOptionalFields")
+        self._stream.seek(pos)
+        return RecordWithOptionalFieldsSerializer().read(self._stream)
+
+    def _read_optional_record_with_optional_fields(self) -> typing.Optional[RecordWithOptionalFields]:
+        pos = self._index.get_step_offset("OptionalRecordWithOptionalFields")
+        self._stream.seek(pos)
+        return _binary.OptionalSerializer(RecordWithOptionalFieldsSerializer()).read(self._stream)
+
 class BinaryNestedRecordsWriter(_binary.BinaryProtocolWriter, NestedRecordsWriterBase):
     """Binary writer for the NestedRecords protocol."""
-
 
     def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
         NestedRecordsWriterBase.__init__(self)
@@ -242,7 +497,6 @@ class BinaryNestedRecordsWriter(_binary.BinaryProtocolWriter, NestedRecordsWrite
 class BinaryNestedRecordsReader(_binary.BinaryProtocolReader, NestedRecordsReaderBase):
     """Binary writer for the NestedRecords protocol."""
 
-
     def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
         NestedRecordsReaderBase.__init__(self)
         _binary.BinaryProtocolReader.__init__(self, stream, NestedRecordsReaderBase.schema)
@@ -250,9 +504,34 @@ class BinaryNestedRecordsReader(_binary.BinaryProtocolReader, NestedRecordsReade
     def _read_tuple_with_records(self) -> TupleWithRecords:
         return TupleWithRecordsSerializer().read(self._stream)
 
+
+class BinaryNestedRecordsIndexedWriter(_binary.BinaryProtocolIndexedWriter, NestedRecordsWriterBase):
+    """Binary indexed writer for the NestedRecords protocol."""
+
+    def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
+        NestedRecordsWriterBase.__init__(self)
+        _binary.BinaryProtocolIndexedWriter.__init__(self, stream, NestedRecordsWriterBase.schema)
+
+    def _write_tuple_with_records(self, value: TupleWithRecords) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("TupleWithRecords", pos)
+        TupleWithRecordsSerializer().write(self._stream, value)
+
+
+class BinaryNestedRecordsIndexedReader(_binary.BinaryProtocolIndexedReader, NestedRecordsIndexedReaderBase):
+    """Binary indexed writer for the NestedRecords protocol."""
+
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
+        NestedRecordsIndexedReaderBase.__init__(self)
+        _binary.BinaryProtocolIndexedReader.__init__(self, stream, NestedRecordsIndexedReaderBase.schema)
+
+    def _read_tuple_with_records(self) -> TupleWithRecords:
+        pos = self._index.get_step_offset("TupleWithRecords")
+        self._stream.seek(pos)
+        return TupleWithRecordsSerializer().read(self._stream)
+
 class BinaryVlensWriter(_binary.BinaryProtocolWriter, VlensWriterBase):
     """Binary writer for the Vlens protocol."""
-
 
     def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
         VlensWriterBase.__init__(self)
@@ -274,7 +553,6 @@ class BinaryVlensWriter(_binary.BinaryProtocolWriter, VlensWriterBase):
 class BinaryVlensReader(_binary.BinaryProtocolReader, VlensReaderBase):
     """Binary writer for the Vlens protocol."""
 
-
     def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
         VlensReaderBase.__init__(self)
         _binary.BinaryProtocolReader.__init__(self, stream, VlensReaderBase.schema)
@@ -291,9 +569,64 @@ class BinaryVlensReader(_binary.BinaryProtocolReader, VlensReaderBase):
     def _read_vlen_of_record_with_vlens(self) -> list[RecordWithVlens]:
         return _binary.VectorSerializer(RecordWithVlensSerializer()).read(self._stream)
 
+
+class BinaryVlensIndexedWriter(_binary.BinaryProtocolIndexedWriter, VlensWriterBase):
+    """Binary indexed writer for the Vlens protocol."""
+
+    def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
+        VlensWriterBase.__init__(self)
+        _binary.BinaryProtocolIndexedWriter.__init__(self, stream, VlensWriterBase.schema)
+
+    def _write_int_vector(self, value: list[yardl.Int32]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("IntVector", pos)
+        _binary.VectorSerializer(_binary.int32_serializer).write(self._stream, value)
+
+    def _write_complex_vector(self, value: list[yardl.ComplexFloat]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("ComplexVector", pos)
+        _binary.VectorSerializer(_binary.complexfloat32_serializer).write(self._stream, value)
+
+    def _write_record_with_vlens(self, value: RecordWithVlens) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("RecordWithVlens", pos)
+        RecordWithVlensSerializer().write(self._stream, value)
+
+    def _write_vlen_of_record_with_vlens(self, value: list[RecordWithVlens]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("VlenOfRecordWithVlens", pos)
+        _binary.VectorSerializer(RecordWithVlensSerializer()).write(self._stream, value)
+
+
+class BinaryVlensIndexedReader(_binary.BinaryProtocolIndexedReader, VlensIndexedReaderBase):
+    """Binary indexed writer for the Vlens protocol."""
+
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
+        VlensIndexedReaderBase.__init__(self)
+        _binary.BinaryProtocolIndexedReader.__init__(self, stream, VlensIndexedReaderBase.schema)
+
+    def _read_int_vector(self) -> list[yardl.Int32]:
+        pos = self._index.get_step_offset("IntVector")
+        self._stream.seek(pos)
+        return _binary.VectorSerializer(_binary.int32_serializer).read(self._stream)
+
+    def _read_complex_vector(self) -> list[yardl.ComplexFloat]:
+        pos = self._index.get_step_offset("ComplexVector")
+        self._stream.seek(pos)
+        return _binary.VectorSerializer(_binary.complexfloat32_serializer).read(self._stream)
+
+    def _read_record_with_vlens(self) -> RecordWithVlens:
+        pos = self._index.get_step_offset("RecordWithVlens")
+        self._stream.seek(pos)
+        return RecordWithVlensSerializer().read(self._stream)
+
+    def _read_vlen_of_record_with_vlens(self) -> list[RecordWithVlens]:
+        pos = self._index.get_step_offset("VlenOfRecordWithVlens")
+        self._stream.seek(pos)
+        return _binary.VectorSerializer(RecordWithVlensSerializer()).read(self._stream)
+
 class BinaryStringsWriter(_binary.BinaryProtocolWriter, StringsWriterBase):
     """Binary writer for the Strings protocol."""
-
 
     def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
         StringsWriterBase.__init__(self)
@@ -309,7 +642,6 @@ class BinaryStringsWriter(_binary.BinaryProtocolWriter, StringsWriterBase):
 class BinaryStringsReader(_binary.BinaryProtocolReader, StringsReaderBase):
     """Binary writer for the Strings protocol."""
 
-
     def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
         StringsReaderBase.__init__(self)
         _binary.BinaryProtocolReader.__init__(self, stream, StringsReaderBase.schema)
@@ -320,9 +652,44 @@ class BinaryStringsReader(_binary.BinaryProtocolReader, StringsReaderBase):
     def _read_rec_with_string(self) -> RecordWithStrings:
         return RecordWithStringsSerializer().read(self._stream)
 
+
+class BinaryStringsIndexedWriter(_binary.BinaryProtocolIndexedWriter, StringsWriterBase):
+    """Binary indexed writer for the Strings protocol."""
+
+    def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
+        StringsWriterBase.__init__(self)
+        _binary.BinaryProtocolIndexedWriter.__init__(self, stream, StringsWriterBase.schema)
+
+    def _write_single_string(self, value: str) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("SingleString", pos)
+        _binary.string_serializer.write(self._stream, value)
+
+    def _write_rec_with_string(self, value: RecordWithStrings) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("RecWithString", pos)
+        RecordWithStringsSerializer().write(self._stream, value)
+
+
+class BinaryStringsIndexedReader(_binary.BinaryProtocolIndexedReader, StringsIndexedReaderBase):
+    """Binary indexed writer for the Strings protocol."""
+
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
+        StringsIndexedReaderBase.__init__(self)
+        _binary.BinaryProtocolIndexedReader.__init__(self, stream, StringsIndexedReaderBase.schema)
+
+    def _read_single_string(self) -> str:
+        pos = self._index.get_step_offset("SingleString")
+        self._stream.seek(pos)
+        return _binary.string_serializer.read(self._stream)
+
+    def _read_rec_with_string(self) -> RecordWithStrings:
+        pos = self._index.get_step_offset("RecWithString")
+        self._stream.seek(pos)
+        return RecordWithStringsSerializer().read(self._stream)
+
 class BinaryOptionalVectorsWriter(_binary.BinaryProtocolWriter, OptionalVectorsWriterBase):
     """Binary writer for the OptionalVectors protocol."""
-
 
     def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
         OptionalVectorsWriterBase.__init__(self)
@@ -335,7 +702,6 @@ class BinaryOptionalVectorsWriter(_binary.BinaryProtocolWriter, OptionalVectorsW
 class BinaryOptionalVectorsReader(_binary.BinaryProtocolReader, OptionalVectorsReaderBase):
     """Binary writer for the OptionalVectors protocol."""
 
-
     def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
         OptionalVectorsReaderBase.__init__(self)
         _binary.BinaryProtocolReader.__init__(self, stream, OptionalVectorsReaderBase.schema)
@@ -343,9 +709,34 @@ class BinaryOptionalVectorsReader(_binary.BinaryProtocolReader, OptionalVectorsR
     def _read_record_with_optional_vector(self) -> RecordWithOptionalVector:
         return RecordWithOptionalVectorSerializer().read(self._stream)
 
+
+class BinaryOptionalVectorsIndexedWriter(_binary.BinaryProtocolIndexedWriter, OptionalVectorsWriterBase):
+    """Binary indexed writer for the OptionalVectors protocol."""
+
+    def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
+        OptionalVectorsWriterBase.__init__(self)
+        _binary.BinaryProtocolIndexedWriter.__init__(self, stream, OptionalVectorsWriterBase.schema)
+
+    def _write_record_with_optional_vector(self, value: RecordWithOptionalVector) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("RecordWithOptionalVector", pos)
+        RecordWithOptionalVectorSerializer().write(self._stream, value)
+
+
+class BinaryOptionalVectorsIndexedReader(_binary.BinaryProtocolIndexedReader, OptionalVectorsIndexedReaderBase):
+    """Binary indexed writer for the OptionalVectors protocol."""
+
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
+        OptionalVectorsIndexedReaderBase.__init__(self)
+        _binary.BinaryProtocolIndexedReader.__init__(self, stream, OptionalVectorsIndexedReaderBase.schema)
+
+    def _read_record_with_optional_vector(self) -> RecordWithOptionalVector:
+        pos = self._index.get_step_offset("RecordWithOptionalVector")
+        self._stream.seek(pos)
+        return RecordWithOptionalVectorSerializer().read(self._stream)
+
 class BinaryFixedVectorsWriter(_binary.BinaryProtocolWriter, FixedVectorsWriterBase):
     """Binary writer for the FixedVectors protocol."""
-
 
     def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
         FixedVectorsWriterBase.__init__(self)
@@ -367,7 +758,6 @@ class BinaryFixedVectorsWriter(_binary.BinaryProtocolWriter, FixedVectorsWriterB
 class BinaryFixedVectorsReader(_binary.BinaryProtocolReader, FixedVectorsReaderBase):
     """Binary writer for the FixedVectors protocol."""
 
-
     def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
         FixedVectorsReaderBase.__init__(self)
         _binary.BinaryProtocolReader.__init__(self, stream, FixedVectorsReaderBase.schema)
@@ -384,9 +774,64 @@ class BinaryFixedVectorsReader(_binary.BinaryProtocolReader, FixedVectorsReaderB
     def _read_record_with_fixed_vectors(self) -> RecordWithFixedVectors:
         return RecordWithFixedVectorsSerializer().read(self._stream)
 
+
+class BinaryFixedVectorsIndexedWriter(_binary.BinaryProtocolIndexedWriter, FixedVectorsWriterBase):
+    """Binary indexed writer for the FixedVectors protocol."""
+
+    def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
+        FixedVectorsWriterBase.__init__(self)
+        _binary.BinaryProtocolIndexedWriter.__init__(self, stream, FixedVectorsWriterBase.schema)
+
+    def _write_fixed_int_vector(self, value: list[yardl.Int32]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("FixedIntVector", pos)
+        _binary.FixedVectorSerializer(_binary.int32_serializer, 5).write(self._stream, value)
+
+    def _write_fixed_simple_record_vector(self, value: list[SimpleRecord]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("FixedSimpleRecordVector", pos)
+        _binary.FixedVectorSerializer(SimpleRecordSerializer(), 3).write(self._stream, value)
+
+    def _write_fixed_record_with_vlens_vector(self, value: list[RecordWithVlens]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("FixedRecordWithVlensVector", pos)
+        _binary.FixedVectorSerializer(RecordWithVlensSerializer(), 2).write(self._stream, value)
+
+    def _write_record_with_fixed_vectors(self, value: RecordWithFixedVectors) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("RecordWithFixedVectors", pos)
+        RecordWithFixedVectorsSerializer().write(self._stream, value)
+
+
+class BinaryFixedVectorsIndexedReader(_binary.BinaryProtocolIndexedReader, FixedVectorsIndexedReaderBase):
+    """Binary indexed writer for the FixedVectors protocol."""
+
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
+        FixedVectorsIndexedReaderBase.__init__(self)
+        _binary.BinaryProtocolIndexedReader.__init__(self, stream, FixedVectorsIndexedReaderBase.schema)
+
+    def _read_fixed_int_vector(self) -> list[yardl.Int32]:
+        pos = self._index.get_step_offset("FixedIntVector")
+        self._stream.seek(pos)
+        return _binary.FixedVectorSerializer(_binary.int32_serializer, 5).read(self._stream)
+
+    def _read_fixed_simple_record_vector(self) -> list[SimpleRecord]:
+        pos = self._index.get_step_offset("FixedSimpleRecordVector")
+        self._stream.seek(pos)
+        return _binary.FixedVectorSerializer(SimpleRecordSerializer(), 3).read(self._stream)
+
+    def _read_fixed_record_with_vlens_vector(self) -> list[RecordWithVlens]:
+        pos = self._index.get_step_offset("FixedRecordWithVlensVector")
+        self._stream.seek(pos)
+        return _binary.FixedVectorSerializer(RecordWithVlensSerializer(), 2).read(self._stream)
+
+    def _read_record_with_fixed_vectors(self) -> RecordWithFixedVectors:
+        pos = self._index.get_step_offset("RecordWithFixedVectors")
+        self._stream.seek(pos)
+        return RecordWithFixedVectorsSerializer().read(self._stream)
+
 class BinaryStreamsWriter(_binary.BinaryProtocolWriter, StreamsWriterBase):
     """Binary writer for the Streams protocol."""
-
 
     def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
         StreamsWriterBase.__init__(self)
@@ -408,7 +853,6 @@ class BinaryStreamsWriter(_binary.BinaryProtocolWriter, StreamsWriterBase):
 class BinaryStreamsReader(_binary.BinaryProtocolReader, StreamsReaderBase):
     """Binary writer for the Streams protocol."""
 
-
     def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
         StreamsReaderBase.__init__(self)
         _binary.BinaryProtocolReader.__init__(self, stream, StreamsReaderBase.schema)
@@ -425,9 +869,80 @@ class BinaryStreamsReader(_binary.BinaryProtocolReader, StreamsReaderBase):
     def _read_fixed_vector(self) -> collections.abc.Iterable[list[yardl.Int32]]:
         return _binary.StreamSerializer(_binary.FixedVectorSerializer(_binary.int32_serializer, 3)).read(self._stream)
 
+
+class BinaryStreamsIndexedWriter(_binary.BinaryProtocolIndexedWriter, StreamsWriterBase):
+    """Binary indexed writer for the Streams protocol."""
+
+    def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
+        StreamsWriterBase.__init__(self)
+        _binary.BinaryProtocolIndexedWriter.__init__(self, stream, StreamsWriterBase.schema)
+
+    def _write_int_data(self, value: collections.abc.Iterable[yardl.Int32]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("IntData", pos)
+        offsets, num_blocks = _binary.StreamSerializer(_binary.int32_serializer).write_and_save_offsets(self._stream, value)
+        self._index.add_stream_offsets("IntData", offsets, num_blocks)
+
+    def _write_optional_int_data(self, value: collections.abc.Iterable[typing.Optional[yardl.Int32]]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("OptionalIntData", pos)
+        offsets, num_blocks = _binary.StreamSerializer(_binary.OptionalSerializer(_binary.int32_serializer)).write_and_save_offsets(self._stream, value)
+        self._index.add_stream_offsets("OptionalIntData", offsets, num_blocks)
+
+    def _write_record_with_optional_vector_data(self, value: collections.abc.Iterable[RecordWithOptionalVector]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("RecordWithOptionalVectorData", pos)
+        offsets, num_blocks = _binary.StreamSerializer(RecordWithOptionalVectorSerializer()).write_and_save_offsets(self._stream, value)
+        self._index.add_stream_offsets("RecordWithOptionalVectorData", offsets, num_blocks)
+
+    def _write_fixed_vector(self, value: collections.abc.Iterable[list[yardl.Int32]]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("FixedVector", pos)
+        offsets, num_blocks = _binary.StreamSerializer(_binary.FixedVectorSerializer(_binary.int32_serializer, 3)).write_and_save_offsets(self._stream, value)
+        self._index.add_stream_offsets("FixedVector", offsets, num_blocks)
+
+
+class BinaryStreamsIndexedReader(_binary.BinaryProtocolIndexedReader, StreamsIndexedReaderBase):
+    """Binary indexed writer for the Streams protocol."""
+
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
+        StreamsIndexedReaderBase.__init__(self)
+        _binary.BinaryProtocolIndexedReader.__init__(self, stream, StreamsIndexedReaderBase.schema)
+
+    def _read_int_data(self, idx: int) -> collections.abc.Iterable[yardl.Int32]: # pyright: ignore [reportIncompatibleMethodOverride]
+        offset, remaining = self._index.find_stream_item("IntData", idx)
+        self._stream.seek(offset)
+        return _binary.StreamSerializer(_binary.int32_serializer).read_mid_stream(self._stream, remaining)
+
+    def _count_int_data(self) -> int:
+        return self._index.get_stream_size("IntData")
+
+    def _read_optional_int_data(self, idx: int) -> collections.abc.Iterable[typing.Optional[yardl.Int32]]: # pyright: ignore [reportIncompatibleMethodOverride]
+        offset, remaining = self._index.find_stream_item("OptionalIntData", idx)
+        self._stream.seek(offset)
+        return _binary.StreamSerializer(_binary.OptionalSerializer(_binary.int32_serializer)).read_mid_stream(self._stream, remaining)
+
+    def _count_optional_int_data(self) -> int:
+        return self._index.get_stream_size("OptionalIntData")
+
+    def _read_record_with_optional_vector_data(self, idx: int) -> collections.abc.Iterable[RecordWithOptionalVector]: # pyright: ignore [reportIncompatibleMethodOverride]
+        offset, remaining = self._index.find_stream_item("RecordWithOptionalVectorData", idx)
+        self._stream.seek(offset)
+        return _binary.StreamSerializer(RecordWithOptionalVectorSerializer()).read_mid_stream(self._stream, remaining)
+
+    def _count_record_with_optional_vector_data(self) -> int:
+        return self._index.get_stream_size("RecordWithOptionalVectorData")
+
+    def _read_fixed_vector(self, idx: int) -> collections.abc.Iterable[list[yardl.Int32]]: # pyright: ignore [reportIncompatibleMethodOverride]
+        offset, remaining = self._index.find_stream_item("FixedVector", idx)
+        self._stream.seek(offset)
+        return _binary.StreamSerializer(_binary.FixedVectorSerializer(_binary.int32_serializer, 3)).read_mid_stream(self._stream, remaining)
+
+    def _count_fixed_vector(self) -> int:
+        return self._index.get_stream_size("FixedVector")
+
 class BinaryFixedArraysWriter(_binary.BinaryProtocolWriter, FixedArraysWriterBase):
     """Binary writer for the FixedArrays protocol."""
-
 
     def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
         FixedArraysWriterBase.__init__(self)
@@ -452,7 +967,6 @@ class BinaryFixedArraysWriter(_binary.BinaryProtocolWriter, FixedArraysWriterBas
 class BinaryFixedArraysReader(_binary.BinaryProtocolReader, FixedArraysReaderBase):
     """Binary writer for the FixedArrays protocol."""
 
-
     def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
         FixedArraysReaderBase.__init__(self)
         _binary.BinaryProtocolReader.__init__(self, stream, FixedArraysReaderBase.schema)
@@ -472,9 +986,74 @@ class BinaryFixedArraysReader(_binary.BinaryProtocolReader, FixedArraysReaderBas
     def _read_named_array(self) -> NamedFixedNDArray:
         return _binary.FixedNDArraySerializer(_binary.int32_serializer, (2, 4,)).read(self._stream)
 
+
+class BinaryFixedArraysIndexedWriter(_binary.BinaryProtocolIndexedWriter, FixedArraysWriterBase):
+    """Binary indexed writer for the FixedArrays protocol."""
+
+    def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
+        FixedArraysWriterBase.__init__(self)
+        _binary.BinaryProtocolIndexedWriter.__init__(self, stream, FixedArraysWriterBase.schema)
+
+    def _write_ints(self, value: npt.NDArray[np.int32]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("Ints", pos)
+        _binary.FixedNDArraySerializer(_binary.int32_serializer, (2, 3,)).write(self._stream, value)
+
+    def _write_fixed_simple_record_array(self, value: npt.NDArray[np.void]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("FixedSimpleRecordArray", pos)
+        _binary.FixedNDArraySerializer(SimpleRecordSerializer(), (3, 2,)).write(self._stream, value)
+
+    def _write_fixed_record_with_vlens_array(self, value: npt.NDArray[np.void]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("FixedRecordWithVlensArray", pos)
+        _binary.FixedNDArraySerializer(RecordWithVlensSerializer(), (2, 2,)).write(self._stream, value)
+
+    def _write_record_with_fixed_arrays(self, value: RecordWithFixedArrays) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("RecordWithFixedArrays", pos)
+        RecordWithFixedArraysSerializer().write(self._stream, value)
+
+    def _write_named_array(self, value: NamedFixedNDArray) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("NamedArray", pos)
+        _binary.FixedNDArraySerializer(_binary.int32_serializer, (2, 4,)).write(self._stream, value)
+
+
+class BinaryFixedArraysIndexedReader(_binary.BinaryProtocolIndexedReader, FixedArraysIndexedReaderBase):
+    """Binary indexed writer for the FixedArrays protocol."""
+
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
+        FixedArraysIndexedReaderBase.__init__(self)
+        _binary.BinaryProtocolIndexedReader.__init__(self, stream, FixedArraysIndexedReaderBase.schema)
+
+    def _read_ints(self) -> npt.NDArray[np.int32]:
+        pos = self._index.get_step_offset("Ints")
+        self._stream.seek(pos)
+        return _binary.FixedNDArraySerializer(_binary.int32_serializer, (2, 3,)).read(self._stream)
+
+    def _read_fixed_simple_record_array(self) -> npt.NDArray[np.void]:
+        pos = self._index.get_step_offset("FixedSimpleRecordArray")
+        self._stream.seek(pos)
+        return _binary.FixedNDArraySerializer(SimpleRecordSerializer(), (3, 2,)).read(self._stream)
+
+    def _read_fixed_record_with_vlens_array(self) -> npt.NDArray[np.void]:
+        pos = self._index.get_step_offset("FixedRecordWithVlensArray")
+        self._stream.seek(pos)
+        return _binary.FixedNDArraySerializer(RecordWithVlensSerializer(), (2, 2,)).read(self._stream)
+
+    def _read_record_with_fixed_arrays(self) -> RecordWithFixedArrays:
+        pos = self._index.get_step_offset("RecordWithFixedArrays")
+        self._stream.seek(pos)
+        return RecordWithFixedArraysSerializer().read(self._stream)
+
+    def _read_named_array(self) -> NamedFixedNDArray:
+        pos = self._index.get_step_offset("NamedArray")
+        self._stream.seek(pos)
+        return _binary.FixedNDArraySerializer(_binary.int32_serializer, (2, 4,)).read(self._stream)
+
 class BinarySubarraysWriter(_binary.BinaryProtocolWriter, SubarraysWriterBase):
     """Binary writer for the Subarrays protocol."""
-
 
     def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
         SubarraysWriterBase.__init__(self)
@@ -511,7 +1090,6 @@ class BinarySubarraysWriter(_binary.BinaryProtocolWriter, SubarraysWriterBase):
 class BinarySubarraysReader(_binary.BinaryProtocolReader, SubarraysReaderBase):
     """Binary writer for the Subarrays protocol."""
 
-
     def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
         SubarraysReaderBase.__init__(self)
         _binary.BinaryProtocolReader.__init__(self, stream, SubarraysReaderBase.schema)
@@ -543,9 +1121,114 @@ class BinarySubarraysReader(_binary.BinaryProtocolReader, SubarraysReaderBase):
     def _read_generic_subarray(self) -> Image[np.int32]:
         return _binary.NDArraySerializer(_binary.FixedNDArraySerializer(_binary.int32_serializer, (3,)), 2).read(self._stream)
 
+
+class BinarySubarraysIndexedWriter(_binary.BinaryProtocolIndexedWriter, SubarraysWriterBase):
+    """Binary indexed writer for the Subarrays protocol."""
+
+    def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
+        SubarraysWriterBase.__init__(self)
+        _binary.BinaryProtocolIndexedWriter.__init__(self, stream, SubarraysWriterBase.schema)
+
+    def _write_dynamic_with_fixed_int_subarray(self, value: npt.NDArray[np.int32]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("DynamicWithFixedIntSubarray", pos)
+        _binary.DynamicNDArraySerializer(_binary.FixedNDArraySerializer(_binary.int32_serializer, (3,))).write(self._stream, value)
+
+    def _write_dynamic_with_fixed_float_subarray(self, value: npt.NDArray[np.float32]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("DynamicWithFixedFloatSubarray", pos)
+        _binary.DynamicNDArraySerializer(_binary.FixedNDArraySerializer(_binary.float32_serializer, (3,))).write(self._stream, value)
+
+    def _write_known_dim_count_with_fixed_int_subarray(self, value: npt.NDArray[np.int32]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("KnownDimCountWithFixedIntSubarray", pos)
+        _binary.NDArraySerializer(_binary.FixedNDArraySerializer(_binary.int32_serializer, (3,)), 1).write(self._stream, value)
+
+    def _write_known_dim_count_with_fixed_float_subarray(self, value: npt.NDArray[np.float32]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("KnownDimCountWithFixedFloatSubarray", pos)
+        _binary.NDArraySerializer(_binary.FixedNDArraySerializer(_binary.float32_serializer, (3,)), 1).write(self._stream, value)
+
+    def _write_fixed_with_fixed_int_subarray(self, value: npt.NDArray[np.int32]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("FixedWithFixedIntSubarray", pos)
+        _binary.FixedNDArraySerializer(_binary.FixedNDArraySerializer(_binary.int32_serializer, (3,)), (2,)).write(self._stream, value)
+
+    def _write_fixed_with_fixed_float_subarray(self, value: npt.NDArray[np.float32]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("FixedWithFixedFloatSubarray", pos)
+        _binary.FixedNDArraySerializer(_binary.FixedNDArraySerializer(_binary.float32_serializer, (3,)), (2,)).write(self._stream, value)
+
+    def _write_nested_subarray(self, value: npt.NDArray[np.int32]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("NestedSubarray", pos)
+        _binary.DynamicNDArraySerializer(_binary.FixedNDArraySerializer(_binary.FixedNDArraySerializer(_binary.int32_serializer, (3,)), (2,))).write(self._stream, value)
+
+    def _write_dynamic_with_fixed_vector_subarray(self, value: npt.NDArray[np.int32]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("DynamicWithFixedVectorSubarray", pos)
+        _binary.DynamicNDArraySerializer(_binary.FixedVectorSerializer(_binary.int32_serializer, 3)).write(self._stream, value)
+
+    def _write_generic_subarray(self, value: Image[np.int32]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("GenericSubarray", pos)
+        _binary.NDArraySerializer(_binary.FixedNDArraySerializer(_binary.int32_serializer, (3,)), 2).write(self._stream, value)
+
+
+class BinarySubarraysIndexedReader(_binary.BinaryProtocolIndexedReader, SubarraysIndexedReaderBase):
+    """Binary indexed writer for the Subarrays protocol."""
+
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
+        SubarraysIndexedReaderBase.__init__(self)
+        _binary.BinaryProtocolIndexedReader.__init__(self, stream, SubarraysIndexedReaderBase.schema)
+
+    def _read_dynamic_with_fixed_int_subarray(self) -> npt.NDArray[np.int32]:
+        pos = self._index.get_step_offset("DynamicWithFixedIntSubarray")
+        self._stream.seek(pos)
+        return _binary.DynamicNDArraySerializer(_binary.FixedNDArraySerializer(_binary.int32_serializer, (3,))).read(self._stream)
+
+    def _read_dynamic_with_fixed_float_subarray(self) -> npt.NDArray[np.float32]:
+        pos = self._index.get_step_offset("DynamicWithFixedFloatSubarray")
+        self._stream.seek(pos)
+        return _binary.DynamicNDArraySerializer(_binary.FixedNDArraySerializer(_binary.float32_serializer, (3,))).read(self._stream)
+
+    def _read_known_dim_count_with_fixed_int_subarray(self) -> npt.NDArray[np.int32]:
+        pos = self._index.get_step_offset("KnownDimCountWithFixedIntSubarray")
+        self._stream.seek(pos)
+        return _binary.NDArraySerializer(_binary.FixedNDArraySerializer(_binary.int32_serializer, (3,)), 1).read(self._stream)
+
+    def _read_known_dim_count_with_fixed_float_subarray(self) -> npt.NDArray[np.float32]:
+        pos = self._index.get_step_offset("KnownDimCountWithFixedFloatSubarray")
+        self._stream.seek(pos)
+        return _binary.NDArraySerializer(_binary.FixedNDArraySerializer(_binary.float32_serializer, (3,)), 1).read(self._stream)
+
+    def _read_fixed_with_fixed_int_subarray(self) -> npt.NDArray[np.int32]:
+        pos = self._index.get_step_offset("FixedWithFixedIntSubarray")
+        self._stream.seek(pos)
+        return _binary.FixedNDArraySerializer(_binary.FixedNDArraySerializer(_binary.int32_serializer, (3,)), (2,)).read(self._stream)
+
+    def _read_fixed_with_fixed_float_subarray(self) -> npt.NDArray[np.float32]:
+        pos = self._index.get_step_offset("FixedWithFixedFloatSubarray")
+        self._stream.seek(pos)
+        return _binary.FixedNDArraySerializer(_binary.FixedNDArraySerializer(_binary.float32_serializer, (3,)), (2,)).read(self._stream)
+
+    def _read_nested_subarray(self) -> npt.NDArray[np.int32]:
+        pos = self._index.get_step_offset("NestedSubarray")
+        self._stream.seek(pos)
+        return _binary.DynamicNDArraySerializer(_binary.FixedNDArraySerializer(_binary.FixedNDArraySerializer(_binary.int32_serializer, (3,)), (2,))).read(self._stream)
+
+    def _read_dynamic_with_fixed_vector_subarray(self) -> npt.NDArray[np.int32]:
+        pos = self._index.get_step_offset("DynamicWithFixedVectorSubarray")
+        self._stream.seek(pos)
+        return _binary.DynamicNDArraySerializer(_binary.FixedVectorSerializer(_binary.int32_serializer, 3)).read(self._stream)
+
+    def _read_generic_subarray(self) -> Image[np.int32]:
+        pos = self._index.get_step_offset("GenericSubarray")
+        self._stream.seek(pos)
+        return _binary.NDArraySerializer(_binary.FixedNDArraySerializer(_binary.int32_serializer, (3,)), 2).read(self._stream)
+
 class BinarySubarraysInRecordsWriter(_binary.BinaryProtocolWriter, SubarraysInRecordsWriterBase):
     """Binary writer for the SubarraysInRecords protocol."""
-
 
     def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
         SubarraysInRecordsWriterBase.__init__(self)
@@ -561,7 +1244,6 @@ class BinarySubarraysInRecordsWriter(_binary.BinaryProtocolWriter, SubarraysInRe
 class BinarySubarraysInRecordsReader(_binary.BinaryProtocolReader, SubarraysInRecordsReaderBase):
     """Binary writer for the SubarraysInRecords protocol."""
 
-
     def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
         SubarraysInRecordsReaderBase.__init__(self)
         _binary.BinaryProtocolReader.__init__(self, stream, SubarraysInRecordsReaderBase.schema)
@@ -572,9 +1254,44 @@ class BinarySubarraysInRecordsReader(_binary.BinaryProtocolReader, SubarraysInRe
     def _read_with_vlen_subarrays(self) -> npt.NDArray[np.void]:
         return _binary.DynamicNDArraySerializer(RecordWithVlenCollectionsSerializer()).read(self._stream)
 
+
+class BinarySubarraysInRecordsIndexedWriter(_binary.BinaryProtocolIndexedWriter, SubarraysInRecordsWriterBase):
+    """Binary indexed writer for the SubarraysInRecords protocol."""
+
+    def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
+        SubarraysInRecordsWriterBase.__init__(self)
+        _binary.BinaryProtocolIndexedWriter.__init__(self, stream, SubarraysInRecordsWriterBase.schema)
+
+    def _write_with_fixed_subarrays(self, value: npt.NDArray[np.void]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("WithFixedSubarrays", pos)
+        _binary.DynamicNDArraySerializer(RecordWithFixedCollectionsSerializer()).write(self._stream, value)
+
+    def _write_with_vlen_subarrays(self, value: npt.NDArray[np.void]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("WithVlenSubarrays", pos)
+        _binary.DynamicNDArraySerializer(RecordWithVlenCollectionsSerializer()).write(self._stream, value)
+
+
+class BinarySubarraysInRecordsIndexedReader(_binary.BinaryProtocolIndexedReader, SubarraysInRecordsIndexedReaderBase):
+    """Binary indexed writer for the SubarraysInRecords protocol."""
+
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
+        SubarraysInRecordsIndexedReaderBase.__init__(self)
+        _binary.BinaryProtocolIndexedReader.__init__(self, stream, SubarraysInRecordsIndexedReaderBase.schema)
+
+    def _read_with_fixed_subarrays(self) -> npt.NDArray[np.void]:
+        pos = self._index.get_step_offset("WithFixedSubarrays")
+        self._stream.seek(pos)
+        return _binary.DynamicNDArraySerializer(RecordWithFixedCollectionsSerializer()).read(self._stream)
+
+    def _read_with_vlen_subarrays(self) -> npt.NDArray[np.void]:
+        pos = self._index.get_step_offset("WithVlenSubarrays")
+        self._stream.seek(pos)
+        return _binary.DynamicNDArraySerializer(RecordWithVlenCollectionsSerializer()).read(self._stream)
+
 class BinaryNDArraysWriter(_binary.BinaryProtocolWriter, NDArraysWriterBase):
     """Binary writer for the NDArrays protocol."""
-
 
     def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
         NDArraysWriterBase.__init__(self)
@@ -599,7 +1316,6 @@ class BinaryNDArraysWriter(_binary.BinaryProtocolWriter, NDArraysWriterBase):
 class BinaryNDArraysReader(_binary.BinaryProtocolReader, NDArraysReaderBase):
     """Binary writer for the NDArrays protocol."""
 
-
     def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
         NDArraysReaderBase.__init__(self)
         _binary.BinaryProtocolReader.__init__(self, stream, NDArraysReaderBase.schema)
@@ -619,9 +1335,74 @@ class BinaryNDArraysReader(_binary.BinaryProtocolReader, NDArraysReaderBase):
     def _read_named_array(self) -> NamedNDArray:
         return _binary.NDArraySerializer(_binary.int32_serializer, 2).read(self._stream)
 
+
+class BinaryNDArraysIndexedWriter(_binary.BinaryProtocolIndexedWriter, NDArraysWriterBase):
+    """Binary indexed writer for the NDArrays protocol."""
+
+    def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
+        NDArraysWriterBase.__init__(self)
+        _binary.BinaryProtocolIndexedWriter.__init__(self, stream, NDArraysWriterBase.schema)
+
+    def _write_ints(self, value: npt.NDArray[np.int32]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("Ints", pos)
+        _binary.NDArraySerializer(_binary.int32_serializer, 2).write(self._stream, value)
+
+    def _write_simple_record_array(self, value: npt.NDArray[np.void]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("SimpleRecordArray", pos)
+        _binary.NDArraySerializer(SimpleRecordSerializer(), 2).write(self._stream, value)
+
+    def _write_record_with_vlens_array(self, value: npt.NDArray[np.void]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("RecordWithVlensArray", pos)
+        _binary.NDArraySerializer(RecordWithVlensSerializer(), 2).write(self._stream, value)
+
+    def _write_record_with_nd_arrays(self, value: RecordWithNDArrays) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("RecordWithNDArrays", pos)
+        RecordWithNDArraysSerializer().write(self._stream, value)
+
+    def _write_named_array(self, value: NamedNDArray) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("NamedArray", pos)
+        _binary.NDArraySerializer(_binary.int32_serializer, 2).write(self._stream, value)
+
+
+class BinaryNDArraysIndexedReader(_binary.BinaryProtocolIndexedReader, NDArraysIndexedReaderBase):
+    """Binary indexed writer for the NDArrays protocol."""
+
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
+        NDArraysIndexedReaderBase.__init__(self)
+        _binary.BinaryProtocolIndexedReader.__init__(self, stream, NDArraysIndexedReaderBase.schema)
+
+    def _read_ints(self) -> npt.NDArray[np.int32]:
+        pos = self._index.get_step_offset("Ints")
+        self._stream.seek(pos)
+        return _binary.NDArraySerializer(_binary.int32_serializer, 2).read(self._stream)
+
+    def _read_simple_record_array(self) -> npt.NDArray[np.void]:
+        pos = self._index.get_step_offset("SimpleRecordArray")
+        self._stream.seek(pos)
+        return _binary.NDArraySerializer(SimpleRecordSerializer(), 2).read(self._stream)
+
+    def _read_record_with_vlens_array(self) -> npt.NDArray[np.void]:
+        pos = self._index.get_step_offset("RecordWithVlensArray")
+        self._stream.seek(pos)
+        return _binary.NDArraySerializer(RecordWithVlensSerializer(), 2).read(self._stream)
+
+    def _read_record_with_nd_arrays(self) -> RecordWithNDArrays:
+        pos = self._index.get_step_offset("RecordWithNDArrays")
+        self._stream.seek(pos)
+        return RecordWithNDArraysSerializer().read(self._stream)
+
+    def _read_named_array(self) -> NamedNDArray:
+        pos = self._index.get_step_offset("NamedArray")
+        self._stream.seek(pos)
+        return _binary.NDArraySerializer(_binary.int32_serializer, 2).read(self._stream)
+
 class BinaryNDArraysSingleDimensionWriter(_binary.BinaryProtocolWriter, NDArraysSingleDimensionWriterBase):
     """Binary writer for the NDArraysSingleDimension protocol."""
-
 
     def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
         NDArraysSingleDimensionWriterBase.__init__(self)
@@ -643,7 +1424,6 @@ class BinaryNDArraysSingleDimensionWriter(_binary.BinaryProtocolWriter, NDArrays
 class BinaryNDArraysSingleDimensionReader(_binary.BinaryProtocolReader, NDArraysSingleDimensionReaderBase):
     """Binary writer for the NDArraysSingleDimension protocol."""
 
-
     def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
         NDArraysSingleDimensionReaderBase.__init__(self)
         _binary.BinaryProtocolReader.__init__(self, stream, NDArraysSingleDimensionReaderBase.schema)
@@ -660,9 +1440,64 @@ class BinaryNDArraysSingleDimensionReader(_binary.BinaryProtocolReader, NDArrays
     def _read_record_with_nd_arrays(self) -> RecordWithNDArraysSingleDimension:
         return RecordWithNDArraysSingleDimensionSerializer().read(self._stream)
 
+
+class BinaryNDArraysSingleDimensionIndexedWriter(_binary.BinaryProtocolIndexedWriter, NDArraysSingleDimensionWriterBase):
+    """Binary indexed writer for the NDArraysSingleDimension protocol."""
+
+    def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
+        NDArraysSingleDimensionWriterBase.__init__(self)
+        _binary.BinaryProtocolIndexedWriter.__init__(self, stream, NDArraysSingleDimensionWriterBase.schema)
+
+    def _write_ints(self, value: npt.NDArray[np.int32]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("Ints", pos)
+        _binary.NDArraySerializer(_binary.int32_serializer, 1).write(self._stream, value)
+
+    def _write_simple_record_array(self, value: npt.NDArray[np.void]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("SimpleRecordArray", pos)
+        _binary.NDArraySerializer(SimpleRecordSerializer(), 1).write(self._stream, value)
+
+    def _write_record_with_vlens_array(self, value: npt.NDArray[np.void]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("RecordWithVlensArray", pos)
+        _binary.NDArraySerializer(RecordWithVlensSerializer(), 1).write(self._stream, value)
+
+    def _write_record_with_nd_arrays(self, value: RecordWithNDArraysSingleDimension) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("RecordWithNDArrays", pos)
+        RecordWithNDArraysSingleDimensionSerializer().write(self._stream, value)
+
+
+class BinaryNDArraysSingleDimensionIndexedReader(_binary.BinaryProtocolIndexedReader, NDArraysSingleDimensionIndexedReaderBase):
+    """Binary indexed writer for the NDArraysSingleDimension protocol."""
+
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
+        NDArraysSingleDimensionIndexedReaderBase.__init__(self)
+        _binary.BinaryProtocolIndexedReader.__init__(self, stream, NDArraysSingleDimensionIndexedReaderBase.schema)
+
+    def _read_ints(self) -> npt.NDArray[np.int32]:
+        pos = self._index.get_step_offset("Ints")
+        self._stream.seek(pos)
+        return _binary.NDArraySerializer(_binary.int32_serializer, 1).read(self._stream)
+
+    def _read_simple_record_array(self) -> npt.NDArray[np.void]:
+        pos = self._index.get_step_offset("SimpleRecordArray")
+        self._stream.seek(pos)
+        return _binary.NDArraySerializer(SimpleRecordSerializer(), 1).read(self._stream)
+
+    def _read_record_with_vlens_array(self) -> npt.NDArray[np.void]:
+        pos = self._index.get_step_offset("RecordWithVlensArray")
+        self._stream.seek(pos)
+        return _binary.NDArraySerializer(RecordWithVlensSerializer(), 1).read(self._stream)
+
+    def _read_record_with_nd_arrays(self) -> RecordWithNDArraysSingleDimension:
+        pos = self._index.get_step_offset("RecordWithNDArrays")
+        self._stream.seek(pos)
+        return RecordWithNDArraysSingleDimensionSerializer().read(self._stream)
+
 class BinaryDynamicNDArraysWriter(_binary.BinaryProtocolWriter, DynamicNDArraysWriterBase):
     """Binary writer for the DynamicNDArrays protocol."""
-
 
     def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
         DynamicNDArraysWriterBase.__init__(self)
@@ -684,7 +1519,6 @@ class BinaryDynamicNDArraysWriter(_binary.BinaryProtocolWriter, DynamicNDArraysW
 class BinaryDynamicNDArraysReader(_binary.BinaryProtocolReader, DynamicNDArraysReaderBase):
     """Binary writer for the DynamicNDArrays protocol."""
 
-
     def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
         DynamicNDArraysReaderBase.__init__(self)
         _binary.BinaryProtocolReader.__init__(self, stream, DynamicNDArraysReaderBase.schema)
@@ -701,9 +1535,64 @@ class BinaryDynamicNDArraysReader(_binary.BinaryProtocolReader, DynamicNDArraysR
     def _read_record_with_dynamic_nd_arrays(self) -> RecordWithDynamicNDArrays:
         return RecordWithDynamicNDArraysSerializer().read(self._stream)
 
+
+class BinaryDynamicNDArraysIndexedWriter(_binary.BinaryProtocolIndexedWriter, DynamicNDArraysWriterBase):
+    """Binary indexed writer for the DynamicNDArrays protocol."""
+
+    def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
+        DynamicNDArraysWriterBase.__init__(self)
+        _binary.BinaryProtocolIndexedWriter.__init__(self, stream, DynamicNDArraysWriterBase.schema)
+
+    def _write_ints(self, value: npt.NDArray[np.int32]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("Ints", pos)
+        _binary.DynamicNDArraySerializer(_binary.int32_serializer).write(self._stream, value)
+
+    def _write_simple_record_array(self, value: npt.NDArray[np.void]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("SimpleRecordArray", pos)
+        _binary.DynamicNDArraySerializer(SimpleRecordSerializer()).write(self._stream, value)
+
+    def _write_record_with_vlens_array(self, value: npt.NDArray[np.void]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("RecordWithVlensArray", pos)
+        _binary.DynamicNDArraySerializer(RecordWithVlensSerializer()).write(self._stream, value)
+
+    def _write_record_with_dynamic_nd_arrays(self, value: RecordWithDynamicNDArrays) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("RecordWithDynamicNDArrays", pos)
+        RecordWithDynamicNDArraysSerializer().write(self._stream, value)
+
+
+class BinaryDynamicNDArraysIndexedReader(_binary.BinaryProtocolIndexedReader, DynamicNDArraysIndexedReaderBase):
+    """Binary indexed writer for the DynamicNDArrays protocol."""
+
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
+        DynamicNDArraysIndexedReaderBase.__init__(self)
+        _binary.BinaryProtocolIndexedReader.__init__(self, stream, DynamicNDArraysIndexedReaderBase.schema)
+
+    def _read_ints(self) -> npt.NDArray[np.int32]:
+        pos = self._index.get_step_offset("Ints")
+        self._stream.seek(pos)
+        return _binary.DynamicNDArraySerializer(_binary.int32_serializer).read(self._stream)
+
+    def _read_simple_record_array(self) -> npt.NDArray[np.void]:
+        pos = self._index.get_step_offset("SimpleRecordArray")
+        self._stream.seek(pos)
+        return _binary.DynamicNDArraySerializer(SimpleRecordSerializer()).read(self._stream)
+
+    def _read_record_with_vlens_array(self) -> npt.NDArray[np.void]:
+        pos = self._index.get_step_offset("RecordWithVlensArray")
+        self._stream.seek(pos)
+        return _binary.DynamicNDArraySerializer(RecordWithVlensSerializer()).read(self._stream)
+
+    def _read_record_with_dynamic_nd_arrays(self) -> RecordWithDynamicNDArrays:
+        pos = self._index.get_step_offset("RecordWithDynamicNDArrays")
+        self._stream.seek(pos)
+        return RecordWithDynamicNDArraysSerializer().read(self._stream)
+
 class BinaryMultiDArraysWriter(_binary.BinaryProtocolWriter, MultiDArraysWriterBase):
     """Binary writer for the MultiDArrays protocol."""
-
 
     def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
         MultiDArraysWriterBase.__init__(self)
@@ -719,7 +1608,6 @@ class BinaryMultiDArraysWriter(_binary.BinaryProtocolWriter, MultiDArraysWriterB
 class BinaryMultiDArraysReader(_binary.BinaryProtocolReader, MultiDArraysReaderBase):
     """Binary writer for the MultiDArrays protocol."""
 
-
     def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
         MultiDArraysReaderBase.__init__(self)
         _binary.BinaryProtocolReader.__init__(self, stream, MultiDArraysReaderBase.schema)
@@ -730,9 +1618,52 @@ class BinaryMultiDArraysReader(_binary.BinaryProtocolReader, MultiDArraysReaderB
     def _read_frames(self) -> collections.abc.Iterable[npt.NDArray[np.float32]]:
         return _binary.StreamSerializer(_binary.FixedNDArraySerializer(_binary.float32_serializer, (1, 1, 64, 32,))).read(self._stream)
 
+
+class BinaryMultiDArraysIndexedWriter(_binary.BinaryProtocolIndexedWriter, MultiDArraysWriterBase):
+    """Binary indexed writer for the MultiDArrays protocol."""
+
+    def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
+        MultiDArraysWriterBase.__init__(self)
+        _binary.BinaryProtocolIndexedWriter.__init__(self, stream, MultiDArraysWriterBase.schema)
+
+    def _write_images(self, value: collections.abc.Iterable[npt.NDArray[np.float32]]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("Images", pos)
+        offsets, num_blocks = _binary.StreamSerializer(_binary.NDArraySerializer(_binary.float32_serializer, 4)).write_and_save_offsets(self._stream, value)
+        self._index.add_stream_offsets("Images", offsets, num_blocks)
+
+    def _write_frames(self, value: collections.abc.Iterable[npt.NDArray[np.float32]]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("Frames", pos)
+        offsets, num_blocks = _binary.StreamSerializer(_binary.FixedNDArraySerializer(_binary.float32_serializer, (1, 1, 64, 32,))).write_and_save_offsets(self._stream, value)
+        self._index.add_stream_offsets("Frames", offsets, num_blocks)
+
+
+class BinaryMultiDArraysIndexedReader(_binary.BinaryProtocolIndexedReader, MultiDArraysIndexedReaderBase):
+    """Binary indexed writer for the MultiDArrays protocol."""
+
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
+        MultiDArraysIndexedReaderBase.__init__(self)
+        _binary.BinaryProtocolIndexedReader.__init__(self, stream, MultiDArraysIndexedReaderBase.schema)
+
+    def _read_images(self, idx: int) -> collections.abc.Iterable[npt.NDArray[np.float32]]: # pyright: ignore [reportIncompatibleMethodOverride]
+        offset, remaining = self._index.find_stream_item("Images", idx)
+        self._stream.seek(offset)
+        return _binary.StreamSerializer(_binary.NDArraySerializer(_binary.float32_serializer, 4)).read_mid_stream(self._stream, remaining)
+
+    def _count_images(self) -> int:
+        return self._index.get_stream_size("Images")
+
+    def _read_frames(self, idx: int) -> collections.abc.Iterable[npt.NDArray[np.float32]]: # pyright: ignore [reportIncompatibleMethodOverride]
+        offset, remaining = self._index.find_stream_item("Frames", idx)
+        self._stream.seek(offset)
+        return _binary.StreamSerializer(_binary.FixedNDArraySerializer(_binary.float32_serializer, (1, 1, 64, 32,))).read_mid_stream(self._stream, remaining)
+
+    def _count_frames(self) -> int:
+        return self._index.get_stream_size("Frames")
+
 class BinaryComplexArraysWriter(_binary.BinaryProtocolWriter, ComplexArraysWriterBase):
     """Binary writer for the ComplexArrays protocol."""
-
 
     def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
         ComplexArraysWriterBase.__init__(self)
@@ -748,7 +1679,6 @@ class BinaryComplexArraysWriter(_binary.BinaryProtocolWriter, ComplexArraysWrite
 class BinaryComplexArraysReader(_binary.BinaryProtocolReader, ComplexArraysReaderBase):
     """Binary writer for the ComplexArrays protocol."""
 
-
     def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
         ComplexArraysReaderBase.__init__(self)
         _binary.BinaryProtocolReader.__init__(self, stream, ComplexArraysReaderBase.schema)
@@ -759,9 +1689,44 @@ class BinaryComplexArraysReader(_binary.BinaryProtocolReader, ComplexArraysReade
     def _read_doubles(self) -> npt.NDArray[np.complex128]:
         return _binary.NDArraySerializer(_binary.complexfloat64_serializer, 2).read(self._stream)
 
+
+class BinaryComplexArraysIndexedWriter(_binary.BinaryProtocolIndexedWriter, ComplexArraysWriterBase):
+    """Binary indexed writer for the ComplexArrays protocol."""
+
+    def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
+        ComplexArraysWriterBase.__init__(self)
+        _binary.BinaryProtocolIndexedWriter.__init__(self, stream, ComplexArraysWriterBase.schema)
+
+    def _write_floats(self, value: npt.NDArray[np.complex64]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("Floats", pos)
+        _binary.DynamicNDArraySerializer(_binary.complexfloat32_serializer).write(self._stream, value)
+
+    def _write_doubles(self, value: npt.NDArray[np.complex128]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("Doubles", pos)
+        _binary.NDArraySerializer(_binary.complexfloat64_serializer, 2).write(self._stream, value)
+
+
+class BinaryComplexArraysIndexedReader(_binary.BinaryProtocolIndexedReader, ComplexArraysIndexedReaderBase):
+    """Binary indexed writer for the ComplexArrays protocol."""
+
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
+        ComplexArraysIndexedReaderBase.__init__(self)
+        _binary.BinaryProtocolIndexedReader.__init__(self, stream, ComplexArraysIndexedReaderBase.schema)
+
+    def _read_floats(self) -> npt.NDArray[np.complex64]:
+        pos = self._index.get_step_offset("Floats")
+        self._stream.seek(pos)
+        return _binary.DynamicNDArraySerializer(_binary.complexfloat32_serializer).read(self._stream)
+
+    def _read_doubles(self) -> npt.NDArray[np.complex128]:
+        pos = self._index.get_step_offset("Doubles")
+        self._stream.seek(pos)
+        return _binary.NDArraySerializer(_binary.complexfloat64_serializer, 2).read(self._stream)
+
 class BinaryMapsWriter(_binary.BinaryProtocolWriter, MapsWriterBase):
     """Binary writer for the Maps protocol."""
-
 
     def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
         MapsWriterBase.__init__(self)
@@ -786,7 +1751,6 @@ class BinaryMapsWriter(_binary.BinaryProtocolWriter, MapsWriterBase):
 class BinaryMapsReader(_binary.BinaryProtocolReader, MapsReaderBase):
     """Binary writer for the Maps protocol."""
 
-
     def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
         MapsReaderBase.__init__(self)
         _binary.BinaryProtocolReader.__init__(self, stream, MapsReaderBase.schema)
@@ -806,9 +1770,74 @@ class BinaryMapsReader(_binary.BinaryProtocolReader, MapsReaderBase):
     def _read_records(self) -> list[RecordWithMaps]:
         return _binary.VectorSerializer(RecordWithMapsSerializer()).read(self._stream)
 
+
+class BinaryMapsIndexedWriter(_binary.BinaryProtocolIndexedWriter, MapsWriterBase):
+    """Binary indexed writer for the Maps protocol."""
+
+    def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
+        MapsWriterBase.__init__(self)
+        _binary.BinaryProtocolIndexedWriter.__init__(self, stream, MapsWriterBase.schema)
+
+    def _write_string_to_int(self, value: dict[str, yardl.Int32]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("StringToInt", pos)
+        _binary.MapSerializer(_binary.string_serializer, _binary.int32_serializer).write(self._stream, value)
+
+    def _write_int_to_string(self, value: dict[yardl.Int32, str]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("IntToString", pos)
+        _binary.MapSerializer(_binary.int32_serializer, _binary.string_serializer).write(self._stream, value)
+
+    def _write_string_to_union(self, value: dict[str, StringOrInt32]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("StringToUnion", pos)
+        _binary.MapSerializer(_binary.string_serializer, _binary.UnionSerializer(StringOrInt32, [(StringOrInt32.String, _binary.string_serializer), (StringOrInt32.Int32, _binary.int32_serializer)])).write(self._stream, value)
+
+    def _write_aliased_generic(self, value: basic_types.AliasedMap[str, yardl.Int32]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("AliasedGeneric", pos)
+        _binary.MapSerializer(_binary.string_serializer, _binary.int32_serializer).write(self._stream, value)
+
+    def _write_records(self, value: list[RecordWithMaps]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("Records", pos)
+        _binary.VectorSerializer(RecordWithMapsSerializer()).write(self._stream, value)
+
+
+class BinaryMapsIndexedReader(_binary.BinaryProtocolIndexedReader, MapsIndexedReaderBase):
+    """Binary indexed writer for the Maps protocol."""
+
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
+        MapsIndexedReaderBase.__init__(self)
+        _binary.BinaryProtocolIndexedReader.__init__(self, stream, MapsIndexedReaderBase.schema)
+
+    def _read_string_to_int(self) -> dict[str, yardl.Int32]:
+        pos = self._index.get_step_offset("StringToInt")
+        self._stream.seek(pos)
+        return _binary.MapSerializer(_binary.string_serializer, _binary.int32_serializer).read(self._stream)
+
+    def _read_int_to_string(self) -> dict[yardl.Int32, str]:
+        pos = self._index.get_step_offset("IntToString")
+        self._stream.seek(pos)
+        return _binary.MapSerializer(_binary.int32_serializer, _binary.string_serializer).read(self._stream)
+
+    def _read_string_to_union(self) -> dict[str, StringOrInt32]:
+        pos = self._index.get_step_offset("StringToUnion")
+        self._stream.seek(pos)
+        return _binary.MapSerializer(_binary.string_serializer, _binary.UnionSerializer(StringOrInt32, [(StringOrInt32.String, _binary.string_serializer), (StringOrInt32.Int32, _binary.int32_serializer)])).read(self._stream)
+
+    def _read_aliased_generic(self) -> basic_types.AliasedMap[str, yardl.Int32]:
+        pos = self._index.get_step_offset("AliasedGeneric")
+        self._stream.seek(pos)
+        return _binary.MapSerializer(_binary.string_serializer, _binary.int32_serializer).read(self._stream)
+
+    def _read_records(self) -> list[RecordWithMaps]:
+        pos = self._index.get_step_offset("Records")
+        self._stream.seek(pos)
+        return _binary.VectorSerializer(RecordWithMapsSerializer()).read(self._stream)
+
 class BinaryUnionsWriter(_binary.BinaryProtocolWriter, UnionsWriterBase):
     """Binary writer for the Unions protocol."""
-
 
     def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
         UnionsWriterBase.__init__(self)
@@ -830,7 +1859,6 @@ class BinaryUnionsWriter(_binary.BinaryProtocolWriter, UnionsWriterBase):
 class BinaryUnionsReader(_binary.BinaryProtocolReader, UnionsReaderBase):
     """Binary writer for the Unions protocol."""
 
-
     def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
         UnionsReaderBase.__init__(self)
         _binary.BinaryProtocolReader.__init__(self, stream, UnionsReaderBase.schema)
@@ -847,9 +1875,64 @@ class BinaryUnionsReader(_binary.BinaryProtocolReader, UnionsReaderBase):
     def _read_record_with_unions(self) -> basic_types.RecordWithUnions:
         return basic_types.binary.RecordWithUnionsSerializer().read(self._stream)
 
+
+class BinaryUnionsIndexedWriter(_binary.BinaryProtocolIndexedWriter, UnionsWriterBase):
+    """Binary indexed writer for the Unions protocol."""
+
+    def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
+        UnionsWriterBase.__init__(self)
+        _binary.BinaryProtocolIndexedWriter.__init__(self, stream, UnionsWriterBase.schema)
+
+    def _write_int_or_simple_record(self, value: Int32OrSimpleRecord) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("IntOrSimpleRecord", pos)
+        _binary.UnionSerializer(Int32OrSimpleRecord, [(Int32OrSimpleRecord.Int32, _binary.int32_serializer), (Int32OrSimpleRecord.SimpleRecord, SimpleRecordSerializer())]).write(self._stream, value)
+
+    def _write_int_or_record_with_vlens(self, value: Int32OrRecordWithVlens) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("IntOrRecordWithVlens", pos)
+        _binary.UnionSerializer(Int32OrRecordWithVlens, [(Int32OrRecordWithVlens.Int32, _binary.int32_serializer), (Int32OrRecordWithVlens.RecordWithVlens, RecordWithVlensSerializer())]).write(self._stream, value)
+
+    def _write_monosotate_or_int_or_simple_record(self, value: typing.Optional[Int32OrSimpleRecord]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("MonosotateOrIntOrSimpleRecord", pos)
+        _binary.UnionSerializer(Int32OrSimpleRecord, [None, (Int32OrSimpleRecord.Int32, _binary.int32_serializer), (Int32OrSimpleRecord.SimpleRecord, SimpleRecordSerializer())]).write(self._stream, value)
+
+    def _write_record_with_unions(self, value: basic_types.RecordWithUnions) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("RecordWithUnions", pos)
+        basic_types.binary.RecordWithUnionsSerializer().write(self._stream, value)
+
+
+class BinaryUnionsIndexedReader(_binary.BinaryProtocolIndexedReader, UnionsIndexedReaderBase):
+    """Binary indexed writer for the Unions protocol."""
+
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
+        UnionsIndexedReaderBase.__init__(self)
+        _binary.BinaryProtocolIndexedReader.__init__(self, stream, UnionsIndexedReaderBase.schema)
+
+    def _read_int_or_simple_record(self) -> Int32OrSimpleRecord:
+        pos = self._index.get_step_offset("IntOrSimpleRecord")
+        self._stream.seek(pos)
+        return _binary.UnionSerializer(Int32OrSimpleRecord, [(Int32OrSimpleRecord.Int32, _binary.int32_serializer), (Int32OrSimpleRecord.SimpleRecord, SimpleRecordSerializer())]).read(self._stream)
+
+    def _read_int_or_record_with_vlens(self) -> Int32OrRecordWithVlens:
+        pos = self._index.get_step_offset("IntOrRecordWithVlens")
+        self._stream.seek(pos)
+        return _binary.UnionSerializer(Int32OrRecordWithVlens, [(Int32OrRecordWithVlens.Int32, _binary.int32_serializer), (Int32OrRecordWithVlens.RecordWithVlens, RecordWithVlensSerializer())]).read(self._stream)
+
+    def _read_monosotate_or_int_or_simple_record(self) -> typing.Optional[Int32OrSimpleRecord]:
+        pos = self._index.get_step_offset("MonosotateOrIntOrSimpleRecord")
+        self._stream.seek(pos)
+        return _binary.UnionSerializer(Int32OrSimpleRecord, [None, (Int32OrSimpleRecord.Int32, _binary.int32_serializer), (Int32OrSimpleRecord.SimpleRecord, SimpleRecordSerializer())]).read(self._stream)
+
+    def _read_record_with_unions(self) -> basic_types.RecordWithUnions:
+        pos = self._index.get_step_offset("RecordWithUnions")
+        self._stream.seek(pos)
+        return basic_types.binary.RecordWithUnionsSerializer().read(self._stream)
+
 class BinaryStreamsOfUnionsWriter(_binary.BinaryProtocolWriter, StreamsOfUnionsWriterBase):
     """Binary writer for the StreamsOfUnions protocol."""
-
 
     def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
         StreamsOfUnionsWriterBase.__init__(self)
@@ -868,7 +1951,6 @@ class BinaryStreamsOfUnionsWriter(_binary.BinaryProtocolWriter, StreamsOfUnionsW
 class BinaryStreamsOfUnionsReader(_binary.BinaryProtocolReader, StreamsOfUnionsReaderBase):
     """Binary writer for the StreamsOfUnions protocol."""
 
-
     def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
         StreamsOfUnionsReaderBase.__init__(self)
         _binary.BinaryProtocolReader.__init__(self, stream, StreamsOfUnionsReaderBase.schema)
@@ -882,9 +1964,66 @@ class BinaryStreamsOfUnionsReader(_binary.BinaryProtocolReader, StreamsOfUnionsR
     def _read_many_cases(self) -> collections.abc.Iterable[Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray]:
         return _binary.StreamSerializer(_binary.UnionSerializer(Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray, [(Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray.Int32, _binary.int32_serializer), (Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray.Float32, _binary.float32_serializer), (Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray.String, _binary.string_serializer), (Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray.SimpleRecord, SimpleRecordSerializer()), (Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray.NamedFixedNDArray, _binary.FixedNDArraySerializer(_binary.int32_serializer, (2, 4,)))])).read(self._stream)
 
+
+class BinaryStreamsOfUnionsIndexedWriter(_binary.BinaryProtocolIndexedWriter, StreamsOfUnionsWriterBase):
+    """Binary indexed writer for the StreamsOfUnions protocol."""
+
+    def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
+        StreamsOfUnionsWriterBase.__init__(self)
+        _binary.BinaryProtocolIndexedWriter.__init__(self, stream, StreamsOfUnionsWriterBase.schema)
+
+    def _write_int_or_simple_record(self, value: collections.abc.Iterable[Int32OrSimpleRecord]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("IntOrSimpleRecord", pos)
+        offsets, num_blocks = _binary.StreamSerializer(_binary.UnionSerializer(Int32OrSimpleRecord, [(Int32OrSimpleRecord.Int32, _binary.int32_serializer), (Int32OrSimpleRecord.SimpleRecord, SimpleRecordSerializer())])).write_and_save_offsets(self._stream, value)
+        self._index.add_stream_offsets("IntOrSimpleRecord", offsets, num_blocks)
+
+    def _write_nullable_int_or_simple_record(self, value: collections.abc.Iterable[typing.Optional[Int32OrSimpleRecord]]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("NullableIntOrSimpleRecord", pos)
+        offsets, num_blocks = _binary.StreamSerializer(_binary.UnionSerializer(Int32OrSimpleRecord, [None, (Int32OrSimpleRecord.Int32, _binary.int32_serializer), (Int32OrSimpleRecord.SimpleRecord, SimpleRecordSerializer())])).write_and_save_offsets(self._stream, value)
+        self._index.add_stream_offsets("NullableIntOrSimpleRecord", offsets, num_blocks)
+
+    def _write_many_cases(self, value: collections.abc.Iterable[Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("ManyCases", pos)
+        offsets, num_blocks = _binary.StreamSerializer(_binary.UnionSerializer(Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray, [(Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray.Int32, _binary.int32_serializer), (Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray.Float32, _binary.float32_serializer), (Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray.String, _binary.string_serializer), (Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray.SimpleRecord, SimpleRecordSerializer()), (Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray.NamedFixedNDArray, _binary.FixedNDArraySerializer(_binary.int32_serializer, (2, 4,)))])).write_and_save_offsets(self._stream, value)
+        self._index.add_stream_offsets("ManyCases", offsets, num_blocks)
+
+
+class BinaryStreamsOfUnionsIndexedReader(_binary.BinaryProtocolIndexedReader, StreamsOfUnionsIndexedReaderBase):
+    """Binary indexed writer for the StreamsOfUnions protocol."""
+
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
+        StreamsOfUnionsIndexedReaderBase.__init__(self)
+        _binary.BinaryProtocolIndexedReader.__init__(self, stream, StreamsOfUnionsIndexedReaderBase.schema)
+
+    def _read_int_or_simple_record(self, idx: int) -> collections.abc.Iterable[Int32OrSimpleRecord]: # pyright: ignore [reportIncompatibleMethodOverride]
+        offset, remaining = self._index.find_stream_item("IntOrSimpleRecord", idx)
+        self._stream.seek(offset)
+        return _binary.StreamSerializer(_binary.UnionSerializer(Int32OrSimpleRecord, [(Int32OrSimpleRecord.Int32, _binary.int32_serializer), (Int32OrSimpleRecord.SimpleRecord, SimpleRecordSerializer())])).read_mid_stream(self._stream, remaining)
+
+    def _count_int_or_simple_record(self) -> int:
+        return self._index.get_stream_size("IntOrSimpleRecord")
+
+    def _read_nullable_int_or_simple_record(self, idx: int) -> collections.abc.Iterable[typing.Optional[Int32OrSimpleRecord]]: # pyright: ignore [reportIncompatibleMethodOverride]
+        offset, remaining = self._index.find_stream_item("NullableIntOrSimpleRecord", idx)
+        self._stream.seek(offset)
+        return _binary.StreamSerializer(_binary.UnionSerializer(Int32OrSimpleRecord, [None, (Int32OrSimpleRecord.Int32, _binary.int32_serializer), (Int32OrSimpleRecord.SimpleRecord, SimpleRecordSerializer())])).read_mid_stream(self._stream, remaining)
+
+    def _count_nullable_int_or_simple_record(self) -> int:
+        return self._index.get_stream_size("NullableIntOrSimpleRecord")
+
+    def _read_many_cases(self, idx: int) -> collections.abc.Iterable[Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray]: # pyright: ignore [reportIncompatibleMethodOverride]
+        offset, remaining = self._index.find_stream_item("ManyCases", idx)
+        self._stream.seek(offset)
+        return _binary.StreamSerializer(_binary.UnionSerializer(Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray, [(Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray.Int32, _binary.int32_serializer), (Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray.Float32, _binary.float32_serializer), (Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray.String, _binary.string_serializer), (Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray.SimpleRecord, SimpleRecordSerializer()), (Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray.NamedFixedNDArray, _binary.FixedNDArraySerializer(_binary.int32_serializer, (2, 4,)))])).read_mid_stream(self._stream, remaining)
+
+    def _count_many_cases(self) -> int:
+        return self._index.get_stream_size("ManyCases")
+
 class BinaryEnumsWriter(_binary.BinaryProtocolWriter, EnumsWriterBase):
     """Binary writer for the Enums protocol."""
-
 
     def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
         EnumsWriterBase.__init__(self)
@@ -906,7 +2045,6 @@ class BinaryEnumsWriter(_binary.BinaryProtocolWriter, EnumsWriterBase):
 class BinaryEnumsReader(_binary.BinaryProtocolReader, EnumsReaderBase):
     """Binary writer for the Enums protocol."""
 
-
     def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
         EnumsReaderBase.__init__(self)
         _binary.BinaryProtocolReader.__init__(self, stream, EnumsReaderBase.schema)
@@ -923,9 +2061,64 @@ class BinaryEnumsReader(_binary.BinaryProtocolReader, EnumsReaderBase):
     def _read_rec(self) -> RecordWithEnums:
         return RecordWithEnumsSerializer().read(self._stream)
 
+
+class BinaryEnumsIndexedWriter(_binary.BinaryProtocolIndexedWriter, EnumsWriterBase):
+    """Binary indexed writer for the Enums protocol."""
+
+    def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
+        EnumsWriterBase.__init__(self)
+        _binary.BinaryProtocolIndexedWriter.__init__(self, stream, EnumsWriterBase.schema)
+
+    def _write_single(self, value: Fruits) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("Single", pos)
+        _binary.EnumSerializer(_binary.int32_serializer, basic_types.Fruits).write(self._stream, value)
+
+    def _write_vec(self, value: list[Fruits]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("Vec", pos)
+        _binary.VectorSerializer(_binary.EnumSerializer(_binary.int32_serializer, basic_types.Fruits)).write(self._stream, value)
+
+    def _write_size(self, value: SizeBasedEnum) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("Size", pos)
+        _binary.EnumSerializer(_binary.size_serializer, SizeBasedEnum).write(self._stream, value)
+
+    def _write_rec(self, value: RecordWithEnums) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("Rec", pos)
+        RecordWithEnumsSerializer().write(self._stream, value)
+
+
+class BinaryEnumsIndexedReader(_binary.BinaryProtocolIndexedReader, EnumsIndexedReaderBase):
+    """Binary indexed writer for the Enums protocol."""
+
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
+        EnumsIndexedReaderBase.__init__(self)
+        _binary.BinaryProtocolIndexedReader.__init__(self, stream, EnumsIndexedReaderBase.schema)
+
+    def _read_single(self) -> Fruits:
+        pos = self._index.get_step_offset("Single")
+        self._stream.seek(pos)
+        return _binary.EnumSerializer(_binary.int32_serializer, basic_types.Fruits).read(self._stream)
+
+    def _read_vec(self) -> list[Fruits]:
+        pos = self._index.get_step_offset("Vec")
+        self._stream.seek(pos)
+        return _binary.VectorSerializer(_binary.EnumSerializer(_binary.int32_serializer, basic_types.Fruits)).read(self._stream)
+
+    def _read_size(self) -> SizeBasedEnum:
+        pos = self._index.get_step_offset("Size")
+        self._stream.seek(pos)
+        return _binary.EnumSerializer(_binary.size_serializer, SizeBasedEnum).read(self._stream)
+
+    def _read_rec(self) -> RecordWithEnums:
+        pos = self._index.get_step_offset("Rec")
+        self._stream.seek(pos)
+        return RecordWithEnumsSerializer().read(self._stream)
+
 class BinaryFlagsWriter(_binary.BinaryProtocolWriter, FlagsWriterBase):
     """Binary writer for the Flags protocol."""
-
 
     def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
         FlagsWriterBase.__init__(self)
@@ -941,7 +2134,6 @@ class BinaryFlagsWriter(_binary.BinaryProtocolWriter, FlagsWriterBase):
 class BinaryFlagsReader(_binary.BinaryProtocolReader, FlagsReaderBase):
     """Binary writer for the Flags protocol."""
 
-
     def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
         FlagsReaderBase.__init__(self)
         _binary.BinaryProtocolReader.__init__(self, stream, FlagsReaderBase.schema)
@@ -952,9 +2144,52 @@ class BinaryFlagsReader(_binary.BinaryProtocolReader, FlagsReaderBase):
     def _read_formats(self) -> collections.abc.Iterable[TextFormat]:
         return _binary.StreamSerializer(_binary.EnumSerializer(_binary.uint64_serializer, basic_types.TextFormat)).read(self._stream)
 
+
+class BinaryFlagsIndexedWriter(_binary.BinaryProtocolIndexedWriter, FlagsWriterBase):
+    """Binary indexed writer for the Flags protocol."""
+
+    def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
+        FlagsWriterBase.__init__(self)
+        _binary.BinaryProtocolIndexedWriter.__init__(self, stream, FlagsWriterBase.schema)
+
+    def _write_days(self, value: collections.abc.Iterable[DaysOfWeek]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("Days", pos)
+        offsets, num_blocks = _binary.StreamSerializer(_binary.EnumSerializer(_binary.int32_serializer, basic_types.DaysOfWeek)).write_and_save_offsets(self._stream, value)
+        self._index.add_stream_offsets("Days", offsets, num_blocks)
+
+    def _write_formats(self, value: collections.abc.Iterable[TextFormat]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("Formats", pos)
+        offsets, num_blocks = _binary.StreamSerializer(_binary.EnumSerializer(_binary.uint64_serializer, basic_types.TextFormat)).write_and_save_offsets(self._stream, value)
+        self._index.add_stream_offsets("Formats", offsets, num_blocks)
+
+
+class BinaryFlagsIndexedReader(_binary.BinaryProtocolIndexedReader, FlagsIndexedReaderBase):
+    """Binary indexed writer for the Flags protocol."""
+
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
+        FlagsIndexedReaderBase.__init__(self)
+        _binary.BinaryProtocolIndexedReader.__init__(self, stream, FlagsIndexedReaderBase.schema)
+
+    def _read_days(self, idx: int) -> collections.abc.Iterable[DaysOfWeek]: # pyright: ignore [reportIncompatibleMethodOverride]
+        offset, remaining = self._index.find_stream_item("Days", idx)
+        self._stream.seek(offset)
+        return _binary.StreamSerializer(_binary.EnumSerializer(_binary.int32_serializer, basic_types.DaysOfWeek)).read_mid_stream(self._stream, remaining)
+
+    def _count_days(self) -> int:
+        return self._index.get_stream_size("Days")
+
+    def _read_formats(self, idx: int) -> collections.abc.Iterable[TextFormat]: # pyright: ignore [reportIncompatibleMethodOverride]
+        offset, remaining = self._index.find_stream_item("Formats", idx)
+        self._stream.seek(offset)
+        return _binary.StreamSerializer(_binary.EnumSerializer(_binary.uint64_serializer, basic_types.TextFormat)).read_mid_stream(self._stream, remaining)
+
+    def _count_formats(self) -> int:
+        return self._index.get_stream_size("Formats")
+
 class BinaryStateTestWriter(_binary.BinaryProtocolWriter, StateTestWriterBase):
     """Binary writer for the StateTest protocol."""
-
 
     def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
         StateTestWriterBase.__init__(self)
@@ -973,7 +2208,6 @@ class BinaryStateTestWriter(_binary.BinaryProtocolWriter, StateTestWriterBase):
 class BinaryStateTestReader(_binary.BinaryProtocolReader, StateTestReaderBase):
     """Binary writer for the StateTest protocol."""
 
-
     def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
         StateTestReaderBase.__init__(self)
         _binary.BinaryProtocolReader.__init__(self, stream, StateTestReaderBase.schema)
@@ -987,9 +2221,58 @@ class BinaryStateTestReader(_binary.BinaryProtocolReader, StateTestReaderBase):
     def _read_another_int(self) -> yardl.Int32:
         return _binary.int32_serializer.read(self._stream)
 
+
+class BinaryStateTestIndexedWriter(_binary.BinaryProtocolIndexedWriter, StateTestWriterBase):
+    """Binary indexed writer for the StateTest protocol."""
+
+    def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
+        StateTestWriterBase.__init__(self)
+        _binary.BinaryProtocolIndexedWriter.__init__(self, stream, StateTestWriterBase.schema)
+
+    def _write_an_int(self, value: yardl.Int32) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("AnInt", pos)
+        _binary.int32_serializer.write(self._stream, value)
+
+    def _write_a_stream(self, value: collections.abc.Iterable[yardl.Int32]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("AStream", pos)
+        offsets, num_blocks = _binary.StreamSerializer(_binary.int32_serializer).write_and_save_offsets(self._stream, value)
+        self._index.add_stream_offsets("AStream", offsets, num_blocks)
+
+    def _write_another_int(self, value: yardl.Int32) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("AnotherInt", pos)
+        _binary.int32_serializer.write(self._stream, value)
+
+
+class BinaryStateTestIndexedReader(_binary.BinaryProtocolIndexedReader, StateTestIndexedReaderBase):
+    """Binary indexed writer for the StateTest protocol."""
+
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
+        StateTestIndexedReaderBase.__init__(self)
+        _binary.BinaryProtocolIndexedReader.__init__(self, stream, StateTestIndexedReaderBase.schema)
+
+    def _read_an_int(self) -> yardl.Int32:
+        pos = self._index.get_step_offset("AnInt")
+        self._stream.seek(pos)
+        return _binary.int32_serializer.read(self._stream)
+
+    def _read_a_stream(self, idx: int) -> collections.abc.Iterable[yardl.Int32]: # pyright: ignore [reportIncompatibleMethodOverride]
+        offset, remaining = self._index.find_stream_item("AStream", idx)
+        self._stream.seek(offset)
+        return _binary.StreamSerializer(_binary.int32_serializer).read_mid_stream(self._stream, remaining)
+
+    def _count_a_stream(self) -> int:
+        return self._index.get_stream_size("AStream")
+
+    def _read_another_int(self) -> yardl.Int32:
+        pos = self._index.get_step_offset("AnotherInt")
+        self._stream.seek(pos)
+        return _binary.int32_serializer.read(self._stream)
+
 class BinarySimpleGenericsWriter(_binary.BinaryProtocolWriter, SimpleGenericsWriterBase):
     """Binary writer for the SimpleGenerics protocol."""
-
 
     def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
         SimpleGenericsWriterBase.__init__(self)
@@ -1026,7 +2309,6 @@ class BinarySimpleGenericsWriter(_binary.BinaryProtocolWriter, SimpleGenericsWri
 class BinarySimpleGenericsReader(_binary.BinaryProtocolReader, SimpleGenericsReaderBase):
     """Binary writer for the SimpleGenerics protocol."""
 
-
     def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
         SimpleGenericsReaderBase.__init__(self)
         _binary.BinaryProtocolReader.__init__(self, stream, SimpleGenericsReaderBase.schema)
@@ -1058,9 +2340,118 @@ class BinarySimpleGenericsReader(_binary.BinaryProtocolReader, SimpleGenericsRea
     def _read_stream_of_type_variants(self) -> collections.abc.Iterable[ImageFloatOrImageDouble]:
         return _binary.StreamSerializer(_binary.UnionSerializer(ImageFloatOrImageDouble, [(ImageFloatOrImageDouble.ImageFloat, _binary.NDArraySerializer(_binary.float32_serializer, 2)), (ImageFloatOrImageDouble.ImageDouble, _binary.NDArraySerializer(_binary.float64_serializer, 2))])).read(self._stream)
 
+
+class BinarySimpleGenericsIndexedWriter(_binary.BinaryProtocolIndexedWriter, SimpleGenericsWriterBase):
+    """Binary indexed writer for the SimpleGenerics protocol."""
+
+    def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
+        SimpleGenericsWriterBase.__init__(self)
+        _binary.BinaryProtocolIndexedWriter.__init__(self, stream, SimpleGenericsWriterBase.schema)
+
+    def _write_float_image(self, value: image.FloatImage) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("FloatImage", pos)
+        _binary.NDArraySerializer(_binary.float32_serializer, 2).write(self._stream, value)
+
+    def _write_int_image(self, value: image.IntImage) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("IntImage", pos)
+        _binary.NDArraySerializer(_binary.int32_serializer, 2).write(self._stream, value)
+
+    def _write_int_image_alternate_syntax(self, value: Image[np.int32]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("IntImageAlternateSyntax", pos)
+        _binary.NDArraySerializer(_binary.int32_serializer, 2).write(self._stream, value)
+
+    def _write_string_image(self, value: Image[np.object_]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("StringImage", pos)
+        _binary.NDArraySerializer(_binary.string_serializer, 2).write(self._stream, value)
+
+    def _write_int_float_tuple(self, value: tuples.Tuple[yardl.Int32, yardl.Float32]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("IntFloatTuple", pos)
+        tuples.binary.TupleSerializer(_binary.int32_serializer, _binary.float32_serializer).write(self._stream, value)
+
+    def _write_float_float_tuple(self, value: tuples.Tuple[yardl.Float32, yardl.Float32]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("FloatFloatTuple", pos)
+        tuples.binary.TupleSerializer(_binary.float32_serializer, _binary.float32_serializer).write(self._stream, value)
+
+    def _write_int_float_tuple_alternate_syntax(self, value: tuples.Tuple[yardl.Int32, yardl.Float32]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("IntFloatTupleAlternateSyntax", pos)
+        tuples.binary.TupleSerializer(_binary.int32_serializer, _binary.float32_serializer).write(self._stream, value)
+
+    def _write_int_string_tuple(self, value: tuples.Tuple[yardl.Int32, str]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("IntStringTuple", pos)
+        tuples.binary.TupleSerializer(_binary.int32_serializer, _binary.string_serializer).write(self._stream, value)
+
+    def _write_stream_of_type_variants(self, value: collections.abc.Iterable[ImageFloatOrImageDouble]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("StreamOfTypeVariants", pos)
+        offsets, num_blocks = _binary.StreamSerializer(_binary.UnionSerializer(ImageFloatOrImageDouble, [(ImageFloatOrImageDouble.ImageFloat, _binary.NDArraySerializer(_binary.float32_serializer, 2)), (ImageFloatOrImageDouble.ImageDouble, _binary.NDArraySerializer(_binary.float64_serializer, 2))])).write_and_save_offsets(self._stream, value)
+        self._index.add_stream_offsets("StreamOfTypeVariants", offsets, num_blocks)
+
+
+class BinarySimpleGenericsIndexedReader(_binary.BinaryProtocolIndexedReader, SimpleGenericsIndexedReaderBase):
+    """Binary indexed writer for the SimpleGenerics protocol."""
+
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
+        SimpleGenericsIndexedReaderBase.__init__(self)
+        _binary.BinaryProtocolIndexedReader.__init__(self, stream, SimpleGenericsIndexedReaderBase.schema)
+
+    def _read_float_image(self) -> image.FloatImage:
+        pos = self._index.get_step_offset("FloatImage")
+        self._stream.seek(pos)
+        return _binary.NDArraySerializer(_binary.float32_serializer, 2).read(self._stream)
+
+    def _read_int_image(self) -> image.IntImage:
+        pos = self._index.get_step_offset("IntImage")
+        self._stream.seek(pos)
+        return _binary.NDArraySerializer(_binary.int32_serializer, 2).read(self._stream)
+
+    def _read_int_image_alternate_syntax(self) -> Image[np.int32]:
+        pos = self._index.get_step_offset("IntImageAlternateSyntax")
+        self._stream.seek(pos)
+        return _binary.NDArraySerializer(_binary.int32_serializer, 2).read(self._stream)
+
+    def _read_string_image(self) -> Image[np.object_]:
+        pos = self._index.get_step_offset("StringImage")
+        self._stream.seek(pos)
+        return _binary.NDArraySerializer(_binary.string_serializer, 2).read(self._stream)
+
+    def _read_int_float_tuple(self) -> tuples.Tuple[yardl.Int32, yardl.Float32]:
+        pos = self._index.get_step_offset("IntFloatTuple")
+        self._stream.seek(pos)
+        return tuples.binary.TupleSerializer(_binary.int32_serializer, _binary.float32_serializer).read(self._stream)
+
+    def _read_float_float_tuple(self) -> tuples.Tuple[yardl.Float32, yardl.Float32]:
+        pos = self._index.get_step_offset("FloatFloatTuple")
+        self._stream.seek(pos)
+        return tuples.binary.TupleSerializer(_binary.float32_serializer, _binary.float32_serializer).read(self._stream)
+
+    def _read_int_float_tuple_alternate_syntax(self) -> tuples.Tuple[yardl.Int32, yardl.Float32]:
+        pos = self._index.get_step_offset("IntFloatTupleAlternateSyntax")
+        self._stream.seek(pos)
+        return tuples.binary.TupleSerializer(_binary.int32_serializer, _binary.float32_serializer).read(self._stream)
+
+    def _read_int_string_tuple(self) -> tuples.Tuple[yardl.Int32, str]:
+        pos = self._index.get_step_offset("IntStringTuple")
+        self._stream.seek(pos)
+        return tuples.binary.TupleSerializer(_binary.int32_serializer, _binary.string_serializer).read(self._stream)
+
+    def _read_stream_of_type_variants(self, idx: int) -> collections.abc.Iterable[ImageFloatOrImageDouble]: # pyright: ignore [reportIncompatibleMethodOverride]
+        offset, remaining = self._index.find_stream_item("StreamOfTypeVariants", idx)
+        self._stream.seek(offset)
+        return _binary.StreamSerializer(_binary.UnionSerializer(ImageFloatOrImageDouble, [(ImageFloatOrImageDouble.ImageFloat, _binary.NDArraySerializer(_binary.float32_serializer, 2)), (ImageFloatOrImageDouble.ImageDouble, _binary.NDArraySerializer(_binary.float64_serializer, 2))])).read_mid_stream(self._stream, remaining)
+
+    def _count_stream_of_type_variants(self) -> int:
+        return self._index.get_stream_size("StreamOfTypeVariants")
+
 class BinaryAdvancedGenericsWriter(_binary.BinaryProtocolWriter, AdvancedGenericsWriterBase):
     """Binary writer for the AdvancedGenerics protocol."""
-
 
     def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
         AdvancedGenericsWriterBase.__init__(self)
@@ -1085,7 +2476,6 @@ class BinaryAdvancedGenericsWriter(_binary.BinaryProtocolWriter, AdvancedGeneric
 class BinaryAdvancedGenericsReader(_binary.BinaryProtocolReader, AdvancedGenericsReaderBase):
     """Binary writer for the AdvancedGenerics protocol."""
 
-
     def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
         AdvancedGenericsReaderBase.__init__(self)
         _binary.BinaryProtocolReader.__init__(self, stream, AdvancedGenericsReaderBase.schema)
@@ -1105,9 +2495,74 @@ class BinaryAdvancedGenericsReader(_binary.BinaryProtocolReader, AdvancedGeneric
     def _read_tuple_of_vectors(self) -> MyTuple[list[yardl.Int32], list[yardl.Float32]]:
         return tuples.binary.TupleSerializer(_binary.VectorSerializer(_binary.int32_serializer), _binary.VectorSerializer(_binary.float32_serializer)).read(self._stream)
 
+
+class BinaryAdvancedGenericsIndexedWriter(_binary.BinaryProtocolIndexedWriter, AdvancedGenericsWriterBase):
+    """Binary indexed writer for the AdvancedGenerics protocol."""
+
+    def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
+        AdvancedGenericsWriterBase.__init__(self)
+        _binary.BinaryProtocolIndexedWriter.__init__(self, stream, AdvancedGenericsWriterBase.schema)
+
+    def _write_float_image_image(self, value: Image[np.object_]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("FloatImageImage", pos)
+        _binary.NDArraySerializer(_binary.NDArraySerializer(_binary.float32_serializer, 2), 2).write(self._stream, value)
+
+    def _write_generic_record_1(self, value: GenericRecord[yardl.Int32, str, np.object_]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("GenericRecord1", pos)
+        GenericRecordSerializer(_binary.int32_serializer, _binary.string_serializer).write(self._stream, value)
+
+    def _write_tuple_of_optionals(self, value: MyTuple[typing.Optional[yardl.Int32], typing.Optional[str]]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("TupleOfOptionals", pos)
+        tuples.binary.TupleSerializer(_binary.OptionalSerializer(_binary.int32_serializer), _binary.OptionalSerializer(_binary.string_serializer)).write(self._stream, value)
+
+    def _write_tuple_of_optionals_alternate_syntax(self, value: MyTuple[typing.Optional[yardl.Int32], typing.Optional[str]]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("TupleOfOptionalsAlternateSyntax", pos)
+        tuples.binary.TupleSerializer(_binary.OptionalSerializer(_binary.int32_serializer), _binary.OptionalSerializer(_binary.string_serializer)).write(self._stream, value)
+
+    def _write_tuple_of_vectors(self, value: MyTuple[list[yardl.Int32], list[yardl.Float32]]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("TupleOfVectors", pos)
+        tuples.binary.TupleSerializer(_binary.VectorSerializer(_binary.int32_serializer), _binary.VectorSerializer(_binary.float32_serializer)).write(self._stream, value)
+
+
+class BinaryAdvancedGenericsIndexedReader(_binary.BinaryProtocolIndexedReader, AdvancedGenericsIndexedReaderBase):
+    """Binary indexed writer for the AdvancedGenerics protocol."""
+
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
+        AdvancedGenericsIndexedReaderBase.__init__(self)
+        _binary.BinaryProtocolIndexedReader.__init__(self, stream, AdvancedGenericsIndexedReaderBase.schema)
+
+    def _read_float_image_image(self) -> Image[np.object_]:
+        pos = self._index.get_step_offset("FloatImageImage")
+        self._stream.seek(pos)
+        return _binary.NDArraySerializer(_binary.NDArraySerializer(_binary.float32_serializer, 2), 2).read(self._stream)
+
+    def _read_generic_record_1(self) -> GenericRecord[yardl.Int32, str, np.object_]:
+        pos = self._index.get_step_offset("GenericRecord1")
+        self._stream.seek(pos)
+        return GenericRecordSerializer(_binary.int32_serializer, _binary.string_serializer).read(self._stream)
+
+    def _read_tuple_of_optionals(self) -> MyTuple[typing.Optional[yardl.Int32], typing.Optional[str]]:
+        pos = self._index.get_step_offset("TupleOfOptionals")
+        self._stream.seek(pos)
+        return tuples.binary.TupleSerializer(_binary.OptionalSerializer(_binary.int32_serializer), _binary.OptionalSerializer(_binary.string_serializer)).read(self._stream)
+
+    def _read_tuple_of_optionals_alternate_syntax(self) -> MyTuple[typing.Optional[yardl.Int32], typing.Optional[str]]:
+        pos = self._index.get_step_offset("TupleOfOptionalsAlternateSyntax")
+        self._stream.seek(pos)
+        return tuples.binary.TupleSerializer(_binary.OptionalSerializer(_binary.int32_serializer), _binary.OptionalSerializer(_binary.string_serializer)).read(self._stream)
+
+    def _read_tuple_of_vectors(self) -> MyTuple[list[yardl.Int32], list[yardl.Float32]]:
+        pos = self._index.get_step_offset("TupleOfVectors")
+        self._stream.seek(pos)
+        return tuples.binary.TupleSerializer(_binary.VectorSerializer(_binary.int32_serializer), _binary.VectorSerializer(_binary.float32_serializer)).read(self._stream)
+
 class BinaryAliasesWriter(_binary.BinaryProtocolWriter, AliasesWriterBase):
     """Binary writer for the Aliases protocol."""
-
 
     def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
         AliasesWriterBase.__init__(self)
@@ -1147,7 +2602,6 @@ class BinaryAliasesWriter(_binary.BinaryProtocolWriter, AliasesWriterBase):
 class BinaryAliasesReader(_binary.BinaryProtocolReader, AliasesReaderBase):
     """Binary writer for the Aliases protocol."""
 
-
     def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
         AliasesReaderBase.__init__(self)
         _binary.BinaryProtocolReader.__init__(self, stream, AliasesReaderBase.schema)
@@ -1182,9 +2636,128 @@ class BinaryAliasesReader(_binary.BinaryProtocolReader, AliasesReaderBase):
     def _read_stream_of_aliased_generic_union_2(self) -> collections.abc.Iterable[AliasedGenericUnion2[AliasedString, AliasedEnum]]:
         return _binary.StreamSerializer(_binary.UnionSerializer(basic_types.GenericUnion2, [(basic_types.GenericUnion2.T1, _binary.string_serializer), (basic_types.GenericUnion2.T2, _binary.EnumSerializer(_binary.int32_serializer, basic_types.Fruits))])).read(self._stream)
 
+
+class BinaryAliasesIndexedWriter(_binary.BinaryProtocolIndexedWriter, AliasesWriterBase):
+    """Binary indexed writer for the Aliases protocol."""
+
+    def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
+        AliasesWriterBase.__init__(self)
+        _binary.BinaryProtocolIndexedWriter.__init__(self, stream, AliasesWriterBase.schema)
+
+    def _write_aliased_string(self, value: AliasedString) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("AliasedString", pos)
+        _binary.string_serializer.write(self._stream, value)
+
+    def _write_aliased_enum(self, value: AliasedEnum) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("AliasedEnum", pos)
+        _binary.EnumSerializer(_binary.int32_serializer, basic_types.Fruits).write(self._stream, value)
+
+    def _write_aliased_open_generic(self, value: AliasedOpenGeneric[AliasedString, AliasedEnum]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("AliasedOpenGeneric", pos)
+        tuples.binary.TupleSerializer(_binary.string_serializer, _binary.EnumSerializer(_binary.int32_serializer, basic_types.Fruits)).write(self._stream, value)
+
+    def _write_aliased_closed_generic(self, value: AliasedClosedGeneric) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("AliasedClosedGeneric", pos)
+        tuples.binary.TupleSerializer(_binary.string_serializer, _binary.EnumSerializer(_binary.int32_serializer, basic_types.Fruits)).write(self._stream, value)
+
+    def _write_aliased_optional(self, value: AliasedOptional) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("AliasedOptional", pos)
+        _binary.OptionalSerializer(_binary.int32_serializer).write(self._stream, value)
+
+    def _write_aliased_generic_optional(self, value: AliasedGenericOptional[yardl.Float32]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("AliasedGenericOptional", pos)
+        _binary.OptionalSerializer(_binary.float32_serializer).write(self._stream, value)
+
+    def _write_aliased_generic_union_2(self, value: AliasedGenericUnion2[AliasedString, AliasedEnum]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("AliasedGenericUnion2", pos)
+        _binary.UnionSerializer(basic_types.GenericUnion2, [(basic_types.GenericUnion2.T1, _binary.string_serializer), (basic_types.GenericUnion2.T2, _binary.EnumSerializer(_binary.int32_serializer, basic_types.Fruits))]).write(self._stream, value)
+
+    def _write_aliased_generic_vector(self, value: AliasedGenericVector[yardl.Float32]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("AliasedGenericVector", pos)
+        _binary.VectorSerializer(_binary.float32_serializer).write(self._stream, value)
+
+    def _write_aliased_generic_fixed_vector(self, value: AliasedGenericFixedVector[yardl.Float32]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("AliasedGenericFixedVector", pos)
+        _binary.FixedVectorSerializer(_binary.float32_serializer, 3).write(self._stream, value)
+
+    def _write_stream_of_aliased_generic_union_2(self, value: collections.abc.Iterable[AliasedGenericUnion2[AliasedString, AliasedEnum]]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("StreamOfAliasedGenericUnion2", pos)
+        offsets, num_blocks = _binary.StreamSerializer(_binary.UnionSerializer(basic_types.GenericUnion2, [(basic_types.GenericUnion2.T1, _binary.string_serializer), (basic_types.GenericUnion2.T2, _binary.EnumSerializer(_binary.int32_serializer, basic_types.Fruits))])).write_and_save_offsets(self._stream, value)
+        self._index.add_stream_offsets("StreamOfAliasedGenericUnion2", offsets, num_blocks)
+
+
+class BinaryAliasesIndexedReader(_binary.BinaryProtocolIndexedReader, AliasesIndexedReaderBase):
+    """Binary indexed writer for the Aliases protocol."""
+
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
+        AliasesIndexedReaderBase.__init__(self)
+        _binary.BinaryProtocolIndexedReader.__init__(self, stream, AliasesIndexedReaderBase.schema)
+
+    def _read_aliased_string(self) -> AliasedString:
+        pos = self._index.get_step_offset("AliasedString")
+        self._stream.seek(pos)
+        return _binary.string_serializer.read(self._stream)
+
+    def _read_aliased_enum(self) -> AliasedEnum:
+        pos = self._index.get_step_offset("AliasedEnum")
+        self._stream.seek(pos)
+        return _binary.EnumSerializer(_binary.int32_serializer, basic_types.Fruits).read(self._stream)
+
+    def _read_aliased_open_generic(self) -> AliasedOpenGeneric[AliasedString, AliasedEnum]:
+        pos = self._index.get_step_offset("AliasedOpenGeneric")
+        self._stream.seek(pos)
+        return tuples.binary.TupleSerializer(_binary.string_serializer, _binary.EnumSerializer(_binary.int32_serializer, basic_types.Fruits)).read(self._stream)
+
+    def _read_aliased_closed_generic(self) -> AliasedClosedGeneric:
+        pos = self._index.get_step_offset("AliasedClosedGeneric")
+        self._stream.seek(pos)
+        return tuples.binary.TupleSerializer(_binary.string_serializer, _binary.EnumSerializer(_binary.int32_serializer, basic_types.Fruits)).read(self._stream)
+
+    def _read_aliased_optional(self) -> AliasedOptional:
+        pos = self._index.get_step_offset("AliasedOptional")
+        self._stream.seek(pos)
+        return _binary.OptionalSerializer(_binary.int32_serializer).read(self._stream)
+
+    def _read_aliased_generic_optional(self) -> AliasedGenericOptional[yardl.Float32]:
+        pos = self._index.get_step_offset("AliasedGenericOptional")
+        self._stream.seek(pos)
+        return _binary.OptionalSerializer(_binary.float32_serializer).read(self._stream)
+
+    def _read_aliased_generic_union_2(self) -> AliasedGenericUnion2[AliasedString, AliasedEnum]:
+        pos = self._index.get_step_offset("AliasedGenericUnion2")
+        self._stream.seek(pos)
+        return _binary.UnionSerializer(basic_types.GenericUnion2, [(basic_types.GenericUnion2.T1, _binary.string_serializer), (basic_types.GenericUnion2.T2, _binary.EnumSerializer(_binary.int32_serializer, basic_types.Fruits))]).read(self._stream)
+
+    def _read_aliased_generic_vector(self) -> AliasedGenericVector[yardl.Float32]:
+        pos = self._index.get_step_offset("AliasedGenericVector")
+        self._stream.seek(pos)
+        return _binary.VectorSerializer(_binary.float32_serializer).read(self._stream)
+
+    def _read_aliased_generic_fixed_vector(self) -> AliasedGenericFixedVector[yardl.Float32]:
+        pos = self._index.get_step_offset("AliasedGenericFixedVector")
+        self._stream.seek(pos)
+        return _binary.FixedVectorSerializer(_binary.float32_serializer, 3).read(self._stream)
+
+    def _read_stream_of_aliased_generic_union_2(self, idx: int) -> collections.abc.Iterable[AliasedGenericUnion2[AliasedString, AliasedEnum]]: # pyright: ignore [reportIncompatibleMethodOverride]
+        offset, remaining = self._index.find_stream_item("StreamOfAliasedGenericUnion2", idx)
+        self._stream.seek(offset)
+        return _binary.StreamSerializer(_binary.UnionSerializer(basic_types.GenericUnion2, [(basic_types.GenericUnion2.T1, _binary.string_serializer), (basic_types.GenericUnion2.T2, _binary.EnumSerializer(_binary.int32_serializer, basic_types.Fruits))])).read_mid_stream(self._stream, remaining)
+
+    def _count_stream_of_aliased_generic_union_2(self) -> int:
+        return self._index.get_stream_size("StreamOfAliasedGenericUnion2")
+
 class BinaryStreamsOfAliasedUnionsWriter(_binary.BinaryProtocolWriter, StreamsOfAliasedUnionsWriterBase):
     """Binary writer for the StreamsOfAliasedUnions protocol."""
-
 
     def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
         StreamsOfAliasedUnionsWriterBase.__init__(self)
@@ -1200,7 +2773,6 @@ class BinaryStreamsOfAliasedUnionsWriter(_binary.BinaryProtocolWriter, StreamsOf
 class BinaryStreamsOfAliasedUnionsReader(_binary.BinaryProtocolReader, StreamsOfAliasedUnionsReaderBase):
     """Binary writer for the StreamsOfAliasedUnions protocol."""
 
-
     def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
         StreamsOfAliasedUnionsReaderBase.__init__(self)
         _binary.BinaryProtocolReader.__init__(self, stream, StreamsOfAliasedUnionsReaderBase.schema)
@@ -1211,9 +2783,52 @@ class BinaryStreamsOfAliasedUnionsReader(_binary.BinaryProtocolReader, StreamsOf
     def _read_nullable_int_or_simple_record(self) -> collections.abc.Iterable[typing.Optional[AliasedNullableIntSimpleRecord]]:
         return _binary.StreamSerializer(_binary.UnionSerializer(AliasedNullableIntSimpleRecord, [None, (AliasedNullableIntSimpleRecord.Int32, _binary.int32_serializer), (AliasedNullableIntSimpleRecord.SimpleRecord, SimpleRecordSerializer())])).read(self._stream)
 
+
+class BinaryStreamsOfAliasedUnionsIndexedWriter(_binary.BinaryProtocolIndexedWriter, StreamsOfAliasedUnionsWriterBase):
+    """Binary indexed writer for the StreamsOfAliasedUnions protocol."""
+
+    def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
+        StreamsOfAliasedUnionsWriterBase.__init__(self)
+        _binary.BinaryProtocolIndexedWriter.__init__(self, stream, StreamsOfAliasedUnionsWriterBase.schema)
+
+    def _write_int_or_simple_record(self, value: collections.abc.Iterable[AliasedIntOrSimpleRecord]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("IntOrSimpleRecord", pos)
+        offsets, num_blocks = _binary.StreamSerializer(_binary.UnionSerializer(AliasedIntOrSimpleRecord, [(AliasedIntOrSimpleRecord.Int32, _binary.int32_serializer), (AliasedIntOrSimpleRecord.SimpleRecord, SimpleRecordSerializer())])).write_and_save_offsets(self._stream, value)
+        self._index.add_stream_offsets("IntOrSimpleRecord", offsets, num_blocks)
+
+    def _write_nullable_int_or_simple_record(self, value: collections.abc.Iterable[typing.Optional[AliasedNullableIntSimpleRecord]]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("NullableIntOrSimpleRecord", pos)
+        offsets, num_blocks = _binary.StreamSerializer(_binary.UnionSerializer(AliasedNullableIntSimpleRecord, [None, (AliasedNullableIntSimpleRecord.Int32, _binary.int32_serializer), (AliasedNullableIntSimpleRecord.SimpleRecord, SimpleRecordSerializer())])).write_and_save_offsets(self._stream, value)
+        self._index.add_stream_offsets("NullableIntOrSimpleRecord", offsets, num_blocks)
+
+
+class BinaryStreamsOfAliasedUnionsIndexedReader(_binary.BinaryProtocolIndexedReader, StreamsOfAliasedUnionsIndexedReaderBase):
+    """Binary indexed writer for the StreamsOfAliasedUnions protocol."""
+
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
+        StreamsOfAliasedUnionsIndexedReaderBase.__init__(self)
+        _binary.BinaryProtocolIndexedReader.__init__(self, stream, StreamsOfAliasedUnionsIndexedReaderBase.schema)
+
+    def _read_int_or_simple_record(self, idx: int) -> collections.abc.Iterable[AliasedIntOrSimpleRecord]: # pyright: ignore [reportIncompatibleMethodOverride]
+        offset, remaining = self._index.find_stream_item("IntOrSimpleRecord", idx)
+        self._stream.seek(offset)
+        return _binary.StreamSerializer(_binary.UnionSerializer(AliasedIntOrSimpleRecord, [(AliasedIntOrSimpleRecord.Int32, _binary.int32_serializer), (AliasedIntOrSimpleRecord.SimpleRecord, SimpleRecordSerializer())])).read_mid_stream(self._stream, remaining)
+
+    def _count_int_or_simple_record(self) -> int:
+        return self._index.get_stream_size("IntOrSimpleRecord")
+
+    def _read_nullable_int_or_simple_record(self, idx: int) -> collections.abc.Iterable[typing.Optional[AliasedNullableIntSimpleRecord]]: # pyright: ignore [reportIncompatibleMethodOverride]
+        offset, remaining = self._index.find_stream_item("NullableIntOrSimpleRecord", idx)
+        self._stream.seek(offset)
+        return _binary.StreamSerializer(_binary.UnionSerializer(AliasedNullableIntSimpleRecord, [None, (AliasedNullableIntSimpleRecord.Int32, _binary.int32_serializer), (AliasedNullableIntSimpleRecord.SimpleRecord, SimpleRecordSerializer())])).read_mid_stream(self._stream, remaining)
+
+    def _count_nullable_int_or_simple_record(self) -> int:
+        return self._index.get_stream_size("NullableIntOrSimpleRecord")
+
 class BinaryProtocolWithComputedFieldsWriter(_binary.BinaryProtocolWriter, ProtocolWithComputedFieldsWriterBase):
     """Binary writer for the ProtocolWithComputedFields protocol."""
-
 
     def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
         ProtocolWithComputedFieldsWriterBase.__init__(self)
@@ -1226,7 +2841,6 @@ class BinaryProtocolWithComputedFieldsWriter(_binary.BinaryProtocolWriter, Proto
 class BinaryProtocolWithComputedFieldsReader(_binary.BinaryProtocolReader, ProtocolWithComputedFieldsReaderBase):
     """Binary writer for the ProtocolWithComputedFields protocol."""
 
-
     def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
         ProtocolWithComputedFieldsReaderBase.__init__(self)
         _binary.BinaryProtocolReader.__init__(self, stream, ProtocolWithComputedFieldsReaderBase.schema)
@@ -1234,9 +2848,34 @@ class BinaryProtocolWithComputedFieldsReader(_binary.BinaryProtocolReader, Proto
     def _read_record_with_computed_fields(self) -> RecordWithComputedFields:
         return RecordWithComputedFieldsSerializer().read(self._stream)
 
+
+class BinaryProtocolWithComputedFieldsIndexedWriter(_binary.BinaryProtocolIndexedWriter, ProtocolWithComputedFieldsWriterBase):
+    """Binary indexed writer for the ProtocolWithComputedFields protocol."""
+
+    def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
+        ProtocolWithComputedFieldsWriterBase.__init__(self)
+        _binary.BinaryProtocolIndexedWriter.__init__(self, stream, ProtocolWithComputedFieldsWriterBase.schema)
+
+    def _write_record_with_computed_fields(self, value: RecordWithComputedFields) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("RecordWithComputedFields", pos)
+        RecordWithComputedFieldsSerializer().write(self._stream, value)
+
+
+class BinaryProtocolWithComputedFieldsIndexedReader(_binary.BinaryProtocolIndexedReader, ProtocolWithComputedFieldsIndexedReaderBase):
+    """Binary indexed writer for the ProtocolWithComputedFields protocol."""
+
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
+        ProtocolWithComputedFieldsIndexedReaderBase.__init__(self)
+        _binary.BinaryProtocolIndexedReader.__init__(self, stream, ProtocolWithComputedFieldsIndexedReaderBase.schema)
+
+    def _read_record_with_computed_fields(self) -> RecordWithComputedFields:
+        pos = self._index.get_step_offset("RecordWithComputedFields")
+        self._stream.seek(pos)
+        return RecordWithComputedFieldsSerializer().read(self._stream)
+
 class BinaryProtocolWithKeywordStepsWriter(_binary.BinaryProtocolWriter, ProtocolWithKeywordStepsWriterBase):
     """Binary writer for the ProtocolWithKeywordSteps protocol."""
-
 
     def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
         ProtocolWithKeywordStepsWriterBase.__init__(self)
@@ -1252,7 +2891,6 @@ class BinaryProtocolWithKeywordStepsWriter(_binary.BinaryProtocolWriter, Protoco
 class BinaryProtocolWithKeywordStepsReader(_binary.BinaryProtocolReader, ProtocolWithKeywordStepsReaderBase):
     """Binary writer for the ProtocolWithKeywordSteps protocol."""
 
-
     def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
         ProtocolWithKeywordStepsReaderBase.__init__(self)
         _binary.BinaryProtocolReader.__init__(self, stream, ProtocolWithKeywordStepsReaderBase.schema)
@@ -1263,9 +2901,48 @@ class BinaryProtocolWithKeywordStepsReader(_binary.BinaryProtocolReader, Protoco
     def _read_float(self) -> EnumWithKeywordSymbols:
         return _binary.EnumSerializer(_binary.int32_serializer, EnumWithKeywordSymbols).read(self._stream)
 
+
+class BinaryProtocolWithKeywordStepsIndexedWriter(_binary.BinaryProtocolIndexedWriter, ProtocolWithKeywordStepsWriterBase):
+    """Binary indexed writer for the ProtocolWithKeywordSteps protocol."""
+
+    def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
+        ProtocolWithKeywordStepsWriterBase.__init__(self)
+        _binary.BinaryProtocolIndexedWriter.__init__(self, stream, ProtocolWithKeywordStepsWriterBase.schema)
+
+    def _write_int(self, value: collections.abc.Iterable[RecordWithKeywordFields]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("Int", pos)
+        offsets, num_blocks = _binary.StreamSerializer(RecordWithKeywordFieldsSerializer()).write_and_save_offsets(self._stream, value)
+        self._index.add_stream_offsets("Int", offsets, num_blocks)
+
+    def _write_float(self, value: EnumWithKeywordSymbols) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("Float", pos)
+        _binary.EnumSerializer(_binary.int32_serializer, EnumWithKeywordSymbols).write(self._stream, value)
+
+
+class BinaryProtocolWithKeywordStepsIndexedReader(_binary.BinaryProtocolIndexedReader, ProtocolWithKeywordStepsIndexedReaderBase):
+    """Binary indexed writer for the ProtocolWithKeywordSteps protocol."""
+
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
+        ProtocolWithKeywordStepsIndexedReaderBase.__init__(self)
+        _binary.BinaryProtocolIndexedReader.__init__(self, stream, ProtocolWithKeywordStepsIndexedReaderBase.schema)
+
+    def _read_int(self, idx: int) -> collections.abc.Iterable[RecordWithKeywordFields]: # pyright: ignore [reportIncompatibleMethodOverride]
+        offset, remaining = self._index.find_stream_item("Int", idx)
+        self._stream.seek(offset)
+        return _binary.StreamSerializer(RecordWithKeywordFieldsSerializer()).read_mid_stream(self._stream, remaining)
+
+    def _count_int(self) -> int:
+        return self._index.get_stream_size("Int")
+
+    def _read_float(self) -> EnumWithKeywordSymbols:
+        pos = self._index.get_step_offset("Float")
+        self._stream.seek(pos)
+        return _binary.EnumSerializer(_binary.int32_serializer, EnumWithKeywordSymbols).read(self._stream)
+
 class BinaryProtocolWithOptionalDateWriter(_binary.BinaryProtocolWriter, ProtocolWithOptionalDateWriterBase):
     """Binary writer for the ProtocolWithOptionalDate protocol."""
-
 
     def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
         ProtocolWithOptionalDateWriterBase.__init__(self)
@@ -1278,12 +2955,37 @@ class BinaryProtocolWithOptionalDateWriter(_binary.BinaryProtocolWriter, Protoco
 class BinaryProtocolWithOptionalDateReader(_binary.BinaryProtocolReader, ProtocolWithOptionalDateReaderBase):
     """Binary writer for the ProtocolWithOptionalDate protocol."""
 
-
     def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
         ProtocolWithOptionalDateReaderBase.__init__(self)
         _binary.BinaryProtocolReader.__init__(self, stream, ProtocolWithOptionalDateReaderBase.schema)
 
     def _read_record(self) -> typing.Optional[RecordWithOptionalDate]:
+        return _binary.OptionalSerializer(RecordWithOptionalDateSerializer()).read(self._stream)
+
+
+class BinaryProtocolWithOptionalDateIndexedWriter(_binary.BinaryProtocolIndexedWriter, ProtocolWithOptionalDateWriterBase):
+    """Binary indexed writer for the ProtocolWithOptionalDate protocol."""
+
+    def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
+        ProtocolWithOptionalDateWriterBase.__init__(self)
+        _binary.BinaryProtocolIndexedWriter.__init__(self, stream, ProtocolWithOptionalDateWriterBase.schema)
+
+    def _write_record(self, value: typing.Optional[RecordWithOptionalDate]) -> None:
+        pos = self._stream.pos()
+        self._index.set_step_offset("Record", pos)
+        _binary.OptionalSerializer(RecordWithOptionalDateSerializer()).write(self._stream, value)
+
+
+class BinaryProtocolWithOptionalDateIndexedReader(_binary.BinaryProtocolIndexedReader, ProtocolWithOptionalDateIndexedReaderBase):
+    """Binary indexed writer for the ProtocolWithOptionalDate protocol."""
+
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
+        ProtocolWithOptionalDateIndexedReaderBase.__init__(self)
+        _binary.BinaryProtocolIndexedReader.__init__(self, stream, ProtocolWithOptionalDateIndexedReaderBase.schema)
+
+    def _read_record(self) -> typing.Optional[RecordWithOptionalDate]:
+        pos = self._index.get_step_offset("Record")
+        self._stream.seek(pos)
         return _binary.OptionalSerializer(RecordWithOptionalDateSerializer()).read(self._stream)
 
 class SmallBenchmarkRecordSerializer(_binary.RecordSerializer[SmallBenchmarkRecord]):

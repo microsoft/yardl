@@ -491,9 +491,11 @@ class ProtocolWithChangesWriterBase {
   static std::string SchemaFromVersion(Version version);
 
   private:
+  virtual void InvalidState(uint8_t attempted, [[maybe_unused]] bool end);
   uint8_t state_ = 0;
 
   friend class ProtocolWithChangesReaderBase;
+  friend class ProtocolWithChangesIndexedReaderBase;
 };
 
 // Abstract reader for the ProtocolWithChanges protocol.
@@ -942,7 +944,68 @@ class ProtocolWithChangesReaderBase {
   static Version VersionFromSchema(const std::string& schema);
 
   private:
+  virtual void InvalidState(uint8_t attempted);
   uint8_t state_ = 0;
+};
+
+// Abstract Indexed reader for the ProtocolWithChanges protocol.
+class ProtocolWithChangesIndexedReaderBase : public ProtocolWithChangesReaderBase {
+  public:
+  // Stream and Vector type changes
+  using ProtocolWithChangesReaderBase::ReadStreamIntToStringToFloat;
+  [[nodiscard]] bool ReadStreamIntToStringToFloat(int32_t& value, size_t idx);
+  [[nodiscard]] bool ReadStreamIntToStringToFloat(std::vector<int32_t>& values, size_t idx);
+  [[nodiscard]] size_t CountStreamIntToStringToFloat();
+
+  using ProtocolWithChangesReaderBase::ReadStreamUnionReordered;
+  [[nodiscard]] bool ReadStreamUnionReordered(std::variant<int32_t, std::string>& value, size_t idx);
+  [[nodiscard]] bool ReadStreamUnionReordered(std::vector<std::variant<int32_t, std::string>>& values, size_t idx);
+  [[nodiscard]] size_t CountStreamUnionReordered();
+
+  using ProtocolWithChangesReaderBase::ReadStreamOfAliasTypeChange;
+  [[nodiscard]] bool ReadStreamOfAliasTypeChange(evo_test::StreamItem& value, size_t idx);
+  [[nodiscard]] bool ReadStreamOfAliasTypeChange(std::vector<evo_test::StreamItem>& values, size_t idx);
+  [[nodiscard]] size_t CountStreamOfAliasTypeChange();
+
+  using ProtocolWithChangesReaderBase::ReadGenericRecordStream;
+  [[nodiscard]] bool ReadGenericRecordStream(evo_test::GenericRecord<int32_t, std::string>& value, size_t idx);
+  [[nodiscard]] bool ReadGenericRecordStream(std::vector<evo_test::GenericRecord<int32_t, std::string>>& values, size_t idx);
+  [[nodiscard]] size_t CountGenericRecordStream();
+
+  using ProtocolWithChangesReaderBase::ReadGenericParentRecordStream;
+  [[nodiscard]] bool ReadGenericParentRecordStream(evo_test::GenericParentRecord<int32_t>& value, size_t idx);
+  [[nodiscard]] bool ReadGenericParentRecordStream(std::vector<evo_test::GenericParentRecord<int32_t>>& values, size_t idx);
+  [[nodiscard]] size_t CountGenericParentRecordStream();
+
+  using ProtocolWithChangesReaderBase::ReadStreamedRecordWithChanges;
+  [[nodiscard]] bool ReadStreamedRecordWithChanges(evo_test::RecordWithChanges& value, size_t idx);
+  [[nodiscard]] bool ReadStreamedRecordWithChanges(std::vector<evo_test::RecordWithChanges>& values, size_t idx);
+  [[nodiscard]] size_t CountStreamedRecordWithChanges();
+
+  virtual ~ProtocolWithChangesIndexedReaderBase() = default;
+
+  protected:
+  virtual bool ReadStreamIntToStringToFloatImpl(int32_t& value, size_t idx) = 0;
+  virtual bool ReadStreamIntToStringToFloatImpl(std::vector<int32_t>& values, size_t idx) = 0;
+  virtual size_t CountStreamIntToStringToFloatImpl() = 0;
+  virtual bool ReadStreamUnionReorderedImpl(std::variant<int32_t, std::string>& value, size_t idx) = 0;
+  virtual bool ReadStreamUnionReorderedImpl(std::vector<std::variant<int32_t, std::string>>& values, size_t idx) = 0;
+  virtual size_t CountStreamUnionReorderedImpl() = 0;
+  virtual bool ReadStreamOfAliasTypeChangeImpl(evo_test::StreamItem& value, size_t idx) = 0;
+  virtual bool ReadStreamOfAliasTypeChangeImpl(std::vector<evo_test::StreamItem>& values, size_t idx) = 0;
+  virtual size_t CountStreamOfAliasTypeChangeImpl() = 0;
+  virtual bool ReadGenericRecordStreamImpl(evo_test::GenericRecord<int32_t, std::string>& value, size_t idx) = 0;
+  virtual bool ReadGenericRecordStreamImpl(std::vector<evo_test::GenericRecord<int32_t, std::string>>& values, size_t idx) = 0;
+  virtual size_t CountGenericRecordStreamImpl() = 0;
+  virtual bool ReadGenericParentRecordStreamImpl(evo_test::GenericParentRecord<int32_t>& value, size_t idx) = 0;
+  virtual bool ReadGenericParentRecordStreamImpl(std::vector<evo_test::GenericParentRecord<int32_t>>& values, size_t idx) = 0;
+  virtual size_t CountGenericParentRecordStreamImpl() = 0;
+  virtual bool ReadStreamedRecordWithChangesImpl(evo_test::RecordWithChanges& value, size_t idx) = 0;
+  virtual bool ReadStreamedRecordWithChangesImpl(std::vector<evo_test::RecordWithChanges>& values, size_t idx) = 0;
+  virtual size_t CountStreamedRecordWithChangesImpl() = 0;
+  virtual void CloseImpl() {}
+  private:
+  virtual void InvalidState(uint8_t attempted) override;
 };
 
 // Abstract writer for the UnusedProtocol protocol.
@@ -980,9 +1043,11 @@ class UnusedProtocolWriterBase {
   static std::string SchemaFromVersion(Version version);
 
   private:
+  virtual void InvalidState(uint8_t attempted, [[maybe_unused]] bool end);
   uint8_t state_ = 0;
 
   friend class UnusedProtocolReaderBase;
+  friend class UnusedProtocolIndexedReaderBase;
 };
 
 // Abstract reader for the UnusedProtocol protocol.
@@ -1012,6 +1077,26 @@ class UnusedProtocolReaderBase {
   static Version VersionFromSchema(const std::string& schema);
 
   private:
+  virtual void InvalidState(uint8_t attempted);
   uint8_t state_ = 0;
+};
+
+// Abstract Indexed reader for the UnusedProtocol protocol.
+class UnusedProtocolIndexedReaderBase : public UnusedProtocolReaderBase {
+  public:
+  using UnusedProtocolReaderBase::ReadRecords;
+  [[nodiscard]] bool ReadRecords(evo_test::UnchangedRecord& value, size_t idx);
+  [[nodiscard]] bool ReadRecords(std::vector<evo_test::UnchangedRecord>& values, size_t idx);
+  [[nodiscard]] size_t CountRecords();
+
+  virtual ~UnusedProtocolIndexedReaderBase() = default;
+
+  protected:
+  virtual bool ReadRecordsImpl(evo_test::UnchangedRecord& value, size_t idx) = 0;
+  virtual bool ReadRecordsImpl(std::vector<evo_test::UnchangedRecord>& values, size_t idx) = 0;
+  virtual size_t CountRecordsImpl() = 0;
+  virtual void CloseImpl() {}
+  private:
+  virtual void InvalidState(uint8_t attempted) override;
 };
 } // namespace evo_test

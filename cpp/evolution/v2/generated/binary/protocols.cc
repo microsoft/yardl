@@ -5385,5 +5385,5328 @@ void ProtocolWithChangesReader::CloseImpl() {
   stream_.VerifyFinished();
 }
 
+void ProtocolWithChangesIndexedWriter::WriteInt8ToIntImpl(int8_t const& value) {
+  step_index_.set_step_offset("Int8ToInt", stream_.Pos());
+  switch (version_) {
+  case Version::v1: {
+    int32_t int8_to_int = {};
+    int8_to_int = static_cast<int32_t>(value);
+    yardl::binary::WriteInteger(stream_, int8_to_int);
+    break;
+  }
+  default:
+    yardl::binary::WriteInteger(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteInt8ToLongImpl(int8_t const& value) {
+  step_index_.set_step_offset("Int8ToLong", stream_.Pos());
+  switch (version_) {
+  case Version::v1: {
+    int64_t int8_to_long = {};
+    int8_to_long = static_cast<int64_t>(value);
+    yardl::binary::WriteInteger(stream_, int8_to_long);
+    break;
+  }
+  default:
+    yardl::binary::WriteInteger(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteInt8ToUintImpl(int8_t const& value) {
+  step_index_.set_step_offset("Int8ToUint", stream_.Pos());
+  switch (version_) {
+  case Version::v1: {
+    uint32_t int8_to_uint = {};
+    if (value < 0) {
+      throw std::runtime_error("Numeric overflow detected while converting 'int8' to 'uint32'");
+    }
+    int8_to_uint = static_cast<uint32_t>(value);
+    yardl::binary::WriteInteger(stream_, int8_to_uint);
+    break;
+  }
+  default:
+    yardl::binary::WriteInteger(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteInt8ToUlongImpl(int8_t const& value) {
+  step_index_.set_step_offset("Int8ToUlong", stream_.Pos());
+  switch (version_) {
+  case Version::v1: {
+    uint64_t int8_to_ulong = {};
+    if (value < 0) {
+      throw std::runtime_error("Numeric overflow detected while converting 'int8' to 'uint64'");
+    }
+    int8_to_ulong = static_cast<uint64_t>(value);
+    yardl::binary::WriteInteger(stream_, int8_to_ulong);
+    break;
+  }
+  default:
+    yardl::binary::WriteInteger(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteInt8ToFloatImpl(int8_t const& value) {
+  step_index_.set_step_offset("Int8ToFloat", stream_.Pos());
+  switch (version_) {
+  case Version::v1: {
+    float int8_to_float = {};
+    int8_to_float = static_cast<float>(value);
+    yardl::binary::WriteFloatingPoint(stream_, int8_to_float);
+    break;
+  }
+  default:
+    yardl::binary::WriteInteger(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteInt8ToDoubleImpl(int8_t const& value) {
+  step_index_.set_step_offset("Int8ToDouble", stream_.Pos());
+  switch (version_) {
+  case Version::v1: {
+    double int8_to_double = {};
+    int8_to_double = static_cast<double>(value);
+    yardl::binary::WriteFloatingPoint(stream_, int8_to_double);
+    break;
+  }
+  default:
+    yardl::binary::WriteInteger(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteIntToUintImpl(int32_t const& value) {
+  step_index_.set_step_offset("IntToUint", stream_.Pos());
+  switch (version_) {
+  case Version::v1: {
+    uint32_t int_to_uint = {};
+    if (value < 0) {
+      throw std::runtime_error("Numeric overflow detected while converting 'int32' to 'uint32'");
+    }
+    int_to_uint = static_cast<uint32_t>(value);
+    yardl::binary::WriteInteger(stream_, int_to_uint);
+    break;
+  }
+  default:
+    yardl::binary::WriteInteger(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteIntToLongImpl(int32_t const& value) {
+  step_index_.set_step_offset("IntToLong", stream_.Pos());
+  switch (version_) {
+  case Version::v1: {
+    int64_t int_to_long = {};
+    int_to_long = static_cast<int64_t>(value);
+    yardl::binary::WriteInteger(stream_, int_to_long);
+    break;
+  }
+  default:
+    yardl::binary::WriteInteger(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteIntToFloatImpl(int32_t const& value) {
+  step_index_.set_step_offset("IntToFloat", stream_.Pos());
+  switch (version_) {
+  case Version::v1: {
+    float int_to_float = {};
+    int_to_float = static_cast<float>(value);
+    yardl::binary::WriteFloatingPoint(stream_, int_to_float);
+    break;
+  }
+  default:
+    yardl::binary::WriteInteger(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteIntToDoubleImpl(int32_t const& value) {
+  step_index_.set_step_offset("IntToDouble", stream_.Pos());
+  switch (version_) {
+  case Version::v1: {
+    double int_to_double = {};
+    int_to_double = static_cast<double>(value);
+    yardl::binary::WriteFloatingPoint(stream_, int_to_double);
+    break;
+  }
+  default:
+    yardl::binary::WriteInteger(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteUintToUlongImpl(uint32_t const& value) {
+  step_index_.set_step_offset("UintToUlong", stream_.Pos());
+  switch (version_) {
+  case Version::v1: {
+    uint64_t uint_to_ulong = {};
+    uint_to_ulong = static_cast<uint64_t>(value);
+    yardl::binary::WriteInteger(stream_, uint_to_ulong);
+    break;
+  }
+  default:
+    yardl::binary::WriteInteger(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteUintToFloatImpl(uint32_t const& value) {
+  step_index_.set_step_offset("UintToFloat", stream_.Pos());
+  switch (version_) {
+  case Version::v1: {
+    float uint_to_float = {};
+    uint_to_float = static_cast<float>(value);
+    yardl::binary::WriteFloatingPoint(stream_, uint_to_float);
+    break;
+  }
+  default:
+    yardl::binary::WriteInteger(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteUintToDoubleImpl(uint32_t const& value) {
+  step_index_.set_step_offset("UintToDouble", stream_.Pos());
+  switch (version_) {
+  case Version::v1: {
+    double uint_to_double = {};
+    uint_to_double = static_cast<double>(value);
+    yardl::binary::WriteFloatingPoint(stream_, uint_to_double);
+    break;
+  }
+  default:
+    yardl::binary::WriteInteger(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteFloatToDoubleImpl(float const& value) {
+  step_index_.set_step_offset("FloatToDouble", stream_.Pos());
+  switch (version_) {
+  case Version::v1: {
+    double float_to_double = {};
+    float_to_double = static_cast<double>(value);
+    yardl::binary::WriteFloatingPoint(stream_, float_to_double);
+    break;
+  }
+  default:
+    yardl::binary::WriteFloatingPoint(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteComplexFloatToComplexDoubleImpl(std::complex<float> const& value) {
+  step_index_.set_step_offset("ComplexFloatToComplexDouble", stream_.Pos());
+  switch (version_) {
+  case Version::v1: {
+    std::complex<double> complex_float_to_complex_double = {};
+    complex_float_to_complex_double = std::complex<double>(value);
+    yardl::binary::WriteFloatingPoint(stream_, complex_float_to_complex_double);
+    break;
+  }
+  default:
+    yardl::binary::WriteFloatingPoint(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteIntToStringImpl(int32_t const& value) {
+  step_index_.set_step_offset("IntToString", stream_.Pos());
+  switch (version_) {
+  case Version::v1: {
+    std::string int_to_string = {};
+    int_to_string = std::to_string(value);
+    yardl::binary::WriteString(stream_, int_to_string);
+    break;
+  }
+  default:
+    yardl::binary::WriteInteger(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteUintToStringImpl(uint32_t const& value) {
+  step_index_.set_step_offset("UintToString", stream_.Pos());
+  switch (version_) {
+  case Version::v1: {
+    std::string uint_to_string = {};
+    uint_to_string = std::to_string(value);
+    yardl::binary::WriteString(stream_, uint_to_string);
+    break;
+  }
+  default:
+    yardl::binary::WriteInteger(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteLongToStringImpl(int64_t const& value) {
+  step_index_.set_step_offset("LongToString", stream_.Pos());
+  switch (version_) {
+  case Version::v1: {
+    std::string long_to_string = {};
+    long_to_string = std::to_string(value);
+    yardl::binary::WriteString(stream_, long_to_string);
+    break;
+  }
+  default:
+    yardl::binary::WriteInteger(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteUlongToStringImpl(uint64_t const& value) {
+  step_index_.set_step_offset("UlongToString", stream_.Pos());
+  switch (version_) {
+  case Version::v1: {
+    std::string ulong_to_string = {};
+    ulong_to_string = std::to_string(value);
+    yardl::binary::WriteString(stream_, ulong_to_string);
+    break;
+  }
+  default:
+    yardl::binary::WriteInteger(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteFloatToStringImpl(float const& value) {
+  step_index_.set_step_offset("FloatToString", stream_.Pos());
+  switch (version_) {
+  case Version::v1: {
+    std::string float_to_string = {};
+    float_to_string = std::to_string(value);
+    yardl::binary::WriteString(stream_, float_to_string);
+    break;
+  }
+  default:
+    yardl::binary::WriteFloatingPoint(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteDoubleToStringImpl(double const& value) {
+  step_index_.set_step_offset("DoubleToString", stream_.Pos());
+  switch (version_) {
+  case Version::v1: {
+    std::string double_to_string = {};
+    double_to_string = std::to_string(value);
+    yardl::binary::WriteString(stream_, double_to_string);
+    break;
+  }
+  default:
+    yardl::binary::WriteFloatingPoint(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteIntToOptionalImpl(int32_t const& value) {
+  step_index_.set_step_offset("IntToOptional", stream_.Pos());
+  switch (version_) {
+  case Version::v1: {
+    std::optional<int32_t> int_to_optional = {};
+    int_to_optional = value;
+    yardl::binary::WriteOptional<int32_t, yardl::binary::WriteInteger>(stream_, int_to_optional);
+    break;
+  }
+  default:
+    yardl::binary::WriteInteger(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteFloatToOptionalImpl(float const& value) {
+  step_index_.set_step_offset("FloatToOptional", stream_.Pos());
+  switch (version_) {
+  case Version::v1: {
+    std::optional<float> float_to_optional = {};
+    float_to_optional = value;
+    yardl::binary::WriteOptional<float, yardl::binary::WriteFloatingPoint>(stream_, float_to_optional);
+    break;
+  }
+  default:
+    yardl::binary::WriteFloatingPoint(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteStringToOptionalImpl(std::string const& value) {
+  step_index_.set_step_offset("StringToOptional", stream_.Pos());
+  switch (version_) {
+  case Version::v1: {
+    std::optional<std::string> string_to_optional = {};
+    string_to_optional = value;
+    yardl::binary::WriteOptional<std::string, yardl::binary::WriteString>(stream_, string_to_optional);
+    break;
+  }
+  default:
+    yardl::binary::WriteString(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteIntToUnionImpl(int32_t const& value) {
+  step_index_.set_step_offset("IntToUnion", stream_.Pos());
+  switch (version_) {
+  case Version::v1: {
+    std::variant<int32_t, bool> int_to_union = {};
+    int_to_union = value;
+    WriteUnion<int32_t, yardl::binary::WriteInteger, bool, yardl::binary::WriteInteger>(stream_, int_to_union);
+    break;
+  }
+  default:
+    yardl::binary::WriteInteger(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteFloatToUnionImpl(float const& value) {
+  step_index_.set_step_offset("FloatToUnion", stream_.Pos());
+  switch (version_) {
+  case Version::v1: {
+    std::variant<float, bool> float_to_union = {};
+    float_to_union = value;
+    WriteUnion<float, yardl::binary::WriteFloatingPoint, bool, yardl::binary::WriteInteger>(stream_, float_to_union);
+    break;
+  }
+  default:
+    yardl::binary::WriteFloatingPoint(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteStringToUnionImpl(std::string const& value) {
+  step_index_.set_step_offset("StringToUnion", stream_.Pos());
+  switch (version_) {
+  case Version::v1: {
+    std::variant<std::string, bool> string_to_union = {};
+    string_to_union = value;
+    WriteUnion<std::string, yardl::binary::WriteString, bool, yardl::binary::WriteInteger>(stream_, string_to_union);
+    break;
+  }
+  default:
+    yardl::binary::WriteString(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteOptionalIntToFloatImpl(std::optional<int32_t> const& value) {
+  step_index_.set_step_offset("OptionalIntToFloat", stream_.Pos());
+  switch (version_) {
+  case Version::v1: {
+    std::optional<float> optional_int_to_float = {};
+    if (value.has_value()) {
+      optional_int_to_float = static_cast<float>(value.value());
+    }
+    yardl::binary::WriteOptional<float, yardl::binary::WriteFloatingPoint>(stream_, optional_int_to_float);
+    break;
+  }
+  default:
+    yardl::binary::WriteOptional<int32_t, yardl::binary::WriteInteger>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteOptionalFloatToStringImpl(std::optional<float> const& value) {
+  step_index_.set_step_offset("OptionalFloatToString", stream_.Pos());
+  switch (version_) {
+  case Version::v1: {
+    std::optional<std::string> optional_float_to_string = {};
+    if (value.has_value()) {
+      optional_float_to_string = std::to_string(value.value());
+    }
+    yardl::binary::WriteOptional<std::string, yardl::binary::WriteString>(stream_, optional_float_to_string);
+    break;
+  }
+  default:
+    yardl::binary::WriteOptional<float, yardl::binary::WriteFloatingPoint>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteAliasedLongToStringImpl(evo_test::AliasedLongToString const& value) {
+  step_index_.set_step_offset("AliasedLongToString", stream_.Pos());
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::WriteAliasedLongToString_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::WriteAliasedLongToString(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteStringToAliasedStringImpl(std::string const& value) {
+  step_index_.set_step_offset("StringToAliasedString", stream_.Pos());
+  yardl::binary::WriteString(stream_, value);
+}
+
+void ProtocolWithChangesIndexedWriter::WriteStringToAliasedIntImpl(std::string const& value) {
+  step_index_.set_step_offset("StringToAliasedInt", stream_.Pos());
+  switch (version_) {
+  case Version::v1: {
+    int32_t string_to_aliased_int = {};
+    try {
+      string_to_aliased_int = std::stoi(value);
+    } catch (...) {
+      throw std::runtime_error("Unable to convert string \"" + value + "\" to number");
+    }
+    yardl::binary::WriteInteger(stream_, string_to_aliased_int);
+    break;
+  }
+  default:
+    yardl::binary::WriteString(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteEnumToAliasedEnumImpl(evo_test::GrowingEnum const& value) {
+  step_index_.set_step_offset("EnumToAliasedEnum", stream_.Pos());
+  switch (version_) {
+  case Version::v0: {
+    yardl::binary::WriteEnum<evo_test::GrowingEnum_v0>(stream_, value);
+    break;
+  }
+  case Version::v1: {
+    evo_test::binary::WriteAliasedEnum_v1(stream_, value);
+    break;
+  }
+  default:
+    yardl::binary::WriteEnum<evo_test::GrowingEnum>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteOptionalIntToUnionImpl(std::optional<int32_t> const& value) {
+  step_index_.set_step_offset("OptionalIntToUnion", stream_.Pos());
+  switch (version_) {
+  case Version::v1: {
+    std::variant<std::monostate, int32_t, std::string> optional_int_to_union = {};
+    if (value.has_value()) {
+      optional_int_to_union = value.value();
+    } else {
+      optional_int_to_union = std::monostate{};
+    }
+    WriteUnion<std::monostate, yardl::binary::WriteMonostate, int32_t, yardl::binary::WriteInteger, std::string, yardl::binary::WriteString>(stream_, optional_int_to_union);
+    break;
+  }
+  default:
+    yardl::binary::WriteOptional<int32_t, yardl::binary::WriteInteger>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteOptionalRecordToUnionImpl(std::optional<evo_test::RecordWithChanges> const& value) {
+  step_index_.set_step_offset("OptionalRecordToUnion", stream_.Pos());
+  switch (version_) {
+  case Version::v0: {
+    yardl::binary::WriteOptional<evo_test::RecordWithChanges_v0, evo_test::binary::WriteRecordWithChanges_v0>(stream_, value);
+    break;
+  }
+  case Version::v1: {
+    std::variant<std::monostate, evo_test::RecordWithChanges_v1, std::string> optional_record_to_union = {};
+    if (value.has_value()) {
+      optional_record_to_union = value.value();
+    } else {
+      optional_record_to_union = std::monostate{};
+    }
+    WriteUnion<std::monostate, yardl::binary::WriteMonostate, evo_test::RecordWithChanges_v1, evo_test::binary::WriteRecordWithChanges_v1, std::string, yardl::binary::WriteString>(stream_, optional_record_to_union);
+    break;
+  }
+  default:
+    yardl::binary::WriteOptional<evo_test::RecordWithChanges, evo_test::binary::WriteRecordWithChanges>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteRecordWithChangesImpl(evo_test::RecordWithChanges const& value) {
+  step_index_.set_step_offset("RecordWithChanges", stream_.Pos());
+  switch (version_) {
+  case Version::v0: {
+    evo_test::binary::WriteRecordWithChanges_v0(stream_, value);
+    break;
+  }
+  case Version::v1: {
+    evo_test::binary::WriteRecordWithChanges_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::WriteRecordWithChanges(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteAliasedRecordWithChangesImpl(evo_test::AliasedRecordWithChanges const& value) {
+  step_index_.set_step_offset("AliasedRecordWithChanges", stream_.Pos());
+  switch (version_) {
+  case Version::v0: {
+    evo_test::binary::WriteAliasedRecordWithChanges_v0(stream_, value);
+    break;
+  }
+  case Version::v1: {
+    evo_test::binary::WriteAliasedRecordWithChanges_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::WriteAliasedRecordWithChanges(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteRecordToRenamedRecordImpl(evo_test::RenamedRecord const& value) {
+  step_index_.set_step_offset("RecordToRenamedRecord", stream_.Pos());
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::WriteRenamedRecord_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::WriteRenamedRecord(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteRecordToAliasedRecordImpl(evo_test::RecordWithChanges const& value) {
+  step_index_.set_step_offset("RecordToAliasedRecord", stream_.Pos());
+  switch (version_) {
+  case Version::v0: {
+    evo_test::binary::WriteRecordWithChanges_v0(stream_, value);
+    break;
+  }
+  case Version::v1: {
+    evo_test::binary::WriteAliasedRecordWithChanges_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::WriteRecordWithChanges(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteRecordToAliasedAliasImpl(evo_test::RecordWithChanges const& value) {
+  step_index_.set_step_offset("RecordToAliasedAlias", stream_.Pos());
+  switch (version_) {
+  case Version::v0: {
+    evo_test::binary::WriteRecordWithChanges_v0(stream_, value);
+    break;
+  }
+  case Version::v1: {
+    evo_test::binary::WriteAliasOfAliasedRecordWithChanges_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::WriteRecordWithChanges(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteStreamIntToStringToFloatImpl(float const& value) {
+  step_index_.set_step_offset("StreamIntToStringToFloat", stream_.Pos());
+  size_t item_offset = 0;
+  switch (version_) {
+  case Version::v0: {
+    int32_t stream_int_to_string_to_float = {};
+    if (value > std::numeric_limits<int32_t>::max() || value < std::numeric_limits<int32_t>::lowest()) {
+      throw std::runtime_error("Numeric overflow detected while converting 'float32' to 'int32'");
+    }
+    stream_int_to_string_to_float = static_cast<int32_t>(std::round(value));
+    yardl::binary::WriteBlockAndSaveOffset<int32_t, yardl::binary::WriteInteger>(stream_, stream_int_to_string_to_float, item_offset);
+    break;
+  }
+  case Version::v1: {
+    std::string stream_int_to_string_to_float = {};
+    stream_int_to_string_to_float = std::to_string(value);
+    yardl::binary::WriteBlockAndSaveOffset<std::string, yardl::binary::WriteString>(stream_, stream_int_to_string_to_float, item_offset);
+    break;
+  }
+  default:
+    yardl::binary::WriteBlockAndSaveOffset<float, yardl::binary::WriteFloatingPoint>(stream_, value, item_offset);
+    break;
+  }
+  step_index_.add_stream_offset("StreamIntToStringToFloat", item_offset);
+}
+
+void ProtocolWithChangesIndexedWriter::WriteStreamIntToStringToFloatImpl(std::vector<float> const& values) {
+  step_index_.set_step_offset("StreamIntToStringToFloat", stream_.Pos());
+  std::vector<size_t> item_offsets;
+  item_offsets.reserve(values.size());
+  if (!values.empty()) {
+    switch (version_) {
+    case Version::v0: {
+      std::vector<int32_t> stream_int_to_string_to_float = {};
+      stream_int_to_string_to_float.resize(values.size());
+      for (size_t i = 0; i < values.size(); i++) {
+        int32_t item = {};
+        if (values[i] > std::numeric_limits<int32_t>::max() || values[i] < std::numeric_limits<int32_t>::lowest()) {
+          throw std::runtime_error("Numeric overflow detected while converting 'float32' to 'int32'");
+        }
+        item = static_cast<int32_t>(std::round(values[i]));
+        stream_int_to_string_to_float[i] = item;
+      }
+      yardl::binary::WriteVectorAndSaveOffsets<int32_t, yardl::binary::WriteInteger>(stream_, stream_int_to_string_to_float, item_offsets);
+      break;
+    }
+    case Version::v1: {
+      std::vector<std::string> stream_int_to_string_to_float = {};
+      stream_int_to_string_to_float.resize(values.size());
+      for (size_t i = 0; i < values.size(); i++) {
+        std::string item = {};
+        item = std::to_string(values[i]);
+        stream_int_to_string_to_float[i] = item;
+      }
+      yardl::binary::WriteVectorAndSaveOffsets<std::string, yardl::binary::WriteString>(stream_, stream_int_to_string_to_float, item_offsets);
+      break;
+    }
+    default:
+      yardl::binary::WriteVectorAndSaveOffsets<float, yardl::binary::WriteFloatingPoint>(stream_, values, item_offsets);
+      break;
+    }
+  }
+  step_index_.add_stream_offsets("StreamIntToStringToFloat", item_offsets);
+}
+
+void ProtocolWithChangesIndexedWriter::EndStreamIntToStringToFloatImpl() {
+  step_index_.set_step_offset("StreamIntToStringToFloat", stream_.Pos());
+  step_index_.add_stream_offsets("StreamIntToStringToFloat", std::vector<size_t>{});
+  switch (version_) {
+  default:
+    yardl::binary::WriteInteger(stream_, 0U);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteVectorIntToStringToFloatImpl(std::vector<float> const& value) {
+  step_index_.set_step_offset("VectorIntToStringToFloat", stream_.Pos());
+  switch (version_) {
+  case Version::v0: {
+    std::vector<int32_t> vector_int_to_string_to_float = {};
+    vector_int_to_string_to_float.resize(value.size());
+    for (size_t i = 0; i < value.size(); i++) {
+      int32_t item = {};
+      if (value[i] > std::numeric_limits<int32_t>::max() || value[i] < std::numeric_limits<int32_t>::lowest()) {
+        throw std::runtime_error("Numeric overflow detected while converting 'float32' to 'int32'");
+      }
+      item = static_cast<int32_t>(std::round(value[i]));
+      vector_int_to_string_to_float[i] = item;
+    }
+    yardl::binary::WriteVector<int32_t, yardl::binary::WriteInteger>(stream_, vector_int_to_string_to_float);
+    break;
+  }
+  case Version::v1: {
+    std::vector<std::string> vector_int_to_string_to_float = {};
+    vector_int_to_string_to_float.resize(value.size());
+    for (size_t i = 0; i < value.size(); i++) {
+      std::string item = {};
+      item = std::to_string(value[i]);
+      vector_int_to_string_to_float[i] = item;
+    }
+    yardl::binary::WriteVector<std::string, yardl::binary::WriteString>(stream_, vector_int_to_string_to_float);
+    break;
+  }
+  default:
+    yardl::binary::WriteVector<float, yardl::binary::WriteFloatingPoint>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteIntFloatUnionReorderedImpl(std::variant<int32_t, float> const& value) {
+  step_index_.set_step_offset("IntFloatUnionReordered", stream_.Pos());
+  switch (version_) {
+  case Version::v1: {
+    std::variant<float, int32_t> int_float_union_reordered = {};
+    switch (value.index()) {
+      case 0: {
+        int_float_union_reordered = std::get<0>(value);
+        break;
+      }
+      case 1: {
+        int_float_union_reordered = std::get<1>(value);
+        break;
+      }
+      default: throw std::runtime_error("Invalid union index.");
+    }
+    WriteUnion<float, yardl::binary::WriteFloatingPoint, int32_t, yardl::binary::WriteInteger>(stream_, int_float_union_reordered);
+    break;
+  }
+  default:
+    WriteUnion<int32_t, yardl::binary::WriteInteger, float, yardl::binary::WriteFloatingPoint>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteVectorUnionReorderedImpl(std::vector<std::variant<int32_t, float>> const& value) {
+  step_index_.set_step_offset("VectorUnionReordered", stream_.Pos());
+  switch (version_) {
+  case Version::v1: {
+    std::vector<std::variant<float, int32_t>> vector_union_reordered = {};
+    vector_union_reordered.resize(value.size());
+    for (size_t i = 0; i < value.size(); i++) {
+      std::variant<float, int32_t> item = {};
+      switch (value[i].index()) {
+        case 0: {
+          item = std::get<0>(value[i]);
+          break;
+        }
+        case 1: {
+          item = std::get<1>(value[i]);
+          break;
+        }
+        default: throw std::runtime_error("Invalid union index.");
+      }
+      vector_union_reordered[i] = item;
+    }
+    yardl::binary::WriteVector<std::variant<float, int32_t>, WriteUnion<float, yardl::binary::WriteFloatingPoint, int32_t, yardl::binary::WriteInteger>>(stream_, vector_union_reordered);
+    break;
+  }
+  default:
+    yardl::binary::WriteVector<std::variant<int32_t, float>, WriteUnion<int32_t, yardl::binary::WriteInteger, float, yardl::binary::WriteFloatingPoint>>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteStreamUnionReorderedImpl(std::variant<int32_t, std::string> const& value) {
+  step_index_.set_step_offset("StreamUnionReordered", stream_.Pos());
+  size_t item_offset = 0;
+  switch (version_) {
+  case Version::v1: {
+    std::variant<std::string, int32_t> stream_union_reordered = {};
+    switch (value.index()) {
+      case 0: {
+        stream_union_reordered = std::get<0>(value);
+        break;
+      }
+      case 1: {
+        stream_union_reordered = std::get<1>(value);
+        break;
+      }
+      default: throw std::runtime_error("Invalid union index.");
+    }
+    yardl::binary::WriteBlockAndSaveOffset<std::variant<std::string, int32_t>, WriteUnion<std::string, yardl::binary::WriteString, int32_t, yardl::binary::WriteInteger>>(stream_, stream_union_reordered, item_offset);
+    break;
+  }
+  default:
+    yardl::binary::WriteBlockAndSaveOffset<std::variant<int32_t, std::string>, WriteUnion<int32_t, yardl::binary::WriteInteger, std::string, yardl::binary::WriteString>>(stream_, value, item_offset);
+    break;
+  }
+  step_index_.add_stream_offset("StreamUnionReordered", item_offset);
+}
+
+void ProtocolWithChangesIndexedWriter::WriteStreamUnionReorderedImpl(std::vector<std::variant<int32_t, std::string>> const& values) {
+  step_index_.set_step_offset("StreamUnionReordered", stream_.Pos());
+  std::vector<size_t> item_offsets;
+  item_offsets.reserve(values.size());
+  if (!values.empty()) {
+    switch (version_) {
+    case Version::v1: {
+      std::vector<std::variant<std::string, int32_t>> stream_union_reordered = {};
+      stream_union_reordered.resize(values.size());
+      for (size_t i = 0; i < values.size(); i++) {
+        std::variant<std::string, int32_t> item = {};
+        switch (values[i].index()) {
+          case 0: {
+            item = std::get<0>(values[i]);
+            break;
+          }
+          case 1: {
+            item = std::get<1>(values[i]);
+            break;
+          }
+          default: throw std::runtime_error("Invalid union index.");
+        }
+        stream_union_reordered[i] = item;
+      }
+      yardl::binary::WriteVectorAndSaveOffsets<std::variant<std::string, int32_t>, WriteUnion<std::string, yardl::binary::WriteString, int32_t, yardl::binary::WriteInteger>>(stream_, stream_union_reordered, item_offsets);
+      break;
+    }
+    default:
+      yardl::binary::WriteVectorAndSaveOffsets<std::variant<int32_t, std::string>, WriteUnion<int32_t, yardl::binary::WriteInteger, std::string, yardl::binary::WriteString>>(stream_, values, item_offsets);
+      break;
+    }
+  }
+  step_index_.add_stream_offsets("StreamUnionReordered", item_offsets);
+}
+
+void ProtocolWithChangesIndexedWriter::EndStreamUnionReorderedImpl() {
+  step_index_.set_step_offset("StreamUnionReordered", stream_.Pos());
+  step_index_.add_stream_offsets("StreamUnionReordered", std::vector<size_t>{});
+  switch (version_) {
+  default:
+    yardl::binary::WriteInteger(stream_, 0U);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteIntToUnionStreamImpl(std::variant<std::string, int32_t> const& value) {
+  step_index_.set_step_offset("IntToUnionStream", stream_.Pos());
+  size_t item_offset = 0;
+  switch (version_) {
+  case Version::v0: {
+    break;
+  }
+  case Version::v1: {
+    int32_t int_to_union_stream = {};
+    if (value.index() == 1) {
+      int_to_union_stream = std::get<1>(value);
+    }
+    yardl::binary::WriteBlockAndSaveOffset<int32_t, yardl::binary::WriteInteger>(stream_, int_to_union_stream, item_offset);
+    break;
+  }
+  default:
+    yardl::binary::WriteBlockAndSaveOffset<std::variant<std::string, int32_t>, WriteUnion<std::string, yardl::binary::WriteString, int32_t, yardl::binary::WriteInteger>>(stream_, value, item_offset);
+    break;
+  }
+  step_index_.add_stream_offset("IntToUnionStream", item_offset);
+}
+
+void ProtocolWithChangesIndexedWriter::WriteIntToUnionStreamImpl(std::vector<std::variant<std::string, int32_t>> const& values) {
+  step_index_.set_step_offset("IntToUnionStream", stream_.Pos());
+  std::vector<size_t> item_offsets;
+  item_offsets.reserve(values.size());
+  if (!values.empty()) {
+    switch (version_) {
+    case Version::v0: {
+      break;
+    }
+    case Version::v1: {
+      std::vector<int32_t> int_to_union_stream = {};
+      int_to_union_stream.resize(values.size());
+      for (size_t i = 0; i < values.size(); i++) {
+        int32_t item = {};
+        if (values[i].index() == 1) {
+          item = std::get<1>(values[i]);
+        }
+        int_to_union_stream[i] = item;
+      }
+      yardl::binary::WriteVectorAndSaveOffsets<int32_t, yardl::binary::WriteInteger>(stream_, int_to_union_stream, item_offsets);
+      break;
+    }
+    default:
+      yardl::binary::WriteVectorAndSaveOffsets<std::variant<std::string, int32_t>, WriteUnion<std::string, yardl::binary::WriteString, int32_t, yardl::binary::WriteInteger>>(stream_, values, item_offsets);
+      break;
+    }
+  }
+  step_index_.add_stream_offsets("IntToUnionStream", item_offsets);
+}
+
+void ProtocolWithChangesIndexedWriter::EndIntToUnionStreamImpl() {
+  step_index_.set_step_offset("IntToUnionStream", stream_.Pos());
+  step_index_.add_stream_offsets("IntToUnionStream", std::vector<size_t>{});
+  switch (version_) {
+  case Version::v0: {
+    break;
+  }
+  default:
+    yardl::binary::WriteInteger(stream_, 0U);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteUnionStreamTypeChangeImpl(std::variant<int32_t, float> const& value) {
+  step_index_.set_step_offset("UnionStreamTypeChange", stream_.Pos());
+  size_t item_offset = 0;
+  switch (version_) {
+  case Version::v0: {
+    break;
+  }
+  case Version::v1: {
+    std::variant<int32_t, bool> union_stream_type_change = {};
+    switch (value.index()) {
+      case 0: {
+        union_stream_type_change = std::get<0>(value);
+        break;
+      }
+      case 1: {
+        std::vector<std::string> source_types = {"int32", "float32"};
+        throw std::runtime_error("Source type '" + source_types[1] + "' incompatible with target union type 'int32 | bool'");
+        break;
+      }
+      default: throw std::runtime_error("Invalid union index.");
+    }
+    yardl::binary::WriteBlockAndSaveOffset<std::variant<int32_t, bool>, WriteUnion<int32_t, yardl::binary::WriteInteger, bool, yardl::binary::WriteInteger>>(stream_, union_stream_type_change, item_offset);
+    break;
+  }
+  default:
+    yardl::binary::WriteBlockAndSaveOffset<std::variant<int32_t, float>, WriteUnion<int32_t, yardl::binary::WriteInteger, float, yardl::binary::WriteFloatingPoint>>(stream_, value, item_offset);
+    break;
+  }
+  step_index_.add_stream_offset("UnionStreamTypeChange", item_offset);
+}
+
+void ProtocolWithChangesIndexedWriter::WriteUnionStreamTypeChangeImpl(std::vector<std::variant<int32_t, float>> const& values) {
+  step_index_.set_step_offset("UnionStreamTypeChange", stream_.Pos());
+  std::vector<size_t> item_offsets;
+  item_offsets.reserve(values.size());
+  if (!values.empty()) {
+    switch (version_) {
+    case Version::v0: {
+      break;
+    }
+    case Version::v1: {
+      std::vector<std::variant<int32_t, bool>> union_stream_type_change = {};
+      union_stream_type_change.resize(values.size());
+      for (size_t i = 0; i < values.size(); i++) {
+        std::variant<int32_t, bool> item = {};
+        switch (values[i].index()) {
+          case 0: {
+            item = std::get<0>(values[i]);
+            break;
+          }
+          case 1: {
+            std::vector<std::string> source_types = {"int32", "float32"};
+            throw std::runtime_error("Source type '" + source_types[1] + "' incompatible with target union type 'int32 | bool'");
+            break;
+          }
+          default: throw std::runtime_error("Invalid union index.");
+        }
+        union_stream_type_change[i] = item;
+      }
+      yardl::binary::WriteVectorAndSaveOffsets<std::variant<int32_t, bool>, WriteUnion<int32_t, yardl::binary::WriteInteger, bool, yardl::binary::WriteInteger>>(stream_, union_stream_type_change, item_offsets);
+      break;
+    }
+    default:
+      yardl::binary::WriteVectorAndSaveOffsets<std::variant<int32_t, float>, WriteUnion<int32_t, yardl::binary::WriteInteger, float, yardl::binary::WriteFloatingPoint>>(stream_, values, item_offsets);
+      break;
+    }
+  }
+  step_index_.add_stream_offsets("UnionStreamTypeChange", item_offsets);
+}
+
+void ProtocolWithChangesIndexedWriter::EndUnionStreamTypeChangeImpl() {
+  step_index_.set_step_offset("UnionStreamTypeChange", stream_.Pos());
+  step_index_.add_stream_offsets("UnionStreamTypeChange", std::vector<size_t>{});
+  switch (version_) {
+  case Version::v0: {
+    break;
+  }
+  default:
+    yardl::binary::WriteInteger(stream_, 0U);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteStreamOfAliasTypeChangeImpl(evo_test::StreamItem const& value) {
+  step_index_.set_step_offset("StreamOfAliasTypeChange", stream_.Pos());
+  size_t item_offset = 0;
+  switch (version_) {
+  case Version::v0: {
+    yardl::binary::WriteBlockAndSaveOffset<evo_test::StreamItem_v0, evo_test::binary::WriteStreamItem_v0>(stream_, value, item_offset);
+    break;
+  }
+  case Version::v1: {
+    yardl::binary::WriteBlockAndSaveOffset<evo_test::StreamItem_v1, evo_test::binary::WriteStreamItem_v1>(stream_, value, item_offset);
+    break;
+  }
+  default:
+    yardl::binary::WriteBlockAndSaveOffset<evo_test::StreamItem, evo_test::binary::WriteStreamItem>(stream_, value, item_offset);
+    break;
+  }
+  step_index_.add_stream_offset("StreamOfAliasTypeChange", item_offset);
+}
+
+void ProtocolWithChangesIndexedWriter::WriteStreamOfAliasTypeChangeImpl(std::vector<evo_test::StreamItem> const& values) {
+  step_index_.set_step_offset("StreamOfAliasTypeChange", stream_.Pos());
+  std::vector<size_t> item_offsets;
+  item_offsets.reserve(values.size());
+  if (!values.empty()) {
+    switch (version_) {
+    case Version::v0: {
+      yardl::binary::WriteVectorAndSaveOffsets<evo_test::StreamItem_v0, evo_test::binary::WriteStreamItem_v0>(stream_, values, item_offsets);
+      break;
+    }
+    case Version::v1: {
+      yardl::binary::WriteVectorAndSaveOffsets<evo_test::StreamItem_v1, evo_test::binary::WriteStreamItem_v1>(stream_, values, item_offsets);
+      break;
+    }
+    default:
+      yardl::binary::WriteVectorAndSaveOffsets<evo_test::StreamItem, evo_test::binary::WriteStreamItem>(stream_, values, item_offsets);
+      break;
+    }
+  }
+  step_index_.add_stream_offsets("StreamOfAliasTypeChange", item_offsets);
+}
+
+void ProtocolWithChangesIndexedWriter::EndStreamOfAliasTypeChangeImpl() {
+  step_index_.set_step_offset("StreamOfAliasTypeChange", stream_.Pos());
+  step_index_.add_stream_offsets("StreamOfAliasTypeChange", std::vector<size_t>{});
+  switch (version_) {
+  default:
+    yardl::binary::WriteInteger(stream_, 0U);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteRlinkImpl(evo_test::RLink const& value) {
+  step_index_.set_step_offset("Rlink", stream_.Pos());
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::WriteRLink_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::WriteRLink(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteRlinkRXImpl(evo_test::RLink const& value) {
+  step_index_.set_step_offset("RlinkRX", stream_.Pos());
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::WriteRX_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::WriteRLink(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteRlinkRYImpl(evo_test::RLink const& value) {
+  step_index_.set_step_offset("RlinkRY", stream_.Pos());
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::WriteRY_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::WriteRLink(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteRlinkRZImpl(evo_test::RLink const& value) {
+  step_index_.set_step_offset("RlinkRZ", stream_.Pos());
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::WriteRZ_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::WriteRLink(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteRaRLinkImpl(evo_test::RA const& value) {
+  step_index_.set_step_offset("RaRLink", stream_.Pos());
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::WriteRLink_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::WriteRA(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteRaRXImpl(evo_test::RA const& value) {
+  step_index_.set_step_offset("RaRX", stream_.Pos());
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::WriteRX_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::WriteRA(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteRaRYImpl(evo_test::RA const& value) {
+  step_index_.set_step_offset("RaRY", stream_.Pos());
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::WriteRY_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::WriteRA(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteRaRZImpl(evo_test::RA const& value) {
+  step_index_.set_step_offset("RaRZ", stream_.Pos());
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::WriteRZ_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::WriteRA(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteRbRLinkImpl(evo_test::RB const& value) {
+  step_index_.set_step_offset("RbRLink", stream_.Pos());
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::WriteRLink_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::WriteRB(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteRbRXImpl(evo_test::RB const& value) {
+  step_index_.set_step_offset("RbRX", stream_.Pos());
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::WriteRX_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::WriteRB(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteRbRYImpl(evo_test::RB const& value) {
+  step_index_.set_step_offset("RbRY", stream_.Pos());
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::WriteRY_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::WriteRB(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteRbRZImpl(evo_test::RB const& value) {
+  step_index_.set_step_offset("RbRZ", stream_.Pos());
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::WriteRZ_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::WriteRB(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteRcRLinkImpl(evo_test::RC const& value) {
+  step_index_.set_step_offset("RcRLink", stream_.Pos());
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::WriteRLink_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::WriteRC(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteRcRXImpl(evo_test::RC const& value) {
+  step_index_.set_step_offset("RcRX", stream_.Pos());
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::WriteRX_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::WriteRC(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteRcRYImpl(evo_test::RC const& value) {
+  step_index_.set_step_offset("RcRY", stream_.Pos());
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::WriteRY_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::WriteRC(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteRcRZImpl(evo_test::RC const& value) {
+  step_index_.set_step_offset("RcRZ", stream_.Pos());
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::WriteRZ_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::WriteRC(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteRlinkRNewImpl(evo_test::RLink const& value) {
+  step_index_.set_step_offset("RlinkRNew", stream_.Pos());
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::WriteRNew_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::WriteRLink(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteRaRNewImpl(evo_test::RA const& value) {
+  step_index_.set_step_offset("RaRNew", stream_.Pos());
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::WriteRNew_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::WriteRA(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteRbRNewImpl(evo_test::RB const& value) {
+  step_index_.set_step_offset("RbRNew", stream_.Pos());
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::WriteRNew_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::WriteRB(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteRcRNewImpl(evo_test::RC const& value) {
+  step_index_.set_step_offset("RcRNew", stream_.Pos());
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::WriteRNew_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::WriteRC(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteRlinkRUnionImpl(evo_test::RLink const& value) {
+  step_index_.set_step_offset("RlinkRUnion", stream_.Pos());
+  switch (version_) {
+  case Version::v1: {
+    std::variant<evo_test::RX_v1, std::string> rlink_r_union = {};
+    rlink_r_union = value;
+    WriteUnion<evo_test::RX_v1, evo_test::binary::WriteRX_v1, std::string, yardl::binary::WriteString>(stream_, rlink_r_union);
+    break;
+  }
+  default:
+    evo_test::binary::WriteRLink(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteRaRUnionImpl(evo_test::RA const& value) {
+  step_index_.set_step_offset("RaRUnion", stream_.Pos());
+  switch (version_) {
+  case Version::v1: {
+    std::variant<evo_test::RX_v1, std::string> ra_r_union = {};
+    ra_r_union = value;
+    WriteUnion<evo_test::RX_v1, evo_test::binary::WriteRX_v1, std::string, yardl::binary::WriteString>(stream_, ra_r_union);
+    break;
+  }
+  default:
+    evo_test::binary::WriteRA(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteRbRUnionImpl(evo_test::RB const& value) {
+  step_index_.set_step_offset("RbRUnion", stream_.Pos());
+  switch (version_) {
+  case Version::v1: {
+    std::variant<evo_test::RX_v1, std::string> rb_r_union = {};
+    rb_r_union = value;
+    WriteUnion<evo_test::RX_v1, evo_test::binary::WriteRX_v1, std::string, yardl::binary::WriteString>(stream_, rb_r_union);
+    break;
+  }
+  default:
+    evo_test::binary::WriteRB(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteRcRUnionImpl(evo_test::RC const& value) {
+  step_index_.set_step_offset("RcRUnion", stream_.Pos());
+  switch (version_) {
+  case Version::v1: {
+    std::variant<evo_test::RX_v1, std::string> rc_r_union = {};
+    rc_r_union = value;
+    WriteUnion<evo_test::RX_v1, evo_test::binary::WriteRX_v1, std::string, yardl::binary::WriteString>(stream_, rc_r_union);
+    break;
+  }
+  default:
+    evo_test::binary::WriteRC(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteOptionalRecordWithChangesImpl(std::optional<evo_test::RecordWithChanges> const& value) {
+  step_index_.set_step_offset("OptionalRecordWithChanges", stream_.Pos());
+  switch (version_) {
+  case Version::v0: {
+    yardl::binary::WriteOptional<evo_test::RecordWithChanges_v0, evo_test::binary::WriteRecordWithChanges_v0>(stream_, value);
+    break;
+  }
+  case Version::v1: {
+    yardl::binary::WriteOptional<evo_test::RecordWithChanges_v1, evo_test::binary::WriteRecordWithChanges_v1>(stream_, value);
+    break;
+  }
+  default:
+    yardl::binary::WriteOptional<evo_test::RecordWithChanges, evo_test::binary::WriteRecordWithChanges>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteAliasedOptionalRecordWithChangesImpl(std::optional<evo_test::AliasedRecordWithChanges> const& value) {
+  step_index_.set_step_offset("AliasedOptionalRecordWithChanges", stream_.Pos());
+  switch (version_) {
+  case Version::v0: {
+    yardl::binary::WriteOptional<evo_test::AliasedRecordWithChanges_v0, evo_test::binary::WriteAliasedRecordWithChanges_v0>(stream_, value);
+    break;
+  }
+  case Version::v1: {
+    yardl::binary::WriteOptional<evo_test::AliasedRecordWithChanges_v1, evo_test::binary::WriteAliasedRecordWithChanges_v1>(stream_, value);
+    break;
+  }
+  default:
+    yardl::binary::WriteOptional<evo_test::AliasedRecordWithChanges, evo_test::binary::WriteAliasedRecordWithChanges>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteUnionRecordWithChangesImpl(std::variant<evo_test::RecordWithChanges, int32_t> const& value) {
+  step_index_.set_step_offset("UnionRecordWithChanges", stream_.Pos());
+  switch (version_) {
+  case Version::v0: {
+    std::variant<evo_test::RecordWithChanges_v0, int32_t> union_record_with_changes = {};
+    switch (value.index()) {
+      case 0: {
+        union_record_with_changes = std::get<0>(value);
+        break;
+      }
+      case 1: {
+        union_record_with_changes = std::get<1>(value);
+        break;
+      }
+      default: throw std::runtime_error("Invalid union index.");
+    }
+    WriteUnion<evo_test::RecordWithChanges_v0, evo_test::binary::WriteRecordWithChanges_v0, int32_t, yardl::binary::WriteInteger>(stream_, union_record_with_changes);
+    break;
+  }
+  case Version::v1: {
+    std::variant<evo_test::RecordWithChanges_v1, int32_t> union_record_with_changes = {};
+    switch (value.index()) {
+      case 0: {
+        union_record_with_changes = std::get<0>(value);
+        break;
+      }
+      case 1: {
+        union_record_with_changes = std::get<1>(value);
+        break;
+      }
+      default: throw std::runtime_error("Invalid union index.");
+    }
+    WriteUnion<evo_test::RecordWithChanges_v1, evo_test::binary::WriteRecordWithChanges_v1, int32_t, yardl::binary::WriteInteger>(stream_, union_record_with_changes);
+    break;
+  }
+  default:
+    WriteUnion<evo_test::RecordWithChanges, evo_test::binary::WriteRecordWithChanges, int32_t, yardl::binary::WriteInteger>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteUnionWithSameTypesetImpl(std::variant<evo_test::RecordWithChanges, int32_t, float, std::string> const& value) {
+  step_index_.set_step_offset("UnionWithSameTypeset", stream_.Pos());
+  switch (version_) {
+  case Version::v0: {
+    std::variant<evo_test::RecordWithChanges_v0, int32_t, float, std::string> union_with_same_typeset = {};
+    switch (value.index()) {
+      case 0: {
+        union_with_same_typeset = std::get<0>(value);
+        break;
+      }
+      case 1: {
+        union_with_same_typeset = std::get<1>(value);
+        break;
+      }
+      case 2: {
+        union_with_same_typeset = std::get<2>(value);
+        break;
+      }
+      case 3: {
+        union_with_same_typeset = std::get<3>(value);
+        break;
+      }
+      default: throw std::runtime_error("Invalid union index.");
+    }
+    WriteUnion<evo_test::RecordWithChanges_v0, evo_test::binary::WriteRecordWithChanges_v0, int32_t, yardl::binary::WriteInteger, float, yardl::binary::WriteFloatingPoint, std::string, yardl::binary::WriteString>(stream_, union_with_same_typeset);
+    break;
+  }
+  case Version::v1: {
+    std::variant<float, evo_test::RecordWithChanges_v1, std::string, int32_t> union_with_same_typeset = {};
+    switch (value.index()) {
+      case 0: {
+        union_with_same_typeset = std::get<0>(value);
+        break;
+      }
+      case 1: {
+        union_with_same_typeset = std::get<1>(value);
+        break;
+      }
+      case 2: {
+        union_with_same_typeset = std::get<2>(value);
+        break;
+      }
+      case 3: {
+        union_with_same_typeset = std::get<3>(value);
+        break;
+      }
+      default: throw std::runtime_error("Invalid union index.");
+    }
+    WriteUnion<float, yardl::binary::WriteFloatingPoint, evo_test::RecordWithChanges_v1, evo_test::binary::WriteRecordWithChanges_v1, std::string, yardl::binary::WriteString, int32_t, yardl::binary::WriteInteger>(stream_, union_with_same_typeset);
+    break;
+  }
+  default:
+    WriteUnion<evo_test::RecordWithChanges, evo_test::binary::WriteRecordWithChanges, int32_t, yardl::binary::WriteInteger, float, yardl::binary::WriteFloatingPoint, std::string, yardl::binary::WriteString>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteUnionWithTypesAddedImpl(std::variant<evo_test::RecordWithChanges, float> const& value) {
+  step_index_.set_step_offset("UnionWithTypesAdded", stream_.Pos());
+  switch (version_) {
+  case Version::v0: {
+    std::variant<evo_test::RecordWithChanges_v0, float> union_with_types_added = {};
+    switch (value.index()) {
+      case 0: {
+        union_with_types_added = std::get<0>(value);
+        break;
+      }
+      case 1: {
+        union_with_types_added = std::get<1>(value);
+        break;
+      }
+      default: throw std::runtime_error("Invalid union index.");
+    }
+    WriteUnion<evo_test::RecordWithChanges_v0, evo_test::binary::WriteRecordWithChanges_v0, float, yardl::binary::WriteFloatingPoint>(stream_, union_with_types_added);
+    break;
+  }
+  case Version::v1: {
+    std::variant<evo_test::RecordWithChanges_v1, int32_t, float, std::string> union_with_types_added = {};
+    switch (value.index()) {
+      case 0: {
+        union_with_types_added = std::get<0>(value);
+        break;
+      }
+      case 1: {
+        union_with_types_added = std::get<1>(value);
+        break;
+      }
+      default: throw std::runtime_error("Invalid union index.");
+    }
+    WriteUnion<evo_test::RecordWithChanges_v1, evo_test::binary::WriteRecordWithChanges_v1, int32_t, yardl::binary::WriteInteger, float, yardl::binary::WriteFloatingPoint, std::string, yardl::binary::WriteString>(stream_, union_with_types_added);
+    break;
+  }
+  default:
+    WriteUnion<evo_test::RecordWithChanges, evo_test::binary::WriteRecordWithChanges, float, yardl::binary::WriteFloatingPoint>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteUnionWithTypesRemovedImpl(std::variant<evo_test::RecordWithChanges, int32_t, float, std::string> const& value) {
+  step_index_.set_step_offset("UnionWithTypesRemoved", stream_.Pos());
+  switch (version_) {
+  case Version::v0: {
+    std::variant<evo_test::RecordWithChanges_v0, int32_t, float, std::string> union_with_types_removed = {};
+    switch (value.index()) {
+      case 0: {
+        union_with_types_removed = std::get<0>(value);
+        break;
+      }
+      case 1: {
+        union_with_types_removed = std::get<1>(value);
+        break;
+      }
+      case 2: {
+        union_with_types_removed = std::get<2>(value);
+        break;
+      }
+      case 3: {
+        union_with_types_removed = std::get<3>(value);
+        break;
+      }
+      default: throw std::runtime_error("Invalid union index.");
+    }
+    WriteUnion<evo_test::RecordWithChanges_v0, evo_test::binary::WriteRecordWithChanges_v0, int32_t, yardl::binary::WriteInteger, float, yardl::binary::WriteFloatingPoint, std::string, yardl::binary::WriteString>(stream_, union_with_types_removed);
+    break;
+  }
+  case Version::v1: {
+    std::variant<evo_test::RecordWithChanges_v1, std::string> union_with_types_removed = {};
+    switch (value.index()) {
+      case 0: {
+        union_with_types_removed = std::get<0>(value);
+        break;
+      }
+      case 1: {
+        std::vector<std::string> source_types = {"EvoTest.RecordWithChanges", "int32", "float32", "string"};
+        throw std::runtime_error("Source type '" + source_types[1] + "' incompatible with target union type 'RecordWithChanges: RecordWithChanges_v1 | string'");
+        break;
+      }
+      case 2: {
+        std::vector<std::string> source_types = {"EvoTest.RecordWithChanges", "int32", "float32", "string"};
+        throw std::runtime_error("Source type '" + source_types[2] + "' incompatible with target union type 'RecordWithChanges: RecordWithChanges_v1 | string'");
+        break;
+      }
+      case 3: {
+        union_with_types_removed = std::get<3>(value);
+        break;
+      }
+      default: throw std::runtime_error("Invalid union index.");
+    }
+    WriteUnion<evo_test::RecordWithChanges_v1, evo_test::binary::WriteRecordWithChanges_v1, std::string, yardl::binary::WriteString>(stream_, union_with_types_removed);
+    break;
+  }
+  default:
+    WriteUnion<evo_test::RecordWithChanges, evo_test::binary::WriteRecordWithChanges, int32_t, yardl::binary::WriteInteger, float, yardl::binary::WriteFloatingPoint, std::string, yardl::binary::WriteString>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteRecordToOptionalImpl(evo_test::RecordWithChanges const& value) {
+  step_index_.set_step_offset("RecordToOptional", stream_.Pos());
+  switch (version_) {
+  case Version::v0: {
+    evo_test::binary::WriteRecordWithChanges_v0(stream_, value);
+    break;
+  }
+  case Version::v1: {
+    std::optional<evo_test::RecordWithChanges_v1> record_to_optional = {};
+    record_to_optional = value;
+    yardl::binary::WriteOptional<evo_test::RecordWithChanges_v1, evo_test::binary::WriteRecordWithChanges_v1>(stream_, record_to_optional);
+    break;
+  }
+  default:
+    evo_test::binary::WriteRecordWithChanges(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteRecordToAliasedOptionalImpl(evo_test::RecordWithChanges const& value) {
+  step_index_.set_step_offset("RecordToAliasedOptional", stream_.Pos());
+  switch (version_) {
+  case Version::v0: {
+    evo_test::binary::WriteRecordWithChanges_v0(stream_, value);
+    break;
+  }
+  case Version::v1: {
+    std::optional<evo_test::RecordWithChanges_v1> record_to_aliased_optional = {};
+    record_to_aliased_optional = value;
+    yardl::binary::WriteOptional<evo_test::RecordWithChanges_v1, evo_test::binary::WriteRecordWithChanges_v1>(stream_, record_to_aliased_optional);
+    break;
+  }
+  default:
+    evo_test::binary::WriteRecordWithChanges(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteRecordToUnionImpl(evo_test::RecordWithChanges const& value) {
+  step_index_.set_step_offset("RecordToUnion", stream_.Pos());
+  switch (version_) {
+  case Version::v0: {
+    evo_test::binary::WriteRecordWithChanges_v0(stream_, value);
+    break;
+  }
+  case Version::v1: {
+    std::variant<evo_test::RecordWithChanges_v1, std::string> record_to_union = {};
+    record_to_union = value;
+    WriteUnion<evo_test::RecordWithChanges_v1, evo_test::binary::WriteRecordWithChanges_v1, std::string, yardl::binary::WriteString>(stream_, record_to_union);
+    break;
+  }
+  default:
+    evo_test::binary::WriteRecordWithChanges(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteRecordToAliasedUnionImpl(evo_test::RecordWithChanges const& value) {
+  step_index_.set_step_offset("RecordToAliasedUnion", stream_.Pos());
+  switch (version_) {
+  case Version::v0: {
+    evo_test::binary::WriteRecordWithChanges_v0(stream_, value);
+    break;
+  }
+  case Version::v1: {
+    std::variant<evo_test::RecordWithChanges_v1, std::string> record_to_aliased_union = {};
+    record_to_aliased_union = value;
+    WriteUnion<evo_test::RecordWithChanges_v1, evo_test::binary::WriteRecordWithChanges_v1, std::string, yardl::binary::WriteString>(stream_, record_to_aliased_union);
+    break;
+  }
+  default:
+    evo_test::binary::WriteRecordWithChanges(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteUnionToAliasedUnionImpl(std::variant<evo_test::RecordWithChanges, int32_t> const& value) {
+  step_index_.set_step_offset("UnionToAliasedUnion", stream_.Pos());
+  switch (version_) {
+  case Version::v0: {
+    std::variant<evo_test::RecordWithChanges_v0, int32_t> union_to_aliased_union = {};
+    switch (value.index()) {
+      case 0: {
+        union_to_aliased_union = std::get<0>(value);
+        break;
+      }
+      case 1: {
+        union_to_aliased_union = std::get<1>(value);
+        break;
+      }
+      default: throw std::runtime_error("Invalid union index.");
+    }
+    WriteUnion<evo_test::RecordWithChanges_v0, evo_test::binary::WriteRecordWithChanges_v0, int32_t, yardl::binary::WriteInteger>(stream_, union_to_aliased_union);
+    break;
+  }
+  case Version::v1: {
+    std::variant<evo_test::RecordWithChanges_v1, int32_t> union_to_aliased_union = {};
+    switch (value.index()) {
+      case 0: {
+        union_to_aliased_union = std::get<0>(value);
+        break;
+      }
+      case 1: {
+        union_to_aliased_union = std::get<1>(value);
+        break;
+      }
+      default: throw std::runtime_error("Invalid union index.");
+    }
+    WriteUnion<evo_test::RecordWithChanges_v1, evo_test::binary::WriteRecordWithChanges_v1, int32_t, yardl::binary::WriteInteger>(stream_, union_to_aliased_union);
+    break;
+  }
+  default:
+    WriteUnion<evo_test::RecordWithChanges, evo_test::binary::WriteRecordWithChanges, int32_t, yardl::binary::WriteInteger>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteUnionToAliasedUnionWithChangesImpl(std::variant<evo_test::RecordWithChanges, int32_t> const& value) {
+  step_index_.set_step_offset("UnionToAliasedUnionWithChanges", stream_.Pos());
+  switch (version_) {
+  case Version::v0: {
+    std::variant<evo_test::RecordWithChanges_v0, int32_t> union_to_aliased_union_with_changes = {};
+    switch (value.index()) {
+      case 0: {
+        union_to_aliased_union_with_changes = std::get<0>(value);
+        break;
+      }
+      case 1: {
+        union_to_aliased_union_with_changes = std::get<1>(value);
+        break;
+      }
+      default: throw std::runtime_error("Invalid union index.");
+    }
+    WriteUnion<evo_test::RecordWithChanges_v0, evo_test::binary::WriteRecordWithChanges_v0, int32_t, yardl::binary::WriteInteger>(stream_, union_to_aliased_union_with_changes);
+    break;
+  }
+  case Version::v1: {
+    std::variant<evo_test::RecordWithChanges_v1, std::string> union_to_aliased_union_with_changes = {};
+    switch (value.index()) {
+      case 0: {
+        union_to_aliased_union_with_changes = std::get<0>(value);
+        break;
+      }
+      case 1: {
+        std::vector<std::string> source_types = {"EvoTest.RecordWithChanges", "int32"};
+        throw std::runtime_error("Source type '" + source_types[1] + "' incompatible with target union type 'RecordWithChanges: RecordWithChanges_v1 | string'");
+        break;
+      }
+      default: throw std::runtime_error("Invalid union index.");
+    }
+    WriteUnion<evo_test::RecordWithChanges_v1, evo_test::binary::WriteRecordWithChanges_v1, std::string, yardl::binary::WriteString>(stream_, union_to_aliased_union_with_changes);
+    break;
+  }
+  default:
+    WriteUnion<evo_test::RecordWithChanges, evo_test::binary::WriteRecordWithChanges, int32_t, yardl::binary::WriteInteger>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteOptionalToAliasedOptionalImpl(std::optional<evo_test::RecordWithChanges> const& value) {
+  step_index_.set_step_offset("OptionalToAliasedOptional", stream_.Pos());
+  switch (version_) {
+  case Version::v0: {
+    yardl::binary::WriteOptional<evo_test::RecordWithChanges_v0, evo_test::binary::WriteRecordWithChanges_v0>(stream_, value);
+    break;
+  }
+  case Version::v1: {
+    yardl::binary::WriteOptional<evo_test::RecordWithChanges_v1, evo_test::binary::WriteRecordWithChanges_v1>(stream_, value);
+    break;
+  }
+  default:
+    yardl::binary::WriteOptional<evo_test::RecordWithChanges, evo_test::binary::WriteRecordWithChanges>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteOptionalToAliasedOptionalWithChangesImpl(std::optional<int32_t> const& value) {
+  step_index_.set_step_offset("OptionalToAliasedOptionalWithChanges", stream_.Pos());
+  switch (version_) {
+  case Version::v1: {
+    std::optional<std::string> optional_to_aliased_optional_with_changes = {};
+    if (value.has_value()) {
+      optional_to_aliased_optional_with_changes = std::to_string(value.value());
+    }
+    yardl::binary::WriteOptional<std::string, yardl::binary::WriteString>(stream_, optional_to_aliased_optional_with_changes);
+    break;
+  }
+  default:
+    yardl::binary::WriteOptional<int32_t, yardl::binary::WriteInteger>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteGenericRecordImpl(evo_test::GenericRecord<int32_t, std::string> const& value) {
+  step_index_.set_step_offset("GenericRecord", stream_.Pos());
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::WriteGenericRecord_v1<int32_t, yardl::binary::WriteInteger, std::string, yardl::binary::WriteString>(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::WriteGenericRecord<int32_t, yardl::binary::WriteInteger, std::string, yardl::binary::WriteString>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteGenericRecordToOpenAliasImpl(evo_test::GenericRecord<int32_t, std::string> const& value) {
+  step_index_.set_step_offset("GenericRecordToOpenAlias", stream_.Pos());
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::WriteAliasedOpenGenericRecord_v1<int32_t, yardl::binary::WriteInteger, std::string, yardl::binary::WriteString>(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::WriteGenericRecord<int32_t, yardl::binary::WriteInteger, std::string, yardl::binary::WriteString>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteGenericRecordToClosedAliasImpl(evo_test::GenericRecord<int32_t, std::string> const& value) {
+  step_index_.set_step_offset("GenericRecordToClosedAlias", stream_.Pos());
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::WriteAliasedClosedGenericRecord_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::WriteGenericRecord<int32_t, yardl::binary::WriteInteger, std::string, yardl::binary::WriteString>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteGenericRecordToHalfClosedAliasImpl(evo_test::GenericRecord<int32_t, std::string> const& value) {
+  step_index_.set_step_offset("GenericRecordToHalfClosedAlias", stream_.Pos());
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::WriteAliasedHalfClosedGenericRecord_v1<int32_t, yardl::binary::WriteInteger>(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::WriteGenericRecord<int32_t, yardl::binary::WriteInteger, std::string, yardl::binary::WriteString>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteAliasedGenericRecordToAliasImpl(evo_test::AliasedHalfClosedGenericRecord<int32_t> const& value) {
+  step_index_.set_step_offset("AliasedGenericRecordToAlias", stream_.Pos());
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::WriteAliasedOpenGenericRecord_v1<int32_t, yardl::binary::WriteInteger, std::string, yardl::binary::WriteString>(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::WriteAliasedHalfClosedGenericRecord<int32_t, yardl::binary::WriteInteger>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteGenericRecordToReversedImpl(evo_test::GenericRecord<int32_t, std::string> const& value) {
+  step_index_.set_step_offset("GenericRecordToReversed", stream_.Pos());
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::WriteGenericRecordReversed_v1<std::string, yardl::binary::WriteString, int32_t, yardl::binary::WriteInteger>(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::WriteGenericRecord<int32_t, yardl::binary::WriteInteger, std::string, yardl::binary::WriteString>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteClosedGenericRecordToUnionImpl(evo_test::AliasedClosedGenericRecord const& value) {
+  step_index_.set_step_offset("ClosedGenericRecordToUnion", stream_.Pos());
+  switch (version_) {
+  case Version::v1: {
+    std::variant<evo_test::GenericRecord_v1<int32_t, std::string>, std::string> closed_generic_record_to_union = {};
+    closed_generic_record_to_union = value;
+    WriteUnion<evo_test::GenericRecord_v1<int32_t, std::string>, evo_test::binary::WriteGenericRecord_v1<int32_t, yardl::binary::WriteInteger, std::string, yardl::binary::WriteString>, std::string, yardl::binary::WriteString>(stream_, closed_generic_record_to_union);
+    break;
+  }
+  default:
+    evo_test::binary::WriteAliasedClosedGenericRecord(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteGenericRecordToAliasedUnionImpl(evo_test::GenericRecord<int32_t, std::string> const& value) {
+  step_index_.set_step_offset("GenericRecordToAliasedUnion", stream_.Pos());
+  switch (version_) {
+  case Version::v1: {
+    std::variant<evo_test::GenericRecord_v1<int32_t, std::string>, std::string> generic_record_to_aliased_union = {};
+    generic_record_to_aliased_union = value;
+    WriteUnion<evo_test::GenericRecord_v1<int32_t, std::string>, evo_test::binary::WriteGenericRecord_v1<int32_t, yardl::binary::WriteInteger, std::string, yardl::binary::WriteString>, std::string, yardl::binary::WriteString>(stream_, generic_record_to_aliased_union);
+    break;
+  }
+  default:
+    evo_test::binary::WriteGenericRecord<int32_t, yardl::binary::WriteInteger, std::string, yardl::binary::WriteString>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteGenericUnionToReversedImpl(evo_test::GenericUnion<evo_test::GenericRecord<int32_t, std::string>, float> const& value) {
+  step_index_.set_step_offset("GenericUnionToReversed", stream_.Pos());
+  switch (version_) {
+  case Version::v1: {
+    std::variant<evo_test::GenericRecord_v1<int32_t, std::string>, float> generic_union_to_reversed = {};
+    switch (value.index()) {
+      case 0: {
+        generic_union_to_reversed = std::get<0>(value);
+        break;
+      }
+      case 1: {
+        generic_union_to_reversed = std::get<1>(value);
+        break;
+      }
+      default: throw std::runtime_error("Invalid union index.");
+    }
+    WriteUnion<evo_test::GenericRecord_v1<int32_t, std::string>, evo_test::binary::WriteGenericRecord_v1<int32_t, yardl::binary::WriteInteger, std::string, yardl::binary::WriteString>, float, yardl::binary::WriteFloatingPoint>(stream_, generic_union_to_reversed);
+    break;
+  }
+  default:
+    evo_test::binary::WriteGenericUnion<evo_test::GenericRecord<int32_t, std::string>, evo_test::binary::WriteGenericRecord<int32_t, yardl::binary::WriteInteger, std::string, yardl::binary::WriteString>, float, yardl::binary::WriteFloatingPoint>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteGenericUnionOfChangedRecordImpl(evo_test::GenericUnion<evo_test::GenericRecord<int32_t, std::string>, float> const& value) {
+  step_index_.set_step_offset("GenericUnionOfChangedRecord", stream_.Pos());
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::WriteGenericUnion_v1<evo_test::GenericRecord_v1<int32_t, std::string>, evo_test::binary::WriteGenericRecord_v1<int32_t, yardl::binary::WriteInteger, std::string, yardl::binary::WriteString>, float, yardl::binary::WriteFloatingPoint>(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::WriteGenericUnion<evo_test::GenericRecord<int32_t, std::string>, evo_test::binary::WriteGenericRecord<int32_t, yardl::binary::WriteInteger, std::string, yardl::binary::WriteString>, float, yardl::binary::WriteFloatingPoint>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteGenericParentRecordImpl(evo_test::GenericParentRecord<int32_t> const& value) {
+  step_index_.set_step_offset("GenericParentRecord", stream_.Pos());
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::WriteGenericParentRecord_v1<int32_t, yardl::binary::WriteInteger>(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::WriteGenericParentRecord<int32_t, yardl::binary::WriteInteger>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteGenericNestedRecordsImpl(evo_test::GenericRecord<evo_test::UnchangedGeneric<int32_t>, evo_test::ChangedGeneric<std::string, int32_t>> const& value) {
+  step_index_.set_step_offset("GenericNestedRecords", stream_.Pos());
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::WriteGenericRecord_v1<evo_test::Unchanged_v1, evo_test::binary::WriteUnchanged_v1, evo_test::Changed_v1, evo_test::binary::WriteChanged_v1>(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::WriteGenericRecord<evo_test::UnchangedGeneric<int32_t>, evo_test::binary::WriteUnchangedGeneric<int32_t, yardl::binary::WriteInteger>, evo_test::ChangedGeneric<std::string, int32_t>, evo_test::binary::WriteChangedGeneric<std::string, yardl::binary::WriteString, int32_t, yardl::binary::WriteInteger>>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteGenericRecordStreamImpl(evo_test::GenericRecord<int32_t, std::string> const& value) {
+  step_index_.set_step_offset("GenericRecordStream", stream_.Pos());
+  size_t item_offset = 0;
+  switch (version_) {
+  case Version::v1: {
+    yardl::binary::WriteBlockAndSaveOffset<evo_test::AliasedClosedGenericRecord_v1, evo_test::binary::WriteAliasedClosedGenericRecord_v1>(stream_, value, item_offset);
+    break;
+  }
+  default:
+    yardl::binary::WriteBlockAndSaveOffset<evo_test::GenericRecord<int32_t, std::string>, evo_test::binary::WriteGenericRecord<int32_t, yardl::binary::WriteInteger, std::string, yardl::binary::WriteString>>(stream_, value, item_offset);
+    break;
+  }
+  step_index_.add_stream_offset("GenericRecordStream", item_offset);
+}
+
+void ProtocolWithChangesIndexedWriter::WriteGenericRecordStreamImpl(std::vector<evo_test::GenericRecord<int32_t, std::string>> const& values) {
+  step_index_.set_step_offset("GenericRecordStream", stream_.Pos());
+  std::vector<size_t> item_offsets;
+  item_offsets.reserve(values.size());
+  if (!values.empty()) {
+    switch (version_) {
+    case Version::v1: {
+      yardl::binary::WriteVectorAndSaveOffsets<evo_test::AliasedClosedGenericRecord_v1, evo_test::binary::WriteAliasedClosedGenericRecord_v1>(stream_, values, item_offsets);
+      break;
+    }
+    default:
+      yardl::binary::WriteVectorAndSaveOffsets<evo_test::GenericRecord<int32_t, std::string>, evo_test::binary::WriteGenericRecord<int32_t, yardl::binary::WriteInteger, std::string, yardl::binary::WriteString>>(stream_, values, item_offsets);
+      break;
+    }
+  }
+  step_index_.add_stream_offsets("GenericRecordStream", item_offsets);
+}
+
+void ProtocolWithChangesIndexedWriter::EndGenericRecordStreamImpl() {
+  step_index_.set_step_offset("GenericRecordStream", stream_.Pos());
+  step_index_.add_stream_offsets("GenericRecordStream", std::vector<size_t>{});
+  switch (version_) {
+  default:
+    yardl::binary::WriteInteger(stream_, 0U);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteGenericParentRecordStreamImpl(evo_test::GenericParentRecord<int32_t> const& value) {
+  step_index_.set_step_offset("GenericParentRecordStream", stream_.Pos());
+  size_t item_offset = 0;
+  switch (version_) {
+  case Version::v1: {
+    yardl::binary::WriteBlockAndSaveOffset<evo_test::GenericParentRecord_v1<int32_t>, evo_test::binary::WriteGenericParentRecord_v1<int32_t, yardl::binary::WriteInteger>>(stream_, value, item_offset);
+    break;
+  }
+  default:
+    yardl::binary::WriteBlockAndSaveOffset<evo_test::GenericParentRecord<int32_t>, evo_test::binary::WriteGenericParentRecord<int32_t, yardl::binary::WriteInteger>>(stream_, value, item_offset);
+    break;
+  }
+  step_index_.add_stream_offset("GenericParentRecordStream", item_offset);
+}
+
+void ProtocolWithChangesIndexedWriter::WriteGenericParentRecordStreamImpl(std::vector<evo_test::GenericParentRecord<int32_t>> const& values) {
+  step_index_.set_step_offset("GenericParentRecordStream", stream_.Pos());
+  std::vector<size_t> item_offsets;
+  item_offsets.reserve(values.size());
+  if (!values.empty()) {
+    switch (version_) {
+    case Version::v1: {
+      yardl::binary::WriteVectorAndSaveOffsets<evo_test::GenericParentRecord_v1<int32_t>, evo_test::binary::WriteGenericParentRecord_v1<int32_t, yardl::binary::WriteInteger>>(stream_, values, item_offsets);
+      break;
+    }
+    default:
+      yardl::binary::WriteVectorAndSaveOffsets<evo_test::GenericParentRecord<int32_t>, evo_test::binary::WriteGenericParentRecord<int32_t, yardl::binary::WriteInteger>>(stream_, values, item_offsets);
+      break;
+    }
+  }
+  step_index_.add_stream_offsets("GenericParentRecordStream", item_offsets);
+}
+
+void ProtocolWithChangesIndexedWriter::EndGenericParentRecordStreamImpl() {
+  step_index_.set_step_offset("GenericParentRecordStream", stream_.Pos());
+  step_index_.add_stream_offsets("GenericParentRecordStream", std::vector<size_t>{});
+  switch (version_) {
+  default:
+    yardl::binary::WriteInteger(stream_, 0U);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteVectorRecordWithChangesImpl(std::vector<evo_test::RecordWithChanges> const& value) {
+  step_index_.set_step_offset("VectorRecordWithChanges", stream_.Pos());
+  switch (version_) {
+  case Version::v0: {
+    yardl::binary::WriteVector<evo_test::RecordWithChanges_v0, evo_test::binary::WriteRecordWithChanges_v0>(stream_, value);
+    break;
+  }
+  case Version::v1: {
+    yardl::binary::WriteVector<evo_test::RecordWithChanges_v1, evo_test::binary::WriteRecordWithChanges_v1>(stream_, value);
+    break;
+  }
+  default:
+    yardl::binary::WriteVector<evo_test::RecordWithChanges, evo_test::binary::WriteRecordWithChanges>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteStreamedRecordWithChangesImpl(evo_test::RecordWithChanges const& value) {
+  step_index_.set_step_offset("StreamedRecordWithChanges", stream_.Pos());
+  size_t item_offset = 0;
+  switch (version_) {
+  case Version::v0: {
+    yardl::binary::WriteBlockAndSaveOffset<evo_test::RecordWithChanges_v0, evo_test::binary::WriteRecordWithChanges_v0>(stream_, value, item_offset);
+    break;
+  }
+  case Version::v1: {
+    yardl::binary::WriteBlockAndSaveOffset<evo_test::RecordWithChanges_v1, evo_test::binary::WriteRecordWithChanges_v1>(stream_, value, item_offset);
+    break;
+  }
+  default:
+    yardl::binary::WriteBlockAndSaveOffset<evo_test::RecordWithChanges, evo_test::binary::WriteRecordWithChanges>(stream_, value, item_offset);
+    break;
+  }
+  step_index_.add_stream_offset("StreamedRecordWithChanges", item_offset);
+}
+
+void ProtocolWithChangesIndexedWriter::WriteStreamedRecordWithChangesImpl(std::vector<evo_test::RecordWithChanges> const& values) {
+  step_index_.set_step_offset("StreamedRecordWithChanges", stream_.Pos());
+  std::vector<size_t> item_offsets;
+  item_offsets.reserve(values.size());
+  if (!values.empty()) {
+    switch (version_) {
+    case Version::v0: {
+      yardl::binary::WriteVectorAndSaveOffsets<evo_test::RecordWithChanges_v0, evo_test::binary::WriteRecordWithChanges_v0>(stream_, values, item_offsets);
+      break;
+    }
+    case Version::v1: {
+      yardl::binary::WriteVectorAndSaveOffsets<evo_test::RecordWithChanges_v1, evo_test::binary::WriteRecordWithChanges_v1>(stream_, values, item_offsets);
+      break;
+    }
+    default:
+      yardl::binary::WriteVectorAndSaveOffsets<evo_test::RecordWithChanges, evo_test::binary::WriteRecordWithChanges>(stream_, values, item_offsets);
+      break;
+    }
+  }
+  step_index_.add_stream_offsets("StreamedRecordWithChanges", item_offsets);
+}
+
+void ProtocolWithChangesIndexedWriter::EndStreamedRecordWithChangesImpl() {
+  step_index_.set_step_offset("StreamedRecordWithChanges", stream_.Pos());
+  step_index_.add_stream_offsets("StreamedRecordWithChanges", std::vector<size_t>{});
+  switch (version_) {
+  default:
+    yardl::binary::WriteInteger(stream_, 0U);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteAddedStringVectorImpl(std::vector<evo_test::AliasedString> const& value) {
+  step_index_.set_step_offset("AddedStringVector", stream_.Pos());
+  switch (version_) {
+  case Version::v0: {
+    break;
+  }
+  case Version::v1: {
+    break;
+  }
+  default:
+    yardl::binary::WriteVector<evo_test::AliasedString, evo_test::binary::WriteAliasedString>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteAddedOptionalImpl(std::optional<evo_test::RecordWithChanges> const& value) {
+  step_index_.set_step_offset("AddedOptional", stream_.Pos());
+  switch (version_) {
+  case Version::v0: {
+    break;
+  }
+  case Version::v1: {
+    yardl::binary::WriteOptional<evo_test::RecordWithChanges_v1, evo_test::binary::WriteRecordWithChanges_v1>(stream_, value);
+    break;
+  }
+  default:
+    yardl::binary::WriteOptional<evo_test::RecordWithChanges, evo_test::binary::WriteRecordWithChanges>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteAddedMapImpl(std::unordered_map<std::string, std::string> const& value) {
+  step_index_.set_step_offset("AddedMap", stream_.Pos());
+  switch (version_) {
+  case Version::v0: {
+    break;
+  }
+  default:
+    yardl::binary::WriteMap<std::string, std::string, yardl::binary::WriteString, yardl::binary::WriteString>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteAddedUnionImpl(std::variant<std::monostate, evo_test::RecordWithChanges, std::string> const& value) {
+  step_index_.set_step_offset("AddedUnion", stream_.Pos());
+  switch (version_) {
+  case Version::v0: {
+    break;
+  }
+  case Version::v1: {
+    break;
+  }
+  default:
+    WriteUnion<std::monostate, yardl::binary::WriteMonostate, evo_test::RecordWithChanges, evo_test::binary::WriteRecordWithChanges, std::string, yardl::binary::WriteString>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteAddedRecordStreamImpl(evo_test::RecordWithChanges const& value) {
+  step_index_.set_step_offset("AddedRecordStream", stream_.Pos());
+  size_t item_offset = 0;
+  switch (version_) {
+  case Version::v0: {
+    break;
+  }
+  case Version::v1: {
+    yardl::binary::WriteBlockAndSaveOffset<evo_test::RecordWithChanges_v1, evo_test::binary::WriteRecordWithChanges_v1>(stream_, value, item_offset);
+    break;
+  }
+  default:
+    yardl::binary::WriteBlockAndSaveOffset<evo_test::RecordWithChanges, evo_test::binary::WriteRecordWithChanges>(stream_, value, item_offset);
+    break;
+  }
+  step_index_.add_stream_offset("AddedRecordStream", item_offset);
+}
+
+void ProtocolWithChangesIndexedWriter::WriteAddedRecordStreamImpl(std::vector<evo_test::RecordWithChanges> const& values) {
+  step_index_.set_step_offset("AddedRecordStream", stream_.Pos());
+  std::vector<size_t> item_offsets;
+  item_offsets.reserve(values.size());
+  if (!values.empty()) {
+    switch (version_) {
+    case Version::v0: {
+      break;
+    }
+    case Version::v1: {
+      yardl::binary::WriteVectorAndSaveOffsets<evo_test::RecordWithChanges_v1, evo_test::binary::WriteRecordWithChanges_v1>(stream_, values, item_offsets);
+      break;
+    }
+    default:
+      yardl::binary::WriteVectorAndSaveOffsets<evo_test::RecordWithChanges, evo_test::binary::WriteRecordWithChanges>(stream_, values, item_offsets);
+      break;
+    }
+  }
+  step_index_.add_stream_offsets("AddedRecordStream", item_offsets);
+}
+
+void ProtocolWithChangesIndexedWriter::EndAddedRecordStreamImpl() {
+  step_index_.set_step_offset("AddedRecordStream", stream_.Pos());
+  step_index_.add_stream_offsets("AddedRecordStream", std::vector<size_t>{});
+  switch (version_) {
+  case Version::v0: {
+    break;
+  }
+  default:
+    yardl::binary::WriteInteger(stream_, 0U);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::WriteAddedUnionStreamImpl(std::variant<evo_test::RecordWithChanges, evo_test::RenamedRecord> const& value) {
+  step_index_.set_step_offset("AddedUnionStream", stream_.Pos());
+  size_t item_offset = 0;
+  switch (version_) {
+  case Version::v0: {
+    break;
+  }
+  case Version::v1: {
+    break;
+  }
+  default:
+    yardl::binary::WriteBlockAndSaveOffset<std::variant<evo_test::RecordWithChanges, evo_test::RenamedRecord>, WriteUnion<evo_test::RecordWithChanges, evo_test::binary::WriteRecordWithChanges, evo_test::RenamedRecord, evo_test::binary::WriteRenamedRecord>>(stream_, value, item_offset);
+    break;
+  }
+  step_index_.add_stream_offset("AddedUnionStream", item_offset);
+}
+
+void ProtocolWithChangesIndexedWriter::WriteAddedUnionStreamImpl(std::vector<std::variant<evo_test::RecordWithChanges, evo_test::RenamedRecord>> const& values) {
+  step_index_.set_step_offset("AddedUnionStream", stream_.Pos());
+  std::vector<size_t> item_offsets;
+  item_offsets.reserve(values.size());
+  if (!values.empty()) {
+    switch (version_) {
+    case Version::v0: {
+      break;
+    }
+    case Version::v1: {
+      break;
+    }
+    default:
+      yardl::binary::WriteVectorAndSaveOffsets<std::variant<evo_test::RecordWithChanges, evo_test::RenamedRecord>, WriteUnion<evo_test::RecordWithChanges, evo_test::binary::WriteRecordWithChanges, evo_test::RenamedRecord, evo_test::binary::WriteRenamedRecord>>(stream_, values, item_offsets);
+      break;
+    }
+  }
+  step_index_.add_stream_offsets("AddedUnionStream", item_offsets);
+}
+
+void ProtocolWithChangesIndexedWriter::EndAddedUnionStreamImpl() {
+  step_index_.set_step_offset("AddedUnionStream", stream_.Pos());
+  step_index_.add_stream_offsets("AddedUnionStream", std::vector<size_t>{});
+  switch (version_) {
+  case Version::v0: {
+    break;
+  }
+  case Version::v1: {
+    break;
+  }
+  default:
+    yardl::binary::WriteInteger(stream_, 0U);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedWriter::Flush() {
+  stream_.Flush();
+}
+
+void ProtocolWithChangesIndexedWriter::CloseImpl() {
+  yardl::binary::WriteIndex(stream_, step_index_);
+  stream_.Flush();
+}
+
+void ProtocolWithChangesIndexedReader::ReadInt8ToIntImpl(int8_t& value) {
+  auto pos = step_index_.get_step_offset("Int8ToInt");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v1: {
+    int32_t int8_to_int = {};
+    yardl::binary::ReadInteger(stream_, int8_to_int);
+    if (int8_to_int > std::numeric_limits<int8_t>::max() || int8_to_int < std::numeric_limits<int8_t>::lowest()) {
+      throw std::runtime_error("Numeric overflow detected while converting 'int32' to 'int8'");
+    }
+    value = static_cast<int8_t>(int8_to_int);
+    break;
+  }
+  default:
+    yardl::binary::ReadInteger(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadInt8ToLongImpl(int8_t& value) {
+  auto pos = step_index_.get_step_offset("Int8ToLong");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v1: {
+    int64_t int8_to_long = {};
+    yardl::binary::ReadInteger(stream_, int8_to_long);
+    if (int8_to_long > std::numeric_limits<int8_t>::max() || int8_to_long < std::numeric_limits<int8_t>::lowest()) {
+      throw std::runtime_error("Numeric overflow detected while converting 'int64' to 'int8'");
+    }
+    value = static_cast<int8_t>(int8_to_long);
+    break;
+  }
+  default:
+    yardl::binary::ReadInteger(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadInt8ToUintImpl(int8_t& value) {
+  auto pos = step_index_.get_step_offset("Int8ToUint");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v1: {
+    uint32_t int8_to_uint = {};
+    yardl::binary::ReadInteger(stream_, int8_to_uint);
+    if (int8_to_uint > std::numeric_limits<int8_t>::max()) {
+      throw std::runtime_error("Numeric overflow detected while converting 'uint32' to 'int8'");
+    }
+    value = static_cast<int8_t>(int8_to_uint);
+    break;
+  }
+  default:
+    yardl::binary::ReadInteger(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadInt8ToUlongImpl(int8_t& value) {
+  auto pos = step_index_.get_step_offset("Int8ToUlong");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v1: {
+    uint64_t int8_to_ulong = {};
+    yardl::binary::ReadInteger(stream_, int8_to_ulong);
+    if (int8_to_ulong > std::numeric_limits<int8_t>::max()) {
+      throw std::runtime_error("Numeric overflow detected while converting 'uint64' to 'int8'");
+    }
+    value = static_cast<int8_t>(int8_to_ulong);
+    break;
+  }
+  default:
+    yardl::binary::ReadInteger(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadInt8ToFloatImpl(int8_t& value) {
+  auto pos = step_index_.get_step_offset("Int8ToFloat");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v1: {
+    float int8_to_float = {};
+    yardl::binary::ReadFloatingPoint(stream_, int8_to_float);
+    if (int8_to_float > std::numeric_limits<int8_t>::max() || int8_to_float < std::numeric_limits<int8_t>::lowest()) {
+      throw std::runtime_error("Numeric overflow detected while converting 'float32' to 'int8'");
+    }
+    value = static_cast<int8_t>(std::round(int8_to_float));
+    break;
+  }
+  default:
+    yardl::binary::ReadInteger(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadInt8ToDoubleImpl(int8_t& value) {
+  auto pos = step_index_.get_step_offset("Int8ToDouble");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v1: {
+    double int8_to_double = {};
+    yardl::binary::ReadFloatingPoint(stream_, int8_to_double);
+    if (int8_to_double > std::numeric_limits<int8_t>::max() || int8_to_double < std::numeric_limits<int8_t>::lowest()) {
+      throw std::runtime_error("Numeric overflow detected while converting 'float64' to 'int8'");
+    }
+    value = static_cast<int8_t>(std::round(int8_to_double));
+    break;
+  }
+  default:
+    yardl::binary::ReadInteger(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadIntToUintImpl(int32_t& value) {
+  auto pos = step_index_.get_step_offset("IntToUint");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v1: {
+    uint32_t int_to_uint = {};
+    yardl::binary::ReadInteger(stream_, int_to_uint);
+    if (int_to_uint > std::numeric_limits<int32_t>::max()) {
+      throw std::runtime_error("Numeric overflow detected while converting 'uint32' to 'int32'");
+    }
+    value = static_cast<int32_t>(int_to_uint);
+    break;
+  }
+  default:
+    yardl::binary::ReadInteger(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadIntToLongImpl(int32_t& value) {
+  auto pos = step_index_.get_step_offset("IntToLong");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v1: {
+    int64_t int_to_long = {};
+    yardl::binary::ReadInteger(stream_, int_to_long);
+    if (int_to_long > std::numeric_limits<int32_t>::max() || int_to_long < std::numeric_limits<int32_t>::lowest()) {
+      throw std::runtime_error("Numeric overflow detected while converting 'int64' to 'int32'");
+    }
+    value = static_cast<int32_t>(int_to_long);
+    break;
+  }
+  default:
+    yardl::binary::ReadInteger(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadIntToFloatImpl(int32_t& value) {
+  auto pos = step_index_.get_step_offset("IntToFloat");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v1: {
+    float int_to_float = {};
+    yardl::binary::ReadFloatingPoint(stream_, int_to_float);
+    if (int_to_float > std::numeric_limits<int32_t>::max() || int_to_float < std::numeric_limits<int32_t>::lowest()) {
+      throw std::runtime_error("Numeric overflow detected while converting 'float32' to 'int32'");
+    }
+    value = static_cast<int32_t>(std::round(int_to_float));
+    break;
+  }
+  default:
+    yardl::binary::ReadInteger(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadIntToDoubleImpl(int32_t& value) {
+  auto pos = step_index_.get_step_offset("IntToDouble");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v1: {
+    double int_to_double = {};
+    yardl::binary::ReadFloatingPoint(stream_, int_to_double);
+    if (int_to_double > std::numeric_limits<int32_t>::max() || int_to_double < std::numeric_limits<int32_t>::lowest()) {
+      throw std::runtime_error("Numeric overflow detected while converting 'float64' to 'int32'");
+    }
+    value = static_cast<int32_t>(std::round(int_to_double));
+    break;
+  }
+  default:
+    yardl::binary::ReadInteger(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadUintToUlongImpl(uint32_t& value) {
+  auto pos = step_index_.get_step_offset("UintToUlong");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v1: {
+    uint64_t uint_to_ulong = {};
+    yardl::binary::ReadInteger(stream_, uint_to_ulong);
+    if (uint_to_ulong > std::numeric_limits<uint32_t>::max()) {
+      throw std::runtime_error("Numeric overflow detected while converting 'uint64' to 'uint32'");
+    }
+    value = static_cast<uint32_t>(uint_to_ulong);
+    break;
+  }
+  default:
+    yardl::binary::ReadInteger(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadUintToFloatImpl(uint32_t& value) {
+  auto pos = step_index_.get_step_offset("UintToFloat");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v1: {
+    float uint_to_float = {};
+    yardl::binary::ReadFloatingPoint(stream_, uint_to_float);
+    if (uint_to_float > std::numeric_limits<uint32_t>::max() || uint_to_float < std::numeric_limits<uint32_t>::lowest()) {
+      throw std::runtime_error("Numeric overflow detected while converting 'float32' to 'uint32'");
+    }
+    value = static_cast<uint32_t>(std::round(uint_to_float));
+    break;
+  }
+  default:
+    yardl::binary::ReadInteger(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadUintToDoubleImpl(uint32_t& value) {
+  auto pos = step_index_.get_step_offset("UintToDouble");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v1: {
+    double uint_to_double = {};
+    yardl::binary::ReadFloatingPoint(stream_, uint_to_double);
+    if (uint_to_double > std::numeric_limits<uint32_t>::max() || uint_to_double < std::numeric_limits<uint32_t>::lowest()) {
+      throw std::runtime_error("Numeric overflow detected while converting 'float64' to 'uint32'");
+    }
+    value = static_cast<uint32_t>(std::round(uint_to_double));
+    break;
+  }
+  default:
+    yardl::binary::ReadInteger(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadFloatToDoubleImpl(float& value) {
+  auto pos = step_index_.get_step_offset("FloatToDouble");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v1: {
+    double float_to_double = {};
+    yardl::binary::ReadFloatingPoint(stream_, float_to_double);
+    if (float_to_double > std::numeric_limits<float>::max() || float_to_double < std::numeric_limits<float>::lowest()) {
+      throw std::runtime_error("Numeric overflow detected while converting 'float64' to 'float32'");
+    }
+    value = static_cast<float>(float_to_double);
+    break;
+  }
+  default:
+    yardl::binary::ReadFloatingPoint(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadComplexFloatToComplexDoubleImpl(std::complex<float>& value) {
+  auto pos = step_index_.get_step_offset("ComplexFloatToComplexDouble");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v1: {
+    std::complex<double> complex_float_to_complex_double = {};
+    yardl::binary::ReadFloatingPoint(stream_, complex_float_to_complex_double);
+    if (std::real(complex_float_to_complex_double) > std::numeric_limits<std::complex<float>::value_type>::max() || std::real(complex_float_to_complex_double) < std::numeric_limits<std::complex<float>::value_type>::lowest()) {
+      throw std::runtime_error("Real part overflow detected while converting 'complexfloat64' to 'complexfloat32'");
+    }
+    if (std::imag(complex_float_to_complex_double) > std::numeric_limits<std::complex<float>::value_type>::max() || std::imag(complex_float_to_complex_double) < std::numeric_limits<std::complex<float>::value_type>::lowest()) {
+      throw std::runtime_error("Imaginary part overflow detected while converting 'complexfloat64' to 'complexfloat32'");
+    }
+    value = std::complex<float>(complex_float_to_complex_double);
+    break;
+  }
+  default:
+    yardl::binary::ReadFloatingPoint(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadIntToStringImpl(int32_t& value) {
+  auto pos = step_index_.get_step_offset("IntToString");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v1: {
+    std::string int_to_string = {};
+    yardl::binary::ReadString(stream_, int_to_string);
+    try {
+      value = std::stoi(int_to_string);
+    } catch (...) {
+      throw std::runtime_error("Unable to convert string \"" + int_to_string + "\" to number");
+    }
+    break;
+  }
+  default:
+    yardl::binary::ReadInteger(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadUintToStringImpl(uint32_t& value) {
+  auto pos = step_index_.get_step_offset("UintToString");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v1: {
+    std::string uint_to_string = {};
+    yardl::binary::ReadString(stream_, uint_to_string);
+    try {
+      value = std::stoul(uint_to_string);
+    } catch (...) {
+      throw std::runtime_error("Unable to convert string \"" + uint_to_string + "\" to number");
+    }
+    break;
+  }
+  default:
+    yardl::binary::ReadInteger(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadLongToStringImpl(int64_t& value) {
+  auto pos = step_index_.get_step_offset("LongToString");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v1: {
+    std::string long_to_string = {};
+    yardl::binary::ReadString(stream_, long_to_string);
+    try {
+      value = std::stol(long_to_string);
+    } catch (...) {
+      throw std::runtime_error("Unable to convert string \"" + long_to_string + "\" to number");
+    }
+    break;
+  }
+  default:
+    yardl::binary::ReadInteger(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadUlongToStringImpl(uint64_t& value) {
+  auto pos = step_index_.get_step_offset("UlongToString");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v1: {
+    std::string ulong_to_string = {};
+    yardl::binary::ReadString(stream_, ulong_to_string);
+    try {
+      value = std::stoul(ulong_to_string);
+    } catch (...) {
+      throw std::runtime_error("Unable to convert string \"" + ulong_to_string + "\" to number");
+    }
+    break;
+  }
+  default:
+    yardl::binary::ReadInteger(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadFloatToStringImpl(float& value) {
+  auto pos = step_index_.get_step_offset("FloatToString");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v1: {
+    std::string float_to_string = {};
+    yardl::binary::ReadString(stream_, float_to_string);
+    try {
+      value = std::stof(float_to_string);
+    } catch (...) {
+      throw std::runtime_error("Unable to convert string \"" + float_to_string + "\" to number");
+    }
+    break;
+  }
+  default:
+    yardl::binary::ReadFloatingPoint(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadDoubleToStringImpl(double& value) {
+  auto pos = step_index_.get_step_offset("DoubleToString");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v1: {
+    std::string double_to_string = {};
+    yardl::binary::ReadString(stream_, double_to_string);
+    try {
+      value = std::stod(double_to_string);
+    } catch (...) {
+      throw std::runtime_error("Unable to convert string \"" + double_to_string + "\" to number");
+    }
+    break;
+  }
+  default:
+    yardl::binary::ReadFloatingPoint(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadIntToOptionalImpl(int32_t& value) {
+  auto pos = step_index_.get_step_offset("IntToOptional");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v1: {
+    std::optional<int32_t> int_to_optional = {};
+    yardl::binary::ReadOptional<int32_t, yardl::binary::ReadInteger>(stream_, int_to_optional);
+    if (int_to_optional.has_value()) {
+      value = int_to_optional.value();
+    }
+    break;
+  }
+  default:
+    yardl::binary::ReadInteger(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadFloatToOptionalImpl(float& value) {
+  auto pos = step_index_.get_step_offset("FloatToOptional");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v1: {
+    std::optional<float> float_to_optional = {};
+    yardl::binary::ReadOptional<float, yardl::binary::ReadFloatingPoint>(stream_, float_to_optional);
+    if (float_to_optional.has_value()) {
+      value = float_to_optional.value();
+    }
+    break;
+  }
+  default:
+    yardl::binary::ReadFloatingPoint(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadStringToOptionalImpl(std::string& value) {
+  auto pos = step_index_.get_step_offset("StringToOptional");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v1: {
+    std::optional<std::string> string_to_optional = {};
+    yardl::binary::ReadOptional<std::string, yardl::binary::ReadString>(stream_, string_to_optional);
+    if (string_to_optional.has_value()) {
+      value = string_to_optional.value();
+    }
+    break;
+  }
+  default:
+    yardl::binary::ReadString(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadIntToUnionImpl(int32_t& value) {
+  auto pos = step_index_.get_step_offset("IntToUnion");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v1: {
+    std::variant<int32_t, bool> int_to_union = {};
+    ReadUnion<int32_t, yardl::binary::ReadInteger, bool, yardl::binary::ReadInteger>(stream_, int_to_union);
+    if (int_to_union.index() == 0) {
+      value = std::get<0>(int_to_union);
+    }
+    break;
+  }
+  default:
+    yardl::binary::ReadInteger(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadFloatToUnionImpl(float& value) {
+  auto pos = step_index_.get_step_offset("FloatToUnion");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v1: {
+    std::variant<float, bool> float_to_union = {};
+    ReadUnion<float, yardl::binary::ReadFloatingPoint, bool, yardl::binary::ReadInteger>(stream_, float_to_union);
+    if (float_to_union.index() == 0) {
+      value = std::get<0>(float_to_union);
+    }
+    break;
+  }
+  default:
+    yardl::binary::ReadFloatingPoint(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadStringToUnionImpl(std::string& value) {
+  auto pos = step_index_.get_step_offset("StringToUnion");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v1: {
+    std::variant<std::string, bool> string_to_union = {};
+    ReadUnion<std::string, yardl::binary::ReadString, bool, yardl::binary::ReadInteger>(stream_, string_to_union);
+    if (string_to_union.index() == 0) {
+      value = std::get<0>(string_to_union);
+    }
+    break;
+  }
+  default:
+    yardl::binary::ReadString(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadOptionalIntToFloatImpl(std::optional<int32_t>& value) {
+  auto pos = step_index_.get_step_offset("OptionalIntToFloat");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v1: {
+    std::optional<float> optional_int_to_float = {};
+    yardl::binary::ReadOptional<float, yardl::binary::ReadFloatingPoint>(stream_, optional_int_to_float);
+    if (optional_int_to_float.has_value()) {
+      if (optional_int_to_float.value() > std::numeric_limits<int32_t>::max() || optional_int_to_float.value() < std::numeric_limits<int32_t>::lowest()) {
+        throw std::runtime_error("Numeric overflow detected while converting 'float32' to 'int32'");
+      }
+      value = static_cast<int32_t>(std::round(optional_int_to_float.value()));
+    }
+    break;
+  }
+  default:
+    yardl::binary::ReadOptional<int32_t, yardl::binary::ReadInteger>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadOptionalFloatToStringImpl(std::optional<float>& value) {
+  auto pos = step_index_.get_step_offset("OptionalFloatToString");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v1: {
+    std::optional<std::string> optional_float_to_string = {};
+    yardl::binary::ReadOptional<std::string, yardl::binary::ReadString>(stream_, optional_float_to_string);
+    if (optional_float_to_string.has_value()) {
+      try {
+        value = std::stof(optional_float_to_string.value());
+      } catch (...) {
+        throw std::runtime_error("Unable to convert string \"" + optional_float_to_string.value() + "\" to number");
+      }
+    }
+    break;
+  }
+  default:
+    yardl::binary::ReadOptional<float, yardl::binary::ReadFloatingPoint>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadAliasedLongToStringImpl(evo_test::AliasedLongToString& value) {
+  auto pos = step_index_.get_step_offset("AliasedLongToString");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::ReadAliasedLongToString_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::ReadAliasedLongToString(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadStringToAliasedStringImpl(std::string& value) {
+  auto pos = step_index_.get_step_offset("StringToAliasedString");
+  stream_.Seek(pos);
+  yardl::binary::ReadString(stream_, value);
+}
+
+void ProtocolWithChangesIndexedReader::ReadStringToAliasedIntImpl(std::string& value) {
+  auto pos = step_index_.get_step_offset("StringToAliasedInt");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v1: {
+    int32_t string_to_aliased_int = {};
+    yardl::binary::ReadInteger(stream_, string_to_aliased_int);
+    value = std::to_string(string_to_aliased_int);
+    break;
+  }
+  default:
+    yardl::binary::ReadString(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadEnumToAliasedEnumImpl(evo_test::GrowingEnum& value) {
+  auto pos = step_index_.get_step_offset("EnumToAliasedEnum");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v0: {
+    yardl::binary::ReadEnum<evo_test::GrowingEnum_v0>(stream_, value);
+    break;
+  }
+  case Version::v1: {
+    evo_test::binary::ReadAliasedEnum_v1(stream_, value);
+    break;
+  }
+  default:
+    yardl::binary::ReadEnum<evo_test::GrowingEnum>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadOptionalIntToUnionImpl(std::optional<int32_t>& value) {
+  auto pos = step_index_.get_step_offset("OptionalIntToUnion");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v1: {
+    std::variant<std::monostate, int32_t, std::string> optional_int_to_union = {};
+    ReadUnion<std::monostate, yardl::binary::ReadMonostate, int32_t, yardl::binary::ReadInteger, std::string, yardl::binary::ReadString>(stream_, optional_int_to_union);
+    if (optional_int_to_union.index() == 1) {
+      value = std::get<1>(optional_int_to_union);
+    }
+    break;
+  }
+  default:
+    yardl::binary::ReadOptional<int32_t, yardl::binary::ReadInteger>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadOptionalRecordToUnionImpl(std::optional<evo_test::RecordWithChanges>& value) {
+  auto pos = step_index_.get_step_offset("OptionalRecordToUnion");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v0: {
+    yardl::binary::ReadOptional<evo_test::RecordWithChanges_v0, evo_test::binary::ReadRecordWithChanges_v0>(stream_, value);
+    break;
+  }
+  case Version::v1: {
+    std::variant<std::monostate, evo_test::RecordWithChanges_v1, std::string> optional_record_to_union = {};
+    ReadUnion<std::monostate, yardl::binary::ReadMonostate, evo_test::RecordWithChanges_v1, evo_test::binary::ReadRecordWithChanges_v1, std::string, yardl::binary::ReadString>(stream_, optional_record_to_union);
+    if (optional_record_to_union.index() == 1) {
+      value = std::get<1>(optional_record_to_union);
+    }
+    break;
+  }
+  default:
+    yardl::binary::ReadOptional<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadRecordWithChangesImpl(evo_test::RecordWithChanges& value) {
+  auto pos = step_index_.get_step_offset("RecordWithChanges");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v0: {
+    evo_test::binary::ReadRecordWithChanges_v0(stream_, value);
+    break;
+  }
+  case Version::v1: {
+    evo_test::binary::ReadRecordWithChanges_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::ReadRecordWithChanges(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadAliasedRecordWithChangesImpl(evo_test::AliasedRecordWithChanges& value) {
+  auto pos = step_index_.get_step_offset("AliasedRecordWithChanges");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v0: {
+    evo_test::binary::ReadAliasedRecordWithChanges_v0(stream_, value);
+    break;
+  }
+  case Version::v1: {
+    evo_test::binary::ReadAliasedRecordWithChanges_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::ReadAliasedRecordWithChanges(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadRecordToRenamedRecordImpl(evo_test::RenamedRecord& value) {
+  auto pos = step_index_.get_step_offset("RecordToRenamedRecord");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::ReadRenamedRecord_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::ReadRenamedRecord(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadRecordToAliasedRecordImpl(evo_test::RecordWithChanges& value) {
+  auto pos = step_index_.get_step_offset("RecordToAliasedRecord");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v0: {
+    evo_test::binary::ReadRecordWithChanges_v0(stream_, value);
+    break;
+  }
+  case Version::v1: {
+    evo_test::binary::ReadAliasedRecordWithChanges_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::ReadRecordWithChanges(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadRecordToAliasedAliasImpl(evo_test::RecordWithChanges& value) {
+  auto pos = step_index_.get_step_offset("RecordToAliasedAlias");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v0: {
+    evo_test::binary::ReadRecordWithChanges_v0(stream_, value);
+    break;
+  }
+  case Version::v1: {
+    evo_test::binary::ReadAliasOfAliasedRecordWithChanges_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::ReadRecordWithChanges(stream_, value);
+    break;
+  }
+}
+
+bool ProtocolWithChangesIndexedReader::ReadStreamIntToStringToFloatImpl(float& value) {
+  if (!step_index_.offset_within_stream("StreamIntToStringToFloat", "VectorIntToStringToFloat", stream_.Pos())) {
+    stream_.Seek(step_index_.get_step_offset("StreamIntToStringToFloat"));
+  }
+  bool read_block_successful = false;
+  switch (version_) {
+  case Version::v0: {
+    int32_t stream_int_to_string_to_float = {};
+    read_block_successful = yardl::binary::ReadBlock<int32_t, yardl::binary::ReadInteger>(stream_, current_block_remaining_, stream_int_to_string_to_float);
+    if (read_block_successful) {
+      value = static_cast<float>(stream_int_to_string_to_float);
+    }
+    break;
+  }
+  case Version::v1: {
+    std::string stream_int_to_string_to_float = {};
+    read_block_successful = yardl::binary::ReadBlock<std::string, yardl::binary::ReadString>(stream_, current_block_remaining_, stream_int_to_string_to_float);
+    if (read_block_successful) {
+      try {
+        value = std::stof(stream_int_to_string_to_float);
+      } catch (...) {
+        throw std::runtime_error("Unable to convert string \"" + stream_int_to_string_to_float + "\" to number");
+      }
+    }
+    break;
+  }
+  default:
+    read_block_successful = yardl::binary::ReadBlock<float, yardl::binary::ReadFloatingPoint>(stream_, current_block_remaining_, value);
+    break;
+  }
+  return read_block_successful;
+}
+
+bool ProtocolWithChangesIndexedReader::ReadStreamIntToStringToFloatImpl(std::vector<float>& values) {
+  if (!step_index_.offset_within_stream("StreamIntToStringToFloat", "VectorIntToStringToFloat", stream_.Pos())) {
+    stream_.Seek(step_index_.get_step_offset("StreamIntToStringToFloat"));
+  }
+  switch (version_) {
+  case Version::v0: {
+    std::vector<int32_t> stream_int_to_string_to_float = {};
+    stream_int_to_string_to_float.reserve(values.capacity());
+    yardl::binary::ReadBlocksIntoVector<int32_t, yardl::binary::ReadInteger>(stream_, current_block_remaining_, stream_int_to_string_to_float);
+    values.resize(stream_int_to_string_to_float.size());
+    for (size_t i = 0; i < stream_int_to_string_to_float.size(); i++) {
+      float item = {};
+      item = static_cast<float>(stream_int_to_string_to_float[i]);
+      values[i] = item;
+    }
+    break;
+  }
+  case Version::v1: {
+    std::vector<std::string> stream_int_to_string_to_float = {};
+    stream_int_to_string_to_float.reserve(values.capacity());
+    yardl::binary::ReadBlocksIntoVector<std::string, yardl::binary::ReadString>(stream_, current_block_remaining_, stream_int_to_string_to_float);
+    values.resize(stream_int_to_string_to_float.size());
+    for (size_t i = 0; i < stream_int_to_string_to_float.size(); i++) {
+      float item = {};
+      try {
+        item = std::stof(stream_int_to_string_to_float[i]);
+      } catch (...) {
+        throw std::runtime_error("Unable to convert string \"" + stream_int_to_string_to_float[i] + "\" to number");
+      }
+      values[i] = item;
+    }
+    break;
+  }
+  default:
+    yardl::binary::ReadBlocksIntoVector<float, yardl::binary::ReadFloatingPoint>(stream_, current_block_remaining_, values);
+    break;
+  }
+  return current_block_remaining_ != 0;
+}
+
+bool ProtocolWithChangesIndexedReader::ReadStreamIntToStringToFloatImpl(float& value, size_t idx) {
+  size_t abs_offset = 0;
+  if (!step_index_.find_stream_item("StreamIntToStringToFloat", idx, abs_offset, current_block_remaining_)) {
+    return false;
+  }
+  stream_.Seek(abs_offset);
+  bool read_block_successful = false;
+  switch (version_) {
+  case Version::v0: {
+    int32_t stream_int_to_string_to_float = {};
+    read_block_successful = yardl::binary::ReadBlock<int32_t, yardl::binary::ReadInteger>(stream_, current_block_remaining_, stream_int_to_string_to_float);
+    if (read_block_successful) {
+      value = static_cast<float>(stream_int_to_string_to_float);
+    }
+    break;
+  }
+  case Version::v1: {
+    std::string stream_int_to_string_to_float = {};
+    read_block_successful = yardl::binary::ReadBlock<std::string, yardl::binary::ReadString>(stream_, current_block_remaining_, stream_int_to_string_to_float);
+    if (read_block_successful) {
+      try {
+        value = std::stof(stream_int_to_string_to_float);
+      } catch (...) {
+        throw std::runtime_error("Unable to convert string \"" + stream_int_to_string_to_float + "\" to number");
+      }
+    }
+    break;
+  }
+  default:
+    read_block_successful = yardl::binary::ReadBlock<float, yardl::binary::ReadFloatingPoint>(stream_, current_block_remaining_, value);
+    break;
+  }
+  return read_block_successful;
+}
+
+bool ProtocolWithChangesIndexedReader::ReadStreamIntToStringToFloatImpl(std::vector<float>& values, size_t idx) {
+  size_t abs_offset = 0;
+  if (!step_index_.find_stream_item("StreamIntToStringToFloat", idx, abs_offset, current_block_remaining_)) {
+    values.clear();
+    return false;
+  }
+  stream_.Seek(abs_offset);
+  switch (version_) {
+  case Version::v0: {
+    std::vector<int32_t> stream_int_to_string_to_float = {};
+    stream_int_to_string_to_float.reserve(values.capacity());
+    yardl::binary::ReadBlocksIntoVector<int32_t, yardl::binary::ReadInteger>(stream_, current_block_remaining_, stream_int_to_string_to_float);
+    values.resize(stream_int_to_string_to_float.size());
+    for (size_t i = 0; i < stream_int_to_string_to_float.size(); i++) {
+      float item = {};
+      item = static_cast<float>(stream_int_to_string_to_float[i]);
+      values[i] = item;
+    }
+    break;
+  }
+  case Version::v1: {
+    std::vector<std::string> stream_int_to_string_to_float = {};
+    stream_int_to_string_to_float.reserve(values.capacity());
+    yardl::binary::ReadBlocksIntoVector<std::string, yardl::binary::ReadString>(stream_, current_block_remaining_, stream_int_to_string_to_float);
+    values.resize(stream_int_to_string_to_float.size());
+    for (size_t i = 0; i < stream_int_to_string_to_float.size(); i++) {
+      float item = {};
+      try {
+        item = std::stof(stream_int_to_string_to_float[i]);
+      } catch (...) {
+        throw std::runtime_error("Unable to convert string \"" + stream_int_to_string_to_float[i] + "\" to number");
+      }
+      values[i] = item;
+    }
+    break;
+  }
+  default:
+    yardl::binary::ReadBlocksIntoVector<float, yardl::binary::ReadFloatingPoint>(stream_, current_block_remaining_, values);
+    break;
+  }
+  return current_block_remaining_ != 0;
+}
+
+size_t ProtocolWithChangesIndexedReader::CountStreamIntToStringToFloatImpl() {
+  return step_index_.get_stream_count("StreamIntToStringToFloat");
+}
+
+void ProtocolWithChangesIndexedReader::ReadVectorIntToStringToFloatImpl(std::vector<float>& value) {
+  auto pos = step_index_.get_step_offset("VectorIntToStringToFloat");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v0: {
+    std::vector<int32_t> vector_int_to_string_to_float = {};
+    yardl::binary::ReadVector<int32_t, yardl::binary::ReadInteger>(stream_, vector_int_to_string_to_float);
+    value.resize(vector_int_to_string_to_float.size());
+    for (size_t i = 0; i < vector_int_to_string_to_float.size(); i++) {
+      float item = {};
+      item = static_cast<float>(vector_int_to_string_to_float[i]);
+      value[i] = item;
+    }
+    break;
+  }
+  case Version::v1: {
+    std::vector<std::string> vector_int_to_string_to_float = {};
+    yardl::binary::ReadVector<std::string, yardl::binary::ReadString>(stream_, vector_int_to_string_to_float);
+    value.resize(vector_int_to_string_to_float.size());
+    for (size_t i = 0; i < vector_int_to_string_to_float.size(); i++) {
+      float item = {};
+      try {
+        item = std::stof(vector_int_to_string_to_float[i]);
+      } catch (...) {
+        throw std::runtime_error("Unable to convert string \"" + vector_int_to_string_to_float[i] + "\" to number");
+      }
+      value[i] = item;
+    }
+    break;
+  }
+  default:
+    yardl::binary::ReadVector<float, yardl::binary::ReadFloatingPoint>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadIntFloatUnionReorderedImpl(std::variant<int32_t, float>& value) {
+  auto pos = step_index_.get_step_offset("IntFloatUnionReordered");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v1: {
+    std::variant<float, int32_t> int_float_union_reordered = {};
+    ReadUnion<float, yardl::binary::ReadFloatingPoint, int32_t, yardl::binary::ReadInteger>(stream_, int_float_union_reordered);
+    switch (int_float_union_reordered.index()) {
+      case 0: {
+        value = std::get<0>(int_float_union_reordered);
+        break;
+      }
+      case 1: {
+        value = std::get<1>(int_float_union_reordered);
+        break;
+      }
+      default: throw std::runtime_error("Invalid union index.");
+    }
+    break;
+  }
+  default:
+    ReadUnion<int32_t, yardl::binary::ReadInteger, float, yardl::binary::ReadFloatingPoint>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadVectorUnionReorderedImpl(std::vector<std::variant<int32_t, float>>& value) {
+  auto pos = step_index_.get_step_offset("VectorUnionReordered");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v1: {
+    std::vector<std::variant<float, int32_t>> vector_union_reordered = {};
+    yardl::binary::ReadVector<std::variant<float, int32_t>, ReadUnion<float, yardl::binary::ReadFloatingPoint, int32_t, yardl::binary::ReadInteger>>(stream_, vector_union_reordered);
+    value.resize(vector_union_reordered.size());
+    for (size_t i = 0; i < vector_union_reordered.size(); i++) {
+      std::variant<int32_t, float> item = {};
+      switch (vector_union_reordered[i].index()) {
+        case 0: {
+          item = std::get<0>(vector_union_reordered[i]);
+          break;
+        }
+        case 1: {
+          item = std::get<1>(vector_union_reordered[i]);
+          break;
+        }
+        default: throw std::runtime_error("Invalid union index.");
+      }
+      value[i] = item;
+    }
+    break;
+  }
+  default:
+    yardl::binary::ReadVector<std::variant<int32_t, float>, ReadUnion<int32_t, yardl::binary::ReadInteger, float, yardl::binary::ReadFloatingPoint>>(stream_, value);
+    break;
+  }
+}
+
+bool ProtocolWithChangesIndexedReader::ReadStreamUnionReorderedImpl(std::variant<int32_t, std::string>& value) {
+  if (!step_index_.offset_within_stream("StreamUnionReordered", "IntToUnionStream", stream_.Pos())) {
+    stream_.Seek(step_index_.get_step_offset("StreamUnionReordered"));
+  }
+  bool read_block_successful = false;
+  switch (version_) {
+  case Version::v1: {
+    std::variant<std::string, int32_t> stream_union_reordered = {};
+    read_block_successful = yardl::binary::ReadBlock<std::variant<std::string, int32_t>, ReadUnion<std::string, yardl::binary::ReadString, int32_t, yardl::binary::ReadInteger>>(stream_, current_block_remaining_, stream_union_reordered);
+    if (read_block_successful) {
+      switch (stream_union_reordered.index()) {
+        case 0: {
+          value = std::get<0>(stream_union_reordered);
+          break;
+        }
+        case 1: {
+          value = std::get<1>(stream_union_reordered);
+          break;
+        }
+        default: throw std::runtime_error("Invalid union index.");
+      }
+    }
+    break;
+  }
+  default:
+    read_block_successful = yardl::binary::ReadBlock<std::variant<int32_t, std::string>, ReadUnion<int32_t, yardl::binary::ReadInteger, std::string, yardl::binary::ReadString>>(stream_, current_block_remaining_, value);
+    break;
+  }
+  return read_block_successful;
+}
+
+bool ProtocolWithChangesIndexedReader::ReadStreamUnionReorderedImpl(std::vector<std::variant<int32_t, std::string>>& values) {
+  if (!step_index_.offset_within_stream("StreamUnionReordered", "IntToUnionStream", stream_.Pos())) {
+    stream_.Seek(step_index_.get_step_offset("StreamUnionReordered"));
+  }
+  switch (version_) {
+  case Version::v1: {
+    std::vector<std::variant<std::string, int32_t>> stream_union_reordered = {};
+    stream_union_reordered.reserve(values.capacity());
+    yardl::binary::ReadBlocksIntoVector<std::variant<std::string, int32_t>, ReadUnion<std::string, yardl::binary::ReadString, int32_t, yardl::binary::ReadInteger>>(stream_, current_block_remaining_, stream_union_reordered);
+    values.resize(stream_union_reordered.size());
+    for (size_t i = 0; i < stream_union_reordered.size(); i++) {
+      std::variant<int32_t, std::string> item = {};
+      switch (stream_union_reordered[i].index()) {
+        case 0: {
+          item = std::get<0>(stream_union_reordered[i]);
+          break;
+        }
+        case 1: {
+          item = std::get<1>(stream_union_reordered[i]);
+          break;
+        }
+        default: throw std::runtime_error("Invalid union index.");
+      }
+      values[i] = item;
+    }
+    break;
+  }
+  default:
+    yardl::binary::ReadBlocksIntoVector<std::variant<int32_t, std::string>, ReadUnion<int32_t, yardl::binary::ReadInteger, std::string, yardl::binary::ReadString>>(stream_, current_block_remaining_, values);
+    break;
+  }
+  return current_block_remaining_ != 0;
+}
+
+bool ProtocolWithChangesIndexedReader::ReadStreamUnionReorderedImpl(std::variant<int32_t, std::string>& value, size_t idx) {
+  size_t abs_offset = 0;
+  if (!step_index_.find_stream_item("StreamUnionReordered", idx, abs_offset, current_block_remaining_)) {
+    return false;
+  }
+  stream_.Seek(abs_offset);
+  bool read_block_successful = false;
+  switch (version_) {
+  case Version::v1: {
+    std::variant<std::string, int32_t> stream_union_reordered = {};
+    read_block_successful = yardl::binary::ReadBlock<std::variant<std::string, int32_t>, ReadUnion<std::string, yardl::binary::ReadString, int32_t, yardl::binary::ReadInteger>>(stream_, current_block_remaining_, stream_union_reordered);
+    if (read_block_successful) {
+      switch (stream_union_reordered.index()) {
+        case 0: {
+          value = std::get<0>(stream_union_reordered);
+          break;
+        }
+        case 1: {
+          value = std::get<1>(stream_union_reordered);
+          break;
+        }
+        default: throw std::runtime_error("Invalid union index.");
+      }
+    }
+    break;
+  }
+  default:
+    read_block_successful = yardl::binary::ReadBlock<std::variant<int32_t, std::string>, ReadUnion<int32_t, yardl::binary::ReadInteger, std::string, yardl::binary::ReadString>>(stream_, current_block_remaining_, value);
+    break;
+  }
+  return read_block_successful;
+}
+
+bool ProtocolWithChangesIndexedReader::ReadStreamUnionReorderedImpl(std::vector<std::variant<int32_t, std::string>>& values, size_t idx) {
+  size_t abs_offset = 0;
+  if (!step_index_.find_stream_item("StreamUnionReordered", idx, abs_offset, current_block_remaining_)) {
+    values.clear();
+    return false;
+  }
+  stream_.Seek(abs_offset);
+  switch (version_) {
+  case Version::v1: {
+    std::vector<std::variant<std::string, int32_t>> stream_union_reordered = {};
+    stream_union_reordered.reserve(values.capacity());
+    yardl::binary::ReadBlocksIntoVector<std::variant<std::string, int32_t>, ReadUnion<std::string, yardl::binary::ReadString, int32_t, yardl::binary::ReadInteger>>(stream_, current_block_remaining_, stream_union_reordered);
+    values.resize(stream_union_reordered.size());
+    for (size_t i = 0; i < stream_union_reordered.size(); i++) {
+      std::variant<int32_t, std::string> item = {};
+      switch (stream_union_reordered[i].index()) {
+        case 0: {
+          item = std::get<0>(stream_union_reordered[i]);
+          break;
+        }
+        case 1: {
+          item = std::get<1>(stream_union_reordered[i]);
+          break;
+        }
+        default: throw std::runtime_error("Invalid union index.");
+      }
+      values[i] = item;
+    }
+    break;
+  }
+  default:
+    yardl::binary::ReadBlocksIntoVector<std::variant<int32_t, std::string>, ReadUnion<int32_t, yardl::binary::ReadInteger, std::string, yardl::binary::ReadString>>(stream_, current_block_remaining_, values);
+    break;
+  }
+  return current_block_remaining_ != 0;
+}
+
+size_t ProtocolWithChangesIndexedReader::CountStreamUnionReorderedImpl() {
+  return step_index_.get_stream_count("StreamUnionReordered");
+}
+
+bool ProtocolWithChangesIndexedReader::ReadIntToUnionStreamImpl(std::variant<std::string, int32_t>& value) {
+  if (!step_index_.offset_within_stream("IntToUnionStream", "UnionStreamTypeChange", stream_.Pos())) {
+    stream_.Seek(step_index_.get_step_offset("IntToUnionStream"));
+  }
+  bool read_block_successful = false;
+  switch (version_) {
+  case Version::v0: {
+    std::variant<std::string, int32_t> int_to_union_stream = {};
+    value = std::move(int_to_union_stream);
+    return false;
+    break;
+  }
+  case Version::v1: {
+    int32_t int_to_union_stream = {};
+    read_block_successful = yardl::binary::ReadBlock<int32_t, yardl::binary::ReadInteger>(stream_, current_block_remaining_, int_to_union_stream);
+    if (read_block_successful) {
+      value = int_to_union_stream;
+    }
+    break;
+  }
+  default:
+    read_block_successful = yardl::binary::ReadBlock<std::variant<std::string, int32_t>, ReadUnion<std::string, yardl::binary::ReadString, int32_t, yardl::binary::ReadInteger>>(stream_, current_block_remaining_, value);
+    break;
+  }
+  return read_block_successful;
+}
+
+bool ProtocolWithChangesIndexedReader::ReadIntToUnionStreamImpl(std::vector<std::variant<std::string, int32_t>>& values) {
+  if (!step_index_.offset_within_stream("IntToUnionStream", "UnionStreamTypeChange", stream_.Pos())) {
+    stream_.Seek(step_index_.get_step_offset("IntToUnionStream"));
+  }
+  switch (version_) {
+  case Version::v0: {
+    values.clear();
+    break;
+  }
+  case Version::v1: {
+    std::vector<int32_t> int_to_union_stream = {};
+    int_to_union_stream.reserve(values.capacity());
+    yardl::binary::ReadBlocksIntoVector<int32_t, yardl::binary::ReadInteger>(stream_, current_block_remaining_, int_to_union_stream);
+    values.resize(int_to_union_stream.size());
+    for (size_t i = 0; i < int_to_union_stream.size(); i++) {
+      std::variant<std::string, int32_t> item = {};
+      item = int_to_union_stream[i];
+      values[i] = item;
+    }
+    break;
+  }
+  default:
+    yardl::binary::ReadBlocksIntoVector<std::variant<std::string, int32_t>, ReadUnion<std::string, yardl::binary::ReadString, int32_t, yardl::binary::ReadInteger>>(stream_, current_block_remaining_, values);
+    break;
+  }
+  return current_block_remaining_ != 0;
+}
+
+bool ProtocolWithChangesIndexedReader::ReadIntToUnionStreamImpl(std::variant<std::string, int32_t>& value, size_t idx) {
+  size_t abs_offset = 0;
+  if (!step_index_.find_stream_item("IntToUnionStream", idx, abs_offset, current_block_remaining_)) {
+    return false;
+  }
+  stream_.Seek(abs_offset);
+  bool read_block_successful = false;
+  switch (version_) {
+  case Version::v0: {
+    std::variant<std::string, int32_t> int_to_union_stream = {};
+    value = std::move(int_to_union_stream);
+    return false;
+    break;
+  }
+  case Version::v1: {
+    int32_t int_to_union_stream = {};
+    read_block_successful = yardl::binary::ReadBlock<int32_t, yardl::binary::ReadInteger>(stream_, current_block_remaining_, int_to_union_stream);
+    if (read_block_successful) {
+      value = int_to_union_stream;
+    }
+    break;
+  }
+  default:
+    read_block_successful = yardl::binary::ReadBlock<std::variant<std::string, int32_t>, ReadUnion<std::string, yardl::binary::ReadString, int32_t, yardl::binary::ReadInteger>>(stream_, current_block_remaining_, value);
+    break;
+  }
+  return read_block_successful;
+}
+
+bool ProtocolWithChangesIndexedReader::ReadIntToUnionStreamImpl(std::vector<std::variant<std::string, int32_t>>& values, size_t idx) {
+  size_t abs_offset = 0;
+  if (!step_index_.find_stream_item("IntToUnionStream", idx, abs_offset, current_block_remaining_)) {
+    values.clear();
+    return false;
+  }
+  stream_.Seek(abs_offset);
+  switch (version_) {
+  case Version::v0: {
+    values.clear();
+    break;
+  }
+  case Version::v1: {
+    std::vector<int32_t> int_to_union_stream = {};
+    int_to_union_stream.reserve(values.capacity());
+    yardl::binary::ReadBlocksIntoVector<int32_t, yardl::binary::ReadInteger>(stream_, current_block_remaining_, int_to_union_stream);
+    values.resize(int_to_union_stream.size());
+    for (size_t i = 0; i < int_to_union_stream.size(); i++) {
+      std::variant<std::string, int32_t> item = {};
+      item = int_to_union_stream[i];
+      values[i] = item;
+    }
+    break;
+  }
+  default:
+    yardl::binary::ReadBlocksIntoVector<std::variant<std::string, int32_t>, ReadUnion<std::string, yardl::binary::ReadString, int32_t, yardl::binary::ReadInteger>>(stream_, current_block_remaining_, values);
+    break;
+  }
+  return current_block_remaining_ != 0;
+}
+
+size_t ProtocolWithChangesIndexedReader::CountIntToUnionStreamImpl() {
+  return step_index_.get_stream_count("IntToUnionStream");
+}
+
+bool ProtocolWithChangesIndexedReader::ReadUnionStreamTypeChangeImpl(std::variant<int32_t, float>& value) {
+  if (!step_index_.offset_within_stream("UnionStreamTypeChange", "StreamOfAliasTypeChange", stream_.Pos())) {
+    stream_.Seek(step_index_.get_step_offset("UnionStreamTypeChange"));
+  }
+  bool read_block_successful = false;
+  switch (version_) {
+  case Version::v0: {
+    std::variant<int32_t, float> union_stream_type_change = {};
+    value = std::move(union_stream_type_change);
+    return false;
+    break;
+  }
+  case Version::v1: {
+    std::variant<int32_t, bool> union_stream_type_change = {};
+    read_block_successful = yardl::binary::ReadBlock<std::variant<int32_t, bool>, ReadUnion<int32_t, yardl::binary::ReadInteger, bool, yardl::binary::ReadInteger>>(stream_, current_block_remaining_, union_stream_type_change);
+    if (read_block_successful) {
+      switch (union_stream_type_change.index()) {
+        case 0: {
+          value = std::get<0>(union_stream_type_change);
+          break;
+        }
+        case 1: {
+          std::vector<std::string> source_types = {"int32", "bool"};
+          throw std::runtime_error("Source type '" + source_types[1] + "' incompatible with target union type 'int32 | float32'");
+          break;
+        }
+        default: throw std::runtime_error("Invalid union index.");
+      }
+    }
+    break;
+  }
+  default:
+    read_block_successful = yardl::binary::ReadBlock<std::variant<int32_t, float>, ReadUnion<int32_t, yardl::binary::ReadInteger, float, yardl::binary::ReadFloatingPoint>>(stream_, current_block_remaining_, value);
+    break;
+  }
+  return read_block_successful;
+}
+
+bool ProtocolWithChangesIndexedReader::ReadUnionStreamTypeChangeImpl(std::vector<std::variant<int32_t, float>>& values) {
+  if (!step_index_.offset_within_stream("UnionStreamTypeChange", "StreamOfAliasTypeChange", stream_.Pos())) {
+    stream_.Seek(step_index_.get_step_offset("UnionStreamTypeChange"));
+  }
+  switch (version_) {
+  case Version::v0: {
+    values.clear();
+    break;
+  }
+  case Version::v1: {
+    std::vector<std::variant<int32_t, bool>> union_stream_type_change = {};
+    union_stream_type_change.reserve(values.capacity());
+    yardl::binary::ReadBlocksIntoVector<std::variant<int32_t, bool>, ReadUnion<int32_t, yardl::binary::ReadInteger, bool, yardl::binary::ReadInteger>>(stream_, current_block_remaining_, union_stream_type_change);
+    values.resize(union_stream_type_change.size());
+    for (size_t i = 0; i < union_stream_type_change.size(); i++) {
+      std::variant<int32_t, float> item = {};
+      switch (union_stream_type_change[i].index()) {
+        case 0: {
+          item = std::get<0>(union_stream_type_change[i]);
+          break;
+        }
+        case 1: {
+          std::vector<std::string> source_types = {"int32", "bool"};
+          throw std::runtime_error("Source type '" + source_types[1] + "' incompatible with target union type 'int32 | float32'");
+          break;
+        }
+        default: throw std::runtime_error("Invalid union index.");
+      }
+      values[i] = item;
+    }
+    break;
+  }
+  default:
+    yardl::binary::ReadBlocksIntoVector<std::variant<int32_t, float>, ReadUnion<int32_t, yardl::binary::ReadInteger, float, yardl::binary::ReadFloatingPoint>>(stream_, current_block_remaining_, values);
+    break;
+  }
+  return current_block_remaining_ != 0;
+}
+
+bool ProtocolWithChangesIndexedReader::ReadUnionStreamTypeChangeImpl(std::variant<int32_t, float>& value, size_t idx) {
+  size_t abs_offset = 0;
+  if (!step_index_.find_stream_item("UnionStreamTypeChange", idx, abs_offset, current_block_remaining_)) {
+    return false;
+  }
+  stream_.Seek(abs_offset);
+  bool read_block_successful = false;
+  switch (version_) {
+  case Version::v0: {
+    std::variant<int32_t, float> union_stream_type_change = {};
+    value = std::move(union_stream_type_change);
+    return false;
+    break;
+  }
+  case Version::v1: {
+    std::variant<int32_t, bool> union_stream_type_change = {};
+    read_block_successful = yardl::binary::ReadBlock<std::variant<int32_t, bool>, ReadUnion<int32_t, yardl::binary::ReadInteger, bool, yardl::binary::ReadInteger>>(stream_, current_block_remaining_, union_stream_type_change);
+    if (read_block_successful) {
+      switch (union_stream_type_change.index()) {
+        case 0: {
+          value = std::get<0>(union_stream_type_change);
+          break;
+        }
+        case 1: {
+          std::vector<std::string> source_types = {"int32", "bool"};
+          throw std::runtime_error("Source type '" + source_types[1] + "' incompatible with target union type 'int32 | float32'");
+          break;
+        }
+        default: throw std::runtime_error("Invalid union index.");
+      }
+    }
+    break;
+  }
+  default:
+    read_block_successful = yardl::binary::ReadBlock<std::variant<int32_t, float>, ReadUnion<int32_t, yardl::binary::ReadInteger, float, yardl::binary::ReadFloatingPoint>>(stream_, current_block_remaining_, value);
+    break;
+  }
+  return read_block_successful;
+}
+
+bool ProtocolWithChangesIndexedReader::ReadUnionStreamTypeChangeImpl(std::vector<std::variant<int32_t, float>>& values, size_t idx) {
+  size_t abs_offset = 0;
+  if (!step_index_.find_stream_item("UnionStreamTypeChange", idx, abs_offset, current_block_remaining_)) {
+    values.clear();
+    return false;
+  }
+  stream_.Seek(abs_offset);
+  switch (version_) {
+  case Version::v0: {
+    values.clear();
+    break;
+  }
+  case Version::v1: {
+    std::vector<std::variant<int32_t, bool>> union_stream_type_change = {};
+    union_stream_type_change.reserve(values.capacity());
+    yardl::binary::ReadBlocksIntoVector<std::variant<int32_t, bool>, ReadUnion<int32_t, yardl::binary::ReadInteger, bool, yardl::binary::ReadInteger>>(stream_, current_block_remaining_, union_stream_type_change);
+    values.resize(union_stream_type_change.size());
+    for (size_t i = 0; i < union_stream_type_change.size(); i++) {
+      std::variant<int32_t, float> item = {};
+      switch (union_stream_type_change[i].index()) {
+        case 0: {
+          item = std::get<0>(union_stream_type_change[i]);
+          break;
+        }
+        case 1: {
+          std::vector<std::string> source_types = {"int32", "bool"};
+          throw std::runtime_error("Source type '" + source_types[1] + "' incompatible with target union type 'int32 | float32'");
+          break;
+        }
+        default: throw std::runtime_error("Invalid union index.");
+      }
+      values[i] = item;
+    }
+    break;
+  }
+  default:
+    yardl::binary::ReadBlocksIntoVector<std::variant<int32_t, float>, ReadUnion<int32_t, yardl::binary::ReadInteger, float, yardl::binary::ReadFloatingPoint>>(stream_, current_block_remaining_, values);
+    break;
+  }
+  return current_block_remaining_ != 0;
+}
+
+size_t ProtocolWithChangesIndexedReader::CountUnionStreamTypeChangeImpl() {
+  return step_index_.get_stream_count("UnionStreamTypeChange");
+}
+
+bool ProtocolWithChangesIndexedReader::ReadStreamOfAliasTypeChangeImpl(evo_test::StreamItem& value) {
+  if (!step_index_.offset_within_stream("StreamOfAliasTypeChange", "Rlink", stream_.Pos())) {
+    stream_.Seek(step_index_.get_step_offset("StreamOfAliasTypeChange"));
+  }
+  bool read_block_successful = false;
+  switch (version_) {
+  case Version::v0: {
+    read_block_successful = yardl::binary::ReadBlock<evo_test::StreamItem_v0, evo_test::binary::ReadStreamItem_v0>(stream_, current_block_remaining_, value);
+    break;
+  }
+  case Version::v1: {
+    read_block_successful = yardl::binary::ReadBlock<evo_test::StreamItem_v1, evo_test::binary::ReadStreamItem_v1>(stream_, current_block_remaining_, value);
+    break;
+  }
+  default:
+    read_block_successful = yardl::binary::ReadBlock<evo_test::StreamItem, evo_test::binary::ReadStreamItem>(stream_, current_block_remaining_, value);
+    break;
+  }
+  return read_block_successful;
+}
+
+bool ProtocolWithChangesIndexedReader::ReadStreamOfAliasTypeChangeImpl(std::vector<evo_test::StreamItem>& values) {
+  if (!step_index_.offset_within_stream("StreamOfAliasTypeChange", "Rlink", stream_.Pos())) {
+    stream_.Seek(step_index_.get_step_offset("StreamOfAliasTypeChange"));
+  }
+  switch (version_) {
+  case Version::v0: {
+    yardl::binary::ReadBlocksIntoVector<evo_test::StreamItem_v0, evo_test::binary::ReadStreamItem_v0>(stream_, current_block_remaining_, values);
+    break;
+  }
+  case Version::v1: {
+    yardl::binary::ReadBlocksIntoVector<evo_test::StreamItem_v1, evo_test::binary::ReadStreamItem_v1>(stream_, current_block_remaining_, values);
+    break;
+  }
+  default:
+    yardl::binary::ReadBlocksIntoVector<evo_test::StreamItem, evo_test::binary::ReadStreamItem>(stream_, current_block_remaining_, values);
+    break;
+  }
+  return current_block_remaining_ != 0;
+}
+
+bool ProtocolWithChangesIndexedReader::ReadStreamOfAliasTypeChangeImpl(evo_test::StreamItem& value, size_t idx) {
+  size_t abs_offset = 0;
+  if (!step_index_.find_stream_item("StreamOfAliasTypeChange", idx, abs_offset, current_block_remaining_)) {
+    return false;
+  }
+  stream_.Seek(abs_offset);
+  bool read_block_successful = false;
+  switch (version_) {
+  case Version::v0: {
+    read_block_successful = yardl::binary::ReadBlock<evo_test::StreamItem_v0, evo_test::binary::ReadStreamItem_v0>(stream_, current_block_remaining_, value);
+    break;
+  }
+  case Version::v1: {
+    read_block_successful = yardl::binary::ReadBlock<evo_test::StreamItem_v1, evo_test::binary::ReadStreamItem_v1>(stream_, current_block_remaining_, value);
+    break;
+  }
+  default:
+    read_block_successful = yardl::binary::ReadBlock<evo_test::StreamItem, evo_test::binary::ReadStreamItem>(stream_, current_block_remaining_, value);
+    break;
+  }
+  return read_block_successful;
+}
+
+bool ProtocolWithChangesIndexedReader::ReadStreamOfAliasTypeChangeImpl(std::vector<evo_test::StreamItem>& values, size_t idx) {
+  size_t abs_offset = 0;
+  if (!step_index_.find_stream_item("StreamOfAliasTypeChange", idx, abs_offset, current_block_remaining_)) {
+    values.clear();
+    return false;
+  }
+  stream_.Seek(abs_offset);
+  switch (version_) {
+  case Version::v0: {
+    yardl::binary::ReadBlocksIntoVector<evo_test::StreamItem_v0, evo_test::binary::ReadStreamItem_v0>(stream_, current_block_remaining_, values);
+    break;
+  }
+  case Version::v1: {
+    yardl::binary::ReadBlocksIntoVector<evo_test::StreamItem_v1, evo_test::binary::ReadStreamItem_v1>(stream_, current_block_remaining_, values);
+    break;
+  }
+  default:
+    yardl::binary::ReadBlocksIntoVector<evo_test::StreamItem, evo_test::binary::ReadStreamItem>(stream_, current_block_remaining_, values);
+    break;
+  }
+  return current_block_remaining_ != 0;
+}
+
+size_t ProtocolWithChangesIndexedReader::CountStreamOfAliasTypeChangeImpl() {
+  return step_index_.get_stream_count("StreamOfAliasTypeChange");
+}
+
+void ProtocolWithChangesIndexedReader::ReadRlinkImpl(evo_test::RLink& value) {
+  auto pos = step_index_.get_step_offset("Rlink");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::ReadRLink_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::ReadRLink(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadRlinkRXImpl(evo_test::RLink& value) {
+  auto pos = step_index_.get_step_offset("RlinkRX");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::ReadRX_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::ReadRLink(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadRlinkRYImpl(evo_test::RLink& value) {
+  auto pos = step_index_.get_step_offset("RlinkRY");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::ReadRY_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::ReadRLink(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadRlinkRZImpl(evo_test::RLink& value) {
+  auto pos = step_index_.get_step_offset("RlinkRZ");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::ReadRZ_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::ReadRLink(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadRaRLinkImpl(evo_test::RA& value) {
+  auto pos = step_index_.get_step_offset("RaRLink");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::ReadRLink_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::ReadRA(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadRaRXImpl(evo_test::RA& value) {
+  auto pos = step_index_.get_step_offset("RaRX");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::ReadRX_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::ReadRA(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadRaRYImpl(evo_test::RA& value) {
+  auto pos = step_index_.get_step_offset("RaRY");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::ReadRY_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::ReadRA(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadRaRZImpl(evo_test::RA& value) {
+  auto pos = step_index_.get_step_offset("RaRZ");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::ReadRZ_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::ReadRA(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadRbRLinkImpl(evo_test::RB& value) {
+  auto pos = step_index_.get_step_offset("RbRLink");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::ReadRLink_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::ReadRB(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadRbRXImpl(evo_test::RB& value) {
+  auto pos = step_index_.get_step_offset("RbRX");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::ReadRX_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::ReadRB(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadRbRYImpl(evo_test::RB& value) {
+  auto pos = step_index_.get_step_offset("RbRY");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::ReadRY_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::ReadRB(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadRbRZImpl(evo_test::RB& value) {
+  auto pos = step_index_.get_step_offset("RbRZ");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::ReadRZ_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::ReadRB(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadRcRLinkImpl(evo_test::RC& value) {
+  auto pos = step_index_.get_step_offset("RcRLink");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::ReadRLink_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::ReadRC(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadRcRXImpl(evo_test::RC& value) {
+  auto pos = step_index_.get_step_offset("RcRX");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::ReadRX_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::ReadRC(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadRcRYImpl(evo_test::RC& value) {
+  auto pos = step_index_.get_step_offset("RcRY");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::ReadRY_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::ReadRC(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadRcRZImpl(evo_test::RC& value) {
+  auto pos = step_index_.get_step_offset("RcRZ");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::ReadRZ_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::ReadRC(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadRlinkRNewImpl(evo_test::RLink& value) {
+  auto pos = step_index_.get_step_offset("RlinkRNew");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::ReadRNew_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::ReadRLink(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadRaRNewImpl(evo_test::RA& value) {
+  auto pos = step_index_.get_step_offset("RaRNew");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::ReadRNew_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::ReadRA(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadRbRNewImpl(evo_test::RB& value) {
+  auto pos = step_index_.get_step_offset("RbRNew");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::ReadRNew_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::ReadRB(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadRcRNewImpl(evo_test::RC& value) {
+  auto pos = step_index_.get_step_offset("RcRNew");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::ReadRNew_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::ReadRC(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadRlinkRUnionImpl(evo_test::RLink& value) {
+  auto pos = step_index_.get_step_offset("RlinkRUnion");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v1: {
+    std::variant<evo_test::RX_v1, std::string> rlink_r_union = {};
+    ReadUnion<evo_test::RX_v1, evo_test::binary::ReadRX_v1, std::string, yardl::binary::ReadString>(stream_, rlink_r_union);
+    if (rlink_r_union.index() == 0) {
+      value = std::get<0>(rlink_r_union);
+    }
+    break;
+  }
+  default:
+    evo_test::binary::ReadRLink(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadRaRUnionImpl(evo_test::RA& value) {
+  auto pos = step_index_.get_step_offset("RaRUnion");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v1: {
+    std::variant<evo_test::RX_v1, std::string> ra_r_union = {};
+    ReadUnion<evo_test::RX_v1, evo_test::binary::ReadRX_v1, std::string, yardl::binary::ReadString>(stream_, ra_r_union);
+    if (ra_r_union.index() == 0) {
+      value = std::get<0>(ra_r_union);
+    }
+    break;
+  }
+  default:
+    evo_test::binary::ReadRA(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadRbRUnionImpl(evo_test::RB& value) {
+  auto pos = step_index_.get_step_offset("RbRUnion");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v1: {
+    std::variant<evo_test::RX_v1, std::string> rb_r_union = {};
+    ReadUnion<evo_test::RX_v1, evo_test::binary::ReadRX_v1, std::string, yardl::binary::ReadString>(stream_, rb_r_union);
+    if (rb_r_union.index() == 0) {
+      value = std::get<0>(rb_r_union);
+    }
+    break;
+  }
+  default:
+    evo_test::binary::ReadRB(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadRcRUnionImpl(evo_test::RC& value) {
+  auto pos = step_index_.get_step_offset("RcRUnion");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v1: {
+    std::variant<evo_test::RX_v1, std::string> rc_r_union = {};
+    ReadUnion<evo_test::RX_v1, evo_test::binary::ReadRX_v1, std::string, yardl::binary::ReadString>(stream_, rc_r_union);
+    if (rc_r_union.index() == 0) {
+      value = std::get<0>(rc_r_union);
+    }
+    break;
+  }
+  default:
+    evo_test::binary::ReadRC(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadOptionalRecordWithChangesImpl(std::optional<evo_test::RecordWithChanges>& value) {
+  auto pos = step_index_.get_step_offset("OptionalRecordWithChanges");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v0: {
+    yardl::binary::ReadOptional<evo_test::RecordWithChanges_v0, evo_test::binary::ReadRecordWithChanges_v0>(stream_, value);
+    break;
+  }
+  case Version::v1: {
+    yardl::binary::ReadOptional<evo_test::RecordWithChanges_v1, evo_test::binary::ReadRecordWithChanges_v1>(stream_, value);
+    break;
+  }
+  default:
+    yardl::binary::ReadOptional<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadAliasedOptionalRecordWithChangesImpl(std::optional<evo_test::AliasedRecordWithChanges>& value) {
+  auto pos = step_index_.get_step_offset("AliasedOptionalRecordWithChanges");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v0: {
+    yardl::binary::ReadOptional<evo_test::AliasedRecordWithChanges_v0, evo_test::binary::ReadAliasedRecordWithChanges_v0>(stream_, value);
+    break;
+  }
+  case Version::v1: {
+    yardl::binary::ReadOptional<evo_test::AliasedRecordWithChanges_v1, evo_test::binary::ReadAliasedRecordWithChanges_v1>(stream_, value);
+    break;
+  }
+  default:
+    yardl::binary::ReadOptional<evo_test::AliasedRecordWithChanges, evo_test::binary::ReadAliasedRecordWithChanges>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadUnionRecordWithChangesImpl(std::variant<evo_test::RecordWithChanges, int32_t>& value) {
+  auto pos = step_index_.get_step_offset("UnionRecordWithChanges");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v0: {
+    std::variant<evo_test::RecordWithChanges_v0, int32_t> union_record_with_changes = {};
+    ReadUnion<evo_test::RecordWithChanges_v0, evo_test::binary::ReadRecordWithChanges_v0, int32_t, yardl::binary::ReadInteger>(stream_, union_record_with_changes);
+    switch (union_record_with_changes.index()) {
+      case 0: {
+        value = std::get<0>(union_record_with_changes);
+        break;
+      }
+      case 1: {
+        value = std::get<1>(union_record_with_changes);
+        break;
+      }
+      default: throw std::runtime_error("Invalid union index.");
+    }
+    break;
+  }
+  case Version::v1: {
+    std::variant<evo_test::RecordWithChanges_v1, int32_t> union_record_with_changes = {};
+    ReadUnion<evo_test::RecordWithChanges_v1, evo_test::binary::ReadRecordWithChanges_v1, int32_t, yardl::binary::ReadInteger>(stream_, union_record_with_changes);
+    switch (union_record_with_changes.index()) {
+      case 0: {
+        value = std::get<0>(union_record_with_changes);
+        break;
+      }
+      case 1: {
+        value = std::get<1>(union_record_with_changes);
+        break;
+      }
+      default: throw std::runtime_error("Invalid union index.");
+    }
+    break;
+  }
+  default:
+    ReadUnion<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges, int32_t, yardl::binary::ReadInteger>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadUnionWithSameTypesetImpl(std::variant<evo_test::RecordWithChanges, int32_t, float, std::string>& value) {
+  auto pos = step_index_.get_step_offset("UnionWithSameTypeset");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v0: {
+    std::variant<evo_test::RecordWithChanges_v0, int32_t, float, std::string> union_with_same_typeset = {};
+    ReadUnion<evo_test::RecordWithChanges_v0, evo_test::binary::ReadRecordWithChanges_v0, int32_t, yardl::binary::ReadInteger, float, yardl::binary::ReadFloatingPoint, std::string, yardl::binary::ReadString>(stream_, union_with_same_typeset);
+    switch (union_with_same_typeset.index()) {
+      case 0: {
+        value = std::get<0>(union_with_same_typeset);
+        break;
+      }
+      case 1: {
+        value = std::get<1>(union_with_same_typeset);
+        break;
+      }
+      case 2: {
+        value = std::get<2>(union_with_same_typeset);
+        break;
+      }
+      case 3: {
+        value = std::get<3>(union_with_same_typeset);
+        break;
+      }
+      default: throw std::runtime_error("Invalid union index.");
+    }
+    break;
+  }
+  case Version::v1: {
+    std::variant<float, evo_test::RecordWithChanges_v1, std::string, int32_t> union_with_same_typeset = {};
+    ReadUnion<float, yardl::binary::ReadFloatingPoint, evo_test::RecordWithChanges_v1, evo_test::binary::ReadRecordWithChanges_v1, std::string, yardl::binary::ReadString, int32_t, yardl::binary::ReadInteger>(stream_, union_with_same_typeset);
+    switch (union_with_same_typeset.index()) {
+      case 0: {
+        value = std::get<0>(union_with_same_typeset);
+        break;
+      }
+      case 1: {
+        value = std::get<1>(union_with_same_typeset);
+        break;
+      }
+      case 2: {
+        value = std::get<2>(union_with_same_typeset);
+        break;
+      }
+      case 3: {
+        value = std::get<3>(union_with_same_typeset);
+        break;
+      }
+      default: throw std::runtime_error("Invalid union index.");
+    }
+    break;
+  }
+  default:
+    ReadUnion<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges, int32_t, yardl::binary::ReadInteger, float, yardl::binary::ReadFloatingPoint, std::string, yardl::binary::ReadString>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadUnionWithTypesAddedImpl(std::variant<evo_test::RecordWithChanges, float>& value) {
+  auto pos = step_index_.get_step_offset("UnionWithTypesAdded");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v0: {
+    std::variant<evo_test::RecordWithChanges_v0, float> union_with_types_added = {};
+    ReadUnion<evo_test::RecordWithChanges_v0, evo_test::binary::ReadRecordWithChanges_v0, float, yardl::binary::ReadFloatingPoint>(stream_, union_with_types_added);
+    switch (union_with_types_added.index()) {
+      case 0: {
+        value = std::get<0>(union_with_types_added);
+        break;
+      }
+      case 1: {
+        value = std::get<1>(union_with_types_added);
+        break;
+      }
+      default: throw std::runtime_error("Invalid union index.");
+    }
+    break;
+  }
+  case Version::v1: {
+    std::variant<evo_test::RecordWithChanges_v1, int32_t, float, std::string> union_with_types_added = {};
+    ReadUnion<evo_test::RecordWithChanges_v1, evo_test::binary::ReadRecordWithChanges_v1, int32_t, yardl::binary::ReadInteger, float, yardl::binary::ReadFloatingPoint, std::string, yardl::binary::ReadString>(stream_, union_with_types_added);
+    switch (union_with_types_added.index()) {
+      case 0: {
+        value = std::get<0>(union_with_types_added);
+        break;
+      }
+      case 1: {
+        std::vector<std::string> source_types = {"EvoTest.RecordWithChanges", "int32", "float32", "string"};
+        throw std::runtime_error("Source type '" + source_types[1] + "' incompatible with target union type 'RecordWithChanges | float32'");
+        break;
+      }
+      case 2: {
+        value = std::get<2>(union_with_types_added);
+        break;
+      }
+      case 3: {
+        std::vector<std::string> source_types = {"EvoTest.RecordWithChanges", "int32", "float32", "string"};
+        throw std::runtime_error("Source type '" + source_types[3] + "' incompatible with target union type 'RecordWithChanges | float32'");
+        break;
+      }
+      default: throw std::runtime_error("Invalid union index.");
+    }
+    break;
+  }
+  default:
+    ReadUnion<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges, float, yardl::binary::ReadFloatingPoint>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadUnionWithTypesRemovedImpl(std::variant<evo_test::RecordWithChanges, int32_t, float, std::string>& value) {
+  auto pos = step_index_.get_step_offset("UnionWithTypesRemoved");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v0: {
+    std::variant<evo_test::RecordWithChanges_v0, int32_t, float, std::string> union_with_types_removed = {};
+    ReadUnion<evo_test::RecordWithChanges_v0, evo_test::binary::ReadRecordWithChanges_v0, int32_t, yardl::binary::ReadInteger, float, yardl::binary::ReadFloatingPoint, std::string, yardl::binary::ReadString>(stream_, union_with_types_removed);
+    switch (union_with_types_removed.index()) {
+      case 0: {
+        value = std::get<0>(union_with_types_removed);
+        break;
+      }
+      case 1: {
+        value = std::get<1>(union_with_types_removed);
+        break;
+      }
+      case 2: {
+        value = std::get<2>(union_with_types_removed);
+        break;
+      }
+      case 3: {
+        value = std::get<3>(union_with_types_removed);
+        break;
+      }
+      default: throw std::runtime_error("Invalid union index.");
+    }
+    break;
+  }
+  case Version::v1: {
+    std::variant<evo_test::RecordWithChanges_v1, std::string> union_with_types_removed = {};
+    ReadUnion<evo_test::RecordWithChanges_v1, evo_test::binary::ReadRecordWithChanges_v1, std::string, yardl::binary::ReadString>(stream_, union_with_types_removed);
+    switch (union_with_types_removed.index()) {
+      case 0: {
+        value = std::get<0>(union_with_types_removed);
+        break;
+      }
+      case 1: {
+        value = std::get<1>(union_with_types_removed);
+        break;
+      }
+      default: throw std::runtime_error("Invalid union index.");
+    }
+    break;
+  }
+  default:
+    ReadUnion<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges, int32_t, yardl::binary::ReadInteger, float, yardl::binary::ReadFloatingPoint, std::string, yardl::binary::ReadString>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadRecordToOptionalImpl(evo_test::RecordWithChanges& value) {
+  auto pos = step_index_.get_step_offset("RecordToOptional");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v0: {
+    evo_test::binary::ReadRecordWithChanges_v0(stream_, value);
+    break;
+  }
+  case Version::v1: {
+    std::optional<evo_test::RecordWithChanges_v1> record_to_optional = {};
+    yardl::binary::ReadOptional<evo_test::RecordWithChanges_v1, evo_test::binary::ReadRecordWithChanges_v1>(stream_, record_to_optional);
+    if (record_to_optional.has_value()) {
+      value = record_to_optional.value();
+    }
+    break;
+  }
+  default:
+    evo_test::binary::ReadRecordWithChanges(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadRecordToAliasedOptionalImpl(evo_test::RecordWithChanges& value) {
+  auto pos = step_index_.get_step_offset("RecordToAliasedOptional");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v0: {
+    evo_test::binary::ReadRecordWithChanges_v0(stream_, value);
+    break;
+  }
+  case Version::v1: {
+    std::optional<evo_test::RecordWithChanges_v1> record_to_aliased_optional = {};
+    yardl::binary::ReadOptional<evo_test::RecordWithChanges_v1, evo_test::binary::ReadRecordWithChanges_v1>(stream_, record_to_aliased_optional);
+    if (record_to_aliased_optional.has_value()) {
+      value = record_to_aliased_optional.value();
+    }
+    break;
+  }
+  default:
+    evo_test::binary::ReadRecordWithChanges(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadRecordToUnionImpl(evo_test::RecordWithChanges& value) {
+  auto pos = step_index_.get_step_offset("RecordToUnion");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v0: {
+    evo_test::binary::ReadRecordWithChanges_v0(stream_, value);
+    break;
+  }
+  case Version::v1: {
+    std::variant<evo_test::RecordWithChanges_v1, std::string> record_to_union = {};
+    ReadUnion<evo_test::RecordWithChanges_v1, evo_test::binary::ReadRecordWithChanges_v1, std::string, yardl::binary::ReadString>(stream_, record_to_union);
+    if (record_to_union.index() == 0) {
+      value = std::get<0>(record_to_union);
+    }
+    break;
+  }
+  default:
+    evo_test::binary::ReadRecordWithChanges(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadRecordToAliasedUnionImpl(evo_test::RecordWithChanges& value) {
+  auto pos = step_index_.get_step_offset("RecordToAliasedUnion");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v0: {
+    evo_test::binary::ReadRecordWithChanges_v0(stream_, value);
+    break;
+  }
+  case Version::v1: {
+    std::variant<evo_test::RecordWithChanges_v1, std::string> record_to_aliased_union = {};
+    ReadUnion<evo_test::RecordWithChanges_v1, evo_test::binary::ReadRecordWithChanges_v1, std::string, yardl::binary::ReadString>(stream_, record_to_aliased_union);
+    if (record_to_aliased_union.index() == 0) {
+      value = std::get<0>(record_to_aliased_union);
+    }
+    break;
+  }
+  default:
+    evo_test::binary::ReadRecordWithChanges(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadUnionToAliasedUnionImpl(std::variant<evo_test::RecordWithChanges, int32_t>& value) {
+  auto pos = step_index_.get_step_offset("UnionToAliasedUnion");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v0: {
+    std::variant<evo_test::RecordWithChanges_v0, int32_t> union_to_aliased_union = {};
+    ReadUnion<evo_test::RecordWithChanges_v0, evo_test::binary::ReadRecordWithChanges_v0, int32_t, yardl::binary::ReadInteger>(stream_, union_to_aliased_union);
+    switch (union_to_aliased_union.index()) {
+      case 0: {
+        value = std::get<0>(union_to_aliased_union);
+        break;
+      }
+      case 1: {
+        value = std::get<1>(union_to_aliased_union);
+        break;
+      }
+      default: throw std::runtime_error("Invalid union index.");
+    }
+    break;
+  }
+  case Version::v1: {
+    std::variant<evo_test::RecordWithChanges_v1, int32_t> union_to_aliased_union = {};
+    ReadUnion<evo_test::RecordWithChanges_v1, evo_test::binary::ReadRecordWithChanges_v1, int32_t, yardl::binary::ReadInteger>(stream_, union_to_aliased_union);
+    switch (union_to_aliased_union.index()) {
+      case 0: {
+        value = std::get<0>(union_to_aliased_union);
+        break;
+      }
+      case 1: {
+        value = std::get<1>(union_to_aliased_union);
+        break;
+      }
+      default: throw std::runtime_error("Invalid union index.");
+    }
+    break;
+  }
+  default:
+    ReadUnion<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges, int32_t, yardl::binary::ReadInteger>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadUnionToAliasedUnionWithChangesImpl(std::variant<evo_test::RecordWithChanges, int32_t>& value) {
+  auto pos = step_index_.get_step_offset("UnionToAliasedUnionWithChanges");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v0: {
+    std::variant<evo_test::RecordWithChanges_v0, int32_t> union_to_aliased_union_with_changes = {};
+    ReadUnion<evo_test::RecordWithChanges_v0, evo_test::binary::ReadRecordWithChanges_v0, int32_t, yardl::binary::ReadInteger>(stream_, union_to_aliased_union_with_changes);
+    switch (union_to_aliased_union_with_changes.index()) {
+      case 0: {
+        value = std::get<0>(union_to_aliased_union_with_changes);
+        break;
+      }
+      case 1: {
+        value = std::get<1>(union_to_aliased_union_with_changes);
+        break;
+      }
+      default: throw std::runtime_error("Invalid union index.");
+    }
+    break;
+  }
+  case Version::v1: {
+    std::variant<evo_test::RecordWithChanges_v1, std::string> union_to_aliased_union_with_changes = {};
+    ReadUnion<evo_test::RecordWithChanges_v1, evo_test::binary::ReadRecordWithChanges_v1, std::string, yardl::binary::ReadString>(stream_, union_to_aliased_union_with_changes);
+    switch (union_to_aliased_union_with_changes.index()) {
+      case 0: {
+        value = std::get<0>(union_to_aliased_union_with_changes);
+        break;
+      }
+      case 1: {
+        std::vector<std::string> source_types = {"EvoTest.RecordWithChanges", "string"};
+        throw std::runtime_error("Source type '" + source_types[1] + "' incompatible with target union type 'RecordWithChanges | int32'");
+        break;
+      }
+      default: throw std::runtime_error("Invalid union index.");
+    }
+    break;
+  }
+  default:
+    ReadUnion<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges, int32_t, yardl::binary::ReadInteger>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadOptionalToAliasedOptionalImpl(std::optional<evo_test::RecordWithChanges>& value) {
+  auto pos = step_index_.get_step_offset("OptionalToAliasedOptional");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v0: {
+    yardl::binary::ReadOptional<evo_test::RecordWithChanges_v0, evo_test::binary::ReadRecordWithChanges_v0>(stream_, value);
+    break;
+  }
+  case Version::v1: {
+    yardl::binary::ReadOptional<evo_test::RecordWithChanges_v1, evo_test::binary::ReadRecordWithChanges_v1>(stream_, value);
+    break;
+  }
+  default:
+    yardl::binary::ReadOptional<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadOptionalToAliasedOptionalWithChangesImpl(std::optional<int32_t>& value) {
+  auto pos = step_index_.get_step_offset("OptionalToAliasedOptionalWithChanges");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v1: {
+    std::optional<std::string> optional_to_aliased_optional_with_changes = {};
+    yardl::binary::ReadOptional<std::string, yardl::binary::ReadString>(stream_, optional_to_aliased_optional_with_changes);
+    if (optional_to_aliased_optional_with_changes.has_value()) {
+      try {
+        value = std::stoi(optional_to_aliased_optional_with_changes.value());
+      } catch (...) {
+        throw std::runtime_error("Unable to convert string \"" + optional_to_aliased_optional_with_changes.value() + "\" to number");
+      }
+    }
+    break;
+  }
+  default:
+    yardl::binary::ReadOptional<int32_t, yardl::binary::ReadInteger>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadGenericRecordImpl(evo_test::GenericRecord<int32_t, std::string>& value) {
+  auto pos = step_index_.get_step_offset("GenericRecord");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::ReadGenericRecord_v1<int32_t, yardl::binary::ReadInteger, std::string, yardl::binary::ReadString>(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::ReadGenericRecord<int32_t, yardl::binary::ReadInteger, std::string, yardl::binary::ReadString>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadGenericRecordToOpenAliasImpl(evo_test::GenericRecord<int32_t, std::string>& value) {
+  auto pos = step_index_.get_step_offset("GenericRecordToOpenAlias");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::ReadAliasedOpenGenericRecord_v1<int32_t, yardl::binary::ReadInteger, std::string, yardl::binary::ReadString>(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::ReadGenericRecord<int32_t, yardl::binary::ReadInteger, std::string, yardl::binary::ReadString>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadGenericRecordToClosedAliasImpl(evo_test::GenericRecord<int32_t, std::string>& value) {
+  auto pos = step_index_.get_step_offset("GenericRecordToClosedAlias");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::ReadAliasedClosedGenericRecord_v1(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::ReadGenericRecord<int32_t, yardl::binary::ReadInteger, std::string, yardl::binary::ReadString>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadGenericRecordToHalfClosedAliasImpl(evo_test::GenericRecord<int32_t, std::string>& value) {
+  auto pos = step_index_.get_step_offset("GenericRecordToHalfClosedAlias");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::ReadAliasedHalfClosedGenericRecord_v1<int32_t, yardl::binary::ReadInteger>(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::ReadGenericRecord<int32_t, yardl::binary::ReadInteger, std::string, yardl::binary::ReadString>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadAliasedGenericRecordToAliasImpl(evo_test::AliasedHalfClosedGenericRecord<int32_t>& value) {
+  auto pos = step_index_.get_step_offset("AliasedGenericRecordToAlias");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::ReadAliasedOpenGenericRecord_v1<int32_t, yardl::binary::ReadInteger, std::string, yardl::binary::ReadString>(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::ReadAliasedHalfClosedGenericRecord<int32_t, yardl::binary::ReadInteger>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadGenericRecordToReversedImpl(evo_test::GenericRecord<int32_t, std::string>& value) {
+  auto pos = step_index_.get_step_offset("GenericRecordToReversed");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::ReadGenericRecordReversed_v1<std::string, yardl::binary::ReadString, int32_t, yardl::binary::ReadInteger>(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::ReadGenericRecord<int32_t, yardl::binary::ReadInteger, std::string, yardl::binary::ReadString>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadClosedGenericRecordToUnionImpl(evo_test::AliasedClosedGenericRecord& value) {
+  auto pos = step_index_.get_step_offset("ClosedGenericRecordToUnion");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v1: {
+    std::variant<evo_test::GenericRecord_v1<int32_t, std::string>, std::string> closed_generic_record_to_union = {};
+    ReadUnion<evo_test::GenericRecord_v1<int32_t, std::string>, evo_test::binary::ReadGenericRecord_v1<int32_t, yardl::binary::ReadInteger, std::string, yardl::binary::ReadString>, std::string, yardl::binary::ReadString>(stream_, closed_generic_record_to_union);
+    if (closed_generic_record_to_union.index() == 0) {
+      value = std::get<0>(closed_generic_record_to_union);
+    }
+    break;
+  }
+  default:
+    evo_test::binary::ReadAliasedClosedGenericRecord(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadGenericRecordToAliasedUnionImpl(evo_test::GenericRecord<int32_t, std::string>& value) {
+  auto pos = step_index_.get_step_offset("GenericRecordToAliasedUnion");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v1: {
+    std::variant<evo_test::GenericRecord_v1<int32_t, std::string>, std::string> generic_record_to_aliased_union = {};
+    ReadUnion<evo_test::GenericRecord_v1<int32_t, std::string>, evo_test::binary::ReadGenericRecord_v1<int32_t, yardl::binary::ReadInteger, std::string, yardl::binary::ReadString>, std::string, yardl::binary::ReadString>(stream_, generic_record_to_aliased_union);
+    if (generic_record_to_aliased_union.index() == 0) {
+      value = std::get<0>(generic_record_to_aliased_union);
+    }
+    break;
+  }
+  default:
+    evo_test::binary::ReadGenericRecord<int32_t, yardl::binary::ReadInteger, std::string, yardl::binary::ReadString>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadGenericUnionToReversedImpl(evo_test::GenericUnion<evo_test::GenericRecord<int32_t, std::string>, float>& value) {
+  auto pos = step_index_.get_step_offset("GenericUnionToReversed");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v1: {
+    std::variant<evo_test::GenericRecord_v1<int32_t, std::string>, float> generic_union_to_reversed = {};
+    ReadUnion<evo_test::GenericRecord_v1<int32_t, std::string>, evo_test::binary::ReadGenericRecord_v1<int32_t, yardl::binary::ReadInteger, std::string, yardl::binary::ReadString>, float, yardl::binary::ReadFloatingPoint>(stream_, generic_union_to_reversed);
+    switch (generic_union_to_reversed.index()) {
+      case 0: {
+        value = std::get<0>(generic_union_to_reversed);
+        break;
+      }
+      case 1: {
+        value = std::get<1>(generic_union_to_reversed);
+        break;
+      }
+      default: throw std::runtime_error("Invalid union index.");
+    }
+    break;
+  }
+  default:
+    evo_test::binary::ReadGenericUnion<evo_test::GenericRecord<int32_t, std::string>, evo_test::binary::ReadGenericRecord<int32_t, yardl::binary::ReadInteger, std::string, yardl::binary::ReadString>, float, yardl::binary::ReadFloatingPoint>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadGenericUnionOfChangedRecordImpl(evo_test::GenericUnion<evo_test::GenericRecord<int32_t, std::string>, float>& value) {
+  auto pos = step_index_.get_step_offset("GenericUnionOfChangedRecord");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::ReadGenericUnion_v1<evo_test::GenericRecord_v1<int32_t, std::string>, evo_test::binary::ReadGenericRecord_v1<int32_t, yardl::binary::ReadInteger, std::string, yardl::binary::ReadString>, float, yardl::binary::ReadFloatingPoint>(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::ReadGenericUnion<evo_test::GenericRecord<int32_t, std::string>, evo_test::binary::ReadGenericRecord<int32_t, yardl::binary::ReadInteger, std::string, yardl::binary::ReadString>, float, yardl::binary::ReadFloatingPoint>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadGenericParentRecordImpl(evo_test::GenericParentRecord<int32_t>& value) {
+  auto pos = step_index_.get_step_offset("GenericParentRecord");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::ReadGenericParentRecord_v1<int32_t, yardl::binary::ReadInteger>(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::ReadGenericParentRecord<int32_t, yardl::binary::ReadInteger>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadGenericNestedRecordsImpl(evo_test::GenericRecord<evo_test::UnchangedGeneric<int32_t>, evo_test::ChangedGeneric<std::string, int32_t>>& value) {
+  auto pos = step_index_.get_step_offset("GenericNestedRecords");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v1: {
+    evo_test::binary::ReadGenericRecord_v1<evo_test::Unchanged_v1, evo_test::binary::ReadUnchanged_v1, evo_test::Changed_v1, evo_test::binary::ReadChanged_v1>(stream_, value);
+    break;
+  }
+  default:
+    evo_test::binary::ReadGenericRecord<evo_test::UnchangedGeneric<int32_t>, evo_test::binary::ReadUnchangedGeneric<int32_t, yardl::binary::ReadInteger>, evo_test::ChangedGeneric<std::string, int32_t>, evo_test::binary::ReadChangedGeneric<std::string, yardl::binary::ReadString, int32_t, yardl::binary::ReadInteger>>(stream_, value);
+    break;
+  }
+}
+
+bool ProtocolWithChangesIndexedReader::ReadGenericRecordStreamImpl(evo_test::GenericRecord<int32_t, std::string>& value) {
+  if (!step_index_.offset_within_stream("GenericRecordStream", "GenericParentRecordStream", stream_.Pos())) {
+    stream_.Seek(step_index_.get_step_offset("GenericRecordStream"));
+  }
+  bool read_block_successful = false;
+  switch (version_) {
+  case Version::v1: {
+    read_block_successful = yardl::binary::ReadBlock<evo_test::AliasedClosedGenericRecord_v1, evo_test::binary::ReadAliasedClosedGenericRecord_v1>(stream_, current_block_remaining_, value);
+    break;
+  }
+  default:
+    read_block_successful = yardl::binary::ReadBlock<evo_test::GenericRecord<int32_t, std::string>, evo_test::binary::ReadGenericRecord<int32_t, yardl::binary::ReadInteger, std::string, yardl::binary::ReadString>>(stream_, current_block_remaining_, value);
+    break;
+  }
+  return read_block_successful;
+}
+
+bool ProtocolWithChangesIndexedReader::ReadGenericRecordStreamImpl(std::vector<evo_test::GenericRecord<int32_t, std::string>>& values) {
+  if (!step_index_.offset_within_stream("GenericRecordStream", "GenericParentRecordStream", stream_.Pos())) {
+    stream_.Seek(step_index_.get_step_offset("GenericRecordStream"));
+  }
+  switch (version_) {
+  case Version::v1: {
+    yardl::binary::ReadBlocksIntoVector<evo_test::AliasedClosedGenericRecord_v1, evo_test::binary::ReadAliasedClosedGenericRecord_v1>(stream_, current_block_remaining_, values);
+    break;
+  }
+  default:
+    yardl::binary::ReadBlocksIntoVector<evo_test::GenericRecord<int32_t, std::string>, evo_test::binary::ReadGenericRecord<int32_t, yardl::binary::ReadInteger, std::string, yardl::binary::ReadString>>(stream_, current_block_remaining_, values);
+    break;
+  }
+  return current_block_remaining_ != 0;
+}
+
+bool ProtocolWithChangesIndexedReader::ReadGenericRecordStreamImpl(evo_test::GenericRecord<int32_t, std::string>& value, size_t idx) {
+  size_t abs_offset = 0;
+  if (!step_index_.find_stream_item("GenericRecordStream", idx, abs_offset, current_block_remaining_)) {
+    return false;
+  }
+  stream_.Seek(abs_offset);
+  bool read_block_successful = false;
+  switch (version_) {
+  case Version::v1: {
+    read_block_successful = yardl::binary::ReadBlock<evo_test::AliasedClosedGenericRecord_v1, evo_test::binary::ReadAliasedClosedGenericRecord_v1>(stream_, current_block_remaining_, value);
+    break;
+  }
+  default:
+    read_block_successful = yardl::binary::ReadBlock<evo_test::GenericRecord<int32_t, std::string>, evo_test::binary::ReadGenericRecord<int32_t, yardl::binary::ReadInteger, std::string, yardl::binary::ReadString>>(stream_, current_block_remaining_, value);
+    break;
+  }
+  return read_block_successful;
+}
+
+bool ProtocolWithChangesIndexedReader::ReadGenericRecordStreamImpl(std::vector<evo_test::GenericRecord<int32_t, std::string>>& values, size_t idx) {
+  size_t abs_offset = 0;
+  if (!step_index_.find_stream_item("GenericRecordStream", idx, abs_offset, current_block_remaining_)) {
+    values.clear();
+    return false;
+  }
+  stream_.Seek(abs_offset);
+  switch (version_) {
+  case Version::v1: {
+    yardl::binary::ReadBlocksIntoVector<evo_test::AliasedClosedGenericRecord_v1, evo_test::binary::ReadAliasedClosedGenericRecord_v1>(stream_, current_block_remaining_, values);
+    break;
+  }
+  default:
+    yardl::binary::ReadBlocksIntoVector<evo_test::GenericRecord<int32_t, std::string>, evo_test::binary::ReadGenericRecord<int32_t, yardl::binary::ReadInteger, std::string, yardl::binary::ReadString>>(stream_, current_block_remaining_, values);
+    break;
+  }
+  return current_block_remaining_ != 0;
+}
+
+size_t ProtocolWithChangesIndexedReader::CountGenericRecordStreamImpl() {
+  return step_index_.get_stream_count("GenericRecordStream");
+}
+
+bool ProtocolWithChangesIndexedReader::ReadGenericParentRecordStreamImpl(evo_test::GenericParentRecord<int32_t>& value) {
+  if (!step_index_.offset_within_stream("GenericParentRecordStream", "VectorRecordWithChanges", stream_.Pos())) {
+    stream_.Seek(step_index_.get_step_offset("GenericParentRecordStream"));
+  }
+  bool read_block_successful = false;
+  switch (version_) {
+  case Version::v1: {
+    read_block_successful = yardl::binary::ReadBlock<evo_test::GenericParentRecord_v1<int32_t>, evo_test::binary::ReadGenericParentRecord_v1<int32_t, yardl::binary::ReadInteger>>(stream_, current_block_remaining_, value);
+    break;
+  }
+  default:
+    read_block_successful = yardl::binary::ReadBlock<evo_test::GenericParentRecord<int32_t>, evo_test::binary::ReadGenericParentRecord<int32_t, yardl::binary::ReadInteger>>(stream_, current_block_remaining_, value);
+    break;
+  }
+  return read_block_successful;
+}
+
+bool ProtocolWithChangesIndexedReader::ReadGenericParentRecordStreamImpl(std::vector<evo_test::GenericParentRecord<int32_t>>& values) {
+  if (!step_index_.offset_within_stream("GenericParentRecordStream", "VectorRecordWithChanges", stream_.Pos())) {
+    stream_.Seek(step_index_.get_step_offset("GenericParentRecordStream"));
+  }
+  switch (version_) {
+  case Version::v1: {
+    yardl::binary::ReadBlocksIntoVector<evo_test::GenericParentRecord_v1<int32_t>, evo_test::binary::ReadGenericParentRecord_v1<int32_t, yardl::binary::ReadInteger>>(stream_, current_block_remaining_, values);
+    break;
+  }
+  default:
+    yardl::binary::ReadBlocksIntoVector<evo_test::GenericParentRecord<int32_t>, evo_test::binary::ReadGenericParentRecord<int32_t, yardl::binary::ReadInteger>>(stream_, current_block_remaining_, values);
+    break;
+  }
+  return current_block_remaining_ != 0;
+}
+
+bool ProtocolWithChangesIndexedReader::ReadGenericParentRecordStreamImpl(evo_test::GenericParentRecord<int32_t>& value, size_t idx) {
+  size_t abs_offset = 0;
+  if (!step_index_.find_stream_item("GenericParentRecordStream", idx, abs_offset, current_block_remaining_)) {
+    return false;
+  }
+  stream_.Seek(abs_offset);
+  bool read_block_successful = false;
+  switch (version_) {
+  case Version::v1: {
+    read_block_successful = yardl::binary::ReadBlock<evo_test::GenericParentRecord_v1<int32_t>, evo_test::binary::ReadGenericParentRecord_v1<int32_t, yardl::binary::ReadInteger>>(stream_, current_block_remaining_, value);
+    break;
+  }
+  default:
+    read_block_successful = yardl::binary::ReadBlock<evo_test::GenericParentRecord<int32_t>, evo_test::binary::ReadGenericParentRecord<int32_t, yardl::binary::ReadInteger>>(stream_, current_block_remaining_, value);
+    break;
+  }
+  return read_block_successful;
+}
+
+bool ProtocolWithChangesIndexedReader::ReadGenericParentRecordStreamImpl(std::vector<evo_test::GenericParentRecord<int32_t>>& values, size_t idx) {
+  size_t abs_offset = 0;
+  if (!step_index_.find_stream_item("GenericParentRecordStream", idx, abs_offset, current_block_remaining_)) {
+    values.clear();
+    return false;
+  }
+  stream_.Seek(abs_offset);
+  switch (version_) {
+  case Version::v1: {
+    yardl::binary::ReadBlocksIntoVector<evo_test::GenericParentRecord_v1<int32_t>, evo_test::binary::ReadGenericParentRecord_v1<int32_t, yardl::binary::ReadInteger>>(stream_, current_block_remaining_, values);
+    break;
+  }
+  default:
+    yardl::binary::ReadBlocksIntoVector<evo_test::GenericParentRecord<int32_t>, evo_test::binary::ReadGenericParentRecord<int32_t, yardl::binary::ReadInteger>>(stream_, current_block_remaining_, values);
+    break;
+  }
+  return current_block_remaining_ != 0;
+}
+
+size_t ProtocolWithChangesIndexedReader::CountGenericParentRecordStreamImpl() {
+  return step_index_.get_stream_count("GenericParentRecordStream");
+}
+
+void ProtocolWithChangesIndexedReader::ReadVectorRecordWithChangesImpl(std::vector<evo_test::RecordWithChanges>& value) {
+  auto pos = step_index_.get_step_offset("VectorRecordWithChanges");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v0: {
+    yardl::binary::ReadVector<evo_test::RecordWithChanges_v0, evo_test::binary::ReadRecordWithChanges_v0>(stream_, value);
+    break;
+  }
+  case Version::v1: {
+    yardl::binary::ReadVector<evo_test::RecordWithChanges_v1, evo_test::binary::ReadRecordWithChanges_v1>(stream_, value);
+    break;
+  }
+  default:
+    yardl::binary::ReadVector<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges>(stream_, value);
+    break;
+  }
+}
+
+bool ProtocolWithChangesIndexedReader::ReadStreamedRecordWithChangesImpl(evo_test::RecordWithChanges& value) {
+  if (!step_index_.offset_within_stream("StreamedRecordWithChanges", "AddedStringVector", stream_.Pos())) {
+    stream_.Seek(step_index_.get_step_offset("StreamedRecordWithChanges"));
+  }
+  bool read_block_successful = false;
+  switch (version_) {
+  case Version::v0: {
+    read_block_successful = yardl::binary::ReadBlock<evo_test::RecordWithChanges_v0, evo_test::binary::ReadRecordWithChanges_v0>(stream_, current_block_remaining_, value);
+    break;
+  }
+  case Version::v1: {
+    read_block_successful = yardl::binary::ReadBlock<evo_test::RecordWithChanges_v1, evo_test::binary::ReadRecordWithChanges_v1>(stream_, current_block_remaining_, value);
+    break;
+  }
+  default:
+    read_block_successful = yardl::binary::ReadBlock<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges>(stream_, current_block_remaining_, value);
+    break;
+  }
+  return read_block_successful;
+}
+
+bool ProtocolWithChangesIndexedReader::ReadStreamedRecordWithChangesImpl(std::vector<evo_test::RecordWithChanges>& values) {
+  if (!step_index_.offset_within_stream("StreamedRecordWithChanges", "AddedStringVector", stream_.Pos())) {
+    stream_.Seek(step_index_.get_step_offset("StreamedRecordWithChanges"));
+  }
+  switch (version_) {
+  case Version::v0: {
+    yardl::binary::ReadBlocksIntoVector<evo_test::RecordWithChanges_v0, evo_test::binary::ReadRecordWithChanges_v0>(stream_, current_block_remaining_, values);
+    break;
+  }
+  case Version::v1: {
+    yardl::binary::ReadBlocksIntoVector<evo_test::RecordWithChanges_v1, evo_test::binary::ReadRecordWithChanges_v1>(stream_, current_block_remaining_, values);
+    break;
+  }
+  default:
+    yardl::binary::ReadBlocksIntoVector<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges>(stream_, current_block_remaining_, values);
+    break;
+  }
+  return current_block_remaining_ != 0;
+}
+
+bool ProtocolWithChangesIndexedReader::ReadStreamedRecordWithChangesImpl(evo_test::RecordWithChanges& value, size_t idx) {
+  size_t abs_offset = 0;
+  if (!step_index_.find_stream_item("StreamedRecordWithChanges", idx, abs_offset, current_block_remaining_)) {
+    return false;
+  }
+  stream_.Seek(abs_offset);
+  bool read_block_successful = false;
+  switch (version_) {
+  case Version::v0: {
+    read_block_successful = yardl::binary::ReadBlock<evo_test::RecordWithChanges_v0, evo_test::binary::ReadRecordWithChanges_v0>(stream_, current_block_remaining_, value);
+    break;
+  }
+  case Version::v1: {
+    read_block_successful = yardl::binary::ReadBlock<evo_test::RecordWithChanges_v1, evo_test::binary::ReadRecordWithChanges_v1>(stream_, current_block_remaining_, value);
+    break;
+  }
+  default:
+    read_block_successful = yardl::binary::ReadBlock<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges>(stream_, current_block_remaining_, value);
+    break;
+  }
+  return read_block_successful;
+}
+
+bool ProtocolWithChangesIndexedReader::ReadStreamedRecordWithChangesImpl(std::vector<evo_test::RecordWithChanges>& values, size_t idx) {
+  size_t abs_offset = 0;
+  if (!step_index_.find_stream_item("StreamedRecordWithChanges", idx, abs_offset, current_block_remaining_)) {
+    values.clear();
+    return false;
+  }
+  stream_.Seek(abs_offset);
+  switch (version_) {
+  case Version::v0: {
+    yardl::binary::ReadBlocksIntoVector<evo_test::RecordWithChanges_v0, evo_test::binary::ReadRecordWithChanges_v0>(stream_, current_block_remaining_, values);
+    break;
+  }
+  case Version::v1: {
+    yardl::binary::ReadBlocksIntoVector<evo_test::RecordWithChanges_v1, evo_test::binary::ReadRecordWithChanges_v1>(stream_, current_block_remaining_, values);
+    break;
+  }
+  default:
+    yardl::binary::ReadBlocksIntoVector<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges>(stream_, current_block_remaining_, values);
+    break;
+  }
+  return current_block_remaining_ != 0;
+}
+
+size_t ProtocolWithChangesIndexedReader::CountStreamedRecordWithChangesImpl() {
+  return step_index_.get_stream_count("StreamedRecordWithChanges");
+}
+
+void ProtocolWithChangesIndexedReader::ReadAddedStringVectorImpl(std::vector<evo_test::AliasedString>& value) {
+  auto pos = step_index_.get_step_offset("AddedStringVector");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v0: {
+    std::vector<evo_test::AliasedString> added_string_vector = {};
+    value = std::move(added_string_vector);
+    break;
+  }
+  case Version::v1: {
+    std::vector<evo_test::AliasedString> added_string_vector = {};
+    value = std::move(added_string_vector);
+    break;
+  }
+  default:
+    yardl::binary::ReadVector<evo_test::AliasedString, evo_test::binary::ReadAliasedString>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadAddedOptionalImpl(std::optional<evo_test::RecordWithChanges>& value) {
+  auto pos = step_index_.get_step_offset("AddedOptional");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v0: {
+    std::optional<evo_test::RecordWithChanges> added_optional = {};
+    value = std::move(added_optional);
+    break;
+  }
+  case Version::v1: {
+    yardl::binary::ReadOptional<evo_test::RecordWithChanges_v1, evo_test::binary::ReadRecordWithChanges_v1>(stream_, value);
+    break;
+  }
+  default:
+    yardl::binary::ReadOptional<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadAddedMapImpl(std::unordered_map<std::string, std::string>& value) {
+  auto pos = step_index_.get_step_offset("AddedMap");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v0: {
+    std::unordered_map<std::string, std::string> added_map = {};
+    value = std::move(added_map);
+    break;
+  }
+  default:
+    yardl::binary::ReadMap<std::string, std::string, yardl::binary::ReadString, yardl::binary::ReadString>(stream_, value);
+    break;
+  }
+}
+
+void ProtocolWithChangesIndexedReader::ReadAddedUnionImpl(std::variant<std::monostate, evo_test::RecordWithChanges, std::string>& value) {
+  auto pos = step_index_.get_step_offset("AddedUnion");
+  stream_.Seek(pos);
+  switch (version_) {
+  case Version::v0: {
+    std::variant<std::monostate, evo_test::RecordWithChanges, std::string> added_union = {};
+    value = std::move(added_union);
+    break;
+  }
+  case Version::v1: {
+    std::variant<std::monostate, evo_test::RecordWithChanges, std::string> added_union = {};
+    value = std::move(added_union);
+    break;
+  }
+  default:
+    ReadUnion<std::monostate, yardl::binary::ReadMonostate, evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges, std::string, yardl::binary::ReadString>(stream_, value);
+    break;
+  }
+}
+
+bool ProtocolWithChangesIndexedReader::ReadAddedRecordStreamImpl(evo_test::RecordWithChanges& value) {
+  if (!step_index_.offset_within_stream("AddedRecordStream", "AddedUnionStream", stream_.Pos())) {
+    stream_.Seek(step_index_.get_step_offset("AddedRecordStream"));
+  }
+  bool read_block_successful = false;
+  switch (version_) {
+  case Version::v0: {
+    evo_test::RecordWithChanges added_record_stream = {};
+    value = std::move(added_record_stream);
+    return false;
+    break;
+  }
+  case Version::v1: {
+    read_block_successful = yardl::binary::ReadBlock<evo_test::RecordWithChanges_v1, evo_test::binary::ReadRecordWithChanges_v1>(stream_, current_block_remaining_, value);
+    break;
+  }
+  default:
+    read_block_successful = yardl::binary::ReadBlock<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges>(stream_, current_block_remaining_, value);
+    break;
+  }
+  return read_block_successful;
+}
+
+bool ProtocolWithChangesIndexedReader::ReadAddedRecordStreamImpl(std::vector<evo_test::RecordWithChanges>& values) {
+  if (!step_index_.offset_within_stream("AddedRecordStream", "AddedUnionStream", stream_.Pos())) {
+    stream_.Seek(step_index_.get_step_offset("AddedRecordStream"));
+  }
+  switch (version_) {
+  case Version::v0: {
+    values.clear();
+    break;
+  }
+  case Version::v1: {
+    yardl::binary::ReadBlocksIntoVector<evo_test::RecordWithChanges_v1, evo_test::binary::ReadRecordWithChanges_v1>(stream_, current_block_remaining_, values);
+    break;
+  }
+  default:
+    yardl::binary::ReadBlocksIntoVector<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges>(stream_, current_block_remaining_, values);
+    break;
+  }
+  return current_block_remaining_ != 0;
+}
+
+bool ProtocolWithChangesIndexedReader::ReadAddedRecordStreamImpl(evo_test::RecordWithChanges& value, size_t idx) {
+  size_t abs_offset = 0;
+  if (!step_index_.find_stream_item("AddedRecordStream", idx, abs_offset, current_block_remaining_)) {
+    return false;
+  }
+  stream_.Seek(abs_offset);
+  bool read_block_successful = false;
+  switch (version_) {
+  case Version::v0: {
+    evo_test::RecordWithChanges added_record_stream = {};
+    value = std::move(added_record_stream);
+    return false;
+    break;
+  }
+  case Version::v1: {
+    read_block_successful = yardl::binary::ReadBlock<evo_test::RecordWithChanges_v1, evo_test::binary::ReadRecordWithChanges_v1>(stream_, current_block_remaining_, value);
+    break;
+  }
+  default:
+    read_block_successful = yardl::binary::ReadBlock<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges>(stream_, current_block_remaining_, value);
+    break;
+  }
+  return read_block_successful;
+}
+
+bool ProtocolWithChangesIndexedReader::ReadAddedRecordStreamImpl(std::vector<evo_test::RecordWithChanges>& values, size_t idx) {
+  size_t abs_offset = 0;
+  if (!step_index_.find_stream_item("AddedRecordStream", idx, abs_offset, current_block_remaining_)) {
+    values.clear();
+    return false;
+  }
+  stream_.Seek(abs_offset);
+  switch (version_) {
+  case Version::v0: {
+    values.clear();
+    break;
+  }
+  case Version::v1: {
+    yardl::binary::ReadBlocksIntoVector<evo_test::RecordWithChanges_v1, evo_test::binary::ReadRecordWithChanges_v1>(stream_, current_block_remaining_, values);
+    break;
+  }
+  default:
+    yardl::binary::ReadBlocksIntoVector<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges>(stream_, current_block_remaining_, values);
+    break;
+  }
+  return current_block_remaining_ != 0;
+}
+
+size_t ProtocolWithChangesIndexedReader::CountAddedRecordStreamImpl() {
+  return step_index_.get_stream_count("AddedRecordStream");
+}
+
+bool ProtocolWithChangesIndexedReader::ReadAddedUnionStreamImpl(std::variant<evo_test::RecordWithChanges, evo_test::RenamedRecord>& value) {
+  if (!step_index_.offset_within_stream("AddedUnionStream", std::nullopt, stream_.Pos())) {
+    stream_.Seek(step_index_.get_step_offset("AddedUnionStream"));
+  }
+  bool read_block_successful = false;
+  switch (version_) {
+  case Version::v0: {
+    std::variant<evo_test::RecordWithChanges, evo_test::RenamedRecord> added_union_stream = {};
+    value = std::move(added_union_stream);
+    return false;
+    break;
+  }
+  case Version::v1: {
+    std::variant<evo_test::RecordWithChanges, evo_test::RenamedRecord> added_union_stream = {};
+    value = std::move(added_union_stream);
+    return false;
+    break;
+  }
+  default:
+    read_block_successful = yardl::binary::ReadBlock<std::variant<evo_test::RecordWithChanges, evo_test::RenamedRecord>, ReadUnion<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges, evo_test::RenamedRecord, evo_test::binary::ReadRenamedRecord>>(stream_, current_block_remaining_, value);
+    break;
+  }
+  return read_block_successful;
+}
+
+bool ProtocolWithChangesIndexedReader::ReadAddedUnionStreamImpl(std::vector<std::variant<evo_test::RecordWithChanges, evo_test::RenamedRecord>>& values) {
+  if (!step_index_.offset_within_stream("AddedUnionStream", std::nullopt, stream_.Pos())) {
+    stream_.Seek(step_index_.get_step_offset("AddedUnionStream"));
+  }
+  switch (version_) {
+  case Version::v0: {
+    values.clear();
+    break;
+  }
+  case Version::v1: {
+    values.clear();
+    break;
+  }
+  default:
+    yardl::binary::ReadBlocksIntoVector<std::variant<evo_test::RecordWithChanges, evo_test::RenamedRecord>, ReadUnion<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges, evo_test::RenamedRecord, evo_test::binary::ReadRenamedRecord>>(stream_, current_block_remaining_, values);
+    break;
+  }
+  return current_block_remaining_ != 0;
+}
+
+bool ProtocolWithChangesIndexedReader::ReadAddedUnionStreamImpl(std::variant<evo_test::RecordWithChanges, evo_test::RenamedRecord>& value, size_t idx) {
+  size_t abs_offset = 0;
+  if (!step_index_.find_stream_item("AddedUnionStream", idx, abs_offset, current_block_remaining_)) {
+    return false;
+  }
+  stream_.Seek(abs_offset);
+  bool read_block_successful = false;
+  switch (version_) {
+  case Version::v0: {
+    std::variant<evo_test::RecordWithChanges, evo_test::RenamedRecord> added_union_stream = {};
+    value = std::move(added_union_stream);
+    return false;
+    break;
+  }
+  case Version::v1: {
+    std::variant<evo_test::RecordWithChanges, evo_test::RenamedRecord> added_union_stream = {};
+    value = std::move(added_union_stream);
+    return false;
+    break;
+  }
+  default:
+    read_block_successful = yardl::binary::ReadBlock<std::variant<evo_test::RecordWithChanges, evo_test::RenamedRecord>, ReadUnion<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges, evo_test::RenamedRecord, evo_test::binary::ReadRenamedRecord>>(stream_, current_block_remaining_, value);
+    break;
+  }
+  return read_block_successful;
+}
+
+bool ProtocolWithChangesIndexedReader::ReadAddedUnionStreamImpl(std::vector<std::variant<evo_test::RecordWithChanges, evo_test::RenamedRecord>>& values, size_t idx) {
+  size_t abs_offset = 0;
+  if (!step_index_.find_stream_item("AddedUnionStream", idx, abs_offset, current_block_remaining_)) {
+    values.clear();
+    return false;
+  }
+  stream_.Seek(abs_offset);
+  switch (version_) {
+  case Version::v0: {
+    values.clear();
+    break;
+  }
+  case Version::v1: {
+    values.clear();
+    break;
+  }
+  default:
+    yardl::binary::ReadBlocksIntoVector<std::variant<evo_test::RecordWithChanges, evo_test::RenamedRecord>, ReadUnion<evo_test::RecordWithChanges, evo_test::binary::ReadRecordWithChanges, evo_test::RenamedRecord, evo_test::binary::ReadRenamedRecord>>(stream_, current_block_remaining_, values);
+    break;
+  }
+  return current_block_remaining_ != 0;
+}
+
+size_t ProtocolWithChangesIndexedReader::CountAddedUnionStreamImpl() {
+  return step_index_.get_stream_count("AddedUnionStream");
+}
+
+void ProtocolWithChangesIndexedReader::CloseImpl() {
+}
+
 } // namespace evo_test::binary
 

@@ -9,33 +9,6 @@
 #endif
 
 namespace test_model {
-namespace {
-void BenchmarkFloat256x256WriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end, uint8_t current) {
-  std::string expected_method;
-  switch (current) {
-  case 0: expected_method = "WriteFloat256x256() or EndFloat256x256()"; break;
-  }
-  std::string attempted_method;
-  switch (attempted) {
-  case 0: attempted_method = end ? "EndFloat256x256()" : "WriteFloat256x256()"; break;
-  case 1: attempted_method = "Close()"; break;
-  }
-  throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
-}
-
-void BenchmarkFloat256x256ReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
-  auto f = [](uint8_t i) -> std::string {
-    switch (i/2) {
-    case 0: return "ReadFloat256x256()";
-    case 1: return "Close()";
-    default: return "<unknown>";
-    }
-  };
-  throw std::runtime_error("Expected call to " + f(current) + " but received call to " + f(attempted) + " instead.");
-}
-
-} // namespace 
-
 std::string BenchmarkFloat256x256WriterBase::schema_ = R"({"protocol":{"name":"BenchmarkFloat256x256","sequence":[{"name":"float256x256","type":{"stream":{"items":{"array":{"items":"float32","dimensions":[{"length":256},{"length":256}]}}}}}]},"types":null})";
 
 std::vector<std::string> BenchmarkFloat256x256WriterBase::previous_schemas_ = {
@@ -48,9 +21,10 @@ std::string BenchmarkFloat256x256WriterBase::SchemaFromVersion(Version version) 
   }
 
 }
+
 void BenchmarkFloat256x256WriterBase::WriteFloat256x256(yardl::FixedNDArray<float, 256, 256> const& value) {
   if (unlikely(state_ != 0)) {
-    BenchmarkFloat256x256WriterBaseInvalidState(0, false, state_);
+    InvalidState(0, false);
   }
 
   WriteFloat256x256Impl(value);
@@ -58,7 +32,7 @@ void BenchmarkFloat256x256WriterBase::WriteFloat256x256(yardl::FixedNDArray<floa
 
 void BenchmarkFloat256x256WriterBase::WriteFloat256x256(std::vector<yardl::FixedNDArray<float, 256, 256>> const& values) {
   if (unlikely(state_ != 0)) {
-    BenchmarkFloat256x256WriterBaseInvalidState(0, false, state_);
+    InvalidState(0, false);
   }
 
   WriteFloat256x256Impl(values);
@@ -66,7 +40,7 @@ void BenchmarkFloat256x256WriterBase::WriteFloat256x256(std::vector<yardl::Fixed
 
 void BenchmarkFloat256x256WriterBase::EndFloat256x256() {
   if (unlikely(state_ != 0)) {
-    BenchmarkFloat256x256WriterBaseInvalidState(0, true, state_);
+    InvalidState(0, true);
   }
 
   EndFloat256x256Impl();
@@ -82,10 +56,23 @@ void BenchmarkFloat256x256WriterBase::WriteFloat256x256Impl(std::vector<yardl::F
 
 void BenchmarkFloat256x256WriterBase::Close() {
   if (unlikely(state_ != 1)) {
-    BenchmarkFloat256x256WriterBaseInvalidState(1, false, state_);
+    InvalidState(1, false);
   }
 
   CloseImpl();
+}
+
+void BenchmarkFloat256x256WriterBase::InvalidState(uint8_t attempted, [[maybe_unused]] bool end) {
+  std::string expected_method;
+  switch (state_) {
+  case 0: expected_method = "WriteFloat256x256() or EndFloat256x256()"; break;
+  }
+  std::string attempted_method;
+  switch (attempted) {
+  case 0: attempted_method = end ? "EndFloat256x256()" : "WriteFloat256x256()"; break;
+  case 1: attempted_method = "Close()"; break;
+  }
+  throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
 }
 
 std::string BenchmarkFloat256x256ReaderBase::schema_ = BenchmarkFloat256x256WriterBase::schema_;
@@ -98,13 +85,14 @@ Version BenchmarkFloat256x256ReaderBase::VersionFromSchema(std::string const& sc
   }
   throw std::runtime_error("The schema does not match any version supported by protocol BenchmarkFloat256x256.");
 }
+
 bool BenchmarkFloat256x256ReaderBase::ReadFloat256x256(yardl::FixedNDArray<float, 256, 256>& value) {
   if (unlikely(state_ != 0)) {
     if (state_ == 1) {
       state_ = 2;
       return false;
     }
-    BenchmarkFloat256x256ReaderBaseInvalidState(0, state_);
+    InvalidState(0);
   }
 
   bool result = ReadFloat256x256Impl(value);
@@ -124,7 +112,7 @@ bool BenchmarkFloat256x256ReaderBase::ReadFloat256x256(std::vector<yardl::FixedN
       values.clear();
       return false;
     }
-    BenchmarkFloat256x256ReaderBaseInvalidState(0, state_);
+    InvalidState(0);
   }
 
   if (!ReadFloat256x256Impl(values)) {
@@ -157,12 +145,13 @@ void BenchmarkFloat256x256ReaderBase::Close() {
     if (state_ == 1) {
       state_ = 2;
     } else {
-      BenchmarkFloat256x256ReaderBaseInvalidState(2, state_);
+      InvalidState(2);
     }
   }
 
   CloseImpl();
 }
+
 void BenchmarkFloat256x256ReaderBase::CopyTo(BenchmarkFloat256x256WriterBase& writer, size_t float256x256_buffer_size) {
   if (float256x256_buffer_size > 1) {
     std::vector<yardl::FixedNDArray<float, 256, 256>> values;
@@ -180,32 +169,40 @@ void BenchmarkFloat256x256ReaderBase::CopyTo(BenchmarkFloat256x256WriterBase& wr
   }
 }
 
-namespace {
-void BenchmarkInt256x256WriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end, uint8_t current) {
-  std::string expected_method;
-  switch (current) {
-  case 0: expected_method = "WriteInt256x256() or EndInt256x256()"; break;
-  }
-  std::string attempted_method;
-  switch (attempted) {
-  case 0: attempted_method = end ? "EndInt256x256()" : "WriteInt256x256()"; break;
-  case 1: attempted_method = "Close()"; break;
-  }
-  throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
-}
-
-void BenchmarkInt256x256ReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
+void BenchmarkFloat256x256ReaderBase::InvalidState(uint8_t attempted) {
   auto f = [](uint8_t i) -> std::string {
     switch (i/2) {
-    case 0: return "ReadInt256x256()";
+    case 0: return "ReadFloat256x256()";
     case 1: return "Close()";
     default: return "<unknown>";
     }
   };
-  throw std::runtime_error("Expected call to " + f(current) + " but received call to " + f(attempted) + " instead.");
+  throw std::runtime_error("Expected call to " + f(state_) + " but received call to " + f(attempted) + " instead.");
 }
 
-} // namespace 
+bool BenchmarkFloat256x256IndexedReaderBase::ReadFloat256x256(yardl::FixedNDArray<float, 256, 256>& value, size_t idx) {
+  return ReadFloat256x256Impl(value, idx);
+}
+
+bool BenchmarkFloat256x256IndexedReaderBase::ReadFloat256x256(std::vector<yardl::FixedNDArray<float, 256, 256>>& values, size_t idx) {
+  if (values.capacity() == 0) {
+    throw std::runtime_error("vector must have a nonzero capacity.");
+  }
+  if (!ReadFloat256x256Impl(values, idx)) {
+    return values.size() > 0;
+  }
+  return true;
+}
+
+size_t BenchmarkFloat256x256IndexedReaderBase::CountFloat256x256() {
+  return CountFloat256x256Impl();
+}
+
+void BenchmarkFloat256x256IndexedReaderBase::InvalidState(uint8_t attempted) {
+  (void)(attempted);
+  return;
+}
+
 
 std::string BenchmarkInt256x256WriterBase::schema_ = R"({"protocol":{"name":"BenchmarkInt256x256","sequence":[{"name":"int256x256","type":{"stream":{"items":{"array":{"items":"int32","dimensions":[{"length":256},{"length":256}]}}}}}]},"types":null})";
 
@@ -219,9 +216,10 @@ std::string BenchmarkInt256x256WriterBase::SchemaFromVersion(Version version) {
   }
 
 }
+
 void BenchmarkInt256x256WriterBase::WriteInt256x256(yardl::FixedNDArray<int32_t, 256, 256> const& value) {
   if (unlikely(state_ != 0)) {
-    BenchmarkInt256x256WriterBaseInvalidState(0, false, state_);
+    InvalidState(0, false);
   }
 
   WriteInt256x256Impl(value);
@@ -229,7 +227,7 @@ void BenchmarkInt256x256WriterBase::WriteInt256x256(yardl::FixedNDArray<int32_t,
 
 void BenchmarkInt256x256WriterBase::WriteInt256x256(std::vector<yardl::FixedNDArray<int32_t, 256, 256>> const& values) {
   if (unlikely(state_ != 0)) {
-    BenchmarkInt256x256WriterBaseInvalidState(0, false, state_);
+    InvalidState(0, false);
   }
 
   WriteInt256x256Impl(values);
@@ -237,7 +235,7 @@ void BenchmarkInt256x256WriterBase::WriteInt256x256(std::vector<yardl::FixedNDAr
 
 void BenchmarkInt256x256WriterBase::EndInt256x256() {
   if (unlikely(state_ != 0)) {
-    BenchmarkInt256x256WriterBaseInvalidState(0, true, state_);
+    InvalidState(0, true);
   }
 
   EndInt256x256Impl();
@@ -253,10 +251,23 @@ void BenchmarkInt256x256WriterBase::WriteInt256x256Impl(std::vector<yardl::Fixed
 
 void BenchmarkInt256x256WriterBase::Close() {
   if (unlikely(state_ != 1)) {
-    BenchmarkInt256x256WriterBaseInvalidState(1, false, state_);
+    InvalidState(1, false);
   }
 
   CloseImpl();
+}
+
+void BenchmarkInt256x256WriterBase::InvalidState(uint8_t attempted, [[maybe_unused]] bool end) {
+  std::string expected_method;
+  switch (state_) {
+  case 0: expected_method = "WriteInt256x256() or EndInt256x256()"; break;
+  }
+  std::string attempted_method;
+  switch (attempted) {
+  case 0: attempted_method = end ? "EndInt256x256()" : "WriteInt256x256()"; break;
+  case 1: attempted_method = "Close()"; break;
+  }
+  throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
 }
 
 std::string BenchmarkInt256x256ReaderBase::schema_ = BenchmarkInt256x256WriterBase::schema_;
@@ -269,13 +280,14 @@ Version BenchmarkInt256x256ReaderBase::VersionFromSchema(std::string const& sche
   }
   throw std::runtime_error("The schema does not match any version supported by protocol BenchmarkInt256x256.");
 }
+
 bool BenchmarkInt256x256ReaderBase::ReadInt256x256(yardl::FixedNDArray<int32_t, 256, 256>& value) {
   if (unlikely(state_ != 0)) {
     if (state_ == 1) {
       state_ = 2;
       return false;
     }
-    BenchmarkInt256x256ReaderBaseInvalidState(0, state_);
+    InvalidState(0);
   }
 
   bool result = ReadInt256x256Impl(value);
@@ -295,7 +307,7 @@ bool BenchmarkInt256x256ReaderBase::ReadInt256x256(std::vector<yardl::FixedNDArr
       values.clear();
       return false;
     }
-    BenchmarkInt256x256ReaderBaseInvalidState(0, state_);
+    InvalidState(0);
   }
 
   if (!ReadInt256x256Impl(values)) {
@@ -328,12 +340,13 @@ void BenchmarkInt256x256ReaderBase::Close() {
     if (state_ == 1) {
       state_ = 2;
     } else {
-      BenchmarkInt256x256ReaderBaseInvalidState(2, state_);
+      InvalidState(2);
     }
   }
 
   CloseImpl();
 }
+
 void BenchmarkInt256x256ReaderBase::CopyTo(BenchmarkInt256x256WriterBase& writer, size_t int256x256_buffer_size) {
   if (int256x256_buffer_size > 1) {
     std::vector<yardl::FixedNDArray<int32_t, 256, 256>> values;
@@ -351,32 +364,40 @@ void BenchmarkInt256x256ReaderBase::CopyTo(BenchmarkInt256x256WriterBase& writer
   }
 }
 
-namespace {
-void BenchmarkFloatVlenWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end, uint8_t current) {
-  std::string expected_method;
-  switch (current) {
-  case 0: expected_method = "WriteFloatArray() or EndFloatArray()"; break;
-  }
-  std::string attempted_method;
-  switch (attempted) {
-  case 0: attempted_method = end ? "EndFloatArray()" : "WriteFloatArray()"; break;
-  case 1: attempted_method = "Close()"; break;
-  }
-  throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
-}
-
-void BenchmarkFloatVlenReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
+void BenchmarkInt256x256ReaderBase::InvalidState(uint8_t attempted) {
   auto f = [](uint8_t i) -> std::string {
     switch (i/2) {
-    case 0: return "ReadFloatArray()";
+    case 0: return "ReadInt256x256()";
     case 1: return "Close()";
     default: return "<unknown>";
     }
   };
-  throw std::runtime_error("Expected call to " + f(current) + " but received call to " + f(attempted) + " instead.");
+  throw std::runtime_error("Expected call to " + f(state_) + " but received call to " + f(attempted) + " instead.");
 }
 
-} // namespace 
+bool BenchmarkInt256x256IndexedReaderBase::ReadInt256x256(yardl::FixedNDArray<int32_t, 256, 256>& value, size_t idx) {
+  return ReadInt256x256Impl(value, idx);
+}
+
+bool BenchmarkInt256x256IndexedReaderBase::ReadInt256x256(std::vector<yardl::FixedNDArray<int32_t, 256, 256>>& values, size_t idx) {
+  if (values.capacity() == 0) {
+    throw std::runtime_error("vector must have a nonzero capacity.");
+  }
+  if (!ReadInt256x256Impl(values, idx)) {
+    return values.size() > 0;
+  }
+  return true;
+}
+
+size_t BenchmarkInt256x256IndexedReaderBase::CountInt256x256() {
+  return CountInt256x256Impl();
+}
+
+void BenchmarkInt256x256IndexedReaderBase::InvalidState(uint8_t attempted) {
+  (void)(attempted);
+  return;
+}
+
 
 std::string BenchmarkFloatVlenWriterBase::schema_ = R"({"protocol":{"name":"BenchmarkFloatVlen","sequence":[{"name":"floatArray","type":{"stream":{"items":{"array":{"items":"float32","dimensions":2}}}}}]},"types":null})";
 
@@ -390,9 +411,10 @@ std::string BenchmarkFloatVlenWriterBase::SchemaFromVersion(Version version) {
   }
 
 }
+
 void BenchmarkFloatVlenWriterBase::WriteFloatArray(yardl::NDArray<float, 2> const& value) {
   if (unlikely(state_ != 0)) {
-    BenchmarkFloatVlenWriterBaseInvalidState(0, false, state_);
+    InvalidState(0, false);
   }
 
   WriteFloatArrayImpl(value);
@@ -400,7 +422,7 @@ void BenchmarkFloatVlenWriterBase::WriteFloatArray(yardl::NDArray<float, 2> cons
 
 void BenchmarkFloatVlenWriterBase::WriteFloatArray(std::vector<yardl::NDArray<float, 2>> const& values) {
   if (unlikely(state_ != 0)) {
-    BenchmarkFloatVlenWriterBaseInvalidState(0, false, state_);
+    InvalidState(0, false);
   }
 
   WriteFloatArrayImpl(values);
@@ -408,7 +430,7 @@ void BenchmarkFloatVlenWriterBase::WriteFloatArray(std::vector<yardl::NDArray<fl
 
 void BenchmarkFloatVlenWriterBase::EndFloatArray() {
   if (unlikely(state_ != 0)) {
-    BenchmarkFloatVlenWriterBaseInvalidState(0, true, state_);
+    InvalidState(0, true);
   }
 
   EndFloatArrayImpl();
@@ -424,10 +446,23 @@ void BenchmarkFloatVlenWriterBase::WriteFloatArrayImpl(std::vector<yardl::NDArra
 
 void BenchmarkFloatVlenWriterBase::Close() {
   if (unlikely(state_ != 1)) {
-    BenchmarkFloatVlenWriterBaseInvalidState(1, false, state_);
+    InvalidState(1, false);
   }
 
   CloseImpl();
+}
+
+void BenchmarkFloatVlenWriterBase::InvalidState(uint8_t attempted, [[maybe_unused]] bool end) {
+  std::string expected_method;
+  switch (state_) {
+  case 0: expected_method = "WriteFloatArray() or EndFloatArray()"; break;
+  }
+  std::string attempted_method;
+  switch (attempted) {
+  case 0: attempted_method = end ? "EndFloatArray()" : "WriteFloatArray()"; break;
+  case 1: attempted_method = "Close()"; break;
+  }
+  throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
 }
 
 std::string BenchmarkFloatVlenReaderBase::schema_ = BenchmarkFloatVlenWriterBase::schema_;
@@ -440,13 +475,14 @@ Version BenchmarkFloatVlenReaderBase::VersionFromSchema(std::string const& schem
   }
   throw std::runtime_error("The schema does not match any version supported by protocol BenchmarkFloatVlen.");
 }
+
 bool BenchmarkFloatVlenReaderBase::ReadFloatArray(yardl::NDArray<float, 2>& value) {
   if (unlikely(state_ != 0)) {
     if (state_ == 1) {
       state_ = 2;
       return false;
     }
-    BenchmarkFloatVlenReaderBaseInvalidState(0, state_);
+    InvalidState(0);
   }
 
   bool result = ReadFloatArrayImpl(value);
@@ -466,7 +502,7 @@ bool BenchmarkFloatVlenReaderBase::ReadFloatArray(std::vector<yardl::NDArray<flo
       values.clear();
       return false;
     }
-    BenchmarkFloatVlenReaderBaseInvalidState(0, state_);
+    InvalidState(0);
   }
 
   if (!ReadFloatArrayImpl(values)) {
@@ -499,12 +535,13 @@ void BenchmarkFloatVlenReaderBase::Close() {
     if (state_ == 1) {
       state_ = 2;
     } else {
-      BenchmarkFloatVlenReaderBaseInvalidState(2, state_);
+      InvalidState(2);
     }
   }
 
   CloseImpl();
 }
+
 void BenchmarkFloatVlenReaderBase::CopyTo(BenchmarkFloatVlenWriterBase& writer, size_t float_array_buffer_size) {
   if (float_array_buffer_size > 1) {
     std::vector<yardl::NDArray<float, 2>> values;
@@ -522,32 +559,40 @@ void BenchmarkFloatVlenReaderBase::CopyTo(BenchmarkFloatVlenWriterBase& writer, 
   }
 }
 
-namespace {
-void BenchmarkSmallRecordWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end, uint8_t current) {
-  std::string expected_method;
-  switch (current) {
-  case 0: expected_method = "WriteSmallRecord() or EndSmallRecord()"; break;
-  }
-  std::string attempted_method;
-  switch (attempted) {
-  case 0: attempted_method = end ? "EndSmallRecord()" : "WriteSmallRecord()"; break;
-  case 1: attempted_method = "Close()"; break;
-  }
-  throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
-}
-
-void BenchmarkSmallRecordReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
+void BenchmarkFloatVlenReaderBase::InvalidState(uint8_t attempted) {
   auto f = [](uint8_t i) -> std::string {
     switch (i/2) {
-    case 0: return "ReadSmallRecord()";
+    case 0: return "ReadFloatArray()";
     case 1: return "Close()";
     default: return "<unknown>";
     }
   };
-  throw std::runtime_error("Expected call to " + f(current) + " but received call to " + f(attempted) + " instead.");
+  throw std::runtime_error("Expected call to " + f(state_) + " but received call to " + f(attempted) + " instead.");
 }
 
-} // namespace 
+bool BenchmarkFloatVlenIndexedReaderBase::ReadFloatArray(yardl::NDArray<float, 2>& value, size_t idx) {
+  return ReadFloatArrayImpl(value, idx);
+}
+
+bool BenchmarkFloatVlenIndexedReaderBase::ReadFloatArray(std::vector<yardl::NDArray<float, 2>>& values, size_t idx) {
+  if (values.capacity() == 0) {
+    throw std::runtime_error("vector must have a nonzero capacity.");
+  }
+  if (!ReadFloatArrayImpl(values, idx)) {
+    return values.size() > 0;
+  }
+  return true;
+}
+
+size_t BenchmarkFloatVlenIndexedReaderBase::CountFloatArray() {
+  return CountFloatArrayImpl();
+}
+
+void BenchmarkFloatVlenIndexedReaderBase::InvalidState(uint8_t attempted) {
+  (void)(attempted);
+  return;
+}
+
 
 std::string BenchmarkSmallRecordWriterBase::schema_ = R"({"protocol":{"name":"BenchmarkSmallRecord","sequence":[{"name":"smallRecord","type":{"stream":{"items":"TestModel.SmallBenchmarkRecord"}}}]},"types":[{"name":"SmallBenchmarkRecord","fields":[{"name":"a","type":"float64"},{"name":"b","type":"float32"},{"name":"c","type":"float32"}]}]})";
 
@@ -561,9 +606,10 @@ std::string BenchmarkSmallRecordWriterBase::SchemaFromVersion(Version version) {
   }
 
 }
+
 void BenchmarkSmallRecordWriterBase::WriteSmallRecord(test_model::SmallBenchmarkRecord const& value) {
   if (unlikely(state_ != 0)) {
-    BenchmarkSmallRecordWriterBaseInvalidState(0, false, state_);
+    InvalidState(0, false);
   }
 
   WriteSmallRecordImpl(value);
@@ -571,7 +617,7 @@ void BenchmarkSmallRecordWriterBase::WriteSmallRecord(test_model::SmallBenchmark
 
 void BenchmarkSmallRecordWriterBase::WriteSmallRecord(std::vector<test_model::SmallBenchmarkRecord> const& values) {
   if (unlikely(state_ != 0)) {
-    BenchmarkSmallRecordWriterBaseInvalidState(0, false, state_);
+    InvalidState(0, false);
   }
 
   WriteSmallRecordImpl(values);
@@ -579,7 +625,7 @@ void BenchmarkSmallRecordWriterBase::WriteSmallRecord(std::vector<test_model::Sm
 
 void BenchmarkSmallRecordWriterBase::EndSmallRecord() {
   if (unlikely(state_ != 0)) {
-    BenchmarkSmallRecordWriterBaseInvalidState(0, true, state_);
+    InvalidState(0, true);
   }
 
   EndSmallRecordImpl();
@@ -595,10 +641,23 @@ void BenchmarkSmallRecordWriterBase::WriteSmallRecordImpl(std::vector<test_model
 
 void BenchmarkSmallRecordWriterBase::Close() {
   if (unlikely(state_ != 1)) {
-    BenchmarkSmallRecordWriterBaseInvalidState(1, false, state_);
+    InvalidState(1, false);
   }
 
   CloseImpl();
+}
+
+void BenchmarkSmallRecordWriterBase::InvalidState(uint8_t attempted, [[maybe_unused]] bool end) {
+  std::string expected_method;
+  switch (state_) {
+  case 0: expected_method = "WriteSmallRecord() or EndSmallRecord()"; break;
+  }
+  std::string attempted_method;
+  switch (attempted) {
+  case 0: attempted_method = end ? "EndSmallRecord()" : "WriteSmallRecord()"; break;
+  case 1: attempted_method = "Close()"; break;
+  }
+  throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
 }
 
 std::string BenchmarkSmallRecordReaderBase::schema_ = BenchmarkSmallRecordWriterBase::schema_;
@@ -611,13 +670,14 @@ Version BenchmarkSmallRecordReaderBase::VersionFromSchema(std::string const& sch
   }
   throw std::runtime_error("The schema does not match any version supported by protocol BenchmarkSmallRecord.");
 }
+
 bool BenchmarkSmallRecordReaderBase::ReadSmallRecord(test_model::SmallBenchmarkRecord& value) {
   if (unlikely(state_ != 0)) {
     if (state_ == 1) {
       state_ = 2;
       return false;
     }
-    BenchmarkSmallRecordReaderBaseInvalidState(0, state_);
+    InvalidState(0);
   }
 
   bool result = ReadSmallRecordImpl(value);
@@ -637,7 +697,7 @@ bool BenchmarkSmallRecordReaderBase::ReadSmallRecord(std::vector<test_model::Sma
       values.clear();
       return false;
     }
-    BenchmarkSmallRecordReaderBaseInvalidState(0, state_);
+    InvalidState(0);
   }
 
   if (!ReadSmallRecordImpl(values)) {
@@ -670,12 +730,13 @@ void BenchmarkSmallRecordReaderBase::Close() {
     if (state_ == 1) {
       state_ = 2;
     } else {
-      BenchmarkSmallRecordReaderBaseInvalidState(2, state_);
+      InvalidState(2);
     }
   }
 
   CloseImpl();
 }
+
 void BenchmarkSmallRecordReaderBase::CopyTo(BenchmarkSmallRecordWriterBase& writer, size_t small_record_buffer_size) {
   if (small_record_buffer_size > 1) {
     std::vector<test_model::SmallBenchmarkRecord> values;
@@ -693,21 +754,7 @@ void BenchmarkSmallRecordReaderBase::CopyTo(BenchmarkSmallRecordWriterBase& writ
   }
 }
 
-namespace {
-void BenchmarkSmallRecordWithOptionalsWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end, uint8_t current) {
-  std::string expected_method;
-  switch (current) {
-  case 0: expected_method = "WriteSmallRecord() or EndSmallRecord()"; break;
-  }
-  std::string attempted_method;
-  switch (attempted) {
-  case 0: attempted_method = end ? "EndSmallRecord()" : "WriteSmallRecord()"; break;
-  case 1: attempted_method = "Close()"; break;
-  }
-  throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
-}
-
-void BenchmarkSmallRecordWithOptionalsReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
+void BenchmarkSmallRecordReaderBase::InvalidState(uint8_t attempted) {
   auto f = [](uint8_t i) -> std::string {
     switch (i/2) {
     case 0: return "ReadSmallRecord()";
@@ -715,10 +762,32 @@ void BenchmarkSmallRecordWithOptionalsReaderBaseInvalidState(uint8_t attempted, 
     default: return "<unknown>";
     }
   };
-  throw std::runtime_error("Expected call to " + f(current) + " but received call to " + f(attempted) + " instead.");
+  throw std::runtime_error("Expected call to " + f(state_) + " but received call to " + f(attempted) + " instead.");
 }
 
-} // namespace 
+bool BenchmarkSmallRecordIndexedReaderBase::ReadSmallRecord(test_model::SmallBenchmarkRecord& value, size_t idx) {
+  return ReadSmallRecordImpl(value, idx);
+}
+
+bool BenchmarkSmallRecordIndexedReaderBase::ReadSmallRecord(std::vector<test_model::SmallBenchmarkRecord>& values, size_t idx) {
+  if (values.capacity() == 0) {
+    throw std::runtime_error("vector must have a nonzero capacity.");
+  }
+  if (!ReadSmallRecordImpl(values, idx)) {
+    return values.size() > 0;
+  }
+  return true;
+}
+
+size_t BenchmarkSmallRecordIndexedReaderBase::CountSmallRecord() {
+  return CountSmallRecordImpl();
+}
+
+void BenchmarkSmallRecordIndexedReaderBase::InvalidState(uint8_t attempted) {
+  (void)(attempted);
+  return;
+}
+
 
 std::string BenchmarkSmallRecordWithOptionalsWriterBase::schema_ = R"({"protocol":{"name":"BenchmarkSmallRecordWithOptionals","sequence":[{"name":"smallRecord","type":{"stream":{"items":"TestModel.SimpleEncodingCounters"}}}]},"types":[{"name":"SimpleEncodingCounters","fields":[{"name":"e1","type":[null,"uint32"]},{"name":"e2","type":[null,"uint32"]},{"name":"slice","type":[null,"uint32"]},{"name":"repetition","type":[null,"uint32"]}]}]})";
 
@@ -732,9 +801,10 @@ std::string BenchmarkSmallRecordWithOptionalsWriterBase::SchemaFromVersion(Versi
   }
 
 }
+
 void BenchmarkSmallRecordWithOptionalsWriterBase::WriteSmallRecord(test_model::SimpleEncodingCounters const& value) {
   if (unlikely(state_ != 0)) {
-    BenchmarkSmallRecordWithOptionalsWriterBaseInvalidState(0, false, state_);
+    InvalidState(0, false);
   }
 
   WriteSmallRecordImpl(value);
@@ -742,7 +812,7 @@ void BenchmarkSmallRecordWithOptionalsWriterBase::WriteSmallRecord(test_model::S
 
 void BenchmarkSmallRecordWithOptionalsWriterBase::WriteSmallRecord(std::vector<test_model::SimpleEncodingCounters> const& values) {
   if (unlikely(state_ != 0)) {
-    BenchmarkSmallRecordWithOptionalsWriterBaseInvalidState(0, false, state_);
+    InvalidState(0, false);
   }
 
   WriteSmallRecordImpl(values);
@@ -750,7 +820,7 @@ void BenchmarkSmallRecordWithOptionalsWriterBase::WriteSmallRecord(std::vector<t
 
 void BenchmarkSmallRecordWithOptionalsWriterBase::EndSmallRecord() {
   if (unlikely(state_ != 0)) {
-    BenchmarkSmallRecordWithOptionalsWriterBaseInvalidState(0, true, state_);
+    InvalidState(0, true);
   }
 
   EndSmallRecordImpl();
@@ -766,10 +836,23 @@ void BenchmarkSmallRecordWithOptionalsWriterBase::WriteSmallRecordImpl(std::vect
 
 void BenchmarkSmallRecordWithOptionalsWriterBase::Close() {
   if (unlikely(state_ != 1)) {
-    BenchmarkSmallRecordWithOptionalsWriterBaseInvalidState(1, false, state_);
+    InvalidState(1, false);
   }
 
   CloseImpl();
+}
+
+void BenchmarkSmallRecordWithOptionalsWriterBase::InvalidState(uint8_t attempted, [[maybe_unused]] bool end) {
+  std::string expected_method;
+  switch (state_) {
+  case 0: expected_method = "WriteSmallRecord() or EndSmallRecord()"; break;
+  }
+  std::string attempted_method;
+  switch (attempted) {
+  case 0: attempted_method = end ? "EndSmallRecord()" : "WriteSmallRecord()"; break;
+  case 1: attempted_method = "Close()"; break;
+  }
+  throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
 }
 
 std::string BenchmarkSmallRecordWithOptionalsReaderBase::schema_ = BenchmarkSmallRecordWithOptionalsWriterBase::schema_;
@@ -782,13 +865,14 @@ Version BenchmarkSmallRecordWithOptionalsReaderBase::VersionFromSchema(std::stri
   }
   throw std::runtime_error("The schema does not match any version supported by protocol BenchmarkSmallRecordWithOptionals.");
 }
+
 bool BenchmarkSmallRecordWithOptionalsReaderBase::ReadSmallRecord(test_model::SimpleEncodingCounters& value) {
   if (unlikely(state_ != 0)) {
     if (state_ == 1) {
       state_ = 2;
       return false;
     }
-    BenchmarkSmallRecordWithOptionalsReaderBaseInvalidState(0, state_);
+    InvalidState(0);
   }
 
   bool result = ReadSmallRecordImpl(value);
@@ -808,7 +892,7 @@ bool BenchmarkSmallRecordWithOptionalsReaderBase::ReadSmallRecord(std::vector<te
       values.clear();
       return false;
     }
-    BenchmarkSmallRecordWithOptionalsReaderBaseInvalidState(0, state_);
+    InvalidState(0);
   }
 
   if (!ReadSmallRecordImpl(values)) {
@@ -841,12 +925,13 @@ void BenchmarkSmallRecordWithOptionalsReaderBase::Close() {
     if (state_ == 1) {
       state_ = 2;
     } else {
-      BenchmarkSmallRecordWithOptionalsReaderBaseInvalidState(2, state_);
+      InvalidState(2);
     }
   }
 
   CloseImpl();
 }
+
 void BenchmarkSmallRecordWithOptionalsReaderBase::CopyTo(BenchmarkSmallRecordWithOptionalsWriterBase& writer, size_t small_record_buffer_size) {
   if (small_record_buffer_size > 1) {
     std::vector<test_model::SimpleEncodingCounters> values;
@@ -864,32 +949,40 @@ void BenchmarkSmallRecordWithOptionalsReaderBase::CopyTo(BenchmarkSmallRecordWit
   }
 }
 
-namespace {
-void BenchmarkSimpleMrdWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end, uint8_t current) {
-  std::string expected_method;
-  switch (current) {
-  case 0: expected_method = "WriteData() or EndData()"; break;
-  }
-  std::string attempted_method;
-  switch (attempted) {
-  case 0: attempted_method = end ? "EndData()" : "WriteData()"; break;
-  case 1: attempted_method = "Close()"; break;
-  }
-  throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
-}
-
-void BenchmarkSimpleMrdReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
+void BenchmarkSmallRecordWithOptionalsReaderBase::InvalidState(uint8_t attempted) {
   auto f = [](uint8_t i) -> std::string {
     switch (i/2) {
-    case 0: return "ReadData()";
+    case 0: return "ReadSmallRecord()";
     case 1: return "Close()";
     default: return "<unknown>";
     }
   };
-  throw std::runtime_error("Expected call to " + f(current) + " but received call to " + f(attempted) + " instead.");
+  throw std::runtime_error("Expected call to " + f(state_) + " but received call to " + f(attempted) + " instead.");
 }
 
-} // namespace 
+bool BenchmarkSmallRecordWithOptionalsIndexedReaderBase::ReadSmallRecord(test_model::SimpleEncodingCounters& value, size_t idx) {
+  return ReadSmallRecordImpl(value, idx);
+}
+
+bool BenchmarkSmallRecordWithOptionalsIndexedReaderBase::ReadSmallRecord(std::vector<test_model::SimpleEncodingCounters>& values, size_t idx) {
+  if (values.capacity() == 0) {
+    throw std::runtime_error("vector must have a nonzero capacity.");
+  }
+  if (!ReadSmallRecordImpl(values, idx)) {
+    return values.size() > 0;
+  }
+  return true;
+}
+
+size_t BenchmarkSmallRecordWithOptionalsIndexedReaderBase::CountSmallRecord() {
+  return CountSmallRecordImpl();
+}
+
+void BenchmarkSmallRecordWithOptionalsIndexedReaderBase::InvalidState(uint8_t attempted) {
+  (void)(attempted);
+  return;
+}
+
 
 std::string BenchmarkSimpleMrdWriterBase::schema_ = R"({"protocol":{"name":"BenchmarkSimpleMrd","sequence":[{"name":"data","type":{"stream":{"items":[{"tag":"acquisition","explicitTag":true,"type":"TestModel.SimpleAcquisition"},{"tag":"image","explicitTag":true,"type":{"name":"Image.Image","typeArguments":["float32"]}}]}}}]},"types":[{"name":"Image","typeParameters":["T"],"type":{"array":{"items":"T","dimensions":[{"name":"x"},{"name":"y"}]}}},{"name":"SimpleAcquisition","fields":[{"name":"flags","type":"uint64"},{"name":"idx","type":"TestModel.SimpleEncodingCounters"},{"name":"data","type":{"array":{"items":"complexfloat32","dimensions":2}}},{"name":"trajectory","type":{"array":{"items":"float32","dimensions":2}}}]},{"name":"SimpleEncodingCounters","fields":[{"name":"e1","type":[null,"uint32"]},{"name":"e2","type":[null,"uint32"]},{"name":"slice","type":[null,"uint32"]},{"name":"repetition","type":[null,"uint32"]}]}]})";
 
@@ -903,9 +996,10 @@ std::string BenchmarkSimpleMrdWriterBase::SchemaFromVersion(Version version) {
   }
 
 }
+
 void BenchmarkSimpleMrdWriterBase::WriteData(std::variant<test_model::SimpleAcquisition, image::Image<float>> const& value) {
   if (unlikely(state_ != 0)) {
-    BenchmarkSimpleMrdWriterBaseInvalidState(0, false, state_);
+    InvalidState(0, false);
   }
 
   WriteDataImpl(value);
@@ -913,7 +1007,7 @@ void BenchmarkSimpleMrdWriterBase::WriteData(std::variant<test_model::SimpleAcqu
 
 void BenchmarkSimpleMrdWriterBase::WriteData(std::vector<std::variant<test_model::SimpleAcquisition, image::Image<float>>> const& values) {
   if (unlikely(state_ != 0)) {
-    BenchmarkSimpleMrdWriterBaseInvalidState(0, false, state_);
+    InvalidState(0, false);
   }
 
   WriteDataImpl(values);
@@ -921,7 +1015,7 @@ void BenchmarkSimpleMrdWriterBase::WriteData(std::vector<std::variant<test_model
 
 void BenchmarkSimpleMrdWriterBase::EndData() {
   if (unlikely(state_ != 0)) {
-    BenchmarkSimpleMrdWriterBaseInvalidState(0, true, state_);
+    InvalidState(0, true);
   }
 
   EndDataImpl();
@@ -937,10 +1031,23 @@ void BenchmarkSimpleMrdWriterBase::WriteDataImpl(std::vector<std::variant<test_m
 
 void BenchmarkSimpleMrdWriterBase::Close() {
   if (unlikely(state_ != 1)) {
-    BenchmarkSimpleMrdWriterBaseInvalidState(1, false, state_);
+    InvalidState(1, false);
   }
 
   CloseImpl();
+}
+
+void BenchmarkSimpleMrdWriterBase::InvalidState(uint8_t attempted, [[maybe_unused]] bool end) {
+  std::string expected_method;
+  switch (state_) {
+  case 0: expected_method = "WriteData() or EndData()"; break;
+  }
+  std::string attempted_method;
+  switch (attempted) {
+  case 0: attempted_method = end ? "EndData()" : "WriteData()"; break;
+  case 1: attempted_method = "Close()"; break;
+  }
+  throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
 }
 
 std::string BenchmarkSimpleMrdReaderBase::schema_ = BenchmarkSimpleMrdWriterBase::schema_;
@@ -953,13 +1060,14 @@ Version BenchmarkSimpleMrdReaderBase::VersionFromSchema(std::string const& schem
   }
   throw std::runtime_error("The schema does not match any version supported by protocol BenchmarkSimpleMrd.");
 }
+
 bool BenchmarkSimpleMrdReaderBase::ReadData(std::variant<test_model::SimpleAcquisition, image::Image<float>>& value) {
   if (unlikely(state_ != 0)) {
     if (state_ == 1) {
       state_ = 2;
       return false;
     }
-    BenchmarkSimpleMrdReaderBaseInvalidState(0, state_);
+    InvalidState(0);
   }
 
   bool result = ReadDataImpl(value);
@@ -979,7 +1087,7 @@ bool BenchmarkSimpleMrdReaderBase::ReadData(std::vector<std::variant<test_model:
       values.clear();
       return false;
     }
-    BenchmarkSimpleMrdReaderBaseInvalidState(0, state_);
+    InvalidState(0);
   }
 
   if (!ReadDataImpl(values)) {
@@ -1012,12 +1120,13 @@ void BenchmarkSimpleMrdReaderBase::Close() {
     if (state_ == 1) {
       state_ = 2;
     } else {
-      BenchmarkSimpleMrdReaderBaseInvalidState(2, state_);
+      InvalidState(2);
     }
   }
 
   CloseImpl();
 }
+
 void BenchmarkSimpleMrdReaderBase::CopyTo(BenchmarkSimpleMrdWriterBase& writer, size_t data_buffer_size) {
   if (data_buffer_size > 1) {
     std::vector<std::variant<test_model::SimpleAcquisition, image::Image<float>>> values;
@@ -1035,35 +1144,40 @@ void BenchmarkSimpleMrdReaderBase::CopyTo(BenchmarkSimpleMrdWriterBase& writer, 
   }
 }
 
-namespace {
-void ScalarsWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end, uint8_t current) {
-  std::string expected_method;
-  switch (current) {
-  case 0: expected_method = "WriteInt32()"; break;
-  case 1: expected_method = "WriteRecord()"; break;
-  }
-  std::string attempted_method;
-  switch (attempted) {
-  case 0: attempted_method = "WriteInt32()"; break;
-  case 1: attempted_method = "WriteRecord()"; break;
-  case 2: attempted_method = "Close()"; break;
-  }
-  throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
-}
-
-void ScalarsReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
+void BenchmarkSimpleMrdReaderBase::InvalidState(uint8_t attempted) {
   auto f = [](uint8_t i) -> std::string {
     switch (i/2) {
-    case 0: return "ReadInt32()";
-    case 1: return "ReadRecord()";
-    case 2: return "Close()";
+    case 0: return "ReadData()";
+    case 1: return "Close()";
     default: return "<unknown>";
     }
   };
-  throw std::runtime_error("Expected call to " + f(current) + " but received call to " + f(attempted) + " instead.");
+  throw std::runtime_error("Expected call to " + f(state_) + " but received call to " + f(attempted) + " instead.");
 }
 
-} // namespace 
+bool BenchmarkSimpleMrdIndexedReaderBase::ReadData(std::variant<test_model::SimpleAcquisition, image::Image<float>>& value, size_t idx) {
+  return ReadDataImpl(value, idx);
+}
+
+bool BenchmarkSimpleMrdIndexedReaderBase::ReadData(std::vector<std::variant<test_model::SimpleAcquisition, image::Image<float>>>& values, size_t idx) {
+  if (values.capacity() == 0) {
+    throw std::runtime_error("vector must have a nonzero capacity.");
+  }
+  if (!ReadDataImpl(values, idx)) {
+    return values.size() > 0;
+  }
+  return true;
+}
+
+size_t BenchmarkSimpleMrdIndexedReaderBase::CountData() {
+  return CountDataImpl();
+}
+
+void BenchmarkSimpleMrdIndexedReaderBase::InvalidState(uint8_t attempted) {
+  (void)(attempted);
+  return;
+}
+
 
 std::string ScalarsWriterBase::schema_ = R"({"protocol":{"name":"Scalars","sequence":[{"name":"int32","type":"int32"},{"name":"record","type":"TestModel.RecordWithPrimitives"}]},"types":[{"name":"RecordWithPrimitives","fields":[{"name":"boolField","type":"bool"},{"name":"int8Field","type":"int8"},{"name":"uint8Field","type":"uint8"},{"name":"int16Field","type":"int16"},{"name":"uint16Field","type":"uint16"},{"name":"int32Field","type":"int32"},{"name":"uint32Field","type":"uint32"},{"name":"int64Field","type":"int64"},{"name":"uint64Field","type":"uint64"},{"name":"sizeField","type":"size"},{"name":"float32Field","type":"float32"},{"name":"float64Field","type":"float64"},{"name":"complexfloat32Field","type":"complexfloat32"},{"name":"complexfloat64Field","type":"complexfloat64"},{"name":"dateField","type":"date"},{"name":"timeField","type":"time"},{"name":"datetimeField","type":"datetime"}]}]})";
 
@@ -1077,9 +1191,10 @@ std::string ScalarsWriterBase::SchemaFromVersion(Version version) {
   }
 
 }
+
 void ScalarsWriterBase::WriteInt32(int32_t const& value) {
   if (unlikely(state_ != 0)) {
-    ScalarsWriterBaseInvalidState(0, false, state_);
+    InvalidState(0, false);
   }
 
   WriteInt32Impl(value);
@@ -1088,7 +1203,7 @@ void ScalarsWriterBase::WriteInt32(int32_t const& value) {
 
 void ScalarsWriterBase::WriteRecord(test_model::RecordWithPrimitives const& value) {
   if (unlikely(state_ != 1)) {
-    ScalarsWriterBaseInvalidState(1, false, state_);
+    InvalidState(1, false);
   }
 
   WriteRecordImpl(value);
@@ -1097,10 +1212,25 @@ void ScalarsWriterBase::WriteRecord(test_model::RecordWithPrimitives const& valu
 
 void ScalarsWriterBase::Close() {
   if (unlikely(state_ != 2)) {
-    ScalarsWriterBaseInvalidState(2, false, state_);
+    InvalidState(2, false);
   }
 
   CloseImpl();
+}
+
+void ScalarsWriterBase::InvalidState(uint8_t attempted, [[maybe_unused]] bool end) {
+  std::string expected_method;
+  switch (state_) {
+  case 0: expected_method = "WriteInt32()"; break;
+  case 1: expected_method = "WriteRecord()"; break;
+  }
+  std::string attempted_method;
+  switch (attempted) {
+  case 0: attempted_method = "WriteInt32()"; break;
+  case 1: attempted_method = "WriteRecord()"; break;
+  case 2: attempted_method = "Close()"; break;
+  }
+  throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
 }
 
 std::string ScalarsReaderBase::schema_ = ScalarsWriterBase::schema_;
@@ -1113,9 +1243,10 @@ Version ScalarsReaderBase::VersionFromSchema(std::string const& schema) {
   }
   throw std::runtime_error("The schema does not match any version supported by protocol Scalars.");
 }
+
 void ScalarsReaderBase::ReadInt32(int32_t& value) {
   if (unlikely(state_ != 0)) {
-    ScalarsReaderBaseInvalidState(0, state_);
+    InvalidState(0);
   }
 
   ReadInt32Impl(value);
@@ -1124,7 +1255,7 @@ void ScalarsReaderBase::ReadInt32(int32_t& value) {
 
 void ScalarsReaderBase::ReadRecord(test_model::RecordWithPrimitives& value) {
   if (unlikely(state_ != 2)) {
-    ScalarsReaderBaseInvalidState(2, state_);
+    InvalidState(2);
   }
 
   ReadRecordImpl(value);
@@ -1133,11 +1264,12 @@ void ScalarsReaderBase::ReadRecord(test_model::RecordWithPrimitives& value) {
 
 void ScalarsReaderBase::Close() {
   if (unlikely(state_ != 4)) {
-    ScalarsReaderBaseInvalidState(4, state_);
+    InvalidState(4);
   }
 
   CloseImpl();
 }
+
 void ScalarsReaderBase::CopyTo(ScalarsWriterBase& writer) {
   {
     int32_t value;
@@ -1151,10 +1283,84 @@ void ScalarsReaderBase::CopyTo(ScalarsWriterBase& writer) {
   }
 }
 
-namespace {
-void ScalarOptionalsWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end, uint8_t current) {
+void ScalarsReaderBase::InvalidState(uint8_t attempted) {
+  auto f = [](uint8_t i) -> std::string {
+    switch (i/2) {
+    case 0: return "ReadInt32()";
+    case 1: return "ReadRecord()";
+    case 2: return "Close()";
+    default: return "<unknown>";
+    }
+  };
+  throw std::runtime_error("Expected call to " + f(state_) + " but received call to " + f(attempted) + " instead.");
+}
+
+void ScalarsIndexedReaderBase::InvalidState(uint8_t attempted) {
+  (void)(attempted);
+  return;
+}
+
+
+std::string ScalarOptionalsWriterBase::schema_ = R"({"protocol":{"name":"ScalarOptionals","sequence":[{"name":"optionalInt","type":[null,"int32"]},{"name":"optionalRecord","type":[null,"TestModel.SimpleRecord"]},{"name":"recordWithOptionalFields","type":"TestModel.RecordWithOptionalFields"},{"name":"optionalRecordWithOptionalFields","type":[null,"TestModel.RecordWithOptionalFields"]}]},"types":[{"name":"RecordWithOptionalFields","fields":[{"name":"optionalInt","type":[null,"int32"]},{"name":"optionalIntAlternateSyntax","type":[null,"int32"]},{"name":"optionalTime","type":[null,"time"]}]},{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]}]})";
+
+std::vector<std::string> ScalarOptionalsWriterBase::previous_schemas_ = {
+};
+
+std::string ScalarOptionalsWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Current: return ScalarOptionalsWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol ScalarOptionals.");
+  }
+
+}
+
+void ScalarOptionalsWriterBase::WriteOptionalInt(std::optional<int32_t> const& value) {
+  if (unlikely(state_ != 0)) {
+    InvalidState(0, false);
+  }
+
+  WriteOptionalIntImpl(value);
+  state_ = 1;
+}
+
+void ScalarOptionalsWriterBase::WriteOptionalRecord(std::optional<test_model::SimpleRecord> const& value) {
+  if (unlikely(state_ != 1)) {
+    InvalidState(1, false);
+  }
+
+  WriteOptionalRecordImpl(value);
+  state_ = 2;
+}
+
+void ScalarOptionalsWriterBase::WriteRecordWithOptionalFields(test_model::RecordWithOptionalFields const& value) {
+  if (unlikely(state_ != 2)) {
+    InvalidState(2, false);
+  }
+
+  WriteRecordWithOptionalFieldsImpl(value);
+  state_ = 3;
+}
+
+void ScalarOptionalsWriterBase::WriteOptionalRecordWithOptionalFields(std::optional<test_model::RecordWithOptionalFields> const& value) {
+  if (unlikely(state_ != 3)) {
+    InvalidState(3, false);
+  }
+
+  WriteOptionalRecordWithOptionalFieldsImpl(value);
+  state_ = 4;
+}
+
+void ScalarOptionalsWriterBase::Close() {
+  if (unlikely(state_ != 4)) {
+    InvalidState(4, false);
+  }
+
+  CloseImpl();
+}
+
+void ScalarOptionalsWriterBase::InvalidState(uint8_t attempted, [[maybe_unused]] bool end) {
   std::string expected_method;
-  switch (current) {
+  switch (state_) {
   case 0: expected_method = "WriteOptionalInt()"; break;
   case 1: expected_method = "WriteOptionalRecord()"; break;
   case 2: expected_method = "WriteRecordWithOptionalFields()"; break;
@@ -1171,78 +1377,6 @@ void ScalarOptionalsWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] b
   throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
 }
 
-void ScalarOptionalsReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
-  auto f = [](uint8_t i) -> std::string {
-    switch (i/2) {
-    case 0: return "ReadOptionalInt()";
-    case 1: return "ReadOptionalRecord()";
-    case 2: return "ReadRecordWithOptionalFields()";
-    case 3: return "ReadOptionalRecordWithOptionalFields()";
-    case 4: return "Close()";
-    default: return "<unknown>";
-    }
-  };
-  throw std::runtime_error("Expected call to " + f(current) + " but received call to " + f(attempted) + " instead.");
-}
-
-} // namespace 
-
-std::string ScalarOptionalsWriterBase::schema_ = R"({"protocol":{"name":"ScalarOptionals","sequence":[{"name":"optionalInt","type":[null,"int32"]},{"name":"optionalRecord","type":[null,"TestModel.SimpleRecord"]},{"name":"recordWithOptionalFields","type":"TestModel.RecordWithOptionalFields"},{"name":"optionalRecordWithOptionalFields","type":[null,"TestModel.RecordWithOptionalFields"]}]},"types":[{"name":"RecordWithOptionalFields","fields":[{"name":"optionalInt","type":[null,"int32"]},{"name":"optionalIntAlternateSyntax","type":[null,"int32"]},{"name":"optionalTime","type":[null,"time"]}]},{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]}]})";
-
-std::vector<std::string> ScalarOptionalsWriterBase::previous_schemas_ = {
-};
-
-std::string ScalarOptionalsWriterBase::SchemaFromVersion(Version version) {
-  switch (version) {
-  case Version::Current: return ScalarOptionalsWriterBase::schema_; break;
-  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol ScalarOptionals.");
-  }
-
-}
-void ScalarOptionalsWriterBase::WriteOptionalInt(std::optional<int32_t> const& value) {
-  if (unlikely(state_ != 0)) {
-    ScalarOptionalsWriterBaseInvalidState(0, false, state_);
-  }
-
-  WriteOptionalIntImpl(value);
-  state_ = 1;
-}
-
-void ScalarOptionalsWriterBase::WriteOptionalRecord(std::optional<test_model::SimpleRecord> const& value) {
-  if (unlikely(state_ != 1)) {
-    ScalarOptionalsWriterBaseInvalidState(1, false, state_);
-  }
-
-  WriteOptionalRecordImpl(value);
-  state_ = 2;
-}
-
-void ScalarOptionalsWriterBase::WriteRecordWithOptionalFields(test_model::RecordWithOptionalFields const& value) {
-  if (unlikely(state_ != 2)) {
-    ScalarOptionalsWriterBaseInvalidState(2, false, state_);
-  }
-
-  WriteRecordWithOptionalFieldsImpl(value);
-  state_ = 3;
-}
-
-void ScalarOptionalsWriterBase::WriteOptionalRecordWithOptionalFields(std::optional<test_model::RecordWithOptionalFields> const& value) {
-  if (unlikely(state_ != 3)) {
-    ScalarOptionalsWriterBaseInvalidState(3, false, state_);
-  }
-
-  WriteOptionalRecordWithOptionalFieldsImpl(value);
-  state_ = 4;
-}
-
-void ScalarOptionalsWriterBase::Close() {
-  if (unlikely(state_ != 4)) {
-    ScalarOptionalsWriterBaseInvalidState(4, false, state_);
-  }
-
-  CloseImpl();
-}
-
 std::string ScalarOptionalsReaderBase::schema_ = ScalarOptionalsWriterBase::schema_;
 
 std::vector<std::string> ScalarOptionalsReaderBase::previous_schemas_ = ScalarOptionalsWriterBase::previous_schemas_;
@@ -1253,9 +1387,10 @@ Version ScalarOptionalsReaderBase::VersionFromSchema(std::string const& schema) 
   }
   throw std::runtime_error("The schema does not match any version supported by protocol ScalarOptionals.");
 }
+
 void ScalarOptionalsReaderBase::ReadOptionalInt(std::optional<int32_t>& value) {
   if (unlikely(state_ != 0)) {
-    ScalarOptionalsReaderBaseInvalidState(0, state_);
+    InvalidState(0);
   }
 
   ReadOptionalIntImpl(value);
@@ -1264,7 +1399,7 @@ void ScalarOptionalsReaderBase::ReadOptionalInt(std::optional<int32_t>& value) {
 
 void ScalarOptionalsReaderBase::ReadOptionalRecord(std::optional<test_model::SimpleRecord>& value) {
   if (unlikely(state_ != 2)) {
-    ScalarOptionalsReaderBaseInvalidState(2, state_);
+    InvalidState(2);
   }
 
   ReadOptionalRecordImpl(value);
@@ -1273,7 +1408,7 @@ void ScalarOptionalsReaderBase::ReadOptionalRecord(std::optional<test_model::Sim
 
 void ScalarOptionalsReaderBase::ReadRecordWithOptionalFields(test_model::RecordWithOptionalFields& value) {
   if (unlikely(state_ != 4)) {
-    ScalarOptionalsReaderBaseInvalidState(4, state_);
+    InvalidState(4);
   }
 
   ReadRecordWithOptionalFieldsImpl(value);
@@ -1282,7 +1417,7 @@ void ScalarOptionalsReaderBase::ReadRecordWithOptionalFields(test_model::RecordW
 
 void ScalarOptionalsReaderBase::ReadOptionalRecordWithOptionalFields(std::optional<test_model::RecordWithOptionalFields>& value) {
   if (unlikely(state_ != 6)) {
-    ScalarOptionalsReaderBaseInvalidState(6, state_);
+    InvalidState(6);
   }
 
   ReadOptionalRecordWithOptionalFieldsImpl(value);
@@ -1291,11 +1426,12 @@ void ScalarOptionalsReaderBase::ReadOptionalRecordWithOptionalFields(std::option
 
 void ScalarOptionalsReaderBase::Close() {
   if (unlikely(state_ != 8)) {
-    ScalarOptionalsReaderBaseInvalidState(8, state_);
+    InvalidState(8);
   }
 
   CloseImpl();
 }
+
 void ScalarOptionalsReaderBase::CopyTo(ScalarOptionalsWriterBase& writer) {
   {
     std::optional<int32_t> value;
@@ -1319,32 +1455,25 @@ void ScalarOptionalsReaderBase::CopyTo(ScalarOptionalsWriterBase& writer) {
   }
 }
 
-namespace {
-void NestedRecordsWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end, uint8_t current) {
-  std::string expected_method;
-  switch (current) {
-  case 0: expected_method = "WriteTupleWithRecords()"; break;
-  }
-  std::string attempted_method;
-  switch (attempted) {
-  case 0: attempted_method = "WriteTupleWithRecords()"; break;
-  case 1: attempted_method = "Close()"; break;
-  }
-  throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
-}
-
-void NestedRecordsReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
+void ScalarOptionalsReaderBase::InvalidState(uint8_t attempted) {
   auto f = [](uint8_t i) -> std::string {
     switch (i/2) {
-    case 0: return "ReadTupleWithRecords()";
-    case 1: return "Close()";
+    case 0: return "ReadOptionalInt()";
+    case 1: return "ReadOptionalRecord()";
+    case 2: return "ReadRecordWithOptionalFields()";
+    case 3: return "ReadOptionalRecordWithOptionalFields()";
+    case 4: return "Close()";
     default: return "<unknown>";
     }
   };
-  throw std::runtime_error("Expected call to " + f(current) + " but received call to " + f(attempted) + " instead.");
+  throw std::runtime_error("Expected call to " + f(state_) + " but received call to " + f(attempted) + " instead.");
 }
 
-} // namespace 
+void ScalarOptionalsIndexedReaderBase::InvalidState(uint8_t attempted) {
+  (void)(attempted);
+  return;
+}
+
 
 std::string NestedRecordsWriterBase::schema_ = R"({"protocol":{"name":"NestedRecords","sequence":[{"name":"tupleWithRecords","type":"TestModel.TupleWithRecords"}]},"types":[{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]},{"name":"TupleWithRecords","fields":[{"name":"a","type":"TestModel.SimpleRecord"},{"name":"b","type":"TestModel.SimpleRecord"}]}]})";
 
@@ -1358,9 +1487,10 @@ std::string NestedRecordsWriterBase::SchemaFromVersion(Version version) {
   }
 
 }
+
 void NestedRecordsWriterBase::WriteTupleWithRecords(test_model::TupleWithRecords const& value) {
   if (unlikely(state_ != 0)) {
-    NestedRecordsWriterBaseInvalidState(0, false, state_);
+    InvalidState(0, false);
   }
 
   WriteTupleWithRecordsImpl(value);
@@ -1369,10 +1499,23 @@ void NestedRecordsWriterBase::WriteTupleWithRecords(test_model::TupleWithRecords
 
 void NestedRecordsWriterBase::Close() {
   if (unlikely(state_ != 1)) {
-    NestedRecordsWriterBaseInvalidState(1, false, state_);
+    InvalidState(1, false);
   }
 
   CloseImpl();
+}
+
+void NestedRecordsWriterBase::InvalidState(uint8_t attempted, [[maybe_unused]] bool end) {
+  std::string expected_method;
+  switch (state_) {
+  case 0: expected_method = "WriteTupleWithRecords()"; break;
+  }
+  std::string attempted_method;
+  switch (attempted) {
+  case 0: attempted_method = "WriteTupleWithRecords()"; break;
+  case 1: attempted_method = "Close()"; break;
+  }
+  throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
 }
 
 std::string NestedRecordsReaderBase::schema_ = NestedRecordsWriterBase::schema_;
@@ -1385,9 +1528,10 @@ Version NestedRecordsReaderBase::VersionFromSchema(std::string const& schema) {
   }
   throw std::runtime_error("The schema does not match any version supported by protocol NestedRecords.");
 }
+
 void NestedRecordsReaderBase::ReadTupleWithRecords(test_model::TupleWithRecords& value) {
   if (unlikely(state_ != 0)) {
-    NestedRecordsReaderBaseInvalidState(0, state_);
+    InvalidState(0);
   }
 
   ReadTupleWithRecordsImpl(value);
@@ -1396,11 +1540,12 @@ void NestedRecordsReaderBase::ReadTupleWithRecords(test_model::TupleWithRecords&
 
 void NestedRecordsReaderBase::Close() {
   if (unlikely(state_ != 2)) {
-    NestedRecordsReaderBaseInvalidState(2, state_);
+    InvalidState(2);
   }
 
   CloseImpl();
 }
+
 void NestedRecordsReaderBase::CopyTo(NestedRecordsWriterBase& writer) {
   {
     test_model::TupleWithRecords value;
@@ -1409,10 +1554,83 @@ void NestedRecordsReaderBase::CopyTo(NestedRecordsWriterBase& writer) {
   }
 }
 
-namespace {
-void VlensWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end, uint8_t current) {
+void NestedRecordsReaderBase::InvalidState(uint8_t attempted) {
+  auto f = [](uint8_t i) -> std::string {
+    switch (i/2) {
+    case 0: return "ReadTupleWithRecords()";
+    case 1: return "Close()";
+    default: return "<unknown>";
+    }
+  };
+  throw std::runtime_error("Expected call to " + f(state_) + " but received call to " + f(attempted) + " instead.");
+}
+
+void NestedRecordsIndexedReaderBase::InvalidState(uint8_t attempted) {
+  (void)(attempted);
+  return;
+}
+
+
+std::string VlensWriterBase::schema_ = R"({"protocol":{"name":"Vlens","sequence":[{"name":"intVector","type":{"vector":{"items":"int32"}}},{"name":"complexVector","type":{"vector":{"items":"complexfloat32"}}},{"name":"recordWithVlens","type":"TestModel.RecordWithVlens"},{"name":"vlenOfRecordWithVlens","type":{"vector":{"items":"TestModel.RecordWithVlens"}}}]},"types":[{"name":"RecordWithVlens","fields":[{"name":"a","type":{"vector":{"items":"TestModel.SimpleRecord"}}},{"name":"b","type":"int32"},{"name":"c","type":"int32"}]},{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]}]})";
+
+std::vector<std::string> VlensWriterBase::previous_schemas_ = {
+};
+
+std::string VlensWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Current: return VlensWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol Vlens.");
+  }
+
+}
+
+void VlensWriterBase::WriteIntVector(std::vector<int32_t> const& value) {
+  if (unlikely(state_ != 0)) {
+    InvalidState(0, false);
+  }
+
+  WriteIntVectorImpl(value);
+  state_ = 1;
+}
+
+void VlensWriterBase::WriteComplexVector(std::vector<std::complex<float>> const& value) {
+  if (unlikely(state_ != 1)) {
+    InvalidState(1, false);
+  }
+
+  WriteComplexVectorImpl(value);
+  state_ = 2;
+}
+
+void VlensWriterBase::WriteRecordWithVlens(test_model::RecordWithVlens const& value) {
+  if (unlikely(state_ != 2)) {
+    InvalidState(2, false);
+  }
+
+  WriteRecordWithVlensImpl(value);
+  state_ = 3;
+}
+
+void VlensWriterBase::WriteVlenOfRecordWithVlens(std::vector<test_model::RecordWithVlens> const& value) {
+  if (unlikely(state_ != 3)) {
+    InvalidState(3, false);
+  }
+
+  WriteVlenOfRecordWithVlensImpl(value);
+  state_ = 4;
+}
+
+void VlensWriterBase::Close() {
+  if (unlikely(state_ != 4)) {
+    InvalidState(4, false);
+  }
+
+  CloseImpl();
+}
+
+void VlensWriterBase::InvalidState(uint8_t attempted, [[maybe_unused]] bool end) {
   std::string expected_method;
-  switch (current) {
+  switch (state_) {
   case 0: expected_method = "WriteIntVector()"; break;
   case 1: expected_method = "WriteComplexVector()"; break;
   case 2: expected_method = "WriteRecordWithVlens()"; break;
@@ -1429,78 +1647,6 @@ void VlensWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end, u
   throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
 }
 
-void VlensReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
-  auto f = [](uint8_t i) -> std::string {
-    switch (i/2) {
-    case 0: return "ReadIntVector()";
-    case 1: return "ReadComplexVector()";
-    case 2: return "ReadRecordWithVlens()";
-    case 3: return "ReadVlenOfRecordWithVlens()";
-    case 4: return "Close()";
-    default: return "<unknown>";
-    }
-  };
-  throw std::runtime_error("Expected call to " + f(current) + " but received call to " + f(attempted) + " instead.");
-}
-
-} // namespace 
-
-std::string VlensWriterBase::schema_ = R"({"protocol":{"name":"Vlens","sequence":[{"name":"intVector","type":{"vector":{"items":"int32"}}},{"name":"complexVector","type":{"vector":{"items":"complexfloat32"}}},{"name":"recordWithVlens","type":"TestModel.RecordWithVlens"},{"name":"vlenOfRecordWithVlens","type":{"vector":{"items":"TestModel.RecordWithVlens"}}}]},"types":[{"name":"RecordWithVlens","fields":[{"name":"a","type":{"vector":{"items":"TestModel.SimpleRecord"}}},{"name":"b","type":"int32"},{"name":"c","type":"int32"}]},{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]}]})";
-
-std::vector<std::string> VlensWriterBase::previous_schemas_ = {
-};
-
-std::string VlensWriterBase::SchemaFromVersion(Version version) {
-  switch (version) {
-  case Version::Current: return VlensWriterBase::schema_; break;
-  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol Vlens.");
-  }
-
-}
-void VlensWriterBase::WriteIntVector(std::vector<int32_t> const& value) {
-  if (unlikely(state_ != 0)) {
-    VlensWriterBaseInvalidState(0, false, state_);
-  }
-
-  WriteIntVectorImpl(value);
-  state_ = 1;
-}
-
-void VlensWriterBase::WriteComplexVector(std::vector<std::complex<float>> const& value) {
-  if (unlikely(state_ != 1)) {
-    VlensWriterBaseInvalidState(1, false, state_);
-  }
-
-  WriteComplexVectorImpl(value);
-  state_ = 2;
-}
-
-void VlensWriterBase::WriteRecordWithVlens(test_model::RecordWithVlens const& value) {
-  if (unlikely(state_ != 2)) {
-    VlensWriterBaseInvalidState(2, false, state_);
-  }
-
-  WriteRecordWithVlensImpl(value);
-  state_ = 3;
-}
-
-void VlensWriterBase::WriteVlenOfRecordWithVlens(std::vector<test_model::RecordWithVlens> const& value) {
-  if (unlikely(state_ != 3)) {
-    VlensWriterBaseInvalidState(3, false, state_);
-  }
-
-  WriteVlenOfRecordWithVlensImpl(value);
-  state_ = 4;
-}
-
-void VlensWriterBase::Close() {
-  if (unlikely(state_ != 4)) {
-    VlensWriterBaseInvalidState(4, false, state_);
-  }
-
-  CloseImpl();
-}
-
 std::string VlensReaderBase::schema_ = VlensWriterBase::schema_;
 
 std::vector<std::string> VlensReaderBase::previous_schemas_ = VlensWriterBase::previous_schemas_;
@@ -1511,9 +1657,10 @@ Version VlensReaderBase::VersionFromSchema(std::string const& schema) {
   }
   throw std::runtime_error("The schema does not match any version supported by protocol Vlens.");
 }
+
 void VlensReaderBase::ReadIntVector(std::vector<int32_t>& value) {
   if (unlikely(state_ != 0)) {
-    VlensReaderBaseInvalidState(0, state_);
+    InvalidState(0);
   }
 
   ReadIntVectorImpl(value);
@@ -1522,7 +1669,7 @@ void VlensReaderBase::ReadIntVector(std::vector<int32_t>& value) {
 
 void VlensReaderBase::ReadComplexVector(std::vector<std::complex<float>>& value) {
   if (unlikely(state_ != 2)) {
-    VlensReaderBaseInvalidState(2, state_);
+    InvalidState(2);
   }
 
   ReadComplexVectorImpl(value);
@@ -1531,7 +1678,7 @@ void VlensReaderBase::ReadComplexVector(std::vector<std::complex<float>>& value)
 
 void VlensReaderBase::ReadRecordWithVlens(test_model::RecordWithVlens& value) {
   if (unlikely(state_ != 4)) {
-    VlensReaderBaseInvalidState(4, state_);
+    InvalidState(4);
   }
 
   ReadRecordWithVlensImpl(value);
@@ -1540,7 +1687,7 @@ void VlensReaderBase::ReadRecordWithVlens(test_model::RecordWithVlens& value) {
 
 void VlensReaderBase::ReadVlenOfRecordWithVlens(std::vector<test_model::RecordWithVlens>& value) {
   if (unlikely(state_ != 6)) {
-    VlensReaderBaseInvalidState(6, state_);
+    InvalidState(6);
   }
 
   ReadVlenOfRecordWithVlensImpl(value);
@@ -1549,11 +1696,12 @@ void VlensReaderBase::ReadVlenOfRecordWithVlens(std::vector<test_model::RecordWi
 
 void VlensReaderBase::Close() {
   if (unlikely(state_ != 8)) {
-    VlensReaderBaseInvalidState(8, state_);
+    InvalidState(8);
   }
 
   CloseImpl();
 }
+
 void VlensReaderBase::CopyTo(VlensWriterBase& writer) {
   {
     std::vector<int32_t> value;
@@ -1577,35 +1725,25 @@ void VlensReaderBase::CopyTo(VlensWriterBase& writer) {
   }
 }
 
-namespace {
-void StringsWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end, uint8_t current) {
-  std::string expected_method;
-  switch (current) {
-  case 0: expected_method = "WriteSingleString()"; break;
-  case 1: expected_method = "WriteRecWithString()"; break;
-  }
-  std::string attempted_method;
-  switch (attempted) {
-  case 0: attempted_method = "WriteSingleString()"; break;
-  case 1: attempted_method = "WriteRecWithString()"; break;
-  case 2: attempted_method = "Close()"; break;
-  }
-  throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
-}
-
-void StringsReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
+void VlensReaderBase::InvalidState(uint8_t attempted) {
   auto f = [](uint8_t i) -> std::string {
     switch (i/2) {
-    case 0: return "ReadSingleString()";
-    case 1: return "ReadRecWithString()";
-    case 2: return "Close()";
+    case 0: return "ReadIntVector()";
+    case 1: return "ReadComplexVector()";
+    case 2: return "ReadRecordWithVlens()";
+    case 3: return "ReadVlenOfRecordWithVlens()";
+    case 4: return "Close()";
     default: return "<unknown>";
     }
   };
-  throw std::runtime_error("Expected call to " + f(current) + " but received call to " + f(attempted) + " instead.");
+  throw std::runtime_error("Expected call to " + f(state_) + " but received call to " + f(attempted) + " instead.");
 }
 
-} // namespace 
+void VlensIndexedReaderBase::InvalidState(uint8_t attempted) {
+  (void)(attempted);
+  return;
+}
+
 
 std::string StringsWriterBase::schema_ = R"({"protocol":{"name":"Strings","sequence":[{"name":"singleString","type":"string"},{"name":"recWithString","type":"TestModel.RecordWithStrings"}]},"types":[{"name":"RecordWithStrings","fields":[{"name":"a","type":"string"},{"name":"b","type":"string"}]}]})";
 
@@ -1619,9 +1757,10 @@ std::string StringsWriterBase::SchemaFromVersion(Version version) {
   }
 
 }
+
 void StringsWriterBase::WriteSingleString(std::string const& value) {
   if (unlikely(state_ != 0)) {
-    StringsWriterBaseInvalidState(0, false, state_);
+    InvalidState(0, false);
   }
 
   WriteSingleStringImpl(value);
@@ -1630,7 +1769,7 @@ void StringsWriterBase::WriteSingleString(std::string const& value) {
 
 void StringsWriterBase::WriteRecWithString(test_model::RecordWithStrings const& value) {
   if (unlikely(state_ != 1)) {
-    StringsWriterBaseInvalidState(1, false, state_);
+    InvalidState(1, false);
   }
 
   WriteRecWithStringImpl(value);
@@ -1639,10 +1778,25 @@ void StringsWriterBase::WriteRecWithString(test_model::RecordWithStrings const& 
 
 void StringsWriterBase::Close() {
   if (unlikely(state_ != 2)) {
-    StringsWriterBaseInvalidState(2, false, state_);
+    InvalidState(2, false);
   }
 
   CloseImpl();
+}
+
+void StringsWriterBase::InvalidState(uint8_t attempted, [[maybe_unused]] bool end) {
+  std::string expected_method;
+  switch (state_) {
+  case 0: expected_method = "WriteSingleString()"; break;
+  case 1: expected_method = "WriteRecWithString()"; break;
+  }
+  std::string attempted_method;
+  switch (attempted) {
+  case 0: attempted_method = "WriteSingleString()"; break;
+  case 1: attempted_method = "WriteRecWithString()"; break;
+  case 2: attempted_method = "Close()"; break;
+  }
+  throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
 }
 
 std::string StringsReaderBase::schema_ = StringsWriterBase::schema_;
@@ -1655,9 +1809,10 @@ Version StringsReaderBase::VersionFromSchema(std::string const& schema) {
   }
   throw std::runtime_error("The schema does not match any version supported by protocol Strings.");
 }
+
 void StringsReaderBase::ReadSingleString(std::string& value) {
   if (unlikely(state_ != 0)) {
-    StringsReaderBaseInvalidState(0, state_);
+    InvalidState(0);
   }
 
   ReadSingleStringImpl(value);
@@ -1666,7 +1821,7 @@ void StringsReaderBase::ReadSingleString(std::string& value) {
 
 void StringsReaderBase::ReadRecWithString(test_model::RecordWithStrings& value) {
   if (unlikely(state_ != 2)) {
-    StringsReaderBaseInvalidState(2, state_);
+    InvalidState(2);
   }
 
   ReadRecWithStringImpl(value);
@@ -1675,11 +1830,12 @@ void StringsReaderBase::ReadRecWithString(test_model::RecordWithStrings& value) 
 
 void StringsReaderBase::Close() {
   if (unlikely(state_ != 4)) {
-    StringsReaderBaseInvalidState(4, state_);
+    InvalidState(4);
   }
 
   CloseImpl();
 }
+
 void StringsReaderBase::CopyTo(StringsWriterBase& writer) {
   {
     std::string value;
@@ -1693,32 +1849,23 @@ void StringsReaderBase::CopyTo(StringsWriterBase& writer) {
   }
 }
 
-namespace {
-void OptionalVectorsWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end, uint8_t current) {
-  std::string expected_method;
-  switch (current) {
-  case 0: expected_method = "WriteRecordWithOptionalVector()"; break;
-  }
-  std::string attempted_method;
-  switch (attempted) {
-  case 0: attempted_method = "WriteRecordWithOptionalVector()"; break;
-  case 1: attempted_method = "Close()"; break;
-  }
-  throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
-}
-
-void OptionalVectorsReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
+void StringsReaderBase::InvalidState(uint8_t attempted) {
   auto f = [](uint8_t i) -> std::string {
     switch (i/2) {
-    case 0: return "ReadRecordWithOptionalVector()";
-    case 1: return "Close()";
+    case 0: return "ReadSingleString()";
+    case 1: return "ReadRecWithString()";
+    case 2: return "Close()";
     default: return "<unknown>";
     }
   };
-  throw std::runtime_error("Expected call to " + f(current) + " but received call to " + f(attempted) + " instead.");
+  throw std::runtime_error("Expected call to " + f(state_) + " but received call to " + f(attempted) + " instead.");
 }
 
-} // namespace 
+void StringsIndexedReaderBase::InvalidState(uint8_t attempted) {
+  (void)(attempted);
+  return;
+}
+
 
 std::string OptionalVectorsWriterBase::schema_ = R"({"protocol":{"name":"OptionalVectors","sequence":[{"name":"recordWithOptionalVector","type":"TestModel.RecordWithOptionalVector"}]},"types":[{"name":"RecordWithOptionalVector","fields":[{"name":"optionalVector","type":[null,{"vector":{"items":"int32"}}]}]}]})";
 
@@ -1732,9 +1879,10 @@ std::string OptionalVectorsWriterBase::SchemaFromVersion(Version version) {
   }
 
 }
+
 void OptionalVectorsWriterBase::WriteRecordWithOptionalVector(test_model::RecordWithOptionalVector const& value) {
   if (unlikely(state_ != 0)) {
-    OptionalVectorsWriterBaseInvalidState(0, false, state_);
+    InvalidState(0, false);
   }
 
   WriteRecordWithOptionalVectorImpl(value);
@@ -1743,10 +1891,23 @@ void OptionalVectorsWriterBase::WriteRecordWithOptionalVector(test_model::Record
 
 void OptionalVectorsWriterBase::Close() {
   if (unlikely(state_ != 1)) {
-    OptionalVectorsWriterBaseInvalidState(1, false, state_);
+    InvalidState(1, false);
   }
 
   CloseImpl();
+}
+
+void OptionalVectorsWriterBase::InvalidState(uint8_t attempted, [[maybe_unused]] bool end) {
+  std::string expected_method;
+  switch (state_) {
+  case 0: expected_method = "WriteRecordWithOptionalVector()"; break;
+  }
+  std::string attempted_method;
+  switch (attempted) {
+  case 0: attempted_method = "WriteRecordWithOptionalVector()"; break;
+  case 1: attempted_method = "Close()"; break;
+  }
+  throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
 }
 
 std::string OptionalVectorsReaderBase::schema_ = OptionalVectorsWriterBase::schema_;
@@ -1759,9 +1920,10 @@ Version OptionalVectorsReaderBase::VersionFromSchema(std::string const& schema) 
   }
   throw std::runtime_error("The schema does not match any version supported by protocol OptionalVectors.");
 }
+
 void OptionalVectorsReaderBase::ReadRecordWithOptionalVector(test_model::RecordWithOptionalVector& value) {
   if (unlikely(state_ != 0)) {
-    OptionalVectorsReaderBaseInvalidState(0, state_);
+    InvalidState(0);
   }
 
   ReadRecordWithOptionalVectorImpl(value);
@@ -1770,11 +1932,12 @@ void OptionalVectorsReaderBase::ReadRecordWithOptionalVector(test_model::RecordW
 
 void OptionalVectorsReaderBase::Close() {
   if (unlikely(state_ != 2)) {
-    OptionalVectorsReaderBaseInvalidState(2, state_);
+    InvalidState(2);
   }
 
   CloseImpl();
 }
+
 void OptionalVectorsReaderBase::CopyTo(OptionalVectorsWriterBase& writer) {
   {
     test_model::RecordWithOptionalVector value;
@@ -1783,10 +1946,83 @@ void OptionalVectorsReaderBase::CopyTo(OptionalVectorsWriterBase& writer) {
   }
 }
 
-namespace {
-void FixedVectorsWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end, uint8_t current) {
+void OptionalVectorsReaderBase::InvalidState(uint8_t attempted) {
+  auto f = [](uint8_t i) -> std::string {
+    switch (i/2) {
+    case 0: return "ReadRecordWithOptionalVector()";
+    case 1: return "Close()";
+    default: return "<unknown>";
+    }
+  };
+  throw std::runtime_error("Expected call to " + f(state_) + " but received call to " + f(attempted) + " instead.");
+}
+
+void OptionalVectorsIndexedReaderBase::InvalidState(uint8_t attempted) {
+  (void)(attempted);
+  return;
+}
+
+
+std::string FixedVectorsWriterBase::schema_ = R"({"protocol":{"name":"FixedVectors","sequence":[{"name":"fixedIntVector","type":{"vector":{"items":"int32","length":5}}},{"name":"fixedSimpleRecordVector","type":{"vector":{"items":"TestModel.SimpleRecord","length":3}}},{"name":"fixedRecordWithVlensVector","type":{"vector":{"items":"TestModel.RecordWithVlens","length":2}}},{"name":"recordWithFixedVectors","type":"TestModel.RecordWithFixedVectors"}]},"types":[{"name":"RecordWithFixedVectors","fields":[{"name":"fixedIntVector","type":{"vector":{"items":"int32","length":5}}},{"name":"fixedSimpleRecordVector","type":{"vector":{"items":"TestModel.SimpleRecord","length":3}}},{"name":"fixedRecordWithVlensVector","type":{"vector":{"items":"TestModel.RecordWithVlens","length":2}}}]},{"name":"RecordWithVlens","fields":[{"name":"a","type":{"vector":{"items":"TestModel.SimpleRecord"}}},{"name":"b","type":"int32"},{"name":"c","type":"int32"}]},{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]}]})";
+
+std::vector<std::string> FixedVectorsWriterBase::previous_schemas_ = {
+};
+
+std::string FixedVectorsWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Current: return FixedVectorsWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol FixedVectors.");
+  }
+
+}
+
+void FixedVectorsWriterBase::WriteFixedIntVector(std::array<int32_t, 5> const& value) {
+  if (unlikely(state_ != 0)) {
+    InvalidState(0, false);
+  }
+
+  WriteFixedIntVectorImpl(value);
+  state_ = 1;
+}
+
+void FixedVectorsWriterBase::WriteFixedSimpleRecordVector(std::array<test_model::SimpleRecord, 3> const& value) {
+  if (unlikely(state_ != 1)) {
+    InvalidState(1, false);
+  }
+
+  WriteFixedSimpleRecordVectorImpl(value);
+  state_ = 2;
+}
+
+void FixedVectorsWriterBase::WriteFixedRecordWithVlensVector(std::array<test_model::RecordWithVlens, 2> const& value) {
+  if (unlikely(state_ != 2)) {
+    InvalidState(2, false);
+  }
+
+  WriteFixedRecordWithVlensVectorImpl(value);
+  state_ = 3;
+}
+
+void FixedVectorsWriterBase::WriteRecordWithFixedVectors(test_model::RecordWithFixedVectors const& value) {
+  if (unlikely(state_ != 3)) {
+    InvalidState(3, false);
+  }
+
+  WriteRecordWithFixedVectorsImpl(value);
+  state_ = 4;
+}
+
+void FixedVectorsWriterBase::Close() {
+  if (unlikely(state_ != 4)) {
+    InvalidState(4, false);
+  }
+
+  CloseImpl();
+}
+
+void FixedVectorsWriterBase::InvalidState(uint8_t attempted, [[maybe_unused]] bool end) {
   std::string expected_method;
-  switch (current) {
+  switch (state_) {
   case 0: expected_method = "WriteFixedIntVector()"; break;
   case 1: expected_method = "WriteFixedSimpleRecordVector()"; break;
   case 2: expected_method = "WriteFixedRecordWithVlensVector()"; break;
@@ -1803,78 +2039,6 @@ void FixedVectorsWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool
   throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
 }
 
-void FixedVectorsReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
-  auto f = [](uint8_t i) -> std::string {
-    switch (i/2) {
-    case 0: return "ReadFixedIntVector()";
-    case 1: return "ReadFixedSimpleRecordVector()";
-    case 2: return "ReadFixedRecordWithVlensVector()";
-    case 3: return "ReadRecordWithFixedVectors()";
-    case 4: return "Close()";
-    default: return "<unknown>";
-    }
-  };
-  throw std::runtime_error("Expected call to " + f(current) + " but received call to " + f(attempted) + " instead.");
-}
-
-} // namespace 
-
-std::string FixedVectorsWriterBase::schema_ = R"({"protocol":{"name":"FixedVectors","sequence":[{"name":"fixedIntVector","type":{"vector":{"items":"int32","length":5}}},{"name":"fixedSimpleRecordVector","type":{"vector":{"items":"TestModel.SimpleRecord","length":3}}},{"name":"fixedRecordWithVlensVector","type":{"vector":{"items":"TestModel.RecordWithVlens","length":2}}},{"name":"recordWithFixedVectors","type":"TestModel.RecordWithFixedVectors"}]},"types":[{"name":"RecordWithFixedVectors","fields":[{"name":"fixedIntVector","type":{"vector":{"items":"int32","length":5}}},{"name":"fixedSimpleRecordVector","type":{"vector":{"items":"TestModel.SimpleRecord","length":3}}},{"name":"fixedRecordWithVlensVector","type":{"vector":{"items":"TestModel.RecordWithVlens","length":2}}}]},{"name":"RecordWithVlens","fields":[{"name":"a","type":{"vector":{"items":"TestModel.SimpleRecord"}}},{"name":"b","type":"int32"},{"name":"c","type":"int32"}]},{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]}]})";
-
-std::vector<std::string> FixedVectorsWriterBase::previous_schemas_ = {
-};
-
-std::string FixedVectorsWriterBase::SchemaFromVersion(Version version) {
-  switch (version) {
-  case Version::Current: return FixedVectorsWriterBase::schema_; break;
-  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol FixedVectors.");
-  }
-
-}
-void FixedVectorsWriterBase::WriteFixedIntVector(std::array<int32_t, 5> const& value) {
-  if (unlikely(state_ != 0)) {
-    FixedVectorsWriterBaseInvalidState(0, false, state_);
-  }
-
-  WriteFixedIntVectorImpl(value);
-  state_ = 1;
-}
-
-void FixedVectorsWriterBase::WriteFixedSimpleRecordVector(std::array<test_model::SimpleRecord, 3> const& value) {
-  if (unlikely(state_ != 1)) {
-    FixedVectorsWriterBaseInvalidState(1, false, state_);
-  }
-
-  WriteFixedSimpleRecordVectorImpl(value);
-  state_ = 2;
-}
-
-void FixedVectorsWriterBase::WriteFixedRecordWithVlensVector(std::array<test_model::RecordWithVlens, 2> const& value) {
-  if (unlikely(state_ != 2)) {
-    FixedVectorsWriterBaseInvalidState(2, false, state_);
-  }
-
-  WriteFixedRecordWithVlensVectorImpl(value);
-  state_ = 3;
-}
-
-void FixedVectorsWriterBase::WriteRecordWithFixedVectors(test_model::RecordWithFixedVectors const& value) {
-  if (unlikely(state_ != 3)) {
-    FixedVectorsWriterBaseInvalidState(3, false, state_);
-  }
-
-  WriteRecordWithFixedVectorsImpl(value);
-  state_ = 4;
-}
-
-void FixedVectorsWriterBase::Close() {
-  if (unlikely(state_ != 4)) {
-    FixedVectorsWriterBaseInvalidState(4, false, state_);
-  }
-
-  CloseImpl();
-}
-
 std::string FixedVectorsReaderBase::schema_ = FixedVectorsWriterBase::schema_;
 
 std::vector<std::string> FixedVectorsReaderBase::previous_schemas_ = FixedVectorsWriterBase::previous_schemas_;
@@ -1885,9 +2049,10 @@ Version FixedVectorsReaderBase::VersionFromSchema(std::string const& schema) {
   }
   throw std::runtime_error("The schema does not match any version supported by protocol FixedVectors.");
 }
+
 void FixedVectorsReaderBase::ReadFixedIntVector(std::array<int32_t, 5>& value) {
   if (unlikely(state_ != 0)) {
-    FixedVectorsReaderBaseInvalidState(0, state_);
+    InvalidState(0);
   }
 
   ReadFixedIntVectorImpl(value);
@@ -1896,7 +2061,7 @@ void FixedVectorsReaderBase::ReadFixedIntVector(std::array<int32_t, 5>& value) {
 
 void FixedVectorsReaderBase::ReadFixedSimpleRecordVector(std::array<test_model::SimpleRecord, 3>& value) {
   if (unlikely(state_ != 2)) {
-    FixedVectorsReaderBaseInvalidState(2, state_);
+    InvalidState(2);
   }
 
   ReadFixedSimpleRecordVectorImpl(value);
@@ -1905,7 +2070,7 @@ void FixedVectorsReaderBase::ReadFixedSimpleRecordVector(std::array<test_model::
 
 void FixedVectorsReaderBase::ReadFixedRecordWithVlensVector(std::array<test_model::RecordWithVlens, 2>& value) {
   if (unlikely(state_ != 4)) {
-    FixedVectorsReaderBaseInvalidState(4, state_);
+    InvalidState(4);
   }
 
   ReadFixedRecordWithVlensVectorImpl(value);
@@ -1914,7 +2079,7 @@ void FixedVectorsReaderBase::ReadFixedRecordWithVlensVector(std::array<test_mode
 
 void FixedVectorsReaderBase::ReadRecordWithFixedVectors(test_model::RecordWithFixedVectors& value) {
   if (unlikely(state_ != 6)) {
-    FixedVectorsReaderBaseInvalidState(6, state_);
+    InvalidState(6);
   }
 
   ReadRecordWithFixedVectorsImpl(value);
@@ -1923,11 +2088,12 @@ void FixedVectorsReaderBase::ReadRecordWithFixedVectors(test_model::RecordWithFi
 
 void FixedVectorsReaderBase::Close() {
   if (unlikely(state_ != 8)) {
-    FixedVectorsReaderBaseInvalidState(8, state_);
+    InvalidState(8);
   }
 
   CloseImpl();
 }
+
 void FixedVectorsReaderBase::CopyTo(FixedVectorsWriterBase& writer) {
   {
     std::array<int32_t, 5> value;
@@ -1951,10 +2117,178 @@ void FixedVectorsReaderBase::CopyTo(FixedVectorsWriterBase& writer) {
   }
 }
 
-namespace {
-void StreamsWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end, uint8_t current) {
+void FixedVectorsReaderBase::InvalidState(uint8_t attempted) {
+  auto f = [](uint8_t i) -> std::string {
+    switch (i/2) {
+    case 0: return "ReadFixedIntVector()";
+    case 1: return "ReadFixedSimpleRecordVector()";
+    case 2: return "ReadFixedRecordWithVlensVector()";
+    case 3: return "ReadRecordWithFixedVectors()";
+    case 4: return "Close()";
+    default: return "<unknown>";
+    }
+  };
+  throw std::runtime_error("Expected call to " + f(state_) + " but received call to " + f(attempted) + " instead.");
+}
+
+void FixedVectorsIndexedReaderBase::InvalidState(uint8_t attempted) {
+  (void)(attempted);
+  return;
+}
+
+
+std::string StreamsWriterBase::schema_ = R"({"protocol":{"name":"Streams","sequence":[{"name":"intData","type":{"stream":{"items":"int32"}}},{"name":"optionalIntData","type":{"stream":{"items":[null,"int32"]}}},{"name":"recordWithOptionalVectorData","type":{"stream":{"items":"TestModel.RecordWithOptionalVector"}}},{"name":"fixedVector","type":{"stream":{"items":{"vector":{"items":"int32","length":3}}}}}]},"types":[{"name":"RecordWithOptionalVector","fields":[{"name":"optionalVector","type":[null,{"vector":{"items":"int32"}}]}]}]})";
+
+std::vector<std::string> StreamsWriterBase::previous_schemas_ = {
+};
+
+std::string StreamsWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Current: return StreamsWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol Streams.");
+  }
+
+}
+
+void StreamsWriterBase::WriteIntData(int32_t const& value) {
+  if (unlikely(state_ != 0)) {
+    InvalidState(0, false);
+  }
+
+  WriteIntDataImpl(value);
+}
+
+void StreamsWriterBase::WriteIntData(std::vector<int32_t> const& values) {
+  if (unlikely(state_ != 0)) {
+    InvalidState(0, false);
+  }
+
+  WriteIntDataImpl(values);
+}
+
+void StreamsWriterBase::EndIntData() {
+  if (unlikely(state_ != 0)) {
+    InvalidState(0, true);
+  }
+
+  EndIntDataImpl();
+  state_ = 1;
+}
+
+// fallback implementation
+void StreamsWriterBase::WriteIntDataImpl(std::vector<int32_t> const& values) {
+  for (auto const& v : values) {
+    WriteIntDataImpl(v);
+  }
+}
+
+void StreamsWriterBase::WriteOptionalIntData(std::optional<int32_t> const& value) {
+  if (unlikely(state_ != 1)) {
+    InvalidState(1, false);
+  }
+
+  WriteOptionalIntDataImpl(value);
+}
+
+void StreamsWriterBase::WriteOptionalIntData(std::vector<std::optional<int32_t>> const& values) {
+  if (unlikely(state_ != 1)) {
+    InvalidState(1, false);
+  }
+
+  WriteOptionalIntDataImpl(values);
+}
+
+void StreamsWriterBase::EndOptionalIntData() {
+  if (unlikely(state_ != 1)) {
+    InvalidState(1, true);
+  }
+
+  EndOptionalIntDataImpl();
+  state_ = 2;
+}
+
+// fallback implementation
+void StreamsWriterBase::WriteOptionalIntDataImpl(std::vector<std::optional<int32_t>> const& values) {
+  for (auto const& v : values) {
+    WriteOptionalIntDataImpl(v);
+  }
+}
+
+void StreamsWriterBase::WriteRecordWithOptionalVectorData(test_model::RecordWithOptionalVector const& value) {
+  if (unlikely(state_ != 2)) {
+    InvalidState(2, false);
+  }
+
+  WriteRecordWithOptionalVectorDataImpl(value);
+}
+
+void StreamsWriterBase::WriteRecordWithOptionalVectorData(std::vector<test_model::RecordWithOptionalVector> const& values) {
+  if (unlikely(state_ != 2)) {
+    InvalidState(2, false);
+  }
+
+  WriteRecordWithOptionalVectorDataImpl(values);
+}
+
+void StreamsWriterBase::EndRecordWithOptionalVectorData() {
+  if (unlikely(state_ != 2)) {
+    InvalidState(2, true);
+  }
+
+  EndRecordWithOptionalVectorDataImpl();
+  state_ = 3;
+}
+
+// fallback implementation
+void StreamsWriterBase::WriteRecordWithOptionalVectorDataImpl(std::vector<test_model::RecordWithOptionalVector> const& values) {
+  for (auto const& v : values) {
+    WriteRecordWithOptionalVectorDataImpl(v);
+  }
+}
+
+void StreamsWriterBase::WriteFixedVector(std::array<int32_t, 3> const& value) {
+  if (unlikely(state_ != 3)) {
+    InvalidState(3, false);
+  }
+
+  WriteFixedVectorImpl(value);
+}
+
+void StreamsWriterBase::WriteFixedVector(std::vector<std::array<int32_t, 3>> const& values) {
+  if (unlikely(state_ != 3)) {
+    InvalidState(3, false);
+  }
+
+  WriteFixedVectorImpl(values);
+}
+
+void StreamsWriterBase::EndFixedVector() {
+  if (unlikely(state_ != 3)) {
+    InvalidState(3, true);
+  }
+
+  EndFixedVectorImpl();
+  state_ = 4;
+}
+
+// fallback implementation
+void StreamsWriterBase::WriteFixedVectorImpl(std::vector<std::array<int32_t, 3>> const& values) {
+  for (auto const& v : values) {
+    WriteFixedVectorImpl(v);
+  }
+}
+
+void StreamsWriterBase::Close() {
+  if (unlikely(state_ != 4)) {
+    InvalidState(4, false);
+  }
+
+  CloseImpl();
+}
+
+void StreamsWriterBase::InvalidState(uint8_t attempted, [[maybe_unused]] bool end) {
   std::string expected_method;
-  switch (current) {
+  switch (state_) {
   case 0: expected_method = "WriteIntData() or EndIntData()"; break;
   case 1: expected_method = "WriteOptionalIntData() or EndOptionalIntData()"; break;
   case 2: expected_method = "WriteRecordWithOptionalVectorData() or EndRecordWithOptionalVectorData()"; break;
@@ -1971,170 +2305,6 @@ void StreamsWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end,
   throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
 }
 
-void StreamsReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
-  auto f = [](uint8_t i) -> std::string {
-    switch (i/2) {
-    case 0: return "ReadIntData()";
-    case 1: return "ReadOptionalIntData()";
-    case 2: return "ReadRecordWithOptionalVectorData()";
-    case 3: return "ReadFixedVector()";
-    case 4: return "Close()";
-    default: return "<unknown>";
-    }
-  };
-  throw std::runtime_error("Expected call to " + f(current) + " but received call to " + f(attempted) + " instead.");
-}
-
-} // namespace 
-
-std::string StreamsWriterBase::schema_ = R"({"protocol":{"name":"Streams","sequence":[{"name":"intData","type":{"stream":{"items":"int32"}}},{"name":"optionalIntData","type":{"stream":{"items":[null,"int32"]}}},{"name":"recordWithOptionalVectorData","type":{"stream":{"items":"TestModel.RecordWithOptionalVector"}}},{"name":"fixedVector","type":{"stream":{"items":{"vector":{"items":"int32","length":3}}}}}]},"types":[{"name":"RecordWithOptionalVector","fields":[{"name":"optionalVector","type":[null,{"vector":{"items":"int32"}}]}]}]})";
-
-std::vector<std::string> StreamsWriterBase::previous_schemas_ = {
-};
-
-std::string StreamsWriterBase::SchemaFromVersion(Version version) {
-  switch (version) {
-  case Version::Current: return StreamsWriterBase::schema_; break;
-  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol Streams.");
-  }
-
-}
-void StreamsWriterBase::WriteIntData(int32_t const& value) {
-  if (unlikely(state_ != 0)) {
-    StreamsWriterBaseInvalidState(0, false, state_);
-  }
-
-  WriteIntDataImpl(value);
-}
-
-void StreamsWriterBase::WriteIntData(std::vector<int32_t> const& values) {
-  if (unlikely(state_ != 0)) {
-    StreamsWriterBaseInvalidState(0, false, state_);
-  }
-
-  WriteIntDataImpl(values);
-}
-
-void StreamsWriterBase::EndIntData() {
-  if (unlikely(state_ != 0)) {
-    StreamsWriterBaseInvalidState(0, true, state_);
-  }
-
-  EndIntDataImpl();
-  state_ = 1;
-}
-
-// fallback implementation
-void StreamsWriterBase::WriteIntDataImpl(std::vector<int32_t> const& values) {
-  for (auto const& v : values) {
-    WriteIntDataImpl(v);
-  }
-}
-
-void StreamsWriterBase::WriteOptionalIntData(std::optional<int32_t> const& value) {
-  if (unlikely(state_ != 1)) {
-    StreamsWriterBaseInvalidState(1, false, state_);
-  }
-
-  WriteOptionalIntDataImpl(value);
-}
-
-void StreamsWriterBase::WriteOptionalIntData(std::vector<std::optional<int32_t>> const& values) {
-  if (unlikely(state_ != 1)) {
-    StreamsWriterBaseInvalidState(1, false, state_);
-  }
-
-  WriteOptionalIntDataImpl(values);
-}
-
-void StreamsWriterBase::EndOptionalIntData() {
-  if (unlikely(state_ != 1)) {
-    StreamsWriterBaseInvalidState(1, true, state_);
-  }
-
-  EndOptionalIntDataImpl();
-  state_ = 2;
-}
-
-// fallback implementation
-void StreamsWriterBase::WriteOptionalIntDataImpl(std::vector<std::optional<int32_t>> const& values) {
-  for (auto const& v : values) {
-    WriteOptionalIntDataImpl(v);
-  }
-}
-
-void StreamsWriterBase::WriteRecordWithOptionalVectorData(test_model::RecordWithOptionalVector const& value) {
-  if (unlikely(state_ != 2)) {
-    StreamsWriterBaseInvalidState(2, false, state_);
-  }
-
-  WriteRecordWithOptionalVectorDataImpl(value);
-}
-
-void StreamsWriterBase::WriteRecordWithOptionalVectorData(std::vector<test_model::RecordWithOptionalVector> const& values) {
-  if (unlikely(state_ != 2)) {
-    StreamsWriterBaseInvalidState(2, false, state_);
-  }
-
-  WriteRecordWithOptionalVectorDataImpl(values);
-}
-
-void StreamsWriterBase::EndRecordWithOptionalVectorData() {
-  if (unlikely(state_ != 2)) {
-    StreamsWriterBaseInvalidState(2, true, state_);
-  }
-
-  EndRecordWithOptionalVectorDataImpl();
-  state_ = 3;
-}
-
-// fallback implementation
-void StreamsWriterBase::WriteRecordWithOptionalVectorDataImpl(std::vector<test_model::RecordWithOptionalVector> const& values) {
-  for (auto const& v : values) {
-    WriteRecordWithOptionalVectorDataImpl(v);
-  }
-}
-
-void StreamsWriterBase::WriteFixedVector(std::array<int32_t, 3> const& value) {
-  if (unlikely(state_ != 3)) {
-    StreamsWriterBaseInvalidState(3, false, state_);
-  }
-
-  WriteFixedVectorImpl(value);
-}
-
-void StreamsWriterBase::WriteFixedVector(std::vector<std::array<int32_t, 3>> const& values) {
-  if (unlikely(state_ != 3)) {
-    StreamsWriterBaseInvalidState(3, false, state_);
-  }
-
-  WriteFixedVectorImpl(values);
-}
-
-void StreamsWriterBase::EndFixedVector() {
-  if (unlikely(state_ != 3)) {
-    StreamsWriterBaseInvalidState(3, true, state_);
-  }
-
-  EndFixedVectorImpl();
-  state_ = 4;
-}
-
-// fallback implementation
-void StreamsWriterBase::WriteFixedVectorImpl(std::vector<std::array<int32_t, 3>> const& values) {
-  for (auto const& v : values) {
-    WriteFixedVectorImpl(v);
-  }
-}
-
-void StreamsWriterBase::Close() {
-  if (unlikely(state_ != 4)) {
-    StreamsWriterBaseInvalidState(4, false, state_);
-  }
-
-  CloseImpl();
-}
-
 std::string StreamsReaderBase::schema_ = StreamsWriterBase::schema_;
 
 std::vector<std::string> StreamsReaderBase::previous_schemas_ = StreamsWriterBase::previous_schemas_;
@@ -2145,13 +2315,14 @@ Version StreamsReaderBase::VersionFromSchema(std::string const& schema) {
   }
   throw std::runtime_error("The schema does not match any version supported by protocol Streams.");
 }
+
 bool StreamsReaderBase::ReadIntData(int32_t& value) {
   if (unlikely(state_ != 0)) {
     if (state_ == 1) {
       state_ = 2;
       return false;
     }
-    StreamsReaderBaseInvalidState(0, state_);
+    InvalidState(0);
   }
 
   bool result = ReadIntDataImpl(value);
@@ -2171,7 +2342,7 @@ bool StreamsReaderBase::ReadIntData(std::vector<int32_t>& values) {
       values.clear();
       return false;
     }
-    StreamsReaderBaseInvalidState(0, state_);
+    InvalidState(0);
   }
 
   if (!ReadIntDataImpl(values)) {
@@ -2208,7 +2379,7 @@ bool StreamsReaderBase::ReadOptionalIntData(std::optional<int32_t>& value) {
     if (state_ == 1) {
       state_ = 2;
     } else {
-      StreamsReaderBaseInvalidState(2, state_);
+      InvalidState(2);
     }
   }
 
@@ -2232,7 +2403,7 @@ bool StreamsReaderBase::ReadOptionalIntData(std::vector<std::optional<int32_t>>&
     if (state_ == 1) {
       state_ = 2;
     } else {
-      StreamsReaderBaseInvalidState(2, state_);
+      InvalidState(2);
     }
   }
 
@@ -2270,7 +2441,7 @@ bool StreamsReaderBase::ReadRecordWithOptionalVectorData(test_model::RecordWithO
     if (state_ == 3) {
       state_ = 4;
     } else {
-      StreamsReaderBaseInvalidState(4, state_);
+      InvalidState(4);
     }
   }
 
@@ -2294,7 +2465,7 @@ bool StreamsReaderBase::ReadRecordWithOptionalVectorData(std::vector<test_model:
     if (state_ == 3) {
       state_ = 4;
     } else {
-      StreamsReaderBaseInvalidState(4, state_);
+      InvalidState(4);
     }
   }
 
@@ -2332,7 +2503,7 @@ bool StreamsReaderBase::ReadFixedVector(std::array<int32_t, 3>& value) {
     if (state_ == 5) {
       state_ = 6;
     } else {
-      StreamsReaderBaseInvalidState(6, state_);
+      InvalidState(6);
     }
   }
 
@@ -2356,7 +2527,7 @@ bool StreamsReaderBase::ReadFixedVector(std::vector<std::array<int32_t, 3>>& val
     if (state_ == 5) {
       state_ = 6;
     } else {
-      StreamsReaderBaseInvalidState(6, state_);
+      InvalidState(6);
     }
   }
 
@@ -2390,12 +2561,13 @@ void StreamsReaderBase::Close() {
     if (state_ == 7) {
       state_ = 8;
     } else {
-      StreamsReaderBaseInvalidState(8, state_);
+      InvalidState(8);
     }
   }
 
   CloseImpl();
 }
+
 void StreamsReaderBase::CopyTo(StreamsWriterBase& writer, size_t int_data_buffer_size, size_t optional_int_data_buffer_size, size_t record_with_optional_vector_data_buffer_size, size_t fixed_vector_buffer_size) {
   if (int_data_buffer_size > 1) {
     std::vector<int32_t> values;
@@ -2455,10 +2627,167 @@ void StreamsReaderBase::CopyTo(StreamsWriterBase& writer, size_t int_data_buffer
   }
 }
 
-namespace {
-void FixedArraysWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end, uint8_t current) {
+void StreamsReaderBase::InvalidState(uint8_t attempted) {
+  auto f = [](uint8_t i) -> std::string {
+    switch (i/2) {
+    case 0: return "ReadIntData()";
+    case 1: return "ReadOptionalIntData()";
+    case 2: return "ReadRecordWithOptionalVectorData()";
+    case 3: return "ReadFixedVector()";
+    case 4: return "Close()";
+    default: return "<unknown>";
+    }
+  };
+  throw std::runtime_error("Expected call to " + f(state_) + " but received call to " + f(attempted) + " instead.");
+}
+
+bool StreamsIndexedReaderBase::ReadIntData(int32_t& value, size_t idx) {
+  return ReadIntDataImpl(value, idx);
+}
+
+bool StreamsIndexedReaderBase::ReadIntData(std::vector<int32_t>& values, size_t idx) {
+  if (values.capacity() == 0) {
+    throw std::runtime_error("vector must have a nonzero capacity.");
+  }
+  if (!ReadIntDataImpl(values, idx)) {
+    return values.size() > 0;
+  }
+  return true;
+}
+
+size_t StreamsIndexedReaderBase::CountIntData() {
+  return CountIntDataImpl();
+}
+
+bool StreamsIndexedReaderBase::ReadOptionalIntData(std::optional<int32_t>& value, size_t idx) {
+  return ReadOptionalIntDataImpl(value, idx);
+}
+
+bool StreamsIndexedReaderBase::ReadOptionalIntData(std::vector<std::optional<int32_t>>& values, size_t idx) {
+  if (values.capacity() == 0) {
+    throw std::runtime_error("vector must have a nonzero capacity.");
+  }
+  if (!ReadOptionalIntDataImpl(values, idx)) {
+    return values.size() > 0;
+  }
+  return true;
+}
+
+size_t StreamsIndexedReaderBase::CountOptionalIntData() {
+  return CountOptionalIntDataImpl();
+}
+
+bool StreamsIndexedReaderBase::ReadRecordWithOptionalVectorData(test_model::RecordWithOptionalVector& value, size_t idx) {
+  return ReadRecordWithOptionalVectorDataImpl(value, idx);
+}
+
+bool StreamsIndexedReaderBase::ReadRecordWithOptionalVectorData(std::vector<test_model::RecordWithOptionalVector>& values, size_t idx) {
+  if (values.capacity() == 0) {
+    throw std::runtime_error("vector must have a nonzero capacity.");
+  }
+  if (!ReadRecordWithOptionalVectorDataImpl(values, idx)) {
+    return values.size() > 0;
+  }
+  return true;
+}
+
+size_t StreamsIndexedReaderBase::CountRecordWithOptionalVectorData() {
+  return CountRecordWithOptionalVectorDataImpl();
+}
+
+bool StreamsIndexedReaderBase::ReadFixedVector(std::array<int32_t, 3>& value, size_t idx) {
+  return ReadFixedVectorImpl(value, idx);
+}
+
+bool StreamsIndexedReaderBase::ReadFixedVector(std::vector<std::array<int32_t, 3>>& values, size_t idx) {
+  if (values.capacity() == 0) {
+    throw std::runtime_error("vector must have a nonzero capacity.");
+  }
+  if (!ReadFixedVectorImpl(values, idx)) {
+    return values.size() > 0;
+  }
+  return true;
+}
+
+size_t StreamsIndexedReaderBase::CountFixedVector() {
+  return CountFixedVectorImpl();
+}
+
+void StreamsIndexedReaderBase::InvalidState(uint8_t attempted) {
+  (void)(attempted);
+  return;
+}
+
+
+std::string FixedArraysWriterBase::schema_ = R"({"protocol":{"name":"FixedArrays","sequence":[{"name":"ints","type":{"array":{"items":"int32","dimensions":[{"length":2},{"length":3}]}}},{"name":"fixedSimpleRecordArray","type":{"array":{"items":"TestModel.SimpleRecord","dimensions":[{"length":3},{"length":2}]}}},{"name":"fixedRecordWithVlensArray","type":{"array":{"items":"TestModel.RecordWithVlens","dimensions":[{"length":2},{"length":2}]}}},{"name":"recordWithFixedArrays","type":"TestModel.RecordWithFixedArrays"},{"name":"namedArray","type":"TestModel.NamedFixedNDArray"}]},"types":[{"name":"NamedFixedNDArray","type":{"array":{"items":"int32","dimensions":[{"name":"dimA","length":2},{"name":"dimB","length":4}]}}},{"name":"RecordWithFixedArrays","fields":[{"name":"ints","type":{"array":{"items":"int32","dimensions":[{"length":2},{"length":3}]}}},{"name":"fixedSimpleRecordArray","type":{"array":{"items":"TestModel.SimpleRecord","dimensions":[{"length":3},{"length":2}]}}},{"name":"fixedRecordWithVlensArray","type":{"array":{"items":"TestModel.RecordWithVlens","dimensions":[{"length":2},{"length":2}]}}}]},{"name":"RecordWithVlens","fields":[{"name":"a","type":{"vector":{"items":"TestModel.SimpleRecord"}}},{"name":"b","type":"int32"},{"name":"c","type":"int32"}]},{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]}]})";
+
+std::vector<std::string> FixedArraysWriterBase::previous_schemas_ = {
+};
+
+std::string FixedArraysWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Current: return FixedArraysWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol FixedArrays.");
+  }
+
+}
+
+void FixedArraysWriterBase::WriteInts(yardl::FixedNDArray<int32_t, 2, 3> const& value) {
+  if (unlikely(state_ != 0)) {
+    InvalidState(0, false);
+  }
+
+  WriteIntsImpl(value);
+  state_ = 1;
+}
+
+void FixedArraysWriterBase::WriteFixedSimpleRecordArray(yardl::FixedNDArray<test_model::SimpleRecord, 3, 2> const& value) {
+  if (unlikely(state_ != 1)) {
+    InvalidState(1, false);
+  }
+
+  WriteFixedSimpleRecordArrayImpl(value);
+  state_ = 2;
+}
+
+void FixedArraysWriterBase::WriteFixedRecordWithVlensArray(yardl::FixedNDArray<test_model::RecordWithVlens, 2, 2> const& value) {
+  if (unlikely(state_ != 2)) {
+    InvalidState(2, false);
+  }
+
+  WriteFixedRecordWithVlensArrayImpl(value);
+  state_ = 3;
+}
+
+void FixedArraysWriterBase::WriteRecordWithFixedArrays(test_model::RecordWithFixedArrays const& value) {
+  if (unlikely(state_ != 3)) {
+    InvalidState(3, false);
+  }
+
+  WriteRecordWithFixedArraysImpl(value);
+  state_ = 4;
+}
+
+void FixedArraysWriterBase::WriteNamedArray(test_model::NamedFixedNDArray const& value) {
+  if (unlikely(state_ != 4)) {
+    InvalidState(4, false);
+  }
+
+  WriteNamedArrayImpl(value);
+  state_ = 5;
+}
+
+void FixedArraysWriterBase::Close() {
+  if (unlikely(state_ != 5)) {
+    InvalidState(5, false);
+  }
+
+  CloseImpl();
+}
+
+void FixedArraysWriterBase::InvalidState(uint8_t attempted, [[maybe_unused]] bool end) {
   std::string expected_method;
-  switch (current) {
+  switch (state_) {
   case 0: expected_method = "WriteInts()"; break;
   case 1: expected_method = "WriteFixedSimpleRecordArray()"; break;
   case 2: expected_method = "WriteFixedRecordWithVlensArray()"; break;
@@ -2477,88 +2806,6 @@ void FixedArraysWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool 
   throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
 }
 
-void FixedArraysReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
-  auto f = [](uint8_t i) -> std::string {
-    switch (i/2) {
-    case 0: return "ReadInts()";
-    case 1: return "ReadFixedSimpleRecordArray()";
-    case 2: return "ReadFixedRecordWithVlensArray()";
-    case 3: return "ReadRecordWithFixedArrays()";
-    case 4: return "ReadNamedArray()";
-    case 5: return "Close()";
-    default: return "<unknown>";
-    }
-  };
-  throw std::runtime_error("Expected call to " + f(current) + " but received call to " + f(attempted) + " instead.");
-}
-
-} // namespace 
-
-std::string FixedArraysWriterBase::schema_ = R"({"protocol":{"name":"FixedArrays","sequence":[{"name":"ints","type":{"array":{"items":"int32","dimensions":[{"length":2},{"length":3}]}}},{"name":"fixedSimpleRecordArray","type":{"array":{"items":"TestModel.SimpleRecord","dimensions":[{"length":3},{"length":2}]}}},{"name":"fixedRecordWithVlensArray","type":{"array":{"items":"TestModel.RecordWithVlens","dimensions":[{"length":2},{"length":2}]}}},{"name":"recordWithFixedArrays","type":"TestModel.RecordWithFixedArrays"},{"name":"namedArray","type":"TestModel.NamedFixedNDArray"}]},"types":[{"name":"NamedFixedNDArray","type":{"array":{"items":"int32","dimensions":[{"name":"dimA","length":2},{"name":"dimB","length":4}]}}},{"name":"RecordWithFixedArrays","fields":[{"name":"ints","type":{"array":{"items":"int32","dimensions":[{"length":2},{"length":3}]}}},{"name":"fixedSimpleRecordArray","type":{"array":{"items":"TestModel.SimpleRecord","dimensions":[{"length":3},{"length":2}]}}},{"name":"fixedRecordWithVlensArray","type":{"array":{"items":"TestModel.RecordWithVlens","dimensions":[{"length":2},{"length":2}]}}}]},{"name":"RecordWithVlens","fields":[{"name":"a","type":{"vector":{"items":"TestModel.SimpleRecord"}}},{"name":"b","type":"int32"},{"name":"c","type":"int32"}]},{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]}]})";
-
-std::vector<std::string> FixedArraysWriterBase::previous_schemas_ = {
-};
-
-std::string FixedArraysWriterBase::SchemaFromVersion(Version version) {
-  switch (version) {
-  case Version::Current: return FixedArraysWriterBase::schema_; break;
-  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol FixedArrays.");
-  }
-
-}
-void FixedArraysWriterBase::WriteInts(yardl::FixedNDArray<int32_t, 2, 3> const& value) {
-  if (unlikely(state_ != 0)) {
-    FixedArraysWriterBaseInvalidState(0, false, state_);
-  }
-
-  WriteIntsImpl(value);
-  state_ = 1;
-}
-
-void FixedArraysWriterBase::WriteFixedSimpleRecordArray(yardl::FixedNDArray<test_model::SimpleRecord, 3, 2> const& value) {
-  if (unlikely(state_ != 1)) {
-    FixedArraysWriterBaseInvalidState(1, false, state_);
-  }
-
-  WriteFixedSimpleRecordArrayImpl(value);
-  state_ = 2;
-}
-
-void FixedArraysWriterBase::WriteFixedRecordWithVlensArray(yardl::FixedNDArray<test_model::RecordWithVlens, 2, 2> const& value) {
-  if (unlikely(state_ != 2)) {
-    FixedArraysWriterBaseInvalidState(2, false, state_);
-  }
-
-  WriteFixedRecordWithVlensArrayImpl(value);
-  state_ = 3;
-}
-
-void FixedArraysWriterBase::WriteRecordWithFixedArrays(test_model::RecordWithFixedArrays const& value) {
-  if (unlikely(state_ != 3)) {
-    FixedArraysWriterBaseInvalidState(3, false, state_);
-  }
-
-  WriteRecordWithFixedArraysImpl(value);
-  state_ = 4;
-}
-
-void FixedArraysWriterBase::WriteNamedArray(test_model::NamedFixedNDArray const& value) {
-  if (unlikely(state_ != 4)) {
-    FixedArraysWriterBaseInvalidState(4, false, state_);
-  }
-
-  WriteNamedArrayImpl(value);
-  state_ = 5;
-}
-
-void FixedArraysWriterBase::Close() {
-  if (unlikely(state_ != 5)) {
-    FixedArraysWriterBaseInvalidState(5, false, state_);
-  }
-
-  CloseImpl();
-}
-
 std::string FixedArraysReaderBase::schema_ = FixedArraysWriterBase::schema_;
 
 std::vector<std::string> FixedArraysReaderBase::previous_schemas_ = FixedArraysWriterBase::previous_schemas_;
@@ -2569,9 +2816,10 @@ Version FixedArraysReaderBase::VersionFromSchema(std::string const& schema) {
   }
   throw std::runtime_error("The schema does not match any version supported by protocol FixedArrays.");
 }
+
 void FixedArraysReaderBase::ReadInts(yardl::FixedNDArray<int32_t, 2, 3>& value) {
   if (unlikely(state_ != 0)) {
-    FixedArraysReaderBaseInvalidState(0, state_);
+    InvalidState(0);
   }
 
   ReadIntsImpl(value);
@@ -2580,7 +2828,7 @@ void FixedArraysReaderBase::ReadInts(yardl::FixedNDArray<int32_t, 2, 3>& value) 
 
 void FixedArraysReaderBase::ReadFixedSimpleRecordArray(yardl::FixedNDArray<test_model::SimpleRecord, 3, 2>& value) {
   if (unlikely(state_ != 2)) {
-    FixedArraysReaderBaseInvalidState(2, state_);
+    InvalidState(2);
   }
 
   ReadFixedSimpleRecordArrayImpl(value);
@@ -2589,7 +2837,7 @@ void FixedArraysReaderBase::ReadFixedSimpleRecordArray(yardl::FixedNDArray<test_
 
 void FixedArraysReaderBase::ReadFixedRecordWithVlensArray(yardl::FixedNDArray<test_model::RecordWithVlens, 2, 2>& value) {
   if (unlikely(state_ != 4)) {
-    FixedArraysReaderBaseInvalidState(4, state_);
+    InvalidState(4);
   }
 
   ReadFixedRecordWithVlensArrayImpl(value);
@@ -2598,7 +2846,7 @@ void FixedArraysReaderBase::ReadFixedRecordWithVlensArray(yardl::FixedNDArray<te
 
 void FixedArraysReaderBase::ReadRecordWithFixedArrays(test_model::RecordWithFixedArrays& value) {
   if (unlikely(state_ != 6)) {
-    FixedArraysReaderBaseInvalidState(6, state_);
+    InvalidState(6);
   }
 
   ReadRecordWithFixedArraysImpl(value);
@@ -2607,7 +2855,7 @@ void FixedArraysReaderBase::ReadRecordWithFixedArrays(test_model::RecordWithFixe
 
 void FixedArraysReaderBase::ReadNamedArray(test_model::NamedFixedNDArray& value) {
   if (unlikely(state_ != 8)) {
-    FixedArraysReaderBaseInvalidState(8, state_);
+    InvalidState(8);
   }
 
   ReadNamedArrayImpl(value);
@@ -2616,11 +2864,12 @@ void FixedArraysReaderBase::ReadNamedArray(test_model::NamedFixedNDArray& value)
 
 void FixedArraysReaderBase::Close() {
   if (unlikely(state_ != 10)) {
-    FixedArraysReaderBaseInvalidState(10, state_);
+    InvalidState(10);
   }
 
   CloseImpl();
 }
+
 void FixedArraysReaderBase::CopyTo(FixedArraysWriterBase& writer) {
   {
     yardl::FixedNDArray<int32_t, 2, 3> value;
@@ -2649,10 +2898,132 @@ void FixedArraysReaderBase::CopyTo(FixedArraysWriterBase& writer) {
   }
 }
 
-namespace {
-void SubarraysWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end, uint8_t current) {
+void FixedArraysReaderBase::InvalidState(uint8_t attempted) {
+  auto f = [](uint8_t i) -> std::string {
+    switch (i/2) {
+    case 0: return "ReadInts()";
+    case 1: return "ReadFixedSimpleRecordArray()";
+    case 2: return "ReadFixedRecordWithVlensArray()";
+    case 3: return "ReadRecordWithFixedArrays()";
+    case 4: return "ReadNamedArray()";
+    case 5: return "Close()";
+    default: return "<unknown>";
+    }
+  };
+  throw std::runtime_error("Expected call to " + f(state_) + " but received call to " + f(attempted) + " instead.");
+}
+
+void FixedArraysIndexedReaderBase::InvalidState(uint8_t attempted) {
+  (void)(attempted);
+  return;
+}
+
+
+std::string SubarraysWriterBase::schema_ = R"({"protocol":{"name":"Subarrays","sequence":[{"name":"dynamicWithFixedIntSubarray","type":{"array":{"items":{"array":{"items":"int32","dimensions":[{"length":3}]}}}}},{"name":"dynamicWithFixedFloatSubarray","type":{"array":{"items":{"array":{"items":"float32","dimensions":[{"length":3}]}}}}},{"name":"knownDimCountWithFixedIntSubarray","type":{"array":{"items":{"array":{"items":"int32","dimensions":[{"length":3}]}},"dimensions":1}}},{"name":"knownDimCountWithFixedFloatSubarray","type":{"array":{"items":{"array":{"items":"float32","dimensions":[{"length":3}]}},"dimensions":1}}},{"name":"fixedWithFixedIntSubarray","type":{"array":{"items":{"array":{"items":"int32","dimensions":[{"length":3}]}},"dimensions":[{"length":2}]}}},{"name":"fixedWithFixedFloatSubarray","type":{"array":{"items":{"array":{"items":"float32","dimensions":[{"length":3}]}},"dimensions":[{"length":2}]}}},{"name":"nestedSubarray","type":{"array":{"items":{"array":{"items":{"array":{"items":"int32","dimensions":[{"length":3}]}},"dimensions":[{"length":2}]}}}}},{"name":"dynamicWithFixedVectorSubarray","type":{"array":{"items":{"vector":{"items":"int32","length":3}}}}},{"name":"genericSubarray","type":{"name":"TestModel.Image","typeArguments":[{"array":{"items":"int32","dimensions":[{"length":3}]}}]}}]},"types":[{"name":"Image","typeParameters":["T"],"type":{"array":{"items":"T","dimensions":[{"name":"x"},{"name":"y"}]}}},{"name":"Image","typeParameters":["T"],"type":{"name":"Image.Image","typeArguments":["T"]}}]})";
+
+std::vector<std::string> SubarraysWriterBase::previous_schemas_ = {
+};
+
+std::string SubarraysWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Current: return SubarraysWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol Subarrays.");
+  }
+
+}
+
+void SubarraysWriterBase::WriteDynamicWithFixedIntSubarray(yardl::DynamicNDArray<yardl::FixedNDArray<int32_t, 3>> const& value) {
+  if (unlikely(state_ != 0)) {
+    InvalidState(0, false);
+  }
+
+  WriteDynamicWithFixedIntSubarrayImpl(value);
+  state_ = 1;
+}
+
+void SubarraysWriterBase::WriteDynamicWithFixedFloatSubarray(yardl::DynamicNDArray<yardl::FixedNDArray<float, 3>> const& value) {
+  if (unlikely(state_ != 1)) {
+    InvalidState(1, false);
+  }
+
+  WriteDynamicWithFixedFloatSubarrayImpl(value);
+  state_ = 2;
+}
+
+void SubarraysWriterBase::WriteKnownDimCountWithFixedIntSubarray(yardl::NDArray<yardl::FixedNDArray<int32_t, 3>, 1> const& value) {
+  if (unlikely(state_ != 2)) {
+    InvalidState(2, false);
+  }
+
+  WriteKnownDimCountWithFixedIntSubarrayImpl(value);
+  state_ = 3;
+}
+
+void SubarraysWriterBase::WriteKnownDimCountWithFixedFloatSubarray(yardl::NDArray<yardl::FixedNDArray<float, 3>, 1> const& value) {
+  if (unlikely(state_ != 3)) {
+    InvalidState(3, false);
+  }
+
+  WriteKnownDimCountWithFixedFloatSubarrayImpl(value);
+  state_ = 4;
+}
+
+void SubarraysWriterBase::WriteFixedWithFixedIntSubarray(yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2> const& value) {
+  if (unlikely(state_ != 4)) {
+    InvalidState(4, false);
+  }
+
+  WriteFixedWithFixedIntSubarrayImpl(value);
+  state_ = 5;
+}
+
+void SubarraysWriterBase::WriteFixedWithFixedFloatSubarray(yardl::FixedNDArray<yardl::FixedNDArray<float, 3>, 2> const& value) {
+  if (unlikely(state_ != 5)) {
+    InvalidState(5, false);
+  }
+
+  WriteFixedWithFixedFloatSubarrayImpl(value);
+  state_ = 6;
+}
+
+void SubarraysWriterBase::WriteNestedSubarray(yardl::DynamicNDArray<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>> const& value) {
+  if (unlikely(state_ != 6)) {
+    InvalidState(6, false);
+  }
+
+  WriteNestedSubarrayImpl(value);
+  state_ = 7;
+}
+
+void SubarraysWriterBase::WriteDynamicWithFixedVectorSubarray(yardl::DynamicNDArray<std::array<int32_t, 3>> const& value) {
+  if (unlikely(state_ != 7)) {
+    InvalidState(7, false);
+  }
+
+  WriteDynamicWithFixedVectorSubarrayImpl(value);
+  state_ = 8;
+}
+
+void SubarraysWriterBase::WriteGenericSubarray(test_model::Image<yardl::FixedNDArray<int32_t, 3>> const& value) {
+  if (unlikely(state_ != 8)) {
+    InvalidState(8, false);
+  }
+
+  WriteGenericSubarrayImpl(value);
+  state_ = 9;
+}
+
+void SubarraysWriterBase::Close() {
+  if (unlikely(state_ != 9)) {
+    InvalidState(9, false);
+  }
+
+  CloseImpl();
+}
+
+void SubarraysWriterBase::InvalidState(uint8_t attempted, [[maybe_unused]] bool end) {
   std::string expected_method;
-  switch (current) {
+  switch (state_) {
   case 0: expected_method = "WriteDynamicWithFixedIntSubarray()"; break;
   case 1: expected_method = "WriteDynamicWithFixedFloatSubarray()"; break;
   case 2: expected_method = "WriteKnownDimCountWithFixedIntSubarray()"; break;
@@ -2679,128 +3050,6 @@ void SubarraysWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool en
   throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
 }
 
-void SubarraysReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
-  auto f = [](uint8_t i) -> std::string {
-    switch (i/2) {
-    case 0: return "ReadDynamicWithFixedIntSubarray()";
-    case 1: return "ReadDynamicWithFixedFloatSubarray()";
-    case 2: return "ReadKnownDimCountWithFixedIntSubarray()";
-    case 3: return "ReadKnownDimCountWithFixedFloatSubarray()";
-    case 4: return "ReadFixedWithFixedIntSubarray()";
-    case 5: return "ReadFixedWithFixedFloatSubarray()";
-    case 6: return "ReadNestedSubarray()";
-    case 7: return "ReadDynamicWithFixedVectorSubarray()";
-    case 8: return "ReadGenericSubarray()";
-    case 9: return "Close()";
-    default: return "<unknown>";
-    }
-  };
-  throw std::runtime_error("Expected call to " + f(current) + " but received call to " + f(attempted) + " instead.");
-}
-
-} // namespace 
-
-std::string SubarraysWriterBase::schema_ = R"({"protocol":{"name":"Subarrays","sequence":[{"name":"dynamicWithFixedIntSubarray","type":{"array":{"items":{"array":{"items":"int32","dimensions":[{"length":3}]}}}}},{"name":"dynamicWithFixedFloatSubarray","type":{"array":{"items":{"array":{"items":"float32","dimensions":[{"length":3}]}}}}},{"name":"knownDimCountWithFixedIntSubarray","type":{"array":{"items":{"array":{"items":"int32","dimensions":[{"length":3}]}},"dimensions":1}}},{"name":"knownDimCountWithFixedFloatSubarray","type":{"array":{"items":{"array":{"items":"float32","dimensions":[{"length":3}]}},"dimensions":1}}},{"name":"fixedWithFixedIntSubarray","type":{"array":{"items":{"array":{"items":"int32","dimensions":[{"length":3}]}},"dimensions":[{"length":2}]}}},{"name":"fixedWithFixedFloatSubarray","type":{"array":{"items":{"array":{"items":"float32","dimensions":[{"length":3}]}},"dimensions":[{"length":2}]}}},{"name":"nestedSubarray","type":{"array":{"items":{"array":{"items":{"array":{"items":"int32","dimensions":[{"length":3}]}},"dimensions":[{"length":2}]}}}}},{"name":"dynamicWithFixedVectorSubarray","type":{"array":{"items":{"vector":{"items":"int32","length":3}}}}},{"name":"genericSubarray","type":{"name":"TestModel.Image","typeArguments":[{"array":{"items":"int32","dimensions":[{"length":3}]}}]}}]},"types":[{"name":"Image","typeParameters":["T"],"type":{"array":{"items":"T","dimensions":[{"name":"x"},{"name":"y"}]}}},{"name":"Image","typeParameters":["T"],"type":{"name":"Image.Image","typeArguments":["T"]}}]})";
-
-std::vector<std::string> SubarraysWriterBase::previous_schemas_ = {
-};
-
-std::string SubarraysWriterBase::SchemaFromVersion(Version version) {
-  switch (version) {
-  case Version::Current: return SubarraysWriterBase::schema_; break;
-  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol Subarrays.");
-  }
-
-}
-void SubarraysWriterBase::WriteDynamicWithFixedIntSubarray(yardl::DynamicNDArray<yardl::FixedNDArray<int32_t, 3>> const& value) {
-  if (unlikely(state_ != 0)) {
-    SubarraysWriterBaseInvalidState(0, false, state_);
-  }
-
-  WriteDynamicWithFixedIntSubarrayImpl(value);
-  state_ = 1;
-}
-
-void SubarraysWriterBase::WriteDynamicWithFixedFloatSubarray(yardl::DynamicNDArray<yardl::FixedNDArray<float, 3>> const& value) {
-  if (unlikely(state_ != 1)) {
-    SubarraysWriterBaseInvalidState(1, false, state_);
-  }
-
-  WriteDynamicWithFixedFloatSubarrayImpl(value);
-  state_ = 2;
-}
-
-void SubarraysWriterBase::WriteKnownDimCountWithFixedIntSubarray(yardl::NDArray<yardl::FixedNDArray<int32_t, 3>, 1> const& value) {
-  if (unlikely(state_ != 2)) {
-    SubarraysWriterBaseInvalidState(2, false, state_);
-  }
-
-  WriteKnownDimCountWithFixedIntSubarrayImpl(value);
-  state_ = 3;
-}
-
-void SubarraysWriterBase::WriteKnownDimCountWithFixedFloatSubarray(yardl::NDArray<yardl::FixedNDArray<float, 3>, 1> const& value) {
-  if (unlikely(state_ != 3)) {
-    SubarraysWriterBaseInvalidState(3, false, state_);
-  }
-
-  WriteKnownDimCountWithFixedFloatSubarrayImpl(value);
-  state_ = 4;
-}
-
-void SubarraysWriterBase::WriteFixedWithFixedIntSubarray(yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2> const& value) {
-  if (unlikely(state_ != 4)) {
-    SubarraysWriterBaseInvalidState(4, false, state_);
-  }
-
-  WriteFixedWithFixedIntSubarrayImpl(value);
-  state_ = 5;
-}
-
-void SubarraysWriterBase::WriteFixedWithFixedFloatSubarray(yardl::FixedNDArray<yardl::FixedNDArray<float, 3>, 2> const& value) {
-  if (unlikely(state_ != 5)) {
-    SubarraysWriterBaseInvalidState(5, false, state_);
-  }
-
-  WriteFixedWithFixedFloatSubarrayImpl(value);
-  state_ = 6;
-}
-
-void SubarraysWriterBase::WriteNestedSubarray(yardl::DynamicNDArray<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>> const& value) {
-  if (unlikely(state_ != 6)) {
-    SubarraysWriterBaseInvalidState(6, false, state_);
-  }
-
-  WriteNestedSubarrayImpl(value);
-  state_ = 7;
-}
-
-void SubarraysWriterBase::WriteDynamicWithFixedVectorSubarray(yardl::DynamicNDArray<std::array<int32_t, 3>> const& value) {
-  if (unlikely(state_ != 7)) {
-    SubarraysWriterBaseInvalidState(7, false, state_);
-  }
-
-  WriteDynamicWithFixedVectorSubarrayImpl(value);
-  state_ = 8;
-}
-
-void SubarraysWriterBase::WriteGenericSubarray(test_model::Image<yardl::FixedNDArray<int32_t, 3>> const& value) {
-  if (unlikely(state_ != 8)) {
-    SubarraysWriterBaseInvalidState(8, false, state_);
-  }
-
-  WriteGenericSubarrayImpl(value);
-  state_ = 9;
-}
-
-void SubarraysWriterBase::Close() {
-  if (unlikely(state_ != 9)) {
-    SubarraysWriterBaseInvalidState(9, false, state_);
-  }
-
-  CloseImpl();
-}
-
 std::string SubarraysReaderBase::schema_ = SubarraysWriterBase::schema_;
 
 std::vector<std::string> SubarraysReaderBase::previous_schemas_ = SubarraysWriterBase::previous_schemas_;
@@ -2811,9 +3060,10 @@ Version SubarraysReaderBase::VersionFromSchema(std::string const& schema) {
   }
   throw std::runtime_error("The schema does not match any version supported by protocol Subarrays.");
 }
+
 void SubarraysReaderBase::ReadDynamicWithFixedIntSubarray(yardl::DynamicNDArray<yardl::FixedNDArray<int32_t, 3>>& value) {
   if (unlikely(state_ != 0)) {
-    SubarraysReaderBaseInvalidState(0, state_);
+    InvalidState(0);
   }
 
   ReadDynamicWithFixedIntSubarrayImpl(value);
@@ -2822,7 +3072,7 @@ void SubarraysReaderBase::ReadDynamicWithFixedIntSubarray(yardl::DynamicNDArray<
 
 void SubarraysReaderBase::ReadDynamicWithFixedFloatSubarray(yardl::DynamicNDArray<yardl::FixedNDArray<float, 3>>& value) {
   if (unlikely(state_ != 2)) {
-    SubarraysReaderBaseInvalidState(2, state_);
+    InvalidState(2);
   }
 
   ReadDynamicWithFixedFloatSubarrayImpl(value);
@@ -2831,7 +3081,7 @@ void SubarraysReaderBase::ReadDynamicWithFixedFloatSubarray(yardl::DynamicNDArra
 
 void SubarraysReaderBase::ReadKnownDimCountWithFixedIntSubarray(yardl::NDArray<yardl::FixedNDArray<int32_t, 3>, 1>& value) {
   if (unlikely(state_ != 4)) {
-    SubarraysReaderBaseInvalidState(4, state_);
+    InvalidState(4);
   }
 
   ReadKnownDimCountWithFixedIntSubarrayImpl(value);
@@ -2840,7 +3090,7 @@ void SubarraysReaderBase::ReadKnownDimCountWithFixedIntSubarray(yardl::NDArray<y
 
 void SubarraysReaderBase::ReadKnownDimCountWithFixedFloatSubarray(yardl::NDArray<yardl::FixedNDArray<float, 3>, 1>& value) {
   if (unlikely(state_ != 6)) {
-    SubarraysReaderBaseInvalidState(6, state_);
+    InvalidState(6);
   }
 
   ReadKnownDimCountWithFixedFloatSubarrayImpl(value);
@@ -2849,7 +3099,7 @@ void SubarraysReaderBase::ReadKnownDimCountWithFixedFloatSubarray(yardl::NDArray
 
 void SubarraysReaderBase::ReadFixedWithFixedIntSubarray(yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>& value) {
   if (unlikely(state_ != 8)) {
-    SubarraysReaderBaseInvalidState(8, state_);
+    InvalidState(8);
   }
 
   ReadFixedWithFixedIntSubarrayImpl(value);
@@ -2858,7 +3108,7 @@ void SubarraysReaderBase::ReadFixedWithFixedIntSubarray(yardl::FixedNDArray<yard
 
 void SubarraysReaderBase::ReadFixedWithFixedFloatSubarray(yardl::FixedNDArray<yardl::FixedNDArray<float, 3>, 2>& value) {
   if (unlikely(state_ != 10)) {
-    SubarraysReaderBaseInvalidState(10, state_);
+    InvalidState(10);
   }
 
   ReadFixedWithFixedFloatSubarrayImpl(value);
@@ -2867,7 +3117,7 @@ void SubarraysReaderBase::ReadFixedWithFixedFloatSubarray(yardl::FixedNDArray<ya
 
 void SubarraysReaderBase::ReadNestedSubarray(yardl::DynamicNDArray<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>>& value) {
   if (unlikely(state_ != 12)) {
-    SubarraysReaderBaseInvalidState(12, state_);
+    InvalidState(12);
   }
 
   ReadNestedSubarrayImpl(value);
@@ -2876,7 +3126,7 @@ void SubarraysReaderBase::ReadNestedSubarray(yardl::DynamicNDArray<yardl::FixedN
 
 void SubarraysReaderBase::ReadDynamicWithFixedVectorSubarray(yardl::DynamicNDArray<std::array<int32_t, 3>>& value) {
   if (unlikely(state_ != 14)) {
-    SubarraysReaderBaseInvalidState(14, state_);
+    InvalidState(14);
   }
 
   ReadDynamicWithFixedVectorSubarrayImpl(value);
@@ -2885,7 +3135,7 @@ void SubarraysReaderBase::ReadDynamicWithFixedVectorSubarray(yardl::DynamicNDArr
 
 void SubarraysReaderBase::ReadGenericSubarray(test_model::Image<yardl::FixedNDArray<int32_t, 3>>& value) {
   if (unlikely(state_ != 16)) {
-    SubarraysReaderBaseInvalidState(16, state_);
+    InvalidState(16);
   }
 
   ReadGenericSubarrayImpl(value);
@@ -2894,11 +3144,12 @@ void SubarraysReaderBase::ReadGenericSubarray(test_model::Image<yardl::FixedNDAr
 
 void SubarraysReaderBase::Close() {
   if (unlikely(state_ != 18)) {
-    SubarraysReaderBaseInvalidState(18, state_);
+    InvalidState(18);
   }
 
   CloseImpl();
 }
+
 void SubarraysReaderBase::CopyTo(SubarraysWriterBase& writer) {
   {
     yardl::DynamicNDArray<yardl::FixedNDArray<int32_t, 3>> value;
@@ -2947,35 +3198,30 @@ void SubarraysReaderBase::CopyTo(SubarraysWriterBase& writer) {
   }
 }
 
-namespace {
-void SubarraysInRecordsWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end, uint8_t current) {
-  std::string expected_method;
-  switch (current) {
-  case 0: expected_method = "WriteWithFixedSubarrays()"; break;
-  case 1: expected_method = "WriteWithVlenSubarrays()"; break;
-  }
-  std::string attempted_method;
-  switch (attempted) {
-  case 0: attempted_method = "WriteWithFixedSubarrays()"; break;
-  case 1: attempted_method = "WriteWithVlenSubarrays()"; break;
-  case 2: attempted_method = "Close()"; break;
-  }
-  throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
-}
-
-void SubarraysInRecordsReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
+void SubarraysReaderBase::InvalidState(uint8_t attempted) {
   auto f = [](uint8_t i) -> std::string {
     switch (i/2) {
-    case 0: return "ReadWithFixedSubarrays()";
-    case 1: return "ReadWithVlenSubarrays()";
-    case 2: return "Close()";
+    case 0: return "ReadDynamicWithFixedIntSubarray()";
+    case 1: return "ReadDynamicWithFixedFloatSubarray()";
+    case 2: return "ReadKnownDimCountWithFixedIntSubarray()";
+    case 3: return "ReadKnownDimCountWithFixedFloatSubarray()";
+    case 4: return "ReadFixedWithFixedIntSubarray()";
+    case 5: return "ReadFixedWithFixedFloatSubarray()";
+    case 6: return "ReadNestedSubarray()";
+    case 7: return "ReadDynamicWithFixedVectorSubarray()";
+    case 8: return "ReadGenericSubarray()";
+    case 9: return "Close()";
     default: return "<unknown>";
     }
   };
-  throw std::runtime_error("Expected call to " + f(current) + " but received call to " + f(attempted) + " instead.");
+  throw std::runtime_error("Expected call to " + f(state_) + " but received call to " + f(attempted) + " instead.");
 }
 
-} // namespace 
+void SubarraysIndexedReaderBase::InvalidState(uint8_t attempted) {
+  (void)(attempted);
+  return;
+}
+
 
 std::string SubarraysInRecordsWriterBase::schema_ = R"({"protocol":{"name":"SubarraysInRecords","sequence":[{"name":"withFixedSubarrays","type":{"array":{"items":"TestModel.RecordWithFixedCollections"}}},{"name":"withVlenSubarrays","type":{"array":{"items":"TestModel.RecordWithVlenCollections"}}}]},"types":[{"name":"RecordWithFixedCollections","fields":[{"name":"fixedVector","type":{"vector":{"items":"int32","length":3}}},{"name":"fixedArray","type":{"array":{"items":"int32","dimensions":[{"length":2},{"length":3}]}}}]},{"name":"RecordWithVlenCollections","fields":[{"name":"vector","type":{"vector":{"items":"int32"}}},{"name":"array","type":{"array":{"items":"int32","dimensions":2}}}]}]})";
 
@@ -2989,9 +3235,10 @@ std::string SubarraysInRecordsWriterBase::SchemaFromVersion(Version version) {
   }
 
 }
+
 void SubarraysInRecordsWriterBase::WriteWithFixedSubarrays(yardl::DynamicNDArray<test_model::RecordWithFixedCollections> const& value) {
   if (unlikely(state_ != 0)) {
-    SubarraysInRecordsWriterBaseInvalidState(0, false, state_);
+    InvalidState(0, false);
   }
 
   WriteWithFixedSubarraysImpl(value);
@@ -3000,7 +3247,7 @@ void SubarraysInRecordsWriterBase::WriteWithFixedSubarrays(yardl::DynamicNDArray
 
 void SubarraysInRecordsWriterBase::WriteWithVlenSubarrays(yardl::DynamicNDArray<test_model::RecordWithVlenCollections> const& value) {
   if (unlikely(state_ != 1)) {
-    SubarraysInRecordsWriterBaseInvalidState(1, false, state_);
+    InvalidState(1, false);
   }
 
   WriteWithVlenSubarraysImpl(value);
@@ -3009,10 +3256,25 @@ void SubarraysInRecordsWriterBase::WriteWithVlenSubarrays(yardl::DynamicNDArray<
 
 void SubarraysInRecordsWriterBase::Close() {
   if (unlikely(state_ != 2)) {
-    SubarraysInRecordsWriterBaseInvalidState(2, false, state_);
+    InvalidState(2, false);
   }
 
   CloseImpl();
+}
+
+void SubarraysInRecordsWriterBase::InvalidState(uint8_t attempted, [[maybe_unused]] bool end) {
+  std::string expected_method;
+  switch (state_) {
+  case 0: expected_method = "WriteWithFixedSubarrays()"; break;
+  case 1: expected_method = "WriteWithVlenSubarrays()"; break;
+  }
+  std::string attempted_method;
+  switch (attempted) {
+  case 0: attempted_method = "WriteWithFixedSubarrays()"; break;
+  case 1: attempted_method = "WriteWithVlenSubarrays()"; break;
+  case 2: attempted_method = "Close()"; break;
+  }
+  throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
 }
 
 std::string SubarraysInRecordsReaderBase::schema_ = SubarraysInRecordsWriterBase::schema_;
@@ -3025,9 +3287,10 @@ Version SubarraysInRecordsReaderBase::VersionFromSchema(std::string const& schem
   }
   throw std::runtime_error("The schema does not match any version supported by protocol SubarraysInRecords.");
 }
+
 void SubarraysInRecordsReaderBase::ReadWithFixedSubarrays(yardl::DynamicNDArray<test_model::RecordWithFixedCollections>& value) {
   if (unlikely(state_ != 0)) {
-    SubarraysInRecordsReaderBaseInvalidState(0, state_);
+    InvalidState(0);
   }
 
   ReadWithFixedSubarraysImpl(value);
@@ -3036,7 +3299,7 @@ void SubarraysInRecordsReaderBase::ReadWithFixedSubarrays(yardl::DynamicNDArray<
 
 void SubarraysInRecordsReaderBase::ReadWithVlenSubarrays(yardl::DynamicNDArray<test_model::RecordWithVlenCollections>& value) {
   if (unlikely(state_ != 2)) {
-    SubarraysInRecordsReaderBaseInvalidState(2, state_);
+    InvalidState(2);
   }
 
   ReadWithVlenSubarraysImpl(value);
@@ -3045,11 +3308,12 @@ void SubarraysInRecordsReaderBase::ReadWithVlenSubarrays(yardl::DynamicNDArray<t
 
 void SubarraysInRecordsReaderBase::Close() {
   if (unlikely(state_ != 4)) {
-    SubarraysInRecordsReaderBaseInvalidState(4, state_);
+    InvalidState(4);
   }
 
   CloseImpl();
 }
+
 void SubarraysInRecordsReaderBase::CopyTo(SubarraysInRecordsWriterBase& writer) {
   {
     yardl::DynamicNDArray<test_model::RecordWithFixedCollections> value;
@@ -3063,10 +3327,93 @@ void SubarraysInRecordsReaderBase::CopyTo(SubarraysInRecordsWriterBase& writer) 
   }
 }
 
-namespace {
-void NDArraysWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end, uint8_t current) {
+void SubarraysInRecordsReaderBase::InvalidState(uint8_t attempted) {
+  auto f = [](uint8_t i) -> std::string {
+    switch (i/2) {
+    case 0: return "ReadWithFixedSubarrays()";
+    case 1: return "ReadWithVlenSubarrays()";
+    case 2: return "Close()";
+    default: return "<unknown>";
+    }
+  };
+  throw std::runtime_error("Expected call to " + f(state_) + " but received call to " + f(attempted) + " instead.");
+}
+
+void SubarraysInRecordsIndexedReaderBase::InvalidState(uint8_t attempted) {
+  (void)(attempted);
+  return;
+}
+
+
+std::string NDArraysWriterBase::schema_ = R"({"protocol":{"name":"NDArrays","sequence":[{"name":"ints","type":{"array":{"items":"int32","dimensions":2}}},{"name":"simpleRecordArray","type":{"array":{"items":"TestModel.SimpleRecord","dimensions":2}}},{"name":"recordWithVlensArray","type":{"array":{"items":"TestModel.RecordWithVlens","dimensions":2}}},{"name":"recordWithNDArrays","type":"TestModel.RecordWithNDArrays"},{"name":"namedArray","type":"TestModel.NamedNDArray"}]},"types":[{"name":"NamedNDArray","type":{"array":{"items":"int32","dimensions":[{"name":"dimA"},{"name":"dimB"}]}}},{"name":"RecordWithNDArrays","fields":[{"name":"ints","type":{"array":{"items":"int32","dimensions":2}}},{"name":"fixedSimpleRecordArray","type":{"array":{"items":"TestModel.SimpleRecord","dimensions":2}}},{"name":"fixedRecordWithVlensArray","type":{"array":{"items":"TestModel.RecordWithVlens","dimensions":2}}}]},{"name":"RecordWithVlens","fields":[{"name":"a","type":{"vector":{"items":"TestModel.SimpleRecord"}}},{"name":"b","type":"int32"},{"name":"c","type":"int32"}]},{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]}]})";
+
+std::vector<std::string> NDArraysWriterBase::previous_schemas_ = {
+};
+
+std::string NDArraysWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Current: return NDArraysWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol NDArrays.");
+  }
+
+}
+
+void NDArraysWriterBase::WriteInts(yardl::NDArray<int32_t, 2> const& value) {
+  if (unlikely(state_ != 0)) {
+    InvalidState(0, false);
+  }
+
+  WriteIntsImpl(value);
+  state_ = 1;
+}
+
+void NDArraysWriterBase::WriteSimpleRecordArray(yardl::NDArray<test_model::SimpleRecord, 2> const& value) {
+  if (unlikely(state_ != 1)) {
+    InvalidState(1, false);
+  }
+
+  WriteSimpleRecordArrayImpl(value);
+  state_ = 2;
+}
+
+void NDArraysWriterBase::WriteRecordWithVlensArray(yardl::NDArray<test_model::RecordWithVlens, 2> const& value) {
+  if (unlikely(state_ != 2)) {
+    InvalidState(2, false);
+  }
+
+  WriteRecordWithVlensArrayImpl(value);
+  state_ = 3;
+}
+
+void NDArraysWriterBase::WriteRecordWithNDArrays(test_model::RecordWithNDArrays const& value) {
+  if (unlikely(state_ != 3)) {
+    InvalidState(3, false);
+  }
+
+  WriteRecordWithNDArraysImpl(value);
+  state_ = 4;
+}
+
+void NDArraysWriterBase::WriteNamedArray(test_model::NamedNDArray const& value) {
+  if (unlikely(state_ != 4)) {
+    InvalidState(4, false);
+  }
+
+  WriteNamedArrayImpl(value);
+  state_ = 5;
+}
+
+void NDArraysWriterBase::Close() {
+  if (unlikely(state_ != 5)) {
+    InvalidState(5, false);
+  }
+
+  CloseImpl();
+}
+
+void NDArraysWriterBase::InvalidState(uint8_t attempted, [[maybe_unused]] bool end) {
   std::string expected_method;
-  switch (current) {
+  switch (state_) {
   case 0: expected_method = "WriteInts()"; break;
   case 1: expected_method = "WriteSimpleRecordArray()"; break;
   case 2: expected_method = "WriteRecordWithVlensArray()"; break;
@@ -3085,88 +3432,6 @@ void NDArraysWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end
   throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
 }
 
-void NDArraysReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
-  auto f = [](uint8_t i) -> std::string {
-    switch (i/2) {
-    case 0: return "ReadInts()";
-    case 1: return "ReadSimpleRecordArray()";
-    case 2: return "ReadRecordWithVlensArray()";
-    case 3: return "ReadRecordWithNDArrays()";
-    case 4: return "ReadNamedArray()";
-    case 5: return "Close()";
-    default: return "<unknown>";
-    }
-  };
-  throw std::runtime_error("Expected call to " + f(current) + " but received call to " + f(attempted) + " instead.");
-}
-
-} // namespace 
-
-std::string NDArraysWriterBase::schema_ = R"({"protocol":{"name":"NDArrays","sequence":[{"name":"ints","type":{"array":{"items":"int32","dimensions":2}}},{"name":"simpleRecordArray","type":{"array":{"items":"TestModel.SimpleRecord","dimensions":2}}},{"name":"recordWithVlensArray","type":{"array":{"items":"TestModel.RecordWithVlens","dimensions":2}}},{"name":"recordWithNDArrays","type":"TestModel.RecordWithNDArrays"},{"name":"namedArray","type":"TestModel.NamedNDArray"}]},"types":[{"name":"NamedNDArray","type":{"array":{"items":"int32","dimensions":[{"name":"dimA"},{"name":"dimB"}]}}},{"name":"RecordWithNDArrays","fields":[{"name":"ints","type":{"array":{"items":"int32","dimensions":2}}},{"name":"fixedSimpleRecordArray","type":{"array":{"items":"TestModel.SimpleRecord","dimensions":2}}},{"name":"fixedRecordWithVlensArray","type":{"array":{"items":"TestModel.RecordWithVlens","dimensions":2}}}]},{"name":"RecordWithVlens","fields":[{"name":"a","type":{"vector":{"items":"TestModel.SimpleRecord"}}},{"name":"b","type":"int32"},{"name":"c","type":"int32"}]},{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]}]})";
-
-std::vector<std::string> NDArraysWriterBase::previous_schemas_ = {
-};
-
-std::string NDArraysWriterBase::SchemaFromVersion(Version version) {
-  switch (version) {
-  case Version::Current: return NDArraysWriterBase::schema_; break;
-  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol NDArrays.");
-  }
-
-}
-void NDArraysWriterBase::WriteInts(yardl::NDArray<int32_t, 2> const& value) {
-  if (unlikely(state_ != 0)) {
-    NDArraysWriterBaseInvalidState(0, false, state_);
-  }
-
-  WriteIntsImpl(value);
-  state_ = 1;
-}
-
-void NDArraysWriterBase::WriteSimpleRecordArray(yardl::NDArray<test_model::SimpleRecord, 2> const& value) {
-  if (unlikely(state_ != 1)) {
-    NDArraysWriterBaseInvalidState(1, false, state_);
-  }
-
-  WriteSimpleRecordArrayImpl(value);
-  state_ = 2;
-}
-
-void NDArraysWriterBase::WriteRecordWithVlensArray(yardl::NDArray<test_model::RecordWithVlens, 2> const& value) {
-  if (unlikely(state_ != 2)) {
-    NDArraysWriterBaseInvalidState(2, false, state_);
-  }
-
-  WriteRecordWithVlensArrayImpl(value);
-  state_ = 3;
-}
-
-void NDArraysWriterBase::WriteRecordWithNDArrays(test_model::RecordWithNDArrays const& value) {
-  if (unlikely(state_ != 3)) {
-    NDArraysWriterBaseInvalidState(3, false, state_);
-  }
-
-  WriteRecordWithNDArraysImpl(value);
-  state_ = 4;
-}
-
-void NDArraysWriterBase::WriteNamedArray(test_model::NamedNDArray const& value) {
-  if (unlikely(state_ != 4)) {
-    NDArraysWriterBaseInvalidState(4, false, state_);
-  }
-
-  WriteNamedArrayImpl(value);
-  state_ = 5;
-}
-
-void NDArraysWriterBase::Close() {
-  if (unlikely(state_ != 5)) {
-    NDArraysWriterBaseInvalidState(5, false, state_);
-  }
-
-  CloseImpl();
-}
-
 std::string NDArraysReaderBase::schema_ = NDArraysWriterBase::schema_;
 
 std::vector<std::string> NDArraysReaderBase::previous_schemas_ = NDArraysWriterBase::previous_schemas_;
@@ -3177,9 +3442,10 @@ Version NDArraysReaderBase::VersionFromSchema(std::string const& schema) {
   }
   throw std::runtime_error("The schema does not match any version supported by protocol NDArrays.");
 }
+
 void NDArraysReaderBase::ReadInts(yardl::NDArray<int32_t, 2>& value) {
   if (unlikely(state_ != 0)) {
-    NDArraysReaderBaseInvalidState(0, state_);
+    InvalidState(0);
   }
 
   ReadIntsImpl(value);
@@ -3188,7 +3454,7 @@ void NDArraysReaderBase::ReadInts(yardl::NDArray<int32_t, 2>& value) {
 
 void NDArraysReaderBase::ReadSimpleRecordArray(yardl::NDArray<test_model::SimpleRecord, 2>& value) {
   if (unlikely(state_ != 2)) {
-    NDArraysReaderBaseInvalidState(2, state_);
+    InvalidState(2);
   }
 
   ReadSimpleRecordArrayImpl(value);
@@ -3197,7 +3463,7 @@ void NDArraysReaderBase::ReadSimpleRecordArray(yardl::NDArray<test_model::Simple
 
 void NDArraysReaderBase::ReadRecordWithVlensArray(yardl::NDArray<test_model::RecordWithVlens, 2>& value) {
   if (unlikely(state_ != 4)) {
-    NDArraysReaderBaseInvalidState(4, state_);
+    InvalidState(4);
   }
 
   ReadRecordWithVlensArrayImpl(value);
@@ -3206,7 +3472,7 @@ void NDArraysReaderBase::ReadRecordWithVlensArray(yardl::NDArray<test_model::Rec
 
 void NDArraysReaderBase::ReadRecordWithNDArrays(test_model::RecordWithNDArrays& value) {
   if (unlikely(state_ != 6)) {
-    NDArraysReaderBaseInvalidState(6, state_);
+    InvalidState(6);
   }
 
   ReadRecordWithNDArraysImpl(value);
@@ -3215,7 +3481,7 @@ void NDArraysReaderBase::ReadRecordWithNDArrays(test_model::RecordWithNDArrays& 
 
 void NDArraysReaderBase::ReadNamedArray(test_model::NamedNDArray& value) {
   if (unlikely(state_ != 8)) {
-    NDArraysReaderBaseInvalidState(8, state_);
+    InvalidState(8);
   }
 
   ReadNamedArrayImpl(value);
@@ -3224,11 +3490,12 @@ void NDArraysReaderBase::ReadNamedArray(test_model::NamedNDArray& value) {
 
 void NDArraysReaderBase::Close() {
   if (unlikely(state_ != 10)) {
-    NDArraysReaderBaseInvalidState(10, state_);
+    InvalidState(10);
   }
 
   CloseImpl();
 }
+
 void NDArraysReaderBase::CopyTo(NDArraysWriterBase& writer) {
   {
     yardl::NDArray<int32_t, 2> value;
@@ -3257,10 +3524,87 @@ void NDArraysReaderBase::CopyTo(NDArraysWriterBase& writer) {
   }
 }
 
-namespace {
-void NDArraysSingleDimensionWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end, uint8_t current) {
+void NDArraysReaderBase::InvalidState(uint8_t attempted) {
+  auto f = [](uint8_t i) -> std::string {
+    switch (i/2) {
+    case 0: return "ReadInts()";
+    case 1: return "ReadSimpleRecordArray()";
+    case 2: return "ReadRecordWithVlensArray()";
+    case 3: return "ReadRecordWithNDArrays()";
+    case 4: return "ReadNamedArray()";
+    case 5: return "Close()";
+    default: return "<unknown>";
+    }
+  };
+  throw std::runtime_error("Expected call to " + f(state_) + " but received call to " + f(attempted) + " instead.");
+}
+
+void NDArraysIndexedReaderBase::InvalidState(uint8_t attempted) {
+  (void)(attempted);
+  return;
+}
+
+
+std::string NDArraysSingleDimensionWriterBase::schema_ = R"({"protocol":{"name":"NDArraysSingleDimension","sequence":[{"name":"ints","type":{"array":{"items":"int32","dimensions":1}}},{"name":"simpleRecordArray","type":{"array":{"items":"TestModel.SimpleRecord","dimensions":1}}},{"name":"recordWithVlensArray","type":{"array":{"items":"TestModel.RecordWithVlens","dimensions":1}}},{"name":"recordWithNDArrays","type":"TestModel.RecordWithNDArraysSingleDimension"}]},"types":[{"name":"RecordWithNDArraysSingleDimension","fields":[{"name":"ints","type":{"array":{"items":"int32","dimensions":1}}},{"name":"fixedSimpleRecordArray","type":{"array":{"items":"TestModel.SimpleRecord","dimensions":1}}},{"name":"fixedRecordWithVlensArray","type":{"array":{"items":"TestModel.RecordWithVlens","dimensions":1}}}]},{"name":"RecordWithVlens","fields":[{"name":"a","type":{"vector":{"items":"TestModel.SimpleRecord"}}},{"name":"b","type":"int32"},{"name":"c","type":"int32"}]},{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]}]})";
+
+std::vector<std::string> NDArraysSingleDimensionWriterBase::previous_schemas_ = {
+};
+
+std::string NDArraysSingleDimensionWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Current: return NDArraysSingleDimensionWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol NDArraysSingleDimension.");
+  }
+
+}
+
+void NDArraysSingleDimensionWriterBase::WriteInts(yardl::NDArray<int32_t, 1> const& value) {
+  if (unlikely(state_ != 0)) {
+    InvalidState(0, false);
+  }
+
+  WriteIntsImpl(value);
+  state_ = 1;
+}
+
+void NDArraysSingleDimensionWriterBase::WriteSimpleRecordArray(yardl::NDArray<test_model::SimpleRecord, 1> const& value) {
+  if (unlikely(state_ != 1)) {
+    InvalidState(1, false);
+  }
+
+  WriteSimpleRecordArrayImpl(value);
+  state_ = 2;
+}
+
+void NDArraysSingleDimensionWriterBase::WriteRecordWithVlensArray(yardl::NDArray<test_model::RecordWithVlens, 1> const& value) {
+  if (unlikely(state_ != 2)) {
+    InvalidState(2, false);
+  }
+
+  WriteRecordWithVlensArrayImpl(value);
+  state_ = 3;
+}
+
+void NDArraysSingleDimensionWriterBase::WriteRecordWithNDArrays(test_model::RecordWithNDArraysSingleDimension const& value) {
+  if (unlikely(state_ != 3)) {
+    InvalidState(3, false);
+  }
+
+  WriteRecordWithNDArraysImpl(value);
+  state_ = 4;
+}
+
+void NDArraysSingleDimensionWriterBase::Close() {
+  if (unlikely(state_ != 4)) {
+    InvalidState(4, false);
+  }
+
+  CloseImpl();
+}
+
+void NDArraysSingleDimensionWriterBase::InvalidState(uint8_t attempted, [[maybe_unused]] bool end) {
   std::string expected_method;
-  switch (current) {
+  switch (state_) {
   case 0: expected_method = "WriteInts()"; break;
   case 1: expected_method = "WriteSimpleRecordArray()"; break;
   case 2: expected_method = "WriteRecordWithVlensArray()"; break;
@@ -3277,78 +3621,6 @@ void NDArraysSingleDimensionWriterBaseInvalidState(uint8_t attempted, [[maybe_un
   throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
 }
 
-void NDArraysSingleDimensionReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
-  auto f = [](uint8_t i) -> std::string {
-    switch (i/2) {
-    case 0: return "ReadInts()";
-    case 1: return "ReadSimpleRecordArray()";
-    case 2: return "ReadRecordWithVlensArray()";
-    case 3: return "ReadRecordWithNDArrays()";
-    case 4: return "Close()";
-    default: return "<unknown>";
-    }
-  };
-  throw std::runtime_error("Expected call to " + f(current) + " but received call to " + f(attempted) + " instead.");
-}
-
-} // namespace 
-
-std::string NDArraysSingleDimensionWriterBase::schema_ = R"({"protocol":{"name":"NDArraysSingleDimension","sequence":[{"name":"ints","type":{"array":{"items":"int32","dimensions":1}}},{"name":"simpleRecordArray","type":{"array":{"items":"TestModel.SimpleRecord","dimensions":1}}},{"name":"recordWithVlensArray","type":{"array":{"items":"TestModel.RecordWithVlens","dimensions":1}}},{"name":"recordWithNDArrays","type":"TestModel.RecordWithNDArraysSingleDimension"}]},"types":[{"name":"RecordWithNDArraysSingleDimension","fields":[{"name":"ints","type":{"array":{"items":"int32","dimensions":1}}},{"name":"fixedSimpleRecordArray","type":{"array":{"items":"TestModel.SimpleRecord","dimensions":1}}},{"name":"fixedRecordWithVlensArray","type":{"array":{"items":"TestModel.RecordWithVlens","dimensions":1}}}]},{"name":"RecordWithVlens","fields":[{"name":"a","type":{"vector":{"items":"TestModel.SimpleRecord"}}},{"name":"b","type":"int32"},{"name":"c","type":"int32"}]},{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]}]})";
-
-std::vector<std::string> NDArraysSingleDimensionWriterBase::previous_schemas_ = {
-};
-
-std::string NDArraysSingleDimensionWriterBase::SchemaFromVersion(Version version) {
-  switch (version) {
-  case Version::Current: return NDArraysSingleDimensionWriterBase::schema_; break;
-  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol NDArraysSingleDimension.");
-  }
-
-}
-void NDArraysSingleDimensionWriterBase::WriteInts(yardl::NDArray<int32_t, 1> const& value) {
-  if (unlikely(state_ != 0)) {
-    NDArraysSingleDimensionWriterBaseInvalidState(0, false, state_);
-  }
-
-  WriteIntsImpl(value);
-  state_ = 1;
-}
-
-void NDArraysSingleDimensionWriterBase::WriteSimpleRecordArray(yardl::NDArray<test_model::SimpleRecord, 1> const& value) {
-  if (unlikely(state_ != 1)) {
-    NDArraysSingleDimensionWriterBaseInvalidState(1, false, state_);
-  }
-
-  WriteSimpleRecordArrayImpl(value);
-  state_ = 2;
-}
-
-void NDArraysSingleDimensionWriterBase::WriteRecordWithVlensArray(yardl::NDArray<test_model::RecordWithVlens, 1> const& value) {
-  if (unlikely(state_ != 2)) {
-    NDArraysSingleDimensionWriterBaseInvalidState(2, false, state_);
-  }
-
-  WriteRecordWithVlensArrayImpl(value);
-  state_ = 3;
-}
-
-void NDArraysSingleDimensionWriterBase::WriteRecordWithNDArrays(test_model::RecordWithNDArraysSingleDimension const& value) {
-  if (unlikely(state_ != 3)) {
-    NDArraysSingleDimensionWriterBaseInvalidState(3, false, state_);
-  }
-
-  WriteRecordWithNDArraysImpl(value);
-  state_ = 4;
-}
-
-void NDArraysSingleDimensionWriterBase::Close() {
-  if (unlikely(state_ != 4)) {
-    NDArraysSingleDimensionWriterBaseInvalidState(4, false, state_);
-  }
-
-  CloseImpl();
-}
-
 std::string NDArraysSingleDimensionReaderBase::schema_ = NDArraysSingleDimensionWriterBase::schema_;
 
 std::vector<std::string> NDArraysSingleDimensionReaderBase::previous_schemas_ = NDArraysSingleDimensionWriterBase::previous_schemas_;
@@ -3359,9 +3631,10 @@ Version NDArraysSingleDimensionReaderBase::VersionFromSchema(std::string const& 
   }
   throw std::runtime_error("The schema does not match any version supported by protocol NDArraysSingleDimension.");
 }
+
 void NDArraysSingleDimensionReaderBase::ReadInts(yardl::NDArray<int32_t, 1>& value) {
   if (unlikely(state_ != 0)) {
-    NDArraysSingleDimensionReaderBaseInvalidState(0, state_);
+    InvalidState(0);
   }
 
   ReadIntsImpl(value);
@@ -3370,7 +3643,7 @@ void NDArraysSingleDimensionReaderBase::ReadInts(yardl::NDArray<int32_t, 1>& val
 
 void NDArraysSingleDimensionReaderBase::ReadSimpleRecordArray(yardl::NDArray<test_model::SimpleRecord, 1>& value) {
   if (unlikely(state_ != 2)) {
-    NDArraysSingleDimensionReaderBaseInvalidState(2, state_);
+    InvalidState(2);
   }
 
   ReadSimpleRecordArrayImpl(value);
@@ -3379,7 +3652,7 @@ void NDArraysSingleDimensionReaderBase::ReadSimpleRecordArray(yardl::NDArray<tes
 
 void NDArraysSingleDimensionReaderBase::ReadRecordWithVlensArray(yardl::NDArray<test_model::RecordWithVlens, 1>& value) {
   if (unlikely(state_ != 4)) {
-    NDArraysSingleDimensionReaderBaseInvalidState(4, state_);
+    InvalidState(4);
   }
 
   ReadRecordWithVlensArrayImpl(value);
@@ -3388,7 +3661,7 @@ void NDArraysSingleDimensionReaderBase::ReadRecordWithVlensArray(yardl::NDArray<
 
 void NDArraysSingleDimensionReaderBase::ReadRecordWithNDArrays(test_model::RecordWithNDArraysSingleDimension& value) {
   if (unlikely(state_ != 6)) {
-    NDArraysSingleDimensionReaderBaseInvalidState(6, state_);
+    InvalidState(6);
   }
 
   ReadRecordWithNDArraysImpl(value);
@@ -3397,11 +3670,12 @@ void NDArraysSingleDimensionReaderBase::ReadRecordWithNDArrays(test_model::Recor
 
 void NDArraysSingleDimensionReaderBase::Close() {
   if (unlikely(state_ != 8)) {
-    NDArraysSingleDimensionReaderBaseInvalidState(8, state_);
+    InvalidState(8);
   }
 
   CloseImpl();
 }
+
 void NDArraysSingleDimensionReaderBase::CopyTo(NDArraysSingleDimensionWriterBase& writer) {
   {
     yardl::NDArray<int32_t, 1> value;
@@ -3425,10 +3699,86 @@ void NDArraysSingleDimensionReaderBase::CopyTo(NDArraysSingleDimensionWriterBase
   }
 }
 
-namespace {
-void DynamicNDArraysWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end, uint8_t current) {
+void NDArraysSingleDimensionReaderBase::InvalidState(uint8_t attempted) {
+  auto f = [](uint8_t i) -> std::string {
+    switch (i/2) {
+    case 0: return "ReadInts()";
+    case 1: return "ReadSimpleRecordArray()";
+    case 2: return "ReadRecordWithVlensArray()";
+    case 3: return "ReadRecordWithNDArrays()";
+    case 4: return "Close()";
+    default: return "<unknown>";
+    }
+  };
+  throw std::runtime_error("Expected call to " + f(state_) + " but received call to " + f(attempted) + " instead.");
+}
+
+void NDArraysSingleDimensionIndexedReaderBase::InvalidState(uint8_t attempted) {
+  (void)(attempted);
+  return;
+}
+
+
+std::string DynamicNDArraysWriterBase::schema_ = R"({"protocol":{"name":"DynamicNDArrays","sequence":[{"name":"ints","type":{"array":{"items":"int32"}}},{"name":"simpleRecordArray","type":{"array":{"items":"TestModel.SimpleRecord"}}},{"name":"recordWithVlensArray","type":{"array":{"items":"TestModel.RecordWithVlens"}}},{"name":"recordWithDynamicNDArrays","type":"TestModel.RecordWithDynamicNDArrays"}]},"types":[{"name":"IntArray","type":{"array":{"items":"int32"}}},{"name":"RecordWithDynamicNDArrays","fields":[{"name":"ints","type":"TestModel.IntArray"},{"name":"simpleRecordArray","type":{"array":{"items":"TestModel.SimpleRecord"}}},{"name":"recordWithVlensArray","type":{"array":{"items":"TestModel.RecordWithVlens"}}}]},{"name":"RecordWithVlens","fields":[{"name":"a","type":{"vector":{"items":"TestModel.SimpleRecord"}}},{"name":"b","type":"int32"},{"name":"c","type":"int32"}]},{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]}]})";
+
+std::vector<std::string> DynamicNDArraysWriterBase::previous_schemas_ = {
+};
+
+std::string DynamicNDArraysWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Current: return DynamicNDArraysWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol DynamicNDArrays.");
+  }
+
+}
+
+void DynamicNDArraysWriterBase::WriteInts(yardl::DynamicNDArray<int32_t> const& value) {
+  if (unlikely(state_ != 0)) {
+    InvalidState(0, false);
+  }
+
+  WriteIntsImpl(value);
+  state_ = 1;
+}
+
+void DynamicNDArraysWriterBase::WriteSimpleRecordArray(yardl::DynamicNDArray<test_model::SimpleRecord> const& value) {
+  if (unlikely(state_ != 1)) {
+    InvalidState(1, false);
+  }
+
+  WriteSimpleRecordArrayImpl(value);
+  state_ = 2;
+}
+
+void DynamicNDArraysWriterBase::WriteRecordWithVlensArray(yardl::DynamicNDArray<test_model::RecordWithVlens> const& value) {
+  if (unlikely(state_ != 2)) {
+    InvalidState(2, false);
+  }
+
+  WriteRecordWithVlensArrayImpl(value);
+  state_ = 3;
+}
+
+void DynamicNDArraysWriterBase::WriteRecordWithDynamicNDArrays(test_model::RecordWithDynamicNDArrays const& value) {
+  if (unlikely(state_ != 3)) {
+    InvalidState(3, false);
+  }
+
+  WriteRecordWithDynamicNDArraysImpl(value);
+  state_ = 4;
+}
+
+void DynamicNDArraysWriterBase::Close() {
+  if (unlikely(state_ != 4)) {
+    InvalidState(4, false);
+  }
+
+  CloseImpl();
+}
+
+void DynamicNDArraysWriterBase::InvalidState(uint8_t attempted, [[maybe_unused]] bool end) {
   std::string expected_method;
-  switch (current) {
+  switch (state_) {
   case 0: expected_method = "WriteInts()"; break;
   case 1: expected_method = "WriteSimpleRecordArray()"; break;
   case 2: expected_method = "WriteRecordWithVlensArray()"; break;
@@ -3445,78 +3795,6 @@ void DynamicNDArraysWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] b
   throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
 }
 
-void DynamicNDArraysReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
-  auto f = [](uint8_t i) -> std::string {
-    switch (i/2) {
-    case 0: return "ReadInts()";
-    case 1: return "ReadSimpleRecordArray()";
-    case 2: return "ReadRecordWithVlensArray()";
-    case 3: return "ReadRecordWithDynamicNDArrays()";
-    case 4: return "Close()";
-    default: return "<unknown>";
-    }
-  };
-  throw std::runtime_error("Expected call to " + f(current) + " but received call to " + f(attempted) + " instead.");
-}
-
-} // namespace 
-
-std::string DynamicNDArraysWriterBase::schema_ = R"({"protocol":{"name":"DynamicNDArrays","sequence":[{"name":"ints","type":{"array":{"items":"int32"}}},{"name":"simpleRecordArray","type":{"array":{"items":"TestModel.SimpleRecord"}}},{"name":"recordWithVlensArray","type":{"array":{"items":"TestModel.RecordWithVlens"}}},{"name":"recordWithDynamicNDArrays","type":"TestModel.RecordWithDynamicNDArrays"}]},"types":[{"name":"IntArray","type":{"array":{"items":"int32"}}},{"name":"RecordWithDynamicNDArrays","fields":[{"name":"ints","type":"TestModel.IntArray"},{"name":"simpleRecordArray","type":{"array":{"items":"TestModel.SimpleRecord"}}},{"name":"recordWithVlensArray","type":{"array":{"items":"TestModel.RecordWithVlens"}}}]},{"name":"RecordWithVlens","fields":[{"name":"a","type":{"vector":{"items":"TestModel.SimpleRecord"}}},{"name":"b","type":"int32"},{"name":"c","type":"int32"}]},{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]}]})";
-
-std::vector<std::string> DynamicNDArraysWriterBase::previous_schemas_ = {
-};
-
-std::string DynamicNDArraysWriterBase::SchemaFromVersion(Version version) {
-  switch (version) {
-  case Version::Current: return DynamicNDArraysWriterBase::schema_; break;
-  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol DynamicNDArrays.");
-  }
-
-}
-void DynamicNDArraysWriterBase::WriteInts(yardl::DynamicNDArray<int32_t> const& value) {
-  if (unlikely(state_ != 0)) {
-    DynamicNDArraysWriterBaseInvalidState(0, false, state_);
-  }
-
-  WriteIntsImpl(value);
-  state_ = 1;
-}
-
-void DynamicNDArraysWriterBase::WriteSimpleRecordArray(yardl::DynamicNDArray<test_model::SimpleRecord> const& value) {
-  if (unlikely(state_ != 1)) {
-    DynamicNDArraysWriterBaseInvalidState(1, false, state_);
-  }
-
-  WriteSimpleRecordArrayImpl(value);
-  state_ = 2;
-}
-
-void DynamicNDArraysWriterBase::WriteRecordWithVlensArray(yardl::DynamicNDArray<test_model::RecordWithVlens> const& value) {
-  if (unlikely(state_ != 2)) {
-    DynamicNDArraysWriterBaseInvalidState(2, false, state_);
-  }
-
-  WriteRecordWithVlensArrayImpl(value);
-  state_ = 3;
-}
-
-void DynamicNDArraysWriterBase::WriteRecordWithDynamicNDArrays(test_model::RecordWithDynamicNDArrays const& value) {
-  if (unlikely(state_ != 3)) {
-    DynamicNDArraysWriterBaseInvalidState(3, false, state_);
-  }
-
-  WriteRecordWithDynamicNDArraysImpl(value);
-  state_ = 4;
-}
-
-void DynamicNDArraysWriterBase::Close() {
-  if (unlikely(state_ != 4)) {
-    DynamicNDArraysWriterBaseInvalidState(4, false, state_);
-  }
-
-  CloseImpl();
-}
-
 std::string DynamicNDArraysReaderBase::schema_ = DynamicNDArraysWriterBase::schema_;
 
 std::vector<std::string> DynamicNDArraysReaderBase::previous_schemas_ = DynamicNDArraysWriterBase::previous_schemas_;
@@ -3527,9 +3805,10 @@ Version DynamicNDArraysReaderBase::VersionFromSchema(std::string const& schema) 
   }
   throw std::runtime_error("The schema does not match any version supported by protocol DynamicNDArrays.");
 }
+
 void DynamicNDArraysReaderBase::ReadInts(yardl::DynamicNDArray<int32_t>& value) {
   if (unlikely(state_ != 0)) {
-    DynamicNDArraysReaderBaseInvalidState(0, state_);
+    InvalidState(0);
   }
 
   ReadIntsImpl(value);
@@ -3538,7 +3817,7 @@ void DynamicNDArraysReaderBase::ReadInts(yardl::DynamicNDArray<int32_t>& value) 
 
 void DynamicNDArraysReaderBase::ReadSimpleRecordArray(yardl::DynamicNDArray<test_model::SimpleRecord>& value) {
   if (unlikely(state_ != 2)) {
-    DynamicNDArraysReaderBaseInvalidState(2, state_);
+    InvalidState(2);
   }
 
   ReadSimpleRecordArrayImpl(value);
@@ -3547,7 +3826,7 @@ void DynamicNDArraysReaderBase::ReadSimpleRecordArray(yardl::DynamicNDArray<test
 
 void DynamicNDArraysReaderBase::ReadRecordWithVlensArray(yardl::DynamicNDArray<test_model::RecordWithVlens>& value) {
   if (unlikely(state_ != 4)) {
-    DynamicNDArraysReaderBaseInvalidState(4, state_);
+    InvalidState(4);
   }
 
   ReadRecordWithVlensArrayImpl(value);
@@ -3556,7 +3835,7 @@ void DynamicNDArraysReaderBase::ReadRecordWithVlensArray(yardl::DynamicNDArray<t
 
 void DynamicNDArraysReaderBase::ReadRecordWithDynamicNDArrays(test_model::RecordWithDynamicNDArrays& value) {
   if (unlikely(state_ != 6)) {
-    DynamicNDArraysReaderBaseInvalidState(6, state_);
+    InvalidState(6);
   }
 
   ReadRecordWithDynamicNDArraysImpl(value);
@@ -3565,11 +3844,12 @@ void DynamicNDArraysReaderBase::ReadRecordWithDynamicNDArrays(test_model::Record
 
 void DynamicNDArraysReaderBase::Close() {
   if (unlikely(state_ != 8)) {
-    DynamicNDArraysReaderBaseInvalidState(8, state_);
+    InvalidState(8);
   }
 
   CloseImpl();
 }
+
 void DynamicNDArraysReaderBase::CopyTo(DynamicNDArraysWriterBase& writer) {
   {
     yardl::DynamicNDArray<int32_t> value;
@@ -3593,35 +3873,25 @@ void DynamicNDArraysReaderBase::CopyTo(DynamicNDArraysWriterBase& writer) {
   }
 }
 
-namespace {
-void MultiDArraysWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end, uint8_t current) {
-  std::string expected_method;
-  switch (current) {
-  case 0: expected_method = "WriteImages() or EndImages()"; break;
-  case 1: expected_method = "WriteFrames() or EndFrames()"; break;
-  }
-  std::string attempted_method;
-  switch (attempted) {
-  case 0: attempted_method = end ? "EndImages()" : "WriteImages()"; break;
-  case 1: attempted_method = end ? "EndFrames()" : "WriteFrames()"; break;
-  case 2: attempted_method = "Close()"; break;
-  }
-  throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
-}
-
-void MultiDArraysReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
+void DynamicNDArraysReaderBase::InvalidState(uint8_t attempted) {
   auto f = [](uint8_t i) -> std::string {
     switch (i/2) {
-    case 0: return "ReadImages()";
-    case 1: return "ReadFrames()";
-    case 2: return "Close()";
+    case 0: return "ReadInts()";
+    case 1: return "ReadSimpleRecordArray()";
+    case 2: return "ReadRecordWithVlensArray()";
+    case 3: return "ReadRecordWithDynamicNDArrays()";
+    case 4: return "Close()";
     default: return "<unknown>";
     }
   };
-  throw std::runtime_error("Expected call to " + f(current) + " but received call to " + f(attempted) + " instead.");
+  throw std::runtime_error("Expected call to " + f(state_) + " but received call to " + f(attempted) + " instead.");
 }
 
-} // namespace 
+void DynamicNDArraysIndexedReaderBase::InvalidState(uint8_t attempted) {
+  (void)(attempted);
+  return;
+}
+
 
 std::string MultiDArraysWriterBase::schema_ = R"({"protocol":{"name":"MultiDArrays","sequence":[{"name":"images","type":{"stream":{"items":{"array":{"items":"float32","dimensions":[{"name":"ch"},{"name":"z"},{"name":"y"},{"name":"x"}]}}}}},{"name":"frames","type":{"stream":{"items":{"array":{"items":"float32","dimensions":[{"name":"ch","length":1},{"name":"z","length":1},{"name":"y","length":64},{"name":"x","length":32}]}}}}}]},"types":null})";
 
@@ -3635,9 +3905,10 @@ std::string MultiDArraysWriterBase::SchemaFromVersion(Version version) {
   }
 
 }
+
 void MultiDArraysWriterBase::WriteImages(yardl::NDArray<float, 4> const& value) {
   if (unlikely(state_ != 0)) {
-    MultiDArraysWriterBaseInvalidState(0, false, state_);
+    InvalidState(0, false);
   }
 
   WriteImagesImpl(value);
@@ -3645,7 +3916,7 @@ void MultiDArraysWriterBase::WriteImages(yardl::NDArray<float, 4> const& value) 
 
 void MultiDArraysWriterBase::WriteImages(std::vector<yardl::NDArray<float, 4>> const& values) {
   if (unlikely(state_ != 0)) {
-    MultiDArraysWriterBaseInvalidState(0, false, state_);
+    InvalidState(0, false);
   }
 
   WriteImagesImpl(values);
@@ -3653,7 +3924,7 @@ void MultiDArraysWriterBase::WriteImages(std::vector<yardl::NDArray<float, 4>> c
 
 void MultiDArraysWriterBase::EndImages() {
   if (unlikely(state_ != 0)) {
-    MultiDArraysWriterBaseInvalidState(0, true, state_);
+    InvalidState(0, true);
   }
 
   EndImagesImpl();
@@ -3669,7 +3940,7 @@ void MultiDArraysWriterBase::WriteImagesImpl(std::vector<yardl::NDArray<float, 4
 
 void MultiDArraysWriterBase::WriteFrames(yardl::FixedNDArray<float, 1, 1, 64, 32> const& value) {
   if (unlikely(state_ != 1)) {
-    MultiDArraysWriterBaseInvalidState(1, false, state_);
+    InvalidState(1, false);
   }
 
   WriteFramesImpl(value);
@@ -3677,7 +3948,7 @@ void MultiDArraysWriterBase::WriteFrames(yardl::FixedNDArray<float, 1, 1, 64, 32
 
 void MultiDArraysWriterBase::WriteFrames(std::vector<yardl::FixedNDArray<float, 1, 1, 64, 32>> const& values) {
   if (unlikely(state_ != 1)) {
-    MultiDArraysWriterBaseInvalidState(1, false, state_);
+    InvalidState(1, false);
   }
 
   WriteFramesImpl(values);
@@ -3685,7 +3956,7 @@ void MultiDArraysWriterBase::WriteFrames(std::vector<yardl::FixedNDArray<float, 
 
 void MultiDArraysWriterBase::EndFrames() {
   if (unlikely(state_ != 1)) {
-    MultiDArraysWriterBaseInvalidState(1, true, state_);
+    InvalidState(1, true);
   }
 
   EndFramesImpl();
@@ -3701,10 +3972,25 @@ void MultiDArraysWriterBase::WriteFramesImpl(std::vector<yardl::FixedNDArray<flo
 
 void MultiDArraysWriterBase::Close() {
   if (unlikely(state_ != 2)) {
-    MultiDArraysWriterBaseInvalidState(2, false, state_);
+    InvalidState(2, false);
   }
 
   CloseImpl();
+}
+
+void MultiDArraysWriterBase::InvalidState(uint8_t attempted, [[maybe_unused]] bool end) {
+  std::string expected_method;
+  switch (state_) {
+  case 0: expected_method = "WriteImages() or EndImages()"; break;
+  case 1: expected_method = "WriteFrames() or EndFrames()"; break;
+  }
+  std::string attempted_method;
+  switch (attempted) {
+  case 0: attempted_method = end ? "EndImages()" : "WriteImages()"; break;
+  case 1: attempted_method = end ? "EndFrames()" : "WriteFrames()"; break;
+  case 2: attempted_method = "Close()"; break;
+  }
+  throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
 }
 
 std::string MultiDArraysReaderBase::schema_ = MultiDArraysWriterBase::schema_;
@@ -3717,13 +4003,14 @@ Version MultiDArraysReaderBase::VersionFromSchema(std::string const& schema) {
   }
   throw std::runtime_error("The schema does not match any version supported by protocol MultiDArrays.");
 }
+
 bool MultiDArraysReaderBase::ReadImages(yardl::NDArray<float, 4>& value) {
   if (unlikely(state_ != 0)) {
     if (state_ == 1) {
       state_ = 2;
       return false;
     }
-    MultiDArraysReaderBaseInvalidState(0, state_);
+    InvalidState(0);
   }
 
   bool result = ReadImagesImpl(value);
@@ -3743,7 +4030,7 @@ bool MultiDArraysReaderBase::ReadImages(std::vector<yardl::NDArray<float, 4>>& v
       values.clear();
       return false;
     }
-    MultiDArraysReaderBaseInvalidState(0, state_);
+    InvalidState(0);
   }
 
   if (!ReadImagesImpl(values)) {
@@ -3780,7 +4067,7 @@ bool MultiDArraysReaderBase::ReadFrames(yardl::FixedNDArray<float, 1, 1, 64, 32>
     if (state_ == 1) {
       state_ = 2;
     } else {
-      MultiDArraysReaderBaseInvalidState(2, state_);
+      InvalidState(2);
     }
   }
 
@@ -3804,7 +4091,7 @@ bool MultiDArraysReaderBase::ReadFrames(std::vector<yardl::FixedNDArray<float, 1
     if (state_ == 1) {
       state_ = 2;
     } else {
-      MultiDArraysReaderBaseInvalidState(2, state_);
+      InvalidState(2);
     }
   }
 
@@ -3838,12 +4125,13 @@ void MultiDArraysReaderBase::Close() {
     if (state_ == 3) {
       state_ = 4;
     } else {
-      MultiDArraysReaderBaseInvalidState(4, state_);
+      InvalidState(4);
     }
   }
 
   CloseImpl();
 }
+
 void MultiDArraysReaderBase::CopyTo(MultiDArraysWriterBase& writer, size_t images_buffer_size, size_t frames_buffer_size) {
   if (images_buffer_size > 1) {
     std::vector<yardl::NDArray<float, 4>> values;
@@ -3875,35 +4163,59 @@ void MultiDArraysReaderBase::CopyTo(MultiDArraysWriterBase& writer, size_t image
   }
 }
 
-namespace {
-void ComplexArraysWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end, uint8_t current) {
-  std::string expected_method;
-  switch (current) {
-  case 0: expected_method = "WriteFloats()"; break;
-  case 1: expected_method = "WriteDoubles()"; break;
-  }
-  std::string attempted_method;
-  switch (attempted) {
-  case 0: attempted_method = "WriteFloats()"; break;
-  case 1: attempted_method = "WriteDoubles()"; break;
-  case 2: attempted_method = "Close()"; break;
-  }
-  throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
-}
-
-void ComplexArraysReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
+void MultiDArraysReaderBase::InvalidState(uint8_t attempted) {
   auto f = [](uint8_t i) -> std::string {
     switch (i/2) {
-    case 0: return "ReadFloats()";
-    case 1: return "ReadDoubles()";
+    case 0: return "ReadImages()";
+    case 1: return "ReadFrames()";
     case 2: return "Close()";
     default: return "<unknown>";
     }
   };
-  throw std::runtime_error("Expected call to " + f(current) + " but received call to " + f(attempted) + " instead.");
+  throw std::runtime_error("Expected call to " + f(state_) + " but received call to " + f(attempted) + " instead.");
 }
 
-} // namespace 
+bool MultiDArraysIndexedReaderBase::ReadImages(yardl::NDArray<float, 4>& value, size_t idx) {
+  return ReadImagesImpl(value, idx);
+}
+
+bool MultiDArraysIndexedReaderBase::ReadImages(std::vector<yardl::NDArray<float, 4>>& values, size_t idx) {
+  if (values.capacity() == 0) {
+    throw std::runtime_error("vector must have a nonzero capacity.");
+  }
+  if (!ReadImagesImpl(values, idx)) {
+    return values.size() > 0;
+  }
+  return true;
+}
+
+size_t MultiDArraysIndexedReaderBase::CountImages() {
+  return CountImagesImpl();
+}
+
+bool MultiDArraysIndexedReaderBase::ReadFrames(yardl::FixedNDArray<float, 1, 1, 64, 32>& value, size_t idx) {
+  return ReadFramesImpl(value, idx);
+}
+
+bool MultiDArraysIndexedReaderBase::ReadFrames(std::vector<yardl::FixedNDArray<float, 1, 1, 64, 32>>& values, size_t idx) {
+  if (values.capacity() == 0) {
+    throw std::runtime_error("vector must have a nonzero capacity.");
+  }
+  if (!ReadFramesImpl(values, idx)) {
+    return values.size() > 0;
+  }
+  return true;
+}
+
+size_t MultiDArraysIndexedReaderBase::CountFrames() {
+  return CountFramesImpl();
+}
+
+void MultiDArraysIndexedReaderBase::InvalidState(uint8_t attempted) {
+  (void)(attempted);
+  return;
+}
+
 
 std::string ComplexArraysWriterBase::schema_ = R"({"protocol":{"name":"ComplexArrays","sequence":[{"name":"floats","type":{"array":{"items":"complexfloat32"}}},{"name":"doubles","type":{"array":{"items":"complexfloat64","dimensions":2}}}]},"types":null})";
 
@@ -3917,9 +4229,10 @@ std::string ComplexArraysWriterBase::SchemaFromVersion(Version version) {
   }
 
 }
+
 void ComplexArraysWriterBase::WriteFloats(yardl::DynamicNDArray<std::complex<float>> const& value) {
   if (unlikely(state_ != 0)) {
-    ComplexArraysWriterBaseInvalidState(0, false, state_);
+    InvalidState(0, false);
   }
 
   WriteFloatsImpl(value);
@@ -3928,7 +4241,7 @@ void ComplexArraysWriterBase::WriteFloats(yardl::DynamicNDArray<std::complex<flo
 
 void ComplexArraysWriterBase::WriteDoubles(yardl::NDArray<std::complex<double>, 2> const& value) {
   if (unlikely(state_ != 1)) {
-    ComplexArraysWriterBaseInvalidState(1, false, state_);
+    InvalidState(1, false);
   }
 
   WriteDoublesImpl(value);
@@ -3937,10 +4250,25 @@ void ComplexArraysWriterBase::WriteDoubles(yardl::NDArray<std::complex<double>, 
 
 void ComplexArraysWriterBase::Close() {
   if (unlikely(state_ != 2)) {
-    ComplexArraysWriterBaseInvalidState(2, false, state_);
+    InvalidState(2, false);
   }
 
   CloseImpl();
+}
+
+void ComplexArraysWriterBase::InvalidState(uint8_t attempted, [[maybe_unused]] bool end) {
+  std::string expected_method;
+  switch (state_) {
+  case 0: expected_method = "WriteFloats()"; break;
+  case 1: expected_method = "WriteDoubles()"; break;
+  }
+  std::string attempted_method;
+  switch (attempted) {
+  case 0: attempted_method = "WriteFloats()"; break;
+  case 1: attempted_method = "WriteDoubles()"; break;
+  case 2: attempted_method = "Close()"; break;
+  }
+  throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
 }
 
 std::string ComplexArraysReaderBase::schema_ = ComplexArraysWriterBase::schema_;
@@ -3953,9 +4281,10 @@ Version ComplexArraysReaderBase::VersionFromSchema(std::string const& schema) {
   }
   throw std::runtime_error("The schema does not match any version supported by protocol ComplexArrays.");
 }
+
 void ComplexArraysReaderBase::ReadFloats(yardl::DynamicNDArray<std::complex<float>>& value) {
   if (unlikely(state_ != 0)) {
-    ComplexArraysReaderBaseInvalidState(0, state_);
+    InvalidState(0);
   }
 
   ReadFloatsImpl(value);
@@ -3964,7 +4293,7 @@ void ComplexArraysReaderBase::ReadFloats(yardl::DynamicNDArray<std::complex<floa
 
 void ComplexArraysReaderBase::ReadDoubles(yardl::NDArray<std::complex<double>, 2>& value) {
   if (unlikely(state_ != 2)) {
-    ComplexArraysReaderBaseInvalidState(2, state_);
+    InvalidState(2);
   }
 
   ReadDoublesImpl(value);
@@ -3973,11 +4302,12 @@ void ComplexArraysReaderBase::ReadDoubles(yardl::NDArray<std::complex<double>, 2
 
 void ComplexArraysReaderBase::Close() {
   if (unlikely(state_ != 4)) {
-    ComplexArraysReaderBaseInvalidState(4, state_);
+    InvalidState(4);
   }
 
   CloseImpl();
 }
+
 void ComplexArraysReaderBase::CopyTo(ComplexArraysWriterBase& writer) {
   {
     yardl::DynamicNDArray<std::complex<float>> value;
@@ -3991,10 +4321,93 @@ void ComplexArraysReaderBase::CopyTo(ComplexArraysWriterBase& writer) {
   }
 }
 
-namespace {
-void MapsWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end, uint8_t current) {
+void ComplexArraysReaderBase::InvalidState(uint8_t attempted) {
+  auto f = [](uint8_t i) -> std::string {
+    switch (i/2) {
+    case 0: return "ReadFloats()";
+    case 1: return "ReadDoubles()";
+    case 2: return "Close()";
+    default: return "<unknown>";
+    }
+  };
+  throw std::runtime_error("Expected call to " + f(state_) + " but received call to " + f(attempted) + " instead.");
+}
+
+void ComplexArraysIndexedReaderBase::InvalidState(uint8_t attempted) {
+  (void)(attempted);
+  return;
+}
+
+
+std::string MapsWriterBase::schema_ = R"({"protocol":{"name":"Maps","sequence":[{"name":"stringToInt","type":{"map":{"keys":"string","values":"int32"}}},{"name":"intToString","type":{"map":{"keys":"int32","values":"string"}}},{"name":"stringToUnion","type":{"map":{"keys":"string","values":[{"tag":"string","type":"string"},{"tag":"int32","type":"int32"}]}}},{"name":"aliasedGeneric","type":{"name":"BasicTypes.AliasedMap","typeArguments":["string","int32"]}},{"name":"records","type":{"vector":{"items":"TestModel.RecordWithMaps"}}}]},"types":[{"name":"AliasedMap","typeParameters":["K","V"],"type":{"map":{"keys":"K","values":"V"}}},{"name":"RecordWithMaps","fields":[{"name":"set1","type":{"map":{"keys":"uint32","values":"uint32"}}},{"name":"set2","type":{"map":{"keys":"int32","values":"bool"}}}]}]})";
+
+std::vector<std::string> MapsWriterBase::previous_schemas_ = {
+};
+
+std::string MapsWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Current: return MapsWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol Maps.");
+  }
+
+}
+
+void MapsWriterBase::WriteStringToInt(std::unordered_map<std::string, int32_t> const& value) {
+  if (unlikely(state_ != 0)) {
+    InvalidState(0, false);
+  }
+
+  WriteStringToIntImpl(value);
+  state_ = 1;
+}
+
+void MapsWriterBase::WriteIntToString(std::unordered_map<int32_t, std::string> const& value) {
+  if (unlikely(state_ != 1)) {
+    InvalidState(1, false);
+  }
+
+  WriteIntToStringImpl(value);
+  state_ = 2;
+}
+
+void MapsWriterBase::WriteStringToUnion(std::unordered_map<std::string, std::variant<std::string, int32_t>> const& value) {
+  if (unlikely(state_ != 2)) {
+    InvalidState(2, false);
+  }
+
+  WriteStringToUnionImpl(value);
+  state_ = 3;
+}
+
+void MapsWriterBase::WriteAliasedGeneric(basic_types::AliasedMap<std::string, int32_t> const& value) {
+  if (unlikely(state_ != 3)) {
+    InvalidState(3, false);
+  }
+
+  WriteAliasedGenericImpl(value);
+  state_ = 4;
+}
+
+void MapsWriterBase::WriteRecords(std::vector<test_model::RecordWithMaps> const& value) {
+  if (unlikely(state_ != 4)) {
+    InvalidState(4, false);
+  }
+
+  WriteRecordsImpl(value);
+  state_ = 5;
+}
+
+void MapsWriterBase::Close() {
+  if (unlikely(state_ != 5)) {
+    InvalidState(5, false);
+  }
+
+  CloseImpl();
+}
+
+void MapsWriterBase::InvalidState(uint8_t attempted, [[maybe_unused]] bool end) {
   std::string expected_method;
-  switch (current) {
+  switch (state_) {
   case 0: expected_method = "WriteStringToInt()"; break;
   case 1: expected_method = "WriteIntToString()"; break;
   case 2: expected_method = "WriteStringToUnion()"; break;
@@ -4013,88 +4426,6 @@ void MapsWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end, ui
   throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
 }
 
-void MapsReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
-  auto f = [](uint8_t i) -> std::string {
-    switch (i/2) {
-    case 0: return "ReadStringToInt()";
-    case 1: return "ReadIntToString()";
-    case 2: return "ReadStringToUnion()";
-    case 3: return "ReadAliasedGeneric()";
-    case 4: return "ReadRecords()";
-    case 5: return "Close()";
-    default: return "<unknown>";
-    }
-  };
-  throw std::runtime_error("Expected call to " + f(current) + " but received call to " + f(attempted) + " instead.");
-}
-
-} // namespace 
-
-std::string MapsWriterBase::schema_ = R"({"protocol":{"name":"Maps","sequence":[{"name":"stringToInt","type":{"map":{"keys":"string","values":"int32"}}},{"name":"intToString","type":{"map":{"keys":"int32","values":"string"}}},{"name":"stringToUnion","type":{"map":{"keys":"string","values":[{"tag":"string","type":"string"},{"tag":"int32","type":"int32"}]}}},{"name":"aliasedGeneric","type":{"name":"BasicTypes.AliasedMap","typeArguments":["string","int32"]}},{"name":"records","type":{"vector":{"items":"TestModel.RecordWithMaps"}}}]},"types":[{"name":"AliasedMap","typeParameters":["K","V"],"type":{"map":{"keys":"K","values":"V"}}},{"name":"RecordWithMaps","fields":[{"name":"set1","type":{"map":{"keys":"uint32","values":"uint32"}}},{"name":"set2","type":{"map":{"keys":"int32","values":"bool"}}}]}]})";
-
-std::vector<std::string> MapsWriterBase::previous_schemas_ = {
-};
-
-std::string MapsWriterBase::SchemaFromVersion(Version version) {
-  switch (version) {
-  case Version::Current: return MapsWriterBase::schema_; break;
-  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol Maps.");
-  }
-
-}
-void MapsWriterBase::WriteStringToInt(std::unordered_map<std::string, int32_t> const& value) {
-  if (unlikely(state_ != 0)) {
-    MapsWriterBaseInvalidState(0, false, state_);
-  }
-
-  WriteStringToIntImpl(value);
-  state_ = 1;
-}
-
-void MapsWriterBase::WriteIntToString(std::unordered_map<int32_t, std::string> const& value) {
-  if (unlikely(state_ != 1)) {
-    MapsWriterBaseInvalidState(1, false, state_);
-  }
-
-  WriteIntToStringImpl(value);
-  state_ = 2;
-}
-
-void MapsWriterBase::WriteStringToUnion(std::unordered_map<std::string, std::variant<std::string, int32_t>> const& value) {
-  if (unlikely(state_ != 2)) {
-    MapsWriterBaseInvalidState(2, false, state_);
-  }
-
-  WriteStringToUnionImpl(value);
-  state_ = 3;
-}
-
-void MapsWriterBase::WriteAliasedGeneric(basic_types::AliasedMap<std::string, int32_t> const& value) {
-  if (unlikely(state_ != 3)) {
-    MapsWriterBaseInvalidState(3, false, state_);
-  }
-
-  WriteAliasedGenericImpl(value);
-  state_ = 4;
-}
-
-void MapsWriterBase::WriteRecords(std::vector<test_model::RecordWithMaps> const& value) {
-  if (unlikely(state_ != 4)) {
-    MapsWriterBaseInvalidState(4, false, state_);
-  }
-
-  WriteRecordsImpl(value);
-  state_ = 5;
-}
-
-void MapsWriterBase::Close() {
-  if (unlikely(state_ != 5)) {
-    MapsWriterBaseInvalidState(5, false, state_);
-  }
-
-  CloseImpl();
-}
-
 std::string MapsReaderBase::schema_ = MapsWriterBase::schema_;
 
 std::vector<std::string> MapsReaderBase::previous_schemas_ = MapsWriterBase::previous_schemas_;
@@ -4105,9 +4436,10 @@ Version MapsReaderBase::VersionFromSchema(std::string const& schema) {
   }
   throw std::runtime_error("The schema does not match any version supported by protocol Maps.");
 }
+
 void MapsReaderBase::ReadStringToInt(std::unordered_map<std::string, int32_t>& value) {
   if (unlikely(state_ != 0)) {
-    MapsReaderBaseInvalidState(0, state_);
+    InvalidState(0);
   }
 
   ReadStringToIntImpl(value);
@@ -4116,7 +4448,7 @@ void MapsReaderBase::ReadStringToInt(std::unordered_map<std::string, int32_t>& v
 
 void MapsReaderBase::ReadIntToString(std::unordered_map<int32_t, std::string>& value) {
   if (unlikely(state_ != 2)) {
-    MapsReaderBaseInvalidState(2, state_);
+    InvalidState(2);
   }
 
   ReadIntToStringImpl(value);
@@ -4125,7 +4457,7 @@ void MapsReaderBase::ReadIntToString(std::unordered_map<int32_t, std::string>& v
 
 void MapsReaderBase::ReadStringToUnion(std::unordered_map<std::string, std::variant<std::string, int32_t>>& value) {
   if (unlikely(state_ != 4)) {
-    MapsReaderBaseInvalidState(4, state_);
+    InvalidState(4);
   }
 
   ReadStringToUnionImpl(value);
@@ -4134,7 +4466,7 @@ void MapsReaderBase::ReadStringToUnion(std::unordered_map<std::string, std::vari
 
 void MapsReaderBase::ReadAliasedGeneric(basic_types::AliasedMap<std::string, int32_t>& value) {
   if (unlikely(state_ != 6)) {
-    MapsReaderBaseInvalidState(6, state_);
+    InvalidState(6);
   }
 
   ReadAliasedGenericImpl(value);
@@ -4143,7 +4475,7 @@ void MapsReaderBase::ReadAliasedGeneric(basic_types::AliasedMap<std::string, int
 
 void MapsReaderBase::ReadRecords(std::vector<test_model::RecordWithMaps>& value) {
   if (unlikely(state_ != 8)) {
-    MapsReaderBaseInvalidState(8, state_);
+    InvalidState(8);
   }
 
   ReadRecordsImpl(value);
@@ -4152,11 +4484,12 @@ void MapsReaderBase::ReadRecords(std::vector<test_model::RecordWithMaps>& value)
 
 void MapsReaderBase::Close() {
   if (unlikely(state_ != 10)) {
-    MapsReaderBaseInvalidState(10, state_);
+    InvalidState(10);
   }
 
   CloseImpl();
 }
+
 void MapsReaderBase::CopyTo(MapsWriterBase& writer) {
   {
     std::unordered_map<std::string, int32_t> value;
@@ -4185,10 +4518,87 @@ void MapsReaderBase::CopyTo(MapsWriterBase& writer) {
   }
 }
 
-namespace {
-void UnionsWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end, uint8_t current) {
+void MapsReaderBase::InvalidState(uint8_t attempted) {
+  auto f = [](uint8_t i) -> std::string {
+    switch (i/2) {
+    case 0: return "ReadStringToInt()";
+    case 1: return "ReadIntToString()";
+    case 2: return "ReadStringToUnion()";
+    case 3: return "ReadAliasedGeneric()";
+    case 4: return "ReadRecords()";
+    case 5: return "Close()";
+    default: return "<unknown>";
+    }
+  };
+  throw std::runtime_error("Expected call to " + f(state_) + " but received call to " + f(attempted) + " instead.");
+}
+
+void MapsIndexedReaderBase::InvalidState(uint8_t attempted) {
+  (void)(attempted);
+  return;
+}
+
+
+std::string UnionsWriterBase::schema_ = R"({"protocol":{"name":"Unions","sequence":[{"name":"intOrSimpleRecord","type":[{"tag":"int32","type":"int32"},{"tag":"SimpleRecord","type":"TestModel.SimpleRecord"}]},{"name":"intOrRecordWithVlens","type":[{"tag":"int32","type":"int32"},{"tag":"RecordWithVlens","type":"TestModel.RecordWithVlens"}]},{"name":"monosotateOrIntOrSimpleRecord","type":[null,{"tag":"int32","type":"int32"},{"tag":"SimpleRecord","type":"TestModel.SimpleRecord"}]},{"name":"recordWithUnions","type":"BasicTypes.RecordWithUnions"}]},"types":[{"name":"DaysOfWeek","values":[{"symbol":"monday","value":1},{"symbol":"tuesday","value":2},{"symbol":"wednesday","value":4},{"symbol":"thursday","value":8},{"symbol":"friday","value":16},{"symbol":"saturday","value":32},{"symbol":"sunday","value":64}]},{"name":"Fruits","values":[{"symbol":"apple","value":1},{"symbol":"banana","value":2},{"symbol":"pear","value":3}]},{"name":"GenericNullableUnion2","typeParameters":["T1","T2"],"type":[null,{"tag":"T1","type":"T1"},{"tag":"T2","type":"T2"}]},{"name":"RecordWithString","fields":[{"name":"i","type":"string"}]},{"name":"RecordWithUnions","fields":[{"name":"nullOrIntOrString","type":[null,{"tag":"int32","type":"int32"},{"tag":"string","type":"string"}]},{"name":"dateOrDatetime","type":[{"tag":"time","type":"time"},{"tag":"datetime","type":"datetime"}]},{"name":"nullOrFruitsOrDaysOfWeek","type":{"name":"BasicTypes.GenericNullableUnion2","typeArguments":["BasicTypes.Fruits","BasicTypes.DaysOfWeek"]}},{"name":"recordOrInt","type":[{"tag":"RecordWithString","type":"BasicTypes.RecordWithString"},{"tag":"int32","type":"int32"}]}]},{"name":"RecordWithVlens","fields":[{"name":"a","type":{"vector":{"items":"TestModel.SimpleRecord"}}},{"name":"b","type":"int32"},{"name":"c","type":"int32"}]},{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]}]})";
+
+std::vector<std::string> UnionsWriterBase::previous_schemas_ = {
+};
+
+std::string UnionsWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Current: return UnionsWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol Unions.");
+  }
+
+}
+
+void UnionsWriterBase::WriteIntOrSimpleRecord(std::variant<int32_t, test_model::SimpleRecord> const& value) {
+  if (unlikely(state_ != 0)) {
+    InvalidState(0, false);
+  }
+
+  WriteIntOrSimpleRecordImpl(value);
+  state_ = 1;
+}
+
+void UnionsWriterBase::WriteIntOrRecordWithVlens(std::variant<int32_t, test_model::RecordWithVlens> const& value) {
+  if (unlikely(state_ != 1)) {
+    InvalidState(1, false);
+  }
+
+  WriteIntOrRecordWithVlensImpl(value);
+  state_ = 2;
+}
+
+void UnionsWriterBase::WriteMonosotateOrIntOrSimpleRecord(std::variant<std::monostate, int32_t, test_model::SimpleRecord> const& value) {
+  if (unlikely(state_ != 2)) {
+    InvalidState(2, false);
+  }
+
+  WriteMonosotateOrIntOrSimpleRecordImpl(value);
+  state_ = 3;
+}
+
+void UnionsWriterBase::WriteRecordWithUnions(basic_types::RecordWithUnions const& value) {
+  if (unlikely(state_ != 3)) {
+    InvalidState(3, false);
+  }
+
+  WriteRecordWithUnionsImpl(value);
+  state_ = 4;
+}
+
+void UnionsWriterBase::Close() {
+  if (unlikely(state_ != 4)) {
+    InvalidState(4, false);
+  }
+
+  CloseImpl();
+}
+
+void UnionsWriterBase::InvalidState(uint8_t attempted, [[maybe_unused]] bool end) {
   std::string expected_method;
-  switch (current) {
+  switch (state_) {
   case 0: expected_method = "WriteIntOrSimpleRecord()"; break;
   case 1: expected_method = "WriteIntOrRecordWithVlens()"; break;
   case 2: expected_method = "WriteMonosotateOrIntOrSimpleRecord()"; break;
@@ -4205,78 +4615,6 @@ void UnionsWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end, 
   throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
 }
 
-void UnionsReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
-  auto f = [](uint8_t i) -> std::string {
-    switch (i/2) {
-    case 0: return "ReadIntOrSimpleRecord()";
-    case 1: return "ReadIntOrRecordWithVlens()";
-    case 2: return "ReadMonosotateOrIntOrSimpleRecord()";
-    case 3: return "ReadRecordWithUnions()";
-    case 4: return "Close()";
-    default: return "<unknown>";
-    }
-  };
-  throw std::runtime_error("Expected call to " + f(current) + " but received call to " + f(attempted) + " instead.");
-}
-
-} // namespace 
-
-std::string UnionsWriterBase::schema_ = R"({"protocol":{"name":"Unions","sequence":[{"name":"intOrSimpleRecord","type":[{"tag":"int32","type":"int32"},{"tag":"SimpleRecord","type":"TestModel.SimpleRecord"}]},{"name":"intOrRecordWithVlens","type":[{"tag":"int32","type":"int32"},{"tag":"RecordWithVlens","type":"TestModel.RecordWithVlens"}]},{"name":"monosotateOrIntOrSimpleRecord","type":[null,{"tag":"int32","type":"int32"},{"tag":"SimpleRecord","type":"TestModel.SimpleRecord"}]},{"name":"recordWithUnions","type":"BasicTypes.RecordWithUnions"}]},"types":[{"name":"DaysOfWeek","values":[{"symbol":"monday","value":1},{"symbol":"tuesday","value":2},{"symbol":"wednesday","value":4},{"symbol":"thursday","value":8},{"symbol":"friday","value":16},{"symbol":"saturday","value":32},{"symbol":"sunday","value":64}]},{"name":"Fruits","values":[{"symbol":"apple","value":1},{"symbol":"banana","value":2},{"symbol":"pear","value":3}]},{"name":"GenericNullableUnion2","typeParameters":["T1","T2"],"type":[null,{"tag":"T1","type":"T1"},{"tag":"T2","type":"T2"}]},{"name":"RecordWithString","fields":[{"name":"i","type":"string"}]},{"name":"RecordWithUnions","fields":[{"name":"nullOrIntOrString","type":[null,{"tag":"int32","type":"int32"},{"tag":"string","type":"string"}]},{"name":"dateOrDatetime","type":[{"tag":"time","type":"time"},{"tag":"datetime","type":"datetime"}]},{"name":"nullOrFruitsOrDaysOfWeek","type":{"name":"BasicTypes.GenericNullableUnion2","typeArguments":["BasicTypes.Fruits","BasicTypes.DaysOfWeek"]}},{"name":"recordOrInt","type":[{"tag":"RecordWithString","type":"BasicTypes.RecordWithString"},{"tag":"int32","type":"int32"}]}]},{"name":"RecordWithVlens","fields":[{"name":"a","type":{"vector":{"items":"TestModel.SimpleRecord"}}},{"name":"b","type":"int32"},{"name":"c","type":"int32"}]},{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]}]})";
-
-std::vector<std::string> UnionsWriterBase::previous_schemas_ = {
-};
-
-std::string UnionsWriterBase::SchemaFromVersion(Version version) {
-  switch (version) {
-  case Version::Current: return UnionsWriterBase::schema_; break;
-  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol Unions.");
-  }
-
-}
-void UnionsWriterBase::WriteIntOrSimpleRecord(std::variant<int32_t, test_model::SimpleRecord> const& value) {
-  if (unlikely(state_ != 0)) {
-    UnionsWriterBaseInvalidState(0, false, state_);
-  }
-
-  WriteIntOrSimpleRecordImpl(value);
-  state_ = 1;
-}
-
-void UnionsWriterBase::WriteIntOrRecordWithVlens(std::variant<int32_t, test_model::RecordWithVlens> const& value) {
-  if (unlikely(state_ != 1)) {
-    UnionsWriterBaseInvalidState(1, false, state_);
-  }
-
-  WriteIntOrRecordWithVlensImpl(value);
-  state_ = 2;
-}
-
-void UnionsWriterBase::WriteMonosotateOrIntOrSimpleRecord(std::variant<std::monostate, int32_t, test_model::SimpleRecord> const& value) {
-  if (unlikely(state_ != 2)) {
-    UnionsWriterBaseInvalidState(2, false, state_);
-  }
-
-  WriteMonosotateOrIntOrSimpleRecordImpl(value);
-  state_ = 3;
-}
-
-void UnionsWriterBase::WriteRecordWithUnions(basic_types::RecordWithUnions const& value) {
-  if (unlikely(state_ != 3)) {
-    UnionsWriterBaseInvalidState(3, false, state_);
-  }
-
-  WriteRecordWithUnionsImpl(value);
-  state_ = 4;
-}
-
-void UnionsWriterBase::Close() {
-  if (unlikely(state_ != 4)) {
-    UnionsWriterBaseInvalidState(4, false, state_);
-  }
-
-  CloseImpl();
-}
-
 std::string UnionsReaderBase::schema_ = UnionsWriterBase::schema_;
 
 std::vector<std::string> UnionsReaderBase::previous_schemas_ = UnionsWriterBase::previous_schemas_;
@@ -4287,9 +4625,10 @@ Version UnionsReaderBase::VersionFromSchema(std::string const& schema) {
   }
   throw std::runtime_error("The schema does not match any version supported by protocol Unions.");
 }
+
 void UnionsReaderBase::ReadIntOrSimpleRecord(std::variant<int32_t, test_model::SimpleRecord>& value) {
   if (unlikely(state_ != 0)) {
-    UnionsReaderBaseInvalidState(0, state_);
+    InvalidState(0);
   }
 
   ReadIntOrSimpleRecordImpl(value);
@@ -4298,7 +4637,7 @@ void UnionsReaderBase::ReadIntOrSimpleRecord(std::variant<int32_t, test_model::S
 
 void UnionsReaderBase::ReadIntOrRecordWithVlens(std::variant<int32_t, test_model::RecordWithVlens>& value) {
   if (unlikely(state_ != 2)) {
-    UnionsReaderBaseInvalidState(2, state_);
+    InvalidState(2);
   }
 
   ReadIntOrRecordWithVlensImpl(value);
@@ -4307,7 +4646,7 @@ void UnionsReaderBase::ReadIntOrRecordWithVlens(std::variant<int32_t, test_model
 
 void UnionsReaderBase::ReadMonosotateOrIntOrSimpleRecord(std::variant<std::monostate, int32_t, test_model::SimpleRecord>& value) {
   if (unlikely(state_ != 4)) {
-    UnionsReaderBaseInvalidState(4, state_);
+    InvalidState(4);
   }
 
   ReadMonosotateOrIntOrSimpleRecordImpl(value);
@@ -4316,7 +4655,7 @@ void UnionsReaderBase::ReadMonosotateOrIntOrSimpleRecord(std::variant<std::monos
 
 void UnionsReaderBase::ReadRecordWithUnions(basic_types::RecordWithUnions& value) {
   if (unlikely(state_ != 6)) {
-    UnionsReaderBaseInvalidState(6, state_);
+    InvalidState(6);
   }
 
   ReadRecordWithUnionsImpl(value);
@@ -4325,11 +4664,12 @@ void UnionsReaderBase::ReadRecordWithUnions(basic_types::RecordWithUnions& value
 
 void UnionsReaderBase::Close() {
   if (unlikely(state_ != 8)) {
-    UnionsReaderBaseInvalidState(8, state_);
+    InvalidState(8);
   }
 
   CloseImpl();
 }
+
 void UnionsReaderBase::CopyTo(UnionsWriterBase& writer) {
   {
     std::variant<int32_t, test_model::SimpleRecord> value;
@@ -4353,38 +4693,25 @@ void UnionsReaderBase::CopyTo(UnionsWriterBase& writer) {
   }
 }
 
-namespace {
-void StreamsOfUnionsWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end, uint8_t current) {
-  std::string expected_method;
-  switch (current) {
-  case 0: expected_method = "WriteIntOrSimpleRecord() or EndIntOrSimpleRecord()"; break;
-  case 1: expected_method = "WriteNullableIntOrSimpleRecord() or EndNullableIntOrSimpleRecord()"; break;
-  case 2: expected_method = "WriteManyCases() or EndManyCases()"; break;
-  }
-  std::string attempted_method;
-  switch (attempted) {
-  case 0: attempted_method = end ? "EndIntOrSimpleRecord()" : "WriteIntOrSimpleRecord()"; break;
-  case 1: attempted_method = end ? "EndNullableIntOrSimpleRecord()" : "WriteNullableIntOrSimpleRecord()"; break;
-  case 2: attempted_method = end ? "EndManyCases()" : "WriteManyCases()"; break;
-  case 3: attempted_method = "Close()"; break;
-  }
-  throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
-}
-
-void StreamsOfUnionsReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
+void UnionsReaderBase::InvalidState(uint8_t attempted) {
   auto f = [](uint8_t i) -> std::string {
     switch (i/2) {
     case 0: return "ReadIntOrSimpleRecord()";
-    case 1: return "ReadNullableIntOrSimpleRecord()";
-    case 2: return "ReadManyCases()";
-    case 3: return "Close()";
+    case 1: return "ReadIntOrRecordWithVlens()";
+    case 2: return "ReadMonosotateOrIntOrSimpleRecord()";
+    case 3: return "ReadRecordWithUnions()";
+    case 4: return "Close()";
     default: return "<unknown>";
     }
   };
-  throw std::runtime_error("Expected call to " + f(current) + " but received call to " + f(attempted) + " instead.");
+  throw std::runtime_error("Expected call to " + f(state_) + " but received call to " + f(attempted) + " instead.");
 }
 
-} // namespace 
+void UnionsIndexedReaderBase::InvalidState(uint8_t attempted) {
+  (void)(attempted);
+  return;
+}
+
 
 std::string StreamsOfUnionsWriterBase::schema_ = R"({"protocol":{"name":"StreamsOfUnions","sequence":[{"name":"intOrSimpleRecord","type":{"stream":{"items":[{"tag":"int32","type":"int32"},{"tag":"SimpleRecord","type":"TestModel.SimpleRecord"}]}}},{"name":"nullableIntOrSimpleRecord","type":{"stream":{"items":[null,{"tag":"int32","type":"int32"},{"tag":"SimpleRecord","type":"TestModel.SimpleRecord"}]}}},{"name":"manyCases","type":{"stream":{"items":[{"tag":"int32","type":"int32"},{"tag":"float32","type":"float32"},{"tag":"string","type":"string"},{"tag":"SimpleRecord","type":"TestModel.SimpleRecord"},{"tag":"NamedFixedNDArray","type":"TestModel.NamedFixedNDArray"}]}}}]},"types":[{"name":"NamedFixedNDArray","type":{"array":{"items":"int32","dimensions":[{"name":"dimA","length":2},{"name":"dimB","length":4}]}}},{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]}]})";
 
@@ -4398,9 +4725,10 @@ std::string StreamsOfUnionsWriterBase::SchemaFromVersion(Version version) {
   }
 
 }
+
 void StreamsOfUnionsWriterBase::WriteIntOrSimpleRecord(std::variant<int32_t, test_model::SimpleRecord> const& value) {
   if (unlikely(state_ != 0)) {
-    StreamsOfUnionsWriterBaseInvalidState(0, false, state_);
+    InvalidState(0, false);
   }
 
   WriteIntOrSimpleRecordImpl(value);
@@ -4408,7 +4736,7 @@ void StreamsOfUnionsWriterBase::WriteIntOrSimpleRecord(std::variant<int32_t, tes
 
 void StreamsOfUnionsWriterBase::WriteIntOrSimpleRecord(std::vector<std::variant<int32_t, test_model::SimpleRecord>> const& values) {
   if (unlikely(state_ != 0)) {
-    StreamsOfUnionsWriterBaseInvalidState(0, false, state_);
+    InvalidState(0, false);
   }
 
   WriteIntOrSimpleRecordImpl(values);
@@ -4416,7 +4744,7 @@ void StreamsOfUnionsWriterBase::WriteIntOrSimpleRecord(std::vector<std::variant<
 
 void StreamsOfUnionsWriterBase::EndIntOrSimpleRecord() {
   if (unlikely(state_ != 0)) {
-    StreamsOfUnionsWriterBaseInvalidState(0, true, state_);
+    InvalidState(0, true);
   }
 
   EndIntOrSimpleRecordImpl();
@@ -4432,7 +4760,7 @@ void StreamsOfUnionsWriterBase::WriteIntOrSimpleRecordImpl(std::vector<std::vari
 
 void StreamsOfUnionsWriterBase::WriteNullableIntOrSimpleRecord(std::variant<std::monostate, int32_t, test_model::SimpleRecord> const& value) {
   if (unlikely(state_ != 1)) {
-    StreamsOfUnionsWriterBaseInvalidState(1, false, state_);
+    InvalidState(1, false);
   }
 
   WriteNullableIntOrSimpleRecordImpl(value);
@@ -4440,7 +4768,7 @@ void StreamsOfUnionsWriterBase::WriteNullableIntOrSimpleRecord(std::variant<std:
 
 void StreamsOfUnionsWriterBase::WriteNullableIntOrSimpleRecord(std::vector<std::variant<std::monostate, int32_t, test_model::SimpleRecord>> const& values) {
   if (unlikely(state_ != 1)) {
-    StreamsOfUnionsWriterBaseInvalidState(1, false, state_);
+    InvalidState(1, false);
   }
 
   WriteNullableIntOrSimpleRecordImpl(values);
@@ -4448,7 +4776,7 @@ void StreamsOfUnionsWriterBase::WriteNullableIntOrSimpleRecord(std::vector<std::
 
 void StreamsOfUnionsWriterBase::EndNullableIntOrSimpleRecord() {
   if (unlikely(state_ != 1)) {
-    StreamsOfUnionsWriterBaseInvalidState(1, true, state_);
+    InvalidState(1, true);
   }
 
   EndNullableIntOrSimpleRecordImpl();
@@ -4464,7 +4792,7 @@ void StreamsOfUnionsWriterBase::WriteNullableIntOrSimpleRecordImpl(std::vector<s
 
 void StreamsOfUnionsWriterBase::WriteManyCases(std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray> const& value) {
   if (unlikely(state_ != 2)) {
-    StreamsOfUnionsWriterBaseInvalidState(2, false, state_);
+    InvalidState(2, false);
   }
 
   WriteManyCasesImpl(value);
@@ -4472,7 +4800,7 @@ void StreamsOfUnionsWriterBase::WriteManyCases(std::variant<int32_t, float, std:
 
 void StreamsOfUnionsWriterBase::WriteManyCases(std::vector<std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray>> const& values) {
   if (unlikely(state_ != 2)) {
-    StreamsOfUnionsWriterBaseInvalidState(2, false, state_);
+    InvalidState(2, false);
   }
 
   WriteManyCasesImpl(values);
@@ -4480,7 +4808,7 @@ void StreamsOfUnionsWriterBase::WriteManyCases(std::vector<std::variant<int32_t,
 
 void StreamsOfUnionsWriterBase::EndManyCases() {
   if (unlikely(state_ != 2)) {
-    StreamsOfUnionsWriterBaseInvalidState(2, true, state_);
+    InvalidState(2, true);
   }
 
   EndManyCasesImpl();
@@ -4496,10 +4824,27 @@ void StreamsOfUnionsWriterBase::WriteManyCasesImpl(std::vector<std::variant<int3
 
 void StreamsOfUnionsWriterBase::Close() {
   if (unlikely(state_ != 3)) {
-    StreamsOfUnionsWriterBaseInvalidState(3, false, state_);
+    InvalidState(3, false);
   }
 
   CloseImpl();
+}
+
+void StreamsOfUnionsWriterBase::InvalidState(uint8_t attempted, [[maybe_unused]] bool end) {
+  std::string expected_method;
+  switch (state_) {
+  case 0: expected_method = "WriteIntOrSimpleRecord() or EndIntOrSimpleRecord()"; break;
+  case 1: expected_method = "WriteNullableIntOrSimpleRecord() or EndNullableIntOrSimpleRecord()"; break;
+  case 2: expected_method = "WriteManyCases() or EndManyCases()"; break;
+  }
+  std::string attempted_method;
+  switch (attempted) {
+  case 0: attempted_method = end ? "EndIntOrSimpleRecord()" : "WriteIntOrSimpleRecord()"; break;
+  case 1: attempted_method = end ? "EndNullableIntOrSimpleRecord()" : "WriteNullableIntOrSimpleRecord()"; break;
+  case 2: attempted_method = end ? "EndManyCases()" : "WriteManyCases()"; break;
+  case 3: attempted_method = "Close()"; break;
+  }
+  throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
 }
 
 std::string StreamsOfUnionsReaderBase::schema_ = StreamsOfUnionsWriterBase::schema_;
@@ -4512,13 +4857,14 @@ Version StreamsOfUnionsReaderBase::VersionFromSchema(std::string const& schema) 
   }
   throw std::runtime_error("The schema does not match any version supported by protocol StreamsOfUnions.");
 }
+
 bool StreamsOfUnionsReaderBase::ReadIntOrSimpleRecord(std::variant<int32_t, test_model::SimpleRecord>& value) {
   if (unlikely(state_ != 0)) {
     if (state_ == 1) {
       state_ = 2;
       return false;
     }
-    StreamsOfUnionsReaderBaseInvalidState(0, state_);
+    InvalidState(0);
   }
 
   bool result = ReadIntOrSimpleRecordImpl(value);
@@ -4538,7 +4884,7 @@ bool StreamsOfUnionsReaderBase::ReadIntOrSimpleRecord(std::vector<std::variant<i
       values.clear();
       return false;
     }
-    StreamsOfUnionsReaderBaseInvalidState(0, state_);
+    InvalidState(0);
   }
 
   if (!ReadIntOrSimpleRecordImpl(values)) {
@@ -4575,7 +4921,7 @@ bool StreamsOfUnionsReaderBase::ReadNullableIntOrSimpleRecord(std::variant<std::
     if (state_ == 1) {
       state_ = 2;
     } else {
-      StreamsOfUnionsReaderBaseInvalidState(2, state_);
+      InvalidState(2);
     }
   }
 
@@ -4599,7 +4945,7 @@ bool StreamsOfUnionsReaderBase::ReadNullableIntOrSimpleRecord(std::vector<std::v
     if (state_ == 1) {
       state_ = 2;
     } else {
-      StreamsOfUnionsReaderBaseInvalidState(2, state_);
+      InvalidState(2);
     }
   }
 
@@ -4637,7 +4983,7 @@ bool StreamsOfUnionsReaderBase::ReadManyCases(std::variant<int32_t, float, std::
     if (state_ == 3) {
       state_ = 4;
     } else {
-      StreamsOfUnionsReaderBaseInvalidState(4, state_);
+      InvalidState(4);
     }
   }
 
@@ -4661,7 +5007,7 @@ bool StreamsOfUnionsReaderBase::ReadManyCases(std::vector<std::variant<int32_t, 
     if (state_ == 3) {
       state_ = 4;
     } else {
-      StreamsOfUnionsReaderBaseInvalidState(4, state_);
+      InvalidState(4);
     }
   }
 
@@ -4695,12 +5041,13 @@ void StreamsOfUnionsReaderBase::Close() {
     if (state_ == 5) {
       state_ = 6;
     } else {
-      StreamsOfUnionsReaderBaseInvalidState(6, state_);
+      InvalidState(6);
     }
   }
 
   CloseImpl();
 }
+
 void StreamsOfUnionsReaderBase::CopyTo(StreamsOfUnionsWriterBase& writer, size_t int_or_simple_record_buffer_size, size_t nullable_int_or_simple_record_buffer_size, size_t many_cases_buffer_size) {
   if (int_or_simple_record_buffer_size > 1) {
     std::vector<std::variant<int32_t, test_model::SimpleRecord>> values;
@@ -4746,10 +5093,139 @@ void StreamsOfUnionsReaderBase::CopyTo(StreamsOfUnionsWriterBase& writer, size_t
   }
 }
 
-namespace {
-void EnumsWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end, uint8_t current) {
+void StreamsOfUnionsReaderBase::InvalidState(uint8_t attempted) {
+  auto f = [](uint8_t i) -> std::string {
+    switch (i/2) {
+    case 0: return "ReadIntOrSimpleRecord()";
+    case 1: return "ReadNullableIntOrSimpleRecord()";
+    case 2: return "ReadManyCases()";
+    case 3: return "Close()";
+    default: return "<unknown>";
+    }
+  };
+  throw std::runtime_error("Expected call to " + f(state_) + " but received call to " + f(attempted) + " instead.");
+}
+
+bool StreamsOfUnionsIndexedReaderBase::ReadIntOrSimpleRecord(std::variant<int32_t, test_model::SimpleRecord>& value, size_t idx) {
+  return ReadIntOrSimpleRecordImpl(value, idx);
+}
+
+bool StreamsOfUnionsIndexedReaderBase::ReadIntOrSimpleRecord(std::vector<std::variant<int32_t, test_model::SimpleRecord>>& values, size_t idx) {
+  if (values.capacity() == 0) {
+    throw std::runtime_error("vector must have a nonzero capacity.");
+  }
+  if (!ReadIntOrSimpleRecordImpl(values, idx)) {
+    return values.size() > 0;
+  }
+  return true;
+}
+
+size_t StreamsOfUnionsIndexedReaderBase::CountIntOrSimpleRecord() {
+  return CountIntOrSimpleRecordImpl();
+}
+
+bool StreamsOfUnionsIndexedReaderBase::ReadNullableIntOrSimpleRecord(std::variant<std::monostate, int32_t, test_model::SimpleRecord>& value, size_t idx) {
+  return ReadNullableIntOrSimpleRecordImpl(value, idx);
+}
+
+bool StreamsOfUnionsIndexedReaderBase::ReadNullableIntOrSimpleRecord(std::vector<std::variant<std::monostate, int32_t, test_model::SimpleRecord>>& values, size_t idx) {
+  if (values.capacity() == 0) {
+    throw std::runtime_error("vector must have a nonzero capacity.");
+  }
+  if (!ReadNullableIntOrSimpleRecordImpl(values, idx)) {
+    return values.size() > 0;
+  }
+  return true;
+}
+
+size_t StreamsOfUnionsIndexedReaderBase::CountNullableIntOrSimpleRecord() {
+  return CountNullableIntOrSimpleRecordImpl();
+}
+
+bool StreamsOfUnionsIndexedReaderBase::ReadManyCases(std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray>& value, size_t idx) {
+  return ReadManyCasesImpl(value, idx);
+}
+
+bool StreamsOfUnionsIndexedReaderBase::ReadManyCases(std::vector<std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray>>& values, size_t idx) {
+  if (values.capacity() == 0) {
+    throw std::runtime_error("vector must have a nonzero capacity.");
+  }
+  if (!ReadManyCasesImpl(values, idx)) {
+    return values.size() > 0;
+  }
+  return true;
+}
+
+size_t StreamsOfUnionsIndexedReaderBase::CountManyCases() {
+  return CountManyCasesImpl();
+}
+
+void StreamsOfUnionsIndexedReaderBase::InvalidState(uint8_t attempted) {
+  (void)(attempted);
+  return;
+}
+
+
+std::string EnumsWriterBase::schema_ = R"({"protocol":{"name":"Enums","sequence":[{"name":"single","type":"TestModel.Fruits"},{"name":"vec","type":{"vector":{"items":"TestModel.Fruits"}}},{"name":"size","type":"TestModel.SizeBasedEnum"},{"name":"rec","type":"TestModel.RecordWithEnums"}]},"types":[{"name":"DaysOfWeek","values":[{"symbol":"monday","value":1},{"symbol":"tuesday","value":2},{"symbol":"wednesday","value":4},{"symbol":"thursday","value":8},{"symbol":"friday","value":16},{"symbol":"saturday","value":32},{"symbol":"sunday","value":64}]},{"name":"Fruits","values":[{"symbol":"apple","value":1},{"symbol":"banana","value":2},{"symbol":"pear","value":3}]},{"name":"TextFormat","base":"uint64","values":[{"symbol":"regular","value":0},{"symbol":"bold","value":1},{"symbol":"italic","value":2},{"symbol":"underline","value":4},{"symbol":"strikethrough","value":8}]},{"name":"DaysOfWeek","type":"BasicTypes.DaysOfWeek"},{"name":"Fruits","type":"BasicTypes.Fruits"},{"name":"RecordWithEnums","fields":[{"name":"enum","type":"TestModel.Fruits"},{"name":"flags","type":"TestModel.DaysOfWeek"},{"name":"flags2","type":"TestModel.TextFormat"},{"name":"rec","type":"TestModel.RecordWithNoDefaultEnum"}]},{"name":"RecordWithNoDefaultEnum","fields":[{"name":"enum","type":"TestModel.Fruits"}]},{"name":"SizeBasedEnum","base":"size","values":[{"symbol":"a","value":0},{"symbol":"b","value":1},{"symbol":"c","value":2}]},{"name":"TextFormat","type":"BasicTypes.TextFormat"}]})";
+
+std::vector<std::string> EnumsWriterBase::previous_schemas_ = {
+};
+
+std::string EnumsWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Current: return EnumsWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol Enums.");
+  }
+
+}
+
+void EnumsWriterBase::WriteSingle(test_model::Fruits const& value) {
+  if (unlikely(state_ != 0)) {
+    InvalidState(0, false);
+  }
+
+  WriteSingleImpl(value);
+  state_ = 1;
+}
+
+void EnumsWriterBase::WriteVec(std::vector<test_model::Fruits> const& value) {
+  if (unlikely(state_ != 1)) {
+    InvalidState(1, false);
+  }
+
+  WriteVecImpl(value);
+  state_ = 2;
+}
+
+void EnumsWriterBase::WriteSize(test_model::SizeBasedEnum const& value) {
+  if (unlikely(state_ != 2)) {
+    InvalidState(2, false);
+  }
+
+  WriteSizeImpl(value);
+  state_ = 3;
+}
+
+void EnumsWriterBase::WriteRec(test_model::RecordWithEnums const& value) {
+  if (unlikely(state_ != 3)) {
+    InvalidState(3, false);
+  }
+
+  WriteRecImpl(value);
+  state_ = 4;
+}
+
+void EnumsWriterBase::Close() {
+  if (unlikely(state_ != 4)) {
+    InvalidState(4, false);
+  }
+
+  CloseImpl();
+}
+
+void EnumsWriterBase::InvalidState(uint8_t attempted, [[maybe_unused]] bool end) {
   std::string expected_method;
-  switch (current) {
+  switch (state_) {
   case 0: expected_method = "WriteSingle()"; break;
   case 1: expected_method = "WriteVec()"; break;
   case 2: expected_method = "WriteSize()"; break;
@@ -4766,78 +5242,6 @@ void EnumsWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end, u
   throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
 }
 
-void EnumsReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
-  auto f = [](uint8_t i) -> std::string {
-    switch (i/2) {
-    case 0: return "ReadSingle()";
-    case 1: return "ReadVec()";
-    case 2: return "ReadSize()";
-    case 3: return "ReadRec()";
-    case 4: return "Close()";
-    default: return "<unknown>";
-    }
-  };
-  throw std::runtime_error("Expected call to " + f(current) + " but received call to " + f(attempted) + " instead.");
-}
-
-} // namespace 
-
-std::string EnumsWriterBase::schema_ = R"({"protocol":{"name":"Enums","sequence":[{"name":"single","type":"TestModel.Fruits"},{"name":"vec","type":{"vector":{"items":"TestModel.Fruits"}}},{"name":"size","type":"TestModel.SizeBasedEnum"},{"name":"rec","type":"TestModel.RecordWithEnums"}]},"types":[{"name":"DaysOfWeek","values":[{"symbol":"monday","value":1},{"symbol":"tuesday","value":2},{"symbol":"wednesday","value":4},{"symbol":"thursday","value":8},{"symbol":"friday","value":16},{"symbol":"saturday","value":32},{"symbol":"sunday","value":64}]},{"name":"Fruits","values":[{"symbol":"apple","value":1},{"symbol":"banana","value":2},{"symbol":"pear","value":3}]},{"name":"TextFormat","base":"uint64","values":[{"symbol":"regular","value":0},{"symbol":"bold","value":1},{"symbol":"italic","value":2},{"symbol":"underline","value":4},{"symbol":"strikethrough","value":8}]},{"name":"DaysOfWeek","type":"BasicTypes.DaysOfWeek"},{"name":"Fruits","type":"BasicTypes.Fruits"},{"name":"RecordWithEnums","fields":[{"name":"enum","type":"TestModel.Fruits"},{"name":"flags","type":"TestModel.DaysOfWeek"},{"name":"flags2","type":"TestModel.TextFormat"},{"name":"rec","type":"TestModel.RecordWithNoDefaultEnum"}]},{"name":"RecordWithNoDefaultEnum","fields":[{"name":"enum","type":"TestModel.Fruits"}]},{"name":"SizeBasedEnum","base":"size","values":[{"symbol":"a","value":0},{"symbol":"b","value":1},{"symbol":"c","value":2}]},{"name":"TextFormat","type":"BasicTypes.TextFormat"}]})";
-
-std::vector<std::string> EnumsWriterBase::previous_schemas_ = {
-};
-
-std::string EnumsWriterBase::SchemaFromVersion(Version version) {
-  switch (version) {
-  case Version::Current: return EnumsWriterBase::schema_; break;
-  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol Enums.");
-  }
-
-}
-void EnumsWriterBase::WriteSingle(test_model::Fruits const& value) {
-  if (unlikely(state_ != 0)) {
-    EnumsWriterBaseInvalidState(0, false, state_);
-  }
-
-  WriteSingleImpl(value);
-  state_ = 1;
-}
-
-void EnumsWriterBase::WriteVec(std::vector<test_model::Fruits> const& value) {
-  if (unlikely(state_ != 1)) {
-    EnumsWriterBaseInvalidState(1, false, state_);
-  }
-
-  WriteVecImpl(value);
-  state_ = 2;
-}
-
-void EnumsWriterBase::WriteSize(test_model::SizeBasedEnum const& value) {
-  if (unlikely(state_ != 2)) {
-    EnumsWriterBaseInvalidState(2, false, state_);
-  }
-
-  WriteSizeImpl(value);
-  state_ = 3;
-}
-
-void EnumsWriterBase::WriteRec(test_model::RecordWithEnums const& value) {
-  if (unlikely(state_ != 3)) {
-    EnumsWriterBaseInvalidState(3, false, state_);
-  }
-
-  WriteRecImpl(value);
-  state_ = 4;
-}
-
-void EnumsWriterBase::Close() {
-  if (unlikely(state_ != 4)) {
-    EnumsWriterBaseInvalidState(4, false, state_);
-  }
-
-  CloseImpl();
-}
-
 std::string EnumsReaderBase::schema_ = EnumsWriterBase::schema_;
 
 std::vector<std::string> EnumsReaderBase::previous_schemas_ = EnumsWriterBase::previous_schemas_;
@@ -4848,9 +5252,10 @@ Version EnumsReaderBase::VersionFromSchema(std::string const& schema) {
   }
   throw std::runtime_error("The schema does not match any version supported by protocol Enums.");
 }
+
 void EnumsReaderBase::ReadSingle(test_model::Fruits& value) {
   if (unlikely(state_ != 0)) {
-    EnumsReaderBaseInvalidState(0, state_);
+    InvalidState(0);
   }
 
   ReadSingleImpl(value);
@@ -4859,7 +5264,7 @@ void EnumsReaderBase::ReadSingle(test_model::Fruits& value) {
 
 void EnumsReaderBase::ReadVec(std::vector<test_model::Fruits>& value) {
   if (unlikely(state_ != 2)) {
-    EnumsReaderBaseInvalidState(2, state_);
+    InvalidState(2);
   }
 
   ReadVecImpl(value);
@@ -4868,7 +5273,7 @@ void EnumsReaderBase::ReadVec(std::vector<test_model::Fruits>& value) {
 
 void EnumsReaderBase::ReadSize(test_model::SizeBasedEnum& value) {
   if (unlikely(state_ != 4)) {
-    EnumsReaderBaseInvalidState(4, state_);
+    InvalidState(4);
   }
 
   ReadSizeImpl(value);
@@ -4877,7 +5282,7 @@ void EnumsReaderBase::ReadSize(test_model::SizeBasedEnum& value) {
 
 void EnumsReaderBase::ReadRec(test_model::RecordWithEnums& value) {
   if (unlikely(state_ != 6)) {
-    EnumsReaderBaseInvalidState(6, state_);
+    InvalidState(6);
   }
 
   ReadRecImpl(value);
@@ -4886,11 +5291,12 @@ void EnumsReaderBase::ReadRec(test_model::RecordWithEnums& value) {
 
 void EnumsReaderBase::Close() {
   if (unlikely(state_ != 8)) {
-    EnumsReaderBaseInvalidState(8, state_);
+    InvalidState(8);
   }
 
   CloseImpl();
 }
+
 void EnumsReaderBase::CopyTo(EnumsWriterBase& writer) {
   {
     test_model::Fruits value;
@@ -4914,35 +5320,25 @@ void EnumsReaderBase::CopyTo(EnumsWriterBase& writer) {
   }
 }
 
-namespace {
-void FlagsWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end, uint8_t current) {
-  std::string expected_method;
-  switch (current) {
-  case 0: expected_method = "WriteDays() or EndDays()"; break;
-  case 1: expected_method = "WriteFormats() or EndFormats()"; break;
-  }
-  std::string attempted_method;
-  switch (attempted) {
-  case 0: attempted_method = end ? "EndDays()" : "WriteDays()"; break;
-  case 1: attempted_method = end ? "EndFormats()" : "WriteFormats()"; break;
-  case 2: attempted_method = "Close()"; break;
-  }
-  throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
-}
-
-void FlagsReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
+void EnumsReaderBase::InvalidState(uint8_t attempted) {
   auto f = [](uint8_t i) -> std::string {
     switch (i/2) {
-    case 0: return "ReadDays()";
-    case 1: return "ReadFormats()";
-    case 2: return "Close()";
+    case 0: return "ReadSingle()";
+    case 1: return "ReadVec()";
+    case 2: return "ReadSize()";
+    case 3: return "ReadRec()";
+    case 4: return "Close()";
     default: return "<unknown>";
     }
   };
-  throw std::runtime_error("Expected call to " + f(current) + " but received call to " + f(attempted) + " instead.");
+  throw std::runtime_error("Expected call to " + f(state_) + " but received call to " + f(attempted) + " instead.");
 }
 
-} // namespace 
+void EnumsIndexedReaderBase::InvalidState(uint8_t attempted) {
+  (void)(attempted);
+  return;
+}
+
 
 std::string FlagsWriterBase::schema_ = R"({"protocol":{"name":"Flags","sequence":[{"name":"days","type":{"stream":{"items":"TestModel.DaysOfWeek"}}},{"name":"formats","type":{"stream":{"items":"TestModel.TextFormat"}}}]},"types":[{"name":"DaysOfWeek","values":[{"symbol":"monday","value":1},{"symbol":"tuesday","value":2},{"symbol":"wednesday","value":4},{"symbol":"thursday","value":8},{"symbol":"friday","value":16},{"symbol":"saturday","value":32},{"symbol":"sunday","value":64}]},{"name":"TextFormat","base":"uint64","values":[{"symbol":"regular","value":0},{"symbol":"bold","value":1},{"symbol":"italic","value":2},{"symbol":"underline","value":4},{"symbol":"strikethrough","value":8}]},{"name":"DaysOfWeek","type":"BasicTypes.DaysOfWeek"},{"name":"TextFormat","type":"BasicTypes.TextFormat"}]})";
 
@@ -4956,9 +5352,10 @@ std::string FlagsWriterBase::SchemaFromVersion(Version version) {
   }
 
 }
+
 void FlagsWriterBase::WriteDays(test_model::DaysOfWeek const& value) {
   if (unlikely(state_ != 0)) {
-    FlagsWriterBaseInvalidState(0, false, state_);
+    InvalidState(0, false);
   }
 
   WriteDaysImpl(value);
@@ -4966,7 +5363,7 @@ void FlagsWriterBase::WriteDays(test_model::DaysOfWeek const& value) {
 
 void FlagsWriterBase::WriteDays(std::vector<test_model::DaysOfWeek> const& values) {
   if (unlikely(state_ != 0)) {
-    FlagsWriterBaseInvalidState(0, false, state_);
+    InvalidState(0, false);
   }
 
   WriteDaysImpl(values);
@@ -4974,7 +5371,7 @@ void FlagsWriterBase::WriteDays(std::vector<test_model::DaysOfWeek> const& value
 
 void FlagsWriterBase::EndDays() {
   if (unlikely(state_ != 0)) {
-    FlagsWriterBaseInvalidState(0, true, state_);
+    InvalidState(0, true);
   }
 
   EndDaysImpl();
@@ -4990,7 +5387,7 @@ void FlagsWriterBase::WriteDaysImpl(std::vector<test_model::DaysOfWeek> const& v
 
 void FlagsWriterBase::WriteFormats(test_model::TextFormat const& value) {
   if (unlikely(state_ != 1)) {
-    FlagsWriterBaseInvalidState(1, false, state_);
+    InvalidState(1, false);
   }
 
   WriteFormatsImpl(value);
@@ -4998,7 +5395,7 @@ void FlagsWriterBase::WriteFormats(test_model::TextFormat const& value) {
 
 void FlagsWriterBase::WriteFormats(std::vector<test_model::TextFormat> const& values) {
   if (unlikely(state_ != 1)) {
-    FlagsWriterBaseInvalidState(1, false, state_);
+    InvalidState(1, false);
   }
 
   WriteFormatsImpl(values);
@@ -5006,7 +5403,7 @@ void FlagsWriterBase::WriteFormats(std::vector<test_model::TextFormat> const& va
 
 void FlagsWriterBase::EndFormats() {
   if (unlikely(state_ != 1)) {
-    FlagsWriterBaseInvalidState(1, true, state_);
+    InvalidState(1, true);
   }
 
   EndFormatsImpl();
@@ -5022,10 +5419,25 @@ void FlagsWriterBase::WriteFormatsImpl(std::vector<test_model::TextFormat> const
 
 void FlagsWriterBase::Close() {
   if (unlikely(state_ != 2)) {
-    FlagsWriterBaseInvalidState(2, false, state_);
+    InvalidState(2, false);
   }
 
   CloseImpl();
+}
+
+void FlagsWriterBase::InvalidState(uint8_t attempted, [[maybe_unused]] bool end) {
+  std::string expected_method;
+  switch (state_) {
+  case 0: expected_method = "WriteDays() or EndDays()"; break;
+  case 1: expected_method = "WriteFormats() or EndFormats()"; break;
+  }
+  std::string attempted_method;
+  switch (attempted) {
+  case 0: attempted_method = end ? "EndDays()" : "WriteDays()"; break;
+  case 1: attempted_method = end ? "EndFormats()" : "WriteFormats()"; break;
+  case 2: attempted_method = "Close()"; break;
+  }
+  throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
 }
 
 std::string FlagsReaderBase::schema_ = FlagsWriterBase::schema_;
@@ -5038,13 +5450,14 @@ Version FlagsReaderBase::VersionFromSchema(std::string const& schema) {
   }
   throw std::runtime_error("The schema does not match any version supported by protocol Flags.");
 }
+
 bool FlagsReaderBase::ReadDays(test_model::DaysOfWeek& value) {
   if (unlikely(state_ != 0)) {
     if (state_ == 1) {
       state_ = 2;
       return false;
     }
-    FlagsReaderBaseInvalidState(0, state_);
+    InvalidState(0);
   }
 
   bool result = ReadDaysImpl(value);
@@ -5064,7 +5477,7 @@ bool FlagsReaderBase::ReadDays(std::vector<test_model::DaysOfWeek>& values) {
       values.clear();
       return false;
     }
-    FlagsReaderBaseInvalidState(0, state_);
+    InvalidState(0);
   }
 
   if (!ReadDaysImpl(values)) {
@@ -5101,7 +5514,7 @@ bool FlagsReaderBase::ReadFormats(test_model::TextFormat& value) {
     if (state_ == 1) {
       state_ = 2;
     } else {
-      FlagsReaderBaseInvalidState(2, state_);
+      InvalidState(2);
     }
   }
 
@@ -5125,7 +5538,7 @@ bool FlagsReaderBase::ReadFormats(std::vector<test_model::TextFormat>& values) {
     if (state_ == 1) {
       state_ = 2;
     } else {
-      FlagsReaderBaseInvalidState(2, state_);
+      InvalidState(2);
     }
   }
 
@@ -5159,12 +5572,13 @@ void FlagsReaderBase::Close() {
     if (state_ == 3) {
       state_ = 4;
     } else {
-      FlagsReaderBaseInvalidState(4, state_);
+      InvalidState(4);
     }
   }
 
   CloseImpl();
 }
+
 void FlagsReaderBase::CopyTo(FlagsWriterBase& writer, size_t days_buffer_size, size_t formats_buffer_size) {
   if (days_buffer_size > 1) {
     std::vector<test_model::DaysOfWeek> values;
@@ -5196,38 +5610,59 @@ void FlagsReaderBase::CopyTo(FlagsWriterBase& writer, size_t days_buffer_size, s
   }
 }
 
-namespace {
-void StateTestWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end, uint8_t current) {
-  std::string expected_method;
-  switch (current) {
-  case 0: expected_method = "WriteAnInt()"; break;
-  case 1: expected_method = "WriteAStream() or EndAStream()"; break;
-  case 2: expected_method = "WriteAnotherInt()"; break;
-  }
-  std::string attempted_method;
-  switch (attempted) {
-  case 0: attempted_method = "WriteAnInt()"; break;
-  case 1: attempted_method = end ? "EndAStream()" : "WriteAStream()"; break;
-  case 2: attempted_method = "WriteAnotherInt()"; break;
-  case 3: attempted_method = "Close()"; break;
-  }
-  throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
-}
-
-void StateTestReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
+void FlagsReaderBase::InvalidState(uint8_t attempted) {
   auto f = [](uint8_t i) -> std::string {
     switch (i/2) {
-    case 0: return "ReadAnInt()";
-    case 1: return "ReadAStream()";
-    case 2: return "ReadAnotherInt()";
-    case 3: return "Close()";
+    case 0: return "ReadDays()";
+    case 1: return "ReadFormats()";
+    case 2: return "Close()";
     default: return "<unknown>";
     }
   };
-  throw std::runtime_error("Expected call to " + f(current) + " but received call to " + f(attempted) + " instead.");
+  throw std::runtime_error("Expected call to " + f(state_) + " but received call to " + f(attempted) + " instead.");
 }
 
-} // namespace 
+bool FlagsIndexedReaderBase::ReadDays(test_model::DaysOfWeek& value, size_t idx) {
+  return ReadDaysImpl(value, idx);
+}
+
+bool FlagsIndexedReaderBase::ReadDays(std::vector<test_model::DaysOfWeek>& values, size_t idx) {
+  if (values.capacity() == 0) {
+    throw std::runtime_error("vector must have a nonzero capacity.");
+  }
+  if (!ReadDaysImpl(values, idx)) {
+    return values.size() > 0;
+  }
+  return true;
+}
+
+size_t FlagsIndexedReaderBase::CountDays() {
+  return CountDaysImpl();
+}
+
+bool FlagsIndexedReaderBase::ReadFormats(test_model::TextFormat& value, size_t idx) {
+  return ReadFormatsImpl(value, idx);
+}
+
+bool FlagsIndexedReaderBase::ReadFormats(std::vector<test_model::TextFormat>& values, size_t idx) {
+  if (values.capacity() == 0) {
+    throw std::runtime_error("vector must have a nonzero capacity.");
+  }
+  if (!ReadFormatsImpl(values, idx)) {
+    return values.size() > 0;
+  }
+  return true;
+}
+
+size_t FlagsIndexedReaderBase::CountFormats() {
+  return CountFormatsImpl();
+}
+
+void FlagsIndexedReaderBase::InvalidState(uint8_t attempted) {
+  (void)(attempted);
+  return;
+}
+
 
 std::string StateTestWriterBase::schema_ = R"({"protocol":{"name":"StateTest","sequence":[{"name":"anInt","type":"int32"},{"name":"aStream","type":{"stream":{"items":"int32"}}},{"name":"anotherInt","type":"int32"}]},"types":null})";
 
@@ -5241,9 +5676,10 @@ std::string StateTestWriterBase::SchemaFromVersion(Version version) {
   }
 
 }
+
 void StateTestWriterBase::WriteAnInt(int32_t const& value) {
   if (unlikely(state_ != 0)) {
-    StateTestWriterBaseInvalidState(0, false, state_);
+    InvalidState(0, false);
   }
 
   WriteAnIntImpl(value);
@@ -5252,7 +5688,7 @@ void StateTestWriterBase::WriteAnInt(int32_t const& value) {
 
 void StateTestWriterBase::WriteAStream(int32_t const& value) {
   if (unlikely(state_ != 1)) {
-    StateTestWriterBaseInvalidState(1, false, state_);
+    InvalidState(1, false);
   }
 
   WriteAStreamImpl(value);
@@ -5260,7 +5696,7 @@ void StateTestWriterBase::WriteAStream(int32_t const& value) {
 
 void StateTestWriterBase::WriteAStream(std::vector<int32_t> const& values) {
   if (unlikely(state_ != 1)) {
-    StateTestWriterBaseInvalidState(1, false, state_);
+    InvalidState(1, false);
   }
 
   WriteAStreamImpl(values);
@@ -5268,7 +5704,7 @@ void StateTestWriterBase::WriteAStream(std::vector<int32_t> const& values) {
 
 void StateTestWriterBase::EndAStream() {
   if (unlikely(state_ != 1)) {
-    StateTestWriterBaseInvalidState(1, true, state_);
+    InvalidState(1, true);
   }
 
   EndAStreamImpl();
@@ -5284,7 +5720,7 @@ void StateTestWriterBase::WriteAStreamImpl(std::vector<int32_t> const& values) {
 
 void StateTestWriterBase::WriteAnotherInt(int32_t const& value) {
   if (unlikely(state_ != 2)) {
-    StateTestWriterBaseInvalidState(2, false, state_);
+    InvalidState(2, false);
   }
 
   WriteAnotherIntImpl(value);
@@ -5293,10 +5729,27 @@ void StateTestWriterBase::WriteAnotherInt(int32_t const& value) {
 
 void StateTestWriterBase::Close() {
   if (unlikely(state_ != 3)) {
-    StateTestWriterBaseInvalidState(3, false, state_);
+    InvalidState(3, false);
   }
 
   CloseImpl();
+}
+
+void StateTestWriterBase::InvalidState(uint8_t attempted, [[maybe_unused]] bool end) {
+  std::string expected_method;
+  switch (state_) {
+  case 0: expected_method = "WriteAnInt()"; break;
+  case 1: expected_method = "WriteAStream() or EndAStream()"; break;
+  case 2: expected_method = "WriteAnotherInt()"; break;
+  }
+  std::string attempted_method;
+  switch (attempted) {
+  case 0: attempted_method = "WriteAnInt()"; break;
+  case 1: attempted_method = end ? "EndAStream()" : "WriteAStream()"; break;
+  case 2: attempted_method = "WriteAnotherInt()"; break;
+  case 3: attempted_method = "Close()"; break;
+  }
+  throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
 }
 
 std::string StateTestReaderBase::schema_ = StateTestWriterBase::schema_;
@@ -5309,9 +5762,10 @@ Version StateTestReaderBase::VersionFromSchema(std::string const& schema) {
   }
   throw std::runtime_error("The schema does not match any version supported by protocol StateTest.");
 }
+
 void StateTestReaderBase::ReadAnInt(int32_t& value) {
   if (unlikely(state_ != 0)) {
-    StateTestReaderBaseInvalidState(0, state_);
+    InvalidState(0);
   }
 
   ReadAnIntImpl(value);
@@ -5324,7 +5778,7 @@ bool StateTestReaderBase::ReadAStream(int32_t& value) {
       state_ = 4;
       return false;
     }
-    StateTestReaderBaseInvalidState(2, state_);
+    InvalidState(2);
   }
 
   bool result = ReadAStreamImpl(value);
@@ -5344,7 +5798,7 @@ bool StateTestReaderBase::ReadAStream(std::vector<int32_t>& values) {
       values.clear();
       return false;
     }
-    StateTestReaderBaseInvalidState(2, state_);
+    InvalidState(2);
   }
 
   if (!ReadAStreamImpl(values)) {
@@ -5377,7 +5831,7 @@ void StateTestReaderBase::ReadAnotherInt(int32_t& value) {
     if (state_ == 3) {
       state_ = 4;
     } else {
-      StateTestReaderBaseInvalidState(4, state_);
+      InvalidState(4);
     }
   }
 
@@ -5387,11 +5841,12 @@ void StateTestReaderBase::ReadAnotherInt(int32_t& value) {
 
 void StateTestReaderBase::Close() {
   if (unlikely(state_ != 6)) {
-    StateTestReaderBaseInvalidState(6, state_);
+    InvalidState(6);
   }
 
   CloseImpl();
 }
+
 void StateTestReaderBase::CopyTo(StateTestWriterBase& writer, size_t a_stream_buffer_size) {
   {
     int32_t value;
@@ -5419,10 +5874,171 @@ void StateTestReaderBase::CopyTo(StateTestWriterBase& writer, size_t a_stream_bu
   }
 }
 
-namespace {
-void SimpleGenericsWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end, uint8_t current) {
+void StateTestReaderBase::InvalidState(uint8_t attempted) {
+  auto f = [](uint8_t i) -> std::string {
+    switch (i/2) {
+    case 0: return "ReadAnInt()";
+    case 1: return "ReadAStream()";
+    case 2: return "ReadAnotherInt()";
+    case 3: return "Close()";
+    default: return "<unknown>";
+    }
+  };
+  throw std::runtime_error("Expected call to " + f(state_) + " but received call to " + f(attempted) + " instead.");
+}
+
+bool StateTestIndexedReaderBase::ReadAStream(int32_t& value, size_t idx) {
+  return ReadAStreamImpl(value, idx);
+}
+
+bool StateTestIndexedReaderBase::ReadAStream(std::vector<int32_t>& values, size_t idx) {
+  if (values.capacity() == 0) {
+    throw std::runtime_error("vector must have a nonzero capacity.");
+  }
+  if (!ReadAStreamImpl(values, idx)) {
+    return values.size() > 0;
+  }
+  return true;
+}
+
+size_t StateTestIndexedReaderBase::CountAStream() {
+  return CountAStreamImpl();
+}
+
+void StateTestIndexedReaderBase::InvalidState(uint8_t attempted) {
+  (void)(attempted);
+  return;
+}
+
+
+std::string SimpleGenericsWriterBase::schema_ = R"({"protocol":{"name":"SimpleGenerics","sequence":[{"name":"floatImage","type":"Image.FloatImage"},{"name":"intImage","type":"Image.IntImage"},{"name":"intImageAlternateSyntax","type":{"name":"TestModel.Image","typeArguments":["int32"]}},{"name":"stringImage","type":{"name":"TestModel.Image","typeArguments":["string"]}},{"name":"intFloatTuple","type":{"name":"Tuples.Tuple","typeArguments":["int32","float32"]}},{"name":"floatFloatTuple","type":{"name":"Tuples.Tuple","typeArguments":["float32","float32"]}},{"name":"intFloatTupleAlternateSyntax","type":{"name":"Tuples.Tuple","typeArguments":["int32","float32"]}},{"name":"intStringTuple","type":{"name":"Tuples.Tuple","typeArguments":["int32","string"]}},{"name":"streamOfTypeVariants","type":{"stream":{"items":[{"tag":"imageFloat","explicitTag":true,"type":"Image.FloatImage"},{"tag":"imageDouble","explicitTag":true,"type":{"name":"TestModel.Image","typeArguments":["float64"]}}]}}}]},"types":[{"name":"FloatImage","type":{"name":"Image.Image","typeArguments":["float32"]}},{"name":"Image","typeParameters":["T"],"type":{"array":{"items":"T","dimensions":[{"name":"x"},{"name":"y"}]}}},{"name":"IntImage","type":{"name":"Image.Image","typeArguments":["int32"]}},{"name":"Image","typeParameters":["T"],"type":{"name":"Image.Image","typeArguments":["T"]}},{"name":"Tuple","typeParameters":["T1","T2"],"fields":[{"name":"v1","type":"T1"},{"name":"v2","type":"T2"}]}]})";
+
+std::vector<std::string> SimpleGenericsWriterBase::previous_schemas_ = {
+};
+
+std::string SimpleGenericsWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Current: return SimpleGenericsWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol SimpleGenerics.");
+  }
+
+}
+
+void SimpleGenericsWriterBase::WriteFloatImage(image::FloatImage const& value) {
+  if (unlikely(state_ != 0)) {
+    InvalidState(0, false);
+  }
+
+  WriteFloatImageImpl(value);
+  state_ = 1;
+}
+
+void SimpleGenericsWriterBase::WriteIntImage(image::IntImage const& value) {
+  if (unlikely(state_ != 1)) {
+    InvalidState(1, false);
+  }
+
+  WriteIntImageImpl(value);
+  state_ = 2;
+}
+
+void SimpleGenericsWriterBase::WriteIntImageAlternateSyntax(test_model::Image<int32_t> const& value) {
+  if (unlikely(state_ != 2)) {
+    InvalidState(2, false);
+  }
+
+  WriteIntImageAlternateSyntaxImpl(value);
+  state_ = 3;
+}
+
+void SimpleGenericsWriterBase::WriteStringImage(test_model::Image<std::string> const& value) {
+  if (unlikely(state_ != 3)) {
+    InvalidState(3, false);
+  }
+
+  WriteStringImageImpl(value);
+  state_ = 4;
+}
+
+void SimpleGenericsWriterBase::WriteIntFloatTuple(tuples::Tuple<int32_t, float> const& value) {
+  if (unlikely(state_ != 4)) {
+    InvalidState(4, false);
+  }
+
+  WriteIntFloatTupleImpl(value);
+  state_ = 5;
+}
+
+void SimpleGenericsWriterBase::WriteFloatFloatTuple(tuples::Tuple<float, float> const& value) {
+  if (unlikely(state_ != 5)) {
+    InvalidState(5, false);
+  }
+
+  WriteFloatFloatTupleImpl(value);
+  state_ = 6;
+}
+
+void SimpleGenericsWriterBase::WriteIntFloatTupleAlternateSyntax(tuples::Tuple<int32_t, float> const& value) {
+  if (unlikely(state_ != 6)) {
+    InvalidState(6, false);
+  }
+
+  WriteIntFloatTupleAlternateSyntaxImpl(value);
+  state_ = 7;
+}
+
+void SimpleGenericsWriterBase::WriteIntStringTuple(tuples::Tuple<int32_t, std::string> const& value) {
+  if (unlikely(state_ != 7)) {
+    InvalidState(7, false);
+  }
+
+  WriteIntStringTupleImpl(value);
+  state_ = 8;
+}
+
+void SimpleGenericsWriterBase::WriteStreamOfTypeVariants(std::variant<image::FloatImage, test_model::Image<double>> const& value) {
+  if (unlikely(state_ != 8)) {
+    InvalidState(8, false);
+  }
+
+  WriteStreamOfTypeVariantsImpl(value);
+}
+
+void SimpleGenericsWriterBase::WriteStreamOfTypeVariants(std::vector<std::variant<image::FloatImage, test_model::Image<double>>> const& values) {
+  if (unlikely(state_ != 8)) {
+    InvalidState(8, false);
+  }
+
+  WriteStreamOfTypeVariantsImpl(values);
+}
+
+void SimpleGenericsWriterBase::EndStreamOfTypeVariants() {
+  if (unlikely(state_ != 8)) {
+    InvalidState(8, true);
+  }
+
+  EndStreamOfTypeVariantsImpl();
+  state_ = 9;
+}
+
+// fallback implementation
+void SimpleGenericsWriterBase::WriteStreamOfTypeVariantsImpl(std::vector<std::variant<image::FloatImage, test_model::Image<double>>> const& values) {
+  for (auto const& v : values) {
+    WriteStreamOfTypeVariantsImpl(v);
+  }
+}
+
+void SimpleGenericsWriterBase::Close() {
+  if (unlikely(state_ != 9)) {
+    InvalidState(9, false);
+  }
+
+  CloseImpl();
+}
+
+void SimpleGenericsWriterBase::InvalidState(uint8_t attempted, [[maybe_unused]] bool end) {
   std::string expected_method;
-  switch (current) {
+  switch (state_) {
   case 0: expected_method = "WriteFloatImage()"; break;
   case 1: expected_method = "WriteIntImage()"; break;
   case 2: expected_method = "WriteIntImageAlternateSyntax()"; break;
@@ -5449,151 +6065,6 @@ void SimpleGenericsWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bo
   throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
 }
 
-void SimpleGenericsReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
-  auto f = [](uint8_t i) -> std::string {
-    switch (i/2) {
-    case 0: return "ReadFloatImage()";
-    case 1: return "ReadIntImage()";
-    case 2: return "ReadIntImageAlternateSyntax()";
-    case 3: return "ReadStringImage()";
-    case 4: return "ReadIntFloatTuple()";
-    case 5: return "ReadFloatFloatTuple()";
-    case 6: return "ReadIntFloatTupleAlternateSyntax()";
-    case 7: return "ReadIntStringTuple()";
-    case 8: return "ReadStreamOfTypeVariants()";
-    case 9: return "Close()";
-    default: return "<unknown>";
-    }
-  };
-  throw std::runtime_error("Expected call to " + f(current) + " but received call to " + f(attempted) + " instead.");
-}
-
-} // namespace 
-
-std::string SimpleGenericsWriterBase::schema_ = R"({"protocol":{"name":"SimpleGenerics","sequence":[{"name":"floatImage","type":"Image.FloatImage"},{"name":"intImage","type":"Image.IntImage"},{"name":"intImageAlternateSyntax","type":{"name":"TestModel.Image","typeArguments":["int32"]}},{"name":"stringImage","type":{"name":"TestModel.Image","typeArguments":["string"]}},{"name":"intFloatTuple","type":{"name":"Tuples.Tuple","typeArguments":["int32","float32"]}},{"name":"floatFloatTuple","type":{"name":"Tuples.Tuple","typeArguments":["float32","float32"]}},{"name":"intFloatTupleAlternateSyntax","type":{"name":"Tuples.Tuple","typeArguments":["int32","float32"]}},{"name":"intStringTuple","type":{"name":"Tuples.Tuple","typeArguments":["int32","string"]}},{"name":"streamOfTypeVariants","type":{"stream":{"items":[{"tag":"imageFloat","explicitTag":true,"type":"Image.FloatImage"},{"tag":"imageDouble","explicitTag":true,"type":{"name":"TestModel.Image","typeArguments":["float64"]}}]}}}]},"types":[{"name":"FloatImage","type":{"name":"Image.Image","typeArguments":["float32"]}},{"name":"Image","typeParameters":["T"],"type":{"array":{"items":"T","dimensions":[{"name":"x"},{"name":"y"}]}}},{"name":"IntImage","type":{"name":"Image.Image","typeArguments":["int32"]}},{"name":"Image","typeParameters":["T"],"type":{"name":"Image.Image","typeArguments":["T"]}},{"name":"Tuple","typeParameters":["T1","T2"],"fields":[{"name":"v1","type":"T1"},{"name":"v2","type":"T2"}]}]})";
-
-std::vector<std::string> SimpleGenericsWriterBase::previous_schemas_ = {
-};
-
-std::string SimpleGenericsWriterBase::SchemaFromVersion(Version version) {
-  switch (version) {
-  case Version::Current: return SimpleGenericsWriterBase::schema_; break;
-  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol SimpleGenerics.");
-  }
-
-}
-void SimpleGenericsWriterBase::WriteFloatImage(image::FloatImage const& value) {
-  if (unlikely(state_ != 0)) {
-    SimpleGenericsWriterBaseInvalidState(0, false, state_);
-  }
-
-  WriteFloatImageImpl(value);
-  state_ = 1;
-}
-
-void SimpleGenericsWriterBase::WriteIntImage(image::IntImage const& value) {
-  if (unlikely(state_ != 1)) {
-    SimpleGenericsWriterBaseInvalidState(1, false, state_);
-  }
-
-  WriteIntImageImpl(value);
-  state_ = 2;
-}
-
-void SimpleGenericsWriterBase::WriteIntImageAlternateSyntax(test_model::Image<int32_t> const& value) {
-  if (unlikely(state_ != 2)) {
-    SimpleGenericsWriterBaseInvalidState(2, false, state_);
-  }
-
-  WriteIntImageAlternateSyntaxImpl(value);
-  state_ = 3;
-}
-
-void SimpleGenericsWriterBase::WriteStringImage(test_model::Image<std::string> const& value) {
-  if (unlikely(state_ != 3)) {
-    SimpleGenericsWriterBaseInvalidState(3, false, state_);
-  }
-
-  WriteStringImageImpl(value);
-  state_ = 4;
-}
-
-void SimpleGenericsWriterBase::WriteIntFloatTuple(tuples::Tuple<int32_t, float> const& value) {
-  if (unlikely(state_ != 4)) {
-    SimpleGenericsWriterBaseInvalidState(4, false, state_);
-  }
-
-  WriteIntFloatTupleImpl(value);
-  state_ = 5;
-}
-
-void SimpleGenericsWriterBase::WriteFloatFloatTuple(tuples::Tuple<float, float> const& value) {
-  if (unlikely(state_ != 5)) {
-    SimpleGenericsWriterBaseInvalidState(5, false, state_);
-  }
-
-  WriteFloatFloatTupleImpl(value);
-  state_ = 6;
-}
-
-void SimpleGenericsWriterBase::WriteIntFloatTupleAlternateSyntax(tuples::Tuple<int32_t, float> const& value) {
-  if (unlikely(state_ != 6)) {
-    SimpleGenericsWriterBaseInvalidState(6, false, state_);
-  }
-
-  WriteIntFloatTupleAlternateSyntaxImpl(value);
-  state_ = 7;
-}
-
-void SimpleGenericsWriterBase::WriteIntStringTuple(tuples::Tuple<int32_t, std::string> const& value) {
-  if (unlikely(state_ != 7)) {
-    SimpleGenericsWriterBaseInvalidState(7, false, state_);
-  }
-
-  WriteIntStringTupleImpl(value);
-  state_ = 8;
-}
-
-void SimpleGenericsWriterBase::WriteStreamOfTypeVariants(std::variant<image::FloatImage, test_model::Image<double>> const& value) {
-  if (unlikely(state_ != 8)) {
-    SimpleGenericsWriterBaseInvalidState(8, false, state_);
-  }
-
-  WriteStreamOfTypeVariantsImpl(value);
-}
-
-void SimpleGenericsWriterBase::WriteStreamOfTypeVariants(std::vector<std::variant<image::FloatImage, test_model::Image<double>>> const& values) {
-  if (unlikely(state_ != 8)) {
-    SimpleGenericsWriterBaseInvalidState(8, false, state_);
-  }
-
-  WriteStreamOfTypeVariantsImpl(values);
-}
-
-void SimpleGenericsWriterBase::EndStreamOfTypeVariants() {
-  if (unlikely(state_ != 8)) {
-    SimpleGenericsWriterBaseInvalidState(8, true, state_);
-  }
-
-  EndStreamOfTypeVariantsImpl();
-  state_ = 9;
-}
-
-// fallback implementation
-void SimpleGenericsWriterBase::WriteStreamOfTypeVariantsImpl(std::vector<std::variant<image::FloatImage, test_model::Image<double>>> const& values) {
-  for (auto const& v : values) {
-    WriteStreamOfTypeVariantsImpl(v);
-  }
-}
-
-void SimpleGenericsWriterBase::Close() {
-  if (unlikely(state_ != 9)) {
-    SimpleGenericsWriterBaseInvalidState(9, false, state_);
-  }
-
-  CloseImpl();
-}
-
 std::string SimpleGenericsReaderBase::schema_ = SimpleGenericsWriterBase::schema_;
 
 std::vector<std::string> SimpleGenericsReaderBase::previous_schemas_ = SimpleGenericsWriterBase::previous_schemas_;
@@ -5604,9 +6075,10 @@ Version SimpleGenericsReaderBase::VersionFromSchema(std::string const& schema) {
   }
   throw std::runtime_error("The schema does not match any version supported by protocol SimpleGenerics.");
 }
+
 void SimpleGenericsReaderBase::ReadFloatImage(image::FloatImage& value) {
   if (unlikely(state_ != 0)) {
-    SimpleGenericsReaderBaseInvalidState(0, state_);
+    InvalidState(0);
   }
 
   ReadFloatImageImpl(value);
@@ -5615,7 +6087,7 @@ void SimpleGenericsReaderBase::ReadFloatImage(image::FloatImage& value) {
 
 void SimpleGenericsReaderBase::ReadIntImage(image::IntImage& value) {
   if (unlikely(state_ != 2)) {
-    SimpleGenericsReaderBaseInvalidState(2, state_);
+    InvalidState(2);
   }
 
   ReadIntImageImpl(value);
@@ -5624,7 +6096,7 @@ void SimpleGenericsReaderBase::ReadIntImage(image::IntImage& value) {
 
 void SimpleGenericsReaderBase::ReadIntImageAlternateSyntax(test_model::Image<int32_t>& value) {
   if (unlikely(state_ != 4)) {
-    SimpleGenericsReaderBaseInvalidState(4, state_);
+    InvalidState(4);
   }
 
   ReadIntImageAlternateSyntaxImpl(value);
@@ -5633,7 +6105,7 @@ void SimpleGenericsReaderBase::ReadIntImageAlternateSyntax(test_model::Image<int
 
 void SimpleGenericsReaderBase::ReadStringImage(test_model::Image<std::string>& value) {
   if (unlikely(state_ != 6)) {
-    SimpleGenericsReaderBaseInvalidState(6, state_);
+    InvalidState(6);
   }
 
   ReadStringImageImpl(value);
@@ -5642,7 +6114,7 @@ void SimpleGenericsReaderBase::ReadStringImage(test_model::Image<std::string>& v
 
 void SimpleGenericsReaderBase::ReadIntFloatTuple(tuples::Tuple<int32_t, float>& value) {
   if (unlikely(state_ != 8)) {
-    SimpleGenericsReaderBaseInvalidState(8, state_);
+    InvalidState(8);
   }
 
   ReadIntFloatTupleImpl(value);
@@ -5651,7 +6123,7 @@ void SimpleGenericsReaderBase::ReadIntFloatTuple(tuples::Tuple<int32_t, float>& 
 
 void SimpleGenericsReaderBase::ReadFloatFloatTuple(tuples::Tuple<float, float>& value) {
   if (unlikely(state_ != 10)) {
-    SimpleGenericsReaderBaseInvalidState(10, state_);
+    InvalidState(10);
   }
 
   ReadFloatFloatTupleImpl(value);
@@ -5660,7 +6132,7 @@ void SimpleGenericsReaderBase::ReadFloatFloatTuple(tuples::Tuple<float, float>& 
 
 void SimpleGenericsReaderBase::ReadIntFloatTupleAlternateSyntax(tuples::Tuple<int32_t, float>& value) {
   if (unlikely(state_ != 12)) {
-    SimpleGenericsReaderBaseInvalidState(12, state_);
+    InvalidState(12);
   }
 
   ReadIntFloatTupleAlternateSyntaxImpl(value);
@@ -5669,7 +6141,7 @@ void SimpleGenericsReaderBase::ReadIntFloatTupleAlternateSyntax(tuples::Tuple<in
 
 void SimpleGenericsReaderBase::ReadIntStringTuple(tuples::Tuple<int32_t, std::string>& value) {
   if (unlikely(state_ != 14)) {
-    SimpleGenericsReaderBaseInvalidState(14, state_);
+    InvalidState(14);
   }
 
   ReadIntStringTupleImpl(value);
@@ -5682,7 +6154,7 @@ bool SimpleGenericsReaderBase::ReadStreamOfTypeVariants(std::variant<image::Floa
       state_ = 18;
       return false;
     }
-    SimpleGenericsReaderBaseInvalidState(16, state_);
+    InvalidState(16);
   }
 
   bool result = ReadStreamOfTypeVariantsImpl(value);
@@ -5702,7 +6174,7 @@ bool SimpleGenericsReaderBase::ReadStreamOfTypeVariants(std::vector<std::variant
       values.clear();
       return false;
     }
-    SimpleGenericsReaderBaseInvalidState(16, state_);
+    InvalidState(16);
   }
 
   if (!ReadStreamOfTypeVariantsImpl(values)) {
@@ -5735,12 +6207,13 @@ void SimpleGenericsReaderBase::Close() {
     if (state_ == 17) {
       state_ = 18;
     } else {
-      SimpleGenericsReaderBaseInvalidState(18, state_);
+      InvalidState(18);
     }
   }
 
   CloseImpl();
 }
+
 void SimpleGenericsReaderBase::CopyTo(SimpleGenericsWriterBase& writer, size_t stream_of_type_variants_buffer_size) {
   {
     image::FloatImage value;
@@ -5798,10 +6271,118 @@ void SimpleGenericsReaderBase::CopyTo(SimpleGenericsWriterBase& writer, size_t s
   }
 }
 
-namespace {
-void AdvancedGenericsWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end, uint8_t current) {
+void SimpleGenericsReaderBase::InvalidState(uint8_t attempted) {
+  auto f = [](uint8_t i) -> std::string {
+    switch (i/2) {
+    case 0: return "ReadFloatImage()";
+    case 1: return "ReadIntImage()";
+    case 2: return "ReadIntImageAlternateSyntax()";
+    case 3: return "ReadStringImage()";
+    case 4: return "ReadIntFloatTuple()";
+    case 5: return "ReadFloatFloatTuple()";
+    case 6: return "ReadIntFloatTupleAlternateSyntax()";
+    case 7: return "ReadIntStringTuple()";
+    case 8: return "ReadStreamOfTypeVariants()";
+    case 9: return "Close()";
+    default: return "<unknown>";
+    }
+  };
+  throw std::runtime_error("Expected call to " + f(state_) + " but received call to " + f(attempted) + " instead.");
+}
+
+bool SimpleGenericsIndexedReaderBase::ReadStreamOfTypeVariants(std::variant<image::FloatImage, test_model::Image<double>>& value, size_t idx) {
+  return ReadStreamOfTypeVariantsImpl(value, idx);
+}
+
+bool SimpleGenericsIndexedReaderBase::ReadStreamOfTypeVariants(std::vector<std::variant<image::FloatImage, test_model::Image<double>>>& values, size_t idx) {
+  if (values.capacity() == 0) {
+    throw std::runtime_error("vector must have a nonzero capacity.");
+  }
+  if (!ReadStreamOfTypeVariantsImpl(values, idx)) {
+    return values.size() > 0;
+  }
+  return true;
+}
+
+size_t SimpleGenericsIndexedReaderBase::CountStreamOfTypeVariants() {
+  return CountStreamOfTypeVariantsImpl();
+}
+
+void SimpleGenericsIndexedReaderBase::InvalidState(uint8_t attempted) {
+  (void)(attempted);
+  return;
+}
+
+
+std::string AdvancedGenericsWriterBase::schema_ = R"({"protocol":{"name":"AdvancedGenerics","sequence":[{"name":"floatImageImage","type":{"name":"TestModel.Image","typeArguments":[{"name":"TestModel.Image","typeArguments":["float32"]}]}},{"name":"genericRecord1","type":{"name":"TestModel.GenericRecord","typeArguments":["int32","string"]}},{"name":"tupleOfOptionals","type":{"name":"TestModel.MyTuple","typeArguments":[[null,"int32"],[null,"string"]]}},{"name":"tupleOfOptionalsAlternateSyntax","type":{"name":"TestModel.MyTuple","typeArguments":[[null,"int32"],[null,"string"]]}},{"name":"tupleOfVectors","type":{"name":"TestModel.MyTuple","typeArguments":[{"vector":{"items":"int32"}},{"vector":{"items":"float32"}}]}}]},"types":[{"name":"MyTuple","typeParameters":["T1","T2"],"type":{"name":"Tuples.Tuple","typeArguments":["T1","T2"]}},{"name":"Image","typeParameters":["T"],"type":{"array":{"items":"T","dimensions":[{"name":"x"},{"name":"y"}]}}},{"name":"GenericRecord","typeParameters":["T1","T2"],"fields":[{"name":"scalar1","type":"T1"},{"name":"scalar2","type":"T2"},{"name":"vector1","type":{"vector":{"items":"T1"}}},{"name":"image2","type":{"name":"TestModel.Image","typeArguments":["T2"]}}]},{"name":"Image","typeParameters":["T"],"type":{"name":"Image.Image","typeArguments":["T"]}},{"name":"MyTuple","typeParameters":["T1","T2"],"type":{"name":"BasicTypes.MyTuple","typeArguments":["T1","T2"]}},{"name":"Tuple","typeParameters":["T1","T2"],"fields":[{"name":"v1","type":"T1"},{"name":"v2","type":"T2"}]}]})";
+
+std::vector<std::string> AdvancedGenericsWriterBase::previous_schemas_ = {
+};
+
+std::string AdvancedGenericsWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Current: return AdvancedGenericsWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol AdvancedGenerics.");
+  }
+
+}
+
+void AdvancedGenericsWriterBase::WriteFloatImageImage(test_model::Image<test_model::Image<float>> const& value) {
+  if (unlikely(state_ != 0)) {
+    InvalidState(0, false);
+  }
+
+  WriteFloatImageImageImpl(value);
+  state_ = 1;
+}
+
+void AdvancedGenericsWriterBase::WriteGenericRecord1(test_model::GenericRecord<int32_t, std::string> const& value) {
+  if (unlikely(state_ != 1)) {
+    InvalidState(1, false);
+  }
+
+  WriteGenericRecord1Impl(value);
+  state_ = 2;
+}
+
+void AdvancedGenericsWriterBase::WriteTupleOfOptionals(test_model::MyTuple<std::optional<int32_t>, std::optional<std::string>> const& value) {
+  if (unlikely(state_ != 2)) {
+    InvalidState(2, false);
+  }
+
+  WriteTupleOfOptionalsImpl(value);
+  state_ = 3;
+}
+
+void AdvancedGenericsWriterBase::WriteTupleOfOptionalsAlternateSyntax(test_model::MyTuple<std::optional<int32_t>, std::optional<std::string>> const& value) {
+  if (unlikely(state_ != 3)) {
+    InvalidState(3, false);
+  }
+
+  WriteTupleOfOptionalsAlternateSyntaxImpl(value);
+  state_ = 4;
+}
+
+void AdvancedGenericsWriterBase::WriteTupleOfVectors(test_model::MyTuple<std::vector<int32_t>, std::vector<float>> const& value) {
+  if (unlikely(state_ != 4)) {
+    InvalidState(4, false);
+  }
+
+  WriteTupleOfVectorsImpl(value);
+  state_ = 5;
+}
+
+void AdvancedGenericsWriterBase::Close() {
+  if (unlikely(state_ != 5)) {
+    InvalidState(5, false);
+  }
+
+  CloseImpl();
+}
+
+void AdvancedGenericsWriterBase::InvalidState(uint8_t attempted, [[maybe_unused]] bool end) {
   std::string expected_method;
-  switch (current) {
+  switch (state_) {
   case 0: expected_method = "WriteFloatImageImage()"; break;
   case 1: expected_method = "WriteGenericRecord1()"; break;
   case 2: expected_method = "WriteTupleOfOptionals()"; break;
@@ -5820,88 +6401,6 @@ void AdvancedGenericsWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] 
   throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
 }
 
-void AdvancedGenericsReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
-  auto f = [](uint8_t i) -> std::string {
-    switch (i/2) {
-    case 0: return "ReadFloatImageImage()";
-    case 1: return "ReadGenericRecord1()";
-    case 2: return "ReadTupleOfOptionals()";
-    case 3: return "ReadTupleOfOptionalsAlternateSyntax()";
-    case 4: return "ReadTupleOfVectors()";
-    case 5: return "Close()";
-    default: return "<unknown>";
-    }
-  };
-  throw std::runtime_error("Expected call to " + f(current) + " but received call to " + f(attempted) + " instead.");
-}
-
-} // namespace 
-
-std::string AdvancedGenericsWriterBase::schema_ = R"({"protocol":{"name":"AdvancedGenerics","sequence":[{"name":"floatImageImage","type":{"name":"TestModel.Image","typeArguments":[{"name":"TestModel.Image","typeArguments":["float32"]}]}},{"name":"genericRecord1","type":{"name":"TestModel.GenericRecord","typeArguments":["int32","string"]}},{"name":"tupleOfOptionals","type":{"name":"TestModel.MyTuple","typeArguments":[[null,"int32"],[null,"string"]]}},{"name":"tupleOfOptionalsAlternateSyntax","type":{"name":"TestModel.MyTuple","typeArguments":[[null,"int32"],[null,"string"]]}},{"name":"tupleOfVectors","type":{"name":"TestModel.MyTuple","typeArguments":[{"vector":{"items":"int32"}},{"vector":{"items":"float32"}}]}}]},"types":[{"name":"MyTuple","typeParameters":["T1","T2"],"type":{"name":"Tuples.Tuple","typeArguments":["T1","T2"]}},{"name":"Image","typeParameters":["T"],"type":{"array":{"items":"T","dimensions":[{"name":"x"},{"name":"y"}]}}},{"name":"GenericRecord","typeParameters":["T1","T2"],"fields":[{"name":"scalar1","type":"T1"},{"name":"scalar2","type":"T2"},{"name":"vector1","type":{"vector":{"items":"T1"}}},{"name":"image2","type":{"name":"TestModel.Image","typeArguments":["T2"]}}]},{"name":"Image","typeParameters":["T"],"type":{"name":"Image.Image","typeArguments":["T"]}},{"name":"MyTuple","typeParameters":["T1","T2"],"type":{"name":"BasicTypes.MyTuple","typeArguments":["T1","T2"]}},{"name":"Tuple","typeParameters":["T1","T2"],"fields":[{"name":"v1","type":"T1"},{"name":"v2","type":"T2"}]}]})";
-
-std::vector<std::string> AdvancedGenericsWriterBase::previous_schemas_ = {
-};
-
-std::string AdvancedGenericsWriterBase::SchemaFromVersion(Version version) {
-  switch (version) {
-  case Version::Current: return AdvancedGenericsWriterBase::schema_; break;
-  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol AdvancedGenerics.");
-  }
-
-}
-void AdvancedGenericsWriterBase::WriteFloatImageImage(test_model::Image<test_model::Image<float>> const& value) {
-  if (unlikely(state_ != 0)) {
-    AdvancedGenericsWriterBaseInvalidState(0, false, state_);
-  }
-
-  WriteFloatImageImageImpl(value);
-  state_ = 1;
-}
-
-void AdvancedGenericsWriterBase::WriteGenericRecord1(test_model::GenericRecord<int32_t, std::string> const& value) {
-  if (unlikely(state_ != 1)) {
-    AdvancedGenericsWriterBaseInvalidState(1, false, state_);
-  }
-
-  WriteGenericRecord1Impl(value);
-  state_ = 2;
-}
-
-void AdvancedGenericsWriterBase::WriteTupleOfOptionals(test_model::MyTuple<std::optional<int32_t>, std::optional<std::string>> const& value) {
-  if (unlikely(state_ != 2)) {
-    AdvancedGenericsWriterBaseInvalidState(2, false, state_);
-  }
-
-  WriteTupleOfOptionalsImpl(value);
-  state_ = 3;
-}
-
-void AdvancedGenericsWriterBase::WriteTupleOfOptionalsAlternateSyntax(test_model::MyTuple<std::optional<int32_t>, std::optional<std::string>> const& value) {
-  if (unlikely(state_ != 3)) {
-    AdvancedGenericsWriterBaseInvalidState(3, false, state_);
-  }
-
-  WriteTupleOfOptionalsAlternateSyntaxImpl(value);
-  state_ = 4;
-}
-
-void AdvancedGenericsWriterBase::WriteTupleOfVectors(test_model::MyTuple<std::vector<int32_t>, std::vector<float>> const& value) {
-  if (unlikely(state_ != 4)) {
-    AdvancedGenericsWriterBaseInvalidState(4, false, state_);
-  }
-
-  WriteTupleOfVectorsImpl(value);
-  state_ = 5;
-}
-
-void AdvancedGenericsWriterBase::Close() {
-  if (unlikely(state_ != 5)) {
-    AdvancedGenericsWriterBaseInvalidState(5, false, state_);
-  }
-
-  CloseImpl();
-}
-
 std::string AdvancedGenericsReaderBase::schema_ = AdvancedGenericsWriterBase::schema_;
 
 std::vector<std::string> AdvancedGenericsReaderBase::previous_schemas_ = AdvancedGenericsWriterBase::previous_schemas_;
@@ -5912,9 +6411,10 @@ Version AdvancedGenericsReaderBase::VersionFromSchema(std::string const& schema)
   }
   throw std::runtime_error("The schema does not match any version supported by protocol AdvancedGenerics.");
 }
+
 void AdvancedGenericsReaderBase::ReadFloatImageImage(test_model::Image<test_model::Image<float>>& value) {
   if (unlikely(state_ != 0)) {
-    AdvancedGenericsReaderBaseInvalidState(0, state_);
+    InvalidState(0);
   }
 
   ReadFloatImageImageImpl(value);
@@ -5923,7 +6423,7 @@ void AdvancedGenericsReaderBase::ReadFloatImageImage(test_model::Image<test_mode
 
 void AdvancedGenericsReaderBase::ReadGenericRecord1(test_model::GenericRecord<int32_t, std::string>& value) {
   if (unlikely(state_ != 2)) {
-    AdvancedGenericsReaderBaseInvalidState(2, state_);
+    InvalidState(2);
   }
 
   ReadGenericRecord1Impl(value);
@@ -5932,7 +6432,7 @@ void AdvancedGenericsReaderBase::ReadGenericRecord1(test_model::GenericRecord<in
 
 void AdvancedGenericsReaderBase::ReadTupleOfOptionals(test_model::MyTuple<std::optional<int32_t>, std::optional<std::string>>& value) {
   if (unlikely(state_ != 4)) {
-    AdvancedGenericsReaderBaseInvalidState(4, state_);
+    InvalidState(4);
   }
 
   ReadTupleOfOptionalsImpl(value);
@@ -5941,7 +6441,7 @@ void AdvancedGenericsReaderBase::ReadTupleOfOptionals(test_model::MyTuple<std::o
 
 void AdvancedGenericsReaderBase::ReadTupleOfOptionalsAlternateSyntax(test_model::MyTuple<std::optional<int32_t>, std::optional<std::string>>& value) {
   if (unlikely(state_ != 6)) {
-    AdvancedGenericsReaderBaseInvalidState(6, state_);
+    InvalidState(6);
   }
 
   ReadTupleOfOptionalsAlternateSyntaxImpl(value);
@@ -5950,7 +6450,7 @@ void AdvancedGenericsReaderBase::ReadTupleOfOptionalsAlternateSyntax(test_model:
 
 void AdvancedGenericsReaderBase::ReadTupleOfVectors(test_model::MyTuple<std::vector<int32_t>, std::vector<float>>& value) {
   if (unlikely(state_ != 8)) {
-    AdvancedGenericsReaderBaseInvalidState(8, state_);
+    InvalidState(8);
   }
 
   ReadTupleOfVectorsImpl(value);
@@ -5959,11 +6459,12 @@ void AdvancedGenericsReaderBase::ReadTupleOfVectors(test_model::MyTuple<std::vec
 
 void AdvancedGenericsReaderBase::Close() {
   if (unlikely(state_ != 10)) {
-    AdvancedGenericsReaderBaseInvalidState(10, state_);
+    InvalidState(10);
   }
 
   CloseImpl();
 }
+
 void AdvancedGenericsReaderBase::CopyTo(AdvancedGenericsWriterBase& writer) {
   {
     test_model::Image<test_model::Image<float>> value;
@@ -5992,10 +6493,164 @@ void AdvancedGenericsReaderBase::CopyTo(AdvancedGenericsWriterBase& writer) {
   }
 }
 
-namespace {
-void AliasesWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end, uint8_t current) {
+void AdvancedGenericsReaderBase::InvalidState(uint8_t attempted) {
+  auto f = [](uint8_t i) -> std::string {
+    switch (i/2) {
+    case 0: return "ReadFloatImageImage()";
+    case 1: return "ReadGenericRecord1()";
+    case 2: return "ReadTupleOfOptionals()";
+    case 3: return "ReadTupleOfOptionalsAlternateSyntax()";
+    case 4: return "ReadTupleOfVectors()";
+    case 5: return "Close()";
+    default: return "<unknown>";
+    }
+  };
+  throw std::runtime_error("Expected call to " + f(state_) + " but received call to " + f(attempted) + " instead.");
+}
+
+void AdvancedGenericsIndexedReaderBase::InvalidState(uint8_t attempted) {
+  (void)(attempted);
+  return;
+}
+
+
+std::string AliasesWriterBase::schema_ = R"({"protocol":{"name":"Aliases","sequence":[{"name":"aliasedString","type":"TestModel.AliasedString"},{"name":"aliasedEnum","type":"TestModel.AliasedEnum"},{"name":"aliasedOpenGeneric","type":{"name":"TestModel.AliasedOpenGeneric","typeArguments":["TestModel.AliasedString","TestModel.AliasedEnum"]}},{"name":"aliasedClosedGeneric","type":"TestModel.AliasedClosedGeneric"},{"name":"aliasedOptional","type":"TestModel.AliasedOptional"},{"name":"aliasedGenericOptional","type":{"name":"TestModel.AliasedGenericOptional","typeArguments":["float32"]}},{"name":"aliasedGenericUnion2","type":{"name":"TestModel.AliasedGenericUnion2","typeArguments":["TestModel.AliasedString","TestModel.AliasedEnum"]}},{"name":"aliasedGenericVector","type":{"name":"TestModel.AliasedGenericVector","typeArguments":["float32"]}},{"name":"aliasedGenericFixedVector","type":{"name":"TestModel.AliasedGenericFixedVector","typeArguments":["float32"]}},{"name":"streamOfAliasedGenericUnion2","type":{"stream":{"items":{"name":"TestModel.AliasedGenericUnion2","typeArguments":["TestModel.AliasedString","TestModel.AliasedEnum"]}}}}]},"types":[{"name":"Fruits","values":[{"symbol":"apple","value":1},{"symbol":"banana","value":2},{"symbol":"pear","value":3}]},{"name":"GenericUnion2","typeParameters":["T1","T2"],"type":[{"tag":"T1","type":"T1"},{"tag":"T2","type":"T2"}]},{"name":"GenericVector","typeParameters":["T"],"type":{"vector":{"items":"T"}}},{"name":"MyTuple","typeParameters":["T1","T2"],"type":{"name":"Tuples.Tuple","typeArguments":["T1","T2"]}},{"name":"AliasedClosedGeneric","type":{"name":"TestModel.AliasedTuple","typeArguments":["TestModel.AliasedString","TestModel.AliasedEnum"]}},{"name":"AliasedEnum","type":"TestModel.Fruits"},{"name":"AliasedGenericFixedVector","typeParameters":["T"],"type":{"vector":{"items":"T","length":3}}},{"name":"AliasedGenericOptional","typeParameters":["T"],"type":[null,"T"]},{"name":"AliasedGenericUnion2","typeParameters":["T1","T2"],"type":{"name":"BasicTypes.GenericUnion2","typeArguments":["T1","T2"]}},{"name":"AliasedGenericVector","typeParameters":["T"],"type":{"name":"BasicTypes.GenericVector","typeArguments":["T"]}},{"name":"AliasedOpenGeneric","typeParameters":["T1","T2"],"type":{"name":"TestModel.AliasedTuple","typeArguments":["T1","T2"]}},{"name":"AliasedOptional","type":[null,"int32"]},{"name":"AliasedString","type":"string"},{"name":"AliasedTuple","typeParameters":["T1","T2"],"type":{"name":"TestModel.MyTuple","typeArguments":["T1","T2"]}},{"name":"Fruits","type":"BasicTypes.Fruits"},{"name":"MyTuple","typeParameters":["T1","T2"],"type":{"name":"BasicTypes.MyTuple","typeArguments":["T1","T2"]}},{"name":"Tuple","typeParameters":["T1","T2"],"fields":[{"name":"v1","type":"T1"},{"name":"v2","type":"T2"}]}]})";
+
+std::vector<std::string> AliasesWriterBase::previous_schemas_ = {
+};
+
+std::string AliasesWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Current: return AliasesWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol Aliases.");
+  }
+
+}
+
+void AliasesWriterBase::WriteAliasedString(test_model::AliasedString const& value) {
+  if (unlikely(state_ != 0)) {
+    InvalidState(0, false);
+  }
+
+  WriteAliasedStringImpl(value);
+  state_ = 1;
+}
+
+void AliasesWriterBase::WriteAliasedEnum(test_model::AliasedEnum const& value) {
+  if (unlikely(state_ != 1)) {
+    InvalidState(1, false);
+  }
+
+  WriteAliasedEnumImpl(value);
+  state_ = 2;
+}
+
+void AliasesWriterBase::WriteAliasedOpenGeneric(test_model::AliasedOpenGeneric<test_model::AliasedString, test_model::AliasedEnum> const& value) {
+  if (unlikely(state_ != 2)) {
+    InvalidState(2, false);
+  }
+
+  WriteAliasedOpenGenericImpl(value);
+  state_ = 3;
+}
+
+void AliasesWriterBase::WriteAliasedClosedGeneric(test_model::AliasedClosedGeneric const& value) {
+  if (unlikely(state_ != 3)) {
+    InvalidState(3, false);
+  }
+
+  WriteAliasedClosedGenericImpl(value);
+  state_ = 4;
+}
+
+void AliasesWriterBase::WriteAliasedOptional(test_model::AliasedOptional const& value) {
+  if (unlikely(state_ != 4)) {
+    InvalidState(4, false);
+  }
+
+  WriteAliasedOptionalImpl(value);
+  state_ = 5;
+}
+
+void AliasesWriterBase::WriteAliasedGenericOptional(test_model::AliasedGenericOptional<float> const& value) {
+  if (unlikely(state_ != 5)) {
+    InvalidState(5, false);
+  }
+
+  WriteAliasedGenericOptionalImpl(value);
+  state_ = 6;
+}
+
+void AliasesWriterBase::WriteAliasedGenericUnion2(test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum> const& value) {
+  if (unlikely(state_ != 6)) {
+    InvalidState(6, false);
+  }
+
+  WriteAliasedGenericUnion2Impl(value);
+  state_ = 7;
+}
+
+void AliasesWriterBase::WriteAliasedGenericVector(test_model::AliasedGenericVector<float> const& value) {
+  if (unlikely(state_ != 7)) {
+    InvalidState(7, false);
+  }
+
+  WriteAliasedGenericVectorImpl(value);
+  state_ = 8;
+}
+
+void AliasesWriterBase::WriteAliasedGenericFixedVector(test_model::AliasedGenericFixedVector<float> const& value) {
+  if (unlikely(state_ != 8)) {
+    InvalidState(8, false);
+  }
+
+  WriteAliasedGenericFixedVectorImpl(value);
+  state_ = 9;
+}
+
+void AliasesWriterBase::WriteStreamOfAliasedGenericUnion2(test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum> const& value) {
+  if (unlikely(state_ != 9)) {
+    InvalidState(9, false);
+  }
+
+  WriteStreamOfAliasedGenericUnion2Impl(value);
+}
+
+void AliasesWriterBase::WriteStreamOfAliasedGenericUnion2(std::vector<test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum>> const& values) {
+  if (unlikely(state_ != 9)) {
+    InvalidState(9, false);
+  }
+
+  WriteStreamOfAliasedGenericUnion2Impl(values);
+}
+
+void AliasesWriterBase::EndStreamOfAliasedGenericUnion2() {
+  if (unlikely(state_ != 9)) {
+    InvalidState(9, true);
+  }
+
+  EndStreamOfAliasedGenericUnion2Impl();
+  state_ = 10;
+}
+
+// fallback implementation
+void AliasesWriterBase::WriteStreamOfAliasedGenericUnion2Impl(std::vector<test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum>> const& values) {
+  for (auto const& v : values) {
+    WriteStreamOfAliasedGenericUnion2Impl(v);
+  }
+}
+
+void AliasesWriterBase::Close() {
+  if (unlikely(state_ != 10)) {
+    InvalidState(10, false);
+  }
+
+  CloseImpl();
+}
+
+void AliasesWriterBase::InvalidState(uint8_t attempted, [[maybe_unused]] bool end) {
   std::string expected_method;
-  switch (current) {
+  switch (state_) {
   case 0: expected_method = "WriteAliasedString()"; break;
   case 1: expected_method = "WriteAliasedEnum()"; break;
   case 2: expected_method = "WriteAliasedOpenGeneric()"; break;
@@ -6024,161 +6679,6 @@ void AliasesWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end,
   throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
 }
 
-void AliasesReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
-  auto f = [](uint8_t i) -> std::string {
-    switch (i/2) {
-    case 0: return "ReadAliasedString()";
-    case 1: return "ReadAliasedEnum()";
-    case 2: return "ReadAliasedOpenGeneric()";
-    case 3: return "ReadAliasedClosedGeneric()";
-    case 4: return "ReadAliasedOptional()";
-    case 5: return "ReadAliasedGenericOptional()";
-    case 6: return "ReadAliasedGenericUnion2()";
-    case 7: return "ReadAliasedGenericVector()";
-    case 8: return "ReadAliasedGenericFixedVector()";
-    case 9: return "ReadStreamOfAliasedGenericUnion2()";
-    case 10: return "Close()";
-    default: return "<unknown>";
-    }
-  };
-  throw std::runtime_error("Expected call to " + f(current) + " but received call to " + f(attempted) + " instead.");
-}
-
-} // namespace 
-
-std::string AliasesWriterBase::schema_ = R"({"protocol":{"name":"Aliases","sequence":[{"name":"aliasedString","type":"TestModel.AliasedString"},{"name":"aliasedEnum","type":"TestModel.AliasedEnum"},{"name":"aliasedOpenGeneric","type":{"name":"TestModel.AliasedOpenGeneric","typeArguments":["TestModel.AliasedString","TestModel.AliasedEnum"]}},{"name":"aliasedClosedGeneric","type":"TestModel.AliasedClosedGeneric"},{"name":"aliasedOptional","type":"TestModel.AliasedOptional"},{"name":"aliasedGenericOptional","type":{"name":"TestModel.AliasedGenericOptional","typeArguments":["float32"]}},{"name":"aliasedGenericUnion2","type":{"name":"TestModel.AliasedGenericUnion2","typeArguments":["TestModel.AliasedString","TestModel.AliasedEnum"]}},{"name":"aliasedGenericVector","type":{"name":"TestModel.AliasedGenericVector","typeArguments":["float32"]}},{"name":"aliasedGenericFixedVector","type":{"name":"TestModel.AliasedGenericFixedVector","typeArguments":["float32"]}},{"name":"streamOfAliasedGenericUnion2","type":{"stream":{"items":{"name":"TestModel.AliasedGenericUnion2","typeArguments":["TestModel.AliasedString","TestModel.AliasedEnum"]}}}}]},"types":[{"name":"Fruits","values":[{"symbol":"apple","value":1},{"symbol":"banana","value":2},{"symbol":"pear","value":3}]},{"name":"GenericUnion2","typeParameters":["T1","T2"],"type":[{"tag":"T1","type":"T1"},{"tag":"T2","type":"T2"}]},{"name":"GenericVector","typeParameters":["T"],"type":{"vector":{"items":"T"}}},{"name":"MyTuple","typeParameters":["T1","T2"],"type":{"name":"Tuples.Tuple","typeArguments":["T1","T2"]}},{"name":"AliasedClosedGeneric","type":{"name":"TestModel.AliasedTuple","typeArguments":["TestModel.AliasedString","TestModel.AliasedEnum"]}},{"name":"AliasedEnum","type":"TestModel.Fruits"},{"name":"AliasedGenericFixedVector","typeParameters":["T"],"type":{"vector":{"items":"T","length":3}}},{"name":"AliasedGenericOptional","typeParameters":["T"],"type":[null,"T"]},{"name":"AliasedGenericUnion2","typeParameters":["T1","T2"],"type":{"name":"BasicTypes.GenericUnion2","typeArguments":["T1","T2"]}},{"name":"AliasedGenericVector","typeParameters":["T"],"type":{"name":"BasicTypes.GenericVector","typeArguments":["T"]}},{"name":"AliasedOpenGeneric","typeParameters":["T1","T2"],"type":{"name":"TestModel.AliasedTuple","typeArguments":["T1","T2"]}},{"name":"AliasedOptional","type":[null,"int32"]},{"name":"AliasedString","type":"string"},{"name":"AliasedTuple","typeParameters":["T1","T2"],"type":{"name":"TestModel.MyTuple","typeArguments":["T1","T2"]}},{"name":"Fruits","type":"BasicTypes.Fruits"},{"name":"MyTuple","typeParameters":["T1","T2"],"type":{"name":"BasicTypes.MyTuple","typeArguments":["T1","T2"]}},{"name":"Tuple","typeParameters":["T1","T2"],"fields":[{"name":"v1","type":"T1"},{"name":"v2","type":"T2"}]}]})";
-
-std::vector<std::string> AliasesWriterBase::previous_schemas_ = {
-};
-
-std::string AliasesWriterBase::SchemaFromVersion(Version version) {
-  switch (version) {
-  case Version::Current: return AliasesWriterBase::schema_; break;
-  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol Aliases.");
-  }
-
-}
-void AliasesWriterBase::WriteAliasedString(test_model::AliasedString const& value) {
-  if (unlikely(state_ != 0)) {
-    AliasesWriterBaseInvalidState(0, false, state_);
-  }
-
-  WriteAliasedStringImpl(value);
-  state_ = 1;
-}
-
-void AliasesWriterBase::WriteAliasedEnum(test_model::AliasedEnum const& value) {
-  if (unlikely(state_ != 1)) {
-    AliasesWriterBaseInvalidState(1, false, state_);
-  }
-
-  WriteAliasedEnumImpl(value);
-  state_ = 2;
-}
-
-void AliasesWriterBase::WriteAliasedOpenGeneric(test_model::AliasedOpenGeneric<test_model::AliasedString, test_model::AliasedEnum> const& value) {
-  if (unlikely(state_ != 2)) {
-    AliasesWriterBaseInvalidState(2, false, state_);
-  }
-
-  WriteAliasedOpenGenericImpl(value);
-  state_ = 3;
-}
-
-void AliasesWriterBase::WriteAliasedClosedGeneric(test_model::AliasedClosedGeneric const& value) {
-  if (unlikely(state_ != 3)) {
-    AliasesWriterBaseInvalidState(3, false, state_);
-  }
-
-  WriteAliasedClosedGenericImpl(value);
-  state_ = 4;
-}
-
-void AliasesWriterBase::WriteAliasedOptional(test_model::AliasedOptional const& value) {
-  if (unlikely(state_ != 4)) {
-    AliasesWriterBaseInvalidState(4, false, state_);
-  }
-
-  WriteAliasedOptionalImpl(value);
-  state_ = 5;
-}
-
-void AliasesWriterBase::WriteAliasedGenericOptional(test_model::AliasedGenericOptional<float> const& value) {
-  if (unlikely(state_ != 5)) {
-    AliasesWriterBaseInvalidState(5, false, state_);
-  }
-
-  WriteAliasedGenericOptionalImpl(value);
-  state_ = 6;
-}
-
-void AliasesWriterBase::WriteAliasedGenericUnion2(test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum> const& value) {
-  if (unlikely(state_ != 6)) {
-    AliasesWriterBaseInvalidState(6, false, state_);
-  }
-
-  WriteAliasedGenericUnion2Impl(value);
-  state_ = 7;
-}
-
-void AliasesWriterBase::WriteAliasedGenericVector(test_model::AliasedGenericVector<float> const& value) {
-  if (unlikely(state_ != 7)) {
-    AliasesWriterBaseInvalidState(7, false, state_);
-  }
-
-  WriteAliasedGenericVectorImpl(value);
-  state_ = 8;
-}
-
-void AliasesWriterBase::WriteAliasedGenericFixedVector(test_model::AliasedGenericFixedVector<float> const& value) {
-  if (unlikely(state_ != 8)) {
-    AliasesWriterBaseInvalidState(8, false, state_);
-  }
-
-  WriteAliasedGenericFixedVectorImpl(value);
-  state_ = 9;
-}
-
-void AliasesWriterBase::WriteStreamOfAliasedGenericUnion2(test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum> const& value) {
-  if (unlikely(state_ != 9)) {
-    AliasesWriterBaseInvalidState(9, false, state_);
-  }
-
-  WriteStreamOfAliasedGenericUnion2Impl(value);
-}
-
-void AliasesWriterBase::WriteStreamOfAliasedGenericUnion2(std::vector<test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum>> const& values) {
-  if (unlikely(state_ != 9)) {
-    AliasesWriterBaseInvalidState(9, false, state_);
-  }
-
-  WriteStreamOfAliasedGenericUnion2Impl(values);
-}
-
-void AliasesWriterBase::EndStreamOfAliasedGenericUnion2() {
-  if (unlikely(state_ != 9)) {
-    AliasesWriterBaseInvalidState(9, true, state_);
-  }
-
-  EndStreamOfAliasedGenericUnion2Impl();
-  state_ = 10;
-}
-
-// fallback implementation
-void AliasesWriterBase::WriteStreamOfAliasedGenericUnion2Impl(std::vector<test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum>> const& values) {
-  for (auto const& v : values) {
-    WriteStreamOfAliasedGenericUnion2Impl(v);
-  }
-}
-
-void AliasesWriterBase::Close() {
-  if (unlikely(state_ != 10)) {
-    AliasesWriterBaseInvalidState(10, false, state_);
-  }
-
-  CloseImpl();
-}
-
 std::string AliasesReaderBase::schema_ = AliasesWriterBase::schema_;
 
 std::vector<std::string> AliasesReaderBase::previous_schemas_ = AliasesWriterBase::previous_schemas_;
@@ -6189,9 +6689,10 @@ Version AliasesReaderBase::VersionFromSchema(std::string const& schema) {
   }
   throw std::runtime_error("The schema does not match any version supported by protocol Aliases.");
 }
+
 void AliasesReaderBase::ReadAliasedString(test_model::AliasedString& value) {
   if (unlikely(state_ != 0)) {
-    AliasesReaderBaseInvalidState(0, state_);
+    InvalidState(0);
   }
 
   ReadAliasedStringImpl(value);
@@ -6200,7 +6701,7 @@ void AliasesReaderBase::ReadAliasedString(test_model::AliasedString& value) {
 
 void AliasesReaderBase::ReadAliasedEnum(test_model::AliasedEnum& value) {
   if (unlikely(state_ != 2)) {
-    AliasesReaderBaseInvalidState(2, state_);
+    InvalidState(2);
   }
 
   ReadAliasedEnumImpl(value);
@@ -6209,7 +6710,7 @@ void AliasesReaderBase::ReadAliasedEnum(test_model::AliasedEnum& value) {
 
 void AliasesReaderBase::ReadAliasedOpenGeneric(test_model::AliasedOpenGeneric<test_model::AliasedString, test_model::AliasedEnum>& value) {
   if (unlikely(state_ != 4)) {
-    AliasesReaderBaseInvalidState(4, state_);
+    InvalidState(4);
   }
 
   ReadAliasedOpenGenericImpl(value);
@@ -6218,7 +6719,7 @@ void AliasesReaderBase::ReadAliasedOpenGeneric(test_model::AliasedOpenGeneric<te
 
 void AliasesReaderBase::ReadAliasedClosedGeneric(test_model::AliasedClosedGeneric& value) {
   if (unlikely(state_ != 6)) {
-    AliasesReaderBaseInvalidState(6, state_);
+    InvalidState(6);
   }
 
   ReadAliasedClosedGenericImpl(value);
@@ -6227,7 +6728,7 @@ void AliasesReaderBase::ReadAliasedClosedGeneric(test_model::AliasedClosedGeneri
 
 void AliasesReaderBase::ReadAliasedOptional(test_model::AliasedOptional& value) {
   if (unlikely(state_ != 8)) {
-    AliasesReaderBaseInvalidState(8, state_);
+    InvalidState(8);
   }
 
   ReadAliasedOptionalImpl(value);
@@ -6236,7 +6737,7 @@ void AliasesReaderBase::ReadAliasedOptional(test_model::AliasedOptional& value) 
 
 void AliasesReaderBase::ReadAliasedGenericOptional(test_model::AliasedGenericOptional<float>& value) {
   if (unlikely(state_ != 10)) {
-    AliasesReaderBaseInvalidState(10, state_);
+    InvalidState(10);
   }
 
   ReadAliasedGenericOptionalImpl(value);
@@ -6245,7 +6746,7 @@ void AliasesReaderBase::ReadAliasedGenericOptional(test_model::AliasedGenericOpt
 
 void AliasesReaderBase::ReadAliasedGenericUnion2(test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum>& value) {
   if (unlikely(state_ != 12)) {
-    AliasesReaderBaseInvalidState(12, state_);
+    InvalidState(12);
   }
 
   ReadAliasedGenericUnion2Impl(value);
@@ -6254,7 +6755,7 @@ void AliasesReaderBase::ReadAliasedGenericUnion2(test_model::AliasedGenericUnion
 
 void AliasesReaderBase::ReadAliasedGenericVector(test_model::AliasedGenericVector<float>& value) {
   if (unlikely(state_ != 14)) {
-    AliasesReaderBaseInvalidState(14, state_);
+    InvalidState(14);
   }
 
   ReadAliasedGenericVectorImpl(value);
@@ -6263,7 +6764,7 @@ void AliasesReaderBase::ReadAliasedGenericVector(test_model::AliasedGenericVecto
 
 void AliasesReaderBase::ReadAliasedGenericFixedVector(test_model::AliasedGenericFixedVector<float>& value) {
   if (unlikely(state_ != 16)) {
-    AliasesReaderBaseInvalidState(16, state_);
+    InvalidState(16);
   }
 
   ReadAliasedGenericFixedVectorImpl(value);
@@ -6276,7 +6777,7 @@ bool AliasesReaderBase::ReadStreamOfAliasedGenericUnion2(test_model::AliasedGene
       state_ = 20;
       return false;
     }
-    AliasesReaderBaseInvalidState(18, state_);
+    InvalidState(18);
   }
 
   bool result = ReadStreamOfAliasedGenericUnion2Impl(value);
@@ -6296,7 +6797,7 @@ bool AliasesReaderBase::ReadStreamOfAliasedGenericUnion2(std::vector<test_model:
       values.clear();
       return false;
     }
-    AliasesReaderBaseInvalidState(18, state_);
+    InvalidState(18);
   }
 
   if (!ReadStreamOfAliasedGenericUnion2Impl(values)) {
@@ -6329,12 +6830,13 @@ void AliasesReaderBase::Close() {
     if (state_ == 19) {
       state_ = 20;
     } else {
-      AliasesReaderBaseInvalidState(20, state_);
+      InvalidState(20);
     }
   }
 
   CloseImpl();
 }
+
 void AliasesReaderBase::CopyTo(AliasesWriterBase& writer, size_t stream_of_aliased_generic_union_2_buffer_size) {
   {
     test_model::AliasedString value;
@@ -6397,35 +6899,49 @@ void AliasesReaderBase::CopyTo(AliasesWriterBase& writer, size_t stream_of_alias
   }
 }
 
-namespace {
-void StreamsOfAliasedUnionsWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end, uint8_t current) {
-  std::string expected_method;
-  switch (current) {
-  case 0: expected_method = "WriteIntOrSimpleRecord() or EndIntOrSimpleRecord()"; break;
-  case 1: expected_method = "WriteNullableIntOrSimpleRecord() or EndNullableIntOrSimpleRecord()"; break;
-  }
-  std::string attempted_method;
-  switch (attempted) {
-  case 0: attempted_method = end ? "EndIntOrSimpleRecord()" : "WriteIntOrSimpleRecord()"; break;
-  case 1: attempted_method = end ? "EndNullableIntOrSimpleRecord()" : "WriteNullableIntOrSimpleRecord()"; break;
-  case 2: attempted_method = "Close()"; break;
-  }
-  throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
-}
-
-void StreamsOfAliasedUnionsReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
+void AliasesReaderBase::InvalidState(uint8_t attempted) {
   auto f = [](uint8_t i) -> std::string {
     switch (i/2) {
-    case 0: return "ReadIntOrSimpleRecord()";
-    case 1: return "ReadNullableIntOrSimpleRecord()";
-    case 2: return "Close()";
+    case 0: return "ReadAliasedString()";
+    case 1: return "ReadAliasedEnum()";
+    case 2: return "ReadAliasedOpenGeneric()";
+    case 3: return "ReadAliasedClosedGeneric()";
+    case 4: return "ReadAliasedOptional()";
+    case 5: return "ReadAliasedGenericOptional()";
+    case 6: return "ReadAliasedGenericUnion2()";
+    case 7: return "ReadAliasedGenericVector()";
+    case 8: return "ReadAliasedGenericFixedVector()";
+    case 9: return "ReadStreamOfAliasedGenericUnion2()";
+    case 10: return "Close()";
     default: return "<unknown>";
     }
   };
-  throw std::runtime_error("Expected call to " + f(current) + " but received call to " + f(attempted) + " instead.");
+  throw std::runtime_error("Expected call to " + f(state_) + " but received call to " + f(attempted) + " instead.");
 }
 
-} // namespace 
+bool AliasesIndexedReaderBase::ReadStreamOfAliasedGenericUnion2(test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum>& value, size_t idx) {
+  return ReadStreamOfAliasedGenericUnion2Impl(value, idx);
+}
+
+bool AliasesIndexedReaderBase::ReadStreamOfAliasedGenericUnion2(std::vector<test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum>>& values, size_t idx) {
+  if (values.capacity() == 0) {
+    throw std::runtime_error("vector must have a nonzero capacity.");
+  }
+  if (!ReadStreamOfAliasedGenericUnion2Impl(values, idx)) {
+    return values.size() > 0;
+  }
+  return true;
+}
+
+size_t AliasesIndexedReaderBase::CountStreamOfAliasedGenericUnion2() {
+  return CountStreamOfAliasedGenericUnion2Impl();
+}
+
+void AliasesIndexedReaderBase::InvalidState(uint8_t attempted) {
+  (void)(attempted);
+  return;
+}
+
 
 std::string StreamsOfAliasedUnionsWriterBase::schema_ = R"({"protocol":{"name":"StreamsOfAliasedUnions","sequence":[{"name":"intOrSimpleRecord","type":{"stream":{"items":"TestModel.AliasedIntOrSimpleRecord"}}},{"name":"nullableIntOrSimpleRecord","type":{"stream":{"items":"TestModel.AliasedNullableIntSimpleRecord"}}}]},"types":[{"name":"AliasedIntOrSimpleRecord","type":[{"tag":"int32","type":"int32"},{"tag":"SimpleRecord","type":"TestModel.SimpleRecord"}]},{"name":"AliasedNullableIntSimpleRecord","type":[null,{"tag":"int32","type":"int32"},{"tag":"SimpleRecord","type":"TestModel.SimpleRecord"}]},{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]}]})";
 
@@ -6439,9 +6955,10 @@ std::string StreamsOfAliasedUnionsWriterBase::SchemaFromVersion(Version version)
   }
 
 }
+
 void StreamsOfAliasedUnionsWriterBase::WriteIntOrSimpleRecord(test_model::AliasedIntOrSimpleRecord const& value) {
   if (unlikely(state_ != 0)) {
-    StreamsOfAliasedUnionsWriterBaseInvalidState(0, false, state_);
+    InvalidState(0, false);
   }
 
   WriteIntOrSimpleRecordImpl(value);
@@ -6449,7 +6966,7 @@ void StreamsOfAliasedUnionsWriterBase::WriteIntOrSimpleRecord(test_model::Aliase
 
 void StreamsOfAliasedUnionsWriterBase::WriteIntOrSimpleRecord(std::vector<test_model::AliasedIntOrSimpleRecord> const& values) {
   if (unlikely(state_ != 0)) {
-    StreamsOfAliasedUnionsWriterBaseInvalidState(0, false, state_);
+    InvalidState(0, false);
   }
 
   WriteIntOrSimpleRecordImpl(values);
@@ -6457,7 +6974,7 @@ void StreamsOfAliasedUnionsWriterBase::WriteIntOrSimpleRecord(std::vector<test_m
 
 void StreamsOfAliasedUnionsWriterBase::EndIntOrSimpleRecord() {
   if (unlikely(state_ != 0)) {
-    StreamsOfAliasedUnionsWriterBaseInvalidState(0, true, state_);
+    InvalidState(0, true);
   }
 
   EndIntOrSimpleRecordImpl();
@@ -6473,7 +6990,7 @@ void StreamsOfAliasedUnionsWriterBase::WriteIntOrSimpleRecordImpl(std::vector<te
 
 void StreamsOfAliasedUnionsWriterBase::WriteNullableIntOrSimpleRecord(test_model::AliasedNullableIntSimpleRecord const& value) {
   if (unlikely(state_ != 1)) {
-    StreamsOfAliasedUnionsWriterBaseInvalidState(1, false, state_);
+    InvalidState(1, false);
   }
 
   WriteNullableIntOrSimpleRecordImpl(value);
@@ -6481,7 +6998,7 @@ void StreamsOfAliasedUnionsWriterBase::WriteNullableIntOrSimpleRecord(test_model
 
 void StreamsOfAliasedUnionsWriterBase::WriteNullableIntOrSimpleRecord(std::vector<test_model::AliasedNullableIntSimpleRecord> const& values) {
   if (unlikely(state_ != 1)) {
-    StreamsOfAliasedUnionsWriterBaseInvalidState(1, false, state_);
+    InvalidState(1, false);
   }
 
   WriteNullableIntOrSimpleRecordImpl(values);
@@ -6489,7 +7006,7 @@ void StreamsOfAliasedUnionsWriterBase::WriteNullableIntOrSimpleRecord(std::vecto
 
 void StreamsOfAliasedUnionsWriterBase::EndNullableIntOrSimpleRecord() {
   if (unlikely(state_ != 1)) {
-    StreamsOfAliasedUnionsWriterBaseInvalidState(1, true, state_);
+    InvalidState(1, true);
   }
 
   EndNullableIntOrSimpleRecordImpl();
@@ -6505,10 +7022,25 @@ void StreamsOfAliasedUnionsWriterBase::WriteNullableIntOrSimpleRecordImpl(std::v
 
 void StreamsOfAliasedUnionsWriterBase::Close() {
   if (unlikely(state_ != 2)) {
-    StreamsOfAliasedUnionsWriterBaseInvalidState(2, false, state_);
+    InvalidState(2, false);
   }
 
   CloseImpl();
+}
+
+void StreamsOfAliasedUnionsWriterBase::InvalidState(uint8_t attempted, [[maybe_unused]] bool end) {
+  std::string expected_method;
+  switch (state_) {
+  case 0: expected_method = "WriteIntOrSimpleRecord() or EndIntOrSimpleRecord()"; break;
+  case 1: expected_method = "WriteNullableIntOrSimpleRecord() or EndNullableIntOrSimpleRecord()"; break;
+  }
+  std::string attempted_method;
+  switch (attempted) {
+  case 0: attempted_method = end ? "EndIntOrSimpleRecord()" : "WriteIntOrSimpleRecord()"; break;
+  case 1: attempted_method = end ? "EndNullableIntOrSimpleRecord()" : "WriteNullableIntOrSimpleRecord()"; break;
+  case 2: attempted_method = "Close()"; break;
+  }
+  throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
 }
 
 std::string StreamsOfAliasedUnionsReaderBase::schema_ = StreamsOfAliasedUnionsWriterBase::schema_;
@@ -6521,13 +7053,14 @@ Version StreamsOfAliasedUnionsReaderBase::VersionFromSchema(std::string const& s
   }
   throw std::runtime_error("The schema does not match any version supported by protocol StreamsOfAliasedUnions.");
 }
+
 bool StreamsOfAliasedUnionsReaderBase::ReadIntOrSimpleRecord(test_model::AliasedIntOrSimpleRecord& value) {
   if (unlikely(state_ != 0)) {
     if (state_ == 1) {
       state_ = 2;
       return false;
     }
-    StreamsOfAliasedUnionsReaderBaseInvalidState(0, state_);
+    InvalidState(0);
   }
 
   bool result = ReadIntOrSimpleRecordImpl(value);
@@ -6547,7 +7080,7 @@ bool StreamsOfAliasedUnionsReaderBase::ReadIntOrSimpleRecord(std::vector<test_mo
       values.clear();
       return false;
     }
-    StreamsOfAliasedUnionsReaderBaseInvalidState(0, state_);
+    InvalidState(0);
   }
 
   if (!ReadIntOrSimpleRecordImpl(values)) {
@@ -6584,7 +7117,7 @@ bool StreamsOfAliasedUnionsReaderBase::ReadNullableIntOrSimpleRecord(test_model:
     if (state_ == 1) {
       state_ = 2;
     } else {
-      StreamsOfAliasedUnionsReaderBaseInvalidState(2, state_);
+      InvalidState(2);
     }
   }
 
@@ -6608,7 +7141,7 @@ bool StreamsOfAliasedUnionsReaderBase::ReadNullableIntOrSimpleRecord(std::vector
     if (state_ == 1) {
       state_ = 2;
     } else {
-      StreamsOfAliasedUnionsReaderBaseInvalidState(2, state_);
+      InvalidState(2);
     }
   }
 
@@ -6642,12 +7175,13 @@ void StreamsOfAliasedUnionsReaderBase::Close() {
     if (state_ == 3) {
       state_ = 4;
     } else {
-      StreamsOfAliasedUnionsReaderBaseInvalidState(4, state_);
+      InvalidState(4);
     }
   }
 
   CloseImpl();
 }
+
 void StreamsOfAliasedUnionsReaderBase::CopyTo(StreamsOfAliasedUnionsWriterBase& writer, size_t int_or_simple_record_buffer_size, size_t nullable_int_or_simple_record_buffer_size) {
   if (int_or_simple_record_buffer_size > 1) {
     std::vector<test_model::AliasedIntOrSimpleRecord> values;
@@ -6679,32 +7213,59 @@ void StreamsOfAliasedUnionsReaderBase::CopyTo(StreamsOfAliasedUnionsWriterBase& 
   }
 }
 
-namespace {
-void ProtocolWithComputedFieldsWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end, uint8_t current) {
-  std::string expected_method;
-  switch (current) {
-  case 0: expected_method = "WriteRecordWithComputedFields()"; break;
-  }
-  std::string attempted_method;
-  switch (attempted) {
-  case 0: attempted_method = "WriteRecordWithComputedFields()"; break;
-  case 1: attempted_method = "Close()"; break;
-  }
-  throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
-}
-
-void ProtocolWithComputedFieldsReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
+void StreamsOfAliasedUnionsReaderBase::InvalidState(uint8_t attempted) {
   auto f = [](uint8_t i) -> std::string {
     switch (i/2) {
-    case 0: return "ReadRecordWithComputedFields()";
-    case 1: return "Close()";
+    case 0: return "ReadIntOrSimpleRecord()";
+    case 1: return "ReadNullableIntOrSimpleRecord()";
+    case 2: return "Close()";
     default: return "<unknown>";
     }
   };
-  throw std::runtime_error("Expected call to " + f(current) + " but received call to " + f(attempted) + " instead.");
+  throw std::runtime_error("Expected call to " + f(state_) + " but received call to " + f(attempted) + " instead.");
 }
 
-} // namespace 
+bool StreamsOfAliasedUnionsIndexedReaderBase::ReadIntOrSimpleRecord(test_model::AliasedIntOrSimpleRecord& value, size_t idx) {
+  return ReadIntOrSimpleRecordImpl(value, idx);
+}
+
+bool StreamsOfAliasedUnionsIndexedReaderBase::ReadIntOrSimpleRecord(std::vector<test_model::AliasedIntOrSimpleRecord>& values, size_t idx) {
+  if (values.capacity() == 0) {
+    throw std::runtime_error("vector must have a nonzero capacity.");
+  }
+  if (!ReadIntOrSimpleRecordImpl(values, idx)) {
+    return values.size() > 0;
+  }
+  return true;
+}
+
+size_t StreamsOfAliasedUnionsIndexedReaderBase::CountIntOrSimpleRecord() {
+  return CountIntOrSimpleRecordImpl();
+}
+
+bool StreamsOfAliasedUnionsIndexedReaderBase::ReadNullableIntOrSimpleRecord(test_model::AliasedNullableIntSimpleRecord& value, size_t idx) {
+  return ReadNullableIntOrSimpleRecordImpl(value, idx);
+}
+
+bool StreamsOfAliasedUnionsIndexedReaderBase::ReadNullableIntOrSimpleRecord(std::vector<test_model::AliasedNullableIntSimpleRecord>& values, size_t idx) {
+  if (values.capacity() == 0) {
+    throw std::runtime_error("vector must have a nonzero capacity.");
+  }
+  if (!ReadNullableIntOrSimpleRecordImpl(values, idx)) {
+    return values.size() > 0;
+  }
+  return true;
+}
+
+size_t StreamsOfAliasedUnionsIndexedReaderBase::CountNullableIntOrSimpleRecord() {
+  return CountNullableIntOrSimpleRecordImpl();
+}
+
+void StreamsOfAliasedUnionsIndexedReaderBase::InvalidState(uint8_t attempted) {
+  (void)(attempted);
+  return;
+}
+
 
 std::string ProtocolWithComputedFieldsWriterBase::schema_ = R"({"protocol":{"name":"ProtocolWithComputedFields","sequence":[{"name":"recordWithComputedFields","type":"TestModel.RecordWithComputedFields"}]},"types":[{"name":"GenericRecordWithComputedFields","typeParameters":["T0","T1"],"fields":[{"name":"f1","type":[{"tag":"T0","type":"T0"},{"tag":"T1","type":"T1"}]}]},{"name":"MyTuple","typeParameters":["T1","T2"],"type":{"name":"Tuples.Tuple","typeArguments":["T1","T2"]}},{"name":"MyTuple","typeParameters":["T1","T2"],"type":{"name":"BasicTypes.MyTuple","typeArguments":["T1","T2"]}},{"name":"NamedNDArray","type":{"array":{"items":"int32","dimensions":[{"name":"dimA"},{"name":"dimB"}]}}},{"name":"RecordWithComputedFields","fields":[{"name":"arrayField","type":{"array":{"items":"int32","dimensions":[{"name":"x"},{"name":"y"}]}}},{"name":"arrayFieldMapDimensions","type":{"array":{"items":"int32","dimensions":[{"name":"x"},{"name":"y"}]}}},{"name":"dynamicArrayField","type":{"array":{"items":"int32"}}},{"name":"fixedArrayField","type":{"array":{"items":"int32","dimensions":[{"name":"x","length":3},{"name":"y","length":4}]}}},{"name":"intField","type":"int32"},{"name":"int8Field","type":"int8"},{"name":"uint8Field","type":"uint8"},{"name":"int16Field","type":"int16"},{"name":"uint16Field","type":"uint16"},{"name":"uint32Field","type":"uint32"},{"name":"int64Field","type":"int64"},{"name":"uint64Field","type":"uint64"},{"name":"sizeField","type":"size"},{"name":"float32Field","type":"float32"},{"name":"float64Field","type":"float64"},{"name":"complexfloat32Field","type":"complexfloat32"},{"name":"complexfloat64Field","type":"complexfloat64"},{"name":"stringField","type":"string"},{"name":"tupleField","type":{"name":"TestModel.MyTuple","typeArguments":["int32","int32"]}},{"name":"vectorField","type":{"vector":{"items":"int32"}}},{"name":"vectorOfVectorsField","type":{"vector":{"items":{"vector":{"items":"int32"}}}}},{"name":"fixedVectorField","type":{"vector":{"items":"int32","length":3}}},{"name":"fixedVectorOfVectorsField","type":{"vector":{"items":{"vector":{"items":"int32","length":3}},"length":2}}},{"name":"optionalNamedArray","type":[null,"TestModel.NamedNDArray"]},{"name":"intFloatUnion","type":[{"tag":"int32","type":"int32"},{"tag":"float32","type":"float32"}]},{"name":"nullableIntFloatUnion","type":[null,{"tag":"int32","type":"int32"},{"tag":"float32","type":"float32"}]},{"name":"unionWithNestedGenericUnion","type":[{"tag":"int","explicitTag":true,"type":"int32"},{"tag":"genericRecordWithComputedFields","explicitTag":true,"type":{"name":"BasicTypes.GenericRecordWithComputedFields","typeArguments":["string","float32"]}}]},{"name":"mapField","type":{"map":{"keys":"string","values":"string"}}}]},{"name":"Tuple","typeParameters":["T1","T2"],"fields":[{"name":"v1","type":"T1"},{"name":"v2","type":"T2"}]}]})";
 
@@ -6718,9 +7279,10 @@ std::string ProtocolWithComputedFieldsWriterBase::SchemaFromVersion(Version vers
   }
 
 }
+
 void ProtocolWithComputedFieldsWriterBase::WriteRecordWithComputedFields(test_model::RecordWithComputedFields const& value) {
   if (unlikely(state_ != 0)) {
-    ProtocolWithComputedFieldsWriterBaseInvalidState(0, false, state_);
+    InvalidState(0, false);
   }
 
   WriteRecordWithComputedFieldsImpl(value);
@@ -6729,10 +7291,23 @@ void ProtocolWithComputedFieldsWriterBase::WriteRecordWithComputedFields(test_mo
 
 void ProtocolWithComputedFieldsWriterBase::Close() {
   if (unlikely(state_ != 1)) {
-    ProtocolWithComputedFieldsWriterBaseInvalidState(1, false, state_);
+    InvalidState(1, false);
   }
 
   CloseImpl();
+}
+
+void ProtocolWithComputedFieldsWriterBase::InvalidState(uint8_t attempted, [[maybe_unused]] bool end) {
+  std::string expected_method;
+  switch (state_) {
+  case 0: expected_method = "WriteRecordWithComputedFields()"; break;
+  }
+  std::string attempted_method;
+  switch (attempted) {
+  case 0: attempted_method = "WriteRecordWithComputedFields()"; break;
+  case 1: attempted_method = "Close()"; break;
+  }
+  throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
 }
 
 std::string ProtocolWithComputedFieldsReaderBase::schema_ = ProtocolWithComputedFieldsWriterBase::schema_;
@@ -6745,9 +7320,10 @@ Version ProtocolWithComputedFieldsReaderBase::VersionFromSchema(std::string cons
   }
   throw std::runtime_error("The schema does not match any version supported by protocol ProtocolWithComputedFields.");
 }
+
 void ProtocolWithComputedFieldsReaderBase::ReadRecordWithComputedFields(test_model::RecordWithComputedFields& value) {
   if (unlikely(state_ != 0)) {
-    ProtocolWithComputedFieldsReaderBaseInvalidState(0, state_);
+    InvalidState(0);
   }
 
   ReadRecordWithComputedFieldsImpl(value);
@@ -6756,11 +7332,12 @@ void ProtocolWithComputedFieldsReaderBase::ReadRecordWithComputedFields(test_mod
 
 void ProtocolWithComputedFieldsReaderBase::Close() {
   if (unlikely(state_ != 2)) {
-    ProtocolWithComputedFieldsReaderBaseInvalidState(2, state_);
+    InvalidState(2);
   }
 
   CloseImpl();
 }
+
 void ProtocolWithComputedFieldsReaderBase::CopyTo(ProtocolWithComputedFieldsWriterBase& writer) {
   {
     test_model::RecordWithComputedFields value;
@@ -6769,35 +7346,22 @@ void ProtocolWithComputedFieldsReaderBase::CopyTo(ProtocolWithComputedFieldsWrit
   }
 }
 
-namespace {
-void ProtocolWithKeywordStepsWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end, uint8_t current) {
-  std::string expected_method;
-  switch (current) {
-  case 0: expected_method = "WriteInt() or EndInt()"; break;
-  case 1: expected_method = "WriteFloat()"; break;
-  }
-  std::string attempted_method;
-  switch (attempted) {
-  case 0: attempted_method = end ? "EndInt()" : "WriteInt()"; break;
-  case 1: attempted_method = "WriteFloat()"; break;
-  case 2: attempted_method = "Close()"; break;
-  }
-  throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
-}
-
-void ProtocolWithKeywordStepsReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
+void ProtocolWithComputedFieldsReaderBase::InvalidState(uint8_t attempted) {
   auto f = [](uint8_t i) -> std::string {
     switch (i/2) {
-    case 0: return "ReadInt()";
-    case 1: return "ReadFloat()";
-    case 2: return "Close()";
+    case 0: return "ReadRecordWithComputedFields()";
+    case 1: return "Close()";
     default: return "<unknown>";
     }
   };
-  throw std::runtime_error("Expected call to " + f(current) + " but received call to " + f(attempted) + " instead.");
+  throw std::runtime_error("Expected call to " + f(state_) + " but received call to " + f(attempted) + " instead.");
 }
 
-} // namespace 
+void ProtocolWithComputedFieldsIndexedReaderBase::InvalidState(uint8_t attempted) {
+  (void)(attempted);
+  return;
+}
+
 
 std::string ProtocolWithKeywordStepsWriterBase::schema_ = R"({"protocol":{"name":"ProtocolWithKeywordSteps","sequence":[{"name":"int","type":{"stream":{"items":"TestModel.RecordWithKeywordFields"}}},{"name":"float","type":"TestModel.EnumWithKeywordSymbols"}]},"types":[{"name":"ArrayWithKeywordDimensionNames","type":{"array":{"items":"int32","dimensions":[{"name":"while"},{"name":"do"}]}}},{"name":"EnumWithKeywordSymbols","values":[{"symbol":"try","value":2},{"symbol":"catch","value":1}]},{"name":"RecordWithKeywordFields","fields":[{"name":"int","type":"string"},{"name":"sizeof","type":"TestModel.ArrayWithKeywordDimensionNames"},{"name":"if","type":"TestModel.EnumWithKeywordSymbols"}]}]})";
 
@@ -6811,9 +7375,10 @@ std::string ProtocolWithKeywordStepsWriterBase::SchemaFromVersion(Version versio
   }
 
 }
+
 void ProtocolWithKeywordStepsWriterBase::WriteInt(test_model::RecordWithKeywordFields const& value) {
   if (unlikely(state_ != 0)) {
-    ProtocolWithKeywordStepsWriterBaseInvalidState(0, false, state_);
+    InvalidState(0, false);
   }
 
   WriteIntImpl(value);
@@ -6821,7 +7386,7 @@ void ProtocolWithKeywordStepsWriterBase::WriteInt(test_model::RecordWithKeywordF
 
 void ProtocolWithKeywordStepsWriterBase::WriteInt(std::vector<test_model::RecordWithKeywordFields> const& values) {
   if (unlikely(state_ != 0)) {
-    ProtocolWithKeywordStepsWriterBaseInvalidState(0, false, state_);
+    InvalidState(0, false);
   }
 
   WriteIntImpl(values);
@@ -6829,7 +7394,7 @@ void ProtocolWithKeywordStepsWriterBase::WriteInt(std::vector<test_model::Record
 
 void ProtocolWithKeywordStepsWriterBase::EndInt() {
   if (unlikely(state_ != 0)) {
-    ProtocolWithKeywordStepsWriterBaseInvalidState(0, true, state_);
+    InvalidState(0, true);
   }
 
   EndIntImpl();
@@ -6845,7 +7410,7 @@ void ProtocolWithKeywordStepsWriterBase::WriteIntImpl(std::vector<test_model::Re
 
 void ProtocolWithKeywordStepsWriterBase::WriteFloat(test_model::EnumWithKeywordSymbols const& value) {
   if (unlikely(state_ != 1)) {
-    ProtocolWithKeywordStepsWriterBaseInvalidState(1, false, state_);
+    InvalidState(1, false);
   }
 
   WriteFloatImpl(value);
@@ -6854,10 +7419,25 @@ void ProtocolWithKeywordStepsWriterBase::WriteFloat(test_model::EnumWithKeywordS
 
 void ProtocolWithKeywordStepsWriterBase::Close() {
   if (unlikely(state_ != 2)) {
-    ProtocolWithKeywordStepsWriterBaseInvalidState(2, false, state_);
+    InvalidState(2, false);
   }
 
   CloseImpl();
+}
+
+void ProtocolWithKeywordStepsWriterBase::InvalidState(uint8_t attempted, [[maybe_unused]] bool end) {
+  std::string expected_method;
+  switch (state_) {
+  case 0: expected_method = "WriteInt() or EndInt()"; break;
+  case 1: expected_method = "WriteFloat()"; break;
+  }
+  std::string attempted_method;
+  switch (attempted) {
+  case 0: attempted_method = end ? "EndInt()" : "WriteInt()"; break;
+  case 1: attempted_method = "WriteFloat()"; break;
+  case 2: attempted_method = "Close()"; break;
+  }
+  throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
 }
 
 std::string ProtocolWithKeywordStepsReaderBase::schema_ = ProtocolWithKeywordStepsWriterBase::schema_;
@@ -6870,13 +7450,14 @@ Version ProtocolWithKeywordStepsReaderBase::VersionFromSchema(std::string const&
   }
   throw std::runtime_error("The schema does not match any version supported by protocol ProtocolWithKeywordSteps.");
 }
+
 bool ProtocolWithKeywordStepsReaderBase::ReadInt(test_model::RecordWithKeywordFields& value) {
   if (unlikely(state_ != 0)) {
     if (state_ == 1) {
       state_ = 2;
       return false;
     }
-    ProtocolWithKeywordStepsReaderBaseInvalidState(0, state_);
+    InvalidState(0);
   }
 
   bool result = ReadIntImpl(value);
@@ -6896,7 +7477,7 @@ bool ProtocolWithKeywordStepsReaderBase::ReadInt(std::vector<test_model::RecordW
       values.clear();
       return false;
     }
-    ProtocolWithKeywordStepsReaderBaseInvalidState(0, state_);
+    InvalidState(0);
   }
 
   if (!ReadIntImpl(values)) {
@@ -6929,7 +7510,7 @@ void ProtocolWithKeywordStepsReaderBase::ReadFloat(test_model::EnumWithKeywordSy
     if (state_ == 1) {
       state_ = 2;
     } else {
-      ProtocolWithKeywordStepsReaderBaseInvalidState(2, state_);
+      InvalidState(2);
     }
   }
 
@@ -6939,11 +7520,12 @@ void ProtocolWithKeywordStepsReaderBase::ReadFloat(test_model::EnumWithKeywordSy
 
 void ProtocolWithKeywordStepsReaderBase::Close() {
   if (unlikely(state_ != 4)) {
-    ProtocolWithKeywordStepsReaderBaseInvalidState(4, state_);
+    InvalidState(4);
   }
 
   CloseImpl();
 }
+
 void ProtocolWithKeywordStepsReaderBase::CopyTo(ProtocolWithKeywordStepsWriterBase& writer, size_t int_buffer_size) {
   if (int_buffer_size > 1) {
     std::vector<test_model::RecordWithKeywordFields> values;
@@ -6966,32 +7548,41 @@ void ProtocolWithKeywordStepsReaderBase::CopyTo(ProtocolWithKeywordStepsWriterBa
   }
 }
 
-namespace {
-void ProtocolWithOptionalDateWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end, uint8_t current) {
-  std::string expected_method;
-  switch (current) {
-  case 0: expected_method = "WriteRecord()"; break;
-  }
-  std::string attempted_method;
-  switch (attempted) {
-  case 0: attempted_method = "WriteRecord()"; break;
-  case 1: attempted_method = "Close()"; break;
-  }
-  throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
-}
-
-void ProtocolWithOptionalDateReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
+void ProtocolWithKeywordStepsReaderBase::InvalidState(uint8_t attempted) {
   auto f = [](uint8_t i) -> std::string {
     switch (i/2) {
-    case 0: return "ReadRecord()";
-    case 1: return "Close()";
+    case 0: return "ReadInt()";
+    case 1: return "ReadFloat()";
+    case 2: return "Close()";
     default: return "<unknown>";
     }
   };
-  throw std::runtime_error("Expected call to " + f(current) + " but received call to " + f(attempted) + " instead.");
+  throw std::runtime_error("Expected call to " + f(state_) + " but received call to " + f(attempted) + " instead.");
 }
 
-} // namespace 
+bool ProtocolWithKeywordStepsIndexedReaderBase::ReadInt(test_model::RecordWithKeywordFields& value, size_t idx) {
+  return ReadIntImpl(value, idx);
+}
+
+bool ProtocolWithKeywordStepsIndexedReaderBase::ReadInt(std::vector<test_model::RecordWithKeywordFields>& values, size_t idx) {
+  if (values.capacity() == 0) {
+    throw std::runtime_error("vector must have a nonzero capacity.");
+  }
+  if (!ReadIntImpl(values, idx)) {
+    return values.size() > 0;
+  }
+  return true;
+}
+
+size_t ProtocolWithKeywordStepsIndexedReaderBase::CountInt() {
+  return CountIntImpl();
+}
+
+void ProtocolWithKeywordStepsIndexedReaderBase::InvalidState(uint8_t attempted) {
+  (void)(attempted);
+  return;
+}
+
 
 std::string ProtocolWithOptionalDateWriterBase::schema_ = R"({"protocol":{"name":"ProtocolWithOptionalDate","sequence":[{"name":"record","type":[null,"TestModel.RecordWithOptionalDate"]}]},"types":[{"name":"RecordWithOptionalDate","fields":[{"name":"dateField","type":[null,"date"]}]}]})";
 
@@ -7005,9 +7596,10 @@ std::string ProtocolWithOptionalDateWriterBase::SchemaFromVersion(Version versio
   }
 
 }
+
 void ProtocolWithOptionalDateWriterBase::WriteRecord(std::optional<test_model::RecordWithOptionalDate> const& value) {
   if (unlikely(state_ != 0)) {
-    ProtocolWithOptionalDateWriterBaseInvalidState(0, false, state_);
+    InvalidState(0, false);
   }
 
   WriteRecordImpl(value);
@@ -7016,10 +7608,23 @@ void ProtocolWithOptionalDateWriterBase::WriteRecord(std::optional<test_model::R
 
 void ProtocolWithOptionalDateWriterBase::Close() {
   if (unlikely(state_ != 1)) {
-    ProtocolWithOptionalDateWriterBaseInvalidState(1, false, state_);
+    InvalidState(1, false);
   }
 
   CloseImpl();
+}
+
+void ProtocolWithOptionalDateWriterBase::InvalidState(uint8_t attempted, [[maybe_unused]] bool end) {
+  std::string expected_method;
+  switch (state_) {
+  case 0: expected_method = "WriteRecord()"; break;
+  }
+  std::string attempted_method;
+  switch (attempted) {
+  case 0: attempted_method = "WriteRecord()"; break;
+  case 1: attempted_method = "Close()"; break;
+  }
+  throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
 }
 
 std::string ProtocolWithOptionalDateReaderBase::schema_ = ProtocolWithOptionalDateWriterBase::schema_;
@@ -7032,9 +7637,10 @@ Version ProtocolWithOptionalDateReaderBase::VersionFromSchema(std::string const&
   }
   throw std::runtime_error("The schema does not match any version supported by protocol ProtocolWithOptionalDate.");
 }
+
 void ProtocolWithOptionalDateReaderBase::ReadRecord(std::optional<test_model::RecordWithOptionalDate>& value) {
   if (unlikely(state_ != 0)) {
-    ProtocolWithOptionalDateReaderBaseInvalidState(0, state_);
+    InvalidState(0);
   }
 
   ReadRecordImpl(value);
@@ -7043,11 +7649,12 @@ void ProtocolWithOptionalDateReaderBase::ReadRecord(std::optional<test_model::Re
 
 void ProtocolWithOptionalDateReaderBase::Close() {
   if (unlikely(state_ != 2)) {
-    ProtocolWithOptionalDateReaderBaseInvalidState(2, state_);
+    InvalidState(2);
   }
 
   CloseImpl();
 }
+
 void ProtocolWithOptionalDateReaderBase::CopyTo(ProtocolWithOptionalDateWriterBase& writer) {
   {
     std::optional<test_model::RecordWithOptionalDate> value;
@@ -7055,4 +7662,21 @@ void ProtocolWithOptionalDateReaderBase::CopyTo(ProtocolWithOptionalDateWriterBa
     writer.WriteRecord(value);
   }
 }
+
+void ProtocolWithOptionalDateReaderBase::InvalidState(uint8_t attempted) {
+  auto f = [](uint8_t i) -> std::string {
+    switch (i/2) {
+    case 0: return "ReadRecord()";
+    case 1: return "Close()";
+    default: return "<unknown>";
+    }
+  };
+  throw std::runtime_error("Expected call to " + f(state_) + " but received call to " + f(attempted) + " instead.");
+}
+
+void ProtocolWithOptionalDateIndexedReaderBase::InvalidState(uint8_t attempted) {
+  (void)(attempted);
+  return;
+}
+
 } // namespace test_model

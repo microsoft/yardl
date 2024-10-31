@@ -32,6 +32,26 @@ class BenchmarkFloat256x256Writer : public test_model::BenchmarkFloat256x256Writ
   Version version_;
 };
 
+// Binary indexed writer for the BenchmarkFloat256x256 protocol.
+class BenchmarkFloat256x256IndexedWriter : public test_model::BenchmarkFloat256x256WriterBase, yardl::binary::BinaryIndexedWriter {
+  public:
+  BenchmarkFloat256x256IndexedWriter(std::ostream& stream, Version version = Version::Current)
+      : yardl::binary::BinaryIndexedWriter(stream, test_model::BenchmarkFloat256x256WriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  BenchmarkFloat256x256IndexedWriter(std::string file_name, Version version = Version::Current)
+      : yardl::binary::BinaryIndexedWriter(file_name, test_model::BenchmarkFloat256x256WriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  void Flush() override;
+
+  protected:
+  void WriteFloat256x256Impl(yardl::FixedNDArray<float, 256, 256> const& value) override;
+  void WriteFloat256x256Impl(std::vector<yardl::FixedNDArray<float, 256, 256>> const& values) override;
+  void EndFloat256x256Impl() override;
+  void CloseImpl() override;
+
+  Version version_;
+};
+
 // Binary reader for the BenchmarkFloat256x256 protocol.
 class BenchmarkFloat256x256Reader : public test_model::BenchmarkFloat256x256ReaderBase, yardl::binary::BinaryReader {
   public:
@@ -54,6 +74,31 @@ class BenchmarkFloat256x256Reader : public test_model::BenchmarkFloat256x256Read
   size_t current_block_remaining_ = 0;
 };
 
+// Binary indexed reader for the BenchmarkFloat256x256 protocol.
+class BenchmarkFloat256x256IndexedReader : public test_model::BenchmarkFloat256x256IndexedReaderBase, yardl::binary::BinaryIndexedReader {
+  public:
+  BenchmarkFloat256x256IndexedReader(std::istream& stream)
+      : yardl::binary::BinaryIndexedReader(stream), version_(test_model::BenchmarkFloat256x256IndexedReaderBase::VersionFromSchema(schema_read_)) {}
+
+  BenchmarkFloat256x256IndexedReader(std::string file_name)
+      : yardl::binary::BinaryIndexedReader(file_name), version_(test_model::BenchmarkFloat256x256IndexedReaderBase::VersionFromSchema(schema_read_)) {}
+
+  Version GetVersion() { return version_; }
+
+  protected:
+  bool ReadFloat256x256Impl(yardl::FixedNDArray<float, 256, 256>& value) override;
+  bool ReadFloat256x256Impl(std::vector<yardl::FixedNDArray<float, 256, 256>>& values) override;
+  bool ReadFloat256x256Impl(yardl::FixedNDArray<float, 256, 256>& value, size_t idx) override;
+  bool ReadFloat256x256Impl(std::vector<yardl::FixedNDArray<float, 256, 256>>& values, size_t idx) override;
+  size_t CountFloat256x256Impl() override;
+  void CloseImpl() override;
+
+  Version version_;
+
+  private:
+  size_t current_block_remaining_ = 0;
+};
+
 // Binary writer for the BenchmarkInt256x256 protocol.
 class BenchmarkInt256x256Writer : public test_model::BenchmarkInt256x256WriterBase, yardl::binary::BinaryWriter {
   public:
@@ -62,6 +107,26 @@ class BenchmarkInt256x256Writer : public test_model::BenchmarkInt256x256WriterBa
 
   BenchmarkInt256x256Writer(std::string file_name, Version version = Version::Current)
       : yardl::binary::BinaryWriter(file_name, test_model::BenchmarkInt256x256WriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  void Flush() override;
+
+  protected:
+  void WriteInt256x256Impl(yardl::FixedNDArray<int32_t, 256, 256> const& value) override;
+  void WriteInt256x256Impl(std::vector<yardl::FixedNDArray<int32_t, 256, 256>> const& values) override;
+  void EndInt256x256Impl() override;
+  void CloseImpl() override;
+
+  Version version_;
+};
+
+// Binary indexed writer for the BenchmarkInt256x256 protocol.
+class BenchmarkInt256x256IndexedWriter : public test_model::BenchmarkInt256x256WriterBase, yardl::binary::BinaryIndexedWriter {
+  public:
+  BenchmarkInt256x256IndexedWriter(std::ostream& stream, Version version = Version::Current)
+      : yardl::binary::BinaryIndexedWriter(stream, test_model::BenchmarkInt256x256WriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  BenchmarkInt256x256IndexedWriter(std::string file_name, Version version = Version::Current)
+      : yardl::binary::BinaryIndexedWriter(file_name, test_model::BenchmarkInt256x256WriterBase::SchemaFromVersion(version)), version_(version) {}
 
   void Flush() override;
 
@@ -96,6 +161,31 @@ class BenchmarkInt256x256Reader : public test_model::BenchmarkInt256x256ReaderBa
   size_t current_block_remaining_ = 0;
 };
 
+// Binary indexed reader for the BenchmarkInt256x256 protocol.
+class BenchmarkInt256x256IndexedReader : public test_model::BenchmarkInt256x256IndexedReaderBase, yardl::binary::BinaryIndexedReader {
+  public:
+  BenchmarkInt256x256IndexedReader(std::istream& stream)
+      : yardl::binary::BinaryIndexedReader(stream), version_(test_model::BenchmarkInt256x256IndexedReaderBase::VersionFromSchema(schema_read_)) {}
+
+  BenchmarkInt256x256IndexedReader(std::string file_name)
+      : yardl::binary::BinaryIndexedReader(file_name), version_(test_model::BenchmarkInt256x256IndexedReaderBase::VersionFromSchema(schema_read_)) {}
+
+  Version GetVersion() { return version_; }
+
+  protected:
+  bool ReadInt256x256Impl(yardl::FixedNDArray<int32_t, 256, 256>& value) override;
+  bool ReadInt256x256Impl(std::vector<yardl::FixedNDArray<int32_t, 256, 256>>& values) override;
+  bool ReadInt256x256Impl(yardl::FixedNDArray<int32_t, 256, 256>& value, size_t idx) override;
+  bool ReadInt256x256Impl(std::vector<yardl::FixedNDArray<int32_t, 256, 256>>& values, size_t idx) override;
+  size_t CountInt256x256Impl() override;
+  void CloseImpl() override;
+
+  Version version_;
+
+  private:
+  size_t current_block_remaining_ = 0;
+};
+
 // Binary writer for the BenchmarkFloatVlen protocol.
 class BenchmarkFloatVlenWriter : public test_model::BenchmarkFloatVlenWriterBase, yardl::binary::BinaryWriter {
   public:
@@ -104,6 +194,26 @@ class BenchmarkFloatVlenWriter : public test_model::BenchmarkFloatVlenWriterBase
 
   BenchmarkFloatVlenWriter(std::string file_name, Version version = Version::Current)
       : yardl::binary::BinaryWriter(file_name, test_model::BenchmarkFloatVlenWriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  void Flush() override;
+
+  protected:
+  void WriteFloatArrayImpl(yardl::NDArray<float, 2> const& value) override;
+  void WriteFloatArrayImpl(std::vector<yardl::NDArray<float, 2>> const& values) override;
+  void EndFloatArrayImpl() override;
+  void CloseImpl() override;
+
+  Version version_;
+};
+
+// Binary indexed writer for the BenchmarkFloatVlen protocol.
+class BenchmarkFloatVlenIndexedWriter : public test_model::BenchmarkFloatVlenWriterBase, yardl::binary::BinaryIndexedWriter {
+  public:
+  BenchmarkFloatVlenIndexedWriter(std::ostream& stream, Version version = Version::Current)
+      : yardl::binary::BinaryIndexedWriter(stream, test_model::BenchmarkFloatVlenWriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  BenchmarkFloatVlenIndexedWriter(std::string file_name, Version version = Version::Current)
+      : yardl::binary::BinaryIndexedWriter(file_name, test_model::BenchmarkFloatVlenWriterBase::SchemaFromVersion(version)), version_(version) {}
 
   void Flush() override;
 
@@ -138,6 +248,31 @@ class BenchmarkFloatVlenReader : public test_model::BenchmarkFloatVlenReaderBase
   size_t current_block_remaining_ = 0;
 };
 
+// Binary indexed reader for the BenchmarkFloatVlen protocol.
+class BenchmarkFloatVlenIndexedReader : public test_model::BenchmarkFloatVlenIndexedReaderBase, yardl::binary::BinaryIndexedReader {
+  public:
+  BenchmarkFloatVlenIndexedReader(std::istream& stream)
+      : yardl::binary::BinaryIndexedReader(stream), version_(test_model::BenchmarkFloatVlenIndexedReaderBase::VersionFromSchema(schema_read_)) {}
+
+  BenchmarkFloatVlenIndexedReader(std::string file_name)
+      : yardl::binary::BinaryIndexedReader(file_name), version_(test_model::BenchmarkFloatVlenIndexedReaderBase::VersionFromSchema(schema_read_)) {}
+
+  Version GetVersion() { return version_; }
+
+  protected:
+  bool ReadFloatArrayImpl(yardl::NDArray<float, 2>& value) override;
+  bool ReadFloatArrayImpl(std::vector<yardl::NDArray<float, 2>>& values) override;
+  bool ReadFloatArrayImpl(yardl::NDArray<float, 2>& value, size_t idx) override;
+  bool ReadFloatArrayImpl(std::vector<yardl::NDArray<float, 2>>& values, size_t idx) override;
+  size_t CountFloatArrayImpl() override;
+  void CloseImpl() override;
+
+  Version version_;
+
+  private:
+  size_t current_block_remaining_ = 0;
+};
+
 // Binary writer for the BenchmarkSmallRecord protocol.
 class BenchmarkSmallRecordWriter : public test_model::BenchmarkSmallRecordWriterBase, yardl::binary::BinaryWriter {
   public:
@@ -146,6 +281,26 @@ class BenchmarkSmallRecordWriter : public test_model::BenchmarkSmallRecordWriter
 
   BenchmarkSmallRecordWriter(std::string file_name, Version version = Version::Current)
       : yardl::binary::BinaryWriter(file_name, test_model::BenchmarkSmallRecordWriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  void Flush() override;
+
+  protected:
+  void WriteSmallRecordImpl(test_model::SmallBenchmarkRecord const& value) override;
+  void WriteSmallRecordImpl(std::vector<test_model::SmallBenchmarkRecord> const& values) override;
+  void EndSmallRecordImpl() override;
+  void CloseImpl() override;
+
+  Version version_;
+};
+
+// Binary indexed writer for the BenchmarkSmallRecord protocol.
+class BenchmarkSmallRecordIndexedWriter : public test_model::BenchmarkSmallRecordWriterBase, yardl::binary::BinaryIndexedWriter {
+  public:
+  BenchmarkSmallRecordIndexedWriter(std::ostream& stream, Version version = Version::Current)
+      : yardl::binary::BinaryIndexedWriter(stream, test_model::BenchmarkSmallRecordWriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  BenchmarkSmallRecordIndexedWriter(std::string file_name, Version version = Version::Current)
+      : yardl::binary::BinaryIndexedWriter(file_name, test_model::BenchmarkSmallRecordWriterBase::SchemaFromVersion(version)), version_(version) {}
 
   void Flush() override;
 
@@ -180,6 +335,31 @@ class BenchmarkSmallRecordReader : public test_model::BenchmarkSmallRecordReader
   size_t current_block_remaining_ = 0;
 };
 
+// Binary indexed reader for the BenchmarkSmallRecord protocol.
+class BenchmarkSmallRecordIndexedReader : public test_model::BenchmarkSmallRecordIndexedReaderBase, yardl::binary::BinaryIndexedReader {
+  public:
+  BenchmarkSmallRecordIndexedReader(std::istream& stream)
+      : yardl::binary::BinaryIndexedReader(stream), version_(test_model::BenchmarkSmallRecordIndexedReaderBase::VersionFromSchema(schema_read_)) {}
+
+  BenchmarkSmallRecordIndexedReader(std::string file_name)
+      : yardl::binary::BinaryIndexedReader(file_name), version_(test_model::BenchmarkSmallRecordIndexedReaderBase::VersionFromSchema(schema_read_)) {}
+
+  Version GetVersion() { return version_; }
+
+  protected:
+  bool ReadSmallRecordImpl(test_model::SmallBenchmarkRecord& value) override;
+  bool ReadSmallRecordImpl(std::vector<test_model::SmallBenchmarkRecord>& values) override;
+  bool ReadSmallRecordImpl(test_model::SmallBenchmarkRecord& value, size_t idx) override;
+  bool ReadSmallRecordImpl(std::vector<test_model::SmallBenchmarkRecord>& values, size_t idx) override;
+  size_t CountSmallRecordImpl() override;
+  void CloseImpl() override;
+
+  Version version_;
+
+  private:
+  size_t current_block_remaining_ = 0;
+};
+
 // Binary writer for the BenchmarkSmallRecordWithOptionals protocol.
 class BenchmarkSmallRecordWithOptionalsWriter : public test_model::BenchmarkSmallRecordWithOptionalsWriterBase, yardl::binary::BinaryWriter {
   public:
@@ -188,6 +368,26 @@ class BenchmarkSmallRecordWithOptionalsWriter : public test_model::BenchmarkSmal
 
   BenchmarkSmallRecordWithOptionalsWriter(std::string file_name, Version version = Version::Current)
       : yardl::binary::BinaryWriter(file_name, test_model::BenchmarkSmallRecordWithOptionalsWriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  void Flush() override;
+
+  protected:
+  void WriteSmallRecordImpl(test_model::SimpleEncodingCounters const& value) override;
+  void WriteSmallRecordImpl(std::vector<test_model::SimpleEncodingCounters> const& values) override;
+  void EndSmallRecordImpl() override;
+  void CloseImpl() override;
+
+  Version version_;
+};
+
+// Binary indexed writer for the BenchmarkSmallRecordWithOptionals protocol.
+class BenchmarkSmallRecordWithOptionalsIndexedWriter : public test_model::BenchmarkSmallRecordWithOptionalsWriterBase, yardl::binary::BinaryIndexedWriter {
+  public:
+  BenchmarkSmallRecordWithOptionalsIndexedWriter(std::ostream& stream, Version version = Version::Current)
+      : yardl::binary::BinaryIndexedWriter(stream, test_model::BenchmarkSmallRecordWithOptionalsWriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  BenchmarkSmallRecordWithOptionalsIndexedWriter(std::string file_name, Version version = Version::Current)
+      : yardl::binary::BinaryIndexedWriter(file_name, test_model::BenchmarkSmallRecordWithOptionalsWriterBase::SchemaFromVersion(version)), version_(version) {}
 
   void Flush() override;
 
@@ -222,6 +422,31 @@ class BenchmarkSmallRecordWithOptionalsReader : public test_model::BenchmarkSmal
   size_t current_block_remaining_ = 0;
 };
 
+// Binary indexed reader for the BenchmarkSmallRecordWithOptionals protocol.
+class BenchmarkSmallRecordWithOptionalsIndexedReader : public test_model::BenchmarkSmallRecordWithOptionalsIndexedReaderBase, yardl::binary::BinaryIndexedReader {
+  public:
+  BenchmarkSmallRecordWithOptionalsIndexedReader(std::istream& stream)
+      : yardl::binary::BinaryIndexedReader(stream), version_(test_model::BenchmarkSmallRecordWithOptionalsIndexedReaderBase::VersionFromSchema(schema_read_)) {}
+
+  BenchmarkSmallRecordWithOptionalsIndexedReader(std::string file_name)
+      : yardl::binary::BinaryIndexedReader(file_name), version_(test_model::BenchmarkSmallRecordWithOptionalsIndexedReaderBase::VersionFromSchema(schema_read_)) {}
+
+  Version GetVersion() { return version_; }
+
+  protected:
+  bool ReadSmallRecordImpl(test_model::SimpleEncodingCounters& value) override;
+  bool ReadSmallRecordImpl(std::vector<test_model::SimpleEncodingCounters>& values) override;
+  bool ReadSmallRecordImpl(test_model::SimpleEncodingCounters& value, size_t idx) override;
+  bool ReadSmallRecordImpl(std::vector<test_model::SimpleEncodingCounters>& values, size_t idx) override;
+  size_t CountSmallRecordImpl() override;
+  void CloseImpl() override;
+
+  Version version_;
+
+  private:
+  size_t current_block_remaining_ = 0;
+};
+
 // Binary writer for the BenchmarkSimpleMrd protocol.
 class BenchmarkSimpleMrdWriter : public test_model::BenchmarkSimpleMrdWriterBase, yardl::binary::BinaryWriter {
   public:
@@ -230,6 +455,26 @@ class BenchmarkSimpleMrdWriter : public test_model::BenchmarkSimpleMrdWriterBase
 
   BenchmarkSimpleMrdWriter(std::string file_name, Version version = Version::Current)
       : yardl::binary::BinaryWriter(file_name, test_model::BenchmarkSimpleMrdWriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  void Flush() override;
+
+  protected:
+  void WriteDataImpl(std::variant<test_model::SimpleAcquisition, image::Image<float>> const& value) override;
+  void WriteDataImpl(std::vector<std::variant<test_model::SimpleAcquisition, image::Image<float>>> const& values) override;
+  void EndDataImpl() override;
+  void CloseImpl() override;
+
+  Version version_;
+};
+
+// Binary indexed writer for the BenchmarkSimpleMrd protocol.
+class BenchmarkSimpleMrdIndexedWriter : public test_model::BenchmarkSimpleMrdWriterBase, yardl::binary::BinaryIndexedWriter {
+  public:
+  BenchmarkSimpleMrdIndexedWriter(std::ostream& stream, Version version = Version::Current)
+      : yardl::binary::BinaryIndexedWriter(stream, test_model::BenchmarkSimpleMrdWriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  BenchmarkSimpleMrdIndexedWriter(std::string file_name, Version version = Version::Current)
+      : yardl::binary::BinaryIndexedWriter(file_name, test_model::BenchmarkSimpleMrdWriterBase::SchemaFromVersion(version)), version_(version) {}
 
   void Flush() override;
 
@@ -264,6 +509,31 @@ class BenchmarkSimpleMrdReader : public test_model::BenchmarkSimpleMrdReaderBase
   size_t current_block_remaining_ = 0;
 };
 
+// Binary indexed reader for the BenchmarkSimpleMrd protocol.
+class BenchmarkSimpleMrdIndexedReader : public test_model::BenchmarkSimpleMrdIndexedReaderBase, yardl::binary::BinaryIndexedReader {
+  public:
+  BenchmarkSimpleMrdIndexedReader(std::istream& stream)
+      : yardl::binary::BinaryIndexedReader(stream), version_(test_model::BenchmarkSimpleMrdIndexedReaderBase::VersionFromSchema(schema_read_)) {}
+
+  BenchmarkSimpleMrdIndexedReader(std::string file_name)
+      : yardl::binary::BinaryIndexedReader(file_name), version_(test_model::BenchmarkSimpleMrdIndexedReaderBase::VersionFromSchema(schema_read_)) {}
+
+  Version GetVersion() { return version_; }
+
+  protected:
+  bool ReadDataImpl(std::variant<test_model::SimpleAcquisition, image::Image<float>>& value) override;
+  bool ReadDataImpl(std::vector<std::variant<test_model::SimpleAcquisition, image::Image<float>>>& values) override;
+  bool ReadDataImpl(std::variant<test_model::SimpleAcquisition, image::Image<float>>& value, size_t idx) override;
+  bool ReadDataImpl(std::vector<std::variant<test_model::SimpleAcquisition, image::Image<float>>>& values, size_t idx) override;
+  size_t CountDataImpl() override;
+  void CloseImpl() override;
+
+  Version version_;
+
+  private:
+  size_t current_block_remaining_ = 0;
+};
+
 // Binary writer for the Scalars protocol.
 class ScalarsWriter : public test_model::ScalarsWriterBase, yardl::binary::BinaryWriter {
   public:
@@ -272,6 +542,25 @@ class ScalarsWriter : public test_model::ScalarsWriterBase, yardl::binary::Binar
 
   ScalarsWriter(std::string file_name, Version version = Version::Current)
       : yardl::binary::BinaryWriter(file_name, test_model::ScalarsWriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  void Flush() override;
+
+  protected:
+  void WriteInt32Impl(int32_t const& value) override;
+  void WriteRecordImpl(test_model::RecordWithPrimitives const& value) override;
+  void CloseImpl() override;
+
+  Version version_;
+};
+
+// Binary indexed writer for the Scalars protocol.
+class ScalarsIndexedWriter : public test_model::ScalarsWriterBase, yardl::binary::BinaryIndexedWriter {
+  public:
+  ScalarsIndexedWriter(std::ostream& stream, Version version = Version::Current)
+      : yardl::binary::BinaryIndexedWriter(stream, test_model::ScalarsWriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  ScalarsIndexedWriter(std::string file_name, Version version = Version::Current)
+      : yardl::binary::BinaryIndexedWriter(file_name, test_model::ScalarsWriterBase::SchemaFromVersion(version)), version_(version) {}
 
   void Flush() override;
 
@@ -302,6 +591,25 @@ class ScalarsReader : public test_model::ScalarsReaderBase, yardl::binary::Binar
   Version version_;
 };
 
+// Binary indexed reader for the Scalars protocol.
+class ScalarsIndexedReader : public test_model::ScalarsIndexedReaderBase, yardl::binary::BinaryIndexedReader {
+  public:
+  ScalarsIndexedReader(std::istream& stream)
+      : yardl::binary::BinaryIndexedReader(stream), version_(test_model::ScalarsIndexedReaderBase::VersionFromSchema(schema_read_)) {}
+
+  ScalarsIndexedReader(std::string file_name)
+      : yardl::binary::BinaryIndexedReader(file_name), version_(test_model::ScalarsIndexedReaderBase::VersionFromSchema(schema_read_)) {}
+
+  Version GetVersion() { return version_; }
+
+  protected:
+  void ReadInt32Impl(int32_t& value) override;
+  void ReadRecordImpl(test_model::RecordWithPrimitives& value) override;
+  void CloseImpl() override;
+
+  Version version_;
+};
+
 // Binary writer for the ScalarOptionals protocol.
 class ScalarOptionalsWriter : public test_model::ScalarOptionalsWriterBase, yardl::binary::BinaryWriter {
   public:
@@ -310,6 +618,27 @@ class ScalarOptionalsWriter : public test_model::ScalarOptionalsWriterBase, yard
 
   ScalarOptionalsWriter(std::string file_name, Version version = Version::Current)
       : yardl::binary::BinaryWriter(file_name, test_model::ScalarOptionalsWriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  void Flush() override;
+
+  protected:
+  void WriteOptionalIntImpl(std::optional<int32_t> const& value) override;
+  void WriteOptionalRecordImpl(std::optional<test_model::SimpleRecord> const& value) override;
+  void WriteRecordWithOptionalFieldsImpl(test_model::RecordWithOptionalFields const& value) override;
+  void WriteOptionalRecordWithOptionalFieldsImpl(std::optional<test_model::RecordWithOptionalFields> const& value) override;
+  void CloseImpl() override;
+
+  Version version_;
+};
+
+// Binary indexed writer for the ScalarOptionals protocol.
+class ScalarOptionalsIndexedWriter : public test_model::ScalarOptionalsWriterBase, yardl::binary::BinaryIndexedWriter {
+  public:
+  ScalarOptionalsIndexedWriter(std::ostream& stream, Version version = Version::Current)
+      : yardl::binary::BinaryIndexedWriter(stream, test_model::ScalarOptionalsWriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  ScalarOptionalsIndexedWriter(std::string file_name, Version version = Version::Current)
+      : yardl::binary::BinaryIndexedWriter(file_name, test_model::ScalarOptionalsWriterBase::SchemaFromVersion(version)), version_(version) {}
 
   void Flush() override;
 
@@ -344,6 +673,27 @@ class ScalarOptionalsReader : public test_model::ScalarOptionalsReaderBase, yard
   Version version_;
 };
 
+// Binary indexed reader for the ScalarOptionals protocol.
+class ScalarOptionalsIndexedReader : public test_model::ScalarOptionalsIndexedReaderBase, yardl::binary::BinaryIndexedReader {
+  public:
+  ScalarOptionalsIndexedReader(std::istream& stream)
+      : yardl::binary::BinaryIndexedReader(stream), version_(test_model::ScalarOptionalsIndexedReaderBase::VersionFromSchema(schema_read_)) {}
+
+  ScalarOptionalsIndexedReader(std::string file_name)
+      : yardl::binary::BinaryIndexedReader(file_name), version_(test_model::ScalarOptionalsIndexedReaderBase::VersionFromSchema(schema_read_)) {}
+
+  Version GetVersion() { return version_; }
+
+  protected:
+  void ReadOptionalIntImpl(std::optional<int32_t>& value) override;
+  void ReadOptionalRecordImpl(std::optional<test_model::SimpleRecord>& value) override;
+  void ReadRecordWithOptionalFieldsImpl(test_model::RecordWithOptionalFields& value) override;
+  void ReadOptionalRecordWithOptionalFieldsImpl(std::optional<test_model::RecordWithOptionalFields>& value) override;
+  void CloseImpl() override;
+
+  Version version_;
+};
+
 // Binary writer for the NestedRecords protocol.
 class NestedRecordsWriter : public test_model::NestedRecordsWriterBase, yardl::binary::BinaryWriter {
   public:
@@ -352,6 +702,24 @@ class NestedRecordsWriter : public test_model::NestedRecordsWriterBase, yardl::b
 
   NestedRecordsWriter(std::string file_name, Version version = Version::Current)
       : yardl::binary::BinaryWriter(file_name, test_model::NestedRecordsWriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  void Flush() override;
+
+  protected:
+  void WriteTupleWithRecordsImpl(test_model::TupleWithRecords const& value) override;
+  void CloseImpl() override;
+
+  Version version_;
+};
+
+// Binary indexed writer for the NestedRecords protocol.
+class NestedRecordsIndexedWriter : public test_model::NestedRecordsWriterBase, yardl::binary::BinaryIndexedWriter {
+  public:
+  NestedRecordsIndexedWriter(std::ostream& stream, Version version = Version::Current)
+      : yardl::binary::BinaryIndexedWriter(stream, test_model::NestedRecordsWriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  NestedRecordsIndexedWriter(std::string file_name, Version version = Version::Current)
+      : yardl::binary::BinaryIndexedWriter(file_name, test_model::NestedRecordsWriterBase::SchemaFromVersion(version)), version_(version) {}
 
   void Flush() override;
 
@@ -380,6 +748,24 @@ class NestedRecordsReader : public test_model::NestedRecordsReaderBase, yardl::b
   Version version_;
 };
 
+// Binary indexed reader for the NestedRecords protocol.
+class NestedRecordsIndexedReader : public test_model::NestedRecordsIndexedReaderBase, yardl::binary::BinaryIndexedReader {
+  public:
+  NestedRecordsIndexedReader(std::istream& stream)
+      : yardl::binary::BinaryIndexedReader(stream), version_(test_model::NestedRecordsIndexedReaderBase::VersionFromSchema(schema_read_)) {}
+
+  NestedRecordsIndexedReader(std::string file_name)
+      : yardl::binary::BinaryIndexedReader(file_name), version_(test_model::NestedRecordsIndexedReaderBase::VersionFromSchema(schema_read_)) {}
+
+  Version GetVersion() { return version_; }
+
+  protected:
+  void ReadTupleWithRecordsImpl(test_model::TupleWithRecords& value) override;
+  void CloseImpl() override;
+
+  Version version_;
+};
+
 // Binary writer for the Vlens protocol.
 class VlensWriter : public test_model::VlensWriterBase, yardl::binary::BinaryWriter {
   public:
@@ -388,6 +774,27 @@ class VlensWriter : public test_model::VlensWriterBase, yardl::binary::BinaryWri
 
   VlensWriter(std::string file_name, Version version = Version::Current)
       : yardl::binary::BinaryWriter(file_name, test_model::VlensWriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  void Flush() override;
+
+  protected:
+  void WriteIntVectorImpl(std::vector<int32_t> const& value) override;
+  void WriteComplexVectorImpl(std::vector<std::complex<float>> const& value) override;
+  void WriteRecordWithVlensImpl(test_model::RecordWithVlens const& value) override;
+  void WriteVlenOfRecordWithVlensImpl(std::vector<test_model::RecordWithVlens> const& value) override;
+  void CloseImpl() override;
+
+  Version version_;
+};
+
+// Binary indexed writer for the Vlens protocol.
+class VlensIndexedWriter : public test_model::VlensWriterBase, yardl::binary::BinaryIndexedWriter {
+  public:
+  VlensIndexedWriter(std::ostream& stream, Version version = Version::Current)
+      : yardl::binary::BinaryIndexedWriter(stream, test_model::VlensWriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  VlensIndexedWriter(std::string file_name, Version version = Version::Current)
+      : yardl::binary::BinaryIndexedWriter(file_name, test_model::VlensWriterBase::SchemaFromVersion(version)), version_(version) {}
 
   void Flush() override;
 
@@ -422,6 +829,27 @@ class VlensReader : public test_model::VlensReaderBase, yardl::binary::BinaryRea
   Version version_;
 };
 
+// Binary indexed reader for the Vlens protocol.
+class VlensIndexedReader : public test_model::VlensIndexedReaderBase, yardl::binary::BinaryIndexedReader {
+  public:
+  VlensIndexedReader(std::istream& stream)
+      : yardl::binary::BinaryIndexedReader(stream), version_(test_model::VlensIndexedReaderBase::VersionFromSchema(schema_read_)) {}
+
+  VlensIndexedReader(std::string file_name)
+      : yardl::binary::BinaryIndexedReader(file_name), version_(test_model::VlensIndexedReaderBase::VersionFromSchema(schema_read_)) {}
+
+  Version GetVersion() { return version_; }
+
+  protected:
+  void ReadIntVectorImpl(std::vector<int32_t>& value) override;
+  void ReadComplexVectorImpl(std::vector<std::complex<float>>& value) override;
+  void ReadRecordWithVlensImpl(test_model::RecordWithVlens& value) override;
+  void ReadVlenOfRecordWithVlensImpl(std::vector<test_model::RecordWithVlens>& value) override;
+  void CloseImpl() override;
+
+  Version version_;
+};
+
 // Binary writer for the Strings protocol.
 class StringsWriter : public test_model::StringsWriterBase, yardl::binary::BinaryWriter {
   public:
@@ -430,6 +858,25 @@ class StringsWriter : public test_model::StringsWriterBase, yardl::binary::Binar
 
   StringsWriter(std::string file_name, Version version = Version::Current)
       : yardl::binary::BinaryWriter(file_name, test_model::StringsWriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  void Flush() override;
+
+  protected:
+  void WriteSingleStringImpl(std::string const& value) override;
+  void WriteRecWithStringImpl(test_model::RecordWithStrings const& value) override;
+  void CloseImpl() override;
+
+  Version version_;
+};
+
+// Binary indexed writer for the Strings protocol.
+class StringsIndexedWriter : public test_model::StringsWriterBase, yardl::binary::BinaryIndexedWriter {
+  public:
+  StringsIndexedWriter(std::ostream& stream, Version version = Version::Current)
+      : yardl::binary::BinaryIndexedWriter(stream, test_model::StringsWriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  StringsIndexedWriter(std::string file_name, Version version = Version::Current)
+      : yardl::binary::BinaryIndexedWriter(file_name, test_model::StringsWriterBase::SchemaFromVersion(version)), version_(version) {}
 
   void Flush() override;
 
@@ -460,6 +907,25 @@ class StringsReader : public test_model::StringsReaderBase, yardl::binary::Binar
   Version version_;
 };
 
+// Binary indexed reader for the Strings protocol.
+class StringsIndexedReader : public test_model::StringsIndexedReaderBase, yardl::binary::BinaryIndexedReader {
+  public:
+  StringsIndexedReader(std::istream& stream)
+      : yardl::binary::BinaryIndexedReader(stream), version_(test_model::StringsIndexedReaderBase::VersionFromSchema(schema_read_)) {}
+
+  StringsIndexedReader(std::string file_name)
+      : yardl::binary::BinaryIndexedReader(file_name), version_(test_model::StringsIndexedReaderBase::VersionFromSchema(schema_read_)) {}
+
+  Version GetVersion() { return version_; }
+
+  protected:
+  void ReadSingleStringImpl(std::string& value) override;
+  void ReadRecWithStringImpl(test_model::RecordWithStrings& value) override;
+  void CloseImpl() override;
+
+  Version version_;
+};
+
 // Binary writer for the OptionalVectors protocol.
 class OptionalVectorsWriter : public test_model::OptionalVectorsWriterBase, yardl::binary::BinaryWriter {
   public:
@@ -468,6 +934,24 @@ class OptionalVectorsWriter : public test_model::OptionalVectorsWriterBase, yard
 
   OptionalVectorsWriter(std::string file_name, Version version = Version::Current)
       : yardl::binary::BinaryWriter(file_name, test_model::OptionalVectorsWriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  void Flush() override;
+
+  protected:
+  void WriteRecordWithOptionalVectorImpl(test_model::RecordWithOptionalVector const& value) override;
+  void CloseImpl() override;
+
+  Version version_;
+};
+
+// Binary indexed writer for the OptionalVectors protocol.
+class OptionalVectorsIndexedWriter : public test_model::OptionalVectorsWriterBase, yardl::binary::BinaryIndexedWriter {
+  public:
+  OptionalVectorsIndexedWriter(std::ostream& stream, Version version = Version::Current)
+      : yardl::binary::BinaryIndexedWriter(stream, test_model::OptionalVectorsWriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  OptionalVectorsIndexedWriter(std::string file_name, Version version = Version::Current)
+      : yardl::binary::BinaryIndexedWriter(file_name, test_model::OptionalVectorsWriterBase::SchemaFromVersion(version)), version_(version) {}
 
   void Flush() override;
 
@@ -496,6 +980,24 @@ class OptionalVectorsReader : public test_model::OptionalVectorsReaderBase, yard
   Version version_;
 };
 
+// Binary indexed reader for the OptionalVectors protocol.
+class OptionalVectorsIndexedReader : public test_model::OptionalVectorsIndexedReaderBase, yardl::binary::BinaryIndexedReader {
+  public:
+  OptionalVectorsIndexedReader(std::istream& stream)
+      : yardl::binary::BinaryIndexedReader(stream), version_(test_model::OptionalVectorsIndexedReaderBase::VersionFromSchema(schema_read_)) {}
+
+  OptionalVectorsIndexedReader(std::string file_name)
+      : yardl::binary::BinaryIndexedReader(file_name), version_(test_model::OptionalVectorsIndexedReaderBase::VersionFromSchema(schema_read_)) {}
+
+  Version GetVersion() { return version_; }
+
+  protected:
+  void ReadRecordWithOptionalVectorImpl(test_model::RecordWithOptionalVector& value) override;
+  void CloseImpl() override;
+
+  Version version_;
+};
+
 // Binary writer for the FixedVectors protocol.
 class FixedVectorsWriter : public test_model::FixedVectorsWriterBase, yardl::binary::BinaryWriter {
   public:
@@ -504,6 +1006,27 @@ class FixedVectorsWriter : public test_model::FixedVectorsWriterBase, yardl::bin
 
   FixedVectorsWriter(std::string file_name, Version version = Version::Current)
       : yardl::binary::BinaryWriter(file_name, test_model::FixedVectorsWriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  void Flush() override;
+
+  protected:
+  void WriteFixedIntVectorImpl(std::array<int32_t, 5> const& value) override;
+  void WriteFixedSimpleRecordVectorImpl(std::array<test_model::SimpleRecord, 3> const& value) override;
+  void WriteFixedRecordWithVlensVectorImpl(std::array<test_model::RecordWithVlens, 2> const& value) override;
+  void WriteRecordWithFixedVectorsImpl(test_model::RecordWithFixedVectors const& value) override;
+  void CloseImpl() override;
+
+  Version version_;
+};
+
+// Binary indexed writer for the FixedVectors protocol.
+class FixedVectorsIndexedWriter : public test_model::FixedVectorsWriterBase, yardl::binary::BinaryIndexedWriter {
+  public:
+  FixedVectorsIndexedWriter(std::ostream& stream, Version version = Version::Current)
+      : yardl::binary::BinaryIndexedWriter(stream, test_model::FixedVectorsWriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  FixedVectorsIndexedWriter(std::string file_name, Version version = Version::Current)
+      : yardl::binary::BinaryIndexedWriter(file_name, test_model::FixedVectorsWriterBase::SchemaFromVersion(version)), version_(version) {}
 
   void Flush() override;
 
@@ -538,6 +1061,27 @@ class FixedVectorsReader : public test_model::FixedVectorsReaderBase, yardl::bin
   Version version_;
 };
 
+// Binary indexed reader for the FixedVectors protocol.
+class FixedVectorsIndexedReader : public test_model::FixedVectorsIndexedReaderBase, yardl::binary::BinaryIndexedReader {
+  public:
+  FixedVectorsIndexedReader(std::istream& stream)
+      : yardl::binary::BinaryIndexedReader(stream), version_(test_model::FixedVectorsIndexedReaderBase::VersionFromSchema(schema_read_)) {}
+
+  FixedVectorsIndexedReader(std::string file_name)
+      : yardl::binary::BinaryIndexedReader(file_name), version_(test_model::FixedVectorsIndexedReaderBase::VersionFromSchema(schema_read_)) {}
+
+  Version GetVersion() { return version_; }
+
+  protected:
+  void ReadFixedIntVectorImpl(std::array<int32_t, 5>& value) override;
+  void ReadFixedSimpleRecordVectorImpl(std::array<test_model::SimpleRecord, 3>& value) override;
+  void ReadFixedRecordWithVlensVectorImpl(std::array<test_model::RecordWithVlens, 2>& value) override;
+  void ReadRecordWithFixedVectorsImpl(test_model::RecordWithFixedVectors& value) override;
+  void CloseImpl() override;
+
+  Version version_;
+};
+
 // Binary writer for the Streams protocol.
 class StreamsWriter : public test_model::StreamsWriterBase, yardl::binary::BinaryWriter {
   public:
@@ -546,6 +1090,35 @@ class StreamsWriter : public test_model::StreamsWriterBase, yardl::binary::Binar
 
   StreamsWriter(std::string file_name, Version version = Version::Current)
       : yardl::binary::BinaryWriter(file_name, test_model::StreamsWriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  void Flush() override;
+
+  protected:
+  void WriteIntDataImpl(int32_t const& value) override;
+  void WriteIntDataImpl(std::vector<int32_t> const& values) override;
+  void EndIntDataImpl() override;
+  void WriteOptionalIntDataImpl(std::optional<int32_t> const& value) override;
+  void WriteOptionalIntDataImpl(std::vector<std::optional<int32_t>> const& values) override;
+  void EndOptionalIntDataImpl() override;
+  void WriteRecordWithOptionalVectorDataImpl(test_model::RecordWithOptionalVector const& value) override;
+  void WriteRecordWithOptionalVectorDataImpl(std::vector<test_model::RecordWithOptionalVector> const& values) override;
+  void EndRecordWithOptionalVectorDataImpl() override;
+  void WriteFixedVectorImpl(std::array<int32_t, 3> const& value) override;
+  void WriteFixedVectorImpl(std::vector<std::array<int32_t, 3>> const& values) override;
+  void EndFixedVectorImpl() override;
+  void CloseImpl() override;
+
+  Version version_;
+};
+
+// Binary indexed writer for the Streams protocol.
+class StreamsIndexedWriter : public test_model::StreamsWriterBase, yardl::binary::BinaryIndexedWriter {
+  public:
+  StreamsIndexedWriter(std::ostream& stream, Version version = Version::Current)
+      : yardl::binary::BinaryIndexedWriter(stream, test_model::StreamsWriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  StreamsIndexedWriter(std::string file_name, Version version = Version::Current)
+      : yardl::binary::BinaryIndexedWriter(file_name, test_model::StreamsWriterBase::SchemaFromVersion(version)), version_(version) {}
 
   void Flush() override;
 
@@ -595,6 +1168,46 @@ class StreamsReader : public test_model::StreamsReaderBase, yardl::binary::Binar
   size_t current_block_remaining_ = 0;
 };
 
+// Binary indexed reader for the Streams protocol.
+class StreamsIndexedReader : public test_model::StreamsIndexedReaderBase, yardl::binary::BinaryIndexedReader {
+  public:
+  StreamsIndexedReader(std::istream& stream)
+      : yardl::binary::BinaryIndexedReader(stream), version_(test_model::StreamsIndexedReaderBase::VersionFromSchema(schema_read_)) {}
+
+  StreamsIndexedReader(std::string file_name)
+      : yardl::binary::BinaryIndexedReader(file_name), version_(test_model::StreamsIndexedReaderBase::VersionFromSchema(schema_read_)) {}
+
+  Version GetVersion() { return version_; }
+
+  protected:
+  bool ReadIntDataImpl(int32_t& value) override;
+  bool ReadIntDataImpl(std::vector<int32_t>& values) override;
+  bool ReadIntDataImpl(int32_t& value, size_t idx) override;
+  bool ReadIntDataImpl(std::vector<int32_t>& values, size_t idx) override;
+  size_t CountIntDataImpl() override;
+  bool ReadOptionalIntDataImpl(std::optional<int32_t>& value) override;
+  bool ReadOptionalIntDataImpl(std::vector<std::optional<int32_t>>& values) override;
+  bool ReadOptionalIntDataImpl(std::optional<int32_t>& value, size_t idx) override;
+  bool ReadOptionalIntDataImpl(std::vector<std::optional<int32_t>>& values, size_t idx) override;
+  size_t CountOptionalIntDataImpl() override;
+  bool ReadRecordWithOptionalVectorDataImpl(test_model::RecordWithOptionalVector& value) override;
+  bool ReadRecordWithOptionalVectorDataImpl(std::vector<test_model::RecordWithOptionalVector>& values) override;
+  bool ReadRecordWithOptionalVectorDataImpl(test_model::RecordWithOptionalVector& value, size_t idx) override;
+  bool ReadRecordWithOptionalVectorDataImpl(std::vector<test_model::RecordWithOptionalVector>& values, size_t idx) override;
+  size_t CountRecordWithOptionalVectorDataImpl() override;
+  bool ReadFixedVectorImpl(std::array<int32_t, 3>& value) override;
+  bool ReadFixedVectorImpl(std::vector<std::array<int32_t, 3>>& values) override;
+  bool ReadFixedVectorImpl(std::array<int32_t, 3>& value, size_t idx) override;
+  bool ReadFixedVectorImpl(std::vector<std::array<int32_t, 3>>& values, size_t idx) override;
+  size_t CountFixedVectorImpl() override;
+  void CloseImpl() override;
+
+  Version version_;
+
+  private:
+  size_t current_block_remaining_ = 0;
+};
+
 // Binary writer for the FixedArrays protocol.
 class FixedArraysWriter : public test_model::FixedArraysWriterBase, yardl::binary::BinaryWriter {
   public:
@@ -603,6 +1216,28 @@ class FixedArraysWriter : public test_model::FixedArraysWriterBase, yardl::binar
 
   FixedArraysWriter(std::string file_name, Version version = Version::Current)
       : yardl::binary::BinaryWriter(file_name, test_model::FixedArraysWriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  void Flush() override;
+
+  protected:
+  void WriteIntsImpl(yardl::FixedNDArray<int32_t, 2, 3> const& value) override;
+  void WriteFixedSimpleRecordArrayImpl(yardl::FixedNDArray<test_model::SimpleRecord, 3, 2> const& value) override;
+  void WriteFixedRecordWithVlensArrayImpl(yardl::FixedNDArray<test_model::RecordWithVlens, 2, 2> const& value) override;
+  void WriteRecordWithFixedArraysImpl(test_model::RecordWithFixedArrays const& value) override;
+  void WriteNamedArrayImpl(test_model::NamedFixedNDArray const& value) override;
+  void CloseImpl() override;
+
+  Version version_;
+};
+
+// Binary indexed writer for the FixedArrays protocol.
+class FixedArraysIndexedWriter : public test_model::FixedArraysWriterBase, yardl::binary::BinaryIndexedWriter {
+  public:
+  FixedArraysIndexedWriter(std::ostream& stream, Version version = Version::Current)
+      : yardl::binary::BinaryIndexedWriter(stream, test_model::FixedArraysWriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  FixedArraysIndexedWriter(std::string file_name, Version version = Version::Current)
+      : yardl::binary::BinaryIndexedWriter(file_name, test_model::FixedArraysWriterBase::SchemaFromVersion(version)), version_(version) {}
 
   void Flush() override;
 
@@ -639,6 +1274,28 @@ class FixedArraysReader : public test_model::FixedArraysReaderBase, yardl::binar
   Version version_;
 };
 
+// Binary indexed reader for the FixedArrays protocol.
+class FixedArraysIndexedReader : public test_model::FixedArraysIndexedReaderBase, yardl::binary::BinaryIndexedReader {
+  public:
+  FixedArraysIndexedReader(std::istream& stream)
+      : yardl::binary::BinaryIndexedReader(stream), version_(test_model::FixedArraysIndexedReaderBase::VersionFromSchema(schema_read_)) {}
+
+  FixedArraysIndexedReader(std::string file_name)
+      : yardl::binary::BinaryIndexedReader(file_name), version_(test_model::FixedArraysIndexedReaderBase::VersionFromSchema(schema_read_)) {}
+
+  Version GetVersion() { return version_; }
+
+  protected:
+  void ReadIntsImpl(yardl::FixedNDArray<int32_t, 2, 3>& value) override;
+  void ReadFixedSimpleRecordArrayImpl(yardl::FixedNDArray<test_model::SimpleRecord, 3, 2>& value) override;
+  void ReadFixedRecordWithVlensArrayImpl(yardl::FixedNDArray<test_model::RecordWithVlens, 2, 2>& value) override;
+  void ReadRecordWithFixedArraysImpl(test_model::RecordWithFixedArrays& value) override;
+  void ReadNamedArrayImpl(test_model::NamedFixedNDArray& value) override;
+  void CloseImpl() override;
+
+  Version version_;
+};
+
 // Binary writer for the Subarrays protocol.
 class SubarraysWriter : public test_model::SubarraysWriterBase, yardl::binary::BinaryWriter {
   public:
@@ -647,6 +1304,32 @@ class SubarraysWriter : public test_model::SubarraysWriterBase, yardl::binary::B
 
   SubarraysWriter(std::string file_name, Version version = Version::Current)
       : yardl::binary::BinaryWriter(file_name, test_model::SubarraysWriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  void Flush() override;
+
+  protected:
+  void WriteDynamicWithFixedIntSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<int32_t, 3>> const& value) override;
+  void WriteDynamicWithFixedFloatSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<float, 3>> const& value) override;
+  void WriteKnownDimCountWithFixedIntSubarrayImpl(yardl::NDArray<yardl::FixedNDArray<int32_t, 3>, 1> const& value) override;
+  void WriteKnownDimCountWithFixedFloatSubarrayImpl(yardl::NDArray<yardl::FixedNDArray<float, 3>, 1> const& value) override;
+  void WriteFixedWithFixedIntSubarrayImpl(yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2> const& value) override;
+  void WriteFixedWithFixedFloatSubarrayImpl(yardl::FixedNDArray<yardl::FixedNDArray<float, 3>, 2> const& value) override;
+  void WriteNestedSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>> const& value) override;
+  void WriteDynamicWithFixedVectorSubarrayImpl(yardl::DynamicNDArray<std::array<int32_t, 3>> const& value) override;
+  void WriteGenericSubarrayImpl(test_model::Image<yardl::FixedNDArray<int32_t, 3>> const& value) override;
+  void CloseImpl() override;
+
+  Version version_;
+};
+
+// Binary indexed writer for the Subarrays protocol.
+class SubarraysIndexedWriter : public test_model::SubarraysWriterBase, yardl::binary::BinaryIndexedWriter {
+  public:
+  SubarraysIndexedWriter(std::ostream& stream, Version version = Version::Current)
+      : yardl::binary::BinaryIndexedWriter(stream, test_model::SubarraysWriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  SubarraysIndexedWriter(std::string file_name, Version version = Version::Current)
+      : yardl::binary::BinaryIndexedWriter(file_name, test_model::SubarraysWriterBase::SchemaFromVersion(version)), version_(version) {}
 
   void Flush() override;
 
@@ -691,6 +1374,32 @@ class SubarraysReader : public test_model::SubarraysReaderBase, yardl::binary::B
   Version version_;
 };
 
+// Binary indexed reader for the Subarrays protocol.
+class SubarraysIndexedReader : public test_model::SubarraysIndexedReaderBase, yardl::binary::BinaryIndexedReader {
+  public:
+  SubarraysIndexedReader(std::istream& stream)
+      : yardl::binary::BinaryIndexedReader(stream), version_(test_model::SubarraysIndexedReaderBase::VersionFromSchema(schema_read_)) {}
+
+  SubarraysIndexedReader(std::string file_name)
+      : yardl::binary::BinaryIndexedReader(file_name), version_(test_model::SubarraysIndexedReaderBase::VersionFromSchema(schema_read_)) {}
+
+  Version GetVersion() { return version_; }
+
+  protected:
+  void ReadDynamicWithFixedIntSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<int32_t, 3>>& value) override;
+  void ReadDynamicWithFixedFloatSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<float, 3>>& value) override;
+  void ReadKnownDimCountWithFixedIntSubarrayImpl(yardl::NDArray<yardl::FixedNDArray<int32_t, 3>, 1>& value) override;
+  void ReadKnownDimCountWithFixedFloatSubarrayImpl(yardl::NDArray<yardl::FixedNDArray<float, 3>, 1>& value) override;
+  void ReadFixedWithFixedIntSubarrayImpl(yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>& value) override;
+  void ReadFixedWithFixedFloatSubarrayImpl(yardl::FixedNDArray<yardl::FixedNDArray<float, 3>, 2>& value) override;
+  void ReadNestedSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<yardl::FixedNDArray<int32_t, 3>, 2>>& value) override;
+  void ReadDynamicWithFixedVectorSubarrayImpl(yardl::DynamicNDArray<std::array<int32_t, 3>>& value) override;
+  void ReadGenericSubarrayImpl(test_model::Image<yardl::FixedNDArray<int32_t, 3>>& value) override;
+  void CloseImpl() override;
+
+  Version version_;
+};
+
 // Binary writer for the SubarraysInRecords protocol.
 class SubarraysInRecordsWriter : public test_model::SubarraysInRecordsWriterBase, yardl::binary::BinaryWriter {
   public:
@@ -699,6 +1408,25 @@ class SubarraysInRecordsWriter : public test_model::SubarraysInRecordsWriterBase
 
   SubarraysInRecordsWriter(std::string file_name, Version version = Version::Current)
       : yardl::binary::BinaryWriter(file_name, test_model::SubarraysInRecordsWriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  void Flush() override;
+
+  protected:
+  void WriteWithFixedSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithFixedCollections> const& value) override;
+  void WriteWithVlenSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithVlenCollections> const& value) override;
+  void CloseImpl() override;
+
+  Version version_;
+};
+
+// Binary indexed writer for the SubarraysInRecords protocol.
+class SubarraysInRecordsIndexedWriter : public test_model::SubarraysInRecordsWriterBase, yardl::binary::BinaryIndexedWriter {
+  public:
+  SubarraysInRecordsIndexedWriter(std::ostream& stream, Version version = Version::Current)
+      : yardl::binary::BinaryIndexedWriter(stream, test_model::SubarraysInRecordsWriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  SubarraysInRecordsIndexedWriter(std::string file_name, Version version = Version::Current)
+      : yardl::binary::BinaryIndexedWriter(file_name, test_model::SubarraysInRecordsWriterBase::SchemaFromVersion(version)), version_(version) {}
 
   void Flush() override;
 
@@ -729,6 +1457,25 @@ class SubarraysInRecordsReader : public test_model::SubarraysInRecordsReaderBase
   Version version_;
 };
 
+// Binary indexed reader for the SubarraysInRecords protocol.
+class SubarraysInRecordsIndexedReader : public test_model::SubarraysInRecordsIndexedReaderBase, yardl::binary::BinaryIndexedReader {
+  public:
+  SubarraysInRecordsIndexedReader(std::istream& stream)
+      : yardl::binary::BinaryIndexedReader(stream), version_(test_model::SubarraysInRecordsIndexedReaderBase::VersionFromSchema(schema_read_)) {}
+
+  SubarraysInRecordsIndexedReader(std::string file_name)
+      : yardl::binary::BinaryIndexedReader(file_name), version_(test_model::SubarraysInRecordsIndexedReaderBase::VersionFromSchema(schema_read_)) {}
+
+  Version GetVersion() { return version_; }
+
+  protected:
+  void ReadWithFixedSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithFixedCollections>& value) override;
+  void ReadWithVlenSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithVlenCollections>& value) override;
+  void CloseImpl() override;
+
+  Version version_;
+};
+
 // Binary writer for the NDArrays protocol.
 class NDArraysWriter : public test_model::NDArraysWriterBase, yardl::binary::BinaryWriter {
   public:
@@ -737,6 +1484,28 @@ class NDArraysWriter : public test_model::NDArraysWriterBase, yardl::binary::Bin
 
   NDArraysWriter(std::string file_name, Version version = Version::Current)
       : yardl::binary::BinaryWriter(file_name, test_model::NDArraysWriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  void Flush() override;
+
+  protected:
+  void WriteIntsImpl(yardl::NDArray<int32_t, 2> const& value) override;
+  void WriteSimpleRecordArrayImpl(yardl::NDArray<test_model::SimpleRecord, 2> const& value) override;
+  void WriteRecordWithVlensArrayImpl(yardl::NDArray<test_model::RecordWithVlens, 2> const& value) override;
+  void WriteRecordWithNDArraysImpl(test_model::RecordWithNDArrays const& value) override;
+  void WriteNamedArrayImpl(test_model::NamedNDArray const& value) override;
+  void CloseImpl() override;
+
+  Version version_;
+};
+
+// Binary indexed writer for the NDArrays protocol.
+class NDArraysIndexedWriter : public test_model::NDArraysWriterBase, yardl::binary::BinaryIndexedWriter {
+  public:
+  NDArraysIndexedWriter(std::ostream& stream, Version version = Version::Current)
+      : yardl::binary::BinaryIndexedWriter(stream, test_model::NDArraysWriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  NDArraysIndexedWriter(std::string file_name, Version version = Version::Current)
+      : yardl::binary::BinaryIndexedWriter(file_name, test_model::NDArraysWriterBase::SchemaFromVersion(version)), version_(version) {}
 
   void Flush() override;
 
@@ -773,6 +1542,28 @@ class NDArraysReader : public test_model::NDArraysReaderBase, yardl::binary::Bin
   Version version_;
 };
 
+// Binary indexed reader for the NDArrays protocol.
+class NDArraysIndexedReader : public test_model::NDArraysIndexedReaderBase, yardl::binary::BinaryIndexedReader {
+  public:
+  NDArraysIndexedReader(std::istream& stream)
+      : yardl::binary::BinaryIndexedReader(stream), version_(test_model::NDArraysIndexedReaderBase::VersionFromSchema(schema_read_)) {}
+
+  NDArraysIndexedReader(std::string file_name)
+      : yardl::binary::BinaryIndexedReader(file_name), version_(test_model::NDArraysIndexedReaderBase::VersionFromSchema(schema_read_)) {}
+
+  Version GetVersion() { return version_; }
+
+  protected:
+  void ReadIntsImpl(yardl::NDArray<int32_t, 2>& value) override;
+  void ReadSimpleRecordArrayImpl(yardl::NDArray<test_model::SimpleRecord, 2>& value) override;
+  void ReadRecordWithVlensArrayImpl(yardl::NDArray<test_model::RecordWithVlens, 2>& value) override;
+  void ReadRecordWithNDArraysImpl(test_model::RecordWithNDArrays& value) override;
+  void ReadNamedArrayImpl(test_model::NamedNDArray& value) override;
+  void CloseImpl() override;
+
+  Version version_;
+};
+
 // Binary writer for the NDArraysSingleDimension protocol.
 class NDArraysSingleDimensionWriter : public test_model::NDArraysSingleDimensionWriterBase, yardl::binary::BinaryWriter {
   public:
@@ -781,6 +1572,27 @@ class NDArraysSingleDimensionWriter : public test_model::NDArraysSingleDimension
 
   NDArraysSingleDimensionWriter(std::string file_name, Version version = Version::Current)
       : yardl::binary::BinaryWriter(file_name, test_model::NDArraysSingleDimensionWriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  void Flush() override;
+
+  protected:
+  void WriteIntsImpl(yardl::NDArray<int32_t, 1> const& value) override;
+  void WriteSimpleRecordArrayImpl(yardl::NDArray<test_model::SimpleRecord, 1> const& value) override;
+  void WriteRecordWithVlensArrayImpl(yardl::NDArray<test_model::RecordWithVlens, 1> const& value) override;
+  void WriteRecordWithNDArraysImpl(test_model::RecordWithNDArraysSingleDimension const& value) override;
+  void CloseImpl() override;
+
+  Version version_;
+};
+
+// Binary indexed writer for the NDArraysSingleDimension protocol.
+class NDArraysSingleDimensionIndexedWriter : public test_model::NDArraysSingleDimensionWriterBase, yardl::binary::BinaryIndexedWriter {
+  public:
+  NDArraysSingleDimensionIndexedWriter(std::ostream& stream, Version version = Version::Current)
+      : yardl::binary::BinaryIndexedWriter(stream, test_model::NDArraysSingleDimensionWriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  NDArraysSingleDimensionIndexedWriter(std::string file_name, Version version = Version::Current)
+      : yardl::binary::BinaryIndexedWriter(file_name, test_model::NDArraysSingleDimensionWriterBase::SchemaFromVersion(version)), version_(version) {}
 
   void Flush() override;
 
@@ -815,6 +1627,27 @@ class NDArraysSingleDimensionReader : public test_model::NDArraysSingleDimension
   Version version_;
 };
 
+// Binary indexed reader for the NDArraysSingleDimension protocol.
+class NDArraysSingleDimensionIndexedReader : public test_model::NDArraysSingleDimensionIndexedReaderBase, yardl::binary::BinaryIndexedReader {
+  public:
+  NDArraysSingleDimensionIndexedReader(std::istream& stream)
+      : yardl::binary::BinaryIndexedReader(stream), version_(test_model::NDArraysSingleDimensionIndexedReaderBase::VersionFromSchema(schema_read_)) {}
+
+  NDArraysSingleDimensionIndexedReader(std::string file_name)
+      : yardl::binary::BinaryIndexedReader(file_name), version_(test_model::NDArraysSingleDimensionIndexedReaderBase::VersionFromSchema(schema_read_)) {}
+
+  Version GetVersion() { return version_; }
+
+  protected:
+  void ReadIntsImpl(yardl::NDArray<int32_t, 1>& value) override;
+  void ReadSimpleRecordArrayImpl(yardl::NDArray<test_model::SimpleRecord, 1>& value) override;
+  void ReadRecordWithVlensArrayImpl(yardl::NDArray<test_model::RecordWithVlens, 1>& value) override;
+  void ReadRecordWithNDArraysImpl(test_model::RecordWithNDArraysSingleDimension& value) override;
+  void CloseImpl() override;
+
+  Version version_;
+};
+
 // Binary writer for the DynamicNDArrays protocol.
 class DynamicNDArraysWriter : public test_model::DynamicNDArraysWriterBase, yardl::binary::BinaryWriter {
   public:
@@ -823,6 +1656,27 @@ class DynamicNDArraysWriter : public test_model::DynamicNDArraysWriterBase, yard
 
   DynamicNDArraysWriter(std::string file_name, Version version = Version::Current)
       : yardl::binary::BinaryWriter(file_name, test_model::DynamicNDArraysWriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  void Flush() override;
+
+  protected:
+  void WriteIntsImpl(yardl::DynamicNDArray<int32_t> const& value) override;
+  void WriteSimpleRecordArrayImpl(yardl::DynamicNDArray<test_model::SimpleRecord> const& value) override;
+  void WriteRecordWithVlensArrayImpl(yardl::DynamicNDArray<test_model::RecordWithVlens> const& value) override;
+  void WriteRecordWithDynamicNDArraysImpl(test_model::RecordWithDynamicNDArrays const& value) override;
+  void CloseImpl() override;
+
+  Version version_;
+};
+
+// Binary indexed writer for the DynamicNDArrays protocol.
+class DynamicNDArraysIndexedWriter : public test_model::DynamicNDArraysWriterBase, yardl::binary::BinaryIndexedWriter {
+  public:
+  DynamicNDArraysIndexedWriter(std::ostream& stream, Version version = Version::Current)
+      : yardl::binary::BinaryIndexedWriter(stream, test_model::DynamicNDArraysWriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  DynamicNDArraysIndexedWriter(std::string file_name, Version version = Version::Current)
+      : yardl::binary::BinaryIndexedWriter(file_name, test_model::DynamicNDArraysWriterBase::SchemaFromVersion(version)), version_(version) {}
 
   void Flush() override;
 
@@ -857,6 +1711,27 @@ class DynamicNDArraysReader : public test_model::DynamicNDArraysReaderBase, yard
   Version version_;
 };
 
+// Binary indexed reader for the DynamicNDArrays protocol.
+class DynamicNDArraysIndexedReader : public test_model::DynamicNDArraysIndexedReaderBase, yardl::binary::BinaryIndexedReader {
+  public:
+  DynamicNDArraysIndexedReader(std::istream& stream)
+      : yardl::binary::BinaryIndexedReader(stream), version_(test_model::DynamicNDArraysIndexedReaderBase::VersionFromSchema(schema_read_)) {}
+
+  DynamicNDArraysIndexedReader(std::string file_name)
+      : yardl::binary::BinaryIndexedReader(file_name), version_(test_model::DynamicNDArraysIndexedReaderBase::VersionFromSchema(schema_read_)) {}
+
+  Version GetVersion() { return version_; }
+
+  protected:
+  void ReadIntsImpl(yardl::DynamicNDArray<int32_t>& value) override;
+  void ReadSimpleRecordArrayImpl(yardl::DynamicNDArray<test_model::SimpleRecord>& value) override;
+  void ReadRecordWithVlensArrayImpl(yardl::DynamicNDArray<test_model::RecordWithVlens>& value) override;
+  void ReadRecordWithDynamicNDArraysImpl(test_model::RecordWithDynamicNDArrays& value) override;
+  void CloseImpl() override;
+
+  Version version_;
+};
+
 // Binary writer for the MultiDArrays protocol.
 class MultiDArraysWriter : public test_model::MultiDArraysWriterBase, yardl::binary::BinaryWriter {
   public:
@@ -865,6 +1740,29 @@ class MultiDArraysWriter : public test_model::MultiDArraysWriterBase, yardl::bin
 
   MultiDArraysWriter(std::string file_name, Version version = Version::Current)
       : yardl::binary::BinaryWriter(file_name, test_model::MultiDArraysWriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  void Flush() override;
+
+  protected:
+  void WriteImagesImpl(yardl::NDArray<float, 4> const& value) override;
+  void WriteImagesImpl(std::vector<yardl::NDArray<float, 4>> const& values) override;
+  void EndImagesImpl() override;
+  void WriteFramesImpl(yardl::FixedNDArray<float, 1, 1, 64, 32> const& value) override;
+  void WriteFramesImpl(std::vector<yardl::FixedNDArray<float, 1, 1, 64, 32>> const& values) override;
+  void EndFramesImpl() override;
+  void CloseImpl() override;
+
+  Version version_;
+};
+
+// Binary indexed writer for the MultiDArrays protocol.
+class MultiDArraysIndexedWriter : public test_model::MultiDArraysWriterBase, yardl::binary::BinaryIndexedWriter {
+  public:
+  MultiDArraysIndexedWriter(std::ostream& stream, Version version = Version::Current)
+      : yardl::binary::BinaryIndexedWriter(stream, test_model::MultiDArraysWriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  MultiDArraysIndexedWriter(std::string file_name, Version version = Version::Current)
+      : yardl::binary::BinaryIndexedWriter(file_name, test_model::MultiDArraysWriterBase::SchemaFromVersion(version)), version_(version) {}
 
   void Flush() override;
 
@@ -904,6 +1802,36 @@ class MultiDArraysReader : public test_model::MultiDArraysReaderBase, yardl::bin
   size_t current_block_remaining_ = 0;
 };
 
+// Binary indexed reader for the MultiDArrays protocol.
+class MultiDArraysIndexedReader : public test_model::MultiDArraysIndexedReaderBase, yardl::binary::BinaryIndexedReader {
+  public:
+  MultiDArraysIndexedReader(std::istream& stream)
+      : yardl::binary::BinaryIndexedReader(stream), version_(test_model::MultiDArraysIndexedReaderBase::VersionFromSchema(schema_read_)) {}
+
+  MultiDArraysIndexedReader(std::string file_name)
+      : yardl::binary::BinaryIndexedReader(file_name), version_(test_model::MultiDArraysIndexedReaderBase::VersionFromSchema(schema_read_)) {}
+
+  Version GetVersion() { return version_; }
+
+  protected:
+  bool ReadImagesImpl(yardl::NDArray<float, 4>& value) override;
+  bool ReadImagesImpl(std::vector<yardl::NDArray<float, 4>>& values) override;
+  bool ReadImagesImpl(yardl::NDArray<float, 4>& value, size_t idx) override;
+  bool ReadImagesImpl(std::vector<yardl::NDArray<float, 4>>& values, size_t idx) override;
+  size_t CountImagesImpl() override;
+  bool ReadFramesImpl(yardl::FixedNDArray<float, 1, 1, 64, 32>& value) override;
+  bool ReadFramesImpl(std::vector<yardl::FixedNDArray<float, 1, 1, 64, 32>>& values) override;
+  bool ReadFramesImpl(yardl::FixedNDArray<float, 1, 1, 64, 32>& value, size_t idx) override;
+  bool ReadFramesImpl(std::vector<yardl::FixedNDArray<float, 1, 1, 64, 32>>& values, size_t idx) override;
+  size_t CountFramesImpl() override;
+  void CloseImpl() override;
+
+  Version version_;
+
+  private:
+  size_t current_block_remaining_ = 0;
+};
+
 // Binary writer for the ComplexArrays protocol.
 class ComplexArraysWriter : public test_model::ComplexArraysWriterBase, yardl::binary::BinaryWriter {
   public:
@@ -912,6 +1840,25 @@ class ComplexArraysWriter : public test_model::ComplexArraysWriterBase, yardl::b
 
   ComplexArraysWriter(std::string file_name, Version version = Version::Current)
       : yardl::binary::BinaryWriter(file_name, test_model::ComplexArraysWriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  void Flush() override;
+
+  protected:
+  void WriteFloatsImpl(yardl::DynamicNDArray<std::complex<float>> const& value) override;
+  void WriteDoublesImpl(yardl::NDArray<std::complex<double>, 2> const& value) override;
+  void CloseImpl() override;
+
+  Version version_;
+};
+
+// Binary indexed writer for the ComplexArrays protocol.
+class ComplexArraysIndexedWriter : public test_model::ComplexArraysWriterBase, yardl::binary::BinaryIndexedWriter {
+  public:
+  ComplexArraysIndexedWriter(std::ostream& stream, Version version = Version::Current)
+      : yardl::binary::BinaryIndexedWriter(stream, test_model::ComplexArraysWriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  ComplexArraysIndexedWriter(std::string file_name, Version version = Version::Current)
+      : yardl::binary::BinaryIndexedWriter(file_name, test_model::ComplexArraysWriterBase::SchemaFromVersion(version)), version_(version) {}
 
   void Flush() override;
 
@@ -942,6 +1889,25 @@ class ComplexArraysReader : public test_model::ComplexArraysReaderBase, yardl::b
   Version version_;
 };
 
+// Binary indexed reader for the ComplexArrays protocol.
+class ComplexArraysIndexedReader : public test_model::ComplexArraysIndexedReaderBase, yardl::binary::BinaryIndexedReader {
+  public:
+  ComplexArraysIndexedReader(std::istream& stream)
+      : yardl::binary::BinaryIndexedReader(stream), version_(test_model::ComplexArraysIndexedReaderBase::VersionFromSchema(schema_read_)) {}
+
+  ComplexArraysIndexedReader(std::string file_name)
+      : yardl::binary::BinaryIndexedReader(file_name), version_(test_model::ComplexArraysIndexedReaderBase::VersionFromSchema(schema_read_)) {}
+
+  Version GetVersion() { return version_; }
+
+  protected:
+  void ReadFloatsImpl(yardl::DynamicNDArray<std::complex<float>>& value) override;
+  void ReadDoublesImpl(yardl::NDArray<std::complex<double>, 2>& value) override;
+  void CloseImpl() override;
+
+  Version version_;
+};
+
 // Binary writer for the Maps protocol.
 class MapsWriter : public test_model::MapsWriterBase, yardl::binary::BinaryWriter {
   public:
@@ -950,6 +1916,28 @@ class MapsWriter : public test_model::MapsWriterBase, yardl::binary::BinaryWrite
 
   MapsWriter(std::string file_name, Version version = Version::Current)
       : yardl::binary::BinaryWriter(file_name, test_model::MapsWriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  void Flush() override;
+
+  protected:
+  void WriteStringToIntImpl(std::unordered_map<std::string, int32_t> const& value) override;
+  void WriteIntToStringImpl(std::unordered_map<int32_t, std::string> const& value) override;
+  void WriteStringToUnionImpl(std::unordered_map<std::string, std::variant<std::string, int32_t>> const& value) override;
+  void WriteAliasedGenericImpl(basic_types::AliasedMap<std::string, int32_t> const& value) override;
+  void WriteRecordsImpl(std::vector<test_model::RecordWithMaps> const& value) override;
+  void CloseImpl() override;
+
+  Version version_;
+};
+
+// Binary indexed writer for the Maps protocol.
+class MapsIndexedWriter : public test_model::MapsWriterBase, yardl::binary::BinaryIndexedWriter {
+  public:
+  MapsIndexedWriter(std::ostream& stream, Version version = Version::Current)
+      : yardl::binary::BinaryIndexedWriter(stream, test_model::MapsWriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  MapsIndexedWriter(std::string file_name, Version version = Version::Current)
+      : yardl::binary::BinaryIndexedWriter(file_name, test_model::MapsWriterBase::SchemaFromVersion(version)), version_(version) {}
 
   void Flush() override;
 
@@ -986,6 +1974,28 @@ class MapsReader : public test_model::MapsReaderBase, yardl::binary::BinaryReade
   Version version_;
 };
 
+// Binary indexed reader for the Maps protocol.
+class MapsIndexedReader : public test_model::MapsIndexedReaderBase, yardl::binary::BinaryIndexedReader {
+  public:
+  MapsIndexedReader(std::istream& stream)
+      : yardl::binary::BinaryIndexedReader(stream), version_(test_model::MapsIndexedReaderBase::VersionFromSchema(schema_read_)) {}
+
+  MapsIndexedReader(std::string file_name)
+      : yardl::binary::BinaryIndexedReader(file_name), version_(test_model::MapsIndexedReaderBase::VersionFromSchema(schema_read_)) {}
+
+  Version GetVersion() { return version_; }
+
+  protected:
+  void ReadStringToIntImpl(std::unordered_map<std::string, int32_t>& value) override;
+  void ReadIntToStringImpl(std::unordered_map<int32_t, std::string>& value) override;
+  void ReadStringToUnionImpl(std::unordered_map<std::string, std::variant<std::string, int32_t>>& value) override;
+  void ReadAliasedGenericImpl(basic_types::AliasedMap<std::string, int32_t>& value) override;
+  void ReadRecordsImpl(std::vector<test_model::RecordWithMaps>& value) override;
+  void CloseImpl() override;
+
+  Version version_;
+};
+
 // Binary writer for the Unions protocol.
 class UnionsWriter : public test_model::UnionsWriterBase, yardl::binary::BinaryWriter {
   public:
@@ -994,6 +2004,27 @@ class UnionsWriter : public test_model::UnionsWriterBase, yardl::binary::BinaryW
 
   UnionsWriter(std::string file_name, Version version = Version::Current)
       : yardl::binary::BinaryWriter(file_name, test_model::UnionsWriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  void Flush() override;
+
+  protected:
+  void WriteIntOrSimpleRecordImpl(std::variant<int32_t, test_model::SimpleRecord> const& value) override;
+  void WriteIntOrRecordWithVlensImpl(std::variant<int32_t, test_model::RecordWithVlens> const& value) override;
+  void WriteMonosotateOrIntOrSimpleRecordImpl(std::variant<std::monostate, int32_t, test_model::SimpleRecord> const& value) override;
+  void WriteRecordWithUnionsImpl(basic_types::RecordWithUnions const& value) override;
+  void CloseImpl() override;
+
+  Version version_;
+};
+
+// Binary indexed writer for the Unions protocol.
+class UnionsIndexedWriter : public test_model::UnionsWriterBase, yardl::binary::BinaryIndexedWriter {
+  public:
+  UnionsIndexedWriter(std::ostream& stream, Version version = Version::Current)
+      : yardl::binary::BinaryIndexedWriter(stream, test_model::UnionsWriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  UnionsIndexedWriter(std::string file_name, Version version = Version::Current)
+      : yardl::binary::BinaryIndexedWriter(file_name, test_model::UnionsWriterBase::SchemaFromVersion(version)), version_(version) {}
 
   void Flush() override;
 
@@ -1028,6 +2059,27 @@ class UnionsReader : public test_model::UnionsReaderBase, yardl::binary::BinaryR
   Version version_;
 };
 
+// Binary indexed reader for the Unions protocol.
+class UnionsIndexedReader : public test_model::UnionsIndexedReaderBase, yardl::binary::BinaryIndexedReader {
+  public:
+  UnionsIndexedReader(std::istream& stream)
+      : yardl::binary::BinaryIndexedReader(stream), version_(test_model::UnionsIndexedReaderBase::VersionFromSchema(schema_read_)) {}
+
+  UnionsIndexedReader(std::string file_name)
+      : yardl::binary::BinaryIndexedReader(file_name), version_(test_model::UnionsIndexedReaderBase::VersionFromSchema(schema_read_)) {}
+
+  Version GetVersion() { return version_; }
+
+  protected:
+  void ReadIntOrSimpleRecordImpl(std::variant<int32_t, test_model::SimpleRecord>& value) override;
+  void ReadIntOrRecordWithVlensImpl(std::variant<int32_t, test_model::RecordWithVlens>& value) override;
+  void ReadMonosotateOrIntOrSimpleRecordImpl(std::variant<std::monostate, int32_t, test_model::SimpleRecord>& value) override;
+  void ReadRecordWithUnionsImpl(basic_types::RecordWithUnions& value) override;
+  void CloseImpl() override;
+
+  Version version_;
+};
+
 // Binary writer for the StreamsOfUnions protocol.
 class StreamsOfUnionsWriter : public test_model::StreamsOfUnionsWriterBase, yardl::binary::BinaryWriter {
   public:
@@ -1036,6 +2088,32 @@ class StreamsOfUnionsWriter : public test_model::StreamsOfUnionsWriterBase, yard
 
   StreamsOfUnionsWriter(std::string file_name, Version version = Version::Current)
       : yardl::binary::BinaryWriter(file_name, test_model::StreamsOfUnionsWriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  void Flush() override;
+
+  protected:
+  void WriteIntOrSimpleRecordImpl(std::variant<int32_t, test_model::SimpleRecord> const& value) override;
+  void WriteIntOrSimpleRecordImpl(std::vector<std::variant<int32_t, test_model::SimpleRecord>> const& values) override;
+  void EndIntOrSimpleRecordImpl() override;
+  void WriteNullableIntOrSimpleRecordImpl(std::variant<std::monostate, int32_t, test_model::SimpleRecord> const& value) override;
+  void WriteNullableIntOrSimpleRecordImpl(std::vector<std::variant<std::monostate, int32_t, test_model::SimpleRecord>> const& values) override;
+  void EndNullableIntOrSimpleRecordImpl() override;
+  void WriteManyCasesImpl(std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray> const& value) override;
+  void WriteManyCasesImpl(std::vector<std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray>> const& values) override;
+  void EndManyCasesImpl() override;
+  void CloseImpl() override;
+
+  Version version_;
+};
+
+// Binary indexed writer for the StreamsOfUnions protocol.
+class StreamsOfUnionsIndexedWriter : public test_model::StreamsOfUnionsWriterBase, yardl::binary::BinaryIndexedWriter {
+  public:
+  StreamsOfUnionsIndexedWriter(std::ostream& stream, Version version = Version::Current)
+      : yardl::binary::BinaryIndexedWriter(stream, test_model::StreamsOfUnionsWriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  StreamsOfUnionsIndexedWriter(std::string file_name, Version version = Version::Current)
+      : yardl::binary::BinaryIndexedWriter(file_name, test_model::StreamsOfUnionsWriterBase::SchemaFromVersion(version)), version_(version) {}
 
   void Flush() override;
 
@@ -1080,6 +2158,41 @@ class StreamsOfUnionsReader : public test_model::StreamsOfUnionsReaderBase, yard
   size_t current_block_remaining_ = 0;
 };
 
+// Binary indexed reader for the StreamsOfUnions protocol.
+class StreamsOfUnionsIndexedReader : public test_model::StreamsOfUnionsIndexedReaderBase, yardl::binary::BinaryIndexedReader {
+  public:
+  StreamsOfUnionsIndexedReader(std::istream& stream)
+      : yardl::binary::BinaryIndexedReader(stream), version_(test_model::StreamsOfUnionsIndexedReaderBase::VersionFromSchema(schema_read_)) {}
+
+  StreamsOfUnionsIndexedReader(std::string file_name)
+      : yardl::binary::BinaryIndexedReader(file_name), version_(test_model::StreamsOfUnionsIndexedReaderBase::VersionFromSchema(schema_read_)) {}
+
+  Version GetVersion() { return version_; }
+
+  protected:
+  bool ReadIntOrSimpleRecordImpl(std::variant<int32_t, test_model::SimpleRecord>& value) override;
+  bool ReadIntOrSimpleRecordImpl(std::vector<std::variant<int32_t, test_model::SimpleRecord>>& values) override;
+  bool ReadIntOrSimpleRecordImpl(std::variant<int32_t, test_model::SimpleRecord>& value, size_t idx) override;
+  bool ReadIntOrSimpleRecordImpl(std::vector<std::variant<int32_t, test_model::SimpleRecord>>& values, size_t idx) override;
+  size_t CountIntOrSimpleRecordImpl() override;
+  bool ReadNullableIntOrSimpleRecordImpl(std::variant<std::monostate, int32_t, test_model::SimpleRecord>& value) override;
+  bool ReadNullableIntOrSimpleRecordImpl(std::vector<std::variant<std::monostate, int32_t, test_model::SimpleRecord>>& values) override;
+  bool ReadNullableIntOrSimpleRecordImpl(std::variant<std::monostate, int32_t, test_model::SimpleRecord>& value, size_t idx) override;
+  bool ReadNullableIntOrSimpleRecordImpl(std::vector<std::variant<std::monostate, int32_t, test_model::SimpleRecord>>& values, size_t idx) override;
+  size_t CountNullableIntOrSimpleRecordImpl() override;
+  bool ReadManyCasesImpl(std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray>& value) override;
+  bool ReadManyCasesImpl(std::vector<std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray>>& values) override;
+  bool ReadManyCasesImpl(std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray>& value, size_t idx) override;
+  bool ReadManyCasesImpl(std::vector<std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray>>& values, size_t idx) override;
+  size_t CountManyCasesImpl() override;
+  void CloseImpl() override;
+
+  Version version_;
+
+  private:
+  size_t current_block_remaining_ = 0;
+};
+
 // Binary writer for the Enums protocol.
 class EnumsWriter : public test_model::EnumsWriterBase, yardl::binary::BinaryWriter {
   public:
@@ -1088,6 +2201,27 @@ class EnumsWriter : public test_model::EnumsWriterBase, yardl::binary::BinaryWri
 
   EnumsWriter(std::string file_name, Version version = Version::Current)
       : yardl::binary::BinaryWriter(file_name, test_model::EnumsWriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  void Flush() override;
+
+  protected:
+  void WriteSingleImpl(test_model::Fruits const& value) override;
+  void WriteVecImpl(std::vector<test_model::Fruits> const& value) override;
+  void WriteSizeImpl(test_model::SizeBasedEnum const& value) override;
+  void WriteRecImpl(test_model::RecordWithEnums const& value) override;
+  void CloseImpl() override;
+
+  Version version_;
+};
+
+// Binary indexed writer for the Enums protocol.
+class EnumsIndexedWriter : public test_model::EnumsWriterBase, yardl::binary::BinaryIndexedWriter {
+  public:
+  EnumsIndexedWriter(std::ostream& stream, Version version = Version::Current)
+      : yardl::binary::BinaryIndexedWriter(stream, test_model::EnumsWriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  EnumsIndexedWriter(std::string file_name, Version version = Version::Current)
+      : yardl::binary::BinaryIndexedWriter(file_name, test_model::EnumsWriterBase::SchemaFromVersion(version)), version_(version) {}
 
   void Flush() override;
 
@@ -1122,6 +2256,27 @@ class EnumsReader : public test_model::EnumsReaderBase, yardl::binary::BinaryRea
   Version version_;
 };
 
+// Binary indexed reader for the Enums protocol.
+class EnumsIndexedReader : public test_model::EnumsIndexedReaderBase, yardl::binary::BinaryIndexedReader {
+  public:
+  EnumsIndexedReader(std::istream& stream)
+      : yardl::binary::BinaryIndexedReader(stream), version_(test_model::EnumsIndexedReaderBase::VersionFromSchema(schema_read_)) {}
+
+  EnumsIndexedReader(std::string file_name)
+      : yardl::binary::BinaryIndexedReader(file_name), version_(test_model::EnumsIndexedReaderBase::VersionFromSchema(schema_read_)) {}
+
+  Version GetVersion() { return version_; }
+
+  protected:
+  void ReadSingleImpl(test_model::Fruits& value) override;
+  void ReadVecImpl(std::vector<test_model::Fruits>& value) override;
+  void ReadSizeImpl(test_model::SizeBasedEnum& value) override;
+  void ReadRecImpl(test_model::RecordWithEnums& value) override;
+  void CloseImpl() override;
+
+  Version version_;
+};
+
 // Binary writer for the Flags protocol.
 class FlagsWriter : public test_model::FlagsWriterBase, yardl::binary::BinaryWriter {
   public:
@@ -1130,6 +2285,29 @@ class FlagsWriter : public test_model::FlagsWriterBase, yardl::binary::BinaryWri
 
   FlagsWriter(std::string file_name, Version version = Version::Current)
       : yardl::binary::BinaryWriter(file_name, test_model::FlagsWriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  void Flush() override;
+
+  protected:
+  void WriteDaysImpl(test_model::DaysOfWeek const& value) override;
+  void WriteDaysImpl(std::vector<test_model::DaysOfWeek> const& values) override;
+  void EndDaysImpl() override;
+  void WriteFormatsImpl(test_model::TextFormat const& value) override;
+  void WriteFormatsImpl(std::vector<test_model::TextFormat> const& values) override;
+  void EndFormatsImpl() override;
+  void CloseImpl() override;
+
+  Version version_;
+};
+
+// Binary indexed writer for the Flags protocol.
+class FlagsIndexedWriter : public test_model::FlagsWriterBase, yardl::binary::BinaryIndexedWriter {
+  public:
+  FlagsIndexedWriter(std::ostream& stream, Version version = Version::Current)
+      : yardl::binary::BinaryIndexedWriter(stream, test_model::FlagsWriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  FlagsIndexedWriter(std::string file_name, Version version = Version::Current)
+      : yardl::binary::BinaryIndexedWriter(file_name, test_model::FlagsWriterBase::SchemaFromVersion(version)), version_(version) {}
 
   void Flush() override;
 
@@ -1169,6 +2347,36 @@ class FlagsReader : public test_model::FlagsReaderBase, yardl::binary::BinaryRea
   size_t current_block_remaining_ = 0;
 };
 
+// Binary indexed reader for the Flags protocol.
+class FlagsIndexedReader : public test_model::FlagsIndexedReaderBase, yardl::binary::BinaryIndexedReader {
+  public:
+  FlagsIndexedReader(std::istream& stream)
+      : yardl::binary::BinaryIndexedReader(stream), version_(test_model::FlagsIndexedReaderBase::VersionFromSchema(schema_read_)) {}
+
+  FlagsIndexedReader(std::string file_name)
+      : yardl::binary::BinaryIndexedReader(file_name), version_(test_model::FlagsIndexedReaderBase::VersionFromSchema(schema_read_)) {}
+
+  Version GetVersion() { return version_; }
+
+  protected:
+  bool ReadDaysImpl(test_model::DaysOfWeek& value) override;
+  bool ReadDaysImpl(std::vector<test_model::DaysOfWeek>& values) override;
+  bool ReadDaysImpl(test_model::DaysOfWeek& value, size_t idx) override;
+  bool ReadDaysImpl(std::vector<test_model::DaysOfWeek>& values, size_t idx) override;
+  size_t CountDaysImpl() override;
+  bool ReadFormatsImpl(test_model::TextFormat& value) override;
+  bool ReadFormatsImpl(std::vector<test_model::TextFormat>& values) override;
+  bool ReadFormatsImpl(test_model::TextFormat& value, size_t idx) override;
+  bool ReadFormatsImpl(std::vector<test_model::TextFormat>& values, size_t idx) override;
+  size_t CountFormatsImpl() override;
+  void CloseImpl() override;
+
+  Version version_;
+
+  private:
+  size_t current_block_remaining_ = 0;
+};
+
 // Binary writer for the StateTest protocol.
 class StateTestWriter : public test_model::StateTestWriterBase, yardl::binary::BinaryWriter {
   public:
@@ -1177,6 +2385,28 @@ class StateTestWriter : public test_model::StateTestWriterBase, yardl::binary::B
 
   StateTestWriter(std::string file_name, Version version = Version::Current)
       : yardl::binary::BinaryWriter(file_name, test_model::StateTestWriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  void Flush() override;
+
+  protected:
+  void WriteAnIntImpl(int32_t const& value) override;
+  void WriteAStreamImpl(int32_t const& value) override;
+  void WriteAStreamImpl(std::vector<int32_t> const& values) override;
+  void EndAStreamImpl() override;
+  void WriteAnotherIntImpl(int32_t const& value) override;
+  void CloseImpl() override;
+
+  Version version_;
+};
+
+// Binary indexed writer for the StateTest protocol.
+class StateTestIndexedWriter : public test_model::StateTestWriterBase, yardl::binary::BinaryIndexedWriter {
+  public:
+  StateTestIndexedWriter(std::ostream& stream, Version version = Version::Current)
+      : yardl::binary::BinaryIndexedWriter(stream, test_model::StateTestWriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  StateTestIndexedWriter(std::string file_name, Version version = Version::Current)
+      : yardl::binary::BinaryIndexedWriter(file_name, test_model::StateTestWriterBase::SchemaFromVersion(version)), version_(version) {}
 
   void Flush() override;
 
@@ -1215,6 +2445,33 @@ class StateTestReader : public test_model::StateTestReaderBase, yardl::binary::B
   size_t current_block_remaining_ = 0;
 };
 
+// Binary indexed reader for the StateTest protocol.
+class StateTestIndexedReader : public test_model::StateTestIndexedReaderBase, yardl::binary::BinaryIndexedReader {
+  public:
+  StateTestIndexedReader(std::istream& stream)
+      : yardl::binary::BinaryIndexedReader(stream), version_(test_model::StateTestIndexedReaderBase::VersionFromSchema(schema_read_)) {}
+
+  StateTestIndexedReader(std::string file_name)
+      : yardl::binary::BinaryIndexedReader(file_name), version_(test_model::StateTestIndexedReaderBase::VersionFromSchema(schema_read_)) {}
+
+  Version GetVersion() { return version_; }
+
+  protected:
+  void ReadAnIntImpl(int32_t& value) override;
+  bool ReadAStreamImpl(int32_t& value) override;
+  bool ReadAStreamImpl(std::vector<int32_t>& values) override;
+  bool ReadAStreamImpl(int32_t& value, size_t idx) override;
+  bool ReadAStreamImpl(std::vector<int32_t>& values, size_t idx) override;
+  size_t CountAStreamImpl() override;
+  void ReadAnotherIntImpl(int32_t& value) override;
+  void CloseImpl() override;
+
+  Version version_;
+
+  private:
+  size_t current_block_remaining_ = 0;
+};
+
 // Binary writer for the SimpleGenerics protocol.
 class SimpleGenericsWriter : public test_model::SimpleGenericsWriterBase, yardl::binary::BinaryWriter {
   public:
@@ -1223,6 +2480,34 @@ class SimpleGenericsWriter : public test_model::SimpleGenericsWriterBase, yardl:
 
   SimpleGenericsWriter(std::string file_name, Version version = Version::Current)
       : yardl::binary::BinaryWriter(file_name, test_model::SimpleGenericsWriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  void Flush() override;
+
+  protected:
+  void WriteFloatImageImpl(image::FloatImage const& value) override;
+  void WriteIntImageImpl(image::IntImage const& value) override;
+  void WriteIntImageAlternateSyntaxImpl(test_model::Image<int32_t> const& value) override;
+  void WriteStringImageImpl(test_model::Image<std::string> const& value) override;
+  void WriteIntFloatTupleImpl(tuples::Tuple<int32_t, float> const& value) override;
+  void WriteFloatFloatTupleImpl(tuples::Tuple<float, float> const& value) override;
+  void WriteIntFloatTupleAlternateSyntaxImpl(tuples::Tuple<int32_t, float> const& value) override;
+  void WriteIntStringTupleImpl(tuples::Tuple<int32_t, std::string> const& value) override;
+  void WriteStreamOfTypeVariantsImpl(std::variant<image::FloatImage, test_model::Image<double>> const& value) override;
+  void WriteStreamOfTypeVariantsImpl(std::vector<std::variant<image::FloatImage, test_model::Image<double>>> const& values) override;
+  void EndStreamOfTypeVariantsImpl() override;
+  void CloseImpl() override;
+
+  Version version_;
+};
+
+// Binary indexed writer for the SimpleGenerics protocol.
+class SimpleGenericsIndexedWriter : public test_model::SimpleGenericsWriterBase, yardl::binary::BinaryIndexedWriter {
+  public:
+  SimpleGenericsIndexedWriter(std::ostream& stream, Version version = Version::Current)
+      : yardl::binary::BinaryIndexedWriter(stream, test_model::SimpleGenericsWriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  SimpleGenericsIndexedWriter(std::string file_name, Version version = Version::Current)
+      : yardl::binary::BinaryIndexedWriter(file_name, test_model::SimpleGenericsWriterBase::SchemaFromVersion(version)), version_(version) {}
 
   void Flush() override;
 
@@ -1273,6 +2558,39 @@ class SimpleGenericsReader : public test_model::SimpleGenericsReaderBase, yardl:
   size_t current_block_remaining_ = 0;
 };
 
+// Binary indexed reader for the SimpleGenerics protocol.
+class SimpleGenericsIndexedReader : public test_model::SimpleGenericsIndexedReaderBase, yardl::binary::BinaryIndexedReader {
+  public:
+  SimpleGenericsIndexedReader(std::istream& stream)
+      : yardl::binary::BinaryIndexedReader(stream), version_(test_model::SimpleGenericsIndexedReaderBase::VersionFromSchema(schema_read_)) {}
+
+  SimpleGenericsIndexedReader(std::string file_name)
+      : yardl::binary::BinaryIndexedReader(file_name), version_(test_model::SimpleGenericsIndexedReaderBase::VersionFromSchema(schema_read_)) {}
+
+  Version GetVersion() { return version_; }
+
+  protected:
+  void ReadFloatImageImpl(image::FloatImage& value) override;
+  void ReadIntImageImpl(image::IntImage& value) override;
+  void ReadIntImageAlternateSyntaxImpl(test_model::Image<int32_t>& value) override;
+  void ReadStringImageImpl(test_model::Image<std::string>& value) override;
+  void ReadIntFloatTupleImpl(tuples::Tuple<int32_t, float>& value) override;
+  void ReadFloatFloatTupleImpl(tuples::Tuple<float, float>& value) override;
+  void ReadIntFloatTupleAlternateSyntaxImpl(tuples::Tuple<int32_t, float>& value) override;
+  void ReadIntStringTupleImpl(tuples::Tuple<int32_t, std::string>& value) override;
+  bool ReadStreamOfTypeVariantsImpl(std::variant<image::FloatImage, test_model::Image<double>>& value) override;
+  bool ReadStreamOfTypeVariantsImpl(std::vector<std::variant<image::FloatImage, test_model::Image<double>>>& values) override;
+  bool ReadStreamOfTypeVariantsImpl(std::variant<image::FloatImage, test_model::Image<double>>& value, size_t idx) override;
+  bool ReadStreamOfTypeVariantsImpl(std::vector<std::variant<image::FloatImage, test_model::Image<double>>>& values, size_t idx) override;
+  size_t CountStreamOfTypeVariantsImpl() override;
+  void CloseImpl() override;
+
+  Version version_;
+
+  private:
+  size_t current_block_remaining_ = 0;
+};
+
 // Binary writer for the AdvancedGenerics protocol.
 class AdvancedGenericsWriter : public test_model::AdvancedGenericsWriterBase, yardl::binary::BinaryWriter {
   public:
@@ -1281,6 +2599,28 @@ class AdvancedGenericsWriter : public test_model::AdvancedGenericsWriterBase, ya
 
   AdvancedGenericsWriter(std::string file_name, Version version = Version::Current)
       : yardl::binary::BinaryWriter(file_name, test_model::AdvancedGenericsWriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  void Flush() override;
+
+  protected:
+  void WriteFloatImageImageImpl(test_model::Image<test_model::Image<float>> const& value) override;
+  void WriteGenericRecord1Impl(test_model::GenericRecord<int32_t, std::string> const& value) override;
+  void WriteTupleOfOptionalsImpl(test_model::MyTuple<std::optional<int32_t>, std::optional<std::string>> const& value) override;
+  void WriteTupleOfOptionalsAlternateSyntaxImpl(test_model::MyTuple<std::optional<int32_t>, std::optional<std::string>> const& value) override;
+  void WriteTupleOfVectorsImpl(test_model::MyTuple<std::vector<int32_t>, std::vector<float>> const& value) override;
+  void CloseImpl() override;
+
+  Version version_;
+};
+
+// Binary indexed writer for the AdvancedGenerics protocol.
+class AdvancedGenericsIndexedWriter : public test_model::AdvancedGenericsWriterBase, yardl::binary::BinaryIndexedWriter {
+  public:
+  AdvancedGenericsIndexedWriter(std::ostream& stream, Version version = Version::Current)
+      : yardl::binary::BinaryIndexedWriter(stream, test_model::AdvancedGenericsWriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  AdvancedGenericsIndexedWriter(std::string file_name, Version version = Version::Current)
+      : yardl::binary::BinaryIndexedWriter(file_name, test_model::AdvancedGenericsWriterBase::SchemaFromVersion(version)), version_(version) {}
 
   void Flush() override;
 
@@ -1317,6 +2657,28 @@ class AdvancedGenericsReader : public test_model::AdvancedGenericsReaderBase, ya
   Version version_;
 };
 
+// Binary indexed reader for the AdvancedGenerics protocol.
+class AdvancedGenericsIndexedReader : public test_model::AdvancedGenericsIndexedReaderBase, yardl::binary::BinaryIndexedReader {
+  public:
+  AdvancedGenericsIndexedReader(std::istream& stream)
+      : yardl::binary::BinaryIndexedReader(stream), version_(test_model::AdvancedGenericsIndexedReaderBase::VersionFromSchema(schema_read_)) {}
+
+  AdvancedGenericsIndexedReader(std::string file_name)
+      : yardl::binary::BinaryIndexedReader(file_name), version_(test_model::AdvancedGenericsIndexedReaderBase::VersionFromSchema(schema_read_)) {}
+
+  Version GetVersion() { return version_; }
+
+  protected:
+  void ReadFloatImageImageImpl(test_model::Image<test_model::Image<float>>& value) override;
+  void ReadGenericRecord1Impl(test_model::GenericRecord<int32_t, std::string>& value) override;
+  void ReadTupleOfOptionalsImpl(test_model::MyTuple<std::optional<int32_t>, std::optional<std::string>>& value) override;
+  void ReadTupleOfOptionalsAlternateSyntaxImpl(test_model::MyTuple<std::optional<int32_t>, std::optional<std::string>>& value) override;
+  void ReadTupleOfVectorsImpl(test_model::MyTuple<std::vector<int32_t>, std::vector<float>>& value) override;
+  void CloseImpl() override;
+
+  Version version_;
+};
+
 // Binary writer for the Aliases protocol.
 class AliasesWriter : public test_model::AliasesWriterBase, yardl::binary::BinaryWriter {
   public:
@@ -1325,6 +2687,35 @@ class AliasesWriter : public test_model::AliasesWriterBase, yardl::binary::Binar
 
   AliasesWriter(std::string file_name, Version version = Version::Current)
       : yardl::binary::BinaryWriter(file_name, test_model::AliasesWriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  void Flush() override;
+
+  protected:
+  void WriteAliasedStringImpl(test_model::AliasedString const& value) override;
+  void WriteAliasedEnumImpl(test_model::AliasedEnum const& value) override;
+  void WriteAliasedOpenGenericImpl(test_model::AliasedOpenGeneric<test_model::AliasedString, test_model::AliasedEnum> const& value) override;
+  void WriteAliasedClosedGenericImpl(test_model::AliasedClosedGeneric const& value) override;
+  void WriteAliasedOptionalImpl(test_model::AliasedOptional const& value) override;
+  void WriteAliasedGenericOptionalImpl(test_model::AliasedGenericOptional<float> const& value) override;
+  void WriteAliasedGenericUnion2Impl(test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum> const& value) override;
+  void WriteAliasedGenericVectorImpl(test_model::AliasedGenericVector<float> const& value) override;
+  void WriteAliasedGenericFixedVectorImpl(test_model::AliasedGenericFixedVector<float> const& value) override;
+  void WriteStreamOfAliasedGenericUnion2Impl(test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum> const& value) override;
+  void WriteStreamOfAliasedGenericUnion2Impl(std::vector<test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum>> const& values) override;
+  void EndStreamOfAliasedGenericUnion2Impl() override;
+  void CloseImpl() override;
+
+  Version version_;
+};
+
+// Binary indexed writer for the Aliases protocol.
+class AliasesIndexedWriter : public test_model::AliasesWriterBase, yardl::binary::BinaryIndexedWriter {
+  public:
+  AliasesIndexedWriter(std::ostream& stream, Version version = Version::Current)
+      : yardl::binary::BinaryIndexedWriter(stream, test_model::AliasesWriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  AliasesIndexedWriter(std::string file_name, Version version = Version::Current)
+      : yardl::binary::BinaryIndexedWriter(file_name, test_model::AliasesWriterBase::SchemaFromVersion(version)), version_(version) {}
 
   void Flush() override;
 
@@ -1377,6 +2768,40 @@ class AliasesReader : public test_model::AliasesReaderBase, yardl::binary::Binar
   size_t current_block_remaining_ = 0;
 };
 
+// Binary indexed reader for the Aliases protocol.
+class AliasesIndexedReader : public test_model::AliasesIndexedReaderBase, yardl::binary::BinaryIndexedReader {
+  public:
+  AliasesIndexedReader(std::istream& stream)
+      : yardl::binary::BinaryIndexedReader(stream), version_(test_model::AliasesIndexedReaderBase::VersionFromSchema(schema_read_)) {}
+
+  AliasesIndexedReader(std::string file_name)
+      : yardl::binary::BinaryIndexedReader(file_name), version_(test_model::AliasesIndexedReaderBase::VersionFromSchema(schema_read_)) {}
+
+  Version GetVersion() { return version_; }
+
+  protected:
+  void ReadAliasedStringImpl(test_model::AliasedString& value) override;
+  void ReadAliasedEnumImpl(test_model::AliasedEnum& value) override;
+  void ReadAliasedOpenGenericImpl(test_model::AliasedOpenGeneric<test_model::AliasedString, test_model::AliasedEnum>& value) override;
+  void ReadAliasedClosedGenericImpl(test_model::AliasedClosedGeneric& value) override;
+  void ReadAliasedOptionalImpl(test_model::AliasedOptional& value) override;
+  void ReadAliasedGenericOptionalImpl(test_model::AliasedGenericOptional<float>& value) override;
+  void ReadAliasedGenericUnion2Impl(test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum>& value) override;
+  void ReadAliasedGenericVectorImpl(test_model::AliasedGenericVector<float>& value) override;
+  void ReadAliasedGenericFixedVectorImpl(test_model::AliasedGenericFixedVector<float>& value) override;
+  bool ReadStreamOfAliasedGenericUnion2Impl(test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum>& value) override;
+  bool ReadStreamOfAliasedGenericUnion2Impl(std::vector<test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum>>& values) override;
+  bool ReadStreamOfAliasedGenericUnion2Impl(test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum>& value, size_t idx) override;
+  bool ReadStreamOfAliasedGenericUnion2Impl(std::vector<test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum>>& values, size_t idx) override;
+  size_t CountStreamOfAliasedGenericUnion2Impl() override;
+  void CloseImpl() override;
+
+  Version version_;
+
+  private:
+  size_t current_block_remaining_ = 0;
+};
+
 // Binary writer for the StreamsOfAliasedUnions protocol.
 class StreamsOfAliasedUnionsWriter : public test_model::StreamsOfAliasedUnionsWriterBase, yardl::binary::BinaryWriter {
   public:
@@ -1385,6 +2810,29 @@ class StreamsOfAliasedUnionsWriter : public test_model::StreamsOfAliasedUnionsWr
 
   StreamsOfAliasedUnionsWriter(std::string file_name, Version version = Version::Current)
       : yardl::binary::BinaryWriter(file_name, test_model::StreamsOfAliasedUnionsWriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  void Flush() override;
+
+  protected:
+  void WriteIntOrSimpleRecordImpl(test_model::AliasedIntOrSimpleRecord const& value) override;
+  void WriteIntOrSimpleRecordImpl(std::vector<test_model::AliasedIntOrSimpleRecord> const& values) override;
+  void EndIntOrSimpleRecordImpl() override;
+  void WriteNullableIntOrSimpleRecordImpl(test_model::AliasedNullableIntSimpleRecord const& value) override;
+  void WriteNullableIntOrSimpleRecordImpl(std::vector<test_model::AliasedNullableIntSimpleRecord> const& values) override;
+  void EndNullableIntOrSimpleRecordImpl() override;
+  void CloseImpl() override;
+
+  Version version_;
+};
+
+// Binary indexed writer for the StreamsOfAliasedUnions protocol.
+class StreamsOfAliasedUnionsIndexedWriter : public test_model::StreamsOfAliasedUnionsWriterBase, yardl::binary::BinaryIndexedWriter {
+  public:
+  StreamsOfAliasedUnionsIndexedWriter(std::ostream& stream, Version version = Version::Current)
+      : yardl::binary::BinaryIndexedWriter(stream, test_model::StreamsOfAliasedUnionsWriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  StreamsOfAliasedUnionsIndexedWriter(std::string file_name, Version version = Version::Current)
+      : yardl::binary::BinaryIndexedWriter(file_name, test_model::StreamsOfAliasedUnionsWriterBase::SchemaFromVersion(version)), version_(version) {}
 
   void Flush() override;
 
@@ -1424,6 +2872,36 @@ class StreamsOfAliasedUnionsReader : public test_model::StreamsOfAliasedUnionsRe
   size_t current_block_remaining_ = 0;
 };
 
+// Binary indexed reader for the StreamsOfAliasedUnions protocol.
+class StreamsOfAliasedUnionsIndexedReader : public test_model::StreamsOfAliasedUnionsIndexedReaderBase, yardl::binary::BinaryIndexedReader {
+  public:
+  StreamsOfAliasedUnionsIndexedReader(std::istream& stream)
+      : yardl::binary::BinaryIndexedReader(stream), version_(test_model::StreamsOfAliasedUnionsIndexedReaderBase::VersionFromSchema(schema_read_)) {}
+
+  StreamsOfAliasedUnionsIndexedReader(std::string file_name)
+      : yardl::binary::BinaryIndexedReader(file_name), version_(test_model::StreamsOfAliasedUnionsIndexedReaderBase::VersionFromSchema(schema_read_)) {}
+
+  Version GetVersion() { return version_; }
+
+  protected:
+  bool ReadIntOrSimpleRecordImpl(test_model::AliasedIntOrSimpleRecord& value) override;
+  bool ReadIntOrSimpleRecordImpl(std::vector<test_model::AliasedIntOrSimpleRecord>& values) override;
+  bool ReadIntOrSimpleRecordImpl(test_model::AliasedIntOrSimpleRecord& value, size_t idx) override;
+  bool ReadIntOrSimpleRecordImpl(std::vector<test_model::AliasedIntOrSimpleRecord>& values, size_t idx) override;
+  size_t CountIntOrSimpleRecordImpl() override;
+  bool ReadNullableIntOrSimpleRecordImpl(test_model::AliasedNullableIntSimpleRecord& value) override;
+  bool ReadNullableIntOrSimpleRecordImpl(std::vector<test_model::AliasedNullableIntSimpleRecord>& values) override;
+  bool ReadNullableIntOrSimpleRecordImpl(test_model::AliasedNullableIntSimpleRecord& value, size_t idx) override;
+  bool ReadNullableIntOrSimpleRecordImpl(std::vector<test_model::AliasedNullableIntSimpleRecord>& values, size_t idx) override;
+  size_t CountNullableIntOrSimpleRecordImpl() override;
+  void CloseImpl() override;
+
+  Version version_;
+
+  private:
+  size_t current_block_remaining_ = 0;
+};
+
 // Binary writer for the ProtocolWithComputedFields protocol.
 class ProtocolWithComputedFieldsWriter : public test_model::ProtocolWithComputedFieldsWriterBase, yardl::binary::BinaryWriter {
   public:
@@ -1432,6 +2910,24 @@ class ProtocolWithComputedFieldsWriter : public test_model::ProtocolWithComputed
 
   ProtocolWithComputedFieldsWriter(std::string file_name, Version version = Version::Current)
       : yardl::binary::BinaryWriter(file_name, test_model::ProtocolWithComputedFieldsWriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  void Flush() override;
+
+  protected:
+  void WriteRecordWithComputedFieldsImpl(test_model::RecordWithComputedFields const& value) override;
+  void CloseImpl() override;
+
+  Version version_;
+};
+
+// Binary indexed writer for the ProtocolWithComputedFields protocol.
+class ProtocolWithComputedFieldsIndexedWriter : public test_model::ProtocolWithComputedFieldsWriterBase, yardl::binary::BinaryIndexedWriter {
+  public:
+  ProtocolWithComputedFieldsIndexedWriter(std::ostream& stream, Version version = Version::Current)
+      : yardl::binary::BinaryIndexedWriter(stream, test_model::ProtocolWithComputedFieldsWriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  ProtocolWithComputedFieldsIndexedWriter(std::string file_name, Version version = Version::Current)
+      : yardl::binary::BinaryIndexedWriter(file_name, test_model::ProtocolWithComputedFieldsWriterBase::SchemaFromVersion(version)), version_(version) {}
 
   void Flush() override;
 
@@ -1460,6 +2956,24 @@ class ProtocolWithComputedFieldsReader : public test_model::ProtocolWithComputed
   Version version_;
 };
 
+// Binary indexed reader for the ProtocolWithComputedFields protocol.
+class ProtocolWithComputedFieldsIndexedReader : public test_model::ProtocolWithComputedFieldsIndexedReaderBase, yardl::binary::BinaryIndexedReader {
+  public:
+  ProtocolWithComputedFieldsIndexedReader(std::istream& stream)
+      : yardl::binary::BinaryIndexedReader(stream), version_(test_model::ProtocolWithComputedFieldsIndexedReaderBase::VersionFromSchema(schema_read_)) {}
+
+  ProtocolWithComputedFieldsIndexedReader(std::string file_name)
+      : yardl::binary::BinaryIndexedReader(file_name), version_(test_model::ProtocolWithComputedFieldsIndexedReaderBase::VersionFromSchema(schema_read_)) {}
+
+  Version GetVersion() { return version_; }
+
+  protected:
+  void ReadRecordWithComputedFieldsImpl(test_model::RecordWithComputedFields& value) override;
+  void CloseImpl() override;
+
+  Version version_;
+};
+
 // Binary writer for the ProtocolWithKeywordSteps protocol.
 class ProtocolWithKeywordStepsWriter : public test_model::ProtocolWithKeywordStepsWriterBase, yardl::binary::BinaryWriter {
   public:
@@ -1468,6 +2982,27 @@ class ProtocolWithKeywordStepsWriter : public test_model::ProtocolWithKeywordSte
 
   ProtocolWithKeywordStepsWriter(std::string file_name, Version version = Version::Current)
       : yardl::binary::BinaryWriter(file_name, test_model::ProtocolWithKeywordStepsWriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  void Flush() override;
+
+  protected:
+  void WriteIntImpl(test_model::RecordWithKeywordFields const& value) override;
+  void WriteIntImpl(std::vector<test_model::RecordWithKeywordFields> const& values) override;
+  void EndIntImpl() override;
+  void WriteFloatImpl(test_model::EnumWithKeywordSymbols const& value) override;
+  void CloseImpl() override;
+
+  Version version_;
+};
+
+// Binary indexed writer for the ProtocolWithKeywordSteps protocol.
+class ProtocolWithKeywordStepsIndexedWriter : public test_model::ProtocolWithKeywordStepsWriterBase, yardl::binary::BinaryIndexedWriter {
+  public:
+  ProtocolWithKeywordStepsIndexedWriter(std::ostream& stream, Version version = Version::Current)
+      : yardl::binary::BinaryIndexedWriter(stream, test_model::ProtocolWithKeywordStepsWriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  ProtocolWithKeywordStepsIndexedWriter(std::string file_name, Version version = Version::Current)
+      : yardl::binary::BinaryIndexedWriter(file_name, test_model::ProtocolWithKeywordStepsWriterBase::SchemaFromVersion(version)), version_(version) {}
 
   void Flush() override;
 
@@ -1504,6 +3039,32 @@ class ProtocolWithKeywordStepsReader : public test_model::ProtocolWithKeywordSte
   size_t current_block_remaining_ = 0;
 };
 
+// Binary indexed reader for the ProtocolWithKeywordSteps protocol.
+class ProtocolWithKeywordStepsIndexedReader : public test_model::ProtocolWithKeywordStepsIndexedReaderBase, yardl::binary::BinaryIndexedReader {
+  public:
+  ProtocolWithKeywordStepsIndexedReader(std::istream& stream)
+      : yardl::binary::BinaryIndexedReader(stream), version_(test_model::ProtocolWithKeywordStepsIndexedReaderBase::VersionFromSchema(schema_read_)) {}
+
+  ProtocolWithKeywordStepsIndexedReader(std::string file_name)
+      : yardl::binary::BinaryIndexedReader(file_name), version_(test_model::ProtocolWithKeywordStepsIndexedReaderBase::VersionFromSchema(schema_read_)) {}
+
+  Version GetVersion() { return version_; }
+
+  protected:
+  bool ReadIntImpl(test_model::RecordWithKeywordFields& value) override;
+  bool ReadIntImpl(std::vector<test_model::RecordWithKeywordFields>& values) override;
+  bool ReadIntImpl(test_model::RecordWithKeywordFields& value, size_t idx) override;
+  bool ReadIntImpl(std::vector<test_model::RecordWithKeywordFields>& values, size_t idx) override;
+  size_t CountIntImpl() override;
+  void ReadFloatImpl(test_model::EnumWithKeywordSymbols& value) override;
+  void CloseImpl() override;
+
+  Version version_;
+
+  private:
+  size_t current_block_remaining_ = 0;
+};
+
 // Binary writer for the ProtocolWithOptionalDate protocol.
 class ProtocolWithOptionalDateWriter : public test_model::ProtocolWithOptionalDateWriterBase, yardl::binary::BinaryWriter {
   public:
@@ -1522,6 +3083,24 @@ class ProtocolWithOptionalDateWriter : public test_model::ProtocolWithOptionalDa
   Version version_;
 };
 
+// Binary indexed writer for the ProtocolWithOptionalDate protocol.
+class ProtocolWithOptionalDateIndexedWriter : public test_model::ProtocolWithOptionalDateWriterBase, yardl::binary::BinaryIndexedWriter {
+  public:
+  ProtocolWithOptionalDateIndexedWriter(std::ostream& stream, Version version = Version::Current)
+      : yardl::binary::BinaryIndexedWriter(stream, test_model::ProtocolWithOptionalDateWriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  ProtocolWithOptionalDateIndexedWriter(std::string file_name, Version version = Version::Current)
+      : yardl::binary::BinaryIndexedWriter(file_name, test_model::ProtocolWithOptionalDateWriterBase::SchemaFromVersion(version)), version_(version) {}
+
+  void Flush() override;
+
+  protected:
+  void WriteRecordImpl(std::optional<test_model::RecordWithOptionalDate> const& value) override;
+  void CloseImpl() override;
+
+  Version version_;
+};
+
 // Binary reader for the ProtocolWithOptionalDate protocol.
 class ProtocolWithOptionalDateReader : public test_model::ProtocolWithOptionalDateReaderBase, yardl::binary::BinaryReader {
   public:
@@ -1530,6 +3109,24 @@ class ProtocolWithOptionalDateReader : public test_model::ProtocolWithOptionalDa
 
   ProtocolWithOptionalDateReader(std::string file_name)
       : yardl::binary::BinaryReader(file_name), version_(test_model::ProtocolWithOptionalDateReaderBase::VersionFromSchema(schema_read_)) {}
+
+  Version GetVersion() { return version_; }
+
+  protected:
+  void ReadRecordImpl(std::optional<test_model::RecordWithOptionalDate>& value) override;
+  void CloseImpl() override;
+
+  Version version_;
+};
+
+// Binary indexed reader for the ProtocolWithOptionalDate protocol.
+class ProtocolWithOptionalDateIndexedReader : public test_model::ProtocolWithOptionalDateIndexedReaderBase, yardl::binary::BinaryIndexedReader {
+  public:
+  ProtocolWithOptionalDateIndexedReader(std::istream& stream)
+      : yardl::binary::BinaryIndexedReader(stream), version_(test_model::ProtocolWithOptionalDateIndexedReaderBase::VersionFromSchema(schema_read_)) {}
+
+  ProtocolWithOptionalDateIndexedReader(std::string file_name)
+      : yardl::binary::BinaryIndexedReader(file_name), version_(test_model::ProtocolWithOptionalDateIndexedReaderBase::VersionFromSchema(schema_read_)) {}
 
   Version GetVersion() { return version_; }
 

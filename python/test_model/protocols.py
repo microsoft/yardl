@@ -17,7 +17,6 @@ from . import yardl_types as yardl
 class BenchmarkFloat256x256WriterBase(abc.ABC):
     """Abstract writer for the BenchmarkFloat256x256 protocol."""
 
-
     def __init__(self) -> None:
         self._state = 0
 
@@ -77,8 +76,7 @@ class BenchmarkFloat256x256WriterBase(abc.ABC):
         return "<unknown>"
 
 class BenchmarkFloat256x256ReaderBase(abc.ABC):
-    """Abstract reader for the BenchmarkFloat256x256 protocol."""
-
+    """Abstract indexed reader for the BenchmarkFloat256x256 protocol."""
 
     def __init__(self) -> None:
         self._state = 0
@@ -93,7 +91,6 @@ class BenchmarkFloat256x256ReaderBase(abc.ABC):
                 expected_method = self._state_to_method_name(self._state)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
-
     schema = BenchmarkFloat256x256WriterBase.schema
 
     def __enter__(self):
@@ -146,9 +143,31 @@ class BenchmarkFloat256x256ReaderBase(abc.ABC):
             return 'read_float256x256'
         return "<unknown>"
 
+class BenchmarkFloat256x256IndexedReaderBase(BenchmarkFloat256x256ReaderBase):
+    """Abstract reader for the BenchmarkFloat256x256 protocol."""
+
+    def close(self) -> None:
+        self._close()
+
+    def read_float256x256(self, idx: int = 0) -> collections.abc.Iterable[npt.NDArray[np.float32]]:
+        value = self._read_float256x256(idx)
+        return self._wrap_iterable(value, 2)
+
+    def count_float256x256(self) -> int:
+        return self._count_float256x256()
+
+    @abc.abstractmethod
+    def _read_float256x256(self, idx: int = 0) -> collections.abc.Iterable[npt.NDArray[np.float32]]:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _count_float256x256(self) -> int:
+        raise NotImplementedError()
+
+    def _raise_unexpected_state(self, actual: int) -> None:
+        pass
 class BenchmarkInt256x256WriterBase(abc.ABC):
     """Abstract writer for the BenchmarkInt256x256 protocol."""
-
 
     def __init__(self) -> None:
         self._state = 0
@@ -209,8 +228,7 @@ class BenchmarkInt256x256WriterBase(abc.ABC):
         return "<unknown>"
 
 class BenchmarkInt256x256ReaderBase(abc.ABC):
-    """Abstract reader for the BenchmarkInt256x256 protocol."""
-
+    """Abstract indexed reader for the BenchmarkInt256x256 protocol."""
 
     def __init__(self) -> None:
         self._state = 0
@@ -225,7 +243,6 @@ class BenchmarkInt256x256ReaderBase(abc.ABC):
                 expected_method = self._state_to_method_name(self._state)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
-
     schema = BenchmarkInt256x256WriterBase.schema
 
     def __enter__(self):
@@ -278,9 +295,31 @@ class BenchmarkInt256x256ReaderBase(abc.ABC):
             return 'read_int256x256'
         return "<unknown>"
 
+class BenchmarkInt256x256IndexedReaderBase(BenchmarkInt256x256ReaderBase):
+    """Abstract reader for the BenchmarkInt256x256 protocol."""
+
+    def close(self) -> None:
+        self._close()
+
+    def read_int256x256(self, idx: int = 0) -> collections.abc.Iterable[npt.NDArray[np.int32]]:
+        value = self._read_int256x256(idx)
+        return self._wrap_iterable(value, 2)
+
+    def count_int256x256(self) -> int:
+        return self._count_int256x256()
+
+    @abc.abstractmethod
+    def _read_int256x256(self, idx: int = 0) -> collections.abc.Iterable[npt.NDArray[np.int32]]:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _count_int256x256(self) -> int:
+        raise NotImplementedError()
+
+    def _raise_unexpected_state(self, actual: int) -> None:
+        pass
 class BenchmarkFloatVlenWriterBase(abc.ABC):
     """Abstract writer for the BenchmarkFloatVlen protocol."""
-
 
     def __init__(self) -> None:
         self._state = 0
@@ -341,8 +380,7 @@ class BenchmarkFloatVlenWriterBase(abc.ABC):
         return "<unknown>"
 
 class BenchmarkFloatVlenReaderBase(abc.ABC):
-    """Abstract reader for the BenchmarkFloatVlen protocol."""
-
+    """Abstract indexed reader for the BenchmarkFloatVlen protocol."""
 
     def __init__(self) -> None:
         self._state = 0
@@ -357,7 +395,6 @@ class BenchmarkFloatVlenReaderBase(abc.ABC):
                 expected_method = self._state_to_method_name(self._state)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
-
     schema = BenchmarkFloatVlenWriterBase.schema
 
     def __enter__(self):
@@ -410,9 +447,31 @@ class BenchmarkFloatVlenReaderBase(abc.ABC):
             return 'read_float_array'
         return "<unknown>"
 
+class BenchmarkFloatVlenIndexedReaderBase(BenchmarkFloatVlenReaderBase):
+    """Abstract reader for the BenchmarkFloatVlen protocol."""
+
+    def close(self) -> None:
+        self._close()
+
+    def read_float_array(self, idx: int = 0) -> collections.abc.Iterable[npt.NDArray[np.float32]]:
+        value = self._read_float_array(idx)
+        return self._wrap_iterable(value, 2)
+
+    def count_float_array(self) -> int:
+        return self._count_float_array()
+
+    @abc.abstractmethod
+    def _read_float_array(self, idx: int = 0) -> collections.abc.Iterable[npt.NDArray[np.float32]]:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _count_float_array(self) -> int:
+        raise NotImplementedError()
+
+    def _raise_unexpected_state(self, actual: int) -> None:
+        pass
 class BenchmarkSmallRecordWriterBase(abc.ABC):
     """Abstract writer for the BenchmarkSmallRecord protocol."""
-
 
     def __init__(self) -> None:
         self._state = 0
@@ -473,8 +532,7 @@ class BenchmarkSmallRecordWriterBase(abc.ABC):
         return "<unknown>"
 
 class BenchmarkSmallRecordReaderBase(abc.ABC):
-    """Abstract reader for the BenchmarkSmallRecord protocol."""
-
+    """Abstract indexed reader for the BenchmarkSmallRecord protocol."""
 
     def __init__(self) -> None:
         self._state = 0
@@ -489,7 +547,6 @@ class BenchmarkSmallRecordReaderBase(abc.ABC):
                 expected_method = self._state_to_method_name(self._state)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
-
     schema = BenchmarkSmallRecordWriterBase.schema
 
     def __enter__(self):
@@ -542,9 +599,31 @@ class BenchmarkSmallRecordReaderBase(abc.ABC):
             return 'read_small_record'
         return "<unknown>"
 
+class BenchmarkSmallRecordIndexedReaderBase(BenchmarkSmallRecordReaderBase):
+    """Abstract reader for the BenchmarkSmallRecord protocol."""
+
+    def close(self) -> None:
+        self._close()
+
+    def read_small_record(self, idx: int = 0) -> collections.abc.Iterable[SmallBenchmarkRecord]:
+        value = self._read_small_record(idx)
+        return self._wrap_iterable(value, 2)
+
+    def count_small_record(self) -> int:
+        return self._count_small_record()
+
+    @abc.abstractmethod
+    def _read_small_record(self, idx: int = 0) -> collections.abc.Iterable[SmallBenchmarkRecord]:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _count_small_record(self) -> int:
+        raise NotImplementedError()
+
+    def _raise_unexpected_state(self, actual: int) -> None:
+        pass
 class BenchmarkSmallRecordWithOptionalsWriterBase(abc.ABC):
     """Abstract writer for the BenchmarkSmallRecordWithOptionals protocol."""
-
 
     def __init__(self) -> None:
         self._state = 0
@@ -605,8 +684,7 @@ class BenchmarkSmallRecordWithOptionalsWriterBase(abc.ABC):
         return "<unknown>"
 
 class BenchmarkSmallRecordWithOptionalsReaderBase(abc.ABC):
-    """Abstract reader for the BenchmarkSmallRecordWithOptionals protocol."""
-
+    """Abstract indexed reader for the BenchmarkSmallRecordWithOptionals protocol."""
 
     def __init__(self) -> None:
         self._state = 0
@@ -621,7 +699,6 @@ class BenchmarkSmallRecordWithOptionalsReaderBase(abc.ABC):
                 expected_method = self._state_to_method_name(self._state)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
-
     schema = BenchmarkSmallRecordWithOptionalsWriterBase.schema
 
     def __enter__(self):
@@ -674,9 +751,31 @@ class BenchmarkSmallRecordWithOptionalsReaderBase(abc.ABC):
             return 'read_small_record'
         return "<unknown>"
 
+class BenchmarkSmallRecordWithOptionalsIndexedReaderBase(BenchmarkSmallRecordWithOptionalsReaderBase):
+    """Abstract reader for the BenchmarkSmallRecordWithOptionals protocol."""
+
+    def close(self) -> None:
+        self._close()
+
+    def read_small_record(self, idx: int = 0) -> collections.abc.Iterable[SimpleEncodingCounters]:
+        value = self._read_small_record(idx)
+        return self._wrap_iterable(value, 2)
+
+    def count_small_record(self) -> int:
+        return self._count_small_record()
+
+    @abc.abstractmethod
+    def _read_small_record(self, idx: int = 0) -> collections.abc.Iterable[SimpleEncodingCounters]:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _count_small_record(self) -> int:
+        raise NotImplementedError()
+
+    def _raise_unexpected_state(self, actual: int) -> None:
+        pass
 class BenchmarkSimpleMrdWriterBase(abc.ABC):
     """Abstract writer for the BenchmarkSimpleMrd protocol."""
-
 
     def __init__(self) -> None:
         self._state = 0
@@ -737,8 +836,7 @@ class BenchmarkSimpleMrdWriterBase(abc.ABC):
         return "<unknown>"
 
 class BenchmarkSimpleMrdReaderBase(abc.ABC):
-    """Abstract reader for the BenchmarkSimpleMrd protocol."""
-
+    """Abstract indexed reader for the BenchmarkSimpleMrd protocol."""
 
     def __init__(self) -> None:
         self._state = 0
@@ -753,7 +851,6 @@ class BenchmarkSimpleMrdReaderBase(abc.ABC):
                 expected_method = self._state_to_method_name(self._state)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
-
     schema = BenchmarkSimpleMrdWriterBase.schema
 
     def __enter__(self):
@@ -806,9 +903,31 @@ class BenchmarkSimpleMrdReaderBase(abc.ABC):
             return 'read_data'
         return "<unknown>"
 
+class BenchmarkSimpleMrdIndexedReaderBase(BenchmarkSimpleMrdReaderBase):
+    """Abstract reader for the BenchmarkSimpleMrd protocol."""
+
+    def close(self) -> None:
+        self._close()
+
+    def read_data(self, idx: int = 0) -> collections.abc.Iterable[AcquisitionOrImage]:
+        value = self._read_data(idx)
+        return self._wrap_iterable(value, 2)
+
+    def count_data(self) -> int:
+        return self._count_data()
+
+    @abc.abstractmethod
+    def _read_data(self, idx: int = 0) -> collections.abc.Iterable[AcquisitionOrImage]:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _count_data(self) -> int:
+        raise NotImplementedError()
+
+    def _raise_unexpected_state(self, actual: int) -> None:
+        pass
 class ScalarsWriterBase(abc.ABC):
     """Abstract writer for the Scalars protocol."""
-
 
     def __init__(self) -> None:
         self._state = 0
@@ -878,8 +997,7 @@ class ScalarsWriterBase(abc.ABC):
         return "<unknown>"
 
 class ScalarsReaderBase(abc.ABC):
-    """Abstract reader for the Scalars protocol."""
-
+    """Abstract indexed reader for the Scalars protocol."""
 
     def __init__(self) -> None:
         self._state = 0
@@ -894,7 +1012,6 @@ class ScalarsReaderBase(abc.ABC):
                 expected_method = self._state_to_method_name(self._state)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
-
     schema = ScalarsWriterBase.schema
 
     def __enter__(self):
@@ -964,9 +1081,16 @@ class ScalarsReaderBase(abc.ABC):
             return 'read_record'
         return "<unknown>"
 
+class ScalarsIndexedReaderBase(ScalarsReaderBase):
+    """Abstract reader for the Scalars protocol."""
+
+    def close(self) -> None:
+        self._close()
+
+    def _raise_unexpected_state(self, actual: int) -> None:
+        pass
 class ScalarOptionalsWriterBase(abc.ABC):
     """Abstract writer for the ScalarOptionals protocol."""
-
 
     def __init__(self) -> None:
         self._state = 0
@@ -1066,8 +1190,7 @@ class ScalarOptionalsWriterBase(abc.ABC):
         return "<unknown>"
 
 class ScalarOptionalsReaderBase(abc.ABC):
-    """Abstract reader for the ScalarOptionals protocol."""
-
+    """Abstract indexed reader for the ScalarOptionals protocol."""
 
     def __init__(self) -> None:
         self._state = 0
@@ -1082,7 +1205,6 @@ class ScalarOptionalsReaderBase(abc.ABC):
                 expected_method = self._state_to_method_name(self._state)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
-
     schema = ScalarOptionalsWriterBase.schema
 
     def __enter__(self):
@@ -1186,9 +1308,16 @@ class ScalarOptionalsReaderBase(abc.ABC):
             return 'read_optional_record_with_optional_fields'
         return "<unknown>"
 
+class ScalarOptionalsIndexedReaderBase(ScalarOptionalsReaderBase):
+    """Abstract reader for the ScalarOptionals protocol."""
+
+    def close(self) -> None:
+        self._close()
+
+    def _raise_unexpected_state(self, actual: int) -> None:
+        pass
 class NestedRecordsWriterBase(abc.ABC):
     """Abstract writer for the NestedRecords protocol."""
-
 
     def __init__(self) -> None:
         self._state = 0
@@ -1243,8 +1372,7 @@ class NestedRecordsWriterBase(abc.ABC):
         return "<unknown>"
 
 class NestedRecordsReaderBase(abc.ABC):
-    """Abstract reader for the NestedRecords protocol."""
-
+    """Abstract indexed reader for the NestedRecords protocol."""
 
     def __init__(self) -> None:
         self._state = 0
@@ -1259,7 +1387,6 @@ class NestedRecordsReaderBase(abc.ABC):
                 expected_method = self._state_to_method_name(self._state)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
-
     schema = NestedRecordsWriterBase.schema
 
     def __enter__(self):
@@ -1312,9 +1439,16 @@ class NestedRecordsReaderBase(abc.ABC):
             return 'read_tuple_with_records'
         return "<unknown>"
 
+class NestedRecordsIndexedReaderBase(NestedRecordsReaderBase):
+    """Abstract reader for the NestedRecords protocol."""
+
+    def close(self) -> None:
+        self._close()
+
+    def _raise_unexpected_state(self, actual: int) -> None:
+        pass
 class VlensWriterBase(abc.ABC):
     """Abstract writer for the Vlens protocol."""
-
 
     def __init__(self) -> None:
         self._state = 0
@@ -1414,8 +1548,7 @@ class VlensWriterBase(abc.ABC):
         return "<unknown>"
 
 class VlensReaderBase(abc.ABC):
-    """Abstract reader for the Vlens protocol."""
-
+    """Abstract indexed reader for the Vlens protocol."""
 
     def __init__(self) -> None:
         self._state = 0
@@ -1430,7 +1563,6 @@ class VlensReaderBase(abc.ABC):
                 expected_method = self._state_to_method_name(self._state)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
-
     schema = VlensWriterBase.schema
 
     def __enter__(self):
@@ -1534,9 +1666,16 @@ class VlensReaderBase(abc.ABC):
             return 'read_vlen_of_record_with_vlens'
         return "<unknown>"
 
+class VlensIndexedReaderBase(VlensReaderBase):
+    """Abstract reader for the Vlens protocol."""
+
+    def close(self) -> None:
+        self._close()
+
+    def _raise_unexpected_state(self, actual: int) -> None:
+        pass
 class StringsWriterBase(abc.ABC):
     """Abstract writer for the Strings protocol."""
-
 
     def __init__(self) -> None:
         self._state = 0
@@ -1606,8 +1745,7 @@ class StringsWriterBase(abc.ABC):
         return "<unknown>"
 
 class StringsReaderBase(abc.ABC):
-    """Abstract reader for the Strings protocol."""
-
+    """Abstract indexed reader for the Strings protocol."""
 
     def __init__(self) -> None:
         self._state = 0
@@ -1622,7 +1760,6 @@ class StringsReaderBase(abc.ABC):
                 expected_method = self._state_to_method_name(self._state)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
-
     schema = StringsWriterBase.schema
 
     def __enter__(self):
@@ -1692,9 +1829,16 @@ class StringsReaderBase(abc.ABC):
             return 'read_rec_with_string'
         return "<unknown>"
 
+class StringsIndexedReaderBase(StringsReaderBase):
+    """Abstract reader for the Strings protocol."""
+
+    def close(self) -> None:
+        self._close()
+
+    def _raise_unexpected_state(self, actual: int) -> None:
+        pass
 class OptionalVectorsWriterBase(abc.ABC):
     """Abstract writer for the OptionalVectors protocol."""
-
 
     def __init__(self) -> None:
         self._state = 0
@@ -1749,8 +1893,7 @@ class OptionalVectorsWriterBase(abc.ABC):
         return "<unknown>"
 
 class OptionalVectorsReaderBase(abc.ABC):
-    """Abstract reader for the OptionalVectors protocol."""
-
+    """Abstract indexed reader for the OptionalVectors protocol."""
 
     def __init__(self) -> None:
         self._state = 0
@@ -1765,7 +1908,6 @@ class OptionalVectorsReaderBase(abc.ABC):
                 expected_method = self._state_to_method_name(self._state)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
-
     schema = OptionalVectorsWriterBase.schema
 
     def __enter__(self):
@@ -1818,9 +1960,16 @@ class OptionalVectorsReaderBase(abc.ABC):
             return 'read_record_with_optional_vector'
         return "<unknown>"
 
+class OptionalVectorsIndexedReaderBase(OptionalVectorsReaderBase):
+    """Abstract reader for the OptionalVectors protocol."""
+
+    def close(self) -> None:
+        self._close()
+
+    def _raise_unexpected_state(self, actual: int) -> None:
+        pass
 class FixedVectorsWriterBase(abc.ABC):
     """Abstract writer for the FixedVectors protocol."""
-
 
     def __init__(self) -> None:
         self._state = 0
@@ -1920,8 +2069,7 @@ class FixedVectorsWriterBase(abc.ABC):
         return "<unknown>"
 
 class FixedVectorsReaderBase(abc.ABC):
-    """Abstract reader for the FixedVectors protocol."""
-
+    """Abstract indexed reader for the FixedVectors protocol."""
 
     def __init__(self) -> None:
         self._state = 0
@@ -1936,7 +2084,6 @@ class FixedVectorsReaderBase(abc.ABC):
                 expected_method = self._state_to_method_name(self._state)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
-
     schema = FixedVectorsWriterBase.schema
 
     def __enter__(self):
@@ -2040,9 +2187,16 @@ class FixedVectorsReaderBase(abc.ABC):
             return 'read_record_with_fixed_vectors'
         return "<unknown>"
 
+class FixedVectorsIndexedReaderBase(FixedVectorsReaderBase):
+    """Abstract reader for the FixedVectors protocol."""
+
+    def close(self) -> None:
+        self._close()
+
+    def _raise_unexpected_state(self, actual: int) -> None:
+        pass
 class StreamsWriterBase(abc.ABC):
     """Abstract writer for the Streams protocol."""
-
 
     def __init__(self) -> None:
         self._state = 0
@@ -2157,8 +2311,7 @@ class StreamsWriterBase(abc.ABC):
         return "<unknown>"
 
 class StreamsReaderBase(abc.ABC):
-    """Abstract reader for the Streams protocol."""
-
+    """Abstract indexed reader for the Streams protocol."""
 
     def __init__(self) -> None:
         self._state = 0
@@ -2173,7 +2326,6 @@ class StreamsReaderBase(abc.ABC):
                 expected_method = self._state_to_method_name(self._state)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
-
     schema = StreamsWriterBase.schema
 
     def __enter__(self):
@@ -2277,9 +2429,76 @@ class StreamsReaderBase(abc.ABC):
             return 'read_fixed_vector'
         return "<unknown>"
 
+class StreamsIndexedReaderBase(StreamsReaderBase):
+    """Abstract reader for the Streams protocol."""
+
+    def close(self) -> None:
+        self._close()
+
+    def read_int_data(self, idx: int = 0) -> collections.abc.Iterable[yardl.Int32]:
+        value = self._read_int_data(idx)
+        return self._wrap_iterable(value, 2)
+
+    def count_int_data(self) -> int:
+        return self._count_int_data()
+
+    def read_optional_int_data(self, idx: int = 0) -> collections.abc.Iterable[typing.Optional[yardl.Int32]]:
+        value = self._read_optional_int_data(idx)
+        return self._wrap_iterable(value, 4)
+
+    def count_optional_int_data(self) -> int:
+        return self._count_optional_int_data()
+
+    def read_record_with_optional_vector_data(self, idx: int = 0) -> collections.abc.Iterable[RecordWithOptionalVector]:
+        value = self._read_record_with_optional_vector_data(idx)
+        return self._wrap_iterable(value, 6)
+
+    def count_record_with_optional_vector_data(self) -> int:
+        return self._count_record_with_optional_vector_data()
+
+    def read_fixed_vector(self, idx: int = 0) -> collections.abc.Iterable[list[yardl.Int32]]:
+        value = self._read_fixed_vector(idx)
+        return self._wrap_iterable(value, 8)
+
+    def count_fixed_vector(self) -> int:
+        return self._count_fixed_vector()
+
+    @abc.abstractmethod
+    def _read_int_data(self, idx: int = 0) -> collections.abc.Iterable[yardl.Int32]:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _count_int_data(self) -> int:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _read_optional_int_data(self, idx: int = 0) -> collections.abc.Iterable[typing.Optional[yardl.Int32]]:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _count_optional_int_data(self) -> int:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _read_record_with_optional_vector_data(self, idx: int = 0) -> collections.abc.Iterable[RecordWithOptionalVector]:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _count_record_with_optional_vector_data(self) -> int:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _read_fixed_vector(self, idx: int = 0) -> collections.abc.Iterable[list[yardl.Int32]]:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _count_fixed_vector(self) -> int:
+        raise NotImplementedError()
+
+    def _raise_unexpected_state(self, actual: int) -> None:
+        pass
 class FixedArraysWriterBase(abc.ABC):
     """Abstract writer for the FixedArrays protocol."""
-
 
     def __init__(self) -> None:
         self._state = 0
@@ -2394,8 +2613,7 @@ class FixedArraysWriterBase(abc.ABC):
         return "<unknown>"
 
 class FixedArraysReaderBase(abc.ABC):
-    """Abstract reader for the FixedArrays protocol."""
-
+    """Abstract indexed reader for the FixedArrays protocol."""
 
     def __init__(self) -> None:
         self._state = 0
@@ -2410,7 +2628,6 @@ class FixedArraysReaderBase(abc.ABC):
                 expected_method = self._state_to_method_name(self._state)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
-
     schema = FixedArraysWriterBase.schema
 
     def __enter__(self):
@@ -2531,9 +2748,16 @@ class FixedArraysReaderBase(abc.ABC):
             return 'read_named_array'
         return "<unknown>"
 
+class FixedArraysIndexedReaderBase(FixedArraysReaderBase):
+    """Abstract reader for the FixedArrays protocol."""
+
+    def close(self) -> None:
+        self._close()
+
+    def _raise_unexpected_state(self, actual: int) -> None:
+        pass
 class SubarraysWriterBase(abc.ABC):
     """Abstract writer for the Subarrays protocol."""
-
 
     def __init__(self) -> None:
         self._state = 0
@@ -2708,8 +2932,7 @@ class SubarraysWriterBase(abc.ABC):
         return "<unknown>"
 
 class SubarraysReaderBase(abc.ABC):
-    """Abstract reader for the Subarrays protocol."""
-
+    """Abstract indexed reader for the Subarrays protocol."""
 
     def __init__(self) -> None:
         self._state = 0
@@ -2724,7 +2947,6 @@ class SubarraysReaderBase(abc.ABC):
                 expected_method = self._state_to_method_name(self._state)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
-
     schema = SubarraysWriterBase.schema
 
     def __enter__(self):
@@ -2913,9 +3135,16 @@ class SubarraysReaderBase(abc.ABC):
             return 'read_generic_subarray'
         return "<unknown>"
 
+class SubarraysIndexedReaderBase(SubarraysReaderBase):
+    """Abstract reader for the Subarrays protocol."""
+
+    def close(self) -> None:
+        self._close()
+
+    def _raise_unexpected_state(self, actual: int) -> None:
+        pass
 class SubarraysInRecordsWriterBase(abc.ABC):
     """Abstract writer for the SubarraysInRecords protocol."""
-
 
     def __init__(self) -> None:
         self._state = 0
@@ -2985,8 +3214,7 @@ class SubarraysInRecordsWriterBase(abc.ABC):
         return "<unknown>"
 
 class SubarraysInRecordsReaderBase(abc.ABC):
-    """Abstract reader for the SubarraysInRecords protocol."""
-
+    """Abstract indexed reader for the SubarraysInRecords protocol."""
 
     def __init__(self) -> None:
         self._state = 0
@@ -3001,7 +3229,6 @@ class SubarraysInRecordsReaderBase(abc.ABC):
                 expected_method = self._state_to_method_name(self._state)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
-
     schema = SubarraysInRecordsWriterBase.schema
 
     def __enter__(self):
@@ -3071,9 +3298,16 @@ class SubarraysInRecordsReaderBase(abc.ABC):
             return 'read_with_vlen_subarrays'
         return "<unknown>"
 
+class SubarraysInRecordsIndexedReaderBase(SubarraysInRecordsReaderBase):
+    """Abstract reader for the SubarraysInRecords protocol."""
+
+    def close(self) -> None:
+        self._close()
+
+    def _raise_unexpected_state(self, actual: int) -> None:
+        pass
 class NDArraysWriterBase(abc.ABC):
     """Abstract writer for the NDArrays protocol."""
-
 
     def __init__(self) -> None:
         self._state = 0
@@ -3188,8 +3422,7 @@ class NDArraysWriterBase(abc.ABC):
         return "<unknown>"
 
 class NDArraysReaderBase(abc.ABC):
-    """Abstract reader for the NDArrays protocol."""
-
+    """Abstract indexed reader for the NDArrays protocol."""
 
     def __init__(self) -> None:
         self._state = 0
@@ -3204,7 +3437,6 @@ class NDArraysReaderBase(abc.ABC):
                 expected_method = self._state_to_method_name(self._state)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
-
     schema = NDArraysWriterBase.schema
 
     def __enter__(self):
@@ -3325,9 +3557,16 @@ class NDArraysReaderBase(abc.ABC):
             return 'read_named_array'
         return "<unknown>"
 
+class NDArraysIndexedReaderBase(NDArraysReaderBase):
+    """Abstract reader for the NDArrays protocol."""
+
+    def close(self) -> None:
+        self._close()
+
+    def _raise_unexpected_state(self, actual: int) -> None:
+        pass
 class NDArraysSingleDimensionWriterBase(abc.ABC):
     """Abstract writer for the NDArraysSingleDimension protocol."""
-
 
     def __init__(self) -> None:
         self._state = 0
@@ -3427,8 +3666,7 @@ class NDArraysSingleDimensionWriterBase(abc.ABC):
         return "<unknown>"
 
 class NDArraysSingleDimensionReaderBase(abc.ABC):
-    """Abstract reader for the NDArraysSingleDimension protocol."""
-
+    """Abstract indexed reader for the NDArraysSingleDimension protocol."""
 
     def __init__(self) -> None:
         self._state = 0
@@ -3443,7 +3681,6 @@ class NDArraysSingleDimensionReaderBase(abc.ABC):
                 expected_method = self._state_to_method_name(self._state)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
-
     schema = NDArraysSingleDimensionWriterBase.schema
 
     def __enter__(self):
@@ -3547,9 +3784,16 @@ class NDArraysSingleDimensionReaderBase(abc.ABC):
             return 'read_record_with_nd_arrays'
         return "<unknown>"
 
+class NDArraysSingleDimensionIndexedReaderBase(NDArraysSingleDimensionReaderBase):
+    """Abstract reader for the NDArraysSingleDimension protocol."""
+
+    def close(self) -> None:
+        self._close()
+
+    def _raise_unexpected_state(self, actual: int) -> None:
+        pass
 class DynamicNDArraysWriterBase(abc.ABC):
     """Abstract writer for the DynamicNDArrays protocol."""
-
 
     def __init__(self) -> None:
         self._state = 0
@@ -3649,8 +3893,7 @@ class DynamicNDArraysWriterBase(abc.ABC):
         return "<unknown>"
 
 class DynamicNDArraysReaderBase(abc.ABC):
-    """Abstract reader for the DynamicNDArrays protocol."""
-
+    """Abstract indexed reader for the DynamicNDArrays protocol."""
 
     def __init__(self) -> None:
         self._state = 0
@@ -3665,7 +3908,6 @@ class DynamicNDArraysReaderBase(abc.ABC):
                 expected_method = self._state_to_method_name(self._state)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
-
     schema = DynamicNDArraysWriterBase.schema
 
     def __enter__(self):
@@ -3769,9 +4011,16 @@ class DynamicNDArraysReaderBase(abc.ABC):
             return 'read_record_with_dynamic_nd_arrays'
         return "<unknown>"
 
+class DynamicNDArraysIndexedReaderBase(DynamicNDArraysReaderBase):
+    """Abstract reader for the DynamicNDArrays protocol."""
+
+    def close(self) -> None:
+        self._close()
+
+    def _raise_unexpected_state(self, actual: int) -> None:
+        pass
 class MultiDArraysWriterBase(abc.ABC):
     """Abstract writer for the MultiDArrays protocol."""
-
 
     def __init__(self) -> None:
         self._state = 0
@@ -3850,8 +4099,7 @@ class MultiDArraysWriterBase(abc.ABC):
         return "<unknown>"
 
 class MultiDArraysReaderBase(abc.ABC):
-    """Abstract reader for the MultiDArrays protocol."""
-
+    """Abstract indexed reader for the MultiDArrays protocol."""
 
     def __init__(self) -> None:
         self._state = 0
@@ -3866,7 +4114,6 @@ class MultiDArraysReaderBase(abc.ABC):
                 expected_method = self._state_to_method_name(self._state)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
-
     schema = MultiDArraysWriterBase.schema
 
     def __enter__(self):
@@ -3936,9 +4183,46 @@ class MultiDArraysReaderBase(abc.ABC):
             return 'read_frames'
         return "<unknown>"
 
+class MultiDArraysIndexedReaderBase(MultiDArraysReaderBase):
+    """Abstract reader for the MultiDArrays protocol."""
+
+    def close(self) -> None:
+        self._close()
+
+    def read_images(self, idx: int = 0) -> collections.abc.Iterable[npt.NDArray[np.float32]]:
+        value = self._read_images(idx)
+        return self._wrap_iterable(value, 2)
+
+    def count_images(self) -> int:
+        return self._count_images()
+
+    def read_frames(self, idx: int = 0) -> collections.abc.Iterable[npt.NDArray[np.float32]]:
+        value = self._read_frames(idx)
+        return self._wrap_iterable(value, 4)
+
+    def count_frames(self) -> int:
+        return self._count_frames()
+
+    @abc.abstractmethod
+    def _read_images(self, idx: int = 0) -> collections.abc.Iterable[npt.NDArray[np.float32]]:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _count_images(self) -> int:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _read_frames(self, idx: int = 0) -> collections.abc.Iterable[npt.NDArray[np.float32]]:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _count_frames(self) -> int:
+        raise NotImplementedError()
+
+    def _raise_unexpected_state(self, actual: int) -> None:
+        pass
 class ComplexArraysWriterBase(abc.ABC):
     """Abstract writer for the ComplexArrays protocol."""
-
 
     def __init__(self) -> None:
         self._state = 0
@@ -4008,8 +4292,7 @@ class ComplexArraysWriterBase(abc.ABC):
         return "<unknown>"
 
 class ComplexArraysReaderBase(abc.ABC):
-    """Abstract reader for the ComplexArrays protocol."""
-
+    """Abstract indexed reader for the ComplexArrays protocol."""
 
     def __init__(self) -> None:
         self._state = 0
@@ -4024,7 +4307,6 @@ class ComplexArraysReaderBase(abc.ABC):
                 expected_method = self._state_to_method_name(self._state)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
-
     schema = ComplexArraysWriterBase.schema
 
     def __enter__(self):
@@ -4094,9 +4376,16 @@ class ComplexArraysReaderBase(abc.ABC):
             return 'read_doubles'
         return "<unknown>"
 
+class ComplexArraysIndexedReaderBase(ComplexArraysReaderBase):
+    """Abstract reader for the ComplexArrays protocol."""
+
+    def close(self) -> None:
+        self._close()
+
+    def _raise_unexpected_state(self, actual: int) -> None:
+        pass
 class MapsWriterBase(abc.ABC):
     """Abstract writer for the Maps protocol."""
-
 
     def __init__(self) -> None:
         self._state = 0
@@ -4211,8 +4500,7 @@ class MapsWriterBase(abc.ABC):
         return "<unknown>"
 
 class MapsReaderBase(abc.ABC):
-    """Abstract reader for the Maps protocol."""
-
+    """Abstract indexed reader for the Maps protocol."""
 
     def __init__(self) -> None:
         self._state = 0
@@ -4227,7 +4515,6 @@ class MapsReaderBase(abc.ABC):
                 expected_method = self._state_to_method_name(self._state)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
-
     schema = MapsWriterBase.schema
 
     def __enter__(self):
@@ -4348,9 +4635,16 @@ class MapsReaderBase(abc.ABC):
             return 'read_records'
         return "<unknown>"
 
+class MapsIndexedReaderBase(MapsReaderBase):
+    """Abstract reader for the Maps protocol."""
+
+    def close(self) -> None:
+        self._close()
+
+    def _raise_unexpected_state(self, actual: int) -> None:
+        pass
 class UnionsWriterBase(abc.ABC):
     """Abstract writer for the Unions protocol."""
-
 
     def __init__(self) -> None:
         self._state = 0
@@ -4450,8 +4744,7 @@ class UnionsWriterBase(abc.ABC):
         return "<unknown>"
 
 class UnionsReaderBase(abc.ABC):
-    """Abstract reader for the Unions protocol."""
-
+    """Abstract indexed reader for the Unions protocol."""
 
     def __init__(self) -> None:
         self._state = 0
@@ -4466,7 +4759,6 @@ class UnionsReaderBase(abc.ABC):
                 expected_method = self._state_to_method_name(self._state)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
-
     schema = UnionsWriterBase.schema
 
     def __enter__(self):
@@ -4570,9 +4862,16 @@ class UnionsReaderBase(abc.ABC):
             return 'read_record_with_unions'
         return "<unknown>"
 
+class UnionsIndexedReaderBase(UnionsReaderBase):
+    """Abstract reader for the Unions protocol."""
+
+    def close(self) -> None:
+        self._close()
+
+    def _raise_unexpected_state(self, actual: int) -> None:
+        pass
 class StreamsOfUnionsWriterBase(abc.ABC):
     """Abstract writer for the StreamsOfUnions protocol."""
-
 
     def __init__(self) -> None:
         self._state = 0
@@ -4669,8 +4968,7 @@ class StreamsOfUnionsWriterBase(abc.ABC):
         return "<unknown>"
 
 class StreamsOfUnionsReaderBase(abc.ABC):
-    """Abstract reader for the StreamsOfUnions protocol."""
-
+    """Abstract indexed reader for the StreamsOfUnions protocol."""
 
     def __init__(self) -> None:
         self._state = 0
@@ -4685,7 +4983,6 @@ class StreamsOfUnionsReaderBase(abc.ABC):
                 expected_method = self._state_to_method_name(self._state)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
-
     schema = StreamsOfUnionsWriterBase.schema
 
     def __enter__(self):
@@ -4772,9 +5069,61 @@ class StreamsOfUnionsReaderBase(abc.ABC):
             return 'read_many_cases'
         return "<unknown>"
 
+class StreamsOfUnionsIndexedReaderBase(StreamsOfUnionsReaderBase):
+    """Abstract reader for the StreamsOfUnions protocol."""
+
+    def close(self) -> None:
+        self._close()
+
+    def read_int_or_simple_record(self, idx: int = 0) -> collections.abc.Iterable[Int32OrSimpleRecord]:
+        value = self._read_int_or_simple_record(idx)
+        return self._wrap_iterable(value, 2)
+
+    def count_int_or_simple_record(self) -> int:
+        return self._count_int_or_simple_record()
+
+    def read_nullable_int_or_simple_record(self, idx: int = 0) -> collections.abc.Iterable[typing.Optional[Int32OrSimpleRecord]]:
+        value = self._read_nullable_int_or_simple_record(idx)
+        return self._wrap_iterable(value, 4)
+
+    def count_nullable_int_or_simple_record(self) -> int:
+        return self._count_nullable_int_or_simple_record()
+
+    def read_many_cases(self, idx: int = 0) -> collections.abc.Iterable[Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray]:
+        value = self._read_many_cases(idx)
+        return self._wrap_iterable(value, 6)
+
+    def count_many_cases(self) -> int:
+        return self._count_many_cases()
+
+    @abc.abstractmethod
+    def _read_int_or_simple_record(self, idx: int = 0) -> collections.abc.Iterable[Int32OrSimpleRecord]:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _count_int_or_simple_record(self) -> int:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _read_nullable_int_or_simple_record(self, idx: int = 0) -> collections.abc.Iterable[typing.Optional[Int32OrSimpleRecord]]:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _count_nullable_int_or_simple_record(self) -> int:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _read_many_cases(self, idx: int = 0) -> collections.abc.Iterable[Int32OrFloat32OrStringOrSimpleRecordOrNamedFixedNDArray]:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _count_many_cases(self) -> int:
+        raise NotImplementedError()
+
+    def _raise_unexpected_state(self, actual: int) -> None:
+        pass
 class EnumsWriterBase(abc.ABC):
     """Abstract writer for the Enums protocol."""
-
 
     def __init__(self) -> None:
         self._state = 0
@@ -4874,8 +5223,7 @@ class EnumsWriterBase(abc.ABC):
         return "<unknown>"
 
 class EnumsReaderBase(abc.ABC):
-    """Abstract reader for the Enums protocol."""
-
+    """Abstract indexed reader for the Enums protocol."""
 
     def __init__(self) -> None:
         self._state = 0
@@ -4890,7 +5238,6 @@ class EnumsReaderBase(abc.ABC):
                 expected_method = self._state_to_method_name(self._state)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
-
     schema = EnumsWriterBase.schema
 
     def __enter__(self):
@@ -4994,9 +5341,16 @@ class EnumsReaderBase(abc.ABC):
             return 'read_rec'
         return "<unknown>"
 
+class EnumsIndexedReaderBase(EnumsReaderBase):
+    """Abstract reader for the Enums protocol."""
+
+    def close(self) -> None:
+        self._close()
+
+    def _raise_unexpected_state(self, actual: int) -> None:
+        pass
 class FlagsWriterBase(abc.ABC):
     """Abstract writer for the Flags protocol."""
-
 
     def __init__(self) -> None:
         self._state = 0
@@ -5075,8 +5429,7 @@ class FlagsWriterBase(abc.ABC):
         return "<unknown>"
 
 class FlagsReaderBase(abc.ABC):
-    """Abstract reader for the Flags protocol."""
-
+    """Abstract indexed reader for the Flags protocol."""
 
     def __init__(self) -> None:
         self._state = 0
@@ -5091,7 +5444,6 @@ class FlagsReaderBase(abc.ABC):
                 expected_method = self._state_to_method_name(self._state)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
-
     schema = FlagsWriterBase.schema
 
     def __enter__(self):
@@ -5161,9 +5513,46 @@ class FlagsReaderBase(abc.ABC):
             return 'read_formats'
         return "<unknown>"
 
+class FlagsIndexedReaderBase(FlagsReaderBase):
+    """Abstract reader for the Flags protocol."""
+
+    def close(self) -> None:
+        self._close()
+
+    def read_days(self, idx: int = 0) -> collections.abc.Iterable[DaysOfWeek]:
+        value = self._read_days(idx)
+        return self._wrap_iterable(value, 2)
+
+    def count_days(self) -> int:
+        return self._count_days()
+
+    def read_formats(self, idx: int = 0) -> collections.abc.Iterable[TextFormat]:
+        value = self._read_formats(idx)
+        return self._wrap_iterable(value, 4)
+
+    def count_formats(self) -> int:
+        return self._count_formats()
+
+    @abc.abstractmethod
+    def _read_days(self, idx: int = 0) -> collections.abc.Iterable[DaysOfWeek]:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _count_days(self) -> int:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _read_formats(self, idx: int = 0) -> collections.abc.Iterable[TextFormat]:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _count_formats(self) -> int:
+        raise NotImplementedError()
+
+    def _raise_unexpected_state(self, actual: int) -> None:
+        pass
 class StateTestWriterBase(abc.ABC):
     """Abstract writer for the StateTest protocol."""
-
 
     def __init__(self) -> None:
         self._state = 0
@@ -5251,8 +5640,7 @@ class StateTestWriterBase(abc.ABC):
         return "<unknown>"
 
 class StateTestReaderBase(abc.ABC):
-    """Abstract reader for the StateTest protocol."""
-
+    """Abstract indexed reader for the StateTest protocol."""
 
     def __init__(self) -> None:
         self._state = 0
@@ -5267,7 +5655,6 @@ class StateTestReaderBase(abc.ABC):
                 expected_method = self._state_to_method_name(self._state)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
-
     schema = StateTestWriterBase.schema
 
     def __enter__(self):
@@ -5354,9 +5741,31 @@ class StateTestReaderBase(abc.ABC):
             return 'read_another_int'
         return "<unknown>"
 
+class StateTestIndexedReaderBase(StateTestReaderBase):
+    """Abstract reader for the StateTest protocol."""
+
+    def close(self) -> None:
+        self._close()
+
+    def read_a_stream(self, idx: int = 0) -> collections.abc.Iterable[yardl.Int32]:
+        value = self._read_a_stream(idx)
+        return self._wrap_iterable(value, 4)
+
+    def count_a_stream(self) -> int:
+        return self._count_a_stream()
+
+    @abc.abstractmethod
+    def _read_a_stream(self, idx: int = 0) -> collections.abc.Iterable[yardl.Int32]:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _count_a_stream(self) -> int:
+        raise NotImplementedError()
+
+    def _raise_unexpected_state(self, actual: int) -> None:
+        pass
 class SimpleGenericsWriterBase(abc.ABC):
     """Abstract writer for the SimpleGenerics protocol."""
-
 
     def __init__(self) -> None:
         self._state = 0
@@ -5537,8 +5946,7 @@ class SimpleGenericsWriterBase(abc.ABC):
         return "<unknown>"
 
 class SimpleGenericsReaderBase(abc.ABC):
-    """Abstract reader for the SimpleGenerics protocol."""
-
+    """Abstract indexed reader for the SimpleGenerics protocol."""
 
     def __init__(self) -> None:
         self._state = 0
@@ -5553,7 +5961,6 @@ class SimpleGenericsReaderBase(abc.ABC):
                 expected_method = self._state_to_method_name(self._state)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
-
     schema = SimpleGenericsWriterBase.schema
 
     def __enter__(self):
@@ -5742,9 +6149,31 @@ class SimpleGenericsReaderBase(abc.ABC):
             return 'read_stream_of_type_variants'
         return "<unknown>"
 
+class SimpleGenericsIndexedReaderBase(SimpleGenericsReaderBase):
+    """Abstract reader for the SimpleGenerics protocol."""
+
+    def close(self) -> None:
+        self._close()
+
+    def read_stream_of_type_variants(self, idx: int = 0) -> collections.abc.Iterable[ImageFloatOrImageDouble]:
+        value = self._read_stream_of_type_variants(idx)
+        return self._wrap_iterable(value, 18)
+
+    def count_stream_of_type_variants(self) -> int:
+        return self._count_stream_of_type_variants()
+
+    @abc.abstractmethod
+    def _read_stream_of_type_variants(self, idx: int = 0) -> collections.abc.Iterable[ImageFloatOrImageDouble]:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _count_stream_of_type_variants(self) -> int:
+        raise NotImplementedError()
+
+    def _raise_unexpected_state(self, actual: int) -> None:
+        pass
 class AdvancedGenericsWriterBase(abc.ABC):
     """Abstract writer for the AdvancedGenerics protocol."""
-
 
     def __init__(self) -> None:
         self._state = 0
@@ -5859,8 +6288,7 @@ class AdvancedGenericsWriterBase(abc.ABC):
         return "<unknown>"
 
 class AdvancedGenericsReaderBase(abc.ABC):
-    """Abstract reader for the AdvancedGenerics protocol."""
-
+    """Abstract indexed reader for the AdvancedGenerics protocol."""
 
     def __init__(self) -> None:
         self._state = 0
@@ -5875,7 +6303,6 @@ class AdvancedGenericsReaderBase(abc.ABC):
                 expected_method = self._state_to_method_name(self._state)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
-
     schema = AdvancedGenericsWriterBase.schema
 
     def __enter__(self):
@@ -5996,9 +6423,16 @@ class AdvancedGenericsReaderBase(abc.ABC):
             return 'read_tuple_of_vectors'
         return "<unknown>"
 
+class AdvancedGenericsIndexedReaderBase(AdvancedGenericsReaderBase):
+    """Abstract reader for the AdvancedGenerics protocol."""
+
+    def close(self) -> None:
+        self._close()
+
+    def _raise_unexpected_state(self, actual: int) -> None:
+        pass
 class AliasesWriterBase(abc.ABC):
     """Abstract writer for the Aliases protocol."""
-
 
     def __init__(self) -> None:
         self._state = 0
@@ -6194,8 +6628,7 @@ class AliasesWriterBase(abc.ABC):
         return "<unknown>"
 
 class AliasesReaderBase(abc.ABC):
-    """Abstract reader for the Aliases protocol."""
-
+    """Abstract indexed reader for the Aliases protocol."""
 
     def __init__(self) -> None:
         self._state = 0
@@ -6210,7 +6643,6 @@ class AliasesReaderBase(abc.ABC):
                 expected_method = self._state_to_method_name(self._state)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
-
     schema = AliasesWriterBase.schema
 
     def __enter__(self):
@@ -6416,9 +6848,31 @@ class AliasesReaderBase(abc.ABC):
             return 'read_stream_of_aliased_generic_union_2'
         return "<unknown>"
 
+class AliasesIndexedReaderBase(AliasesReaderBase):
+    """Abstract reader for the Aliases protocol."""
+
+    def close(self) -> None:
+        self._close()
+
+    def read_stream_of_aliased_generic_union_2(self, idx: int = 0) -> collections.abc.Iterable[AliasedGenericUnion2[AliasedString, AliasedEnum]]:
+        value = self._read_stream_of_aliased_generic_union_2(idx)
+        return self._wrap_iterable(value, 20)
+
+    def count_stream_of_aliased_generic_union_2(self) -> int:
+        return self._count_stream_of_aliased_generic_union_2()
+
+    @abc.abstractmethod
+    def _read_stream_of_aliased_generic_union_2(self, idx: int = 0) -> collections.abc.Iterable[AliasedGenericUnion2[AliasedString, AliasedEnum]]:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _count_stream_of_aliased_generic_union_2(self) -> int:
+        raise NotImplementedError()
+
+    def _raise_unexpected_state(self, actual: int) -> None:
+        pass
 class StreamsOfAliasedUnionsWriterBase(abc.ABC):
     """Abstract writer for the StreamsOfAliasedUnions protocol."""
-
 
     def __init__(self) -> None:
         self._state = 0
@@ -6497,8 +6951,7 @@ class StreamsOfAliasedUnionsWriterBase(abc.ABC):
         return "<unknown>"
 
 class StreamsOfAliasedUnionsReaderBase(abc.ABC):
-    """Abstract reader for the StreamsOfAliasedUnions protocol."""
-
+    """Abstract indexed reader for the StreamsOfAliasedUnions protocol."""
 
     def __init__(self) -> None:
         self._state = 0
@@ -6513,7 +6966,6 @@ class StreamsOfAliasedUnionsReaderBase(abc.ABC):
                 expected_method = self._state_to_method_name(self._state)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
-
     schema = StreamsOfAliasedUnionsWriterBase.schema
 
     def __enter__(self):
@@ -6583,9 +7035,46 @@ class StreamsOfAliasedUnionsReaderBase(abc.ABC):
             return 'read_nullable_int_or_simple_record'
         return "<unknown>"
 
+class StreamsOfAliasedUnionsIndexedReaderBase(StreamsOfAliasedUnionsReaderBase):
+    """Abstract reader for the StreamsOfAliasedUnions protocol."""
+
+    def close(self) -> None:
+        self._close()
+
+    def read_int_or_simple_record(self, idx: int = 0) -> collections.abc.Iterable[AliasedIntOrSimpleRecord]:
+        value = self._read_int_or_simple_record(idx)
+        return self._wrap_iterable(value, 2)
+
+    def count_int_or_simple_record(self) -> int:
+        return self._count_int_or_simple_record()
+
+    def read_nullable_int_or_simple_record(self, idx: int = 0) -> collections.abc.Iterable[typing.Optional[AliasedNullableIntSimpleRecord]]:
+        value = self._read_nullable_int_or_simple_record(idx)
+        return self._wrap_iterable(value, 4)
+
+    def count_nullable_int_or_simple_record(self) -> int:
+        return self._count_nullable_int_or_simple_record()
+
+    @abc.abstractmethod
+    def _read_int_or_simple_record(self, idx: int = 0) -> collections.abc.Iterable[AliasedIntOrSimpleRecord]:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _count_int_or_simple_record(self) -> int:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _read_nullable_int_or_simple_record(self, idx: int = 0) -> collections.abc.Iterable[typing.Optional[AliasedNullableIntSimpleRecord]]:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _count_nullable_int_or_simple_record(self) -> int:
+        raise NotImplementedError()
+
+    def _raise_unexpected_state(self, actual: int) -> None:
+        pass
 class ProtocolWithComputedFieldsWriterBase(abc.ABC):
     """Abstract writer for the ProtocolWithComputedFields protocol."""
-
 
     def __init__(self) -> None:
         self._state = 0
@@ -6640,8 +7129,7 @@ class ProtocolWithComputedFieldsWriterBase(abc.ABC):
         return "<unknown>"
 
 class ProtocolWithComputedFieldsReaderBase(abc.ABC):
-    """Abstract reader for the ProtocolWithComputedFields protocol."""
-
+    """Abstract indexed reader for the ProtocolWithComputedFields protocol."""
 
     def __init__(self) -> None:
         self._state = 0
@@ -6656,7 +7144,6 @@ class ProtocolWithComputedFieldsReaderBase(abc.ABC):
                 expected_method = self._state_to_method_name(self._state)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
-
     schema = ProtocolWithComputedFieldsWriterBase.schema
 
     def __enter__(self):
@@ -6709,9 +7196,16 @@ class ProtocolWithComputedFieldsReaderBase(abc.ABC):
             return 'read_record_with_computed_fields'
         return "<unknown>"
 
+class ProtocolWithComputedFieldsIndexedReaderBase(ProtocolWithComputedFieldsReaderBase):
+    """Abstract reader for the ProtocolWithComputedFields protocol."""
+
+    def close(self) -> None:
+        self._close()
+
+    def _raise_unexpected_state(self, actual: int) -> None:
+        pass
 class ProtocolWithKeywordStepsWriterBase(abc.ABC):
     """Abstract writer for the ProtocolWithKeywordSteps protocol."""
-
 
     def __init__(self) -> None:
         self._state = 0
@@ -6784,8 +7278,7 @@ class ProtocolWithKeywordStepsWriterBase(abc.ABC):
         return "<unknown>"
 
 class ProtocolWithKeywordStepsReaderBase(abc.ABC):
-    """Abstract reader for the ProtocolWithKeywordSteps protocol."""
-
+    """Abstract indexed reader for the ProtocolWithKeywordSteps protocol."""
 
     def __init__(self) -> None:
         self._state = 0
@@ -6800,7 +7293,6 @@ class ProtocolWithKeywordStepsReaderBase(abc.ABC):
                 expected_method = self._state_to_method_name(self._state)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
-
     schema = ProtocolWithKeywordStepsWriterBase.schema
 
     def __enter__(self):
@@ -6870,9 +7362,31 @@ class ProtocolWithKeywordStepsReaderBase(abc.ABC):
             return 'read_float'
         return "<unknown>"
 
+class ProtocolWithKeywordStepsIndexedReaderBase(ProtocolWithKeywordStepsReaderBase):
+    """Abstract reader for the ProtocolWithKeywordSteps protocol."""
+
+    def close(self) -> None:
+        self._close()
+
+    def read_int(self, idx: int = 0) -> collections.abc.Iterable[RecordWithKeywordFields]:
+        value = self._read_int(idx)
+        return self._wrap_iterable(value, 2)
+
+    def count_int(self) -> int:
+        return self._count_int()
+
+    @abc.abstractmethod
+    def _read_int(self, idx: int = 0) -> collections.abc.Iterable[RecordWithKeywordFields]:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _count_int(self) -> int:
+        raise NotImplementedError()
+
+    def _raise_unexpected_state(self, actual: int) -> None:
+        pass
 class ProtocolWithOptionalDateWriterBase(abc.ABC):
     """Abstract writer for the ProtocolWithOptionalDate protocol."""
-
 
     def __init__(self) -> None:
         self._state = 0
@@ -6927,8 +7441,7 @@ class ProtocolWithOptionalDateWriterBase(abc.ABC):
         return "<unknown>"
 
 class ProtocolWithOptionalDateReaderBase(abc.ABC):
-    """Abstract reader for the ProtocolWithOptionalDate protocol."""
-
+    """Abstract indexed reader for the ProtocolWithOptionalDate protocol."""
 
     def __init__(self) -> None:
         self._state = 0
@@ -6943,7 +7456,6 @@ class ProtocolWithOptionalDateReaderBase(abc.ABC):
                 expected_method = self._state_to_method_name(self._state)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
-
     schema = ProtocolWithOptionalDateWriterBase.schema
 
     def __enter__(self):
@@ -6996,3 +7508,11 @@ class ProtocolWithOptionalDateReaderBase(abc.ABC):
             return 'read_record'
         return "<unknown>"
 
+class ProtocolWithOptionalDateIndexedReaderBase(ProtocolWithOptionalDateReaderBase):
+    """Abstract reader for the ProtocolWithOptionalDate protocol."""
+
+    def close(self) -> None:
+        self._close()
+
+    def _raise_unexpected_state(self, actual: int) -> None:
+        pass

@@ -130,11 +130,11 @@ inline Index ReadIndex(CodedInputStream& stream) {
   auto pos = stream.Pos();
 
   size_t index_offset = 0;
-  stream.Seek(-sizeof(index_offset));
+  stream.Seek(-static_cast<int64_t>(sizeof(index_offset)));
   stream.ReadFixedInteger(index_offset);
   try {
     stream.Seek(index_offset);
-  } catch (std::exception const& e) {
+  } catch (std::exception const&) {
     throw std::runtime_error("Binary Index not found in stream.");
   }
 

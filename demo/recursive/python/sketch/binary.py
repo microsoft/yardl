@@ -110,7 +110,7 @@ class BinaryMyProtocolIndexedReader(_binary.BinaryProtocolIndexedReader, MyProto
         self._stream.seek(pos)
         return _binary.OptionalSerializer(LinkedListSerializer(_binary.string_serializer)).read(self._stream)
 
-    def _read_cwd(self, idx: int) -> collections.abc.Iterable[DirectoryEntry]:
+    def _read_cwd(self, idx: int) -> collections.abc.Iterable[DirectoryEntry]: # pyright: ignore [reportIncompatibleMethodOverride]
         offset, remaining = self._index.find_stream_item("Cwd", idx)
         self._stream.seek(offset)
         return _binary.StreamSerializer(_binary.UnionSerializer(DirectoryEntry, [(DirectoryEntry.File, FileSerializer()), (DirectoryEntry.Directory, _binary.RecursiveSerializer(lambda *args, **kwargs : DirectorySerializer()))])).read_mid_stream(self._stream, remaining)
