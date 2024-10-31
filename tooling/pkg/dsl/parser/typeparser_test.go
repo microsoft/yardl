@@ -69,14 +69,21 @@ func TestTypeParsing_Invalid(t *testing.T) {
 		input    string
 		expected string
 	}{
-		{input: "Foo<", expected: `unexpected token "<EOF>" (expected Type ("," Type)* ">")`},
+		// TODO: Inspect this carefully before finalizing the "Recursive Types" feature
+		// {input: "Foo<", expected: `unexpected token "<EOF>" (expected Type ("," Type)* ">")`},
+		{input: "Foo<", expected: `unexpected token "<EOF>" (expected <ident> ("." <ident>)* ("<" Type ("," Type)* ">")?)`},
+
 		{input: "Foo?<int>", expected: `unexpected token "<"`},
 		{input: "Foo<int>>", expected: `unexpected token ">"`},
 		{input: "Foo<int>,bar>", expected: `unexpected token ","`},
 		{input: "<int>", expected: `unexpected token "<"`},
 		{input: "Foo<>", expected: `unexpected token ">"`},
 		{input: "Foo<int,>", expected: `unexpected token "," (expected ">")`},
-		{input: "string->", expected: `unexpected token "<EOF>" (expected Type)`},
+
+		// TODO: Inspect this carefully before finalizing the "Recursive Types" feature
+		// {input: "string->", expected: `unexpected token "<EOF>" (expected Type)`},
+		{input: "string->", expected: `unexpected token "<EOF>" (expected <ident> ("." <ident>)* ("<" Type ("," Type)* ">")?)`},
+
 		{input: "int[", expected: `unexpected token "<EOF>" (expected "]")`},
 		{input: "int[/]", expected: `unexpected token "/" (expected "]")`},
 		{input: "int[x:]", expected: `unexpected token "]" (expected integer)`},

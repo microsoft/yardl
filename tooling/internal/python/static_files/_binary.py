@@ -16,6 +16,7 @@ from typing import (
     Optional,
     Tuple,
     cast,
+    Callable,
 )
 from abc import ABC, abstractmethod
 import struct
@@ -1345,11 +1346,13 @@ def read_fixed_int32(stream: CodedInputStream) -> int:
     return stream.read(int32_struct)[0]
 
 
-class RecursiveSerializer(Generic[T, T_NP], TypeSerializer[T, np.void]):
-    def __init__(self, element_serializer_type: TypeSerializer[T, T_NP]) -> None:
+class RecursiveSerializer(Generic[T, T_NP], TypeSerializer[Optional[T], np.void]):
+    def __init__(
+        self, element_serializer_type: Callable[[], TypeSerializer[Optional[T], T_NP]]
+    ) -> None:
         super().__init__(np.dtype([("has_value", np.bool_), ("value", np.object_)]))
         self._element_serializer_type = element_serializer_type
-        self._element_serializer = None
+        self._element_serializer: Union[TypeSerializer[Optional[T], T_NP], None] = None
         self._none = cast(np.void, np.zeros((), dtype=self.overall_dtype())[()])
 
     def write(self, stream: CodedOutputStream, value: Optional[T]) -> None:
