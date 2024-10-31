@@ -40,20 +40,20 @@ class Header:
 
 class Sample:
     id: yardl.UInt32
-    data: list[yardl.Int32]
+    data: npt.NDArray[np.int32]
 
     def __init__(self, *,
         id: yardl.UInt32 = 0,
-        data: typing.Optional[list[yardl.Int32]] = None,
+        data: typing.Optional[npt.NDArray[np.int32]] = None,
     ):
         self.id = id
-        self.data = data if data is not None else []
+        self.data = data if data is not None else np.zeros((0), dtype=np.dtype(np.int32))
 
     def __eq__(self, other: object) -> bool:
         return (
             isinstance(other, Sample)
             and self.id == other.id
-            and self.data == other.data
+            and yardl.structural_equal(self.data, other.data)
         )
 
     def __str__(self) -> str:

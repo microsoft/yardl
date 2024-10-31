@@ -1,6 +1,7 @@
 import sketch
 from io import BytesIO
 import itertools
+import numpy as np
 
 HEADER = sketch.Header(subject="Hello World!")
 
@@ -8,7 +9,9 @@ HEADER = sketch.Header(subject="Hello World!")
 def generate_samples(N, start=0):
     for i in range(N):
         v = i + start
-        yield sketch.Sample(id=v, data=[v, v + 1, v + 2])
+        # Intentionally generating a "large" NumPy array for each sample
+        # to test the underlying Indexing mechanisms.
+        yield sketch.Sample(id=v, data=np.arange(v, v + 1000, dtype=np.int32))
 
 
 def main():
@@ -80,6 +83,7 @@ def test_stream_read():
 
     total_samples = 77 + 33 + 55
 
+    # First, test reading the entire stream without the Index
     stream.seek(0)
     with sketch.BinaryMyProtocolIndexedReader(stream) as reader:
         samples_read = list(reader.read_samples())
@@ -88,6 +92,7 @@ def test_stream_read():
         assert reader.count_samples() == total_samples
         assert len(samples_read) == total_samples
 
+    # Next, test reading the stream in batches from varying start indices
     stream.seek(0)
     with sketch.BinaryMyProtocolIndexedReader(stream) as reader:
         for start in range(0, total_samples, 15):

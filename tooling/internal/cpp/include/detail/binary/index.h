@@ -42,8 +42,17 @@ class Index {
     return step_offsets.at(step_name);
   }
 
-  size_t get_stream_size(std::string const& step_name) const {
+  size_t get_stream_count(std::string const& step_name) const {
     return stream_offsets.at(step_name).size();
+  }
+
+  bool offset_within_stream(std::string const& start_step_name, std::optional<std::string> const& stop_step_name, size_t offset) const {
+    auto start = get_step_offset(start_step_name);
+    auto end = SIZE_MAX;
+    if (stop_step_name) {
+      end = get_step_offset(*stop_step_name);
+    }
+    return (offset >= start) && (offset <= end);
   }
 
   // Given the name of a Stream ProtocolStep and an index into the stream, sets the

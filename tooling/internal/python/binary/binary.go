@@ -155,7 +155,6 @@ func writeProtocols(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 		fmt.Fprintf(w, "class %s(_binary.BinaryProtocolWriter, %s):\n", BinaryWriterName(p), common.AbstractWriterName(p))
 		w.Indented(func() {
 			common.WriteDocstringWithLeadingLine(w, fmt.Sprintf("Binary writer for the %s protocol.", p.Name), p.Comment)
-			w.WriteStringln("")
 
 			w.WriteStringln("def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:")
 			w.Indented(func() {
@@ -184,7 +183,6 @@ func writeProtocols(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 		fmt.Fprintf(w, "class %s(_binary.BinaryProtocolReader, %s):\n", BinaryReaderName(p), common.AbstractReaderName(p))
 		w.Indented(func() {
 			common.WriteDocstringWithLeadingLine(w, fmt.Sprintf("Binary writer for the %s protocol.", p.Name), p.Comment)
-			w.WriteStringln("")
 
 			w.WriteStringln("def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:")
 			w.Indented(func() {
@@ -214,7 +212,6 @@ func writeProtocols(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 		fmt.Fprintf(w, "class %s(_binary.BinaryProtocolIndexedWriter, %s):\n", BinaryIndexedWriterName(p), common.AbstractWriterName(p))
 		w.Indented(func() {
 			common.WriteDocstringWithLeadingLine(w, fmt.Sprintf("Binary indexed writer for the %s protocol.", p.Name), p.Comment)
-			w.WriteStringln("")
 
 			w.WriteStringln("def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:")
 			w.Indented(func() {
@@ -251,7 +248,6 @@ func writeProtocols(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 		fmt.Fprintf(w, "class %s(_binary.BinaryProtocolIndexedReader, %s):\n", BinaryIndexedReaderName(p), common.AbstractIndexedReaderName(p))
 		w.Indented(func() {
 			common.WriteDocstringWithLeadingLine(w, fmt.Sprintf("Binary indexed writer for the %s protocol.", p.Name), p.Comment)
-			w.WriteStringln("")
 
 			w.WriteStringln("def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:")
 			w.Indented(func() {
@@ -264,7 +260,7 @@ func writeProtocols(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 				valueType := common.TypeSyntax(step.Type, ns.Name)
 				if step.IsStream() {
 					valueType = fmt.Sprintf("collections.abc.Iterable[%s]", valueType)
-					fmt.Fprintf(w, "def %s(self, idx: int = 0) -> %s:\n", common.ProtocolReadImplMethodName(step), valueType)
+					fmt.Fprintf(w, "def %s(self, idx: int) -> %s:\n", common.ProtocolReadImplMethodName(step), valueType)
 					w.Indented(func() {
 						fmt.Fprintf(w, "offset, remaining = self._index.find_stream_item(\"%s\", idx)\n", formatting.ToPascalCase(step.Name))
 						fmt.Fprintf(w, "self._stream.seek(offset)\n")

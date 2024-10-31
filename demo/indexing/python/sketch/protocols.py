@@ -17,11 +17,10 @@ from . import yardl_types as yardl
 class MyProtocolWriterBase(abc.ABC):
     """Abstract writer for the MyProtocol protocol."""
 
-
     def __init__(self) -> None:
         self._state = 0
 
-    schema = r"""{"protocol":{"name":"MyProtocol","sequence":[{"name":"header","type":"Sketch.Header"},{"name":"samples","type":{"stream":{"items":"Sketch.Sample"}}}]},"types":[{"name":"Header","fields":[{"name":"subject","type":"string"}]},{"name":"Sample","fields":[{"name":"id","type":"uint32"},{"name":"data","type":{"vector":{"items":"int32"}}}]}]}"""
+    schema = r"""{"protocol":{"name":"MyProtocol","sequence":[{"name":"header","type":"Sketch.Header"},{"name":"samples","type":{"stream":{"items":"Sketch.Sample"}}}]},"types":[{"name":"Header","fields":[{"name":"subject","type":"string"}]},{"name":"Sample","fields":[{"name":"id","type":"uint32"},{"name":"data","type":{"array":{"items":"int32","dimensions":1}}}]}]}"""
 
     def close(self) -> None:
         if self._state == 3:
@@ -94,7 +93,6 @@ class MyProtocolWriterBase(abc.ABC):
 class MyProtocolReaderBase(abc.ABC):
     """Abstract indexed reader for the MyProtocol protocol."""
 
-
     def __init__(self) -> None:
         self._state = 0
 
@@ -108,7 +106,6 @@ class MyProtocolReaderBase(abc.ABC):
                 expected_method = self._state_to_method_name(self._state)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
-
     schema = MyProtocolWriterBase.schema
 
     def __enter__(self):
@@ -178,55 +175,22 @@ class MyProtocolReaderBase(abc.ABC):
             return 'read_samples'
         return "<unknown>"
 
-class MyProtocolIndexedReaderBase(abc.ABC):
+class MyProtocolIndexedReaderBase(MyProtocolReaderBase):
     """Abstract reader for the MyProtocol protocol."""
-
-
-    def __init__(self) -> None:
-        pass
 
     def close(self) -> None:
         self._close()
 
-    schema = MyProtocolWriterBase.schema
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
-        try:
-            self.close()
-        except Exception as e:
-            if exc is None:
-                raise e
-
-    @abc.abstractmethod
-    def _close(self) -> None:
-        raise NotImplementedError()
-
-    def read_header(self) -> Header:
-        return self._read_header()
-
     def read_samples(self, idx: int = 0) -> collections.abc.Iterable[Sample]:
         value = self._read_samples(idx)
-        return self._wrap_iterable(value)
+        return self._wrap_iterable(value, 4)
 
     def count_samples(self) -> int:
         return self._count_samples()
-
-    def copy_to(self, writer: MyProtocolWriterBase) -> None:
-        writer.write_header(self.read_header())
-        writer.write_samples(self.read_samples())
-
-    @abc.abstractmethod
-    def _read_header(self) -> Header:
-        raise NotImplementedError()
 
     @abc.abstractmethod
     def _read_samples(self, idx: int = 0) -> collections.abc.Iterable[Sample]:
         raise NotImplementedError()
 
-    T = typing.TypeVar('T')
-    def _wrap_iterable(self, iterable: collections.abc.Iterable[T]) -> collections.abc.Iterable[T]:
-        yield from iterable
-
+    def _raise_unexpected_state(self, actual: int) -> None:
+        pass

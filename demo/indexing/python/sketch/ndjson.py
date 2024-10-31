@@ -60,7 +60,7 @@ class HeaderConverter(_ndjson.JsonConverter[Header, np.void]):
 class SampleConverter(_ndjson.JsonConverter[Sample, np.void]):
     def __init__(self) -> None:
         self._id_converter = _ndjson.uint32_converter
-        self._data_converter = _ndjson.VectorConverter(_ndjson.int32_converter)
+        self._data_converter = _ndjson.NDArrayConverter(_ndjson.int32_converter, 1)
         super().__init__(np.dtype([
             ("id", self._id_converter.overall_dtype()),
             ("data", self._data_converter.overall_dtype()),

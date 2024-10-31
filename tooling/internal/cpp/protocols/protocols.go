@@ -130,6 +130,7 @@ func writeDeclarations(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 			w.WriteString("static std::string SchemaFromVersion(Version version);\n\n")
 
 			w.WriteStringln("private:")
+			fmt.Fprintf(w, "virtual void InvalidState(uint8_t attempted, [[maybe_unused]] bool end);\n")
 			w.WriteString("uint8_t state_ = 0;\n\n")
 
 			fmt.Fprintf(w, "friend class %s;\n", common.AbstractReaderName(p))
@@ -193,6 +194,7 @@ func writeDeclarations(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 			w.WriteString("static Version VersionFromSchema(const std::string& schema);\n\n")
 
 			w.WriteStringln("private:")
+			fmt.Fprintf(w, "virtual void InvalidState(uint8_t attempted);\n")
 			w.WriteStringln("uint8_t state_ = 0;")
 		})
 		fmt.Fprint(w, "};\n\n")
@@ -200,29 +202,18 @@ func writeDeclarations(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 		// Indexed Reader
 		common.WriteComment(w, fmt.Sprintf("Abstract Indexed reader for the %s protocol.", p.Name))
 		common.WriteComment(w, p.Comment)
-		fmt.Fprintf(w, "class %s {\n", common.AbstractIndexedReaderName(p))
+		fmt.Fprintf(w, "class %s : public %s {\n", common.AbstractIndexedReaderName(p), common.AbstractReaderName(p))
 		w.Indented(func() {
 			w.WriteString("public:\n")
-			for i, step := range p.Sequence {
-				common.WriteComment(w, fmt.Sprintf("Ordinal %d.", i))
-				common.WriteComment(w, step.Comment)
-
+			for _, step := range p.Sequence {
 				if step.IsStream() {
-					returnType := "[[nodiscard]] bool"
-					fmt.Fprintf(w, "%s %s(%s& value, size_t idx=0);\n\n", returnType, common.ProtocolReadMethodName(step), common.TypeSyntax(step.Type))
-
-					common.WriteComment(w, fmt.Sprintf("Ordinal %d.", i))
 					common.WriteComment(w, step.Comment)
-					fmt.Fprintf(w, "%s %s(std::vector<%s>& values, size_t idx=0);\n\n", returnType, common.ProtocolReadMethodName(step), common.TypeSyntax(step.Type))
-
+					fmt.Fprintf(w, "using %s::%s;\n", common.AbstractReaderName(p), common.ProtocolReadMethodName(step))
+					fmt.Fprintf(w, "[[nodiscard]] bool %s(%s& value, size_t idx);\n", common.ProtocolReadMethodName(step), common.TypeSyntax(step.Type))
+					fmt.Fprintf(w, "[[nodiscard]] bool %s(std::vector<%s>& values, size_t idx);\n", common.ProtocolReadMethodName(step), common.TypeSyntax(step.Type))
 					fmt.Fprintf(w, "[[nodiscard]] size_t %s();\n\n", common.ProtocolStreamSizeMethodName(step))
-				} else {
-					fmt.Fprintf(w, "void %s(%s& value);\n\n", common.ProtocolReadMethodName(step), common.TypeSyntax(step.Type))
 				}
 			}
-
-			common.WriteComment(w, "Optionaly close this writer before destructing")
-			w.WriteString("void Close();\n\n")
 
 			fmt.Fprintf(w, "virtual ~%s() = default;\n\n", common.AbstractIndexedReaderName(p))
 
@@ -232,19 +223,13 @@ func writeDeclarations(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 					fmt.Fprintf(w, "virtual bool %s(%s& value, size_t idx) = 0;\n", common.ProtocolReadImplMethodName(step), common.TypeSyntax(step.Type))
 					fmt.Fprintf(w, "virtual bool %s(std::vector<%s>& values, size_t idx) = 0;\n", common.ProtocolReadImplMethodName(step), common.TypeSyntax(step.Type))
 					fmt.Fprintf(w, "virtual size_t %s() = 0;\n", common.ProtocolStreamSizeImplMethodName(step))
-				} else {
-					fmt.Fprintf(w, "virtual void %s(%s& value) = 0;\n", common.ProtocolReadImplMethodName(step), common.TypeSyntax(step.Type))
 				}
 			}
 
 			w.WriteString("virtual void CloseImpl() {}\n")
 
-			w.WriteString("static std::string schema_;\n\n")
-			w.WriteString("static std::vector<std::string> previous_schemas_;\n\n")
-			w.WriteString("static Version VersionFromSchema(const std::string& schema);\n\n")
-
 			w.WriteStringln("private:")
-			w.WriteStringln("uint8_t state_ = 0;")
+			fmt.Fprintf(w, "virtual void InvalidState(uint8_t attempted) override;\n")
 		})
 		fmt.Fprint(w, "};\n")
 	})
@@ -252,14 +237,7 @@ func writeDeclarations(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 
 func writeDefinitions(w *formatting.IndentedWriter, ns *dsl.Namespace, symbolTable dsl.SymbolTable) {
 	formatting.Delimited(w, "\n", ns.Protocols, func(w *formatting.IndentedWriter, i int, p *dsl.ProtocolDefinition) {
-		w.WriteString("namespace {\n")
-		writeInvalidWriterStateMethod(w, p)
-		writeInvalidReaderStateMethod(w, p)
-
-		w.WriteStringln("} // namespace \n")
-
 		// Writers
-
 		fmt.Fprintf(w, "std::string %s::schema_ = R\"(%s)\";\n\n", common.AbstractWriterName(p), dsl.GetProtocolSchemaString(p, symbolTable))
 		fmt.Fprintf(w, "std::vector<std::string> %s::previous_schemas_ = {\n", common.AbstractWriterName(p))
 		w.Indented(func() {
@@ -293,7 +271,7 @@ func writeDefinitions(w *formatting.IndentedWriter, ns *dsl.Namespace, symbolTab
 				w.Indented(func() {
 					fmt.Fprintf(w, "if (unlikely(state_ != %d)) {\n", i)
 					w.Indented(func() {
-						fmt.Fprintf(w, "%s(%d, false, state_);\n", invalidWriterStateMethodName(p), i)
+						fmt.Fprintf(w, "InvalidState(%d, false);\n", i)
 					})
 					w.WriteString("}\n\n")
 
@@ -316,7 +294,7 @@ func writeDefinitions(w *formatting.IndentedWriter, ns *dsl.Namespace, symbolTab
 				w.Indented(func() {
 					fmt.Fprintf(w, "if (unlikely(state_ != %d)) {\n", i)
 					w.Indented(func() {
-						fmt.Fprintf(w, "%s(%d, true, state_);\n", invalidWriterStateMethodName(p), i)
+						fmt.Fprintf(w, "InvalidState(%d, true);\n", i)
 					})
 					w.WriteString("}\n\n")
 					fmt.Fprintf(w, "%s();\n", common.ProtocolWriteEndImplMethodName(step))
@@ -341,15 +319,17 @@ func writeDefinitions(w *formatting.IndentedWriter, ns *dsl.Namespace, symbolTab
 		w.Indented(func() {
 			fmt.Fprintf(w, "if (unlikely(state_ != %d)) {\n", len(p.Sequence))
 			w.Indented(func() {
-				fmt.Fprintf(w, "%s(%d, false, state_);\n", invalidWriterStateMethodName(p), len(p.Sequence))
+				fmt.Fprintf(w, "InvalidState(%d, false);\n", len(p.Sequence))
 			})
 			w.WriteString("}\n\n")
 			fmt.Fprintf(w, "CloseImpl();\n")
 		})
 		w.WriteString("}\n\n")
 
-		// Readers
+		fmt.Fprintf(w, "void %s::InvalidState(uint8_t attempted, [[maybe_unused]] bool end) {\n", common.AbstractWriterName(p))
+		writeInvalidWriterStateBody(w, p)
 
+		// Readers
 		fmt.Fprintf(w, "std::string %s::schema_ = %s::schema_;\n\n", common.AbstractReaderName(p), common.AbstractWriterName(p))
 		fmt.Fprintf(w, "std::vector<std::string> %s::previous_schemas_ = %s::previous_schemas_;\n\n", common.AbstractReaderName(p), common.AbstractWriterName(p))
 
@@ -458,34 +438,14 @@ func writeDefinitions(w *formatting.IndentedWriter, ns *dsl.Namespace, symbolTab
 			w.WriteString("}\n\n")
 			fmt.Fprintf(w, "CloseImpl();\n")
 		})
-		w.WriteString("}\n")
+		w.WriteString("}\n\n")
 
 		writeProtocolCopyToMethod(w, p)
 
-		w.WriteString("\n")
+		fmt.Fprintf(w, "void %s::InvalidState(uint8_t attempted) {\n", common.AbstractReaderName(p))
+		writeInvalidReaderStateBody(w, p)
 
 		// Indexed Readers
-		fmt.Fprintf(w, "std::string %s::schema_ = %s::schema_;\n\n", common.AbstractIndexedReaderName(p), common.AbstractWriterName(p))
-		fmt.Fprintf(w, "std::vector<std::string> %s::previous_schemas_ = %s::previous_schemas_;\n\n", common.AbstractIndexedReaderName(p), common.AbstractWriterName(p))
-
-		fmt.Fprintf(w, "Version %s::VersionFromSchema(std::string const& schema) {\n", common.AbstractIndexedReaderName(p))
-		w.Indented(func() {
-			fmt.Fprintf(w, "if (schema == %s::schema_) {\n", common.AbstractWriterName(p))
-			w.Indented(func() {
-				w.WriteStringln("return Version::Current;")
-			})
-			w.WriteStringln("}")
-			for i, versionLabel := range ns.Versions {
-				fmt.Fprintf(w, "else if (schema == previous_schemas_[%d]) {\n", i)
-				w.Indented(func() {
-					fmt.Fprintf(w, "return Version::%s;\n", versionLabel)
-				})
-				w.WriteStringln("}")
-			}
-			fmt.Fprintf(w, "throw std::runtime_error(\"The schema does not match any version supported by protocol %s.\");\n", p.Name)
-		})
-		fmt.Fprintf(w, "}\n\n")
-
 		for _, step := range p.Sequence {
 			returnType := "void"
 			if step.IsStream() {
@@ -494,17 +454,11 @@ func writeDefinitions(w *formatting.IndentedWriter, ns *dsl.Namespace, symbolTab
 
 			if step.IsStream() {
 				fmt.Fprintf(w, "%s %s::%s(%s& value, size_t idx) {\n", returnType, common.AbstractIndexedReaderName(p), common.ProtocolReadMethodName(step), common.TypeSyntax(step.Type))
-			} else {
-				fmt.Fprintf(w, "%s %s::%s(%s& value) {\n", returnType, common.AbstractIndexedReaderName(p), common.ProtocolReadMethodName(step), common.TypeSyntax(step.Type))
-			}
-			w.Indented(func() {
-				if step.IsStream() {
+				w.Indented(func() {
 					fmt.Fprintf(w, "return %s(value, idx);\n", common.ProtocolReadImplMethodName(step))
-				} else {
-					fmt.Fprintf(w, "%s(value);\n", common.ProtocolReadImplMethodName(step))
-				}
-			})
-			w.WriteString("}\n\n")
+				})
+				w.WriteString("}\n\n")
+			}
 
 			if step.IsStream() {
 				fmt.Fprintf(w, "%s %s::%s(std::vector<%s>& values, size_t idx) {\n", returnType, common.AbstractIndexedReaderName(p), common.ProtocolReadMethodName(step), common.TypeSyntax(step.Type))
@@ -532,12 +486,12 @@ func writeDefinitions(w *formatting.IndentedWriter, ns *dsl.Namespace, symbolTab
 			}
 		}
 
-		fmt.Fprintf(w, "void %s::Close() {\n", common.AbstractIndexedReaderName(p))
+		fmt.Fprintf(w, "void %s::InvalidState(uint8_t attempted) {\n", common.AbstractIndexedReaderName(p))
 		w.Indented(func() {
-			fmt.Fprintf(w, "CloseImpl();\n")
+			w.WriteStringln("(void)(attempted);")
+			w.WriteStringln("return;")
 		})
-		w.WriteString("}\n")
-
+		w.WriteStringln("}\n")
 	})
 }
 
@@ -550,11 +504,11 @@ func writeReaderStateUnobservedCompletionCheck(w *formatting.IndentedWriter, p *
 		})
 		w.WriteStringln("} else {")
 		w.Indented(func() {
-			fmt.Fprintf(w, "%s(%d, state_);\n", invalidReaderStateMethodName(p), expectedState)
+			fmt.Fprintf(w, "InvalidState(%d);\n", expectedState)
 		})
 		w.WriteStringln("}")
 	} else {
-		fmt.Fprintf(w, "%s(%d, state_);\n", invalidReaderStateMethodName(p), expectedState)
+		fmt.Fprintf(w, "InvalidState(%d);\n", expectedState)
 	}
 }
 
@@ -583,11 +537,10 @@ func writeReaderStateCheckIfStatement(w *formatting.IndentedWriter, protocol *ds
 	w.WriteString("}\n\n")
 }
 
-func writeInvalidWriterStateMethod(w *formatting.IndentedWriter, p *dsl.ProtocolDefinition) {
-	fmt.Fprintf(w, "void %s(uint8_t attempted, [[maybe_unused]] bool end, uint8_t current) {\n", invalidWriterStateMethodName(p))
+func writeInvalidWriterStateBody(w *formatting.IndentedWriter, p *dsl.ProtocolDefinition) {
 	w.Indented(func() {
 		w.WriteStringln("std::string expected_method;")
-		w.WriteStringln("switch (current) {")
+		w.WriteStringln("switch (state_) {")
 		for i, step := range p.Sequence {
 			methodName := fmt.Sprintf("%s()", common.ProtocolWriteMethodName(step))
 			if step.IsStream() {
@@ -615,8 +568,7 @@ func writeInvalidWriterStateMethod(w *formatting.IndentedWriter, p *dsl.Protocol
 	w.WriteString("}\n\n")
 }
 
-func writeInvalidReaderStateMethod(w *formatting.IndentedWriter, p *dsl.ProtocolDefinition) {
-	fmt.Fprintf(w, "void %s(uint8_t attempted, uint8_t current) {\n", invalidReaderStateMethodName(p))
+func writeInvalidReaderStateBody(w *formatting.IndentedWriter, p *dsl.ProtocolDefinition) {
 	w.Indented(func() {
 		w.WriteString("auto f = [](uint8_t i) -> std::string {\n")
 		w.Indented(func() {
@@ -630,20 +582,10 @@ func writeInvalidReaderStateMethod(w *formatting.IndentedWriter, p *dsl.Protocol
 		})
 		w.WriteString("};\n")
 
-		fmt.Fprintf(w, "throw std::runtime_error(\"Expected call to \" + f(current) + \" but received call to \" + f(attempted) + \" instead.\");\n")
+		fmt.Fprintf(w, "throw std::runtime_error(\"Expected call to \" + f(state_) + \" but received call to \" + f(attempted) + \" instead.\");\n")
 	})
 
 	w.WriteString("}\n\n")
-}
-
-func invalidWriterStateMethodName(p *dsl.ProtocolDefinition) string {
-	writerInvalidStateMethod := fmt.Sprintf("%sInvalidState", common.AbstractWriterName(p))
-	return writerInvalidStateMethod
-}
-
-func invalidReaderStateMethodName(p *dsl.ProtocolDefinition) string {
-	writerInvalidStateMethod := fmt.Sprintf("%sInvalidState", common.AbstractReaderName(p))
-	return writerInvalidStateMethod
 }
 
 func writeProtocolCopyToMethod(w *formatting.IndentedWriter, p *dsl.ProtocolDefinition) {
@@ -688,5 +630,5 @@ func writeProtocolCopyToMethod(w *formatting.IndentedWriter, p *dsl.ProtocolDefi
 			}
 		}
 	})
-	w.WriteString("}\n")
+	w.WriteString("}\n\n")
 }

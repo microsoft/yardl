@@ -49,7 +49,6 @@ func writeAbstractWriter(w *formatting.IndentedWriter, p *dsl.ProtocolDefinition
 	fmt.Fprintf(w, "class %s(abc.ABC):\n", common.AbstractWriterName(p))
 	w.Indented(func() {
 		common.WriteDocstringWithLeadingLine(w, fmt.Sprintf("Abstract writer for the %s protocol.", p.Name), p.Comment)
-		w.WriteStringln("")
 
 		// __init__
 		w.WriteStringln("def __init__(self) -> None:")
@@ -209,7 +208,6 @@ func writeAbstractReader(w *formatting.IndentedWriter, p *dsl.ProtocolDefinition
 	fmt.Fprintf(w, "class %s(abc.ABC):\n", common.AbstractReaderName(p))
 	w.Indented(func() {
 		common.WriteDocstringWithLeadingLine(w, fmt.Sprintf("Abstract indexed reader for the %s protocol.", p.Name), p.Comment)
-		w.WriteStringln("")
 
 		// init method
 		w.WriteStringln("def __init__(self) -> None:")
@@ -233,7 +231,6 @@ else:
 	`)
 			})
 		})
-		w.WriteStringln("")
 
 		// schema field
 		fmt.Fprintf(w, `schema = %s.schema`, common.AbstractWriterName(p))
@@ -363,17 +360,9 @@ else:
 }
 
 func writeAbstractIndexedReader(w *formatting.IndentedWriter, p *dsl.ProtocolDefinition, ns *dsl.Namespace) {
-	fmt.Fprintf(w, "class %s(abc.ABC):\n", common.AbstractIndexedReaderName(p))
+	fmt.Fprintf(w, "class %s(%s):\n", common.AbstractIndexedReaderName(p), common.AbstractReaderName(p))
 	w.Indented(func() {
 		common.WriteDocstringWithLeadingLine(w, fmt.Sprintf("Abstract reader for the %s protocol.", p.Name), p.Comment)
-		w.WriteStringln("")
-
-		// init method
-		w.WriteStringln("def __init__(self) -> None:")
-		w.Indented(func() {
-			w.WriteStringln("pass")
-		})
-		w.WriteStringln("")
 
 		// close method
 		w.WriteStringln("def close(self) -> None:")
@@ -382,42 +371,8 @@ func writeAbstractIndexedReader(w *formatting.IndentedWriter, p *dsl.ProtocolDef
 		})
 		w.WriteStringln("")
 
-		// schema field
-		fmt.Fprintf(w, `schema = %s.schema`, common.AbstractWriterName(p))
-		w.WriteStringln("\n")
-
-		// dunder methods
-		w.WriteStringln("def __enter__(self):")
-		w.Indented(func() {
-			w.WriteStringln("return self")
-		})
-		w.WriteStringln("")
-
-		w.WriteStringln("def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:")
-		w.Indented(func() {
-			w.WriteStringln("try:")
-			w.Indented(func() {
-				w.WriteStringln("self.close()")
-			})
-			w.WriteStringln("except Exception as e:")
-			w.Indented(func() {
-				w.WriteStringln("if exc is None:")
-				w.Indented(func() {
-					w.WriteStringln("raise e")
-				})
-			})
-		})
-		w.WriteStringln("")
-
-		w.WriteStringln("@abc.abstractmethod")
-		w.WriteStringln("def _close(self) -> None:")
-		w.Indented(func() {
-			w.WriteStringln("raise NotImplementedError()")
-		})
-		w.WriteStringln("")
-
 		// public read methods
-		for _, step := range p.Sequence {
+		for i, step := range p.Sequence {
 			valueType := common.TypeSyntax(step.Type, ns.Name)
 			if step.IsStream() {
 				valueType = fmt.Sprintf("collections.abc.Iterable[%s]", valueType)
@@ -425,60 +380,37 @@ func writeAbstractIndexedReader(w *formatting.IndentedWriter, p *dsl.ProtocolDef
 				w.Indented(func() {
 					common.WriteDocstring(w, step.Comment)
 					fmt.Fprintf(w, "value = self.%s(idx)\n", common.ProtocolReadImplMethodName(step))
-					fmt.Fprintf(w, "return self._wrap_iterable(value)\n")
+					fmt.Fprintf(w, "return self._wrap_iterable(value, %d)\n", (i+1)*2)
 				})
 				w.WriteStringln("")
+
 				fmt.Fprintf(w, "def %s(self) -> int:\n", common.ProtocolStreamSizeMethodName(step))
 				w.Indented(func() {
 					fmt.Fprintf(w, "return self.%s()\n", common.ProtocolStreamSizeImplMethodName(step))
 				})
-			} else {
-				fmt.Fprintf(w, "def %s(self) -> %s:\n", common.ProtocolReadMethodName(step), valueType)
-				w.Indented(func() {
-					common.WriteDocstring(w, step.Comment)
-					fmt.Fprintf(w, "return self.%s()\n", common.ProtocolReadImplMethodName(step))
-				})
+				w.WriteStringln("")
 			}
 
-			w.WriteStringln("")
 		}
-
-		// copy_to method
-		fmt.Fprintf(w, "def copy_to(self, writer: %s) -> None:\n", common.AbstractWriterName(p))
-		w.Indented(func() {
-			if len(p.Sequence) == 0 {
-				w.WriteStringln("pass")
-			} else {
-				for _, step := range p.Sequence {
-					fmt.Fprintf(w, "writer.%s(self.%s())\n", common.ProtocolWriteMethodName(step), common.ProtocolReadMethodName(step))
-				}
-			}
-		})
-		w.WriteStringln("")
 
 		// protected abstract read methods
 		for _, step := range p.Sequence {
 			valueType := common.TypeSyntax(step.Type, ns.Name)
 			if step.IsStream() {
+				w.WriteStringln("@abc.abstractmethod")
 				valueType = fmt.Sprintf("collections.abc.Iterable[%s]", valueType)
-				w.WriteStringln("@abc.abstractmethod")
 				fmt.Fprintf(w, "def %s(self, idx: int = 0) -> %s:\n", common.ProtocolReadImplMethodName(step), valueType)
-			} else {
-				w.WriteStringln("@abc.abstractmethod")
-				fmt.Fprintf(w, "def %s(self) -> %s:\n", common.ProtocolReadImplMethodName(step), valueType)
+				w.Indented(func() {
+					w.WriteStringln("raise NotImplementedError()")
+				})
+				w.WriteStringln("")
 			}
-			w.Indented(func() {
-				w.WriteStringln("raise NotImplementedError()")
-			})
-			w.WriteStringln("")
 		}
 
-		// _wrap_iterable method
-		w.WriteStringln("T = typing.TypeVar('T')")
-		w.WriteStringln("def _wrap_iterable(self, iterable: collections.abc.Iterable[T]) -> collections.abc.Iterable[T]:")
+		// _raise_unexpected_state method
+		w.WriteStringln("def _raise_unexpected_state(self, actual: int) -> None:")
 		w.Indented(func() {
-			w.WriteStringln("yield from iterable")
+			w.WriteStringln("pass")
 		})
-		w.WriteStringln("")
 	})
 }

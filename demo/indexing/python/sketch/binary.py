@@ -22,7 +22,6 @@ from . import yardl_types as yardl
 class BinaryMyProtocolWriter(_binary.BinaryProtocolWriter, MyProtocolWriterBase):
     """Binary writer for the MyProtocol protocol."""
 
-
     def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
         MyProtocolWriterBase.__init__(self)
         _binary.BinaryProtocolWriter.__init__(self, stream, MyProtocolWriterBase.schema)
@@ -37,7 +36,6 @@ class BinaryMyProtocolWriter(_binary.BinaryProtocolWriter, MyProtocolWriterBase)
 class BinaryMyProtocolReader(_binary.BinaryProtocolReader, MyProtocolReaderBase):
     """Binary writer for the MyProtocol protocol."""
 
-
     def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
         MyProtocolReaderBase.__init__(self)
         _binary.BinaryProtocolReader.__init__(self, stream, MyProtocolReaderBase.schema)
@@ -51,7 +49,6 @@ class BinaryMyProtocolReader(_binary.BinaryProtocolReader, MyProtocolReaderBase)
 
 class BinaryMyProtocolIndexedWriter(_binary.BinaryProtocolIndexedWriter, MyProtocolWriterBase):
     """Binary indexed writer for the MyProtocol protocol."""
-
 
     def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
         MyProtocolWriterBase.__init__(self)
@@ -72,7 +69,6 @@ class BinaryMyProtocolIndexedWriter(_binary.BinaryProtocolIndexedWriter, MyProto
 class BinaryMyProtocolIndexedReader(_binary.BinaryProtocolIndexedReader, MyProtocolIndexedReaderBase):
     """Binary indexed writer for the MyProtocol protocol."""
 
-
     def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
         MyProtocolIndexedReaderBase.__init__(self)
         _binary.BinaryProtocolIndexedReader.__init__(self, stream, MyProtocolIndexedReaderBase.schema)
@@ -82,7 +78,7 @@ class BinaryMyProtocolIndexedReader(_binary.BinaryProtocolIndexedReader, MyProto
         self._stream.seek(pos)
         return HeaderSerializer().read(self._stream)
 
-    def _read_samples(self, idx: int = 0) -> collections.abc.Iterable[Sample]:
+    def _read_samples(self, idx: int) -> collections.abc.Iterable[Sample]:
         offset, remaining = self._index.find_stream_item("Samples", idx)
         self._stream.seek(offset)
         return _binary.StreamSerializer(SampleSerializer()).read_mid_stream(self._stream, remaining)
@@ -110,7 +106,7 @@ class HeaderSerializer(_binary.RecordSerializer[Header]):
 
 class SampleSerializer(_binary.RecordSerializer[Sample]):
     def __init__(self) -> None:
-        super().__init__([("id", _binary.uint32_serializer), ("data", _binary.VectorSerializer(_binary.int32_serializer))])
+        super().__init__([("id", _binary.uint32_serializer), ("data", _binary.NDArraySerializer(_binary.int32_serializer, 1))])
 
     def write(self, stream: _binary.CodedOutputStream, value: Sample) -> None:
         if isinstance(value, np.void):

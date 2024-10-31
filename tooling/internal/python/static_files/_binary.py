@@ -145,7 +145,6 @@ class CodedOutputStream:
         if self._offset > 0:
             self._stream.write(self._buffer[: self._offset])
             self._stream.flush()
-            self._streampos += self._offset
             self._offset = 0
 
     def write(self, formatter: struct.Struct, *args: Any) -> None:
@@ -159,8 +158,7 @@ class CodedOutputStream:
 
     def write_bytes(self, data: Union[bytes, bytearray]) -> None:
         if len(data) > (len(self._buffer) - self._offset):
-            self.flush()
-            self._stream.write(data)
+            self.write_bytes_directly(data)
         else:
             self._buffer[self._offset : self._offset + len(data)] = data
             self._offset += len(data)
@@ -168,7 +166,8 @@ class CodedOutputStream:
 
     def write_bytes_directly(self, data: Union[bytes, bytearray, memoryview]) -> None:
         self.flush()
-        self._stream.write(data)
+        nbytes = self._stream.write(data)
+        self._streampos += nbytes
 
     def write_byte_no_check(self, value: int) -> None:
         assert 0 <= value <= UINT8_MAX
@@ -318,6 +317,9 @@ class CodedInputStream:
         return bytearray(result)
 
     def seek(self, offset: int) -> None:
+        if not self._stream.seekable():
+            raise RuntimeError(f"Stream {self._stream} is not seekable")
+
         if offset < 0:
             pos = self._stream.tell()
             self._stream.seek(offset, os.SEEK_END)
@@ -350,7 +352,8 @@ class CodedInputStream:
             ]
             self._buffer[:remaining] = remaining_view
 
-        self._last_read_pos = self._stream.tell()
+        if self._stream.seekable():
+            self._last_read_pos = self._stream.tell()
         slice = memoryview(self._buffer)[remaining:]
         self._last_read_count = self._stream.readinto(slice) + remaining
         self._offset = 0
