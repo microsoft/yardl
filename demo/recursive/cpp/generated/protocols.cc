@@ -9,10 +9,89 @@
 #endif
 
 namespace sketch {
-namespace {
-void MyProtocolWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end, uint8_t current) {
+std::string MyProtocolWriterBase::schema_ = R"({"protocol":{"name":"MyProtocol","sequence":[{"name":"tree","type":"Sketch.BinaryTree"},{"name":"ptree","type":"Sketch.BinaryTree"},{"name":"list","type":[null,{"name":"Sketch.LinkedList","typeArguments":["string"]}]},{"name":"cwd","type":{"stream":{"items":"Sketch.DirectoryEntry"}}}]},"types":[{"name":"BinaryTree","fields":[{"name":"value","type":"int32"},{"name":"left","type":"Sketch.BinaryTree"},{"name":"right","type":"Sketch.BinaryTree"}]},{"name":"Directory","fields":[{"name":"name","type":"string"},{"name":"entries","type":{"vector":{"items":"Sketch.DirectoryEntry"}}}]},{"name":"DirectoryEntry","type":[{"tag":"File","type":"Sketch.File"},{"tag":"Directory","type":"Sketch.Directory"}]},{"name":"File","fields":[{"name":"name","type":"string"},{"name":"data","type":{"vector":{"items":"uint8"}}}]},{"name":"LinkedList","typeParameters":["T"],"fields":[{"name":"value","type":"T"},{"name":"next","type":{"name":"Sketch.LinkedList","typeArguments":["T"]}}]}]})";
+
+std::vector<std::string> MyProtocolWriterBase::previous_schemas_ = {
+};
+
+std::string MyProtocolWriterBase::SchemaFromVersion(Version version) {
+  switch (version) {
+  case Version::Current: return MyProtocolWriterBase::schema_; break;
+  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol MyProtocol.");
+  }
+
+}
+
+void MyProtocolWriterBase::WriteTree(sketch::BinaryTree const& value) {
+  if (unlikely(state_ != 0)) {
+    InvalidState(0, false);
+  }
+
+  WriteTreeImpl(value);
+  state_ = 1;
+}
+
+void MyProtocolWriterBase::WritePtree(std::unique_ptr<sketch::BinaryTree> const& value) {
+  if (unlikely(state_ != 1)) {
+    InvalidState(1, false);
+  }
+
+  WritePtreeImpl(value);
+  state_ = 2;
+}
+
+void MyProtocolWriterBase::WriteList(std::optional<sketch::LinkedList<std::string>> const& value) {
+  if (unlikely(state_ != 2)) {
+    InvalidState(2, false);
+  }
+
+  WriteListImpl(value);
+  state_ = 3;
+}
+
+void MyProtocolWriterBase::WriteCwd(sketch::DirectoryEntry const& value) {
+  if (unlikely(state_ != 3)) {
+    InvalidState(3, false);
+  }
+
+  WriteCwdImpl(value);
+}
+
+void MyProtocolWriterBase::WriteCwd(std::vector<sketch::DirectoryEntry> const& values) {
+  if (unlikely(state_ != 3)) {
+    InvalidState(3, false);
+  }
+
+  WriteCwdImpl(values);
+}
+
+void MyProtocolWriterBase::EndCwd() {
+  if (unlikely(state_ != 3)) {
+    InvalidState(3, true);
+  }
+
+  EndCwdImpl();
+  state_ = 4;
+}
+
+// fallback implementation
+void MyProtocolWriterBase::WriteCwdImpl(std::vector<sketch::DirectoryEntry> const& values) {
+  for (auto const& v : values) {
+    WriteCwdImpl(v);
+  }
+}
+
+void MyProtocolWriterBase::Close() {
+  if (unlikely(state_ != 4)) {
+    InvalidState(4, false);
+  }
+
+  CloseImpl();
+}
+
+void MyProtocolWriterBase::InvalidState(uint8_t attempted, [[maybe_unused]] bool end) {
   std::string expected_method;
-  switch (current) {
+  switch (state_) {
   case 0: expected_method = "WriteTree()"; break;
   case 1: expected_method = "WritePtree()"; break;
   case 2: expected_method = "WriteList()"; break;
@@ -29,102 +108,6 @@ void MyProtocolWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool e
   throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
 }
 
-void MyProtocolReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
-  auto f = [](uint8_t i) -> std::string {
-    switch (i/2) {
-    case 0: return "ReadTree()";
-    case 1: return "ReadPtree()";
-    case 2: return "ReadList()";
-    case 3: return "ReadCwd()";
-    case 4: return "Close()";
-    default: return "<unknown>";
-    }
-  };
-  throw std::runtime_error("Expected call to " + f(current) + " but received call to " + f(attempted) + " instead.");
-}
-
-} // namespace 
-
-std::string MyProtocolWriterBase::schema_ = R"({"protocol":{"name":"MyProtocol","sequence":[{"name":"tree","type":"Sketch.BinaryTree"},{"name":"ptree","type":"Sketch.BinaryTree"},{"name":"list","type":[null,{"name":"Sketch.LinkedList","typeArguments":["string"]}]},{"name":"cwd","type":{"stream":{"items":"Sketch.DirectoryEntry"}}}]},"types":[{"name":"BinaryTree","fields":[{"name":"value","type":"int32"},{"name":"left","type":"Sketch.BinaryTree"},{"name":"right","type":"Sketch.BinaryTree"}]},{"name":"Directory","fields":[{"name":"name","type":"string"},{"name":"entries","type":{"vector":{"items":"Sketch.DirectoryEntry"}}}]},{"name":"DirectoryEntry","type":[{"tag":"File","type":"Sketch.File"},{"tag":"Directory","type":"Sketch.Directory"}]},{"name":"File","fields":[{"name":"name","type":"string"},{"name":"data","type":{"vector":{"items":"uint8"}}}]},{"name":"LinkedList","typeParameters":["T"],"fields":[{"name":"value","type":"T"},{"name":"next","type":{"name":"Sketch.LinkedList","typeArguments":["T"]}}]}]})";
-
-std::vector<std::string> MyProtocolWriterBase::previous_schemas_ = {
-};
-
-std::string MyProtocolWriterBase::SchemaFromVersion(Version version) {
-  switch (version) {
-  case Version::Current: return MyProtocolWriterBase::schema_; break;
-  default: throw std::runtime_error("The version does not correspond to any schema supported by protocol MyProtocol.");
-  }
-
-}
-
-void MyProtocolWriterBase::WriteTree(sketch::BinaryTree const& value) {
-  if (unlikely(state_ != 0)) {
-    MyProtocolWriterBaseInvalidState(0, false, state_);
-  }
-
-  WriteTreeImpl(value);
-  state_ = 1;
-}
-
-void MyProtocolWriterBase::WritePtree(std::unique_ptr<sketch::BinaryTree> const& value) {
-  if (unlikely(state_ != 1)) {
-    MyProtocolWriterBaseInvalidState(1, false, state_);
-  }
-
-  WritePtreeImpl(value);
-  state_ = 2;
-}
-
-void MyProtocolWriterBase::WriteList(std::optional<sketch::LinkedList<std::string>> const& value) {
-  if (unlikely(state_ != 2)) {
-    MyProtocolWriterBaseInvalidState(2, false, state_);
-  }
-
-  WriteListImpl(value);
-  state_ = 3;
-}
-
-void MyProtocolWriterBase::WriteCwd(sketch::DirectoryEntry const& value) {
-  if (unlikely(state_ != 3)) {
-    MyProtocolWriterBaseInvalidState(3, false, state_);
-  }
-
-  WriteCwdImpl(value);
-}
-
-void MyProtocolWriterBase::WriteCwd(std::vector<sketch::DirectoryEntry> const& values) {
-  if (unlikely(state_ != 3)) {
-    MyProtocolWriterBaseInvalidState(3, false, state_);
-  }
-
-  WriteCwdImpl(values);
-}
-
-void MyProtocolWriterBase::EndCwd() {
-  if (unlikely(state_ != 3)) {
-    MyProtocolWriterBaseInvalidState(3, true, state_);
-  }
-
-  EndCwdImpl();
-  state_ = 4;
-}
-
-// fallback implementation
-void MyProtocolWriterBase::WriteCwdImpl(std::vector<sketch::DirectoryEntry> const& values) {
-  for (auto const& v : values) {
-    WriteCwdImpl(v);
-  }
-}
-
-void MyProtocolWriterBase::Close() {
-  if (unlikely(state_ != 4)) {
-    MyProtocolWriterBaseInvalidState(4, false, state_);
-  }
-
-  CloseImpl();
-}
-
 std::string MyProtocolReaderBase::schema_ = MyProtocolWriterBase::schema_;
 
 std::vector<std::string> MyProtocolReaderBase::previous_schemas_ = MyProtocolWriterBase::previous_schemas_;
@@ -138,7 +121,7 @@ Version MyProtocolReaderBase::VersionFromSchema(std::string const& schema) {
 
 void MyProtocolReaderBase::ReadTree(sketch::BinaryTree& value) {
   if (unlikely(state_ != 0)) {
-    MyProtocolReaderBaseInvalidState(0, state_);
+    InvalidState(0);
   }
 
   ReadTreeImpl(value);
@@ -147,7 +130,7 @@ void MyProtocolReaderBase::ReadTree(sketch::BinaryTree& value) {
 
 void MyProtocolReaderBase::ReadPtree(std::unique_ptr<sketch::BinaryTree>& value) {
   if (unlikely(state_ != 2)) {
-    MyProtocolReaderBaseInvalidState(2, state_);
+    InvalidState(2);
   }
 
   ReadPtreeImpl(value);
@@ -156,7 +139,7 @@ void MyProtocolReaderBase::ReadPtree(std::unique_ptr<sketch::BinaryTree>& value)
 
 void MyProtocolReaderBase::ReadList(std::optional<sketch::LinkedList<std::string>>& value) {
   if (unlikely(state_ != 4)) {
-    MyProtocolReaderBaseInvalidState(4, state_);
+    InvalidState(4);
   }
 
   ReadListImpl(value);
@@ -169,7 +152,7 @@ bool MyProtocolReaderBase::ReadCwd(sketch::DirectoryEntry& value) {
       state_ = 8;
       return false;
     }
-    MyProtocolReaderBaseInvalidState(6, state_);
+    InvalidState(6);
   }
 
   bool result = ReadCwdImpl(value);
@@ -189,7 +172,7 @@ bool MyProtocolReaderBase::ReadCwd(std::vector<sketch::DirectoryEntry>& values) 
       values.clear();
       return false;
     }
-    MyProtocolReaderBaseInvalidState(6, state_);
+    InvalidState(6);
   }
 
   if (!ReadCwdImpl(values)) {
@@ -222,12 +205,13 @@ void MyProtocolReaderBase::Close() {
     if (state_ == 7) {
       state_ = 8;
     } else {
-      MyProtocolReaderBaseInvalidState(8, state_);
+      InvalidState(8);
     }
   }
 
   CloseImpl();
 }
+
 void MyProtocolReaderBase::CopyTo(MyProtocolWriterBase& writer, size_t cwd_buffer_size) {
   {
     sketch::BinaryTree value;
@@ -260,27 +244,18 @@ void MyProtocolReaderBase::CopyTo(MyProtocolWriterBase& writer, size_t cwd_buffe
   }
 }
 
-std::string MyProtocolIndexedReaderBase::schema_ = MyProtocolWriterBase::schema_;
-
-std::vector<std::string> MyProtocolIndexedReaderBase::previous_schemas_ = MyProtocolWriterBase::previous_schemas_;
-
-Version MyProtocolIndexedReaderBase::VersionFromSchema(std::string const& schema) {
-  if (schema == MyProtocolWriterBase::schema_) {
-    return Version::Current;
-  }
-  throw std::runtime_error("The schema does not match any version supported by protocol MyProtocol.");
-}
-
-void MyProtocolIndexedReaderBase::ReadTree(sketch::BinaryTree& value) {
-  ReadTreeImpl(value);
-}
-
-void MyProtocolIndexedReaderBase::ReadPtree(std::unique_ptr<sketch::BinaryTree>& value) {
-  ReadPtreeImpl(value);
-}
-
-void MyProtocolIndexedReaderBase::ReadList(std::optional<sketch::LinkedList<std::string>>& value) {
-  ReadListImpl(value);
+void MyProtocolReaderBase::InvalidState(uint8_t attempted) {
+  auto f = [](uint8_t i) -> std::string {
+    switch (i/2) {
+    case 0: return "ReadTree()";
+    case 1: return "ReadPtree()";
+    case 2: return "ReadList()";
+    case 3: return "ReadCwd()";
+    case 4: return "Close()";
+    default: return "<unknown>";
+    }
+  };
+  throw std::runtime_error("Expected call to " + f(state_) + " but received call to " + f(attempted) + " instead.");
 }
 
 bool MyProtocolIndexedReaderBase::ReadCwd(sketch::DirectoryEntry& value, size_t idx) {
@@ -301,7 +276,9 @@ size_t MyProtocolIndexedReaderBase::CountCwd() {
   return CountCwdImpl();
 }
 
-void MyProtocolIndexedReaderBase::Close() {
-  CloseImpl();
+void MyProtocolIndexedReaderBase::InvalidState(uint8_t attempted) {
+  (void)(attempted);
+  return;
 }
+
 } // namespace sketch

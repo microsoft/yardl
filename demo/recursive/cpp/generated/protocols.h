@@ -58,6 +58,7 @@ class MyProtocolWriterBase {
   static std::string SchemaFromVersion(Version version);
 
   private:
+  virtual void InvalidState(uint8_t attempted, [[maybe_unused]] bool end);
   uint8_t state_ = 0;
 
   friend class MyProtocolReaderBase;
@@ -107,53 +108,28 @@ class MyProtocolReaderBase {
   static Version VersionFromSchema(const std::string& schema);
 
   private:
+  virtual void InvalidState(uint8_t attempted);
   uint8_t state_ = 0;
 };
 
 // Abstract Indexed reader for the MyProtocol protocol.
-class MyProtocolIndexedReaderBase {
+class MyProtocolIndexedReaderBase : public MyProtocolReaderBase {
   public:
-  // Ordinal 0.
-  void ReadTree(sketch::BinaryTree& value);
-
-  // Ordinal 1.
-  void ReadPtree(std::unique_ptr<sketch::BinaryTree>& value);
-
-  // Ordinal 2.
-  void ReadList(std::optional<sketch::LinkedList<std::string>>& value);
-
-  // Ordinal 3.
   // dirs: !stream
   //   items: Directory
-  [[nodiscard]] bool ReadCwd(sketch::DirectoryEntry& value, size_t idx=0);
-
-  // Ordinal 3.
-  // dirs: !stream
-  //   items: Directory
-  [[nodiscard]] bool ReadCwd(std::vector<sketch::DirectoryEntry>& values, size_t idx=0);
-
+  using MyProtocolReaderBase::ReadCwd;
+  [[nodiscard]] bool ReadCwd(sketch::DirectoryEntry& value, size_t idx);
+  [[nodiscard]] bool ReadCwd(std::vector<sketch::DirectoryEntry>& values, size_t idx);
   [[nodiscard]] size_t CountCwd();
-
-  // Optionaly close this writer before destructing
-  void Close();
 
   virtual ~MyProtocolIndexedReaderBase() = default;
 
   protected:
-  virtual void ReadTreeImpl(sketch::BinaryTree& value) = 0;
-  virtual void ReadPtreeImpl(std::unique_ptr<sketch::BinaryTree>& value) = 0;
-  virtual void ReadListImpl(std::optional<sketch::LinkedList<std::string>>& value) = 0;
   virtual bool ReadCwdImpl(sketch::DirectoryEntry& value, size_t idx) = 0;
   virtual bool ReadCwdImpl(std::vector<sketch::DirectoryEntry>& values, size_t idx) = 0;
   virtual size_t CountCwdImpl() = 0;
   virtual void CloseImpl() {}
-  static std::string schema_;
-
-  static std::vector<std::string> previous_schemas_;
-
-  static Version VersionFromSchema(const std::string& schema);
-
   private:
-  uint8_t state_ = 0;
+  virtual void InvalidState(uint8_t attempted) override;
 };
 } // namespace sketch

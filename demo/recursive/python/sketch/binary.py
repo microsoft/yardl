@@ -22,7 +22,6 @@ from . import yardl_types as yardl
 class BinaryMyProtocolWriter(_binary.BinaryProtocolWriter, MyProtocolWriterBase):
     """Binary writer for the MyProtocol protocol."""
 
-
     def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
         MyProtocolWriterBase.__init__(self)
         _binary.BinaryProtocolWriter.__init__(self, stream, MyProtocolWriterBase.schema)
@@ -43,7 +42,6 @@ class BinaryMyProtocolWriter(_binary.BinaryProtocolWriter, MyProtocolWriterBase)
 class BinaryMyProtocolReader(_binary.BinaryProtocolReader, MyProtocolReaderBase):
     """Binary writer for the MyProtocol protocol."""
 
-
     def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
         MyProtocolReaderBase.__init__(self)
         _binary.BinaryProtocolReader.__init__(self, stream, MyProtocolReaderBase.schema)
@@ -63,7 +61,6 @@ class BinaryMyProtocolReader(_binary.BinaryProtocolReader, MyProtocolReaderBase)
 
 class BinaryMyProtocolIndexedWriter(_binary.BinaryProtocolIndexedWriter, MyProtocolWriterBase):
     """Binary indexed writer for the MyProtocol protocol."""
-
 
     def __init__(self, stream: typing.Union[typing.BinaryIO, str]) -> None:
         MyProtocolWriterBase.__init__(self)
@@ -94,7 +91,6 @@ class BinaryMyProtocolIndexedWriter(_binary.BinaryProtocolIndexedWriter, MyProto
 class BinaryMyProtocolIndexedReader(_binary.BinaryProtocolIndexedReader, MyProtocolIndexedReaderBase):
     """Binary indexed writer for the MyProtocol protocol."""
 
-
     def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
         MyProtocolIndexedReaderBase.__init__(self)
         _binary.BinaryProtocolIndexedReader.__init__(self, stream, MyProtocolIndexedReaderBase.schema)
@@ -114,7 +110,7 @@ class BinaryMyProtocolIndexedReader(_binary.BinaryProtocolIndexedReader, MyProto
         self._stream.seek(pos)
         return _binary.OptionalSerializer(LinkedListSerializer(_binary.string_serializer)).read(self._stream)
 
-    def _read_cwd(self, idx: int = 0) -> collections.abc.Iterable[DirectoryEntry]:
+    def _read_cwd(self, idx: int) -> collections.abc.Iterable[DirectoryEntry]:
         offset, remaining = self._index.find_stream_item("Cwd", idx)
         self._stream.seek(offset)
         return _binary.StreamSerializer(_binary.UnionSerializer(DirectoryEntry, [(DirectoryEntry.File, FileSerializer()), (DirectoryEntry.Directory, _binary.RecursiveSerializer(lambda *args, **kwargs : DirectorySerializer()))])).read_mid_stream(self._stream, remaining)

@@ -25,7 +25,7 @@ struct Header {
 
 struct Sample {
   uint32_t id{};
-  std::vector<int32_t> data{};
+  yardl::NDArray<int32_t, 1> data{};
 
   bool operator==(const Sample& other) const {
     return id == other.id &&

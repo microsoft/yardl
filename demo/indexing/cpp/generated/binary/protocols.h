@@ -90,6 +90,8 @@ class MyProtocolIndexedReader : public sketch::MyProtocolIndexedReaderBase, yard
 
   protected:
   void ReadHeaderImpl(sketch::Header& value) override;
+  bool ReadSamplesImpl(sketch::Sample& value) override;
+  bool ReadSamplesImpl(std::vector<sketch::Sample>& values) override;
   bool ReadSamplesImpl(sketch::Sample& value, size_t idx) override;
   bool ReadSamplesImpl(std::vector<sketch::Sample>& values, size_t idx) override;
   size_t CountSamplesImpl() override;

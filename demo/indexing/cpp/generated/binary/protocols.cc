@@ -66,7 +66,7 @@ namespace {
   }
 
   yardl::binary::WriteInteger(stream, value.id);
-  yardl::binary::WriteVector<int32_t, yardl::binary::WriteInteger>(stream, value.data);
+  yardl::binary::WriteNDArray<int32_t, yardl::binary::WriteInteger, 1>(stream, value.data);
 }
 
 [[maybe_unused]] void ReadSample(yardl::binary::CodedInputStream& stream, sketch::Sample& value) {
@@ -76,7 +76,7 @@ namespace {
   }
 
   yardl::binary::ReadInteger(stream, value.id);
-  yardl::binary::ReadVector<int32_t, yardl::binary::ReadInteger>(stream, value.data);
+  yardl::binary::ReadNDArray<int32_t, yardl::binary::ReadInteger, 1>(stream, value.data);
 }
 
 } // namespace
@@ -169,6 +169,23 @@ void MyProtocolIndexedReader::ReadHeaderImpl(sketch::Header& value) {
   sketch::binary::ReadHeader(stream_, value);
 }
 
+bool MyProtocolIndexedReader::ReadSamplesImpl(sketch::Sample& value) {
+  if (!step_index_.offset_within_stream("Samples", std::nullopt, stream_.Pos())) {
+    stream_.Seek(step_index_.get_step_offset("Samples"));
+  }
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<sketch::Sample, sketch::binary::ReadSample>(stream_, current_block_remaining_, value);
+  return read_block_successful;
+}
+
+bool MyProtocolIndexedReader::ReadSamplesImpl(std::vector<sketch::Sample>& values) {
+  if (!step_index_.offset_within_stream("Samples", std::nullopt, stream_.Pos())) {
+    stream_.Seek(step_index_.get_step_offset("Samples"));
+  }
+  yardl::binary::ReadBlocksIntoVector<sketch::Sample, sketch::binary::ReadSample>(stream_, current_block_remaining_, values);
+  return current_block_remaining_ != 0;
+}
+
 bool MyProtocolIndexedReader::ReadSamplesImpl(sketch::Sample& value, size_t idx) {
   size_t abs_offset = 0;
   if (!step_index_.find_stream_item("Samples", idx, abs_offset, current_block_remaining_)) {
@@ -192,7 +209,7 @@ bool MyProtocolIndexedReader::ReadSamplesImpl(std::vector<sketch::Sample>& value
 }
 
 size_t MyProtocolIndexedReader::CountSamplesImpl() {
-  return step_index_.get_stream_size("Samples");
+  return step_index_.get_stream_count("Samples");
 }
 
 void MyProtocolIndexedReader::CloseImpl() {

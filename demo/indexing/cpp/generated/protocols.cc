@@ -9,37 +9,7 @@
 #endif
 
 namespace sketch {
-namespace {
-void MyProtocolWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end, uint8_t current) {
-  std::string expected_method;
-  switch (current) {
-  case 0: expected_method = "WriteHeader()"; break;
-  case 1: expected_method = "WriteSamples() or EndSamples()"; break;
-  }
-  std::string attempted_method;
-  switch (attempted) {
-  case 0: attempted_method = "WriteHeader()"; break;
-  case 1: attempted_method = end ? "EndSamples()" : "WriteSamples()"; break;
-  case 2: attempted_method = "Close()"; break;
-  }
-  throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
-}
-
-void MyProtocolReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
-  auto f = [](uint8_t i) -> std::string {
-    switch (i/2) {
-    case 0: return "ReadHeader()";
-    case 1: return "ReadSamples()";
-    case 2: return "Close()";
-    default: return "<unknown>";
-    }
-  };
-  throw std::runtime_error("Expected call to " + f(current) + " but received call to " + f(attempted) + " instead.");
-}
-
-} // namespace 
-
-std::string MyProtocolWriterBase::schema_ = R"({"protocol":{"name":"MyProtocol","sequence":[{"name":"header","type":"Sketch.Header"},{"name":"samples","type":{"stream":{"items":"Sketch.Sample"}}}]},"types":[{"name":"Header","fields":[{"name":"subject","type":"string"}]},{"name":"Sample","fields":[{"name":"id","type":"uint32"},{"name":"data","type":{"vector":{"items":"int32"}}}]}]})";
+std::string MyProtocolWriterBase::schema_ = R"({"protocol":{"name":"MyProtocol","sequence":[{"name":"header","type":"Sketch.Header"},{"name":"samples","type":{"stream":{"items":"Sketch.Sample"}}}]},"types":[{"name":"Header","fields":[{"name":"subject","type":"string"}]},{"name":"Sample","fields":[{"name":"id","type":"uint32"},{"name":"data","type":{"array":{"items":"int32","dimensions":1}}}]}]})";
 
 std::vector<std::string> MyProtocolWriterBase::previous_schemas_ = {
 };
@@ -54,7 +24,7 @@ std::string MyProtocolWriterBase::SchemaFromVersion(Version version) {
 
 void MyProtocolWriterBase::WriteHeader(sketch::Header const& value) {
   if (unlikely(state_ != 0)) {
-    MyProtocolWriterBaseInvalidState(0, false, state_);
+    InvalidState(0, false);
   }
 
   WriteHeaderImpl(value);
@@ -63,7 +33,7 @@ void MyProtocolWriterBase::WriteHeader(sketch::Header const& value) {
 
 void MyProtocolWriterBase::WriteSamples(sketch::Sample const& value) {
   if (unlikely(state_ != 1)) {
-    MyProtocolWriterBaseInvalidState(1, false, state_);
+    InvalidState(1, false);
   }
 
   WriteSamplesImpl(value);
@@ -71,7 +41,7 @@ void MyProtocolWriterBase::WriteSamples(sketch::Sample const& value) {
 
 void MyProtocolWriterBase::WriteSamples(std::vector<sketch::Sample> const& values) {
   if (unlikely(state_ != 1)) {
-    MyProtocolWriterBaseInvalidState(1, false, state_);
+    InvalidState(1, false);
   }
 
   WriteSamplesImpl(values);
@@ -79,7 +49,7 @@ void MyProtocolWriterBase::WriteSamples(std::vector<sketch::Sample> const& value
 
 void MyProtocolWriterBase::EndSamples() {
   if (unlikely(state_ != 1)) {
-    MyProtocolWriterBaseInvalidState(1, true, state_);
+    InvalidState(1, true);
   }
 
   EndSamplesImpl();
@@ -95,10 +65,25 @@ void MyProtocolWriterBase::WriteSamplesImpl(std::vector<sketch::Sample> const& v
 
 void MyProtocolWriterBase::Close() {
   if (unlikely(state_ != 2)) {
-    MyProtocolWriterBaseInvalidState(2, false, state_);
+    InvalidState(2, false);
   }
 
   CloseImpl();
+}
+
+void MyProtocolWriterBase::InvalidState(uint8_t attempted, [[maybe_unused]] bool end) {
+  std::string expected_method;
+  switch (state_) {
+  case 0: expected_method = "WriteHeader()"; break;
+  case 1: expected_method = "WriteSamples() or EndSamples()"; break;
+  }
+  std::string attempted_method;
+  switch (attempted) {
+  case 0: attempted_method = "WriteHeader()"; break;
+  case 1: attempted_method = end ? "EndSamples()" : "WriteSamples()"; break;
+  case 2: attempted_method = "Close()"; break;
+  }
+  throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
 }
 
 std::string MyProtocolReaderBase::schema_ = MyProtocolWriterBase::schema_;
@@ -114,7 +99,7 @@ Version MyProtocolReaderBase::VersionFromSchema(std::string const& schema) {
 
 void MyProtocolReaderBase::ReadHeader(sketch::Header& value) {
   if (unlikely(state_ != 0)) {
-    MyProtocolReaderBaseInvalidState(0, state_);
+    InvalidState(0);
   }
 
   ReadHeaderImpl(value);
@@ -127,7 +112,7 @@ bool MyProtocolReaderBase::ReadSamples(sketch::Sample& value) {
       state_ = 4;
       return false;
     }
-    MyProtocolReaderBaseInvalidState(2, state_);
+    InvalidState(2);
   }
 
   bool result = ReadSamplesImpl(value);
@@ -147,7 +132,7 @@ bool MyProtocolReaderBase::ReadSamples(std::vector<sketch::Sample>& values) {
       values.clear();
       return false;
     }
-    MyProtocolReaderBaseInvalidState(2, state_);
+    InvalidState(2);
   }
 
   if (!ReadSamplesImpl(values)) {
@@ -180,12 +165,13 @@ void MyProtocolReaderBase::Close() {
     if (state_ == 3) {
       state_ = 4;
     } else {
-      MyProtocolReaderBaseInvalidState(4, state_);
+      InvalidState(4);
     }
   }
 
   CloseImpl();
 }
+
 void MyProtocolReaderBase::CopyTo(MyProtocolWriterBase& writer, size_t samples_buffer_size) {
   {
     sketch::Header value;
@@ -208,19 +194,16 @@ void MyProtocolReaderBase::CopyTo(MyProtocolWriterBase& writer, size_t samples_b
   }
 }
 
-std::string MyProtocolIndexedReaderBase::schema_ = MyProtocolWriterBase::schema_;
-
-std::vector<std::string> MyProtocolIndexedReaderBase::previous_schemas_ = MyProtocolWriterBase::previous_schemas_;
-
-Version MyProtocolIndexedReaderBase::VersionFromSchema(std::string const& schema) {
-  if (schema == MyProtocolWriterBase::schema_) {
-    return Version::Current;
-  }
-  throw std::runtime_error("The schema does not match any version supported by protocol MyProtocol.");
-}
-
-void MyProtocolIndexedReaderBase::ReadHeader(sketch::Header& value) {
-  ReadHeaderImpl(value);
+void MyProtocolReaderBase::InvalidState(uint8_t attempted) {
+  auto f = [](uint8_t i) -> std::string {
+    switch (i/2) {
+    case 0: return "ReadHeader()";
+    case 1: return "ReadSamples()";
+    case 2: return "Close()";
+    default: return "<unknown>";
+    }
+  };
+  throw std::runtime_error("Expected call to " + f(state_) + " but received call to " + f(attempted) + " instead.");
 }
 
 bool MyProtocolIndexedReaderBase::ReadSamples(sketch::Sample& value, size_t idx) {
@@ -241,7 +224,9 @@ size_t MyProtocolIndexedReaderBase::CountSamples() {
   return CountSamplesImpl();
 }
 
-void MyProtocolIndexedReaderBase::Close() {
-  CloseImpl();
+void MyProtocolIndexedReaderBase::InvalidState(uint8_t attempted) {
+  (void)(attempted);
+  return;
 }
+
 } // namespace sketch

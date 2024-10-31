@@ -46,6 +46,7 @@ class MyProtocolWriterBase {
   static std::string SchemaFromVersion(Version version);
 
   private:
+  virtual void InvalidState(uint8_t attempted, [[maybe_unused]] bool end);
   uint8_t state_ = 0;
 
   friend class MyProtocolReaderBase;
@@ -83,41 +84,26 @@ class MyProtocolReaderBase {
   static Version VersionFromSchema(const std::string& schema);
 
   private:
+  virtual void InvalidState(uint8_t attempted);
   uint8_t state_ = 0;
 };
 
 // Abstract Indexed reader for the MyProtocol protocol.
-class MyProtocolIndexedReaderBase {
+class MyProtocolIndexedReaderBase : public MyProtocolReaderBase {
   public:
-  // Ordinal 0.
-  void ReadHeader(sketch::Header& value);
-
-  // Ordinal 1.
-  [[nodiscard]] bool ReadSamples(sketch::Sample& value, size_t idx=0);
-
-  // Ordinal 1.
-  [[nodiscard]] bool ReadSamples(std::vector<sketch::Sample>& values, size_t idx=0);
-
+  using MyProtocolReaderBase::ReadSamples;
+  [[nodiscard]] bool ReadSamples(sketch::Sample& value, size_t idx);
+  [[nodiscard]] bool ReadSamples(std::vector<sketch::Sample>& values, size_t idx);
   [[nodiscard]] size_t CountSamples();
-
-  // Optionaly close this writer before destructing
-  void Close();
 
   virtual ~MyProtocolIndexedReaderBase() = default;
 
   protected:
-  virtual void ReadHeaderImpl(sketch::Header& value) = 0;
   virtual bool ReadSamplesImpl(sketch::Sample& value, size_t idx) = 0;
   virtual bool ReadSamplesImpl(std::vector<sketch::Sample>& values, size_t idx) = 0;
   virtual size_t CountSamplesImpl() = 0;
   virtual void CloseImpl() {}
-  static std::string schema_;
-
-  static std::vector<std::string> previous_schemas_;
-
-  static Version VersionFromSchema(const std::string& schema);
-
   private:
-  uint8_t state_ = 0;
+  virtual void InvalidState(uint8_t attempted) override;
 };
 } // namespace sketch

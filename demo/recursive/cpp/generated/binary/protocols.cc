@@ -351,6 +351,23 @@ void MyProtocolIndexedReader::ReadListImpl(std::optional<sketch::LinkedList<std:
   yardl::binary::ReadOptional<sketch::LinkedList<std::string>, sketch::binary::ReadLinkedList<std::string, yardl::binary::ReadString>>(stream_, value);
 }
 
+bool MyProtocolIndexedReader::ReadCwdImpl(sketch::DirectoryEntry& value) {
+  if (!step_index_.offset_within_stream("Cwd", std::nullopt, stream_.Pos())) {
+    stream_.Seek(step_index_.get_step_offset("Cwd"));
+  }
+  bool read_block_successful = false;
+  read_block_successful = yardl::binary::ReadBlock<sketch::DirectoryEntry, sketch::binary::ReadDirectoryEntry>(stream_, current_block_remaining_, value);
+  return read_block_successful;
+}
+
+bool MyProtocolIndexedReader::ReadCwdImpl(std::vector<sketch::DirectoryEntry>& values) {
+  if (!step_index_.offset_within_stream("Cwd", std::nullopt, stream_.Pos())) {
+    stream_.Seek(step_index_.get_step_offset("Cwd"));
+  }
+  yardl::binary::ReadBlocksIntoVector<sketch::DirectoryEntry, sketch::binary::ReadDirectoryEntry>(stream_, current_block_remaining_, values);
+  return current_block_remaining_ != 0;
+}
+
 bool MyProtocolIndexedReader::ReadCwdImpl(sketch::DirectoryEntry& value, size_t idx) {
   size_t abs_offset = 0;
   if (!step_index_.find_stream_item("Cwd", idx, abs_offset, current_block_remaining_)) {
@@ -374,7 +391,7 @@ bool MyProtocolIndexedReader::ReadCwdImpl(std::vector<sketch::DirectoryEntry>& v
 }
 
 size_t MyProtocolIndexedReader::CountCwdImpl() {
-  return step_index_.get_stream_size("Cwd");
+  return step_index_.get_stream_count("Cwd");
 }
 
 void MyProtocolIndexedReader::CloseImpl() {

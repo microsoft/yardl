@@ -17,7 +17,6 @@ from . import yardl_types as yardl
 class MyProtocolWriterBase(abc.ABC):
     """Abstract writer for the MyProtocol protocol."""
 
-
     def __init__(self) -> None:
         self._state = 0
 
@@ -128,7 +127,6 @@ class MyProtocolWriterBase(abc.ABC):
 class MyProtocolReaderBase(abc.ABC):
     """Abstract indexed reader for the MyProtocol protocol."""
 
-
     def __init__(self) -> None:
         self._state = 0
 
@@ -142,7 +140,6 @@ class MyProtocolReaderBase(abc.ABC):
                 expected_method = self._state_to_method_name(self._state)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. Expected call to '{expected_method}'.")
             	
-
     schema = MyProtocolWriterBase.schema
 
     def __enter__(self):
@@ -250,40 +247,11 @@ class MyProtocolReaderBase(abc.ABC):
             return 'read_cwd'
         return "<unknown>"
 
-class MyProtocolIndexedReaderBase(abc.ABC):
+class MyProtocolIndexedReaderBase(MyProtocolReaderBase):
     """Abstract reader for the MyProtocol protocol."""
-
-
-    def __init__(self) -> None:
-        pass
 
     def close(self) -> None:
         self._close()
-
-    schema = MyProtocolWriterBase.schema
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type: typing.Optional[type[BaseException]], exc: typing.Optional[BaseException], traceback: object) -> None:
-        try:
-            self.close()
-        except Exception as e:
-            if exc is None:
-                raise e
-
-    @abc.abstractmethod
-    def _close(self) -> None:
-        raise NotImplementedError()
-
-    def read_tree(self) -> BinaryTree:
-        return self._read_tree()
-
-    def read_ptree(self) -> BinaryTree__:
-        return self._read_ptree()
-
-    def read_list(self) -> typing.Optional[LinkedList[str]]:
-        return self._read_list()
 
     def read_cwd(self, idx: int = 0) -> collections.abc.Iterable[DirectoryEntry]:
         """dirs: !stream
@@ -291,34 +259,14 @@ class MyProtocolIndexedReaderBase(abc.ABC):
         """
 
         value = self._read_cwd(idx)
-        return self._wrap_iterable(value)
+        return self._wrap_iterable(value, 8)
 
     def count_cwd(self) -> int:
         return self._count_cwd()
-
-    def copy_to(self, writer: MyProtocolWriterBase) -> None:
-        writer.write_tree(self.read_tree())
-        writer.write_ptree(self.read_ptree())
-        writer.write_list(self.read_list())
-        writer.write_cwd(self.read_cwd())
-
-    @abc.abstractmethod
-    def _read_tree(self) -> BinaryTree:
-        raise NotImplementedError()
-
-    @abc.abstractmethod
-    def _read_ptree(self) -> BinaryTree__:
-        raise NotImplementedError()
-
-    @abc.abstractmethod
-    def _read_list(self) -> typing.Optional[LinkedList[str]]:
-        raise NotImplementedError()
 
     @abc.abstractmethod
     def _read_cwd(self, idx: int = 0) -> collections.abc.Iterable[DirectoryEntry]:
         raise NotImplementedError()
 
-    T = typing.TypeVar('T')
-    def _wrap_iterable(self, iterable: collections.abc.Iterable[T]) -> collections.abc.Iterable[T]:
-        yield from iterable
-
+    def _raise_unexpected_state(self, actual: int) -> None:
+        pass

@@ -102,6 +102,8 @@ class MyProtocolIndexedReader : public sketch::MyProtocolIndexedReaderBase, yard
   void ReadTreeImpl(sketch::BinaryTree& value) override;
   void ReadPtreeImpl(std::unique_ptr<sketch::BinaryTree>& value) override;
   void ReadListImpl(std::optional<sketch::LinkedList<std::string>>& value) override;
+  bool ReadCwdImpl(sketch::DirectoryEntry& value) override;
+  bool ReadCwdImpl(std::vector<sketch::DirectoryEntry>& values) override;
   bool ReadCwdImpl(sketch::DirectoryEntry& value, size_t idx) override;
   bool ReadCwdImpl(std::vector<sketch::DirectoryEntry>& values, size_t idx) override;
   size_t CountCwdImpl() override;
