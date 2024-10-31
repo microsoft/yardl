@@ -260,7 +260,7 @@ func writeProtocols(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 				valueType := common.TypeSyntax(step.Type, ns.Name)
 				if step.IsStream() {
 					valueType = fmt.Sprintf("collections.abc.Iterable[%s]", valueType)
-					fmt.Fprintf(w, "def %s(self, idx: int) -> %s:\n", common.ProtocolReadImplMethodName(step), valueType)
+					fmt.Fprintf(w, "def %s(self, idx: int) -> %s: # pyright: ignore [reportIncompatibleMethodOverride]\n", common.ProtocolReadImplMethodName(step), valueType)
 					w.Indented(func() {
 						fmt.Fprintf(w, "offset, remaining = self._index.find_stream_item(\"%s\", idx)\n", formatting.ToPascalCase(step.Name))
 						fmt.Fprintf(w, "self._stream.seek(offset)\n")

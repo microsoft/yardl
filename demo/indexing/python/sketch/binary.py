@@ -78,7 +78,7 @@ class BinaryMyProtocolIndexedReader(_binary.BinaryProtocolIndexedReader, MyProto
         self._stream.seek(pos)
         return HeaderSerializer().read(self._stream)
 
-    def _read_samples(self, idx: int) -> collections.abc.Iterable[Sample]:
+    def _read_samples(self, idx: int) -> collections.abc.Iterable[Sample]: # pyright: ignore [reportIncompatibleMethodOverride]
         offset, remaining = self._index.find_stream_item("Samples", idx)
         self._stream.seek(offset)
         return _binary.StreamSerializer(SampleSerializer()).read_mid_stream(self._stream, remaining)
