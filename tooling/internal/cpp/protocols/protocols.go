@@ -220,6 +220,7 @@ func writeDeclarations(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 			w.WriteStringln("protected:")
 			for _, step := range p.Sequence {
 				if step.IsStream() {
+					fmt.Fprintf(w, "using %s::%s;\n", common.AbstractReaderName(p), common.ProtocolReadImplMethodName(step))
 					fmt.Fprintf(w, "virtual bool %s(%s& value, size_t idx) = 0;\n", common.ProtocolReadImplMethodName(step), common.TypeSyntax(step.Type))
 					fmt.Fprintf(w, "virtual bool %s(std::vector<%s>& values, size_t idx) = 0;\n", common.ProtocolReadImplMethodName(step), common.TypeSyntax(step.Type))
 					fmt.Fprintf(w, "virtual size_t %s() = 0;\n", common.ProtocolStreamSizeImplMethodName(step))
