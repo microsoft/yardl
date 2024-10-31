@@ -985,21 +985,27 @@ class ProtocolWithChangesIndexedReaderBase : public ProtocolWithChangesReaderBas
   virtual ~ProtocolWithChangesIndexedReaderBase() = default;
 
   protected:
+  using ProtocolWithChangesReaderBase::ReadStreamIntToStringToFloatImpl;
   virtual bool ReadStreamIntToStringToFloatImpl(int32_t& value, size_t idx) = 0;
   virtual bool ReadStreamIntToStringToFloatImpl(std::vector<int32_t>& values, size_t idx) = 0;
   virtual size_t CountStreamIntToStringToFloatImpl() = 0;
+  using ProtocolWithChangesReaderBase::ReadStreamUnionReorderedImpl;
   virtual bool ReadStreamUnionReorderedImpl(std::variant<int32_t, std::string>& value, size_t idx) = 0;
   virtual bool ReadStreamUnionReorderedImpl(std::vector<std::variant<int32_t, std::string>>& values, size_t idx) = 0;
   virtual size_t CountStreamUnionReorderedImpl() = 0;
+  using ProtocolWithChangesReaderBase::ReadStreamOfAliasTypeChangeImpl;
   virtual bool ReadStreamOfAliasTypeChangeImpl(evo_test::StreamItem& value, size_t idx) = 0;
   virtual bool ReadStreamOfAliasTypeChangeImpl(std::vector<evo_test::StreamItem>& values, size_t idx) = 0;
   virtual size_t CountStreamOfAliasTypeChangeImpl() = 0;
+  using ProtocolWithChangesReaderBase::ReadGenericRecordStreamImpl;
   virtual bool ReadGenericRecordStreamImpl(evo_test::GenericRecord<int32_t, std::string>& value, size_t idx) = 0;
   virtual bool ReadGenericRecordStreamImpl(std::vector<evo_test::GenericRecord<int32_t, std::string>>& values, size_t idx) = 0;
   virtual size_t CountGenericRecordStreamImpl() = 0;
+  using ProtocolWithChangesReaderBase::ReadGenericParentRecordStreamImpl;
   virtual bool ReadGenericParentRecordStreamImpl(evo_test::GenericParentRecord<int32_t>& value, size_t idx) = 0;
   virtual bool ReadGenericParentRecordStreamImpl(std::vector<evo_test::GenericParentRecord<int32_t>>& values, size_t idx) = 0;
   virtual size_t CountGenericParentRecordStreamImpl() = 0;
+  using ProtocolWithChangesReaderBase::ReadStreamedRecordWithChangesImpl;
   virtual bool ReadStreamedRecordWithChangesImpl(evo_test::RecordWithChanges& value, size_t idx) = 0;
   virtual bool ReadStreamedRecordWithChangesImpl(std::vector<evo_test::RecordWithChanges>& values, size_t idx) = 0;
   virtual size_t CountStreamedRecordWithChangesImpl() = 0;
@@ -1092,6 +1098,7 @@ class UnusedProtocolIndexedReaderBase : public UnusedProtocolReaderBase {
   virtual ~UnusedProtocolIndexedReaderBase() = default;
 
   protected:
+  using UnusedProtocolReaderBase::ReadRecordsImpl;
   virtual bool ReadRecordsImpl(evo_test::UnchangedRecord& value, size_t idx) = 0;
   virtual bool ReadRecordsImpl(std::vector<evo_test::UnchangedRecord>& values, size_t idx) = 0;
   virtual size_t CountRecordsImpl() = 0;

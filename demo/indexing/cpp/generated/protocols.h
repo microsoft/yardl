@@ -99,6 +99,7 @@ class MyProtocolIndexedReaderBase : public MyProtocolReaderBase {
   virtual ~MyProtocolIndexedReaderBase() = default;
 
   protected:
+  using MyProtocolReaderBase::ReadSamplesImpl;
   virtual bool ReadSamplesImpl(sketch::Sample& value, size_t idx) = 0;
   virtual bool ReadSamplesImpl(std::vector<sketch::Sample>& values, size_t idx) = 0;
   virtual size_t CountSamplesImpl() = 0;

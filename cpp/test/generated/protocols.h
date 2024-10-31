@@ -91,6 +91,7 @@ class BenchmarkFloat256x256IndexedReaderBase : public BenchmarkFloat256x256Reade
   virtual ~BenchmarkFloat256x256IndexedReaderBase() = default;
 
   protected:
+  using BenchmarkFloat256x256ReaderBase::ReadFloat256x256Impl;
   virtual bool ReadFloat256x256Impl(yardl::FixedNDArray<float, 256, 256>& value, size_t idx) = 0;
   virtual bool ReadFloat256x256Impl(std::vector<yardl::FixedNDArray<float, 256, 256>>& values, size_t idx) = 0;
   virtual size_t CountFloat256x256Impl() = 0;
@@ -183,6 +184,7 @@ class BenchmarkInt256x256IndexedReaderBase : public BenchmarkInt256x256ReaderBas
   virtual ~BenchmarkInt256x256IndexedReaderBase() = default;
 
   protected:
+  using BenchmarkInt256x256ReaderBase::ReadInt256x256Impl;
   virtual bool ReadInt256x256Impl(yardl::FixedNDArray<int32_t, 256, 256>& value, size_t idx) = 0;
   virtual bool ReadInt256x256Impl(std::vector<yardl::FixedNDArray<int32_t, 256, 256>>& values, size_t idx) = 0;
   virtual size_t CountInt256x256Impl() = 0;
@@ -275,6 +277,7 @@ class BenchmarkFloatVlenIndexedReaderBase : public BenchmarkFloatVlenReaderBase 
   virtual ~BenchmarkFloatVlenIndexedReaderBase() = default;
 
   protected:
+  using BenchmarkFloatVlenReaderBase::ReadFloatArrayImpl;
   virtual bool ReadFloatArrayImpl(yardl::NDArray<float, 2>& value, size_t idx) = 0;
   virtual bool ReadFloatArrayImpl(std::vector<yardl::NDArray<float, 2>>& values, size_t idx) = 0;
   virtual size_t CountFloatArrayImpl() = 0;
@@ -367,6 +370,7 @@ class BenchmarkSmallRecordIndexedReaderBase : public BenchmarkSmallRecordReaderB
   virtual ~BenchmarkSmallRecordIndexedReaderBase() = default;
 
   protected:
+  using BenchmarkSmallRecordReaderBase::ReadSmallRecordImpl;
   virtual bool ReadSmallRecordImpl(test_model::SmallBenchmarkRecord& value, size_t idx) = 0;
   virtual bool ReadSmallRecordImpl(std::vector<test_model::SmallBenchmarkRecord>& values, size_t idx) = 0;
   virtual size_t CountSmallRecordImpl() = 0;
@@ -459,6 +463,7 @@ class BenchmarkSmallRecordWithOptionalsIndexedReaderBase : public BenchmarkSmall
   virtual ~BenchmarkSmallRecordWithOptionalsIndexedReaderBase() = default;
 
   protected:
+  using BenchmarkSmallRecordWithOptionalsReaderBase::ReadSmallRecordImpl;
   virtual bool ReadSmallRecordImpl(test_model::SimpleEncodingCounters& value, size_t idx) = 0;
   virtual bool ReadSmallRecordImpl(std::vector<test_model::SimpleEncodingCounters>& values, size_t idx) = 0;
   virtual size_t CountSmallRecordImpl() = 0;
@@ -551,6 +556,7 @@ class BenchmarkSimpleMrdIndexedReaderBase : public BenchmarkSimpleMrdReaderBase 
   virtual ~BenchmarkSimpleMrdIndexedReaderBase() = default;
 
   protected:
+  using BenchmarkSimpleMrdReaderBase::ReadDataImpl;
   virtual bool ReadDataImpl(std::variant<test_model::SimpleAcquisition, image::Image<float>>& value, size_t idx) = 0;
   virtual bool ReadDataImpl(std::vector<std::variant<test_model::SimpleAcquisition, image::Image<float>>>& values, size_t idx) = 0;
   virtual size_t CountDataImpl() = 0;
@@ -1302,15 +1308,19 @@ class StreamsIndexedReaderBase : public StreamsReaderBase {
   virtual ~StreamsIndexedReaderBase() = default;
 
   protected:
+  using StreamsReaderBase::ReadIntDataImpl;
   virtual bool ReadIntDataImpl(int32_t& value, size_t idx) = 0;
   virtual bool ReadIntDataImpl(std::vector<int32_t>& values, size_t idx) = 0;
   virtual size_t CountIntDataImpl() = 0;
+  using StreamsReaderBase::ReadOptionalIntDataImpl;
   virtual bool ReadOptionalIntDataImpl(std::optional<int32_t>& value, size_t idx) = 0;
   virtual bool ReadOptionalIntDataImpl(std::vector<std::optional<int32_t>>& values, size_t idx) = 0;
   virtual size_t CountOptionalIntDataImpl() = 0;
+  using StreamsReaderBase::ReadRecordWithOptionalVectorDataImpl;
   virtual bool ReadRecordWithOptionalVectorDataImpl(test_model::RecordWithOptionalVector& value, size_t idx) = 0;
   virtual bool ReadRecordWithOptionalVectorDataImpl(std::vector<test_model::RecordWithOptionalVector>& values, size_t idx) = 0;
   virtual size_t CountRecordWithOptionalVectorDataImpl() = 0;
+  using StreamsReaderBase::ReadFixedVectorImpl;
   virtual bool ReadFixedVectorImpl(std::array<int32_t, 3>& value, size_t idx) = 0;
   virtual bool ReadFixedVectorImpl(std::vector<std::array<int32_t, 3>>& values, size_t idx) = 0;
   virtual size_t CountFixedVectorImpl() = 0;
@@ -2034,9 +2044,11 @@ class MultiDArraysIndexedReaderBase : public MultiDArraysReaderBase {
   virtual ~MultiDArraysIndexedReaderBase() = default;
 
   protected:
+  using MultiDArraysReaderBase::ReadImagesImpl;
   virtual bool ReadImagesImpl(yardl::NDArray<float, 4>& value, size_t idx) = 0;
   virtual bool ReadImagesImpl(std::vector<yardl::NDArray<float, 4>>& values, size_t idx) = 0;
   virtual size_t CountImagesImpl() = 0;
+  using MultiDArraysReaderBase::ReadFramesImpl;
   virtual bool ReadFramesImpl(yardl::FixedNDArray<float, 1, 1, 64, 32>& value, size_t idx) = 0;
   virtual bool ReadFramesImpl(std::vector<yardl::FixedNDArray<float, 1, 1, 64, 32>>& values, size_t idx) = 0;
   virtual size_t CountFramesImpl() = 0;
@@ -2457,12 +2469,15 @@ class StreamsOfUnionsIndexedReaderBase : public StreamsOfUnionsReaderBase {
   virtual ~StreamsOfUnionsIndexedReaderBase() = default;
 
   protected:
+  using StreamsOfUnionsReaderBase::ReadIntOrSimpleRecordImpl;
   virtual bool ReadIntOrSimpleRecordImpl(std::variant<int32_t, test_model::SimpleRecord>& value, size_t idx) = 0;
   virtual bool ReadIntOrSimpleRecordImpl(std::vector<std::variant<int32_t, test_model::SimpleRecord>>& values, size_t idx) = 0;
   virtual size_t CountIntOrSimpleRecordImpl() = 0;
+  using StreamsOfUnionsReaderBase::ReadNullableIntOrSimpleRecordImpl;
   virtual bool ReadNullableIntOrSimpleRecordImpl(std::variant<std::monostate, int32_t, test_model::SimpleRecord>& value, size_t idx) = 0;
   virtual bool ReadNullableIntOrSimpleRecordImpl(std::vector<std::variant<std::monostate, int32_t, test_model::SimpleRecord>>& values, size_t idx) = 0;
   virtual size_t CountNullableIntOrSimpleRecordImpl() = 0;
+  using StreamsOfUnionsReaderBase::ReadManyCasesImpl;
   virtual bool ReadManyCasesImpl(std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray>& value, size_t idx) = 0;
   virtual bool ReadManyCasesImpl(std::vector<std::variant<int32_t, float, std::string, test_model::SimpleRecord, test_model::NamedFixedNDArray>>& values, size_t idx) = 0;
   virtual size_t CountManyCasesImpl() = 0;
@@ -2676,9 +2691,11 @@ class FlagsIndexedReaderBase : public FlagsReaderBase {
   virtual ~FlagsIndexedReaderBase() = default;
 
   protected:
+  using FlagsReaderBase::ReadDaysImpl;
   virtual bool ReadDaysImpl(test_model::DaysOfWeek& value, size_t idx) = 0;
   virtual bool ReadDaysImpl(std::vector<test_model::DaysOfWeek>& values, size_t idx) = 0;
   virtual size_t CountDaysImpl() = 0;
+  using FlagsReaderBase::ReadFormatsImpl;
   virtual bool ReadFormatsImpl(test_model::TextFormat& value, size_t idx) = 0;
   virtual bool ReadFormatsImpl(std::vector<test_model::TextFormat>& values, size_t idx) = 0;
   virtual size_t CountFormatsImpl() = 0;
@@ -2787,6 +2804,7 @@ class StateTestIndexedReaderBase : public StateTestReaderBase {
   virtual ~StateTestIndexedReaderBase() = default;
 
   protected:
+  using StateTestReaderBase::ReadAStreamImpl;
   virtual bool ReadAStreamImpl(int32_t& value, size_t idx) = 0;
   virtual bool ReadAStreamImpl(std::vector<int32_t>& values, size_t idx) = 0;
   virtual size_t CountAStreamImpl() = 0;
@@ -2943,6 +2961,7 @@ class SimpleGenericsIndexedReaderBase : public SimpleGenericsReaderBase {
   virtual ~SimpleGenericsIndexedReaderBase() = default;
 
   protected:
+  using SimpleGenericsReaderBase::ReadStreamOfTypeVariantsImpl;
   virtual bool ReadStreamOfTypeVariantsImpl(std::variant<image::FloatImage, test_model::Image<double>>& value, size_t idx) = 0;
   virtual bool ReadStreamOfTypeVariantsImpl(std::vector<std::variant<image::FloatImage, test_model::Image<double>>>& values, size_t idx) = 0;
   virtual size_t CountStreamOfTypeVariantsImpl() = 0;
@@ -3209,6 +3228,7 @@ class AliasesIndexedReaderBase : public AliasesReaderBase {
   virtual ~AliasesIndexedReaderBase() = default;
 
   protected:
+  using AliasesReaderBase::ReadStreamOfAliasedGenericUnion2Impl;
   virtual bool ReadStreamOfAliasedGenericUnion2Impl(test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum>& value, size_t idx) = 0;
   virtual bool ReadStreamOfAliasedGenericUnion2Impl(std::vector<test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum>>& values, size_t idx) = 0;
   virtual size_t CountStreamOfAliasedGenericUnion2Impl() = 0;
@@ -3328,9 +3348,11 @@ class StreamsOfAliasedUnionsIndexedReaderBase : public StreamsOfAliasedUnionsRea
   virtual ~StreamsOfAliasedUnionsIndexedReaderBase() = default;
 
   protected:
+  using StreamsOfAliasedUnionsReaderBase::ReadIntOrSimpleRecordImpl;
   virtual bool ReadIntOrSimpleRecordImpl(test_model::AliasedIntOrSimpleRecord& value, size_t idx) = 0;
   virtual bool ReadIntOrSimpleRecordImpl(std::vector<test_model::AliasedIntOrSimpleRecord>& values, size_t idx) = 0;
   virtual size_t CountIntOrSimpleRecordImpl() = 0;
+  using StreamsOfAliasedUnionsReaderBase::ReadNullableIntOrSimpleRecordImpl;
   virtual bool ReadNullableIntOrSimpleRecordImpl(test_model::AliasedNullableIntSimpleRecord& value, size_t idx) = 0;
   virtual bool ReadNullableIntOrSimpleRecordImpl(std::vector<test_model::AliasedNullableIntSimpleRecord>& values, size_t idx) = 0;
   virtual size_t CountNullableIntOrSimpleRecordImpl() = 0;
@@ -3501,6 +3523,7 @@ class ProtocolWithKeywordStepsIndexedReaderBase : public ProtocolWithKeywordStep
   virtual ~ProtocolWithKeywordStepsIndexedReaderBase() = default;
 
   protected:
+  using ProtocolWithKeywordStepsReaderBase::ReadIntImpl;
   virtual bool ReadIntImpl(test_model::RecordWithKeywordFields& value, size_t idx) = 0;
   virtual bool ReadIntImpl(std::vector<test_model::RecordWithKeywordFields>& values, size_t idx) = 0;
   virtual size_t CountIntImpl() = 0;

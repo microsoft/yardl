@@ -125,6 +125,7 @@ class MyProtocolIndexedReaderBase : public MyProtocolReaderBase {
   virtual ~MyProtocolIndexedReaderBase() = default;
 
   protected:
+  using MyProtocolReaderBase::ReadCwdImpl;
   virtual bool ReadCwdImpl(sketch::DirectoryEntry& value, size_t idx) = 0;
   virtual bool ReadCwdImpl(std::vector<sketch::DirectoryEntry>& values, size_t idx) = 0;
   virtual size_t CountCwdImpl() = 0;
