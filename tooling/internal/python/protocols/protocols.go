@@ -404,6 +404,13 @@ func writeAbstractIndexedReader(w *formatting.IndentedWriter, p *dsl.ProtocolDef
 					w.WriteStringln("raise NotImplementedError()")
 				})
 				w.WriteStringln("")
+
+				w.WriteStringln("@abc.abstractmethod")
+				fmt.Fprintf(w, "def %s(self) -> int:\n", common.ProtocolStreamSizeImplMethodName(step))
+				w.Indented(func() {
+					w.WriteStringln("raise NotImplementedError()")
+				})
+				w.WriteStringln("")
 			}
 		}
 

@@ -192,5 +192,9 @@ class MyProtocolIndexedReaderBase(MyProtocolReaderBase):
     def _read_samples(self, idx: int = 0) -> collections.abc.Iterable[Sample]:
         raise NotImplementedError()
 
+    @abc.abstractmethod
+    def _count_samples(self) -> int:
+        raise NotImplementedError()
+
     def _raise_unexpected_state(self, actual: int) -> None:
         pass
