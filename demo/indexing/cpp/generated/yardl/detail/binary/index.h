@@ -129,10 +129,13 @@ static inline uint32_t kBinaryIndexFormatVersionNumber = 1;
 inline Index ReadIndex(CodedInputStream& stream) {
   auto pos = stream.Pos();
 
+  // std::cerr << "ReadIndex, starting at " << stream.Pos() << std::endl;
   size_t index_offset = 0;
   stream.Seek(-static_cast<int64_t>(sizeof(index_offset)));
+  // std::cerr << "Reading index location from " << stream.Pos() << std::endl;
   stream.ReadFixedInteger(index_offset);
   try {
+    // std::cerr << "Reading index, seeking to " << index_offset << std::endl;
     stream.Seek(index_offset);
   } catch (std::exception const&) {
     throw std::runtime_error("Binary Index not found in stream.");
@@ -164,6 +167,7 @@ inline Index ReadIndex(CodedInputStream& stream) {
 inline void WriteIndex(CodedOutputStream& stream, Index const& index) {
   size_t pos = stream.Pos();
 
+  // std::cerr << "Writing index at " << stream.Pos() << std::endl;
   stream.WriteBytes(INDEX_MAGIC_BYTES.data(), INDEX_MAGIC_BYTES.size());
   stream.WriteFixedInteger(kBinaryIndexFormatVersionNumber);
 
@@ -171,6 +175,7 @@ inline void WriteIndex(CodedOutputStream& stream, Index const& index) {
   yardl::binary::WriteMap<std::string, std::vector<size_t>, yardl::binary::WriteString, yardl::binary::WriteVector<size_t, yardl::binary::WriteInteger<size_t>>>(stream, index.stream_offsets);
   yardl::binary::WriteMap<std::string, std::vector<size_t>, yardl::binary::WriteString, yardl::binary::WriteVector<size_t, yardl::binary::WriteInteger<size_t>>>(stream, index.stream_blocks);
 
+  // std::cerr << "Writing index pos at " << stream.Pos() << std::endl;
   stream.WriteFixedInteger(pos);
 }
 
