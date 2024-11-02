@@ -103,20 +103,20 @@ class CodedOutputStream {
       if (remaining_buffer_space >= size_in_bytes) {
         memcpy(buffer_ptr_, data, size_in_bytes);
         buffer_ptr_ += size_in_bytes;
+        pos_ += size_in_bytes;
         break;
       }
 
       if (remaining_buffer_space > 0) {
         memcpy(buffer_ptr_, data, remaining_buffer_space);
         buffer_ptr_ += remaining_buffer_space;
+        pos_ += remaining_buffer_space;
         data = static_cast<uint8_t const*>(data) + remaining_buffer_space;
         size_in_bytes -= remaining_buffer_space;
       }
 
       FlushBuffer();
     }
-
-    pos_ += size_in_bytes;
   }
 
   void Flush() {

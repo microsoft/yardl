@@ -230,9 +230,7 @@ class CodedInputStream:
         self._buffer = bytearray(buffer_size)
         self._view = memoryview(self._buffer)
         self._offset = 0
-        self._at_end = False
         self._last_read_pos = 0
-        self._streampos = 0
 
     def close(self) -> None:
         if self._owns_stream:
@@ -286,6 +284,9 @@ class CodedInputStream:
             remaining = self._last_read_count - self._offset
             local_view[:remaining] = self._view[self._offset : self._last_read_count]
             self._offset = self._last_read_count
+            # TODO: Test if this is correct
+            if self._stream.seekable():
+                self._last_read_pos = self._stream.tell()
             if self._stream.readinto(local_view[remaining:]) < count - remaining:
                 raise EOFError("Unexpected EOF")
             return local_view
@@ -307,6 +308,9 @@ class CodedInputStream:
             remaining = self._last_read_count - self._offset
             local_view[:remaining] = self._view[self._offset : self._last_read_count]
             self._offset = self._last_read_count
+            # TODO: Test if this is correct
+            if self._stream.seekable():
+                self._last_read_pos = self._stream.tell()
             if self._stream.readinto(local_view[remaining:]) < count - remaining:
                 raise EOFError("Unexpected EOF")
             return local_buf
@@ -331,14 +335,15 @@ class CodedInputStream:
                 offset < self._last_read_pos
                 or offset >= self._last_read_pos + self._last_read_count
             ):
-                self._at_end = False
+                # Seek to position in stream then re-fill buffer
                 try:
                     self._stream.seek(offset)
                 except Exception as e:
                     raise RuntimeError(f"Failed to seek to {offset}") from e
-                self._last_read_count = self._offset
+                self._offset = self._last_read_count
                 self._fill_buffer(1)
             else:
+                # Seek within buffer
                 self._offset = offset - self._last_read_pos
 
     def pos(self) -> int:
@@ -356,10 +361,9 @@ class CodedInputStream:
             self._last_read_pos = self._stream.tell()
         slice = memoryview(self._buffer)[remaining:]
         self._last_read_count = self._stream.readinto(slice) + remaining
+        self._last_read_pos -= remaining
         self._offset = 0
-        if self._last_read_count == 0:
-            self._at_end = True
-        if min_count > 0 and (self._last_read_count) < min_count:
+        if min_count > 0 and (self._last_read_count < min_count):
             raise EOFError("Unexpected EOF")
 
 
