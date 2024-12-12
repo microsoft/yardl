@@ -12,7 +12,7 @@ classdef RecordContainingVectorsOfAliases < handle
     function self = RecordContainingVectorsOfAliases(kwargs)
       arguments
         kwargs.strings = string.empty();
-        kwargs.maps = yardl.Map.empty();
+        kwargs.maps = test_model.AliasedMap.empty();
         kwargs.arrays = single.empty();
         kwargs.tuples = test_model.MyTuple.empty();
       end

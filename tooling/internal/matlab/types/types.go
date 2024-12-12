@@ -153,7 +153,7 @@ func typeCanBeAliased(t dsl.Type) bool {
 		}
 	} else if gt, ok := t.(*dsl.GeneralizedType); ok {
 		switch gt.Dimensionality.(type) {
-		case *dsl.Vector, *dsl.Array, *dsl.Map:
+		case *dsl.Vector, *dsl.Array:
 			return false
 		}
 	}
