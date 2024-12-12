@@ -533,6 +533,13 @@ RecordContainingNestedGenericRecords: !record
 
 # END nested generic records
 
+RecordContainingVectorsOfAliases: !record
+  fields:
+    strings: AliasedString*
+    maps: AliasedMap<string, int>*
+    arrays: Image<float>*
+    tuples: MyTuple<int, SimpleRecord>*
+
 Aliases: !protocol
   sequence:
     aliasedString: AliasedString
@@ -546,6 +553,7 @@ Aliases: !protocol
     aliasedGenericFixedVector: AliasedGenericFixedVector<float>
     streamOfAliasedGenericUnion2: !stream
       items: AliasedGenericUnion2<AliasedString, AliasedEnum>
+    vectors: RecordContainingVectorsOfAliases*
 
 AliasedIntOrSimpleRecord: [int, SimpleRecord]
 AliasedIntOrAliasedSimpleRecord: [int, AliasedSimpleRecord]

@@ -16,11 +16,15 @@ classdef RecordWithVectorOfTimes < handle
     function res = eq(self, other)
       res = ...
         isa(other, "test_model.RecordWithVectorOfTimes") && ...
-        isequal(self.times, other.times);
+        isequal({self.times}, {other.times});
     end
 
     function res = ne(self, other)
       res = ~self.eq(other);
+    end
+
+    function res = isequal(self, other)
+      res = all(eq(self, other));
     end
   end
 

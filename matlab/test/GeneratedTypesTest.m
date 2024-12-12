@@ -55,7 +55,7 @@ classdef GeneratedTypesTest < matlab.unittest.TestCase
         function testDefaultRecordWithUnionsOfContainers(testCase)
             r = test_model.RecordWithUnionsOfContainers();
 
-            testCase.verifyEqual(r.map_or_scalar, test_model.MapOrScalar.Map(dictionary));
+            testCase.verifyEqual(r.map_or_scalar, test_model.MapOrScalar.Map(yardl.Map()));
             testCase.verifyEqual(r.vector_or_scalar, test_model.VectorOrScalar.Vector(int32([])));
             testCase.verifyEqual(r.array_or_scalar, test_model.ArrayOrScalar.Array(int32([])));
         end
@@ -82,12 +82,11 @@ classdef GeneratedTypesTest < matlab.unittest.TestCase
             g2a = test_model.RecordWithAliasedOptionalGenericUnionField();
             testCase.verifyEqual(g2a.v, g2.v)
 
-            % testCase.verifyError(@() test_model.MyTuple(), 'MATLAB:minrhs');
             testCase.verifyError(@() test_model.MyTuple(), 'yardl:TypeError');
             t = test_model.MyTuple(v1="a", v2=42);
 
             rm = test_model.RecordWithGenericMaps();
-            testCase.verifyEqual(rm.m, dictionary);
+            testCase.verifyEqual(rm.m, yardl.Map());
             testCase.verifyEqual(rm.am, rm.m);
         end
 
@@ -142,7 +141,7 @@ classdef GeneratedTypesTest < matlab.unittest.TestCase
         function testYardlAllocate(testCase)
             rs = yardl.allocate('test_model.RecordWithPrimitives', 5);
             testCase.verifyEqual(size(rs), [5, 5]);
-            testCase.verifyTrue(all(rs == test_model.RecordWithPrimitives()));
+            testCase.verifyTrue(all(rs == repelem(test_model.RecordWithPrimitives(), 5, 5)));
 
             os = yardl.allocate('yardl.Optional', 1, 4);
             testCase.verifyEqual(size(os), [1, 4]);

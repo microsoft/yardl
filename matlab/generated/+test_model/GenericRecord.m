@@ -37,15 +37,33 @@ classdef GenericRecord < handle
     function res = eq(self, other)
       res = ...
         isa(other, "test_model.GenericRecord") && ...
-        isequal(self.scalar_1, other.scalar_1) && ...
-        isequal(self.scalar_2, other.scalar_2) && ...
-        isequal(self.vector_1, other.vector_1) && ...
-        isequal(self.image_2, other.image_2);
+        isequal({self.scalar_1}, {other.scalar_1}) && ...
+        isequal({self.scalar_2}, {other.scalar_2}) && ...
+        isequal({self.vector_1}, {other.vector_1}) && ...
+        isequal({self.image_2}, {other.image_2});
     end
 
     function res = ne(self, other)
       res = ~self.eq(other);
     end
+
+    function res = isequal(self, other)
+      res = all(eq(self, other));
+    end
   end
 
+  methods (Static)
+    function z = zeros(varargin)
+      elem = test_model.GenericRecord(scalar_1=yardl.None, scalar_2=yardl.None, vector_1=yardl.None, image_2=yardl.None);
+      if nargin == 0
+        z = elem;
+        return;
+      end
+      sz = [varargin{:}];
+      if isscalar(sz)
+        sz = [sz, sz];
+      end
+      z = reshape(repelem(elem, prod(sz)), sz);
+    end
+  end
 end

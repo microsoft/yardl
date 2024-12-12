@@ -16,11 +16,15 @@ classdef RecordWithOptionalGenericField < handle
     function res = eq(self, other)
       res = ...
         isa(other, "test_model.RecordWithOptionalGenericField") && ...
-        isequal(self.v, other.v);
+        isequal({self.v}, {other.v});
     end
 
     function res = ne(self, other)
       res = ~self.eq(other);
+    end
+
+    function res = isequal(self, other)
+      res = all(eq(self, other));
     end
   end
 

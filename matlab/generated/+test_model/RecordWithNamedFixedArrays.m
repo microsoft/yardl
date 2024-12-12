@@ -22,13 +22,17 @@ classdef RecordWithNamedFixedArrays < handle
     function res = eq(self, other)
       res = ...
         isa(other, "test_model.RecordWithNamedFixedArrays") && ...
-        isequal(self.ints, other.ints) && ...
-        isequal(self.fixed_simple_record_array, other.fixed_simple_record_array) && ...
-        isequal(self.fixed_record_with_vlens_array, other.fixed_record_with_vlens_array);
+        isequal({self.ints}, {other.ints}) && ...
+        isequal({self.fixed_simple_record_array}, {other.fixed_simple_record_array}) && ...
+        isequal({self.fixed_record_with_vlens_array}, {other.fixed_record_with_vlens_array});
     end
 
     function res = ne(self, other)
       res = ~self.eq(other);
+    end
+
+    function res = isequal(self, other)
+      res = all(eq(self, other));
     end
   end
 

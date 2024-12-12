@@ -123,7 +123,7 @@ func writeUnionClass(w *formatting.IndentedWriter, className string, generalized
 
 			w.WriteStringln("function eq = eq(self, other)")
 			common.WriteBlockBody(w, func() {
-				fmt.Fprintf(w, "eq = isa(other, \"%s\") && isequal(self.index, other.index) && isequal(self.value, other.value);\n", qualifiedClassName)
+				fmt.Fprintf(w, "eq = isa(other, \"%s\") && all([self.index_] == [other.index_], 'all') && all([self.value] == [other.value], 'all');\n", qualifiedClassName)
 			})
 			w.WriteStringln("")
 			w.WriteStringln("function ne = ne(self, other)")
@@ -143,72 +143,33 @@ func writeUnionClass(w *formatting.IndentedWriter, className string, generalized
 	return nil
 }
 
-func writeNamedType(fw *common.MatlabFileWriter, td *dsl.NamedType) error {
-	return fw.WriteFile(common.TypeIdentifierName(td.Name), func(w *formatting.IndentedWriter) {
-		ut := dsl.GetUnderlyingType(td.Type)
-		// If the underlying type is a RecordDefinition, PrimitiveString, Optional,
-		// 		Vector, Array, or Map - we will generate a "function" alias
-		if st, ok := ut.(*dsl.SimpleType); ok {
-			if _, ok := st.ResolvedDefinition.(*dsl.RecordDefinition); ok {
-				fmt.Fprintf(w, "function c = %s(varargin)\n", common.TypeIdentifierName(td.Name))
-				common.WriteBlockBody(w, func() {
-					common.WriteComment(w, td.Comment)
-					fmt.Fprintf(w, "c = %s(varargin{:});\n", common.TypeSyntax(td.Type, td.Namespace))
-				})
-				return
-			} else if pd, ok := st.ResolvedDefinition.(dsl.PrimitiveDefinition); ok {
-				if pd == dsl.PrimitiveString {
-					fmt.Fprintf(w, "function s = %s(varargin)\n", common.TypeIdentifierName(td.Name))
-					common.WriteBlockBody(w, func() {
-						common.WriteComment(w, td.Comment)
-						fmt.Fprintf(w, "s = %s(varargin{:});\n", common.TypeSyntax(td.Type, td.Namespace))
-					})
-					return
-				}
-			}
-		} else if gt, ok := ut.(*dsl.GeneralizedType); ok {
-			if gt.Cases.IsOptional() {
-				innerType := gt.Cases[1].Type
-				fmt.Fprintf(w, "function o = %s(value)\n", common.TypeIdentifierName(td.Name))
-				common.WriteBlockBody(w, func() {
-					common.WriteComment(w, td.Comment)
-					if !dsl.TypeContainsGenericTypeParameter(innerType) {
-						w.WriteStringln("arguments")
-						common.WriteBlockBody(w, func() {
-							fmt.Fprintf(w, "value %s\n", common.TypeSyntax(innerType, td.Namespace))
-						})
-					}
-					fmt.Fprintf(w, "o = %s(value);\n", common.TypeSyntax(td.Type, td.Namespace))
-				})
-				return
-			}
-
-			switch gt.Dimensionality.(type) {
-			case *dsl.Vector, *dsl.Array:
-				scalar := gt.ToScalar()
-				fmt.Fprintf(w, "function a = %s(array)\n", common.TypeIdentifierName(td.Name))
-				common.WriteBlockBody(w, func() {
-					common.WriteComment(w, td.Comment)
-					if !dsl.TypeContainsGenericTypeParameter(scalar) {
-						w.WriteStringln("arguments")
-						common.WriteBlockBody(w, func() {
-							fmt.Fprintf(w, "array %s\n", common.TypeSyntax(scalar, td.Namespace))
-						})
-					}
-					w.WriteStringln("a = array;")
-				})
-				return
-			case *dsl.Map:
-				fmt.Fprintf(w, "function m = %s(varargin)\n", common.TypeIdentifierName(td.Name))
-				common.WriteBlockBody(w, func() {
-					common.WriteComment(w, td.Comment)
-					fmt.Fprintf(w, "m = %s(varargin{:});\n", common.TypeSyntax(td.Type, td.Namespace))
-				})
-				return
+func typeCanBeAliased(t dsl.Type) bool {
+	if st, ok := t.(*dsl.SimpleType); ok {
+		if pd, ok := st.ResolvedDefinition.(dsl.PrimitiveDefinition); ok {
+			switch pd {
+			case dsl.PrimitiveString:
+				return false
 			}
 		}
+	} else if gt, ok := t.(*dsl.GeneralizedType); ok {
+		switch gt.Dimensionality.(type) {
+		case *dsl.Vector, *dsl.Array, *dsl.Map:
+			return false
+		}
+	}
+	return true
+}
 
-		// Otherwise, it's a subclass of the underlying type
+func writeNamedType(fw *common.MatlabFileWriter, td *dsl.NamedType) error {
+	// If the underlying type is a PrimitiveString, Vector, Array, or Map...
+	// 		it is not possible to generate an alias type definition in MATLAB.
+	ut := dsl.GetUnderlyingType(td.Type)
+	if !typeCanBeAliased(ut) {
+		return nil
+	}
+
+	// Otherwise, generate a subclass of the underlying type
+	return fw.WriteFile(common.TypeIdentifierName(td.Name), func(w *formatting.IndentedWriter) {
 		fmt.Fprintf(w, "classdef %s < %s\n", common.TypeIdentifierName(td.Name), common.TypeSyntax(td.Type, td.Namespace))
 		common.WriteBlockBody(w, func() {
 			common.WriteComment(w, td.Comment)
@@ -300,7 +261,7 @@ func writeRecord(fw *common.MatlabFileWriter, rec *dsl.RecordDefinition, st dsl.
 
 			w.WriteStringln("properties")
 			var fieldNames []string
-			requiresArgsToConstruct := false
+			var zerosMethodArgs []string
 			common.WriteBlockBody(w, func() {
 				for _, field := range rec.Fields {
 					common.WriteComment(w, field.Comment)
@@ -310,7 +271,7 @@ func writeRecord(fw *common.MatlabFileWriter, rec *dsl.RecordDefinition, st dsl.
 					_, defaultExpressionKind := typeDefault(field.Type, rec.Namespace, "", st)
 					switch defaultExpressionKind {
 					case defaultValueKindNone:
-						requiresArgsToConstruct = true
+						zerosMethodArgs = append(zerosMethodArgs, fmt.Sprintf("%s=yardl.None", fieldName))
 					}
 				}
 			})
@@ -373,7 +334,9 @@ func writeRecord(fw *common.MatlabFileWriter, rec *dsl.RecordDefinition, st dsl.
 						for _, field := range rec.Fields {
 							w.WriteStringln(" && ...")
 							fieldIdentifier := common.FieldIdentifierName(field.Name)
-							fmt.Fprintf(w, "isequal(%s, %s)", "self."+fieldIdentifier, "other."+fieldIdentifier)
+							// Instead of `isequal`, we could use `all([self.field] == [other.field], 'all')`,
+							// 	except it won't work for fields stored as cell arrays (e.g. a vector of NDArrays)
+							fmt.Fprintf(w, "isequal({%s}, {%s})", "self."+fieldIdentifier, "other."+fieldIdentifier)
 						}
 						w.WriteStringln(";")
 					})
@@ -385,15 +348,20 @@ func writeRecord(fw *common.MatlabFileWriter, rec *dsl.RecordDefinition, st dsl.
 				common.WriteBlockBody(w, func() {
 					w.WriteStringln("res = ~self.eq(other);")
 				})
+				w.WriteStringln("")
+
+				// isequal method
+				w.WriteStringln("function res = isequal(self, other)")
+				common.WriteBlockBody(w, func() {
+					w.WriteStringln("res = all(eq(self, other));")
+				})
 			})
 			w.WriteStringln("")
 
-			if !requiresArgsToConstruct {
-				w.WriteStringln("methods (Static)")
-				common.WriteBlockBody(w, func() {
-					writeZerosStaticMethod(w, common.TypeSyntax(rec, rec.Namespace), []string{})
-				})
-			}
+			w.WriteStringln("methods (Static)")
+			common.WriteBlockBody(w, func() {
+				writeZerosStaticMethod(w, common.TypeSyntax(rec, rec.Namespace), zerosMethodArgs)
+			})
 		})
 	})
 }
@@ -610,7 +578,13 @@ func writeComputedFieldExpression(w *formatting.IndentedWriter, expression dsl.E
 							startSubscript = "(1+"
 							delimeter = ", 1+"
 							return
+						case *dsl.Map:
+							startSubscript = ".lookup("
+							delimeter = ","
+							return
 						}
+					case *dsl.SimpleType:
+						self.Visit(t.ResolvedDefinition)
 					}
 					self.VisitChildren(node)
 				})
@@ -897,6 +871,19 @@ const (
 )
 
 func typeDefault(t dsl.Type, contextNamespace string, namedType string, st dsl.SymbolTable) (string, defaultValueKind) {
+
+	getScalarDtype := func(scalar dsl.Type) string {
+		// Some types CANNOT be aliased in MATLAB, so we need to extract their underlying type
+		// in order to generate specific syntax, such as the `.empty()` constructor for vectors/arrays
+		dtype := common.TypeSyntax(scalar, contextNamespace)
+		if ut := dsl.GetUnderlyingType(scalar); ut != scalar {
+			if !typeCanBeAliased(ut) {
+				dtype = common.TypeSyntax(ut, contextNamespace)
+			}
+		}
+		return dtype
+	}
+
 	switch t := t.(type) {
 	case nil:
 		return "yardl.None", defaultValueKindImmutable
@@ -932,7 +919,7 @@ func typeDefault(t dsl.Type, contextNamespace string, namedType string, st dsl.S
 				return "", defaultValueKindNone
 			}
 
-			dtype := common.TypeSyntax(scalar, contextNamespace)
+			dtype := getScalarDtype(scalar)
 			if td.Length == nil {
 				return fmt.Sprintf("%s.empty()", dtype), defaultValueKindMutable
 			}
@@ -971,15 +958,11 @@ func typeDefault(t dsl.Type, contextNamespace string, namedType string, st dsl.S
 				return fmt.Sprintf("repelem(%s, %s)", scalarDefault, strings.Join(dims, ", ")), defaultValueKindMutable
 			}
 
-			dtype := common.TypeSyntax(scalar, contextNamespace)
-			if td.HasKnownNumberOfDimensions() {
-				shape := strings.Repeat("0, ", len(*td.Dimensions))[0 : len(*td.Dimensions)*3-2]
-				return fmt.Sprintf("%s.empty(%s)", dtype, shape), defaultValueKindMutable
-			}
+			dtype := getScalarDtype(scalar)
 			return fmt.Sprintf("%s.empty()", dtype), defaultValueKindMutable
 
 		case *dsl.Map:
-			return "dictionary", defaultValueKindMutable
+			return "yardl.Map", defaultValueKindMutable
 		}
 	}
 

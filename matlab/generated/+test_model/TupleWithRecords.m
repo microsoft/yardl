@@ -19,12 +19,16 @@ classdef TupleWithRecords < handle
     function res = eq(self, other)
       res = ...
         isa(other, "test_model.TupleWithRecords") && ...
-        isequal(self.a, other.a) && ...
-        isequal(self.b, other.b);
+        isequal({self.a}, {other.a}) && ...
+        isequal({self.b}, {other.b});
     end
 
     function res = ne(self, other)
       res = ~self.eq(other);
+    end
+
+    function res = isequal(self, other)
+      res = all(eq(self, other));
     end
   end
 

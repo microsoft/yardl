@@ -31,11 +31,15 @@ classdef DateTime < handle
             end
 
             eq = isa(other, 'yardl.DateTime') && ...
-                all([self.value] == [other.value]);
+                all([self.nanoseconds_since_epoch] == [other.nanoseconds_since_epoch]);
         end
 
-        function ne = new(self, other)
+        function ne = ne(self, other)
             ne = ~self.eq(other);
+        end
+
+        function isequal = isequal(self, other)
+            isequal = all(eq(self, other));
         end
     end
 

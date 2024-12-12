@@ -1074,6 +1074,8 @@ class AliasesWriter : public test_model::AliasesWriterBase, public yardl::hdf5::
 
   void EndStreamOfAliasedGenericUnion2Impl() override;
 
+  void WriteVectorsImpl(std::vector<test_model::RecordContainingVectorsOfAliases> const& value) override;
+
   public:
   void Flush() override;
 
@@ -1105,6 +1107,8 @@ class AliasesReader : public test_model::AliasesReaderBase, public yardl::hdf5::
   void ReadAliasedGenericFixedVectorImpl(test_model::AliasedGenericFixedVector<float>& value) override;
 
   bool ReadStreamOfAliasedGenericUnion2Impl(test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum>& value) override;
+
+  void ReadVectorsImpl(std::vector<test_model::RecordContainingVectorsOfAliases>& value) override;
 
   private:
   std::unique_ptr<yardl::hdf5::UnionDatasetReader<2>> streamOfAliasedGenericUnion2_dataset_state_;

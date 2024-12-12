@@ -31,7 +31,7 @@ classdef ComputedFieldsTest < matlab.unittest.TestCase
             r.fixed_vector_of_vectors_field = int32([[1; 2; 3], [4; 5; 6]]);
             testCase.verifyEqual(r.access_fixed_vector_of_vectors_field(), r.fixed_vector_of_vectors_field(3, 2));
 
-            r.map_field = dictionary(["hello", "world"], ["world", "bye"]);
+            r.map_field = yardl.Map(["hello", "world"], ["world", "bye"]);
             testCase.verifyEqual(r.access_map(), r.map_field);
             testCase.verifyEqual(r.access_map_entry(), "world");
             testCase.verifyEqual(r.access_map_entry_with_computed_field(), "world");
@@ -85,7 +85,7 @@ classdef ComputedFieldsTest < matlab.unittest.TestCase
         function testMapSize(testCase)
             r = test_model.RecordWithComputedFields();
             testCase.verifyEqual(r.map_size(), 0);
-            r.map_field = dictionary(["hello", "bonjour"], ["world", "monde"]);
+            r.map_field = yardl.Map(["hello", "bonjour"], ["world", "monde"]);
             testCase.verifyEqual(r.map_size(), 2);
         end
 

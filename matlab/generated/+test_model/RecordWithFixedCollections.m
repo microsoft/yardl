@@ -19,12 +19,16 @@ classdef RecordWithFixedCollections < handle
     function res = eq(self, other)
       res = ...
         isa(other, "test_model.RecordWithFixedCollections") && ...
-        isequal(self.fixed_vector, other.fixed_vector) && ...
-        isequal(self.fixed_array, other.fixed_array);
+        isequal({self.fixed_vector}, {other.fixed_vector}) && ...
+        isequal({self.fixed_array}, {other.fixed_array});
     end
 
     function res = ne(self, other)
       res = ~self.eq(other);
+    end
+
+    function res = isequal(self, other)
+      res = all(eq(self, other));
     end
   end
 

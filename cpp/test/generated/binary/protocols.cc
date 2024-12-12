@@ -552,6 +552,19 @@ struct IsTriviallySerializable<test_model::RecordContainingNestedGenericRecords>
 };
 
 template <>
+struct IsTriviallySerializable<test_model::RecordContainingVectorsOfAliases> {
+  using __T__ = test_model::RecordContainingVectorsOfAliases;
+  static constexpr bool value = 
+    std::is_standard_layout_v<__T__> &&
+    IsTriviallySerializable<decltype(__T__::strings)>::value &&
+    IsTriviallySerializable<decltype(__T__::maps)>::value &&
+    IsTriviallySerializable<decltype(__T__::arrays)>::value &&
+    IsTriviallySerializable<decltype(__T__::tuples)>::value &&
+    (sizeof(__T__) == (sizeof(__T__::strings) + sizeof(__T__::maps) + sizeof(__T__::arrays) + sizeof(__T__::tuples))) &&
+    offsetof(__T__, strings) < offsetof(__T__, maps) && offsetof(__T__, maps) < offsetof(__T__, arrays) && offsetof(__T__, arrays) < offsetof(__T__, tuples);
+};
+
+template <>
 struct IsTriviallySerializable<test_model::RecordWithComputedFields> {
   using __T__ = test_model::RecordWithComputedFields;
   static constexpr bool value = 
@@ -2566,6 +2579,30 @@ template<typename A, yardl::binary::Reader<A> ReadA, typename B, yardl::binary::
   test_model::binary::ReadRecordContainingGenericRecords<std::string, yardl::binary::ReadString, int32_t, yardl::binary::ReadInteger>(stream, value.nested);
 }
 
+[[maybe_unused]] void WriteRecordContainingVectorsOfAliases(yardl::binary::CodedOutputStream& stream, test_model::RecordContainingVectorsOfAliases const& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<test_model::RecordContainingVectorsOfAliases>::value) {
+    yardl::binary::WriteTriviallySerializable(stream, value);
+    return;
+  }
+
+  yardl::binary::WriteVector<test_model::AliasedString, test_model::binary::WriteAliasedString>(stream, value.strings);
+  yardl::binary::WriteVector<test_model::AliasedMap<std::string, int32_t>, test_model::binary::WriteAliasedMap<std::string, yardl::binary::WriteString, int32_t, yardl::binary::WriteInteger>>(stream, value.maps);
+  yardl::binary::WriteVector<test_model::Image<float>, test_model::binary::WriteImage<float, yardl::binary::WriteFloatingPoint>>(stream, value.arrays);
+  yardl::binary::WriteVector<test_model::MyTuple<int32_t, test_model::SimpleRecord>, test_model::binary::WriteMyTuple<int32_t, yardl::binary::WriteInteger, test_model::SimpleRecord, test_model::binary::WriteSimpleRecord>>(stream, value.tuples);
+}
+
+[[maybe_unused]] void ReadRecordContainingVectorsOfAliases(yardl::binary::CodedInputStream& stream, test_model::RecordContainingVectorsOfAliases& value) {
+  if constexpr (yardl::binary::IsTriviallySerializable<test_model::RecordContainingVectorsOfAliases>::value) {
+    yardl::binary::ReadTriviallySerializable(stream, value);
+    return;
+  }
+
+  yardl::binary::ReadVector<test_model::AliasedString, test_model::binary::ReadAliasedString>(stream, value.strings);
+  yardl::binary::ReadVector<test_model::AliasedMap<std::string, int32_t>, test_model::binary::ReadAliasedMap<std::string, yardl::binary::ReadString, int32_t, yardl::binary::ReadInteger>>(stream, value.maps);
+  yardl::binary::ReadVector<test_model::Image<float>, test_model::binary::ReadImage<float, yardl::binary::ReadFloatingPoint>>(stream, value.arrays);
+  yardl::binary::ReadVector<test_model::MyTuple<int32_t, test_model::SimpleRecord>, test_model::binary::ReadMyTuple<int32_t, yardl::binary::ReadInteger, test_model::SimpleRecord, test_model::binary::ReadSimpleRecord>>(stream, value.tuples);
+}
+
 [[maybe_unused]] void WriteAliasedIntOrSimpleRecord(yardl::binary::CodedOutputStream& stream, test_model::AliasedIntOrSimpleRecord const& value) {
   if constexpr (yardl::binary::IsTriviallySerializable<test_model::AliasedIntOrSimpleRecord>::value) {
     yardl::binary::WriteTriviallySerializable(stream, value);
@@ -4387,6 +4424,10 @@ void AliasesWriter::EndStreamOfAliasedGenericUnion2Impl() {
   yardl::binary::WriteInteger(stream_, 0U);
 }
 
+void AliasesWriter::WriteVectorsImpl(std::vector<test_model::RecordContainingVectorsOfAliases> const& value) {
+  yardl::binary::WriteVector<test_model::RecordContainingVectorsOfAliases, test_model::binary::WriteRecordContainingVectorsOfAliases>(stream_, value);
+}
+
 void AliasesWriter::Flush() {
   stream_.Flush();
 }
@@ -4440,6 +4481,10 @@ bool AliasesReader::ReadStreamOfAliasedGenericUnion2Impl(test_model::AliasedGene
 bool AliasesReader::ReadStreamOfAliasedGenericUnion2Impl(std::vector<test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum>>& values) {
   yardl::binary::ReadBlocksIntoVector<test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum>, test_model::binary::ReadAliasedGenericUnion2<test_model::AliasedString, test_model::binary::ReadAliasedString, test_model::AliasedEnum, test_model::binary::ReadAliasedEnum>>(stream_, current_block_remaining_, values);
   return current_block_remaining_ != 0;
+}
+
+void AliasesReader::ReadVectorsImpl(std::vector<test_model::RecordContainingVectorsOfAliases>& value) {
+  yardl::binary::ReadVector<test_model::RecordContainingVectorsOfAliases, test_model::binary::ReadRecordContainingVectorsOfAliases>(stream_, value);
 }
 
 void AliasesReader::CloseImpl() {

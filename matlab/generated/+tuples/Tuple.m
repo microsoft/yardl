@@ -25,13 +25,31 @@ classdef Tuple < handle
     function res = eq(self, other)
       res = ...
         isa(other, "tuples.Tuple") && ...
-        isequal(self.v1, other.v1) && ...
-        isequal(self.v2, other.v2);
+        isequal({self.v1}, {other.v1}) && ...
+        isequal({self.v2}, {other.v2});
     end
 
     function res = ne(self, other)
       res = ~self.eq(other);
     end
+
+    function res = isequal(self, other)
+      res = all(eq(self, other));
+    end
   end
 
+  methods (Static)
+    function z = zeros(varargin)
+      elem = tuples.Tuple(v1=yardl.None, v2=yardl.None);
+      if nargin == 0
+        z = elem;
+        return;
+      end
+      sz = [varargin{:}];
+      if isscalar(sz)
+        sz = [sz, sz];
+      end
+      z = reshape(repelem(elem, prod(sz)), sz);
+    end
+  end
 end

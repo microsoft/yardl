@@ -11,7 +11,7 @@ classdef RecordWithKeywordFields < handle
     function self = RecordWithKeywordFields(kwargs)
       arguments
         kwargs.int = "";
-        kwargs.sizeof = int32.empty(0, 0);
+        kwargs.sizeof = int32.empty();
         kwargs.if_;
       end
       self.int = kwargs.int;
@@ -33,7 +33,7 @@ classdef RecordWithKeywordFields < handle
     end
 
     function res = return_(self)
-      res = self.sizeof(2, 1);
+      res = self.sizeof(1+2, 1+1);
       return
     end
 
@@ -41,14 +41,32 @@ classdef RecordWithKeywordFields < handle
     function res = eq(self, other)
       res = ...
         isa(other, "test_model.RecordWithKeywordFields") && ...
-        isequal(self.int, other.int) && ...
-        isequal(self.sizeof, other.sizeof) && ...
-        isequal(self.if_, other.if_);
+        isequal({self.int}, {other.int}) && ...
+        isequal({self.sizeof}, {other.sizeof}) && ...
+        isequal({self.if_}, {other.if_});
     end
 
     function res = ne(self, other)
       res = ~self.eq(other);
     end
+
+    function res = isequal(self, other)
+      res = all(eq(self, other));
+    end
   end
 
+  methods (Static)
+    function z = zeros(varargin)
+      elem = test_model.RecordWithKeywordFields(if_=yardl.None);
+      if nargin == 0
+        z = elem;
+        return;
+      end
+      sz = [varargin{:}];
+      if isscalar(sz)
+        sz = [sz, sz];
+      end
+      z = reshape(repelem(elem, prod(sz)), sz);
+    end
+  end
 end

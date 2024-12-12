@@ -596,6 +596,23 @@ TEST_P(RoundTripTests, Aliases) {
   tw->WriteStreamOfAliasedGenericUnion2(ae);
   tw->EndStreamOfAliasedGenericUnion2();
 
+  std::vector<AliasedString> aliased_strings = {"hello", "world"};
+  std::vector<AliasedMap<std::string, int32_t>> aliased_maps = {
+      {{"a", 1}, {"b", 2}},
+      {{"c", 3}, {"d", 4}},
+  };
+  Image<float> image = {{1, 2}, {3, 4}};
+  std::vector<Image<float>> aliased_arrays{image, image};
+  MyTuple<int32_t, SimpleRecord> my_tuple{42, SimpleRecord{1, 2, 3}};
+  std::vector<MyTuple<int32_t, SimpleRecord>> aliased_tuples{my_tuple, my_tuple};
+  RecordContainingVectorsOfAliases vrec{
+      aliased_strings,
+      aliased_maps,
+      aliased_arrays,
+      aliased_tuples};
+  std::vector<RecordContainingVectorsOfAliases> vector_records{vrec, vrec};
+  tw->WriteVectors(vector_records);
+
   tw->Close();
 }
 

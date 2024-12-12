@@ -70,6 +70,7 @@ from .types import (
     NamedNDArray,
     RecordContainingGenericRecords,
     RecordContainingNestedGenericRecords,
+    RecordContainingVectorsOfAliases,
     RecordNotUsedInProtocol,
     RecordWithAliasedGenerics,
     RecordWithAliasedOptionalGenericField,

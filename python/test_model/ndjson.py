@@ -2204,6 +2204,62 @@ class RecordContainingNestedGenericRecordsConverter(_ndjson.JsonConverter[Record
         ) # type:ignore 
 
 
+class RecordContainingVectorsOfAliasesConverter(_ndjson.JsonConverter[RecordContainingVectorsOfAliases, np.void]):
+    def __init__(self) -> None:
+        self._strings_converter = _ndjson.VectorConverter(_ndjson.string_converter)
+        self._maps_converter = _ndjson.VectorConverter(_ndjson.MapConverter(_ndjson.string_converter, _ndjson.int32_converter))
+        self._arrays_converter = _ndjson.VectorConverter(_ndjson.NDArrayConverter(_ndjson.float32_converter, 2))
+        self._tuples_converter = _ndjson.VectorConverter(tuples.ndjson.TupleConverter(_ndjson.int32_converter, SimpleRecordConverter()))
+        super().__init__(np.dtype([
+            ("strings", self._strings_converter.overall_dtype()),
+            ("maps", self._maps_converter.overall_dtype()),
+            ("arrays", self._arrays_converter.overall_dtype()),
+            ("tuples", self._tuples_converter.overall_dtype()),
+        ]))
+
+    def to_json(self, value: RecordContainingVectorsOfAliases) -> object:
+        if not isinstance(value, RecordContainingVectorsOfAliases): # pyright: ignore [reportUnnecessaryIsInstance]
+            raise TypeError("Expected 'RecordContainingVectorsOfAliases' instance")
+        json_object = {}
+
+        json_object["strings"] = self._strings_converter.to_json(value.strings)
+        json_object["maps"] = self._maps_converter.to_json(value.maps)
+        json_object["arrays"] = self._arrays_converter.to_json(value.arrays)
+        json_object["tuples"] = self._tuples_converter.to_json(value.tuples)
+        return json_object
+
+    def numpy_to_json(self, value: np.void) -> object:
+        if not isinstance(value, np.void): # pyright: ignore [reportUnnecessaryIsInstance]
+            raise TypeError("Expected 'np.void' instance")
+        json_object = {}
+
+        json_object["strings"] = self._strings_converter.numpy_to_json(value["strings"])
+        json_object["maps"] = self._maps_converter.numpy_to_json(value["maps"])
+        json_object["arrays"] = self._arrays_converter.numpy_to_json(value["arrays"])
+        json_object["tuples"] = self._tuples_converter.numpy_to_json(value["tuples"])
+        return json_object
+
+    def from_json(self, json_object: object) -> RecordContainingVectorsOfAliases:
+        if not isinstance(json_object, dict):
+            raise TypeError("Expected 'dict' instance")
+        return RecordContainingVectorsOfAliases(
+            strings=self._strings_converter.from_json(json_object["strings"],),
+            maps=self._maps_converter.from_json(json_object["maps"],),
+            arrays=self._arrays_converter.from_json(json_object["arrays"],),
+            tuples=self._tuples_converter.from_json(json_object["tuples"],),
+        )
+
+    def from_json_to_numpy(self, json_object: object) -> np.void:
+        if not isinstance(json_object, dict):
+            raise TypeError("Expected 'dict' instance")
+        return (
+            self._strings_converter.from_json_to_numpy(json_object["strings"]),
+            self._maps_converter.from_json_to_numpy(json_object["maps"]),
+            self._arrays_converter.from_json_to_numpy(json_object["arrays"]),
+            self._tuples_converter.from_json_to_numpy(json_object["tuples"]),
+        ) # type:ignore 
+
+
 class RecordWithComputedFieldsConverter(_ndjson.JsonConverter[RecordWithComputedFields, np.void]):
     def __init__(self) -> None:
         self._array_field_converter = _ndjson.NDArrayConverter(_ndjson.int32_converter, 2)
@@ -4096,6 +4152,11 @@ class NDJsonAliasesWriter(_ndjson.NDJsonProtocolWriter, AliasesWriterBase):
             json_item = converter.to_json(item)
             self._write_json_line({"streamOfAliasedGenericUnion2": json_item})
 
+    def _write_vectors(self, value: list[RecordContainingVectorsOfAliases]) -> None:
+        converter = _ndjson.VectorConverter(RecordContainingVectorsOfAliasesConverter())
+        json_value = converter.to_json(value)
+        self._write_json_line({"vectors": json_value})
+
 
 class NDJsonAliasesReader(_ndjson.NDJsonProtocolReader, AliasesReaderBase):
     """NDJson writer for the Aliases protocol."""
@@ -4154,6 +4215,11 @@ class NDJsonAliasesReader(_ndjson.NDJsonProtocolReader, AliasesReaderBase):
         converter = _ndjson.UnionConverter(basic_types.GenericUnion2, [(basic_types.GenericUnion2.T1, _ndjson.string_converter, [str]), (basic_types.GenericUnion2.T2, _ndjson.EnumConverter(basic_types.Fruits, np.int32, basic_types.ndjson.fruits_name_to_value_map, basic_types.ndjson.fruits_value_to_name_map), [int, float, str])], False)
         while (json_object := self._read_json_line("streamOfAliasedGenericUnion2", False)) is not _ndjson.MISSING_SENTINEL:
             yield converter.from_json(json_object)
+
+    def _read_vectors(self) -> list[RecordContainingVectorsOfAliases]:
+        json_object = self._read_json_line("vectors", True)
+        converter = _ndjson.VectorConverter(RecordContainingVectorsOfAliasesConverter())
+        return converter.from_json(json_object)
 
 class NDJsonStreamsOfAliasedUnionsWriter(_ndjson.NDJsonProtocolWriter, StreamsOfAliasedUnionsWriterBase):
     """NDJson writer for the StreamsOfAliasedUnions protocol."""

@@ -13,8 +13,8 @@ classdef SimpleAcquisition < handle
       arguments
         kwargs.flags = uint64(0);
         kwargs.idx = test_model.SimpleEncodingCounters();
-        kwargs.data = single.empty(0, 0);
-        kwargs.trajectory = single.empty(0, 0);
+        kwargs.data = single.empty();
+        kwargs.trajectory = single.empty();
       end
       self.flags = kwargs.flags;
       self.idx = kwargs.idx;
@@ -25,14 +25,18 @@ classdef SimpleAcquisition < handle
     function res = eq(self, other)
       res = ...
         isa(other, "test_model.SimpleAcquisition") && ...
-        isequal(self.flags, other.flags) && ...
-        isequal(self.idx, other.idx) && ...
-        isequal(self.data, other.data) && ...
-        isequal(self.trajectory, other.trajectory);
+        isequal({self.flags}, {other.flags}) && ...
+        isequal({self.idx}, {other.idx}) && ...
+        isequal({self.data}, {other.data}) && ...
+        isequal({self.trajectory}, {other.trajectory});
     end
 
     function res = ne(self, other)
       res = ~self.eq(other);
+    end
+
+    function res = isequal(self, other)
+      res = all(eq(self, other));
     end
   end
 

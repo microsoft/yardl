@@ -13,6 +13,7 @@ classdef AliasesReader < yardl.binary.BinaryProtocolReader & test_model.AliasesR
     aliased_generic_vector_serializer
     aliased_generic_fixed_vector_serializer
     stream_of_aliased_generic_union_2_serializer
+    vectors_serializer
   end
 
   methods
@@ -29,6 +30,7 @@ classdef AliasesReader < yardl.binary.BinaryProtocolReader & test_model.AliasesR
       self.aliased_generic_vector_serializer = yardl.binary.VectorSerializer(yardl.binary.Float32Serializer);
       self.aliased_generic_fixed_vector_serializer = yardl.binary.FixedVectorSerializer(yardl.binary.Float32Serializer, 3);
       self.stream_of_aliased_generic_union_2_serializer = yardl.binary.StreamSerializer(yardl.binary.UnionSerializer('basic_types.GenericUnion2', {yardl.binary.StringSerializer, yardl.binary.EnumSerializer('basic_types.Fruits', @basic_types.Fruits, yardl.binary.Int32Serializer)}, {@basic_types.GenericUnion2.T1, @basic_types.GenericUnion2.T2}));
+      self.vectors_serializer = yardl.binary.VectorSerializer(test_model.binary.RecordContainingVectorsOfAliasesSerializer());
     end
   end
 
@@ -75,6 +77,10 @@ classdef AliasesReader < yardl.binary.BinaryProtocolReader & test_model.AliasesR
 
     function value = read_stream_of_aliased_generic_union_2_(self)
       value = self.stream_of_aliased_generic_union_2_serializer.read(self.stream_);
+    end
+
+    function value = read_vectors_(self)
+      value = self.vectors_serializer.read(self.stream_);
     end
   end
 end

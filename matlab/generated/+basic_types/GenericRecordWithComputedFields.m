@@ -33,12 +33,30 @@ classdef GenericRecordWithComputedFields < handle
     function res = eq(self, other)
       res = ...
         isa(other, "basic_types.GenericRecordWithComputedFields") && ...
-        isequal(self.f1, other.f1);
+        isequal({self.f1}, {other.f1});
     end
 
     function res = ne(self, other)
       res = ~self.eq(other);
     end
+
+    function res = isequal(self, other)
+      res = all(eq(self, other));
+    end
   end
 
+  methods (Static)
+    function z = zeros(varargin)
+      elem = basic_types.GenericRecordWithComputedFields(f1=yardl.None);
+      if nargin == 0
+        z = elem;
+        return;
+      end
+      sz = [varargin{:}];
+      if isscalar(sz)
+        sz = [sz, sz];
+      end
+      z = reshape(repelem(elem, prod(sz)), sz);
+    end
+  end
 end

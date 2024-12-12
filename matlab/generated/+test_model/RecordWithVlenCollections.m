@@ -10,7 +10,7 @@ classdef RecordWithVlenCollections < handle
     function self = RecordWithVlenCollections(kwargs)
       arguments
         kwargs.vector = int32.empty();
-        kwargs.array = int32.empty(0, 0);
+        kwargs.array = int32.empty();
       end
       self.vector = kwargs.vector;
       self.array = kwargs.array;
@@ -19,12 +19,16 @@ classdef RecordWithVlenCollections < handle
     function res = eq(self, other)
       res = ...
         isa(other, "test_model.RecordWithVlenCollections") && ...
-        isequal(self.vector, other.vector) && ...
-        isequal(self.array, other.array);
+        isequal({self.vector}, {other.vector}) && ...
+        isequal({self.array}, {other.array});
     end
 
     function res = ne(self, other)
       res = ~self.eq(other);
+    end
+
+    function res = isequal(self, other)
+      res = all(eq(self, other));
     end
   end
 
