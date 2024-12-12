@@ -20,16 +20,16 @@ classdef Map < handle
             v = values(self.dict);
         end
 
-        function l = lookup(self, varargin)
-            l = lookup(self.dict, varargin{:});
+        function v = lookup(self, key)
+            v = self.dict(key);
         end
 
-        function insert(self, varargin)
-            self.dict = insert(self.dict, varargin{:});
+        function insert(self, key, value)
+            self.dict(key) = value;
         end
 
-        function remove(self, varargin)
-            self.dict = remove(self.dict, varargin{:});
+        function remove(self, key)
+            self.dict(key) = [];
         end
 
         function n = numEntries(self)
