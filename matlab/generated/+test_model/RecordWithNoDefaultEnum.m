@@ -19,12 +19,30 @@ classdef RecordWithNoDefaultEnum < handle
     function res = eq(self, other)
       res = ...
         isa(other, "test_model.RecordWithNoDefaultEnum") && ...
-        isequal(self.enum, other.enum);
+        isequal({self.enum}, {other.enum});
     end
 
     function res = ne(self, other)
       res = ~self.eq(other);
     end
+
+    function res = isequal(self, other)
+      res = all(eq(self, other));
+    end
   end
 
+  methods (Static)
+    function z = zeros(varargin)
+      elem = test_model.RecordWithNoDefaultEnum(enum=yardl.None);
+      if nargin == 0
+        z = elem;
+        return;
+      end
+      sz = [varargin{:}];
+      if isscalar(sz)
+        sz = [sz, sz];
+      end
+      z = reshape(repelem(elem, prod(sz)), sz);
+    end
+  end
 end

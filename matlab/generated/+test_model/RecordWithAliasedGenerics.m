@@ -19,12 +19,16 @@ classdef RecordWithAliasedGenerics < handle
     function res = eq(self, other)
       res = ...
         isa(other, "test_model.RecordWithAliasedGenerics") && ...
-        isequal(self.my_strings, other.my_strings) && ...
-        isequal(self.aliased_strings, other.aliased_strings);
+        isequal({self.my_strings}, {other.my_strings}) && ...
+        isequal({self.aliased_strings}, {other.aliased_strings});
     end
 
     function res = ne(self, other)
       res = ~self.eq(other);
+    end
+
+    function res = isequal(self, other)
+      res = all(eq(self, other));
     end
   end
 

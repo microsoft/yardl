@@ -6003,17 +6003,11 @@ class AliasesWriterBase(abc.ABC):
     def __init__(self) -> None:
         self._state = 0
 
-    schema = r"""{"protocol":{"name":"Aliases","sequence":[{"name":"aliasedString","type":"TestModel.AliasedString"},{"name":"aliasedEnum","type":"TestModel.AliasedEnum"},{"name":"aliasedOpenGeneric","type":{"name":"TestModel.AliasedOpenGeneric","typeArguments":["TestModel.AliasedString","TestModel.AliasedEnum"]}},{"name":"aliasedClosedGeneric","type":"TestModel.AliasedClosedGeneric"},{"name":"aliasedOptional","type":"TestModel.AliasedOptional"},{"name":"aliasedGenericOptional","type":{"name":"TestModel.AliasedGenericOptional","typeArguments":["float32"]}},{"name":"aliasedGenericUnion2","type":{"name":"TestModel.AliasedGenericUnion2","typeArguments":["TestModel.AliasedString","TestModel.AliasedEnum"]}},{"name":"aliasedGenericVector","type":{"name":"TestModel.AliasedGenericVector","typeArguments":["float32"]}},{"name":"aliasedGenericFixedVector","type":{"name":"TestModel.AliasedGenericFixedVector","typeArguments":["float32"]}},{"name":"streamOfAliasedGenericUnion2","type":{"stream":{"items":{"name":"TestModel.AliasedGenericUnion2","typeArguments":["TestModel.AliasedString","TestModel.AliasedEnum"]}}}}]},"types":[{"name":"Fruits","values":[{"symbol":"apple","value":1},{"symbol":"banana","value":2},{"symbol":"pear","value":3}]},{"name":"GenericUnion2","typeParameters":["T1","T2"],"type":[{"tag":"T1","type":"T1"},{"tag":"T2","type":"T2"}]},{"name":"GenericVector","typeParameters":["T"],"type":{"vector":{"items":"T"}}},{"name":"MyTuple","typeParameters":["T1","T2"],"type":{"name":"Tuples.Tuple","typeArguments":["T1","T2"]}},{"name":"AliasedClosedGeneric","type":{"name":"TestModel.AliasedTuple","typeArguments":["TestModel.AliasedString","TestModel.AliasedEnum"]}},{"name":"AliasedEnum","type":"TestModel.Fruits"},{"name":"AliasedGenericFixedVector","typeParameters":["T"],"type":{"vector":{"items":"T","length":3}}},{"name":"AliasedGenericOptional","typeParameters":["T"],"type":[null,"T"]},{"name":"AliasedGenericUnion2","typeParameters":["T1","T2"],"type":{"name":"BasicTypes.GenericUnion2","typeArguments":["T1","T2"]}},{"name":"AliasedGenericVector","typeParameters":["T"],"type":{"name":"BasicTypes.GenericVector","typeArguments":["T"]}},{"name":"AliasedOpenGeneric","typeParameters":["T1","T2"],"type":{"name":"TestModel.AliasedTuple","typeArguments":["T1","T2"]}},{"name":"AliasedOptional","type":[null,"int32"]},{"name":"AliasedString","type":"string"},{"name":"AliasedTuple","typeParameters":["T1","T2"],"type":{"name":"TestModel.MyTuple","typeArguments":["T1","T2"]}},{"name":"Fruits","type":"BasicTypes.Fruits"},{"name":"MyTuple","typeParameters":["T1","T2"],"type":{"name":"BasicTypes.MyTuple","typeArguments":["T1","T2"]}},{"name":"Tuple","typeParameters":["T1","T2"],"fields":[{"name":"v1","type":"T1"},{"name":"v2","type":"T2"}]}]}"""
+    schema = r"""{"protocol":{"name":"Aliases","sequence":[{"name":"aliasedString","type":"TestModel.AliasedString"},{"name":"aliasedEnum","type":"TestModel.AliasedEnum"},{"name":"aliasedOpenGeneric","type":{"name":"TestModel.AliasedOpenGeneric","typeArguments":["TestModel.AliasedString","TestModel.AliasedEnum"]}},{"name":"aliasedClosedGeneric","type":"TestModel.AliasedClosedGeneric"},{"name":"aliasedOptional","type":"TestModel.AliasedOptional"},{"name":"aliasedGenericOptional","type":{"name":"TestModel.AliasedGenericOptional","typeArguments":["float32"]}},{"name":"aliasedGenericUnion2","type":{"name":"TestModel.AliasedGenericUnion2","typeArguments":["TestModel.AliasedString","TestModel.AliasedEnum"]}},{"name":"aliasedGenericVector","type":{"name":"TestModel.AliasedGenericVector","typeArguments":["float32"]}},{"name":"aliasedGenericFixedVector","type":{"name":"TestModel.AliasedGenericFixedVector","typeArguments":["float32"]}},{"name":"streamOfAliasedGenericUnion2","type":{"stream":{"items":{"name":"TestModel.AliasedGenericUnion2","typeArguments":["TestModel.AliasedString","TestModel.AliasedEnum"]}}}},{"name":"vectors","type":{"vector":{"items":"TestModel.RecordContainingVectorsOfAliases"}}}]},"types":[{"name":"AliasedMap","typeParameters":["K","V"],"type":{"map":{"keys":"K","values":"V"}}},{"name":"Fruits","values":[{"symbol":"apple","value":1},{"symbol":"banana","value":2},{"symbol":"pear","value":3}]},{"name":"GenericUnion2","typeParameters":["T1","T2"],"type":[{"tag":"T1","type":"T1"},{"tag":"T2","type":"T2"}]},{"name":"GenericVector","typeParameters":["T"],"type":{"vector":{"items":"T"}}},{"name":"MyTuple","typeParameters":["T1","T2"],"type":{"name":"Tuples.Tuple","typeArguments":["T1","T2"]}},{"name":"Image","typeParameters":["T"],"type":{"array":{"items":"T","dimensions":[{"name":"x"},{"name":"y"}]}}},{"name":"AliasedClosedGeneric","type":{"name":"TestModel.AliasedTuple","typeArguments":["TestModel.AliasedString","TestModel.AliasedEnum"]}},{"name":"AliasedEnum","type":"TestModel.Fruits"},{"name":"AliasedGenericFixedVector","typeParameters":["T"],"type":{"vector":{"items":"T","length":3}}},{"name":"AliasedGenericOptional","typeParameters":["T"],"type":[null,"T"]},{"name":"AliasedGenericUnion2","typeParameters":["T1","T2"],"type":{"name":"BasicTypes.GenericUnion2","typeArguments":["T1","T2"]}},{"name":"AliasedGenericVector","typeParameters":["T"],"type":{"name":"BasicTypes.GenericVector","typeArguments":["T"]}},{"name":"AliasedMap","typeParameters":["K","V"],"type":{"name":"BasicTypes.AliasedMap","typeArguments":["K","V"]}},{"name":"AliasedOpenGeneric","typeParameters":["T1","T2"],"type":{"name":"TestModel.AliasedTuple","typeArguments":["T1","T2"]}},{"name":"AliasedOptional","type":[null,"int32"]},{"name":"AliasedString","type":"string"},{"name":"AliasedTuple","typeParameters":["T1","T2"],"type":{"name":"TestModel.MyTuple","typeArguments":["T1","T2"]}},{"name":"Fruits","type":"BasicTypes.Fruits"},{"name":"Image","typeParameters":["T"],"type":{"name":"Image.Image","typeArguments":["T"]}},{"name":"MyTuple","typeParameters":["T1","T2"],"type":{"name":"BasicTypes.MyTuple","typeArguments":["T1","T2"]}},{"name":"RecordContainingVectorsOfAliases","fields":[{"name":"strings","type":{"vector":{"items":"TestModel.AliasedString"}}},{"name":"maps","type":{"vector":{"items":{"name":"TestModel.AliasedMap","typeArguments":["string","int32"]}}}},{"name":"arrays","type":{"vector":{"items":{"name":"TestModel.Image","typeArguments":["float32"]}}}},{"name":"tuples","type":{"vector":{"items":{"name":"TestModel.MyTuple","typeArguments":["int32","TestModel.SimpleRecord"]}}}}]},{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]},{"name":"Tuple","typeParameters":["T1","T2"],"fields":[{"name":"v1","type":"T1"},{"name":"v2","type":"T2"}]}]}"""
 
     def close(self) -> None:
-        if self._state == 19:
-            try:
-                self._end_stream()
-                return
-            finally:
-                self._close()
         self._close()
-        if self._state != 20:
+        if self._state != 22:
             expected_method = self._state_to_method_name((self._state + 1) & ~1)
             raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
 
@@ -6117,6 +6111,18 @@ class AliasesWriterBase(abc.ABC):
         self._write_stream_of_aliased_generic_union_2(value)
         self._state = 19
 
+    def write_vectors(self, value: list[RecordContainingVectorsOfAliases]) -> None:
+        """Ordinal 10"""
+
+        if self._state == 19:
+            self._end_stream()
+            self._state = 20
+        elif self._state != 20:
+            self._raise_unexpected_state(20)
+
+        self._write_vectors(value)
+        self._state = 22
+
     @abc.abstractmethod
     def _write_aliased_string(self, value: AliasedString) -> None:
         raise NotImplementedError()
@@ -6158,6 +6164,10 @@ class AliasesWriterBase(abc.ABC):
         raise NotImplementedError()
 
     @abc.abstractmethod
+    def _write_vectors(self, value: list[RecordContainingVectorsOfAliases]) -> None:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
     def _close(self) -> None:
         pass
 
@@ -6191,6 +6201,8 @@ class AliasesWriterBase(abc.ABC):
             return 'write_aliased_generic_fixed_vector'
         if state == 18:
             return 'write_stream_of_aliased_generic_union_2'
+        if state == 20:
+            return 'write_vectors'
         return "<unknown>"
 
 class AliasesReaderBase(abc.ABC):
@@ -6202,7 +6214,7 @@ class AliasesReaderBase(abc.ABC):
 
     def close(self) -> None:
         self._close()
-        if self._state != 20:
+        if self._state != 22:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
@@ -6327,6 +6339,16 @@ class AliasesReaderBase(abc.ABC):
         self._state = 19
         return self._wrap_iterable(value, 20)
 
+    def read_vectors(self) -> list[RecordContainingVectorsOfAliases]:
+        """Ordinal 10"""
+
+        if self._state != 20:
+            self._raise_unexpected_state(20)
+
+        value = self._read_vectors()
+        self._state = 22
+        return value
+
     def copy_to(self, writer: AliasesWriterBase) -> None:
         writer.write_aliased_string(self.read_aliased_string())
         writer.write_aliased_enum(self.read_aliased_enum())
@@ -6338,6 +6360,7 @@ class AliasesReaderBase(abc.ABC):
         writer.write_aliased_generic_vector(self.read_aliased_generic_vector())
         writer.write_aliased_generic_fixed_vector(self.read_aliased_generic_fixed_vector())
         writer.write_stream_of_aliased_generic_union_2(self.read_stream_of_aliased_generic_union_2())
+        writer.write_vectors(self.read_vectors())
 
     @abc.abstractmethod
     def _read_aliased_string(self) -> AliasedString:
@@ -6379,6 +6402,10 @@ class AliasesReaderBase(abc.ABC):
     def _read_stream_of_aliased_generic_union_2(self) -> collections.abc.Iterable[AliasedGenericUnion2[AliasedString, AliasedEnum]]:
         raise NotImplementedError()
 
+    @abc.abstractmethod
+    def _read_vectors(self) -> list[RecordContainingVectorsOfAliases]:
+        raise NotImplementedError()
+
     T = typing.TypeVar('T')
     def _wrap_iterable(self, iterable: collections.abc.Iterable[T], final_state: int) -> collections.abc.Iterable[T]:
         yield from iterable
@@ -6414,6 +6441,8 @@ class AliasesReaderBase(abc.ABC):
             return 'read_aliased_generic_fixed_vector'
         if state == 18:
             return 'read_stream_of_aliased_generic_union_2'
+        if state == 20:
+            return 'read_vectors'
         return "<unknown>"
 
 class StreamsOfAliasedUnionsWriterBase(abc.ABC):

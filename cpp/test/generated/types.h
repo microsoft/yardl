@@ -925,6 +925,24 @@ struct RecordContainingNestedGenericRecords {
   }
 };
 
+struct RecordContainingVectorsOfAliases {
+  std::vector<test_model::AliasedString> strings{};
+  std::vector<test_model::AliasedMap<std::string, int32_t>> maps{};
+  std::vector<test_model::Image<float>> arrays{};
+  std::vector<test_model::MyTuple<int32_t, test_model::SimpleRecord>> tuples{};
+
+  bool operator==(const RecordContainingVectorsOfAliases& other) const {
+    return strings == other.strings &&
+      maps == other.maps &&
+      arrays == other.arrays &&
+      tuples == other.tuples;
+  }
+
+  bool operator!=(const RecordContainingVectorsOfAliases& other) const {
+    return !(*this == other);
+  }
+};
+
 using AliasedIntOrSimpleRecord = std::variant<int32_t, test_model::SimpleRecord>;
 
 using AliasedIntOrAliasedSimpleRecord = std::variant<int32_t, test_model::AliasedSimpleRecord>;

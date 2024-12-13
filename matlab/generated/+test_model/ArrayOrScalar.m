@@ -34,7 +34,7 @@ classdef ArrayOrScalar < yardl.Union
     end
 
     function eq = eq(self, other)
-      eq = isa(other, "test_model.ArrayOrScalar") && isequal(self.index, other.index) && isequal(self.value, other.value);
+      eq = isa(other, "test_model.ArrayOrScalar") && all([self.index_] == [other.index_], 'all') && all([self.value] == [other.value], 'all');
     end
 
     function ne = ne(self, other)

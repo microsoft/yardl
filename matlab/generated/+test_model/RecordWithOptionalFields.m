@@ -22,13 +22,17 @@ classdef RecordWithOptionalFields < handle
     function res = eq(self, other)
       res = ...
         isa(other, "test_model.RecordWithOptionalFields") && ...
-        isequal(self.optional_int, other.optional_int) && ...
-        isequal(self.optional_int_alternate_syntax, other.optional_int_alternate_syntax) && ...
-        isequal(self.optional_time, other.optional_time);
+        isequal({self.optional_int}, {other.optional_int}) && ...
+        isequal({self.optional_int_alternate_syntax}, {other.optional_int_alternate_syntax}) && ...
+        isequal({self.optional_time}, {other.optional_time});
     end
 
     function res = ne(self, other)
       res = ~self.eq(other);
+    end
+
+    function res = isequal(self, other)
+      res = all(eq(self, other));
     end
   end
 

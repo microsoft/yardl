@@ -12,7 +12,7 @@ classdef AliasesReaderBase < handle
 
     function close(self)
       self.close_();
-      if self.state_ ~= 10
+      if self.state_ ~= 11
         expected_method = self.state_to_method_name_(self.state_);
         throw(yardl.ProtocolError("Protocol reader closed before all data was consumed. Expected call to '%s'.", expected_method));
       end
@@ -128,6 +128,16 @@ classdef AliasesReaderBase < handle
       value = self.read_stream_of_aliased_generic_union_2_();
     end
 
+    % Ordinal 10
+    function value = read_vectors(self)
+      if self.state_ ~= 10
+        self.raise_unexpected_state_(10);
+      end
+
+      value = self.read_vectors_();
+      self.state_ = 11;
+    end
+
     function copy_to(self, writer)
       writer.write_aliased_string(self.read_aliased_string());
       writer.write_aliased_enum(self.read_aliased_enum());
@@ -143,6 +153,7 @@ classdef AliasesReaderBase < handle
         writer.write_stream_of_aliased_generic_union_2({item});
       end
       writer.end_stream_of_aliased_generic_union_2();
+      writer.write_vectors(self.read_vectors());
     end
   end
 
@@ -164,6 +175,7 @@ classdef AliasesReaderBase < handle
     read_aliased_generic_fixed_vector_(self)
     has_stream_of_aliased_generic_union_2_(self)
     read_stream_of_aliased_generic_union_2_(self)
+    read_vectors_(self)
 
     close_(self)
   end
@@ -196,6 +208,8 @@ classdef AliasesReaderBase < handle
         name = "read_aliased_generic_fixed_vector";
       elseif state == 9
         name = "read_stream_of_aliased_generic_union_2";
+      elseif state == 10
+        name = "read_vectors";
       else
         name = "<unknown>";
       end

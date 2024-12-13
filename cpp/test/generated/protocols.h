@@ -2522,6 +2522,9 @@ class AliasesWriterBase {
   // Marks the end of the `streamOfAliasedGenericUnion2` stream.
   void EndStreamOfAliasedGenericUnion2();
 
+  // Ordinal 10.
+  void WriteVectors(std::vector<test_model::RecordContainingVectorsOfAliases> const& value);
+
   // Optionaly close this writer before destructing. Validates that all steps were completed.
   void Close();
 
@@ -2543,6 +2546,7 @@ class AliasesWriterBase {
   virtual void WriteStreamOfAliasedGenericUnion2Impl(test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum> const& value) = 0;
   virtual void WriteStreamOfAliasedGenericUnion2Impl(std::vector<test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum>> const& value);
   virtual void EndStreamOfAliasedGenericUnion2Impl() = 0;
+  virtual void WriteVectorsImpl(std::vector<test_model::RecordContainingVectorsOfAliases> const& value) = 0;
   virtual void CloseImpl() {}
 
   static std::string schema_;
@@ -2593,6 +2597,9 @@ class AliasesReaderBase {
   // Ordinal 9.
   [[nodiscard]] bool ReadStreamOfAliasedGenericUnion2(std::vector<test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum>>& values);
 
+  // Ordinal 10.
+  void ReadVectors(std::vector<test_model::RecordContainingVectorsOfAliases>& value);
+
   // Optionaly close this writer before destructing. Validates that all steps were completely read.
   void Close();
 
@@ -2612,6 +2619,7 @@ class AliasesReaderBase {
   virtual void ReadAliasedGenericFixedVectorImpl(test_model::AliasedGenericFixedVector<float>& value) = 0;
   virtual bool ReadStreamOfAliasedGenericUnion2Impl(test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum>& value) = 0;
   virtual bool ReadStreamOfAliasedGenericUnion2Impl(std::vector<test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum>>& values);
+  virtual void ReadVectorsImpl(std::vector<test_model::RecordContainingVectorsOfAliases>& value) = 0;
   virtual void CloseImpl() {}
   static std::string schema_;
 

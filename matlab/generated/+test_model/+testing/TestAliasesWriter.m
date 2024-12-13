@@ -85,6 +85,11 @@ classdef TestAliasesWriter < test_model.AliasesWriterBase
       self.mock_writer_.expect_write_stream_of_aliased_generic_union_2_(value);
     end
 
+    function write_vectors_(self, value)
+      self.writer_.write_vectors(value);
+      self.mock_writer_.expect_write_vectors_(value);
+    end
+
     function close_(self)
       self.close_called_ = true;
       self.writer_.close();

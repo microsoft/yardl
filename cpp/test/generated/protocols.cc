@@ -6006,6 +6006,7 @@ void AliasesWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end,
   case 7: expected_method = "WriteAliasedGenericVector()"; break;
   case 8: expected_method = "WriteAliasedGenericFixedVector()"; break;
   case 9: expected_method = "WriteStreamOfAliasedGenericUnion2() or EndStreamOfAliasedGenericUnion2()"; break;
+  case 10: expected_method = "WriteVectors()"; break;
   }
   std::string attempted_method;
   switch (attempted) {
@@ -6019,7 +6020,8 @@ void AliasesWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end,
   case 7: attempted_method = "WriteAliasedGenericVector()"; break;
   case 8: attempted_method = "WriteAliasedGenericFixedVector()"; break;
   case 9: attempted_method = end ? "EndStreamOfAliasedGenericUnion2()" : "WriteStreamOfAliasedGenericUnion2()"; break;
-  case 10: attempted_method = "Close()"; break;
+  case 10: attempted_method = "WriteVectors()"; break;
+  case 11: attempted_method = "Close()"; break;
   }
   throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
 }
@@ -6037,7 +6039,8 @@ void AliasesReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
     case 7: return "ReadAliasedGenericVector()";
     case 8: return "ReadAliasedGenericFixedVector()";
     case 9: return "ReadStreamOfAliasedGenericUnion2()";
-    case 10: return "Close()";
+    case 10: return "ReadVectors()";
+    case 11: return "Close()";
     default: return "<unknown>";
     }
   };
@@ -6046,7 +6049,7 @@ void AliasesReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
 
 } // namespace 
 
-std::string AliasesWriterBase::schema_ = R"({"protocol":{"name":"Aliases","sequence":[{"name":"aliasedString","type":"TestModel.AliasedString"},{"name":"aliasedEnum","type":"TestModel.AliasedEnum"},{"name":"aliasedOpenGeneric","type":{"name":"TestModel.AliasedOpenGeneric","typeArguments":["TestModel.AliasedString","TestModel.AliasedEnum"]}},{"name":"aliasedClosedGeneric","type":"TestModel.AliasedClosedGeneric"},{"name":"aliasedOptional","type":"TestModel.AliasedOptional"},{"name":"aliasedGenericOptional","type":{"name":"TestModel.AliasedGenericOptional","typeArguments":["float32"]}},{"name":"aliasedGenericUnion2","type":{"name":"TestModel.AliasedGenericUnion2","typeArguments":["TestModel.AliasedString","TestModel.AliasedEnum"]}},{"name":"aliasedGenericVector","type":{"name":"TestModel.AliasedGenericVector","typeArguments":["float32"]}},{"name":"aliasedGenericFixedVector","type":{"name":"TestModel.AliasedGenericFixedVector","typeArguments":["float32"]}},{"name":"streamOfAliasedGenericUnion2","type":{"stream":{"items":{"name":"TestModel.AliasedGenericUnion2","typeArguments":["TestModel.AliasedString","TestModel.AliasedEnum"]}}}}]},"types":[{"name":"Fruits","values":[{"symbol":"apple","value":1},{"symbol":"banana","value":2},{"symbol":"pear","value":3}]},{"name":"GenericUnion2","typeParameters":["T1","T2"],"type":[{"tag":"T1","type":"T1"},{"tag":"T2","type":"T2"}]},{"name":"GenericVector","typeParameters":["T"],"type":{"vector":{"items":"T"}}},{"name":"MyTuple","typeParameters":["T1","T2"],"type":{"name":"Tuples.Tuple","typeArguments":["T1","T2"]}},{"name":"AliasedClosedGeneric","type":{"name":"TestModel.AliasedTuple","typeArguments":["TestModel.AliasedString","TestModel.AliasedEnum"]}},{"name":"AliasedEnum","type":"TestModel.Fruits"},{"name":"AliasedGenericFixedVector","typeParameters":["T"],"type":{"vector":{"items":"T","length":3}}},{"name":"AliasedGenericOptional","typeParameters":["T"],"type":[null,"T"]},{"name":"AliasedGenericUnion2","typeParameters":["T1","T2"],"type":{"name":"BasicTypes.GenericUnion2","typeArguments":["T1","T2"]}},{"name":"AliasedGenericVector","typeParameters":["T"],"type":{"name":"BasicTypes.GenericVector","typeArguments":["T"]}},{"name":"AliasedOpenGeneric","typeParameters":["T1","T2"],"type":{"name":"TestModel.AliasedTuple","typeArguments":["T1","T2"]}},{"name":"AliasedOptional","type":[null,"int32"]},{"name":"AliasedString","type":"string"},{"name":"AliasedTuple","typeParameters":["T1","T2"],"type":{"name":"TestModel.MyTuple","typeArguments":["T1","T2"]}},{"name":"Fruits","type":"BasicTypes.Fruits"},{"name":"MyTuple","typeParameters":["T1","T2"],"type":{"name":"BasicTypes.MyTuple","typeArguments":["T1","T2"]}},{"name":"Tuple","typeParameters":["T1","T2"],"fields":[{"name":"v1","type":"T1"},{"name":"v2","type":"T2"}]}]})";
+std::string AliasesWriterBase::schema_ = R"({"protocol":{"name":"Aliases","sequence":[{"name":"aliasedString","type":"TestModel.AliasedString"},{"name":"aliasedEnum","type":"TestModel.AliasedEnum"},{"name":"aliasedOpenGeneric","type":{"name":"TestModel.AliasedOpenGeneric","typeArguments":["TestModel.AliasedString","TestModel.AliasedEnum"]}},{"name":"aliasedClosedGeneric","type":"TestModel.AliasedClosedGeneric"},{"name":"aliasedOptional","type":"TestModel.AliasedOptional"},{"name":"aliasedGenericOptional","type":{"name":"TestModel.AliasedGenericOptional","typeArguments":["float32"]}},{"name":"aliasedGenericUnion2","type":{"name":"TestModel.AliasedGenericUnion2","typeArguments":["TestModel.AliasedString","TestModel.AliasedEnum"]}},{"name":"aliasedGenericVector","type":{"name":"TestModel.AliasedGenericVector","typeArguments":["float32"]}},{"name":"aliasedGenericFixedVector","type":{"name":"TestModel.AliasedGenericFixedVector","typeArguments":["float32"]}},{"name":"streamOfAliasedGenericUnion2","type":{"stream":{"items":{"name":"TestModel.AliasedGenericUnion2","typeArguments":["TestModel.AliasedString","TestModel.AliasedEnum"]}}}},{"name":"vectors","type":{"vector":{"items":"TestModel.RecordContainingVectorsOfAliases"}}}]},"types":[{"name":"AliasedMap","typeParameters":["K","V"],"type":{"map":{"keys":"K","values":"V"}}},{"name":"Fruits","values":[{"symbol":"apple","value":1},{"symbol":"banana","value":2},{"symbol":"pear","value":3}]},{"name":"GenericUnion2","typeParameters":["T1","T2"],"type":[{"tag":"T1","type":"T1"},{"tag":"T2","type":"T2"}]},{"name":"GenericVector","typeParameters":["T"],"type":{"vector":{"items":"T"}}},{"name":"MyTuple","typeParameters":["T1","T2"],"type":{"name":"Tuples.Tuple","typeArguments":["T1","T2"]}},{"name":"Image","typeParameters":["T"],"type":{"array":{"items":"T","dimensions":[{"name":"x"},{"name":"y"}]}}},{"name":"AliasedClosedGeneric","type":{"name":"TestModel.AliasedTuple","typeArguments":["TestModel.AliasedString","TestModel.AliasedEnum"]}},{"name":"AliasedEnum","type":"TestModel.Fruits"},{"name":"AliasedGenericFixedVector","typeParameters":["T"],"type":{"vector":{"items":"T","length":3}}},{"name":"AliasedGenericOptional","typeParameters":["T"],"type":[null,"T"]},{"name":"AliasedGenericUnion2","typeParameters":["T1","T2"],"type":{"name":"BasicTypes.GenericUnion2","typeArguments":["T1","T2"]}},{"name":"AliasedGenericVector","typeParameters":["T"],"type":{"name":"BasicTypes.GenericVector","typeArguments":["T"]}},{"name":"AliasedMap","typeParameters":["K","V"],"type":{"name":"BasicTypes.AliasedMap","typeArguments":["K","V"]}},{"name":"AliasedOpenGeneric","typeParameters":["T1","T2"],"type":{"name":"TestModel.AliasedTuple","typeArguments":["T1","T2"]}},{"name":"AliasedOptional","type":[null,"int32"]},{"name":"AliasedString","type":"string"},{"name":"AliasedTuple","typeParameters":["T1","T2"],"type":{"name":"TestModel.MyTuple","typeArguments":["T1","T2"]}},{"name":"Fruits","type":"BasicTypes.Fruits"},{"name":"Image","typeParameters":["T"],"type":{"name":"Image.Image","typeArguments":["T"]}},{"name":"MyTuple","typeParameters":["T1","T2"],"type":{"name":"BasicTypes.MyTuple","typeArguments":["T1","T2"]}},{"name":"RecordContainingVectorsOfAliases","fields":[{"name":"strings","type":{"vector":{"items":"TestModel.AliasedString"}}},{"name":"maps","type":{"vector":{"items":{"name":"TestModel.AliasedMap","typeArguments":["string","int32"]}}}},{"name":"arrays","type":{"vector":{"items":{"name":"TestModel.Image","typeArguments":["float32"]}}}},{"name":"tuples","type":{"vector":{"items":{"name":"TestModel.MyTuple","typeArguments":["int32","TestModel.SimpleRecord"]}}}}]},{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]},{"name":"Tuple","typeParameters":["T1","T2"],"fields":[{"name":"v1","type":"T1"},{"name":"v2","type":"T2"}]}]})";
 
 std::vector<std::string> AliasesWriterBase::previous_schemas_ = {
 };
@@ -6171,9 +6174,18 @@ void AliasesWriterBase::WriteStreamOfAliasedGenericUnion2Impl(std::vector<test_m
   }
 }
 
-void AliasesWriterBase::Close() {
+void AliasesWriterBase::WriteVectors(std::vector<test_model::RecordContainingVectorsOfAliases> const& value) {
   if (unlikely(state_ != 10)) {
     AliasesWriterBaseInvalidState(10, false, state_);
+  }
+
+  WriteVectorsImpl(value);
+  state_ = 11;
+}
+
+void AliasesWriterBase::Close() {
+  if (unlikely(state_ != 11)) {
+    AliasesWriterBaseInvalidState(11, false, state_);
   }
 
   CloseImpl();
@@ -6324,13 +6336,22 @@ bool AliasesReaderBase::ReadStreamOfAliasedGenericUnion2Impl(std::vector<test_mo
   }
 }
 
-void AliasesReaderBase::Close() {
+void AliasesReaderBase::ReadVectors(std::vector<test_model::RecordContainingVectorsOfAliases>& value) {
   if (unlikely(state_ != 20)) {
     if (state_ == 19) {
       state_ = 20;
     } else {
       AliasesReaderBaseInvalidState(20, state_);
     }
+  }
+
+  ReadVectorsImpl(value);
+  state_ = 22;
+}
+
+void AliasesReaderBase::Close() {
+  if (unlikely(state_ != 22)) {
+    AliasesReaderBaseInvalidState(22, state_);
   }
 
   CloseImpl();
@@ -6394,6 +6415,11 @@ void AliasesReaderBase::CopyTo(AliasesWriterBase& writer, size_t stream_of_alias
       writer.WriteStreamOfAliasedGenericUnion2(value);
     }
     writer.EndStreamOfAliasedGenericUnion2();
+  }
+  {
+    std::vector<test_model::RecordContainingVectorsOfAliases> value;
+    ReadVectors(value);
+    writer.WriteVectors(value);
   }
 }
 

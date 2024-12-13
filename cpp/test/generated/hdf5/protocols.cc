@@ -1170,6 +1170,28 @@ struct _Inner_RecordContainingNestedGenericRecords {
   test_model::hdf5::_Inner_RecordContainingGenericRecords<yardl::hdf5::InnerVlenString, std::string, int32_t, int32_t> nested;
 };
 
+struct _Inner_RecordContainingVectorsOfAliases {
+  _Inner_RecordContainingVectorsOfAliases() {} 
+  _Inner_RecordContainingVectorsOfAliases(test_model::RecordContainingVectorsOfAliases const& o) 
+      : strings(o.strings),
+      maps(o.maps),
+      arrays(o.arrays),
+      tuples(o.tuples) {
+  }
+
+  void ToOuter (test_model::RecordContainingVectorsOfAliases& o) const {
+    yardl::hdf5::ToOuter(strings, o.strings);
+    yardl::hdf5::ToOuter(maps, o.maps);
+    yardl::hdf5::ToOuter(arrays, o.arrays);
+    yardl::hdf5::ToOuter(tuples, o.tuples);
+  }
+
+  yardl::hdf5::InnerVlen<yardl::hdf5::InnerVlenString, test_model::AliasedString> strings;
+  yardl::hdf5::InnerVlen<yardl::hdf5::InnerMap<yardl::hdf5::InnerVlenString, std::string, int32_t, int32_t>, test_model::AliasedMap<std::string, int32_t>> maps;
+  yardl::hdf5::InnerVlen<yardl::hdf5::InnerNdArray<float, float, 2>, test_model::Image<float>> arrays;
+  yardl::hdf5::InnerVlen<tuples::Tuple<int32_t, test_model::SimpleRecord>, test_model::MyTuple<int32_t, test_model::SimpleRecord>> tuples;
+};
+
 struct _Inner_RecordWithComputedFields {
   _Inner_RecordWithComputedFields() {} 
   _Inner_RecordWithComputedFields(test_model::RecordWithComputedFields const& o) 
@@ -1703,6 +1725,16 @@ template <typename _A_Inner, typename A, typename _B_Inner, typename B>
   t.insertMember("f2", HOFFSET(RecordType, f2), test_model::hdf5::GetRecordWithOptionalGenericUnionFieldHdf5Ddl<yardl::hdf5::InnerVlenString, std::string, int32_t, int32_t>(yardl::hdf5::InnerVlenStringDdl(), H5::PredType::NATIVE_INT32));
   t.insertMember("f2a", HOFFSET(RecordType, f2a), test_model::hdf5::GetRecordWithAliasedOptionalGenericUnionFieldHdf5Ddl<yardl::hdf5::InnerVlenString, std::string, int32_t, int32_t>(yardl::hdf5::InnerVlenStringDdl(), H5::PredType::NATIVE_INT32));
   t.insertMember("nested", HOFFSET(RecordType, nested), test_model::hdf5::GetRecordContainingGenericRecordsHdf5Ddl<yardl::hdf5::InnerVlenString, std::string, int32_t, int32_t>(yardl::hdf5::InnerVlenStringDdl(), H5::PredType::NATIVE_INT32));
+  return t;
+}
+
+[[maybe_unused]] H5::CompType GetRecordContainingVectorsOfAliasesHdf5Ddl() {
+  using RecordType = test_model::hdf5::_Inner_RecordContainingVectorsOfAliases;
+  H5::CompType t(sizeof(RecordType));
+  t.insertMember("strings", HOFFSET(RecordType, strings), yardl::hdf5::InnerVlenDdl(yardl::hdf5::InnerVlenStringDdl()));
+  t.insertMember("maps", HOFFSET(RecordType, maps), yardl::hdf5::InnerVlenDdl(yardl::hdf5::InnerMapDdl<yardl::hdf5::InnerVlenString, int32_t>(yardl::hdf5::InnerVlenStringDdl(), H5::PredType::NATIVE_INT32)));
+  t.insertMember("arrays", HOFFSET(RecordType, arrays), yardl::hdf5::InnerVlenDdl(yardl::hdf5::NDArrayDdl<float, float, 2>(H5::PredType::NATIVE_FLOAT)));
+  t.insertMember("tuples", HOFFSET(RecordType, tuples), yardl::hdf5::InnerVlenDdl(tuples::hdf5::GetTupleHdf5Ddl<int32_t, int32_t, test_model::SimpleRecord, test_model::SimpleRecord>(H5::PredType::NATIVE_INT32, test_model::hdf5::GetSimpleRecordHdf5Ddl())));
   return t;
 }
 
@@ -3709,6 +3741,10 @@ void AliasesWriter::EndStreamOfAliasedGenericUnion2Impl() {
   streamOfAliasedGenericUnion2_dataset_state_.reset();
 }
 
+void AliasesWriter::WriteVectorsImpl(std::vector<test_model::RecordContainingVectorsOfAliases> const& value) {
+  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerVlen<test_model::hdf5::_Inner_RecordContainingVectorsOfAliases, test_model::RecordContainingVectorsOfAliases>, std::vector<test_model::RecordContainingVectorsOfAliases>>(group_, "vectors", yardl::hdf5::InnerVlenDdl(test_model::hdf5::GetRecordContainingVectorsOfAliasesHdf5Ddl()), value);
+}
+
 void AliasesWriter::Flush() {
   if (streamOfAliasedGenericUnion2_dataset_state_) {
     streamOfAliasedGenericUnion2_dataset_state_->Flush();
@@ -3780,6 +3816,10 @@ bool AliasesReader::ReadStreamOfAliasedGenericUnion2Impl(test_model::AliasedGene
   }
 
   return true;
+}
+
+void AliasesReader::ReadVectorsImpl(std::vector<test_model::RecordContainingVectorsOfAliases>& value) {
+  yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerVlen<test_model::hdf5::_Inner_RecordContainingVectorsOfAliases, test_model::RecordContainingVectorsOfAliases>, std::vector<test_model::RecordContainingVectorsOfAliases>>(group_, "vectors", yardl::hdf5::InnerVlenDdl(test_model::hdf5::GetRecordContainingVectorsOfAliasesHdf5Ddl()), value);
 }
 
 StreamsOfAliasedUnionsWriter::StreamsOfAliasedUnionsWriter(std::string path)

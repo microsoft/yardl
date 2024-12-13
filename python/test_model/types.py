@@ -1418,6 +1418,39 @@ class RecordContainingNestedGenericRecords:
         return f"RecordContainingNestedGenericRecords(f1={repr(self.f1)}, f1a={repr(self.f1a)}, f2={repr(self.f2)}, f2a={repr(self.f2a)}, nested={repr(self.nested)})"
 
 
+class RecordContainingVectorsOfAliases:
+    strings: list[AliasedString]
+    maps: list[AliasedMap[str, yardl.Int32]]
+    arrays: list[Image[np.float32]]
+    tuples: list[MyTuple[yardl.Int32, SimpleRecord]]
+
+    def __init__(self, *,
+        strings: typing.Optional[list[AliasedString]] = None,
+        maps: typing.Optional[list[AliasedMap[str, yardl.Int32]]] = None,
+        arrays: typing.Optional[list[Image[np.float32]]] = None,
+        tuples: typing.Optional[list[MyTuple[yardl.Int32, SimpleRecord]]] = None,
+    ):
+        self.strings = strings if strings is not None else []
+        self.maps = maps if maps is not None else []
+        self.arrays = arrays if arrays is not None else []
+        self.tuples = tuples if tuples is not None else []
+
+    def __eq__(self, other: object) -> bool:
+        return (
+            isinstance(other, RecordContainingVectorsOfAliases)
+            and self.strings == other.strings
+            and len(self.maps) == len(other.maps) and all(a == b for a, b in zip(self.maps, other.maps))
+            and len(self.arrays) == len(other.arrays) and all(yardl.structural_equal(a, b) for a, b in zip(self.arrays, other.arrays))
+            and len(self.tuples) == len(other.tuples) and all(a == b for a, b in zip(self.tuples, other.tuples))
+        )
+
+    def __str__(self) -> str:
+        return f"RecordContainingVectorsOfAliases(strings={self.strings}, maps={self.maps}, arrays={self.arrays}, tuples={self.tuples})"
+
+    def __repr__(self) -> str:
+        return f"RecordContainingVectorsOfAliases(strings={repr(self.strings)}, maps={repr(self.maps)}, arrays={repr(self.arrays)}, tuples={repr(self.tuples)})"
+
+
 class AliasedIntOrSimpleRecord:
     Int32: typing.ClassVar[type["AliasedIntOrSimpleRecordUnionCase[yardl.Int32]"]]
     SimpleRecord: typing.ClassVar[type["AliasedIntOrSimpleRecordUnionCase[SimpleRecord]"]]
@@ -2175,6 +2208,7 @@ def _mk_get_dtype():
     dtype_map.setdefault(RecordWithGenericMaps, lambda type_args: np.dtype([('m', np.dtype(np.object_)), ('am', np.dtype(np.object_))], align=True))
     dtype_map.setdefault(RecordContainingGenericRecords, lambda type_args: np.dtype([('g1', get_dtype(types.GenericAlias(RecordWithOptionalGenericField, (type_args[0],)))), ('g1a', get_dtype(types.GenericAlias(RecordWithAliasedOptionalGenericField, (type_args[0],)))), ('g2', get_dtype(types.GenericAlias(RecordWithOptionalGenericUnionField, (type_args[0], type_args[1],)))), ('g2a', get_dtype(types.GenericAlias(RecordWithAliasedOptionalGenericUnionField, (type_args[0], type_args[1],)))), ('g3', get_dtype(types.GenericAlias(tuples.Tuple, (type_args[0], type_args[1],)))), ('g3a', get_dtype(types.GenericAlias(tuples.Tuple, (type_args[0], type_args[1],)))), ('g4', get_dtype(types.GenericAlias(RecordWithGenericVectors, (type_args[1],)))), ('g5', get_dtype(types.GenericAlias(RecordWithGenericFixedVectors, (type_args[1],)))), ('g6', get_dtype(types.GenericAlias(RecordWithGenericArrays, (type_args[1],)))), ('g7', get_dtype(types.GenericAlias(RecordWithGenericMaps, (type_args[0], type_args[1],))))], align=True))
     dtype_map.setdefault(RecordContainingNestedGenericRecords, np.dtype([('f1', get_dtype(types.GenericAlias(RecordWithOptionalGenericField, (str,)))), ('f1a', get_dtype(types.GenericAlias(RecordWithAliasedOptionalGenericField, (str,)))), ('f2', get_dtype(types.GenericAlias(RecordWithOptionalGenericUnionField, (str, yardl.Int32,)))), ('f2a', get_dtype(types.GenericAlias(RecordWithAliasedOptionalGenericUnionField, (str, yardl.Int32,)))), ('nested', get_dtype(types.GenericAlias(RecordContainingGenericRecords, (str, yardl.Int32,))))], align=True))
+    dtype_map.setdefault(RecordContainingVectorsOfAliases, np.dtype([('strings', np.dtype(np.object_)), ('maps', np.dtype(np.object_)), ('arrays', np.dtype(np.object_)), ('tuples', np.dtype(np.object_))], align=True))
     dtype_map.setdefault(AliasedIntOrSimpleRecord, np.dtype(np.object_))
     dtype_map.setdefault(AliasedIntOrAliasedSimpleRecord, np.dtype(np.object_))
     dtype_map.setdefault(typing.Optional[AliasedNullableIntSimpleRecord], np.dtype(np.object_))

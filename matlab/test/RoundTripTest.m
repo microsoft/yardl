@@ -298,34 +298,34 @@ classdef RoundTripTest < matlab.unittest.TestCase
         end
 
         function testMaps(testCase, format)
-            d = dictionary();
-            d("a") = int32(1);
-            d("b") = 2;
-            d("c") = 3;
+            d = yardl.Map();
+            d.insert("a", int32(1));
+            d.insert("b", 2);
+            d.insert("c", 3);
 
             w = create_validating_writer(testCase, format, 'Maps');
             w.write_string_to_int(d);
-            w.write_int_to_string(dictionary(int32([1, 2, 3]), ["a", "b", "c"]));
+            w.write_int_to_string(yardl.Map(int32([1, 2, 3]), ["a", "b", "c"]));
             w.write_string_to_union(...
-                dictionary(...
+                yardl.Map(...
                     ["a", "b"], ...
                     [test_model.StringOrInt32.Int32(1), test_model.StringOrInt32.String("2")] ...
                 ) ...
             );
             w.write_aliased_generic(d);
 
-            r1 = test_model.RecordWithMaps(set_1=dictionary(uint32(1), uint32(1), uint32(2), uint32(2)), set_2=dictionary(int32(-1), true, int32(3), false));
-            r2 = test_model.RecordWithMaps(set_1=dictionary(uint32(1), uint32(2), uint32(2), uint32(1)), set_2=dictionary(int32(-1), false, int32(3), true));
+            r1 = test_model.RecordWithMaps(set_1=yardl.Map(uint32(1), uint32(1), uint32(2), uint32(2)), set_2=yardl.Map(int32(-1), true, int32(3), false));
+            r2 = test_model.RecordWithMaps(set_1=yardl.Map(uint32(1), uint32(2), uint32(2), uint32(1)), set_2=yardl.Map(int32(-1), false, int32(3), true));
             w.write_records([r1, r2]);
             w.close();
 
             % Now again for "empty" maps
             w = create_validating_writer(testCase, format, 'Maps');
-            w.write_string_to_int(dictionary());
-            w.write_int_to_string(dictionary());
-            w.write_string_to_union(dictionary());
-            w.write_aliased_generic(dictionary());
-            w.write_records([test_model.RecordWithMaps(set_1=dictionary(), set_2=dictionary())]);
+            w.write_string_to_int(yardl.Map());
+            w.write_int_to_string(yardl.Map());
+            w.write_string_to_union(yardl.Map());
+            w.write_aliased_generic(yardl.Map());
+            w.write_records([test_model.RecordWithMaps(set_1=yardl.Map(), set_2=yardl.Map())]);
 
             w.close();
         end
@@ -553,6 +553,20 @@ classdef RoundTripTest < matlab.unittest.TestCase
                 test_model.AliasedGenericUnion2.T2(test_model.Fruits.APPLE) ...
             ]);
             w.end_stream_of_aliased_generic_union_2();
+
+            strings = ["hello", "world"];
+            maps = [yardl.Map("a", 1, "b", 2), yardl.Map("c", 3, "d", 4)];
+            my_tuple = test_model.MyTuple(v1=42, v2=test_model.SimpleRecord(x=1, y=2, z=3));
+            image = single([1 2; 3 4]);
+
+            vectors_record = test_model.RecordContainingVectorsOfAliases(...
+                strings=strings, ...
+                maps=maps, ...
+                arrays={image, image}, ...
+                tuples=[my_tuple, my_tuple] ...
+            );
+            w.write_vectors([vectors_record, vectors_record]);
+
             w.close();
         end
     end

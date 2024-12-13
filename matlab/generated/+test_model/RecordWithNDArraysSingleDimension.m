@@ -10,9 +10,9 @@ classdef RecordWithNDArraysSingleDimension < handle
   methods
     function self = RecordWithNDArraysSingleDimension(kwargs)
       arguments
-        kwargs.ints = int32.empty(0);
-        kwargs.fixed_simple_record_array = test_model.SimpleRecord.empty(0);
-        kwargs.fixed_record_with_vlens_array = test_model.RecordWithVlens.empty(0);
+        kwargs.ints = int32.empty();
+        kwargs.fixed_simple_record_array = test_model.SimpleRecord.empty();
+        kwargs.fixed_record_with_vlens_array = test_model.RecordWithVlens.empty();
       end
       self.ints = kwargs.ints;
       self.fixed_simple_record_array = kwargs.fixed_simple_record_array;
@@ -22,13 +22,17 @@ classdef RecordWithNDArraysSingleDimension < handle
     function res = eq(self, other)
       res = ...
         isa(other, "test_model.RecordWithNDArraysSingleDimension") && ...
-        isequal(self.ints, other.ints) && ...
-        isequal(self.fixed_simple_record_array, other.fixed_simple_record_array) && ...
-        isequal(self.fixed_record_with_vlens_array, other.fixed_record_with_vlens_array);
+        isequal({self.ints}, {other.ints}) && ...
+        isequal({self.fixed_simple_record_array}, {other.fixed_simple_record_array}) && ...
+        isequal({self.fixed_record_with_vlens_array}, {other.fixed_record_with_vlens_array});
     end
 
     function res = ne(self, other)
       res = ~self.eq(other);
+    end
+
+    function res = isequal(self, other)
+      res = all(eq(self, other));
     end
   end
 

@@ -102,7 +102,7 @@ var TypeSyntaxWriter dsl.TypeSyntaxWriter[string] = func(self dsl.TypeSyntaxWrit
 		case nil, *dsl.Stream, *dsl.Vector, *dsl.Array:
 			return scalarString
 		case *dsl.Map:
-			return "dictionary"
+			return "yardl.Map"
 		default:
 			panic(fmt.Sprintf("unexpected type %T", d))
 		}

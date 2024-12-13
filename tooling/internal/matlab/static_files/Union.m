@@ -19,6 +19,10 @@ classdef Union < handle & matlab.mixin.CustomDisplay
         function i = index(self)
             i = self.index_;
         end
+
+        function isequal = isequal(self, other)
+            isequal = all(eq(self, other));
+        end
     end
 
     methods (Abstract)

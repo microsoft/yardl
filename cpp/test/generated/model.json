@@ -2327,6 +2327,62 @@
           }
         },
         {
+          "record": {
+            "name": "RecordContainingVectorsOfAliases",
+            "fields": [
+              {
+                "name": "strings",
+                "type": {
+                  "vector": {
+                    "items": "TestModel.AliasedString"
+                  }
+                }
+              },
+              {
+                "name": "maps",
+                "type": {
+                  "vector": {
+                    "items": {
+                      "name": "TestModel.AliasedMap",
+                      "typeArguments": [
+                        "string",
+                        "int32"
+                      ]
+                    }
+                  }
+                }
+              },
+              {
+                "name": "arrays",
+                "type": {
+                  "vector": {
+                    "items": {
+                      "name": "TestModel.Image",
+                      "typeArguments": [
+                        "float32"
+                      ]
+                    }
+                  }
+                }
+              },
+              {
+                "name": "tuples",
+                "type": {
+                  "vector": {
+                    "items": {
+                      "name": "TestModel.MyTuple",
+                      "typeArguments": [
+                        "int32",
+                        "TestModel.SimpleRecord"
+                      ]
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
           "alias": {
             "name": "AliasedIntOrSimpleRecord",
             "type": [
@@ -5433,6 +5489,14 @@
                       "TestModel.AliasedEnum"
                     ]
                   }
+                }
+              }
+            },
+            {
+              "name": "vectors",
+              "type": {
+                "vector": {
+                  "items": "TestModel.RecordContainingVectorsOfAliases"
                 }
               }
             }

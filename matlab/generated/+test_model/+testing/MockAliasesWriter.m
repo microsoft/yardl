@@ -13,6 +13,7 @@ classdef MockAliasesWriter < matlab.mixin.Copyable & test_model.AliasesWriterBas
     expected_aliased_generic_vector
     expected_aliased_generic_fixed_vector
     expected_stream_of_aliased_generic_union_2
+    expected_vectors
   end
 
   methods
@@ -28,6 +29,7 @@ classdef MockAliasesWriter < matlab.mixin.Copyable & test_model.AliasesWriterBas
       self.expected_aliased_generic_vector = yardl.None;
       self.expected_aliased_generic_fixed_vector = yardl.None;
       self.expected_stream_of_aliased_generic_union_2 = {};
+      self.expected_vectors = yardl.None;
     end
 
     function expect_write_aliased_string_(self, value)
@@ -82,6 +84,10 @@ classdef MockAliasesWriter < matlab.mixin.Copyable & test_model.AliasesWriterBas
       end
     end
 
+    function expect_write_vectors_(self, value)
+      self.expected_vectors = yardl.Optional(value);
+    end
+
     function verify(self)
       self.testCase_.verifyEqual(self.expected_aliased_string, yardl.None, "Expected call to write_aliased_string_ was not received");
       self.testCase_.verifyEqual(self.expected_aliased_enum, yardl.None, "Expected call to write_aliased_enum_ was not received");
@@ -93,6 +99,7 @@ classdef MockAliasesWriter < matlab.mixin.Copyable & test_model.AliasesWriterBas
       self.testCase_.verifyEqual(self.expected_aliased_generic_vector, yardl.None, "Expected call to write_aliased_generic_vector_ was not received");
       self.testCase_.verifyEqual(self.expected_aliased_generic_fixed_vector, yardl.None, "Expected call to write_aliased_generic_fixed_vector_ was not received");
       self.testCase_.verifyTrue(isempty(self.expected_stream_of_aliased_generic_union_2), "Expected call to write_stream_of_aliased_generic_union_2_ was not received");
+      self.testCase_.verifyEqual(self.expected_vectors, yardl.None, "Expected call to write_vectors_ was not received");
     end
   end
 
@@ -157,6 +164,12 @@ classdef MockAliasesWriter < matlab.mixin.Copyable & test_model.AliasesWriterBas
       self.testCase_.verifyFalse(isempty(self.expected_stream_of_aliased_generic_union_2), "Unexpected call to write_stream_of_aliased_generic_union_2_");
       self.testCase_.verifyEqual(value{1}, self.expected_stream_of_aliased_generic_union_2{1}, "Unexpected argument value for call to write_stream_of_aliased_generic_union_2_");
       self.expected_stream_of_aliased_generic_union_2 = self.expected_stream_of_aliased_generic_union_2(2:end);
+    end
+
+    function write_vectors_(self, value)
+      self.testCase_.verifyTrue(self.expected_vectors.has_value(), "Unexpected call to write_vectors_");
+      self.testCase_.verifyEqual(value, self.expected_vectors.value, "Unexpected argument value for call to write_vectors_");
+      self.expected_vectors = yardl.None;
     end
 
     function close_(self)

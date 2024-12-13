@@ -10,7 +10,7 @@ classdef RecordWithUnionsOfContainers < handle
   methods
     function self = RecordWithUnionsOfContainers(kwargs)
       arguments
-        kwargs.map_or_scalar = test_model.MapOrScalar.Map(dictionary);
+        kwargs.map_or_scalar = test_model.MapOrScalar.Map(yardl.Map);
         kwargs.vector_or_scalar = test_model.VectorOrScalar.Vector(int32.empty());
         kwargs.array_or_scalar = test_model.ArrayOrScalar.Array(int32.empty());
       end
@@ -22,13 +22,17 @@ classdef RecordWithUnionsOfContainers < handle
     function res = eq(self, other)
       res = ...
         isa(other, "test_model.RecordWithUnionsOfContainers") && ...
-        isequal(self.map_or_scalar, other.map_or_scalar) && ...
-        isequal(self.vector_or_scalar, other.vector_or_scalar) && ...
-        isequal(self.array_or_scalar, other.array_or_scalar);
+        isequal({self.map_or_scalar}, {other.map_or_scalar}) && ...
+        isequal({self.vector_or_scalar}, {other.vector_or_scalar}) && ...
+        isequal({self.array_or_scalar}, {other.array_or_scalar});
     end
 
     function res = ne(self, other)
       res = ~self.eq(other);
+    end
+
+    function res = isequal(self, other)
+      res = all(eq(self, other));
     end
   end
 

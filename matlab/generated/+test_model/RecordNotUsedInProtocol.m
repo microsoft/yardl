@@ -19,12 +19,16 @@ classdef RecordNotUsedInProtocol < handle
     function res = eq(self, other)
       res = ...
         isa(other, "test_model.RecordNotUsedInProtocol") && ...
-        isequal(self.u1, other.u1) && ...
-        isequal(self.u2, other.u2);
+        isequal({self.u1}, {other.u1}) && ...
+        isequal({self.u2}, {other.u2});
     end
 
     function res = ne(self, other)
       res = ~self.eq(other);
+    end
+
+    function res = isequal(self, other)
+      res = all(eq(self, other));
     end
   end
 

@@ -34,7 +34,7 @@ classdef RecordWithStringOrInt32 < yardl.Union
     end
 
     function eq = eq(self, other)
-      eq = isa(other, "basic_types.RecordWithStringOrInt32") && isequal(self.index, other.index) && isequal(self.value, other.value);
+      eq = isa(other, "basic_types.RecordWithStringOrInt32") && all([self.index_] == [other.index_], 'all') && all([self.value] == [other.value], 'all');
     end
 
     function ne = ne(self, other)

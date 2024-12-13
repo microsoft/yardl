@@ -3994,6 +3994,22 @@ class MockAliasesWriter : public AliasesWriterBase {
     EndStreamOfAliasedGenericUnion2Impl_expected_call_count_++;
   }
 
+  void WriteVectorsImpl (std::vector<test_model::RecordContainingVectorsOfAliases> const& value) override {
+    if (WriteVectorsImpl_expected_values_.empty()) {
+      throw std::runtime_error("Unexpected call to WriteVectorsImpl");
+    }
+    if (WriteVectorsImpl_expected_values_.front() != value) {
+      throw std::runtime_error("Unexpected argument value for call to WriteVectorsImpl");
+    }
+    WriteVectorsImpl_expected_values_.pop();
+  }
+
+  std::queue<std::vector<test_model::RecordContainingVectorsOfAliases>> WriteVectorsImpl_expected_values_;
+
+  void ExpectWriteVectorsImpl (std::vector<test_model::RecordContainingVectorsOfAliases> const& value) {
+    WriteVectorsImpl_expected_values_.push(value);
+  }
+
   void Verify() {
     if (!WriteAliasedStringImpl_expected_values_.empty()) {
       throw std::runtime_error("Expected call to WriteAliasedStringImpl was not received");
@@ -4027,6 +4043,9 @@ class MockAliasesWriter : public AliasesWriterBase {
     }
     if (EndStreamOfAliasedGenericUnion2Impl_expected_call_count_ > 0) {
       throw std::runtime_error("Expected call to EndStreamOfAliasedGenericUnion2Impl was not received");
+    }
+    if (!WriteVectorsImpl_expected_values_.empty()) {
+      throw std::runtime_error("Expected call to WriteVectorsImpl was not received");
     }
   }
 };
@@ -4103,6 +4122,11 @@ class TestAliasesWriterBase : public AliasesWriterBase {
   void EndStreamOfAliasedGenericUnion2Impl() override {
     writer_->EndStreamOfAliasedGenericUnion2();
     mock_writer_.ExpectEndStreamOfAliasedGenericUnion2Impl();
+  }
+
+  void WriteVectorsImpl(std::vector<test_model::RecordContainingVectorsOfAliases> const& value) override {
+    writer_->WriteVectors(value);
+    mock_writer_.ExpectWriteVectorsImpl(value);
   }
 
   void CloseImpl() override {

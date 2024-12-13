@@ -197,6 +197,9 @@ void from_json(ordered_json const& j, test_model::RecordContainingGenericRecords
 void to_json(ordered_json& j, test_model::RecordContainingNestedGenericRecords const& value);
 void from_json(ordered_json const& j, test_model::RecordContainingNestedGenericRecords& value);
 
+void to_json(ordered_json& j, test_model::RecordContainingVectorsOfAliases const& value);
+void from_json(ordered_json const& j, test_model::RecordContainingVectorsOfAliases& value);
+
 void to_json(ordered_json& j, test_model::RecordWithComputedFields const& value);
 void from_json(ordered_json const& j, test_model::RecordWithComputedFields& value);
 
@@ -2477,6 +2480,37 @@ void from_json(ordered_json const& j, test_model::RecordContainingNestedGenericR
   }
 }
 
+void to_json(ordered_json& j, test_model::RecordContainingVectorsOfAliases const& value) {
+  j = ordered_json::object();
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.strings)) {
+    j.push_back({"strings", value.strings});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.maps)) {
+    j.push_back({"maps", value.maps});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.arrays)) {
+    j.push_back({"arrays", value.arrays});
+  }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.tuples)) {
+    j.push_back({"tuples", value.tuples});
+  }
+}
+
+void from_json(ordered_json const& j, test_model::RecordContainingVectorsOfAliases& value) {
+  if (auto it = j.find("strings"); it != j.end()) {
+    it->get_to(value.strings);
+  }
+  if (auto it = j.find("maps"); it != j.end()) {
+    it->get_to(value.maps);
+  }
+  if (auto it = j.find("arrays"); it != j.end()) {
+    it->get_to(value.arrays);
+  }
+  if (auto it = j.find("tuples"); it != j.end()) {
+    it->get_to(value.tuples);
+  }
+}
+
 void to_json(ordered_json& j, test_model::RecordWithComputedFields const& value) {
   j = ordered_json::object();
   if (yardl::ndjson::ShouldSerializeFieldValue(value.array_field)) {
@@ -3915,6 +3949,10 @@ void AliasesWriter::WriteStreamOfAliasedGenericUnion2Impl(test_model::AliasedGen
   ordered_json json_value = value;
   yardl::ndjson::WriteProtocolValue(stream_, "streamOfAliasedGenericUnion2", json_value);}
 
+void AliasesWriter::WriteVectorsImpl(std::vector<test_model::RecordContainingVectorsOfAliases> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "vectors", json_value);}
+
 void AliasesWriter::Flush() {
   stream_.flush();
 }
@@ -3961,6 +3999,10 @@ void AliasesReader::ReadAliasedGenericFixedVectorImpl(test_model::AliasedGeneric
 
 bool AliasesReader::ReadStreamOfAliasedGenericUnion2Impl(test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum>& value) {
   return yardl::ndjson::ReadProtocolValue(stream_, line_, "streamOfAliasedGenericUnion2", false, unused_step_, value);
+}
+
+void AliasesReader::ReadVectorsImpl(std::vector<test_model::RecordContainingVectorsOfAliases>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "vectors", true, unused_step_, value);
 }
 
 void AliasesReader::CloseImpl() {

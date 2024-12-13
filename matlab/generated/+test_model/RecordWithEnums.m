@@ -31,15 +31,33 @@ classdef RecordWithEnums < handle
     function res = eq(self, other)
       res = ...
         isa(other, "test_model.RecordWithEnums") && ...
-        isequal(self.enum, other.enum) && ...
-        isequal(self.flags, other.flags) && ...
-        isequal(self.flags_2, other.flags_2) && ...
-        isequal(self.rec, other.rec);
+        isequal({self.enum}, {other.enum}) && ...
+        isequal({self.flags}, {other.flags}) && ...
+        isequal({self.flags_2}, {other.flags_2}) && ...
+        isequal({self.rec}, {other.rec});
     end
 
     function res = ne(self, other)
       res = ~self.eq(other);
     end
+
+    function res = isequal(self, other)
+      res = all(eq(self, other));
+    end
   end
 
+  methods (Static)
+    function z = zeros(varargin)
+      elem = test_model.RecordWithEnums(enum=yardl.None, rec=yardl.None);
+      if nargin == 0
+        z = elem;
+        return;
+      end
+      sz = [varargin{:}];
+      if isscalar(sz)
+        sz = [sz, sz];
+      end
+      z = reshape(repelem(elem, prod(sz)), sz);
+    end
+  end
 end

@@ -22,13 +22,17 @@ classdef RecordWithFixedVectors < handle
     function res = eq(self, other)
       res = ...
         isa(other, "test_model.RecordWithFixedVectors") && ...
-        isequal(self.fixed_int_vector, other.fixed_int_vector) && ...
-        isequal(self.fixed_simple_record_vector, other.fixed_simple_record_vector) && ...
-        isequal(self.fixed_record_with_vlens_vector, other.fixed_record_with_vlens_vector);
+        isequal({self.fixed_int_vector}, {other.fixed_int_vector}) && ...
+        isequal({self.fixed_simple_record_vector}, {other.fixed_simple_record_vector}) && ...
+        isequal({self.fixed_record_with_vlens_vector}, {other.fixed_record_with_vlens_vector});
     end
 
     function res = ne(self, other)
       res = ~self.eq(other);
+    end
+
+    function res = isequal(self, other)
+      res = all(eq(self, other));
     end
   end
 

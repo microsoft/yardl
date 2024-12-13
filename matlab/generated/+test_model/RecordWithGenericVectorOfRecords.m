@@ -19,12 +19,30 @@ classdef RecordWithGenericVectorOfRecords < handle
     function res = eq(self, other)
       res = ...
         isa(other, "test_model.RecordWithGenericVectorOfRecords") && ...
-        isequal(self.v, other.v);
+        isequal({self.v}, {other.v});
     end
 
     function res = ne(self, other)
       res = ~self.eq(other);
     end
+
+    function res = isequal(self, other)
+      res = all(eq(self, other));
+    end
   end
 
+  methods (Static)
+    function z = zeros(varargin)
+      elem = test_model.RecordWithGenericVectorOfRecords(v=yardl.None);
+      if nargin == 0
+        z = elem;
+        return;
+      end
+      sz = [varargin{:}];
+      if isscalar(sz)
+        sz = [sz, sz];
+      end
+      z = reshape(repelem(elem, prod(sz)), sz);
+    end
+  end
 end

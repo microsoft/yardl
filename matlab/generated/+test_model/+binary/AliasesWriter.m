@@ -13,6 +13,7 @@ classdef AliasesWriter < yardl.binary.BinaryProtocolWriter & test_model.AliasesW
     aliased_generic_vector_serializer
     aliased_generic_fixed_vector_serializer
     stream_of_aliased_generic_union_2_serializer
+    vectors_serializer
   end
 
   methods
@@ -29,6 +30,7 @@ classdef AliasesWriter < yardl.binary.BinaryProtocolWriter & test_model.AliasesW
       self.aliased_generic_vector_serializer = yardl.binary.VectorSerializer(yardl.binary.Float32Serializer);
       self.aliased_generic_fixed_vector_serializer = yardl.binary.FixedVectorSerializer(yardl.binary.Float32Serializer, 3);
       self.stream_of_aliased_generic_union_2_serializer = yardl.binary.StreamSerializer(yardl.binary.UnionSerializer('basic_types.GenericUnion2', {yardl.binary.StringSerializer, yardl.binary.EnumSerializer('basic_types.Fruits', @basic_types.Fruits, yardl.binary.Int32Serializer)}, {@basic_types.GenericUnion2.T1, @basic_types.GenericUnion2.T2}));
+      self.vectors_serializer = yardl.binary.VectorSerializer(test_model.binary.RecordContainingVectorsOfAliasesSerializer());
     end
   end
 
@@ -71,6 +73,10 @@ classdef AliasesWriter < yardl.binary.BinaryProtocolWriter & test_model.AliasesW
 
     function write_stream_of_aliased_generic_union_2_(self, value)
       self.stream_of_aliased_generic_union_2_serializer.write(self.stream_, value);
+    end
+
+    function write_vectors_(self, value)
+      self.vectors_serializer.write(self.stream_, value);
     end
   end
 end

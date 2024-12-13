@@ -22,13 +22,17 @@ classdef RecordWithVectors < handle
     function res = eq(self, other)
       res = ...
         isa(other, "test_model.RecordWithVectors") && ...
-        isequal(self.default_vector, other.default_vector) && ...
-        isequal(self.default_vector_fixed_length, other.default_vector_fixed_length) && ...
-        isequal(self.vector_of_vectors, other.vector_of_vectors);
+        isequal({self.default_vector}, {other.default_vector}) && ...
+        isequal({self.default_vector_fixed_length}, {other.default_vector_fixed_length}) && ...
+        isequal({self.vector_of_vectors}, {other.vector_of_vectors});
     end
 
     function res = ne(self, other)
       res = ~self.eq(other);
+    end
+
+    function res = isequal(self, other)
+      res = all(eq(self, other));
     end
   end
 

@@ -49,17 +49,35 @@ classdef RecordWithGenericArrays < handle
     function res = eq(self, other)
       res = ...
         isa(other, "test_model.RecordWithGenericArrays") && ...
-        isequal(self.nd, other.nd) && ...
-        isequal(self.fixed_nd, other.fixed_nd) && ...
-        isequal(self.dynamic_nd, other.dynamic_nd) && ...
-        isequal(self.aliased_nd, other.aliased_nd) && ...
-        isequal(self.aliased_fixed_nd, other.aliased_fixed_nd) && ...
-        isequal(self.aliased_dynamic_nd, other.aliased_dynamic_nd);
+        isequal({self.nd}, {other.nd}) && ...
+        isequal({self.fixed_nd}, {other.fixed_nd}) && ...
+        isequal({self.dynamic_nd}, {other.dynamic_nd}) && ...
+        isequal({self.aliased_nd}, {other.aliased_nd}) && ...
+        isequal({self.aliased_fixed_nd}, {other.aliased_fixed_nd}) && ...
+        isequal({self.aliased_dynamic_nd}, {other.aliased_dynamic_nd});
     end
 
     function res = ne(self, other)
       res = ~self.eq(other);
     end
+
+    function res = isequal(self, other)
+      res = all(eq(self, other));
+    end
   end
 
+  methods (Static)
+    function z = zeros(varargin)
+      elem = test_model.RecordWithGenericArrays(nd=yardl.None, fixed_nd=yardl.None, dynamic_nd=yardl.None, aliased_nd=yardl.None, aliased_fixed_nd=yardl.None, aliased_dynamic_nd=yardl.None);
+      if nargin == 0
+        z = elem;
+        return;
+      end
+      sz = [varargin{:}];
+      if isscalar(sz)
+        sz = [sz, sz];
+      end
+      z = reshape(repelem(elem, prod(sz)), sz);
+    end
+  end
 end

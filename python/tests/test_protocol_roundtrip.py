@@ -794,6 +794,19 @@ def test_aliases(format: Format):
             ]
         )
 
+        strings = ["hello", "world"]
+        maps = [{"a": 1, "b": 2}, {"c": 3, "d": 4}]
+        my_tuple = tm.MyTuple(v1=42, v2=tm.SimpleRecord(x=1, y=2, z=3))
+        image = np.array([[1, 2], [3, 4]], dtype=np.float32)
+
+        vectors_record = tm.RecordContainingVectorsOfAliases(
+            strings=strings,
+            maps=maps,
+            arrays=[image, image],
+            tuples=[my_tuple, my_tuple],
+        )
+        w.write_vectors([vectors_record, vectors_record])
+
 
 def test_streams_of_unions_manual_close(format: Format):
     w = create_validating_writer_class(format, tm.StreamsOfUnionsWriterBase)()

@@ -9,8 +9,8 @@ classdef RecordWithMaps < handle
   methods
     function self = RecordWithMaps(kwargs)
       arguments
-        kwargs.set_1 = dictionary;
-        kwargs.set_2 = dictionary;
+        kwargs.set_1 = yardl.Map;
+        kwargs.set_2 = yardl.Map;
       end
       self.set_1 = kwargs.set_1;
       self.set_2 = kwargs.set_2;
@@ -19,12 +19,16 @@ classdef RecordWithMaps < handle
     function res = eq(self, other)
       res = ...
         isa(other, "test_model.RecordWithMaps") && ...
-        isequal(self.set_1, other.set_1) && ...
-        isequal(self.set_2, other.set_2);
+        isequal({self.set_1}, {other.set_1}) && ...
+        isequal({self.set_2}, {other.set_2});
     end
 
     function res = ne(self, other)
       res = ~self.eq(other);
+    end
+
+    function res = isequal(self, other)
+      res = all(eq(self, other));
     end
   end
 

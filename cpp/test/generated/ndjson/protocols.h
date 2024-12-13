@@ -1208,6 +1208,7 @@ class AliasesWriter : public test_model::AliasesWriterBase, yardl::ndjson::NDJso
   void WriteAliasedGenericFixedVectorImpl(test_model::AliasedGenericFixedVector<float> const& value) override;
   void WriteStreamOfAliasedGenericUnion2Impl(test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum> const& value) override;
   void EndStreamOfAliasedGenericUnion2Impl() override {}
+  void WriteVectorsImpl(std::vector<test_model::RecordContainingVectorsOfAliases> const& value) override;
   void CloseImpl() override;
 };
 
@@ -1233,6 +1234,7 @@ class AliasesReader : public test_model::AliasesReaderBase, yardl::ndjson::NDJso
   void ReadAliasedGenericVectorImpl(test_model::AliasedGenericVector<float>& value) override;
   void ReadAliasedGenericFixedVectorImpl(test_model::AliasedGenericFixedVector<float>& value) override;
   bool ReadStreamOfAliasedGenericUnion2Impl(test_model::AliasedGenericUnion2<test_model::AliasedString, test_model::AliasedEnum>& value) override;
+  void ReadVectorsImpl(std::vector<test_model::RecordContainingVectorsOfAliases>& value) override;
   void CloseImpl() override;
 };
 

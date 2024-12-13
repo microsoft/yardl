@@ -1143,6 +1143,9 @@ class BinaryAliasesWriter(_binary.BinaryProtocolWriter, AliasesWriterBase):
     def _write_stream_of_aliased_generic_union_2(self, value: collections.abc.Iterable[AliasedGenericUnion2[AliasedString, AliasedEnum]]) -> None:
         _binary.StreamSerializer(_binary.UnionSerializer(basic_types.GenericUnion2, [(basic_types.GenericUnion2.T1, _binary.string_serializer), (basic_types.GenericUnion2.T2, _binary.EnumSerializer(_binary.int32_serializer, basic_types.Fruits))])).write(self._stream, value)
 
+    def _write_vectors(self, value: list[RecordContainingVectorsOfAliases]) -> None:
+        _binary.VectorSerializer(RecordContainingVectorsOfAliasesSerializer()).write(self._stream, value)
+
 
 class BinaryAliasesReader(_binary.BinaryProtocolReader, AliasesReaderBase):
     """Binary writer for the Aliases protocol."""
@@ -1181,6 +1184,9 @@ class BinaryAliasesReader(_binary.BinaryProtocolReader, AliasesReaderBase):
 
     def _read_stream_of_aliased_generic_union_2(self) -> collections.abc.Iterable[AliasedGenericUnion2[AliasedString, AliasedEnum]]:
         return _binary.StreamSerializer(_binary.UnionSerializer(basic_types.GenericUnion2, [(basic_types.GenericUnion2.T1, _binary.string_serializer), (basic_types.GenericUnion2.T2, _binary.EnumSerializer(_binary.int32_serializer, basic_types.Fruits))])).read(self._stream)
+
+    def _read_vectors(self) -> list[RecordContainingVectorsOfAliases]:
+        return _binary.VectorSerializer(RecordContainingVectorsOfAliasesSerializer()).read(self._stream)
 
 class BinaryStreamsOfAliasedUnionsWriter(_binary.BinaryProtocolWriter, StreamsOfAliasedUnionsWriterBase):
     """Binary writer for the StreamsOfAliasedUnions protocol."""
@@ -2004,6 +2010,24 @@ class RecordContainingNestedGenericRecordsSerializer(_binary.RecordSerializer[Re
     def read(self, stream: _binary.CodedInputStream) -> RecordContainingNestedGenericRecords:
         field_values = self._read(stream)
         return RecordContainingNestedGenericRecords(f1=field_values[0], f1a=field_values[1], f2=field_values[2], f2a=field_values[3], nested=field_values[4])
+
+
+class RecordContainingVectorsOfAliasesSerializer(_binary.RecordSerializer[RecordContainingVectorsOfAliases]):
+    def __init__(self) -> None:
+        super().__init__([("strings", _binary.VectorSerializer(_binary.string_serializer)), ("maps", _binary.VectorSerializer(_binary.MapSerializer(_binary.string_serializer, _binary.int32_serializer))), ("arrays", _binary.VectorSerializer(_binary.NDArraySerializer(_binary.float32_serializer, 2))), ("tuples", _binary.VectorSerializer(tuples.binary.TupleSerializer(_binary.int32_serializer, SimpleRecordSerializer())))])
+
+    def write(self, stream: _binary.CodedOutputStream, value: RecordContainingVectorsOfAliases) -> None:
+        if isinstance(value, np.void):
+            self.write_numpy(stream, value)
+            return
+        self._write(stream, value.strings, value.maps, value.arrays, value.tuples)
+
+    def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
+        self._write(stream, value['strings'], value['maps'], value['arrays'], value['tuples'])
+
+    def read(self, stream: _binary.CodedInputStream) -> RecordContainingVectorsOfAliases:
+        field_values = self._read(stream)
+        return RecordContainingVectorsOfAliases(strings=field_values[0], maps=field_values[1], arrays=field_values[2], tuples=field_values[3])
 
 
 class RecordWithComputedFieldsSerializer(_binary.RecordSerializer[RecordWithComputedFields]):

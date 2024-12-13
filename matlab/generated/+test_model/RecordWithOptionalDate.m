@@ -16,11 +16,15 @@ classdef RecordWithOptionalDate < handle
     function res = eq(self, other)
       res = ...
         isa(other, "test_model.RecordWithOptionalDate") && ...
-        isequal(self.date_field, other.date_field);
+        isequal({self.date_field}, {other.date_field});
     end
 
     function res = ne(self, other)
       res = ~self.eq(other);
+    end
+
+    function res = isequal(self, other)
+      res = all(eq(self, other));
     end
   end
 

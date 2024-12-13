@@ -9,8 +9,8 @@ classdef RecordWithGenericMaps < handle
   methods
     function self = RecordWithGenericMaps(kwargs)
       arguments
-        kwargs.m = dictionary;
-        kwargs.am = dictionary;
+        kwargs.m = yardl.Map;
+        kwargs.am = yardl.Map;
       end
       self.m = kwargs.m;
       self.am = kwargs.am;
@@ -19,12 +19,16 @@ classdef RecordWithGenericMaps < handle
     function res = eq(self, other)
       res = ...
         isa(other, "test_model.RecordWithGenericMaps") && ...
-        isequal(self.m, other.m) && ...
-        isequal(self.am, other.am);
+        isequal({self.m}, {other.m}) && ...
+        isequal({self.am}, {other.am});
     end
 
     function res = ne(self, other)
       res = ~self.eq(other);
+    end
+
+    function res = isequal(self, other)
+      res = all(eq(self, other));
     end
   end
 
