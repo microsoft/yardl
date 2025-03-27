@@ -51,8 +51,8 @@ jobs:
       - name: Build yardl binaries for multiple platforms
         uses: goreleaser/goreleaser-action@v6
         with:
-          version: v1.13.0
-          args: release --rm-dist --snapshot
+          version: v2.8.1
+          args: release --clean --snapshot
 
       - name: Upload yardl binaries
         uses: actions/upload-artifact@v4
@@ -236,7 +236,7 @@ jobs:
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v6
         with:
-          version: v1.13.0
-          args: release --rm-dist
+          version: v2.8.1
+          args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
