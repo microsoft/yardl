@@ -332,10 +332,10 @@ int main(void) {
 
   GenericUnion<GenericRecord<int, std::string>, float> generic_union_record;
   r.ReadGenericUnionToReversed(generic_union_record);
-  assert(generic_union_record.index() == 0);
+  EVO_ASSERT(generic_union_record.index() == 0);
   validateGenericRecord(std::get<0>(generic_union_record));
   r.ReadGenericUnionOfChangedRecord(generic_union_record);
-  assert(generic_union_record.index() == 0);
+  EVO_ASSERT(generic_union_record.index() == 0);
   validateGenericRecord(std::get<0>(generic_union_record));
 
   GenericParentRecord<int> generic_parent;
@@ -343,18 +343,18 @@ int main(void) {
 
   validateGenericRecord(generic_parent.record);
 
-  assert(generic_parent.record_of_union.field_1.index() == 0);
-  assert(std::get<0>(generic_parent.record_of_union.field_1) == 42);
-  assert(generic_parent.record_of_union.field_2 == HelloWorld);
+  EVO_ASSERT(generic_parent.record_of_union.field_1.index() == 0);
+  EVO_ASSERT(std::get<0>(generic_parent.record_of_union.field_1) == 42);
+  EVO_ASSERT(generic_parent.record_of_union.field_2 == HelloWorld);
 
-  assert(generic_parent.union_of_record.index() == 0);
+  EVO_ASSERT(generic_parent.union_of_record.index() == 0);
   validateGenericRecord(std::get<0>(generic_parent.union_of_record));
 
   GenericRecord<UnchangedGeneric<int>, ChangedGeneric<std::string, int>> generic_nested;
   r.ReadGenericNestedRecords(generic_nested);
-  assert(generic_nested.field_1.field == 42);
-  assert(generic_nested.field_2.y == "42");
-  assert(generic_nested.field_2.z.field == 42);
+  EVO_ASSERT(generic_nested.field_1.field == 42);
+  EVO_ASSERT(generic_nested.field_2.y == "42");
+  EVO_ASSERT(generic_nested.field_2.z.field == 42);
 
   std::vector<AliasedClosedGenericRecord> generic_records(10);
   while (r.ReadGenericRecordStream(generic_records)) {

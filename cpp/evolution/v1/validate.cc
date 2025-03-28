@@ -376,18 +376,18 @@ int main(void) {
 
   std::variant<GenericRecord<int, std::string>, std::string> generic_record_or_string;
   r.ReadClosedGenericRecordToUnion(generic_record_or_string);
-  assert(generic_record_or_string.index() == 0);
+  EVO_ASSERT(generic_record_or_string.index() == 0);
   validateGenericRecord(std::get<0>(generic_record_or_string));
   r.ReadGenericRecordToAliasedUnion(generic_record_or_string);
-  assert(generic_record_or_string.index() == 0);
+  EVO_ASSERT(generic_record_or_string.index() == 0);
   validateGenericRecord(std::get<0>(generic_record_or_string));
 
   GenericUnion<GenericRecord<int, std::string>, float> generic_union_record;
   r.ReadGenericUnionToReversed(generic_union_record);
-  assert(generic_union_record.index() == 0);
+  EVO_ASSERT(generic_union_record.index() == 0);
   validateGenericRecord(std::get<0>(generic_union_record));
   r.ReadGenericUnionOfChangedRecord(generic_union_record);
-  assert(generic_union_record.index() == 0);
+  EVO_ASSERT(generic_union_record.index() == 0);
   validateGenericRecord(std::get<0>(generic_union_record));
 
   GenericParentRecord<int> generic_parent;
@@ -395,20 +395,20 @@ int main(void) {
 
   validateGenericRecord(generic_parent.record);
 
-  assert(generic_parent.record_of_union.field_1.index() == 0);
-  assert(std::get<0>(generic_parent.record_of_union.field_1) == 42);
-  assert(generic_parent.record_of_union.field_2 == "Hello, World");
+  EVO_ASSERT(generic_parent.record_of_union.field_1.index() == 0);
+  EVO_ASSERT(std::get<0>(generic_parent.record_of_union.field_1) == 42);
+  EVO_ASSERT(generic_parent.record_of_union.field_2 == HelloWorld);
 
-  assert(generic_parent.union_of_record.index() == 0);
+  EVO_ASSERT(generic_parent.union_of_record.index() == 0);
   validateGenericRecord(std::get<0>(generic_parent.union_of_record));
 
   GenericRecord<Unchanged, Changed> generic_nested;
   r.ReadGenericNestedRecords(generic_nested);
-  assert(generic_nested.field_1.field == 42);
-  assert(generic_nested.field_2.y.has_value());
-  assert(generic_nested.field_2.y.value() == "42");
-  assert(generic_nested.field_2.z.has_value());
-  assert(generic_nested.field_2.z.value().field == 42);
+  EVO_ASSERT(generic_nested.field_1.field == 42);
+  EVO_ASSERT(generic_nested.field_2.y.has_value());
+  EVO_ASSERT(generic_nested.field_2.y.value() == "42");
+  EVO_ASSERT(generic_nested.field_2.z.has_value());
+  EVO_ASSERT(generic_nested.field_2.z.value().field == 42);
 
   std::vector<AliasedClosedGenericRecord> generic_records(10);
   while (r.ReadGenericRecordStream(generic_records)) {
