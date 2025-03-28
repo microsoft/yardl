@@ -90,7 +90,7 @@ int main(void) {
   w.WriteVectorUnionReordered(vec);
 
   for (int i = 0; i < 42; i++) {
-    w.WriteStreamUnionReordered("Hello, World!");
+    w.WriteStreamUnionReordered(HelloWorld);
   }
   w.EndStreamUnionReordered();
 
