@@ -4,10 +4,24 @@
   "dependencies": [
     {
       "name": "hdf5",
-      "features": ["cpp"],
+      "features": [
+        "cpp"
+      ],
       "default-features": false
     },
     "date",
-    "xtensor"
-  ]
+    "xtensor",
+    "xtl"
+  ],
+  "overrides": [
+    {
+      "name": "xtensor",
+      "version": "0.25.0"
+    },
+    {
+      "name": "xtl",
+      "version": "0.7.7"
+    }
+  ],
+  "builtin-baseline": "1541d5458da5abc551fa9c64526cd4070404283e"
 }
