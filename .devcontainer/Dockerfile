@@ -83,7 +83,7 @@ RUN umask 0002 \
     && sudo chown -R :conda /opt/conda/envs
 
 # Install Go
-ARG GO_VERSION=1.21.3
+ARG GO_VERSION=1.24.4
 ENV GOROOT="/usr/local/go"
 ENV GOPATH="/go"
 ENV "PATH"="/usr/local/go/bin:/go/bin:${PATH}"
