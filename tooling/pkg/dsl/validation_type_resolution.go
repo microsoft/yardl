@@ -73,7 +73,7 @@ func resolveTypes(env *Environment, errorSink *validation.ErrorSink) *Environmen
 			self.VisitChildren(node, context)
 			err := resolveType(t, context.currentNamespace, context.symbolTable, true)
 			if err != nil {
-				errorSink.Add(validationError(t, err.Error()))
+				errorSink.Add(validationError(t, "%s", err.Error()))
 				break
 			}
 		}
@@ -115,7 +115,7 @@ func convertGenericReferences(env *Environment, errorSink *validation.ErrorSink)
 			self.VisitChildren(node, context)
 			err := resolveType(t, context.currentNamespace, context.symbolTable, false)
 			if err != nil {
-				errorSink.Add(validationError(t, err.Error()))
+				errorSink.Add(validationError(t, "%s", err.Error()))
 				break
 			}
 		}

@@ -121,7 +121,7 @@ func (meta *DefinitionMeta) UnmarshalYAML(value *yaml.Node) error {
 
 	parsedTypeString, err := parser.ParseType(meta.Name)
 	if err != nil {
-		return parseError(value, err.Error())
+		return parseError(value, "%s", err.Error())
 	}
 
 	parsedType := convertType(parsedTypeString, meta.NodeMeta)
@@ -347,7 +347,7 @@ func UnmarshalPattern(patternNode *yaml.Node) (Pattern, error) {
 	case "!!str":
 		patAst, err := parser.ParsePattern(patternNode.Value)
 		if err != nil {
-			return nil, parseError(patternNode, err.Error())
+			return nil, parseError(patternNode, "%s", err.Error())
 		}
 
 		pat := convertPattern(patAst, createNodeMeta(patternNode))
@@ -738,7 +738,7 @@ func UnmarshalTypeYAML(value *yaml.Node) (Type, error) {
 	case "!!str":
 		parsedTypeTree, err := parser.ParseType(value.Value)
 		if err != nil {
-			return nil, parseError(value, err.Error())
+			return nil, parseError(value, "%s", err.Error())
 		}
 
 		return convertType(parsedTypeTree, createNodeMeta(value)), nil

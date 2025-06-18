@@ -20,7 +20,7 @@ save_dir="/tmp/licenses"
 # This pattern will filter the known warnings out of the output.
 known_non_go_dependency_patterns="(golang.org/x/sys.*/unix)"
 
-go-licenses save ./... --ignore "github.com/microsoft/yardl/tooling" --save_path=$save_dir --force 2> >(grep -Pv "$known_non_go_dependency_patterns")
+go-licenses save --ignore "github.com/microsoft/yardl/tooling" --save_path=$save_dir --force 2> >(grep -Pv "$known_non_go_dependency_patterns") ./...
 
 # license and notice files will be in directories named after the import path of each library
 
