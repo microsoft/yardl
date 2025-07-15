@@ -4,8 +4,10 @@
 package include
 
 import (
+	"bytes"
 	"embed"
 	_ "embed"
+	"io"
 	"os"
 	"path"
 	"text/template"
@@ -38,12 +40,6 @@ func GenerateYardlHeaders(options packaging.CppCodegenOptions) error {
 		return err
 	}
 
-	outputFile, err := os.Create(path.Join(options.SourcesOutputDir, "yardl", "yardl.h"))
-	if err != nil {
-		return err
-	}
-	defer outputFile.Close()
-
 	arrayHeader := DefaultArrayHeader
 	if options.OverrideArrayHeader != "" {
 		arrayHeader = options.OverrideArrayHeader
@@ -53,10 +49,13 @@ func GenerateYardlHeaders(options packaging.CppCodegenOptions) error {
 	}{
 		ArrayHeader: arrayHeader,
 	}
-	err = tmpl.Execute(outputFile, data)
+
+	b := bytes.Buffer{}
+	w := io.Writer(&b)
+	err = tmpl.Execute(w, data)
 	if err != nil {
 		return err
 	}
 
-	return nil
+	return iocommon.WriteFileIfNeeded(path.Join(options.SourcesOutputDir, "yardl", "yardl.h"), b.Bytes(), 0644)
 }
