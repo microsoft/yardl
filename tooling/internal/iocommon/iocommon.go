@@ -3,7 +3,6 @@ package iocommon
 import (
 	"bytes"
 	"embed"
-	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
@@ -13,12 +12,12 @@ import (
 // Writes the given contents to the file at the given path, unless the file already
 // exists and its contents already match the given contents.
 func WriteFileIfNeeded(filename string, contents []byte, perm os.FileMode) error {
-	existingContents, err := ioutil.ReadFile(filename)
+	existingContents, err := os.ReadFile(filename)
 	if err == nil && bytes.Equal(existingContents, contents) {
 		return nil
 	}
 
-	return ioutil.WriteFile(filename, contents, perm)
+	return os.WriteFile(filename, contents, perm)
 }
 
 func CopyEmbeddedStaticFiles(destinationDir string, symlink bool, embeddedFiles embed.FS) error {

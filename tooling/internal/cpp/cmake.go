@@ -30,7 +30,10 @@ func writeCMakeLists(env *dsl.Environment, options packaging.CppCodegenOptions) 
 
 set(HOWARD_HINNANT_DATE_MINIMUM_VERSION "3.0.0")
 find_package(date ${HOWARD_HINNANT_DATE_MINIMUM_VERSION} REQUIRED)
+`, objectLibraryName)
 
+	if options.GenerateHDF5 {
+		w.WriteString(`
 if(VCPKG_TARGET_TRIPLET)
   set(HDF5_CXX_LIBRARIES hdf5::hdf5_cpp-shared)
 else()
@@ -39,13 +42,20 @@ endif()
 
 set(HDF5_MINIMUM_VERSION "1.10.5")
 find_package(HDF5 ${HDF5_MINIMUM_VERSION} REQUIRED COMPONENTS C CXX)
+`)
+	}
 
+	w.WriteString(`
 set(XTENSOR_MINIMUM_VERSION "0.21.10")
 find_package(xtensor ${XTENSOR_MINIMUM_VERSION} REQUIRED)
+`)
 
+	if options.GenerateNDJson {
+		w.WriteString(`
 set(NLOHMANN_JSON_MINIMUM_VERSION "3.11.1")
 find_package(nlohmann_json ${NLOHMANN_JSON_MINIMUM_VERSION} REQUIRED)
-`, objectLibraryName)
+`)
+	}
 
 	fmt.Fprintf(w, "add_library(%s OBJECT\n", objectLibraryName)
 	w.Indented(func() {
@@ -54,9 +64,13 @@ find_package(nlohmann_json ${NLOHMANN_JSON_MINIMUM_VERSION} REQUIRED)
 		}
 		w.WriteStringln("protocols.cc")
 		w.WriteStringln("types.cc")
-		w.WriteStringln("ndjson/protocols.cc")
+		if options.GenerateNDJson {
+			w.WriteStringln("ndjson/protocols.cc")
+		}
 		w.WriteStringln("binary/protocols.cc")
-		w.WriteStringln("hdf5/protocols.cc")
+		if options.GenerateHDF5 {
+			w.WriteStringln("hdf5/protocols.cc")
+		}
 		if options.InternalGenerateTranslator {
 			w.WriteStringln("translator_impl.cc")
 		}
@@ -65,11 +79,15 @@ find_package(nlohmann_json ${NLOHMANN_JSON_MINIMUM_VERSION} REQUIRED)
 
 	fmt.Fprintf(w, "target_link_libraries(%s\n", objectLibraryName)
 	w.Indented(func() {
-		w.WriteStringln("PUBLIC ${HDF5_C_LIBRARIES}")
-		w.WriteStringln("PUBLIC ${HDF5_CXX_LIBRARIES}")
+		if options.GenerateHDF5 {
+			w.WriteStringln("PUBLIC ${HDF5_C_LIBRARIES}")
+			w.WriteStringln("PUBLIC ${HDF5_CXX_LIBRARIES}")
+		}
 		w.WriteStringln("PUBLIC xtensor")
 		w.WriteStringln("PUBLIC date::date")
-		w.WriteStringln("PUBLIC nlohmann_json::nlohmann_json")
+		if options.GenerateNDJson {
+			w.WriteStringln("PUBLIC nlohmann_json::nlohmann_json")
+		}
 	})
 	w.WriteString(")\n")
 

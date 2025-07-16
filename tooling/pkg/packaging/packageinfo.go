@@ -185,6 +185,8 @@ func (versions *Versions) UnmarshalYAML(value *yaml.Node) error {
 type CppCodegenOptions struct {
 	PackageInfo         *PackageInfo `yaml:"-"`
 	SourcesOutputDir    string       `yaml:"sourcesOutputDir"`
+	GenerateHDF5        bool         `yaml:"generateHDF5"`
+	GenerateNDJson      bool         `yaml:"generateNDJson"`
 	GenerateCMakeLists  bool         `yaml:"generateCMakeLists"`
 	OverrideArrayHeader string       `yaml:"overrideArrayHeader"`
 
@@ -200,6 +202,8 @@ func (o CppCodegenOptions) ChangeOutputDir(newRelativeDir string) CppCodegenOpti
 
 func (o *CppCodegenOptions) UnmarshalYAML(value *yaml.Node) error {
 	// Set default values
+	o.GenerateHDF5 = true
+	o.GenerateNDJson = true
 	o.GenerateCMakeLists = true
 
 	type alias CppCodegenOptions
@@ -214,7 +218,16 @@ type JsonCodegenOptions struct {
 type PythonCodegenOptions struct {
 	PackageInfo                *PackageInfo `yaml:"-"`
 	OutputDir                  string       `yaml:"outputDir"`
+	GenerateNDJson             bool         `yaml:"generateNDJson"`
 	InternalSymlinkStaticFiles bool         `yaml:"internalSymlinkStaticFiles"`
+}
+
+func (o *PythonCodegenOptions) UnmarshalYAML(value *yaml.Node) error {
+	// Set default values
+	o.GenerateNDJson = true
+
+	type alias PythonCodegenOptions
+	return value.DecodeWithOptions((*alias)(o), yaml.DecodeOptions{KnownFields: true})
 }
 
 type MatlabCodegenOptions struct {
