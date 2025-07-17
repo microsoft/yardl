@@ -31,8 +31,5 @@ int main() {
   }
   reader.Close();  // validates that protocol was completed.
 
-  std::cout << "\nhexdump output:\n\n";
-  std::system(("hexdump -C " + filename).c_str());
-
   return 0;
 }

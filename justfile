@@ -39,9 +39,6 @@ benchmark-cmd := if matlab != "disabled" { "python python/benchmark.py --include
 @generate-ndarray: install
     cd models/test && yardl generate -c cpp.overrideArrayHeader=external/ndarray_impl.h
 
-@generate-sandbox-only-binary: install
-    cd models/sandbox && yardl generate -c namespace=OnlyBinary -c cpp.generateHDF5=false -c cpp.generateNDJson=false -c cpp.sourcesOutputDir=../../cpp/onlybinary/generated -c python.disabled=true -c matlab.disabled=true
-
 @build-sandbox: generate-sandbox ensure-build-dir
     cd cpp/build && ninja sandbox_exec
 
@@ -65,7 +62,7 @@ benchmark-cmd := if matlab != "disabled" { "python python/benchmark.py --include
     cd matlab; \
     {{ matlab-sandbox-cmd }} > /dev/null
 
-@build-all: generate generate-sandbox generate-remote-import generate-evolution generate-sandbox-only-binary configure
+@build-all: generate generate-sandbox generate-remote-import generate-evolution configure
     cd cpp/build && ninja
 
 @tooling-test:
@@ -104,11 +101,10 @@ benchmark-cmd := if matlab != "disabled" { "python python/benchmark.py --include
     ninja evolution/all; \
     python ../evolution/test-evolution.py
 
-@only-binary-test: generate-sandbox-only-binary ensure-build-dir
-    cd cpp/build; \
-    ./test_only_binary; \
+@codegen-optout-test: install
+    /usr/bin/env bash scripts/test-codegen-optout.sh
 
-@test: tooling-test cpp-test python-test matlab-test evolution-test cpp-test-ndarray only-binary-test
+@test: tooling-test cpp-test python-test matlab-test evolution-test cpp-test-ndarray codegen-optout-test
 
 @benchmark: generate ensure-build-dir
     cd cpp/build; \

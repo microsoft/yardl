@@ -6,43 +6,55 @@
 # target_link_libraries(<your target> test_model_generated)
 # add_subdirectory(<path to this directory>)
 
+option(TestModel_GENERATED_USE_HDF5 "Whether to use HDF5 in the generated code" ON)
+option(TestModel_GENERATED_USE_NDJSON "Whether to use NDJSON in the generated code" ON)
+
+set(TestModel_GENERATED_SOURCES
+  protocols.cc
+  types.cc
+  binary/protocols.cc
+)
+
+set(TestModel_GENERATED_LINK_LIBRARIES
+  xtensor
+  date::date
+)
+
 set(HOWARD_HINNANT_DATE_MINIMUM_VERSION "3.0.0")
 find_package(date ${HOWARD_HINNANT_DATE_MINIMUM_VERSION} REQUIRED)
-
-if(VCPKG_TARGET_TRIPLET)
-  set(HDF5_CXX_LIBRARIES hdf5::hdf5_cpp-shared)
-else()
-  set(HDF5_CXX_LIBRARIES hdf5::hdf5_cpp)
-endif()
-
-set(HDF5_MINIMUM_VERSION "1.10.5")
-find_package(HDF5 ${HDF5_MINIMUM_VERSION} REQUIRED COMPONENTS C CXX)
 
 set(XTENSOR_MINIMUM_VERSION "0.21.10")
 find_package(xtensor ${XTENSOR_MINIMUM_VERSION} REQUIRED)
 
-set(NLOHMANN_JSON_MINIMUM_VERSION "3.11.1")
-find_package(nlohmann_json ${NLOHMANN_JSON_MINIMUM_VERSION} REQUIRED)
-add_library(test_model_generated OBJECT
-  factories.cc
-  protocols.cc
-  types.cc
-  ndjson/protocols.cc
-  binary/protocols.cc
-  hdf5/protocols.cc
-  translator_impl.cc
-)
+if(TestModel_GENERATED_USE_HDF5)
+	if(VCPKG_TARGET_TRIPLET)
+		set(HDF5_CXX_LIBRARIES hdf5::hdf5_cpp-shared)
+	else()
+		set(HDF5_CXX_LIBRARIES hdf5::hdf5_cpp)
+	endif()
 
-target_link_libraries(test_model_generated
-  PUBLIC HDF5::HDF5
-  PUBLIC xtensor
-  PUBLIC date::date
-  PUBLIC nlohmann_json::nlohmann_json
-)
+	set(HDF5_MINIMUM_VERSION "1.10.5")
+	find_package(HDF5 ${HDF5_MINIMUM_VERSION} REQUIRED COMPONENTS C CXX)
 
-add_library(test_model_generated_mocks OBJECT
-  mocks.cc
-)
+	list(APPEND TestModel_GENERATED_SOURCES hdf5/protocols.cc)
+	list(APPEND TestModel_GENERATED_LINK_LIBRARIES HDF5::HDF5)
+endif()
+
+if(TestModel_GENERATED_USE_NDJSON)
+	set(NLOHMANN_JSON_MINIMUM_VERSION "3.11.1")
+	find_package(nlohmann_json ${NLOHMANN_JSON_MINIMUM_VERSION} REQUIRED)
+
+	list(APPEND TestModel_GENERATED_SOURCES ndjson/protocols.cc)
+	list(APPEND TestModel_GENERATED_LINK_LIBRARIES nlohmann_json::nlohmann_json)
+endif()
+
+list(APPEND TestModel_GENERATED_SOURCES factories.cc translator_impl.cc)
+
+add_library(test_model_generated OBJECT ${TestModel_GENERATED_SOURCES})
+
+target_link_libraries(test_model_generated ${TestModel_GENERATED_LINK_LIBRARIES})
+
+add_library(test_model_generated_mocks OBJECT mocks.cc)
 
 target_link_libraries(test_model_generated_mocks
   PUBLIC test_model_generated
