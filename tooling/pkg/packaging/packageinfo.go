@@ -184,6 +184,7 @@ func (versions *Versions) UnmarshalYAML(value *yaml.Node) error {
 
 type CppCodegenOptions struct {
 	PackageInfo         *PackageInfo `yaml:"-"`
+	Disabled            bool         `yaml:"disabled"`
 	SourcesOutputDir    string       `yaml:"sourcesOutputDir"`
 	GenerateHDF5        bool         `yaml:"generateHDF5"`
 	GenerateNDJson      bool         `yaml:"generateNDJson"`
@@ -212,11 +213,13 @@ func (o *CppCodegenOptions) UnmarshalYAML(value *yaml.Node) error {
 
 type JsonCodegenOptions struct {
 	PackageInfo *PackageInfo `yaml:"-"`
+	Disabled    bool         `yaml:"disabled"`
 	OutputDir   string       `yaml:"outputDir"`
 }
 
 type PythonCodegenOptions struct {
 	PackageInfo                *PackageInfo `yaml:"-"`
+	Disabled                   bool         `yaml:"disabled"`
 	OutputDir                  string       `yaml:"outputDir"`
 	GenerateNDJson             bool         `yaml:"generateNDJson"`
 	InternalSymlinkStaticFiles bool         `yaml:"internalSymlinkStaticFiles"`
@@ -232,6 +235,7 @@ func (o *PythonCodegenOptions) UnmarshalYAML(value *yaml.Node) error {
 
 type MatlabCodegenOptions struct {
 	PackageInfo                *PackageInfo `yaml:"-"`
+	Disabled                   bool         `yaml:"disabled"`
 	OutputDir                  string       `yaml:"outputDir"`
 	InternalSymlinkStaticFiles bool         `yaml:"internalSymlinkStaticFiles"`
 	InternalGenerateMocks      bool         `yaml:"internalGenerateMocks"`

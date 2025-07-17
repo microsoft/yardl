@@ -34,8 +34,7 @@ add_library(test_model_generated OBJECT
 )
 
 target_link_libraries(test_model_generated
-  PUBLIC ${HDF5_C_LIBRARIES}
-  PUBLIC ${HDF5_CXX_LIBRARIES}
+  PUBLIC HDF5::HDF5
   PUBLIC xtensor
   PUBLIC date::date
   PUBLIC nlohmann_json::nlohmann_json

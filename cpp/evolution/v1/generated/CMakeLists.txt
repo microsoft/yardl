@@ -32,8 +32,7 @@ add_library(evo_test_generated_v1 OBJECT
 )
 
 target_link_libraries(evo_test_generated_v1
-  PUBLIC ${HDF5_C_LIBRARIES}
-  PUBLIC ${HDF5_CXX_LIBRARIES}
+  PUBLIC HDF5::HDF5
   PUBLIC xtensor
   PUBLIC date::date
   PUBLIC nlohmann_json::nlohmann_json

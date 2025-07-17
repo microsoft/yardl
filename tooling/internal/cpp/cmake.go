@@ -80,8 +80,7 @@ find_package(nlohmann_json ${NLOHMANN_JSON_MINIMUM_VERSION} REQUIRED)
 	fmt.Fprintf(w, "target_link_libraries(%s\n", objectLibraryName)
 	w.Indented(func() {
 		if options.GenerateHDF5 {
-			w.WriteStringln("PUBLIC ${HDF5_C_LIBRARIES}")
-			w.WriteStringln("PUBLIC ${HDF5_CXX_LIBRARIES}")
+			w.WriteStringln("PUBLIC HDF5::HDF5")
 		}
 		w.WriteStringln("PUBLIC xtensor")
 		w.WriteStringln("PUBLIC date::date")
