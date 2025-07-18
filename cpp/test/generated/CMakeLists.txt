@@ -25,12 +25,6 @@ find_package(xtensor ${XTENSOR_MINIMUM_VERSION} REQUIRED)
 
 option(TestModel_GENERATED_USE_HDF5 "Whether to use HDF5 in the generated code" ON)
 if(TestModel_GENERATED_USE_HDF5)
-	if(VCPKG_TARGET_TRIPLET)
-		set(HDF5_CXX_LIBRARIES hdf5::hdf5_cpp-shared)
-	else()
-		set(HDF5_CXX_LIBRARIES hdf5::hdf5_cpp)
-	endif()
-
 	set(HDF5_MINIMUM_VERSION "1.10.5")
 	find_package(HDF5 ${HDF5_MINIMUM_VERSION} REQUIRED COMPONENTS CXX)
 
