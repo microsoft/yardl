@@ -3,8 +3,8 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 
-# This script generates the NOTICE file for the repository based on the GO dependencies
-# using the go-licenses tool.
+# This script tests the functionality of the yardl code generation tool with specific configurations,
+# including disabling HDF5 and NDJSON features at generation and build time.
 
 set -euo pipefail
 
