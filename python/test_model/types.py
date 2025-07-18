@@ -243,10 +243,10 @@ class RecordWithPrimitives:
         )
 
     def __str__(self) -> str:
-        return f"RecordWithPrimitives(boolField={self.bool_field}, int8Field={self.int8_field}, uint8Field={self.uint8_field}, int16Field={self.int16_field}, uint16Field={self.uint16_field}, int32Field={self.int32_field}, uint32Field={self.uint32_field}, int64Field={self.int64_field}, uint64Field={self.uint64_field}, sizeField={self.size_field}, float32Field={self.float32_field}, float64Field={self.float64_field}, complexfloat32Field={self.complexfloat32_field}, complexfloat64Field={self.complexfloat64_field}, dateField={self.date_field}, timeField={self.time_field}, datetimeField={self.datetime_field})"
+        return f"RecordWithPrimitives(bool_field={self.bool_field}, int8_field={self.int8_field}, uint8_field={self.uint8_field}, int16_field={self.int16_field}, uint16_field={self.uint16_field}, int32_field={self.int32_field}, uint32_field={self.uint32_field}, int64_field={self.int64_field}, uint64_field={self.uint64_field}, size_field={self.size_field}, float32_field={self.float32_field}, float64_field={self.float64_field}, complexfloat32_field={self.complexfloat32_field}, complexfloat64_field={self.complexfloat64_field}, date_field={self.date_field}, time_field={self.time_field}, datetime_field={self.datetime_field})"
 
     def __repr__(self) -> str:
-        return f"RecordWithPrimitives(boolField={repr(self.bool_field)}, int8Field={repr(self.int8_field)}, uint8Field={repr(self.uint8_field)}, int16Field={repr(self.int16_field)}, uint16Field={repr(self.uint16_field)}, int32Field={repr(self.int32_field)}, uint32Field={repr(self.uint32_field)}, int64Field={repr(self.int64_field)}, uint64Field={repr(self.uint64_field)}, sizeField={repr(self.size_field)}, float32Field={repr(self.float32_field)}, float64Field={repr(self.float64_field)}, complexfloat32Field={repr(self.complexfloat32_field)}, complexfloat64Field={repr(self.complexfloat64_field)}, dateField={repr(self.date_field)}, timeField={repr(self.time_field)}, datetimeField={repr(self.datetime_field)})"
+        return f"RecordWithPrimitives(bool_field={repr(self.bool_field)}, int8_field={repr(self.int8_field)}, uint8_field={repr(self.uint8_field)}, int16_field={repr(self.int16_field)}, uint16_field={repr(self.uint16_field)}, int32_field={repr(self.int32_field)}, uint32_field={repr(self.uint32_field)}, int64_field={repr(self.int64_field)}, uint64_field={repr(self.uint64_field)}, size_field={repr(self.size_field)}, float32_field={repr(self.float32_field)}, float64_field={repr(self.float64_field)}, complexfloat32_field={repr(self.complexfloat32_field)}, complexfloat64_field={repr(self.complexfloat64_field)}, date_field={repr(self.date_field)}, time_field={repr(self.time_field)}, datetime_field={repr(self.datetime_field)})"
 
 
 class RecordWithPrimitiveAliases:
@@ -296,10 +296,10 @@ class RecordWithPrimitiveAliases:
         )
 
     def __str__(self) -> str:
-        return f"RecordWithPrimitiveAliases(byteField={self.byte_field}, intField={self.int_field}, uintField={self.uint_field}, longField={self.long_field}, ulongField={self.ulong_field}, floatField={self.float_field}, doubleField={self.double_field}, complexfloatField={self.complexfloat_field}, complexdoubleField={self.complexdouble_field})"
+        return f"RecordWithPrimitiveAliases(byte_field={self.byte_field}, int_field={self.int_field}, uint_field={self.uint_field}, long_field={self.long_field}, ulong_field={self.ulong_field}, float_field={self.float_field}, double_field={self.double_field}, complexfloat_field={self.complexfloat_field}, complexdouble_field={self.complexdouble_field})"
 
     def __repr__(self) -> str:
-        return f"RecordWithPrimitiveAliases(byteField={repr(self.byte_field)}, intField={repr(self.int_field)}, uintField={repr(self.uint_field)}, longField={repr(self.long_field)}, ulongField={repr(self.ulong_field)}, floatField={repr(self.float_field)}, doubleField={repr(self.double_field)}, complexfloatField={repr(self.complexfloat_field)}, complexdoubleField={repr(self.complexdouble_field)})"
+        return f"RecordWithPrimitiveAliases(byte_field={repr(self.byte_field)}, int_field={repr(self.int_field)}, uint_field={repr(self.uint_field)}, long_field={repr(self.long_field)}, ulong_field={repr(self.ulong_field)}, float_field={repr(self.float_field)}, double_field={repr(self.double_field)}, complexfloat_field={repr(self.complexfloat_field)}, complexdouble_field={repr(self.complexdouble_field)})"
 
 
 class TupleWithRecords:
@@ -350,10 +350,10 @@ class RecordWithVectors:
         )
 
     def __str__(self) -> str:
-        return f"RecordWithVectors(defaultVector={self.default_vector}, defaultVectorFixedLength={self.default_vector_fixed_length}, vectorOfVectors={self.vector_of_vectors})"
+        return f"RecordWithVectors(default_vector={self.default_vector}, default_vector_fixed_length={self.default_vector_fixed_length}, vector_of_vectors={self.vector_of_vectors})"
 
     def __repr__(self) -> str:
-        return f"RecordWithVectors(defaultVector={repr(self.default_vector)}, defaultVectorFixedLength={repr(self.default_vector_fixed_length)}, vectorOfVectors={repr(self.vector_of_vectors)})"
+        return f"RecordWithVectors(default_vector={repr(self.default_vector)}, default_vector_fixed_length={repr(self.default_vector_fixed_length)}, vector_of_vectors={repr(self.vector_of_vectors)})"
 
 
 class RecordWithVectorOfTimes:
@@ -424,10 +424,10 @@ class RecordWithArrays:
         )
 
     def __str__(self) -> str:
-        return f"RecordWithArrays(defaultArray={self.default_array}, defaultArrayWithEmptyDimension={self.default_array_with_empty_dimension}, rank1Array={self.rank_1_array}, rank2Array={self.rank_2_array}, rank2ArrayWithNamedDimensions={self.rank_2_array_with_named_dimensions}, rank2FixedArray={self.rank_2_fixed_array}, rank2FixedArrayWithNamedDimensions={self.rank_2_fixed_array_with_named_dimensions}, dynamicArray={self.dynamic_array}, arrayOfVectors={self.array_of_vectors})"
+        return f"RecordWithArrays(default_array={self.default_array}, default_array_with_empty_dimension={self.default_array_with_empty_dimension}, rank_1_array={self.rank_1_array}, rank_2_array={self.rank_2_array}, rank_2_array_with_named_dimensions={self.rank_2_array_with_named_dimensions}, rank_2_fixed_array={self.rank_2_fixed_array}, rank_2_fixed_array_with_named_dimensions={self.rank_2_fixed_array_with_named_dimensions}, dynamic_array={self.dynamic_array}, array_of_vectors={self.array_of_vectors})"
 
     def __repr__(self) -> str:
-        return f"RecordWithArrays(defaultArray={repr(self.default_array)}, defaultArrayWithEmptyDimension={repr(self.default_array_with_empty_dimension)}, rank1Array={repr(self.rank_1_array)}, rank2Array={repr(self.rank_2_array)}, rank2ArrayWithNamedDimensions={repr(self.rank_2_array_with_named_dimensions)}, rank2FixedArray={repr(self.rank_2_fixed_array)}, rank2FixedArrayWithNamedDimensions={repr(self.rank_2_fixed_array_with_named_dimensions)}, dynamicArray={repr(self.dynamic_array)}, arrayOfVectors={repr(self.array_of_vectors)})"
+        return f"RecordWithArrays(default_array={repr(self.default_array)}, default_array_with_empty_dimension={repr(self.default_array_with_empty_dimension)}, rank_1_array={repr(self.rank_1_array)}, rank_2_array={repr(self.rank_2_array)}, rank_2_array_with_named_dimensions={repr(self.rank_2_array_with_named_dimensions)}, rank_2_fixed_array={repr(self.rank_2_fixed_array)}, rank_2_fixed_array_with_named_dimensions={repr(self.rank_2_fixed_array_with_named_dimensions)}, dynamic_array={repr(self.dynamic_array)}, array_of_vectors={repr(self.array_of_vectors)})"
 
 
 class RecordWithArraysSimpleSyntax:
@@ -477,10 +477,10 @@ class RecordWithArraysSimpleSyntax:
         )
 
     def __str__(self) -> str:
-        return f"RecordWithArraysSimpleSyntax(defaultArray={self.default_array}, defaultArrayWithEmptyDimension={self.default_array_with_empty_dimension}, rank1Array={self.rank_1_array}, rank2Array={self.rank_2_array}, rank2ArrayWithNamedDimensions={self.rank_2_array_with_named_dimensions}, rank2FixedArray={self.rank_2_fixed_array}, rank2FixedArrayWithNamedDimensions={self.rank_2_fixed_array_with_named_dimensions}, dynamicArray={self.dynamic_array}, arrayOfVectors={self.array_of_vectors})"
+        return f"RecordWithArraysSimpleSyntax(default_array={self.default_array}, default_array_with_empty_dimension={self.default_array_with_empty_dimension}, rank_1_array={self.rank_1_array}, rank_2_array={self.rank_2_array}, rank_2_array_with_named_dimensions={self.rank_2_array_with_named_dimensions}, rank_2_fixed_array={self.rank_2_fixed_array}, rank_2_fixed_array_with_named_dimensions={self.rank_2_fixed_array_with_named_dimensions}, dynamic_array={self.dynamic_array}, array_of_vectors={self.array_of_vectors})"
 
     def __repr__(self) -> str:
-        return f"RecordWithArraysSimpleSyntax(defaultArray={repr(self.default_array)}, defaultArrayWithEmptyDimension={repr(self.default_array_with_empty_dimension)}, rank1Array={repr(self.rank_1_array)}, rank2Array={repr(self.rank_2_array)}, rank2ArrayWithNamedDimensions={repr(self.rank_2_array_with_named_dimensions)}, rank2FixedArray={repr(self.rank_2_fixed_array)}, rank2FixedArrayWithNamedDimensions={repr(self.rank_2_fixed_array_with_named_dimensions)}, dynamicArray={repr(self.dynamic_array)}, arrayOfVectors={repr(self.array_of_vectors)})"
+        return f"RecordWithArraysSimpleSyntax(default_array={repr(self.default_array)}, default_array_with_empty_dimension={repr(self.default_array_with_empty_dimension)}, rank_1_array={repr(self.rank_1_array)}, rank_2_array={repr(self.rank_2_array)}, rank_2_array_with_named_dimensions={repr(self.rank_2_array_with_named_dimensions)}, rank_2_fixed_array={repr(self.rank_2_fixed_array)}, rank_2_fixed_array_with_named_dimensions={repr(self.rank_2_fixed_array_with_named_dimensions)}, dynamic_array={repr(self.dynamic_array)}, array_of_vectors={repr(self.array_of_vectors)})"
 
 
 class RecordWithOptionalFields:
@@ -506,10 +506,10 @@ class RecordWithOptionalFields:
         )
 
     def __str__(self) -> str:
-        return f"RecordWithOptionalFields(optionalInt={self.optional_int}, optionalIntAlternateSyntax={self.optional_int_alternate_syntax}, optionalTime={self.optional_time})"
+        return f"RecordWithOptionalFields(optional_int={self.optional_int}, optional_int_alternate_syntax={self.optional_int_alternate_syntax}, optional_time={self.optional_time})"
 
     def __repr__(self) -> str:
-        return f"RecordWithOptionalFields(optionalInt={repr(self.optional_int)}, optionalIntAlternateSyntax={repr(self.optional_int_alternate_syntax)}, optionalTime={repr(self.optional_time)})"
+        return f"RecordWithOptionalFields(optional_int={repr(self.optional_int)}, optional_int_alternate_syntax={repr(self.optional_int_alternate_syntax)}, optional_time={repr(self.optional_time)})"
 
 
 class RecordWithVlens:
@@ -581,10 +581,10 @@ class RecordWithOptionalVector:
         )
 
     def __str__(self) -> str:
-        return f"RecordWithOptionalVector(optionalVector={self.optional_vector})"
+        return f"RecordWithOptionalVector(optional_vector={self.optional_vector})"
 
     def __repr__(self) -> str:
-        return f"RecordWithOptionalVector(optionalVector={repr(self.optional_vector)})"
+        return f"RecordWithOptionalVector(optional_vector={repr(self.optional_vector)})"
 
 
 class RecordWithFixedVectors:
@@ -610,10 +610,10 @@ class RecordWithFixedVectors:
         )
 
     def __str__(self) -> str:
-        return f"RecordWithFixedVectors(fixedIntVector={self.fixed_int_vector}, fixedSimpleRecordVector={self.fixed_simple_record_vector}, fixedRecordWithVlensVector={self.fixed_record_with_vlens_vector})"
+        return f"RecordWithFixedVectors(fixed_int_vector={self.fixed_int_vector}, fixed_simple_record_vector={self.fixed_simple_record_vector}, fixed_record_with_vlens_vector={self.fixed_record_with_vlens_vector})"
 
     def __repr__(self) -> str:
-        return f"RecordWithFixedVectors(fixedIntVector={repr(self.fixed_int_vector)}, fixedSimpleRecordVector={repr(self.fixed_simple_record_vector)}, fixedRecordWithVlensVector={repr(self.fixed_record_with_vlens_vector)})"
+        return f"RecordWithFixedVectors(fixed_int_vector={repr(self.fixed_int_vector)}, fixed_simple_record_vector={repr(self.fixed_simple_record_vector)}, fixed_record_with_vlens_vector={repr(self.fixed_record_with_vlens_vector)})"
 
 
 class RecordWithFixedArrays:
@@ -639,10 +639,10 @@ class RecordWithFixedArrays:
         )
 
     def __str__(self) -> str:
-        return f"RecordWithFixedArrays(ints={self.ints}, fixedSimpleRecordArray={self.fixed_simple_record_array}, fixedRecordWithVlensArray={self.fixed_record_with_vlens_array})"
+        return f"RecordWithFixedArrays(ints={self.ints}, fixed_simple_record_array={self.fixed_simple_record_array}, fixed_record_with_vlens_array={self.fixed_record_with_vlens_array})"
 
     def __repr__(self) -> str:
-        return f"RecordWithFixedArrays(ints={repr(self.ints)}, fixedSimpleRecordArray={repr(self.fixed_simple_record_array)}, fixedRecordWithVlensArray={repr(self.fixed_record_with_vlens_array)})"
+        return f"RecordWithFixedArrays(ints={repr(self.ints)}, fixed_simple_record_array={repr(self.fixed_simple_record_array)}, fixed_record_with_vlens_array={repr(self.fixed_record_with_vlens_array)})"
 
 
 IntArray = npt.NDArray[np.int32]
@@ -678,10 +678,10 @@ class RecordWithNamedFixedArrays:
         )
 
     def __str__(self) -> str:
-        return f"RecordWithNamedFixedArrays(ints={self.ints}, fixedSimpleRecordArray={self.fixed_simple_record_array}, fixedRecordWithVlensArray={self.fixed_record_with_vlens_array})"
+        return f"RecordWithNamedFixedArrays(ints={self.ints}, fixed_simple_record_array={self.fixed_simple_record_array}, fixed_record_with_vlens_array={self.fixed_record_with_vlens_array})"
 
     def __repr__(self) -> str:
-        return f"RecordWithNamedFixedArrays(ints={repr(self.ints)}, fixedSimpleRecordArray={repr(self.fixed_simple_record_array)}, fixedRecordWithVlensArray={repr(self.fixed_record_with_vlens_array)})"
+        return f"RecordWithNamedFixedArrays(ints={repr(self.ints)}, fixed_simple_record_array={repr(self.fixed_simple_record_array)}, fixed_record_with_vlens_array={repr(self.fixed_record_with_vlens_array)})"
 
 
 class RecordWithNDArrays:
@@ -707,10 +707,10 @@ class RecordWithNDArrays:
         )
 
     def __str__(self) -> str:
-        return f"RecordWithNDArrays(ints={self.ints}, fixedSimpleRecordArray={self.fixed_simple_record_array}, fixedRecordWithVlensArray={self.fixed_record_with_vlens_array})"
+        return f"RecordWithNDArrays(ints={self.ints}, fixed_simple_record_array={self.fixed_simple_record_array}, fixed_record_with_vlens_array={self.fixed_record_with_vlens_array})"
 
     def __repr__(self) -> str:
-        return f"RecordWithNDArrays(ints={repr(self.ints)}, fixedSimpleRecordArray={repr(self.fixed_simple_record_array)}, fixedRecordWithVlensArray={repr(self.fixed_record_with_vlens_array)})"
+        return f"RecordWithNDArrays(ints={repr(self.ints)}, fixed_simple_record_array={repr(self.fixed_simple_record_array)}, fixed_record_with_vlens_array={repr(self.fixed_record_with_vlens_array)})"
 
 
 class RecordWithNDArraysSingleDimension:
@@ -736,10 +736,10 @@ class RecordWithNDArraysSingleDimension:
         )
 
     def __str__(self) -> str:
-        return f"RecordWithNDArraysSingleDimension(ints={self.ints}, fixedSimpleRecordArray={self.fixed_simple_record_array}, fixedRecordWithVlensArray={self.fixed_record_with_vlens_array})"
+        return f"RecordWithNDArraysSingleDimension(ints={self.ints}, fixed_simple_record_array={self.fixed_simple_record_array}, fixed_record_with_vlens_array={self.fixed_record_with_vlens_array})"
 
     def __repr__(self) -> str:
-        return f"RecordWithNDArraysSingleDimension(ints={repr(self.ints)}, fixedSimpleRecordArray={repr(self.fixed_simple_record_array)}, fixedRecordWithVlensArray={repr(self.fixed_record_with_vlens_array)})"
+        return f"RecordWithNDArraysSingleDimension(ints={repr(self.ints)}, fixed_simple_record_array={repr(self.fixed_simple_record_array)}, fixed_record_with_vlens_array={repr(self.fixed_record_with_vlens_array)})"
 
 
 class RecordWithDynamicNDArrays:
@@ -765,10 +765,10 @@ class RecordWithDynamicNDArrays:
         )
 
     def __str__(self) -> str:
-        return f"RecordWithDynamicNDArrays(ints={self.ints}, simpleRecordArray={self.simple_record_array}, recordWithVlensArray={self.record_with_vlens_array})"
+        return f"RecordWithDynamicNDArrays(ints={self.ints}, simple_record_array={self.simple_record_array}, record_with_vlens_array={self.record_with_vlens_array})"
 
     def __repr__(self) -> str:
-        return f"RecordWithDynamicNDArrays(ints={repr(self.ints)}, simpleRecordArray={repr(self.simple_record_array)}, recordWithVlensArray={repr(self.record_with_vlens_array)})"
+        return f"RecordWithDynamicNDArrays(ints={repr(self.ints)}, simple_record_array={repr(self.simple_record_array)}, record_with_vlens_array={repr(self.record_with_vlens_array)})"
 
 
 NamedFixedNDArray = npt.NDArray[np.int32]
@@ -792,10 +792,10 @@ class RecordWithFixedCollections:
         )
 
     def __str__(self) -> str:
-        return f"RecordWithFixedCollections(fixedVector={self.fixed_vector}, fixedArray={self.fixed_array})"
+        return f"RecordWithFixedCollections(fixed_vector={self.fixed_vector}, fixed_array={self.fixed_array})"
 
     def __repr__(self) -> str:
-        return f"RecordWithFixedCollections(fixedVector={repr(self.fixed_vector)}, fixedArray={repr(self.fixed_array)})"
+        return f"RecordWithFixedCollections(fixed_vector={repr(self.fixed_vector)}, fixed_array={repr(self.fixed_array)})"
 
 
 class RecordWithVlenCollections:
@@ -881,10 +881,10 @@ class RecordWithUnionsOfContainers:
         )
 
     def __str__(self) -> str:
-        return f"RecordWithUnionsOfContainers(mapOrScalar={self.map_or_scalar}, vectorOrScalar={self.vector_or_scalar}, arrayOrScalar={self.array_or_scalar})"
+        return f"RecordWithUnionsOfContainers(map_or_scalar={self.map_or_scalar}, vector_or_scalar={self.vector_or_scalar}, array_or_scalar={self.array_or_scalar})"
 
     def __repr__(self) -> str:
-        return f"RecordWithUnionsOfContainers(mapOrScalar={repr(self.map_or_scalar)}, vectorOrScalar={repr(self.vector_or_scalar)}, arrayOrScalar={repr(self.array_or_scalar)})"
+        return f"RecordWithUnionsOfContainers(map_or_scalar={repr(self.map_or_scalar)}, vector_or_scalar={repr(self.vector_or_scalar)}, array_or_scalar={repr(self.array_or_scalar)})"
 
 
 NamedNDArray = npt.NDArray[np.int32]
@@ -908,10 +908,10 @@ class RecordWithMaps:
         )
 
     def __str__(self) -> str:
-        return f"RecordWithMaps(set1={self.set_1}, set2={self.set_2})"
+        return f"RecordWithMaps(set_1={self.set_1}, set_2={self.set_2})"
 
     def __repr__(self) -> str:
-        return f"RecordWithMaps(set1={repr(self.set_1)}, set2={repr(self.set_2)})"
+        return f"RecordWithMaps(set_1={repr(self.set_1)}, set_2={repr(self.set_2)})"
 
 
 Fruits = basic_types.Fruits
@@ -979,10 +979,10 @@ class RecordWithEnums:
         )
 
     def __str__(self) -> str:
-        return f"RecordWithEnums(enum={self.enum}, flags={self.flags}, flags2={self.flags_2}, rec={self.rec})"
+        return f"RecordWithEnums(enum={self.enum}, flags={self.flags}, flags_2={self.flags_2}, rec={self.rec})"
 
     def __repr__(self) -> str:
-        return f"RecordWithEnums(enum={repr(self.enum)}, flags={repr(self.flags)}, flags2={repr(self.flags_2)}, rec={repr(self.rec)})"
+        return f"RecordWithEnums(enum={repr(self.enum)}, flags={repr(self.flags)}, flags_2={repr(self.flags_2)}, rec={repr(self.rec)})"
 
 
 Image = image.Image[T_NP]
@@ -1014,10 +1014,10 @@ class GenericRecord(typing.Generic[T1, T2, T2_NP]):
         )
 
     def __str__(self) -> str:
-        return f"GenericRecord(scalar1={self.scalar_1}, scalar2={self.scalar_2}, vector1={self.vector_1}, image2={self.image_2})"
+        return f"GenericRecord(scalar_1={self.scalar_1}, scalar_2={self.scalar_2}, vector_1={self.vector_1}, image_2={self.image_2})"
 
     def __repr__(self) -> str:
-        return f"GenericRecord(scalar1={repr(self.scalar_1)}, scalar2={repr(self.scalar_2)}, vector1={repr(self.vector_1)}, image2={repr(self.image_2)})"
+        return f"GenericRecord(scalar_1={repr(self.scalar_1)}, scalar_2={repr(self.scalar_2)}, vector_1={repr(self.vector_1)}, image_2={repr(self.image_2)})"
 
 
 MyTuple = basic_types.MyTuple
@@ -1043,10 +1043,10 @@ class RecordWithAliasedGenerics:
         )
 
     def __str__(self) -> str:
-        return f"RecordWithAliasedGenerics(myStrings={self.my_strings}, aliasedStrings={self.aliased_strings})"
+        return f"RecordWithAliasedGenerics(my_strings={self.my_strings}, aliased_strings={self.aliased_strings})"
 
     def __repr__(self) -> str:
-        return f"RecordWithAliasedGenerics(myStrings={repr(self.my_strings)}, aliasedStrings={repr(self.aliased_strings)})"
+        return f"RecordWithAliasedGenerics(my_strings={repr(self.my_strings)}, aliased_strings={repr(self.aliased_strings)})"
 
 
 AliasedString = str
@@ -1293,10 +1293,10 @@ class RecordWithGenericArrays(typing.Generic[T_NP]):
         )
 
     def __str__(self) -> str:
-        return f"RecordWithGenericArrays(nd={self.nd}, fixedNd={self.fixed_nd}, dynamicNd={self.dynamic_nd}, aliasedNd={self.aliased_nd}, aliasedFixedNd={self.aliased_fixed_nd}, aliasedDynamicNd={self.aliased_dynamic_nd})"
+        return f"RecordWithGenericArrays(nd={self.nd}, fixed_nd={self.fixed_nd}, dynamic_nd={self.dynamic_nd}, aliased_nd={self.aliased_nd}, aliased_fixed_nd={self.aliased_fixed_nd}, aliased_dynamic_nd={self.aliased_dynamic_nd})"
 
     def __repr__(self) -> str:
-        return f"RecordWithGenericArrays(nd={repr(self.nd)}, fixedNd={repr(self.fixed_nd)}, dynamicNd={repr(self.dynamic_nd)}, aliasedNd={repr(self.aliased_nd)}, aliasedFixedNd={repr(self.aliased_fixed_nd)}, aliasedDynamicNd={repr(self.aliased_dynamic_nd)})"
+        return f"RecordWithGenericArrays(nd={repr(self.nd)}, fixed_nd={repr(self.fixed_nd)}, dynamic_nd={repr(self.dynamic_nd)}, aliased_nd={repr(self.aliased_nd)}, aliased_fixed_nd={repr(self.aliased_fixed_nd)}, aliased_dynamic_nd={repr(self.aliased_dynamic_nd)})"
 
 
 class RecordWithGenericMaps(typing.Generic[T, U]):
@@ -1908,10 +1908,10 @@ class RecordWithComputedFields:
         )
 
     def __str__(self) -> str:
-        return f"RecordWithComputedFields(arrayField={self.array_field}, arrayFieldMapDimensions={self.array_field_map_dimensions}, dynamicArrayField={self.dynamic_array_field}, fixedArrayField={self.fixed_array_field}, intField={self.int_field}, int8Field={self.int8_field}, uint8Field={self.uint8_field}, int16Field={self.int16_field}, uint16Field={self.uint16_field}, uint32Field={self.uint32_field}, int64Field={self.int64_field}, uint64Field={self.uint64_field}, sizeField={self.size_field}, float32Field={self.float32_field}, float64Field={self.float64_field}, complexfloat32Field={self.complexfloat32_field}, complexfloat64Field={self.complexfloat64_field}, stringField={self.string_field}, tupleField={self.tuple_field}, vectorField={self.vector_field}, vectorOfVectorsField={self.vector_of_vectors_field}, fixedVectorField={self.fixed_vector_field}, fixedVectorOfVectorsField={self.fixed_vector_of_vectors_field}, optionalNamedArray={self.optional_named_array}, intFloatUnion={self.int_float_union}, nullableIntFloatUnion={self.nullable_int_float_union}, unionWithNestedGenericUnion={self.union_with_nested_generic_union}, mapField={self.map_field})"
+        return f"RecordWithComputedFields(array_field={self.array_field}, array_field_map_dimensions={self.array_field_map_dimensions}, dynamic_array_field={self.dynamic_array_field}, fixed_array_field={self.fixed_array_field}, int_field={self.int_field}, int8_field={self.int8_field}, uint8_field={self.uint8_field}, int16_field={self.int16_field}, uint16_field={self.uint16_field}, uint32_field={self.uint32_field}, int64_field={self.int64_field}, uint64_field={self.uint64_field}, size_field={self.size_field}, float32_field={self.float32_field}, float64_field={self.float64_field}, complexfloat32_field={self.complexfloat32_field}, complexfloat64_field={self.complexfloat64_field}, string_field={self.string_field}, tuple_field={self.tuple_field}, vector_field={self.vector_field}, vector_of_vectors_field={self.vector_of_vectors_field}, fixed_vector_field={self.fixed_vector_field}, fixed_vector_of_vectors_field={self.fixed_vector_of_vectors_field}, optional_named_array={self.optional_named_array}, int_float_union={self.int_float_union}, nullable_int_float_union={self.nullable_int_float_union}, union_with_nested_generic_union={self.union_with_nested_generic_union}, map_field={self.map_field})"
 
     def __repr__(self) -> str:
-        return f"RecordWithComputedFields(arrayField={repr(self.array_field)}, arrayFieldMapDimensions={repr(self.array_field_map_dimensions)}, dynamicArrayField={repr(self.dynamic_array_field)}, fixedArrayField={repr(self.fixed_array_field)}, intField={repr(self.int_field)}, int8Field={repr(self.int8_field)}, uint8Field={repr(self.uint8_field)}, int16Field={repr(self.int16_field)}, uint16Field={repr(self.uint16_field)}, uint32Field={repr(self.uint32_field)}, int64Field={repr(self.int64_field)}, uint64Field={repr(self.uint64_field)}, sizeField={repr(self.size_field)}, float32Field={repr(self.float32_field)}, float64Field={repr(self.float64_field)}, complexfloat32Field={repr(self.complexfloat32_field)}, complexfloat64Field={repr(self.complexfloat64_field)}, stringField={repr(self.string_field)}, tupleField={repr(self.tuple_field)}, vectorField={repr(self.vector_field)}, vectorOfVectorsField={repr(self.vector_of_vectors_field)}, fixedVectorField={repr(self.fixed_vector_field)}, fixedVectorOfVectorsField={repr(self.fixed_vector_of_vectors_field)}, optionalNamedArray={repr(self.optional_named_array)}, intFloatUnion={repr(self.int_float_union)}, nullableIntFloatUnion={repr(self.nullable_int_float_union)}, unionWithNestedGenericUnion={repr(self.union_with_nested_generic_union)}, mapField={repr(self.map_field)})"
+        return f"RecordWithComputedFields(array_field={repr(self.array_field)}, array_field_map_dimensions={repr(self.array_field_map_dimensions)}, dynamic_array_field={repr(self.dynamic_array_field)}, fixed_array_field={repr(self.fixed_array_field)}, int_field={repr(self.int_field)}, int8_field={repr(self.int8_field)}, uint8_field={repr(self.uint8_field)}, int16_field={repr(self.int16_field)}, uint16_field={repr(self.uint16_field)}, uint32_field={repr(self.uint32_field)}, int64_field={repr(self.int64_field)}, uint64_field={repr(self.uint64_field)}, size_field={repr(self.size_field)}, float32_field={repr(self.float32_field)}, float64_field={repr(self.float64_field)}, complexfloat32_field={repr(self.complexfloat32_field)}, complexfloat64_field={repr(self.complexfloat64_field)}, string_field={repr(self.string_field)}, tuple_field={repr(self.tuple_field)}, vector_field={repr(self.vector_field)}, vector_of_vectors_field={repr(self.vector_of_vectors_field)}, fixed_vector_field={repr(self.fixed_vector_field)}, fixed_vector_of_vectors_field={repr(self.fixed_vector_of_vectors_field)}, optional_named_array={repr(self.optional_named_array)}, int_float_union={repr(self.int_float_union)}, nullable_int_float_union={repr(self.nullable_int_float_union)}, union_with_nested_generic_union={repr(self.union_with_nested_generic_union)}, map_field={repr(self.map_field)})"
 
 
 class GenericUnionWithRepeatedTypeParameters(typing.Generic[T, T_NP]):
@@ -2018,10 +2018,10 @@ class RecordWithKeywordFields:
         )
 
     def __str__(self) -> str:
-        return f"RecordWithKeywordFields(int={self.int_}, sizeof={self.sizeof}, if={self.if_})"
+        return f"RecordWithKeywordFields(int_={self.int_}, sizeof={self.sizeof}, if_={self.if_})"
 
     def __repr__(self) -> str:
-        return f"RecordWithKeywordFields(int={repr(self.int_)}, sizeof={repr(self.sizeof)}, if={repr(self.if_)})"
+        return f"RecordWithKeywordFields(int_={repr(self.int_)}, sizeof={repr(self.sizeof)}, if_={repr(self.if_)})"
 
 
 class RecordWithOptionalDate:
@@ -2039,10 +2039,10 @@ class RecordWithOptionalDate:
         )
 
     def __str__(self) -> str:
-        return f"RecordWithOptionalDate(dateField={self.date_field})"
+        return f"RecordWithOptionalDate(date_field={self.date_field})"
 
     def __repr__(self) -> str:
-        return f"RecordWithOptionalDate(dateField={repr(self.date_field)})"
+        return f"RecordWithOptionalDate(date_field={repr(self.date_field)})"
 
 
 class AcquisitionOrImage:
