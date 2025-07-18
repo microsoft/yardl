@@ -4154,6 +4154,7 @@
         {
           "record": {
             "name": "RecordWithKeywordFields",
+            "comment": "This comment ends with a Python docstring character\"",
             "fields": [
               {
                 "name": "int",

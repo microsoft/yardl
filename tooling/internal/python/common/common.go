@@ -483,6 +483,12 @@ func WriteComment(w *formatting.IndentedWriter, comment string) {
 
 func WriteDocstring(w *formatting.IndentedWriter, comment string) {
 	comment = strings.TrimSpace(comment)
+	if strings.HasPrefix(comment, "\"") {
+		comment = " " + comment
+	}
+	if strings.HasSuffix(comment, "\"") {
+		comment = comment + " "
+	}
 	if comment != "" {
 		w.WriteString(`"""`)
 		w.WriteString(comment)

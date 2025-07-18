@@ -180,10 +180,10 @@ class RecordWithUnions:
         )
 
     def __str__(self) -> str:
-        return f"RecordWithUnions(nullOrIntOrString={self.null_or_int_or_string}, dateOrDatetime={self.date_or_datetime}, nullOrFruitsOrDaysOfWeek={self.null_or_fruits_or_days_of_week}, recordOrInt={self.record_or_int})"
+        return f"RecordWithUnions(null_or_int_or_string={self.null_or_int_or_string}, date_or_datetime={self.date_or_datetime}, null_or_fruits_or_days_of_week={self.null_or_fruits_or_days_of_week}, record_or_int={self.record_or_int})"
 
     def __repr__(self) -> str:
-        return f"RecordWithUnions(nullOrIntOrString={repr(self.null_or_int_or_string)}, dateOrDatetime={repr(self.date_or_datetime)}, nullOrFruitsOrDaysOfWeek={repr(self.null_or_fruits_or_days_of_week)}, recordOrInt={repr(self.record_or_int)})"
+        return f"RecordWithUnions(null_or_int_or_string={repr(self.null_or_int_or_string)}, date_or_datetime={repr(self.date_or_datetime)}, null_or_fruits_or_days_of_week={repr(self.null_or_fruits_or_days_of_week)}, record_or_int={repr(self.record_or_int)})"
 
 
 class T0OrT1(typing.Generic[T0, T1]):
