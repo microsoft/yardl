@@ -40,19 +40,23 @@ func Generate(env *dsl.Environment, options packaging.CppCodegenOptions) error {
 		return err
 	}
 
-	err = ndjson.WriteNdJson(env, options)
-	if err != nil {
-		return err
-	}
-
 	err = binary.WriteBinary(env, options)
 	if err != nil {
 		return err
 	}
 
-	err = hdf5.WriteHdf5(env, options)
-	if err != nil {
-		return err
+	if options.GenerateNDJson {
+		err = ndjson.WriteNdJson(env, options)
+		if err != nil {
+			return err
+		}
+	}
+
+	if options.GenerateHDF5 {
+		err = hdf5.WriteHdf5(env, options)
+		if err != nil {
+			return err
+		}
 	}
 
 	if options.InternalGenerateMocks {

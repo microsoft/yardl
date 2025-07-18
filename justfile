@@ -101,7 +101,10 @@ benchmark-cmd := if matlab != "disabled" { "python python/benchmark.py --include
     ninja evolution/all; \
     python ../evolution/test-evolution.py
 
-@test: tooling-test cpp-test python-test matlab-test evolution-test cpp-test-ndarray
+@codegen-optout-test: install
+    /usr/bin/env bash scripts/test-codegen-optout.sh
+
+@test: tooling-test cpp-test python-test matlab-test evolution-test cpp-test-ndarray codegen-optout-test
 
 @benchmark: generate ensure-build-dir
     cd cpp/build; \

@@ -197,28 +197,28 @@ func generateImpl(configArgs map[string]string) (*packaging.PackageInfo, []strin
 		return packageInfo, warnings, err
 	}
 
-	if packageInfo.Cpp != nil {
+	if packageInfo.Cpp != nil && !packageInfo.Cpp.Disabled {
 		err = cpp.Generate(env, *packageInfo.Cpp)
 		if err != nil {
 			return packageInfo, warnings, err
 		}
 	}
 
-	if packageInfo.Python != nil {
+	if packageInfo.Python != nil && !packageInfo.Python.Disabled {
 		err = python.Generate(env, *packageInfo.Python)
 		if err != nil {
 			return packageInfo, warnings, err
 		}
 	}
 
-	if packageInfo.Json != nil {
+	if packageInfo.Json != nil && !packageInfo.Json.Disabled {
 		err = outputJson(env, packageInfo.Json)
 		if err != nil {
 			return packageInfo, warnings, err
 		}
 	}
 
-	if packageInfo.Matlab != nil {
+	if packageInfo.Matlab != nil && !packageInfo.Matlab.Disabled {
 		err = matlab.Generate(env, *packageInfo.Matlab)
 		if err != nil {
 			return packageInfo, warnings, err

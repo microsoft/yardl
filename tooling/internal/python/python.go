@@ -22,8 +22,11 @@ import (
 	"github.com/microsoft/yardl/tooling/pkg/packaging"
 )
 
-//go:embed static_files/*
+//go:embed static_files/_binary.py static_files/_dtypes.py static_files/yardl_types.py
 var staticFiles embed.FS
+
+//go:embed static_files/_ndjson.py
+var staticNdJsonFile embed.FS
 
 func Generate(env *dsl.Environment, options packaging.PythonCodegenOptions) error {
 	common.AnnotateGenerics(env)
@@ -38,13 +41,18 @@ func Generate(env *dsl.Environment, options packaging.PythonCodegenOptions) erro
 	if err := iocommon.CopyEmbeddedStaticFiles(topPackageDir, options.InternalSymlinkStaticFiles, staticFiles); err != nil {
 		return err
 	}
+	if options.GenerateNDJson {
+		if err := iocommon.CopyEmbeddedStaticFiles(topPackageDir, options.InternalSymlinkStaticFiles, staticNdJsonFile); err != nil {
+			return err
+		}
+	}
 
 	for _, ns := range env.Namespaces {
 		packageDir := topPackageDir
 		if !ns.IsTopLevel {
 			packageDir = path.Join(packageDir, formatting.ToSnakeCase(ns.Name))
 		}
-		err = writeNamespace(ns, env.SymbolTable, packageDir)
+		err = writeNamespace(ns, env.SymbolTable, packageDir, options.GenerateNDJson)
 		if err != nil {
 			return err
 		}
@@ -53,13 +61,13 @@ func Generate(env *dsl.Environment, options packaging.PythonCodegenOptions) erro
 	return nil
 }
 
-func writeNamespace(ns *dsl.Namespace, st dsl.SymbolTable, packageDir string) error {
+func writeNamespace(ns *dsl.Namespace, st dsl.SymbolTable, packageDir string, generateNDJson bool) error {
 	if err := os.MkdirAll(packageDir, 0775); err != nil {
 		return err
 	}
 
 	// Write __init__.py
-	if err := writePackageInitFile(ns, packageDir); err != nil {
+	if err := writePackageInitFile(ns, packageDir, generateNDJson); err != nil {
 		return err
 	}
 
@@ -77,14 +85,16 @@ func writeNamespace(ns *dsl.Namespace, st dsl.SymbolTable, packageDir string) er
 		return err
 	}
 
-	if err := ndjson.WriteNDJson(ns, packageDir); err != nil {
-		return err
+	if generateNDJson {
+		if err := ndjson.WriteNDJson(ns, packageDir); err != nil {
+			return err
+		}
 	}
 
 	return nil
 }
 
-func writePackageInitFile(ns *dsl.Namespace, packageDir string) error {
+func writePackageInitFile(ns *dsl.Namespace, packageDir string, generateNDJson bool) error {
 	b := bytes.Buffer{}
 	w := formatting.NewIndentedWriter(&b, "    ")
 	common.WriteGeneratedFileHeader(w)
@@ -195,25 +205,29 @@ if _parse_version(_np.__version__) < _MIN_NUMPY_VERSION:
 		})
 		fmt.Fprintf(w, ")\n")
 
-		for i, p := range ns.Protocols {
-			protocolsMembers[i*2] = ndjson.NDJsonWriterName(p)
-			protocolsMembers[i*2+1] = ndjson.NDJsonReaderName(p)
-		}
-
-		sort.Slice(protocolsMembers, func(i, j int) bool {
-			return protocolsMembers[i] < protocolsMembers[j]
-		})
-
-		fmt.Fprintf(w, "from .ndjson import (\n")
-		w.Indented(func() {
-			for _, p := range protocolsMembers {
-				fmt.Fprintf(w, "%s,\n", p)
+		if generateNDJson {
+			for i, p := range ns.Protocols {
+				protocolsMembers[i*2] = ndjson.NDJsonWriterName(p)
+				protocolsMembers[i*2+1] = ndjson.NDJsonReaderName(p)
 			}
-		})
-		fmt.Fprintf(w, ")\n")
+
+			sort.Slice(protocolsMembers, func(i, j int) bool {
+				return protocolsMembers[i] < protocolsMembers[j]
+			})
+
+			fmt.Fprintf(w, "from .ndjson import (\n")
+			w.Indented(func() {
+				for _, p := range protocolsMembers {
+					fmt.Fprintf(w, "%s,\n", p)
+				}
+			})
+			fmt.Fprintf(w, ")\n")
+		}
 	} else {
 		w.WriteStringln("from . import binary")
-		w.WriteStringln("from . import ndjson")
+		if generateNDJson {
+			w.WriteStringln("from . import ndjson")
+		}
 	}
 
 	return iocommon.WriteFileIfNeeded(path.Join(packageDir, "__init__.py"), b.Bytes(), 0644)

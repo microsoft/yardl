@@ -5,6 +5,7 @@ cpp:
 
 python:
   outputDir: ../../python/
+  generateNDJson: false
 
 matlab:
   outputDir: ../../matlab/generated
