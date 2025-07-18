@@ -1985,6 +1985,8 @@ class EnumWithKeywordSymbols(yardl.OutOfRangeEnum):
     CATCH = 1
 
 class RecordWithKeywordFields:
+    """This comment ends with a Python docstring character" """
+
     int_: str
     sizeof: ArrayWithKeywordDimensionNames
     if_: EnumWithKeywordSymbols

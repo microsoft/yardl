@@ -1471,6 +1471,7 @@ enum class EnumWithKeywordSymbols {
   kCatch = 1,
 };
 
+// This comment ends with a Python docstring character"
 struct RecordWithKeywordFields {
   std::string int_field{};
   test_model::ArrayWithKeywordDimensionNames sizeof_field{};
