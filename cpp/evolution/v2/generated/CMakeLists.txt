@@ -6,9 +6,6 @@
 # target_link_libraries(<your target> evo_test_generated)
 # add_subdirectory(<path to this directory>)
 
-option(EvoTest_GENERATED_USE_HDF5 "Whether to use HDF5 in the generated code" ON)
-option(EvoTest_GENERATED_USE_NDJSON "Whether to use NDJSON in the generated code" ON)
-
 set(EvoTest_GENERATED_SOURCES
   protocols.cc
   types.cc
@@ -26,6 +23,7 @@ find_package(date ${HOWARD_HINNANT_DATE_MINIMUM_VERSION} REQUIRED)
 set(XTENSOR_MINIMUM_VERSION "0.21.10")
 find_package(xtensor ${XTENSOR_MINIMUM_VERSION} REQUIRED)
 
+option(EvoTest_GENERATED_USE_HDF5 "Whether to use HDF5 in the generated code" ON)
 if(EvoTest_GENERATED_USE_HDF5)
 	if(VCPKG_TARGET_TRIPLET)
 		set(HDF5_CXX_LIBRARIES hdf5::hdf5_cpp-shared)
@@ -34,12 +32,13 @@ if(EvoTest_GENERATED_USE_HDF5)
 	endif()
 
 	set(HDF5_MINIMUM_VERSION "1.10.5")
-	find_package(HDF5 ${HDF5_MINIMUM_VERSION} REQUIRED COMPONENTS C CXX)
+	find_package(HDF5 ${HDF5_MINIMUM_VERSION} REQUIRED COMPONENTS CXX)
 
 	list(APPEND EvoTest_GENERATED_SOURCES hdf5/protocols.cc)
 	list(APPEND EvoTest_GENERATED_LINK_LIBRARIES HDF5::HDF5)
 endif()
 
+option(EvoTest_GENERATED_USE_NDJSON "Whether to use NDJSON in the generated code" ON)
 if(EvoTest_GENERATED_USE_NDJSON)
 	set(NLOHMANN_JSON_MINIMUM_VERSION "3.11.1")
 	find_package(nlohmann_json ${NLOHMANN_JSON_MINIMUM_VERSION} REQUIRED)
@@ -49,5 +48,4 @@ if(EvoTest_GENERATED_USE_NDJSON)
 endif()
 
 add_library(evo_test_generated OBJECT ${EvoTest_GENERATED_SOURCES})
-
 target_link_libraries(evo_test_generated ${EvoTest_GENERATED_LINK_LIBRARIES})

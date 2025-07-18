@@ -29,9 +29,6 @@ func writeCMakeLists(env *dsl.Environment, options packaging.CppCodegenOptions) 
 # target_link_libraries(<your target> %s)
 # add_subdirectory(<path to this directory>)
 
-option(%s_USE_HDF5 "Whether to use HDF5 in the generated code" ON)
-option(%s_USE_NDJSON "Whether to use NDJSON in the generated code" ON)
-
 set(%s_SOURCES
   protocols.cc
   types.cc
@@ -48,10 +45,11 @@ find_package(date ${HOWARD_HINNANT_DATE_MINIMUM_VERSION} REQUIRED)
 
 set(XTENSOR_MINIMUM_VERSION "0.21.10")
 find_package(xtensor ${XTENSOR_MINIMUM_VERSION} REQUIRED)
-`, objectLibraryName, cmakePrefix, cmakePrefix, cmakePrefix, cmakePrefix)
+`, objectLibraryName, cmakePrefix, cmakePrefix)
 
 	if options.GenerateHDF5 {
 		fmt.Fprintf(w, `
+option(%s_USE_HDF5 "Whether to use HDF5 in the generated code" ON)
 if(%s_USE_HDF5)
 	if(VCPKG_TARGET_TRIPLET)
 		set(HDF5_CXX_LIBRARIES hdf5::hdf5_cpp-shared)
@@ -60,16 +58,17 @@ if(%s_USE_HDF5)
 	endif()
 
 	set(HDF5_MINIMUM_VERSION "1.10.5")
-	find_package(HDF5 ${HDF5_MINIMUM_VERSION} REQUIRED COMPONENTS C CXX)
+	find_package(HDF5 ${HDF5_MINIMUM_VERSION} REQUIRED COMPONENTS CXX)
 
 	list(APPEND %s_SOURCES hdf5/protocols.cc)
 	list(APPEND %s_LINK_LIBRARIES HDF5::HDF5)
 endif()
-`, cmakePrefix, cmakePrefix, cmakePrefix)
+`, cmakePrefix, cmakePrefix, cmakePrefix, cmakePrefix)
 	}
 
 	if options.GenerateNDJson {
 		fmt.Fprintf(w, `
+option(%s_USE_NDJSON "Whether to use NDJSON in the generated code" ON)
 if(%s_USE_NDJSON)
 	set(NLOHMANN_JSON_MINIMUM_VERSION "3.11.1")
 	find_package(nlohmann_json ${NLOHMANN_JSON_MINIMUM_VERSION} REQUIRED)
@@ -77,7 +76,7 @@ if(%s_USE_NDJSON)
 	list(APPEND %s_SOURCES ndjson/protocols.cc)
 	list(APPEND %s_LINK_LIBRARIES nlohmann_json::nlohmann_json)
 endif()
-`, cmakePrefix, cmakePrefix, cmakePrefix)
+`, cmakePrefix, cmakePrefix, cmakePrefix, cmakePrefix)
 	}
 
 	w.WriteStringln("")
@@ -86,14 +85,14 @@ endif()
 		fmt.Fprintf(w, "list(APPEND %s_SOURCES factories.cc translator_impl.cc)\n\n", cmakePrefix)
 	}
 
-	fmt.Fprintf(w, "add_library(%s OBJECT ${%s_SOURCES})\n\n", objectLibraryName, cmakePrefix)
+	fmt.Fprintf(w, "add_library(%s OBJECT ${%s_SOURCES})\n", objectLibraryName, cmakePrefix)
 	fmt.Fprintf(w, "target_link_libraries(%s ${%s_LINK_LIBRARIES})\n", objectLibraryName, cmakePrefix)
 
 	if options.InternalGenerateMocks {
 		w.WriteStringln("")
 
 		mocksObjectLibraryName := fmt.Sprintf("%s_mocks", objectLibraryName)
-		fmt.Fprintf(w, "add_library(%s OBJECT mocks.cc)\n\n", mocksObjectLibraryName)
+		fmt.Fprintf(w, "add_library(%s OBJECT mocks.cc)\n", mocksObjectLibraryName)
 
 		fmt.Fprintf(w, "target_link_libraries(%s\n", mocksObjectLibraryName)
 		w.Indented(func() {

@@ -6,9 +6,6 @@
 # target_link_libraries(<your target> test_model_generated)
 # add_subdirectory(<path to this directory>)
 
-option(TestModel_GENERATED_USE_HDF5 "Whether to use HDF5 in the generated code" ON)
-option(TestModel_GENERATED_USE_NDJSON "Whether to use NDJSON in the generated code" ON)
-
 set(TestModel_GENERATED_SOURCES
   protocols.cc
   types.cc
@@ -26,6 +23,7 @@ find_package(date ${HOWARD_HINNANT_DATE_MINIMUM_VERSION} REQUIRED)
 set(XTENSOR_MINIMUM_VERSION "0.21.10")
 find_package(xtensor ${XTENSOR_MINIMUM_VERSION} REQUIRED)
 
+option(TestModel_GENERATED_USE_HDF5 "Whether to use HDF5 in the generated code" ON)
 if(TestModel_GENERATED_USE_HDF5)
 	if(VCPKG_TARGET_TRIPLET)
 		set(HDF5_CXX_LIBRARIES hdf5::hdf5_cpp-shared)
@@ -34,12 +32,13 @@ if(TestModel_GENERATED_USE_HDF5)
 	endif()
 
 	set(HDF5_MINIMUM_VERSION "1.10.5")
-	find_package(HDF5 ${HDF5_MINIMUM_VERSION} REQUIRED COMPONENTS C CXX)
+	find_package(HDF5 ${HDF5_MINIMUM_VERSION} REQUIRED COMPONENTS CXX)
 
 	list(APPEND TestModel_GENERATED_SOURCES hdf5/protocols.cc)
 	list(APPEND TestModel_GENERATED_LINK_LIBRARIES HDF5::HDF5)
 endif()
 
+option(TestModel_GENERATED_USE_NDJSON "Whether to use NDJSON in the generated code" ON)
 if(TestModel_GENERATED_USE_NDJSON)
 	set(NLOHMANN_JSON_MINIMUM_VERSION "3.11.1")
 	find_package(nlohmann_json ${NLOHMANN_JSON_MINIMUM_VERSION} REQUIRED)
@@ -51,11 +50,9 @@ endif()
 list(APPEND TestModel_GENERATED_SOURCES factories.cc translator_impl.cc)
 
 add_library(test_model_generated OBJECT ${TestModel_GENERATED_SOURCES})
-
 target_link_libraries(test_model_generated ${TestModel_GENERATED_LINK_LIBRARIES})
 
 add_library(test_model_generated_mocks OBJECT mocks.cc)
-
 target_link_libraries(test_model_generated_mocks
   PUBLIC test_model_generated
   PUBLIC gtest
