@@ -142,6 +142,7 @@ func writeDeclarations(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 		fmt.Fprintf(w, "class %s {\n", common.AbstractReaderName(p))
 		w.Indented(func() {
 			w.WriteString("public:\n")
+			fmt.Fprintf(w, "%s(bool skip_completed_check = false): skip_completed_check_(skip_completed_check) {}\n\n", common.AbstractReaderName(p))
 			for i, step := range p.Sequence {
 				common.WriteComment(w, fmt.Sprintf("Ordinal %d.", i))
 				common.WriteComment(w, step.Comment)
@@ -184,12 +185,12 @@ func writeDeclarations(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 					fmt.Fprintf(w, "virtual %s %s(std::vector<%s>& values);\n", returnType, common.ProtocolReadImplMethodName(step), common.TypeSyntax(step.Type))
 				}
 			}
-
 			w.WriteString("virtual void CloseImpl() {}\n")
 
 			w.WriteString("static std::string schema_;\n\n")
 			w.WriteString("static std::vector<std::string> previous_schemas_;\n\n")
 			w.WriteString("static Version VersionFromSchema(const std::string& schema);\n\n")
+			w.WriteString("bool skip_completed_check_;\n\n")
 
 			w.WriteStringln("private:")
 			w.WriteStringln("uint8_t state_ = 0;")
@@ -398,7 +399,7 @@ func writeDefinitions(w *formatting.IndentedWriter, ns *dsl.Namespace, symbolTab
 		fmt.Fprintf(w, "void %s::Close() {\n", common.AbstractReaderName(p))
 		w.Indented(func() {
 			expectedState := len(p.Sequence) * 2
-			fmt.Fprintf(w, "if (unlikely(state_ != %d)) {\n", expectedState)
+			fmt.Fprintf(w, "if (!skip_completed_check_ && unlikely(state_ != %d)) {\n", expectedState)
 
 			w.Indented(func() {
 				writeReaderStateUnobservedCompletionCheck(w, p, len(p.Sequence)-1, expectedState)

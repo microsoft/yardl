@@ -7,8 +7,12 @@ classdef ProtocolWithOptionalDateReader < yardl.binary.BinaryProtocolReader & te
   end
 
   methods
-    function self = ProtocolWithOptionalDateReader(filename)
-      self@test_model.ProtocolWithOptionalDateReaderBase();
+    function self = ProtocolWithOptionalDateReader(filename, options)
+      arguments
+        filename (1,1) string
+        options.skip_completed_check (1,1) logical = false
+      end
+      self@test_model.ProtocolWithOptionalDateReaderBase(skip_completed_check=options.skip_completed_check);
       self@yardl.binary.BinaryProtocolReader(filename, test_model.ProtocolWithOptionalDateReaderBase.schema);
       self.record_serializer = yardl.binary.OptionalSerializer(test_model.binary.RecordWithOptionalDateSerializer());
     end

@@ -4870,7 +4870,9 @@ bool ProtocolWithChangesReader::ReadAddedRecordStreamImpl(std::vector<evo_test::
 }
 
 void ProtocolWithChangesReader::CloseImpl() {
-  stream_.VerifyFinished();
+  if (!skip_completed_check_) {
+    stream_.VerifyFinished();
+  }
 }
 
 void UnusedProtocolWriter::WriteRecordsImpl(evo_test::UnchangedRecord const& value) {
@@ -4907,7 +4909,9 @@ bool UnusedProtocolReader::ReadRecordsImpl(std::vector<evo_test::UnchangedRecord
 }
 
 void UnusedProtocolReader::CloseImpl() {
-  stream_.VerifyFinished();
+  if (!skip_completed_check_) {
+    stream_.VerifyFinished();
+  }
 }
 
 } // namespace evo_test::binary

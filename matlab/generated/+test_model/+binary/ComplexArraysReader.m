@@ -8,8 +8,12 @@ classdef ComplexArraysReader < yardl.binary.BinaryProtocolReader & test_model.Co
   end
 
   methods
-    function self = ComplexArraysReader(filename)
-      self@test_model.ComplexArraysReaderBase();
+    function self = ComplexArraysReader(filename, options)
+      arguments
+        filename (1,1) string
+        options.skip_completed_check (1,1) logical = false
+      end
+      self@test_model.ComplexArraysReaderBase(skip_completed_check=options.skip_completed_check);
       self@yardl.binary.BinaryProtocolReader(filename, test_model.ComplexArraysReaderBase.schema);
       self.floats_serializer = yardl.binary.DynamicNDArraySerializer(yardl.binary.Complexfloat32Serializer);
       self.doubles_serializer = yardl.binary.NDArraySerializer(yardl.binary.Complexfloat64Serializer, 2);

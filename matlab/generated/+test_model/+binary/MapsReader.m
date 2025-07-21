@@ -11,8 +11,12 @@ classdef MapsReader < yardl.binary.BinaryProtocolReader & test_model.MapsReaderB
   end
 
   methods
-    function self = MapsReader(filename)
-      self@test_model.MapsReaderBase();
+    function self = MapsReader(filename, options)
+      arguments
+        filename (1,1) string
+        options.skip_completed_check (1,1) logical = false
+      end
+      self@test_model.MapsReaderBase(skip_completed_check=options.skip_completed_check);
       self@yardl.binary.BinaryProtocolReader(filename, test_model.MapsReaderBase.schema);
       self.string_to_int_serializer = yardl.binary.MapSerializer(yardl.binary.StringSerializer, yardl.binary.Int32Serializer);
       self.int_to_string_serializer = yardl.binary.MapSerializer(yardl.binary.Int32Serializer, yardl.binary.StringSerializer);

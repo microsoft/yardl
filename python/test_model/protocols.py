@@ -80,12 +80,13 @@ class BenchmarkFloat256x256ReaderBase(abc.ABC):
     """Abstract reader for the BenchmarkFloat256x256 protocol."""
 
 
-    def __init__(self) -> None:
+    def __init__(self, skip_completed_check: bool = False) -> None:
+        self._skip_completed_check = skip_completed_check
         self._state = 0
 
     def close(self) -> None:
         self._close()
-        if self._state != 2:
+        if not self._skip_completed_check and self._state != 2:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
@@ -212,12 +213,13 @@ class BenchmarkInt256x256ReaderBase(abc.ABC):
     """Abstract reader for the BenchmarkInt256x256 protocol."""
 
 
-    def __init__(self) -> None:
+    def __init__(self, skip_completed_check: bool = False) -> None:
+        self._skip_completed_check = skip_completed_check
         self._state = 0
 
     def close(self) -> None:
         self._close()
-        if self._state != 2:
+        if not self._skip_completed_check and self._state != 2:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
@@ -344,12 +346,13 @@ class BenchmarkFloatVlenReaderBase(abc.ABC):
     """Abstract reader for the BenchmarkFloatVlen protocol."""
 
 
-    def __init__(self) -> None:
+    def __init__(self, skip_completed_check: bool = False) -> None:
+        self._skip_completed_check = skip_completed_check
         self._state = 0
 
     def close(self) -> None:
         self._close()
-        if self._state != 2:
+        if not self._skip_completed_check and self._state != 2:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
@@ -476,12 +479,13 @@ class BenchmarkSmallRecordReaderBase(abc.ABC):
     """Abstract reader for the BenchmarkSmallRecord protocol."""
 
 
-    def __init__(self) -> None:
+    def __init__(self, skip_completed_check: bool = False) -> None:
+        self._skip_completed_check = skip_completed_check
         self._state = 0
 
     def close(self) -> None:
         self._close()
-        if self._state != 2:
+        if not self._skip_completed_check and self._state != 2:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
@@ -608,12 +612,13 @@ class BenchmarkSmallRecordWithOptionalsReaderBase(abc.ABC):
     """Abstract reader for the BenchmarkSmallRecordWithOptionals protocol."""
 
 
-    def __init__(self) -> None:
+    def __init__(self, skip_completed_check: bool = False) -> None:
+        self._skip_completed_check = skip_completed_check
         self._state = 0
 
     def close(self) -> None:
         self._close()
-        if self._state != 2:
+        if not self._skip_completed_check and self._state != 2:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
@@ -740,12 +745,13 @@ class BenchmarkSimpleMrdReaderBase(abc.ABC):
     """Abstract reader for the BenchmarkSimpleMrd protocol."""
 
 
-    def __init__(self) -> None:
+    def __init__(self, skip_completed_check: bool = False) -> None:
+        self._skip_completed_check = skip_completed_check
         self._state = 0
 
     def close(self) -> None:
         self._close()
-        if self._state != 2:
+        if not self._skip_completed_check and self._state != 2:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
@@ -881,12 +887,13 @@ class ScalarsReaderBase(abc.ABC):
     """Abstract reader for the Scalars protocol."""
 
 
-    def __init__(self) -> None:
+    def __init__(self, skip_completed_check: bool = False) -> None:
+        self._skip_completed_check = skip_completed_check
         self._state = 0
 
     def close(self) -> None:
         self._close()
-        if self._state != 4:
+        if not self._skip_completed_check and self._state != 4:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
@@ -1069,12 +1076,13 @@ class ScalarOptionalsReaderBase(abc.ABC):
     """Abstract reader for the ScalarOptionals protocol."""
 
 
-    def __init__(self) -> None:
+    def __init__(self, skip_completed_check: bool = False) -> None:
+        self._skip_completed_check = skip_completed_check
         self._state = 0
 
     def close(self) -> None:
         self._close()
-        if self._state != 8:
+        if not self._skip_completed_check and self._state != 8:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
@@ -1246,12 +1254,13 @@ class NestedRecordsReaderBase(abc.ABC):
     """Abstract reader for the NestedRecords protocol."""
 
 
-    def __init__(self) -> None:
+    def __init__(self, skip_completed_check: bool = False) -> None:
+        self._skip_completed_check = skip_completed_check
         self._state = 0
 
     def close(self) -> None:
         self._close()
-        if self._state != 2:
+        if not self._skip_completed_check and self._state != 2:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
@@ -1417,12 +1426,13 @@ class VlensReaderBase(abc.ABC):
     """Abstract reader for the Vlens protocol."""
 
 
-    def __init__(self) -> None:
+    def __init__(self, skip_completed_check: bool = False) -> None:
+        self._skip_completed_check = skip_completed_check
         self._state = 0
 
     def close(self) -> None:
         self._close()
-        if self._state != 8:
+        if not self._skip_completed_check and self._state != 8:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
@@ -1609,12 +1619,13 @@ class StringsReaderBase(abc.ABC):
     """Abstract reader for the Strings protocol."""
 
 
-    def __init__(self) -> None:
+    def __init__(self, skip_completed_check: bool = False) -> None:
+        self._skip_completed_check = skip_completed_check
         self._state = 0
 
     def close(self) -> None:
         self._close()
-        if self._state != 4:
+        if not self._skip_completed_check and self._state != 4:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
@@ -1752,12 +1763,13 @@ class OptionalVectorsReaderBase(abc.ABC):
     """Abstract reader for the OptionalVectors protocol."""
 
 
-    def __init__(self) -> None:
+    def __init__(self, skip_completed_check: bool = False) -> None:
+        self._skip_completed_check = skip_completed_check
         self._state = 0
 
     def close(self) -> None:
         self._close()
-        if self._state != 2:
+        if not self._skip_completed_check and self._state != 2:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
@@ -1923,12 +1935,13 @@ class FixedVectorsReaderBase(abc.ABC):
     """Abstract reader for the FixedVectors protocol."""
 
 
-    def __init__(self) -> None:
+    def __init__(self, skip_completed_check: bool = False) -> None:
+        self._skip_completed_check = skip_completed_check
         self._state = 0
 
     def close(self) -> None:
         self._close()
-        if self._state != 8:
+        if not self._skip_completed_check and self._state != 8:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
@@ -2160,12 +2173,13 @@ class StreamsReaderBase(abc.ABC):
     """Abstract reader for the Streams protocol."""
 
 
-    def __init__(self) -> None:
+    def __init__(self, skip_completed_check: bool = False) -> None:
+        self._skip_completed_check = skip_completed_check
         self._state = 0
 
     def close(self) -> None:
         self._close()
-        if self._state != 8:
+        if not self._skip_completed_check and self._state != 8:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
@@ -2397,12 +2411,13 @@ class FixedArraysReaderBase(abc.ABC):
     """Abstract reader for the FixedArrays protocol."""
 
 
-    def __init__(self) -> None:
+    def __init__(self, skip_completed_check: bool = False) -> None:
+        self._skip_completed_check = skip_completed_check
         self._state = 0
 
     def close(self) -> None:
         self._close()
-        if self._state != 10:
+        if not self._skip_completed_check and self._state != 10:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
@@ -2711,12 +2726,13 @@ class SubarraysReaderBase(abc.ABC):
     """Abstract reader for the Subarrays protocol."""
 
 
-    def __init__(self) -> None:
+    def __init__(self, skip_completed_check: bool = False) -> None:
+        self._skip_completed_check = skip_completed_check
         self._state = 0
 
     def close(self) -> None:
         self._close()
-        if self._state != 18:
+        if not self._skip_completed_check and self._state != 18:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
@@ -2988,12 +3004,13 @@ class SubarraysInRecordsReaderBase(abc.ABC):
     """Abstract reader for the SubarraysInRecords protocol."""
 
 
-    def __init__(self) -> None:
+    def __init__(self, skip_completed_check: bool = False) -> None:
+        self._skip_completed_check = skip_completed_check
         self._state = 0
 
     def close(self) -> None:
         self._close()
-        if self._state != 4:
+        if not self._skip_completed_check and self._state != 4:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
@@ -3191,12 +3208,13 @@ class NDArraysReaderBase(abc.ABC):
     """Abstract reader for the NDArrays protocol."""
 
 
-    def __init__(self) -> None:
+    def __init__(self, skip_completed_check: bool = False) -> None:
+        self._skip_completed_check = skip_completed_check
         self._state = 0
 
     def close(self) -> None:
         self._close()
-        if self._state != 10:
+        if not self._skip_completed_check and self._state != 10:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
@@ -3430,12 +3448,13 @@ class NDArraysSingleDimensionReaderBase(abc.ABC):
     """Abstract reader for the NDArraysSingleDimension protocol."""
 
 
-    def __init__(self) -> None:
+    def __init__(self, skip_completed_check: bool = False) -> None:
+        self._skip_completed_check = skip_completed_check
         self._state = 0
 
     def close(self) -> None:
         self._close()
-        if self._state != 8:
+        if not self._skip_completed_check and self._state != 8:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
@@ -3652,12 +3671,13 @@ class DynamicNDArraysReaderBase(abc.ABC):
     """Abstract reader for the DynamicNDArrays protocol."""
 
 
-    def __init__(self) -> None:
+    def __init__(self, skip_completed_check: bool = False) -> None:
+        self._skip_completed_check = skip_completed_check
         self._state = 0
 
     def close(self) -> None:
         self._close()
-        if self._state != 8:
+        if not self._skip_completed_check and self._state != 8:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
@@ -3853,12 +3873,13 @@ class MultiDArraysReaderBase(abc.ABC):
     """Abstract reader for the MultiDArrays protocol."""
 
 
-    def __init__(self) -> None:
+    def __init__(self, skip_completed_check: bool = False) -> None:
+        self._skip_completed_check = skip_completed_check
         self._state = 0
 
     def close(self) -> None:
         self._close()
-        if self._state != 4:
+        if not self._skip_completed_check and self._state != 4:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
@@ -4011,12 +4032,13 @@ class ComplexArraysReaderBase(abc.ABC):
     """Abstract reader for the ComplexArrays protocol."""
 
 
-    def __init__(self) -> None:
+    def __init__(self, skip_completed_check: bool = False) -> None:
+        self._skip_completed_check = skip_completed_check
         self._state = 0
 
     def close(self) -> None:
         self._close()
-        if self._state != 4:
+        if not self._skip_completed_check and self._state != 4:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
@@ -4214,12 +4236,13 @@ class MapsReaderBase(abc.ABC):
     """Abstract reader for the Maps protocol."""
 
 
-    def __init__(self) -> None:
+    def __init__(self, skip_completed_check: bool = False) -> None:
+        self._skip_completed_check = skip_completed_check
         self._state = 0
 
     def close(self) -> None:
         self._close()
-        if self._state != 10:
+        if not self._skip_completed_check and self._state != 10:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
@@ -4453,12 +4476,13 @@ class UnionsReaderBase(abc.ABC):
     """Abstract reader for the Unions protocol."""
 
 
-    def __init__(self) -> None:
+    def __init__(self, skip_completed_check: bool = False) -> None:
+        self._skip_completed_check = skip_completed_check
         self._state = 0
 
     def close(self) -> None:
         self._close()
-        if self._state != 8:
+        if not self._skip_completed_check and self._state != 8:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
@@ -4672,12 +4696,13 @@ class StreamsOfUnionsReaderBase(abc.ABC):
     """Abstract reader for the StreamsOfUnions protocol."""
 
 
-    def __init__(self) -> None:
+    def __init__(self, skip_completed_check: bool = False) -> None:
+        self._skip_completed_check = skip_completed_check
         self._state = 0
 
     def close(self) -> None:
         self._close()
-        if self._state != 6:
+        if not self._skip_completed_check and self._state != 6:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
@@ -4877,12 +4902,13 @@ class EnumsReaderBase(abc.ABC):
     """Abstract reader for the Enums protocol."""
 
 
-    def __init__(self) -> None:
+    def __init__(self, skip_completed_check: bool = False) -> None:
+        self._skip_completed_check = skip_completed_check
         self._state = 0
 
     def close(self) -> None:
         self._close()
-        if self._state != 8:
+        if not self._skip_completed_check and self._state != 8:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
@@ -5078,12 +5104,13 @@ class FlagsReaderBase(abc.ABC):
     """Abstract reader for the Flags protocol."""
 
 
-    def __init__(self) -> None:
+    def __init__(self, skip_completed_check: bool = False) -> None:
+        self._skip_completed_check = skip_completed_check
         self._state = 0
 
     def close(self) -> None:
         self._close()
-        if self._state != 4:
+        if not self._skip_completed_check and self._state != 4:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
@@ -5254,12 +5281,13 @@ class StateTestReaderBase(abc.ABC):
     """Abstract reader for the StateTest protocol."""
 
 
-    def __init__(self) -> None:
+    def __init__(self, skip_completed_check: bool = False) -> None:
+        self._skip_completed_check = skip_completed_check
         self._state = 0
 
     def close(self) -> None:
         self._close()
-        if self._state != 6:
+        if not self._skip_completed_check and self._state != 6:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
@@ -5540,12 +5568,13 @@ class SimpleGenericsReaderBase(abc.ABC):
     """Abstract reader for the SimpleGenerics protocol."""
 
 
-    def __init__(self) -> None:
+    def __init__(self, skip_completed_check: bool = False) -> None:
+        self._skip_completed_check = skip_completed_check
         self._state = 0
 
     def close(self) -> None:
         self._close()
-        if self._state != 18:
+        if not self._skip_completed_check and self._state != 18:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
@@ -5862,12 +5891,13 @@ class AdvancedGenericsReaderBase(abc.ABC):
     """Abstract reader for the AdvancedGenerics protocol."""
 
 
-    def __init__(self) -> None:
+    def __init__(self, skip_completed_check: bool = False) -> None:
+        self._skip_completed_check = skip_completed_check
         self._state = 0
 
     def close(self) -> None:
         self._close()
-        if self._state != 10:
+        if not self._skip_completed_check and self._state != 10:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
@@ -6209,12 +6239,13 @@ class AliasesReaderBase(abc.ABC):
     """Abstract reader for the Aliases protocol."""
 
 
-    def __init__(self) -> None:
+    def __init__(self, skip_completed_check: bool = False) -> None:
+        self._skip_completed_check = skip_completed_check
         self._state = 0
 
     def close(self) -> None:
         self._close()
-        if self._state != 22:
+        if not self._skip_completed_check and self._state != 22:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
@@ -6529,12 +6560,13 @@ class StreamsOfAliasedUnionsReaderBase(abc.ABC):
     """Abstract reader for the StreamsOfAliasedUnions protocol."""
 
 
-    def __init__(self) -> None:
+    def __init__(self, skip_completed_check: bool = False) -> None:
+        self._skip_completed_check = skip_completed_check
         self._state = 0
 
     def close(self) -> None:
         self._close()
-        if self._state != 4:
+        if not self._skip_completed_check and self._state != 4:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
@@ -6672,12 +6704,13 @@ class ProtocolWithComputedFieldsReaderBase(abc.ABC):
     """Abstract reader for the ProtocolWithComputedFields protocol."""
 
 
-    def __init__(self) -> None:
+    def __init__(self, skip_completed_check: bool = False) -> None:
+        self._skip_completed_check = skip_completed_check
         self._state = 0
 
     def close(self) -> None:
         self._close()
-        if self._state != 2:
+        if not self._skip_completed_check and self._state != 2:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
@@ -6816,12 +6849,13 @@ class ProtocolWithKeywordStepsReaderBase(abc.ABC):
     """Abstract reader for the ProtocolWithKeywordSteps protocol."""
 
 
-    def __init__(self) -> None:
+    def __init__(self, skip_completed_check: bool = False) -> None:
+        self._skip_completed_check = skip_completed_check
         self._state = 0
 
     def close(self) -> None:
         self._close()
-        if self._state != 4:
+        if not self._skip_completed_check and self._state != 4:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
@@ -6959,12 +6993,13 @@ class ProtocolWithOptionalDateReaderBase(abc.ABC):
     """Abstract reader for the ProtocolWithOptionalDate protocol."""
 
 
-    def __init__(self) -> None:
+    def __init__(self, skip_completed_check: bool = False) -> None:
+        self._skip_completed_check = skip_completed_check
         self._state = 0
 
     def close(self) -> None:
         self._close()
-        if self._state != 2:
+        if not self._skip_completed_check and self._state != 2:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")

@@ -211,8 +211,9 @@ func writeAbstractReader(w *formatting.IndentedWriter, p *dsl.ProtocolDefinition
 		w.WriteStringln("")
 
 		// init method
-		w.WriteStringln("def __init__(self) -> None:")
+		w.WriteStringln("def __init__(self, skip_completed_check: bool = False) -> None:")
 		w.Indented(func() {
+			w.WriteStringln("self._skip_completed_check = skip_completed_check")
 			w.WriteStringln("self._state = 0")
 		})
 		w.WriteStringln("")
@@ -221,7 +222,7 @@ func writeAbstractReader(w *formatting.IndentedWriter, p *dsl.ProtocolDefinition
 		w.WriteStringln("def close(self) -> None:")
 		w.Indented(func() {
 			w.WriteStringln("self._close()")
-			fmt.Fprintf(w, "if self._state != %d:\n", len(p.Sequence)*2)
+			fmt.Fprintf(w, "if not self._skip_completed_check and self._state != %d:\n", len(p.Sequence)*2)
 			w.Indented(func() {
 				w.WriteStringln(`if self._state % 2 == 1:
     previous_method = self._state_to_method_name(self._state - 1)

@@ -9,6 +9,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 add_executable(tests
   binary/coded_stream_test.cc
   binary/header_test.cc
+  binary/partial_read_test.cc
   computed_fields_test.cc
   definitions_test.cc
   hdf5/hdf5_test.cc

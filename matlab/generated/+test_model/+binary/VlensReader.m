@@ -10,8 +10,12 @@ classdef VlensReader < yardl.binary.BinaryProtocolReader & test_model.VlensReade
   end
 
   methods
-    function self = VlensReader(filename)
-      self@test_model.VlensReaderBase();
+    function self = VlensReader(filename, options)
+      arguments
+        filename (1,1) string
+        options.skip_completed_check (1,1) logical = false
+      end
+      self@test_model.VlensReaderBase(skip_completed_check=options.skip_completed_check);
       self@yardl.binary.BinaryProtocolReader(filename, test_model.VlensReaderBase.schema);
       self.int_vector_serializer = yardl.binary.VectorSerializer(yardl.binary.Int32Serializer);
       self.complex_vector_serializer = yardl.binary.VectorSerializer(yardl.binary.Complexfloat32Serializer);

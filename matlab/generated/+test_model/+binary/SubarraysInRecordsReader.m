@@ -8,8 +8,12 @@ classdef SubarraysInRecordsReader < yardl.binary.BinaryProtocolReader & test_mod
   end
 
   methods
-    function self = SubarraysInRecordsReader(filename)
-      self@test_model.SubarraysInRecordsReaderBase();
+    function self = SubarraysInRecordsReader(filename, options)
+      arguments
+        filename (1,1) string
+        options.skip_completed_check (1,1) logical = false
+      end
+      self@test_model.SubarraysInRecordsReaderBase(skip_completed_check=options.skip_completed_check);
       self@yardl.binary.BinaryProtocolReader(filename, test_model.SubarraysInRecordsReaderBase.schema);
       self.with_fixed_subarrays_serializer = yardl.binary.DynamicNDArraySerializer(test_model.binary.RecordWithFixedCollectionsSerializer());
       self.with_vlen_subarrays_serializer = yardl.binary.DynamicNDArraySerializer(test_model.binary.RecordWithVlenCollectionsSerializer());

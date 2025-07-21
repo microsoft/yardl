@@ -550,6 +550,8 @@ class ProtocolWithChangesWriterBase {
 // Abstract reader for the ProtocolWithChanges protocol.
 class ProtocolWithChangesReaderBase {
   public:
+  ProtocolWithChangesReaderBase(bool skip_completed_check = false): skip_completed_check_(skip_completed_check) {}
+
   // Ordinal 0.
   void ReadInt8ToInt(int32_t& value);
 
@@ -1024,6 +1026,8 @@ class ProtocolWithChangesReaderBase {
 
   static Version VersionFromSchema(const std::string& schema);
 
+  bool skip_completed_check_;
+
   private:
   uint8_t state_ = 0;
 };
@@ -1071,6 +1075,8 @@ class UnusedProtocolWriterBase {
 // Abstract reader for the UnusedProtocol protocol.
 class UnusedProtocolReaderBase {
   public:
+  UnusedProtocolReaderBase(bool skip_completed_check = false): skip_completed_check_(skip_completed_check) {}
+
   // Ordinal 0.
   [[nodiscard]] bool ReadRecords(evo_test::UnchangedRecord& value);
 
@@ -1093,6 +1099,8 @@ class UnusedProtocolReaderBase {
   static std::vector<std::string> previous_schemas_;
 
   static Version VersionFromSchema(const std::string& schema);
+
+  bool skip_completed_check_;
 
   private:
   uint8_t state_ = 0;

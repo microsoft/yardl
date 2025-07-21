@@ -7,8 +7,12 @@ classdef BenchmarkSimpleMrdReader < yardl.binary.BinaryProtocolReader & test_mod
   end
 
   methods
-    function self = BenchmarkSimpleMrdReader(filename)
-      self@test_model.BenchmarkSimpleMrdReaderBase();
+    function self = BenchmarkSimpleMrdReader(filename, options)
+      arguments
+        filename (1,1) string
+        options.skip_completed_check (1,1) logical = false
+      end
+      self@test_model.BenchmarkSimpleMrdReaderBase(skip_completed_check=options.skip_completed_check);
       self@yardl.binary.BinaryProtocolReader(filename, test_model.BenchmarkSimpleMrdReaderBase.schema);
       self.data_serializer = yardl.binary.StreamSerializer(yardl.binary.UnionSerializer('test_model.AcquisitionOrImage', {test_model.binary.SimpleAcquisitionSerializer(), yardl.binary.NDArraySerializer(yardl.binary.Float32Serializer, 2)}, {@test_model.AcquisitionOrImage.Acquisition, @test_model.AcquisitionOrImage.Image}));
     end

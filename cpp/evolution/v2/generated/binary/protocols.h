@@ -162,11 +162,11 @@ class ProtocolWithChangesWriter : public evo_test::ProtocolWithChangesWriterBase
 // Binary reader for the ProtocolWithChanges protocol.
 class ProtocolWithChangesReader : public evo_test::ProtocolWithChangesReaderBase, yardl::binary::BinaryReader {
   public:
-  ProtocolWithChangesReader(std::istream& stream)
-      : yardl::binary::BinaryReader(stream), version_(evo_test::ProtocolWithChangesReaderBase::VersionFromSchema(schema_read_)) {}
+  ProtocolWithChangesReader(std::istream& stream, bool skip_completed_check=false)
+      : evo_test::ProtocolWithChangesReaderBase(skip_completed_check), yardl::binary::BinaryReader(stream), version_(evo_test::ProtocolWithChangesReaderBase::VersionFromSchema(schema_read_)) {}
 
-  ProtocolWithChangesReader(std::string file_name)
-      : yardl::binary::BinaryReader(file_name), version_(evo_test::ProtocolWithChangesReaderBase::VersionFromSchema(schema_read_)) {}
+  ProtocolWithChangesReader(std::string file_name, bool skip_completed_check=false)
+      : evo_test::ProtocolWithChangesReaderBase(skip_completed_check), yardl::binary::BinaryReader(file_name), version_(evo_test::ProtocolWithChangesReaderBase::VersionFromSchema(schema_read_)) {}
 
   Version GetVersion() { return version_; }
 

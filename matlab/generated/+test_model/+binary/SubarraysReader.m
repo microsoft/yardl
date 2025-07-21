@@ -15,8 +15,12 @@ classdef SubarraysReader < yardl.binary.BinaryProtocolReader & test_model.Subarr
   end
 
   methods
-    function self = SubarraysReader(filename)
-      self@test_model.SubarraysReaderBase();
+    function self = SubarraysReader(filename, options)
+      arguments
+        filename (1,1) string
+        options.skip_completed_check (1,1) logical = false
+      end
+      self@test_model.SubarraysReaderBase(skip_completed_check=options.skip_completed_check);
       self@yardl.binary.BinaryProtocolReader(filename, test_model.SubarraysReaderBase.schema);
       self.dynamic_with_fixed_int_subarray_serializer = yardl.binary.DynamicNDArraySerializer(yardl.binary.FixedNDArraySerializer(yardl.binary.Int32Serializer, [3]));
       self.dynamic_with_fixed_float_subarray_serializer = yardl.binary.DynamicNDArraySerializer(yardl.binary.FixedNDArraySerializer(yardl.binary.Float32Serializer, [3]));

@@ -8,8 +8,12 @@ classdef ProtocolWithKeywordStepsReader < yardl.binary.BinaryProtocolReader & te
   end
 
   methods
-    function self = ProtocolWithKeywordStepsReader(filename)
-      self@test_model.ProtocolWithKeywordStepsReaderBase();
+    function self = ProtocolWithKeywordStepsReader(filename, options)
+      arguments
+        filename (1,1) string
+        options.skip_completed_check (1,1) logical = false
+      end
+      self@test_model.ProtocolWithKeywordStepsReaderBase(skip_completed_check=options.skip_completed_check);
       self@yardl.binary.BinaryProtocolReader(filename, test_model.ProtocolWithKeywordStepsReaderBase.schema);
       self.int_serializer = yardl.binary.StreamSerializer(test_model.binary.RecordWithKeywordFieldsSerializer());
       self.float_serializer = yardl.binary.EnumSerializer('test_model.EnumWithKeywordSymbols', @test_model.EnumWithKeywordSymbols, yardl.binary.Int32Serializer);

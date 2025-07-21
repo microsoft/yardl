@@ -11,8 +11,12 @@ classdef FixedArraysReader < yardl.binary.BinaryProtocolReader & test_model.Fixe
   end
 
   methods
-    function self = FixedArraysReader(filename)
-      self@test_model.FixedArraysReaderBase();
+    function self = FixedArraysReader(filename, options)
+      arguments
+        filename (1,1) string
+        options.skip_completed_check (1,1) logical = false
+      end
+      self@test_model.FixedArraysReaderBase(skip_completed_check=options.skip_completed_check);
       self@yardl.binary.BinaryProtocolReader(filename, test_model.FixedArraysReaderBase.schema);
       self.ints_serializer = yardl.binary.FixedNDArraySerializer(yardl.binary.Int32Serializer, [3, 2]);
       self.fixed_simple_record_array_serializer = yardl.binary.FixedNDArraySerializer(test_model.binary.SimpleRecordSerializer(), [2, 3]);

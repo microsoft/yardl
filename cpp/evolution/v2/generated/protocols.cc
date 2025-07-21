@@ -3078,7 +3078,7 @@ bool ProtocolWithChangesReaderBase::ReadAddedUnionStreamImpl(std::vector<std::va
 }
 
 void ProtocolWithChangesReaderBase::Close() {
-  if (unlikely(state_ != 216)) {
+  if (!skip_completed_check_ && unlikely(state_ != 216)) {
     if (state_ == 215) {
       state_ = 216;
     } else {

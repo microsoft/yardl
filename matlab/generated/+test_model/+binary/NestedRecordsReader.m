@@ -7,8 +7,12 @@ classdef NestedRecordsReader < yardl.binary.BinaryProtocolReader & test_model.Ne
   end
 
   methods
-    function self = NestedRecordsReader(filename)
-      self@test_model.NestedRecordsReaderBase();
+    function self = NestedRecordsReader(filename, options)
+      arguments
+        filename (1,1) string
+        options.skip_completed_check (1,1) logical = false
+      end
+      self@test_model.NestedRecordsReaderBase(skip_completed_check=options.skip_completed_check);
       self@yardl.binary.BinaryProtocolReader(filename, test_model.NestedRecordsReaderBase.schema);
       self.tuple_with_records_serializer = test_model.binary.TupleWithRecordsSerializer();
     end

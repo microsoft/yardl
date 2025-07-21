@@ -8,8 +8,12 @@ classdef StringsReader < yardl.binary.BinaryProtocolReader & test_model.StringsR
   end
 
   methods
-    function self = StringsReader(filename)
-      self@test_model.StringsReaderBase();
+    function self = StringsReader(filename, options)
+      arguments
+        filename (1,1) string
+        options.skip_completed_check (1,1) logical = false
+      end
+      self@test_model.StringsReaderBase(skip_completed_check=options.skip_completed_check);
       self@yardl.binary.BinaryProtocolReader(filename, test_model.StringsReaderBase.schema);
       self.single_string_serializer = yardl.binary.StringSerializer;
       self.rec_with_string_serializer = test_model.binary.RecordWithStringsSerializer();

@@ -9,8 +9,12 @@ classdef StateTestReader < yardl.binary.BinaryProtocolReader & test_model.StateT
   end
 
   methods
-    function self = StateTestReader(filename)
-      self@test_model.StateTestReaderBase();
+    function self = StateTestReader(filename, options)
+      arguments
+        filename (1,1) string
+        options.skip_completed_check (1,1) logical = false
+      end
+      self@test_model.StateTestReaderBase(skip_completed_check=options.skip_completed_check);
       self@yardl.binary.BinaryProtocolReader(filename, test_model.StateTestReaderBase.schema);
       self.an_int_serializer = yardl.binary.Int32Serializer;
       self.a_stream_serializer = yardl.binary.StreamSerializer(yardl.binary.Int32Serializer);

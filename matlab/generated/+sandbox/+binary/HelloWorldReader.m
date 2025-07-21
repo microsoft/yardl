@@ -7,8 +7,12 @@ classdef HelloWorldReader < yardl.binary.BinaryProtocolReader & sandbox.HelloWor
   end
 
   methods
-    function self = HelloWorldReader(filename)
-      self@sandbox.HelloWorldReaderBase();
+    function self = HelloWorldReader(filename, options)
+      arguments
+        filename (1,1) string
+        options.skip_completed_check (1,1) logical = false
+      end
+      self@sandbox.HelloWorldReaderBase(skip_completed_check=options.skip_completed_check);
       self@yardl.binary.BinaryProtocolReader(filename, sandbox.HelloWorldReaderBase.schema);
       self.data_serializer = yardl.binary.StreamSerializer(yardl.binary.FixedNDArraySerializer(yardl.binary.Complexfloat64Serializer, [2]));
     end

@@ -11,8 +11,12 @@ classdef AdvancedGenericsReader < yardl.binary.BinaryProtocolReader & test_model
   end
 
   methods
-    function self = AdvancedGenericsReader(filename)
-      self@test_model.AdvancedGenericsReaderBase();
+    function self = AdvancedGenericsReader(filename, options)
+      arguments
+        filename (1,1) string
+        options.skip_completed_check (1,1) logical = false
+      end
+      self@test_model.AdvancedGenericsReaderBase(skip_completed_check=options.skip_completed_check);
       self@yardl.binary.BinaryProtocolReader(filename, test_model.AdvancedGenericsReaderBase.schema);
       self.float_image_image_serializer = yardl.binary.NDArraySerializer(yardl.binary.NDArraySerializer(yardl.binary.Float32Serializer, 2), 2);
       self.generic_record_1_serializer = test_model.binary.GenericRecordSerializer(yardl.binary.Int32Serializer, yardl.binary.StringSerializer);

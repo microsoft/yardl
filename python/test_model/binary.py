@@ -35,8 +35,8 @@ class BinaryBenchmarkFloat256x256Reader(_binary.BinaryProtocolReader, BenchmarkF
     """Binary writer for the BenchmarkFloat256x256 protocol."""
 
 
-    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
-        BenchmarkFloat256x256ReaderBase.__init__(self)
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str], skip_completed_check: bool = False) -> None:
+        BenchmarkFloat256x256ReaderBase.__init__(self, skip_completed_check)
         _binary.BinaryProtocolReader.__init__(self, stream, BenchmarkFloat256x256ReaderBase.schema)
 
     def _read_float256x256(self) -> collections.abc.Iterable[npt.NDArray[np.float32]]:
@@ -58,8 +58,8 @@ class BinaryBenchmarkInt256x256Reader(_binary.BinaryProtocolReader, BenchmarkInt
     """Binary writer for the BenchmarkInt256x256 protocol."""
 
 
-    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
-        BenchmarkInt256x256ReaderBase.__init__(self)
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str], skip_completed_check: bool = False) -> None:
+        BenchmarkInt256x256ReaderBase.__init__(self, skip_completed_check)
         _binary.BinaryProtocolReader.__init__(self, stream, BenchmarkInt256x256ReaderBase.schema)
 
     def _read_int256x256(self) -> collections.abc.Iterable[npt.NDArray[np.int32]]:
@@ -81,8 +81,8 @@ class BinaryBenchmarkFloatVlenReader(_binary.BinaryProtocolReader, BenchmarkFloa
     """Binary writer for the BenchmarkFloatVlen protocol."""
 
 
-    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
-        BenchmarkFloatVlenReaderBase.__init__(self)
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str], skip_completed_check: bool = False) -> None:
+        BenchmarkFloatVlenReaderBase.__init__(self, skip_completed_check)
         _binary.BinaryProtocolReader.__init__(self, stream, BenchmarkFloatVlenReaderBase.schema)
 
     def _read_float_array(self) -> collections.abc.Iterable[npt.NDArray[np.float32]]:
@@ -104,8 +104,8 @@ class BinaryBenchmarkSmallRecordReader(_binary.BinaryProtocolReader, BenchmarkSm
     """Binary writer for the BenchmarkSmallRecord protocol."""
 
 
-    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
-        BenchmarkSmallRecordReaderBase.__init__(self)
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str], skip_completed_check: bool = False) -> None:
+        BenchmarkSmallRecordReaderBase.__init__(self, skip_completed_check)
         _binary.BinaryProtocolReader.__init__(self, stream, BenchmarkSmallRecordReaderBase.schema)
 
     def _read_small_record(self) -> collections.abc.Iterable[SmallBenchmarkRecord]:
@@ -127,8 +127,8 @@ class BinaryBenchmarkSmallRecordWithOptionalsReader(_binary.BinaryProtocolReader
     """Binary writer for the BenchmarkSmallRecordWithOptionals protocol."""
 
 
-    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
-        BenchmarkSmallRecordWithOptionalsReaderBase.__init__(self)
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str], skip_completed_check: bool = False) -> None:
+        BenchmarkSmallRecordWithOptionalsReaderBase.__init__(self, skip_completed_check)
         _binary.BinaryProtocolReader.__init__(self, stream, BenchmarkSmallRecordWithOptionalsReaderBase.schema)
 
     def _read_small_record(self) -> collections.abc.Iterable[SimpleEncodingCounters]:
@@ -150,8 +150,8 @@ class BinaryBenchmarkSimpleMrdReader(_binary.BinaryProtocolReader, BenchmarkSimp
     """Binary writer for the BenchmarkSimpleMrd protocol."""
 
 
-    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
-        BenchmarkSimpleMrdReaderBase.__init__(self)
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str], skip_completed_check: bool = False) -> None:
+        BenchmarkSimpleMrdReaderBase.__init__(self, skip_completed_check)
         _binary.BinaryProtocolReader.__init__(self, stream, BenchmarkSimpleMrdReaderBase.schema)
 
     def _read_data(self) -> collections.abc.Iterable[AcquisitionOrImage]:
@@ -176,8 +176,8 @@ class BinaryScalarsReader(_binary.BinaryProtocolReader, ScalarsReaderBase):
     """Binary writer for the Scalars protocol."""
 
 
-    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
-        ScalarsReaderBase.__init__(self)
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str], skip_completed_check: bool = False) -> None:
+        ScalarsReaderBase.__init__(self, skip_completed_check)
         _binary.BinaryProtocolReader.__init__(self, stream, ScalarsReaderBase.schema)
 
     def _read_int32(self) -> yardl.Int32:
@@ -211,8 +211,8 @@ class BinaryScalarOptionalsReader(_binary.BinaryProtocolReader, ScalarOptionalsR
     """Binary writer for the ScalarOptionals protocol."""
 
 
-    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
-        ScalarOptionalsReaderBase.__init__(self)
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str], skip_completed_check: bool = False) -> None:
+        ScalarOptionalsReaderBase.__init__(self, skip_completed_check)
         _binary.BinaryProtocolReader.__init__(self, stream, ScalarOptionalsReaderBase.schema)
 
     def _read_optional_int(self) -> typing.Optional[yardl.Int32]:
@@ -243,8 +243,8 @@ class BinaryNestedRecordsReader(_binary.BinaryProtocolReader, NestedRecordsReade
     """Binary writer for the NestedRecords protocol."""
 
 
-    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
-        NestedRecordsReaderBase.__init__(self)
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str], skip_completed_check: bool = False) -> None:
+        NestedRecordsReaderBase.__init__(self, skip_completed_check)
         _binary.BinaryProtocolReader.__init__(self, stream, NestedRecordsReaderBase.schema)
 
     def _read_tuple_with_records(self) -> TupleWithRecords:
@@ -275,8 +275,8 @@ class BinaryVlensReader(_binary.BinaryProtocolReader, VlensReaderBase):
     """Binary writer for the Vlens protocol."""
 
 
-    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
-        VlensReaderBase.__init__(self)
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str], skip_completed_check: bool = False) -> None:
+        VlensReaderBase.__init__(self, skip_completed_check)
         _binary.BinaryProtocolReader.__init__(self, stream, VlensReaderBase.schema)
 
     def _read_int_vector(self) -> list[yardl.Int32]:
@@ -310,8 +310,8 @@ class BinaryStringsReader(_binary.BinaryProtocolReader, StringsReaderBase):
     """Binary writer for the Strings protocol."""
 
 
-    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
-        StringsReaderBase.__init__(self)
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str], skip_completed_check: bool = False) -> None:
+        StringsReaderBase.__init__(self, skip_completed_check)
         _binary.BinaryProtocolReader.__init__(self, stream, StringsReaderBase.schema)
 
     def _read_single_string(self) -> str:
@@ -336,8 +336,8 @@ class BinaryOptionalVectorsReader(_binary.BinaryProtocolReader, OptionalVectorsR
     """Binary writer for the OptionalVectors protocol."""
 
 
-    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
-        OptionalVectorsReaderBase.__init__(self)
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str], skip_completed_check: bool = False) -> None:
+        OptionalVectorsReaderBase.__init__(self, skip_completed_check)
         _binary.BinaryProtocolReader.__init__(self, stream, OptionalVectorsReaderBase.schema)
 
     def _read_record_with_optional_vector(self) -> RecordWithOptionalVector:
@@ -368,8 +368,8 @@ class BinaryFixedVectorsReader(_binary.BinaryProtocolReader, FixedVectorsReaderB
     """Binary writer for the FixedVectors protocol."""
 
 
-    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
-        FixedVectorsReaderBase.__init__(self)
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str], skip_completed_check: bool = False) -> None:
+        FixedVectorsReaderBase.__init__(self, skip_completed_check)
         _binary.BinaryProtocolReader.__init__(self, stream, FixedVectorsReaderBase.schema)
 
     def _read_fixed_int_vector(self) -> list[yardl.Int32]:
@@ -409,8 +409,8 @@ class BinaryStreamsReader(_binary.BinaryProtocolReader, StreamsReaderBase):
     """Binary writer for the Streams protocol."""
 
 
-    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
-        StreamsReaderBase.__init__(self)
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str], skip_completed_check: bool = False) -> None:
+        StreamsReaderBase.__init__(self, skip_completed_check)
         _binary.BinaryProtocolReader.__init__(self, stream, StreamsReaderBase.schema)
 
     def _read_int_data(self) -> collections.abc.Iterable[yardl.Int32]:
@@ -453,8 +453,8 @@ class BinaryFixedArraysReader(_binary.BinaryProtocolReader, FixedArraysReaderBas
     """Binary writer for the FixedArrays protocol."""
 
 
-    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
-        FixedArraysReaderBase.__init__(self)
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str], skip_completed_check: bool = False) -> None:
+        FixedArraysReaderBase.__init__(self, skip_completed_check)
         _binary.BinaryProtocolReader.__init__(self, stream, FixedArraysReaderBase.schema)
 
     def _read_ints(self) -> npt.NDArray[np.int32]:
@@ -512,8 +512,8 @@ class BinarySubarraysReader(_binary.BinaryProtocolReader, SubarraysReaderBase):
     """Binary writer for the Subarrays protocol."""
 
 
-    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
-        SubarraysReaderBase.__init__(self)
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str], skip_completed_check: bool = False) -> None:
+        SubarraysReaderBase.__init__(self, skip_completed_check)
         _binary.BinaryProtocolReader.__init__(self, stream, SubarraysReaderBase.schema)
 
     def _read_dynamic_with_fixed_int_subarray(self) -> npt.NDArray[np.int32]:
@@ -562,8 +562,8 @@ class BinarySubarraysInRecordsReader(_binary.BinaryProtocolReader, SubarraysInRe
     """Binary writer for the SubarraysInRecords protocol."""
 
 
-    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
-        SubarraysInRecordsReaderBase.__init__(self)
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str], skip_completed_check: bool = False) -> None:
+        SubarraysInRecordsReaderBase.__init__(self, skip_completed_check)
         _binary.BinaryProtocolReader.__init__(self, stream, SubarraysInRecordsReaderBase.schema)
 
     def _read_with_fixed_subarrays(self) -> npt.NDArray[np.void]:
@@ -600,8 +600,8 @@ class BinaryNDArraysReader(_binary.BinaryProtocolReader, NDArraysReaderBase):
     """Binary writer for the NDArrays protocol."""
 
 
-    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
-        NDArraysReaderBase.__init__(self)
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str], skip_completed_check: bool = False) -> None:
+        NDArraysReaderBase.__init__(self, skip_completed_check)
         _binary.BinaryProtocolReader.__init__(self, stream, NDArraysReaderBase.schema)
 
     def _read_ints(self) -> npt.NDArray[np.int32]:
@@ -644,8 +644,8 @@ class BinaryNDArraysSingleDimensionReader(_binary.BinaryProtocolReader, NDArrays
     """Binary writer for the NDArraysSingleDimension protocol."""
 
 
-    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
-        NDArraysSingleDimensionReaderBase.__init__(self)
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str], skip_completed_check: bool = False) -> None:
+        NDArraysSingleDimensionReaderBase.__init__(self, skip_completed_check)
         _binary.BinaryProtocolReader.__init__(self, stream, NDArraysSingleDimensionReaderBase.schema)
 
     def _read_ints(self) -> npt.NDArray[np.int32]:
@@ -685,8 +685,8 @@ class BinaryDynamicNDArraysReader(_binary.BinaryProtocolReader, DynamicNDArraysR
     """Binary writer for the DynamicNDArrays protocol."""
 
 
-    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
-        DynamicNDArraysReaderBase.__init__(self)
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str], skip_completed_check: bool = False) -> None:
+        DynamicNDArraysReaderBase.__init__(self, skip_completed_check)
         _binary.BinaryProtocolReader.__init__(self, stream, DynamicNDArraysReaderBase.schema)
 
     def _read_ints(self) -> npt.NDArray[np.int32]:
@@ -720,8 +720,8 @@ class BinaryMultiDArraysReader(_binary.BinaryProtocolReader, MultiDArraysReaderB
     """Binary writer for the MultiDArrays protocol."""
 
 
-    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
-        MultiDArraysReaderBase.__init__(self)
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str], skip_completed_check: bool = False) -> None:
+        MultiDArraysReaderBase.__init__(self, skip_completed_check)
         _binary.BinaryProtocolReader.__init__(self, stream, MultiDArraysReaderBase.schema)
 
     def _read_images(self) -> collections.abc.Iterable[npt.NDArray[np.float32]]:
@@ -749,8 +749,8 @@ class BinaryComplexArraysReader(_binary.BinaryProtocolReader, ComplexArraysReade
     """Binary writer for the ComplexArrays protocol."""
 
 
-    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
-        ComplexArraysReaderBase.__init__(self)
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str], skip_completed_check: bool = False) -> None:
+        ComplexArraysReaderBase.__init__(self, skip_completed_check)
         _binary.BinaryProtocolReader.__init__(self, stream, ComplexArraysReaderBase.schema)
 
     def _read_floats(self) -> npt.NDArray[np.complex64]:
@@ -787,8 +787,8 @@ class BinaryMapsReader(_binary.BinaryProtocolReader, MapsReaderBase):
     """Binary writer for the Maps protocol."""
 
 
-    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
-        MapsReaderBase.__init__(self)
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str], skip_completed_check: bool = False) -> None:
+        MapsReaderBase.__init__(self, skip_completed_check)
         _binary.BinaryProtocolReader.__init__(self, stream, MapsReaderBase.schema)
 
     def _read_string_to_int(self) -> dict[str, yardl.Int32]:
@@ -831,8 +831,8 @@ class BinaryUnionsReader(_binary.BinaryProtocolReader, UnionsReaderBase):
     """Binary writer for the Unions protocol."""
 
 
-    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
-        UnionsReaderBase.__init__(self)
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str], skip_completed_check: bool = False) -> None:
+        UnionsReaderBase.__init__(self, skip_completed_check)
         _binary.BinaryProtocolReader.__init__(self, stream, UnionsReaderBase.schema)
 
     def _read_int_or_simple_record(self) -> Int32OrSimpleRecord:
@@ -869,8 +869,8 @@ class BinaryStreamsOfUnionsReader(_binary.BinaryProtocolReader, StreamsOfUnionsR
     """Binary writer for the StreamsOfUnions protocol."""
 
 
-    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
-        StreamsOfUnionsReaderBase.__init__(self)
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str], skip_completed_check: bool = False) -> None:
+        StreamsOfUnionsReaderBase.__init__(self, skip_completed_check)
         _binary.BinaryProtocolReader.__init__(self, stream, StreamsOfUnionsReaderBase.schema)
 
     def _read_int_or_simple_record(self) -> collections.abc.Iterable[Int32OrSimpleRecord]:
@@ -907,8 +907,8 @@ class BinaryEnumsReader(_binary.BinaryProtocolReader, EnumsReaderBase):
     """Binary writer for the Enums protocol."""
 
 
-    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
-        EnumsReaderBase.__init__(self)
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str], skip_completed_check: bool = False) -> None:
+        EnumsReaderBase.__init__(self, skip_completed_check)
         _binary.BinaryProtocolReader.__init__(self, stream, EnumsReaderBase.schema)
 
     def _read_single(self) -> Fruits:
@@ -942,8 +942,8 @@ class BinaryFlagsReader(_binary.BinaryProtocolReader, FlagsReaderBase):
     """Binary writer for the Flags protocol."""
 
 
-    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
-        FlagsReaderBase.__init__(self)
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str], skip_completed_check: bool = False) -> None:
+        FlagsReaderBase.__init__(self, skip_completed_check)
         _binary.BinaryProtocolReader.__init__(self, stream, FlagsReaderBase.schema)
 
     def _read_days(self) -> collections.abc.Iterable[DaysOfWeek]:
@@ -974,8 +974,8 @@ class BinaryStateTestReader(_binary.BinaryProtocolReader, StateTestReaderBase):
     """Binary writer for the StateTest protocol."""
 
 
-    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
-        StateTestReaderBase.__init__(self)
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str], skip_completed_check: bool = False) -> None:
+        StateTestReaderBase.__init__(self, skip_completed_check)
         _binary.BinaryProtocolReader.__init__(self, stream, StateTestReaderBase.schema)
 
     def _read_an_int(self) -> yardl.Int32:
@@ -1027,8 +1027,8 @@ class BinarySimpleGenericsReader(_binary.BinaryProtocolReader, SimpleGenericsRea
     """Binary writer for the SimpleGenerics protocol."""
 
 
-    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
-        SimpleGenericsReaderBase.__init__(self)
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str], skip_completed_check: bool = False) -> None:
+        SimpleGenericsReaderBase.__init__(self, skip_completed_check)
         _binary.BinaryProtocolReader.__init__(self, stream, SimpleGenericsReaderBase.schema)
 
     def _read_float_image(self) -> image.FloatImage:
@@ -1086,8 +1086,8 @@ class BinaryAdvancedGenericsReader(_binary.BinaryProtocolReader, AdvancedGeneric
     """Binary writer for the AdvancedGenerics protocol."""
 
 
-    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
-        AdvancedGenericsReaderBase.__init__(self)
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str], skip_completed_check: bool = False) -> None:
+        AdvancedGenericsReaderBase.__init__(self, skip_completed_check)
         _binary.BinaryProtocolReader.__init__(self, stream, AdvancedGenericsReaderBase.schema)
 
     def _read_float_image_image(self) -> Image[np.object_]:
@@ -1151,8 +1151,8 @@ class BinaryAliasesReader(_binary.BinaryProtocolReader, AliasesReaderBase):
     """Binary writer for the Aliases protocol."""
 
 
-    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
-        AliasesReaderBase.__init__(self)
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str], skip_completed_check: bool = False) -> None:
+        AliasesReaderBase.__init__(self, skip_completed_check)
         _binary.BinaryProtocolReader.__init__(self, stream, AliasesReaderBase.schema)
 
     def _read_aliased_string(self) -> AliasedString:
@@ -1207,8 +1207,8 @@ class BinaryStreamsOfAliasedUnionsReader(_binary.BinaryProtocolReader, StreamsOf
     """Binary writer for the StreamsOfAliasedUnions protocol."""
 
 
-    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
-        StreamsOfAliasedUnionsReaderBase.__init__(self)
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str], skip_completed_check: bool = False) -> None:
+        StreamsOfAliasedUnionsReaderBase.__init__(self, skip_completed_check)
         _binary.BinaryProtocolReader.__init__(self, stream, StreamsOfAliasedUnionsReaderBase.schema)
 
     def _read_int_or_simple_record(self) -> collections.abc.Iterable[AliasedIntOrSimpleRecord]:
@@ -1233,8 +1233,8 @@ class BinaryProtocolWithComputedFieldsReader(_binary.BinaryProtocolReader, Proto
     """Binary writer for the ProtocolWithComputedFields protocol."""
 
 
-    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
-        ProtocolWithComputedFieldsReaderBase.__init__(self)
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str], skip_completed_check: bool = False) -> None:
+        ProtocolWithComputedFieldsReaderBase.__init__(self, skip_completed_check)
         _binary.BinaryProtocolReader.__init__(self, stream, ProtocolWithComputedFieldsReaderBase.schema)
 
     def _read_record_with_computed_fields(self) -> RecordWithComputedFields:
@@ -1259,8 +1259,8 @@ class BinaryProtocolWithKeywordStepsReader(_binary.BinaryProtocolReader, Protoco
     """Binary writer for the ProtocolWithKeywordSteps protocol."""
 
 
-    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
-        ProtocolWithKeywordStepsReaderBase.__init__(self)
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str], skip_completed_check: bool = False) -> None:
+        ProtocolWithKeywordStepsReaderBase.__init__(self, skip_completed_check)
         _binary.BinaryProtocolReader.__init__(self, stream, ProtocolWithKeywordStepsReaderBase.schema)
 
     def _read_int(self) -> collections.abc.Iterable[RecordWithKeywordFields]:
@@ -1285,8 +1285,8 @@ class BinaryProtocolWithOptionalDateReader(_binary.BinaryProtocolReader, Protoco
     """Binary writer for the ProtocolWithOptionalDate protocol."""
 
 
-    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:
-        ProtocolWithOptionalDateReaderBase.__init__(self)
+    def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str], skip_completed_check: bool = False) -> None:
+        ProtocolWithOptionalDateReaderBase.__init__(self, skip_completed_check)
         _binary.BinaryProtocolReader.__init__(self, stream, ProtocolWithOptionalDateReaderBase.schema)
 
     def _read_record(self) -> typing.Optional[RecordWithOptionalDate]:
