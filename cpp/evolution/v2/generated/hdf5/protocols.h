@@ -284,7 +284,7 @@ class ProtocolWithChangesWriter : public evo_test::ProtocolWithChangesWriterBase
 // HDF5 reader for the ProtocolWithChanges protocol.
 class ProtocolWithChangesReader : public evo_test::ProtocolWithChangesReaderBase, public yardl::hdf5::Hdf5Reader {
   public:
-  ProtocolWithChangesReader(std::string path);
+  ProtocolWithChangesReader(std::string path, bool skip_completed_check=false);
 
   void ReadInt8ToIntImpl(int8_t& value) override;
 

@@ -152,12 +152,12 @@ class ProtocolWithChangesWriter : public evo_test::ProtocolWithChangesWriterBase
 // NDJSON reader for the ProtocolWithChanges protocol.
 class ProtocolWithChangesReader : public evo_test::ProtocolWithChangesReaderBase, yardl::ndjson::NDJsonReader {
   public:
-  ProtocolWithChangesReader(std::istream& stream)
-      : yardl::ndjson::NDJsonReader(stream, schema_) {
+  ProtocolWithChangesReader(std::istream& stream, bool skip_completed_check=false)
+      : evo_test::ProtocolWithChangesReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(stream, schema_) {
   }
 
-  ProtocolWithChangesReader(std::string file_name)
-      : yardl::ndjson::NDJsonReader(file_name, schema_) {
+  ProtocolWithChangesReader(std::string file_name, bool skip_completed_check=false)
+      : evo_test::ProtocolWithChangesReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(file_name, schema_) {
   }
 
   protected:

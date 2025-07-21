@@ -217,10 +217,10 @@ func writeProtocolMethods(w *formatting.IndentedWriter, p *dsl.ProtocolDefinitio
 	}
 
 	readerClassName := Hdf5ReaderClassName(p)
-	fmt.Fprintf(w, "%s::%s(std::string path)\n", readerClassName, readerClassName)
+	fmt.Fprintf(w, "%s::%s(std::string path, bool skip_completed_check)\n", readerClassName, readerClassName)
 	w.Indented(func() {
 		w.Indented(func() {
-			fmt.Fprintf(w, ": yardl::hdf5::Hdf5Reader::Hdf5Reader(path, \"%s\", schema_) {\n", p.Name)
+			fmt.Fprintf(w, ": %s(skip_completed_check), yardl::hdf5::Hdf5Reader::Hdf5Reader(path, \"%s\", schema_) {\n", common.QualifiedAbstractReaderName(p), p.Name)
 		})
 	})
 

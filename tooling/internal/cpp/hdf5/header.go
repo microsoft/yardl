@@ -85,7 +85,7 @@ func writeHeaderFile(env *dsl.Environment, options packaging.CppCodegenOptions) 
 			fmt.Fprintf(w, "class %s : public %s, public yardl::hdf5::Hdf5Reader {\n", readerClassName, common.QualifiedAbstractReaderName(protocol))
 			w.Indented(func() {
 				fmt.Fprintln(w, "public:")
-				fmt.Fprintf(w, "%s(std::string path);\n\n", readerClassName)
+				fmt.Fprintf(w, "%s(std::string path, bool skip_completed_check=false);\n\n", readerClassName)
 
 				for _, step := range protocol.Sequence {
 					returnType := "void"

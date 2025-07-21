@@ -1458,7 +1458,9 @@ bool ProtocolWithChangesReader::ReadAddedUnionStreamImpl(std::variant<evo_test::
 }
 
 void ProtocolWithChangesReader::CloseImpl() {
-  VerifyFinished();
+  if (!skip_completed_check_) {
+    VerifyFinished();
+  }
 }
 
 } // namespace evo_test::ndjson

@@ -234,18 +234,18 @@ func writeHeaderFile(env *dsl.Environment, options packaging.CppCodegenOptions) 
 			fmt.Fprintf(w, "class %s : public %s, yardl::ndjson::NDJsonReader {\n", readerClassName, common.QualifiedAbstractReaderName(protocol))
 			w.Indented(func() {
 				fmt.Fprintln(w, "public:")
-				fmt.Fprintf(w, "%s(std::istream& stream)\n", readerClassName)
+				fmt.Fprintf(w, "%s(std::istream& stream, bool skip_completed_check=false)\n", readerClassName)
 				w.Indented(func() {
 					w.Indented(func() {
-						w.WriteStringln(": yardl::ndjson::NDJsonReader(stream, schema_) {")
+						fmt.Fprintf(w, ": %s(skip_completed_check), yardl::ndjson::NDJsonReader(stream, schema_) {\n", common.QualifiedAbstractReaderName(protocol))
 					})
 				})
 				w.WriteStringln("}\n")
 
-				fmt.Fprintf(w, "%s(std::string file_name)\n", readerClassName)
+				fmt.Fprintf(w, "%s(std::string file_name, bool skip_completed_check=false)\n", readerClassName)
 				w.Indented(func() {
 					w.Indented(func() {
-						w.WriteStringln(": yardl::ndjson::NDJsonReader(file_name, schema_) {")
+						fmt.Fprintf(w, ": %s(skip_completed_check), yardl::ndjson::NDJsonReader(file_name, schema_) {\n", common.QualifiedAbstractReaderName(protocol))
 					})
 				})
 				w.WriteStringln("}\n")
@@ -566,7 +566,11 @@ func writeProtocolMethods(w *formatting.IndentedWriter, p *dsl.ProtocolDefinitio
 
 	fmt.Fprintf(w, "void %s::CloseImpl() {\n", readerClassName)
 	w.Indented(func() {
-		w.WriteString("VerifyFinished();\n")
+		w.WriteStringln("if (!skip_completed_check_) {")
+		w.Indented(func() {
+			w.WriteString("VerifyFinished();\n")
+		})
+		w.WriteStringln("}")
 	})
 	w.WriteString("}\n\n")
 }

@@ -34,12 +34,12 @@ class BenchmarkFloat256x256Writer : public test_model::BenchmarkFloat256x256Writ
 // NDJSON reader for the BenchmarkFloat256x256 protocol.
 class BenchmarkFloat256x256Reader : public test_model::BenchmarkFloat256x256ReaderBase, yardl::ndjson::NDJsonReader {
   public:
-  BenchmarkFloat256x256Reader(std::istream& stream)
-      : yardl::ndjson::NDJsonReader(stream, schema_) {
+  BenchmarkFloat256x256Reader(std::istream& stream, bool skip_completed_check=false)
+      : test_model::BenchmarkFloat256x256ReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(stream, schema_) {
   }
 
-  BenchmarkFloat256x256Reader(std::string file_name)
-      : yardl::ndjson::NDJsonReader(file_name, schema_) {
+  BenchmarkFloat256x256Reader(std::string file_name, bool skip_completed_check=false)
+      : test_model::BenchmarkFloat256x256ReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(file_name, schema_) {
   }
 
   protected:
@@ -69,12 +69,12 @@ class BenchmarkInt256x256Writer : public test_model::BenchmarkInt256x256WriterBa
 // NDJSON reader for the BenchmarkInt256x256 protocol.
 class BenchmarkInt256x256Reader : public test_model::BenchmarkInt256x256ReaderBase, yardl::ndjson::NDJsonReader {
   public:
-  BenchmarkInt256x256Reader(std::istream& stream)
-      : yardl::ndjson::NDJsonReader(stream, schema_) {
+  BenchmarkInt256x256Reader(std::istream& stream, bool skip_completed_check=false)
+      : test_model::BenchmarkInt256x256ReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(stream, schema_) {
   }
 
-  BenchmarkInt256x256Reader(std::string file_name)
-      : yardl::ndjson::NDJsonReader(file_name, schema_) {
+  BenchmarkInt256x256Reader(std::string file_name, bool skip_completed_check=false)
+      : test_model::BenchmarkInt256x256ReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(file_name, schema_) {
   }
 
   protected:
@@ -104,12 +104,12 @@ class BenchmarkFloatVlenWriter : public test_model::BenchmarkFloatVlenWriterBase
 // NDJSON reader for the BenchmarkFloatVlen protocol.
 class BenchmarkFloatVlenReader : public test_model::BenchmarkFloatVlenReaderBase, yardl::ndjson::NDJsonReader {
   public:
-  BenchmarkFloatVlenReader(std::istream& stream)
-      : yardl::ndjson::NDJsonReader(stream, schema_) {
+  BenchmarkFloatVlenReader(std::istream& stream, bool skip_completed_check=false)
+      : test_model::BenchmarkFloatVlenReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(stream, schema_) {
   }
 
-  BenchmarkFloatVlenReader(std::string file_name)
-      : yardl::ndjson::NDJsonReader(file_name, schema_) {
+  BenchmarkFloatVlenReader(std::string file_name, bool skip_completed_check=false)
+      : test_model::BenchmarkFloatVlenReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(file_name, schema_) {
   }
 
   protected:
@@ -139,12 +139,12 @@ class BenchmarkSmallRecordWriter : public test_model::BenchmarkSmallRecordWriter
 // NDJSON reader for the BenchmarkSmallRecord protocol.
 class BenchmarkSmallRecordReader : public test_model::BenchmarkSmallRecordReaderBase, yardl::ndjson::NDJsonReader {
   public:
-  BenchmarkSmallRecordReader(std::istream& stream)
-      : yardl::ndjson::NDJsonReader(stream, schema_) {
+  BenchmarkSmallRecordReader(std::istream& stream, bool skip_completed_check=false)
+      : test_model::BenchmarkSmallRecordReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(stream, schema_) {
   }
 
-  BenchmarkSmallRecordReader(std::string file_name)
-      : yardl::ndjson::NDJsonReader(file_name, schema_) {
+  BenchmarkSmallRecordReader(std::string file_name, bool skip_completed_check=false)
+      : test_model::BenchmarkSmallRecordReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(file_name, schema_) {
   }
 
   protected:
@@ -174,12 +174,12 @@ class BenchmarkSmallRecordWithOptionalsWriter : public test_model::BenchmarkSmal
 // NDJSON reader for the BenchmarkSmallRecordWithOptionals protocol.
 class BenchmarkSmallRecordWithOptionalsReader : public test_model::BenchmarkSmallRecordWithOptionalsReaderBase, yardl::ndjson::NDJsonReader {
   public:
-  BenchmarkSmallRecordWithOptionalsReader(std::istream& stream)
-      : yardl::ndjson::NDJsonReader(stream, schema_) {
+  BenchmarkSmallRecordWithOptionalsReader(std::istream& stream, bool skip_completed_check=false)
+      : test_model::BenchmarkSmallRecordWithOptionalsReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(stream, schema_) {
   }
 
-  BenchmarkSmallRecordWithOptionalsReader(std::string file_name)
-      : yardl::ndjson::NDJsonReader(file_name, schema_) {
+  BenchmarkSmallRecordWithOptionalsReader(std::string file_name, bool skip_completed_check=false)
+      : test_model::BenchmarkSmallRecordWithOptionalsReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(file_name, schema_) {
   }
 
   protected:
@@ -209,12 +209,12 @@ class BenchmarkSimpleMrdWriter : public test_model::BenchmarkSimpleMrdWriterBase
 // NDJSON reader for the BenchmarkSimpleMrd protocol.
 class BenchmarkSimpleMrdReader : public test_model::BenchmarkSimpleMrdReaderBase, yardl::ndjson::NDJsonReader {
   public:
-  BenchmarkSimpleMrdReader(std::istream& stream)
-      : yardl::ndjson::NDJsonReader(stream, schema_) {
+  BenchmarkSimpleMrdReader(std::istream& stream, bool skip_completed_check=false)
+      : test_model::BenchmarkSimpleMrdReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(stream, schema_) {
   }
 
-  BenchmarkSimpleMrdReader(std::string file_name)
-      : yardl::ndjson::NDJsonReader(file_name, schema_) {
+  BenchmarkSimpleMrdReader(std::string file_name, bool skip_completed_check=false)
+      : test_model::BenchmarkSimpleMrdReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(file_name, schema_) {
   }
 
   protected:
@@ -244,12 +244,12 @@ class ScalarsWriter : public test_model::ScalarsWriterBase, yardl::ndjson::NDJso
 // NDJSON reader for the Scalars protocol.
 class ScalarsReader : public test_model::ScalarsReaderBase, yardl::ndjson::NDJsonReader {
   public:
-  ScalarsReader(std::istream& stream)
-      : yardl::ndjson::NDJsonReader(stream, schema_) {
+  ScalarsReader(std::istream& stream, bool skip_completed_check=false)
+      : test_model::ScalarsReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(stream, schema_) {
   }
 
-  ScalarsReader(std::string file_name)
-      : yardl::ndjson::NDJsonReader(file_name, schema_) {
+  ScalarsReader(std::string file_name, bool skip_completed_check=false)
+      : test_model::ScalarsReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(file_name, schema_) {
   }
 
   protected:
@@ -282,12 +282,12 @@ class ScalarOptionalsWriter : public test_model::ScalarOptionalsWriterBase, yard
 // NDJSON reader for the ScalarOptionals protocol.
 class ScalarOptionalsReader : public test_model::ScalarOptionalsReaderBase, yardl::ndjson::NDJsonReader {
   public:
-  ScalarOptionalsReader(std::istream& stream)
-      : yardl::ndjson::NDJsonReader(stream, schema_) {
+  ScalarOptionalsReader(std::istream& stream, bool skip_completed_check=false)
+      : test_model::ScalarOptionalsReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(stream, schema_) {
   }
 
-  ScalarOptionalsReader(std::string file_name)
-      : yardl::ndjson::NDJsonReader(file_name, schema_) {
+  ScalarOptionalsReader(std::string file_name, bool skip_completed_check=false)
+      : test_model::ScalarOptionalsReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(file_name, schema_) {
   }
 
   protected:
@@ -319,12 +319,12 @@ class NestedRecordsWriter : public test_model::NestedRecordsWriterBase, yardl::n
 // NDJSON reader for the NestedRecords protocol.
 class NestedRecordsReader : public test_model::NestedRecordsReaderBase, yardl::ndjson::NDJsonReader {
   public:
-  NestedRecordsReader(std::istream& stream)
-      : yardl::ndjson::NDJsonReader(stream, schema_) {
+  NestedRecordsReader(std::istream& stream, bool skip_completed_check=false)
+      : test_model::NestedRecordsReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(stream, schema_) {
   }
 
-  NestedRecordsReader(std::string file_name)
-      : yardl::ndjson::NDJsonReader(file_name, schema_) {
+  NestedRecordsReader(std::string file_name, bool skip_completed_check=false)
+      : test_model::NestedRecordsReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(file_name, schema_) {
   }
 
   protected:
@@ -356,12 +356,12 @@ class VlensWriter : public test_model::VlensWriterBase, yardl::ndjson::NDJsonWri
 // NDJSON reader for the Vlens protocol.
 class VlensReader : public test_model::VlensReaderBase, yardl::ndjson::NDJsonReader {
   public:
-  VlensReader(std::istream& stream)
-      : yardl::ndjson::NDJsonReader(stream, schema_) {
+  VlensReader(std::istream& stream, bool skip_completed_check=false)
+      : test_model::VlensReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(stream, schema_) {
   }
 
-  VlensReader(std::string file_name)
-      : yardl::ndjson::NDJsonReader(file_name, schema_) {
+  VlensReader(std::string file_name, bool skip_completed_check=false)
+      : test_model::VlensReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(file_name, schema_) {
   }
 
   protected:
@@ -394,12 +394,12 @@ class StringsWriter : public test_model::StringsWriterBase, yardl::ndjson::NDJso
 // NDJSON reader for the Strings protocol.
 class StringsReader : public test_model::StringsReaderBase, yardl::ndjson::NDJsonReader {
   public:
-  StringsReader(std::istream& stream)
-      : yardl::ndjson::NDJsonReader(stream, schema_) {
+  StringsReader(std::istream& stream, bool skip_completed_check=false)
+      : test_model::StringsReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(stream, schema_) {
   }
 
-  StringsReader(std::string file_name)
-      : yardl::ndjson::NDJsonReader(file_name, schema_) {
+  StringsReader(std::string file_name, bool skip_completed_check=false)
+      : test_model::StringsReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(file_name, schema_) {
   }
 
   protected:
@@ -429,12 +429,12 @@ class OptionalVectorsWriter : public test_model::OptionalVectorsWriterBase, yard
 // NDJSON reader for the OptionalVectors protocol.
 class OptionalVectorsReader : public test_model::OptionalVectorsReaderBase, yardl::ndjson::NDJsonReader {
   public:
-  OptionalVectorsReader(std::istream& stream)
-      : yardl::ndjson::NDJsonReader(stream, schema_) {
+  OptionalVectorsReader(std::istream& stream, bool skip_completed_check=false)
+      : test_model::OptionalVectorsReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(stream, schema_) {
   }
 
-  OptionalVectorsReader(std::string file_name)
-      : yardl::ndjson::NDJsonReader(file_name, schema_) {
+  OptionalVectorsReader(std::string file_name, bool skip_completed_check=false)
+      : test_model::OptionalVectorsReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(file_name, schema_) {
   }
 
   protected:
@@ -466,12 +466,12 @@ class FixedVectorsWriter : public test_model::FixedVectorsWriterBase, yardl::ndj
 // NDJSON reader for the FixedVectors protocol.
 class FixedVectorsReader : public test_model::FixedVectorsReaderBase, yardl::ndjson::NDJsonReader {
   public:
-  FixedVectorsReader(std::istream& stream)
-      : yardl::ndjson::NDJsonReader(stream, schema_) {
+  FixedVectorsReader(std::istream& stream, bool skip_completed_check=false)
+      : test_model::FixedVectorsReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(stream, schema_) {
   }
 
-  FixedVectorsReader(std::string file_name)
-      : yardl::ndjson::NDJsonReader(file_name, schema_) {
+  FixedVectorsReader(std::string file_name, bool skip_completed_check=false)
+      : test_model::FixedVectorsReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(file_name, schema_) {
   }
 
   protected:
@@ -510,12 +510,12 @@ class StreamsWriter : public test_model::StreamsWriterBase, yardl::ndjson::NDJso
 // NDJSON reader for the Streams protocol.
 class StreamsReader : public test_model::StreamsReaderBase, yardl::ndjson::NDJsonReader {
   public:
-  StreamsReader(std::istream& stream)
-      : yardl::ndjson::NDJsonReader(stream, schema_) {
+  StreamsReader(std::istream& stream, bool skip_completed_check=false)
+      : test_model::StreamsReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(stream, schema_) {
   }
 
-  StreamsReader(std::string file_name)
-      : yardl::ndjson::NDJsonReader(file_name, schema_) {
+  StreamsReader(std::string file_name, bool skip_completed_check=false)
+      : test_model::StreamsReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(file_name, schema_) {
   }
 
   protected:
@@ -551,12 +551,12 @@ class FixedArraysWriter : public test_model::FixedArraysWriterBase, yardl::ndjso
 // NDJSON reader for the FixedArrays protocol.
 class FixedArraysReader : public test_model::FixedArraysReaderBase, yardl::ndjson::NDJsonReader {
   public:
-  FixedArraysReader(std::istream& stream)
-      : yardl::ndjson::NDJsonReader(stream, schema_) {
+  FixedArraysReader(std::istream& stream, bool skip_completed_check=false)
+      : test_model::FixedArraysReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(stream, schema_) {
   }
 
-  FixedArraysReader(std::string file_name)
-      : yardl::ndjson::NDJsonReader(file_name, schema_) {
+  FixedArraysReader(std::string file_name, bool skip_completed_check=false)
+      : test_model::FixedArraysReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(file_name, schema_) {
   }
 
   protected:
@@ -597,12 +597,12 @@ class SubarraysWriter : public test_model::SubarraysWriterBase, yardl::ndjson::N
 // NDJSON reader for the Subarrays protocol.
 class SubarraysReader : public test_model::SubarraysReaderBase, yardl::ndjson::NDJsonReader {
   public:
-  SubarraysReader(std::istream& stream)
-      : yardl::ndjson::NDJsonReader(stream, schema_) {
+  SubarraysReader(std::istream& stream, bool skip_completed_check=false)
+      : test_model::SubarraysReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(stream, schema_) {
   }
 
-  SubarraysReader(std::string file_name)
-      : yardl::ndjson::NDJsonReader(file_name, schema_) {
+  SubarraysReader(std::string file_name, bool skip_completed_check=false)
+      : test_model::SubarraysReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(file_name, schema_) {
   }
 
   protected:
@@ -640,12 +640,12 @@ class SubarraysInRecordsWriter : public test_model::SubarraysInRecordsWriterBase
 // NDJSON reader for the SubarraysInRecords protocol.
 class SubarraysInRecordsReader : public test_model::SubarraysInRecordsReaderBase, yardl::ndjson::NDJsonReader {
   public:
-  SubarraysInRecordsReader(std::istream& stream)
-      : yardl::ndjson::NDJsonReader(stream, schema_) {
+  SubarraysInRecordsReader(std::istream& stream, bool skip_completed_check=false)
+      : test_model::SubarraysInRecordsReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(stream, schema_) {
   }
 
-  SubarraysInRecordsReader(std::string file_name)
-      : yardl::ndjson::NDJsonReader(file_name, schema_) {
+  SubarraysInRecordsReader(std::string file_name, bool skip_completed_check=false)
+      : test_model::SubarraysInRecordsReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(file_name, schema_) {
   }
 
   protected:
@@ -679,12 +679,12 @@ class NDArraysWriter : public test_model::NDArraysWriterBase, yardl::ndjson::NDJ
 // NDJSON reader for the NDArrays protocol.
 class NDArraysReader : public test_model::NDArraysReaderBase, yardl::ndjson::NDJsonReader {
   public:
-  NDArraysReader(std::istream& stream)
-      : yardl::ndjson::NDJsonReader(stream, schema_) {
+  NDArraysReader(std::istream& stream, bool skip_completed_check=false)
+      : test_model::NDArraysReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(stream, schema_) {
   }
 
-  NDArraysReader(std::string file_name)
-      : yardl::ndjson::NDJsonReader(file_name, schema_) {
+  NDArraysReader(std::string file_name, bool skip_completed_check=false)
+      : test_model::NDArraysReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(file_name, schema_) {
   }
 
   protected:
@@ -720,12 +720,12 @@ class NDArraysSingleDimensionWriter : public test_model::NDArraysSingleDimension
 // NDJSON reader for the NDArraysSingleDimension protocol.
 class NDArraysSingleDimensionReader : public test_model::NDArraysSingleDimensionReaderBase, yardl::ndjson::NDJsonReader {
   public:
-  NDArraysSingleDimensionReader(std::istream& stream)
-      : yardl::ndjson::NDJsonReader(stream, schema_) {
+  NDArraysSingleDimensionReader(std::istream& stream, bool skip_completed_check=false)
+      : test_model::NDArraysSingleDimensionReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(stream, schema_) {
   }
 
-  NDArraysSingleDimensionReader(std::string file_name)
-      : yardl::ndjson::NDJsonReader(file_name, schema_) {
+  NDArraysSingleDimensionReader(std::string file_name, bool skip_completed_check=false)
+      : test_model::NDArraysSingleDimensionReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(file_name, schema_) {
   }
 
   protected:
@@ -760,12 +760,12 @@ class DynamicNDArraysWriter : public test_model::DynamicNDArraysWriterBase, yard
 // NDJSON reader for the DynamicNDArrays protocol.
 class DynamicNDArraysReader : public test_model::DynamicNDArraysReaderBase, yardl::ndjson::NDJsonReader {
   public:
-  DynamicNDArraysReader(std::istream& stream)
-      : yardl::ndjson::NDJsonReader(stream, schema_) {
+  DynamicNDArraysReader(std::istream& stream, bool skip_completed_check=false)
+      : test_model::DynamicNDArraysReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(stream, schema_) {
   }
 
-  DynamicNDArraysReader(std::string file_name)
-      : yardl::ndjson::NDJsonReader(file_name, schema_) {
+  DynamicNDArraysReader(std::string file_name, bool skip_completed_check=false)
+      : test_model::DynamicNDArraysReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(file_name, schema_) {
   }
 
   protected:
@@ -800,12 +800,12 @@ class MultiDArraysWriter : public test_model::MultiDArraysWriterBase, yardl::ndj
 // NDJSON reader for the MultiDArrays protocol.
 class MultiDArraysReader : public test_model::MultiDArraysReaderBase, yardl::ndjson::NDJsonReader {
   public:
-  MultiDArraysReader(std::istream& stream)
-      : yardl::ndjson::NDJsonReader(stream, schema_) {
+  MultiDArraysReader(std::istream& stream, bool skip_completed_check=false)
+      : test_model::MultiDArraysReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(stream, schema_) {
   }
 
-  MultiDArraysReader(std::string file_name)
-      : yardl::ndjson::NDJsonReader(file_name, schema_) {
+  MultiDArraysReader(std::string file_name, bool skip_completed_check=false)
+      : test_model::MultiDArraysReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(file_name, schema_) {
   }
 
   protected:
@@ -836,12 +836,12 @@ class ComplexArraysWriter : public test_model::ComplexArraysWriterBase, yardl::n
 // NDJSON reader for the ComplexArrays protocol.
 class ComplexArraysReader : public test_model::ComplexArraysReaderBase, yardl::ndjson::NDJsonReader {
   public:
-  ComplexArraysReader(std::istream& stream)
-      : yardl::ndjson::NDJsonReader(stream, schema_) {
+  ComplexArraysReader(std::istream& stream, bool skip_completed_check=false)
+      : test_model::ComplexArraysReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(stream, schema_) {
   }
 
-  ComplexArraysReader(std::string file_name)
-      : yardl::ndjson::NDJsonReader(file_name, schema_) {
+  ComplexArraysReader(std::string file_name, bool skip_completed_check=false)
+      : test_model::ComplexArraysReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(file_name, schema_) {
   }
 
   protected:
@@ -875,12 +875,12 @@ class MapsWriter : public test_model::MapsWriterBase, yardl::ndjson::NDJsonWrite
 // NDJSON reader for the Maps protocol.
 class MapsReader : public test_model::MapsReaderBase, yardl::ndjson::NDJsonReader {
   public:
-  MapsReader(std::istream& stream)
-      : yardl::ndjson::NDJsonReader(stream, schema_) {
+  MapsReader(std::istream& stream, bool skip_completed_check=false)
+      : test_model::MapsReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(stream, schema_) {
   }
 
-  MapsReader(std::string file_name)
-      : yardl::ndjson::NDJsonReader(file_name, schema_) {
+  MapsReader(std::string file_name, bool skip_completed_check=false)
+      : test_model::MapsReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(file_name, schema_) {
   }
 
   protected:
@@ -916,12 +916,12 @@ class UnionsWriter : public test_model::UnionsWriterBase, yardl::ndjson::NDJsonW
 // NDJSON reader for the Unions protocol.
 class UnionsReader : public test_model::UnionsReaderBase, yardl::ndjson::NDJsonReader {
   public:
-  UnionsReader(std::istream& stream)
-      : yardl::ndjson::NDJsonReader(stream, schema_) {
+  UnionsReader(std::istream& stream, bool skip_completed_check=false)
+      : test_model::UnionsReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(stream, schema_) {
   }
 
-  UnionsReader(std::string file_name)
-      : yardl::ndjson::NDJsonReader(file_name, schema_) {
+  UnionsReader(std::string file_name, bool skip_completed_check=false)
+      : test_model::UnionsReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(file_name, schema_) {
   }
 
   protected:
@@ -958,12 +958,12 @@ class StreamsOfUnionsWriter : public test_model::StreamsOfUnionsWriterBase, yard
 // NDJSON reader for the StreamsOfUnions protocol.
 class StreamsOfUnionsReader : public test_model::StreamsOfUnionsReaderBase, yardl::ndjson::NDJsonReader {
   public:
-  StreamsOfUnionsReader(std::istream& stream)
-      : yardl::ndjson::NDJsonReader(stream, schema_) {
+  StreamsOfUnionsReader(std::istream& stream, bool skip_completed_check=false)
+      : test_model::StreamsOfUnionsReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(stream, schema_) {
   }
 
-  StreamsOfUnionsReader(std::string file_name)
-      : yardl::ndjson::NDJsonReader(file_name, schema_) {
+  StreamsOfUnionsReader(std::string file_name, bool skip_completed_check=false)
+      : test_model::StreamsOfUnionsReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(file_name, schema_) {
   }
 
   protected:
@@ -997,12 +997,12 @@ class EnumsWriter : public test_model::EnumsWriterBase, yardl::ndjson::NDJsonWri
 // NDJSON reader for the Enums protocol.
 class EnumsReader : public test_model::EnumsReaderBase, yardl::ndjson::NDJsonReader {
   public:
-  EnumsReader(std::istream& stream)
-      : yardl::ndjson::NDJsonReader(stream, schema_) {
+  EnumsReader(std::istream& stream, bool skip_completed_check=false)
+      : test_model::EnumsReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(stream, schema_) {
   }
 
-  EnumsReader(std::string file_name)
-      : yardl::ndjson::NDJsonReader(file_name, schema_) {
+  EnumsReader(std::string file_name, bool skip_completed_check=false)
+      : test_model::EnumsReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(file_name, schema_) {
   }
 
   protected:
@@ -1037,12 +1037,12 @@ class FlagsWriter : public test_model::FlagsWriterBase, yardl::ndjson::NDJsonWri
 // NDJSON reader for the Flags protocol.
 class FlagsReader : public test_model::FlagsReaderBase, yardl::ndjson::NDJsonReader {
   public:
-  FlagsReader(std::istream& stream)
-      : yardl::ndjson::NDJsonReader(stream, schema_) {
+  FlagsReader(std::istream& stream, bool skip_completed_check=false)
+      : test_model::FlagsReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(stream, schema_) {
   }
 
-  FlagsReader(std::string file_name)
-      : yardl::ndjson::NDJsonReader(file_name, schema_) {
+  FlagsReader(std::string file_name, bool skip_completed_check=false)
+      : test_model::FlagsReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(file_name, schema_) {
   }
 
   protected:
@@ -1075,12 +1075,12 @@ class StateTestWriter : public test_model::StateTestWriterBase, yardl::ndjson::N
 // NDJSON reader for the StateTest protocol.
 class StateTestReader : public test_model::StateTestReaderBase, yardl::ndjson::NDJsonReader {
   public:
-  StateTestReader(std::istream& stream)
-      : yardl::ndjson::NDJsonReader(stream, schema_) {
+  StateTestReader(std::istream& stream, bool skip_completed_check=false)
+      : test_model::StateTestReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(stream, schema_) {
   }
 
-  StateTestReader(std::string file_name)
-      : yardl::ndjson::NDJsonReader(file_name, schema_) {
+  StateTestReader(std::string file_name, bool skip_completed_check=false)
+      : test_model::StateTestReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(file_name, schema_) {
   }
 
   protected:
@@ -1120,12 +1120,12 @@ class SimpleGenericsWriter : public test_model::SimpleGenericsWriterBase, yardl:
 // NDJSON reader for the SimpleGenerics protocol.
 class SimpleGenericsReader : public test_model::SimpleGenericsReaderBase, yardl::ndjson::NDJsonReader {
   public:
-  SimpleGenericsReader(std::istream& stream)
-      : yardl::ndjson::NDJsonReader(stream, schema_) {
+  SimpleGenericsReader(std::istream& stream, bool skip_completed_check=false)
+      : test_model::SimpleGenericsReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(stream, schema_) {
   }
 
-  SimpleGenericsReader(std::string file_name)
-      : yardl::ndjson::NDJsonReader(file_name, schema_) {
+  SimpleGenericsReader(std::string file_name, bool skip_completed_check=false)
+      : test_model::SimpleGenericsReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(file_name, schema_) {
   }
 
   protected:
@@ -1166,12 +1166,12 @@ class AdvancedGenericsWriter : public test_model::AdvancedGenericsWriterBase, ya
 // NDJSON reader for the AdvancedGenerics protocol.
 class AdvancedGenericsReader : public test_model::AdvancedGenericsReaderBase, yardl::ndjson::NDJsonReader {
   public:
-  AdvancedGenericsReader(std::istream& stream)
-      : yardl::ndjson::NDJsonReader(stream, schema_) {
+  AdvancedGenericsReader(std::istream& stream, bool skip_completed_check=false)
+      : test_model::AdvancedGenericsReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(stream, schema_) {
   }
 
-  AdvancedGenericsReader(std::string file_name)
-      : yardl::ndjson::NDJsonReader(file_name, schema_) {
+  AdvancedGenericsReader(std::string file_name, bool skip_completed_check=false)
+      : test_model::AdvancedGenericsReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(file_name, schema_) {
   }
 
   protected:
@@ -1215,12 +1215,12 @@ class AliasesWriter : public test_model::AliasesWriterBase, yardl::ndjson::NDJso
 // NDJSON reader for the Aliases protocol.
 class AliasesReader : public test_model::AliasesReaderBase, yardl::ndjson::NDJsonReader {
   public:
-  AliasesReader(std::istream& stream)
-      : yardl::ndjson::NDJsonReader(stream, schema_) {
+  AliasesReader(std::istream& stream, bool skip_completed_check=false)
+      : test_model::AliasesReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(stream, schema_) {
   }
 
-  AliasesReader(std::string file_name)
-      : yardl::ndjson::NDJsonReader(file_name, schema_) {
+  AliasesReader(std::string file_name, bool skip_completed_check=false)
+      : test_model::AliasesReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(file_name, schema_) {
   }
 
   protected:
@@ -1262,12 +1262,12 @@ class StreamsOfAliasedUnionsWriter : public test_model::StreamsOfAliasedUnionsWr
 // NDJSON reader for the StreamsOfAliasedUnions protocol.
 class StreamsOfAliasedUnionsReader : public test_model::StreamsOfAliasedUnionsReaderBase, yardl::ndjson::NDJsonReader {
   public:
-  StreamsOfAliasedUnionsReader(std::istream& stream)
-      : yardl::ndjson::NDJsonReader(stream, schema_) {
+  StreamsOfAliasedUnionsReader(std::istream& stream, bool skip_completed_check=false)
+      : test_model::StreamsOfAliasedUnionsReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(stream, schema_) {
   }
 
-  StreamsOfAliasedUnionsReader(std::string file_name)
-      : yardl::ndjson::NDJsonReader(file_name, schema_) {
+  StreamsOfAliasedUnionsReader(std::string file_name, bool skip_completed_check=false)
+      : test_model::StreamsOfAliasedUnionsReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(file_name, schema_) {
   }
 
   protected:
@@ -1297,12 +1297,12 @@ class ProtocolWithComputedFieldsWriter : public test_model::ProtocolWithComputed
 // NDJSON reader for the ProtocolWithComputedFields protocol.
 class ProtocolWithComputedFieldsReader : public test_model::ProtocolWithComputedFieldsReaderBase, yardl::ndjson::NDJsonReader {
   public:
-  ProtocolWithComputedFieldsReader(std::istream& stream)
-      : yardl::ndjson::NDJsonReader(stream, schema_) {
+  ProtocolWithComputedFieldsReader(std::istream& stream, bool skip_completed_check=false)
+      : test_model::ProtocolWithComputedFieldsReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(stream, schema_) {
   }
 
-  ProtocolWithComputedFieldsReader(std::string file_name)
-      : yardl::ndjson::NDJsonReader(file_name, schema_) {
+  ProtocolWithComputedFieldsReader(std::string file_name, bool skip_completed_check=false)
+      : test_model::ProtocolWithComputedFieldsReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(file_name, schema_) {
   }
 
   protected:
@@ -1333,12 +1333,12 @@ class ProtocolWithKeywordStepsWriter : public test_model::ProtocolWithKeywordSte
 // NDJSON reader for the ProtocolWithKeywordSteps protocol.
 class ProtocolWithKeywordStepsReader : public test_model::ProtocolWithKeywordStepsReaderBase, yardl::ndjson::NDJsonReader {
   public:
-  ProtocolWithKeywordStepsReader(std::istream& stream)
-      : yardl::ndjson::NDJsonReader(stream, schema_) {
+  ProtocolWithKeywordStepsReader(std::istream& stream, bool skip_completed_check=false)
+      : test_model::ProtocolWithKeywordStepsReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(stream, schema_) {
   }
 
-  ProtocolWithKeywordStepsReader(std::string file_name)
-      : yardl::ndjson::NDJsonReader(file_name, schema_) {
+  ProtocolWithKeywordStepsReader(std::string file_name, bool skip_completed_check=false)
+      : test_model::ProtocolWithKeywordStepsReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(file_name, schema_) {
   }
 
   protected:
@@ -1368,12 +1368,12 @@ class ProtocolWithOptionalDateWriter : public test_model::ProtocolWithOptionalDa
 // NDJSON reader for the ProtocolWithOptionalDate protocol.
 class ProtocolWithOptionalDateReader : public test_model::ProtocolWithOptionalDateReaderBase, yardl::ndjson::NDJsonReader {
   public:
-  ProtocolWithOptionalDateReader(std::istream& stream)
-      : yardl::ndjson::NDJsonReader(stream, schema_) {
+  ProtocolWithOptionalDateReader(std::istream& stream, bool skip_completed_check=false)
+      : test_model::ProtocolWithOptionalDateReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(stream, schema_) {
   }
 
-  ProtocolWithOptionalDateReader(std::string file_name)
-      : yardl::ndjson::NDJsonReader(file_name, schema_) {
+  ProtocolWithOptionalDateReader(std::string file_name, bool skip_completed_check=false)
+      : test_model::ProtocolWithOptionalDateReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(file_name, schema_) {
   }
 
   protected:

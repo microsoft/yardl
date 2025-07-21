@@ -148,12 +148,12 @@ class ProtocolWithChangesWriter : public evo_test::ProtocolWithChangesWriterBase
 // NDJSON reader for the ProtocolWithChanges protocol.
 class ProtocolWithChangesReader : public evo_test::ProtocolWithChangesReaderBase, yardl::ndjson::NDJsonReader {
   public:
-  ProtocolWithChangesReader(std::istream& stream)
-      : yardl::ndjson::NDJsonReader(stream, schema_) {
+  ProtocolWithChangesReader(std::istream& stream, bool skip_completed_check=false)
+      : evo_test::ProtocolWithChangesReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(stream, schema_) {
   }
 
-  ProtocolWithChangesReader(std::string file_name)
-      : yardl::ndjson::NDJsonReader(file_name, schema_) {
+  ProtocolWithChangesReader(std::string file_name, bool skip_completed_check=false)
+      : evo_test::ProtocolWithChangesReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(file_name, schema_) {
   }
 
   protected:
@@ -287,12 +287,12 @@ class UnusedProtocolWriter : public evo_test::UnusedProtocolWriterBase, yardl::n
 // NDJSON reader for the UnusedProtocol protocol.
 class UnusedProtocolReader : public evo_test::UnusedProtocolReaderBase, yardl::ndjson::NDJsonReader {
   public:
-  UnusedProtocolReader(std::istream& stream)
-      : yardl::ndjson::NDJsonReader(stream, schema_) {
+  UnusedProtocolReader(std::istream& stream, bool skip_completed_check=false)
+      : evo_test::UnusedProtocolReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(stream, schema_) {
   }
 
-  UnusedProtocolReader(std::string file_name)
-      : yardl::ndjson::NDJsonReader(file_name, schema_) {
+  UnusedProtocolReader(std::string file_name, bool skip_completed_check=false)
+      : evo_test::UnusedProtocolReaderBase(skip_completed_check), yardl::ndjson::NDJsonReader(file_name, schema_) {
   }
 
   protected:
