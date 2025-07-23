@@ -186,9 +186,9 @@ func writeProtocols(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 			common.WriteDocstringWithLeadingLine(w, fmt.Sprintf("Binary writer for the %s protocol.", p.Name), p.Comment)
 			w.WriteStringln("")
 
-			w.WriteStringln("def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str]) -> None:")
+			w.WriteStringln("def __init__(self, stream: typing.Union[io.BufferedReader, io.BytesIO, typing.BinaryIO, str], skip_completed_check: bool = False) -> None:")
 			w.Indented(func() {
-				fmt.Fprintf(w, "%s.__init__(self)\n", common.AbstractReaderName(p))
+				fmt.Fprintf(w, "%s.__init__(self, skip_completed_check)\n", common.AbstractReaderName(p))
 				fmt.Fprintf(w, "_binary.BinaryProtocolReader.__init__(self, stream, %s.schema)\n", common.AbstractReaderName(p))
 			})
 			w.WriteStringln("")

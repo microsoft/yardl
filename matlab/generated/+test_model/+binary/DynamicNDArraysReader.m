@@ -10,8 +10,12 @@ classdef DynamicNDArraysReader < yardl.binary.BinaryProtocolReader & test_model.
   end
 
   methods
-    function self = DynamicNDArraysReader(filename)
-      self@test_model.DynamicNDArraysReaderBase();
+    function self = DynamicNDArraysReader(filename, options)
+      arguments
+        filename (1,1) string
+        options.skip_completed_check (1,1) logical = false
+      end
+      self@test_model.DynamicNDArraysReaderBase(skip_completed_check=options.skip_completed_check);
       self@yardl.binary.BinaryProtocolReader(filename, test_model.DynamicNDArraysReaderBase.schema);
       self.ints_serializer = yardl.binary.DynamicNDArraySerializer(yardl.binary.Int32Serializer);
       self.simple_record_array_serializer = yardl.binary.DynamicNDArraySerializer(test_model.binary.SimpleRecordSerializer());

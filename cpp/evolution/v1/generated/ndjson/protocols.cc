@@ -1583,7 +1583,9 @@ bool ProtocolWithChangesReader::ReadAddedRecordStreamImpl(evo_test::RecordWithCh
 }
 
 void ProtocolWithChangesReader::CloseImpl() {
-  VerifyFinished();
+  if (!skip_completed_check_) {
+    VerifyFinished();
+  }
 }
 
 void UnusedProtocolWriter::WriteRecordsImpl(evo_test::UnchangedRecord const& value) {
@@ -1603,7 +1605,9 @@ bool UnusedProtocolReader::ReadRecordsImpl(evo_test::UnchangedRecord& value) {
 }
 
 void UnusedProtocolReader::CloseImpl() {
-  VerifyFinished();
+  if (!skip_completed_check_) {
+    VerifyFinished();
+  }
 }
 
 } // namespace evo_test::ndjson

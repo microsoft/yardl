@@ -7,8 +7,12 @@ classdef BenchmarkFloat256x256Reader < yardl.binary.BinaryProtocolReader & test_
   end
 
   methods
-    function self = BenchmarkFloat256x256Reader(filename)
-      self@test_model.BenchmarkFloat256x256ReaderBase();
+    function self = BenchmarkFloat256x256Reader(filename, options)
+      arguments
+        filename (1,1) string
+        options.skip_completed_check (1,1) logical = false
+      end
+      self@test_model.BenchmarkFloat256x256ReaderBase(skip_completed_check=options.skip_completed_check);
       self@yardl.binary.BinaryProtocolReader(filename, test_model.BenchmarkFloat256x256ReaderBase.schema);
       self.float256x256_serializer = yardl.binary.StreamSerializer(yardl.binary.FixedNDArraySerializer(yardl.binary.Float32Serializer, [256, 256]));
     end

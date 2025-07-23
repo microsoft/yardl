@@ -2623,8 +2623,8 @@ class NDJsonBenchmarkFloat256x256Reader(_ndjson.NDJsonProtocolReader, BenchmarkF
     """NDJson writer for the BenchmarkFloat256x256 protocol."""
 
 
-    def __init__(self, stream: typing.Union[io.BufferedReader, typing.TextIO, str]) -> None:
-        BenchmarkFloat256x256ReaderBase.__init__(self)
+    def __init__(self, stream: typing.Union[io.BufferedReader, typing.TextIO, str], skip_completed_check: bool = False) -> None:
+        BenchmarkFloat256x256ReaderBase.__init__(self, skip_completed_check)
         _ndjson.NDJsonProtocolReader.__init__(self, stream, BenchmarkFloat256x256ReaderBase.schema)
 
     def _read_float256x256(self) -> collections.abc.Iterable[npt.NDArray[np.float32]]:
@@ -2651,8 +2651,8 @@ class NDJsonBenchmarkInt256x256Reader(_ndjson.NDJsonProtocolReader, BenchmarkInt
     """NDJson writer for the BenchmarkInt256x256 protocol."""
 
 
-    def __init__(self, stream: typing.Union[io.BufferedReader, typing.TextIO, str]) -> None:
-        BenchmarkInt256x256ReaderBase.__init__(self)
+    def __init__(self, stream: typing.Union[io.BufferedReader, typing.TextIO, str], skip_completed_check: bool = False) -> None:
+        BenchmarkInt256x256ReaderBase.__init__(self, skip_completed_check)
         _ndjson.NDJsonProtocolReader.__init__(self, stream, BenchmarkInt256x256ReaderBase.schema)
 
     def _read_int256x256(self) -> collections.abc.Iterable[npt.NDArray[np.int32]]:
@@ -2679,8 +2679,8 @@ class NDJsonBenchmarkFloatVlenReader(_ndjson.NDJsonProtocolReader, BenchmarkFloa
     """NDJson writer for the BenchmarkFloatVlen protocol."""
 
 
-    def __init__(self, stream: typing.Union[io.BufferedReader, typing.TextIO, str]) -> None:
-        BenchmarkFloatVlenReaderBase.__init__(self)
+    def __init__(self, stream: typing.Union[io.BufferedReader, typing.TextIO, str], skip_completed_check: bool = False) -> None:
+        BenchmarkFloatVlenReaderBase.__init__(self, skip_completed_check)
         _ndjson.NDJsonProtocolReader.__init__(self, stream, BenchmarkFloatVlenReaderBase.schema)
 
     def _read_float_array(self) -> collections.abc.Iterable[npt.NDArray[np.float32]]:
@@ -2707,8 +2707,8 @@ class NDJsonBenchmarkSmallRecordReader(_ndjson.NDJsonProtocolReader, BenchmarkSm
     """NDJson writer for the BenchmarkSmallRecord protocol."""
 
 
-    def __init__(self, stream: typing.Union[io.BufferedReader, typing.TextIO, str]) -> None:
-        BenchmarkSmallRecordReaderBase.__init__(self)
+    def __init__(self, stream: typing.Union[io.BufferedReader, typing.TextIO, str], skip_completed_check: bool = False) -> None:
+        BenchmarkSmallRecordReaderBase.__init__(self, skip_completed_check)
         _ndjson.NDJsonProtocolReader.__init__(self, stream, BenchmarkSmallRecordReaderBase.schema)
 
     def _read_small_record(self) -> collections.abc.Iterable[SmallBenchmarkRecord]:
@@ -2735,8 +2735,8 @@ class NDJsonBenchmarkSmallRecordWithOptionalsReader(_ndjson.NDJsonProtocolReader
     """NDJson writer for the BenchmarkSmallRecordWithOptionals protocol."""
 
 
-    def __init__(self, stream: typing.Union[io.BufferedReader, typing.TextIO, str]) -> None:
-        BenchmarkSmallRecordWithOptionalsReaderBase.__init__(self)
+    def __init__(self, stream: typing.Union[io.BufferedReader, typing.TextIO, str], skip_completed_check: bool = False) -> None:
+        BenchmarkSmallRecordWithOptionalsReaderBase.__init__(self, skip_completed_check)
         _ndjson.NDJsonProtocolReader.__init__(self, stream, BenchmarkSmallRecordWithOptionalsReaderBase.schema)
 
     def _read_small_record(self) -> collections.abc.Iterable[SimpleEncodingCounters]:
@@ -2763,8 +2763,8 @@ class NDJsonBenchmarkSimpleMrdReader(_ndjson.NDJsonProtocolReader, BenchmarkSimp
     """NDJson writer for the BenchmarkSimpleMrd protocol."""
 
 
-    def __init__(self, stream: typing.Union[io.BufferedReader, typing.TextIO, str]) -> None:
-        BenchmarkSimpleMrdReaderBase.__init__(self)
+    def __init__(self, stream: typing.Union[io.BufferedReader, typing.TextIO, str], skip_completed_check: bool = False) -> None:
+        BenchmarkSimpleMrdReaderBase.__init__(self, skip_completed_check)
         _ndjson.NDJsonProtocolReader.__init__(self, stream, BenchmarkSimpleMrdReaderBase.schema)
 
     def _read_data(self) -> collections.abc.Iterable[AcquisitionOrImage]:
@@ -2795,8 +2795,8 @@ class NDJsonScalarsReader(_ndjson.NDJsonProtocolReader, ScalarsReaderBase):
     """NDJson writer for the Scalars protocol."""
 
 
-    def __init__(self, stream: typing.Union[io.BufferedReader, typing.TextIO, str]) -> None:
-        ScalarsReaderBase.__init__(self)
+    def __init__(self, stream: typing.Union[io.BufferedReader, typing.TextIO, str], skip_completed_check: bool = False) -> None:
+        ScalarsReaderBase.__init__(self, skip_completed_check)
         _ndjson.NDJsonProtocolReader.__init__(self, stream, ScalarsReaderBase.schema)
 
     def _read_int32(self) -> yardl.Int32:
@@ -2842,8 +2842,8 @@ class NDJsonScalarOptionalsReader(_ndjson.NDJsonProtocolReader, ScalarOptionalsR
     """NDJson writer for the ScalarOptionals protocol."""
 
 
-    def __init__(self, stream: typing.Union[io.BufferedReader, typing.TextIO, str]) -> None:
-        ScalarOptionalsReaderBase.__init__(self)
+    def __init__(self, stream: typing.Union[io.BufferedReader, typing.TextIO, str], skip_completed_check: bool = False) -> None:
+        ScalarOptionalsReaderBase.__init__(self, skip_completed_check)
         _ndjson.NDJsonProtocolReader.__init__(self, stream, ScalarOptionalsReaderBase.schema)
 
     def _read_optional_int(self) -> typing.Optional[yardl.Int32]:
@@ -2884,8 +2884,8 @@ class NDJsonNestedRecordsReader(_ndjson.NDJsonProtocolReader, NestedRecordsReade
     """NDJson writer for the NestedRecords protocol."""
 
 
-    def __init__(self, stream: typing.Union[io.BufferedReader, typing.TextIO, str]) -> None:
-        NestedRecordsReaderBase.__init__(self)
+    def __init__(self, stream: typing.Union[io.BufferedReader, typing.TextIO, str], skip_completed_check: bool = False) -> None:
+        NestedRecordsReaderBase.__init__(self, skip_completed_check)
         _ndjson.NDJsonProtocolReader.__init__(self, stream, NestedRecordsReaderBase.schema)
 
     def _read_tuple_with_records(self) -> TupleWithRecords:
@@ -2926,8 +2926,8 @@ class NDJsonVlensReader(_ndjson.NDJsonProtocolReader, VlensReaderBase):
     """NDJson writer for the Vlens protocol."""
 
 
-    def __init__(self, stream: typing.Union[io.BufferedReader, typing.TextIO, str]) -> None:
-        VlensReaderBase.__init__(self)
+    def __init__(self, stream: typing.Union[io.BufferedReader, typing.TextIO, str], skip_completed_check: bool = False) -> None:
+        VlensReaderBase.__init__(self, skip_completed_check)
         _ndjson.NDJsonProtocolReader.__init__(self, stream, VlensReaderBase.schema)
 
     def _read_int_vector(self) -> list[yardl.Int32]:
@@ -2973,8 +2973,8 @@ class NDJsonStringsReader(_ndjson.NDJsonProtocolReader, StringsReaderBase):
     """NDJson writer for the Strings protocol."""
 
 
-    def __init__(self, stream: typing.Union[io.BufferedReader, typing.TextIO, str]) -> None:
-        StringsReaderBase.__init__(self)
+    def __init__(self, stream: typing.Union[io.BufferedReader, typing.TextIO, str], skip_completed_check: bool = False) -> None:
+        StringsReaderBase.__init__(self, skip_completed_check)
         _ndjson.NDJsonProtocolReader.__init__(self, stream, StringsReaderBase.schema)
 
     def _read_single_string(self) -> str:
@@ -3005,8 +3005,8 @@ class NDJsonOptionalVectorsReader(_ndjson.NDJsonProtocolReader, OptionalVectorsR
     """NDJson writer for the OptionalVectors protocol."""
 
 
-    def __init__(self, stream: typing.Union[io.BufferedReader, typing.TextIO, str]) -> None:
-        OptionalVectorsReaderBase.__init__(self)
+    def __init__(self, stream: typing.Union[io.BufferedReader, typing.TextIO, str], skip_completed_check: bool = False) -> None:
+        OptionalVectorsReaderBase.__init__(self, skip_completed_check)
         _ndjson.NDJsonProtocolReader.__init__(self, stream, OptionalVectorsReaderBase.schema)
 
     def _read_record_with_optional_vector(self) -> RecordWithOptionalVector:
@@ -3047,8 +3047,8 @@ class NDJsonFixedVectorsReader(_ndjson.NDJsonProtocolReader, FixedVectorsReaderB
     """NDJson writer for the FixedVectors protocol."""
 
 
-    def __init__(self, stream: typing.Union[io.BufferedReader, typing.TextIO, str]) -> None:
-        FixedVectorsReaderBase.__init__(self)
+    def __init__(self, stream: typing.Union[io.BufferedReader, typing.TextIO, str], skip_completed_check: bool = False) -> None:
+        FixedVectorsReaderBase.__init__(self, skip_completed_check)
         _ndjson.NDJsonProtocolReader.__init__(self, stream, FixedVectorsReaderBase.schema)
 
     def _read_fixed_int_vector(self) -> list[yardl.Int32]:
@@ -3108,8 +3108,8 @@ class NDJsonStreamsReader(_ndjson.NDJsonProtocolReader, StreamsReaderBase):
     """NDJson writer for the Streams protocol."""
 
 
-    def __init__(self, stream: typing.Union[io.BufferedReader, typing.TextIO, str]) -> None:
-        StreamsReaderBase.__init__(self)
+    def __init__(self, stream: typing.Union[io.BufferedReader, typing.TextIO, str], skip_completed_check: bool = False) -> None:
+        StreamsReaderBase.__init__(self, skip_completed_check)
         _ndjson.NDJsonProtocolReader.__init__(self, stream, StreamsReaderBase.schema)
 
     def _read_int_data(self) -> collections.abc.Iterable[yardl.Int32]:
@@ -3170,8 +3170,8 @@ class NDJsonFixedArraysReader(_ndjson.NDJsonProtocolReader, FixedArraysReaderBas
     """NDJson writer for the FixedArrays protocol."""
 
 
-    def __init__(self, stream: typing.Union[io.BufferedReader, typing.TextIO, str]) -> None:
-        FixedArraysReaderBase.__init__(self)
+    def __init__(self, stream: typing.Union[io.BufferedReader, typing.TextIO, str], skip_completed_check: bool = False) -> None:
+        FixedArraysReaderBase.__init__(self, skip_completed_check)
         _ndjson.NDJsonProtocolReader.__init__(self, stream, FixedArraysReaderBase.schema)
 
     def _read_ints(self) -> npt.NDArray[np.int32]:
@@ -3257,8 +3257,8 @@ class NDJsonSubarraysReader(_ndjson.NDJsonProtocolReader, SubarraysReaderBase):
     """NDJson writer for the Subarrays protocol."""
 
 
-    def __init__(self, stream: typing.Union[io.BufferedReader, typing.TextIO, str]) -> None:
-        SubarraysReaderBase.__init__(self)
+    def __init__(self, stream: typing.Union[io.BufferedReader, typing.TextIO, str], skip_completed_check: bool = False) -> None:
+        SubarraysReaderBase.__init__(self, skip_completed_check)
         _ndjson.NDJsonProtocolReader.__init__(self, stream, SubarraysReaderBase.schema)
 
     def _read_dynamic_with_fixed_int_subarray(self) -> npt.NDArray[np.int32]:
@@ -3329,8 +3329,8 @@ class NDJsonSubarraysInRecordsReader(_ndjson.NDJsonProtocolReader, SubarraysInRe
     """NDJson writer for the SubarraysInRecords protocol."""
 
 
-    def __init__(self, stream: typing.Union[io.BufferedReader, typing.TextIO, str]) -> None:
-        SubarraysInRecordsReaderBase.__init__(self)
+    def __init__(self, stream: typing.Union[io.BufferedReader, typing.TextIO, str], skip_completed_check: bool = False) -> None:
+        SubarraysInRecordsReaderBase.__init__(self, skip_completed_check)
         _ndjson.NDJsonProtocolReader.__init__(self, stream, SubarraysInRecordsReaderBase.schema)
 
     def _read_with_fixed_subarrays(self) -> npt.NDArray[np.void]:
@@ -3381,8 +3381,8 @@ class NDJsonNDArraysReader(_ndjson.NDJsonProtocolReader, NDArraysReaderBase):
     """NDJson writer for the NDArrays protocol."""
 
 
-    def __init__(self, stream: typing.Union[io.BufferedReader, typing.TextIO, str]) -> None:
-        NDArraysReaderBase.__init__(self)
+    def __init__(self, stream: typing.Union[io.BufferedReader, typing.TextIO, str], skip_completed_check: bool = False) -> None:
+        NDArraysReaderBase.__init__(self, skip_completed_check)
         _ndjson.NDJsonProtocolReader.__init__(self, stream, NDArraysReaderBase.schema)
 
     def _read_ints(self) -> npt.NDArray[np.int32]:
@@ -3443,8 +3443,8 @@ class NDJsonNDArraysSingleDimensionReader(_ndjson.NDJsonProtocolReader, NDArrays
     """NDJson writer for the NDArraysSingleDimension protocol."""
 
 
-    def __init__(self, stream: typing.Union[io.BufferedReader, typing.TextIO, str]) -> None:
-        NDArraysSingleDimensionReaderBase.__init__(self)
+    def __init__(self, stream: typing.Union[io.BufferedReader, typing.TextIO, str], skip_completed_check: bool = False) -> None:
+        NDArraysSingleDimensionReaderBase.__init__(self, skip_completed_check)
         _ndjson.NDJsonProtocolReader.__init__(self, stream, NDArraysSingleDimensionReaderBase.schema)
 
     def _read_ints(self) -> npt.NDArray[np.int32]:
@@ -3500,8 +3500,8 @@ class NDJsonDynamicNDArraysReader(_ndjson.NDJsonProtocolReader, DynamicNDArraysR
     """NDJson writer for the DynamicNDArrays protocol."""
 
 
-    def __init__(self, stream: typing.Union[io.BufferedReader, typing.TextIO, str]) -> None:
-        DynamicNDArraysReaderBase.__init__(self)
+    def __init__(self, stream: typing.Union[io.BufferedReader, typing.TextIO, str], skip_completed_check: bool = False) -> None:
+        DynamicNDArraysReaderBase.__init__(self, skip_completed_check)
         _ndjson.NDJsonProtocolReader.__init__(self, stream, DynamicNDArraysReaderBase.schema)
 
     def _read_ints(self) -> npt.NDArray[np.int32]:
@@ -3549,8 +3549,8 @@ class NDJsonMultiDArraysReader(_ndjson.NDJsonProtocolReader, MultiDArraysReaderB
     """NDJson writer for the MultiDArrays protocol."""
 
 
-    def __init__(self, stream: typing.Union[io.BufferedReader, typing.TextIO, str]) -> None:
-        MultiDArraysReaderBase.__init__(self)
+    def __init__(self, stream: typing.Union[io.BufferedReader, typing.TextIO, str], skip_completed_check: bool = False) -> None:
+        MultiDArraysReaderBase.__init__(self, skip_completed_check)
         _ndjson.NDJsonProtocolReader.__init__(self, stream, MultiDArraysReaderBase.schema)
 
     def _read_images(self) -> collections.abc.Iterable[npt.NDArray[np.float32]]:
@@ -3586,8 +3586,8 @@ class NDJsonComplexArraysReader(_ndjson.NDJsonProtocolReader, ComplexArraysReade
     """NDJson writer for the ComplexArrays protocol."""
 
 
-    def __init__(self, stream: typing.Union[io.BufferedReader, typing.TextIO, str]) -> None:
-        ComplexArraysReaderBase.__init__(self)
+    def __init__(self, stream: typing.Union[io.BufferedReader, typing.TextIO, str], skip_completed_check: bool = False) -> None:
+        ComplexArraysReaderBase.__init__(self, skip_completed_check)
         _ndjson.NDJsonProtocolReader.__init__(self, stream, ComplexArraysReaderBase.schema)
 
     def _read_floats(self) -> npt.NDArray[np.complex64]:
@@ -3638,8 +3638,8 @@ class NDJsonMapsReader(_ndjson.NDJsonProtocolReader, MapsReaderBase):
     """NDJson writer for the Maps protocol."""
 
 
-    def __init__(self, stream: typing.Union[io.BufferedReader, typing.TextIO, str]) -> None:
-        MapsReaderBase.__init__(self)
+    def __init__(self, stream: typing.Union[io.BufferedReader, typing.TextIO, str], skip_completed_check: bool = False) -> None:
+        MapsReaderBase.__init__(self, skip_completed_check)
         _ndjson.NDJsonProtocolReader.__init__(self, stream, MapsReaderBase.schema)
 
     def _read_string_to_int(self) -> dict[str, yardl.Int32]:
@@ -3700,8 +3700,8 @@ class NDJsonUnionsReader(_ndjson.NDJsonProtocolReader, UnionsReaderBase):
     """NDJson writer for the Unions protocol."""
 
 
-    def __init__(self, stream: typing.Union[io.BufferedReader, typing.TextIO, str]) -> None:
-        UnionsReaderBase.__init__(self)
+    def __init__(self, stream: typing.Union[io.BufferedReader, typing.TextIO, str], skip_completed_check: bool = False) -> None:
+        UnionsReaderBase.__init__(self, skip_completed_check)
         _ndjson.NDJsonProtocolReader.__init__(self, stream, UnionsReaderBase.schema)
 
     def _read_int_or_simple_record(self) -> Int32OrSimpleRecord:
@@ -3755,8 +3755,8 @@ class NDJsonStreamsOfUnionsReader(_ndjson.NDJsonProtocolReader, StreamsOfUnionsR
     """NDJson writer for the StreamsOfUnions protocol."""
 
 
-    def __init__(self, stream: typing.Union[io.BufferedReader, typing.TextIO, str]) -> None:
-        StreamsOfUnionsReaderBase.__init__(self)
+    def __init__(self, stream: typing.Union[io.BufferedReader, typing.TextIO, str], skip_completed_check: bool = False) -> None:
+        StreamsOfUnionsReaderBase.__init__(self, skip_completed_check)
         _ndjson.NDJsonProtocolReader.__init__(self, stream, StreamsOfUnionsReaderBase.schema)
 
     def _read_int_or_simple_record(self) -> collections.abc.Iterable[Int32OrSimpleRecord]:
@@ -3807,8 +3807,8 @@ class NDJsonEnumsReader(_ndjson.NDJsonProtocolReader, EnumsReaderBase):
     """NDJson writer for the Enums protocol."""
 
 
-    def __init__(self, stream: typing.Union[io.BufferedReader, typing.TextIO, str]) -> None:
-        EnumsReaderBase.__init__(self)
+    def __init__(self, stream: typing.Union[io.BufferedReader, typing.TextIO, str], skip_completed_check: bool = False) -> None:
+        EnumsReaderBase.__init__(self, skip_completed_check)
         _ndjson.NDJsonProtocolReader.__init__(self, stream, EnumsReaderBase.schema)
 
     def _read_single(self) -> Fruits:
@@ -3856,8 +3856,8 @@ class NDJsonFlagsReader(_ndjson.NDJsonProtocolReader, FlagsReaderBase):
     """NDJson writer for the Flags protocol."""
 
 
-    def __init__(self, stream: typing.Union[io.BufferedReader, typing.TextIO, str]) -> None:
-        FlagsReaderBase.__init__(self)
+    def __init__(self, stream: typing.Union[io.BufferedReader, typing.TextIO, str], skip_completed_check: bool = False) -> None:
+        FlagsReaderBase.__init__(self, skip_completed_check)
         _ndjson.NDJsonProtocolReader.__init__(self, stream, FlagsReaderBase.schema)
 
     def _read_days(self) -> collections.abc.Iterable[DaysOfWeek]:
@@ -3899,8 +3899,8 @@ class NDJsonStateTestReader(_ndjson.NDJsonProtocolReader, StateTestReaderBase):
     """NDJson writer for the StateTest protocol."""
 
 
-    def __init__(self, stream: typing.Union[io.BufferedReader, typing.TextIO, str]) -> None:
-        StateTestReaderBase.__init__(self)
+    def __init__(self, stream: typing.Union[io.BufferedReader, typing.TextIO, str], skip_completed_check: bool = False) -> None:
+        StateTestReaderBase.__init__(self, skip_completed_check)
         _ndjson.NDJsonProtocolReader.__init__(self, stream, StateTestReaderBase.schema)
 
     def _read_an_int(self) -> yardl.Int32:
@@ -3977,8 +3977,8 @@ class NDJsonSimpleGenericsReader(_ndjson.NDJsonProtocolReader, SimpleGenericsRea
     """NDJson writer for the SimpleGenerics protocol."""
 
 
-    def __init__(self, stream: typing.Union[io.BufferedReader, typing.TextIO, str]) -> None:
-        SimpleGenericsReaderBase.__init__(self)
+    def __init__(self, stream: typing.Union[io.BufferedReader, typing.TextIO, str], skip_completed_check: bool = False) -> None:
+        SimpleGenericsReaderBase.__init__(self, skip_completed_check)
         _ndjson.NDJsonProtocolReader.__init__(self, stream, SimpleGenericsReaderBase.schema)
 
     def _read_float_image(self) -> image.FloatImage:
@@ -4064,8 +4064,8 @@ class NDJsonAdvancedGenericsReader(_ndjson.NDJsonProtocolReader, AdvancedGeneric
     """NDJson writer for the AdvancedGenerics protocol."""
 
 
-    def __init__(self, stream: typing.Union[io.BufferedReader, typing.TextIO, str]) -> None:
-        AdvancedGenericsReaderBase.__init__(self)
+    def __init__(self, stream: typing.Union[io.BufferedReader, typing.TextIO, str], skip_completed_check: bool = False) -> None:
+        AdvancedGenericsReaderBase.__init__(self, skip_completed_check)
         _ndjson.NDJsonProtocolReader.__init__(self, stream, AdvancedGenericsReaderBase.schema)
 
     def _read_float_image_image(self) -> Image[np.object_]:
@@ -4162,8 +4162,8 @@ class NDJsonAliasesReader(_ndjson.NDJsonProtocolReader, AliasesReaderBase):
     """NDJson writer for the Aliases protocol."""
 
 
-    def __init__(self, stream: typing.Union[io.BufferedReader, typing.TextIO, str]) -> None:
-        AliasesReaderBase.__init__(self)
+    def __init__(self, stream: typing.Union[io.BufferedReader, typing.TextIO, str], skip_completed_check: bool = False) -> None:
+        AliasesReaderBase.__init__(self, skip_completed_check)
         _ndjson.NDJsonProtocolReader.__init__(self, stream, AliasesReaderBase.schema)
 
     def _read_aliased_string(self) -> AliasedString:
@@ -4246,8 +4246,8 @@ class NDJsonStreamsOfAliasedUnionsReader(_ndjson.NDJsonProtocolReader, StreamsOf
     """NDJson writer for the StreamsOfAliasedUnions protocol."""
 
 
-    def __init__(self, stream: typing.Union[io.BufferedReader, typing.TextIO, str]) -> None:
-        StreamsOfAliasedUnionsReaderBase.__init__(self)
+    def __init__(self, stream: typing.Union[io.BufferedReader, typing.TextIO, str], skip_completed_check: bool = False) -> None:
+        StreamsOfAliasedUnionsReaderBase.__init__(self, skip_completed_check)
         _ndjson.NDJsonProtocolReader.__init__(self, stream, StreamsOfAliasedUnionsReaderBase.schema)
 
     def _read_int_or_simple_record(self) -> collections.abc.Iterable[AliasedIntOrSimpleRecord]:
@@ -4278,8 +4278,8 @@ class NDJsonProtocolWithComputedFieldsReader(_ndjson.NDJsonProtocolReader, Proto
     """NDJson writer for the ProtocolWithComputedFields protocol."""
 
 
-    def __init__(self, stream: typing.Union[io.BufferedReader, typing.TextIO, str]) -> None:
-        ProtocolWithComputedFieldsReaderBase.__init__(self)
+    def __init__(self, stream: typing.Union[io.BufferedReader, typing.TextIO, str], skip_completed_check: bool = False) -> None:
+        ProtocolWithComputedFieldsReaderBase.__init__(self, skip_completed_check)
         _ndjson.NDJsonProtocolReader.__init__(self, stream, ProtocolWithComputedFieldsReaderBase.schema)
 
     def _read_record_with_computed_fields(self) -> RecordWithComputedFields:
@@ -4311,8 +4311,8 @@ class NDJsonProtocolWithKeywordStepsReader(_ndjson.NDJsonProtocolReader, Protoco
     """NDJson writer for the ProtocolWithKeywordSteps protocol."""
 
 
-    def __init__(self, stream: typing.Union[io.BufferedReader, typing.TextIO, str]) -> None:
-        ProtocolWithKeywordStepsReaderBase.__init__(self)
+    def __init__(self, stream: typing.Union[io.BufferedReader, typing.TextIO, str], skip_completed_check: bool = False) -> None:
+        ProtocolWithKeywordStepsReaderBase.__init__(self, skip_completed_check)
         _ndjson.NDJsonProtocolReader.__init__(self, stream, ProtocolWithKeywordStepsReaderBase.schema)
 
     def _read_int(self) -> collections.abc.Iterable[RecordWithKeywordFields]:
@@ -4343,8 +4343,8 @@ class NDJsonProtocolWithOptionalDateReader(_ndjson.NDJsonProtocolReader, Protoco
     """NDJson writer for the ProtocolWithOptionalDate protocol."""
 
 
-    def __init__(self, stream: typing.Union[io.BufferedReader, typing.TextIO, str]) -> None:
-        ProtocolWithOptionalDateReaderBase.__init__(self)
+    def __init__(self, stream: typing.Union[io.BufferedReader, typing.TextIO, str], skip_completed_check: bool = False) -> None:
+        ProtocolWithOptionalDateReaderBase.__init__(self, skip_completed_check)
         _ndjson.NDJsonProtocolReader.__init__(self, stream, ProtocolWithOptionalDateReaderBase.schema)
 
     def _read_record(self) -> typing.Optional[RecordWithOptionalDate]:

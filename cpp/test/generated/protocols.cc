@@ -153,7 +153,7 @@ bool BenchmarkFloat256x256ReaderBase::ReadFloat256x256Impl(std::vector<yardl::Fi
 }
 
 void BenchmarkFloat256x256ReaderBase::Close() {
-  if (unlikely(state_ != 2)) {
+  if (!skip_completed_check_ && unlikely(state_ != 2)) {
     if (state_ == 1) {
       state_ = 2;
     } else {
@@ -324,7 +324,7 @@ bool BenchmarkInt256x256ReaderBase::ReadInt256x256Impl(std::vector<yardl::FixedN
 }
 
 void BenchmarkInt256x256ReaderBase::Close() {
-  if (unlikely(state_ != 2)) {
+  if (!skip_completed_check_ && unlikely(state_ != 2)) {
     if (state_ == 1) {
       state_ = 2;
     } else {
@@ -495,7 +495,7 @@ bool BenchmarkFloatVlenReaderBase::ReadFloatArrayImpl(std::vector<yardl::NDArray
 }
 
 void BenchmarkFloatVlenReaderBase::Close() {
-  if (unlikely(state_ != 2)) {
+  if (!skip_completed_check_ && unlikely(state_ != 2)) {
     if (state_ == 1) {
       state_ = 2;
     } else {
@@ -666,7 +666,7 @@ bool BenchmarkSmallRecordReaderBase::ReadSmallRecordImpl(std::vector<test_model:
 }
 
 void BenchmarkSmallRecordReaderBase::Close() {
-  if (unlikely(state_ != 2)) {
+  if (!skip_completed_check_ && unlikely(state_ != 2)) {
     if (state_ == 1) {
       state_ = 2;
     } else {
@@ -837,7 +837,7 @@ bool BenchmarkSmallRecordWithOptionalsReaderBase::ReadSmallRecordImpl(std::vecto
 }
 
 void BenchmarkSmallRecordWithOptionalsReaderBase::Close() {
-  if (unlikely(state_ != 2)) {
+  if (!skip_completed_check_ && unlikely(state_ != 2)) {
     if (state_ == 1) {
       state_ = 2;
     } else {
@@ -1008,7 +1008,7 @@ bool BenchmarkSimpleMrdReaderBase::ReadDataImpl(std::vector<std::variant<test_mo
 }
 
 void BenchmarkSimpleMrdReaderBase::Close() {
-  if (unlikely(state_ != 2)) {
+  if (!skip_completed_check_ && unlikely(state_ != 2)) {
     if (state_ == 1) {
       state_ = 2;
     } else {
@@ -1132,7 +1132,7 @@ void ScalarsReaderBase::ReadRecord(test_model::RecordWithPrimitives& value) {
 }
 
 void ScalarsReaderBase::Close() {
-  if (unlikely(state_ != 4)) {
+  if (!skip_completed_check_ && unlikely(state_ != 4)) {
     ScalarsReaderBaseInvalidState(4, state_);
   }
 
@@ -1290,7 +1290,7 @@ void ScalarOptionalsReaderBase::ReadOptionalRecordWithOptionalFields(std::option
 }
 
 void ScalarOptionalsReaderBase::Close() {
-  if (unlikely(state_ != 8)) {
+  if (!skip_completed_check_ && unlikely(state_ != 8)) {
     ScalarOptionalsReaderBaseInvalidState(8, state_);
   }
 
@@ -1395,7 +1395,7 @@ void NestedRecordsReaderBase::ReadTupleWithRecords(test_model::TupleWithRecords&
 }
 
 void NestedRecordsReaderBase::Close() {
-  if (unlikely(state_ != 2)) {
+  if (!skip_completed_check_ && unlikely(state_ != 2)) {
     NestedRecordsReaderBaseInvalidState(2, state_);
   }
 
@@ -1548,7 +1548,7 @@ void VlensReaderBase::ReadVlenOfRecordWithVlens(std::vector<test_model::RecordWi
 }
 
 void VlensReaderBase::Close() {
-  if (unlikely(state_ != 8)) {
+  if (!skip_completed_check_ && unlikely(state_ != 8)) {
     VlensReaderBaseInvalidState(8, state_);
   }
 
@@ -1674,7 +1674,7 @@ void StringsReaderBase::ReadRecWithString(test_model::RecordWithStrings& value) 
 }
 
 void StringsReaderBase::Close() {
-  if (unlikely(state_ != 4)) {
+  if (!skip_completed_check_ && unlikely(state_ != 4)) {
     StringsReaderBaseInvalidState(4, state_);
   }
 
@@ -1769,7 +1769,7 @@ void OptionalVectorsReaderBase::ReadRecordWithOptionalVector(test_model::RecordW
 }
 
 void OptionalVectorsReaderBase::Close() {
-  if (unlikely(state_ != 2)) {
+  if (!skip_completed_check_ && unlikely(state_ != 2)) {
     OptionalVectorsReaderBaseInvalidState(2, state_);
   }
 
@@ -1922,7 +1922,7 @@ void FixedVectorsReaderBase::ReadRecordWithFixedVectors(test_model::RecordWithFi
 }
 
 void FixedVectorsReaderBase::Close() {
-  if (unlikely(state_ != 8)) {
+  if (!skip_completed_check_ && unlikely(state_ != 8)) {
     FixedVectorsReaderBaseInvalidState(8, state_);
   }
 
@@ -2386,7 +2386,7 @@ bool StreamsReaderBase::ReadFixedVectorImpl(std::vector<std::array<int32_t, 3>>&
 }
 
 void StreamsReaderBase::Close() {
-  if (unlikely(state_ != 8)) {
+  if (!skip_completed_check_ && unlikely(state_ != 8)) {
     if (state_ == 7) {
       state_ = 8;
     } else {
@@ -2615,7 +2615,7 @@ void FixedArraysReaderBase::ReadNamedArray(test_model::NamedFixedNDArray& value)
 }
 
 void FixedArraysReaderBase::Close() {
-  if (unlikely(state_ != 10)) {
+  if (!skip_completed_check_ && unlikely(state_ != 10)) {
     FixedArraysReaderBaseInvalidState(10, state_);
   }
 
@@ -2893,7 +2893,7 @@ void SubarraysReaderBase::ReadGenericSubarray(test_model::Image<yardl::FixedNDAr
 }
 
 void SubarraysReaderBase::Close() {
-  if (unlikely(state_ != 18)) {
+  if (!skip_completed_check_ && unlikely(state_ != 18)) {
     SubarraysReaderBaseInvalidState(18, state_);
   }
 
@@ -3044,7 +3044,7 @@ void SubarraysInRecordsReaderBase::ReadWithVlenSubarrays(yardl::DynamicNDArray<t
 }
 
 void SubarraysInRecordsReaderBase::Close() {
-  if (unlikely(state_ != 4)) {
+  if (!skip_completed_check_ && unlikely(state_ != 4)) {
     SubarraysInRecordsReaderBaseInvalidState(4, state_);
   }
 
@@ -3223,7 +3223,7 @@ void NDArraysReaderBase::ReadNamedArray(test_model::NamedNDArray& value) {
 }
 
 void NDArraysReaderBase::Close() {
-  if (unlikely(state_ != 10)) {
+  if (!skip_completed_check_ && unlikely(state_ != 10)) {
     NDArraysReaderBaseInvalidState(10, state_);
   }
 
@@ -3396,7 +3396,7 @@ void NDArraysSingleDimensionReaderBase::ReadRecordWithNDArrays(test_model::Recor
 }
 
 void NDArraysSingleDimensionReaderBase::Close() {
-  if (unlikely(state_ != 8)) {
+  if (!skip_completed_check_ && unlikely(state_ != 8)) {
     NDArraysSingleDimensionReaderBaseInvalidState(8, state_);
   }
 
@@ -3564,7 +3564,7 @@ void DynamicNDArraysReaderBase::ReadRecordWithDynamicNDArrays(test_model::Record
 }
 
 void DynamicNDArraysReaderBase::Close() {
-  if (unlikely(state_ != 8)) {
+  if (!skip_completed_check_ && unlikely(state_ != 8)) {
     DynamicNDArraysReaderBaseInvalidState(8, state_);
   }
 
@@ -3834,7 +3834,7 @@ bool MultiDArraysReaderBase::ReadFramesImpl(std::vector<yardl::FixedNDArray<floa
 }
 
 void MultiDArraysReaderBase::Close() {
-  if (unlikely(state_ != 4)) {
+  if (!skip_completed_check_ && unlikely(state_ != 4)) {
     if (state_ == 3) {
       state_ = 4;
     } else {
@@ -3972,7 +3972,7 @@ void ComplexArraysReaderBase::ReadDoubles(yardl::NDArray<std::complex<double>, 2
 }
 
 void ComplexArraysReaderBase::Close() {
-  if (unlikely(state_ != 4)) {
+  if (!skip_completed_check_ && unlikely(state_ != 4)) {
     ComplexArraysReaderBaseInvalidState(4, state_);
   }
 
@@ -4151,7 +4151,7 @@ void MapsReaderBase::ReadRecords(std::vector<test_model::RecordWithMaps>& value)
 }
 
 void MapsReaderBase::Close() {
-  if (unlikely(state_ != 10)) {
+  if (!skip_completed_check_ && unlikely(state_ != 10)) {
     MapsReaderBaseInvalidState(10, state_);
   }
 
@@ -4324,7 +4324,7 @@ void UnionsReaderBase::ReadRecordWithUnions(basic_types::RecordWithUnions& value
 }
 
 void UnionsReaderBase::Close() {
-  if (unlikely(state_ != 8)) {
+  if (!skip_completed_check_ && unlikely(state_ != 8)) {
     UnionsReaderBaseInvalidState(8, state_);
   }
 
@@ -4691,7 +4691,7 @@ bool StreamsOfUnionsReaderBase::ReadManyCasesImpl(std::vector<std::variant<int32
 }
 
 void StreamsOfUnionsReaderBase::Close() {
-  if (unlikely(state_ != 6)) {
+  if (!skip_completed_check_ && unlikely(state_ != 6)) {
     if (state_ == 5) {
       state_ = 6;
     } else {
@@ -4885,7 +4885,7 @@ void EnumsReaderBase::ReadRec(test_model::RecordWithEnums& value) {
 }
 
 void EnumsReaderBase::Close() {
-  if (unlikely(state_ != 8)) {
+  if (!skip_completed_check_ && unlikely(state_ != 8)) {
     EnumsReaderBaseInvalidState(8, state_);
   }
 
@@ -5155,7 +5155,7 @@ bool FlagsReaderBase::ReadFormatsImpl(std::vector<test_model::TextFormat>& value
 }
 
 void FlagsReaderBase::Close() {
-  if (unlikely(state_ != 4)) {
+  if (!skip_completed_check_ && unlikely(state_ != 4)) {
     if (state_ == 3) {
       state_ = 4;
     } else {
@@ -5386,7 +5386,7 @@ void StateTestReaderBase::ReadAnotherInt(int32_t& value) {
 }
 
 void StateTestReaderBase::Close() {
-  if (unlikely(state_ != 6)) {
+  if (!skip_completed_check_ && unlikely(state_ != 6)) {
     StateTestReaderBaseInvalidState(6, state_);
   }
 
@@ -5731,7 +5731,7 @@ bool SimpleGenericsReaderBase::ReadStreamOfTypeVariantsImpl(std::vector<std::var
 }
 
 void SimpleGenericsReaderBase::Close() {
-  if (unlikely(state_ != 18)) {
+  if (!skip_completed_check_ && unlikely(state_ != 18)) {
     if (state_ == 17) {
       state_ = 18;
     } else {
@@ -5958,7 +5958,7 @@ void AdvancedGenericsReaderBase::ReadTupleOfVectors(test_model::MyTuple<std::vec
 }
 
 void AdvancedGenericsReaderBase::Close() {
-  if (unlikely(state_ != 10)) {
+  if (!skip_completed_check_ && unlikely(state_ != 10)) {
     AdvancedGenericsReaderBaseInvalidState(10, state_);
   }
 
@@ -6350,7 +6350,7 @@ void AliasesReaderBase::ReadVectors(std::vector<test_model::RecordContainingVect
 }
 
 void AliasesReaderBase::Close() {
-  if (unlikely(state_ != 22)) {
+  if (!skip_completed_check_ && unlikely(state_ != 22)) {
     AliasesReaderBaseInvalidState(22, state_);
   }
 
@@ -6664,7 +6664,7 @@ bool StreamsOfAliasedUnionsReaderBase::ReadNullableIntOrSimpleRecordImpl(std::ve
 }
 
 void StreamsOfAliasedUnionsReaderBase::Close() {
-  if (unlikely(state_ != 4)) {
+  if (!skip_completed_check_ && unlikely(state_ != 4)) {
     if (state_ == 3) {
       state_ = 4;
     } else {
@@ -6781,7 +6781,7 @@ void ProtocolWithComputedFieldsReaderBase::ReadRecordWithComputedFields(test_mod
 }
 
 void ProtocolWithComputedFieldsReaderBase::Close() {
-  if (unlikely(state_ != 2)) {
+  if (!skip_completed_check_ && unlikely(state_ != 2)) {
     ProtocolWithComputedFieldsReaderBaseInvalidState(2, state_);
   }
 
@@ -6964,7 +6964,7 @@ void ProtocolWithKeywordStepsReaderBase::ReadFloat(test_model::EnumWithKeywordSy
 }
 
 void ProtocolWithKeywordStepsReaderBase::Close() {
-  if (unlikely(state_ != 4)) {
+  if (!skip_completed_check_ && unlikely(state_ != 4)) {
     ProtocolWithKeywordStepsReaderBaseInvalidState(4, state_);
   }
 
@@ -7068,7 +7068,7 @@ void ProtocolWithOptionalDateReaderBase::ReadRecord(std::optional<test_model::Re
 }
 
 void ProtocolWithOptionalDateReaderBase::Close() {
-  if (unlikely(state_ != 2)) {
+  if (!skip_completed_check_ && unlikely(state_ != 2)) {
     ProtocolWithOptionalDateReaderBaseInvalidState(2, state_);
   }
 

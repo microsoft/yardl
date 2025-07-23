@@ -1103,8 +1103,8 @@ void ProtocolWithChangesWriter::Flush() {
   }
 }
 
-ProtocolWithChangesReader::ProtocolWithChangesReader(std::string path)
-    : yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "ProtocolWithChanges", schema_) {
+ProtocolWithChangesReader::ProtocolWithChangesReader(std::string path, bool skip_completed_check)
+    : evo_test::ProtocolWithChangesReaderBase(skip_completed_check), yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "ProtocolWithChanges", schema_) {
 }
 
 void ProtocolWithChangesReader::ReadInt8ToIntImpl(int32_t& value) {
@@ -1756,8 +1756,8 @@ void UnusedProtocolWriter::EndRecordsImpl() {
   records_dataset_state_.reset();
 }
 
-UnusedProtocolReader::UnusedProtocolReader(std::string path)
-    : yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "UnusedProtocol", schema_) {
+UnusedProtocolReader::UnusedProtocolReader(std::string path, bool skip_completed_check)
+    : evo_test::UnusedProtocolReaderBase(skip_completed_check), yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "UnusedProtocol", schema_) {
 }
 
 bool UnusedProtocolReader::ReadRecordsImpl(evo_test::UnchangedRecord& value) {

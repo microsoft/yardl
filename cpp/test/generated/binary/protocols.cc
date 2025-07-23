@@ -2957,7 +2957,9 @@ bool BenchmarkFloat256x256Reader::ReadFloat256x256Impl(std::vector<yardl::FixedN
 }
 
 void BenchmarkFloat256x256Reader::CloseImpl() {
-  stream_.VerifyFinished();
+  if (!skip_completed_check_) {
+    stream_.VerifyFinished();
+  }
 }
 
 void BenchmarkInt256x256Writer::WriteInt256x256Impl(yardl::FixedNDArray<int32_t, 256, 256> const& value) {
@@ -2994,7 +2996,9 @@ bool BenchmarkInt256x256Reader::ReadInt256x256Impl(std::vector<yardl::FixedNDArr
 }
 
 void BenchmarkInt256x256Reader::CloseImpl() {
-  stream_.VerifyFinished();
+  if (!skip_completed_check_) {
+    stream_.VerifyFinished();
+  }
 }
 
 void BenchmarkFloatVlenWriter::WriteFloatArrayImpl(yardl::NDArray<float, 2> const& value) {
@@ -3031,7 +3035,9 @@ bool BenchmarkFloatVlenReader::ReadFloatArrayImpl(std::vector<yardl::NDArray<flo
 }
 
 void BenchmarkFloatVlenReader::CloseImpl() {
-  stream_.VerifyFinished();
+  if (!skip_completed_check_) {
+    stream_.VerifyFinished();
+  }
 }
 
 void BenchmarkSmallRecordWriter::WriteSmallRecordImpl(test_model::SmallBenchmarkRecord const& value) {
@@ -3068,7 +3074,9 @@ bool BenchmarkSmallRecordReader::ReadSmallRecordImpl(std::vector<test_model::Sma
 }
 
 void BenchmarkSmallRecordReader::CloseImpl() {
-  stream_.VerifyFinished();
+  if (!skip_completed_check_) {
+    stream_.VerifyFinished();
+  }
 }
 
 void BenchmarkSmallRecordWithOptionalsWriter::WriteSmallRecordImpl(test_model::SimpleEncodingCounters const& value) {
@@ -3105,7 +3113,9 @@ bool BenchmarkSmallRecordWithOptionalsReader::ReadSmallRecordImpl(std::vector<te
 }
 
 void BenchmarkSmallRecordWithOptionalsReader::CloseImpl() {
-  stream_.VerifyFinished();
+  if (!skip_completed_check_) {
+    stream_.VerifyFinished();
+  }
 }
 
 void BenchmarkSimpleMrdWriter::WriteDataImpl(std::variant<test_model::SimpleAcquisition, image::Image<float>> const& value) {
@@ -3142,7 +3152,9 @@ bool BenchmarkSimpleMrdReader::ReadDataImpl(std::vector<std::variant<test_model:
 }
 
 void BenchmarkSimpleMrdReader::CloseImpl() {
-  stream_.VerifyFinished();
+  if (!skip_completed_check_) {
+    stream_.VerifyFinished();
+  }
 }
 
 void ScalarsWriter::WriteInt32Impl(int32_t const& value) {
@@ -3170,7 +3182,9 @@ void ScalarsReader::ReadRecordImpl(test_model::RecordWithPrimitives& value) {
 }
 
 void ScalarsReader::CloseImpl() {
-  stream_.VerifyFinished();
+  if (!skip_completed_check_) {
+    stream_.VerifyFinished();
+  }
 }
 
 void ScalarOptionalsWriter::WriteOptionalIntImpl(std::optional<int32_t> const& value) {
@@ -3214,7 +3228,9 @@ void ScalarOptionalsReader::ReadOptionalRecordWithOptionalFieldsImpl(std::option
 }
 
 void ScalarOptionalsReader::CloseImpl() {
-  stream_.VerifyFinished();
+  if (!skip_completed_check_) {
+    stream_.VerifyFinished();
+  }
 }
 
 void NestedRecordsWriter::WriteTupleWithRecordsImpl(test_model::TupleWithRecords const& value) {
@@ -3234,7 +3250,9 @@ void NestedRecordsReader::ReadTupleWithRecordsImpl(test_model::TupleWithRecords&
 }
 
 void NestedRecordsReader::CloseImpl() {
-  stream_.VerifyFinished();
+  if (!skip_completed_check_) {
+    stream_.VerifyFinished();
+  }
 }
 
 void VlensWriter::WriteIntVectorImpl(std::vector<int32_t> const& value) {
@@ -3278,7 +3296,9 @@ void VlensReader::ReadVlenOfRecordWithVlensImpl(std::vector<test_model::RecordWi
 }
 
 void VlensReader::CloseImpl() {
-  stream_.VerifyFinished();
+  if (!skip_completed_check_) {
+    stream_.VerifyFinished();
+  }
 }
 
 void StringsWriter::WriteSingleStringImpl(std::string const& value) {
@@ -3306,7 +3326,9 @@ void StringsReader::ReadRecWithStringImpl(test_model::RecordWithStrings& value) 
 }
 
 void StringsReader::CloseImpl() {
-  stream_.VerifyFinished();
+  if (!skip_completed_check_) {
+    stream_.VerifyFinished();
+  }
 }
 
 void OptionalVectorsWriter::WriteRecordWithOptionalVectorImpl(test_model::RecordWithOptionalVector const& value) {
@@ -3326,7 +3348,9 @@ void OptionalVectorsReader::ReadRecordWithOptionalVectorImpl(test_model::RecordW
 }
 
 void OptionalVectorsReader::CloseImpl() {
-  stream_.VerifyFinished();
+  if (!skip_completed_check_) {
+    stream_.VerifyFinished();
+  }
 }
 
 void FixedVectorsWriter::WriteFixedIntVectorImpl(std::array<int32_t, 5> const& value) {
@@ -3370,7 +3394,9 @@ void FixedVectorsReader::ReadRecordWithFixedVectorsImpl(test_model::RecordWithFi
 }
 
 void FixedVectorsReader::CloseImpl() {
-  stream_.VerifyFinished();
+  if (!skip_completed_check_) {
+    stream_.VerifyFinished();
+  }
 }
 
 void StreamsWriter::WriteIntDataImpl(int32_t const& value) {
@@ -3482,7 +3508,9 @@ bool StreamsReader::ReadFixedVectorImpl(std::vector<std::array<int32_t, 3>>& val
 }
 
 void StreamsReader::CloseImpl() {
-  stream_.VerifyFinished();
+  if (!skip_completed_check_) {
+    stream_.VerifyFinished();
+  }
 }
 
 void FixedArraysWriter::WriteIntsImpl(yardl::FixedNDArray<int32_t, 2, 3> const& value) {
@@ -3534,7 +3562,9 @@ void FixedArraysReader::ReadNamedArrayImpl(test_model::NamedFixedNDArray& value)
 }
 
 void FixedArraysReader::CloseImpl() {
-  stream_.VerifyFinished();
+  if (!skip_completed_check_) {
+    stream_.VerifyFinished();
+  }
 }
 
 void SubarraysWriter::WriteDynamicWithFixedIntSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<int32_t, 3>> const& value) {
@@ -3618,7 +3648,9 @@ void SubarraysReader::ReadGenericSubarrayImpl(test_model::Image<yardl::FixedNDAr
 }
 
 void SubarraysReader::CloseImpl() {
-  stream_.VerifyFinished();
+  if (!skip_completed_check_) {
+    stream_.VerifyFinished();
+  }
 }
 
 void SubarraysInRecordsWriter::WriteWithFixedSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithFixedCollections> const& value) {
@@ -3646,7 +3678,9 @@ void SubarraysInRecordsReader::ReadWithVlenSubarraysImpl(yardl::DynamicNDArray<t
 }
 
 void SubarraysInRecordsReader::CloseImpl() {
-  stream_.VerifyFinished();
+  if (!skip_completed_check_) {
+    stream_.VerifyFinished();
+  }
 }
 
 void NDArraysWriter::WriteIntsImpl(yardl::NDArray<int32_t, 2> const& value) {
@@ -3698,7 +3732,9 @@ void NDArraysReader::ReadNamedArrayImpl(test_model::NamedNDArray& value) {
 }
 
 void NDArraysReader::CloseImpl() {
-  stream_.VerifyFinished();
+  if (!skip_completed_check_) {
+    stream_.VerifyFinished();
+  }
 }
 
 void NDArraysSingleDimensionWriter::WriteIntsImpl(yardl::NDArray<int32_t, 1> const& value) {
@@ -3742,7 +3778,9 @@ void NDArraysSingleDimensionReader::ReadRecordWithNDArraysImpl(test_model::Recor
 }
 
 void NDArraysSingleDimensionReader::CloseImpl() {
-  stream_.VerifyFinished();
+  if (!skip_completed_check_) {
+    stream_.VerifyFinished();
+  }
 }
 
 void DynamicNDArraysWriter::WriteIntsImpl(yardl::DynamicNDArray<int32_t> const& value) {
@@ -3786,7 +3824,9 @@ void DynamicNDArraysReader::ReadRecordWithDynamicNDArraysImpl(test_model::Record
 }
 
 void DynamicNDArraysReader::CloseImpl() {
-  stream_.VerifyFinished();
+  if (!skip_completed_check_) {
+    stream_.VerifyFinished();
+  }
 }
 
 void MultiDArraysWriter::WriteImagesImpl(yardl::NDArray<float, 4> const& value) {
@@ -3848,7 +3888,9 @@ bool MultiDArraysReader::ReadFramesImpl(std::vector<yardl::FixedNDArray<float, 1
 }
 
 void MultiDArraysReader::CloseImpl() {
-  stream_.VerifyFinished();
+  if (!skip_completed_check_) {
+    stream_.VerifyFinished();
+  }
 }
 
 void ComplexArraysWriter::WriteFloatsImpl(yardl::DynamicNDArray<std::complex<float>> const& value) {
@@ -3876,7 +3918,9 @@ void ComplexArraysReader::ReadDoublesImpl(yardl::NDArray<std::complex<double>, 2
 }
 
 void ComplexArraysReader::CloseImpl() {
-  stream_.VerifyFinished();
+  if (!skip_completed_check_) {
+    stream_.VerifyFinished();
+  }
 }
 
 void MapsWriter::WriteStringToIntImpl(std::unordered_map<std::string, int32_t> const& value) {
@@ -3928,7 +3972,9 @@ void MapsReader::ReadRecordsImpl(std::vector<test_model::RecordWithMaps>& value)
 }
 
 void MapsReader::CloseImpl() {
-  stream_.VerifyFinished();
+  if (!skip_completed_check_) {
+    stream_.VerifyFinished();
+  }
 }
 
 void UnionsWriter::WriteIntOrSimpleRecordImpl(std::variant<int32_t, test_model::SimpleRecord> const& value) {
@@ -3972,7 +4018,9 @@ void UnionsReader::ReadRecordWithUnionsImpl(basic_types::RecordWithUnions& value
 }
 
 void UnionsReader::CloseImpl() {
-  stream_.VerifyFinished();
+  if (!skip_completed_check_) {
+    stream_.VerifyFinished();
+  }
 }
 
 void StreamsOfUnionsWriter::WriteIntOrSimpleRecordImpl(std::variant<int32_t, test_model::SimpleRecord> const& value) {
@@ -4059,7 +4107,9 @@ bool StreamsOfUnionsReader::ReadManyCasesImpl(std::vector<std::variant<int32_t, 
 }
 
 void StreamsOfUnionsReader::CloseImpl() {
-  stream_.VerifyFinished();
+  if (!skip_completed_check_) {
+    stream_.VerifyFinished();
+  }
 }
 
 void EnumsWriter::WriteSingleImpl(test_model::Fruits const& value) {
@@ -4103,7 +4153,9 @@ void EnumsReader::ReadRecImpl(test_model::RecordWithEnums& value) {
 }
 
 void EnumsReader::CloseImpl() {
-  stream_.VerifyFinished();
+  if (!skip_completed_check_) {
+    stream_.VerifyFinished();
+  }
 }
 
 void FlagsWriter::WriteDaysImpl(test_model::DaysOfWeek const& value) {
@@ -4165,7 +4217,9 @@ bool FlagsReader::ReadFormatsImpl(std::vector<test_model::TextFormat>& values) {
 }
 
 void FlagsReader::CloseImpl() {
-  stream_.VerifyFinished();
+  if (!skip_completed_check_) {
+    stream_.VerifyFinished();
+  }
 }
 
 void StateTestWriter::WriteAnIntImpl(int32_t const& value) {
@@ -4218,7 +4272,9 @@ void StateTestReader::ReadAnotherIntImpl(int32_t& value) {
 }
 
 void StateTestReader::CloseImpl() {
-  stream_.VerifyFinished();
+  if (!skip_completed_check_) {
+    stream_.VerifyFinished();
+  }
 }
 
 void SimpleGenericsWriter::WriteFloatImageImpl(image::FloatImage const& value) {
@@ -4319,7 +4375,9 @@ bool SimpleGenericsReader::ReadStreamOfTypeVariantsImpl(std::vector<std::variant
 }
 
 void SimpleGenericsReader::CloseImpl() {
-  stream_.VerifyFinished();
+  if (!skip_completed_check_) {
+    stream_.VerifyFinished();
+  }
 }
 
 void AdvancedGenericsWriter::WriteFloatImageImageImpl(test_model::Image<test_model::Image<float>> const& value) {
@@ -4371,7 +4429,9 @@ void AdvancedGenericsReader::ReadTupleOfVectorsImpl(test_model::MyTuple<std::vec
 }
 
 void AdvancedGenericsReader::CloseImpl() {
-  stream_.VerifyFinished();
+  if (!skip_completed_check_) {
+    stream_.VerifyFinished();
+  }
 }
 
 void AliasesWriter::WriteAliasedStringImpl(test_model::AliasedString const& value) {
@@ -4488,7 +4548,9 @@ void AliasesReader::ReadVectorsImpl(std::vector<test_model::RecordContainingVect
 }
 
 void AliasesReader::CloseImpl() {
-  stream_.VerifyFinished();
+  if (!skip_completed_check_) {
+    stream_.VerifyFinished();
+  }
 }
 
 void StreamsOfAliasedUnionsWriter::WriteIntOrSimpleRecordImpl(test_model::AliasedIntOrSimpleRecord const& value) {
@@ -4550,7 +4612,9 @@ bool StreamsOfAliasedUnionsReader::ReadNullableIntOrSimpleRecordImpl(std::vector
 }
 
 void StreamsOfAliasedUnionsReader::CloseImpl() {
-  stream_.VerifyFinished();
+  if (!skip_completed_check_) {
+    stream_.VerifyFinished();
+  }
 }
 
 void ProtocolWithComputedFieldsWriter::WriteRecordWithComputedFieldsImpl(test_model::RecordWithComputedFields const& value) {
@@ -4570,7 +4634,9 @@ void ProtocolWithComputedFieldsReader::ReadRecordWithComputedFieldsImpl(test_mod
 }
 
 void ProtocolWithComputedFieldsReader::CloseImpl() {
-  stream_.VerifyFinished();
+  if (!skip_completed_check_) {
+    stream_.VerifyFinished();
+  }
 }
 
 void ProtocolWithKeywordStepsWriter::WriteIntImpl(test_model::RecordWithKeywordFields const& value) {
@@ -4615,7 +4681,9 @@ void ProtocolWithKeywordStepsReader::ReadFloatImpl(test_model::EnumWithKeywordSy
 }
 
 void ProtocolWithKeywordStepsReader::CloseImpl() {
-  stream_.VerifyFinished();
+  if (!skip_completed_check_) {
+    stream_.VerifyFinished();
+  }
 }
 
 void ProtocolWithOptionalDateWriter::WriteRecordImpl(std::optional<test_model::RecordWithOptionalDate> const& value) {
@@ -4635,7 +4703,9 @@ void ProtocolWithOptionalDateReader::ReadRecordImpl(std::optional<test_model::Re
 }
 
 void ProtocolWithOptionalDateReader::CloseImpl() {
-  stream_.VerifyFinished();
+  if (!skip_completed_check_) {
+    stream_.VerifyFinished();
+  }
 }
 
 } // namespace test_model::binary

@@ -17,8 +17,12 @@ classdef AliasesReader < yardl.binary.BinaryProtocolReader & test_model.AliasesR
   end
 
   methods
-    function self = AliasesReader(filename)
-      self@test_model.AliasesReaderBase();
+    function self = AliasesReader(filename, options)
+      arguments
+        filename (1,1) string
+        options.skip_completed_check (1,1) logical = false
+      end
+      self@test_model.AliasesReaderBase(skip_completed_check=options.skip_completed_check);
       self@yardl.binary.BinaryProtocolReader(filename, test_model.AliasesReaderBase.schema);
       self.aliased_string_serializer = yardl.binary.StringSerializer;
       self.aliased_enum_serializer = yardl.binary.EnumSerializer('basic_types.Fruits', @basic_types.Fruits, yardl.binary.Int32Serializer);

@@ -7,8 +7,12 @@ classdef BenchmarkSmallRecordWithOptionalsReader < yardl.binary.BinaryProtocolRe
   end
 
   methods
-    function self = BenchmarkSmallRecordWithOptionalsReader(filename)
-      self@test_model.BenchmarkSmallRecordWithOptionalsReaderBase();
+    function self = BenchmarkSmallRecordWithOptionalsReader(filename, options)
+      arguments
+        filename (1,1) string
+        options.skip_completed_check (1,1) logical = false
+      end
+      self@test_model.BenchmarkSmallRecordWithOptionalsReaderBase(skip_completed_check=options.skip_completed_check);
       self@yardl.binary.BinaryProtocolReader(filename, test_model.BenchmarkSmallRecordWithOptionalsReaderBase.schema);
       self.small_record_serializer = yardl.binary.StreamSerializer(test_model.binary.SimpleEncodingCountersSerializer());
     end

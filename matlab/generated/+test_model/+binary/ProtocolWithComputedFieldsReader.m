@@ -7,8 +7,12 @@ classdef ProtocolWithComputedFieldsReader < yardl.binary.BinaryProtocolReader & 
   end
 
   methods
-    function self = ProtocolWithComputedFieldsReader(filename)
-      self@test_model.ProtocolWithComputedFieldsReaderBase();
+    function self = ProtocolWithComputedFieldsReader(filename, options)
+      arguments
+        filename (1,1) string
+        options.skip_completed_check (1,1) logical = false
+      end
+      self@test_model.ProtocolWithComputedFieldsReaderBase(skip_completed_check=options.skip_completed_check);
       self@yardl.binary.BinaryProtocolReader(filename, test_model.ProtocolWithComputedFieldsReaderBase.schema);
       self.record_with_computed_fields_serializer = test_model.binary.RecordWithComputedFieldsSerializer();
     end

@@ -164,15 +164,21 @@ func writeAbstractReader(fw *common.MatlabFileWriter, p *dsl.ProtocolDefinition,
 			w.WriteStringln("properties (Access=protected)")
 			common.WriteBlockBody(w, func() {
 				w.WriteStringln("state_")
+				w.WriteStringln("skip_completed_check_")
 			})
 			w.WriteStringln("")
 
 			w.WriteStringln("methods")
 			common.WriteBlockBody(w, func() {
 				// Constructor
-				fmt.Fprintf(w, "function self = %s()\n", common.AbstractReaderName(p))
+				fmt.Fprintf(w, "function self = %s(options)\n", common.AbstractReaderName(p))
 				common.WriteBlockBody(w, func() {
+					w.WriteStringln("arguments")
+					common.WriteBlockBody(w, func() {
+						fmt.Fprintf(w, "options.skip_completed_check (1,1) logical = false\n")
+					})
 					w.WriteStringln("self.state_ = 0;")
+					w.WriteStringln("self.skip_completed_check_ = options.skip_completed_check;")
 				})
 				w.WriteStringln("")
 
@@ -180,7 +186,7 @@ func writeAbstractReader(fw *common.MatlabFileWriter, p *dsl.ProtocolDefinition,
 				w.WriteStringln("function close(self)")
 				common.WriteBlockBody(w, func() {
 					w.WriteStringln("self.close_();")
-					fmt.Fprintf(w, "if self.state_ ~= %d\n", len(p.Sequence))
+					fmt.Fprintf(w, "if ~self.skip_completed_check_ && self.state_ ~= %d\n", len(p.Sequence))
 					common.WriteBlockBody(w, func() {
 						w.WriteStringln("expected_method = self.state_to_method_name_(self.state_);")
 						w.WriteStringln(`throw(yardl.ProtocolError("Protocol reader closed before all data was consumed. Expected call to '%s'.", expected_method));`)

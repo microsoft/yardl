@@ -35,11 +35,11 @@ class BenchmarkFloat256x256Writer : public test_model::BenchmarkFloat256x256Writ
 // Binary reader for the BenchmarkFloat256x256 protocol.
 class BenchmarkFloat256x256Reader : public test_model::BenchmarkFloat256x256ReaderBase, yardl::binary::BinaryReader {
   public:
-  BenchmarkFloat256x256Reader(std::istream& stream)
-      : yardl::binary::BinaryReader(stream), version_(test_model::BenchmarkFloat256x256ReaderBase::VersionFromSchema(schema_read_)) {}
+  BenchmarkFloat256x256Reader(std::istream& stream, bool skip_completed_check=false)
+      : test_model::BenchmarkFloat256x256ReaderBase(skip_completed_check), yardl::binary::BinaryReader(stream), version_(test_model::BenchmarkFloat256x256ReaderBase::VersionFromSchema(schema_read_)) {}
 
-  BenchmarkFloat256x256Reader(std::string file_name)
-      : yardl::binary::BinaryReader(file_name), version_(test_model::BenchmarkFloat256x256ReaderBase::VersionFromSchema(schema_read_)) {}
+  BenchmarkFloat256x256Reader(std::string file_name, bool skip_completed_check=false)
+      : test_model::BenchmarkFloat256x256ReaderBase(skip_completed_check), yardl::binary::BinaryReader(file_name), version_(test_model::BenchmarkFloat256x256ReaderBase::VersionFromSchema(schema_read_)) {}
 
   Version GetVersion() { return version_; }
 
@@ -77,11 +77,11 @@ class BenchmarkInt256x256Writer : public test_model::BenchmarkInt256x256WriterBa
 // Binary reader for the BenchmarkInt256x256 protocol.
 class BenchmarkInt256x256Reader : public test_model::BenchmarkInt256x256ReaderBase, yardl::binary::BinaryReader {
   public:
-  BenchmarkInt256x256Reader(std::istream& stream)
-      : yardl::binary::BinaryReader(stream), version_(test_model::BenchmarkInt256x256ReaderBase::VersionFromSchema(schema_read_)) {}
+  BenchmarkInt256x256Reader(std::istream& stream, bool skip_completed_check=false)
+      : test_model::BenchmarkInt256x256ReaderBase(skip_completed_check), yardl::binary::BinaryReader(stream), version_(test_model::BenchmarkInt256x256ReaderBase::VersionFromSchema(schema_read_)) {}
 
-  BenchmarkInt256x256Reader(std::string file_name)
-      : yardl::binary::BinaryReader(file_name), version_(test_model::BenchmarkInt256x256ReaderBase::VersionFromSchema(schema_read_)) {}
+  BenchmarkInt256x256Reader(std::string file_name, bool skip_completed_check=false)
+      : test_model::BenchmarkInt256x256ReaderBase(skip_completed_check), yardl::binary::BinaryReader(file_name), version_(test_model::BenchmarkInt256x256ReaderBase::VersionFromSchema(schema_read_)) {}
 
   Version GetVersion() { return version_; }
 
@@ -119,11 +119,11 @@ class BenchmarkFloatVlenWriter : public test_model::BenchmarkFloatVlenWriterBase
 // Binary reader for the BenchmarkFloatVlen protocol.
 class BenchmarkFloatVlenReader : public test_model::BenchmarkFloatVlenReaderBase, yardl::binary::BinaryReader {
   public:
-  BenchmarkFloatVlenReader(std::istream& stream)
-      : yardl::binary::BinaryReader(stream), version_(test_model::BenchmarkFloatVlenReaderBase::VersionFromSchema(schema_read_)) {}
+  BenchmarkFloatVlenReader(std::istream& stream, bool skip_completed_check=false)
+      : test_model::BenchmarkFloatVlenReaderBase(skip_completed_check), yardl::binary::BinaryReader(stream), version_(test_model::BenchmarkFloatVlenReaderBase::VersionFromSchema(schema_read_)) {}
 
-  BenchmarkFloatVlenReader(std::string file_name)
-      : yardl::binary::BinaryReader(file_name), version_(test_model::BenchmarkFloatVlenReaderBase::VersionFromSchema(schema_read_)) {}
+  BenchmarkFloatVlenReader(std::string file_name, bool skip_completed_check=false)
+      : test_model::BenchmarkFloatVlenReaderBase(skip_completed_check), yardl::binary::BinaryReader(file_name), version_(test_model::BenchmarkFloatVlenReaderBase::VersionFromSchema(schema_read_)) {}
 
   Version GetVersion() { return version_; }
 
@@ -161,11 +161,11 @@ class BenchmarkSmallRecordWriter : public test_model::BenchmarkSmallRecordWriter
 // Binary reader for the BenchmarkSmallRecord protocol.
 class BenchmarkSmallRecordReader : public test_model::BenchmarkSmallRecordReaderBase, yardl::binary::BinaryReader {
   public:
-  BenchmarkSmallRecordReader(std::istream& stream)
-      : yardl::binary::BinaryReader(stream), version_(test_model::BenchmarkSmallRecordReaderBase::VersionFromSchema(schema_read_)) {}
+  BenchmarkSmallRecordReader(std::istream& stream, bool skip_completed_check=false)
+      : test_model::BenchmarkSmallRecordReaderBase(skip_completed_check), yardl::binary::BinaryReader(stream), version_(test_model::BenchmarkSmallRecordReaderBase::VersionFromSchema(schema_read_)) {}
 
-  BenchmarkSmallRecordReader(std::string file_name)
-      : yardl::binary::BinaryReader(file_name), version_(test_model::BenchmarkSmallRecordReaderBase::VersionFromSchema(schema_read_)) {}
+  BenchmarkSmallRecordReader(std::string file_name, bool skip_completed_check=false)
+      : test_model::BenchmarkSmallRecordReaderBase(skip_completed_check), yardl::binary::BinaryReader(file_name), version_(test_model::BenchmarkSmallRecordReaderBase::VersionFromSchema(schema_read_)) {}
 
   Version GetVersion() { return version_; }
 
@@ -203,11 +203,11 @@ class BenchmarkSmallRecordWithOptionalsWriter : public test_model::BenchmarkSmal
 // Binary reader for the BenchmarkSmallRecordWithOptionals protocol.
 class BenchmarkSmallRecordWithOptionalsReader : public test_model::BenchmarkSmallRecordWithOptionalsReaderBase, yardl::binary::BinaryReader {
   public:
-  BenchmarkSmallRecordWithOptionalsReader(std::istream& stream)
-      : yardl::binary::BinaryReader(stream), version_(test_model::BenchmarkSmallRecordWithOptionalsReaderBase::VersionFromSchema(schema_read_)) {}
+  BenchmarkSmallRecordWithOptionalsReader(std::istream& stream, bool skip_completed_check=false)
+      : test_model::BenchmarkSmallRecordWithOptionalsReaderBase(skip_completed_check), yardl::binary::BinaryReader(stream), version_(test_model::BenchmarkSmallRecordWithOptionalsReaderBase::VersionFromSchema(schema_read_)) {}
 
-  BenchmarkSmallRecordWithOptionalsReader(std::string file_name)
-      : yardl::binary::BinaryReader(file_name), version_(test_model::BenchmarkSmallRecordWithOptionalsReaderBase::VersionFromSchema(schema_read_)) {}
+  BenchmarkSmallRecordWithOptionalsReader(std::string file_name, bool skip_completed_check=false)
+      : test_model::BenchmarkSmallRecordWithOptionalsReaderBase(skip_completed_check), yardl::binary::BinaryReader(file_name), version_(test_model::BenchmarkSmallRecordWithOptionalsReaderBase::VersionFromSchema(schema_read_)) {}
 
   Version GetVersion() { return version_; }
 
@@ -245,11 +245,11 @@ class BenchmarkSimpleMrdWriter : public test_model::BenchmarkSimpleMrdWriterBase
 // Binary reader for the BenchmarkSimpleMrd protocol.
 class BenchmarkSimpleMrdReader : public test_model::BenchmarkSimpleMrdReaderBase, yardl::binary::BinaryReader {
   public:
-  BenchmarkSimpleMrdReader(std::istream& stream)
-      : yardl::binary::BinaryReader(stream), version_(test_model::BenchmarkSimpleMrdReaderBase::VersionFromSchema(schema_read_)) {}
+  BenchmarkSimpleMrdReader(std::istream& stream, bool skip_completed_check=false)
+      : test_model::BenchmarkSimpleMrdReaderBase(skip_completed_check), yardl::binary::BinaryReader(stream), version_(test_model::BenchmarkSimpleMrdReaderBase::VersionFromSchema(schema_read_)) {}
 
-  BenchmarkSimpleMrdReader(std::string file_name)
-      : yardl::binary::BinaryReader(file_name), version_(test_model::BenchmarkSimpleMrdReaderBase::VersionFromSchema(schema_read_)) {}
+  BenchmarkSimpleMrdReader(std::string file_name, bool skip_completed_check=false)
+      : test_model::BenchmarkSimpleMrdReaderBase(skip_completed_check), yardl::binary::BinaryReader(file_name), version_(test_model::BenchmarkSimpleMrdReaderBase::VersionFromSchema(schema_read_)) {}
 
   Version GetVersion() { return version_; }
 
@@ -286,11 +286,11 @@ class ScalarsWriter : public test_model::ScalarsWriterBase, yardl::binary::Binar
 // Binary reader for the Scalars protocol.
 class ScalarsReader : public test_model::ScalarsReaderBase, yardl::binary::BinaryReader {
   public:
-  ScalarsReader(std::istream& stream)
-      : yardl::binary::BinaryReader(stream), version_(test_model::ScalarsReaderBase::VersionFromSchema(schema_read_)) {}
+  ScalarsReader(std::istream& stream, bool skip_completed_check=false)
+      : test_model::ScalarsReaderBase(skip_completed_check), yardl::binary::BinaryReader(stream), version_(test_model::ScalarsReaderBase::VersionFromSchema(schema_read_)) {}
 
-  ScalarsReader(std::string file_name)
-      : yardl::binary::BinaryReader(file_name), version_(test_model::ScalarsReaderBase::VersionFromSchema(schema_read_)) {}
+  ScalarsReader(std::string file_name, bool skip_completed_check=false)
+      : test_model::ScalarsReaderBase(skip_completed_check), yardl::binary::BinaryReader(file_name), version_(test_model::ScalarsReaderBase::VersionFromSchema(schema_read_)) {}
 
   Version GetVersion() { return version_; }
 
@@ -326,11 +326,11 @@ class ScalarOptionalsWriter : public test_model::ScalarOptionalsWriterBase, yard
 // Binary reader for the ScalarOptionals protocol.
 class ScalarOptionalsReader : public test_model::ScalarOptionalsReaderBase, yardl::binary::BinaryReader {
   public:
-  ScalarOptionalsReader(std::istream& stream)
-      : yardl::binary::BinaryReader(stream), version_(test_model::ScalarOptionalsReaderBase::VersionFromSchema(schema_read_)) {}
+  ScalarOptionalsReader(std::istream& stream, bool skip_completed_check=false)
+      : test_model::ScalarOptionalsReaderBase(skip_completed_check), yardl::binary::BinaryReader(stream), version_(test_model::ScalarOptionalsReaderBase::VersionFromSchema(schema_read_)) {}
 
-  ScalarOptionalsReader(std::string file_name)
-      : yardl::binary::BinaryReader(file_name), version_(test_model::ScalarOptionalsReaderBase::VersionFromSchema(schema_read_)) {}
+  ScalarOptionalsReader(std::string file_name, bool skip_completed_check=false)
+      : test_model::ScalarOptionalsReaderBase(skip_completed_check), yardl::binary::BinaryReader(file_name), version_(test_model::ScalarOptionalsReaderBase::VersionFromSchema(schema_read_)) {}
 
   Version GetVersion() { return version_; }
 
@@ -365,11 +365,11 @@ class NestedRecordsWriter : public test_model::NestedRecordsWriterBase, yardl::b
 // Binary reader for the NestedRecords protocol.
 class NestedRecordsReader : public test_model::NestedRecordsReaderBase, yardl::binary::BinaryReader {
   public:
-  NestedRecordsReader(std::istream& stream)
-      : yardl::binary::BinaryReader(stream), version_(test_model::NestedRecordsReaderBase::VersionFromSchema(schema_read_)) {}
+  NestedRecordsReader(std::istream& stream, bool skip_completed_check=false)
+      : test_model::NestedRecordsReaderBase(skip_completed_check), yardl::binary::BinaryReader(stream), version_(test_model::NestedRecordsReaderBase::VersionFromSchema(schema_read_)) {}
 
-  NestedRecordsReader(std::string file_name)
-      : yardl::binary::BinaryReader(file_name), version_(test_model::NestedRecordsReaderBase::VersionFromSchema(schema_read_)) {}
+  NestedRecordsReader(std::string file_name, bool skip_completed_check=false)
+      : test_model::NestedRecordsReaderBase(skip_completed_check), yardl::binary::BinaryReader(file_name), version_(test_model::NestedRecordsReaderBase::VersionFromSchema(schema_read_)) {}
 
   Version GetVersion() { return version_; }
 
@@ -404,11 +404,11 @@ class VlensWriter : public test_model::VlensWriterBase, yardl::binary::BinaryWri
 // Binary reader for the Vlens protocol.
 class VlensReader : public test_model::VlensReaderBase, yardl::binary::BinaryReader {
   public:
-  VlensReader(std::istream& stream)
-      : yardl::binary::BinaryReader(stream), version_(test_model::VlensReaderBase::VersionFromSchema(schema_read_)) {}
+  VlensReader(std::istream& stream, bool skip_completed_check=false)
+      : test_model::VlensReaderBase(skip_completed_check), yardl::binary::BinaryReader(stream), version_(test_model::VlensReaderBase::VersionFromSchema(schema_read_)) {}
 
-  VlensReader(std::string file_name)
-      : yardl::binary::BinaryReader(file_name), version_(test_model::VlensReaderBase::VersionFromSchema(schema_read_)) {}
+  VlensReader(std::string file_name, bool skip_completed_check=false)
+      : test_model::VlensReaderBase(skip_completed_check), yardl::binary::BinaryReader(file_name), version_(test_model::VlensReaderBase::VersionFromSchema(schema_read_)) {}
 
   Version GetVersion() { return version_; }
 
@@ -444,11 +444,11 @@ class StringsWriter : public test_model::StringsWriterBase, yardl::binary::Binar
 // Binary reader for the Strings protocol.
 class StringsReader : public test_model::StringsReaderBase, yardl::binary::BinaryReader {
   public:
-  StringsReader(std::istream& stream)
-      : yardl::binary::BinaryReader(stream), version_(test_model::StringsReaderBase::VersionFromSchema(schema_read_)) {}
+  StringsReader(std::istream& stream, bool skip_completed_check=false)
+      : test_model::StringsReaderBase(skip_completed_check), yardl::binary::BinaryReader(stream), version_(test_model::StringsReaderBase::VersionFromSchema(schema_read_)) {}
 
-  StringsReader(std::string file_name)
-      : yardl::binary::BinaryReader(file_name), version_(test_model::StringsReaderBase::VersionFromSchema(schema_read_)) {}
+  StringsReader(std::string file_name, bool skip_completed_check=false)
+      : test_model::StringsReaderBase(skip_completed_check), yardl::binary::BinaryReader(file_name), version_(test_model::StringsReaderBase::VersionFromSchema(schema_read_)) {}
 
   Version GetVersion() { return version_; }
 
@@ -481,11 +481,11 @@ class OptionalVectorsWriter : public test_model::OptionalVectorsWriterBase, yard
 // Binary reader for the OptionalVectors protocol.
 class OptionalVectorsReader : public test_model::OptionalVectorsReaderBase, yardl::binary::BinaryReader {
   public:
-  OptionalVectorsReader(std::istream& stream)
-      : yardl::binary::BinaryReader(stream), version_(test_model::OptionalVectorsReaderBase::VersionFromSchema(schema_read_)) {}
+  OptionalVectorsReader(std::istream& stream, bool skip_completed_check=false)
+      : test_model::OptionalVectorsReaderBase(skip_completed_check), yardl::binary::BinaryReader(stream), version_(test_model::OptionalVectorsReaderBase::VersionFromSchema(schema_read_)) {}
 
-  OptionalVectorsReader(std::string file_name)
-      : yardl::binary::BinaryReader(file_name), version_(test_model::OptionalVectorsReaderBase::VersionFromSchema(schema_read_)) {}
+  OptionalVectorsReader(std::string file_name, bool skip_completed_check=false)
+      : test_model::OptionalVectorsReaderBase(skip_completed_check), yardl::binary::BinaryReader(file_name), version_(test_model::OptionalVectorsReaderBase::VersionFromSchema(schema_read_)) {}
 
   Version GetVersion() { return version_; }
 
@@ -520,11 +520,11 @@ class FixedVectorsWriter : public test_model::FixedVectorsWriterBase, yardl::bin
 // Binary reader for the FixedVectors protocol.
 class FixedVectorsReader : public test_model::FixedVectorsReaderBase, yardl::binary::BinaryReader {
   public:
-  FixedVectorsReader(std::istream& stream)
-      : yardl::binary::BinaryReader(stream), version_(test_model::FixedVectorsReaderBase::VersionFromSchema(schema_read_)) {}
+  FixedVectorsReader(std::istream& stream, bool skip_completed_check=false)
+      : test_model::FixedVectorsReaderBase(skip_completed_check), yardl::binary::BinaryReader(stream), version_(test_model::FixedVectorsReaderBase::VersionFromSchema(schema_read_)) {}
 
-  FixedVectorsReader(std::string file_name)
-      : yardl::binary::BinaryReader(file_name), version_(test_model::FixedVectorsReaderBase::VersionFromSchema(schema_read_)) {}
+  FixedVectorsReader(std::string file_name, bool skip_completed_check=false)
+      : test_model::FixedVectorsReaderBase(skip_completed_check), yardl::binary::BinaryReader(file_name), version_(test_model::FixedVectorsReaderBase::VersionFromSchema(schema_read_)) {}
 
   Version GetVersion() { return version_; }
 
@@ -570,11 +570,11 @@ class StreamsWriter : public test_model::StreamsWriterBase, yardl::binary::Binar
 // Binary reader for the Streams protocol.
 class StreamsReader : public test_model::StreamsReaderBase, yardl::binary::BinaryReader {
   public:
-  StreamsReader(std::istream& stream)
-      : yardl::binary::BinaryReader(stream), version_(test_model::StreamsReaderBase::VersionFromSchema(schema_read_)) {}
+  StreamsReader(std::istream& stream, bool skip_completed_check=false)
+      : test_model::StreamsReaderBase(skip_completed_check), yardl::binary::BinaryReader(stream), version_(test_model::StreamsReaderBase::VersionFromSchema(schema_read_)) {}
 
-  StreamsReader(std::string file_name)
-      : yardl::binary::BinaryReader(file_name), version_(test_model::StreamsReaderBase::VersionFromSchema(schema_read_)) {}
+  StreamsReader(std::string file_name, bool skip_completed_check=false)
+      : test_model::StreamsReaderBase(skip_completed_check), yardl::binary::BinaryReader(file_name), version_(test_model::StreamsReaderBase::VersionFromSchema(schema_read_)) {}
 
   Version GetVersion() { return version_; }
 
@@ -620,11 +620,11 @@ class FixedArraysWriter : public test_model::FixedArraysWriterBase, yardl::binar
 // Binary reader for the FixedArrays protocol.
 class FixedArraysReader : public test_model::FixedArraysReaderBase, yardl::binary::BinaryReader {
   public:
-  FixedArraysReader(std::istream& stream)
-      : yardl::binary::BinaryReader(stream), version_(test_model::FixedArraysReaderBase::VersionFromSchema(schema_read_)) {}
+  FixedArraysReader(std::istream& stream, bool skip_completed_check=false)
+      : test_model::FixedArraysReaderBase(skip_completed_check), yardl::binary::BinaryReader(stream), version_(test_model::FixedArraysReaderBase::VersionFromSchema(schema_read_)) {}
 
-  FixedArraysReader(std::string file_name)
-      : yardl::binary::BinaryReader(file_name), version_(test_model::FixedArraysReaderBase::VersionFromSchema(schema_read_)) {}
+  FixedArraysReader(std::string file_name, bool skip_completed_check=false)
+      : test_model::FixedArraysReaderBase(skip_completed_check), yardl::binary::BinaryReader(file_name), version_(test_model::FixedArraysReaderBase::VersionFromSchema(schema_read_)) {}
 
   Version GetVersion() { return version_; }
 
@@ -668,11 +668,11 @@ class SubarraysWriter : public test_model::SubarraysWriterBase, yardl::binary::B
 // Binary reader for the Subarrays protocol.
 class SubarraysReader : public test_model::SubarraysReaderBase, yardl::binary::BinaryReader {
   public:
-  SubarraysReader(std::istream& stream)
-      : yardl::binary::BinaryReader(stream), version_(test_model::SubarraysReaderBase::VersionFromSchema(schema_read_)) {}
+  SubarraysReader(std::istream& stream, bool skip_completed_check=false)
+      : test_model::SubarraysReaderBase(skip_completed_check), yardl::binary::BinaryReader(stream), version_(test_model::SubarraysReaderBase::VersionFromSchema(schema_read_)) {}
 
-  SubarraysReader(std::string file_name)
-      : yardl::binary::BinaryReader(file_name), version_(test_model::SubarraysReaderBase::VersionFromSchema(schema_read_)) {}
+  SubarraysReader(std::string file_name, bool skip_completed_check=false)
+      : test_model::SubarraysReaderBase(skip_completed_check), yardl::binary::BinaryReader(file_name), version_(test_model::SubarraysReaderBase::VersionFromSchema(schema_read_)) {}
 
   Version GetVersion() { return version_; }
 
@@ -713,11 +713,11 @@ class SubarraysInRecordsWriter : public test_model::SubarraysInRecordsWriterBase
 // Binary reader for the SubarraysInRecords protocol.
 class SubarraysInRecordsReader : public test_model::SubarraysInRecordsReaderBase, yardl::binary::BinaryReader {
   public:
-  SubarraysInRecordsReader(std::istream& stream)
-      : yardl::binary::BinaryReader(stream), version_(test_model::SubarraysInRecordsReaderBase::VersionFromSchema(schema_read_)) {}
+  SubarraysInRecordsReader(std::istream& stream, bool skip_completed_check=false)
+      : test_model::SubarraysInRecordsReaderBase(skip_completed_check), yardl::binary::BinaryReader(stream), version_(test_model::SubarraysInRecordsReaderBase::VersionFromSchema(schema_read_)) {}
 
-  SubarraysInRecordsReader(std::string file_name)
-      : yardl::binary::BinaryReader(file_name), version_(test_model::SubarraysInRecordsReaderBase::VersionFromSchema(schema_read_)) {}
+  SubarraysInRecordsReader(std::string file_name, bool skip_completed_check=false)
+      : test_model::SubarraysInRecordsReaderBase(skip_completed_check), yardl::binary::BinaryReader(file_name), version_(test_model::SubarraysInRecordsReaderBase::VersionFromSchema(schema_read_)) {}
 
   Version GetVersion() { return version_; }
 
@@ -754,11 +754,11 @@ class NDArraysWriter : public test_model::NDArraysWriterBase, yardl::binary::Bin
 // Binary reader for the NDArrays protocol.
 class NDArraysReader : public test_model::NDArraysReaderBase, yardl::binary::BinaryReader {
   public:
-  NDArraysReader(std::istream& stream)
-      : yardl::binary::BinaryReader(stream), version_(test_model::NDArraysReaderBase::VersionFromSchema(schema_read_)) {}
+  NDArraysReader(std::istream& stream, bool skip_completed_check=false)
+      : test_model::NDArraysReaderBase(skip_completed_check), yardl::binary::BinaryReader(stream), version_(test_model::NDArraysReaderBase::VersionFromSchema(schema_read_)) {}
 
-  NDArraysReader(std::string file_name)
-      : yardl::binary::BinaryReader(file_name), version_(test_model::NDArraysReaderBase::VersionFromSchema(schema_read_)) {}
+  NDArraysReader(std::string file_name, bool skip_completed_check=false)
+      : test_model::NDArraysReaderBase(skip_completed_check), yardl::binary::BinaryReader(file_name), version_(test_model::NDArraysReaderBase::VersionFromSchema(schema_read_)) {}
 
   Version GetVersion() { return version_; }
 
@@ -797,11 +797,11 @@ class NDArraysSingleDimensionWriter : public test_model::NDArraysSingleDimension
 // Binary reader for the NDArraysSingleDimension protocol.
 class NDArraysSingleDimensionReader : public test_model::NDArraysSingleDimensionReaderBase, yardl::binary::BinaryReader {
   public:
-  NDArraysSingleDimensionReader(std::istream& stream)
-      : yardl::binary::BinaryReader(stream), version_(test_model::NDArraysSingleDimensionReaderBase::VersionFromSchema(schema_read_)) {}
+  NDArraysSingleDimensionReader(std::istream& stream, bool skip_completed_check=false)
+      : test_model::NDArraysSingleDimensionReaderBase(skip_completed_check), yardl::binary::BinaryReader(stream), version_(test_model::NDArraysSingleDimensionReaderBase::VersionFromSchema(schema_read_)) {}
 
-  NDArraysSingleDimensionReader(std::string file_name)
-      : yardl::binary::BinaryReader(file_name), version_(test_model::NDArraysSingleDimensionReaderBase::VersionFromSchema(schema_read_)) {}
+  NDArraysSingleDimensionReader(std::string file_name, bool skip_completed_check=false)
+      : test_model::NDArraysSingleDimensionReaderBase(skip_completed_check), yardl::binary::BinaryReader(file_name), version_(test_model::NDArraysSingleDimensionReaderBase::VersionFromSchema(schema_read_)) {}
 
   Version GetVersion() { return version_; }
 
@@ -839,11 +839,11 @@ class DynamicNDArraysWriter : public test_model::DynamicNDArraysWriterBase, yard
 // Binary reader for the DynamicNDArrays protocol.
 class DynamicNDArraysReader : public test_model::DynamicNDArraysReaderBase, yardl::binary::BinaryReader {
   public:
-  DynamicNDArraysReader(std::istream& stream)
-      : yardl::binary::BinaryReader(stream), version_(test_model::DynamicNDArraysReaderBase::VersionFromSchema(schema_read_)) {}
+  DynamicNDArraysReader(std::istream& stream, bool skip_completed_check=false)
+      : test_model::DynamicNDArraysReaderBase(skip_completed_check), yardl::binary::BinaryReader(stream), version_(test_model::DynamicNDArraysReaderBase::VersionFromSchema(schema_read_)) {}
 
-  DynamicNDArraysReader(std::string file_name)
-      : yardl::binary::BinaryReader(file_name), version_(test_model::DynamicNDArraysReaderBase::VersionFromSchema(schema_read_)) {}
+  DynamicNDArraysReader(std::string file_name, bool skip_completed_check=false)
+      : test_model::DynamicNDArraysReaderBase(skip_completed_check), yardl::binary::BinaryReader(file_name), version_(test_model::DynamicNDArraysReaderBase::VersionFromSchema(schema_read_)) {}
 
   Version GetVersion() { return version_; }
 
@@ -883,11 +883,11 @@ class MultiDArraysWriter : public test_model::MultiDArraysWriterBase, yardl::bin
 // Binary reader for the MultiDArrays protocol.
 class MultiDArraysReader : public test_model::MultiDArraysReaderBase, yardl::binary::BinaryReader {
   public:
-  MultiDArraysReader(std::istream& stream)
-      : yardl::binary::BinaryReader(stream), version_(test_model::MultiDArraysReaderBase::VersionFromSchema(schema_read_)) {}
+  MultiDArraysReader(std::istream& stream, bool skip_completed_check=false)
+      : test_model::MultiDArraysReaderBase(skip_completed_check), yardl::binary::BinaryReader(stream), version_(test_model::MultiDArraysReaderBase::VersionFromSchema(schema_read_)) {}
 
-  MultiDArraysReader(std::string file_name)
-      : yardl::binary::BinaryReader(file_name), version_(test_model::MultiDArraysReaderBase::VersionFromSchema(schema_read_)) {}
+  MultiDArraysReader(std::string file_name, bool skip_completed_check=false)
+      : test_model::MultiDArraysReaderBase(skip_completed_check), yardl::binary::BinaryReader(file_name), version_(test_model::MultiDArraysReaderBase::VersionFromSchema(schema_read_)) {}
 
   Version GetVersion() { return version_; }
 
@@ -926,11 +926,11 @@ class ComplexArraysWriter : public test_model::ComplexArraysWriterBase, yardl::b
 // Binary reader for the ComplexArrays protocol.
 class ComplexArraysReader : public test_model::ComplexArraysReaderBase, yardl::binary::BinaryReader {
   public:
-  ComplexArraysReader(std::istream& stream)
-      : yardl::binary::BinaryReader(stream), version_(test_model::ComplexArraysReaderBase::VersionFromSchema(schema_read_)) {}
+  ComplexArraysReader(std::istream& stream, bool skip_completed_check=false)
+      : test_model::ComplexArraysReaderBase(skip_completed_check), yardl::binary::BinaryReader(stream), version_(test_model::ComplexArraysReaderBase::VersionFromSchema(schema_read_)) {}
 
-  ComplexArraysReader(std::string file_name)
-      : yardl::binary::BinaryReader(file_name), version_(test_model::ComplexArraysReaderBase::VersionFromSchema(schema_read_)) {}
+  ComplexArraysReader(std::string file_name, bool skip_completed_check=false)
+      : test_model::ComplexArraysReaderBase(skip_completed_check), yardl::binary::BinaryReader(file_name), version_(test_model::ComplexArraysReaderBase::VersionFromSchema(schema_read_)) {}
 
   Version GetVersion() { return version_; }
 
@@ -967,11 +967,11 @@ class MapsWriter : public test_model::MapsWriterBase, yardl::binary::BinaryWrite
 // Binary reader for the Maps protocol.
 class MapsReader : public test_model::MapsReaderBase, yardl::binary::BinaryReader {
   public:
-  MapsReader(std::istream& stream)
-      : yardl::binary::BinaryReader(stream), version_(test_model::MapsReaderBase::VersionFromSchema(schema_read_)) {}
+  MapsReader(std::istream& stream, bool skip_completed_check=false)
+      : test_model::MapsReaderBase(skip_completed_check), yardl::binary::BinaryReader(stream), version_(test_model::MapsReaderBase::VersionFromSchema(schema_read_)) {}
 
-  MapsReader(std::string file_name)
-      : yardl::binary::BinaryReader(file_name), version_(test_model::MapsReaderBase::VersionFromSchema(schema_read_)) {}
+  MapsReader(std::string file_name, bool skip_completed_check=false)
+      : test_model::MapsReaderBase(skip_completed_check), yardl::binary::BinaryReader(file_name), version_(test_model::MapsReaderBase::VersionFromSchema(schema_read_)) {}
 
   Version GetVersion() { return version_; }
 
@@ -1010,11 +1010,11 @@ class UnionsWriter : public test_model::UnionsWriterBase, yardl::binary::BinaryW
 // Binary reader for the Unions protocol.
 class UnionsReader : public test_model::UnionsReaderBase, yardl::binary::BinaryReader {
   public:
-  UnionsReader(std::istream& stream)
-      : yardl::binary::BinaryReader(stream), version_(test_model::UnionsReaderBase::VersionFromSchema(schema_read_)) {}
+  UnionsReader(std::istream& stream, bool skip_completed_check=false)
+      : test_model::UnionsReaderBase(skip_completed_check), yardl::binary::BinaryReader(stream), version_(test_model::UnionsReaderBase::VersionFromSchema(schema_read_)) {}
 
-  UnionsReader(std::string file_name)
-      : yardl::binary::BinaryReader(file_name), version_(test_model::UnionsReaderBase::VersionFromSchema(schema_read_)) {}
+  UnionsReader(std::string file_name, bool skip_completed_check=false)
+      : test_model::UnionsReaderBase(skip_completed_check), yardl::binary::BinaryReader(file_name), version_(test_model::UnionsReaderBase::VersionFromSchema(schema_read_)) {}
 
   Version GetVersion() { return version_; }
 
@@ -1057,11 +1057,11 @@ class StreamsOfUnionsWriter : public test_model::StreamsOfUnionsWriterBase, yard
 // Binary reader for the StreamsOfUnions protocol.
 class StreamsOfUnionsReader : public test_model::StreamsOfUnionsReaderBase, yardl::binary::BinaryReader {
   public:
-  StreamsOfUnionsReader(std::istream& stream)
-      : yardl::binary::BinaryReader(stream), version_(test_model::StreamsOfUnionsReaderBase::VersionFromSchema(schema_read_)) {}
+  StreamsOfUnionsReader(std::istream& stream, bool skip_completed_check=false)
+      : test_model::StreamsOfUnionsReaderBase(skip_completed_check), yardl::binary::BinaryReader(stream), version_(test_model::StreamsOfUnionsReaderBase::VersionFromSchema(schema_read_)) {}
 
-  StreamsOfUnionsReader(std::string file_name)
-      : yardl::binary::BinaryReader(file_name), version_(test_model::StreamsOfUnionsReaderBase::VersionFromSchema(schema_read_)) {}
+  StreamsOfUnionsReader(std::string file_name, bool skip_completed_check=false)
+      : test_model::StreamsOfUnionsReaderBase(skip_completed_check), yardl::binary::BinaryReader(file_name), version_(test_model::StreamsOfUnionsReaderBase::VersionFromSchema(schema_read_)) {}
 
   Version GetVersion() { return version_; }
 
@@ -1104,11 +1104,11 @@ class EnumsWriter : public test_model::EnumsWriterBase, yardl::binary::BinaryWri
 // Binary reader for the Enums protocol.
 class EnumsReader : public test_model::EnumsReaderBase, yardl::binary::BinaryReader {
   public:
-  EnumsReader(std::istream& stream)
-      : yardl::binary::BinaryReader(stream), version_(test_model::EnumsReaderBase::VersionFromSchema(schema_read_)) {}
+  EnumsReader(std::istream& stream, bool skip_completed_check=false)
+      : test_model::EnumsReaderBase(skip_completed_check), yardl::binary::BinaryReader(stream), version_(test_model::EnumsReaderBase::VersionFromSchema(schema_read_)) {}
 
-  EnumsReader(std::string file_name)
-      : yardl::binary::BinaryReader(file_name), version_(test_model::EnumsReaderBase::VersionFromSchema(schema_read_)) {}
+  EnumsReader(std::string file_name, bool skip_completed_check=false)
+      : test_model::EnumsReaderBase(skip_completed_check), yardl::binary::BinaryReader(file_name), version_(test_model::EnumsReaderBase::VersionFromSchema(schema_read_)) {}
 
   Version GetVersion() { return version_; }
 
@@ -1148,11 +1148,11 @@ class FlagsWriter : public test_model::FlagsWriterBase, yardl::binary::BinaryWri
 // Binary reader for the Flags protocol.
 class FlagsReader : public test_model::FlagsReaderBase, yardl::binary::BinaryReader {
   public:
-  FlagsReader(std::istream& stream)
-      : yardl::binary::BinaryReader(stream), version_(test_model::FlagsReaderBase::VersionFromSchema(schema_read_)) {}
+  FlagsReader(std::istream& stream, bool skip_completed_check=false)
+      : test_model::FlagsReaderBase(skip_completed_check), yardl::binary::BinaryReader(stream), version_(test_model::FlagsReaderBase::VersionFromSchema(schema_read_)) {}
 
-  FlagsReader(std::string file_name)
-      : yardl::binary::BinaryReader(file_name), version_(test_model::FlagsReaderBase::VersionFromSchema(schema_read_)) {}
+  FlagsReader(std::string file_name, bool skip_completed_check=false)
+      : test_model::FlagsReaderBase(skip_completed_check), yardl::binary::BinaryReader(file_name), version_(test_model::FlagsReaderBase::VersionFromSchema(schema_read_)) {}
 
   Version GetVersion() { return version_; }
 
@@ -1194,11 +1194,11 @@ class StateTestWriter : public test_model::StateTestWriterBase, yardl::binary::B
 // Binary reader for the StateTest protocol.
 class StateTestReader : public test_model::StateTestReaderBase, yardl::binary::BinaryReader {
   public:
-  StateTestReader(std::istream& stream)
-      : yardl::binary::BinaryReader(stream), version_(test_model::StateTestReaderBase::VersionFromSchema(schema_read_)) {}
+  StateTestReader(std::istream& stream, bool skip_completed_check=false)
+      : test_model::StateTestReaderBase(skip_completed_check), yardl::binary::BinaryReader(stream), version_(test_model::StateTestReaderBase::VersionFromSchema(schema_read_)) {}
 
-  StateTestReader(std::string file_name)
-      : yardl::binary::BinaryReader(file_name), version_(test_model::StateTestReaderBase::VersionFromSchema(schema_read_)) {}
+  StateTestReader(std::string file_name, bool skip_completed_check=false)
+      : test_model::StateTestReaderBase(skip_completed_check), yardl::binary::BinaryReader(file_name), version_(test_model::StateTestReaderBase::VersionFromSchema(schema_read_)) {}
 
   Version GetVersion() { return version_; }
 
@@ -1246,11 +1246,11 @@ class SimpleGenericsWriter : public test_model::SimpleGenericsWriterBase, yardl:
 // Binary reader for the SimpleGenerics protocol.
 class SimpleGenericsReader : public test_model::SimpleGenericsReaderBase, yardl::binary::BinaryReader {
   public:
-  SimpleGenericsReader(std::istream& stream)
-      : yardl::binary::BinaryReader(stream), version_(test_model::SimpleGenericsReaderBase::VersionFromSchema(schema_read_)) {}
+  SimpleGenericsReader(std::istream& stream, bool skip_completed_check=false)
+      : test_model::SimpleGenericsReaderBase(skip_completed_check), yardl::binary::BinaryReader(stream), version_(test_model::SimpleGenericsReaderBase::VersionFromSchema(schema_read_)) {}
 
-  SimpleGenericsReader(std::string file_name)
-      : yardl::binary::BinaryReader(file_name), version_(test_model::SimpleGenericsReaderBase::VersionFromSchema(schema_read_)) {}
+  SimpleGenericsReader(std::string file_name, bool skip_completed_check=false)
+      : test_model::SimpleGenericsReaderBase(skip_completed_check), yardl::binary::BinaryReader(file_name), version_(test_model::SimpleGenericsReaderBase::VersionFromSchema(schema_read_)) {}
 
   Version GetVersion() { return version_; }
 
@@ -1298,11 +1298,11 @@ class AdvancedGenericsWriter : public test_model::AdvancedGenericsWriterBase, ya
 // Binary reader for the AdvancedGenerics protocol.
 class AdvancedGenericsReader : public test_model::AdvancedGenericsReaderBase, yardl::binary::BinaryReader {
   public:
-  AdvancedGenericsReader(std::istream& stream)
-      : yardl::binary::BinaryReader(stream), version_(test_model::AdvancedGenericsReaderBase::VersionFromSchema(schema_read_)) {}
+  AdvancedGenericsReader(std::istream& stream, bool skip_completed_check=false)
+      : test_model::AdvancedGenericsReaderBase(skip_completed_check), yardl::binary::BinaryReader(stream), version_(test_model::AdvancedGenericsReaderBase::VersionFromSchema(schema_read_)) {}
 
-  AdvancedGenericsReader(std::string file_name)
-      : yardl::binary::BinaryReader(file_name), version_(test_model::AdvancedGenericsReaderBase::VersionFromSchema(schema_read_)) {}
+  AdvancedGenericsReader(std::string file_name, bool skip_completed_check=false)
+      : test_model::AdvancedGenericsReaderBase(skip_completed_check), yardl::binary::BinaryReader(file_name), version_(test_model::AdvancedGenericsReaderBase::VersionFromSchema(schema_read_)) {}
 
   Version GetVersion() { return version_; }
 
@@ -1350,11 +1350,11 @@ class AliasesWriter : public test_model::AliasesWriterBase, yardl::binary::Binar
 // Binary reader for the Aliases protocol.
 class AliasesReader : public test_model::AliasesReaderBase, yardl::binary::BinaryReader {
   public:
-  AliasesReader(std::istream& stream)
-      : yardl::binary::BinaryReader(stream), version_(test_model::AliasesReaderBase::VersionFromSchema(schema_read_)) {}
+  AliasesReader(std::istream& stream, bool skip_completed_check=false)
+      : test_model::AliasesReaderBase(skip_completed_check), yardl::binary::BinaryReader(stream), version_(test_model::AliasesReaderBase::VersionFromSchema(schema_read_)) {}
 
-  AliasesReader(std::string file_name)
-      : yardl::binary::BinaryReader(file_name), version_(test_model::AliasesReaderBase::VersionFromSchema(schema_read_)) {}
+  AliasesReader(std::string file_name, bool skip_completed_check=false)
+      : test_model::AliasesReaderBase(skip_completed_check), yardl::binary::BinaryReader(file_name), version_(test_model::AliasesReaderBase::VersionFromSchema(schema_read_)) {}
 
   Version GetVersion() { return version_; }
 
@@ -1405,11 +1405,11 @@ class StreamsOfAliasedUnionsWriter : public test_model::StreamsOfAliasedUnionsWr
 // Binary reader for the StreamsOfAliasedUnions protocol.
 class StreamsOfAliasedUnionsReader : public test_model::StreamsOfAliasedUnionsReaderBase, yardl::binary::BinaryReader {
   public:
-  StreamsOfAliasedUnionsReader(std::istream& stream)
-      : yardl::binary::BinaryReader(stream), version_(test_model::StreamsOfAliasedUnionsReaderBase::VersionFromSchema(schema_read_)) {}
+  StreamsOfAliasedUnionsReader(std::istream& stream, bool skip_completed_check=false)
+      : test_model::StreamsOfAliasedUnionsReaderBase(skip_completed_check), yardl::binary::BinaryReader(stream), version_(test_model::StreamsOfAliasedUnionsReaderBase::VersionFromSchema(schema_read_)) {}
 
-  StreamsOfAliasedUnionsReader(std::string file_name)
-      : yardl::binary::BinaryReader(file_name), version_(test_model::StreamsOfAliasedUnionsReaderBase::VersionFromSchema(schema_read_)) {}
+  StreamsOfAliasedUnionsReader(std::string file_name, bool skip_completed_check=false)
+      : test_model::StreamsOfAliasedUnionsReaderBase(skip_completed_check), yardl::binary::BinaryReader(file_name), version_(test_model::StreamsOfAliasedUnionsReaderBase::VersionFromSchema(schema_read_)) {}
 
   Version GetVersion() { return version_; }
 
@@ -1447,11 +1447,11 @@ class ProtocolWithComputedFieldsWriter : public test_model::ProtocolWithComputed
 // Binary reader for the ProtocolWithComputedFields protocol.
 class ProtocolWithComputedFieldsReader : public test_model::ProtocolWithComputedFieldsReaderBase, yardl::binary::BinaryReader {
   public:
-  ProtocolWithComputedFieldsReader(std::istream& stream)
-      : yardl::binary::BinaryReader(stream), version_(test_model::ProtocolWithComputedFieldsReaderBase::VersionFromSchema(schema_read_)) {}
+  ProtocolWithComputedFieldsReader(std::istream& stream, bool skip_completed_check=false)
+      : test_model::ProtocolWithComputedFieldsReaderBase(skip_completed_check), yardl::binary::BinaryReader(stream), version_(test_model::ProtocolWithComputedFieldsReaderBase::VersionFromSchema(schema_read_)) {}
 
-  ProtocolWithComputedFieldsReader(std::string file_name)
-      : yardl::binary::BinaryReader(file_name), version_(test_model::ProtocolWithComputedFieldsReaderBase::VersionFromSchema(schema_read_)) {}
+  ProtocolWithComputedFieldsReader(std::string file_name, bool skip_completed_check=false)
+      : test_model::ProtocolWithComputedFieldsReaderBase(skip_completed_check), yardl::binary::BinaryReader(file_name), version_(test_model::ProtocolWithComputedFieldsReaderBase::VersionFromSchema(schema_read_)) {}
 
   Version GetVersion() { return version_; }
 
@@ -1486,11 +1486,11 @@ class ProtocolWithKeywordStepsWriter : public test_model::ProtocolWithKeywordSte
 // Binary reader for the ProtocolWithKeywordSteps protocol.
 class ProtocolWithKeywordStepsReader : public test_model::ProtocolWithKeywordStepsReaderBase, yardl::binary::BinaryReader {
   public:
-  ProtocolWithKeywordStepsReader(std::istream& stream)
-      : yardl::binary::BinaryReader(stream), version_(test_model::ProtocolWithKeywordStepsReaderBase::VersionFromSchema(schema_read_)) {}
+  ProtocolWithKeywordStepsReader(std::istream& stream, bool skip_completed_check=false)
+      : test_model::ProtocolWithKeywordStepsReaderBase(skip_completed_check), yardl::binary::BinaryReader(stream), version_(test_model::ProtocolWithKeywordStepsReaderBase::VersionFromSchema(schema_read_)) {}
 
-  ProtocolWithKeywordStepsReader(std::string file_name)
-      : yardl::binary::BinaryReader(file_name), version_(test_model::ProtocolWithKeywordStepsReaderBase::VersionFromSchema(schema_read_)) {}
+  ProtocolWithKeywordStepsReader(std::string file_name, bool skip_completed_check=false)
+      : test_model::ProtocolWithKeywordStepsReaderBase(skip_completed_check), yardl::binary::BinaryReader(file_name), version_(test_model::ProtocolWithKeywordStepsReaderBase::VersionFromSchema(schema_read_)) {}
 
   Version GetVersion() { return version_; }
 
@@ -1527,11 +1527,11 @@ class ProtocolWithOptionalDateWriter : public test_model::ProtocolWithOptionalDa
 // Binary reader for the ProtocolWithOptionalDate protocol.
 class ProtocolWithOptionalDateReader : public test_model::ProtocolWithOptionalDateReaderBase, yardl::binary::BinaryReader {
   public:
-  ProtocolWithOptionalDateReader(std::istream& stream)
-      : yardl::binary::BinaryReader(stream), version_(test_model::ProtocolWithOptionalDateReaderBase::VersionFromSchema(schema_read_)) {}
+  ProtocolWithOptionalDateReader(std::istream& stream, bool skip_completed_check=false)
+      : test_model::ProtocolWithOptionalDateReaderBase(skip_completed_check), yardl::binary::BinaryReader(stream), version_(test_model::ProtocolWithOptionalDateReaderBase::VersionFromSchema(schema_read_)) {}
 
-  ProtocolWithOptionalDateReader(std::string file_name)
-      : yardl::binary::BinaryReader(file_name), version_(test_model::ProtocolWithOptionalDateReaderBase::VersionFromSchema(schema_read_)) {}
+  ProtocolWithOptionalDateReader(std::string file_name, bool skip_completed_check=false)
+      : test_model::ProtocolWithOptionalDateReaderBase(skip_completed_check), yardl::binary::BinaryReader(file_name), version_(test_model::ProtocolWithOptionalDateReaderBase::VersionFromSchema(schema_read_)) {}
 
   Version GetVersion() { return version_; }
 

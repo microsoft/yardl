@@ -99,9 +99,14 @@ func writeProtocolReader(fw *common.MatlabFileWriter, p *dsl.ProtocolDefinition,
 
 			w.WriteStringln("methods")
 			common.WriteBlockBody(w, func() {
-				fmt.Fprintf(w, "function self = %s(filename)\n", BinaryReaderName(p))
+				fmt.Fprintf(w, "function self = %s(filename, options)\n", BinaryReaderName(p))
 				common.WriteBlockBody(w, func() {
-					fmt.Fprintf(w, "self@%s();\n", abstractReaderName)
+					w.WriteStringln("arguments")
+					common.WriteBlockBody(w, func() {
+						w.WriteStringln("filename (1,1) string")
+						fmt.Fprintf(w, "options.skip_completed_check (1,1) logical = false\n")
+					})
+					fmt.Fprintf(w, "self@%s(skip_completed_check=options.skip_completed_check);\n", abstractReaderName)
 					fmt.Fprintf(w, "self@yardl.binary.BinaryProtocolReader(filename, %s.schema);\n", abstractReaderName)
 					for _, step := range p.Sequence {
 						fmt.Fprintf(w, "self.%s = %s;\n", serializerName(step), typeSerializer(step.Type, ns.Name, nil))

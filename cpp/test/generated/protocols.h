@@ -50,6 +50,8 @@ class BenchmarkFloat256x256WriterBase {
 // Abstract reader for the BenchmarkFloat256x256 protocol.
 class BenchmarkFloat256x256ReaderBase {
   public:
+  BenchmarkFloat256x256ReaderBase(bool skip_completed_check = false): skip_completed_check_(skip_completed_check) {}
+
   // Ordinal 0.
   [[nodiscard]] bool ReadFloat256x256(yardl::FixedNDArray<float, 256, 256>& value);
 
@@ -72,6 +74,8 @@ class BenchmarkFloat256x256ReaderBase {
   static std::vector<std::string> previous_schemas_;
 
   static Version VersionFromSchema(const std::string& schema);
+
+  bool skip_completed_check_;
 
   private:
   uint8_t state_ = 0;
@@ -120,6 +124,8 @@ class BenchmarkInt256x256WriterBase {
 // Abstract reader for the BenchmarkInt256x256 protocol.
 class BenchmarkInt256x256ReaderBase {
   public:
+  BenchmarkInt256x256ReaderBase(bool skip_completed_check = false): skip_completed_check_(skip_completed_check) {}
+
   // Ordinal 0.
   [[nodiscard]] bool ReadInt256x256(yardl::FixedNDArray<int32_t, 256, 256>& value);
 
@@ -142,6 +148,8 @@ class BenchmarkInt256x256ReaderBase {
   static std::vector<std::string> previous_schemas_;
 
   static Version VersionFromSchema(const std::string& schema);
+
+  bool skip_completed_check_;
 
   private:
   uint8_t state_ = 0;
@@ -190,6 +198,8 @@ class BenchmarkFloatVlenWriterBase {
 // Abstract reader for the BenchmarkFloatVlen protocol.
 class BenchmarkFloatVlenReaderBase {
   public:
+  BenchmarkFloatVlenReaderBase(bool skip_completed_check = false): skip_completed_check_(skip_completed_check) {}
+
   // Ordinal 0.
   [[nodiscard]] bool ReadFloatArray(yardl::NDArray<float, 2>& value);
 
@@ -212,6 +222,8 @@ class BenchmarkFloatVlenReaderBase {
   static std::vector<std::string> previous_schemas_;
 
   static Version VersionFromSchema(const std::string& schema);
+
+  bool skip_completed_check_;
 
   private:
   uint8_t state_ = 0;
@@ -260,6 +272,8 @@ class BenchmarkSmallRecordWriterBase {
 // Abstract reader for the BenchmarkSmallRecord protocol.
 class BenchmarkSmallRecordReaderBase {
   public:
+  BenchmarkSmallRecordReaderBase(bool skip_completed_check = false): skip_completed_check_(skip_completed_check) {}
+
   // Ordinal 0.
   [[nodiscard]] bool ReadSmallRecord(test_model::SmallBenchmarkRecord& value);
 
@@ -282,6 +296,8 @@ class BenchmarkSmallRecordReaderBase {
   static std::vector<std::string> previous_schemas_;
 
   static Version VersionFromSchema(const std::string& schema);
+
+  bool skip_completed_check_;
 
   private:
   uint8_t state_ = 0;
@@ -330,6 +346,8 @@ class BenchmarkSmallRecordWithOptionalsWriterBase {
 // Abstract reader for the BenchmarkSmallRecordWithOptionals protocol.
 class BenchmarkSmallRecordWithOptionalsReaderBase {
   public:
+  BenchmarkSmallRecordWithOptionalsReaderBase(bool skip_completed_check = false): skip_completed_check_(skip_completed_check) {}
+
   // Ordinal 0.
   [[nodiscard]] bool ReadSmallRecord(test_model::SimpleEncodingCounters& value);
 
@@ -352,6 +370,8 @@ class BenchmarkSmallRecordWithOptionalsReaderBase {
   static std::vector<std::string> previous_schemas_;
 
   static Version VersionFromSchema(const std::string& schema);
+
+  bool skip_completed_check_;
 
   private:
   uint8_t state_ = 0;
@@ -400,6 +420,8 @@ class BenchmarkSimpleMrdWriterBase {
 // Abstract reader for the BenchmarkSimpleMrd protocol.
 class BenchmarkSimpleMrdReaderBase {
   public:
+  BenchmarkSimpleMrdReaderBase(bool skip_completed_check = false): skip_completed_check_(skip_completed_check) {}
+
   // Ordinal 0.
   [[nodiscard]] bool ReadData(std::variant<test_model::SimpleAcquisition, image::Image<float>>& value);
 
@@ -422,6 +444,8 @@ class BenchmarkSimpleMrdReaderBase {
   static std::vector<std::string> previous_schemas_;
 
   static Version VersionFromSchema(const std::string& schema);
+
+  bool skip_completed_check_;
 
   private:
   uint8_t state_ = 0;
@@ -464,6 +488,8 @@ class ScalarsWriterBase {
 // Abstract reader for the Scalars protocol.
 class ScalarsReaderBase {
   public:
+  ScalarsReaderBase(bool skip_completed_check = false): skip_completed_check_(skip_completed_check) {}
+
   // Ordinal 0.
   void ReadInt32(int32_t& value);
 
@@ -486,6 +512,8 @@ class ScalarsReaderBase {
   static std::vector<std::string> previous_schemas_;
 
   static Version VersionFromSchema(const std::string& schema);
+
+  bool skip_completed_check_;
 
   private:
   uint8_t state_ = 0;
@@ -536,6 +564,8 @@ class ScalarOptionalsWriterBase {
 // Abstract reader for the ScalarOptionals protocol.
 class ScalarOptionalsReaderBase {
   public:
+  ScalarOptionalsReaderBase(bool skip_completed_check = false): skip_completed_check_(skip_completed_check) {}
+
   // Ordinal 0.
   void ReadOptionalInt(std::optional<int32_t>& value);
 
@@ -566,6 +596,8 @@ class ScalarOptionalsReaderBase {
   static std::vector<std::string> previous_schemas_;
 
   static Version VersionFromSchema(const std::string& schema);
+
+  bool skip_completed_check_;
 
   private:
   uint8_t state_ = 0;
@@ -604,6 +636,8 @@ class NestedRecordsWriterBase {
 // Abstract reader for the NestedRecords protocol.
 class NestedRecordsReaderBase {
   public:
+  NestedRecordsReaderBase(bool skip_completed_check = false): skip_completed_check_(skip_completed_check) {}
+
   // Ordinal 0.
   void ReadTupleWithRecords(test_model::TupleWithRecords& value);
 
@@ -622,6 +656,8 @@ class NestedRecordsReaderBase {
   static std::vector<std::string> previous_schemas_;
 
   static Version VersionFromSchema(const std::string& schema);
+
+  bool skip_completed_check_;
 
   private:
   uint8_t state_ = 0;
@@ -672,6 +708,8 @@ class VlensWriterBase {
 // Abstract reader for the Vlens protocol.
 class VlensReaderBase {
   public:
+  VlensReaderBase(bool skip_completed_check = false): skip_completed_check_(skip_completed_check) {}
+
   // Ordinal 0.
   void ReadIntVector(std::vector<int32_t>& value);
 
@@ -702,6 +740,8 @@ class VlensReaderBase {
   static std::vector<std::string> previous_schemas_;
 
   static Version VersionFromSchema(const std::string& schema);
+
+  bool skip_completed_check_;
 
   private:
   uint8_t state_ = 0;
@@ -744,6 +784,8 @@ class StringsWriterBase {
 // Abstract reader for the Strings protocol.
 class StringsReaderBase {
   public:
+  StringsReaderBase(bool skip_completed_check = false): skip_completed_check_(skip_completed_check) {}
+
   // Ordinal 0.
   void ReadSingleString(std::string& value);
 
@@ -766,6 +808,8 @@ class StringsReaderBase {
   static std::vector<std::string> previous_schemas_;
 
   static Version VersionFromSchema(const std::string& schema);
+
+  bool skip_completed_check_;
 
   private:
   uint8_t state_ = 0;
@@ -804,6 +848,8 @@ class OptionalVectorsWriterBase {
 // Abstract reader for the OptionalVectors protocol.
 class OptionalVectorsReaderBase {
   public:
+  OptionalVectorsReaderBase(bool skip_completed_check = false): skip_completed_check_(skip_completed_check) {}
+
   // Ordinal 0.
   void ReadRecordWithOptionalVector(test_model::RecordWithOptionalVector& value);
 
@@ -822,6 +868,8 @@ class OptionalVectorsReaderBase {
   static std::vector<std::string> previous_schemas_;
 
   static Version VersionFromSchema(const std::string& schema);
+
+  bool skip_completed_check_;
 
   private:
   uint8_t state_ = 0;
@@ -872,6 +920,8 @@ class FixedVectorsWriterBase {
 // Abstract reader for the FixedVectors protocol.
 class FixedVectorsReaderBase {
   public:
+  FixedVectorsReaderBase(bool skip_completed_check = false): skip_completed_check_(skip_completed_check) {}
+
   // Ordinal 0.
   void ReadFixedIntVector(std::array<int32_t, 5>& value);
 
@@ -902,6 +952,8 @@ class FixedVectorsReaderBase {
   static std::vector<std::string> previous_schemas_;
 
   static Version VersionFromSchema(const std::string& schema);
+
+  bool skip_completed_check_;
 
   private:
   uint8_t state_ = 0;
@@ -992,6 +1044,8 @@ class StreamsWriterBase {
 // Abstract reader for the Streams protocol.
 class StreamsReaderBase {
   public:
+  StreamsReaderBase(bool skip_completed_check = false): skip_completed_check_(skip_completed_check) {}
+
   // Ordinal 0.
   [[nodiscard]] bool ReadIntData(int32_t& value);
 
@@ -1038,6 +1092,8 @@ class StreamsReaderBase {
   static std::vector<std::string> previous_schemas_;
 
   static Version VersionFromSchema(const std::string& schema);
+
+  bool skip_completed_check_;
 
   private:
   uint8_t state_ = 0;
@@ -1092,6 +1148,8 @@ class FixedArraysWriterBase {
 // Abstract reader for the FixedArrays protocol.
 class FixedArraysReaderBase {
   public:
+  FixedArraysReaderBase(bool skip_completed_check = false): skip_completed_check_(skip_completed_check) {}
+
   // Ordinal 0.
   void ReadInts(yardl::FixedNDArray<int32_t, 2, 3>& value);
 
@@ -1126,6 +1184,8 @@ class FixedArraysReaderBase {
   static std::vector<std::string> previous_schemas_;
 
   static Version VersionFromSchema(const std::string& schema);
+
+  bool skip_completed_check_;
 
   private:
   uint8_t state_ = 0;
@@ -1196,6 +1256,8 @@ class SubarraysWriterBase {
 // Abstract reader for the Subarrays protocol.
 class SubarraysReaderBase {
   public:
+  SubarraysReaderBase(bool skip_completed_check = false): skip_completed_check_(skip_completed_check) {}
+
   // Ordinal 0.
   void ReadDynamicWithFixedIntSubarray(yardl::DynamicNDArray<yardl::FixedNDArray<int32_t, 3>>& value);
 
@@ -1247,6 +1309,8 @@ class SubarraysReaderBase {
 
   static Version VersionFromSchema(const std::string& schema);
 
+  bool skip_completed_check_;
+
   private:
   uint8_t state_ = 0;
 };
@@ -1288,6 +1352,8 @@ class SubarraysInRecordsWriterBase {
 // Abstract reader for the SubarraysInRecords protocol.
 class SubarraysInRecordsReaderBase {
   public:
+  SubarraysInRecordsReaderBase(bool skip_completed_check = false): skip_completed_check_(skip_completed_check) {}
+
   // Ordinal 0.
   void ReadWithFixedSubarrays(yardl::DynamicNDArray<test_model::RecordWithFixedCollections>& value);
 
@@ -1310,6 +1376,8 @@ class SubarraysInRecordsReaderBase {
   static std::vector<std::string> previous_schemas_;
 
   static Version VersionFromSchema(const std::string& schema);
+
+  bool skip_completed_check_;
 
   private:
   uint8_t state_ = 0;
@@ -1364,6 +1432,8 @@ class NDArraysWriterBase {
 // Abstract reader for the NDArrays protocol.
 class NDArraysReaderBase {
   public:
+  NDArraysReaderBase(bool skip_completed_check = false): skip_completed_check_(skip_completed_check) {}
+
   // Ordinal 0.
   void ReadInts(yardl::NDArray<int32_t, 2>& value);
 
@@ -1398,6 +1468,8 @@ class NDArraysReaderBase {
   static std::vector<std::string> previous_schemas_;
 
   static Version VersionFromSchema(const std::string& schema);
+
+  bool skip_completed_check_;
 
   private:
   uint8_t state_ = 0;
@@ -1448,6 +1520,8 @@ class NDArraysSingleDimensionWriterBase {
 // Abstract reader for the NDArraysSingleDimension protocol.
 class NDArraysSingleDimensionReaderBase {
   public:
+  NDArraysSingleDimensionReaderBase(bool skip_completed_check = false): skip_completed_check_(skip_completed_check) {}
+
   // Ordinal 0.
   void ReadInts(yardl::NDArray<int32_t, 1>& value);
 
@@ -1478,6 +1552,8 @@ class NDArraysSingleDimensionReaderBase {
   static std::vector<std::string> previous_schemas_;
 
   static Version VersionFromSchema(const std::string& schema);
+
+  bool skip_completed_check_;
 
   private:
   uint8_t state_ = 0;
@@ -1528,6 +1604,8 @@ class DynamicNDArraysWriterBase {
 // Abstract reader for the DynamicNDArrays protocol.
 class DynamicNDArraysReaderBase {
   public:
+  DynamicNDArraysReaderBase(bool skip_completed_check = false): skip_completed_check_(skip_completed_check) {}
+
   // Ordinal 0.
   void ReadInts(yardl::DynamicNDArray<int32_t>& value);
 
@@ -1558,6 +1636,8 @@ class DynamicNDArraysReaderBase {
   static std::vector<std::string> previous_schemas_;
 
   static Version VersionFromSchema(const std::string& schema);
+
+  bool skip_completed_check_;
 
   private:
   uint8_t state_ = 0;
@@ -1620,6 +1700,8 @@ class MultiDArraysWriterBase {
 // Abstract reader for the MultiDArrays protocol.
 class MultiDArraysReaderBase {
   public:
+  MultiDArraysReaderBase(bool skip_completed_check = false): skip_completed_check_(skip_completed_check) {}
+
   // Ordinal 0.
   [[nodiscard]] bool ReadImages(yardl::NDArray<float, 4>& value);
 
@@ -1650,6 +1732,8 @@ class MultiDArraysReaderBase {
   static std::vector<std::string> previous_schemas_;
 
   static Version VersionFromSchema(const std::string& schema);
+
+  bool skip_completed_check_;
 
   private:
   uint8_t state_ = 0;
@@ -1692,6 +1776,8 @@ class ComplexArraysWriterBase {
 // Abstract reader for the ComplexArrays protocol.
 class ComplexArraysReaderBase {
   public:
+  ComplexArraysReaderBase(bool skip_completed_check = false): skip_completed_check_(skip_completed_check) {}
+
   // Ordinal 0.
   void ReadFloats(yardl::DynamicNDArray<std::complex<float>>& value);
 
@@ -1714,6 +1800,8 @@ class ComplexArraysReaderBase {
   static std::vector<std::string> previous_schemas_;
 
   static Version VersionFromSchema(const std::string& schema);
+
+  bool skip_completed_check_;
 
   private:
   uint8_t state_ = 0;
@@ -1768,6 +1856,8 @@ class MapsWriterBase {
 // Abstract reader for the Maps protocol.
 class MapsReaderBase {
   public:
+  MapsReaderBase(bool skip_completed_check = false): skip_completed_check_(skip_completed_check) {}
+
   // Ordinal 0.
   void ReadStringToInt(std::unordered_map<std::string, int32_t>& value);
 
@@ -1802,6 +1892,8 @@ class MapsReaderBase {
   static std::vector<std::string> previous_schemas_;
 
   static Version VersionFromSchema(const std::string& schema);
+
+  bool skip_completed_check_;
 
   private:
   uint8_t state_ = 0;
@@ -1852,6 +1944,8 @@ class UnionsWriterBase {
 // Abstract reader for the Unions protocol.
 class UnionsReaderBase {
   public:
+  UnionsReaderBase(bool skip_completed_check = false): skip_completed_check_(skip_completed_check) {}
+
   // Ordinal 0.
   void ReadIntOrSimpleRecord(std::variant<int32_t, test_model::SimpleRecord>& value);
 
@@ -1882,6 +1976,8 @@ class UnionsReaderBase {
   static std::vector<std::string> previous_schemas_;
 
   static Version VersionFromSchema(const std::string& schema);
+
+  bool skip_completed_check_;
 
   private:
   uint8_t state_ = 0;
@@ -1958,6 +2054,8 @@ class StreamsOfUnionsWriterBase {
 // Abstract reader for the StreamsOfUnions protocol.
 class StreamsOfUnionsReaderBase {
   public:
+  StreamsOfUnionsReaderBase(bool skip_completed_check = false): skip_completed_check_(skip_completed_check) {}
+
   // Ordinal 0.
   [[nodiscard]] bool ReadIntOrSimpleRecord(std::variant<int32_t, test_model::SimpleRecord>& value);
 
@@ -1996,6 +2094,8 @@ class StreamsOfUnionsReaderBase {
   static std::vector<std::string> previous_schemas_;
 
   static Version VersionFromSchema(const std::string& schema);
+
+  bool skip_completed_check_;
 
   private:
   uint8_t state_ = 0;
@@ -2046,6 +2146,8 @@ class EnumsWriterBase {
 // Abstract reader for the Enums protocol.
 class EnumsReaderBase {
   public:
+  EnumsReaderBase(bool skip_completed_check = false): skip_completed_check_(skip_completed_check) {}
+
   // Ordinal 0.
   void ReadSingle(test_model::Fruits& value);
 
@@ -2076,6 +2178,8 @@ class EnumsReaderBase {
   static std::vector<std::string> previous_schemas_;
 
   static Version VersionFromSchema(const std::string& schema);
+
+  bool skip_completed_check_;
 
   private:
   uint8_t state_ = 0;
@@ -2138,6 +2242,8 @@ class FlagsWriterBase {
 // Abstract reader for the Flags protocol.
 class FlagsReaderBase {
   public:
+  FlagsReaderBase(bool skip_completed_check = false): skip_completed_check_(skip_completed_check) {}
+
   // Ordinal 0.
   [[nodiscard]] bool ReadDays(test_model::DaysOfWeek& value);
 
@@ -2168,6 +2274,8 @@ class FlagsReaderBase {
   static std::vector<std::string> previous_schemas_;
 
   static Version VersionFromSchema(const std::string& schema);
+
+  bool skip_completed_check_;
 
   private:
   uint8_t state_ = 0;
@@ -2224,6 +2332,8 @@ class StateTestWriterBase {
 // Abstract reader for the StateTest protocol.
 class StateTestReaderBase {
   public:
+  StateTestReaderBase(bool skip_completed_check = false): skip_completed_check_(skip_completed_check) {}
+
   // Ordinal 0.
   void ReadAnInt(int32_t& value);
 
@@ -2254,6 +2364,8 @@ class StateTestReaderBase {
   static std::vector<std::string> previous_schemas_;
 
   static Version VersionFromSchema(const std::string& schema);
+
+  bool skip_completed_check_;
 
   private:
   uint8_t state_ = 0;
@@ -2334,6 +2446,8 @@ class SimpleGenericsWriterBase {
 // Abstract reader for the SimpleGenerics protocol.
 class SimpleGenericsReaderBase {
   public:
+  SimpleGenericsReaderBase(bool skip_completed_check = false): skip_completed_check_(skip_completed_check) {}
+
   // Ordinal 0.
   void ReadFloatImage(image::FloatImage& value);
 
@@ -2389,6 +2503,8 @@ class SimpleGenericsReaderBase {
 
   static Version VersionFromSchema(const std::string& schema);
 
+  bool skip_completed_check_;
+
   private:
   uint8_t state_ = 0;
 };
@@ -2442,6 +2558,8 @@ class AdvancedGenericsWriterBase {
 // Abstract reader for the AdvancedGenerics protocol.
 class AdvancedGenericsReaderBase {
   public:
+  AdvancedGenericsReaderBase(bool skip_completed_check = false): skip_completed_check_(skip_completed_check) {}
+
   // Ordinal 0.
   void ReadFloatImageImage(test_model::Image<test_model::Image<float>>& value);
 
@@ -2476,6 +2594,8 @@ class AdvancedGenericsReaderBase {
   static std::vector<std::string> previous_schemas_;
 
   static Version VersionFromSchema(const std::string& schema);
+
+  bool skip_completed_check_;
 
   private:
   uint8_t state_ = 0;
@@ -2564,6 +2684,8 @@ class AliasesWriterBase {
 // Abstract reader for the Aliases protocol.
 class AliasesReaderBase {
   public:
+  AliasesReaderBase(bool skip_completed_check = false): skip_completed_check_(skip_completed_check) {}
+
   // Ordinal 0.
   void ReadAliasedString(test_model::AliasedString& value);
 
@@ -2627,6 +2749,8 @@ class AliasesReaderBase {
 
   static Version VersionFromSchema(const std::string& schema);
 
+  bool skip_completed_check_;
+
   private:
   uint8_t state_ = 0;
 };
@@ -2688,6 +2812,8 @@ class StreamsOfAliasedUnionsWriterBase {
 // Abstract reader for the StreamsOfAliasedUnions protocol.
 class StreamsOfAliasedUnionsReaderBase {
   public:
+  StreamsOfAliasedUnionsReaderBase(bool skip_completed_check = false): skip_completed_check_(skip_completed_check) {}
+
   // Ordinal 0.
   [[nodiscard]] bool ReadIntOrSimpleRecord(test_model::AliasedIntOrSimpleRecord& value);
 
@@ -2718,6 +2844,8 @@ class StreamsOfAliasedUnionsReaderBase {
   static std::vector<std::string> previous_schemas_;
 
   static Version VersionFromSchema(const std::string& schema);
+
+  bool skip_completed_check_;
 
   private:
   uint8_t state_ = 0;
@@ -2756,6 +2884,8 @@ class ProtocolWithComputedFieldsWriterBase {
 // Abstract reader for the ProtocolWithComputedFields protocol.
 class ProtocolWithComputedFieldsReaderBase {
   public:
+  ProtocolWithComputedFieldsReaderBase(bool skip_completed_check = false): skip_completed_check_(skip_completed_check) {}
+
   // Ordinal 0.
   void ReadRecordWithComputedFields(test_model::RecordWithComputedFields& value);
 
@@ -2774,6 +2904,8 @@ class ProtocolWithComputedFieldsReaderBase {
   static std::vector<std::string> previous_schemas_;
 
   static Version VersionFromSchema(const std::string& schema);
+
+  bool skip_completed_check_;
 
   private:
   uint8_t state_ = 0;
@@ -2826,6 +2958,8 @@ class ProtocolWithKeywordStepsWriterBase {
 // Abstract reader for the ProtocolWithKeywordSteps protocol.
 class ProtocolWithKeywordStepsReaderBase {
   public:
+  ProtocolWithKeywordStepsReaderBase(bool skip_completed_check = false): skip_completed_check_(skip_completed_check) {}
+
   // Ordinal 0.
   [[nodiscard]] bool ReadInt(test_model::RecordWithKeywordFields& value);
 
@@ -2852,6 +2986,8 @@ class ProtocolWithKeywordStepsReaderBase {
   static std::vector<std::string> previous_schemas_;
 
   static Version VersionFromSchema(const std::string& schema);
+
+  bool skip_completed_check_;
 
   private:
   uint8_t state_ = 0;
@@ -2890,6 +3026,8 @@ class ProtocolWithOptionalDateWriterBase {
 // Abstract reader for the ProtocolWithOptionalDate protocol.
 class ProtocolWithOptionalDateReaderBase {
   public:
+  ProtocolWithOptionalDateReaderBase(bool skip_completed_check = false): skip_completed_check_(skip_completed_check) {}
+
   // Ordinal 0.
   void ReadRecord(std::optional<test_model::RecordWithOptionalDate>& value);
 
@@ -2908,6 +3046,8 @@ class ProtocolWithOptionalDateReaderBase {
   static std::vector<std::string> previous_schemas_;
 
   static Version VersionFromSchema(const std::string& schema);
+
+  bool skip_completed_check_;
 
   private:
   uint8_t state_ = 0;

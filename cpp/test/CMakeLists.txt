@@ -15,6 +15,7 @@ add_executable(tests
   ndjson/schema_test.cc
   protocol_state_test.cc
   roundtrip_test.cc
+  partial_read_test.cc
 )
 
 # This additional test must be compiled with C++20 to test compatibility with

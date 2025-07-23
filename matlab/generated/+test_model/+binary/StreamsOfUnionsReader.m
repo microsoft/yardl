@@ -9,8 +9,12 @@ classdef StreamsOfUnionsReader < yardl.binary.BinaryProtocolReader & test_model.
   end
 
   methods
-    function self = StreamsOfUnionsReader(filename)
-      self@test_model.StreamsOfUnionsReaderBase();
+    function self = StreamsOfUnionsReader(filename, options)
+      arguments
+        filename (1,1) string
+        options.skip_completed_check (1,1) logical = false
+      end
+      self@test_model.StreamsOfUnionsReaderBase(skip_completed_check=options.skip_completed_check);
       self@yardl.binary.BinaryProtocolReader(filename, test_model.StreamsOfUnionsReaderBase.schema);
       self.int_or_simple_record_serializer = yardl.binary.StreamSerializer(yardl.binary.UnionSerializer('test_model.Int32OrSimpleRecord', {yardl.binary.Int32Serializer, test_model.binary.SimpleRecordSerializer()}, {@test_model.Int32OrSimpleRecord.Int32, @test_model.Int32OrSimpleRecord.SimpleRecord}));
       self.nullable_int_or_simple_record_serializer = yardl.binary.StreamSerializer(yardl.binary.UnionSerializer('test_model.Int32OrSimpleRecord', {yardl.binary.NoneSerializer, yardl.binary.Int32Serializer, test_model.binary.SimpleRecordSerializer()}, {yardl.None, @test_model.Int32OrSimpleRecord.Int32, @test_model.Int32OrSimpleRecord.SimpleRecord}));

@@ -10,8 +10,12 @@ classdef StreamsReader < yardl.binary.BinaryProtocolReader & test_model.StreamsR
   end
 
   methods
-    function self = StreamsReader(filename)
-      self@test_model.StreamsReaderBase();
+    function self = StreamsReader(filename, options)
+      arguments
+        filename (1,1) string
+        options.skip_completed_check (1,1) logical = false
+      end
+      self@test_model.StreamsReaderBase(skip_completed_check=options.skip_completed_check);
       self@yardl.binary.BinaryProtocolReader(filename, test_model.StreamsReaderBase.schema);
       self.int_data_serializer = yardl.binary.StreamSerializer(yardl.binary.Int32Serializer);
       self.optional_int_data_serializer = yardl.binary.StreamSerializer(yardl.binary.OptionalSerializer(yardl.binary.Int32Serializer));

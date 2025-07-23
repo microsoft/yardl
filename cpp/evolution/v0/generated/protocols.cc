@@ -2600,7 +2600,7 @@ bool ProtocolWithChangesReaderBase::ReadStreamedRecordWithChangesImpl(std::vecto
 }
 
 void ProtocolWithChangesReaderBase::Close() {
-  if (unlikely(state_ != 200)) {
+  if (!skip_completed_check_ && unlikely(state_ != 200)) {
     if (state_ == 199) {
       state_ = 200;
     } else {
@@ -3311,7 +3311,7 @@ bool UnusedProtocolReaderBase::ReadRecordsImpl(std::vector<evo_test::UnchangedRe
 }
 
 void UnusedProtocolReaderBase::Close() {
-  if (unlikely(state_ != 2)) {
+  if (!skip_completed_check_ && unlikely(state_ != 2)) {
     if (state_ == 1) {
       state_ = 2;
     } else {

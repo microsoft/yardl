@@ -8,8 +8,12 @@ classdef FlagsReader < yardl.binary.BinaryProtocolReader & test_model.FlagsReade
   end
 
   methods
-    function self = FlagsReader(filename)
-      self@test_model.FlagsReaderBase();
+    function self = FlagsReader(filename, options)
+      arguments
+        filename (1,1) string
+        options.skip_completed_check (1,1) logical = false
+      end
+      self@test_model.FlagsReaderBase(skip_completed_check=options.skip_completed_check);
       self@yardl.binary.BinaryProtocolReader(filename, test_model.FlagsReaderBase.schema);
       self.days_serializer = yardl.binary.StreamSerializer(yardl.binary.EnumSerializer('basic_types.DaysOfWeek', @basic_types.DaysOfWeek, yardl.binary.Int32Serializer));
       self.formats_serializer = yardl.binary.StreamSerializer(yardl.binary.EnumSerializer('basic_types.TextFormat', @basic_types.TextFormat, yardl.binary.Uint64Serializer));

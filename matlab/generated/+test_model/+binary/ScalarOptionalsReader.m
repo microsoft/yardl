@@ -10,8 +10,12 @@ classdef ScalarOptionalsReader < yardl.binary.BinaryProtocolReader & test_model.
   end
 
   methods
-    function self = ScalarOptionalsReader(filename)
-      self@test_model.ScalarOptionalsReaderBase();
+    function self = ScalarOptionalsReader(filename, options)
+      arguments
+        filename (1,1) string
+        options.skip_completed_check (1,1) logical = false
+      end
+      self@test_model.ScalarOptionalsReaderBase(skip_completed_check=options.skip_completed_check);
       self@yardl.binary.BinaryProtocolReader(filename, test_model.ScalarOptionalsReaderBase.schema);
       self.optional_int_serializer = yardl.binary.OptionalSerializer(yardl.binary.Int32Serializer);
       self.optional_record_serializer = yardl.binary.OptionalSerializer(test_model.binary.SimpleRecordSerializer());

@@ -30,7 +30,7 @@ class BenchmarkFloat256x256Writer : public test_model::BenchmarkFloat256x256Writ
 // HDF5 reader for the BenchmarkFloat256x256 protocol.
 class BenchmarkFloat256x256Reader : public test_model::BenchmarkFloat256x256ReaderBase, public yardl::hdf5::Hdf5Reader {
   public:
-  BenchmarkFloat256x256Reader(std::string path);
+  BenchmarkFloat256x256Reader(std::string path, bool skip_completed_check=false);
 
   bool ReadFloat256x256Impl(yardl::FixedNDArray<float, 256, 256>& value) override;
 
@@ -59,7 +59,7 @@ class BenchmarkInt256x256Writer : public test_model::BenchmarkInt256x256WriterBa
 // HDF5 reader for the BenchmarkInt256x256 protocol.
 class BenchmarkInt256x256Reader : public test_model::BenchmarkInt256x256ReaderBase, public yardl::hdf5::Hdf5Reader {
   public:
-  BenchmarkInt256x256Reader(std::string path);
+  BenchmarkInt256x256Reader(std::string path, bool skip_completed_check=false);
 
   bool ReadInt256x256Impl(yardl::FixedNDArray<int32_t, 256, 256>& value) override;
 
@@ -88,7 +88,7 @@ class BenchmarkFloatVlenWriter : public test_model::BenchmarkFloatVlenWriterBase
 // HDF5 reader for the BenchmarkFloatVlen protocol.
 class BenchmarkFloatVlenReader : public test_model::BenchmarkFloatVlenReaderBase, public yardl::hdf5::Hdf5Reader {
   public:
-  BenchmarkFloatVlenReader(std::string path);
+  BenchmarkFloatVlenReader(std::string path, bool skip_completed_check=false);
 
   bool ReadFloatArrayImpl(yardl::NDArray<float, 2>& value) override;
 
@@ -117,7 +117,7 @@ class BenchmarkSmallRecordWriter : public test_model::BenchmarkSmallRecordWriter
 // HDF5 reader for the BenchmarkSmallRecord protocol.
 class BenchmarkSmallRecordReader : public test_model::BenchmarkSmallRecordReaderBase, public yardl::hdf5::Hdf5Reader {
   public:
-  BenchmarkSmallRecordReader(std::string path);
+  BenchmarkSmallRecordReader(std::string path, bool skip_completed_check=false);
 
   bool ReadSmallRecordImpl(test_model::SmallBenchmarkRecord& value) override;
 
@@ -146,7 +146,7 @@ class BenchmarkSmallRecordWithOptionalsWriter : public test_model::BenchmarkSmal
 // HDF5 reader for the BenchmarkSmallRecordWithOptionals protocol.
 class BenchmarkSmallRecordWithOptionalsReader : public test_model::BenchmarkSmallRecordWithOptionalsReaderBase, public yardl::hdf5::Hdf5Reader {
   public:
-  BenchmarkSmallRecordWithOptionalsReader(std::string path);
+  BenchmarkSmallRecordWithOptionalsReader(std::string path, bool skip_completed_check=false);
 
   bool ReadSmallRecordImpl(test_model::SimpleEncodingCounters& value) override;
 
@@ -176,7 +176,7 @@ class BenchmarkSimpleMrdWriter : public test_model::BenchmarkSimpleMrdWriterBase
 // HDF5 reader for the BenchmarkSimpleMrd protocol.
 class BenchmarkSimpleMrdReader : public test_model::BenchmarkSimpleMrdReaderBase, public yardl::hdf5::Hdf5Reader {
   public:
-  BenchmarkSimpleMrdReader(std::string path);
+  BenchmarkSimpleMrdReader(std::string path, bool skip_completed_check=false);
 
   bool ReadDataImpl(std::variant<test_model::SimpleAcquisition, image::Image<float>>& value) override;
 
@@ -200,7 +200,7 @@ class ScalarsWriter : public test_model::ScalarsWriterBase, public yardl::hdf5::
 // HDF5 reader for the Scalars protocol.
 class ScalarsReader : public test_model::ScalarsReaderBase, public yardl::hdf5::Hdf5Reader {
   public:
-  ScalarsReader(std::string path);
+  ScalarsReader(std::string path, bool skip_completed_check=false);
 
   void ReadInt32Impl(int32_t& value) override;
 
@@ -229,7 +229,7 @@ class ScalarOptionalsWriter : public test_model::ScalarOptionalsWriterBase, publ
 // HDF5 reader for the ScalarOptionals protocol.
 class ScalarOptionalsReader : public test_model::ScalarOptionalsReaderBase, public yardl::hdf5::Hdf5Reader {
   public:
-  ScalarOptionalsReader(std::string path);
+  ScalarOptionalsReader(std::string path, bool skip_completed_check=false);
 
   void ReadOptionalIntImpl(std::optional<int32_t>& value) override;
 
@@ -256,7 +256,7 @@ class NestedRecordsWriter : public test_model::NestedRecordsWriterBase, public y
 // HDF5 reader for the NestedRecords protocol.
 class NestedRecordsReader : public test_model::NestedRecordsReaderBase, public yardl::hdf5::Hdf5Reader {
   public:
-  NestedRecordsReader(std::string path);
+  NestedRecordsReader(std::string path, bool skip_completed_check=false);
 
   void ReadTupleWithRecordsImpl(test_model::TupleWithRecords& value) override;
 
@@ -283,7 +283,7 @@ class VlensWriter : public test_model::VlensWriterBase, public yardl::hdf5::Hdf5
 // HDF5 reader for the Vlens protocol.
 class VlensReader : public test_model::VlensReaderBase, public yardl::hdf5::Hdf5Reader {
   public:
-  VlensReader(std::string path);
+  VlensReader(std::string path, bool skip_completed_check=false);
 
   void ReadIntVectorImpl(std::vector<int32_t>& value) override;
 
@@ -312,7 +312,7 @@ class StringsWriter : public test_model::StringsWriterBase, public yardl::hdf5::
 // HDF5 reader for the Strings protocol.
 class StringsReader : public test_model::StringsReaderBase, public yardl::hdf5::Hdf5Reader {
   public:
-  StringsReader(std::string path);
+  StringsReader(std::string path, bool skip_completed_check=false);
 
   void ReadSingleStringImpl(std::string& value) override;
 
@@ -335,7 +335,7 @@ class OptionalVectorsWriter : public test_model::OptionalVectorsWriterBase, publ
 // HDF5 reader for the OptionalVectors protocol.
 class OptionalVectorsReader : public test_model::OptionalVectorsReaderBase, public yardl::hdf5::Hdf5Reader {
   public:
-  OptionalVectorsReader(std::string path);
+  OptionalVectorsReader(std::string path, bool skip_completed_check=false);
 
   void ReadRecordWithOptionalVectorImpl(test_model::RecordWithOptionalVector& value) override;
 
@@ -362,7 +362,7 @@ class FixedVectorsWriter : public test_model::FixedVectorsWriterBase, public yar
 // HDF5 reader for the FixedVectors protocol.
 class FixedVectorsReader : public test_model::FixedVectorsReaderBase, public yardl::hdf5::Hdf5Reader {
   public:
-  FixedVectorsReader(std::string path);
+  FixedVectorsReader(std::string path, bool skip_completed_check=false);
 
   void ReadFixedIntVectorImpl(std::array<int32_t, 5>& value) override;
 
@@ -415,7 +415,7 @@ class StreamsWriter : public test_model::StreamsWriterBase, public yardl::hdf5::
 // HDF5 reader for the Streams protocol.
 class StreamsReader : public test_model::StreamsReaderBase, public yardl::hdf5::Hdf5Reader {
   public:
-  StreamsReader(std::string path);
+  StreamsReader(std::string path, bool skip_completed_check=false);
 
   bool ReadIntDataImpl(int32_t& value) override;
 
@@ -462,7 +462,7 @@ class FixedArraysWriter : public test_model::FixedArraysWriterBase, public yardl
 // HDF5 reader for the FixedArrays protocol.
 class FixedArraysReader : public test_model::FixedArraysReaderBase, public yardl::hdf5::Hdf5Reader {
   public:
-  FixedArraysReader(std::string path);
+  FixedArraysReader(std::string path, bool skip_completed_check=false);
 
   void ReadIntsImpl(yardl::FixedNDArray<int32_t, 2, 3>& value) override;
 
@@ -507,7 +507,7 @@ class SubarraysWriter : public test_model::SubarraysWriterBase, public yardl::hd
 // HDF5 reader for the Subarrays protocol.
 class SubarraysReader : public test_model::SubarraysReaderBase, public yardl::hdf5::Hdf5Reader {
   public:
-  SubarraysReader(std::string path);
+  SubarraysReader(std::string path, bool skip_completed_check=false);
 
   void ReadDynamicWithFixedIntSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<int32_t, 3>>& value) override;
 
@@ -546,7 +546,7 @@ class SubarraysInRecordsWriter : public test_model::SubarraysInRecordsWriterBase
 // HDF5 reader for the SubarraysInRecords protocol.
 class SubarraysInRecordsReader : public test_model::SubarraysInRecordsReaderBase, public yardl::hdf5::Hdf5Reader {
   public:
-  SubarraysInRecordsReader(std::string path);
+  SubarraysInRecordsReader(std::string path, bool skip_completed_check=false);
 
   void ReadWithFixedSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithFixedCollections>& value) override;
 
@@ -577,7 +577,7 @@ class NDArraysWriter : public test_model::NDArraysWriterBase, public yardl::hdf5
 // HDF5 reader for the NDArrays protocol.
 class NDArraysReader : public test_model::NDArraysReaderBase, public yardl::hdf5::Hdf5Reader {
   public:
-  NDArraysReader(std::string path);
+  NDArraysReader(std::string path, bool skip_completed_check=false);
 
   void ReadIntsImpl(yardl::NDArray<int32_t, 2>& value) override;
 
@@ -612,7 +612,7 @@ class NDArraysSingleDimensionWriter : public test_model::NDArraysSingleDimension
 // HDF5 reader for the NDArraysSingleDimension protocol.
 class NDArraysSingleDimensionReader : public test_model::NDArraysSingleDimensionReaderBase, public yardl::hdf5::Hdf5Reader {
   public:
-  NDArraysSingleDimensionReader(std::string path);
+  NDArraysSingleDimensionReader(std::string path, bool skip_completed_check=false);
 
   void ReadIntsImpl(yardl::NDArray<int32_t, 1>& value) override;
 
@@ -645,7 +645,7 @@ class DynamicNDArraysWriter : public test_model::DynamicNDArraysWriterBase, publ
 // HDF5 reader for the DynamicNDArrays protocol.
 class DynamicNDArraysReader : public test_model::DynamicNDArraysReaderBase, public yardl::hdf5::Hdf5Reader {
   public:
-  DynamicNDArraysReader(std::string path);
+  DynamicNDArraysReader(std::string path, bool skip_completed_check=false);
 
   void ReadIntsImpl(yardl::DynamicNDArray<int32_t>& value) override;
 
@@ -684,7 +684,7 @@ class MultiDArraysWriter : public test_model::MultiDArraysWriterBase, public yar
 // HDF5 reader for the MultiDArrays protocol.
 class MultiDArraysReader : public test_model::MultiDArraysReaderBase, public yardl::hdf5::Hdf5Reader {
   public:
-  MultiDArraysReader(std::string path);
+  MultiDArraysReader(std::string path, bool skip_completed_check=false);
 
   bool ReadImagesImpl(yardl::NDArray<float, 4>& value) override;
 
@@ -715,7 +715,7 @@ class ComplexArraysWriter : public test_model::ComplexArraysWriterBase, public y
 // HDF5 reader for the ComplexArrays protocol.
 class ComplexArraysReader : public test_model::ComplexArraysReaderBase, public yardl::hdf5::Hdf5Reader {
   public:
-  ComplexArraysReader(std::string path);
+  ComplexArraysReader(std::string path, bool skip_completed_check=false);
 
   void ReadFloatsImpl(yardl::DynamicNDArray<std::complex<float>>& value) override;
 
@@ -746,7 +746,7 @@ class MapsWriter : public test_model::MapsWriterBase, public yardl::hdf5::Hdf5Wr
 // HDF5 reader for the Maps protocol.
 class MapsReader : public test_model::MapsReaderBase, public yardl::hdf5::Hdf5Reader {
   public:
-  MapsReader(std::string path);
+  MapsReader(std::string path, bool skip_completed_check=false);
 
   void ReadStringToIntImpl(std::unordered_map<std::string, int32_t>& value) override;
 
@@ -781,7 +781,7 @@ class UnionsWriter : public test_model::UnionsWriterBase, public yardl::hdf5::Hd
 // HDF5 reader for the Unions protocol.
 class UnionsReader : public test_model::UnionsReaderBase, public yardl::hdf5::Hdf5Reader {
   public:
-  UnionsReader(std::string path);
+  UnionsReader(std::string path, bool skip_completed_check=false);
 
   void ReadIntOrSimpleRecordImpl(std::variant<int32_t, test_model::SimpleRecord>& value) override;
 
@@ -824,7 +824,7 @@ class StreamsOfUnionsWriter : public test_model::StreamsOfUnionsWriterBase, publ
 // HDF5 reader for the StreamsOfUnions protocol.
 class StreamsOfUnionsReader : public test_model::StreamsOfUnionsReaderBase, public yardl::hdf5::Hdf5Reader {
   public:
-  StreamsOfUnionsReader(std::string path);
+  StreamsOfUnionsReader(std::string path, bool skip_completed_check=false);
 
   bool ReadIntOrSimpleRecordImpl(std::variant<int32_t, test_model::SimpleRecord>& value) override;
 
@@ -858,7 +858,7 @@ class EnumsWriter : public test_model::EnumsWriterBase, public yardl::hdf5::Hdf5
 // HDF5 reader for the Enums protocol.
 class EnumsReader : public test_model::EnumsReaderBase, public yardl::hdf5::Hdf5Reader {
   public:
-  EnumsReader(std::string path);
+  EnumsReader(std::string path, bool skip_completed_check=false);
 
   void ReadSingleImpl(test_model::Fruits& value) override;
 
@@ -897,7 +897,7 @@ class FlagsWriter : public test_model::FlagsWriterBase, public yardl::hdf5::Hdf5
 // HDF5 reader for the Flags protocol.
 class FlagsReader : public test_model::FlagsReaderBase, public yardl::hdf5::Hdf5Reader {
   public:
-  FlagsReader(std::string path);
+  FlagsReader(std::string path, bool skip_completed_check=false);
 
   bool ReadDaysImpl(test_model::DaysOfWeek& value) override;
 
@@ -935,7 +935,7 @@ class StateTestWriter : public test_model::StateTestWriterBase, public yardl::hd
 // HDF5 reader for the StateTest protocol.
 class StateTestReader : public test_model::StateTestReaderBase, public yardl::hdf5::Hdf5Reader {
   public:
-  StateTestReader(std::string path);
+  StateTestReader(std::string path, bool skip_completed_check=false);
 
   void ReadAnIntImpl(int32_t& value) override;
 
@@ -985,7 +985,7 @@ class SimpleGenericsWriter : public test_model::SimpleGenericsWriterBase, public
 // HDF5 reader for the SimpleGenerics protocol.
 class SimpleGenericsReader : public test_model::SimpleGenericsReaderBase, public yardl::hdf5::Hdf5Reader {
   public:
-  SimpleGenericsReader(std::string path);
+  SimpleGenericsReader(std::string path, bool skip_completed_check=false);
 
   void ReadFloatImageImpl(image::FloatImage& value) override;
 
@@ -1031,7 +1031,7 @@ class AdvancedGenericsWriter : public test_model::AdvancedGenericsWriterBase, pu
 // HDF5 reader for the AdvancedGenerics protocol.
 class AdvancedGenericsReader : public test_model::AdvancedGenericsReaderBase, public yardl::hdf5::Hdf5Reader {
   public:
-  AdvancedGenericsReader(std::string path);
+  AdvancedGenericsReader(std::string path, bool skip_completed_check=false);
 
   void ReadFloatImageImageImpl(test_model::Image<test_model::Image<float>>& value) override;
 
@@ -1086,7 +1086,7 @@ class AliasesWriter : public test_model::AliasesWriterBase, public yardl::hdf5::
 // HDF5 reader for the Aliases protocol.
 class AliasesReader : public test_model::AliasesReaderBase, public yardl::hdf5::Hdf5Reader {
   public:
-  AliasesReader(std::string path);
+  AliasesReader(std::string path, bool skip_completed_check=false);
 
   void ReadAliasedStringImpl(test_model::AliasedString& value) override;
 
@@ -1139,7 +1139,7 @@ class StreamsOfAliasedUnionsWriter : public test_model::StreamsOfAliasedUnionsWr
 // HDF5 reader for the StreamsOfAliasedUnions protocol.
 class StreamsOfAliasedUnionsReader : public test_model::StreamsOfAliasedUnionsReaderBase, public yardl::hdf5::Hdf5Reader {
   public:
-  StreamsOfAliasedUnionsReader(std::string path);
+  StreamsOfAliasedUnionsReader(std::string path, bool skip_completed_check=false);
 
   bool ReadIntOrSimpleRecordImpl(test_model::AliasedIntOrSimpleRecord& value) override;
 
@@ -1164,7 +1164,7 @@ class ProtocolWithComputedFieldsWriter : public test_model::ProtocolWithComputed
 // HDF5 reader for the ProtocolWithComputedFields protocol.
 class ProtocolWithComputedFieldsReader : public test_model::ProtocolWithComputedFieldsReaderBase, public yardl::hdf5::Hdf5Reader {
   public:
-  ProtocolWithComputedFieldsReader(std::string path);
+  ProtocolWithComputedFieldsReader(std::string path, bool skip_completed_check=false);
 
   void ReadRecordWithComputedFieldsImpl(test_model::RecordWithComputedFields& value) override;
 
@@ -1192,7 +1192,7 @@ class ProtocolWithKeywordStepsWriter : public test_model::ProtocolWithKeywordSte
 // HDF5 reader for the ProtocolWithKeywordSteps protocol.
 class ProtocolWithKeywordStepsReader : public test_model::ProtocolWithKeywordStepsReaderBase, public yardl::hdf5::Hdf5Reader {
   public:
-  ProtocolWithKeywordStepsReader(std::string path);
+  ProtocolWithKeywordStepsReader(std::string path, bool skip_completed_check=false);
 
   bool ReadIntImpl(test_model::RecordWithKeywordFields& value) override;
 
@@ -1218,7 +1218,7 @@ class ProtocolWithOptionalDateWriter : public test_model::ProtocolWithOptionalDa
 // HDF5 reader for the ProtocolWithOptionalDate protocol.
 class ProtocolWithOptionalDateReader : public test_model::ProtocolWithOptionalDateReaderBase, public yardl::hdf5::Hdf5Reader {
   public:
-  ProtocolWithOptionalDateReader(std::string path);
+  ProtocolWithOptionalDateReader(std::string path, bool skip_completed_check=false);
 
   void ReadRecordImpl(std::optional<test_model::RecordWithOptionalDate>& value) override;
 

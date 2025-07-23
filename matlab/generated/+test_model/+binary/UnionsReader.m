@@ -10,8 +10,12 @@ classdef UnionsReader < yardl.binary.BinaryProtocolReader & test_model.UnionsRea
   end
 
   methods
-    function self = UnionsReader(filename)
-      self@test_model.UnionsReaderBase();
+    function self = UnionsReader(filename, options)
+      arguments
+        filename (1,1) string
+        options.skip_completed_check (1,1) logical = false
+      end
+      self@test_model.UnionsReaderBase(skip_completed_check=options.skip_completed_check);
       self@yardl.binary.BinaryProtocolReader(filename, test_model.UnionsReaderBase.schema);
       self.int_or_simple_record_serializer = yardl.binary.UnionSerializer('test_model.Int32OrSimpleRecord', {yardl.binary.Int32Serializer, test_model.binary.SimpleRecordSerializer()}, {@test_model.Int32OrSimpleRecord.Int32, @test_model.Int32OrSimpleRecord.SimpleRecord});
       self.int_or_record_with_vlens_serializer = yardl.binary.UnionSerializer('test_model.Int32OrRecordWithVlens', {yardl.binary.Int32Serializer, test_model.binary.RecordWithVlensSerializer()}, {@test_model.Int32OrRecordWithVlens.Int32, @test_model.Int32OrRecordWithVlens.RecordWithVlens});

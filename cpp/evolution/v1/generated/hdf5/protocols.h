@@ -275,7 +275,7 @@ class ProtocolWithChangesWriter : public evo_test::ProtocolWithChangesWriterBase
 // HDF5 reader for the ProtocolWithChanges protocol.
 class ProtocolWithChangesReader : public evo_test::ProtocolWithChangesReaderBase, public yardl::hdf5::Hdf5Reader {
   public:
-  ProtocolWithChangesReader(std::string path);
+  ProtocolWithChangesReader(std::string path, bool skip_completed_check=false);
 
   void ReadInt8ToIntImpl(int32_t& value) override;
 
@@ -530,7 +530,7 @@ class UnusedProtocolWriter : public evo_test::UnusedProtocolWriterBase, public y
 // HDF5 reader for the UnusedProtocol protocol.
 class UnusedProtocolReader : public evo_test::UnusedProtocolReaderBase, public yardl::hdf5::Hdf5Reader {
   public:
-  UnusedProtocolReader(std::string path);
+  UnusedProtocolReader(std::string path, bool skip_completed_check=false);
 
   bool ReadRecordsImpl(evo_test::UnchangedRecord& value) override;
 

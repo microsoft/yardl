@@ -8,8 +8,12 @@ classdef MultiDArraysReader < yardl.binary.BinaryProtocolReader & test_model.Mul
   end
 
   methods
-    function self = MultiDArraysReader(filename)
-      self@test_model.MultiDArraysReaderBase();
+    function self = MultiDArraysReader(filename, options)
+      arguments
+        filename (1,1) string
+        options.skip_completed_check (1,1) logical = false
+      end
+      self@test_model.MultiDArraysReaderBase(skip_completed_check=options.skip_completed_check);
       self@yardl.binary.BinaryProtocolReader(filename, test_model.MultiDArraysReaderBase.schema);
       self.images_serializer = yardl.binary.StreamSerializer(yardl.binary.NDArraySerializer(yardl.binary.Float32Serializer, 4));
       self.frames_serializer = yardl.binary.StreamSerializer(yardl.binary.FixedNDArraySerializer(yardl.binary.Float32Serializer, [32, 64, 1, 1]));

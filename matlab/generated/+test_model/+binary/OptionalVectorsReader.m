@@ -7,8 +7,12 @@ classdef OptionalVectorsReader < yardl.binary.BinaryProtocolReader & test_model.
   end
 
   methods
-    function self = OptionalVectorsReader(filename)
-      self@test_model.OptionalVectorsReaderBase();
+    function self = OptionalVectorsReader(filename, options)
+      arguments
+        filename (1,1) string
+        options.skip_completed_check (1,1) logical = false
+      end
+      self@test_model.OptionalVectorsReaderBase(skip_completed_check=options.skip_completed_check);
       self@yardl.binary.BinaryProtocolReader(filename, test_model.OptionalVectorsReaderBase.schema);
       self.record_with_optional_vector_serializer = test_model.binary.RecordWithOptionalVectorSerializer();
     end

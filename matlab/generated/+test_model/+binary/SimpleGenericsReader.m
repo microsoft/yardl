@@ -15,8 +15,12 @@ classdef SimpleGenericsReader < yardl.binary.BinaryProtocolReader & test_model.S
   end
 
   methods
-    function self = SimpleGenericsReader(filename)
-      self@test_model.SimpleGenericsReaderBase();
+    function self = SimpleGenericsReader(filename, options)
+      arguments
+        filename (1,1) string
+        options.skip_completed_check (1,1) logical = false
+      end
+      self@test_model.SimpleGenericsReaderBase(skip_completed_check=options.skip_completed_check);
       self@yardl.binary.BinaryProtocolReader(filename, test_model.SimpleGenericsReaderBase.schema);
       self.float_image_serializer = yardl.binary.NDArraySerializer(yardl.binary.Float32Serializer, 2);
       self.int_image_serializer = yardl.binary.NDArraySerializer(yardl.binary.Int32Serializer, 2);

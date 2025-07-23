@@ -5382,7 +5382,9 @@ bool ProtocolWithChangesReader::ReadAddedUnionStreamImpl(std::vector<std::varian
 }
 
 void ProtocolWithChangesReader::CloseImpl() {
-  stream_.VerifyFinished();
+  if (!skip_completed_check_) {
+    stream_.VerifyFinished();
+  }
 }
 
 } // namespace evo_test::binary

@@ -1826,8 +1826,8 @@ void BenchmarkFloat256x256Writer::EndFloat256x256Impl() {
   float256x256_dataset_state_.reset();
 }
 
-BenchmarkFloat256x256Reader::BenchmarkFloat256x256Reader(std::string path)
-    : yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "BenchmarkFloat256x256", schema_) {
+BenchmarkFloat256x256Reader::BenchmarkFloat256x256Reader(std::string path, bool skip_completed_check)
+    : test_model::BenchmarkFloat256x256ReaderBase(skip_completed_check), yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "BenchmarkFloat256x256", schema_) {
 }
 
 bool BenchmarkFloat256x256Reader::ReadFloat256x256Impl(yardl::FixedNDArray<float, 256, 256>& value) {
@@ -1884,8 +1884,8 @@ void BenchmarkInt256x256Writer::EndInt256x256Impl() {
   int256x256_dataset_state_.reset();
 }
 
-BenchmarkInt256x256Reader::BenchmarkInt256x256Reader(std::string path)
-    : yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "BenchmarkInt256x256", schema_) {
+BenchmarkInt256x256Reader::BenchmarkInt256x256Reader(std::string path, bool skip_completed_check)
+    : test_model::BenchmarkInt256x256ReaderBase(skip_completed_check), yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "BenchmarkInt256x256", schema_) {
 }
 
 bool BenchmarkInt256x256Reader::ReadInt256x256Impl(yardl::FixedNDArray<int32_t, 256, 256>& value) {
@@ -1942,8 +1942,8 @@ void BenchmarkFloatVlenWriter::EndFloatArrayImpl() {
   floatArray_dataset_state_.reset();
 }
 
-BenchmarkFloatVlenReader::BenchmarkFloatVlenReader(std::string path)
-    : yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "BenchmarkFloatVlen", schema_) {
+BenchmarkFloatVlenReader::BenchmarkFloatVlenReader(std::string path, bool skip_completed_check)
+    : test_model::BenchmarkFloatVlenReaderBase(skip_completed_check), yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "BenchmarkFloatVlen", schema_) {
 }
 
 bool BenchmarkFloatVlenReader::ReadFloatArrayImpl(yardl::NDArray<float, 2>& value) {
@@ -2000,8 +2000,8 @@ void BenchmarkSmallRecordWriter::EndSmallRecordImpl() {
   smallRecord_dataset_state_.reset();
 }
 
-BenchmarkSmallRecordReader::BenchmarkSmallRecordReader(std::string path)
-    : yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "BenchmarkSmallRecord", schema_) {
+BenchmarkSmallRecordReader::BenchmarkSmallRecordReader(std::string path, bool skip_completed_check)
+    : test_model::BenchmarkSmallRecordReaderBase(skip_completed_check), yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "BenchmarkSmallRecord", schema_) {
 }
 
 bool BenchmarkSmallRecordReader::ReadSmallRecordImpl(test_model::SmallBenchmarkRecord& value) {
@@ -2058,8 +2058,8 @@ void BenchmarkSmallRecordWithOptionalsWriter::EndSmallRecordImpl() {
   smallRecord_dataset_state_.reset();
 }
 
-BenchmarkSmallRecordWithOptionalsReader::BenchmarkSmallRecordWithOptionalsReader(std::string path)
-    : yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "BenchmarkSmallRecordWithOptionals", schema_) {
+BenchmarkSmallRecordWithOptionalsReader::BenchmarkSmallRecordWithOptionalsReader(std::string path, bool skip_completed_check)
+    : test_model::BenchmarkSmallRecordWithOptionalsReaderBase(skip_completed_check), yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "BenchmarkSmallRecordWithOptionals", schema_) {
 }
 
 bool BenchmarkSmallRecordWithOptionalsReader::ReadSmallRecordImpl(test_model::SimpleEncodingCounters& value) {
@@ -2125,8 +2125,8 @@ void BenchmarkSimpleMrdWriter::Flush() {
   }
 }
 
-BenchmarkSimpleMrdReader::BenchmarkSimpleMrdReader(std::string path)
-    : yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "BenchmarkSimpleMrd", schema_) {
+BenchmarkSimpleMrdReader::BenchmarkSimpleMrdReader(std::string path, bool skip_completed_check)
+    : test_model::BenchmarkSimpleMrdReaderBase(skip_completed_check), yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "BenchmarkSimpleMrd", schema_) {
 }
 
 bool BenchmarkSimpleMrdReader::ReadDataImpl(std::variant<test_model::SimpleAcquisition, image::Image<float>>& value) {
@@ -2168,8 +2168,8 @@ void ScalarsWriter::WriteRecordImpl(test_model::RecordWithPrimitives const& valu
   yardl::hdf5::WriteScalarDataset<test_model::RecordWithPrimitives, test_model::RecordWithPrimitives>(group_, "record", test_model::hdf5::GetRecordWithPrimitivesHdf5Ddl(), value);
 }
 
-ScalarsReader::ScalarsReader(std::string path)
-    : yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "Scalars", schema_) {
+ScalarsReader::ScalarsReader(std::string path, bool skip_completed_check)
+    : test_model::ScalarsReaderBase(skip_completed_check), yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "Scalars", schema_) {
 }
 
 void ScalarsReader::ReadInt32Impl(int32_t& value) {
@@ -2200,8 +2200,8 @@ void ScalarOptionalsWriter::WriteOptionalRecordWithOptionalFieldsImpl(std::optio
   yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerOptional<test_model::hdf5::_Inner_RecordWithOptionalFields, test_model::RecordWithOptionalFields>, std::optional<test_model::RecordWithOptionalFields>>(group_, "optionalRecordWithOptionalFields", yardl::hdf5::OptionalTypeDdl<test_model::hdf5::_Inner_RecordWithOptionalFields, test_model::RecordWithOptionalFields>(test_model::hdf5::GetRecordWithOptionalFieldsHdf5Ddl()), value);
 }
 
-ScalarOptionalsReader::ScalarOptionalsReader(std::string path)
-    : yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "ScalarOptionals", schema_) {
+ScalarOptionalsReader::ScalarOptionalsReader(std::string path, bool skip_completed_check)
+    : test_model::ScalarOptionalsReaderBase(skip_completed_check), yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "ScalarOptionals", schema_) {
 }
 
 void ScalarOptionalsReader::ReadOptionalIntImpl(std::optional<int32_t>& value) {
@@ -2228,8 +2228,8 @@ void NestedRecordsWriter::WriteTupleWithRecordsImpl(test_model::TupleWithRecords
   yardl::hdf5::WriteScalarDataset<test_model::TupleWithRecords, test_model::TupleWithRecords>(group_, "tupleWithRecords", test_model::hdf5::GetTupleWithRecordsHdf5Ddl(), value);
 }
 
-NestedRecordsReader::NestedRecordsReader(std::string path)
-    : yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "NestedRecords", schema_) {
+NestedRecordsReader::NestedRecordsReader(std::string path, bool skip_completed_check)
+    : test_model::NestedRecordsReaderBase(skip_completed_check), yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "NestedRecords", schema_) {
 }
 
 void NestedRecordsReader::ReadTupleWithRecordsImpl(test_model::TupleWithRecords& value) {
@@ -2256,8 +2256,8 @@ void VlensWriter::WriteVlenOfRecordWithVlensImpl(std::vector<test_model::RecordW
   yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerVlen<test_model::hdf5::_Inner_RecordWithVlens, test_model::RecordWithVlens>, std::vector<test_model::RecordWithVlens>>(group_, "vlenOfRecordWithVlens", yardl::hdf5::InnerVlenDdl(test_model::hdf5::GetRecordWithVlensHdf5Ddl()), value);
 }
 
-VlensReader::VlensReader(std::string path)
-    : yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "Vlens", schema_) {
+VlensReader::VlensReader(std::string path, bool skip_completed_check)
+    : test_model::VlensReaderBase(skip_completed_check), yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "Vlens", schema_) {
 }
 
 void VlensReader::ReadIntVectorImpl(std::vector<int32_t>& value) {
@@ -2288,8 +2288,8 @@ void StringsWriter::WriteRecWithStringImpl(test_model::RecordWithStrings const& 
   yardl::hdf5::WriteScalarDataset<test_model::hdf5::_Inner_RecordWithStrings, test_model::RecordWithStrings>(group_, "recWithString", test_model::hdf5::GetRecordWithStringsHdf5Ddl(), value);
 }
 
-StringsReader::StringsReader(std::string path)
-    : yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "Strings", schema_) {
+StringsReader::StringsReader(std::string path, bool skip_completed_check)
+    : test_model::StringsReaderBase(skip_completed_check), yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "Strings", schema_) {
 }
 
 void StringsReader::ReadSingleStringImpl(std::string& value) {
@@ -2308,8 +2308,8 @@ void OptionalVectorsWriter::WriteRecordWithOptionalVectorImpl(test_model::Record
   yardl::hdf5::WriteScalarDataset<test_model::hdf5::_Inner_RecordWithOptionalVector, test_model::RecordWithOptionalVector>(group_, "recordWithOptionalVector", test_model::hdf5::GetRecordWithOptionalVectorHdf5Ddl(), value);
 }
 
-OptionalVectorsReader::OptionalVectorsReader(std::string path)
-    : yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "OptionalVectors", schema_) {
+OptionalVectorsReader::OptionalVectorsReader(std::string path, bool skip_completed_check)
+    : test_model::OptionalVectorsReaderBase(skip_completed_check), yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "OptionalVectors", schema_) {
 }
 
 void OptionalVectorsReader::ReadRecordWithOptionalVectorImpl(test_model::RecordWithOptionalVector& value) {
@@ -2336,8 +2336,8 @@ void FixedVectorsWriter::WriteRecordWithFixedVectorsImpl(test_model::RecordWithF
   yardl::hdf5::WriteScalarDataset<test_model::hdf5::_Inner_RecordWithFixedVectors, test_model::RecordWithFixedVectors>(group_, "recordWithFixedVectors", test_model::hdf5::GetRecordWithFixedVectorsHdf5Ddl(), value);
 }
 
-FixedVectorsReader::FixedVectorsReader(std::string path)
-    : yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "FixedVectors", schema_) {
+FixedVectorsReader::FixedVectorsReader(std::string path, bool skip_completed_check)
+    : test_model::FixedVectorsReaderBase(skip_completed_check), yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "FixedVectors", schema_) {
 }
 
 void FixedVectorsReader::ReadFixedIntVectorImpl(std::array<int32_t, 5>& value) {
@@ -2456,8 +2456,8 @@ void StreamsWriter::EndFixedVectorImpl() {
   fixedVector_dataset_state_.reset();
 }
 
-StreamsReader::StreamsReader(std::string path)
-    : yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "Streams", schema_) {
+StreamsReader::StreamsReader(std::string path, bool skip_completed_check)
+    : test_model::StreamsReaderBase(skip_completed_check), yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "Streams", schema_) {
 }
 
 bool StreamsReader::ReadIntDataImpl(int32_t& value) {
@@ -2588,8 +2588,8 @@ void FixedArraysWriter::WriteNamedArrayImpl(test_model::NamedFixedNDArray const&
   yardl::hdf5::WriteScalarDataset<yardl::FixedNDArray<int32_t, 2, 4>, test_model::NamedFixedNDArray>(group_, "namedArray", yardl::hdf5::FixedNDArrayDdl(H5::PredType::NATIVE_INT32, {2, 4}), value);
 }
 
-FixedArraysReader::FixedArraysReader(std::string path)
-    : yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "FixedArrays", schema_) {
+FixedArraysReader::FixedArraysReader(std::string path, bool skip_completed_check)
+    : test_model::FixedArraysReaderBase(skip_completed_check), yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "FixedArrays", schema_) {
 }
 
 void FixedArraysReader::ReadIntsImpl(yardl::FixedNDArray<int32_t, 2, 3>& value) {
@@ -2652,8 +2652,8 @@ void SubarraysWriter::WriteGenericSubarrayImpl(test_model::Image<yardl::FixedNDA
   yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerNdArray<yardl::FixedNDArray<int32_t, 3>, yardl::FixedNDArray<int32_t, 3>, 2>, test_model::Image<yardl::FixedNDArray<int32_t, 3>>>(group_, "genericSubarray", yardl::hdf5::NDArrayDdl<yardl::FixedNDArray<int32_t, 3>, yardl::FixedNDArray<int32_t, 3>, 2>(yardl::hdf5::FixedNDArrayDdl(H5::PredType::NATIVE_INT32, {3})), value);
 }
 
-SubarraysReader::SubarraysReader(std::string path)
-    : yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "Subarrays", schema_) {
+SubarraysReader::SubarraysReader(std::string path, bool skip_completed_check)
+    : test_model::SubarraysReaderBase(skip_completed_check), yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "Subarrays", schema_) {
 }
 
 void SubarraysReader::ReadDynamicWithFixedIntSubarrayImpl(yardl::DynamicNDArray<yardl::FixedNDArray<int32_t, 3>>& value) {
@@ -2704,8 +2704,8 @@ void SubarraysInRecordsWriter::WriteWithVlenSubarraysImpl(yardl::DynamicNDArray<
   yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerDynamicNdArray<test_model::hdf5::_Inner_RecordWithVlenCollections, test_model::RecordWithVlenCollections>, yardl::DynamicNDArray<test_model::RecordWithVlenCollections>>(group_, "withVlenSubarrays", yardl::hdf5::DynamicNDArrayDdl<test_model::hdf5::_Inner_RecordWithVlenCollections, test_model::RecordWithVlenCollections>(test_model::hdf5::GetRecordWithVlenCollectionsHdf5Ddl()), value);
 }
 
-SubarraysInRecordsReader::SubarraysInRecordsReader(std::string path)
-    : yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "SubarraysInRecords", schema_) {
+SubarraysInRecordsReader::SubarraysInRecordsReader(std::string path, bool skip_completed_check)
+    : test_model::SubarraysInRecordsReaderBase(skip_completed_check), yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "SubarraysInRecords", schema_) {
 }
 
 void SubarraysInRecordsReader::ReadWithFixedSubarraysImpl(yardl::DynamicNDArray<test_model::RecordWithFixedCollections>& value) {
@@ -2740,8 +2740,8 @@ void NDArraysWriter::WriteNamedArrayImpl(test_model::NamedNDArray const& value) 
   yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerNdArray<int32_t, int32_t, 2>, test_model::NamedNDArray>(group_, "namedArray", yardl::hdf5::NDArrayDdl<int32_t, int32_t, 2>(H5::PredType::NATIVE_INT32), value);
 }
 
-NDArraysReader::NDArraysReader(std::string path)
-    : yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "NDArrays", schema_) {
+NDArraysReader::NDArraysReader(std::string path, bool skip_completed_check)
+    : test_model::NDArraysReaderBase(skip_completed_check), yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "NDArrays", schema_) {
 }
 
 void NDArraysReader::ReadIntsImpl(yardl::NDArray<int32_t, 2>& value) {
@@ -2784,8 +2784,8 @@ void NDArraysSingleDimensionWriter::WriteRecordWithNDArraysImpl(test_model::Reco
   yardl::hdf5::WriteScalarDataset<test_model::hdf5::_Inner_RecordWithNDArraysSingleDimension, test_model::RecordWithNDArraysSingleDimension>(group_, "recordWithNDArrays", test_model::hdf5::GetRecordWithNDArraysSingleDimensionHdf5Ddl(), value);
 }
 
-NDArraysSingleDimensionReader::NDArraysSingleDimensionReader(std::string path)
-    : yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "NDArraysSingleDimension", schema_) {
+NDArraysSingleDimensionReader::NDArraysSingleDimensionReader(std::string path, bool skip_completed_check)
+    : test_model::NDArraysSingleDimensionReaderBase(skip_completed_check), yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "NDArraysSingleDimension", schema_) {
 }
 
 void NDArraysSingleDimensionReader::ReadIntsImpl(yardl::NDArray<int32_t, 1>& value) {
@@ -2824,8 +2824,8 @@ void DynamicNDArraysWriter::WriteRecordWithDynamicNDArraysImpl(test_model::Recor
   yardl::hdf5::WriteScalarDataset<test_model::hdf5::_Inner_RecordWithDynamicNDArrays, test_model::RecordWithDynamicNDArrays>(group_, "recordWithDynamicNDArrays", test_model::hdf5::GetRecordWithDynamicNDArraysHdf5Ddl(), value);
 }
 
-DynamicNDArraysReader::DynamicNDArraysReader(std::string path)
-    : yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "DynamicNDArrays", schema_) {
+DynamicNDArraysReader::DynamicNDArraysReader(std::string path, bool skip_completed_check)
+    : test_model::DynamicNDArraysReaderBase(skip_completed_check), yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "DynamicNDArrays", schema_) {
 }
 
 void DynamicNDArraysReader::ReadIntsImpl(yardl::DynamicNDArray<int32_t>& value) {
@@ -2896,8 +2896,8 @@ void MultiDArraysWriter::EndFramesImpl() {
   frames_dataset_state_.reset();
 }
 
-MultiDArraysReader::MultiDArraysReader(std::string path)
-    : yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "MultiDArrays", schema_) {
+MultiDArraysReader::MultiDArraysReader(std::string path, bool skip_completed_check)
+    : test_model::MultiDArraysReaderBase(skip_completed_check), yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "MultiDArrays", schema_) {
 }
 
 bool MultiDArraysReader::ReadImagesImpl(yardl::NDArray<float, 4>& value) {
@@ -2964,8 +2964,8 @@ void ComplexArraysWriter::WriteDoublesImpl(yardl::NDArray<std::complex<double>, 
   yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerNdArray<std::complex<double>, std::complex<double>, 2>, yardl::NDArray<std::complex<double>, 2>>(group_, "doubles", yardl::hdf5::NDArrayDdl<std::complex<double>, std::complex<double>, 2>(yardl::hdf5::ComplexTypeDdl<double>()), value);
 }
 
-ComplexArraysReader::ComplexArraysReader(std::string path)
-    : yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "ComplexArrays", schema_) {
+ComplexArraysReader::ComplexArraysReader(std::string path, bool skip_completed_check)
+    : test_model::ComplexArraysReaderBase(skip_completed_check), yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "ComplexArrays", schema_) {
 }
 
 void ComplexArraysReader::ReadFloatsImpl(yardl::DynamicNDArray<std::complex<float>>& value) {
@@ -3000,8 +3000,8 @@ void MapsWriter::WriteRecordsImpl(std::vector<test_model::RecordWithMaps> const&
   yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerVlen<test_model::hdf5::_Inner_RecordWithMaps, test_model::RecordWithMaps>, std::vector<test_model::RecordWithMaps>>(group_, "records", yardl::hdf5::InnerVlenDdl(test_model::hdf5::GetRecordWithMapsHdf5Ddl()), value);
 }
 
-MapsReader::MapsReader(std::string path)
-    : yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "Maps", schema_) {
+MapsReader::MapsReader(std::string path, bool skip_completed_check)
+    : test_model::MapsReaderBase(skip_completed_check), yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "Maps", schema_) {
 }
 
 void MapsReader::ReadStringToIntImpl(std::unordered_map<std::string, int32_t>& value) {
@@ -3044,8 +3044,8 @@ void UnionsWriter::WriteRecordWithUnionsImpl(basic_types::RecordWithUnions const
   yardl::hdf5::WriteScalarDataset<basic_types::hdf5::_Inner_RecordWithUnions, basic_types::RecordWithUnions>(group_, "recordWithUnions", basic_types::hdf5::GetRecordWithUnionsHdf5Ddl(), value);
 }
 
-UnionsReader::UnionsReader(std::string path)
-    : yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "Unions", schema_) {
+UnionsReader::UnionsReader(std::string path, bool skip_completed_check)
+    : test_model::UnionsReaderBase(skip_completed_check), yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "Unions", schema_) {
 }
 
 void UnionsReader::ReadIntOrSimpleRecordImpl(std::variant<int32_t, test_model::SimpleRecord>& value) {
@@ -3169,8 +3169,8 @@ void StreamsOfUnionsWriter::Flush() {
   }
 }
 
-StreamsOfUnionsReader::StreamsOfUnionsReader(std::string path)
-    : yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "StreamsOfUnions", schema_) {
+StreamsOfUnionsReader::StreamsOfUnionsReader(std::string path, bool skip_completed_check)
+    : test_model::StreamsOfUnionsReaderBase(skip_completed_check), yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "StreamsOfUnions", schema_) {
 }
 
 bool StreamsOfUnionsReader::ReadIntOrSimpleRecordImpl(std::variant<int32_t, test_model::SimpleRecord>& value) {
@@ -3292,8 +3292,8 @@ void EnumsWriter::WriteRecImpl(test_model::RecordWithEnums const& value) {
   yardl::hdf5::WriteScalarDataset<test_model::RecordWithEnums, test_model::RecordWithEnums>(group_, "rec", test_model::hdf5::GetRecordWithEnumsHdf5Ddl(), value);
 }
 
-EnumsReader::EnumsReader(std::string path)
-    : yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "Enums", schema_) {
+EnumsReader::EnumsReader(std::string path, bool skip_completed_check)
+    : test_model::EnumsReaderBase(skip_completed_check), yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "Enums", schema_) {
 }
 
 void EnumsReader::ReadSingleImpl(test_model::Fruits& value) {
@@ -3364,8 +3364,8 @@ void FlagsWriter::EndFormatsImpl() {
   formats_dataset_state_.reset();
 }
 
-FlagsReader::FlagsReader(std::string path)
-    : yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "Flags", schema_) {
+FlagsReader::FlagsReader(std::string path, bool skip_completed_check)
+    : test_model::FlagsReaderBase(skip_completed_check), yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "Flags", schema_) {
 }
 
 bool FlagsReader::ReadDaysImpl(test_model::DaysOfWeek& value) {
@@ -3456,8 +3456,8 @@ void StateTestWriter::WriteAnotherIntImpl(int32_t const& value) {
   yardl::hdf5::WriteScalarDataset<int32_t, int32_t>(group_, "anotherInt", H5::PredType::NATIVE_INT32, value);
 }
 
-StateTestReader::StateTestReader(std::string path)
-    : yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "StateTest", schema_) {
+StateTestReader::StateTestReader(std::string path, bool skip_completed_check)
+    : test_model::StateTestReaderBase(skip_completed_check), yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "StateTest", schema_) {
 }
 
 void StateTestReader::ReadAnIntImpl(int32_t& value) {
@@ -3563,8 +3563,8 @@ void SimpleGenericsWriter::Flush() {
   }
 }
 
-SimpleGenericsReader::SimpleGenericsReader(std::string path)
-    : yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "SimpleGenerics", schema_) {
+SimpleGenericsReader::SimpleGenericsReader(std::string path, bool skip_completed_check)
+    : test_model::SimpleGenericsReaderBase(skip_completed_check), yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "SimpleGenerics", schema_) {
 }
 
 void SimpleGenericsReader::ReadFloatImageImpl(image::FloatImage& value) {
@@ -3650,8 +3650,8 @@ void AdvancedGenericsWriter::WriteTupleOfVectorsImpl(test_model::MyTuple<std::ve
   yardl::hdf5::WriteScalarDataset<tuples::hdf5::_Inner_Tuple<yardl::hdf5::InnerVlen<int32_t, int32_t>, std::vector<int32_t>, yardl::hdf5::InnerVlen<float, float>, std::vector<float>>, test_model::MyTuple<std::vector<int32_t>, std::vector<float>>>(group_, "tupleOfVectors", tuples::hdf5::GetTupleHdf5Ddl<yardl::hdf5::InnerVlen<int32_t, int32_t>, std::vector<int32_t>, yardl::hdf5::InnerVlen<float, float>, std::vector<float>>(yardl::hdf5::InnerVlenDdl(H5::PredType::NATIVE_INT32), yardl::hdf5::InnerVlenDdl(H5::PredType::NATIVE_FLOAT)), value);
 }
 
-AdvancedGenericsReader::AdvancedGenericsReader(std::string path)
-    : yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "AdvancedGenerics", schema_) {
+AdvancedGenericsReader::AdvancedGenericsReader(std::string path, bool skip_completed_check)
+    : test_model::AdvancedGenericsReaderBase(skip_completed_check), yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "AdvancedGenerics", schema_) {
 }
 
 void AdvancedGenericsReader::ReadFloatImageImageImpl(test_model::Image<test_model::Image<float>>& value) {
@@ -3751,8 +3751,8 @@ void AliasesWriter::Flush() {
   }
 }
 
-AliasesReader::AliasesReader(std::string path)
-    : yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "Aliases", schema_) {
+AliasesReader::AliasesReader(std::string path, bool skip_completed_check)
+    : test_model::AliasesReaderBase(skip_completed_check), yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "Aliases", schema_) {
 }
 
 void AliasesReader::ReadAliasedStringImpl(test_model::AliasedString& value) {
@@ -3891,8 +3891,8 @@ void StreamsOfAliasedUnionsWriter::Flush() {
   }
 }
 
-StreamsOfAliasedUnionsReader::StreamsOfAliasedUnionsReader(std::string path)
-    : yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "StreamsOfAliasedUnions", schema_) {
+StreamsOfAliasedUnionsReader::StreamsOfAliasedUnionsReader(std::string path, bool skip_completed_check)
+    : test_model::StreamsOfAliasedUnionsReaderBase(skip_completed_check), yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "StreamsOfAliasedUnions", schema_) {
 }
 
 bool StreamsOfAliasedUnionsReader::ReadIntOrSimpleRecordImpl(test_model::AliasedIntOrSimpleRecord& value) {
@@ -3960,8 +3960,8 @@ void ProtocolWithComputedFieldsWriter::WriteRecordWithComputedFieldsImpl(test_mo
   yardl::hdf5::WriteScalarDataset<test_model::hdf5::_Inner_RecordWithComputedFields, test_model::RecordWithComputedFields>(group_, "recordWithComputedFields", test_model::hdf5::GetRecordWithComputedFieldsHdf5Ddl(), value);
 }
 
-ProtocolWithComputedFieldsReader::ProtocolWithComputedFieldsReader(std::string path)
-    : yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "ProtocolWithComputedFields", schema_) {
+ProtocolWithComputedFieldsReader::ProtocolWithComputedFieldsReader(std::string path, bool skip_completed_check)
+    : test_model::ProtocolWithComputedFieldsReaderBase(skip_completed_check), yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "ProtocolWithComputedFields", schema_) {
 }
 
 void ProtocolWithComputedFieldsReader::ReadRecordWithComputedFieldsImpl(test_model::RecordWithComputedFields& value) {
@@ -4000,8 +4000,8 @@ void ProtocolWithKeywordStepsWriter::WriteFloatImpl(test_model::EnumWithKeywordS
   yardl::hdf5::WriteScalarDataset<test_model::EnumWithKeywordSymbols, test_model::EnumWithKeywordSymbols>(group_, "float", test_model::hdf5::GetEnumWithKeywordSymbolsHdf5Ddl(), value);
 }
 
-ProtocolWithKeywordStepsReader::ProtocolWithKeywordStepsReader(std::string path)
-    : yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "ProtocolWithKeywordSteps", schema_) {
+ProtocolWithKeywordStepsReader::ProtocolWithKeywordStepsReader(std::string path, bool skip_completed_check)
+    : test_model::ProtocolWithKeywordStepsReaderBase(skip_completed_check), yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "ProtocolWithKeywordSteps", schema_) {
 }
 
 bool ProtocolWithKeywordStepsReader::ReadIntImpl(test_model::RecordWithKeywordFields& value) {
@@ -4042,8 +4042,8 @@ void ProtocolWithOptionalDateWriter::WriteRecordImpl(std::optional<test_model::R
   yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerOptional<test_model::hdf5::_Inner_RecordWithOptionalDate, test_model::RecordWithOptionalDate>, std::optional<test_model::RecordWithOptionalDate>>(group_, "record", yardl::hdf5::OptionalTypeDdl<test_model::hdf5::_Inner_RecordWithOptionalDate, test_model::RecordWithOptionalDate>(test_model::hdf5::GetRecordWithOptionalDateHdf5Ddl()), value);
 }
 
-ProtocolWithOptionalDateReader::ProtocolWithOptionalDateReader(std::string path)
-    : yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "ProtocolWithOptionalDate", schema_) {
+ProtocolWithOptionalDateReader::ProtocolWithOptionalDateReader(std::string path, bool skip_completed_check)
+    : test_model::ProtocolWithOptionalDateReaderBase(skip_completed_check), yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "ProtocolWithOptionalDate", schema_) {
 }
 
 void ProtocolWithOptionalDateReader::ReadRecordImpl(std::optional<test_model::RecordWithOptionalDate>& value) {

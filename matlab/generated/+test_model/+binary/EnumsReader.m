@@ -10,8 +10,12 @@ classdef EnumsReader < yardl.binary.BinaryProtocolReader & test_model.EnumsReade
   end
 
   methods
-    function self = EnumsReader(filename)
-      self@test_model.EnumsReaderBase();
+    function self = EnumsReader(filename, options)
+      arguments
+        filename (1,1) string
+        options.skip_completed_check (1,1) logical = false
+      end
+      self@test_model.EnumsReaderBase(skip_completed_check=options.skip_completed_check);
       self@yardl.binary.BinaryProtocolReader(filename, test_model.EnumsReaderBase.schema);
       self.single_serializer = yardl.binary.EnumSerializer('basic_types.Fruits', @basic_types.Fruits, yardl.binary.Int32Serializer);
       self.vec_serializer = yardl.binary.VectorSerializer(yardl.binary.EnumSerializer('basic_types.Fruits', @basic_types.Fruits, yardl.binary.Int32Serializer));

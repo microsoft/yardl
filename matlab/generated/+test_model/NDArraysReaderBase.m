@@ -3,16 +3,21 @@
 classdef NDArraysReaderBase < handle
   properties (Access=protected)
     state_
+    skip_completed_check_
   end
 
   methods
-    function self = NDArraysReaderBase()
+    function self = NDArraysReaderBase(options)
+      arguments
+        options.skip_completed_check (1,1) logical = false
+      end
       self.state_ = 0;
+      self.skip_completed_check_ = options.skip_completed_check;
     end
 
     function close(self)
       self.close_();
-      if self.state_ ~= 5
+      if ~self.skip_completed_check_ && self.state_ ~= 5
         expected_method = self.state_to_method_name_(self.state_);
         throw(yardl.ProtocolError("Protocol reader closed before all data was consumed. Expected call to '%s'.", expected_method));
       end
