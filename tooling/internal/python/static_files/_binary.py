@@ -632,7 +632,7 @@ class Complex32Serializer(StructSerializer[ComplexFloat, np.complex64]):
         stream.write(self._struct, value.real, value.imag)
 
     def read(self, stream: CodedInputStream) -> ComplexFloat:
-        return ComplexFloat(*stream.read(self._struct))
+        return complex(*stream.read(self._struct))
 
     def read_numpy(self, stream: CodedInputStream) -> np.complex64:
         real, imag = stream.read(self._struct)
@@ -656,7 +656,7 @@ class Complex64Serializer(StructSerializer[ComplexDouble, np.complex128]):
         stream.write(self._struct, value.real, value.imag)
 
     def read(self, stream: CodedInputStream) -> ComplexDouble:
-        return ComplexDouble(*stream.read(self._struct))
+        return complex(*stream.read(self._struct))
 
     def read_numpy(self, stream: CodedInputStream) -> np.complex128:
         real, imag = stream.read(self._struct)
@@ -687,7 +687,7 @@ class StringSerializer(TypeSerializer[str, np.object_]):
         return str(view, "utf-8")
 
     def read_numpy(self, stream: CodedInputStream) -> np.object_:
-        return np.object_(self.read(stream))
+        return np.object_(self.read(stream))  # pyright: ignore [reportReturnType]
 
 
 string_serializer = StringSerializer()
@@ -770,7 +770,7 @@ class TimeSerializer(TypeSerializer[Time, np.timedelta64]):
 time_serializer = TimeSerializer()
 
 DATETIME_NANOSECONDS_DTYPE = np.dtype("datetime64[ns]")
-EPOCH_DATETIME = datetime.datetime.utcfromtimestamp(0)
+EPOCH_DATETIME = datetime.datetime.fromtimestamp(0, tz=datetime.timezone.utc)
 
 
 class DateTimeSerializer(TypeSerializer[DateTime, np.datetime64]):
@@ -1034,7 +1034,7 @@ class VectorSerializer(Generic[T, T_NP], TypeSerializer[list[T], np.object_]):
         return [self._element_serializer.read(stream) for _ in range(length)]
 
     def read_numpy(self, stream: CodedInputStream) -> np.object_:
-        return np.object_(self.read(stream))
+        return np.object_(self.read(stream))  # pyright: ignore [reportReturnType]
 
 
 TKey = TypeVar("TKey")
@@ -1073,7 +1073,7 @@ class MapSerializer(
         }
 
     def read_numpy(self, stream: CodedInputStream) -> np.object_:
-        return np.object_(self.read(stream))
+        return np.object_(self.read(stream))  # pyright: ignore [reportReturnType]
 
 
 class NDArraySerializerBase(

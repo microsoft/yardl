@@ -40,6 +40,14 @@ void Read(std::string filename) {
   reader.Close();  // validates that protocol was completed.
 }
 
+void ExecCommand(std::string command) {
+  int ret = std::system(command.c_str());
+  if (ret != 0) {
+    std::cerr << "Command failed: " << command << std::endl;
+    exit(1);
+  }
+}
+
 int main() {
   std::cout << "=================HDF5=================\n\n";
   std::string filename = "sandbox.h5";
@@ -48,7 +56,7 @@ int main() {
   Read<sandbox::hdf5::HelloWorldReader>(filename);
 
   std::cout << "\nh5dump output:\n\n";
-  std::system(("h5dump " + filename).c_str());
+  ExecCommand("h5dump " + filename);
 
   std::cout << "\n================BINARY================\n\n";
   filename = "sandbox.bin";
@@ -57,7 +65,7 @@ int main() {
   Read<sandbox::binary::HelloWorldReader>(filename);
 
   std::cout << "\nhexdump output:\n\n";
-  std::system(("hexdump -C " + filename).c_str());
+  ExecCommand("hexdump -C " + filename);
 
   std::cout << "\n================NDJSON================\n\n";
   filename = "sandbox.ndjson";
@@ -66,7 +74,7 @@ int main() {
   Read<sandbox::ndjson::HelloWorldReader>(filename);
 
   std::cout << "\noutput:\n\n";
-  std::system(("cat " + filename).c_str());
+  ExecCommand("cat " + filename);
 
   return 0;
 }

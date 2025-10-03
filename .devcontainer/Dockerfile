@@ -9,7 +9,7 @@ ARG DEVCONTAINER_BASE=mcr.microsoft.com/devcontainers/base:1.0.9-ubuntu-22.04
 # subsequent stage and normalize the permissions.
 #########################################################
 
-FROM ${DEVCONTAINER_BASE} as file-normalizer
+FROM ${DEVCONTAINER_BASE} AS file-normalizer
 
 COPY environment.yml \
      .devcontainer/devcontainer.bashrc  \
@@ -24,6 +24,70 @@ RUN chmod -R 555 /data/
 #########################################################
 
 FROM ${DEVCONTAINER_BASE} AS devcontainer
+
+#########################################################
+# Install Matlab
+#   Based on mathworks/{matlab-deps:r2023b,matlab:r2023b}
+#
+# Configure the Matlab License Server to use Matlab within the devcontainer (including VSCode extensions):
+#   In your HOST environment, export the environment variable MATLAB_LICENSE_FILE, e.g.
+#       export MATLAB_LICENSE_FILE=/mnt/c/Users/username/Documents/MATLAB/license.lic
+#########################################################
+
+ENV DEBIAN_FRONTEND="noninteractive" TZ="Etc/UTC"
+
+COPY --from=file-normalizer /data/matlab-r2023b.ubuntu-22.04.dependencies.txt /tmp/matlab-dependencies.txt
+
+RUN export DEBIAN_FRONTEND=noninteractive \
+    && apt-get update \
+    && apt-get install --no-install-recommends --yes \
+    `cat /tmp/matlab-dependencies.txt` \
+    wget \
+    unzip \
+    ca-certificates \
+    && apt-get clean \
+    && apt-get -y autoremove \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN [ -d /usr/share/X11/xkb ] || mkdir -p /usr/share/X11/xkb
+
+ARG MATLAB_RELEASE=r2023b
+ARG MATLAB_PRODUCT_LIST="MATLAB"
+ARG MATLAB_INSTALL_LOCATION="/opt/matlab/${MATLAB_RELEASE}"
+ARG LICENSE_SERVER=
+
+RUN adduser --shell /bin/bash --disabled-password --gecos "" matlab \
+    && echo "matlab ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/matlab \
+    && chmod 0440 /etc/sudoers.d/matlab
+
+USER matlab
+WORKDIR /home/matlab
+
+ENV MLM_LICENSE_FILE=${LICENSE_SERVER}
+
+RUN wget -q https://www.mathworks.com/mpm/glnxa64/mpm \
+    && chmod +x mpm \
+    && sudo HOME=${HOME} ./mpm install \
+    --release=${MATLAB_RELEASE} \
+    --destination=${MATLAB_INSTALL_LOCATION} \
+    --products ${MATLAB_PRODUCT_LIST} \
+    || (echo "MPM Installation Failure. See below for more information:" && cat /tmp/mathworks_root.log && false) \
+    && sudo rm -f mpm /tmp/mathworks_root.log \
+    && sudo ln -s ${MATLAB_INSTALL_LOCATION}/bin/matlab /usr/local/bin/matlab \
+    && sudo ln -s ${MATLAB_INSTALL_LOCATION} /opt/matlab/latest \
+    && sudo mkdir -p ${MATLAB_INSTALL_LOCATION}/licenses
+
+# Install workaround run-matlab-command script to unify local and CI invocations of `matlab -batch`
+# See https://github.com/matlab-actions/run-command/issues/53
+RUN sudo wget -O /usr/local/bin/run-matlab-command https://ssd.mathworks.com/supportfiles/ci/run-matlab-command/v2/glnxa64/run-matlab-command \
+    && sudo chmod +x /usr/local/bin/run-matlab-command
+
+
+#########################################################
+# Install everything else
+#########################################################
+
+USER root
 
 # Install needed packages and setup non-root user.
 ARG USERNAME="vscode"
@@ -54,10 +118,10 @@ RUN script=$(curl -fsSL "https://raw.githubusercontent.com/devcontainers/feature
 ENTRYPOINT [ "/usr/local/share/docker-init.sh" ]
 CMD [ "sleep", "infinity" ]
 
-ARG MAMBAFORGE_VERSION=22.9.0-2
+ARG MAMBAFORGE_VERSION=25.3.1-0
 
 # Based on https://github.com/conda-forge/miniforge-images/blob/master/ubuntu/Dockerfile
-RUN wget --no-hsts --quiet https://github.com/conda-forge/miniforge/releases/download/${MAMBAFORGE_VERSION}/Mambaforge-${MAMBAFORGE_VERSION}-Linux-$(uname -m).sh -O /tmp/miniforge.sh \
+RUN wget --no-hsts --quiet https://github.com/conda-forge/miniforge/releases/download/${MAMBAFORGE_VERSION}/Miniforge3-${MAMBAFORGE_VERSION}-Linux-$(uname -m).sh -O /tmp/miniforge.sh \
     && /bin/bash /tmp/miniforge.sh -b -p /opt/conda \
     && rm /tmp/miniforge.sh \
     && /opt/conda/bin/conda clean --tarballs --index-cache --packages --yes \
@@ -118,60 +182,3 @@ RUN . /opt/conda/etc/profile.d/conda.sh \
     && echo "[{\"name\":\"Conda\",\"compilers\":{\"C\":\"$GCC\",\"CXX\":\"$GXX\"}}]" > /home/vscode/.local/share/CMakeTools/cmake-tools-kits.json \
     && chown vscode:conda /home/vscode/.local/share/CMakeTools/cmake-tools-kits.json
 
-
-#########################################################
-# Install Matlab
-#   Based on mathworks/{matlab-deps:r2023b,matlab:r2023b}
-#
-# Configure the Matlab License Server to use Matlab within the devcontainer (including VSCode extensions):
-#   In your HOST environment, export the environment variable MATLAB_LICENSE_FILE, e.g.
-#       export MATLAB_LICENSE_FILE=/mnt/c/Users/username/Documents/MATLAB/license.lic
-#########################################################
-
-ENV DEBIAN_FRONTEND="noninteractive" TZ="Etc/UTC"
-
-COPY --from=file-normalizer /data/matlab-r2023b.ubuntu-22.04.dependencies.txt /tmp/matlab-dependencies.txt
-
-RUN export DEBIAN_FRONTEND=noninteractive \
-    && apt-get update \
-    && apt-get install --no-install-recommends --yes \
-    `cat /tmp/matlab-dependencies.txt` \
-    wget \
-    unzip \
-    ca-certificates \
-    && apt-get clean \
-    && apt-get -y autoremove \
-    && rm -rf /var/lib/apt/lists/*
-
-RUN [ -d /usr/share/X11/xkb ] || mkdir -p /usr/share/X11/xkb
-
-ARG MATLAB_RELEASE=r2023b
-ARG MATLAB_PRODUCT_LIST="MATLAB"
-ARG MATLAB_INSTALL_LOCATION="/opt/matlab/${MATLAB_RELEASE}"
-ARG LICENSE_SERVER=
-
-RUN adduser --shell /bin/bash --disabled-password --gecos "" matlab \
-    && echo "matlab ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/matlab \
-    && chmod 0440 /etc/sudoers.d/matlab
-
-USER matlab
-WORKDIR /home/matlab
-
-ENV MLM_LICENSE_FILE=${LICENSE_SERVER}
-
-RUN wget -q https://www.mathworks.com/mpm/glnxa64/mpm \
-    && chmod +x mpm \
-    && sudo HOME=${HOME} ./mpm install \
-    --release=${MATLAB_RELEASE} \
-    --destination=${MATLAB_INSTALL_LOCATION} \
-    --products ${MATLAB_PRODUCT_LIST} \
-    || (echo "MPM Installation Failure. See below for more information:" && cat /tmp/mathworks_root.log && false) \
-    && sudo rm -f mpm /tmp/mathworks_root.log \
-    && sudo ln -s ${MATLAB_INSTALL_LOCATION}/bin/matlab /usr/local/bin/matlab \
-    && sudo ln -s ${MATLAB_INSTALL_LOCATION} /opt/matlab/latest \
-    && sudo mkdir -p ${MATLAB_INSTALL_LOCATION}/licenses
-
-# Install workaround run-matlab-command script to unify local and CI invocations of `matlab -batch`
-# See https://github.com/matlab-actions/run-command/issues/53
-RUN sudo wget -O /usr/local/bin/run-matlab-command https://ssd.mathworks.com/supportfiles/ci/run-matlab-command/v2/glnxa64/run-matlab-command \
-    && sudo chmod +x /usr/local/bin/run-matlab-command

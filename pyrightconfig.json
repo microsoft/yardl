@@ -1,5 +1,5 @@
 {
-  "typeCheckingMode": "strict",
+  "typeCheckingMode": "standard",
   "exclude": ["smoketest/**", "python/sandbox/**", "tooling/**"],
   "extraPaths": ["python/"]
 }

@@ -5,8 +5,7 @@ import sys
 import numpy as np
 import pytest
 import test_model as tm
-
-# pyright: basic
+import test_model.basic_types as bt
 
 
 def test_defaulting():
@@ -244,3 +243,14 @@ def test_get_dtype():
         tm.get_dtype(tm.AliasedVectorOfGenericRecords[int, float, np.float32])
         == np.object_
     )
+
+
+def test_foo():
+    b = bt.GenericUnion2[int, str].T1(42)
+
+
+def gg(c: bt.GenericUnion2[int, str]) -> int:
+    if isinstance(c, bt.GenericUnion2[int, str].T1):
+        return c.value
+
+    return 0
