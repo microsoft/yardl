@@ -16,7 +16,7 @@ dependencies:
   - gxx_linux-64=15.1.0 # arch=x86_64
   - gxx_linux-aarch64=15.1.0 # arch=aarch64
   - hdf5=1.14.6
-  - howardhinnant_date=3.0.4
+  - howardhinnant_date=3.0.3
   - ipykernel=6.30.1 # local
   - just=1.43.0
   - ninja=1.13.1
