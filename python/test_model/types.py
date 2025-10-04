@@ -1064,8 +1064,8 @@ AliasedOptional = typing.Optional[yardl.Int32]
 AliasedGenericOptional = typing.Optional[T]
 
 class AliasedMultiGenericOptional(typing.Generic[T, U]):
-    T: type["AliasedMultiGenericOptionalUnionCase[T, U, T]"]
-    U: type["AliasedMultiGenericOptionalUnionCase[T, U, U]"]
+    T: typing.ClassVar[type["AliasedMultiGenericOptionalUnionCase[T, U, T]"]] # type: ignore
+    U: typing.ClassVar[type["AliasedMultiGenericOptionalUnionCase[T, U, U]"]] # type: ignore
 
 class AliasedMultiGenericOptionalUnionCase(AliasedMultiGenericOptional[T, U], yardl.UnionCase[_T]):
     pass
@@ -1156,8 +1156,8 @@ class RecordWithAliasedOptionalGenericField(typing.Generic[T]):
 
 
 class UOrV(typing.Generic[U, V]):
-    U: type["UOrVUnionCase[U, V, U]"]
-    V: type["UOrVUnionCase[U, V, V]"]
+    U: typing.ClassVar[type["UOrVUnionCase[U, V, U]"]] # type: ignore
+    V: typing.ClassVar[type["UOrVUnionCase[U, V, V]"]] # type: ignore
 
 class UOrVUnionCase(UOrV[U, V], yardl.UnionCase[_T]):
     pass
@@ -1915,9 +1915,9 @@ class RecordWithComputedFields:
 
 
 class GenericUnionWithRepeatedTypeParameters(typing.Generic[T, T_NP]):
-    T: type["GenericUnionWithRepeatedTypeParametersUnionCase[T, T_NP, T]"]
-    Tv: type["GenericUnionWithRepeatedTypeParametersUnionCase[T, T_NP, list[T]]"]
-    Ta: type["GenericUnionWithRepeatedTypeParametersUnionCase[T, T_NP, npt.NDArray[T_NP]]"]
+    T: typing.ClassVar[type["GenericUnionWithRepeatedTypeParametersUnionCase[T, T_NP, T]"]] # type: ignore
+    Tv: typing.ClassVar[type["GenericUnionWithRepeatedTypeParametersUnionCase[T, T_NP, list[T]]"]] # type: ignore
+    Ta: typing.ClassVar[type["GenericUnionWithRepeatedTypeParametersUnionCase[T, T_NP, npt.NDArray[T_NP]]"]] # type: ignore
 
 class GenericUnionWithRepeatedTypeParametersUnionCase(GenericUnionWithRepeatedTypeParameters[T, T_NP], yardl.UnionCase[_T]):
     pass
@@ -1928,9 +1928,9 @@ GenericUnionWithRepeatedTypeParameters.Ta = type("GenericUnionWithRepeatedTypePa
 del GenericUnionWithRepeatedTypeParametersUnionCase
 
 class GenericUnion3(typing.Generic[T, U, V]):
-    T: type["GenericUnion3UnionCase[T, U, V, T]"]
-    U: type["GenericUnion3UnionCase[T, U, V, U]"]
-    V: type["GenericUnion3UnionCase[T, U, V, V]"]
+    T: typing.ClassVar[type["GenericUnion3UnionCase[T, U, V, T]"]] # type: ignore
+    U: typing.ClassVar[type["GenericUnion3UnionCase[T, U, V, U]"]] # type: ignore
+    V: typing.ClassVar[type["GenericUnion3UnionCase[T, U, V, V]"]] # type: ignore
 
 class GenericUnion3UnionCase(GenericUnion3[T, U, V], yardl.UnionCase[_T]):
     pass
@@ -1941,9 +1941,9 @@ GenericUnion3.V = type("GenericUnion3.V", (GenericUnion3UnionCase,), {"index": 2
 del GenericUnion3UnionCase
 
 class GenericUnion3Alternate(typing.Generic[U, V, W]):
-    U: type["GenericUnion3AlternateUnionCase[U, V, W, U]"]
-    V: type["GenericUnion3AlternateUnionCase[U, V, W, V]"]
-    W: type["GenericUnion3AlternateUnionCase[U, V, W, W]"]
+    U: typing.ClassVar[type["GenericUnion3AlternateUnionCase[U, V, W, U]"]] # type: ignore
+    V: typing.ClassVar[type["GenericUnion3AlternateUnionCase[U, V, W, V]"]] # type: ignore
+    W: typing.ClassVar[type["GenericUnion3AlternateUnionCase[U, V, W, W]"]] # type: ignore
 
 class GenericUnion3AlternateUnionCase(GenericUnion3Alternate[U, V, W], yardl.UnionCase[_T]):
     pass
@@ -2118,7 +2118,7 @@ ImageFloatOrImageDouble.ImageDouble = type("ImageFloatOrImageDouble.ImageDouble"
 del ImageFloatOrImageDoubleUnionCase
 
 def _mk_get_dtype():
-    dtype_map: dict[typing.Union[type, types.GenericAlias], typing.Union[np.dtype[typing.Any], typing.Callable[[tuple[type, ...]], np.dtype[typing.Any]]]] = {}
+    dtype_map: dict[typing.Union[type, types.GenericAlias, typing.Annotated[typing.Any, typing.Any]], typing.Union[np.dtype[typing.Any], typing.Callable[[tuple[type, ...]], np.dtype[typing.Any]]]] = {}
     get_dtype = _dtypes.make_get_dtype_func(dtype_map)
 
     dtype_map.setdefault(tuples.Tuple, lambda type_args: np.dtype([('v1', get_dtype(type_args[0])), ('v2', get_dtype(type_args[1]))], align=True))

@@ -3,6 +3,7 @@
 
 import datetime
 from types import GenericAlias
+from typing import Annotated, Any
 import sys
 
 if sys.version_info >= (3, 10):
@@ -15,10 +16,13 @@ from . import yardl_types as yardl
 
 def make_get_dtype_func(
     dtype_map: dict[
-        Union[type, GenericAlias],
+        Union[type, GenericAlias, Annotated[Any, Any]],
         Union[np.dtype[Any], Callable[[tuple[type, ...]], np.dtype[Any]]],
-    ]
-) -> Callable[[Union[type, GenericAlias]], np.dtype[Any]]:
+    ],
+) -> Callable[
+    [Union[type, GenericAlias, Annotated[Any, Any]]],
+    np.dtype[Any],
+]:
     dtype_map[bool] = np.dtype(np.bool_)
     dtype_map[yardl.Int8] = np.dtype(np.int8)
     dtype_map[yardl.UInt8] = np.dtype(np.uint8)
@@ -50,7 +54,7 @@ def make_get_dtype_func(
 
     def get_dtype_impl(
         dtype_map: dict[
-            Union[type, GenericAlias],
+            Union[type, GenericAlias, Annotated[Any, Any]],
             Union[np.dtype[Any], Callable[[tuple[type, ...]], np.dtype[Any]]],
         ],
         t: Union[type, GenericAlias],
@@ -65,7 +69,8 @@ def make_get_dtype_func(
         origin = get_origin(t)
 
         if origin == Union or (
-            sys.version_info >= (3, 10) and isinstance(t, UnionType)
+            sys.version_info >= (3, 10)
+            and isinstance(t, UnionType)  # pyright: ignore[reportUnnecessaryIsInstance]
         ):
             return _get_union_dtype(get_args(t))
 

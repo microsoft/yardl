@@ -76,8 +76,8 @@ MyTuple = tuples.Tuple
 _T = typing.TypeVar('_T')
 
 class GenericUnion2(typing.Generic[T1, T2]):
-    T1: type["GenericUnion2UnionCase[T1, T2, T1]"]
-    T2: type["GenericUnion2UnionCase[T1, T2, T2]"]
+    T1: typing.ClassVar[type["GenericUnion2UnionCase[T1, T2, T1]"]] # type: ignore
+    T2: typing.ClassVar[type["GenericUnion2UnionCase[T1, T2, T2]"]] # type: ignore
 
 class GenericUnion2UnionCase(GenericUnion2[T1, T2], yardl.UnionCase[_T]):
     pass
@@ -87,8 +87,8 @@ GenericUnion2.T2 = type("GenericUnion2.T2", (GenericUnion2UnionCase,), {"index":
 del GenericUnion2UnionCase
 
 class GenericNullableUnion2(typing.Generic[T1, T2]):
-    T1: type["GenericNullableUnion2UnionCase[T1, T2, T1]"]
-    T2: type["GenericNullableUnion2UnionCase[T1, T2, T2]"]
+    T1: typing.ClassVar[type["GenericNullableUnion2UnionCase[T1, T2, T1]"]] # type: ignore
+    T2: typing.ClassVar[type["GenericNullableUnion2UnionCase[T1, T2, T2]"]] # type: ignore
 
 class GenericNullableUnion2UnionCase(GenericNullableUnion2[T1, T2], yardl.UnionCase[_T]):
     pass
@@ -187,8 +187,8 @@ class RecordWithUnions:
 
 
 class T0OrT1(typing.Generic[T0, T1]):
-    T0: type["T0OrT1UnionCase[T0, T1, T0]"]
-    T1: type["T0OrT1UnionCase[T0, T1, T1]"]
+    T0: typing.ClassVar[type["T0OrT1UnionCase[T0, T1, T0]"]] # type: ignore
+    T1: typing.ClassVar[type["T0OrT1UnionCase[T0, T1, T1]"]] # type: ignore
 
 class T0OrT1UnionCase(T0OrT1[T0, T1], yardl.UnionCase[_T]):
     pass
@@ -227,7 +227,7 @@ class GenericRecordWithComputedFields(typing.Generic[T0, T1]):
 
 
 def _mk_get_dtype():
-    dtype_map: dict[typing.Union[type, types.GenericAlias], typing.Union[np.dtype[typing.Any], typing.Callable[[tuple[type, ...]], np.dtype[typing.Any]]]] = {}
+    dtype_map: dict[typing.Union[type, types.GenericAlias, typing.Annotated[typing.Any, typing.Any]], typing.Union[np.dtype[typing.Any], typing.Callable[[tuple[type, ...]], np.dtype[typing.Any]]]] = {}
     get_dtype = _dtypes.make_get_dtype_func(dtype_map)
 
     dtype_map.setdefault(tuples.Tuple, lambda type_args: np.dtype([('v1', get_dtype(type_args[0])), ('v2', get_dtype(type_args[1]))], align=True))

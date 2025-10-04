@@ -143,7 +143,7 @@ func writeUnionClass(w *formatting.IndentedWriter, className string, typeParamet
 			}
 
 			if len(typeParameters) > 0 {
-				fmt.Fprintf(w, "%s: type[\"%s[%s, %s]\"]\n", formatting.ToPascalCase(tc.Tag), unionCaseType, typeParameters, common.TypeSyntax(tc.Type, contextNamespace))
+				fmt.Fprintf(w, "%s: typing.ClassVar[type[\"%s[%s, %s]\"]] # type: ignore\n", formatting.ToPascalCase(tc.Tag), unionCaseType, typeParameters, common.TypeSyntax(tc.Type, contextNamespace))
 			} else {
 				fmt.Fprintf(w, "%s: typing.ClassVar[type[\"%s[%s]\"]]\n", formatting.ToPascalCase(tc.Tag), unionCaseType, common.TypeSyntax(tc.Type, contextNamespace))
 			}
@@ -978,7 +978,7 @@ func typeDefinitionDefault(t dsl.TypeDefinition, contextNamespace string, st dsl
 func writeGetDTypeFunc(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 	w.WriteStringln("def _mk_get_dtype():")
 	w.Indented(func() {
-		w.WriteStringln("dtype_map: dict[typing.Union[type, types.GenericAlias], typing.Union[np.dtype[typing.Any], typing.Callable[[tuple[type, ...]], np.dtype[typing.Any]]]] = {}")
+		w.WriteStringln("dtype_map: dict[typing.Union[type, types.GenericAlias, typing.Annotated[typing.Any, typing.Any]], typing.Union[np.dtype[typing.Any], typing.Callable[[tuple[type, ...]], np.dtype[typing.Any]]]] = {}")
 		w.WriteStringln("get_dtype = _dtypes.make_get_dtype_func(dtype_map)\n")
 
 		context := dTypeExpressionContext{

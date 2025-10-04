@@ -8,8 +8,6 @@ import test_model as tm
 from .factories import Format
 from .factories import get_reader_writer_types
 
-# pyright: basic
-
 
 _translator_path = (
     pathlib.Path(__file__).parent / "../../cpp/build/translator"
@@ -123,8 +121,8 @@ def create_validating_writer_class(
 
             self = args[0]
             this_buffer = self._buffer.getvalue()
-            validating_instance = validating_class(in_memory_stream_class())
-            validating_instance._recorded_arguments = (  # pyright: ignore[reportGeneralTypeIssues]
+            validating_instance = validating_class(in_memory_stream_class())  # type: ignore
+            validating_instance._recorded_arguments = (  # type: ignore
                 self._recorded_arguments
             )
 
@@ -140,11 +138,7 @@ def create_validating_writer_class(
             # and validate that we get the same data
             cpp_output = invoke_translator(this_buffer, format, format)
 
-            reader = reader_class(
-                in_memory_stream_class(
-                    cpp_output  # pyright: ignore[reportGeneralTypeIssues]
-                )
-            )
+            reader = reader_class(in_memory_stream_class(cpp_output))  # type: ignore
             reader.copy_to(validating_instance)
 
             # 3. Now use the translator to convert the output to the other format,
@@ -165,7 +159,7 @@ def create_validating_writer_class(
 
             reader = other_format_reader_class(
                 in_memory_stream_class_other_format(
-                    cpp_output_other_format  # pyright: ignore[reportGeneralTypeIssues]
+                    cpp_output_other_format  # type: ignore
                 )
             )
             reader.copy_to(validating_instance)
@@ -177,9 +171,7 @@ def create_validating_writer_class(
             args[0]._recorded_arguments = recorded_args
             buf = in_memory_stream_class()
             args[0]._buffer = buf
-            return writer_class.__init__(
-                args[0], buf, **kwargs
-            )  # pyright: ignore[reportGeneralTypeIssues]
+            return writer_class.__init__(args[0], buf, **kwargs)  # type: ignore
 
         attrs["__init__"] = init_wrapper
 

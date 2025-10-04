@@ -34,7 +34,15 @@ class NDArray {
     this->dimensions_.clear();
   }
 
+  // NOTE:
+  // GCC (observed on version 15) appears to emit a false -Wmaybe-uninitialized
+  // when this type is the value inside a std::optional and get_size() is
+  // invoked immediately after an has_value()/if(optional) check.
   size_t get_size() const {
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#endif
     if (this->dimensions_.empty()) {
       return 0;
     }
@@ -43,6 +51,9 @@ class NDArray {
     for (size_t dim : this->dimensions_) {
       s *= dim;
     }
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
     return s;
   }
 

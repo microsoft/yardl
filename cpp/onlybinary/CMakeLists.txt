@@ -1,5 +1,5 @@
-project(OnlyBinary)
 cmake_minimum_required(VERSION 3.21)
+project(OnlyBinary)
 
 add_executable(test_only_binary only_binary.cc)
 

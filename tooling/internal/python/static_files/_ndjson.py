@@ -568,7 +568,7 @@ class StringConverter(JsonConverter[str, np.object_]):
         return cast(str, json_object)
 
     def from_json_to_numpy(self, json_object: object) -> np.object_:
-        return np.object_(json_object)
+        return np.object_(json_object)  # pyright: ignore [reportReturnType]
 
 
 string_converter = StringConverter()
