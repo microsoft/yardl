@@ -2,10 +2,17 @@
 
 #include <utility>
 
+#if XTENSOR_VERSION_MAJOR==0 && XTENSOR_VERSION_MINOR < 26
 #include <xtensor/xarray.hpp>
 #include <xtensor/xfixed.hpp>
 #include <xtensor/xio.hpp>
 #include <xtensor/xtensor.hpp>
+#else
+#include <xtensor/containers/xarray.hpp>
+#include <xtensor/containers/xfixed.hpp>
+#include <xtensor/io/xio.hpp>
+#include <xtensor/containers/xtensor.hpp>
+#endif
 
 namespace yardl {
 
