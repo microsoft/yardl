@@ -29,4 +29,4 @@ dependencies:
   - rich=14.1.0
   - shellcheck=0.10.0 # local
   - valgrind=3.25.1 # local arch=x86_64
-  - xtensor=0.25.0
+  - xtensor=0.27.1
