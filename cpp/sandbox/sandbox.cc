@@ -4,8 +4,6 @@
 #include <filesystem>
 #include <iostream>
 
-#include <xtensor/xio.hpp>
-
 #include "generated/binary/protocols.h"
 #include "generated/hdf5/protocols.h"
 #include "generated/ndjson/protocols.h"
