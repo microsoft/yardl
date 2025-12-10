@@ -3,7 +3,17 @@
 #include <array>
 #include <cstddef>
 
+#if __has_include(<xtensor/core/xtensor_config.hpp>)
+#include <xtensor/core/xtensor_config.hpp>
+#else
+#include <xtensor/xtensor_config.hpp>
+#endif
+
+#if XTENSOR_VERSION_MAJOR == 0 && XTENSOR_VERSION_MINOR <= 25
 #include <xtensor/xfixed.hpp>
+#else
+#include <xtensor/containers/xfixed.hpp>
+#endif
 
 #include "hoNDArray.h"
 
