@@ -1458,6 +1458,24 @@
                     "values": "bool"
                   }
                 }
+              },
+              {
+                "name": "set3",
+                "type": {
+                  "map": {
+                    "keys": "string",
+                    "values": [
+                      {
+                        "tag": "string",
+                        "type": "string"
+                      },
+                      {
+                        "tag": "int32",
+                        "type": "int32"
+                      }
+                    ]
+                  }
+                }
               }
             ]
           }
@@ -5096,6 +5114,23 @@
                   "type": "TestModel.SimpleRecord"
                 }
               ]
+            },
+            {
+              "name": "vectorOfUnions",
+              "type": {
+                "vector": {
+                  "items": [
+                    {
+                      "tag": "string",
+                      "type": "string"
+                    },
+                    {
+                      "tag": "int32",
+                      "type": "int32"
+                    }
+                  ]
+                }
+              }
             },
             {
               "name": "recordWithUnions",

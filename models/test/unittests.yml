@@ -313,6 +313,9 @@ RecordWithMaps: !record
   fields:
     set1: uint->uint
     set2: int->bool
+    set3: !map
+      keys: string
+      values: [string, int]
 
 Maps: !protocol
   sequence:
@@ -329,6 +332,8 @@ Unions: !protocol
     intOrSimpleRecord: [int, SimpleRecord]
     intOrRecordWithVlens: [int, RecordWithVlens]
     monosotateOrIntOrSimpleRecord: [null, int, SimpleRecord]
+    vectorOfUnions: !vector
+      items: [string, int]
     recordWithUnions: BasicTypes.RecordWithUnions
 
 StreamsOfUnions: !protocol

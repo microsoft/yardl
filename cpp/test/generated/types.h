@@ -592,10 +592,12 @@ using NamedNDArray = yardl::NDArray<int32_t, 2>;
 struct RecordWithMaps {
   std::unordered_map<uint32_t, uint32_t> set_1{};
   std::unordered_map<int32_t, bool> set_2{};
+  std::unordered_map<std::string, std::variant<std::string, int32_t>> set_3{};
 
   bool operator==(const RecordWithMaps& other) const {
     return set_1 == other.set_1 &&
-      set_2 == other.set_2;
+      set_2 == other.set_2 &&
+      set_3 == other.set_3;
   }
 
   bool operator!=(const RecordWithMaps& other) const {

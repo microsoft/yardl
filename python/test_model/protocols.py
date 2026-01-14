@@ -4123,7 +4123,7 @@ class MapsWriterBase(abc.ABC):
     def __init__(self) -> None:
         self._state = 0
 
-    schema = r"""{"protocol":{"name":"Maps","sequence":[{"name":"stringToInt","type":{"map":{"keys":"string","values":"int32"}}},{"name":"intToString","type":{"map":{"keys":"int32","values":"string"}}},{"name":"stringToUnion","type":{"map":{"keys":"string","values":[{"tag":"string","type":"string"},{"tag":"int32","type":"int32"}]}}},{"name":"aliasedGeneric","type":{"name":"BasicTypes.AliasedMap","typeArguments":["string","int32"]}},{"name":"records","type":{"vector":{"items":"TestModel.RecordWithMaps"}}}]},"types":[{"name":"AliasedMap","typeParameters":["K","V"],"type":{"map":{"keys":"K","values":"V"}}},{"name":"RecordWithMaps","fields":[{"name":"set1","type":{"map":{"keys":"uint32","values":"uint32"}}},{"name":"set2","type":{"map":{"keys":"int32","values":"bool"}}}]}]}"""
+    schema = r"""{"protocol":{"name":"Maps","sequence":[{"name":"stringToInt","type":{"map":{"keys":"string","values":"int32"}}},{"name":"intToString","type":{"map":{"keys":"int32","values":"string"}}},{"name":"stringToUnion","type":{"map":{"keys":"string","values":[{"tag":"string","type":"string"},{"tag":"int32","type":"int32"}]}}},{"name":"aliasedGeneric","type":{"name":"BasicTypes.AliasedMap","typeArguments":["string","int32"]}},{"name":"records","type":{"vector":{"items":"TestModel.RecordWithMaps"}}}]},"types":[{"name":"AliasedMap","typeParameters":["K","V"],"type":{"map":{"keys":"K","values":"V"}}},{"name":"RecordWithMaps","fields":[{"name":"set1","type":{"map":{"keys":"uint32","values":"uint32"}}},{"name":"set2","type":{"map":{"keys":"int32","values":"bool"}}},{"name":"set3","type":{"map":{"keys":"string","values":[{"tag":"string","type":"string"},{"tag":"int32","type":"int32"}]}}}]}]}"""
 
     def close(self) -> None:
         self._close()
@@ -4378,11 +4378,11 @@ class UnionsWriterBase(abc.ABC):
     def __init__(self) -> None:
         self._state = 0
 
-    schema = r"""{"protocol":{"name":"Unions","sequence":[{"name":"intOrSimpleRecord","type":[{"tag":"int32","type":"int32"},{"tag":"SimpleRecord","type":"TestModel.SimpleRecord"}]},{"name":"intOrRecordWithVlens","type":[{"tag":"int32","type":"int32"},{"tag":"RecordWithVlens","type":"TestModel.RecordWithVlens"}]},{"name":"monosotateOrIntOrSimpleRecord","type":[null,{"tag":"int32","type":"int32"},{"tag":"SimpleRecord","type":"TestModel.SimpleRecord"}]},{"name":"recordWithUnions","type":"BasicTypes.RecordWithUnions"}]},"types":[{"name":"DaysOfWeek","values":[{"symbol":"monday","value":1},{"symbol":"tuesday","value":2},{"symbol":"wednesday","value":4},{"symbol":"thursday","value":8},{"symbol":"friday","value":16},{"symbol":"saturday","value":32},{"symbol":"sunday","value":64}]},{"name":"Fruits","values":[{"symbol":"apple","value":1},{"symbol":"banana","value":2},{"symbol":"pear","value":3}]},{"name":"GenericNullableUnion2","typeParameters":["T1","T2"],"type":[null,{"tag":"T1","type":"T1"},{"tag":"T2","type":"T2"}]},{"name":"RecordWithString","fields":[{"name":"i","type":"string"}]},{"name":"RecordWithUnions","fields":[{"name":"nullOrIntOrString","type":[null,{"tag":"int32","type":"int32"},{"tag":"string","type":"string"}]},{"name":"dateOrDatetime","type":[{"tag":"time","type":"time"},{"tag":"datetime","type":"datetime"}]},{"name":"nullOrFruitsOrDaysOfWeek","type":{"name":"BasicTypes.GenericNullableUnion2","typeArguments":["BasicTypes.Fruits","BasicTypes.DaysOfWeek"]}},{"name":"recordOrInt","type":[{"tag":"RecordWithString","type":"BasicTypes.RecordWithString"},{"tag":"int32","type":"int32"}]}]},{"name":"RecordWithVlens","fields":[{"name":"a","type":{"vector":{"items":"TestModel.SimpleRecord"}}},{"name":"b","type":"int32"},{"name":"c","type":"int32"}]},{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]}]}"""
+    schema = r"""{"protocol":{"name":"Unions","sequence":[{"name":"intOrSimpleRecord","type":[{"tag":"int32","type":"int32"},{"tag":"SimpleRecord","type":"TestModel.SimpleRecord"}]},{"name":"intOrRecordWithVlens","type":[{"tag":"int32","type":"int32"},{"tag":"RecordWithVlens","type":"TestModel.RecordWithVlens"}]},{"name":"monosotateOrIntOrSimpleRecord","type":[null,{"tag":"int32","type":"int32"},{"tag":"SimpleRecord","type":"TestModel.SimpleRecord"}]},{"name":"vectorOfUnions","type":{"vector":{"items":[{"tag":"string","type":"string"},{"tag":"int32","type":"int32"}]}}},{"name":"recordWithUnions","type":"BasicTypes.RecordWithUnions"}]},"types":[{"name":"DaysOfWeek","values":[{"symbol":"monday","value":1},{"symbol":"tuesday","value":2},{"symbol":"wednesday","value":4},{"symbol":"thursday","value":8},{"symbol":"friday","value":16},{"symbol":"saturday","value":32},{"symbol":"sunday","value":64}]},{"name":"Fruits","values":[{"symbol":"apple","value":1},{"symbol":"banana","value":2},{"symbol":"pear","value":3}]},{"name":"GenericNullableUnion2","typeParameters":["T1","T2"],"type":[null,{"tag":"T1","type":"T1"},{"tag":"T2","type":"T2"}]},{"name":"RecordWithString","fields":[{"name":"i","type":"string"}]},{"name":"RecordWithUnions","fields":[{"name":"nullOrIntOrString","type":[null,{"tag":"int32","type":"int32"},{"tag":"string","type":"string"}]},{"name":"dateOrDatetime","type":[{"tag":"time","type":"time"},{"tag":"datetime","type":"datetime"}]},{"name":"nullOrFruitsOrDaysOfWeek","type":{"name":"BasicTypes.GenericNullableUnion2","typeArguments":["BasicTypes.Fruits","BasicTypes.DaysOfWeek"]}},{"name":"recordOrInt","type":[{"tag":"RecordWithString","type":"BasicTypes.RecordWithString"},{"tag":"int32","type":"int32"}]}]},{"name":"RecordWithVlens","fields":[{"name":"a","type":{"vector":{"items":"TestModel.SimpleRecord"}}},{"name":"b","type":"int32"},{"name":"c","type":"int32"}]},{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]}]}"""
 
     def close(self) -> None:
         self._close()
-        if self._state != 8:
+        if self._state != 10:
             expected_method = self._state_to_method_name((self._state + 1) & ~1)
             raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
 
@@ -4423,14 +4423,23 @@ class UnionsWriterBase(abc.ABC):
         self._write_monosotate_or_int_or_simple_record(value)
         self._state = 6
 
-    def write_record_with_unions(self, value: basic_types.RecordWithUnions) -> None:
+    def write_vector_of_unions(self, value: list[StringOrInt32]) -> None:
         """Ordinal 3"""
 
         if self._state != 6:
             self._raise_unexpected_state(6)
 
-        self._write_record_with_unions(value)
+        self._write_vector_of_unions(value)
         self._state = 8
+
+    def write_record_with_unions(self, value: basic_types.RecordWithUnions) -> None:
+        """Ordinal 4"""
+
+        if self._state != 8:
+            self._raise_unexpected_state(8)
+
+        self._write_record_with_unions(value)
+        self._state = 10
 
     @abc.abstractmethod
     def _write_int_or_simple_record(self, value: Int32OrSimpleRecord) -> None:
@@ -4442,6 +4451,10 @@ class UnionsWriterBase(abc.ABC):
 
     @abc.abstractmethod
     def _write_monosotate_or_int_or_simple_record(self, value: typing.Optional[Int32OrSimpleRecord]) -> None:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _write_vector_of_unions(self, value: list[StringOrInt32]) -> None:
         raise NotImplementedError()
 
     @abc.abstractmethod
@@ -4469,6 +4482,8 @@ class UnionsWriterBase(abc.ABC):
         if state == 4:
             return 'write_monosotate_or_int_or_simple_record'
         if state == 6:
+            return 'write_vector_of_unions'
+        if state == 8:
             return 'write_record_with_unions'
         return "<unknown>"
 
@@ -4482,7 +4497,7 @@ class UnionsReaderBase(abc.ABC):
 
     def close(self) -> None:
         self._close()
-        if not self._skip_completed_check and self._state != 8:
+        if not self._skip_completed_check and self._state != 10:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
@@ -4537,20 +4552,31 @@ class UnionsReaderBase(abc.ABC):
         self._state = 6
         return value
 
-    def read_record_with_unions(self) -> basic_types.RecordWithUnions:
+    def read_vector_of_unions(self) -> list[StringOrInt32]:
         """Ordinal 3"""
 
         if self._state != 6:
             self._raise_unexpected_state(6)
 
-        value = self._read_record_with_unions()
+        value = self._read_vector_of_unions()
         self._state = 8
+        return value
+
+    def read_record_with_unions(self) -> basic_types.RecordWithUnions:
+        """Ordinal 4"""
+
+        if self._state != 8:
+            self._raise_unexpected_state(8)
+
+        value = self._read_record_with_unions()
+        self._state = 10
         return value
 
     def copy_to(self, writer: UnionsWriterBase) -> None:
         writer.write_int_or_simple_record(self.read_int_or_simple_record())
         writer.write_int_or_record_with_vlens(self.read_int_or_record_with_vlens())
         writer.write_monosotate_or_int_or_simple_record(self.read_monosotate_or_int_or_simple_record())
+        writer.write_vector_of_unions(self.read_vector_of_unions())
         writer.write_record_with_unions(self.read_record_with_unions())
 
     @abc.abstractmethod
@@ -4563,6 +4589,10 @@ class UnionsReaderBase(abc.ABC):
 
     @abc.abstractmethod
     def _read_monosotate_or_int_or_simple_record(self) -> typing.Optional[Int32OrSimpleRecord]:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _read_vector_of_unions(self) -> list[StringOrInt32]:
         raise NotImplementedError()
 
     @abc.abstractmethod
@@ -4591,6 +4621,8 @@ class UnionsReaderBase(abc.ABC):
         if state == 4:
             return 'read_monosotate_or_int_or_simple_record'
         if state == 6:
+            return 'read_vector_of_unions'
+        if state == 8:
             return 'read_record_with_unions'
         return "<unknown>"
 

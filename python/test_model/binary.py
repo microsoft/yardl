@@ -823,6 +823,9 @@ class BinaryUnionsWriter(_binary.BinaryProtocolWriter, UnionsWriterBase):
     def _write_monosotate_or_int_or_simple_record(self, value: typing.Optional[Int32OrSimpleRecord]) -> None:
         _binary.UnionSerializer(Int32OrSimpleRecord, [None, (Int32OrSimpleRecord.Int32, _binary.int32_serializer), (Int32OrSimpleRecord.SimpleRecord, SimpleRecordSerializer())]).write(self._stream, value)
 
+    def _write_vector_of_unions(self, value: list[StringOrInt32]) -> None:
+        _binary.VectorSerializer(_binary.UnionSerializer(StringOrInt32, [(StringOrInt32.String, _binary.string_serializer), (StringOrInt32.Int32, _binary.int32_serializer)])).write(self._stream, value)
+
     def _write_record_with_unions(self, value: basic_types.RecordWithUnions) -> None:
         basic_types.binary.RecordWithUnionsSerializer().write(self._stream, value)
 
@@ -843,6 +846,9 @@ class BinaryUnionsReader(_binary.BinaryProtocolReader, UnionsReaderBase):
 
     def _read_monosotate_or_int_or_simple_record(self) -> typing.Optional[Int32OrSimpleRecord]:
         return _binary.UnionSerializer(Int32OrSimpleRecord, [None, (Int32OrSimpleRecord.Int32, _binary.int32_serializer), (Int32OrSimpleRecord.SimpleRecord, SimpleRecordSerializer())]).read(self._stream)
+
+    def _read_vector_of_unions(self) -> list[StringOrInt32]:
+        return _binary.VectorSerializer(_binary.UnionSerializer(StringOrInt32, [(StringOrInt32.String, _binary.string_serializer), (StringOrInt32.Int32, _binary.int32_serializer)])).read(self._stream)
 
     def _read_record_with_unions(self) -> basic_types.RecordWithUnions:
         return basic_types.binary.RecordWithUnionsSerializer().read(self._stream)
@@ -1726,20 +1732,20 @@ class RecordWithUnionsOfContainersSerializer(_binary.RecordSerializer[RecordWith
 
 class RecordWithMapsSerializer(_binary.RecordSerializer[RecordWithMaps]):
     def __init__(self) -> None:
-        super().__init__([("set_1", _binary.MapSerializer(_binary.uint32_serializer, _binary.uint32_serializer)), ("set_2", _binary.MapSerializer(_binary.int32_serializer, _binary.bool_serializer))])
+        super().__init__([("set_1", _binary.MapSerializer(_binary.uint32_serializer, _binary.uint32_serializer)), ("set_2", _binary.MapSerializer(_binary.int32_serializer, _binary.bool_serializer)), ("set_3", _binary.MapSerializer(_binary.string_serializer, _binary.UnionSerializer(StringOrInt32, [(StringOrInt32.String, _binary.string_serializer), (StringOrInt32.Int32, _binary.int32_serializer)])))])
 
     def write(self, stream: _binary.CodedOutputStream, value: RecordWithMaps) -> None:
         if isinstance(value, np.void):
             self.write_numpy(stream, value)
             return
-        self._write(stream, value.set_1, value.set_2)
+        self._write(stream, value.set_1, value.set_2, value.set_3)
 
     def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
-        self._write(stream, value['set_1'], value['set_2'])
+        self._write(stream, value['set_1'], value['set_2'], value['set_3'])
 
     def read(self, stream: _binary.CodedInputStream) -> RecordWithMaps:
         field_values = self._read(stream)
-        return RecordWithMaps(set_1=field_values[0], set_2=field_values[1])
+        return RecordWithMaps(set_1=field_values[0], set_2=field_values[1], set_3=field_values[2])
 
 
 class RecordWithNoDefaultEnumSerializer(_binary.RecordSerializer[RecordWithNoDefaultEnum]):

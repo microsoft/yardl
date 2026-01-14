@@ -889,29 +889,44 @@ class RecordWithUnionsOfContainers:
 
 NamedNDArray = npt.NDArray[np.int32]
 
+class StringOrInt32:
+    String: typing.ClassVar[type["StringOrInt32UnionCase[str]"]]
+    Int32: typing.ClassVar[type["StringOrInt32UnionCase[yardl.Int32]"]]
+
+class StringOrInt32UnionCase(StringOrInt32, yardl.UnionCase[_T]):
+    pass
+
+StringOrInt32.String = type("StringOrInt32.String", (StringOrInt32UnionCase,), {"index": 0, "tag": "string"})
+StringOrInt32.Int32 = type("StringOrInt32.Int32", (StringOrInt32UnionCase,), {"index": 1, "tag": "int32"})
+del StringOrInt32UnionCase
+
 class RecordWithMaps:
     set_1: dict[yardl.UInt32, yardl.UInt32]
     set_2: dict[yardl.Int32, bool]
+    set_3: dict[str, StringOrInt32]
 
     def __init__(self, *,
         set_1: typing.Optional[dict[yardl.UInt32, yardl.UInt32]] = None,
         set_2: typing.Optional[dict[yardl.Int32, bool]] = None,
+        set_3: typing.Optional[dict[str, StringOrInt32]] = None,
     ):
         self.set_1 = set_1 if set_1 is not None else {}
         self.set_2 = set_2 if set_2 is not None else {}
+        self.set_3 = set_3 if set_3 is not None else {}
 
     def __eq__(self, other: object) -> bool:
         return (
             isinstance(other, RecordWithMaps)
             and self.set_1 == other.set_1
             and self.set_2 == other.set_2
+            and self.set_3 == other.set_3
         )
 
     def __str__(self) -> str:
-        return f"RecordWithMaps(set_1={self.set_1}, set_2={self.set_2})"
+        return f"RecordWithMaps(set_1={self.set_1}, set_2={self.set_2}, set_3={self.set_3})"
 
     def __repr__(self) -> str:
-        return f"RecordWithMaps(set_1={repr(self.set_1)}, set_2={repr(self.set_2)})"
+        return f"RecordWithMaps(set_1={repr(self.set_1)}, set_2={repr(self.set_2)}, set_3={repr(self.set_3)})"
 
 
 Fruits = basic_types.Fruits
@@ -2056,17 +2071,6 @@ AcquisitionOrImage.Acquisition = type("AcquisitionOrImage.Acquisition", (Acquisi
 AcquisitionOrImage.Image = type("AcquisitionOrImage.Image", (AcquisitionOrImageUnionCase,), {"index": 1, "tag": "image"})
 del AcquisitionOrImageUnionCase
 
-class StringOrInt32:
-    String: typing.ClassVar[type["StringOrInt32UnionCase[str]"]]
-    Int32: typing.ClassVar[type["StringOrInt32UnionCase[yardl.Int32]"]]
-
-class StringOrInt32UnionCase(StringOrInt32, yardl.UnionCase[_T]):
-    pass
-
-StringOrInt32.String = type("StringOrInt32.String", (StringOrInt32UnionCase,), {"index": 0, "tag": "string"})
-StringOrInt32.Int32 = type("StringOrInt32.Int32", (StringOrInt32UnionCase,), {"index": 1, "tag": "int32"})
-del StringOrInt32UnionCase
-
 class Int32OrSimpleRecord:
     Int32: typing.ClassVar[type["Int32OrSimpleRecordUnionCase[yardl.Int32]"]]
     SimpleRecord: typing.ClassVar[type["Int32OrSimpleRecordUnionCase[SimpleRecord]"]]
@@ -2175,7 +2179,10 @@ def _mk_get_dtype():
     dtype_map.setdefault(ArrayOrScalar, np.dtype(np.object_))
     dtype_map.setdefault(ArrayOrScalar.Array, np.dtype(np.object_))
     dtype_map.setdefault(ArrayOrScalar.Scalar, np.dtype(np.int32))
-    dtype_map.setdefault(RecordWithMaps, np.dtype([('set_1', np.dtype(np.object_)), ('set_2', np.dtype(np.object_))], align=True))
+    dtype_map.setdefault(RecordWithMaps, np.dtype([('set_1', np.dtype(np.object_)), ('set_2', np.dtype(np.object_)), ('set_3', np.dtype(np.object_))], align=True))
+    dtype_map.setdefault(StringOrInt32, np.dtype(np.object_))
+    dtype_map.setdefault(StringOrInt32.String, np.dtype(np.object_))
+    dtype_map.setdefault(StringOrInt32.Int32, np.dtype(np.int32))
     dtype_map.setdefault(Fruits, get_dtype(basic_types.Fruits))
     dtype_map.setdefault(UInt64Enum, np.dtype(np.uint64))
     dtype_map.setdefault(Int64Enum, np.dtype(np.int64))
@@ -2237,9 +2244,6 @@ def _mk_get_dtype():
     dtype_map.setdefault(AcquisitionOrImage, np.dtype(np.object_))
     dtype_map.setdefault(AcquisitionOrImage.Acquisition, get_dtype(SimpleAcquisition))
     dtype_map.setdefault(AcquisitionOrImage.Image, np.dtype(np.object_))
-    dtype_map.setdefault(StringOrInt32, np.dtype(np.object_))
-    dtype_map.setdefault(StringOrInt32.String, np.dtype(np.object_))
-    dtype_map.setdefault(StringOrInt32.Int32, np.dtype(np.int32))
     dtype_map.setdefault(Int32OrSimpleRecord, np.dtype(np.object_))
     dtype_map.setdefault(Int32OrSimpleRecord.Int32, np.dtype(np.int32))
     dtype_map.setdefault(Int32OrSimpleRecord.SimpleRecord, get_dtype(SimpleRecord))

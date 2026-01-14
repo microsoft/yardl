@@ -6,6 +6,7 @@ classdef UnionsReader < yardl.binary.BinaryProtocolReader & test_model.UnionsRea
     int_or_simple_record_serializer
     int_or_record_with_vlens_serializer
     monosotate_or_int_or_simple_record_serializer
+    vector_of_unions_serializer
     record_with_unions_serializer
   end
 
@@ -20,6 +21,7 @@ classdef UnionsReader < yardl.binary.BinaryProtocolReader & test_model.UnionsRea
       self.int_or_simple_record_serializer = yardl.binary.UnionSerializer('test_model.Int32OrSimpleRecord', {yardl.binary.Int32Serializer, test_model.binary.SimpleRecordSerializer()}, {@test_model.Int32OrSimpleRecord.Int32, @test_model.Int32OrSimpleRecord.SimpleRecord});
       self.int_or_record_with_vlens_serializer = yardl.binary.UnionSerializer('test_model.Int32OrRecordWithVlens', {yardl.binary.Int32Serializer, test_model.binary.RecordWithVlensSerializer()}, {@test_model.Int32OrRecordWithVlens.Int32, @test_model.Int32OrRecordWithVlens.RecordWithVlens});
       self.monosotate_or_int_or_simple_record_serializer = yardl.binary.UnionSerializer('test_model.Int32OrSimpleRecord', {yardl.binary.NoneSerializer, yardl.binary.Int32Serializer, test_model.binary.SimpleRecordSerializer()}, {yardl.None, @test_model.Int32OrSimpleRecord.Int32, @test_model.Int32OrSimpleRecord.SimpleRecord});
+      self.vector_of_unions_serializer = yardl.binary.VectorSerializer(yardl.binary.UnionSerializer('test_model.StringOrInt32', {yardl.binary.StringSerializer, yardl.binary.Int32Serializer}, {@test_model.StringOrInt32.String, @test_model.StringOrInt32.Int32}));
       self.record_with_unions_serializer = basic_types.binary.RecordWithUnionsSerializer();
     end
   end
@@ -35,6 +37,10 @@ classdef UnionsReader < yardl.binary.BinaryProtocolReader & test_model.UnionsRea
 
     function value = read_monosotate_or_int_or_simple_record_(self)
       value = self.monosotate_or_int_or_simple_record_serializer.read(self.stream_);
+    end
+
+    function value = read_vector_of_unions_(self)
+      value = self.vector_of_unions_serializer.read(self.stream_);
     end
 
     function value = read_record_with_unions_(self)

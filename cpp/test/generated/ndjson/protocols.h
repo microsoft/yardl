@@ -909,6 +909,7 @@ class UnionsWriter : public test_model::UnionsWriterBase, yardl::ndjson::NDJsonW
   void WriteIntOrSimpleRecordImpl(std::variant<int32_t, test_model::SimpleRecord> const& value) override;
   void WriteIntOrRecordWithVlensImpl(std::variant<int32_t, test_model::RecordWithVlens> const& value) override;
   void WriteMonosotateOrIntOrSimpleRecordImpl(std::variant<std::monostate, int32_t, test_model::SimpleRecord> const& value) override;
+  void WriteVectorOfUnionsImpl(std::vector<std::variant<std::string, int32_t>> const& value) override;
   void WriteRecordWithUnionsImpl(basic_types::RecordWithUnions const& value) override;
   void CloseImpl() override;
 };
@@ -928,6 +929,7 @@ class UnionsReader : public test_model::UnionsReaderBase, yardl::ndjson::NDJsonR
   void ReadIntOrSimpleRecordImpl(std::variant<int32_t, test_model::SimpleRecord>& value) override;
   void ReadIntOrRecordWithVlensImpl(std::variant<int32_t, test_model::RecordWithVlens>& value) override;
   void ReadMonosotateOrIntOrSimpleRecordImpl(std::variant<std::monostate, int32_t, test_model::SimpleRecord>& value) override;
+  void ReadVectorOfUnionsImpl(std::vector<std::variant<std::string, int32_t>>& value) override;
   void ReadRecordWithUnionsImpl(basic_types::RecordWithUnions& value) override;
   void CloseImpl() override;
 };

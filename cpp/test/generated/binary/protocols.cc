@@ -375,8 +375,9 @@ struct IsTriviallySerializable<test_model::RecordWithMaps> {
     std::is_standard_layout_v<__T__> &&
     IsTriviallySerializable<decltype(__T__::set_1)>::value &&
     IsTriviallySerializable<decltype(__T__::set_2)>::value &&
-    (sizeof(__T__) == (sizeof(__T__::set_1) + sizeof(__T__::set_2))) &&
-    offsetof(__T__, set_1) < offsetof(__T__, set_2);
+    IsTriviallySerializable<decltype(__T__::set_3)>::value &&
+    (sizeof(__T__) == (sizeof(__T__::set_1) + sizeof(__T__::set_2) + sizeof(__T__::set_3))) &&
+    offsetof(__T__, set_1) < offsetof(__T__, set_2) && offsetof(__T__, set_2) < offsetof(__T__, set_3);
 };
 
 template <>
@@ -1775,6 +1776,7 @@ namespace {
 
   yardl::binary::WriteMap<uint32_t, uint32_t, yardl::binary::WriteInteger, yardl::binary::WriteInteger>(stream, value.set_1);
   yardl::binary::WriteMap<int32_t, bool, yardl::binary::WriteInteger, yardl::binary::WriteInteger>(stream, value.set_2);
+  yardl::binary::WriteMap<std::string, std::variant<std::string, int32_t>, yardl::binary::WriteString, WriteUnion<std::string, yardl::binary::WriteString, int32_t, yardl::binary::WriteInteger>>(stream, value.set_3);
 }
 
 [[maybe_unused]] void ReadRecordWithMaps(yardl::binary::CodedInputStream& stream, test_model::RecordWithMaps& value) {
@@ -1785,6 +1787,7 @@ namespace {
 
   yardl::binary::ReadMap<uint32_t, uint32_t, yardl::binary::ReadInteger, yardl::binary::ReadInteger>(stream, value.set_1);
   yardl::binary::ReadMap<int32_t, bool, yardl::binary::ReadInteger, yardl::binary::ReadInteger>(stream, value.set_2);
+  yardl::binary::ReadMap<std::string, std::variant<std::string, int32_t>, yardl::binary::ReadString, ReadUnion<std::string, yardl::binary::ReadString, int32_t, yardl::binary::ReadInteger>>(stream, value.set_3);
 }
 
 [[maybe_unused]] void WriteFruits(yardl::binary::CodedOutputStream& stream, test_model::Fruits const& value) {
@@ -3989,6 +3992,10 @@ void UnionsWriter::WriteMonosotateOrIntOrSimpleRecordImpl(std::variant<std::mono
   WriteUnion<std::monostate, yardl::binary::WriteMonostate, int32_t, yardl::binary::WriteInteger, test_model::SimpleRecord, test_model::binary::WriteSimpleRecord>(stream_, value);
 }
 
+void UnionsWriter::WriteVectorOfUnionsImpl(std::vector<std::variant<std::string, int32_t>> const& value) {
+  yardl::binary::WriteVector<std::variant<std::string, int32_t>, WriteUnion<std::string, yardl::binary::WriteString, int32_t, yardl::binary::WriteInteger>>(stream_, value);
+}
+
 void UnionsWriter::WriteRecordWithUnionsImpl(basic_types::RecordWithUnions const& value) {
   basic_types::binary::WriteRecordWithUnions(stream_, value);
 }
@@ -4011,6 +4018,10 @@ void UnionsReader::ReadIntOrRecordWithVlensImpl(std::variant<int32_t, test_model
 
 void UnionsReader::ReadMonosotateOrIntOrSimpleRecordImpl(std::variant<std::monostate, int32_t, test_model::SimpleRecord>& value) {
   ReadUnion<std::monostate, yardl::binary::ReadMonostate, int32_t, yardl::binary::ReadInteger, test_model::SimpleRecord, test_model::binary::ReadSimpleRecord>(stream_, value);
+}
+
+void UnionsReader::ReadVectorOfUnionsImpl(std::vector<std::variant<std::string, int32_t>>& value) {
+  yardl::binary::ReadVector<std::variant<std::string, int32_t>, ReadUnion<std::string, yardl::binary::ReadString, int32_t, yardl::binary::ReadInteger>>(stream_, value);
 }
 
 void UnionsReader::ReadRecordWithUnionsImpl(basic_types::RecordWithUnions& value) {

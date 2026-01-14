@@ -549,6 +549,7 @@ def test_unions(format: Format):
         w.write_int_or_simple_record(tm.Int32OrSimpleRecord.Int32(1))
         w.write_int_or_record_with_vlens(tm.Int32OrRecordWithVlens.Int32(2))
         w.write_monosotate_or_int_or_simple_record(None)
+        w.write_vector_of_unions([])
         w.write_record_with_unions(tm.basic_types.RecordWithUnions())
 
     # second option
@@ -562,6 +563,13 @@ def test_unions(format: Format):
             )
         )
         w.write_monosotate_or_int_or_simple_record(tm.Int32OrSimpleRecord.Int32(6))
+        w.write_vector_of_unions(
+            [
+                tm.StringOrInt32.Int32(3),
+                tm.StringOrInt32.String("hello"),
+                tm.StringOrInt32.Int32(4),
+            ]
+        )
         w.write_record_with_unions(
             tm.basic_types.RecordWithUnions(
                 null_or_int_or_string=tm.basic_types.Int32OrString.Int32(7),

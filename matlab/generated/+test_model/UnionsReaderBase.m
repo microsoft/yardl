@@ -17,7 +17,7 @@ classdef UnionsReaderBase < handle
 
     function close(self)
       self.close_();
-      if ~self.skip_completed_check_ && self.state_ ~= 4
+      if ~self.skip_completed_check_ && self.state_ ~= 5
         expected_method = self.state_to_method_name_(self.state_);
         throw(yardl.ProtocolError("Protocol reader closed before all data was consumed. Expected call to '%s'.", expected_method));
       end
@@ -54,19 +54,30 @@ classdef UnionsReaderBase < handle
     end
 
     % Ordinal 3
-    function value = read_record_with_unions(self)
+    function value = read_vector_of_unions(self)
       if self.state_ ~= 3
         self.raise_unexpected_state_(3);
       end
 
-      value = self.read_record_with_unions_();
+      value = self.read_vector_of_unions_();
       self.state_ = 4;
+    end
+
+    % Ordinal 4
+    function value = read_record_with_unions(self)
+      if self.state_ ~= 4
+        self.raise_unexpected_state_(4);
+      end
+
+      value = self.read_record_with_unions_();
+      self.state_ = 5;
     end
 
     function copy_to(self, writer)
       writer.write_int_or_simple_record(self.read_int_or_simple_record());
       writer.write_int_or_record_with_vlens(self.read_int_or_record_with_vlens());
       writer.write_monosotate_or_int_or_simple_record(self.read_monosotate_or_int_or_simple_record());
+      writer.write_vector_of_unions(self.read_vector_of_unions());
       writer.write_record_with_unions(self.read_record_with_unions());
     end
   end
@@ -81,6 +92,7 @@ classdef UnionsReaderBase < handle
     read_int_or_simple_record_(self)
     read_int_or_record_with_vlens_(self)
     read_monosotate_or_int_or_simple_record_(self)
+    read_vector_of_unions_(self)
     read_record_with_unions_(self)
 
     close_(self)
@@ -101,6 +113,8 @@ classdef UnionsReaderBase < handle
       elseif state == 2
         name = "read_monosotate_or_int_or_simple_record";
       elseif state == 3
+        name = "read_vector_of_unions";
+      elseif state == 4
         name = "read_record_with_unions";
       else
         name = "<unknown>";

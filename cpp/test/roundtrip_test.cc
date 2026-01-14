@@ -380,6 +380,7 @@ TEST_P(RoundTripTests, Unions_FirstOption) {
   tw->WriteIntOrSimpleRecord({2});
   tw->WriteIntOrRecordWithVlens({2});
   tw->WriteMonosotateOrIntOrSimpleRecord({});
+  tw->WriteVectorOfUnions({});
   tw->WriteRecordWithUnions({std::monostate{}});
 
   tw->Close();
@@ -396,6 +397,7 @@ TEST_P(RoundTripTests, Unions_SecondOption) {
           12,
       });
   tw->WriteMonosotateOrIntOrSimpleRecord({6});
+  tw->WriteVectorOfUnions({3, "hello", 4});
   tw->WriteRecordWithUnions({77});
 
   tw->Close();

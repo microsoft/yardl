@@ -5,6 +5,7 @@ classdef RecordWithMapsSerializer < yardl.binary.RecordSerializer
     function self = RecordWithMapsSerializer()
       field_serializers{1} = yardl.binary.MapSerializer(yardl.binary.Uint32Serializer, yardl.binary.Uint32Serializer);
       field_serializers{2} = yardl.binary.MapSerializer(yardl.binary.Int32Serializer, yardl.binary.BoolSerializer);
+      field_serializers{3} = yardl.binary.MapSerializer(yardl.binary.StringSerializer, yardl.binary.UnionSerializer('test_model.StringOrInt32', {yardl.binary.StringSerializer, yardl.binary.Int32Serializer}, {@test_model.StringOrInt32.String, @test_model.StringOrInt32.Int32}));
       self@yardl.binary.RecordSerializer('test_model.RecordWithMaps', field_serializers);
     end
 
@@ -14,12 +15,12 @@ classdef RecordWithMapsSerializer < yardl.binary.RecordSerializer
         outstream (1,1) yardl.binary.CodedOutputStream
         value (1,1) test_model.RecordWithMaps
       end
-      self.write_(outstream, value.set_1, value.set_2);
+      self.write_(outstream, value.set_1, value.set_2, value.set_3);
     end
 
     function value = read(self, instream)
       fields = self.read_(instream);
-      value = test_model.RecordWithMaps(set_1=fields{1}, set_2=fields{2});
+      value = test_model.RecordWithMaps(set_1=fields{1}, set_2=fields{2}, set_3=fields{3});
     end
   end
 end

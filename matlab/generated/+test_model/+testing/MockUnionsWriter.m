@@ -6,6 +6,7 @@ classdef MockUnionsWriter < matlab.mixin.Copyable & test_model.UnionsWriterBase
     expected_int_or_simple_record
     expected_int_or_record_with_vlens
     expected_monosotate_or_int_or_simple_record
+    expected_vector_of_unions
     expected_record_with_unions
   end
 
@@ -15,6 +16,7 @@ classdef MockUnionsWriter < matlab.mixin.Copyable & test_model.UnionsWriterBase
       self.expected_int_or_simple_record = yardl.None;
       self.expected_int_or_record_with_vlens = yardl.None;
       self.expected_monosotate_or_int_or_simple_record = yardl.None;
+      self.expected_vector_of_unions = yardl.None;
       self.expected_record_with_unions = yardl.None;
     end
 
@@ -30,6 +32,10 @@ classdef MockUnionsWriter < matlab.mixin.Copyable & test_model.UnionsWriterBase
       self.expected_monosotate_or_int_or_simple_record = yardl.Optional(value);
     end
 
+    function expect_write_vector_of_unions_(self, value)
+      self.expected_vector_of_unions = yardl.Optional(value);
+    end
+
     function expect_write_record_with_unions_(self, value)
       self.expected_record_with_unions = yardl.Optional(value);
     end
@@ -38,6 +44,7 @@ classdef MockUnionsWriter < matlab.mixin.Copyable & test_model.UnionsWriterBase
       self.testCase_.verifyEqual(self.expected_int_or_simple_record, yardl.None, "Expected call to write_int_or_simple_record_ was not received");
       self.testCase_.verifyEqual(self.expected_int_or_record_with_vlens, yardl.None, "Expected call to write_int_or_record_with_vlens_ was not received");
       self.testCase_.verifyEqual(self.expected_monosotate_or_int_or_simple_record, yardl.None, "Expected call to write_monosotate_or_int_or_simple_record_ was not received");
+      self.testCase_.verifyEqual(self.expected_vector_of_unions, yardl.None, "Expected call to write_vector_of_unions_ was not received");
       self.testCase_.verifyEqual(self.expected_record_with_unions, yardl.None, "Expected call to write_record_with_unions_ was not received");
     end
   end
@@ -59,6 +66,12 @@ classdef MockUnionsWriter < matlab.mixin.Copyable & test_model.UnionsWriterBase
       self.testCase_.verifyTrue(self.expected_monosotate_or_int_or_simple_record.has_value(), "Unexpected call to write_monosotate_or_int_or_simple_record_");
       self.testCase_.verifyEqual(value, self.expected_monosotate_or_int_or_simple_record.value, "Unexpected argument value for call to write_monosotate_or_int_or_simple_record_");
       self.expected_monosotate_or_int_or_simple_record = yardl.None;
+    end
+
+    function write_vector_of_unions_(self, value)
+      self.testCase_.verifyTrue(self.expected_vector_of_unions.has_value(), "Unexpected call to write_vector_of_unions_");
+      self.testCase_.verifyEqual(value, self.expected_vector_of_unions.value, "Unexpected argument value for call to write_vector_of_unions_");
+      self.expected_vector_of_unions = yardl.None;
     end
 
     function write_record_with_unions_(self, value)
