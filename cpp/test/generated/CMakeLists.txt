@@ -45,6 +45,7 @@ list(APPEND TestModel_GENERATED_SOURCES factories.cc translator_impl.cc)
 
 add_library(test_model_generated OBJECT ${TestModel_GENERATED_SOURCES})
 target_link_libraries(test_model_generated ${TestModel_GENERATED_LINK_LIBRARIES})
+target_compile_features(test_model_generated PUBLIC cxx_std_17)
 
 add_library(test_model_generated_mocks OBJECT mocks.cc)
 target_link_libraries(test_model_generated_mocks
