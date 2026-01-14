@@ -43,3 +43,4 @@ endif()
 
 add_library(evo_test_generated OBJECT ${EvoTest_GENERATED_SOURCES})
 target_link_libraries(evo_test_generated ${EvoTest_GENERATED_LINK_LIBRARIES})
+target_compile_features(evo_test_generated PUBLIC cxx_std_17)

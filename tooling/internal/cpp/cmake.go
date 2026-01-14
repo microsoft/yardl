@@ -81,6 +81,7 @@ endif()
 
 	fmt.Fprintf(w, "add_library(%s OBJECT ${%s_SOURCES})\n", objectLibraryName, cmakePrefix)
 	fmt.Fprintf(w, "target_link_libraries(%s ${%s_LINK_LIBRARIES})\n", objectLibraryName, cmakePrefix)
+	fmt.Fprintf(w, "target_compile_features(%s PUBLIC cxx_std_17)\n", objectLibraryName)
 
 	if options.InternalGenerateMocks {
 		w.WriteStringln("")
