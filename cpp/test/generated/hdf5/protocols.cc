@@ -903,16 +903,19 @@ struct _Inner_RecordWithMaps {
   _Inner_RecordWithMaps() {} 
   _Inner_RecordWithMaps(test_model::RecordWithMaps const& o) 
       : set_1(o.set_1),
-      set_2(o.set_2) {
+      set_2(o.set_2),
+      set_3(o.set_3) {
   }
 
   void ToOuter (test_model::RecordWithMaps& o) const {
     yardl::hdf5::ToOuter(set_1, o.set_1);
     yardl::hdf5::ToOuter(set_2, o.set_2);
+    yardl::hdf5::ToOuter(set_3, o.set_3);
   }
 
   yardl::hdf5::InnerMap<uint32_t, uint32_t, uint32_t, uint32_t> set_1;
   yardl::hdf5::InnerMap<int32_t, int32_t, bool, bool> set_2;
+  yardl::hdf5::InnerMap<yardl::hdf5::InnerVlenString, std::string, ::InnerUnion2<yardl::hdf5::InnerVlenString, std::string, int32_t, int32_t>, std::variant<std::string, int32_t>> set_3;
 };
 
 template <typename _T1_Inner, typename T1, typename _T2_Inner, typename T2>
@@ -1581,6 +1584,7 @@ struct _Inner_RecordWithOptionalDate {
   H5::CompType t(sizeof(RecordType));
   t.insertMember("set1", HOFFSET(RecordType, set_1), yardl::hdf5::InnerMapDdl<uint32_t, uint32_t>(H5::PredType::NATIVE_UINT32, H5::PredType::NATIVE_UINT32));
   t.insertMember("set2", HOFFSET(RecordType, set_2), yardl::hdf5::InnerMapDdl<int32_t, bool>(H5::PredType::NATIVE_INT32, H5::PredType::NATIVE_HBOOL));
+  t.insertMember("set3", HOFFSET(RecordType, set_3), yardl::hdf5::InnerMapDdl<yardl::hdf5::InnerVlenString, ::InnerUnion2<yardl::hdf5::InnerVlenString, std::string, int32_t, int32_t>>(yardl::hdf5::InnerVlenStringDdl(), ::InnerUnion2Ddl<yardl::hdf5::InnerVlenString, std::string, int32_t, int32_t>(false, yardl::hdf5::InnerVlenStringDdl(), "string", H5::PredType::NATIVE_INT32, "int32")));
   return t;
 }
 
@@ -3040,6 +3044,10 @@ void UnionsWriter::WriteMonosotateOrIntOrSimpleRecordImpl(std::variant<std::mono
   yardl::hdf5::WriteScalarDataset<::InnerUnion2<int32_t, int32_t, test_model::SimpleRecord, test_model::SimpleRecord>, std::variant<std::monostate, int32_t, test_model::SimpleRecord>>(group_, "monosotateOrIntOrSimpleRecord", ::InnerUnion2Ddl<int32_t, int32_t, test_model::SimpleRecord, test_model::SimpleRecord>(true, H5::PredType::NATIVE_INT32, "int32", test_model::hdf5::GetSimpleRecordHdf5Ddl(), "SimpleRecord"), value);
 }
 
+void UnionsWriter::WriteVectorOfUnionsImpl(std::vector<std::variant<std::string, int32_t>> const& value) {
+  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerVlen<::InnerUnion2<yardl::hdf5::InnerVlenString, std::string, int32_t, int32_t>, std::variant<std::string, int32_t>>, std::vector<std::variant<std::string, int32_t>>>(group_, "vectorOfUnions", yardl::hdf5::InnerVlenDdl(::InnerUnion2Ddl<yardl::hdf5::InnerVlenString, std::string, int32_t, int32_t>(false, yardl::hdf5::InnerVlenStringDdl(), "string", H5::PredType::NATIVE_INT32, "int32")), value);
+}
+
 void UnionsWriter::WriteRecordWithUnionsImpl(basic_types::RecordWithUnions const& value) {
   yardl::hdf5::WriteScalarDataset<basic_types::hdf5::_Inner_RecordWithUnions, basic_types::RecordWithUnions>(group_, "recordWithUnions", basic_types::hdf5::GetRecordWithUnionsHdf5Ddl(), value);
 }
@@ -3058,6 +3066,10 @@ void UnionsReader::ReadIntOrRecordWithVlensImpl(std::variant<int32_t, test_model
 
 void UnionsReader::ReadMonosotateOrIntOrSimpleRecordImpl(std::variant<std::monostate, int32_t, test_model::SimpleRecord>& value) {
   yardl::hdf5::ReadScalarDataset<::InnerUnion2<int32_t, int32_t, test_model::SimpleRecord, test_model::SimpleRecord>, std::variant<std::monostate, int32_t, test_model::SimpleRecord>>(group_, "monosotateOrIntOrSimpleRecord", ::InnerUnion2Ddl<int32_t, int32_t, test_model::SimpleRecord, test_model::SimpleRecord>(true, H5::PredType::NATIVE_INT32, "int32", test_model::hdf5::GetSimpleRecordHdf5Ddl(), "SimpleRecord"), value);
+}
+
+void UnionsReader::ReadVectorOfUnionsImpl(std::vector<std::variant<std::string, int32_t>>& value) {
+  yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerVlen<::InnerUnion2<yardl::hdf5::InnerVlenString, std::string, int32_t, int32_t>, std::variant<std::string, int32_t>>, std::vector<std::variant<std::string, int32_t>>>(group_, "vectorOfUnions", yardl::hdf5::InnerVlenDdl(::InnerUnion2Ddl<yardl::hdf5::InnerVlenString, std::string, int32_t, int32_t>(false, yardl::hdf5::InnerVlenStringDdl(), "string", H5::PredType::NATIVE_INT32, "int32")), value);
 }
 
 void UnionsReader::ReadRecordWithUnionsImpl(basic_types::RecordWithUnions& value) {

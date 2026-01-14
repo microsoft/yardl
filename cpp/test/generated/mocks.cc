@@ -2730,6 +2730,22 @@ class MockUnionsWriter : public UnionsWriterBase {
     WriteMonosotateOrIntOrSimpleRecordImpl_expected_values_.push(value);
   }
 
+  void WriteVectorOfUnionsImpl (std::vector<std::variant<std::string, int32_t>> const& value) override {
+    if (WriteVectorOfUnionsImpl_expected_values_.empty()) {
+      throw std::runtime_error("Unexpected call to WriteVectorOfUnionsImpl");
+    }
+    if (WriteVectorOfUnionsImpl_expected_values_.front() != value) {
+      throw std::runtime_error("Unexpected argument value for call to WriteVectorOfUnionsImpl");
+    }
+    WriteVectorOfUnionsImpl_expected_values_.pop();
+  }
+
+  std::queue<std::vector<std::variant<std::string, int32_t>>> WriteVectorOfUnionsImpl_expected_values_;
+
+  void ExpectWriteVectorOfUnionsImpl (std::vector<std::variant<std::string, int32_t>> const& value) {
+    WriteVectorOfUnionsImpl_expected_values_.push(value);
+  }
+
   void WriteRecordWithUnionsImpl (basic_types::RecordWithUnions const& value) override {
     if (WriteRecordWithUnionsImpl_expected_values_.empty()) {
       throw std::runtime_error("Unexpected call to WriteRecordWithUnionsImpl");
@@ -2755,6 +2771,9 @@ class MockUnionsWriter : public UnionsWriterBase {
     }
     if (!WriteMonosotateOrIntOrSimpleRecordImpl_expected_values_.empty()) {
       throw std::runtime_error("Expected call to WriteMonosotateOrIntOrSimpleRecordImpl was not received");
+    }
+    if (!WriteVectorOfUnionsImpl_expected_values_.empty()) {
+      throw std::runtime_error("Expected call to WriteVectorOfUnionsImpl was not received");
     }
     if (!WriteRecordWithUnionsImpl_expected_values_.empty()) {
       throw std::runtime_error("Expected call to WriteRecordWithUnionsImpl was not received");
@@ -2787,6 +2806,11 @@ class TestUnionsWriterBase : public UnionsWriterBase {
   void WriteMonosotateOrIntOrSimpleRecordImpl(std::variant<std::monostate, int32_t, test_model::SimpleRecord> const& value) override {
     writer_->WriteMonosotateOrIntOrSimpleRecord(value);
     mock_writer_.ExpectWriteMonosotateOrIntOrSimpleRecordImpl(value);
+  }
+
+  void WriteVectorOfUnionsImpl(std::vector<std::variant<std::string, int32_t>> const& value) override {
+    writer_->WriteVectorOfUnions(value);
+    mock_writer_.ExpectWriteVectorOfUnionsImpl(value);
   }
 
   void WriteRecordWithUnionsImpl(basic_types::RecordWithUnions const& value) override {

@@ -335,6 +335,7 @@ classdef RoundTripTest < matlab.unittest.TestCase
             w.write_int_or_simple_record(test_model.Int32OrSimpleRecord.Int32(1));
             w.write_int_or_record_with_vlens(test_model.Int32OrRecordWithVlens.Int32(2));
             w.write_monosotate_or_int_or_simple_record(yardl.None);
+            w.write_vector_of_unions(zeros(0, "test_model.StringOrInt32"));
             w.write_record_with_unions(basic_types.RecordWithUnions());
             w.close();
 
@@ -342,6 +343,11 @@ classdef RoundTripTest < matlab.unittest.TestCase
             w.write_int_or_simple_record(test_model.Int32OrSimpleRecord.SimpleRecord(test_model.SimpleRecord(x=1, y=2, z=3)));
             w.write_int_or_record_with_vlens(test_model.Int32OrRecordWithVlens.RecordWithVlens(test_model.RecordWithVlens(a=[test_model.SimpleRecord(x=1, y=2, z=3)], b=12, c=13)));
             w.write_monosotate_or_int_or_simple_record(test_model.Int32OrSimpleRecord.Int32(6));
+            w.write_vector_of_unions([
+                test_model.StringOrInt32.Int32(3), ...
+                test_model.StringOrInt32.String("hello"), ...
+                test_model.StringOrInt32.Int32(4) ...
+            ]);
             w.write_record_with_unions(basic_types.RecordWithUnions(...
                 null_or_int_or_string= basic_types.Int32OrString.Int32(7), ...
                 date_or_datetime= basic_types.TimeOrDatetime.Datetime(yardl.DateTime.from_components(2025, 3, 4, 12, 34, 56, 0)), ...

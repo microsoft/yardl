@@ -1,7 +1,7 @@
 % Copyright (c) Microsoft Corporation.
 % Licensed under the MIT License.
 
-classdef UnionSerializer < handle
+classdef UnionSerializer < yardl.binary.TypeSerializer
 
     properties (Access=protected)
         classname_

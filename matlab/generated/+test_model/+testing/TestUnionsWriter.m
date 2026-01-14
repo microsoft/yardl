@@ -45,6 +45,11 @@ classdef TestUnionsWriter < test_model.UnionsWriterBase
       self.mock_writer_.expect_write_monosotate_or_int_or_simple_record_(value);
     end
 
+    function write_vector_of_unions_(self, value)
+      self.writer_.write_vector_of_unions(value);
+      self.mock_writer_.expect_write_vector_of_unions_(value);
+    end
+
     function write_record_with_unions_(self, value)
       self.writer_.write_record_with_unions(value);
       self.mock_writer_.expect_write_record_with_unions_(value);

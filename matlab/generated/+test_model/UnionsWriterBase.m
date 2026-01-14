@@ -13,7 +13,7 @@ classdef (Abstract) UnionsWriterBase < handle
 
     function close(self)
       self.close_();
-      if self.state_ ~= 4
+      if self.state_ ~= 5
         expected_method = self.state_to_method_name_(self.state_);
         throw(yardl.ProtocolError("Protocol writer closed before all steps were called. Expected call to '%s'.", expected_method));
       end
@@ -50,19 +50,29 @@ classdef (Abstract) UnionsWriterBase < handle
     end
 
     % Ordinal 3
-    function write_record_with_unions(self, value)
+    function write_vector_of_unions(self, value)
       if self.state_ ~= 3
         self.raise_unexpected_state_(3);
       end
 
-      self.write_record_with_unions_(value);
+      self.write_vector_of_unions_(value);
       self.state_ = 4;
+    end
+
+    % Ordinal 4
+    function write_record_with_unions(self, value)
+      if self.state_ ~= 4
+        self.raise_unexpected_state_(4);
+      end
+
+      self.write_record_with_unions_(value);
+      self.state_ = 5;
     end
   end
 
   methods (Static)
     function res = schema()
-      res = string('{"protocol":{"name":"Unions","sequence":[{"name":"intOrSimpleRecord","type":[{"tag":"int32","type":"int32"},{"tag":"SimpleRecord","type":"TestModel.SimpleRecord"}]},{"name":"intOrRecordWithVlens","type":[{"tag":"int32","type":"int32"},{"tag":"RecordWithVlens","type":"TestModel.RecordWithVlens"}]},{"name":"monosotateOrIntOrSimpleRecord","type":[null,{"tag":"int32","type":"int32"},{"tag":"SimpleRecord","type":"TestModel.SimpleRecord"}]},{"name":"recordWithUnions","type":"BasicTypes.RecordWithUnions"}]},"types":[{"name":"DaysOfWeek","values":[{"symbol":"monday","value":1},{"symbol":"tuesday","value":2},{"symbol":"wednesday","value":4},{"symbol":"thursday","value":8},{"symbol":"friday","value":16},{"symbol":"saturday","value":32},{"symbol":"sunday","value":64}]},{"name":"Fruits","values":[{"symbol":"apple","value":1},{"symbol":"banana","value":2},{"symbol":"pear","value":3}]},{"name":"GenericNullableUnion2","typeParameters":["T1","T2"],"type":[null,{"tag":"T1","type":"T1"},{"tag":"T2","type":"T2"}]},{"name":"RecordWithString","fields":[{"name":"i","type":"string"}]},{"name":"RecordWithUnions","fields":[{"name":"nullOrIntOrString","type":[null,{"tag":"int32","type":"int32"},{"tag":"string","type":"string"}]},{"name":"dateOrDatetime","type":[{"tag":"time","type":"time"},{"tag":"datetime","type":"datetime"}]},{"name":"nullOrFruitsOrDaysOfWeek","type":{"name":"BasicTypes.GenericNullableUnion2","typeArguments":["BasicTypes.Fruits","BasicTypes.DaysOfWeek"]}},{"name":"recordOrInt","type":[{"tag":"RecordWithString","type":"BasicTypes.RecordWithString"},{"tag":"int32","type":"int32"}]}]},{"name":"RecordWithVlens","fields":[{"name":"a","type":{"vector":{"items":"TestModel.SimpleRecord"}}},{"name":"b","type":"int32"},{"name":"c","type":"int32"}]},{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]}]}');
+      res = string('{"protocol":{"name":"Unions","sequence":[{"name":"intOrSimpleRecord","type":[{"tag":"int32","type":"int32"},{"tag":"SimpleRecord","type":"TestModel.SimpleRecord"}]},{"name":"intOrRecordWithVlens","type":[{"tag":"int32","type":"int32"},{"tag":"RecordWithVlens","type":"TestModel.RecordWithVlens"}]},{"name":"monosotateOrIntOrSimpleRecord","type":[null,{"tag":"int32","type":"int32"},{"tag":"SimpleRecord","type":"TestModel.SimpleRecord"}]},{"name":"vectorOfUnions","type":{"vector":{"items":[{"tag":"string","type":"string"},{"tag":"int32","type":"int32"}]}}},{"name":"recordWithUnions","type":"BasicTypes.RecordWithUnions"}]},"types":[{"name":"DaysOfWeek","values":[{"symbol":"monday","value":1},{"symbol":"tuesday","value":2},{"symbol":"wednesday","value":4},{"symbol":"thursday","value":8},{"symbol":"friday","value":16},{"symbol":"saturday","value":32},{"symbol":"sunday","value":64}]},{"name":"Fruits","values":[{"symbol":"apple","value":1},{"symbol":"banana","value":2},{"symbol":"pear","value":3}]},{"name":"GenericNullableUnion2","typeParameters":["T1","T2"],"type":[null,{"tag":"T1","type":"T1"},{"tag":"T2","type":"T2"}]},{"name":"RecordWithString","fields":[{"name":"i","type":"string"}]},{"name":"RecordWithUnions","fields":[{"name":"nullOrIntOrString","type":[null,{"tag":"int32","type":"int32"},{"tag":"string","type":"string"}]},{"name":"dateOrDatetime","type":[{"tag":"time","type":"time"},{"tag":"datetime","type":"datetime"}]},{"name":"nullOrFruitsOrDaysOfWeek","type":{"name":"BasicTypes.GenericNullableUnion2","typeArguments":["BasicTypes.Fruits","BasicTypes.DaysOfWeek"]}},{"name":"recordOrInt","type":[{"tag":"RecordWithString","type":"BasicTypes.RecordWithString"},{"tag":"int32","type":"int32"}]}]},{"name":"RecordWithVlens","fields":[{"name":"a","type":{"vector":{"items":"TestModel.SimpleRecord"}}},{"name":"b","type":"int32"},{"name":"c","type":"int32"}]},{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]}]}');
     end
   end
 
@@ -70,6 +80,7 @@ classdef (Abstract) UnionsWriterBase < handle
     write_int_or_simple_record_(self, value)
     write_int_or_record_with_vlens_(self, value)
     write_monosotate_or_int_or_simple_record_(self, value)
+    write_vector_of_unions_(self, value)
     write_record_with_unions_(self, value)
 
     end_stream_(self)
@@ -91,6 +102,8 @@ classdef (Abstract) UnionsWriterBase < handle
       elseif state == 2
         name = "write_monosotate_or_int_or_simple_record";
       elseif state == 3
+        name = "write_vector_of_unions";
+      elseif state == 4
         name = "write_record_with_unions";
       else
         name = '<unknown>';

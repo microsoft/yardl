@@ -1395,9 +1395,11 @@ class RecordWithMapsConverter(_ndjson.JsonConverter[RecordWithMaps, np.void]):
     def __init__(self) -> None:
         self._set_1_converter = _ndjson.MapConverter(_ndjson.uint32_converter, _ndjson.uint32_converter)
         self._set_2_converter = _ndjson.MapConverter(_ndjson.int32_converter, _ndjson.bool_converter)
+        self._set_3_converter = _ndjson.MapConverter(_ndjson.string_converter, _ndjson.UnionConverter(StringOrInt32, [(StringOrInt32.String, _ndjson.string_converter, [str]), (StringOrInt32.Int32, _ndjson.int32_converter, [int, float])], True))
         super().__init__(np.dtype([
             ("set_1", self._set_1_converter.overall_dtype()),
             ("set_2", self._set_2_converter.overall_dtype()),
+            ("set_3", self._set_3_converter.overall_dtype()),
         ]))
 
     def to_json(self, value: RecordWithMaps) -> object:
@@ -1407,6 +1409,7 @@ class RecordWithMapsConverter(_ndjson.JsonConverter[RecordWithMaps, np.void]):
 
         json_object["set1"] = self._set_1_converter.to_json(value.set_1)
         json_object["set2"] = self._set_2_converter.to_json(value.set_2)
+        json_object["set3"] = self._set_3_converter.to_json(value.set_3)
         return json_object
 
     def numpy_to_json(self, value: np.void) -> object:
@@ -1416,6 +1419,7 @@ class RecordWithMapsConverter(_ndjson.JsonConverter[RecordWithMaps, np.void]):
 
         json_object["set1"] = self._set_1_converter.numpy_to_json(value["set_1"])
         json_object["set2"] = self._set_2_converter.numpy_to_json(value["set_2"])
+        json_object["set3"] = self._set_3_converter.numpy_to_json(value["set_3"])
         return json_object
 
     def from_json(self, json_object: object) -> RecordWithMaps:
@@ -1424,6 +1428,7 @@ class RecordWithMapsConverter(_ndjson.JsonConverter[RecordWithMaps, np.void]):
         return RecordWithMaps(
             set_1=self._set_1_converter.from_json(json_object["set1"],),
             set_2=self._set_2_converter.from_json(json_object["set2"],),
+            set_3=self._set_3_converter.from_json(json_object["set3"],),
         )
 
     def from_json_to_numpy(self, json_object: object) -> np.void:
@@ -1432,6 +1437,7 @@ class RecordWithMapsConverter(_ndjson.JsonConverter[RecordWithMaps, np.void]):
         return (
             self._set_1_converter.from_json_to_numpy(json_object["set1"]),
             self._set_2_converter.from_json_to_numpy(json_object["set2"]),
+            self._set_3_converter.from_json_to_numpy(json_object["set3"]),
         ) # type:ignore 
 
 
@@ -3690,6 +3696,11 @@ class NDJsonUnionsWriter(_ndjson.NDJsonProtocolWriter, UnionsWriterBase):
         json_value = converter.to_json(value)
         self._write_json_line({"monosotateOrIntOrSimpleRecord": json_value})
 
+    def _write_vector_of_unions(self, value: list[StringOrInt32]) -> None:
+        converter = _ndjson.VectorConverter(_ndjson.UnionConverter(StringOrInt32, [(StringOrInt32.String, _ndjson.string_converter, [str]), (StringOrInt32.Int32, _ndjson.int32_converter, [int, float])], True))
+        json_value = converter.to_json(value)
+        self._write_json_line({"vectorOfUnions": json_value})
+
     def _write_record_with_unions(self, value: basic_types.RecordWithUnions) -> None:
         converter = basic_types.ndjson.RecordWithUnionsConverter()
         json_value = converter.to_json(value)
@@ -3717,6 +3728,11 @@ class NDJsonUnionsReader(_ndjson.NDJsonProtocolReader, UnionsReaderBase):
     def _read_monosotate_or_int_or_simple_record(self) -> typing.Optional[Int32OrSimpleRecord]:
         json_object = self._read_json_line("monosotateOrIntOrSimpleRecord", True)
         converter = _ndjson.UnionConverter(Int32OrSimpleRecord, [None, (Int32OrSimpleRecord.Int32, _ndjson.int32_converter, [int, float]), (Int32OrSimpleRecord.SimpleRecord, SimpleRecordConverter(), [dict])], True)
+        return converter.from_json(json_object)
+
+    def _read_vector_of_unions(self) -> list[StringOrInt32]:
+        json_object = self._read_json_line("vectorOfUnions", True)
+        converter = _ndjson.VectorConverter(_ndjson.UnionConverter(StringOrInt32, [(StringOrInt32.String, _ndjson.string_converter, [str]), (StringOrInt32.Int32, _ndjson.int32_converter, [int, float])], True))
         return converter.from_json(json_object)
 
     def _read_record_with_unions(self) -> basic_types.RecordWithUnions:

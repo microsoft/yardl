@@ -436,6 +436,25 @@ struct adl_serializer<std::variant<yardl::DynamicNDArray<int32_t>, int32_t>> {
 };
 
 template <>
+struct adl_serializer<std::variant<std::string, int32_t>> {
+  static void to_json(ordered_json& j, std::variant<std::string, int32_t> const& value) {
+    std::visit([&j](auto const& v) {j = v;}, value);
+  }
+
+  static void from_json(ordered_json const& j, std::variant<std::string, int32_t>& value) {
+    if ((j.is_string())) {
+      value = j.get<std::string>();
+      return;
+    }
+    if ((j.is_number())) {
+      value = j.get<int32_t>();
+      return;
+    }
+    throw std::runtime_error("Invalid union value");
+  }
+};
+
+template <>
 struct adl_serializer<std::variant<std::monostate, std::string, int32_t>> {
   static void to_json(ordered_json& j, std::variant<std::monostate, std::string, int32_t> const& value) {
     std::visit([&j](auto const& v) {j = v;}, value);
@@ -766,25 +785,6 @@ struct adl_serializer<std::variant<test_model::SimpleAcquisition, yardl::NDArray
       value = it.value().get<yardl::NDArray<float, 2>>();
       return;
     }
-  }
-};
-
-template <>
-struct adl_serializer<std::variant<std::string, int32_t>> {
-  static void to_json(ordered_json& j, std::variant<std::string, int32_t> const& value) {
-    std::visit([&j](auto const& v) {j = v;}, value);
-  }
-
-  static void from_json(ordered_json const& j, std::variant<std::string, int32_t>& value) {
-    if ((j.is_string())) {
-      value = j.get<std::string>();
-      return;
-    }
-    if ((j.is_number())) {
-      value = j.get<int32_t>();
-      return;
-    }
-    throw std::runtime_error("Invalid union value");
   }
 };
 
@@ -1983,6 +1983,9 @@ void to_json(ordered_json& j, test_model::RecordWithMaps const& value) {
   if (yardl::ndjson::ShouldSerializeFieldValue(value.set_2)) {
     j.push_back({"set2", value.set_2});
   }
+  if (yardl::ndjson::ShouldSerializeFieldValue(value.set_3)) {
+    j.push_back({"set3", value.set_3});
+  }
 }
 
 void from_json(ordered_json const& j, test_model::RecordWithMaps& value) {
@@ -1991,6 +1994,9 @@ void from_json(ordered_json const& j, test_model::RecordWithMaps& value) {
   }
   if (auto it = j.find("set2"); it != j.end()) {
     it->get_to(value.set_2);
+  }
+  if (auto it = j.find("set3"); it != j.end()) {
+    it->get_to(value.set_3);
   }
 }
 
@@ -3643,6 +3649,10 @@ void UnionsWriter::WriteMonosotateOrIntOrSimpleRecordImpl(std::variant<std::mono
   ordered_json json_value = value;
   yardl::ndjson::WriteProtocolValue(stream_, "monosotateOrIntOrSimpleRecord", json_value);}
 
+void UnionsWriter::WriteVectorOfUnionsImpl(std::vector<std::variant<std::string, int32_t>> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "vectorOfUnions", json_value);}
+
 void UnionsWriter::WriteRecordWithUnionsImpl(basic_types::RecordWithUnions const& value) {
   ordered_json json_value = value;
   yardl::ndjson::WriteProtocolValue(stream_, "recordWithUnions", json_value);}
@@ -3665,6 +3675,10 @@ void UnionsReader::ReadIntOrRecordWithVlensImpl(std::variant<int32_t, test_model
 
 void UnionsReader::ReadMonosotateOrIntOrSimpleRecordImpl(std::variant<std::monostate, int32_t, test_model::SimpleRecord>& value) {
   yardl::ndjson::ReadProtocolValue(stream_, line_, "monosotateOrIntOrSimpleRecord", true, unused_step_, value);
+}
+
+void UnionsReader::ReadVectorOfUnionsImpl(std::vector<std::variant<std::string, int32_t>>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "vectorOfUnions", true, unused_step_, value);
 }
 
 void UnionsReader::ReadRecordWithUnionsImpl(basic_types::RecordWithUnions& value) {

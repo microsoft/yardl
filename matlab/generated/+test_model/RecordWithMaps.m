@@ -4,6 +4,7 @@ classdef RecordWithMaps < handle
   properties
     set_1
     set_2
+    set_3
   end
 
   methods
@@ -11,16 +12,19 @@ classdef RecordWithMaps < handle
       arguments
         kwargs.set_1 = yardl.Map;
         kwargs.set_2 = yardl.Map;
+        kwargs.set_3 = yardl.Map;
       end
       self.set_1 = kwargs.set_1;
       self.set_2 = kwargs.set_2;
+      self.set_3 = kwargs.set_3;
     end
 
     function res = eq(self, other)
       res = ...
         isa(other, "test_model.RecordWithMaps") && ...
         isequal({self.set_1}, {other.set_1}) && ...
-        isequal({self.set_2}, {other.set_2});
+        isequal({self.set_2}, {other.set_2}) && ...
+        isequal({self.set_3}, {other.set_3});
     end
 
     function res = ne(self, other)

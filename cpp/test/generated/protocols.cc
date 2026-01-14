@@ -4030,7 +4030,7 @@ void MapsReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
 
 } // namespace 
 
-std::string MapsWriterBase::schema_ = R"({"protocol":{"name":"Maps","sequence":[{"name":"stringToInt","type":{"map":{"keys":"string","values":"int32"}}},{"name":"intToString","type":{"map":{"keys":"int32","values":"string"}}},{"name":"stringToUnion","type":{"map":{"keys":"string","values":[{"tag":"string","type":"string"},{"tag":"int32","type":"int32"}]}}},{"name":"aliasedGeneric","type":{"name":"BasicTypes.AliasedMap","typeArguments":["string","int32"]}},{"name":"records","type":{"vector":{"items":"TestModel.RecordWithMaps"}}}]},"types":[{"name":"AliasedMap","typeParameters":["K","V"],"type":{"map":{"keys":"K","values":"V"}}},{"name":"RecordWithMaps","fields":[{"name":"set1","type":{"map":{"keys":"uint32","values":"uint32"}}},{"name":"set2","type":{"map":{"keys":"int32","values":"bool"}}}]}]})";
+std::string MapsWriterBase::schema_ = R"({"protocol":{"name":"Maps","sequence":[{"name":"stringToInt","type":{"map":{"keys":"string","values":"int32"}}},{"name":"intToString","type":{"map":{"keys":"int32","values":"string"}}},{"name":"stringToUnion","type":{"map":{"keys":"string","values":[{"tag":"string","type":"string"},{"tag":"int32","type":"int32"}]}}},{"name":"aliasedGeneric","type":{"name":"BasicTypes.AliasedMap","typeArguments":["string","int32"]}},{"name":"records","type":{"vector":{"items":"TestModel.RecordWithMaps"}}}]},"types":[{"name":"AliasedMap","typeParameters":["K","V"],"type":{"map":{"keys":"K","values":"V"}}},{"name":"RecordWithMaps","fields":[{"name":"set1","type":{"map":{"keys":"uint32","values":"uint32"}}},{"name":"set2","type":{"map":{"keys":"int32","values":"bool"}}},{"name":"set3","type":{"map":{"keys":"string","values":[{"tag":"string","type":"string"},{"tag":"int32","type":"int32"}]}}}]}]})";
 
 std::vector<std::string> MapsWriterBase::previous_schemas_ = {
 };
@@ -4192,15 +4192,17 @@ void UnionsWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end, 
   case 0: expected_method = "WriteIntOrSimpleRecord()"; break;
   case 1: expected_method = "WriteIntOrRecordWithVlens()"; break;
   case 2: expected_method = "WriteMonosotateOrIntOrSimpleRecord()"; break;
-  case 3: expected_method = "WriteRecordWithUnions()"; break;
+  case 3: expected_method = "WriteVectorOfUnions()"; break;
+  case 4: expected_method = "WriteRecordWithUnions()"; break;
   }
   std::string attempted_method;
   switch (attempted) {
   case 0: attempted_method = "WriteIntOrSimpleRecord()"; break;
   case 1: attempted_method = "WriteIntOrRecordWithVlens()"; break;
   case 2: attempted_method = "WriteMonosotateOrIntOrSimpleRecord()"; break;
-  case 3: attempted_method = "WriteRecordWithUnions()"; break;
-  case 4: attempted_method = "Close()"; break;
+  case 3: attempted_method = "WriteVectorOfUnions()"; break;
+  case 4: attempted_method = "WriteRecordWithUnions()"; break;
+  case 5: attempted_method = "Close()"; break;
   }
   throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
 }
@@ -4211,8 +4213,9 @@ void UnionsReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
     case 0: return "ReadIntOrSimpleRecord()";
     case 1: return "ReadIntOrRecordWithVlens()";
     case 2: return "ReadMonosotateOrIntOrSimpleRecord()";
-    case 3: return "ReadRecordWithUnions()";
-    case 4: return "Close()";
+    case 3: return "ReadVectorOfUnions()";
+    case 4: return "ReadRecordWithUnions()";
+    case 5: return "Close()";
     default: return "<unknown>";
     }
   };
@@ -4221,7 +4224,7 @@ void UnionsReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
 
 } // namespace 
 
-std::string UnionsWriterBase::schema_ = R"({"protocol":{"name":"Unions","sequence":[{"name":"intOrSimpleRecord","type":[{"tag":"int32","type":"int32"},{"tag":"SimpleRecord","type":"TestModel.SimpleRecord"}]},{"name":"intOrRecordWithVlens","type":[{"tag":"int32","type":"int32"},{"tag":"RecordWithVlens","type":"TestModel.RecordWithVlens"}]},{"name":"monosotateOrIntOrSimpleRecord","type":[null,{"tag":"int32","type":"int32"},{"tag":"SimpleRecord","type":"TestModel.SimpleRecord"}]},{"name":"recordWithUnions","type":"BasicTypes.RecordWithUnions"}]},"types":[{"name":"DaysOfWeek","values":[{"symbol":"monday","value":1},{"symbol":"tuesday","value":2},{"symbol":"wednesday","value":4},{"symbol":"thursday","value":8},{"symbol":"friday","value":16},{"symbol":"saturday","value":32},{"symbol":"sunday","value":64}]},{"name":"Fruits","values":[{"symbol":"apple","value":1},{"symbol":"banana","value":2},{"symbol":"pear","value":3}]},{"name":"GenericNullableUnion2","typeParameters":["T1","T2"],"type":[null,{"tag":"T1","type":"T1"},{"tag":"T2","type":"T2"}]},{"name":"RecordWithString","fields":[{"name":"i","type":"string"}]},{"name":"RecordWithUnions","fields":[{"name":"nullOrIntOrString","type":[null,{"tag":"int32","type":"int32"},{"tag":"string","type":"string"}]},{"name":"dateOrDatetime","type":[{"tag":"time","type":"time"},{"tag":"datetime","type":"datetime"}]},{"name":"nullOrFruitsOrDaysOfWeek","type":{"name":"BasicTypes.GenericNullableUnion2","typeArguments":["BasicTypes.Fruits","BasicTypes.DaysOfWeek"]}},{"name":"recordOrInt","type":[{"tag":"RecordWithString","type":"BasicTypes.RecordWithString"},{"tag":"int32","type":"int32"}]}]},{"name":"RecordWithVlens","fields":[{"name":"a","type":{"vector":{"items":"TestModel.SimpleRecord"}}},{"name":"b","type":"int32"},{"name":"c","type":"int32"}]},{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]}]})";
+std::string UnionsWriterBase::schema_ = R"({"protocol":{"name":"Unions","sequence":[{"name":"intOrSimpleRecord","type":[{"tag":"int32","type":"int32"},{"tag":"SimpleRecord","type":"TestModel.SimpleRecord"}]},{"name":"intOrRecordWithVlens","type":[{"tag":"int32","type":"int32"},{"tag":"RecordWithVlens","type":"TestModel.RecordWithVlens"}]},{"name":"monosotateOrIntOrSimpleRecord","type":[null,{"tag":"int32","type":"int32"},{"tag":"SimpleRecord","type":"TestModel.SimpleRecord"}]},{"name":"vectorOfUnions","type":{"vector":{"items":[{"tag":"string","type":"string"},{"tag":"int32","type":"int32"}]}}},{"name":"recordWithUnions","type":"BasicTypes.RecordWithUnions"}]},"types":[{"name":"DaysOfWeek","values":[{"symbol":"monday","value":1},{"symbol":"tuesday","value":2},{"symbol":"wednesday","value":4},{"symbol":"thursday","value":8},{"symbol":"friday","value":16},{"symbol":"saturday","value":32},{"symbol":"sunday","value":64}]},{"name":"Fruits","values":[{"symbol":"apple","value":1},{"symbol":"banana","value":2},{"symbol":"pear","value":3}]},{"name":"GenericNullableUnion2","typeParameters":["T1","T2"],"type":[null,{"tag":"T1","type":"T1"},{"tag":"T2","type":"T2"}]},{"name":"RecordWithString","fields":[{"name":"i","type":"string"}]},{"name":"RecordWithUnions","fields":[{"name":"nullOrIntOrString","type":[null,{"tag":"int32","type":"int32"},{"tag":"string","type":"string"}]},{"name":"dateOrDatetime","type":[{"tag":"time","type":"time"},{"tag":"datetime","type":"datetime"}]},{"name":"nullOrFruitsOrDaysOfWeek","type":{"name":"BasicTypes.GenericNullableUnion2","typeArguments":["BasicTypes.Fruits","BasicTypes.DaysOfWeek"]}},{"name":"recordOrInt","type":[{"tag":"RecordWithString","type":"BasicTypes.RecordWithString"},{"tag":"int32","type":"int32"}]}]},{"name":"RecordWithVlens","fields":[{"name":"a","type":{"vector":{"items":"TestModel.SimpleRecord"}}},{"name":"b","type":"int32"},{"name":"c","type":"int32"}]},{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]}]})";
 
 std::vector<std::string> UnionsWriterBase::previous_schemas_ = {
 };
@@ -4260,18 +4263,27 @@ void UnionsWriterBase::WriteMonosotateOrIntOrSimpleRecord(std::variant<std::mono
   state_ = 3;
 }
 
-void UnionsWriterBase::WriteRecordWithUnions(basic_types::RecordWithUnions const& value) {
+void UnionsWriterBase::WriteVectorOfUnions(std::vector<std::variant<std::string, int32_t>> const& value) {
   if (unlikely(state_ != 3)) {
     UnionsWriterBaseInvalidState(3, false, state_);
   }
 
-  WriteRecordWithUnionsImpl(value);
+  WriteVectorOfUnionsImpl(value);
   state_ = 4;
 }
 
-void UnionsWriterBase::Close() {
+void UnionsWriterBase::WriteRecordWithUnions(basic_types::RecordWithUnions const& value) {
   if (unlikely(state_ != 4)) {
     UnionsWriterBaseInvalidState(4, false, state_);
+  }
+
+  WriteRecordWithUnionsImpl(value);
+  state_ = 5;
+}
+
+void UnionsWriterBase::Close() {
+  if (unlikely(state_ != 5)) {
+    UnionsWriterBaseInvalidState(5, false, state_);
   }
 
   CloseImpl();
@@ -4314,18 +4326,27 @@ void UnionsReaderBase::ReadMonosotateOrIntOrSimpleRecord(std::variant<std::monos
   state_ = 6;
 }
 
-void UnionsReaderBase::ReadRecordWithUnions(basic_types::RecordWithUnions& value) {
+void UnionsReaderBase::ReadVectorOfUnions(std::vector<std::variant<std::string, int32_t>>& value) {
   if (unlikely(state_ != 6)) {
     UnionsReaderBaseInvalidState(6, state_);
   }
 
-  ReadRecordWithUnionsImpl(value);
+  ReadVectorOfUnionsImpl(value);
   state_ = 8;
 }
 
-void UnionsReaderBase::Close() {
-  if (!skip_completed_check_ && unlikely(state_ != 8)) {
+void UnionsReaderBase::ReadRecordWithUnions(basic_types::RecordWithUnions& value) {
+  if (unlikely(state_ != 8)) {
     UnionsReaderBaseInvalidState(8, state_);
+  }
+
+  ReadRecordWithUnionsImpl(value);
+  state_ = 10;
+}
+
+void UnionsReaderBase::Close() {
+  if (!skip_completed_check_ && unlikely(state_ != 10)) {
+    UnionsReaderBaseInvalidState(10, state_);
   }
 
   CloseImpl();
@@ -4345,6 +4366,11 @@ void UnionsReaderBase::CopyTo(UnionsWriterBase& writer) {
     std::variant<std::monostate, int32_t, test_model::SimpleRecord> value;
     ReadMonosotateOrIntOrSimpleRecord(value);
     writer.WriteMonosotateOrIntOrSimpleRecord(value);
+  }
+  {
+    std::vector<std::variant<std::string, int32_t>> value;
+    ReadVectorOfUnions(value);
+    writer.WriteVectorOfUnions(value);
   }
   {
     basic_types::RecordWithUnions value;
