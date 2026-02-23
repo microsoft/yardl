@@ -50,7 +50,7 @@ jobs:
           cache-dependency-path: tooling/go.sum
 
       - name: Build yardl binaries for multiple platforms
-        uses: goreleaser/goreleaser-action@v6
+        uses: goreleaser/goreleaser-action@v7
         with:
           version: v2.8.1
           args: release --clean --snapshot
@@ -235,7 +235,7 @@ jobs:
           dirname $(which go) >> $GITHUB_PATH
 
       - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v6
+        uses: goreleaser/goreleaser-action@v7
         with:
           version: v2.8.1
           args: release --clean
