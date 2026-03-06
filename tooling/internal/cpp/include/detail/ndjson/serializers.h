@@ -130,7 +130,7 @@ struct adl_serializer<yardl::Date> {
 
   static void from_json(ordered_json const& j, yardl::Date& value) {
     std::stringstream ss{j.get<std::string>()};
-    ss >> date::parse("%F", value);
+    date::from_stream(ss, "%F", value);
     if (ss.fail()) {
       throw std::runtime_error("invalid date format");
     }
@@ -145,7 +145,7 @@ struct adl_serializer<yardl::Time> {
 
   static void from_json(ordered_json const& j, yardl::Time& value) {
     std::stringstream ss{j.get<std::string>()};
-    ss >> date::parse("%T", value);
+    date::from_stream(ss, "%T", value);
     if (ss.fail()) {
       throw std::runtime_error("invalid time format");
     }
@@ -160,7 +160,7 @@ struct adl_serializer<yardl::DateTime> {
 
   static void from_json(ordered_json const& j, yardl::DateTime& value) {
     std::stringstream ss{j.get<std::string>()};
-    ss >> date::parse("%FT%T", value);
+    date::from_stream(ss, "%FT%T", value);
     if (ss.fail()) {
       throw std::runtime_error("invalid datetime format");
     }
