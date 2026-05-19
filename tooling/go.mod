@@ -4,7 +4,7 @@ go 1.24.0
 
 require (
 	github.com/alecthomas/participle/v2 v2.1.4
-	github.com/dlclark/regexp2 v1.11.5
+	github.com/dlclark/regexp2 v1.12.0
 	github.com/fsnotify/fsnotify v1.9.0
 	github.com/inancgumus/screen v0.0.0-20190314163918-06e984b86ed3
 	github.com/knadh/koanf/providers/structs v1.0.0
