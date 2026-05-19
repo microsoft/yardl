@@ -4,7 +4,12 @@
   "name": "yardl",
   "build": {
     "dockerfile": "Dockerfile",
-    "context": ".."
+    "context": "..",
+    "args": {
+      // Set to "false" to skip installing MATLAB in the devcontainer.
+      // This significantly reduces image build time and size when MATLAB is not needed.
+      "INSTALL_MATLAB": "true"
+    }
   },
   "runArgs": [
     "--cap-add=SYS_PTRACE",
