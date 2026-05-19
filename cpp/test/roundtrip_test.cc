@@ -410,6 +410,11 @@ TEST_P(RoundTripTests, Enums) {
   tw->WriteSize(SizeBasedEnum::kC);
   tw->WriteRec(RecordWithEnums{Fruits::kBanana, DaysOfWeek::kMonday, TextFormat::kBold, RecordWithNoDefaultEnum{Fruits::kPear}});
 
+  tw->WriteRecArray({
+      RecordWithEnums{Fruits::kPear, DaysOfWeek::kMonday, TextFormat::kBold, RecordWithNoDefaultEnum{Fruits::kBanana}},
+      RecordWithEnums{Fruits::kApple, DaysOfWeek(), TextFormat::kRegular, RecordWithNoDefaultEnum{Fruits::kApple}},
+  });
+
   tw->Close();
 }
 

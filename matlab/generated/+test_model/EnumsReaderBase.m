@@ -17,7 +17,7 @@ classdef EnumsReaderBase < handle
 
     function close(self)
       self.close_();
-      if ~self.skip_completed_check_ && self.state_ ~= 4
+      if ~self.skip_completed_check_ && self.state_ ~= 5
         expected_method = self.state_to_method_name_(self.state_);
         throw(yardl.ProtocolError("Protocol reader closed before all data was consumed. Expected call to '%s'.", expected_method));
       end
@@ -63,11 +63,22 @@ classdef EnumsReaderBase < handle
       self.state_ = 4;
     end
 
+    % Ordinal 4
+    function value = read_rec_array(self)
+      if self.state_ ~= 4
+        self.raise_unexpected_state_(4);
+      end
+
+      value = self.read_rec_array_();
+      self.state_ = 5;
+    end
+
     function copy_to(self, writer)
       writer.write_single(self.read_single());
       writer.write_vec(self.read_vec());
       writer.write_size(self.read_size());
       writer.write_rec(self.read_rec());
+      writer.write_rec_array(self.read_rec_array());
     end
   end
 
@@ -82,6 +93,7 @@ classdef EnumsReaderBase < handle
     read_vec_(self)
     read_size_(self)
     read_rec_(self)
+    read_rec_array_(self)
 
     close_(self)
   end
@@ -102,6 +114,8 @@ classdef EnumsReaderBase < handle
         name = "read_size";
       elseif state == 3
         name = "read_rec";
+      elseif state == 4
+        name = "read_rec_array";
       else
         name = "<unknown>";
       end

@@ -1098,6 +1098,7 @@ class EnumsWriter : public test_model::EnumsWriterBase, yardl::binary::BinaryWri
   void WriteVecImpl(std::vector<test_model::Fruits> const& value) override;
   void WriteSizeImpl(test_model::SizeBasedEnum const& value) override;
   void WriteRecImpl(test_model::RecordWithEnums const& value) override;
+  void WriteRecArrayImpl(yardl::DynamicNDArray<test_model::RecordWithEnums> const& value) override;
   void CloseImpl() override;
 
   Version version_;
@@ -1119,6 +1120,7 @@ class EnumsReader : public test_model::EnumsReaderBase, yardl::binary::BinaryRea
   void ReadVecImpl(std::vector<test_model::Fruits>& value) override;
   void ReadSizeImpl(test_model::SizeBasedEnum& value) override;
   void ReadRecImpl(test_model::RecordWithEnums& value) override;
+  void ReadRecArrayImpl(yardl::DynamicNDArray<test_model::RecordWithEnums>& value) override;
   void CloseImpl() override;
 
   Version version_;

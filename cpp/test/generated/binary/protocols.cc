@@ -4139,6 +4139,10 @@ void EnumsWriter::WriteRecImpl(test_model::RecordWithEnums const& value) {
   test_model::binary::WriteRecordWithEnums(stream_, value);
 }
 
+void EnumsWriter::WriteRecArrayImpl(yardl::DynamicNDArray<test_model::RecordWithEnums> const& value) {
+  yardl::binary::WriteDynamicNDArray<test_model::RecordWithEnums, test_model::binary::WriteRecordWithEnums>(stream_, value);
+}
+
 void EnumsWriter::Flush() {
   stream_.Flush();
 }
@@ -4161,6 +4165,10 @@ void EnumsReader::ReadSizeImpl(test_model::SizeBasedEnum& value) {
 
 void EnumsReader::ReadRecImpl(test_model::RecordWithEnums& value) {
   test_model::binary::ReadRecordWithEnums(stream_, value);
+}
+
+void EnumsReader::ReadRecArrayImpl(yardl::DynamicNDArray<test_model::RecordWithEnums>& value) {
+  yardl::binary::ReadDynamicNDArray<test_model::RecordWithEnums, test_model::binary::ReadRecordWithEnums>(stream_, value);
 }
 
 void EnumsReader::CloseImpl() {

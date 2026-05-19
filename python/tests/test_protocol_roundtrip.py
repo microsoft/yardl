@@ -4,6 +4,7 @@ from typing import TypeVar
 
 import numpy as np
 import numpy.typing as npt
+from numpy.lib.recfunctions import repack_fields
 import pytest
 
 import test_model as tm
@@ -594,6 +595,27 @@ def test_enums(format: Format):
                 rec=tm.RecordWithNoDefaultEnum(enum=tm.Fruits.BANANA),
             )
         )
+        # NDArray of records containing enum fields: exercises the numpy
+        # write/read path where enum fields arrive as bare numpy scalars.
+        rec_array = np.zeros(
+            (2,),
+            dtype=repack_fields(
+                tm.get_dtype(tm.RecordWithEnums), align=False, recurse=True
+            ),
+        )
+        rec_array[0] = (
+            tm.Fruits.PEAR.value,
+            tm.DaysOfWeek.MONDAY.value,
+            tm.TextFormat.BOLD.value,
+            (tm.Fruits.BANANA.value,),
+        )
+        rec_array[1] = (
+            tm.Fruits.APPLE.value,
+            tm.DaysOfWeek(0).value,
+            tm.TextFormat.REGULAR.value,
+            (tm.Fruits.APPLE.value,),
+        )
+        w.write_rec_array(rec_array)
 
 
 def test_flags(format: Format):

@@ -3745,6 +3745,10 @@ void EnumsWriter::WriteRecImpl(test_model::RecordWithEnums const& value) {
   ordered_json json_value = value;
   yardl::ndjson::WriteProtocolValue(stream_, "rec", json_value);}
 
+void EnumsWriter::WriteRecArrayImpl(yardl::DynamicNDArray<test_model::RecordWithEnums> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "recArray", json_value);}
+
 void EnumsWriter::Flush() {
   stream_.flush();
 }
@@ -3767,6 +3771,10 @@ void EnumsReader::ReadSizeImpl(test_model::SizeBasedEnum& value) {
 
 void EnumsReader::ReadRecImpl(test_model::RecordWithEnums& value) {
   yardl::ndjson::ReadProtocolValue(stream_, line_, "rec", true, unused_step_, value);
+}
+
+void EnumsReader::ReadRecArrayImpl(yardl::DynamicNDArray<test_model::RecordWithEnums>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "recArray", true, unused_step_, value);
 }
 
 void EnumsReader::CloseImpl() {

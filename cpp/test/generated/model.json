@@ -5229,6 +5229,14 @@
             {
               "name": "rec",
               "type": "TestModel.RecordWithEnums"
+            },
+            {
+              "name": "recArray",
+              "type": {
+                "array": {
+                  "items": "TestModel.RecordWithEnums"
+                }
+              }
             }
           ]
         },

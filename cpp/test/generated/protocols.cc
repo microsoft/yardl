@@ -4780,6 +4780,7 @@ void EnumsWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end, u
   case 1: expected_method = "WriteVec()"; break;
   case 2: expected_method = "WriteSize()"; break;
   case 3: expected_method = "WriteRec()"; break;
+  case 4: expected_method = "WriteRecArray()"; break;
   }
   std::string attempted_method;
   switch (attempted) {
@@ -4787,7 +4788,8 @@ void EnumsWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end, u
   case 1: attempted_method = "WriteVec()"; break;
   case 2: attempted_method = "WriteSize()"; break;
   case 3: attempted_method = "WriteRec()"; break;
-  case 4: attempted_method = "Close()"; break;
+  case 4: attempted_method = "WriteRecArray()"; break;
+  case 5: attempted_method = "Close()"; break;
   }
   throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
 }
@@ -4799,7 +4801,8 @@ void EnumsReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
     case 1: return "ReadVec()";
     case 2: return "ReadSize()";
     case 3: return "ReadRec()";
-    case 4: return "Close()";
+    case 4: return "ReadRecArray()";
+    case 5: return "Close()";
     default: return "<unknown>";
     }
   };
@@ -4808,7 +4811,7 @@ void EnumsReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
 
 } // namespace 
 
-std::string EnumsWriterBase::schema_ = R"({"protocol":{"name":"Enums","sequence":[{"name":"single","type":"TestModel.Fruits"},{"name":"vec","type":{"vector":{"items":"TestModel.Fruits"}}},{"name":"size","type":"TestModel.SizeBasedEnum"},{"name":"rec","type":"TestModel.RecordWithEnums"}]},"types":[{"name":"DaysOfWeek","values":[{"symbol":"monday","value":1},{"symbol":"tuesday","value":2},{"symbol":"wednesday","value":4},{"symbol":"thursday","value":8},{"symbol":"friday","value":16},{"symbol":"saturday","value":32},{"symbol":"sunday","value":64}]},{"name":"Fruits","values":[{"symbol":"apple","value":1},{"symbol":"banana","value":2},{"symbol":"pear","value":3}]},{"name":"TextFormat","base":"uint64","values":[{"symbol":"regular","value":0},{"symbol":"bold","value":1},{"symbol":"italic","value":2},{"symbol":"underline","value":4},{"symbol":"strikethrough","value":8}]},{"name":"DaysOfWeek","type":"BasicTypes.DaysOfWeek"},{"name":"Fruits","type":"BasicTypes.Fruits"},{"name":"RecordWithEnums","fields":[{"name":"enum","type":"TestModel.Fruits"},{"name":"flags","type":"TestModel.DaysOfWeek"},{"name":"flags2","type":"TestModel.TextFormat"},{"name":"rec","type":"TestModel.RecordWithNoDefaultEnum"}]},{"name":"RecordWithNoDefaultEnum","fields":[{"name":"enum","type":"TestModel.Fruits"}]},{"name":"SizeBasedEnum","base":"size","values":[{"symbol":"a","value":0},{"symbol":"b","value":1},{"symbol":"c","value":2}]},{"name":"TextFormat","type":"BasicTypes.TextFormat"}]})";
+std::string EnumsWriterBase::schema_ = R"({"protocol":{"name":"Enums","sequence":[{"name":"single","type":"TestModel.Fruits"},{"name":"vec","type":{"vector":{"items":"TestModel.Fruits"}}},{"name":"size","type":"TestModel.SizeBasedEnum"},{"name":"rec","type":"TestModel.RecordWithEnums"},{"name":"recArray","type":{"array":{"items":"TestModel.RecordWithEnums"}}}]},"types":[{"name":"DaysOfWeek","values":[{"symbol":"monday","value":1},{"symbol":"tuesday","value":2},{"symbol":"wednesday","value":4},{"symbol":"thursday","value":8},{"symbol":"friday","value":16},{"symbol":"saturday","value":32},{"symbol":"sunday","value":64}]},{"name":"Fruits","values":[{"symbol":"apple","value":1},{"symbol":"banana","value":2},{"symbol":"pear","value":3}]},{"name":"TextFormat","base":"uint64","values":[{"symbol":"regular","value":0},{"symbol":"bold","value":1},{"symbol":"italic","value":2},{"symbol":"underline","value":4},{"symbol":"strikethrough","value":8}]},{"name":"DaysOfWeek","type":"BasicTypes.DaysOfWeek"},{"name":"Fruits","type":"BasicTypes.Fruits"},{"name":"RecordWithEnums","fields":[{"name":"enum","type":"TestModel.Fruits"},{"name":"flags","type":"TestModel.DaysOfWeek"},{"name":"flags2","type":"TestModel.TextFormat"},{"name":"rec","type":"TestModel.RecordWithNoDefaultEnum"}]},{"name":"RecordWithNoDefaultEnum","fields":[{"name":"enum","type":"TestModel.Fruits"}]},{"name":"SizeBasedEnum","base":"size","values":[{"symbol":"a","value":0},{"symbol":"b","value":1},{"symbol":"c","value":2}]},{"name":"TextFormat","type":"BasicTypes.TextFormat"}]})";
 
 std::vector<std::string> EnumsWriterBase::previous_schemas_ = {
 };
@@ -4856,9 +4859,18 @@ void EnumsWriterBase::WriteRec(test_model::RecordWithEnums const& value) {
   state_ = 4;
 }
 
-void EnumsWriterBase::Close() {
+void EnumsWriterBase::WriteRecArray(yardl::DynamicNDArray<test_model::RecordWithEnums> const& value) {
   if (unlikely(state_ != 4)) {
     EnumsWriterBaseInvalidState(4, false, state_);
+  }
+
+  WriteRecArrayImpl(value);
+  state_ = 5;
+}
+
+void EnumsWriterBase::Close() {
+  if (unlikely(state_ != 5)) {
+    EnumsWriterBaseInvalidState(5, false, state_);
   }
 
   CloseImpl();
@@ -4910,9 +4922,18 @@ void EnumsReaderBase::ReadRec(test_model::RecordWithEnums& value) {
   state_ = 8;
 }
 
-void EnumsReaderBase::Close() {
-  if (!skip_completed_check_ && unlikely(state_ != 8)) {
+void EnumsReaderBase::ReadRecArray(yardl::DynamicNDArray<test_model::RecordWithEnums>& value) {
+  if (unlikely(state_ != 8)) {
     EnumsReaderBaseInvalidState(8, state_);
+  }
+
+  ReadRecArrayImpl(value);
+  state_ = 10;
+}
+
+void EnumsReaderBase::Close() {
+  if (!skip_completed_check_ && unlikely(state_ != 10)) {
+    EnumsReaderBaseInvalidState(10, state_);
   }
 
   CloseImpl();
@@ -4937,6 +4958,11 @@ void EnumsReaderBase::CopyTo(EnumsWriterBase& writer) {
     test_model::RecordWithEnums value;
     ReadRec(value);
     writer.WriteRec(value);
+  }
+  {
+    yardl::DynamicNDArray<test_model::RecordWithEnums> value;
+    ReadRecArray(value);
+    writer.WriteRecArray(value);
   }
 }
 

@@ -3818,6 +3818,11 @@ class NDJsonEnumsWriter(_ndjson.NDJsonProtocolWriter, EnumsWriterBase):
         json_value = converter.to_json(value)
         self._write_json_line({"rec": json_value})
 
+    def _write_rec_array(self, value: npt.NDArray[np.void]) -> None:
+        converter = _ndjson.DynamicNDArrayConverter(RecordWithEnumsConverter())
+        json_value = converter.to_json(value)
+        self._write_json_line({"recArray": json_value})
+
 
 class NDJsonEnumsReader(_ndjson.NDJsonProtocolReader, EnumsReaderBase):
     """NDJson writer for the Enums protocol."""
@@ -3845,6 +3850,11 @@ class NDJsonEnumsReader(_ndjson.NDJsonProtocolReader, EnumsReaderBase):
     def _read_rec(self) -> RecordWithEnums:
         json_object = self._read_json_line("rec", True)
         converter = RecordWithEnumsConverter()
+        return converter.from_json(json_object)
+
+    def _read_rec_array(self) -> npt.NDArray[np.void]:
+        json_object = self._read_json_line("recArray", True)
+        converter = _ndjson.DynamicNDArrayConverter(RecordWithEnumsConverter())
         return converter.from_json(json_object)
 
 class NDJsonFlagsWriter(_ndjson.NDJsonProtocolWriter, FlagsWriterBase):

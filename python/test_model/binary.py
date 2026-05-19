@@ -908,6 +908,9 @@ class BinaryEnumsWriter(_binary.BinaryProtocolWriter, EnumsWriterBase):
     def _write_rec(self, value: RecordWithEnums) -> None:
         RecordWithEnumsSerializer().write(self._stream, value)
 
+    def _write_rec_array(self, value: npt.NDArray[np.void]) -> None:
+        _binary.DynamicNDArraySerializer(RecordWithEnumsSerializer()).write(self._stream, value)
+
 
 class BinaryEnumsReader(_binary.BinaryProtocolReader, EnumsReaderBase):
     """Binary writer for the Enums protocol."""
@@ -928,6 +931,9 @@ class BinaryEnumsReader(_binary.BinaryProtocolReader, EnumsReaderBase):
 
     def _read_rec(self) -> RecordWithEnums:
         return RecordWithEnumsSerializer().read(self._stream)
+
+    def _read_rec_array(self) -> npt.NDArray[np.void]:
+        return _binary.DynamicNDArraySerializer(RecordWithEnumsSerializer()).read(self._stream)
 
 class BinaryFlagsWriter(_binary.BinaryProtocolWriter, FlagsWriterBase):
     """Binary writer for the Flags protocol."""

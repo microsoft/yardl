@@ -841,7 +841,8 @@ class EnumSerializer(Generic[TEnum, T, T_NP], TypeSerializer[TEnum, T_NP]):
         self._enum_type = enum_type
 
     def write(self, stream: CodedOutputStream, value: TEnum) -> None:
-        self._integer_serializer.write(stream, value.value)
+        int_value = value.value if isinstance(value, Enum) else value
+        self._integer_serializer.write(stream, int_value)
 
     def write_numpy(self, stream: CodedOutputStream, value: T_NP) -> None:
         return self._integer_serializer.write_numpy(stream, value)
@@ -1325,7 +1326,17 @@ class RecordSerializer(TypeSerializer[T, np.void]):
         )
 
     def read_numpy(self, stream: CodedInputStream) -> np.void:
-        return cast(np.void, self._read(stream))
+        # Enum and nested-record fields must be read via read_numpy so they
+        # yield numpy-assignable values rather than Enum or record objects.
+        return cast(
+            np.void,
+            tuple(
+                serializer.read_numpy(stream)
+                if isinstance(serializer, (EnumSerializer, RecordSerializer))
+                else serializer.read(stream)
+                for _, serializer in self._field_serializers
+            ),
+        )
 
 
 # Only used in the header

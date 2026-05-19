@@ -3304,6 +3304,10 @@ void EnumsWriter::WriteRecImpl(test_model::RecordWithEnums const& value) {
   yardl::hdf5::WriteScalarDataset<test_model::RecordWithEnums, test_model::RecordWithEnums>(group_, "rec", test_model::hdf5::GetRecordWithEnumsHdf5Ddl(), value);
 }
 
+void EnumsWriter::WriteRecArrayImpl(yardl::DynamicNDArray<test_model::RecordWithEnums> const& value) {
+  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerDynamicNdArray<test_model::RecordWithEnums, test_model::RecordWithEnums>, yardl::DynamicNDArray<test_model::RecordWithEnums>>(group_, "recArray", yardl::hdf5::DynamicNDArrayDdl<test_model::RecordWithEnums, test_model::RecordWithEnums>(test_model::hdf5::GetRecordWithEnumsHdf5Ddl()), value);
+}
+
 EnumsReader::EnumsReader(std::string path, bool skip_completed_check)
     : test_model::EnumsReaderBase(skip_completed_check), yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "Enums", schema_) {
 }
@@ -3322,6 +3326,10 @@ void EnumsReader::ReadSizeImpl(test_model::SizeBasedEnum& value) {
 
 void EnumsReader::ReadRecImpl(test_model::RecordWithEnums& value) {
   yardl::hdf5::ReadScalarDataset<test_model::RecordWithEnums, test_model::RecordWithEnums>(group_, "rec", test_model::hdf5::GetRecordWithEnumsHdf5Ddl(), value);
+}
+
+void EnumsReader::ReadRecArrayImpl(yardl::DynamicNDArray<test_model::RecordWithEnums>& value) {
+  yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerDynamicNdArray<test_model::RecordWithEnums, test_model::RecordWithEnums>, yardl::DynamicNDArray<test_model::RecordWithEnums>>(group_, "recArray", yardl::hdf5::DynamicNDArrayDdl<test_model::RecordWithEnums, test_model::RecordWithEnums>(test_model::hdf5::GetRecordWithEnumsHdf5Ddl()), value);
 }
 
 FlagsWriter::FlagsWriter(std::string path)
