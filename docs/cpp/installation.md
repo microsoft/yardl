@@ -16,23 +16,30 @@ C++17 (or more recent) compiler and the following dependencies installed:
 4. [JSON for Modern C++](https://github.com/nlohmann/json), version: 3.11.1 or
    later.
 
-### Conda
+### Pixi
 
-If using the [Conda](https://docs.conda.io/en/latest/) package manager, these
-dependencies can be installed with:
-
-``` bash
-conda install -c conda-forge hdf5 xtensor howardhinnant_date nlohmann-json
-```
-
-Alternatively, you can create an isolated environment with all dependencies and
-compilers using [pixi](https://pixi.sh/) and the [pixi.toml like the one in this
-repo](https://github.com/microsoft/yardl/blob/main/pixi.toml).
+An easy way to get all dependencies and a complete C++ toolchain is to
+create an isolated environment with [pixi](https://pixi.sh/). To set up a new
+project from scratch:
 
 ```bash
-wget https://raw.githubusercontent.com/microsoft/yardl/main/pixi.toml
-wget https://raw.githubusercontent.com/microsoft/yardl/main/pixi.lock
+pixi init my-project
+cd my-project
+pixi add cmake cxx-compiler hdf5 xtensor howardhinnant_date nlohmann_json
 pixi shell
+```
+
+This installs a complete C++ toolchain alongside the libraries, fully isolated
+from your system. The `cxx-compiler` meta-package pulls in the appropriate
+compiler for your platform.
+
+### Conda
+
+Alternatively, if using the [Conda](https://docs.conda.io/en/latest/) package
+manager, these dependencies can be installed with:
+
+``` bash
+conda install -c cmake cxx-compiler conda-forge hdf5 xtensor howardhinnant_date nlohmann-json
 ```
 
 ### vcpkg
