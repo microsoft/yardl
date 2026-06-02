@@ -4,10 +4,26 @@ runs:
   using: composite
   steps:
 
+    - name: Read tool versions from repo config
+      id: versions
+      shell: bash
+      run: |
+        set -euo pipefail
+        go_version="$(awk '/^go /{print $2; exit}' tooling/go.mod)"
+        pixi_version="$(awk -F= '/^ARG PIXI_VERSION=/{print $2; exit}' .devcontainer/Dockerfile)"
+
+        if [[ -z "${go_version}" || -z "${pixi_version}" ]]; then
+          echo "Failed to read Go/Pixi versions from tooling/go.mod and .devcontainer/Dockerfile" >&2
+          exit 1
+        fi
+
+        echo "go_version=${go_version}" >> "${GITHUB_OUTPUT}"
+        echo "pixi_version=${pixi_version}" >> "${GITHUB_OUTPUT}"
+
     - name: Setup pixi
       uses: prefix-dev/setup-pixi@v0.8.14
       with:
-        pixi-version: v0.64.0
+        pixi-version: v${{ steps.versions.outputs.pixi_version }}
         # Only the "default" environment is needed in CI; the "dev" environment
         # contains extra tooling that is only used for local development.
         environments: default
@@ -17,7 +33,7 @@ runs:
     - name: Setup Go
       uses: actions/setup-go@v4
       with:
-        go-version: ${{ env.GO_VERSION }}
+        go-version: ${{ steps.versions.outputs.go_version }}
         cache-dependency-path: tooling/go.sum
 
     - name: Setup Matlab

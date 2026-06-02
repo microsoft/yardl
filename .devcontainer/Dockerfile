@@ -1,22 +1,6 @@
 ARG DEVCONTAINER_BASE=mcr.microsoft.com/devcontainers/base:1.0.9-ubuntu-22.04
 
 #########################################################
-# file-normalizer stage
-# In order to use BuildKit remote caching, input files must have
-# not only the right content hash, but also the right permissions.
-# Git only tracks whether the owner can execute a file.
-# Here we bring in all files that are going to be used in the
-# subsequent stage and normalize the permissions.
-#########################################################
-
-FROM ${DEVCONTAINER_BASE} AS file-normalizer
-
-COPY .devcontainer/matlab-r2023b.ubuntu-22.04.dependencies.txt \
-     /data/
-
-RUN chmod -R 555 /data/
-
-#########################################################
 # devcontainer stage
 # Installs all dependencies and tooling for development.
 #########################################################
@@ -44,7 +28,7 @@ ARG LICENSE_SERVER=
 
 ENV MLM_LICENSE_FILE=${LICENSE_SERVER}
 
-COPY --from=file-normalizer /data/matlab-r2023b.ubuntu-22.04.dependencies.txt /tmp/matlab-dependencies.txt
+COPY .devcontainer/matlab-r2023b.ubuntu-22.04.dependencies.txt /tmp/matlab-dependencies.txt
 
 RUN if [ "${INSTALL_MATLAB}" = "true" ]; then \
         set -e; \
@@ -117,7 +101,7 @@ CMD [ "sleep", "infinity" ]
 # Install pixi. The conda/pypi environment itself is created from pixi.toml /
 # pixi.lock at container creation time (see postCreateCommand), so that it can
 # live in the mounted .pixi volume rather than being baked into the image.
-ARG PIXI_VERSION=0.64.0
+ARG PIXI_VERSION=0.70.0
 RUN mkdir -p /home/${USERNAME}/.pixi/bin \
     && curl -L -o /home/${USERNAME}/.pixi/bin/pixi -fsSL --compressed "https://github.com/prefix-dev/pixi/releases/download/v${PIXI_VERSION}/pixi-$(uname -m)-unknown-linux-musl" \
     && chmod +x /home/${USERNAME}/.pixi/bin/pixi \
@@ -125,17 +109,19 @@ RUN mkdir -p /home/${USERNAME}/.pixi/bin \
 ENV PATH="/home/${USERNAME}/.pixi/bin:${PATH}"
 
 # Install Go
-ARG GO_VERSION=1.26.3
+COPY tooling/go.mod /tmp/build/go.mod
 ENV GOROOT="/usr/local/go"
 ENV GOPATH="/go"
 ENV "PATH"="/usr/local/go/bin:/go/bin:${PATH}"
 RUN umask 0002 \
+    && GO_VERSION="$(awk '/^go /{print $2; exit}' /tmp/build/go.mod)" \
+    && [ -n "${GO_VERSION}" ] \
     && script=$(curl -fsSL "https://raw.githubusercontent.com/devcontainers/features/72df8a5f191f840a66dc2e2ced10a136e4d75173/src/go/install.sh") \
     && VERSION=${GO_VERSION} TARGET_GOPATH=${GOPATH} TARGET_GOROOT=${GOROOT} bash -c "$script" \
     && chown -R "${USERNAME}:${USERNAME}" "${GOROOT}" "${GOPATH}"
 
 # Install watchexec
-ARG WATCHEXEC_VERSION=1.22.3
+ARG WATCHEXEC_VERSION=2.5.1
 RUN wget --quiet https://github.com/watchexec/watchexec/releases/download/v${WATCHEXEC_VERSION}/watchexec-${WATCHEXEC_VERSION}-$(uname -m)-unknown-linux-musl.deb -O watchexec.deb \
     && dpkg -i watchexec.deb
 
