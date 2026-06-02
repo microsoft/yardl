@@ -9,12 +9,14 @@ runs:
       shell: bash
       run: |
         set -euo pipefail
-        pixi_version="$(awk -F= '/^ARG PIXI_VERSION=/{print $2; exit}' .devcontainer/Dockerfile)"
-
-        if [[ -z "${pixi_version}" ]]; then
-          echo "Failed to read Pixi version from .devcontainer/Dockerfile" >&2
+        # yq is pre-installed on GitHub-hosted runners.
+        # requires-pixi must be pinned with '==' (e.g. "==0.70.0").
+        requires_pixi="$(yq -p toml -oy '.workspace.requires-pixi' pixi.toml)"
+        if [[ "${requires_pixi}" != ==* ]]; then
+          echo "requires-pixi in pixi.toml must be pinned with '==' (got: '${requires_pixi}')" >&2
           exit 1
         fi
+        pixi_version="${requires_pixi#==}"
 
         echo "pixi_version=${pixi_version}" >> "${GITHUB_OUTPUT}"
 

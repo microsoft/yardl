@@ -103,14 +103,34 @@ RUN script=$(curl -fsSL "https://raw.githubusercontent.com/devcontainers/feature
 ENTRYPOINT [ "/usr/local/share/docker-init.sh" ]
 CMD [ "sleep", "infinity" ]
 
+# Install yq (used to parse pixi.toml below; also pre-installed on
+# GitHub-hosted runners so the same parsing logic can be shared).
+ARG YQ_VERSION=4.53.2
+RUN arch="$(uname -m)" \
+    && case "${arch}" in \
+         x86_64) yq_arch=amd64 ;; \
+         aarch64|arm64) yq_arch=arm64 ;; \
+         *) echo "Unsupported arch: ${arch}" >&2; exit 1 ;; \
+       esac \
+    && curl -fsSL -o /usr/local/bin/yq "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_${yq_arch}" \
+    && chmod +x /usr/local/bin/yq
+
 # Install pixi. The conda/pypi environment itself is created from pixi.toml /
 # pixi.lock at container creation time (see postCreateCommand), so that it can
 # live in the mounted .pixi volume rather than being baked into the image.
-ARG PIXI_VERSION=0.70.0
-RUN mkdir -p /home/${USERNAME}/.pixi/bin \
+# The pixi version is read from the `requires-pixi` field in pixi.toml, which
+# must be pinned with `==` (e.g. "==0.70.0").
+COPY pixi.toml /tmp/build/pixi.toml
+RUN requires_pixi="$(yq -p toml -oy '.workspace.requires-pixi' /tmp/build/pixi.toml)" \
+    && case "${requires_pixi}" in \
+         ==*) PIXI_VERSION="${requires_pixi#==}" ;; \
+         *) echo "requires-pixi in pixi.toml must be pinned with '==' (got: '${requires_pixi}')" >&2; exit 1 ;; \
+       esac \
+    && mkdir -p /home/${USERNAME}/.pixi/bin \
     && curl -L -o /home/${USERNAME}/.pixi/bin/pixi -fsSL --compressed "https://github.com/prefix-dev/pixi/releases/download/v${PIXI_VERSION}/pixi-$(uname -m)-unknown-linux-musl" \
     && chmod +x /home/${USERNAME}/.pixi/bin/pixi \
-    && chown -R ${USERNAME}:${USERNAME} /home/${USERNAME}/.pixi
+    && chown -R ${USERNAME}:${USERNAME} /home/${USERNAME}/.pixi \
+    && rm -f /tmp/build/pixi.toml
 ENV PATH="/home/${USERNAME}/.pixi/bin:${PATH}"
 
 # Install Go
