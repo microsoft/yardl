@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.19)
 project(yardl)
 
-SET(CMAKE_CXX_FLAGS_DEBUG "-O0 -ggdb")
+SET(CMAKE_CXX_FLAGS_DEBUG "-O0 -ggdb -U_FORTIFY_SOURCE")
 
 #Set the build type to Release if not specified
 if (NOT CMAKE_BUILD_TYPE)

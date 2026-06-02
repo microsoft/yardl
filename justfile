@@ -14,9 +14,15 @@ benchmark-cmd := if matlab != "disabled" { "python python/benchmark.py --include
 @ensure-build-dir:
     mkdir -p cpp/build
 
-@configure: ensure-build-dir
+@clean-build-dir:
+    rm -rf cpp/build
+
+@configure build_type="Release": ensure-build-dir
     cd cpp/build; \
-    cmake -GNinja -D CMAKE_CXX_STANDARD={{ cpp_version }} ..
+    cmake -GNinja -D CMAKE_CXX_STANDARD={{ cpp_version }} -DCMAKE_BUILD_TYPE={{ build_type }} ..
+
+@configure-debug: ensure-build-dir
+    just configure Debug
 
 @install:
     cd tooling/cmd/yardl; \

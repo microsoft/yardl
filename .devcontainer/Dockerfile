@@ -11,9 +11,7 @@ ARG DEVCONTAINER_BASE=mcr.microsoft.com/devcontainers/base:1.0.9-ubuntu-22.04
 
 FROM ${DEVCONTAINER_BASE} AS file-normalizer
 
-COPY environment.yml \
-     .devcontainer/devcontainer.bashrc  \
-     .devcontainer/matlab-r2023b.ubuntu-22.04.dependencies.txt \
+COPY .devcontainer/matlab-r2023b.ubuntu-22.04.dependencies.txt \
      /data/
 
 RUN chmod -R 555 /data/
@@ -93,8 +91,6 @@ RUN if [ "${INSTALL_MATLAB}" = "true" ]; then \
 ARG USERNAME="vscode"
 ARG USER_UID=1000
 ARG USER_GID=$USER_UID
-ARG CONDA_GID=900
-ARG CONDA_ENVIRONMENT_NAME=yardl
 
 RUN apt-get update \
     && apt-get install -y \
@@ -118,67 +114,29 @@ RUN script=$(curl -fsSL "https://raw.githubusercontent.com/devcontainers/feature
 ENTRYPOINT [ "/usr/local/share/docker-init.sh" ]
 CMD [ "sleep", "infinity" ]
 
-ARG MAMBAFORGE_VERSION=25.3.1-0
-
-# Based on https://github.com/conda-forge/miniforge-images/blob/master/ubuntu/Dockerfile
-RUN wget --no-hsts --quiet https://github.com/conda-forge/miniforge/releases/download/${MAMBAFORGE_VERSION}/Miniforge3-${MAMBAFORGE_VERSION}-Linux-$(uname -m).sh -O /tmp/miniforge.sh \
-    && /bin/bash /tmp/miniforge.sh -b -p /opt/conda \
-    && rm /tmp/miniforge.sh \
-    && /opt/conda/bin/conda clean --tarballs --index-cache --packages --yes \
-    && find /opt/conda -follow -type f -name '*.a' -delete \
-    && find /opt/conda -follow -type f -name '*.pyc' -delete \
-    && /opt/conda/bin/conda clean --force-pkgs-dirs --all --yes  \
-    && groupadd -r conda --gid ${CONDA_GID} \
-    && usermod -aG conda ${USERNAME} \
-    && chown -R :conda /opt/conda \
-    && chmod -R g+w /opt/conda \
-    && find /opt -type d | xargs -n 1 chmod g+s
-
-# Create a conda environment from the environment file in the repo root.
-# Filter out lines where the the # arch=??? comment does not match the current architecture.
-COPY --from=file-normalizer --chown=$USER_UID:conda /data/environment.yml /tmp/build/
-RUN umask 0002 \
-    && awk -v arch="$(uname -m)" ' \
-        !/#.*arch=/ { print; next } \
-        /#.*arch=/ && $0 ~ "arch="arch { print } \
-        ' /tmp/build/environment.yml > /tmp/build/filtered_environment.yml \
-    && /opt/conda/bin/mamba env create -f /tmp/build/filtered_environment.yml \
-    && /opt/conda/bin/mamba clean -fy \
-    && sudo chown -R :conda /opt/conda/envs
+# Install pixi. The conda/pypi environment itself is created from pixi.toml /
+# pixi.lock at container creation time (see postCreateCommand), so that it can
+# live in the mounted .pixi volume rather than being baked into the image.
+ARG PIXI_VERSION=0.64.0
+RUN mkdir -p /home/${USERNAME}/.pixi/bin \
+    && curl -L -o /home/${USERNAME}/.pixi/bin/pixi -fsSL --compressed "https://github.com/prefix-dev/pixi/releases/download/v${PIXI_VERSION}/pixi-$(uname -m)-unknown-linux-musl" \
+    && chmod +x /home/${USERNAME}/.pixi/bin/pixi \
+    && chown -R ${USERNAME}:${USERNAME} /home/${USERNAME}/.pixi
+ENV PATH="/home/${USERNAME}/.pixi/bin:${PATH}"
 
 # Install Go
-ARG GO_VERSION=1.24.4
+ARG GO_VERSION=1.26.3
 ENV GOROOT="/usr/local/go"
 ENV GOPATH="/go"
 ENV "PATH"="/usr/local/go/bin:/go/bin:${PATH}"
 RUN umask 0002 \
-    && script=$(curl -fsSL "https://raw.githubusercontent.com/devcontainers/features/8c471574f1b39e260e88ddcb858ab1681dafbdac/src/go/install.sh") \
+    && script=$(curl -fsSL "https://raw.githubusercontent.com/devcontainers/features/72df8a5f191f840a66dc2e2ced10a136e4d75173/src/go/install.sh") \
     && VERSION=${GO_VERSION} TARGET_GOPATH=${GOPATH} TARGET_GOROOT=${GOROOT} bash -c "$script" \
-    && chown -R "${USERNAME}:conda" "${GOROOT}" "${GOPATH}"
+    && chown -R "${USERNAME}:${USERNAME}" "${GOROOT}" "${GOPATH}"
 
 # Install watchexec
 ARG WATCHEXEC_VERSION=1.22.3
 RUN wget --quiet https://github.com/watchexec/watchexec/releases/download/v${WATCHEXEC_VERSION}/watchexec-${WATCHEXEC_VERSION}-$(uname -m)-unknown-linux-musl.deb -O watchexec.deb \
     && dpkg -i watchexec.deb
 
-# Add a file that is to be sourced from .bashrc and from the devops pipeline stages
-COPY --from=file-normalizer /data/devcontainer.bashrc /opt/devcontainer/
-
-# Add a section to /etc/bash.bashrc that ensures that a section is present at the end of ~/.bashrc.
-# We can't just write to .bashrc from here because it will be overwritten if the devcontainer user has
-# opted to use their own dotfiles repo. The dotfiles repo is cloned after the postCreateCommand
-# in the devcontainer.json file is executed.
-RUN echo "\n\
-if ! grep -q \"^source /opt/devcontainer/devcontainer.bashrc\" \${HOME}/.bashrc; then\n\
-	echo \"source /opt/devcontainer/devcontainer.bashrc\" >> \${HOME}/.bashrc\n\
-fi\n" >> /etc/bash.bashrc
-
 ENV CMAKE_GENERATOR=Ninja
-
-# Create a kits file for the VSCode CMake Tools extension, so you are not prompted for which kit to select whenever you open VSCode
-RUN . /opt/conda/etc/profile.d/conda.sh \
-    && conda activate /opt/conda/envs/yardl \
-    && mkdir -p /home/vscode/.local/share/CMakeTools \
-    && echo "[{\"name\":\"Conda\",\"compilers\":{\"C\":\"$GCC\",\"CXX\":\"$GXX\"}}]" > /home/vscode/.local/share/CMakeTools/cmake-tools-kits.json \
-    && chown vscode:conda /home/vscode/.local/share/CMakeTools/cmake-tools-kits.json
-

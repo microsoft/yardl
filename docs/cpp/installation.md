@@ -25,14 +25,14 @@ dependencies can be installed with:
 conda install -c conda-forge hdf5 xtensor howardhinnant_date nlohmann-json
 ```
 
-Alternatively, you can create a new conda environment with all dependencies and
-compilers using an environment.yml like [the one in this
-repo](https://github.com/microsoft/yardl/blob/main/environment.yml).
+Alternatively, you can create an isolated environment with all dependencies and
+compilers using [pixi](https://pixi.sh/) and the [pixi.toml like the one in this
+repo](https://github.com/microsoft/yardl/blob/main/pixi.toml).
 
 ```bash
-wget https://raw.githubusercontent.com/microsoft/yardl/main/environment.yml
-conda env create -n yardl -f environment.yml
-conda activate yardl
+wget https://raw.githubusercontent.com/microsoft/yardl/main/pixi.toml
+wget https://raw.githubusercontent.com/microsoft/yardl/main/pixi.lock
+pixi shell
 ```
 
 ### vcpkg

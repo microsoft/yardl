@@ -110,8 +110,8 @@ We recommend opening repo in a [dev
 container](https://code.visualstudio.com/docs/devcontainers/containers) or a
 [codespace](https://docs.github.com/en/codespaces/overview). Otherwise, all the
 required dependencies are specified in the
-[Conda](https://docs.conda.io/en/latest/) [environment.yml](environment.yml)
-file in the repo root.
+[pixi](https://pixi.sh/) [pixi.toml](pixi.toml) file in the repo root, and can be
+installed with `pixi install`.
 
 We use the [`just`](https://github.com/casey/just) command runner to build and run tests. To get
 started, you should be able to run

@@ -13,8 +13,8 @@
 
 **/__pycache__/
 
-# a filtered environment file generated during CI runs
-ci-environment.yml
+# pixi environments (created from pixi.toml / pixi.lock)
+.pixi/
 
 dist/
 

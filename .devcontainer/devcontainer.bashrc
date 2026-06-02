@@ -1,8 +1,12 @@
 #! /bin/bash
 # shellcheck source=/dev/null
 
-source /opt/conda/etc/profile.d/conda.sh
-conda activate yardl
+# Activate the pixi "dev" environment for interactive shells.
+parent_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")"/.. && pwd)"
+eval "$(pixi shell-hook --manifest-path "${parent_dir}/pixi.toml" --environment dev)"
+
+# Shell completions
+source <(pixi completion --shell bash)
 source <(just --completions bash)
 
 PATH=${PATH}:${HOME}/go/bin
