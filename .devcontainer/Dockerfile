@@ -1,24 +1,6 @@
 ARG DEVCONTAINER_BASE=mcr.microsoft.com/devcontainers/base:1.0.9-ubuntu-22.04
 
 #########################################################
-# file-normalizer stage
-# In order to use BuildKit remote caching, input files must have
-# not only the right content hash, but also the right permissions.
-# Git only tracks whether the owner can execute a file.
-# Here we bring in all files that are going to be used in the
-# subsequent stage and normalize the permissions.
-#########################################################
-
-FROM ${DEVCONTAINER_BASE} AS file-normalizer
-
-COPY environment.yml \
-     .devcontainer/devcontainer.bashrc  \
-     .devcontainer/matlab-r2023b.ubuntu-22.04.dependencies.txt \
-     /data/
-
-RUN chmod -R 555 /data/
-
-#########################################################
 # devcontainer stage
 # Installs all dependencies and tooling for development.
 #########################################################
@@ -26,75 +8,78 @@ RUN chmod -R 555 /data/
 FROM ${DEVCONTAINER_BASE} AS devcontainer
 
 #########################################################
-# Install Matlab
+# Install Matlab (conditional on INSTALL_MATLAB build arg)
 #   Based on mathworks/{matlab-deps:r2023b,matlab:r2023b}
 #
 # Configure the Matlab License Server to use Matlab within the devcontainer (including VSCode extensions):
 #   In your HOST environment, export the environment variable MATLAB_LICENSE_FILE, e.g.
 #       export MATLAB_LICENSE_FILE=/mnt/c/Users/username/Documents/MATLAB/license.lic
+#
+# To skip MATLAB installation, set the INSTALL_MATLAB build arg to "false" in devcontainer.json.
 #########################################################
 
 ENV DEBIAN_FRONTEND="noninteractive" TZ="Etc/UTC"
 
-COPY --from=file-normalizer /data/matlab-r2023b.ubuntu-22.04.dependencies.txt /tmp/matlab-dependencies.txt
-
-RUN export DEBIAN_FRONTEND=noninteractive \
-    && apt-get update \
-    && apt-get install --no-install-recommends --yes \
-    `cat /tmp/matlab-dependencies.txt` \
-    wget \
-    unzip \
-    ca-certificates \
-    && apt-get clean \
-    && apt-get -y autoremove \
-    && rm -rf /var/lib/apt/lists/*
-
-RUN [ -d /usr/share/X11/xkb ] || mkdir -p /usr/share/X11/xkb
-
+ARG INSTALL_MATLAB=true
 ARG MATLAB_RELEASE=r2023b
 ARG MATLAB_PRODUCT_LIST="MATLAB"
 ARG MATLAB_INSTALL_LOCATION="/opt/matlab/${MATLAB_RELEASE}"
 ARG LICENSE_SERVER=
 
-RUN adduser --shell /bin/bash --disabled-password --gecos "" matlab \
-    && echo "matlab ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/matlab \
-    && chmod 0440 /etc/sudoers.d/matlab
-
-USER matlab
-WORKDIR /home/matlab
-
 ENV MLM_LICENSE_FILE=${LICENSE_SERVER}
 
-RUN wget -q https://www.mathworks.com/mpm/glnxa64/mpm \
-    && chmod +x mpm \
-    && sudo HOME=${HOME} ./mpm install \
-    --release=${MATLAB_RELEASE} \
-    --destination=${MATLAB_INSTALL_LOCATION} \
-    --products ${MATLAB_PRODUCT_LIST} \
-    || (echo "MPM Installation Failure. See below for more information:" && cat /tmp/mathworks_root.log && false) \
-    && sudo rm -f mpm /tmp/mathworks_root.log \
-    && sudo ln -s ${MATLAB_INSTALL_LOCATION}/bin/matlab /usr/local/bin/matlab \
-    && sudo ln -s ${MATLAB_INSTALL_LOCATION} /opt/matlab/latest \
-    && sudo mkdir -p ${MATLAB_INSTALL_LOCATION}/licenses
+COPY .devcontainer/matlab-r2023b.ubuntu-22.04.dependencies.txt /tmp/matlab-dependencies.txt
 
-# Install workaround run-matlab-command script to unify local and CI invocations of `matlab -batch`
-# See https://github.com/matlab-actions/run-command/issues/53
-RUN sudo wget -O /usr/local/bin/run-matlab-command https://ssd.mathworks.com/supportfiles/ci/run-matlab-command/v2/glnxa64/run-matlab-command \
-    && sudo chmod +x /usr/local/bin/run-matlab-command
+RUN if [ "${INSTALL_MATLAB}" = "true" ]; then \
+        set -e; \
+        arch="$(uname -m)"; \
+        if [ "${arch}" = "aarch64" ] || [ "${arch}" = "arm64" ]; then \
+            echo "Skipping MATLAB installation on ${arch} (not supported in this devcontainer setup)"; \
+            exit 0; \
+        fi; \
+        export DEBIAN_FRONTEND=noninteractive; \
+        apt-get update; \
+        apt-get install --no-install-recommends --yes \
+            $(cat /tmp/matlab-dependencies.txt) \
+            wget \
+            unzip \
+            ca-certificates; \
+        apt-get clean; \
+        apt-get -y autoremove; \
+        rm -rf /var/lib/apt/lists/*; \
+        [ -d /usr/share/X11/xkb ] || mkdir -p /usr/share/X11/xkb; \
+        adduser --shell /bin/bash --disabled-password --gecos "" matlab; \
+        echo "matlab ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/matlab; \
+        chmod 0440 /etc/sudoers.d/matlab; \
+        cd /home/matlab; \
+        wget -q https://www.mathworks.com/mpm/glnxa64/mpm -O /home/matlab/mpm; \
+        chmod +x /home/matlab/mpm; \
+        HOME=/home/matlab /home/matlab/mpm install \
+            --release=${MATLAB_RELEASE} \
+            --destination=${MATLAB_INSTALL_LOCATION} \
+            --products ${MATLAB_PRODUCT_LIST} \
+            || (echo "MPM Installation Failure. See below for more information:" && cat /tmp/mathworks_root.log && false); \
+        rm -f /home/matlab/mpm /tmp/mathworks_root.log; \
+        ln -s ${MATLAB_INSTALL_LOCATION}/bin/matlab /usr/local/bin/matlab; \
+        ln -s ${MATLAB_INSTALL_LOCATION} /opt/matlab/latest; \
+        mkdir -p ${MATLAB_INSTALL_LOCATION}/licenses; \
+        chown -R matlab:matlab /opt/matlab; \
+        wget -O /usr/local/bin/run-matlab-command https://ssd.mathworks.com/supportfiles/ci/run-matlab-command/v2/glnxa64/run-matlab-command; \
+        chmod +x /usr/local/bin/run-matlab-command; \
+    else \
+        echo "Skipping MATLAB installation (INSTALL_MATLAB=${INSTALL_MATLAB})"; \
+    fi
 
 
 #########################################################
 # Install everything else
 #########################################################
 
-USER root
 
 # Install needed packages and setup non-root user.
 ARG USERNAME="vscode"
 ARG USER_UID=1000
 ARG USER_GID=$USER_UID
-ARG CONDA_GID=900
-ARG CONDA_ENVIRONMENT_NAME=yardl
 
 RUN apt-get update \
     && apt-get install -y \
@@ -118,67 +103,51 @@ RUN script=$(curl -fsSL "https://raw.githubusercontent.com/devcontainers/feature
 ENTRYPOINT [ "/usr/local/share/docker-init.sh" ]
 CMD [ "sleep", "infinity" ]
 
-ARG MAMBAFORGE_VERSION=25.3.1-0
+# Install yq (used to parse pixi.toml below; also pre-installed on
+# GitHub-hosted runners so the same parsing logic can be shared).
+ARG YQ_VERSION=4.53.2
+RUN arch="$(uname -m)" \
+    && case "${arch}" in \
+         x86_64) yq_arch=amd64 ;; \
+         aarch64|arm64) yq_arch=arm64 ;; \
+         *) echo "Unsupported arch: ${arch}" >&2; exit 1 ;; \
+       esac \
+    && curl -fsSL -o /usr/local/bin/yq "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_${yq_arch}" \
+    && chmod +x /usr/local/bin/yq
 
-# Based on https://github.com/conda-forge/miniforge-images/blob/master/ubuntu/Dockerfile
-RUN wget --no-hsts --quiet https://github.com/conda-forge/miniforge/releases/download/${MAMBAFORGE_VERSION}/Miniforge3-${MAMBAFORGE_VERSION}-Linux-$(uname -m).sh -O /tmp/miniforge.sh \
-    && /bin/bash /tmp/miniforge.sh -b -p /opt/conda \
-    && rm /tmp/miniforge.sh \
-    && /opt/conda/bin/conda clean --tarballs --index-cache --packages --yes \
-    && find /opt/conda -follow -type f -name '*.a' -delete \
-    && find /opt/conda -follow -type f -name '*.pyc' -delete \
-    && /opt/conda/bin/conda clean --force-pkgs-dirs --all --yes  \
-    && groupadd -r conda --gid ${CONDA_GID} \
-    && usermod -aG conda ${USERNAME} \
-    && chown -R :conda /opt/conda \
-    && chmod -R g+w /opt/conda \
-    && find /opt -type d | xargs -n 1 chmod g+s
-
-# Create a conda environment from the environment file in the repo root.
-# Filter out lines where the the # arch=??? comment does not match the current architecture.
-COPY --from=file-normalizer --chown=$USER_UID:conda /data/environment.yml /tmp/build/
-RUN umask 0002 \
-    && awk -v arch="$(uname -m)" ' \
-        !/#.*arch=/ { print; next } \
-        /#.*arch=/ && $0 ~ "arch="arch { print } \
-        ' /tmp/build/environment.yml > /tmp/build/filtered_environment.yml \
-    && /opt/conda/bin/mamba env create -f /tmp/build/filtered_environment.yml \
-    && /opt/conda/bin/mamba clean -fy \
-    && sudo chown -R :conda /opt/conda/envs
+# Install pixi. The conda/pypi environment itself is created from pixi.toml /
+# pixi.lock at container creation time (see postCreateCommand), so that it can
+# live in the mounted .pixi volume rather than being baked into the image.
+# The pixi version is read from the `requires-pixi` field in pixi.toml, which
+# must be pinned with `==` (e.g. "==0.70.0").
+COPY pixi.toml /tmp/build/pixi.toml
+RUN requires_pixi="$(yq -p toml -oy '.workspace.requires-pixi' /tmp/build/pixi.toml)" \
+    && case "${requires_pixi}" in \
+         ==*) PIXI_VERSION="${requires_pixi#==}" ;; \
+         *) echo "requires-pixi in pixi.toml must be pinned with '==' (got: '${requires_pixi}')" >&2; exit 1 ;; \
+       esac \
+    && mkdir -p /home/${USERNAME}/.pixi/bin \
+    && curl -L -o /home/${USERNAME}/.pixi/bin/pixi -fsSL --compressed "https://github.com/prefix-dev/pixi/releases/download/v${PIXI_VERSION}/pixi-$(uname -m)-unknown-linux-musl" \
+    && chmod +x /home/${USERNAME}/.pixi/bin/pixi \
+    && chown -R ${USERNAME}:${USERNAME} /home/${USERNAME}/.pixi \
+    && rm -f /tmp/build/pixi.toml
+ENV PATH="/home/${USERNAME}/.pixi/bin:${PATH}"
 
 # Install Go
-ARG GO_VERSION=1.24.4
+COPY tooling/go.mod /tmp/build/go.mod
 ENV GOROOT="/usr/local/go"
 ENV GOPATH="/go"
 ENV "PATH"="/usr/local/go/bin:/go/bin:${PATH}"
 RUN umask 0002 \
-    && script=$(curl -fsSL "https://raw.githubusercontent.com/devcontainers/features/8d3685e09f18dd8b0a6bce50abe3e868dac27a69/src/go/install.sh") \
+    && GO_VERSION="$(awk '/^go /{print $2; exit}' /tmp/build/go.mod)" \
+    && [ -n "${GO_VERSION}" ] \
+    && script=$(curl -fsSL "https://raw.githubusercontent.com/devcontainers/features/72df8a5f191f840a66dc2e2ced10a136e4d75173/src/go/install.sh") \
     && VERSION=${GO_VERSION} TARGET_GOPATH=${GOPATH} TARGET_GOROOT=${GOROOT} bash -c "$script" \
-    && chown -R "${USERNAME}:conda" "${GOROOT}" "${GOPATH}"
+    && chown -R "${USERNAME}:${USERNAME}" "${GOROOT}" "${GOPATH}"
 
 # Install watchexec
-ARG WATCHEXEC_VERSION=1.22.3
+ARG WATCHEXEC_VERSION=2.5.1
 RUN wget --quiet https://github.com/watchexec/watchexec/releases/download/v${WATCHEXEC_VERSION}/watchexec-${WATCHEXEC_VERSION}-$(uname -m)-unknown-linux-musl.deb -O watchexec.deb \
     && dpkg -i watchexec.deb
 
-# Add a file that is to be sourced from .bashrc and from the devops pipeline stages
-COPY --from=file-normalizer /data/devcontainer.bashrc /opt/devcontainer/
-
-# Add a section to /etc/bash.bashrc that ensures that a section is present at the end of ~/.bashrc.
-# We can't just write to .bashrc from here because it will be overwritten if the devcontainer user has
-# opted to use their own dotfiles repo. The dotfiles repo is cloned after the postCreateCommand
-# in the devcontainer.json file is executed.
-RUN echo "\n\
-if ! grep -q \"^source /opt/devcontainer/devcontainer.bashrc\" \${HOME}/.bashrc; then\n\
-	echo \"source /opt/devcontainer/devcontainer.bashrc\" >> \${HOME}/.bashrc\n\
-fi\n" >> /etc/bash.bashrc
-
 ENV CMAKE_GENERATOR=Ninja
-
-# Create a kits file for the VSCode CMake Tools extension, so you are not prompted for which kit to select whenever you open VSCode
-RUN . /opt/conda/etc/profile.d/conda.sh \
-    && conda activate /opt/conda/envs/yardl \
-    && mkdir -p /home/vscode/.local/share/CMakeTools \
-    && echo "[{\"name\":\"Conda\",\"compilers\":{\"C\":\"$GCC\",\"CXX\":\"$GXX\"}}]" > /home/vscode/.local/share/CMakeTools/cmake-tools-kits.json \
-    && chown vscode:conda /home/vscode/.local/share/CMakeTools/cmake-tools-kits.json
-

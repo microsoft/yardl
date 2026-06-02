@@ -10,16 +10,6 @@ on:
     - cron: "0 0 * * 3" # 00:00 every Wednesday
   workflow_dispatch:
 
-defaults:
-  run:
-    # See https://github.com/marketplace/actions/setup-miniconda#important
-    shell: bash -el {0}
-
-env:
-  # Increase this to manually reset the conda environment cache
-  CONDA_CACHE_NUMBER: 0
-  GO_VERSION: "1.24.4"
-
 jobs:
   validate:
     strategy:
@@ -44,10 +34,8 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - uses: actions/setup-go@v6
-        with:
-          go-version: ${{ env.GO_VERSION }}
-          cache-dependency-path: tooling/go.sum
+      - name: Configure environment
+        uses: ./.github/actions/configure-environment
 
       - name: Build yardl binaries for multiple platforms
         uses: goreleaser/goreleaser-action@v7
@@ -145,7 +133,7 @@ jobs:
 
       - uses: actions/setup-go@v6
         with:
-          go-version: ${{ env.GO_VERSION }}
+          go-version-file: tooling/go.mod
           cache-dependency-path: tooling/go.sum
 
       - name: Set variables

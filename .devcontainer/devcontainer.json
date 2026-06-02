@@ -4,7 +4,12 @@
   "name": "yardl",
   "build": {
     "dockerfile": "Dockerfile",
-    "context": ".."
+    "context": "..",
+    "args": {
+      // Set to "false" to skip installing MATLAB in the devcontainer.
+      // It is also skipped on ARM machines
+      "INSTALL_MATLAB": "true"
+    }
   },
   "runArgs": [
     "--cap-add=SYS_PTRACE",
@@ -16,9 +21,14 @@
   "mounts": [
     // Bind mount docker socket under an alias to support docker-from-docker
     "source=/var/run/docker.sock,target=/var/run/docker-host.sock,type=bind",
-    "source=${localEnv:MATLAB_LICENSE_FILE:/dev/null},target=/tmp/matlab.host.lic,type=bind,readonly"
+    "source=${localEnv:MATLAB_LICENSE_FILE:/dev/null},target=/tmp/matlab.host.lic,type=bind,readonly",
+    // Persist the pixi environment (and its package cache) in a named volume so
+    // it survives rebuilds and is not subject to the slow bind-mount filesystem.
+    "source=${localWorkspaceFolderBasename}-pixi,target=${containerWorkspaceFolder}/.pixi,type=volume"
   ],
   "onCreateCommand": ".devcontainer/devcontainer-on-create.sh",
+  "postCreateCommand": ".devcontainer/devcontainer-post-create.sh",
+  "postStartCommand": ".devcontainer/devcontainer-post-start.sh",
   "remoteUser": "vscode",
 
   // Configure tool-specific properties.
@@ -34,6 +44,10 @@
         "files.readonlyInclude": {
           "**/generated/**": true,
           "python/sandbox/**": true
+        },
+
+        "files.exclude": {
+          ".pixi/": true
         },
 
         "go.toolsManagement.checkForUpdates": "local",
@@ -59,6 +73,12 @@
           "editor.formatOnSave": true
         },
 
+        "cmake.cmakePath": "${containerWorkspaceFolder}/.pixi/envs/dev/bin/cmake",
+        "cmake.generator": "Ninja",
+        "cmake.configureSettings": {
+          "CMAKE_MAKE_PROGRAM": "${containerWorkspaceFolder}/.pixi/envs/dev/bin/ninja"
+        },
+        "cmake.configureOnOpen": false,
         "cmake.sourceDirectory": "${workspaceFolder}/cpp",
         "cmake.buildDirectory": "${workspaceFolder}/cpp/build",
 
@@ -71,7 +91,7 @@
           "${workspaceFolder}/tooling/internal/python/static_files"
         ],
 
-        "python.defaultInterpreterPath": "/opt/conda/envs/yardl/bin/python",
+        "python.defaultInterpreterPath": "${containerWorkspaceFolder}/.pixi/envs/dev/bin/python",
         "python.terminal.activateEnvironment": false, // Disable the extension calling activate when the integrated terminal launches. We take care of this in ~/.bashrc.
 
         "python.testing.pytestArgs": ["python"],
@@ -101,7 +121,7 @@
           ]
         },
 
-        "gcovViewer.gcovBinary": "/opt/conda/envs/yardl/bin/x86_64-conda-linux-gnu-gcov",
+        "gcovViewer.gcovBinary": "${containerWorkspaceFolder}/.pixi/envs/dev/bin/gcov",
         "gcovViewer.buildDirectories": ["${workspaceFolder}/cpp/build"]
       },
 
@@ -119,9 +139,10 @@
         "ms-python.black-formatter",
         "ms-python.python",
         "ms-toolsai.jupyter",
-        "ms-vscode.cmake-tools",
-        "ms-vscode.cpptools",
+        "ms-vscode.cpptools-extension-pack",
+        "jjjermiah.pixi-vscode",
         "sclu1034.justfile",
+        "tamasfe.even-better-toml",
         "timonwong.shellcheck",
         "twxs.cmake",
         "yzhang.markdown-all-in-one"

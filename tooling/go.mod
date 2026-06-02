@@ -1,6 +1,6 @@
 module github.com/microsoft/yardl/tooling
 
-go 1.24.0
+go 1.26.3
 
 require (
 	github.com/alecthomas/participle/v2 v2.1.4

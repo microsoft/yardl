@@ -1,51 +1,39 @@
 name: Configure Environment
-description: Configures the conda environment
+description: Configures the pixi environment
 runs:
   using: composite
   steps:
 
-    - name: Initial setup
+    - name: Read tool versions from repo config
+      id: versions
       shell: bash
       run: |
-        # filter conda environment file
-        awk -v arch="$(uname -m)" '
-        !/#.*arch=/ && !/#.*\<local\>/ { print; next }
-        /#.*arch=/ && $0 ~ "arch="arch { print }
-        ' environment.yml > ci-environment.yml
+        set -euo pipefail
+        # yq is pre-installed on GitHub-hosted runners.
+        # requires-pixi must be pinned with '==' (e.g. "==0.70.0").
+        requires_pixi="$(yq -p toml -oy '.workspace.requires-pixi' pixi.toml)"
+        if [[ "${requires_pixi}" != ==* ]]; then
+          echo "requires-pixi in pixi.toml must be pinned with '==' (got: '${requires_pixi}')" >&2
+          exit 1
+        fi
+        pixi_version="${requires_pixi#==}"
 
-    - name: Setup Mambaforge
-      uses: conda-incubator/setup-miniconda@v3
+        echo "pixi_version=${pixi_version}" >> "${GITHUB_OUTPUT}"
+
+    - name: Setup pixi
+      uses: prefix-dev/setup-pixi@v0.8.14
       with:
-        miniforge-version: latest
-        # Do not specify environment file - see Cache step below
-        activate-environment: yardl
-
-    - name: Get Date
-      id: get-date
-      shell: bash
-      run: echo "DATE=$(date -u +'%Y%m%d')" >> $GITHUB_ENV
-
-    - name: Cache Conda Env
-      id: cache-conda
-      uses: actions/cache@v3
-      with:
-        path: ${{ env.CONDA }}/envs
-        key:
-            conda-${{ runner.os }}--${{ runner.arch }}--${{
-            hashFiles('ci-environment.yml') }}-${{
-            env.DATE }}-${{
-            env.CONDA_CACHE_NUMBER }}
-
-    - name: Update Environment
-      shell: bash
-      run: mamba env update -n yardl -f ci-environment.yml
-      if: steps.cache-conda.outputs.cache-hit != 'true'
-
+        pixi-version: v${{ steps.versions.outputs.pixi_version }}
+        # Only the "default" environment is needed in CI; the "dev" environment
+        # contains extra tooling that is only used for local development.
+        environments: default
+        activate-environment: true
+        cache: true
 
     - name: Setup Go
-      uses: actions/setup-go@v4
+      uses: actions/setup-go@v6
       with:
-        go-version: ${{ env.GO_VERSION }}
+        go-version-file: tooling/go.mod
         cache-dependency-path: tooling/go.sum
 
     - name: Setup Matlab

@@ -1,5 +1,12 @@
 {
   "typeCheckingMode": "standard",
-  "exclude": ["smoketest/**", "python/sandbox/**", "tooling/**"],
+  "exclude": [
+    "smoketest/**",
+    "python/sandbox/**",
+    "tooling/**",
+    "**/node_modules",
+    "**/__pycache__",
+    "**/.*"
+  ],
   "extraPaths": ["python/"]
 }
