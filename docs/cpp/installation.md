@@ -39,7 +39,7 @@ Alternatively, if using the [Conda](https://docs.conda.io/en/latest/) package
 manager, these dependencies can be installed with:
 
 ``` bash
-conda install -c cmake cxx-compiler conda-forge hdf5 xtensor howardhinnant_date nlohmann-json
+conda install -c conda-forge cmake cxx-compiler hdf5 xtensor howardhinnant_date nlohmann-json
 ```
 
 ### vcpkg
