@@ -7,8 +7,8 @@
     "context": "..",
     "args": {
       // Set to "false" to skip installing MATLAB in the devcontainer.
-      // This significantly reduces image build time and size when MATLAB is not needed.
-      "INSTALL_MATLAB": "false"
+      // It is also skipped on ARM machines
+      "INSTALL_MATLAB": "true"
     }
   },
   "runArgs": [
@@ -74,6 +74,11 @@
         },
 
         "cmake.cmakePath": "/workspaces/yardl/.pixi/envs/dev/bin/cmake",
+        "cmake.generator": "Ninja",
+        "cmake.configureSettings": {
+          "CMAKE_MAKE_PROGRAM": "${containerWorkspaceFolder}/.pixi/envs/dev/bin/ninja"
+        },
+        "cmake.configureOnOpen": false,
         "cmake.sourceDirectory": "${workspaceFolder}/cpp",
         "cmake.buildDirectory": "${workspaceFolder}/cpp/build",
 

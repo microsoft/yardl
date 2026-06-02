@@ -4,7 +4,7 @@
       "name": "Linux",
       "includePath": [],
       "defines": [],
-      "compilerPath": "${env:GXX}",
+      "compilerPath": "${workspaceFolder}/.pixi/envs/dev/bin/g++",
       "cStandard": "gnu17",
       "cppStandard": "c++17",
       "configurationProvider": "ms-vscode.cmake-tools"

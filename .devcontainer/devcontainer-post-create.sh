@@ -19,6 +19,19 @@ if [[ -e "${gcov_candidates[0]}" ]]; then
     ln -sf "$(basename "${gcov_candidates[0]}")" "${gcov_symlink}"
 fi
 
+# Create stable compiler symlinks used by VS Code C/C++ tooling.
+gxx_symlink="${workspace_dir}/.pixi/envs/dev/bin/g++"
+gxx_candidates=("${workspace_dir}"/.pixi/envs/dev/bin/*-conda-linux-gnu-g++)
+if [[ -e "${gxx_candidates[0]}" ]]; then
+    ln -sf "$(basename "${gxx_candidates[0]}")" "${gxx_symlink}"
+fi
+
+gcc_symlink="${workspace_dir}/.pixi/envs/dev/bin/gcc"
+gcc_candidates=("${workspace_dir}"/.pixi/envs/dev/bin/*-conda-linux-gnu-gcc)
+if [[ -e "${gcc_candidates[0]}" ]]; then
+    ln -sf "$(basename "${gcc_candidates[0]}")" "${gcc_symlink}"
+fi
+
 # Create a kits file for the VSCode CMake Tools extension, so you are not
 # prompted for which kit to select whenever you open VSCode. The compiler paths
 # come from the conda compiler packages, which set $GCC and $GXX when the pixi
