@@ -29,7 +29,7 @@ runs:
         cache: true
 
     - name: Setup Go
-      uses: actions/setup-go@v4
+      uses: actions/setup-go@v6
       with:
         go-version-file: tooling/go.mod
         cache-dependency-path: tooling/go.sum

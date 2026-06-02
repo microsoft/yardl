@@ -73,7 +73,7 @@
           "editor.formatOnSave": true
         },
 
-        "cmake.cmakePath": "/workspaces/yardl/.pixi/envs/dev/bin/cmake",
+        "cmake.cmakePath": "${containerWorkspaceFolder}/.pixi/envs/dev/bin/cmake",
         "cmake.generator": "Ninja",
         "cmake.configureSettings": {
           "CMAKE_MAKE_PROGRAM": "${containerWorkspaceFolder}/.pixi/envs/dev/bin/ninja"
