@@ -12,6 +12,13 @@ sudo chown "$(id -u):$(id -g)" .pixi
 # mounted .pixi volume rather than being baked into the image.
 pixi install --locked --environment dev
 
+# Create a stable gcov path for VS Code settings regardless of architecture.
+gcov_symlink="${workspace_dir}/.pixi/envs/dev/bin/gcov"
+gcov_candidates=("${workspace_dir}"/.pixi/envs/dev/bin/*-conda-linux-gnu-gcov)
+if [[ -e "${gcov_candidates[0]}" ]]; then
+    ln -sf "$(basename "${gcov_candidates[0]}")" "${gcov_symlink}"
+fi
+
 # Create a kits file for the VSCode CMake Tools extension, so you are not
 # prompted for which kit to select whenever you open VSCode. The compiler paths
 # come from the conda compiler packages, which set $GCC and $GXX when the pixi

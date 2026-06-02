@@ -9,15 +9,13 @@ runs:
       shell: bash
       run: |
         set -euo pipefail
-        go_version="$(awk '/^go /{print $2; exit}' tooling/go.mod)"
         pixi_version="$(awk -F= '/^ARG PIXI_VERSION=/{print $2; exit}' .devcontainer/Dockerfile)"
 
-        if [[ -z "${go_version}" || -z "${pixi_version}" ]]; then
-          echo "Failed to read Go/Pixi versions from tooling/go.mod and .devcontainer/Dockerfile" >&2
+        if [[ -z "${pixi_version}" ]]; then
+          echo "Failed to read Pixi version from .devcontainer/Dockerfile" >&2
           exit 1
         fi
 
-        echo "go_version=${go_version}" >> "${GITHUB_OUTPUT}"
         echo "pixi_version=${pixi_version}" >> "${GITHUB_OUTPUT}"
 
     - name: Setup pixi
@@ -33,7 +31,7 @@ runs:
     - name: Setup Go
       uses: actions/setup-go@v4
       with:
-        go-version: ${{ steps.versions.outputs.go_version }}
+        go-version-file: tooling/go.mod
         cache-dependency-path: tooling/go.sum
 
     - name: Setup Matlab

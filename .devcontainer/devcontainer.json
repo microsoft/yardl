@@ -116,7 +116,7 @@
           ]
         },
 
-        "gcovViewer.gcovBinary": "${containerWorkspaceFolder}/.pixi/envs/dev/bin/x86_64-conda-linux-gnu-gcov",
+        "gcovViewer.gcovBinary": "${containerWorkspaceFolder}/.pixi/envs/dev/bin/gcov",
         "gcovViewer.buildDirectories": ["${workspaceFolder}/cpp/build"]
       },
 
