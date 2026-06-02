@@ -32,6 +32,11 @@ COPY .devcontainer/matlab-r2023b.ubuntu-22.04.dependencies.txt /tmp/matlab-depen
 
 RUN if [ "${INSTALL_MATLAB}" = "true" ]; then \
         set -e; \
+        arch="$(uname -m)"; \
+        if [ "${arch}" = "aarch64" ] || [ "${arch}" = "arm64" ]; then \
+            echo "Skipping MATLAB installation on ${arch} (not supported in this devcontainer setup)"; \
+            exit 0; \
+        fi; \
         export DEBIAN_FRONTEND=noninteractive; \
         apt-get update; \
         apt-get install --no-install-recommends --yes \
