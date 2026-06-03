@@ -1326,14 +1326,13 @@ class RecordSerializer(TypeSerializer[T, np.void]):
         )
 
     def read_numpy(self, stream: CodedInputStream) -> np.void:
-        # Enum and nested-record fields must be read via read_numpy so they
-        # yield numpy-assignable values rather than Enum or record objects.
+        # Every field must be read via read_numpy so it yields a value that is
+        # assignable into the record's numpy dtype slot. read() can return a
+        # Python object (Enum, record, Optional, etc.) that does not fit.
         return cast(
             np.void,
             tuple(
                 serializer.read_numpy(stream)
-                if isinstance(serializer, (EnumSerializer, RecordSerializer))
-                else serializer.read(stream)
                 for _, serializer in self._field_serializers
             ),
         )
