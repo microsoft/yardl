@@ -911,6 +911,18 @@ class BinaryEnumsWriter(_binary.BinaryProtocolWriter, EnumsWriterBase):
     def _write_rec_array(self, value: npt.NDArray[np.void]) -> None:
         _binary.DynamicNDArraySerializer(RecordWithEnumsSerializer()).write(self._stream, value)
 
+    def _write_rec_with_fixed_vectors_array(self, value: npt.NDArray[np.void]) -> None:
+        _binary.DynamicNDArraySerializer(RecordWithFixedVectorsSerializer()).write(self._stream, value)
+
+    def _write_rec_with_optional_fields_array(self, value: npt.NDArray[np.void]) -> None:
+        _binary.DynamicNDArraySerializer(RecordWithOptionalFieldsSerializer()).write(self._stream, value)
+
+    def _write_rec_with_vlens_array(self, value: npt.NDArray[np.void]) -> None:
+        _binary.DynamicNDArraySerializer(RecordWithVlensSerializer()).write(self._stream, value)
+
+    def _write_rec_with_strings_array(self, value: npt.NDArray[np.void]) -> None:
+        _binary.DynamicNDArraySerializer(RecordWithStringsSerializer()).write(self._stream, value)
+
 
 class BinaryEnumsReader(_binary.BinaryProtocolReader, EnumsReaderBase):
     """Binary writer for the Enums protocol."""
@@ -934,6 +946,18 @@ class BinaryEnumsReader(_binary.BinaryProtocolReader, EnumsReaderBase):
 
     def _read_rec_array(self) -> npt.NDArray[np.void]:
         return _binary.DynamicNDArraySerializer(RecordWithEnumsSerializer()).read(self._stream)
+
+    def _read_rec_with_fixed_vectors_array(self) -> npt.NDArray[np.void]:
+        return _binary.DynamicNDArraySerializer(RecordWithFixedVectorsSerializer()).read(self._stream)
+
+    def _read_rec_with_optional_fields_array(self) -> npt.NDArray[np.void]:
+        return _binary.DynamicNDArraySerializer(RecordWithOptionalFieldsSerializer()).read(self._stream)
+
+    def _read_rec_with_vlens_array(self) -> npt.NDArray[np.void]:
+        return _binary.DynamicNDArraySerializer(RecordWithVlensSerializer()).read(self._stream)
+
+    def _read_rec_with_strings_array(self) -> npt.NDArray[np.void]:
+        return _binary.DynamicNDArraySerializer(RecordWithStringsSerializer()).read(self._stream)
 
 class BinaryFlagsWriter(_binary.BinaryProtocolWriter, FlagsWriterBase):
     """Binary writer for the Flags protocol."""
@@ -1315,7 +1339,7 @@ class SmallBenchmarkRecordSerializer(_binary.RecordSerializer[SmallBenchmarkReco
         self._write(stream, value.a, value.b, value.c)
 
     def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
-        self._write(stream, value['a'], value['b'], value['c'])
+        self._write_numpy(stream, value['a'], value['b'], value['c'])
 
     def read(self, stream: _binary.CodedInputStream) -> SmallBenchmarkRecord:
         field_values = self._read(stream)
@@ -1333,7 +1357,7 @@ class SimpleEncodingCountersSerializer(_binary.RecordSerializer[SimpleEncodingCo
         self._write(stream, value.e1, value.e2, value.slice, value.repetition)
 
     def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
-        self._write(stream, value['e1'], value['e2'], value['slice'], value['repetition'])
+        self._write_numpy(stream, value['e1'], value['e2'], value['slice'], value['repetition'])
 
     def read(self, stream: _binary.CodedInputStream) -> SimpleEncodingCounters:
         field_values = self._read(stream)
@@ -1351,7 +1375,7 @@ class SimpleAcquisitionSerializer(_binary.RecordSerializer[SimpleAcquisition]):
         self._write(stream, value.flags, value.idx, value.data, value.trajectory)
 
     def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
-        self._write(stream, value['flags'], value['idx'], value['data'], value['trajectory'])
+        self._write_numpy(stream, value['flags'], value['idx'], value['data'], value['trajectory'])
 
     def read(self, stream: _binary.CodedInputStream) -> SimpleAcquisition:
         field_values = self._read(stream)
@@ -1369,7 +1393,7 @@ class SimpleRecordSerializer(_binary.RecordSerializer[SimpleRecord]):
         self._write(stream, value.x, value.y, value.z)
 
     def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
-        self._write(stream, value['x'], value['y'], value['z'])
+        self._write_numpy(stream, value['x'], value['y'], value['z'])
 
     def read(self, stream: _binary.CodedInputStream) -> SimpleRecord:
         field_values = self._read(stream)
@@ -1387,7 +1411,7 @@ class RecordWithPrimitivesSerializer(_binary.RecordSerializer[RecordWithPrimitiv
         self._write(stream, value.bool_field, value.int8_field, value.uint8_field, value.int16_field, value.uint16_field, value.int32_field, value.uint32_field, value.int64_field, value.uint64_field, value.size_field, value.float32_field, value.float64_field, value.complexfloat32_field, value.complexfloat64_field, value.date_field, value.time_field, value.datetime_field)
 
     def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
-        self._write(stream, value['bool_field'], value['int8_field'], value['uint8_field'], value['int16_field'], value['uint16_field'], value['int32_field'], value['uint32_field'], value['int64_field'], value['uint64_field'], value['size_field'], value['float32_field'], value['float64_field'], value['complexfloat32_field'], value['complexfloat64_field'], value['date_field'], value['time_field'], value['datetime_field'])
+        self._write_numpy(stream, value['bool_field'], value['int8_field'], value['uint8_field'], value['int16_field'], value['uint16_field'], value['int32_field'], value['uint32_field'], value['int64_field'], value['uint64_field'], value['size_field'], value['float32_field'], value['float64_field'], value['complexfloat32_field'], value['complexfloat64_field'], value['date_field'], value['time_field'], value['datetime_field'])
 
     def read(self, stream: _binary.CodedInputStream) -> RecordWithPrimitives:
         field_values = self._read(stream)
@@ -1405,7 +1429,7 @@ class RecordWithPrimitiveAliasesSerializer(_binary.RecordSerializer[RecordWithPr
         self._write(stream, value.byte_field, value.int_field, value.uint_field, value.long_field, value.ulong_field, value.float_field, value.double_field, value.complexfloat_field, value.complexdouble_field)
 
     def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
-        self._write(stream, value['byte_field'], value['int_field'], value['uint_field'], value['long_field'], value['ulong_field'], value['float_field'], value['double_field'], value['complexfloat_field'], value['complexdouble_field'])
+        self._write_numpy(stream, value['byte_field'], value['int_field'], value['uint_field'], value['long_field'], value['ulong_field'], value['float_field'], value['double_field'], value['complexfloat_field'], value['complexdouble_field'])
 
     def read(self, stream: _binary.CodedInputStream) -> RecordWithPrimitiveAliases:
         field_values = self._read(stream)
@@ -1423,7 +1447,7 @@ class TupleWithRecordsSerializer(_binary.RecordSerializer[TupleWithRecords]):
         self._write(stream, value.a, value.b)
 
     def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
-        self._write(stream, value['a'], value['b'])
+        self._write_numpy(stream, value['a'], value['b'])
 
     def read(self, stream: _binary.CodedInputStream) -> TupleWithRecords:
         field_values = self._read(stream)
@@ -1441,7 +1465,7 @@ class RecordWithVectorsSerializer(_binary.RecordSerializer[RecordWithVectors]):
         self._write(stream, value.default_vector, value.default_vector_fixed_length, value.vector_of_vectors)
 
     def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
-        self._write(stream, value['default_vector'], value['default_vector_fixed_length'], value['vector_of_vectors'])
+        self._write_numpy(stream, value['default_vector'], value['default_vector_fixed_length'], value['vector_of_vectors'])
 
     def read(self, stream: _binary.CodedInputStream) -> RecordWithVectors:
         field_values = self._read(stream)
@@ -1459,7 +1483,7 @@ class RecordWithVectorOfTimesSerializer(_binary.RecordSerializer[RecordWithVecto
         self._write(stream, value.times)
 
     def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
-        self._write(stream, value['times'])
+        self._write_numpy(stream, value['times'])
 
     def read(self, stream: _binary.CodedInputStream) -> RecordWithVectorOfTimes:
         field_values = self._read(stream)
@@ -1477,7 +1501,7 @@ class RecordWithArraysSerializer(_binary.RecordSerializer[RecordWithArrays]):
         self._write(stream, value.default_array, value.default_array_with_empty_dimension, value.rank_1_array, value.rank_2_array, value.rank_2_array_with_named_dimensions, value.rank_2_fixed_array, value.rank_2_fixed_array_with_named_dimensions, value.dynamic_array, value.array_of_vectors)
 
     def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
-        self._write(stream, value['default_array'], value['default_array_with_empty_dimension'], value['rank_1_array'], value['rank_2_array'], value['rank_2_array_with_named_dimensions'], value['rank_2_fixed_array'], value['rank_2_fixed_array_with_named_dimensions'], value['dynamic_array'], value['array_of_vectors'])
+        self._write_numpy(stream, value['default_array'], value['default_array_with_empty_dimension'], value['rank_1_array'], value['rank_2_array'], value['rank_2_array_with_named_dimensions'], value['rank_2_fixed_array'], value['rank_2_fixed_array_with_named_dimensions'], value['dynamic_array'], value['array_of_vectors'])
 
     def read(self, stream: _binary.CodedInputStream) -> RecordWithArrays:
         field_values = self._read(stream)
@@ -1495,7 +1519,7 @@ class RecordWithArraysSimpleSyntaxSerializer(_binary.RecordSerializer[RecordWith
         self._write(stream, value.default_array, value.default_array_with_empty_dimension, value.rank_1_array, value.rank_2_array, value.rank_2_array_with_named_dimensions, value.rank_2_fixed_array, value.rank_2_fixed_array_with_named_dimensions, value.dynamic_array, value.array_of_vectors)
 
     def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
-        self._write(stream, value['default_array'], value['default_array_with_empty_dimension'], value['rank_1_array'], value['rank_2_array'], value['rank_2_array_with_named_dimensions'], value['rank_2_fixed_array'], value['rank_2_fixed_array_with_named_dimensions'], value['dynamic_array'], value['array_of_vectors'])
+        self._write_numpy(stream, value['default_array'], value['default_array_with_empty_dimension'], value['rank_1_array'], value['rank_2_array'], value['rank_2_array_with_named_dimensions'], value['rank_2_fixed_array'], value['rank_2_fixed_array_with_named_dimensions'], value['dynamic_array'], value['array_of_vectors'])
 
     def read(self, stream: _binary.CodedInputStream) -> RecordWithArraysSimpleSyntax:
         field_values = self._read(stream)
@@ -1513,7 +1537,7 @@ class RecordWithOptionalFieldsSerializer(_binary.RecordSerializer[RecordWithOpti
         self._write(stream, value.optional_int, value.optional_int_alternate_syntax, value.optional_time)
 
     def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
-        self._write(stream, value['optional_int'], value['optional_int_alternate_syntax'], value['optional_time'])
+        self._write_numpy(stream, value['optional_int'], value['optional_int_alternate_syntax'], value['optional_time'])
 
     def read(self, stream: _binary.CodedInputStream) -> RecordWithOptionalFields:
         field_values = self._read(stream)
@@ -1531,7 +1555,7 @@ class RecordWithVlensSerializer(_binary.RecordSerializer[RecordWithVlens]):
         self._write(stream, value.a, value.b, value.c)
 
     def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
-        self._write(stream, value['a'], value['b'], value['c'])
+        self._write_numpy(stream, value['a'], value['b'], value['c'])
 
     def read(self, stream: _binary.CodedInputStream) -> RecordWithVlens:
         field_values = self._read(stream)
@@ -1549,7 +1573,7 @@ class RecordWithStringsSerializer(_binary.RecordSerializer[RecordWithStrings]):
         self._write(stream, value.a, value.b)
 
     def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
-        self._write(stream, value['a'], value['b'])
+        self._write_numpy(stream, value['a'], value['b'])
 
     def read(self, stream: _binary.CodedInputStream) -> RecordWithStrings:
         field_values = self._read(stream)
@@ -1567,7 +1591,7 @@ class RecordWithOptionalVectorSerializer(_binary.RecordSerializer[RecordWithOpti
         self._write(stream, value.optional_vector)
 
     def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
-        self._write(stream, value['optional_vector'])
+        self._write_numpy(stream, value['optional_vector'])
 
     def read(self, stream: _binary.CodedInputStream) -> RecordWithOptionalVector:
         field_values = self._read(stream)
@@ -1585,7 +1609,7 @@ class RecordWithFixedVectorsSerializer(_binary.RecordSerializer[RecordWithFixedV
         self._write(stream, value.fixed_int_vector, value.fixed_simple_record_vector, value.fixed_record_with_vlens_vector)
 
     def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
-        self._write(stream, value['fixed_int_vector'], value['fixed_simple_record_vector'], value['fixed_record_with_vlens_vector'])
+        self._write_numpy(stream, value['fixed_int_vector'], value['fixed_simple_record_vector'], value['fixed_record_with_vlens_vector'])
 
     def read(self, stream: _binary.CodedInputStream) -> RecordWithFixedVectors:
         field_values = self._read(stream)
@@ -1603,7 +1627,7 @@ class RecordWithFixedArraysSerializer(_binary.RecordSerializer[RecordWithFixedAr
         self._write(stream, value.ints, value.fixed_simple_record_array, value.fixed_record_with_vlens_array)
 
     def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
-        self._write(stream, value['ints'], value['fixed_simple_record_array'], value['fixed_record_with_vlens_array'])
+        self._write_numpy(stream, value['ints'], value['fixed_simple_record_array'], value['fixed_record_with_vlens_array'])
 
     def read(self, stream: _binary.CodedInputStream) -> RecordWithFixedArrays:
         field_values = self._read(stream)
@@ -1621,7 +1645,7 @@ class RecordWithNamedFixedArraysSerializer(_binary.RecordSerializer[RecordWithNa
         self._write(stream, value.ints, value.fixed_simple_record_array, value.fixed_record_with_vlens_array)
 
     def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
-        self._write(stream, value['ints'], value['fixed_simple_record_array'], value['fixed_record_with_vlens_array'])
+        self._write_numpy(stream, value['ints'], value['fixed_simple_record_array'], value['fixed_record_with_vlens_array'])
 
     def read(self, stream: _binary.CodedInputStream) -> RecordWithNamedFixedArrays:
         field_values = self._read(stream)
@@ -1639,7 +1663,7 @@ class RecordWithNDArraysSerializer(_binary.RecordSerializer[RecordWithNDArrays])
         self._write(stream, value.ints, value.fixed_simple_record_array, value.fixed_record_with_vlens_array)
 
     def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
-        self._write(stream, value['ints'], value['fixed_simple_record_array'], value['fixed_record_with_vlens_array'])
+        self._write_numpy(stream, value['ints'], value['fixed_simple_record_array'], value['fixed_record_with_vlens_array'])
 
     def read(self, stream: _binary.CodedInputStream) -> RecordWithNDArrays:
         field_values = self._read(stream)
@@ -1657,7 +1681,7 @@ class RecordWithNDArraysSingleDimensionSerializer(_binary.RecordSerializer[Recor
         self._write(stream, value.ints, value.fixed_simple_record_array, value.fixed_record_with_vlens_array)
 
     def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
-        self._write(stream, value['ints'], value['fixed_simple_record_array'], value['fixed_record_with_vlens_array'])
+        self._write_numpy(stream, value['ints'], value['fixed_simple_record_array'], value['fixed_record_with_vlens_array'])
 
     def read(self, stream: _binary.CodedInputStream) -> RecordWithNDArraysSingleDimension:
         field_values = self._read(stream)
@@ -1675,7 +1699,7 @@ class RecordWithDynamicNDArraysSerializer(_binary.RecordSerializer[RecordWithDyn
         self._write(stream, value.ints, value.simple_record_array, value.record_with_vlens_array)
 
     def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
-        self._write(stream, value['ints'], value['simple_record_array'], value['record_with_vlens_array'])
+        self._write_numpy(stream, value['ints'], value['simple_record_array'], value['record_with_vlens_array'])
 
     def read(self, stream: _binary.CodedInputStream) -> RecordWithDynamicNDArrays:
         field_values = self._read(stream)
@@ -1693,7 +1717,7 @@ class RecordWithFixedCollectionsSerializer(_binary.RecordSerializer[RecordWithFi
         self._write(stream, value.fixed_vector, value.fixed_array)
 
     def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
-        self._write(stream, value['fixed_vector'], value['fixed_array'])
+        self._write_numpy(stream, value['fixed_vector'], value['fixed_array'])
 
     def read(self, stream: _binary.CodedInputStream) -> RecordWithFixedCollections:
         field_values = self._read(stream)
@@ -1711,7 +1735,7 @@ class RecordWithVlenCollectionsSerializer(_binary.RecordSerializer[RecordWithVle
         self._write(stream, value.vector, value.array)
 
     def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
-        self._write(stream, value['vector'], value['array'])
+        self._write_numpy(stream, value['vector'], value['array'])
 
     def read(self, stream: _binary.CodedInputStream) -> RecordWithVlenCollections:
         field_values = self._read(stream)
@@ -1729,7 +1753,7 @@ class RecordWithUnionsOfContainersSerializer(_binary.RecordSerializer[RecordWith
         self._write(stream, value.map_or_scalar, value.vector_or_scalar, value.array_or_scalar)
 
     def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
-        self._write(stream, value['map_or_scalar'], value['vector_or_scalar'], value['array_or_scalar'])
+        self._write_numpy(stream, value['map_or_scalar'], value['vector_or_scalar'], value['array_or_scalar'])
 
     def read(self, stream: _binary.CodedInputStream) -> RecordWithUnionsOfContainers:
         field_values = self._read(stream)
@@ -1747,7 +1771,7 @@ class RecordWithMapsSerializer(_binary.RecordSerializer[RecordWithMaps]):
         self._write(stream, value.set_1, value.set_2, value.set_3)
 
     def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
-        self._write(stream, value['set_1'], value['set_2'], value['set_3'])
+        self._write_numpy(stream, value['set_1'], value['set_2'], value['set_3'])
 
     def read(self, stream: _binary.CodedInputStream) -> RecordWithMaps:
         field_values = self._read(stream)
@@ -1765,7 +1789,7 @@ class RecordWithNoDefaultEnumSerializer(_binary.RecordSerializer[RecordWithNoDef
         self._write(stream, value.enum)
 
     def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
-        self._write(stream, value['enum'])
+        self._write_numpy(stream, value['enum'])
 
     def read(self, stream: _binary.CodedInputStream) -> RecordWithNoDefaultEnum:
         field_values = self._read(stream)
@@ -1783,7 +1807,7 @@ class RecordWithEnumsSerializer(_binary.RecordSerializer[RecordWithEnums]):
         self._write(stream, value.enum, value.flags, value.flags_2, value.rec)
 
     def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
-        self._write(stream, value['enum'], value['flags'], value['flags_2'], value['rec'])
+        self._write_numpy(stream, value['enum'], value['flags'], value['flags_2'], value['rec'])
 
     def read(self, stream: _binary.CodedInputStream) -> RecordWithEnums:
         field_values = self._read(stream)
@@ -1801,7 +1825,7 @@ class GenericRecordSerializer(typing.Generic[T1, T1_NP, T2, T2_NP], _binary.Reco
         self._write(stream, value.scalar_1, value.scalar_2, value.vector_1, value.image_2)
 
     def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
-        self._write(stream, value['scalar_1'], value['scalar_2'], value['vector_1'], value['image_2'])
+        self._write_numpy(stream, value['scalar_1'], value['scalar_2'], value['vector_1'], value['image_2'])
 
     def read(self, stream: _binary.CodedInputStream) -> GenericRecord[T1, T2, T2_NP]:
         field_values = self._read(stream)
@@ -1819,7 +1843,7 @@ class RecordWithAliasedGenericsSerializer(_binary.RecordSerializer[RecordWithAli
         self._write(stream, value.my_strings, value.aliased_strings)
 
     def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
-        self._write(stream, value['my_strings'], value['aliased_strings'])
+        self._write_numpy(stream, value['my_strings'], value['aliased_strings'])
 
     def read(self, stream: _binary.CodedInputStream) -> RecordWithAliasedGenerics:
         field_values = self._read(stream)
@@ -1837,7 +1861,7 @@ class RecordWithGenericVectorOfRecordsSerializer(typing.Generic[T, T_NP, U, U_NP
         self._write(stream, value.v)
 
     def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
-        self._write(stream, value['v'])
+        self._write_numpy(stream, value['v'])
 
     def read(self, stream: _binary.CodedInputStream) -> RecordWithGenericVectorOfRecords[T, U, U_NP]:
         field_values = self._read(stream)
@@ -1855,7 +1879,7 @@ class RecordWithOptionalGenericFieldSerializer(typing.Generic[T, T_NP], _binary.
         self._write(stream, value.v)
 
     def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
-        self._write(stream, value['v'])
+        self._write_numpy(stream, value['v'])
 
     def read(self, stream: _binary.CodedInputStream) -> RecordWithOptionalGenericField[T]:
         field_values = self._read(stream)
@@ -1873,7 +1897,7 @@ class RecordWithAliasedOptionalGenericFieldSerializer(typing.Generic[T, T_NP], _
         self._write(stream, value.v)
 
     def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
-        self._write(stream, value['v'])
+        self._write_numpy(stream, value['v'])
 
     def read(self, stream: _binary.CodedInputStream) -> RecordWithAliasedOptionalGenericField[T]:
         field_values = self._read(stream)
@@ -1891,7 +1915,7 @@ class RecordWithOptionalGenericUnionFieldSerializer(typing.Generic[U, U_NP, V, V
         self._write(stream, value.v)
 
     def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
-        self._write(stream, value['v'])
+        self._write_numpy(stream, value['v'])
 
     def read(self, stream: _binary.CodedInputStream) -> RecordWithOptionalGenericUnionField[U, V]:
         field_values = self._read(stream)
@@ -1909,7 +1933,7 @@ class RecordWithAliasedOptionalGenericUnionFieldSerializer(typing.Generic[U, U_N
         self._write(stream, value.v)
 
     def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
-        self._write(stream, value['v'])
+        self._write_numpy(stream, value['v'])
 
     def read(self, stream: _binary.CodedInputStream) -> RecordWithAliasedOptionalGenericUnionField[U, V]:
         field_values = self._read(stream)
@@ -1927,7 +1951,7 @@ class RecordWithGenericVectorsSerializer(typing.Generic[T, T_NP], _binary.Record
         self._write(stream, value.v, value.av)
 
     def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
-        self._write(stream, value['v'], value['av'])
+        self._write_numpy(stream, value['v'], value['av'])
 
     def read(self, stream: _binary.CodedInputStream) -> RecordWithGenericVectors[T]:
         field_values = self._read(stream)
@@ -1945,7 +1969,7 @@ class RecordWithGenericFixedVectorsSerializer(typing.Generic[T, T_NP], _binary.R
         self._write(stream, value.fv, value.afv)
 
     def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
-        self._write(stream, value['fv'], value['afv'])
+        self._write_numpy(stream, value['fv'], value['afv'])
 
     def read(self, stream: _binary.CodedInputStream) -> RecordWithGenericFixedVectors[T]:
         field_values = self._read(stream)
@@ -1963,7 +1987,7 @@ class RecordWithGenericArraysSerializer(typing.Generic[T, T_NP], _binary.RecordS
         self._write(stream, value.nd, value.fixed_nd, value.dynamic_nd, value.aliased_nd, value.aliased_fixed_nd, value.aliased_dynamic_nd)
 
     def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
-        self._write(stream, value['nd'], value['fixed_nd'], value['dynamic_nd'], value['aliased_nd'], value['aliased_fixed_nd'], value['aliased_dynamic_nd'])
+        self._write_numpy(stream, value['nd'], value['fixed_nd'], value['dynamic_nd'], value['aliased_nd'], value['aliased_fixed_nd'], value['aliased_dynamic_nd'])
 
     def read(self, stream: _binary.CodedInputStream) -> RecordWithGenericArrays[T_NP]:
         field_values = self._read(stream)
@@ -1981,7 +2005,7 @@ class RecordWithGenericMapsSerializer(typing.Generic[T, T_NP, U, U_NP], _binary.
         self._write(stream, value.m, value.am)
 
     def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
-        self._write(stream, value['m'], value['am'])
+        self._write_numpy(stream, value['m'], value['am'])
 
     def read(self, stream: _binary.CodedInputStream) -> RecordWithGenericMaps[T, U]:
         field_values = self._read(stream)
@@ -1999,7 +2023,7 @@ class RecordContainingGenericRecordsSerializer(typing.Generic[A, A_NP, B, B_NP],
         self._write(stream, value.g1, value.g1a, value.g2, value.g2a, value.g3, value.g3a, value.g4, value.g5, value.g6, value.g7)
 
     def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
-        self._write(stream, value['g1'], value['g1a'], value['g2'], value['g2a'], value['g3'], value['g3a'], value['g4'], value['g5'], value['g6'], value['g7'])
+        self._write_numpy(stream, value['g1'], value['g1a'], value['g2'], value['g2a'], value['g3'], value['g3a'], value['g4'], value['g5'], value['g6'], value['g7'])
 
     def read(self, stream: _binary.CodedInputStream) -> RecordContainingGenericRecords[A, B, B_NP]:
         field_values = self._read(stream)
@@ -2017,7 +2041,7 @@ class RecordContainingNestedGenericRecordsSerializer(_binary.RecordSerializer[Re
         self._write(stream, value.f1, value.f1a, value.f2, value.f2a, value.nested)
 
     def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
-        self._write(stream, value['f1'], value['f1a'], value['f2'], value['f2a'], value['nested'])
+        self._write_numpy(stream, value['f1'], value['f1a'], value['f2'], value['f2a'], value['nested'])
 
     def read(self, stream: _binary.CodedInputStream) -> RecordContainingNestedGenericRecords:
         field_values = self._read(stream)
@@ -2035,7 +2059,7 @@ class RecordContainingVectorsOfAliasesSerializer(_binary.RecordSerializer[Record
         self._write(stream, value.strings, value.maps, value.arrays, value.tuples)
 
     def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
-        self._write(stream, value['strings'], value['maps'], value['arrays'], value['tuples'])
+        self._write_numpy(stream, value['strings'], value['maps'], value['arrays'], value['tuples'])
 
     def read(self, stream: _binary.CodedInputStream) -> RecordContainingVectorsOfAliases:
         field_values = self._read(stream)
@@ -2053,7 +2077,7 @@ class RecordWithComputedFieldsSerializer(_binary.RecordSerializer[RecordWithComp
         self._write(stream, value.array_field, value.array_field_map_dimensions, value.dynamic_array_field, value.fixed_array_field, value.int_field, value.int8_field, value.uint8_field, value.int16_field, value.uint16_field, value.uint32_field, value.int64_field, value.uint64_field, value.size_field, value.float32_field, value.float64_field, value.complexfloat32_field, value.complexfloat64_field, value.string_field, value.tuple_field, value.vector_field, value.vector_of_vectors_field, value.fixed_vector_field, value.fixed_vector_of_vectors_field, value.optional_named_array, value.int_float_union, value.nullable_int_float_union, value.union_with_nested_generic_union, value.map_field)
 
     def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
-        self._write(stream, value['array_field'], value['array_field_map_dimensions'], value['dynamic_array_field'], value['fixed_array_field'], value['int_field'], value['int8_field'], value['uint8_field'], value['int16_field'], value['uint16_field'], value['uint32_field'], value['int64_field'], value['uint64_field'], value['size_field'], value['float32_field'], value['float64_field'], value['complexfloat32_field'], value['complexfloat64_field'], value['string_field'], value['tuple_field'], value['vector_field'], value['vector_of_vectors_field'], value['fixed_vector_field'], value['fixed_vector_of_vectors_field'], value['optional_named_array'], value['int_float_union'], value['nullable_int_float_union'], value['union_with_nested_generic_union'], value['map_field'])
+        self._write_numpy(stream, value['array_field'], value['array_field_map_dimensions'], value['dynamic_array_field'], value['fixed_array_field'], value['int_field'], value['int8_field'], value['uint8_field'], value['int16_field'], value['uint16_field'], value['uint32_field'], value['int64_field'], value['uint64_field'], value['size_field'], value['float32_field'], value['float64_field'], value['complexfloat32_field'], value['complexfloat64_field'], value['string_field'], value['tuple_field'], value['vector_field'], value['vector_of_vectors_field'], value['fixed_vector_field'], value['fixed_vector_of_vectors_field'], value['optional_named_array'], value['int_float_union'], value['nullable_int_float_union'], value['union_with_nested_generic_union'], value['map_field'])
 
     def read(self, stream: _binary.CodedInputStream) -> RecordWithComputedFields:
         field_values = self._read(stream)
@@ -2071,7 +2095,7 @@ class RecordNotUsedInProtocolSerializer(_binary.RecordSerializer[RecordNotUsedIn
         self._write(stream, value.u1, value.u2)
 
     def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
-        self._write(stream, value['u1'], value['u2'])
+        self._write_numpy(stream, value['u1'], value['u2'])
 
     def read(self, stream: _binary.CodedInputStream) -> RecordNotUsedInProtocol:
         field_values = self._read(stream)
@@ -2089,7 +2113,7 @@ class RecordWithKeywordFieldsSerializer(_binary.RecordSerializer[RecordWithKeywo
         self._write(stream, value.int_, value.sizeof, value.if_)
 
     def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
-        self._write(stream, value['int_'], value['sizeof'], value['if_'])
+        self._write_numpy(stream, value['int_'], value['sizeof'], value['if_'])
 
     def read(self, stream: _binary.CodedInputStream) -> RecordWithKeywordFields:
         field_values = self._read(stream)
@@ -2107,7 +2131,7 @@ class RecordWithOptionalDateSerializer(_binary.RecordSerializer[RecordWithOption
         self._write(stream, value.date_field)
 
     def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
-        self._write(stream, value['date_field'])
+        self._write_numpy(stream, value['date_field'])
 
     def read(self, stream: _binary.CodedInputStream) -> RecordWithOptionalDate:
         field_values = self._read(stream)

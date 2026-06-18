@@ -8,6 +8,10 @@ classdef EnumsWriter < yardl.binary.BinaryProtocolWriter & test_model.EnumsWrite
     size_serializer
     rec_serializer
     rec_array_serializer
+    rec_with_fixed_vectors_array_serializer
+    rec_with_optional_fields_array_serializer
+    rec_with_vlens_array_serializer
+    rec_with_strings_array_serializer
   end
 
   methods
@@ -19,6 +23,10 @@ classdef EnumsWriter < yardl.binary.BinaryProtocolWriter & test_model.EnumsWrite
       self.size_serializer = yardl.binary.EnumSerializer('test_model.SizeBasedEnum', @test_model.SizeBasedEnum, yardl.binary.SizeSerializer);
       self.rec_serializer = test_model.binary.RecordWithEnumsSerializer();
       self.rec_array_serializer = yardl.binary.DynamicNDArraySerializer(test_model.binary.RecordWithEnumsSerializer());
+      self.rec_with_fixed_vectors_array_serializer = yardl.binary.DynamicNDArraySerializer(test_model.binary.RecordWithFixedVectorsSerializer());
+      self.rec_with_optional_fields_array_serializer = yardl.binary.DynamicNDArraySerializer(test_model.binary.RecordWithOptionalFieldsSerializer());
+      self.rec_with_vlens_array_serializer = yardl.binary.DynamicNDArraySerializer(test_model.binary.RecordWithVlensSerializer());
+      self.rec_with_strings_array_serializer = yardl.binary.DynamicNDArraySerializer(test_model.binary.RecordWithStringsSerializer());
     end
   end
 
@@ -41,6 +49,22 @@ classdef EnumsWriter < yardl.binary.BinaryProtocolWriter & test_model.EnumsWrite
 
     function write_rec_array_(self, value)
       self.rec_array_serializer.write(self.stream_, value);
+    end
+
+    function write_rec_with_fixed_vectors_array_(self, value)
+      self.rec_with_fixed_vectors_array_serializer.write(self.stream_, value);
+    end
+
+    function write_rec_with_optional_fields_array_(self, value)
+      self.rec_with_optional_fields_array_serializer.write(self.stream_, value);
+    end
+
+    function write_rec_with_vlens_array_(self, value)
+      self.rec_with_vlens_array_serializer.write(self.stream_, value);
+    end
+
+    function write_rec_with_strings_array_(self, value)
+      self.rec_with_strings_array_serializer.write(self.stream_, value);
     end
   end
 end

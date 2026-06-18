@@ -5237,6 +5237,38 @@
                   "items": "TestModel.RecordWithEnums"
                 }
               }
+            },
+            {
+              "name": "recWithFixedVectorsArray",
+              "type": {
+                "array": {
+                  "items": "TestModel.RecordWithFixedVectors"
+                }
+              }
+            },
+            {
+              "name": "recWithOptionalFieldsArray",
+              "type": {
+                "array": {
+                  "items": "TestModel.RecordWithOptionalFields"
+                }
+              }
+            },
+            {
+              "name": "recWithVlensArray",
+              "type": {
+                "array": {
+                  "items": "TestModel.RecordWithVlens"
+                }
+              }
+            },
+            {
+              "name": "recWithStringsArray",
+              "type": {
+                "array": {
+                  "items": "TestModel.RecordWithStrings"
+                }
+              }
             }
           ]
         },

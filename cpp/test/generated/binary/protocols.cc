@@ -4143,6 +4143,22 @@ void EnumsWriter::WriteRecArrayImpl(yardl::DynamicNDArray<test_model::RecordWith
   yardl::binary::WriteDynamicNDArray<test_model::RecordWithEnums, test_model::binary::WriteRecordWithEnums>(stream_, value);
 }
 
+void EnumsWriter::WriteRecWithFixedVectorsArrayImpl(yardl::DynamicNDArray<test_model::RecordWithFixedVectors> const& value) {
+  yardl::binary::WriteDynamicNDArray<test_model::RecordWithFixedVectors, test_model::binary::WriteRecordWithFixedVectors>(stream_, value);
+}
+
+void EnumsWriter::WriteRecWithOptionalFieldsArrayImpl(yardl::DynamicNDArray<test_model::RecordWithOptionalFields> const& value) {
+  yardl::binary::WriteDynamicNDArray<test_model::RecordWithOptionalFields, test_model::binary::WriteRecordWithOptionalFields>(stream_, value);
+}
+
+void EnumsWriter::WriteRecWithVlensArrayImpl(yardl::DynamicNDArray<test_model::RecordWithVlens> const& value) {
+  yardl::binary::WriteDynamicNDArray<test_model::RecordWithVlens, test_model::binary::WriteRecordWithVlens>(stream_, value);
+}
+
+void EnumsWriter::WriteRecWithStringsArrayImpl(yardl::DynamicNDArray<test_model::RecordWithStrings> const& value) {
+  yardl::binary::WriteDynamicNDArray<test_model::RecordWithStrings, test_model::binary::WriteRecordWithStrings>(stream_, value);
+}
+
 void EnumsWriter::Flush() {
   stream_.Flush();
 }
@@ -4169,6 +4185,22 @@ void EnumsReader::ReadRecImpl(test_model::RecordWithEnums& value) {
 
 void EnumsReader::ReadRecArrayImpl(yardl::DynamicNDArray<test_model::RecordWithEnums>& value) {
   yardl::binary::ReadDynamicNDArray<test_model::RecordWithEnums, test_model::binary::ReadRecordWithEnums>(stream_, value);
+}
+
+void EnumsReader::ReadRecWithFixedVectorsArrayImpl(yardl::DynamicNDArray<test_model::RecordWithFixedVectors>& value) {
+  yardl::binary::ReadDynamicNDArray<test_model::RecordWithFixedVectors, test_model::binary::ReadRecordWithFixedVectors>(stream_, value);
+}
+
+void EnumsReader::ReadRecWithOptionalFieldsArrayImpl(yardl::DynamicNDArray<test_model::RecordWithOptionalFields>& value) {
+  yardl::binary::ReadDynamicNDArray<test_model::RecordWithOptionalFields, test_model::binary::ReadRecordWithOptionalFields>(stream_, value);
+}
+
+void EnumsReader::ReadRecWithVlensArrayImpl(yardl::DynamicNDArray<test_model::RecordWithVlens>& value) {
+  yardl::binary::ReadDynamicNDArray<test_model::RecordWithVlens, test_model::binary::ReadRecordWithVlens>(stream_, value);
+}
+
+void EnumsReader::ReadRecWithStringsArrayImpl(yardl::DynamicNDArray<test_model::RecordWithStrings>& value) {
+  yardl::binary::ReadDynamicNDArray<test_model::RecordWithStrings, test_model::binary::ReadRecordWithStrings>(stream_, value);
 }
 
 void EnumsReader::CloseImpl() {

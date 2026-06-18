@@ -8,6 +8,10 @@ classdef EnumsReader < yardl.binary.BinaryProtocolReader & test_model.EnumsReade
     size_serializer
     rec_serializer
     rec_array_serializer
+    rec_with_fixed_vectors_array_serializer
+    rec_with_optional_fields_array_serializer
+    rec_with_vlens_array_serializer
+    rec_with_strings_array_serializer
   end
 
   methods
@@ -23,6 +27,10 @@ classdef EnumsReader < yardl.binary.BinaryProtocolReader & test_model.EnumsReade
       self.size_serializer = yardl.binary.EnumSerializer('test_model.SizeBasedEnum', @test_model.SizeBasedEnum, yardl.binary.SizeSerializer);
       self.rec_serializer = test_model.binary.RecordWithEnumsSerializer();
       self.rec_array_serializer = yardl.binary.DynamicNDArraySerializer(test_model.binary.RecordWithEnumsSerializer());
+      self.rec_with_fixed_vectors_array_serializer = yardl.binary.DynamicNDArraySerializer(test_model.binary.RecordWithFixedVectorsSerializer());
+      self.rec_with_optional_fields_array_serializer = yardl.binary.DynamicNDArraySerializer(test_model.binary.RecordWithOptionalFieldsSerializer());
+      self.rec_with_vlens_array_serializer = yardl.binary.DynamicNDArraySerializer(test_model.binary.RecordWithVlensSerializer());
+      self.rec_with_strings_array_serializer = yardl.binary.DynamicNDArraySerializer(test_model.binary.RecordWithStringsSerializer());
     end
   end
 
@@ -45,6 +53,22 @@ classdef EnumsReader < yardl.binary.BinaryProtocolReader & test_model.EnumsReade
 
     function value = read_rec_array_(self)
       value = self.rec_array_serializer.read(self.stream_);
+    end
+
+    function value = read_rec_with_fixed_vectors_array_(self)
+      value = self.rec_with_fixed_vectors_array_serializer.read(self.stream_);
+    end
+
+    function value = read_rec_with_optional_fields_array_(self)
+      value = self.rec_with_optional_fields_array_serializer.read(self.stream_);
+    end
+
+    function value = read_rec_with_vlens_array_(self)
+      value = self.rec_with_vlens_array_serializer.read(self.stream_);
+    end
+
+    function value = read_rec_with_strings_array_(self)
+      value = self.rec_with_strings_array_serializer.read(self.stream_);
     end
   end
 end

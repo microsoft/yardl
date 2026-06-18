@@ -3749,6 +3749,22 @@ void EnumsWriter::WriteRecArrayImpl(yardl::DynamicNDArray<test_model::RecordWith
   ordered_json json_value = value;
   yardl::ndjson::WriteProtocolValue(stream_, "recArray", json_value);}
 
+void EnumsWriter::WriteRecWithFixedVectorsArrayImpl(yardl::DynamicNDArray<test_model::RecordWithFixedVectors> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "recWithFixedVectorsArray", json_value);}
+
+void EnumsWriter::WriteRecWithOptionalFieldsArrayImpl(yardl::DynamicNDArray<test_model::RecordWithOptionalFields> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "recWithOptionalFieldsArray", json_value);}
+
+void EnumsWriter::WriteRecWithVlensArrayImpl(yardl::DynamicNDArray<test_model::RecordWithVlens> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "recWithVlensArray", json_value);}
+
+void EnumsWriter::WriteRecWithStringsArrayImpl(yardl::DynamicNDArray<test_model::RecordWithStrings> const& value) {
+  ordered_json json_value = value;
+  yardl::ndjson::WriteProtocolValue(stream_, "recWithStringsArray", json_value);}
+
 void EnumsWriter::Flush() {
   stream_.flush();
 }
@@ -3775,6 +3791,22 @@ void EnumsReader::ReadRecImpl(test_model::RecordWithEnums& value) {
 
 void EnumsReader::ReadRecArrayImpl(yardl::DynamicNDArray<test_model::RecordWithEnums>& value) {
   yardl::ndjson::ReadProtocolValue(stream_, line_, "recArray", true, unused_step_, value);
+}
+
+void EnumsReader::ReadRecWithFixedVectorsArrayImpl(yardl::DynamicNDArray<test_model::RecordWithFixedVectors>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "recWithFixedVectorsArray", true, unused_step_, value);
+}
+
+void EnumsReader::ReadRecWithOptionalFieldsArrayImpl(yardl::DynamicNDArray<test_model::RecordWithOptionalFields>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "recWithOptionalFieldsArray", true, unused_step_, value);
+}
+
+void EnumsReader::ReadRecWithVlensArrayImpl(yardl::DynamicNDArray<test_model::RecordWithVlens>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "recWithVlensArray", true, unused_step_, value);
+}
+
+void EnumsReader::ReadRecWithStringsArrayImpl(yardl::DynamicNDArray<test_model::RecordWithStrings>& value) {
+  yardl::ndjson::ReadProtocolValue(stream_, line_, "recWithStringsArray", true, unused_step_, value);
 }
 
 void EnumsReader::CloseImpl() {
