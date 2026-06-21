@@ -967,6 +967,7 @@ class StreamSerializer(TypeSerializer[Iterable[T], Any]):
                 self._element_serializer.write(stream, element)
         else:
             for element in value:
+                stream.ensure_capacity(1)
                 stream.write_byte_no_check(1)
                 self._element_serializer.write(stream, element)
 
