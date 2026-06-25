@@ -65,8 +65,7 @@ class BinaryProtocolWriter(ABC):
         self._stream.close()
 
     def _end_stream(self) -> None:
-        self._stream.ensure_capacity(1)
-        self._stream.write_byte_no_check(0)
+        self._stream.write_byte(0)
 
 
 class BinaryProtocolReader(ABC):
@@ -141,7 +140,14 @@ class CodedOutputStream:
         self.flush()
         self._stream.write(data)
 
-    def write_byte_no_check(self, value: int) -> None:
+    def write_byte(self, value: int) -> None:
+        if (len(self._buffer) - self._offset) < 1:
+            self.flush()
+        self._write_byte_unchecked(value)
+
+    def _write_byte_unchecked(self, value: int) -> None:
+        # Caller must have reserved capacity (e.g. via ensure_capacity).
+        # Used by inner varint loops where capacity is checked once up front.
         assert 0 <= value <= UINT8_MAX
         self._buffer[self._offset] = value
         self._offset += 1
@@ -157,10 +163,10 @@ class CodedOutputStream:
 
         while True:
             if int_val < 0x80:
-                self.write_byte_no_check(int_val)
+                self._write_byte_unchecked(int_val)
                 return
 
-            self.write_byte_no_check((int_val & 0x7F) | 0x80)
+            self._write_byte_unchecked((int_val & 0x7F) | 0x80)
             int_val >>= 7
 
     def zigzag_encode(
@@ -868,19 +874,17 @@ class OptionalSerializer(Generic[T, T_NP], TypeSerializer[Optional[T], np.void])
         self._none = cast(np.void, np.zeros((), dtype=self.overall_dtype())[()])
 
     def write(self, stream: CodedOutputStream, value: Optional[T]) -> None:
-        stream.ensure_capacity(1)
         if value is None:
-            stream.write_byte_no_check(0)
+            stream.write_byte(0)
         else:
-            stream.write_byte_no_check(1)
+            stream.write_byte(1)
             self._element_serializer.write(stream, value)
 
     def write_numpy(self, stream: CodedOutputStream, value: np.void) -> None:
-        stream.ensure_capacity(1)
         if not value["has_value"]:
-            stream.write_byte_no_check(0)
+            stream.write_byte(0)
         else:
-            stream.write_byte_no_check(1)
+            stream.write_byte(1)
             self._element_serializer.write_numpy(stream, value["value"])
 
     def read(self, stream: CodedInputStream) -> Optional[T]:
@@ -920,7 +924,7 @@ class UnionSerializer(TypeSerializer[T, np.object_]):
     def write(self, stream: CodedOutputStream, value: T) -> None:
         if value is None:
             if self._cases[0] is None:
-                stream.write_byte_no_check(0)
+                stream.write_byte(0)
                 return
             else:
                 raise ValueError("None is not a valid for this union type")
@@ -933,8 +937,7 @@ class UnionSerializer(TypeSerializer[T, np.object_]):
         union_value = cast(UnionCaseProtocol, value)
 
         tag_index = union_value.index + self._offset
-        stream.ensure_capacity(1)
-        stream.write_byte_no_check(tag_index)
+        stream.write_byte(tag_index)
         type_case = self._cases[tag_index]
         assert type_case is not None
         type_case[1].write(stream, union_value.value)
@@ -967,7 +970,7 @@ class StreamSerializer(TypeSerializer[Iterable[T], Any]):
                 self._element_serializer.write(stream, element)
         else:
             for element in value:
-                stream.write_byte_no_check(1)
+                stream.write_byte(1)
                 self._element_serializer.write(stream, element)
 
     def write_numpy(self, stream: CodedOutputStream, value: Any) -> None:
