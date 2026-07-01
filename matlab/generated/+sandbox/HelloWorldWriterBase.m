@@ -40,7 +40,7 @@ classdef (Abstract) HelloWorldWriterBase < handle
 
   methods (Static)
     function res = schema()
-      res = string('{"protocol":{"name":"HelloWorld","sequence":[{"name":"data","type":{"stream":{"items":{"array":{"items":"complexfloat64","dimensions":[{"length":2}]}}}}}]},"types":null}');
+      res = string('{"protocol":{"name":"HelloWorld","sequence":[{"name":"data","type":{"stream":{"items":{"array":{"items":"complexfloat64","dimensions":[{"length":2}]}}}}}]},"types":[]}');
     end
   end
 
