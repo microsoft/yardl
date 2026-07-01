@@ -40,7 +40,7 @@ classdef (Abstract) BenchmarkFloatVlenWriterBase < handle
 
   methods (Static)
     function res = schema()
-      res = string('{"protocol":{"name":"BenchmarkFloatVlen","sequence":[{"name":"floatArray","type":{"stream":{"items":{"array":{"items":"float32","dimensions":2}}}}}]},"types":null}');
+      res = string('{"protocol":{"name":"BenchmarkFloatVlen","sequence":[{"name":"floatArray","type":{"stream":{"items":{"array":{"items":"float32","dimensions":2}}}}}]},"types":[]}');
     end
   end
 

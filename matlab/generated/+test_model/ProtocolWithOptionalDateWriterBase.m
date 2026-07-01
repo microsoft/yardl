@@ -32,7 +32,7 @@ classdef (Abstract) ProtocolWithOptionalDateWriterBase < handle
 
   methods (Static)
     function res = schema()
-      res = string('{"protocol":{"name":"ProtocolWithOptionalDate","sequence":[{"name":"record","type":[null,"TestModel.RecordWithOptionalDate"]}]},"types":[{"name":"RecordWithOptionalDate","fields":[{"name":"dateField","type":[null,"date"]}]}]}');
+      res = string('{"protocol":{"name":"ProtocolWithOptionalDate","sequence":[{"name":"record","type":[null,"TestModel.RecordWithOptionalDate"]}]},"types":[{"record":{"name":"RecordWithOptionalDate","fields":[{"name":"dateField","type":[null,"date"]}]}}]}');
     end
   end
 
