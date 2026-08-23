@@ -21,7 +21,7 @@ runs:
         echo "pixi_version=${pixi_version}" >> "${GITHUB_OUTPUT}"
 
     - name: Setup pixi
-      uses: prefix-dev/setup-pixi@v0.8.14
+      uses: prefix-dev/setup-pixi@8ca4608ef7f4daeb54f5205b20d0b7cb42f11143 # v0.8.14
       with:
         pixi-version: v${{ steps.versions.outputs.pixi_version }}
         # Only the "default" environment is needed in CI; the "dev" environment
@@ -31,13 +31,13 @@ runs:
         cache: true
 
     - name: Setup Go
-      uses: actions/setup-go@v6
+      uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
       with:
         go-version-file: tooling/go.mod
         cache-dependency-path: tooling/go.sum
 
     - name: Setup Matlab
-      uses: matlab-actions/setup-matlab@v2
+      uses: matlab-actions/setup-matlab@aa8bbc7b76daa63c5d456d1430cbd6cb5b626ab4 # v2.7.0
       with:
         release: R2022b
         cache: true
