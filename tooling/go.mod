@@ -7,7 +7,7 @@ require (
 	github.com/dlclark/regexp2 v1.12.0
 	github.com/fsnotify/fsnotify v1.10.1
 	github.com/inancgumus/screen v0.0.0-20190314163918-06e984b86ed3
-	github.com/knadh/koanf/providers/structs v1.0.0
+	github.com/knadh/koanf/providers/structs v1.0.1
 	github.com/knadh/koanf/v2 v2.3.6
 	github.com/rs/zerolog v1.35.1
 	github.com/spf13/cobra v1.10.2
