@@ -367,6 +367,11 @@ Enums: !protocol
     vec: Fruits*
     size: SizeBasedEnum
     rec: RecordWithEnums
+    recArray: RecordWithEnums[]
+    recWithFixedVectorsArray: RecordWithFixedVectors[]
+    recWithOptionalFieldsArray: RecordWithOptionalFields[]
+    recWithVlensArray: RecordWithVlens[]
+    recWithStringsArray: RecordWithStrings[]
 
 DaysOfWeek: BasicTypes.DaysOfWeek
 

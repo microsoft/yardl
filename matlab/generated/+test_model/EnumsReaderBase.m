@@ -17,7 +17,7 @@ classdef EnumsReaderBase < handle
 
     function close(self)
       self.close_();
-      if ~self.skip_completed_check_ && self.state_ ~= 4
+      if ~self.skip_completed_check_ && self.state_ ~= 9
         expected_method = self.state_to_method_name_(self.state_);
         throw(yardl.ProtocolError("Protocol reader closed before all data was consumed. Expected call to '%s'.", expected_method));
       end
@@ -63,11 +63,66 @@ classdef EnumsReaderBase < handle
       self.state_ = 4;
     end
 
+    % Ordinal 4
+    function value = read_rec_array(self)
+      if self.state_ ~= 4
+        self.raise_unexpected_state_(4);
+      end
+
+      value = self.read_rec_array_();
+      self.state_ = 5;
+    end
+
+    % Ordinal 5
+    function value = read_rec_with_fixed_vectors_array(self)
+      if self.state_ ~= 5
+        self.raise_unexpected_state_(5);
+      end
+
+      value = self.read_rec_with_fixed_vectors_array_();
+      self.state_ = 6;
+    end
+
+    % Ordinal 6
+    function value = read_rec_with_optional_fields_array(self)
+      if self.state_ ~= 6
+        self.raise_unexpected_state_(6);
+      end
+
+      value = self.read_rec_with_optional_fields_array_();
+      self.state_ = 7;
+    end
+
+    % Ordinal 7
+    function value = read_rec_with_vlens_array(self)
+      if self.state_ ~= 7
+        self.raise_unexpected_state_(7);
+      end
+
+      value = self.read_rec_with_vlens_array_();
+      self.state_ = 8;
+    end
+
+    % Ordinal 8
+    function value = read_rec_with_strings_array(self)
+      if self.state_ ~= 8
+        self.raise_unexpected_state_(8);
+      end
+
+      value = self.read_rec_with_strings_array_();
+      self.state_ = 9;
+    end
+
     function copy_to(self, writer)
       writer.write_single(self.read_single());
       writer.write_vec(self.read_vec());
       writer.write_size(self.read_size());
       writer.write_rec(self.read_rec());
+      writer.write_rec_array(self.read_rec_array());
+      writer.write_rec_with_fixed_vectors_array(self.read_rec_with_fixed_vectors_array());
+      writer.write_rec_with_optional_fields_array(self.read_rec_with_optional_fields_array());
+      writer.write_rec_with_vlens_array(self.read_rec_with_vlens_array());
+      writer.write_rec_with_strings_array(self.read_rec_with_strings_array());
     end
   end
 
@@ -82,6 +137,11 @@ classdef EnumsReaderBase < handle
     read_vec_(self)
     read_size_(self)
     read_rec_(self)
+    read_rec_array_(self)
+    read_rec_with_fixed_vectors_array_(self)
+    read_rec_with_optional_fields_array_(self)
+    read_rec_with_vlens_array_(self)
+    read_rec_with_strings_array_(self)
 
     close_(self)
   end
@@ -102,6 +162,16 @@ classdef EnumsReaderBase < handle
         name = "read_size";
       elseif state == 3
         name = "read_rec";
+      elseif state == 4
+        name = "read_rec_array";
+      elseif state == 5
+        name = "read_rec_with_fixed_vectors_array";
+      elseif state == 6
+        name = "read_rec_with_optional_fields_array";
+      elseif state == 7
+        name = "read_rec_with_vlens_array";
+      elseif state == 8
+        name = "read_rec_with_strings_array";
       else
         name = "<unknown>";
       end

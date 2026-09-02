@@ -3818,6 +3818,31 @@ class NDJsonEnumsWriter(_ndjson.NDJsonProtocolWriter, EnumsWriterBase):
         json_value = converter.to_json(value)
         self._write_json_line({"rec": json_value})
 
+    def _write_rec_array(self, value: npt.NDArray[np.void]) -> None:
+        converter = _ndjson.DynamicNDArrayConverter(RecordWithEnumsConverter())
+        json_value = converter.to_json(value)
+        self._write_json_line({"recArray": json_value})
+
+    def _write_rec_with_fixed_vectors_array(self, value: npt.NDArray[np.void]) -> None:
+        converter = _ndjson.DynamicNDArrayConverter(RecordWithFixedVectorsConverter())
+        json_value = converter.to_json(value)
+        self._write_json_line({"recWithFixedVectorsArray": json_value})
+
+    def _write_rec_with_optional_fields_array(self, value: npt.NDArray[np.void]) -> None:
+        converter = _ndjson.DynamicNDArrayConverter(RecordWithOptionalFieldsConverter())
+        json_value = converter.to_json(value)
+        self._write_json_line({"recWithOptionalFieldsArray": json_value})
+
+    def _write_rec_with_vlens_array(self, value: npt.NDArray[np.void]) -> None:
+        converter = _ndjson.DynamicNDArrayConverter(RecordWithVlensConverter())
+        json_value = converter.to_json(value)
+        self._write_json_line({"recWithVlensArray": json_value})
+
+    def _write_rec_with_strings_array(self, value: npt.NDArray[np.void]) -> None:
+        converter = _ndjson.DynamicNDArrayConverter(RecordWithStringsConverter())
+        json_value = converter.to_json(value)
+        self._write_json_line({"recWithStringsArray": json_value})
+
 
 class NDJsonEnumsReader(_ndjson.NDJsonProtocolReader, EnumsReaderBase):
     """NDJson writer for the Enums protocol."""
@@ -3845,6 +3870,31 @@ class NDJsonEnumsReader(_ndjson.NDJsonProtocolReader, EnumsReaderBase):
     def _read_rec(self) -> RecordWithEnums:
         json_object = self._read_json_line("rec", True)
         converter = RecordWithEnumsConverter()
+        return converter.from_json(json_object)
+
+    def _read_rec_array(self) -> npt.NDArray[np.void]:
+        json_object = self._read_json_line("recArray", True)
+        converter = _ndjson.DynamicNDArrayConverter(RecordWithEnumsConverter())
+        return converter.from_json(json_object)
+
+    def _read_rec_with_fixed_vectors_array(self) -> npt.NDArray[np.void]:
+        json_object = self._read_json_line("recWithFixedVectorsArray", True)
+        converter = _ndjson.DynamicNDArrayConverter(RecordWithFixedVectorsConverter())
+        return converter.from_json(json_object)
+
+    def _read_rec_with_optional_fields_array(self) -> npt.NDArray[np.void]:
+        json_object = self._read_json_line("recWithOptionalFieldsArray", True)
+        converter = _ndjson.DynamicNDArrayConverter(RecordWithOptionalFieldsConverter())
+        return converter.from_json(json_object)
+
+    def _read_rec_with_vlens_array(self) -> npt.NDArray[np.void]:
+        json_object = self._read_json_line("recWithVlensArray", True)
+        converter = _ndjson.DynamicNDArrayConverter(RecordWithVlensConverter())
+        return converter.from_json(json_object)
+
+    def _read_rec_with_strings_array(self) -> npt.NDArray[np.void]:
+        json_object = self._read_json_line("recWithStringsArray", True)
+        converter = _ndjson.DynamicNDArrayConverter(RecordWithStringsConverter())
         return converter.from_json(json_object)
 
 class NDJsonFlagsWriter(_ndjson.NDJsonProtocolWriter, FlagsWriterBase):

@@ -410,6 +410,37 @@ TEST_P(RoundTripTests, Enums) {
   tw->WriteSize(SizeBasedEnum::kC);
   tw->WriteRec(RecordWithEnums{Fruits::kBanana, DaysOfWeek::kMonday, TextFormat::kBold, RecordWithNoDefaultEnum{Fruits::kPear}});
 
+  tw->WriteRecArray({
+      RecordWithEnums{Fruits::kPear, DaysOfWeek::kMonday, TextFormat::kBold, RecordWithNoDefaultEnum{Fruits::kBanana}},
+      RecordWithEnums{Fruits::kApple, DaysOfWeek(), TextFormat::kRegular, RecordWithNoDefaultEnum{Fruits::kApple}},
+  });
+
+  tw->WriteRecWithFixedVectorsArray({
+      RecordWithFixedVectors{
+          {1, 2, 3, 4, 5},
+          {SimpleRecord{1, 2, 3}, SimpleRecord{4, 5, 6}, SimpleRecord{7, 8, 9}},
+          {RecordWithVlens{{{SimpleRecord{1, 2, 3}}}, -7, 22}, RecordWithVlens{{{SimpleRecord{4, 5, 6}, SimpleRecord{7, 8, 9}}}, 11, 13}}},
+      RecordWithFixedVectors{
+          {6, 7, 8, 9, 10},
+          {SimpleRecord{10, 11, 12}, SimpleRecord{13, 14, 15}, SimpleRecord{16, 17, 18}},
+          {RecordWithVlens{{}, 0, 0}, RecordWithVlens{{{SimpleRecord{2, 3, 4}}}, 1, 2}}},
+  });
+
+  tw->WriteRecWithOptionalFieldsArray({
+      RecordWithOptionalFields{5, std::nullopt, std::nullopt},
+      RecordWithOptionalFields{std::nullopt, 9, std::nullopt},
+  });
+
+  tw->WriteRecWithVlensArray({
+      RecordWithVlens{{{SimpleRecord{1, 2, 3}}}, -7, 22},
+      RecordWithVlens{{{SimpleRecord{4, 5, 6}, SimpleRecord{7, 8, 9}}}, 11, 13},
+  });
+
+  tw->WriteRecWithStringsArray({
+      RecordWithStrings{"hello", "world"},
+      RecordWithStrings{"", "yardl"},
+  });
+
   tw->Close();
 }
 

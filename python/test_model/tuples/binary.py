@@ -29,7 +29,7 @@ class TupleSerializer(typing.Generic[T1, T1_NP, T2, T2_NP], _binary.RecordSerial
         self._write(stream, value.v1, value.v2)
 
     def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
-        self._write(stream, value['v1'], value['v2'])
+        self._write_numpy(stream, value['v1'], value['v2'])
 
     def read(self, stream: _binary.CodedInputStream) -> Tuple[T1, T2]:
         field_values = self._read(stream)

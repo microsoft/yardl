@@ -13,7 +13,7 @@ classdef (Abstract) EnumsWriterBase < handle
 
     function close(self)
       self.close_();
-      if self.state_ ~= 4
+      if self.state_ ~= 9
         expected_method = self.state_to_method_name_(self.state_);
         throw(yardl.ProtocolError("Protocol writer closed before all steps were called. Expected call to '%s'.", expected_method));
       end
@@ -58,11 +58,61 @@ classdef (Abstract) EnumsWriterBase < handle
       self.write_rec_(value);
       self.state_ = 4;
     end
+
+    % Ordinal 4
+    function write_rec_array(self, value)
+      if self.state_ ~= 4
+        self.raise_unexpected_state_(4);
+      end
+
+      self.write_rec_array_(value);
+      self.state_ = 5;
+    end
+
+    % Ordinal 5
+    function write_rec_with_fixed_vectors_array(self, value)
+      if self.state_ ~= 5
+        self.raise_unexpected_state_(5);
+      end
+
+      self.write_rec_with_fixed_vectors_array_(value);
+      self.state_ = 6;
+    end
+
+    % Ordinal 6
+    function write_rec_with_optional_fields_array(self, value)
+      if self.state_ ~= 6
+        self.raise_unexpected_state_(6);
+      end
+
+      self.write_rec_with_optional_fields_array_(value);
+      self.state_ = 7;
+    end
+
+    % Ordinal 7
+    function write_rec_with_vlens_array(self, value)
+      if self.state_ ~= 7
+        self.raise_unexpected_state_(7);
+      end
+
+      self.write_rec_with_vlens_array_(value);
+      self.state_ = 8;
+    end
+
+    % Ordinal 8
+    function write_rec_with_strings_array(self, value)
+      if self.state_ ~= 8
+        self.raise_unexpected_state_(8);
+      end
+
+      self.write_rec_with_strings_array_(value);
+      self.state_ = 9;
+    end
   end
 
   methods (Static)
     function res = schema()
-      res = string('{"protocol":{"name":"Enums","sequence":[{"name":"single","type":"TestModel.Fruits"},{"name":"vec","type":{"vector":{"items":"TestModel.Fruits"}}},{"name":"size","type":"TestModel.SizeBasedEnum"},{"name":"rec","type":"TestModel.RecordWithEnums"}]},"types":[{"name":"DaysOfWeek","values":[{"symbol":"monday","value":1},{"symbol":"tuesday","value":2},{"symbol":"wednesday","value":4},{"symbol":"thursday","value":8},{"symbol":"friday","value":16},{"symbol":"saturday","value":32},{"symbol":"sunday","value":64}]},{"name":"Fruits","values":[{"symbol":"apple","value":1},{"symbol":"banana","value":2},{"symbol":"pear","value":3}]},{"name":"TextFormat","base":"uint64","values":[{"symbol":"regular","value":0},{"symbol":"bold","value":1},{"symbol":"italic","value":2},{"symbol":"underline","value":4},{"symbol":"strikethrough","value":8}]},{"name":"DaysOfWeek","type":"BasicTypes.DaysOfWeek"},{"name":"Fruits","type":"BasicTypes.Fruits"},{"name":"RecordWithEnums","fields":[{"name":"enum","type":"TestModel.Fruits"},{"name":"flags","type":"TestModel.DaysOfWeek"},{"name":"flags2","type":"TestModel.TextFormat"},{"name":"rec","type":"TestModel.RecordWithNoDefaultEnum"}]},{"name":"RecordWithNoDefaultEnum","fields":[{"name":"enum","type":"TestModel.Fruits"}]},{"name":"SizeBasedEnum","base":"size","values":[{"symbol":"a","value":0},{"symbol":"b","value":1},{"symbol":"c","value":2}]},{"name":"TextFormat","type":"BasicTypes.TextFormat"}]}');
+      res = string('{"protocol":{"name":"Enums","sequence":[{"name":"single","type":"TestModel.Fruits"},{"name":"vec","type":{"vector":{"items":"TestModel.Fruits"}}},{"name":"size","type":"TestModel.SizeBasedEnum"},{"name":"rec","type":"TestModel.RecordWithEnums"},{"name":"recArray","type":{"array":{"items":"TestModel.RecordWithEnums"}}},{"name":"recWithFixedVectorsArray","type":{"array":{"items":"TestModel.RecordWithFixedVectors"}}},{"name":"recWithOptionalFieldsArray","type":{"array":{"items":"TestModel.RecordWithOptionalFields"}}},{"name":"recWithVlensArray","type":{"array":{"items":"TestModel.RecordWithVlens"}}},{"name":"recWithStringsArray","type":{"array":{"items":"TestModel.RecordWithStrings"}}}]},"types":[{"name":"DaysOfWeek","values":[{"symbol":"monday","value":1},{"symbol":"tuesday","value":2},{"symbol":"wednesday","value":4},{"symbol":"thursday","value":8},{"symbol":"friday","value":16},{"symbol":"saturday","value":32},{"symbol":"sunday","value":64}]},{"name":"Fruits","values":[{"symbol":"apple","value":1},{"symbol":"banana","value":2},{"symbol":"pear","value":3}]},{"name":"TextFormat","base":"uint64","values":[{"symbol":"regular","value":0},{"symbol":"bold","value":1},{"symbol":"italic","value":2},{"symbol":"underline","value":4},{"symbol":"strikethrough","value":8}]},{"name":"DaysOfWeek","type":"BasicTypes.DaysOfWeek"},{"name":"Fruits","type":"BasicTypes.Fruits"},{"name":"RecordWithEnums","fields":[{"name":"enum","type":"TestModel.Fruits"},{"name":"flags","type":"TestModel.DaysOfWeek"},{"name":"flags2","type":"TestModel.TextFormat"},{"name":"rec","type":"TestModel.RecordWithNoDefaultEnum"}]},{"name":"RecordWithFixedVectors","fields":[{"name":"fixedIntVector","type":{"vector":{"items":"int32","length":5}}},{"name":"fixedSimpleRecordVector","type":{"vector":{"items":"TestModel.SimpleRecord","length":3}}},{"name":"fixedRecordWithVlensVector","type":{"vector":{"items":"TestModel.RecordWithVlens","length":2}}}]},{"name":"RecordWithNoDefaultEnum","fields":[{"name":"enum","type":"TestModel.Fruits"}]},{"name":"RecordWithOptionalFields","fields":[{"name":"optionalInt","type":[null,"int32"]},{"name":"optionalIntAlternateSyntax","type":[null,"int32"]},{"name":"optionalTime","type":[null,"time"]}]},{"name":"RecordWithStrings","fields":[{"name":"a","type":"string"},{"name":"b","type":"string"}]},{"name":"RecordWithVlens","fields":[{"name":"a","type":{"vector":{"items":"TestModel.SimpleRecord"}}},{"name":"b","type":"int32"},{"name":"c","type":"int32"}]},{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]},{"name":"SizeBasedEnum","base":"size","values":[{"symbol":"a","value":0},{"symbol":"b","value":1},{"symbol":"c","value":2}]},{"name":"TextFormat","type":"BasicTypes.TextFormat"}]}');
     end
   end
 
@@ -71,6 +121,11 @@ classdef (Abstract) EnumsWriterBase < handle
     write_vec_(self, value)
     write_size_(self, value)
     write_rec_(self, value)
+    write_rec_array_(self, value)
+    write_rec_with_fixed_vectors_array_(self, value)
+    write_rec_with_optional_fields_array_(self, value)
+    write_rec_with_vlens_array_(self, value)
+    write_rec_with_strings_array_(self, value)
 
     end_stream_(self)
     close_(self)
@@ -92,6 +147,16 @@ classdef (Abstract) EnumsWriterBase < handle
         name = "write_size";
       elseif state == 3
         name = "write_rec";
+      elseif state == 4
+        name = "write_rec_array";
+      elseif state == 5
+        name = "write_rec_with_fixed_vectors_array";
+      elseif state == 6
+        name = "write_rec_with_optional_fields_array";
+      elseif state == 7
+        name = "write_rec_with_vlens_array";
+      elseif state == 8
+        name = "write_rec_with_strings_array";
       else
         name = '<unknown>';
       end

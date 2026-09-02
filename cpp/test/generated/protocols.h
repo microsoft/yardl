@@ -2124,6 +2124,21 @@ class EnumsWriterBase {
   // Ordinal 3.
   void WriteRec(test_model::RecordWithEnums const& value);
 
+  // Ordinal 4.
+  void WriteRecArray(yardl::DynamicNDArray<test_model::RecordWithEnums> const& value);
+
+  // Ordinal 5.
+  void WriteRecWithFixedVectorsArray(yardl::DynamicNDArray<test_model::RecordWithFixedVectors> const& value);
+
+  // Ordinal 6.
+  void WriteRecWithOptionalFieldsArray(yardl::DynamicNDArray<test_model::RecordWithOptionalFields> const& value);
+
+  // Ordinal 7.
+  void WriteRecWithVlensArray(yardl::DynamicNDArray<test_model::RecordWithVlens> const& value);
+
+  // Ordinal 8.
+  void WriteRecWithStringsArray(yardl::DynamicNDArray<test_model::RecordWithStrings> const& value);
+
   // Optionaly close this writer before destructing. Validates that all steps were completed.
   void Close();
 
@@ -2137,6 +2152,11 @@ class EnumsWriterBase {
   virtual void WriteVecImpl(std::vector<test_model::Fruits> const& value) = 0;
   virtual void WriteSizeImpl(test_model::SizeBasedEnum const& value) = 0;
   virtual void WriteRecImpl(test_model::RecordWithEnums const& value) = 0;
+  virtual void WriteRecArrayImpl(yardl::DynamicNDArray<test_model::RecordWithEnums> const& value) = 0;
+  virtual void WriteRecWithFixedVectorsArrayImpl(yardl::DynamicNDArray<test_model::RecordWithFixedVectors> const& value) = 0;
+  virtual void WriteRecWithOptionalFieldsArrayImpl(yardl::DynamicNDArray<test_model::RecordWithOptionalFields> const& value) = 0;
+  virtual void WriteRecWithVlensArrayImpl(yardl::DynamicNDArray<test_model::RecordWithVlens> const& value) = 0;
+  virtual void WriteRecWithStringsArrayImpl(yardl::DynamicNDArray<test_model::RecordWithStrings> const& value) = 0;
   virtual void CloseImpl() {}
 
   static std::string schema_;
@@ -2168,6 +2188,21 @@ class EnumsReaderBase {
   // Ordinal 3.
   void ReadRec(test_model::RecordWithEnums& value);
 
+  // Ordinal 4.
+  void ReadRecArray(yardl::DynamicNDArray<test_model::RecordWithEnums>& value);
+
+  // Ordinal 5.
+  void ReadRecWithFixedVectorsArray(yardl::DynamicNDArray<test_model::RecordWithFixedVectors>& value);
+
+  // Ordinal 6.
+  void ReadRecWithOptionalFieldsArray(yardl::DynamicNDArray<test_model::RecordWithOptionalFields>& value);
+
+  // Ordinal 7.
+  void ReadRecWithVlensArray(yardl::DynamicNDArray<test_model::RecordWithVlens>& value);
+
+  // Ordinal 8.
+  void ReadRecWithStringsArray(yardl::DynamicNDArray<test_model::RecordWithStrings>& value);
+
   // Optionaly close this writer before destructing. Validates that all steps were completely read.
   void Close();
 
@@ -2180,6 +2215,11 @@ class EnumsReaderBase {
   virtual void ReadVecImpl(std::vector<test_model::Fruits>& value) = 0;
   virtual void ReadSizeImpl(test_model::SizeBasedEnum& value) = 0;
   virtual void ReadRecImpl(test_model::RecordWithEnums& value) = 0;
+  virtual void ReadRecArrayImpl(yardl::DynamicNDArray<test_model::RecordWithEnums>& value) = 0;
+  virtual void ReadRecWithFixedVectorsArrayImpl(yardl::DynamicNDArray<test_model::RecordWithFixedVectors>& value) = 0;
+  virtual void ReadRecWithOptionalFieldsArrayImpl(yardl::DynamicNDArray<test_model::RecordWithOptionalFields>& value) = 0;
+  virtual void ReadRecWithVlensArrayImpl(yardl::DynamicNDArray<test_model::RecordWithVlens>& value) = 0;
+  virtual void ReadRecWithStringsArrayImpl(yardl::DynamicNDArray<test_model::RecordWithStrings>& value) = 0;
   virtual void CloseImpl() {}
   static std::string schema_;
 

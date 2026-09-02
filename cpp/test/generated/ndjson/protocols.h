@@ -993,6 +993,11 @@ class EnumsWriter : public test_model::EnumsWriterBase, yardl::ndjson::NDJsonWri
   void WriteVecImpl(std::vector<test_model::Fruits> const& value) override;
   void WriteSizeImpl(test_model::SizeBasedEnum const& value) override;
   void WriteRecImpl(test_model::RecordWithEnums const& value) override;
+  void WriteRecArrayImpl(yardl::DynamicNDArray<test_model::RecordWithEnums> const& value) override;
+  void WriteRecWithFixedVectorsArrayImpl(yardl::DynamicNDArray<test_model::RecordWithFixedVectors> const& value) override;
+  void WriteRecWithOptionalFieldsArrayImpl(yardl::DynamicNDArray<test_model::RecordWithOptionalFields> const& value) override;
+  void WriteRecWithVlensArrayImpl(yardl::DynamicNDArray<test_model::RecordWithVlens> const& value) override;
+  void WriteRecWithStringsArrayImpl(yardl::DynamicNDArray<test_model::RecordWithStrings> const& value) override;
   void CloseImpl() override;
 };
 
@@ -1012,6 +1017,11 @@ class EnumsReader : public test_model::EnumsReaderBase, yardl::ndjson::NDJsonRea
   void ReadVecImpl(std::vector<test_model::Fruits>& value) override;
   void ReadSizeImpl(test_model::SizeBasedEnum& value) override;
   void ReadRecImpl(test_model::RecordWithEnums& value) override;
+  void ReadRecArrayImpl(yardl::DynamicNDArray<test_model::RecordWithEnums>& value) override;
+  void ReadRecWithFixedVectorsArrayImpl(yardl::DynamicNDArray<test_model::RecordWithFixedVectors>& value) override;
+  void ReadRecWithOptionalFieldsArrayImpl(yardl::DynamicNDArray<test_model::RecordWithOptionalFields>& value) override;
+  void ReadRecWithVlensArrayImpl(yardl::DynamicNDArray<test_model::RecordWithVlens>& value) override;
+  void ReadRecWithStringsArrayImpl(yardl::DynamicNDArray<test_model::RecordWithStrings>& value) override;
   void CloseImpl() override;
 };
 

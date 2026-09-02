@@ -1002,13 +1002,29 @@ class FixedVectorSerializer(Generic[T, T_NP], TypeSerializer[list[T], np.object_
             self.element_serializer.write(stream, element)
 
     def write_numpy(self, stream: CodedOutputStream, value: np.object_) -> None:
-        raise NotImplementedError("Internal error: expected this to be a subarray")
+        # Reached when a fixed vector is a record field written via the numpy
+        # record path. The value is a length-`self._length` subarray; dispatch
+        # each element through the element serializer's numpy path.
+        if len(value) != self._length:
+            raise ValueError(
+                f"Expected a subarray of length {self._length}, got {len(value)}"
+            )
+        for element in value:
+            self.element_serializer.write_numpy(stream, element)
 
     def read(self, stream: CodedInputStream) -> list[T]:
         return [self.element_serializer.read(stream) for _ in range(self._length)]
 
     def read_numpy(self, stream: CodedInputStream) -> np.object_:
-        raise NotImplementedError("Internal error: expected this to be a subarray")
+        # Reached when a fixed vector is a record field read via the numpy
+        # record path. Return an array shaped like the subarray dtype slot so
+        # that assignment into the enclosing record is unambiguous.
+        result = np.ndarray(
+            (self._length,), dtype=self.element_serializer.overall_dtype()
+        )
+        for i in range(self._length):
+            result[i] = self.element_serializer.read_numpy(stream)
+        return cast(np.object_, result)
 
     def is_trivially_serializable(self) -> bool:
         return self.element_serializer.is_trivially_serializable()
@@ -1322,13 +1338,29 @@ class RecordSerializer(TypeSerializer[T, np.void]):
         for i, (_, serializer) in enumerate(self._field_serializers):
             serializer.write(stream, values[i])
 
+    def _write_numpy(self, stream: CodedOutputStream, *values: Any) -> None:
+        # Each value comes from a numpy record slot, so it must be written via
+        # write_numpy. Dispatching through write() would mishandle enums (bare
+        # numpy scalars), optionals, and other fields with distinct numpy paths.
+        for i, (_, serializer) in enumerate(self._field_serializers):
+            serializer.write_numpy(stream, values[i])
+
     def _read(self, stream: CodedInputStream) -> tuple[Any, ...]:
         return tuple(
             serializer.read(stream) for _, serializer in self._field_serializers
         )
 
     def read_numpy(self, stream: CodedInputStream) -> np.void:
-        return cast(np.void, self._read(stream))
+        # Every field must be read via read_numpy so it yields a value that is
+        # assignable into the record's numpy dtype slot. read() can return a
+        # Python object (Enum, record, Optional, etc.) that does not fit.
+        return cast(
+            np.void,
+            tuple(
+                serializer.read_numpy(stream)
+                for _, serializer in self._field_serializers
+            ),
+        )
 
 
 # Only used in the header
